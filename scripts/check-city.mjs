@@ -310,6 +310,13 @@ assert.match(cssSrc, /puzzle-title/)
 assert.match(cssSrc, /win-flash 0\.45s ease-out both !important/)
 
 const juiceSrc = readFileSync(new URL('../src/lib/juice.ts', import.meta.url), 'utf8')
+assert.match(cssSrc, /win-stamp/)
+
+const burstSrc = readFileSync(
+  new URL('../src/components/challenges/WinBurst.tsx', import.meta.url),
+  'utf8',
+)
+assert.match(burstSrc, /Locked!/)
 assert.match(juiceSrc, /WIN_BURST_MS = 760/)
 assert.match(juiceSrc, /useJuiceHandoff/)
 
