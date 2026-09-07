@@ -4,7 +4,13 @@ import { dailyForDate } from '../content/daily'
 import { evidenceFor } from '../content/evidence'
 import { STORY } from '../content/story'
 import { kindLabel } from './icons'
-import { addLocalDays, formatTrailDate, localDateKey } from '../lib/dates'
+import {
+  DATE_SOURCE,
+  addLocalDays,
+  assertLocalCalendar,
+  formatDeviceLocalDate,
+  localDateKey,
+} from '../lib/dates'
 import { streakAfterPlay } from '../lib/streak'
 import { Avatar, Say } from './Avatar'
 import { Landmark } from './Landmark'
@@ -28,7 +34,9 @@ interface DailyTrailProps {
 
 export function DailyTrail({ onNavigate }: DailyTrailProps) {
   const { completeDaily, recordReview, progress } = useProgress()
-  const today = localDateKey()
+  const now = new Date()
+  assertLocalCalendar(now)
+  const today = localDateKey(now)
   const tomorrow = dailyForDate(addLocalDays(today, 1))
 
   const [session] = useState(() => {
@@ -152,7 +160,9 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
       <div className="card-lead">
         <Avatar who="juniper" size="lg" />
         <div>
-          <p className="eyebrow">Today’s Trail · {formatTrailDate(today)}</p>
+          <p className="eyebrow" data-date-source={DATE_SOURCE}>
+            Today’s Trail · {formatDeviceLocalDate(now)}
+          </p>
           <h1>
             {showTeaser
               ? 'A mark for this morning'
