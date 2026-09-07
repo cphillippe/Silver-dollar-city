@@ -20,10 +20,14 @@ export function PuzzleHint({
           setOpen((value) => !value)
         }}
       >
-        {open ? 'Hide clue' : 'Peek a clue'}
+        {open ? 'Hide' : 'Clue'}
       </button>
-      <p className="hint-cost">Won’t count as clean</p>
-      {open ? <p className="context">{text}</p> : null}
+      {open ? (
+        <>
+          <p className="hint-cost">Won’t count as clean</p>
+          <p className="context">{text}</p>
+        </>
+      ) : null}
     </div>
   )
 }

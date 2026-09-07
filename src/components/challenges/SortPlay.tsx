@@ -2,9 +2,11 @@ import { useMemo, useState } from 'react'
 import { shuffle } from '../../lib/shuffle'
 import type { SortChallenge, SortTile } from '../../types'
 import { STORY } from '../../content/story'
+import { burstStyle } from '../../lib/juice'
 import { PuzzleHint } from './PuzzleHint'
 import { PuzzleLead } from './PuzzleLead'
 import { ResultPanel } from './ResultPanel'
+import { WinBurst } from './WinBurst'
 
 interface SortPlayProps {
   challenge: SortChallenge
@@ -106,15 +108,11 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
     <div
       className={`play ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''} ${ready ? 'is-ready' : ''}`}
     >
+      <WinBurst play={status === 'ok'} />
       <PuzzleLead challenge={challenge} />
       <PuzzleHint text={challenge.context} onPeek={onPeek} />
       <p className="sort-how">
-        <span>
-          <strong>Keep</strong> this belongs
-        </span>
-        <span>
-          <strong>Toss</strong> set it aside
-        </span>
+        <strong>Keep</strong> belongs · <strong>Toss</strong> aside
       </p>
 
       <div className="bank">
@@ -172,11 +170,12 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
                   : 'Lines that belong'}
               </span>
             ) : (
-              keep.map((tile) => (
+              keep.map((tile, index) => (
                 <button
                   key={tile.id}
                   type="button"
                   className="chip in-bin"
+                  style={status === 'ok' ? burstStyle(index, 'keep') : undefined}
                   onClick={(event) => {
                     event.stopPropagation()
                     returnToBank(tile.id)
@@ -209,11 +208,12 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
                   : 'Set aside — not the claim'}
               </span>
             ) : (
-              discard.map((tile) => (
+              discard.map((tile, index) => (
                 <button
                   key={tile.id}
                   type="button"
                   className="chip in-bin"
+                  style={status === 'ok' ? burstStyle(index, 'discard') : undefined}
                   onClick={(event) => {
                     event.stopPropagation()
                     returnToBank(tile.id)

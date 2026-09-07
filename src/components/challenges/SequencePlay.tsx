@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react'
 import { shuffle } from '../../lib/shuffle'
 import type { SequenceChallenge } from '../../types'
+import { burstStyle } from '../../lib/juice'
 import { PuzzleHint } from './PuzzleHint'
 import { PuzzleLead } from './PuzzleLead'
 import { ResultPanel } from './ResultPanel'
+import { WinBurst } from './WinBurst'
 
 interface SequencePlayProps {
   challenge: SequenceChallenge
@@ -75,9 +77,9 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
 
   return (
     <div className={`play ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}>
+      <WinBurst play={status === 'ok'} />
       <PuzzleLead challenge={challenge} />
       <PuzzleHint text={challenge.context} onPeek={onPeek} />
-      <p className="hint">Tap tiles in order. The chain checks itself when full.</p>
 
       <ol className="chain">
         {challenge.items.map((item, index) => {
@@ -86,7 +88,12 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
             <li key={item.id} className={placed ? 'filled pop-in' : 'empty'}>
               <span className="chain-index">{index + 1}</span>
               {placed ? (
-                <button type="button" className="chip in-chain" onClick={() => remove(placed.id)}>
+                <button
+                  type="button"
+                  className="chip in-chain"
+                  style={status === 'ok' ? burstStyle(index, 'mid') : undefined}
+                  onClick={() => remove(placed.id)}
+                >
                   {placed.text}
                 </button>
               ) : (

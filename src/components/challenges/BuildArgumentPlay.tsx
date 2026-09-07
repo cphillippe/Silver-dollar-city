@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react'
 import { shuffle } from '../../lib/shuffle'
 import type { ArgumentCard, BuildArgumentChallenge } from '../../types'
+import { burstStyle } from '../../lib/juice'
 import { PuzzleHint } from './PuzzleHint'
 import { PuzzleLead } from './PuzzleLead'
 import { ResultPanel } from './ResultPanel'
+import { WinBurst } from './WinBurst'
 
 interface BuildArgumentPlayProps {
   challenge: BuildArgumentChallenge
@@ -91,12 +93,12 @@ export function BuildArgumentPlay({
 
   return (
     <div className={`play ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}>
+      <WinBurst play={status === 'ok'} />
       <PuzzleLead challenge={challenge} />
       <PuzzleHint text={challenge.context} onPeek={onPeek} />
-      <p className="hint">Slot the chain. Leave the decoys in the bank — it checks when full.</p>
 
       <div className="slot-list">
-        {challenge.slots.map((slot) => {
+        {challenge.slots.map((slot, index) => {
           const card = slots[slot.id]
           return (
             <div key={slot.id} className={`slot ${slot.role}`}>
@@ -105,6 +107,7 @@ export function BuildArgumentPlay({
                 <button
                   type="button"
                   className="chip in-slot pop-in"
+                  style={status === 'ok' ? burstStyle(index, 'mid') : undefined}
                   onClick={() => returnCard(slot.id)}
                 >
                   {card.text}
