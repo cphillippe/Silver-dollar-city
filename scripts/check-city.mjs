@@ -67,6 +67,7 @@ assert.match(mapSrc, /TownFolk/)
 assert.match(mapSrc, /city-portrait/)
 assert.match(mapSrc, /tweenCam/)
 assert.match(mapSrc, /Grew!/)
+assert.match(mapSrc, /beatRank/)
 
 const twoHollow = {
   ...afterDaily,
