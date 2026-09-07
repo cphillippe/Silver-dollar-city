@@ -255,6 +255,22 @@ p {
   font-size: 1.05rem;
 }
 
+.btn.tiny {
+  padding: 6px 12px;
+  font-size: 0.82rem;
+  font-weight: 650;
+}
+
+.btn.tiny.keep {
+  background: rgba(107, 143, 113, 0.28);
+  border-color: rgba(107, 143, 113, 0.45);
+}
+
+.btn.tiny.toss {
+  background: rgba(196, 107, 74, 0.28);
+  border-color: rgba(196, 107, 74, 0.45);
+}
+
 .text-link {
   background: none;
   border: 0;
@@ -311,6 +327,14 @@ p {
   font-size: 1.15rem;
   max-width: 38rem;
   color: rgba(244, 234, 210, 0.88);
+}
+
+.welcome-goal {
+  font-family: var(--serif);
+  font-size: 1.25rem;
+  max-width: 36rem;
+  color: var(--gold);
+  margin: -0.3em 0 1em;
 }
 
 .welcome-facts {
@@ -650,6 +674,21 @@ p {
   gap: 8px;
   padding: 10px;
   align-content: start;
+}
+
+.sort-tile {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+}
+
+.sort-tile.is-selected .chip {
+  border-color: var(--gold);
+}
+
+.sort-tile-actions {
+  display: flex;
+  gap: 8px;
 }
 
 .match-card.is-locked {

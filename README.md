@@ -6,16 +6,18 @@ The product goal is **keeping the evidence**: claims, reasons, and sources you c
 
 ## Play now (no install)
 
-**Friend link (GitHub Pages, once enabled):**  
+**Open this on a phone or laptop — no APK:**  
+https://instructors-manufacturer-configurations-tired.trycloudflare.com/
+
+That is a live public preview of this branch (same build friends would get). If it ever 404s, use the durable links below.
+
+**Durable (survives after this preview sleeps):**  
+https://stackblitz.com/github/cphillippe/Silver-dollar-city/tree/cursor/silver-city-unending-evidence-8233?embed=1&view=preview&hideExplorer=1&hideNavigation=1
+
+**GitHub Pages (one click, then it stays pretty):**  
 https://cphillippe.github.io/Silver-dollar-city/
 
-The built site lives in [`docs/`](docs/) on this branch. One-click enable (repo owner):
-
-1. GitHub → **Settings** → **Pages**
-2. Build and deployment → **Deploy from a branch**
-3. Branch: `cursor/silver-city-unending-evidence-8233` · folder: `/docs` → Save  
-   (or Source: **GitHub Actions** — this repo already has `.github/workflows/pages.yml`)
-4. Open the Pages URL above on a phone or laptop. No APK sideload.
+Repo owner: **Settings → Pages → Deploy from a branch** → `cursor/silver-city-unending-evidence-8233` → `/docs` → Save. The site is already in [`docs/`](docs/). Or set Source to **GitHub Actions** (workflow is on this branch).
 
 ## The story
 
@@ -113,12 +115,13 @@ Progress shape (same key `silver-city-progress-v1`): `memory[id].nextReviewAt`, 
 
 ## Friend preview (no install)
 
-Open https://cphillippe.github.io/Silver-dollar-city/ (after Pages is enabled, steps at the top of this README). On the web app, tap **Share a morning**. The pitch is not a high score. It asks a friend to try the walk, fold the page, and see what they can still say.
+**Play now:** https://instructors-manufacturer-configurations-tired.trycloudflare.com/
 
-```bash
-npm run dev          # local
-npm run build && npm run preview
-```
+**If that sleeps:** https://stackblitz.com/github/cphillippe/Silver-dollar-city/tree/cursor/silver-city-unending-evidence-8233?embed=1&view=preview&hideExplorer=1&hideNavigation=1
+
+**After Pages is enabled:** https://cphillippe.github.io/Silver-dollar-city/
+
+On the web app, tap **Share a morning**. The pitch is not a high score. It asks a friend to try the walk, fold the page, and see what they can still say.
 
 Playtest notes live in [`PLAYTEST.md`](PLAYTEST.md).
 

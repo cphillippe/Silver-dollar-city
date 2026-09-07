@@ -23,47 +23,65 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
   const [shake, setShake] = useState(false)
   const [misses, setMisses] = useState(0)
 
-  function takeTile(id: string): SortTile | undefined {
-    return (
-      bank.find((tile) => tile.id === id) ??
-      keep.find((tile) => tile.id === id) ??
-      discard.find((tile) => tile.id === id)
-    )
+  function allTiles(
+    nextBank = bank,
+    nextKeep = keep,
+    nextDiscard = discard,
+  ) {
+    return [...nextBank, ...nextKeep, ...nextDiscard]
   }
 
-  function removeFromAll(id: string) {
-    setBank((current) => current.filter((tile) => tile.id !== id))
-    setKeep((current) => current.filter((tile) => tile.id !== id))
-    setDiscard((current) => current.filter((tile) => tile.id !== id))
+  function takeTile(
+    id: string,
+    nextBank = bank,
+    nextKeep = keep,
+    nextDiscard = discard,
+  ): SortTile | undefined {
+    return allTiles(nextBank, nextKeep, nextDiscard).find((tile) => tile.id === id)
+  }
+
+  function place(id: string, bin: Bin) {
+    if (status === 'ok') return
+    const tile = takeTile(id)
+    if (!tile) return
+    const nextBank = bank.filter((item) => item.id !== id)
+    const nextKeep = keep.filter((item) => item.id !== id)
+    const nextDiscard = discard.filter((item) => item.id !== id)
+    if (bin === 'keep') nextKeep.push(tile)
+    else nextDiscard.push(tile)
+    setBank(nextBank)
+    setKeep(nextKeep)
+    setDiscard(nextDiscard)
+    setPicked(null)
+    setStatus('idle')
+    if (nextBank.length === 0) {
+      window.setTimeout(() => evaluate(nextKeep, nextDiscard), 80)
+    }
   }
 
   function drop(bin: Bin) {
-    if (status === 'ok' || !picked) return
-    const tile = takeTile(picked)
-    if (!tile) return
-    removeFromAll(tile.id)
-    if (bin === 'keep') setKeep((current) => [...current, tile])
-    else setDiscard((current) => [...current, tile])
-    setPicked(null)
-    setStatus('idle')
+    if (!picked) return
+    place(picked, bin)
   }
 
   function returnToBank(id: string) {
     if (status === 'ok') return
     const tile = takeTile(id)
     if (!tile) return
-    removeFromAll(id)
-    setBank((current) => [...current, tile])
+    setKeep((current) => current.filter((item) => item.id !== id))
+    setDiscard((current) => current.filter((item) => item.id !== id))
+    setBank((current) =>
+      current.some((item) => item.id === id) ? current : [...current, tile],
+    )
     setStatus('idle')
   }
 
-  function check() {
-    const placed = [...keep, ...discard]
-    if (placed.length !== challenge.tiles.length) return
+  function evaluate(nextKeep = keep, nextDiscard = discard) {
     const ok =
-      keep.every((tile) => tile.bin === 'keep') &&
-      discard.every((tile) => tile.bin === 'discard') &&
-      keep.length === challenge.tiles.filter((tile) => tile.bin === 'keep').length
+      nextKeep.every((tile) => tile.bin === 'keep') &&
+      nextDiscard.every((tile) => tile.bin === 'discard') &&
+      nextKeep.length + nextDiscard.length === challenge.tiles.length &&
+      nextKeep.length === challenge.tiles.filter((tile) => tile.bin === 'keep').length
     if (ok) {
       setStatus('ok')
       onSolved()
@@ -78,113 +96,134 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
       setBank(shuffle(challenge.tiles))
       setKeep([])
       setDiscard([])
+      setPicked(null)
     }, 520)
   }
+
+  const selected = picked ? takeTile(picked) : undefined
 
   return (
     <div className={`play ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}>
       <PuzzleHint text={challenge.context} onPeek={onPeek} />
       <p className="prompt">{challenge.prompt}</p>
       <p className="hint">
-        Tap a tile, then tap a whole bin — Keep or Toss. The bin lights when a
-        tile is ready to drop.
+        Keep or toss each line. Tap Keep / Toss on the tile, or tap a tile then
+        a bin. Bins check themselves when full. Tap a line in a bin to pull it
+        back.
       </p>
 
       <div className="sort-bins">
-        <button
-          type="button"
+        <div
           className={`bin keep ${picked ? 'awaiting' : ''}`}
           onClick={() => drop('keep')}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault()
+              drop('keep')
+            }
+          }}
+          role="button"
+          tabIndex={0}
         >
           <span className="bin-head">{challenge.keepLabel}</span>
           <span className="bin-body">
             {keep.length === 0 ? (
               <span className="placeholder">
-                {picked ? 'Drop here' : 'Keep'}
+                {selected
+                  ? `Keep: ${selected.text}`
+                  : 'Tap Keep on a tile, or drop one here'}
               </span>
             ) : (
               keep.map((tile) => (
-                <span
+                <button
                   key={tile.id}
+                  type="button"
                   className="chip in-bin"
                   onClick={(event) => {
                     event.stopPropagation()
                     returnToBank(tile.id)
                   }}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                      event.preventDefault()
-                      event.stopPropagation()
-                      returnToBank(tile.id)
-                    }
-                  }}
-                  role="button"
-                  tabIndex={0}
                 >
                   {tile.text}
-                </span>
+                </button>
               ))
             )}
           </span>
-        </button>
-        <button
-          type="button"
+        </div>
+        <div
           className={`bin toss ${picked ? 'awaiting' : ''}`}
           onClick={() => drop('discard')}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault()
+              drop('discard')
+            }
+          }}
+          role="button"
+          tabIndex={0}
         >
           <span className="bin-head toss">{challenge.discardLabel}</span>
           <span className="bin-body">
             {discard.length === 0 ? (
               <span className="placeholder">
-                {picked ? 'Drop here' : 'Toss'}
+                {selected
+                  ? `Toss: ${selected.text}`
+                  : 'Tap Toss on a tile, or drop one here'}
               </span>
             ) : (
               discard.map((tile) => (
-                <span
+                <button
                   key={tile.id}
+                  type="button"
                   className="chip in-bin"
                   onClick={(event) => {
                     event.stopPropagation()
                     returnToBank(tile.id)
                   }}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                      event.preventDefault()
-                      event.stopPropagation()
-                      returnToBank(tile.id)
-                    }
-                  }}
-                  role="button"
-                  tabIndex={0}
                 >
                   {tile.text}
-                </span>
+                </button>
               ))
             )}
           </span>
-        </button>
+        </div>
       </div>
 
       <div className="bank">
         {bank.map((tile) => (
-          <button
+          <div
             key={tile.id}
-            type="button"
-            className={`chip ${picked === tile.id ? 'is-selected' : ''}`}
-            onClick={() => setPicked(tile.id === picked ? null : tile.id)}
+            className={`sort-tile ${picked === tile.id ? 'is-selected' : ''}`}
           >
-            {tile.text}
-          </button>
+            <button
+              type="button"
+              className="chip"
+              onClick={() => setPicked(tile.id === picked ? null : tile.id)}
+            >
+              {tile.text}
+            </button>
+            <span className="sort-tile-actions">
+              <button
+                type="button"
+                className="btn tiny keep"
+                onClick={() => place(tile.id, 'keep')}
+              >
+                Keep
+              </button>
+              <button
+                type="button"
+                className="btn tiny toss"
+                onClick={() => place(tile.id, 'discard')}
+              >
+                Toss
+              </button>
+            </span>
+          </div>
         ))}
       </div>
 
-      {status !== 'ok' ? (
-        <button
-          type="button"
-          className="btn primary"
-          disabled={bank.length > 0}
-          onClick={check}
-        >
+      {status !== 'ok' && bank.length === 0 ? (
+        <button type="button" className="btn primary" onClick={() => evaluate()}>
           Snap the bins
         </button>
       ) : null}
