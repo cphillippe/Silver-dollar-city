@@ -117,6 +117,14 @@ Fun path toward 5: the hub should feel like coming home to a place, not a menu w
 - **Post-win:** after takeaway/reason, a character meets you with “See the town” (or the next roof on the same street). Recall/Journal/Daily dust-off unchanged.
 - **Less chrome:** no star-key dump on the hub; Map tab is Town; street directory is tucked under **Who lives where**; puzzle goal lives in the lead line, not a second paragraph.
 
+## Fun pass (2026-09-07, Fun 4 → 5)
+
+Playtest: town only breathed lightly; scroll/text killed the climb.
+
+- **Every win returns to town.** No skip to the next puzzle. Takeaway → why it stands → **See the town**. The one-more is the glowing roof.
+- **Town moves:** camera punches in, roof pops, NPCs bounce. Mid-district walks play **Grew!** (new oak / window) even when the stage stays Built. Flags, creek, lamps, folk keep moving while you sit on the hub.
+- **Shorter post-win:** chips, then one fat See-the-town button. No essay card. No win-dump `deeper` paragraph.
+
 Retention still: sort → takeaway chip → why it stands → journal / spaced dust-off.
 
 ## Tooling note (npm audit)

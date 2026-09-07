@@ -69,9 +69,7 @@ export function RecallGate({
       </p>
 
       {phase === 'claim' ? (
-        <>
-          <h2>{STORY.tapTakeaway}</h2>
-          <div className="recall-choices">
+        <div className="recall-choices">
             {claimOptions.map((line) => (
               <button
                 key={line}
@@ -83,7 +81,6 @@ export function RecallGate({
               </button>
             ))}
           </div>
-        </>
       ) : null}
 
       {phase === 'reason' ? (

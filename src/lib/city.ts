@@ -217,6 +217,7 @@ export function nextKicker(stage: CityStage, plotId: CityPlotId, dailyDone: bool
 }
 
 export const CITY_SEEN_KEY = 'silver-city-seen-city-v1'
+export const CITY_FILL_KEY = 'silver-city-seen-fill-v1'
 
 export const STAGE_RANK: Record<CityStage, number> = {
   empty: 0,
@@ -226,12 +227,13 @@ export const STAGE_RANK: Record<CityStage, number> = {
 }
 
 export type CitySnapshot = Record<CityPlotId, CityStage>
+export type CityFills = Record<CityPlotId, number>
 
 export interface CityUpgrade {
   id: CityPlotId
   from: CityStage
   to: CityStage
-  beat: 'Built!' | 'Lit!' | 'Unlocked'
+  beat: 'Built!' | 'Lit!' | 'Unlocked' | 'Grew!'
   title: string
 }
 
@@ -239,6 +241,14 @@ export function citySnapshot(progress: ProgressState): CitySnapshot {
   const snap = {} as CitySnapshot
   for (const plot of CITY_PLOTS) {
     snap[plot.id] = plotStage(plot.id, progress)
+  }
+  return snap
+}
+
+export function fillSnapshot(progress: ProgressState): CityFills {
+  const snap = {} as CityFills
+  for (const plot of CITY_PLOTS) {
+    snap[plot.id] = plotFill(plot.id, progress)
   }
   return snap
 }
@@ -266,6 +276,31 @@ export function cityUpgrades(
   return list
 }
 
+export function fillGrows(
+  prev: CityFills,
+  next: CityFills,
+  stages: CitySnapshot,
+  stageUps: CityUpgrade[],
+): CityUpgrade[] {
+  const jumped = new Set(stageUps.map((item) => item.id))
+  const list: CityUpgrade[] = []
+  for (const plot of CITY_PLOTS) {
+    const from = prev[plot.id] ?? 0
+    const to = next[plot.id] ?? 0
+    if (to <= from) continue
+    if (jumped.has(plot.id)) continue
+    const stage = stages[plot.id]
+    list.push({
+      id: plot.id,
+      from: stage,
+      to: stage,
+      beat: 'Grew!',
+      title: plot.title,
+    })
+  }
+  return list
+}
+
 export function readCitySeen(): CitySnapshot | null {
   if (typeof localStorage === 'undefined') return null
   try {
@@ -284,7 +319,26 @@ export function writeCitySeen(snap: CitySnapshot) {
   localStorage.setItem(CITY_SEEN_KEY, JSON.stringify(snap))
 }
 
+export function readFillsSeen(): CityFills | null {
+  if (typeof localStorage === 'undefined') return null
+  try {
+    const raw = localStorage.getItem(CITY_FILL_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw) as CityFills
+    if (!parsed || typeof parsed !== 'object') return null
+    return parsed
+  } catch {
+    return null
+  }
+}
+
+export function writeFillsSeen(snap: CityFills) {
+  if (typeof localStorage === 'undefined') return
+  localStorage.setItem(CITY_FILL_KEY, JSON.stringify(snap))
+}
+
 export function forgetCitySeen() {
   if (typeof localStorage === 'undefined') return
   localStorage.removeItem(CITY_SEEN_KEY)
+  localStorage.removeItem(CITY_FILL_KEY)
 }

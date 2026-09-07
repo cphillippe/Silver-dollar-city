@@ -13,7 +13,6 @@ export function ResultPanel({
   tone,
   title,
   body,
-  deeper,
   kicker,
   children,
 }: ResultPanelProps) {
@@ -26,7 +25,6 @@ export function ResultPanel({
       </p>
       <h3>{title}</h3>
       {body ? <p>{body}</p> : null}
-      {tone === 'ok' && deeper ? <p className="result-deeper">{deeper}</p> : null}
       {children}
     </div>
   )

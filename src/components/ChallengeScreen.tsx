@@ -8,8 +8,6 @@ import { PuzzlePlay } from './PuzzlePlay'
 import { RecallGate } from './RecallGate'
 import { TownReturn } from './TownReturn'
 import {
-  getNextGoal,
-  isAreaComplete,
   isAreaUnlocked,
   useProgress,
 } from '../store/progress'
@@ -31,7 +29,6 @@ export function ChallengeScreen({
   const challenge = getChallenge(areaId, challengeId)
   const brief = evidenceFor(challengeId)
   const today = localDateKey()
-  const replay = Boolean(challenge && progress.completed.includes(challenge.id))
   const [reviewing] = useState(
     Boolean(
       brief &&
@@ -116,47 +113,11 @@ export function ChallengeScreen({
   }
 
   function goNext() {
-    const latest = {
-      ...progress,
-      completed: progress.completed.includes(challengeId)
-        ? progress.completed
-        : [...progress.completed, challengeId],
-    }
-    const areaNow = getArea(areaId)
-    const areaDone = areaNow ? isAreaComplete(areaNow, latest.completed) : false
-
-    if (replay) {
-      onNavigate({ name: 'hub' })
-      return
-    }
-
-    if (areaDone) {
-      onNavigate({ name: 'hub' })
-      return
-    }
-
-    const goal = getNextGoal({ ...latest, started: true })
-
-    if (goal.kind === 'challenge' && goal.areaId && goal.challengeId) {
-      onNavigate({
-        name: 'challenge',
-        areaId: goal.areaId,
-        challengeId: goal.challengeId,
-      })
-      return
-    }
-
     onNavigate({ name: 'hub' })
   }
 
   const canProceed = showNext && (!brief || recalled)
   const rehearsing = showNext && Boolean(brief) && !recalled
-  const areaWillComplete = isAreaComplete(area, [
-    ...progress.completed,
-    challengeId,
-  ])
-  const nextTitle = area.challenges[index + 1]?.title
-  const goingToTown = replay || areaWillComplete || !nextTitle
   const voice = townVoiceForArea(areaId)
 
   return (
@@ -201,10 +162,8 @@ export function ChallengeScreen({
           {canProceed ? (
             <TownReturn
               who={voice.who}
-              line={goingToTown ? voice.afterWin : 'One more roof on this street.'}
-              action={
-                goingToTown ? 'See the town' : `Next: ${nextTitle}`
-              }
+              line={voice.afterWin}
+              action="See the town"
               onGo={goNext}
             />
           ) : null}
