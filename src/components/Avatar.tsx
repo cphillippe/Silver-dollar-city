@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react'
+import { useId, type ReactElement } from 'react'
 import type { CharacterId } from '../content/story'
 import { CAST } from '../content/story'
 
@@ -13,6 +13,7 @@ interface AvatarProps {
 /** Consistent circular portraits — same line, same eye language, distinct silhouettes. */
 export function Avatar({ who, size = 'md', className = '' }: AvatarProps) {
   const person = CAST[who]
+  const clip = `av-${who}-${useId().replace(/:/g, '')}`
   return (
     <span
       className={`avatar size-${size} ${className}`}
@@ -21,12 +22,12 @@ export function Avatar({ who, size = 'md', className = '' }: AvatarProps) {
     >
       <svg viewBox="0 0 96 96" aria-hidden>
         <defs>
-          <clipPath id={`av-${who}`}>
+          <clipPath id={clip}>
             <circle cx="48" cy="48" r="45.5" />
           </clipPath>
         </defs>
         <circle cx="48" cy="48" r="47.2" fill="#1a2238" />
-        <g clipPath={`url(#av-${who})`}>{PORTRAITS[who]}</g>
+        <g clipPath={`url(#${clip})`}>{PORTRAITS[who]}</g>
         <circle
           cx="48"
           cy="48"
