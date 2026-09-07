@@ -7,7 +7,7 @@ The product goal is **keeping the evidence**: claims, reasons, and sources you c
 ## Play now (no install)
 
 **Open this in normal Chrome — live preview of this branch:**  
-https://dose-blogging-blessed-invision.trycloudflare.com/
+https://leisure-continues-girls-craft.trycloudflare.com/
 
 That URL is a **new** Cloudflare origin in front of `vite preview` (HTTP 200). Skip older tunnels. Skip StackBlitz.
 
@@ -112,7 +112,7 @@ Progress shape (same key `silver-city-progress-v1`): `memory[id].nextReviewAt`, 
 
 ## Friend preview (no install)
 
-**Play now (Chrome, new origin):** https://dose-blogging-blessed-invision.trycloudflare.com/
+**Play now (Chrome, new origin):** https://leisure-continues-girls-craft.trycloudflare.com/
 
 **After Pages is enabled:** https://cphillippe.github.io/Silver-dollar-city/
 
