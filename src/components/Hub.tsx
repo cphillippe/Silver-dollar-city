@@ -3,7 +3,7 @@ import { dailyForDate } from '../content/daily'
 import { STORY } from '../content/story'
 import { formatDeviceLocalDate, localDateKey } from '../lib/dates'
 import { STAR_KEY } from '../lib/stars'
-import { CITY_PLOTS, nextPlotId, plotStage } from '../lib/city'
+import { CITY_PLOTS, nextPlotId } from '../lib/city'
 import { Avatar } from './Avatar'
 import { DeviceDay } from './DeviceDay'
 import { Landmark } from './Landmark'
@@ -18,7 +18,6 @@ import {
   isAreaUnlocked,
   morningReview,
   rehearseGo,
-  streakCopy,
   useProgress,
 } from '../store/progress'
 import type { View } from '../types'
@@ -48,8 +47,9 @@ export function Hub({ onNavigate }: HubProps) {
 
       <CityMap onNavigate={onNavigate} />
 
+      {doneToday ? null : (
       <section
-        className={`today-trail is-slim ${doneToday ? 'is-done' : 'is-live'}`}
+        className={`today-trail is-slim is-live`}
         aria-label="Today’s Trail"
       >
         <div className="card-lead">
@@ -58,43 +58,36 @@ export function Hub({ onNavigate }: HubProps) {
             <p className="eyebrow">Today’s Trail · {formatDeviceLocalDate()}</p>
             <DeviceDay />
             <h2>
-              {doneToday
-                ? 'This morning is marked'
-                : due
-                  ? 'Time to dust off this one'
-                  : daily.challenge.title}
+              {due
+                ? 'Time to dust off this one'
+                : daily.challenge.title}
             </h2>
           </div>
         </div>
         {due ? <Landmark pillar={due.pillar} compact /> : null}
-        {doneToday ? (
-          <p>{streakCopy(progress, today)}</p>
-        ) : (
-          <>
-            <p>
-              {due
-                ? duePlay
-                  ? `${duePlay.challenge.title} · an older walk.`
-                  : 'An older page is waiting to be rebuilt.'
-                : daily.districtFlavor}
-            </p>
-            <p className="quiet">
-              {due
-                ? waiting > 1
-                  ? `${waiting} pages due · about a minute`
-                  : 'A spaced recall · about a minute'
-                : 'One short puzzle · about a minute'}
-            </p>
-            <button
-              type="button"
-              className="btn primary"
-              onClick={() => onNavigate({ name: 'daily' })}
-            >
-              {due ? 'Dust this one off' : 'Walk today’s trail'}
-            </button>
-          </>
-        )}
+        <p>
+          {due
+            ? duePlay
+              ? `${duePlay.challenge.title} · an older walk.`
+              : 'An older page is waiting to be rebuilt.'
+            : daily.districtFlavor}
+        </p>
+        <p className="quiet">
+          {due
+            ? waiting > 1
+              ? `${waiting} pages due · about a minute`
+              : 'A spaced recall · about a minute'
+            : 'One short puzzle · about a minute'}
+        </p>
+        <button
+          type="button"
+          className="btn primary"
+          onClick={() => onNavigate({ name: 'daily' })}
+        >
+          {due ? 'Dust this one off' : 'Walk today’s trail'}
+        </button>
       </section>
+      )}
 
       <AdSlot slot="hub-banner" />
 
@@ -149,7 +142,6 @@ export function Hub({ onNavigate }: HubProps) {
           const complete = area
             ? isAreaComplete(area, progress.completed)
             : doneToday
-          const stage = plotStage(plot.id, progress)
           const current = plot.id === nextId
 
           return (
@@ -159,21 +151,11 @@ export function Hub({ onNavigate }: HubProps) {
             >
               <div className="street-name">
                 <strong>{plot.title}</strong>
-                <span className="quiet">
-                  {stage === 'empty'
-                    ? area
-                      ? 'Waiting'
-                      : 'Waiting'
-                    : stage === 'scaffold'
-                      ? 'Rising'
-                      : stage === 'built'
-                        ? 'Standing'
-                        : 'Lit'}
-                </span>
+                {current ? <span className="street-next">Next</span> : null}
               </div>
               <button
                 type="button"
-                className={`btn tiny ${complete && unlocked ? 'street-rehearse' : ''}`}
+                className={`btn tiny ${complete && unlocked ? 'street-rehearse' : ''} ${current && unlocked && !complete ? 'gold' : ''}`}
                 disabled={!unlocked}
                 onClick={() => {
                   if (complete) {
@@ -198,7 +180,11 @@ export function Hub({ onNavigate }: HubProps) {
                     : 'Gated'
                   : complete
                     ? STORY.takeaway
-                    : 'Enter'}
+                    : current
+                      ? plot.id === 'porch'
+                        ? 'Walk next'
+                        : 'Build next'
+                      : 'Enter'}
               </button>
             </li>
           )
