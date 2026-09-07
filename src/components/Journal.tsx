@@ -237,7 +237,7 @@ function JournalCard({
                 className="btn primary"
                 onClick={() => setQuizAgain(true)}
               >
-                Rebuild this line
+                  Rebuild this line — can you still say it?
               </button>
             </>
           ) : brief && quizAgain ? (

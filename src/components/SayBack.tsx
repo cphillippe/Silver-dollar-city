@@ -59,7 +59,7 @@ export function SayBack({ brief, onDone }: SayBackProps) {
             rows={2}
             maxLength={220}
             value={text}
-            placeholder="One sentence you’ll still recognize tomorrow…"
+            placeholder="One sentence you’ll still recognize tomorrow… Your words help it stick."
             onChange={(event) => setText(event.target.value)}
           />
           <button
