@@ -7,6 +7,7 @@ import {
   fillGrows,
   fillSnapshot,
   newestStanding,
+  nextKicker,
   nextPlotId,
   plotFill,
   plotStage,
@@ -220,6 +221,9 @@ assert.doesNotMatch(sortSrc, /this belongs/)
 assert.match(sortSrc, /Toss<\/strong> a distractor/)
 assert.match(sortSrc, /Keep · belongs/)
 assert.match(sortSrc, /Toss · aside/)
+assert.match(sortSrc, /is-gone/)
+assert.match(sortSrc, /\[slots, setSlots\]/)
+assert.doesNotMatch(sortSrc, /bank\.length/)
 
 const dailySrc = readFileSync(
   new URL('../src/content/daily.ts', import.meta.url),
@@ -271,6 +275,19 @@ const recallSrc = readFileSync(
 assert.doesNotMatch(recallSrc, /phase === 'echo'/)
 assert.doesNotMatch(recallSrc, /held-stamp/)
 assert.match(recallSrc, /STORY\.takeaway/)
+assert.match(recallSrc, /is-encode/)
+assert.match(recallSrc, /encode \? \[brief\.claim\]/)
+assert.match(recallSrc, /encode \? \[brief\.reason\]/)
+
+const evidenceSrc = readFileSync(
+  new URL('../src/content/evidence.ts', import.meta.url),
+  'utf8',
+)
+assert.match(evidenceSrc, /Wonder and measurement can share a roof/)
+assert.match(evidenceSrc, /Psalm 19 treats the sky as speech/)
+assert.doesNotMatch(evidenceSrc, /Beauty forbids/)
+assert.doesNotMatch(evidenceSrc, /Wonder is the enemy of science/)
+assert.doesNotMatch(evidenceSrc, /The sky is not worth looking at slowly/)
 
 assert.doesNotMatch(hubSrc, /['"]Again['"]/)
 assert.doesNotMatch(hubSrc, /Standing/)
@@ -301,7 +318,13 @@ assert.match(challengeSrc, /puzzle-title/)
 
 const cityLibSrc = readFileSync(new URL('../src/lib/city.ts', import.meta.url), 'utf8')
 assert.doesNotMatch(cityLibSrc, /Walk again/)
-assert.match(cityLibSrc, /Tap the takeaway/)
+assert.match(cityLibSrc, /Still lit/)
+assert.doesNotMatch(cityLibSrc, /Keep building/)
+assert.equal(nextKicker('built', 'hollow', true), 'Still lit')
+assert.equal(nextKicker('lit', 'porch', true), 'Still lit')
+assert.equal(nextKicker('scaffold', 'hollow', true), 'Build next')
+assert.equal(nextKicker('empty', 'bench', true), 'Build next')
+assert.equal(nextKicker('built', 'porch', false), 'Walk next')
 
 const shellSrc = readFileSync(
   new URL('../src/components/AppShell.tsx', import.meta.url),
@@ -324,6 +347,8 @@ assert.match(cssSrc, /app\.is-town \.app-body/)
 assert.match(cssSrc, /welcome\.is-onescreen/)
 assert.match(cssSrc, /win-stamp-glow/)
 assert.match(cssSrc, /is-homecoming/)
+assert.match(cssSrc, /sort-tile\.is-gone/)
+assert.match(cssSrc, /recall-gate\.is-encode/)
 
 const juiceSrc = readFileSync(new URL('../src/lib/juice.ts', import.meta.url), 'utf8')
 assert.match(cssSrc, /win-stamp/)

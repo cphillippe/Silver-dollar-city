@@ -212,8 +212,7 @@ export function plotFill(id: CityPlotId, progress: ProgressState): number {
 export function nextKicker(stage: CityStage, plotId: CityPlotId, dailyDone: boolean): string {
   if (plotId === 'porch' && !dailyDone) return 'Walk next'
   if (stage === 'scaffold' || stage === 'empty') return 'Build next'
-  if (stage === 'built') return 'Keep building'
-  return 'Tap the takeaway'
+  return 'Still lit'
 }
 
 export const CITY_SEEN_KEY = 'silver-city-seen-city-v1'

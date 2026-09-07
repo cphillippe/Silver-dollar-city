@@ -14,20 +14,23 @@ interface RecallGateProps {
 type Phase = 'claim' | 'reason' | 'teach'
 
 /**
- * Sort → takeaway → reason. Teaching only if the chips miss twice.
+ * Encode (right after lock-in): claim + reason only — same idea, no inversions.
+ * Review (dust-off): choose among decoys that are not word-flips of the keep.
  */
 export function RecallGate({
   brief,
   kicker = STORY.tapTakeaway,
+  mode = 'encode',
   onHeld,
 }: RecallGateProps) {
+  const encode = mode === 'encode'
   const claimOptions = useMemo(
-    () => shuffle([...brief.claimChoices]),
-    [brief.id, brief.claimChoices],
+    () => (encode ? [brief.claim] : shuffle([...brief.claimChoices])),
+    [brief.id, brief.claim, brief.claimChoices, encode],
   )
   const reasonOptions = useMemo(
-    () => shuffle([...brief.reasonChoices]),
-    [brief.id, brief.reasonChoices],
+    () => (encode ? [brief.reason] : shuffle([...brief.reasonChoices])),
+    [brief.id, brief.reason, brief.reasonChoices, encode],
   )
   const [phase, setPhase] = useState<Phase>('claim')
   const [misses, setMisses] = useState(0)
@@ -60,7 +63,7 @@ export function RecallGate({
 
   return (
     <section
-      className={`recall-gate ${shake ? 'is-shake' : ''} phase-${phase}`}
+      className={`recall-gate ${shake ? 'is-shake' : ''} phase-${phase} ${encode ? 'is-encode' : 'is-review'}`}
       aria-label={STORY.takeaway}
     >
       <p className="eyebrow">
@@ -70,17 +73,17 @@ export function RecallGate({
 
       {phase === 'claim' ? (
         <div className="recall-choices">
-            {claimOptions.map((line) => (
-              <button
-                key={line}
-                type="button"
-                className={`match-card recall-card ${flash === line ? 'is-flash' : ''}`}
-                onClick={() => pick(line, brief.claim, 'reason')}
-              >
-                {line}
-              </button>
-            ))}
-          </div>
+          {claimOptions.map((line) => (
+            <button
+              key={line}
+              type="button"
+              className={`match-card recall-card ${flash === line ? 'is-flash' : ''}`}
+              onClick={() => pick(line, brief.claim, 'reason')}
+            >
+              {line}
+            </button>
+          ))}
+        </div>
       ) : null}
 
       {phase === 'reason' ? (

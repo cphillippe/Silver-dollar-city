@@ -148,6 +148,17 @@ Closed playtest: Fun 4 · Clarity 5 · Retention 5 · Learnability 4. Lock-in ex
 
 Retention still: sort → takeaway chip → why it stands → journal / spaced dust-off.
 
+## Stop-ship: truthful takeaway (2026-09-07)
+
+Clarity fell 5 → 3 when post-win chips inverted a just-kept line (Night air: “Wonder and measurement can share a roof” expanded into “Wonder is the enemy of science”).
+
+- **Encode (right after lock-in):** claim chip is only `brief.claim`; Why-it-stands chip is only `brief.reason`. No shuffled inversions on the first hold.
+- **Review / dust-off:** decoys stay, but they are not word-flips of the keep tiles.
+- **Sort grid:** Keep/Toss leaves holes — tile seats do not reflow.
+- **Return copy:** built/lit lots say **Still lit** / held, not Keep building.
+
+Done when a cold player’s locked takeaway and the Why-it-stands chip say the same idea.
+
 ## Tooling note (npm audit)
 
 `uuid` 7.x via `@capacitor/cli` (GHSA-w5hq-g745-h8pq) is **tooling-only**. Do not `npm audit fix --force` (it wants to downgrade Capacitor). Upgrade when a CLI release pulls `uuid >= 11.1.1`. Details in `SECURITY_REVIEW.md`.
