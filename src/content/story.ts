@@ -87,10 +87,14 @@ export function guideForArea(areaId: string): Character {
 }
 
 export const STORY = {
+  purpose:
+    'Silver City is a puzzle trail: play a short game, fold the page, and keep evidence you can still say tomorrow.',
+  who:
+    'You walk as River. Juniper walks the first puzzle with you — then the line is yours.',
   premise:
-    'River comes to Silver City with a folded letter: the evidence is a trail, not a shout. Five Christians already live on that trail. They will walk with you. They will not lock you in a pew.',
+    'Silver City is a puzzle trail: play a short game, fold the page, and keep evidence you can still say tomorrow.',
   welcomeJuniper:
-    'I’m Juniper. I light the east porch at dawn. One short walk — then we fold the page and keep the line.',
+    'You walk as River. I’m Juniper. One short puzzle — then we fold the page and keep the line.',
   welcomeRiver:
     'I’m River. I came to see if the case for God can be walked. If you’ll walk, I’ll try to remember.',
   dailyInvite: 'Lantern’s lit. Snap it, fold the page, keep the line. Later I’ll bring an older page back.',

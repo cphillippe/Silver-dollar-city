@@ -1,10 +1,7 @@
-import { areas, totalChallenges, totalJournal } from '../content'
-import { dailyForDate } from '../content/daily'
 import { STORY } from '../content/story'
+import { Avatar } from './Avatar'
+import { dailyDoneToday, useProgress } from '../store/progress'
 import { localDateKey } from '../lib/dates'
-import { Avatar, Say } from './Avatar'
-import { ShareInvite } from './ShareInvite'
-import { dailyDoneToday, morningReview, useProgress } from '../store/progress'
 import type { View } from '../types'
 
 interface WelcomeProps {
@@ -13,29 +10,16 @@ interface WelcomeProps {
 
 export function Welcome({ onNavigate }: WelcomeProps) {
   const { progress, start } = useProgress()
-  const resumed = progress.started && progress.completed.length > 0
-  const todayKey = localDateKey()
-  const today = dailyForDate(todayKey)
-  const due = dailyDoneToday(progress, todayKey)
-    ? undefined
-    : morningReview(progress, todayKey)
+  const today = localDateKey()
+  const returning = progress.started && dailyDoneToday(progress, today)
 
-  function walkDaily() {
+  function begin() {
     start()
-    onNavigate({ name: 'daily' })
-  }
-
-  function beginDistricts() {
-    start()
-    if (resumed && progress.lastAreaId && progress.lastChallengeId) {
-      onNavigate({
-        name: 'challenge',
-        areaId: progress.lastAreaId,
-        challengeId: progress.lastChallengeId,
-      })
+    if (returning) {
+      onNavigate({ name: 'hub' })
       return
     }
-    onNavigate({ name: 'area', areaId: 'parable-hollow' })
+    onNavigate({ name: 'daily' })
   }
 
   return (
@@ -45,58 +29,21 @@ export function Welcome({ onNavigate }: WelcomeProps) {
         <Avatar who="river" size="xl" />
         <Avatar who="juniper" size="xl" />
       </div>
-      <p className="eyebrow">A mountain-town adventure</p>
+      <p className="eyebrow">A puzzle trail</p>
       <h1>
         Silver City
         <span>Unending Evidence</span>
       </h1>
-      <p className="lede">{STORY.premise}</p>
-      <p className="welcome-goal">
-        Play a short puzzle. Fold the page. Keep one claim you can still say
-        tomorrow.
-      </p>
-      <Say who="juniper" line={STORY.welcomeJuniper} />
-      <ul className="welcome-facts">
-        <li>
-          <strong>{areas.length}</strong>
-          <span>areas</span>
-        </li>
-        <li>
-          <strong>{totalChallenges}</strong>
-          <span>challenges</span>
-        </li>
-        <li>
-          <strong>{totalJournal}</strong>
-          <span>journal cards</span>
-        </li>
-      </ul>
+      <p className="welcome-goal">{STORY.purpose}</p>
+      <p className="welcome-who">{STORY.who}</p>
       <div className="welcome-actions">
-        <button type="button" className="btn primary xl" onClick={walkDaily}>
-          {due ? 'Dust off a page with Juniper' : 'Walk today’s trail with Juniper'}
+        <button type="button" className="btn primary xl" onClick={begin}>
+          {returning ? 'Back to the map' : 'Begin the trail'}
         </button>
-        <p className="welcome-daily-line">
-          {due
-            ? 'Time to dust off a line you already walked — forgetting is why it returns.'
-            : today.districtFlavor}
-        </p>
-        <button type="button" className="btn ghost" onClick={beginDistricts}>
-          {resumed ? 'Continue the districts' : 'Meet Mercy in Parable Hollow'}
-        </button>
-        {progress.started ? (
-          <button
-            type="button"
-            className="btn ghost"
-            onClick={() => onNavigate({ name: 'hub' })}
-          >
-            Open the city map
-          </button>
-        ) : null}
       </div>
-      <ShareInvite />
       <p className="welcome-note">
-        Progress is saved on this device. Miss a morning and the trail waits —
-        your journal stays. Invite a friend to try remembering what they
-        unlocked, not only to chase a streak.
+        About a minute. Progress stays on this device. Miss a morning and the
+        trail waits.
       </p>
     </main>
   )

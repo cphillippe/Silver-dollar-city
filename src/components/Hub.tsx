@@ -42,21 +42,11 @@ export function Hub({ onNavigate }: HubProps) {
   return (
     <main className="hub">
       <header className="page-head">
-        <p className="eyebrow">Silver City map</p>
+        <p className="eyebrow">Silver City</p>
         <h1>What’s next</h1>
-        <div className="cast-row">
-          <Avatar who="river" size="sm" />
-          <Avatar who="juniper" size="sm" />
-          <Avatar who="mercy" size="sm" />
-          <Avatar who="silas" size="sm" />
-          <Avatar who="nora" size="sm" />
-          <Avatar who="ansel" size="sm" />
-          <Avatar who="hope" size="sm" />
-        </div>
         <p>
-          River walks; Juniper keeps the morning lamp. Five guides wait on the
-          longer trail. Come back as you are. The town does not scold an empty
-          day.
+          A puzzle trail for a line you can still say tomorrow. Today’s walk is
+          first; the districts wait underneath.
         </p>
       </header>
 
@@ -163,11 +153,18 @@ export function Hub({ onNavigate }: HubProps) {
               }
             }}
           >
-            Continue here
+            {goal.kind === 'challenge' && goal.title.startsWith('Next:')
+              ? goal.title
+              : goal.kind === 'area'
+                ? `Open ${goal.areaId === 'parable-hollow' ? 'Parable Hollow' : 'the next district'}`
+                : goal.kind === 'vista'
+                  ? 'Stand at the lookout'
+                  : 'Open the next walk'}
           </button>
         </section>
       ) : null}
 
+      {progress.completed.length > 0 || doneToday ? (
       <ol className="trail">
         {areas.map((area, index) => {
           const unlocked = isAreaUnlocked(area.id, progress.completed)
@@ -235,17 +232,16 @@ export function Hub({ onNavigate }: HubProps) {
                     ? 'Still gated'
                     : complete
                       ? 'Walk again'
-                      : current
-                        ? 'Continue here'
-                        : 'Enter'}
+                      : 'Enter this district'}
                 </button>
               </div>
             </li>
           )
         })}
       </ol>
+      ) : null}
 
-      <ShareInvite compact />
+      {(progress.completed.length > 0 || doneToday) && <ShareInvite compact />}
 
       {goal.kind === 'vista' ? (
         <button
