@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { findPlayable, getJournalEntry, pillarFor } from '../content'
+import { findPlayable, pillarFor } from '../content'
 import { dailyForDate } from '../content/daily'
 import { evidenceFor } from '../content/evidence'
 import { STORY } from '../content/story'
@@ -16,15 +16,10 @@ import { DeviceDay } from './DeviceDay'
 import { Landmark } from './Landmark'
 import { PuzzlePlay } from './PuzzlePlay'
 import { RecallGate } from './RecallGate'
-import { SayBack } from './SayBack'
-import { ShareInvite } from './ShareInvite'
-import { StarRow } from './StarRow'
 import { AdSlot } from './AdSlot'
-import { starLegend, type StarCount } from '../lib/stars'
 import {
   dailyDoneToday,
   morningReview,
-  streakCopy,
   useProgress,
 } from '../store/progress'
 import type { View } from '../types'
@@ -70,58 +65,24 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
   const [solved, setSolved] = useState(session.already)
   const [missed, setMissed] = useState(false)
   const [peeked, setPeeked] = useState(false)
-  const [recallClean, setRecallClean] = useState(true)
   const [held, setHeld] = useState(
     () =>
       !brief ||
       (Boolean(progress.held.includes(brief.id)) && !isReview),
   )
-  const [said, setSaid] = useState(
-    () =>
-      !brief ||
-      Boolean(progress.memory[brief.id]?.elaborated && !isReview),
-  )
-  const [earned, setEarned] = useState<StarCount | 0>(
-    () => (brief && progress.stars[brief.id]) || 0,
-  )
-  const [newCards, setNewCards] = useState<string[]>([])
   const [tone, setTone] = useState(() =>
     session.already
       ? streakAfterPlay(progress.lastDailyDate, today, progress.streak).tone
       : undefined,
   )
 
-  const showTeaser = solved && held && said
-
-  function commitMemory(
-    elaborated: boolean,
-    text?: string,
-    clean = recallClean,
-  ) {
-    if (!brief) {
-      setSaid(true)
-      return
-    }
-    const stars = recordReview({
-      id: brief.id,
-      pillar,
-      kind: isReview ? 'recall' : 'encode',
-      today,
-      clean: clean && !missed && !peeked,
-      peeked,
-      elaborated,
-      text,
-    })
-    setEarned(stars)
-    setSaid(true)
-  }
+  const showTeaser = solved && held
 
   function finishPuzzle() {
-    const unlocked = completeDaily(today)
-    setNewCards(unlocked)
+    completeDaily(today)
     setTone(streakAfterPlay(progress.lastDailyDate, today, progress.streak).tone)
     if (brief && !isReview) {
-      const stars = recordReview({
+      recordReview({
         id: brief.id,
         pillar,
         kind: 'encode',
@@ -130,24 +91,26 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
         peeked,
         elaborated: false,
       })
-      setEarned(stars)
     }
     setSolved(true)
   }
 
   function settleRecall(result: { clean: boolean }) {
-    setRecallClean(result.clean)
     setHeld(true)
-    if (brief && progress.memory[brief.id]?.elaborated) {
-      commitMemory(true, undefined, result.clean)
+    if (!brief) return
+    if (isReview) {
+      recordReview({
+        id: brief.id,
+        pillar,
+        kind: 'recall',
+        today,
+        clean: result.clean && !missed && !peeked,
+        peeked,
+        elaborated: Boolean(progress.memory[brief.id]?.elaborated),
+      })
     }
   }
 
-  function settleSay(result: { elaborated: boolean; text?: string }) {
-    commitMemory(result.elaborated, result.text)
-  }
-
-  const flourish = newCards[0] ? getJournalEntry(newCards[0]) : undefined
   const liveStreak = Math.max(progress.streak, solved || session.already ? 1 : 0)
   const rehearsing = solved && Boolean(brief) && !held
 
@@ -175,7 +138,7 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
           <DeviceDay now={now} />
           <h1>
             {rehearsing
-              ? STORY.takeaway
+              ? STORY.tapTakeaway
               : showTeaser
                 ? 'A mark for this morning'
                 : isReview
@@ -184,18 +147,14 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
           </h1>
         </div>
       </div>
-      {rehearsing ? null : (
+      {rehearsing || showTeaser ? null : (
         <>
           <Say
             who="juniper"
             line={
-              showTeaser
-                ? tone === 'welcome-back'
-                  ? STORY.trailWait
-                  : STORY.dailyHeld
-                : isReview
-                  ? 'Forgetting is why the trail brings a page back. Same snap — no shame in dusting it off.'
-                  : STORY.dailyInvite
+              isReview
+                ? 'Forgetting is why the trail brings a page back. Same snap — no shame in dusting it off.'
+                : STORY.dailyInvite
             }
           />
           <Landmark pillar={pillar} />
@@ -225,80 +184,34 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
               <RecallGate
                 brief={brief}
                 mode={isReview ? 'review' : 'encode'}
-                kicker={STORY.takeaway}
+                kicker={STORY.tapTakeaway}
                 onHeld={settleRecall}
               />
             </div>
           ) : null}
 
-          {brief && held && !said ? (
-            <SayBack brief={brief} onDone={settleSay} />
-          ) : null}
-
           {showTeaser ? (
             <>
-              <p className="streak-pill pop-in">
-                {tone === 'welcome-back'
-                  ? 'The trail waited. Welcome back.'
-                  : tone === 'first' || liveStreak <= 1
-                    ? 'Your first mark on the trail.'
-                    : `${Math.max(progress.streak, 1)} mornings in a row.`}
-              </p>
-              <div className="daily-flourish">
-                <StarRow
-                  count={earned || 1}
-                  label={starLegend(earned || 1)}
-                />
-                <p>
-                  {earned >= 3
-                    ? 'Held after a rest, and said back.'
-                    : earned === 2
-                      ? 'Held after a rest. The trail will ask again later.'
-                      : '1★ first walk. A later morning will ask this line back.'}
+              <div className="after-win-cta">
+                <p className="streak-pill pop-in">
+                  {tone === 'welcome-back'
+                    ? 'The trail waited.'
+                    : tone === 'first' || liveStreak <= 1
+                      ? 'First mark.'
+                      : `${Math.max(progress.streak, 1)} mornings.`}
                 </p>
+                <button
+                  type="button"
+                  className="btn primary xl"
+                  onClick={() => onNavigate({ name: 'hub' })}
+                >
+                  See the town
+                </button>
               </div>
-              {flourish ? (
-                <article className="unlock-card pop-in">
-                  <p className="eyebrow">Journal flourish</p>
-                  <h2>{flourish.title}</h2>
-                  <p>{flourish.body[0]}</p>
-                  <button
-                    type="button"
-                    className="text-link"
-                    onClick={() =>
-                      onNavigate({ name: 'journal', focusId: flourish.id })
-                    }
-                  >
-                    Open the page →
-                  </button>
-                </article>
-              ) : (
-                <p className="quiet">{streakCopy(progress, today)}</p>
-              )}
-
-              <article
-                className="teaser-card"
-                aria-label="Tomorrow’s trail, still closed"
-              >
-                <p className="eyebrow">Tomorrow’s trail</p>
-                <h2>A locked card waits</h2>
-                <p className="district-flavor">{tomorrow.districtFlavor}</p>
-                <p>{tomorrow.teaser}</p>
-                <p className="quiet">
-                  When a page is due, Juniper will dust it off — mixed among
-                  the districts, never as punishment.
-                </p>
-              </article>
-
-              <ShareInvite compact />
+              <p className="quiet teaser-inline">
+                Tomorrow: {tomorrow.districtFlavor}
+              </p>
               <AdSlot slot="after-daily" />
-              <button
-                type="button"
-                className="btn primary xl"
-                onClick={() => onNavigate({ name: 'hub' })}
-              >
-                Back to the map
-              </button>
             </>
           ) : null}
         </section>

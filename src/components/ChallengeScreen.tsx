@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { areas, getArea, getChallenge, journalForChallenge } from '../content'
+import { getArea, getChallenge, journalForChallenge } from '../content'
 import { evidenceFor } from '../content/evidence'
 import { guideForArea, STORY } from '../content/story'
 import { kindLabel } from './icons'
@@ -9,7 +9,6 @@ import { starLegend, type StarCount } from '../lib/stars'
 import { PuzzlePlay } from './PuzzlePlay'
 import { Landmark } from './Landmark'
 import { RecallGate } from './RecallGate'
-import { SayBack } from './SayBack'
 import { Say } from './Avatar'
 import { StarRow } from './StarRow'
 import {
@@ -49,10 +48,8 @@ export function ChallengeScreen({
   const [showNext, setShowNext] = useState(false)
   const [attemptMissed, setAttemptMissed] = useState(false)
   const [attemptPeeked, setAttemptPeeked] = useState(false)
-  const [recallClean, setRecallClean] = useState(true)
   const [earned, setEarned] = useState<StarCount | 0>(progress.stars[challengeId] ?? 0)
   const [recalled, setRecalled] = useState(false)
-  const [said, setSaid] = useState(false)
 
   useEffect(() => {
     if (!showNext) return
@@ -89,32 +86,12 @@ export function ChallengeScreen({
     )
   }
 
-  function commitMemory(elaborated: boolean, text?: string, clean = recallClean) {
-    if (!brief) {
-      setSaid(true)
-      return
-    }
-    const stars = recordReview({
-      id: brief.id,
-      pillar: areaId,
-      kind: reviewing ? 'recall' : 'encode',
-      today,
-      clean: clean && !attemptMissed && !attemptPeeked,
-      peeked: attemptPeeked,
-      elaborated,
-      text,
-    })
-    setEarned(stars)
-    setSaid(true)
-  }
-
   function solved() {
     const cards = completeChallenge(areaId, challengeId)
     setUnlockedCards(cards)
     setShowNext(true)
     if (!brief) {
       setRecalled(true)
-      setSaid(true)
       return
     }
     if (!reviewing) {
@@ -132,10 +109,19 @@ export function ChallengeScreen({
   }
 
   function settleRecall(result: { clean: boolean }) {
-    setRecallClean(result.clean)
     setRecalled(true)
-    if (brief && progress.memory[brief.id]?.elaborated) {
-      commitMemory(true, undefined, result.clean)
+    if (!brief) return
+    if (reviewing) {
+      const stars = recordReview({
+        id: brief.id,
+        pillar: areaId,
+        kind: 'recall',
+        today,
+        clean: result.clean && !attemptMissed && !attemptPeeked,
+        peeked: attemptPeeked,
+        elaborated: Boolean(progress.memory[brief.id]?.elaborated),
+      })
+      setEarned(stars)
     }
   }
 
@@ -148,22 +134,18 @@ export function ChallengeScreen({
     }
     const areaNow = getArea(areaId)
     const areaDone = areaNow ? isAreaComplete(areaNow, latest.completed) : false
-    const goal = getNextGoal({ ...latest, started: true })
 
     if (replay) {
-      onNavigate({ name: 'area', areaId })
+      onNavigate({ name: 'hub' })
       return
     }
 
     if (areaDone) {
-      const following = areas.find((item) => item.order === (areaNow?.order ?? 0) + 1)
-      if (following) {
-        onNavigate({ name: 'area', areaId: following.id })
-        return
-      }
-      onNavigate({ name: 'vista' })
+      onNavigate({ name: 'hub' })
       return
     }
+
+    const goal = getNextGoal({ ...latest, started: true })
 
     if (goal.kind === 'challenge' && goal.areaId && goal.challengeId) {
       onNavigate({
@@ -174,13 +156,17 @@ export function ChallengeScreen({
       return
     }
 
-    onNavigate({ name: 'area', areaId })
+    onNavigate({ name: 'hub' })
   }
 
   const card = journalForChallenge(challengeId)
   const bestBefore = progress.stars[challengeId] ?? 0
-  const canProceed = showNext && (!brief || (recalled && said))
+  const canProceed = showNext && (!brief || recalled)
   const rehearsing = showNext && Boolean(brief) && !recalled
+  const areaWillComplete = isAreaComplete(area, [
+    ...progress.completed,
+    challengeId,
+  ])
 
   return (
     <main
@@ -195,18 +181,20 @@ export function ChallengeScreen({
       </button>
       {rehearsing ? (
         <p className="eyebrow">
-          {area.title} · Today’s takeaway
+          {area.title} · Takeaway
           {replay ? ' · replay' : ''}
         </p>
-      ) : (
+      ) : showNext ? null : (
         <p className="eyebrow">
           {area.title} · {kindLabel(challenge.kind)}
           {replay ? ' · replay' : ''}
           {reviewing ? ' · time to dust off' : ''}
         </p>
       )}
-      <h1>{rehearsing ? STORY.takeaway : challenge.title}</h1>
-      {rehearsing ? null : (
+      {showNext && !rehearsing ? null : (
+        <h1>{rehearsing ? STORY.tapTakeaway : challenge.title}</h1>
+      )}
+      {rehearsing || showNext ? null : (
         <>
           <Say
             who={guide.id}
@@ -246,59 +234,33 @@ export function ChallengeScreen({
               <RecallGate
                 brief={brief}
                 mode={reviewing ? 'review' : 'encode'}
-                kicker={STORY.takeaway}
+                kicker={STORY.tapTakeaway}
                 onHeld={settleRecall}
               />
             </div>
           ) : null}
 
-          {brief && recalled && !said ? (
-            <SayBack brief={brief} onDone={(result) => commitMemory(result.elaborated, result.text)} />
-          ) : null}
-
           {canProceed ? (
-            <div className="daily-flourish">
-              <StarRow
-                count={earned || 1}
-                label={starLegend(earned || 1)}
-              />
+            <div className="after-win-cta">
               <p className="streak-pill">
-                {earned >= 3
-                  ? 'Held after a rest, and said back.'
-                  : earned === 2
-                    ? 'Held after a rest.'
-                    : reviewing
-                      ? 'Time to dust off this one — then it can rest again.'
-                      : '1★ first walk. A later morning will ask this line back.'}
+                {areaWillComplete && !replay
+                  ? 'District held — the town rose.'
+                  : earned >= 2
+                    ? 'Held.'
+                    : 'Line locked.'}
               </p>
+              <button type="button" className="btn primary xl" onClick={goNext}>
+                {replay
+                  ? 'See the town'
+                  : areaWillComplete
+                    ? 'See the town'
+                    : `Next: ${area.challenges[index + 1]?.title ?? 'Continue'}`}
+              </button>
             </div>
           ) : null}
 
           {canProceed && unlockedCards.length > 0 && card ? (
-            <article className="unlock-card pop-in">
-              <p className="eyebrow">Evidence Journal</p>
-              <h2>{card.title}</h2>
-              <p>{card.body[0]}</p>
-              <button
-                type="button"
-                className="text-link"
-                onClick={() => onNavigate({ name: 'journal', focusId: card.id, autoQuiz: true })}
-              >
-                Choose the takeaway →
-              </button>
-            </article>
-          ) : null}
-
-          {canProceed ? (
-            <button type="button" className="btn primary xl" onClick={goNext}>
-              {replay
-                ? 'Back to the district'
-                : isAreaComplete(area, [...progress.completed, challengeId])
-                  ? areas.find((item) => item.order === area.order + 1)
-                    ? `Enter ${areas.find((item) => item.order === area.order + 1)?.title}`
-                    : 'Stand at the lookout'
-                  : `Next: ${area.challenges[index + 1]?.title ?? 'Continue'}`}
-            </button>
+            <p className="quiet teaser-inline">{card.title} unsealed.</p>
           ) : null}
         </section>
       )}

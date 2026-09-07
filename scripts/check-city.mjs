@@ -2,6 +2,8 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import {
   CITY_HOLLOW_TO_WITNESS,
+  citySnapshot,
+  cityUpgrades,
   nextPlotId,
   plotStage,
 } from '../src/lib/city.ts'
@@ -45,6 +47,18 @@ const afterDaily = {
 assert.equal(plotStage('porch', afterDaily), 'built')
 assert.equal(plotStage('hollow', afterDaily), 'scaffold')
 assert.equal(nextPlotId(afterDaily, true), 'hollow')
+
+const fromEmpty = citySnapshot(empty)
+const fromDaily = citySnapshot(afterDaily)
+const upgrades = cityUpgrades(fromEmpty, fromDaily)
+assert.equal(upgrades[0].beat, 'Built!')
+assert.equal(upgrades.some((item) => item.id === 'porch' && item.to === 'built'), true)
+assert.equal(upgrades.some((item) => item.id === 'hollow' && item.to === 'scaffold'), true)
+
+const mapSrc = readFileSync(new URL('../src/components/CityMap.tsx', import.meta.url), 'utf8')
+assert.match(mapSrc, /city-beat/)
+assert.match(mapSrc, /is-rising/)
+assert.match(mapSrc, /beat\.beat/)
 
 const twoHollow = {
   ...afterDaily,
@@ -175,6 +189,13 @@ for (const file of contentFiles) {
   const ideas = [...src.matchAll(/\bidea: '/g)].length
   assert.equal(kinds, ideas, `${file} needs a plain idea on every puzzle`)
 }
+
+const dailyTrailSrc = readFileSync(
+  new URL('../src/components/DailyTrail.tsx', import.meta.url),
+  'utf8',
+)
+assert.match(dailyTrailSrc, /See the town/)
+assert.match(dailyTrailSrc, /STORY\.tapTakeaway/)
 
 const shellSrc = readFileSync(
   new URL('../src/components/AppShell.tsx', import.meta.url),
