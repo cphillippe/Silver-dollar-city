@@ -3,7 +3,7 @@ import { areas } from '../content'
 import { dailyForDate } from '../content/daily'
 import { guideForArea, STORY } from '../content/story'
 import { addLocalDays, localDateKey } from '../lib/dates'
-import { Avatar, Say } from './Avatar'
+import { Avatar } from './Avatar'
 import { ShareInvite } from './ShareInvite'
 import { StarRow } from './StarRow'
 import {
@@ -52,13 +52,6 @@ export function Hub({ onNavigate }: HubProps) {
         </p>
       </header>
 
-      <Say
-        who="juniper"
-        line={
-          doneToday ? STORY.dailyHeld : STORY.dailyInvite
-        }
-      />
-
       <section
         className={`today-trail ${doneToday ? 'is-done' : 'is-live'}`}
         aria-label="Today’s Trail"
@@ -70,6 +63,9 @@ export function Hub({ onNavigate }: HubProps) {
             <h2>{doneToday ? 'This morning is marked' : daily.challenge.title}</h2>
           </div>
         </div>
+        <p className="say-line">
+          “{doneToday ? STORY.dailyHeld : STORY.dailyInvite}”
+        </p>
         <p>{doneToday ? streakCopy(progress, today) : daily.districtFlavor}</p>
         {!doneToday ? (
           <p>One short puzzle · about a minute · same walk for this calendar day.</p>
