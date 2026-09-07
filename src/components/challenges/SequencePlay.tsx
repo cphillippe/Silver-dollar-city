@@ -69,7 +69,7 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
       setShake(false)
       setBank(shuffle(challenge.items))
       setChain([])
-    }, 620)
+    }, 880)
   }
 
   return (

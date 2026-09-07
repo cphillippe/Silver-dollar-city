@@ -85,7 +85,7 @@ export function BuildArgumentPlay({
       setShake(false)
       setBank(shuffle(challenge.cards))
       setSlots({})
-    }, 620)
+    }, 880)
   }
 
   return (

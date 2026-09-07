@@ -77,7 +77,7 @@ New user, storage cleared. **Clarity 5/5** in ≤15s.
 3. **Keep / Toss** — Keep = belongs, Toss = set aside. Peek line is always visible: *won’t count as a clean recall.*
 4. **~390px overflow** — Topbar wraps (Reset stays on-screen). Headings/chips/journal wrap. No horizontal scroll.
 5. **Miss copy** — Sequence names the step that broke; first miss is a nudge, second miss still folds in `teachOnWrong`. Kicker is *Not yet*, not *Think again*.
-6. **Fun 4/5 delight** — Goal bar no longer covers Keep/Toss (shell scrolls in the body). Miss shake is punchier. Say-back is a bonus snap with Skip always visible; correct chip still grants elaboration. Sort tiles (Keep/Toss) sit above the bins so the first tap is the game.
+6. **Fun 4/5 delight** — Goal bar no longer covers Keep/Toss (shell scrolls in the body). Miss shake is punchier. Say-back is a bonus snap with Skip always visible; correct chip still grants elaboration. Sort tiles (Keep/Toss) sit above the bins so the first tap is the game. Snap-the-bins is an explicit lock (no silent auto-commit); miss shake holds ~0.8s.
 
 ## What still sucks
 

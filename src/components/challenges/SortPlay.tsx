@@ -54,9 +54,6 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
     setDiscard(nextDiscard)
     setPicked(null)
     setStatus('idle')
-    if (nextBank.length === 0) {
-      window.setTimeout(() => evaluate(nextKeep, nextDiscard), 80)
-    }
   }
 
   function drop(bin: Bin) {
@@ -97,7 +94,7 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
       setKeep([])
       setDiscard([])
       setPicked(null)
-    }, 620)
+    }, 880)
   }
 
   const selected = picked ? takeTile(picked) : undefined
@@ -148,7 +145,7 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
         ))}
       </div>
 
-      <div className="sort-bins">
+      <div className={`sort-bins ${bank.length === 0 && status !== 'ok' ? 'is-ready' : ''}`}>
         <div
           className={`bin keep ${picked ? 'awaiting' : ''}`}
           onClick={() => drop('keep')}
@@ -226,23 +223,30 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
       </div>
 
       {status !== 'ok' && bank.length === 0 ? (
-        <button type="button" className="btn primary" onClick={() => evaluate()}>
-          Snap the bins
-        </button>
+        <>
+          <p className="quiet">Bins are full. Snap to lock the sort.</p>
+          <button
+            type="button"
+            className="btn primary xl snap-bins"
+            onClick={() => evaluate()}
+          >
+            Snap the bins
+          </button>
+        </>
       ) : null}
 
       <ResultPanel
         tone={status === 'idle' ? 'idle' : status === 'ok' ? 'ok' : 'teach'}
         kicker={
           status === 'ok'
-            ? 'Well reasoned'
+            ? 'Snapped'
             : misses >= 2
               ? 'One more look'
               : 'A line is in the wrong bin'
         }
         title={
           status === 'ok'
-            ? 'Clean sort!'
+            ? 'Keep and toss lock in.'
             : misses >= 2
               ? 'Those bins still mix.'
               : 'Keep vs toss — shake and sort again.'

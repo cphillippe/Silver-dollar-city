@@ -53,7 +53,7 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
       setFlash(null)
       setPickedLeft(null)
       setShake(false)
-    }, 580)
+    }, 880)
   }
 
   return (
