@@ -137,6 +137,17 @@ Bill: Keep/Toss + Lock-in stay. Fun has to hit like a mobile match game.
 
 Retention still: sort → takeaway chip → why it stands → journal / spaced dust-off.
 
+## Fun + Learner pass (2026-09-07)
+
+Closed playtest: Fun 4 · Clarity 5 · Retention 5 · Learnability 4. Lock-in explode and Trail sort one-screen stayed PASS.
+
+- **Intro + Town one-screen:** cold open no longer stacks a second screen of cast/copy. Town hub kills the nested page scroll — map fills, Who-lives-where stays folded.
+- **Keep/Toss unmistakable:** Keep = belongs (green), Toss = a distractor (cedar). Bins say it. Clue stays optional.
+- **Return hook:** coming back to Town plays **Still lit** (camera punch, lamps, folk) and a short “lamp waits tomorrow” line. Growth is visible, not a label dump.
+- Lock-in stamp holds a gold seal-glow; explode stays.
+
+Retention still: sort → takeaway chip → why it stands → journal / spaced dust-off.
+
 ## Tooling note (npm audit)
 
 `uuid` 7.x via `@capacitor/cli` (GHSA-w5hq-g745-h8pq) is **tooling-only**. Do not `npm audit fix --force` (it wants to downgrade Capacitor). Upgrade when a CLI release pulls `uuid >= 11.1.1`. Details in `SECURITY_REVIEW.md`.

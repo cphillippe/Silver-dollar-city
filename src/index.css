@@ -95,17 +95,31 @@ p {
 }
 
 .app.is-welcome {
-  display: block;
-  height: auto;
-  max-height: none;
-  overflow: auto;
-  min-height: 100dvh;
+  display: grid;
+  grid-template-rows: 1fr;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
 }
 
 .app.is-welcome .app-body {
-  overflow: visible;
-  min-height: 100dvh;
-  padding-bottom: 32px;
+  overflow: hidden;
+  min-height: 0;
+  height: 100%;
+  padding: 0;
+  width: min(820px, calc(100% - 16px));
+}
+
+.app.is-town {
+  grid-template-rows: auto 1fr;
+}
+
+.app.is-town .app-body {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding-top: 8px;
+  padding-bottom: calc(10px + var(--safe-bottom));
 }
 
 .app.is-play {
@@ -341,13 +355,15 @@ p {
 }
 
 .btn.tiny.keep {
-  background: linear-gradient(180deg, rgba(107, 143, 113, 0.42), rgba(107, 143, 113, 0.22));
-  border-color: rgba(107, 143, 113, 0.55);
+  background: linear-gradient(180deg, #6b8f71, #4e7358);
+  border-color: #8fb396;
+  color: #f4ead2;
 }
 
 .btn.tiny.toss {
-  background: linear-gradient(180deg, rgba(196, 107, 74, 0.42), rgba(196, 107, 74, 0.2));
-  border-color: rgba(196, 107, 74, 0.55);
+  background: linear-gradient(180deg, #c46b4a, #9a4d34);
+  border-color: #e08a6a;
+  color: #f4ead2;
 }
 
 .text-link {
@@ -364,6 +380,14 @@ p {
   flex-direction: column;
   justify-content: center;
   padding: 36px 8px 32px;
+}
+
+.welcome.is-onescreen {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  padding: calc(10px + var(--safe-top)) 6px calc(12px + var(--safe-bottom));
+  justify-content: stretch;
 }
 
 .welcome {
@@ -448,11 +472,24 @@ p {
   box-shadow: var(--lift);
 }
 
+.welcome.is-onescreen .welcome-goal {
+  font-size: 1.02rem;
+  line-height: 1.3;
+  margin: 0.2em 0 0.4em;
+  padding: 10px 12px;
+  border-radius: 16px;
+}
+
 .welcome-who {
   font-size: 1.02rem;
   max-width: 34rem;
   margin: 0 0 1.3em;
   color: rgba(244, 234, 210, 0.82);
+}
+
+.welcome.is-onescreen .welcome-who {
+  font-size: 0.92rem;
+  margin: 0 0 0.55em;
 }
 
 .welcome-facts {
@@ -922,7 +959,9 @@ p {
   box-shadow:
     0 0 0 3px rgba(255, 236, 170, 0.55),
     0 18px 56px rgba(224, 179, 74, 0.72);
-  animation: win-stamp-pop 0.48s cubic-bezier(0.2, 1.45, 0.35, 1) both;
+  animation:
+    win-stamp-pop 0.48s cubic-bezier(0.2, 1.45, 0.35, 1) both,
+    win-stamp-glow 0.9s 0.4s ease-in-out both;
 }
 
 @keyframes win-stamp-pop {
@@ -937,6 +976,16 @@ p {
   100% {
     transform: scale(1) rotate(0deg);
     opacity: 1;
+  }
+}
+
+@keyframes win-stamp-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 10px rgba(255, 224, 138, 0.45));
+  }
+  50% {
+    filter: drop-shadow(0 0 28px rgba(255, 236, 170, 0.95));
   }
 }
 
@@ -1175,11 +1224,11 @@ p {
 }
 
 .bin.keep {
-  box-shadow: inset 0 0 0 1px rgba(107, 143, 113, 0.18);
+  box-shadow: inset 0 0 0 2px rgba(107, 143, 113, 0.42);
 }
 
 .bin.toss {
-  box-shadow: inset 0 0 0 1px rgba(196, 107, 74, 0.16);
+  box-shadow: inset 0 0 0 2px rgba(196, 107, 74, 0.4);
 }
 
 .bin.awaiting {
@@ -2813,6 +2862,15 @@ p {
   max-height: 28vh;
 }
 
+.welcome.is-onescreen .city-overworld.is-poster {
+  margin: 0;
+}
+
+.welcome.is-onescreen .city-overworld.is-poster .city-svg {
+  margin: 0 0 6px;
+  max-height: 16vh;
+}
+
 .city-overworld.is-poster .city-plot {
   cursor: default;
   pointer-events: none;
@@ -3030,6 +3088,95 @@ p {
   justify-content: center;
 }
 
+.welcome.is-onescreen .welcome-hero {
+  min-height: 0;
+  flex: 1;
+  justify-content: center;
+  gap: 2px;
+}
+
+.welcome.is-onescreen h1 {
+  font-size: clamp(1.55rem, 6vw, 2.4rem);
+  margin-bottom: 0.15em;
+}
+
+.welcome.is-onescreen .welcome-cast {
+  margin: 0 0 8px;
+  justify-content: center;
+}
+
+.welcome.is-onescreen .welcome-lantern {
+  margin-top: 10px;
+}
+
+.welcome.is-onescreen .welcome-actions {
+  max-width: none;
+}
+
+.hub.is-town {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.hub.is-town .city-overworld {
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.hub.is-town .city-svg {
+  flex: 1;
+  min-height: 140px;
+  height: auto;
+  max-height: none;
+}
+
+.hub.is-town .city-legend {
+  margin-top: -18px;
+  flex-shrink: 0;
+  padding: 10px 12px 12px;
+}
+
+.hub.is-town .city-legend h2 {
+  font-size: 1.2rem;
+}
+
+.hub.is-town .street-drawer,
+.hub.is-town .today-trail {
+  flex-shrink: 0;
+  margin-bottom: 0;
+}
+
+.hub.is-town .today-trail .landmark,
+.hub.is-town .today-trail .quiet {
+  display: none;
+}
+
+.city-morrow {
+  margin: 0 0 8px;
+  font-size: 0.88rem;
+  color: var(--gold);
+}
+
+.city-overworld.is-homecoming .city-svg {
+  box-shadow: 0 0 0 2px rgba(255, 224, 138, 0.7), 0 20px 56px rgba(224, 179, 74, 0.4);
+}
+
+.city-overworld.is-homecoming .city-plot.is-lit .city-lamp,
+.city-overworld.is-homecoming .city-plot.is-built .city-lamp {
+  filter: url(#city-glow);
+}
+
+.city-beat.is-home {
+  background: linear-gradient(180deg, #fff3b0, #e0b34a);
+}
+
 .welcome-promise {
   margin: 0 0 1.1em;
   max-width: 34rem;
@@ -3144,7 +3291,9 @@ p {
   }
 
   .win-stamp {
-    animation: win-stamp-pop 0.48s cubic-bezier(0.2, 1.45, 0.35, 1) both !important;
+    animation:
+      win-stamp-pop 0.48s cubic-bezier(0.2, 1.45, 0.35, 1) both,
+      win-stamp-glow 0.9s 0.4s ease-in-out both !important;
   }
 
   .win-flash {

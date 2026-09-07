@@ -16,7 +16,8 @@ export function AppShell({ view, onNavigate, children }: AppShellProps) {
   const hideChrome = view.name === 'welcome'
   const playView =
     view.name === 'daily' || view.name === 'challenge' || view.name === 'journal'
-  const hideGoalbar = hideChrome || playView || view.name === 'hub'
+  const townView = view.name === 'hub'
+  const hideGoalbar = hideChrome || playView || townView
 
   function followGoal() {
     if (goal.kind === 'daily') {
@@ -55,7 +56,7 @@ export function AppShell({ view, onNavigate, children }: AppShellProps) {
 
   return (
     <div
-      className={`app ${hideChrome ? 'is-welcome' : ''} ${playView ? 'is-play' : ''}`}
+      className={`app ${hideChrome ? 'is-welcome' : ''} ${playView ? 'is-play' : ''} ${townView ? 'is-town' : ''}`}
     >
       <div className="grain" aria-hidden />
       {!hideChrome ? (
