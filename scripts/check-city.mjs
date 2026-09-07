@@ -6,6 +6,7 @@ import {
   cityUpgrades,
   fillGrows,
   fillSnapshot,
+  newestStanding,
   nextPlotId,
   plotFill,
   plotStage,
@@ -68,6 +69,9 @@ assert.match(mapSrc, /city-portrait/)
 assert.match(mapSrc, /tweenCam/)
 assert.match(mapSrc, /Grew!/)
 assert.match(mapSrc, /beatRank/)
+assert.match(mapSrc, /maybeHomecoming/)
+assert.match(mapSrc, /Still lit/)
+assert.match(mapSrc, /city-morrow/)
 
 const twoHollow = {
   ...afterDaily,
@@ -169,10 +173,11 @@ const welcomeSrc = readFileSync(
   'utf8',
 )
 assert.match(welcomeSrc, /welcome-hero/)
-assert.match(welcomeSrc, /welcome-cast-late/)
+assert.match(welcomeSrc, /is-onescreen/)
 assert.match(welcomeSrc, /STORY\.purpose/)
 assert.match(welcomeSrc, /STORY\.who/)
-assert.match(welcomeSrc, /cityPromise/)
+assert.doesNotMatch(welcomeSrc, /cityPromise/)
+assert.doesNotMatch(welcomeSrc, /welcome-cast-late/)
 assert.match(welcomeSrc, /YOU · RIVER/)
 assert.match(welcomeSrc, /GUIDE · JUNIPER/)
 
@@ -212,6 +217,9 @@ assert.match(sortSrc, /burstStyle/)
 assert.doesNotMatch(sortSrc, /Snap the bins/)
 assert.doesNotMatch(sortSrc, /Bins are full/)
 assert.doesNotMatch(sortSrc, /this belongs/)
+assert.match(sortSrc, /Toss<\/strong> a distractor/)
+assert.match(sortSrc, /Keep · belongs/)
+assert.match(sortSrc, /Toss · aside/)
 
 const dailySrc = readFileSync(
   new URL('../src/content/daily.ts', import.meta.url),
@@ -312,6 +320,10 @@ assert.match(cssSrc, /puzzle-title/)
 assert.match(cssSrc, /win-flash 0\.9s ease-out both !important/)
 assert.match(cssSrc, /win-ring/)
 assert.match(cssSrc, /bin-clear/)
+assert.match(cssSrc, /app\.is-town \.app-body/)
+assert.match(cssSrc, /welcome\.is-onescreen/)
+assert.match(cssSrc, /win-stamp-glow/)
+assert.match(cssSrc, /is-homecoming/)
 
 const juiceSrc = readFileSync(new URL('../src/lib/juice.ts', import.meta.url), 'utf8')
 assert.match(cssSrc, /win-stamp/)
@@ -336,6 +348,8 @@ const resultSrc = readFileSync(
   'utf8',
 )
 assert.match(resultSrc, /tone === 'ok'\) return null/)
+
+assert.equal(newestStanding(fromDaily), 'porch')
 
 assert.match(mapSrc, /nextWalkView/)
 assert.match(hubSrc, /nextWalkView/)

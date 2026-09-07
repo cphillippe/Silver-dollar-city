@@ -112,7 +112,7 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
       <PuzzleLead challenge={challenge} />
       <PuzzleHint text={challenge.context} onPeek={onPeek} />
       <p className="sort-how">
-        <strong>Keep</strong> belongs · <strong>Toss</strong> aside
+        <strong>Keep</strong> belongs · <strong>Toss</strong> a distractor
       </p>
 
       <div className="bank">
@@ -161,13 +161,13 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
           role="button"
           tabIndex={0}
         >
-          <span className="bin-head">Keep</span>
+          <span className="bin-head">Keep · belongs</span>
           <span className="bin-body">
             {keep.length === 0 ? (
               <span className="placeholder">
                 {selected
                   ? `Keep: ${selected.text}`
-                  : 'Keep'}
+                  : 'Belongs here'}
               </span>
             ) : (
               keep.map((tile, index) => (
@@ -199,13 +199,13 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
           role="button"
           tabIndex={0}
         >
-          <span className="bin-head toss">Toss</span>
+          <span className="bin-head toss">Toss · aside</span>
           <span className="bin-body">
             {discard.length === 0 ? (
               <span className="placeholder">
                 {selected
                   ? `Toss: ${selected.text}`
-                  : 'Toss'}
+                  : 'Set aside'}
               </span>
             ) : (
               discard.map((tile, index) => (

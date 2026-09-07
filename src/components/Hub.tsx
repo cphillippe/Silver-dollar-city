@@ -143,11 +143,10 @@ export function Hub({ onNavigate }: HubProps) {
           )
         })}
       </ol>
+        {(progress.completed.length > 0 || doneToday) && <ShareInvite compact />}
       </details>
 
       <AdSlot slot="between-districts" />
-
-      {(progress.completed.length > 0 || doneToday) && <ShareInvite compact />}
 
       {goal.kind === 'vista' ? (
         <button

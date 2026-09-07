@@ -24,7 +24,7 @@ export function Welcome({ onNavigate }: WelcomeProps) {
   }
 
   return (
-    <main className="welcome">
+    <main className="welcome is-onescreen">
       <div className="welcome-sky" aria-hidden />
       <div className="welcome-ridge" aria-hidden />
       <div className="welcome-hero">
@@ -36,31 +36,21 @@ export function Welcome({ onNavigate }: WelcomeProps) {
         </h1>
         <p className="welcome-goal">{STORY.purpose}</p>
         <p className="welcome-who">{STORY.who}</p>
-        <p className="welcome-promise">{STORY.cityPromise}</p>
+        <div className="welcome-cast">
+          <figure>
+            <Avatar who="river" size="md" />
+            <figcaption>YOU · RIVER</figcaption>
+          </figure>
+          <span className="welcome-lantern" aria-hidden />
+          <figure>
+            <Avatar who="juniper" size="md" />
+            <figcaption>GUIDE · JUNIPER</figcaption>
+          </figure>
+        </div>
         <div className="welcome-actions">
           <button type="button" className="btn primary xl" onClick={begin}>
             {returning ? 'Back to town' : 'Begin the trail'}
           </button>
-        </div>
-        <p className="welcome-note">
-          Sort, lock in, keep one takeaway. The town lights when the line holds.
-        </p>
-      </div>
-      <div className="welcome-cast-late">
-        <div className="welcome-cast">
-          <figure>
-            <Avatar who="river" size="xl" />
-            <figcaption>
-              YOU · RIVER
-            </figcaption>
-          </figure>
-          <span className="welcome-lantern" aria-hidden />
-          <figure>
-            <Avatar who="juniper" size="xl" />
-            <figcaption>
-              GUIDE · JUNIPER
-            </figcaption>
-          </figure>
         </div>
       </div>
     </main>

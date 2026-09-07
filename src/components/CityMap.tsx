@@ -11,10 +11,13 @@ import {
   nextKicker,
   nextPlotId,
   plotView,
+  newestStanding,
   readCitySeen,
   readFillsSeen,
+  readHomecomingDay,
   writeCitySeen,
   writeFillsSeen,
+  writeHomecomingDay,
   type CityFills,
   type CityPlotId,
   type CityStage,
@@ -82,6 +85,7 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
   const [shown, setShown] = useState(liveSnap)
   const [shownFill, setShownFill] = useState(liveFills)
   const [rising, setRising] = useState<CityPlotId | null>(null)
+  const [homecoming, setHomecoming] = useState(false)
   const [beat, setBeat] = useState<CityUpgrade | null>(null)
   const [cam, setCam] = useState(FULL_CAM)
   const playing = useRef(false)
@@ -156,6 +160,7 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
       setShownFill(fills)
       writeCitySeen(now)
       writeFillsSeen(fills)
+      maybeHomecoming(now)
       return
     }
     if (playing.current) return
@@ -207,6 +212,7 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
       setShownFill(finalFills)
       writeCitySeen(finalSnap)
       writeFillsSeen(finalFills)
+      writeHomecomingDay(today)
       playing.current = false
     }
 
@@ -239,11 +245,34 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
     step(0)
   }
 
+  function maybeHomecoming(snap: ReturnType<typeof citySnapshot>) {
+    if (playing.current) return
+    if (readHomecomingDay() === today) return
+    const id = newestStanding(snap)
+    if (!id) return
+    writeHomecomingDay(today)
+    playing.current = true
+    const reduced =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    setHomecoming(true)
+    setRising(id)
+    if (!reduced) tweenCam(camAround(id), 200)
+    later(reduced ? 700 : 1100, () => {
+      setHomecoming(false)
+      setRising(null)
+      if (!reduced) tweenCam(FULL_CAM, 220)
+      later(reduced ? 40 : 200, () => {
+        playing.current = false
+      })
+    })
+  }
+
   const nextSpec = CITY_PLOTS.find((plot) => plot.id === nextId)
   const nextStage = stageOf(nextId)
   const nextAt = ANCHOR[nextId]
   const kicker = nextKicker(nextStage, nextId, doneToday)
-  const celebrating = Boolean(beat)
+  const celebrating = Boolean(beat) || homecoming
   const beatVoice = beat ? townVoice(beat.id) : townVoice(nextId)
   const hollowFill = shownFill.hollow
   const benchFill = shownFill.bench
@@ -251,7 +280,7 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
 
   return (
     <section
-      className={`city-overworld ${mode === 'poster' ? 'is-poster' : 'is-alive'} ${celebrating ? 'is-revealing' : ''}`}
+      className={`city-overworld ${mode === 'poster' ? 'is-poster' : 'is-alive'} ${celebrating ? 'is-revealing' : ''} ${homecoming ? 'is-homecoming' : ''}`}
     >
       <svg
         className="city-svg"
@@ -517,6 +546,16 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
         </div>
       ) : null}
 
+      {homecoming && !beat ? (
+        <div className="city-beat is-home" role="status">
+          <Avatar who="juniper" size="sm" />
+          <div>
+            <strong>Still lit</strong>
+            <span>The town held</span>
+          </div>
+        </div>
+      ) : null}
+
       {mode === 'live' ? (
         <div className="city-legend">
           {celebrating ? (
@@ -525,6 +564,9 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
             <>
               <p className="eyebrow">{kicker}</p>
               <h2>{nextSpec?.title}</h2>
+              {doneToday ? (
+                <p className="city-morrow">Town held. A lamp waits tomorrow.</p>
+              ) : null}
               <button type="button" className="btn primary" onClick={() => open(nextId)}>
                 {nextId === 'porch' && !doneToday
                   ? 'Walk the east porch'

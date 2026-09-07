@@ -218,6 +218,43 @@ export function nextKicker(stage: CityStage, plotId: CityPlotId, dailyDone: bool
 
 export const CITY_SEEN_KEY = 'silver-city-seen-city-v1'
 export const CITY_FILL_KEY = 'silver-city-seen-fill-v1'
+export const CITY_HOMECOMING_KEY = 'silver-city-homecoming-v1'
+
+const HOMECOMING_ORDER: CityPlotId[] = [
+  'lookout',
+  'lamps',
+  'gate',
+  'observatory',
+  'bench',
+  'hollow',
+  'journal',
+  'porch',
+]
+
+export function newestStanding(snap: CitySnapshot): CityPlotId | null {
+  for (const id of HOMECOMING_ORDER) {
+    if (snap[id] === 'lit' || snap[id] === 'built') return id
+  }
+  return null
+}
+
+export function readHomecomingDay(): string | null {
+  if (typeof window === 'undefined') return null
+  try {
+    return window.localStorage.getItem(CITY_HOMECOMING_KEY)
+  } catch {
+    return null
+  }
+}
+
+export function writeHomecomingDay(day: string) {
+  if (typeof window === 'undefined') return
+  try {
+    window.localStorage.setItem(CITY_HOMECOMING_KEY, day)
+  } catch {
+    /* ignore quota */
+  }
+}
 
 export const STAGE_RANK: Record<CityStage, number> = {
   empty: 0,
