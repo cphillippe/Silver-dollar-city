@@ -867,22 +867,29 @@ p {
 .play.is-win .chip.in-slot,
 .play.is-win .match-card.is-locked,
 .play.is-win .chip.in-bin {
-  animation: tile-burst 0.58s cubic-bezier(0.2, 0.85, 0.25, 1) forwards;
+  animation: tile-burst 0.72s cubic-bezier(0.18, 0.9, 0.22, 1) forwards;
 }
 
 .play.is-win .bin {
   border-style: solid;
-  border-color: rgba(255, 224, 138, 0.85);
-  box-shadow: 0 0 0 3px rgba(224, 179, 74, 0.28), 0 0 28px rgba(224, 179, 74, 0.35);
-  animation: bin-flash 0.45s ease-out;
+  border-color: rgba(255, 224, 138, 0.95);
+  box-shadow: 0 0 0 3px rgba(224, 179, 74, 0.4), 0 0 36px rgba(224, 179, 74, 0.5);
+  animation: bin-flash 0.4s ease-out, bin-clear 0.7s 0.42s forwards;
 }
 
+.play.is-win .prompt,
+.play.is-win .hint-peek,
+.play.is-win .sort-how,
 .play.is-win .match-score {
-  visibility: hidden;
+  opacity: 0;
+  height: 0;
+  margin: 0;
+  overflow: hidden;
+  pointer-events: none;
 }
 
 .play.is-win {
-  animation: play-boom 0.42s cubic-bezier(0.2, 1.35, 0.4, 1);
+  animation: play-boom 0.5s cubic-bezier(0.2, 1.35, 0.4, 1);
 }
 
 .win-burst {
@@ -896,7 +903,7 @@ p {
 .win-stamp-wrap {
   position: fixed;
   left: 50%;
-  top: 40%;
+  top: 42%;
   z-index: 32;
   transform: translate(-50%, -50%);
   pointer-events: none;
@@ -905,28 +912,30 @@ p {
 .win-stamp {
   display: block;
   font-family: var(--sans);
-  font-size: clamp(1.4rem, 7vw, 2.2rem);
-  letter-spacing: 0.18em;
+  font-size: clamp(1.9rem, 11vw, 3.1rem);
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: #1a1408;
-  background: linear-gradient(180deg, #ffe08a, #d4a84a);
-  padding: 12px 22px 14px;
-  border-radius: 20px;
-  box-shadow: 0 16px 48px rgba(224, 179, 74, 0.62);
-  animation: win-stamp-pop 0.35s cubic-bezier(0.2, 1.45, 0.35, 1) both;
+  background: linear-gradient(180deg, #fff3b0, #e0b34a 62%, #c4922a);
+  padding: 16px 28px 18px;
+  border-radius: 22px;
+  box-shadow:
+    0 0 0 3px rgba(255, 236, 170, 0.55),
+    0 18px 56px rgba(224, 179, 74, 0.72);
+  animation: win-stamp-pop 0.48s cubic-bezier(0.2, 1.45, 0.35, 1) both;
 }
 
 @keyframes win-stamp-pop {
   0% {
-    transform: scale(0.55);
+    transform: scale(0.28) rotate(-10deg);
     opacity: 0;
   }
-  70% {
-    transform: scale(1.08);
+  62% {
+    transform: scale(1.14) rotate(2deg);
     opacity: 1;
   }
   100% {
-    transform: scale(1);
+    transform: scale(1) rotate(0deg);
     opacity: 1;
   }
 }
@@ -935,22 +944,51 @@ p {
   position: fixed;
   inset: 0;
   z-index: 30;
-  background: radial-gradient(circle at 50% 42%, rgba(255, 236, 170, 0.88), rgba(224, 179, 74, 0.28) 38%, transparent 70%);
-  animation: win-flash 0.55s ease-out both;
+  background: radial-gradient(
+    circle at 50% 42%,
+    rgba(255, 244, 196, 0.96),
+    rgba(255, 214, 90, 0.55) 32%,
+    rgba(224, 179, 74, 0.22) 58%,
+    transparent 78%
+  );
+  animation: win-flash 1.05s ease-out both;
+}
+
+.win-ring {
+  position: fixed;
+  left: 50%;
+  top: 42%;
+  z-index: 31;
+  width: 64px;
+  height: 64px;
+  margin: -32px;
+  border-radius: 50%;
+  border: 4px solid rgba(255, 236, 170, 0.95);
+  box-shadow: 0 0 28px rgba(255, 224, 138, 0.8);
+  animation: win-ring 0.7s cubic-bezier(0.12, 0.7, 0.28, 1) both;
 }
 
 .win-spark {
   position: absolute;
   left: 50%;
   top: 46%;
-  width: 12px;
-  height: 12px;
-  margin: -6px;
+  width: 14px;
+  height: 14px;
+  margin: -7px;
   border-radius: 50%;
   background: #ffe08a;
-  box-shadow: 0 0 14px rgba(255, 224, 138, 1);
-  animation: win-spark 0.72s cubic-bezier(0.12, 0.8, 0.3, 1) both;
-  transform: rotate(calc(var(--i) * 25.7deg)) translateY(-8px);
+  box-shadow: 0 0 16px rgba(255, 224, 138, 1);
+  animation: win-spark 0.86s cubic-bezier(0.12, 0.8, 0.3, 1) both;
+  animation-delay: calc(var(--i) * 16ms);
+  transform: rotate(calc(var(--i) * 20deg)) translateY(-8px);
+}
+
+.win-spark.is-shard {
+  width: 8px;
+  height: 22px;
+  margin: -11px -4px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #fff6c4, #e0b34a);
 }
 
 @keyframes win-flash {
@@ -958,24 +996,39 @@ p {
     opacity: 0;
     transform: scale(0.7);
   }
-  28% {
+  8% {
     opacity: 1;
-    transform: scale(1.05);
+    transform: scale(1.04);
+  }
+  40% {
+    opacity: 0.78;
+    transform: scale(1.08);
   }
   100% {
     opacity: 0;
-    transform: scale(1.18);
+    transform: scale(1.22);
+  }
+}
+
+@keyframes win-ring {
+  0% {
+    transform: scale(0.18);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(16);
+    opacity: 0;
   }
 }
 
 @keyframes win-spark {
   0% {
     opacity: 1;
-    transform: rotate(calc(var(--i) * 25.7deg)) translateY(0) scale(0.5);
+    transform: rotate(calc(var(--i) * 20deg)) translateY(0) scale(0.55);
   }
   100% {
     opacity: 0;
-    transform: rotate(calc(var(--i) * 25.7deg)) translateY(-150px) scale(0.2);
+    transform: rotate(calc(var(--i) * 20deg)) translateY(-210px) scale(0.15);
   }
 }
 
@@ -984,22 +1037,29 @@ p {
     transform: scale(1) rotate(0);
     opacity: 1;
   }
-  22% {
-    transform: scale(1.16) rotate(calc(var(--spin, 8deg) * 0.4));
+  18% {
+    transform: scale(1.22) rotate(calc(var(--spin, 8deg) * 0.35));
     opacity: 1;
   }
   100% {
-    transform: translate(var(--dx, 0), var(--dy, -72px)) scale(0.12) rotate(var(--spin, 18deg));
+    transform: translate(var(--dx, 0), var(--dy, -110px)) scale(0.08) rotate(var(--spin, 18deg));
     opacity: 0;
   }
 }
 
 @keyframes bin-flash {
   0% {
-    filter: brightness(1.6);
+    filter: brightness(1.75);
   }
   100% {
     filter: brightness(1);
+  }
+}
+
+@keyframes bin-clear {
+  to {
+    opacity: 0.12;
+    transform: scale(0.94);
   }
 }
 
@@ -1007,8 +1067,8 @@ p {
   0% {
     transform: scale(1);
   }
-  35% {
-    transform: scale(1.035);
+  32% {
+    transform: scale(1.055);
   }
   100% {
     transform: scale(1);
@@ -3084,29 +3144,33 @@ p {
   }
 
   .win-stamp {
-    animation: win-stamp-pop 0.35s cubic-bezier(0.2, 1.45, 0.35, 1) both !important;
+    animation: win-stamp-pop 0.48s cubic-bezier(0.2, 1.45, 0.35, 1) both !important;
   }
 
   .win-flash {
-    animation: win-flash 0.45s ease-out both !important;
+    animation: win-flash 0.9s ease-out both !important;
+  }
+
+  .win-ring {
+    animation: win-ring 0.62s cubic-bezier(0.12, 0.7, 0.28, 1) both !important;
   }
 
   .win-spark {
-    animation: win-spark 0.7s cubic-bezier(0.12, 0.8, 0.3, 1) both !important;
+    animation: win-spark 0.8s cubic-bezier(0.12, 0.8, 0.3, 1) both !important;
   }
 
   .play.is-win {
-    animation: play-boom 0.42s cubic-bezier(0.2, 1.35, 0.4, 1) !important;
+    animation: play-boom 0.5s cubic-bezier(0.2, 1.35, 0.4, 1) !important;
   }
 
   .play.is-win .chip.in-chain,
   .play.is-win .chip.in-slot,
   .play.is-win .match-card.is-locked,
   .play.is-win .chip.in-bin {
-    animation: tile-burst 0.58s cubic-bezier(0.2, 0.85, 0.25, 1) forwards !important;
+    animation: tile-burst 0.72s cubic-bezier(0.18, 0.9, 0.22, 1) forwards !important;
   }
 
   .play.is-win .bin {
-    animation: bin-flash 0.45s ease-out !important;
+    animation: bin-flash 0.4s ease-out, bin-clear 0.7s 0.42s forwards !important;
   }
 }

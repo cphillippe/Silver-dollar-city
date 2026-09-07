@@ -309,7 +309,9 @@ assert.match(cssSrc, /city-roof-kick/)
 assert.match(cssSrc, /tile-burst/)
 assert.match(cssSrc, /win-spark/)
 assert.match(cssSrc, /puzzle-title/)
-assert.match(cssSrc, /win-flash 0\.45s ease-out both !important/)
+assert.match(cssSrc, /win-flash 0\.9s ease-out both !important/)
+assert.match(cssSrc, /win-ring/)
+assert.match(cssSrc, /bin-clear/)
 
 const juiceSrc = readFileSync(new URL('../src/lib/juice.ts', import.meta.url), 'utf8')
 assert.match(cssSrc, /win-stamp/)
@@ -319,7 +321,7 @@ const burstSrc = readFileSync(
   'utf8',
 )
 assert.match(burstSrc, /Locked!/)
-assert.match(juiceSrc, /WIN_BURST_MS = 760/)
+assert.match(juiceSrc, /WIN_BURST_MS = 1320/)
 assert.match(juiceSrc, /useJuiceHandoff/)
 
 const hintSrc = readFileSync(
