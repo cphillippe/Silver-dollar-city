@@ -90,7 +90,7 @@ export const STORY = {
   purpose:
     'Silver City is a puzzle trail: play a short game, fold the page, and keep evidence you can still say tomorrow.',
   who:
-    'You walk as River. Juniper walks the first puzzle with you — then the line is yours.',
+    'River and Juniper are Christian companions on this trail. You walk as River; Juniper keeps the first lamp with you.',
   premise:
     'Silver City is a puzzle trail: play a short game, fold the page, and keep evidence you can still say tomorrow.',
   welcomeJuniper:

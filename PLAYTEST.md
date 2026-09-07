@@ -46,7 +46,7 @@ Fresh browser pass on the production preview, then a second pass on the dev serv
 New user, storage cleared. **Clarity 5/5** in ≤15s.
 
 - Purpose, quoted: *Silver City is a puzzle trail: play a short game, fold the page, and keep evidence you can still say tomorrow.*
-- Who: *You walk as River. Juniper walks the first puzzle with you — then the line is yours.*
+- Who: *River and Juniper are Christian companions on this trail. You walk as River; Juniper keeps the first lamp with you.*
 - **One** button: **Begin the trail**. No duplicate Continue. No map, no district list.
 - Begin goes to today’s short puzzle, not the five-district map.
 
@@ -70,10 +70,16 @@ New user, storage cleared. **Clarity 5/5** in ≤15s.
 4. **Peek / clean stars** — peek now says it will not count as clean.
 5. **Match remaining pairs** — `N left` is on the board.
 
+## Follow-up (2026-09-07, after 4/5 clarity)
+
+1. **Local date** — Daily Trail now uses the device calendar (`Intl` + civil date), not UTC midnight. America/Chicago Monday Sep 7 no longer prints Sunday Sep 6.
+2. **Cast on welcome** — River and Juniper named as Christian companions on the first screen.
+3. **Keep / Toss** — Keep = belongs, Toss = set aside. Peek line is always visible: *won’t count as a clean recall.*
+
 ## What still sucks
 
 1. Four-puzzle districts plus say-back every time is a long sitting. Skip must stay.
-2. GitHub Pages is the nicest durable URL but **only the repo owner can flip Settings → Pages**. Until then use the live tunnel or StackBlitz.
+2. GitHub Pages is the nicest durable URL but **only the repo owner can flip Settings → Pages**. Until then use the live Chrome tunnel.
 3. Debug APK sideload is still worse than a web link for friends.
 4. A stale service worker on `localhost:4173` can serve yesterday’s JS to a tester. Hard-reload or use a new host.
 

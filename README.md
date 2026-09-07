@@ -6,13 +6,13 @@ The product goal is **keeping the evidence**: claims, reasons, and sources you c
 
 ## Play now (no install)
 
-**Open this in normal Chrome — live preview of this branch (cold-open fix included):**  
+**Open this in normal Chrome — live preview of this branch:**  
+https://strikes-downloadable-hospital-lesser.trycloudflare.com/
+
+That URL is a public Cloudflare tunnel in front of `vite preview` (HTTP 200, `text/html`). Skip StackBlitz — some testers hit **Incompatible Web Browser**. Hard-refresh if an older tunnel cached a service worker.
+
+Backup tunnels (same host, may be an older bundle):  
 https://russell-bernard-kernel-accept.trycloudflare.com/
-
-That URL is a public Cloudflare tunnel in front of `vite preview` (HTTP 200, `text/html`). Skip StackBlitz — some testers hit **Incompatible Web Browser**.
-
-Backup tunnel (same build):  
-https://instructors-manufacturer-configurations-tired.trycloudflare.com/
 
 **GitHub Pages (one click, then it stays pretty):**  
 https://cphillippe.github.io/Silver-dollar-city/
@@ -115,9 +115,7 @@ Progress shape (same key `silver-city-progress-v1`): `memory[id].nextReviewAt`, 
 
 ## Friend preview (no install)
 
-**Play now (Chrome):** https://russell-bernard-kernel-accept.trycloudflare.com/
-
-Backup tunnel: https://instructors-manufacturer-configurations-tired.trycloudflare.com/
+**Play now (Chrome):** https://strikes-downloadable-hospital-lesser.trycloudflare.com/
 
 **After Pages is enabled:** https://cphillippe.github.io/Silver-dollar-city/
 
