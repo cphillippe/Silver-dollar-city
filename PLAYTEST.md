@@ -33,29 +33,30 @@ Mark pass / thin / gone.
 
 ## Evidence retention outcomes
 
-Filled from a fresh-reset playtest of this build (local calendar day, default Daily pick).
+Filled from a fresh playtest of this build (local calendar **2026-09-07**, Daily pick: *Come and rest*).
 
 | Walk | Claim that should stick | What stuck | What evaporated | UI change that would lock it |
 | --- | --- | --- | --- | --- |
-| Today’s Trail (whichever daily the date seeds) | The one-line claim in `evidence.ts` for that puzzle | The snap itself; the *shape* of the story | Exact source wording unless it was on the locked chip | Keep source as a gold chip on the Held stamp (already shown after lock-in). |
-| Recall Loop (claim → reason) | Claim + reason pair | Choosing among three snappy cards felt like the match puzzle | After two rapid walks, the *first* reason blurred into the second | Spaced “older page stirs” on a later morning; journal face-down on return. |
-| Parable Hollow · first challenge | Neighbor is the one who shows costly mercy | The Samaritan / road picture | “Luke 10” unless rebuilt | Forced fold before Continue; journal quiz-me-again. |
-| Journal face-down | Same line as the walk that unsealed it | Title + kicker | Body paragraphs (expected) | Rebuild-the-line CTA before the essay — essay is the reward, not the teacher. |
+| Today’s Trail · Come and rest | Tired people are named first; rest is the gift, not a steeper hill. | The three-tile order; Juniper’s “keep the line.” | Matthew 11:28 until the Held stamp showed the source. | Source already appears on Held. Keep it one breath. |
+| Recall Loop (fold → claim → reason) | Claim + “invitation to a person, not a performance.” | Snapping the right card felt like the puzzle, not a worksheet. | After jumping to Jericho, the *daily* reason blurred for a minute. | Spaced “older page stirs” on a later morning. |
+| Parable Hollow · The road to Jericho | Neighbor is the one who shows costly mercy. | The Samaritan sequence; Mercy’s creek line. | Exact Luke chapter until journal. | Forced fold before Continue; journal face-down. |
+| Journal face-down | First frost / trail waits | Title + mystery math (1 of 25 · 4%) | Body paragraphs (expected — essay is the reward). | Rebuild-the-line before the essay. |
 
-**Failures noted while playing:** long `deeper` paragraphs are pleasant in the moment and gone thirty seconds later. The one-line claim is what survives — if a brief in `evidence.ts` runs long, players miss. Prefer a sentence you can say in one breath.
-
-**What this build already changes:** Continue is gated on lock-in; Daily Trail re-asks an older brief; journal pages start face-down; Held is the footer metric.
+**Failures noted:** long `deeper` copy is pleasant and gone. One-line briefs survive. First avatar pass hid Juniper’s face under hair — faces must stay readable or the story does not land.
 
 ## Fun / polish outcomes
 
-| Moment | Feel | If it dipped |
+| Moment | Feel | Refine |
 | --- | --- | --- |
-| Welcome CTA | Primary button is the morning walk; sky drifts | Secondary district CTA stays quiet |
-| Daily card on the map | Live glow, one tap | Must not look like a streak nag |
-| Puzzle snap | Same chips / bins / pairs as before | Don’t add extra chrome on the tiles |
-| Fold → rebuild | Should feel like a boss snap, not a quiz sheet | Warm miss bounce; two misses speak the line |
-| Tomorrow teaser | Locked, flavor only | No FOMO countdown |
-| Stars on replay | Map and district rows update | Best clear is kept |
+| Welcome CTA | Primary button is the morning walk with Juniper | River + Juniper portraits; sky drift |
+| Avatars (pass 1) | Juniper read as back-of-head | Redrew hair behind faces, shared eye language |
+| Daily card on the map | Live glow, streak 1, tomorrow teaser | No FOMO countdown |
+| Fold → rebuild | Boss snap, not a quiz sheet | Warm miss bounce |
+| Stars on replay | Map showed 3★ / mastery 3/12 after Jericho | Best clear kept |
+
+## Tone check
+
+Warm, invitational. Missing a day says **the trail waits**, never that you lost the journal. Share copy asks for memory, not guilt.
 
 ## Tone check
 
