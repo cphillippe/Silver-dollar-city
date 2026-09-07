@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { areas, journalEntries } from '../content'
-import { evidenceForJournal } from '../content/evidence'
+import { areas, journalEntries, pillarFor } from '../content'
+import { evidenceFor, evidenceForJournal } from '../content/evidence'
 import { guideForArea, STORY } from '../content/story'
 import { localDateKey } from '../lib/dates'
 import { isDue, nextGapLabel } from '../lib/memory'
@@ -48,37 +48,47 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
   const focusedBrief = focusedEntry
     ? evidenceForJournal(focusedEntry.unlockAfter, focusedEntry.id)
     : undefined
+  const quizBrief = focusedBrief ?? (focusId ? evidenceFor(focusId) : undefined)
 
-  if (autoQuiz && focusedEntry && focusedOpen && focusedBrief) {
+  if (autoQuiz && quizBrief && (!focusedEntry || focusedOpen)) {
+    const pillar = focusedEntry?.areaId ?? pillarFor(quizBrief.id)
     return (
       <main className="journal is-rehearse">
         <button
           type="button"
           className="text-link"
           onClick={() =>
-            onNavigate({ name: 'journal', focusId: focusedEntry.id })
+            onNavigate(
+              focusedEntry
+                ? { name: 'journal', focusId: focusedEntry.id }
+                : { name: 'journal' },
+            )
           }
         >
           ← Journal
         </button>
         <section className="rehearse-anchor">
-          <p className="eyebrow">Next recommended · Today’s takeaway</p>
-          <h1>{focusedEntry.title}</h1>
+          <p className="eyebrow">Takeaway</p>
+          <h1>{focusedEntry?.title ?? STORY.takeaway}</h1>
           <RecallGate
-            brief={focusedBrief}
+            brief={quizBrief}
             mode="review"
-            kicker={STORY.tapTakeaway}
+            kicker={STORY.takeaway}
             onHeld={(result) => {
               recordReview({
-                id: focusedBrief.id,
-                pillar: focusedEntry.areaId,
+                id: quizBrief.id,
+                pillar,
                 kind: 'recall',
                 today,
                 clean: result.clean,
                 peeked: false,
                 elaborated: false,
               })
-              onNavigate({ name: 'journal', focusId: focusedEntry.id })
+              onNavigate(
+                focusedEntry
+                  ? { name: 'journal', focusId: focusedEntry.id }
+                  : { name: 'journal' },
+              )
             }}
           />
         </section>
@@ -347,7 +357,7 @@ function JournalCard({
                   className="btn ghost"
                   onClick={() => setQuizAgain(true)}
                 >
-                  Quiz me again
+                  {STORY.takeaway}
                 </button>
               ) : null}
             </>

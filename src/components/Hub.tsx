@@ -1,6 +1,7 @@
 import { areas, findPlayable } from '../content'
 import { dailyForDate } from '../content/daily'
-import { addLocalDays, formatDeviceLocalDate, localDateKey } from '../lib/dates'
+import { STORY } from '../content/story'
+import { formatDeviceLocalDate, localDateKey } from '../lib/dates'
 import { STAR_KEY } from '../lib/stars'
 import { CITY_PLOTS, nextPlotId, plotStage } from '../lib/city'
 import { Avatar } from './Avatar'
@@ -16,6 +17,7 @@ import {
   isAreaComplete,
   isAreaUnlocked,
   morningReview,
+  rehearseGo,
   streakCopy,
   useProgress,
 } from '../store/progress'
@@ -30,7 +32,6 @@ export function Hub({ onNavigate }: HubProps) {
   const today = localDateKey()
   const morningsBefore = progress.dailyDates.filter((d) => d !== today).length
   const daily = dailyForDate(today, morningsBefore)
-  const tomorrow = dailyForDate(addLocalDays(today, 1))
   const doneToday = dailyDoneToday(progress, today)
   const due = doneToday ? undefined : morningReview(progress, today)
   const duePlay = due ? findPlayable(due.id) : undefined
@@ -66,39 +67,33 @@ export function Hub({ onNavigate }: HubProps) {
           </div>
         </div>
         {due ? <Landmark pillar={due.pillar} compact /> : null}
-        <p>
-          {doneToday
-            ? streakCopy(progress, today)
-            : due
-              ? duePlay
-                ? `${duePlay.challenge.title} · an older walk.`
-                : 'An older page is waiting to be rebuilt.'
-              : daily.districtFlavor}
-        </p>
         {doneToday ? (
-          <p className="teaser-inline">
-            Tomorrow: {tomorrow.districtFlavor}. {tomorrow.teaser}
-          </p>
+          <p>{streakCopy(progress, today)}</p>
         ) : (
-          <p className="quiet">
-            {due
-              ? waiting > 1
-                ? `${waiting} pages due · about a minute`
-                : 'A spaced recall · about a minute'
-              : 'One short puzzle · about a minute'}
-          </p>
+          <>
+            <p>
+              {due
+                ? duePlay
+                  ? `${duePlay.challenge.title} · an older walk.`
+                  : 'An older page is waiting to be rebuilt.'
+                : daily.districtFlavor}
+            </p>
+            <p className="quiet">
+              {due
+                ? waiting > 1
+                  ? `${waiting} pages due · about a minute`
+                  : 'A spaced recall · about a minute'
+                : 'One short puzzle · about a minute'}
+            </p>
+            <button
+              type="button"
+              className="btn primary"
+              onClick={() => onNavigate({ name: 'daily' })}
+            >
+              {due ? 'Dust this one off' : 'Walk today’s trail'}
+            </button>
+          </>
         )}
-        <button
-          type="button"
-          className="btn primary"
-          onClick={() => onNavigate({ name: 'daily' })}
-        >
-          {doneToday
-            ? 'See tomorrow’s teaser'
-            : due
-              ? 'Dust this one off'
-              : 'Walk today’s trail'}
-        </button>
       </section>
 
       <AdSlot slot="hub-banner" />
@@ -178,22 +173,31 @@ export function Hub({ onNavigate }: HubProps) {
               </div>
               <button
                 type="button"
-                className="btn tiny"
+                className={`btn tiny ${complete && unlocked ? 'street-rehearse' : ''}`}
                 disabled={!unlocked}
-                onClick={() =>
+                onClick={() => {
+                  if (complete) {
+                    onNavigate(
+                      rehearseGo(
+                        progress,
+                        plot.id === 'porch' ? 'porch' : plot.areaId,
+                      ),
+                    )
+                    return
+                  }
                   onNavigate(
                     plot.id === 'porch'
                       ? { name: 'daily' }
                       : { name: 'area', areaId: plot.areaId ?? 'parable-hollow' },
                   )
-                }
+                }}
               >
                 {!unlocked
                   ? plot.areaId === 'witness-bench'
                     ? 'Two Hollow walks'
                     : 'Gated'
                   : complete
-                    ? 'Again'
+                    ? STORY.takeaway
                     : 'Enter'}
               </button>
             </li>

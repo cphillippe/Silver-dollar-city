@@ -52,7 +52,7 @@ export function Vista({ onNavigate }: VistaProps) {
           className="btn ghost"
           onClick={() => onNavigate({ name: 'hub' })}
         >
-          Walk a district again
+          Return to the town
         </button>
         <ShareInvite />
       </div>

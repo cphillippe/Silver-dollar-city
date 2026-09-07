@@ -8,6 +8,9 @@ assert.match(progressSrc, /HOLLOW_WALKS_TO_WITNESS = 2/)
 assert.match(progressSrc, /area\.id === 'witness-bench'/)
 assert.match(progressSrc, /autoQuiz: true/)
 assert.match(progressSrc, /title: STORY\.tapTakeaway/)
+assert.match(progressSrc, /export function rehearseGo/)
+assert.doesNotMatch(progressSrc, /walk a path again/)
+assert.doesNotMatch(progressSrc, /walk a district again/)
 
 const HOLLOW_WALKS_TO_WITNESS = 2
 
@@ -36,7 +39,8 @@ const journalSrc = readFileSync(
   new URL('../src/components/Journal.tsx', import.meta.url),
   'utf8',
 )
-assert.match(journalSrc, /autoQuiz && focusedEntry/)
-assert.match(journalSrc, /kicker=\{STORY\.tapTakeaway\}/)
+assert.match(journalSrc, /autoQuiz && quizBrief/)
+assert.match(journalSrc, /kicker=\{STORY\.takeaway\}/)
+assert.doesNotMatch(journalSrc, /Quiz me again/)
 
 console.log('check-progress: ok')
