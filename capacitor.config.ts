@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'Silver City',
   webDir: 'dist',
   android: {
-    allowMixedContent: true,
+    allowMixedContent: false,
   },
 }
 

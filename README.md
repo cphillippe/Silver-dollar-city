@@ -52,6 +52,8 @@ npm run build
 npm run preview
 ```
 
+`vite preview` listens on **127.0.0.1**. Do not tunnel `vite --host` (unbound / `0.0.0.0`) or the Vite **dev** server. A playtest tunnel should front `vite preview` or the `docs/` build only.
+
 Progress is stored **offline-first on this device** (versioned save, same localStorage key). Open **Settings** for Export / Import. Use **Reset** in the top bar to start over.
 
 Installable as a PWA (Add to Home Screen) after a production build, or as an Android debug APK (below).

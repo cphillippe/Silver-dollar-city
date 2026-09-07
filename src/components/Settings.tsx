@@ -8,6 +8,7 @@ import {
 import {
   cloudSyncStatus,
   encodeShareCode,
+  SAVE_MAX_BYTES,
   wrapSave,
 } from '../lib/save'
 import { localDateKey } from '../lib/dates'
@@ -83,6 +84,14 @@ export function Settings({ onNavigate }: SettingsProps) {
 
   function onFile(file: File | undefined) {
     if (!file) return
+    if (file.size > SAVE_MAX_BYTES) {
+      setMessage('That file is too large to be a Silver City save.')
+      return
+    }
+    const ok = window.confirm(
+      'Replace the save on this device with the imported one? Anyone with this file can overwrite local progress.',
+    )
+    if (!ok) return
     const reader = new FileReader()
     reader.onload = () => {
       applyRaw(String(reader.result ?? ''))
@@ -141,8 +150,10 @@ export function Settings({ onNavigate }: SettingsProps) {
       <section className="settings-card">
         <p className="eyebrow">Move to another device</p>
         <p>
-          Export a JSON file, or copy a share code. Import replaces the save on
-          this device (a backup of the old one is kept).
+          Export a JSON file, or copy a share code. Import <strong>replaces</strong> the
+          save on this device (a backup of the old one is kept). Treat a share
+          code like a secret for that save — anyone who imports it takes over
+          this walk.
         </p>
         <div className="settings-actions">
           <button type="button" className="btn primary" onClick={downloadJson}>

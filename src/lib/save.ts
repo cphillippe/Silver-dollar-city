@@ -7,6 +7,19 @@ export { STORAGE_KEY, STORAGE_BACKUP_KEY, SAVE_SCHEMA_VERSION }
 
 export const SAVE_KIND = 'silver-city-save'
 
+/** Reject import payloads larger than this before JSON.parse. */
+export const SAVE_MAX_BYTES = 256 * 1024
+const SAVE_MAX_RAW = Math.floor(SAVE_MAX_BYTES * 1.5)
+const SAVE_MAX_ARRAY = 256
+const SAVE_MAX_MAP = 256
+const SAVE_MAX_ID = 64
+const SAVE_MAX_ELABORATION = 220
+const SAVE_MAX_COUNT = 10_000
+const SAVE_MAX_INTERVAL = 32
+const DATE_KEY = /^\d{4}-\d{2}-\d{2}$/
+const ID_KEY = /^[A-Za-z0-9._:-]{1,64}$/
+const DANGEROUS_KEYS = new Set(['__proto__', 'constructor', 'prototype'])
+
 export interface SaveEnvelope {
   kind: typeof SAVE_KIND
   schemaVersion: number
@@ -52,45 +65,96 @@ export function emptyProgress(): ProgressState {
   }
 }
 
+function isDangerousKey(key: string): boolean {
+  return DANGEROUS_KEYS.has(key)
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) return false
+  const proto = Object.getPrototypeOf(value)
+  return proto === Object.prototype || proto === null
+}
+
+function isDateKey(value: unknown): value is string {
+  return typeof value === 'string' && DATE_KEY.test(value) && value.length <= SAVE_MAX_ID
+}
+
+function isSafeId(value: unknown): value is string {
+  return typeof value === 'string' && ID_KEY.test(value)
+}
+
+function finiteInt(value: unknown, min: number, max: number, fallback: number): number {
+  if (typeof value !== 'number' || !Number.isFinite(value) || !Number.isInteger(value)) {
+    return fallback
+  }
+  return Math.min(max, Math.max(min, value))
+}
+
+function clipString(value: string, max: number): string {
+  return value.length <= max ? value : value.slice(0, max)
+}
+
 function asStringArray(value: unknown): string[] {
   if (!Array.isArray(value)) return []
-  return value.filter((item): item is string => typeof item === 'string')
+  const next: string[] = []
+  for (const item of value) {
+    if (next.length >= SAVE_MAX_ARRAY) break
+    if (!isSafeId(item) || isDangerousKey(item)) continue
+    next.push(item)
+  }
+  return next
 }
 
 function asMemoryMap(value: unknown): Record<string, MemoryTrace> {
-  if (!value || typeof value !== 'object') return {}
-  const next: Record<string, MemoryTrace> = {}
-  for (const [key, raw] of Object.entries(value as Record<string, unknown>)) {
-    if (!raw || typeof raw !== 'object') continue
-    const item = raw as MemoryTrace
+  const next = Object.create(null) as Record<string, MemoryTrace>
+  if (!isPlainObject(value)) return next
+  let count = 0
+  for (const [key, raw] of Object.entries(value)) {
+    if (count >= SAVE_MAX_MAP) break
+    if (isDangerousKey(key) || !isSafeId(key)) continue
+    if (!isPlainObject(raw)) continue
+    const today = localDateKey()
+    const id = isSafeId(raw.id) ? raw.id : key
     next[key] = {
-      id: typeof item.id === 'string' ? item.id : key,
-      pillar: typeof item.pillar === 'string' ? item.pillar : 'unspecified',
-      intervalIndex: typeof item.intervalIndex === 'number' ? item.intervalIndex : 0,
-      nextReviewAt: typeof item.nextReviewAt === 'string' ? item.nextReviewAt : localDateKey(),
-      lastReviewAt: item.lastReviewAt,
-      reviews: typeof item.reviews === 'number' ? item.reviews : 0,
-      cleanRecalls: typeof item.cleanRecalls === 'number' ? item.cleanRecalls : 0,
-      elaborated: Boolean(item.elaborated),
+      id,
+      pillar: isSafeId(raw.pillar) ? raw.pillar : 'unspecified',
+      intervalIndex: finiteInt(raw.intervalIndex, 0, SAVE_MAX_INTERVAL, 0),
+      nextReviewAt: isDateKey(raw.nextReviewAt) ? raw.nextReviewAt : today,
+      lastReviewAt: isDateKey(raw.lastReviewAt) ? raw.lastReviewAt : undefined,
+      reviews: finiteInt(raw.reviews, 0, SAVE_MAX_COUNT, 0),
+      cleanRecalls: finiteInt(raw.cleanRecalls, 0, SAVE_MAX_COUNT, 0),
+      elaborated: Boolean(raw.elaborated),
     }
+    count += 1
   }
   return next
 }
 
 function asStringMap(value: unknown): Record<string, string> {
-  if (!value || typeof value !== 'object') return {}
-  const next: Record<string, string> = {}
-  for (const [key, raw] of Object.entries(value as Record<string, unknown>)) {
-    if (typeof raw === 'string') next[key] = raw
+  const next = Object.create(null) as Record<string, string>
+  if (!isPlainObject(value)) return next
+  let count = 0
+  for (const [key, raw] of Object.entries(value)) {
+    if (count >= SAVE_MAX_MAP) break
+    if (isDangerousKey(key) || !isSafeId(key)) continue
+    if (typeof raw !== 'string') continue
+    next[key] = clipString(raw, SAVE_MAX_ELABORATION)
+    count += 1
   }
   return next
 }
 
 function asStarMap(value: unknown): Record<string, StarCount> {
-  if (!value || typeof value !== 'object') return {}
-  const next: Record<string, StarCount> = {}
-  for (const [key, raw] of Object.entries(value as Record<string, unknown>)) {
-    if (raw === 1 || raw === 2 || raw === 3) next[key] = raw
+  const next = Object.create(null) as Record<string, StarCount>
+  if (!isPlainObject(value)) return next
+  let count = 0
+  for (const [key, raw] of Object.entries(value)) {
+    if (count >= SAVE_MAX_MAP) break
+    if (isDangerousKey(key) || !isSafeId(key)) continue
+    if (raw === 1 || raw === 2 || raw === 3) {
+      next[key] = raw
+      count += 1
+    }
   }
   return next
 }
@@ -117,44 +181,36 @@ export function normalizeProgress(parsed: Partial<ProgressState> | ProgressState
     completed: asStringArray(parsed.completed),
     journal: asStringArray(parsed.journal),
     firstTry: asStringArray(parsed.firstTry),
-    lastAreaId: typeof parsed.lastAreaId === 'string' ? parsed.lastAreaId : undefined,
-    lastChallengeId:
-      typeof parsed.lastChallengeId === 'string' ? parsed.lastChallengeId : undefined,
+    lastAreaId: isSafeId(parsed.lastAreaId) ? parsed.lastAreaId : undefined,
+    lastChallengeId: isSafeId(parsed.lastChallengeId) ? parsed.lastChallengeId : undefined,
     stars: asStarMap(parsed.stars),
     dailyDates: asStringArray(parsed.dailyDates),
-    lastDailyDate: typeof parsed.lastDailyDate === 'string' ? parsed.lastDailyDate : undefined,
-    streak: typeof parsed.streak === 'number' ? parsed.streak : 0,
-    bestStreak: typeof parsed.bestStreak === 'number' ? parsed.bestStreak : 0,
+    lastDailyDate: isDateKey(parsed.lastDailyDate) ? parsed.lastDailyDate : undefined,
+    streak: finiteInt(parsed.streak, 0, SAVE_MAX_COUNT, 0),
+    bestStreak: finiteInt(parsed.bestStreak, 0, SAVE_MAX_COUNT, 0),
     held,
     memory: {},
     elaborations: asStringMap(parsed.elaborations),
-    lastReviewPillar:
-      typeof parsed.lastReviewPillar === 'string' ? parsed.lastReviewPillar : undefined,
+    lastReviewPillar: isSafeId(parsed.lastReviewPillar) ? parsed.lastReviewPillar : undefined,
   }
   base.memory = migrateMemory({ ...base, memory: parsed.memory ?? {} })
   return base
 }
 
 function isEnvelope(value: unknown): value is SaveEnvelope {
-  if (!value || typeof value !== 'object') return false
-  const row = value as Record<string, unknown>
-  const progress = row.progress
-  return (
-    (row.kind === SAVE_KIND || typeof row.schemaVersion === 'number') &&
-    Boolean(progress) &&
-    typeof progress === 'object'
-  )
+  if (!isPlainObject(value)) return false
+  return value.kind === SAVE_KIND && isPlainObject(value.progress)
 }
 
 function looksLikeProgress(value: unknown): value is Partial<ProgressState> {
-  if (!value || typeof value !== 'object') return false
-  const row = value as Record<string, unknown>
+  if (!isPlainObject(value)) return false
+  if (value.kind === SAVE_KIND) return false
   return (
-    Array.isArray(row.completed) ||
-    Array.isArray(row.journal) ||
-    Array.isArray(row.held) ||
-    Array.isArray(row.dailyDates) ||
-    typeof row.started === 'boolean'
+    Array.isArray(value.completed) ||
+    Array.isArray(value.journal) ||
+    Array.isArray(value.held) ||
+    Array.isArray(value.dailyDates) ||
+    typeof value.started === 'boolean'
   )
 }
 
@@ -192,13 +248,31 @@ export function wrapSave(progress: ProgressState, savedAt = new Date().toISOStri
 
 export function parseUnknownSave(value: unknown): ParseResult {
   if (isEnvelope(value)) {
-    const schemaVersion =
-      typeof value.schemaVersion === 'number' ? value.schemaVersion : 1
-    const progress = migrateToCurrent(schemaVersion, normalizeProgress(value.progress))
+    const schemaVersion = value.schemaVersion
+    if (schemaVersion === undefined) {
+      // kind-matched envelopes without a version are treated as v1
+    } else if (
+      typeof schemaVersion !== 'number' ||
+      !Number.isInteger(schemaVersion) ||
+      schemaVersion < 0
+    ) {
+      return { ok: false, error: 'That save’s schema version is not valid.' }
+    } else if (schemaVersion > SAVE_SCHEMA_VERSION) {
+      return {
+        ok: false,
+        error: 'This save needs a newer Silver City before it can be imported.',
+      }
+    }
+    const version = typeof schemaVersion === 'number' ? schemaVersion : 1
+    const progress = migrateToCurrent(version, normalizeProgress(value.progress))
     const savedAt =
-      typeof value.savedAt === 'string' ? value.savedAt : new Date().toISOString()
+      typeof value.savedAt === 'string' && value.savedAt.length <= 40
+        ? value.savedAt
+        : new Date().toISOString()
     const appVersion =
-      typeof value.appVersion === 'string' ? value.appVersion : APP_VERSION
+      typeof value.appVersion === 'string' && value.appVersion.length <= SAVE_MAX_ID
+        ? clipString(value.appVersion, SAVE_MAX_ID)
+        : APP_VERSION
     return {
       ok: true,
       progress,
@@ -260,6 +334,9 @@ export function encodeShareCode(envelope: SaveEnvelope): string {
 export function parseIncomingSave(raw: string): ParseResult {
   const trimmed = raw.trim()
   if (!trimmed) return { ok: false, error: 'Nothing to import.' }
+  if (trimmed.length > SAVE_MAX_RAW) {
+    return { ok: false, error: 'That save is too large to import.' }
+  }
   let text = trimmed
   if (trimmed.startsWith('SC1.')) {
     try {
@@ -267,6 +344,9 @@ export function parseIncomingSave(raw: string): ParseResult {
     } catch {
       return { ok: false, error: 'That share code could not be read.' }
     }
+  }
+  if (text.length > SAVE_MAX_BYTES) {
+    return { ok: false, error: 'That save is too large to import.' }
   }
   try {
     return parseUnknownSave(JSON.parse(text) as unknown)

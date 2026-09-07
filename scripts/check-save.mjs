@@ -5,6 +5,7 @@ import { APP_VERSION, SAVE_SCHEMA_VERSION } from '../src/config/app.ts'
 import {
   encodeShareCode,
   parseIncomingSave,
+  SAVE_MAX_BYTES,
   wrapSave,
 } from '../src/lib/save.ts'
 
@@ -80,8 +81,65 @@ assert.deepEqual(roundTrip.progress.journal, legacy.journal)
 const junk = parseIncomingSave('not-json')
 assert.equal(junk.ok, false)
 
+const tooBig = parseIncomingSave('n'.repeat(SAVE_MAX_BYTES * 2))
+assert.equal(tooBig.ok, false)
+
+const future = parseIncomingSave(
+  JSON.stringify({
+    kind: 'silver-city-save',
+    schemaVersion: SAVE_SCHEMA_VERSION + 8,
+    appVersion: APP_VERSION,
+    savedAt: '2026-09-07T00:00:00.000Z',
+    progress: legacy,
+  }),
+)
+assert.equal(future.ok, false)
+
+const protoRaw = `{"kind":"silver-city-save","schemaVersion":1,"appVersion":"${APP_VERSION}","savedAt":"2026-09-07T00:00:00.000Z","progress":{"started":true,"completed":["ph-road"],"journal":[],"firstTry":[],"stars":{},"dailyDates":[],"streak":0,"bestStreak":0,"held":[],"memory":{"__proto__":{"id":"nope","pillar":"x","intervalIndex":0,"nextReviewAt":"2026-09-07","reviews":0,"cleanRecalls":0,"elaborated":false},"ph-road":{"id":"ph-road","pillar":"parable-hollow","intervalIndex":0,"nextReviewAt":"2026-09-07","reviews":1,"cleanRecalls":0,"elaborated":false}},"elaborations":{"constructor":"nope","ph-road":"mercy crosses the road"}}}`
+const protoSave = parseIncomingSave(protoRaw)
+assert.equal(protoSave.ok, true)
+if (!protoSave.ok) throw new Error('proto skip')
+assert.equal(Object.hasOwn(protoSave.progress.memory, '__proto__'), false)
+assert.equal(Object.hasOwn(protoSave.progress.elaborations, 'constructor'), false)
+assert.equal(protoSave.progress.elaborations['ph-road'], 'mercy crosses the road')
+assert.equal(protoSave.progress.memory['ph-road']?.id, 'ph-road')
+
+const settingsSrc = readFileSync(
+  new URL('../src/components/Settings.tsx', import.meta.url),
+  'utf8',
+)
+assert.match(settingsSrc, /window\.confirm/)
+assert.match(settingsSrc, /onFile/)
+assert.match(settingsSrc, /file\.size > SAVE_MAX_BYTES/)
+assert.match(settingsSrc, /Treat a share/)
+assert.match(settingsSrc, /code like a secret/)
+
 const shellSrc = readFileSync(new URL('../src/components/AppShell.tsx', import.meta.url), 'utf8')
 assert.match(shellSrc, /view\.name === 'journal'/)
 assert.match(shellSrc, /hideGoalbar/)
+
+const capSrc = readFileSync(new URL('../capacitor.config.ts', import.meta.url), 'utf8')
+assert.match(capSrc, /allowMixedContent:\s*false/)
+assert.doesNotMatch(capSrc, /allowMixedContent:\s*true/)
+
+const viteSrc = readFileSync(new URL('../vite.config.ts', import.meta.url), 'utf8')
+assert.doesNotMatch(viteSrc, /allowedHosts:\s*true/)
+assert.match(viteSrc, /\.trycloudflare\.com/)
+assert.match(viteSrc, /Content-Security-Policy/)
+assert.match(viteSrc, /script-src 'self'/)
+assert.doesNotMatch(viteSrc, /script-src[^\\n]*unsafe-eval/)
+
+const filePaths = readFileSync(
+  new URL('../android/app/src/main/res/xml/file_paths.xml', import.meta.url),
+  'utf8',
+)
+assert.doesNotMatch(filePaths, /external-path[^>]*path="\."/)
+assert.match(filePaths, /path="share\/"/)
+
+const androidIgnore = readFileSync(new URL('../android/.gitignore', import.meta.url), 'utf8')
+assert.match(androidIgnore, /^\*\.jks$/m)
+assert.match(androidIgnore, /^\*\.keystore$/m)
+assert.match(androidIgnore, /^google-services\.json$/m)
+assert.doesNotMatch(androidIgnore, /#\*\.jks/)
 
 console.log('check-save: ok')
