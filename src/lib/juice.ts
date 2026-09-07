@@ -1,23 +1,23 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 
 /** How long the lock-in burst holds the board before takeaway chips. */
-export const WIN_BURST_MS = 760
+export const WIN_BURST_MS = 1320
 
-export const BURST_SPARKS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+export const BURST_SPARKS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
 
 export function burstStyle(
   index: number,
   side: 'keep' | 'discard' | 'mid' = 'mid',
 ): CSSProperties {
   const dir = side === 'keep' ? -1 : side === 'discard' ? 1 : index % 2 === 0 ? -1 : 1
-  const dx = dir * (36 + (index % 4) * 22)
-  const dy = -64 - index * 16
-  const spin = dir * (16 + index * 11)
+  const dx = dir * (52 + (index % 4) * 34)
+  const dy = -110 - index * 28
+  const spin = dir * (28 + index * 18)
   return {
     ['--dx' as string]: `${dx}px`,
     ['--dy' as string]: `${dy}px`,
     ['--spin' as string]: `${spin}deg`,
-    animationDelay: `${index * 38}ms`,
+    animationDelay: `${index * 42}ms`,
   }
 }
 
@@ -28,7 +28,7 @@ export function prefersReducedMotion(): boolean {
   )
 }
 
-/** Save immediately, then wait for the burst before swapping the screen. */
+/** Wait for the burst, then swap to takeaway. Progress saves after juiceDone. */
 export function useJuiceHandoff(already = false) {
   const [ready, setReady] = useState(already)
   const timer = useRef(0)
@@ -38,7 +38,7 @@ export function useJuiceHandoff(already = false) {
     window.clearTimeout(timer.current)
     timer.current = window.setTimeout(
       () => setReady(true),
-      prefersReducedMotion() ? 480 : WIN_BURST_MS,
+      prefersReducedMotion() ? 900 : WIN_BURST_MS,
     )
   }
 
