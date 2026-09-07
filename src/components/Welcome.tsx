@@ -25,9 +25,15 @@ export function Welcome({ onNavigate }: WelcomeProps) {
   return (
     <main className="welcome">
       <div className="welcome-sky" aria-hidden />
-      <div className="welcome-cast" aria-hidden>
-        <Avatar who="river" size="xl" />
-        <Avatar who="juniper" size="xl" />
+      <div className="welcome-cast">
+        <figure>
+          <Avatar who="river" size="xl" />
+          <figcaption>River</figcaption>
+        </figure>
+        <figure>
+          <Avatar who="juniper" size="xl" />
+          <figcaption>Juniper</figcaption>
+        </figure>
       </div>
       <p className="eyebrow">A puzzle trail</p>
       <h1>

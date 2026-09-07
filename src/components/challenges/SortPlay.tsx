@@ -106,10 +106,13 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
     <div className={`play ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}>
       <PuzzleHint text={challenge.context} onPeek={onPeek} />
       <p className="prompt">{challenge.prompt}</p>
-      <p className="hint">
-        Keep or toss each line. Tap Keep / Toss on the tile, or tap a tile then
-        a bin. Bins check themselves when full. Tap a line in a bin to pull it
-        back.
+      <p className="sort-how">
+        <span>
+          <strong>Keep</strong> this belongs
+        </span>
+        <span>
+          <strong>Toss</strong> set it aside
+        </span>
       </p>
 
       <div className="sort-bins">
@@ -125,13 +128,13 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
           role="button"
           tabIndex={0}
         >
-          <span className="bin-head">{challenge.keepLabel}</span>
+          <span className="bin-head">Keep</span>
           <span className="bin-body">
             {keep.length === 0 ? (
               <span className="placeholder">
                 {selected
                   ? `Keep: ${selected.text}`
-                  : 'Tap Keep on a tile, or drop one here'}
+                  : 'Lines that belong'}
               </span>
             ) : (
               keep.map((tile) => (
@@ -162,13 +165,13 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
           role="button"
           tabIndex={0}
         >
-          <span className="bin-head toss">{challenge.discardLabel}</span>
+          <span className="bin-head toss">Toss</span>
           <span className="bin-body">
             {discard.length === 0 ? (
               <span className="placeholder">
                 {selected
                   ? `Toss: ${selected.text}`
-                  : 'Tap Toss on a tile, or drop one here'}
+                  : 'Set aside — not the claim'}
               </span>
             ) : (
               discard.map((tile) => (
