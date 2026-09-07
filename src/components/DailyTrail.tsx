@@ -224,7 +224,6 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
               </p>
               <RecallGate
                 brief={brief}
-                pillar={pillar}
                 mode={isReview ? 'review' : 'encode'}
                 kicker="Rehearse this"
                 onHeld={settleRecall}
