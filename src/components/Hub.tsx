@@ -44,7 +44,6 @@ export function Hub({ onNavigate }: HubProps) {
           <div>
             <p className="eyebrow">{person.name} · in town</p>
             <h1>Silver City</h1>
-            <p className="town-line">“{voice.here}”</p>
           </div>
         </div>
       </header>
@@ -119,6 +118,7 @@ export function Hub({ onNavigate }: HubProps) {
                 type="button"
                 className={`btn tiny ${complete && unlocked ? 'street-rehearse' : ''} ${current && unlocked && !complete ? 'gold' : ''}`}
                 disabled={!unlocked}
+                aria-label={complete && unlocked ? STORY.takeaway : undefined}
                 onClick={() => {
                   if (complete) {
                     onNavigate(
@@ -141,7 +141,7 @@ export function Hub({ onNavigate }: HubProps) {
                     ? 'Two Hollow walks'
                     : 'Gated'
                   : complete
-                    ? STORY.takeaway
+                    ? STORY.tapTakeaway
                     : current
                       ? plot.id === 'porch'
                         ? 'Walk next'
