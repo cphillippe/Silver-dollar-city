@@ -7,7 +7,7 @@ interface SayBackProps {
   onDone: (result: { elaborated: boolean; text?: string }) => void
 }
 
-/** Optional generation step — skippable once so it doesn’t kill pace. */
+/** Optional bonus snap — skippable, one-tap credit when the reason chips. */
 export function SayBack({ brief, onDone }: SayBackProps) {
   const choices = useMemo(
     () => shuffle([...brief.reasonChoices]),
@@ -15,6 +15,7 @@ export function SayBack({ brief, onDone }: SayBackProps) {
   )
   const [picked, setPicked] = useState<string | null>(null)
   const [text, setText] = useState('')
+  const [wantLine, setWantLine] = useState(false)
   const [shake, setShake] = useState(false)
 
   function choose(line: string) {
@@ -23,19 +24,24 @@ export function SayBack({ brief, onDone }: SayBackProps) {
       return
     }
     setShake(true)
-    window.setTimeout(() => setShake(false), 420)
+    window.setTimeout(() => setShake(false), 520)
   }
 
   const locked = picked === brief.reason
 
   return (
     <section className={`say-back ${shake ? 'is-shake' : ''}`}>
-      <p className="eyebrow">Say it back</p>
-      <h2>Which premise is load-bearing?</h2>
-      <p className="quiet">
-        Not the slogan — the reason the claim stands. Skip once if you need the
-        pace; the trail will ask again later.
-      </p>
+      <div className="say-back-head">
+        <p className="eyebrow">Bonus snap</p>
+        <button
+          type="button"
+          className="text-link say-back-skip"
+          onClick={() => onDone({ elaborated: false })}
+        >
+          Skip
+        </button>
+      </div>
+      <h2>Tap the reason it stands.</h2>
       <div className="recall-choices">
         {choices.map((line) => (
           <button
@@ -50,18 +56,31 @@ export function SayBack({ brief, onDone }: SayBackProps) {
       </div>
       {locked ? (
         <>
-          <label className="say-back-label" htmlFor={`say-${brief.id}`}>
-            In your own words (stays on this device)
-          </label>
-          <textarea
-            id={`say-${brief.id}`}
-            className="say-back-text"
-            rows={2}
-            maxLength={220}
-            value={text}
-            placeholder="One sentence you’ll still recognize tomorrow… Your words help it stick."
-            onChange={(event) => setText(event.target.value)}
-          />
+          <p className="streak-pill pop-in">That’s the load-bearing line</p>
+          {wantLine ? (
+            <>
+              <label className="say-back-label" htmlFor={`say-${brief.id}`}>
+                Optional — one private sentence
+              </label>
+              <textarea
+                id={`say-${brief.id}`}
+                className="say-back-text"
+                rows={2}
+                maxLength={220}
+                value={text}
+                placeholder="A line you’ll still recognize tomorrow…"
+                onChange={(event) => setText(event.target.value)}
+              />
+            </>
+          ) : (
+            <button
+              type="button"
+              className="text-link"
+              onClick={() => setWantLine(true)}
+            >
+              Add a private sentence?
+            </button>
+          )}
           <button
             type="button"
             className="btn primary xl"
@@ -69,17 +88,11 @@ export function SayBack({ brief, onDone }: SayBackProps) {
               onDone({ elaborated: true, text: text.trim() || undefined })
             }
           >
-            Lock the teach-back
+            Snap it in
           </button>
         </>
       ) : (
-        <button
-          type="button"
-          className="btn ghost"
-          onClick={() => onDone({ elaborated: false })}
-        >
-          I’ll say it later
-        </button>
+        <p className="quiet">Wrong chips bounce. Skip stays on the table.</p>
       )}
     </section>
   )

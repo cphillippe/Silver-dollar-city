@@ -85,14 +85,26 @@ p {
 }
 
 .app {
-  min-height: 100dvh;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
   display: grid;
   grid-template-rows: auto 1fr auto;
   position: relative;
 }
 
 .app.is-welcome {
-  grid-template-rows: 1fr;
+  display: block;
+  height: auto;
+  max-height: none;
+  overflow: auto;
+  min-height: 100dvh;
+}
+
+.app.is-welcome .app-body {
+  overflow: visible;
+  min-height: 100dvh;
+  padding-bottom: 32px;
 }
 
 .grain {
@@ -126,8 +138,7 @@ p {
   flex-wrap: wrap;
   gap: 8px 12px;
   padding: calc(14px + var(--safe-top)) 12px 10px;
-  position: sticky;
-  top: 0;
+  position: relative;
   backdrop-filter: blur(16px);
   background: rgba(14, 20, 36, 0.72);
   border-bottom: 1px solid var(--line);
@@ -188,21 +199,24 @@ p {
 .app-body {
   width: min(820px, calc(100% - 20px));
   margin: 0 auto;
-  padding: 18px 0 32px;
+  padding: 14px 0 calc(28px + var(--safe-bottom));
   min-width: 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .goalbar {
-  position: sticky;
-  bottom: 0;
+  position: relative;
   display: flex;
   align-items: stretch;
   flex-wrap: wrap;
   gap: 10px;
   padding: 10px 12px var(--safe-bottom);
-  background: rgba(10, 14, 26, 0.88);
+  background: rgba(10, 14, 26, 0.92);
   border-top: 1px solid var(--line);
   backdrop-filter: blur(16px);
+  z-index: 6;
 }
 
 .goal {
@@ -608,37 +622,42 @@ p {
 }
 
 .hint-peek {
-  display: grid;
-  gap: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 12px;
+  margin-bottom: 8px;
 }
 
 .hint-toggle {
   justify-self: start;
-  background: none;
-  border: 0;
+  background: rgba(224, 179, 74, 0.12);
+  border: 1px solid var(--line);
   color: var(--gold);
-  padding: 0;
-  font-size: 0.92rem;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
 }
 
 .hint-cost {
   margin: 0;
-  font-size: 0.88rem;
-  color: rgba(244, 234, 210, 0.78);
+  font-size: 0.8rem;
+  color: rgba(244, 234, 210, 0.62);
 }
 
 .sort-how {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin: 0 0 12px;
-  font-size: 0.92rem;
+  gap: 8px;
+  margin: 0 0 10px;
+  font-size: 0.86rem;
 }
 
 .sort-how span {
   background: rgba(14, 18, 32, 0.45);
-  border-radius: 14px;
-  padding: 10px 12px;
+  border-radius: 12px;
+  padding: 8px 10px;
 }
 
 .sort-how strong {
@@ -650,8 +669,20 @@ p {
   margin-bottom: 2px;
 }
 
-.play.is-shake {
-  animation: shake 0.42s ease;
+.play {
+  padding-bottom: 8px;
+}
+
+.play.is-shake,
+.say-back.is-shake,
+.recall-gate.is-shake {
+  animation: miss-shake 0.58s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+.play.is-shake .bin,
+.play.is-shake .chip,
+.play.is-shake .chain li {
+  box-shadow: 0 0 0 2px rgba(196, 107, 74, 0.55);
 }
 
 .play.is-win .chip.in-chain,
@@ -674,6 +705,31 @@ p {
   }
   75% {
     transform: translateX(7px);
+  }
+}
+
+@keyframes miss-shake {
+  0%,
+  100% {
+    transform: translateX(0) rotate(0);
+  }
+  12% {
+    transform: translateX(-14px) rotate(-1.4deg);
+  }
+  24% {
+    transform: translateX(14px) rotate(1.4deg);
+  }
+  36% {
+    transform: translateX(-11px) rotate(-1deg);
+  }
+  48% {
+    transform: translateX(11px) rotate(1deg);
+  }
+  62% {
+    transform: translateX(-6px);
+  }
+  76% {
+    transform: translateX(6px);
   }
 }
 
@@ -707,7 +763,7 @@ p {
 }
 
 .bin {
-  min-height: 160px;
+  min-height: 92px;
   border-radius: 18px;
   border: 1px dashed var(--line);
   background: rgba(14, 18, 32, 0.35);
@@ -1251,6 +1307,29 @@ p {
   margin-bottom: 18px;
 }
 
+.say-back-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.say-back-head .eyebrow {
+  margin: 0;
+}
+
+.say-back h2 {
+  font-size: 1.25rem;
+  margin-bottom: 8px;
+}
+
+.say-back-skip {
+  padding-bottom: 0;
+  font-size: 0.88rem;
+}
+
 .say-back-label {
   display: block;
   margin: 12px 0 6px;
@@ -1386,10 +1465,10 @@ p {
 }
 
 .device-day {
-  margin: 0 0 6px;
-  font-size: 0.78rem;
+  margin: 0 0 4px;
+  font-size: 0.72rem;
   letter-spacing: 0.04em;
-  opacity: 0.62;
+  opacity: 0.55;
 }
 
 .next-rebuild {
@@ -1514,7 +1593,7 @@ p {
   }
 
   .sort-bins {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
   }
 
   .challenge-row {

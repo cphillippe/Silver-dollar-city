@@ -69,13 +69,13 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
       setShake(false)
       setBank(shuffle(challenge.items))
       setChain([])
-    }, 520)
+    }, 620)
   }
 
   return (
     <div className={`play ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}>
-      <PuzzleHint text={challenge.context} onPeek={onPeek} />
       <p className="prompt">{challenge.prompt}</p>
+      <PuzzleHint text={challenge.context} onPeek={onPeek} />
       <p className="hint">Tap tiles in order. The chain checks itself when full.</p>
 
       <ol className="chain">
