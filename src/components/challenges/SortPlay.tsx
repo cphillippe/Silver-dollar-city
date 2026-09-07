@@ -19,7 +19,8 @@ type Bin = 'keep' | 'discard'
 
 export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps) {
   const seed = useMemo(() => shuffle(challenge.tiles), [challenge.tiles])
-  const [bank, setBank] = useState(seed)
+  const [order, setOrder] = useState(seed)
+  const [slots, setSlots] = useState<(SortTile | null)[]>(seed)
   const [keep, setKeep] = useState<SortTile[]>([])
   const [discard, setDiscard] = useState<SortTile[]>([])
   const [picked, setPicked] = useState<string | null>(null)
@@ -27,33 +28,37 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
   const [shake, setShake] = useState(false)
   const [misses, setMisses] = useState(0)
 
+  function filledSlots(nextSlots = slots) {
+    return nextSlots.filter((tile): tile is SortTile => tile !== null)
+  }
+
   function allTiles(
-    nextBank = bank,
+    nextSlots = slots,
     nextKeep = keep,
     nextDiscard = discard,
   ) {
-    return [...nextBank, ...nextKeep, ...nextDiscard]
+    return [...filledSlots(nextSlots), ...nextKeep, ...nextDiscard]
   }
 
   function takeTile(
     id: string,
-    nextBank = bank,
+    nextSlots = slots,
     nextKeep = keep,
     nextDiscard = discard,
   ): SortTile | undefined {
-    return allTiles(nextBank, nextKeep, nextDiscard).find((tile) => tile.id === id)
+    return allTiles(nextSlots, nextKeep, nextDiscard).find((tile) => tile.id === id)
   }
 
   function place(id: string, bin: Bin) {
     if (status === 'ok') return
     const tile = takeTile(id)
     if (!tile) return
-    const nextBank = bank.filter((item) => item.id !== id)
+    const nextSlots = slots.map((item) => (item?.id === id ? null : item))
     const nextKeep = keep.filter((item) => item.id !== id)
     const nextDiscard = discard.filter((item) => item.id !== id)
     if (bin === 'keep') nextKeep.push(tile)
     else nextDiscard.push(tile)
-    setBank(nextBank)
+    setSlots(nextSlots)
     setKeep(nextKeep)
     setDiscard(nextDiscard)
     setPicked(null)
@@ -69,11 +74,15 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
     if (status === 'ok') return
     const tile = takeTile(id)
     if (!tile) return
+    const home = order.findIndex((item) => item.id === id)
     setKeep((current) => current.filter((item) => item.id !== id))
     setDiscard((current) => current.filter((item) => item.id !== id))
-    setBank((current) =>
-      current.some((item) => item.id === id) ? current : [...current, tile],
-    )
+    setSlots((current) => {
+      if (current.some((item) => item?.id === id)) return current
+      const next = [...current]
+      if (home >= 0) next[home] = tile
+      return next
+    })
     setStatus('idle')
   }
 
@@ -94,7 +103,9 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
     onMiss()
     window.setTimeout(() => {
       setShake(false)
-      setBank(shuffle(challenge.tiles))
+      const next = shuffle(challenge.tiles)
+      setOrder(next)
+      setSlots(next)
       setKeep([])
       setDiscard([])
       setPicked(null)
@@ -102,7 +113,7 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
   }
 
   const selected = picked ? takeTile(picked) : undefined
-  const ready = status !== 'ok' && bank.length === 0
+  const ready = status !== 'ok' && filledSlots().length === 0
 
   return (
     <div
@@ -116,39 +127,53 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
       </p>
 
       <div className="bank">
-        {bank.map((tile) => (
-          <div
-            key={tile.id}
-            className={`sort-tile ${picked === tile.id ? 'is-selected' : ''}`}
-          >
-            <button
-              type="button"
-              className="chip"
-              onClick={() => setPicked(tile.id === picked ? null : tile.id)}
+        {slots.map((tile, index) => {
+          const shown = tile ?? order[index]
+          const live = Boolean(tile)
+          if (!shown) {
+            return <div key={`gone-${index}`} className="sort-tile is-gone" aria-hidden />
+          }
+          return (
+            <div
+              key={shown.id}
+              className={`sort-tile ${live && picked === shown.id ? 'is-selected' : ''} ${live ? '' : 'is-gone'}`}
+              aria-hidden={!live}
             >
-              {tile.text}
-            </button>
-            <span className="sort-tile-actions">
               <button
                 type="button"
-                className="btn tiny keep"
-                onClick={() => place(tile.id, 'keep')}
+                className="chip"
+                tabIndex={live ? 0 : -1}
+                disabled={!live}
+                onClick={() => live && setPicked(shown.id === picked ? null : shown.id)}
               >
-                Keep
+                {shown.text}
               </button>
-              <button
-                type="button"
-                className="btn tiny toss"
-                onClick={() => place(tile.id, 'discard')}
-              >
-                Toss
-              </button>
-            </span>
-          </div>
-        ))}
+              <span className="sort-tile-actions">
+                <button
+                  type="button"
+                  className="btn tiny keep"
+                  tabIndex={live ? 0 : -1}
+                  disabled={!live}
+                  onClick={() => live && place(shown.id, 'keep')}
+                >
+                  Keep
+                </button>
+                <button
+                  type="button"
+                  className="btn tiny toss"
+                  tabIndex={live ? 0 : -1}
+                  disabled={!live}
+                  onClick={() => live && place(shown.id, 'discard')}
+                >
+                  Toss
+                </button>
+              </span>
+            </div>
+          )
+        })}
       </div>
 
-      <div className={`sort-bins ${bank.length === 0 && status !== 'ok' ? 'is-ready' : ''}`}>
+      <div className={`sort-bins ${ready ? 'is-ready' : ''}`}>
         <div
           className={`bin keep ${picked ? 'awaiting' : ''}`}
           onClick={() => drop('keep')}

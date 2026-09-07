@@ -865,8 +865,14 @@ p {
 
 .play.is-ready .sort-how,
 .play.is-ready .hint-peek,
-.play.is-ready .bank:empty {
+.play.is-ready .bank {
   display: none;
+}
+
+.sort-tile.is-gone {
+  visibility: hidden;
+  pointer-events: none;
+  min-height: 88px;
 }
 
 .sort-lock {
@@ -1355,6 +1361,7 @@ p {
 
 .is-puzzle .play .bank {
   grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
   gap: 8px;
 }
 
@@ -1680,6 +1687,14 @@ p {
 .recall-choices {
   display: grid;
   gap: 8px;
+}
+
+.recall-gate.is-encode .recall-choices {
+  grid-template-columns: 1fr;
+}
+
+.recall-gate.is-encode .recall-card {
+  border-color: color-mix(in srgb, var(--gold) 55%, white);
 }
 
 .today-trail.is-live {
