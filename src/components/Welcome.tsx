@@ -37,8 +37,8 @@ export function Welcome({ onNavigate }: WelcomeProps) {
         <span>Unending Evidence</span>
       </h1>
       <p className="lede">
-        Walk a town of five districts. Play stories, weigh testimony, and build
-        the old arguments — carefully, without sneering at doubt. The trail
+        Walk a town of five districts. Snap pairs, sort claims, and lock
+        argument chains — little puzzles with serious substance. The trail
         always has a next step.
       </p>
       <ul className="welcome-facts">

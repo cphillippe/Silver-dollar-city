@@ -3,8 +3,8 @@ import { areas, getArea, getChallenge, journalForChallenge } from '../content'
 import { kindLabel } from './icons'
 import { BuildArgumentPlay } from './challenges/BuildArgumentPlay'
 import { MatchPlay } from './challenges/MatchPlay'
-import { MultipleChoicePlay } from './challenges/MultipleChoicePlay'
 import { SequencePlay } from './challenges/SequencePlay'
+import { SortPlay } from './challenges/SortPlay'
 import {
   getNextGoal,
   isAreaComplete,
@@ -24,11 +24,12 @@ export function ChallengeScreen({
   challengeId,
   onNavigate,
 }: ChallengeScreenProps) {
-  const { completeChallenge, markMiss, progress } = useProgress()
+  const { completeChallenge, markMiss, missed, progress } = useProgress()
   const area = getArea(areaId)
   const challenge = getChallenge(areaId, challengeId)
   const [unlockedCards, setUnlockedCards] = useState<string[]>([])
   const [showNext, setShowNext] = useState(false)
+  const [clean, setClean] = useState(false)
 
   if (!area || !challenge) {
     return (
@@ -60,7 +61,9 @@ export function ChallengeScreen({
   }
 
   function solved() {
+    const wasClean = !missed.includes(challengeId)
     const cards = completeChallenge(areaId, challengeId)
+    setClean(wasClean)
     setUnlockedCards(cards)
     setShowNext(true)
   }
@@ -114,8 +117,8 @@ export function ChallengeScreen({
       </p>
       <h1>{challenge.title}</h1>
 
-      {challenge.kind === 'multiple-choice' || challenge.kind === 'scenario' ? (
-        <MultipleChoicePlay
+      {challenge.kind === 'sort' ? (
+        <SortPlay
           challenge={challenge}
           onMiss={() => markMiss(challenge.id)}
           onSolved={solved}
@@ -145,6 +148,13 @@ export function ChallengeScreen({
 
       {showNext ? (
         <section className="after-win">
+          <div className="burst" aria-hidden>
+            <span />
+            <span />
+            <span />
+            <span />
+          </div>
+          {clean ? <p className="streak-pill">Clean solve · +insight</p> : null}
           {unlockedCards.length > 0 && card ? (
             <article className="unlock-card">
               <p className="eyebrow">Evidence Journal</p>

@@ -118,85 +118,76 @@ export const highLookout: Area = {
         'Some materialists expect a future theory to close the gap. Some dualists and some theists argue that mind is fundamental — and that a living God is the most coherent place for mind to be fundamental. Again: a clue with rivals.',
     },
     {
-      kind: 'multiple-choice',
+      kind: 'sort',
       id: 'hl-meaning',
       title: 'Invented or found',
-      prompt:
-        'People can build local meaning without theism: love a child, finish a craft, keep a promise. What is the deeper question the lookout adds?',
+      prompt: 'Keep the lookout’s real question. Toss the decoys.',
       context:
-        'Ecclesiastes gives voice to vanity under the sun — and still ends with fear of God and keeping his commandments (Eccl 12:13). The book refuses both cheap cheer and cheap despair.',
-      choices: [
+        'You can build local meaning without theism. Ecclesiastes refuses both cheap cheer and cheap despair (Eccl 12:13).',
+      keepLabel: 'Keep',
+      discardLabel: 'Toss',
+      tiles: [
         {
           id: 'a',
-          text: 'Whether meaning is only invented, or also discovered — whether the hunger for a final good has a real object.',
-          correct: true,
-          teach:
-            'Yes. Constructed meaning is not fake at the human scale. The philosophical question is whether the universe is such that our deepest loves are at home, or whether they are a brief pattern on indifferent matter. Theism claims they are at home.',
+          text: 'Is meaning only invented — or also discovered? Does the hunger for a final good have an object?',
+          bin: 'keep',
         },
         {
           id: 'b',
-          text: 'Whether we can force every doubter to feel meaning on command.',
-          correct: false,
-          teach:
-            'Meaning is not a truncheon. A respectful case invites; it does not coerce an inner life.',
+          text: 'Can we force every doubter to feel meaning on command?',
+          bin: 'discard',
         },
         {
           id: 'c',
-          text: 'Whether Ecclesiastes forbids ordinary work and love as pointless.',
-          correct: false,
-          teach:
-            'Ecclesiastes also blesses eating, work, and companionship as gifts (e.g. Eccl 2:24; 9:7–10). The “vanity” is what those gifts become when they are asked to be God.',
+          text: 'Does Ecclesiastes forbid ordinary work and love as pointless?',
+          bin: 'discard',
         },
         {
           id: 'd',
-          text: 'Whether science has located the meaning organ and closed the file.',
-          correct: false,
-          teach:
-            'Neuroscience can study reward and narrative. It cannot, by measuring them, tell you whether the good you seek is real. That remains a philosophical — and for many, a religious — question.',
+          text: 'Has science located the meaning organ and closed the file?',
+          bin: 'discard',
         },
       ],
+      teachOnWrong:
+        'Constructed meaning can be real at human scale. The deeper question is whether our loves are at home in the universe.',
       deeper:
-        'If God is the good that created goods point toward, then ordinary loves are not canceled. They are promised a future. That is a different picture than “meaning is a private hobby.”',
+        'If God is the good that created goods point toward, ordinary loves are not canceled. They are promised a future.',
     },
     {
-      kind: 'scenario',
+      kind: 'sort',
       id: 'hl-beauty',
       title: 'Homesick at the music',
-      scene:
-        'C. S. Lewis wrote of a desire that beauty wakes and does not satisfy — Sehnsucht, the inconsolable longing. In “The Weight of Glory” he describes the tramp of something we were born for, as if a memory of a country we have not visited. You hear a piece of music, or see evening on the ridge, and the ache is larger than the object.',
-      prompt: 'What is the most careful use of this experience?',
-      choices: [
+      prompt: 'Keep Lewis’s careful use of longing. Toss the rest.',
+      context:
+        'Beauty wakes a hunger it cannot feed — Sehnsucht. Lewis: as if a memory of a country you have not visited.',
+      keepLabel: 'Keep',
+      discardLabel: 'Toss',
+      tiles: [
         {
           id: 'a',
-          text: 'It does not demonstrate God the way a theorem does. It is a signpost: if nothing in the world satisfies a hunger the world keeps waking, one rational possibility is that we were made for another country.',
-          correct: true,
-          teach:
-            'Yes. Lewis offers an argument from desire, not a deduction. Hungers usually correspond to real objects (hunger / food, homesickness / home). The inference can be resisted — perhaps this hunger is a misfire. It cannot be honestly ignored as if beauty were only interior paint.',
+          text: 'A signpost, not a theorem: the hunger may mean we were made for another country.',
+          bin: 'keep',
         },
         {
           id: 'b',
-          text: 'Beautiful feelings are already the beatific vision, so no further truth is needed.',
-          correct: false,
-          teach:
-            'Lewis’s point is the opposite: the feeling is a messenger, not the city. Worshiping the messenger is how the ache turns sour.',
+          text: 'Beautiful feelings already are the beatific vision.',
+          bin: 'discard',
         },
         {
           id: 'c',
           text: 'Anyone unmoved by your favorite song is morally lost.',
-          correct: false,
-          teach:
-            'Taste differs. The argument is not “share my playlist.” It is about a structure of longing that many people recognize under different objects.',
+          bin: 'discard',
         },
         {
           id: 'd',
-          text: 'Psalm 19 forbids looking at the sky except as a physics problem.',
-          correct: false,
-          teach:
-            'Psalm 19:1 — “The heavens declare the glory of God” — is one of Scripture’s invitations to read the world as speech, not only as mechanism. Physics can be part of the reading.',
+          text: 'Psalm 19 forbids looking at the sky except as physics.',
+          bin: 'discard',
         },
       ],
+      teachOnWrong:
+        'The feeling is a messenger, not the city. Taste differs. Psalm 19 treats the sky as speech — physics can be part of the reading.',
       deeper:
-        'Beauty does not replace the earlier areas. It keeps them from becoming only a brief. The case for God, if it is true, should be a home for the mind and for the heart that the mind cannot gag.',
+        'Beauty does not replace the earlier areas. It keeps them from becoming only a brief.',
     },
   ],
 }

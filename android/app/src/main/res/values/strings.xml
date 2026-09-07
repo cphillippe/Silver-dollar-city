@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Silver City</string>
+    <string name="title_activity_main">Silver City</string>
+    <string name="package_name">city.silver.unending</string>
+    <string name="custom_url_scheme">city.silver.unending</string>
+</resources>

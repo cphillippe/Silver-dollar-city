@@ -16,6 +16,7 @@
   --sans: 'Outfit', system-ui, sans-serif;
   --radius: 22px;
   --safe-bottom: max(18px, env(safe-area-inset-bottom));
+  --safe-top: max(10px, env(safe-area-inset-top));
 }
 
 * {
@@ -101,7 +102,7 @@ p {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 14px 18px 10px;
+  padding: calc(14px + var(--safe-top)) 18px 10px;
   position: sticky;
   top: 0;
   backdrop-filter: blur(16px);
@@ -526,6 +527,180 @@ p {
 .prompt {
   font-size: 1.15rem;
   font-weight: 600;
+}
+
+.hint-peek {
+  display: grid;
+  gap: 8px;
+}
+
+.hint-toggle {
+  justify-self: start;
+  background: none;
+  border: 0;
+  color: var(--gold);
+  padding: 0;
+  font-size: 0.92rem;
+}
+
+.play.is-shake {
+  animation: shake 0.42s ease;
+}
+
+.play.is-win .chip.in-chain,
+.play.is-win .chip.in-slot,
+.play.is-win .match-card.is-locked {
+  animation: pop-win 0.45s ease;
+}
+
+.pop-in {
+  animation: pop-in 0.28s ease;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-7px);
+  }
+  75% {
+    transform: translateX(7px);
+  }
+}
+
+@keyframes pop-in {
+  from {
+    transform: scale(0.92);
+    opacity: 0.4;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes pop-win {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.sort-bins {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.bin {
+  min-height: 160px;
+  border-radius: 18px;
+  border: 1px dashed var(--line);
+  background: rgba(14, 18, 32, 0.35);
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+.bin.awaiting {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(224, 179, 74, 0.14);
+}
+
+.bin-head {
+  width: 100%;
+  border: 0;
+  border-radius: 18px 18px 0 0;
+  background: rgba(107, 143, 113, 0.22);
+  color: var(--parchment);
+  padding: 10px;
+  font-weight: 650;
+}
+
+.bin-head.toss {
+  background: rgba(196, 107, 74, 0.22);
+}
+
+.bin-body {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  align-content: start;
+}
+
+.match-card.is-locked {
+  border-color: var(--pine);
+  background: rgba(107, 143, 113, 0.2);
+}
+
+.match-card.is-flash {
+  animation: shake 0.4s ease;
+  border-color: var(--cedar);
+}
+
+.match-score {
+  margin: 0;
+  text-align: center;
+  color: var(--gold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+}
+
+.streak-pill {
+  justify-self: start;
+  margin: 0;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(224, 179, 74, 0.16);
+  color: var(--gold);
+  font-weight: 650;
+}
+
+.burst {
+  position: relative;
+  height: 0;
+}
+
+.burst span {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gold);
+  animation: burst 0.7s ease-out;
+}
+
+.burst span:nth-child(1) {
+  left: 20%;
+}
+.burst span:nth-child(2) {
+  left: 40%;
+  background: var(--pine);
+}
+.burst span:nth-child(3) {
+  left: 60%;
+  background: var(--cedar);
+}
+.burst span:nth-child(4) {
+  left: 80%;
+}
+
+@keyframes burst {
+  from {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-28px) scale(0.2);
+    opacity: 0;
+  }
 }
 
 .play {

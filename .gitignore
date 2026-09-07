@@ -7,3 +7,7 @@ dev-dist
 .vite
 tsconfig.tsbuildinfo
 node_modules/.tmp
+android/local.properties
+android/.gradle
+android/**/build
+releases/*.apk

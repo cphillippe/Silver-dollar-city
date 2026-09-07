@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { shuffle } from '../../lib/shuffle'
 import type { SequenceChallenge } from '../../types'
+import { PuzzleHint } from './PuzzleHint'
 import { ResultPanel } from './ResultPanel'
 
 interface SequencePlayProps {
@@ -14,14 +15,20 @@ export function SequencePlay({ challenge, onMiss, onSolved }: SequencePlayProps)
   const [bank, setBank] = useState(bankSeed)
   const [chain, setChain] = useState<typeof challenge.items>([])
   const [status, setStatus] = useState<'idle' | 'wrong' | 'ok'>('idle')
+  const [shake, setShake] = useState(false)
 
   function add(id: string) {
     if (status === 'ok') return
     const item = bank.find((entry) => entry.id === id)
     if (!item) return
-    setBank((current) => current.filter((entry) => entry.id !== id))
-    setChain((current) => [...current, item])
+    const nextChain = [...chain, item]
+    const nextBank = bank.filter((entry) => entry.id !== id)
+    setBank(nextBank)
+    setChain(nextChain)
     setStatus('idle')
+    if (nextBank.length === 0) {
+      window.setTimeout(() => evaluate(nextChain), 80)
+    }
   }
 
   function remove(id: string) {
@@ -33,36 +40,43 @@ export function SequencePlay({ challenge, onMiss, onSolved }: SequencePlayProps)
     setStatus('idle')
   }
 
-  function check() {
+  function evaluate(nextChain = chain) {
     const correct =
-      chain.length === challenge.items.length &&
-      chain.every((item, index) => item.id === challenge.items[index]?.id)
+      nextChain.length === challenge.items.length &&
+      nextChain.every((item, index) => item.id === challenge.items[index]?.id)
     if (correct) {
       setStatus('ok')
       onSolved()
-    } else {
-      setStatus('wrong')
-      onMiss()
+      return
     }
+    setStatus('wrong')
+    setShake(true)
+    onMiss()
+    window.setTimeout(() => {
+      setShake(false)
+      setBank(shuffle(challenge.items))
+      setChain([])
+    }, 520)
   }
 
   return (
-    <div className="play">
-      {challenge.context ? <p className="context">{challenge.context}</p> : null}
+    <div className={`play ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}>
+      <PuzzleHint text={challenge.context} />
       <p className="prompt">{challenge.prompt}</p>
+      <p className="hint">Tap tiles in order. The chain checks itself when full.</p>
 
       <ol className="chain">
         {challenge.items.map((item, index) => {
           const placed = chain[index]
           return (
-            <li key={item.id} className={placed ? 'filled' : 'empty'}>
+            <li key={item.id} className={placed ? 'filled pop-in' : 'empty'}>
               <span className="chain-index">{index + 1}</span>
               {placed ? (
                 <button type="button" className="chip in-chain" onClick={() => remove(placed.id)}>
                   {placed.text}
                 </button>
               ) : (
-                <span className="placeholder">Tap a step below</span>
+                <span className="placeholder">Next step</span>
               )}
             </li>
           )
@@ -77,20 +91,9 @@ export function SequencePlay({ challenge, onMiss, onSolved }: SequencePlayProps)
         ))}
       </div>
 
-      {status !== 'ok' ? (
-        <button
-          type="button"
-          className="btn primary"
-          disabled={chain.length !== challenge.items.length}
-          onClick={check}
-        >
-          Check the order
-        </button>
-      ) : null}
-
       <ResultPanel
         tone={status === 'idle' ? 'idle' : status === 'ok' ? 'ok' : 'teach'}
-        title={status === 'ok' ? 'The sequence holds.' : 'The order is the argument.'}
+        title={status === 'ok' ? 'The path locks in.' : 'Not that order — tiles bounce back.'}
         body={status === 'wrong' ? challenge.teachOnWrong : undefined}
         deeper={challenge.deeper}
       />

@@ -48,45 +48,40 @@ export const witnessBench: Area = {
         'Verses 6–8 widen the circle: more than five hundred, James, “all the apostles,” and last of all Paul. A creed is not a video. It is a public, early summary of what the churches were already saying.',
     },
     {
-      kind: 'multiple-choice',
+      kind: 'sort',
       id: 'wb-early',
       title: 'Why historians call it early',
-      prompt:
-        'Why do many historians treat 1 Corinthians 15:3–7 as very early tradition rather than a late legend?',
+      prompt: 'Keep the careful historical claim. Toss the overclaims.',
       context:
-        'Dating is scholarly judgment, not a photograph. Still, several features cluster in the same direction.',
-      choices: [
+        '1 Corinthians 15:3–7. Dating is judgment, not a photograph — but several features cluster.',
+      keepLabel: 'Keep',
+      discardLabel: 'Toss',
+      tiles: [
         {
           id: 'a',
-          text: 'Paul (writing ~AD 53–55) says he “received” a formulaic tradition; many date that formula to the first years after the crucifixion.',
-          correct: true,
-          teach:
-            'Yes — with honesty. The letter is mid-first-century. “I received / I delivered” (1 Cor 15:3) is the language of handing on tradition. Aramaic-flavored names (Cephas), the tight structure, and the fact that Paul can assume Corinth already knows it are why a wide range of scholars — not only conservative ones — treat the core as early. “Within a few years” is a common conclusion, not an inerrant timestamp.',
+          text: 'Paul (~AD 53–55) “received” a formula; many date it to the first years after the crucifixion.',
+          bin: 'keep',
         },
         {
           id: 'b',
-          text: 'The creed was composed by a medieval monk and later copied into Paul.',
-          correct: false,
-          teach:
-            'Paul’s letters are among the earliest Christian documents we have. 1 Corinthians is not a medieval insertion. Whatever one concludes about the resurrection, the text itself is first-century.',
+          text: 'A medieval monk wrote the creed and copied it into Paul.',
+          bin: 'discard',
         },
         {
           id: 'c',
-          text: 'It functions like a lab result: it proves the resurrection the way an experiment proves a chemical reaction.',
-          correct: false,
-          teach:
-            'That overclaims. Early testimony is historically weighty. It is not a repeatable experiment. The honest move is: this is what the first Christians were already proclaiming, close to the events, including named witnesses.',
+          text: 'The creed is a lab result that proves the resurrection like a chemical reaction.',
+          bin: 'discard',
         },
         {
           id: 'd',
-          text: 'Paul invented the list in the second century after the Gospels were finished.',
-          correct: false,
-          teach:
-            'Standard dating places 1 Corinthians before the finished Gospels as we have them. Paul is not looking back from the 100s. He is arguing with a live congregation in the 50s.',
+          text: 'Paul invented the list in the second century after the Gospels.',
+          bin: 'discard',
         },
       ],
+      teachOnWrong:
+        'The letter is mid-first-century. “I received / I delivered” is tradition language — weighty testimony, not a lab rerun.',
       deeper:
-        'Compare Luke’s preface (Luke 1:1–4): he claims inquiry among “eyewitnesses and servants of the word.” That is a historiographical posture, whether or not one accepts every report.',
+        'Compare Luke 1:1–4: a first-century writer claiming inquiry among eyewitnesses. That posture can be tested. It should not be sneered out of court in advance.',
     },
     {
       kind: 'match',
@@ -123,45 +118,40 @@ export const witnessBench: Area = {
         'These criteria can be overused. They do not replace reading texts as wholes. They do resist a lazy story: “Someone, somewhere, made everything up much later.”',
     },
     {
-      kind: 'scenario',
+      kind: 'sort',
       id: 'wb-women',
       title: 'Idle talk',
-      scene:
-        'The Gospels report that women were first at the empty tomb (Mark 16:1–8; Luke 24:1–11; John 20:1–18). Luke notes that to the apostles “these words seemed to them an idle tale, and they did not believe them” (Luke 24:11). In much of that culture, a woman’s testimony carried less public weight.',
-      prompt:
-        'Why do many historians treat the women’s discovery as unlikely to be a late, polished invention?',
-      choices: [
+      prompt: 'Keep the careful historical move. Toss the overclaims.',
+      context:
+        'Women are first at the tomb (Mark 16:1–8; Luke 24:1–11; John 20). Luke 24:11: the report sounded like “idle talk.”',
+      keepLabel: 'Keep',
+      discardLabel: 'Toss',
+      tiles: [
         {
           id: 'a',
-          text: 'An inventor seeking courtroom-style credibility would more likely lead with respected male witnesses.',
-          correct: true,
-          teach:
-            'This is the criterion of embarrassment used carefully. It does not prove the tomb was empty. It raises the cost of the theory that the story was crafted late purely for persuasion. The churches preserved a beginning that, by their own telling, the male disciples dismissed.',
+          text: 'An inventor hunting courtroom credibility would more likely lead with respected men.',
+          bin: 'keep',
         },
         {
           id: 'b',
-          text: 'Women’s names in the story automatically make every detail certain.',
-          correct: false,
-          teach:
-            'Named women (Mary Magdalene and others) are historically interesting — they are not a magic stamp. The argument is about plausibility of invention, not about inerrancy sneaking in through the side door.',
+          text: 'Named women automatically make every detail certain.',
+          bin: 'discard',
         },
         {
           id: 'c',
-          text: 'Luke 24:11 shows the evangelists wanted readers to distrust women.',
-          correct: false,
-          teach:
-            'Luke reports the disciples’ disbelief — and then the narrative vindicates the women’s report. The “idle tale” line is frank about first reactions, not a program for silencing women.',
+          text: 'Luke 24:11 means the evangelists wanted readers to distrust women.',
+          bin: 'discard',
         },
         {
           id: 'd',
-          text: 'Because Tacitus wrote the tomb story in Annals 15.44.',
-          correct: false,
-          teach:
-            'Tacitus (Annals 15.44) mentions Christus executed under Pontius Pilate and a “mischief” that broke out again in Judea and Rome. That is valuable Roman notice of Jesus’ execution and of Christians in the 60s. It is not a tomb narrative. Do not invent citations.',
+          text: 'Tacitus wrote the tomb story in Annals 15.44.',
+          bin: 'discard',
         },
       ],
+      teachOnWrong:
+        'This is embarrassment used carefully — a plausibility cost, not a proof. Tacitus 15.44 notes the execution, not the tomb. Do not invent citations.',
       deeper:
-        'Read also Josephus, Antiquities 18.63–64 (the Testimonium Flavianum): most scholars think it was later touched by Christian scribes, though many still find a Josephan core about Jesus as a teacher who was condemned under Pilate. Honesty about disputed lines is part of the case, not a threat to it.',
+        'Josephus, Antiquities 18.63–64, is partly disputed because of later Christian touches. Honesty about that dispute belongs in the dossier.',
     },
   ],
 }

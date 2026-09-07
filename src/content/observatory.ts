@@ -119,85 +119,76 @@ export const observatory: Area = {
         'Robin Collins and others develop this as a likelihood argument: theism predicts a life-permitting world more naturally than a single throw of indifferent chance. Critics reply with a multiverse or with “we can only observe a world like this.” Both replies can be examined — neither should be assumed as a trump.',
     },
     {
-      kind: 'multiple-choice',
+      kind: 'sort',
       id: 'ob-leibniz',
       title: 'Something rather than nothing',
-      prompt:
-        'Leibniz asked why there is something rather than nothing. What is the most careful way to locate that question beside modern cosmology?',
+      prompt: 'Keep the careful reading of Leibniz beside cosmology. Toss the rest.',
       context:
-        'Gottfried Wilhelm Leibniz, “On the Ultimate Origination of Things” and related essays. The Big Bang model describes an early hot, dense state of this universe — it is not automatically a story about absolute nothing.',
-      choices: [
+        'Leibniz: why is there something rather than nothing? The Big Bang describes an early hot state — not automatically absolute nothing.',
+      keepLabel: 'Keep',
+      discardLabel: 'Toss',
+      tiles: [
         {
           id: 'a',
-          text: 'Physics can describe how this universe evolves, and perhaps its earliest describable state; it does not by itself say why there is a concrete reality with laws at all.',
-          correct: true,
-          teach:
-            'Yes. Cosmology is not metaphysics. “Nothing” in some physics papers means a quantum vacuum, which is already a structured something. Leibniz’s question survives every successful equation, because equations describe a world that is already there to be described.',
+          text: 'Physics can map how this universe evolves; it does not by itself say why there is a concrete reality with laws.',
+          bin: 'keep',
         },
         {
           id: 'b',
-          text: 'The Big Bang is a video recording of God creating, timestamped in Genesis.',
-          correct: false,
-          teach:
-            'That confuses a scientific model with a theophany. Many theists see the beginning of this spacetime as consonant with creation. Consonance is not the same as a frame-by-frame proof.',
+          text: 'The Big Bang is a video of God creating, timestamped in Genesis.',
+          bin: 'discard',
         },
         {
           id: 'c',
-          text: 'Once we write a wave function of the universe, the question “why anything?” becomes meaningless.',
-          correct: false,
-          teach:
-            'A wave function still assumes formalism, laws, and a reality they apply to. Declaring the question meaningless is a philosophical move — and it needs an argument, not a sigh.',
+          text: 'A wave function of the universe makes “why anything?” meaningless.',
+          bin: 'discard',
         },
         {
           id: 'd',
-          text: '“Nothing” in every physics paper already means absolute non-being, so the universe is explained as a free lunch.',
-          correct: false,
-          teach:
-            'Popular books sometimes say this. In practice the “nothing” is usually a physical state (vacuum, quantum fields, laws). A free lunch still needs a kitchen.',
+          text: 'In physics papers, “nothing” already means absolute non-being — a free lunch.',
+          bin: 'discard',
         },
       ],
+      teachOnWrong:
+        'A vacuum is already a structured something. Equations describe a world that is already there.',
       deeper:
-        'The cosmological question and the fine-tuning question are siblings, not twins. One asks why there is a world; the other asks why this world’s numbers permit us to sit here and ask.',
+        'Fine-tuning and “why anything?” are siblings, not twins. One asks why this world’s numbers permit us; the other asks why there is a world.',
     },
     {
-      kind: 'scenario',
+      kind: 'sort',
       id: 'ob-life',
       title: 'The threshold of life',
-      scene:
-        'Cells store specified information in nucleic acids, fold functional proteins, and run a coordinated metabolism. Abiogenesis — life from non-life — is an active research program, not a closed chapter. Some theists argue that information and functional complexity look like the work of mind. Many scientists expect a natural pathway that is not yet known.',
-      prompt: 'Which statement is the most careful?',
-      choices: [
+      prompt: 'Keep the careful statement. Toss the gaps and the shrugs.',
+      context:
+        'Cells store specified information and run a coordinated metabolism. Abiogenesis is an open research program — not a closed chapter.',
+      keepLabel: 'Keep',
+      discardLabel: 'Toss',
+      tiles: [
         {
           id: 'a',
-          text: 'We should distinguish “no complete naturalistic account yet” from “we have demonstrated a miracle.” The open problems are real; overclaiming in either direction is a mistake.',
-          correct: true,
-          teach:
-            'Yes. Honesty is part of the case for God, not a concession that empties it. The origin of life is a place where wonder is rational. It is also a place where “God of the gaps” and “science of the gaps” both tempt us.',
+          text: '“No complete naturalistic account yet” is not the same as “we demonstrated a miracle.”',
+          bin: 'keep',
         },
         {
           id: 'b',
-          text: 'Because we cannot yet assemble a cell from scratch in a storm, theism is proven and further research is irreverent.',
-          correct: false,
-          teach:
-            'That is a gaps argument dressed as piety. Christian history includes people who expected the world to be intelligible because it is created. Curiosity is not the enemy.',
+          text: 'Because we cannot assemble a cell in a storm, theism is proven and research is irreverent.',
+          bin: 'discard',
         },
         {
           id: 'c',
-          text: 'Because research continues, we already know a full chemical pathway and the philosophical question is closed.',
-          correct: false,
-          teach:
-            'Continuing research is not the same as a finished explanation. Hypotheses about RNA worlds, metabolism-first models, and hydrothermal vents are serious — and still incomplete. Do not pretend otherwise.',
+          text: 'Because research continues, the chemical pathway is finished and the question is closed.',
+          bin: 'discard',
         },
         {
           id: 'd',
-          text: 'Genesis 1 forbids asking biological questions at all.',
-          correct: false,
-          teach:
-            'Genesis 1 is a theological account of God giving an ordered, good world. It is not a lab protocol, and it does not command ignorance of cells.',
+          text: 'Genesis 1 forbids asking biological questions.',
+          bin: 'discard',
         },
       ],
+      teachOnWrong:
+        'Wonder is rational here. So is more work. “God of the gaps” and “science of the gaps” both tempt us.',
       deeper:
-        'A careful theist can say: life’s informational structure is the sort of thing minds produce; that is a clue. A careful skeptic can say: clues are not certificates. The trail does not end here — it climbs toward cause itself.',
+        'A careful theist can say life’s information looks like the work of mind — a clue. A careful skeptic can say clues are not certificates.',
     },
   ],
 }

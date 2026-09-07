@@ -114,85 +114,76 @@ export const firstGate: Area = {
         'Atheist replies include: the universe itself is necessary; or “brute fact” is acceptable; or quantum vacua suffice. Each reply relocates necessity or else gives up explanation. That is a real debate — not a slogan fight.',
     },
     {
-      kind: 'multiple-choice',
+      kind: 'sort',
       id: 'fg-kalam',
       title: 'Whatever begins',
-      prompt:
-        'The kalām cosmological argument is often put: whatever begins to exist has a cause; the universe began to exist; therefore the universe has a cause. What is the most careful reading?',
+      prompt: 'Keep the careful reading of the kalām form. Toss the flattenings.',
       context:
-        'The form is associated with medieval Islamic kalām (notably al-Ghazālī) and, in modern analytic philosophy, with William Lane Craig. Premise 2 is argued both philosophically (against an infinite past) and scientifically (Big Bang cosmology).',
-      choices: [
+        'Whatever begins to exist has a cause; the universe began to exist; therefore it has a cause. Medieval kalām (al-Ghazālī); modern analytic form (Craig).',
+      keepLabel: 'Keep',
+      discardLabel: 'Toss',
+      tiles: [
         {
           id: 'a',
-          text: 'If both premises are true, you get a cause of the universe’s beginning. Whether that cause is personal, good, or the God of Abraham takes further argument — and “began” is itself debated.',
-          correct: true,
-          teach:
-            'Yes. Craig argues the cause is personal because only an agent could freely originate a temporal world. That is an extra step, not smuggled inside “has a cause.” Meanwhile, Big Bang cosmology describes the beginning of this spacetime; it is not automatically “from metaphysical nothing.” Opponents challenge both the causal premise and the beginning premise. Name the steps. Do not flatten them.',
+          text: 'If both premises hold, you get a cause of the beginning — personhood and the gospel take further steps.',
+          bin: 'keep',
         },
         {
           id: 'b',
-          text: 'The argument, if mentioned, automatically proves every line of the Nicene Creed.',
-          correct: false,
-          teach:
-            'No cosmological argument, however sound, is already the Trinity, the incarnation, or the empty tomb. Those are further claims with their own warrants — some of which you met on the Witness Bench.',
+          text: 'Mentioning the argument proves every line of the Nicene Creed.',
+          bin: 'discard',
         },
         {
           id: 'c',
-          text: 'Because some popular books say “nothing,” the second premise is beyond dispute.',
-          correct: false,
-          teach:
-            'Popular wording outruns the physics. A beginning of this universe is a serious position. It is not a fact no competent physicist may question. A careful case does not need that exaggeration.',
+          text: 'Popular books saying “nothing” make premise 2 beyond dispute.',
+          bin: 'discard',
         },
         {
           id: 'd',
-          text: 'Aristotle already used this exact three-line kalām syllogism in the Physics.',
-          correct: false,
-          teach:
-            'Aristotle argued for an unmoved mover and, in some readings, an eternal cosmos. The kalām “whatever begins to exist” form is later. Honor the genealogy; do not collapse the traditions.',
+          text: 'Aristotle already used this exact three-line kalām syllogism.',
+          bin: 'discard',
         },
       ],
+      teachOnWrong:
+        'Name the steps. “Began” is debated. Aristotle’s unmoved mover is a different road. Do not collapse the traditions.',
       deeper:
-        'Useful practice: write the argument, then write the best objection you know, then write the reply. That is how these arguments have actually lived — from Athens to Paris to the present.',
+        'Write the argument, then the best objection, then the reply. That is how these arguments have actually lived.',
     },
     {
-      kind: 'scenario',
+      kind: 'sort',
       id: 'fg-limits',
       title: 'What the gate opens',
-      scene:
-        'Suppose, for the sake of the exercise, that a cosmological argument succeeds: there is a first cause or a necessary being. A traveler at the gate says, “Then I already know the whole of Christian faith.” Another says, “Then the argument was worthless, because it did not preach the sermon on the mount.”',
-      prompt: 'What does a successful cosmological argument actually give you?',
-      choices: [
+      prompt: 'If a cosmological argument succeeds, what do you actually have?',
+      context:
+        'Suppose there is a first cause or necessary being. One traveler says the whole creed is finished. Another says the argument was worthless because it did not preach the sermon on the mount.',
+      keepLabel: 'Keep',
+      discardLabel: 'Toss',
+      tiles: [
         {
           id: 'a',
-          text: 'A metaphysical destination — a first cause or necessary ground. Intellect, will, goodness, and the gospel are further steps, not failures of the first one.',
-          correct: true,
-          teach:
-            'Yes. Aquinas himself does not stop at q.2. He argues onward about simplicity, goodness, intellect, and will. The New Testament claims are historical as well as philosophical. Layers are not leaks.',
+          text: 'A metaphysical destination. Intellect, goodness, and the gospel are further steps — not leaks.',
+          bin: 'keep',
         },
         {
           id: 'b',
-          text: 'Nothing useful, because only a full systematic theology counts as an argument.',
-          correct: false,
-          teach:
-            'That all-or-nothing habit sinks both belief and unbelief. Partial conclusions are how reasoning works. “There is a necessary ground” would already be an enormous thing to know.',
+          text: 'Nothing useful, because only a full systematic theology counts.',
+          bin: 'discard',
         },
         {
           id: 'c',
           text: 'A complete biography of God, including every future event.',
-          correct: false,
-          teach:
-            'No classical proponent claims that. The arguments are about existence and certain attributes, not about omniscient travel brochures.',
+          bin: 'discard',
         },
         {
           id: 'd',
-          text: 'Proof that inquiry should now stop, because mystery is a vice.',
-          correct: false,
-          teach:
-            'In Christian thought, God is not less mysterious after the arguments — God is the reason the world is intelligible at all. The gate opens onto a longer trail.',
+          text: 'Proof that inquiry should stop, because mystery is a vice.',
+          bin: 'discard',
         },
       ],
+      teachOnWrong:
+        'Partial conclusions are how reasoning works. Aquinas does not stop at q.2. Layers are not leaks.',
       deeper:
-        'Pascal wrote of the God of Abraham, not “the God of the philosophers,” as a warning against a thin deity. The warning only works if the philosophers’ question is real. Silver City holds both: the gate and the lookout.',
+        'Pascal’s warning about the God of the philosophers is a warning against stopping — not a command to skip the philosophers.',
     },
   ],
 }

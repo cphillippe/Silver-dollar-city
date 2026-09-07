@@ -51,45 +51,40 @@ export const parableHollow: Area = {
         'Samaritans and Judeans were divided by worship and memory (see John 4:9). Jesus does not define “neighbor” as the person who looks like you. He makes the listener identify with the wounded man — and then with costly mercy.',
     },
     {
-      kind: 'multiple-choice',
+      kind: 'sort',
       id: 'ph-father',
       title: 'The father’s run',
-      prompt:
-        'In Luke 15:20 the father “ran” to the returning son. In that world a patriarch running was undignified. What is the story pressing you to see?',
+      prompt: 'Toss the weak readings. Keep what Luke 15 is actually pressing.',
       context:
-        'Luke 15:11–32. The younger son squanders his share “in reckless living,” rehearses a hired-hand speech, and is met before he finishes it.',
-      choices: [
+        'Luke 15:11–32. In that world a patriarch running was undignified. The father runs before the son finishes his hired-hand speech.',
+      keepLabel: 'Keep',
+      discardLabel: 'Toss',
+      tiles: [
         {
           id: 'a',
-          text: 'God’s welcome is not cool justice delayed, but eager mercy that absorbs shame.',
-          correct: true,
-          teach:
-            'Yes. The run, the robe, the ring, and the feast (Luke 15:20–24) picture a restoration the son cannot earn. The older brother then reveals another way of being lost: near the house, far from the father’s joy.',
+          text: 'Eager mercy that absorbs shame — not cool justice delayed.',
+          bin: 'keep',
         },
         {
           id: 'b',
-          text: 'The son had already earned restoration by composing a sincere apology.',
-          correct: false,
-          teach:
-            'He does rehearse a confession (Luke 15:18–19), but the father interrupts it. Grace arrives before the speech is complete. The point is not a well-crafted apology as currency.',
+          text: 'The son earned the feast by writing a good apology.',
+          bin: 'discard',
         },
         {
           id: 'c',
-          text: 'The older brother is the hero, because staying home is the whole of faithfulness.',
-          correct: false,
-          teach:
-            'The older brother is dutiful — and furious at mercy (Luke 15:28–30). Jesus leaves him outside the feast, still addressed as “son.” Faithfulness without joy at another’s return is not the father’s heart.',
+          text: 'The older brother is the hero simply for staying home.',
+          bin: 'discard',
         },
         {
           id: 'd',
-          text: 'The parable is mainly a lesson in prudent estate planning.',
-          correct: false,
-          teach:
-            'The “share of the estate” (Luke 15:12) sets the plot, but the story is about lostness and homecoming — told after the lost sheep and lost coin (Luke 15:1–10), when Pharisees grumble that Jesus welcomes sinners.',
+          text: 'The story is mainly about estate planning.',
+          bin: 'discard',
         },
       ],
+      teachOnWrong:
+        'Grace arrives before the speech is done (Luke 15:20). The older brother is dutiful — and furious at mercy. Try the bins again.',
       deeper:
-        'Luke 15 is one movement in three stories. God is not only willing to receive. God seeks. The feast is the Father’s idea.',
+        'Luke 15 stacks three lost-and-found stories. God is not only willing to receive. God seeks. The feast is the Father’s idea.',
     },
     {
       kind: 'match',
@@ -126,44 +121,40 @@ export const parableHollow: Area = {
         'Jesus’ stories assume a God who speaks, seeks, grows a kingdom, and will ask what we did with a trust. They are not proofs. They are a portrait — and a demand.',
     },
     {
-      kind: 'scenario',
+      kind: 'sort',
       id: 'ph-debt',
       title: 'An unpayable account',
-      scene:
-        'In Matthew 18:21–35 Peter asks how often he must forgive. Jesus tells of a servant forgiven a debt of ten thousand talents — a figure so large it reads as “unpayable” — who then seizes a fellow servant over a hundred denarii. The king, hearing this, reinstates the first debt.',
-      prompt: 'What inner logic is Jesus forcing?',
-      choices: [
+      prompt: 'Sort the claims. Only one belongs in the keep bin.',
+      context:
+        'Matthew 18:21–35. A servant forgiven an unpayable debt then throttles a peer over a small sum. The king reinstates the first debt.',
+      keepLabel: 'Keep',
+      discardLabel: 'Toss',
+      tiles: [
         {
           id: 'a',
-          text: 'Receiving mercy creates a moral world in which refusing mercy is a kind of contradiction.',
-          correct: true,
-          teach:
-            'Yes. The horror of the story is not arithmetic. It is ingratitude that treats grace as a private windfall instead of a new way of being toward others (see also Matt 6:12, 14–15).',
+          text: 'Received mercy makes refusing mercy a contradiction.',
+          bin: 'keep',
         },
         {
           id: 'b',
-          text: 'God keeps a spreadsheet, and forgiveness is a limited coupon.',
-          correct: false,
-          teach:
-            'Peter offered a generous number — seven. Jesus answers “seventy-seven” or “seventy times seven” (Matt 18:22), which breaks the coupon logic. The warning at the end is about a heart that will not live from mercy.',
+          text: 'Forgiveness is a limited coupon on God’s spreadsheet.',
+          bin: 'discard',
         },
         {
           id: 'c',
-          text: 'The first servant was right: small debts still deserve prison.',
-          correct: false,
-          teach:
-            'The king calls him “wicked” precisely for that (Matt 18:32–33). Justice for the small debt is not the issue; the refusal to mirror mercy is.',
+          text: 'The first servant was right to demand prison for a small debt.',
+          bin: 'discard',
         },
         {
           id: 'd',
-          text: 'Jesus is only discussing first-century banking reform.',
-          correct: false,
-          teach:
-            'Talents and denarii make the contrast vivid, but the frame is Peter’s question about forgiving a brother. The economy is a window, not the subject.',
+          text: 'Jesus is only reforming first-century banking.',
+          bin: 'discard',
         },
       ],
+      teachOnWrong:
+        'Peter offered seven. Jesus breaks coupon-logic (Matt 18:22). The horror is ingratitude, not arithmetic.',
       deeper:
-        'Biblical faith does not treat mercy as softness. It treats it as the grain of God’s world — and then asks whether we will live against that grain.',
+        'Mercy is not softness. It is the grain of God’s world — and then a question: will you live against that grain? See also Matt 6:12–15.',
     },
   ],
 }
