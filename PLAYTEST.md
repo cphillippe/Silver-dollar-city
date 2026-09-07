@@ -132,7 +132,7 @@ Retention still: sort → takeaway chip → why it stands → journal / spaced d
 Bill: Keep/Toss + Lock-in stay. Fun has to hit like a mobile match game.
 
 - **One screen:** first sort fits the viewport. Title is screen-reader only. Clue is a text link. Keep/Toss is one short line. No “Won’t count as clean” until you peek.
-- **Lock-in explosion:** on success the board flashes, tiles pop and fly clear, sparks burst (~640ms), then takeaway chips. Save happens immediately; the handoff waits for the juice.
+- **Lock-in explosion:** on success the board flashes, tiles pop and fly clear, sparks burst (~760ms), then takeaway chips. Save happens immediately; the handoff waits for the juice.
 - Town still grows after **See the town**. The dopamine spike is the lock-in burst, not a wall of text.
 
 Retention still: sort → takeaway chip → why it stands → journal / spaced dust-off.

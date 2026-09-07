@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 
 /** How long the lock-in burst holds the board before takeaway chips. */
-export const WIN_BURST_MS = 640
+export const WIN_BURST_MS = 760
 
 export const BURST_SPARKS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
 

@@ -167,7 +167,7 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
               <span className="placeholder">
                 {selected
                   ? `Keep: ${selected.text}`
-                  : 'Lines that belong'}
+                  : 'Keep'}
               </span>
             ) : (
               keep.map((tile, index) => (
@@ -205,7 +205,7 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
               <span className="placeholder">
                 {selected
                   ? `Toss: ${selected.text}`
-                  : 'Set aside — not the claim'}
+                  : 'Toss'}
               </span>
             ) : (
               discard.map((tile, index) => (
