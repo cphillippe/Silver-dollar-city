@@ -69,11 +69,11 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
         </button>
         <section className="rehearse-anchor">
           <p className="eyebrow">Takeaway</p>
-          <h1>{focusedEntry?.title ?? STORY.takeaway}</h1>
+          <h1>{focusedEntry?.title ?? STORY.tapTakeaway}</h1>
           <RecallGate
             brief={quizBrief}
             mode="review"
-            kicker={STORY.takeaway}
+            kicker={STORY.tapTakeaway}
             onHeld={(result) => {
               recordReview({
                 id: quizBrief.id,

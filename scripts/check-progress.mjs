@@ -40,7 +40,7 @@ const journalSrc = readFileSync(
   'utf8',
 )
 assert.match(journalSrc, /autoQuiz && quizBrief/)
-assert.match(journalSrc, /kicker=\{STORY\.takeaway\}/)
+assert.match(journalSrc, /kicker=\{STORY\.tapTakeaway\}/)
 assert.doesNotMatch(journalSrc, /Quiz me again/)
 
 console.log('check-progress: ok')

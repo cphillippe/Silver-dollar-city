@@ -189,7 +189,7 @@ export function ChallengeScreen({
               <RecallGate
                 brief={brief}
                 mode={reviewing ? 'review' : 'encode'}
-                kicker={STORY.takeaway}
+                kicker={STORY.tapTakeaway}
                 onHeld={settleRecall}
               />
             </div>

@@ -195,7 +195,7 @@ const dailyTrailSrc = readFileSync(
   'utf8',
 )
 assert.match(dailyTrailSrc, /See the town/)
-assert.match(dailyTrailSrc, /STORY\.takeaway/)
+assert.match(dailyTrailSrc, /STORY\.tapTakeaway/)
 assert.doesNotMatch(dailyTrailSrc, /AdSlot/)
 assert.doesNotMatch(dailyTrailSrc, /district-flavor/)
 assert.doesNotMatch(dailyTrailSrc, /Tomorrow:/)

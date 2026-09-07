@@ -127,7 +127,7 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
               <RecallGate
                 brief={brief}
                 mode={isReview ? 'review' : 'encode'}
-                kicker={STORY.takeaway}
+                kicker={STORY.tapTakeaway}
                 onHeld={settleRecall}
               />
             </div>
