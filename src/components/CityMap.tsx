@@ -250,7 +250,6 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
     if (readHomecomingDay() === today) return
     const id = newestStanding(snap)
     if (!id) return
-    writeHomecomingDay(today)
     playing.current = true
     const reduced =
       typeof window !== 'undefined' &&
@@ -261,6 +260,7 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
     later(reduced ? 700 : 1100, () => {
       setHomecoming(false)
       setRising(null)
+      writeHomecomingDay(today)
       if (!reduced) tweenCam(FULL_CAM, 220)
       later(reduced ? 40 : 200, () => {
         playing.current = false
