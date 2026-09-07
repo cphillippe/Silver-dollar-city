@@ -119,7 +119,7 @@ export function Settings({ onNavigate }: SettingsProps) {
         className="text-link"
         onClick={() => onNavigate({ name: 'hub' })}
       >
-        ← City map
+        ← The town
       </button>
 
       <header className="page-head">

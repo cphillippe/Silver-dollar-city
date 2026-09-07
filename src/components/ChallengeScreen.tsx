@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
 import { getArea, getChallenge } from '../content'
 import { evidenceFor } from '../content/evidence'
-import { STORY } from '../content/story'
+import { STORY, townVoiceForArea } from '../content/story'
 import { localDateKey } from '../lib/dates'
 import { isDue } from '../lib/memory'
 import { PuzzlePlay } from './PuzzlePlay'
 import { RecallGate } from './RecallGate'
+import { TownReturn } from './TownReturn'
 import {
   getNextGoal,
   isAreaComplete,
@@ -155,10 +156,13 @@ export function ChallengeScreen({
     challengeId,
   ])
   const nextTitle = area.challenges[index + 1]?.title
+  const goingToTown = replay || areaWillComplete || !nextTitle
+  const voice = townVoiceForArea(areaId)
 
   return (
     <main
       className={`challenge-page ${showNext ? 'is-after' : 'is-puzzle'} ${rehearsing ? 'is-rehearse' : ''}`}
+      aria-label={STORY.playGoal}
     >
       <button
         type="button"
@@ -171,7 +175,6 @@ export function ChallengeScreen({
       {!showNext ? (
         <>
           <h1>{challenge.title}</h1>
-          <p className="play-goal">{STORY.playGoal}</p>
           <PuzzlePlay
             challenge={challenge}
             onMiss={() => {
@@ -196,13 +199,14 @@ export function ChallengeScreen({
           ) : null}
 
           {canProceed ? (
-            <div className="after-win-cta">
-              <button type="button" className="btn primary xl" onClick={goNext}>
-                {replay || areaWillComplete || !nextTitle
-                  ? 'See the town'
-                  : `Next: ${nextTitle}`}
-              </button>
-            </div>
+            <TownReturn
+              who={voice.who}
+              line={goingToTown ? voice.afterWin : 'One more roof on this street.'}
+              action={
+                goingToTown ? 'See the town' : `Next: ${nextTitle}`
+              }
+              onGo={goNext}
+            />
           ) : null}
         </section>
       )}

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { areas } from '../content'
+import { townAck, townVoice } from '../content/story'
 import {
   CITY_PLOTS,
   citySnapshot,
@@ -7,6 +8,7 @@ import {
   cityUpgrades,
   nextKicker,
   nextPlotId,
+  plotFill,
   plotView,
   readCitySeen,
   writeCitySeen,
@@ -23,6 +25,7 @@ import {
 } from '../store/progress'
 import { localDateKey } from '../lib/dates'
 import type { View } from '../types'
+import { Avatar } from './Avatar'
 
 interface CityMapProps {
   onNavigate: (view: View) => void
@@ -38,6 +41,17 @@ const ANCHOR: Record<CityPlotId, { x: number; y: number }> = {
   lamps: { x: 258, y: 300 },
   gate: { x: 498, y: 268 },
   porch: { x: 564, y: 292 },
+}
+
+const FOLK: Record<CityPlotId, { x: number; y: number }> = {
+  lookout: { x: 548, y: 118 },
+  observatory: { x: 508, y: 152 },
+  hollow: { x: 152, y: 322 },
+  journal: { x: 322, y: 298 },
+  bench: { x: 392, y: 324 },
+  lamps: { x: 230, y: 340 },
+  gate: { x: 542, y: 322 },
+  porch: { x: 520, y: 340 },
 }
 
 const FULL_CAM = { x: 0, y: 0, w: 640, h: 420 }
@@ -160,6 +174,11 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
   const nextAt = ANCHOR[nextId]
   const kicker = nextKicker(nextStage, nextId, doneToday)
   const celebrating = Boolean(beat)
+  const beatVoice = beat ? townVoice(beat.id) : townVoice(nextId)
+  const beatLine = beat ? townAck(beat.id, beat.beat) : beatVoice.here
+  const hollowFill = plotFill('hollow', progress)
+  const benchFill = plotFill('bench', progress)
+  const alive = standing > 0 && mode === 'live'
 
   return (
     <section
@@ -232,6 +251,13 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
           fill="none"
         />
 
+        {alive && !celebrating ? (
+          <g className="city-walkers" aria-hidden>
+            <circle className="city-walker city-walker-a" r="3.2" cx="90" cy="308" />
+            <circle className="city-walker city-walker-b" r="2.6" cx="420" cy="286" />
+          </g>
+        ) : null}
+
         {mode === 'live' && !celebrating ? (
           <g className="city-next-mark" transform={`translate(${nextAt.x} ${nextAt.y})`}>
             <circle r="34" className="city-next-halo" />
@@ -275,6 +301,15 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
         >
           <ellipse cx="92" cy="286" rx="28" ry="18" className="city-canopy" />
           <ellipse cx="128" cy="278" rx="22" ry="16" className="city-canopy" />
+          {hollowFill >= 2 ? (
+            <ellipse cx="70" cy="300" rx="16" ry="12" className="city-canopy" />
+          ) : null}
+          {hollowFill >= 3 ? (
+            <ellipse cx="148" cy="268" rx="14" ry="11" className="city-canopy" />
+          ) : null}
+          {hollowFill >= 4 ? (
+            <ellipse cx="54" cy="278" rx="12" ry="9" className="city-canopy" />
+          ) : null}
           <rect x="98" y="292" width="36" height="28" rx="3" />
           <path className="city-roof" d="M94 292 l22-16 22 16" />
         </PlotGroup>
@@ -301,6 +336,12 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
           <rect x="318" y="268" width="64" height="36" rx="3" />
           <rect x="338" y="278" width="10" height="12" rx="1" className="city-window" />
           <rect x="354" y="278" width="10" height="12" rx="1" className="city-window" />
+          {benchFill >= 2 ? (
+            <rect x="322" y="278" width="8" height="10" rx="1" className="city-window" />
+          ) : null}
+          {benchFill >= 3 ? (
+            <rect x="370" y="278" width="8" height="10" rx="1" className="city-window" />
+          ) : null}
           <path d="M332 304 h36 M338 304 v-12 h24 v12" />
         </PlotGroup>
 
@@ -340,15 +381,38 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
           <rect x="552" y="306" width="12" height="14" rx="1" className="city-window" />
           <path d="M574 292 v-36" />
           <circle cx="574" cy="252" r="8" className="city-lamp" />
+          {stageOf('porch') === 'lit' || stageOf('porch') === 'built' ? (
+            <g className="city-smoke" transform="translate(574 236)">
+              <circle className="city-puff city-puff-a" r="3" cx="0" cy="0" />
+              <circle className="city-puff city-puff-b" r="2.4" cx="3" cy="-8" />
+            </g>
+          ) : null}
         </PlotGroup>
 
         <path d="M-10 368 Q 180 340 320 358 T 660 372 V430 H-10 Z" fill="#0a101c" />
+
+        {mode === 'live'
+          ? CITY_PLOTS.map((plot) => (
+              <TownFolk
+                key={`folk-${plot.id}`}
+                id={plot.id}
+                stage={stageOf(plot.id)}
+                next={nextId === plot.id}
+                rising={rising === plot.id}
+                speaking={beat?.id === plot.id || (nextId === plot.id && !celebrating)}
+              />
+            ))
+          : null}
       </svg>
 
       {beat ? (
         <div className="city-beat" role="status">
-          <strong>{beat.beat}</strong>
-          <span>{beat.title}</span>
+          <Avatar who={beatVoice.who} size="sm" />
+          <div>
+            <strong>{beat.beat}</strong>
+            <span>{beat.title}</span>
+            <em>{beatLine}</em>
+          </div>
         </div>
       ) : null}
 
@@ -358,12 +422,8 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
           <h2>{celebrating ? beat?.title : nextSpec?.title}</h2>
           <p>
             {celebrating
-              ? beat?.to === 'lit'
-                ? 'Lanterns caught. The line held.'
-                : beat?.to === 'built'
-                  ? 'The structure is up. You earned that roof.'
-                  : 'Scaffold’s on the lot. Walk it into a building.'
-              : nextSpec?.blurb}
+              ? beatLine
+              : townVoice(nextId).here}
           </p>
           {celebrating ? null : (
             <button type="button" className="btn primary" onClick={() => open(nextId)}>
@@ -437,6 +497,44 @@ function PlotGroup({
           ))}
         </g>
       ) : null}
+    </g>
+  )
+}
+
+function TownFolk({
+  id,
+  stage,
+  next,
+  rising,
+  speaking,
+}: {
+  id: CityPlotId
+  stage: CityStage
+  next: boolean
+  rising: boolean
+  speaking: boolean
+}) {
+  if (stage === 'empty' && !next) return null
+  const at = FOLK[id]
+  const voice = townVoice(id)
+  const line = rising ? townAck(id, stage === 'lit' ? 'Lit!' : stage === 'built' ? 'Built!' : 'Unlocked') : voice.here
+  const short = line.length > 22 ? `${line.slice(0, 20)}…` : line
+  return (
+    <g transform={`translate(${at.x} ${at.y})`} pointerEvents="none">
+      <g
+        className={`city-folk is-${stage} ${next ? 'is-next' : ''} ${rising ? 'is-waving' : ''}`}
+      >
+        <circle className="city-folk-head" r="5.4" cy="-15" />
+        <path className="city-folk-body" d="M0 -9 l-4.5 13 h9 z" />
+        {speaking ? (
+          <g className="city-bubble">
+            <rect x="-36" y="-40" width="72" height="16" rx="8" />
+            <text y="-29" textAnchor="middle">
+              {short}
+            </text>
+          </g>
+        ) : null}
+      </g>
     </g>
   )
 }

@@ -116,34 +116,127 @@ export const AREA_LINES: Record<
 > = {
   'parable-hollow': {
     hello:
-      'Sit by the creek a minute. Jesus taught in pictures — not to hide the truth, but to make it walk around inside you.',
+      'Sit by the creek. Jesus taught in pictures so the truth could walk around inside you.',
     after:
-      'Keep the line, not my voice. Neighbor is the one who shows mercy. That’s a start.',
+      'Keep the line, not my voice. Neighbor is the one who shows mercy.',
   },
   'witness-bench': {
-    hello:
-      'I copy names for a living. Paul stacked witnesses; I won’t sand the awkward parts. We’ll read what’s there.',
-    after:
-      'Early is not the same as easy. Hold the creed: died, buried, raised, appeared.',
+    hello: 'I copy names. We’ll read what’s there — awkward parts too.',
+    after: 'Hold the creed: died, buried, raised, appeared.',
   },
   observatory: {
-    hello:
-      'The dome is open. Bring wonder and a notebook. A psalm is not a telescope — and a telescope is not a shrug.',
-    after:
-      'If a line about the sky stuck, say it before you climb down the stairs.',
+    hello: 'Dome’s open. Wonder and a notebook — not a shrug.',
+    after: 'If a sky line stuck, say it on the stairs.',
   },
   'first-gate': {
-    hello:
-      'The stone only asks why there is a world. We can walk that far together without pretending it is already the whole gospel.',
-    after:
-      'A first cause is already a great deal. It is not yet the sermon on the mount. That’s honesty, not a dodge.',
+    hello: 'The stone only asks why there is a world. That’s as far as we walk tonight.',
+    after: 'A first cause is a lot. It is not yet the sermon on the mount.',
   },
   'high-lookout': {
-    hello:
-      'The wind up here is honest. Duty, mind, meaning, beauty — sit with them. You don’t have to finish the mountain tonight.',
-    after:
-      'If a hunger woke, don’t be ashamed of it. Hungers usually correspond to real countries.',
+    hello: 'Wind’s honest up here. Duty, mind, meaning, beauty — sit with them.',
+    after: 'If a hunger woke, don’t be ashamed. Hungers map to real countries.',
   },
+}
+
+/** Short in-world lines for the overworld — not essays. */
+export const TOWN_VOICE: Record<
+  string,
+  {
+    who: CharacterId
+    here: string
+    built: string
+    lit: string
+    unlocked: string
+    afterWin: string
+  }
+> = {
+  porch: {
+    who: 'juniper',
+    here: 'Lamp’s ready. Tap the glow.',
+    built: 'Porch stood up.',
+    lit: 'Lantern’s holding.',
+    unlocked: 'East lot’s staked.',
+    afterWin: 'Come look — the porch caught.',
+  },
+  hollow: {
+    who: 'mercy',
+    here: 'Creek path’s open.',
+    built: 'Cabin’s standing.',
+    lit: 'Oaks are lit.',
+    unlocked: 'Mercy’s staking the lot.',
+    afterWin: 'Hear the creek? It grew.',
+  },
+  bench: {
+    who: 'silas',
+    here: 'Ledger’s on the square.',
+    built: 'Hall’s up.',
+    lit: 'Names are warm.',
+    unlocked: 'Silas unlocked the bench.',
+    afterWin: 'The square just filled in.',
+  },
+  observatory: {
+    who: 'nora',
+    here: 'Dome’s waiting on the ridge.',
+    built: 'Glass is set.',
+    lit: 'Stars caught the glass.',
+    unlocked: 'Nora opened the ridge.',
+    afterWin: 'Look up — the ridge woke.',
+  },
+  gate: {
+    who: 'ansel',
+    here: 'East road’s asking why.',
+    built: 'Arch is standing.',
+    lit: 'Stone’s warm.',
+    unlocked: 'Ansel unbarred the road.',
+    afterWin: 'The east road grew a gate.',
+  },
+  lookout: {
+    who: 'hope',
+    here: 'High wind. Come up.',
+    built: 'Tower’s up.',
+    lit: 'Ridge lantern’s on.',
+    unlocked: 'Hope marked the climb.',
+    afterWin: 'The ridge just stood taller.',
+  },
+  journal: {
+    who: 'river',
+    here: 'Pages live in that house.',
+    built: 'Dossier house is up.',
+    lit: 'Pages are glowing.',
+    unlocked: 'A house for what you can still say.',
+    afterWin: 'A page just found a house.',
+  },
+  lamps: {
+    who: 'juniper',
+    here: 'Street lamps remember the walks.',
+    built: 'Lamps are up.',
+    lit: 'The street remembered.',
+    unlocked: 'First lamp on the street.',
+    afterWin: 'Another lamp caught.',
+  },
+}
+
+export function townVoice(plotId: string) {
+  return TOWN_VOICE[plotId] ?? TOWN_VOICE.porch
+}
+
+export function townVoiceForArea(areaId: string) {
+  if (areaId === 'parable-hollow') return TOWN_VOICE.hollow
+  if (areaId === 'witness-bench') return TOWN_VOICE.bench
+  if (areaId === 'observatory') return TOWN_VOICE.observatory
+  if (areaId === 'first-gate') return TOWN_VOICE.gate
+  if (areaId === 'high-lookout') return TOWN_VOICE.lookout
+  return TOWN_VOICE.porch
+}
+
+export function townAck(
+  plotId: string,
+  beat: 'Built!' | 'Lit!' | 'Unlocked',
+): string {
+  const voice = townVoice(plotId)
+  if (beat === 'Lit!') return voice.lit
+  if (beat === 'Built!') return voice.built
+  return voice.unlocked
 }
 
 export const VISTA_LINE =

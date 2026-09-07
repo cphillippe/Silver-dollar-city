@@ -186,6 +186,29 @@ export function cityStanding(progress: ProgressState): {
   return { standing, possible }
 }
 
+export function plotFill(id: CityPlotId, progress: ProgressState): number {
+  switch (id) {
+    case 'porch':
+      return progress.dailyDates.length
+    case 'hollow':
+      return countHits(HOLLOW, progress.completed)
+    case 'bench':
+      return countHits(BENCH, progress.completed)
+    case 'observatory':
+      return countHits(OBS, progress.completed)
+    case 'gate':
+      return countHits(GATE, progress.completed)
+    case 'lookout':
+      return countHits(LOOK, progress.completed)
+    case 'journal':
+      return progress.journal.length
+    case 'lamps':
+      return starTotal(progress.stars)
+    default:
+      return 0
+  }
+}
+
 export function nextKicker(stage: CityStage, plotId: CityPlotId, dailyDone: boolean): string {
   if (plotId === 'porch' && !dailyDone) return 'Walk next'
   if (stage === 'scaffold' || stage === 'empty') return 'Build next'

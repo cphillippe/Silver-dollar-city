@@ -1,8 +1,6 @@
 import { areas, findPlayable } from '../content'
-import { dailyForDate } from '../content/daily'
-import { STORY } from '../content/story'
+import { CAST, STORY, townVoice } from '../content/story'
 import { formatDeviceLocalDate, localDateKey } from '../lib/dates'
-import { STAR_KEY } from '../lib/stars'
 import { CITY_PLOTS, nextPlotId } from '../lib/city'
 import { Avatar } from './Avatar'
 import { DeviceDay } from './DeviceDay'
@@ -29,25 +27,31 @@ interface HubProps {
 export function Hub({ onNavigate }: HubProps) {
   const { progress } = useProgress()
   const today = localDateKey()
-  const morningsBefore = progress.dailyDates.filter((d) => d !== today).length
-  const daily = dailyForDate(today, morningsBefore)
   const doneToday = dailyDoneToday(progress, today)
   const due = doneToday ? undefined : morningReview(progress, today)
   const duePlay = due ? findPlayable(due.id) : undefined
   const waiting = dueCount(progress, today)
   const goal = getNextGoal(progress, today)
   const nextId = nextPlotId(progress, doneToday)
+  const voice = townVoice(nextId)
+  const person = CAST[voice.who]
 
   return (
-    <main className="hub">
+    <main className="hub is-town" aria-label="The town">
       <header className="page-head town-head">
-        <h1>The town</h1>
-        <p>Tap the glow — that’s the next roof.</p>
+        <div className="town-now">
+          <Avatar who={voice.who} size="md" />
+          <div>
+            <p className="eyebrow">{person.name} · in town</p>
+            <h1>Silver City</h1>
+            <p className="town-line">“{voice.here}”</p>
+          </div>
+        </div>
       </header>
 
       <CityMap onNavigate={onNavigate} />
 
-      {doneToday ? null : (
+      {due ? (
       <section
         className={`today-trail is-slim is-live`}
         aria-label="Today’s Trail"
@@ -57,78 +61,32 @@ export function Hub({ onNavigate }: HubProps) {
           <div>
             <p className="eyebrow">Today’s Trail · {formatDeviceLocalDate()}</p>
             <DeviceDay />
-            <h2>
-              {due
-                ? 'Time to dust off this one'
-                : daily.challenge.title}
-            </h2>
+            <h2>Time to dust off this one</h2>
           </div>
         </div>
-        {due ? <Landmark pillar={due.pillar} compact /> : null}
+        <Landmark pillar={due.pillar} compact />
         <p>
-          {due
-            ? duePlay
-              ? `${duePlay.challenge.title} · an older walk.`
-              : 'An older page is waiting to be rebuilt.'
-            : daily.districtFlavor}
+          {duePlay
+            ? `${duePlay.challenge.title} · an older walk.`
+            : 'An older page is waiting to be rebuilt.'}
         </p>
         <p className="quiet">
-          {due
-            ? waiting > 1
-              ? `${waiting} pages due · about a minute`
-              : 'A spaced recall · about a minute'
-            : 'One short puzzle · about a minute'}
+          {waiting > 1
+            ? `${waiting} pages due · about a minute`
+            : 'A spaced recall · about a minute'}
         </p>
         <button
           type="button"
           className="btn primary"
           onClick={() => onNavigate({ name: 'daily' })}
         >
-          {due ? 'Dust this one off' : 'Walk today’s trail'}
+          Dust this one off
         </button>
       </section>
-      )}
+      ) : null}
 
       <AdSlot slot="hub-banner" />
 
-      {goal.kind !== 'daily' ? (
-        <section className="next-card">
-          <p className="eyebrow">On the longer trail</p>
-          <h2>{goal.title}</h2>
-          <p>{goal.detail}</p>
-          <button
-            type="button"
-            className="btn gold"
-            onClick={() => {
-              if (goal.kind === 'vista') {
-                onNavigate({ name: 'vista' })
-                return
-              }
-              if (goal.challengeId && goal.areaId) {
-                onNavigate({
-                  name: 'challenge',
-                  areaId: goal.areaId,
-                  challengeId: goal.challengeId,
-                })
-                return
-              }
-              if (goal.areaId) {
-                onNavigate({ name: 'area', areaId: goal.areaId })
-              }
-            }}
-          >
-            {goal.kind === 'challenge' && goal.title.startsWith('Next:')
-              ? goal.title
-              : goal.kind === 'area'
-                ? `Open ${goal.areaId === 'parable-hollow' ? 'Parable Hollow' : 'the next district'}`
-                : goal.kind === 'vista'
-                  ? 'Stand at the lookout'
-                  : 'Open the next walk'}
-          </button>
-        </section>
-      ) : null}
-
-      <p className="star-key">{STAR_KEY}</p>
       <ol className="city-streets">
         {CITY_PLOTS.filter((plot) => plot.areaId || plot.id === 'porch').map((plot) => {
           const area = plot.areaId
@@ -143,6 +101,7 @@ export function Hub({ onNavigate }: HubProps) {
             ? isAreaComplete(area, progress.completed)
             : doneToday
           const current = plot.id === nextId
+          const streetVoice = townVoice(plot.id)
 
           return (
             <li
@@ -150,8 +109,11 @@ export function Hub({ onNavigate }: HubProps) {
               className={`${unlocked ? '' : 'is-locked'} ${current ? 'is-next' : ''}`}
             >
               <div className="street-name">
-                <strong>{plot.title}</strong>
-                {current ? <span className="street-next">Next</span> : null}
+                <Avatar who={streetVoice.who} size="sm" />
+                <div>
+                  <strong>{plot.title}</strong>
+                  {current ? <span className="street-next">Next</span> : null}
+                </div>
               </div>
               <button
                 type="button"

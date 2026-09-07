@@ -108,6 +108,17 @@ Playtest said evidence retention is the remaining gap, and the footer still ate 
 3. Debug APK sideload is still worse than a web link for friends.
 4. A stale service worker on `localhost:4173` can serve yesterday’s JS to a tester. Hard-reload or use a new host.
 
+## Immersion pass (2026-09-07)
+
+Fun path toward 5: the hub should feel like coming home to a place, not a menu with a map skin.
+
+- **Town reacts:** Built!/Lit! overlay names the person who lives there. Folk stand on plots, speech bubbles on the next roof, walkers on the street, extra oaks/windows as a district fills, porch smoke when the lamp is up.
+- **In-world lines:** short `TOWN_VOICE` (Juniper, Mercy, Silas…) — not dump walls. District pages dropped the intro essay; guide `Say` + one blurb stay.
+- **Post-win:** after takeaway/reason, a character meets you with “See the town” (or the next roof on the same street). Recall/Journal/Daily dust-off unchanged.
+- **Less chrome:** no star-key dump on the hub; Map tab is Town; puzzle goal lives in the lead line, not a second paragraph.
+
+Retention still: sort → takeaway chip → why it stands → journal / spaced dust-off.
+
 ## Tooling note (npm audit)
 
 `uuid` 7.x via `@capacitor/cli` (GHSA-w5hq-g745-h8pq) is **tooling-only**. Do not `npm audit fix --force` (it wants to downgrade Capacitor). Upgrade when a CLI release pulls `uuid >= 11.1.1`. Details in `SECURITY_REVIEW.md`.
