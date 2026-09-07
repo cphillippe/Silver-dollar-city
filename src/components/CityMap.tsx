@@ -24,6 +24,7 @@ import {
   dailyDoneToday,
   isAreaComplete,
   isAreaUnlocked,
+  nextWalkView,
   rehearseGo,
   useProgress,
 } from '../store/progress'
@@ -108,6 +109,10 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
       const area = areas.find((item) => item.id === areaId)
       if (area && isAreaComplete(area, progress.completed)) {
         onNavigate(rehearseGo(progress, areaId))
+        return
+      }
+      if (area && unlocked) {
+        onNavigate(nextWalkView(area.id, progress.completed))
         return
       }
     }

@@ -2081,14 +2081,32 @@ p {
   animation: city-rise 0.95s cubic-bezier(0.2, 1.45, 0.35, 1) both;
 }
 
+.city-plot.is-rising .city-roof {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  animation: city-roof-kick 0.7s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+}
+
 @keyframes city-rise {
   0% {
-    transform: translateY(36px) scale(0.2);
+    transform: translateY(48px) scale(0.12);
     opacity: 0;
   }
   55% {
-    transform: translateY(-14px) scale(1.18);
+    transform: translateY(-22px) scale(1.28);
     opacity: 1;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes city-roof-kick {
+  0% {
+    transform: translateY(16px) scale(0.4);
+  }
+  55% {
+    transform: translateY(-10px) scale(1.22);
   }
   100% {
     transform: translateY(0) scale(1);
@@ -2323,7 +2341,12 @@ p {
 }
 
 .city-canopy.is-sprout,
-.city-window.is-sprout {
+.city-window.is-sprout,
+.city-overworld.is-alive .city-canopy.is-sprout,
+.city-overworld.is-alive .city-window.is-sprout,
+.city-plot.is-lit .city-window.is-sprout,
+.city-overworld.is-revealing .city-canopy.is-sprout,
+.city-overworld.is-revealing .city-window.is-sprout {
   animation: city-sprout 0.55s cubic-bezier(0.2, 1.5, 0.4, 1) both;
 }
 
@@ -2345,8 +2368,10 @@ p {
   animation: city-bob 2.1s ease-in-out infinite;
 }
 
-.city-folk.is-waving {
-  animation: city-wave 0.45s ease-in-out 3;
+.city-folk.is-waving,
+.city-overworld.is-alive .city-folk.is-waving,
+.city-overworld.is-revealing .city-folk.is-waving {
+  animation: city-wave 0.4s ease-in-out 4;
 }
 
 @keyframes city-bob {
@@ -2407,12 +2432,21 @@ p {
   }
 }
 
-.city-walker-a {
-  animation: city-stroll-a 5.5s linear infinite;
+.city-overworld.is-alive .city-walker-a {
+  animation: city-stroll-a 3.2s linear infinite;
 }
 
-.city-walker-b {
-  animation: city-stroll-b 6.5s linear infinite;
+.city-overworld.is-alive .city-walker-b {
+  animation: city-stroll-b 3.8s linear infinite;
+}
+
+.city-overworld.is-revealing .city-walker-a,
+.city-overworld.is-revealing .city-walker-b {
+  animation-duration: 1.4s;
+}
+
+.city-overworld.is-revealing .city-flag {
+  animation-duration: 0.5s;
 }
 
 .city-walker {
@@ -2421,7 +2455,7 @@ p {
 
 @keyframes city-wave {
   50% {
-    transform: translateY(-6px);
+    transform: translateY(-14px) rotate(-10deg);
   }
 }
 
