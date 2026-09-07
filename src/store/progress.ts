@@ -1,6 +1,7 @@
 import { createContext, useContext } from 'react'
 import { dailyForDate } from '../content/daily'
 import { evidenceFor } from '../content/evidence'
+import { STORY } from '../content/story'
 import {
   areas,
   findPlayable,
@@ -220,9 +221,9 @@ export function nextRebuildHint(
   if (due) {
     const claim = due.brief?.claim ?? due.entry?.title ?? 'A held line'
     return {
-      title: 'Rehearse this',
+      title: STORY.takeaway,
       detail: `${claim} · due this morning · tap the claim, then the reason`,
-      cta: 'Rehearse this',
+      cta: STORY.takeaway,
       go: {
         name: 'journal',
         focusId: due.entry?.id ?? journalFocusForTrace(due.trace.id),
@@ -248,9 +249,9 @@ export function nextRebuildHint(
   if (upcoming) {
     const brief = evidenceFor(upcoming.id)
     return {
-      title: 'Rehearse this',
+      title: STORY.takeaway,
       detail: `${brief?.claim ?? findPlayable(upcoming.id)?.challenge.title ?? 'A held line'} · ${nextGapLabel(upcoming, today)}`,
-      cta: 'Rehearse this',
+      cta: STORY.takeaway,
       go: {
         name: 'journal',
         focusId: journalFocusForTrace(upcoming.id),

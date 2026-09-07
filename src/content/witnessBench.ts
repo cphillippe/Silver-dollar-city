@@ -20,6 +20,7 @@ export const witnessBench: Area = {
       kind: 'sequence',
       id: 'wb-creed',
       title: 'What Paul received',
+      idea: 'died, buried, raised, appeared — in that order',
       prompt:
         'Order the core of the tradition Paul says he “delivered” and “received.”',
       context:
@@ -51,6 +52,7 @@ export const witnessBench: Area = {
       kind: 'sort',
       id: 'wb-early',
       title: 'Why historians call it early',
+      idea: 'the creed is early testimony, not a medieval insert',
       prompt: 'Keep the careful historical claim. Toss the overclaims.',
       context:
         '1 Corinthians 15:3–7. Dating is judgment, not a photograph — but several features cluster.',
@@ -87,6 +89,7 @@ export const witnessBench: Area = {
       kind: 'match',
       id: 'wb-method',
       title: 'Tools of the ancient historian',
+      idea: 'historians weigh sources; they cannot rerun the past',
       prompt: 'Match each criterion to what it is actually testing.',
       context:
         'Used in historical Jesus research (and ancient history more broadly). None of these “prove God.” They help ask which reports are harder to dismiss as late invention.',
@@ -121,6 +124,7 @@ export const witnessBench: Area = {
       kind: 'sort',
       id: 'wb-women',
       title: 'Idle talk',
+      idea: 'women as first witnesses is an awkward detail to invent',
       prompt: 'Keep the careful historical move. Toss the overclaims.',
       context:
         'Women are first at the tomb (Mark 16:1–8; Luke 24:1–11; John 20). Luke 24:11: the report sounded like “idle talk.”',

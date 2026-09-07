@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { areas, getArea, getChallenge, journalForChallenge } from '../content'
 import { evidenceFor } from '../content/evidence'
-import { guideForArea } from '../content/story'
+import { guideForArea, STORY } from '../content/story'
 import { kindLabel } from './icons'
 import { localDateKey } from '../lib/dates'
 import { isDue } from '../lib/memory'
@@ -195,7 +195,7 @@ export function ChallengeScreen({
       </button>
       {rehearsing ? (
         <p className="eyebrow">
-          {area.title} · Rehearse this
+          {area.title} · Today’s takeaway
           {replay ? ' · replay' : ''}
         </p>
       ) : (
@@ -205,7 +205,7 @@ export function ChallengeScreen({
           {reviewing ? ' · time to dust off' : ''}
         </p>
       )}
-      <h1>{rehearsing ? 'Rehearse this' : challenge.title}</h1>
+      <h1>{rehearsing ? STORY.takeaway : challenge.title}</h1>
       {rehearsing ? null : (
         <>
           <Say
@@ -227,26 +227,27 @@ export function ChallengeScreen({
       )}
 
       {!showNext ? (
-        <PuzzlePlay
-          challenge={challenge}
-          onMiss={() => {
-            setAttemptMissed(true)
-            markMiss(challenge.id)
-          }}
-          onPeek={() => setAttemptPeeked(true)}
-          onSolved={solved}
-        />
+        <>
+          <p className="play-goal">{STORY.playGoal}</p>
+          <PuzzlePlay
+            challenge={challenge}
+            onMiss={() => {
+              setAttemptMissed(true)
+              markMiss(challenge.id)
+            }}
+            onPeek={() => setAttemptPeeked(true)}
+            onSolved={solved}
+          />
+        </>
       ) : (
         <section className="after-win">
           {brief && !recalled ? (
             <div className="rehearse-anchor">
-              <p className="quiet">
-                Folded. Tap the claim, then the reason — that’s the line that should stick.
-              </p>
+              <p className="quiet">{STORY.takeaway}</p>
               <RecallGate
                 brief={brief}
                 mode={reviewing ? 'review' : 'encode'}
-                kicker="Rehearse this"
+                kicker={STORY.takeaway}
                 onHeld={settleRecall}
               />
             </div>
@@ -284,7 +285,7 @@ export function ChallengeScreen({
                 className="text-link"
                 onClick={() => onNavigate({ name: 'journal', focusId: card.id, autoQuiz: true })}
               >
-                Rehearse this page →
+                Choose the takeaway →
               </button>
             </article>
           ) : null}

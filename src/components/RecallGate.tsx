@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { shuffle } from '../lib/shuffle'
 import type { EvidenceBrief } from '../content/evidence'
+import { STORY } from '../content/story'
 import { Landmark } from './Landmark'
 
 interface RecallGateProps {
@@ -19,7 +20,7 @@ type Phase = 'claim' | 'echo' | 'reason' | 'teach' | 'held'
  */
 export function RecallGate({
   brief,
-  kicker = 'Rehearse this',
+  kicker = STORY.takeaway,
   pillar,
   mode = 'encode',
   onHeld,
@@ -84,11 +85,11 @@ export function RecallGate({
 
       {phase === 'claim' ? (
         <>
-          <h2>Rehearse this claim</h2>
+          <h2>{STORY.takeaway}</h2>
           <p className="quiet">
             {mode === 'review'
-              ? 'From memory — tap the line. Forgetting is why it came back.'
-              : 'The page folded. Tap the claim you’d still say tomorrow.'}
+              ? 'From memory — tap the takeaway. Forgetting is why it came back.'
+              : 'The page folded. Tap the one-sentence takeaway you’ll still say tomorrow.'}
           </p>
           <div className="recall-choices">
             {claimOptions.map((line) => (

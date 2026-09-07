@@ -20,6 +20,7 @@ export const highLookout: Area = {
       kind: 'build-argument',
       id: 'hl-moral',
       title: 'The grain of duty',
+      idea: 'duty feels real, not like a taste for tea',
       prompt:
         'Build a modest moral argument: morality as evidence, not as a police report.',
       context:
@@ -87,6 +88,7 @@ export const highLookout: Area = {
       kind: 'match',
       id: 'hl-mind',
       title: 'The inside of mind',
+      idea: 'inner experience is not captured by a scan',
       prompt: 'Match each feature of mind to what physical description still leaves standing.',
       context:
         'David Chalmers named the “hard problem of consciousness”: explaining why physical process is accompanied by inner experience. None of this “inserts God into a neuron.” It asks whether mind is at home in a story that begins and ends with the indifferent.',
@@ -121,6 +123,7 @@ export const highLookout: Area = {
       kind: 'sort',
       id: 'hl-meaning',
       title: 'Invented or found',
+      idea: 'meaning might be found, not only invented',
       prompt: 'Keep the lookout’s real question. Toss the decoys.',
       context:
         'You can build local meaning without theism. Ecclesiastes refuses both cheap cheer and cheap despair (Eccl 12:13).',
@@ -157,6 +160,7 @@ export const highLookout: Area = {
       kind: 'sort',
       id: 'hl-beauty',
       title: 'Homesick at the music',
+      idea: 'beauty wakes a hunger it cannot feed',
       prompt: 'Keep Lewis’s careful use of longing. Toss the rest.',
       context:
         'Beauty wakes a hunger it cannot feed — Sehnsucht. Lewis: as if a memory of a country you have not visited.',

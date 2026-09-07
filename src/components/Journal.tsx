@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { areas, journalEntries } from '../content'
 import { evidenceForJournal } from '../content/evidence'
-import { guideForArea } from '../content/story'
+import { guideForArea, STORY } from '../content/story'
 import { localDateKey } from '../lib/dates'
 import { isDue, nextGapLabel } from '../lib/memory'
 import { starLegend } from '../lib/stars'
@@ -62,16 +62,13 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
           ← Journal
         </button>
         <section className="rehearse-anchor">
-          <p className="eyebrow">Next recommended · Rehearse this</p>
+          <p className="eyebrow">Next recommended · Today’s takeaway</p>
           <h1>{focusedEntry.title}</h1>
-          <p className="quiet">
-            Tap the claim, then the reason. The long page stays face-down until
-            the line is yours.
-          </p>
+          <p className="quiet">{STORY.takeaway}</p>
           <RecallGate
             brief={focusedBrief}
             mode="review"
-            kicker="Rehearse this"
+            kicker={STORY.takeaway}
             onHeld={(result) => {
               recordReview({
                 id: focusedBrief.id,
@@ -123,7 +120,7 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
                     })
                   }
                 >
-                  Rehearse this
+                  {STORY.takeaway}
                 </button>
               </article>
             ))}
@@ -294,16 +291,16 @@ function JournalCard({
                 className="btn primary"
                 onClick={() => setQuizAgain(true)}
               >
-                Rehearse this
+                {STORY.takeaway}
               </button>
             </>
           ) : brief && quizAgain ? (
             <>
-              <p className="eyebrow">Rehearse this</p>
+              <p className="eyebrow">{STORY.takeaway}</p>
               <RecallGate
                 brief={brief}
                 pillar={entry.areaId}
-                kicker={due ? 'Rehearse this' : 'Journal recall'}
+                kicker={due ? STORY.takeaway : 'Journal recall'}
                 mode={due ? 'review' : 'encode'}
                 onHeld={(result) => {
                   if (due) {

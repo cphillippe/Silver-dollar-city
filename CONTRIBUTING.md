@@ -15,7 +15,7 @@ Saves stay **offline-first** on this device. Players move devices with **Export 
 
 ## Ads
 
-`src/config/ads.ts` — `adsEnabledDefault` is **false** for playtest. Placeholders never mount on Keep/Toss, Rehearse this, or Journal. See README → Ads.
+`src/config/ads.ts` — `adsEnabledDefault` is **false** for playtest. Placeholders never mount on Keep/Toss, the takeaway step, or Journal. See README → Ads.
 
 ## Android
 

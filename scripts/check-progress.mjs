@@ -7,7 +7,7 @@ const progressSrc = readFileSync(new URL('../src/store/progress.ts', import.meta
 assert.match(progressSrc, /HOLLOW_WALKS_TO_WITNESS = 2/)
 assert.match(progressSrc, /area\.id === 'witness-bench'/)
 assert.match(progressSrc, /autoQuiz: true/)
-assert.match(progressSrc, /title: 'Rehearse this'/)
+assert.match(progressSrc, /title: STORY\.takeaway/)
 
 const HOLLOW_WALKS_TO_WITNESS = 2
 
@@ -37,6 +37,6 @@ const journalSrc = readFileSync(
   'utf8',
 )
 assert.match(journalSrc, /autoQuiz && focusedEntry/)
-assert.match(journalSrc, /kicker="Rehearse this"/)
+assert.match(journalSrc, /kicker=\{STORY\.takeaway\}/)
 
 console.log('check-progress: ok')

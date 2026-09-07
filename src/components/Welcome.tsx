@@ -29,12 +29,13 @@ export function Welcome({ onNavigate }: WelcomeProps) {
       <div className="welcome-ridge" aria-hidden />
       <div className="welcome-hero">
         <CityMap mode="poster" onNavigate={onNavigate} />
-        <p className="eyebrow">A puzzle trail</p>
+        <p className="eyebrow">60 seconds</p>
         <h1>
           Silver City
           <span>Unending Evidence</span>
         </h1>
         <p className="welcome-goal">{STORY.purpose}</p>
+        <p className="welcome-who">{STORY.who}</p>
         <p className="welcome-promise">{STORY.cityPromise}</p>
         <div className="welcome-actions">
           <button type="button" className="btn primary xl" onClick={begin}>
@@ -42,8 +43,7 @@ export function Welcome({ onNavigate }: WelcomeProps) {
           </button>
         </div>
         <p className="welcome-note">
-          About a minute. Snap, fold, keep one line. The valley waits until you
-          do.
+          Sort, lock in, keep one takeaway. The town lights when the line holds.
         </p>
       </div>
       <div className="welcome-cast-late">
@@ -51,20 +51,17 @@ export function Welcome({ onNavigate }: WelcomeProps) {
           <figure>
             <Avatar who="river" size="xl" />
             <figcaption>
-              River
-              <span>You walk</span>
+              YOU · RIVER
             </figcaption>
           </figure>
           <span className="welcome-lantern" aria-hidden />
           <figure>
             <Avatar who="juniper" size="xl" />
             <figcaption>
-              Juniper
-              <span>First lamp</span>
+              GUIDE · JUNIPER
             </figcaption>
           </figure>
         </div>
-        <p className="welcome-who">{STORY.who}</p>
       </div>
     </main>
   )

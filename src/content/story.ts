@@ -88,17 +88,22 @@ export function guideForArea(areaId: string): Character {
 
 export const STORY = {
   purpose:
-    'Silver City is a puzzle trail: play a short game, fold the page, and keep evidence you can still say tomorrow.',
+    'A 60-second Christian reasoning game: sort ideas, choose one takeaway, and remember why it stands tomorrow.',
   cityPromise: 'Keep the line — the town lights. Streets and landmarks rise when a claim holds.',
-  who:
-    'River and Juniper are Christian companions on this trail. You walk as River; Juniper keeps the first lamp with you.',
+  who: 'You are River. Juniper is your guide. Each day you practice one Christian idea.',
+  playGoal:
+    'Goal: keep the lines that support today’s claim; toss the distractors; then choose the claim and reason you’ll remember.',
+  takeaway:
+    'Choose the one-sentence takeaway you can repeat tomorrow, then choose why it stands.',
+  lockSort: 'Lock in the sort.',
   premise:
-    'Silver City is a puzzle trail: play a short game, fold the page, and keep evidence you can still say tomorrow.',
+    'A 60-second Christian reasoning game: sort ideas, choose one takeaway, and remember why it stands tomorrow.',
   welcomeJuniper:
-    'You walk as River. I’m Juniper. One short puzzle — then we fold the page and keep the line.',
+    'You are River. I’m Juniper. Each day we practice one Christian idea — then you keep the takeaway.',
   welcomeRiver:
     'I’m River. I came to see if the case for God can be walked. If you’ll walk, I’ll try to remember.',
-  dailyInvite: 'Lantern’s lit. Snap it, fold the page, keep the line. Later I’ll bring an older page back.',
+  dailyInvite:
+    'Lantern’s lit. Sort the idea, lock it in, keep the takeaway. Later I’ll bring an older page back.',
   dailyHeld: 'That’s the line. Tomorrow I may cover a new card — or dust off one that’s rested.',
   trailWait: 'The trail waits. Your pages stay. Come when you can.',
 }
