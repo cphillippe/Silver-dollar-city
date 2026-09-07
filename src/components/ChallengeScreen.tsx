@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { getArea, getChallenge } from '../content'
 import { evidenceFor } from '../content/evidence'
 import { STORY, townVoiceForArea } from '../content/story'
@@ -38,6 +38,7 @@ export function ChallengeScreen({
     ),
   )
   const { juiceDone: showNext, afterJuice } = useJuiceHandoff()
+  const savedWin = useRef(false)
   const [attemptMissed, setAttemptMissed] = useState(false)
   const [attemptPeeked, setAttemptPeeked] = useState(false)
   const [recalled, setRecalled] = useState(false)
@@ -46,6 +47,19 @@ export function ChallengeScreen({
     if (!showNext) return
     const body = document.querySelector('.app-body')
     body?.scrollTo({ top: 0, behavior: 'smooth' })
+    if (savedWin.current) return
+    savedWin.current = true
+    completeChallenge(areaId, challengeId)
+    if (!brief || reviewing) return
+    recordReview({
+      id: brief.id,
+      pillar: areaId,
+      kind: 'encode',
+      today,
+      clean: !attemptMissed && !attemptPeeked,
+      peeked: attemptPeeked,
+      elaborated: false,
+    })
   }, [showNext])
 
   if (!area || !challenge) {
@@ -78,23 +92,8 @@ export function ChallengeScreen({
   }
 
   function solved() {
-    completeChallenge(areaId, challengeId)
     afterJuice()
-    if (!brief) {
-      setRecalled(true)
-      return
-    }
-    if (!reviewing) {
-      recordReview({
-        id: brief.id,
-        pillar: areaId,
-        kind: 'encode',
-        today,
-        clean: !attemptMissed && !attemptPeeked,
-        peeked: attemptPeeked,
-        elaborated: false,
-      })
-    }
+    if (!brief) setRecalled(true)
   }
 
   function settleRecall(result: { clean: boolean }) {
