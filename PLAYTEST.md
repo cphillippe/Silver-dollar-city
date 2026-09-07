@@ -122,8 +122,8 @@ Fun path toward 5: the hub should feel like coming home to a place, not a menu w
 Playtest: town only breathed lightly; scroll/text killed the climb.
 
 - **Every win returns to town.** No skip to the next puzzle. Takeaway → why it stands → **See the town**. The one-more is the glowing roof.
-- **Town moves:** camera punches in, roof pops, NPCs bounce. Mid-district walks play **Grew!** (new oak / window) even when the stage stays Built. Flags, creek, lamps, folk keep moving while you sit on the hub.
-- **Shorter post-win:** chips, then one fat See-the-town button. No essay card. No win-dump `deeper` paragraph.
+- **Town moves:** camera punches in, roof pops, NPCs bounce. Mid-district walks play **Grew!** (new oak / window) even when the stage stays Built. Flags, creek, lamps, folk keep moving while you sit on the hub. Celebrate animations (sprout / wave / roof kick) beat idle sway so the lot actually jumps.
+- **Shorter post-win:** chips, then one fat See-the-town button. No essay card. No win-dump panel. Hub hides the What’s-next footer. Glowing roof skips the district list and opens the next walk.
 
 Retention still: sort → takeaway chip → why it stands → journal / spaced dust-off.
 

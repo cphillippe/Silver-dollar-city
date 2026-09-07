@@ -16,13 +16,11 @@ export function ResultPanel({
   kicker,
   children,
 }: ResultPanelProps) {
-  if (tone === 'idle') return null
+  if (tone === 'idle' || tone === 'ok') return null
 
   return (
     <div className={`result result-${tone}`} role="status">
-      <p className="result-kicker">
-        {kicker ?? (tone === 'ok' ? 'Well reasoned' : 'Not yet')}
-      </p>
+      <p className="result-kicker">{kicker ?? 'Not yet'}</p>
       <h3>{title}</h3>
       {body ? <p>{body}</p> : null}
       {children}

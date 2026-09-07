@@ -108,6 +108,17 @@ export function nextChallengeInArea(
   return area.challenges.find((challenge) => !completed.includes(challenge.id))
 }
 
+/** Skip the district essay — glowing roof goes straight into the next walk. */
+export function nextWalkView(areaId: string, completed: string[]): View {
+  const area = areas.find((item) => item.id === areaId)
+  if (!area) return { name: 'hub' }
+  const challenge = nextChallengeInArea(area, completed)
+  if (challenge) {
+    return { name: 'challenge', areaId: area.id, challengeId: challenge.id }
+  }
+  return { name: 'area', areaId: area.id }
+}
+
 export interface NextGoal {
   kind: 'daily' | 'challenge' | 'area' | 'vista' | 'welcome'
   title: string

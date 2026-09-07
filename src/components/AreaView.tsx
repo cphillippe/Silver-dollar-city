@@ -138,7 +138,7 @@ export function AreaView({ areaId, onNavigate }: AreaViewProps) {
             })
           }
         >
-          Next: {next.title}
+          Keep building
         </button>
       ) : null}
 

@@ -15,6 +15,7 @@ import {
   isAreaComplete,
   isAreaUnlocked,
   morningReview,
+  nextWalkView,
   rehearseGo,
   useProgress,
 } from '../store/progress'
@@ -122,7 +123,7 @@ export function Hub({ onNavigate }: HubProps) {
                   onNavigate(
                     plot.id === 'porch'
                       ? { name: 'daily' }
-                      : { name: 'area', areaId: plot.areaId ?? 'parable-hollow' },
+                      : nextWalkView(plot.areaId ?? 'parable-hollow', progress.completed),
                   )
                 }}
               >

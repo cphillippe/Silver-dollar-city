@@ -270,6 +270,8 @@ const areaSrc = readFileSync(
 )
 assert.doesNotMatch(areaSrc, /area\.intro\.map/)
 assert.match(areaSrc, /Landmark/)
+assert.doesNotMatch(areaSrc, /Next: \{next\.title\}/)
+assert.match(areaSrc, /Keep building/)
 
 const challengeSrc = readFileSync(
   new URL('../src/components/ChallengeScreen.tsx', import.meta.url),
@@ -277,6 +279,7 @@ const challengeSrc = readFileSync(
 )
 assert.match(challengeSrc, /TownReturn/)
 assert.match(challengeSrc, /See the town/)
+assert.match(challengeSrc, /onNavigate\(\{ name: 'hub' \}\)/)
 
 const cityLibSrc = readFileSync(new URL('../src/lib/city.ts', import.meta.url), 'utf8')
 assert.doesNotMatch(cityLibSrc, /Walk again/)
@@ -287,5 +290,21 @@ const shellSrc = readFileSync(
   'utf8',
 )
 assert.match(shellSrc, /view\.name === 'journal'/)
+assert.match(shellSrc, /view\.name === 'hub'/)
+
+const cssSrc = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
+assert.match(cssSrc, /is-alive \.city-canopy\.is-sprout/)
+assert.match(cssSrc, /is-alive \.city-folk\.is-waving/)
+assert.match(cssSrc, /city-roof-kick/)
+
+const resultSrc = readFileSync(
+  new URL('../src/components/challenges/ResultPanel.tsx', import.meta.url),
+  'utf8',
+)
+assert.match(resultSrc, /tone === 'ok'\) return null/)
+
+assert.match(mapSrc, /nextWalkView/)
+assert.match(hubSrc, /nextWalkView/)
+assert.match(progressSrc, /export function nextWalkView/)
 
 console.log('check-city: ok')
