@@ -15,4 +15,8 @@ Supported puzzle `kind` values:
 
 Keep citations real. Prefer honest framing of what an argument claims versus what it proves. Teaching copy belongs in `deeper` / journal cards so it appears after a solve.
 
+Keep citations real. Prefer honest framing of what an argument claims versus what it proves. Teaching copy belongs in `deeper` / journal cards so it appears after a solve.
+
 Every challenge (and Daily Trail puzzle) also needs a one-line **claim + reason + source** in `src/content/evidence.ts`. After a solve the teaching folds and the player rebuilds that line. If the line is not crisp, the Recall Loop will feel like homework — keep it short enough to snap.
+
+Story and faces live in `src/content/story.ts` and `src/components/Avatar.tsx`. Keep dialogue light. Do not sermonize. New guides need a matching portrait in the same line weight and circular frame.

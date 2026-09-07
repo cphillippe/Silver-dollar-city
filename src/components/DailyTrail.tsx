@@ -6,10 +6,12 @@ import {
   knownEvidenceIds,
   pickSpacedEvidence,
 } from '../content/evidence'
+import { STORY } from '../content/story'
 import { kindLabel } from './icons'
 import { addLocalDays, formatTrailDate, localDateKey } from '../lib/dates'
 import { starsFromAttempt } from '../lib/stars'
 import { streakAfterPlay } from '../lib/streak'
+import { Avatar, Say } from './Avatar'
 import { PuzzlePlay } from './PuzzlePlay'
 import { RecallGate } from './RecallGate'
 import { ShareInvite } from './ShareInvite'
@@ -72,12 +74,17 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
       >
         ← City map
       </button>
-      <p className="eyebrow">Today’s Trail · {formatTrailDate(today)}</p>
-      <h1>{already || solved ? 'A mark for this morning' : daily.challenge.title}</h1>
-      <p className="lede daily-lede">
-        One snappy walk — then fold the page and keep the line. Same puzzle on
-        this calendar day. Tomorrow, an older page may stir.
-      </p>
+      <div className="card-lead">
+        <Avatar who="juniper" size="lg" />
+        <div>
+          <p className="eyebrow">Today’s Trail · {formatTrailDate(today)}</p>
+          <h1>{already || solved ? 'A mark for this morning' : daily.challenge.title}</h1>
+        </div>
+      </div>
+      <Say
+        who="juniper"
+        line={solved ? (tone === 'welcome-back' ? STORY.trailWait : STORY.dailyHeld) : STORY.dailyInvite}
+      />
 
       {!solved ? (
         <>

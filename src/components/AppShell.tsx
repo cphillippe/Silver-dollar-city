@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { getNextGoal, insightScore, useProgress } from '../store/progress'
+import { Avatar } from './Avatar'
 import type { View } from '../types'
 
 interface AppShellProps {
@@ -58,7 +59,7 @@ export function AppShell({ view, onNavigate, children }: AppShellProps) {
             className="brand"
             onClick={() => onNavigate({ name: 'hub' })}
           >
-            <span className="brand-mark" aria-hidden />
+            <Avatar who="river" size="sm" />
             Silver City
           </button>
           <nav>

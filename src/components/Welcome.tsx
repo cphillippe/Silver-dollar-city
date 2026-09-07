@@ -1,6 +1,8 @@
 import { areas, totalChallenges, totalJournal } from '../content'
 import { dailyForDate } from '../content/daily'
+import { STORY } from '../content/story'
 import { localDateKey } from '../lib/dates'
+import { Avatar, Say } from './Avatar'
 import { ShareInvite } from './ShareInvite'
 import { useProgress } from '../store/progress'
 import type { View } from '../types'
@@ -35,16 +37,17 @@ export function Welcome({ onNavigate }: WelcomeProps) {
   return (
     <main className="welcome">
       <div className="welcome-sky" aria-hidden />
+      <div className="welcome-cast" aria-hidden>
+        <Avatar who="river" size="xl" />
+        <Avatar who="juniper" size="xl" />
+      </div>
       <p className="eyebrow">A mountain-town adventure</p>
       <h1>
         Silver City
         <span>Unending Evidence</span>
       </h1>
-      <p className="lede">
-        Snap pairs, sort claims, lock a chain — then fold the teaching and
-        rebuild one line from memory. Fun is the delivery. The point is what
-        you can still say: a claim, a reason, a source.
-      </p>
+      <p className="lede">{STORY.premise}</p>
+      <Say who="juniper" line={STORY.welcomeJuniper} />
       <ul className="welcome-facts">
         <li>
           <strong>{areas.length}</strong>
@@ -61,11 +64,11 @@ export function Welcome({ onNavigate }: WelcomeProps) {
       </ul>
       <div className="welcome-actions">
         <button type="button" className="btn primary xl" onClick={walkDaily}>
-          Walk today’s trail
+          Walk today’s trail with Juniper
         </button>
         <p className="welcome-daily-line">{today.districtFlavor}</p>
         <button type="button" className="btn ghost" onClick={beginDistricts}>
-          {resumed ? 'Continue the districts' : 'Begin in Parable Hollow'}
+          {resumed ? 'Continue the districts' : 'Meet Mercy in Parable Hollow'}
         </button>
         {progress.started ? (
           <button

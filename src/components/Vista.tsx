@@ -1,4 +1,6 @@
 import { areas, totalJournal } from '../content'
+import { CAST, VISTA_LINE } from '../content/story'
+import { Avatar, Say } from './Avatar'
 import { ShareInvite } from './ShareInvite'
 import { insightScore, useProgress } from '../store/progress'
 import type { View } from '../types'
@@ -12,8 +14,14 @@ export function Vista({ onNavigate }: VistaProps) {
 
   return (
     <main className="vista">
+      <div className="cast-row vista-cast">
+        {(Object.keys(CAST) as Array<keyof typeof CAST>).map((id) => (
+          <Avatar key={id} who={id} size="lg" />
+        ))}
+      </div>
       <p className="eyebrow">The trail does not end</p>
       <h1>You have walked the five districts</h1>
+      <Say who="hope" line={VISTA_LINE} />
       <p className="lede">
         Parables, testimony, a habitable cosmos, a first cause, and the inward
         clues of duty, mind, meaning, and beauty. None of these, alone, is the

@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { areas, journalEntries } from '../content'
 import { evidenceForJournal } from '../content/evidence'
-import { AreaIcon } from './icons'
+import { guideForArea } from '../content/story'
+import { Avatar } from './Avatar'
 import { RecallGate } from './RecallGate'
 import { ShareInvite } from './ShareInvite'
 import { StarRow } from './StarRow'
@@ -49,12 +50,10 @@ export function Journal({ focusId, onNavigate }: JournalProps) {
 
       <section className="journal-chapter">
         <div className="chapter-head">
-          <span className="station-emblem sm" style={{ color: 'var(--gold)' }}>
-            ✦
-          </span>
+          <Avatar who="juniper" size="sm" />
           <div>
             <h2>Trail notes</h2>
-            <p>Pages that open by returning — not only by clearing a district.</p>
+            <p>Juniper’s pages — they open when you return, not only when you clear a district.</p>
           </div>
         </div>
         <div className="card-grid">
@@ -76,12 +75,12 @@ export function Journal({ focusId, onNavigate }: JournalProps) {
       {districtChapters.map(({ area, entries }) => (
         <section key={area.id} className="journal-chapter">
           <div className="chapter-head">
-            <span className="station-emblem sm" style={{ color: area.accent }}>
-              <AreaIcon name={area.icon} />
-            </span>
+            <Avatar who={guideForArea(area.id).id} size="sm" />
             <div>
               <h2>{area.title}</h2>
-              <p>{area.subtitle}</p>
+              <p>
+                {guideForArea(area.id).name} · {area.subtitle}
+              </p>
             </div>
           </div>
           <div className="card-grid">
