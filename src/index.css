@@ -107,6 +107,14 @@ p {
   padding-bottom: 32px;
 }
 
+.app.is-play {
+  grid-template-rows: auto 1fr;
+}
+
+.app.is-play .app-body {
+  padding-bottom: calc(20px + var(--safe-bottom));
+}
+
 .grain {
   pointer-events: none;
   position: fixed;
@@ -670,7 +678,9 @@ p {
 }
 
 .play {
-  padding-bottom: 8px;
+  display: grid;
+  gap: 14px;
+  padding-bottom: 18px;
 }
 
 .play.is-shake,
@@ -709,7 +719,9 @@ p {
 
 .btn.snap-bins {
   margin-top: 8px;
+  margin-bottom: 12px;
   animation: pop-in 0.28s ease;
+  scroll-margin-bottom: 24px;
 }
 
 .pop-in {
@@ -912,11 +924,6 @@ p {
   }
 }
 
-.play {
-  display: grid;
-  gap: 14px;
-}
-
 .choice-list,
 .bank,
 .slot-list {
@@ -1065,6 +1072,23 @@ p {
   display: grid;
   gap: 12px;
   margin-top: 8px;
+}
+
+.rehearse-anchor {
+  scroll-margin-top: 8px;
+}
+
+.rehearse-anchor .recall-gate {
+  margin-bottom: 8px;
+}
+
+.claim-echo {
+  padding: 8px 0 4px;
+}
+
+.rehearse-stem {
+  font-size: 1.2rem;
+  margin-bottom: 0.35em;
 }
 
 .unlock-card h2 {
@@ -1591,6 +1615,75 @@ p {
 .welcome h1,
 .vista h1 {
   font-size: clamp(1.85rem, 8vw, 3.6rem);
+}
+
+@media (max-height: 520px) {
+  .topbar {
+    padding: calc(6px + var(--safe-top)) 10px 6px;
+  }
+
+  .app.is-play .brand .avatar {
+    display: none;
+  }
+
+  .topbar nav button {
+    padding: 4px 8px;
+    font-size: 0.82rem;
+  }
+
+  .app.is-play .say,
+  .app.is-play .daily-page.is-puzzle .landmark,
+  .app.is-play .challenge-page.is-puzzle .landmark,
+  .daily-page.is-puzzle .district-flavor {
+    display: none;
+  }
+
+  .app.is-play h1 {
+    font-size: 1.28rem;
+  }
+
+  .app.is-play .card-lead {
+    margin-bottom: 6px;
+  }
+
+  .recall-gate,
+  .today-trail,
+  .next-card,
+  .teaser-card,
+  .say-back,
+  .share-invite {
+    padding: 12px 12px 14px;
+  }
+
+  .today-trail h2,
+  .next-card h2,
+  .teaser-card h2,
+  .recall-gate h2 {
+    font-size: 1.28rem;
+  }
+
+  .app-body {
+    padding-top: 8px;
+  }
+
+  .play .prompt {
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+  }
+}
+
+@media (max-height: 430px) {
+  .app.is-play .topbar nav .subtle {
+    display: none;
+  }
+
+  .bin {
+    min-height: 72px;
+  }
+
+  .app.is-play .app-body {
+    padding-bottom: calc(28px + var(--safe-bottom));
+  }
 }
 
 @media (max-width: 640px) {

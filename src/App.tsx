@@ -24,7 +24,7 @@ export default function App() {
   }, [view])
 
   useEffect(() => {
-    if (view.name !== 'journal' || !view.focusId) return
+    if (view.name !== 'journal' || !view.focusId || view.autoQuiz) return
     const node = document.getElementById(view.focusId)
     node?.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }, [view])
@@ -46,7 +46,11 @@ export default function App() {
         />
       ) : null}
       {view.name === 'journal' ? (
-        <Journal focusId={view.focusId} onNavigate={setView} />
+        <Journal
+          focusId={view.focusId}
+          autoQuiz={view.autoQuiz}
+          onNavigate={setView}
+        />
       ) : null}
       {view.name === 'vista' ? <Vista onNavigate={setView} /> : null}
     </AppShell>

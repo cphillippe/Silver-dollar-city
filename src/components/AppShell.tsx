@@ -14,6 +14,8 @@ export function AppShell({ view, onNavigate, children }: AppShellProps) {
   const goal = getNextGoal(progress)
   const waiting = dueCount(progress)
   const hideChrome = view.name === 'welcome'
+  const playView = view.name === 'daily' || view.name === 'challenge'
+  const hideGoalbar = hideChrome || playView
 
   function followGoal() {
     if (goal.kind === 'daily') {
@@ -51,7 +53,9 @@ export function AppShell({ view, onNavigate, children }: AppShellProps) {
   }
 
   return (
-    <div className={`app ${hideChrome ? 'is-welcome' : ''}`}>
+    <div
+      className={`app ${hideChrome ? 'is-welcome' : ''} ${playView ? 'is-play' : ''}`}
+    >
       <div className="grain" aria-hidden />
       {!hideChrome ? (
         <header className="topbar">
@@ -94,7 +98,7 @@ export function AppShell({ view, onNavigate, children }: AppShellProps) {
 
       <div className="app-body">{children}</div>
 
-      {!hideChrome ? (
+      {!hideGoalbar ? (
         <footer className="goalbar">
           <button type="button" className="goal" onClick={followGoal}>
             <span className="goal-kicker">What’s next</span>

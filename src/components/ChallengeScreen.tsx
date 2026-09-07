@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { areas, getArea, getChallenge, journalForChallenge } from '../content'
 import { evidenceFor } from '../content/evidence'
 import { guideForArea } from '../content/story'
@@ -53,6 +53,12 @@ export function ChallengeScreen({
   const [earned, setEarned] = useState<StarCount | 0>(progress.stars[challengeId] ?? 0)
   const [recalled, setRecalled] = useState(false)
   const [said, setSaid] = useState(false)
+
+  useEffect(() => {
+    if (!showNext) return
+    const body = document.querySelector('.app-body')
+    body?.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [showNext])
 
   if (!area || !challenge) {
     return (
@@ -174,9 +180,12 @@ export function ChallengeScreen({
   const card = journalForChallenge(challengeId)
   const bestBefore = progress.stars[challengeId] ?? 0
   const canProceed = showNext && (!brief || (recalled && said))
+  const rehearsing = showNext && Boolean(brief) && !recalled
 
   return (
-    <main className="challenge-page">
+    <main
+      className={`challenge-page ${showNext ? 'is-after' : 'is-puzzle'} ${rehearsing ? 'is-rehearse' : ''}`}
+    >
       <button
         type="button"
         className="text-link"
@@ -184,74 +193,86 @@ export function ChallengeScreen({
       >
         ← {area.title}
       </button>
-      <p className="eyebrow">
-        {area.title} · {kindLabel(challenge.kind)}
-        {replay ? ' · replay' : ''}
-        {reviewing ? ' · time to dust off' : ''}
-      </p>
-      <h1>{challenge.title}</h1>
-      <Say
-        who={guide.id}
-        line={
-          reviewing
-            ? 'This line has rested. Snap it again — forgetting is why it came back.'
-            : 'Snap it like a game. Then fold my page and keep the line — that’s the whole walk.'
-        }
-      />
-      <Landmark pillar={areaId} compact />
-      {bestBefore ? (
-        <p className="best-clear">
-          Mastery <StarRow count={bestBefore} compact label={starLegend(bestBefore)} />
-          <span className="quiet">{starLegend(bestBefore)}</span>
+      {rehearsing ? (
+        <p className="eyebrow">
+          {area.title} · Rehearse this
+          {replay ? ' · replay' : ''}
         </p>
-      ) : null}
-
-      <PuzzlePlay
-        challenge={challenge}
-        onMiss={() => {
-          setAttemptMissed(true)
-          markMiss(challenge.id)
-        }}
-        onPeek={() => setAttemptPeeked(true)}
-        onSolved={solved}
-      />
-
-      {showNext ? (
-        <section className="after-win">
-          <div className="burst" aria-hidden>
-            <span />
-            <span />
-            <span />
-            <span />
-          </div>
-          <div className="daily-flourish">
-            <StarRow
-              count={earned || 1}
-              label={starLegend(earned || 1)}
-            />
-            <p className="streak-pill">
-              {earned >= 3
-                ? 'Held after a rest, and said back.'
-                : earned === 2
-                  ? 'Held after a rest.'
-                  : reviewing
-                    ? 'Time to dust off this one — then it can rest again.'
-                    : 'First walk. The trail will bring this line back later.'}
+      ) : (
+        <p className="eyebrow">
+          {area.title} · {kindLabel(challenge.kind)}
+          {replay ? ' · replay' : ''}
+          {reviewing ? ' · time to dust off' : ''}
+        </p>
+      )}
+      <h1>{rehearsing ? 'Rehearse this' : challenge.title}</h1>
+      {rehearsing ? null : (
+        <>
+          <Say
+            who={guide.id}
+            line={
+              reviewing
+                ? 'This line has rested. Snap it again — forgetting is why it came back.'
+                : 'Snap it like a game. Then fold my page and keep the line — that’s the whole walk.'
+            }
+          />
+          <Landmark pillar={areaId} compact />
+          {bestBefore ? (
+            <p className="best-clear">
+              Mastery <StarRow count={bestBefore} compact label={starLegend(bestBefore)} />
+              <span className="quiet">{starLegend(bestBefore)}</span>
             </p>
-          </div>
+          ) : null}
+        </>
+      )}
 
+      {!showNext ? (
+        <PuzzlePlay
+          challenge={challenge}
+          onMiss={() => {
+            setAttemptMissed(true)
+            markMiss(challenge.id)
+          }}
+          onPeek={() => setAttemptPeeked(true)}
+          onSolved={solved}
+        />
+      ) : (
+        <section className="after-win">
           {brief && !recalled ? (
-            <RecallGate
-              brief={brief}
-              pillar={areaId}
-              mode={reviewing ? 'review' : 'encode'}
-              kicker={reviewing ? 'Time to dust off this one' : 'Lock it in'}
-              onHeld={settleRecall}
-            />
+            <div className="rehearse-anchor">
+              <p className="quiet">
+                Folded. Tap the claim, then the reason — that’s the line that should stick.
+              </p>
+              <RecallGate
+                brief={brief}
+                pillar={areaId}
+                mode={reviewing ? 'review' : 'encode'}
+                kicker="Rehearse this"
+                onHeld={settleRecall}
+              />
+            </div>
           ) : null}
 
           {brief && recalled && !said ? (
             <SayBack brief={brief} onDone={(result) => commitMemory(result.elaborated, result.text)} />
+          ) : null}
+
+          {canProceed ? (
+            <div className="daily-flourish">
+              <StarRow
+                count={earned || 1}
+                label={starLegend(earned || 1)}
+              />
+              <p className="streak-pill">
+                {earned >= 3
+                  ? 'Held after a rest, and said back.'
+                  : earned === 2
+                    ? 'Held after a rest.'
+                    : reviewing
+                      ? 'Time to dust off this one — then it can rest again.'
+                      : 'First walk. The trail will bring this line back later.'}
+              </p>
+            </div>
           ) : null}
 
           {canProceed && unlockedCards.length > 0 && card ? (
@@ -262,9 +283,9 @@ export function ChallengeScreen({
               <button
                 type="button"
                 className="text-link"
-                onClick={() => onNavigate({ name: 'journal', focusId: card.id })}
+                onClick={() => onNavigate({ name: 'journal', focusId: card.id, autoQuiz: true })}
               >
-                Open the full card →
+                Rehearse this page →
               </button>
             </article>
           ) : null}
@@ -281,7 +302,7 @@ export function ChallengeScreen({
             </button>
           ) : null}
         </section>
-      ) : null}
+      )}
     </main>
   )
 }
