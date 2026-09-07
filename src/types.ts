@@ -144,5 +144,5 @@ export type View =
   | { name: 'daily' }
   | { name: 'area'; areaId: string }
   | { name: 'challenge'; areaId: string; challengeId: string }
-  | { name: 'journal'; focusId?: string }
+  | { name: 'journal'; focusId?: string; autoQuiz?: boolean }
   | { name: 'vista' }

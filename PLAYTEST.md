@@ -79,6 +79,15 @@ New user, storage cleared. **Clarity 5/5** in ≤15s.
 5. **Miss copy** — Sequence names the step that broke; first miss is a nudge, second miss still folds in `teachOnWrong`. Kicker is *Not yet*, not *Think again*.
 6. **Fun 4/5 delight** — Goal bar no longer covers Keep/Toss (shell scrolls in the body). Miss shake is punchier. Say-back is a bonus snap with Skip always visible; correct chip still grants elaboration. Sort tiles (Keep/Toss) sit above the bins so the first tap is the game. Snap-the-bins is an explicit lock (no silent auto-commit); miss shake holds ~0.8s.
 
+## Retention pass (2026-09-07, Fun 5 / Clarity 5 / Retention 3)
+
+Playtest said evidence retention is the remaining gap, and the footer still ate Keep/Toss/Snap on short viewports.
+
+1. **Puzzle chrome** — The What’s next footer **collapses on Trail and challenge screens**. Short heights (~390–430px and short laptops) also shrink the top bar and hide Say/Landmark during the puzzle so Keep/Toss and Snap the bins stay on-screen.
+2. **Rehearse this, above the fold** — After a solve, the puzzle and burst chrome fold away. One **Rehearse this** block is first: claim chips immediately (no extra Fold-the-page tap). A snapped claim echoes in large type, then stays visible while you pick the reason.
+3. **Witness Bench** — Unlocks after **two** Parable Hollow walks, not Unpayable. Hub copy: *Two Hollow walks open this.*
+4. **Journal Next recommended** — If a page is due (or waiting), the button is **Rehearse this** and jumps straight into that claim rebuild, not a long journal scroll.
+
 ## What still sucks
 
 1. Four-puzzle districts plus say-back every time is a long sitting. Skip must stay.

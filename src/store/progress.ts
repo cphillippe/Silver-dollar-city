@@ -124,12 +124,40 @@ export function isAreaComplete(area: Area, completed: string[]): boolean {
   return area.challenges.every((challenge) => completed.includes(challenge.id))
 }
 
+/** Witness Bench opens after this many Parable Hollow walks — Unpayable can wait. */
+export const HOLLOW_WALKS_TO_WITNESS = 2
+
+export function hollowWalksDone(completed: string[]): number {
+  const hollow = areas.find((item) => item.id === 'parable-hollow')
+  if (!hollow) return 0
+  return hollow.challenges.filter((challenge) => completed.includes(challenge.id))
+    .length
+}
+
+export function areaGateCopy(areaId: string, completed: string[]): string {
+  if (areaId === 'witness-bench') {
+    const have = hollowWalksDone(completed)
+    return `Walk ${HOLLOW_WALKS_TO_WITNESS} scenes in Parable Hollow (${have}/${HOLLOW_WALKS_TO_WITNESS}) — then Silas. Unpayable can wait.`
+  }
+  const area = areas.find((item) => item.id === areaId)
+  const previous = area
+    ? areas.find((item) => item.order === area.order - 1)
+    : undefined
+  return previous
+    ? `Finish ${previous.title}, then the path opens.`
+    : 'This gate is still closed.'
+}
+
 export function isAreaUnlocked(areaId: string, completed: string[]): boolean {
   const area = areas.find((item) => item.id === areaId)
   if (!area) return false
   if (area.order === 1) return true
   const previous = areas.find((item) => item.order === area.order - 1)
-  return previous ? isAreaComplete(previous, completed) : false
+  if (!previous) return false
+  if (area.id === 'witness-bench') {
+    return hollowWalksDone(completed) >= HOLLOW_WALKS_TO_WITNESS
+  }
+  return isAreaComplete(previous, completed)
 }
 
 export function nextChallengeInArea(
@@ -211,9 +239,7 @@ export function getNextGoal(
       return {
         kind: 'area',
         title: `${area.title} is still gated`,
-        detail: previous
-          ? `Finish every challenge in ${previous.title} to open the path.`
-          : 'Keep walking the trail you have.',
+        detail: areaGateCopy(area.id, progress.completed),
         areaId: previous?.id,
       }
     }
@@ -237,6 +263,10 @@ export function getNextGoal(
   }
 }
 
+function journalFocusForTrace(id: string) {
+  return journalForChallenge(id)?.id ?? journalEntries.find((entry) => entry.id === id)?.id ?? id
+}
+
 export function nextRebuildHint(
   progress: ProgressState,
   today = localDateKey(),
@@ -246,15 +276,26 @@ export function nextRebuildHint(
   cta: string
   go: View
 } {
-  if (!dailyDoneToday(progress, today)) {
-    const due = morningReview(progress, today)
-    const playable = due ? findPlayable(due.id) : undefined
+  const due = dueForRecall(progress, today).find((item) => item.brief)
+  if (due) {
+    const claim = due.brief?.claim ?? due.entry?.title ?? 'A held line'
     return {
-      title: due ? 'Next rebuild' : 'Next walk',
-      detail: due
-        ? `${playable?.challenge.title ?? 'An older page'} · due this morning · about a minute`
-        : `${dailyForDate(today).challenge.title} · today’s trail · about a minute`,
-      cta: due ? 'Dust this one off' : 'Walk today’s trail',
+      title: 'Rehearse this',
+      detail: `${claim} · due this morning · tap the claim, then the reason`,
+      cta: 'Rehearse this',
+      go: {
+        name: 'journal',
+        focusId: due.entry?.id ?? journalFocusForTrace(due.trace.id),
+        autoQuiz: true,
+      },
+    }
+  }
+
+  if (!dailyDoneToday(progress, today)) {
+    return {
+      title: 'Next walk',
+      detail: `${dailyForDate(today).challenge.title} · today’s trail · fold, then rehearse the claim`,
+      cta: 'Walk today’s trail',
       go: { name: 'daily' },
     }
   }
@@ -264,30 +305,30 @@ export function nextRebuildHint(
     .sort((a, b) => a.nextReviewAt.localeCompare(b.nextReviewAt))[0]
   const goal = getNextGoal(progress, today)
 
+  if (upcoming) {
+    const brief = evidenceFor(upcoming.id)
+    return {
+      title: 'Rehearse this',
+      detail: `${brief?.claim ?? findPlayable(upcoming.id)?.challenge.title ?? 'A held line'} · ${nextGapLabel(upcoming, today)}`,
+      cta: 'Rehearse this',
+      go: {
+        name: 'journal',
+        focusId: journalFocusForTrace(upcoming.id),
+        autoQuiz: true,
+      },
+    }
+  }
+
   if (goal.kind === 'challenge' && goal.areaId && goal.challengeId) {
-    const when = upcoming ? nextGapLabel(upcoming, today) : null
     return {
       title: 'Next on the trail',
-      detail: when
-        ? `${goal.detail}. Next recall: ${upcoming ? findPlayable(upcoming.id)?.challenge.title ?? 'a held line' : ''} · ${when}.`
-        : goal.detail,
+      detail: goal.detail,
       cta: 'Open this walk',
       go: {
         name: 'challenge',
         areaId: goal.areaId,
         challengeId: goal.challengeId,
       },
-    }
-  }
-
-  if (upcoming) {
-    const playable = findPlayable(upcoming.id)
-    const entry = journalForChallenge(upcoming.id)
-    return {
-      title: 'Next rebuild',
-      detail: `${playable?.challenge.title ?? evidenceFor(upcoming.id)?.claim ?? 'A held line'} · ${nextGapLabel(upcoming, today)}`,
-      cta: 'Open the page',
-      go: { name: 'journal', focusId: entry?.id ?? upcoming.id },
     }
   }
 

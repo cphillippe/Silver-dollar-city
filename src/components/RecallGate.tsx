@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { shuffle } from '../lib/shuffle'
 import type { EvidenceBrief } from '../content/evidence'
 import { Landmark } from './Landmark'
@@ -11,7 +11,7 @@ interface RecallGateProps {
   onHeld: (result: { clean: boolean }) => void
 }
 
-type Phase = 'invite' | 'claim' | 'reason' | 'teach' | 'held'
+type Phase = 'claim' | 'echo' | 'reason' | 'teach' | 'held'
 
 /**
  * Same verbs as the puzzles: snap a line, then a reason.
@@ -19,7 +19,7 @@ type Phase = 'invite' | 'claim' | 'reason' | 'teach' | 'held'
  */
 export function RecallGate({
   brief,
-  kicker = 'Lock it in',
+  kicker = 'Rehearse this',
   pillar,
   mode = 'encode',
   onHeld,
@@ -32,13 +32,27 @@ export function RecallGate({
     () => shuffle([...brief.reasonChoices]),
     [brief.id, brief.reasonChoices],
   )
-  const [phase, setPhase] = useState<Phase>(mode === 'review' ? 'claim' : 'invite')
+  const [phase, setPhase] = useState<Phase>('claim')
   const [misses, setMisses] = useState(0)
   const [flash, setFlash] = useState<string | null>(null)
   const [shake, setShake] = useState(false)
+  const echoTimer = useRef<number | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (echoTimer.current) window.clearTimeout(echoTimer.current)
+    }
+  }, [])
 
   function pick(line: string, correct: string, next: Phase) {
     if (line === correct) {
+      if (next === 'reason') {
+        setPhase('echo')
+        echoTimer.current = window.setTimeout(() => {
+          setPhase('reason')
+        }, 1100)
+        return
+      }
       setPhase(next)
       if (next === 'held') onHeld({ clean: misses === 0 })
       return
@@ -61,38 +75,20 @@ export function RecallGate({
 
   return (
     <section className={`recall-gate ${shake ? 'is-shake' : ''} phase-${phase}`}>
-      <p className="eyebrow">{kicker}</p>
+      <p className="eyebrow">
+        {kicker}
+        {brief.source ? ` · ${brief.source}` : ''}
+      </p>
 
       {pillar ? <Landmark pillar={pillar} compact /> : null}
 
-      {phase === 'invite' ? (
-        <>
-          <h2>The page folds. Rebuild the line.</h2>
-          <p>
-            Same snap as the puzzle — one claim, then one reason. Close the
-            teaching so it can stay.
-          </p>
-          <button
-            type="button"
-            className="btn primary xl"
-            onClick={() => setPhase('claim')}
-          >
-            Fold the page
-          </button>
-        </>
-      ) : null}
-
       {phase === 'claim' ? (
         <>
-          <h2>
-            {mode === 'review'
-              ? 'Time to dust off this one.'
-              : 'Which claim did this walk lock in?'}
-          </h2>
+          <h2>Rehearse this claim</h2>
           <p className="quiet">
             {mode === 'review'
-              ? 'Forgetting is why the trail brings it back. From memory — the long page is face-down.'
-              : 'From memory. The long page is face-down.'}
+              ? 'From memory — tap the line. Forgetting is why it came back.'
+              : 'The page folded. Tap the claim you’d still say tomorrow.'}
           </p>
           <div className="recall-choices">
             {claimOptions.map((line) => (
@@ -109,11 +105,19 @@ export function RecallGate({
         </>
       ) : null}
 
+      {phase === 'echo' ? (
+        <article className="claim-echo pop-in">
+          <p className="streak-pill">Claim snapped</p>
+          <p className="recall-line">{brief.claim}</p>
+          <p className="quiet">{brief.source}</p>
+        </article>
+      ) : null}
+
       {phase === 'reason' ? (
         <>
-          <p className="streak-pill pop-in">Claim locked</p>
-          <h2>Now the reason.</h2>
-          <p className="quiet">Why does that claim stand?</p>
+          <p className="recall-line rehearse-stem">{brief.claim}</p>
+          <h2>Why it stands</h2>
+          <p className="quiet">Tap the reason that holds that line up.</p>
           <div className="recall-choices">
             {reasonOptions.map((line) => (
               <button
@@ -153,6 +157,7 @@ export function RecallGate({
           </div>
           <p className="streak-pill">Held</p>
           <p className="recall-line">{brief.claim}</p>
+          <p>{brief.reason}</p>
           <p className="quiet">{brief.source}</p>
         </div>
       ) : null}

@@ -10,6 +10,7 @@ import { Landmark } from './Landmark'
 import { ShareInvite } from './ShareInvite'
 import { StarRow } from './StarRow'
 import {
+  areaGateCopy,
   areaMastery,
   areaProgress,
   dailyDoneToday,
@@ -203,6 +204,9 @@ export function Hub({ onNavigate }: HubProps) {
                 </p>
                 <h2>{area.title}</h2>
                 <p>{area.blurb}</p>
+                {!unlocked ? (
+                  <p className="quiet">{areaGateCopy(area.id, progress.completed)}</p>
+                ) : null}
                 <div className="station-mastery">
                   <StarRow
                     count={best as 0 | 1 | 2 | 3}
@@ -231,7 +235,9 @@ export function Hub({ onNavigate }: HubProps) {
                   onClick={() => onNavigate({ name: 'area', areaId: area.id })}
                 >
                   {!unlocked
-                    ? 'Still gated'
+                    ? area.id === 'witness-bench'
+                      ? 'Two Hollow walks open this'
+                      : 'Still gated'
                     : complete
                       ? 'Walk again'
                       : 'Enter this district'}

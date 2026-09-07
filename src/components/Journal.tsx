@@ -23,11 +23,12 @@ import type { JournalEntry, MemoryTrace, View } from '../types'
 
 interface JournalProps {
   focusId?: string
+  autoQuiz?: boolean
   onNavigate: (view: View) => void
 }
 
-export function Journal({ focusId, onNavigate }: JournalProps) {
-  const { progress } = useProgress()
+export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
+  const { progress, recordReview } = useProgress()
   const today = localDateKey()
   const { open, total, percent } = journalCompletion(progress)
   const trailNotes = journalEntries.filter((entry) => entry.areaId === 'daily-trail')
@@ -40,6 +41,57 @@ export function Journal({ focusId, onNavigate }: JournalProps) {
   const waiting = dueCount(progress, today)
   const trailOpen = !dailyDoneToday(progress, today)
   const nextStep = nextRebuildHint(progress, today)
+  const focusedEntry = journalEntries.find(
+    (entry) => entry.id === focusId || entry.unlockAfter === focusId,
+  )
+  const focusedOpen = Boolean(
+    focusedEntry && progress.journal.includes(focusedEntry.id),
+  )
+  const focusedBrief = focusedEntry
+    ? evidenceForJournal(focusedEntry.unlockAfter, focusedEntry.id)
+    : undefined
+
+  if (autoQuiz && focusedEntry && focusedOpen && focusedBrief) {
+    return (
+      <main className="journal is-rehearse">
+        <button
+          type="button"
+          className="text-link"
+          onClick={() =>
+            onNavigate({ name: 'journal', focusId: focusedEntry.id })
+          }
+        >
+          ← Journal
+        </button>
+        <section className="rehearse-anchor">
+          <p className="eyebrow">Next recommended · Rehearse this</p>
+          <h1>{focusedEntry.title}</h1>
+          <p className="quiet">
+            Tap the claim, then the reason. The long page stays face-down until
+            the line is yours.
+          </p>
+          <RecallGate
+            brief={focusedBrief}
+            pillar={focusedEntry.areaId}
+            mode="review"
+            kicker="Rehearse this"
+            onHeld={(result) => {
+              recordReview({
+                id: focusedBrief.id,
+                pillar: focusedEntry.areaId,
+                kind: 'recall',
+                today,
+                clean: result.clean,
+                peeked: false,
+                elaborated: false,
+              })
+              onNavigate({ name: 'journal', focusId: focusedEntry.id })
+            }}
+          />
+        </section>
+      </main>
+    )
+  }
 
   return (
     <main className="journal">
@@ -215,12 +267,14 @@ function JournalCard({
   trace?: MemoryTrace
   today: string
 }) {
-  const { recordHeld } = useProgress()
+  const { recordHeld, recordReview } = useProgress()
   const need = trailDaysRequired(entry.unlockAfter)
   const brief = evidenceForJournal(entry.unlockAfter, entry.id)
-  const [face, setFace] = useState<'recall' | 'read'>(held ? 'read' : 'recall')
-  const [quizAgain, setQuizAgain] = useState(Boolean(focused && open && brief && !held))
   const due = trace ? isDue(trace, today) : false
+  const [face, setFace] = useState<'recall' | 'read'>(held ? 'read' : 'recall')
+  const [quizAgain, setQuizAgain] = useState(
+    Boolean(focused && open && brief && (!held || due)),
+  )
 
   return (
     <article
@@ -252,18 +306,31 @@ function JournalCard({
                 className="btn primary"
                 onClick={() => setQuizAgain(true)}
               >
-                  Rebuild this line — can you still say it?
+                Rehearse this
               </button>
             </>
           ) : brief && quizAgain ? (
             <>
+              <p className="eyebrow">Rehearse this</p>
               <RecallGate
                 brief={brief}
                 pillar={entry.areaId}
-                kicker={due ? 'Time to dust off this one' : 'Journal recall'}
+                kicker={due ? 'Rehearse this' : 'Journal recall'}
                 mode={due ? 'review' : 'encode'}
-                onHeld={() => {
-                  recordHeld(brief.id)
+                onHeld={(result) => {
+                  if (due) {
+                    recordReview({
+                      id: brief.id,
+                      pillar: entry.areaId,
+                      kind: 'recall',
+                      today,
+                      clean: result.clean,
+                      peeked: false,
+                      elaborated: false,
+                    })
+                  } else {
+                    recordHeld(brief.id)
+                  }
                   setFace('read')
                   setQuizAgain(false)
                 }}

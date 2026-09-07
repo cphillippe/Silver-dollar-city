@@ -6,6 +6,7 @@ import { kindLabel } from './icons'
 import { starLegend } from '../lib/stars'
 import { StarRow } from './StarRow'
 import {
+  areaGateCopy,
   areaMastery,
   areaProgress,
   isAreaComplete,
@@ -79,7 +80,7 @@ export function AreaView({ areaId, onNavigate }: AreaViewProps) {
 
       {!unlocked ? (
         <p className="locked-note">
-          This gate is still closed. Finish the district before it, then return.
+          {areaGateCopy(area.id, progress.completed)}
         </p>
       ) : (
         <ol className="challenge-list">

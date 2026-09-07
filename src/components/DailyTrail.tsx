@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { findPlayable, getJournalEntry, pillarFor } from '../content'
 import { dailyForDate } from '../content/daily'
 import { evidenceFor } from '../content/evidence'
@@ -147,9 +147,16 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
 
   const flourish = newCards[0] ? getJournalEntry(newCards[0]) : undefined
   const liveStreak = Math.max(progress.streak, solved || session.already ? 1 : 0)
+  const rehearsing = solved && Boolean(brief) && !held
+
+  useEffect(() => {
+    if (!solved) return
+    const body = document.querySelector('.app-body')
+    body?.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [solved, rehearsing])
 
   return (
-    <main className="daily-page">
+    <main className={`daily-page ${solved ? 'is-after' : 'is-puzzle'} ${rehearsing ? 'is-rehearse' : ''}`}>
       <button
         type="button"
         className="text-link"
@@ -158,34 +165,40 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
         ← City map
       </button>
       <div className="card-lead">
-        <Avatar who="juniper" size="lg" />
+        <Avatar who="juniper" size={rehearsing ? 'sm' : 'lg'} />
         <div>
           <p className="eyebrow">
             Today’s Trail · {formatDeviceLocalDate(now)}
           </p>
           <DeviceDay now={now} />
           <h1>
-            {showTeaser
-              ? 'A mark for this morning'
-              : isReview
-                ? 'Time to dust off this one'
-                : challenge.title}
+            {rehearsing
+              ? 'Rehearse this'
+              : showTeaser
+                ? 'A mark for this morning'
+                : isReview
+                  ? 'Time to dust off this one'
+                  : challenge.title}
           </h1>
         </div>
       </div>
-      <Say
-        who="juniper"
-        line={
-          showTeaser
-            ? tone === 'welcome-back'
-              ? STORY.trailWait
-              : STORY.dailyHeld
-            : isReview
-              ? 'Forgetting is why the trail brings a page back. Same snap — no shame in dusting it off.'
-              : STORY.dailyInvite
-        }
-      />
-      <Landmark pillar={pillar} />
+      {rehearsing ? null : (
+        <>
+          <Say
+            who="juniper"
+            line={
+              showTeaser
+                ? tone === 'welcome-back'
+                  ? STORY.trailWait
+                  : STORY.dailyHeld
+                : isReview
+                  ? 'Forgetting is why the trail brings a page back. Same snap — no shame in dusting it off.'
+                  : STORY.dailyInvite
+            }
+          />
+          <Landmark pillar={pillar} />
+        </>
+      )}
 
       {!solved ? (
         <>
@@ -204,30 +217,19 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
         </>
       ) : (
         <section className="after-win daily-done">
-          <div className="burst" aria-hidden>
-            <span />
-            <span />
-            <span />
-            <span />
-          </div>
-          <p className="streak-pill pop-in">
-            {tone === 'welcome-back'
-              ? 'The trail waited. Welcome back.'
-              : tone === 'first' || liveStreak <= 1
-                ? 'Your first mark on the trail.'
-                : `${Math.max(progress.streak, 1)} mornings in a row.`}
-          </p>
-
           {brief && !held ? (
-            <RecallGate
-              brief={brief}
-              pillar={pillar}
-              mode={isReview ? 'review' : 'encode'}
-              kicker={
-                isReview ? 'Time to dust off this one' : 'This morning’s line'
-              }
-              onHeld={settleRecall}
-            />
+            <div className="rehearse-anchor">
+              <p className="quiet">
+                Folded. One claim, then one reason — the wording that should stick.
+              </p>
+              <RecallGate
+                brief={brief}
+                pillar={pillar}
+                mode={isReview ? 'review' : 'encode'}
+                kicker="Rehearse this"
+                onHeld={settleRecall}
+              />
+            </div>
           ) : null}
 
           {brief && held && !said ? (
@@ -236,6 +238,13 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
 
           {showTeaser ? (
             <>
+              <p className="streak-pill pop-in">
+                {tone === 'welcome-back'
+                  ? 'The trail waited. Welcome back.'
+                  : tone === 'first' || liveStreak <= 1
+                    ? 'Your first mark on the trail.'
+                    : `${Math.max(progress.streak, 1)} mornings in a row.`}
+              </p>
               <div className="daily-flourish">
                 <StarRow
                   count={earned || 1}
