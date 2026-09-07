@@ -12,9 +12,12 @@ import type { View } from './types'
 
 export default function App() {
   const { progress } = useProgress()
-  const [view, setView] = useState<View>(() =>
-    progress.started ? { name: 'hub' } : { name: 'welcome' },
-  )
+  const [view, setView] = useState<View>(() => {
+    const walked =
+      progress.completed.length > 0 || Boolean(progress.lastDailyDate)
+    if (progress.started && walked) return { name: 'hub' }
+    return { name: 'welcome' }
+  })
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })

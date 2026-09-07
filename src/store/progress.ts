@@ -199,7 +199,7 @@ export function getNextGoal(
     return {
       kind: 'welcome',
       title: 'Begin in Parable Hollow',
-      detail: 'The creek path is open. Stories first — then the longer case.',
+      detail: 'After today’s short walk, the longer trail opens here.',
       areaId: 'parable-hollow',
     }
   }

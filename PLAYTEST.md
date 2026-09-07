@@ -41,12 +41,21 @@ Fresh browser pass on the production preview, then a second pass on the dev serv
 | Mobile ~390px | Hub/nav readable; no overflow on the trail card. |
 | Spaced dust-off (earlier same-day pass) | Hub *Time to dust off this one*; Journal *Due this morning*; Jericho resurfaced; 1★ → 3★ after rest + say-back. |
 
+## Cold open re-test (this pass)
+
+New user, storage cleared. **Clarity 5/5** in ≤15s.
+
+- Purpose, quoted: *Silver City is a puzzle trail: play a short game, fold the page, and keep evidence you can still say tomorrow.*
+- Who: *You walk as River. Juniper walks the first puzzle with you — then the line is yours.*
+- **One** button: **Begin the trail**. No duplicate Continue. No map, no district list.
+- Begin goes to today’s short puzzle, not the five-district map.
+
 ## Rubric
 
 | Bar | Score | Notes |
 | --- | --- | --- |
 | Fun / “one more puzzle” | 4/5 | Sequence and match pull you forward. Sort was the bounce until Keep/Toss sat on the tile. |
-| Clarity | 4/5 | Cold open is now one sentence. Sequence is self-checking. Sort no longer needs a hidden two-step. |
+| Clarity | 5/5 | Cold open states the product in one line; one Begin button; map waits until after a walk. |
 | Learning lock-in | 5/5 | Fold → claim → reason, journal face-down, later dust-off of the same walk. |
 | Pacing | 4/5 | Daily ~a minute. “I’ll say it later” keeps a four-puzzle district from stalling. |
 | Tone | 5/5 | Invite, not a pew. Dust-off never shames the gap. |

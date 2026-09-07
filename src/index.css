@@ -331,10 +331,17 @@ p {
 
 .welcome-goal {
   font-family: var(--serif);
-  font-size: 1.25rem;
+  font-size: 1.35rem;
   max-width: 36rem;
   color: var(--gold);
-  margin: -0.3em 0 1em;
+  margin: 0.15em 0 0.55em;
+}
+
+.welcome-who {
+  font-size: 1.05rem;
+  max-width: 34rem;
+  margin: 0 0 1.2em;
+  color: rgba(244, 234, 210, 0.88);
 }
 
 .welcome-facts {
