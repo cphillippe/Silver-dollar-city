@@ -39,7 +39,7 @@ export function Welcome({ onNavigate }: WelcomeProps) {
         <p className="welcome-promise">{STORY.cityPromise}</p>
         <div className="welcome-actions">
           <button type="button" className="btn primary xl" onClick={begin}>
-            {returning ? 'Back to the map' : 'Begin the trail'}
+            {returning ? 'Back to town' : 'Begin the trail'}
           </button>
         </div>
         <p className="welcome-note">

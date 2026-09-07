@@ -74,7 +74,7 @@ export function AppShell({ view, onNavigate, children }: AppShellProps) {
               className={view.name === 'hub' ? 'is-active' : ''}
               onClick={() => onNavigate({ name: 'hub' })}
             >
-              Map
+              Town
             </button>
             <button
               type="button"

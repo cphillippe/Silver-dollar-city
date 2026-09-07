@@ -3,7 +3,7 @@ import { getArea } from '../content'
 import { AREA_LINES, guideForArea } from '../content/story'
 import { Avatar, Say } from './Avatar'
 import { kindLabel } from './icons'
-import { STAR_KEY, starLegend } from '../lib/stars'
+import { starLegend } from '../lib/stars'
 import { StarRow } from './StarRow'
 import {
   areaGateCopy,
@@ -48,7 +48,7 @@ export function AreaView({ areaId, onNavigate }: AreaViewProps) {
         className="text-link"
         onClick={() => onNavigate({ name: 'hub' })}
       >
-        ← City map
+        ← The town
       </button>
 
       <header
@@ -61,21 +61,14 @@ export function AreaView({ areaId, onNavigate }: AreaViewProps) {
         </div>
         <p className="eyebrow">{guide.role} · {area.subtitle}</p>
         <h1>{area.title}</h1>
+        <p className="lede">{area.blurb}</p>
         <p className="progress-line">
-          {done} of {total} challenges · {complete ? 'District complete — still playable' : 'In progress'}
-        </p>
-        <p className="progress-line quiet">
-          {mastery.earned}/{mastery.possible} stars here · {STAR_KEY}
+          {done} of {total} · {complete ? 'Street’s standing' : 'Still rising'}
+          {mastery.earned ? ` · ${mastery.earned}★` : ''}
         </p>
       </header>
 
       {lines ? <Say who={guide.id} line={complete ? lines.after : lines.hello} /> : null}
-
-      <section className="narrative">
-        {area.intro.map((paragraph) => (
-          <p key={paragraph}>{paragraph}</p>
-        ))}
-      </section>
 
       {!unlocked ? (
         <p className="locked-note">
@@ -160,7 +153,7 @@ export function AreaView({ areaId, onNavigate }: AreaViewProps) {
               })
             }
           >
-            Replay from the first challenge
+            Walk with {guide.shortName}
           </button>
           <button
             type="button"

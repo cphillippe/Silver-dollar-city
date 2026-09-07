@@ -5,6 +5,7 @@ import {
   citySnapshot,
   cityUpgrades,
   nextPlotId,
+  plotFill,
   plotStage,
 } from '../src/lib/city.ts'
 
@@ -59,6 +60,8 @@ const mapSrc = readFileSync(new URL('../src/components/CityMap.tsx', import.meta
 assert.match(mapSrc, /city-beat/)
 assert.match(mapSrc, /is-rising/)
 assert.match(mapSrc, /beat\.beat/)
+assert.match(mapSrc, /city-folk/)
+assert.match(mapSrc, /TownFolk/)
 
 const twoHollow = {
   ...afterDaily,
@@ -67,6 +70,7 @@ const twoHollow = {
   stars: { 'ph-road': 1, 'ph-father': 1 },
 }
 assert.equal(plotStage('hollow', twoHollow), 'built')
+assert.equal(plotFill('hollow', twoHollow), 2)
 assert.equal(plotStage('bench', twoHollow), 'scaffold')
 assert.equal(nextPlotId(twoHollow, true), 'hollow')
 
@@ -127,6 +131,9 @@ assert.equal(plotStage('lamps', grown), 'lit')
 const hubSrc = readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8')
 assert.match(hubSrc, /CityMap/)
 assert.match(hubSrc, /The town/)
+assert.match(hubSrc, /town-now/)
+assert.match(hubSrc, /townVoice/)
+assert.doesNotMatch(hubSrc, /STAR_KEY/)
 
 const welcomeSrc = readFileSync(
   new URL('../src/components/Welcome.tsx', import.meta.url),
@@ -161,6 +168,8 @@ assert.match(
   /Choose the one-sentence takeaway you can repeat tomorrow, then choose why it stands\./,
 )
 assert.match(storySrc, /Lock in the sort\./)
+assert.match(storySrc, /TOWN_VOICE/)
+assert.match(storySrc, /Lamp’s ready/)
 
 const sortSrc = readFileSync(
   new URL('../src/components/challenges/SortPlay.tsx', import.meta.url),
@@ -199,6 +208,7 @@ const dailyTrailSrc = readFileSync(
 )
 assert.match(dailyTrailSrc, /See the town/)
 assert.match(dailyTrailSrc, /STORY\.tapTakeaway/)
+assert.match(dailyTrailSrc, /TownReturn/)
 assert.doesNotMatch(dailyTrailSrc, /AdSlot/)
 assert.doesNotMatch(dailyTrailSrc, /district-flavor/)
 assert.doesNotMatch(dailyTrailSrc, /Tomorrow:/)
@@ -225,6 +235,20 @@ assert.doesNotMatch(hubSrc, /Rising/)
 assert.match(hubSrc, /STORY\.takeaway/)
 assert.match(hubSrc, /rehearseGo/)
 assert.match(hubSrc, /street-next/)
+
+const areaSrc = readFileSync(
+  new URL('../src/components/AreaView.tsx', import.meta.url),
+  'utf8',
+)
+assert.doesNotMatch(areaSrc, /area\.intro\.map/)
+assert.match(areaSrc, /area\.blurb/)
+
+const challengeSrc = readFileSync(
+  new URL('../src/components/ChallengeScreen.tsx', import.meta.url),
+  'utf8',
+)
+assert.match(challengeSrc, /TownReturn/)
+assert.match(challengeSrc, /See the town/)
 
 const cityLibSrc = readFileSync(new URL('../src/lib/city.ts', import.meta.url), 'utf8')
 assert.doesNotMatch(cityLibSrc, /Walk again/)

@@ -59,7 +59,10 @@ export function RecallGate({
   }
 
   return (
-    <section className={`recall-gate ${shake ? 'is-shake' : ''} phase-${phase}`}>
+    <section
+      className={`recall-gate ${shake ? 'is-shake' : ''} phase-${phase}`}
+      aria-label={STORY.takeaway}
+    >
       <p className="eyebrow">
         {kicker}
         {brief.source ? ` · ${brief.source}` : ''}
@@ -68,7 +71,6 @@ export function RecallGate({
       {phase === 'claim' ? (
         <>
           <h2>{STORY.tapTakeaway}</h2>
-          <p className="quiet">{STORY.takeaway}</p>
           <div className="recall-choices">
             {claimOptions.map((line) => (
               <button

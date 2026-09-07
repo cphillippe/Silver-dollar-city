@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react'
 import { findPlayable, pillarFor } from '../content'
 import { dailyForDate } from '../content/daily'
 import { evidenceFor } from '../content/evidence'
-import { STORY } from '../content/story'
+import { STORY, townVoice } from '../content/story'
 import { localDateKey } from '../lib/dates'
 import { PuzzlePlay } from './PuzzlePlay'
 import { RecallGate } from './RecallGate'
+import { TownReturn } from './TownReturn'
 import {
   dailyDoneToday,
   morningReview,
@@ -100,19 +101,18 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
   }, [solved, rehearsing])
 
   return (
-    <main className={`daily-page ${solved ? 'is-after' : 'is-puzzle'} ${rehearsing ? 'is-rehearse' : ''}`}>
+    <main className={`daily-page ${solved ? 'is-after' : 'is-puzzle'} ${rehearsing ? 'is-rehearse' : ''}`} aria-label={STORY.playGoal}>
       <button
         type="button"
         className="text-link"
         onClick={() => onNavigate({ name: 'hub' })}
       >
-        ← City map
+        ← The town
       </button>
 
       {!solved ? (
         <>
           <h1>{isReview ? 'Time to dust off this one' : challenge.title}</h1>
-          <p className="play-goal">{STORY.playGoal}</p>
           <PuzzlePlay
             challenge={challenge}
             onMiss={() => setMissed(true)}
@@ -134,15 +134,12 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
           ) : null}
 
           {showNext ? (
-            <div className="after-win-cta">
-              <button
-                type="button"
-                className="btn primary xl"
-                onClick={() => onNavigate({ name: 'hub' })}
-              >
-                See the town
-              </button>
-            </div>
+            <TownReturn
+              who={townVoice('porch').who}
+              line={townVoice('porch').afterWin}
+              action="See the town"
+              onGo={() => onNavigate({ name: 'hub' })}
+            />
           ) : null}
         </section>
       )}
