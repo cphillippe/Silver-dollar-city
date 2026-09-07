@@ -8,6 +8,8 @@ Silver City is content-driven. The game engine does not need to change when you 
 4. Add a one-line **claim + reason + source** in `src/content/evidence.ts` (required for the Recall Loop).
 5. If the district has a guide, add them in `src/content/story.ts` and `src/components/Avatar.tsx`.
 
+6. If the district is on the overworld, add its challenge ids to the lists in `src/lib/city.ts` so the building can rise.
+
 See also [`CONTRIBUTING.md`](../../CONTRIBUTING.md).
 
 Supported puzzle `kind` values:

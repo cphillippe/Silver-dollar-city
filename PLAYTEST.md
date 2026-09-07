@@ -11,7 +11,8 @@ Two bars, scored equally. A dry lesson that nobody finishes fails. A candy puzzl
 
 Run before a public URL or APK drop. Do not skip the retention chrome.
 
-1. Cold open → Begin the trail → Daily puzzle (Keep/Toss or order) → fold → **Rehearse this** (claim, then reason). Footer absent on Trail.
+1. Cold open → purpose (snap → fold → keep) **before** companions → Begin the trail → Daily puzzle → fold → **Rehearse this**. Footer absent on Trail. Then Map: mostly empty town, east porch glowing.
+2. Hub overworld: complete walks and watch Hollow / Bench / lamps construct. Grown city has lit roofs and a gold “build next” ring.
 2. Hub: “Progress saved on this device”. Settings → Export JSON, copy share code, Import pasted code (use a second browser profile or reset+import). Stars/journal/Daily survive.
 3. Two Hollow walks unlock Witness. Star key readable: `1★ first walk · 2★ held after a rest · 3★ held and said back`.
 4. Journal: no What’s-next footer; due cards + Rehearse this at the top when a line is due.

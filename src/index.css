@@ -1904,6 +1904,243 @@ p {
   }
 }
 
+.city-overworld {
+  position: relative;
+  margin: 0 0 16px;
+}
+
+.city-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  background: #12192c;
+}
+
+.city-overworld.is-poster .city-svg {
+  border-radius: 18px;
+  margin: 0 0 14px;
+  max-height: 28vh;
+}
+
+.city-overworld.is-poster .city-plot {
+  cursor: default;
+  pointer-events: none;
+}
+
+.city-plot {
+  cursor: pointer;
+  fill: #1a2336;
+  stroke: rgba(244, 234, 210, 0.22);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  transition: fill 0.35s ease, stroke 0.35s ease, filter 0.35s ease;
+}
+
+.city-plot.is-empty {
+  fill: rgba(16, 22, 36, 0.35);
+  stroke: rgba(244, 234, 210, 0.08);
+  cursor: default;
+}
+
+.city-plot.is-scaffold {
+  fill: none;
+  stroke: rgba(224, 179, 74, 0.55);
+  stroke-dasharray: 5 4;
+}
+
+.city-plot.is-built {
+  fill: #243044;
+  stroke: rgba(224, 179, 74, 0.45);
+}
+
+.city-plot.is-lit {
+  fill: #2c3a28;
+  stroke: var(--gold);
+  filter: url(#city-glow);
+}
+
+.city-plot.is-lit .city-lamp,
+.city-plot.is-built .city-lamp {
+  fill: var(--gold);
+  stroke: none;
+}
+
+.city-plot.is-empty .city-lamp,
+.city-plot.is-scaffold .city-lamp {
+  fill: rgba(224, 179, 74, 0.15);
+  stroke: none;
+}
+
+.city-plot.is-lit .city-window {
+  fill: #f0d27a;
+  stroke: none;
+}
+
+.city-plot.is-next {
+  filter: url(#city-glow);
+}
+
+.city-canopy {
+  fill: #1e3328;
+}
+
+.city-plot.is-scaffold .city-canopy,
+.city-plot.is-empty .city-canopy {
+  fill: none;
+}
+
+.city-plot.is-lit .city-canopy {
+  fill: #3d6a4c;
+}
+
+.city-flag {
+  fill: var(--cedar);
+  stroke: none;
+}
+
+.city-street,
+.city-creek {
+  stroke: rgba(244, 234, 210, 0.12);
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+
+.city-street.is-built,
+.city-street.is-lit,
+.city-creek.is-built,
+.city-creek.is-lit {
+  stroke: rgba(224, 179, 74, 0.38);
+}
+
+.city-sky-stars {
+  fill: rgba(244, 234, 210, 0.2);
+}
+
+.city-sky-stars.is-lit,
+.city-sky-stars.is-built {
+  fill: #f4ead2;
+}
+
+.city-next-halo {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 2;
+  opacity: 0.85;
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: city-pulse 2.4s ease-in-out infinite;
+}
+
+.city-next-mark text {
+  fill: var(--gold);
+  font-family: var(--sans);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+@keyframes city-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.86);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(1.12);
+  }
+}
+
+.city-legend {
+  margin-top: -28px;
+  position: relative;
+  z-index: 2;
+  background: linear-gradient(180deg, rgba(18, 26, 44, 0.96), rgba(14, 20, 36, 0.92));
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 14px 16px 16px;
+  box-shadow: var(--lift);
+}
+
+.city-legend h2 {
+  font-size: 1.45rem;
+  margin-bottom: 0.15em;
+}
+
+.today-trail.is-slim {
+  padding: 12px 14px 14px;
+  margin-bottom: 14px;
+}
+
+.today-trail.is-slim h2 {
+  font-size: 1.2rem;
+}
+
+.city-streets {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 18px;
+  display: grid;
+  gap: 8px;
+}
+
+.city-streets li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(244, 234, 210, 0.04);
+}
+
+.city-streets li.is-next {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px rgba(224, 179, 74, 0.25);
+}
+
+.city-streets li.is-locked {
+  opacity: 0.55;
+}
+
+.city-streets button {
+  flex: 0 0 auto;
+}
+
+.city-streets .street-name {
+  min-width: 0;
+}
+
+.city-streets .street-name strong {
+  display: block;
+  font-family: var(--serif);
+}
+
+.welcome-hero {
+  min-height: 88dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.welcome-promise {
+  margin: 0 0 1.1em;
+  max-width: 34rem;
+  color: var(--gold);
+  font-family: var(--serif);
+}
+
+.welcome-cast-late {
+  margin-top: 36px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
 .progress-saved {
   opacity: 0.78;
   font-size: 0.9rem;

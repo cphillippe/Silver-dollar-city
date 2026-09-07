@@ -89,6 +89,7 @@ export function guideForArea(areaId: string): Character {
 export const STORY = {
   purpose:
     'Silver City is a puzzle trail: play a short game, fold the page, and keep evidence you can still say tomorrow.',
+  cityPromise: 'Keep the line — the town lights. Streets and landmarks rise when a claim holds.',
   who:
     'River and Juniper are Christian companions on this trail. You walk as River; Juniper keeps the first lamp with you.',
   premise:
