@@ -62,6 +62,7 @@ assert.match(mapSrc, /is-rising/)
 assert.match(mapSrc, /beat\.beat/)
 assert.match(mapSrc, /city-folk/)
 assert.match(mapSrc, /TownFolk/)
+assert.match(mapSrc, /city-portrait/)
 
 const twoHollow = {
   ...afterDaily,
@@ -133,6 +134,7 @@ assert.match(hubSrc, /CityMap/)
 assert.match(hubSrc, /The town/)
 assert.match(hubSrc, /town-now/)
 assert.match(hubSrc, /townVoice/)
+assert.match(hubSrc, /street-drawer/)
 assert.doesNotMatch(hubSrc, /STAR_KEY/)
 
 const welcomeSrc = readFileSync(

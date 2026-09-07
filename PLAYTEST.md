@@ -112,10 +112,10 @@ Playtest said evidence retention is the remaining gap, and the footer still ate 
 
 Fun path toward 5: the hub should feel like coming home to a place, not a menu with a map skin.
 
-- **Town reacts:** Built!/Lit! overlay names the person who lives there. Folk stand on plots, speech bubbles on the next roof, walkers on the street, extra oaks/windows as a district fills, porch smoke when the lamp is up.
+- **Town reacts:** Built!/Lit! overlay names the person who lives there. Real portraits stand on plots with speech bubbles; walkers on the street; extra oaks/windows as a district fills; porch smoke when the lamp is up. Empty lots are earth and timber, not HUD dashes.
 - **In-world lines:** short `TOWN_VOICE` (Juniper, Mercy, Silas…) — not dump walls. District pages dropped the intro essay; guide `Say` + one blurb stay.
 - **Post-win:** after takeaway/reason, a character meets you with “See the town” (or the next roof on the same street). Recall/Journal/Daily dust-off unchanged.
-- **Less chrome:** no star-key dump on the hub; Map tab is Town; puzzle goal lives in the lead line, not a second paragraph.
+- **Less chrome:** no star-key dump on the hub; Map tab is Town; street directory is tucked under **Who lives where**; puzzle goal lives in the lead line, not a second paragraph.
 
 Retention still: sort → takeaway chip → why it stands → journal / spaced dust-off.
 
