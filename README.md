@@ -50,7 +50,7 @@ npm run build
 npm run preview
 ```
 
-Progress is stored in `localStorage` on this device (`silver-city-progress-v1`). Use **Reset** in the top bar to start over.
+Progress is stored **offline-first on this device** (versioned save, same localStorage key). Open **Settings** for Export / Import. Use **Reset** in the top bar to start over.
 
 Installable as a PWA (Add to Home Screen) after a production build, or as an Android debug APK (below).
 
@@ -130,9 +130,33 @@ Playtest notes live in [`PLAYTEST.md`](PLAYTEST.md).
 | The First Gate | First mover, contingency, kalām — and what those arguments do *not* yet prove |
 | The High Lookout | Morality, consciousness, meaning, beauty |
 
-## Extending
+## Progress
 
-Content lives in `src/content/`. The play engine reads typed modules; add an area, register it in `src/content/index.ts`, and attach journal cards in `src/content/journal.ts`. See `src/content/README.md`.
+Saves are **offline-first**. Nothing requires a login.
+
+- **Key:** `localStorage` `silver-city-progress-v1` (unchanged, so existing playtest saves still load).
+- **Envelope:** `{ kind: "silver-city-save", schemaVersion, appVersion, savedAt, progress }`. Unversioned gameplay objects from earlier builds are migrated on read, then rewritten as an envelope. Stars, journal, Daily dates, held lines, and `memory[id]` are kept.
+- **Schema:** `SAVE_SCHEMA_VERSION` in `src/config/app.ts`. Bump it only when the persisted shape changes, and add a step in `src/lib/save.ts` `migrateToCurrent`. Do not wipe on upgrade.
+- **Move devices:** Settings → **Export JSON** (file) or **Copy share code** (`SC1.…`). Import file or paste on the other device. Import replaces this device’s save and keeps a backup key (`silver-city-progress-v1.bak`).
+- **Cloud:** not shipped. `cloudSyncStatus()` is `local-only` until there is real auth. Optional keys can be added later without dropping v1 fields.
+- **UI:** Hub shows “Progress saved on this device” with a link to Export / Import. Settings also lists schema version and app version (`1.1.0`).
+
+## Ads
+
+No live ad network in this build. Slots are empty, labeled placeholders behind a flag.
+
+- **Flag:** `adsEnabledDefault` in `src/config/ads.ts` is **false** (playtest). Settings can show placeholders on this device only.
+- **Slots:** hub banner (under Today’s Trail), once between Parable Hollow and Witness Bench, after Daily **complete** (teaser screen).
+- **Must never be blocked or covered:** Keep/Toss and Snap the bins; Rehearse this / RecallGate; Journal due cards; puzzle boards. Ads are in-flow boxes, not overlays, and they do not mount on Trail/challenge/Journal play chrome.
+
+Wire a test unit later by teaching `AdSlot` to render the network creative when `adsEnabledDefault` is true — still only in those three slots.
+
+## Support
+
+- **Version:** app `1.1.0` (`package.json`, `src/config/app.ts`, Android `versionName`). Capacitor id `city.silver.unending`. `npm run android:apk` still builds the debug APK.
+- **Content:** data-driven under `src/content/`. How to add a district: [`src/content/README.md`](src/content/README.md) and [`CONTRIBUTING.md`](CONTRIBUTING.md). The play engine reads typed modules; add an area, register it in `src/content/index.ts`, attach journal cards in `src/content/journal.ts`, and add a claim line in `src/content/evidence.ts`.
+- **Release smoke:** [`PLAYTEST.md`](PLAYTEST.md) (fun / clarity / retention plus the short checklist).
+- **Playtest notes:** same file.
 
 ## Stack
 

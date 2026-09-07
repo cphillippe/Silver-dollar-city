@@ -7,6 +7,18 @@ Two bars, scored equally. A dry lesson that nobody finishes fails. A candy puzzl
 | **Fun / polish** | Would you open this again tonight? Snappy? Clear? Delightful? |
 | **Evidence retention** | After the page folds, can you say the **claim** and **one reason**? |
 
+## Release smoke (short)
+
+Run before a public URL or APK drop. Do not skip the retention chrome.
+
+1. Cold open → Begin the trail → Daily puzzle (Keep/Toss or order) → fold → **Rehearse this** (claim, then reason). Footer absent on Trail.
+2. Hub: “Progress saved on this device”. Settings → Export JSON, copy share code, Import pasted code (use a second browser profile or reset+import). Stars/journal/Daily survive.
+3. Two Hollow walks unlock Witness. Star key readable: `1★ first walk · 2★ held after a rest · 3★ held and said back`.
+4. Journal: no What’s-next footer; due cards + Rehearse this at the top when a line is due.
+5. Settings → Show placeholders: hub banner and between-districts appear; Trail/Journal still have no ad over Keep/Toss or Rehearse. Hide slots again for playtest.
+6. Reload / Android APK: same save key; version in Settings matches `package.json`.
+7. `npm test` and `npm run android:apk`.
+
 ## Session (required coverage)
 
 1. Cold open — is the goal obvious in 15 seconds?

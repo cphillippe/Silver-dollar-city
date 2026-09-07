@@ -1904,6 +1904,99 @@ p {
   }
 }
 
+.progress-saved {
+  opacity: 0.78;
+  font-size: 0.9rem;
+}
+
+.inline-link {
+  display: inline;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--gold);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.ad-slot {
+  position: relative;
+  margin: 14px 0;
+  padding: 12px 14px;
+  min-height: 72px;
+  border: 1px dashed var(--line);
+  border-radius: 16px;
+  background: rgba(244, 234, 210, 0.04);
+  z-index: 1;
+}
+
+.ad-slot .ad-slot-label {
+  font-family: var(--serif);
+  margin: 0 0 4px;
+}
+
+.ad-slot .quiet {
+  margin: 0;
+}
+
+.ad-between {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ad-between:not(:has(.ad-slot)) {
+  display: none;
+}
+
+.settings-card {
+  background: var(--mist);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px 16px 18px;
+  margin: 0 0 16px;
+}
+
+.settings-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0 12px;
+}
+
+.settings-paste,
+.settings-paste textarea,
+.share-code-out {
+  display: block;
+  width: 100%;
+}
+
+.settings-paste {
+  margin: 8px 0 12px;
+  font-size: 0.88rem;
+  opacity: 0.9;
+}
+
+.settings-paste textarea,
+.share-code-out {
+  margin-top: 6px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgba(10, 14, 26, 0.55);
+  color: inherit;
+  padding: 10px 12px;
+  resize: vertical;
+}
+
+.settings-msg {
+  color: var(--gold);
+  margin: 10px 0 0;
+}
+
+.settings code {
+  font-size: 0.85em;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     scroll-behavior: auto !important;

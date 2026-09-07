@@ -1,5 +1,5 @@
-import { addLocalDays, hashString } from './dates'
-import type { MemoryTrace, StarCount } from '../types'
+import { addLocalDays, hashString } from './dates.ts'
+import type { MemoryTrace, StarCount } from '../types.ts'
 
 /** Expanding gaps after a successful recall (local calendar days). */
 export const SPACE_DAYS = [1, 3, 7, 21] as const

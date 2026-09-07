@@ -6,26 +6,38 @@ import {
   masteryFromReview,
   type ReviewEvent,
 } from '../lib/memory'
+import {
+  backupCurrentSave,
+  parseIncomingSave,
+  persistSave,
+  type SaveMeta,
+} from '../lib/save'
 import { bestStars, type StarCount } from '../lib/stars'
 import { streakAfterPlay } from '../lib/streak'
 import type { ProgressState } from '../types'
 import {
   cardsUnlockedBy,
   emptyProgress,
-  loadProgress,
+  loadAppSave,
   ProgressContext,
-  saveProgress,
   trailCardsForDays,
   type ProgressApi,
 } from './progress'
 
 export function ProgressProvider({ children }: { children: ReactNode }) {
-  const [progress, setProgress] = useState<ProgressState>(() => loadProgress())
+  const [progress, setProgress] = useState<ProgressState>(() => loadAppSave().progress)
+  const [saveMeta, setSaveMeta] = useState<SaveMeta>(() => loadAppSave().meta)
   const [missed, setMissed] = useState<string[]>([])
 
   const commit = useCallback((next: ProgressState) => {
+    const meta = persistSave(next)
     setProgress(next)
-    saveProgress(next)
+    setSaveMeta(meta)
+  }, [])
+
+  const write = useCallback((next: ProgressState) => {
+    setSaveMeta(persistSave(next))
+    return next
   }, [])
 
   const start = useCallback(() => {
@@ -35,10 +47,9 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         started: true,
         lastAreaId: current.lastAreaId ?? 'parable-hollow',
       }
-      saveProgress(next)
-      return next
+      return write(next)
     })
-  }, [])
+  }, [write])
 
   const markMiss = useCallback((challengeId: string) => {
     setMissed((current) =>
@@ -53,10 +64,9 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         ...current,
         held: [...current.held, evidenceId],
       }
-      saveProgress(next)
-      return next
+      return write(next)
     })
-  }, [])
+  }, [write])
 
   const recordReview = useCallback((event: ReviewEvent) => {
     let kept: StarCount = 1
@@ -104,11 +114,10 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
           ? { ...current.elaborations, [event.id]: event.text }
           : current.elaborations,
       }
-      saveProgress(next)
-      return next
+      return write(next)
     })
     return kept
-  }, [])
+  }, [write])
 
   const recordStars = useCallback((challengeId: string, stars: StarCount) => {
     let kept: StarCount = stars
@@ -119,11 +128,10 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         ...current,
         stars: { ...current.stars, [challengeId]: kept },
       }
-      saveProgress(next)
-      return next
+      return write(next)
     })
     return kept
-  }, [])
+  }, [write])
 
   const completeChallenge = useCallback(
     (areaId: string, challengeId: string) => {
@@ -146,12 +154,11 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
           lastAreaId: areaId,
           lastChallengeId: challengeId,
         }
-        saveProgress(next)
-        return next
+        return write(next)
       })
       return unlocked
     },
-    [missed],
+    [missed, write],
   )
 
   const completeDaily = useCallback((dateKey: string) => {
@@ -180,20 +187,30 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
           ...new Set([...current.journal, ...trailCardsForDays(dates.length)]),
         ],
       }
-      saveProgress(next)
-      return next
+      return write(next)
     })
     return unlocked
-  }, [])
+  }, [write])
 
   const reset = useCallback(() => {
     setMissed([])
+    backupCurrentSave()
     commit(emptyProgress())
+  }, [commit])
+
+  const importSaveText = useCallback((raw: string) => {
+    const parsed = parseIncomingSave(raw)
+    if (!parsed.ok) return parsed
+    backupCurrentSave()
+    setMissed([])
+    commit(parsed.progress)
+    return { ok: true as const }
   }, [commit])
 
   const api = useMemo<ProgressApi>(
     () => ({
       progress,
+      saveMeta,
       missed,
       start,
       completeChallenge,
@@ -203,10 +220,12 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       recordReview,
       markMiss,
       reset,
+      importSaveText,
     }),
     [
       completeChallenge,
       completeDaily,
+      importSaveText,
       markMiss,
       missed,
       progress,
@@ -214,6 +233,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       recordReview,
       recordStars,
       reset,
+      saveMeta,
       start,
     ],
   )

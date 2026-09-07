@@ -12,112 +12,52 @@ import {
 import { localDateKey } from '../lib/dates'
 import {
   dueTraces,
-  emptyTrace,
   nextGapLabel,
   pickInterleaved,
   type ReviewEvent,
 } from '../lib/memory'
+import {
+  emptyProgress,
+  loadSave,
+  persistSave,
+  STORAGE_KEY,
+  type SaveMeta,
+} from '../lib/save'
 import { districtMastery, type StarCount } from '../lib/stars'
 import { isStreakLive, trailDaysRequired } from '../lib/streak'
-import type { Area, Challenge, MemoryTrace, ProgressState, View } from '../types'
+import type { Area, Challenge, ProgressState, View } from '../types'
 
-export const STORAGE_KEY = 'silver-city-progress-v1'
-
-export const emptyProgress = (): ProgressState => ({
-  started: false,
-  completed: [],
-  journal: [],
-  firstTry: [],
-  stars: {},
-  dailyDates: [],
-  streak: 0,
-  bestStreak: 0,
-  held: [],
-  memory: {},
-  elaborations: {},
-})
-
-function asMemoryMap(value: unknown): Record<string, MemoryTrace> {
-  if (!value || typeof value !== 'object') return {}
-  const next: Record<string, MemoryTrace> = {}
-  for (const [key, raw] of Object.entries(value as Record<string, unknown>)) {
-    if (!raw || typeof raw !== 'object') continue
-    const item = raw as MemoryTrace
-    next[key] = {
-      id: typeof item.id === 'string' ? item.id : key,
-      pillar: typeof item.pillar === 'string' ? item.pillar : pillarFor(key),
-      intervalIndex: typeof item.intervalIndex === 'number' ? item.intervalIndex : 0,
-      nextReviewAt: typeof item.nextReviewAt === 'string' ? item.nextReviewAt : localDateKey(),
-      lastReviewAt: item.lastReviewAt,
-      reviews: typeof item.reviews === 'number' ? item.reviews : 0,
-      cleanRecalls: typeof item.cleanRecalls === 'number' ? item.cleanRecalls : 0,
-      elaborated: Boolean(item.elaborated),
-    }
-  }
-  return next
-}
-
-function asStringMap(value: unknown): Record<string, string> {
-  if (!value || typeof value !== 'object') return {}
-  const next: Record<string, string> = {}
-  for (const [key, raw] of Object.entries(value as Record<string, unknown>)) {
-    if (typeof raw === 'string') next[key] = raw
-  }
-  return next
-}
-
-function asStarMap(value: unknown): Record<string, StarCount> {
-  if (!value || typeof value !== 'object') return {}
-  const next: Record<string, StarCount> = {}
-  for (const [key, raw] of Object.entries(value as Record<string, unknown>)) {
-    if (raw === 1 || raw === 2 || raw === 3) next[key] = raw
-  }
-  return next
-}
-
-function migrateMemory(parsed: ProgressState): Record<string, MemoryTrace> {
-  const memory = asMemoryMap(parsed.memory)
-  const today = localDateKey()
-  for (const id of parsed.held ?? []) {
-    if (memory[id]) continue
-    memory[id] = {
-      ...emptyTrace(id, pillarFor(id), today),
-      nextReviewAt: today,
-      lastReviewAt: undefined,
-    }
-  }
-  return memory
-}
+export { STORAGE_KEY, emptyProgress }
+export type { SaveMeta }
 
 export function loadProgress(): ProgressState {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return emptyProgress()
-    const parsed = JSON.parse(raw) as ProgressState
-    return {
-      started: Boolean(parsed.started),
-      completed: Array.isArray(parsed.completed) ? parsed.completed : [],
-      journal: Array.isArray(parsed.journal) ? parsed.journal : [],
-      firstTry: Array.isArray(parsed.firstTry) ? parsed.firstTry : [],
-      lastAreaId: parsed.lastAreaId,
-      lastChallengeId: parsed.lastChallengeId,
-      stars: asStarMap(parsed.stars),
-      dailyDates: Array.isArray(parsed.dailyDates) ? parsed.dailyDates : [],
-      lastDailyDate: parsed.lastDailyDate,
-      streak: typeof parsed.streak === 'number' ? parsed.streak : 0,
-      bestStreak: typeof parsed.bestStreak === 'number' ? parsed.bestStreak : 0,
-      held: Array.isArray(parsed.held) ? parsed.held : [],
-      memory: migrateMemory(parsed),
-      elaborations: asStringMap(parsed.elaborations),
-      lastReviewPillar: parsed.lastReviewPillar,
-    }
-  } catch {
-    return emptyProgress()
-  }
+  return loadAppSave().progress
 }
 
-export function saveProgress(state: ProgressState) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+export function loadSaveMeta(): SaveMeta {
+  return loadAppSave().meta
+}
+
+export function loadAppSave(): { progress: ProgressState; meta: SaveMeta } {
+  const loaded = loadSave()
+  const progress = withPillars(loaded.progress)
+  return { progress, meta: loaded.meta }
+}
+
+function withPillars(progress: ProgressState): ProgressState {
+  const memory = { ...progress.memory }
+  let changed = false
+  for (const [id, trace] of Object.entries(memory)) {
+    if (!trace.pillar || trace.pillar === 'unspecified') {
+      memory[id] = { ...trace, pillar: pillarFor(id) }
+      changed = true
+    }
+  }
+  return changed ? { ...progress, memory } : progress
+}
+
+export function saveProgress(state: ProgressState): SaveMeta {
+  return persistSave(state)
 }
 
 export function isAreaComplete(area: Area, completed: string[]): boolean {
@@ -433,6 +373,7 @@ export function streakCopy(progress: ProgressState, today = localDateKey()): str
 
 export interface ProgressApi {
   progress: ProgressState
+  saveMeta: SaveMeta
   missed: string[]
   start: () => void
   completeChallenge: (areaId: string, challengeId: string) => string[]
@@ -442,6 +383,7 @@ export interface ProgressApi {
   recordReview: (event: ReviewEvent) => StarCount
   markMiss: (challengeId: string) => void
   reset: () => void
+  importSaveText: (raw: string) => { ok: true } | { ok: false; error: string }
 }
 
 export const ProgressContext = createContext<ProgressApi | null>(null)

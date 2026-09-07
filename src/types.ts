@@ -146,3 +146,4 @@ export type View =
   | { name: 'challenge'; areaId: string; challengeId: string }
   | { name: 'journal'; focusId?: string; autoQuiz?: boolean }
   | { name: 'vista' }
+  | { name: 'settings' }

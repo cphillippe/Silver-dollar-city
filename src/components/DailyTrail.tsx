@@ -19,6 +19,7 @@ import { RecallGate } from './RecallGate'
 import { SayBack } from './SayBack'
 import { ShareInvite } from './ShareInvite'
 import { StarRow } from './StarRow'
+import { AdSlot } from './AdSlot'
 import { starLegend, type StarCount } from '../lib/stars'
 import {
   dailyDoneToday,
@@ -292,6 +293,7 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
               </article>
 
               <ShareInvite compact />
+              <AdSlot slot="after-daily" />
               <button
                 type="button"
                 className="btn primary xl"
