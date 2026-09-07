@@ -6,6 +6,9 @@ export function WinBurst({ play }: { play: boolean }) {
   return (
     <div className="win-burst" aria-hidden>
       <span className="win-flash" />
+      <span className="win-stamp-wrap">
+        <strong className="win-stamp">Locked!</strong>
+      </span>
       {BURST_SPARKS.map((i) => (
         <span
           key={i}
@@ -16,3 +19,4 @@ export function WinBurst({ play }: { play: boolean }) {
     </div>
   )
 }
+
