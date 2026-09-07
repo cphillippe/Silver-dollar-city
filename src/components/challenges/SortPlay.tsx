@@ -100,9 +100,12 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
   }
 
   const selected = picked ? takeTile(picked) : undefined
+  const ready = status !== 'ok' && bank.length === 0
 
   return (
-    <div className={`play ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}>
+    <div
+      className={`play ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''} ${ready ? 'is-ready' : ''}`}
+    >
       <PuzzleLead challenge={challenge} />
       <PuzzleHint text={challenge.context} onPeek={onPeek} />
       <p className="sort-how">
@@ -224,9 +227,8 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
         </div>
       </div>
 
-      {status !== 'ok' && bank.length === 0 ? (
-        <>
-          <p className="quiet">Bins are full. {STORY.lockSort}</p>
+      {ready ? (
+        <div className="sort-lock">
           <button
             type="button"
             className="btn primary xl snap-bins"
@@ -234,7 +236,7 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
           >
             {STORY.lockSort}
           </button>
-        </>
+        </div>
       ) : null}
 
       <ResultPanel

@@ -167,7 +167,10 @@ const sortSrc = readFileSync(
   'utf8',
 )
 assert.match(sortSrc, /STORY\.lockSort/)
+assert.match(sortSrc, /sort-lock/)
+assert.match(sortSrc, /is-ready/)
 assert.doesNotMatch(sortSrc, /Snap the bins/)
+assert.doesNotMatch(sortSrc, /Bins are full/)
 
 const dailySrc = readFileSync(
   new URL('../src/content/daily.ts', import.meta.url),
@@ -217,8 +220,11 @@ assert.doesNotMatch(recallSrc, /held-stamp/)
 assert.match(recallSrc, /STORY\.takeaway/)
 
 assert.doesNotMatch(hubSrc, /['"]Again['"]/)
+assert.doesNotMatch(hubSrc, /Standing/)
+assert.doesNotMatch(hubSrc, /Rising/)
 assert.match(hubSrc, /STORY\.takeaway/)
 assert.match(hubSrc, /rehearseGo/)
+assert.match(hubSrc, /street-next/)
 
 const cityLibSrc = readFileSync(new URL('../src/lib/city.ts', import.meta.url), 'utf8')
 assert.doesNotMatch(cityLibSrc, /Walk again/)
