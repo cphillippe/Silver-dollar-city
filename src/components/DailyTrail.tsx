@@ -5,7 +5,6 @@ import { evidenceFor } from '../content/evidence'
 import { STORY } from '../content/story'
 import { kindLabel } from './icons'
 import {
-  DATE_SOURCE,
   addLocalDays,
   assertLocalCalendar,
   formatDeviceLocalDate,
@@ -13,6 +12,7 @@ import {
 } from '../lib/dates'
 import { streakAfterPlay } from '../lib/streak'
 import { Avatar, Say } from './Avatar'
+import { DeviceDay } from './DeviceDay'
 import { Landmark } from './Landmark'
 import { PuzzlePlay } from './PuzzlePlay'
 import { RecallGate } from './RecallGate'
@@ -160,9 +160,10 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
       <div className="card-lead">
         <Avatar who="juniper" size="lg" />
         <div>
-          <p className="eyebrow" data-date-source={DATE_SOURCE}>
+          <p className="eyebrow">
             Today’s Trail · {formatDeviceLocalDate(now)}
           </p>
+          <DeviceDay now={now} />
           <h1>
             {showTeaser
               ? 'A mark for this morning'

@@ -13,12 +13,13 @@ import { localDateKey } from '../lib/dates'
 import {
   dueTraces,
   emptyTrace,
+  nextGapLabel,
   pickInterleaved,
   type ReviewEvent,
 } from '../lib/memory'
 import { districtMastery, type StarCount } from '../lib/stars'
 import { isStreakLive, trailDaysRequired } from '../lib/streak'
-import type { Area, Challenge, MemoryTrace, ProgressState } from '../types'
+import type { Area, Challenge, MemoryTrace, ProgressState, View } from '../types'
 
 export const STORAGE_KEY = 'silver-city-progress-v1'
 
@@ -233,6 +234,86 @@ export function getNextGoal(
     kind: 'vista',
     title: 'The lookout is yours',
     detail: 'Every area is open. Sit with the journal — or walk a path again.',
+  }
+}
+
+export function nextRebuildHint(
+  progress: ProgressState,
+  today = localDateKey(),
+): {
+  title: string
+  detail: string
+  cta: string
+  go: View
+} {
+  if (!dailyDoneToday(progress, today)) {
+    const due = morningReview(progress, today)
+    const playable = due ? findPlayable(due.id) : undefined
+    return {
+      title: due ? 'Next rebuild' : 'Next walk',
+      detail: due
+        ? `${playable?.challenge.title ?? 'An older page'} · due this morning · about a minute`
+        : `${dailyForDate(today).challenge.title} · today’s trail · about a minute`,
+      cta: due ? 'Dust this one off' : 'Walk today’s trail',
+      go: { name: 'daily' },
+    }
+  }
+
+  const upcoming = Object.values(progress.memory)
+    .filter((trace) => trace.nextReviewAt > today)
+    .sort((a, b) => a.nextReviewAt.localeCompare(b.nextReviewAt))[0]
+  const goal = getNextGoal(progress, today)
+
+  if (goal.kind === 'challenge' && goal.areaId && goal.challengeId) {
+    const when = upcoming ? nextGapLabel(upcoming, today) : null
+    return {
+      title: 'Next on the trail',
+      detail: when
+        ? `${goal.detail}. Next recall: ${upcoming ? findPlayable(upcoming.id)?.challenge.title ?? 'a held line' : ''} · ${when}.`
+        : goal.detail,
+      cta: 'Open this walk',
+      go: {
+        name: 'challenge',
+        areaId: goal.areaId,
+        challengeId: goal.challengeId,
+      },
+    }
+  }
+
+  if (upcoming) {
+    const playable = findPlayable(upcoming.id)
+    const entry = journalForChallenge(upcoming.id)
+    return {
+      title: 'Next rebuild',
+      detail: `${playable?.challenge.title ?? evidenceFor(upcoming.id)?.claim ?? 'A held line'} · ${nextGapLabel(upcoming, today)}`,
+      cta: 'Open the page',
+      go: { name: 'journal', focusId: entry?.id ?? upcoming.id },
+    }
+  }
+
+  if (goal.kind === 'area' && goal.areaId) {
+    return {
+      title: 'Next on the trail',
+      detail: goal.detail,
+      cta: goal.title,
+      go: { name: 'area', areaId: goal.areaId },
+    }
+  }
+
+  if (goal.kind === 'vista') {
+    return {
+      title: 'Next rebuild',
+      detail: 'Sit with a journal page, or walk a district again.',
+      cta: 'Open the journal',
+      go: { name: 'journal' },
+    }
+  }
+
+  return {
+    title: goal.title,
+    detail: goal.detail,
+    cta: 'Continue',
+    go: { name: 'hub' },
   }
 }
 

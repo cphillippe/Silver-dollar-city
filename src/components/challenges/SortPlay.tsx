@@ -233,14 +233,27 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
 
       <ResultPanel
         tone={status === 'idle' ? 'idle' : status === 'ok' ? 'ok' : 'teach'}
+        kicker={
+          status === 'ok'
+            ? 'Well reasoned'
+            : misses >= 2
+              ? 'One more look'
+              : 'A line is in the wrong bin'
+        }
         title={
           status === 'ok'
             ? 'Clean sort!'
             : misses >= 2
               ? 'Those bins still mix.'
-              : 'Shake and try the bins again.'
+              : 'Keep vs toss — shake and sort again.'
         }
-        body={status === 'wrong' && misses >= 2 ? challenge.teachOnWrong : undefined}
+        body={
+          status === 'wrong'
+            ? misses >= 2
+              ? challenge.teachOnWrong
+              : 'Keep the lines that belong. Toss (set aside) the rest.'
+            : undefined
+        }
         deeper={challenge.deeper}
       />
     </div>

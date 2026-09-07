@@ -25,8 +25,29 @@
 
 html,
 body,
-#root {
-  min-height: 100%;
+#root,
+.app {
+  max-width: 100%;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+p,
+li,
+.chip,
+.match-card,
+.prompt,
+.eyebrow,
+.dossier,
+.goal strong,
+.goal em {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 body {
@@ -102,8 +123,9 @@ p {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: calc(14px + var(--safe-top)) 18px 10px;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  padding: calc(14px + var(--safe-top)) 12px 10px;
   position: sticky;
   top: 0;
   backdrop-filter: blur(16px);
@@ -120,7 +142,8 @@ p {
   border: 0;
   color: var(--parchment);
   font-family: var(--serif);
-  font-size: 1.15rem;
+  font-size: 1.05rem;
+  min-width: 0;
 }
 
 .brand .avatar {
@@ -137,15 +160,20 @@ p {
 
 .topbar nav {
   display: flex;
-  gap: 6px;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: flex-end;
+  flex: 1 1 200px;
+  min-width: 0;
 }
 
 .topbar nav button {
   background: transparent;
   border: 1px solid transparent;
   color: var(--parchment);
-  padding: 8px 12px;
+  padding: 6px 10px;
   border-radius: 999px;
+  font-size: 0.88rem;
 }
 
 .topbar nav button.is-active {
@@ -158,9 +186,10 @@ p {
 }
 
 .app-body {
-  width: min(820px, calc(100% - 28px));
+  width: min(820px, calc(100% - 20px));
   margin: 0 auto;
   padding: 18px 0 32px;
+  min-width: 0;
 }
 
 .goalbar {
@@ -168,15 +197,17 @@ p {
   bottom: 0;
   display: flex;
   align-items: stretch;
+  flex-wrap: wrap;
   gap: 10px;
-  padding: 10px 14px var(--safe-bottom);
+  padding: 10px 12px var(--safe-bottom);
   background: rgba(10, 14, 26, 0.88);
   border-top: 1px solid var(--line);
   backdrop-filter: blur(16px);
 }
 
 .goal {
-  flex: 1;
+  flex: 1 1 180px;
+  min-width: 0;
   text-align: left;
   background: linear-gradient(180deg, rgba(224, 179, 74, 0.12), rgba(224, 179, 74, 0.04));
   border: 1px solid var(--line);
@@ -188,10 +219,11 @@ p {
 .goal-kicker,
 .eyebrow {
   font-size: 0.74rem;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--gold);
   margin-bottom: 4px;
+  max-width: 100%;
 }
 
 .goal strong,
@@ -209,7 +241,8 @@ p {
 .score {
   align-self: center;
   margin: 0;
-  white-space: nowrap;
+  white-space: normal;
+  flex: 1 1 88px;
 }
 
 .score-sub {
@@ -304,8 +337,10 @@ p {
 .vista h1,
 .page-head h1,
 .area-hero h1,
-.challenge-page h1 {
-  font-size: clamp(2.3rem, 8vw, 4.2rem);
+.challenge-page h1,
+.daily-page h1 {
+  font-size: clamp(1.65rem, 7vw, 4.2rem);
+  max-width: 100%;
 }
 
 .welcome h1 span,
@@ -724,6 +759,7 @@ p {
 
 .sort-tile-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -964,6 +1000,11 @@ p {
   gap: 12px;
   align-items: center;
   margin-bottom: 12px;
+  min-width: 0;
+}
+
+.chapter-head > div {
+  min-width: 0;
 }
 
 .card-grid {
@@ -1337,6 +1378,35 @@ p {
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
+}
+
+.card-lead > div {
+  min-width: 0;
+}
+
+.device-day {
+  margin: 0 0 6px;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  opacity: 0.62;
+}
+
+.next-rebuild {
+  background: linear-gradient(180deg, rgba(224, 179, 74, 0.14), rgba(224, 179, 74, 0.04));
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px 16px 18px;
+  margin-bottom: 22px;
+}
+
+.next-rebuild h2 {
+  font-size: 1.35rem;
+}
+
+.sort-tile-actions .btn.tiny {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .welcome-cast {
@@ -1417,7 +1487,7 @@ p {
 
 .welcome h1,
 .vista h1 {
-  font-size: clamp(2.1rem, 7vw, 3.6rem);
+  font-size: clamp(1.85rem, 8vw, 3.6rem);
 }
 
 @media (max-width: 640px) {
@@ -1426,16 +1496,38 @@ p {
   }
 
   .station {
-    grid-template-columns: 58px 1fr;
+    grid-template-columns: 52px 1fr;
   }
 
   .station-emblem {
-    width: 58px;
-    height: 58px;
+    width: 52px;
+    height: 52px;
   }
 
   .goal em {
     display: none;
+  }
+
+  .topbar nav {
+    flex: 1 1 100%;
+    justify-content: flex-start;
+  }
+
+  .sort-bins {
+    grid-template-columns: 1fr;
+  }
+
+  .challenge-row {
+    grid-template-columns: 32px 1fr;
+  }
+
+  .challenge-row .row-status {
+    grid-column: 2;
+  }
+
+  .welcome,
+  .vista {
+    padding: 24px 4px 28px;
   }
 }
 
