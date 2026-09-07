@@ -95,6 +95,8 @@ export const STORY = {
     'Goal: keep the lines that support today’s claim; toss the distractors; then choose the claim and reason you’ll remember.',
   takeaway:
     'Choose the one-sentence takeaway you can repeat tomorrow, then choose why it stands.',
+  tapTakeaway: 'Tap the takeaway',
+  whyItStands: 'Why it stands',
   lockSort: 'Lock in the sort.',
   premise:
     'A 60-second Christian reasoning game: sort ideas, choose one takeaway, and remember why it stands tomorrow.',

@@ -221,9 +221,9 @@ export function nextRebuildHint(
   if (due) {
     const claim = due.brief?.claim ?? due.entry?.title ?? 'A held line'
     return {
-      title: STORY.takeaway,
-      detail: `${claim} · due this morning · tap the claim, then the reason`,
-      cta: STORY.takeaway,
+      title: STORY.tapTakeaway,
+      detail: `${claim} · due this morning`,
+      cta: STORY.tapTakeaway,
       go: {
         name: 'journal',
         focusId: due.entry?.id ?? journalFocusForTrace(due.trace.id),
@@ -249,9 +249,9 @@ export function nextRebuildHint(
   if (upcoming) {
     const brief = evidenceFor(upcoming.id)
     return {
-      title: STORY.takeaway,
+      title: STORY.tapTakeaway,
       detail: `${brief?.claim ?? findPlayable(upcoming.id)?.challenge.title ?? 'A held line'} · ${nextGapLabel(upcoming, today)}`,
-      cta: STORY.takeaway,
+      cta: STORY.tapTakeaway,
       go: {
         name: 'journal',
         focusId: journalFocusForTrace(upcoming.id),

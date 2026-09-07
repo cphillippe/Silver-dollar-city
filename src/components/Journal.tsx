@@ -64,11 +64,10 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
         <section className="rehearse-anchor">
           <p className="eyebrow">Next recommended · Today’s takeaway</p>
           <h1>{focusedEntry.title}</h1>
-          <p className="quiet">{STORY.takeaway}</p>
           <RecallGate
             brief={focusedBrief}
             mode="review"
-            kicker={STORY.takeaway}
+            kicker={STORY.tapTakeaway}
             onHeld={(result) => {
               recordReview({
                 id: focusedBrief.id,
@@ -120,7 +119,7 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
                     })
                   }
                 >
-                  {STORY.takeaway}
+                  {STORY.tapTakeaway}
                 </button>
               </article>
             ))}
@@ -291,16 +290,15 @@ function JournalCard({
                 className="btn primary"
                 onClick={() => setQuizAgain(true)}
               >
-                {STORY.takeaway}
+                {STORY.tapTakeaway}
               </button>
             </>
           ) : brief && quizAgain ? (
             <>
-              <p className="eyebrow">{STORY.takeaway}</p>
+              <p className="eyebrow">{STORY.tapTakeaway}</p>
               <RecallGate
                 brief={brief}
-                pillar={entry.areaId}
-                kicker={due ? STORY.takeaway : 'Journal recall'}
+                kicker={due ? STORY.tapTakeaway : 'Journal recall'}
                 mode={due ? 'review' : 'encode'}
                 onHeld={(result) => {
                   if (due) {

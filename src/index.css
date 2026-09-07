@@ -1315,8 +1315,22 @@ p {
   background: linear-gradient(90deg, transparent, var(--gold), transparent);
 }
 
+.recall-gate h2 {
+  font-size: 1.28rem;
+}
+
 .recall-card {
-  min-height: 56px;
+  min-height: 44px;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  line-height: 1.25;
+  text-align: left;
+  white-space: normal;
+}
+
+.recall-choices {
+  display: grid;
+  gap: 8px;
 }
 
 .today-trail.is-live {
@@ -1338,7 +1352,7 @@ p {
 .next-card h2,
 .teaser-card h2,
 .recall-gate h2 {
-  font-size: 1.7rem;
+  font-size: 1.35rem;
 }
 
 .district-flavor {
@@ -1561,19 +1575,21 @@ p {
 
 .recall-choices {
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .recall-card {
   text-align: left;
   width: 100%;
-  min-height: 56px;
+  min-height: 44px;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  line-height: 1.25;
+  white-space: normal;
   background: linear-gradient(180deg, rgba(244, 234, 210, 0.1), rgba(14, 18, 32, 0.4));
   border: 1px solid var(--line);
   color: inherit;
-  border-radius: 18px;
-  padding: 14px 16px;
-  font-size: 1.02rem;
+  border-radius: 16px;
   box-shadow: 0 6px 16px rgba(4, 8, 18, 0.18);
 }
 
@@ -1958,6 +1974,209 @@ p {
   border: 1px solid var(--line);
   box-shadow: var(--shadow);
   background: #12192c;
+  overflow: hidden;
+}
+
+.city-overworld.is-revealing .city-svg {
+  box-shadow: 0 0 0 1px rgba(224, 179, 74, 0.55), 0 18px 50px rgba(224, 179, 74, 0.28);
+}
+
+.city-beat {
+  position: absolute;
+  left: 50%;
+  top: 28%;
+  z-index: 3;
+  transform: translate(-50%, -40%);
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: 10px 22px 12px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #f0d27a, #c9a14a);
+  color: #1a1408;
+  box-shadow: 0 10px 40px rgba(224, 179, 74, 0.45);
+  animation: city-beat-pop 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+  pointer-events: none;
+}
+
+.city-beat strong {
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.city-beat span {
+  font-family: var(--serif);
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+@keyframes city-beat-pop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -20%) scale(0.6);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -40%) scale(1);
+  }
+}
+
+.city-plot {
+  cursor: pointer;
+  fill: #1a2336;
+  stroke: rgba(244, 234, 210, 0.22);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  transition: fill 0.35s ease, stroke 0.35s ease, filter 0.35s ease;
+}
+
+.city-plot.is-rising {
+  animation: city-rise 0.7s cubic-bezier(0.2, 1.45, 0.35, 1) both;
+}
+
+@keyframes city-rise {
+  0% {
+    transform: translateY(22px) scale(0.35);
+    opacity: 0.15;
+  }
+  62% {
+    transform: translateY(-8px) scale(1.12);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+.city-plot.is-empty {
+  fill: rgba(16, 22, 36, 0.2);
+  stroke: rgba(244, 234, 210, 0.1);
+  cursor: default;
+}
+
+.city-lot {
+  fill: none;
+  stroke: rgba(244, 234, 210, 0.14);
+  stroke-dasharray: 3 4;
+}
+
+.city-plot.is-scaffold {
+  fill: none;
+  stroke: rgba(224, 179, 74, 0.7);
+  stroke-dasharray: 5 4;
+}
+
+.city-plot.is-built {
+  fill: #2a384c;
+  stroke: #e0b34a;
+  stroke-width: 2.4;
+}
+
+.city-plot.is-lit {
+  fill: #35503a;
+  stroke: var(--gold);
+  stroke-width: 2.6;
+  filter: url(#city-glow);
+}
+
+.city-roof {
+  fill: none;
+  stroke: inherit;
+}
+
+.city-plot.is-built .city-roof,
+.city-plot.is-lit .city-roof {
+  fill: #d4a84a;
+  stroke: #f0d27a;
+}
+
+.city-plot.is-lit .city-lamp,
+.city-plot.is-built .city-lamp {
+  fill: #ffe08a;
+  stroke: none;
+  filter: url(#city-glow);
+}
+
+.city-plot.is-empty .city-lamp,
+.city-plot.is-scaffold .city-lamp {
+  fill: rgba(224, 179, 74, 0.12);
+  stroke: none;
+}
+
+.city-window {
+  fill: rgba(14, 18, 28, 0.5);
+  stroke: none;
+}
+
+.city-plot.is-built .city-window {
+  fill: #7a6240;
+}
+
+.city-plot.is-lit .city-window {
+  fill: #ffe08a;
+  stroke: none;
+}
+
+.city-flash {
+  fill: rgba(255, 224, 138, 0.45);
+  stroke: none;
+  animation: city-flash 0.7s ease-out both;
+}
+
+.city-spark {
+  fill: #ffe08a;
+  stroke: none;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: city-spark 0.85s ease-out both;
+  transform: rotate(var(--deg)) translateY(-6px);
+}
+
+@keyframes city-flash {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.2);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.8);
+  }
+}
+
+@keyframes city-spark {
+  0% {
+    opacity: 1;
+    transform: rotate(var(--deg)) translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--deg)) translateY(-42px) scale(0.2);
+  }
+}
+
+.city-plot.is-next {
+  filter: url(#city-glow);
+}
+
+.after-win-cta {
+  position: sticky;
+  bottom: calc(6px + var(--safe-bottom, 0px));
+  z-index: 4;
+  display: grid;
+  gap: 8px;
+  justify-items: stretch;
+  padding: 8px 0 4px;
+  background: linear-gradient(180deg, transparent, rgba(14, 20, 36, 0.94) 28%);
+}
+
+.after-win-cta .btn {
+  width: 100%;
 }
 
 .city-overworld.is-poster .city-svg {
@@ -1969,60 +2188,6 @@ p {
 .city-overworld.is-poster .city-plot {
   cursor: default;
   pointer-events: none;
-}
-
-.city-plot {
-  cursor: pointer;
-  fill: #1a2336;
-  stroke: rgba(244, 234, 210, 0.22);
-  stroke-width: 2;
-  stroke-linejoin: round;
-  stroke-linecap: round;
-  transition: fill 0.35s ease, stroke 0.35s ease, filter 0.35s ease;
-}
-
-.city-plot.is-empty {
-  fill: rgba(16, 22, 36, 0.35);
-  stroke: rgba(244, 234, 210, 0.08);
-  cursor: default;
-}
-
-.city-plot.is-scaffold {
-  fill: none;
-  stroke: rgba(224, 179, 74, 0.55);
-  stroke-dasharray: 5 4;
-}
-
-.city-plot.is-built {
-  fill: #243044;
-  stroke: rgba(224, 179, 74, 0.45);
-}
-
-.city-plot.is-lit {
-  fill: #2c3a28;
-  stroke: var(--gold);
-  filter: url(#city-glow);
-}
-
-.city-plot.is-lit .city-lamp,
-.city-plot.is-built .city-lamp {
-  fill: var(--gold);
-  stroke: none;
-}
-
-.city-plot.is-empty .city-lamp,
-.city-plot.is-scaffold .city-lamp {
-  fill: rgba(224, 179, 74, 0.15);
-  stroke: none;
-}
-
-.city-plot.is-lit .city-window {
-  fill: #f0d27a;
-  stroke: none;
-}
-
-.city-plot.is-next {
-  filter: url(#city-glow);
 }
 
 .city-canopy {

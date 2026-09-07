@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { shuffle } from '../lib/shuffle'
 import type { EvidenceBrief } from '../content/evidence'
 import { STORY } from '../content/story'
-import { Landmark } from './Landmark'
 
 interface RecallGateProps {
   brief: EvidenceBrief
@@ -20,8 +19,7 @@ type Phase = 'claim' | 'echo' | 'reason' | 'teach' | 'held'
  */
 export function RecallGate({
   brief,
-  kicker = STORY.takeaway,
-  pillar,
+  kicker = STORY.tapTakeaway,
   mode = 'encode',
   onHeld,
 }: RecallGateProps) {
@@ -51,7 +49,7 @@ export function RecallGate({
         setPhase('echo')
         echoTimer.current = window.setTimeout(() => {
           setPhase('reason')
-        }, 1100)
+        }, 380)
         return
       }
       setPhase(next)
@@ -66,7 +64,7 @@ export function RecallGate({
       setShake(false)
       setFlash(null)
       if (nextMisses >= 2) setPhase('teach')
-    }, 420)
+    }, 320)
   }
 
   function finishFromTeach() {
@@ -81,15 +79,11 @@ export function RecallGate({
         {brief.source ? ` · ${brief.source}` : ''}
       </p>
 
-      {pillar ? <Landmark pillar={pillar} compact /> : null}
-
       {phase === 'claim' ? (
         <>
-          <h2>{STORY.takeaway}</h2>
+          <h2>{STORY.tapTakeaway}</h2>
           <p className="quiet">
-            {mode === 'review'
-              ? 'From memory — tap the takeaway. Forgetting is why it came back.'
-              : 'The page folded. Tap the one-sentence takeaway you’ll still say tomorrow.'}
+            {mode === 'review' ? 'From memory.' : 'One line. Tomorrow you’ll still say it.'}
           </p>
           <div className="recall-choices">
             {claimOptions.map((line) => (
@@ -108,17 +102,15 @@ export function RecallGate({
 
       {phase === 'echo' ? (
         <article className="claim-echo pop-in">
-          <p className="streak-pill">Claim snapped</p>
+          <p className="streak-pill">Held</p>
           <p className="recall-line">{brief.claim}</p>
-          <p className="quiet">{brief.source}</p>
         </article>
       ) : null}
 
       {phase === 'reason' ? (
         <>
           <p className="recall-line rehearse-stem">{brief.claim}</p>
-          <h2>Why it stands</h2>
-          <p className="quiet">Tap the reason that holds that line up.</p>
+          <h2>{STORY.whyItStands}</h2>
           <div className="recall-choices">
             {reasonOptions.map((line) => (
               <button
@@ -136,30 +128,21 @@ export function RecallGate({
 
       {phase === 'teach' ? (
         <>
-          <h2>Say it with us — then it’s yours.</h2>
+          <h2>Here’s the line.</h2>
           <article className="unlock-card pop-in">
-            <p className="eyebrow">{brief.source}</p>
             <p className="recall-line">{brief.claim}</p>
             <p>{brief.reason}</p>
           </article>
           <button type="button" className="btn primary xl" onClick={finishFromTeach}>
-            I’ve got the line
+            Got it
           </button>
         </>
       ) : null}
 
       {phase === 'held' ? (
         <div className="held-stamp pop-in">
-          <div className="burst" aria-hidden>
-            <span />
-            <span />
-            <span />
-            <span />
-          </div>
           <p className="streak-pill">Held</p>
           <p className="recall-line">{brief.claim}</p>
-          <p>{brief.reason}</p>
-          <p className="quiet">{brief.source}</p>
         </div>
       ) : null}
     </section>

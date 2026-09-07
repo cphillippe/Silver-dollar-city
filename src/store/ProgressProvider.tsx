@@ -14,6 +14,7 @@ import {
 } from '../lib/save'
 import { bestStars, type StarCount } from '../lib/stars'
 import { streakAfterPlay } from '../lib/streak'
+import { citySnapshot, forgetCitySeen, writeCitySeen } from '../lib/city'
 import type { ProgressState } from '../types'
 import {
   cardsUnlockedBy,
@@ -42,6 +43,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
 
   const start = useCallback(() => {
     setProgress((current) => {
+      writeCitySeen(citySnapshot(current))
       const next = {
         ...current,
         started: true,
@@ -194,6 +196,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
 
   const reset = useCallback(() => {
     setMissed([])
+    forgetCitySeen()
     backupCurrentSave()
     commit(emptyProgress())
   }, [commit])
@@ -203,6 +206,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     if (!parsed.ok) return parsed
     backupCurrentSave()
     setMissed([])
+    forgetCitySeen()
     commit(parsed.progress)
     return { ok: true as const }
   }, [commit])

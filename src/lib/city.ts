@@ -192,3 +192,76 @@ export function nextKicker(stage: CityStage, plotId: CityPlotId, dailyDone: bool
   if (stage === 'built') return 'Keep building'
   return 'Walk again'
 }
+
+export const CITY_SEEN_KEY = 'silver-city-seen-city-v1'
+
+export const STAGE_RANK: Record<CityStage, number> = {
+  empty: 0,
+  scaffold: 1,
+  built: 2,
+  lit: 3,
+}
+
+export type CitySnapshot = Record<CityPlotId, CityStage>
+
+export interface CityUpgrade {
+  id: CityPlotId
+  from: CityStage
+  to: CityStage
+  beat: 'Built!' | 'Lit!' | 'Unlocked'
+  title: string
+}
+
+export function citySnapshot(progress: ProgressState): CitySnapshot {
+  const snap = {} as CitySnapshot
+  for (const plot of CITY_PLOTS) {
+    snap[plot.id] = plotStage(plot.id, progress)
+  }
+  return snap
+}
+
+export function cityUpgrades(
+  prev: CitySnapshot,
+  next: CitySnapshot,
+): CityUpgrade[] {
+  const list: CityUpgrade[] = []
+  for (const plot of CITY_PLOTS) {
+    const from = prev[plot.id]
+    const to = next[plot.id]
+    if (STAGE_RANK[to] <= STAGE_RANK[from]) continue
+    list.push({
+      id: plot.id,
+      from,
+      to,
+      beat: to === 'lit' ? 'Lit!' : to === 'built' ? 'Built!' : 'Unlocked',
+      title: plot.title,
+    })
+  }
+  list.sort(
+    (a, b) => STAGE_RANK[b.to] - STAGE_RANK[a.to] || STAGE_RANK[a.from] - STAGE_RANK[b.from],
+  )
+  return list
+}
+
+export function readCitySeen(): CitySnapshot | null {
+  if (typeof localStorage === 'undefined') return null
+  try {
+    const raw = localStorage.getItem(CITY_SEEN_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw) as CitySnapshot
+    if (!parsed || typeof parsed !== 'object') return null
+    return parsed
+  } catch {
+    return null
+  }
+}
+
+export function writeCitySeen(snap: CitySnapshot) {
+  if (typeof localStorage === 'undefined') return
+  localStorage.setItem(CITY_SEEN_KEY, JSON.stringify(snap))
+}
+
+export function forgetCitySeen() {
+  if (typeof localStorage === 'undefined') return
+  localStorage.removeItem(CITY_SEEN_KEY)
+}

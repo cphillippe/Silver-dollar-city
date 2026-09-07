@@ -11,9 +11,6 @@ import { AdSlot } from './AdSlot'
 import { CityMap } from './CityMap'
 import { APP_VERSION } from '../config/app'
 import {
-  areaGateCopy,
-  areaMastery,
-  areaProgress,
   dailyDoneToday,
   dueCount,
   getNextGoal,
@@ -175,10 +172,6 @@ export function Hub({ onNavigate }: HubProps) {
           const complete = area
             ? isAreaComplete(area, progress.completed)
             : doneToday
-          const { done, total } = area
-            ? areaProgress(area, progress.completed)
-            : { done: progress.dailyDates.length, total: Math.max(3, progress.dailyDates.length) }
-          const mastery = area ? areaMastery(area, progress.stars) : undefined
           const stage = plotStage(plot.id, progress)
           const current = plot.id === nextId
 
@@ -192,14 +185,13 @@ export function Hub({ onNavigate }: HubProps) {
                 <span className="quiet">
                   {stage === 'empty'
                     ? area
-                      ? areaGateCopy(area.id, progress.completed)
+                      ? 'Waiting'
                       : 'Waiting'
                     : stage === 'scaffold'
-                      ? 'Scaffold'
+                      ? 'Rising'
                       : stage === 'built'
-                        ? `${done}/${total} standing`
+                        ? 'Standing'
                         : 'Lit'}
-                  {mastery && stage !== 'empty' ? ` · ${mastery.earned}/${mastery.possible}★` : ''}
                 </span>
               </div>
               <button

@@ -156,7 +156,7 @@ The hub is an **overworld map**, not a locked list. Buildings are derived from t
 | Dossier house | First journal page | 4 pages built · 12 lit |
 | Star lamps | First star | 4★ built · 12★ lit |
 
-The gold ring is **what to unlock next**. Tap it (or the street row). Puzzle + Recall Loop are unchanged.
+The gold ring is **what to unlock next**. Tap it (or the street row). When a landmark rises, the camera punches in with sparks and a **Built!** / **Lit!** beat — empty lots become roofs, not outline counters.
 
 ## Ads
 
