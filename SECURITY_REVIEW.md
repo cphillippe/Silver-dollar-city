@@ -10,6 +10,22 @@ This is a local-first playtest app (no backend, no auth, no third-party ad SDK y
 
 ---
 
+## Remediated (2026-09-07 follow-up)
+
+Defensive patches on this branch. No exploit PoCs. Gameplay unchanged.
+
+| ID | Status |
+| --- | --- |
+| HIGH-1 debug-signed public APK | **Deferred** — debug-signed sideload (`CN=Android Debug`) stays intentional until a real release keystore. |
+| MED-1 save import | **Fixed** — size cap before parse; skip `__proto__` / `constructor` / `prototype`; `Object.create(null)` maps; strict `kind` + schema range (refuse newer); date-key / finite-int / array / elaboration (220) bounds; file import confirms like paste. Tests in `scripts/check-save.mjs`. |
+| MED-2 mixed content | **Fixed** — `capacitor.config.ts` `android.allowMixedContent: false`. |
+| MED-3 FileProvider | **Fixed** — `file_paths.xml` uses `share/` cache, files, and external-files paths. No `external-path path="."`. |
+| MED-4 Vite `allowedHosts: true` | **Fixed** — allowlist `localhost`, `127.0.0.1`, `.trycloudflare.com`. Preview/dev bind `127.0.0.1`. Docs: do not tunnel `vite --host` unbound. `package.json` `start` is `vite` (no `--host`). |
+| MED-5 CSP | **Fixed** — production `index.html` meta CSP via Vite plugin (`script-src 'self'`, no `unsafe-eval`; Google Fonts allowlisted). Dev server unchanged so HMR works. GitHub Pages still cannot set HTTP `frame-ancestors`; meta CSP is the Pages control. |
+| MED-6 gitignore + uuid | **Fixed / noted** — `android/.gitignore` ignores `*.jks`, `*.keystore`, `*.p12`, `*.pem`, `google-services.json`. `@capacitor/cli` moved to `devDependencies`. **uuid &lt; 11.1.1** (GHSA-w5hq-g745-h8pq) remains via `@capacitor/cli` → `xcode` → `uuid@7`. Tooling-only; do not `npm audit fix --force` (it wants to downgrade Capacitor). Upgrade when a CLI release pulls `uuid >= 11.1.1`. `releases/*.apk` stays tracked for the intentional debug sideload. |
+
+---
+
 ## Summary
 
 | Severity | Count |
@@ -185,20 +201,20 @@ Use this before a public web cut or Play upload.
 ### Secrets scan
 
 - [ ] `gitleaks` / GitHub secret scanning clean on the release tag.
-- [ ] `android/.gitignore` ignores `*.jks`, `*.keystore`, `google-services.json`.
+- [x] `android/.gitignore` ignores `*.jks`, `*.keystore`, `google-services.json`.
 - [ ] Release keystore only in the Play Console / CI secret store — never git, never the debug APK path.
 - [ ] No `.env`, Cloudflare tokens, or signing passwords in README / PR text.
 
 ### Dependency advisories
 
-- [ ] `npm audit` (and `npm audit --omit=dev`) on the release lockfile; record accepted tooling-only items (e.g. Capacitor CLI `uuid`) in the release notes.
+- [x] `npm audit` (and `npm audit --omit=dev`) on the release lockfile; record accepted tooling-only items (e.g. Capacitor CLI `uuid`) in the release notes. **Accepted (tooling):** uuid 7.0.3 via `@capacitor/cli` until upstream upgrades.
 - [ ] Do not `--force` audit fixes that downgrade Capacitor.
 - [ ] Re-check `serialize-javascript` stays `>= 7.0.5` (currently 7.1.1).
-- [ ] Move `@capacitor/cli` to `devDependencies` unless you have a reason it ships.
+- [x] Move `@capacitor/cli` to `devDependencies` unless you have a reason it ships.
 
 ### CSP / security headers (web / PWA)
 
-- [ ] CSP in `index.html` (and HTTP headers if the host allows).
+- [x] CSP in `index.html` (and HTTP headers if the host allows). Meta CSP on production builds; GitHub Pages has no custom headers.
 - [ ] `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `frame-ancestors 'none'` (or `X-Frame-Options: DENY` where headers exist).
 - [ ] GitHub Pages: assume **no** custom headers — meta CSP is the control; or front the app with Cloudflare/Pages Functions.
 - [ ] Service worker still same-origin only; `registerSW` stays gated with `!Capacitor.isNativePlatform()`.
@@ -207,8 +223,8 @@ Use this before a public web cut or Play upload.
 ### Android export hardening
 
 - [ ] Merged manifest review: no unexpected `exported="true"`, no extra intent filters, no cleartext.
-- [ ] `allowMixedContent: false`; optional `network_security_config.xml` that denies cleartext.
-- [ ] Narrow `file_paths.xml`; FileProvider remains unexported.
+- [x] `allowMixedContent: false`; optional `network_security_config.xml` that denies cleartext.
+- [x] Narrow `file_paths.xml`; FileProvider remains unexported.
 - [ ] `allowBackup`: keep `true` only if you want Google backup of WebView/`localStorage` (progress + optional private sentence). Set `false` or use a backup exclude if that is too much for the threat model.
 - [ ] Release/playtest APK: `debuggable false`, private key, not `CN=Android Debug`.
 - [ ] `minifyEnabled` / R8 for Play; drop `releases/silver_city_debug.apk` from the public README.
@@ -216,11 +232,11 @@ Use this before a public web cut or Play upload.
 
 ### Save-import validation
 
-- [ ] Size cap before parse; confirm on file import; skip prototype-polluting keys; `Object.create(null)` maps.
-- [ ] Strict `kind` + schema version range; finite/bounded numbers; date-key format; string/array caps (including elaborations).
-- [ ] Imported text still never rendered as HTML.
-- [ ] `scripts/check-save.mjs` covers reject paths (oversize, junk keys, newer schema).
-- [ ] Settings copy states that import **replaces** this device’s save and that share codes are secret-equivalent for that save.
+- [x] Size cap before parse; confirm on file import; skip prototype-polluting keys; `Object.create(null)` maps.
+- [x] Strict `kind` + schema version range; finite/bounded numbers; date-key format; string/array caps (including elaborations).
+- [x] Imported text still never rendered as HTML.
+- [x] `scripts/check-save.mjs` covers reject paths (oversize, junk keys, newer schema).
+- [x] Settings copy states that import **replaces** this device’s save and that share codes are secret-equivalent for that save.
 
 ### Ads (when no longer placeholders)
 

@@ -79,7 +79,7 @@ New user, storage cleared. **Clarity 5/5** in ≤15s.
 
 1. **Keep/Toss drop** — tap-bin-only failed testers (blocking). **Shipped:** Keep/Toss on each tile; bin still accepts a selected tile; auto-check when full; tap a binned line to pull it back.
 2. **Goal in 15 seconds** — story lede was pretty but slow. **Shipped:** gold line on welcome.
-3. **Public play URL** — Pages needs an owner toggle; first tunnel was blocked by Vite `allowedHosts`. **Shipped:** `allowedHosts: true`; live tunnel; StackBlitz preview URL; `docs/` + Pages one-click.
+3. **Public play URL** — Pages needs an owner toggle; first tunnel was blocked by Vite `allowedHosts`. **Shipped:** `allowedHosts` allowlist (localhost + `.trycloudflare.com`), not `true`. Tunnel `vite preview` on **127.0.0.1** — do not expose `vite --host` / the dev server on a public tunnel.
 4. **Peek / clean stars** — peek now says it will not count as clean.
 5. **Match remaining pairs** — `N left` is on the board.
 
