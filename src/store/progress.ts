@@ -200,7 +200,7 @@ export function getNextGoal(
   return {
     kind: 'vista',
     title: 'The lookout is yours',
-    detail: 'Every area is open. Sit with the journal — or walk a path again.',
+    detail: 'Every area is open. Sit with the journal — or rehearse a takeaway.',
   }
 }
 
@@ -285,7 +285,7 @@ export function nextRebuildHint(
   if (goal.kind === 'vista') {
     return {
       title: 'Next rebuild',
-      detail: 'Sit with a journal page, or walk a district again.',
+      detail: 'Sit with a journal page, or rehearse a takeaway.',
       cta: 'Open the journal',
       go: { name: 'journal' },
     }
@@ -297,6 +297,75 @@ export function nextRebuildHint(
     cta: 'Continue',
     go: { name: 'hub' },
   }
+}
+
+function matchesRehearseScope(
+  scope: string | undefined,
+  id: string,
+  entryArea?: string,
+  pillar?: string,
+) {
+  const place = pillar || pillarFor(id)
+  if (!scope || scope === 'porch' || scope === 'daily-trail') {
+    return id.startsWith('daily-') || entryArea === 'daily-trail'
+  }
+  return place === scope || entryArea === scope
+}
+
+/** Due first, else a held line — never a vague replay. */
+export function rehearseGo(
+  progress: ProgressState,
+  scope?: string,
+  today = localDateKey(),
+): View {
+  const dueItems = dueForRecall(progress, today).filter((item) => item.brief)
+  const due =
+    dueItems.find((item) =>
+      matchesRehearseScope(
+        scope,
+        item.trace.id,
+        item.entry?.areaId,
+        item.trace.pillar,
+      ),
+    ) ?? (scope && scope !== 'porch' && scope !== 'daily-trail' ? undefined : dueItems[0])
+
+  if (due) {
+    return {
+      name: 'journal',
+      focusId: due.entry?.id ?? due.trace.id,
+      autoQuiz: true,
+    }
+  }
+
+  const heldNewest = [...progress.held].reverse()
+  const held =
+    heldNewest.find((id) =>
+      matchesRehearseScope(
+        scope,
+        id,
+        journalForChallenge(id)?.areaId,
+        progress.memory[id]?.pillar,
+      ),
+    ) ?? (scope && scope !== 'porch' && scope !== 'daily-trail' ? undefined : heldNewest[0])
+
+  if (held) {
+    return {
+      name: 'journal',
+      focusId: journalFocusForTrace(held),
+      autoQuiz: true,
+    }
+  }
+
+  if (scope && scope !== 'porch' && scope !== 'daily-trail') {
+    const page = journalEntries.find(
+      (entry) => entry.areaId === scope && progress.journal.includes(entry.id),
+    )
+    if (page) {
+      return { name: 'journal', focusId: page.id, autoQuiz: true }
+    }
+  }
+
+  return { name: 'journal' }
 }
 
 export function cardsUnlockedBy(challengeId: string): string[] {

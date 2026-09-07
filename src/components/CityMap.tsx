@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { areas } from '../content'
 import {
   CITY_PLOTS,
   citySnapshot,
@@ -13,7 +14,13 @@ import {
   type CityStage,
   type CityUpgrade,
 } from '../lib/city'
-import { dailyDoneToday, isAreaUnlocked, useProgress } from '../store/progress'
+import {
+  dailyDoneToday,
+  isAreaComplete,
+  isAreaUnlocked,
+  rehearseGo,
+  useProgress,
+} from '../store/progress'
 import { localDateKey } from '../lib/dates'
 import type { View } from '../types'
 
@@ -68,8 +75,20 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
     if (mode === 'poster' || playing.current) return
     const st = stageOf(id)
     if (st === 'empty' && id !== nextId) return
-    const areaId = CITY_PLOTS.find((plot) => plot.id === id)?.areaId
+    const spec = CITY_PLOTS.find((plot) => plot.id === id)
+    const areaId = spec?.areaId
     const unlocked = areaId ? isAreaUnlocked(areaId, progress.completed) : true
+    if (id === 'porch' && doneToday) {
+      onNavigate(rehearseGo(progress, 'porch'))
+      return
+    }
+    if (areaId) {
+      const area = areas.find((item) => item.id === areaId)
+      if (area && isAreaComplete(area, progress.completed)) {
+        onNavigate(rehearseGo(progress, areaId))
+        return
+      }
+    }
     onNavigate(plotView(id, unlocked))
   }
 

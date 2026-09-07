@@ -190,7 +190,7 @@ export function nextKicker(stage: CityStage, plotId: CityPlotId, dailyDone: bool
   if (plotId === 'porch' && !dailyDone) return 'Walk next'
   if (stage === 'scaffold' || stage === 'empty') return 'Build next'
   if (stage === 'built') return 'Keep building'
-  return 'Walk again'
+  return 'Tap the takeaway'
 }
 
 export const CITY_SEEN_KEY = 'silver-city-seen-city-v1'

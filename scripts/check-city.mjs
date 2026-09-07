@@ -195,7 +195,34 @@ const dailyTrailSrc = readFileSync(
   'utf8',
 )
 assert.match(dailyTrailSrc, /See the town/)
-assert.match(dailyTrailSrc, /STORY\.tapTakeaway/)
+assert.match(dailyTrailSrc, /STORY\.takeaway/)
+assert.doesNotMatch(dailyTrailSrc, /AdSlot/)
+assert.doesNotMatch(dailyTrailSrc, /district-flavor/)
+assert.doesNotMatch(dailyTrailSrc, /Tomorrow:/)
+
+const puzzleLeadSrc = readFileSync(
+  new URL('../src/components/challenges/PuzzleLead.tsx', import.meta.url),
+  'utf8',
+)
+assert.match(puzzleLeadSrc, /challenge\.idea \?\? challenge\.prompt/)
+assert.doesNotMatch(puzzleLeadSrc, /Today’s idea/)
+assert.doesNotMatch(puzzleLeadSrc, /challenge\.prompt<\/p>/)
+
+const recallSrc = readFileSync(
+  new URL('../src/components/RecallGate.tsx', import.meta.url),
+  'utf8',
+)
+assert.doesNotMatch(recallSrc, /phase === 'echo'/)
+assert.doesNotMatch(recallSrc, /held-stamp/)
+assert.match(recallSrc, /STORY\.takeaway/)
+
+assert.doesNotMatch(hubSrc, /['"]Again['"]/)
+assert.match(hubSrc, /STORY\.takeaway/)
+assert.match(hubSrc, /rehearseGo/)
+
+const cityLibSrc = readFileSync(new URL('../src/lib/city.ts', import.meta.url), 'utf8')
+assert.doesNotMatch(cityLibSrc, /Walk again/)
+assert.match(cityLibSrc, /Tap the takeaway/)
 
 const shellSrc = readFileSync(
   new URL('../src/components/AppShell.tsx', import.meta.url),
