@@ -1,8 +1,9 @@
 import type { CSSProperties } from 'react'
 import { areas } from '../content'
 import { dailyForDate } from '../content/daily'
+import { guideForArea, STORY } from '../content/story'
 import { addLocalDays, localDateKey } from '../lib/dates'
-import { AreaIcon } from './icons'
+import { Avatar, Say } from './Avatar'
 import { ShareInvite } from './ShareInvite'
 import { StarRow } from './StarRow'
 import {
@@ -35,19 +36,40 @@ export function Hub({ onNavigate }: HubProps) {
       <header className="page-head">
         <p className="eyebrow">Silver City map</p>
         <h1>What’s next</h1>
+        <div className="cast-row">
+          <Avatar who="river" size="sm" />
+          <Avatar who="juniper" size="sm" />
+          <Avatar who="mercy" size="sm" />
+          <Avatar who="silas" size="sm" />
+          <Avatar who="nora" size="sm" />
+          <Avatar who="ansel" size="sm" />
+          <Avatar who="hope" size="sm" />
+        </div>
         <p>
-          A short morning walk — snap, fold, keep the line — then the longer
-          trail when you have time. Come back as you are. The town does not
-          scold an empty day.
+          River walks; Juniper keeps the morning lamp. Five guides wait on the
+          longer trail. Come back as you are. The town does not scold an empty
+          day.
         </p>
       </header>
+
+      <Say
+        who="juniper"
+        line={
+          doneToday ? STORY.dailyHeld : STORY.dailyInvite
+        }
+      />
 
       <section
         className={`today-trail ${doneToday ? 'is-done' : 'is-live'}`}
         aria-label="Today’s Trail"
       >
-        <p className="eyebrow">Today’s Trail</p>
-        <h2>{doneToday ? 'This morning is marked' : daily.challenge.title}</h2>
+        <div className="card-lead">
+          <Avatar who="juniper" size="lg" />
+          <div>
+            <p className="eyebrow">Today’s Trail</p>
+            <h2>{doneToday ? 'This morning is marked' : daily.challenge.title}</h2>
+          </div>
+        </div>
         <p>{doneToday ? streakCopy(progress, today) : daily.districtFlavor}</p>
         {!doneToday ? (
           <p>One short puzzle · about a minute · same walk for this calendar day.</p>
@@ -134,13 +156,13 @@ export function Hub({ onNavigate }: HubProps) {
               style={{ '--accent': area.accent } as CSSProperties}
             >
               {index > 0 ? <span className="trail-line" aria-hidden /> : null}
-              <div className="station-emblem">
-                <AreaIcon name={area.icon} />
+              <div className="station-emblem avatar-emblem">
+                <Avatar who={guideForArea(area.id).id} size="lg" />
               </div>
               <div className="station-body">
                 <p className="station-kicker">
-                  {complete ? 'Charted' : unlocked ? 'Open' : 'Gated'} · District{' '}
-                  {area.order}
+                  {complete ? 'Charted' : unlocked ? 'Open' : 'Gated'} ·{' '}
+                  {guideForArea(area.id).name}
                 </p>
                 <h2>{area.title}</h2>
                 <p>{area.blurb}</p>

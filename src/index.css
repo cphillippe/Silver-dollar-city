@@ -123,6 +123,10 @@ p {
   font-size: 1.15rem;
 }
 
+.brand .avatar {
+  flex-shrink: 0;
+}
+
 .brand-mark {
   width: 14px;
   height: 14px;
@@ -264,7 +268,7 @@ p {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 48px 8px 32px;
+  padding: 36px 8px 32px;
 }
 
 .welcome-sky {
@@ -1120,6 +1124,115 @@ p {
   opacity: 0.95;
   background:
     linear-gradient(180deg, rgba(224, 179, 74, 0.08), rgba(244, 234, 210, 0.03));
+}
+
+.avatar {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.avatar svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.28));
+}
+
+.avatar.size-sm {
+  width: 44px;
+  height: 44px;
+}
+
+.avatar.size-md {
+  width: 64px;
+  height: 64px;
+}
+
+.avatar.size-lg {
+  width: 84px;
+  height: 84px;
+}
+
+.avatar.size-xl {
+  width: 112px;
+  height: 112px;
+}
+
+.welcome-cast,
+.cast-row,
+.area-hero-cast,
+.card-lead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.welcome-cast {
+  gap: 18px;
+  margin: 0 0 16px;
+}
+
+.cast-row {
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 14px;
+}
+
+.area-hero-cast {
+  margin-bottom: 12px;
+}
+
+.area-hero-cast .size-md {
+  margin-left: -18px;
+  margin-top: 28px;
+}
+
+.say {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: start;
+  background: linear-gradient(180deg, rgba(244, 234, 210, 0.1), rgba(244, 234, 210, 0.03));
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 12px 14px 14px;
+  margin: 0 0 16px;
+  box-shadow: var(--shadow);
+}
+
+.say-name {
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  margin: 0 0 4px;
+}
+
+.say-line {
+  margin: 0;
+  font-size: 1.02rem;
+}
+
+.say .eyebrow {
+  margin-bottom: 2px;
+}
+
+.station-emblem.avatar-emblem {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  width: auto;
+  height: auto;
+}
+
+.brand .avatar.size-sm {
+  width: 34px;
+  height: 34px;
+}
+
+.welcome h1,
+.vista h1 {
+  font-size: clamp(2.1rem, 7vw, 3.6rem);
 }
 
 @media (max-width: 640px) {

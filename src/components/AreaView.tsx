@@ -1,6 +1,8 @@
 import type { CSSProperties } from 'react'
 import { getArea } from '../content'
-import { AreaIcon, kindLabel } from './icons'
+import { AREA_LINES, guideForArea } from '../content/story'
+import { Avatar, Say } from './Avatar'
+import { kindLabel } from './icons'
 import { StarRow } from './StarRow'
 import {
   areaMastery,
@@ -34,6 +36,8 @@ export function AreaView({ areaId, onNavigate }: AreaViewProps) {
   const { done, total } = areaProgress(area, progress.completed)
   const next = nextChallengeInArea(area, progress.completed)
   const mastery = areaMastery(area, progress.stars)
+  const guide = guideForArea(area.id)
+  const lines = AREA_LINES[area.id]
 
   return (
     <main className="area-page">
@@ -49,10 +53,11 @@ export function AreaView({ areaId, onNavigate }: AreaViewProps) {
         className="area-hero"
         style={{ '--accent': area.accent } as CSSProperties}
       >
-        <div className="station-emblem lg">
-          <AreaIcon name={area.icon} />
+        <div className="area-hero-cast">
+          <Avatar who={guide.id} size="xl" />
+          <Avatar who="river" size="md" />
         </div>
-        <p className="eyebrow">{area.subtitle}</p>
+        <p className="eyebrow">{guide.role} · {area.subtitle}</p>
         <h1>{area.title}</h1>
         <p className="progress-line">
           {done} of {total} challenges · {complete ? 'District complete — still playable' : 'In progress'}
@@ -61,6 +66,8 @@ export function AreaView({ areaId, onNavigate }: AreaViewProps) {
           Mastery {mastery.earned}/{mastery.possible} · replay to lift your stars
         </p>
       </header>
+
+      {lines ? <Say who={guide.id} line={complete ? lines.after : lines.hello} /> : null}
 
       <section className="narrative">
         {area.intro.map((paragraph) => (

@@ -2,7 +2,21 @@
 
 A progressive web app — playable in the browser — that walks the case for God as a mountain-town adventure. You move through themed districts, finish challenges, and fill an Evidence Journal. The trail always names a next step.
 
-The product goal is **keeping the evidence**: claims, reasons, and sources you can still say after the page folds. Puzzles, streaks, and polish are the delivery system — the game has to be fun enough to play, or nothing is retained.
+The product goal is **keeping the evidence**: claims, reasons, and sources you can still say after the page folds. Puzzles, streaks, polish, and a small Christian cast are the delivery system — the game has to be fun enough to play, or nothing is retained.
+
+## The story
+
+**River** arrives in Silver City with a folded letter: the evidence is a trail, not a shout. **Juniper** lights the east porch each morning (Today’s Trail). Five Christians already live on the longer trail and walk with you — they will not lock you in a pew:
+
+| Guide | District | Role |
+| --- | --- | --- |
+| Mercy Wren | Parable Hollow | Parable-teller |
+| Silas Page | The Witness Bench | Witness clerk |
+| Nora Vale | The Observatory | Observatory keeper |
+| Ansel Gate | The First Gate | Gatekeeper |
+| Hope Lind | The High Lookout | Lookout |
+
+Portraits are original SVGs in one circular style (`src/components/Avatar.tsx`). Light dialogue, not sermons.
 
 The world is **Silver City**, named for this repository. The through-line is unending evidence: biblical narrative, eyewitness testimony, empirical clues, classical cosmological arguments, and later questions of mind, morality, meaning, and beauty.
 

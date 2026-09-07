@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { areas, getArea, getChallenge, journalForChallenge } from '../content'
 import { evidenceFor } from '../content/evidence'
+import { guideForArea } from '../content/story'
 import { kindLabel } from './icons'
 import { PuzzlePlay } from './PuzzlePlay'
 import { RecallGate } from './RecallGate'
+import { Say } from './Avatar'
 import { StarRow } from './StarRow'
 import { starsFromAttempt } from '../lib/stars'
 import {
@@ -30,6 +32,7 @@ export function ChallengeScreen({
   const area = getArea(areaId)
   const challenge = getChallenge(areaId, challengeId)
   const brief = evidenceFor(challengeId)
+  const guide = guideForArea(areaId)
   const replay = Boolean(challenge && progress.completed.includes(challenge.id))
   const [unlockedCards, setUnlockedCards] = useState<string[]>([])
   const [showNext, setShowNext] = useState(false)
@@ -134,6 +137,10 @@ export function ChallengeScreen({
         {replay ? ' · replay' : ''}
       </p>
       <h1>{challenge.title}</h1>
+      <Say
+        who={guide.id}
+        line="Snap it like a game. Then fold my page and keep the line — that’s the whole walk."
+      />
       {bestBefore ? (
         <p className="best-clear">
           Best clear <StarRow count={bestBefore} compact />
