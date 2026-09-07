@@ -307,7 +307,7 @@ assert.match(cssSrc, /city-roof-kick/)
 assert.match(cssSrc, /tile-burst/)
 assert.match(cssSrc, /win-spark/)
 assert.match(cssSrc, /puzzle-title/)
-assert.match(cssSrc, /is-puzzle \.play \.bank/)
+assert.match(cssSrc, /win-flash 0\.45s ease-out both !important/)
 
 const juiceSrc = readFileSync(new URL('../src/lib/juice.ts', import.meta.url), 'utf8')
 assert.match(juiceSrc, /WIN_BURST_MS = 760/)

@@ -3044,4 +3044,27 @@ p {
     animation: none !important;
     transition: none !important;
   }
+
+  .win-flash {
+    animation: win-flash 0.45s ease-out both !important;
+  }
+
+  .win-spark {
+    animation: win-spark 0.7s cubic-bezier(0.12, 0.8, 0.3, 1) both !important;
+  }
+
+  .play.is-win {
+    animation: play-boom 0.42s cubic-bezier(0.2, 1.35, 0.4, 1) !important;
+  }
+
+  .play.is-win .chip.in-chain,
+  .play.is-win .chip.in-slot,
+  .play.is-win .match-card.is-locked,
+  .play.is-win .chip.in-bin {
+    animation: tile-burst 0.58s cubic-bezier(0.2, 0.85, 0.25, 1) forwards !important;
+  }
+
+  .play.is-win .bin {
+    animation: bin-flash 0.45s ease-out !important;
+  }
 }

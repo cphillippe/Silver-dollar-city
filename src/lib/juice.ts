@@ -36,11 +36,10 @@ export function useJuiceHandoff(already = false) {
 
   function afterJuice() {
     window.clearTimeout(timer.current)
-    if (prefersReducedMotion()) {
-      setReady(true)
-      return
-    }
-    timer.current = window.setTimeout(() => setReady(true), WIN_BURST_MS)
+    timer.current = window.setTimeout(
+      () => setReady(true),
+      prefersReducedMotion() ? 480 : WIN_BURST_MS,
+    )
   }
 
   return { juiceDone: ready, afterJuice }
