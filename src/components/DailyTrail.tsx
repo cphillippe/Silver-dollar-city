@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { findPlayable, pillarFor } from '../content'
 import { dailyForDate } from '../content/daily'
 import { evidenceFor } from '../content/evidence'
@@ -51,6 +51,7 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
 
   const { isReview, challenge, brief, pillar } = session
   const { juiceDone: solved, afterJuice } = useJuiceHandoff(session.already)
+  const savedWin = useRef(false)
   const [missed, setMissed] = useState(false)
   const [peeked, setPeeked] = useState(false)
   const [held, setHeld] = useState(
@@ -61,7 +62,12 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
 
   const showNext = solved && held
 
-  function finishPuzzle() {
+  useEffect(() => {
+    if (!solved) return
+    const body = document.querySelector('.app-body')
+    body?.scrollTo({ top: 0, behavior: 'smooth' })
+    if (session.already || savedWin.current) return
+    savedWin.current = true
     completeDaily(today)
     if (brief && !isReview) {
       recordReview({
@@ -74,6 +80,9 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
         elaborated: false,
       })
     }
+  }, [solved])
+
+  function finishPuzzle() {
     afterJuice()
   }
 
@@ -94,12 +103,6 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
   }
 
   const rehearsing = solved && Boolean(brief) && !held
-
-  useEffect(() => {
-    if (!solved) return
-    const body = document.querySelector('.app-body')
-    body?.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [solved, rehearsing])
 
   return (
     <main className={`daily-page ${solved ? 'is-after' : 'is-puzzle'} ${rehearsing ? 'is-rehearse' : ''}`} aria-label={STORY.playGoal}>
