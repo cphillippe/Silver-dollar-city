@@ -245,7 +245,6 @@ export function ChallengeScreen({
               </p>
               <RecallGate
                 brief={brief}
-                pillar={areaId}
                 mode={reviewing ? 'review' : 'encode'}
                 kicker="Rehearse this"
                 onHeld={settleRecall}

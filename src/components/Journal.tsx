@@ -72,7 +72,6 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
           </p>
           <RecallGate
             brief={focusedBrief}
-            pillar={focusedEntry.areaId}
             mode="review"
             kicker="Rehearse this"
             onHeld={(result) => {
@@ -95,7 +94,20 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
 
   return (
     <main className="journal">
-      <header className="page-head">
+      <section className="next-rebuild">
+        <p className="eyebrow">Next recommended</p>
+        <h2>{nextStep.title}</h2>
+        <p>{nextStep.detail}</p>
+        <button
+          type="button"
+          className="btn primary"
+          onClick={() => onNavigate(nextStep.go)}
+        >
+          {nextStep.cta}
+        </button>
+      </section>
+
+      <header className="page-head journal-head">
         <p className="eyebrow">Evidence Journal</p>
         <h1>What you can still say</h1>
         <p>
@@ -116,24 +128,7 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
           {open} unsealed · {total - open} sealed · {heldCount} held
           {waiting ? ` · ${waiting} due this morning` : ''}
         </p>
-        <p className="star-key">
-          ★ first walk · ★★ held after a rest · ★★★ held after a rest, and said
-          back
-        </p>
       </header>
-
-      <section className="next-rebuild">
-        <p className="eyebrow">Next recommended</p>
-        <h2>{nextStep.title}</h2>
-        <p>{nextStep.detail}</p>
-        <button
-          type="button"
-          className="btn primary"
-          onClick={() => onNavigate(nextStep.go)}
-        >
-          {nextStep.cta}
-        </button>
-      </section>
 
       {dueItems.length > 0 ? (
         <section className="journal-chapter due-chapter">

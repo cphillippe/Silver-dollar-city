@@ -1684,6 +1684,28 @@ p {
   .app.is-play .app-body {
     padding-bottom: calc(28px + var(--safe-bottom));
   }
+
+  .is-rehearse h1 {
+    font-size: 1.12rem;
+    margin-bottom: 4px;
+  }
+
+  .rehearse-anchor > .quiet {
+    display: none;
+  }
+
+  .recall-gate .landmark {
+    display: none;
+  }
+
+  .journal .page-head p {
+    display: none;
+  }
+
+  .journal-meter,
+  .journal-split {
+    display: none;
+  }
 }
 
 @media (max-width: 640px) {
