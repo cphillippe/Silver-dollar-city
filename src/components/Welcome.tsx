@@ -1,5 +1,8 @@
 import { areas, totalChallenges, totalJournal } from '../content'
-import { getNextGoal, useProgress } from '../store/progress'
+import { dailyForDate } from '../content/daily'
+import { localDateKey } from '../lib/dates'
+import { ShareInvite } from './ShareInvite'
+import { useProgress } from '../store/progress'
 import type { View } from '../types'
 
 interface WelcomeProps {
@@ -9,20 +12,21 @@ interface WelcomeProps {
 export function Welcome({ onNavigate }: WelcomeProps) {
   const { progress, start } = useProgress()
   const resumed = progress.started && progress.completed.length > 0
-  const goal = getNextGoal(progress)
+  const today = dailyForDate(localDateKey())
 
-  function begin() {
+  function walkDaily() {
     start()
-    if (resumed && goal.areaId && goal.challengeId) {
+    onNavigate({ name: 'daily' })
+  }
+
+  function beginDistricts() {
+    start()
+    if (resumed && progress.lastAreaId && progress.lastChallengeId) {
       onNavigate({
         name: 'challenge',
-        areaId: goal.areaId,
-        challengeId: goal.challengeId,
+        areaId: progress.lastAreaId,
+        challengeId: progress.lastChallengeId,
       })
-      return
-    }
-    if (resumed && goal.kind === 'vista') {
-      onNavigate({ name: 'vista' })
       return
     }
     onNavigate({ name: 'area', areaId: 'parable-hollow' })
@@ -37,9 +41,9 @@ export function Welcome({ onNavigate }: WelcomeProps) {
         <span>Unending Evidence</span>
       </h1>
       <p className="lede">
-        Walk a town of five districts. Snap pairs, sort claims, and lock
-        argument chains — little puzzles with serious substance. The trail
-        always has a next step.
+        Snap pairs, sort claims, lock a chain — then fold the teaching and
+        rebuild one line from memory. Fun is the delivery. The point is what
+        you can still say: a claim, a reason, a source.
       </p>
       <ul className="welcome-facts">
         <li>
@@ -56,8 +60,12 @@ export function Welcome({ onNavigate }: WelcomeProps) {
         </li>
       </ul>
       <div className="welcome-actions">
-        <button type="button" className="btn primary xl" onClick={begin}>
-          {resumed ? 'Continue the trail' : 'Begin in Parable Hollow'}
+        <button type="button" className="btn primary xl" onClick={walkDaily}>
+          Walk today’s trail
+        </button>
+        <p className="welcome-daily-line">{today.districtFlavor}</p>
+        <button type="button" className="btn ghost" onClick={beginDistricts}>
+          {resumed ? 'Continue the districts' : 'Begin in Parable Hollow'}
         </button>
         {progress.started ? (
           <button
@@ -69,9 +77,11 @@ export function Welcome({ onNavigate }: WelcomeProps) {
           </button>
         ) : null}
       </div>
+      <ShareInvite />
       <p className="welcome-note">
-        Progress is saved on this device. Content is meant to invite thought,
-        not to mock the person who is still walking.
+        Progress is saved on this device. Miss a morning and the trail waits —
+        your journal stays. Invite a friend to try remembering what they
+        unlocked, not only to chase a streak.
       </p>
     </main>
   )

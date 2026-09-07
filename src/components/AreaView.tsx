@@ -1,7 +1,9 @@
 import type { CSSProperties } from 'react'
 import { getArea } from '../content'
 import { AreaIcon, kindLabel } from './icons'
+import { StarRow } from './StarRow'
 import {
+  areaMastery,
   areaProgress,
   isAreaComplete,
   isAreaUnlocked,
@@ -31,6 +33,7 @@ export function AreaView({ areaId, onNavigate }: AreaViewProps) {
   const complete = isAreaComplete(area, progress.completed)
   const { done, total } = areaProgress(area, progress.completed)
   const next = nextChallengeInArea(area, progress.completed)
+  const mastery = areaMastery(area, progress.stars)
 
   return (
     <main className="area-page">
@@ -52,7 +55,10 @@ export function AreaView({ areaId, onNavigate }: AreaViewProps) {
         <p className="eyebrow">{area.subtitle}</p>
         <h1>{area.title}</h1>
         <p className="progress-line">
-          {done} of {total} challenges · {complete ? 'District complete' : 'In progress'}
+          {done} of {total} challenges · {complete ? 'District complete — still playable' : 'In progress'}
+        </p>
+        <p className="progress-line quiet">
+          Mastery {mastery.earned}/{mastery.possible} · replay to lift your stars
         </p>
       </header>
 
@@ -94,9 +100,18 @@ export function AreaView({ areaId, onNavigate }: AreaViewProps) {
                   <span className="challenge-meta">
                     <strong>{challenge.title}</strong>
                     <em>{kindLabel(challenge.kind)}</em>
+                    {progress.stars[challenge.id] ? (
+                      <StarRow count={progress.stars[challenge.id]} compact />
+                    ) : null}
                   </span>
                   <span className="row-status">
-                    {doneHere ? 'Journaled' : playable ? 'Play' : 'Soon'}
+                    {doneHere
+                      ? progress.stars[challenge.id] === 3
+                        ? 'Clean'
+                        : 'Replay'
+                      : playable
+                        ? 'Play'
+                        : 'Soon'}
                   </span>
                 </button>
               </li>
@@ -122,13 +137,28 @@ export function AreaView({ areaId, onNavigate }: AreaViewProps) {
       ) : null}
 
       {complete ? (
-        <button
-          type="button"
-          className="btn gold"
-          onClick={() => onNavigate({ name: 'journal' })}
-        >
-          Read this district in the journal
-        </button>
+        <div className="area-replay">
+          <button
+            type="button"
+            className="btn primary xl"
+            onClick={() =>
+              onNavigate({
+                name: 'challenge',
+                areaId: area.id,
+                challengeId: area.challenges[0].id,
+              })
+            }
+          >
+            Replay from the first challenge
+          </button>
+          <button
+            type="button"
+            className="btn gold"
+            onClick={() => onNavigate({ name: 'journal' })}
+          >
+            Read this district in the journal
+          </button>
+        </div>
       ) : null}
     </main>
   )

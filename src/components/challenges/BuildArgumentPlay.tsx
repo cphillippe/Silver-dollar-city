@@ -8,12 +8,14 @@ interface BuildArgumentPlayProps {
   challenge: BuildArgumentChallenge
   onMiss: () => void
   onSolved: () => void
+  onPeek?: () => void
 }
 
 export function BuildArgumentPlay({
   challenge,
   onMiss,
   onSolved,
+  onPeek,
 }: BuildArgumentPlayProps) {
   const seed = useMemo(() => shuffle(challenge.cards), [challenge.cards])
   const [bank, setBank] = useState(seed)
@@ -86,7 +88,7 @@ export function BuildArgumentPlay({
 
   return (
     <div className={`play ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}>
-      <PuzzleHint text={challenge.context} />
+      <PuzzleHint text={challenge.context} onPeek={onPeek} />
       <p className="prompt">{challenge.prompt}</p>
       <p className="hint">Slot the chain. Leave the decoys in the bank — it checks when full.</p>
 

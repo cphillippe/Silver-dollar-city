@@ -1,5 +1,9 @@
 import { createContext, useContext } from 'react'
+import { dailyForDate } from '../content/daily'
 import { areas, journalEntries, totalChallenges } from '../content'
+import { localDateKey } from '../lib/dates'
+import { districtMastery, type StarCount } from '../lib/stars'
+import { isStreakLive, trailDaysRequired } from '../lib/streak'
 import type { Area, Challenge, ProgressState } from '../types'
 
 export const STORAGE_KEY = 'silver-city-progress-v1'
@@ -9,7 +13,21 @@ export const emptyProgress = (): ProgressState => ({
   completed: [],
   journal: [],
   firstTry: [],
+  stars: {},
+  dailyDates: [],
+  streak: 0,
+  bestStreak: 0,
+  held: [],
 })
+
+function asStarMap(value: unknown): Record<string, StarCount> {
+  if (!value || typeof value !== 'object') return {}
+  const next: Record<string, StarCount> = {}
+  for (const [key, raw] of Object.entries(value as Record<string, unknown>)) {
+    if (raw === 1 || raw === 2 || raw === 3) next[key] = raw
+  }
+  return next
+}
 
 export function loadProgress(): ProgressState {
   try {
@@ -23,6 +41,12 @@ export function loadProgress(): ProgressState {
       firstTry: Array.isArray(parsed.firstTry) ? parsed.firstTry : [],
       lastAreaId: parsed.lastAreaId,
       lastChallengeId: parsed.lastChallengeId,
+      stars: asStarMap(parsed.stars),
+      dailyDates: Array.isArray(parsed.dailyDates) ? parsed.dailyDates : [],
+      lastDailyDate: parsed.lastDailyDate,
+      streak: typeof parsed.streak === 'number' ? parsed.streak : 0,
+      bestStreak: typeof parsed.bestStreak === 'number' ? parsed.bestStreak : 0,
+      held: Array.isArray(parsed.held) ? parsed.held : [],
     }
   } catch {
     return emptyProgress()
@@ -53,14 +77,33 @@ export function nextChallengeInArea(
 }
 
 export interface NextGoal {
-  kind: 'challenge' | 'area' | 'vista' | 'welcome'
+  kind: 'daily' | 'challenge' | 'area' | 'vista' | 'welcome'
   title: string
   detail: string
   areaId?: string
   challengeId?: string
 }
 
-export function getNextGoal(progress: ProgressState): NextGoal {
+export function dailyDoneToday(
+  progress: ProgressState,
+  today = localDateKey(),
+): boolean {
+  return progress.lastDailyDate === today || progress.dailyDates.includes(today)
+}
+
+export function getNextGoal(
+  progress: ProgressState,
+  today = localDateKey(),
+): NextGoal {
+  if (!dailyDoneToday(progress, today)) {
+    const daily = dailyForDate(today)
+    return {
+      kind: 'daily',
+      title: 'Today’s Trail',
+      detail: `${daily.challenge.title} · about a minute`,
+    }
+  }
+
   if (!progress.started) {
     return {
       kind: 'welcome',
@@ -108,6 +151,15 @@ export function cardsUnlockedBy(challengeId: string): string[] {
     .map((entry) => entry.id)
 }
 
+export function trailCardsForDays(days: number): string[] {
+  return journalEntries
+    .filter((entry) => {
+      const need = trailDaysRequired(entry.unlockAfter)
+      return need !== null && days >= need
+    })
+    .map((entry) => entry.id)
+}
+
 export function areaProgress(area: Area, completed: string[]): {
   done: number
   total: number
@@ -119,7 +171,8 @@ export function areaProgress(area: Area, completed: string[]): {
 }
 
 export function insightScore(progress: ProgressState): number {
-  return progress.firstTry.length * 3 + progress.completed.length * 2
+  const starBonus = Object.values(progress.stars).reduce((sum, n) => sum + n, 0)
+  return progress.firstTry.length * 3 + progress.completed.length * 2 + starBonus
 }
 
 export function completionRatio(progress: ProgressState): number {
@@ -127,11 +180,52 @@ export function completionRatio(progress: ProgressState): number {
   return progress.completed.length / totalChallenges
 }
 
+export function journalCompletion(progress: ProgressState): {
+  open: number
+  total: number
+  percent: number
+} {
+  const total = journalEntries.length
+  const open = journalEntries.filter((entry) =>
+    progress.journal.includes(entry.id),
+  ).length
+  return {
+    open,
+    total,
+    percent: total === 0 ? 0 : Math.round((open / total) * 100),
+  }
+}
+
+export function areaMastery(area: Area, stars: ProgressState['stars']) {
+  return districtMastery(
+    area.challenges.map((challenge) => challenge.id),
+    stars,
+  )
+}
+
+export function streakCopy(progress: ProgressState, today = localDateKey()): string {
+  if (progress.streak <= 0) {
+    return 'The trail is open whenever you are.'
+  }
+  if (dailyDoneToday(progress, today)) {
+    return progress.streak === 1
+      ? 'A first mark for this morning.'
+      : `${progress.streak} mornings in a row — the town remembers your step.`
+  }
+  if (isStreakLive(progress.lastDailyDate, today)) {
+    return `Yesterday’s mark is still warm. Today’s walk is waiting.`
+  }
+  return 'The trail waits. Your journal marks remain.'
+}
+
 export interface ProgressApi {
   progress: ProgressState
   missed: string[]
   start: () => void
   completeChallenge: (areaId: string, challengeId: string) => string[]
+  completeDaily: (dateKey: string, challengeId: string, stars: StarCount) => string[]
+  recordStars: (challengeId: string, stars: StarCount) => StarCount
+  recordHeld: (evidenceId: string) => void
   markMiss: (challengeId: string) => void
   reset: () => void
 }

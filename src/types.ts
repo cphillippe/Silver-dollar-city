@@ -106,6 +106,8 @@ export interface JournalEntry {
   unlockAfter: string
 }
 
+export type StarCount = 1 | 2 | 3
+
 export interface ProgressState {
   started: boolean
   completed: string[]
@@ -113,11 +115,19 @@ export interface ProgressState {
   firstTry: string[]
   lastAreaId?: string
   lastChallengeId?: string
+  stars: Record<string, StarCount>
+  dailyDates: string[]
+  lastDailyDate?: string
+  streak: number
+  bestStreak: number
+  /** Evidence briefs successfully retrieved (claim + reason). */
+  held: string[]
 }
 
 export type View =
   | { name: 'welcome' }
   | { name: 'hub' }
+  | { name: 'daily' }
   | { name: 'area'; areaId: string }
   | { name: 'challenge'; areaId: string; challengeId: string }
   | { name: 'journal'; focusId?: string }

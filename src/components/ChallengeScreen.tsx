@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { areas, getArea, getChallenge, journalForChallenge } from '../content'
+import { evidenceFor } from '../content/evidence'
 import { kindLabel } from './icons'
-import { BuildArgumentPlay } from './challenges/BuildArgumentPlay'
-import { MatchPlay } from './challenges/MatchPlay'
-import { SequencePlay } from './challenges/SequencePlay'
-import { SortPlay } from './challenges/SortPlay'
+import { PuzzlePlay } from './PuzzlePlay'
+import { RecallGate } from './RecallGate'
+import { StarRow } from './StarRow'
+import { starsFromAttempt } from '../lib/stars'
 import {
   getNextGoal,
   isAreaComplete,
@@ -24,12 +25,20 @@ export function ChallengeScreen({
   challengeId,
   onNavigate,
 }: ChallengeScreenProps) {
-  const { completeChallenge, markMiss, missed, progress } = useProgress()
+  const { completeChallenge, recordStars, recordHeld, markMiss, progress } =
+    useProgress()
   const area = getArea(areaId)
   const challenge = getChallenge(areaId, challengeId)
+  const brief = evidenceFor(challengeId)
+  const replay = Boolean(challenge && progress.completed.includes(challenge.id))
   const [unlockedCards, setUnlockedCards] = useState<string[]>([])
   const [showNext, setShowNext] = useState(false)
-  const [clean, setClean] = useState(false)
+  const [attemptMissed, setAttemptMissed] = useState(false)
+  const [attemptPeeked, setAttemptPeeked] = useState(false)
+  const [earned, setEarned] = useState(progress.stars[challengeId] ?? 0)
+  const [lockedIn, setLockedIn] = useState(
+    () => Boolean(brief && progress.held.includes(brief.id)),
+  )
 
   if (!area || !challenge) {
     return (
@@ -61,9 +70,10 @@ export function ChallengeScreen({
   }
 
   function solved() {
-    const wasClean = !missed.includes(challengeId)
+    const stars = starsFromAttempt(attemptMissed, attemptPeeked)
+    const best = recordStars(challengeId, stars)
     const cards = completeChallenge(areaId, challengeId)
-    setClean(wasClean)
+    setEarned(best)
     setUnlockedCards(cards)
     setShowNext(true)
   }
@@ -78,6 +88,11 @@ export function ChallengeScreen({
     const areaNow = getArea(areaId)
     const areaDone = areaNow ? isAreaComplete(areaNow, latest.completed) : false
     const goal = getNextGoal({ ...latest, started: true })
+
+    if (replay) {
+      onNavigate({ name: 'area', areaId })
+      return
+    }
 
     if (areaDone) {
       const following = areas.find((item) => item.order === (areaNow?.order ?? 0) + 1)
@@ -102,6 +117,8 @@ export function ChallengeScreen({
   }
 
   const card = journalForChallenge(challengeId)
+  const bestBefore = progress.stars[challengeId] ?? 0
+  const canProceed = !brief || lockedIn
 
   return (
     <main className="challenge-page">
@@ -114,37 +131,24 @@ export function ChallengeScreen({
       </button>
       <p className="eyebrow">
         {area.title} · {kindLabel(challenge.kind)}
+        {replay ? ' · replay' : ''}
       </p>
       <h1>{challenge.title}</h1>
+      {bestBefore ? (
+        <p className="best-clear">
+          Best clear <StarRow count={bestBefore} compact />
+        </p>
+      ) : null}
 
-      {challenge.kind === 'sort' ? (
-        <SortPlay
-          challenge={challenge}
-          onMiss={() => markMiss(challenge.id)}
-          onSolved={solved}
-        />
-      ) : null}
-      {challenge.kind === 'sequence' ? (
-        <SequencePlay
-          challenge={challenge}
-          onMiss={() => markMiss(challenge.id)}
-          onSolved={solved}
-        />
-      ) : null}
-      {challenge.kind === 'build-argument' ? (
-        <BuildArgumentPlay
-          challenge={challenge}
-          onMiss={() => markMiss(challenge.id)}
-          onSolved={solved}
-        />
-      ) : null}
-      {challenge.kind === 'match' ? (
-        <MatchPlay
-          challenge={challenge}
-          onMiss={() => markMiss(challenge.id)}
-          onSolved={solved}
-        />
-      ) : null}
+      <PuzzlePlay
+        challenge={challenge}
+        onMiss={() => {
+          setAttemptMissed(true)
+          markMiss(challenge.id)
+        }}
+        onPeek={() => setAttemptPeeked(true)}
+        onSolved={solved}
+      />
 
       {showNext ? (
         <section className="after-win">
@@ -154,9 +158,29 @@ export function ChallengeScreen({
             <span />
             <span />
           </div>
-          {clean ? <p className="streak-pill">Clean solve · +insight</p> : null}
-          {unlockedCards.length > 0 && card ? (
-            <article className="unlock-card">
+          <div className="daily-flourish">
+            <StarRow count={earned || 1} />
+            <p className="streak-pill">
+              {earned === 3
+                ? 'Clean solve — no mistakes, no peek.'
+                : replay
+                  ? 'Replay counted. Best stars are kept.'
+                  : 'Nice snap. Now fold the page and rebuild the line.'}
+            </p>
+          </div>
+
+          {brief && !lockedIn ? (
+            <RecallGate
+              brief={brief}
+              onHeld={() => {
+                recordHeld(brief.id)
+                setLockedIn(true)
+              }}
+            />
+          ) : null}
+
+          {canProceed && unlockedCards.length > 0 && card ? (
+            <article className="unlock-card pop-in">
               <p className="eyebrow">Evidence Journal</p>
               <h2>{card.title}</h2>
               <p>{card.body[0]}</p>
@@ -169,13 +193,18 @@ export function ChallengeScreen({
               </button>
             </article>
           ) : null}
-          <button type="button" className="btn primary xl" onClick={goNext}>
-            {isAreaComplete(area, [...progress.completed, challengeId])
-              ? areas.find((item) => item.order === area.order + 1)
-                ? `Enter ${areas.find((item) => item.order === area.order + 1)?.title}`
-                : 'Stand at the lookout'
-              : `Next: ${area.challenges[index + 1]?.title ?? 'Continue'}`}
-          </button>
+
+          {canProceed ? (
+            <button type="button" className="btn primary xl" onClick={goNext}>
+              {replay
+                ? 'Back to the district'
+                : isAreaComplete(area, [...progress.completed, challengeId])
+                  ? areas.find((item) => item.order === area.order + 1)
+                    ? `Enter ${areas.find((item) => item.order === area.order + 1)?.title}`
+                    : 'Stand at the lookout'
+                  : `Next: ${area.challenges[index + 1]?.title ?? 'Continue'}`}
+            </button>
+          ) : null}
         </section>
       ) : null}
     </main>

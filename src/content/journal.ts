@@ -280,4 +280,60 @@ export const journalEntries: JournalEntry[] = [
       'Psalm 19:1–4',
     ],
   },
+  {
+    id: 'j-trail-1',
+    areaId: 'daily-trail',
+    title: 'First frost on the rail',
+    kicker: 'Daily Trail',
+    unlockAfter: 'trail-days-1',
+    body: [
+      'You walked a morning that will not come again. The town keeps a small mark for that — not a trophy, a thank-you.',
+      'The trail will be here tomorrow. If you are away, it waits. Nothing you have already gathered is taken back.',
+    ],
+    sources: ['A return gift for a single morning on the trail'],
+  },
+  {
+    id: 'j-trail-2',
+    areaId: 'daily-trail',
+    title: 'A second lantern',
+    kicker: 'Daily Trail',
+    unlockAfter: 'trail-days-2',
+    body: [
+      'Two distinct mornings. The path is starting to know your step. Nothing is owed; the bench is still free.',
+    ],
+    sources: ['A trail note for a second return'],
+  },
+  {
+    id: 'j-trail-3',
+    areaId: 'daily-trail',
+    title: 'Margin note from the clerk',
+    kicker: 'Daily Trail',
+    unlockAfter: 'trail-days-3',
+    body: [
+      'Three distinct days on the trail. The archive clerk left this: “Return is a kind of courage.”',
+    ],
+    sources: ['A trail note for three unique mornings'],
+  },
+  {
+    id: 'j-trail-5',
+    areaId: 'daily-trail',
+    title: 'Five weather reports',
+    kicker: 'Daily Trail',
+    unlockAfter: 'trail-days-5',
+    body: [
+      'Five different skies. The town does not scold the days you were away. It only saves a page for when you are here.',
+    ],
+    sources: ['A trail note for five unique mornings'],
+  },
+  {
+    id: 'j-trail-7',
+    areaId: 'daily-trail',
+    title: 'A week of porches',
+    kicker: 'Daily Trail',
+    unlockAfter: 'trail-days-7',
+    body: [
+      'Seven unique mornings. If you miss tomorrow, the trail waits. The marks you already made stay in the journal.',
+    ],
+    sources: ['A trail note for seven unique mornings'],
+  },
 ]
