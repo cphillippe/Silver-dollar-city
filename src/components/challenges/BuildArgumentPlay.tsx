@@ -85,13 +85,13 @@ export function BuildArgumentPlay({
       setShake(false)
       setBank(shuffle(challenge.cards))
       setSlots({})
-    }, 520)
+    }, 620)
   }
 
   return (
     <div className={`play ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}>
-      <PuzzleHint text={challenge.context} onPeek={onPeek} />
       <p className="prompt">{challenge.prompt}</p>
+      <PuzzleHint text={challenge.context} onPeek={onPeek} />
       <p className="hint">Slot the chain. Leave the decoys in the bank — it checks when full.</p>
 
       <div className="slot-list">

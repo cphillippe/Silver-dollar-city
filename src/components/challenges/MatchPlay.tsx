@@ -53,13 +53,13 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
       setFlash(null)
       setPickedLeft(null)
       setShake(false)
-    }, 420)
+    }, 580)
   }
 
   return (
     <div className={`play ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}>
-      <PuzzleHint text={challenge.context} onPeek={onPeek} />
       <p className="prompt">{challenge.prompt}</p>
+      <PuzzleHint text={challenge.context} onPeek={onPeek} />
       <p className="hint">Snap a pair. Right matches lock; misses flash and bounce.</p>
 
       <div className="match-grid">

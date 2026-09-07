@@ -97,15 +97,15 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
       setKeep([])
       setDiscard([])
       setPicked(null)
-    }, 520)
+    }, 620)
   }
 
   const selected = picked ? takeTile(picked) : undefined
 
   return (
     <div className={`play ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}>
-      <PuzzleHint text={challenge.context} onPeek={onPeek} />
       <p className="prompt">{challenge.prompt}</p>
+      <PuzzleHint text={challenge.context} onPeek={onPeek} />
       <p className="sort-how">
         <span>
           <strong>Keep</strong> this belongs
@@ -114,6 +114,39 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
           <strong>Toss</strong> set it aside
         </span>
       </p>
+
+      <div className="bank">
+        {bank.map((tile) => (
+          <div
+            key={tile.id}
+            className={`sort-tile ${picked === tile.id ? 'is-selected' : ''}`}
+          >
+            <button
+              type="button"
+              className="chip"
+              onClick={() => setPicked(tile.id === picked ? null : tile.id)}
+            >
+              {tile.text}
+            </button>
+            <span className="sort-tile-actions">
+              <button
+                type="button"
+                className="btn tiny keep"
+                onClick={() => place(tile.id, 'keep')}
+              >
+                Keep
+              </button>
+              <button
+                type="button"
+                className="btn tiny toss"
+                onClick={() => place(tile.id, 'discard')}
+              >
+                Toss
+              </button>
+            </span>
+          </div>
+        ))}
+      </div>
 
       <div className="sort-bins">
         <div
@@ -190,39 +223,6 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
             )}
           </span>
         </div>
-      </div>
-
-      <div className="bank">
-        {bank.map((tile) => (
-          <div
-            key={tile.id}
-            className={`sort-tile ${picked === tile.id ? 'is-selected' : ''}`}
-          >
-            <button
-              type="button"
-              className="chip"
-              onClick={() => setPicked(tile.id === picked ? null : tile.id)}
-            >
-              {tile.text}
-            </button>
-            <span className="sort-tile-actions">
-              <button
-                type="button"
-                className="btn tiny keep"
-                onClick={() => place(tile.id, 'keep')}
-              >
-                Keep
-              </button>
-              <button
-                type="button"
-                className="btn tiny toss"
-                onClick={() => place(tile.id, 'discard')}
-              >
-                Toss
-              </button>
-            </span>
-          </div>
-        ))}
       </div>
 
       {status !== 'ok' && bank.length === 0 ? (
