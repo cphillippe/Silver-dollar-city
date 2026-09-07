@@ -220,7 +220,7 @@ export function getNextGoal(
       title: 'Today’s Trail',
       detail: due
         ? 'Time to dust off a page · about a minute'
-        : `${dailyForDate(today).challenge.title} · about a minute`,
+        : `${dailyForDate(today, progress.dailyDates.filter((d) => d !== today).length).challenge.title} · about a minute`,
     }
   }
 
@@ -294,7 +294,7 @@ export function nextRebuildHint(
   if (!dailyDoneToday(progress, today)) {
     return {
       title: 'Next walk',
-      detail: `${dailyForDate(today).challenge.title} · today’s trail · fold, then rehearse the claim`,
+      detail: `${dailyForDate(today, progress.dailyDates.filter((d) => d !== today).length).challenge.title} · today’s trail · fold, then rehearse the claim`,
       cta: 'Walk today’s trail',
       go: { name: 'daily' },
     }

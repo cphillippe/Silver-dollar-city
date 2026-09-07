@@ -37,6 +37,7 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
   const now = new Date()
   assertLocalCalendar(now)
   const today = localDateKey(now)
+  const morningsBefore = progress.dailyDates.filter((d) => d !== today).length
   const tomorrow = dailyForDate(addLocalDays(today, 1))
 
   const [session] = useState(() => {
@@ -44,7 +45,7 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
     const due = already ? undefined : morningReview(progress, today)
     const reviewBrief = due ? evidenceFor(due.id) : undefined
     const isReview = Boolean(due && reviewBrief)
-    const fresh = dailyForDate(today)
+    const fresh = dailyForDate(today, morningsBefore)
     const playable =
       due && isReview
         ? findPlayable(due.id)
@@ -254,7 +255,7 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
                     ? 'Held after a rest, and said back.'
                     : earned === 2
                       ? 'Held after a rest. The trail will ask again later.'
-                      : 'First walk locked. It will return in a morning or two.'}
+                      : '1★ first walk. A later morning will ask this line back.'}
                 </p>
               </div>
               {flourish ? (

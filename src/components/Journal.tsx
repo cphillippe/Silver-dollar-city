@@ -11,7 +11,6 @@ import { RecallGate } from './RecallGate'
 import { ShareInvite } from './ShareInvite'
 import { StarRow } from './StarRow'
 import {
-  dailyDoneToday,
   dueCount,
   dueForRecall,
   journalCompletion,
@@ -39,7 +38,6 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
   const heldCount = progress.held.length
   const dueItems = dueForRecall(progress, today).filter((item) => item.brief)
   const waiting = dueCount(progress, today)
-  const trailOpen = !dailyDoneToday(progress, today)
   const nextStep = nextRebuildHint(progress, today)
   const focusedEntry = journalEntries.find(
     (entry) => entry.id === focusId || entry.unlockAfter === focusId,
@@ -93,7 +91,7 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
   }
 
   return (
-    <main className="journal">
+    <main className={`journal ${dueItems.length ? 'has-due' : ''}`}>
       <section className="next-rebuild">
         <p className="eyebrow">Next recommended</p>
         <h2>{nextStep.title}</h2>
@@ -106,6 +104,45 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
           {nextStep.cta}
         </button>
       </section>
+
+      {dueItems.length > 0 ? (
+        <section className="journal-chapter due-chapter">
+          <div className="chapter-head">
+            <Avatar who="juniper" size="sm" />
+            <div>
+              <h2>Due this morning</h2>
+              <p>Face-down. Rebuild the line — then the page opens.</p>
+            </div>
+          </div>
+          <div className="card-grid">
+            {dueItems.map((item) => (
+              <article key={item.trace.id} className="dossier is-open is-due">
+                <Landmark pillar={item.trace.pillar} compact />
+                <p className="eyebrow">Due this morning · Face-down</p>
+                <h3>{item.entry?.title ?? 'A held line'}</h3>
+                <StarRow
+                  count={progress.stars[item.trace.id] ?? 0}
+                  compact
+                  label={starLegend(progress.stars[item.trace.id] ?? 0)}
+                />
+                <button
+                  type="button"
+                  className="btn primary"
+                  onClick={() =>
+                    onNavigate({
+                      name: 'journal',
+                      focusId: item.entry?.id ?? item.trace.id,
+                      autoQuiz: true,
+                    })
+                  }
+                >
+                  Rehearse this
+                </button>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <header className="page-head journal-head">
         <p className="eyebrow">Evidence Journal</p>
@@ -129,50 +166,6 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
           {waiting ? ` · ${waiting} due this morning` : ''}
         </p>
       </header>
-
-      {dueItems.length > 0 ? (
-        <section className="journal-chapter due-chapter">
-          <div className="chapter-head">
-            <Avatar who="juniper" size="sm" />
-            <div>
-              <h2>Due this morning</h2>
-              <p>
-                Time to dust these off. The trail mixes districts on purpose —
-                never as a scolding.
-              </p>
-            </div>
-          </div>
-          {trailOpen ? (
-            <button
-              type="button"
-              className="btn primary"
-              onClick={() => onNavigate({ name: 'daily' })}
-            >
-              Walk today’s trail
-            </button>
-          ) : (
-            <p className="quiet">
-              This morning’s walk is marked. Remaining pages rest until a later
-              sunrise.
-            </p>
-          )}
-          <div className="card-grid">
-            {dueItems.map((item) => (
-              <article key={item.trace.id} className="dossier is-open is-due">
-                <Landmark pillar={item.trace.pillar} compact />
-                <p className="eyebrow">Due this morning</p>
-                <h3>{item.entry?.title ?? item.brief?.claim}</h3>
-                <p className="quiet">{item.brief?.claim}</p>
-                <StarRow
-                  count={progress.stars[item.trace.id] ?? 0}
-                  compact
-                  label={starLegend(progress.stars[item.trace.id] ?? 0)}
-                />
-              </article>
-            ))}
-          </div>
-        </section>
-      ) : null}
 
       <section className="journal-chapter">
         <div className="chapter-head">

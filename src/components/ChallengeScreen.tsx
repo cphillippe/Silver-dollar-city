@@ -219,7 +219,7 @@ export function ChallengeScreen({
           <Landmark pillar={areaId} compact />
           {bestBefore ? (
             <p className="best-clear">
-              Mastery <StarRow count={bestBefore} compact label={starLegend(bestBefore)} />
+              Stars <StarRow count={bestBefore} compact label={starLegend(bestBefore)} />
               <span className="quiet">{starLegend(bestBefore)}</span>
             </p>
           ) : null}
@@ -269,7 +269,7 @@ export function ChallengeScreen({
                     ? 'Held after a rest.'
                     : reviewing
                       ? 'Time to dust off this one — then it can rest again.'
-                      : 'First walk. The trail will bring this line back later.'}
+                      : '1★ first walk. A later morning will ask this line back.'}
               </p>
             </div>
           ) : null}

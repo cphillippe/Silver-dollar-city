@@ -1353,10 +1353,25 @@ p {
   font-weight: 650;
 }
 
+.journal.has-due .journal-head > p,
+.journal.has-due .journal-meter,
+.journal.has-due .journal-split {
+  display: none;
+}
+
+.journal.has-due .journal-head h1 {
+  font-size: 1.35rem;
+  margin-bottom: 0.15em;
+}
+
+.due-chapter .btn.primary {
+  margin-top: 8px;
+}
+
 .star-key {
   opacity: 0.72;
-  font-size: 0.92rem;
-  margin: 0 0 8px;
+  font-size: 0.88rem;
+  margin: 0 0 12px;
 }
 
 .star-row {
