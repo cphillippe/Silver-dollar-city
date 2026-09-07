@@ -930,6 +930,11 @@ p {
     opacity: 1;
   }
 }
+
+.win-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
   background: radial-gradient(circle at 50% 42%, rgba(255, 236, 170, 0.88), rgba(224, 179, 74, 0.28) 38%, transparent 70%);
   animation: win-flash 0.55s ease-out both;
 }
