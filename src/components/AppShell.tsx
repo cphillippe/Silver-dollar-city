@@ -14,6 +14,10 @@ export function AppShell({ view, onNavigate, children }: AppShellProps) {
   const hideChrome = view.name === 'welcome'
 
   function followGoal() {
+    if (goal.kind === 'daily') {
+      onNavigate({ name: 'daily' })
+      return
+    }
     if (goal.kind === 'welcome') {
       onNavigate({ name: 'welcome' })
       return
@@ -67,6 +71,13 @@ export function AppShell({ view, onNavigate, children }: AppShellProps) {
             </button>
             <button
               type="button"
+              className={view.name === 'daily' ? 'is-active' : ''}
+              onClick={() => onNavigate({ name: 'daily' })}
+            >
+              Trail
+            </button>
+            <button
+              type="button"
               className={view.name === 'journal' ? 'is-active' : ''}
               onClick={() => onNavigate({ name: 'journal' })}
             >
@@ -88,8 +99,9 @@ export function AppShell({ view, onNavigate, children }: AppShellProps) {
             <strong>{goal.title}</strong>
             <em>{goal.detail}</em>
           </button>
-          <p className="score" title="Insight grows with first-try answers">
-            Insight {insightScore(progress)}
+          <p className="score" title="Held lines are claims you rebuilt from memory">
+            Held {progress.held.length}
+            <span className="score-sub"> · insight {insightScore(progress)}</span>
           </p>
         </footer>
       ) : null}

@@ -1,4 +1,5 @@
 import { areas, totalJournal } from '../content'
+import { ShareInvite } from './ShareInvite'
 import { insightScore, useProgress } from '../store/progress'
 import type { View } from '../types'
 
@@ -21,8 +22,8 @@ export function Vista({ onNavigate }: VistaProps) {
         that the Author has spoken.
       </p>
       <p>
-        Insight marks: {insightScore(progress)} · Journal cards:{' '}
-        {progress.journal.length}/{totalJournal} · First-try clearances:{' '}
+        Held lines: {progress.held.length} · Insight {insightScore(progress)} ·
+        Journal {progress.journal.length}/{totalJournal} · First-try{' '}
         {progress.firstTry.length}
       </p>
       <blockquote>
@@ -45,6 +46,7 @@ export function Vista({ onNavigate }: VistaProps) {
         >
           Walk a district again
         </button>
+        <ShareInvite />
       </div>
       <ul className="vista-list">
         {areas.map((area) => (

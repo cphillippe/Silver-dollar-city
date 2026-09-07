@@ -8,9 +8,10 @@ interface SequencePlayProps {
   challenge: SequenceChallenge
   onMiss: () => void
   onSolved: () => void
+  onPeek?: () => void
 }
 
-export function SequencePlay({ challenge, onMiss, onSolved }: SequencePlayProps) {
+export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePlayProps) {
   const bankSeed = useMemo(() => shuffle(challenge.items), [challenge.items])
   const [bank, setBank] = useState(bankSeed)
   const [chain, setChain] = useState<typeof challenge.items>([])
@@ -61,7 +62,7 @@ export function SequencePlay({ challenge, onMiss, onSolved }: SequencePlayProps)
 
   return (
     <div className={`play ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}>
-      <PuzzleHint text={challenge.context} />
+      <PuzzleHint text={challenge.context} onPeek={onPeek} />
       <p className="prompt">{challenge.prompt}</p>
       <p className="hint">Tap tiles in order. The chain checks itself when full.</p>
 

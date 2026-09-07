@@ -90,6 +90,7 @@ p {
 .hub,
 .area-page,
 .challenge-page,
+.daily-page,
 .journal,
 .vista,
 .page {
@@ -207,6 +208,12 @@ p {
   white-space: nowrap;
 }
 
+.score-sub {
+  display: block;
+  font-size: 0.78rem;
+  opacity: 0.7;
+}
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -270,6 +277,7 @@ p {
     radial-gradient(circle at 40% 70%, rgba(255, 244, 200, 0.8) 0 1.4px, transparent 2px);
   opacity: 0.55;
   pointer-events: none;
+  animation: sky-drift 12s ease-in-out infinite;
 }
 
 .welcome h1,
@@ -924,6 +932,194 @@ p {
   background: rgba(196, 107, 74, 0.12);
   border-radius: 16px;
   padding: 14px;
+}
+
+@keyframes sky-drift {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 0.7;
+    transform: translateY(-8px);
+  }
+}
+
+.today-trail,
+.next-card,
+.teaser-card,
+.recall-gate,
+.share-invite {
+  background: linear-gradient(180deg, rgba(244, 234, 210, 0.1), rgba(244, 234, 210, 0.03));
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px 18px 20px;
+  box-shadow: var(--shadow);
+  margin-bottom: 18px;
+}
+
+.today-trail.is-live {
+  border-color: color-mix(in srgb, var(--gold) 70%, white);
+  animation: trail-glow 2.8s ease-in-out infinite;
+}
+
+@keyframes trail-glow {
+  0%,
+  100% {
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+  }
+  50% {
+    box-shadow: 0 18px 50px rgba(224, 179, 74, 0.18);
+  }
+}
+
+.today-trail h2,
+.next-card h2,
+.teaser-card h2,
+.recall-gate h2 {
+  font-size: 1.7rem;
+}
+
+.district-flavor {
+  color: var(--gold);
+  font-family: var(--serif);
+  font-size: 1.05rem;
+}
+
+.today-trail-meta,
+.daily-flourish,
+.station-mastery,
+.dossier-marks,
+.best-clear {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.teaser-inline,
+.quiet,
+.welcome-daily-line {
+  opacity: 0.72;
+  margin-bottom: 0.6em;
+}
+
+.streak-mark,
+.held-mark,
+.clean-mark {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(224, 179, 74, 0.16);
+  color: var(--gold);
+  font-size: 0.82rem;
+  font-weight: 650;
+}
+
+.held-mark {
+  background: rgba(107, 143, 113, 0.22);
+  color: #cfe6d2;
+}
+
+.star-row {
+  letter-spacing: 0.08em;
+  color: rgba(244, 234, 210, 0.28);
+  font-size: 1.05rem;
+}
+
+.star-row.is-compact {
+  font-size: 0.92rem;
+}
+
+.star-row .is-lit {
+  color: var(--gold);
+  text-shadow: 0 0 12px rgba(224, 179, 74, 0.45);
+}
+
+.journal-meter {
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(244, 234, 210, 0.08);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  margin: 10px 0 8px;
+}
+
+.journal-meter span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold-deep), var(--gold));
+  border-radius: inherit;
+  transition: width 0.4s ease;
+}
+
+.journal-split {
+  opacity: 0.7;
+  font-size: 0.92rem;
+}
+
+.dossier.is-mystery {
+  opacity: 0.7;
+  border-style: dashed;
+}
+
+.dossier.is-held {
+  border-color: rgba(107, 143, 113, 0.45);
+}
+
+.recall-gate {
+  animation: pop-in 0.32s ease;
+}
+
+.recall-choices {
+  display: grid;
+  gap: 10px;
+}
+
+.recall-card {
+  text-align: left;
+  width: 100%;
+  background: rgba(14, 18, 32, 0.45);
+  border: 1px solid var(--line);
+  color: inherit;
+  border-radius: 16px;
+  padding: 14px 16px;
+  font-size: 1rem;
+}
+
+.recall-card:hover {
+  border-color: var(--gold);
+}
+
+.recall-line {
+  font-family: var(--serif);
+  font-size: 1.35rem;
+  margin: 0.2em 0 0.4em;
+}
+
+.held-stamp {
+  text-align: left;
+}
+
+.area-replay {
+  display: grid;
+  gap: 10px;
+}
+
+.share-invite.is-compact {
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.teaser-card {
+  opacity: 0.95;
+  background:
+    linear-gradient(180deg, rgba(224, 179, 74, 0.08), rgba(244, 234, 210, 0.03));
 }
 
 @media (max-width: 640px) {

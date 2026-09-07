@@ -8,11 +8,12 @@ interface SortPlayProps {
   challenge: SortChallenge
   onMiss: () => void
   onSolved: () => void
+  onPeek?: () => void
 }
 
 type Bin = 'keep' | 'discard'
 
-export function SortPlay({ challenge, onMiss, onSolved }: SortPlayProps) {
+export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps) {
   const seed = useMemo(() => shuffle(challenge.tiles), [challenge.tiles])
   const [bank, setBank] = useState(seed)
   const [keep, setKeep] = useState<SortTile[]>([])
@@ -80,7 +81,7 @@ export function SortPlay({ challenge, onMiss, onSolved }: SortPlayProps) {
 
   return (
     <div className={`play ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}>
-      <PuzzleHint text={challenge.context} />
+      <PuzzleHint text={challenge.context} onPeek={onPeek} />
       <p className="prompt">{challenge.prompt}</p>
       <p className="hint">Tap a tile, then drop it in Keep or Toss.</p>
 

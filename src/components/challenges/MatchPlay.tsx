@@ -8,9 +8,10 @@ interface MatchPlayProps {
   challenge: MatchChallenge
   onMiss: () => void
   onSolved: () => void
+  onPeek?: () => void
 }
 
-export function MatchPlay({ challenge, onMiss, onSolved }: MatchPlayProps) {
+export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProps) {
   const left = challenge.pairs
   const right = useMemo(
     () => shuffle(challenge.pairs.map((pair) => ({ id: pair.id, text: pair.right }))),
@@ -52,7 +53,7 @@ export function MatchPlay({ challenge, onMiss, onSolved }: MatchPlayProps) {
 
   return (
     <div className={`play ${status === 'ok' ? 'is-win' : ''}`}>
-      <PuzzleHint text={challenge.context} />
+      <PuzzleHint text={challenge.context} onPeek={onPeek} />
       <p className="prompt">{challenge.prompt}</p>
       <p className="hint">Snap a pair. Right matches lock; misses flash and bounce.</p>
 

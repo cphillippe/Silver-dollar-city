@@ -14,3 +14,5 @@ Supported puzzle `kind` values:
 - `sort` — keep-or-toss bins
 
 Keep citations real. Prefer honest framing of what an argument claims versus what it proves. Teaching copy belongs in `deeper` / journal cards so it appears after a solve.
+
+Every challenge (and Daily Trail puzzle) also needs a one-line **claim + reason + source** in `src/content/evidence.ts`. After a solve the teaching folds and the player rebuilds that line. If the line is not crisp, the Recall Loop will feel like homework — keep it short enough to snap.
