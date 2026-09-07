@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react'
 import { areas, findPlayable } from '../content'
 import { dailyForDate } from '../content/daily'
 import { guideForArea, STORY } from '../content/story'
-import { addLocalDays, localDateKey } from '../lib/dates'
+import { addLocalDays, formatDeviceLocalDate, localDateKey } from '../lib/dates'
 import { starLegend } from '../lib/stars'
 import { Avatar } from './Avatar'
 import { Landmark } from './Landmark'
@@ -57,7 +57,7 @@ export function Hub({ onNavigate }: HubProps) {
         <div className="card-lead">
           <Avatar who="juniper" size="lg" />
           <div>
-            <p className="eyebrow">Today’s Trail</p>
+            <p className="eyebrow">Today’s Trail · {formatDeviceLocalDate()}</p>
             <h2>
               {doneToday
                 ? 'This morning is marked'

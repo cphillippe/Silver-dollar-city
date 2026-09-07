@@ -1,45 +1,22 @@
-/** Device IANA timezone (never assume UTC). */
-export function deviceTimeZone(): string {
-  try {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
-  } catch {
-    return 'UTC'
-  }
-}
-
 function pad2(n: number): string {
   return String(n).padStart(2, '0')
 }
 
-function pickPart(
-  parts: Intl.DateTimeFormatPart[],
-  type: Intl.DateTimeFormatPartTypes,
-): string {
-  return parts.find((part) => part.type === type)?.value ?? ''
-}
-
 /**
- * Local calendar date as YYYY-MM-DD in the given IANA zone.
- * Uses Intl parts — never `toISOString()` / UTC getters — so America/Chicago
- * after local midnight is Monday even while UTC is still catching up, and the
- * reverse never prints yesterday.
+ * Device calendar YYYY-MM-DD from local getters only.
+ * Never `toISOString()`, `getUTC*`, or `Intl` with an explicit `timeZone`
+ * (date-only Intl + a zone is how America/Chicago 00:50 Monday became Sunday).
  */
-export function localDateKey(d = new Date(), timeZone = deviceTimeZone()): string {
-  const parts = new Intl.DateTimeFormat('en-US', {
-    timeZone,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).formatToParts(d)
-  return `${pickPart(parts, 'year')}-${pickPart(parts, 'month')}-${pickPart(parts, 'day')}`
+export function localDateKey(d = new Date()): string {
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`
 }
 
-/** Civil (date-only) arithmetic — UTC calendar math on YYYY-MM-DD, not instants. */
+/** Civil (date-only) arithmetic on YYYY-MM-DD keys — not wall-clock instants. */
 export function addLocalDays(key: string, n: number): string {
   const { y, m, d } = parseDateKey(key)
-  const next = new Date(Date.UTC(y, m - 1, d))
-  next.setUTCDate(next.getUTCDate() + n)
-  return `${next.getUTCFullYear()}-${pad2(next.getUTCMonth() + 1)}-${pad2(next.getUTCDate())}`
+  const next = new Date(y, m - 1, d)
+  next.setDate(next.getDate() + n)
+  return localDateKey(next)
 }
 
 export function parseDateKey(key: string): { y: number; m: number; d: number } {
@@ -56,18 +33,38 @@ export function hashString(value: string): number {
   return h >>> 0
 }
 
+/** Grep marker so we can prove the live bundle is this revision. */
+export const DATE_SOURCE = 'device-local-getters'
+
 /**
- * Print a YYYY-MM-DD civil date. Format at UTC noon with timeZone UTC so a
- * date-only string is never parsed as UTC midnight (which is the previous
- * evening in America/Chicago).
+ * Weekday + date for a `Date` in the *device* timezone.
+ * `timeZone` is omitted on purpose — the browser's local zone, not UTC.
  */
-export function formatTrailDate(key: string): string {
-  const { y, m, d } = parseDateKey(key)
-  const utcNoon = new Date(Date.UTC(y, m - 1, d, 12, 0, 0))
+export function formatDeviceLocalDate(d = new Date()): string {
   return new Intl.DateTimeFormat(undefined, {
     weekday: 'long',
     month: 'long',
     day: 'numeric',
-    timeZone: 'UTC',
-  }).format(utcNoon)
+  }).format(d)
+}
+
+/** Print a stored YYYY-MM-DD as local noon that day (never Date.parse of the key). */
+export function formatTrailDate(key: string): string {
+  const { y, m, d } = parseDateKey(key)
+  return formatDeviceLocalDate(new Date(y, m - 1, d, 12, 0, 0))
+}
+
+export function assertLocalCalendar(d = new Date()): void {
+  const key = localDateKey(d)
+  const { y, m, day } = {
+    y: d.getFullYear(),
+    m: d.getMonth() + 1,
+    day: d.getDate(),
+  }
+  const [ky, km, kd] = key.split('-').map(Number)
+  console.assert(
+    ky === y && km === m && kd === day,
+    `[${DATE_SOURCE}] date key drifted from local getters`,
+    { key, y, m, day },
+  )
 }

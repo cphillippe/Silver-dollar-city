@@ -7,12 +7,9 @@ The product goal is **keeping the evidence**: claims, reasons, and sources you c
 ## Play now (no install)
 
 **Open this in normal Chrome — live preview of this branch:**  
-https://strikes-downloadable-hospital-lesser.trycloudflare.com/
+https://really-helpful-parker-chester.trycloudflare.com/
 
-That URL is a public Cloudflare tunnel in front of `vite preview` (HTTP 200, `text/html`). Skip StackBlitz — some testers hit **Incompatible Web Browser**. Hard-refresh if an older tunnel cached a service worker.
-
-Backup tunnels (same host, may be an older bundle):  
-https://russell-bernard-kernel-accept.trycloudflare.com/
+That URL is a **new** Cloudflare origin in front of `vite preview` (HTTP 200). Skip older tunnels — they may still have a cached date bug. Skip StackBlitz.
 
 **GitHub Pages (one click, then it stays pretty):**  
 https://cphillippe.github.io/Silver-dollar-city/
@@ -115,7 +112,7 @@ Progress shape (same key `silver-city-progress-v1`): `memory[id].nextReviewAt`, 
 
 ## Friend preview (no install)
 
-**Play now (Chrome):** https://strikes-downloadable-hospital-lesser.trycloudflare.com/
+**Play now (Chrome, new origin):** https://really-helpful-parker-chester.trycloudflare.com/
 
 **After Pages is enabled:** https://cphillippe.github.io/Silver-dollar-city/
 

@@ -72,7 +72,7 @@ New user, storage cleared. **Clarity 5/5** in ≤15s.
 
 ## Follow-up (2026-09-07, after 4/5 clarity)
 
-1. **Local date** — Daily Trail now uses the device calendar (`Intl` + civil date), not UTC midnight. America/Chicago Monday Sep 7 no longer prints Sunday Sep 6.
+1. **Local date** — Root cause: the trail label formatted a `YYYY-MM-DD` key with `Intl` + `timeZone: 'UTC'` / date-only ISO midnight, which is Sunday evening in America/Chicago. **Shipped:** `getFullYear/getMonth/getDate` + `Intl` with `timeZone` omitted; label is `new Date()` in the browser. Marker: `device-local-getters`.
 2. **Cast on welcome** — River and Juniper named as Christian companions on the first screen.
 3. **Keep / Toss** — Keep = belongs, Toss = set aside. Peek line is always visible: *won’t count as a clean recall.*
 
