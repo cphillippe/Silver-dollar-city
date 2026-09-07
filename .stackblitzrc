@@ -1,0 +1,5 @@
+{
+  "installDependencies": true,
+  "startCommand": "npm run dev -- --host --port 5173",
+  "compileTrigger": "save"
+}

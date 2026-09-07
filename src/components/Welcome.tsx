@@ -51,6 +51,10 @@ export function Welcome({ onNavigate }: WelcomeProps) {
         <span>Unending Evidence</span>
       </h1>
       <p className="lede">{STORY.premise}</p>
+      <p className="welcome-goal">
+        Play a short puzzle. Fold the page. Keep one claim you can still say
+        tomorrow.
+      </p>
       <Say who="juniper" line={STORY.welcomeJuniper} />
       <ul className="welcome-facts">
         <li>
