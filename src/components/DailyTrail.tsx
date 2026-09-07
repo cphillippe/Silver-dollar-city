@@ -4,6 +4,7 @@ import { dailyForDate } from '../content/daily'
 import { evidenceFor } from '../content/evidence'
 import { STORY, townVoice } from '../content/story'
 import { localDateKey } from '../lib/dates'
+import { useJuiceHandoff } from '../lib/juice'
 import { PuzzlePlay } from './PuzzlePlay'
 import { RecallGate } from './RecallGate'
 import { TownReturn } from './TownReturn'
@@ -49,7 +50,7 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
   })
 
   const { isReview, challenge, brief, pillar } = session
-  const [solved, setSolved] = useState(session.already)
+  const { juiceDone: solved, afterJuice } = useJuiceHandoff(session.already)
   const [missed, setMissed] = useState(false)
   const [peeked, setPeeked] = useState(false)
   const [held, setHeld] = useState(
@@ -73,7 +74,7 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
         elaborated: false,
       })
     }
-    setSolved(true)
+    afterJuice()
   }
 
   function settleRecall(result: { clean: boolean }) {
@@ -112,7 +113,9 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
 
       {!solved ? (
         <>
-          <h1>{isReview ? 'Time to dust off this one' : challenge.title}</h1>
+          <h1 className="puzzle-title">
+            {isReview ? 'Time to dust off this one' : challenge.title}
+          </h1>
           <PuzzlePlay
             challenge={challenge}
             onMiss={() => setMissed(true)}

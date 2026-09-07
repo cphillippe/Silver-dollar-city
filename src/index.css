@@ -113,7 +113,23 @@ p {
 }
 
 .app.is-play .app-body {
-  padding-bottom: calc(20px + var(--safe-bottom));
+  padding-bottom: calc(12px + var(--safe-bottom));
+}
+
+.app.is-play .app-body:has(.is-puzzle) {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding-top: 8px;
+}
+
+.app.is-play .topbar {
+  flex-wrap: nowrap;
+  padding: calc(6px + var(--safe-top)) 10px 6px;
+}
+
+.app.is-play .topbar nav .subtle {
+  display: none;
 }
 
 .grain {
@@ -675,10 +691,44 @@ p {
   border-radius: 14px;
 }
 
-.daily-page.is-puzzle h1,
-.challenge-page.is-puzzle h1 {
-  font-size: 1.35rem;
-  margin-bottom: 0.2em;
+.daily-page.is-puzzle,
+.challenge-page.is-puzzle {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  gap: 4px;
+  overflow: hidden;
+}
+
+.daily-page.is-puzzle .text-link,
+.challenge-page.is-puzzle .text-link {
+  font-size: 0.82rem;
+  margin-bottom: 0;
+}
+
+.puzzle-title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.daily-page.is-puzzle .play,
+.challenge-page.is-puzzle .play {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.daily-page.is-puzzle .play.is-win,
+.challenge-page.is-puzzle .play.is-win {
+  overflow: visible;
 }
 
 .puzzle-idea {
@@ -693,10 +743,10 @@ p {
 
 .prompt {
   font-family: var(--serif);
-  font-size: 1.22rem;
+  font-size: 1.05rem;
   font-weight: 650;
-  line-height: 1.3;
-  margin-bottom: 0.2em;
+  line-height: 1.25;
+  margin-bottom: 0.1em;
   color: var(--gold);
   text-wrap: pretty;
 }
@@ -722,29 +772,30 @@ p {
 
 .hint-toggle {
   justify-self: start;
-  background: rgba(224, 179, 74, 0.1);
-  border: 1px solid var(--line);
+  background: none;
+  border: 0;
   color: var(--gold);
-  padding: 8px 14px;
-  min-height: 40px;
-  border-radius: 999px;
-  font-size: 0.86rem;
+  padding: 0;
+  min-height: 0;
+  border-radius: 0;
+  font-size: 0.78rem;
   font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .sort-how {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin: 0 0 6px;
-  font-size: 0.82rem;
+  margin: 0 0 4px;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  color: rgba(244, 234, 210, 0.72);
 }
 
-.sort-how span {
-  background: rgba(14, 18, 32, 0.4);
-  border: 1px solid rgba(224, 179, 74, 0.16);
-  border-radius: 14px;
-  padding: 8px 12px;
+.sort-how strong {
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
 }
 
 .hint-peek {
@@ -761,19 +812,11 @@ p {
   color: rgba(244, 234, 210, 0.62);
 }
 
-.sort-how strong {
-  display: block;
-  font-size: 0.78rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--gold);
-  margin-bottom: 2px;
-}
-
 .play {
+  position: relative;
   display: grid;
-  gap: 10px;
-  padding: 12px 12px 16px;
+  gap: 8px;
+  padding: 10px 10px 12px;
   background: linear-gradient(180deg, rgba(244, 234, 210, 0.07), rgba(10, 14, 24, 0.28));
   border: 1px solid var(--line);
   border-radius: 24px;
@@ -824,15 +867,114 @@ p {
 .play.is-win .chip.in-chain,
 .play.is-win .chip.in-slot,
 .play.is-win .match-card.is-locked,
-.play.is-win .bin,
 .play.is-win .chip.in-bin {
-  animation: pop-win 0.5s ease;
+  animation: tile-burst 0.58s cubic-bezier(0.2, 0.85, 0.25, 1) forwards;
 }
 
 .play.is-win .bin {
   border-style: solid;
-  border-color: rgba(107, 143, 113, 0.7);
-  box-shadow: 0 0 0 3px rgba(107, 143, 113, 0.22);
+  border-color: rgba(255, 224, 138, 0.85);
+  box-shadow: 0 0 0 3px rgba(224, 179, 74, 0.28), 0 0 28px rgba(224, 179, 74, 0.35);
+  animation: bin-flash 0.45s ease-out;
+}
+
+.play.is-win .match-score {
+  visibility: hidden;
+}
+
+.play.is-win {
+  animation: play-boom 0.42s cubic-bezier(0.2, 1.35, 0.4, 1);
+}
+
+.win-burst {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 7;
+  overflow: visible;
+}
+
+.win-flash {
+  position: absolute;
+  inset: -12%;
+  background: radial-gradient(circle at 50% 45%, rgba(255, 236, 170, 0.72), rgba(224, 179, 74, 0.12) 42%, transparent 68%);
+  animation: win-flash 0.5s ease-out both;
+}
+
+.win-spark {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: 9px;
+  height: 9px;
+  margin: -4px;
+  border-radius: 50%;
+  background: #ffe08a;
+  box-shadow: 0 0 10px rgba(255, 224, 138, 0.9);
+  animation: win-spark 0.62s cubic-bezier(0.12, 0.8, 0.3, 1) both;
+  transform: rotate(calc(var(--i) * 25.7deg)) translateY(-8px);
+}
+
+@keyframes win-flash {
+  0% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  28% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.18);
+  }
+}
+
+@keyframes win-spark {
+  0% {
+    opacity: 1;
+    transform: rotate(calc(var(--i) * 25.7deg)) translateY(0) scale(0.4);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(calc(var(--i) * 25.7deg)) translateY(-118px) scale(0.15);
+  }
+}
+
+@keyframes tile-burst {
+  0% {
+    transform: scale(1) rotate(0);
+    opacity: 1;
+  }
+  22% {
+    transform: scale(1.16) rotate(calc(var(--spin, 8deg) * 0.4));
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--dx, 0), var(--dy, -72px)) scale(0.12) rotate(var(--spin, 18deg));
+    opacity: 0;
+  }
+}
+
+@keyframes bin-flash {
+  0% {
+    filter: brightness(1.6);
+  }
+  100% {
+    filter: brightness(1);
+  }
+}
+
+@keyframes play-boom {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.035);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .sort-bins.is-ready {
@@ -919,7 +1061,7 @@ p {
 }
 
 .bin {
-  min-height: 108px;
+  min-height: 88px;
   border-radius: 20px;
   border: 2px dashed var(--line);
   background:
@@ -954,11 +1096,11 @@ p {
   border-radius: 18px 18px 0 0;
   background: linear-gradient(180deg, rgba(107, 143, 113, 0.38), rgba(107, 143, 113, 0.18));
   color: var(--parchment);
-  padding: 12px 12px 10px;
+  padding: 8px 10px 6px;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  font-size: 0.82rem;
+  font-size: 0.75rem;
 }
 
 .bin-head.toss {
@@ -1076,6 +1218,13 @@ p {
   padding: 14px 16px;
   min-height: 52px;
   box-shadow: 0 6px 16px rgba(4, 8, 18, 0.18);
+}
+
+.is-puzzle .chip,
+.is-puzzle .match-card,
+.is-puzzle .slot-target {
+  padding: 8px 10px;
+  min-height: 44px;
 }
 
 .choice {

@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react'
 import { shuffle } from '../../lib/shuffle'
 import type { MatchChallenge } from '../../types'
+import { burstStyle } from '../../lib/juice'
 import { PuzzleHint } from './PuzzleHint'
 import { PuzzleLead } from './PuzzleLead'
 import { ResultPanel } from './ResultPanel'
+import { WinBurst } from './WinBurst'
 
 interface MatchPlayProps {
   challenge: MatchChallenge
@@ -59,17 +61,18 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
 
   return (
     <div className={`play ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}>
+      <WinBurst play={status === 'ok'} />
       <PuzzleLead challenge={challenge} />
       <PuzzleHint text={challenge.context} onPeek={onPeek} />
-      <p className="hint">Snap a pair. Right matches lock; misses flash and bounce.</p>
 
       <div className="match-grid">
         <div className="match-col">
-          {left.map((pair) => (
+          {left.map((pair, index) => (
             <button
               key={pair.id}
               type="button"
               className={`match-card ${pickedLeft === pair.id ? 'is-selected' : ''} ${locked.includes(pair.id) ? 'is-locked' : ''} ${flash === pair.id && !locked.includes(pair.id) ? 'is-flash' : ''}`}
+              style={status === 'ok' ? burstStyle(index, 'keep') : undefined}
               onClick={() => chooseLeft(pair.id)}
             >
               {pair.left}
@@ -77,11 +80,12 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
           ))}
         </div>
         <div className="match-col">
-          {right.map((item) => (
+          {right.map((item, index) => (
             <button
               key={item.id}
               type="button"
               className={`match-card right ${locked.includes(item.id) ? 'is-locked' : ''} ${pickedLeft ? 'awaiting' : ''} ${flash === item.id ? 'is-flash' : ''}`}
+              style={status === 'ok' ? burstStyle(index, 'discard') : undefined}
               onClick={() => chooseRight(item.id)}
             >
               {item.text}

@@ -3,6 +3,7 @@ import { getArea, getChallenge } from '../content'
 import { evidenceFor } from '../content/evidence'
 import { STORY, townVoiceForArea } from '../content/story'
 import { localDateKey } from '../lib/dates'
+import { useJuiceHandoff } from '../lib/juice'
 import { isDue } from '../lib/memory'
 import { PuzzlePlay } from './PuzzlePlay'
 import { RecallGate } from './RecallGate'
@@ -36,7 +37,7 @@ export function ChallengeScreen({
         isDue(progress.memory[brief.id], today),
     ),
   )
-  const [showNext, setShowNext] = useState(false)
+  const { juiceDone: showNext, afterJuice } = useJuiceHandoff()
   const [attemptMissed, setAttemptMissed] = useState(false)
   const [attemptPeeked, setAttemptPeeked] = useState(false)
   const [recalled, setRecalled] = useState(false)
@@ -78,7 +79,7 @@ export function ChallengeScreen({
 
   function solved() {
     completeChallenge(areaId, challengeId)
-    setShowNext(true)
+    afterJuice()
     if (!brief) {
       setRecalled(true)
       return
@@ -135,7 +136,7 @@ export function ChallengeScreen({
 
       {!showNext ? (
         <>
-          <h1>{challenge.title}</h1>
+          <h1 className="puzzle-title">{challenge.title}</h1>
           <PuzzlePlay
             challenge={challenge}
             onMiss={() => {

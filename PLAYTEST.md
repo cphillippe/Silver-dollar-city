@@ -127,6 +127,16 @@ Playtest: town only breathed lightly; scroll/text killed the climb.
 
 Retention still: sort → takeaway chip → why it stands → journal / spaced dust-off.
 
+## Fun pass (lock-in juice, 2026-09-07)
+
+Bill: Keep/Toss + Lock-in stay. Fun has to hit like a mobile match game.
+
+- **One screen:** first sort fits the viewport. Title is screen-reader only. Clue is a text link. Keep/Toss is one short line. No “Won’t count as clean” until you peek.
+- **Lock-in explosion:** on success the board flashes, tiles pop and fly clear, sparks burst (~640ms), then takeaway chips. Save happens immediately; the handoff waits for the juice.
+- Town still grows after **See the town**. The dopamine spike is the lock-in burst, not a wall of text.
+
+Retention still: sort → takeaway chip → why it stands → journal / spaced dust-off.
+
 ## Tooling note (npm audit)
 
 `uuid` 7.x via `@capacitor/cli` (GHSA-w5hq-g745-h8pq) is **tooling-only**. Do not `npm audit fix --force` (it wants to downgrade Capacitor). Upgrade when a CLI release pulls `uuid >= 11.1.1`. Details in `SECURITY_REVIEW.md`.

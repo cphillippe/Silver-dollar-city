@@ -207,8 +207,11 @@ const sortSrc = readFileSync(
 assert.match(sortSrc, /STORY\.lockSort/)
 assert.match(sortSrc, /sort-lock/)
 assert.match(sortSrc, /is-ready/)
+assert.match(sortSrc, /WinBurst/)
+assert.match(sortSrc, /burstStyle/)
 assert.doesNotMatch(sortSrc, /Snap the bins/)
 assert.doesNotMatch(sortSrc, /Bins are full/)
+assert.doesNotMatch(sortSrc, /this belongs/)
 
 const dailySrc = readFileSync(
   new URL('../src/content/daily.ts', import.meta.url),
@@ -238,6 +241,8 @@ const dailyTrailSrc = readFileSync(
 assert.match(dailyTrailSrc, /See the town/)
 assert.match(dailyTrailSrc, /STORY\.tapTakeaway/)
 assert.match(dailyTrailSrc, /TownReturn/)
+assert.match(dailyTrailSrc, /afterJuice/)
+assert.match(dailyTrailSrc, /puzzle-title/)
 assert.doesNotMatch(dailyTrailSrc, /AdSlot/)
 assert.doesNotMatch(dailyTrailSrc, /district-flavor/)
 assert.doesNotMatch(dailyTrailSrc, /Tomorrow:/)
@@ -281,6 +286,8 @@ const challengeSrc = readFileSync(
 assert.match(challengeSrc, /TownReturn/)
 assert.match(challengeSrc, /See the town/)
 assert.match(challengeSrc, /onNavigate\(\{ name: 'hub' \}\)/)
+assert.match(challengeSrc, /afterJuice/)
+assert.match(challengeSrc, /puzzle-title/)
 
 const cityLibSrc = readFileSync(new URL('../src/lib/city.ts', import.meta.url), 'utf8')
 assert.doesNotMatch(cityLibSrc, /Walk again/)
@@ -297,6 +304,20 @@ const cssSrc = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8'
 assert.match(cssSrc, /is-alive \.city-canopy\.is-sprout/)
 assert.match(cssSrc, /is-alive \.city-folk\.is-waving/)
 assert.match(cssSrc, /city-roof-kick/)
+assert.match(cssSrc, /tile-burst/)
+assert.match(cssSrc, /win-spark/)
+assert.match(cssSrc, /puzzle-title/)
+
+const juiceSrc = readFileSync(new URL('../src/lib/juice.ts', import.meta.url), 'utf8')
+assert.match(juiceSrc, /WIN_BURST_MS = 640/)
+assert.match(juiceSrc, /useJuiceHandoff/)
+
+const hintSrc = readFileSync(
+  new URL('../src/components/challenges/PuzzleHint.tsx', import.meta.url),
+  'utf8',
+)
+assert.match(hintSrc, /'Clue'/)
+assert.doesNotMatch(hintSrc, /Peek a clue/)
 
 const resultSrc = readFileSync(
   new URL('../src/components/challenges/ResultPanel.tsx', import.meta.url),
