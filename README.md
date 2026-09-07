@@ -7,7 +7,7 @@ The product goal is **keeping the evidence**: claims, reasons, and sources you c
 ## Play now (no install)
 
 **Open this in normal Chrome — live preview of this branch:**  
-https://delays-ear-between-mating.trycloudflare.com/
+https://twist-qualities-employment-marble.trycloudflare.com/
 
 That URL is a **new** Cloudflare origin in front of `vite preview` (HTTP 200). Skip older tunnels. Skip StackBlitz.
 
