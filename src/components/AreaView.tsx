@@ -3,7 +3,7 @@ import { getArea } from '../content'
 import { AREA_LINES, guideForArea } from '../content/story'
 import { Avatar, Say } from './Avatar'
 import { kindLabel } from './icons'
-import { starLegend } from '../lib/stars'
+import { STAR_KEY, starLegend } from '../lib/stars'
 import { StarRow } from './StarRow'
 import {
   areaGateCopy,
@@ -65,8 +65,7 @@ export function AreaView({ areaId, onNavigate }: AreaViewProps) {
           {done} of {total} challenges · {complete ? 'District complete — still playable' : 'In progress'}
         </p>
         <p className="progress-line quiet">
-          Mastery {mastery.earned}/{mastery.possible} · stars grow when a morning
-          brings the line back
+          {mastery.earned}/{mastery.possible} stars here · {STAR_KEY}
         </p>
       </header>
 

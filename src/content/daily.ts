@@ -324,7 +324,13 @@ export const DAILY_POOL: DailyPuzzle[] = [
   },
 ]
 
-export function dailyForDate(dateKey: string): DailyPuzzle {
-  const index = hashString(`silver-city-trail:${dateKey}`) % DAILY_POOL.length
-  return DAILY_POOL[index]
+export function dailyForDate(
+  dateKey: string,
+  trailMorningsBeforeToday = 99,
+): DailyPuzzle {
+  const sorts = DAILY_POOL.filter((item) => item.challenge.kind === 'sort')
+  const pool =
+    trailMorningsBeforeToday < 2 && sorts.length > 0 ? sorts : DAILY_POOL
+  const index = hashString(`silver-city-trail:${dateKey}`) % pool.length
+  return pool[index]
 }

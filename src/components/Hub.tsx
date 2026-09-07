@@ -3,7 +3,7 @@ import { areas, findPlayable } from '../content'
 import { dailyForDate } from '../content/daily'
 import { guideForArea, STORY } from '../content/story'
 import { addLocalDays, formatDeviceLocalDate, localDateKey } from '../lib/dates'
-import { starLegend } from '../lib/stars'
+import { STAR_KEY, starLegend } from '../lib/stars'
 import { Avatar } from './Avatar'
 import { DeviceDay } from './DeviceDay'
 import { Landmark } from './Landmark'
@@ -31,7 +31,8 @@ interface HubProps {
 export function Hub({ onNavigate }: HubProps) {
   const { progress } = useProgress()
   const today = localDateKey()
-  const daily = dailyForDate(today)
+  const morningsBefore = progress.dailyDates.filter((d) => d !== today).length
+  const daily = dailyForDate(today, morningsBefore)
   const tomorrow = dailyForDate(addLocalDays(today, 1))
   const doneToday = dailyDoneToday(progress, today)
   const due = doneToday ? undefined : morningReview(progress, today)
@@ -168,6 +169,8 @@ export function Hub({ onNavigate }: HubProps) {
       ) : null}
 
       {progress.completed.length > 0 || doneToday ? (
+      <>
+      <p className="star-key">{STAR_KEY}</p>
       <ol className="trail">
         {areas.map((area, index) => {
           const unlocked = isAreaUnlocked(area.id, progress.completed)
@@ -214,8 +217,8 @@ export function Hub({ onNavigate }: HubProps) {
                     label={starLegend((best as 0 | 1 | 2 | 3) || 0)}
                   />
                   <span>
-                    {starLegend((best as 0 | 1 | 2 | 3) || 0)} · mastery{' '}
-                    {mastery.earned}/{mastery.possible}
+                    {starLegend((best as 0 | 1 | 2 | 3) || 0)} · {mastery.earned}/
+                    {mastery.possible} stars here
                   </span>
                 </div>
                 <div className="pips" aria-label={`${done} of ${total} complete`}>
@@ -247,6 +250,7 @@ export function Hub({ onNavigate }: HubProps) {
           )
         })}
       </ol>
+      </>
       ) : null}
 
       {(progress.completed.length > 0 || doneToday) && <ShareInvite compact />}
