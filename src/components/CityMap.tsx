@@ -142,7 +142,15 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
     if (!prevFill) writeFillsSeen(fills)
     const stageQ = cityUpgrades(prev, now)
     const fillQ = prevFill ? fillGrows(prevFill, fills, now, stageQ) : []
-    const queue = [...stageQ, ...fillQ]
+    const beatRank: Record<CityUpgrade['beat'], number> = {
+      'Lit!': 4,
+      'Built!': 3,
+      'Grew!': 2,
+      Unlocked: 1,
+    }
+    const queue = [...stageQ, ...fillQ].sort(
+      (a, b) => beatRank[b.beat] - beatRank[a.beat],
+    )
     if (!queue.length) {
       setShown(now)
       setShownFill(fills)
