@@ -478,17 +478,15 @@ function PlotGroup({
       }}
     >
       {vacant ? (
-        <g className={`city-lot ${next ? 'is-staked' : ''}`} transform={`translate(${at.x} ${at.y})`}>
-          <ellipse rx="20" ry="9" className="city-earth" />
-          {next ? (
+        next ? (
+          <g className="city-lot is-staked" transform={`translate(${at.x} ${at.y})`}>
+            <ellipse rx="20" ry="9" className="city-earth" />
             <path
               className="city-timber"
               d="M-10 8 V-12 M10 8 V-12 M-12 -2 H12 M-5 8 V-7 M5 8 V-7"
             />
-          ) : (
-            <path className="city-lot-path" d="M-8 2 H8" />
-          )}
-        </g>
+          </g>
+        ) : null
       ) : (
         children
       )}
