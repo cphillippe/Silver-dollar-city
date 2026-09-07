@@ -6,13 +6,13 @@ The product goal is **keeping the evidence**: claims, reasons, and sources you c
 
 ## Play now (no install)
 
-**Open this on a phone or laptop — no APK:**  
+**Open this in normal Chrome — live preview of this branch (cold-open fix included):**  
+https://russell-bernard-kernel-accept.trycloudflare.com/
+
+That URL is a public Cloudflare tunnel in front of `vite preview` (HTTP 200, `text/html`). Skip StackBlitz — some testers hit **Incompatible Web Browser**.
+
+Backup tunnel (same build):  
 https://instructors-manufacturer-configurations-tired.trycloudflare.com/
-
-That is a live public preview of this branch (same build friends would get). If it ever 404s, use the durable links below.
-
-**Durable (survives after this preview sleeps):**  
-https://stackblitz.com/github/cphillippe/Silver-dollar-city/tree/cursor/silver-city-unending-evidence-8233?embed=1&view=preview&hideExplorer=1&hideNavigation=1
 
 **GitHub Pages (one click, then it stays pretty):**  
 https://cphillippe.github.io/Silver-dollar-city/
@@ -115,9 +115,9 @@ Progress shape (same key `silver-city-progress-v1`): `memory[id].nextReviewAt`, 
 
 ## Friend preview (no install)
 
-**Play now:** https://instructors-manufacturer-configurations-tired.trycloudflare.com/
+**Play now (Chrome):** https://russell-bernard-kernel-accept.trycloudflare.com/
 
-**If that sleeps:** https://stackblitz.com/github/cphillippe/Silver-dollar-city/tree/cursor/silver-city-unending-evidence-8233?embed=1&view=preview&hideExplorer=1&hideNavigation=1
+Backup tunnel: https://instructors-manufacturer-configurations-tired.trycloudflare.com/
 
 **After Pages is enabled:** https://cphillippe.github.io/Silver-dollar-city/
 
