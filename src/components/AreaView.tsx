@@ -63,7 +63,6 @@ export function AreaView({ areaId, onNavigate }: AreaViewProps) {
         <Landmark pillar={area.id} compact />
         <p className="eyebrow">{guide.role} · in town</p>
         <h1>{area.title}</h1>
-        <p className="lede">{area.blurb}</p>
         <p className="progress-line">
           {done} of {total}
           {complete ? ' · street’s standing' : ''}

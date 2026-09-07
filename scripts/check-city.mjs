@@ -4,6 +4,8 @@ import {
   CITY_HOLLOW_TO_WITNESS,
   citySnapshot,
   cityUpgrades,
+  fillGrows,
+  fillSnapshot,
   nextPlotId,
   plotFill,
   plotStage,
@@ -63,6 +65,8 @@ assert.match(mapSrc, /beat\.beat/)
 assert.match(mapSrc, /city-folk/)
 assert.match(mapSrc, /TownFolk/)
 assert.match(mapSrc, /city-portrait/)
+assert.match(mapSrc, /tweenCam/)
+assert.match(mapSrc, /Grew!/)
 
 const twoHollow = {
   ...afterDaily,
@@ -72,6 +76,28 @@ const twoHollow = {
 }
 assert.equal(plotStage('hollow', twoHollow), 'built')
 assert.equal(plotFill('hollow', twoHollow), 2)
+
+const hollowOnce = {
+  ...afterDaily,
+  completed: ['ph-road'],
+  journal: ['j-ph-1'],
+  stars: { 'ph-road': 1 },
+}
+const hollowTwice = {
+  ...hollowOnce,
+  completed: ['ph-road', 'ph-father'],
+  journal: ['j-ph-1', 'j-ph-2'],
+  stars: { 'ph-road': 1, 'ph-father': 1 },
+}
+assert.equal(plotStage('hollow', hollowOnce), 'built')
+assert.equal(plotStage('hollow', hollowTwice), 'built')
+const grew = fillGrows(
+  fillSnapshot(hollowOnce),
+  fillSnapshot(hollowTwice),
+  citySnapshot(hollowTwice),
+  cityUpgrades(citySnapshot(hollowOnce), citySnapshot(hollowTwice)),
+)
+assert.equal(grew.some((item) => item.id === 'hollow' && item.beat === 'Grew!'), true)
 assert.equal(plotStage('bench', twoHollow), 'scaffold')
 assert.equal(nextPlotId(twoHollow, true), 'hollow')
 
@@ -132,7 +158,7 @@ assert.equal(plotStage('lamps', grown), 'lit')
 const hubSrc = readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8')
 assert.match(hubSrc, /CityMap/)
 assert.match(hubSrc, /The town/)
-assert.match(hubSrc, /town-now/)
+assert.match(hubSrc, /is-town/)
 assert.match(hubSrc, /townVoice/)
 assert.match(hubSrc, /street-drawer/)
 assert.doesNotMatch(hubSrc, /STAR_KEY/)
@@ -243,7 +269,7 @@ const areaSrc = readFileSync(
   'utf8',
 )
 assert.doesNotMatch(areaSrc, /area\.intro\.map/)
-assert.match(areaSrc, /area\.blurb/)
+assert.match(areaSrc, /Landmark/)
 
 const challengeSrc = readFileSync(
   new URL('../src/components/ChallengeScreen.tsx', import.meta.url),

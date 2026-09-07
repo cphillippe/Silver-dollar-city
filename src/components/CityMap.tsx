@@ -6,12 +6,16 @@ import {
   citySnapshot,
   cityStanding,
   cityUpgrades,
+  fillGrows,
+  fillSnapshot,
   nextKicker,
   nextPlotId,
-  plotFill,
   plotView,
   readCitySeen,
+  readFillsSeen,
   writeCitySeen,
+  writeFillsSeen,
+  type CityFills,
   type CityPlotId,
   type CityStage,
   type CityUpgrade,
@@ -72,13 +76,17 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
   const nextId = mode === 'poster' ? 'porch' : nextPlotId(progress, doneToday)
   const { standing, possible } = cityStanding(progress)
   const liveSnap = citySnapshot(progress)
+  const liveFills = fillSnapshot(progress)
 
   const [shown, setShown] = useState(liveSnap)
+  const [shownFill, setShownFill] = useState(liveFills)
   const [rising, setRising] = useState<CityPlotId | null>(null)
   const [beat, setBeat] = useState<CityUpgrade | null>(null)
   const [cam, setCam] = useState(FULL_CAM)
   const playing = useRef(false)
   const timers = useRef<number[]>([])
+  const camNow = useRef(FULL_CAM)
+  const camFrame = useRef(0)
 
   function stageOf(id: CityPlotId): CityStage {
     if (mode === 'poster') return id === 'porch' ? 'scaffold' : 'empty'
@@ -109,28 +117,39 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
   useEffect(() => {
     return () => {
       timers.current.forEach((id) => window.clearTimeout(id))
+      if (camFrame.current) cancelAnimationFrame(camFrame.current)
     }
   }, [])
 
   useEffect(() => {
     if (mode !== 'live') return
     const now = citySnapshot(progress)
+    const fills = fillSnapshot(progress)
     const prev = readCitySeen()
+    const prevFill = readFillsSeen()
     if (!prev) {
       writeCitySeen(now)
+      writeFillsSeen(fills)
       setShown(now)
+      setShownFill(fills)
       return
     }
-    const queue = cityUpgrades(prev, now)
+    if (!prevFill) writeFillsSeen(fills)
+    const stageQ = cityUpgrades(prev, now)
+    const fillQ = prevFill ? fillGrows(prevFill, fills, now, stageQ) : []
+    const queue = [...stageQ, ...fillQ]
     if (!queue.length) {
       setShown(now)
+      setShownFill(fills)
       writeCitySeen(now)
+      writeFillsSeen(fills)
       return
     }
     if (playing.current) return
     playing.current = true
     setShown(prev)
-    playQueue(queue, now)
+    setShownFill(prevFill ?? fills)
+    playQueue(queue, now, fills)
   }, [mode, progress])
 
   function later(ms: number, fn: () => void) {
@@ -138,31 +157,69 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
     timers.current.push(id)
   }
 
-  function playQueue(queue: CityUpgrade[], finalSnap: ReturnType<typeof citySnapshot>) {
+  function tweenCam(target: { x: number; y: number; w: number; h: number }, ms: number) {
+    if (camFrame.current) cancelAnimationFrame(camFrame.current)
+    const from = { ...camNow.current }
+    const t0 = performance.now()
+    const tick = (now: number) => {
+      const t = ms <= 0 ? 1 : Math.min(1, (now - t0) / ms)
+      const e = t * t * (3 - 2 * t)
+      const next = {
+        x: from.x + (target.x - from.x) * e,
+        y: from.y + (target.y - from.y) * e,
+        w: from.w + (target.w - from.w) * e,
+        h: from.h + (target.h - from.h) * e,
+      }
+      camNow.current = next
+      setCam(next)
+      if (t < 1) camFrame.current = requestAnimationFrame(tick)
+    }
+    camFrame.current = requestAnimationFrame(tick)
+  }
+
+  function playQueue(
+    queue: CityUpgrade[],
+    finalSnap: ReturnType<typeof citySnapshot>,
+    finalFills: CityFills,
+  ) {
     const reduced =
       typeof window !== 'undefined' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
+    function finish() {
+      setRising(null)
+      setBeat(null)
+      tweenCam(FULL_CAM, reduced ? 0 : 240)
+      setShown(finalSnap)
+      setShownFill(finalFills)
+      writeCitySeen(finalSnap)
+      writeFillsSeen(finalFills)
+      playing.current = false
+    }
+
     function step(index: number) {
       if (index >= queue.length) {
-        setRising(null)
-        setBeat(null)
-        setCam(FULL_CAM)
-        setShown(finalSnap)
-        writeCitySeen(finalSnap)
-        playing.current = false
+        finish()
         return
       }
       const item = queue[index]
       setBeat(item)
-      if (!reduced) setCam(camAround(item.id))
-      later(reduced ? 80 : 160, () => {
-        setShown((current) => ({ ...current, [item.id]: item.to }))
+      if (!reduced) tweenCam(camAround(item.id), 200)
+      later(reduced ? 40 : 180, () => {
+        if (item.beat !== 'Grew!') {
+          setShown((current) => ({ ...current, [item.id]: item.to }))
+        }
+        setShownFill((current) => ({
+          ...current,
+          [item.id]: finalFills[item.id],
+        }))
         setRising(item.id)
       })
-      later(reduced ? 900 : 2400, () => {
+      later(reduced ? 700 : 1100, () => {
         setRising(null)
-        step(index + 1)
+        setBeat(null)
+        if (!reduced) tweenCam(FULL_CAM, 220)
+        later(reduced ? 40 : 200, () => step(index + 1))
       })
     }
 
@@ -175,14 +232,13 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
   const kicker = nextKicker(nextStage, nextId, doneToday)
   const celebrating = Boolean(beat)
   const beatVoice = beat ? townVoice(beat.id) : townVoice(nextId)
-  const beatLine = beat ? townAck(beat.id, beat.beat) : beatVoice.here
-  const hollowFill = plotFill('hollow', progress)
-  const benchFill = plotFill('bench', progress)
-  const alive = standing > 0 && mode === 'live'
+  const hollowFill = shownFill.hollow
+  const benchFill = shownFill.bench
+  const alive = mode === 'live'
 
   return (
     <section
-      className={`city-overworld ${mode === 'poster' ? 'is-poster' : ''} ${celebrating ? 'is-revealing' : ''}`}
+      className={`city-overworld ${mode === 'poster' ? 'is-poster' : 'is-alive'} ${celebrating ? 'is-revealing' : ''}`}
     >
       <svg
         className="city-svg"
@@ -302,13 +358,31 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
           <ellipse cx="92" cy="286" rx="28" ry="18" className="city-canopy" />
           <ellipse cx="128" cy="278" rx="22" ry="16" className="city-canopy" />
           {hollowFill >= 2 ? (
-            <ellipse cx="70" cy="300" rx="16" ry="12" className="city-canopy" />
+            <ellipse
+              cx="70"
+              cy="300"
+              rx="16"
+              ry="12"
+              className={`city-canopy ${rising === 'hollow' && hollowFill === 2 ? 'is-sprout' : ''}`}
+            />
           ) : null}
           {hollowFill >= 3 ? (
-            <ellipse cx="148" cy="268" rx="14" ry="11" className="city-canopy" />
+            <ellipse
+              cx="148"
+              cy="268"
+              rx="14"
+              ry="11"
+              className={`city-canopy ${rising === 'hollow' && hollowFill === 3 ? 'is-sprout' : ''}`}
+            />
           ) : null}
           {hollowFill >= 4 ? (
-            <ellipse cx="54" cy="278" rx="12" ry="9" className="city-canopy" />
+            <ellipse
+              cx="54"
+              cy="278"
+              rx="12"
+              ry="9"
+              className={`city-canopy ${rising === 'hollow' && hollowFill === 4 ? 'is-sprout' : ''}`}
+            />
           ) : null}
           <rect x="98" y="292" width="36" height="28" rx="3" />
           <path className="city-roof" d="M94 292 l22-16 22 16" />
@@ -337,10 +411,24 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
           <rect x="338" y="278" width="10" height="12" rx="1" className="city-window" />
           <rect x="354" y="278" width="10" height="12" rx="1" className="city-window" />
           {benchFill >= 2 ? (
-            <rect x="322" y="278" width="8" height="10" rx="1" className="city-window" />
+            <rect
+              x="322"
+              y="278"
+              width="8"
+              height="10"
+              rx="1"
+              className={`city-window ${rising === 'bench' && benchFill === 2 ? 'is-sprout' : ''}`}
+            />
           ) : null}
           {benchFill >= 3 ? (
-            <rect x="370" y="278" width="8" height="10" rx="1" className="city-window" />
+            <rect
+              x="370"
+              y="278"
+              width="8"
+              height="10"
+              rx="1"
+              className={`city-window ${rising === 'bench' && benchFill === 3 ? 'is-sprout' : ''}`}
+            />
           ) : null}
           <path d="M332 304 h36 M338 304 v-12 h24 v12" />
         </PlotGroup>
@@ -400,6 +488,7 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
                 next={nextId === plot.id}
                 rising={rising === plot.id}
                 speaking={beat?.id === plot.id || (nextId === plot.id && !celebrating)}
+                ack={beat?.id === plot.id ? beat.beat : undefined}
               />
             ))
           : null}
@@ -411,28 +500,26 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
           <div>
             <strong>{beat.beat}</strong>
             <span>{beat.title}</span>
-            <em>{beatLine}</em>
           </div>
         </div>
       ) : null}
 
       {mode === 'live' ? (
         <div className="city-legend">
-          <p className="eyebrow">{celebrating ? beat?.beat : kicker}</p>
-          <h2>{celebrating ? beat?.title : nextSpec?.title}</h2>
-          <p>
-            {celebrating
-              ? beatLine
-              : nextSpec?.blurb}
-          </p>
-          {celebrating ? null : (
-            <button type="button" className="btn primary" onClick={() => open(nextId)}>
-              {nextId === 'porch' && !doneToday
-                ? 'Walk the east porch'
-                : nextStage === 'scaffold' || nextStage === 'empty'
-                  ? `Build ${nextSpec?.title ?? 'next'}`
-                  : `Enter ${nextSpec?.title ?? 'the town'}`}
-            </button>
+          {celebrating ? (
+            <p className="eyebrow">{beat?.beat}</p>
+          ) : (
+            <>
+              <p className="eyebrow">{kicker}</p>
+              <h2>{nextSpec?.title}</h2>
+              <button type="button" className="btn primary" onClick={() => open(nextId)}>
+                {nextId === 'porch' && !doneToday
+                  ? 'Walk the east porch'
+                  : nextStage === 'scaffold' || nextStage === 'empty'
+                    ? `Build ${nextSpec?.title ?? 'next'}`
+                    : `Enter ${nextSpec?.title ?? 'the town'}`}
+              </button>
+            </>
           )}
         </div>
       ) : null}
@@ -513,17 +600,19 @@ function TownFolk({
   next,
   rising,
   speaking,
+  ack,
 }: {
   id: CityPlotId
   stage: CityStage
   next: boolean
   rising: boolean
   speaking: boolean
+  ack?: CityUpgrade['beat']
 }) {
   if (stage === 'empty' && !next) return null
   const at = FOLK[id]
   const voice = townVoice(id)
-  const line = rising ? townAck(id, stage === 'lit' ? 'Lit!' : stage === 'built' ? 'Built!' : 'Unlocked') : voice.here
+  const line = ack ? townAck(id, ack) : voice.here
   const short = line.length > 22 ? `${line.slice(0, 20)}…` : line
   return (
     <g transform={`translate(${at.x} ${at.y})`} pointerEvents="none">

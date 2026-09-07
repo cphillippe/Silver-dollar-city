@@ -12,17 +12,14 @@ interface TownReturnProps {
 export function TownReturn({ who, line, action, onGo }: TownReturnProps) {
   const person = CAST[who]
   return (
-    <div className="town-return after-win-cta">
-      <div className="town-now">
-        <Avatar who={who} size="md" />
-        <div>
-          <p className="eyebrow">{person.name} · in town</p>
-          <p className="town-line">“{line}”</p>
-        </div>
-      </div>
+    <div className="town-return is-tight after-win-cta">
       <button type="button" className="btn primary xl" onClick={onGo}>
+        <Avatar who={who} size="sm" />
         {action}
       </button>
+      <p className="town-kicker">
+        {person.shortName}: {line}
+      </p>
     </div>
   )
 }

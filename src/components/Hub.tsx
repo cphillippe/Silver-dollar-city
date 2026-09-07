@@ -1,5 +1,5 @@
 import { areas, findPlayable } from '../content'
-import { CAST, STORY, townVoice } from '../content/story'
+import { STORY, townVoice } from '../content/story'
 import { formatDeviceLocalDate, localDateKey } from '../lib/dates'
 import { CITY_PLOTS, nextPlotId } from '../lib/city'
 import { Avatar } from './Avatar'
@@ -33,21 +33,9 @@ export function Hub({ onNavigate }: HubProps) {
   const waiting = dueCount(progress, today)
   const goal = getNextGoal(progress, today)
   const nextId = nextPlotId(progress, doneToday)
-  const voice = townVoice(nextId)
-  const person = CAST[voice.who]
 
   return (
     <main className="hub is-town" aria-label="The town">
-      <header className="page-head town-head">
-        <div className="town-now">
-          <Avatar who={voice.who} size="md" />
-          <div>
-            <p className="eyebrow">{person.name} · in town</p>
-            <h1>Silver City</h1>
-          </div>
-        </div>
-      </header>
-
       <CityMap onNavigate={onNavigate} />
 
       {due ? (

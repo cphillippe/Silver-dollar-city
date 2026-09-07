@@ -148,6 +148,7 @@ export const TOWN_VOICE: Record<
     lit: string
     unlocked: string
     afterWin: string
+    grew: string
   }
 > = {
   porch: {
@@ -156,7 +157,8 @@ export const TOWN_VOICE: Record<
     built: 'Porch stood up.',
     lit: 'Lantern’s holding.',
     unlocked: 'East lot’s staked.',
-    afterWin: 'Come look — the porch caught.',
+    afterWin: 'The porch caught.',
+    grew: 'Lamp kicked.',
   },
   hollow: {
     who: 'mercy',
@@ -164,7 +166,8 @@ export const TOWN_VOICE: Record<
     built: 'Cabin’s standing.',
     lit: 'Oaks are lit.',
     unlocked: 'Mercy’s staking the lot.',
-    afterWin: 'Hear the creek? It grew.',
+    afterWin: 'The creek grew.',
+    grew: 'Another oak.',
   },
   bench: {
     who: 'silas',
@@ -172,7 +175,8 @@ export const TOWN_VOICE: Record<
     built: 'Hall’s up.',
     lit: 'Names are warm.',
     unlocked: 'Silas unlocked the bench.',
-    afterWin: 'The square just filled in.',
+    afterWin: 'The square filled.',
+    grew: 'Another window.',
   },
   observatory: {
     who: 'nora',
@@ -180,7 +184,8 @@ export const TOWN_VOICE: Record<
     built: 'Glass is set.',
     lit: 'Stars caught the glass.',
     unlocked: 'Nora opened the ridge.',
-    afterWin: 'Look up — the ridge woke.',
+    afterWin: 'The ridge woke.',
+    grew: 'Glass caught.',
   },
   gate: {
     who: 'ansel',
@@ -188,7 +193,8 @@ export const TOWN_VOICE: Record<
     built: 'Arch is standing.',
     lit: 'Stone’s warm.',
     unlocked: 'Ansel unbarred the road.',
-    afterWin: 'The east road grew a gate.',
+    afterWin: 'A gate rose.',
+    grew: 'Stone settled.',
   },
   lookout: {
     who: 'hope',
@@ -196,7 +202,8 @@ export const TOWN_VOICE: Record<
     built: 'Tower’s up.',
     lit: 'Ridge lantern’s on.',
     unlocked: 'Hope marked the climb.',
-    afterWin: 'The ridge just stood taller.',
+    afterWin: 'The ridge grew.',
+    grew: 'Flag kicked.',
   },
   journal: {
     who: 'river',
@@ -204,7 +211,8 @@ export const TOWN_VOICE: Record<
     built: 'Dossier house is up.',
     lit: 'Pages are glowing.',
     unlocked: 'A house for what you can still say.',
-    afterWin: 'A page just found a house.',
+    afterWin: 'A page landed.',
+    grew: 'Another page.',
   },
   lamps: {
     who: 'juniper',
@@ -212,7 +220,8 @@ export const TOWN_VOICE: Record<
     built: 'Lamps are up.',
     lit: 'The street remembered.',
     unlocked: 'First lamp on the street.',
-    afterWin: 'Another lamp caught.',
+    afterWin: 'A lamp caught.',
+    grew: 'Another lamp.',
   },
 }
 
@@ -231,11 +240,12 @@ export function townVoiceForArea(areaId: string) {
 
 export function townAck(
   plotId: string,
-  beat: 'Built!' | 'Lit!' | 'Unlocked',
+  beat: 'Built!' | 'Lit!' | 'Unlocked' | 'Grew!',
 ): string {
   const voice = townVoice(plotId)
   if (beat === 'Lit!') return voice.lit
   if (beat === 'Built!') return voice.built
+  if (beat === 'Grew!') return voice.grew
   return voice.unlocked
 }
 
