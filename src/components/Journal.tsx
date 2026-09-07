@@ -92,19 +92,6 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
 
   return (
     <main className={`journal ${dueItems.length ? 'has-due' : ''}`}>
-      <section className="next-rebuild">
-        <p className="eyebrow">Next recommended</p>
-        <h2>{nextStep.title}</h2>
-        <p>{nextStep.detail}</p>
-        <button
-          type="button"
-          className="btn primary"
-          onClick={() => onNavigate(nextStep.go)}
-        >
-          {nextStep.cta}
-        </button>
-      </section>
-
       {dueItems.length > 0 ? (
         <section className="journal-chapter due-chapter">
           <div className="chapter-head">
@@ -142,7 +129,20 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
             ))}
           </div>
         </section>
-      ) : null}
+      ) : (
+        <section className="next-rebuild">
+          <p className="eyebrow">Next recommended</p>
+          <h2>{nextStep.title}</h2>
+          <p>{nextStep.detail}</p>
+          <button
+            type="button"
+            className="btn primary"
+            onClick={() => onNavigate(nextStep.go)}
+          >
+            {nextStep.cta}
+          </button>
+        </section>
+      )}
 
       <header className="page-head journal-head">
         <p className="eyebrow">Evidence Journal</p>
