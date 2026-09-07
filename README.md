@@ -24,13 +24,34 @@ npm run preview
 
 Progress is stored in `localStorage` on this device (`silver-city-progress-v1`). Use **Reset** in the top bar to start over.
 
-Installable as a PWA (Add to Home Screen) after a production build or when the service worker is registered.
+Installable as a PWA (Add to Home Screen) after a production build, or as an Android debug APK (below).
+
+## Android debug APK
+
+A sideloadable debug build is produced with Capacitor.
+
+```bash
+# Needs Android SDK + JDK 17+ (ANDROID_HOME or ANDROID_SDK_ROOT)
+npm install
+npm run android:apk
+```
+
+The APK is written to `android/app/build/outputs/apk/debug/app-debug.apk`.
+
+**Install on a phone**
+
+1. Copy the `.apk` to the device (download, USB, or Drive).
+2. Settings → Security → allow **Install unknown apps** for Chrome/Files.
+3. Open the APK and tap Install.
+4. App id: `city.silver.unending` · name: **Silver City**.
+
+This is a **debug** build for testing, not a Play Store release.
 
 ## How it works
 
 1. **Map** — five districts on one trail. Completing a district unbars the next.
 2. **Area intro** — a short narrative, then a series of challenges.
-3. **Challenges** — sequencing, multiple choice with teaching on every option, match-the-claims, “build the argument,” and short historical/philosophical scenarios.
+3. **Puzzles** — order chains, snap-pairs, keep-or-toss bins, and build-the-argument. Teaching lands after a solve.
 4. **Evidence Journal** — each win unseals a card with sources.
 5. **What’s next** — a persistent goal bar after you leave the welcome screen.
 
@@ -50,4 +71,4 @@ Content lives in `src/content/`. The play engine reads typed modules; add an are
 
 ## Stack
 
-React 19, TypeScript, Vite, `vite-plugin-pwa`. No backend.
+React 19, TypeScript, Vite, `vite-plugin-pwa`, Capacitor Android. No backend.

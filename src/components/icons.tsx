@@ -125,16 +125,14 @@ export function AreaIcon({ name, className }: IconProps) {
 
 export function kindLabel(kind: string): string {
   switch (kind) {
-    case 'multiple-choice':
-      return 'Choose & learn'
     case 'sequence':
-      return 'Put in order'
+      return 'Order puzzle'
     case 'build-argument':
-      return 'Build the argument'
+      return 'Chain puzzle'
     case 'match':
-      return 'Match the claims'
-    case 'scenario':
-      return 'Scenario'
+      return 'Snap pairs'
+    case 'sort':
+      return 'Keep or toss'
     default:
       return kind
   }

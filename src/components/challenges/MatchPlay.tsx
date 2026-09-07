@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { shuffle } from '../../lib/shuffle'
 import type { MatchChallenge } from '../../types'
+import { PuzzleHint } from './PuzzleHint'
 import { ResultPanel } from './ResultPanel'
 
 interface MatchPlayProps {
@@ -15,47 +16,45 @@ export function MatchPlay({ challenge, onMiss, onSolved }: MatchPlayProps) {
     () => shuffle(challenge.pairs.map((pair) => ({ id: pair.id, text: pair.right }))),
     [challenge.pairs],
   )
-  const [links, setLinks] = useState<Record<string, string>>({})
+  const [locked, setLocked] = useState<string[]>([])
   const [pickedLeft, setPickedLeft] = useState<string | null>(null)
+  const [flash, setFlash] = useState<string | null>(null)
   const [status, setStatus] = useState<'idle' | 'wrong' | 'ok'>('idle')
 
   function chooseLeft(id: string) {
-    if (status === 'ok') return
+    if (status === 'ok' || locked.includes(id)) return
     setPickedLeft((current) => (current === id ? null : id))
     setStatus('idle')
   }
 
   function chooseRight(id: string) {
-    if (status === 'ok' || !pickedLeft) return
-    setLinks((current) => {
-      const next = { ...current }
-      for (const key of Object.keys(next)) {
-        if (next[key] === id) delete next[key]
+    if (status === 'ok' || !pickedLeft || locked.includes(id)) return
+    if (pickedLeft === id) {
+      const next = [...locked, id]
+      setLocked(next)
+      setPickedLeft(null)
+      setFlash(id)
+      window.setTimeout(() => setFlash(null), 380)
+      if (next.length === challenge.pairs.length) {
+        setStatus('ok')
+        onSolved()
       }
-      next[pickedLeft] = id
-      return next
-    })
-    setPickedLeft(null)
-  }
-
-  function check() {
-    const ok =
-      challenge.pairs.every((pair) => links[pair.id] === pair.id) &&
-      Object.keys(links).length === challenge.pairs.length
-    if (ok) {
-      setStatus('ok')
-      onSolved()
-    } else {
-      setStatus('wrong')
-      onMiss()
+      return
     }
+    setFlash(pickedLeft)
+    setStatus('wrong')
+    onMiss()
+    window.setTimeout(() => {
+      setFlash(null)
+      setPickedLeft(null)
+    }, 420)
   }
 
   return (
-    <div className="play">
-      {challenge.context ? <p className="context">{challenge.context}</p> : null}
+    <div className={`play ${status === 'ok' ? 'is-win' : ''}`}>
+      <PuzzleHint text={challenge.context} />
       <p className="prompt">{challenge.prompt}</p>
-      <p className="hint">Tap a claim on the left, then the matching account on the right.</p>
+      <p className="hint">Snap a pair. Right matches lock; misses flash and bounce.</p>
 
       <div className="match-grid">
         <div className="match-col">
@@ -63,7 +62,7 @@ export function MatchPlay({ challenge, onMiss, onSolved }: MatchPlayProps) {
             <button
               key={pair.id}
               type="button"
-              className={`match-card ${pickedLeft === pair.id ? 'is-selected' : ''} ${links[pair.id] ? 'is-linked' : ''}`}
+              className={`match-card ${pickedLeft === pair.id ? 'is-selected' : ''} ${locked.includes(pair.id) ? 'is-locked' : ''} ${flash === pair.id && !locked.includes(pair.id) ? 'is-flash' : ''}`}
               onClick={() => chooseLeft(pair.id)}
             >
               {pair.left}
@@ -71,38 +70,27 @@ export function MatchPlay({ challenge, onMiss, onSolved }: MatchPlayProps) {
           ))}
         </div>
         <div className="match-col">
-          {right.map((item) => {
-            const used = Object.values(links).includes(item.id)
-            return (
-              <button
-                key={item.id}
-                type="button"
-                className={`match-card right ${used ? 'is-linked' : ''} ${pickedLeft ? 'awaiting' : ''}`}
-                onClick={() => chooseRight(item.id)}
-              >
-                {item.text}
-              </button>
-            )
-          })}
+          {right.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              className={`match-card right ${locked.includes(item.id) ? 'is-locked' : ''} ${pickedLeft ? 'awaiting' : ''} ${flash === item.id ? 'is-flash' : ''}`}
+              onClick={() => chooseRight(item.id)}
+            >
+              {item.text}
+            </button>
+          ))}
         </div>
       </div>
 
-      {status !== 'ok' ? (
-        <button
-          type="button"
-          className="btn primary"
-          disabled={Object.keys(links).length !== challenge.pairs.length}
-          onClick={check}
-        >
-          Check the pairs
-        </button>
-      ) : null}
+      <p className="match-score">
+        {locked.length} / {challenge.pairs.length} snapped
+      </p>
 
       <ResultPanel
-        tone={status === 'idle' ? 'idle' : status === 'ok' ? 'ok' : 'teach'}
-        title={status === 'ok' ? 'Those belong together.' : 'One or more pairs still slip.'}
-        body={status === 'wrong' ? challenge.teachOnWrong : undefined}
-        deeper={challenge.deeper}
+        tone={status === 'ok' ? 'ok' : 'idle'}
+        title="All pairs snap!"
+        deeper={challenge.deeper ?? challenge.teachOnWrong}
       />
     </div>
   )

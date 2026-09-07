@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { shuffle } from '../../lib/shuffle'
 import type { ArgumentCard, BuildArgumentChallenge } from '../../types'
+import { PuzzleHint } from './PuzzleHint'
 import { ResultPanel } from './ResultPanel'
 
 interface BuildArgumentPlayProps {
@@ -19,6 +20,7 @@ export function BuildArgumentPlay({
   const [slots, setSlots] = useState<Record<string, ArgumentCard | undefined>>({})
   const [selected, setSelected] = useState<string | null>(null)
   const [status, setStatus] = useState<'idle' | 'wrong' | 'ok'>('idle')
+  const [shake, setShake] = useState(false)
 
   function place(slotId: string) {
     if (status === 'ok' || !selected) return
@@ -27,25 +29,27 @@ export function BuildArgumentPlay({
       Object.values(slots).find((item) => item?.id === selected)
     if (!card) return
 
-    setBank((current) => current.filter((item) => item.id !== card.id))
-    setSlots((current) => {
-      const next = { ...current }
-      const displaced = next[slotId]
-      for (const key of Object.keys(next)) {
-        if (next[key]?.id === card.id) delete next[key]
-      }
-      next[slotId] = card
-      if (displaced && displaced.id !== card.id) {
-        setBank((bankNow) =>
-          bankNow.some((item) => item.id === displaced.id)
-            ? bankNow
-            : [...bankNow, displaced],
-        )
-      }
-      return next
-    })
+    const nextSlots = { ...slots }
+    const displaced = nextSlots[slotId]
+    for (const key of Object.keys(nextSlots)) {
+      if (nextSlots[key]?.id === card.id) delete nextSlots[key]
+    }
+    nextSlots[slotId] = card
+    let nextBank = bank.filter((item) => item.id !== card.id)
+    if (displaced && displaced.id !== card.id) {
+      nextBank = nextBank.some((item) => item.id === displaced.id)
+        ? nextBank
+        : [...nextBank, displaced]
+    }
+    setBank(nextBank)
+    setSlots(nextSlots)
     setSelected(null)
     setStatus('idle')
+
+    const filled = challenge.slots.every((slot) => nextSlots[slot.id])
+    if (filled) {
+      window.setTimeout(() => evaluate(nextSlots), 80)
+    }
   }
 
   function returnCard(slotId: string) {
@@ -61,26 +65,30 @@ export function BuildArgumentPlay({
     setStatus('idle')
   }
 
-  function check() {
+  function evaluate(currentSlots = slots) {
     const ok = challenge.slots.every(
-      (slot) => slots[slot.id]?.id === slot.correctCardId,
+      (slot) => currentSlots[slot.id]?.id === slot.correctCardId,
     )
     if (ok) {
       setStatus('ok')
       onSolved()
-    } else {
-      setStatus('wrong')
-      onMiss()
+      return
     }
+    setStatus('wrong')
+    setShake(true)
+    onMiss()
+    window.setTimeout(() => {
+      setShake(false)
+      setBank(shuffle(challenge.cards))
+      setSlots({})
+    }, 520)
   }
 
-  const filled = challenge.slots.every((slot) => slots[slot.id])
-
   return (
-    <div className="play">
-      {challenge.context ? <p className="context">{challenge.context}</p> : null}
+    <div className={`play ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}>
+      <PuzzleHint text={challenge.context} />
       <p className="prompt">{challenge.prompt}</p>
-      <p className="hint">Select a card, then place it in a slot. Leave the weak claims in the bank.</p>
+      <p className="hint">Slot the chain. Leave the decoys in the bank — it checks when full.</p>
 
       <div className="slot-list">
         {challenge.slots.map((slot) => {
@@ -91,7 +99,7 @@ export function BuildArgumentPlay({
               {card ? (
                 <button
                   type="button"
-                  className="chip in-slot"
+                  className="chip in-slot pop-in"
                   onClick={() => returnCard(slot.id)}
                 >
                   {card.text}
@@ -102,7 +110,7 @@ export function BuildArgumentPlay({
                   className={`slot-target ${selected ? 'awaiting' : ''}`}
                   onClick={() => place(slot.id)}
                 >
-                  {selected ? 'Place here' : 'Empty'}
+                  {selected ? 'Drop here' : 'Empty'}
                 </button>
               )}
             </div>
@@ -123,15 +131,9 @@ export function BuildArgumentPlay({
         ))}
       </div>
 
-      {status !== 'ok' ? (
-        <button type="button" className="btn primary" disabled={!filled} onClick={check}>
-          Test the chain
-        </button>
-      ) : null}
-
       <ResultPanel
         tone={status === 'idle' ? 'idle' : status === 'ok' ? 'ok' : 'teach'}
-        title={status === 'ok' ? 'The chain is valid.' : 'A link is out of place.'}
+        title={status === 'ok' ? 'The chain locks!' : 'A link slips — tiles bounce back.'}
         body={status === 'wrong' ? challenge.teachOnWrong : undefined}
         deeper={challenge.deeper}
       />

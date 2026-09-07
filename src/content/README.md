@@ -6,12 +6,11 @@ Silver City is content-driven. The game engine does not need to change when you 
 2. Register it in the `areas` array in `src/content/index.ts` (order matters).
 3. Add matching `JournalEntry` records in `src/content/journal.ts`, with `unlockAfter` set to a challenge id.
 
-Supported `kind` values:
+Supported puzzle `kind` values:
 
-- `multiple-choice` — options with a `teach` note on every answer
-- `scenario` — a richer stem, same engine as multiple choice
-- `sequence` — items listed in correct order are shuffled in play
-- `build-argument` — slots plus cards (mark weak claims `distractor: true`)
-- `match` — left/right pairs
+- `sequence` — order tiles; the chain checks itself when full
+- `match` — snap left/right pairs (locks on a hit, flashes on a miss)
+- `build-argument` — slot a chain; leave decoys in the bank
+- `sort` — keep-or-toss bins
 
-Keep citations real. Prefer honest framing of what an argument claims versus what it proves.
+Keep citations real. Prefer honest framing of what an argument claims versus what it proves. Teaching copy belongs in `deeper` / journal cards so it appears after a solve.

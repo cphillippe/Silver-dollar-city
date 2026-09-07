@@ -1,24 +1,21 @@
-export type ChallengeKind =
-  | 'multiple-choice'
-  | 'sequence'
-  | 'build-argument'
-  | 'match'
-  | 'scenario'
+export type ChallengeKind = 'sequence' | 'build-argument' | 'match' | 'sort'
 
-export interface Choice {
+export interface SortTile {
   id: string
   text: string
-  correct: boolean
-  teach: string
+  bin: 'keep' | 'discard'
 }
 
-export interface MultipleChoiceChallenge {
-  kind: 'multiple-choice'
+export interface SortChallenge {
+  kind: 'sort'
   id: string
   title: string
   prompt: string
   context?: string
-  choices: Choice[]
+  keepLabel: string
+  discardLabel: string
+  tiles: SortTile[]
+  teachOnWrong: string
   deeper?: string
 }
 
@@ -80,22 +77,11 @@ export interface MatchChallenge {
   deeper?: string
 }
 
-export interface ScenarioChallenge {
-  kind: 'scenario'
-  id: string
-  title: string
-  scene: string
-  prompt: string
-  choices: Choice[]
-  deeper?: string
-}
-
 export type Challenge =
-  | MultipleChoiceChallenge
   | SequenceChallenge
   | BuildArgumentChallenge
   | MatchChallenge
-  | ScenarioChallenge
+  | SortChallenge
 
 export interface Area {
   id: string
