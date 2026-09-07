@@ -85,43 +85,84 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
     <div className={`play ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}>
       <PuzzleHint text={challenge.context} onPeek={onPeek} />
       <p className="prompt">{challenge.prompt}</p>
-      <p className="hint">Tap a tile, then drop it in Keep or Toss.</p>
+      <p className="hint">
+        Tap a tile, then tap a whole bin — Keep or Toss. The bin lights when a
+        tile is ready to drop.
+      </p>
 
       <div className="sort-bins">
-        <div className={`bin keep ${picked ? 'awaiting' : ''}`}>
-          <button type="button" className="bin-head" onClick={() => drop('keep')}>
-            {challenge.keepLabel}
-          </button>
-          <div className="bin-body">
-            {keep.map((tile) => (
-              <button
-                key={tile.id}
-                type="button"
-                className="chip in-bin"
-                onClick={() => returnToBank(tile.id)}
-              >
-                {tile.text}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className={`bin toss ${picked ? 'awaiting' : ''}`}>
-          <button type="button" className="bin-head toss" onClick={() => drop('discard')}>
-            {challenge.discardLabel}
-          </button>
-          <div className="bin-body">
-            {discard.map((tile) => (
-              <button
-                key={tile.id}
-                type="button"
-                className="chip in-bin"
-                onClick={() => returnToBank(tile.id)}
-              >
-                {tile.text}
-              </button>
-            ))}
-          </div>
-        </div>
+        <button
+          type="button"
+          className={`bin keep ${picked ? 'awaiting' : ''}`}
+          onClick={() => drop('keep')}
+        >
+          <span className="bin-head">{challenge.keepLabel}</span>
+          <span className="bin-body">
+            {keep.length === 0 ? (
+              <span className="placeholder">
+                {picked ? 'Drop here' : 'Keep'}
+              </span>
+            ) : (
+              keep.map((tile) => (
+                <span
+                  key={tile.id}
+                  className="chip in-bin"
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    returnToBank(tile.id)
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault()
+                      event.stopPropagation()
+                      returnToBank(tile.id)
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                >
+                  {tile.text}
+                </span>
+              ))
+            )}
+          </span>
+        </button>
+        <button
+          type="button"
+          className={`bin toss ${picked ? 'awaiting' : ''}`}
+          onClick={() => drop('discard')}
+        >
+          <span className="bin-head toss">{challenge.discardLabel}</span>
+          <span className="bin-body">
+            {discard.length === 0 ? (
+              <span className="placeholder">
+                {picked ? 'Drop here' : 'Toss'}
+              </span>
+            ) : (
+              discard.map((tile) => (
+                <span
+                  key={tile.id}
+                  className="chip in-bin"
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    returnToBank(tile.id)
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault()
+                      event.stopPropagation()
+                      returnToBank(tile.id)
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                >
+                  {tile.text}
+                </span>
+              ))
+            )}
+          </span>
+        </button>
       </div>
 
       <div className="bank">

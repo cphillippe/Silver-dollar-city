@@ -90,7 +90,8 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
       </div>
 
       <p className="match-score">
-        {locked.length} / {challenge.pairs.length} snapped
+        {challenge.pairs.length - locked.length} left · {locked.length} /{' '}
+        {challenge.pairs.length} snapped
       </p>
 
       <ResultPanel

@@ -618,6 +618,12 @@ p {
   background: rgba(14, 18, 32, 0.35);
   display: grid;
   grid-template-rows: auto 1fr;
+  width: 100%;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 
 .bin.awaiting {
