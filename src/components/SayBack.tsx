@@ -24,7 +24,7 @@ export function SayBack({ brief, onDone }: SayBackProps) {
       return
     }
     setShake(true)
-    window.setTimeout(() => setShake(false), 520)
+    window.setTimeout(() => setShake(false), 880)
   }
 
   const locked = picked === brief.reason

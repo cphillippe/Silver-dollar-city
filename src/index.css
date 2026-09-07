@@ -674,7 +674,10 @@ p {
 }
 
 .play.is-shake,
-.say-back.is-shake,
+.say-back.is-shake {
+  animation: miss-shake 0.82s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
 .recall-gate.is-shake {
   animation: miss-shake 0.58s cubic-bezier(0.36, 0.07, 0.19, 0.97);
 }
@@ -687,8 +690,26 @@ p {
 
 .play.is-win .chip.in-chain,
 .play.is-win .chip.in-slot,
-.play.is-win .match-card.is-locked {
-  animation: pop-win 0.45s ease;
+.play.is-win .match-card.is-locked,
+.play.is-win .bin,
+.play.is-win .chip.in-bin {
+  animation: pop-win 0.5s ease;
+}
+
+.play.is-win .bin {
+  border-style: solid;
+  border-color: rgba(107, 143, 113, 0.7);
+  box-shadow: 0 0 0 3px rgba(107, 143, 113, 0.22);
+}
+
+.sort-bins.is-ready {
+  box-shadow: 0 0 0 3px rgba(224, 179, 74, 0.28);
+  border-radius: 20px;
+}
+
+.btn.snap-bins {
+  margin-top: 8px;
+  animation: pop-in 0.28s ease;
 }
 
 .pop-in {
@@ -713,23 +734,26 @@ p {
   100% {
     transform: translateX(0) rotate(0);
   }
-  12% {
-    transform: translateX(-14px) rotate(-1.4deg);
+  8% {
+    transform: translateX(-16px) rotate(-1.6deg);
   }
-  24% {
-    transform: translateX(14px) rotate(1.4deg);
+  16% {
+    transform: translateX(16px) rotate(1.6deg);
   }
-  36% {
-    transform: translateX(-11px) rotate(-1deg);
+  28% {
+    transform: translateX(-12px) rotate(-1.2deg);
   }
-  48% {
-    transform: translateX(11px) rotate(1deg);
+  40% {
+    transform: translateX(12px) rotate(1.2deg);
   }
-  62% {
-    transform: translateX(-6px);
+  54% {
+    transform: translateX(-7px);
   }
-  76% {
-    transform: translateX(6px);
+  68% {
+    transform: translateX(7px);
+  }
+  82% {
+    transform: translateX(-3px);
   }
 }
 
