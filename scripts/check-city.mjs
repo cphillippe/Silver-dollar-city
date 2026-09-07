@@ -1,0 +1,132 @@
+import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
+import {
+  CITY_HOLLOW_TO_WITNESS,
+  nextPlotId,
+  plotStage,
+} from '../src/lib/city.ts'
+
+const progressSrc = readFileSync(
+  new URL('../src/store/progress.ts', import.meta.url),
+  'utf8',
+)
+assert.match(progressSrc, /HOLLOW_WALKS_TO_WITNESS = 2/)
+assert.equal(CITY_HOLLOW_TO_WITNESS, 2)
+
+const empty = {
+  started: false,
+  completed: [],
+  journal: [],
+  firstTry: [],
+  stars: {},
+  dailyDates: [],
+  streak: 0,
+  bestStreak: 0,
+  held: [],
+  memory: {},
+  elaborations: {},
+}
+
+assert.equal(plotStage('porch', empty), 'scaffold')
+assert.equal(plotStage('hollow', empty), 'empty')
+assert.equal(plotStage('bench', empty), 'empty')
+assert.equal(plotStage('observatory', empty), 'empty')
+assert.equal(plotStage('journal', empty), 'empty')
+assert.equal(nextPlotId(empty, false), 'porch')
+
+const afterDaily = {
+  ...empty,
+  started: true,
+  dailyDates: ['2026-09-07'],
+  lastDailyDate: '2026-09-07',
+  streak: 1,
+  bestStreak: 1,
+}
+assert.equal(plotStage('porch', afterDaily), 'built')
+assert.equal(plotStage('hollow', afterDaily), 'scaffold')
+assert.equal(nextPlotId(afterDaily, true), 'hollow')
+
+const twoHollow = {
+  ...afterDaily,
+  completed: ['ph-road', 'ph-father'],
+  journal: ['j-ph-1', 'j-ph-2'],
+  stars: { 'ph-road': 1, 'ph-father': 1 },
+}
+assert.equal(plotStage('hollow', twoHollow), 'built')
+assert.equal(plotStage('bench', twoHollow), 'scaffold')
+assert.equal(nextPlotId(twoHollow, true), 'hollow')
+
+const grown = {
+  ...empty,
+  started: true,
+  completed: [
+    'ph-road',
+    'ph-father',
+    'ph-seeds',
+    'ph-debt',
+    'wb-creed',
+    'wb-early',
+    'wb-method',
+    'wb-women',
+    'ob-tuning',
+    'ob-design',
+    'ob-leibniz',
+    'ob-life',
+    'fg-mover',
+    'fg-contingent',
+    'fg-kalam',
+    'fg-limits',
+    'hl-moral',
+    'hl-mind',
+    'hl-meaning',
+    'hl-beauty',
+  ],
+  journal: Array.from({ length: 12 }, (_, i) => `j-${i}`),
+  stars: Object.fromEntries(
+    [
+      'ph-road',
+      'ph-father',
+      'wb-creed',
+      'ob-tuning',
+      'fg-mover',
+      'hl-moral',
+    ].map((id) => [id, 3]),
+  ),
+  dailyDates: ['2026-09-05', '2026-09-06', '2026-09-07'],
+  lastDailyDate: '2026-09-07',
+  streak: 3,
+  bestStreak: 3,
+  held: ['ph-road'],
+  memory: {},
+  elaborations: {},
+}
+
+assert.equal(plotStage('porch', grown), 'lit')
+assert.equal(plotStage('hollow', grown), 'lit')
+assert.equal(plotStage('bench', grown), 'lit')
+assert.equal(plotStage('observatory', grown), 'lit')
+assert.equal(plotStage('gate', grown), 'lit')
+assert.equal(plotStage('lookout', grown), 'lit')
+assert.equal(plotStage('journal', grown), 'lit')
+assert.equal(plotStage('lamps', grown), 'lit')
+
+const hubSrc = readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8')
+assert.match(hubSrc, /CityMap/)
+assert.match(hubSrc, /The town/)
+
+const welcomeSrc = readFileSync(
+  new URL('../src/components/Welcome.tsx', import.meta.url),
+  'utf8',
+)
+assert.match(welcomeSrc, /welcome-hero/)
+assert.match(welcomeSrc, /welcome-cast-late/)
+assert.match(welcomeSrc, /STORY\.purpose/)
+assert.match(welcomeSrc, /cityPromise/)
+
+const shellSrc = readFileSync(
+  new URL('../src/components/AppShell.tsx', import.meta.url),
+  'utf8',
+)
+assert.match(shellSrc, /view\.name === 'journal'/)
+
+console.log('check-city: ok')

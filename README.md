@@ -139,7 +139,22 @@ Saves are **offline-first**. Nothing requires a login.
 - **Schema:** `SAVE_SCHEMA_VERSION` in `src/config/app.ts`. Bump it only when the persisted shape changes, and add a step in `src/lib/save.ts` `migrateToCurrent`. Do not wipe on upgrade.
 - **Move devices:** Settings → **Export JSON** (file) or **Copy share code** (`SC1.…`). Import file or paste on the other device. Import replaces this device’s save and keeps a backup key (`silver-city-progress-v1.bak`).
 - **Cloud:** not shipped. `cloudSyncStatus()` is `local-only` until there is real auth. Optional keys can be added later without dropping v1 fields.
-- **UI:** Hub shows “Progress saved on this device” with a link to Export / Import. Settings also lists schema version and app version (`1.1.0`).
+- **UI:** Hub is the **overworld town**. Completing Daily / districts / journal / stars lights buildings. Settings still lists schema version and app version (`1.2.0`).
+
+## The town
+
+The hub is an **overworld map**, not a locked list. Buildings are derived from the same save (no extra schema):
+
+| Landmark | Appears | Lights |
+| --- | --- | --- |
+| East porch | Always (scaffold) | 1 Daily built · 3 mornings lit |
+| Parable Hollow | After first Daily | Walks build it · all four light it |
+| Witness Bench | After **two** Hollow walks | Same pattern |
+| Observatory / First Gate / High Lookout | After the previous district is finished | Same |
+| Dossier house | First journal page | 4 pages built · 12 lit |
+| Star lamps | First star | 4★ built · 12★ lit |
+
+The gold ring is **what to unlock next**. Tap it (or the street row). Puzzle + Recall Loop are unchanged.
 
 ## Ads
 
@@ -153,7 +168,7 @@ Wire a test unit later by teaching `AdSlot` to render the network creative when 
 
 ## Support
 
-- **Version:** app `1.1.0` (`package.json`, `src/config/app.ts`, Android `versionName`). Capacitor id `city.silver.unending`. `npm run android:apk` still builds the debug APK.
+- **Version:** app `1.2.0` (`package.json`, `src/config/app.ts`, Android `versionName`). Capacitor id `city.silver.unending`. `npm run android:apk` still builds the debug APK.
 - **Content:** data-driven under `src/content/`. How to add a district: [`src/content/README.md`](src/content/README.md) and [`CONTRIBUTING.md`](CONTRIBUTING.md). The play engine reads typed modules; add an area, register it in `src/content/index.ts`, attach journal cards in `src/content/journal.ts`, and add a claim line in `src/content/evidence.ts`.
 - **Release smoke:** [`PLAYTEST.md`](PLAYTEST.md) (fun / clarity / retention plus the short checklist).
 - **Playtest notes:** same file.

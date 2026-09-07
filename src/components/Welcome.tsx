@@ -1,5 +1,6 @@
 import { STORY } from '../content/story'
 import { Avatar } from './Avatar'
+import { CityMap } from './CityMap'
 import { dailyDoneToday, useProgress } from '../store/progress'
 import { localDateKey } from '../lib/dates'
 import type { View } from '../types'
@@ -26,39 +27,45 @@ export function Welcome({ onNavigate }: WelcomeProps) {
     <main className="welcome">
       <div className="welcome-sky" aria-hidden />
       <div className="welcome-ridge" aria-hidden />
-      <div className="welcome-cast">
-        <figure>
-          <Avatar who="river" size="xl" />
-          <figcaption>
-            River
-            <span>You walk</span>
-          </figcaption>
-        </figure>
-        <span className="welcome-lantern" aria-hidden />
-        <figure>
-          <Avatar who="juniper" size="xl" />
-          <figcaption>
-            Juniper
-            <span>First lamp</span>
-          </figcaption>
-        </figure>
+      <div className="welcome-hero">
+        <CityMap mode="poster" onNavigate={onNavigate} />
+        <p className="eyebrow">A puzzle trail</p>
+        <h1>
+          Silver City
+          <span>Unending Evidence</span>
+        </h1>
+        <p className="welcome-goal">{STORY.purpose}</p>
+        <p className="welcome-promise">{STORY.cityPromise}</p>
+        <div className="welcome-actions">
+          <button type="button" className="btn primary xl" onClick={begin}>
+            {returning ? 'Back to the map' : 'Begin the trail'}
+          </button>
+        </div>
+        <p className="welcome-note">
+          About a minute. Snap, fold, keep one line. The valley waits until you
+          do.
+        </p>
       </div>
-      <p className="eyebrow">A puzzle trail</p>
-      <h1>
-        Silver City
-        <span>Unending Evidence</span>
-      </h1>
-      <p className="welcome-goal">{STORY.purpose}</p>
-      <p className="welcome-who">{STORY.who}</p>
-      <div className="welcome-actions">
-        <button type="button" className="btn primary xl" onClick={begin}>
-          {returning ? 'Back to the map' : 'Begin the trail'}
-        </button>
+      <div className="welcome-cast-late">
+        <div className="welcome-cast">
+          <figure>
+            <Avatar who="river" size="xl" />
+            <figcaption>
+              River
+              <span>You walk</span>
+            </figcaption>
+          </figure>
+          <span className="welcome-lantern" aria-hidden />
+          <figure>
+            <Avatar who="juniper" size="xl" />
+            <figcaption>
+              Juniper
+              <span>First lamp</span>
+            </figcaption>
+          </figure>
+        </div>
+        <p className="welcome-who">{STORY.who}</p>
       </div>
-      <p className="welcome-note">
-        About a minute. Progress stays on this device. Miss a morning and the
-        trail waits.
-      </p>
     </main>
   )
 }
