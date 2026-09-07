@@ -18,6 +18,7 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
   const [status, setStatus] = useState<'idle' | 'wrong' | 'ok'>('idle')
   const [shake, setShake] = useState(false)
   const [misses, setMisses] = useState(0)
+  const [breakHint, setBreakHint] = useState('')
 
   function add(id: string) {
     if (status === 'ok') return
@@ -51,9 +52,18 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
       onSolved()
       return
     }
+    const breakAt = nextChain.findIndex(
+      (item, index) => item.id !== challenge.items[index]?.id,
+    )
+    const step = (breakAt === -1 ? nextChain.length : breakAt) + 1
+    const nudge =
+      step <= 1
+        ? 'The first stone is already off. The claim starts somewhere else.'
+        : `The first ${step - 1} sat right. The chain broke at step ${step} — try that stone again.`
     setStatus('wrong')
     setShake(true)
     setMisses((count) => count + 1)
+    setBreakHint(nudge)
     onMiss()
     window.setTimeout(() => {
       setShake(false)
@@ -96,14 +106,27 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
 
       <ResultPanel
         tone={status === 'idle' ? 'idle' : status === 'ok' ? 'ok' : 'teach'}
+        kicker={
+          status === 'ok'
+            ? 'Well reasoned'
+            : misses >= 2
+              ? 'One more look'
+              : 'The chain bounced'
+        }
         title={
           status === 'ok'
             ? 'The path locks in.'
             : misses >= 2
               ? 'Not that order — tiles bounce back.'
-              : 'Shake and try the chain again.'
+              : breakHint || 'Shake and try the chain again.'
         }
-        body={status === 'wrong' && misses >= 2 ? challenge.teachOnWrong : undefined}
+        body={
+          status === 'wrong'
+            ? misses >= 2
+              ? challenge.teachOnWrong
+              : 'No lecture — just find the stone that jumped the line.'
+            : undefined
+        }
         deeper={challenge.deeper}
       />
     </div>

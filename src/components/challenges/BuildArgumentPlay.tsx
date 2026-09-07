@@ -137,6 +137,13 @@ export function BuildArgumentPlay({
 
       <ResultPanel
         tone={status === 'idle' ? 'idle' : status === 'ok' ? 'ok' : 'teach'}
+        kicker={
+          status === 'ok'
+            ? 'Well reasoned'
+            : misses >= 2
+              ? 'One more look'
+              : 'A link slipped'
+        }
         title={
           status === 'ok'
             ? 'The chain locks!'
@@ -144,7 +151,13 @@ export function BuildArgumentPlay({
               ? 'A link slips — tiles bounce back.'
               : 'Shake and rebuild the chain.'
         }
-        body={status === 'wrong' && misses >= 2 ? challenge.teachOnWrong : undefined}
+        body={
+          status === 'wrong'
+            ? misses >= 2
+              ? challenge.teachOnWrong
+              : 'Premise first, then the conclusion. Leave the decoy in the bank.'
+            : undefined
+        }
         deeper={challenge.deeper}
       />
     </div>

@@ -5,6 +5,7 @@ import { guideForArea, STORY } from '../content/story'
 import { addLocalDays, formatDeviceLocalDate, localDateKey } from '../lib/dates'
 import { starLegend } from '../lib/stars'
 import { Avatar } from './Avatar'
+import { DeviceDay } from './DeviceDay'
 import { Landmark } from './Landmark'
 import { ShareInvite } from './ShareInvite'
 import { StarRow } from './StarRow'
@@ -58,6 +59,7 @@ export function Hub({ onNavigate }: HubProps) {
           <Avatar who="juniper" size="lg" />
           <div>
             <p className="eyebrow">Today’s Trail · {formatDeviceLocalDate()}</p>
+            <DeviceDay />
             <h2>
               {doneToday
                 ? 'This morning is marked'

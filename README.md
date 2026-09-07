@@ -7,9 +7,9 @@ The product goal is **keeping the evidence**: claims, reasons, and sources you c
 ## Play now (no install)
 
 **Open this in normal Chrome — live preview of this branch:**  
-https://really-helpful-parker-chester.trycloudflare.com/
+https://dried-urgent-vegetable-students.trycloudflare.com/
 
-That URL is a **new** Cloudflare origin in front of `vite preview` (HTTP 200). Skip older tunnels — they may still have a cached date bug. Skip StackBlitz.
+That URL is a **new** Cloudflare origin in front of `vite preview` (HTTP 200). Skip older tunnels. Skip StackBlitz.
 
 **GitHub Pages (one click, then it stays pretty):**  
 https://cphillippe.github.io/Silver-dollar-city/
@@ -112,7 +112,7 @@ Progress shape (same key `silver-city-progress-v1`): `memory[id].nextReviewAt`, 
 
 ## Friend preview (no install)
 
-**Play now (Chrome, new origin):** https://really-helpful-parker-chester.trycloudflare.com/
+**Play now (Chrome, new origin):** https://dried-urgent-vegetable-students.trycloudflare.com/
 
 **After Pages is enabled:** https://cphillippe.github.io/Silver-dollar-city/
 

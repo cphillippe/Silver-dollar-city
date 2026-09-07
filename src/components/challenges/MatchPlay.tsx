@@ -95,9 +95,22 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
       </p>
 
       <ResultPanel
-        tone={status === 'ok' ? 'ok' : status === 'wrong' && misses >= 2 ? 'teach' : 'idle'}
-        title={status === 'ok' ? 'All pairs snap!' : 'Shake and snap again.'}
-        body={status === 'wrong' && misses >= 2 ? challenge.teachOnWrong : undefined}
+        tone={status === 'ok' ? 'ok' : status === 'wrong' ? 'teach' : 'idle'}
+        kicker={
+          status === 'ok'
+            ? 'Well reasoned'
+            : misses >= 2
+              ? 'One more look'
+              : 'Those two don’t snap'
+        }
+        title={status === 'ok' ? 'All pairs snap!' : 'Shake and pick a new pair.'}
+        body={
+          status === 'wrong'
+            ? misses >= 2
+              ? challenge.teachOnWrong
+              : 'Leave that pairing. The match is a neighbor, not a look-alike.'
+            : undefined
+        }
         deeper={status === 'ok' ? (challenge.deeper ?? challenge.teachOnWrong) : undefined}
       />
     </div>

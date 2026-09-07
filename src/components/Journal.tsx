@@ -15,6 +15,7 @@ import {
   dueCount,
   dueForRecall,
   journalCompletion,
+  nextRebuildHint,
   useProgress,
 } from '../store/progress'
 import { trailDaysRequired } from '../lib/streak'
@@ -38,6 +39,7 @@ export function Journal({ focusId, onNavigate }: JournalProps) {
   const dueItems = dueForRecall(progress, today).filter((item) => item.brief)
   const waiting = dueCount(progress, today)
   const trailOpen = !dailyDoneToday(progress, today)
+  const nextStep = nextRebuildHint(progress, today)
 
   return (
     <main className="journal">
@@ -67,6 +69,19 @@ export function Journal({ focusId, onNavigate }: JournalProps) {
           back
         </p>
       </header>
+
+      <section className="next-rebuild">
+        <p className="eyebrow">Next recommended</p>
+        <h2>{nextStep.title}</h2>
+        <p>{nextStep.detail}</p>
+        <button
+          type="button"
+          className="btn primary"
+          onClick={() => onNavigate(nextStep.go)}
+        >
+          {nextStep.cta}
+        </button>
+      </section>
 
       {dueItems.length > 0 ? (
         <section className="journal-chapter due-chapter">

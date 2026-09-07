@@ -72,9 +72,12 @@ New user, storage cleared. **Clarity 5/5** in ≤15s.
 
 ## Follow-up (2026-09-07, after 4/5 clarity)
 
-1. **Local date** — Root cause: the trail label formatted a `YYYY-MM-DD` key with `Intl` + `timeZone: 'UTC'` / date-only ISO midnight, which is Sunday evening in America/Chicago. **Shipped:** `getFullYear/getMonth/getDate` + `Intl` with `timeZone` omitted; label is `new Date()` in the browser. Marker: `device-local-getters`.
+1. **Local date / device-day footer** — Pretty weekday uses local getters + local noon. Under the trail date: `Device day · YYYY-MM-DD` from `localDateKey()`. **If that key is still yesterday while your wall clock is today, the browser/`Date` is on yesterday** (frozen VM clock, wrong OS timezone). The app is reading the device, not UTC.
 2. **Cast on welcome** — River and Juniper named as Christian companions on the first screen.
 3. **Keep / Toss** — Keep = belongs, Toss = set aside. Peek line is always visible: *won’t count as a clean recall.*
+4. **~390px overflow** — Topbar wraps (Reset stays on-screen). Headings/chips/journal wrap. No horizontal scroll.
+5. **Miss copy** — Sequence names the step that broke; first miss is a nudge, second miss still folds in `teachOnWrong`. Kicker is *Not yet*, not *Think again*.
+6. **Journal next rebuild** — Top card names the next recall or trail walk.
 
 ## What still sucks
 

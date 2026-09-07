@@ -41,11 +41,12 @@ export const DATE_SOURCE = 'device-local-getters'
  * `timeZone` is omitted on purpose — the browser's local zone, not UTC.
  */
 export function formatDeviceLocalDate(d = new Date()): string {
+  const localNoon = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0)
   return new Intl.DateTimeFormat(undefined, {
     weekday: 'long',
     month: 'long',
     day: 'numeric',
-  }).format(d)
+  }).format(localNoon)
 }
 
 /** Print a stored YYYY-MM-DD as local noon that day (never Date.parse of the key). */
