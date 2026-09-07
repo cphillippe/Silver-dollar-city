@@ -222,7 +222,6 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
         <section className="after-win daily-done">
           {brief && !held ? (
             <div className="rehearse-anchor">
-              <p className="quiet">{STORY.takeaway}</p>
               <RecallGate
                 brief={brief}
                 mode={isReview ? 'review' : 'encode'}

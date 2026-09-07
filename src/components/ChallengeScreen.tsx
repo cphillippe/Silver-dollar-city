@@ -243,7 +243,6 @@ export function ChallengeScreen({
         <section className="after-win">
           {brief && !recalled ? (
             <div className="rehearse-anchor">
-              <p className="quiet">{STORY.takeaway}</p>
               <RecallGate
                 brief={brief}
                 mode={reviewing ? 'review' : 'encode'}
