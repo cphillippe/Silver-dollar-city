@@ -108,6 +108,10 @@ Playtest said evidence retention is the remaining gap, and the footer still ate 
 3. Debug APK sideload is still worse than a web link for friends.
 4. A stale service worker on `localhost:4173` can serve yesterday’s JS to a tester. Hard-reload or use a new host.
 
+## Tooling note (npm audit)
+
+`uuid` 7.x via `@capacitor/cli` (GHSA-w5hq-g745-h8pq) is **tooling-only**. Do not `npm audit fix --force` (it wants to downgrade Capacitor). Upgrade when a CLI release pulls `uuid >= 11.1.1`. Details in `SECURITY_REVIEW.md`.
+
 ## Tone
 
 Warm. Missing a day: *the trail waits*. A rested page: *Time to dust off this one.* Never “you failed.”

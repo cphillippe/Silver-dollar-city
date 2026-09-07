@@ -1,7 +1,7 @@
 # Security review — Silver City (PR #1)
 
 **Scope:** defensive source review of `https://github.com/cphillippe/Silver-dollar-city/pull/1`  
-**Branch / commit:** `cursor/silver-city-unending-evidence-8233` @ `9223d7b`  
+**Branch / commit:** `cursor/silver-city-unending-evidence-8233` (see Remediated follow-up; original review was @ `9223d7b`)  
 **Stack:** React 19 + Vite 7 + TypeScript + Capacitor Android 8  
 **Date:** 2026-09-07  
 **Method:** static review of application source, Android manifests/Gradle, Capacitor config, save/import path, ad placeholders, `package-lock.json` (`npm audit --package-lock-only`), and the committed debug APK’s embedded config / signing identity. No exploit PoCs, payloads, or attack procedures.
@@ -42,6 +42,8 @@ Areas with **no issue found** are listed explicitly after the findings.
 
 ### HIGH-1 — Public Android binary is a debug-signed debug build
 
+**Status (2026-09-07):** Deferred on purpose — debug-signed sideload stays until a real release keystore. Keystore ignore rules are now active (MED-6).
+
 **Where:** `releases/silver_city_debug.apk` (linked from `README.md` / PR body); produced by `assembleDebug` (`package.json` `android:apk`). Signing identity inside the APK includes `CN=Android Debug`. `android/app/build.gradle` has no release signing config; debug `buildType` remains the default (debuggable).
 
 **Risk:** Testers are directed to sideload this file. A debug-signed, debug-build WebView app is not a release identity: it is easier to inspect at runtime, uses a non-production signing cert, and must not be uploaded to Play or treated as the installable product. Anyone who can replace a debug package on a device (or confuse testers into installing a look-alike) is not constrained by a private release key.
@@ -50,12 +52,14 @@ Areas with **no issue found** are listed explicitly after the findings.
 
 - Keep `assembleDebug` for local developers only.
 - For any shared APK, use `assembleRelease` (or a dedicated `playtest` build type) with `debuggable false`, a **private** upload keystore that is **not** the SDK debug cert, and `minifyEnabled` / R8 at least considered for store builds.
-- Do not commit that keystore. Uncomment `*.jks` / `*.keystore` in `android/.gitignore` (those lines are currently commented out — see MED-6).
+- Do not commit that keystore. `android/.gitignore` now ignores `*.jks` / `*.keystore` (MED-6).
 - Label store/Play binaries separately from `releases/silver_city_debug.apk`. Remove or stop linking the debug APK once a playtest/release keystore exists.
 
 ---
 
 ### MED-1 — Save export/import accepts untrusted JSON without size, key, or shape hardness
+
+**Status (2026-09-07):** Remediated — see [Remediated](#remediated-2026-09-07-follow-up).
 
 **Where:** `src/lib/save.ts` (`parseIncomingSave`, `parseUnknownSave`, `normalizeProgress`, `asMemoryMap`, `asStringMap`, `asStringArray`); `src/store/ProgressProvider.tsx` (`importSaveText`); `src/components/Settings.tsx` (`onFile` / paste import).
 
@@ -85,7 +89,9 @@ Areas with **no issue found** are listed explicitly after the findings.
 
 ### MED-2 — Capacitor WebView allows mixed content
 
-**Where:** `capacitor.config.ts` → `android.allowMixedContent: true` (also present in the APK’s `assets/capacitor.config.json`).
+**Status (2026-09-07):** Remediated — `allowMixedContent: false` in `capacitor.config.ts` and the rebuilt debug APK.
+
+**Where:** `capacitor.config.ts` → was `android.allowMixedContent: true` (also present in the APK’s `assets/capacitor.config.json`).
 
 **Risk:** The WebView may load **cleartext HTTP** subresources (scripts, frames, images) even though the app `targetSdk` is 36 and the manifest does **not** set `usesCleartextTraffic` (so app-level cleartext is off by default). Mixed content is the usual path for a later ad/analytics/font URL to be downgraded or hijacked on hostile networks. The app already loads Google Fonts over HTTPS from `index.html`; mixed content is not required for current first-party assets (`webDir: 'dist'`, no remote `server.url`).
 
@@ -96,6 +102,8 @@ Areas with **no issue found** are listed explicitly after the findings.
 ---
 
 ### MED-3 — FileProvider paths share the entire external volume
+
+**Status (2026-09-07):** Remediated — paths scoped to `share/` (cache, files, external-files). No `external-path path="."`.
 
 **Where:** `android/app/src/main/res/xml/file_paths.xml`
 
@@ -112,6 +120,8 @@ Areas with **no issue found** are listed explicitly after the findings.
 
 ### MED-4 — Vite `allowedHosts: true` on both `server` and `preview`
 
+**Status (2026-09-07):** Remediated — explicit allowlist; bind `127.0.0.1`; do not tunnel `vite --host` / the dev server.
+
 **Where:** `vite.config.ts` (`server.host` / `preview.host` and `allowedHosts: true`); `.stackblitzrc` starts `npm run dev -- --host`; README playtest is a public tunnel in front of `vite preview`.
 
 **Risk:** `allowedHosts: true` turns off Vite’s Host-header check (documented DNS-rebinding protection). That matters if **`vite` / `vite --host` (dev)** is exposed beyond localhost. `vite preview` is a static server (narrower than the transform pipeline) but is still a public origin without CSP (see MED-5). Do not expose `npm start` / `npm run dev` on a tunnel.
@@ -126,6 +136,8 @@ Areas with **no issue found** are listed explicitly after the findings.
 ---
 
 ### MED-5 — No CSP or other security headers on the web origin
+
+**Status (2026-09-07):** Remediated — production meta CSP (`script-src 'self'`, no `unsafe-eval`). GitHub Pages still cannot send HTTP `frame-ancestors`.
 
 **Where:** `index.html` (no `<meta http-equiv="Content-Security-Policy">`); GitHub Pages deploy (`.github/workflows/pages.yml` + `docs/`); Cloudflare tunnel playtest. `main.tsx` registers a Workbox service worker with `immediate: true` on web only.
 
@@ -144,10 +156,12 @@ Google Fonts (`fonts.googleapis.com` / `fonts.gstatic.com`) must be allowlisted 
 
 ### MED-6 — Keystore / Google services ignore rules are commented out; CLI advisory in lockfile
 
+**Status (2026-09-07):** Gitignore + CLI placement fixed. **uuid advisory still accepted (tooling)** until Capacitor CLI pulls `uuid >= 11.1.1`. Do not `npm audit fix --force`.
+
 **Where:**
 
-- `android/.gitignore` — `*.jks` / `*.keystore` and `google-services.json` remain commented (Android template default). Root `.gitignore` does not ignore APKs or keystores (`releases/*.apk` is committed on purpose today).
-- `npm audit --package-lock-only`: **uuid &lt; 11.1.1** (GHSA-w5hq-g745-h8pq, moderate) via `@capacitor/cli` → `xcode` → `uuid@7.0.3`. `@capacitor/cli` is in `dependencies` (not `devDependencies`).
+- `android/.gitignore` — `*.jks` / `*.keystore` and `google-services.json` were commented (Android template default). Root `.gitignore` does not ignore APKs or keystores (`releases/*.apk` is committed on purpose today).
+- `npm audit --package-lock-only`: **uuid &lt; 11.1.1** (GHSA-w5hq-g745-h8pq, moderate) via `@capacitor/cli` → `xcode` → `uuid@7.0.3`. `@capacitor/cli` was in `dependencies` (now `devDependencies`).
 - `serialize-javascript` in this lockfile is **7.1.1** (patched vs GHSA-5c6j-r48x-rmvq). **None found** for that advisory here.
 
 **Risk:**
@@ -182,7 +196,7 @@ Google Fonts (`fonts.googleapis.com` / `fonts.gstatic.com`) must be allowlisted 
 
 ### 4. Secrets in repo
 
-**None found** (no `.env`, tokens, PEM/JKS, `google-services.json`, or API keys in tracked files). Residual process gap is MED-6 (gitignore). The Cloudflare tunnel URL in README is a playtest origin, not a credential.
+**None found** (no `.env`, tokens, PEM/JKS, `google-services.json`, or API keys in tracked files). Keystore / `google-services.json` ignore rules are in `android/.gitignore` (MED-6). The Cloudflare tunnel URL in README is a playtest origin, not a credential.
 
 ### 5. Deep links / exported components (beyond HIGH-1 / MED-2 / MED-3)
 
@@ -255,7 +269,7 @@ Use this before a public web cut or Play upload.
 - **Google Fonts** — extra network dependency in an otherwise offline-first APK/PWA; privacy + CSP cost. Self-host for release.
 - **Pages deploy from this feature branch** (workflow `on.push.branches` includes `cursor/silver-city-unending-evidence-8233`) — every push goes live. Restrict to `main` (or tags) for a stable public origin.
 - **PWA `registerType: 'autoUpdate'`** — good for shipping fixes; testers may need a hard reload if a SW cached an old bundle (already noted in the PR).
-- **`@capacitor/cli` in `dependencies`** — pulls audit noise into production installs; belongs in `devDependencies`.
+- **`@capacitor/cli`** — moved to `devDependencies`. uuid 7.x advisory remains tooling-only until upstream upgrades.
 - **No custom ProGuard keep rules** — unused until JS interfaces or reflection appear; Capacitor’s defaults are enough today.
 
 ---
