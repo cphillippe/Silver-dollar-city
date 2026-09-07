@@ -90,6 +90,15 @@ export function AppShell({ view, onNavigate, children }: AppShellProps) {
             >
               Journal
             </button>
+            {!playView ? (
+              <button
+                type="button"
+                className={view.name === 'settings' ? 'is-active' : ''}
+                onClick={() => onNavigate({ name: 'settings' })}
+              >
+                Settings
+              </button>
+            ) : null}
             <button type="button" className="subtle" onClick={confirmReset}>
               Reset
             </button>

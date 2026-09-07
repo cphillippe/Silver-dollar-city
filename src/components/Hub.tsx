@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react'
+import { Fragment, type CSSProperties } from 'react'
 import { areas, findPlayable } from '../content'
 import { dailyForDate } from '../content/daily'
 import { guideForArea, STORY } from '../content/story'
@@ -9,6 +9,8 @@ import { DeviceDay } from './DeviceDay'
 import { Landmark } from './Landmark'
 import { ShareInvite } from './ShareInvite'
 import { StarRow } from './StarRow'
+import { AdSlot } from './AdSlot'
+import { APP_VERSION } from '../config/app'
 import {
   areaGateCopy,
   areaMastery,
@@ -29,7 +31,7 @@ interface HubProps {
 }
 
 export function Hub({ onNavigate }: HubProps) {
-  const { progress } = useProgress()
+  const { progress, saveMeta } = useProgress()
   const today = localDateKey()
   const morningsBefore = progress.dailyDates.filter((d) => d !== today).length
   const daily = dailyForDate(today, morningsBefore)
@@ -50,6 +52,19 @@ export function Hub({ onNavigate }: HubProps) {
         <p>
           A puzzle trail for a line you can still say tomorrow. Today’s walk is
           first; the districts wait underneath.
+        </p>
+        <p className="progress-saved">
+          Progress saved on this device
+          {saveMeta.savedAt ? ` · schema v${saveMeta.schemaVersion}` : ''} ·{' '}
+          {APP_VERSION}
+          {' · '}
+          <button
+            type="button"
+            className="text-link inline-link"
+            onClick={() => onNavigate({ name: 'settings' })}
+          >
+            Export / Import
+          </button>
         </p>
       </header>
 
@@ -131,6 +146,8 @@ export function Hub({ onNavigate }: HubProps) {
         </button>
       </section>
 
+      <AdSlot slot="hub-banner" />
+
       {goal.kind !== 'daily' ? (
         <section className="next-card">
           <p className="eyebrow">On the longer trail</p>
@@ -184,8 +201,8 @@ export function Hub({ onNavigate }: HubProps) {
           )
 
           return (
+            <Fragment key={area.id}>
             <li
-              key={area.id}
               className={[
                 'station',
                 unlocked ? 'is-open' : 'is-locked',
@@ -247,6 +264,12 @@ export function Hub({ onNavigate }: HubProps) {
                 </button>
               </div>
             </li>
+            {index === 0 ? (
+              <li className="ad-between">
+                <AdSlot slot="between-districts" />
+              </li>
+            ) : null}
+            </Fragment>
           )
         })}
       </ol>

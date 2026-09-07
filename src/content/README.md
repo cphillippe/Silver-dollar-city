@@ -5,6 +5,10 @@ Silver City is content-driven. The game engine does not need to change when you 
 1. Create a module in `src/content/` that exports an `Area`.
 2. Register it in the `areas` array in `src/content/index.ts` (order matters).
 3. Add matching `JournalEntry` records in `src/content/journal.ts`, with `unlockAfter` set to a challenge id.
+4. Add a one-line **claim + reason + source** in `src/content/evidence.ts` (required for the Recall Loop).
+5. If the district has a guide, add them in `src/content/story.ts` and `src/components/Avatar.tsx`.
+
+See also [`CONTRIBUTING.md`](../../CONTRIBUTING.md).
 
 Supported puzzle `kind` values:
 
@@ -13,11 +17,7 @@ Supported puzzle `kind` values:
 - `build-argument` — slot a chain; leave decoys in the bank
 - `sort` — keep-or-toss bins
 
-Keep citations real. Prefer honest framing of what an argument claims versus what it proves. Teaching copy belongs in `deeper` / journal cards so it appears after a solve.
-
-Keep citations real. Prefer honest framing of what an argument claims versus what it proves. Teaching copy belongs in `deeper` / journal cards so it appears after a solve.
-
-Every challenge (and Daily Trail puzzle) also needs a one-line **claim + reason + source** in `src/content/evidence.ts`. After a solve the teaching folds and the player rebuilds that line. If the line is not crisp, the Recall Loop will feel like homework — keep it short enough to snap.
+Keep citations real. Prefer honest framing of what an argument claims versus what it proves. Teaching copy belongs in `deeper` / journal cards so it appears after a solve. If the evidence line is not crisp, the Recall Loop will feel like homework — keep it short enough to snap.
 
 Spacing lives in `src/lib/memory.ts` (`SPACE_DAYS = 1, 3, 7, 21`). Do not add a separate flashcard UI. Daily Trail should prefer a due `nextReviewAt` over brand-new copy, mixed across districts.
 
