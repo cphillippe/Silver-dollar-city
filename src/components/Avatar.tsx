@@ -34,7 +34,7 @@ export function Avatar({ who, size = 'md', className = '' }: AvatarProps) {
           r="45.5"
           fill="none"
           stroke="#e0b34a"
-          strokeWidth="2.4"
+          strokeWidth="2.8"
         />
         <circle
           cx="48"

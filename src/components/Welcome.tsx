@@ -25,14 +25,22 @@ export function Welcome({ onNavigate }: WelcomeProps) {
   return (
     <main className="welcome">
       <div className="welcome-sky" aria-hidden />
+      <div className="welcome-ridge" aria-hidden />
       <div className="welcome-cast">
         <figure>
           <Avatar who="river" size="xl" />
-          <figcaption>River</figcaption>
+          <figcaption>
+            River
+            <span>You walk</span>
+          </figcaption>
         </figure>
+        <span className="welcome-lantern" aria-hidden />
         <figure>
           <Avatar who="juniper" size="xl" />
-          <figcaption>Juniper</figcaption>
+          <figcaption>
+            Juniper
+            <span>First lamp</span>
+          </figcaption>
         </figure>
       </div>
       <p className="eyebrow">A puzzle trail</p>
