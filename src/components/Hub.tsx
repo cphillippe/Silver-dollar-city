@@ -9,7 +9,6 @@ import { Landmark } from './Landmark'
 import { ShareInvite } from './ShareInvite'
 import { AdSlot } from './AdSlot'
 import { CityMap } from './CityMap'
-import { APP_VERSION } from '../config/app'
 import {
   dailyDoneToday,
   dueCount,
@@ -27,7 +26,7 @@ interface HubProps {
 }
 
 export function Hub({ onNavigate }: HubProps) {
-  const { progress, saveMeta } = useProgress()
+  const { progress } = useProgress()
   const today = localDateKey()
   const morningsBefore = progress.dailyDates.filter((d) => d !== today).length
   const daily = dailyForDate(today, morningsBefore)
@@ -41,26 +40,9 @@ export function Hub({ onNavigate }: HubProps) {
 
   return (
     <main className="hub">
-      <header className="page-head">
-        <p className="eyebrow">Silver City</p>
+      <header className="page-head town-head">
         <h1>The town</h1>
-        <p>
-          Landmarks rise when a line holds. Tap the glow — that’s what to build
-          next.
-        </p>
-        <p className="progress-saved">
-          Progress saved on this device
-          {saveMeta.savedAt ? ` · schema v${saveMeta.schemaVersion}` : ''} ·{' '}
-          {APP_VERSION}
-          {' · '}
-          <button
-            type="button"
-            className="text-link inline-link"
-            onClick={() => onNavigate({ name: 'settings' })}
-          >
-            Export / Import
-          </button>
-        </p>
+        <p>Tap the glow — that’s the next roof.</p>
       </header>
 
       <CityMap onNavigate={onNavigate} />
