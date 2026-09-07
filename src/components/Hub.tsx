@@ -86,7 +86,9 @@ export function Hub({ onNavigate }: HubProps) {
 
       <AdSlot slot="hub-banner" />
 
-      <ol className="city-streets">
+      <details className="street-drawer">
+        <summary>Who lives where</summary>
+        <ol className="city-streets">
         {CITY_PLOTS.filter((plot) => plot.areaId || plot.id === 'porch').map((plot) => {
           const area = plot.areaId
             ? areas.find((item) => item.id === plot.areaId)
@@ -152,6 +154,7 @@ export function Hub({ onNavigate }: HubProps) {
           )
         })}
       </ol>
+      </details>
 
       <AdSlot slot="between-districts" />
 

@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react'
 import { getArea } from '../content'
 import { AREA_LINES, guideForArea } from '../content/story'
 import { Avatar, Say } from './Avatar'
+import { Landmark } from './Landmark'
 import { kindLabel } from './icons'
 import { starLegend } from '../lib/stars'
 import { StarRow } from './StarRow'
@@ -59,11 +60,13 @@ export function AreaView({ areaId, onNavigate }: AreaViewProps) {
           <Avatar who={guide.id} size="xl" />
           <Avatar who="river" size="md" />
         </div>
-        <p className="eyebrow">{guide.role} · {area.subtitle}</p>
+        <Landmark pillar={area.id} compact />
+        <p className="eyebrow">{guide.role} · in town</p>
         <h1>{area.title}</h1>
         <p className="lede">{area.blurb}</p>
         <p className="progress-line">
-          {done} of {total} · {complete ? 'Street’s standing' : 'Still rising'}
+          {done} of {total}
+          {complete ? ' · street’s standing' : ''}
           {mastery.earned ? ` · ${mastery.earned}★` : ''}
         </p>
       </header>

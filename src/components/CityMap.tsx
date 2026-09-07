@@ -423,7 +423,7 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
           <p>
             {celebrating
               ? beatLine
-              : townVoice(nextId).here}
+              : nextSpec?.blurb}
           </p>
           {celebrating ? null : (
             <button type="button" className="btn primary" onClick={() => open(nextId)}>
@@ -478,8 +478,16 @@ function PlotGroup({
       }}
     >
       {vacant ? (
-        <g className="city-lot" transform={`translate(${at.x} ${at.y})`}>
-          <rect x="-16" y="-10" width="32" height="18" rx="2" />
+        <g className={`city-lot ${next ? 'is-staked' : ''}`} transform={`translate(${at.x} ${at.y})`}>
+          <ellipse rx="20" ry="9" className="city-earth" />
+          {next ? (
+            <path
+              className="city-timber"
+              d="M-10 8 V-12 M10 8 V-12 M-12 -2 H12 M-5 8 V-7 M5 8 V-7"
+            />
+          ) : (
+            <path className="city-lot-path" d="M-8 2 H8" />
+          )}
         </g>
       ) : (
         children
@@ -526,6 +534,11 @@ function TownFolk({
       >
         <circle className="city-folk-head" r="5.4" cy="-15" />
         <path className="city-folk-body" d="M0 -9 l-4.5 13 h9 z" />
+        <foreignObject x="-16" y="-36" width="32" height="32">
+          <div className="city-portrait">
+            <Avatar who={voice.who} size="sm" />
+          </div>
+        </foreignObject>
         {speaking ? (
           <g className="city-bubble">
             <rect x="-36" y="-40" width="72" height="16" rx="8" />
