@@ -28,24 +28,27 @@ Installable as a PWA (Add to Home Screen) after a production build, or as an And
 
 ## Android debug APK
 
-A sideloadable debug build is produced with Capacitor.
+**Direct download (debug, sideload):**  
+https://github.com/cphillippe/Silver-dollar-city/raw/cursor/silver-city-unending-evidence-8233/releases/silver_city_debug.apk
+
+Same file in the repo: [`releases/silver_city_debug.apk`](https://github.com/cphillippe/Silver-dollar-city/blob/cursor/silver-city-unending-evidence-8233/releases/silver_city_debug.apk)
+
+App id: `city.silver.unending` · name: **Silver City**. This is a **debug** build for testing, not a Play Store release.
+
+**Install on a phone**
+
+1. Open the download link on the phone (or copy the APK over USB/Drive).
+2. Settings → Security → allow **Install unknown apps** for Chrome/Files.
+3. Open the APK and tap Install.
+
+Rebuild locally (needs Android SDK + JDK 17+, `ANDROID_HOME` or `ANDROID_SDK_ROOT`):
 
 ```bash
-# Needs Android SDK + JDK 17+ (ANDROID_HOME or ANDROID_SDK_ROOT)
 npm install
 npm run android:apk
 ```
 
-The APK is written to `android/app/build/outputs/apk/debug/app-debug.apk`.
-
-**Install on a phone**
-
-1. Copy the `.apk` to the device (download, USB, or Drive).
-2. Settings → Security → allow **Install unknown apps** for Chrome/Files.
-3. Open the APK and tap Install.
-4. App id: `city.silver.unending` · name: **Silver City**.
-
-This is a **debug** build for testing, not a Play Store release.
+Gradle writes `android/app/build/outputs/apk/debug/app-debug.apk`. Copy it to `releases/silver_city_debug.apk` if you want the committed download file updated.
 
 ## How it works
 
