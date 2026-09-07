@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react'
 import { shuffle } from '../../lib/shuffle'
 import type { SortChallenge, SortTile } from '../../types'
+import { STORY } from '../../content/story'
 import { PuzzleHint } from './PuzzleHint'
+import { PuzzleLead } from './PuzzleLead'
 import { ResultPanel } from './ResultPanel'
 
 interface SortPlayProps {
@@ -101,7 +103,7 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
 
   return (
     <div className={`play ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}>
-      <p className="prompt">{challenge.prompt}</p>
+      <PuzzleLead challenge={challenge} />
       <PuzzleHint text={challenge.context} onPeek={onPeek} />
       <p className="sort-how">
         <span>
@@ -224,13 +226,13 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
 
       {status !== 'ok' && bank.length === 0 ? (
         <>
-          <p className="quiet">Bins are full. Snap to lock the sort.</p>
+          <p className="quiet">Bins are full. {STORY.lockSort}</p>
           <button
             type="button"
             className="btn primary xl snap-bins"
             onClick={() => evaluate()}
           >
-            Snap the bins
+            {STORY.lockSort}
           </button>
         </>
       ) : null}

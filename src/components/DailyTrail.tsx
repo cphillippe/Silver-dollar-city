@@ -175,7 +175,7 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
           <DeviceDay now={now} />
           <h1>
             {rehearsing
-              ? 'Rehearse this'
+              ? STORY.takeaway
               : showTeaser
                 ? 'A mark for this morning'
                 : isReview
@@ -204,6 +204,7 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
 
       {!solved ? (
         <>
+          <p className="play-goal">{STORY.playGoal}</p>
           <p className="district-flavor">
             {isReview
               ? 'An older walk, mixed among the districts.'
@@ -221,13 +222,11 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
         <section className="after-win daily-done">
           {brief && !held ? (
             <div className="rehearse-anchor">
-              <p className="quiet">
-                Folded. One claim, then one reason — the wording that should stick.
-              </p>
+              <p className="quiet">{STORY.takeaway}</p>
               <RecallGate
                 brief={brief}
                 mode={isReview ? 'review' : 'encode'}
-                kicker="Rehearse this"
+                kicker={STORY.takeaway}
                 onHeld={settleRecall}
               />
             </div>

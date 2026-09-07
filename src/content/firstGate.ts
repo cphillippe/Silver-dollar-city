@@ -20,6 +20,7 @@ export const firstGate: Area = {
       kind: 'sequence',
       id: 'fg-mover',
       title: 'The unmoved mover',
+      idea: 'change here and now still asks for a first changer',
       prompt:
         'Order Aquinas’s First Way as a chain of explanation — not as a timeline of yesterday’s events.',
       context:
@@ -51,6 +52,7 @@ export const firstGate: Area = {
       kind: 'build-argument',
       id: 'fg-contingent',
       title: 'What might not have been',
+      idea: 'what might not have been needs a ground',
       prompt: 'Assemble a contingency argument in a valid order.',
       context:
         'Related to Aquinas’s Third Way (ST I, q.2, a.3) and Leibniz’s principle of sufficient reason. Contingent means: it exists, but it could have failed to exist.',
@@ -117,6 +119,7 @@ export const firstGate: Area = {
       kind: 'sort',
       id: 'fg-kalam',
       title: 'Whatever begins',
+      idea: 'whatever begins still asks for a cause',
       prompt: 'Keep the careful reading of the kalām form. Toss the flattenings.',
       context:
         'Whatever begins to exist has a cause; the universe began to exist; therefore it has a cause. Medieval kalām (al-Ghazālī); modern analytic form (Craig).',
@@ -153,6 +156,7 @@ export const firstGate: Area = {
       kind: 'sort',
       id: 'fg-limits',
       title: 'What the gate opens',
+      idea: 'a first cause is not yet the whole creed',
       prompt: 'If a cosmological argument succeeds, what do you actually have?',
       context:
         'Suppose there is a first cause or necessary being. One traveler says the whole creed is finished. Another says the argument was worthless because it did not preach the sermon on the mount.',

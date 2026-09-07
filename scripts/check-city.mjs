@@ -121,7 +121,60 @@ const welcomeSrc = readFileSync(
 assert.match(welcomeSrc, /welcome-hero/)
 assert.match(welcomeSrc, /welcome-cast-late/)
 assert.match(welcomeSrc, /STORY\.purpose/)
+assert.match(welcomeSrc, /STORY\.who/)
 assert.match(welcomeSrc, /cityPromise/)
+assert.match(welcomeSrc, /YOU · RIVER/)
+assert.match(welcomeSrc, /GUIDE · JUNIPER/)
+
+const storySrc = readFileSync(
+  new URL('../src/content/story.ts', import.meta.url),
+  'utf8',
+)
+assert.match(
+  storySrc,
+  /A 60-second Christian reasoning game: sort ideas, choose one takeaway, and remember why it stands tomorrow\./,
+)
+assert.match(
+  storySrc,
+  /You are River\. Juniper is your guide\. Each day you practice one Christian idea\./,
+)
+assert.match(
+  storySrc,
+  /Goal: keep the lines that support today’s claim; toss the distractors; then choose the claim and reason you’ll remember\./,
+)
+assert.match(
+  storySrc,
+  /Choose the one-sentence takeaway you can repeat tomorrow, then choose why it stands\./,
+)
+assert.match(storySrc, /Lock in the sort\./)
+
+const sortSrc = readFileSync(
+  new URL('../src/components/challenges/SortPlay.tsx', import.meta.url),
+  'utf8',
+)
+assert.match(sortSrc, /STORY\.lockSort/)
+assert.doesNotMatch(sortSrc, /Snap the bins/)
+
+const dailySrc = readFileSync(
+  new URL('../src/content/daily.ts', import.meta.url),
+  'utf8',
+)
+assert.match(dailySrc, /faith and science can share the same sky/)
+
+const contentFiles = [
+  'daily.ts',
+  'parableHollow.ts',
+  'witnessBench.ts',
+  'observatory.ts',
+  'firstGate.ts',
+  'highLookout.ts',
+]
+for (const file of contentFiles) {
+  const src = readFileSync(new URL(`../src/content/${file}`, import.meta.url), 'utf8')
+  const kinds = [...src.matchAll(/\bkind: '/g)].length
+  const ideas = [...src.matchAll(/\bidea: '/g)].length
+  assert.equal(kinds, ideas, `${file} needs a plain idea on every puzzle`)
+}
 
 const shellSrc = readFileSync(
   new URL('../src/components/AppShell.tsx', import.meta.url),

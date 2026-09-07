@@ -1,6 +1,6 @@
 /**
  * Ad placements for a later network. Playtest default is off.
- * Never mount these over Keep/Toss, Rehearse this, RecallGate, or Journal due cards.
+ * Never mount these over Keep/Toss, the takeaway step, RecallGate, or Journal due cards.
  */
 
 export const ADS_PREF_KEY = 'silver-city-ads'
@@ -22,7 +22,7 @@ export const AD_SLOTS = {
   'after-daily': {
     id: 'after-daily',
     label: 'After Daily complete',
-    where: 'Today’s Trail teaser screen only — after Rehearse this is done',
+    where: 'Today’s Trail teaser screen only — after the takeaway is chosen',
   },
 } as const
 
@@ -30,9 +30,9 @@ export type AdSlotId = keyof typeof AD_SLOTS
 
 /** Controls and screens that must never be covered or replaced by an ad. */
 export const ADS_NEVER_COVER = [
-  'Keep / Toss tiles and Snap the bins',
-  'Rehearse this / RecallGate claim chips',
-  'Journal due cards and Rehearse this',
+  'Keep / Toss tiles and Lock in the sort',
+  'Takeaway / RecallGate claim chips',
+  'Journal due cards and takeaway',
   'Puzzle boards (sequence, match, sort, argument)',
   'What’s next footer on Map (ads sit in flow, not as overlays)',
 ] as const

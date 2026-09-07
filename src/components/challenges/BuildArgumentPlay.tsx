@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { shuffle } from '../../lib/shuffle'
 import type { ArgumentCard, BuildArgumentChallenge } from '../../types'
 import { PuzzleHint } from './PuzzleHint'
+import { PuzzleLead } from './PuzzleLead'
 import { ResultPanel } from './ResultPanel'
 
 interface BuildArgumentPlayProps {
@@ -90,7 +91,7 @@ export function BuildArgumentPlay({
 
   return (
     <div className={`play ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}>
-      <p className="prompt">{challenge.prompt}</p>
+      <PuzzleLead challenge={challenge} />
       <PuzzleHint text={challenge.context} onPeek={onPeek} />
       <p className="hint">Slot the chain. Leave the decoys in the bank — it checks when full.</p>
 

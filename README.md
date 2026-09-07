@@ -4,6 +4,8 @@ A progressive web app — playable in the browser — that walks the case for Go
 
 The product goal is **keeping the evidence**: claims, reasons, and sources you can still say after the page folds. Puzzles, streaks, polish, and a small Christian cast are the delivery system — the game has to be fun enough to play, or nothing is retained.
 
+A stranger should know in 60 seconds: this is a **Christian reasoning game**. Sort ideas, choose one takeaway, remember why it stands tomorrow. You are **River**. **Juniper** is your guide. Each day you practice one Christian idea. The town map lights when a line holds.
+
 ## Play now (no install)
 
 **Open this in normal Chrome — live preview of this branch:**  
@@ -162,7 +164,7 @@ No live ad network in this build. Slots are empty, labeled placeholders behind a
 
 - **Flag:** `adsEnabledDefault` in `src/config/ads.ts` is **false** (playtest). Settings can show placeholders on this device only.
 - **Slots:** hub banner (under Today’s Trail), once between Parable Hollow and Witness Bench, after Daily **complete** (teaser screen).
-- **Must never be blocked or covered:** Keep/Toss and Snap the bins; Rehearse this / RecallGate; Journal due cards; puzzle boards. Ads are in-flow boxes, not overlays, and they do not mount on Trail/challenge/Journal play chrome.
+- **Must never be blocked or covered:** Keep/Toss and Lock in the sort; takeaway / RecallGate; Journal due cards; puzzle boards. Ads are in-flow boxes, not overlays, and they do not mount on Trail/challenge/Journal play chrome.
 
 Wire a test unit later by teaching `AdSlot` to render the network creative when `adsEnabledDefault` is true — still only in those three slots.
 

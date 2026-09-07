@@ -10,6 +10,7 @@ export interface SortChallenge {
   kind: 'sort'
   id: string
   title: string
+  idea?: string
   prompt: string
   context?: string
   keepLabel: string
@@ -28,6 +29,7 @@ export interface SequenceChallenge {
   kind: 'sequence'
   id: string
   title: string
+  idea?: string
   prompt: string
   context?: string
   items: SequenceItem[]
@@ -52,6 +54,7 @@ export interface BuildArgumentChallenge {
   kind: 'build-argument'
   id: string
   title: string
+  idea?: string
   prompt: string
   context?: string
   slots: ArgumentSlot[]
@@ -70,6 +73,7 @@ export interface MatchChallenge {
   kind: 'match'
   id: string
   title: string
+  idea?: string
   prompt: string
   context?: string
   pairs: MatchPair[]

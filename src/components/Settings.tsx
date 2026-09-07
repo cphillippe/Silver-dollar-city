@@ -209,7 +209,7 @@ export function Settings({ onNavigate }: SettingsProps) {
         <p className="eyebrow">Ad placeholders</p>
         <p>
           Playtest default is off. Placeholders are labeled slots for a later
-          network — they never cover Keep/Toss, Rehearse this, or Journal.
+          network — they never cover Keep/Toss, the takeaway step, or Journal.
         </p>
         <p className="quiet">
           Product flag <code>adsEnabled</code> is {adsEnabledDefault ? 'on' : 'off'}{' '}

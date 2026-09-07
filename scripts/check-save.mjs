@@ -21,7 +21,7 @@ assert.equal(adsAreVisible('off'), false)
 assert.ok(AD_SLOTS['hub-banner'])
 assert.ok(AD_SLOTS['after-daily'])
 assert.ok(AD_SLOTS['between-districts'])
-assert.ok(ADS_NEVER_COVER.some((line) => /Rehearse/i.test(line)))
+assert.ok(ADS_NEVER_COVER.some((line) => /takeaway/i.test(line)))
 assert.ok(ADS_NEVER_COVER.some((line) => /Keep/i.test(line)))
 
 const legacy = {

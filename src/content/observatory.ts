@@ -20,6 +20,7 @@ export const observatory: Area = {
       kind: 'match',
       id: 'ob-tuning',
       title: 'Narrow ranges',
+      idea: 'the cosmos looks strangely fitted for life',
       prompt:
         'Match each feature of the cosmos to the standard fine-tuning observation about it.',
       context:
@@ -55,6 +56,7 @@ export const observatory: Area = {
       kind: 'build-argument',
       id: 'ob-design',
       title: 'A habitable cosmos',
+      idea: 'fine-tuning makes design a live explanation',
       prompt:
         'Build a careful inference — not a slogan — from fine-tuning to design as a rational option.',
       context:
@@ -122,6 +124,7 @@ export const observatory: Area = {
       kind: 'sort',
       id: 'ob-leibniz',
       title: 'Something rather than nothing',
+      idea: 'physics maps how the world runs; it does not finish why',
       prompt: 'Keep the careful reading of Leibniz beside cosmology. Toss the rest.',
       context:
         'Leibniz: why is there something rather than nothing? The Big Bang describes an early hot state — not automatically absolute nothing.',
@@ -158,6 +161,7 @@ export const observatory: Area = {
       kind: 'sort',
       id: 'ob-life',
       title: 'The threshold of life',
+      idea: 'an unfinished origin story is not a closed file',
       prompt: 'Keep the careful statement. Toss the gaps and the shrugs.',
       context:
         'Cells store specified information and run a coordinated metabolism. Abiogenesis is an open research program — not a closed chapter.',

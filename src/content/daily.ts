@@ -21,6 +21,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
       kind: 'sequence',
       id: 'daily-lantern',
       title: 'The porch lamp',
+      idea: 'a city on a hill is meant to be seen',
       prompt: 'A neighbor leaves a lamp on the porch. Put the picture in order.',
       context: 'Matthew 5:14–16. Jesus used ordinary light to talk about a life that is seen.',
       items: [
@@ -42,6 +43,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
       kind: 'sort',
       id: 'daily-seed',
       title: 'A handful of seed',
+      idea: 'the same word meets very different hearts',
       prompt: 'Which lines belong with Jesus’ picture of seed and soil?',
       context: 'Mark 4:1–9. The parable does not flatter every listener. Some seed is lost.',
       keepLabel: 'Fits the parable',
@@ -65,6 +67,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
       kind: 'match',
       id: 'daily-names',
       title: 'Names that stay',
+      idea: 'the resurrection claim rests on named witnesses',
       prompt: 'Match the person to the kind of witness they left.',
       context:
         '1 Corinthians 15:5–6. The New Testament does not rest on one voice. It stacks named people.',
@@ -86,6 +89,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
       kind: 'sequence',
       id: 'daily-creed',
       title: 'Older than the letter',
+      idea: 'the first church already said he died, was buried, and was raised',
       prompt: 'Scholars often date this creed earlier than the letter that quotes it. Order the steps.',
       context: '1 Corinthians 15:3–4. If the creed is early, the claim is close to the event it names.',
       items: [
@@ -106,6 +110,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
       kind: 'sort',
       id: 'daily-stars',
       title: 'Night air',
+      idea: 'faith and science can share the same sky',
       prompt: 'Which notes belong in a careful night of looking?',
       context: 'Psalm 19:1. Wonder is not the enemy of science.',
       keepLabel: 'Keep',
@@ -129,6 +134,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
       kind: 'match',
       id: 'daily-life',
       title: 'Not cheap',
+      idea: 'living cells are not a cheap accident',
       prompt: 'Pair each observation with the honest next sentence.',
       context:
         'This walk will not pretend chemistry is easy to dismiss. It only asks whether “it happened” is the last word.',
@@ -150,6 +156,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
       kind: 'sequence',
       id: 'daily-scroll',
       title: 'A copied line',
+      idea: 'the Bible we hold arrived through a river of copies',
       prompt: 'How does a line travel from an ancient hand to yours?',
       context: 'We do not hold the first ink. We hold a river of copies.',
       items: [
@@ -170,6 +177,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
       kind: 'sort',
       id: 'daily-isaiah',
       title: 'A hard poem',
+      idea: 'a suffering servant, not a sword, is the poem’s claim',
       prompt: 'Which lines belong with Isaiah 53’s servant?',
       context:
         'Christians read this poem as a portrait of Jesus. You are not required to agree — only to see why the first church did.',
@@ -193,6 +201,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
       kind: 'match',
       id: 'daily-grace',
       title: 'Not a wage',
+      idea: 'grace is a gift, not a wage',
       prompt: 'Match the word to the meaning this town uses.',
       context: 'Grace is not a prize for finishing the map. It is the claim that God moves first.',
       pairs: [
@@ -213,6 +222,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
       kind: 'sequence',
       id: 'daily-rest',
       title: 'Come and rest',
+      idea: 'rest is offered to tired people first',
       prompt: 'Jesus’ invitation has an order. Set the stones.',
       context: 'Matthew 11:28. Tired people are named first. The invitation is to a person, not a performance.',
       items: [
@@ -232,6 +242,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
       kind: 'build-argument',
       id: 'daily-neighbor',
       title: 'Who is near',
+      idea: 'neighbor is the one who shows mercy',
       prompt: 'Build the Samaritan’s answer from the stones provided.',
       context: 'Luke 10:36–37. The question “who is my neighbor?” is turned around. Mercy makes a neighbor.',
       slots: [
@@ -258,6 +269,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
       kind: 'sort',
       id: 'daily-empty',
       title: 'Morning',
+      idea: 'the first Easter reports are awkward on purpose',
       prompt: 'Which details belong in the first Easter reports?',
       context:
         'The first reports are not tidy. They include women, fear, and an empty place. The town does not sand that down.',
@@ -283,6 +295,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
       kind: 'build-argument',
       id: 'daily-cosmos',
       title: 'Why anything at all',
+      idea: 'why there is anything at all is a fair question',
       prompt: 'Set the three stones of a modest cosmological question.',
       context:
         'This is not a proof that silences every physicist. It is a question the psalms are willing to ask out loud.',
@@ -309,6 +322,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
       kind: 'match',
       id: 'daily-door',
       title: 'A door, not a wall',
+      idea: 'Jesus claims to be a door in, not a wall',
       prompt: 'Match Jesus’ image to what it offers.',
       context:
         '“I am the door” is a claim about access — personal, particular. You may refuse it. The town will not lock you in a pew.',

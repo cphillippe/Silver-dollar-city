@@ -20,6 +20,7 @@ export const parableHollow: Area = {
       kind: 'sequence',
       id: 'ph-road',
       title: 'The road to Jericho',
+      idea: 'neighbor is the one who shows mercy',
       prompt: 'Place the Good Samaritan in the order Luke tells it.',
       context:
         'Luke 10:25–37. A lawyer asks, “Who is my neighbor?” Jesus answers with a story set on the Jerusalem–Jericho road — a real, dangerous descent.',
@@ -54,6 +55,7 @@ export const parableHollow: Area = {
       kind: 'sort',
       id: 'ph-father',
       title: 'The father’s run',
+      idea: 'the father runs before the apology is finished',
       prompt: 'Toss the weak readings. Keep what Luke 15 is actually pressing.',
       context:
         'Luke 15:11–32. In that world a patriarch running was undignified. The father runs before the son finishes his hired-hand speech.',
@@ -90,6 +92,7 @@ export const parableHollow: Area = {
       kind: 'match',
       id: 'ph-seeds',
       title: 'Pictures of the kingdom',
+      idea: 'the kingdom arrives in pictures, not slogans',
       prompt: 'Match each parable to the claim it is actually making.',
       context:
         'These are among the most-attested teachings in the Synoptic Gospels. A parable can have one main thrust — resist turning every detail into an allegory.',
@@ -124,6 +127,7 @@ export const parableHollow: Area = {
       kind: 'sort',
       id: 'ph-debt',
       title: 'An unpayable account',
+      idea: 'received mercy makes refusing mercy a contradiction',
       prompt: 'Sort the claims. Only one belongs in the keep bin.',
       context:
         'Matthew 18:21–35. A servant forgiven an unpayable debt then throttles a peer over a small sum. The king reinstates the first debt.',
