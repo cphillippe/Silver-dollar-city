@@ -21,6 +21,8 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
   const [pickedLeft, setPickedLeft] = useState<string | null>(null)
   const [flash, setFlash] = useState<string | null>(null)
   const [status, setStatus] = useState<'idle' | 'wrong' | 'ok'>('idle')
+  const [shake, setShake] = useState(false)
+  const [misses, setMisses] = useState(0)
 
   function chooseLeft(id: string) {
     if (status === 'ok' || locked.includes(id)) return
@@ -44,15 +46,18 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
     }
     setFlash(pickedLeft)
     setStatus('wrong')
+    setShake(true)
+    setMisses((count) => count + 1)
     onMiss()
     window.setTimeout(() => {
       setFlash(null)
       setPickedLeft(null)
+      setShake(false)
     }, 420)
   }
 
   return (
-    <div className={`play ${status === 'ok' ? 'is-win' : ''}`}>
+    <div className={`play ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}>
       <PuzzleHint text={challenge.context} onPeek={onPeek} />
       <p className="prompt">{challenge.prompt}</p>
       <p className="hint">Snap a pair. Right matches lock; misses flash and bounce.</p>
@@ -89,9 +94,10 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
       </p>
 
       <ResultPanel
-        tone={status === 'ok' ? 'ok' : 'idle'}
-        title="All pairs snap!"
-        deeper={challenge.deeper ?? challenge.teachOnWrong}
+        tone={status === 'ok' ? 'ok' : status === 'wrong' && misses >= 2 ? 'teach' : 'idle'}
+        title={status === 'ok' ? 'All pairs snap!' : 'Shake and snap again.'}
+        body={status === 'wrong' && misses >= 2 ? challenge.teachOnWrong : undefined}
+        deeper={status === 'ok' ? (challenge.deeper ?? challenge.teachOnWrong) : undefined}
       />
     </div>
   )

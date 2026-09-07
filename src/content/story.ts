@@ -93,8 +93,8 @@ export const STORY = {
     'I’m Juniper. I light the east porch at dawn. One short walk — then we fold the page and keep the line.',
   welcomeRiver:
     'I’m River. I came to see if the case for God can be walked. If you’ll walk, I’ll try to remember.',
-  dailyInvite: 'Lantern’s lit. Same walk for this morning. Snap it, then say it back.',
-  dailyHeld: 'That’s the line. Tomorrow I’ll cover a new card — and maybe stir an older one.',
+  dailyInvite: 'Lantern’s lit. Snap it, fold the page, keep the line. Later I’ll bring an older page back.',
+  dailyHeld: 'That’s the line. Tomorrow I may cover a new card — or dust off one that’s rested.',
   trailWait: 'The trail waits. Your pages stay. Come when you can.',
 }
 

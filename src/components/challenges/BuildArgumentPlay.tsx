@@ -23,6 +23,7 @@ export function BuildArgumentPlay({
   const [selected, setSelected] = useState<string | null>(null)
   const [status, setStatus] = useState<'idle' | 'wrong' | 'ok'>('idle')
   const [shake, setShake] = useState(false)
+  const [misses, setMisses] = useState(0)
 
   function place(slotId: string) {
     if (status === 'ok' || !selected) return
@@ -78,6 +79,7 @@ export function BuildArgumentPlay({
     }
     setStatus('wrong')
     setShake(true)
+    setMisses((count) => count + 1)
     onMiss()
     window.setTimeout(() => {
       setShake(false)
@@ -135,8 +137,14 @@ export function BuildArgumentPlay({
 
       <ResultPanel
         tone={status === 'idle' ? 'idle' : status === 'ok' ? 'ok' : 'teach'}
-        title={status === 'ok' ? 'The chain locks!' : 'A link slips — tiles bounce back.'}
-        body={status === 'wrong' ? challenge.teachOnWrong : undefined}
+        title={
+          status === 'ok'
+            ? 'The chain locks!'
+            : misses >= 2
+              ? 'A link slips — tiles bounce back.'
+              : 'Shake and rebuild the chain.'
+        }
+        body={status === 'wrong' && misses >= 2 ? challenge.teachOnWrong : undefined}
         deeper={challenge.deeper}
       />
     </div>

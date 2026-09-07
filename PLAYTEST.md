@@ -18,8 +18,9 @@ Do not trade one for the other. Prefer a fix that raises both (satisfying snap �
 5. Confirm streak 1 and the tomorrow teaser.
 6. Open the Journal. Note % complete, sealed vs mystery, and whether the new page is face-down.
 7. Enter Parable Hollow. Finish one district challenge. Rebuild the line before Continue appears.
-8. Replay that challenge with a peek or a miss. Confirm stars update on the map.
+8. Replay that challenge with a peek or a miss. Confirm a peek blocks a “clean” rest, and that 3★ is mastery (spaced + said back), not a same-session no-miss badge.
 9. Share a morning — read the copied pitch. It should ask what a friend can still say.
+10. If a page is due: Journal shows **Due this morning**; Today’s Trail copy is **Time to dust off this one**; solving it can raise 1★ → 2★ (or 3★ with teach-back).
 
 ## Self-test (required)
 
@@ -52,7 +53,7 @@ Filled from a fresh playtest of this build (local calendar **2026-09-07**, Daily
 | Avatars (pass 1) | Juniper read as back-of-head | Redrew hair behind faces, shared eye language |
 | Daily card on the map | Live glow, streak 1, tomorrow teaser | No FOMO countdown |
 | Fold → rebuild | Boss snap, not a quiz sheet | Warm miss bounce |
-| Stars on replay | Map showed 3★ / mastery 3/12 after Jericho | Best clear kept |
+| Stars on replay | Map shows mastery, not a no-miss badge | 1★ encode; 2★ after a rest; 3★ said back |
 
 ## Tone check
 

@@ -108,6 +108,17 @@ export interface JournalEntry {
 
 export type StarCount = 1 | 2 | 3
 
+export interface MemoryTrace {
+  id: string
+  pillar: string
+  intervalIndex: number
+  nextReviewAt: string
+  lastReviewAt?: string
+  reviews: number
+  cleanRecalls: number
+  elaborated: boolean
+}
+
 export interface ProgressState {
   started: boolean
   completed: string[]
@@ -122,6 +133,9 @@ export interface ProgressState {
   bestStreak: number
   /** Evidence briefs successfully retrieved (claim + reason). */
   held: string[]
+  memory: Record<string, MemoryTrace>
+  elaborations: Record<string, string>
+  lastReviewPillar?: string
 }
 
 export type View =

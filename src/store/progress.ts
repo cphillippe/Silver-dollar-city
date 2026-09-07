@@ -1,10 +1,24 @@
 import { createContext, useContext } from 'react'
 import { dailyForDate } from '../content/daily'
-import { areas, journalEntries, totalChallenges } from '../content'
+import { evidenceFor } from '../content/evidence'
+import {
+  areas,
+  findPlayable,
+  journalEntries,
+  journalForChallenge,
+  pillarFor,
+  totalChallenges,
+} from '../content'
 import { localDateKey } from '../lib/dates'
+import {
+  dueTraces,
+  emptyTrace,
+  pickInterleaved,
+  type ReviewEvent,
+} from '../lib/memory'
 import { districtMastery, type StarCount } from '../lib/stars'
 import { isStreakLive, trailDaysRequired } from '../lib/streak'
-import type { Area, Challenge, ProgressState } from '../types'
+import type { Area, Challenge, MemoryTrace, ProgressState } from '../types'
 
 export const STORAGE_KEY = 'silver-city-progress-v1'
 
@@ -18,7 +32,38 @@ export const emptyProgress = (): ProgressState => ({
   streak: 0,
   bestStreak: 0,
   held: [],
+  memory: {},
+  elaborations: {},
 })
+
+function asMemoryMap(value: unknown): Record<string, MemoryTrace> {
+  if (!value || typeof value !== 'object') return {}
+  const next: Record<string, MemoryTrace> = {}
+  for (const [key, raw] of Object.entries(value as Record<string, unknown>)) {
+    if (!raw || typeof raw !== 'object') continue
+    const item = raw as MemoryTrace
+    next[key] = {
+      id: typeof item.id === 'string' ? item.id : key,
+      pillar: typeof item.pillar === 'string' ? item.pillar : pillarFor(key),
+      intervalIndex: typeof item.intervalIndex === 'number' ? item.intervalIndex : 0,
+      nextReviewAt: typeof item.nextReviewAt === 'string' ? item.nextReviewAt : localDateKey(),
+      lastReviewAt: item.lastReviewAt,
+      reviews: typeof item.reviews === 'number' ? item.reviews : 0,
+      cleanRecalls: typeof item.cleanRecalls === 'number' ? item.cleanRecalls : 0,
+      elaborated: Boolean(item.elaborated),
+    }
+  }
+  return next
+}
+
+function asStringMap(value: unknown): Record<string, string> {
+  if (!value || typeof value !== 'object') return {}
+  const next: Record<string, string> = {}
+  for (const [key, raw] of Object.entries(value as Record<string, unknown>)) {
+    if (typeof raw === 'string') next[key] = raw
+  }
+  return next
+}
 
 function asStarMap(value: unknown): Record<string, StarCount> {
   if (!value || typeof value !== 'object') return {}
@@ -27,6 +72,20 @@ function asStarMap(value: unknown): Record<string, StarCount> {
     if (raw === 1 || raw === 2 || raw === 3) next[key] = raw
   }
   return next
+}
+
+function migrateMemory(parsed: ProgressState): Record<string, MemoryTrace> {
+  const memory = asMemoryMap(parsed.memory)
+  const today = localDateKey()
+  for (const id of parsed.held ?? []) {
+    if (memory[id]) continue
+    memory[id] = {
+      ...emptyTrace(id, pillarFor(id), today),
+      nextReviewAt: today,
+      lastReviewAt: undefined,
+    }
+  }
+  return memory
 }
 
 export function loadProgress(): ProgressState {
@@ -47,6 +106,9 @@ export function loadProgress(): ProgressState {
       streak: typeof parsed.streak === 'number' ? parsed.streak : 0,
       bestStreak: typeof parsed.bestStreak === 'number' ? parsed.bestStreak : 0,
       held: Array.isArray(parsed.held) ? parsed.held : [],
+      memory: migrateMemory(parsed),
+      elaborations: asStringMap(parsed.elaborations),
+      lastReviewPillar: parsed.lastReviewPillar,
     }
   } catch {
     return emptyProgress()
@@ -91,16 +153,45 @@ export function dailyDoneToday(
   return progress.lastDailyDate === today || progress.dailyDates.includes(today)
 }
 
+export function morningReview(
+  progress: ProgressState,
+  today = localDateKey(),
+) {
+  const due = dueTraces(progress.memory, today).filter(
+    (trace) => Boolean(findPlayable(trace.id) && evidenceFor(trace.id)),
+  )
+  return pickInterleaved(due, today, progress.lastReviewPillar)
+}
+
+export function dueForRecall(
+  progress: ProgressState,
+  today = localDateKey(),
+) {
+  return dueTraces(progress.memory, today).map((trace) => ({
+    trace,
+    brief: evidenceFor(trace.id),
+    entry:
+      journalForChallenge(trace.id) ??
+      journalEntries.find((item) => item.id === trace.id),
+  }))
+}
+
+export function dueCount(progress: ProgressState, today = localDateKey()) {
+  return dueTraces(progress.memory, today).length
+}
+
 export function getNextGoal(
   progress: ProgressState,
   today = localDateKey(),
 ): NextGoal {
   if (!dailyDoneToday(progress, today)) {
-    const daily = dailyForDate(today)
+    const due = morningReview(progress, today)
     return {
       kind: 'daily',
       title: 'Today’s Trail',
-      detail: `${daily.challenge.title} · about a minute`,
+      detail: due
+        ? 'Time to dust off a page · about a minute'
+        : `${dailyForDate(today).challenge.title} · about a minute`,
     }
   }
 
@@ -223,9 +314,10 @@ export interface ProgressApi {
   missed: string[]
   start: () => void
   completeChallenge: (areaId: string, challengeId: string) => string[]
-  completeDaily: (dateKey: string, challengeId: string, stars: StarCount) => string[]
+  completeDaily: (dateKey: string) => string[]
   recordStars: (challengeId: string, stars: StarCount) => StarCount
   recordHeld: (evidenceId: string) => void
+  recordReview: (event: ReviewEvent) => StarCount
   markMiss: (challengeId: string) => void
   reset: () => void
 }

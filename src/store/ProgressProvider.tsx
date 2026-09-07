@@ -1,4 +1,11 @@
 import { useCallback, useMemo, useState, type ReactNode } from 'react'
+import {
+  applyMiss,
+  applySuccess,
+  emptyTrace,
+  masteryFromReview,
+  type ReviewEvent,
+} from '../lib/memory'
 import { bestStars, type StarCount } from '../lib/stars'
 import { streakAfterPlay } from '../lib/streak'
 import type { ProgressState } from '../types'
@@ -51,6 +58,58 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     })
   }, [])
 
+  const recordReview = useCallback((event: ReviewEvent) => {
+    let kept: StarCount = 1
+    setProgress((current) => {
+      const prior = current.memory[event.id]
+      const base = prior ?? emptyTrace(event.id, event.pillar, event.today)
+      const helped = event.peeked || !event.clean
+
+      let nextTrace = base
+      if (event.kind === 'encode') {
+        nextTrace = prior
+          ? {
+              ...base,
+              pillar: event.pillar,
+              elaborated: base.elaborated || event.elaborated,
+            }
+          : {
+              ...emptyTrace(event.id, event.pillar, event.today),
+              elaborated: event.elaborated,
+            }
+      } else if (helped) {
+        nextTrace = applyMiss(base, event.today)
+      } else {
+        nextTrace = applySuccess(base, event.today)
+      }
+
+      nextTrace = {
+        ...nextTrace,
+        elaborated: nextTrace.elaborated || event.elaborated,
+      }
+
+      kept = bestStars(
+        current.stars[event.id],
+        masteryFromReview(current.stars[event.id], prior, event, nextTrace),
+      )
+      const next: ProgressState = {
+        ...current,
+        memory: { ...current.memory, [event.id]: nextTrace },
+        stars: { ...current.stars, [event.id]: kept },
+        held: current.held.includes(event.id)
+          ? current.held
+          : [...current.held, event.id],
+        lastReviewPillar: event.pillar,
+        elaborations: event.text
+          ? { ...current.elaborations, [event.id]: event.text }
+          : current.elaborations,
+      }
+      saveProgress(next)
+      return next
+    })
+    return kept
+  }, [])
+
   const recordStars = useCallback((challengeId: string, stars: StarCount) => {
     let kept: StarCount = stars
     setProgress((current) => {
@@ -95,46 +154,37 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     [missed],
   )
 
-  const completeDaily = useCallback(
-    (dateKey: string, challengeId: string, stars: StarCount) => {
-      const alreadyToday = progress.dailyDates.includes(dateKey)
-      const nextCount = alreadyToday
-        ? progress.dailyDates.length
-        : progress.dailyDates.length + 1
-      const unlocked = trailCardsForDays(nextCount).filter(
-        (id) => !progress.journal.includes(id),
+  const completeDaily = useCallback((dateKey: string) => {
+    let unlocked: string[] = []
+    setProgress((current) => {
+      const seenToday = current.dailyDates.includes(dateKey)
+      const dates = seenToday
+        ? current.dailyDates
+        : [...current.dailyDates, dateKey]
+      unlocked = trailCardsForDays(dates.length).filter(
+        (id) => !current.journal.includes(id),
       )
-
-      setProgress((current) => {
-        const seenToday = current.dailyDates.includes(dateKey)
-        const dates = seenToday
-          ? current.dailyDates
-          : [...current.dailyDates, dateKey]
-        const update = streakAfterPlay(
-          current.lastDailyDate,
-          dateKey,
-          current.streak,
-        )
-        const next: ProgressState = {
-          ...current,
-          started: true,
-          dailyDates: dates,
-          lastDailyDate: dateKey,
-          streak: update.streak,
-          bestStreak: Math.max(current.bestStreak, update.streak),
-          journal: [...new Set([...current.journal, ...trailCardsForDays(dates.length)])],
-          stars: {
-            ...current.stars,
-            [challengeId]: bestStars(current.stars[challengeId], stars),
-          },
-        }
-        saveProgress(next)
-        return next
-      })
-      return unlocked
-    },
-    [progress.dailyDates, progress.journal],
-  )
+      const update = streakAfterPlay(
+        current.lastDailyDate,
+        dateKey,
+        current.streak,
+      )
+      const next: ProgressState = {
+        ...current,
+        started: true,
+        dailyDates: dates,
+        lastDailyDate: dateKey,
+        streak: update.streak,
+        bestStreak: Math.max(current.bestStreak, update.streak),
+        journal: [
+          ...new Set([...current.journal, ...trailCardsForDays(dates.length)]),
+        ],
+      }
+      saveProgress(next)
+      return next
+    })
+    return unlocked
+  }, [])
 
   const reset = useCallback(() => {
     setMissed([])
@@ -150,6 +200,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       completeDaily,
       recordStars,
       recordHeld,
+      recordReview,
       markMiss,
       reset,
     }),
@@ -160,6 +211,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       missed,
       progress,
       recordHeld,
+      recordReview,
       recordStars,
       reset,
       start,
