@@ -68,21 +68,35 @@ Gradle writes `android/app/build/outputs/apk/debug/app-debug.apk`. Copy it to `r
 
 ## How it works
 
-1. **Today’s Trail** — one short puzzle each local calendar day (seeded by date, so the same day is the same walk). Completing it marks a gentle streak and unlocks trail notes in the journal. Miss a day and **the trail waits** — marks you already made stay. After a solve you see a locked **tomorrow teaser**.
-2. **Recall Loop** — after the snap, the teaching folds. You rebuild **one claim + one reason** with the same card-snap feel. Two misses and the line is spoken, then you walk on. Held lines are the real score.
-3. **Spaced re-ask** — a later morning may stir an older page. Same snap, no lecture.
-4. **Map** — five districts on one trail. Completing a district unbars the next. Finished districts stay playable; stars record your best clear (3 = no miss, no peek).
-5. **Puzzles** — order chains, snap-pairs, keep-or-toss bins, and build-the-argument.
-6. **Evidence Journal** — unsealed vs sealed, % complete, mystery slots from Daily Trail. Open pages start face-down so the journal is a recall surface, not only a trophy case.
-7. **What’s next** — a persistent goal bar. **Held** counts lines you rebuilt from memory.
+1. **Today’s Trail** — one short puzzle each local calendar day. If a page is **due for recall**, Juniper dusts that one off instead of only serving something new. Completing the walk marks a gentle streak and can unseal trail notes. Miss a day and **the trail waits** — marks you already made stay. After a solve you see a locked **tomorrow teaser**.
+2. **Recall Loop** — after the snap, the teaching folds. You rebuild **one claim + one reason** (retrieval practice). Two misses and the line is spoken, then you walk on. A peek marks the attempt as helped. Held lines are the real score.
+3. **Spacing** — each locked line stores `nextReviewAt` in `localStorage`. Clean recalls expand the gap (~1, then 3, then 7, then 21 local days). A miss or peek brings it back tomorrow, warmly: *Time to dust off this one.* The morning queue **interleaves districts** so you don’t drill one pillar in a block.
+4. **Say it back** — optional, skippable once: pick the load-bearing premise, and (if you want) one local sentence in your own words. That teach-back is how a line reaches 3★.
+5. **Map** — five districts on one trail. Completing a district unbars the next. Finished districts stay playable. Stars are **mastery**, not a no-miss trophy: 1★ first walk, 2★ held after a rest, 3★ held after a rest and said back (or a second clean recall later).
+6. **Puzzles** — order chains, snap-pairs, keep-or-toss bins, and build-the-argument. Misses shake and retry before a fuller hint.
+7. **Evidence Journal** — unsealed vs sealed, % complete, mystery slots from Daily Trail, **due-for-recall** pages, and landmark marks (visual + verbal cues). Open pages start face-down.
+8. **What’s next** — a persistent goal bar. **Held** counts lines you rebuilt from memory. **Due** counts pages waiting to be dusted off.
+
+## Recall Loop / spacing (for the player)
+
+The science stays inside the game — not a flashcard deck.
+
+- After you solve, the long page folds. You snap the claim, then the reason, the way you snapped the puzzle.
+- Forgetting is expected. When a line has rested, Today’s Trail often **resurfaces that same walk** instead of only a brand-new puzzle. Copy stays warm: the trail brings it back because memory needs the practice, not because you failed.
+- Gaps grow after a clean recall: **about 1 day, then 3, 7, then 21**. Peeking or missing keeps the line close (back tomorrow) without deleting stars you already earned.
+- Journal cards show the landmark for that district and whether a page is due this morning. Dual cues: a picture of the place plus the sentence.
+- Optional “say it back” (load-bearing premise + a private sentence) is skippable so it doesn’t kill pace. Doing it is how mastery reaches three stars.
+
+Progress shape (same key `silver-city-progress-v1`): `memory[id].nextReviewAt`, `intervalIndex`, `elaborated`, plus `stars` 1–3.
 
 ## Daily Trail and streaks
 
 - Timezone: the device’s local calendar (`YYYY-MM-DD`).
-- Pick: `hash("silver-city-trail:" + date) % pool` over `src/content/daily.ts`.
-- Streak: consecutive local days with a completed trail. A gap starts a new count (`The trail waited. Welcome back.`) without deleting journal cards, stars, or held lines.
+- New-content pick (when nothing is due): `hash("silver-city-trail:" + date) % pool` over `src/content/daily.ts`.
+- Due pick (when something has rested): mix pillars, prefer a different district than last time (`src/lib/memory.ts`).
+- Streak: consecutive local days with a completed trail. A gap starts a new count (`The trail waited. Welcome back.`) without deleting journal cards, stars, held lines, or the recall schedule.
 - Trail notes unseal after 1, 2, 3, 5, and 7 **distinct** mornings (replaying today does not count twice).
-- Stars on a daily walk use the same clean-solve rules as districts.
+- Stars follow mastery (encode → spaced recall → teach-back), not a same-session no-miss badge.
 
 ## Friend preview (no install)
 

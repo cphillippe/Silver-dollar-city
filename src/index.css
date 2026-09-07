@@ -954,6 +954,7 @@ p {
 .next-card,
 .teaser-card,
 .recall-gate,
+.say-back,
 .share-invite {
   background: linear-gradient(180deg, rgba(244, 234, 210, 0.1), rgba(244, 234, 210, 0.03));
   border: 1px solid var(--line);
@@ -1027,6 +1028,23 @@ p {
   color: #cfe6d2;
 }
 
+.due-mark {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(224, 179, 74, 0.22);
+  color: var(--gold);
+  font-size: 0.82rem;
+  font-weight: 650;
+}
+
+.star-key {
+  opacity: 0.72;
+  font-size: 0.92rem;
+  margin: 0 0 8px;
+}
+
 .star-row {
   letter-spacing: 0.08em;
   color: rgba(244, 234, 210, 0.28);
@@ -1071,6 +1089,77 @@ p {
 
 .dossier.is-held {
   border-color: rgba(107, 143, 113, 0.45);
+}
+
+.dossier.is-due {
+  border-color: color-mix(in srgb, var(--gold) 55%, white);
+}
+
+.landmark {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 14px;
+  color: var(--gold);
+}
+
+.landmark.is-compact {
+  margin-bottom: 10px;
+}
+
+.landmark-mark {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+}
+
+.landmark.is-compact .landmark-mark {
+  width: 36px;
+  height: 36px;
+}
+
+.landmark-label {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 1.02rem;
+}
+
+.say-back {
+  animation: pop-in 0.32s ease;
+  margin-bottom: 18px;
+}
+
+.say-back-label {
+  display: block;
+  margin: 12px 0 6px;
+  font-size: 0.92rem;
+}
+
+.say-back-text {
+  width: 100%;
+  resize: vertical;
+  min-height: 64px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: rgba(14, 18, 32, 0.45);
+  color: inherit;
+  padding: 12px 14px;
+  font: inherit;
+  margin-bottom: 12px;
+}
+
+.say-back-text:focus {
+  outline: 2px solid color-mix(in srgb, var(--gold) 70%, white);
+  outline-offset: 2px;
+}
+
+.recall-card.is-locked {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--gold) 50%, transparent);
+}
+
+.due-chapter {
+  padding-bottom: 8px;
 }
 
 .recall-gate {

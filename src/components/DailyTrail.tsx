@@ -1,22 +1,25 @@
 import { useState } from 'react'
-import { getJournalEntry } from '../content'
+import { findPlayable, getJournalEntry, pillarFor } from '../content'
 import { dailyForDate } from '../content/daily'
-import {
-  evidenceFor,
-  knownEvidenceIds,
-  pickSpacedEvidence,
-} from '../content/evidence'
+import { evidenceFor } from '../content/evidence'
 import { STORY } from '../content/story'
 import { kindLabel } from './icons'
 import { addLocalDays, formatTrailDate, localDateKey } from '../lib/dates'
-import { starsFromAttempt } from '../lib/stars'
 import { streakAfterPlay } from '../lib/streak'
 import { Avatar, Say } from './Avatar'
+import { Landmark } from './Landmark'
 import { PuzzlePlay } from './PuzzlePlay'
 import { RecallGate } from './RecallGate'
+import { SayBack } from './SayBack'
 import { ShareInvite } from './ShareInvite'
 import { StarRow } from './StarRow'
-import { dailyDoneToday, streakCopy, useProgress } from '../store/progress'
+import { starLegend, type StarCount } from '../lib/stars'
+import {
+  dailyDoneToday,
+  morningReview,
+  streakCopy,
+  useProgress,
+} from '../store/progress'
 import type { View } from '../types'
 
 interface DailyTrailProps {
@@ -24,46 +27,118 @@ interface DailyTrailProps {
 }
 
 export function DailyTrail({ onNavigate }: DailyTrailProps) {
-  const { completeDaily, recordHeld, progress } = useProgress()
+  const { completeDaily, recordReview, progress } = useProgress()
   const today = localDateKey()
-  const daily = dailyForDate(today)
   const tomorrow = dailyForDate(addLocalDays(today, 1))
-  const already = dailyDoneToday(progress, today)
-  const todayBrief = evidenceFor(daily.challenge.id)
-  const spaced = pickSpacedEvidence(
-    today,
-    knownEvidenceIds(progress),
-    daily.challenge.id,
-  )
-  const [solved, setSolved] = useState(already)
+
+  const [session] = useState(() => {
+    const already = dailyDoneToday(progress, today)
+    const due = already ? undefined : morningReview(progress, today)
+    const reviewBrief = due ? evidenceFor(due.id) : undefined
+    const isReview = Boolean(due && reviewBrief)
+    const fresh = dailyForDate(today)
+    const playable =
+      due && isReview
+        ? findPlayable(due.id)
+        : {
+            areaId: pillarFor(fresh.challenge.id),
+            challenge: fresh.challenge,
+          }
+    const brief = reviewBrief ?? evidenceFor(fresh.challenge.id)
+    const pillar = due?.pillar ?? pillarFor(fresh.challenge.id)
+    return {
+      already,
+      isReview,
+      fresh,
+      challenge: playable?.challenge ?? fresh.challenge,
+      brief,
+      pillar,
+    }
+  })
+
+  const { isReview, fresh, challenge, brief, pillar } = session
+  const [solved, setSolved] = useState(session.already)
   const [missed, setMissed] = useState(false)
   const [peeked, setPeeked] = useState(false)
-  const [earned, setEarned] = useState(progress.stars[daily.challenge.id] ?? 0)
+  const [recallClean, setRecallClean] = useState(true)
+  const [held, setHeld] = useState(
+    () =>
+      !brief ||
+      (Boolean(progress.held.includes(brief.id)) && !isReview),
+  )
+  const [said, setSaid] = useState(
+    () =>
+      !brief ||
+      Boolean(progress.memory[brief.id]?.elaborated && !isReview),
+  )
+  const [earned, setEarned] = useState<StarCount | 0>(
+    () => (brief && progress.stars[brief.id]) || 0,
+  )
   const [newCards, setNewCards] = useState<string[]>([])
-  const [todayHeld, setTodayHeld] = useState(
-    () => Boolean(todayBrief && progress.held.includes(todayBrief.id)),
-  )
-  const [spacedHeld, setSpacedHeld] = useState(
-    () => Boolean(spaced && progress.held.includes(spaced.id)),
-  )
   const [tone, setTone] = useState(() =>
-    already
+    session.already
       ? streakAfterPlay(progress.lastDailyDate, today, progress.streak).tone
       : undefined,
   )
 
-  function finish() {
-    const stars = starsFromAttempt(missed, peeked)
-    const unlocked = completeDaily(today, daily.challenge.id, stars)
+  const showTeaser = solved && held && said
+
+  function commitMemory(
+    elaborated: boolean,
+    text?: string,
+    clean = recallClean,
+  ) {
+    if (!brief) {
+      setSaid(true)
+      return
+    }
+    const stars = recordReview({
+      id: brief.id,
+      pillar,
+      kind: isReview ? 'recall' : 'encode',
+      today,
+      clean: clean && !missed && !peeked,
+      peeked,
+      elaborated,
+      text,
+    })
     setEarned(stars)
+    setSaid(true)
+  }
+
+  function finishPuzzle() {
+    const unlocked = completeDaily(today)
     setNewCards(unlocked)
     setTone(streakAfterPlay(progress.lastDailyDate, today, progress.streak).tone)
+    if (brief && !isReview) {
+      const stars = recordReview({
+        id: brief.id,
+        pillar,
+        kind: 'encode',
+        today,
+        clean: !missed && !peeked,
+        peeked,
+        elaborated: false,
+      })
+      setEarned(stars)
+    }
     setSolved(true)
   }
 
+  function settleRecall(result: { clean: boolean }) {
+    setRecallClean(result.clean)
+    setHeld(true)
+    if (brief && progress.memory[brief.id]?.elaborated) {
+      commitMemory(true, undefined, result.clean)
+    }
+  }
+
+  function settleSay(result: { elaborated: boolean; text?: string }) {
+    commitMemory(result.elaborated, result.text)
+  }
+
   const flourish = newCards[0] ? getJournalEntry(newCards[0]) : undefined
-  const liveStreak = Math.max(progress.streak, solved || already ? 1 : 0)
-  const showTeaser = solved && (!todayBrief || todayHeld) && (!spaced || spacedHeld)
+  const liveStreak = Math.max(progress.streak, solved || session.already ? 1 : 0)
 
   return (
     <main className="daily-page">
@@ -78,23 +153,42 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
         <Avatar who="juniper" size="lg" />
         <div>
           <p className="eyebrow">Today’s Trail · {formatTrailDate(today)}</p>
-          <h1>{already || solved ? 'A mark for this morning' : daily.challenge.title}</h1>
+          <h1>
+            {showTeaser
+              ? 'A mark for this morning'
+              : isReview
+                ? 'Time to dust off this one'
+                : challenge.title}
+          </h1>
         </div>
       </div>
       <Say
         who="juniper"
-        line={solved ? (tone === 'welcome-back' ? STORY.trailWait : STORY.dailyHeld) : STORY.dailyInvite}
+        line={
+          showTeaser
+            ? tone === 'welcome-back'
+              ? STORY.trailWait
+              : STORY.dailyHeld
+            : isReview
+              ? 'Forgetting is why the trail brings a page back. Same snap — no shame in dusting it off.'
+              : STORY.dailyInvite
+        }
       />
+      <Landmark pillar={pillar} />
 
       {!solved ? (
         <>
-          <p className="district-flavor">{daily.districtFlavor}</p>
-          <p className="eyebrow">{kindLabel(daily.challenge.kind)}</p>
+          <p className="district-flavor">
+            {isReview
+              ? 'An older walk, mixed among the districts.'
+              : fresh.districtFlavor}
+          </p>
+          <p className="eyebrow">{kindLabel(challenge.kind)}</p>
           <PuzzlePlay
-            challenge={daily.challenge}
+            challenge={challenge}
             onMiss={() => setMissed(true)}
             onPeek={() => setPeeked(true)}
-            onSolved={finish}
+            onSolved={finishPuzzle}
           />
         </>
       ) : (
@@ -112,39 +206,38 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
                 ? 'Your first mark on the trail.'
                 : `${Math.max(progress.streak, 1)} mornings in a row.`}
           </p>
-          <div className="daily-flourish">
-            <StarRow count={earned || progress.stars[daily.challenge.id] || 1} />
-            <p>
-              {earned === 3
-                ? 'A clean walk — no misses, no peek.'
-                : 'A mark is a mark. You can snap this one again today for a cleaner star.'}
-            </p>
-          </div>
 
-          {todayBrief && !todayHeld ? (
+          {brief && !held ? (
             <RecallGate
-              brief={todayBrief}
-              kicker="This morning’s line"
-              onHeld={() => {
-                recordHeld(todayBrief.id)
-                setTodayHeld(true)
-              }}
+              brief={brief}
+              pillar={pillar}
+              mode={isReview ? 'review' : 'encode'}
+              kicker={
+                isReview ? 'Time to dust off this one' : 'This morning’s line'
+              }
+              onHeld={settleRecall}
             />
           ) : null}
 
-          {todayHeld && spaced && !spacedHeld ? (
-            <RecallGate
-              brief={spaced}
-              kicker="An older page stirs"
-              onHeld={() => {
-                recordHeld(spaced.id)
-                setSpacedHeld(true)
-              }}
-            />
+          {brief && held && !said ? (
+            <SayBack brief={brief} onDone={settleSay} />
           ) : null}
 
           {showTeaser ? (
             <>
+              <div className="daily-flourish">
+                <StarRow
+                  count={earned || 1}
+                  label={starLegend(earned || 1)}
+                />
+                <p>
+                  {earned >= 3
+                    ? 'Held after a rest, and said back.'
+                    : earned === 2
+                      ? 'Held after a rest. The trail will ask again later.'
+                      : 'First walk locked. It will return in a morning or two.'}
+                </p>
+              </div>
               {flourish ? (
                 <article className="unlock-card pop-in">
                   <p className="eyebrow">Journal flourish</p>
@@ -164,33 +257,21 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
                 <p className="quiet">{streakCopy(progress, today)}</p>
               )}
 
-              <article className="teaser-card" aria-label="Tomorrow’s trail, still closed">
+              <article
+                className="teaser-card"
+                aria-label="Tomorrow’s trail, still closed"
+              >
                 <p className="eyebrow">Tomorrow’s trail</p>
                 <h2>A locked card waits</h2>
                 <p className="district-flavor">{tomorrow.districtFlavor}</p>
                 <p>{tomorrow.teaser}</p>
                 <p className="quiet">
-                  The puzzle stays covered until the next local morning. The
-                  trail will be here — no hurry, no guilt. An older line may ask
-                  to be rebuilt.
+                  When a page is due, Juniper will dust it off — mixed among
+                  the districts, never as punishment.
                 </p>
               </article>
 
               <ShareInvite compact />
-
-              <button
-                type="button"
-                className="btn ghost"
-                onClick={() => {
-                  setSolved(false)
-                  setMissed(false)
-                  setPeeked(false)
-                  setNewCards([])
-                  setTodayHeld(Boolean(todayBrief && progress.held.includes(todayBrief.id)))
-                }}
-              >
-                Walk today’s puzzle again
-              </button>
               <button
                 type="button"
                 className="btn primary xl"

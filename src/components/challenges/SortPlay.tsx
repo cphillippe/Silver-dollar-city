@@ -21,6 +21,7 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
   const [picked, setPicked] = useState<string | null>(null)
   const [status, setStatus] = useState<'idle' | 'wrong' | 'ok'>('idle')
   const [shake, setShake] = useState(false)
+  const [misses, setMisses] = useState(0)
 
   function takeTile(id: string): SortTile | undefined {
     return (
@@ -70,6 +71,7 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
     }
     setStatus('wrong')
     setShake(true)
+    setMisses((count) => count + 1)
     onMiss()
     window.setTimeout(() => {
       setShake(false)
@@ -148,8 +150,14 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
 
       <ResultPanel
         tone={status === 'idle' ? 'idle' : status === 'ok' ? 'ok' : 'teach'}
-        title={status === 'ok' ? 'Clean sort!' : 'Those bins still mix.'}
-        body={status === 'wrong' ? challenge.teachOnWrong : undefined}
+        title={
+          status === 'ok'
+            ? 'Clean sort!'
+            : misses >= 2
+              ? 'Those bins still mix.'
+              : 'Shake and try the bins again.'
+        }
+        body={status === 'wrong' && misses >= 2 ? challenge.teachOnWrong : undefined}
         deeper={challenge.deeper}
       />
     </div>

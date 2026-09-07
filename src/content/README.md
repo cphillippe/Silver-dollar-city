@@ -19,4 +19,6 @@ Keep citations real. Prefer honest framing of what an argument claims versus wha
 
 Every challenge (and Daily Trail puzzle) also needs a one-line **claim + reason + source** in `src/content/evidence.ts`. After a solve the teaching folds and the player rebuilds that line. If the line is not crisp, the Recall Loop will feel like homework — keep it short enough to snap.
 
+Spacing lives in `src/lib/memory.ts` (`SPACE_DAYS = 1, 3, 7, 21`). Do not add a separate flashcard UI. Daily Trail should prefer a due `nextReviewAt` over brand-new copy, mixed across districts.
+
 Story and faces live in `src/content/story.ts` and `src/components/Avatar.tsx`. Keep dialogue light. Do not sermonize. New guides need a matching portrait in the same line weight and circular frame.

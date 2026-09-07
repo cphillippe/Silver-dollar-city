@@ -1,12 +1,14 @@
 import { useMemo, useState } from 'react'
 import { shuffle } from '../lib/shuffle'
 import type { EvidenceBrief } from '../content/evidence'
+import { Landmark } from './Landmark'
 
 interface RecallGateProps {
   brief: EvidenceBrief
   kicker?: string
-  onHeld: () => void
-  onPassed?: () => void
+  pillar?: string
+  mode?: 'encode' | 'review'
+  onHeld: (result: { clean: boolean }) => void
 }
 
 type Phase = 'invite' | 'claim' | 'reason' | 'teach' | 'held'
@@ -18,8 +20,9 @@ type Phase = 'invite' | 'claim' | 'reason' | 'teach' | 'held'
 export function RecallGate({
   brief,
   kicker = 'Lock it in',
+  pillar,
+  mode = 'encode',
   onHeld,
-  onPassed,
 }: RecallGateProps) {
   const claimOptions = useMemo(
     () => shuffle([...brief.claimChoices]),
@@ -29,7 +32,7 @@ export function RecallGate({
     () => shuffle([...brief.reasonChoices]),
     [brief.id, brief.reasonChoices],
   )
-  const [phase, setPhase] = useState<Phase>('invite')
+  const [phase, setPhase] = useState<Phase>(mode === 'review' ? 'claim' : 'invite')
   const [misses, setMisses] = useState(0)
   const [flash, setFlash] = useState<string | null>(null)
   const [shake, setShake] = useState(false)
@@ -37,7 +40,7 @@ export function RecallGate({
   function pick(line: string, correct: string, next: Phase) {
     if (line === correct) {
       setPhase(next)
-      if (next === 'held') onHeld()
+      if (next === 'held') onHeld({ clean: misses === 0 })
       return
     }
     const nextMisses = misses + 1
@@ -53,13 +56,14 @@ export function RecallGate({
 
   function finishFromTeach() {
     setPhase('held')
-    onHeld()
-    onPassed?.()
+    onHeld({ clean: false })
   }
 
   return (
     <section className={`recall-gate ${shake ? 'is-shake' : ''} phase-${phase}`}>
       <p className="eyebrow">{kicker}</p>
+
+      {pillar ? <Landmark pillar={pillar} compact /> : null}
 
       {phase === 'invite' ? (
         <>
@@ -80,8 +84,16 @@ export function RecallGate({
 
       {phase === 'claim' ? (
         <>
-          <h2>Which claim did this walk lock in?</h2>
-          <p className="quiet">From memory. The long page is face-down.</p>
+          <h2>
+            {mode === 'review'
+              ? 'Time to dust off this one.'
+              : 'Which claim did this walk lock in?'}
+          </h2>
+          <p className="quiet">
+            {mode === 'review'
+              ? 'Forgetting is why the trail brings it back. From memory — the long page is face-down.'
+              : 'From memory. The long page is face-down.'}
+          </p>
           <div className="recall-choices">
             {claimOptions.map((line) => (
               <button

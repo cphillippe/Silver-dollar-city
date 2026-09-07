@@ -17,6 +17,7 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
   const [chain, setChain] = useState<typeof challenge.items>([])
   const [status, setStatus] = useState<'idle' | 'wrong' | 'ok'>('idle')
   const [shake, setShake] = useState(false)
+  const [misses, setMisses] = useState(0)
 
   function add(id: string) {
     if (status === 'ok') return
@@ -52,6 +53,7 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
     }
     setStatus('wrong')
     setShake(true)
+    setMisses((count) => count + 1)
     onMiss()
     window.setTimeout(() => {
       setShake(false)
@@ -94,8 +96,14 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
 
       <ResultPanel
         tone={status === 'idle' ? 'idle' : status === 'ok' ? 'ok' : 'teach'}
-        title={status === 'ok' ? 'The path locks in.' : 'Not that order — tiles bounce back.'}
-        body={status === 'wrong' ? challenge.teachOnWrong : undefined}
+        title={
+          status === 'ok'
+            ? 'The path locks in.'
+            : misses >= 2
+              ? 'Not that order — tiles bounce back.'
+              : 'Shake and try the chain again.'
+        }
+        body={status === 'wrong' && misses >= 2 ? challenge.teachOnWrong : undefined}
         deeper={challenge.deeper}
       />
     </div>

@@ -3,11 +3,15 @@ import { areas, getArea, getChallenge, journalForChallenge } from '../content'
 import { evidenceFor } from '../content/evidence'
 import { guideForArea } from '../content/story'
 import { kindLabel } from './icons'
+import { localDateKey } from '../lib/dates'
+import { isDue } from '../lib/memory'
+import { starLegend, type StarCount } from '../lib/stars'
 import { PuzzlePlay } from './PuzzlePlay'
+import { Landmark } from './Landmark'
 import { RecallGate } from './RecallGate'
+import { SayBack } from './SayBack'
 import { Say } from './Avatar'
 import { StarRow } from './StarRow'
-import { starsFromAttempt } from '../lib/stars'
 import {
   getNextGoal,
   isAreaComplete,
@@ -27,21 +31,28 @@ export function ChallengeScreen({
   challengeId,
   onNavigate,
 }: ChallengeScreenProps) {
-  const { completeChallenge, recordStars, recordHeld, markMiss, progress } =
-    useProgress()
+  const { completeChallenge, recordReview, markMiss, progress } = useProgress()
   const area = getArea(areaId)
   const challenge = getChallenge(areaId, challengeId)
   const brief = evidenceFor(challengeId)
   const guide = guideForArea(areaId)
+  const today = localDateKey()
   const replay = Boolean(challenge && progress.completed.includes(challenge.id))
+  const [reviewing] = useState(
+    Boolean(
+      brief &&
+        progress.memory[brief.id] &&
+        isDue(progress.memory[brief.id], today),
+    ),
+  )
   const [unlockedCards, setUnlockedCards] = useState<string[]>([])
   const [showNext, setShowNext] = useState(false)
   const [attemptMissed, setAttemptMissed] = useState(false)
   const [attemptPeeked, setAttemptPeeked] = useState(false)
-  const [earned, setEarned] = useState(progress.stars[challengeId] ?? 0)
-  const [lockedIn, setLockedIn] = useState(
-    () => Boolean(brief && progress.held.includes(brief.id)),
-  )
+  const [recallClean, setRecallClean] = useState(true)
+  const [earned, setEarned] = useState<StarCount | 0>(progress.stars[challengeId] ?? 0)
+  const [recalled, setRecalled] = useState(false)
+  const [said, setSaid] = useState(false)
 
   if (!area || !challenge) {
     return (
@@ -72,13 +83,54 @@ export function ChallengeScreen({
     )
   }
 
+  function commitMemory(elaborated: boolean, text?: string, clean = recallClean) {
+    if (!brief) {
+      setSaid(true)
+      return
+    }
+    const stars = recordReview({
+      id: brief.id,
+      pillar: areaId,
+      kind: reviewing ? 'recall' : 'encode',
+      today,
+      clean: clean && !attemptMissed && !attemptPeeked,
+      peeked: attemptPeeked,
+      elaborated,
+      text,
+    })
+    setEarned(stars)
+    setSaid(true)
+  }
+
   function solved() {
-    const stars = starsFromAttempt(attemptMissed, attemptPeeked)
-    const best = recordStars(challengeId, stars)
     const cards = completeChallenge(areaId, challengeId)
-    setEarned(best)
     setUnlockedCards(cards)
     setShowNext(true)
+    if (!brief) {
+      setRecalled(true)
+      setSaid(true)
+      return
+    }
+    if (!reviewing) {
+      const stars = recordReview({
+        id: brief.id,
+        pillar: areaId,
+        kind: 'encode',
+        today,
+        clean: !attemptMissed && !attemptPeeked,
+        peeked: attemptPeeked,
+        elaborated: false,
+      })
+      setEarned(stars)
+    }
+  }
+
+  function settleRecall(result: { clean: boolean }) {
+    setRecallClean(result.clean)
+    setRecalled(true)
+    if (brief && progress.memory[brief.id]?.elaborated) {
+      commitMemory(true, undefined, result.clean)
+    }
   }
 
   function goNext() {
@@ -121,7 +173,7 @@ export function ChallengeScreen({
 
   const card = journalForChallenge(challengeId)
   const bestBefore = progress.stars[challengeId] ?? 0
-  const canProceed = !brief || lockedIn
+  const canProceed = showNext && (!brief || (recalled && said))
 
   return (
     <main className="challenge-page">
@@ -135,15 +187,22 @@ export function ChallengeScreen({
       <p className="eyebrow">
         {area.title} · {kindLabel(challenge.kind)}
         {replay ? ' · replay' : ''}
+        {reviewing ? ' · time to dust off' : ''}
       </p>
       <h1>{challenge.title}</h1>
       <Say
         who={guide.id}
-        line="Snap it like a game. Then fold my page and keep the line — that’s the whole walk."
+        line={
+          reviewing
+            ? 'This line has rested. Snap it again — forgetting is why it came back.'
+            : 'Snap it like a game. Then fold my page and keep the line — that’s the whole walk.'
+        }
       />
+      <Landmark pillar={areaId} compact />
       {bestBefore ? (
         <p className="best-clear">
-          Best clear <StarRow count={bestBefore} compact />
+          Mastery <StarRow count={bestBefore} compact label={starLegend(bestBefore)} />
+          <span className="quiet">{starLegend(bestBefore)}</span>
         </p>
       ) : null}
 
@@ -166,24 +225,33 @@ export function ChallengeScreen({
             <span />
           </div>
           <div className="daily-flourish">
-            <StarRow count={earned || 1} />
+            <StarRow
+              count={earned || 1}
+              label={starLegend(earned || 1)}
+            />
             <p className="streak-pill">
-              {earned === 3
-                ? 'Clean solve — no mistakes, no peek.'
-                : replay
-                  ? 'Replay counted. Best stars are kept.'
-                  : 'Nice snap. Now fold the page and rebuild the line.'}
+              {earned >= 3
+                ? 'Held after a rest, and said back.'
+                : earned === 2
+                  ? 'Held after a rest.'
+                  : reviewing
+                    ? 'Time to dust off this one — then it can rest again.'
+                    : 'First walk. The trail will bring this line back later.'}
             </p>
           </div>
 
-          {brief && !lockedIn ? (
+          {brief && !recalled ? (
             <RecallGate
               brief={brief}
-              onHeld={() => {
-                recordHeld(brief.id)
-                setLockedIn(true)
-              }}
+              pillar={areaId}
+              mode={reviewing ? 'review' : 'encode'}
+              kicker={reviewing ? 'Time to dust off this one' : 'Lock it in'}
+              onHeld={settleRecall}
             />
+          ) : null}
+
+          {brief && recalled && !said ? (
+            <SayBack brief={brief} onDone={(result) => commitMemory(result.elaborated, result.text)} />
           ) : null}
 
           {canProceed && unlockedCards.length > 0 && card ? (

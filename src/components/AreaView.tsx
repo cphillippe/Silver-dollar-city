@@ -3,6 +3,7 @@ import { getArea } from '../content'
 import { AREA_LINES, guideForArea } from '../content/story'
 import { Avatar, Say } from './Avatar'
 import { kindLabel } from './icons'
+import { starLegend } from '../lib/stars'
 import { StarRow } from './StarRow'
 import {
   areaMastery,
@@ -63,7 +64,8 @@ export function AreaView({ areaId, onNavigate }: AreaViewProps) {
           {done} of {total} challenges · {complete ? 'District complete — still playable' : 'In progress'}
         </p>
         <p className="progress-line quiet">
-          Mastery {mastery.earned}/{mastery.possible} · replay to lift your stars
+          Mastery {mastery.earned}/{mastery.possible} · stars grow when a morning
+          brings the line back
         </p>
       </header>
 
@@ -108,14 +110,16 @@ export function AreaView({ areaId, onNavigate }: AreaViewProps) {
                     <strong>{challenge.title}</strong>
                     <em>{kindLabel(challenge.kind)}</em>
                     {progress.stars[challenge.id] ? (
-                      <StarRow count={progress.stars[challenge.id]} compact />
+                      <StarRow
+                        count={progress.stars[challenge.id]}
+                        compact
+                        label={starLegend(progress.stars[challenge.id])}
+                      />
                     ) : null}
                   </span>
                   <span className="row-status">
                     {doneHere
-                      ? progress.stars[challenge.id] === 3
-                        ? 'Clean'
-                        : 'Replay'
+                      ? starLegend(progress.stars[challenge.id] ?? 0)
                       : playable
                         ? 'Play'
                         : 'Soon'}

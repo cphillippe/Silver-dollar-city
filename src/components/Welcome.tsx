@@ -4,7 +4,7 @@ import { STORY } from '../content/story'
 import { localDateKey } from '../lib/dates'
 import { Avatar, Say } from './Avatar'
 import { ShareInvite } from './ShareInvite'
-import { useProgress } from '../store/progress'
+import { dailyDoneToday, morningReview, useProgress } from '../store/progress'
 import type { View } from '../types'
 
 interface WelcomeProps {
@@ -14,7 +14,11 @@ interface WelcomeProps {
 export function Welcome({ onNavigate }: WelcomeProps) {
   const { progress, start } = useProgress()
   const resumed = progress.started && progress.completed.length > 0
-  const today = dailyForDate(localDateKey())
+  const todayKey = localDateKey()
+  const today = dailyForDate(todayKey)
+  const due = dailyDoneToday(progress, todayKey)
+    ? undefined
+    : morningReview(progress, todayKey)
 
   function walkDaily() {
     start()
@@ -64,9 +68,13 @@ export function Welcome({ onNavigate }: WelcomeProps) {
       </ul>
       <div className="welcome-actions">
         <button type="button" className="btn primary xl" onClick={walkDaily}>
-          Walk today’s trail with Juniper
+          {due ? 'Dust off a page with Juniper' : 'Walk today’s trail with Juniper'}
         </button>
-        <p className="welcome-daily-line">{today.districtFlavor}</p>
+        <p className="welcome-daily-line">
+          {due
+            ? 'Time to dust off a line you already walked — forgetting is why it returns.'
+            : today.districtFlavor}
+        </p>
         <button type="button" className="btn ghost" onClick={beginDistricts}>
           {resumed ? 'Continue the districts' : 'Meet Mercy in Parable Hollow'}
         </button>
