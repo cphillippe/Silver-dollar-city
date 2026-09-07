@@ -4,6 +4,19 @@ A progressive web app — playable in the browser — that walks the case for Go
 
 The product goal is **keeping the evidence**: claims, reasons, and sources you can still say after the page folds. Puzzles, streaks, polish, and a small Christian cast are the delivery system — the game has to be fun enough to play, or nothing is retained.
 
+## Play now (no install)
+
+**Friend link (GitHub Pages, once enabled):**  
+https://cphillippe.github.io/Silver-dollar-city/
+
+The built site lives in [`docs/`](docs/) on this branch. One-click enable (repo owner):
+
+1. GitHub → **Settings** → **Pages**
+2. Build and deployment → **Deploy from a branch**
+3. Branch: `cursor/silver-city-unending-evidence-8233` · folder: `/docs` → Save  
+   (or Source: **GitHub Actions** — this repo already has `.github/workflows/pages.yml`)
+4. Open the Pages URL above on a phone or laptop. No APK sideload.
+
 ## The story
 
 **River** arrives in Silver City with a folded letter: the evidence is a trail, not a shout. **Juniper** lights the east porch each morning (Today’s Trail). Five Christians already live on the longer trail and walk with you — they will not lock you in a pew:
@@ -100,7 +113,7 @@ Progress shape (same key `silver-city-progress-v1`): `memory[id].nextReviewAt`, 
 
 ## Friend preview (no install)
 
-Open the web app (dev or preview URL) and tap **Share a morning**. The pitch is not a high score. It asks a friend to try the walk, fold the page, and see what they can still say.
+Open https://cphillippe.github.io/Silver-dollar-city/ (after Pages is enabled, steps at the top of this README). On the web app, tap **Share a morning**. The pitch is not a high score. It asks a friend to try the walk, fold the page, and see what they can still say.
 
 ```bash
 npm run dev          # local
