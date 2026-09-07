@@ -123,11 +123,11 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
       const item = queue[index]
       setBeat(item)
       if (!reduced) setCam(camAround(item.id))
-      later(reduced ? 80 : 280, () => {
+      later(reduced ? 80 : 160, () => {
         setShown((current) => ({ ...current, [item.id]: item.to }))
         setRising(item.id)
       })
-      later(reduced ? 700 : 1500, () => {
+      later(reduced ? 900 : 2400, () => {
         setRising(null)
         step(index + 1)
       })

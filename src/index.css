@@ -1984,31 +1984,31 @@ p {
 .city-beat {
   position: absolute;
   left: 50%;
-  top: 28%;
+  top: 34%;
   z-index: 3;
   transform: translate(-50%, -40%);
   display: grid;
   justify-items: center;
   gap: 2px;
-  padding: 10px 22px 12px;
+  padding: 14px 28px 16px;
   border-radius: 999px;
-  background: linear-gradient(180deg, #f0d27a, #c9a14a);
+  background: linear-gradient(180deg, #ffe08a, #d4a84a);
   color: #1a1408;
-  box-shadow: 0 10px 40px rgba(224, 179, 74, 0.45);
+  box-shadow: 0 12px 48px rgba(224, 179, 74, 0.55);
   animation: city-beat-pop 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) both;
   pointer-events: none;
 }
 
 .city-beat strong {
   font-family: var(--sans);
-  font-size: 0.78rem;
-  letter-spacing: 0.18em;
+  font-size: 0.92rem;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
 }
 
 .city-beat span {
   font-family: var(--serif);
-  font-size: 1.35rem;
+  font-size: 1.7rem;
   font-weight: 700;
   line-height: 1.1;
 }
@@ -2284,6 +2284,19 @@ p {
 
 .today-trail.is-slim h2 {
   font-size: 1.2rem;
+}
+
+.town-head {
+  margin-bottom: 10px;
+}
+
+.town-head h1 {
+  font-size: 1.8rem;
+}
+
+.town-head p {
+  margin: 0;
+  opacity: 0.78;
 }
 
 .city-streets {
