@@ -1438,9 +1438,12 @@ p {
   gap: 0;
 }
 
-.is-puzzle .play.is-sequence.is-deal {
+.is-puzzle .play.is-sequence.is-deal,
+.daily-page.is-puzzle .play.is-sequence.is-deal,
+.challenge-page.is-puzzle .play.is-sequence.is-deal {
   display: flex;
   flex-direction: column;
+  flex: 0 0 auto;
   min-height: 0;
   overflow: hidden;
   gap: 10px;
@@ -1470,7 +1473,8 @@ p {
   padding: 14px 16px;
 }
 
-.is-puzzle .play.is-sequence.is-deal .chain {
+.is-puzzle .play.is-sequence.is-deal .chain,
+.is-puzzle .play.is-sequence.is-deal .hint-peek {
   display: none;
 }
 
