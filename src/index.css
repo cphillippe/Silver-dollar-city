@@ -2749,15 +2749,50 @@ p {
 }
 
 .city-portrait {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   display: block;
   filter: drop-shadow(0 2px 6px rgba(8, 12, 20, 0.55));
 }
 
 .city-portrait .avatar {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
+}
+
+.city-home-pad {
+  fill: #3a2a1c;
+  stroke: rgba(224, 179, 74, 0.55);
+  stroke-width: 1.2;
+}
+
+.city-folk.is-lit .city-home-pad {
+  fill: #5a4030;
+  stroke: #e0b34a;
+}
+
+.city-porch {
+  fill: #4a3424;
+  stroke: #c4922a;
+  stroke-width: 1.2;
+}
+
+.city-plot.is-lit .city-porch {
+  fill: #6a4a30;
+  stroke: #e0b34a;
+}
+
+.city-porch-rail {
+  fill: none;
+  stroke: rgba(224, 179, 74, 0.75);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.city-roof-tile {
+  fill: #e8c56a;
+  stroke: #fff3b0;
+  stroke-width: 1.8;
 }
 
 .city-plot.is-lit .city-window {
@@ -2824,10 +2859,19 @@ p {
   stroke: inherit;
 }
 
-.city-plot.is-built .city-roof,
+.city-plot.is-built .city-roof {
+  fill: #8b5340;
+  stroke: #c4922a;
+}
+
 .city-plot.is-lit .city-roof {
   fill: #d4a84a;
   stroke: #f0d27a;
+}
+
+.city-plot.is-lit .city-roof-tile {
+  fill: #f0d27a;
+  stroke: #fff3b0;
 }
 
 .city-plot.is-lit .city-lamp,
@@ -3184,16 +3228,33 @@ p {
 
 .city-street,
 .city-creek {
-  stroke: rgba(244, 234, 210, 0.12);
-  stroke-width: 5;
+  stroke: rgba(244, 234, 210, 0.08);
+  stroke-width: 4;
   stroke-linecap: round;
 }
 
 .city-street.is-built,
+.city-creek.is-built {
+  stroke: #6a5338;
+  stroke-width: 7;
+}
+
 .city-street.is-lit,
-.city-creek.is-built,
 .city-creek.is-lit {
-  stroke: rgba(224, 179, 74, 0.38);
+  stroke: #e0b34a;
+  stroke-width: 9;
+  filter: url(#city-glow);
+}
+
+.city-street-lamps .city-lamp {
+  fill: #ffe08a;
+  stroke: none;
+  filter: url(#city-glow);
+}
+
+.city-street-lamps.is-scaffold .city-lamp {
+  fill: rgba(224, 179, 74, 0.35);
+  filter: none;
 }
 
 .city-sky-stars {
@@ -3249,6 +3310,14 @@ p {
 .city-legend h2 {
   font-size: 1.45rem;
   margin-bottom: 0.15em;
+}
+
+.city-gift {
+  margin: 0 0 10px;
+  font-family: var(--serif);
+  font-size: 1.02rem;
+  line-height: 1.3;
+  color: var(--gold);
 }
 
 .today-trail.is-slim {
@@ -3433,6 +3502,11 @@ p {
 
 .hub.is-town .city-legend h2 {
   font-size: 1.2rem;
+}
+
+.hub.is-town .city-gift {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
 }
 
 .hub.is-town .street-drawer,
