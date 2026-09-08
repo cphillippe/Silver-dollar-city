@@ -294,6 +294,8 @@ assert.match(dailyTrailSrc, /puzzle-title/)
 assert.doesNotMatch(dailyTrailSrc, /AdSlot/)
 assert.doesNotMatch(dailyTrailSrc, /district-flavor/)
 assert.doesNotMatch(dailyTrailSrc, /Tomorrow:/)
+assert.match(dailyTrailSrc, /TeachUnlock/)
+assert.match(dailyTrailSrc, /is-teach/)
 
 const puzzleLeadSrc = readFileSync(
   new URL('../src/components/challenges/PuzzleLead.tsx', import.meta.url),
@@ -355,6 +357,19 @@ assert.match(challengeSrc, /afterJuice/)
 assert.match(challengeSrc, /savedWin/)
 assert.match(challengeSrc, /puzzle-title/)
 assert.match(challengeSrc, /tile\.bin === 'keep'/)
+assert.match(challengeSrc, /TeachUnlock/)
+assert.match(challengeSrc, /areaId === 'observatory'/)
+assert.match(challengeSrc, /is-teach/)
+
+const teachSrc = readFileSync(
+  new URL('../src/components/TeachUnlock.tsx', import.meta.url),
+  'utf8',
+)
+assert.match(teachSrc, /brief\.claim/)
+assert.match(teachSrc, /brief\.reason/)
+assert.match(teachSrc, /brief\.source/)
+assert.match(teachSrc, /Unlock the sort/)
+assert.doesNotMatch(teachSrc, /essay/)
 
 const cityLibSrc = readFileSync(new URL('../src/lib/city.ts', import.meta.url), 'utf8')
 assert.doesNotMatch(cityLibSrc, /Walk again/)
@@ -403,6 +418,8 @@ assert.doesNotMatch(
 )
 assert.match(cssSrc, /recall-gate\.is-encode/)
 assert.match(cssSrc, /recall-gate\.is-own/)
+assert.match(cssSrc, /teach-gate/)
+assert.match(cssSrc, /--slot-seat/)
 assert.doesNotMatch(
   cssSrc,
   /\.play\.is-ready\s+\.bank\s*\{[^}]*display:\s*none/,

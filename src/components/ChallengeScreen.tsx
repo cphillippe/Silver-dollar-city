@@ -7,6 +7,7 @@ import { useJuiceHandoff } from '../lib/juice'
 import { isDue } from '../lib/memory'
 import { PuzzlePlay } from './PuzzlePlay'
 import { RecallGate } from './RecallGate'
+import { TeachUnlock } from './TeachUnlock'
 import { TownReturn } from './TownReturn'
 import {
   isAreaUnlocked,
@@ -42,6 +43,8 @@ export function ChallengeScreen({
   const [attemptMissed, setAttemptMissed] = useState(false)
   const [attemptPeeked, setAttemptPeeked] = useState(false)
   const [recalled, setRecalled] = useState(false)
+  const teachFirst = areaId === 'observatory' && Boolean(brief)
+  const [taught, setTaught] = useState(() => !teachFirst || reviewing)
 
   useEffect(() => {
     if (!showNext) return
@@ -122,7 +125,7 @@ export function ChallengeScreen({
 
   return (
     <main
-      className={`challenge-page ${showNext ? 'is-after' : 'is-puzzle'} ${rehearsing ? 'is-rehearse' : ''}`}
+      className={`challenge-page ${showNext ? 'is-after' : taught ? 'is-puzzle' : 'is-teach'} ${rehearsing ? 'is-rehearse' : ''}`}
       aria-label={STORY.playGoal}
     >
       <button
@@ -134,18 +137,26 @@ export function ChallengeScreen({
       </button>
 
       {!showNext ? (
-        <>
-          <h1 className="puzzle-title">{challenge.title}</h1>
-          <PuzzlePlay
-            challenge={challenge}
-            onMiss={() => {
-              setAttemptMissed(true)
-              markMiss(challenge.id)
-            }}
-            onPeek={() => setAttemptPeeked(true)}
-            onSolved={solved}
+        !taught && brief ? (
+          <TeachUnlock
+            brief={brief}
+            kind={challenge.kind}
+            onUnlock={() => setTaught(true)}
           />
-        </>
+        ) : (
+          <>
+            <h1 className="puzzle-title">{challenge.title}</h1>
+            <PuzzlePlay
+              challenge={challenge}
+              onMiss={() => {
+                setAttemptMissed(true)
+                markMiss(challenge.id)
+              }}
+              onPeek={() => setAttemptPeeked(true)}
+              onSolved={solved}
+            />
+          </>
+        )
       ) : (
         <section className="after-win">
           {brief && !recalled ? (

@@ -7,6 +7,7 @@ import { localDateKey } from '../lib/dates'
 import { useJuiceHandoff } from '../lib/juice'
 import { PuzzlePlay } from './PuzzlePlay'
 import { RecallGate } from './RecallGate'
+import { TeachUnlock } from './TeachUnlock'
 import { TownReturn } from './TownReturn'
 import {
   dailyDoneToday,
@@ -59,6 +60,7 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
       !brief ||
       (Boolean(progress.held.includes(brief.id)) && !isReview),
   )
+  const [taught, setTaught] = useState(() => !brief || isReview)
 
   const showNext = solved && held
 
@@ -105,7 +107,7 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
   const rehearsing = solved && Boolean(brief) && !held
 
   return (
-    <main className={`daily-page ${solved ? 'is-after' : 'is-puzzle'} ${rehearsing ? 'is-rehearse' : ''}`} aria-label={STORY.playGoal}>
+    <main className={`daily-page ${solved ? 'is-after' : taught ? 'is-puzzle' : 'is-teach'} ${rehearsing ? 'is-rehearse' : ''}`} aria-label={STORY.playGoal}>
       <button
         type="button"
         className="text-link"
@@ -115,17 +117,25 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
       </button>
 
       {!solved ? (
-        <>
-          <h1 className="puzzle-title">
-            {isReview ? 'Time to dust off this one' : challenge.title}
-          </h1>
-          <PuzzlePlay
-            challenge={challenge}
-            onMiss={() => setMissed(true)}
-            onPeek={() => setPeeked(true)}
-            onSolved={finishPuzzle}
+        !taught && brief ? (
+          <TeachUnlock
+            brief={brief}
+            kind={challenge.kind}
+            onUnlock={() => setTaught(true)}
           />
-        </>
+        ) : (
+          <>
+            <h1 className="puzzle-title">
+              {isReview ? 'Time to dust off this one' : challenge.title}
+            </h1>
+            <PuzzlePlay
+              challenge={challenge}
+              onMiss={() => setMissed(true)}
+              onPeek={() => setPeeked(true)}
+              onSolved={finishPuzzle}
+            />
+          </>
+        )
       ) : (
         <section className="after-win daily-done">
           {brief && !held ? (

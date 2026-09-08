@@ -1425,6 +1425,23 @@ p {
   gap: 0;
 }
 
+.is-puzzle .play.is-build .slot-list {
+  gap: 6px;
+}
+
+.is-puzzle .play.is-build .slot {
+  --slot-seat: 64px;
+}
+
+.is-puzzle .play.is-build .slot-target,
+.is-puzzle .play.is-build .chip.in-slot {
+  height: var(--slot-seat);
+  min-height: var(--slot-seat);
+  max-height: var(--slot-seat);
+  overflow: auto;
+  overflow-wrap: anywhere;
+}
+
 .is-puzzle .sort-bins {
   height: 102px;
   max-height: 102px;
@@ -1915,6 +1932,21 @@ p {
   padding: 16px 18px;
   font-size: 1.05rem;
   line-height: 1.35;
+}
+
+.teach-gate {
+  padding: 22px 16px 26px;
+}
+
+.teach-gate .teach-reason {
+  margin: 0 0 20px;
+  font-size: 1.02rem;
+  line-height: 1.4;
+  opacity: 0.92;
+}
+
+.teach-gate .btn {
+  width: 100%;
 }
 
 .today-trail.is-live {
