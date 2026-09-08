@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react'
 import { shuffle } from '../lib/shuffle'
-import type { EvidenceBrief } from '../content/evidence'
+import { takeawayLines, type EvidenceBrief } from '../content/evidence'
 import { STORY } from '../content/story'
 
 interface RecallGateProps {
   brief: EvidenceBrief
+  keeps?: { text: string; why?: string }[]
   kicker?: string
   pillar?: string
   mode?: 'encode' | 'review'
@@ -14,28 +15,35 @@ interface RecallGateProps {
 type Phase = 'claim' | 'reason' | 'teach'
 
 /**
- * Encode (right after lock-in): claim + reason only — same idea, no inversions.
+ * Encode (right after lock-in): player taps the Keep they will hold, then
+ * Why-it-stands for THAT line — no inversions, no silent auto-pick.
  * Review (dust-off): choose among decoys that are not word-flips of the keep.
  */
 export function RecallGate({
   brief,
+  keeps,
   kicker = STORY.tapTakeaway,
   mode = 'encode',
   onHeld,
 }: RecallGateProps) {
   const encode = mode === 'encode'
+  const lines = useMemo(() => takeawayLines(brief, keeps), [brief, keeps])
+  const own = encode && lines.length > 1
+  const [chosen, setChosen] = useState<(typeof lines)[0] | null>(own ? null : lines[0] ?? null)
   const claimOptions = useMemo(
-    () => (encode ? [brief.claim] : shuffle([...brief.claimChoices])),
-    [brief.id, brief.claim, brief.claimChoices, encode],
+    () => (encode ? (own ? lines.map((item) => item.claim) : [brief.claim]) : shuffle([...brief.claimChoices])),
+    [brief.id, brief.claim, brief.claimChoices, encode, own, lines],
   )
   const reasonOptions = useMemo(
-    () => (encode ? [brief.reason] : shuffle([...brief.reasonChoices])),
-    [brief.id, brief.reason, brief.reasonChoices, encode],
+    () => (encode ? [chosen?.reason ?? brief.reason] : shuffle([...brief.reasonChoices])),
+    [brief.id, brief.reason, brief.reasonChoices, encode, chosen],
   )
   const [phase, setPhase] = useState<Phase>('claim')
   const [misses, setMisses] = useState(0)
   const [flash, setFlash] = useState<string | null>(null)
   const [shake, setShake] = useState(false)
+  const heldClaim = chosen?.claim ?? brief.claim
+  const heldReason = chosen?.reason ?? brief.reason
 
   function pick(line: string, correct: string, next: Phase | 'done') {
     if (line === correct) {
@@ -57,13 +65,25 @@ export function RecallGate({
     }, 320)
   }
 
+  function pickClaim(line: string) {
+    if (encode && own) {
+      const hit = lines.find((item) => item.claim === line)
+      if (hit) {
+        setChosen(hit)
+        setPhase('reason')
+        return
+      }
+    }
+    pick(line, brief.claim, 'reason')
+  }
+
   function finishFromTeach() {
     onHeld({ clean: false })
   }
 
   return (
     <section
-      className={`recall-gate ${shake ? 'is-shake' : ''} phase-${phase} ${encode ? 'is-encode' : 'is-review'}`}
+      className={`recall-gate ${shake ? 'is-shake' : ''} phase-${phase} ${encode ? 'is-encode' : 'is-review'} ${own ? 'is-own' : ''}`}
       aria-label={STORY.takeaway}
     >
       <p className="eyebrow">
@@ -78,7 +98,7 @@ export function RecallGate({
               key={line}
               type="button"
               className={`match-card recall-card ${flash === line ? 'is-flash' : ''}`}
-              onClick={() => pick(line, brief.claim, 'reason')}
+              onClick={() => pickClaim(line)}
             >
               {line}
             </button>
@@ -88,7 +108,7 @@ export function RecallGate({
 
       {phase === 'reason' ? (
         <>
-          <p className="recall-line rehearse-stem">{brief.claim}</p>
+          <p className="recall-line rehearse-stem">{heldClaim}</p>
           <h2>{STORY.whyItStands}</h2>
           <div className="recall-choices">
             {reasonOptions.map((line) => (
@@ -96,7 +116,7 @@ export function RecallGate({
                 key={line}
                 type="button"
                 className={`match-card recall-card ${flash === line ? 'is-flash' : ''}`}
-                onClick={() => pick(line, brief.reason, 'done')}
+                onClick={() => pick(line, heldReason, 'done')}
               >
                 {line}
               </button>
@@ -109,8 +129,8 @@ export function RecallGate({
         <>
           <h2>Here’s the line.</h2>
           <article className="unlock-card pop-in">
-            <p className="recall-line">{brief.claim}</p>
-            <p>{brief.reason}</p>
+            <p className="recall-line">{heldClaim}</p>
+            <p>{heldReason}</p>
           </article>
           <button type="button" className="btn primary xl" onClick={finishFromTeach}>
             Got it

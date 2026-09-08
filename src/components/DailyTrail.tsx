@@ -132,6 +132,11 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
             <div className="rehearse-anchor">
               <RecallGate
                 brief={brief}
+                keeps={
+                  challenge.kind === 'sort'
+                    ? challenge.tiles.filter((tile) => tile.bin === 'keep')
+                    : undefined
+                }
                 mode={isReview ? 'review' : 'encode'}
                 kicker={STORY.tapTakeaway}
                 onHeld={settleRecall}

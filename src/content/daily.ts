@@ -49,10 +49,25 @@ export const DAILY_POOL: DailyPuzzle[] = [
       keepLabel: 'Fits the parable',
       discardLabel: 'Set aside',
       tiles: [
-        { id: 'a', text: 'Some seed is eaten before it roots.', bin: 'keep' },
-        { id: 'b', text: 'Good soil hears and holds the word.', bin: 'keep' },
+        {
+          id: 'a',
+          text: 'Some seed is eaten before it roots.',
+          bin: 'keep',
+          why: 'The parable names loss — not every field is the same.',
+        },
+        {
+          id: 'b',
+          text: 'Good soil hears and holds the word.',
+          bin: 'keep',
+          why: 'Hearing that holds is the invitation — not a guaranteed harvest.',
+        },
         { id: 'c', text: 'Every field is guaranteed a harvest.', bin: 'discard' },
-        { id: 'd', text: 'Shallow ground withers under heat.', bin: 'keep' },
+        {
+          id: 'd',
+          text: 'Shallow ground withers under heat.',
+          bin: 'keep',
+          why: 'Jesus names withering in the same breath as hearing.',
+        },
       ],
       teachOnWrong:
         'Jesus names loss and hearing in the same breath. The invitation is still to hear — not a promise that every soil is the same.',
@@ -116,10 +131,25 @@ export const DAILY_POOL: DailyPuzzle[] = [
       keepLabel: 'Keep',
       discardLabel: 'Set aside',
       tiles: [
-        { id: 'a', text: 'The sky is worth looking at slowly.', bin: 'keep' },
-        { id: 'b', text: 'Beauty can raise a question of gift.', bin: 'keep' },
+        {
+          id: 'a',
+          text: 'The sky is worth looking at slowly.',
+          bin: 'keep',
+          why: 'Psalm 19 treats the sky as speech — not a lab report, and not a shrug.',
+        },
+        {
+          id: 'b',
+          text: 'Beauty can raise a question of gift.',
+          bin: 'keep',
+          why: 'A gift-shaped beauty is a fair question — not a proof, and not a shrug.',
+        },
         { id: 'c', text: 'A psalm replaces a telescope.', bin: 'discard' },
-        { id: 'd', text: 'Wonder and measurement can share a roof.', bin: 'keep' },
+        {
+          id: 'd',
+          text: 'Wonder and measurement can share a roof.',
+          bin: 'keep',
+          why: 'Psalm 19 treats the sky as speech — not a lab report, and not a shrug.',
+        },
       ],
       teachOnWrong:
         'Psalm 19 treats the sky as speech — not a lab report, and not a shrug. Keep the wonder; toss the false choice.',
@@ -184,10 +214,25 @@ export const DAILY_POOL: DailyPuzzle[] = [
       keepLabel: 'In the poem',
       discardLabel: 'Not the claim',
       tiles: [
-        { id: 'a', text: 'The servant suffers for others.', bin: 'keep' },
-        { id: 'b', text: 'The servant is silent like a lamb.', bin: 'keep' },
+        {
+          id: 'a',
+          text: 'The servant suffers for others.',
+          bin: 'keep',
+          why: 'Isaiah 53’s servant is wounded for others — not a general on a horse.',
+        },
+        {
+          id: 'b',
+          text: 'The servant is silent like a lamb.',
+          bin: 'keep',
+          why: 'The poem’s servant does not answer back with a sword.',
+        },
         { id: 'c', text: 'The servant conquers Rome by sword.', bin: 'discard' },
-        { id: 'd', text: 'Many are counted righteous through him.', bin: 'keep' },
+        {
+          id: 'd',
+          text: 'Many are counted righteous through him.',
+          bin: 'keep',
+          why: 'The poem says many are made right through his suffering.',
+        },
       ],
       teachOnWrong: 'Isaiah 53 is a suffering servant, not a general on a horse. Keep the wounds; toss the sword.',
       deeper: 'He was pierced for our transgressions… and with his wounds we are healed.',
@@ -276,10 +321,25 @@ export const DAILY_POOL: DailyPuzzle[] = [
       keepLabel: 'In the reports',
       discardLabel: 'Later invention?',
       tiles: [
-        { id: 'a', text: 'The tomb is found empty.', bin: 'keep' },
-        { id: 'b', text: 'Women are among the first witnesses.', bin: 'keep' },
+        {
+          id: 'a',
+          text: 'The tomb is found empty.',
+          bin: 'keep',
+          why: 'The first reports open with an empty place, not a tidy triumph.',
+        },
+        {
+          id: 'b',
+          text: 'Women are among the first witnesses.',
+          bin: 'keep',
+          why: 'Luke names women first — and that the men called it idle talk.',
+        },
         { id: 'c', text: 'Rome instantly converts the senate.', bin: 'discard' },
-        { id: 'd', text: 'Fear and wonder sit side by side.', bin: 'keep' },
+        {
+          id: 'd',
+          text: 'Fear and wonder sit side by side.',
+          bin: 'keep',
+          why: 'The opening keeps fear; it is not sanded into instant victory.',
+        },
       ],
       teachOnWrong:
         'Luke 24 begins with an empty place and a dismissed report. Keep the awkwardness; toss the tidy triumph.',

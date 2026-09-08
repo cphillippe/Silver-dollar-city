@@ -428,6 +428,23 @@ export function evidenceFor(id: string): EvidenceBrief | undefined {
   return EVIDENCE[id]
 }
 
+export interface TakeawayLine {
+  claim: string
+  reason: string
+}
+
+/** Encode: if several Keeps have a why, the player owns the pick. Else the brief’s one line. */
+export function takeawayLines(
+  brief: EvidenceBrief,
+  keeps?: { text: string; why?: string }[],
+): TakeawayLine[] {
+  const owned = (keeps ?? [])
+    .filter((item): item is { text: string; why: string } => Boolean(item.why))
+    .map((item) => ({ claim: item.text, reason: item.why }))
+  if (owned.length > 1) return owned
+  return [{ claim: brief.claim, reason: brief.reason }]
+}
+
 export function evidenceForJournal(unlockAfter: string, journalId: string) {
   return EVIDENCE[unlockAfter] ?? EVIDENCE[journalId]
 }

@@ -169,6 +169,16 @@ Copy-truth PASS. Fun 4 · Clarity 5 · Retention 4 · Learnability 4. Do not reg
 
 Done when tile positions stay predictable through a Keep/Toss and Night air copy-truth still holds.
 
+## Takeaway ownership (2026-09-08)
+
+Board-wide: after several Keeps, one line became the takeaway with no say. Felt picked-for.
+
+- **Encode:** if more than one Keep has a why, tap which Keep is today’s takeaway, then Why-it-stands for **that** line.
+- Seats stay put. Copy-truth stays. Lock-in explode stays.
+- Silent auto-pick is gone on multi-Keep sorts.
+
+Done when a cold player can say why THAT claim is the takeaway and rehearse it without feeling picked-for.
+
 ## Tooling note (npm audit)
 
 `uuid` 7.x via `@capacitor/cli` (GHSA-w5hq-g745-h8pq) is **tooling-only**. Do not `npm audit fix --force` (it wants to downgrade Capacitor). Upgrade when a CLI release pulls `uuid >= 11.1.1`. Details in `SECURITY_REVIEW.md`.
