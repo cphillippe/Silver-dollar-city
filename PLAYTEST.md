@@ -159,6 +159,16 @@ Clarity fell 5 → 3 when post-win chips inverted a just-kept line (Night air: �
 
 Done when a cold player’s locked takeaway and the Why-it-stands chip say the same idea.
 
+## Fun climb: locked seats (2026-09-08)
+
+Copy-truth PASS. Fun 4 · Clarity 5 · Retention 4 · Learnability 4. Do not regress encode chips.
+
+- **Seats stay put:** 2×2 tracks are fixed (`--sort-seat`). Keep/Toss leaves a same-size chair (green Keep / cedar Toss tint). Bins cannot grow into the board mid-sort.
+- Lock-in explode, one-screen intro/Town, Still lit, Keep · belongs / Toss · aside stay.
+- Light Learner mark: ✓ on Keep, × on Toss — no extra reading.
+
+Done when tile positions stay predictable through a Keep/Toss and Night air copy-truth still holds.
+
 ## Tooling note (npm audit)
 
 `uuid` 7.x via `@capacitor/cli` (GHSA-w5hq-g745-h8pq) is **tooling-only**. Do not `npm audit fix --force` (it wants to downgrade Capacitor). Upgrade when a CLI release pulls `uuid >= 11.1.1`. Details in `SECURITY_REVIEW.md`.
