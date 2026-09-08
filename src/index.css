@@ -3916,3 +3916,139 @@ p {
     box-shadow: 0 0 0 3px rgba(224, 179, 74, 0.36) !important;
   }
 }
+
+.hub.is-town .night-watch {
+  flex-shrink: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 1px solid rgba(224, 179, 74, 0.22);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255, 248, 232, 0.08), rgba(20, 16, 10, 0.2));
+}
+
+.hub.is-town .night-watch h2 {
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.hub.is-town .night-watch .town-line {
+  margin: 0;
+  font-size: 0.78rem;
+  opacity: 0.72;
+}
+
+.hub.is-town .night-watch .btn {
+  width: auto;
+  min-height: 40px;
+  padding: 8px 12px;
+}
+
+@media (max-height: 430px) {
+  .hub.is-town .night-watch .town-line {
+    display: none;
+  }
+}
+
+.defend-page {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.defend-page.is-arming {
+  pointer-events: none;
+}
+
+.defend-title {
+  font-size: 1.05rem;
+  margin: 0;
+  color: #e8c36a;
+}
+
+.defend-hud {
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+  font-size: 0.88rem;
+  color: #f4ead2;
+}
+
+.defend-board {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 46vh;
+  border-radius: 22px;
+  border: 1px solid rgba(224, 179, 74, 0.28);
+  box-shadow: 0 14px 36px rgba(12, 8, 4, 0.4);
+  background: #1c1810;
+}
+
+.defend-pad {
+  cursor: pointer;
+}
+
+.defend-ring {
+  fill: rgba(224, 179, 74, 0.12);
+  stroke: rgba(224, 179, 74, 0.45);
+  stroke-width: 2;
+}
+
+.defend-pad.is-planted .defend-ring {
+  fill: rgba(255, 224, 138, 0.2);
+  stroke: #ffe08a;
+}
+
+.defend-lamp {
+  fill: rgba(224, 179, 74, 0.35);
+  stroke: none;
+}
+
+.defend-pad.is-planted .defend-lamp {
+  fill: #ffe08a;
+  filter: url(#defend-glow);
+}
+
+.defend-pad.is-flash .defend-lamp {
+  fill: #fff8d4;
+}
+
+.defend-pad.is-lit .defend-lamp {
+  fill: #fff3b0;
+}
+
+.defend-raider circle {
+  fill: #c46b4a;
+  stroke: #f4ead2;
+  stroke-width: 1.2;
+}
+
+.defend-raider text {
+  fill: #fff6e8;
+  font-size: 9px;
+  font-weight: 700;
+  font-family: var(--sans);
+}
+
+.defend-tip {
+  margin: 0;
+  font-size: 0.82rem;
+  color: rgba(244, 234, 210, 0.7);
+}
+
+.defend-lost p {
+  margin: 0 0 8px;
+}
+
+.app.is-play:has(.defend-page) .app-body {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding-top: 8px;
+}

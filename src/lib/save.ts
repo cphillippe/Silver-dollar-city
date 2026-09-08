@@ -1,7 +1,8 @@
 import { APP_VERSION, SAVE_SCHEMA_VERSION, STORAGE_BACKUP_KEY, STORAGE_KEY } from '../config/app.ts'
 import { localDateKey } from './dates.ts'
+import { emptyDefense } from './defend.ts'
 import { emptyTrace } from './memory.ts'
-import type { MemoryTrace, ProgressState, StarCount } from '../types.ts'
+import type { DefenseState, MemoryTrace, ProgressState, StarCount } from '../types.ts'
 
 export { STORAGE_KEY, STORAGE_BACKUP_KEY, SAVE_SCHEMA_VERSION }
 
@@ -62,6 +63,7 @@ export function emptyProgress(): ProgressState {
     held: [],
     memory: {},
     elaborations: {},
+    defense: emptyDefense(),
   }
 }
 
@@ -192,9 +194,20 @@ export function normalizeProgress(parsed: Partial<ProgressState> | ProgressState
     memory: {},
     elaborations: asStringMap(parsed.elaborations),
     lastReviewPillar: isSafeId(parsed.lastReviewPillar) ? parsed.lastReviewPillar : undefined,
+    defense: asDefense(parsed.defense),
   }
   base.memory = migrateMemory({ ...base, memory: parsed.memory ?? {} })
   return base
+}
+
+function asDefense(value: unknown): DefenseState {
+  if (!isPlainObject(value)) return emptyDefense()
+  const nights = asStringArray(value.nights).filter(isDateKey)
+  return {
+    cleared: finiteInt(value.cleared, 0, SAVE_MAX_COUNT, 0),
+    nights,
+    lastNight: isDateKey(value.lastNight) ? value.lastNight : undefined,
+  }
 }
 
 function isEnvelope(value: unknown): value is SaveEnvelope {

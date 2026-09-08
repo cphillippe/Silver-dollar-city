@@ -39,6 +39,24 @@ export function Hub({ onNavigate }: HubProps) {
     <main className="hub is-town" aria-label="The town">
       <CityMap onNavigate={onNavigate} />
 
+      <section className="night-watch" aria-label="Night Watch">
+        <div className="card-lead">
+          <Avatar who="juniper" size="sm" />
+          <div>
+            <p className="eyebrow">{progress.defense.cleared ? 'Still watched' : 'Night Watch'}</p>
+            <h2>Hold the night</h2>
+            <p className="town-line">Built lots hold lamps.</p>
+          </div>
+        </div>
+        <button
+          type="button"
+          className="btn gold"
+          onClick={() => onNavigate({ name: 'defend' })}
+        >
+          Hold the night
+        </button>
+      </section>
+
       {due ? (
       <section
         className={`today-trail is-slim is-live`}

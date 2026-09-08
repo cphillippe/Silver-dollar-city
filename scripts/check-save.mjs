@@ -62,6 +62,8 @@ assert.equal(fromLegacy.progress.journal[1], 'j-ph-2')
 assert.equal(fromLegacy.progress.dailyDates[0], '2026-09-06')
 assert.equal(fromLegacy.progress.memory['ph-road']?.nextReviewAt, '2026-09-07')
 assert.equal(fromLegacy.envelope.kind, 'silver-city-save')
+assert.equal(fromLegacy.progress.defense.cleared, 0)
+assert.deepEqual(fromLegacy.progress.defense.nights, [])
 
 const code = encodeShareCode(fromLegacy.envelope)
 assert.match(code, /^SC1\./)

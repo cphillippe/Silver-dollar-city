@@ -422,6 +422,16 @@ export const EVIDENCE: Record<string, EvidenceBrief> = {
     'Seven days become a debt collector.',
     'The trail closes after a week.',
   ),
+  'td-watch': brief(
+    'td-watch',
+    'The town holds when a true line still has a house.',
+    'Cheap claims walk past the wounded; a kept claim stays and pays the inn.',
+    'Luke 10:25–37 · the night road',
+    'A town holds because the streets are pretty.',
+    'Defense is shouting until no one asks.',
+    'The Samaritan story is only about travel safety.',
+    'A lamp replaces the need for a claim.',
+  ),
 }
 
 export function evidenceFor(id: string): EvidenceBrief | undefined {

@@ -463,6 +463,7 @@ export interface ProgressApi {
   recordHeld: (evidenceId: string) => void
   recordReview: (event: ReviewEvent) => StarCount
   markMiss: (challengeId: string) => void
+  recordNight: (dateKey: string) => void
   reset: () => void
   importSaveText: (raw: string) => { ok: true } | { ok: false; error: string }
 }

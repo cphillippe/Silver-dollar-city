@@ -15,7 +15,10 @@ export function AppShell({ view, onNavigate, children }: AppShellProps) {
   const waiting = dueCount(progress)
   const hideChrome = view.name === 'welcome'
   const playView =
-    view.name === 'daily' || view.name === 'challenge' || view.name === 'journal'
+    view.name === 'daily' ||
+    view.name === 'challenge' ||
+    view.name === 'journal' ||
+    view.name === 'defend'
   const townView = view.name === 'hub'
   const hideGoalbar = hideChrome || playView || townView
 
