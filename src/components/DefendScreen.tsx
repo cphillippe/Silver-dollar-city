@@ -16,8 +16,10 @@ import {
   pathPoint,
   towerCooldown,
   towerRange,
+  waveSpawnEvery,
+  waveSpeed,
 } from '../lib/defend'
-import { prefersReducedMotion, useJuiceHandoff } from '../lib/juice'
+import { useJuiceHandoff } from '../lib/juice'
 import { CITY_PLOTS, type CityPlotId } from '../lib/city'
 import { useProgress } from '../store/progress'
 import type { View } from '../types'
@@ -44,9 +46,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const [taught, setTaught] = useState(false)
   const [arming, setArming] = useState(false)
   const [phase, setPhase] = useState<'plant' | 'wave' | 'lost'>('plant')
-  const [planted, setPlanted] = useState<CityPlotId[]>(() =>
-    pads.includes('porch') ? ['porch'] : pads.slice(0, 1),
-  )
+  const [planted, setPlanted] = useState<CityPlotId[]>(() => [...pads])
   const [hearts, setHearts] = useState(DEFEND_HEARTS)
   const [raiders, setRaiders] = useState<Raider[]>([])
   const [downed, setDowned] = useState(0)
@@ -100,7 +100,6 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     setRaiders([])
     setDowned(0)
     setHearts(DEFEND_HEARTS)
-    const reduced = prefersReducedMotion()
     let last = performance.now()
     let spawnAt = 0
     let frame = 0
@@ -112,7 +111,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       spawnAt += dt
       const next = live.current.raiders.map((item) => ({
         ...item,
-        t: item.t + (reduced ? 0.12 : 0.085) * dt,
+        t: item.t + waveSpeed() * dt,
       }))
       let leaked = 0
       const walking = next.filter((item) => {
@@ -128,7 +127,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       }
       if (
         live.current.spawned < DEFEND_WAVE_SIZE &&
-        spawnAt >= (reduced ? 0.4 : 1.35)
+        spawnAt >= waveSpawnEvery()
       ) {
         spawnAt = 0
         const id = live.current.spawned
@@ -207,6 +206,24 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     }
   }
 
+  function fireBest() {
+    if (phase !== 'wave' || won) return
+    let pick: CityPlotId | null = null
+    let bestD = Infinity
+    for (const id of live.current.planted) {
+      const at = DEFEND_ANCHOR[id]
+      const range = towerRange(padStage(id, progress))
+      for (const raider of live.current.raiders) {
+        const d = dist(at, pathPoint(raider.t))
+        if (d <= range && d < bestD) {
+          bestD = d
+          pick = id
+        }
+      }
+    }
+    if (pick) fire(pick)
+  }
+
   function retry() {
     setPhase('plant')
     setWon(false)
@@ -266,7 +283,15 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
               {phase === 'wave' ? `${downed}/${DEFEND_WAVE_SIZE} down` : `${planted.length} lamp${planted.length === 1 ? '' : 's'}`}
             </span>
           </p>
-          <svg className="defend-board" viewBox="0 0 640 420" role="img" aria-label="Night road through Silver City">
+          <svg
+            className="defend-board"
+            viewBox="0 0 640 420"
+            role="img"
+            aria-label="Night road through Silver City"
+            onClick={() => {
+              if (phase === 'wave') fireBest()
+            }}
+          >
             <defs>
               <linearGradient id="defend-dusk" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#1a2240" />
@@ -297,10 +322,17 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
               const on = planted.includes(id)
               const stage = padStage(id, progress)
               const plot = CITY_PLOTS.find((item) => item.id === id)
+              const hot =
+                phase === 'wave' &&
+                on &&
+                raiders.some(
+                  (raider) =>
+                    dist(at, pathPoint(raider.t)) <= towerRange(stage),
+                )
               return (
                 <g
                   key={id}
-                  className={`defend-pad is-${stage} ${on ? 'is-planted' : ''} ${flash === id ? 'is-flash' : ''}`}
+                  className={`defend-pad is-${stage} ${on ? 'is-planted' : ''} ${hot ? 'is-hot' : ''} ${flash === id ? 'is-flash' : ''}`}
                   transform={`translate(${at.x} ${at.y})`}
                   role="button"
                   tabIndex={0}
@@ -309,7 +341,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                       ? `${on ? 'Pull' : 'Plant'} lamp at ${plot?.title ?? id}`
                       : `Fire ${plot?.title ?? id}`
                   }
-                  onClick={() => (phase === 'plant' ? togglePad(id) : fire(id))}
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    if (phase === 'plant') togglePad(id)
+                    else fire(id)
+                  }}
                   onKeyDown={(event) => {
                     if (event.key === 'Enter' || event.key === ' ') {
                       event.preventDefault()
@@ -318,7 +354,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                     }
                   }}
                 >
-                  <circle className="defend-ring" r={on ? 22 : 16} />
+                  <circle className="defend-hit" r="34" />
+                  <circle className="defend-ring" r={on ? 24 : 16} />
                   <circle className="defend-lamp" r={on ? 8 : 5} />
                 </g>
               )
@@ -354,8 +391,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           {phase === 'wave' ? (
             <p className="defend-tip">
               {raiders[0]
-                ? `“${raiders[0].text}” · tap a lamp when they are near it.`
-                : 'Tap a lamp when a cheap line is near it.'}
+                ? `“${raiders[0].text}” · tap the road or a lamp.`
+                : 'Tap the road or a lamp when a cheap line is near.'}
             </p>
           ) : (
             <p className="defend-tip">Built lots hold lamps. Empty lots cannot.</p>

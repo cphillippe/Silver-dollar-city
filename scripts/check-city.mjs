@@ -530,6 +530,11 @@ assert.match(defendSrc, /RecallGate/)
 assert.match(defendSrc, /defendPads/)
 assert.match(defendSrc, /afterJuiceRef/)
 assert.match(defendSrc, /}, \[phase\]/)
+assert.match(defendSrc, /fireBest/)
+assert.match(
+  readFileSync(new URL('../src/lib/defend.ts', import.meta.url), 'utf8'),
+  /waveSpeed/,
+)
 assert.match(cssSrc, /defend-board/)
 assert.match(sequenceSrc, /progressive && !live/)
 
