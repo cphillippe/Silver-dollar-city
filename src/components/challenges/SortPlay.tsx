@@ -127,16 +127,21 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
       </p>
 
       <div className="bank">
-        {slots.map((tile, index) => {
-          const shown = tile ?? order[index]
-          const live = Boolean(tile)
-          if (!shown) {
-            return <div key={`gone-${index}`} className="sort-tile is-gone" aria-hidden />
-          }
+        {order.map((home, index) => {
+          const live = slots[index]?.id === home.id
+          const goneTo = keep.some((item) => item.id === home.id)
+            ? 'keep'
+            : discard.some((item) => item.id === home.id)
+              ? 'toss'
+              : null
           return (
             <div
-              key={shown.id}
-              className={`sort-tile ${live && picked === shown.id ? 'is-selected' : ''} ${live ? '' : 'is-gone'}`}
+              key={home.id}
+              className={`sort-tile sort-seat ${live && picked === home.id ? 'is-selected' : ''} ${live ? '' : 'is-gone'} ${goneTo === 'keep' ? 'was-keep' : ''} ${goneTo === 'toss' ? 'was-toss' : ''}`}
+              style={{
+                gridColumn: (index % 2) + 1,
+                gridRow: Math.floor(index / 2) + 1,
+              }}
               aria-hidden={!live}
             >
               <button
@@ -144,9 +149,9 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
                 className="chip"
                 tabIndex={live ? 0 : -1}
                 disabled={!live}
-                onClick={() => live && setPicked(shown.id === picked ? null : shown.id)}
+                onClick={() => live && setPicked(home.id === picked ? null : home.id)}
               >
-                {shown.text}
+                {home.text}
               </button>
               <span className="sort-tile-actions">
                 <button
@@ -154,18 +159,18 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
                   className="btn tiny keep"
                   tabIndex={live ? 0 : -1}
                   disabled={!live}
-                  onClick={() => live && place(shown.id, 'keep')}
+                  onClick={() => live && place(home.id, 'keep')}
                 >
-                  Keep
+                  Keep<span className="sort-mark" aria-hidden>✓</span>
                 </button>
                 <button
                   type="button"
                   className="btn tiny toss"
                   tabIndex={live ? 0 : -1}
                   disabled={!live}
-                  onClick={() => live && place(shown.id, 'discard')}
+                  onClick={() => live && place(home.id, 'discard')}
                 >
-                  Toss
+                  Toss<span className="sort-mark" aria-hidden>×</span>
                 </button>
               </span>
             </div>

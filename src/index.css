@@ -870,9 +870,28 @@ p {
 }
 
 .sort-tile.is-gone {
-  visibility: hidden;
   pointer-events: none;
-  min-height: 88px;
+}
+
+.sort-tile.is-gone .chip,
+.sort-tile.is-gone .sort-tile-actions {
+  visibility: hidden;
+}
+
+.sort-tile.was-keep {
+  background: rgba(107, 143, 113, 0.16);
+  box-shadow: inset 0 0 0 2px rgba(107, 143, 113, 0.5);
+}
+
+.sort-tile.was-toss {
+  background: rgba(196, 107, 74, 0.14);
+  box-shadow: inset 0 0 0 2px rgba(196, 107, 74, 0.46);
+}
+
+.sort-mark {
+  margin-left: 4px;
+  font-weight: 700;
+  opacity: 0.88;
 }
 
 .sort-lock {
@@ -1360,13 +1379,57 @@ p {
 }
 
 .is-puzzle .play .bank {
+  --sort-seat: 108px;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
+  grid-template-rows: var(--sort-seat) var(--sort-seat);
   gap: 8px;
+  height: calc(var(--sort-seat) * 2 + 8px);
+  min-height: calc(var(--sort-seat) * 2 + 8px);
+  max-height: calc(var(--sort-seat) * 2 + 8px);
+  align-items: stretch;
+  justify-items: stretch;
 }
 
 .is-puzzle .sort-tile {
   gap: 4px;
+  height: var(--sort-seat);
+  min-height: var(--sort-seat);
+  max-height: var(--sort-seat);
+  overflow: hidden;
+}
+
+.is-puzzle .sort-bins {
+  height: 102px;
+  max-height: 102px;
+}
+
+.is-puzzle .play.is-ready .sort-bins {
+  height: auto;
+  max-height: none;
+}
+
+.is-puzzle .bin {
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.is-puzzle .play.is-ready .bin {
+  height: auto;
+  min-height: 88px;
+}
+
+.is-puzzle .bin-body {
+  overflow: auto;
+  gap: 4px;
+  padding: 6px 8px;
+}
+
+.is-puzzle .chip.in-bin {
+  min-height: 30px;
+  padding: 4px 8px;
+  font-size: 0.72rem;
+  line-height: 1.2;
 }
 
 .is-puzzle .sort-tile .chip {
@@ -2228,6 +2291,15 @@ p {
 @media (max-height: 430px) {
   .app.is-play .topbar nav .subtle {
     display: none;
+  }
+
+  .is-puzzle .play .bank {
+    --sort-seat: 88px;
+  }
+
+  .is-puzzle .sort-bins {
+    height: 80px;
+    max-height: 80px;
   }
 
   .bin {
