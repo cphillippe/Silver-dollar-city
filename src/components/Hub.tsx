@@ -76,7 +76,7 @@ export function Hub({ onNavigate }: HubProps) {
       <AdSlot slot="hub-banner" />
 
       <details className="street-drawer">
-        <summary>Who lives where</summary>
+        <summary>Homes on the street</summary>
         <ol className="city-streets">
         {CITY_PLOTS.filter((plot) => plot.areaId || plot.id === 'porch').map((plot) => {
           const area = plot.areaId

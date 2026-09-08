@@ -222,6 +222,16 @@ Usage tight. Observatory Premise 2 broke the screen (slot grew, board clipped).
 
 Done when Premise 2 is stable and that path sees teaching before the quiz.
 
+## Buildable town (2026-09-08)
+
+Usage tight. Town was a labeled map. Bill wants a place you BUILD.
+
+- **Build next → something better:** timber, then wood roof, then gold roof / lamps / oaks / windows. Streets pack, then light.
+- **Homes:** Juniper, Mercy, Silas, Nora, Ansel, Hope, River stand on their porch when that plot unlocks.
+- Teach-before-test, Premise 2 seats, Fun 5, ownership, copy-truth, lock-in stay.
+
+Done when a cold player feels they are upgrading a real town as they learn.
+
 ## Tooling note (npm audit)
 
 `uuid` 7.x via `@capacitor/cli` (GHSA-w5hq-g745-h8pq) is **tooling-only**. Do not `npm audit fix --force` (it wants to downgrade Capacitor). Upgrade when a CLI release pulls `uuid >= 11.1.1`. Details in `SECURITY_REVIEW.md`.

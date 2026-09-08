@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { areas } from '../content'
 import { townAck, townVoice } from '../content/story'
 import {
@@ -8,6 +8,7 @@ import {
   cityUpgrades,
   fillGrows,
   fillSnapshot,
+  nextGift,
   nextKicker,
   nextPlotId,
   plotView,
@@ -52,14 +53,14 @@ const ANCHOR: Record<CityPlotId, { x: number; y: number }> = {
 }
 
 const FOLK: Record<CityPlotId, { x: number; y: number }> = {
-  lookout: { x: 548, y: 118 },
-  observatory: { x: 508, y: 152 },
-  hollow: { x: 152, y: 322 },
-  journal: { x: 322, y: 298 },
-  bench: { x: 392, y: 324 },
-  lamps: { x: 230, y: 340 },
-  gate: { x: 542, y: 322 },
-  porch: { x: 520, y: 340 },
+  lookout: { x: 556, y: 132 },
+  observatory: { x: 512, y: 168 },
+  hollow: { x: 156, y: 336 },
+  journal: { x: 328, y: 308 },
+  bench: { x: 396, y: 334 },
+  lamps: { x: 232, y: 348 },
+  gate: { x: 548, y: 334 },
+  porch: { x: 518, y: 348 },
 }
 
 const FULL_CAM = { x: 0, y: 0, w: 640, h: 420 }
@@ -272,10 +273,9 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
   const nextStage = stageOf(nextId)
   const nextAt = ANCHOR[nextId]
   const kicker = nextKicker(nextStage, nextId, doneToday)
+  const gift = nextGift(nextId, nextStage, shownFill[nextId] ?? 0)
   const celebrating = Boolean(beat) || homecoming
   const beatVoice = beat ? townVoice(beat.id) : townVoice(nextId)
-  const hollowFill = shownFill.hollow
-  const benchFill = shownFill.bench
   const alive = mode === 'live'
 
   return (
@@ -334,12 +334,12 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
         />
 
         <path
-          className={`city-street is-${stageOf('hollow')} is-${stageOf('bench')}`}
+          className={`city-street city-street-main is-${stageOf('hollow')} is-${stageOf('bench')}`}
           d="M70 310 C 140 300, 200 280, 280 292 C 360 304, 430 286, 560 300"
           fill="none"
         />
         <path
-          className={`city-street is-${stageOf('bench')} is-${stageOf('gate')}`}
+          className={`city-street city-street-ridge is-${stageOf('bench')} is-${stageOf('gate')}`}
           d="M300 292 C 360 250, 400 210, 448 168"
           fill="none"
         />
@@ -348,6 +348,13 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
           d="M18 250 C 70 270, 90 300, 60 360 C 40 400, 80 410, 120 400"
           fill="none"
         />
+        {shownFill.lamps >= 1 ? (
+          <g className={`city-street-lamps is-${stageOf('lamps')}`} aria-hidden>
+            <circle className="city-lamp" cx="148" cy="298" r="5" />
+            {shownFill.lamps >= 4 ? <circle className="city-lamp" cx="330" cy="296" r="5" /> : null}
+            {shownFill.lamps >= 8 ? <circle className="city-lamp" cx="470" cy="292" r="5" /> : null}
+          </g>
+        ) : null}
 
         {alive && !celebrating ? (
           <g className="city-walkers" aria-hidden>
@@ -368,156 +375,74 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
         <PlotGroup
           id="lookout"
           stage={stageOf('lookout')}
+          fill={shownFill.lookout}
           next={nextId === 'lookout'}
           rising={rising === 'lookout'}
           onOpen={open}
-        >
-          <path className="city-roof" d="M502 86 l18-38 18 38" />
-          <path d="M502 86 l18-38 18 38 v52 h-36 z" />
-          <rect x="514" y="78" width="12" height="18" rx="1" className="city-window" />
-          <path d="M520 48 l14 8 v10 h-8 z" className="city-flag" />
-        </PlotGroup>
+        />
 
         <PlotGroup
           id="observatory"
           stage={stageOf('observatory')}
+          fill={shownFill.observatory}
           next={nextId === 'observatory'}
           rising={rising === 'observatory'}
           onOpen={open}
-        >
-          <path d="M428 118 a36 28 0 0 1 72 0 v22 h-72 z" />
-          <rect x="454" y="86" width="8" height="16" rx="1" />
-          <circle cx="464" cy="108" r="6" className="city-window" />
-        </PlotGroup>
+        />
 
         <PlotGroup
           id="hollow"
           stage={stageOf('hollow')}
+          fill={shownFill.hollow}
           next={nextId === 'hollow'}
           rising={rising === 'hollow'}
           onOpen={open}
-        >
-          <ellipse cx="92" cy="286" rx="28" ry="18" className="city-canopy" />
-          <ellipse cx="128" cy="278" rx="22" ry="16" className="city-canopy" />
-          {hollowFill >= 2 ? (
-            <ellipse
-              cx="70"
-              cy="300"
-              rx="16"
-              ry="12"
-              className={`city-canopy ${rising === 'hollow' && hollowFill === 2 ? 'is-sprout' : ''}`}
-            />
-          ) : null}
-          {hollowFill >= 3 ? (
-            <ellipse
-              cx="148"
-              cy="268"
-              rx="14"
-              ry="11"
-              className={`city-canopy ${rising === 'hollow' && hollowFill === 3 ? 'is-sprout' : ''}`}
-            />
-          ) : null}
-          {hollowFill >= 4 ? (
-            <ellipse
-              cx="54"
-              cy="278"
-              rx="12"
-              ry="9"
-              className={`city-canopy ${rising === 'hollow' && hollowFill === 4 ? 'is-sprout' : ''}`}
-            />
-          ) : null}
-          <rect x="98" y="292" width="36" height="28" rx="3" />
-          <path className="city-roof" d="M94 292 l22-16 22 16" />
-        </PlotGroup>
+        />
 
         <PlotGroup
           id="journal"
           stage={stageOf('journal')}
+          fill={shownFill.journal}
           next={nextId === 'journal'}
           rising={rising === 'journal'}
           onOpen={open}
-        >
-          <path className="city-roof" d="M256 248 l32-20 32 20" />
-          <rect x="262" y="248" width="52" height="40" rx="3" />
-          <rect x="280" y="262" width="16" height="14" rx="1" className="city-window" />
-        </PlotGroup>
+        />
 
         <PlotGroup
           id="bench"
           stage={stageOf('bench')}
+          fill={shownFill.bench}
           next={nextId === 'bench'}
           rising={rising === 'bench'}
           onOpen={open}
-        >
-          <rect x="318" y="268" width="64" height="36" rx="3" />
-          <rect x="338" y="278" width="10" height="12" rx="1" className="city-window" />
-          <rect x="354" y="278" width="10" height="12" rx="1" className="city-window" />
-          {benchFill >= 2 ? (
-            <rect
-              x="322"
-              y="278"
-              width="8"
-              height="10"
-              rx="1"
-              className={`city-window ${rising === 'bench' && benchFill === 2 ? 'is-sprout' : ''}`}
-            />
-          ) : null}
-          {benchFill >= 3 ? (
-            <rect
-              x="370"
-              y="278"
-              width="8"
-              height="10"
-              rx="1"
-              className={`city-window ${rising === 'bench' && benchFill === 3 ? 'is-sprout' : ''}`}
-            />
-          ) : null}
-          <path d="M332 304 h36 M338 304 v-12 h24 v12" />
-        </PlotGroup>
+        />
 
         <PlotGroup
           id="lamps"
           stage={stageOf('lamps')}
+          fill={shownFill.lamps}
           next={nextId === 'lamps'}
           rising={rising === 'lamps'}
           onOpen={open}
-        >
-          <path d="M214 318 v-28 M258 322 v-28 M392 326 v-28" />
-          <circle cx="214" cy="286" r="6" className="city-lamp" />
-          <circle cx="258" cy="290" r="6" className="city-lamp" />
-          <circle cx="392" cy="294" r="6" className="city-lamp" />
-        </PlotGroup>
+        />
 
         <PlotGroup
           id="gate"
           stage={stageOf('gate')}
+          fill={shownFill.gate}
           next={nextId === 'gate'}
           rising={rising === 'gate'}
           onOpen={open}
-        >
-          <path d="M470 250 v62 h56 v-62" />
-          <path className="city-roof" d="M478 250 a20 28 0 0 1 40 0" />
-        </PlotGroup>
+        />
 
         <PlotGroup
           id="porch"
           stage={stageOf('porch')}
+          fill={shownFill.porch}
           next={nextId === 'porch'}
           rising={rising === 'porch'}
           onOpen={open}
-        >
-          <path className="city-roof" d="M530 292 l35-22 35 22" />
-          <rect x="536" y="292" width="58" height="42" rx="3" />
-          <rect x="552" y="306" width="12" height="14" rx="1" className="city-window" />
-          <path d="M574 292 v-36" />
-          <circle cx="574" cy="252" r="8" className="city-lamp" />
-          {stageOf('porch') === 'lit' || stageOf('porch') === 'built' ? (
-            <g className="city-smoke" transform="translate(574 236)">
-              <circle className="city-puff city-puff-a" r="3" cx="0" cy="0" />
-              <circle className="city-puff city-puff-b" r="2.4" cx="3" cy="-8" />
-            </g>
-          ) : null}
-        </PlotGroup>
+        />
 
         <path d="M-10 368 Q 180 340 320 358 T 660 372 V430 H-10 Z" fill="#0a101c" />
 
@@ -564,6 +489,7 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
             <>
               <p className="eyebrow">{kicker}</p>
               <h2>{nextSpec?.title}</h2>
+              <p className="city-gift">{gift}</p>
               {doneToday ? (
                 <p className="city-morrow">Town held. A lamp waits tomorrow.</p>
               ) : null}
@@ -587,17 +513,17 @@ const SPARKS = [0, 45, 90, 135, 180, 225, 270, 315]
 function PlotGroup({
   id,
   stage,
+  fill,
   next,
   rising,
   onOpen,
-  children,
 }: {
   id: CityPlotId
   stage: CityStage
+  fill: number
   next: boolean
   rising: boolean
   onOpen: (id: CityPlotId) => void
-  children: ReactNode
 }) {
   const clickable = stage !== 'empty' || next
   const at = ANCHOR[id]
@@ -630,7 +556,7 @@ function PlotGroup({
           </g>
         ) : null
       ) : (
-        children
+        <PlotArt id={id} stage={stage} fill={fill} rising={rising} />
       )}
       {rising ? (
         <g className="city-sparks" transform={`translate(${at.x} ${at.y})`}>
@@ -646,6 +572,365 @@ function PlotGroup({
         </g>
       ) : null}
     </g>
+  )
+}
+
+function PlotArt({
+  id,
+  stage,
+  fill,
+  rising,
+}: {
+  id: CityPlotId
+  stage: CityStage
+  fill: number
+  rising: boolean
+}) {
+  if (id === 'hollow') return <HollowArt stage={stage} fill={fill} rising={rising} />
+  if (id === 'porch') return <PorchArt stage={stage} />
+  if (id === 'bench') return <BenchArt stage={stage} fill={fill} rising={rising} />
+  if (id === 'observatory') return <ObservatoryArt stage={stage} fill={fill} rising={rising} />
+  if (id === 'gate') return <GateArt stage={stage} fill={fill} rising={rising} />
+  if (id === 'lookout') return <LookoutArt stage={stage} fill={fill} rising={rising} />
+  if (id === 'journal') return <JournalArt stage={stage} fill={fill} />
+  return <LampsArt stage={stage} fill={fill} />
+}
+
+function HollowArt({
+  stage,
+  fill,
+  rising,
+}: {
+  stage: CityStage
+  fill: number
+  rising: boolean
+}) {
+  if (stage === 'scaffold') {
+    return (
+      <>
+        <ellipse cx="116" cy="320" rx="24" ry="8" className="city-earth" />
+        <path
+          className="city-timber"
+          d="M98 318 V288 M134 318 V288 M96 288 H136 M108 318 V272 L116 260 L124 272 V318"
+        />
+      </>
+    )
+  }
+  return (
+    <>
+      <ellipse cx="92" cy="286" rx="28" ry="18" className="city-canopy" />
+      <ellipse cx="128" cy="278" rx="22" ry="16" className="city-canopy" />
+      {fill >= 2 ? (
+        <ellipse
+          cx="70"
+          cy="300"
+          rx="16"
+          ry="12"
+          className={`city-canopy ${rising && fill === 2 ? 'is-sprout' : ''}`}
+        />
+      ) : null}
+      {fill >= 3 ? (
+        <ellipse
+          cx="148"
+          cy="268"
+          rx="14"
+          ry="11"
+          className={`city-canopy ${rising && fill === 3 ? 'is-sprout' : ''}`}
+        />
+      ) : null}
+      {fill >= 4 ? (
+        <ellipse
+          cx="54"
+          cy="278"
+          rx="12"
+          ry="9"
+          className={`city-canopy ${rising && fill === 4 ? 'is-sprout' : ''}`}
+        />
+      ) : null}
+      <path className="city-porch" d="M94 320 h44 l5 8 H90 Z" />
+      <rect x="98" y="292" width="36" height="28" rx="3" />
+      <path className="city-roof" d="M94 292 l22-16 22 16" />
+      {stage === 'lit' ? (
+        <path className="city-roof city-roof-tile" d="M90 294 l26-20 26 20" />
+      ) : null}
+      {fill >= 1 ? (
+        <rect x="110" y="300" width="10" height="10" rx="1" className="city-window" />
+      ) : null}
+      {stage === 'lit' ? <circle className="city-lamp" cx="142" cy="302" r="4.5" /> : null}
+    </>
+  )
+}
+
+function PorchArt({ stage }: { stage: CityStage }) {
+  if (stage === 'scaffold') {
+    return (
+      <>
+        <ellipse cx="565" cy="334" rx="30" ry="9" className="city-earth" />
+        <path
+          className="city-timber"
+          d="M538 330 V296 M590 330 V296 M536 296 H592 M574 330 V256"
+        />
+        <circle className="city-lamp" cx="574" cy="252" r="6" />
+      </>
+    )
+  }
+  return (
+    <>
+      <path className="city-porch" d="M532 334 h66 l7 9 H526 Z" />
+      <path className="city-roof" d="M530 292 l35-22 35 22" />
+      <rect x="536" y="292" width="58" height="42" rx="3" />
+      <rect x="552" y="306" width="12" height="14" rx="1" className="city-window" />
+      {stage === 'lit' ? (
+        <path className="city-roof city-roof-tile" d="M526 294 l39-26 39 26" />
+      ) : null}
+      <path d="M574 292 v-36" />
+      <circle cx="574" cy="252" r="8" className="city-lamp" />
+      {stage === 'lit' ? (
+        <>
+          <path className="city-porch-rail" d="M538 328 h54 M538 328 v-8 M564 328 v-8 M592 328 v-8" />
+          <g className="city-smoke" transform="translate(574 236)">
+            <circle className="city-puff city-puff-a" r="3" cx="0" cy="0" />
+            <circle className="city-puff city-puff-b" r="2.4" cx="3" cy="-8" />
+          </g>
+        </>
+      ) : (
+        <g className="city-smoke" transform="translate(574 236)">
+          <circle className="city-puff city-puff-a" r="3" cx="0" cy="0" />
+          <circle className="city-puff city-puff-b" r="2.4" cx="3" cy="-8" />
+        </g>
+      )}
+    </>
+  )
+}
+
+function BenchArt({
+  stage,
+  fill,
+  rising,
+}: {
+  stage: CityStage
+  fill: number
+  rising: boolean
+}) {
+  if (stage === 'scaffold') {
+    return (
+      <>
+        <ellipse cx="350" cy="308" rx="28" ry="8" className="city-earth" />
+        <path className="city-timber" d="M322 304 V270 M378 304 V270 M320 270 H380 M332 304 h36" />
+      </>
+    )
+  }
+  return (
+    <>
+      <path className="city-porch" d="M318 304 h64 l6 8 H312 Z" />
+      <rect x="318" y="268" width="64" height="36" rx="3" />
+      <path className="city-roof" d="M314 268 l34-16 34 16" />
+      {stage === 'lit' ? (
+        <path className="city-roof city-roof-tile" d="M310 270 l38-20 38 20" />
+      ) : null}
+      <rect x="338" y="278" width="10" height="12" rx="1" className="city-window" />
+      <rect x="354" y="278" width="10" height="12" rx="1" className="city-window" />
+      {fill >= 2 ? (
+        <rect
+          x="322"
+          y="278"
+          width="8"
+          height="10"
+          rx="1"
+          className={`city-window ${rising && fill === 2 ? 'is-sprout' : ''}`}
+        />
+      ) : null}
+      {fill >= 3 ? (
+        <rect
+          x="370"
+          y="278"
+          width="8"
+          height="10"
+          rx="1"
+          className={`city-window ${rising && fill === 3 ? 'is-sprout' : ''}`}
+        />
+      ) : null}
+      <path d="M332 304 h36 M338 304 v-12 h24 v12" />
+      {stage === 'lit' ? <circle className="city-lamp" cx="350" cy="254" r="5" /> : null}
+    </>
+  )
+}
+
+function ObservatoryArt({
+  stage,
+  fill,
+  rising,
+}: {
+  stage: CityStage
+  fill: number
+  rising: boolean
+}) {
+  if (stage === 'scaffold') {
+    return (
+      <>
+        <ellipse cx="464" cy="142" rx="28" ry="9" className="city-earth" />
+        <path className="city-timber" d="M440 140 V112 M488 140 V112 M438 112 H490 M464 140 V88" />
+        <circle cx="464" cy="86" r="7" className="city-timber" />
+      </>
+    )
+  }
+  return (
+    <>
+      <path d="M428 118 a36 28 0 0 1 72 0 v22 h-72 z" />
+      <rect x="454" y="86" width="8" height="16" rx="1" />
+      <circle
+        cx="464"
+        cy="108"
+        r={fill >= 2 ? 7 : 5}
+        className={`city-window ${rising && fill === 2 ? 'is-sprout' : ''}`}
+      />
+      {fill >= 3 ? (
+        <circle
+          cx="448"
+          cy="116"
+          r="4"
+          className={`city-window ${rising && fill === 3 ? 'is-sprout' : ''}`}
+        />
+      ) : null}
+      {fill >= 4 || stage === 'lit' ? (
+        <circle cx="480" cy="116" r="4" className="city-window" />
+      ) : null}
+      {stage === 'lit' ? (
+        <>
+          <path className="city-roof city-roof-tile" d="M432 118 a32 24 0 0 1 64 0" />
+          <circle className="city-lamp" cx="498" cy="124" r="4.5" />
+        </>
+      ) : null}
+    </>
+  )
+}
+
+function GateArt({
+  stage,
+  fill,
+  rising,
+}: {
+  stage: CityStage
+  fill: number
+  rising: boolean
+}) {
+  if (stage === 'scaffold') {
+    return (
+      <>
+        <ellipse cx="498" cy="314" rx="26" ry="8" className="city-earth" />
+        <path className="city-timber" d="M474 312 V252 M522 312 V252" />
+      </>
+    )
+  }
+  return (
+    <>
+      <path d="M470 250 v62 h56 v-62" />
+      <path className="city-roof" d="M478 250 a20 28 0 0 1 40 0" />
+      {fill >= 2 ? (
+        <path
+          className={`city-roof ${rising && fill === 2 ? 'is-sprout' : ''}`}
+          d="M474 252 a24 30 0 0 1 48 0"
+        />
+      ) : null}
+      {fill >= 3 || stage === 'lit' ? (
+        <circle className="city-lamp" cx="474" cy="248" r="4.5" />
+      ) : null}
+      {stage === 'lit' ? (
+        <>
+          <path className="city-roof city-roof-tile" d="M476 248 a22 30 0 0 1 44 0" />
+          <circle className="city-lamp" cx="522" cy="248" r="4.5" />
+        </>
+      ) : null}
+    </>
+  )
+}
+
+function LookoutArt({
+  stage,
+  fill,
+  rising,
+}: {
+  stage: CityStage
+  fill: number
+  rising: boolean
+}) {
+  if (stage === 'scaffold') {
+    return (
+      <>
+        <ellipse cx="520" cy="140" rx="18" ry="7" className="city-earth" />
+        <path className="city-timber" d="M520 140 V70 M508 96 H532 M512 118 H528" />
+      </>
+    )
+  }
+  return (
+    <>
+      <path d="M502 86 l18-38 18 38 v52 h-36 z" />
+      <path className="city-roof" d="M502 86 l18-38 18 38" />
+      <rect x="514" y="78" width="12" height="18" rx="1" className="city-window" />
+      {fill >= 2 ? (
+        <path
+          d="M520 48 l14 8 v10 h-8 z"
+          className={`city-flag ${rising && fill === 2 ? 'is-sprout' : ''}`}
+        />
+      ) : null}
+      {fill >= 3 || stage === 'lit' ? (
+        <circle className="city-lamp" cx="538" cy="70" r="4.5" />
+      ) : null}
+      {stage === 'lit' ? (
+        <path className="city-roof city-roof-tile" d="M498 88 l22-44 22 44" />
+      ) : null}
+    </>
+  )
+}
+
+function JournalArt({ stage, fill }: { stage: CityStage; fill: number }) {
+  if (stage === 'scaffold') {
+    return (
+      <>
+        <ellipse cx="288" cy="290" rx="26" ry="8" className="city-earth" />
+        <path className="city-timber" d="M266 286 V250 M310 286 V250 M264 250 H312" />
+      </>
+    )
+  }
+  return (
+    <>
+      <path className="city-porch" d="M260 288 h56 l6 8 H254 Z" />
+      <path className="city-roof" d="M256 248 l32-20 32 20" />
+      <rect x="262" y="248" width="52" height="40" rx="3" />
+      <rect x="280" y="262" width="16" height="14" rx="1" className="city-window" />
+      {fill >= 4 || stage === 'lit' ? (
+        <path className="city-roof city-roof-tile" d="M252 250 l36-24 36 24" />
+      ) : null}
+      {stage === 'lit' ? <circle className="city-lamp" cx="312" cy="246" r="4" /> : null}
+    </>
+  )
+}
+
+function LampsArt({ stage, fill }: { stage: CityStage; fill: number }) {
+  const first = stage !== 'empty'
+  const second = fill >= 4 || stage === 'built' || stage === 'lit'
+  const third = fill >= 8 || stage === 'lit'
+  return (
+    <>
+      {first ? (
+        <>
+          <path d="M214 318 v-28" />
+          <circle cx="214" cy="286" r="6" className="city-lamp" />
+        </>
+      ) : null}
+      {second ? (
+        <>
+          <path d="M258 322 v-28" />
+          <circle cx="258" cy="290" r="6" className="city-lamp" />
+        </>
+      ) : null}
+      {third ? (
+        <>
+          <path d="M392 326 v-28" />
+          <circle cx="392" cy="294" r="6" className="city-lamp" />
+        </>
+      ) : null}
+    </>
   )
 }
 
@@ -669,22 +954,26 @@ function TownFolk({
   const voice = townVoice(id)
   const line = ack ? townAck(id, ack) : voice.here
   const short = line.length > 22 ? `${line.slice(0, 20)}…` : line
+  const home = stage === 'built' || stage === 'lit'
   return (
     <g transform={`translate(${at.x} ${at.y})`} pointerEvents="none">
       <g
-        className={`city-folk is-${stage} ${next ? 'is-next' : ''} ${rising ? 'is-waving' : ''}`}
+        className={`city-folk is-${stage} ${next ? 'is-next' : ''} ${rising ? 'is-waving' : ''} ${home ? 'is-home' : ''}`}
       >
-        <circle className="city-folk-head" r="5.4" cy="-15" />
-        <path className="city-folk-body" d="M0 -9 l-4.5 13 h9 z" />
-        <foreignObject x="-16" y="-36" width="32" height="32">
+        <ellipse className="city-home-pad" rx={home ? 18 : 12} ry={home ? 7 : 5} cy="6" />
+        {home ? (
+          <path className="city-porch-rail" d="M-14 2 H14 M-14 2 v-7 M0 2 v-7 M14 2 v-7" />
+        ) : null}
+        {stage === 'lit' ? <circle className="city-lamp" cx="16" cy="-2" r="3.4" /> : null}
+        <foreignObject x="-20" y="-44" width="40" height="40">
           <div className="city-portrait">
             <Avatar who={voice.who} size="sm" />
           </div>
         </foreignObject>
         {speaking ? (
           <g className="city-bubble">
-            <rect x="-36" y="-40" width="72" height="16" rx="8" />
-            <text y="-29" textAnchor="middle">
+            <rect x="-38" y="-62" width="76" height="16" rx="8" />
+            <text y="-51" textAnchor="middle">
               {short}
             </text>
           </g>

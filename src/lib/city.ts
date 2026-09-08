@@ -215,6 +215,58 @@ export function nextKicker(stage: CityStage, plotId: CityPlotId, dailyDone: bool
   return 'Still lit'
 }
 
+/** What visibly appears if the player takes the next build. */
+export function nextGift(id: CityPlotId, stage: CityStage, fill: number): string {
+  switch (id) {
+    case 'porch':
+      if (stage === 'scaffold' || stage === 'empty') return 'Juniper’s porch roof will go on'
+      if (stage === 'built') return 'The east lantern will hold'
+      return 'The porch stays lit'
+    case 'hollow':
+      if (stage === 'empty' || stage === 'scaffold') return 'Mercy’s cabin will stand'
+      if (fill < 2) return 'Another oak will rise'
+      if (fill < 3) return 'A porch oak will sprout'
+      if (fill < 4) return 'The last oak will rise'
+      return 'The oaks will light'
+    case 'bench':
+      if (stage === 'empty' || stage === 'scaffold') return 'Silas’s hall will stand'
+      if (fill < 2) return 'A window will open'
+      if (fill < 3) return 'Another window will open'
+      if (fill < 4) return 'The last window will open'
+      return 'The square will warm'
+    case 'observatory':
+      if (stage === 'empty' || stage === 'scaffold') return 'Nora’s dome will rise'
+      if (fill < 2) return 'Glass will set in the dome'
+      if (fill < 3) return 'The oculus will catch'
+      if (fill < 4) return 'The last glass will set'
+      return 'Stars will catch the glass'
+    case 'gate':
+      if (stage === 'empty' || stage === 'scaffold') return 'Ansel’s arch will stand'
+      if (fill < 2) return 'Stone will settle'
+      if (fill < 3) return 'A lantern will hang'
+      if (fill < 4) return 'The last stone will set'
+      return 'The east road will warm'
+    case 'lookout':
+      if (stage === 'empty' || stage === 'scaffold') return 'Hope’s tower will rise'
+      if (fill < 2) return 'The flag will kick'
+      if (fill < 3) return 'A ridge lantern will hang'
+      if (fill < 4) return 'The last timber will set'
+      return 'The ridge lantern will hold'
+    case 'journal':
+      if (stage === 'empty' || stage === 'scaffold') return 'The dossier house will stand'
+      if (fill < 4) return 'Another page will land'
+      if (fill < 12) return 'The window will glow'
+      return 'The pages will glow'
+    case 'lamps':
+      if (stage === 'empty' || stage === 'scaffold') return 'The first street lamp will catch'
+      if (fill < 4) return 'Another lamp will catch'
+      if (fill < 12) return 'The street will remember'
+      return 'The street stays remembered'
+    default:
+      return 'The town will grow'
+  }
+}
+
 export const CITY_SEEN_KEY = 'silver-city-seen-city-v1'
 export const CITY_FILL_KEY = 'silver-city-seen-fill-v1'
 export const CITY_HOMECOMING_KEY = 'silver-city-homecoming-v1'

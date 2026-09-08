@@ -7,6 +7,7 @@ import {
   fillGrows,
   fillSnapshot,
   newestStanding,
+  nextGift,
   nextKicker,
   nextPlotId,
   plotFill,
@@ -73,6 +74,13 @@ assert.match(mapSrc, /beatRank/)
 assert.match(mapSrc, /maybeHomecoming/)
 assert.match(mapSrc, /Still lit/)
 assert.match(mapSrc, /city-morrow/)
+assert.match(mapSrc, /city-gift/)
+assert.match(mapSrc, /nextGift/)
+assert.match(mapSrc, /city-home-pad/)
+assert.match(mapSrc, /city-roof-tile/)
+assert.match(mapSrc, /PlotArt/)
+assert.match(mapSrc, /HollowArt/)
+assert.match(mapSrc, /PorchArt/)
 
 const twoHollow = {
   ...afterDaily,
@@ -380,6 +388,10 @@ assert.equal(nextKicker('lit', 'porch', true), 'Still lit')
 assert.equal(nextKicker('scaffold', 'hollow', true), 'Build next')
 assert.equal(nextKicker('empty', 'bench', true), 'Build next')
 assert.equal(nextKicker('built', 'porch', false), 'Walk next')
+assert.equal(nextGift('hollow', 'scaffold', 0), 'Mercy’s cabin will stand')
+assert.equal(nextGift('porch', 'scaffold', 0), 'Juniper’s porch roof will go on')
+assert.equal(nextGift('hollow', 'built', 1), 'Another oak will rise')
+assert.equal(nextGift('bench', 'scaffold', 0), 'Silas’s hall will stand')
 
 const shellSrc = readFileSync(
   new URL('../src/components/AppShell.tsx', import.meta.url),
@@ -392,6 +404,12 @@ const cssSrc = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8'
 assert.match(cssSrc, /is-alive \.city-canopy\.is-sprout/)
 assert.match(cssSrc, /is-alive \.city-folk\.is-waving/)
 assert.match(cssSrc, /city-roof-kick/)
+assert.match(cssSrc, /city-home-pad/)
+assert.match(cssSrc, /city-roof-tile/)
+assert.match(cssSrc, /city-gift/)
+assert.match(cssSrc, /city-porch/)
+assert.match(cssSrc, /city-plot\.is-built \.city-roof/)
+assert.match(cssSrc, /city-street\.is-lit/)
 assert.match(cssSrc, /tile-burst/)
 assert.match(cssSrc, /win-spark/)
 assert.match(cssSrc, /puzzle-title/)
