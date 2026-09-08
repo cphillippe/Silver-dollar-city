@@ -61,6 +61,7 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
       (Boolean(progress.held.includes(brief.id)) && !isReview),
   )
   const [taught, setTaught] = useState(() => !brief || isReview)
+  const [arming, setArming] = useState(false)
 
   const showNext = solved && held
 
@@ -107,7 +108,7 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
   const rehearsing = solved && Boolean(brief) && !held
 
   return (
-    <main className={`daily-page ${solved ? 'is-after' : taught ? 'is-puzzle' : 'is-teach'} ${rehearsing ? 'is-rehearse' : ''}`} aria-label={STORY.playGoal}>
+    <main className={`daily-page ${solved ? 'is-after' : taught ? 'is-puzzle' : 'is-teach'} ${rehearsing ? 'is-rehearse' : ''} ${arming ? 'is-arming' : ''}`} aria-label={STORY.playGoal}>
       <button
         type="button"
         className="text-link"
@@ -121,7 +122,11 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
           <TeachUnlock
             brief={brief}
             kind={challenge.kind}
-            onUnlock={() => setTaught(true)}
+            onUnlock={() => {
+              setTaught(true)
+              setArming(true)
+              window.setTimeout(() => setArming(false), 360)
+            }}
           />
         ) : (
           <>

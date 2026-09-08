@@ -232,6 +232,24 @@ Usage tight. Town was a labeled map. Bill wants a place you BUILD.
 
 Done when a cold player feels they are upgrading a real town as they learn.
 
+## Block-choice glitches (2026-09-08)
+
+Usage tight. Bill: “Glitches in the block choices” on the buildable-city build.
+
+What glitched:
+- **Keep/Toss:** long lines grew the chip and clipped the Keep/Toss hit targets — tap selected the tile instead of Keep.
+- **Jericho two-choice:** a new decoy flipped after each beat (cards jumped); taps during shake double-fired; first miss left a stuck wrong state.
+- **Observatory slots:** `overflow: auto` stole taps; Premise labels weren’t in the hit target; Unlock could ghost-click the first stone.
+
+What we fixed:
+- Seats keep a reserved Keep/Toss row (44px). Chip text clamps. No overlap.
+- Decoy stays put until used. Shake locks input. Miss returns to idle.
+- Slots clip (no scroll-steal). Whole slot including the label is tappable. Unlock arms 360ms.
+
+Seats, teach-first, Premise 2 chairs, town upgrades, ownership, copy-truth, lock-in stay.
+
+Done when block choices feel solid on mobile 390×844.
+
 ## Tooling note (npm audit)
 
 `uuid` 7.x via `@capacitor/cli` (GHSA-w5hq-g745-h8pq) is **tooling-only**. Do not `npm audit fix --force` (it wants to downgrade Capacitor). Upgrade when a CLI release pulls `uuid >= 11.1.1`. Details in `SECURITY_REVIEW.md`.
