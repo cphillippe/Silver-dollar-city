@@ -250,6 +250,16 @@ Seats, teach-first, Premise 2 chairs, town upgrades, ownership, copy-truth, lock
 
 Done when block choices feel solid on mobile 390×844.
 
+## Observatory slots fit the phone (2026-09-08)
+
+Bill: the Premise / Conclusion screen does not fit. He cannot tap **Premise 1**.
+
+- Slots sit above the stones. Premise 1 is on-screen first.
+- Each slot is one row: label + same-size seat. The board does not scroll; long text scrolls inside a seat.
+- Fill any order. Teach-before-test and the town stay.
+
+Done when Premise 1 is tappable on ~390×844 and the screen does not cut off.
+
 ## Tooling note (npm audit)
 
 `uuid` 7.x via `@capacitor/cli` (GHSA-w5hq-g745-h8pq) is **tooling-only**. Do not `npm audit fix --force` (it wants to downgrade Capacitor). Upgrade when a CLI release pulls `uuid >= 11.1.1`. Details in `SECURITY_REVIEW.md`.

@@ -113,43 +113,13 @@ export function BuildArgumentPlay({
   }
 
   return (
-    <div className={`play is-build ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}>
+    <div className={`play is-build is-onescreen ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}>
       <WinBurst play={status === 'ok'} />
       <PuzzleLead challenge={challenge} />
       <PuzzleHint text={challenge.context} onPeek={onPeek} />
       <p className="sort-how">
         <strong>Tap a stone</strong> · then a slot
       </p>
-
-      <div className="bank is-order">
-        {order.map((home, index) => {
-          const live = seats[index]?.id === home.id
-          return (
-            <div
-              key={home.id}
-              className={`sort-tile sort-seat ${live && selected === home.id ? 'is-selected' : ''} ${live ? '' : 'is-gone'} ${live ? '' : 'was-placed'}`}
-              style={{
-                gridColumn: (index % 2) + 1,
-                gridRow: Math.floor(index / 2) + 1,
-              }}
-            >
-              <button
-                type="button"
-                className={`chip ${live && selected === home.id ? 'is-selected' : ''} ${home.distractor ? 'is-tempt' : ''}`}
-                tabIndex={0}
-                aria-label={live ? home.text : `Return ${home.text} to its seat`}
-                onClick={() => {
-                  if (shake) return
-                  if (live) setSelected(home.id === selected ? null : home.id)
-                  else returnCard(home.id)
-                }}
-              >
-                {home.text}
-              </button>
-            </div>
-          )
-        })}
-      </div>
 
       <div className="slot-list">
         {challenge.slots.map((slot, index) => {
@@ -187,6 +157,36 @@ export function BuildArgumentPlay({
                   {selected ? '↓' : ''}
                 </button>
               )}
+            </div>
+          )
+        })}
+      </div>
+
+      <div className="bank is-order">
+        {order.map((home, index) => {
+          const live = seats[index]?.id === home.id
+          return (
+            <div
+              key={home.id}
+              className={`sort-tile sort-seat ${live && selected === home.id ? 'is-selected' : ''} ${live ? '' : 'is-gone'} ${live ? '' : 'was-placed'}`}
+              style={{
+                gridColumn: (index % 2) + 1,
+                gridRow: Math.floor(index / 2) + 1,
+              }}
+            >
+              <button
+                type="button"
+                className={`chip ${live && selected === home.id ? 'is-selected' : ''} ${home.distractor ? 'is-tempt' : ''}`}
+                tabIndex={0}
+                aria-label={live ? home.text : `Return ${home.text} to its seat`}
+                onClick={() => {
+                  if (shake) return
+                  if (live) setSelected(home.id === selected ? null : home.id)
+                  else returnCard(home.id)
+                }}
+              >
+                {home.text}
+              </button>
             </div>
           )
         })}
