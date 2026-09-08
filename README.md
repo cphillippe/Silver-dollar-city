@@ -9,9 +9,9 @@ A stranger should know in 60 seconds: this is a **Christian reasoning game**. So
 ## Play now (no install)
 
 **Open this in normal Chrome — live preview of this branch:**  
-https://combined-present-apply-rental.trycloudflare.com/
+https://cms-virgin-wrote-performed.trycloudflare.com/
 
-That URL is a **new** Cloudflare origin in front of `vite preview` (HTTP 200). Skip older tunnels. Skip StackBlitz.
+That URL is a **new** Cloudflare origin in front of `vite preview` (HTTP 200, look-climb bundle `index-9hCmVdE0.js`). Skip older tunnels. Skip StackBlitz.
 
 **GitHub Pages (one click, then it stays pretty):**  
 https://cphillippe.github.io/Silver-dollar-city/
