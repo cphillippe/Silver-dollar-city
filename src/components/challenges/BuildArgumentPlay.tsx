@@ -21,18 +21,24 @@ export function BuildArgumentPlay({
   onPeek,
 }: BuildArgumentPlayProps) {
   const seed = useMemo(() => shuffle(challenge.cards), [challenge.cards])
-  const [bank, setBank] = useState(seed)
+  const [order, setOrder] = useState(seed)
+  const [seats, setSeats] = useState<(ArgumentCard | null)[]>(seed)
   const [slots, setSlots] = useState<Record<string, ArgumentCard | undefined>>({})
   const [selected, setSelected] = useState<string | null>(null)
   const [status, setStatus] = useState<'idle' | 'wrong' | 'ok'>('idle')
   const [shake, setShake] = useState(false)
   const [misses, setMisses] = useState(0)
 
+  function takeCard(id: string) {
+    return (
+      seats.find((item) => item?.id === id) ??
+      Object.values(slots).find((item) => item?.id === id)
+    )
+  }
+
   function place(slotId: string) {
     if (status === 'ok' || !selected) return
-    const card =
-      bank.find((item) => item.id === selected) ??
-      Object.values(slots).find((item) => item?.id === selected)
+    const card = takeCard(selected)
     if (!card) return
 
     const nextSlots = { ...slots }
@@ -41,13 +47,16 @@ export function BuildArgumentPlay({
       if (nextSlots[key]?.id === card.id) delete nextSlots[key]
     }
     nextSlots[slotId] = card
-    let nextBank = bank.filter((item) => item.id !== card.id)
-    if (displaced && displaced.id !== card.id) {
-      nextBank = nextBank.some((item) => item.id === displaced.id)
-        ? nextBank
-        : [...nextBank, displaced]
-    }
-    setBank(nextBank)
+
+    const homeOf = (id: string) => order.findIndex((item) => item.id === id)
+    setSeats((current) => {
+      const next = current.map((item) => (item?.id === card.id ? null : item))
+      if (displaced && displaced.id !== card.id) {
+        const home = homeOf(displaced.id)
+        if (home >= 0) next[home] = displaced
+      }
+      return next
+    })
     setSlots(nextSlots)
     setSelected(null)
     setStatus('idle')
@@ -58,16 +67,25 @@ export function BuildArgumentPlay({
     }
   }
 
-  function returnCard(slotId: string) {
+  function returnCard(id: string) {
     if (status === 'ok') return
-    const card = slots[slotId]
+    const card = takeCard(id)
     if (!card) return
+    const home = order.findIndex((item) => item.id === id)
     setSlots((current) => {
       const next = { ...current }
-      delete next[slotId]
+      for (const key of Object.keys(next)) {
+        if (next[key]?.id === id) delete next[key]
+      }
       return next
     })
-    setBank((current) => [...current, card])
+    setSeats((current) => {
+      if (current.some((item) => item?.id === id)) return current
+      const next = [...current]
+      if (home >= 0) next[home] = card
+      return next
+    })
+    setSelected(null)
     setStatus('idle')
   }
 
@@ -86,16 +104,51 @@ export function BuildArgumentPlay({
     onMiss()
     window.setTimeout(() => {
       setShake(false)
-      setBank(shuffle(challenge.cards))
+      const next = shuffle(challenge.cards)
+      setOrder(next)
+      setSeats(next)
       setSlots({})
+      setSelected(null)
     }, 880)
   }
 
   return (
-    <div className={`play ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}>
+    <div className={`play is-build ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}>
       <WinBurst play={status === 'ok'} />
       <PuzzleLead challenge={challenge} />
       <PuzzleHint text={challenge.context} onPeek={onPeek} />
+      <p className="sort-how">
+        <strong>Tap a stone</strong> · then a slot
+      </p>
+
+      <div className="bank is-order">
+        {order.map((home, index) => {
+          const live = seats[index]?.id === home.id
+          return (
+            <div
+              key={home.id}
+              className={`sort-tile sort-seat ${live && selected === home.id ? 'is-selected' : ''} ${live ? '' : 'is-gone'} ${live ? '' : 'was-placed'}`}
+              style={{
+                gridColumn: (index % 2) + 1,
+                gridRow: Math.floor(index / 2) + 1,
+              }}
+            >
+              <button
+                type="button"
+                className={`chip ${live && selected === home.id ? 'is-selected' : ''} ${home.distractor ? 'is-tempt' : ''}`}
+                tabIndex={0}
+                aria-label={live ? home.text : `Return ${home.text} to its seat`}
+                onClick={() => {
+                  if (live) setSelected(home.id === selected ? null : home.id)
+                  else returnCard(home.id)
+                }}
+              >
+                {home.text}
+              </button>
+            </div>
+          )
+        })}
+      </div>
 
       <div className="slot-list">
         {challenge.slots.map((slot, index) => {
@@ -108,7 +161,7 @@ export function BuildArgumentPlay({
                   type="button"
                   className="chip in-slot pop-in"
                   style={status === 'ok' ? burstStyle(index, 'mid') : undefined}
-                  onClick={() => returnCard(slot.id)}
+                  onClick={() => returnCard(card.id)}
                 >
                   {card.text}
                 </button>
@@ -118,25 +171,12 @@ export function BuildArgumentPlay({
                   className={`slot-target ${selected ? 'awaiting' : ''}`}
                   onClick={() => place(slot.id)}
                 >
-                  {selected ? 'Drop here' : 'Empty'}
+                  {selected ? '↓' : ''}
                 </button>
               )}
             </div>
           )
         })}
-      </div>
-
-      <div className="bank">
-        {bank.map((card) => (
-          <button
-            key={card.id}
-            type="button"
-            className={`chip ${selected === card.id ? 'is-selected' : ''} ${card.distractor ? 'is-tempt' : ''}`}
-            onClick={() => setSelected(card.id === selected ? null : card.id)}
-          >
-            {card.text}
-          </button>
-        ))}
       </div>
 
       <ResultPanel

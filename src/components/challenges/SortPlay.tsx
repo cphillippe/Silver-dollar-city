@@ -126,7 +126,7 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
         <strong>Keep</strong> belongs · <strong>Toss</strong> a distractor
       </p>
 
-      <div className="bank">
+      <div className="bank is-sort">
         {order.map((home, index) => {
           const live = slots[index]?.id === home.id
           const goneTo = keep.some((item) => item.id === home.id)
