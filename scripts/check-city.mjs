@@ -528,6 +528,8 @@ assert.match(defendSrc, /Unlock the lamps/)
 assert.match(defendSrc, /TeachUnlock/)
 assert.match(defendSrc, /RecallGate/)
 assert.match(defendSrc, /defendPads/)
+assert.match(defendSrc, /afterJuiceRef/)
+assert.match(defendSrc, /}, \[phase\]/)
 assert.match(cssSrc, /defend-board/)
 assert.match(sequenceSrc, /progressive && !live/)
 
