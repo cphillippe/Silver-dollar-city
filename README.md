@@ -8,15 +8,20 @@ A stranger should know in 60 seconds: this is a **Christian reasoning game**. So
 
 ## Play now (no install)
 
-**Open this in normal Chrome — live preview of this branch:**  
-https://cms-virgin-wrote-performed.trycloudflare.com/
-
-That URL is a **new** Cloudflare origin in front of `vite preview` (HTTP 200, look-climb bundle `index-9hCmVdE0.js`). Skip older tunnels. Skip StackBlitz.
-
-**GitHub Pages (one click, then it stays pretty):**  
+**Sticky public preview (GitHub Pages):**  
 https://cphillippe.github.io/Silver-dollar-city/
 
-Repo owner: **Settings → Pages → Deploy from a branch** → `cursor/silver-city-unending-evidence-8233` → `/docs` → Save. The site is already in [`docs/`](docs/). Or set Source to **GitHub Actions** (workflow is on this branch).
+The game is already in [`docs/`](docs/) on this branch (`base: './'`, so assets resolve under `/Silver-dollar-city/`). **Bill must flip this once** (owner-only):
+
+1. Open the repo → **Settings** → **Pages**
+2. **Build and deployment** → Source: **Deploy from a branch**
+3. Branch: **`cursor/silver-city-unending-evidence-8233`**
+4. Folder: **`/docs`**
+5. **Save**
+
+After Save, wait a minute, then hard-reload the Pages URL. Later, after merge, switch the branch to **`main`** and keep `/docs`.
+
+**Interim tunnel (dies often — skip if Pages is live):** a fresh trycloudflare URL is posted on PR #1 after each package. Do not use older tunnels. Skip StackBlitz.
 
 ## The story
 
@@ -116,9 +121,9 @@ Progress shape (same key `silver-city-progress-v1`): `memory[id].nextReviewAt`, 
 
 ## Friend preview (no install)
 
-**Play now (Chrome, new origin):** https://combined-present-apply-rental.trycloudflare.com/
+**Sticky:** https://cphillippe.github.io/Silver-dollar-city/ (owner must enable Pages once — steps above).
 
-**After Pages is enabled:** https://cphillippe.github.io/Silver-dollar-city/
+**Interim tunnel:** see PR #1. Skip older trycloudflare links.
 
 On the web app, tap **Share a morning**. The pitch is not a high score. It asks a friend to try the walk, fold the page, and see what they can still say.
 
