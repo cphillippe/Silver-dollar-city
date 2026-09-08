@@ -200,6 +200,18 @@ Learner: seats were stable on Night air only. Mercy / Hollow (Jericho order) pac
 
 Done when Learner can pass seats on Hollow/mercy and the first beat feels less like homework.
 
+## First order as a game (2026-09-08)
+
+Playtest: Fun 5 · Clarity 5 · Retention 5 · Learnability 4. Jericho seats PASS. Ownership / copy-truth / Fun 5 stay.
+
+Learner: five face-up sentences still felt like a quiz.
+
+- **Deal two** on long orders. Face-down chairs hold the seats. The next stone flips in — no pack.
+- **1 2 3 4 5** HUD: the next number beats gold. The empty chair pulses. Live stones glow.
+- No extra essay. Fold still keeps claim / reason / source.
+
+Done when first sequencing feels playful enough for Learnability 5.
+
 ## Tooling note (npm audit)
 
 `uuid` 7.x via `@capacitor/cli` (GHSA-w5hq-g745-h8pq) is **tooling-only**. Do not `npm audit fix --force` (it wants to downgrade Capacitor). Upgrade when a CLI release pulls `uuid >= 11.1.1`. Details in `SECURITY_REVIEW.md`.
