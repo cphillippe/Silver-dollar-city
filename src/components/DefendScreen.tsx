@@ -56,6 +56,10 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const [missedNight, setMissedNight] = useState(false)
   const { juiceDone, afterJuice } = useJuiceHandoff()
   const saved = useRef(false)
+  const afterJuiceRef = useRef(afterJuice)
+  const markMissRef = useRef(markMiss)
+  afterJuiceRef.current = afterJuice
+  markMissRef.current = markMiss
   const live = useRef({
     raiders: [] as Raider[],
     spawned: 0,
@@ -120,7 +124,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         live.current.hearts = Math.max(0, live.current.hearts - leaked)
         setHearts(live.current.hearts)
         setMissedNight(true)
-        markMiss(DEFEND_BRIEF_ID)
+        markMissRef.current(DEFEND_BRIEF_ID)
       }
       if (
         live.current.spawned < DEFEND_WAVE_SIZE &&
@@ -145,7 +149,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       if (live.current.spawned >= DEFEND_WAVE_SIZE && walking.length === 0) {
         live.current.playing = false
         setWon(true)
-        afterJuice()
+        afterJuiceRef.current()
         return
       }
       frame = requestAnimationFrame(tick)
@@ -155,7 +159,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       live.current.playing = false
       cancelAnimationFrame(frame)
     }
-  }, [phase, afterJuice, markMiss])
+  }, [phase])
 
   function togglePad(id: CityPlotId) {
     if (phase !== 'plant') return
@@ -287,11 +291,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
               strokeLinecap="round"
               opacity="0.85"
             />
-            {DEFEND_PATH.map((pt, index) =>
-              index === 0 ? (
-                <circle key="spawn" cx={pt.x} cy={pt.y} r="5" fill="#c46b4a" />
-              ) : null,
-            )}
+            <circle cx={DEFEND_PATH[0].x} cy={DEFEND_PATH[0].y} r="4" fill="#8a5428" />
             {pads.map((id) => {
               const at = DEFEND_ANCHOR[id]
               const on = planted.includes(id)
@@ -327,7 +327,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
               const at = pathPoint(raider.t)
               return (
                 <g key={raider.id} className="defend-raider" transform={`translate(${at.x} ${at.y})`}>
-                  <circle r="11" />
+                  <circle r="13" />
+                  <circle r="5" className="defend-raider-core" />
                 </g>
               )
             })}

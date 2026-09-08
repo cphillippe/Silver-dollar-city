@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
 
 /** How long the lock-in burst holds the board before takeaway chips. */
 export const WIN_BURST_MS = 1100
@@ -34,13 +34,13 @@ export function useJuiceHandoff(already = false) {
   const timer = useRef(0)
   useEffect(() => () => window.clearTimeout(timer.current), [])
 
-  function afterJuice() {
+  const afterJuice = useCallback(() => {
     window.clearTimeout(timer.current)
     timer.current = window.setTimeout(
       () => setReady(true),
       prefersReducedMotion() ? 900 : WIN_BURST_MS,
     )
-  }
+  }, [])
 
   return { juiceDone: ready, afterJuice }
 }

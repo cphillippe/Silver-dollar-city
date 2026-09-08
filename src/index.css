@@ -4025,15 +4025,13 @@ p {
 
 .defend-raider circle {
   fill: #c46b4a;
-  stroke: #f4ead2;
-  stroke-width: 1.2;
+  stroke: #fff6e8;
+  stroke-width: 2;
 }
 
-.defend-raider text {
-  fill: #fff6e8;
-  font-size: 9px;
-  font-weight: 700;
-  font-family: var(--sans);
+.defend-raider-core {
+  fill: #fff1c8;
+  stroke: none;
 }
 
 .defend-tip {
