@@ -212,6 +212,16 @@ Learner: five face-up sentences still felt like a quiz.
 
 Done when first sequencing feels playful enough for Learnability 5.
 
+## Teach before the test (2026-09-08)
+
+Usage tight. Observatory Premise 2 broke the screen (slot grew, board clipped).
+
+- **Any premise order:** build slots are same-size chairs. Filling Premise 2 first cannot blow the layout.
+- **Teach first** on Daily Trail (Night air / early trail) and Observatory: claim · reason · source, then Unlock. Dust-off skips the gate.
+- Fun 5 seats, ownership, copy-truth, lock-in, Hollow seats stay.
+
+Done when Premise 2 is stable and that path sees teaching before the quiz.
+
 ## Tooling note (npm audit)
 
 `uuid` 7.x via `@capacitor/cli` (GHSA-w5hq-g745-h8pq) is **tooling-only**. Do not `npm audit fix --force` (it wants to downgrade Capacitor). Upgrade when a CLI release pulls `uuid >= 11.1.1`. Details in `SECURITY_REVIEW.md`.
