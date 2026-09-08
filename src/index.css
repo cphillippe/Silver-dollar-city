@@ -3994,6 +3994,15 @@ p {
   cursor: pointer;
 }
 
+.defend-hit {
+  fill: transparent;
+}
+
+.defend-pad.is-hot .defend-ring {
+  stroke: #fff6d8;
+  stroke-width: 3;
+}
+
 .defend-ring {
   fill: rgba(224, 179, 74, 0.12);
   stroke: rgba(224, 179, 74, 0.45);

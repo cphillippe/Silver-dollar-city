@@ -57,15 +57,23 @@ export function defendPads(progress: ProgressState): CityPlotId[] {
 }
 
 export function towerRange(stage: CityStage): number {
-  if (stage === 'lit') return 120
-  if (stage === 'built') return 100
-  return 78
+  if (stage === 'lit') return 136
+  if (stage === 'built') return 118
+  return 96
 }
 
 export function towerCooldown(stage: CityStage): number {
-  if (stage === 'lit') return 420
-  if (stage === 'built') return 640
-  return 880
+  if (stage === 'lit') return 380
+  if (stage === 'built') return 520
+  return 700
+}
+
+export function waveSpeed(): number {
+  return 0.048
+}
+
+export function waveSpawnEvery(): number {
+  return 2.05
 }
 
 export function pathPoint(t: number): { x: number; y: number } {
