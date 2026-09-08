@@ -45,6 +45,7 @@ export function ChallengeScreen({
   const [recalled, setRecalled] = useState(false)
   const teachFirst = areaId === 'observatory' && Boolean(brief)
   const [taught, setTaught] = useState(() => !teachFirst || reviewing)
+  const [arming, setArming] = useState(false)
 
   useEffect(() => {
     if (!showNext) return
@@ -125,7 +126,7 @@ export function ChallengeScreen({
 
   return (
     <main
-      className={`challenge-page ${showNext ? 'is-after' : taught ? 'is-puzzle' : 'is-teach'} ${rehearsing ? 'is-rehearse' : ''}`}
+      className={`challenge-page ${showNext ? 'is-after' : taught ? 'is-puzzle' : 'is-teach'} ${rehearsing ? 'is-rehearse' : ''} ${arming ? 'is-arming' : ''}`}
       aria-label={STORY.playGoal}
     >
       <button
@@ -141,7 +142,11 @@ export function ChallengeScreen({
           <TeachUnlock
             brief={brief}
             kind={challenge.kind}
-            onUnlock={() => setTaught(true)}
+            onUnlock={() => {
+              setTaught(true)
+              setArming(true)
+              window.setTimeout(() => setArming(false), 360)
+            }}
           />
         ) : (
           <>

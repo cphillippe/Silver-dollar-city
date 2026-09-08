@@ -1412,11 +1412,14 @@ p {
 }
 
 .is-puzzle .sort-tile {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
   gap: 4px;
   height: var(--sort-seat);
   min-height: var(--sort-seat);
   max-height: var(--sort-seat);
   overflow: hidden;
+  isolation: isolate;
 }
 
 .is-puzzle .play.is-sequence .sort-tile,
@@ -1431,6 +1434,7 @@ p {
 
 .is-puzzle .play.is-build .slot {
   --slot-seat: 64px;
+  cursor: pointer;
 }
 
 .is-puzzle .play.is-build .slot-target,
@@ -1438,8 +1442,14 @@ p {
   height: var(--slot-seat);
   min-height: var(--slot-seat);
   max-height: var(--slot-seat);
-  overflow: auto;
+  overflow: hidden;
   overflow-wrap: anywhere;
+}
+
+.is-puzzle .play.is-build .chip.in-slot {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
 }
 
 .is-puzzle .sort-bins {
@@ -1477,10 +1487,17 @@ p {
 }
 
 .is-puzzle .sort-tile .chip {
-  padding: 8px 8px;
-  min-height: 40px;
+  padding: 6px 8px;
+  min-height: 0;
+  max-height: 100%;
+  height: auto;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
   font-size: 0.82rem;
-  line-height: 1.25;
+  line-height: 1.2;
+  z-index: 0;
 }
 
 .is-puzzle .play.is-sequence .sort-tile .chip,
@@ -1489,15 +1506,29 @@ p {
   padding: 6px 8px;
   min-height: 0;
   height: 100%;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   font-size: 0.72rem;
   line-height: 1.2;
 }
 
+.is-puzzle .sort-tile-actions {
+  position: relative;
+  z-index: 1;
+  flex-wrap: nowrap;
+  gap: 6px;
+  min-height: 44px;
+}
+
 .is-puzzle .sort-tile-actions .btn.tiny {
   flex: 1;
-  min-height: 40px;
+  min-height: 44px;
+  min-width: 44px;
   padding: 6px 8px;
   font-size: 0.78rem;
+  touch-action: manipulation;
 }
 
 .choice,
@@ -1519,6 +1550,11 @@ p {
 .is-puzzle .slot-target {
   padding: 8px 10px;
   min-height: 44px;
+  touch-action: manipulation;
+}
+
+.is-puzzle.is-arming .play {
+  pointer-events: none;
 }
 
 .choice {
@@ -1640,6 +1676,7 @@ p {
 .sort-tile.is-facedown {
   background: rgba(224, 179, 74, 0.06);
   box-shadow: inset 0 0 0 2px rgba(224, 179, 74, 0.28);
+  pointer-events: none;
 }
 
 .stone-back {
@@ -2496,6 +2533,14 @@ p {
     height: 40px;
     min-height: 40px;
     max-height: 40px;
+  }
+
+  .is-puzzle .sort-tile-actions {
+    min-height: 36px;
+  }
+
+  .is-puzzle .sort-tile-actions .btn.tiny {
+    min-height: 36px;
   }
 
   .is-puzzle .sort-bins {

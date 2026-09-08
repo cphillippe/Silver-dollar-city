@@ -37,7 +37,7 @@ export function BuildArgumentPlay({
   }
 
   function place(slotId: string) {
-    if (status === 'ok' || !selected) return
+    if (status === 'ok' || shake || !selected) return
     const card = takeCard(selected)
     if (!card) return
 
@@ -68,7 +68,7 @@ export function BuildArgumentPlay({
   }
 
   function returnCard(id: string) {
-    if (status === 'ok') return
+    if (status === 'ok' || shake) return
     const card = takeCard(id)
     if (!card) return
     const home = order.findIndex((item) => item.id === id)
@@ -139,6 +139,7 @@ export function BuildArgumentPlay({
                 tabIndex={0}
                 aria-label={live ? home.text : `Return ${home.text} to its seat`}
                 onClick={() => {
+                  if (shake) return
                   if (live) setSelected(home.id === selected ? null : home.id)
                   else returnCard(home.id)
                 }}
@@ -154,14 +155,23 @@ export function BuildArgumentPlay({
         {challenge.slots.map((slot, index) => {
           const card = slots[slot.id]
           return (
-            <div key={slot.id} className={`slot ${slot.role}`}>
+            <div
+              key={slot.id}
+              className={`slot ${slot.role}`}
+              onClick={() => {
+                if (!card) place(slot.id)
+              }}
+            >
               <span className="slot-label">{slot.label}</span>
               {card ? (
                 <button
                   type="button"
                   className="chip in-slot pop-in"
                   style={status === 'ok' ? burstStyle(index, 'mid') : undefined}
-                  onClick={() => returnCard(card.id)}
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    returnCard(card.id)
+                  }}
                 >
                   {card.text}
                 </button>
@@ -169,7 +179,10 @@ export function BuildArgumentPlay({
                 <button
                   type="button"
                   className={`slot-target ${selected ? 'awaiting' : ''}`}
-                  onClick={() => place(slot.id)}
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    place(slot.id)
+                  }}
                 >
                   {selected ? '↓' : ''}
                 </button>

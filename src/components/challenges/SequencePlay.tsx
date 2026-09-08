@@ -25,6 +25,17 @@ function decoyFor(
   return shuffle(decoys)[0]?.id ?? null
 }
 
+function keepDecoy(
+  items: SequenceItem[],
+  nextIndex: number,
+  placed: Set<string>,
+  current: string | null,
+) {
+  const need = items[nextIndex]
+  if (current && need && current !== need.id && !placed.has(current)) return current
+  return decoyFor(items, nextIndex, placed)
+}
+
 export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePlayProps) {
   const seed = useMemo(() => shuffle(challenge.items), [challenge.items])
   const progressive = challenge.items.length >= 4
@@ -60,7 +71,7 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
   }
 
   function add(id: string) {
-    if (status === 'ok') return
+    if (status === 'ok' || shake) return
     const item = takeItem(id)
     if (!item) return
     const dest = chain.findIndex((slot) => slot === null)
@@ -80,10 +91,8 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
       onMiss()
       window.setTimeout(() => {
         setShake(false)
-        if (nextMisses >= 2) {
-          resetBoard()
-          setStatus('idle')
-        }
+        if (nextMisses >= 2) resetBoard()
+        setStatus('idle')
       }, 880)
       return
     }
@@ -94,7 +103,7 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
     const nextDest = nextChain.findIndex((slot) => slot === null)
     setDecoyId(
       progressive && nextDest >= 0
-        ? decoyFor(challenge.items, nextDest, placedIds(nextChain))
+        ? keepDecoy(challenge.items, nextDest, placedIds(nextChain), decoyId)
         : null,
     )
     setStatus('idle')
@@ -105,7 +114,7 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
   }
 
   function remove(id: string) {
-    if (status === 'ok') return
+    if (status === 'ok' || shake) return
     const item = takeItem(id)
     if (!item) return
     const home = order.findIndex((entry) => entry.id === id)
@@ -120,7 +129,7 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
     const nextDest = nextChain.findIndex((slot) => slot === null)
     setDecoyId(
       progressive && nextDest >= 0
-        ? decoyFor(challenge.items, nextDest, placedIds(nextChain))
+        ? keepDecoy(challenge.items, nextDest, placedIds(nextChain), decoyId)
         : null,
     )
     setStatus('idle')

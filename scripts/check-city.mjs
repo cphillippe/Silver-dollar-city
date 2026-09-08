@@ -251,6 +251,8 @@ assert.match(sequenceSrc, /is-now/)
 assert.match(sequenceSrc, /is-facedown/)
 assert.match(sequenceSrc, /is-deal/)
 assert.match(sequenceSrc, /decoyFor/)
+assert.match(sequenceSrc, /keepDecoy/)
+assert.match(sequenceSrc, /shake\) return/)
 assert.match(sequenceSrc, /need\.id/)
 assert.match(sequenceSrc, /Return \$\{home\.text\} to its seat/)
 assert.doesNotMatch(sequenceSrc, /Next step/)
@@ -304,6 +306,7 @@ assert.doesNotMatch(dailyTrailSrc, /district-flavor/)
 assert.doesNotMatch(dailyTrailSrc, /Tomorrow:/)
 assert.match(dailyTrailSrc, /TeachUnlock/)
 assert.match(dailyTrailSrc, /is-teach/)
+assert.match(dailyTrailSrc, /is-arming/)
 
 const puzzleLeadSrc = readFileSync(
   new URL('../src/components/challenges/PuzzleLead.tsx', import.meta.url),
@@ -368,6 +371,7 @@ assert.match(challengeSrc, /tile\.bin === 'keep'/)
 assert.match(challengeSrc, /TeachUnlock/)
 assert.match(challengeSrc, /areaId === 'observatory'/)
 assert.match(challengeSrc, /is-teach/)
+assert.match(challengeSrc, /is-arming/)
 
 const teachSrc = readFileSync(
   new URL('../src/components/TeachUnlock.tsx', import.meta.url),
@@ -438,6 +442,19 @@ assert.match(cssSrc, /recall-gate\.is-encode/)
 assert.match(cssSrc, /recall-gate\.is-own/)
 assert.match(cssSrc, /teach-gate/)
 assert.match(cssSrc, /--slot-seat/)
+assert.match(cssSrc, /grid-template-rows: minmax\(0, 1fr\) auto/)
+assert.match(cssSrc, /-webkit-line-clamp: 3/)
+assert.match(cssSrc, /is-arming/)
+assert.match(
+  cssSrc,
+  /\.is-puzzle \.play\.is-build \.chip\.in-slot \{\s*height: var\(--slot-seat\);[\s\S]*?overflow: hidden/,
+  'premise slots must clip, not scroll-steal taps',
+)
+assert.doesNotMatch(
+  cssSrc,
+  /\.is-puzzle \.play\.is-build \.chip\.in-slot \{[^}]*overflow:\s*auto/,
+  'in-slot overflow auto steals taps on Premise 2',
+)
 assert.doesNotMatch(
   cssSrc,
   /\.play\.is-ready\s+\.bank\s*\{[^}]*display:\s*none/,

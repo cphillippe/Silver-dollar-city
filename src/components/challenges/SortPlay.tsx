@@ -50,7 +50,7 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
   }
 
   function place(id: string, bin: Bin) {
-    if (status === 'ok') return
+    if (status === 'ok' || shake) return
     const tile = takeTile(id)
     if (!tile) return
     const nextSlots = slots.map((item) => (item?.id === id ? null : item))
@@ -71,7 +71,7 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
   }
 
   function returnToBank(id: string) {
-    if (status === 'ok') return
+    if (status === 'ok' || shake) return
     const tile = takeTile(id)
     if (!tile) return
     const home = order.findIndex((item) => item.id === id)
@@ -153,6 +153,7 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
                     : `Return ${home.text} to its seat`
                 }
                 onClick={() => {
+                  if (shake) return
                   if (live) setPicked(home.id === picked ? null : home.id)
                   else returnToBank(home.id)
                 }}
@@ -175,7 +176,10 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
                   className="btn tiny keep"
                   tabIndex={live ? 0 : -1}
                   disabled={!live}
-                  onClick={() => live && place(home.id, 'keep')}
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    if (live) place(home.id, 'keep')
+                  }}
                 >
                   Keep<span className="sort-mark" aria-hidden>✓</span>
                 </button>
@@ -184,7 +188,10 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
                   className="btn tiny toss"
                   tabIndex={live ? 0 : -1}
                   disabled={!live}
-                  onClick={() => live && place(home.id, 'discard')}
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    if (live) place(home.id, 'discard')
+                  }}
                 >
                   Toss<span className="sort-mark" aria-hidden>×</span>
                 </button>
