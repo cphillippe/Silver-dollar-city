@@ -1433,16 +1433,18 @@ p {
   flex-direction: column;
   min-height: 0;
   overflow: hidden;
-  gap: 6px;
+  gap: 4px;
+  padding: 8px 8px 8px;
 }
 
 .is-puzzle .play.is-build .prompt {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   margin: 0;
+  line-height: 1.25;
 }
 
 .is-puzzle .play.is-build .hint-peek {
-  margin-bottom: 0;
+  display: none;
 }
 
 .is-puzzle .play.is-build .slot-list {
@@ -1452,7 +1454,7 @@ p {
 }
 
 .is-puzzle .play.is-build .slot {
-  --slot-seat: 52px;
+  --slot-seat: 48px;
   display: grid;
   grid-template-columns: 5.5rem minmax(0, 1fr);
   align-items: stretch;
