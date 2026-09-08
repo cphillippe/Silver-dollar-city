@@ -206,9 +206,9 @@ Playtest: Fun 5 · Clarity 5 · Retention 5 · Learnability 4. Jericho seats PAS
 
 Learner: five face-up sentences still felt like a quiz.
 
-- **Deal two** on long orders. Face-down chairs hold the seats. The next stone flips in — no pack.
+- **Two live stones:** the next beat plus one decoy. Face-down chairs hold the rest. No pack.
 - **1 2 3 4 5** HUD: the next number beats gold. The empty chair pulses. Live stones glow.
-- No extra essay. Fold still keeps claim / reason / source.
+- A wrong tap shakes; the right stone is always among the two. No extra essay. Fold still keeps claim / reason / source.
 
 Done when first sequencing feels playful enough for Learnability 5.
 

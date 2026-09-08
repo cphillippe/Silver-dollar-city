@@ -14,15 +14,27 @@ interface SequencePlayProps {
   onPeek?: () => void
 }
 
+function decoyFor(
+  items: SequenceItem[],
+  nextIndex: number,
+  placed: Set<string>,
+) {
+  const need = items[nextIndex]
+  if (!need) return null
+  const decoys = items.filter((item) => item.id !== need.id && !placed.has(item.id))
+  return shuffle(decoys)[0]?.id ?? null
+}
+
 export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePlayProps) {
   const seed = useMemo(() => shuffle(challenge.items), [challenge.items])
   const progressive = challenge.items.length >= 4
-  const openingDeal = progressive ? 2 : challenge.items.length
   const [order, setOrder] = useState(seed)
   const [seats, setSeats] = useState<(SequenceItem | null)[]>(seed)
-  const [dealt, setDealt] = useState(openingDeal)
   const [chain, setChain] = useState<(SequenceItem | null)[]>(() =>
     challenge.items.map(() => null),
+  )
+  const [decoyId, setDecoyId] = useState(() =>
+    progressive ? decoyFor(challenge.items, 0, new Set()) : null,
   )
   const [status, setStatus] = useState<'idle' | 'wrong' | 'ok'>('idle')
   const [shake, setShake] = useState(false)
@@ -33,20 +45,62 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
     return order.find((entry) => entry.id === id)
   }
 
+  function placedIds(nextChain = chain) {
+    return new Set(
+      nextChain.filter((item): item is SequenceItem => item !== null).map((item) => item.id),
+    )
+  }
+
+  function resetBoard() {
+    const next = shuffle(challenge.items)
+    setOrder(next)
+    setSeats(next)
+    setChain(challenge.items.map(() => null))
+    setDecoyId(progressive ? decoyFor(challenge.items, 0, new Set()) : null)
+  }
+
   function add(id: string) {
     if (status === 'ok') return
     const item = takeItem(id)
     if (!item) return
     const dest = chain.findIndex((slot) => slot === null)
     if (dest < 0) return
+    const need = challenge.items[dest]
+    if (!need) return
+    if (item.id !== need.id) {
+      const nextMisses = misses + 1
+      setStatus('wrong')
+      setShake(true)
+      setMisses(nextMisses)
+      setBreakHint(
+        dest <= 0
+          ? 'The first stone is already off. The claim starts somewhere else.'
+          : `The first ${dest} sat right. The chain broke at step ${dest + 1} — try that stone again.`,
+      )
+      onMiss()
+      window.setTimeout(() => {
+        setShake(false)
+        if (nextMisses >= 2) {
+          resetBoard()
+          setStatus('idle')
+        }
+      }, 880)
+      return
+    }
     const nextSeats = seats.map((slot) => (slot?.id === id ? null : slot))
     const nextChain = chain.map((slot, index) => (index === dest ? item : slot))
     setSeats(nextSeats)
     setChain(nextChain)
-    setDealt((count) => Math.min(challenge.items.length, count + 1))
+    const nextDest = nextChain.findIndex((slot) => slot === null)
+    setDecoyId(
+      progressive && nextDest >= 0
+        ? decoyFor(challenge.items, nextDest, placedIds(nextChain))
+        : null,
+    )
     setStatus('idle')
     if (nextChain.every(Boolean)) {
-      window.setTimeout(() => evaluate(nextChain), 80)
+      setStatus('ok')
+      onSolved()
     }
   }
 
@@ -55,50 +109,29 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
     const item = takeItem(id)
     if (!item) return
     const home = order.findIndex((entry) => entry.id === id)
-    setChain((current) => current.map((slot) => (slot?.id === id ? null : slot)))
+    const nextChain = chain.map((slot) => (slot?.id === id ? null : slot))
+    setChain(nextChain)
     setSeats((current) => {
       if (current.some((slot) => slot?.id === id)) return current
       const next = [...current]
       if (home >= 0) next[home] = item
       return next
     })
+    const nextDest = nextChain.findIndex((slot) => slot === null)
+    setDecoyId(
+      progressive && nextDest >= 0
+        ? decoyFor(challenge.items, nextDest, placedIds(nextChain))
+        : null,
+    )
     setStatus('idle')
   }
 
-  function evaluate(nextChain = chain) {
-    const filled = nextChain.filter((item): item is SequenceItem => item !== null)
-    const correct =
-      filled.length === challenge.items.length &&
-      nextChain.every((item, index) => item?.id === challenge.items[index]?.id)
-    if (correct) {
-      setStatus('ok')
-      onSolved()
-      return
-    }
-    const breakAt = nextChain.findIndex(
-      (item, index) => item?.id !== challenge.items[index]?.id,
-    )
-    const step = (breakAt === -1 ? filled.length : breakAt) + 1
-    const nudge =
-      step <= 1
-        ? 'The first stone is already off. The claim starts somewhere else.'
-        : `The first ${step - 1} sat right. The chain broke at step ${step} — try that stone again.`
-    setStatus('wrong')
-    setShake(true)
-    setMisses((count) => count + 1)
-    setBreakHint(nudge)
-    onMiss()
-    window.setTimeout(() => {
-      setShake(false)
-      const next = shuffle(challenge.items)
-      setOrder(next)
-      setSeats(next)
-      setDealt(openingDeal)
-      setChain(challenge.items.map(() => null))
-    }, 880)
-  }
-
   const nextIndex = chain.findIndex((slot) => slot === null)
+  const liveIds = new Set(
+    progressive
+      ? [challenge.items[nextIndex]?.id, decoyId].filter((id): id is string => Boolean(id))
+      : order.map((item) => item.id),
+  )
 
   return (
     <div
@@ -123,7 +156,7 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
         {order.map((home, index) => {
           const live = seats[index]?.id === home.id
           const placedAt = chain.findIndex((slot) => slot?.id === home.id)
-          const faceDown = progressive && live && index >= dealt
+          const faceDown = progressive && live && !liveIds.has(home.id)
           return (
             <div
               key={home.id}
