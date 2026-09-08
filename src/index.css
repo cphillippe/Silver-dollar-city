@@ -888,6 +888,11 @@ p {
   box-shadow: inset 0 0 0 2px rgba(196, 107, 74, 0.46);
 }
 
+.sort-tile.was-placed {
+  background: rgba(224, 179, 74, 0.12);
+  box-shadow: inset 0 0 0 2px rgba(224, 179, 74, 0.42);
+}
+
 .sort-mark {
   margin-left: 4px;
   font-weight: 700;
@@ -1382,7 +1387,7 @@ p {
   --sort-seat: 108px;
 }
 
-.is-puzzle .play .bank {
+.is-puzzle .play .bank.is-sort {
   --sort-seat: 108px;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: var(--sort-seat) var(--sort-seat);
@@ -1394,12 +1399,30 @@ p {
   justify-items: stretch;
 }
 
+.is-puzzle .play .bank.is-order {
+  --sort-seat: 52px;
+  grid-template-columns: 1fr 1fr;
+  grid-auto-rows: var(--sort-seat);
+  gap: 6px;
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  align-items: stretch;
+  justify-items: stretch;
+}
+
 .is-puzzle .sort-tile {
   gap: 4px;
   height: var(--sort-seat);
   min-height: var(--sort-seat);
   max-height: var(--sort-seat);
   overflow: hidden;
+}
+
+.is-puzzle .play.is-sequence .sort-tile,
+.is-puzzle .play.is-build .sort-tile {
+  --sort-seat: 52px;
+  gap: 0;
 }
 
 .is-puzzle .sort-bins {
@@ -1441,6 +1464,16 @@ p {
   min-height: 40px;
   font-size: 0.82rem;
   line-height: 1.25;
+}
+
+.is-puzzle .play.is-sequence .sort-tile .chip,
+.is-puzzle .play.is-build .sort-tile .chip,
+.is-puzzle .play.is-sequence .chip.in-chain {
+  padding: 6px 8px;
+  min-height: 0;
+  height: 100%;
+  font-size: 0.72rem;
+  line-height: 1.2;
 }
 
 .is-puzzle .sort-tile-actions .btn.tiny {
@@ -1525,6 +1558,22 @@ p {
   grid-template-columns: 32px 1fr;
   gap: 10px;
   align-items: center;
+}
+
+.chain li.sort-seat {
+  height: 48px;
+  min-height: 48px;
+  max-height: 48px;
+  overflow: hidden;
+}
+
+.chain li.awaiting {
+  border-radius: 16px;
+  box-shadow: 0 0 0 3px rgba(224, 179, 74, 0.28);
+}
+
+.chain li.awaiting .chain-index {
+  box-shadow: 0 0 0 3px rgba(224, 179, 74, 0.45), 0 4px 10px rgba(196, 146, 42, 0.28);
 }
 
 .chain-index {
@@ -2312,8 +2361,20 @@ p {
     display: none;
   }
 
-  .is-puzzle .play .bank {
+  .is-puzzle .play .bank.is-sort {
     --sort-seat: 88px;
+  }
+
+  .is-puzzle .play .bank.is-order,
+  .is-puzzle .play.is-sequence .sort-tile,
+  .is-puzzle .play.is-build .sort-tile {
+    --sort-seat: 44px;
+  }
+
+  .chain li.sort-seat {
+    height: 40px;
+    min-height: 40px;
+    max-height: 40px;
   }
 
   .is-puzzle .sort-bins {

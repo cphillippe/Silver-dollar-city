@@ -227,7 +227,31 @@ assert.match(sortSrc, /was-keep/)
 assert.match(sortSrc, /was-toss/)
 assert.match(sortSrc, /Return \$\{home\.text\} to its seat/)
 assert.match(sortSrc, /\[slots, setSlots\]/)
+assert.match(sortSrc, /bank is-sort/)
 assert.doesNotMatch(sortSrc, /bank\.length/)
+
+const sequenceSrc = readFileSync(
+  new URL('../src/components/challenges/SequencePlay.tsx', import.meta.url),
+  'utf8',
+)
+assert.match(sequenceSrc, /is-sequence/)
+assert.match(sequenceSrc, /bank is-order/)
+assert.match(sequenceSrc, /is-gone/)
+assert.match(sequenceSrc, /sort-seat/)
+assert.match(sequenceSrc, /1 · 2 · 3/)
+assert.match(sequenceSrc, /tap the next stone/)
+assert.match(sequenceSrc, /Return \$\{home\.text\} to its seat/)
+assert.doesNotMatch(sequenceSrc, /Next step/)
+assert.doesNotMatch(sequenceSrc, /bank\.filter/)
+
+const buildSrc = readFileSync(
+  new URL('../src/components/challenges/BuildArgumentPlay.tsx', import.meta.url),
+  'utf8',
+)
+assert.match(buildSrc, /bank is-order/)
+assert.match(buildSrc, /is-gone/)
+assert.match(buildSrc, /sort-seat/)
+assert.doesNotMatch(buildSrc, /Drop here/)
 
 const dailySrc = readFileSync(
   new URL('../src/content/daily.ts', import.meta.url),
@@ -361,7 +385,15 @@ assert.match(cssSrc, /win-stamp-glow/)
 assert.match(cssSrc, /is-homecoming/)
 assert.match(cssSrc, /sort-tile\.is-gone/)
 assert.match(cssSrc, /--sort-seat/)
+assert.match(cssSrc, /bank\.is-sort/)
+assert.match(cssSrc, /bank\.is-order/)
+assert.match(cssSrc, /play\.is-sequence/)
 assert.match(cssSrc, /grid-template-rows: var\(--sort-seat\)/)
+assert.doesNotMatch(
+  cssSrc,
+  /\.is-puzzle \.play \.bank \{/,
+  '2×2 seat lock must target .bank.is-sort only — order paths cannot inherit a 2-row clip',
+)
 assert.match(cssSrc, /recall-gate\.is-encode/)
 assert.match(cssSrc, /recall-gate\.is-own/)
 assert.doesNotMatch(

@@ -189,6 +189,17 @@ Ownership PASS. Learner: seats reflowed again (empty chairs + hiding the board a
 
 Done when seats stay put again and Keep-pick isn’t cramped.
 
+## Every-path seats + first-beat affordance (2026-09-08)
+
+Playtest: Fun 5 · Clarity 5 · Retention 5 · Learnability 4. Night air ghosts, Keep-pick air, lock-in ~1.1s, tap-the-Keep, copy-truth stay.
+
+Learner: seats were stable on Night air only. Mercy / Hollow (Jericho order) packed remaining stones.
+
+- **Every sort/order path** uses locked same-size ghost seats — Hollow sequence, Keep/Toss, and build-a-chain. Tiles do not pack.
+- **First sequencing beat:** **1 · 2 · 3** tap the next stone. The next number glows. No extra essay.
+
+Done when Learner can pass seats on Hollow/mercy and the first beat feels less like homework.
+
 ## Tooling note (npm audit)
 
 `uuid` 7.x via `@capacitor/cli` (GHSA-w5hq-g745-h8pq) is **tooling-only**. Do not `npm audit fix --force` (it wants to downgrade Capacitor). Upgrade when a CLI release pulls `uuid >= 11.1.1`. Details in `SECURITY_REVIEW.md`.
