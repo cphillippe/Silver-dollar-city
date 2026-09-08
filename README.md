@@ -9,7 +9,7 @@ A stranger should know in 60 seconds: this is a **Christian reasoning game**. So
 ## Play now (no install)
 
 **Open this in normal Chrome — live preview of this branch:**  
-https://list-reserve-upon-competitions.trycloudflare.com/
+https://essentials-takes-handy-lawsuit.trycloudflare.com/
 
 That URL is a **new** Cloudflare origin in front of `vite preview` (HTTP 200). Skip older tunnels. Skip StackBlitz.
 
@@ -116,7 +116,7 @@ Progress shape (same key `silver-city-progress-v1`): `memory[id].nextReviewAt`, 
 
 ## Friend preview (no install)
 
-**Play now (Chrome, new origin):** https://list-reserve-upon-competitions.trycloudflare.com/
+**Play now (Chrome, new origin):** https://essentials-takes-handy-lawsuit.trycloudflare.com/
 
 **After Pages is enabled:** https://cphillippe.github.io/Silver-dollar-city/
 
