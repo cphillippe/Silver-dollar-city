@@ -255,8 +255,15 @@ assert.match(sequenceSrc, /keepDecoy/)
 assert.match(sequenceSrc, /shake\) return/)
 assert.match(sequenceSrc, /need\.id/)
 assert.match(sequenceSrc, /Return \$\{home\.text\} to its seat/)
+assert.match(sequenceSrc, /progressive && !live/)
+assert.match(sequenceSrc, /if \(faceDown\) return null/)
 assert.doesNotMatch(sequenceSrc, /Next step/)
 assert.doesNotMatch(sequenceSrc, /bank\.filter/)
+assert.match(
+  sequenceSrc,
+  /progressive \? null/,
+  'Jericho two-pick must not render the empty 1–5 chain',
+)
 
 const buildSrc = readFileSync(
   new URL('../src/components/challenges/BuildArgumentPlay.tsx', import.meta.url),
@@ -434,6 +441,8 @@ assert.match(cssSrc, /--sort-seat/)
 assert.match(cssSrc, /bank\.is-sort/)
 assert.match(cssSrc, /bank\.is-order/)
 assert.match(cssSrc, /play\.is-sequence/)
+assert.match(cssSrc, /play\.is-sequence\.is-deal/)
+assert.match(cssSrc, /is-deal \.chain/)
 assert.match(cssSrc, /next-glow/)
 assert.match(cssSrc, /order-step\.is-now/)
 assert.match(cssSrc, /stone-back/)

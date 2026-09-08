@@ -155,7 +155,7 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
             key={item.id}
             className={`order-step ${index === nextIndex ? 'is-now' : ''} ${chain[index] ? 'is-done' : ''}`}
           >
-            {index + 1}
+            {index === nextIndex ? index + 1 : ''}
           </span>
         ))}
         tap the next stone
@@ -166,14 +166,12 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
           const live = seats[index]?.id === home.id
           const placedAt = chain.findIndex((slot) => slot?.id === home.id)
           const faceDown = progressive && live && !liveIds.has(home.id)
+          if (progressive && !live) return null
+          if (faceDown) return null
           return (
             <div
               key={home.id}
-              className={`sort-tile sort-seat ${live && !faceDown ? 'is-live' : ''} ${live || faceDown ? '' : 'is-gone'} ${faceDown ? 'is-facedown' : ''} ${placedAt >= 0 ? 'was-placed' : ''}`}
-              style={{
-                gridColumn: (index % 2) + 1,
-                gridRow: Math.floor(index / 2) + 1,
-              }}
+              className={`sort-tile sort-seat ${live ? 'is-live' : 'is-gone'} ${faceDown ? 'is-facedown' : ''} ${placedAt >= 0 ? 'was-placed' : ''}`}
             >
               {faceDown ? (
                 <span className="stone-back" aria-hidden />
@@ -186,11 +184,6 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
                   onClick={() => (live ? add(home.id) : remove(home.id))}
                 >
                   {home.text}
-                  {placedAt >= 0 ? (
-                    <span className="sort-mark" aria-hidden>
-                      {placedAt + 1}
-                    </span>
-                  ) : null}
                 </button>
               )}
             </div>
@@ -198,34 +191,36 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
         })}
       </div>
 
-      <ol className="chain">
-        {challenge.items.map((item, index) => {
-          const placed = chain[index]
-          const awaiting = index === nextIndex && status !== 'ok'
-          return (
-            <li
-              key={item.id}
-              className={`sort-seat ${placed ? 'filled' : 'empty'} ${awaiting ? 'awaiting' : ''}`}
-            >
-              <span className="chain-index">{index + 1}</span>
-              {placed ? (
-                <button
-                  type="button"
-                  className="chip in-chain"
-                  style={status === 'ok' ? burstStyle(index, 'mid') : undefined}
-                  onClick={() => remove(placed.id)}
-                >
-                  {placed.text}
-                </button>
-              ) : (
-                <span className="placeholder" aria-hidden>
-                  {awaiting ? '↓' : ''}
-                </span>
-              )}
-            </li>
-          )
-        })}
-      </ol>
+      {progressive ? null : (
+        <ol className="chain">
+          {challenge.items.map((item, index) => {
+            const placed = chain[index]
+            const awaiting = index === nextIndex && status !== 'ok'
+            return (
+              <li
+                key={item.id}
+                className={`sort-seat ${placed ? 'filled' : 'empty'} ${awaiting ? 'awaiting' : ''}`}
+              >
+                <span className="chain-index">{index + 1}</span>
+                {placed ? (
+                  <button
+                    type="button"
+                    className="chip in-chain"
+                    style={status === 'ok' ? burstStyle(index, 'mid') : undefined}
+                    onClick={() => remove(placed.id)}
+                  >
+                    {placed.text}
+                  </button>
+                ) : (
+                  <span className="placeholder" aria-hidden>
+                    {awaiting ? '↓' : ''}
+                  </span>
+                )}
+              </li>
+            )
+          })}
+        </ol>
+      )}
 
       <ResultPanel
         tone={status === 'idle' ? 'idle' : status === 'ok' ? 'ok' : 'teach'}

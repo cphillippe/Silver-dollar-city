@@ -260,6 +260,16 @@ Bill: the Premise / Conclusion screen does not fit. He cannot tap **Premise 1**.
 
 Done when Premise 1 is tappable on ~390×844 and the screen does not cut off.
 
+## Jericho two-pick (2026-09-08)
+
+Bill: Jericho looked like homework — 1–5 chrome, empty 2×2 ghosts, stacked cards, a vertical empty 1–5 list.
+
+- Progressive orders (4+ stones): slim step dots + **two live stones only**. Ghost chairs and the empty chain stay off-screen.
+- Tap one of the two. Decoy still stays until used. Fold claim / reason / source stays.
+- Keep/Toss seats, Observatory Premise 1, teach-before-test, town look, ownership, copy-truth — unchanged.
+
+Done when Jericho reads as a clean two-pick game on ~390×844.
+
 ## Look climb (2026-09-08)
 
 Bill: “Looks cheap should look most enjoyable.” One look pass. No playtest fan-out.
