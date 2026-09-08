@@ -43,6 +43,8 @@ function htmlSecurityHeaders(): Plugin {
 }
 
 export default defineConfig({
+  // Relative base so the same build works at
+  // https://cphillippe.github.io/Silver-dollar-city/, vite preview, and Capacitor.
   base: './',
   server: {
     host: '127.0.0.1',
