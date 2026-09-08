@@ -13,6 +13,7 @@ import {
   plotFill,
   plotStage,
 } from '../src/lib/city.ts'
+import { defendPads } from '../src/lib/defend.ts'
 
 const progressSrc = readFileSync(
   new URL('../src/store/progress.ts', import.meta.url),
@@ -507,5 +508,27 @@ assert.equal(newestStanding(fromDaily), 'porch')
 assert.match(mapSrc, /nextWalkView/)
 assert.match(hubSrc, /nextWalkView/)
 assert.match(progressSrc, /export function nextWalkView/)
+
+assert.deepEqual(defendPads(empty), ['porch'])
+assert.match(hubSrc, /Hold the night/)
+assert.match(hubSrc, /night-watch/)
+assert.match(hubSrc, /Built lots hold lamps/)
+assert.doesNotMatch(hubSrc, /standing lot/i)
+const defendCopy = readFileSync(
+  new URL('../src/content/defend.ts', import.meta.url),
+  'utf8',
+)
+assert.doesNotMatch(defendCopy, /standing lot/i)
+const defendSrc = readFileSync(
+  new URL('../src/components/DefendScreen.tsx', import.meta.url),
+  'utf8',
+)
+assert.match(defendSrc, /The road is coming/)
+assert.match(defendSrc, /Unlock the lamps/)
+assert.match(defendSrc, /TeachUnlock/)
+assert.match(defendSrc, /RecallGate/)
+assert.match(defendSrc, /defendPads/)
+assert.match(cssSrc, /defend-board/)
+assert.match(sequenceSrc, /progressive && !live/)
 
 console.log('check-city: ok')

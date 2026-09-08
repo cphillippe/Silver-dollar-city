@@ -194,6 +194,21 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     return unlocked
   }, [write])
 
+  const recordNight = useCallback((dateKey: string) => {
+    setProgress((current) => {
+      const seen = current.defense.nights.includes(dateKey)
+      const next = {
+        ...current,
+        defense: {
+          cleared: current.defense.cleared + (seen ? 0 : 1),
+          nights: seen ? current.defense.nights : [...current.defense.nights, dateKey],
+          lastNight: dateKey,
+        },
+      }
+      return write(next)
+    })
+  }, [write])
+
   const reset = useCallback(() => {
     setMissed([])
     forgetCitySeen()
@@ -223,6 +238,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       recordHeld,
       recordReview,
       markMiss,
+      recordNight,
       reset,
       importSaveText,
     }),
@@ -234,6 +250,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       missed,
       progress,
       recordHeld,
+      recordNight,
       recordReview,
       recordStars,
       reset,

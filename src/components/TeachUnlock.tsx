@@ -5,6 +5,7 @@ interface TeachUnlockProps {
   brief: EvidenceBrief
   kind: Challenge['kind']
   onUnlock: () => void
+  unlock?: string
 }
 
 export function unlockLabel(kind: Challenge['kind']) {
@@ -15,14 +16,14 @@ export function unlockLabel(kind: Challenge['kind']) {
 }
 
 /** Claim · reason · source first. The quiz stays locked until this tap. */
-export function TeachUnlock({ brief, kind, onUnlock }: TeachUnlockProps) {
+export function TeachUnlock({ brief, kind, onUnlock, unlock }: TeachUnlockProps) {
   return (
     <section className="recall-gate is-encode teach-gate" aria-label="Today’s line">
       <p className="eyebrow">{brief.source}</p>
       <p className="recall-line rehearse-stem">{brief.claim}</p>
       <p className="teach-reason">{brief.reason}</p>
       <button type="button" className="btn primary xl" onClick={onUnlock}>
-        {unlockLabel(kind)}
+        {unlock ?? unlockLabel(kind)}
       </button>
     </section>
   )

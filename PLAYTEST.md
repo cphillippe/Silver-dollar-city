@@ -260,6 +260,17 @@ Bill: the Premise / Conclusion screen does not fit. He cannot tap **Premise 1**.
 
 Done when Premise 1 is tappable on ~390×844 and the screen does not cut off.
 
+## Tower Defense slice (2026-09-08)
+
+Bill confirmed Tower Defense. First playable night on the same town.
+
+- Town → **Hold the night**. Teach claim · reason · source, then plant lamps on built lots (empty lots cannot). Porch can hold timber.
+- Tap a lamp when a cheap line walks near it. Three hearts. Five raiders. Fold the takeaway after the road clears.
+- Nights light street lamps (same empty→scaffold→built→lit). Trail, Keep/Toss, Journal stay. Local save only — no schema bump.
+- Jericho stays a clean two-pick (slim dots + two stones).
+
+Done when Jericho is clean and Bill can play one night on ~390×844.
+
 ## Jericho two-pick (2026-09-08)
 
 Bill: Jericho looked like homework — 1–5 chrome, empty 2×2 ghosts, stacked cards, a vertical empty 1–5 list.

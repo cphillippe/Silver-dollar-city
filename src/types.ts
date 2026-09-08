@@ -125,6 +125,12 @@ export interface MemoryTrace {
   elaborated: boolean
 }
 
+export interface DefenseState {
+  cleared: number
+  nights: string[]
+  lastNight?: string
+}
+
 export interface ProgressState {
   started: boolean
   completed: string[]
@@ -142,6 +148,8 @@ export interface ProgressState {
   memory: Record<string, MemoryTrace>
   elaborations: Record<string, string>
   lastReviewPillar?: string
+  /** Night Watch — optional on old saves; normalize fills an empty watch. */
+  defense: DefenseState
 }
 
 export type View =
@@ -153,3 +161,4 @@ export type View =
   | { name: 'journal'; focusId?: string; autoQuiz?: boolean }
   | { name: 'vista' }
   | { name: 'settings' }
+  | { name: 'defend' }

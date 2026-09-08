@@ -126,9 +126,9 @@ export function plotStage(id: CityPlotId, progress: ProgressState): CityStage {
       if (journal >= 1) return 'scaffold'
       return 'empty'
     case 'lamps':
-      if (stars >= 12) return 'lit'
-      if (stars >= 4) return 'built'
-      if (stars >= 1) return 'scaffold'
+      if (stars + (progress.defense?.cleared ?? 0) >= 12) return 'lit'
+      if (stars + (progress.defense?.cleared ?? 0) >= 4) return 'built'
+      if (stars + (progress.defense?.cleared ?? 0) >= 1) return 'scaffold'
       return 'empty'
     default:
       return 'empty'
@@ -203,7 +203,7 @@ export function plotFill(id: CityPlotId, progress: ProgressState): number {
     case 'journal':
       return progress.journal.length
     case 'lamps':
-      return starTotal(progress.stars)
+      return starTotal(progress.stars) + (progress.defense?.cleared ?? 0)
     default:
       return 0
   }
