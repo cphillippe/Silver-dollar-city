@@ -179,6 +179,16 @@ Board-wide: after several Keeps, one line became the takeaway with no say. Felt 
 
 Done when a cold player can say why THAT claim is the takeaway and rehearse it without feeling picked-for.
 
+## Seat ghosts + Keep-pick air (2026-09-08)
+
+Ownership PASS. Learner: seats reflowed again (empty chairs + hiding the board after the last Keep).
+
+- **Ghosts stay in the chair** — dimmed Keep/Toss text, same-size seat. Board is not `display: none` on ready.
+- **Keep-pick** chips have more padding and gap. Lock-in hold is 1100ms — explode stays.
+- Ownership and copy-truth stay.
+
+Done when seats stay put again and Keep-pick isn’t cramped.
+
 ## Tooling note (npm audit)
 
 `uuid` 7.x via `@capacitor/cli` (GHSA-w5hq-g745-h8pq) is **tooling-only**. Do not `npm audit fix --force` (it wants to downgrade Capacitor). Upgrade when a CLI release pulls `uuid >= 11.1.1`. Details in `SECURITY_REVIEW.md`.

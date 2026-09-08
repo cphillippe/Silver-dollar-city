@@ -864,18 +864,18 @@ p {
 }
 
 .play.is-ready .sort-how,
-.play.is-ready .hint-peek,
-.play.is-ready .bank {
+.play.is-ready .hint-peek {
   display: none;
 }
 
-.sort-tile.is-gone {
+.sort-tile.is-gone .sort-tile-actions {
+  visibility: hidden;
   pointer-events: none;
 }
 
-.sort-tile.is-gone .chip,
-.sort-tile.is-gone .sort-tile-actions {
-  visibility: hidden;
+.sort-tile.is-gone .chip {
+  opacity: 0.55;
+  cursor: pointer;
 }
 
 .sort-tile.was-keep {
@@ -1025,7 +1025,7 @@ p {
     rgba(224, 179, 74, 0.22) 58%,
     transparent 78%
   );
-  animation: win-flash 1.05s ease-out both;
+  animation: win-flash 0.88s ease-out both;
 }
 
 .win-ring {
@@ -1376,6 +1376,10 @@ p {
 .slot-list {
   display: grid;
   gap: 10px;
+}
+
+.is-puzzle .play {
+  --sort-seat: 108px;
 }
 
 .is-puzzle .play .bank {
@@ -1760,9 +1764,19 @@ p {
   border-color: color-mix(in srgb, var(--gold) 55%, white);
 }
 
+.recall-gate.is-own {
+  padding: 22px 16px 26px;
+}
+
+.recall-gate.is-own.phase-claim .recall-choices {
+  gap: 14px;
+}
+
 .recall-gate.is-own.phase-claim .recall-card {
-  min-height: 48px;
-  padding: 12px 14px;
+  min-height: 64px;
+  padding: 16px 18px;
+  font-size: 1.05rem;
+  line-height: 1.35;
 }
 
 .today-trail.is-live {

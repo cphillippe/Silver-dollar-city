@@ -225,6 +225,7 @@ assert.match(sortSrc, /is-gone/)
 assert.match(sortSrc, /sort-seat/)
 assert.match(sortSrc, /was-keep/)
 assert.match(sortSrc, /was-toss/)
+assert.match(sortSrc, /Return \$\{home\.text\} to its seat/)
 assert.match(sortSrc, /\[slots, setSlots\]/)
 assert.doesNotMatch(sortSrc, /bank\.length/)
 
@@ -363,6 +364,17 @@ assert.match(cssSrc, /--sort-seat/)
 assert.match(cssSrc, /grid-template-rows: var\(--sort-seat\)/)
 assert.match(cssSrc, /recall-gate\.is-encode/)
 assert.match(cssSrc, /recall-gate\.is-own/)
+assert.doesNotMatch(
+  cssSrc,
+  /\.play\.is-ready\s+\.bank\s*\{[^}]*display:\s*none/,
+  'ready must not hide the 2×2 bank — chairs stay after the last Keep',
+)
+assert.match(
+  cssSrc,
+  /\.is-gone \.chip \{\s*opacity: 0\.55/,
+  'gone chip stays as a faint ghost in its seat',
+)
+assert.match(cssSrc, /min-height: 64px/)
 
 const juiceSrc = readFileSync(new URL('../src/lib/juice.ts', import.meta.url), 'utf8')
 assert.match(cssSrc, /win-stamp/)
@@ -372,7 +384,7 @@ const burstSrc = readFileSync(
   'utf8',
 )
 assert.match(burstSrc, /Locked!/)
-assert.match(juiceSrc, /WIN_BURST_MS = 1320/)
+assert.match(juiceSrc, /WIN_BURST_MS = 1100/)
 assert.match(juiceSrc, /useJuiceHandoff/)
 
 const hintSrc = readFileSync(

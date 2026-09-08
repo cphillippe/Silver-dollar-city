@@ -142,16 +142,32 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
                 gridColumn: (index % 2) + 1,
                 gridRow: Math.floor(index / 2) + 1,
               }}
-              aria-hidden={!live}
             >
               <button
                 type="button"
                 className="chip"
-                tabIndex={live ? 0 : -1}
-                disabled={!live}
-                onClick={() => live && setPicked(home.id === picked ? null : home.id)}
+                tabIndex={0}
+                aria-label={
+                  live
+                    ? home.text
+                    : `Return ${home.text} to its seat`
+                }
+                onClick={() => {
+                  if (live) setPicked(home.id === picked ? null : home.id)
+                  else returnToBank(home.id)
+                }}
               >
                 {home.text}
+                {goneTo === 'keep' ? (
+                  <span className="sort-mark" aria-hidden>
+                    ✓
+                  </span>
+                ) : null}
+                {goneTo === 'toss' ? (
+                  <span className="sort-mark" aria-hidden>
+                    ×
+                  </span>
+                ) : null}
               </button>
               <span className="sort-tile-actions">
                 <button
