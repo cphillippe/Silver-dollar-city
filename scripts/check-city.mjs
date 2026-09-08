@@ -263,9 +263,14 @@ const buildSrc = readFileSync(
   'utf8',
 )
 assert.match(buildSrc, /bank is-order/)
+assert.match(buildSrc, /is-onescreen/)
 assert.match(buildSrc, /is-gone/)
 assert.match(buildSrc, /sort-seat/)
 assert.doesNotMatch(buildSrc, /Drop here/)
+assert.ok(
+  buildSrc.indexOf('slot-list') < buildSrc.indexOf('bank is-order'),
+  'slots sit above the bank so Premise 1 stays on-screen',
+)
 
 const dailySrc = readFileSync(
   new URL('../src/content/daily.ts', import.meta.url),
@@ -445,15 +450,12 @@ assert.match(cssSrc, /--slot-seat/)
 assert.match(cssSrc, /grid-template-rows: minmax\(0, 1fr\) auto/)
 assert.match(cssSrc, /-webkit-line-clamp: 3/)
 assert.match(cssSrc, /is-arming/)
+assert.match(cssSrc, /play\.is-build \{\s*[\s\S]*?overflow: hidden/)
+assert.match(cssSrc, /grid-template-columns: 5\.5rem minmax\(0, 1fr\)/)
 assert.match(
   cssSrc,
-  /\.is-puzzle \.play\.is-build \.chip\.in-slot \{\s*height: var\(--slot-seat\);[\s\S]*?overflow: hidden/,
-  'premise slots must clip, not scroll-steal taps',
-)
-assert.doesNotMatch(
-  cssSrc,
-  /\.is-puzzle \.play\.is-build \.chip\.in-slot \{[^}]*overflow:\s*auto/,
-  'in-slot overflow auto steals taps on Premise 2',
+  /\.is-puzzle \.play\.is-build \.chip\.in-slot \{\s*[\s\S]*?overflow: auto/,
+  'long premise text scrolls inside the seat only',
 )
 assert.doesNotMatch(
   cssSrc,

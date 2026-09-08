@@ -1428,28 +1428,81 @@ p {
   gap: 0;
 }
 
-.is-puzzle .play.is-build .slot-list {
+.is-puzzle .play.is-build {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
   gap: 6px;
 }
 
+.is-puzzle .play.is-build .prompt {
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.is-puzzle .play.is-build .hint-peek {
+  margin-bottom: 0;
+}
+
+.is-puzzle .play.is-build .slot-list {
+  display: grid;
+  gap: 4px;
+  flex: 0 0 auto;
+}
+
 .is-puzzle .play.is-build .slot {
-  --slot-seat: 64px;
+  --slot-seat: 52px;
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  align-items: stretch;
+  gap: 6px;
+  height: var(--slot-seat);
+  min-height: var(--slot-seat);
+  max-height: var(--slot-seat);
   cursor: pointer;
+}
+
+.is-puzzle .play.is-build .slot-label {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  font-size: 0.68rem;
+  line-height: 1.15;
+  overflow: hidden;
 }
 
 .is-puzzle .play.is-build .slot-target,
 .is-puzzle .play.is-build .chip.in-slot {
-  height: var(--slot-seat);
-  min-height: var(--slot-seat);
-  max-height: var(--slot-seat);
-  overflow: hidden;
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+  overflow: auto;
   overflow-wrap: anywhere;
 }
 
 .is-puzzle .play.is-build .chip.in-slot {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
+  display: block;
+  -webkit-line-clamp: unset;
+}
+
+.is-puzzle .play.is-build .bank.is-order {
+  --sort-seat: 40px;
+  flex: 0 0 auto;
+  max-height: calc(var(--sort-seat) * 3 + 12px);
+}
+
+.is-puzzle .play.is-build .sort-tile {
+  --sort-seat: 40px;
+}
+
+.is-puzzle .play.is-build .result {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 8px;
+  z-index: 4;
+  margin: 0;
 }
 
 .is-puzzle .sort-bins {
@@ -2527,6 +2580,15 @@ p {
   .is-puzzle .play.is-sequence .sort-tile,
   .is-puzzle .play.is-build .sort-tile {
     --sort-seat: 44px;
+  }
+
+  .is-puzzle .play.is-build .slot {
+    --slot-seat: 40px;
+  }
+
+  .is-puzzle .play.is-build .bank.is-order,
+  .is-puzzle .play.is-build .sort-tile {
+    --sort-seat: 36px;
   }
 
   .chain li.sort-seat {
