@@ -26,23 +26,23 @@ export function Avatar({ who, size = 'md', className = '' }: AvatarProps) {
             <circle cx="48" cy="48" r="45.5" />
           </clipPath>
         </defs>
-        <circle cx="48" cy="48" r="47.2" fill="#1a2238" />
+        <circle cx="48" cy="48" r="47.2" fill="#2a2418" />
         <g clipPath={`url(#${clip})`}>{PORTRAITS[who]}</g>
         <circle
           cx="48"
           cy="48"
           r="45.5"
           fill="none"
-          stroke="#e0b34a"
-          strokeWidth="2.8"
+          stroke="#e8c36a"
+          strokeWidth="2.6"
         />
         <circle
           cx="48"
           cy="48"
           r="43.4"
           fill="none"
-          stroke="rgba(255,243,196,0.35)"
-          strokeWidth="0.8"
+          stroke="rgba(255,246,212,0.45)"
+          strokeWidth="0.9"
         />
       </svg>
     </span>
@@ -62,10 +62,11 @@ function Face({
     <>
       <ellipse cx="48" cy="82" rx="15" ry="9" fill={skin} />
       <ellipse cx="48" cy="54" rx="21.5" ry="24" fill={skin} />
+      <ellipse cx="40" cy="46" rx="10" ry="7" fill="#fff6ee" opacity="0.18" />
       <ellipse cx="28.8" cy="55" rx="4" ry="5.8" fill={skin} />
       <ellipse cx="67.2" cy="55" rx="4" ry="5.8" fill={skin} />
-      <ellipse cx="36.5" cy="62.5" rx="5" ry="3.1" fill={blush} opacity="0.38" />
-      <ellipse cx="59.5" cy="62.5" rx="5" ry="3.1" fill={blush} opacity="0.38" />
+      <ellipse cx="36.5" cy="62.5" rx="5" ry="3.1" fill={blush} opacity="0.42" />
+      <ellipse cx="59.5" cy="62.5" rx="5" ry="3.1" fill={blush} opacity="0.42" />
       <path
         d="M32.5 44.2c4.2-2.8 10-2.6 13.2.4"
         fill="none"
@@ -116,8 +117,8 @@ function HairCap({ fill }: { fill: string }) {
 const PORTRAITS: Record<CharacterId, ReactElement> = {
   river: (
     <>
-      <rect width="96" height="96" fill="#3a463c" />
-      <circle cx="74" cy="16" r="14" fill="#f0d789" opacity="0.32" />
+      <rect width="96" height="96" fill="#4a5644" />
+      <circle cx="74" cy="16" r="14" fill="#f0d789" opacity="0.42" />
       <path d="M16 96h64v-20c-9-11-46-11-64 0Z" fill="#5c3226" />
       <path d="M32 80c5 7 27 7 32 0" fill="#c46b4a" />
       <HairCap fill="#2a1c14" />
@@ -135,8 +136,8 @@ const PORTRAITS: Record<CharacterId, ReactElement> = {
   ),
   juniper: (
     <>
-      <rect width="96" height="96" fill="#243044" />
-      <circle cx="20" cy="18" r="8" fill="#f4ead2" opacity="0.4" />
+      <rect width="96" height="96" fill="#33445a" />
+      <circle cx="20" cy="18" r="8" fill="#f4ead2" opacity="0.52" />
       <path d="M16 96h64v-18c-10-12-46-12-64 0Z" fill="#5f7f66" />
       <path d="M48 80c-9 2-16 9-18 16h36c-2-7-9-14-18-16Z" fill="#e0b34a" />
       <HairCap fill="#3d2918" />
@@ -162,7 +163,7 @@ const PORTRAITS: Record<CharacterId, ReactElement> = {
   ),
   mercy: (
     <>
-      <rect width="96" height="96" fill="#354338" />
+      <rect width="96" height="96" fill="#445448" />
       <path d="M12 96h72v-16c-12-15-50-15-72 0Z" fill="#4e6d55" />
       <path d="M26 84c8 9 36 9 44 0" fill="#d7c4a0" />
       <HairCap fill="#6a4a36" />
@@ -180,7 +181,7 @@ const PORTRAITS: Record<CharacterId, ReactElement> = {
   ),
   silas: (
     <>
-      <rect width="96" height="96" fill="#3a342c" />
+      <rect width="96" height="96" fill="#4a4034" />
       <path d="M0 72h96v24H0Z" fill="#5c4636" />
       <path d="M22 96v-26c8-6 44-6 52 0v26Z" fill="#e7d6b4" />
       <path d="M30 74h36v22H30Z" fill="#6b5340" />
@@ -193,8 +194,8 @@ const PORTRAITS: Record<CharacterId, ReactElement> = {
   ),
   nora: (
     <>
-      <rect width="96" height="96" fill="#1b2438" />
-      <circle cx="72" cy="14" r="8" fill="#f4ead2" opacity="0.5" />
+      <rect width="96" height="96" fill="#2a344c" />
+      <circle cx="72" cy="14" r="8" fill="#f4ead2" opacity="0.62" />
       <circle cx="22" cy="22" r="2.4" fill="#f4ead2" opacity="0.85" />
       <path d="M14 96h68v-20c-10-12-50-12-68 0Z" fill="#2c3a62" />
       <path d="M48 82c-11 0-20 7-22 14h44c-2-7-11-14-22-14Z" fill="#e0b34a" />
@@ -213,7 +214,7 @@ const PORTRAITS: Record<CharacterId, ReactElement> = {
   ),
   ansel: (
     <>
-      <rect width="96" height="96" fill="#3a3028" />
+      <rect width="96" height="96" fill="#4a3c30" />
       <path d="M10 96h76v-14c-13-13-52-13-76 0Z" fill="#8a4e38" />
       <path d="M32 86h32v10H32Z" fill="#e7d6b4" />
       <HairCap fill="#c9c0b2" />
@@ -226,7 +227,7 @@ const PORTRAITS: Record<CharacterId, ReactElement> = {
   ),
   hope: (
     <>
-      <rect width="96" height="96" fill="#463848" />
+      <rect width="96" height="96" fill="#564458" />
       <path d="M16 96h64v-18c-10-13-46-13-64 0Z" fill="#efe4cc" />
       <path d="M48 80c-10 2-18 9-20 16h40c-2-7-10-14-20-16Z" fill="#c46b4a" />
       <HairCap fill="#c47a4a" />

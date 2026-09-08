@@ -260,6 +260,17 @@ Bill: the Premise / Conclusion screen does not fit. He cannot tap **Premise 1**.
 
 Done when Premise 1 is tappable on ~390×844 and the screen does not cut off.
 
+## Look climb (2026-09-08)
+
+Bill: “Looks cheap should look most enjoyable.” One look pass. No playtest fan-out.
+
+- Town: warmer dusk, moon, wood/gold roofs, packed-then-lit streets, richer oaks. Upgrade stages unchanged.
+- Porch folk: larger portraits, gold ring, lamp glow on lit homes. Avatars warmer, less black-circle.
+- Trail / Observatory / Jericho: cream stones, quieter “Tap a stone” / Keep·Toss chrome, slimmer play topbar. Reset stays off the puzzle chrome.
+- Seats, teach-before-test, ownership, copy-truth, Lock-in explode, local save — unchanged.
+
+Done when a cold glance feels enjoyable, not cheap.
+
 ## Tooling note (npm audit)
 
 `uuid` 7.x via `@capacitor/cli` (GHSA-w5hq-g745-h8pq) is **tooling-only**. Do not `npm audit fix --force` (it wants to downgrade Capacitor). Upgrade when a CLI release pulls `uuid >= 11.1.1`. Details in `SECURITY_REVIEW.md`.
