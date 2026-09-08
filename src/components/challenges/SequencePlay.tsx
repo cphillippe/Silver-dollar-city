@@ -16,8 +16,11 @@ interface SequencePlayProps {
 
 export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePlayProps) {
   const seed = useMemo(() => shuffle(challenge.items), [challenge.items])
+  const progressive = challenge.items.length >= 4
+  const openingDeal = progressive ? 2 : challenge.items.length
   const [order, setOrder] = useState(seed)
   const [seats, setSeats] = useState<(SequenceItem | null)[]>(seed)
+  const [dealt, setDealt] = useState(openingDeal)
   const [chain, setChain] = useState<(SequenceItem | null)[]>(() =>
     challenge.items.map(() => null),
   )
@@ -40,6 +43,7 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
     const nextChain = chain.map((slot, index) => (index === dest ? item : slot))
     setSeats(nextSeats)
     setChain(nextChain)
+    setDealt((count) => Math.min(challenge.items.length, count + 1))
     setStatus('idle')
     if (nextChain.every(Boolean)) {
       window.setTimeout(() => evaluate(nextChain), 80)
@@ -89,6 +93,7 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
       const next = shuffle(challenge.items)
       setOrder(next)
       setSeats(next)
+      setDealt(openingDeal)
       setChain(challenge.items.map(() => null))
     }, 880)
   }
@@ -96,41 +101,56 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
   const nextIndex = chain.findIndex((slot) => slot === null)
 
   return (
-    <div className={`play is-sequence ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}>
+    <div
+      className={`play is-sequence ${progressive ? 'is-deal' : ''} ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}
+    >
       <WinBurst play={status === 'ok'} />
       <PuzzleLead challenge={challenge} />
       <PuzzleHint text={challenge.context} onPeek={onPeek} />
-      <p className="sort-how">
-        <strong>1 · 2 · 3</strong> tap the next stone
+      <p className="sort-how is-order-how">
+        {challenge.items.map((item, index) => (
+          <span
+            key={item.id}
+            className={`order-step ${index === nextIndex ? 'is-now' : ''} ${chain[index] ? 'is-done' : ''}`}
+          >
+            {index + 1}
+          </span>
+        ))}
+        tap the next stone
       </p>
 
       <div className="bank is-order">
         {order.map((home, index) => {
           const live = seats[index]?.id === home.id
           const placedAt = chain.findIndex((slot) => slot?.id === home.id)
+          const faceDown = progressive && live && index >= dealt
           return (
             <div
               key={home.id}
-              className={`sort-tile sort-seat ${live ? '' : 'is-gone'} ${placedAt >= 0 ? 'was-placed' : ''}`}
+              className={`sort-tile sort-seat ${live && !faceDown ? 'is-live' : ''} ${live || faceDown ? '' : 'is-gone'} ${faceDown ? 'is-facedown' : ''} ${placedAt >= 0 ? 'was-placed' : ''}`}
               style={{
                 gridColumn: (index % 2) + 1,
                 gridRow: Math.floor(index / 2) + 1,
               }}
             >
-              <button
-                type="button"
-                className="chip"
-                tabIndex={0}
-                aria-label={live ? home.text : `Return ${home.text} to its seat`}
-                onClick={() => (live ? add(home.id) : remove(home.id))}
-              >
-                {home.text}
-                {placedAt >= 0 ? (
-                  <span className="sort-mark" aria-hidden>
-                    {placedAt + 1}
-                  </span>
-                ) : null}
-              </button>
+              {faceDown ? (
+                <span className="stone-back" aria-hidden />
+              ) : (
+                <button
+                  type="button"
+                  className="chip"
+                  tabIndex={0}
+                  aria-label={live ? home.text : `Return ${home.text} to its seat`}
+                  onClick={() => (live ? add(home.id) : remove(home.id))}
+                >
+                  {home.text}
+                  {placedAt >= 0 ? (
+                    <span className="sort-mark" aria-hidden>
+                      {placedAt + 1}
+                    </span>
+                  ) : null}
+                </button>
+              )}
             </div>
           )
         })}
