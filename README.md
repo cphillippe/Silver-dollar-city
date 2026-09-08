@@ -21,7 +21,10 @@ The game is already in [`docs/`](docs/) on this branch (`base: './'`, so assets 
 
 After Save, wait a minute, then hard-reload the Pages URL. Later, after merge, switch the branch to **`main`** and keep `/docs`.
 
-**Interim tunnel (dies often — skip if Pages is live):** a fresh trycloudflare URL is posted on PR #1 after each package. Do not use older tunnels. Skip StackBlitz.
+**Interim tunnel (dies often — skip if Pages is live):**  
+https://placing-decorating-heroes-differences.trycloudflare.com/
+
+Verified HTTP 200, “Silver City,” look-climb bundle `index-9hCmVdE0.js`. Skip older tunnels. Skip StackBlitz.
 
 ## The story
 
@@ -123,7 +126,7 @@ Progress shape (same key `silver-city-progress-v1`): `memory[id].nextReviewAt`, 
 
 **Sticky:** https://cphillippe.github.io/Silver-dollar-city/ (owner must enable Pages once — steps above).
 
-**Interim tunnel:** see PR #1. Skip older trycloudflare links.
+**Interim tunnel:** https://placing-decorating-heroes-differences.trycloudflare.com/ (HTTP 200). Skip older trycloudflare links.
 
 On the web app, tap **Share a morning**. The pitch is not a high score. It asks a friend to try the walk, fold the page, and see what they can still say.
 
