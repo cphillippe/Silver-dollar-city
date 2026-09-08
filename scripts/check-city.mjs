@@ -233,6 +233,9 @@ const dailySrc = readFileSync(
   'utf8',
 )
 assert.match(dailySrc, /faith and science can share the same sky/)
+assert.match(dailySrc, /why: 'A gift-shaped beauty/)
+assert.match(dailySrc, /why: 'Psalm 19 treats the sky as speech/)
+assert.equal([...dailySrc.matchAll(/\bwhy: '/g)].length, 12)
 
 const contentFiles = [
   'daily.ts',
@@ -279,8 +282,11 @@ assert.doesNotMatch(recallSrc, /phase === 'echo'/)
 assert.doesNotMatch(recallSrc, /held-stamp/)
 assert.match(recallSrc, /STORY\.takeaway/)
 assert.match(recallSrc, /is-encode/)
-assert.match(recallSrc, /encode \? \[brief\.claim\]/)
-assert.match(recallSrc, /encode \? \[brief\.reason\]/)
+assert.match(recallSrc, /is-own/)
+assert.match(recallSrc, /takeawayLines/)
+assert.match(recallSrc, /\[brief\.claim\]/)
+assert.match(recallSrc, /pickClaim/)
+assert.match(dailyTrailSrc, /tile\.bin === 'keep'/)
 
 const evidenceSrc = readFileSync(
   new URL('../src/content/evidence.ts', import.meta.url),
@@ -288,6 +294,7 @@ const evidenceSrc = readFileSync(
 )
 assert.match(evidenceSrc, /Wonder and measurement can share a roof/)
 assert.match(evidenceSrc, /Psalm 19 treats the sky as speech/)
+assert.match(evidenceSrc, /export function takeawayLines/)
 assert.doesNotMatch(evidenceSrc, /Beauty forbids/)
 assert.doesNotMatch(evidenceSrc, /Wonder is the enemy of science/)
 assert.doesNotMatch(evidenceSrc, /The sky is not worth looking at slowly/)
@@ -318,6 +325,7 @@ assert.match(challengeSrc, /onNavigate\(\{ name: 'hub' \}\)/)
 assert.match(challengeSrc, /afterJuice/)
 assert.match(challengeSrc, /savedWin/)
 assert.match(challengeSrc, /puzzle-title/)
+assert.match(challengeSrc, /tile\.bin === 'keep'/)
 
 const cityLibSrc = readFileSync(new URL('../src/lib/city.ts', import.meta.url), 'utf8')
 assert.doesNotMatch(cityLibSrc, /Walk again/)
@@ -354,6 +362,7 @@ assert.match(cssSrc, /sort-tile\.is-gone/)
 assert.match(cssSrc, /--sort-seat/)
 assert.match(cssSrc, /grid-template-rows: var\(--sort-seat\)/)
 assert.match(cssSrc, /recall-gate\.is-encode/)
+assert.match(cssSrc, /recall-gate\.is-own/)
 
 const juiceSrc = readFileSync(new URL('../src/lib/juice.ts', import.meta.url), 'utf8')
 assert.match(cssSrc, /win-stamp/)

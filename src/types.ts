@@ -4,6 +4,8 @@ export interface SortTile {
   id: string
   text: string
   bin: 'keep' | 'discard'
+  /** Why this Keep can be today’s takeaway — required when several Keeps share a board. */
+  why?: string
 }
 
 export interface SortChallenge {

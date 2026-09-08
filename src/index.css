@@ -1760,6 +1760,11 @@ p {
   border-color: color-mix(in srgb, var(--gold) 55%, white);
 }
 
+.recall-gate.is-own.phase-claim .recall-card {
+  min-height: 48px;
+  padding: 12px 14px;
+}
+
 .today-trail.is-live {
   border-color: color-mix(in srgb, var(--gold) 70%, white);
   animation: trail-glow 2.8s ease-in-out infinite;
