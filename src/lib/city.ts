@@ -187,6 +187,7 @@ export function cityStanding(progress: ProgressState): {
 }
 
 /** Journey ages. Lot stages stay empty→scaffold→built→lit; this frames the story. */
+/** Parked: Seven Seals as a later-depth walk. Do not build it on this spine yet. */
 export type CityAge = 'eden' | 'village' | 'town' | 'gold' | 'heaven'
 
 export const CITY_AGES: CityAge[] = ['eden', 'village', 'town', 'gold', 'heaven']
