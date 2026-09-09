@@ -29,7 +29,7 @@ Skip older trycloudflare links. Skip StackBlitz.
 | Ansel Gate | The First Gate | Gatekeeper |
 | Hope Lind | The High Lookout | Lookout |
 
-Portraits are original SVGs in one circular style (`src/components/Avatar.tsx`). Light dialogue, not sermons.
+Portraits are candy circular faces (`src/assets/cast/`, `src/components/Avatar.tsx`). Light dialogue, not sermons.
 
 The world is **Silver City**, named for this repository. The through-line is unending evidence: biblical narrative, eyewitness testimony, empirical clues, classical cosmological arguments, and later questions of mind, morality, meaning, and beauty.
 

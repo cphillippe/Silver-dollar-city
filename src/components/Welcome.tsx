@@ -24,7 +24,7 @@ export function Welcome({ onNavigate }: WelcomeProps) {
   }
 
   return (
-    <main className="welcome is-onescreen">
+    <main className="welcome is-onescreen is-alive">
       <div className="welcome-sky" aria-hidden />
       <div className="welcome-ridge" aria-hidden />
       <div className="welcome-hero">
@@ -38,12 +38,12 @@ export function Welcome({ onNavigate }: WelcomeProps) {
         <p className="welcome-who">{STORY.who}</p>
         <div className="welcome-cast">
           <figure>
-            <Avatar who="river" size="md" />
+            <Avatar who="river" size="lg" />
             <figcaption>YOU · RIVER</figcaption>
           </figure>
           <span className="welcome-lantern" aria-hidden />
           <figure>
-            <Avatar who="juniper" size="md" />
+            <Avatar who="juniper" size="lg" />
             <figcaption>GUIDE · JUNIPER</figcaption>
           </figure>
         </div>

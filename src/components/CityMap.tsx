@@ -40,6 +40,8 @@ import {
 } from '../store/progress'
 import { localDateKey } from '../lib/dates'
 import type { View } from '../types'
+import riverWalk from '../assets/cast/portrait-river.png'
+import juniperWalk from '../assets/cast/portrait-juniper.png'
 import { Avatar } from './Avatar'
 import { GemMark } from './GemMark'
 
@@ -96,6 +98,7 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
   const [rising, setRising] = useState<CityPlotId | null>(null)
   const [homecoming, setHomecoming] = useState(false)
   const [beat, setBeat] = useState<CityUpgrade | null>(null)
+  const [tapped, setTapped] = useState<CityPlotId | null>(null)
   const [cam, setCam] = useState(FULL_CAM)
   const playing = useRef(false)
   const timers = useRef<number[]>([])
@@ -109,6 +112,10 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
 
   function open(id: CityPlotId) {
     if (mode === 'poster' || playing.current) return
+    setTapped(id)
+    window.setTimeout(() => {
+      setTapped((cur) => (cur === id ? null : cur))
+    }, 340)
     const st = stageOf(id)
     if (st === 'empty' && id !== nextId) return
     const spec = CITY_PLOTS.find((plot) => plot.id === id)
@@ -284,11 +291,10 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
   const gift = nextGift(nextId, nextStage, shownFill[nextId] ?? 0)
   const celebrating = Boolean(beat) || homecoming
   const beatVoice = beat ? townVoice(beat.id) : townVoice(nextId)
-  const alive = mode === 'live'
 
   return (
     <section
-      className={`city-overworld is-age-${age} ${mode === 'poster' ? 'is-poster' : 'is-alive'} ${celebrating ? 'is-revealing' : ''} ${homecoming ? 'is-homecoming' : ''}`}
+      className={`city-overworld is-age-${age} is-alive ${mode === 'poster' ? 'is-poster' : ''} ${celebrating ? 'is-revealing' : ''} ${homecoming ? 'is-homecoming' : ''}`}
     >
       <svg
         className="city-svg"
@@ -352,6 +358,9 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
+          <clipPath id="city-face-clip" clipPathUnits="objectBoundingBox">
+            <circle cx="0.5" cy="0.5" r="0.36" />
+          </clipPath>
         </defs>
 
         <rect width="640" height="420" fill="url(#city-sky)" />
@@ -409,10 +418,46 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
           </g>
         ) : null}
 
-        {alive && !celebrating ? (
+        {!celebrating ? (
           <g className="city-walkers" aria-hidden>
-            <circle className="city-walker city-walker-a" r="3.2" cx="90" cy="308" />
-            <circle className="city-walker city-walker-b" r="2.6" cx="420" cy="286" />
+            <image
+              className="city-walker city-walker-a"
+              href={riverWalk}
+              x="78"
+              y="286"
+              width="32"
+              height="32"
+              clipPath="url(#city-face-clip)"
+            />
+            <image
+              className="city-walker city-walker-b"
+              href={juniperWalk}
+              x="408"
+              y="266"
+              width="30"
+              height="30"
+              clipPath="url(#city-face-clip)"
+            />
+          </g>
+        ) : null}
+
+        {mode === 'poster' ? (
+          <g className="city-welcome-folk" aria-hidden>
+            <foreignObject x="148" y="300" width="44" height="44">
+              <div className="city-portrait">
+                <Avatar who="river" size="sm" />
+              </div>
+            </foreignObject>
+            <foreignObject x="348" y="274" width="44" height="44">
+              <div className="city-portrait">
+                <Avatar who="juniper" size="sm" />
+              </div>
+            </foreignObject>
+            <foreignObject x="236" y="318" width="40" height="40">
+              <div className="city-portrait">
+                <Avatar who="mercy" size="sm" />
+              </div>
+            </foreignObject>
           </g>
         ) : null}
 
@@ -431,6 +476,7 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
           fill={shownFill.lookout}
           next={nextId === 'lookout'}
           rising={rising === 'lookout'}
+          tapped={tapped === 'lookout'}
           onOpen={open}
         />
 
@@ -440,6 +486,7 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
           fill={shownFill.observatory}
           next={nextId === 'observatory'}
           rising={rising === 'observatory'}
+          tapped={tapped === 'observatory'}
           onOpen={open}
         />
 
@@ -449,6 +496,7 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
           fill={shownFill.hollow}
           next={nextId === 'hollow'}
           rising={rising === 'hollow'}
+          tapped={tapped === 'hollow'}
           onOpen={open}
         />
 
@@ -458,6 +506,7 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
           fill={shownFill.journal}
           next={nextId === 'journal'}
           rising={rising === 'journal'}
+          tapped={tapped === 'journal'}
           onOpen={open}
         />
 
@@ -467,6 +516,7 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
           fill={shownFill.bench}
           next={nextId === 'bench'}
           rising={rising === 'bench'}
+          tapped={tapped === 'bench'}
           onOpen={open}
         />
 
@@ -476,6 +526,7 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
           fill={shownFill.lamps}
           next={nextId === 'lamps'}
           rising={rising === 'lamps'}
+          tapped={tapped === 'lamps'}
           onOpen={open}
         />
 
@@ -485,6 +536,7 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
           fill={shownFill.gate}
           next={nextId === 'gate'}
           rising={rising === 'gate'}
+          tapped={tapped === 'gate'}
           onOpen={open}
         />
 
@@ -494,6 +546,7 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
           fill={shownFill.porch}
           next={nextId === 'porch'}
           rising={rising === 'porch'}
+          tapped={tapped === 'porch'}
           onOpen={open}
         />
 
@@ -648,6 +701,7 @@ function PlotGroup({
   fill,
   next,
   rising,
+  tapped,
   onOpen,
 }: {
   id: CityPlotId
@@ -655,6 +709,7 @@ function PlotGroup({
   fill: number
   next: boolean
   rising: boolean
+  tapped: boolean
   onOpen: (id: CityPlotId) => void
 }) {
   const clickable = stage !== 'empty' || next
@@ -662,7 +717,7 @@ function PlotGroup({
   const vacant = stage === 'empty' && !next
   return (
     <g
-      className={`city-plot is-${stage} ${next ? 'is-next' : ''} ${rising ? 'is-rising' : ''}`}
+      className={`city-plot is-${stage} ${next ? 'is-next' : ''} ${rising ? 'is-rising' : ''} ${tapped ? 'is-tapped' : ''}`}
       role={clickable ? 'button' : undefined}
       tabIndex={clickable ? 0 : undefined}
       aria-label={`${id} ${stage}${next ? ', next to build' : ''}${rising ? ', just rose' : ''}`}

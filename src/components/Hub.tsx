@@ -41,7 +41,7 @@ export function Hub({ onNavigate }: HubProps) {
   const watchOpen = unlockedWatchAbilities(progress)
 
   return (
-    <main className="hub is-town" aria-label="The town">
+    <main className="hub is-town is-inhabited" aria-label="The town">
       <CityMap onNavigate={onNavigate} />
 
       <section
