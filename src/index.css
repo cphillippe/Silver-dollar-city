@@ -4677,7 +4677,7 @@ html[data-theme='dusk'] .hub.is-town .night-watch {
   flex-direction: column;
   flex: 1;
   min-height: 0;
-  gap: 8px;
+  gap: 6px;
   overflow: hidden;
 }
 
@@ -4691,12 +4691,22 @@ html[data-theme='dusk'] .hub.is-town .night-watch {
   color: #ffe9b0;
   line-height: 1.2;
   font-family: var(--serif);
+  flex: 0 0 auto;
+}
+
+.defend-page > .eyebrow {
+  flex: 0 0 auto;
+  margin: 0;
 }
 
 .defend-frame {
   position: relative;
+  z-index: 0;
   flex: 1 1 auto;
   min-height: 0;
+  max-height: min(42vh, 320px);
+  overflow: hidden;
+  isolation: isolate;
 }
 
 .defend-frame.is-shake .defend-board,
@@ -4760,8 +4770,8 @@ html[data-theme='dusk'] .hub.is-town .night-watch {
 .defend-board {
   display: block;
   width: 100%;
-  height: auto;
-  max-height: min(58vh, 440px);
+  height: 100%;
+  max-height: 100%;
   border-radius: 22px;
   border: 2px solid rgba(255, 204, 51, 0.45);
   box-shadow: 0 16px 40px rgba(58, 20, 128, 0.48), inset 0 0 40px rgba(255, 200, 80, 0.08);
@@ -5188,9 +5198,12 @@ html[data-theme='dusk'] .hub.is-town .night-watch {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
   justify-items: stretch;
-  margin: 8px auto 4px;
+  margin: 4px auto 0;
   max-width: 340px;
   width: 100%;
+  flex: 0 0 auto;
+  position: relative;
+  z-index: 3;
 }
 
 .defend-ability {
@@ -5249,6 +5262,17 @@ html[data-theme='dusk'] .hub.is-town .night-watch {
   margin: 0;
   font-size: 0.82rem;
   color: rgba(244, 234, 210, 0.72);
+  flex: 0 0 auto;
+}
+
+.defend-go {
+  flex: 0 0 auto;
+  z-index: 3;
+}
+
+.defend-lost {
+  flex: 0 0 auto;
+  z-index: 3;
 }
 
 .learning-store {
@@ -5302,4 +5326,70 @@ html[data-theme='dusk'] .hub.is-town .night-watch {
   display: flex;
   flex-direction: column;
   padding-top: 8px;
+  padding-bottom: calc(8px + var(--safe-bottom));
+}
+
+@media (max-width: 480px) {
+  .app.is-play:has(.defend-page) .app-body {
+    padding-top: 4px;
+    padding-bottom: calc(6px + var(--safe-bottom));
+  }
+
+  .defend-page {
+    gap: 4px;
+  }
+
+  .defend-title {
+    font-size: 1rem;
+  }
+
+  .defend-frame {
+    flex: 0 0 auto;
+    height: min(34vh, 220px);
+    min-height: 150px;
+    max-height: none;
+  }
+
+  .defend-board {
+    border-radius: 16px;
+  }
+
+  .defend-hud {
+    top: 6px;
+    left: 6px;
+    right: 6px;
+    padding: 4px 8px;
+    font-size: 0.72rem;
+  }
+
+  .defend-abilities {
+    gap: 6px;
+    max-width: none;
+  }
+
+  .defend-ability {
+    padding: 6px 4px 7px;
+    gap: 2px;
+    font-size: 0.78rem;
+    border-radius: 14px;
+  }
+
+  .defend-ability .gem-ability {
+    width: 40px;
+    height: 40px;
+  }
+
+  .defend-ability-claim {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 0.6rem;
+    line-height: 1.2;
+    max-height: 2.5em;
+  }
+
+  .defend-tip {
+    font-size: 0.72rem;
+  }
 }
