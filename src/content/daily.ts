@@ -115,8 +115,8 @@ export const DAILY_POOL: DailyPuzzle[] = [
       context:
         '1 Corinthians 15:5–6. The New Testament does not rest on one voice. It stacks named people.',
       pairs: [
-        { id: 'cephas', gem: 'heart', scene: 'heart', left: 'Cephas (Peter)', right: 'Named first in Paul’s list' },
-        { id: 'twelve', gem: 'star', scene: 'scrolls', left: 'The Twelve', right: 'The gathered apprentices' },
+        { id: 'cephas', gem: 'heart', scene: 'first', left: 'Cephas (Peter)', right: 'Named first in Paul’s list' },
+        { id: 'twelve', gem: 'star', scene: 'twelve', left: 'The Twelve', right: 'The gathered apprentices' },
         { id: 'crowd', gem: 'tree', scene: 'crowd', left: 'More than five hundred', right: 'A crowd, many still living then' },
       ],
       teachOnWrong: 'Paul is listing appearances, not inventing titles. Look at who is named, then snap again.',
@@ -199,7 +199,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
       pairs: [
         { id: 'cells', gem: 'seed', scene: 'cells', left: 'Cells copy information', right: 'Copying is not a small trick' },
         { id: 'band', gem: 'tree', scene: 'band', left: 'Earth sits in a habitable band', right: 'A narrow kindness of place' },
-        { id: 'science', gem: 'lamp', scene: 'cosmos', left: 'We can do science at all', right: 'A mind that fits a cosmos' },
+        { id: 'science', gem: 'lamp', scene: 'mindsky', left: 'We can do science at all', right: 'A mind that fits a cosmos' },
       ],
       teachOnWrong: 'Each pair is a modest next sentence, not a proof. Match the observation to its honest neighbor.',
       deeper:
@@ -419,7 +419,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
       pairs: [
         { id: 'door', gem: 'door', scene: 'door', left: 'A door', right: 'A way in, not a dead end' },
         { id: 'pasture', gem: 'tree', scene: 'pasture', left: 'Pasture', right: 'Life on the other side' },
-        { id: 'anyone', gem: 'heart', scene: 'heart', left: 'Anyone', right: 'The invitation’s width' },
+        { id: 'anyone', gem: 'heart', scene: 'welcome', left: 'Anyone', right: 'The invitation’s width' },
       ],
       teachOnWrong: 'John 10 is an invitation with a particular door and a wide “anyone.” Snap the image to the gift.',
       deeper:
