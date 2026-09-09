@@ -271,6 +271,16 @@ Bill confirmed Tower Defense. First playable night on the same town.
 
 Done when Jericho is clean and Bill can play one night on ~390×844.
 
+## Night Watch look (2026-09-08)
+
+Bill: “Make it better lookin.” One look pass. No new systems.
+
+- Night Watch: richer dusk, packed road, timber lanterns, cloak raiders, lamp-to-road hit flash.
+- Town **Hold the night** CTA warmer, still compact.
+- Jericho two-pick, teach-first, seats, ownership, copy-truth, lock-in, local save — unchanged.
+
+Done when a cold glance at Hold the night looks enjoyable on ~390×844.
+
 ## Jericho two-pick (2026-09-08)
 
 Bill: Jericho looked like homework — 1–5 chrome, empty 2×2 ghosts, stacked cards, a vertical empty 1–5 list.

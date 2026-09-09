@@ -531,11 +531,17 @@ assert.match(defendSrc, /defendPads/)
 assert.match(defendSrc, /afterJuiceRef/)
 assert.match(defendSrc, /}, \[phase\]/)
 assert.match(defendSrc, /fireBest/)
+assert.match(defendSrc, /defend-lantern/)
+assert.match(defendSrc, /defend-ridge/)
+assert.match(defendSrc, /defend-beam/)
+assert.match(hubSrc, /night-watch-glow/)
 assert.match(
   readFileSync(new URL('../src/lib/defend.ts', import.meta.url), 'utf8'),
   /waveSpeed/,
 )
 assert.match(cssSrc, /defend-board/)
+assert.match(cssSrc, /defend-lantern/)
+assert.match(cssSrc, /night-watch-glow/)
 assert.match(sequenceSrc, /progressive && !live/)
 
 console.log('check-city: ok')
