@@ -66,7 +66,7 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
   }
 
   function choose(side: Side, id: string) {
-    if (status === 'ok' || shake || locked.includes(id) && !guided) return
+    if (status === 'ok' || (shake || locked.includes(id)) && !guided) return
     if (locked.includes(id) && !(side === 'right' && picked?.side === 'left')) return
     if (!picked || picked.side === side) {
       setPicked((current) =>
@@ -110,7 +110,7 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
   return (
     <div
       className={`play is-match ${guided ? 'is-deal' : ''} ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}
-      style={{ ['--match-rows' as string]: guided ? 1 : left.length }}
+      style={{ ['--match-rows' as string]: guided ? 2 : left.length }}
     >
       <WinBurst play={status === 'ok'} />
       <PuzzleLead challenge={challenge} />

@@ -111,7 +111,7 @@ export function BuildArgumentPlay({
   }
 
   function place(slotId: string) {
-    if (status === 'ok' || shake || !selected) return
+    if (status === 'ok' || !selected) return
     const card = takeCard(selected)
     if (!card) return
     if (guided && nextSlot && slotId !== nextSlot.id) return
@@ -136,7 +136,7 @@ export function BuildArgumentPlay({
   }
 
   function pickStone(id: string) {
-    if (status === 'ok' || shake) return
+    if (status === 'ok') return
     if (!guided) {
       setSelected(id === selected ? null : id)
       setStatus('idle')
@@ -171,7 +171,7 @@ export function BuildArgumentPlay({
   }
 
   function returnCard(id: string) {
-    if (status === 'ok' || shake) return
+    if (status === 'ok') return
     const card = takeCard(id)
     if (!card) return
     const home = order.findIndex((item) => item.id === id)
@@ -233,7 +233,9 @@ export function BuildArgumentPlay({
           <strong>{misses >= 2 ? 'One more look.' : 'That stone slipped.'}</strong>{' '}
           {misses >= 2
             ? challenge.teachOnWrong
-            : 'Tap a red slot to swap. The chain stays; try again.'}
+            : guided
+              ? 'Not that stone. Try the other — the chain stays.'
+              : 'Tap a red slot to swap. The chain stays; try again.'}
         </p>
       ) : null}
 
@@ -316,7 +318,6 @@ export function BuildArgumentPlay({
                 tabIndex={0}
                 aria-label={live ? home.text : `Return ${home.text} to its seat`}
                 onClick={() => {
-                  if (shake) return
                   if (live) pickStone(home.id)
                   else returnCard(home.id)
                 }}
