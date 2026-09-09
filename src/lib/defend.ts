@@ -87,6 +87,76 @@ export function pathPoint(t: number): { x: number; y: number } {
   return { x: a.x + (b.x - a.x) * local, y: a.y + (b.y - a.y) * local }
 }
 
+export type WatchAbility = 'love' | 'logic' | 'reason' | 'science'
+
+export const WATCH_ABILITIES: WatchAbility[] = ['love', 'logic', 'reason', 'science']
+
+export const WATCH_ABILITY_LABEL: Record<WatchAbility, string> = {
+  love: 'Love',
+  logic: 'Logic',
+  reason: 'Reason',
+  science: 'Science',
+}
+
+export const WATCH_ABILITY_GEM: Record<WatchAbility, 'heart' | 'star' | 'cup' | 'lamp'> = {
+  love: 'heart',
+  logic: 'star',
+  reason: 'cup',
+  science: 'lamp',
+}
+
+const LOGIC_KEYS = [
+  'wb-creed',
+  'wb-early',
+  'wb-method',
+  'wb-women',
+  'fg-mover',
+  'fg-contingent',
+  'fg-kalam',
+  'daily-creed',
+  'daily-names',
+]
+const REASON_KEYS = ['hl-moral', 'hl-mind', 'hl-meaning', 'hl-beauty', 'fg-limits']
+const SCIENCE_KEYS = [
+  'ob-tuning',
+  'ob-design',
+  'ob-leibniz',
+  'ob-life',
+  'daily-stars',
+  'daily-life',
+  'daily-cosmos',
+]
+
+/** City of Heaven on the ridge — same seat as the overworld teaser. */
+export const HEAVEN_POINT = { x: 572, y: 36 }
+
+export function unlockedWatchAbilities(progress: ProgressState): WatchAbility[] {
+  const held = new Set(progress.held ?? [])
+  const completed = new Set(progress.completed ?? [])
+  const known = (keys: string[]) => keys.some((id) => held.has(id) || completed.has(id))
+  const next: WatchAbility[] = ['love']
+  if (known(LOGIC_KEYS)) next.push('logic')
+  if (known(REASON_KEYS)) next.push('reason')
+  if (known(SCIENCE_KEYS)) next.push('science')
+  return next
+}
+
+export function heavenPoint(
+  from: { x: number; y: number },
+  t: number,
+  to = HEAVEN_POINT,
+): { x: number; y: number } {
+  const clamped = Math.min(1, Math.max(0, t))
+  return {
+    x: from.x + (to.x - from.x) * clamped,
+    y: from.y + (to.y - from.y) * clamped,
+  }
+}
+
+export function heavenSpeed(): number {
+  return waveSpeed() * 1.7
+}
+
 export function dist(
   a: { x: number; y: number },
   b: { x: number; y: number },
