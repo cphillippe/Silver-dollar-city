@@ -39,14 +39,22 @@ export function Hub({ onNavigate }: HubProps) {
     <main className="hub is-town" aria-label="The town">
       <CityMap onNavigate={onNavigate} />
 
-      <section className="night-watch" aria-label="Night Watch">
+      <section
+        className={`night-watch ${progress.defense.cleared ? 'is-held' : ''}`}
+        aria-label="Night Watch"
+      >
         <div className="night-watch-glow" aria-hidden />
         <div className="card-lead">
           <Avatar who="juniper" size="sm" />
           <div>
             <p className="eyebrow">{progress.defense.cleared ? 'Still watched' : 'Night Watch'}</p>
             <h2>Hold the night</h2>
-            <p className="town-line">Built lots hold lamps.</p>
+            <p className="town-line">
+              Built lots hold lamps
+              {progress.defense.cleared
+                ? ` · ${progress.defense.cleared} night${progress.defense.cleared === 1 ? '' : 's'} held.`
+                : '.'}
+            </p>
           </div>
         </div>
         <button

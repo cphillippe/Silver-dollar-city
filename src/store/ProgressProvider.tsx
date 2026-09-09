@@ -200,7 +200,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       const next = {
         ...current,
         defense: {
-          cleared: current.defense.cleared + (seen ? 0 : 1),
+          cleared: current.defense.cleared + 1,
           nights: seen ? current.defense.nights : [...current.defense.nights, dateKey],
           lastNight: dateKey,
         },

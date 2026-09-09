@@ -566,11 +566,26 @@ assert.match(defendSrc, /defend-lantern/)
 assert.match(defendSrc, /defend-ridge/)
 assert.match(defendSrc, /defend-beam/)
 assert.match(defendSrc, /defend-porch/)
+assert.match(defendSrc, /defend-blast/)
+assert.match(defendSrc, /Night held!/)
+assert.match(defendSrc, /comboRef/)
+assert.match(defendCopy, /Plant lamps\. Blast cheap lines\./)
+assert.doesNotMatch(defendCopy, /Cheap lines walk the Jericho road/)
 assert.match(hubSrc, /night-watch-glow/)
+assert.match(hubSrc, /is-held/)
+assert.match(hubSrc, /held\./)
 assert.match(
   readFileSync(new URL('../src/lib/defend.ts', import.meta.url), 'utf8'),
-  /waveSpeed/,
+  /prefersReducedMotion/,
 )
+assert.match(
+  readFileSync(new URL('../src/store/ProgressProvider.tsx', import.meta.url), 'utf8'),
+  /cleared: current\.defense\.cleared \+ 1/,
+)
+assert.match(burstSrc, /Locked!/)
+assert.match(burstSrc, /stamp = 'Locked!'/)
+assert.match(cssSrc, /defend-blast-ring/)
+assert.match(cssSrc, /defend-shake/)
 assert.match(cssSrc, /defend-board/)
 assert.match(cssSrc, /defend-lantern/)
 assert.match(cssSrc, /night-watch-glow/)

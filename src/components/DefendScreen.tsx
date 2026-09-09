@@ -38,6 +38,20 @@ interface Raider {
   text: string
 }
 
+interface Shot {
+  key: number
+  from: { x: number; y: number }
+  to: { x: number; y: number }
+}
+
+interface Blast {
+  key: number
+  x: number
+  y: number
+  line: string
+  combo: number
+}
+
 export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const { progress, recordNight, recordReview, markMiss } = useProgress()
   const today = localDateKey()
@@ -51,11 +65,13 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const [raiders, setRaiders] = useState<Raider[]>([])
   const [downed, setDowned] = useState(0)
   const [flash, setFlash] = useState<CityPlotId | null>(null)
-  const [shot, setShot] = useState<{ key: number; from: { x: number; y: number }; to: { x: number; y: number } } | null>(
-    null,
-  )
-  const [puffs, setPuffs] = useState<{ key: number; x: number; y: number }[]>([])
+  const [shots, setShots] = useState<Shot[]>([])
+  const [blasts, setBlasts] = useState<Blast[]>([])
+  const [combo, setCombo] = useState(0)
+  const [shake, setShake] = useState(false)
+  const [leakFlash, setLeakFlash] = useState(false)
   const [won, setWon] = useState(false)
+  const comboRef = useRef(0)
   const [recalled, setRecalled] = useState(false)
   const [missedNight, setMissedNight] = useState(false)
   const { juiceDone, afterJuice } = useJuiceHandoff()
@@ -127,6 +143,10 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         live.current.hearts = Math.max(0, live.current.hearts - leaked)
         setHearts(live.current.hearts)
         setMissedNight(true)
+        comboRef.current = 0
+        setCombo(0)
+        setLeakFlash(true)
+        window.setTimeout(() => setLeakFlash(false), 220)
         markMissRef.current(DEFEND_BRIEF_ID)
       }
       if (
@@ -194,17 +214,23 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     }
     live.current.cool[id] = now
     setFlash(id)
-    window.setTimeout(() => setFlash(null), 280)
+    window.setTimeout(() => setFlash(null), 220)
     if (!best) return
     const to = pathPoint(best.t)
-    setShot({ key: now, from: { x: at.x, y: at.y - 16 }, to })
-    setPuffs((current) => [...current.slice(-2), { key: now, x: to.x, y: to.y }])
+    comboRef.current += 1
+    const nextCombo = comboRef.current
+    setCombo(nextCombo)
+    setShake(true)
+    window.setTimeout(() => setShake(false), 160)
+    const blast: Blast = { key: now, x: to.x, y: to.y, line: best.text, combo: nextCombo }
+    setShots((current) => [...current.slice(-3), { key: now, from: { x: at.x, y: at.y - 16 }, to }])
+    setBlasts((current) => [...current.slice(-3), blast])
     window.setTimeout(() => {
-      setShot((current) => (current?.key === now ? null : current))
+      setShots((current) => current.filter((item) => item.key !== now))
     }, 280)
     window.setTimeout(() => {
-      setPuffs((current) => current.filter((item) => item.key !== now))
-    }, 520)
+      setBlasts((current) => current.filter((item) => item.key !== now))
+    }, 620)
     live.current.raiders = live.current.raiders.filter((item) => item.id !== best.id)
     live.current.downed += 1
     setRaiders(live.current.raiders)
@@ -243,6 +269,10 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     setRaiders([])
     setDowned(0)
     setHearts(DEFEND_HEARTS)
+    comboRef.current = 0
+    setCombo(0)
+    setShots([])
+    setBlasts([])
     saved.current = false
   }
 
@@ -258,7 +288,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
 
   return (
     <main
-      className={`defend-page ${taught ? 'is-puzzle' : 'is-teach'} ${arming ? 'is-arming' : ''} ${won ? 'is-win' : ''}`}
+      className={`defend-page ${taught ? 'is-puzzle' : 'is-teach'} ${arming ? 'is-arming' : ''} ${won ? 'is-win' : ''} ${shake ? 'is-shake' : ''} ${leakFlash ? 'is-leak' : ''}`}
       aria-label={WATCH_TITLE}
     >
       {!taught ? (
@@ -282,15 +312,17 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       ) : after && recalled ? (
         <TownReturn
           who="juniper"
-          line="The lamps held. See what the street remembered."
+          line="Night held. The street grew."
           action="See the town"
           onGo={() => onNavigate({ name: 'hub' })}
         />
       ) : (
         <>
           <p className="eyebrow">{WATCH_KICKER}</p>
-          <h1 className="defend-title">{WATCH_LEAD}</h1>
-          <div className="defend-frame">
+          <h1 className="defend-title">
+            {phase === 'wave' ? 'Blast them.' : WATCH_LEAD}
+          </h1>
+          <div className={`defend-frame ${shake ? 'is-shake' : ''} ${won ? 'is-clear' : ''}`}>
             <p className="defend-hud" aria-live="polite">
               <span className="defend-hearts">
                 {Array.from({ length: DEFEND_HEARTS }, (_, index) => (
@@ -299,14 +331,16 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                   </span>
                 ))}
               </span>
-              <span className="defend-count">
+              <span className={`defend-count ${combo > 1 ? 'is-combo' : ''}`}>
                 {phase === 'wave'
-                  ? `${downed}/${DEFEND_WAVE_SIZE} down`
+                  ? combo > 1
+                    ? `×${combo}  ${downed}/${DEFEND_WAVE_SIZE}`
+                    : `${downed}/${DEFEND_WAVE_SIZE} · TAP`
                   : `${planted.length} lamp${planted.length === 1 ? '' : 's'}`}
               </span>
             </p>
             <svg
-              className="defend-board"
+              className={`defend-board ${shake ? 'is-shake' : ''} ${won ? 'is-clear' : ''}`}
               viewBox="0 0 640 420"
               role="img"
               aria-label="Night road through Silver City"
@@ -440,7 +474,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                       }
                     }}
                   >
-                    <circle className="defend-hit" r="34" />
+                    <circle className="defend-hit" r="38" />
                     <ellipse className="defend-earth" cx="0" cy="10" rx="15" ry="6" />
                     {on ? (
                       <>
@@ -460,7 +494,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                   </g>
                 )
               })}
-              {shot ? (
+              {shots.map((shot) => (
                 <g className="defend-shot" key={shot.key}>
                   <line
                     className="defend-beam"
@@ -469,24 +503,41 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                     x2={shot.to.x}
                     y2={shot.to.y}
                   />
-                  <circle className="defend-impact" cx={shot.to.x} cy={shot.to.y} r="16" />
+                  <circle className="defend-impact" cx={shot.to.x} cy={shot.to.y} r="22" />
                 </g>
-              ) : null}
+              ))}
               {raiders.map((raider) => {
                 const at = pathPoint(raider.t)
                 return (
                   <g key={raider.id} className="defend-raider" transform={`translate(${at.x} ${at.y})`}>
-                    <ellipse className="defend-raider-shadow" cy="10" rx="11" ry="3.8" />
-                    <path className="defend-raider-cloak" d="M-9 10 Q0 13 9 10 L4 -2 Q0 -9 -4 -2 Z" />
-                    <circle className="defend-raider-head" cy="-8" r="5" />
+                    <ellipse className="defend-raider-shadow" cy="10" rx="12" ry="4.2" />
+                    <path className="defend-raider-cloak" d="M-10 11 Q0 15 10 11 L5 -2 Q0 -11 -5 -2 Z" />
+                    <circle className="defend-raider-head" cy="-9" r="5.6" />
+                    <g className="defend-raider-call">
+                      <rect x="-36" y="-32" width="72" height="14" rx="7" />
+                      <text y="-22" textAnchor="middle">
+                        {raider.text}
+                      </text>
+                    </g>
                   </g>
                 )
               })}
-              {puffs.map((puff) => (
-                <g key={puff.key} className="defend-puff" transform={`translate(${puff.x} ${puff.y})`}>
-                  <circle r="3" cx="-6" cy="-4" />
-                  <circle r="4" cx="2" cy="-10" />
-                  <circle r="2.4" cx="8" cy="-2" />
+              {blasts.map((blast) => (
+                <g key={blast.key} className="defend-blast" transform={`translate(${blast.x} ${blast.y})`}>
+                  <circle className="defend-blast-ring" r="26" />
+                  <circle className="defend-blast-core" r="10" />
+                  <path className="defend-shard" d="M-2 -4 L4 -28 L8 -6 Z" />
+                  <path className="defend-shard is-2" d="M4 2 L28 8 L8 8 Z" />
+                  <path className="defend-shard is-3" d="M-4 4 L-26 16 L-8 8 Z" />
+                  <path className="defend-shard is-4" d="M2 6 L10 26 L-2 10 Z" />
+                  {blast.combo > 1 ? (
+                    <text className="defend-combo-pop" y="-34" textAnchor="middle">
+                      ×{blast.combo}
+                    </text>
+                  ) : null}
+                  <text className="defend-blast-line" y="28" textAnchor="middle">
+                    {blast.line}
+                  </text>
                 </g>
               ))}
             </svg>
@@ -494,7 +545,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           {phase === 'plant' ? (
             <button
               type="button"
-              className="btn primary xl"
+              className="btn primary xl defend-go"
               onClick={() => setPhase('wave')}
               disabled={planted.length < 1 || arming}
             >
@@ -503,24 +554,20 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           ) : null}
           {phase === 'lost' ? (
             <div className="defend-lost">
-              <p>The porch flickered. Plant again — the claim still stands.</p>
+              <p>Porch flickered. Blast again.</p>
               <button type="button" className="btn primary" onClick={retry}>
                 Try the night again
               </button>
             </div>
           ) : null}
           {phase === 'wave' ? (
-            <p className="defend-tip">
-              {raiders[0]
-                ? `“${raiders[0].text}” · tap the road or a lamp.`
-                : 'Tap the road or a lamp when a cheap line is near.'}
-            </p>
+            <p className="defend-tip">Tap the road — lamps fire for you.</p>
           ) : (
             <p className="defend-tip">Built lots hold lamps. Empty lots cannot.</p>
           )}
         </>
       )}
-      <WinBurst play={won && !juiceDone} />
+      <WinBurst play={won && !juiceDone} stamp="Night held!" />
     </main>
   )
 }
