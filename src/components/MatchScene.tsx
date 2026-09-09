@@ -7,46 +7,51 @@ export function MatchScene({ scene }: { scene: MatchSceneId }) {
     case 'expand':
       return (
         <SceneFrame uid={uid} from="#14062e" to="#2a0d58">
-          <circle cx="32" cy="32" r="7" fill="#fff6b8" />
-          <circle cx="32" cy="32" r="3" fill="#ffcc33" />
-          <path d="M32 18v-12M32 46v12M18 32h-12M46 32h12M21 21l-8-8M43 21l8-8M21 43l-8 8M43 43l8 8" stroke="#ffcc33" strokeWidth="3.2" strokeLinecap="round" />
-          <circle cx="12" cy="12" r="3" fill="#c86bff" />
-          <circle cx="52" cy="14" r="2.6" fill="#7dffb0" />
-          <circle cx="50" cy="50" r="3" fill="#ff9f1a" />
-          <circle cx="14" cy="50" r="2.4" fill="#fff" />
+          <circle cx="32" cy="32" r="8" fill="#fff6b8" />
+          <circle cx="32" cy="32" r="3.5" fill="#ffcc33" />
+          <path d="M32 22V12M32 42v10M22 32H12M42 32h10M24 24l-7-7M40 24l7-7M24 40l-7 7M40 40l7 7" stroke="#ffcc33" strokeWidth="3" strokeLinecap="round" />
+          <polygon points="32,6 28,13 36,13" fill="#ffcc33" />
+          <polygon points="32,58 28,51 36,51" fill="#ffcc33" />
+          <polygon points="6,32 13,28 13,36" fill="#ffcc33" />
+          <polygon points="58,32 51,28 51,36" fill="#ffcc33" />
+          <circle cx="16" cy="14" r="3.4" fill="#c86bff" />
+          <circle cx="50" cy="16" r="3" fill="#7dffb0" />
+          <circle cx="48" cy="48" r="3.4" fill="#ff9f1a" />
+          <circle cx="16" cy="48" r="2.8" fill="#fff" />
         </SceneFrame>
       )
     case 'bind':
       return (
         <SceneFrame uid={uid} from="#12382a" to="#1a0840">
-          <path d="M22 32h20" stroke="#7dffb0" strokeWidth="8" strokeLinecap="round" />
-          <circle cx="18" cy="32" r="11" fill="#fff6e8" stroke="#ffe08a" strokeWidth="2" />
-          <circle cx="46" cy="32" r="14" fill="#ffcc33" stroke="#fff8dc" strokeWidth="2" />
-          <circle cx="18" cy="32" r="4" fill="#c4922a" />
-          <circle cx="46" cy="32" r="5" fill="#8a5a22" />
+          <path d="M24 32h16" stroke="#7dffb0" strokeWidth="10" strokeLinecap="round" />
+          <path d="M28 26c4 4 4 8 0 12M36 26c-4 4-4 8 0 12" stroke="#148a48" strokeWidth="2.2" fill="none" />
+          <circle cx="16" cy="32" r="12" fill="#fff6e8" stroke="#ffe08a" strokeWidth="2.4" />
+          <circle cx="48" cy="32" r="15" fill="#ffcc33" stroke="#fff8dc" strokeWidth="2.4" />
+          <circle cx="16" cy="32" r="4.5" fill="#c4922a" />
+          <circle cx="48" cy="32" r="6" fill="#8a5a22" />
         </SceneFrame>
       )
     case 'tidy':
       return (
         <SceneFrame uid={uid} from="#2a0d58" to="#1a0840">
-          <rect x="6" y="50" width="52" height="4" rx="1" fill="#ffe08a" />
-          <rect x="18" y="34" width="28" height="16" rx="3" fill="#ffcc33" />
-          <rect x="22" y="20" width="20" height="14" rx="3" fill="#fff6b8" />
-          <rect x="26" y="8" width="12" height="12" rx="3" fill="#ffe08a" />
-          <path d="M32 8v-4" stroke="#ff5a7a" strokeWidth="2.4" />
-          <path d="M32 4l8 3-8 2Z" fill="#ff5a7a" />
+          <circle cx="48" cy="14" r="8" fill="#ffcc33" />
+          <rect x="4" y="52" width="56" height="5" rx="1" fill="#ffe08a" />
+          <rect x="10" y="36" width="16" height="16" rx="2" fill="#ffcc33" />
+          <rect x="24" y="36" width="16" height="16" rx="2" fill="#fff6b8" />
+          <rect x="10" y="20" width="16" height="16" rx="2" fill="#ffe08a" />
+          <rect x="24" y="20" width="16" height="16" rx="2" fill="#ffcc33" />
         </SceneFrame>
       )
     case 'dial':
       return (
         <SceneFrame uid={uid} from="#1a0840" to="#3a1480">
-          <circle cx="32" cy="34" r="20" fill="#fff6e8" stroke="#ffcc33" strokeWidth="3" />
-          <path d="M32 16v4M32 48v4M14 34h4M46 34h4M19 21l3 3M42 21l-3 3M19 47l3-3M42 47l-3-3" stroke="#c4922a" strokeWidth="2.2" strokeLinecap="round" />
-          <path d="M32 34l10-12" stroke="#b01c40" strokeWidth="3.4" strokeLinecap="round" />
-          <circle cx="32" cy="34" r="4" fill="#2a0d58" />
-          <circle cx="12" cy="12" r="6" fill="#3dcc7a" />
-          <path d="M50 8l4 8h-8Z" fill="#ffcc33" />
-          <path d="M52 18v8" stroke="#ffcc33" strokeWidth="2" />
+          <circle cx="32" cy="36" r="18" fill="#fff6e8" stroke="#ffcc33" strokeWidth="3" />
+          <path d="M32 20v3M32 49v3M16 36h3M45 36h3M21 25l2 2M41 25l-2 2M21 47l2-2M41 47l-2-2" stroke="#c4922a" strokeWidth="2" strokeLinecap="round" />
+          <path d="M32 36 42 24" stroke="#b01c40" strokeWidth="3.2" strokeLinecap="round" />
+          <circle cx="32" cy="36" r="3.4" fill="#2a0d58" />
+          <circle cx="12" cy="12" r="8" fill="#3d7ccc" />
+          <path d="M8 11c3-3 7-2 9 1 1 2-1 4-3 4-2 1-4 0-4-2Z" fill="#3dcc7a" />
+          <path d="M54 4 46 16h6l-8 14 12-12h-6Z" fill="#ffcc33" />
         </SceneFrame>
       )
     case 'witnesses':
@@ -63,37 +68,41 @@ export function MatchScene({ scene }: { scene: MatchSceneId }) {
     case 'reluctant':
       return (
         <SceneFrame uid={uid} from="#2a0d58" to="#1a0840">
-          <circle cx="24" cy="18" r="8" fill="#ffe7b8" />
-          <path d="M16 30c0-6 4-10 8-10s8 4 8 10v16H16Z" fill="#ffe7b8" />
-          <path d="M20 16c2 2 6 2 8 0" stroke="#8a5a22" strokeWidth="2" fill="none" strokeLinecap="round" />
-          <path d="M30 22c6-8 16-6 18 2" stroke="#ffe08a" strokeWidth="2.6" fill="none" strokeLinecap="round" />
-          <rect x="38" y="28" width="18" height="22" rx="3" fill="#fff6e8" />
-          <path d="M42 36h10M42 42h8" stroke="#c4922a" strokeWidth="2" strokeLinecap="round" />
-          <circle cx="47" cy="48" r="2" fill="#ff5a7a" />
+          <circle cx="22" cy="18" r="8" fill="#ffe7b8" />
+          <path d="M14 30c0-6 4-10 8-10s8 4 8 10v16H14Z" fill="#ffe7b8" />
+          <path d="M16 16c3 4 8 5 12 2" stroke="#8a5a22" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+          <path d="M26 20c2 4 2 8-1 10" stroke="#ffe7b8" strokeWidth="3.4" strokeLinecap="round" />
+          <circle cx="18" cy="12" r="1.6" fill="#fff" />
+          <rect x="40" y="24" width="18" height="24" rx="3" fill="#fff6e8" />
+          <path d="M44 32h10M44 38h8" stroke="#c4922a" strokeWidth="2" strokeLinecap="round" />
+          <path d="M46 46c2 2 6 2 8 0" stroke="#ff5a7a" strokeWidth="2" fill="none" strokeLinecap="round" />
         </SceneFrame>
       )
     case 'clock':
       return (
         <SceneFrame uid={uid} from="#2a0d58" to="#ff5a7a">
-          <circle cx="32" cy="42" r="12" fill="#ffcc33" />
-          <path d="M0 50h64v14H0Z" fill="#148a48" />
-          <circle cx="32" cy="28" r="16" fill="#fff6e8" stroke="#2a0d58" strokeWidth="3" />
-          <path d="M32 16v4M32 36v4M20 28h4M40 28h4" stroke="#c4922a" strokeWidth="2" strokeLinecap="round" />
-          <path d="M32 28v-8" stroke="#2a0d58" strokeWidth="2.6" strokeLinecap="round" />
-          <path d="M32 28l7 4" stroke="#b01c40" strokeWidth="2.4" strokeLinecap="round" />
-          <circle cx="32" cy="28" r="2.2" fill="#2a0d58" />
+          <circle cx="32" cy="46" r="14" fill="#ffcc33" />
+          <circle cx="32" cy="46" r="7" fill="#fff6b8" />
+          <path d="M0 52h64v12H0Z" fill="#148a48" />
+          <circle cx="32" cy="26" r="16" fill="#fff6e8" stroke="#2a0d58" strokeWidth="3" />
+          <path d="M32 14v3M32 35v3M19 26h3M42 26h3" stroke="#c4922a" strokeWidth="2" strokeLinecap="round" />
+          <path d="M32 26v-8" stroke="#2a0d58" strokeWidth="2.6" strokeLinecap="round" />
+          <path d="M32 26l6 4" stroke="#b01c40" strokeWidth="2.4" strokeLinecap="round" />
+          <circle cx="32" cy="26" r="2.2" fill="#2a0d58" />
         </SceneFrame>
       )
     case 'judea':
       return (
         <SceneFrame uid={uid} from="#1a2848" to="#2a0d58">
-          <rect x="8" y="30" width="28" height="22" fill="#ffe7b8" />
-          <path d="M6 30h32l-16-14Z" fill="#c4922a" />
-          <rect x="14" y="36" width="5" height="16" fill="#fff6e8" />
-          <rect x="25" y="36" width="5" height="16" fill="#fff6e8" />
-          <rect x="42" y="18" width="12" height="34" fill="#d8c4a0" />
-          <rect x="40" y="14" width="16" height="6" fill="#c4922a" />
-          <path d="M48 8l3 6h-6Z" fill="#ffcc33" />
+          <path d="M4 32h34l-17-16Z" fill="#c4922a" />
+          <rect x="8" y="32" width="26" height="22" fill="#ffe7b8" />
+          <rect x="12" y="38" width="5" height="16" fill="#fff6e8" />
+          <rect x="25" y="38" width="5" height="16" fill="#fff6e8" />
+          <path d="M17 20v-6M21 20v-8M25 20v-6" stroke="#ffcc33" strokeWidth="2" />
+          <rect x="44" y="22" width="10" height="32" fill="#d8c4a0" />
+          <rect x="41" y="18" width="16" height="5" fill="#c4922a" />
+          <path d="M49 8 53 16h-8Z" fill="#ffcc33" />
+          <path d="M49 8v10" stroke="#ffcc33" strokeWidth="2" />
         </SceneFrame>
       )
     case 'redness':
