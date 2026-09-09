@@ -415,11 +415,11 @@ p {
 
 .welcome-sky {
   position: absolute;
-  inset: -8% -8% 28%;
+  inset: -8% -8% 18%;
   background:
-    radial-gradient(ellipse at 50% 12%, rgba(255, 204, 51, 0.55), transparent 48%),
-    radial-gradient(ellipse at 80% 30%, rgba(255, 90, 122, 0.42), transparent 46%),
-    radial-gradient(ellipse at 12% 40%, rgba(90, 124, 255, 0.4), transparent 50%),
+    radial-gradient(ellipse at 50% 0%, #ffcc33 0%, rgba(255, 90, 122, 0.85) 28%, transparent 58%),
+    radial-gradient(ellipse at 88% 22%, rgba(200, 107, 255, 0.7), transparent 46%),
+    radial-gradient(ellipse at 8% 30%, rgba(90, 124, 255, 0.55), transparent 48%),
     radial-gradient(circle at 18% 36%, #fff 0 1.4px, transparent 2.4px),
     radial-gradient(circle at 72% 22%, #fff 0 1.2px, transparent 2.2px),
     radial-gradient(circle at 42% 58%, #ffe08a 0 1.8px, transparent 2.6px);
@@ -3503,7 +3503,7 @@ p {
 
 .welcome.is-onescreen .city-overworld.is-poster .city-svg {
   margin: 0 0 6px;
-  max-height: 16vh;
+  max-height: 20vh;
 }
 
 .city-overworld.is-poster .city-plot {

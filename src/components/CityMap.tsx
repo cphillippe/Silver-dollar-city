@@ -296,10 +296,10 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
       >
         <defs>
           <linearGradient id="city-sky" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#3a1480" />
-            <stop offset="32%" stopColor="#6a2ab8" />
-            <stop offset="62%" stopColor="#ff5a7a" />
-            <stop offset="100%" stopColor="#ffcc33" />
+            <stop offset="0%" stopColor="#ffcc33" />
+            <stop offset="22%" stopColor="#ff5a7a" />
+            <stop offset="52%" stopColor="#c86bff" />
+            <stop offset="100%" stopColor="#3a1480" />
           </linearGradient>
           <linearGradient id="city-ridge" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#3dcc7a" />
