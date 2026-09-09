@@ -22,9 +22,9 @@ The game is already in [`docs/`](docs/) on this branch (`base: './'`, so assets 
 After Save, wait a minute, then hard-reload the Pages URL. Later, after merge, switch the branch to **`main`** and keep `/docs`.
 
 **Interim tunnel (dies often — skip if Pages is live):**  
-https://assured-gather-regards-accounting.trycloudflare.com/
+https://allocation-occur-closes-solution.trycloudflare.com/
 
-Verified HTTP 200, “Silver City,” Night Watch bundle `index-DOClPij3.js`. Skip older tunnels. Skip StackBlitz.
+Verified HTTP 200, “Silver City,” Night Watch look bundle `index-gR7nglOr.js`. Skip older tunnels. Skip StackBlitz.
 
 ## The story
 
