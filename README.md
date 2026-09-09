@@ -11,7 +11,7 @@ A stranger should know in 60 seconds: this is a **Christian reasoning game**. So
 **Sticky public preview (GitHub Pages):**  
 https://cphillippe.github.io/Silver-dollar-city/
 
-Hard-reload once if you still see the old game (the PWA can keep a cached copy). Live bundle on this branch’s `docs/` is `index-DhMxWnFl.js` — Pictures match two-column, Night Watch blasts, Good Samaritan teach-first, Jericho two-pick.
+Hard-reload once if you still see the old game (the PWA can keep a cached copy). Live bundle on this branch’s `docs/` is `index-MzZ9UjBA.js` — candy look, Pictures match two-column, Night Watch blasts, Good Samaritan teach-first, Jericho two-pick.
 
 Pages is on. **One Settings change so it follows `main` instead of the merged PR branch:**
 
@@ -24,9 +24,9 @@ Pages is on. **One Settings change so it follows `main` instead of the merged PR
 Until that flip, Pages still deploys from `cursor/silver-city-unending-evidence-8233` `/docs` (older bundle until this PR lands on the Pages branch). Hard-reload github.io after it updates.
 
 **Interim tunnel (dies often — skip if Pages is live):**  
-https://prompt-peripheral-news-acrylic.trycloudflare.com/
+https://alone-wish-huntington-currently.trycloudflare.com/
 
-Verified HTTP 200, “Silver City,” bundle `index-DhMxWnFl.js`. Skip older tunnels. Skip StackBlitz.
+Verified HTTP 200, “Silver City,” bundle `index-MzZ9UjBA.js`. Skip older tunnels. Skip StackBlitz.
 
 ## The story
 
