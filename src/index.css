@@ -4048,6 +4048,7 @@ p {
   border: 1px solid rgba(224, 179, 74, 0.34);
   box-shadow: 0 16px 40px rgba(12, 8, 4, 0.48), inset 0 0 40px rgba(255, 200, 80, 0.04);
   background: #1c1810;
+  outline: none;
 }
 
 .defend-stars {
@@ -4055,8 +4056,23 @@ p {
 }
 
 .defend-canopy {
-  fill: #24301c;
-  opacity: 0.88;
+  fill: #2a3a20;
+  opacity: 0.9;
+}
+
+.defend-windows {
+  fill: #ffe08a;
+  opacity: 0.72;
+}
+
+.defend-porch path,
+.defend-porch rect {
+  fill: #3a2a18;
+}
+
+.defend-porch-window {
+  fill: #ffe08a;
+  filter: url(#defend-glow);
 }
 
 .defend-road-bed {
@@ -4091,6 +4107,13 @@ p {
 
 .defend-pad {
   cursor: pointer;
+  outline: none;
+}
+
+.defend-pad:focus-visible .defend-ring,
+.defend-pad:focus-visible .defend-hot-halo {
+  stroke: #ffe08a;
+  stroke-width: 2.4;
 }
 
 .defend-hit {

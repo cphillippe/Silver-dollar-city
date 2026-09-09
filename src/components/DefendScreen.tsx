@@ -371,7 +371,13 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                 fill="url(#defend-ridge)"
                 opacity="0.92"
               />
-              <path d="M-20 248 L40 200 120 228 210 176 300 214 410 168 500 206 660 150 V430 H-20 Z" fill="#1a2014" />
+              <path d="M-20 248 L40 200 120 228 210 176 300 214 410 168 500 206 660 150 V430 H-20 Z" fill="#21180f" />
+              <g className="defend-windows">
+                <circle cx="156" cy="214" r="1.8" />
+                <circle cx="248" cy="198" r="1.5" />
+                <circle cx="364" cy="188" r="1.6" />
+                <circle cx="476" cy="196" r="1.4" />
+              </g>
               <ellipse className="defend-canopy" cx="96" cy="268" rx="28" ry="16" />
               <ellipse className="defend-canopy" cx="214" cy="252" rx="22" ry="13" />
               <ellipse className="defend-canopy" cx="402" cy="246" rx="24" ry="14" />
@@ -389,6 +395,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                 d="M70 310 C 140 300, 200 280, 280 292 C 360 304, 430 286, 560 300"
               />
               <path d="M-10 368 Q 180 340 320 358 T 660 372 V430 H-10 Z" fill="#14180e" />
+              <g className="defend-porch" transform="translate(564 292)">
+                <path d="M-20 22 h40 l5 7 H-25 Z" />
+                <rect x="-16" y="-4" width="32" height="26" rx="2" />
+                <rect className="defend-porch-window" x="-5" y="4" width="10" height="9" rx="1" />
+              </g>
               <g className="defend-gate" transform={`translate(${DEFEND_PATH[0].x} ${DEFEND_PATH[0].y})`}>
                 <path d="M-10 6 V-16 M10 6 V-16" />
                 <path d="M-12 -16 H12" />
@@ -465,9 +476,9 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                 const at = pathPoint(raider.t)
                 return (
                   <g key={raider.id} className="defend-raider" transform={`translate(${at.x} ${at.y})`}>
-                    <ellipse className="defend-raider-shadow" cy="8" rx="9" ry="3.4" />
-                    <path className="defend-raider-cloak" d="M-7.5 8 Q0 11 7.5 8 L3.2 -1 Q0 -7 -3.2 -1 Z" />
-                    <circle className="defend-raider-head" cy="-7" r="4.3" />
+                    <ellipse className="defend-raider-shadow" cy="10" rx="11" ry="3.8" />
+                    <path className="defend-raider-cloak" d="M-9 10 Q0 13 9 10 L4 -2 Q0 -9 -4 -2 Z" />
+                    <circle className="defend-raider-head" cy="-8" r="5" />
                   </g>
                 )
               })}
