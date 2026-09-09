@@ -67,6 +67,15 @@ export const WALKER_KINDS: WalkerKind[] = [
   'spiritual',
 ]
 
+export const WALKER_LABEL: Record<WalkerKind, string> = {
+  'image-bearer': 'Image-bearer',
+  skeptic: 'Skeptic',
+  pagan: 'Pagan',
+  physical: 'Physical',
+  metaphysical: 'Metaphysical',
+  spiritual: 'Spiritual',
+}
+
 export function watchTool(id: string): WatchTool | undefined {
   return WATCH_TOOLS.find((tool) => tool.id === id)
 }

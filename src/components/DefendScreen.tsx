@@ -26,7 +26,8 @@ import {
   waveSpeed,
   type WatchAbility,
 } from '../lib/defend'
-import { deployFit } from '../lib/watchTools'
+import { learningForTool } from '../lib/learning'
+import { deployFit, WALKER_LABEL } from '../lib/watchTools'
 import { useJuiceHandoff } from '../lib/juice'
 import { CITY_PLOTS, type CityPlotId } from '../lib/city'
 import { useProgress } from '../store/progress'
@@ -248,6 +249,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     if (!best) return
     const to = raiderAt(best)
     const fit = deployFit(using, best.kind)
+    const heldLine = learningForTool(progress, using)
     comboRef.current += 1
     const nextCombo = comboRef.current
     setCombo(nextCombo)
@@ -257,7 +259,10 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       key: now,
       x: to.x,
       y: to.y,
-      line: fit === 'match' ? `${WATCH_ABILITY_LABEL[using]} matches` : `${WATCH_ABILITY_LABEL[using]} is weak`,
+      line:
+        fit === 'match'
+          ? heldLine?.claim ?? `${WATCH_ABILITY_LABEL[using]} matches`
+          : `${WATCH_ABILITY_LABEL[using]} is weak here`,
       combo: nextCombo,
     }
     setShots((current) => [...current.slice(-3), { key: now, from: { x: at.x, y: at.y - 16 }, to }])
@@ -342,6 +347,15 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           kind="sort"
           unlock="Unlock the lamps"
           onUnlock={() => {
+            recordReview({
+              id: brief.id,
+              pillar: 'parable-hollow',
+              kind: 'encode',
+              today,
+              clean: true,
+              peeked: false,
+              elaborated: false,
+            })
             setTaught(true)
             setArming(true)
             window.setTimeout(() => setArming(false), 360)
@@ -578,8 +592,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                     <path className="defend-raider-cloak" d="M-10 11 Q0 15 10 11 L5 -2 Q0 -11 -5 -2 Z" />
                     <circle className="defend-raider-head" cy="-9" r="5.6" />
                     <g className="defend-raider-call">
-                      <rect x="-36" y="-32" width="72" height="14" rx="7" />
-                      <text y="-22" textAnchor="middle">
+                      <rect x="-40" y="-42" width="80" height="28" rx="8" />
+                      <text className="defend-raider-kind" y="-32" textAnchor="middle">
+                        {WALKER_LABEL[raider.kind]}
+                      </text>
+                      <text y="-20" textAnchor="middle">
                         {raider.text}
                       </text>
                     </g>
@@ -619,6 +636,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           <div className="defend-abilities" role="group" aria-label="Night abilities">
             {WATCH_ABILITIES.map((id) => {
               const open = unlocked.includes(id)
+              const heldLine = learningForTool(progress, id)
               return (
                 <button
                   key={id}
@@ -630,8 +648,14 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                     if (open) setAbility(id)
                   }}
                 >
-                  <AbilityMark ability={id} size="sm" />
+                  <AbilityMark ability={id} size="md" />
                   {WATCH_ABILITY_LABEL[id]}
+                  <span className="defend-ability-claim">
+                    {open
+                      ? heldLine?.claim ??
+                        (id === 'love' ? 'A true line can turn a cheap claim.' : 'Hold a line to name this tool.')
+                      : 'Hold a matching line'}
+                  </span>
                 </button>
               )
             })}
@@ -645,9 +669,13 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
             </div>
           ) : null}
           {phase === 'wave' ? (
-            <p className="defend-tip">Match the walker. A held line deploys; the wrong tool only nudges.</p>
+            <p className="defend-tip">
+              Match the walker. Deploy the held argument — the wrong tool only nudges.
+            </p>
           ) : (
-            <p className="defend-tip">Learn · hold · deploy. Love is ready. Other tools unlock as you keep lines.</p>
+            <p className="defend-tip">
+              Learn · hold · deploy. Love is ready. Logic, reason, and science unlock as you keep lines.
+            </p>
           )}
         </>
       )}

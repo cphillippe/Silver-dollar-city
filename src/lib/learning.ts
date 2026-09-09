@@ -36,3 +36,12 @@ export function findLearning(
 ): Learning | undefined {
   return (progress.learnings ?? []).find((item) => item.id === id)
 }
+
+/** Newest stored line that deploys this tool — what you remember on the road. */
+export function learningForTool(
+  progress: ProgressState,
+  toolId: string,
+): Learning | undefined {
+  const hits = (progress.learnings ?? []).filter((item) => item.toolId === toolId)
+  return hits.at(-1)
+}
