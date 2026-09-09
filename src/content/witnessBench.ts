@@ -96,21 +96,25 @@ export const witnessBench: Area = {
       pairs: [
         {
           id: 'multi',
+          gem: 'star',
           left: 'Multiple attestation',
           right: 'Independent sources carrying the same core',
         },
         {
           id: 'emb',
+          gem: 'coin',
           left: 'Embarrassment',
           right: 'Details early Christians would be unlikely to invent',
         },
         {
           id: 'early',
+          gem: 'lamp',
           left: 'Early testimony',
           right: 'Closer in time, less room for legend to harden',
         },
         {
           id: 'context',
+          gem: 'tree',
           left: 'Contextual credibility',
           right: 'Fits the known first-century Jewish and Roman world',
         },
