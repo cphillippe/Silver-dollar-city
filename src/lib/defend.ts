@@ -1,6 +1,7 @@
+import type { ProgressState, WalkerKind } from '../types.ts'
 import { CITY_PLOTS, plotStage, type CityPlotId, type CityStage } from './city.ts'
 import { prefersReducedMotion } from './juice.ts'
-import type { ProgressState } from '../types.ts'
+import { unlockedWatchTools } from './watchTools.ts'
 
 export const DEFEND_BRIEF_ID = 'td-watch'
 export const DEFEND_HEARTS = 3
@@ -28,13 +29,27 @@ export const DEFEND_ANCHOR: Record<CityPlotId, { x: number; y: number }> = {
   porch: { x: 564, y: 292 },
 }
 
-export const RAID_LINES = [
-  'Mercy is optional',
-  'Neighbor means your own',
-  'Keep walking',
-  'Classify and leave',
-  'The priest did enough',
+export const RAID_CAST: { text: string; kind: WalkerKind }[] = [
+  { text: 'Mercy is optional', kind: 'skeptic' },
+  { text: 'Neighbor means your own', kind: 'image-bearer' },
+  { text: 'Keep walking', kind: 'spiritual' },
+  { text: 'Classify and leave', kind: 'skeptic' },
+  { text: 'The priest did enough', kind: 'image-bearer' },
+  { text: 'Only atoms speak', kind: 'physical' },
+  { text: 'The gods are many and tired', kind: 'pagan' },
+  { text: 'Mind is only weather', kind: 'metaphysical' },
 ]
+
+export const RAID_LINES = RAID_CAST.map((item) => item.text)
+
+export function raidForWave(cleared: number, index: number): { text: string; kind: WalkerKind } {
+  const loveKinds: WalkerKind[] = ['image-bearer', 'spiritual', 'skeptic']
+  const pool =
+    cleared < 1
+      ? RAID_CAST.filter((item) => loveKinds.includes(item.kind))
+      : RAID_CAST
+  return pool[index % pool.length]
+}
 
 export function emptyDefense() {
   return { cleared: 0, nights: [] as string[] }
@@ -105,40 +120,15 @@ export const WATCH_ABILITY_GEM: Record<WatchAbility, 'heart' | 'star' | 'cup' | 
   science: 'lamp',
 }
 
-const LOGIC_KEYS = [
-  'wb-creed',
-  'wb-early',
-  'wb-method',
-  'wb-women',
-  'fg-mover',
-  'fg-contingent',
-  'fg-kalam',
-  'daily-creed',
-  'daily-names',
-]
-const REASON_KEYS = ['hl-moral', 'hl-mind', 'hl-meaning', 'hl-beauty', 'fg-limits']
-const SCIENCE_KEYS = [
-  'ob-tuning',
-  'ob-design',
-  'ob-leibniz',
-  'ob-life',
-  'daily-stars',
-  'daily-life',
-  'daily-cosmos',
-]
-
 /** City of Heaven on the ridge — same seat as the overworld teaser. */
 export const HEAVEN_POINT = { x: 572, y: 36 }
 
 export function unlockedWatchAbilities(progress: ProgressState): WatchAbility[] {
-  const held = new Set(progress.held ?? [])
-  const completed = new Set(progress.completed ?? [])
-  const known = (keys: string[]) => keys.some((id) => held.has(id) || completed.has(id))
-  const next: WatchAbility[] = ['love']
-  if (known(LOGIC_KEYS)) next.push('logic')
-  if (known(REASON_KEYS)) next.push('reason')
-  if (known(SCIENCE_KEYS)) next.push('science')
-  return next
+  return unlockedWatchTools(progress)
+    .map((tool) => tool.id)
+    .filter((id): id is WatchAbility =>
+      id === 'love' || id === 'logic' || id === 'reason' || id === 'science',
+    )
 }
 
 export function heavenPoint(

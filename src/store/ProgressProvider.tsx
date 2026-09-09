@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState, type ReactNode } from 'react'
+import { learningFromReview, upsertLearning } from '../lib/learning'
 import {
   applyMiss,
   applySuccess,
@@ -115,6 +116,10 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         elaborations: event.text
           ? { ...current.elaborations, [event.id]: event.text }
           : current.elaborations,
+      }
+      const stored = learningFromReview(event, current)
+      if (stored) {
+        next.learnings = upsertLearning(current.learnings ?? [], stored)
       }
       return write(next)
     })

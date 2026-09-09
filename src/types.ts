@@ -139,6 +139,37 @@ export interface DefenseState {
 
 export type AppTheme = 'candy' | 'dusk' | 'parchment'
 
+/** Night Watch walker kinds — add rows later; first slice uses these six. */
+export type WalkerKind =
+  | 'image-bearer'
+  | 'skeptic'
+  | 'pagan'
+  | 'physical'
+  | 'metaphysical'
+  | 'spiritual'
+
+/** Expandable tool row. Ship four now; later tools are more rows, not new board code. */
+export interface WatchTool {
+  id: string
+  label: string
+  gem: GemId
+  unlockKeys: string[]
+  counters: WalkerKind[]
+  tier: number
+}
+
+/** One saved learning: claim · reason · source · anchor · picture · tool. */
+export interface Learning {
+  id: string
+  claim: string
+  reason: string
+  source: string
+  anchor: string
+  picture?: GemId
+  toolId?: string
+  acquiredAt: string
+}
+
 export interface ProgressState {
   started: boolean
   completed: string[]
@@ -160,6 +191,11 @@ export interface ProgressState {
   defense: DefenseState
   /** Visual chrome. Optional on old saves; normalize defaults to candy. */
   theme: AppTheme
+  /**
+   * Encoded learnings (Acquire→Store). Optional on old saves;
+   * normalize fills []. Schema stays 1 — do not wipe.
+   */
+  learnings: Learning[]
 }
 
 export type View =

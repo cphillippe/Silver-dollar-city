@@ -65,6 +65,7 @@ assert.equal(fromLegacy.envelope.kind, 'silver-city-save')
 assert.equal(fromLegacy.progress.defense.cleared, 0)
 assert.deepEqual(fromLegacy.progress.defense.nights, [])
 assert.equal(fromLegacy.progress.theme, 'candy')
+assert.deepEqual(fromLegacy.progress.learnings, [])
 
 const code = encodeShareCode(fromLegacy.envelope)
 assert.match(code, /^SC1\./)

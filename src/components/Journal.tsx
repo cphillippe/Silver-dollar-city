@@ -5,7 +5,10 @@ import { guideForArea, STORY } from '../content/story'
 import { localDateKey } from '../lib/dates'
 import { isDue, nextGapLabel } from '../lib/memory'
 import { starLegend } from '../lib/stars'
+import { findLearning } from '../lib/learning'
+import { watchTool } from '../lib/watchTools'
 import { Avatar } from './Avatar'
+import { GemMark } from './GemMark'
 import { Landmark } from './Landmark'
 import { RecallGate } from './RecallGate'
 import { ShareInvite } from './ShareInvite'
@@ -18,7 +21,7 @@ import {
   useProgress,
 } from '../store/progress'
 import { trailDaysRequired } from '../lib/streak'
-import type { JournalEntry, MemoryTrace, View } from '../types'
+import type { JournalEntry, Learning, MemoryTrace, View } from '../types'
 
 interface JournalProps {
   focusId?: string
@@ -193,6 +196,9 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
               stars={progress.stars[entry.unlockAfter] ?? progress.stars[entry.id]}
               held={progress.held.includes(entry.unlockAfter) || progress.held.includes(entry.id)}
               trace={progress.memory[entry.unlockAfter] ?? progress.memory[entry.id]}
+              learning={
+                findLearning(progress, entry.unlockAfter) ?? findLearning(progress, entry.id)
+              }
               today={today}
             />
           ))}
@@ -220,6 +226,7 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
                 stars={progress.stars[entry.unlockAfter]}
                 held={progress.held.includes(entry.unlockAfter)}
                 trace={progress.memory[entry.unlockAfter]}
+                learning={findLearning(progress, entry.unlockAfter)}
                 today={today}
               />
             ))}
@@ -249,6 +256,7 @@ function JournalCard({
   stars,
   held,
   trace,
+  learning,
   today,
 }: {
   entry: JournalEntry
@@ -259,6 +267,7 @@ function JournalCard({
   stars?: 1 | 2 | 3
   held?: boolean
   trace?: MemoryTrace
+  learning?: Learning
   today: string
 }) {
   const { recordHeld, recordReview } = useProgress()
@@ -288,6 +297,17 @@ function JournalCard({
           </div>
           {trace && !due ? (
             <p className="quiet">{nextGapLabel(trace, today)}</p>
+          ) : null}
+          {learning ? (
+            <p className="learning-store">
+              {learning.picture ? <GemMark gem={learning.picture} size="sm" /> : null}
+              <span>
+                Anchored to {learning.anchor}
+                {learning.toolId
+                  ? ` · deploys as ${watchTool(learning.toolId)?.label ?? learning.toolId}`
+                  : ''}
+              </span>
+            </p>
           ) : null}
           <p className="eyebrow">{entry.kicker}</p>
           <h3>{entry.title}</h3>

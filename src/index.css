@@ -5219,6 +5219,15 @@ html[data-theme='dusk'] .hub.is-town .night-watch {
   color: rgba(244, 234, 210, 0.72);
 }
 
+.learning-store {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  font-size: 0.82rem;
+  color: var(--gold);
+}
+
 .defend-lost p {
   margin: 0 0 8px;
 }

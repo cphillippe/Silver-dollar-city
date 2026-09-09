@@ -10,7 +10,7 @@ import {
   DEFEND_PATH,
   DEFEND_WAVE_SIZE,
   HEAVEN_POINT,
-  RAID_LINES,
+  raidForWave,
   WATCH_ABILITIES,
   WATCH_ABILITY_LABEL,
   abilityRange,
@@ -26,10 +26,11 @@ import {
   waveSpeed,
   type WatchAbility,
 } from '../lib/defend'
+import { deployFit } from '../lib/watchTools'
 import { useJuiceHandoff } from '../lib/juice'
 import { CITY_PLOTS, type CityPlotId } from '../lib/city'
 import { useProgress } from '../store/progress'
-import type { View } from '../types'
+import type { View, WalkerKind } from '../types'
 import { AbilityMark } from './GemMark'
 import { RecallGate } from './RecallGate'
 import { TeachUnlock } from './TeachUnlock'
@@ -44,6 +45,7 @@ interface Raider {
   id: number
   t: number
   text: string
+  kind: WalkerKind
   turned?: WatchAbility
   from?: { x: number; y: number }
   heavenT?: number
@@ -174,10 +176,12 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       ) {
         spawnAt = 0
         const id = live.current.spawned
+        const cast = raidForWave(progress.defense.cleared, id)
         walking.push({
           id,
           t: 0,
-          text: RAID_LINES[id % RAID_LINES.length],
+          text: cast.text,
+          kind: cast.kind,
         })
         live.current.spawned += 1
       }
@@ -243,12 +247,19 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     window.setTimeout(() => setFlash(null), 220)
     if (!best) return
     const to = raiderAt(best)
+    const fit = deployFit(using, best.kind)
     comboRef.current += 1
     const nextCombo = comboRef.current
     setCombo(nextCombo)
     setShake(true)
     window.setTimeout(() => setShake(false), 160)
-    const blast: Blast = { key: now, x: to.x, y: to.y, line: WATCH_ABILITY_LABEL[using], combo: nextCombo }
+    const blast: Blast = {
+      key: now,
+      x: to.x,
+      y: to.y,
+      line: fit === 'match' ? `${WATCH_ABILITY_LABEL[using]} matches` : `${WATCH_ABILITY_LABEL[using]} is weak`,
+      combo: nextCombo,
+    }
     setShots((current) => [...current.slice(-3), { key: now, from: { x: at.x, y: at.y - 16 }, to }])
     setBlasts((current) => [...current.slice(-3), blast])
     window.setTimeout(() => {
@@ -257,12 +268,20 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     window.setTimeout(() => {
       setBlasts((current) => current.filter((item) => item.key !== now))
     }, 620)
-    live.current.raiders = live.current.raiders.map((item) =>
-      item.id === best.id
-        ? { ...item, turned: using, from: to, heavenT: 0, text: 'Toward heaven' }
-        : item,
-    )
-    live.current.downed += 1
+    if (fit === 'match') {
+      live.current.raiders = live.current.raiders.map((item) =>
+        item.id === best.id
+          ? { ...item, turned: using, from: to, heavenT: 0, text: 'Toward heaven' }
+          : item,
+      )
+      live.current.downed += 1
+    } else {
+      live.current.raiders = live.current.raiders.map((item) =>
+        item.id === best.id
+          ? { ...item, t: Math.max(0, item.t - 0.22), text: `${WATCH_ABILITY_LABEL[using]} is weak` }
+          : item,
+      )
+    }
     setRaiders(live.current.raiders)
     setDowned(live.current.downed)
   }
@@ -626,9 +645,9 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
             </div>
           ) : null}
           {phase === 'wave' ? (
-            <p className="defend-tip">Tap the road — love turns a line toward heaven.</p>
+            <p className="defend-tip">Match the walker. A held line deploys; the wrong tool only nudges.</p>
           ) : (
-            <p className="defend-tip">Love is ready. Logic, reason, and science unlock as you keep lines.</p>
+            <p className="defend-tip">Learn · hold · deploy. Love is ready. Other tools unlock as you keep lines.</p>
           )}
         </>
       )}
