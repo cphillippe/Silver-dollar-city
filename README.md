@@ -11,7 +11,7 @@ A stranger should know in 60 seconds: this is a **Christian reasoning game**. So
 **Sticky public preview (GitHub Pages):**  
 https://cphillippe.github.io/Silver-dollar-city/
 
-Hard-reload once if you still see the old game (the PWA can keep a cached copy). Live bundle is `index-DB20K5c-.js` — Eden → City of Heaven, candy default, theme picker (Dusk town / Clean parchment).
+Hard-reload once if you still see the old game (the PWA can keep a cached copy). Live bundle is `index-BQjgprke.js` — Eden → City of Heaven, candy default, early gems, theme picker.
 
 Pages deploys `docs/` from `main` once that source is selected. Until then the same `docs/` is also on `cursor/silver-city-unending-evidence-8233`. Hard-reload github.io after it updates.
 

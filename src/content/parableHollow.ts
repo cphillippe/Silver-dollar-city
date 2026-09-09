@@ -9,9 +9,8 @@ export const parableHollow: Area = {
   blurb:
     'The Teacher spoke in pictures — not to hide the truth, but to make it move.',
   intro: [
-    'A creek path slips under oak and cedar. In this hollow the stories still have weight: a road, a table, a lost coin flashing in the dust.',
-    'Jesus of Nazareth taught in parables. They are not riddles for insiders only. They are invitations — they ask what kind of neighbor, child, and steward you will be.',
-    'Play the stories. Then sit with what they claim about God.',
+    'A creek path, oaks, and pictures you can hold: a road, a table, a lost coin in the dust.',
+    'Jesus taught in pictures. Play them. Then keep one true line.',
   ],
   icon: 'oak',
   accent: '#6b8f71',
@@ -27,22 +26,27 @@ export const parableHollow: Area = {
       items: [
         {
           id: 'a',
+          gem: 'cup',
           text: 'A lawyer asks Jesus, “And who is my neighbor?”',
         },
         {
           id: 'b',
+          gem: 'heart',
           text: 'A man is beaten and left half-dead on the road.',
         },
         {
           id: 'c',
+          gem: 'door',
           text: 'A priest and then a Levite see him and pass by.',
         },
         {
           id: 'd',
+          gem: 'lamp',
           text: 'A Samaritan binds the wounds, takes him to an inn, and pays.',
         },
         {
           id: 'e',
+          gem: 'star',
           text: 'Jesus: “Go and do likewise.”',
         },
       ],
@@ -64,21 +68,25 @@ export const parableHollow: Area = {
       tiles: [
         {
           id: 'a',
-          text: 'Eager mercy that absorbs shame — not cool justice delayed.',
+          gem: 'heart',
+          text: 'The father runs with mercy — before the speech is done.',
           bin: 'keep',
         },
         {
           id: 'b',
+          gem: 'coin',
           text: 'The son earned the feast by writing a good apology.',
           bin: 'discard',
         },
         {
           id: 'c',
+          gem: 'star',
           text: 'The older brother is the hero simply for staying home.',
           bin: 'discard',
         },
         {
           id: 'd',
+          gem: 'door',
           text: 'The story is mainly about estate planning.',
           bin: 'discard',
         },
@@ -99,23 +107,27 @@ export const parableHollow: Area = {
       pairs: [
         {
           id: 'sower',
-          left: 'The sower (Matt 13:1–23)',
-          right: 'The same word meets very different hearts',
+          gem: 'seed',
+          left: 'The sower',
+          right: 'Same word, different hearts',
         },
         {
           id: 'sheep',
-          left: 'The lost sheep (Luke 15:1–7)',
-          right: 'The shepherd seeks the one, not only the ninety-nine',
+          gem: 'heart',
+          left: 'Lost sheep',
+          right: 'The one is sought',
         },
         {
           id: 'mustard',
-          left: 'The mustard seed (Matt 13:31–32)',
-          right: 'The kingdom begins small and becomes shelter',
+          gem: 'tree',
+          left: 'Mustard seed',
+          right: 'Small start, later shelter',
         },
         {
           id: 'talents',
-          left: 'The talents (Matt 25:14–30)',
-          right: 'What is entrusted is meant to be used, not buried',
+          gem: 'coin',
+          left: 'The talents',
+          right: 'Use the trust; don’t bury it',
         },
       ],
       teachOnWrong:
@@ -136,21 +148,25 @@ export const parableHollow: Area = {
       tiles: [
         {
           id: 'a',
+          gem: 'cup',
           text: 'Received mercy makes refusing mercy a contradiction.',
           bin: 'keep',
         },
         {
           id: 'b',
+          gem: 'coin',
           text: 'Forgiveness is a limited coupon on God’s spreadsheet.',
           bin: 'discard',
         },
         {
           id: 'c',
+          gem: 'door',
           text: 'The first servant was right to demand prison for a small debt.',
           bin: 'discard',
         },
         {
           id: 'd',
+          gem: 'star',
           text: 'Jesus is only reforming first-century banking.',
           bin: 'discard',
         },

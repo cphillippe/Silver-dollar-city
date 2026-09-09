@@ -514,6 +514,11 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
 
       {beat ? (
         <div className="city-beat" role="status">
+          <span className="city-beat-gems" aria-hidden>
+            <span className="gem gem-lamp gem-sm" />
+            <span className="gem gem-star gem-sm" />
+            <span className="gem gem-coin gem-sm" />
+          </span>
           <Avatar who={beatVoice.who} size="sm" />
           <div>
             <strong>{beat.beat}</strong>
@@ -570,7 +575,7 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
   )
 }
 
-const SPARKS = [0, 45, 90, 135, 180, 225, 270, 315]
+const SPARKS = [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330]
 
 const SPINE_MARKS: { age: CityAge; x: number; y: number }[] = [
   { age: 'eden', x: 58, y: 338 },

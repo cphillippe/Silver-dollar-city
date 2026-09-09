@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { shuffle } from '../../lib/shuffle'
 import type { SortChallenge, SortTile } from '../../types'
 import { STORY } from '../../content/story'
+import { GemMark } from '../GemMark'
 import { burstStyle } from '../../lib/juice'
 import { PuzzleHint } from './PuzzleHint'
 import { PuzzleLead } from './PuzzleLead'
@@ -158,6 +159,7 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
                   else returnToBank(home.id)
                 }}
               >
+                {home.gem ? <GemMark gem={home.gem} size="sm" /> : null}
                 {home.text}
                 {goneTo === 'keep' ? (
                   <span className="sort-mark" aria-hidden>
@@ -234,6 +236,7 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
                     returnToBank(tile.id)
                   }}
                 >
+                  {tile.gem ? <GemMark gem={tile.gem} size="sm" /> : null}
                   {tile.text}
                 </button>
               ))
@@ -272,6 +275,7 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
                     returnToBank(tile.id)
                   }}
                 >
+                  {tile.gem ? <GemMark gem={tile.gem} size="sm" /> : null}
                   {tile.text}
                 </button>
               ))

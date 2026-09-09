@@ -14,6 +14,7 @@ import {
   plotFill,
   plotStage,
 } from '../src/lib/city.ts'
+import { dailyForDate } from '../src/content/daily.ts'
 import { defendPads } from '../src/lib/defend.ts'
 
 const progressSrc = readFileSync(
@@ -344,6 +345,11 @@ assert.match(dailySrc, /faith and science can share the same sky/)
 assert.match(dailySrc, /why: 'A gift-shaped beauty/)
 assert.match(dailySrc, /why: 'Psalm 19 treats the sky as speech/)
 assert.equal([...dailySrc.matchAll(/\bwhy: '/g)].length, 12)
+assert.match(dailySrc, /early: true/)
+assert.match(dailySrc, /daily-gems/)
+assert.match(dailySrc, /item\.early/)
+assert.equal(dailyForDate('2026-09-09', 0).early, true)
+assert.equal(dailyForDate('2026-09-10', 1).early, true)
 
 const contentFiles = [
   'daily.ts',
@@ -409,6 +415,8 @@ assert.match(matchSrc, /shake \|\| locked/)
 assert.match(matchSrc, /Tap a picture/)
 assert.match(matchSrc, /stopPropagation/)
 assert.match(matchSrc, /match-col-label/)
+assert.match(matchSrc, /pair.gem/)
+assert.match(matchSrc, /GemMark/)
 assert.doesNotMatch(matchSrc, /pickedLeft/)
 
 const evidenceSrc = readFileSync(
@@ -474,6 +482,8 @@ assert.match(hollowSrc, /The Good Samaritan/)
 assert.match(hollowSrc, /kind: 'sequence'/)
 assert.match(hollowSrc, /the kingdom arrives in pictures, not slogans/)
 assert.match(hollowSrc, /id: 'ph-seeds'/)
+assert.match(hollowSrc, /gem: 'seed'/)
+assert.match(hollowSrc, /The father runs with mercy/)
 
 const cityLibSrc = readFileSync(new URL('../src/lib/city.ts', import.meta.url), 'utf8')
 assert.doesNotMatch(cityLibSrc, /Walk again/)
@@ -659,6 +669,11 @@ assert.match(
 )
 assert.match(burstSrc, /Locked!/)
 assert.match(burstSrc, /stamp = 'Locked!'/)
+assert.match(burstSrc, /win-gem/)
+assert.match(juiceSrc, /GEM_BURST/)
+assert.match(cssSrc, /win-gem/)
+assert.match(cssSrc, /\.gem-lamp/)
+assert.match(cssSrc, /city-beat-gems/)
 assert.match(cssSrc, /defend-blast-ring/)
 assert.match(cssSrc, /defend-shake/)
 assert.match(cssSrc, /defend-board/)

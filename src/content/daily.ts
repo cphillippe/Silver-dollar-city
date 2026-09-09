@@ -1,10 +1,12 @@
-import type { Challenge } from '../types'
-import { hashString } from '../lib/dates'
+import type { Challenge } from '../types.ts'
+import { hashString } from '../lib/dates.ts'
 
 export interface DailyPuzzle {
   id: string
   teaser: string
   districtFlavor: string
+  /** First mornings prefer these — picture cards, short true lines. */
+  early?: boolean
   challenge: Challenge
 }
 
@@ -14,7 +16,29 @@ export interface DailyPuzzle {
  */
 export const DAILY_POOL: DailyPuzzle[] = [
   {
+    id: 'trail-gems',
+    early: true,
+    teaser: 'Juniper set three gems on the east-porch rail.',
+    districtFlavor: 'Parable Hollow · porch gems',
+    challenge: {
+      kind: 'match',
+      id: 'daily-gems',
+      title: 'Porch gems',
+      idea: 'Jesus taught with pictures you can hold',
+      prompt: 'Match each picture to the short claim.',
+      context: 'The Teacher spoke in pictures so the truth could walk around inside you.',
+      pairs: [
+        { id: 'lamp', gem: 'lamp', left: 'Lamp', right: 'A light is meant to be seen' },
+        { id: 'seed', gem: 'seed', left: 'Seed', right: 'The same word meets different hearts' },
+        { id: 'cup', gem: 'cup', left: 'Cup', right: 'Mercy is poured, not earned' },
+      ],
+      teachOnWrong: 'Each gem is a short true claim. Snap the picture to its sentence.',
+      deeper: 'Jesus taught with lamps, seed, and a cup — pictures first, dense words later.',
+    },
+  },
+  {
     id: 'trail-lantern',
+    early: true,
     teaser: 'A lantern is already lit on the east porch.',
     districtFlavor: 'Parable Hollow · a small lamp',
     challenge: {
@@ -25,9 +49,9 @@ export const DAILY_POOL: DailyPuzzle[] = [
       prompt: 'A neighbor leaves a lamp on the porch. Put the picture in order.',
       context: 'Matthew 5:14–16. Jesus used ordinary light to talk about a life that is seen.',
       items: [
-        { id: 'a', text: 'Evening comes and the street grows dim.' },
-        { id: 'b', text: 'Someone sets a lamp where it can be seen.' },
-        { id: 'c', text: 'A walker finds the stoop without stumbling.' },
+        { id: 'a', gem: 'star', text: 'Evening comes. The street grows dim.' },
+        { id: 'b', gem: 'lamp', text: 'Someone sets a lamp where it can be seen.' },
+        { id: 'c', gem: 'heart', text: 'A walker finds the stoop.' },
       ],
       teachOnWrong:
         'The claim is not that we become the sun — only that we do not hide what we have received. Try the order again.',
@@ -37,6 +61,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
   },
   {
     id: 'trail-seed',
+    early: true,
     teaser: 'Someone has been turning soil behind the chapel.',
     districtFlavor: 'Parable Hollow · a handful of seed',
     challenge: {
@@ -51,19 +76,22 @@ export const DAILY_POOL: DailyPuzzle[] = [
       tiles: [
         {
           id: 'a',
+          gem: 'seed',
           text: 'Some seed is eaten before it roots.',
           bin: 'keep',
           why: 'The parable names loss — not every field is the same.',
         },
         {
           id: 'b',
+          gem: 'tree',
           text: 'Good soil hears and holds the word.',
           bin: 'keep',
           why: 'Hearing that holds is the invitation — not a guaranteed harvest.',
         },
-        { id: 'c', text: 'Every field is guaranteed a harvest.', bin: 'discard' },
+        { id: 'c', gem: 'coin', text: 'Every field is guaranteed a harvest.', bin: 'discard' },
         {
           id: 'd',
+          gem: 'star',
           text: 'Shallow ground withers under heat.',
           bin: 'keep',
           why: 'Jesus names withering in the same breath as hearing.',
@@ -240,6 +268,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
   },
   {
     id: 'trail-grace',
+    early: true,
     teaser: 'A pew card says only: “not a wage.”',
     districtFlavor: 'The High Lookout · unearned',
     challenge: {
@@ -250,9 +279,9 @@ export const DAILY_POOL: DailyPuzzle[] = [
       prompt: 'Match the word to the meaning this town uses.',
       context: 'Grace is not a prize for finishing the map. It is the claim that God moves first.',
       pairs: [
-        { id: 'grace', left: 'Grace', right: 'Gift, not wage' },
-        { id: 'faith', left: 'Faith', right: 'Trust that receives' },
-        { id: 'boast', left: 'Boast', right: 'What the gift refuses' },
+        { id: 'grace', gem: 'cup', left: 'Grace', right: 'Gift, not wage' },
+        { id: 'faith', gem: 'heart', left: 'Faith', right: 'Trust that receives' },
+        { id: 'boast', gem: 'coin', left: 'Boast', right: 'What the gift refuses' },
       ],
       teachOnWrong: 'Ephesians 2 treats grace as gift and faith as receiving. Boast is what the gift will not feed.',
       deeper:
@@ -261,6 +290,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
   },
   {
     id: 'trail-rest',
+    early: true,
     teaser: 'The lookout bench is empty on purpose.',
     districtFlavor: 'The High Lookout · come and rest',
     challenge: {
@@ -271,9 +301,9 @@ export const DAILY_POOL: DailyPuzzle[] = [
       prompt: 'Jesus’ invitation has an order. Set the stones.',
       context: 'Matthew 11:28. Tired people are named first. The invitation is to a person, not a performance.',
       items: [
-        { id: 'a', text: 'You are tired and carrying too much.' },
-        { id: 'b', text: 'Jesus says, “Come to me.”' },
-        { id: 'c', text: 'He promises rest — not a steeper hill.' },
+        { id: 'a', gem: 'heart', text: 'You are tired and carrying too much.' },
+        { id: 'b', gem: 'door', text: 'Jesus says, “Come to me.”' },
+        { id: 'c', gem: 'star', text: 'He promises rest — not a steeper hill.' },
       ],
       teachOnWrong: 'The weary are addressed before the command. Rest is the gift, not a prize for climbing harder.',
       deeper: 'Come to me, all who labor and are heavy laden, and I will give you rest.',
@@ -402,9 +432,9 @@ export function dailyForDate(
   dateKey: string,
   trailMorningsBeforeToday = 99,
 ): DailyPuzzle {
-  const sorts = DAILY_POOL.filter((item) => item.challenge.kind === 'sort')
+  const early = DAILY_POOL.filter((item) => item.early)
   const pool =
-    trailMorningsBeforeToday < 2 && sorts.length > 0 ? sorts : DAILY_POOL
+    trailMorningsBeforeToday < 2 && early.length > 0 ? early : DAILY_POOL
   const index = hashString(`silver-city-trail:${dateKey}`) % pool.length
   return pool[index]
 }

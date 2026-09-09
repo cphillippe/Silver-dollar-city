@@ -1,9 +1,13 @@
 export type ChallengeKind = 'sequence' | 'build-argument' | 'match' | 'sort'
 
+/** Candy picture-marks for early boards. Later walks may omit these. */
+export type GemId = 'lamp' | 'seed' | 'heart' | 'star' | 'cup' | 'tree' | 'door' | 'coin'
+
 export interface SortTile {
   id: string
   text: string
   bin: 'keep' | 'discard'
+  gem?: GemId
   /** Why this Keep can be today’s takeaway — required when several Keeps share a board. */
   why?: string
 }
@@ -25,6 +29,7 @@ export interface SortChallenge {
 export interface SequenceItem {
   id: string
   text: string
+  gem?: GemId
 }
 
 export interface SequenceChallenge {
@@ -69,6 +74,7 @@ export interface MatchPair {
   id: string
   left: string
   right: string
+  gem?: GemId
 }
 
 export interface MatchChallenge {

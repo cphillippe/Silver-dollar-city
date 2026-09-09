@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { shuffle } from '../../lib/shuffle'
 import type { SequenceChallenge, SequenceItem } from '../../types'
+import { GemMark } from '../GemMark'
 import { burstStyle } from '../../lib/juice'
 import { PuzzleHint } from './PuzzleHint'
 import { PuzzleLead } from './PuzzleLead'
@@ -183,6 +184,7 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
                   aria-label={live ? home.text : `Return ${home.text} to its seat`}
                   onClick={() => (live ? add(home.id) : remove(home.id))}
                 >
+                  {home.gem ? <GemMark gem={home.gem} size="sm" /> : null}
                   {home.text}
                 </button>
               )}
@@ -208,7 +210,8 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
                     className="chip in-chain"
                     style={status === 'ok' ? burstStyle(index, 'mid') : undefined}
                     onClick={() => remove(placed.id)}
-                  >
+                    >
+                    {placed.gem ? <GemMark gem={placed.gem} size="sm" /> : null}
                     {placed.text}
                   </button>
                 ) : (
