@@ -122,6 +122,7 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
           <TeachUnlock
             brief={brief}
             kind={challenge.kind}
+            beats={challenge.kind === 'sequence' ? challenge.items : undefined}
             onUnlock={() => {
               setTaught(true)
               setArming(true)
