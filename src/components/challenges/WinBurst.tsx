@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react'
-import { BURST_SPARKS } from '../../lib/juice'
+import { BURST_SPARKS, GEM_BURST } from '../../lib/juice'
 
 export function WinBurst({
   play,
@@ -20,6 +20,13 @@ export function WinBurst({
         <span
           key={i}
           className={`win-spark ${i % 3 === 0 ? 'is-shard' : ''}`}
+          style={{ ['--i' as string]: i } as CSSProperties}
+        />
+      ))}
+      {GEM_BURST.map((i) => (
+        <span
+          key={`gem-${i}`}
+          className="win-gem"
           style={{ ['--i' as string]: i } as CSSProperties}
         />
       ))}

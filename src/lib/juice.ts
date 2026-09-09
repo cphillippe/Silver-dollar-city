@@ -5,6 +5,8 @@ export const WIN_BURST_MS = 1100
 
 export const BURST_SPARKS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 
+export const GEM_BURST = [0, 1, 2, 3, 4, 5, 6, 7]
+
 export function burstStyle(
   index: number,
   side: 'keep' | 'discard' | 'mid' = 'mid',

@@ -44,6 +44,7 @@ export function findPlayable(
 
 const DAILY_PILLAR: Record<string, string> = {
   'daily-lantern': 'parable-hollow',
+  'daily-gems': 'parable-hollow',
   'daily-seed': 'parable-hollow',
   'daily-neighbor': 'parable-hollow',
   'daily-names': 'witness-bench',

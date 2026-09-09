@@ -34,7 +34,7 @@ function brief(
 export const EVIDENCE: Record<string, EvidenceBrief> = {
   'ph-road': brief(
     'ph-road',
-    'Neighbor is the one who shows costly mercy.',
+    'Neighbor is the one who shows mercy.',
     'Jesus makes the listener identify with the wounded man, then with the Samaritan who stops.',
     'Luke 10:25–37',
     'Neighbor means the person who already looks like you.',
@@ -44,7 +44,7 @@ export const EVIDENCE: Record<string, EvidenceBrief> = {
   ),
   'ph-father': brief(
     'ph-father',
-    'The father runs with mercy before the speech is finished.',
+    'The father runs with mercy before the speech is done.',
     'Honor is spent so the son can be embraced; the older brother shows nearness without joy.',
     'Luke 15:11–32',
     'The son earned the feast by writing a good apology.',
@@ -234,13 +234,23 @@ export const EVIDENCE: Record<string, EvidenceBrief> = {
   ),
   'daily-lantern': brief(
     'daily-lantern',
-    'A received light is meant to be seen, not hidden.',
+    'A lamp is meant to be seen.',
     'Jesus uses an ordinary lamp and a city on a hill — public without being proud.',
     'Matthew 5:14–16',
     'We are told to become the sun.',
     'Light is only for insiders behind a door.',
     'The picture is a command to boast.',
     'A hidden lamp is the point of the saying.',
+  ),
+  'daily-gems': brief(
+    'daily-gems',
+    'Jesus taught with pictures you can hold.',
+    'A lamp is seen, seed meets different hearts, mercy is poured — not earned.',
+    'Matthew 5; Mark 4; Luke 10',
+    'Pictures are only decoration.',
+    'Mercy is a wage you finish earning.',
+    'Every heart is the same soil.',
+    'A hidden lamp is the point.',
   ),
   'daily-seed': brief(
     'daily-seed',
