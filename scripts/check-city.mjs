@@ -353,9 +353,9 @@ const dailySrc = readFileSync(
   new URL('../src/content/daily.ts', import.meta.url),
   'utf8',
 )
-assert.match(dailySrc, /faith and science can share the same sky/)
+assert.match(dailySrc, /the heavens already speak of a Maker/)
 assert.match(dailySrc, /why: 'A gift-shaped beauty/)
-assert.match(dailySrc, /why: 'Psalm 19 treats the sky as speech/)
+assert.match(dailySrc, /why: 'Scripture treats the created order/)
 assert.equal([...dailySrc.matchAll(/\bwhy: '/g)].length, 12)
 assert.match(dailySrc, /early: true/)
 assert.match(dailySrc, /daily-gems/)
@@ -466,8 +466,11 @@ assert.match(obSrc, /scene: 'bind'/)
 assert.match(obSrc, /scene: 'tidy'/)
 assert.match(obSrc, /scene: 'dial'/)
 assert.doesNotMatch(obSrc, /not yet a proof of a Designer/)
-assert.match(obSrc, /fitted for life by a Designer/)
-assert.match(obSrc, /Designer who wanted life/)
+assert.doesNotMatch(obSrc, /not yet a Designer/)
+assert.match(obSrc, /that fit points to a Designer/)
+assert.match(obSrc, /Fine-tuning is best explained by a mind that intended a habitable world/)
+assert.match(obSrc, /initial condition, not another force dial/)
+assert.match(obSrc, /Designer who wants observers/)
 const benchSrc = readFileSync(
   new URL('../src/content/witnessBench.ts', import.meta.url),
   'utf8',
@@ -481,11 +484,15 @@ const evidenceSrc = readFileSync(
   new URL('../src/content/evidence.ts', import.meta.url),
   'utf8',
 )
-assert.match(evidenceSrc, /Wonder and measurement can share a roof/)
-assert.match(evidenceSrc, /Psalm 19 treats the sky as speech/)
+assert.match(evidenceSrc, /The universe is finely tuned for life — that fit points to a Designer/)
+assert.match(evidenceSrc, /The heavens already speak of a Maker; fine-tuning fits that voice/)
+assert.match(evidenceSrc, /Psalm 19:1–4; Romans 1:20/)
 assert.match(evidenceSrc, /The kingdom arrives in pictures, not slogans/)
-assert.match(evidenceSrc, /Designer who wanted a habitable world/)
+assert.match(evidenceSrc, /Fine-tuning is best explained by a mind that intended a habitable world/)
+assert.match(evidenceSrc, /Designer who wants observers/)
 assert.doesNotMatch(evidenceSrc, /name them honestly/)
+assert.doesNotMatch(evidenceSrc, /not yet a proof of a Designer/)
+assert.doesNotMatch(evidenceSrc, /not yet a Designer/)
 assert.match(evidenceSrc, /export function takeawayLines/)
 assert.doesNotMatch(evidenceSrc, /Beauty forbids/)
 assert.doesNotMatch(evidenceSrc, /Wonder is the enemy of science/)
