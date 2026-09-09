@@ -169,7 +169,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
           id: 'b',
           text: 'Beauty can raise a question of gift.',
           bin: 'keep',
-          why: 'A gift-shaped beauty is a fair question — not a proof, and not a shrug.',
+          why: 'A gift-shaped beauty is how the heavens declare a Giver — Psalm 19, not a shrug.',
         },
         { id: 'c', text: 'A psalm replaces a telescope.', bin: 'discard' },
         {
@@ -195,13 +195,13 @@ export const DAILY_POOL: DailyPuzzle[] = [
       idea: 'living cells are not a cheap accident',
       prompt: 'Pair each observation with the honest next sentence.',
       context:
-        'This walk will not pretend chemistry is easy to dismiss. It only asks whether “it happened” is the last word.',
+        'Chemistry is real work. “It just happened” is not the last word. Life, place, and mind look given.',
       pairs: [
         { id: 'cells', gem: 'seed', scene: 'cells', left: 'Cells copy information', right: 'Copying is not a small trick' },
         { id: 'band', gem: 'tree', scene: 'band', left: 'Earth sits in a habitable band', right: 'A narrow kindness of place' },
         { id: 'science', gem: 'lamp', scene: 'mindsky', left: 'We can do science at all', right: 'A mind that fits a cosmos' },
       ],
-      teachOnWrong: 'Each pair is a modest next sentence, not a proof. Match the observation to its honest neighbor.',
+      teachOnWrong: 'Each pair names a mark of a Maker. Snap the observation to the sentence that holds.',
       deeper:
         'Acts 17:24–25: the God who made the world… gives to all mankind life and breath and everything.',
     },
@@ -385,10 +385,10 @@ export const DAILY_POOL: DailyPuzzle[] = [
       kind: 'build-argument',
       id: 'daily-cosmos',
       title: 'Why anything at all',
-      idea: 'why there is anything at all is a fair question',
-      prompt: 'Set the three stones of a modest cosmological question.',
+      idea: 'why there is anything at all points to a Source',
+      prompt: 'Set the three stones of a cosmological question the psalms are willing to ask.',
       context:
-        'This is not a proof that silences every physicist. It is a question the psalms are willing to ask out loud.',
+        'The psalms ask why there is a world at all. That question points to a Source — not to a polite silence.',
       slots: [
         { id: 'p1', role: 'premise', label: 'Fact', correctCardId: 'exists' },
         { id: 'p2', role: 'premise', label: 'Surprise', correctCardId: 'contingent' },
@@ -397,7 +397,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
       cards: [
         { id: 'exists', text: 'The universe exists' },
         { id: 'contingent', text: 'It did not have to' },
-        { id: 'ask', text: 'So its source is worth asking' },
+        { id: 'ask', text: 'So a Source is worth naming' },
         { id: 'shrug', text: 'So questions are impolite', distractor: true },
       ],
       teachOnWrong: 'Existence plus contingency yields a question, not a scolding. Leave the shrug in the bank.',

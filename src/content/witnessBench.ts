@@ -161,7 +161,7 @@ export const witnessBench: Area = {
         },
       ],
       teachOnWrong:
-        'This is embarrassment used carefully — a plausibility cost, not a proof. Tacitus 15.44 notes the execution, not the tomb. Do not invent citations.',
+        'This is a costly detail that counts for the report’s honesty. Tacitus 15.44 notes the execution, not the tomb. Do not invent citations.',
       deeper:
         'Josephus, Antiquities 18.63–64, is partly disputed because of later Christian touches. Honesty about that dispute belongs in the dossier.',
     },

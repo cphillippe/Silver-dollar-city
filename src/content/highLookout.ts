@@ -91,7 +91,7 @@ export const highLookout: Area = {
       idea: 'inner experience is not captured by a scan',
       prompt: 'Match each feature of mind to what physical description still leaves standing.',
       context:
-        'David Chalmers named the “hard problem of consciousness”: explaining why physical process is accompanied by inner experience. None of this “inserts God into a neuron.” It asks whether mind is at home in a story that begins and ends with the indifferent.',
+        'David Chalmers named the “hard problem of consciousness”: explaining why physical process is accompanied by inner experience. Mind is at home if the world’s ground is a living God — not an indifferent process.',
       pairs: [
         {
           id: 'qualia',
@@ -125,16 +125,16 @@ export const highLookout: Area = {
       teachOnWrong:
         'Pair the everyday word with the leftover mystery. Wavelengths, brain scans, and causes are real — they are not yet the felt, the about, the why-it-is-like-something, or the ought-of-logic.',
       deeper:
-        'Some materialists expect a future theory to close the gap. Some dualists and some theists argue that mind is fundamental — and that a living God is the most coherent place for mind to be fundamental. Again: a clue with rivals.',
+        'A living God is the home of mind. Materialism hopes a future theory will close the gap. Hold the claim: inner life is not an accident at the end of indifference.',
     },
     {
       kind: 'sort',
       id: 'hl-meaning',
       title: 'Invented or found',
-      idea: 'meaning might be found, not only invented',
+      idea: 'meaning is found, not only invented',
       prompt: 'Keep the lookout’s real question. Toss the decoys.',
       context:
-        'You can build local meaning without theism. Ecclesiastes refuses both cheap cheer and cheap despair (Eccl 12:13).',
+        'Ecclesiastes refuses cheap cheer and cheap despair. The hunger for a final good has an object (Eccl 12:13).',
       keepLabel: 'Keep',
       discardLabel: 'Toss',
       tiles: [

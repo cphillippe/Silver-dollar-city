@@ -465,6 +465,9 @@ assert.match(obSrc, /scene: 'expand'/)
 assert.match(obSrc, /scene: 'bind'/)
 assert.match(obSrc, /scene: 'tidy'/)
 assert.match(obSrc, /scene: 'dial'/)
+assert.doesNotMatch(obSrc, /not yet a proof of a Designer/)
+assert.match(obSrc, /fitted for life by a Designer/)
+assert.match(obSrc, /Designer who wanted life/)
 const benchSrc = readFileSync(
   new URL('../src/content/witnessBench.ts', import.meta.url),
   'utf8',
@@ -481,6 +484,8 @@ const evidenceSrc = readFileSync(
 assert.match(evidenceSrc, /Wonder and measurement can share a roof/)
 assert.match(evidenceSrc, /Psalm 19 treats the sky as speech/)
 assert.match(evidenceSrc, /The kingdom arrives in pictures, not slogans/)
+assert.match(evidenceSrc, /Designer who wanted a habitable world/)
+assert.doesNotMatch(evidenceSrc, /name them honestly/)
 assert.match(evidenceSrc, /export function takeawayLines/)
 assert.doesNotMatch(evidenceSrc, /Beauty forbids/)
 assert.doesNotMatch(evidenceSrc, /Wonder is the enemy of science/)
