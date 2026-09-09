@@ -11,7 +11,7 @@ A stranger should know in 60 seconds: this is a **Christian reasoning game**. So
 **Sticky public preview (GitHub Pages):**  
 https://cphillippe.github.io/Silver-dollar-city/
 
-Hard-reload once if you still see the old game (the PWA can keep a cached copy). Live bundle is `index-DaEYj9gv.js` — fine-tuning claim/reason/source are scholar-locked; Night Watch stays phone-safe.
+Hard-reload once if you still see the old game (the PWA can keep a cached copy). Live bundle is `index-C1134ibs.js` — fine-tuning names necessity, chance (often a multiverse), and design; the multiverse is assertion, not a peer; Night Watch stays phone-safe.
 
 Pages deploys `docs/` from `main` once that source is selected. Until then the same `docs/` is also on `cursor/silver-city-unending-evidence-8233`. Hard-reload github.io after it updates.
 
