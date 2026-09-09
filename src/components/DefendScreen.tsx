@@ -11,7 +11,6 @@ import {
   DEFEND_WAVE_SIZE,
   HEAVEN_POINT,
   raidForWave,
-  WATCH_ABILITIES,
   WATCH_ABILITY_LABEL,
   abilityRange,
   defendPads,
@@ -27,7 +26,7 @@ import {
   type WatchAbility,
 } from '../lib/defend'
 import { learningForTool } from '../lib/learning'
-import { deployFit, WALKER_LABEL } from '../lib/watchTools'
+import { deployFit, TIER_MARK, toolTier, WALKER_LABEL, watchTool, WATCH_TOOLS } from '../lib/watchTools'
 import { useJuiceHandoff } from '../lib/juice'
 import { CITY_PLOTS, type CityPlotId } from '../lib/city'
 import { useProgress } from '../store/progress'
@@ -47,7 +46,7 @@ interface Raider {
   t: number
   text: string
   kind: WalkerKind
-  turned?: WatchAbility
+  turned?: string
   from?: { x: number; y: number }
   heavenT?: number
 }
@@ -147,7 +146,9 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       spawnAt += dt
       const next = live.current.raiders.map((item) => {
         if (item.turned) {
-          return { ...item, heavenT: (item.heavenT ?? 0) + heavenSpeed() * dt }
+          const tool = item.turned ? watchTool(item.turned) : undefined
+          const tier = tool ? toolTier(tool, progress) : 1
+          return { ...item, heavenT: (item.heavenT ?? 0) + heavenSpeed(tier) * dt }
         }
         return { ...item, t: item.t + waveSpeed() * dt }
       })
@@ -232,7 +233,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     if ((live.current.cool[id] ?? 0) + wait > now) return
     const at = DEFEND_ANCHOR[id]
     const using = unlocked.includes(ability) ? ability : 'love'
-    const range = abilityRange(using, stage)
+    const range = abilityRange(using, stage, progress)
     let best: Raider | null = null
     let bestD = range
     for (const raider of live.current.raiders) {
@@ -300,6 +301,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       const range = abilityRange(
         unlocked.includes(ability) ? ability : 'love',
         padStage(id, progress),
+        progress,
       )
       for (const raider of live.current.raiders) {
         if (raider.turned) continue
@@ -521,7 +523,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                     (raider) =>
                       !raider.turned &&
                       dist(at, raiderAt(raider)) <=
-                        abilityRange(unlocked.includes(ability) ? ability : 'love', stage),
+                        abilityRange(unlocked.includes(ability) ? ability : 'love', stage, progress),
                   )
                 return (
                   <g
@@ -634,26 +636,30 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
             </button>
           ) : null}
           <div className="defend-abilities" role="group" aria-label="Night abilities">
-            {WATCH_ABILITIES.map((id) => {
-              const open = unlocked.includes(id)
-              const heldLine = learningForTool(progress, id)
+            {WATCH_TOOLS.map((tool) => {
+              const open = unlocked.includes(tool.id)
+              const heldLine = learningForTool(progress, tool.id)
+              const tier = toolTier(tool, progress)
               return (
                 <button
-                  key={id}
+                  key={tool.id}
                   type="button"
-                  className={`defend-ability ${ability === id ? 'is-on' : ''} ${open ? '' : 'is-locked'}`}
+                  className={`defend-ability ${ability === tool.id ? 'is-on' : ''} ${open ? '' : 'is-locked'}`}
                   disabled={!open}
-                  aria-pressed={ability === id}
+                  aria-pressed={ability === tool.id}
                   onClick={() => {
-                    if (open) setAbility(id)
+                    if (open) setAbility(tool.id)
                   }}
                 >
-                  <AbilityMark ability={id} size="md" />
-                  {WATCH_ABILITY_LABEL[id]}
+                  <AbilityMark ability={tool.id} size="md" />
+                  {tool.label}
+                  <span className="defend-ability-tier" aria-hidden>
+                    {TIER_MARK[tier]}
+                  </span>
                   <span className="defend-ability-claim">
                     {open
                       ? heldLine?.claim ??
-                        (id === 'love' ? 'A true line can turn a cheap claim.' : 'Hold a line to name this tool.')
+                        (tool.id === 'love' ? 'A true line can turn a cheap claim.' : 'Hold a line to name this tool.')
                       : 'Hold a matching line'}
                   </span>
                 </button>
