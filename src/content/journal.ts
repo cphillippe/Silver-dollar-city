@@ -113,28 +113,30 @@ export const journalEntries: JournalEntry[] = [
   {
     id: 'j-ob-1',
     areaId: 'observatory',
-    title: 'A habitable cosmos',
+    title: 'The universe is finely tuned for life',
     kicker: 'The Observatory',
     unlockAfter: 'ob-tuning',
     body: [
-      'Several physical parameters sit in life-permitting ranges so narrow that cosmologists call the fact fine-tuning.',
-      'A Designer who wanted a habitable world explains the fittedness. Necessity only restates the surprise. A multiverse invents a crowd of unseen worlds to avoid an Author. Hold the design inference.',
+      'The universe is finely tuned for life — that fit points to a Designer.',
+      'Life-permitting ranges are extravagantly narrow across independent parameters; design predicts a habitable cosmos, blank chance does not.',
     ],
     sources: [
-      'Discussions in contemporary cosmology (e.g. Rees; Lewis & Barnes; Collins)',
+      'Fine-tuning of physical constants and initial conditions (e.g. cosmological constant; Penrose’s low-entropy start — initial condition, not another force dial).',
     ],
   },
   {
     id: 'j-ob-2',
     areaId: 'observatory',
-    title: 'Design explains the fittedness',
+    title: 'A mind that intended a habitable world',
     kicker: 'The Observatory',
     unlockAfter: 'ob-design',
     body: [
-      'If life-permitting numbers surprise a single throw of chance, and a mind wanting observers would expect them, then a Designer is the fitting inference. Physics named the mark; it did not erase the Author.',
-      'The rest of the trail still names which Scriptures are true. Fine-tuning already tells you this world looks authored.',
+      'Fine-tuning is best explained by a mind that intended a habitable world.',
+      'Life-permitting ranges are extravagantly narrow; a Designer who wants observers leads us to expect that fit — blank indifference does not.',
     ],
-    sources: ['Philosophical fine-tuning literature (Collins and respondents)'],
+    sources: [
+      'Likelihood / fine-tuning arguments (Collins; Rees; Penrose low-entropy as initial condition, not another force dial).',
+    ],
   },
   {
     id: 'j-ob-3',

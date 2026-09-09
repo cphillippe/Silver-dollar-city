@@ -20,11 +20,11 @@ export const observatory: Area = {
       kind: 'match',
       id: 'ob-tuning',
       title: 'Narrow ranges',
-      idea: 'the cosmos is fitted for life by a Designer',
+      idea: 'the universe is finely tuned for life — that fit points to a Designer',
       prompt:
         'Match each feature of the cosmos to the fine-tuning mark that points to a Designer.',
       context:
-        '“Fine-tuning” means: small changes to certain numbers yield a sterile world. Cosmologists (Rees, Barnes, and others) name that sensitivity. A Christian reads the mark: this is the fittedness a Designer who wanted life would write into the world.',
+        'The universe is finely tuned for life — that fit points to a Designer. Life-permitting ranges are extravagantly narrow across independent parameters; design predicts a habitable cosmos, blank chance does not. Source: physical constants and initial conditions (e.g. cosmological constant; Penrose’s low-entropy start — initial condition, not another force dial).',
       pairs: [
         {
           id: 'lambda',
@@ -45,7 +45,8 @@ export const observatory: Area = {
           gem: 'seed',
           scene: 'tidy',
           left: 'Early-universe entropy',
-          right: 'Penrose: the initial low-entropy state is extravagantly special',
+          right:
+            'Penrose: the initial low-entropy state is extravagantly special — an initial condition, not another force dial',
         },
         {
           id: 'ratio',
@@ -56,7 +57,7 @@ export const observatory: Area = {
         },
       ],
       teachOnWrong:
-        'Ask what breaks if the number moves. That narrow hospitality is the fingerprint of a mind — not a shrug.',
+        'Ask what breaks if the number moves. Life-permitting ranges are extravagantly narrow; design predicts that fit, blank chance does not.',
       deeper:
         'Design explains the fittedness. “The numbers had to be this way” only renames the surprise. A multiverse multiplies unseen worlds to dodge an Author. Neither reply erases the mark in this one.',
     },
@@ -64,11 +65,11 @@ export const observatory: Area = {
       kind: 'build-argument',
       id: 'ob-design',
       title: 'A habitable cosmos',
-      idea: 'fine-tuning is a mark of a Designer',
+      idea: 'fine-tuning is best explained by a mind that intended a habitable world',
       prompt:
         'Build the inference from a habitable cosmos to a Designer.',
       context:
-        'If a mind wanted observers, we would expect a life-permitting world. We have one. That is a case for God, not a blush.',
+        'Fine-tuning is best explained by a mind that intended a habitable world. Life-permitting ranges are extravagantly narrow; a Designer who wants observers leads us to expect that fit — blank indifference does not. Source: likelihood / fine-tuning arguments (Collins; Rees; Penrose low-entropy as initial condition, not another force dial).',
       slots: [
         {
           id: 'p1',
@@ -124,7 +125,7 @@ export const observatory: Area = {
         },
       ],
       teachOnWrong:
-        'Leave the two overclaims. Fine-tuning supports a Designer. It does not replace a lab, and it does not by itself name every verse.',
+        'Leave the two overclaims. Fine-tuning lands a Designer. It does not by itself name which gospel.',
       deeper:
         'Robin Collins: theism predicts a life-permitting world more naturally than a single throw of chance. A multiverse or “we could only see this world” are replies — examine them; do not let them veto the Author.',
     },
