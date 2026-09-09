@@ -11,22 +11,11 @@ A stranger should know in 60 seconds: this is a **Christian reasoning game**. So
 **Sticky public preview (GitHub Pages):**  
 https://cphillippe.github.io/Silver-dollar-city/
 
-Hard-reload once if you still see the old game (the PWA can keep a cached copy). Live bundle on this branch’s `docs/` is `index-DB20K5c-.js` — Eden → City of Heaven, candy default, theme picker.
+Hard-reload once if you still see the old game (the PWA can keep a cached copy). Live bundle is `index-DB20K5c-.js` — Eden → City of Heaven, candy default, theme picker (Dusk town / Clean parchment).
 
-Pages is on. **One Settings change so it follows `main` instead of the merged PR branch:**
+Pages deploys `docs/` from `main` once that source is selected. Until then the same `docs/` is also on `cursor/silver-city-unending-evidence-8233`. Hard-reload github.io after it updates.
 
-1. Repo → **Settings** → **Pages**
-2. Source: **Deploy from a branch**
-3. Branch: **`main`**
-4. Folder: **`/docs`**
-5. **Save**
-
-Until that flip, Pages still deploys from `cursor/silver-city-unending-evidence-8233` `/docs` (older bundle until this PR lands on the Pages branch). Hard-reload github.io after it updates.
-
-**Interim tunnel (dies often — skip if Pages is live):**  
-https://alone-wish-huntington-currently.trycloudflare.com/
-
-Verified HTTP 200, “Silver City,” bundle `index-MzZ9UjBA.js`. Skip older tunnels. Skip StackBlitz.
+Skip older trycloudflare links. Skip StackBlitz.
 
 ## The story
 
@@ -128,7 +117,7 @@ Progress shape (same key `silver-city-progress-v1`): `memory[id].nextReviewAt`, 
 
 **Sticky:** https://cphillippe.github.io/Silver-dollar-city/ (hard-reload once if a cached PWA shows the old game).
 
-**Interim tunnel:** https://alone-wish-huntington-currently.trycloudflare.com/ (HTTP 200, `index-MzZ9UjBA.js`). Skip older trycloudflare links.
+Skip older trycloudflare links. Use the Pages URL above.
 
 On the web app, tap **Share a morning**. The pitch is not a high score. It asks a friend to try the walk, fold the page, and see what they can still say.
 
