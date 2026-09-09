@@ -1,7 +1,7 @@
 import type { ProgressState, WalkerKind } from '../types.ts'
 import { CITY_PLOTS, plotStage, type CityPlotId, type CityStage } from './city.ts'
 import { prefersReducedMotion } from './juice.ts'
-import { unlockedWatchTools } from './watchTools.ts'
+import { toolTier, unlockedWatchTools, watchTool, WATCH_TOOLS } from './watchTools.ts'
 
 export const DEFEND_BRIEF_ID = 'td-watch'
 export const DEFEND_HEARTS = 3
@@ -102,33 +102,20 @@ export function pathPoint(t: number): { x: number; y: number } {
   return { x: a.x + (b.x - a.x) * local, y: a.y + (b.y - a.y) * local }
 }
 
-export type WatchAbility = 'love' | 'logic' | 'reason' | 'science'
+/** Catalog ids. Later tools are more WATCH_TOOLS rows — do not hard-code a 4-id board. */
+export type WatchAbility = string
 
-export const WATCH_ABILITIES: WatchAbility[] = ['love', 'logic', 'reason', 'science']
+export const WATCH_ABILITIES = WATCH_TOOLS.map((tool) => tool.id)
 
-export const WATCH_ABILITY_LABEL: Record<WatchAbility, string> = {
-  love: 'Love',
-  logic: 'Logic',
-  reason: 'Reason',
-  science: 'Science',
-}
-
-export const WATCH_ABILITY_GEM: Record<WatchAbility, 'heart' | 'star' | 'cup' | 'lamp'> = {
-  love: 'heart',
-  logic: 'star',
-  reason: 'cup',
-  science: 'lamp',
-}
+export const WATCH_ABILITY_LABEL: Record<string, string> = Object.fromEntries(
+  WATCH_TOOLS.map((tool) => [tool.id, tool.label]),
+)
 
 /** City of Heaven on the ridge — same seat as the overworld teaser. */
 export const HEAVEN_POINT = { x: 572, y: 36 }
 
-export function unlockedWatchAbilities(progress: ProgressState): WatchAbility[] {
-  return unlockedWatchTools(progress)
-    .map((tool) => tool.id)
-    .filter((id): id is WatchAbility =>
-      id === 'love' || id === 'logic' || id === 'reason' || id === 'science',
-    )
+export function unlockedWatchAbilities(progress: ProgressState): string[] {
+  return unlockedWatchTools(progress).map((tool) => tool.id)
 }
 
 export function heavenPoint(
@@ -143,13 +130,20 @@ export function heavenPoint(
   }
 }
 
-export function abilityRange(ability: WatchAbility, stage: CityStage): number {
-  if (ability === 'love') return 640
-  return towerRange(stage)
+export function abilityRange(
+  ability: string,
+  stage: CityStage,
+  progress: ProgressState,
+): number {
+  const tool = watchTool(ability)
+  const tier = tool ? toolTier(tool, progress) : 1
+  const reach = (tier - 1) * 18
+  if (ability === 'love') return 640 + reach
+  return towerRange(stage) + reach
 }
 
-export function heavenSpeed(): number {
-  return waveSpeed() * 1.7
+export function heavenSpeed(tier = 1): number {
+  return waveSpeed() * (1.7 + Math.max(0, tier - 1) * 0.08)
 }
 
 export function dist(

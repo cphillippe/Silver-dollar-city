@@ -153,8 +153,10 @@ export interface WatchTool {
   id: string
   label: string
   gem: GemId
+  /** Evidence ids that unlock this tool. Empty = starter (Love). */
   unlockKeys: string[]
   counters: WalkerKind[]
+  /** Catalog floor (1). Live tier grows with held/recall mastery, max 3. */
   tier: number
 }
 

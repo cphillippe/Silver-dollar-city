@@ -8,8 +8,7 @@ import door from '../assets/gems/door.svg'
 import heart from '../assets/gems/heart.png'
 import seed from '../assets/gems/seed.png'
 import tree from '../assets/gems/tree.svg'
-
-export type WatchAbilityId = 'love' | 'logic' | 'reason' | 'science'
+import { watchTool } from '../lib/watchTools'
 
 const GEM_SRC: Record<GemId, string> = {
   lamp: abilityScience,
@@ -22,7 +21,8 @@ const GEM_SRC: Record<GemId, string> = {
   coin,
 }
 
-const ABILITY_SRC: Record<WatchAbilityId, string> = {
+/** Cropped PNGs for the first four. Later catalog rows fall back to the tool gem. */
+const ABILITY_SRC: Record<string, string> = {
   love: abilityLove,
   logic: abilityLogic,
   reason: abilityReason,
@@ -51,13 +51,17 @@ export function AbilityMark({
   ability,
   size = 'sm',
 }: {
-  ability: WatchAbilityId
+  ability: string
   size?: 'sm' | 'md'
 }) {
+  const src = ABILITY_SRC[ability]
+  if (!src) {
+    return <GemMark gem={watchTool(ability)?.gem ?? 'heart'} size={size} />
+  }
   return (
     <img
       className={`gem gem-art gem-ability gem-${ability} gem-${size}`}
-      src={ABILITY_SRC[ability]}
+      src={src}
       alt=""
       draggable={false}
       aria-hidden

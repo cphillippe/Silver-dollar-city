@@ -9,7 +9,8 @@ import { ShareInvite } from './ShareInvite'
 import { AdSlot } from './AdSlot'
 import { CityMap } from './CityMap'
 import { AbilityMark } from './GemMark'
-import { WATCH_ABILITIES, unlockedWatchAbilities } from '../lib/defend'
+import { unlockedWatchAbilities } from '../lib/defend'
+import { TIER_MARK, toolTier, WATCH_TOOLS } from '../lib/watchTools'
 import {
   dailyDoneToday,
   dueCount,
@@ -60,13 +61,13 @@ export function Hub({ onNavigate }: HubProps) {
                 : '.'}
             </p>
             <p className="night-watch-gems" aria-label="Night abilities">
-              {WATCH_ABILITIES.map((id) => (
+              {WATCH_TOOLS.map((tool) => (
                 <span
-                  key={id}
-                  className={watchOpen.includes(id) ? 'is-ready' : 'is-locked'}
-                  title={id}
+                  key={tool.id}
+                  className={watchOpen.includes(tool.id) ? 'is-ready' : 'is-locked'}
+                  title={`${tool.label} ${TIER_MARK[toolTier(tool, progress)]}`}
                 >
-                  <AbilityMark ability={id} size="sm" />
+                  <AbilityMark ability={tool.id} size="sm" />
                 </span>
               ))}
             </p>

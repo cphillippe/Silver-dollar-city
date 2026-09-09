@@ -2,9 +2,11 @@ import type { GemId, ProgressState, WalkerKind, WatchTool } from '../types.ts'
 
 /**
  * Expandable Night Watch catalog.
- * This climb ships four tools. Add later tools as rows — do not hard-code
- * new ability chips in the board. Seven Seals stays parked.
+ * Add later tools as rows. This climb ships four. Seven Seals stays parked.
+ * Unlock is keyed to held / completed claims. Live tier grows with mastery.
  */
+export const TOOL_TIER_MAX = 3
+
 export const WATCH_TOOLS: WatchTool[] = [
   {
     id: 'love',
@@ -76,6 +78,8 @@ export const WALKER_LABEL: Record<WalkerKind, string> = {
   spiritual: 'Spiritual',
 }
 
+export const TIER_MARK = ['', 'I', 'II', 'III'] as const
+
 export function watchTool(id: string): WatchTool | undefined {
   return WATCH_TOOLS.find((tool) => tool.id === id)
 }
@@ -87,9 +91,32 @@ export function toolUnlocked(tool: WatchTool, progress: ProgressState): boolean 
   return tool.unlockKeys.some((id) => held.has(id) || completed.has(id))
 }
 
-/** Ready for later mastery upgrades — this climb stays at catalog tier. */
-export function toolTier(tool: WatchTool, _progress: ProgressState): number {
-  return tool.tier
+/** Starter tools with no unlockKeys grow from the night brief + stored learnings. */
+export function masteryKeys(tool: WatchTool): string[] {
+  if (tool.unlockKeys.length > 0) return tool.unlockKeys
+  return ['td-watch']
+}
+
+export function toolMastery(
+  tool: WatchTool,
+  progress: ProgressState,
+): { held: number; reviews: number; stars: number } {
+  const keys = masteryKeys(tool)
+  const known = new Set([...(progress.held ?? []), ...(progress.completed ?? [])])
+  const held = keys.filter((id) => known.has(id)).length
+  const stored = (progress.learnings ?? []).filter((item) => item.toolId === tool.id).length
+  const reviews = keys.reduce((sum, id) => sum + (progress.memory[id]?.reviews ?? 0), 0)
+  const stars = keys.reduce((sum, id) => sum + (progress.stars[id] ?? 0), 0)
+  return { held: held + stored, reviews, stars }
+}
+
+/** Live tier = catalog floor + mastery extras. Later tools reuse this. */
+export function toolTier(tool: WatchTool, progress: ProgressState): number {
+  const { held, reviews, stars } = toolMastery(tool, progress)
+  let extra = 0
+  if (held >= 2 || reviews >= 2 || stars >= 4) extra = 1
+  if (held >= 4 || reviews >= 6 || stars >= 8) extra = 2
+  return Math.min(TOOL_TIER_MAX, tool.tier + extra)
 }
 
 export function unlockedWatchTools(progress: ProgressState): WatchTool[] {

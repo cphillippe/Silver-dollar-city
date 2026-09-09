@@ -15,8 +15,15 @@ import {
   plotStage,
 } from '../src/lib/city.ts'
 import { dailyForDate } from '../src/content/daily.ts'
-import { defendPads, heavenPoint, raidForWave, unlockedWatchAbilities } from '../src/lib/defend.ts'
-import { deployFit, toolForEvidence, WALKER_LABEL, WATCH_TOOLS } from '../src/lib/watchTools.ts'
+import { abilityRange, defendPads, heavenPoint, raidForWave, unlockedWatchAbilities } from '../src/lib/defend.ts'
+import {
+  deployFit,
+  toolForEvidence,
+  toolTier,
+  WALKER_LABEL,
+  watchTool,
+  WATCH_TOOLS,
+} from '../src/lib/watchTools.ts'
 
 const progressSrc = readFileSync(
   new URL('../src/store/progress.ts', import.meta.url),
@@ -671,6 +678,8 @@ assert.match(defendSrc, /WALKER_LABEL/)
 assert.match(defendSrc, /learningForTool/)
 assert.match(defendSrc, /kind: 'encode'/)
 assert.match(defendSrc, /WATCH_ABILITY_LABEL/)
+assert.match(defendSrc, /WATCH_TOOLS\.map/)
+assert.match(defendSrc, /TIER_MARK/)
 assert.match(defendSrc, /defend-heaven-path/)
 assert.match(defendSrc, /Toward heaven/)
 assert.match(defendCopy, /Plant love\. Turn cheap lines toward heaven\./)
@@ -692,6 +701,7 @@ assert.match(
 assert.match(hubSrc, /night-watch-glow/)
 assert.match(hubSrc, /night-watch-gems/)
 assert.match(hubSrc, /AbilityMark/)
+assert.match(hubSrc, /WATCH_TOOLS\.map/)
 assert.match(hubSrc, /Learn · hold · deploy/)
 assert.match(hubSrc, /is-held/)
 assert.match(hubSrc, /held\./)
@@ -733,6 +743,24 @@ assert.equal(deployFit('love', 'physical'), 'weak')
 assert.equal(deployFit('science', 'physical'), 'match')
 assert.equal(raidForWave(0, 0).kind !== 'physical', true)
 assert.equal(raidForWave(2, 5).kind.length > 0, true)
+assert.equal(toolTier(watchTool('love'), empty), 1)
+assert.equal(abilityRange('love', 'built', empty), 640)
+assert.equal(
+  toolTier(watchTool('logic'), { ...empty, held: ['wb-creed', 'wb-early'] }),
+  2,
+)
+assert.equal(
+  toolTier(watchTool('logic'), {
+    ...empty,
+    held: ['wb-creed'],
+    memory: { 'wb-creed': { reviews: 6 } },
+  }),
+  3,
+)
+assert.equal(
+  abilityRange('logic', 'built', { ...empty, held: ['wb-creed', 'wb-early'] }),
+  136,
+)
 assert.match(
   readFileSync(new URL('../src/components/TeachUnlock.tsx', import.meta.url), 'utf8'),
   /Hold this line to deploy/,
@@ -746,6 +774,16 @@ assert.equal(toolForEvidence('ph-road')?.id, 'love')
 assert.equal(toolForEvidence('wb-creed')?.id, 'logic')
 assert.equal(WALKER_LABEL.skeptic, 'Skeptic')
 assert.equal(WALKER_LABEL.physical, 'Physical')
-assert.match(cssSrc, /\.defend-abilities \{[\s\S]*?grid-template-columns: 1fr 1fr/)
+assert.match(
+  cssSrc,
+  /\.defend-abilities \{[\s\S]*?grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/,
+)
+assert.match(cssSrc, /defend-ability-tier/)
+assert.match(
+  readFileSync(new URL('../src/lib/watchTools.ts', import.meta.url), 'utf8'),
+  /Add later tools as rows/,
+)
+assert.match(gemSrc, /ability: string/)
+assert.match(gemSrc, /watchTool\(ability\)\?\.gem/)
 
 console.log('check-city: ok')
