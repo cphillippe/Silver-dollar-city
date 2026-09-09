@@ -178,9 +178,14 @@ export const DAILY_POOL: DailyPuzzle[] = [
           bin: 'keep',
           why: 'Scripture treats the created order as intelligible testimony — design inference and “the heavens declare” land in the same grain.',
         },
+        {
+          id: 'e',
+          text: 'A multiverse is a peer to design — treat it as an equal live option.',
+          bin: 'discard',
+        },
       ],
       teachOnWrong:
-        'Scripture treats the created order as intelligible testimony — design inference and “the heavens declare” land in the same grain. Keep that voice; toss the false choice.',
+        'Scripture treats the created order as intelligible testimony — design inference and “the heavens declare” land in the same grain. Toss the multiverse-as-peer: it is assertion without evidence, not a peer to design.',
       deeper: 'The heavens declare the glory of God, and the sky above proclaims his handiwork.',
     },
   },

@@ -11,7 +11,7 @@ export const observatory: Area = {
   intro: [
     'Above the ridge a small observatory points at winter stars. The question here is not “Does a lab experiment prove God?” That would confuse the tools.',
     'The question is: what kind of universe is this? Why are its laws hospitable to life? Why is there a concrete world with laws at all?',
-    'Fine-tuning, origins, and “something rather than nothing” begin from public facts and make a case for God. Hold the claim. Deploy it. The sky is not a shrug.',
+    'Fine-tuning names three replies: necessity, chance (often a multiverse), or design. Necessity fails. The multiverse is assertion, not a peer. Hold the Designer. Deploy it. The sky is not a shrug.',
   ],
   icon: 'star',
   accent: '#7f9ec7',
@@ -24,7 +24,7 @@ export const observatory: Area = {
       prompt:
         'Match each feature of the cosmos to the fine-tuning mark that points to a Designer.',
       context:
-        'The universe is finely tuned for life — that fit points to a Designer. Life-permitting ranges are extravagantly narrow across independent parameters; design predicts a habitable cosmos, blank chance does not. Source: physical constants and initial conditions (e.g. cosmological constant; Penrose’s low-entropy start — initial condition, not another force dial).',
+        'The universe is finely tuned for life — that fit points to a Designer. Life-permitting ranges are extravagantly narrow across independent parameters; design predicts a habitable cosmos, blank chance does not. Three replies get named: necessity, chance (often a multiverse), or design. Necessity fails — these constants are not necessary in that way. Name the multiverse, then mark it: pure assertion, no evidence, not a peer to design.',
       pairs: [
         {
           id: 'lambda',
@@ -57,9 +57,9 @@ export const observatory: Area = {
         },
       ],
       teachOnWrong:
-        'Ask what breaks if the number moves. Life-permitting ranges are extravagantly narrow; design predicts that fit, blank chance does not.',
+        'Ask what breaks if the number moves. Necessity fails — the constants are not necessary in that way. A multiverse is assertion without evidence, not a peer. Design predicts that fit.',
       deeper:
-        'Design explains the fittedness. “The numbers had to be this way” only renames the surprise. A multiverse multiplies unseen worlds to dodge an Author. Neither reply erases the mark in this one.',
+        'Three replies get named: necessity, chance (often a multiverse), or design. Necessity fails — these constants are not necessary in that way. Name the multiverse, then mark it: pure assertion, no evidence, not a peer to design. Hold the Designer.',
     },
     {
       kind: 'build-argument',
@@ -69,7 +69,7 @@ export const observatory: Area = {
       prompt:
         'Build the inference from a habitable cosmos to a Designer.',
       context:
-        'Fine-tuning is best explained by a mind that intended a habitable world. Life-permitting ranges are extravagantly narrow; a Designer who wants observers leads us to expect that fit — blank indifference does not. Source: likelihood / fine-tuning arguments (Collins; Rees; Penrose low-entropy as initial condition, not another force dial).',
+        'Fine-tuning is best explained by a mind that intended a habitable world. Life-permitting ranges are extravagantly narrow; a Designer who wants observers leads us to expect that fit — blank indifference does not. Three replies get named: necessity, chance (often a multiverse), or design. Necessity fails. Name the multiverse, then mark it: pure assertion, no evidence, not a peer to design.',
       slots: [
         {
           id: 'p1',
@@ -114,8 +114,13 @@ export const observatory: Area = {
           text: 'Therefore the best explanation is a Designer who intended a habitable cosmos.',
         },
         {
-          id: 'lab',
-          text: 'Therefore a laboratory has now measured God directly.',
+          id: 'must',
+          text: 'Therefore the constants are necessary and could not have been otherwise.',
+          distractor: true,
+        },
+        {
+          id: 'many',
+          text: 'Therefore a multiverse is a peer to design — same evidence, equal weight.',
           distractor: true,
         },
         {
@@ -125,9 +130,9 @@ export const observatory: Area = {
         },
       ],
       teachOnWrong:
-        'Leave the two overclaims. Fine-tuning lands a Designer. It does not by itself name which gospel.',
+        'Toss necessity-as-success and the multiverse-as-peer. Necessity fails — the constants are not necessary in that way. A multiverse is assertion without evidence, not a peer. Fine-tuning lands a Designer, not which gospel.',
       deeper:
-        'Robin Collins: theism predicts a life-permitting world more naturally than a single throw of chance. A multiverse or “we could only see this world” are replies — examine them; do not let them veto the Author.',
+        'Three replies get named: necessity, chance (often a multiverse), or design. Necessity fails. Name the multiverse, then mark it: pure assertion, no evidence, not a peer to design. Hold the Designer.',
     },
     {
       kind: 'sort',
