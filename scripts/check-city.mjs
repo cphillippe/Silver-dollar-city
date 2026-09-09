@@ -357,6 +357,9 @@ assert.match(dailySrc, /the heavens already speak of a Maker/)
 assert.match(dailySrc, /why: 'A gift-shaped beauty/)
 assert.match(dailySrc, /why: 'Scripture treats the created order/)
 assert.doesNotMatch(dailySrc, /A multiverse is a peer to design/)
+assert.doesNotMatch(dailySrc, /multiverse/)
+assert.doesNotMatch(dailySrc, /necessity/)
+assert.doesNotMatch(dailySrc, /asserted to cancel the surprise/)
 assert.equal([...dailySrc.matchAll(/\bwhy: '/g)].length, 12)
 assert.match(dailySrc, /early: true/)
 assert.match(dailySrc, /daily-gems/)
@@ -473,11 +476,23 @@ assert.match(obSrc, /Fine-tuning is best explained by a mind that intended a hab
 assert.match(obSrc, /initial condition, not another force dial/)
 assert.match(obSrc, /Designer who wants observers/)
 assert.match(obSrc, /extravagantly narrow, habitable/)
-assert.match(obSrc, /empty assertion/)
+assert.match(obSrc, /asserted to cancel the surprise — no evidence/)
+assert.equal(
+  [...obSrc.matchAll(/asserted to cancel the surprise — no evidence/g)].length,
+  2,
+  'one multiverse clause on ob-tuning and ob-design only',
+)
+assert.doesNotMatch(obSrc, /empty assertion/)
 assert.doesNotMatch(obSrc, /Three replies get named/)
 assert.doesNotMatch(obSrc, /peer to design/)
+assert.doesNotMatch(obSrc, /named and dismissed/)
+assert.doesNotMatch(obSrc, /Necessity does not oblige/)
 assert.doesNotMatch(obSrc, /examine them/)
 assert.doesNotMatch(obSrc, /Neither reply erases/)
+assert.ok(
+  !obSrc.slice(0, obSrc.indexOf("id: 'ob-tuning'")).includes('multiverse'),
+  'area intro must not brief the triad',
+)
 const benchSrc = readFileSync(
   new URL('../src/content/witnessBench.ts', import.meta.url),
   'utf8',
@@ -501,11 +516,20 @@ assert.doesNotMatch(evidenceSrc, /name them honestly/)
 assert.doesNotMatch(evidenceSrc, /not yet a proof of a Designer/)
 assert.doesNotMatch(evidenceSrc, /not yet a Designer/)
 assert.doesNotMatch(evidenceSrc, /peer explanation/)
-assert.match(evidenceSrc, /A multiverse — empty assertion — does the explaining/)
+assert.doesNotMatch(evidenceSrc, /multiverse/)
+assert.doesNotMatch(evidenceSrc, /empty assertion/)
+assert.match(evidenceSrc, /The fittedness is only a rumor in the numbers/)
 assert.match(evidenceSrc, /export function takeawayLines/)
 assert.doesNotMatch(evidenceSrc, /Beauty forbids/)
 assert.doesNotMatch(evidenceSrc, /Wonder is the enemy of science/)
 assert.doesNotMatch(evidenceSrc, /The sky is not worth looking at slowly/)
+
+const journalSrc = readFileSync(
+  new URL('../src/content/journal.ts', import.meta.url),
+  'utf8',
+)
+assert.doesNotMatch(journalSrc, /multiverse/)
+assert.doesNotMatch(journalSrc, /asserted to cancel the surprise/)
 
 assert.doesNotMatch(hubSrc, /['"]Again['"]/)
 assert.doesNotMatch(hubSrc, /Standing/)

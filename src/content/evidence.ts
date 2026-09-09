@@ -120,7 +120,7 @@ export const EVIDENCE: Record<string, EvidenceBrief> = {
     'Fine-tuning is a rumor with no name in science.',
     'A habitable cosmos needs no explanation at all.',
     'Life-permitting ranges are wide; blank chance predicts a habitable cosmos just as well.',
-    'A multiverse — empty assertion — does the explaining.',
+    'The fittedness is only a rumor in the numbers.',
   ),
   'ob-design': brief(
     'ob-design',
