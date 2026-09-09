@@ -119,7 +119,7 @@ export const journalEntries: JournalEntry[] = [
     body: [
       'The universe is finely tuned for life — that fit points to a Designer.',
       'Life-permitting ranges are extravagantly narrow across independent parameters; design predicts a habitable cosmos, blank chance does not.',
-      'Three replies get named: necessity, chance (often a multiverse), or design. Necessity fails — these constants are not necessary in that way. Name the multiverse, then mark it: pure assertion, no evidence, not a peer to design.',
+      'Necessity and a multiverse (empty assertion) are named and dismissed. The narrow habitable fit remains.',
     ],
     sources: [
       'Fine-tuning of physical constants and initial conditions (e.g. cosmological constant; Penrose’s low-entropy start — initial condition, not another force dial).',
@@ -134,7 +134,7 @@ export const journalEntries: JournalEntry[] = [
     body: [
       'Fine-tuning is best explained by a mind that intended a habitable world.',
       'Life-permitting ranges are extravagantly narrow; a Designer who wants observers leads us to expect that fit — blank indifference does not.',
-      'Name necessity and chance (often a multiverse). Necessity fails. The multiverse is assertion without evidence, not a peer. Hold the Designer.',
+      'Necessity and a multiverse (empty assertion) are named and dismissed. Hold the Designer.',
     ],
     sources: [
       'Likelihood / fine-tuning arguments (Collins; Rees; Penrose low-entropy as initial condition, not another force dial).',
