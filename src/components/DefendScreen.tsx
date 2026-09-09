@@ -350,31 +350,31 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
             >
               <defs>
                 <linearGradient id="defend-dusk" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#1a2240" />
-                  <stop offset="38%" stopColor="#243044" />
-                  <stop offset="72%" stopColor="#5a3a24" />
-                  <stop offset="100%" stopColor="#8a5428" />
+                  <stop offset="0%" stopColor="#3a1480" />
+                  <stop offset="32%" stopColor="#6a2ab8" />
+                  <stop offset="62%" stopColor="#ff5a7a" />
+                  <stop offset="100%" stopColor="#ffcc33" />
                 </linearGradient>
                 <linearGradient id="defend-ridge" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#3a4830" />
-                  <stop offset="100%" stopColor="#1c2418" />
+                  <stop offset="0%" stopColor="#3dcc7a" />
+                  <stop offset="100%" stopColor="#148a48" />
                 </linearGradient>
                 <linearGradient id="defend-wood" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#d4a06a" />
-                  <stop offset="100%" stopColor="#8a562c" />
+                  <stop offset="0%" stopColor="#ffd24a" />
+                  <stop offset="100%" stopColor="#ff9f1a" />
                 </linearGradient>
                 <linearGradient id="defend-gold-roof" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#ffe9a8" />
-                  <stop offset="100%" stopColor="#b8862e" />
+                  <stop offset="0%" stopColor="#fff6b8" />
+                  <stop offset="100%" stopColor="#ff9f1a" />
                 </linearGradient>
                 <radialGradient id="defend-moon-glow" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor="#fff6d4" stopOpacity="0.9" />
-                  <stop offset="55%" stopColor="#f4e8c4" stopOpacity="0.22" />
-                  <stop offset="100%" stopColor="#f4e8c4" stopOpacity="0" />
+                  <stop offset="0%" stopColor="#fff6d4" stopOpacity="1" />
+                  <stop offset="55%" stopColor="#ffcc33" stopOpacity="0.4" />
+                  <stop offset="100%" stopColor="#ff5a7a" stopOpacity="0" />
                 </radialGradient>
                 <radialGradient id="defend-pool" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor="#ffe08a" stopOpacity="0.55" />
-                  <stop offset="100%" stopColor="#ffe08a" stopOpacity="0" />
+                  <stop offset="0%" stopColor="#ffcc33" stopOpacity="0.75" />
+                  <stop offset="100%" stopColor="#ff5a7a" stopOpacity="0" />
                 </radialGradient>
                 <filter id="defend-glow" x="-50%" y="-50%" width="200%" height="200%">
                   <feGaussianBlur stdDeviation="4" result="b" />
@@ -385,7 +385,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                 </filter>
               </defs>
               <rect width="640" height="420" fill="url(#defend-dusk)" />
-              <ellipse cx="320" cy="198" rx="280" ry="28" fill="#c4783a" opacity="0.22" />
+              <ellipse cx="320" cy="198" rx="280" ry="28" fill="#ffcc33" opacity="0.28" />
               <circle cx="548" cy="48" r="32" fill="url(#defend-moon-glow)" />
               <circle cx="548" cy="48" r="9" fill="#fff6d8" />
               <g className="defend-stars">
@@ -405,7 +405,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                 fill="url(#defend-ridge)"
                 opacity="0.92"
               />
-              <path d="M-20 248 L40 200 120 228 210 176 300 214 410 168 500 206 660 150 V430 H-20 Z" fill="#21180f" />
+              <path d="M-20 248 L40 200 120 228 210 176 300 214 410 168 500 206 660 150 V430 H-20 Z" fill="#3dcc7a" opacity="0.55" />
               <g className="defend-windows">
                 <circle cx="156" cy="214" r="1.8" />
                 <circle cx="248" cy="198" r="1.5" />
@@ -428,7 +428,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                 className="defend-road-shine"
                 d="M70 310 C 140 300, 200 280, 280 292 C 360 304, 430 286, 560 300"
               />
-              <path d="M-10 368 Q 180 340 320 358 T 660 372 V430 H-10 Z" fill="#14180e" />
+              <path d="M-10 368 Q 180 340 320 358 T 660 372 V430 H-10 Z" fill="#148a48" />
               <g className="defend-porch" transform="translate(564 292)">
                 <path d="M-20 22 h40 l5 7 H-25 Z" />
                 <rect x="-16" y="-4" width="32" height="26" rx="2" />
