@@ -746,6 +746,23 @@ assert.equal(raidForWave(2, 5).kind.length > 0, true)
 assert.equal(toolTier(watchTool('love'), empty), 1)
 assert.equal(abilityRange('love', 'built', empty), 640)
 assert.equal(
+  toolTier(watchTool('love'), {
+    ...empty,
+    held: ['td-watch'],
+    learnings: [{ id: 'td-watch', toolId: 'love' }],
+    memory: { 'td-watch': { reviews: 1 } },
+  }),
+  1,
+)
+assert.equal(
+  toolTier(watchTool('love'), {
+    ...empty,
+    held: ['td-watch'],
+    memory: { 'td-watch': { reviews: 2 } },
+  }),
+  2,
+)
+assert.equal(
   toolTier(watchTool('logic'), { ...empty, held: ['wb-creed', 'wb-early'] }),
   2,
 )

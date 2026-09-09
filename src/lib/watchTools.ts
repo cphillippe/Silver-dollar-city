@@ -103,11 +103,14 @@ export function toolMastery(
 ): { held: number; reviews: number; stars: number } {
   const keys = masteryKeys(tool)
   const known = new Set([...(progress.held ?? []), ...(progress.completed ?? [])])
-  const held = keys.filter((id) => known.has(id)).length
-  const stored = (progress.learnings ?? []).filter((item) => item.toolId === tool.id).length
+  const fromKeys = keys.filter((id) => known.has(id))
+  const fromStore = (progress.learnings ?? [])
+    .filter((item) => item.toolId === tool.id)
+    .map((item) => item.id)
+  const held = new Set([...fromKeys, ...fromStore]).size
   const reviews = keys.reduce((sum, id) => sum + (progress.memory[id]?.reviews ?? 0), 0)
   const stars = keys.reduce((sum, id) => sum + (progress.stars[id] ?? 0), 0)
-  return { held: held + stored, reviews, stars }
+  return { held, reviews, stars }
 }
 
 /** Live tier = catalog floor + mastery extras. Later tools reuse this. */
