@@ -20,7 +20,7 @@ type Bin = 'keep' | 'discard'
 
 export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps) {
   const seed = useMemo(() => shuffle(challenge.tiles), [challenge.tiles])
-  const [order, setOrder] = useState(seed)
+  const order = seed
   const [slots, setSlots] = useState<(SortTile | null)[]>(seed)
   const [keep, setKeep] = useState<SortTile[]>([])
   const [discard, setDiscard] = useState<SortTile[]>([])
@@ -54,6 +54,18 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
     if (status === 'ok' || shake) return
     const tile = takeTile(id)
     if (!tile) return
+    if (tile.bin !== bin) {
+      setStatus('wrong')
+      setShake(true)
+      setMisses((count) => count + 1)
+      setPicked(null)
+      onMiss()
+      window.setTimeout(() => {
+        setShake(false)
+        setStatus('idle')
+      }, 880)
+      return
+    }
     const nextSlots = slots.map((item) => (item?.id === id ? null : item))
     const nextKeep = keep.filter((item) => item.id !== id)
     const nextDiscard = discard.filter((item) => item.id !== id)
@@ -104,12 +116,7 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
     onMiss()
     window.setTimeout(() => {
       setShake(false)
-      const next = shuffle(challenge.tiles)
-      setOrder(next)
-      setSlots(next)
-      setKeep([])
-      setDiscard([])
-      setPicked(null)
+      setStatus('idle')
     }, 880)
   }
 
@@ -283,6 +290,19 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
           </span>
         </div>
       </div>
+
+      {misses > 0 && status !== 'ok' ? (
+        <button
+          type="button"
+          className="btn tiny match-recover"
+          onClick={() => {
+            setShake(false)
+            setStatus('idle')
+          }}
+        >
+          Try again
+        </button>
+      ) : null}
 
       {ready ? (
         <div className="sort-lock">

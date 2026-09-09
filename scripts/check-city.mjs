@@ -307,6 +307,8 @@ assert.match(sortSrc, /Return \$\{home\.text\} to its seat/)
 assert.match(sortSrc, /\[slots, setSlots\]/)
 assert.match(sortSrc, /bank is-sort/)
 assert.doesNotMatch(sortSrc, /bank\.length/)
+assert.match(sortSrc, /tile\.bin !== bin/)
+assert.match(sortSrc, /Try again/)
 
 const sequenceSrc = readFileSync(
   new URL('../src/components/challenges/SequencePlay.tsx', import.meta.url),
@@ -348,6 +350,10 @@ assert.ok(
   buildSrc.indexOf('slot-list') < buildSrc.indexOf('bank is-order'),
   'slots sit above the bank so Premise 1 stays on-screen',
 )
+assert.match(buildSrc, /startsWith\('ob-'\)/)
+assert.match(buildSrc, /Try again/)
+assert.match(buildSrc, /setStatus\('idle'\)/)
+assert.doesNotMatch(buildSrc, /setSlots\(\{\}\)/)
 
 const dailySrc = readFileSync(
   new URL('../src/content/daily.ts', import.meta.url),
@@ -457,6 +463,9 @@ assert.match(matchSrc, /aria-label=\{pair.left\}/)
 assert.match(matchSrc, /match-caption/)
 assert.doesNotMatch(matchSrc, /ResultPanel/)
 assert.doesNotMatch(matchSrc, /pickedLeft/)
+assert.match(matchSrc, /startsWith\('ob-'\)/)
+assert.match(matchSrc, /Try again/)
+assert.match(matchSrc, /decoyFor/)
 
 const matchCss = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
 assert.match(matchCss, /match-toast/)
@@ -560,6 +569,7 @@ assert.match(challengeSrc, /puzzle-title/)
 assert.match(challengeSrc, /tile\.bin === 'keep'/)
 assert.match(challengeSrc, /TeachUnlock/)
 assert.match(challengeSrc, /areaId === 'observatory'/)
+assert.match(challengeSrc, /challenge.pairs.map/)
 assert.match(challengeSrc, /kind === 'sequence'/)
 assert.match(challengeSrc, /is-teach/)
 assert.match(challengeSrc, /is-arming/)
@@ -903,6 +913,11 @@ assert.match(cssSrc, /height: min\(34vh, 220px\)/)
 assert.match(cssSrc, /defend-ability-pop/)
 assert.match(cssSrc, /city-tap/)
 assert.match(cssSrc, /lantern-breathe/)
+assert.match(
+  cssSrc,
+  /\.is-puzzle \.play\.is-build \.result \{[\s\S]*?position: static/,
+)
+assert.match(cssSrc, /match-recover/)
 assert.match(defendSrc, /preserveAspectRatio="xMidYMid meet"/)
 assert.match(defendSrc, /walkerSrc/)
 assert.match(

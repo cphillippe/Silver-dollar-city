@@ -147,7 +147,22 @@ export function ChallengeScreen({
           <TeachUnlock
             brief={brief}
             kind={challenge.kind}
-            beats={challenge.kind === 'sequence' ? challenge.items : undefined}
+            beats={
+              challenge.kind === 'sequence'
+                ? challenge.items
+                : areaId === 'observatory' && challenge.kind === 'match'
+                  ? challenge.pairs.map((pair) => ({ id: pair.id, text: pair.left }))
+                  : areaId === 'observatory' && challenge.kind === 'build-argument'
+                    ? challenge.slots.map((slot) => {
+                        const card = challenge.cards.find((item) => item.id === slot.correctCardId)
+                        return { id: slot.id, text: card?.text ?? slot.label }
+                      })
+                    : areaId === 'observatory' && challenge.kind === 'sort'
+                      ? challenge.tiles
+                          .filter((tile) => tile.bin === 'keep')
+                          .map((tile) => ({ id: tile.id, text: tile.text }))
+                      : undefined
+            }
             onUnlock={() => {
               setTaught(true)
               setArming(true)

@@ -1865,12 +1865,45 @@ img.gem-heart {
 }
 
 .is-puzzle .play.is-build .result {
-  position: absolute;
-  left: 10px;
-  right: 10px;
-  bottom: 8px;
-  z-index: 4;
-  margin: 0;
+  position: static;
+  margin: 4px 0 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.is-puzzle .play.is-build.is-deal .sort-tile {
+  --sort-seat: 92px;
+}
+
+.is-puzzle .play.is-build.is-deal .sort-tile .chip {
+  -webkit-line-clamp: 6;
+  font-size: 0.78rem;
+  overflow: auto;
+}
+
+.is-puzzle .play.is-build .slot.is-wrong .chip.in-slot,
+.is-puzzle .play.is-build .slot.is-wrong .slot-target {
+  box-shadow: 0 0 0 2px rgba(196, 107, 74, 0.75);
+}
+
+.is-puzzle .play.is-build .slot.is-now .slot-label {
+  color: #fff6b8;
+}
+
+.is-puzzle .play.is-match.is-deal .match-card {
+  min-height: 110px;
+}
+
+.match-recover,
+.build-lock {
+  flex: 0 0 auto;
+  z-index: 5;
+  pointer-events: auto;
+}
+
+.build-lock {
+  width: 100%;
+  margin: 4px 0;
 }
 
 .is-puzzle .sort-bins {

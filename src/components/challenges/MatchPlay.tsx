@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { shuffle } from '../../lib/shuffle'
 import type { MatchChallenge, MatchSceneId } from '../../types'
 import { MatchScene } from '../MatchScene'
@@ -20,7 +20,14 @@ function pictureOf(pair: { scene?: MatchSceneId; gem?: MatchSceneId }): MatchSce
   return pair.scene ?? pair.gem
 }
 
+function decoyFor(ids: string[], focus: string, locked: string[]) {
+  const open = ids.filter((id) => id !== focus && !locked.includes(id))
+  const pool = open.length > 0 ? open : ids.filter((id) => id !== focus)
+  return shuffle(pool)[0] ?? ids.find((id) => id !== focus) ?? focus
+}
+
 export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProps) {
+  const guided = challenge.id.startsWith('ob-')
   const left = challenge.pairs
   const right = useMemo(
     () => shuffle(challenge.pairs.map((pair) => ({ id: pair.id, text: pair.right }))),
@@ -32,9 +39,35 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
   const [status, setStatus] = useState<'idle' | 'wrong' | 'ok'>('idle')
   const [shake, setShake] = useState(false)
   const [misses, setMisses] = useState(0)
+  const focusId = left.find((pair) => !locked.includes(pair.id))?.id
+  const [decoyId, setDecoyId] = useState(() =>
+    focusId ? decoyFor(left.map((pair) => pair.id), focusId, []) : '',
+  )
+
+  useEffect(() => {
+    if (!guided || !focusId) return
+    setDecoyId((current) =>
+      current && current !== focusId && !locked.includes(current)
+        ? current
+        : decoyFor(
+            left.map((pair) => pair.id),
+            focusId,
+            locked,
+          ),
+    )
+    setPicked({ side: 'left', id: focusId })
+  }, [guided, focusId, locked, left])
+
+  function recover() {
+    setFlash(null)
+    setShake(false)
+    setStatus('idle')
+    if (guided && focusId) setPicked({ side: 'left', id: focusId })
+  }
 
   function choose(side: Side, id: string) {
-    if (status === 'ok' || shake || locked.includes(id)) return
+    if (status === 'ok' || shake || locked.includes(id) && !guided) return
+    if (locked.includes(id) && !(side === 'right' && picked?.side === 'left')) return
     if (!picked || picked.side === side) {
       setPicked((current) =>
         current?.side === side && current.id === id ? null : { side, id },
@@ -59,41 +92,57 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
     setShake(true)
     setMisses((count) => count + 1)
     onMiss()
+    const keep = picked
     window.setTimeout(() => {
       setFlash(null)
-      setPicked(null)
       setShake(false)
+      setStatus('idle')
+      setPicked(guided && focusId ? { side: 'left', id: focusId } : keep)
     }, 880)
-    window.setTimeout(() => {
-      setStatus((current) => (current === 'wrong' ? 'idle' : current))
-    }, 2200)
   }
 
   const picture = (pair: (typeof left)[number]) => pictureOf(pair)
+  const shownLeft = guided ? left.filter((pair) => pair.id === focusId) : left
+  const shownRight = guided
+    ? right.filter((item) => item.id === focusId || item.id === decoyId)
+    : right
 
   return (
     <div
-      className={`play is-match ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}
-      style={{ ['--match-rows' as string]: left.length }}
+      className={`play is-match ${guided ? 'is-deal' : ''} ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}
+      style={{ ['--match-rows' as string]: guided ? 1 : left.length }}
     >
       <WinBurst play={status === 'ok'} />
       <PuzzleLead challenge={challenge} />
       <PuzzleHint text={challenge.context} onPeek={onPeek} />
       <p className="sort-how">
         <strong>Tap a picture</strong>, then the claim that belongs
+        {guided ? ' · two choices' : ''}
       </p>
 
-      {status === 'wrong' ? (
+      {status === 'wrong' || misses > 0 ? (
         <p className="match-toast" role="status">
-          <strong>{misses >= 2 ? 'One more look.' : 'Those don’t snap.'}</strong>{' '}
+          <strong>
+            {status === 'wrong'
+              ? misses >= 2
+                ? 'One more look.'
+                : 'Those don’t snap.'
+              : 'Try the other claim.'}
+          </strong>{' '}
           {misses >= 2 ? challenge.teachOnWrong : 'Pick a new pair.'}
         </p>
+      ) : null}
+
+      {misses > 0 && status !== 'ok' ? (
+        <button type="button" className="btn tiny match-recover" onClick={recover}>
+          Try again
+        </button>
       ) : null}
 
       <div className="match-grid">
         <div className="match-col is-pictures">
           <p className="match-col-label">Picture</p>
-          {left.map((pair, index) => {
+          {shownLeft.map((pair, index) => {
             const scene = picture(pair)
             return (
               <button
@@ -121,7 +170,7 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
         </div>
         <div className="match-col is-claims">
           <p className="match-col-label">Claim</p>
-          {right.map((item, index) => (
+          {shownRight.map((item, index) => (
             <button
               key={item.id}
               type="button"

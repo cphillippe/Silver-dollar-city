@@ -22,7 +22,7 @@ export const observatory: Area = {
       title: 'Narrow ranges',
       idea: 'the universe is finely tuned for life — that fit points to a Designer',
       prompt:
-        'Match each feature of the cosmos to the fine-tuning mark that points to a Designer.',
+        'Tap a picture, then the mark that belongs. Two choices at a time.',
       context:
         'The universe is finely tuned for life — that fit points to a Designer. Life-permitting ranges are extravagantly narrow across independent parameters; design predicts a habitable cosmos, blank chance does not. Necessity, chance (often a multiverse — asserted to cancel the surprise — no evidence), or design: the fit still points to a Designer.',
       pairs: [
@@ -67,7 +67,7 @@ export const observatory: Area = {
       title: 'A habitable cosmos',
       idea: 'fine-tuning is best explained by a mind that intended a habitable world',
       prompt:
-        'Build the inference from a habitable cosmos to a Designer.',
+        'Place the next stone. Two choices. Leave the overclaims.',
       context:
         'Fine-tuning is best explained by a mind that intended a habitable world. Life-permitting ranges are extravagantly narrow; a Designer who wants observers leads us to expect that fit — blank indifference does not. Necessity, chance (often a multiverse — asserted to cancel the surprise — no evidence), or design: hold the Designer.',
       slots: [
@@ -134,7 +134,7 @@ export const observatory: Area = {
       id: 'ob-leibniz',
       title: 'Something rather than nothing',
       idea: 'physics maps how the world runs; it does not finish why',
-      prompt: 'Keep the careful reading of Leibniz beside cosmology. Toss the rest.',
+      prompt: 'Keep the careful Leibniz reading. Toss the rest — a wrong toss bounces back.',
       context:
         'Leibniz: why is there something rather than nothing? The Big Bang describes an early hot state — not automatically absolute nothing.',
       keepLabel: 'Keep',
@@ -171,7 +171,7 @@ export const observatory: Area = {
       id: 'ob-life',
       title: 'The threshold of life',
       idea: 'an unfinished origin story is not a closed file',
-      prompt: 'Keep the careful statement. Toss the gaps and the shrugs.',
+      prompt: 'Keep the careful statement. Toss the gaps — a wrong toss bounces back.',
       context:
         'Cells store specified information and run a coordinated metabolism. Abiogenesis is an open research program — not a closed chapter.',
       keepLabel: 'Keep',
