@@ -14,6 +14,7 @@ import {
   WATCH_ABILITIES,
   WATCH_ABILITY_GEM,
   WATCH_ABILITY_LABEL,
+  abilityRange,
   defendPads,
   dist,
   heavenPoint,
@@ -21,7 +22,6 @@ import {
   padStage,
   pathPoint,
   towerCooldown,
-  towerRange,
   unlockedWatchAbilities,
   waveSpawnEvery,
   waveSpeed,
@@ -227,8 +227,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     const wait = towerCooldown(stage)
     if ((live.current.cool[id] ?? 0) + wait > now) return
     const at = DEFEND_ANCHOR[id]
-    const range = towerRange(stage)
     const using = unlocked.includes(ability) ? ability : 'love'
+    const range = abilityRange(using, stage)
     let best: Raider | null = null
     let bestD = range
     for (const raider of live.current.raiders) {
@@ -274,7 +274,10 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     let bestD = Infinity
     for (const id of live.current.planted) {
       const at = DEFEND_ANCHOR[id]
-      const range = towerRange(padStage(id, progress))
+      const range = abilityRange(
+        unlocked.includes(ability) ? ability : 'love',
+        padStage(id, progress),
+      )
       for (const raider of live.current.raiders) {
         if (raider.turned) continue
         const d = dist(at, raiderAt(raider))
@@ -483,7 +486,10 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                   phase === 'wave' &&
                   on &&
                   raiders.some(
-                    (raider) => !raider.turned && dist(at, raiderAt(raider)) <= towerRange(stage),
+                    (raider) =>
+                      !raider.turned &&
+                      dist(at, raiderAt(raider)) <=
+                        abilityRange(unlocked.includes(ability) ? ability : 'love', stage),
                   )
                 return (
                   <g
