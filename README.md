@@ -128,7 +128,7 @@ Progress shape (same key `silver-city-progress-v1`): `memory[id].nextReviewAt`, 
 
 **Sticky:** https://cphillippe.github.io/Silver-dollar-city/ (hard-reload once if a cached PWA shows the old game).
 
-**Interim tunnel:** https://prompt-peripheral-news-acrylic.trycloudflare.com/ (HTTP 200, `index-DhMxWnFl.js`). Skip older trycloudflare links.
+**Interim tunnel:** https://alone-wish-huntington-currently.trycloudflare.com/ (HTTP 200, `index-MzZ9UjBA.js`). Skip older trycloudflare links.
 
 On the web app, tap **Share a morning**. The pitch is not a high score. It asks a friend to try the walk, fold the page, and see what they can still say.
 
