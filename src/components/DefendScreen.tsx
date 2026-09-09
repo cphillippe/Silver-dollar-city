@@ -424,6 +424,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
             <svg
               className={`defend-board ${shake ? 'is-shake' : ''} ${won ? 'is-clear' : ''}`}
               viewBox="0 0 640 420"
+              preserveAspectRatio="xMidYMid meet"
               role="img"
               aria-label="Night road through Silver City"
               onClick={() => {

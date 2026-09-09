@@ -795,6 +795,20 @@ assert.match(
   cssSrc,
   /\.defend-abilities \{[\s\S]*?grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/,
 )
+assert.match(
+  cssSrc,
+  /\.defend-frame \{[\s\S]*?overflow: hidden/,
+)
+assert.match(
+  cssSrc,
+  /\.defend-abilities \{[\s\S]*?flex: 0 0 auto/,
+)
+assert.match(
+  cssSrc,
+  /\.defend-abilities \{[\s\S]*?z-index: 3/,
+)
+assert.match(cssSrc, /height: min\(34vh, 220px\)/)
+assert.match(defendSrc, /preserveAspectRatio="xMidYMid meet"/)
 assert.match(cssSrc, /defend-ability-tier/)
 assert.match(
   readFileSync(new URL('../src/lib/watchTools.ts', import.meta.url), 'utf8'),
