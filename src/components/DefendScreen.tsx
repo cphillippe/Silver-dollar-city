@@ -25,7 +25,8 @@ import {
   waveSpeed,
   type WatchAbility,
 } from '../lib/defend'
-import { learningForTool } from '../lib/learning'
+import { findLearning, learningForTool } from '../lib/learning'
+import { nextGapLabel } from '../lib/memory'
 import { deployFit, TIER_MARK, toolTier, WALKER_LABEL, watchTool, WATCH_TOOLS } from '../lib/watchTools'
 import { useJuiceHandoff } from '../lib/juice'
 import { CITY_PLOTS, type CityPlotId } from '../lib/city'
@@ -34,6 +35,7 @@ import type { View, WalkerKind } from '../types'
 import { AbilityMark } from './GemMark'
 import { RecallGate } from './RecallGate'
 import { TeachUnlock } from './TeachUnlock'
+import { StoredLine } from './StoredLine'
 import { TownReturn } from './TownReturn'
 import { WinBurst } from './challenges/WinBurst'
 
@@ -371,12 +373,31 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           onHeld={() => setRecalled(true)}
         />
       ) : after && recalled ? (
-        <TownReturn
-          who="juniper"
-          line="Night held. The road turned toward heaven."
-          action="See the town"
-          onGo={() => onNavigate({ name: 'hub' })}
-        />
+        <>
+          <StoredLine
+            learning={
+              findLearning(progress, brief.id) ?? {
+                id: brief.id,
+                claim: brief.claim,
+                reason: brief.reason,
+                source: brief.source,
+                anchor: 'Juniper’s east porch',
+                acquiredAt: today,
+              }
+            }
+            when={
+              progress.memory[brief.id]
+                ? nextGapLabel(progress.memory[brief.id], today)
+                : 'Dust off today'
+            }
+          />
+          <TownReturn
+            who="juniper"
+            line="Night held. The road turned toward heaven."
+            action="See the town"
+            onGo={() => onNavigate({ name: 'hub' })}
+          />
+        </>
       ) : (
         <>
           <p className="eyebrow">{WATCH_KICKER}</p>

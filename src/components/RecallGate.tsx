@@ -2,6 +2,9 @@ import { useMemo, useState } from 'react'
 import { shuffle } from '../lib/shuffle'
 import { takeawayLines, type EvidenceBrief } from '../content/evidence'
 import { STORY } from '../content/story'
+import { learningBeat } from '../lib/learning'
+import { learningPicture, toolForEvidence } from '../lib/watchTools'
+import { GemMark } from './GemMark'
 
 interface RecallGateProps {
   brief: EvidenceBrief
@@ -27,6 +30,9 @@ export function RecallGate({
   onHeld,
 }: RecallGateProps) {
   const encode = mode === 'encode'
+  const tool = toolForEvidence(brief.id)
+  const picture = learningPicture(brief.id, tool)
+  const beat = learningBeat(brief.id)
   const lines = useMemo(() => takeawayLines(brief, keeps), [brief, keeps])
   const own = encode && lines.length > 1
   const [chosen, setChosen] = useState<(typeof lines)[0] | null>(own ? null : lines[0] ?? null)
@@ -90,6 +96,14 @@ export function RecallGate({
         {kicker}
         {brief.source ? ` · ${brief.source}` : ''}
       </p>
+      {encode ? (
+        <p className="learning-store">
+          {picture ? <GemMark gem={picture} size="sm" /> : null}
+          <span>Picture this: {beat}</span>
+        </p>
+      ) : (
+        <p className="quiet">Rebuild the map — claim, then why it stands.</p>
+      )}
 
       {phase === 'claim' ? (
         <div className="recall-choices">

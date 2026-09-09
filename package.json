@@ -8,7 +8,7 @@
     "start": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "test": "TZ=America/Chicago node --experimental-strip-types scripts/check-dates.mjs && TZ=UTC node --experimental-strip-types scripts/check-dates.mjs && node --experimental-strip-types scripts/check-progress.mjs && node --experimental-strip-types scripts/check-save.mjs && node --experimental-strip-types scripts/check-city.mjs",
+    "test": "TZ=America/Chicago node --experimental-strip-types scripts/check-dates.mjs && TZ=UTC node --experimental-strip-types scripts/check-dates.mjs && node --experimental-strip-types scripts/check-progress.mjs && node --experimental-strip-types scripts/check-save.mjs && node --experimental-strip-types scripts/check-learning.mjs && node --experimental-strip-types scripts/check-city.mjs",
     "android:sync": "npm run build && npx cap sync android",
     "android:apk": "npm run android:sync && node scripts/write-android-local-properties.mjs && cd android && ./gradlew assembleDebug"
   },

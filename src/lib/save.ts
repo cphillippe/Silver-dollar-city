@@ -245,6 +245,7 @@ function asLearningArray(value: unknown): Learning[] {
         typeof raw.picture === 'string' && raw.picture.length <= 16
           ? (raw.picture as Learning['picture'])
           : undefined,
+      beat: typeof raw.beat === 'string' ? clipString(raw.beat, 180) : undefined,
       toolId: isSafeId(raw.toolId) ? raw.toolId : undefined,
       acquiredAt: isDateKey(raw.acquiredAt) ? raw.acquiredAt : '',
     })

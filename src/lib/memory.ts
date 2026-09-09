@@ -1,7 +1,11 @@
 import { addLocalDays, hashString } from './dates.ts'
 import type { MemoryTrace, StarCount } from '../types.ts'
 
-/** Expanding gaps after a successful recall (local calendar days). */
+/**
+ * Gaps earned by a successful recall (local calendar days).
+ * First recall after encode is same-day (nextReviewAt = today), then
+ * this ladder: tomorrow’s Daily, then 3 / 7 / 21.
+ */
 export const SPACE_DAYS = [1, 3, 7, 21] as const
 
 export type ReviewKind = 'encode' | 'recall'
@@ -22,7 +26,7 @@ export function emptyTrace(id: string, pillar: string, today: string): MemoryTra
     id,
     pillar,
     intervalIndex: 0,
-    nextReviewAt: addLocalDays(today, SPACE_DAYS[0]),
+    nextReviewAt: today,
     lastReviewAt: today,
     reviews: 0,
     cleanRecalls: 0,
@@ -31,7 +35,7 @@ export function emptyTrace(id: string, pillar: string, today: string): MemoryTra
 }
 
 export function isDue(trace: MemoryTrace, today: string): boolean {
-  if (trace.lastReviewAt === today) return false
+  if (trace.lastReviewAt === today && trace.reviews > 0) return false
   return trace.nextReviewAt <= today
 }
 
@@ -61,11 +65,12 @@ export function pickInterleaved(
 }
 
 export function applySuccess(trace: MemoryTrace, today: string): MemoryTrace {
+  const gap = SPACE_DAYS[Math.min(SPACE_DAYS.length - 1, trace.intervalIndex)]
   const nextIndex = Math.min(SPACE_DAYS.length - 1, trace.intervalIndex + 1)
   return {
     ...trace,
     intervalIndex: nextIndex,
-    nextReviewAt: addLocalDays(today, SPACE_DAYS[nextIndex]),
+    nextReviewAt: addLocalDays(today, gap),
     lastReviewAt: today,
     reviews: trace.reviews + 1,
     cleanRecalls: trace.cleanRecalls + 1,
@@ -113,7 +118,9 @@ export function masteryFromReview(
 }
 
 export function nextGapLabel(trace: MemoryTrace, today: string): string {
-  if (isDue(trace, today)) return 'Due this morning'
+  if (isDue(trace, today)) {
+    return trace.reviews === 0 ? 'Dust off today' : 'Due this morning'
+  }
   if (trace.nextReviewAt === addLocalDays(today, 1)) return 'Returns tomorrow'
   return `Returns ${trace.nextReviewAt}`
 }

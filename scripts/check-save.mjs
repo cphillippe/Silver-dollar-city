@@ -67,6 +67,28 @@ assert.deepEqual(fromLegacy.progress.defense.nights, [])
 assert.equal(fromLegacy.progress.theme, 'candy')
 assert.deepEqual(fromLegacy.progress.learnings, [])
 
+const withBeat = {
+  ...fromLegacy.progress,
+  learnings: [
+    {
+      id: 'ph-road',
+      claim: 'Neighbor is the one who shows mercy.',
+      reason: 'Mercy crosses the road.',
+      source: 'Luke 10:25–37',
+      anchor: 'Mercy Wren · Parable Hollow',
+      picture: 'heart',
+      beat: 'neighbor is the one who shows mercy',
+      toolId: 'love',
+      acquiredAt: '2026-09-09',
+    },
+  ],
+}
+const beatTrip = parseIncomingSave(JSON.stringify(wrapSave(withBeat)))
+assert.equal(beatTrip.ok, true)
+if (!beatTrip.ok) throw new Error('beat parse')
+assert.equal(beatTrip.progress.learnings[0]?.beat, 'neighbor is the one who shows mercy')
+assert.equal(beatTrip.meta.schemaVersion, 1)
+
 const code = encodeShareCode(fromLegacy.envelope)
 assert.match(code, /^SC1\./)
 const fromCode = parseIncomingSave(code)

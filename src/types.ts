@@ -160,7 +160,7 @@ export interface WatchTool {
   tier: number
 }
 
-/** One saved learning: claim · reason · source · anchor · picture · tool. */
+/** One saved learning: claim · reason · source · anchor · picture/beat · tool. */
 export interface Learning {
   id: string
   claim: string
@@ -168,6 +168,8 @@ export interface Learning {
   source: string
   anchor: string
   picture?: GemId
+  /** Dual-code story beat. Optional on old saves; derive via learningBeat. */
+  beat?: string
   toolId?: string
   acquiredAt: string
 }

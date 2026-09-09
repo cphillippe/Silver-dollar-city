@@ -1,5 +1,5 @@
-import { journalEntries } from './journal'
-import { hashString } from '../lib/dates'
+import { journalEntries } from './journal.ts'
+import { hashString } from '../lib/dates.ts'
 
 export interface EvidenceBrief {
   id: string

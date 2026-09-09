@@ -802,5 +802,16 @@ assert.match(
 )
 assert.match(gemSrc, /ability: string/)
 assert.match(gemSrc, /watchTool\(ability\)\?\.gem/)
+assert.match(
+  readFileSync(new URL('../src/components/StoredLine.tsx', import.meta.url), 'utf8'),
+  /Stored learning/,
+)
+assert.match(cssSrc, /\.stored-line/)
+assert.match(cssSrc, /\.memory-pipe/)
+assert.match(
+  readFileSync(new URL('../src/lib/learning.ts', import.meta.url), 'utf8'),
+  /Acquire → Anchor → Picture → Store/,
+)
+assert.match(challengeSrc, /StoredLine/)
 
 console.log('check-city: ok')
