@@ -11,20 +11,22 @@ A stranger should know in 60 seconds: this is a **Christian reasoning game**. So
 **Sticky public preview (GitHub Pages):**  
 https://cphillippe.github.io/Silver-dollar-city/
 
-The game is already in [`docs/`](docs/) on this branch (`base: './'`, so assets resolve under `/Silver-dollar-city/`). **Bill must flip this once** (owner-only):
+Hard-reload once if you still see the old game (the PWA can keep a cached copy). Live bundle is `index-S3Yv8oYl.js` — Good Samaritan teach-first, Night Watch, Jericho two-pick.
 
-1. Open the repo → **Settings** → **Pages**
-2. **Build and deployment** → Source: **Deploy from a branch**
-3. Branch: **`cursor/silver-city-unending-evidence-8233`**
+Pages is on. **One Settings change so it follows `main` instead of the merged PR branch:**
+
+1. Repo → **Settings** → **Pages**
+2. Source: **Deploy from a branch**
+3. Branch: **`main`**
 4. Folder: **`/docs`**
 5. **Save**
 
-After Save, wait a minute, then hard-reload the Pages URL. Later, after merge, switch the branch to **`main`** and keep `/docs`.
+Until that flip, Pages still deploys from `cursor/silver-city-unending-evidence-8233` `/docs` (same files as `main` today).
 
 **Interim tunnel (dies often — skip if Pages is live):**  
-https://east-programs-bikes-operates.trycloudflare.com/
+https://lace-worldwide-seed-planned.trycloudflare.com/
 
-Verified HTTP 200, “Silver City,” Night Watch look bundle `index-gR7nglOr.js`. Skip older tunnels. Skip StackBlitz.
+Verified HTTP 200, “Silver City,” bundle `index-S3Yv8oYl.js`. Skip older tunnels. Skip StackBlitz.
 
 ## The story
 
@@ -124,9 +126,9 @@ Progress shape (same key `silver-city-progress-v1`): `memory[id].nextReviewAt`, 
 
 ## Friend preview (no install)
 
-**Sticky:** https://cphillippe.github.io/Silver-dollar-city/ (owner must enable Pages once — steps above).
+**Sticky:** https://cphillippe.github.io/Silver-dollar-city/ (hard-reload once if a cached PWA shows the old game).
 
-**Interim tunnel:** https://east-programs-bikes-operates.trycloudflare.com/ (HTTP 200, Night Watch look `index-gR7nglOr.js`). Skip older trycloudflare links.
+**Interim tunnel:** https://lace-worldwide-seed-planned.trycloudflare.com/ (HTTP 200, `index-S3Yv8oYl.js`). Skip older trycloudflare links.
 
 On the web app, tap **Share a morning**. The pitch is not a high score. It asks a friend to try the walk, fold the page, and see what they can still say.
 
