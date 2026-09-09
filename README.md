@@ -11,7 +11,7 @@ A stranger should know in 60 seconds: this is a **Christian reasoning game**. So
 **Sticky public preview (GitHub Pages):**  
 https://cphillippe.github.io/Silver-dollar-city/
 
-Hard-reload once if you still see the old game (the PWA can keep a cached copy). Live bundle is `index-yrKorLHH.js` — memory-science pipeline (Acquire → Store → spaced Recall → Deploy), four Night Watch tools, town overlay gone.
+Hard-reload once if you still see the old game (the PWA can keep a cached copy). Live bundle is `index-DhEmHSjT.js` — Night Watch tools stay below a compact board on a phone; memory-science pipeline; town overlay gone.
 
 Pages deploys `docs/` from `main` once that source is selected. Until then the same `docs/` is also on `cursor/silver-city-unending-evidence-8233`. Hard-reload github.io after it updates.
 
