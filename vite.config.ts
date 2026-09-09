@@ -65,8 +65,8 @@ export default defineConfig({
         short_name: 'Silver City',
         description:
           'A mountain-town adventure that explores the case for God through games, testimony, and argument.',
-        theme_color: '#1a2238',
-        background_color: '#0e1424',
+        theme_color: '#3a1480',
+        background_color: '#2a0d58',
         display: 'standalone',
         start_url: './',
         icons: [

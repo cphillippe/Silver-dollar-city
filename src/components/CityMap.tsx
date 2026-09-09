@@ -296,36 +296,36 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
       >
         <defs>
           <linearGradient id="city-sky" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#1a2240" />
-            <stop offset="42%" stopColor="#243044" />
-            <stop offset="78%" stopColor="#5a3a24" />
-            <stop offset="100%" stopColor="#8a5428" />
+            <stop offset="0%" stopColor="#3a1480" />
+            <stop offset="32%" stopColor="#6a2ab8" />
+            <stop offset="62%" stopColor="#ff5a7a" />
+            <stop offset="100%" stopColor="#ffcc33" />
           </linearGradient>
           <linearGradient id="city-ridge" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#3a4830" />
-            <stop offset="100%" stopColor="#1c2418" />
+            <stop offset="0%" stopColor="#3dcc7a" />
+            <stop offset="100%" stopColor="#148a48" />
           </linearGradient>
           <linearGradient id="city-wood" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#d4a06a" />
-            <stop offset="100%" stopColor="#8a562c" />
+            <stop offset="0%" stopColor="#ffd24a" />
+            <stop offset="100%" stopColor="#ff9f1a" />
           </linearGradient>
           <linearGradient id="city-gold-roof" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#ffe9a8" />
-            <stop offset="52%" stopColor="#e8c36a" />
-            <stop offset="100%" stopColor="#b8862e" />
+            <stop offset="0%" stopColor="#fff6b8" />
+            <stop offset="52%" stopColor="#ffcc33" />
+            <stop offset="100%" stopColor="#ff9f1a" />
           </linearGradient>
           <linearGradient id="city-wall-built" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#4a3a2c" />
-            <stop offset="100%" stopColor="#2a2018" />
+            <stop offset="0%" stopColor="#7a4ad4" />
+            <stop offset="100%" stopColor="#4a1a88" />
           </linearGradient>
           <linearGradient id="city-wall-lit" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#5c4a32" />
-            <stop offset="100%" stopColor="#3a2c1c" />
+            <stop offset="0%" stopColor="#c86bff" />
+            <stop offset="100%" stopColor="#5a2ab8" />
           </linearGradient>
           <radialGradient id="city-moon-glow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#fff6d4" stopOpacity="0.9" />
-            <stop offset="55%" stopColor="#f4e8c4" stopOpacity="0.22" />
-            <stop offset="100%" stopColor="#f4e8c4" stopOpacity="0" />
+            <stop offset="0%" stopColor="#fff6d4" stopOpacity="1" />
+            <stop offset="55%" stopColor="#ffcc33" stopOpacity="0.4" />
+            <stop offset="100%" stopColor="#ff5a7a" stopOpacity="0" />
           </radialGradient>
           <filter id="city-glow" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur stdDeviation="5" result="b" />
@@ -337,7 +337,7 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
         </defs>
 
         <rect width="640" height="420" fill="url(#city-sky)" />
-        <ellipse cx="320" cy="198" rx="280" ry="28" fill="#c4783a" opacity="0.22" />
+        <ellipse cx="320" cy="198" rx="280" ry="28" fill="#ffcc33" opacity="0.28" />
         <circle cx="548" cy="48" r="28" fill="url(#city-moon-glow)" />
         <circle className="city-moon" cx="548" cy="48" r="9" fill="#fff6d8" />
         <g className={`city-sky-stars is-${stageOf('lamps')}`}>
@@ -360,7 +360,8 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
         />
         <path
           d="M-20 248 L40 200 120 228 210 176 300 214 410 168 500 206 660 150 V430 H-20 Z"
-          fill="#1a2014"
+          fill="#3dcc7a"
+          opacity="0.55"
         />
 
         <path
@@ -474,7 +475,7 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
           onOpen={open}
         />
 
-        <path d="M-10 368 Q 180 340 320 358 T 660 372 V430 H-10 Z" fill="#14180e" />
+        <path d="M-10 368 Q 180 340 320 358 T 660 372 V430 H-10 Z" fill="#148a48" />
 
         {mode === 'live'
           ? CITY_PLOTS.map((plot) => (

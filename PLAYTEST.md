@@ -324,6 +324,14 @@ What made it more fun: blasting a cheap line off the gold road with a lamp thump
 
 Done when a cold player would say “one more night,” not “homework with lamps.”
 
+## Candy look (2026-09-09)
+
+Bill: “It should look like candy.” One look climb, no playtest fan-out.
+
+Saturated berry/gold/lime/strawberry, glossy 3D tiles, juicy lamps, candy dusk on Town + Night Watch. Welcome, Keep/Toss, Jericho stones, Observatory seats included. Gameplay and pedagogy unchanged.
+
+Done when a cold glance says candy, not homework chrome.
+
 ## Tooling note (npm audit)
 
 `uuid` 7.x via `@capacitor/cli` (GHSA-w5hq-g745-h8pq) is **tooling-only**. Do not `npm audit fix --force` (it wants to downgrade Capacitor). Upgrade when a CLI release pulls `uuid >= 11.1.1`. Details in `SECURITY_REVIEW.md`.
