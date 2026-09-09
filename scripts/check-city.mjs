@@ -534,6 +534,7 @@ assert.match(defendSrc, /fireBest/)
 assert.match(defendSrc, /defend-lantern/)
 assert.match(defendSrc, /defend-ridge/)
 assert.match(defendSrc, /defend-beam/)
+assert.match(defendSrc, /defend-porch/)
 assert.match(hubSrc, /night-watch-glow/)
 assert.match(
   readFileSync(new URL('../src/lib/defend.ts', import.meta.url), 'utf8'),
