@@ -22,7 +22,7 @@ The game is already in [`docs/`](docs/) on this branch (`base: './'`, so assets 
 After Save, wait a minute, then hard-reload the Pages URL. Later, after merge, switch the branch to **`main`** and keep `/docs`.
 
 **Interim tunnel (dies often — skip if Pages is live):**  
-https://allocation-occur-closes-solution.trycloudflare.com/
+https://east-programs-bikes-operates.trycloudflare.com/
 
 Verified HTTP 200, “Silver City,” Night Watch look bundle `index-gR7nglOr.js`. Skip older tunnels. Skip StackBlitz.
 
@@ -126,7 +126,7 @@ Progress shape (same key `silver-city-progress-v1`): `memory[id].nextReviewAt`, 
 
 **Sticky:** https://cphillippe.github.io/Silver-dollar-city/ (owner must enable Pages once — steps above).
 
-**Interim tunnel:** https://assured-gather-regards-accounting.trycloudflare.com/ (HTTP 200, Night Watch `index-DOClPij3.js`). Skip older trycloudflare links.
+**Interim tunnel:** https://allocation-occur-closes-solution.trycloudflare.com/ (HTTP 200, Night Watch look `index-gR7nglOr.js`). Skip older trycloudflare links.
 
 On the web app, tap **Share a morning**. The pitch is not a high score. It asks a friend to try the walk, fold the page, and see what they can still say.
 
