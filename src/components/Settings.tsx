@@ -14,14 +14,14 @@ import {
 import { localDateKey } from '../lib/dates'
 import { useAdsPref } from './AdSlot'
 import { useProgress } from '../store/progress'
-import type { View } from '../types'
+import type { AppTheme, View } from '../types'
 
 interface SettingsProps {
   onNavigate: (view: View) => void
 }
 
 export function Settings({ onNavigate }: SettingsProps) {
-  const { progress, saveMeta, importSaveText, reset } = useProgress()
+  const { progress, saveMeta, importSaveText, reset, setTheme } = useProgress()
   const adsPref = useAdsPref()
   const fileRef = useRef<HTMLInputElement>(null)
   const [paste, setPaste] = useState('')
@@ -217,6 +217,24 @@ export function Settings({ onNavigate }: SettingsProps) {
       </section>
 
       <section className="settings-card">
+        <p className="eyebrow">Look</p>
+        <p>Candy is the default. Switch anytime — the walk and the save stay.</p>
+        <div className="settings-actions theme-picks">
+          {(['candy', 'dusk', 'parchment'] as const).map((theme) => (
+            <button
+              key={theme}
+              type="button"
+              className={`btn ${progress.theme === theme ? 'primary' : ''}`}
+              aria-pressed={progress.theme === theme}
+              onClick={() => setTheme(theme)}
+            >
+              {themeLabel(theme)}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="settings-card">
         <p className="eyebrow">Ad placeholders</p>
         <p>
           Playtest default is off. Placeholders are labeled slots for a later
@@ -259,4 +277,10 @@ function adsAreOn(pref: AdsPref) {
   if (pref === 'on') return true
   if (pref === 'off') return false
   return adsEnabledDefault
+}
+
+function themeLabel(theme: AppTheme) {
+  if (theme === 'dusk') return 'Dusk town'
+  if (theme === 'parchment') return 'Clean parchment'
+  return 'Candy'
 }

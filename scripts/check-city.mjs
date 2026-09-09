@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import {
   CITY_HOLLOW_TO_WITNESS,
+  cityAge,
   citySnapshot,
   cityUpgrades,
   fillGrows,
@@ -42,6 +43,7 @@ assert.equal(plotStage('bench', empty), 'empty')
 assert.equal(plotStage('observatory', empty), 'empty')
 assert.equal(plotStage('journal', empty), 'empty')
 assert.equal(nextPlotId(empty, false), 'porch')
+assert.equal(cityAge(empty), 'eden')
 
 const afterDaily = {
   ...empty,
@@ -54,6 +56,7 @@ const afterDaily = {
 assert.equal(plotStage('porch', afterDaily), 'built')
 assert.equal(plotStage('hollow', afterDaily), 'scaffold')
 assert.equal(nextPlotId(afterDaily, true), 'hollow')
+assert.equal(cityAge(afterDaily), 'village')
 
 const fromEmpty = citySnapshot(empty)
 const fromDaily = citySnapshot(afterDaily)
@@ -82,6 +85,12 @@ assert.match(mapSrc, /city-roof-tile/)
 assert.match(mapSrc, /PlotArt/)
 assert.match(mapSrc, /HollowArt/)
 assert.match(mapSrc, /PorchArt/)
+assert.match(mapSrc, /HeavenCity/)
+assert.match(mapSrc, /EdenGrove/)
+assert.match(mapSrc, /SpinePath/)
+assert.match(mapSrc, /City of Heaven/)
+assert.match(mapSrc, /Eden → City of Heaven/)
+assert.match(mapSrc, /city-age-track/)
 
 const twoHollow = {
   ...afterDaily,
@@ -115,6 +124,53 @@ const grew = fillGrows(
 assert.equal(grew.some((item) => item.id === 'hollow' && item.beat === 'Grew!'), true)
 assert.equal(plotStage('bench', twoHollow), 'scaffold')
 assert.equal(nextPlotId(twoHollow, true), 'hollow')
+assert.equal(cityAge(twoHollow), 'village')
+
+const townish = {
+  ...twoHollow,
+  completed: ['ph-road', 'ph-father', 'wb-creed'],
+}
+assert.equal(cityAge(townish), 'town')
+
+const goldish = {
+  ...empty,
+  started: true,
+  dailyDates: ['2026-09-07'],
+  completed: [
+    'ph-road',
+    'ph-father',
+    'ph-seeds',
+    'ph-debt',
+    'wb-creed',
+    'wb-early',
+    'wb-method',
+    'wb-women',
+    'ob-tuning',
+    'ob-design',
+    'ob-leibniz',
+    'ob-life',
+    'fg-mover',
+  ],
+  held: ['ph-road', 'ph-father', 'ph-seeds'],
+}
+assert.equal(cityAge(goldish), 'gold')
+
+const heavenish = {
+  ...goldish,
+  completed: [
+    ...goldish.completed,
+    'fg-contingent',
+    'fg-kalam',
+    'fg-limits',
+    'hl-moral',
+    'hl-mind',
+    'hl-meaning',
+    'hl-beauty',
+  ],
+  held: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'],
+}
+assert.equal(plotStage('lookout', heavenish), 'lit')
+assert.equal(cityAge(heavenish), 'heaven')
 
 const grown = {
   ...empty,
@@ -447,6 +503,11 @@ assert.match(cssSrc, /#ffcc33/)
 assert.match(cssSrc, /#ff5a7a/)
 assert.match(cssSrc, /background: #3a1480/)
 assert.doesNotMatch(cssSrc, /#1c1810/)
+assert.match(cssSrc, /city-heaven/)
+assert.match(cssSrc, /city-spine/)
+assert.match(cssSrc, /city-age-track/)
+assert.match(cssSrc, /data-theme='parchment'/)
+assert.match(cssSrc, /data-theme='dusk'/)
 assert.match(cssSrc, /is-alive \.city-canopy\.is-sprout/)
 assert.match(cssSrc, /is-alive \.city-folk\.is-waving/)
 assert.match(cssSrc, /city-roof-kick/)

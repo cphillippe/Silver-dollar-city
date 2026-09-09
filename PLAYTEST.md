@@ -332,6 +332,16 @@ Saturated berry/gold/lime/strawberry, glossy 3D tiles, juicy lamps, candy dusk o
 
 Done when a cold glance says candy, not homework chrome.
 
+## Eden → City of Heaven + theme picker (2026-09-09)
+
+Bill: city progression from Eden to the City of Heaven, and a theme picker.
+
+Town map frames empty→scaffold→built→lit as Eden → village → lit town → gold city → City of Heaven. Garden/river early; a spine path and ridge teaser show the destination ahead; Heaven opens when the lookout is lit and enough lines are held. Candy stays default. Settings: Candy / Dusk town / Clean parchment (local save, no schema bump).
+
+Keep Night Watch, teach-first Samaritan, Keep/Toss, ownership, copy-truth.
+
+Done when a cold player feels: I’m building from Eden toward the City of Heaven — and can switch looks.
+
 ## Tooling note (npm audit)
 
 `uuid` 7.x via `@capacitor/cli` (GHSA-w5hq-g745-h8pq) is **tooling-only**. Do not `npm audit fix --force` (it wants to downgrade Capacitor). Upgrade when a CLI release pulls `uuid >= 11.1.1`. Details in `SECURITY_REVIEW.md`.

@@ -350,14 +350,14 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
             >
               <defs>
                 <linearGradient id="defend-dusk" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#ffcc33" />
-                  <stop offset="22%" stopColor="#ff5a7a" />
-                  <stop offset="52%" stopColor="#c86bff" />
-                  <stop offset="100%" stopColor="#3a1480" />
+                  <stop offset="0%" stopColor="var(--city-sky-0)" />
+                  <stop offset="22%" stopColor="var(--city-sky-1)" />
+                  <stop offset="52%" stopColor="var(--city-sky-2)" />
+                  <stop offset="100%" stopColor="var(--city-sky-3)" />
                 </linearGradient>
                 <linearGradient id="defend-ridge" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#3dcc7a" />
-                  <stop offset="100%" stopColor="#148a48" />
+                  <stop offset="0%" stopColor="var(--city-ridge-0)" />
+                  <stop offset="100%" stopColor="var(--city-ridge-1)" />
                 </linearGradient>
                 <linearGradient id="defend-wood" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#ffd24a" />

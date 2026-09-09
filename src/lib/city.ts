@@ -186,6 +186,52 @@ export function cityStanding(progress: ProgressState): {
   return { standing, possible }
 }
 
+/** Journey ages. Lot stages stay empty→scaffold→built→lit; this frames the story. */
+export type CityAge = 'eden' | 'village' | 'town' | 'gold' | 'heaven'
+
+export const CITY_AGES: CityAge[] = ['eden', 'village', 'town', 'gold', 'heaven']
+
+export const CITY_AGE_TITLE: Record<CityAge, string> = {
+  eden: 'Eden',
+  village: 'Village',
+  town: 'Lit town',
+  gold: 'Gold city',
+  heaven: 'City of Heaven',
+}
+
+export const CITY_AGE_SHORT: Record<CityAge, string> = {
+  eden: 'Eden',
+  village: 'Village',
+  town: 'Town',
+  gold: 'Gold',
+  heaven: 'Heaven',
+}
+
+export const CITY_AGE_LINE: Record<CityAge, string> = {
+  eden: 'A garden by the river. The City of Heaven waits on the ridge.',
+  village: 'First trees and a cabin. Proofs will raise a village.',
+  town: 'The square is lighting. Keep the lines — the town grows.',
+  gold: 'Gates and gold roofs. The ridge city is close enough to see.',
+  heaven: 'The City of Heaven is open. Light, gates, and glory — you kept the trail.',
+}
+
+/** Held lines needed with a lit lookout before the ridge city fully opens. */
+export const HEAVEN_HELD = 8
+
+export function cityAge(progress: ProgressState): CityAge {
+  const snap = citySnapshot(progress)
+  const held = progress.held?.length ?? 0
+  if (snap.lookout === 'lit' && held >= HEAVEN_HELD) return 'heaven'
+  if (snap.gate === 'built' || snap.gate === 'lit' || snap.lookout !== 'empty') return 'gold'
+  if (snap.bench === 'built' || snap.bench === 'lit' || snap.observatory !== 'empty') return 'town'
+  if ((progress.dailyDates?.length ?? 0) >= 1 || snap.hollow !== 'empty') return 'village'
+  return 'eden'
+}
+
+export function cityAgeIndex(age: CityAge): number {
+  return CITY_AGES.indexOf(age)
+}
+
 export function plotFill(id: CityPlotId, progress: ProgressState): number {
   switch (id) {
     case 'porch':

@@ -26,6 +26,12 @@ export default function App() {
   }, [view])
 
   useEffect(() => {
+    const theme = progress.theme ?? 'candy'
+    document.documentElement.dataset.theme = theme
+    document.documentElement.style.colorScheme = theme === 'parchment' ? 'light' : 'dark'
+  }, [progress.theme])
+
+  useEffect(() => {
     if (view.name !== 'journal' || !view.focusId || view.autoQuiz) return
     const node = document.getElementById(view.focusId)
     node?.scrollIntoView({ behavior: 'smooth', block: 'center' })

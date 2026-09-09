@@ -2,7 +2,7 @@ import { APP_VERSION, SAVE_SCHEMA_VERSION, STORAGE_BACKUP_KEY, STORAGE_KEY } fro
 import { localDateKey } from './dates.ts'
 import { emptyDefense } from './defend.ts'
 import { emptyTrace } from './memory.ts'
-import type { DefenseState, MemoryTrace, ProgressState, StarCount } from '../types.ts'
+import type { AppTheme, DefenseState, MemoryTrace, ProgressState, StarCount } from '../types.ts'
 
 export { STORAGE_KEY, STORAGE_BACKUP_KEY, SAVE_SCHEMA_VERSION }
 
@@ -64,6 +64,7 @@ export function emptyProgress(): ProgressState {
     memory: {},
     elaborations: {},
     defense: emptyDefense(),
+    theme: 'candy',
   }
 }
 
@@ -195,9 +196,15 @@ export function normalizeProgress(parsed: Partial<ProgressState> | ProgressState
     elaborations: asStringMap(parsed.elaborations),
     lastReviewPillar: isSafeId(parsed.lastReviewPillar) ? parsed.lastReviewPillar : undefined,
     defense: asDefense(parsed.defense),
+    theme: asTheme(parsed.theme),
   }
   base.memory = migrateMemory({ ...base, memory: parsed.memory ?? {} })
   return base
+}
+
+function asTheme(value: unknown): AppTheme {
+  if (value === 'dusk' || value === 'parchment' || value === 'candy') return value
+  return 'candy'
 }
 
 function asDefense(value: unknown): DefenseState {
