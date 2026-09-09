@@ -2,7 +2,12 @@ import { useEffect, useRef, useState } from 'react'
 import { areas } from '../content'
 import { townAck, townVoice } from '../content/story'
 import {
+  CITY_AGES,
+  CITY_AGE_LINE,
+  CITY_AGE_SHORT,
+  CITY_AGE_TITLE,
   CITY_PLOTS,
+  cityAge,
   citySnapshot,
   cityStanding,
   cityUpgrades,
@@ -19,6 +24,7 @@ import {
   writeCitySeen,
   writeFillsSeen,
   writeHomecomingDay,
+  type CityAge,
   type CityFills,
   type CityPlotId,
   type CityStage,
@@ -80,6 +86,7 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
   const doneToday = dailyDoneToday(progress, today)
   const nextId = mode === 'poster' ? 'porch' : nextPlotId(progress, doneToday)
   const { standing, possible } = cityStanding(progress)
+  const age = mode === 'poster' ? 'eden' : cityAge(progress)
   const liveSnap = citySnapshot(progress)
   const liveFills = fillSnapshot(progress)
 
@@ -280,7 +287,7 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
 
   return (
     <section
-      className={`city-overworld ${mode === 'poster' ? 'is-poster' : 'is-alive'} ${celebrating ? 'is-revealing' : ''} ${homecoming ? 'is-homecoming' : ''}`}
+      className={`city-overworld is-age-${age} ${mode === 'poster' ? 'is-poster' : 'is-alive'} ${celebrating ? 'is-revealing' : ''} ${homecoming ? 'is-homecoming' : ''}`}
     >
       <svg
         className="city-svg"
@@ -288,22 +295,22 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
         role={mode === 'poster' ? 'img' : 'group'}
         aria-label={
           mode === 'poster'
-            ? 'A dim valley town waiting to be built'
+            ? 'A garden valley. The City of Heaven waits on the ridge.'
             : celebrating
               ? `${beat?.beat} ${beat?.title}`
-              : `Silver City overworld, ${standing} of ${possible} landmarks standing`
+              : `Silver City, ${CITY_AGE_TITLE[age]}. ${standing} of ${possible} landmarks standing. The City of Heaven waits on the ridge.`
         }
       >
         <defs>
           <linearGradient id="city-sky" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#ffcc33" />
-            <stop offset="22%" stopColor="#ff5a7a" />
-            <stop offset="52%" stopColor="#c86bff" />
-            <stop offset="100%" stopColor="#3a1480" />
+            <stop offset="0%" stopColor="var(--city-sky-0)" />
+            <stop offset="22%" stopColor="var(--city-sky-1)" />
+            <stop offset="52%" stopColor="var(--city-sky-2)" />
+            <stop offset="100%" stopColor="var(--city-sky-3)" />
           </linearGradient>
           <linearGradient id="city-ridge" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#3dcc7a" />
-            <stop offset="100%" stopColor="#148a48" />
+            <stop offset="0%" stopColor="var(--city-ridge-0)" />
+            <stop offset="100%" stopColor="var(--city-ridge-1)" />
           </linearGradient>
           <linearGradient id="city-wood" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#ffd24a" />
@@ -322,9 +329,18 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
             <stop offset="0%" stopColor="#c86bff" />
             <stop offset="100%" stopColor="#5a2ab8" />
           </linearGradient>
+          <linearGradient id="city-heaven-wall" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#fff6d4" />
+            <stop offset="100%" stopColor="#ffcc33" />
+          </linearGradient>
           <radialGradient id="city-moon-glow" cx="50%" cy="50%" r="50%">
             <stop offset="0%" stopColor="#fff6d4" stopOpacity="1" />
             <stop offset="55%" stopColor="#ffcc33" stopOpacity="0.4" />
+            <stop offset="100%" stopColor="#ff5a7a" stopOpacity="0" />
+          </radialGradient>
+          <radialGradient id="city-glory" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#fffce8" stopOpacity="0.95" />
+            <stop offset="40%" stopColor="#ffcc33" stopOpacity="0.45" />
             <stop offset="100%" stopColor="#ff5a7a" stopOpacity="0" />
           </radialGradient>
           <filter id="city-glow" x="-50%" y="-50%" width="200%" height="200%">
@@ -363,6 +379,10 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
           fill="#3dcc7a"
           opacity="0.55"
         />
+
+        <HeavenCity age={age} />
+        <EdenGrove age={age} />
+        <SpinePath age={age} />
 
         <path
           className={`city-street city-street-main is-${stageOf('hollow')} is-${stageOf('bench')}`}
@@ -518,8 +538,19 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
             <p className="eyebrow">{beat?.beat}</p>
           ) : (
             <>
-              <p className="eyebrow">{kicker}</p>
-              <h2>{nextSpec?.title}</h2>
+              <p className="eyebrow">Eden → City of Heaven</p>
+              <ol className="city-age-track" aria-label="Journey ages">
+                {CITY_AGES.map((item) => (
+                  <li
+                    key={item}
+                    className={item === age ? 'is-now' : cityAgeReached(item, age) ? 'is-done' : ''}
+                  >
+                    {CITY_AGE_SHORT[item]}
+                  </li>
+                ))}
+              </ol>
+              <h2>{CITY_AGE_TITLE[age]}</h2>
+              <p className="city-age-line">{CITY_AGE_LINE[age]}</p>
               <p className="city-gift">{gift}</p>
               {doneToday ? (
                 <p className="city-morrow">Town held. A lamp waits tomorrow.</p>
@@ -540,6 +571,69 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
 }
 
 const SPARKS = [0, 45, 90, 135, 180, 225, 270, 315]
+
+const SPINE_MARKS: { age: CityAge; x: number; y: number }[] = [
+  { age: 'eden', x: 58, y: 338 },
+  { age: 'village', x: 118, y: 300 },
+  { age: 'town', x: 280, y: 292 },
+  { age: 'gold', x: 498, y: 268 },
+  { age: 'heaven', x: 572, y: 36 },
+]
+
+function cityAgeReached(item: CityAge, current: CityAge) {
+  return CITY_AGES.indexOf(item) <= CITY_AGES.indexOf(current)
+}
+
+function EdenGrove({ age }: { age: CityAge }) {
+  return (
+    <g className={`city-eden is-${age}`} aria-hidden>
+      <ellipse className="city-eden-canopy" cx="46" cy="268" rx="22" ry="16" />
+      <ellipse className="city-eden-canopy" cx="78" cy="258" rx="18" ry="14" />
+      <ellipse className="city-eden-canopy" cx="28" cy="292" rx="16" ry="12" />
+      <circle className="city-eden-fruit" cx="40" cy="262" r="3.2" />
+      <circle className="city-eden-fruit" cx="70" cy="250" r="2.8" />
+      <circle className="city-eden-fruit" cx="88" cy="266" r="2.4" />
+      <path
+        className="city-eden-river"
+        d="M8 236 C 40 258, 54 300, 36 348 C 22 382, 70 404, 118 396"
+      />
+    </g>
+  )
+}
+
+function SpinePath({ age }: { age: CityAge }) {
+  return (
+    <g className={`city-spine is-${age}`} aria-hidden>
+      <path
+        className="city-spine-line"
+        d="M58 338 C 100 312, 160 300, 280 292 C 380 286, 460 220, 520 80 C 540 48, 560 32, 572 36"
+      />
+      {SPINE_MARKS.map((mark) => (
+        <g key={mark.age} className={`city-spine-mark ${cityAgeReached(mark.age, age) ? 'is-lit' : ''}`} transform={`translate(${mark.x} ${mark.y})`}>
+          <circle r="7" />
+          <circle r="3.2" className="city-spine-core" />
+        </g>
+      ))}
+    </g>
+  )
+}
+
+function HeavenCity({ age }: { age: CityAge }) {
+  return (
+    <g className={`city-heaven is-${age}`} aria-label="City of Heaven">
+      <circle className="city-heaven-glory" cx="575" cy="28" r="46" fill="url(#city-glory)" />
+      <path className="city-heaven-wall" d="M530 48 l18-22 16 10 14-18 16 12 18-16 16 20 v22 H530 Z" fill="url(#city-heaven-wall)" />
+      <path className="city-heaven-gate" d="M568 58 v-16 a8 10 0 0 1 16 0 v16" />
+      <rect className="city-heaven-tower" x="538" y="18" width="10" height="22" rx="1" />
+      <rect className="city-heaven-tower" x="602" y="14" width="10" height="26" rx="1" />
+      <path className="city-heaven-spire" d="M543 18 l5-10 5 10" />
+      <path className="city-heaven-spire" d="M607 14 l5-12 5 12" />
+      <text className="city-heaven-label" x="575" y="8" textAnchor="middle">
+        City of Heaven
+      </text>
+    </g>
+  )
+}
 
 function PlotGroup({
   id,

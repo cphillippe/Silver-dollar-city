@@ -15,7 +15,7 @@ import {
 import { bestStars, type StarCount } from '../lib/stars'
 import { streakAfterPlay } from '../lib/streak'
 import { citySnapshot, forgetCitySeen, writeCitySeen } from '../lib/city'
-import type { ProgressState } from '../types'
+import type { AppTheme, ProgressState } from '../types'
 import {
   cardsUnlockedBy,
   emptyProgress,
@@ -209,12 +209,22 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     })
   }, [write])
 
+  const setTheme = useCallback((theme: AppTheme) => {
+    setProgress((current) => {
+      if (current.theme === theme) return current
+      return write({ ...current, theme })
+    })
+  }, [write])
+
   const reset = useCallback(() => {
     setMissed([])
     forgetCitySeen()
     backupCurrentSave()
-    commit(emptyProgress())
-  }, [commit])
+    setProgress((current) => {
+      const next = { ...emptyProgress(), theme: current.theme }
+      return write(next)
+    })
+  }, [write])
 
   const importSaveText = useCallback((raw: string) => {
     const parsed = parseIncomingSave(raw)
@@ -239,6 +249,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       recordReview,
       markMiss,
       recordNight,
+      setTheme,
       reset,
       importSaveText,
     }),
@@ -255,6 +266,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       recordStars,
       reset,
       saveMeta,
+      setTheme,
       start,
     ],
   )

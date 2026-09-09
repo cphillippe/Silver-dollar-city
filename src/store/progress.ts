@@ -26,7 +26,7 @@ import {
 } from '../lib/save'
 import { districtMastery, type StarCount } from '../lib/stars'
 import { isStreakLive, trailDaysRequired } from '../lib/streak'
-import type { Area, Challenge, ProgressState, View } from '../types'
+import type { AppTheme, Area, Challenge, ProgressState, View } from '../types'
 
 export { STORAGE_KEY, emptyProgress }
 export type { SaveMeta }
@@ -464,6 +464,7 @@ export interface ProgressApi {
   recordReview: (event: ReviewEvent) => StarCount
   markMiss: (challengeId: string) => void
   recordNight: (dateKey: string) => void
+  setTheme: (theme: AppTheme) => void
   reset: () => void
   importSaveText: (raw: string) => { ok: true } | { ok: false; error: string }
 }

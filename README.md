@@ -11,7 +11,7 @@ A stranger should know in 60 seconds: this is a **Christian reasoning game**. So
 **Sticky public preview (GitHub Pages):**  
 https://cphillippe.github.io/Silver-dollar-city/
 
-Hard-reload once if you still see the old game (the PWA can keep a cached copy). Live bundle on this branch’s `docs/` is `index-MzZ9UjBA.js` — candy look, Pictures match two-column, Night Watch blasts, Good Samaritan teach-first, Jericho two-pick.
+Hard-reload once if you still see the old game (the PWA can keep a cached copy). Live bundle on this branch’s `docs/` is rebuilt on publish — candy default, Eden → City of Heaven on the Town map, theme picker in Settings.
 
 Pages is on. **One Settings change so it follows `main` instead of the merged PR branch:**
 

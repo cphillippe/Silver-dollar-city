@@ -21,6 +21,84 @@
   --radius: 22px;
   --safe-bottom: max(18px, env(safe-area-inset-bottom));
   --safe-top: max(10px, env(safe-area-inset-top));
+  --body-glow-1: #ff6b9a;
+  --body-glow-2: rgba(90, 124, 255, 0.55);
+  --body-glow-3: rgba(255, 204, 51, 0.32);
+  --body-base-0: #2a0d58;
+  --body-base-1: #1a0840;
+  --body-base-2: #12062e;
+  --city-sky-0: #ffcc33;
+  --city-sky-1: #ff5a7a;
+  --city-sky-2: #c86bff;
+  --city-sky-3: #3a1480;
+  --city-ridge-0: #3dcc7a;
+  --city-ridge-1: #148a48;
+}
+
+html[data-theme='dusk'],
+.app[data-theme='dusk'] {
+  color-scheme: dark;
+  --dusk: #0e1424;
+  --dusk-2: #151c30;
+  --ink: #1a2238;
+  --parchment: #f4ead2;
+  --parchment-2: #e7d6b4;
+  --gold: #e0b34a;
+  --gold-deep: #c4922a;
+  --cedar: #c46b4a;
+  --pine: #6b8f71;
+  --berry: #7f9ec7;
+  --mist: rgba(244, 234, 210, 0.08);
+  --line: rgba(224, 179, 74, 0.28);
+  --shadow: 0 16px 40px rgba(4, 8, 18, 0.42);
+  --lift: 0 10px 28px rgba(4, 8, 18, 0.28);
+  --candy-lip: 0 4px 0 #8a6a22;
+  --candy-shine: inset 0 2px 0 rgba(255, 248, 220, 0.35);
+  --body-glow-1: #3a3858;
+  --body-glow-2: rgba(196, 107, 74, 0.28);
+  --body-glow-3: rgba(224, 179, 74, 0.16);
+  --body-base-0: #1a1828;
+  --body-base-1: #12141c;
+  --body-base-2: #0e100c;
+  --city-sky-0: #1a2240;
+  --city-sky-1: #243044;
+  --city-sky-2: #5a3a24;
+  --city-sky-3: #8a5428;
+  --city-ridge-0: #3a4830;
+  --city-ridge-1: #1c2418;
+}
+
+html[data-theme='parchment'],
+.app[data-theme='parchment'] {
+  color-scheme: light;
+  --dusk: #f7edd8;
+  --dusk-2: #efe4cc;
+  --ink: #3a2418;
+  --parchment: #2a1810;
+  --parchment-2: #4a3424;
+  --gold: #c4922a;
+  --gold-deep: #a07418;
+  --cedar: #c46b4a;
+  --pine: #3d8a52;
+  --berry: #7a4ad4;
+  --mist: rgba(42, 24, 16, 0.08);
+  --line: rgba(196, 146, 42, 0.4);
+  --shadow: 0 16px 36px rgba(80, 50, 20, 0.18);
+  --lift: 0 10px 24px rgba(196, 146, 42, 0.18);
+  --candy-lip: 0 4px 0 #a07418;
+  --candy-shine: inset 0 2px 0 rgba(255, 255, 255, 0.85);
+  --body-glow-1: #ffe7b8;
+  --body-glow-2: rgba(200, 160, 90, 0.28);
+  --body-glow-3: rgba(107, 143, 113, 0.18);
+  --body-base-0: #fff6e8;
+  --body-base-1: #f4ead2;
+  --body-base-2: #e7d6b4;
+  --city-sky-0: #fff8dc;
+  --city-sky-1: #f0d27a;
+  --city-sky-2: #cfe6d2;
+  --city-sky-3: #7f9ec7;
+  --city-ridge-0: #6b8f71;
+  --city-ridge-1: #4a7a52;
 }
 
 * {
@@ -58,10 +136,10 @@ body {
   margin: 0;
   font-family: var(--sans);
   background:
-    radial-gradient(1000px 520px at 50% -8%, #ff6b9a 0%, transparent 52%),
-    radial-gradient(820px 420px at 100% 8%, rgba(90, 124, 255, 0.55), transparent 52%),
-    radial-gradient(640px 340px at 0% 88%, rgba(255, 204, 51, 0.32), transparent 48%),
-    linear-gradient(180deg, #2a0d58, #1a0840 42%, #12062e);
+    radial-gradient(1000px 520px at 50% -8%, var(--body-glow-1) 0%, transparent 52%),
+    radial-gradient(820px 420px at 100% 8%, var(--body-glow-2), transparent 52%),
+    radial-gradient(640px 340px at 0% 88%, var(--body-glow-3), transparent 48%),
+    linear-gradient(180deg, var(--body-base-0), var(--body-base-1) 42%, var(--body-base-2));
   color: var(--parchment);
   line-height: 1.55;
 }
@@ -3619,6 +3697,177 @@ p {
   margin-bottom: 0.15em;
 }
 
+.city-age-track {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 8px;
+}
+
+.city-age-track li {
+  font-size: 0.66rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 204, 51, 0.32);
+  opacity: 0.42;
+}
+
+.city-age-track li.is-done {
+  opacity: 0.82;
+  border-color: rgba(255, 204, 51, 0.55);
+}
+
+.city-age-track li.is-now {
+  opacity: 1;
+  background: linear-gradient(180deg, #fff6b8, #ffcc33);
+  color: #2a1c08;
+  font-weight: 700;
+  border-color: #fff8dc;
+}
+
+.city-age-line {
+  margin: 0 0 6px;
+  font-size: 0.88rem;
+  line-height: 1.35;
+}
+
+.city-overworld.is-age-eden .city-svg {
+  --city-sky-0: #fff3a8;
+  --city-sky-1: #7dffb0;
+  --city-sky-2: #5ad4ff;
+  --city-sky-3: #3dcc7a;
+}
+
+.city-overworld.is-age-village .city-svg {
+  --city-sky-0: #ffe08a;
+  --city-sky-1: #ff9f1a;
+  --city-sky-2: #3dcc7a;
+  --city-sky-3: #2a1070;
+}
+
+.city-overworld.is-age-gold .city-svg {
+  --city-sky-0: #fff6b8;
+  --city-sky-1: #ffcc33;
+  --city-sky-2: #ff9f1a;
+  --city-sky-3: #5a2ab8;
+}
+
+.city-overworld.is-age-heaven .city-svg {
+  --city-sky-0: #fffce8;
+  --city-sky-1: #ffcc33;
+  --city-sky-2: #ffe08a;
+  --city-sky-3: #c86bff;
+}
+
+.city-eden-canopy {
+  fill: #34c46a;
+}
+
+.city-eden-fruit {
+  fill: #ff5a7a;
+}
+
+.city-eden-river {
+  fill: none;
+  stroke: #5ad4ff;
+  stroke-width: 7;
+  stroke-linecap: round;
+  opacity: 0.85;
+}
+
+.city-eden.is-gold,
+.city-eden.is-heaven {
+  opacity: 0.55;
+}
+
+.city-spine-line {
+  fill: none;
+  stroke: rgba(255, 246, 184, 0.28);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-dasharray: 5 8;
+}
+
+.city-spine.is-village .city-spine-line,
+.city-spine.is-town .city-spine-line {
+  stroke: rgba(255, 204, 51, 0.55);
+  stroke-dasharray: 8 6;
+}
+
+.city-spine.is-gold .city-spine-line,
+.city-spine.is-heaven .city-spine-line {
+  stroke: #ffcc33;
+  stroke-width: 5;
+  stroke-dasharray: none;
+  filter: url(#city-glow);
+}
+
+.city-spine-mark circle {
+  fill: rgba(255, 246, 232, 0.18);
+  stroke: #ffcc33;
+  stroke-width: 1.4;
+}
+
+.city-spine-mark.is-lit circle {
+  fill: #ffcc33;
+}
+
+.city-spine-core {
+  fill: #fff6d4;
+}
+
+.city-heaven {
+  opacity: 0.32;
+}
+
+.city-heaven.is-village {
+  opacity: 0.42;
+}
+
+.city-heaven.is-town {
+  opacity: 0.58;
+}
+
+.city-heaven.is-gold {
+  opacity: 0.84;
+}
+
+.city-heaven.is-heaven {
+  opacity: 1;
+}
+
+.city-heaven-gate {
+  fill: none;
+  stroke: #fffce8;
+  stroke-width: 2.2;
+}
+
+.city-heaven-tower,
+.city-heaven-spire {
+  fill: #fff6b8;
+  stroke: #ff9f1a;
+  stroke-width: 1.1;
+}
+
+.city-heaven-label {
+  fill: #fffce8;
+  font-family: var(--sans);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.theme-picks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .city-gift {
   margin: 0 0 10px;
   font-family: var(--serif);
@@ -4083,7 +4332,8 @@ p {
 }
 
 @media (max-height: 430px) {
-  .hub.is-town .night-watch .town-line {
+  .hub.is-town .night-watch .town-line,
+  .hub.is-town .city-age-line {
     display: none;
   }
 }

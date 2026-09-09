@@ -131,6 +131,8 @@ export interface DefenseState {
   lastNight?: string
 }
 
+export type AppTheme = 'candy' | 'dusk' | 'parchment'
+
 export interface ProgressState {
   started: boolean
   completed: string[]
@@ -150,6 +152,8 @@ export interface ProgressState {
   lastReviewPillar?: string
   /** Night Watch — optional on old saves; normalize fills an empty watch. */
   defense: DefenseState
+  /** Visual chrome. Optional on old saves; normalize defaults to candy. */
+  theme: AppTheme
 }
 
 export type View =
