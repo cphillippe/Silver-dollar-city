@@ -14,7 +14,11 @@ import {
   plotFill,
   plotStage,
 } from '../src/lib/city.ts'
-import { dailyForDate } from '../src/content/daily.ts'
+import { DAILY_POOL, dailyForDate } from '../src/content/daily.ts'
+import { highLookout } from '../src/content/highLookout.ts'
+import { observatory } from '../src/content/observatory.ts'
+import { parableHollow } from '../src/content/parableHollow.ts'
+import { witnessBench } from '../src/content/witnessBench.ts'
 import { abilityRange, defendPads, heavenPoint, raidForWave, unlockedWatchAbilities } from '../src/lib/defend.ts'
 import {
   deployFit,
@@ -359,6 +363,25 @@ assert.match(dailySrc, /item\.early/)
 assert.equal(dailyForDate('2026-09-09', 0).early, true)
 assert.equal(dailyForDate('2026-09-10', 1).early, true)
 
+function assertMatchPictures(label, pairs) {
+  for (const pair of pairs) {
+    assert.ok(pair.gem, `${label} ${pair.id} needs a picture gem`)
+  }
+}
+
+for (const area of [parableHollow, witnessBench, observatory, highLookout]) {
+  for (const challenge of area.challenges) {
+    if (challenge.kind === 'match') {
+      assertMatchPictures(challenge.id, challenge.pairs)
+    }
+  }
+}
+for (const item of DAILY_POOL) {
+  if (item.challenge.kind === 'match') {
+    assertMatchPictures(item.challenge.id, item.challenge.pairs)
+  }
+}
+
 const contentFiles = [
   'daily.ts',
   'parableHollow.ts',
@@ -425,6 +448,8 @@ assert.match(matchSrc, /stopPropagation/)
 assert.match(matchSrc, /match-col-label/)
 assert.match(matchSrc, /pair.gem/)
 assert.match(matchSrc, /GemMark/)
+assert.match(matchSrc, /aria-label=\{pair.left\}/)
+assert.match(matchSrc, /pair.gem \? <GemMark gem=\{pair.gem\} \/> : pair.left/)
 assert.doesNotMatch(matchSrc, /pickedLeft/)
 
 const evidenceSrc = readFileSync(

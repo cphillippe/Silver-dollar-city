@@ -28,21 +28,25 @@ export const observatory: Area = {
       pairs: [
         {
           id: 'lambda',
+          gem: 'star',
           left: 'Cosmological constant',
           right: 'Much larger: expansion too fierce for galaxies; much more negative: recollapse',
         },
         {
           id: 'strong',
+          gem: 'coin',
           left: 'Strong nuclear force',
           right: 'Slight shift: familiar chemistry of hydrogen and heavier elements fails',
         },
         {
           id: 'entropy',
+          gem: 'seed',
           left: 'Early-universe entropy',
           right: 'Penrose: the initial low-entropy state is extravagantly special',
         },
         {
           id: 'ratio',
+          gem: 'lamp',
           left: 'Gravity vs. electromagnetism',
           right: 'Stars, long-lived structure, and chemistry sit in a delicate balance',
         },

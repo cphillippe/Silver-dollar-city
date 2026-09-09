@@ -1355,6 +1355,11 @@ img.gem-heart {
   gap: 6px;
 }
 
+.play.is-match .match-card.is-gem .gem {
+  width: 40px;
+  height: 40px;
+}
+
 @keyframes tile-burst {
   0% {
     transform: scale(1) rotate(0);

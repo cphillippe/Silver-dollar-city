@@ -81,13 +81,13 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
               type="button"
               className={`match-card ${pair.gem ? 'is-gem' : ''} ${picked?.side === 'left' && picked.id === pair.id ? 'is-selected' : ''} ${locked.includes(pair.id) ? 'is-locked' : ''} ${flash === pair.id && !locked.includes(pair.id) ? 'is-flash' : ''} ${picked && picked.side === 'right' && !locked.includes(pair.id) ? 'awaiting' : ''}`}
               style={status === 'ok' ? burstStyle(index, 'keep') : undefined}
+              aria-label={pair.left}
               onClick={(event) => {
                 event.stopPropagation()
                 choose('left', pair.id)
               }}
             >
-              {pair.gem ? <GemMark gem={pair.gem} /> : null}
-              {pair.left}
+              {pair.gem ? <GemMark gem={pair.gem} /> : pair.left}
             </button>
           ))}
         </div>

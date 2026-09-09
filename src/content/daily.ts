@@ -115,9 +115,9 @@ export const DAILY_POOL: DailyPuzzle[] = [
       context:
         '1 Corinthians 15:5–6. The New Testament does not rest on one voice. It stacks named people.',
       pairs: [
-        { id: 'cephas', left: 'Cephas (Peter)', right: 'Named first in Paul’s list' },
-        { id: 'twelve', left: 'The Twelve', right: 'The gathered apprentices' },
-        { id: 'crowd', left: 'More than five hundred', right: 'A crowd, many still living then' },
+        { id: 'cephas', gem: 'heart', left: 'Cephas (Peter)', right: 'Named first in Paul’s list' },
+        { id: 'twelve', gem: 'star', left: 'The Twelve', right: 'The gathered apprentices' },
+        { id: 'crowd', gem: 'tree', left: 'More than five hundred', right: 'A crowd, many still living then' },
       ],
       teachOnWrong: 'Paul is listing appearances, not inventing titles. Look at who is named, then snap again.',
       deeper:
@@ -197,9 +197,9 @@ export const DAILY_POOL: DailyPuzzle[] = [
       context:
         'This walk will not pretend chemistry is easy to dismiss. It only asks whether “it happened” is the last word.',
       pairs: [
-        { id: 'cells', left: 'Cells copy information', right: 'Copying is not a small trick' },
-        { id: 'band', left: 'Earth sits in a habitable band', right: 'A narrow kindness of place' },
-        { id: 'science', left: 'We can do science at all', right: 'A mind that fits a cosmos' },
+        { id: 'cells', gem: 'seed', left: 'Cells copy information', right: 'Copying is not a small trick' },
+        { id: 'band', gem: 'tree', left: 'Earth sits in a habitable band', right: 'A narrow kindness of place' },
+        { id: 'science', gem: 'lamp', left: 'We can do science at all', right: 'A mind that fits a cosmos' },
       ],
       teachOnWrong: 'Each pair is a modest next sentence, not a proof. Match the observation to its honest neighbor.',
       deeper:
@@ -417,9 +417,9 @@ export const DAILY_POOL: DailyPuzzle[] = [
       context:
         '“I am the door” is a claim about access — personal, particular. You may refuse it. The town will not lock you in a pew.',
       pairs: [
-        { id: 'door', left: 'A door', right: 'A way in, not a dead end' },
-        { id: 'pasture', left: 'Pasture', right: 'Life on the other side' },
-        { id: 'anyone', left: 'Anyone', right: 'The invitation’s width' },
+        { id: 'door', gem: 'door', left: 'A door', right: 'A way in, not a dead end' },
+        { id: 'pasture', gem: 'tree', left: 'Pasture', right: 'Life on the other side' },
+        { id: 'anyone', gem: 'heart', left: 'Anyone', right: 'The invitation’s width' },
       ],
       teachOnWrong: 'John 10 is an invitation with a particular door and a wide “anyone.” Snap the image to the gift.',
       deeper:
