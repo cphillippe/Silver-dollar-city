@@ -2,7 +2,14 @@ import { APP_VERSION, SAVE_SCHEMA_VERSION, STORAGE_BACKUP_KEY, STORAGE_KEY } fro
 import { localDateKey } from './dates.ts'
 import { emptyDefense } from './defend.ts'
 import { emptyTrace } from './memory.ts'
-import type { AppTheme, DefenseState, MemoryTrace, ProgressState, StarCount } from '../types.ts'
+import type {
+  AppTheme,
+  DefenseState,
+  Learning,
+  MemoryTrace,
+  ProgressState,
+  StarCount,
+} from '../types.ts'
 
 export { STORAGE_KEY, STORAGE_BACKUP_KEY, SAVE_SCHEMA_VERSION }
 
@@ -65,6 +72,7 @@ export function emptyProgress(): ProgressState {
     elaborations: {},
     defense: emptyDefense(),
     theme: 'candy',
+    learnings: [],
   }
 }
 
@@ -197,6 +205,7 @@ export function normalizeProgress(parsed: Partial<ProgressState> | ProgressState
     lastReviewPillar: isSafeId(parsed.lastReviewPillar) ? parsed.lastReviewPillar : undefined,
     defense: asDefense(parsed.defense),
     theme: asTheme(parsed.theme),
+    learnings: asLearningArray(parsed.learnings),
   }
   base.memory = migrateMemory({ ...base, memory: parsed.memory ?? {} })
   return base
@@ -215,6 +224,32 @@ function asDefense(value: unknown): DefenseState {
     nights,
     lastNight: isDateKey(value.lastNight) ? value.lastNight : undefined,
   }
+}
+
+function asLearningArray(value: unknown): Learning[] {
+  if (!Array.isArray(value)) return []
+  const next: Learning[] = []
+  for (const raw of value) {
+    if (next.length >= SAVE_MAX_ARRAY) break
+    if (!isPlainObject(raw)) continue
+    if (!isSafeId(raw.id) || isDangerousKey(raw.id)) continue
+    const claim = typeof raw.claim === 'string' ? clipString(raw.claim, 280) : ''
+    if (!claim) continue
+    next.push({
+      id: raw.id,
+      claim,
+      reason: typeof raw.reason === 'string' ? clipString(raw.reason, 280) : '',
+      source: typeof raw.source === 'string' ? clipString(raw.source, 120) : '',
+      anchor: typeof raw.anchor === 'string' ? clipString(raw.anchor, 180) : '',
+      picture:
+        typeof raw.picture === 'string' && raw.picture.length <= 16
+          ? (raw.picture as Learning['picture'])
+          : undefined,
+      toolId: isSafeId(raw.toolId) ? raw.toolId : undefined,
+      acquiredAt: isDateKey(raw.acquiredAt) ? raw.acquiredAt : '',
+    })
+  }
+  return next
 }
 
 function isEnvelope(value: unknown): value is SaveEnvelope {

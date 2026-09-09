@@ -15,7 +15,8 @@ import {
   plotStage,
 } from '../src/lib/city.ts'
 import { dailyForDate } from '../src/content/daily.ts'
-import { defendPads, heavenPoint, unlockedWatchAbilities } from '../src/lib/defend.ts'
+import { defendPads, heavenPoint, raidForWave, unlockedWatchAbilities } from '../src/lib/defend.ts'
+import { deployFit, toolForEvidence, WATCH_TOOLS } from '../src/lib/watchTools.ts'
 
 const progressSrc = readFileSync(
   new URL('../src/store/progress.ts', import.meta.url),
@@ -664,6 +665,8 @@ assert.match(defendSrc, /Turn them toward heaven/)
 assert.match(defendSrc, /unlockedWatchAbilities/)
 assert.match(defendSrc, /heavenPoint/)
 assert.match(defendSrc, /AbilityMark/)
+assert.match(defendSrc, /deployFit/)
+assert.match(defendSrc, /raidForWave/)
 assert.match(defendSrc, /WATCH_ABILITY_LABEL/)
 assert.match(defendSrc, /defend-heaven-path/)
 assert.match(defendSrc, /Toward heaven/)
@@ -686,6 +689,7 @@ assert.match(
 assert.match(hubSrc, /night-watch-glow/)
 assert.match(hubSrc, /night-watch-gems/)
 assert.match(hubSrc, /AbilityMark/)
+assert.match(hubSrc, /Learn · hold · deploy/)
 assert.match(hubSrc, /is-held/)
 assert.match(hubSrc, /held\./)
 assert.match(
@@ -717,5 +721,25 @@ assert.match(gemSrc, /assets\/gems\/logic\.png/)
 assert.match(gemSrc, /assets\/gems\/reason\.png/)
 assert.match(gemSrc, /assets\/gems\/science\.png/)
 assert.match(gemSrc, /AbilityMark/)
+
+assert.equal(WATCH_TOOLS.length, 4)
+assert.equal(WATCH_TOOLS[0].id, 'love')
+assert.equal(deployFit('love', 'skeptic'), 'match')
+assert.equal(deployFit('love', 'physical'), 'weak')
+assert.equal(deployFit('science', 'physical'), 'match')
+assert.equal(raidForWave(0, 0).kind !== 'physical', true)
+assert.equal(raidForWave(2, 5).kind.length > 0, true)
+assert.match(
+  readFileSync(new URL('../src/components/TeachUnlock.tsx', import.meta.url), 'utf8'),
+  /Hold this line to deploy/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/Journal.tsx', import.meta.url), 'utf8'),
+  /learning-store/,
+)
+assert.match(cssSrc, /learning-store/)
+assert.equal(toolForEvidence('ph-road')?.id, 'love')
+assert.equal(toolForEvidence('wb-creed')?.id, 'logic')
+assert.equal(toolForEvidence('ob-tuning')?.id, 'science')
 
 console.log('check-city: ok')

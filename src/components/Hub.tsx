@@ -52,6 +52,7 @@ export function Hub({ onNavigate }: HubProps) {
           <div>
             <p className="eyebrow">{progress.defense.cleared ? 'Still watched' : 'Night Watch'}</p>
             <h2>Hold the night</h2>
+            <p className="quiet">Learn · hold · deploy</p>
             <p className="town-line">
               Held lines turn the night toward heaven
               {progress.defense.cleared

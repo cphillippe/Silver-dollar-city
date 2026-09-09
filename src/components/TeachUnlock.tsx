@@ -1,5 +1,6 @@
 import type { Challenge, SequenceItem } from '../types'
 import type { EvidenceBrief } from '../content/evidence'
+import { toolForEvidence } from '../lib/watchTools'
 
 interface TeachUnlockProps {
   brief: EvidenceBrief
@@ -23,6 +24,9 @@ export function TeachUnlock({ brief, kind, onUnlock, unlock, beats }: TeachUnloc
       <p className="eyebrow">{brief.source}</p>
       <p className="recall-line rehearse-stem">{brief.claim}</p>
       <p className="teach-reason">{brief.reason}</p>
+      <p className="quiet">
+        Hold this line to deploy {toolForEvidence(brief.id)?.label ?? 'Love'} on the night road.
+      </p>
       {beats && beats.length > 0 ? (
         <ol className="teach-beats">
           {beats.map((beat) => (
