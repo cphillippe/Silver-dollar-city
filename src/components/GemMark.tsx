@@ -1,31 +1,32 @@
 import type { GemId } from '../types'
+import abilityLogic from '../assets/gems/ability-logic.png'
+import abilityLove from '../assets/gems/ability-love.png'
+import abilityReason from '../assets/gems/ability-reason.png'
+import abilityScience from '../assets/gems/ability-science.png'
 import coin from '../assets/gems/coin.svg'
 import door from '../assets/gems/door.svg'
-import logic from '../assets/gems/logic.png'
-import love from '../assets/gems/love.png'
-import reason from '../assets/gems/reason.png'
-import science from '../assets/gems/science.png'
+import heart from '../assets/gems/heart.png'
 import seed from '../assets/gems/seed.png'
 import tree from '../assets/gems/tree.svg'
 
 export type WatchAbilityId = 'love' | 'logic' | 'reason' | 'science'
 
 const GEM_SRC: Record<GemId, string> = {
-  lamp: science,
+  lamp: abilityScience,
   seed,
-  heart: love,
-  star: logic,
-  cup: reason,
+  heart,
+  star: abilityLogic,
+  cup: abilityReason,
   tree,
   door,
   coin,
 }
 
 const ABILITY_SRC: Record<WatchAbilityId, string> = {
-  love,
-  logic,
-  reason,
-  science,
+  love: abilityLove,
+  logic: abilityLogic,
+  reason: abilityReason,
+  science: abilityScience,
 }
 
 export function GemMark({

@@ -1283,13 +1283,16 @@ span.gem:not(.gem-art)::after {
 
 img.gem-art {
   display: block;
-  object-fit: cover;
+  object-fit: contain;
   border-radius: 9px;
-  background: #2a0d58;
+  background: transparent;
   transform: none;
-  box-shadow:
-    0 3px 0 rgba(40, 8, 70, 0.3),
-    0 0 10px rgba(255, 204, 51, 0.45);
+  box-shadow: none;
+}
+
+img.gem-ability,
+img.gem-heart {
+  border-radius: 50%;
 }
 
 .gem-sm {
@@ -4621,8 +4624,9 @@ html[data-theme='dusk'] .hub.is-town .night-watch {
 }
 
 .night-watch-gems .gem-sm {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
 }
 
 .hub.is-town .night-watch.is-held {
@@ -5120,6 +5124,13 @@ html[data-theme='dusk'] .hub.is-town .night-watch {
   font-weight: 650;
 }
 
+.defend-raider-call text.defend-raider-kind {
+  fill: #ffcc33;
+  font-size: 5.4px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
 .defend-go {
   animation: defend-go 1.2s ease-in-out infinite;
   box-shadow: 0 0 22px rgba(224, 179, 74, 0.45);
@@ -5172,24 +5183,41 @@ html[data-theme='dusk'] .hub.is-town .night-watch {
 }
 
 .defend-abilities {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
-  justify-content: center;
-  margin: 8px 0 4px;
+  justify-items: stretch;
+  margin: 8px auto 4px;
+  max-width: 340px;
+  width: 100%;
 }
 
 .defend-ability {
-  display: inline-flex;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 6px;
-  border-radius: 999px;
+  gap: 4px;
+  border-radius: 18px;
   border: 2px solid rgba(255, 204, 51, 0.45);
   background: linear-gradient(180deg, rgba(58, 20, 128, 0.7), rgba(26, 8, 64, 0.85));
   color: var(--parchment);
-  padding: 8px 12px;
+  padding: 8px 8px 10px;
   font-weight: 650;
   font-size: 0.82rem;
+}
+
+.defend-ability .gem-ability {
+  width: 52px;
+  height: 52px;
+}
+
+.defend-ability-claim {
+  margin: 0;
+  font-size: 0.68rem;
+  line-height: 1.25;
+  font-weight: 500;
+  text-align: center;
+  max-width: 100%;
 }
 
 .defend-ability.is-on {
@@ -5206,11 +5234,6 @@ html[data-theme='dusk'] .hub.is-town .night-watch {
 
 .defend-ability .gem {
   pointer-events: none;
-}
-
-.defend-ability .gem-art {
-  width: 22px;
-  height: 22px;
 }
 
 .defend-tip {

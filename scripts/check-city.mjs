@@ -16,7 +16,7 @@ import {
 } from '../src/lib/city.ts'
 import { dailyForDate } from '../src/content/daily.ts'
 import { defendPads, heavenPoint, raidForWave, unlockedWatchAbilities } from '../src/lib/defend.ts'
-import { deployFit, toolForEvidence, WATCH_TOOLS } from '../src/lib/watchTools.ts'
+import { deployFit, toolForEvidence, WALKER_LABEL, WATCH_TOOLS } from '../src/lib/watchTools.ts'
 
 const progressSrc = readFileSync(
   new URL('../src/store/progress.ts', import.meta.url),
@@ -667,6 +667,9 @@ assert.match(defendSrc, /heavenPoint/)
 assert.match(defendSrc, /AbilityMark/)
 assert.match(defendSrc, /deployFit/)
 assert.match(defendSrc, /raidForWave/)
+assert.match(defendSrc, /WALKER_LABEL/)
+assert.match(defendSrc, /learningForTool/)
+assert.match(defendSrc, /kind: 'encode'/)
 assert.match(defendSrc, /WATCH_ABILITY_LABEL/)
 assert.match(defendSrc, /defend-heaven-path/)
 assert.match(defendSrc, /Toward heaven/)
@@ -716,10 +719,11 @@ assert.match(sequenceSrc, /progressive && !live/)
 
 const gemSrc = readFileSync(new URL('../src/components/GemMark.tsx', import.meta.url), 'utf8')
 assert.match(gemSrc, /gem-art/)
-assert.match(gemSrc, /assets\/gems\/love\.png/)
-assert.match(gemSrc, /assets\/gems\/logic\.png/)
-assert.match(gemSrc, /assets\/gems\/reason\.png/)
-assert.match(gemSrc, /assets\/gems\/science\.png/)
+assert.match(gemSrc, /assets\/gems\/heart\.png/)
+assert.match(gemSrc, /assets\/gems\/ability-love\.png/)
+assert.match(gemSrc, /assets\/gems\/ability-logic\.png/)
+assert.match(gemSrc, /assets\/gems\/ability-reason\.png/)
+assert.match(gemSrc, /assets\/gems\/ability-science\.png/)
 assert.match(gemSrc, /AbilityMark/)
 
 assert.equal(WATCH_TOOLS.length, 4)
@@ -740,6 +744,8 @@ assert.match(
 assert.match(cssSrc, /learning-store/)
 assert.equal(toolForEvidence('ph-road')?.id, 'love')
 assert.equal(toolForEvidence('wb-creed')?.id, 'logic')
-assert.equal(toolForEvidence('ob-tuning')?.id, 'science')
+assert.equal(WALKER_LABEL.skeptic, 'Skeptic')
+assert.equal(WALKER_LABEL.physical, 'Physical')
+assert.match(cssSrc, /\.defend-abilities \{[\s\S]*?grid-template-columns: 1fr 1fr/)
 
 console.log('check-city: ok')
