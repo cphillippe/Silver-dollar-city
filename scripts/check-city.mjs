@@ -672,6 +672,10 @@ assert.equal(
   true,
 )
 assert.equal(heavenPoint({ x: 0, y: 0 }, 1).x, 572)
+assert.match(
+  readFileSync(new URL('../src/lib/defend.ts', import.meta.url), 'utf8'),
+  /abilityRange/,
+)
 assert.match(hubSrc, /night-watch-glow/)
 assert.match(hubSrc, /is-held/)
 assert.match(hubSrc, /held\./)

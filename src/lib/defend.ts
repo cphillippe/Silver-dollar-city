@@ -153,6 +153,11 @@ export function heavenPoint(
   }
 }
 
+export function abilityRange(ability: WatchAbility, stage: CityStage): number {
+  if (ability === 'love') return 640
+  return towerRange(stage)
+}
+
 export function heavenSpeed(): number {
   return waveSpeed() * 1.7
 }
