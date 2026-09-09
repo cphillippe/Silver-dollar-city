@@ -32,6 +32,7 @@ import { useJuiceHandoff } from '../lib/juice'
 import { CITY_PLOTS, type CityPlotId } from '../lib/city'
 import { useProgress } from '../store/progress'
 import type { View, WalkerKind } from '../types'
+import { walkerSrc } from './Avatar'
 import { AbilityMark } from './GemMark'
 import { RecallGate } from './RecallGate'
 import { TeachUnlock } from './TeachUnlock'
@@ -88,6 +89,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const [shake, setShake] = useState(false)
   const [leakFlash, setLeakFlash] = useState(false)
   const [won, setWon] = useState(false)
+  const [firing, setFiring] = useState(false)
   const comboRef = useRef(0)
   const [recalled, setRecalled] = useState(false)
   const [missedNight, setMissedNight] = useState(false)
@@ -248,7 +250,9 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     }
     live.current.cool[id] = now
     setFlash(id)
-    window.setTimeout(() => setFlash(null), 220)
+    setFiring(true)
+    window.setTimeout(() => setFlash(null), 280)
+    window.setTimeout(() => setFiring(false), 220)
     if (!best) return
     const to = raiderAt(best)
     const fit = deployFit(using, best.kind)
@@ -342,7 +346,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
 
   return (
     <main
-      className={`defend-page ${taught ? 'is-puzzle' : 'is-teach'} ${arming ? 'is-arming' : ''} ${won ? 'is-win' : ''} ${shake ? 'is-shake' : ''} ${leakFlash ? 'is-leak' : ''}`}
+      className={`defend-page ${taught ? 'is-puzzle' : 'is-teach'} ${arming ? 'is-arming' : ''} ${won ? 'is-win' : ''} ${shake ? 'is-shake' : ''} ${leakFlash ? 'is-leak' : ''} ${firing ? 'is-firing' : ''}`}
       aria-label={WATCH_TITLE}
     >
       {!taught ? (
@@ -459,6 +463,9 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                   <stop offset="0%" stopColor="#ffcc33" stopOpacity="0.75" />
                   <stop offset="100%" stopColor="#ff5a7a" stopOpacity="0" />
                 </radialGradient>
+                <clipPath id="defend-face-clip" clipPathUnits="objectBoundingBox">
+                  <circle cx="0.5" cy="0.5" r="0.36" />
+                </clipPath>
                 <filter id="defend-glow" x="-50%" y="-50%" width="200%" height="200%">
                   <feGaussianBlur stdDeviation="4" result="b" />
                   <feMerge>
@@ -612,9 +619,23 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                     className={`defend-raider ${raider.turned ? 'is-turned' : ''}`}
                     transform={`translate(${at.x} ${at.y})`}
                   >
-                    <ellipse className="defend-raider-shadow" cy="10" rx="12" ry="4.2" />
-                    <path className="defend-raider-cloak" d="M-10 11 Q0 15 10 11 L5 -2 Q0 -11 -5 -2 Z" />
-                    <circle className="defend-raider-head" cy="-9" r="5.6" />
+                    <ellipse className="defend-raider-shadow" cy="12" rx="13" ry="4.6" />
+                    <image
+                      className="defend-raider-face"
+                      href={walkerSrc(raider.kind)}
+                      x="-18"
+                      y="-24"
+                      width="36"
+                      height="36"
+                      clipPath="url(#defend-face-clip)"
+                    />
+                    {raider.turned ? (
+                      <g className="defend-heaven-cheer" aria-hidden>
+                        <circle className="defend-cheer-spark" cx="-10" cy="-18" r="2.2" />
+                        <circle className="defend-cheer-spark is-2" cx="12" cy="-20" r="1.8" />
+                        <circle className="defend-cheer-spark is-3" cx="2" cy="-26" r="1.4" />
+                      </g>
+                    ) : null}
                     <g className="defend-raider-call">
                       <rect x="-40" y="-42" width="80" height="28" rx="8" />
                       <text className="defend-raider-kind" y="-32" textAnchor="middle">
@@ -666,7 +687,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                 <button
                   key={tool.id}
                   type="button"
-                  className={`defend-ability ${ability === tool.id ? 'is-on' : ''} ${open ? '' : 'is-locked'}`}
+                  className={`defend-ability ${ability === tool.id ? 'is-on' : ''} ${open ? '' : 'is-locked'} ${firing && ability === tool.id ? 'is-firing' : ''}`}
                   disabled={!open}
                   aria-pressed={ability === tool.id}
                   onClick={() => {

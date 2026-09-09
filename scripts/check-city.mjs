@@ -900,7 +900,39 @@ assert.match(
   /\.defend-abilities \{[\s\S]*?z-index: 3/,
 )
 assert.match(cssSrc, /height: min\(34vh, 220px\)/)
+assert.match(cssSrc, /defend-ability-pop/)
+assert.match(cssSrc, /city-tap/)
+assert.match(cssSrc, /lantern-breathe/)
 assert.match(defendSrc, /preserveAspectRatio="xMidYMid meet"/)
+assert.match(defendSrc, /walkerSrc/)
+assert.match(
+  readFileSync(new URL('../src/components/Avatar.tsx', import.meta.url), 'utf8'),
+  /portrait-river/,
+)
+assert.doesNotMatch(
+  readFileSync(new URL('../src/components/Avatar.tsx', import.meta.url), 'utf8'),
+  /HairCap/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/CityMap.tsx', import.meta.url), 'utf8'),
+  /is-tapped/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/Welcome.tsx', import.meta.url), 'utf8'),
+  /is-alive/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8'),
+  /is-inhabited/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/CityMap.tsx', import.meta.url), 'utf8'),
+  /city-welcome-folk/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/CityMap.tsx', import.meta.url), 'utf8'),
+  /is-alive/,
+)
 assert.match(cssSrc, /defend-ability-tier/)
 assert.match(
   readFileSync(new URL('../src/lib/watchTools.ts', import.meta.url), 'utf8'),

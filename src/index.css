@@ -267,10 +267,24 @@ p {
   gap: 8px 12px;
   padding: calc(12px + var(--safe-top)) 14px 12px;
   position: relative;
-  backdrop-filter: blur(18px);
-  background: linear-gradient(180deg, rgba(52, 16, 110, 0.92), rgba(28, 10, 64, 0.78));
-  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(10px);
+  background: linear-gradient(180deg, rgba(42, 13, 88, 0.55), rgba(26, 8, 64, 0.18));
+  border-bottom: 1px solid transparent;
   z-index: 5;
+}
+
+.app.is-town .topbar {
+  background: linear-gradient(180deg, rgba(42, 13, 88, 0.16), transparent);
+  backdrop-filter: blur(4px);
+  border-bottom-color: transparent;
+}
+
+.app.is-town .topbar nav button {
+  opacity: 0.78;
+}
+
+.app.is-town .topbar nav button.is-active {
+  opacity: 1;
 }
 
 .brand {
@@ -2805,10 +2819,13 @@ img.gem-heart {
   line-height: 0;
 }
 
-.avatar svg {
+.avatar svg,
+.avatar img {
   width: 100%;
   height: 100%;
   display: block;
+  object-fit: cover;
+  border-radius: 50%;
   filter: drop-shadow(0 4px 10px rgba(20, 16, 10, 0.28));
 }
 
@@ -2897,6 +2914,38 @@ img.gem-heart {
 
 .welcome-cast .avatar {
   filter: drop-shadow(0 0 18px rgba(255, 204, 51, 0.45));
+}
+
+.welcome.is-alive .welcome-cast figure:first-child .avatar {
+  animation: city-bob 2.3s ease-in-out infinite;
+}
+
+.welcome.is-alive .welcome-cast figure:last-child .avatar {
+  animation: city-bob 2.6s ease-in-out 0.3s infinite;
+}
+
+.welcome.is-alive .welcome-lantern {
+  animation: lantern-breathe 1.6s ease-in-out infinite;
+}
+
+.welcome.is-alive .welcome-sky {
+  animation: sky-drift 12s ease-in-out infinite, lantern-breathe 7s ease-in-out infinite;
+}
+
+@keyframes lantern-breathe {
+  0%,
+  100% {
+    filter: brightness(1);
+    box-shadow:
+      0 0 16px #ffcc33,
+      0 0 36px rgba(255, 90, 122, 0.7);
+  }
+  50% {
+    filter: brightness(1.18);
+    box-shadow:
+      0 0 22px #fff6b8,
+      0 0 48px rgba(255, 204, 51, 0.85);
+  }
 }
 
 .welcome-cast figcaption {
@@ -3668,8 +3717,27 @@ img.gem-heart {
   }
 }
 
-.city-overworld.is-alive .city-folk {
+.city-overworld.is-alive .city-folk,
+.city-overworld.is-alive .city-welcome-folk .city-portrait {
   animation: city-bob 2.1s ease-in-out infinite;
+}
+
+.city-overworld.is-alive .city-welcome-folk foreignObject:nth-of-type(2) .city-portrait {
+  animation-delay: 0.25s;
+}
+
+.city-overworld.is-alive .city-welcome-folk foreignObject:nth-of-type(3) .city-portrait {
+  animation-delay: 0.5s;
+}
+
+.city-overworld.is-alive .city-folk.is-lit .city-portrait {
+  animation: city-cheer-glow 1.8s ease-in-out infinite;
+}
+
+.city-plot.is-tapped {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: city-tap 0.34s cubic-bezier(0.2, 1.45, 0.3, 1);
 }
 
 .city-folk.is-waving,
@@ -3753,8 +3821,29 @@ img.gem-heart {
   animation-duration: 0.5s;
 }
 
-.city-walker {
-  fill: #ffe08a;
+@keyframes city-tap {
+  0% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  40% {
+    transform: scale(1.1);
+    filter: brightness(1.28);
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+}
+
+@keyframes city-cheer-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 6px rgba(255, 224, 138, 0.35));
+  }
+  50% {
+    filter: drop-shadow(0 0 14px rgba(255, 224, 138, 0.85));
+  }
 }
 
 @keyframes city-wave {
@@ -3778,7 +3867,10 @@ img.gem-heart {
 .city-walker {
   fill: #ffe08a;
   stroke: none;
-  opacity: 0.9;
+  opacity: 1;
+  transform-box: fill-box;
+  transform-origin: center;
+  filter: drop-shadow(0 2px 5px rgba(20, 8, 40, 0.5));
 }
 
 @keyframes city-stroll-a {
@@ -3853,7 +3945,7 @@ img.gem-heart {
 
 .welcome.is-onescreen .city-overworld.is-poster .city-svg {
   margin: 0 0 6px;
-  max-height: 20vh;
+  max-height: 26vh;
 }
 
 .city-overworld.is-poster .city-plot {
@@ -4417,6 +4509,28 @@ html[data-theme='dusk'] .hub.is-town .night-watch {
   overflow-x: hidden;
 }
 
+.hub.is-inhabited .city-legend {
+  background: linear-gradient(180deg, rgba(58, 20, 128, 0.55), rgba(26, 8, 64, 0.38));
+  border-color: rgba(255, 204, 51, 0.28);
+  box-shadow: 0 8px 22px rgba(20, 8, 40, 0.2);
+}
+
+.hub.is-inhabited .city-svg {
+  box-shadow: 0 0 36px rgba(255, 180, 70, 0.16);
+}
+
+.hub.is-inhabited .ad-slot {
+  opacity: 0.46;
+  min-height: 48px;
+  padding: 8px 12px;
+  border-style: dotted;
+}
+
+.hub.is-inhabited .street-drawer {
+  border-color: rgba(255, 204, 51, 0.22);
+  background: rgba(26, 8, 64, 0.28);
+}
+
 .hub.is-town .city-overworld {
   flex: 0 0 auto;
   min-height: 0;
@@ -4775,6 +4889,10 @@ html[data-theme='dusk'] .hub.is-town .night-watch {
   overflow: hidden;
 }
 
+.defend-page.is-firing .defend-frame {
+  filter: brightness(1.08);
+}
+
 .defend-page.is-arming {
   pointer-events: none;
 }
@@ -5038,10 +5156,10 @@ html[data-theme='dusk'] .hub.is-town .night-watch {
 
 .defend-beam {
   stroke: #fff8d4;
-  stroke-width: 5.5;
+  stroke-width: 7;
   stroke-linecap: round;
-  filter: url(#defend-glow);
-  animation: defend-beam 0.28s ease-out both;
+  filter: url(#defend-glow) drop-shadow(0 0 10px #ffcc33);
+  animation: defend-beam 0.34s ease-out both;
 }
 
 .defend-impact {
@@ -5253,8 +5371,43 @@ html[data-theme='dusk'] .hub.is-town .night-watch {
   }
 }
 
+@keyframes defend-ability-pop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.08);
+    filter: brightness(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 .defend-raider-shadow {
   fill: rgba(10, 8, 6, 0.45);
+}
+
+.defend-raider-face {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.defend-raider.is-turned .defend-raider-face {
+  filter: brightness(1.2) drop-shadow(0 0 8px #ffcc33);
+}
+
+.defend-cheer-spark {
+  fill: #fff6b8;
+  animation: defend-puff 0.55s ease-out both;
+}
+
+.defend-cheer-spark.is-2 {
+  animation-delay: 0.06s;
+}
+
+.defend-cheer-spark.is-3 {
+  animation-delay: 0.12s;
 }
 
 .defend-raider-cloak {
@@ -5298,6 +5451,11 @@ html[data-theme='dusk'] .hub.is-town .night-watch {
   flex: 0 0 auto;
   position: relative;
   z-index: 3;
+  isolation: isolate;
+  padding: 8px 6px 4px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(26, 8, 64, 0.94), rgba(18, 6, 46, 0.98));
+  box-shadow: 0 -10px 24px rgba(18, 6, 46, 0.55);
 }
 
 .defend-ability {
@@ -5341,6 +5499,10 @@ html[data-theme='dusk'] .hub.is-town .night-watch {
   color: #2a1c08;
   border-color: #fff8dc;
   box-shadow: var(--candy-lip), var(--candy-shine);
+}
+
+.defend-ability.is-firing {
+  animation: defend-ability-pop 0.22s cubic-bezier(0.2, 1.5, 0.3, 1);
 }
 
 .defend-ability.is-locked {
