@@ -434,8 +434,8 @@ export const EVIDENCE: Record<string, EvidenceBrief> = {
   ),
   'td-watch': brief(
     'td-watch',
-    'The town holds when a true line still has a house.',
-    'Cheap claims walk past the wounded; a kept claim stays and pays the inn.',
+    'A true line can turn a cheap claim toward heaven.',
+    'Love, logic, reason, and science you have kept can divert a false step up the ridge.',
     'Luke 10:25–37 · the night road',
     'A town holds because the streets are pretty.',
     'Defense is shouting until no one asks.',

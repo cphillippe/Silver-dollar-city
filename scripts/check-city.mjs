@@ -15,7 +15,7 @@ import {
   plotStage,
 } from '../src/lib/city.ts'
 import { dailyForDate } from '../src/content/daily.ts'
-import { defendPads } from '../src/lib/defend.ts'
+import { defendPads, heavenPoint, unlockedWatchAbilities } from '../src/lib/defend.ts'
 
 const progressSrc = readFileSync(
   new URL('../src/store/progress.ts', import.meta.url),
@@ -628,7 +628,7 @@ assert.match(progressSrc, /export function nextWalkView/)
 assert.deepEqual(defendPads(empty), ['porch'])
 assert.match(hubSrc, /Hold the night/)
 assert.match(hubSrc, /night-watch/)
-assert.match(hubSrc, /Built lots hold lamps/)
+assert.match(hubSrc, /Held lines turn the night toward heaven/)
 assert.doesNotMatch(hubSrc, /standing lot/i)
 const defendCopy = readFileSync(
   new URL('../src/content/defend.ts', import.meta.url),
@@ -654,8 +654,24 @@ assert.match(defendSrc, /defend-porch/)
 assert.match(defendSrc, /defend-blast/)
 assert.match(defendSrc, /Night held!/)
 assert.match(defendSrc, /comboRef/)
-assert.match(defendCopy, /Plant lamps\. Blast cheap lines\./)
+assert.match(defendSrc, /Turn them toward heaven/)
+assert.match(defendSrc, /unlockedWatchAbilities/)
+assert.match(defendSrc, /heavenPoint/)
+assert.match(defendSrc, /WATCH_ABILITY_LABEL/)
+assert.match(defendSrc, /defend-heaven-path/)
+assert.match(defendSrc, /Toward heaven/)
+assert.match(defendCopy, /Plant love\. Turn cheap lines toward heaven\./)
 assert.doesNotMatch(defendCopy, /Cheap lines walk the Jericho road/)
+assert.deepEqual(unlockedWatchAbilities(empty), ['love'])
+assert.equal(
+  unlockedWatchAbilities({ ...empty, held: ['wb-creed'] }).includes('logic'),
+  true,
+)
+assert.equal(
+  unlockedWatchAbilities({ ...empty, completed: ['ob-tuning'] }).includes('science'),
+  true,
+)
+assert.equal(heavenPoint({ x: 0, y: 0 }, 1).x, 572)
 assert.match(hubSrc, /night-watch-glow/)
 assert.match(hubSrc, /is-held/)
 assert.match(hubSrc, /held\./)

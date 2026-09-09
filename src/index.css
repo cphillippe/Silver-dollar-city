@@ -4766,6 +4766,41 @@ html[data-theme='dusk'] .hub.is-town .night-watch {
   filter: url(#defend-glow);
 }
 
+.defend-heaven-path {
+  fill: none;
+  stroke: #ffcc33;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: 7 8;
+  opacity: 0.85;
+  filter: url(#defend-glow);
+}
+
+.defend-heaven-glow {
+  fill: url(#defend-moon-glow);
+}
+
+.defend-heaven-wall {
+  fill: #fff6b8;
+  stroke: #ff9f1a;
+  stroke-width: 1.2;
+}
+
+.defend-heaven-gate {
+  fill: none;
+  stroke: #fffce8;
+  stroke-width: 2;
+}
+
+.defend-heaven-label {
+  fill: #fffce8;
+  font-size: 9px;
+  font-family: var(--sans);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
 .defend-gate path {
   fill: none;
   stroke: #ffcc33;
@@ -5071,6 +5106,61 @@ html[data-theme='dusk'] .hub.is-town .night-watch {
   fill: #c46b4a;
   stroke: #fff1c8;
   stroke-width: 1.2;
+}
+
+.defend-raider.is-turned .defend-raider-cloak {
+  fill: #ffcc33;
+  stroke: #fffce8;
+}
+
+.defend-raider.is-turned .defend-raider-head {
+  fill: #fff6b8;
+}
+
+.defend-raider.is-turned .defend-raider-call rect {
+  fill: #fff6b8;
+  stroke: #ffcc33;
+}
+
+.defend-raider.is-turned .defend-raider-call text {
+  fill: #2a1c08;
+}
+
+.defend-abilities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin: 8px 0 4px;
+}
+
+.defend-ability {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 204, 51, 0.45);
+  background: linear-gradient(180deg, rgba(58, 20, 128, 0.7), rgba(26, 8, 64, 0.85));
+  color: var(--parchment);
+  padding: 8px 12px;
+  font-weight: 650;
+  font-size: 0.82rem;
+}
+
+.defend-ability.is-on {
+  background: linear-gradient(180deg, #fff6b8, #ffcc33 55%, #ff9f1a);
+  color: #2a1c08;
+  border-color: #fff8dc;
+  box-shadow: var(--candy-lip), var(--candy-shine);
+}
+
+.defend-ability.is-locked {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.defend-ability .gem {
+  pointer-events: none;
 }
 
 .defend-tip {

@@ -9,20 +9,29 @@ import {
   DEFEND_HEARTS,
   DEFEND_PATH,
   DEFEND_WAVE_SIZE,
+  HEAVEN_POINT,
   RAID_LINES,
+  WATCH_ABILITIES,
+  WATCH_ABILITY_GEM,
+  WATCH_ABILITY_LABEL,
   defendPads,
   dist,
+  heavenPoint,
+  heavenSpeed,
   padStage,
   pathPoint,
   towerCooldown,
   towerRange,
+  unlockedWatchAbilities,
   waveSpawnEvery,
   waveSpeed,
+  type WatchAbility,
 } from '../lib/defend'
 import { useJuiceHandoff } from '../lib/juice'
 import { CITY_PLOTS, type CityPlotId } from '../lib/city'
 import { useProgress } from '../store/progress'
 import type { View } from '../types'
+import { GemMark } from './GemMark'
 import { RecallGate } from './RecallGate'
 import { TeachUnlock } from './TeachUnlock'
 import { TownReturn } from './TownReturn'
@@ -36,6 +45,9 @@ interface Raider {
   id: number
   t: number
   text: string
+  turned?: WatchAbility
+  from?: { x: number; y: number }
+  heavenT?: number
 }
 
 interface Shot {
@@ -57,6 +69,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const today = localDateKey()
   const brief = evidenceFor(DEFEND_BRIEF_ID)
   const pads = defendPads(progress)
+  const unlocked = unlockedWatchAbilities(progress)
+  const [ability, setAbility] = useState<WatchAbility>(() => unlocked[0] ?? 'love')
   const [taught, setTaught] = useState(false)
   const [arming, setArming] = useState(false)
   const [phase, setPhase] = useState<'plant' | 'wave' | 'lost'>('plant')
@@ -129,12 +143,18 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       const dt = Math.min(0.05, (now - last) / 1000)
       last = now
       spawnAt += dt
-      const next = live.current.raiders.map((item) => ({
-        ...item,
-        t: item.t + waveSpeed() * dt,
-      }))
+      const next = live.current.raiders.map((item) => {
+        if (item.turned) {
+          return { ...item, heavenT: (item.heavenT ?? 0) + heavenSpeed() * dt }
+        }
+        return { ...item, t: item.t + waveSpeed() * dt }
+      })
       let leaked = 0
       const walking = next.filter((item) => {
+        if (item.turned) {
+          if ((item.heavenT ?? 0) >= 1) return false
+          return true
+        }
         if (item.t < 1) return true
         leaked += 1
         return false
@@ -195,6 +215,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     })
   }
 
+  function raiderAt(raider: Raider) {
+    if (raider.turned && raider.from) return heavenPoint(raider.from, raider.heavenT ?? 0)
+    return pathPoint(raider.t)
+  }
+
   function fire(id: CityPlotId) {
     if (phase !== 'wave' || won) return
     const now = performance.now()
@@ -203,10 +228,12 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     if ((live.current.cool[id] ?? 0) + wait > now) return
     const at = DEFEND_ANCHOR[id]
     const range = towerRange(stage)
+    const using = unlocked.includes(ability) ? ability : 'love'
     let best: Raider | null = null
     let bestD = range
     for (const raider of live.current.raiders) {
-      const d = dist(at, pathPoint(raider.t))
+      if (raider.turned) continue
+      const d = dist(at, raiderAt(raider))
       if (d <= bestD) {
         best = raider
         bestD = d
@@ -216,13 +243,13 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     setFlash(id)
     window.setTimeout(() => setFlash(null), 220)
     if (!best) return
-    const to = pathPoint(best.t)
+    const to = raiderAt(best)
     comboRef.current += 1
     const nextCombo = comboRef.current
     setCombo(nextCombo)
     setShake(true)
     window.setTimeout(() => setShake(false), 160)
-    const blast: Blast = { key: now, x: to.x, y: to.y, line: best.text, combo: nextCombo }
+    const blast: Blast = { key: now, x: to.x, y: to.y, line: WATCH_ABILITY_LABEL[using], combo: nextCombo }
     setShots((current) => [...current.slice(-3), { key: now, from: { x: at.x, y: at.y - 16 }, to }])
     setBlasts((current) => [...current.slice(-3), blast])
     window.setTimeout(() => {
@@ -231,18 +258,14 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     window.setTimeout(() => {
       setBlasts((current) => current.filter((item) => item.key !== now))
     }, 620)
-    live.current.raiders = live.current.raiders.filter((item) => item.id !== best.id)
+    live.current.raiders = live.current.raiders.map((item) =>
+      item.id === best.id
+        ? { ...item, turned: using, from: to, heavenT: 0, text: 'Toward heaven' }
+        : item,
+    )
     live.current.downed += 1
     setRaiders(live.current.raiders)
     setDowned(live.current.downed)
-    if (
-      live.current.spawned >= DEFEND_WAVE_SIZE &&
-      live.current.raiders.length === 0
-    ) {
-      live.current.playing = false
-      setWon(true)
-      afterJuice()
-    }
   }
 
   function fireBest() {
@@ -253,7 +276,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       const at = DEFEND_ANCHOR[id]
       const range = towerRange(padStage(id, progress))
       for (const raider of live.current.raiders) {
-        const d = dist(at, pathPoint(raider.t))
+        if (raider.turned) continue
+        const d = dist(at, raiderAt(raider))
         if (d <= range && d < bestD) {
           bestD = d
           pick = id
@@ -312,7 +336,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       ) : after && recalled ? (
         <TownReturn
           who="juniper"
-          line="Night held. The street grew."
+          line="Night held. The road turned toward heaven."
           action="See the town"
           onGo={() => onNavigate({ name: 'hub' })}
         />
@@ -320,7 +344,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         <>
           <p className="eyebrow">{WATCH_KICKER}</p>
           <h1 className="defend-title">
-            {phase === 'wave' ? 'Blast them.' : WATCH_LEAD}
+            {phase === 'wave' ? 'Turn them toward heaven.' : WATCH_LEAD}
           </h1>
           <div className={`defend-frame ${shake ? 'is-shake' : ''} ${won ? 'is-clear' : ''}`}>
             <p className="defend-hud" aria-live="polite">
@@ -428,6 +452,18 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                 className="defend-road-shine"
                 d="M70 310 C 140 300, 200 280, 280 292 C 360 304, 430 286, 560 300"
               />
+              <path
+                className="defend-heaven-path"
+                d="M280 292 C 400 210, 500 90, 572 36"
+              />
+              <g className="defend-heaven" transform={`translate(${HEAVEN_POINT.x} ${HEAVEN_POINT.y})`}>
+                <circle className="defend-heaven-glow" r="36" />
+                <path className="defend-heaven-wall" d="M-28 14 l12-16 10 8 8-12 10 8 10-10 10 14 v16 H-28 Z" />
+                <path className="defend-heaven-gate" d="M-6 22 v-12 a6 8 0 0 1 12 0 v12" />
+                <text className="defend-heaven-label" y="-22" textAnchor="middle">
+                  City of Heaven
+                </text>
+              </g>
               <path d="M-10 368 Q 180 340 320 358 T 660 372 V430 H-10 Z" fill="#148a48" />
               <g className="defend-porch" transform="translate(564 292)">
                 <path d="M-20 22 h40 l5 7 H-25 Z" />
@@ -447,7 +483,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                   phase === 'wave' &&
                   on &&
                   raiders.some(
-                    (raider) => dist(at, pathPoint(raider.t)) <= towerRange(stage),
+                    (raider) => !raider.turned && dist(at, raiderAt(raider)) <= towerRange(stage),
                   )
                 return (
                   <g
@@ -507,9 +543,13 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                 </g>
               ))}
               {raiders.map((raider) => {
-                const at = pathPoint(raider.t)
+                const at = raiderAt(raider)
                 return (
-                  <g key={raider.id} className="defend-raider" transform={`translate(${at.x} ${at.y})`}>
+                  <g
+                    key={raider.id}
+                    className={`defend-raider ${raider.turned ? 'is-turned' : ''}`}
+                    transform={`translate(${at.x} ${at.y})`}
+                  >
                     <ellipse className="defend-raider-shadow" cy="10" rx="12" ry="4.2" />
                     <path className="defend-raider-cloak" d="M-10 11 Q0 15 10 11 L5 -2 Q0 -11 -5 -2 Z" />
                     <circle className="defend-raider-head" cy="-9" r="5.6" />
@@ -552,18 +592,38 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
               The road is coming
             </button>
           ) : null}
+          <div className="defend-abilities" role="group" aria-label="Night abilities">
+            {WATCH_ABILITIES.map((id) => {
+              const open = unlocked.includes(id)
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  className={`defend-ability ${ability === id ? 'is-on' : ''} ${open ? '' : 'is-locked'}`}
+                  disabled={!open}
+                  aria-pressed={ability === id}
+                  onClick={() => {
+                    if (open) setAbility(id)
+                  }}
+                >
+                  <GemMark gem={WATCH_ABILITY_GEM[id]} size="sm" />
+                  {WATCH_ABILITY_LABEL[id]}
+                </button>
+              )
+            })}
+          </div>
           {phase === 'lost' ? (
             <div className="defend-lost">
-              <p>Porch flickered. Blast again.</p>
+              <p>Porch flickered. Turn them again.</p>
               <button type="button" className="btn primary" onClick={retry}>
                 Try the night again
               </button>
             </div>
           ) : null}
           {phase === 'wave' ? (
-            <p className="defend-tip">Tap the road — lamps fire for you.</p>
+            <p className="defend-tip">Tap the road — love turns a line toward heaven.</p>
           ) : (
-            <p className="defend-tip">Built lots hold lamps. Empty lots cannot.</p>
+            <p className="defend-tip">Love is ready. Logic, reason, and science unlock as you keep lines.</p>
           )}
         </>
       )}
