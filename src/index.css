@@ -1890,8 +1890,16 @@ img.gem-heart {
   color: #fff6b8;
 }
 
+.is-puzzle .play.is-match.is-deal .match-grid {
+  grid-template-rows: auto repeat(2, minmax(72px, auto));
+}
+
 .is-puzzle .play.is-match.is-deal .match-card {
-  min-height: 110px;
+  min-height: 72px;
+}
+
+.is-puzzle .play.is-match.is-deal .match-card.is-picture {
+  min-height: 96px;
 }
 
 .match-recover,

@@ -51,7 +51,7 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
   }
 
   function place(id: string, bin: Bin) {
-    if (status === 'ok' || shake) return
+    if (status === 'ok') return
     const tile = takeTile(id)
     if (!tile) return
     if (tile.bin !== bin) {
@@ -161,7 +161,6 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
                     : `Return ${home.text} to its seat`
                 }
                 onClick={() => {
-                  if (shake) return
                   if (live) setPicked(home.id === picked ? null : home.id)
                   else returnToBank(home.id)
                 }}
