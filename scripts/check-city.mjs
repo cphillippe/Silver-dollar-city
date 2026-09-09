@@ -461,10 +461,18 @@ assert.match(matchCss, /grid-template-rows: subgrid/)
 assert.match(matchCss, /\.match-card\.right/)
 
 const obSrc = readFileSync(new URL('../src/content/observatory.ts', import.meta.url), 'utf8')
-assert.match(obSrc, /scene: 'cosmos'/)
-assert.match(obSrc, /scene: 'atom'/)
-assert.match(obSrc, /scene: 'origin'/)
-assert.match(obSrc, /scene: 'balance'/)
+assert.match(obSrc, /scene: 'expand'/)
+assert.match(obSrc, /scene: 'bind'/)
+assert.match(obSrc, /scene: 'tidy'/)
+assert.match(obSrc, /scene: 'dial'/)
+const benchSrc = readFileSync(
+  new URL('../src/content/witnessBench.ts', import.meta.url),
+  'utf8',
+)
+assert.match(benchSrc, /scene: 'witnesses'/)
+assert.match(benchSrc, /scene: 'reluctant'/)
+assert.match(benchSrc, /scene: 'clock'/)
+assert.match(benchSrc, /scene: 'judea'/)
 
 const evidenceSrc = readFileSync(
   new URL('../src/content/evidence.ts', import.meta.url),
