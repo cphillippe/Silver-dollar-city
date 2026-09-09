@@ -7,9 +7,9 @@ export function MatchScene({ scene }: { scene: MatchSceneId }) {
     case 'cosmos':
       return (
         <SceneFrame uid={uid} from="#1a0840" to="#3a1480">
-          <circle cx="32" cy="32" r="18" fill="none" stroke="#ffcc33" strokeWidth="2.2" opacity=".85" />
-          <circle cx="32" cy="32" r="10" fill="none" stroke="#ffe08a" strokeWidth="1.6" opacity=".7" />
-          <circle cx="32" cy="32" r="4" fill="#fff6b8" />
+          <circle cx="32" cy="32" r="22" fill="none" stroke="#ffcc33" strokeWidth="2.6" opacity=".9" />
+          <circle cx="32" cy="32" r="13" fill="none" stroke="#ffe08a" strokeWidth="2" opacity=".8" />
+          <circle cx="32" cy="32" r="6" fill="#fff6b8" />
           <circle cx="14" cy="18" r="2.2" fill="#c86bff" />
           <circle cx="50" cy="16" r="1.8" fill="#ffcc33" />
           <circle cx="52" cy="40" r="2.4" fill="#7dffb0" />
@@ -20,31 +20,31 @@ export function MatchScene({ scene }: { scene: MatchSceneId }) {
     case 'atom':
       return (
         <SceneFrame uid={uid} from="#12305a" to="#2a0d58">
-          <ellipse cx="32" cy="32" rx="22" ry="9" fill="none" stroke="#7dffb0" strokeWidth="2.2" />
-          <ellipse cx="32" cy="32" rx="22" ry="9" fill="none" stroke="#c86bff" strokeWidth="2.2" transform="rotate(60 32 32)" />
-          <ellipse cx="32" cy="32" rx="22" ry="9" fill="none" stroke="#ffcc33" strokeWidth="2.2" transform="rotate(-60 32 32)" />
-          <circle cx="32" cy="32" r="6" fill="#fff6b8" stroke="#ff9f1a" strokeWidth="2" />
+          <ellipse cx="32" cy="32" rx="26" ry="11" fill="none" stroke="#7dffb0" strokeWidth="2.6" />
+          <ellipse cx="32" cy="32" rx="26" ry="11" fill="none" stroke="#c86bff" strokeWidth="2.6" transform="rotate(60 32 32)" />
+          <ellipse cx="32" cy="32" rx="26" ry="11" fill="none" stroke="#ffcc33" strokeWidth="2.6" transform="rotate(-60 32 32)" />
+          <circle cx="32" cy="32" r="8" fill="#fff6b8" stroke="#ff9f1a" strokeWidth="2" />
         </SceneFrame>
       )
     case 'origin':
       return (
         <SceneFrame uid={uid} from="#3a1480" to="#1a0840">
-          <path d="M6 46c10-4 16-14 26-14s16 10 26 14" fill="#ffcc33" opacity=".95" />
-          <path d="M10 40c8-3 13-10 22-10s14 7 22 10" fill="#fff6b8" />
-          <rect x="24" y="18" width="16" height="10" rx="2" fill="#ffe08a" />
-          <rect x="27" y="12" width="10" height="8" rx="2" fill="#fff8dc" />
-          <circle cx="32" cy="10" r="3" fill="#ff9f1a" />
+          <path d="M0 50c12-6 18-18 32-18s20 12 32 18v14H0Z" fill="#ffcc33" />
+          <path d="M4 44c10-4 16-14 28-14s18 10 28 14v8H4Z" fill="#fff6b8" />
+          <rect x="20" y="16" width="24" height="14" rx="3" fill="#ffe08a" />
+          <rect x="25" y="8" width="14" height="12" rx="3" fill="#fff8dc" />
+          <circle cx="32" cy="8" r="4" fill="#ff9f1a" />
         </SceneFrame>
       )
     case 'balance':
       return (
         <SceneFrame uid={uid} from="#2a0d58" to="#4a1a88">
-          <path d="M32 12v28" stroke="#ffe08a" strokeWidth="3" strokeLinecap="round" />
-          <path d="M14 28h36" stroke="#ffcc33" strokeWidth="3" strokeLinecap="round" />
-          <path d="M14 28l-6 12h12Z" fill="#c86bff" />
-          <path d="M50 28l-6 12h12Z" fill="#ffcc33" />
-          <rect x="24" y="40" width="16" height="4" rx="2" fill="#fff6b8" />
-          <circle cx="32" cy="12" r="4" fill="#fff6b8" />
+          <path d="M32 8v34" stroke="#ffe08a" strokeWidth="4" strokeLinecap="round" />
+          <path d="M8 26h48" stroke="#ffcc33" strokeWidth="4" strokeLinecap="round" />
+          <path d="M10 26l-8 16h16Z" fill="#c86bff" />
+          <path d="M54 26l-8 16h16Z" fill="#ffcc33" />
+          <rect x="20" y="46" width="24" height="6" rx="2" fill="#fff6b8" />
+          <circle cx="32" cy="8" r="5" fill="#fff6b8" />
         </SceneFrame>
       )
     case 'scrolls':
@@ -238,7 +238,7 @@ function SceneFrame({
           <stop offset="100%" stopColor={to} />
         </linearGradient>
       </defs>
-      <rect width="64" height="64" rx="14" fill={`url(#${uid}-bg)`} />
+      <rect width="64" height="64" fill={`url(#${uid}-bg)`} />
       {children}
     </svg>
   )
