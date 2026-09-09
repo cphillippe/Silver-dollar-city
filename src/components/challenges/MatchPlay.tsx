@@ -85,10 +85,8 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
 
       {status === 'wrong' ? (
         <p className="match-toast" role="status">
-          <strong>{misses >= 2 ? 'One more look' : 'Those don’t snap'}</strong>
-          {misses >= 2
-            ? ` ${challenge.teachOnWrong}`
-            : ' Leave that pairing. The match is a neighbor, not a look-alike.'}
+          <strong>{misses >= 2 ? 'One more look.' : 'Those don’t snap.'}</strong>{' '}
+          {misses >= 2 ? challenge.teachOnWrong : 'Pick a new pair.'}
         </p>
       ) : null}
 
