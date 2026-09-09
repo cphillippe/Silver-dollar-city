@@ -508,6 +508,14 @@ assert.match(cssSrc, /city-spine/)
 assert.match(cssSrc, /city-age-track/)
 assert.match(cssSrc, /data-theme='parchment'/)
 assert.match(cssSrc, /data-theme='dusk'/)
+assert.match(
+  cssSrc,
+  /:root:not\(\[data-theme='dusk'\]\):not\(\[data-theme='parchment'\]\) \.city-overworld\.is-age-heaven/,
+)
+assert.match(cssSrc, /html\[data-theme='parchment'\] \.city-legend/)
+assert.match(cssSrc, /html\[data-theme='dusk'\] \.city-legend/)
+assert.match(cssSrc, /html\[data-theme='parchment'\] \.hub\.is-town \.night-watch/)
+assert.match(cssSrc, /html\[data-theme='dusk'\] \.hub\.is-town \.night-watch/)
 assert.match(cssSrc, /is-alive \.city-canopy\.is-sprout/)
 assert.match(cssSrc, /is-alive \.city-folk\.is-waving/)
 assert.match(cssSrc, /city-roof-kick/)

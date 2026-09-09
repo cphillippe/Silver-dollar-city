@@ -3735,28 +3735,28 @@ p {
   line-height: 1.35;
 }
 
-.city-overworld.is-age-eden .city-svg {
+:root:not([data-theme='dusk']):not([data-theme='parchment']) .city-overworld.is-age-eden .city-svg {
   --city-sky-0: #fff3a8;
   --city-sky-1: #7dffb0;
   --city-sky-2: #5ad4ff;
   --city-sky-3: #3dcc7a;
 }
 
-.city-overworld.is-age-village .city-svg {
+:root:not([data-theme='dusk']):not([data-theme='parchment']) .city-overworld.is-age-village .city-svg {
   --city-sky-0: #ffe08a;
   --city-sky-1: #ff9f1a;
   --city-sky-2: #3dcc7a;
   --city-sky-3: #2a1070;
 }
 
-.city-overworld.is-age-gold .city-svg {
+:root:not([data-theme='dusk']):not([data-theme='parchment']) .city-overworld.is-age-gold .city-svg {
   --city-sky-0: #fff6b8;
   --city-sky-1: #ffcc33;
   --city-sky-2: #ff9f1a;
   --city-sky-3: #5a2ab8;
 }
 
-.city-overworld.is-age-heaven .city-svg {
+:root:not([data-theme='dusk']):not([data-theme='parchment']) .city-overworld.is-age-heaven .city-svg {
   --city-sky-0: #fffce8;
   --city-sky-1: #ffcc33;
   --city-sky-2: #ffe08a;
@@ -3866,6 +3866,115 @@ p {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+html[data-theme='parchment'] .topbar,
+html[data-theme='parchment'] .goalbar {
+  background: linear-gradient(180deg, rgba(255, 246, 232, 0.96), rgba(231, 214, 180, 0.92));
+  border-color: rgba(160, 122, 46, 0.35);
+}
+
+html[data-theme='parchment'] .city-legend,
+html[data-theme='parchment'] .play {
+  background: linear-gradient(180deg, #fff8ea, #efe0c4);
+  border-color: rgba(160, 122, 46, 0.42);
+  box-shadow: 0 10px 28px rgba(80, 50, 20, 0.16), inset 0 2px 0 rgba(255, 255, 255, 0.7);
+}
+
+html[data-theme='parchment'] .lede {
+  color: rgba(42, 24, 16, 0.82);
+}
+
+html[data-theme='parchment'] .welcome-sky {
+  background:
+    radial-gradient(ellipse at 50% 0%, #fff8dc 0%, rgba(240, 210, 122, 0.7) 28%, transparent 58%),
+    radial-gradient(ellipse at 88% 22%, rgba(107, 143, 113, 0.45), transparent 46%),
+    radial-gradient(ellipse at 8% 30%, rgba(127, 158, 199, 0.4), transparent 48%);
+}
+
+html[data-theme='parchment'] .welcome-ridge {
+  background:
+    linear-gradient(180deg, transparent, rgba(107, 143, 113, 0.35)),
+    radial-gradient(120% 80% at 50% 120%, #6b8f71 40%, transparent 70%);
+}
+
+html[data-theme='parchment'] .welcome-goal,
+html[data-theme='parchment'] .today-trail,
+html[data-theme='parchment'] .next-card,
+html[data-theme='parchment'] .teaser-card,
+html[data-theme='parchment'] .recall-gate,
+html[data-theme='parchment'] .say-back,
+html[data-theme='parchment'] .share-invite,
+html[data-theme='parchment'] .settings-card {
+  background: linear-gradient(180deg, #f7edd8, #efe4cc);
+  border-color: rgba(160, 122, 46, 0.4);
+  color: #3a2418;
+}
+
+html[data-theme='parchment'] .settings-paste textarea,
+html[data-theme='parchment'] .share-code-out {
+  background: rgba(255, 246, 232, 0.9);
+  color: #3a2418;
+}
+
+html[data-theme='parchment'] .hub.is-town .night-watch {
+  background:
+    radial-gradient(140px 70px at 90% -10%, rgba(196, 146, 42, 0.28), transparent 70%),
+    linear-gradient(105deg, #efe4cc, #e7d6b4 55%, #d4c08a);
+  border-color: rgba(160, 122, 46, 0.5);
+  box-shadow: 0 10px 28px rgba(80, 50, 20, 0.16), inset 0 2px 0 rgba(255, 255, 255, 0.55);
+}
+
+html[data-theme='parchment'] .hub.is-town .night-watch h2 {
+  color: #3a2418;
+}
+
+html[data-theme='parchment'] .hub.is-town .night-watch .town-line {
+  color: rgba(58, 36, 24, 0.72);
+}
+
+html[data-theme='dusk'] .topbar,
+html[data-theme='dusk'] .goalbar {
+  background: linear-gradient(180deg, rgba(14, 20, 36, 0.94), rgba(18, 20, 28, 0.88));
+  border-color: rgba(224, 179, 74, 0.22);
+}
+
+html[data-theme='dusk'] .city-legend,
+html[data-theme='dusk'] .play {
+  background: linear-gradient(180deg, rgba(36, 24, 72, 0.94), rgba(18, 12, 42, 0.96));
+  border-color: rgba(224, 179, 74, 0.28);
+  box-shadow: 0 10px 28px rgba(4, 8, 18, 0.4), inset 0 2px 0 rgba(255, 220, 160, 0.12);
+}
+
+html[data-theme='dusk'] .welcome-sky {
+  background:
+    radial-gradient(ellipse at 50% 0%, #8a5428 0%, rgba(36, 48, 68, 0.9) 32%, transparent 60%),
+    radial-gradient(ellipse at 88% 22%, rgba(196, 107, 74, 0.4), transparent 46%),
+    radial-gradient(ellipse at 8% 30%, rgba(26, 34, 64, 0.7), transparent 48%);
+}
+
+html[data-theme='dusk'] .welcome-ridge {
+  background:
+    linear-gradient(180deg, transparent, rgba(14, 16, 12, 0.7)),
+    radial-gradient(120% 80% at 50% 120%, #1c2418 40%, transparent 70%);
+}
+
+html[data-theme='dusk'] .welcome-goal,
+html[data-theme='dusk'] .today-trail,
+html[data-theme='dusk'] .next-card,
+html[data-theme='dusk'] .teaser-card,
+html[data-theme='dusk'] .recall-gate,
+html[data-theme='dusk'] .say-back,
+html[data-theme='dusk'] .share-invite {
+  background: linear-gradient(180deg, rgba(36, 24, 72, 0.7), rgba(18, 12, 42, 0.85));
+  border-color: rgba(224, 179, 74, 0.28);
+}
+
+html[data-theme='dusk'] .hub.is-town .night-watch {
+  background:
+    radial-gradient(140px 70px at 90% -10%, rgba(224, 179, 74, 0.28), transparent 70%),
+    linear-gradient(105deg, rgba(18, 20, 36, 0.95), rgba(42, 32, 28, 0.9) 55%, rgba(90, 58, 28, 0.55));
+  border-color: rgba(224, 179, 74, 0.4);
 }
 
 .city-gift {

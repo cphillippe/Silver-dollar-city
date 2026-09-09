@@ -119,6 +119,10 @@ assert.match(settingsSrc, /code like a secret/)
 assert.match(settingsSrc, /setTheme/)
 assert.match(settingsSrc, /Dusk town/)
 assert.match(settingsSrc, /Clean parchment/)
+assert.ok(
+  settingsSrc.indexOf('eyebrow">Look') < settingsSrc.indexOf('Export JSON'),
+  'Look picker should sit above export so a cold player can switch themes',
+)
 
 const shellSrc = readFileSync(new URL('../src/components/AppShell.tsx', import.meta.url), 'utf8')
 assert.match(shellSrc, /view\.name === 'journal'/)

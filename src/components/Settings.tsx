@@ -129,6 +129,24 @@ export function Settings({ onNavigate }: SettingsProps) {
       </header>
 
       <section className="settings-card">
+        <p className="eyebrow">Look</p>
+        <p>Candy is the default. Switch anytime — the walk and the save stay.</p>
+        <div className="settings-actions theme-picks">
+          {(['candy', 'dusk', 'parchment'] as const).map((theme) => (
+            <button
+              key={theme}
+              type="button"
+              className={`btn ${progress.theme === theme ? 'primary' : ''}`}
+              aria-pressed={progress.theme === theme}
+              onClick={() => setTheme(theme)}
+            >
+              {themeLabel(theme)}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="settings-card">
         <p className="eyebrow">This device</p>
         <p>
           Schema v{saveMeta.schemaVersion || SAVE_SCHEMA_VERSION} · app{' '}
@@ -214,24 +232,6 @@ export function Settings({ onNavigate }: SettingsProps) {
           />
         ) : null}
         {message ? <p className="settings-msg">{message}</p> : null}
-      </section>
-
-      <section className="settings-card">
-        <p className="eyebrow">Look</p>
-        <p>Candy is the default. Switch anytime — the walk and the save stay.</p>
-        <div className="settings-actions theme-picks">
-          {(['candy', 'dusk', 'parchment'] as const).map((theme) => (
-            <button
-              key={theme}
-              type="button"
-              className={`btn ${progress.theme === theme ? 'primary' : ''}`}
-              aria-pressed={progress.theme === theme}
-              onClick={() => setTheme(theme)}
-            >
-              {themeLabel(theme)}
-            </button>
-          ))}
-        </div>
       </section>
 
       <section className="settings-card">
