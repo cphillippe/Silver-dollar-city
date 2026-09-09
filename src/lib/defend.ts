@@ -1,9 +1,10 @@
 import { CITY_PLOTS, plotStage, type CityPlotId, type CityStage } from './city.ts'
+import { prefersReducedMotion } from './juice.ts'
 import type { ProgressState } from '../types.ts'
 
 export const DEFEND_BRIEF_ID = 'td-watch'
 export const DEFEND_HEARTS = 3
-export const DEFEND_WAVE_SIZE = 5
+export const DEFEND_WAVE_SIZE = 6
 
 /** Main street — same curve the overworld draws. Raiders walk toward the porch. */
 export const DEFEND_PATH: { x: number; y: number }[] = [
@@ -69,11 +70,11 @@ export function towerCooldown(stage: CityStage): number {
 }
 
 export function waveSpeed(): number {
-  return 0.048
+  return prefersReducedMotion() ? 0.042 : 0.086
 }
 
 export function waveSpawnEvery(): number {
-  return 2.05
+  return prefersReducedMotion() ? 2.05 : 1.08
 }
 
 export function pathPoint(t: number): { x: number; y: number } {
