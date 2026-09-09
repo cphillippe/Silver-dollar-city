@@ -5260,6 +5260,39 @@ html[data-theme='dusk'] .hub.is-town .night-watch {
   color: var(--gold);
 }
 
+.stored-line {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 14px;
+  padding: 14px 16px 16px;
+  border-radius: 18px;
+  border: 2px solid rgba(255, 204, 51, 0.45);
+  background: linear-gradient(180deg, rgba(58, 20, 128, 0.55), rgba(26, 8, 64, 0.8));
+}
+
+.stored-line .stored-claim {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  font-weight: 650;
+}
+
+.stored-line .stored-reason {
+  margin: 0;
+}
+
+.memory-pipe {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.dossier.is-stored .learning-store {
+  align-items: flex-start;
+}
+
 .defend-lost p {
   margin: 0 0 8px;
 }

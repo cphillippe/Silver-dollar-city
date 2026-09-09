@@ -5,7 +5,7 @@ import { guideForArea, STORY } from '../content/story'
 import { localDateKey } from '../lib/dates'
 import { isDue, nextGapLabel } from '../lib/memory'
 import { starLegend } from '../lib/stars'
-import { findLearning } from '../lib/learning'
+import { deployLabel, findLearning, storedLearnings, withLearningBeat } from '../lib/learning'
 import { watchTool } from '../lib/watchTools'
 import { Avatar } from './Avatar'
 import { GemMark } from './GemMark'
@@ -106,8 +106,12 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
           <div className="chapter-head">
             <Avatar who="juniper" size="sm" />
             <div>
-              <h2>Due this morning</h2>
-              <p>Face-down. Rebuild the line — then the page opens.</p>
+              <h2>
+                {dueItems.some((item) => item.trace.reviews === 0)
+                  ? 'Dust off today'
+                  : 'Due this morning'}
+              </h2>
+              <p>Mapping and recall — not a checkbox. Rebuild the line, then the page opens.</p>
             </div>
           </div>
           <div className="card-grid">
@@ -175,6 +179,42 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
           {waiting ? ` · ${waiting} due this morning` : ''}
         </p>
       </header>
+
+      {progress.learnings.length > 0 ? (
+        <section className="journal-chapter stored-chapter">
+          <div className="chapter-head">
+            <Avatar who="juniper" size="sm" />
+            <div>
+              <h2>Stored lines</h2>
+              <p>Each learning is its own unit: claim · reason · source · anchor · picture · tool.</p>
+            </div>
+          </div>
+          <div className="card-grid">
+            {storedLearnings(progress).map((raw) => {
+              const learning = withLearningBeat(raw)
+              const tool = deployLabel(learning)
+              const trace = progress.memory[learning.id]
+              return (
+                <article key={learning.id} className="dossier is-open is-stored">
+                  <p className="eyebrow">Stored · {learning.source}</p>
+                  {learning.picture ? <GemMark gem={learning.picture} size="sm" /> : null}
+                  <h3>{learning.claim}</h3>
+                  <p>{learning.reason}</p>
+                  <p className="learning-store">
+                    {learning.picture ? <GemMark gem={learning.picture} size="sm" /> : null}
+                    <span>
+                      Anchored to {learning.anchor}
+                      {learning.beat ? ` · pictured as ${learning.beat}` : ''}
+                      {tool ? ` · deploys as ${tool}` : ''}
+                    </span>
+                  </p>
+                  {trace ? <p className="quiet">{nextGapLabel(trace, today)}</p> : null}
+                </article>
+              )
+            })}
+          </div>
+        </section>
+      ) : null}
 
       <section className="journal-chapter">
         <div className="chapter-head">
@@ -303,6 +343,9 @@ function JournalCard({
               {learning.picture ? <GemMark gem={learning.picture} size="sm" /> : null}
               <span>
                 Anchored to {learning.anchor}
+                {withLearningBeat(learning).beat
+                  ? ` · pictured as ${withLearningBeat(learning).beat}`
+                  : ''}
                 {learning.toolId
                   ? ` · deploys as ${watchTool(learning.toolId)?.label ?? learning.toolId}`
                   : ''}

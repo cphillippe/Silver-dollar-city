@@ -5,8 +5,11 @@ import { evidenceFor } from '../content/evidence'
 import { STORY, townVoice } from '../content/story'
 import { localDateKey } from '../lib/dates'
 import { useJuiceHandoff } from '../lib/juice'
+import { findLearning } from '../lib/learning'
+import { nextGapLabel } from '../lib/memory'
 import { PuzzlePlay } from './PuzzlePlay'
 import { RecallGate } from './RecallGate'
+import { StoredLine } from './StoredLine'
 import { TeachUnlock } from './TeachUnlock'
 import { TownReturn } from './TownReturn'
 import {
@@ -158,6 +161,26 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
                 onHeld={settleRecall}
               />
             </div>
+          ) : null}
+
+          {showNext && brief && !isReview ? (
+            <StoredLine
+              learning={
+                findLearning(progress, brief.id) ?? {
+                  id: brief.id,
+                  claim: brief.claim,
+                  reason: brief.reason,
+                  source: brief.source,
+                  anchor: 'Juniper’s east porch',
+                  acquiredAt: today,
+                }
+              }
+              when={
+                progress.memory[brief.id]
+                  ? nextGapLabel(progress.memory[brief.id], today)
+                  : 'Dust off today'
+              }
+            />
           ) : null}
 
           {showNext ? (

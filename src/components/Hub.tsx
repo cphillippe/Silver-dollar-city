@@ -32,9 +32,10 @@ export function Hub({ onNavigate }: HubProps) {
   const { progress } = useProgress()
   const today = localDateKey()
   const doneToday = dailyDoneToday(progress, today)
-  const due = doneToday ? undefined : morningReview(progress, today)
+  const due = morningReview(progress, today)
   const duePlay = due ? findPlayable(due.id) : undefined
   const waiting = dueCount(progress, today)
+  const sameDay = Boolean(due && doneToday)
   const goal = getNextGoal(progress, today)
   const nextId = nextPlotId(progress, doneToday)
   const watchOpen = unlockedWatchAbilities(progress)
@@ -85,31 +86,43 @@ export function Hub({ onNavigate }: HubProps) {
       {due ? (
       <section
         className={`today-trail is-slim is-live`}
-        aria-label="Today’s Trail"
+        aria-label={sameDay ? 'Same-day dust-off' : 'Today’s Trail'}
       >
         <div className="card-lead">
           <Avatar who="juniper" size="md" />
           <div>
-            <p className="eyebrow">Today’s Trail · {formatDeviceLocalDate()}</p>
+            <p className="eyebrow">
+              {sameDay ? 'Same-day recall' : 'Today’s Trail'} · {formatDeviceLocalDate()}
+            </p>
             <DeviceDay />
-            <h2>Time to dust off this one</h2>
+            <h2>{sameDay ? 'Dust off today’s line' : 'Time to dust off this one'}</h2>
           </div>
         </div>
         <Landmark pillar={due.pillar} compact />
         <p>
-          {duePlay
-            ? `${duePlay.challenge.title} · an older walk.`
-            : 'An older page is waiting to be rebuilt.'}
+          {sameDay
+            ? 'You stored it this morning. Map the claim again — not a checkbox.'
+            : duePlay
+              ? `${duePlay.challenge.title} · an older walk.`
+              : 'An older page is waiting to be rebuilt.'}
         </p>
         <p className="quiet">
           {waiting > 1
             ? `${waiting} pages due · about a minute`
-            : 'A spaced recall · about a minute'}
+            : sameDay
+              ? 'Same-day dust-off · mapping + recall'
+              : 'A spaced recall · about a minute'}
         </p>
         <button
           type="button"
           className="btn primary"
-          onClick={() => onNavigate({ name: 'daily' })}
+          onClick={() =>
+            onNavigate(
+              sameDay
+                ? rehearseGo(progress)
+                : { name: 'daily' },
+            )
+          }
         >
           Dust this one off
         </button>
