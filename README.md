@@ -11,7 +11,7 @@ A stranger should know in 60 seconds: this is a **Christian reasoning game**. So
 **Sticky public preview (GitHub Pages):**  
 https://cphillippe.github.io/Silver-dollar-city/
 
-Hard-reload once if you still see the old game (the PWA can keep a cached copy). Live bundle is `index-S3Yv8oYl.js` — Good Samaritan teach-first, Night Watch, Jericho two-pick.
+Hard-reload once if you still see the old game (the PWA can keep a cached copy). Live bundle on this branch’s `docs/` is `index-DhMxWnFl.js` — Pictures match two-column, Night Watch blasts, Good Samaritan teach-first, Jericho two-pick.
 
 Pages is on. **One Settings change so it follows `main` instead of the merged PR branch:**
 
@@ -21,12 +21,12 @@ Pages is on. **One Settings change so it follows `main` instead of the merged PR
 4. Folder: **`/docs`**
 5. **Save**
 
-Until that flip, Pages still deploys from `cursor/silver-city-unending-evidence-8233` `/docs` (same files as `main` today).
+Until that flip, Pages still deploys from `cursor/silver-city-unending-evidence-8233` `/docs` (older bundle until this PR lands on the Pages branch). Hard-reload github.io after it updates.
 
 **Interim tunnel (dies often — skip if Pages is live):**  
-https://lace-worldwide-seed-planned.trycloudflare.com/
+https://prompt-peripheral-news-acrylic.trycloudflare.com/
 
-Verified HTTP 200, “Silver City,” bundle `index-S3Yv8oYl.js`. Skip older tunnels. Skip StackBlitz.
+Verified HTTP 200, “Silver City,” bundle `index-DhMxWnFl.js`. Skip older tunnels. Skip StackBlitz.
 
 ## The story
 
@@ -128,7 +128,7 @@ Progress shape (same key `silver-city-progress-v1`): `memory[id].nextReviewAt`, 
 
 **Sticky:** https://cphillippe.github.io/Silver-dollar-city/ (hard-reload once if a cached PWA shows the old game).
 
-**Interim tunnel:** https://lace-worldwide-seed-planned.trycloudflare.com/ (HTTP 200, `index-S3Yv8oYl.js`). Skip older trycloudflare links.
+**Interim tunnel:** https://prompt-peripheral-news-acrylic.trycloudflare.com/ (HTTP 200, `index-DhMxWnFl.js`). Skip older trycloudflare links.
 
 On the web app, tap **Share a morning**. The pitch is not a high score. It asks a friend to try the walk, fold the page, and see what they can still say.
 

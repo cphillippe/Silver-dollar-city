@@ -312,6 +312,18 @@ Bill: “Looks cheap should look most enjoyable.” One look pass. No playtest f
 
 Done when a cold glance feels enjoyable, not cheap.
 
+## Pictures match + Night Watch fun (2026-09-09)
+
+Bill: Pictures claim broken; then “Make it fun — is this the most fun you can come up with?”
+
+- **Pictures of the kingdom** (`ph-seeds`): two columns on 390×844 so pictures and claims stay neighbors; either side can start a pair; encode is *The kingdom arrives in pictures, not slogans.* (not a different sketch sentence).
+- **Night Watch:** plant → **The road is coming** → **Blast them.** Tap the road; lamps fire. Hits shake, shard, and combo. Wave is snappier (not on reduced motion). **Night held!** then the same claim/reason/source encode. Hub shows *N nights held* and **GREW!** on star lamps. Every clear grows the town, even a second night the same day.
+- Teach-first (Unlock the lamps), Good Samaritan first sequencing, Jericho two-pick, Observatory Premise 1, local save schema 1 — unchanged.
+
+What made it more fun: blasting a cheap line off the gold road with a lamp thump, not reading a slogan under a slow wave. The street actually grows if you play one more.
+
+Done when a cold player would say “one more night,” not “homework with lamps.”
+
 ## Tooling note (npm audit)
 
 `uuid` 7.x via `@capacitor/cli` (GHSA-w5hq-g745-h8pq) is **tooling-only**. Do not `npm audit fix --force` (it wants to downgrade Capacitor). Upgrade when a CLI release pulls `uuid >= 11.1.1`. Details in `SECURITY_REVIEW.md`.
