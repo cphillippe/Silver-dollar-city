@@ -96,24 +96,28 @@ export const highLookout: Area = {
         {
           id: 'qualia',
           gem: 'heart',
+          scene: 'felt',
           left: 'Qualia',
           right: 'The felt redness of red — not captured by a wavelength number',
         },
         {
           id: 'about',
           gem: 'lamp',
+          scene: 'pointing',
           left: 'Intentionality',
           right: 'Thoughts being about things, not only colliding with them',
         },
         {
           id: 'hard',
           gem: 'door',
+          scene: 'gap',
           left: 'The hard problem',
           right: 'Why physical process is accompanied by inner experience at all',
         },
         {
           id: 'reason',
           gem: 'star',
+          scene: 'norm',
           left: 'Reason as norm',
           right: 'Following a standard of truth, not only a causal shove',
         },

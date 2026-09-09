@@ -365,7 +365,7 @@ assert.equal(dailyForDate('2026-09-10', 1).early, true)
 
 function assertMatchPictures(label, pairs) {
   for (const pair of pairs) {
-    assert.ok(pair.gem, `${label} ${pair.id} needs a picture gem`)
+    assert.ok(pair.gem || pair.scene, `${label} ${pair.id} needs a picture gem or scene`)
   }
 }
 
@@ -447,10 +447,24 @@ assert.match(matchSrc, /Tap a picture/)
 assert.match(matchSrc, /stopPropagation/)
 assert.match(matchSrc, /match-col-label/)
 assert.match(matchSrc, /pair.gem/)
-assert.match(matchSrc, /GemMark/)
+assert.match(matchSrc, /MatchScene/)
+assert.match(matchSrc, /match-toast/)
 assert.match(matchSrc, /aria-label=\{pair.left\}/)
-assert.match(matchSrc, /pair.gem \? <GemMark gem=\{pair.gem\} \/> : pair.left/)
+assert.match(matchSrc, /match-caption/)
+assert.doesNotMatch(matchSrc, /ResultPanel/)
 assert.doesNotMatch(matchSrc, /pickedLeft/)
+
+const matchCss = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
+assert.match(matchCss, /match-toast/)
+assert.match(matchCss, /match-scene/)
+assert.match(matchCss, /grid-template-rows: subgrid/)
+assert.match(matchCss, /\.match-card\.right/)
+
+const obSrc = readFileSync(new URL('../src/content/observatory.ts', import.meta.url), 'utf8')
+assert.match(obSrc, /scene: 'cosmos'/)
+assert.match(obSrc, /scene: 'atom'/)
+assert.match(obSrc, /scene: 'origin'/)
+assert.match(obSrc, /scene: 'balance'/)
 
 const evidenceSrc = readFileSync(
   new URL('../src/content/evidence.ts', import.meta.url),

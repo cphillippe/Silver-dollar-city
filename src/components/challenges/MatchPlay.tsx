@@ -1,11 +1,10 @@
 import { useMemo, useState } from 'react'
 import { shuffle } from '../../lib/shuffle'
-import type { MatchChallenge } from '../../types'
-import { GemMark } from '../GemMark'
+import type { MatchChallenge, MatchSceneId } from '../../types'
+import { MatchScene } from '../MatchScene'
 import { burstStyle } from '../../lib/juice'
 import { PuzzleHint } from './PuzzleHint'
 import { PuzzleLead } from './PuzzleLead'
-import { ResultPanel } from './ResultPanel'
 import { WinBurst } from './WinBurst'
 
 interface MatchPlayProps {
@@ -16,6 +15,10 @@ interface MatchPlayProps {
 }
 
 type Side = 'left' | 'right'
+
+function pictureOf(pair: { scene?: MatchSceneId; gem?: MatchSceneId }): MatchSceneId | undefined {
+  return pair.scene ?? pair.gem
+}
 
 export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProps) {
   const left = challenge.pairs
@@ -61,10 +64,18 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
       setPicked(null)
       setShake(false)
     }, 880)
+    window.setTimeout(() => {
+      setStatus((current) => (current === 'wrong' ? 'idle' : current))
+    }, 2200)
   }
 
+  const picture = (pair: (typeof left)[number]) => pictureOf(pair)
+
   return (
-    <div className={`play is-match ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}>
+    <div
+      className={`play is-match ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}
+      style={{ ['--match-rows' as string]: left.length }}
+    >
       <WinBurst play={status === 'ok'} />
       <PuzzleLead challenge={challenge} />
       <PuzzleHint text={challenge.context} onPeek={onPeek} />
@@ -72,26 +83,45 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
         <strong>Tap a picture</strong>, then the claim that belongs
       </p>
 
+      {status === 'wrong' ? (
+        <p className="match-toast" role="status">
+          <strong>{misses >= 2 ? 'One more look' : 'Those don’t snap'}</strong>
+          {misses >= 2
+            ? ` ${challenge.teachOnWrong}`
+            : ' Leave that pairing. The match is a neighbor, not a look-alike.'}
+        </p>
+      ) : null}
+
       <div className="match-grid">
-        <div className="match-col">
+        <div className="match-col is-pictures">
           <p className="match-col-label">Picture</p>
-          {left.map((pair, index) => (
-            <button
-              key={pair.id}
-              type="button"
-              className={`match-card ${pair.gem ? 'is-gem' : ''} ${picked?.side === 'left' && picked.id === pair.id ? 'is-selected' : ''} ${locked.includes(pair.id) ? 'is-locked' : ''} ${flash === pair.id && !locked.includes(pair.id) ? 'is-flash' : ''} ${picked && picked.side === 'right' && !locked.includes(pair.id) ? 'awaiting' : ''}`}
-              style={status === 'ok' ? burstStyle(index, 'keep') : undefined}
-              aria-label={pair.left}
-              onClick={(event) => {
-                event.stopPropagation()
-                choose('left', pair.id)
-              }}
-            >
-              {pair.gem ? <GemMark gem={pair.gem} /> : pair.left}
-            </button>
-          ))}
+          {left.map((pair, index) => {
+            const scene = picture(pair)
+            return (
+              <button
+                key={pair.id}
+                type="button"
+                className={`match-card is-picture ${scene ? 'is-gem' : ''} ${picked?.side === 'left' && picked.id === pair.id ? 'is-selected' : ''} ${locked.includes(pair.id) ? 'is-locked' : ''} ${flash === pair.id && !locked.includes(pair.id) ? 'is-flash' : ''} ${picked && picked.side === 'right' && !locked.includes(pair.id) ? 'awaiting' : ''}`}
+                style={status === 'ok' ? burstStyle(index, 'keep') : undefined}
+                aria-label={pair.left}
+                onClick={(event) => {
+                  event.stopPropagation()
+                  choose('left', pair.id)
+                }}
+              >
+                {scene ? (
+                  <>
+                    <MatchScene scene={scene} />
+                    <span className="match-caption">{pair.left}</span>
+                  </>
+                ) : (
+                  pair.left
+                )}
+              </button>
+            )
+          })}
         </div>
-        <div className="match-col">
+        <div className="match-col is-claims">
           <p className="match-col-label">Claim</p>
           {right.map((item, index) => (
             <button
@@ -114,26 +144,6 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
         {challenge.pairs.length - locked.length} left · {locked.length} /{' '}
         {challenge.pairs.length} snapped
       </p>
-
-      <ResultPanel
-        tone={status === 'ok' ? 'ok' : status === 'wrong' ? 'teach' : 'idle'}
-        kicker={
-          status === 'ok'
-            ? 'Well reasoned'
-            : misses >= 2
-              ? 'One more look'
-              : 'Those two don’t snap'
-        }
-        title={status === 'ok' ? 'All pairs snap!' : 'Shake and pick a new pair.'}
-        body={
-          status === 'wrong'
-            ? misses >= 2
-              ? challenge.teachOnWrong
-              : 'Leave that pairing. The match is a neighbor, not a look-alike.'
-            : undefined
-        }
-        deeper={status === 'ok' ? (challenge.deeper ?? challenge.teachOnWrong) : undefined}
-      />
     </div>
   )
 }
