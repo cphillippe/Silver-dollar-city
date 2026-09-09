@@ -11,7 +11,7 @@ export const observatory: Area = {
   intro: [
     'Above the ridge a small observatory points at winter stars. The question here is not “Does a lab experiment prove God?” That would confuse the tools.',
     'The question is: what kind of universe is this? Why are its laws hospitable to life? Why is there a concrete world with laws at all?',
-    'Fine-tuning, origins, and “something rather than nothing” begin from public facts and make a case for God. Necessity and a multiverse (empty assertion) are named and dismissed. Hold the Designer.',
+    'Fine-tuning, origins, and “something rather than nothing” begin from public facts and make a case for God. Hold the claim. Deploy it. The sky is not a shrug.',
   ],
   icon: 'star',
   accent: '#7f9ec7',
@@ -24,7 +24,7 @@ export const observatory: Area = {
       prompt:
         'Match each feature of the cosmos to the fine-tuning mark that points to a Designer.',
       context:
-        'The universe is finely tuned for life — that fit points to a Designer. Life-permitting ranges are extravagantly narrow across independent parameters; design predicts a habitable cosmos, blank chance does not. Necessity and a multiverse (empty assertion, no evidence) are named and dismissed.',
+        'The universe is finely tuned for life — that fit points to a Designer. Life-permitting ranges are extravagantly narrow across independent parameters; design predicts a habitable cosmos, blank chance does not. Necessity, chance (often a multiverse — asserted to cancel the surprise — no evidence), or design: the fit still points to a Designer.',
       pairs: [
         {
           id: 'lambda',
@@ -59,7 +59,7 @@ export const observatory: Area = {
       teachOnWrong:
         'Ask what breaks if the number moves. Those extravagantly narrow, habitable ranges are the mark of a Designer.',
       deeper:
-        'Design predicts this cosmos: cosmological constant, nuclear binding, Penrose’s low-entropy start, gravity against electromagnetism — extravagantly narrow, habitable. Necessity does not oblige those numbers. A multiverse is empty assertion. Hold the Designer.',
+        'Design predicts this cosmos: cosmological constant, nuclear binding, Penrose’s low-entropy start, gravity against electromagnetism — extravagantly narrow, habitable. That fit points to a Designer.',
     },
     {
       kind: 'build-argument',
@@ -69,7 +69,7 @@ export const observatory: Area = {
       prompt:
         'Build the inference from a habitable cosmos to a Designer.',
       context:
-        'Fine-tuning is best explained by a mind that intended a habitable world. Life-permitting ranges are extravagantly narrow; a Designer who wants observers leads us to expect that fit — blank indifference does not. Necessity and a multiverse (empty assertion) are named and dismissed.',
+        'Fine-tuning is best explained by a mind that intended a habitable world. Life-permitting ranges are extravagantly narrow; a Designer who wants observers leads us to expect that fit — blank indifference does not. Necessity, chance (often a multiverse — asserted to cancel the surprise — no evidence), or design: hold the Designer.',
       slots: [
         {
           id: 'p1',
@@ -127,7 +127,7 @@ export const observatory: Area = {
       teachOnWrong:
         'Leave the two overclaims. The narrow habitable fit lands a Designer, not which gospel.',
       deeper:
-        'A Designer who wants observers predicts this habitable fit. Necessity does not oblige the numbers. A multiverse is empty assertion. Hold the Designer.',
+        'A Designer who wants observers predicts this habitable fit. The narrow ranges are the evidence. Hold the Designer.',
     },
     {
       kind: 'sort',
