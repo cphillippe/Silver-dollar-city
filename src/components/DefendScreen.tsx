@@ -51,6 +51,10 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const [raiders, setRaiders] = useState<Raider[]>([])
   const [downed, setDowned] = useState(0)
   const [flash, setFlash] = useState<CityPlotId | null>(null)
+  const [shot, setShot] = useState<{ key: number; from: { x: number; y: number }; to: { x: number; y: number } } | null>(
+    null,
+  )
+  const [puffs, setPuffs] = useState<{ key: number; x: number; y: number }[]>([])
   const [won, setWon] = useState(false)
   const [recalled, setRecalled] = useState(false)
   const [missedNight, setMissedNight] = useState(false)
@@ -190,8 +194,17 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     }
     live.current.cool[id] = now
     setFlash(id)
-    window.setTimeout(() => setFlash(null), 220)
+    window.setTimeout(() => setFlash(null), 280)
     if (!best) return
+    const to = pathPoint(best.t)
+    setShot({ key: now, from: { x: at.x, y: at.y - 16 }, to })
+    setPuffs((current) => [...current.slice(-2), { key: now, x: to.x, y: to.y }])
+    window.setTimeout(() => {
+      setShot((current) => (current?.key === now ? null : current))
+    }, 280)
+    window.setTimeout(() => {
+      setPuffs((current) => current.filter((item) => item.key !== now))
+    }, 520)
     live.current.raiders = live.current.raiders.filter((item) => item.id !== best.id)
     live.current.downed += 1
     setRaiders(live.current.raiders)
@@ -277,99 +290,196 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         <>
           <p className="eyebrow">{WATCH_KICKER}</p>
           <h1 className="defend-title">{WATCH_LEAD}</h1>
-          <p className="defend-hud" aria-live="polite">
-            <span>{'♥'.repeat(hearts)}{'♡'.repeat(DEFEND_HEARTS - hearts)}</span>
-            <span>
-              {phase === 'wave' ? `${downed}/${DEFEND_WAVE_SIZE} down` : `${planted.length} lamp${planted.length === 1 ? '' : 's'}`}
-            </span>
-          </p>
-          <svg
-            className="defend-board"
-            viewBox="0 0 640 420"
-            role="img"
-            aria-label="Night road through Silver City"
-            onClick={() => {
-              if (phase === 'wave') fireBest()
-            }}
-          >
-            <defs>
-              <linearGradient id="defend-dusk" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#1a2240" />
-                <stop offset="70%" stopColor="#5a3a24" />
-                <stop offset="100%" stopColor="#8a5428" />
-              </linearGradient>
-              <filter id="defend-glow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="4" result="b" />
-                <feMerge>
-                  <feMergeNode in="b" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-            </defs>
-            <rect width="640" height="420" fill="url(#defend-dusk)" />
-            <circle cx="548" cy="48" r="9" fill="#fff6d8" />
-            <path
-              d="M70 310 C 140 300, 200 280, 280 292 C 360 304, 430 286, 560 300"
-              fill="none"
-              stroke="#f0c86a"
-              strokeWidth="8"
-              strokeLinecap="round"
-              opacity="0.85"
-            />
-            <circle cx={DEFEND_PATH[0].x} cy={DEFEND_PATH[0].y} r="4" fill="#8a5428" />
-            {pads.map((id) => {
-              const at = DEFEND_ANCHOR[id]
-              const on = planted.includes(id)
-              const stage = padStage(id, progress)
-              const plot = CITY_PLOTS.find((item) => item.id === id)
-              const hot =
-                phase === 'wave' &&
-                on &&
-                raiders.some(
-                  (raider) =>
-                    dist(at, pathPoint(raider.t)) <= towerRange(stage),
-                )
-              return (
-                <g
-                  key={id}
-                  className={`defend-pad is-${stage} ${on ? 'is-planted' : ''} ${hot ? 'is-hot' : ''} ${flash === id ? 'is-flash' : ''}`}
-                  transform={`translate(${at.x} ${at.y})`}
-                  role="button"
-                  tabIndex={0}
-                  aria-label={
-                    phase === 'plant'
-                      ? `${on ? 'Pull' : 'Plant'} lamp at ${plot?.title ?? id}`
-                      : `Fire ${plot?.title ?? id}`
-                  }
-                  onClick={(event) => {
-                    event.stopPropagation()
-                    if (phase === 'plant') togglePad(id)
-                    else fire(id)
-                  }}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                      event.preventDefault()
+          <div className="defend-frame">
+            <p className="defend-hud" aria-live="polite">
+              <span className="defend-hearts">
+                {Array.from({ length: DEFEND_HEARTS }, (_, index) => (
+                  <span key={index} className={index < hearts ? 'is-on' : ''}>
+                    ♥
+                  </span>
+                ))}
+              </span>
+              <span className="defend-count">
+                {phase === 'wave'
+                  ? `${downed}/${DEFEND_WAVE_SIZE} down`
+                  : `${planted.length} lamp${planted.length === 1 ? '' : 's'}`}
+              </span>
+            </p>
+            <svg
+              className="defend-board"
+              viewBox="0 0 640 420"
+              role="img"
+              aria-label="Night road through Silver City"
+              onClick={() => {
+                if (phase === 'wave') fireBest()
+              }}
+            >
+              <defs>
+                <linearGradient id="defend-dusk" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#1a2240" />
+                  <stop offset="38%" stopColor="#243044" />
+                  <stop offset="72%" stopColor="#5a3a24" />
+                  <stop offset="100%" stopColor="#8a5428" />
+                </linearGradient>
+                <linearGradient id="defend-ridge" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#3a4830" />
+                  <stop offset="100%" stopColor="#1c2418" />
+                </linearGradient>
+                <linearGradient id="defend-wood" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#d4a06a" />
+                  <stop offset="100%" stopColor="#8a562c" />
+                </linearGradient>
+                <linearGradient id="defend-gold-roof" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#ffe9a8" />
+                  <stop offset="100%" stopColor="#b8862e" />
+                </linearGradient>
+                <radialGradient id="defend-moon-glow" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor="#fff6d4" stopOpacity="0.9" />
+                  <stop offset="55%" stopColor="#f4e8c4" stopOpacity="0.22" />
+                  <stop offset="100%" stopColor="#f4e8c4" stopOpacity="0" />
+                </radialGradient>
+                <radialGradient id="defend-pool" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor="#ffe08a" stopOpacity="0.55" />
+                  <stop offset="100%" stopColor="#ffe08a" stopOpacity="0" />
+                </radialGradient>
+                <filter id="defend-glow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="4" result="b" />
+                  <feMerge>
+                    <feMergeNode in="b" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+              <rect width="640" height="420" fill="url(#defend-dusk)" />
+              <ellipse cx="320" cy="198" rx="280" ry="28" fill="#c4783a" opacity="0.22" />
+              <circle cx="548" cy="48" r="32" fill="url(#defend-moon-glow)" />
+              <circle cx="548" cy="48" r="9" fill="#fff6d8" />
+              <g className="defend-stars">
+                <circle cx="72" cy="42" r="1.6" />
+                <circle cx="118" cy="28" r="1.2" />
+                <circle cx="510" cy="36" r="1.5" />
+                <circle cx="430" cy="22" r="1.3" />
+                <circle cx="300" cy="34" r="1.1" />
+                <circle cx="196" cy="50" r="1.1" />
+                <circle cx="248" cy="20" r="0.9" />
+                <circle cx="390" cy="54" r="1.2" />
+                <circle cx="88" cy="68" r="0.8" />
+              </g>
+              <path
+                className="defend-ridge"
+                d="M-20 210 L80 120 160 168 250 96 340 150 430 78 520 130 660 70 V230 H-20 Z"
+                fill="url(#defend-ridge)"
+                opacity="0.92"
+              />
+              <path d="M-20 248 L40 200 120 228 210 176 300 214 410 168 500 206 660 150 V430 H-20 Z" fill="#1a2014" />
+              <ellipse className="defend-canopy" cx="96" cy="268" rx="28" ry="16" />
+              <ellipse className="defend-canopy" cx="214" cy="252" rx="22" ry="13" />
+              <ellipse className="defend-canopy" cx="402" cy="246" rx="24" ry="14" />
+              <ellipse className="defend-canopy" cx="528" cy="258" rx="20" ry="12" />
+              <path
+                className="defend-road-bed"
+                d="M70 310 C 140 300, 200 280, 280 292 C 360 304, 430 286, 560 300"
+              />
+              <path
+                className="defend-road"
+                d="M70 310 C 140 300, 200 280, 280 292 C 360 304, 430 286, 560 300"
+              />
+              <path
+                className="defend-road-shine"
+                d="M70 310 C 140 300, 200 280, 280 292 C 360 304, 430 286, 560 300"
+              />
+              <path d="M-10 368 Q 180 340 320 358 T 660 372 V430 H-10 Z" fill="#14180e" />
+              <g className="defend-gate" transform={`translate(${DEFEND_PATH[0].x} ${DEFEND_PATH[0].y})`}>
+                <path d="M-10 6 V-16 M10 6 V-16" />
+                <path d="M-12 -16 H12" />
+              </g>
+              {pads.map((id) => {
+                const at = DEFEND_ANCHOR[id]
+                const on = planted.includes(id)
+                const stage = padStage(id, progress)
+                const plot = CITY_PLOTS.find((item) => item.id === id)
+                const hot =
+                  phase === 'wave' &&
+                  on &&
+                  raiders.some(
+                    (raider) => dist(at, pathPoint(raider.t)) <= towerRange(stage),
+                  )
+                return (
+                  <g
+                    key={id}
+                    className={`defend-pad is-${stage} ${on ? 'is-planted' : ''} ${hot ? 'is-hot' : ''} ${flash === id ? 'is-flash' : ''}`}
+                    transform={`translate(${at.x} ${at.y})`}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={
+                      phase === 'plant'
+                        ? `${on ? 'Pull' : 'Plant'} lamp at ${plot?.title ?? id}`
+                        : `Fire ${plot?.title ?? id}`
+                    }
+                    onClick={(event) => {
+                      event.stopPropagation()
                       if (phase === 'plant') togglePad(id)
                       else fire(id)
-                    }
-                  }}
-                >
-                  <circle className="defend-hit" r="34" />
-                  <circle className="defend-ring" r={on ? 24 : 16} />
-                  <circle className="defend-lamp" r={on ? 8 : 5} />
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault()
+                        if (phase === 'plant') togglePad(id)
+                        else fire(id)
+                      }
+                    }}
+                  >
+                    <circle className="defend-hit" r="34" />
+                    <ellipse className="defend-earth" cx="0" cy="10" rx="15" ry="6" />
+                    {on ? (
+                      <>
+                        <ellipse className="defend-pool" cx="0" cy="12" rx={hot ? 30 : 20} ry={hot ? 11 : 7} />
+                        <path className="defend-post" d="M-2.4 10 V-18 H2.4 V10 Z" fill="url(#defend-wood)" />
+                        <path className="defend-lantern-roof" d="M-8 -18 l8 -7 8 7 Z" fill="url(#defend-gold-roof)" />
+                        <rect className="defend-lantern" x="-6.5" y="-18" width="13" height="11" rx="2" />
+                        <circle className="defend-lamp" cx="0" cy="-13" r="4.6" />
+                        {hot ? <circle className="defend-hot-halo" r="27" /> : null}
+                      </>
+                    ) : (
+                      <>
+                        <circle className="defend-ring" r="16" />
+                        <path className="defend-post is-empty" d="M-1.6 8 V-8 H1.6 V8 Z" />
+                      </>
+                    )}
+                  </g>
+                )
+              })}
+              {shot ? (
+                <g className="defend-shot" key={shot.key}>
+                  <line
+                    className="defend-beam"
+                    x1={shot.from.x}
+                    y1={shot.from.y}
+                    x2={shot.to.x}
+                    y2={shot.to.y}
+                  />
+                  <circle className="defend-impact" cx={shot.to.x} cy={shot.to.y} r="16" />
                 </g>
-              )
-            })}
-            {raiders.map((raider) => {
-              const at = pathPoint(raider.t)
-              return (
-                <g key={raider.id} className="defend-raider" transform={`translate(${at.x} ${at.y})`}>
-                  <circle r="13" />
-                  <circle r="5" className="defend-raider-core" />
+              ) : null}
+              {raiders.map((raider) => {
+                const at = pathPoint(raider.t)
+                return (
+                  <g key={raider.id} className="defend-raider" transform={`translate(${at.x} ${at.y})`}>
+                    <ellipse className="defend-raider-shadow" cy="8" rx="9" ry="3.4" />
+                    <path className="defend-raider-cloak" d="M-7.5 8 Q0 11 7.5 8 L3.2 -1 Q0 -7 -3.2 -1 Z" />
+                    <circle className="defend-raider-head" cy="-7" r="4.3" />
+                  </g>
+                )
+              })}
+              {puffs.map((puff) => (
+                <g key={puff.key} className="defend-puff" transform={`translate(${puff.x} ${puff.y})`}>
+                  <circle r="3" cx="-6" cy="-4" />
+                  <circle r="4" cx="2" cy="-10" />
+                  <circle r="2.4" cx="8" cy="-2" />
                 </g>
-              )
-            })}
-          </svg>
+              ))}
+            </svg>
+          </div>
           {phase === 'plant' ? (
             <button
               type="button"

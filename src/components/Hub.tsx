@@ -40,6 +40,7 @@ export function Hub({ onNavigate }: HubProps) {
       <CityMap onNavigate={onNavigate} />
 
       <section className="night-watch" aria-label="Night Watch">
+        <div className="night-watch-glow" aria-hidden />
         <div className="card-lead">
           <Avatar who="juniper" size="sm" />
           <div>

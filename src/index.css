@@ -3918,32 +3918,53 @@ p {
 }
 
 .hub.is-town .night-watch {
+  position: relative;
   flex-shrink: 0;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 8px;
-  padding: 6px 8px;
-  border: 1px solid rgba(224, 179, 74, 0.22);
-  border-radius: 16px;
-  background: linear-gradient(180deg, rgba(255, 248, 232, 0.08), rgba(20, 16, 10, 0.2));
+  padding: 8px 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 224, 138, 0.38);
+  border-radius: 18px;
+  background:
+    radial-gradient(120px 60px at 88% 0%, rgba(255, 224, 138, 0.22), transparent 70%),
+    linear-gradient(105deg, rgba(48, 32, 16, 0.72), rgba(86, 46, 18, 0.4) 55%, rgba(18, 16, 28, 0.5));
+  box-shadow:
+    0 0 0 1px rgba(224, 179, 74, 0.12),
+    0 10px 28px rgba(12, 8, 4, 0.32),
+    inset 0 0 36px rgba(255, 200, 80, 0.06);
+}
+
+.hub.is-town .night-watch-glow {
+  position: absolute;
+  right: 72px;
+  top: -18px;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 232, 160, 0.45), transparent 70%);
+  pointer-events: none;
 }
 
 .hub.is-town .night-watch h2 {
-  font-size: 1.05rem;
+  font-size: 1.08rem;
   margin: 0;
+  color: #ffe9b0;
 }
 
 .hub.is-town .night-watch .town-line {
   margin: 0;
   font-size: 0.78rem;
-  opacity: 0.72;
+  color: rgba(255, 236, 196, 0.78);
 }
 
 .hub.is-town .night-watch .btn {
   width: auto;
   min-height: 40px;
-  padding: 8px 12px;
+  padding: 8px 14px;
+  box-shadow: 0 0 16px rgba(224, 179, 74, 0.28);
 }
 
 @media (max-height: 430px) {
@@ -3966,28 +3987,106 @@ p {
 }
 
 .defend-title {
-  font-size: 1.05rem;
+  font-size: 1.02rem;
   margin: 0;
-  color: #e8c36a;
+  color: #f0d08a;
+  line-height: 1.3;
+}
+
+.defend-frame {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .defend-hud {
+  position: absolute;
+  z-index: 2;
+  left: 10px;
+  right: 10px;
+  top: 10px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin: 0;
-  font-size: 0.88rem;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(12, 10, 8, 0.46);
+  border: 1px solid rgba(255, 224, 138, 0.18);
+  font-size: 0.82rem;
   color: #f4ead2;
+  pointer-events: none;
+}
+
+.defend-hearts {
+  display: flex;
+  gap: 3px;
+  letter-spacing: 0;
+}
+
+.defend-hearts span {
+  color: rgba(244, 234, 210, 0.28);
+  text-shadow: none;
+}
+
+.defend-hearts span.is-on {
+  color: #ffd36a;
+  text-shadow: 0 0 10px rgba(255, 210, 100, 0.7);
+}
+
+.defend-count {
+  color: #ffe9b0;
+  font-weight: 600;
 }
 
 .defend-board {
   display: block;
   width: 100%;
   height: auto;
-  max-height: 46vh;
+  max-height: 50vh;
   border-radius: 22px;
-  border: 1px solid rgba(224, 179, 74, 0.28);
-  box-shadow: 0 14px 36px rgba(12, 8, 4, 0.4);
+  border: 1px solid rgba(224, 179, 74, 0.34);
+  box-shadow: 0 16px 40px rgba(12, 8, 4, 0.48), inset 0 0 40px rgba(255, 200, 80, 0.04);
   background: #1c1810;
+}
+
+.defend-stars {
+  fill: #f4ead2;
+}
+
+.defend-canopy {
+  fill: #24301c;
+  opacity: 0.88;
+}
+
+.defend-road-bed {
+  fill: none;
+  stroke: #2a1c10;
+  stroke-width: 22;
+  stroke-linecap: round;
+}
+
+.defend-road {
+  fill: none;
+  stroke: #8a5a28;
+  stroke-width: 14;
+  stroke-linecap: round;
+}
+
+.defend-road-shine {
+  fill: none;
+  stroke: #f0c86a;
+  stroke-width: 5;
+  stroke-linecap: round;
+  opacity: 0.88;
+  filter: url(#defend-glow);
+}
+
+.defend-gate path {
+  fill: none;
+  stroke: #d4a06a;
+  stroke-width: 3;
+  stroke-linecap: round;
 }
 
 .defend-pad {
@@ -3998,20 +4097,36 @@ p {
   fill: transparent;
 }
 
-.defend-pad.is-hot .defend-ring {
+.defend-earth {
+  fill: #3a2818;
+  opacity: 0.7;
+}
+
+.defend-pool {
+  fill: url(#defend-pool);
+}
+
+.defend-post.is-empty {
+  fill: rgba(212, 160, 106, 0.45);
+}
+
+.defend-lantern {
+  fill: #3a2a16;
+  stroke: #e8c36a;
+  stroke-width: 1.2;
+}
+
+.defend-hot-halo {
+  fill: none;
   stroke: #fff6d8;
-  stroke-width: 3;
+  stroke-width: 2;
+  opacity: 0.7;
 }
 
 .defend-ring {
-  fill: rgba(224, 179, 74, 0.12);
-  stroke: rgba(224, 179, 74, 0.45);
+  fill: rgba(224, 179, 74, 0.1);
+  stroke: rgba(224, 179, 74, 0.4);
   stroke-width: 2;
-}
-
-.defend-pad.is-planted .defend-ring {
-  fill: rgba(255, 224, 138, 0.2);
-  stroke: #ffe08a;
 }
 
 .defend-lamp {
@@ -4032,21 +4147,86 @@ p {
   fill: #fff3b0;
 }
 
-.defend-raider circle {
-  fill: #c46b4a;
-  stroke: #fff6e8;
-  stroke-width: 2;
+.defend-pad.is-hot .defend-hot-halo {
+  opacity: 1;
 }
 
-.defend-raider-core {
-  fill: #fff1c8;
-  stroke: none;
+.defend-beam {
+  stroke: #fff3b0;
+  stroke-width: 3.4;
+  stroke-linecap: round;
+  filter: url(#defend-glow);
+  animation: defend-beam 0.28s ease-out both;
+}
+
+.defend-impact {
+  fill: none;
+  stroke: #fff8d4;
+  stroke-width: 2.4;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: defend-impact 0.36s ease-out both;
+}
+
+.defend-puff circle {
+  fill: #f4ead2;
+  opacity: 0.7;
+  animation: defend-puff 0.5s ease-out both;
+}
+
+@keyframes defend-beam {
+  0% {
+    stroke-opacity: 1;
+    stroke-width: 5;
+  }
+  100% {
+    stroke-opacity: 0;
+    stroke-width: 1.4;
+  }
+}
+
+@keyframes defend-impact {
+  0% {
+    transform: scale(0.35);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.7);
+    opacity: 0;
+  }
+}
+
+@keyframes defend-puff {
+  0% {
+    transform: translate(0, 0);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(0, -12px);
+    opacity: 0;
+  }
+}
+
+.defend-raider-shadow {
+  fill: rgba(10, 8, 6, 0.45);
+}
+
+.defend-raider-cloak {
+  fill: #8a3e2c;
+  stroke: #f4ead2;
+  stroke-width: 1.1;
+}
+
+.defend-raider-head {
+  fill: #c46b4a;
+  stroke: #fff1c8;
+  stroke-width: 1.2;
 }
 
 .defend-tip {
   margin: 0;
   font-size: 0.82rem;
-  color: rgba(244, 234, 210, 0.7);
+  color: rgba(244, 234, 210, 0.72);
 }
 
 .defend-lost p {
