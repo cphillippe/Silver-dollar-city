@@ -260,6 +260,16 @@ Bill: the Premise / Conclusion screen does not fit. He cannot tap **Premise 1**.
 
 Done when Premise 1 is tappable on ~390×844 and the screen does not cut off.
 
+## Good Samaritan teach-first (2026-09-09)
+
+Bill: “At least start with one everyone should know” + teach-before-test on sequencing.
+
+- First Hollow walk is **The Good Samaritan** (same `ph-road` save id).
+- Claim · reason · source and the story beats show first. Unlock the order, then the clean two-pick.
+- Observatory teach-first, Night Watch look, seats, ownership, copy-truth, lock-in, local save — unchanged.
+
+Done when a cold player sees a known story taught before any sequencing quiz.
+
 ## Tower Defense slice (2026-09-08)
 
 Bill confirmed Tower Defense. First playable night on the same town.

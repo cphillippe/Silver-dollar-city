@@ -43,7 +43,9 @@ export function ChallengeScreen({
   const [attemptMissed, setAttemptMissed] = useState(false)
   const [attemptPeeked, setAttemptPeeked] = useState(false)
   const [recalled, setRecalled] = useState(false)
-  const teachFirst = areaId === 'observatory' && Boolean(brief)
+  const teachFirst =
+    Boolean(brief) &&
+    (areaId === 'observatory' || challenge?.kind === 'sequence')
   const [taught, setTaught] = useState(() => !teachFirst || reviewing)
   const [arming, setArming] = useState(false)
 
@@ -142,6 +144,7 @@ export function ChallengeScreen({
           <TeachUnlock
             brief={brief}
             kind={challenge.kind}
+            beats={challenge.kind === 'sequence' ? challenge.items : undefined}
             onUnlock={() => {
               setTaught(true)
               setArming(true)

@@ -19,7 +19,7 @@ export const parableHollow: Area = {
     {
       kind: 'sequence',
       id: 'ph-road',
-      title: 'The road to Jericho',
+      title: 'The Good Samaritan',
       idea: 'neighbor is the one who shows mercy',
       prompt: 'Place the Good Samaritan in the order Luke tells it.',
       context:

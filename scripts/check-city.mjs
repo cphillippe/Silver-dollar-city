@@ -383,6 +383,7 @@ assert.match(challengeSrc, /puzzle-title/)
 assert.match(challengeSrc, /tile\.bin === 'keep'/)
 assert.match(challengeSrc, /TeachUnlock/)
 assert.match(challengeSrc, /areaId === 'observatory'/)
+assert.match(challengeSrc, /kind === 'sequence'/)
 assert.match(challengeSrc, /is-teach/)
 assert.match(challengeSrc, /is-arming/)
 
@@ -394,7 +395,14 @@ assert.match(teachSrc, /brief\.claim/)
 assert.match(teachSrc, /brief\.reason/)
 assert.match(teachSrc, /brief\.source/)
 assert.match(teachSrc, /Unlock the sort/)
+assert.match(teachSrc, /teach-beats/)
 assert.doesNotMatch(teachSrc, /essay/)
+const hollowSrc = readFileSync(
+  new URL('../src/content/parableHollow.ts', import.meta.url),
+  'utf8',
+)
+assert.match(hollowSrc, /The Good Samaritan/)
+assert.match(hollowSrc, /kind: 'sequence'/)
 
 const cityLibSrc = readFileSync(new URL('../src/lib/city.ts', import.meta.url), 'utf8')
 assert.doesNotMatch(cityLibSrc, /Walk again/)
