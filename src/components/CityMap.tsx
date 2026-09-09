@@ -41,6 +41,7 @@ import {
 import { localDateKey } from '../lib/dates'
 import type { View } from '../types'
 import { Avatar } from './Avatar'
+import { GemMark } from './GemMark'
 
 interface CityMapProps {
   onNavigate: (view: View) => void
@@ -292,6 +293,7 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
       <svg
         className="city-svg"
         viewBox={viewBoxOf(cam)}
+        preserveAspectRatio="xMidYMid meet"
         role={mode === 'poster' ? 'img' : 'group'}
         aria-label={
           mode === 'poster'
@@ -515,9 +517,9 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
       {beat ? (
         <div className="city-beat" role="status">
           <span className="city-beat-gems" aria-hidden>
-            <span className="gem gem-lamp gem-sm" />
-            <span className="gem gem-star gem-sm" />
-            <span className="gem gem-coin gem-sm" />
+            <GemMark gem="lamp" size="sm" />
+            <GemMark gem="star" size="sm" />
+            <GemMark gem="coin" size="sm" />
           </span>
           <Avatar who={beatVoice.who} size="sm" />
           <div>

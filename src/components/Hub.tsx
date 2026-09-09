@@ -8,6 +8,8 @@ import { Landmark } from './Landmark'
 import { ShareInvite } from './ShareInvite'
 import { AdSlot } from './AdSlot'
 import { CityMap } from './CityMap'
+import { AbilityMark } from './GemMark'
+import { WATCH_ABILITIES, unlockedWatchAbilities } from '../lib/defend'
 import {
   dailyDoneToday,
   dueCount,
@@ -34,6 +36,7 @@ export function Hub({ onNavigate }: HubProps) {
   const waiting = dueCount(progress, today)
   const goal = getNextGoal(progress, today)
   const nextId = nextPlotId(progress, doneToday)
+  const watchOpen = unlockedWatchAbilities(progress)
 
   return (
     <main className="hub is-town" aria-label="The town">
@@ -54,6 +57,17 @@ export function Hub({ onNavigate }: HubProps) {
               {progress.defense.cleared
                 ? ` · ${progress.defense.cleared} night${progress.defense.cleared === 1 ? '' : 's'} held.`
                 : '.'}
+            </p>
+            <p className="night-watch-gems" aria-label="Night abilities">
+              {WATCH_ABILITIES.map((id) => (
+                <span
+                  key={id}
+                  className={watchOpen.includes(id) ? 'is-ready' : 'is-locked'}
+                  title={id}
+                >
+                  <AbilityMark ability={id} size="sm" />
+                </span>
+              ))}
             </p>
           </div>
         </div>

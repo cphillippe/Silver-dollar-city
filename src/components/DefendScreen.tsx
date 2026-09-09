@@ -12,7 +12,6 @@ import {
   HEAVEN_POINT,
   RAID_LINES,
   WATCH_ABILITIES,
-  WATCH_ABILITY_GEM,
   WATCH_ABILITY_LABEL,
   abilityRange,
   defendPads,
@@ -31,7 +30,7 @@ import { useJuiceHandoff } from '../lib/juice'
 import { CITY_PLOTS, type CityPlotId } from '../lib/city'
 import { useProgress } from '../store/progress'
 import type { View } from '../types'
-import { GemMark } from './GemMark'
+import { AbilityMark } from './GemMark'
 import { RecallGate } from './RecallGate'
 import { TeachUnlock } from './TeachUnlock'
 import { TownReturn } from './TownReturn'
@@ -612,7 +611,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                     if (open) setAbility(id)
                   }}
                 >
-                  <GemMark gem={WATCH_ABILITY_GEM[id]} size="sm" />
+                  <AbilityMark ability={id} size="sm" />
                   {WATCH_ABILITY_LABEL[id]}
                 </button>
               )
