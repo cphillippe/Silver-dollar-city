@@ -54,7 +54,7 @@ export const EVIDENCE: Record<string, EvidenceBrief> = {
   ),
   'ph-seeds': brief(
     'ph-seeds',
-    'The parables sketch a God who speaks, seeks, grows, and entrusts.',
+    'The kingdom arrives in pictures, not slogans.',
     'Soil, search, a tiny seed, and a trust form a portrait — not a slogan.',
     'Matthew 13; Luke 15; Matthew 25',
     'Every parable is an allegory of every detail.',

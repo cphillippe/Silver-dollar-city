@@ -343,12 +343,25 @@ assert.match(recallSrc, /\[brief\.claim\]/)
 assert.match(recallSrc, /pickClaim/)
 assert.match(dailyTrailSrc, /tile\.bin === 'keep'/)
 
+const matchSrc = readFileSync(
+  new URL('../src/components/challenges/MatchPlay.tsx', import.meta.url),
+  'utf8',
+)
+assert.match(matchSrc, /is-match/)
+assert.match(matchSrc, /side: Side/)
+assert.match(matchSrc, /shake \|\| locked/)
+assert.match(matchSrc, /Tap a picture/)
+assert.match(matchSrc, /stopPropagation/)
+assert.match(matchSrc, /match-col-label/)
+assert.doesNotMatch(matchSrc, /pickedLeft/)
+
 const evidenceSrc = readFileSync(
   new URL('../src/content/evidence.ts', import.meta.url),
   'utf8',
 )
 assert.match(evidenceSrc, /Wonder and measurement can share a roof/)
 assert.match(evidenceSrc, /Psalm 19 treats the sky as speech/)
+assert.match(evidenceSrc, /The kingdom arrives in pictures, not slogans/)
 assert.match(evidenceSrc, /export function takeawayLines/)
 assert.doesNotMatch(evidenceSrc, /Beauty forbids/)
 assert.doesNotMatch(evidenceSrc, /Wonder is the enemy of science/)
@@ -403,6 +416,8 @@ const hollowSrc = readFileSync(
 )
 assert.match(hollowSrc, /The Good Samaritan/)
 assert.match(hollowSrc, /kind: 'sequence'/)
+assert.match(hollowSrc, /the kingdom arrives in pictures, not slogans/)
+assert.match(hollowSrc, /id: 'ph-seeds'/)
 
 const cityLibSrc = readFileSync(new URL('../src/lib/city.ts', import.meta.url), 'utf8')
 assert.doesNotMatch(cityLibSrc, /Walk again/)
@@ -468,6 +483,14 @@ assert.match(cssSrc, /--slot-seat/)
 assert.match(cssSrc, /grid-template-rows: minmax\(0, 1fr\) auto/)
 assert.match(cssSrc, /-webkit-line-clamp: 3/)
 assert.match(cssSrc, /is-arming/)
+assert.match(cssSrc, /play\.is-match/)
+assert.match(cssSrc, /match-col-label/)
+assert.match(cssSrc, /\.match-grid \{\s*[\s\S]*?grid-template-columns: 1fr 1fr/)
+assert.doesNotMatch(
+  cssSrc,
+  /\.match-grid \{\s*grid-template-columns: 1fr;\s*\}/,
+  'match stays two columns on a phone so pictures and claims stay neighbors',
+)
 assert.match(cssSrc, /play\.is-build \{\s*[\s\S]*?overflow: hidden/)
 assert.match(cssSrc, /grid-template-columns: 5\.5rem minmax\(0, 1fr\)/)
 assert.match(
