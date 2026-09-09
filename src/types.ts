@@ -3,6 +3,26 @@ export type ChallengeKind = 'sequence' | 'build-argument' | 'match' | 'sort'
 /** Candy picture-marks for early boards. Later walks may omit these. */
 export type GemId = 'lamp' | 'seed' | 'heart' | 'star' | 'cup' | 'tree' | 'door' | 'coin'
 
+/** Full-tile match pictures. Gem ids stay valid; extra scenes name the claim. */
+export type MatchSceneId =
+  | GemId
+  | 'cosmos'
+  | 'atom'
+  | 'origin'
+  | 'balance'
+  | 'scrolls'
+  | 'cost'
+  | 'dawn'
+  | 'world'
+  | 'felt'
+  | 'pointing'
+  | 'gap'
+  | 'norm'
+  | 'crowd'
+  | 'cells'
+  | 'band'
+  | 'pasture'
+
 export interface SortTile {
   id: string
   text: string
@@ -75,6 +95,7 @@ export interface MatchPair {
   left: string
   right: string
   gem?: GemId
+  scene?: MatchSceneId
 }
 
 export interface MatchChallenge {
