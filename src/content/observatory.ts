@@ -11,7 +11,7 @@ export const observatory: Area = {
   intro: [
     'Above the ridge a small observatory points at winter stars. The question here is not “Does a lab experiment prove God?” That would confuse the tools.',
     'The question is: what kind of universe is this? Why are its laws hospitable to life? Why is there a concrete world with laws at all?',
-    'Fine-tuning, origins, and “something rather than nothing” are live philosophical arguments that begin from public facts. Treat them as clues with rivals — not as slogans.',
+    'Fine-tuning, origins, and “something rather than nothing” begin from public facts and make a case for God. Hold the claim. Deploy it. The sky is not a shrug.',
   ],
   icon: 'star',
   accent: '#7f9ec7',
@@ -20,11 +20,11 @@ export const observatory: Area = {
       kind: 'match',
       id: 'ob-tuning',
       title: 'Narrow ranges',
-      idea: 'the cosmos looks strangely fitted for life',
+      idea: 'the cosmos is fitted for life by a Designer',
       prompt:
-        'Match each feature of the cosmos to the standard fine-tuning observation about it.',
+        'Match each feature of the cosmos to the fine-tuning mark that points to a Designer.',
       context:
-        '“Fine-tuning” here means: small changes to certain numbers yield a sterile world. This is widely discussed in cosmology (e.g. work popularized by Martin Rees, Luke Barnes, and others). It is a claim about sensitivity — not yet a proof of a Designer.',
+        '“Fine-tuning” means: small changes to certain numbers yield a sterile world. Cosmologists (Rees, Barnes, and others) name that sensitivity. A Christian reads the mark: this is the fittedness a Designer who wanted life would write into the world.',
       pairs: [
         {
           id: 'lambda',
@@ -56,19 +56,19 @@ export const observatory: Area = {
         },
       ],
       teachOnWrong:
-        'Think “what breaks if the number moves,” not “which verse this matches.” Fine-tuning is a physical observation first.',
+        'Ask what breaks if the number moves. That narrow hospitality is the fingerprint of a mind — not a shrug.',
       deeper:
-        'Proposed explanations include: the numbers had to be this way (necessity), a vast ensemble of worlds (chance / multiverse), or intention (design). Intellectual honesty means keeping all three on the table while asking which is an explanation and which is a postponement.',
+        'Design explains the fittedness. “The numbers had to be this way” only renames the surprise. A multiverse multiplies unseen worlds to dodge an Author. Neither reply erases the mark in this one.',
     },
     {
       kind: 'build-argument',
       id: 'ob-design',
       title: 'A habitable cosmos',
-      idea: 'fine-tuning makes design a live explanation',
+      idea: 'fine-tuning is a mark of a Designer',
       prompt:
-        'Build a careful inference — not a slogan — from fine-tuning to design as a rational option.',
+        'Build the inference from a habitable cosmos to a Designer.',
       context:
-        'An argument can be reasonable without being irresistible. That is the standard in philosophy, not a weakness unique to theism.',
+        'If a mind wanted observers, we would expect a life-permitting world. We have one. That is a case for God, not a blush.',
       slots: [
         {
           id: 'p1',
@@ -110,7 +110,7 @@ export const observatory: Area = {
         },
         {
           id: 'live',
-          text: 'Design is therefore a live, rational explanation of fine-tuning — alongside necessity and a multiverse.',
+          text: 'Therefore the best explanation is a Designer who intended a habitable cosmos.',
         },
         {
           id: 'lab',
@@ -124,9 +124,9 @@ export const observatory: Area = {
         },
       ],
       teachOnWrong:
-        'Avoid the two cheap cards. Fine-tuning, if you grant the premises, supports design as a serious explanation. It does not by itself baptize a tradition or replace physics.',
+        'Leave the two overclaims. Fine-tuning supports a Designer. It does not replace a lab, and it does not by itself name every verse.',
       deeper:
-        'Robin Collins and others develop this as a likelihood argument: theism predicts a life-permitting world more naturally than a single throw of indifferent chance. Critics reply with a multiverse or with “we can only observe a world like this.” Both replies can be examined — neither should be assumed as a trump.',
+        'Robin Collins: theism predicts a life-permitting world more naturally than a single throw of chance. A multiverse or “we could only see this world” are replies — examine them; do not let them veto the Author.',
     },
     {
       kind: 'sort',
@@ -200,7 +200,7 @@ export const observatory: Area = {
       teachOnWrong:
         'Wonder is rational here. So is more work. “God of the gaps” and “science of the gaps” both tempt us.',
       deeper:
-        'A careful theist can say life’s information looks like the work of mind — a clue. A careful skeptic can say clues are not certificates.',
+        'Life’s information looks like the work of mind. Wonder is rational. So is more work. Do not trade the mark for a shrug.',
     },
   ],
 }

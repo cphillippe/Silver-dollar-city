@@ -117,8 +117,8 @@ export const journalEntries: JournalEntry[] = [
     kicker: 'The Observatory',
     unlockAfter: 'ob-tuning',
     body: [
-      'Several physical parameters appear delicately balanced for complexity and life. That observation is shared widely enough to have a name: fine-tuning.',
-      'Explanations divide: necessity, chance (often via a multiverse), or design. Naming the options is the beginning of seriousness. Theism does not need to pretend the rivals do not exist. It does need to ask which explanation explains.',
+      'Several physical parameters sit in life-permitting ranges so narrow that cosmologists call the fact fine-tuning.',
+      'A Designer who wanted a habitable world explains the fittedness. Necessity only restates the surprise. A multiverse invents a crowd of unseen worlds to avoid an Author. Hold the design inference.',
     ],
     sources: [
       'Discussions in contemporary cosmology (e.g. Rees; Lewis & Barnes; Collins)',
@@ -127,12 +127,12 @@ export const journalEntries: JournalEntry[] = [
   {
     id: 'j-ob-2',
     areaId: 'observatory',
-    title: 'Design as a live option',
+    title: 'Design explains the fittedness',
     kicker: 'The Observatory',
     unlockAfter: 'ob-design',
     body: [
-      'If life-permitting numbers are surprising on a single indifferent throw, and expected if a mind wanted a habitable world, then design is a rational inference — a likelihood argument, not a tantrum against physics.',
-      'It does not, by itself, tell you which Scriptures are true. It tells you the universe is the sort of place a mind might author. The rest of the trail still matters.',
+      'If life-permitting numbers surprise a single throw of chance, and a mind wanting observers would expect them, then a Designer is the fitting inference. Physics named the mark; it did not erase the Author.',
+      'The rest of the trail still names which Scriptures are true. Fine-tuning already tells you this world looks authored.',
     ],
     sources: ['Philosophical fine-tuning literature (Collins and respondents)'],
   },
@@ -159,7 +159,7 @@ export const journalEntries: JournalEntry[] = [
     unlockAfter: 'ob-life',
     body: [
       'The origin of life is an unfinished scientific story and a live philosophical clue. Cells require specified information and coordinated function. That is not a rumor; it is biology.',
-      'A careful theist treats the unfinished story as a place for wonder and for more work — not as a command to stop the lab, and not as a claim that a miracle has been demonstrated in a flask.',
+      'Treat the unfinished story as a place for wonder and for more work — and as a mark of mind. Do not stop the lab. Do not shrug the information away.',
     ],
     sources: [
       'Contemporary abiogenesis research as an open program',
@@ -233,7 +233,7 @@ export const journalEntries: JournalEntry[] = [
     kicker: 'The High Lookout',
     unlockAfter: 'hl-moral',
     body: [
-      'Duty presents itself as more than taste. That experience can be given a theistic home: a good God as the ground of a good law. It can also be given an atheist-realist home. The argument is that the theistic home fits more naturally — a claim to be weighed, not spat.',
+      'Duty presents itself as more than taste. A good God is the ground of a good law — the home that fits. Romans 2 treats that knowledge as widely shared, which is why injustice still has a name.',
       'Romans 2:14–15 treats moral knowledge as widely shared. That is why strangers can still accuse one another of injustice and expect the accusation to mean something.',
     ],
     sources: ['Romans 2:14–15', 'Modern moral arguments and atheist moral realism'],
@@ -246,7 +246,7 @@ export const journalEntries: JournalEntry[] = [
     unlockAfter: 'hl-mind',
     body: [
       'Qualia, aboutness, the hard problem, and the norm of reason are not parlor tricks. They are what it is like to be a knower. A story of the world that cannot find a home for mind is a story that cannot find a home for the storyteller.',
-      'Theism is not the only reply. It is a reply in which mind is not an accident at the end of an indifferent process, but is present at the beginning.',
+      'A living God is the home of mind: not an accident at the end of an indifferent process, but present at the beginning.',
     ],
     sources: [
       'Chalmers on the hard problem',

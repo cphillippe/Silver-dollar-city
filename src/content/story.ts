@@ -61,7 +61,7 @@ export const CAST: Record<CharacterId, Character> = {
     name: 'Ansel Gate',
     shortName: 'Ansel',
     role: 'Gatekeeper',
-    seeking: 'Why there is a world at all — and what that does not yet prove.',
+    seeking: 'Why there is a world at all — and the God who answers it.',
     areaId: 'first-gate',
   },
   hope: {
