@@ -14,6 +14,8 @@ interface MatchPlayProps {
   onPeek?: () => void
 }
 
+type Side = 'left' | 'right'
+
 export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProps) {
   const left = challenge.pairs
   const right = useMemo(
@@ -21,24 +23,25 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
     [challenge.pairs],
   )
   const [locked, setLocked] = useState<string[]>([])
-  const [pickedLeft, setPickedLeft] = useState<string | null>(null)
+  const [picked, setPicked] = useState<{ side: Side; id: string } | null>(null)
   const [flash, setFlash] = useState<string | null>(null)
   const [status, setStatus] = useState<'idle' | 'wrong' | 'ok'>('idle')
   const [shake, setShake] = useState(false)
   const [misses, setMisses] = useState(0)
 
-  function chooseLeft(id: string) {
-    if (status === 'ok' || locked.includes(id)) return
-    setPickedLeft((current) => (current === id ? null : id))
-    setStatus('idle')
-  }
-
-  function chooseRight(id: string) {
-    if (status === 'ok' || !pickedLeft || locked.includes(id)) return
-    if (pickedLeft === id) {
+  function choose(side: Side, id: string) {
+    if (status === 'ok' || shake || locked.includes(id)) return
+    if (!picked || picked.side === side) {
+      setPicked((current) =>
+        current?.side === side && current.id === id ? null : { side, id },
+      )
+      setStatus('idle')
+      return
+    }
+    if (picked.id === id) {
       const next = [...locked, id]
       setLocked(next)
-      setPickedLeft(null)
+      setPicked(null)
       setFlash(id)
       window.setTimeout(() => setFlash(null), 380)
       if (next.length === challenge.pairs.length) {
@@ -47,46 +50,57 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
       }
       return
     }
-    setFlash(pickedLeft)
+    setFlash(picked.id)
     setStatus('wrong')
     setShake(true)
     setMisses((count) => count + 1)
     onMiss()
     window.setTimeout(() => {
       setFlash(null)
-      setPickedLeft(null)
+      setPicked(null)
       setShake(false)
     }, 880)
   }
 
   return (
-    <div className={`play ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}>
+    <div className={`play is-match ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}>
       <WinBurst play={status === 'ok'} />
       <PuzzleLead challenge={challenge} />
       <PuzzleHint text={challenge.context} onPeek={onPeek} />
+      <p className="sort-how">
+        <strong>Tap a picture</strong>, then the claim that belongs
+      </p>
 
       <div className="match-grid">
         <div className="match-col">
+          <p className="match-col-label">Picture</p>
           {left.map((pair, index) => (
             <button
               key={pair.id}
               type="button"
-              className={`match-card ${pickedLeft === pair.id ? 'is-selected' : ''} ${locked.includes(pair.id) ? 'is-locked' : ''} ${flash === pair.id && !locked.includes(pair.id) ? 'is-flash' : ''}`}
+              className={`match-card ${picked?.side === 'left' && picked.id === pair.id ? 'is-selected' : ''} ${locked.includes(pair.id) ? 'is-locked' : ''} ${flash === pair.id && !locked.includes(pair.id) ? 'is-flash' : ''} ${picked && picked.side === 'right' && !locked.includes(pair.id) ? 'awaiting' : ''}`}
               style={status === 'ok' ? burstStyle(index, 'keep') : undefined}
-              onClick={() => chooseLeft(pair.id)}
+              onClick={(event) => {
+                event.stopPropagation()
+                choose('left', pair.id)
+              }}
             >
               {pair.left}
             </button>
           ))}
         </div>
         <div className="match-col">
+          <p className="match-col-label">Claim</p>
           {right.map((item, index) => (
             <button
               key={item.id}
               type="button"
-              className={`match-card right ${locked.includes(item.id) ? 'is-locked' : ''} ${pickedLeft ? 'awaiting' : ''} ${flash === item.id ? 'is-flash' : ''}`}
+              className={`match-card right ${picked?.side === 'right' && picked.id === item.id ? 'is-selected' : ''} ${locked.includes(item.id) ? 'is-locked' : ''} ${flash === item.id ? 'is-flash' : ''} ${picked && picked.side === 'left' && !locked.includes(item.id) ? 'awaiting' : ''}`}
               style={status === 'ok' ? burstStyle(index, 'discard') : undefined}
-              onClick={() => chooseRight(item.id)}
+              onClick={(event) => {
+                event.stopPropagation()
+                choose('right', item.id)
+              }}
             >
               {item.text}
             </button>
