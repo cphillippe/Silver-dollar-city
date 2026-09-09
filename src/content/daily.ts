@@ -1,0 +1,410 @@
+import type { Challenge } from '../types'
+import { hashString } from '../lib/dates'
+
+export interface DailyPuzzle {
+  id: string
+  teaser: string
+  districtFlavor: string
+  challenge: Challenge
+}
+
+/**
+ * Short morning walks (~60–90 seconds). Same local calendar day
+ * always maps to the same puzzle (seeded by YYYY-MM-DD).
+ */
+export const DAILY_POOL: DailyPuzzle[] = [
+  {
+    id: 'trail-lantern',
+    teaser: 'A lantern is already lit on the east porch.',
+    districtFlavor: 'Parable Hollow · a small lamp',
+    challenge: {
+      kind: 'sequence',
+      id: 'daily-lantern',
+      title: 'The porch lamp',
+      idea: 'a city on a hill is meant to be seen',
+      prompt: 'A neighbor leaves a lamp on the porch. Put the picture in order.',
+      context: 'Matthew 5:14–16. Jesus used ordinary light to talk about a life that is seen.',
+      items: [
+        { id: 'a', text: 'Evening comes and the street grows dim.' },
+        { id: 'b', text: 'Someone sets a lamp where it can be seen.' },
+        { id: 'c', text: 'A walker finds the stoop without stumbling.' },
+      ],
+      teachOnWrong:
+        'The claim is not that we become the sun — only that we do not hide what we have received. Try the order again.',
+      deeper:
+        '“You are the light of the world. A city set on a hill cannot be hidden.” The picture is public without being proud.',
+    },
+  },
+  {
+    id: 'trail-seed',
+    teaser: 'Someone has been turning soil behind the chapel.',
+    districtFlavor: 'Parable Hollow · a handful of seed',
+    challenge: {
+      kind: 'sort',
+      id: 'daily-seed',
+      title: 'A handful of seed',
+      idea: 'the same word meets very different hearts',
+      prompt: 'Which lines belong with Jesus’ picture of seed and soil?',
+      context: 'Mark 4:1–9. The parable does not flatter every listener. Some seed is lost.',
+      keepLabel: 'Fits the parable',
+      discardLabel: 'Set aside',
+      tiles: [
+        {
+          id: 'a',
+          text: 'Some seed is eaten before it roots.',
+          bin: 'keep',
+          why: 'The parable names loss — not every field is the same.',
+        },
+        {
+          id: 'b',
+          text: 'Good soil hears and holds the word.',
+          bin: 'keep',
+          why: 'Hearing that holds is the invitation — not a guaranteed harvest.',
+        },
+        { id: 'c', text: 'Every field is guaranteed a harvest.', bin: 'discard' },
+        {
+          id: 'd',
+          text: 'Shallow ground withers under heat.',
+          bin: 'keep',
+          why: 'Jesus names withering in the same breath as hearing.',
+        },
+      ],
+      teachOnWrong:
+        'Jesus names loss and hearing in the same breath. The invitation is still to hear — not a promise that every soil is the same.',
+      deeper: '“He who has ears to hear, let him hear.” The story asks for a kind of soil, not a slogan.',
+    },
+  },
+  {
+    id: 'trail-names',
+    teaser: 'The bench ledger has two new names in the margin.',
+    districtFlavor: 'The Witness Bench · names that stay',
+    challenge: {
+      kind: 'match',
+      id: 'daily-names',
+      title: 'Names that stay',
+      idea: 'the resurrection claim rests on named witnesses',
+      prompt: 'Match the person to the kind of witness they left.',
+      context:
+        '1 Corinthians 15:5–6. The New Testament does not rest on one voice. It stacks named people.',
+      pairs: [
+        { id: 'cephas', left: 'Cephas (Peter)', right: 'Named first in Paul’s list' },
+        { id: 'twelve', left: 'The Twelve', right: 'The gathered apprentices' },
+        { id: 'crowd', left: 'More than five hundred', right: 'A crowd, many still living then' },
+      ],
+      teachOnWrong: 'Paul is listing appearances, not inventing titles. Look at who is named, then snap again.',
+      deeper:
+        'He appeared to Cephas, then to the twelve. Then he appeared to more than five hundred brothers at one time.',
+    },
+  },
+  {
+    id: 'trail-creed',
+    teaser: 'A folded card from an old church bulletin sits on the rail.',
+    districtFlavor: 'The Witness Bench · an early creed',
+    challenge: {
+      kind: 'sequence',
+      id: 'daily-creed',
+      title: 'Older than the letter',
+      idea: 'the first church already said he died, was buried, and was raised',
+      prompt: 'Scholars often date this creed earlier than the letter that quotes it. Order the steps.',
+      context: '1 Corinthians 15:3–4. If the creed is early, the claim is close to the event it names.',
+      items: [
+        { id: 'a', text: 'Jesus is executed and buried.' },
+        { id: 'b', text: 'The first believers pass a short creed.' },
+        { id: 'c', text: 'Paul quotes that creed in a letter to Corinth.' },
+      ],
+      teachOnWrong:
+        'Paul is handing on something he received. The creed sits between the event and the letter. Try the chain again.',
+      deeper: 'Christ died… he was buried… he was raised on the third day. Burial and raising are both named.',
+    },
+  },
+  {
+    id: 'trail-stars',
+    teaser: 'The observatory dome is cracked just enough for Orion.',
+    districtFlavor: 'The Observatory · night air',
+    challenge: {
+      kind: 'sort',
+      id: 'daily-stars',
+      title: 'Night air',
+      idea: 'faith and science can share the same sky',
+      prompt: 'Which notes belong in a careful night of looking?',
+      context: 'Psalm 19:1. Wonder is not the enemy of science.',
+      keepLabel: 'Keep',
+      discardLabel: 'Set aside',
+      tiles: [
+        {
+          id: 'a',
+          text: 'The sky is worth looking at slowly.',
+          bin: 'keep',
+          why: 'Psalm 19 treats the sky as speech — not a lab report, and not a shrug.',
+        },
+        {
+          id: 'b',
+          text: 'Beauty can raise a question of gift.',
+          bin: 'keep',
+          why: 'A gift-shaped beauty is a fair question — not a proof, and not a shrug.',
+        },
+        { id: 'c', text: 'A psalm replaces a telescope.', bin: 'discard' },
+        {
+          id: 'd',
+          text: 'Wonder and measurement can share a roof.',
+          bin: 'keep',
+          why: 'Psalm 19 treats the sky as speech — not a lab report, and not a shrug.',
+        },
+      ],
+      teachOnWrong:
+        'Psalm 19 treats the sky as speech — not a lab report, and not a shrug. Keep the wonder; toss the false choice.',
+      deeper: 'The heavens declare the glory of God, and the sky above proclaims his handiwork.',
+    },
+  },
+  {
+    id: 'trail-life',
+    teaser: 'A biologist left a note under the eyepiece: “still not cheap.”',
+    districtFlavor: 'The Observatory · living cells',
+    challenge: {
+      kind: 'match',
+      id: 'daily-life',
+      title: 'Not cheap',
+      idea: 'living cells are not a cheap accident',
+      prompt: 'Pair each observation with the honest next sentence.',
+      context:
+        'This walk will not pretend chemistry is easy to dismiss. It only asks whether “it happened” is the last word.',
+      pairs: [
+        { id: 'cells', left: 'Cells copy information', right: 'Copying is not a small trick' },
+        { id: 'band', left: 'Earth sits in a habitable band', right: 'A narrow kindness of place' },
+        { id: 'science', left: 'We can do science at all', right: 'A mind that fits a cosmos' },
+      ],
+      teachOnWrong: 'Each pair is a modest next sentence, not a proof. Match the observation to its honest neighbor.',
+      deeper:
+        'Acts 17:24–25: the God who made the world… gives to all mankind life and breath and everything.',
+    },
+  },
+  {
+    id: 'trail-scroll',
+    teaser: 'The archive clerk set out one short Hebrew line.',
+    districtFlavor: 'The First Gate · a copied line',
+    challenge: {
+      kind: 'sequence',
+      id: 'daily-scroll',
+      title: 'A copied line',
+      idea: 'the Bible we hold arrived through a river of copies',
+      prompt: 'How does a line travel from an ancient hand to yours?',
+      context: 'We do not hold the first ink. We hold a river of copies.',
+      items: [
+        { id: 'a', text: 'A scribe copies a scroll by hand.' },
+        { id: 'b', text: 'Later copies are compared when they differ.' },
+        { id: 'c', text: 'A modern page prints a recovered text.' },
+      ],
+      teachOnWrong:
+        'Transmission is a river, not a single page falling from the sky. Order the hands, then the comparison, then the print.',
+      deeper: 'Isaiah 40:8: the grass withers, the flower fades, but the word of our God will stand forever.',
+    },
+  },
+  {
+    id: 'trail-isaiah',
+    teaser: 'Someone underlined “with his wounds” in a visitor Bible.',
+    districtFlavor: 'The First Gate · a hard poem',
+    challenge: {
+      kind: 'sort',
+      id: 'daily-isaiah',
+      title: 'A hard poem',
+      idea: 'a suffering servant, not a sword, is the poem’s claim',
+      prompt: 'Which lines belong with Isaiah 53’s servant?',
+      context:
+        'Christians read this poem as a portrait of Jesus. You are not required to agree — only to see why the first church did.',
+      keepLabel: 'In the poem',
+      discardLabel: 'Not the claim',
+      tiles: [
+        {
+          id: 'a',
+          text: 'The servant suffers for others.',
+          bin: 'keep',
+          why: 'Isaiah 53’s servant is wounded for others — not a general on a horse.',
+        },
+        {
+          id: 'b',
+          text: 'The servant is silent like a lamb.',
+          bin: 'keep',
+          why: 'The poem’s servant does not answer back with a sword.',
+        },
+        { id: 'c', text: 'The servant conquers Rome by sword.', bin: 'discard' },
+        {
+          id: 'd',
+          text: 'Many are counted righteous through him.',
+          bin: 'keep',
+          why: 'The poem says many are made right through his suffering.',
+        },
+      ],
+      teachOnWrong: 'Isaiah 53 is a suffering servant, not a general on a horse. Keep the wounds; toss the sword.',
+      deeper: 'He was pierced for our transgressions… and with his wounds we are healed.',
+    },
+  },
+  {
+    id: 'trail-grace',
+    teaser: 'A pew card says only: “not a wage.”',
+    districtFlavor: 'The High Lookout · unearned',
+    challenge: {
+      kind: 'match',
+      id: 'daily-grace',
+      title: 'Not a wage',
+      idea: 'grace is a gift, not a wage',
+      prompt: 'Match the word to the meaning this town uses.',
+      context: 'Grace is not a prize for finishing the map. It is the claim that God moves first.',
+      pairs: [
+        { id: 'grace', left: 'Grace', right: 'Gift, not wage' },
+        { id: 'faith', left: 'Faith', right: 'Trust that receives' },
+        { id: 'boast', left: 'Boast', right: 'What the gift refuses' },
+      ],
+      teachOnWrong: 'Ephesians 2 treats grace as gift and faith as receiving. Boast is what the gift will not feed.',
+      deeper:
+        'By grace you have been saved through faith. And this is not your own doing; it is the gift of God.',
+    },
+  },
+  {
+    id: 'trail-rest',
+    teaser: 'The lookout bench is empty on purpose.',
+    districtFlavor: 'The High Lookout · come and rest',
+    challenge: {
+      kind: 'sequence',
+      id: 'daily-rest',
+      title: 'Come and rest',
+      idea: 'rest is offered to tired people first',
+      prompt: 'Jesus’ invitation has an order. Set the stones.',
+      context: 'Matthew 11:28. Tired people are named first. The invitation is to a person, not a performance.',
+      items: [
+        { id: 'a', text: 'You are tired and carrying too much.' },
+        { id: 'b', text: 'Jesus says, “Come to me.”' },
+        { id: 'c', text: 'He promises rest — not a steeper hill.' },
+      ],
+      teachOnWrong: 'The weary are addressed before the command. Rest is the gift, not a prize for climbing harder.',
+      deeper: 'Come to me, all who labor and are heavy laden, and I will give you rest.',
+    },
+  },
+  {
+    id: 'trail-neighbor',
+    teaser: 'A child left chalk arrows toward the well.',
+    districtFlavor: 'Parable Hollow · who is near',
+    challenge: {
+      kind: 'build-argument',
+      id: 'daily-neighbor',
+      title: 'Who is near',
+      idea: 'neighbor is the one who shows mercy',
+      prompt: 'Build the Samaritan’s answer from the stones provided.',
+      context: 'Luke 10:36–37. The question “who is my neighbor?” is turned around. Mercy makes a neighbor.',
+      slots: [
+        { id: 'p1', role: 'premise', label: 'The scene', correctCardId: 'wounded' },
+        { id: 'p2', role: 'premise', label: 'The action', correctCardId: 'helped' },
+        { id: 'c', role: 'conclusion', label: 'The measure', correctCardId: 'mercy' },
+      ],
+      cards: [
+        { id: 'wounded', text: 'A man is left wounded on the road' },
+        { id: 'helped', text: 'An unlikely traveler stops and helps' },
+        { id: 'mercy', text: 'Neighbor is the one who showed mercy' },
+        { id: 'priest', text: 'The priest who passed by is the hero', distractor: true },
+      ],
+      teachOnWrong:
+        'Jesus asks which man *proved* to be a neighbor. Mercy, not pedigree, is the measure. Leave the decoy in the bank.',
+      deeper: 'He said, “The one who showed him mercy.” And Jesus said, “You go, and do likewise.”',
+    },
+  },
+  {
+    id: 'trail-empty',
+    teaser: 'Dawn light on an unused grave cloth.',
+    districtFlavor: 'The Witness Bench · morning',
+    challenge: {
+      kind: 'sort',
+      id: 'daily-empty',
+      title: 'Morning',
+      idea: 'the first Easter reports are awkward on purpose',
+      prompt: 'Which details belong in the first Easter reports?',
+      context:
+        'The first reports are not tidy. They include women, fear, and an empty place. The town does not sand that down.',
+      keepLabel: 'In the reports',
+      discardLabel: 'Later invention?',
+      tiles: [
+        {
+          id: 'a',
+          text: 'The tomb is found empty.',
+          bin: 'keep',
+          why: 'The first reports open with an empty place, not a tidy triumph.',
+        },
+        {
+          id: 'b',
+          text: 'Women are among the first witnesses.',
+          bin: 'keep',
+          why: 'Luke names women first — and that the men called it idle talk.',
+        },
+        { id: 'c', text: 'Rome instantly converts the senate.', bin: 'discard' },
+        {
+          id: 'd',
+          text: 'Fear and wonder sit side by side.',
+          bin: 'keep',
+          why: 'The opening keeps fear; it is not sanded into instant victory.',
+        },
+      ],
+      teachOnWrong:
+        'Luke 24 begins with an empty place and a dismissed report. Keep the awkwardness; toss the tidy triumph.',
+      deeper:
+        'They found the stone rolled away from the tomb, but when they went in they did not find the body.',
+    },
+  },
+  {
+    id: 'trail-cosmos',
+    teaser: 'The chalkboard still says “why anything at all?”',
+    districtFlavor: 'The Observatory · a first question',
+    challenge: {
+      kind: 'build-argument',
+      id: 'daily-cosmos',
+      title: 'Why anything at all',
+      idea: 'why there is anything at all is a fair question',
+      prompt: 'Set the three stones of a modest cosmological question.',
+      context:
+        'This is not a proof that silences every physicist. It is a question the psalms are willing to ask out loud.',
+      slots: [
+        { id: 'p1', role: 'premise', label: 'Fact', correctCardId: 'exists' },
+        { id: 'p2', role: 'premise', label: 'Surprise', correctCardId: 'contingent' },
+        { id: 'c', role: 'conclusion', label: 'Question', correctCardId: 'ask' },
+      ],
+      cards: [
+        { id: 'exists', text: 'The universe exists' },
+        { id: 'contingent', text: 'It did not have to' },
+        { id: 'ask', text: 'So its source is worth asking' },
+        { id: 'shrug', text: 'So questions are impolite', distractor: true },
+      ],
+      teachOnWrong: 'Existence plus contingency yields a question, not a scolding. Leave the shrug in the bank.',
+      deeper: 'Psalm 8: when I look at your heavens… what is man that you are mindful of him?',
+    },
+  },
+  {
+    id: 'trail-door',
+    teaser: 'Someone chalked a small door on the lookout wall.',
+    districtFlavor: 'The High Lookout · a door, not a wall',
+    challenge: {
+      kind: 'match',
+      id: 'daily-door',
+      title: 'A door, not a wall',
+      idea: 'Jesus claims to be a door in, not a wall',
+      prompt: 'Match Jesus’ image to what it offers.',
+      context:
+        '“I am the door” is a claim about access — personal, particular. You may refuse it. The town will not lock you in a pew.',
+      pairs: [
+        { id: 'door', left: 'A door', right: 'A way in, not a dead end' },
+        { id: 'pasture', left: 'Pasture', right: 'Life on the other side' },
+        { id: 'anyone', left: 'Anyone', right: 'The invitation’s width' },
+      ],
+      teachOnWrong: 'John 10 is an invitation with a particular door and a wide “anyone.” Snap the image to the gift.',
+      deeper:
+        'I am the door. If anyone enters by me, he will be saved and will go in and out and find pasture.',
+    },
+  },
+]
+
+export function dailyForDate(
+  dateKey: string,
+  trailMorningsBeforeToday = 99,
+): DailyPuzzle {
+  const sorts = DAILY_POOL.filter((item) => item.challenge.kind === 'sort')
+  const pool =
+    trailMorningsBeforeToday < 2 && sorts.length > 0 ? sorts : DAILY_POOL
+  const index = hashString(`silver-city-trail:${dateKey}`) % pool.length
+  return pool[index]
+}

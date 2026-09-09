@@ -1,0 +1,142 @@
+import { useMemo, useState } from 'react'
+import { shuffle } from '../lib/shuffle'
+import { takeawayLines, type EvidenceBrief } from '../content/evidence'
+import { STORY } from '../content/story'
+
+interface RecallGateProps {
+  brief: EvidenceBrief
+  keeps?: { text: string; why?: string }[]
+  kicker?: string
+  pillar?: string
+  mode?: 'encode' | 'review'
+  onHeld: (result: { clean: boolean }) => void
+}
+
+type Phase = 'claim' | 'reason' | 'teach'
+
+/**
+ * Encode (right after lock-in): player taps the Keep they will hold, then
+ * Why-it-stands for THAT line — no inversions, no silent auto-pick.
+ * Review (dust-off): choose among decoys that are not word-flips of the keep.
+ */
+export function RecallGate({
+  brief,
+  keeps,
+  kicker = STORY.tapTakeaway,
+  mode = 'encode',
+  onHeld,
+}: RecallGateProps) {
+  const encode = mode === 'encode'
+  const lines = useMemo(() => takeawayLines(brief, keeps), [brief, keeps])
+  const own = encode && lines.length > 1
+  const [chosen, setChosen] = useState<(typeof lines)[0] | null>(own ? null : lines[0] ?? null)
+  const claimOptions = useMemo(
+    () => (encode ? (own ? lines.map((item) => item.claim) : [brief.claim]) : shuffle([...brief.claimChoices])),
+    [brief.id, brief.claim, brief.claimChoices, encode, own, lines],
+  )
+  const reasonOptions = useMemo(
+    () => (encode ? [chosen?.reason ?? brief.reason] : shuffle([...brief.reasonChoices])),
+    [brief.id, brief.reason, brief.reasonChoices, encode, chosen],
+  )
+  const [phase, setPhase] = useState<Phase>('claim')
+  const [misses, setMisses] = useState(0)
+  const [flash, setFlash] = useState<string | null>(null)
+  const [shake, setShake] = useState(false)
+  const heldClaim = chosen?.claim ?? brief.claim
+  const heldReason = chosen?.reason ?? brief.reason
+
+  function pick(line: string, correct: string, next: Phase | 'done') {
+    if (line === correct) {
+      if (next === 'done') {
+        onHeld({ clean: misses === 0 })
+        return
+      }
+      setPhase(next)
+      return
+    }
+    const nextMisses = misses + 1
+    setMisses(nextMisses)
+    setFlash(line)
+    setShake(true)
+    window.setTimeout(() => {
+      setShake(false)
+      setFlash(null)
+      if (nextMisses >= 2) setPhase('teach')
+    }, 320)
+  }
+
+  function pickClaim(line: string) {
+    if (encode && own) {
+      const hit = lines.find((item) => item.claim === line)
+      if (hit) {
+        setChosen(hit)
+        setPhase('reason')
+        return
+      }
+    }
+    pick(line, brief.claim, 'reason')
+  }
+
+  function finishFromTeach() {
+    onHeld({ clean: false })
+  }
+
+  return (
+    <section
+      className={`recall-gate ${shake ? 'is-shake' : ''} phase-${phase} ${encode ? 'is-encode' : 'is-review'} ${own ? 'is-own' : ''}`}
+      aria-label={STORY.takeaway}
+    >
+      <p className="eyebrow">
+        {kicker}
+        {brief.source ? ` · ${brief.source}` : ''}
+      </p>
+
+      {phase === 'claim' ? (
+        <div className="recall-choices">
+          {claimOptions.map((line) => (
+            <button
+              key={line}
+              type="button"
+              className={`match-card recall-card ${flash === line ? 'is-flash' : ''}`}
+              onClick={() => pickClaim(line)}
+            >
+              {line}
+            </button>
+          ))}
+        </div>
+      ) : null}
+
+      {phase === 'reason' ? (
+        <>
+          <p className="recall-line rehearse-stem">{heldClaim}</p>
+          <h2>{STORY.whyItStands}</h2>
+          <div className="recall-choices">
+            {reasonOptions.map((line) => (
+              <button
+                key={line}
+                type="button"
+                className={`match-card recall-card ${flash === line ? 'is-flash' : ''}`}
+                onClick={() => pick(line, heldReason, 'done')}
+              >
+                {line}
+              </button>
+            ))}
+          </div>
+        </>
+      ) : null}
+
+      {phase === 'teach' ? (
+        <>
+          <h2>Here’s the line.</h2>
+          <article className="unlock-card pop-in">
+            <p className="recall-line">{heldClaim}</p>
+            <p>{heldReason}</p>
+          </article>
+          <button type="button" className="btn primary xl" onClick={finishFromTeach}>
+            Got it
+          </button>
+        </>
+      ) : null}
+    </section>
+  )
+}

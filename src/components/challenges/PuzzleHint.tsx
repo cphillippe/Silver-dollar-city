@@ -1,0 +1,33 @@
+import { useState } from 'react'
+
+export function PuzzleHint({
+  text,
+  onPeek,
+}: {
+  text?: string
+  onPeek?: () => void
+}) {
+  const [open, setOpen] = useState(false)
+  if (!text) return null
+
+  return (
+    <div className="hint-peek">
+      <button
+        type="button"
+        className="hint-toggle"
+        onClick={() => {
+          if (!open) onPeek?.()
+          setOpen((value) => !value)
+        }}
+      >
+        {open ? 'Hide' : 'Clue'}
+      </button>
+      {open ? (
+        <>
+          <p className="hint-cost">Won’t count as clean</p>
+          <p className="context">{text}</p>
+        </>
+      ) : null}
+    </div>
+  )
+}

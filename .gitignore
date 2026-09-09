@@ -1,0 +1,12 @@
+node_modules
+dist
+dist-ssr
+*.local
+.DS_Store
+dev-dist
+.vite
+tsconfig.tsbuildinfo
+node_modules/.tmp
+android/local.properties
+android/.gradle
+android/**/build

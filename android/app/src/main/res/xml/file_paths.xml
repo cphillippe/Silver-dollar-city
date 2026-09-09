@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Narrow grants for a future share/file plugin. Never the whole volume. -->
+    <cache-path name="share_cache" path="share/" />
+    <files-path name="share_files" path="share/" />
+    <external-files-path name="share_external" path="share/" />
+</paths>
