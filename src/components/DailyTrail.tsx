@@ -3,6 +3,7 @@ import { findPlayable, pillarFor } from '../content'
 import { dailyForDate } from '../content/daily'
 import { evidenceFor } from '../content/evidence'
 import { STORY, townVoice } from '../content/story'
+import { EASY, isEasy } from '../lib/easy'
 import { localDateKey } from '../lib/dates'
 import { useJuiceHandoff } from '../lib/juice'
 import { findLearning } from '../lib/learning'
@@ -25,6 +26,7 @@ interface DailyTrailProps {
 
 export function DailyTrail({ onNavigate }: DailyTrailProps) {
   const { completeDaily, recordReview, progress } = useProgress()
+  const easy = isEasy(progress)
   const now = new Date()
   const today = localDateKey(now)
   const morningsBefore = progress.dailyDates.filter((d) => d !== today).length
@@ -135,7 +137,7 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
         ) : (
           <>
             <h1 className="puzzle-title">
-              {isReview ? 'Time to dust off this one' : challenge.title}
+              {isReview ? (easy ? EASY.readAgain : 'Time to dust off this one') : challenge.title}
             </h1>
             <PuzzlePlay
               challenge={challenge}

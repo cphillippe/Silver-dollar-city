@@ -26,6 +26,7 @@ type Phase = 'claim' | 'reason' | 'teach'
  * Encode (right after lock-in): player taps the Keep they will hold, then
  * Why-it-stands for THAT line — no inversions, no silent auto-pick.
  * Review (dust-off): choose among decoys that are not word-flips of the keep.
+ * After every tap: Next/Done or loud success/miss. Reason never sits still.
  */
 export function RecallGate({
   brief,
@@ -62,13 +63,36 @@ export function RecallGate({
   const [misses, setMisses] = useState(0)
   const [flash, setFlash] = useState<string | null>(null)
   const [shake, setShake] = useState(false)
+  const [heldNote, setHeldNote] = useState(false)
   const heldClaim = chosen?.claim ?? brief.claim
   const heldReason = chosen?.reason ?? brief.reason
+  const confirmReason = encode || reasonOptions.length === 1
+
+  const nextTap =
+    phase === 'teach'
+      ? 'Read this, then tap Got it.'
+      : phase === 'reason'
+        ? confirmReason
+          ? easy
+            ? 'Read why it stands, then tap Done.'
+            : 'Tap Done when you have the reason.'
+          : easy
+            ? 'Tap the reason that still holds.'
+            : 'Tap the reason that holds.'
+        : easy
+          ? encode
+            ? 'Choose the sentence to remember.'
+            : 'Tap the sentence you still remember.'
+          : kicker
+
+  function settle(clean: boolean) {
+    onHeld({ clean })
+  }
 
   function pick(line: string, correct: string, next: Phase | 'done') {
     if (line === correct) {
       if (next === 'done') {
-        onHeld({ clean: misses === 0 })
+        settle(misses === 0)
         return
       }
       setPhase(next)
@@ -90,15 +114,19 @@ export function RecallGate({
       const hit = lines.find((item) => item.claim === line)
       if (hit) {
         setChosen(hit)
+        setHeldNote(true)
         setPhase('reason')
         return
       }
+    }
+    if (line === brief.claim || (encode && !own)) {
+      setHeldNote(true)
     }
     pick(line, brief.claim, 'reason')
   }
 
   function finishFromTeach() {
-    onHeld({ clean: false })
+    settle(false)
   }
 
   return (
@@ -107,13 +135,7 @@ export function RecallGate({
       aria-label={STORY.takeaway}
     >
       <p className="eyebrow">{brief.source ? brief.source : 'Hold'}</p>
-      <p className="next-tap">
-        {easy
-          ? encode
-            ? 'Tap the claim you will keep'
-            : 'Tap the claim you still hold'
-          : kicker}
-      </p>
+      <p className="next-tap">{nextTap}</p>
       {encode ? (
         easy ? (
           <p className="quiet">{EASY.claimTeach} You will hold this same line.</p>
@@ -149,20 +171,40 @@ export function RecallGate({
 
       {phase === 'reason' ? (
         <>
+          {heldNote ? (
+            <p className="match-toast" role="status">
+              <strong>Held.</strong>{' '}
+              {easy ? 'That sentence is yours to remember.' : 'That claim is yours to keep.'}
+            </p>
+          ) : null}
           <p className="recall-line rehearse-stem">{heldClaim}</p>
           <h2>{easy ? `${WORDS.reason.term} — ${WORDS.reason.sense}` : STORY.whyItStands}</h2>
-          <div className="recall-choices">
-            {reasonOptions.map((line) => (
+          {easy ? <p className="quiet">{WORDS.reason.teach}</p> : null}
+          {confirmReason ? (
+            <>
+              <p className="reason-held">{heldReason}</p>
               <button
-                key={line}
                 type="button"
-                className={`match-card recall-card ${flash === line ? 'is-flash' : ''}`}
-                onClick={() => pick(line, heldReason, 'done')}
+                className="btn primary xl recall-done"
+                onClick={() => settle(misses === 0)}
               >
-                {line}
+                Done
               </button>
-            ))}
-          </div>
+            </>
+          ) : (
+            <div className="recall-choices">
+              {reasonOptions.map((line) => (
+                <button
+                  key={line}
+                  type="button"
+                  className={`match-card recall-card ${flash === line ? 'is-flash' : ''}`}
+                  onClick={() => pick(line, heldReason, 'done')}
+                >
+                  {line}
+                </button>
+              ))}
+            </div>
+          )}
         </>
       ) : null}
 

@@ -467,6 +467,10 @@ assert.match(recallSrc, /is-own/)
 assert.match(recallSrc, /takeawayLines/)
 assert.match(recallSrc, /\[brief\.claim\]/)
 assert.match(recallSrc, /pickClaim/)
+assert.match(recallSrc, /recall-done/)
+assert.match(recallSrc, /Choose the sentence to remember/)
+assert.match(recallSrc, /Read why it stands, then tap Done/)
+assert.match(recallSrc, /recall-done[\s\S]*Done/)
 assert.match(dailyTrailSrc, /tile\.bin === 'keep'/)
 
 const matchSrc = readFileSync(
@@ -991,7 +995,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.0')
+assert.equal(APP_VERSION, '1.4.1')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -1110,6 +1114,10 @@ assert.match(linkPlaySrc, /Try again/)
 assert.match(linkPlaySrc, /match-recover/)
 assert.match(linkPlaySrc, /setStatus\('idle'\)/)
 assert.match(linkPlaySrc, /link-block/)
+assert.match(linkPlaySrc, /Link complete/)
+assert.match(linkPlaySrc, /wizard-step/)
+assert.match(linkPlaySrc, /Connect sentence → place → person/)
+assert.match(linkPlaySrc, /is-wizard/)
 
 const puzzleSrc = readFileSync(
   new URL('../src/components/PuzzlePlay.tsx', import.meta.url),
@@ -1273,6 +1281,18 @@ assert.match(
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
   /scrapbook of links/,
+)
+assert.match(
+  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  /Read today’s story/,
+)
+assert.match(
+  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  /Choose the sentence to remember/,
+)
+assert.match(
+  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  /Connect sentence → place → person/,
 )
 assert.match(hubSrc, /Do this next/)
 assert.match(hubSrc, /do-next/)

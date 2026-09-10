@@ -8,6 +8,17 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.1',
+    title: 'Plain next words',
+    when: '2026-09-10',
+    items: [
+      'Easy names the next tap in plain words: Read today’s story, Choose the sentence to remember, Connect sentence → place → person.',
+      'After you pick a sentence, Reason never sits still — you get Held, then Done (or a miss you can try again).',
+      'Link the street is a 3-step wizard: one pick per step, checkmarks, then Link complete.',
+      'A building you earned shows one Upgrade button. If you have not earned it yet, one sentence says what is missing. Upgrade still means a better building you earn by learning, not by paying.',
+    ],
+  },
+  {
     version: '1.4.0',
     title: 'A city you build',
     when: '2026-09-10',

@@ -5950,6 +5950,72 @@ html[data-theme='dusk'] .hub.is-town .street-link {
   animation: defend-shake 0.4s ease-in-out;
 }
 
+.link-grid.is-wizard {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.link-checks {
+  display: flex;
+  gap: 6px;
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+}
+
+.link-checks li {
+  flex: 1;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 4px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 204, 51, 0.35);
+  font-size: 0.78rem;
+  font-weight: 650;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.link-checks li.is-now {
+  border-color: #ffcc33;
+  box-shadow: 0 0 0 2px rgba(255, 204, 51, 0.28);
+}
+
+.link-checks li.is-done {
+  background: rgba(61, 204, 122, 0.28);
+  border-color: #3dcc7a;
+}
+
+.wizard-step {
+  margin: 0 0 6px;
+  font-weight: 650;
+}
+
+.link-complete {
+  margin: 4px 0 8px;
+  font-size: 1.2rem;
+  font-weight: 750;
+  color: #ffcc33;
+  text-align: center;
+}
+
+.link-next {
+  width: 100%;
+}
+
+.reason-held {
+  margin: 8px 0 12px;
+  font-size: 1.05rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.recall-done {
+  width: 100%;
+}
+
 .city-plot-hit {
   fill: transparent;
   pointer-events: all;

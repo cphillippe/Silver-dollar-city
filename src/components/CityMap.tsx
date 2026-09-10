@@ -322,7 +322,7 @@ export function CityMap({
     : nextKicker(nextStage, nextId, doneToday)
   const gift = anyUpgradeReady(progress)
     ? isEasy(progress)
-      ? 'A building is ready. Tap it and Upgrade — you earn looks by learning.'
+      ? 'A building is ready. Tap it, then Upgrade.'
       : 'A building is ready to upgrade. Tap it — learning raises the house.'
     : nextGift(nextId, nextStage, shownFill[nextId] ?? 0)
   const celebrating = Boolean(beat) || homecoming

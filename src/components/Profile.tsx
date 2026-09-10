@@ -142,7 +142,11 @@ export function Profile({ onNavigate }: ProfileProps) {
                 <AbilityMark ability={tool.id} size="sm" />
                 <span>
                   <strong>{tool.label}</strong>
-                  <em>Still locked — hold a line that opens it.</em>
+                  <em>
+                    {easy
+                      ? 'Still locked — hold a claim (what we hold to be true) that opens it.'
+                      : 'Still locked — hold a line that opens it.'}
+                  </em>
                 </span>
               </p>
             )}
@@ -181,7 +185,7 @@ export function Profile({ onNavigate }: ProfileProps) {
         ) : (
           <p className="quiet">
             {easy
-              ? 'Link the street from Town to match idea · place · person. Lit nodes reopen in your scrapbook of links.'
+              ? 'Link the street from Town. Connect sentence → place → person. Lit nodes reopen in your scrapbook of links.'
               : 'Link the street from Town to snap idea · place · person. Lit nodes reopen here.'}
           </p>
         )}
