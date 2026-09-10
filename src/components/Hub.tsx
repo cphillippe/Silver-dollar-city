@@ -5,7 +5,7 @@ import { LOT_STORY } from '../content/lots'
 import { localDateKey } from '../lib/dates'
 import { CITY_PLOTS, nextPlotId, type CityPlotId } from '../lib/city'
 import { lotTapWhy } from '../lib/cityBuild'
-import { EASY, isEasy } from '../lib/easy'
+import { EASY, easyTapNext, isEasy } from '../lib/easy'
 import { markLater, readLater, sessionDue } from '../lib/recall'
 import { Avatar } from './Avatar'
 import { ShareInvite } from './ShareInvite'
@@ -200,7 +200,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
           className={`btn tiny ${easy ? '' : 'gold'}`}
           onClick={() => onNavigate({ name: 'link' })}
         >
-          Link the street
+          {easy ? EASY.linkStreet : 'Link the street'}
         </button>
         {easy ? (
           <button
@@ -383,7 +383,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
       {easy ? (
         <div className="tap-next-dock" aria-label="Tap this next">
           <button type="button" className="btn gold xl" onClick={goNext}>
-            Tap this next
+            {easyTapNext(goal)}
           </button>
         </div>
       ) : null}

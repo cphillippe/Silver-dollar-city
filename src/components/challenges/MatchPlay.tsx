@@ -121,8 +121,8 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
       <p className="sort-how">
         {isEasy(progress) ? (
           <>
-            <strong>A claim is what we hold to be true.</strong> Tap a picture, then the claim
-            that belongs
+            <strong>A claim is the main idea we hold to be true.</strong> Tap a picture, then the
+            main idea that belongs
             {guided ? ' · two choices' : ''}
           </>
         ) : (
@@ -186,7 +186,7 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
           })}
         </div>
         <div className="match-col is-claims">
-          <p className="match-col-label">Claim</p>
+          <p className="match-col-label">{isEasy(progress) ? 'Main idea' : 'Claim'}</p>
           {shownRight.map((item, index) => (
             <button
               key={item.id}

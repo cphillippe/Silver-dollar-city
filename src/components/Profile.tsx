@@ -44,7 +44,7 @@ export function Profile({ onNavigate }: ProfileProps) {
         <p className="eyebrow">Held ideas / proofs</p>
         <h2>What you can still say</h2>
         {easy ? (
-          <p className="quiet">A claim is what we hold to be true. These are the claims you kept.</p>
+          <p className="quiet">A claim is the main idea we hold to be true. These are the main ideas you kept.</p>
         ) : null}
         {inv.ideas.length === 0 ? (
           <p className="quiet">

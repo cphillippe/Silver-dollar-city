@@ -9,8 +9,8 @@ export interface WordSense {
 export const WORDS = {
   claim: {
     term: 'Claim',
-    sense: 'what we hold to be true',
-    teach: 'A claim is what we hold to be true.',
+    sense: 'the main idea we hold to be true',
+    teach: 'A claim is the main idea we hold to be true.',
   },
   hold: {
     term: 'Hold',

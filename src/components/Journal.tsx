@@ -175,7 +175,7 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
           lines held from memory
           {waiting ? ` · ${waiting} ${easy ? 'due to read again' : 'due to dust off'}` : ''}.{' '}
           {easy
-            ? `${EASY.claimTeach} Open pages start face-down — rebuild the claim, then read.`
+            ? `${EASY.claimTeach} Open pages start face-down — rebuild the main idea, then read.`
             : 'Open pages start face-down — rebuild the claim, then read. Forgetting is why a page comes back.'}
         </p>
         <div

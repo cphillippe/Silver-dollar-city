@@ -472,7 +472,7 @@ assert.match(recallSrc, /takeawayLines/)
 assert.match(recallSrc, /\[brief\.claim\]/)
 assert.match(recallSrc, /pickClaim/)
 assert.match(recallSrc, /recall-done/)
-assert.match(recallSrc, /Choose the sentence to remember/)
+assert.match(recallSrc, /EASY.rememberSentence/)
 assert.match(recallSrc, /Read why it stands, then tap Done/)
 assert.match(recallSrc, /reasonLocked/)
 assert.match(recallSrc, /btn gold xl recall-done/)
@@ -1009,7 +1009,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.9')
+assert.equal(APP_VERSION, '1.4.10')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -1388,11 +1388,25 @@ assert.match(
 )
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /Choose the sentence to remember/,
+  /Choose the main idea to remember/,
 )
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /Connect sentence → place → person/,
+  /Match sentence → place → person/,
+)
+assert.match(
+  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  /Tap this next — short Jesus story/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/TeachUnlock.tsx', import.meta.url), 'utf8'),
+  /Skip reading/,
+)
+assert.match(hubSrc, /easyTapNext/)
+assert.match(hubSrc, /EASY\.linkStreet/)
+assert.match(
+  readFileSync(new URL('../src/content/lots.ts', import.meta.url), 'utf8'),
+  /Jesus-story creek/,
 )
 assert.doesNotMatch(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
@@ -1525,21 +1539,23 @@ assert.match(
 )
 assert.match(
   readFileSync(new URL('../src/lib/words.ts', import.meta.url), 'utf8'),
-  /A claim is what we hold to be true/,
+  /A claim is the main idea we hold to be true/,
 )
 assert.match(
   readFileSync(new URL('../src/lib/words.ts', import.meta.url), 'utf8'),
   /building block of an argument/,
 )
-assert.match(teachSrc, /A claim is what we hold to be true/)
+assert.match(teachSrc, /A claim is the main idea we hold to be true/)
 assert.match(teachSrc, /The claim you will hold/)
+assert.match(teachSrc, /Skip reading/)
+assert.match(teachSrc, /The main idea you will keep/)
 assert.ok(
   teachSrc.indexOf('teach-reason') < teachSrc.indexOf('brief.claim'),
   'teach story before the claim line',
 )
 assert.match(matchSrc, /match-col-label/)
-assert.match(matchSrc, />Claim</)
-assert.match(matchSrc, /A claim is what we hold to be true/)
+assert.match(matchSrc, /Main idea' : 'Claim'/)
+assert.match(matchSrc, /A claim is the main idea we hold to be true/)
 assert.match(cssSrc, /\.word-school/)
 assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
 

@@ -169,6 +169,7 @@ export function linkMiss(tripleId: string, step: LinkStep): string {
 
 /** Short label under the picture — not the full claim wall. */
 export function linkCaption(node: LinkNode, easy: boolean): string {
+  if (easy && node.id === 'place-hollow') return 'Jesus-story creek'
   if (node.kind === 'idea') {
     if (node.evidenceId === 'daily-lantern') return 'A lamp is meant to be seen.'
     if (node.evidenceId === 'ph-road') {
