@@ -41,7 +41,6 @@ export function TeachUnlock({ brief, kind, onUnlock, unlock, beats }: TeachUnloc
         <p className="eyebrow">Short story</p>
         {picture ? <GemMark gem={picture} size="sm" /> : null}
         <p className="teach-reason">{easyStoryCard(story)}</p>
-        <p className="quiet">A claim is the main idea we hold to be true.</p>
         <p className="eyebrow hold-kicker">The main idea you will keep</p>
         <p className="recall-line rehearse-stem">{brief.claim}</p>
         <div className="cta-dock easy-story-dock">

@@ -41,8 +41,9 @@ function keepDecoy(
 
 export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePlayProps) {
   const { progress } = useProgress()
+  const easy = isEasy(progress)
   const seed = useMemo(() => shuffle(challenge.items), [challenge.items])
-  const progressive = isEasy(progress) || challenge.items.length >= 4
+  const progressive = easy || challenge.items.length >= 4
   const [order, setOrder] = useState(seed)
   const [seats, setSeats] = useState<(SequenceItem | null)[]>(seed)
   const [chain, setChain] = useState<(SequenceItem | null)[]>(() =>
@@ -89,7 +90,9 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
       setMisses(nextMisses)
       setBreakHint(
         dest <= 0
-          ? 'The first stone is already off. The claim starts somewhere else.'
+          ? easy
+            ? 'The first stone is already off. The main idea starts somewhere else.'
+            : 'The first stone is already off. The claim starts somewhere else.'
           : `The first ${dest} sat right. The chain broke at step ${dest + 1} — try that stone again.`,
       )
       onMiss()

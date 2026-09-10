@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.11',
+    title: 'Easy main idea chrome + bigger map labels',
+    when: '2026-09-10',
+    items: [
+      'Easy teaches “A claim is the main idea we hold to be true” once, then chrome says main idea only.',
+      'Sort lock-in is Save your picks. Weak readings is wrong picks.',
+      'Town map labels are bigger at phone size — Hollow, Porch, and Square.',
+    ],
+  },
+  {
     version: '1.4.10',
     title: 'Easy short card + named next tap',
     when: '2026-09-10',

@@ -121,8 +121,7 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
       <p className="sort-how">
         {isEasy(progress) ? (
           <>
-            <strong>A claim is the main idea we hold to be true.</strong> Tap a picture, then the
-            main idea that belongs
+            <strong>Tap a picture</strong>, then the main idea that belongs
             {guided ? ' · two choices' : ''}
           </>
         ) : (
@@ -140,7 +139,9 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
               ? misses >= 2
                 ? 'One more look.'
                 : 'Those don’t snap.'
-              : 'Try the other claim.'}
+              : isEasy(progress)
+                ? 'Try the other main idea.'
+                : 'Try the other claim.'}
           </strong>{' '}
           {misses >= 2
             ? isEasy(progress)

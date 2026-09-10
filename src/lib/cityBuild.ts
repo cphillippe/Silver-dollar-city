@@ -261,7 +261,7 @@ function needForTier(id: CityPlotId, want: number, easy: boolean): string {
         : 'A second walk, a held claim, or Link the street furnishes this house.'
     }
     return easy
-      ? 'Finish a second walk here, or hold a claim — a claim is what we hold to be true.'
+      ? 'Finish a second walk here, or keep a main idea from this lot.'
       : 'A second walk or a held claim from this lot furnishes the rooms.'
   }
   return easy
@@ -288,6 +288,12 @@ export function plotTag(id: CityPlotId): string {
     case 'lamps':
       return 'Lamps'
   }
+}
+
+/** Easy map chips — Square, not Bench, so the street reads at 390px. */
+export function easyPlotTag(id: CityPlotId): string {
+  if (id === 'bench') return 'Square'
+  return plotTag(id)
 }
 
 export const STREET_LIGHT_PLOTS = STREET_LIGHTS

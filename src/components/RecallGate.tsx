@@ -176,7 +176,7 @@ export function RecallGate({
       <p className="next-tap">{nextTap}</p>
       {encode ? (
         easy ? (
-          <p className="quiet">{EASY.claimTeach} You will keep this main idea.</p>
+          <p className="quiet">You will keep this main idea.</p>
         ) : (
           <p className="learning-store">
             {picture ? <GemMark gem={picture} size="sm" /> : null}
@@ -187,10 +187,10 @@ export function RecallGate({
         <p className="quiet">
           {deeper
             ? easy
-              ? `${EASY.claimTeach} A new angle — not the first read again.`
+              ? 'A new angle — not the first read again.'
               : 'A new angle on a line you already hold — not the first teach again.'
             : easy
-              ? `${EASY.claimTeach} Then the reason — why it stands.`
+              ? 'Then the reason — why it stands.'
               : 'Rebuild the map — claim, then why it stands.'}
         </p>
       )}

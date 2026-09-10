@@ -6122,6 +6122,11 @@ html[data-theme='dusk'] .hub.is-town .street-link {
   animation: city-pulse 2.4s ease-in-out infinite;
 }
 
+.city-plot-tag-bg {
+  fill: rgba(58, 20, 128, 0.78);
+  pointer-events: none;
+}
+
 .city-plot-tag {
   fill: #fffce8;
   font-family: var(--sans);
@@ -6132,6 +6137,22 @@ html[data-theme='dusk'] .hub.is-town .street-link {
   stroke: #3a1480;
   stroke-width: 3.5px;
   pointer-events: none;
+}
+
+html[data-easy='on'] .city-plot-tag {
+  font-size: 22px;
+  font-weight: 800;
+  stroke-width: 5px;
+}
+
+html[data-easy='on'] .city-plot-tag-bg {
+  fill: rgba(28, 8, 56, 0.88);
+}
+
+@media (max-width: 430px) {
+  html[data-easy='on'] .hub.is-town .city-svg {
+    min-height: 340px;
+  }
 }
 
 .mind-map {

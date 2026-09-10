@@ -49,6 +49,7 @@ import {
   anyUpgradeReady,
   canUpgrade,
   lotTapWhy,
+  easyPlotTag,
   plotTag,
   visualFills,
   visualSnapshot,
@@ -798,13 +799,21 @@ function PlotGroup({
   ready: boolean
   onOpen: (id: CityPlotId) => void
 }) {
-  const clickable = stage !== 'empty' || next || ready
+  const { progress } = useProgress()
+  const easy = isEasy(progress)
+  const streetLot = id === 'porch' || id === 'hollow' || id === 'bench'
+  const clickable = stage !== 'empty' || next || ready || (easy && streetLot)
   const at = ANCHOR[id]
   const vacant = stage === 'empty' && !next && !ready
   const title = CITY_PLOTS.find((plot) => plot.id === id)?.title ?? id
+  const scale = easy ? 1.92 : BUILD_SCALE
+  const hit = easy ? 64 : 42
+  const tag = easy ? easyPlotTag(id) : plotTag(id)
+  const showTag = clickable || (easy && streetLot)
+  const tagW = Math.max(easy ? 86 : 64, tag.length * (easy ? 13 : 8) + 20)
   return (
     <g
-      className={`city-plot is-${stage} ${next ? 'is-next' : ''} ${rising ? 'is-rising' : ''} ${tapped ? 'is-tapped' : ''} ${ready ? 'is-ready' : ''}`}
+      className={`city-plot is-${stage} ${next ? 'is-next' : ''} ${rising ? 'is-rising' : ''} ${tapped ? 'is-tapped' : ''} ${ready ? 'is-ready' : ''} ${easy ? 'is-easy-lot' : ''}`}
       role={clickable ? 'button' : undefined}
       tabIndex={clickable ? 0 : undefined}
       aria-label={`${title} ${stage}${ready ? ', upgrade ready' : ''}${next ? ', next to build' : ''}${rising ? ', just rose' : ''}`}
@@ -820,11 +829,11 @@ function PlotGroup({
       }}
     >
       {clickable ? (
-        <circle className="city-plot-hit" cx={at.x} cy={at.y} r="42" />
+        <circle className="city-plot-hit" cx={at.x} cy={at.y} r={hit} />
       ) : null}
       {vacant ? (
-        next ? (
-          <g className="city-lot is-staked" transform={`translate(${at.x} ${at.y}) scale(${BUILD_SCALE})`}>
+        next || (easy && streetLot) ? (
+          <g className="city-lot is-staked" transform={`translate(${at.x} ${at.y}) scale(${scale})`}>
             <ellipse rx="20" ry="9" className="city-earth" />
             <path
               className="city-timber"
@@ -833,14 +842,24 @@ function PlotGroup({
           </g>
         ) : null
       ) : (
-        <g transform={`translate(${at.x} ${at.y}) scale(${BUILD_SCALE}) translate(${-at.x} ${-at.y})`}>
+        <g transform={`translate(${at.x} ${at.y}) scale(${scale}) translate(${-at.x} ${-at.y})`}>
           <PlotArt id={id} stage={stage} fill={fill} rising={rising} />
         </g>
       )}
-      {clickable ? (
-        <text className="city-plot-tag" x={at.x} y={at.y + 46} textAnchor="middle">
-          {plotTag(id)}
-        </text>
+      {showTag ? (
+        <>
+          <rect
+            className="city-plot-tag-bg"
+            x={at.x - tagW / 2}
+            y={at.y + (easy ? 36 : 32)}
+            width={tagW}
+            height={easy ? 28 : 18}
+            rx={easy ? 10 : 7}
+          />
+          <text className="city-plot-tag" x={at.x} y={at.y + (easy ? 56 : 46)} textAnchor="middle">
+            {tag}
+          </text>
+        </>
       ) : null}
       {rising ? (
         <g className="city-sparks" transform={`translate(${at.x} ${at.y})`}>

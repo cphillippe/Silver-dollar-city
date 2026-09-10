@@ -44,7 +44,7 @@ export function Profile({ onNavigate }: ProfileProps) {
         <p className="eyebrow">Held ideas / proofs</p>
         <h2>What you can still say</h2>
         {easy ? (
-          <p className="quiet">A claim is the main idea we hold to be true. These are the main ideas you kept.</p>
+          <p className="quiet">These are the main ideas you kept.</p>
         ) : null}
         {inv.ideas.length === 0 ? (
           <p className="quiet">
@@ -144,7 +144,7 @@ export function Profile({ onNavigate }: ProfileProps) {
                   <strong>{tool.label}</strong>
                   <em>
                     {easy
-                      ? 'Still locked — hold a claim (what we hold to be true) that opens it.'
+                      ? 'Still locked — keep a main idea that opens it.'
                       : 'Still locked — hold a line that opens it.'}
                   </em>
                 </span>
@@ -185,7 +185,7 @@ export function Profile({ onNavigate }: ProfileProps) {
         ) : (
           <p className="quiet">
             {easy
-              ? 'Link the street from Town. Connect sentence → place → person. Lit nodes reopen in your scrapbook of links.'
+              ? 'Match sentence → place → person from Town. Tap a place later to open what you matched.'
               : 'Link the street from Town to snap idea · place · person. Lit nodes reopen here.'}
           </p>
         )}
