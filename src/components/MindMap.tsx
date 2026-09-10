@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { evidenceFor } from '../content/evidence'
 import { journalForChallenge } from '../content'
 import { plainFor } from '../content/plain'
@@ -55,7 +56,7 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
     onNavigate({ name: 'journal', focusId: page?.id ?? id })
   }
 
-  return (
+  const sheet = (
     <div
       className="mind-map is-manage"
       role="dialog"
@@ -173,4 +174,5 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
       </div>
     </div>
   )
+  return typeof document === 'undefined' ? sheet : createPortal(sheet, document.body)
 }

@@ -1009,7 +1009,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.6')
+assert.equal(APP_VERSION, '1.4.7')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -1156,6 +1156,12 @@ assert.match(
   readFileSync(new URL('../src/components/MindMap.tsx', import.meta.url), 'utf8'),
   /mind-map-dock/,
 )
+assert.match(
+  readFileSync(new URL('../src/components/MindMap.tsx', import.meta.url), 'utf8'),
+  /createPortal/,
+)
+assert.match(cssSrc, /position:\s*fixed/)
+assert.match(hubSrc, /EASY\.nightDo/)
 assert.match(cssSrc, /mind-map-dock/)
 assert.match(cssSrc, /link-dock/)
 assert.match(cssSrc, /cta-dock/)
