@@ -11,7 +11,7 @@ A stranger should know in 60 seconds: this is a **Christian reasoning game**. So
 **Sticky public preview (GitHub Pages):**  
 https://cphillippe.github.io/Silver-dollar-city/
 
-Hard-reload once if you still see the old game (the PWA can keep a cached copy). Live bundle is `index-Dh_vOF6X.js` — Observatory miss recovers (Try again + two-choice); Designer hold and triad placement unchanged.
+Hard-reload once if you still see the old game (the PWA can keep a cached copy). Live bundle is `index-DbGu2T_v.js` — V0 **1.3.0**; Settings What’s new; Observatory miss recovery unchanged.
 
 Pages deploys `docs/` from `main` once that source is selected. Until then the same `docs/` is also on `cursor/silver-city-unending-evidence-8233`. Hard-reload github.io after it updates.
 
