@@ -62,7 +62,7 @@ export const journalEntries: JournalEntry[] = [
     unlockAfter: 'wb-creed',
     body: [
       '1 Corinthians 15:3–5 is a compressed public claim: death, burial, raising, appearances. Paul presents it as received tradition, not as a private dream. Burial resists a merely “spiritual” death; appearances resist a merely “spiritual” raising.',
-      'Whatever one concludes, this is what the churches were already handing on when Paul wrote — a mid-first-century letter appealing to a still-earlier formula.',
+      'This is what the churches were already handing on when Paul wrote — a mid-first-century letter appealing to a still-earlier formula.',
     ],
     sources: ['1 Corinthians 15:3–8'],
   },
@@ -121,7 +121,9 @@ export const journalEntries: JournalEntry[] = [
       'Life-permitting ranges are extravagantly narrow across independent parameters; design predicts a habitable cosmos, blank chance does not.',
     ],
     sources: [
-      'Fine-tuning of physical constants and initial conditions (e.g. cosmological constant; Penrose’s low-entropy start — initial condition, not another force dial).',
+      'Fine-tuning of physical constants and initial conditions (e.g. cosmological constant; a low-entropy start — an initial condition, not another force dial).',
+      'Aquinas, ST I, q.2, a.3 (Fifth Way); Psalm 19; Romans 1',
+      'Robin Collins, The Fine-Tuning Design Argument',
     ],
   },
   {
@@ -135,7 +137,8 @@ export const journalEntries: JournalEntry[] = [
       'Life-permitting ranges are extravagantly narrow; a Designer who wants observers leads us to expect that fit — blank indifference does not.',
     ],
     sources: [
-      'Likelihood / fine-tuning arguments (Collins; Rees; Penrose low-entropy as initial condition, not another force dial).',
+      'Likelihood / fine-tuning arguments (Collins). A low-entropy start is an initial condition, not another force dial.',
+      'Aquinas, ST I, q.2, a.3 (Fifth Way); Psalm 19; Romans 1',
     ],
   },
   {
@@ -160,7 +163,7 @@ export const journalEntries: JournalEntry[] = [
     kicker: 'The Observatory',
     unlockAfter: 'ob-life',
     body: [
-      'The origin of life is an unfinished scientific story and a live philosophical clue. Cells require specified information and coordinated function. That is not a rumor; it is biology.',
+      'Life’s specified information is a mark of mind. Cells require coordinated function. That is not a rumor; it is biology.',
       'Treat the unfinished story as a place for wonder and for more work — and as a mark of mind. Do not stop the lab. Do not shrug the information away.',
     ],
     sources: [
@@ -238,7 +241,7 @@ export const journalEntries: JournalEntry[] = [
       'Duty presents itself as more than taste. A good God is the ground of a good law — the home that fits. Romans 2 treats that knowledge as widely shared, which is why injustice still has a name.',
       'Romans 2:14–15 treats moral knowledge as widely shared. That is why strangers can still accuse one another of injustice and expect the accusation to mean something.',
     ],
-    sources: ['Romans 2:14–15', 'Modern moral arguments and atheist moral realism'],
+    sources: ['Romans 2:14–15', 'Aquinas, ST I-II, q.91', 'Augustine, City of God XIX'],
   },
   {
     id: 'j-hl-2',
@@ -251,7 +254,8 @@ export const journalEntries: JournalEntry[] = [
       'A living God is the home of mind: not an accident at the end of an indifferent process, but present at the beginning.',
     ],
     sources: [
-      'Chalmers on the hard problem',
+      'Augustine, De Trinitate X',
+      'John 1:1–4',
       'Classical theism on God as living intellect',
     ],
   },
@@ -274,7 +278,7 @@ export const journalEntries: JournalEntry[] = [
     kicker: 'The High Lookout',
     unlockAfter: 'hl-beauty',
     body: [
-      'Lewis’s argument from desire does not deduct God from a sunset. It notices that beauty wakes a hunger it cannot feed, and that hungers usually correspond to real countries.',
+      'Beauty wakes a hunger it cannot feed — longing for a country the sunset cannot give. Hungers like that usually correspond to real countries.',
       'Psalm 19 treats the sky as speech. The observatory and the lookout are the same ridge at two hours of the day: measurement at dusk, longing after dark. The trail is unending because the object, if real, is not smaller than a game.',
     ],
     sources: [

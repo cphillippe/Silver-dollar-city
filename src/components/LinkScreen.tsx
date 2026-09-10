@@ -4,6 +4,7 @@ import { STORY } from '../content/story'
 import { useJuiceHandoff } from '../lib/juice'
 import { PuzzlePlay } from './PuzzlePlay'
 import { TownReturn } from './TownReturn'
+import { DigDeeper } from './DigDeeper'
 import { useProgress } from '../store/progress'
 import type { View } from '../types'
 
@@ -79,6 +80,7 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
       ) : (
         <section className="after-win">
           <p className="quiet">{challenge.deeper}</p>
+          <DigDeeper id={challenge.id} />
           <TownReturn
             who="juniper"
             line="Tap a place on the map — the mind map holds what you linked."

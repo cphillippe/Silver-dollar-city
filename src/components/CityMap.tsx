@@ -378,7 +378,7 @@ export function CityMap({
             </feMerge>
           </filter>
           <clipPath id="city-face-clip" clipPathUnits="objectBoundingBox">
-            <circle cx="0.5" cy="0.5" r="0.36" />
+            <circle cx="0.5" cy="0.5" r="0.48" />
           </clipPath>
         </defs>
 
@@ -631,6 +631,7 @@ export function CityMap({
               <h2>{CITY_AGE_TITLE[age]}</h2>
               <p className="city-age-line">{CITY_AGE_LINE[age]}</p>
               <p className="city-gift">{gift}</p>
+              <p className="city-map-hint">Tap a place for its mind map.</p>
               {doneToday ? (
                 <p className="city-morrow">Town held. A lamp waits tomorrow.</p>
               ) : null}

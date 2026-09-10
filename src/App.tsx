@@ -8,6 +8,7 @@ import { Journal } from './components/Journal'
 import { Settings } from './components/Settings'
 import { DefendScreen } from './components/DefendScreen'
 import { LinkScreen } from './components/LinkScreen'
+import { Profile } from './components/Profile'
 import { Vista } from './components/Vista'
 import { Welcome } from './components/Welcome'
 import { useProgress } from './store/progress'
@@ -41,7 +42,9 @@ export default function App() {
   return (
     <AppShell view={view} onNavigate={setView}>
       {view.name === 'welcome' ? <Welcome onNavigate={setView} /> : null}
-      {view.name === 'hub' ? <Hub onNavigate={setView} /> : null}
+      {view.name === 'hub' ? (
+        <Hub onNavigate={setView} openPlot={view.mindPlot} />
+      ) : null}
       {view.name === 'daily' ? <DailyTrail onNavigate={setView} /> : null}
       {view.name === 'area' ? (
         <AreaView areaId={view.areaId} onNavigate={setView} />
@@ -65,6 +68,7 @@ export default function App() {
       {view.name === 'settings' ? <Settings onNavigate={setView} /> : null}
       {view.name === 'defend' ? <DefendScreen onNavigate={setView} /> : null}
       {view.name === 'link' ? <LinkScreen onNavigate={setView} /> : null}
+      {view.name === 'profile' ? <Profile onNavigate={setView} /> : null}
     </AppShell>
   )
 }

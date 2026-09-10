@@ -53,7 +53,7 @@ export const parableHollow: Area = {
       teachOnWrong:
         'Luke’s force depends on order: religious insiders fail first; the unexpected outsider becomes the measure of neighbor-love. Try again.',
       deeper:
-        'Samaritans and Judeans were divided by worship and memory (see John 4:9). Jesus does not define “neighbor” as the person who looks like you. He makes the listener identify with the wounded man — and then with costly mercy.',
+        'Samaritans and Judeans were divided by worship and memory (see John 4:9). Jesus flips the question (Luke 10:36): mercy proves who the neighbor is. He makes the listener identify with the wounded man — and then with costly mercy.',
     },
     {
       kind: 'sort',

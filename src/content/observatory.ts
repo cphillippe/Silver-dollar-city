@@ -46,7 +46,7 @@ export const observatory: Area = {
           scene: 'tidy',
           left: 'Early-universe entropy',
           right:
-            'Penrose: the initial low-entropy state is extravagantly special — an initial condition, not another force dial',
+            'The initial low-entropy state is extravagantly special — an initial condition, not another force dial',
         },
         {
           id: 'ratio',
@@ -59,7 +59,7 @@ export const observatory: Area = {
       teachOnWrong:
         'Ask what breaks if the number moves. Those extravagantly narrow, habitable ranges are the mark of a Designer.',
       deeper:
-        'Design predicts this cosmos: cosmological constant, nuclear binding, Penrose’s low-entropy start, gravity against electromagnetism — extravagantly narrow, habitable. That fit points to a Designer.',
+        'Design predicts this cosmos: cosmological constant, nuclear binding, a low-entropy start, gravity against electromagnetism — extravagantly narrow, habitable. That fit points to a Designer.',
     },
     {
       kind: 'build-argument',
@@ -170,7 +170,7 @@ export const observatory: Area = {
       kind: 'sort',
       id: 'ob-life',
       title: 'The threshold of life',
-      idea: 'an unfinished origin story is not a closed file',
+      idea: 'life’s specified information is a mark of mind',
       prompt: 'Keep the careful statement. Toss the gaps — a wrong toss bounces back.',
       context:
         'Cells store specified information and run a coordinated metabolism. Abiogenesis is an open research program — not a closed chapter.',

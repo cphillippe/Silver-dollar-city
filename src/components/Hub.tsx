@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { areas, findPlayable } from '../content'
 import { STORY, townVoice } from '../content/story'
 import { formatDeviceLocalDate, localDateKey } from '../lib/dates'
@@ -27,9 +27,10 @@ import type { View } from '../types'
 
 interface HubProps {
   onNavigate: (view: View) => void
+  openPlot?: string
 }
 
-export function Hub({ onNavigate }: HubProps) {
+export function Hub({ onNavigate, openPlot }: HubProps) {
   const { progress } = useProgress()
   const today = localDateKey()
   const doneToday = dailyDoneToday(progress, today)
@@ -40,15 +41,48 @@ export function Hub({ onNavigate }: HubProps) {
   const goal = getNextGoal(progress, today)
   const nextId = nextPlotId(progress, doneToday)
   const watchOpen = unlockedWatchAbilities(progress)
-  const [mindPlot, setMindPlot] = useState<CityPlotId | null>(null)
+  const requested =
+    openPlot && CITY_PLOTS.some((plot) => plot.id === openPlot)
+      ? (openPlot as CityPlotId)
+      : null
+  const [mindPlot, setMindPlot] = useState<CityPlotId | null>(requested)
+
+  useEffect(() => {
+    setMindPlot(requested)
+  }, [requested])
+
+  function setPlot(id: CityPlotId | null) {
+    setMindPlot(id)
+    if (!id && openPlot) onNavigate({ name: 'hub' })
+  }
 
   return (
     <main className="hub is-town is-inhabited" aria-label="The town">
       <CityMap
         onNavigate={onNavigate}
         mindPlot={mindPlot}
-        onMindPlot={setMindPlot}
+        onMindPlot={setPlot}
       />
+
+      <nav className="town-tools" aria-label="Town actions">
+        <button type="button" className="btn tiny" onClick={() => setPlot(nextId)}>
+          Mind map
+        </button>
+        <button
+          type="button"
+          className="btn tiny gold"
+          onClick={() => onNavigate({ name: 'link' })}
+        >
+          Link the street
+        </button>
+        <button
+          type="button"
+          className="btn tiny"
+          onClick={() => onNavigate({ name: 'profile' })}
+        >
+          Profile
+        </button>
+      </nav>
 
       <section
         className={`street-link ${progress.completed.includes('ln-street') ? 'is-held' : ''}`}
@@ -196,7 +230,7 @@ export function Hub({ onNavigate }: HubProps) {
               <button
                 type="button"
                 className="btn tiny"
-                onClick={() => setMindPlot(plot.id)}
+                onClick={() => setPlot(plot.id)}
               >
                 Mind map
               </button>

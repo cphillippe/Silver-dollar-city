@@ -1,6 +1,7 @@
 import { deployLabel, withLearningBeat } from '../lib/learning'
 import type { Learning } from '../types'
 import { GemMark } from './GemMark'
+import { DigDeeper } from './DigDeeper'
 
 interface StoredLineProps {
   learning: Learning
@@ -28,6 +29,7 @@ export function StoredLine({ learning, when }: StoredLineProps) {
         </span>
       </p>
       {when ? <p className="quiet">{when}</p> : null}
+      <DigDeeper id={stored.id} />
     </article>
   )
 }

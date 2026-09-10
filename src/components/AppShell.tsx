@@ -10,7 +10,7 @@ interface AppShellProps {
 }
 
 export function AppShell({ view, onNavigate, children }: AppShellProps) {
-  const { progress, reset } = useProgress()
+  const { progress } = useProgress()
   const goal = getNextGoal(progress)
   const waiting = dueCount(progress)
   const hideChrome = view.name === 'welcome'
@@ -19,7 +19,8 @@ export function AppShell({ view, onNavigate, children }: AppShellProps) {
     view.name === 'challenge' ||
     view.name === 'journal' ||
     view.name === 'defend' ||
-    view.name === 'link'
+    view.name === 'link' ||
+    view.name === 'profile'
   const townView = view.name === 'hub'
   const hideGoalbar = hideChrome || playView || townView
 
@@ -47,15 +48,6 @@ export function AppShell({ view, onNavigate, children }: AppShellProps) {
     if (goal.areaId) {
       onNavigate({ name: 'area', areaId: goal.areaId })
     }
-  }
-
-  function confirmReset() {
-    const ok = window.confirm(
-      'Clear all saved progress on this device and return to the start?',
-    )
-    if (!ok) return
-    reset()
-    onNavigate({ name: 'welcome' })
   }
 
   return (
@@ -96,17 +88,12 @@ export function AppShell({ view, onNavigate, children }: AppShellProps) {
             >
               Journal
             </button>
-            {!playView ? (
-              <button
-                type="button"
-                className={view.name === 'settings' ? 'is-active' : ''}
-                onClick={() => onNavigate({ name: 'settings' })}
-              >
-                Settings
-              </button>
-            ) : null}
-            <button type="button" className="subtle" onClick={confirmReset}>
-              Reset
+            <button
+              type="button"
+              className={view.name === 'settings' ? 'is-active' : ''}
+              onClick={() => onNavigate({ name: 'settings' })}
+            >
+              Settings
             </button>
           </nav>
         </header>

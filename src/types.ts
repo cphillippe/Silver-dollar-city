@@ -264,7 +264,7 @@ export interface ProgressState {
 
 export type View =
   | { name: 'welcome' }
-  | { name: 'hub' }
+  | { name: 'hub'; mindPlot?: string }
   | { name: 'daily' }
   | { name: 'area'; areaId: string }
   | { name: 'challenge'; areaId: string; challengeId: string }
@@ -273,3 +273,4 @@ export type View =
   | { name: 'settings' }
   | { name: 'defend' }
   | { name: 'link' }
+  | { name: 'profile' }
