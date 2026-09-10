@@ -5806,6 +5806,12 @@ html[data-theme='dusk'] .hub.is-town .street-link {
   animation: defend-shake 0.4s ease-in-out;
 }
 
+.city-plot-hit {
+  fill: transparent;
+  pointer-events: all;
+  cursor: pointer;
+}
+
 .mind-map {
   position: absolute;
   inset: 0;
