@@ -83,7 +83,7 @@ export const witnessBench: Area = {
       teachOnWrong:
         'The letter is mid-first-century. “I received / I delivered” is tradition language — weighty testimony, not a lab rerun.',
       deeper:
-        'Compare Luke 1:1–4: a first-century writer claiming inquiry among eyewitnesses. That posture can be tested. It should not be sneered out of court in advance.',
+        'Compare Luke 1:1–4: a first-century writer claiming inquiry among eyewitnesses. That posture can be tested. It stands to be weighed.',
     },
     {
       kind: 'match',

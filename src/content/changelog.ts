@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.3.7',
+    title: 'Kalām, positively',
+    when: '2026-09-10',
+    items: [
+      'First Gate journal: the kalām syllogism leads cleanly — what begins has a cause. Sources are Philoponus and al-Ghazālī first; Craig is the modern statement only.',
+      'Witness Bench: Luke’s inquiry posture stands to be weighed.',
+    ],
+  },
+  {
     version: '1.3.6',
     title: 'Teach the words',
     when: '2026-09-10',
