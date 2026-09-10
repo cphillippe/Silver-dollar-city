@@ -14,6 +14,7 @@ import { StoredLine } from './StoredLine'
 import { TeachUnlock } from './TeachUnlock'
 import { TownReturn } from './TownReturn'
 import {
+  areaGateCopy,
   isAreaUnlocked,
   useProgress,
 } from '../store/progress'
@@ -89,7 +90,13 @@ export function ChallengeScreen({
   if (!unlocked || !priorDone) {
     return (
       <main className="page">
-        <p>This challenge is still gated. Return to the district map.</p>
+        <p>
+          {unlocked
+            ? isEasy(progress)
+              ? 'This walk is locked. Finish the walk before it on this street first.'
+              : 'This walk is still waiting. Finish the earlier challenge on this street first.'
+            : areaGateCopy(area.id, progress.completed, isEasy(progress))}
+        </p>
         <button
           type="button"
           className="btn primary"

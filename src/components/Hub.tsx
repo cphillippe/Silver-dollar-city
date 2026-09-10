@@ -4,6 +4,7 @@ import { STORY, townVoice } from '../content/story'
 import { LOT_STORY } from '../content/lots'
 import { localDateKey } from '../lib/dates'
 import { CITY_PLOTS, nextPlotId, type CityPlotId } from '../lib/city'
+import { lotTapWhy } from '../lib/cityBuild'
 import { EASY, isEasy } from '../lib/easy'
 import { markLater, readLater, sessionDue } from '../lib/recall'
 import { Avatar } from './Avatar'
@@ -14,6 +15,7 @@ import { AbilityMark } from './GemMark'
 import { unlockedWatchAbilities } from '../lib/defend'
 import { TIER_MARK, toolTier, WATCH_TOOLS } from '../lib/watchTools'
 import {
+  areaGateCopy,
   dailyDoneToday,
   dueCount,
   getNextGoal,
@@ -216,13 +218,19 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
           <Avatar who="juniper" size="sm" />
           <div>
             <p className="eyebrow">{progress.defense.cleared ? 'Still watched' : 'Night Watch'}</p>
-            <h2>Hold the night</h2>
-            <p className="quiet">Learn · hold · deploy</p>
+            <h2>{easy ? 'Use a sentence you kept' : 'Hold the night'}</h2>
+            <p className="quiet">
+              {easy ? `${EASY.claimTeach} ${EASY.deployTeach}` : 'Learn · hold · deploy'}
+            </p>
             <p className="town-line">
-              Held lines turn the night toward heaven
+              {easy
+                ? EASY.nightWhat
+                : 'Held lines turn the night toward heaven'}
               {progress.defense.cleared
                 ? ` · ${progress.defense.cleared} night${progress.defense.cleared === 1 ? '' : 's'} held.`
-                : '.'}
+                : easy
+                  ? ''
+                  : '.'}
             </p>
             <p className="night-watch-gems" aria-label="Night abilities">
               {WATCH_TOOLS.map((tool) => (
@@ -239,10 +247,10 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
         </div>
         <button
           type="button"
-          className="btn gold"
+          className="btn gold xl"
           onClick={() => onNavigate({ name: 'defend' })}
         >
-          Hold the night
+          {easy ? EASY.nightDo : 'Hold the night'}
         </button>
       </section>
 
@@ -279,6 +287,23 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
                   {current ? <span className="street-next">Next</span> : null}
                 </div>
               </div>
+              {unlocked ? null : (
+                <p className="street-lock">
+                  {lotTapWhy(
+                    plot.id,
+                    progress,
+                    easy,
+                    unlocked,
+                    plot.areaId
+                      ? areaGateCopy(plot.areaId, progress.completed, easy)
+                      : '',
+                    doneToday,
+                  ) ??
+                    (easy
+                      ? 'This street is locked. Finish the walk before it first.'
+                      : 'This gate is still closed.')}
+                </p>
+              )}
               <button
                 type="button"
                 className="btn tiny"
@@ -289,9 +314,12 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
               <button
                 type="button"
                 className={`btn tiny ${complete && unlocked ? 'street-rehearse' : ''} ${current && unlocked && !complete ? 'gold' : ''}`}
-                disabled={!unlocked}
                 aria-label={complete && unlocked ? STORY.takeaway : undefined}
                 onClick={() => {
+                  if (!unlocked) {
+                    setPlot(plot.id)
+                    return
+                  }
                   if (complete) {
                     onNavigate(
                       rehearseGo(
@@ -309,9 +337,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
                 }}
               >
                 {!unlocked
-                  ? plot.areaId === 'witness-bench'
-                    ? 'Two Hollow walks'
-                    : 'Gated'
+                  ? 'Why locked'
                   : complete
                     ? 'Hold the line'
                     : current

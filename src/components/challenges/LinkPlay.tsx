@@ -194,6 +194,19 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
           ? 'Connect sentence → place → person'
           : 'Tap idea → place → person'
 
+  const missNeed =
+    step === 'place'
+      ? easy
+        ? 'Wrong place. This sentence lives at its own lot — pick that place.'
+        : 'Wrong lot. Snap the idea to the place that keeps it.'
+      : step === 'person'
+        ? easy
+          ? 'Wrong person. Pick who keeps this place.'
+          : 'Wrong keeper. The person who lives on that lot is the match.'
+        : easy
+          ? 'Wrong sentence. Pick the sentence for this story, then its place, then its person.'
+          : 'Wrong idea. Pick the claim, then its place, then its person.'
+
   const wizardCue =
     step === 'linked' || status === 'ok'
       ? null
@@ -216,9 +229,11 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
           <li className="is-done">✓ Place</li>
           <li className="is-done">✓ Person</li>
         </ol>
-        <button type="button" className="btn gold xl link-next" onClick={finishStreet}>
-          Done
-        </button>
+        <div className="link-dock">
+          <button type="button" className="btn gold xl link-next" onClick={finishStreet}>
+            Done
+          </button>
+        </div>
       </div>
     )
   }
@@ -231,6 +246,7 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
       <PuzzleHint text={challenge.context} id={challenge.id} onPeek={onPeek} />
       <p className="next-tap">{nextTap}</p>
       {wizardCue ? <p className="quiet wizard-step">{wizardCue}</p> : null}
+      {easy ? <p className="quiet">A claim is what we hold to be true. Pick the sentence, then the place, then the person.</p> : null}
 
       <ol className="link-checks" aria-label="Link steps">
         <li className={marks.idea ? 'is-done' : step === 'idea' ? 'is-now' : ''}>
@@ -246,22 +262,7 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
 
       {status === 'wrong' || misses > 0 ? (
         <p className="match-toast" role="status">
-          <strong>
-            {status === 'wrong'
-              ? misses >= 2
-                ? 'One more look.'
-                : easy
-                  ? 'Not that one.'
-                  : 'Those don’t snap.'
-              : 'Try another pick.'}
-          </strong>{' '}
-          {misses >= 2
-            ? easy
-              ? 'Same story: sentence, place, person.'
-              : challenge.teachOnWrong
-            : easy
-              ? 'Same story: sentence, place, person.'
-              : 'Same story: idea, place, person.'}
+          {missNeed}
         </p>
       ) : null}
 
@@ -272,9 +273,11 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
       ) : null}
 
       {step === 'linked' ? (
-        <button type="button" className="btn primary xl link-next" onClick={nextLink}>
-          Next
-        </button>
+        <div className="link-dock">
+          <button type="button" className="btn primary xl link-next" onClick={nextLink}>
+            Next
+          </button>
+        </div>
       ) : (
         <div className="link-grid is-wizard">
           <div className={`link-col is-${step}`}>

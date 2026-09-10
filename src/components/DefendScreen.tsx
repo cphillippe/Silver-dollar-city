@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { evidenceFor } from '../content/evidence'
 import { WATCH_KICKER, WATCH_LEAD, WATCH_TITLE } from '../content/defend'
 import { STORY } from '../content/story'
-import { isEasy } from '../lib/easy'
+import { EASY, isEasy } from '../lib/easy'
 import { localDateKey } from '../lib/dates'
 import {
   DEFEND_ANCHOR,
@@ -71,12 +71,14 @@ interface Blast {
 
 export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const { progress, recordNight, recordReview, markMiss } = useProgress()
+  const easy = isEasy(progress)
   const today = localDateKey()
   const brief = evidenceFor(DEFEND_BRIEF_ID)
   const pads = defendPads(progress)
   const unlocked = unlockedWatchAbilities(progress)
   const [ability, setAbility] = useState<WatchAbility>(() => unlocked[0] ?? 'love')
   const [taught, setTaught] = useState(false)
+  const [toolLock, setToolLock] = useState<string | null>(null)
   const [arming, setArming] = useState(false)
   const [phase, setPhase] = useState<'plant' | 'wave' | 'lost'>('plant')
   const [planted, setPlanted] = useState<CityPlotId[]>(() => [...pads])
@@ -392,8 +394,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
             }
             when={
               progress.memory[brief.id]
-                ? nextGapLabel(progress.memory[brief.id], today, isEasy(progress))
-                : isEasy(progress)
+                ? nextGapLabel(progress.memory[brief.id], today, easy)
+                : easy
                   ? 'Read this again today'
                   : 'Dust off today'
             }
@@ -407,9 +409,15 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         </>
       ) : (
         <>
-          <p className="eyebrow">{WATCH_KICKER}</p>
+          <p className="eyebrow">{easy ? 'Night Watch' : WATCH_KICKER}</p>
           <h1 className="defend-title">
-            {phase === 'wave' ? 'Turn them toward heaven.' : WATCH_LEAD}
+            {phase === 'wave'
+              ? easy
+                ? 'Tap cheap lines toward heaven.'
+                : 'Turn them toward heaven.'
+              : easy
+                ? EASY.nightWhat
+                : WATCH_LEAD}
           </h1>
           <div className={`defend-frame ${shake ? 'is-shake' : ''} ${won ? 'is-clear' : ''}`}>
             <p className="defend-hud" aria-live="polite">
@@ -678,8 +686,13 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
               onClick={() => setPhase('wave')}
               disabled={planted.length < 1 || arming}
             >
-              The road is coming
+              {easy ? EASY.nightDo : 'The road is coming'}
             </button>
+          ) : null}
+          {toolLock ? (
+            <p className="match-toast" role="status">
+              {toolLock}
+            </p>
           ) : null}
           <div className="defend-abilities" role="group" aria-label="Night abilities">
             {WATCH_TOOLS.map((tool) => {
@@ -691,10 +704,18 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                   key={tool.id}
                   type="button"
                   className={`defend-ability ${ability === tool.id ? 'is-on' : ''} ${open ? '' : 'is-locked'} ${firing && ability === tool.id ? 'is-firing' : ''}`}
-                  disabled={!open}
                   aria-pressed={ability === tool.id}
                   onClick={() => {
-                    if (open) setAbility(tool.id)
+                    if (open) {
+                      setToolLock(null)
+                      setAbility(tool.id)
+                      return
+                    }
+                    setToolLock(
+                      easy
+                        ? `${tool.label} is locked. Hold a matching claim — a claim is what we hold to be true — to deploy it.`
+                        : `${tool.label} is locked. Hold a matching line to deploy this tool.`,
+                    )
                   }}
                 >
                   <AbilityMark ability={tool.id} size="md" />
@@ -706,7 +727,9 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                     {open
                       ? heldLine?.claim ??
                         (tool.id === 'love' ? 'A true line can turn a cheap claim.' : 'Hold a line to name this tool.')
-                      : 'Hold a matching line'}
+                      : easy
+                        ? 'Locked — hold a matching claim to deploy it.'
+                        : 'Hold a matching line'}
                   </span>
                 </button>
               )
@@ -722,11 +745,15 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           ) : null}
           {phase === 'wave' ? (
             <p className="defend-tip">
-              Match the walker. Deploy the held argument — the wrong tool only nudges.
+              {easy
+                ? `${EASY.deployTeach} Match the walker, then tap.`
+                : 'Match the walker. Deploy the held argument — the wrong tool only nudges.'}
             </p>
           ) : (
             <p className="defend-tip">
-              Learn · hold · deploy. Love is ready. Logic, reason, and science unlock as you keep lines.
+              {easy
+                ? `${EASY.nightWhat} ${EASY.deployTeach} Love is ready. Plant a lamp, then ${EASY.nightDo.toLowerCase()}.`
+                : 'Learn · hold · deploy. Love is ready. Logic, reason, and science unlock as you keep lines.'}
             </p>
           )}
         </>

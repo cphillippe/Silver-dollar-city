@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.5',
+    title: 'Sticky next tap',
+    when: '2026-09-10',
+    items: [
+      'Build this, Walk, Done, and Next stay at the bottom of manage sheets and Link — no hunting below the fold.',
+      'A wrong tap or a locked building says why, and what is still needed, in one sentence.',
+      'Night Watch in Easy: what it is, then Do this. Deploy means use a claim you held.',
+    ],
+  },
+  {
     version: '1.4.4',
     title: 'Recall, then Later',
     when: '2026-09-10',

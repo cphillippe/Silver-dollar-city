@@ -1,6 +1,7 @@
 import { STREET_LIGHTS } from '../content/links.ts'
 import {
   CITY_PLOTS,
+  nextPlotId,
   plotFill,
   plotStage,
   type CityFills,
@@ -8,7 +9,7 @@ import {
   type CitySnapshot,
   type CityStage,
 } from './city.ts'
-import { PLOT_IDEAS, streetLinked } from './mindMap.ts'
+import { PLOT_IDEAS, mindMapHasLit, streetLinked } from './mindMap.ts'
 import type { ProgressState } from '../types.ts'
 
 /** Four visible building looks. 0 is an empty lot. */
@@ -189,6 +190,36 @@ export function nextUpgradeNeed(
     }
   }
   return { ready: false, line: needForTier(id, applied + 1, easy) }
+}
+
+/**
+ * One sentence: why this tap is wrong, and what is still needed.
+ * Pass areaUnlocked + gateLine from the UI so this file stays free of the store.
+ * Null means the tap may open the manage sheet.
+ */
+export function lotTapWhy(
+  id: CityPlotId,
+  progress: ProgressState,
+  easy: boolean,
+  areaUnlocked = true,
+  gateLine = '',
+  dailyDone = false,
+): string | null {
+  if (!areaUnlocked && gateLine) return gateLine
+  if (canUpgrade(id, progress) || mindMapHasLit(id, progress)) return null
+  const nextId = nextPlotId(progress, dailyDone)
+  if (id === nextId) return null
+  if (appliedTier(id, progress) > 0 || earnedTier(id, progress) > 0) return null
+  const need = needForTier(id, 1, easy)
+  return easy
+    ? `This lot is locked. ${need}`
+    : `This lot is still empty. ${need}`
+}
+
+export function ideaLockWhy(easy: boolean): string {
+  return easy
+    ? 'This idea is locked. Walk this lot, or connect sentence → place → person, to light it.'
+    : 'This idea is locked. Walk this lot — or Link the street — to light it.'
 }
 
 function needForTier(id: CityPlotId, want: number, easy: boolean): string {

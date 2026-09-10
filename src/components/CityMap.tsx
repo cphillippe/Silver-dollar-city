@@ -31,6 +31,7 @@ import {
   type CityUpgrade,
 } from '../lib/city'
 import {
+  areaGateCopy,
   dailyDoneToday,
   isAreaComplete,
   isAreaUnlocked,
@@ -47,6 +48,7 @@ import { mindMapHasLit } from '../lib/mindMap'
 import {
   anyUpgradeReady,
   canUpgrade,
+  lotTapWhy,
   plotTag,
   visualFills,
   visualSnapshot,
@@ -120,6 +122,7 @@ export function CityMap({
   const [homecoming, setHomecoming] = useState(false)
   const [beat, setBeat] = useState<CityUpgrade | null>(null)
   const [tapped, setTapped] = useState<CityPlotId | null>(null)
+  const [lockNote, setLockNote] = useState<string | null>(null)
   const [mindPlotLocal, setMindPlotLocal] = useState<CityPlotId | null>(null)
   const mindPlot = mindPlotProp !== undefined ? mindPlotProp : mindPlotLocal
   const setMindPlot = onMindPlot ?? setMindPlotLocal
@@ -165,8 +168,26 @@ export function CityMap({
       setTapped((cur) => (cur === id ? null : cur))
     }, 340)
     const st = stageOf(id)
-    if (st === 'empty' && id !== nextId && !mindMapHasLit(id, progress) && !canUpgrade(id, progress))
+    const why = (() => {
+      const spec = CITY_PLOTS.find((plot) => plot.id === id)
+      const areaId = spec?.areaId
+      const unlocked = areaId ? isAreaUnlocked(areaId, progress.completed) : true
+      return lotTapWhy(
+        id,
+        progress,
+        isEasy(progress),
+        unlocked,
+        areaId ? areaGateCopy(areaId, progress.completed, isEasy(progress)) : '',
+        doneToday,
+      )
+    })()
+    if (st === 'empty' && id !== nextId && !mindMapHasLit(id, progress) && !canUpgrade(id, progress)) {
+      setLockNote(why ?? (isEasy(progress)
+        ? 'This lot is locked. Finish the street before it first.'
+        : 'This lot is still empty. Finish the earlier street so this lot unlocks.'))
       return
+    }
+    setLockNote(null)
     setMindPlot(id)
   }
 
@@ -656,6 +677,11 @@ export function CityMap({
               <h2>{CITY_AGE_TITLE[age]}</h2>
               <p className="city-age-line">{CITY_AGE_LINE[age]}</p>
               <p className="city-gift">{gift}</p>
+              {lockNote ? (
+                <p className="city-lock-toast" role="status">
+                  {lockNote}
+                </p>
+              ) : null}
               <p className="city-map-hint">
                 {isEasy(progress) ? TOWN_PATH_EASY : TOWN_PATH_HARD}
               </p>

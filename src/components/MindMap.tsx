@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { evidenceFor } from '../content/evidence'
 import { journalForChallenge } from '../content'
 import { plainFor } from '../content/plain'
@@ -7,6 +8,7 @@ import { mindGraph } from '../lib/mindMap'
 import {
   appliedTier,
   canUpgrade,
+  ideaLockWhy,
   nextUpgradeNeed,
   TIER_MAX,
   tierJob,
@@ -35,6 +37,7 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
   const applied = appliedTier(plotId, progress)
   const ready = canUpgrade(plotId, progress)
   const need = nextUpgradeNeed(plotId, progress, easy)
+  const [ideaLock, setIdeaLock] = useState<string | null>(null)
   const litCount =
     graph.ideas.filter((item) => item.lit).length +
     graph.tools.filter((item) => item.lit).length
@@ -74,23 +77,18 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
             Close
           </button>
         </header>
+        <div className="mind-map-scroll">
         <p className="quiet">{lotWhy(graph.plotId, easy)}</p>
 
         <WordGloss words={[WORDS.upgrade]} />
         {easy ? <p className="quiet">{WORDS.claim.teach}</p> : null}
 
         <p className="build-job">{tierJob(applied, easy)}</p>
-        {ready ? (
-          <button
-            type="button"
-            className="btn gold xl build-upgrade"
-            onClick={() => upgradeBuilding(plotId)}
-          >
-            Build this
-          </button>
-        ) : (
-          <p className="build-next">{need.line}</p>
-        )}
+        {ideaLock ? (
+          <p className="match-toast" role="status">
+            {ideaLock}
+          </p>
+        ) : null}
 
         <div className="mind-web" aria-label="Linked nodes">
           <div className="mind-node is-place is-lit">
@@ -108,9 +106,13 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
               <button
                 type="button"
                 className={`mind-node is-idea ${idea.lit ? 'is-lit' : 'is-dim'}`}
-                disabled={!idea.lit}
                 onClick={() => {
-                  if (idea.lit) openIdea(idea.id)
+                  if (idea.lit) {
+                    setIdeaLock(null)
+                    openIdea(idea.id)
+                    return
+                  }
+                  setIdeaLock(ideaLockWhy(easy))
                 }}
               >
                 <span className="mind-kicker">{idea.lit ? 'Idea' : 'Locked'}</span>
@@ -145,11 +147,28 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
               : `${applied} of ${TIER_MAX} looks earned by learning.`}
           </p>
         )}
+        </div>
 
-        <div className="mind-map-actions">
-          <button type="button" className="btn primary" onClick={() => onEnter(plotId)}>
-            {easy ? `Walk ${graph.placeTitle}` : `Enter ${graph.placeTitle}`}
-          </button>
+        <div className="mind-map-dock">
+          {ready ? null : <p className="build-next">{need.line}</p>}
+          {ready ? (
+            <button
+              type="button"
+              className="btn gold xl build-upgrade"
+              onClick={() => upgradeBuilding(plotId)}
+            >
+              Build this
+            </button>
+          ) : (
+            <button type="button" className="btn primary xl" onClick={() => onEnter(plotId)}>
+              {easy ? `Walk ${graph.placeTitle}` : `Enter ${graph.placeTitle}`}
+            </button>
+          )}
+          {ready ? (
+            <button type="button" className="text-link mind-map-walk" onClick={() => onEnter(plotId)}>
+              {easy ? `Walk ${graph.placeTitle}` : `Enter ${graph.placeTitle}`}
+            </button>
+          ) : null}
         </div>
       </div>
     </div>
