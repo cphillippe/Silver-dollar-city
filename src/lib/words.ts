@@ -53,9 +53,9 @@ export const WORDS = {
     teach: 'Kalām is the beginning argument: whatever begins still asks for a cause.',
   },
   upgrade: {
-    term: 'Upgrade',
-    sense: 'a better look you earn by learning, not by paying',
-    teach: 'An upgrade is a better building you earn by learning — not by paying.',
+    term: 'Build this',
+    sense: 'raise the next look you earned by learning, not by paying',
+    teach: 'Build this means raise the next look you earned by learning — not by paying.',
   },
 } as const satisfies Record<string, WordSense>
 
