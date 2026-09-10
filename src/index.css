@@ -5958,7 +5958,7 @@ html[data-theme='dusk'] .hub.is-town .street-link {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 10px;
-  align-items: center;
+  align-items: start;
 }
 
 .mind-map-head h2 {
