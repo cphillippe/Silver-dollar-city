@@ -4,14 +4,23 @@ interface DigDeeperProps {
   id: string
   surface?: DeeperSurface
   compact?: boolean
+  /** Why the hold stands — shown inside Dig deeper, not as a lecture on the win. */
+  why?: string
+  source?: string
 }
 
 /** Openable Dig deeper list. Ancient / pre-Reform first; modern believing voices only. */
-export function DigDeeper({ id, surface = 'hold', compact = false }: DigDeeperProps) {
+export function DigDeeper({
+  id,
+  surface = 'hold',
+  compact = false,
+  why,
+  source,
+}: DigDeeperProps) {
   const links = deeperLinksFor(id, surface)
-  if (links.length === 0) return null
+  if (links.length === 0 && !why && !source) return null
 
-  const list = (
+  const list = links.length > 0 ? (
     <ul>
       {links.map((link) => (
         <li key={link.href}>
@@ -24,13 +33,21 @@ export function DigDeeper({ id, surface = 'hold', compact = false }: DigDeeperPr
         </li>
       ))}
     </ul>
+  ) : null
+
+  const body = (
+    <>
+      {why ? <p className="stored-reason">{why}</p> : null}
+      {source ? <p className="quiet">{source}</p> : null}
+      {list}
+    </>
   )
 
   if (compact) {
     return (
       <details className="dig-deeper is-compact">
-        <summary>Dig deeper</summary>
-        {list}
+        <summary>Why it stands · Dig deeper</summary>
+        {body}
       </details>
     )
   }
@@ -38,7 +55,7 @@ export function DigDeeper({ id, surface = 'hold', compact = false }: DigDeeperPr
   return (
     <nav className="dig-deeper" aria-label="Dig deeper">
       <p className="eyebrow">Dig deeper</p>
-      {list}
+      {body}
     </nav>
   )
 }

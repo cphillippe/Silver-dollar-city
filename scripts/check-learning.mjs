@@ -87,8 +87,9 @@ const storeSrc = readFileSync(
   new URL('../src/components/StoredLine.tsx', import.meta.url),
   'utf8',
 )
-assert.match(storeSrc, /Acquired · Anchored · Pictured · Stored/)
-assert.match(storeSrc, /deploys as/)
+assert.match(storeSrc, /Say this out loud/)
+assert.match(storeSrc, /stored-claim/)
+assert.match(storeSrc, /DigDeeper/)
 
 const teachSrc = readFileSync(
   new URL('../src/components/TeachUnlock.tsx', import.meta.url),

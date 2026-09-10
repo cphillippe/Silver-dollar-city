@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.3.5',
+    title: 'Say the line',
+    when: '2026-09-10',
+    items: [
+      'After every win, one claim to say out loud. Why it stands and the source wait in Dig deeper — and on Profile.',
+      'First session: one Do this next card. The town stays candy; it does not add a second primary tap under the map.',
+      'Easy mode still off until you ask — Welcome checkbox or Settings → Reading.',
+    ],
+  },
+  {
     version: '1.3.4',
     title: 'Easy mode',
     when: '2026-09-10',

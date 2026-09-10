@@ -55,7 +55,7 @@ export function Welcome({ onNavigate }: WelcomeProps) {
               checked={Boolean(progress.easyMode)}
               onChange={(event) => setEasyMode(event.target.checked)}
             />
-            Easier words · bigger taps
+            New here? Easier words · bigger taps
           </label>
           <p className="quiet welcome-easy-note">
             Optional. You can turn this on later in Settings → Reading.

@@ -105,17 +105,16 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
         )
       ) : (
         <section className="after-win">
-          <p className="link-takeaway">
-            {easy
-              ? 'You matched each idea to a place and a person. Mercy’s Jesus story lives at Parable Hollow. The old shared belief — died, buried, raised — lives at the Witness Bench. The lamp lives on Juniper’s porch.'
-              : 'You matched each idea to a place and a person. Mercy’s neighbor-line lives at Parable Hollow. The creed — died, buried, raised — lives at the Witness Bench. The lamp lives on Juniper’s porch.'}
-          </p>
-          <p className="quiet">
-            {easy
-              ? 'Tap a place on the map to open your scrapbook of links.'
-              : challenge.deeper}
-          </p>
-          <DigDeeper id={challenge.id} />
+          <article className="stored-line is-spoken" aria-label="Street takeaway">
+            <p className="eyebrow">Say this out loud</p>
+            <p className="stored-claim">An idea lives at a place, with a person.</p>
+            <p className="link-takeaway">
+              {easy
+                ? 'Mercy’s Jesus story lives at Parable Hollow. The old shared belief — died, buried, raised — lives at the Witness Bench. The lamp lives on Juniper’s porch.'
+                : 'Mercy’s neighbor-line lives at Parable Hollow. The creed — died, buried, raised — lives at the Witness Bench. The lamp lives on Juniper’s porch.'}
+            </p>
+            <DigDeeper id={challenge.id} compact />
+          </article>
           <TownReturn
             who="juniper"
             line={

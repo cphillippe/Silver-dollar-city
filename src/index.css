@@ -5674,6 +5674,16 @@ html[data-theme='dusk'] .hub.is-town .street-link {
   font-weight: 650;
 }
 
+.stored-line.is-spoken {
+  padding: 16px 16px 18px;
+}
+
+.stored-line.is-spoken .stored-claim {
+  font-size: 1.35rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
 .stored-line .stored-reason {
   margin: 0;
 }
@@ -6119,8 +6129,22 @@ html[data-theme='dusk'] .mind-map-card {
   .dig-deeper,
   .profile-unlock-hit strong,
   .profile-unlock-hit p,
-  .mind-node strong {
+  .mind-node strong,
+  .stored-claim,
+  .link-takeaway,
+  .do-next-detail,
+  .next-tap,
+  .match-toast {
     overflow-wrap: anywhere;
+  }
+
+  .stored-line.is-spoken .stored-claim {
+    font-size: 1.2rem;
+  }
+
+  .hub.is-town .do-next,
+  .hub.is-town .street-link {
+    padding: 12px 12px 14px;
   }
 }
 
