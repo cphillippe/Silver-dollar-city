@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.3.8',
+    title: 'Link lights the map',
+    when: '2026-09-10',
+    items: [
+      'Link the street: each match lights a spot on the town map. Tap the place later to open that idea again.',
+      'Easy still: you’ll reopen them from your scrapbook of links. One story at a time.',
+    ],
+  },
+  {
     version: '1.3.7',
     title: 'Kalām, positively',
     when: '2026-09-10',

@@ -73,8 +73,8 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
             <PlainTalk id={challenge.id} />
             <p className="quiet">
               {easy
-                ? 'Places on the map: Parable Hollow, the Witness Bench, Juniper’s east porch. You’ll open them again from your scrapbook of links. One story at a time.'
-                : 'You’ll reopen them from the town map — not a flat list only.'}
+                ? 'You’ll reopen them from your scrapbook of links. One story at a time.'
+                : 'Each match lights a spot on the town map. Tap the place later to open that idea again.'}
             </p>
             <ol className={`teach-beats ${easy ? 'is-easy' : ''}`}>
               {STREET_BEATS.map((beat) => (
