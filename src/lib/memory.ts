@@ -117,9 +117,13 @@ export function masteryFromReview(
   return stars
 }
 
-export function nextGapLabel(trace: MemoryTrace, today: string): string {
+export function nextGapLabel(trace: MemoryTrace, today: string, easy = false): string {
   if (isDue(trace, today)) {
-    return trace.reviews === 0 ? 'Dust off today' : 'Due this morning'
+    return trace.reviews === 0
+      ? easy
+        ? 'Read this again today'
+        : 'Dust off today'
+      : 'Due this morning'
   }
   if (trace.nextReviewAt === addLocalDays(today, 1)) return 'Returns tomorrow'
   return `Returns ${trace.nextReviewAt}`

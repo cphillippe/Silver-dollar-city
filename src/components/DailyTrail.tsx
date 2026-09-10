@@ -179,8 +179,10 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
               }
               when={
                 progress.memory[brief.id]
-                  ? nextGapLabel(progress.memory[brief.id], today)
-                  : 'Dust off today'
+                  ? nextGapLabel(progress.memory[brief.id], today, easy)
+                  : easy
+                    ? 'Read this again today'
+                    : 'Dust off today'
               }
             />
           ) : null}

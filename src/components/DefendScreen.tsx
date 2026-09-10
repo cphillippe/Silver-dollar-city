@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { evidenceFor } from '../content/evidence'
 import { WATCH_KICKER, WATCH_LEAD, WATCH_TITLE } from '../content/defend'
 import { STORY } from '../content/story'
+import { isEasy } from '../lib/easy'
 import { localDateKey } from '../lib/dates'
 import {
   DEFEND_ANCHOR,
@@ -391,8 +392,10 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
             }
             when={
               progress.memory[brief.id]
-                ? nextGapLabel(progress.memory[brief.id], today)
-                : 'Dust off today'
+                ? nextGapLabel(progress.memory[brief.id], today, isEasy(progress))
+                : isEasy(progress)
+                  ? 'Read this again today'
+                  : 'Dust off today'
             }
           />
           <TownReturn
