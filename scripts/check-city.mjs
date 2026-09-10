@@ -1020,6 +1020,7 @@ assert.match(hubSrc, /street-link/)
 assert.match(mapSrc, /setMindPlot/)
 assert.match(mapSrc, /MindMap/)
 assert.match(mapSrc, /mindMapHasLit/)
+assert.match(mapSrc, /city-plot-hit/)
 assert.match(
   readFileSync(new URL('../src/components/MindMap.tsx', import.meta.url), 'utf8'),
   /mind-map/,
