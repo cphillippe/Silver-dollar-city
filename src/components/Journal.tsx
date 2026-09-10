@@ -175,7 +175,7 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
           lines held from memory
           {waiting ? ` · ${waiting} ${easy ? 'due to read again' : 'due to dust off'}` : ''}.{' '}
           {easy
-            ? `${EASY.claimTeach} Open pages start face-down — rebuild the main idea, then read.`
+            ? 'Open pages start face-down — rebuild the main idea, then read.'
             : 'Open pages start face-down — rebuild the claim, then read. Forgetting is why a page comes back.'}
         </p>
         <div
@@ -199,7 +199,7 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
               <h2>Stored lines</h2>
               <p>
                 {easy
-                  ? 'Each learning is a claim (what we hold), a reason (why it stands), and a source (where it comes from) — plus the picture and tool.'
+                  ? 'Each learning is a main idea (what we hold), a reason (why it stands), and a source (where it comes from) — plus the picture and tool.'
                   : 'Each learning is its own unit: claim · reason · source · anchor · picture · tool.'}
               </p>
             </div>

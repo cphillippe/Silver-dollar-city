@@ -19,11 +19,12 @@ export const EASY = {
   readAgain: 'Read this one again.',
   claimTeach: 'A claim is the main idea we hold to be true.',
   mainIdea: 'main idea',
+  lockIn: 'Save your picks.',
   upgrade: 'Build this — raise the next look you earned by learning',
   manage: 'Building',
   nightDo: 'Do this',
   nightTap: 'Tap the walker.',
-  deployTeach: 'Deploy means use a claim you held.',
+  deployTeach: 'Deploy means use a main idea you kept.',
 } as const
 
 /** Gold Town next tap — name what opens, not a bare “Tap this next.” */

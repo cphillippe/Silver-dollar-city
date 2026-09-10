@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { shuffle } from '../../lib/shuffle'
 import type { SortChallenge, SortTile } from '../../types'
 import { STORY } from '../../content/story'
-import { isEasy } from '../../lib/easy'
+import { EASY, isEasy } from '../../lib/easy'
 import { useProgress } from '../../store/progress'
 import { GemMark } from '../GemMark'
 import { burstStyle } from '../../lib/juice'
@@ -178,7 +178,7 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
               className="btn primary xl snap-bins"
               onClick={() => evaluate()}
             >
-              {STORY.lockSort}
+              {easy ? EASY.lockIn : STORY.lockSort}
             </button>
           </div>
         ) : null
@@ -387,7 +387,7 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
           status === 'wrong'
             ? misses >= 2
               ? easy
-                ? 'Keep what belongs with the claim. Toss the rest.'
+                ? 'Keep what belongs with the main idea. Toss the rest.'
                 : challenge.teachOnWrong
               : 'Keep the lines that belong. Toss (set aside) the rest.'
             : undefined

@@ -101,7 +101,9 @@ const teachSrc = readFileSync(
 )
 assert.match(teachSrc, /Acquire/)
 assert.match(teachSrc, /Hold this line to deploy/)
-assert.match(teachSrc, /A claim is the main idea we hold to be true/)
+assert.match(teachSrc, /WORDS\.claim\.teach/)
+assert.match(teachSrc, /The main idea you will keep/)
+assert.doesNotMatch(teachSrc, /A claim is the main idea we hold to be true/)
 assert.match(teachSrc, /Short story/)
 assert.match(teachSrc, /Skip reading/)
 assert.ok(

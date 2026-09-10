@@ -75,7 +75,7 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
             {easy ? null : <PlainTalk id={challenge.id} />}
             <p className="quiet">
               {easy
-                ? 'You’ll reopen them from your scrapbook of links.'
+                ? 'You’ll reopen them from Town — tap the place you matched.'
                 : 'Each match lights a spot on the town map. Tap the place later to open that idea again.'}
             </p>
             {easy ? null : (
@@ -130,7 +130,7 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
             who="juniper"
             line={
               easy
-                ? 'Tap a place — your scrapbook of links holds what you matched.'
+                ? 'Tap a place on the map to see what you matched.'
                 : 'Tap a place on the map — the mind map holds what you linked.'
             }
             action="See the town"
