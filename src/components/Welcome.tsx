@@ -1,3 +1,4 @@
+import { APP_VERSION } from '../config/app'
 import { STORY } from '../content/story'
 import { Avatar } from './Avatar'
 import { CityMap } from './CityMap'
@@ -51,6 +52,7 @@ export function Welcome({ onNavigate }: WelcomeProps) {
           <button type="button" className="btn primary xl" onClick={begin}>
             {returning ? 'Back to town' : 'Begin the trail'}
           </button>
+          <p className="welcome-version">V0 · {APP_VERSION}</p>
         </div>
       </div>
     </main>

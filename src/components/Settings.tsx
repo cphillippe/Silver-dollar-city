@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { APP_ID, APP_VERSION, SAVE_SCHEMA_VERSION } from '../config/app'
+import { CHANGELOG, latestChange } from '../content/changelog'
 import {
   adsEnabledDefault,
   writeAdsPref,
@@ -30,6 +31,7 @@ export function Settings({ onNavigate }: SettingsProps) {
 
   const held = progress.held.length
   const open = progress.journal.length
+  const drop = latestChange(APP_VERSION)
   const savedLabel = saveMeta.savedAt
     ? `Progress saved on this device · ${formatSaved(saveMeta.savedAt)}`
     : 'Progress saved on this device as you walk'
@@ -123,10 +125,38 @@ export function Settings({ onNavigate }: SettingsProps) {
       </button>
 
       <header className="page-head">
-        <p className="eyebrow">Settings · {APP_VERSION}</p>
+        <p className="eyebrow">Settings · V0 · {APP_VERSION}</p>
         <h1>Progress & support</h1>
         <p>{savedLabel}</p>
       </header>
+
+      <section className="settings-card whats-new" aria-label="What’s new">
+        <p className="eyebrow">What’s new · {APP_VERSION}</p>
+        <h2>{drop.title}</h2>
+        <p className="quiet">{drop.when}</p>
+        <ul className="whats-new-list">
+          {drop.items.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+        {CHANGELOG.length > 1 ? (
+          <details className="whats-new-more">
+            <summary>Earlier drops</summary>
+            {CHANGELOG.filter((note) => note.version !== APP_VERSION).map((note) => (
+              <div key={note.version} className="whats-new-past">
+                <p className="eyebrow">
+                  {note.version} · {note.title}
+                </p>
+                <ul className="whats-new-list">
+                  {note.items.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </details>
+        ) : null}
+      </section>
 
       <section className="settings-card">
         <p className="eyebrow">Look</p>

@@ -4540,6 +4540,16 @@ html[data-theme='dusk'] .hub.is-town .night-watch {
   max-width: none;
 }
 
+.welcome-version {
+  margin: 8px 0 0;
+  text-align: center;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  opacity: 0.72;
+}
+
 .hub.is-town {
   flex: 1;
   min-height: 0;
@@ -4697,6 +4707,32 @@ html[data-theme='dusk'] .hub.is-town .night-watch {
   border-radius: var(--radius);
   padding: 16px 16px 18px;
   margin: 0 0 16px;
+}
+
+.settings-card.whats-new h2 {
+  font-size: 1.35rem;
+  margin: 0 0 4px;
+}
+
+.whats-new-list {
+  margin: 8px 0 0;
+  padding: 0 0 0 1.15em;
+  font-size: 0.92rem;
+  line-height: 1.35;
+}
+
+.whats-new-more {
+  margin-top: 12px;
+}
+
+.whats-new-more summary {
+  cursor: pointer;
+  color: var(--gold);
+  font-size: 0.88rem;
+}
+
+.whats-new-past {
+  margin-top: 10px;
 }
 
 .settings-actions {
