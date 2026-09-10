@@ -74,7 +74,7 @@ export const journalEntries: JournalEntry[] = [
     unlockAfter: 'wb-early',
     body: [
       'Historians cannot rewind the world. They ask how close a report stands to the events, how formulaic it is, and whether the author is appealing to known people (Cephas, the Twelve, James, a large group, Paul himself).',
-      'Luke 1:1–4 shows another first-century Christian writer claiming the posture of inquiry among eyewitnesses. That posture can be tested. It should not be sneered out of court in advance.',
+      'Luke 1:1–4 shows another first-century Christian writer claiming the posture of inquiry among eyewitnesses. That posture can be tested. It stands to be weighed.',
     ],
     sources: ['1 Corinthians 15:3–7', 'Luke 1:1–4'],
   },
@@ -208,12 +208,13 @@ export const journalEntries: JournalEntry[] = [
     kicker: 'The First Gate',
     unlockAfter: 'fg-kalam',
     body: [
-      'The kalām form is clean: what begins has a cause; the universe began; therefore it has a cause. Clean is not the same as uncontested. The second premise is argued from the impossibility of an infinite past and from contemporary cosmology.',
-      'If the form holds, you have a cause of the beginning. Personhood, goodness, and the name of the God of Abraham are further questions — some of them historical.',
+      'The kalām form is clean: what begins has a cause; the universe began; therefore it has a cause. The second premise is argued from the impossibility of an infinite past and from the cosmos we actually observe.',
+      'That yields a cause of the beginning. Personhood, goodness, and the name of the God of Abraham are further questions — some of them historical.',
     ],
     sources: [
+      'Philoponus against an eternal world',
       'al-Ghazālī and the kalām tradition',
-      'Contemporary analytic statements (e.g. Craig) and their critics',
+      'Craig’s modern statement of the kalām syllogism',
     ],
   },
   {

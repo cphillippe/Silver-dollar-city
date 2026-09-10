@@ -570,6 +570,12 @@ assert.doesNotMatch(journalSrc, /asserted to cancel the surprise/)
 assert.doesNotMatch(journalSrc, /Whatever one concludes/)
 assert.match(journalSrc, /This is what the churches were already handing on/)
 assert.doesNotMatch(journalSrc, /does not deduct God/)
+assert.doesNotMatch(journalSrc, /Clean is not the same as uncontested/)
+assert.doesNotMatch(journalSrc, /their critics/)
+assert.doesNotMatch(journalSrc, /sneered out of court/)
+assert.match(journalSrc, /Philoponus against an eternal world/)
+assert.match(journalSrc, /Craig’s modern statement of the kalām syllogism/)
+assert.match(journalSrc, /stands to be weighed/)
 
 assert.doesNotMatch(hubSrc, /['"]Again['"]/)
 assert.doesNotMatch(hubSrc, /Standing/)
@@ -976,7 +982,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.3.6')
+assert.equal(APP_VERSION, '1.3.7')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
