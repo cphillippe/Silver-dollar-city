@@ -31,6 +31,8 @@ import {
   watchTool,
   WATCH_TOOLS,
 } from '../src/lib/watchTools.ts'
+import { ideaUnlocked, mindGraph, mindMapHasLit } from '../src/lib/mindMap.ts'
+import { STREET_CHALLENGE, STREET_LIGHTS } from '../src/content/links.ts'
 
 const progressSrc = readFileSync(
   new URL('../src/store/progress.ts', import.meta.url),
@@ -947,7 +949,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.3.1')
+assert.equal(APP_VERSION, '1.3.2')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -982,5 +984,58 @@ assert.match(
   /Acquire → Anchor → Picture → Store/,
 )
 assert.match(challengeSrc, /StoredLine/)
+
+assert.equal(STREET_CHALLENGE.kind, 'link')
+assert.equal(STREET_CHALLENGE.id, 'ln-street')
+assert.deepEqual([...STREET_LIGHTS], ['ph-road', 'wb-creed', 'daily-lantern'])
+assert.equal(STREET_CHALLENGE.triples.length, 3)
+assert.match(STREET_CHALLENGE.nodes.find((node) => node.id === 'idea-mercy')?.text ?? '', /Neighbor/)
+assert.equal(ideaUnlocked(empty, 'ph-road'), false)
+assert.equal(ideaUnlocked({ ...empty, completed: ['ln-street'] }, 'ph-road'), true)
+assert.equal(ideaUnlocked({ ...empty, held: ['wb-creed'] }, 'wb-creed'), true)
+assert.equal(mindMapHasLit('hollow', { ...empty, completed: ['ln-street'] }), true)
+assert.equal(mindGraph('hollow', { ...empty, completed: ['ph-road'] }).ideas.some((item) => item.id === 'ph-road' && item.lit), true)
+
+const linkPlaySrc = readFileSync(
+  new URL('../src/components/challenges/LinkPlay.tsx', import.meta.url),
+  'utf8',
+)
+assert.match(linkPlaySrc, /is-link/)
+assert.match(linkPlaySrc, /Try again/)
+assert.match(linkPlaySrc, /match-recover/)
+assert.match(linkPlaySrc, /setStatus\('idle'\)/)
+assert.match(linkPlaySrc, /link-block/)
+
+const puzzleSrc = readFileSync(
+  new URL('../src/components/PuzzlePlay.tsx', import.meta.url),
+  'utf8',
+)
+assert.match(puzzleSrc, /kind === 'link'/)
+assert.match(puzzleSrc, /LinkPlay/)
+
+assert.match(teachSrc, /Unlock the links/)
+assert.match(hubSrc, /Link the street/)
+assert.match(hubSrc, /name: 'link'/)
+assert.match(hubSrc, /street-link/)
+assert.match(mapSrc, /setMindPlot/)
+assert.match(mapSrc, /MindMap/)
+assert.match(mapSrc, /mindMapHasLit/)
+assert.match(
+  readFileSync(new URL('../src/components/MindMap.tsx', import.meta.url), 'utf8'),
+  /mind-map/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
+  /Unlock the links/,
+)
+assert.match(
+  readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8'),
+  /view\.name === 'link'/,
+)
+assert.match(cssSrc, /mind-map/)
+assert.match(cssSrc, /mind-web/)
+assert.match(cssSrc, /link-grid/)
+assert.match(cssSrc, /street-link/)
+assert.match(cssSrc, /play\.is-link/)
 
 console.log('check-city: ok')

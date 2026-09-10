@@ -28,6 +28,7 @@ Supported puzzle `kind` values:
 - `match` — snap left/right pairs (locks on a hit, flashes on a miss). Observatory ids (`ob-`) teach first, then two choices, with Try again.
 - `build-argument` — slot a chain; leave decoys in the bank. Observatory ids deal two stones at a time.
 - `sort` — keep-or-toss bins. A wrong bin bounces that tile.
+- `link` — tap idea ↔ place ↔ person blocks. Miss shows Try again. Completing `ln-street` lights those nodes on the town mind map.
 
 Keep citations real. Prefer honest framing of what an argument claims versus what it proves. Teaching copy belongs in `deeper` / journal cards so it appears after a solve. Name the Christian idea in plain English (`idea`) so a stranger can see what they’re practicing before they tap. If the evidence line is not crisp, the Recall Loop will feel like homework — keep it short enough to snap.
 

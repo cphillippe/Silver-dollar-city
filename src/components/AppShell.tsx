@@ -18,7 +18,8 @@ export function AppShell({ view, onNavigate, children }: AppShellProps) {
     view.name === 'daily' ||
     view.name === 'challenge' ||
     view.name === 'journal' ||
-    view.name === 'defend'
+    view.name === 'defend' ||
+    view.name === 'link'
   const townView = view.name === 'hub'
   const hideGoalbar = hideChrome || playView || townView
 

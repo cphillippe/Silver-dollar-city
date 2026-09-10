@@ -18,6 +18,7 @@ export const areas: Area[] = [
 export { journalEntries }
 export { CHANGELOG, latestChange } from './changelog'
 export { CONTENT_PACKS, packForArea } from './packs'
+export { STREET_CHALLENGE, STREET_LIGHTS } from './links'
 
 export function getArea(id: string): Area | undefined {
   return areas.find((area) => area.id === id)

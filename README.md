@@ -11,7 +11,7 @@ A stranger should know in 60 seconds: this is a **Christian reasoning game**. So
 **Sticky public preview (GitHub Pages):**  
 https://cphillippe.github.io/Silver-dollar-city/
 
-Hard-reload once if you still see the old game (the PWA can keep a cached copy). Live bundle is `index-CHoQFc80.js` — V0 **1.3.1**; River is the fair blonde traveler.
+Hard-reload once if you still see the old game (the PWA can keep a cached copy). Live bundle is `index-CHoQFc80.js` — V0 **1.3.2**; tap a place on the town map for its mind map.
 
 Pages deploys `docs/` from `main` once that source is selected. Until then the same `docs/` is also on `cursor/silver-city-unending-evidence-8233`. Hard-reload github.io after it updates.
 
@@ -142,7 +142,7 @@ Saves are **offline-first**. Nothing requires a login.
 - **Schema:** `SAVE_SCHEMA_VERSION` in `src/config/app.ts`. Bump it only when the persisted shape changes, and add a step in `src/lib/save.ts` `migrateToCurrent`. Do not wipe on upgrade.
 - **Move devices:** Settings → **Export JSON** (file) or **Copy share code** (`SC1.…`). Import file or paste on the other device. Import replaces this device’s save and keeps a backup key (`silver-city-progress-v1.bak`).
 - **Cloud:** not shipped. `cloudSyncStatus()` is `local-only` until there is real auth. Optional keys can be added later without dropping v1 fields.
-- **UI:** Hub is the **overworld town**. Completing Daily / districts / journal / stars lights buildings. Settings shows **What’s new** plus schema and app version (`1.3.1`).
+- **UI:** Hub is the **overworld town**. Completing Daily / districts / journal / stars lights buildings. Tap a place to open its **mind map** (person + idea nodes). Settings shows **What’s new** plus schema and app version (`1.3.2`).
 
 ## The town
 
@@ -157,7 +157,7 @@ The hub is an **overworld map**, not a locked list. Buildings are derived from t
 | Dossier house | First journal page | 4 pages built · 12 lit |
 | Star lamps | First star | 4★ built · 12★ lit |
 
-The gold ring is **what to unlock next**. Tap it (or the street row). When a landmark rises, the camera punches in with sparks and a **Built!** / **Lit!** beat — empty lots become roofs, not outline counters.
+The gold ring is **what to unlock next**. Tap a building to open that lot’s **mind map** (who lives there + the claims you unlocked). **Link the street** snaps idea ↔ place ↔ person and lights those nodes. The legend button still walks the next lot. When a landmark rises, the camera punches in with sparks and a **Built!** / **Lit!** beat — empty lots become roofs, not outline counters.
 
 ## Ads
 
@@ -171,7 +171,7 @@ Wire a test unit later by teaching `AdSlot` to render the network creative when 
 
 ## Support
 
-- **Version:** app `1.3.1` V0 (`package.json`, `src/config/app.ts`, Android `versionName`). Capacitor id `city.silver.unending`. `npm run android:apk` still builds the debug APK. Settings → **What’s new** (`src/content/changelog.ts`) is the hook for later packs.
+- **Version:** app `1.3.2` V0 (`package.json`, `src/config/app.ts`, Android `versionName`). Capacitor id `city.silver.unending`. `npm run android:apk` still builds the debug APK. Settings → **What’s new** (`src/content/changelog.ts`) is the hook for later packs.
 - **Content packs:** core trail is `CONTENT_PACKS` in [`src/content/packs.ts`](src/content/packs.ts). Next drop: new Area module → register in `index.ts` → one pack row → changelog row → journal/evidence/city/tools. Details: [`src/content/README.md`](src/content/README.md).
 - **Release smoke:** [`PLAYTEST.md`](PLAYTEST.md) (fun / clarity / retention plus the short checklist).
 - **Playtest notes:** same file.
