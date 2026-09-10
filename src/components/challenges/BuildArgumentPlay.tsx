@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react'
 import { shuffle } from '../../lib/shuffle'
+import { isEasy } from '../../lib/easy'
+import { useProgress } from '../../store/progress'
 import type { ArgumentCard, BuildArgumentChallenge } from '../../types'
 import { burstStyle } from '../../lib/juice'
 import { PuzzleHint } from './PuzzleHint'
@@ -34,7 +36,8 @@ export function BuildArgumentPlay({
   onSolved,
   onPeek,
 }: BuildArgumentPlayProps) {
-  const guided = challenge.id.startsWith('ob-')
+  const { progress } = useProgress()
+  const guided = isEasy(progress) || challenge.id.startsWith('ob-')
   const seed = useMemo(() => shuffle(challenge.cards), [challenge.cards])
   const order = seed
   const [seats, setSeats] = useState<(ArgumentCard | null)[]>(seed)
@@ -215,7 +218,7 @@ export function BuildArgumentPlay({
     >
       <WinBurst play={status === 'ok'} />
       <PuzzleLead challenge={challenge} />
-      <PuzzleHint text={challenge.context} onPeek={onPeek} />
+      <PuzzleHint text={challenge.context} id={challenge.id} onPeek={onPeek} />
       <p className="sort-how">
         {guided ? (
           <>
@@ -232,7 +235,9 @@ export function BuildArgumentPlay({
         <p className="match-toast" role="status">
           <strong>{misses >= 2 ? 'One more look.' : 'That stone slipped.'}</strong>{' '}
           {misses >= 2
-            ? challenge.teachOnWrong
+            ? isEasy(progress)
+              ? 'Look again. Two choices.'
+              : challenge.teachOnWrong
             : guided
               ? 'Not that stone. Try the other — the chain stays.'
               : 'Tap a red slot to swap. The chain stays; try again.'}

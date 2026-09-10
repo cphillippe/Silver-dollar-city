@@ -1,5 +1,7 @@
 import { evidenceFor } from '../content/evidence'
 import { journalForChallenge } from '../content'
+import { plainFor } from '../content/plain'
+import { isEasy, scrapbookLabel } from '../lib/easy'
 import { mindGraph } from '../lib/mindMap'
 import type { CityPlotId } from '../lib/city'
 import { rehearseGo, useProgress } from '../store/progress'
@@ -17,6 +19,7 @@ interface MindMapProps {
 
 export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) {
   const { progress } = useProgress()
+  const easy = isEasy(progress)
   const graph = mindGraph(plotId, progress)
   const litCount =
     graph.ideas.filter((item) => item.lit).length +
@@ -36,16 +39,16 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
   }
 
   return (
-    <div className="mind-map" role="dialog" aria-label={`${graph.placeTitle} mind map`}>
+    <div className="mind-map" role="dialog" aria-label={`${graph.placeTitle} · ${scrapbookLabel(easy)}`}>
       <button type="button" className="mind-map-scrim" aria-label="Close mind map" onClick={onClose} />
       <div className="mind-map-card">
         <header className="mind-map-head">
           <Avatar who={graph.person.id} size="md" />
           <div>
-            <p className="eyebrow">Mind map · {litCount} lit</p>
+            <p className="eyebrow">{scrapbookLabel(easy, litCount)}</p>
             <h2>{graph.placeTitle}</h2>
             <p className="quiet">
-              {graph.person.name} · where + who + what claim
+              {easy ? `${graph.person.name} · this lot` : `${graph.person.name} · where + who + what claim`}
             </p>
           </div>
           <button type="button" className="btn tiny" onClick={onClose}>
@@ -74,8 +77,8 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
                 }}
               >
                 <span className="mind-kicker">{idea.lit ? 'Idea' : 'Locked'}</span>
-                <strong>{idea.claim}</strong>
-                {idea.lit && idea.source ? <em>{idea.source}</em> : null}
+                <strong>{idea.lit && easy ? (plainFor(idea.id)?.gloss ?? idea.claim) : idea.claim}</strong>
+                {idea.lit && idea.source && !easy ? <em>{idea.source}</em> : null}
               </button>
               {idea.lit ? <DigDeeper id={idea.id} surface="map" compact /> : null}
             </div>

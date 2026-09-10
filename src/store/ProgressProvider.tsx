@@ -221,12 +221,23 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     })
   }, [write])
 
+  const setEasyMode = useCallback((easyMode: boolean) => {
+    setProgress((current) => {
+      if (current.easyMode === easyMode) return current
+      return write({ ...current, easyMode })
+    })
+  }, [write])
+
   const reset = useCallback(() => {
     setMissed([])
     forgetCitySeen()
     backupCurrentSave()
     setProgress((current) => {
-      const next = { ...emptyProgress(), theme: current.theme }
+      const next = {
+        ...emptyProgress(),
+        theme: current.theme,
+        easyMode: current.easyMode,
+      }
       return write(next)
     })
   }, [write])
@@ -255,6 +266,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       markMiss,
       recordNight,
       setTheme,
+      setEasyMode,
       reset,
       importSaveText,
     }),
@@ -271,6 +283,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       recordStars,
       reset,
       saveMeta,
+      setEasyMode,
       setTheme,
       start,
     ],

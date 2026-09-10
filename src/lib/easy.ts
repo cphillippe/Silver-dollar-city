@@ -1,0 +1,24 @@
+import type { ProgressState } from '../types.ts'
+
+export function isEasy(progress: Pick<ProgressState, 'easyMode'> | { easyMode?: boolean }): boolean {
+  return Boolean(progress.easyMode)
+}
+
+/** Easy-mode chrome. Same truths — simpler labels. */
+export const EASY = {
+  creed: 'old shared belief',
+  parable: 'Jesus story',
+  mindMap: 'your scrapbook of links',
+  mindMapShort: 'Scrapbook',
+  linkMatch: 'Match idea · place · person.',
+  linkDemo: 'Tap idea → place → person',
+} as const
+
+export function scrapbookLabel(easy: boolean, lit?: number) {
+  if (!easy) {
+    return lit === undefined ? 'Mind map' : `Mind map · ${lit} lit`
+  }
+  return lit === undefined
+    ? 'Your scrapbook of links'
+    : `Your scrapbook of links · ${lit} lit`
+}

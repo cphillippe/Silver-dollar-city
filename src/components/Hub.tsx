@@ -3,9 +3,9 @@ import { areas, findPlayable } from '../content'
 import { STORY, townVoice } from '../content/story'
 import { formatDeviceLocalDate, localDateKey } from '../lib/dates'
 import { CITY_PLOTS, nextPlotId, type CityPlotId } from '../lib/city'
+import { EASY, isEasy, scrapbookLabel } from '../lib/easy'
 import { Avatar } from './Avatar'
 import { DeviceDay } from './DeviceDay'
-import { Landmark } from './Landmark'
 import { ShareInvite } from './ShareInvite'
 import { AdSlot } from './AdSlot'
 import { CityMap } from './CityMap'
@@ -38,9 +38,12 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
   const duePlay = due ? findPlayable(due.id) : undefined
   const waiting = dueCount(progress, today)
   const sameDay = Boolean(due && doneToday)
+  const dustOff = sameDay
   const goal = getNextGoal(progress, today)
   const nextId = nextPlotId(progress, doneToday)
   const watchOpen = unlockedWatchAbilities(progress)
+  const easy = isEasy(progress)
+  const streetDone = progress.completed.includes('ln-street')
   const requested =
     openPlot && CITY_PLOTS.some((plot) => plot.id === openPlot)
       ? (openPlot as CityPlotId)
@@ -56,8 +59,108 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
     if (!id && openPlot) onNavigate({ name: 'hub' })
   }
 
+  const nextCta = dustOff
+    ? 'Dust this one off'
+    : goal.kind === 'daily'
+      ? 'Walk today’s trail'
+      : goal.kind === 'vista'
+        ? 'Stand at the lookout'
+        : goal.kind === 'challenge'
+          ? 'Open this walk'
+          : 'Do this next'
+
+  function goNext() {
+    if (dustOff) {
+      onNavigate(sameDay ? rehearseGo(progress) : { name: 'daily' })
+      return
+    }
+    if (goal.kind === 'daily') {
+      onNavigate({ name: 'daily' })
+      return
+    }
+    if (goal.kind === 'welcome') {
+      onNavigate({ name: 'welcome' })
+      return
+    }
+    if (goal.kind === 'vista') {
+      onNavigate({ name: 'vista' })
+      return
+    }
+    if (goal.challengeId && goal.areaId) {
+      onNavigate({
+        name: 'challenge',
+        areaId: goal.areaId,
+        challengeId: goal.challengeId,
+      })
+      return
+    }
+    if (goal.areaId) {
+      onNavigate(nextWalkView(goal.areaId, progress.completed))
+    }
+  }
+
+  const nextTitle = dustOff
+    ? sameDay
+      ? 'Dust off today’s line'
+      : 'Time to dust off this one'
+    : goal.title
+  const nextDetail = dustOff
+    ? sameDay
+      ? 'You stored it this morning. Map the claim again — not a checkbox.'
+      : duePlay
+        ? `${duePlay.challenge.title} · an older walk.`
+        : 'An older page is waiting to be rebuilt.'
+    : easy
+      ? goal.detail.replace(/\bparable\b/gi, EASY.parable).replace(/\bcreed\b/gi, EASY.creed)
+      : goal.detail
+
   return (
     <main className="hub is-town is-inhabited" aria-label="The town">
+      <section className="next-card do-next" aria-label="Do this next">
+        <p className="eyebrow">Do this next</p>
+        {dustOff ? <DeviceDay /> : null}
+        <h2>{nextTitle}</h2>
+        <p className="do-next-detail">{nextDetail}</p>
+        {dustOff ? (
+          <p className="quiet">
+            {waiting > 1
+              ? `${waiting} pages due · about a minute`
+              : sameDay
+                ? 'Same-day dust-off · mapping + recall'
+                : 'A spaced recall · about a minute'}
+            {dustOff ? ` · ${formatDeviceLocalDate()}` : ''}
+          </p>
+        ) : null}
+        <button type="button" className="btn primary xl" onClick={goNext}>
+          {nextCta}
+        </button>
+      </section>
+
+      {!streetDone ? (
+        <section className="street-link" aria-label="Link the street">
+          <div className="card-lead">
+            <Avatar who="mercy" size="sm" />
+            <div>
+              <p className="eyebrow">Match idea · place · person.</p>
+              <h2>Link the street</h2>
+              <p className="quiet">{easy ? EASY.linkDemo : 'Idea · place · person'}</p>
+              <p className="town-line">
+                {easy
+                  ? 'Match each idea to its place and person. Then it lives in your scrapbook of links.'
+                  : 'Snap a claim to its lot and keeper. Lit nodes reopen from the town map.'}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="btn gold xl"
+            onClick={() => onNavigate({ name: 'link' })}
+          >
+            Link the street
+          </button>
+        </section>
+      ) : null}
+
       <CityMap
         onNavigate={onNavigate}
         mindPlot={mindPlot}
@@ -66,7 +169,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
 
       <nav className="town-tools" aria-label="Town actions">
         <button type="button" className="btn tiny" onClick={() => setPlot(nextId)}>
-          Mind map
+          {scrapbookLabel(easy)}
         </button>
         <button
           type="button"
@@ -83,32 +186,6 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
           Profile
         </button>
       </nav>
-
-      <section
-        className={`street-link ${progress.completed.includes('ln-street') ? 'is-held' : ''}`}
-        aria-label="Link the street"
-      >
-        <div className="card-lead">
-          <Avatar who="mercy" size="sm" />
-          <div>
-            <p className="eyebrow">
-              {progress.completed.includes('ln-street') ? 'Street linked' : 'Mind map'}
-            </p>
-            <h2>Link the street</h2>
-            <p className="quiet">Idea · place · person</p>
-            <p className="town-line">
-              Snap a claim to its lot and keeper. Lit nodes reopen from the town map.
-            </p>
-          </div>
-        </div>
-        <button
-          type="button"
-          className="btn gold"
-          onClick={() => onNavigate({ name: 'link' })}
-        >
-          Link the street
-        </button>
-      </section>
 
       <section
         className={`night-watch ${progress.defense.cleared ? 'is-held' : ''}`}
@@ -149,52 +226,6 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
         </button>
       </section>
 
-      {due ? (
-      <section
-        className={`today-trail is-slim is-live`}
-        aria-label={sameDay ? 'Same-day dust-off' : 'Today’s Trail'}
-      >
-        <div className="card-lead">
-          <Avatar who="juniper" size="md" />
-          <div>
-            <p className="eyebrow">
-              {sameDay ? 'Same-day recall' : 'Today’s Trail'} · {formatDeviceLocalDate()}
-            </p>
-            <DeviceDay />
-            <h2>{sameDay ? 'Dust off today’s line' : 'Time to dust off this one'}</h2>
-          </div>
-        </div>
-        <Landmark pillar={due.pillar} compact />
-        <p>
-          {sameDay
-            ? 'You stored it this morning. Map the claim again — not a checkbox.'
-            : duePlay
-              ? `${duePlay.challenge.title} · an older walk.`
-              : 'An older page is waiting to be rebuilt.'}
-        </p>
-        <p className="quiet">
-          {waiting > 1
-            ? `${waiting} pages due · about a minute`
-            : sameDay
-              ? 'Same-day dust-off · mapping + recall'
-              : 'A spaced recall · about a minute'}
-        </p>
-        <button
-          type="button"
-          className="btn primary"
-          onClick={() =>
-            onNavigate(
-              sameDay
-                ? rehearseGo(progress)
-                : { name: 'daily' },
-            )
-          }
-        >
-          Dust this one off
-        </button>
-      </section>
-      ) : null}
-
       <AdSlot slot="hub-banner" />
 
       <details className="street-drawer">
@@ -232,7 +263,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
                 className="btn tiny"
                 onClick={() => setPlot(plot.id)}
               >
-                Mind map
+                {easy ? EASY.mindMapShort : 'Mind map'}
               </button>
               <button
                 type="button"
@@ -261,7 +292,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
                     ? 'Two Hollow walks'
                     : 'Gated'
                   : complete
-                    ? STORY.tapTakeaway
+                    ? 'Hold the line'
                     : current
                       ? plot.id === 'porch'
                         ? 'Walk next'

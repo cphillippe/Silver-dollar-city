@@ -54,6 +54,7 @@ export function AppShell({ view, onNavigate, children }: AppShellProps) {
     <div
       className={`app ${hideChrome ? 'is-welcome' : ''} ${playView ? 'is-play' : ''} ${townView ? 'is-town' : ''}`}
       data-theme={progress.theme ?? 'candy'}
+      data-easy={progress.easyMode ? 'on' : 'off'}
     >
       <div className="grain" aria-hidden />
       {!hideChrome ? (

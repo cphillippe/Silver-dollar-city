@@ -22,7 +22,7 @@ interface SettingsProps {
 }
 
 export function Settings({ onNavigate }: SettingsProps) {
-  const { progress, saveMeta, importSaveText, reset, setTheme } = useProgress()
+  const { progress, saveMeta, importSaveText, reset, setTheme, setEasyMode } = useProgress()
   const adsPref = useAdsPref()
   const fileRef = useRef<HTMLInputElement>(null)
   const [paste, setPaste] = useState('')
@@ -190,6 +190,32 @@ export function Settings({ onNavigate }: SettingsProps) {
               {themeLabel(theme)}
             </button>
           ))}
+        </div>
+      </section>
+
+      <section className="settings-card">
+        <p className="eyebrow">Reading</p>
+        <p>
+          Easy mode uses shorter sentences and bigger taps. The claims stay the
+          same — the words get plainer.
+        </p>
+        <div className="settings-actions">
+          <button
+            type="button"
+            className={`btn ${progress.easyMode ? 'primary' : ''}`}
+            aria-pressed={progress.easyMode}
+            onClick={() => setEasyMode(true)}
+          >
+            Easy mode
+          </button>
+          <button
+            type="button"
+            className={`btn ${progress.easyMode ? '' : 'primary'}`}
+            aria-pressed={!progress.easyMode}
+            onClick={() => setEasyMode(false)}
+          >
+            Standard
+          </button>
         </div>
       </section>
 

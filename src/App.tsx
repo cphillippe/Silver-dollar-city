@@ -31,7 +31,8 @@ export default function App() {
     const theme = progress.theme ?? 'candy'
     document.documentElement.dataset.theme = theme
     document.documentElement.style.colorScheme = theme === 'parchment' ? 'light' : 'dark'
-  }, [progress.theme])
+    document.documentElement.dataset.easy = progress.easyMode ? 'on' : 'off'
+  }, [progress.theme, progress.easyMode])
 
   useEffect(() => {
     if (view.name !== 'journal' || !view.focusId || view.autoQuiz) return

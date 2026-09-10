@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { shuffle } from '../../lib/shuffle'
+import { isEasy } from '../../lib/easy'
+import { useProgress } from '../../store/progress'
 import type { MatchChallenge, MatchSceneId } from '../../types'
 import { MatchScene } from '../MatchScene'
 import { burstStyle } from '../../lib/juice'
@@ -27,7 +29,8 @@ function decoyFor(ids: string[], focus: string, locked: string[]) {
 }
 
 export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProps) {
-  const guided = challenge.id.startsWith('ob-')
+  const { progress } = useProgress()
+  const guided = isEasy(progress) || challenge.id.startsWith('ob-')
   const left = challenge.pairs
   const right = useMemo(
     () => shuffle(challenge.pairs.map((pair) => ({ id: pair.id, text: pair.right }))),
@@ -114,7 +117,7 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
     >
       <WinBurst play={status === 'ok'} />
       <PuzzleLead challenge={challenge} />
-      <PuzzleHint text={challenge.context} onPeek={onPeek} />
+      <PuzzleHint text={challenge.context} id={challenge.id} onPeek={onPeek} />
       <p className="sort-how">
         <strong>Tap a picture</strong>, then the claim that belongs
         {guided ? ' · two choices' : ''}
@@ -129,7 +132,11 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
                 : 'Those don’t snap.'
               : 'Try the other claim.'}
           </strong>{' '}
-          {misses >= 2 ? challenge.teachOnWrong : 'Pick a new pair.'}
+          {misses >= 2
+            ? isEasy(progress)
+              ? 'Look again. Two choices.'
+              : challenge.teachOnWrong
+            : 'Pick a new pair.'}
         </p>
       ) : null}
 

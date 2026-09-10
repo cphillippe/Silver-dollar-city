@@ -11,7 +11,7 @@ interface WelcomeProps {
 }
 
 export function Welcome({ onNavigate }: WelcomeProps) {
-  const { progress, start } = useProgress()
+  const { progress, start, setEasyMode } = useProgress()
   const today = localDateKey()
   const returning = progress.started && dailyDoneToday(progress, today)
 
@@ -49,6 +49,17 @@ export function Welcome({ onNavigate }: WelcomeProps) {
           </figure>
         </div>
         <div className="welcome-actions">
+          <label className="welcome-easy">
+            <input
+              type="checkbox"
+              checked={Boolean(progress.easyMode)}
+              onChange={(event) => setEasyMode(event.target.checked)}
+            />
+            Easier words · bigger taps
+          </label>
+          <p className="quiet welcome-easy-note">
+            Optional. You can turn this on later in Settings → Reading.
+          </p>
           <button type="button" className="btn primary xl" onClick={begin}>
             {returning ? 'Back to town' : 'Begin the trail'}
           </button>

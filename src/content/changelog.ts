@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.3.4',
+    title: 'Easy mode',
+    when: '2026-09-10',
+    items: [
+      'Easy mode: plainer words, bigger taps, fewer choices at once. Off by default — turn it on at Welcome or Settings → Reading.',
+      'Teaches and Holds use shorter sentences and define hard words once. Creed is “old shared belief”; parable is “Jesus story”; mind map is “your scrapbook of links.” The claims stay the same.',
+      'Town opens with one Do this next card. Link the street sits above the map, with a tap-idea → place → person demo and a plain takeaway after you match.',
+    ],
+  },
+  {
     version: '1.3.3',
     title: 'Readable town',
     when: '2026-09-10',

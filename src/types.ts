@@ -256,6 +256,11 @@ export interface ProgressState {
   /** Visual chrome. Optional on old saves; normalize defaults to candy. */
   theme: AppTheme
   /**
+   * Easier words and bigger taps. Optional on old saves; normalize defaults to false.
+   * Schema stays 1 — do not wipe.
+   */
+  easyMode: boolean
+  /**
    * Encoded learnings (Acquire→Store). Optional on old saves;
    * normalize fills []. Schema stays 1 — do not wipe.
    */

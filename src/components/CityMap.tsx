@@ -39,6 +39,7 @@ import {
   useProgress,
 } from '../store/progress'
 import { localDateKey } from '../lib/dates'
+import { isEasy, scrapbookLabel } from '../lib/easy'
 import type { View } from '../types'
 import riverWalk from '../assets/cast/portrait-river.png'
 import juniperWalk from '../assets/cast/portrait-juniper.png'
@@ -631,7 +632,11 @@ export function CityMap({
               <h2>{CITY_AGE_TITLE[age]}</h2>
               <p className="city-age-line">{CITY_AGE_LINE[age]}</p>
               <p className="city-gift">{gift}</p>
-              <p className="city-map-hint">Tap a place for its mind map.</p>
+              <p className="city-map-hint">
+                {isEasy(progress)
+                  ? `Tap a place for ${scrapbookLabel(true).toLowerCase()}.`
+                  : 'Tap a place for its mind map.'}
+              </p>
               {doneToday ? (
                 <p className="city-morrow">Town held. A lamp waits tomorrow.</p>
               ) : null}
