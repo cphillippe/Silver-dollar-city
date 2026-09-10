@@ -142,7 +142,7 @@ Saves are **offline-first**. Nothing requires a login.
 - **Schema:** `SAVE_SCHEMA_VERSION` in `src/config/app.ts`. Bump it only when the persisted shape changes, and add a step in `src/lib/save.ts` `migrateToCurrent`. Do not wipe on upgrade.
 - **Move devices:** Settings → **Export JSON** (file) or **Copy share code** (`SC1.…`). Import file or paste on the other device. Import replaces this device’s save and keeps a backup key (`silver-city-progress-v1.bak`).
 - **Cloud:** not shipped. `cloudSyncStatus()` is `local-only` until there is real auth. Optional keys can be added later without dropping v1 fields.
-- **UI:** Hub is the **overworld town**. Completing Daily / districts / journal / stars lights buildings. Settings shows **What’s new** plus schema and app version (`1.3.0`).
+- **UI:** Hub is the **overworld town**. Completing Daily / districts / journal / stars lights buildings. Settings shows **What’s new** plus schema and app version (`1.3.1`).
 
 ## The town
 
@@ -171,7 +171,7 @@ Wire a test unit later by teaching `AdSlot` to render the network creative when 
 
 ## Support
 
-- **Version:** app `1.3.0` V0 (`package.json`, `src/config/app.ts`, Android `versionName`). Capacitor id `city.silver.unending`. `npm run android:apk` still builds the debug APK. Settings → **What’s new** (`src/content/changelog.ts`) is the hook for later packs.
+- **Version:** app `1.3.1` V0 (`package.json`, `src/config/app.ts`, Android `versionName`). Capacitor id `city.silver.unending`. `npm run android:apk` still builds the debug APK. Settings → **What’s new** (`src/content/changelog.ts`) is the hook for later packs.
 - **Content packs:** core trail is `CONTENT_PACKS` in [`src/content/packs.ts`](src/content/packs.ts). Next drop: new Area module → register in `index.ts` → one pack row → changelog row → journal/evidence/city/tools. Details: [`src/content/README.md`](src/content/README.md).
 - **Release smoke:** [`PLAYTEST.md`](PLAYTEST.md) (fun / clarity / retention plus the short checklist).
 - **Playtest notes:** same file.
