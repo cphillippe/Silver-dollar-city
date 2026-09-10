@@ -1,6 +1,7 @@
 import { evidenceFor } from '../content/evidence'
 import { journalForChallenge } from '../content'
 import { plainFor } from '../content/plain'
+import { LOT_STORY, lotWhy } from '../content/lots'
 import { isEasy, scrapbookLabel } from '../lib/easy'
 import { mindGraph } from '../lib/mindMap'
 import type { CityPlotId } from '../lib/city'
@@ -47,11 +48,7 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
           <div>
             <p className="eyebrow">{scrapbookLabel(easy, litCount)}</p>
             <h2>{graph.placeTitle}</h2>
-            <p className="quiet">
-              {easy
-                ? `${graph.person.name} · this lot`
-                : `${graph.person.name} · place · person · claim`}
-            </p>
+            <p className="quiet">{lotWhy(graph.plotId, easy)}</p>
           </div>
           <button type="button" className="btn tiny" onClick={onClose}>
             Close
@@ -62,6 +59,7 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
           <div className="mind-node is-place is-lit">
             <span className="mind-kicker">Place</span>
             <strong>{graph.placeTitle}</strong>
+            <em className="mind-why">{LOT_STORY[graph.plotId].path}</em>
           </div>
           <div className="mind-node is-person is-lit">
             <span className="mind-kicker">Person</span>

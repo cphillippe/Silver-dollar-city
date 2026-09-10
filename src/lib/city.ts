@@ -26,47 +26,47 @@ export const CITY_PLOTS: CityPlotSpec[] = [
   {
     id: 'porch',
     title: 'East porch',
-    blurb: 'Juniper’s lamp. Today’s Trail starts here.',
+    blurb: 'Juniper’s lamp. You arrive here so today’s line can be seen.',
   },
   {
     id: 'hollow',
     title: 'Parable Hollow',
-    blurb: 'Creek oaks and Mercy’s cabin.',
+    blurb: 'Mercy’s creek. Jesus stories live where pictures can walk.',
     areaId: 'parable-hollow',
   },
   {
     id: 'bench',
     title: 'Witness Bench',
-    blurb: 'Silas’s ledger hall by the square.',
+    blurb: 'Silas’s ledger on the square. Public names, not parables.',
     areaId: 'witness-bench',
   },
   {
     id: 'observatory',
     title: 'The Observatory',
-    blurb: 'Nora’s dome on the north ridge.',
+    blurb: 'Nora’s dome. The sky’s fit belongs on the ridge.',
     areaId: 'observatory',
   },
   {
     id: 'gate',
     title: 'The First Gate',
-    blurb: 'Ansel’s stone arch on the east road.',
+    blurb: 'Ansel’s arch. The stone asks why there is a world at all.',
     areaId: 'first-gate',
   },
   {
     id: 'lookout',
     title: 'High Lookout',
-    blurb: 'Hope’s tower on the high ridge.',
+    blurb: 'Hope’s tower. Duty, mind, meaning, and beauty look over the town.',
     areaId: 'high-lookout',
   },
   {
     id: 'journal',
     title: 'Dossier house',
-    blurb: 'Pages you can still say.',
+    blurb: 'River’s pages. What you can still say lives in the house.',
   },
   {
     id: 'lamps',
     title: 'Star lamps',
-    blurb: 'Mastery lights along the street.',
+    blurb: 'Juniper’s street lamps. The town remembers walks you kept.',
   },
 ]
 
@@ -209,11 +209,11 @@ export const CITY_AGE_SHORT: Record<CityAge, string> = {
 }
 
 export const CITY_AGE_LINE: Record<CityAge, string> = {
-  eden: 'A garden by the river. The City of Heaven waits on the ridge.',
-  village: 'First trees and a cabin. Proofs will raise a village.',
-  town: 'The square is lighting. Keep the lines — the town grows.',
-  gold: 'Gates and gold roofs. The ridge city is close enough to see.',
-  heaven: 'The City of Heaven is open. Light, gates, and glory — you kept the trail.',
+  eden: 'You arrive at Juniper’s lamp. The creek garden — Parable Hollow — holds Jesus stories. Heaven waits on the ridge.',
+  village: 'Mercy’s oaks and Silas’s square. Stories first, then public names.',
+  town: 'Nora’s dome looks up. Fine-tuning lives with the sky.',
+  gold: 'Ansel’s gate asks why there is a world. The lookout is close enough to see.',
+  heaven: 'Hope’s ridge and the City of Heaven. You kept the trail.',
 }
 
 /** Held lines needed with a lit lookout before the ridge city fully opens. */

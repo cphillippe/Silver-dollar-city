@@ -13,7 +13,7 @@ export const STREET_CHALLENGE: LinkChallenge = {
   idea: 'an idea lives at a place, with a person',
   prompt: 'Tap a block, then the place or person that belongs with it.',
   context:
-    'Mercy at the hollow, Silas at the bench, Juniper on the east porch. Snap idea → place → person.',
+    'Mercy at the creek because Jesus stories live there. Silas at the square because names belong in a ledger. Juniper on the east porch because a lamp is meant to be seen.',
   nodes: [
     {
       id: 'idea-mercy',
@@ -90,9 +90,9 @@ export const STREET_CHALLENGE: LinkChallenge = {
       personId: 'person-juniper',
     },
   ],
-  teachOnWrong: 'Same story: idea, the lot it lives on, and the person who keeps it.',
+  teachOnWrong: 'Same story: idea, the lot it lives on, and the person who keeps it — for a reason.',
   deeper:
-    'Reopen each lit node from its place on the town map — where + who + what claim. Luke 10:36: mercy proves who the neighbor is.',
+    'Mercy keeps the creek because Jesus taught in pictures (Luke 10:36). Silas keeps the square because the creed is a public report. Juniper keeps the porch because a lamp is meant to be seen.',
 }
 
 export const STREET_BEATS = [
@@ -100,3 +100,19 @@ export const STREET_BEATS = [
   'Silas Page · Witness Bench · died, buried, raised, appeared.',
   'Juniper · East porch · A lamp is meant to be seen.',
 ]
+
+/** Why each street triple lives where it lives. Teach before the match. */
+export const STREET_WHYS: Record<(typeof STREET_CHALLENGE.triples)[number]['id'], { easy: string; hard: string }> = {
+  'mercy-hollow': {
+    easy: 'Mercy lives at the creek because she tells Jesus stories. The neighbor-line is a picture, so it lives at Parable Hollow.',
+    hard: 'Mercy Wren keeps Parable Hollow: Jesus taught in pictures by the road and the water. Neighbor is the one who shows mercy — that line belongs with the storyteller, not the clerk.',
+  },
+  'silas-bench': {
+    easy: 'Silas copies names at the square. The old shared belief — died, buried, raised — sits in a public ledger.',
+    hard: 'Silas Page keeps the Witness Bench on the square. Died, buried, raised, appeared is a public creed. It belongs in a ledger hall, not under the oaks.',
+  },
+  'juniper-porch': {
+    easy: 'Juniper’s lamp is on the porch so today’s line can be seen.',
+    hard: 'Juniper keeps the east porch. A lamp is meant to be seen — so the morning line lives at the lamp, where the trail starts.',
+  },
+}

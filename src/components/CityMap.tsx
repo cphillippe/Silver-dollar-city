@@ -39,11 +39,12 @@ import {
   useProgress,
 } from '../store/progress'
 import { localDateKey } from '../lib/dates'
-import { isEasy, scrapbookLabel } from '../lib/easy'
+import { isEasy } from '../lib/easy'
 import type { View } from '../types'
 import riverWalk from '../assets/cast/portrait-river.png'
 import juniperWalk from '../assets/cast/portrait-juniper.png'
 import { mindMapHasLit } from '../lib/mindMap'
+import { TOWN_PATH_EASY, TOWN_PATH_HARD } from '../content/lots'
 import { Avatar } from './Avatar'
 import { GemMark } from './GemMark'
 import { MindMap } from './MindMap'
@@ -632,9 +633,7 @@ export function CityMap({
               <p className="city-age-line">{CITY_AGE_LINE[age]}</p>
               <p className="city-gift">{gift}</p>
               <p className="city-map-hint">
-                {isEasy(progress)
-                  ? `Tap a place for ${scrapbookLabel(true).toLowerCase()}.`
-                  : 'Tap a place for its mind map.'}
+                {isEasy(progress) ? TOWN_PATH_EASY : TOWN_PATH_HARD}
               </p>
               {doneToday ? (
                 <p className="city-morrow">Town held. A lamp waits tomorrow.</p>
@@ -746,7 +745,7 @@ function PlotGroup({
       className={`city-plot is-${stage} ${next ? 'is-next' : ''} ${rising ? 'is-rising' : ''} ${tapped ? 'is-tapped' : ''}`}
       role={clickable ? 'button' : undefined}
       tabIndex={clickable ? 0 : undefined}
-      aria-label={`${id} ${stage}${next ? ', next to build' : ''}${rising ? ', just rose' : ''}`}
+      aria-label={`${CITY_PLOTS.find((plot) => plot.id === id)?.title ?? id} ${stage}${next ? ', next to build' : ''}${rising ? ', just rose' : ''}`}
       onClick={() => {
         if (clickable) onOpen(id)
       }}

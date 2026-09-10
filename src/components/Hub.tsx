@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { areas, findPlayable } from '../content'
 import { STORY, townVoice } from '../content/story'
+import { LOT_STORY } from '../content/lots'
 import { formatDeviceLocalDate, localDateKey } from '../lib/dates'
 import { CITY_PLOTS, nextPlotId, type CityPlotId } from '../lib/city'
 import { EASY, isEasy, scrapbookLabel } from '../lib/easy'
@@ -151,6 +152,11 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
                   ? 'Match each idea to its place and person. Then it lives in your scrapbook of links.'
                   : 'Snap a claim to its lot and keeper. Lit nodes reopen from the town map.'}
               </p>
+              <p className="street-lot-why">
+                {easy
+                  ? 'Mercy at the creek. Silas at the square. Juniper’s lamp on the porch.'
+                  : 'Mercy’s pictures at the creek. Silas’s ledger at the square. Juniper’s lamp on the porch — meant to be seen.'}
+              </p>
             </div>
           </div>
           <button
@@ -257,6 +263,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
                 <Avatar who={streetVoice.who} size="sm" />
                 <div>
                   <strong>{plot.title}</strong>
+                  <em className="lot-path">{LOT_STORY[plot.id].path}</em>
                   {current ? <span className="street-next">Next</span> : null}
                 </div>
               </div>

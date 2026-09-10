@@ -3,27 +3,27 @@ import { Avatar } from './Avatar'
 
 const MARKS: Record<string, { label: string; path: string }> = {
   'parable-hollow': {
-    label: 'The creek oaks',
+    label: 'Parable Hollow',
     path: 'M16 70c8-18 14-28 20-28 4 0 6 8 8 16 4-14 10-22 16-22 8 0 14 18 20 34',
   },
   'witness-bench': {
-    label: 'The witness bench',
+    label: 'Witness Bench',
     path: 'M18 58h60M24 58v16h48V58M20 74h56',
   },
   observatory: {
-    label: 'The cracked dome',
+    label: 'The Observatory',
     path: 'M18 70c0-22 14-38 30-38s30 16 30 38M48 32v10',
   },
   'first-gate': {
-    label: 'The first gate',
+    label: 'The First Gate',
     path: 'M22 78V38l26-16 26 16v40M48 78V50',
   },
   'high-lookout': {
-    label: 'The high ridge',
+    label: 'High Lookout',
     path: 'M8 70 28 42l14 12 18-28 28 44',
   },
   'daily-trail': {
-    label: 'The east porch',
+    label: 'East porch',
     path: 'M24 78V44h48v34M36 78V58h24v20M48 44V28',
   },
 }

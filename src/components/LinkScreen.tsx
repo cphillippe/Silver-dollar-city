@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { STREET_BEATS, STREET_CHALLENGE } from '../content/links'
+import { STREET_BEATS, STREET_CHALLENGE, STREET_WHYS } from '../content/links'
 import { STORY } from '../content/story'
 import { isEasy } from '../lib/easy'
 import { useJuiceHandoff } from '../lib/juice'
@@ -76,6 +76,11 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
                 ? 'You’ll reopen them from your scrapbook of links. One story at a time.'
                 : 'Each match lights a spot on the town map. Tap the place later to open that idea again.'}
             </p>
+            <ul className="word-school street-whys" aria-label="Why each place">
+              {challenge.triples.map((triple) => (
+                <li key={triple.id}>{easy ? STREET_WHYS[triple.id].easy : STREET_WHYS[triple.id].hard}</li>
+              ))}
+            </ul>
             <ol className={`teach-beats ${easy ? 'is-easy' : ''}`}>
               {STREET_BEATS.map((beat) => (
                 <li key={beat}>{beat}</li>
@@ -111,8 +116,8 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
             <p className="stored-claim">An idea lives at a place, with a person.</p>
             <p className="link-takeaway">
               {easy
-                ? 'Mercy’s Jesus story lives at Parable Hollow. The old shared belief — died, buried, raised — lives at the Witness Bench. The lamp lives on Juniper’s porch.'
-                : 'Mercy’s neighbor-line lives at Parable Hollow. The creed — died, buried, raised — lives at the Witness Bench. The lamp lives on Juniper’s porch.'}
+                ? 'Mercy tells Jesus stories at the creek — that is why the neighbor-line lives at Parable Hollow. Silas copies names on the square — that is why the old shared belief lives at the Witness Bench. Juniper’s lamp is on the porch so today’s line can be seen.'
+                : 'Mercy keeps the creek because Jesus taught in pictures. Silas keeps the square because the creed is a public report. Juniper keeps the porch because a lamp is meant to be seen.'}
             </p>
             <DigDeeper id={challenge.id} compact />
           </article>

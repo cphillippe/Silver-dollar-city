@@ -236,7 +236,7 @@ const PLAIN: Record<string, PlainLine> = {
   ),
   'ln-street': line(
     'An idea lives at a place, with a person.',
-    'Mercy’s Jesus story at the hollow. Silas’s old shared belief at the bench. Juniper’s lamp on the east porch. Tap idea → place → person.',
+    'Mercy tells Jesus stories at the creek — that is why the neighbor-line lives at Parable Hollow. Silas copies names on the square — that is why the old shared belief lives at the Witness Bench. Juniper’s lamp is on the porch so today’s line can be seen.',
     { term: 'Link', sense: 'snap the claim to its lot and keeper', hint: 'Tap idea → place → person. One story at a time.' },
   ),
 }

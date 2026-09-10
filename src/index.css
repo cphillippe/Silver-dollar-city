@@ -5817,6 +5817,34 @@ html[data-theme='dusk'] .hub.is-town .street-link {
   color: rgba(255, 236, 196, 0.78);
 }
 
+.street-lot-why,
+.lot-path {
+  display: block;
+  margin: 0.35rem 0 0;
+  font-size: 0.82rem;
+  font-style: italic;
+  color: var(--ink-soft, rgba(255, 236, 196, 0.78));
+}
+
+.lot-path {
+  margin: 0.12rem 0 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.street-whys {
+  margin: 0.55rem 0 0.2rem;
+}
+
+.mind-why {
+  display: block;
+  margin: 0.2rem 0 0;
+  font-size: 0.72rem;
+  font-style: italic;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
 .hub.is-town .street-link {
   background:
     radial-gradient(140px 70px at 8% -10%, rgba(61, 204, 122, 0.35), transparent 70%),
