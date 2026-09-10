@@ -121,11 +121,12 @@ export const AREA_LINES: Record<
       'Keep the line, not my voice. Neighbor is the one who shows mercy.',
   },
   'witness-bench': {
-    hello: 'I copy names. We’ll read what’s there — awkward parts too.',
+    hello:
+      'I copy names on the square. Public reports live here — the creed is a ledger line, not a creek story.',
     after: 'Hold the creed: died, buried, raised, appeared.',
   },
   observatory: {
-    hello: 'Dome’s open. Wonder and a notebook — not a shrug.',
+    hello: 'Dome’s open on the ridge. We look up. Fine-tuning lives with the sky.',
     after: 'If a sky line stuck, say it on the stairs.',
   },
   'first-gate': {

@@ -32,7 +32,8 @@ import {
   WATCH_TOOLS,
 } from '../src/lib/watchTools.ts'
 import { ideaUnlocked, mindGraph, mindMapHasLit } from '../src/lib/mindMap.ts'
-import { STREET_CHALLENGE, STREET_LIGHTS } from '../src/content/links.ts'
+import { STREET_CHALLENGE, STREET_LIGHTS, STREET_WHYS } from '../src/content/links.ts'
+import { LOT_STORY, TOWN_PATH_EASY, TOWN_PATH_HARD } from '../src/content/lots.ts'
 import { deeperLinksFor } from '../src/content/deeper.ts'
 import { allEvidenceIds, evidenceFor } from '../src/content/evidence.ts'
 import { plainFor } from '../src/content/plain.ts'
@@ -982,7 +983,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.3.8')
+assert.equal(APP_VERSION, '1.3.9')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -1029,6 +1030,34 @@ assert.equal(STREET_CHALLENGE.kind, 'link')
 assert.equal(STREET_CHALLENGE.id, 'ln-street')
 assert.deepEqual([...STREET_LIGHTS], ['ph-road', 'wb-creed', 'daily-lantern'])
 assert.equal(STREET_CHALLENGE.triples.length, 3)
+assert.deepEqual(
+  Object.keys(LOT_STORY).sort(),
+  ['bench', 'gate', 'hollow', 'journal', 'lamps', 'lookout', 'observatory', 'porch'],
+)
+assert.match(LOT_STORY.hollow.whyEasy, /creek/)
+assert.match(LOT_STORY.bench.whyEasy, /square|ledger/)
+assert.match(LOT_STORY.porch.whyEasy, /lamp/)
+assert.match(LOT_STORY.observatory.whyHard, /telescope|ridge|sky/)
+assert.match(STREET_CHALLENGE.context, /creek/)
+assert.match(STREET_WHYS['mercy-hollow'].easy, /creek/)
+assert.match(STREET_WHYS['silas-bench'].easy, /square|ledger/)
+assert.match(STREET_WHYS['juniper-porch'].easy, /lamp|porch/)
+assert.match(TOWN_PATH_EASY, /Porch lamp/)
+assert.match(TOWN_PATH_HARD, /Heaven/)
+assert.match(mapSrc, /TOWN_PATH/)
+assert.match(
+  readFileSync(new URL('../src/components/Landmark.tsx', import.meta.url), 'utf8'),
+  /Parable Hollow/,
+)
+assert.doesNotMatch(
+  readFileSync(new URL('../src/components/Landmark.tsx', import.meta.url), 'utf8'),
+  /cracked dome/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8'),
+  /street-lot-why/,
+)
+assert.match(cssSrc, /street-whys/)
 assert.match(STREET_CHALLENGE.nodes.find((node) => node.id === 'idea-mercy')?.text ?? '', /Neighbor/)
 assert.equal(ideaUnlocked(empty, 'ph-road'), false)
 assert.equal(ideaUnlocked({ ...empty, completed: ['ln-street'] }, 'ph-road'), true)

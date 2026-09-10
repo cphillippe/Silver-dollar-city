@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.3.9',
+    title: 'The map tells the walk',
+    when: '2026-09-10',
+    items: [
+      'Town lots have in-world reasons: Mercy’s pictures at the creek, Silas’s ledger on the square, Juniper’s lamp on the porch, Nora’s sky on the ridge, Ansel’s stone at the gate, Hope’s look over the town.',
+      'The legend names the walk: porch lamp → creek stories → square names → ridge sky, then gate and lookout toward Heaven.',
+      'Link the street still lights the same three spots. Easy still teaches a claim as what we hold to be true.',
+    ],
+  },
+  {
     version: '1.3.8',
     title: 'Link lights the map',
     when: '2026-09-10',
