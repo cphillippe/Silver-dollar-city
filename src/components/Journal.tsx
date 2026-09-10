@@ -216,7 +216,7 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
                       {tool ? ` · deploys as ${tool}` : ''}
                     </span>
                   </p>
-                  {trace ? <p className="quiet">{nextGapLabel(trace, today)}</p> : null}
+                  {trace ? <p className="quiet">{nextGapLabel(trace, today, easy)}</p> : null}
                   <DigDeeper id={learning.id} surface="journal" />
                 </article>
               )
@@ -346,7 +346,7 @@ function JournalCard({
             {held && !due ? <span className="held-mark">Held</span> : null}
           </div>
           {trace && !due ? (
-            <p className="quiet">{nextGapLabel(trace, today)}</p>
+            <p className="quiet">{nextGapLabel(trace, today, easy)}</p>
           ) : null}
           {learning ? (
             <p className="learning-store">

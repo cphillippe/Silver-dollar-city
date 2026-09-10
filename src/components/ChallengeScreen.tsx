@@ -216,8 +216,10 @@ export function ChallengeScreen({
               }
               when={
                 progress.memory[brief.id]
-                  ? nextGapLabel(progress.memory[brief.id], today)
-                  : 'Dust off today'
+                  ? nextGapLabel(progress.memory[brief.id], today, isEasy(progress))
+                  : isEasy(progress)
+                    ? 'Read this again today'
+                    : 'Dust off today'
               }
             />
           ) : null}

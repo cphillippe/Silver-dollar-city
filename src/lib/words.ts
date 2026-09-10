@@ -54,7 +54,7 @@ export const WORDS = {
   },
   upgrade: {
     term: 'Upgrade',
-    sense: 'a better look and use you earn by keeping a line',
+    sense: 'a better look you earn by learning, not by paying',
     teach: 'An upgrade is a better building you earn by learning — not by paying.',
   },
 } as const satisfies Record<string, WordSense>
@@ -107,6 +107,9 @@ export function schoolWordsFor(
 
 /** Easy puzzle leads: bury unread jargon; keep claim/parable/creed after they are taught. */
 export function easyLead(id: string, prompt: string): string {
+  if (id === 'ln-street') {
+    return 'Connect sentence → place → person. One story at a time.'
+  }
   if (id === 'fg-contingent') {
     return 'Stack the stones: things that might not have been still need a ground.'
   }
