@@ -6001,6 +6001,16 @@ html[data-theme='dusk'] .hub.is-town .street-link {
   text-align: center;
 }
 
+.play.is-link.is-finale {
+  gap: 14px;
+  padding: 8px 0 4px;
+}
+
+.play.is-link.is-finale .link-complete {
+  font-size: 1.45rem;
+  line-height: 1.25;
+}
+
 .link-next {
   width: 100%;
 }
