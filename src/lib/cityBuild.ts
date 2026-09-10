@@ -184,8 +184,8 @@ export function nextUpgradeNeed(
     return {
       ready: true,
       line: easy
-        ? 'Upgrade — a better building you earn by learning, not by paying.'
-        : 'You earned the next look by keeping a line. Tap Upgrade — learning raises the house, not payment.',
+        ? 'Build this — raise the next look you earned by learning, not by paying.'
+        : 'You earned the next look by keeping a line. Tap Build this — learning raises the house, not payment.',
     }
   }
   return { ready: false, line: needForTier(id, applied + 1, easy) }

@@ -318,12 +318,12 @@ export function CityMap({
   const nextStage = stageOf(nextId)
   const nextAt = ANCHOR[nextId]
   const kicker = canUpgrade(nextId, progress)
-    ? 'Upgrade'
+    ? 'Build this'
     : nextKicker(nextStage, nextId, doneToday)
   const gift = anyUpgradeReady(progress)
     ? isEasy(progress)
-      ? 'A building is ready. Tap it, then Upgrade.'
-      : 'A building is ready to upgrade. Tap it — learning raises the house.'
+      ? 'A building is ready. Tap it, then Build this.'
+      : 'A building is ready. Tap it, then Build this — learning raises the house.'
     : nextGift(nextId, nextStage, shownFill[nextId] ?? 0)
   const celebrating = Boolean(beat) || homecoming
   const beatVoice = beat ? townVoice(beat.id) : townVoice(nextId)

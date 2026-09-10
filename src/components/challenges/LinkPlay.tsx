@@ -49,6 +49,7 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
   const [shake, setShake] = useState(false)
   const [misses, setMisses] = useState(0)
   const [picked, setPicked] = useState<string | null>(null)
+  const [streetDone, setStreetDone] = useState(false)
 
   function needed(tripleId: string) {
     const triple = challenge.triples.find((item) => item.id === tripleId)
@@ -122,7 +123,6 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
     if (done) {
       setStep('linked')
       setStatus('ok')
-      onSolved()
       return
     }
     setStep('linked')
@@ -155,6 +155,12 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
     onMiss()
   }
 
+  function finishStreet() {
+    if (streetDone) return
+    setStreetDone(true)
+    onSolved()
+  }
+
   function nextLink() {
     recover()
     setStep('idea')
@@ -162,7 +168,7 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
 
   const nextTap =
     status === 'ok'
-      ? 'Link complete'
+      ? 'All 3 links complete'
       : step === 'linked'
         ? 'This link is complete. Tap Next.'
         : easy
@@ -230,9 +236,14 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
       ) : null}
 
       {status === 'ok' ? (
-        <p className="link-complete" role="status">
-          Link complete
-        </p>
+        <>
+          <p className="link-complete" role="status">
+            All 3 links complete
+          </p>
+          <button type="button" className="btn gold xl link-next" onClick={finishStreet}>
+            Done
+          </button>
+        </>
       ) : null}
 
       {step === 'linked' && status !== 'ok' ? (

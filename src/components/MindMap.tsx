@@ -86,7 +86,7 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
             className="btn gold xl build-upgrade"
             onClick={() => upgradeBuilding(plotId)}
           >
-            Upgrade
+            Build this
           </button>
         ) : (
           <p className="build-next">{need.line}</p>

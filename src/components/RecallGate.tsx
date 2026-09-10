@@ -64,9 +64,10 @@ export function RecallGate({
   const [flash, setFlash] = useState<string | null>(null)
   const [shake, setShake] = useState(false)
   const [heldNote, setHeldNote] = useState(false)
+  const [reasonLocked, setReasonLocked] = useState(false)
   const heldClaim = chosen?.claim ?? brief.claim
   const heldReason = chosen?.reason ?? brief.reason
-  const confirmReason = encode || reasonOptions.length === 1
+  const confirmReason = encode || reasonOptions.length === 1 || reasonLocked
 
   const nextTap =
     phase === 'teach'
@@ -74,7 +75,9 @@ export function RecallGate({
       : phase === 'reason'
         ? confirmReason
           ? easy
-            ? 'Read why it stands, then tap Done.'
+            ? reasonLocked
+              ? 'That reason holds. Tap Done.'
+              : 'Read why it stands, then tap Done.'
             : 'Tap Done when you have the reason.'
           : easy
             ? 'Tap the reason that still holds.'
@@ -89,10 +92,15 @@ export function RecallGate({
     onHeld({ clean })
   }
 
-  function pick(line: string, correct: string, next: Phase | 'done') {
+  function pick(line: string, correct: string, next: Phase | 'lock' | 'done') {
     if (line === correct) {
       if (next === 'done') {
         settle(misses === 0)
+        return
+      }
+      if (next === 'lock') {
+        setReasonLocked(true)
+        setFlash(line)
         return
       }
       setPhase(next)
@@ -180,12 +188,17 @@ export function RecallGate({
           <p className="recall-line rehearse-stem">{heldClaim}</p>
           <h2>{easy ? `${WORDS.reason.term} — ${WORDS.reason.sense}` : STORY.whyItStands}</h2>
           {easy ? <p className="quiet">{WORDS.reason.teach}</p> : null}
+          {reasonLocked ? (
+            <p className="match-toast" role="status">
+              <strong>That reason holds.</strong>
+            </p>
+          ) : null}
           {confirmReason ? (
             <>
               <p className="reason-held">{heldReason}</p>
               <button
                 type="button"
-                className="btn primary xl recall-done"
+                className="btn gold xl recall-done"
                 onClick={() => settle(misses === 0)}
               >
                 Done
@@ -198,7 +211,7 @@ export function RecallGate({
                   key={line}
                   type="button"
                   className={`match-card recall-card ${flash === line ? 'is-flash' : ''}`}
-                  onClick={() => pick(line, heldReason, 'done')}
+                  onClick={() => pick(line, heldReason, 'lock')}
                 >
                   {line}
                 </button>

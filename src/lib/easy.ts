@@ -17,7 +17,7 @@ export const EASY = {
   rememberSentence: 'Choose the sentence to remember.',
   readAgain: 'Read this one again.',
   claimTeach: 'A claim is what we hold to be true.',
-  upgrade: 'a better building you earn by learning',
+  upgrade: 'Build this — raise the next look you earned by learning',
   manage: 'Building',
 } as const
 

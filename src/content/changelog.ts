@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.2',
+    title: 'Done, then Build this',
+    when: '2026-09-10',
+    items: [
+      'After you pick the reason that still holds, a gold Done waits — the quiz does not vanish on its own.',
+      'Link the street still uses the 3-step wizard. After the third link: All 3 links complete, then Done.',
+      'The building button is Build this. The success beat is still Built! You earn the next look by learning, not by paying.',
+    ],
+  },
+  {
     version: '1.4.1',
     title: 'Plain next words',
     when: '2026-09-10',
