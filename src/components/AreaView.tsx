@@ -4,6 +4,7 @@ import { AREA_LINES, guideForArea } from '../content/story'
 import { Avatar, Say } from './Avatar'
 import { Landmark } from './Landmark'
 import { kindLabel } from './icons'
+import { isEasy } from '../lib/easy'
 import { starLegend } from '../lib/stars'
 import { StarRow } from './StarRow'
 import {
@@ -74,7 +75,7 @@ export function AreaView({ areaId, onNavigate }: AreaViewProps) {
 
       {!unlocked ? (
         <p className="locked-note">
-          {areaGateCopy(area.id, progress.completed)}
+          {areaGateCopy(area.id, progress.completed, isEasy(progress))}
         </p>
       ) : (
         <ol className="challenge-list">

@@ -19,6 +19,9 @@ export const EASY = {
   claimTeach: 'A claim is what we hold to be true.',
   upgrade: 'Build this — raise the next look you earned by learning',
   manage: 'Building',
+  nightWhat: 'Night Watch: use a sentence you kept to turn cheap lines toward heaven.',
+  nightDo: 'Do this',
+  deployTeach: 'Deploy means use a claim you held.',
 } as const
 
 export function scrapbookLabel(easy: boolean, lit?: number) {

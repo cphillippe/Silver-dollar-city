@@ -6126,8 +6126,10 @@ html[data-theme='dusk'] .hub.is-town .street-link {
   position: relative;
   z-index: 1;
   width: min(100%, 420px);
-  max-height: min(72vh, 520px);
-  overflow: auto;
+  max-height: min(78vh, 560px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   margin: 0 8px 8px;
   padding: 12px;
   border-radius: 20px;
@@ -6210,6 +6212,36 @@ html[data-theme='dusk'] .hub.is-town .street-link {
   color: #ffe08a;
 }
 
+.mind-map-scroll {
+  overflow: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.mind-map-dock {
+  flex-shrink: 0;
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 8px 0 0;
+  background: linear-gradient(180deg, transparent, rgba(36, 12, 80, 0.96) 18%);
+}
+
+.mind-map-dock .build-upgrade,
+.mind-map-dock .btn.xl {
+  width: 100%;
+  margin: 0;
+}
+
+.mind-map-walk {
+  align-self: center;
+  min-height: 44px;
+}
+
 .mind-empty {
   grid-column: 1 / -1;
 }
@@ -6221,6 +6253,34 @@ html[data-theme='dusk'] .hub.is-town .street-link {
 
 .mind-map-actions .btn {
   width: 100%;
+}
+
+.link-dock {
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+  padding: 10px 0 calc(8px + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(180deg, transparent, rgba(20, 8, 48, 0.94) 24%);
+}
+
+.link-dock .btn {
+  width: 100%;
+}
+
+.city-lock-toast,
+.street-lock {
+  margin: 8px 0 0;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(255, 204, 51, 0.16);
+  color: #fff6e8;
+  font-size: 0.92rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 html[data-theme='parchment'] .mind-map-card {

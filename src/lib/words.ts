@@ -57,6 +57,11 @@ export const WORDS = {
     sense: 'raise the next look you earned by learning, not by paying',
     teach: 'Build this means raise the next look you earned by learning — not by paying.',
   },
+  deploy: {
+    term: 'Deploy',
+    sense: 'use a claim you held',
+    teach: 'Deploy means use a claim you held — a claim is what we hold to be true.',
+  },
 } as const satisfies Record<string, WordSense>
 
 export type WordKey = keyof typeof WORDS

@@ -73,7 +73,7 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
             <PlainTalk id={challenge.id} />
             <p className="quiet">
               {easy
-                ? 'You’ll reopen them from your scrapbook of links. One story at a time.'
+                ? `${EASY.claimTeach} Pick the sentence, then the place, then the person. You’ll reopen them from your scrapbook of links.`
                 : 'Each match lights a spot on the town map. Tap the place later to open that idea again.'}
             </p>
             <ul className="word-school street-whys" aria-label="Why each place">

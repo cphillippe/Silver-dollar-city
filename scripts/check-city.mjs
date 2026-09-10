@@ -40,7 +40,9 @@ import {
   canUpgrade,
   earnedTier,
   emptyCityBuilt,
+  lotTapWhy,
 } from '../src/lib/cityBuild.ts'
+import { emptyProgress } from '../src/lib/save.ts'
 import { WORDS } from '../src/lib/words.ts'
 import { deeperLinksFor, eraLabel } from '../src/content/deeper.ts'
 import { allEvidenceIds, evidenceFor } from '../src/content/evidence.ts'
@@ -804,6 +806,9 @@ assert.deepEqual(defendPads(empty), ['porch'])
 assert.match(hubSrc, /Hold the night/)
 assert.match(hubSrc, /night-watch/)
 assert.match(hubSrc, /Held lines turn the night toward heaven/)
+assert.match(hubSrc, /EASY.nightDo/)
+assert.match(hubSrc, /Why locked/)
+assert.match(hubSrc, /street-lock/)
 assert.doesNotMatch(hubSrc, /standing lot/i)
 const defendCopy = readFileSync(
   new URL('../src/content/defend.ts', import.meta.url),
@@ -815,6 +820,7 @@ const defendSrc = readFileSync(
   'utf8',
 )
 assert.match(defendSrc, /The road is coming/)
+assert.match(defendSrc, /EASY.nightDo/)
 assert.match(defendSrc, /Unlock the lamps/)
 assert.match(defendSrc, /TeachUnlock/)
 assert.match(defendSrc, /RecallGate/)
@@ -1003,7 +1009,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.4')
+assert.equal(APP_VERSION, '1.4.5')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -1066,6 +1072,7 @@ assert.equal(earnedTier('journal', grown), 4)
 }
 assert.equal(WORDS.upgrade.teach.includes('learning'), true)
 assert.match(WORDS.upgrade.teach, /not by paying/)
+assert.match(WORDS.deploy.teach, /claim you held/)
 assert.match(
   readFileSync(new URL('../src/components/MindMap.tsx', import.meta.url), 'utf8'),
   /Build this/,
@@ -1131,6 +1138,29 @@ assert.match(linkPlaySrc, /is-picture/)
 assert.match(linkPlaySrc, /PlaceGlyph/)
 assert.match(linkPlaySrc, /size="lg"/)
 assert.match(linkPlaySrc, /daily-lantern/)
+assert.match(linkPlaySrc, /link-dock/)
+assert.match(linkPlaySrc, /Wrong place/)
+assert.match(
+  readFileSync(new URL('../src/components/MindMap.tsx', import.meta.url), 'utf8'),
+  /mind-map-dock/,
+)
+assert.match(cssSrc, /mind-map-dock/)
+assert.match(cssSrc, /link-dock/)
+assert.match(cssSrc, /city-lock-toast/)
+{
+  const fresh = emptyProgress()
+  const benchWhy = lotTapWhy(
+    'bench',
+    fresh,
+    true,
+    false,
+    'This street is locked. Finish 2 Jesus-story walks at the creek (0/2), then the square opens.',
+    false,
+  )
+  assert.match(benchWhy ?? '', /locked/)
+  assert.match(benchWhy ?? '', /2/)
+  assert.equal(lotTapWhy('porch', fresh, true, true, '', false), null)
+}
 
 const puzzleSrc = readFileSync(
   new URL('../src/components/PuzzlePlay.tsx', import.meta.url),

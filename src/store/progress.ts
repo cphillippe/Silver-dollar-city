@@ -73,18 +73,23 @@ export function hollowWalksDone(completed: string[]): number {
     .length
 }
 
-export function areaGateCopy(areaId: string, completed: string[]): string {
+export function areaGateCopy(areaId: string, completed: string[], easy = false): string {
   if (areaId === 'witness-bench') {
     const have = hollowWalksDone(completed)
-    return `Walk ${HOLLOW_WALKS_TO_WITNESS} scenes in Parable Hollow (${have}/${HOLLOW_WALKS_TO_WITNESS}) — then Silas. Unpayable can wait.`
+    return easy
+      ? `This street is locked. Finish 2 Jesus-story walks at the creek (${have}/2), then the square opens.`
+      : `Walk ${HOLLOW_WALKS_TO_WITNESS} scenes in Parable Hollow (${have}/${HOLLOW_WALKS_TO_WITNESS}) — then Silas. Unpayable can wait.`
   }
   const area = areas.find((item) => item.id === areaId)
   const previous = area
     ? areas.find((item) => item.order === area.order - 1)
     : undefined
-  return previous
-    ? `Finish ${previous.title}, then the path opens.`
-    : 'This gate is still closed.'
+  if (previous) {
+    return easy
+      ? `This street is locked. Finish ${previous.title} first, then this lot opens.`
+      : `Finish ${previous.title}, then the path opens.`
+  }
+  return easy ? 'This street is locked. Finish the walk before it first.' : 'This gate is still closed.'
 }
 
 export function isAreaUnlocked(areaId: string, completed: string[]): boolean {
