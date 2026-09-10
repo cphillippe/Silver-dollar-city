@@ -92,7 +92,7 @@ export const STREET_CHALLENGE: LinkChallenge = {
   ],
   teachOnWrong: 'Same story: idea, the lot it lives on, and the person who keeps it.',
   deeper:
-    'Reopen each lit node from its place on the town map — where + who + what claim.',
+    'Reopen each lit node from its place on the town map — where + who + what claim. Luke 10:36: mercy proves who the neighbor is.',
 }
 
 export const STREET_BEATS = [

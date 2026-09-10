@@ -91,7 +91,7 @@ export const highLookout: Area = {
       idea: 'inner experience is not captured by a scan',
       prompt: 'Match each feature of mind to what physical description still leaves standing.',
       context:
-        'David Chalmers named the “hard problem of consciousness”: explaining why physical process is accompanied by inner experience. Mind is at home if the world’s ground is a living God — not an indifferent process.',
+        'Inner experience is not captured by a scan. The “hard problem” is why physical process is accompanied by felt life at all. Mind is at home if the world’s ground is a living God — not an indifferent process.',
       pairs: [
         {
           id: 'qualia',

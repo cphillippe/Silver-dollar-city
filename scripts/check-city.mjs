@@ -33,6 +33,9 @@ import {
 } from '../src/lib/watchTools.ts'
 import { ideaUnlocked, mindGraph, mindMapHasLit } from '../src/lib/mindMap.ts'
 import { STREET_CHALLENGE, STREET_LIGHTS } from '../src/content/links.ts'
+import { deeperLinksFor } from '../src/content/deeper.ts'
+import { allEvidenceIds } from '../src/content/evidence.ts'
+import { profileInventory } from '../src/lib/profile.ts'
 
 const progressSrc = readFileSync(
   new URL('../src/store/progress.ts', import.meta.url),
@@ -371,6 +374,11 @@ assert.doesNotMatch(dailySrc, /A multiverse is a peer to design/)
 assert.doesNotMatch(dailySrc, /multiverse/)
 assert.doesNotMatch(dailySrc, /necessity/)
 assert.doesNotMatch(dailySrc, /asserted to cancel the surprise/)
+assert.doesNotMatch(dailySrc, /not required to agree/)
+assert.doesNotMatch(dailySrc, /you may disagree/)
+assert.match(dailySrc, /Isaiah 53’s Servant is the Jesus the church confesses/)
+assert.match(dailySrc, /Matthew 26:28; Luke 22:20/)
+assert.doesNotMatch(dailySrc, /Mercy is poured, not earned/)
 assert.equal([...dailySrc.matchAll(/\bwhy: '/g)].length, 12)
 assert.match(dailySrc, /early: true/)
 assert.match(dailySrc, /daily-gems/)
@@ -515,6 +523,10 @@ assert.match(benchSrc, /scene: 'witnesses'/)
 assert.match(benchSrc, /scene: 'reluctant'/)
 assert.match(benchSrc, /scene: 'clock'/)
 assert.match(benchSrc, /scene: 'judea'/)
+assert.doesNotMatch(benchSrc, /None of these prove God/)
+assert.match(benchSrc, /early public testimony, not a lab rerun/)
+assert.doesNotMatch(benchSrc, /appearances list widened/)
+assert.match(benchSrc, /1 Cor 15:3–5/)
 
 const evidenceSrc = readFileSync(
   new URL('../src/content/evidence.ts', import.meta.url),
@@ -537,6 +549,16 @@ assert.match(evidenceSrc, /export function takeawayLines/)
 assert.doesNotMatch(evidenceSrc, /Beauty forbids/)
 assert.doesNotMatch(evidenceSrc, /Wonder is the enemy of science/)
 assert.doesNotMatch(evidenceSrc, /The sky is not worth looking at slowly/)
+assert.doesNotMatch(evidenceSrc, /you may disagree/)
+assert.doesNotMatch(evidenceSrc, /Tacitus still notes/)
+assert.doesNotMatch(evidenceSrc, /does not deduct God/)
+assert.doesNotMatch(evidenceSrc, /philosophical clue/)
+assert.doesNotMatch(evidenceSrc, /Clean is not uncontested/)
+assert.match(evidenceSrc, /Isaiah 53:4–12/)
+assert.match(evidenceSrc, /That yields a Cause of the beginning/)
+assert.match(evidenceSrc, /costly opening if the goal were instant respectability/)
+assert.match(evidenceSrc, /Life’s specified information is a mark of mind/)
+assert.match(evidenceSrc, /Matthew 26:28; Luke 22:20/)
 
 const journalSrc = readFileSync(
   new URL('../src/content/journal.ts', import.meta.url),
@@ -544,6 +566,9 @@ const journalSrc = readFileSync(
 )
 assert.doesNotMatch(journalSrc, /multiverse/)
 assert.doesNotMatch(journalSrc, /asserted to cancel the surprise/)
+assert.doesNotMatch(journalSrc, /Whatever one concludes/)
+assert.match(journalSrc, /This is what the churches were already handing on/)
+assert.doesNotMatch(journalSrc, /does not deduct God/)
 
 assert.doesNotMatch(hubSrc, /['"]Again['"]/)
 assert.doesNotMatch(hubSrc, /Standing/)
@@ -599,6 +624,7 @@ assert.match(hollowSrc, /the kingdom arrives in pictures, not slogans/)
 assert.match(hollowSrc, /id: 'ph-seeds'/)
 assert.match(hollowSrc, /gem: 'seed'/)
 assert.match(hollowSrc, /The father runs with mercy/)
+assert.match(hollowSrc, /Luke 10:36/)
 
 const cityLibSrc = readFileSync(new URL('../src/lib/city.ts', import.meta.url), 'utf8')
 assert.doesNotMatch(cityLibSrc, /Walk again/)
@@ -949,7 +975,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.3.2')
+assert.equal(APP_VERSION, '1.3.3')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -977,13 +1003,16 @@ assert.match(
   readFileSync(new URL('../src/components/StoredLine.tsx', import.meta.url), 'utf8'),
   /Stored learning/,
 )
+assert.match(challengeSrc, /StoredLine/)
 assert.match(cssSrc, /\.stored-line/)
 assert.match(cssSrc, /\.memory-pipe/)
 assert.match(
   readFileSync(new URL('../src/lib/learning.ts', import.meta.url), 'utf8'),
   /Acquire → Anchor → Picture → Store/,
 )
-assert.match(challengeSrc, /StoredLine/)
+assert.match(cssSrc, /object-fit: contain/)
+assert.match(mapSrc, /city-map-hint/)
+assert.match(cssSrc, /town-tools/)
 
 assert.equal(STREET_CHALLENGE.kind, 'link')
 assert.equal(STREET_CHALLENGE.id, 'ln-street')
@@ -1019,6 +1048,7 @@ assert.match(hubSrc, /name: 'link'/)
 assert.match(hubSrc, /street-link/)
 assert.match(hubSrc, /Mind map/)
 assert.match(hubSrc, /setMindPlot/)
+assert.match(hubSrc, /town-tools/)
 assert.match(mapSrc, /setMindPlot/)
 assert.match(mapSrc, /MindMap/)
 assert.match(mapSrc, /mindMapHasLit/)
@@ -1040,5 +1070,119 @@ assert.match(cssSrc, /mind-web/)
 assert.match(cssSrc, /link-grid/)
 assert.match(cssSrc, /street-link/)
 assert.match(cssSrc, /play\.is-link/)
+
+const deeperSrc = readFileSync(new URL('../src/content/deeper.ts', import.meta.url), 'utf8')
+assert.doesNotMatch(deeperSrc, /Rees/)
+assert.doesNotMatch(deeperSrc, /Penrose/)
+assert.doesNotMatch(deeperSrc, /infidels\.org/)
+assert.doesNotMatch(deeperSrc, /reddit\.com/)
+assert.doesNotMatch(deeperSrc, /wikipedia\.org/)
+assert.doesNotMatch(deeperSrc, /Ehrman/)
+assert.match(deeperSrc, /journalOnly/)
+assert.match(deeperSrc, /Habermas/)
+assert.match(deeperSrc, /Licona/)
+assert.match(deeperSrc, /Robin Collins/)
+assert.match(deeperSrc, /Edward Feser|Feser/)
+assert.match(deeperSrc, /Philoponus/)
+assert.match(deeperSrc, /Ghazālī|Ghazali/)
+
+for (const id of allEvidenceIds()) {
+  assert.ok(
+    deeperLinksFor(id).length > 0,
+    `Dig deeper missing for ${id}`,
+  )
+  assert.notEqual(deeperLinksFor(id)[0]?.era, 'modern', `${id} must not lead with a modern voice`)
+}
+
+const creed = deeperLinksFor('wb-creed')
+assert.match(creed[0]?.href ?? '', /Corinthians/)
+assert.match(creed[0]?.label ?? '', /1 Corinthians 15:3/)
+assert.ok(creed.some((link) => /Ignatius|Smyrnaeans/.test(link.label)))
+assert.ok(creed.some((link) => /Habermas/.test(link.label)))
+assert.ok(
+  creed.findIndex((link) => /Habermas/.test(link.label)) >
+    creed.findIndex((link) => /Ignatius/.test(link.label)),
+)
+
+const stars = deeperLinksFor('daily-stars')
+assert.ok(stars.every((link) => !/Collins|Rees|Feser|Craig|rintintin|reasonablefaith/i.test(`${link.label} ${link.href}`)))
+assert.ok(stars.some((link) => /Psalm/.test(link.href)))
+assert.ok(stars.some((link) => /Athanasius/.test(link.label)))
+
+const tuning = deeperLinksFor('ob-tuning')
+assert.ok(tuning.some((link) => /summa\/1002/.test(link.href)))
+assert.ok(tuning.some((link) => /Collins/.test(link.label)))
+assert.ok(tuning.every((link) => !/Rees|Penrose/i.test(`${link.label} ${link.href}`)))
+
+const firstWay = deeperLinksFor('fg-mover')
+assert.ok(firstWay.some((link) => /Aristotle/.test(link.label)))
+assert.ok(firstWay.some((link) => /Feser/.test(link.label)))
+assert.ok(
+  firstWay.findIndex((link) => /Feser/.test(link.label)) >
+    firstWay.findIndex((link) => /Aquinas/.test(link.label)),
+)
+
+const kalam = deeperLinksFor('fg-kalam')
+assert.ok(kalam.some((link) => /Philoponus/.test(link.label)))
+assert.ok(kalam.some((link) => /Ghaz/.test(link.label)))
+assert.ok(kalam.some((link) => /Craig/.test(link.label)))
+assert.ok(
+  kalam.findIndex((link) => /Craig/.test(link.label)) >
+    kalam.findIndex((link) => /Ghaz/.test(link.label)),
+)
+
+const womenHold = deeperLinksFor('wb-women', 'hold')
+assert.ok(womenHold.every((link) => !/Tacitus|Josephus/i.test(link.label)))
+const womenJournal = deeperLinksFor('wb-women', 'journal')
+assert.ok(womenJournal.some((link) => /Tacitus/.test(link.label)))
+assert.ok(womenJournal.some((link) => /Josephus/.test(link.label)))
+
+const isaiah = deeperLinksFor('daily-isaiah')
+assert.ok(isaiah.some((link) => /Isaiah/.test(link.href)))
+assert.ok(isaiah.some((link) => /City of God XVIII/.test(link.label)))
+
+assert.match(
+  readFileSync(new URL('../src/components/DigDeeper.tsx', import.meta.url), 'utf8'),
+  /Dig deeper/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/StoredLine.tsx', import.meta.url), 'utf8'),
+  /DigDeeper/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/Journal.tsx', import.meta.url), 'utf8'),
+  /DigDeeper/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/MindMap.tsx', import.meta.url), 'utf8'),
+  /DigDeeper/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/Profile.tsx', import.meta.url), 'utf8'),
+  /DigDeeper/,
+)
+assert.match(
+  readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8'),
+  /view\.name === 'profile'/,
+)
+assert.match(hubSrc, /name: 'profile'/)
+assert.doesNotMatch(hubSrc, /Reset progress/)
+assert.doesNotMatch(hubSrc, />Reset</)
+assert.match(cssSrc, /\.dig-deeper/)
+assert.match(cssSrc, /\.profile-unlock/)
+assert.match(cssSrc, /max-width: 390px/)
+
+const inv = profileInventory({
+  ...empty,
+  held: ['ph-road'],
+  completed: ['ph-road', 'ln-street'],
+  learnings: [],
+  defense: { cleared: 0, nights: [] },
+  theme: 'candy',
+})
+assert.ok(inv.ideas.some((item) => item.id === 'ph-road'))
+assert.equal(inv.streetLinked, true)
+assert.ok(inv.links.length >= 3)
+assert.ok(inv.places.some((plot) => plot.id === 'porch'))
 
 console.log('check-city: ok')

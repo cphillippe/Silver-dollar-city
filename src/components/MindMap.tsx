@@ -6,6 +6,7 @@ import { rehearseGo, useProgress } from '../store/progress'
 import type { View } from '../types'
 import { Avatar } from './Avatar'
 import { AbilityMark } from './GemMark'
+import { DigDeeper } from './DigDeeper'
 
 interface MindMapProps {
   plotId: CityPlotId
@@ -63,19 +64,21 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
             <strong>{graph.person.shortName}</strong>
           </div>
           {graph.ideas.map((idea) => (
-            <button
-              key={idea.id}
-              type="button"
-              className={`mind-node is-idea ${idea.lit ? 'is-lit' : 'is-dim'}`}
-              disabled={!idea.lit}
-              onClick={() => {
-                if (idea.lit) openIdea(idea.id)
-              }}
-            >
-              <span className="mind-kicker">{idea.lit ? 'Idea' : 'Locked'}</span>
-              <strong>{idea.claim}</strong>
-              {idea.lit && idea.source ? <em>{idea.source}</em> : null}
-            </button>
+            <div key={idea.id} className="mind-idea-wrap">
+              <button
+                type="button"
+                className={`mind-node is-idea ${idea.lit ? 'is-lit' : 'is-dim'}`}
+                disabled={!idea.lit}
+                onClick={() => {
+                  if (idea.lit) openIdea(idea.id)
+                }}
+              >
+                <span className="mind-kicker">{idea.lit ? 'Idea' : 'Locked'}</span>
+                <strong>{idea.claim}</strong>
+                {idea.lit && idea.source ? <em>{idea.source}</em> : null}
+              </button>
+              {idea.lit ? <DigDeeper id={idea.id} surface="map" compact /> : null}
+            </div>
           ))}
           {graph.tools.map((tool) => (
             <div

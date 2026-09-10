@@ -4,6 +4,7 @@ import { takeawayLines, type EvidenceBrief } from '../content/evidence'
 import { STORY } from '../content/story'
 import { learningBeat } from '../lib/learning'
 import { learningPicture, toolForEvidence } from '../lib/watchTools'
+import { DigDeeper } from './DigDeeper'
 import { GemMark } from './GemMark'
 
 interface RecallGateProps {
@@ -149,6 +150,7 @@ export function RecallGate({
           <button type="button" className="btn primary xl" onClick={finishFromTeach}>
             Got it
           </button>
+          <DigDeeper id={brief.id} />
         </>
       ) : null}
     </section>

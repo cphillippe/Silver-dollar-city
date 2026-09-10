@@ -8,6 +8,18 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.3.3',
+    title: 'Readable town',
+    when: '2026-09-10',
+    items: [
+      'Profile gathers River’s unlocks — held ideas, places, people, tools, and mind-map links. Open it from Town or Settings.',
+      'Dig deeper on Hold, Journal, mind map, and Profile: Scripture and the Fathers first; modern believing scholars only when the evidence is modern.',
+      'Reset progress is buried in Settings → Danger zone and asks before it wipes the save. It is not on the town screen.',
+      'Claims, journal, mind map, and link blocks wrap or scroll on a phone — no clipped takeaways.',
+      'Isaiah 53’s Servant is the Jesus the church confesses. Witness, kalām, beauty, and life lines lead with the hold.',
+    ],
+  },
+  {
     version: '1.3.2',
     title: 'Town mind map',
     when: '2026-09-10',

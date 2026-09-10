@@ -8,6 +8,7 @@ import { starLegend } from '../lib/stars'
 import { deployLabel, findLearning, storedLearnings, withLearningBeat } from '../lib/learning'
 import { watchTool } from '../lib/watchTools'
 import { Avatar } from './Avatar'
+import { DigDeeper } from './DigDeeper'
 import { GemMark } from './GemMark'
 import { Landmark } from './Landmark'
 import { RecallGate } from './RecallGate'
@@ -195,7 +196,7 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
               const tool = deployLabel(learning)
               const trace = progress.memory[learning.id]
               return (
-                <article key={learning.id} className="dossier is-open is-stored">
+                <article key={learning.id} id={`learn-${learning.id}`} className="dossier is-open is-stored">
                   <p className="eyebrow">Stored · {learning.source}</p>
                   {learning.picture ? <GemMark gem={learning.picture} size="sm" /> : null}
                   <h3>{learning.claim}</h3>
@@ -209,6 +210,7 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
                     </span>
                   </p>
                   {trace ? <p className="quiet">{nextGapLabel(trace, today)}</p> : null}
+                  <DigDeeper id={learning.id} surface="journal" />
                 </article>
               )
             })}
@@ -414,6 +416,7 @@ function JournalCard({
                   <li key={source}>{source}</li>
                 ))}
               </ul>
+              <DigDeeper id={entry.unlockAfter} surface="journal" />
               {brief ? (
                 <button
                   type="button"

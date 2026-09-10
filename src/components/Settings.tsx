@@ -103,7 +103,7 @@ export function Settings({ onNavigate }: SettingsProps) {
 
   function confirmReset() {
     const ok = window.confirm(
-      'Clear all saved progress on this device and return to the start? A backup of this save stays until the next import or reset.',
+      'Reset progress? This wipes the save on this device — all held lines, journal pages, Night Watch, and mind-map links — and returns to the start. A backup of this save stays until the next import or reset.',
     )
     if (!ok) return
     reset()
@@ -129,6 +129,23 @@ export function Settings({ onNavigate }: SettingsProps) {
         <h1>Progress & support</h1>
         <p>{savedLabel}</p>
       </header>
+
+      <section className="settings-card">
+        <p className="eyebrow">You</p>
+        <p>
+          River’s unlocks in one place — held ideas, places, people, tools, and
+          mind-map links.
+        </p>
+        <div className="settings-actions">
+          <button
+            type="button"
+            className="btn primary"
+            onClick={() => onNavigate({ name: 'profile' })}
+          >
+            Open Profile
+          </button>
+        </div>
+      </section>
 
       <section className="settings-card whats-new" aria-label="What’s new">
         <p className="eyebrow">What’s new · {APP_VERSION}</p>
@@ -292,13 +309,18 @@ export function Settings({ onNavigate }: SettingsProps) {
         </div>
       </section>
 
-      <section className="settings-card">
-        <p className="eyebrow">Reset</p>
-        <p>Start over on this device. Export first if you want the walk back.</p>
+      <details className="settings-card settings-danger">
+        <summary>Danger zone · wipe this device</summary>
+        <p className="eyebrow">Reset progress</p>
+        <p>
+          Wipe ALL progress on this device — held lines, journal, Night Watch, and
+          mind-map links — and return to the start. Export first if you want the
+          walk back. This is not on the town screen.
+        </p>
         <button type="button" className="btn" onClick={confirmReset}>
-          Clear progress
+          Reset progress
         </button>
-      </section>
+      </details>
     </main>
   )
 }

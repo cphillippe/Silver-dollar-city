@@ -30,10 +30,11 @@ export const DAILY_POOL: DailyPuzzle[] = [
       pairs: [
         { id: 'lamp', gem: 'lamp', left: 'Lamp', right: 'A light is meant to be seen' },
         { id: 'seed', gem: 'seed', left: 'Seed', right: 'The same word meets different hearts' },
-        { id: 'cup', gem: 'cup', left: 'Cup', right: 'Mercy is poured, not earned' },
+        { id: 'cup', gem: 'cup', left: 'Cup', right: 'Poured for many — gift, not wage' },
       ],
       teachOnWrong: 'Each gem is a short true claim. Snap the picture to its sentence.',
-      deeper: 'Jesus taught with lamps, seed, and a cup — pictures first, dense words later.',
+      deeper:
+        'Jesus taught with lamps, seed, and a cup. The cup of the new covenant is poured for many (Matthew 26:28; Luke 22:20) — gift, not wage.',
     },
   },
   {
@@ -235,10 +236,10 @@ export const DAILY_POOL: DailyPuzzle[] = [
       kind: 'sort',
       id: 'daily-isaiah',
       title: 'A hard poem',
-      idea: 'a suffering servant, not a sword, is the poem’s claim',
+      idea: 'Isaiah 53’s Servant is the Jesus the church confesses',
       prompt: 'Which lines belong with Isaiah 53’s servant?',
       context:
-        'Christians read this poem as a portrait of Jesus. You are not required to agree — only to see why the first church did.',
+        'Isaiah 53’s Servant is the Jesus the church confesses — wounded for others, silent like a lamb.',
       keepLabel: 'In the poem',
       discardLabel: 'Not the claim',
       tiles: [

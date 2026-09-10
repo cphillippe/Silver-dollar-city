@@ -55,13 +55,13 @@ export const witnessBench: Area = {
       idea: 'the creed is early testimony, not a medieval insert',
       prompt: 'Keep the careful historical claim. Toss the overclaims.',
       context:
-        '1 Corinthians 15:3–7. Dating is judgment, not a photograph — but several features cluster.',
+        '1 Corinthians 15:3–5. Paul “received” and “delivered” the early core — died, buried, raised, appeared.',
       keepLabel: 'Keep',
       discardLabel: 'Toss',
       tiles: [
         {
           id: 'a',
-          text: 'Paul (~AD 53–55) “received” a formula; many date it to the first years after the crucifixion.',
+          text: 'Paul “received” and “delivered” the early core: died, buried, raised, appeared (1 Cor 15:3–5).',
           bin: 'keep',
         },
         {
@@ -92,7 +92,7 @@ export const witnessBench: Area = {
       idea: 'historians weigh sources; they cannot rerun the past',
       prompt: 'Match each criterion to what it is actually testing.',
       context:
-        'Used in historical Jesus research (and ancient history more broadly). None of these “prove God.” They help ask which reports are harder to dismiss as late invention.',
+        'Used in historical Jesus research (and ancient history more broadly). These tools show which reports are hard to dismiss as late invention — early public testimony, not a lab rerun.',
       pairs: [
         {
           id: 'multi',

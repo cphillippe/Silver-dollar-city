@@ -135,6 +135,11 @@ const settingsSrc = readFileSync(
   'utf8',
 )
 assert.match(settingsSrc, /window\.confirm/)
+assert.match(settingsSrc, /Reset progress/)
+assert.match(settingsSrc, /wipes the save/)
+assert.match(settingsSrc, /Danger zone/)
+assert.match(settingsSrc, /Open Profile/)
+assert.match(settingsSrc, /name: 'profile'/)
 assert.match(settingsSrc, /onFile/)
 assert.match(settingsSrc, /file\.size > SAVE_MAX_BYTES/)
 assert.match(settingsSrc, /Treat a share/)
@@ -150,6 +155,8 @@ assert.ok(
 const shellSrc = readFileSync(new URL('../src/components/AppShell.tsx', import.meta.url), 'utf8')
 assert.match(shellSrc, /view\.name === 'journal'/)
 assert.match(shellSrc, /hideGoalbar/)
+assert.doesNotMatch(shellSrc, />Reset</)
+assert.match(shellSrc, /view\.name === 'profile'/)
 
 const capSrc = readFileSync(new URL('../capacitor.config.ts', import.meta.url), 'utf8')
 assert.match(capSrc, /allowMixedContent:\s*false/)
