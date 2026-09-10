@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.0',
+    title: 'A city you build',
+    when: '2026-09-10',
+    items: [
+      'The town map is a city of buildings. Tap a lot to manage it: see the level, who lives there, which ideas are lit, and Dig deeper.',
+      'Upgrades are earned by learning — finishing walks, holding claims, Link the street, and journal pages. Tap Upgrade to raise the next look. You do not pay.',
+      'Walk stays porch → creek → square → sky → gate → lookout → Heaven. Easy still teaches: a claim is what we hold to be true.',
+    ],
+  },
+  {
     version: '1.3.9',
     title: 'The map tells the walk',
     when: '2026-09-10',

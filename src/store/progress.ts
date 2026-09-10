@@ -27,6 +27,7 @@ import {
 import { districtMastery, type StarCount } from '../lib/stars'
 import { isStreakLive, trailDaysRequired } from '../lib/streak'
 import type { AppTheme, Area, Challenge, ProgressState, View } from '../types'
+import type { CityPlotId } from '../lib/city'
 
 export { STORAGE_KEY, emptyProgress }
 export type { SaveMeta }
@@ -466,6 +467,7 @@ export interface ProgressApi {
   recordNight: (dateKey: string) => void
   setTheme: (theme: AppTheme) => void
   setEasyMode: (easy: boolean) => void
+  upgradeBuilding: (id: CityPlotId) => void
   reset: () => void
   importSaveText: (raw: string) => { ok: true } | { ok: false; error: string }
 }

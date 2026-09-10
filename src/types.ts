@@ -265,6 +265,12 @@ export interface ProgressState {
    * normalize fills []. Schema stays 1 — do not wipe.
    */
   learnings: Learning[]
+  /**
+   * Applied building looks (0–4) per lot. Optional on old saves;
+   * normalize snapshots what learning already earned so the city does not vanish.
+   * Schema stays 1 — do not wipe. Further looks are tapped as Upgrade.
+   */
+  cityBuilt: Record<string, number>
 }
 
 export type View =

@@ -34,6 +34,14 @@ import {
 import { ideaUnlocked, mindGraph, mindMapHasLit } from '../src/lib/mindMap.ts'
 import { STREET_CHALLENGE, STREET_LIGHTS, STREET_WHYS } from '../src/content/links.ts'
 import { LOT_STORY, TOWN_PATH_EASY, TOWN_PATH_HARD } from '../src/content/lots.ts'
+import {
+  appliedTier,
+  applyUpgrade,
+  canUpgrade,
+  earnedTier,
+  emptyCityBuilt,
+} from '../src/lib/cityBuild.ts'
+import { WORDS } from '../src/lib/words.ts'
 import { deeperLinksFor } from '../src/content/deeper.ts'
 import { allEvidenceIds, evidenceFor } from '../src/content/evidence.ts'
 import { plainFor } from '../src/content/plain.ts'
@@ -983,7 +991,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.3.9')
+assert.equal(APP_VERSION, '1.4.0')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -1030,6 +1038,34 @@ assert.equal(STREET_CHALLENGE.kind, 'link')
 assert.equal(STREET_CHALLENGE.id, 'ln-street')
 assert.deepEqual([...STREET_LIGHTS], ['ph-road', 'wb-creed', 'daily-lantern'])
 assert.equal(STREET_CHALLENGE.triples.length, 3)
+assert.equal(earnedTier('porch', empty), 1)
+assert.equal(earnedTier('porch', afterDaily), 2)
+assert.equal(earnedTier('hollow', hollowTwice), 3)
+assert.equal(earnedTier('hollow', grown), 4)
+assert.equal(earnedTier('journal', grown), 4)
+{
+  const managed = { ...afterDaily, cityBuilt: emptyCityBuilt() }
+  assert.equal(appliedTier('porch', managed), 1)
+  assert.equal(canUpgrade('porch', managed), true)
+  const raised = applyUpgrade(managed, 'porch')
+  assert.equal(appliedTier('porch', raised), 2)
+  assert.equal(canUpgrade('porch', raised), false)
+  assert.equal(applyUpgrade(raised, 'porch'), raised)
+}
+assert.equal(WORDS.upgrade.teach.includes('learning'), true)
+assert.match(WORDS.upgrade.teach, /not by paying/)
+assert.match(
+  readFileSync(new URL('../src/components/MindMap.tsx', import.meta.url), 'utf8'),
+  /Upgrade/,
+)
+assert.match(mapSrc, /is-city-build/)
+assert.match(mapSrc, /BUILD_SCALE/)
+assert.match(cssSrc, /city-plot-tag/)
+assert.match(cssSrc, /build-upgrade/)
+assert.match(
+  readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8'),
+  /Manage/,
+)
 assert.deepEqual(
   Object.keys(LOT_STORY).sort(),
   ['bench', 'gate', 'hollow', 'journal', 'lamps', 'lookout', 'observatory', 'porch'],
@@ -1086,7 +1122,7 @@ assert.match(teachSrc, /Unlock the links/)
 assert.match(hubSrc, /Link the street/)
 assert.match(hubSrc, /name: 'link'/)
 assert.match(hubSrc, /street-link/)
-assert.match(hubSrc, /Mind map/)
+assert.match(hubSrc, /Manage/)
 assert.match(hubSrc, /setMindPlot/)
 assert.match(hubSrc, /town-tools/)
 assert.match(mapSrc, /setMindPlot/)
@@ -1326,6 +1362,10 @@ assert.match(
 assert.match(
   readFileSync(new URL('../src/lib/save.ts', import.meta.url), 'utf8'),
   /easyMode: parsed\.easyMode === true/,
+)
+assert.match(
+  readFileSync(new URL('../src/lib/save.ts', import.meta.url), 'utf8'),
+  /cityBuilt/,
 )
 assert.match(
   readFileSync(new URL('../src/config/app.ts', import.meta.url), 'utf8'),

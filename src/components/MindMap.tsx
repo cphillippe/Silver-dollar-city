@@ -2,14 +2,24 @@ import { evidenceFor } from '../content/evidence'
 import { journalForChallenge } from '../content'
 import { plainFor } from '../content/plain'
 import { LOT_STORY, lotWhy } from '../content/lots'
-import { isEasy, scrapbookLabel } from '../lib/easy'
+import { EASY, isEasy, scrapbookLabel } from '../lib/easy'
 import { mindGraph } from '../lib/mindMap'
+import {
+  appliedTier,
+  canUpgrade,
+  nextUpgradeNeed,
+  TIER_MAX,
+  tierJob,
+  tierTitle,
+} from '../lib/cityBuild'
 import type { CityPlotId } from '../lib/city'
+import { WORDS } from '../lib/words'
 import { rehearseGo, useProgress } from '../store/progress'
 import type { View } from '../types'
 import { Avatar } from './Avatar'
 import { AbilityMark } from './GemMark'
 import { DigDeeper } from './DigDeeper'
+import { WordGloss } from './WordGloss'
 
 interface MindMapProps {
   plotId: CityPlotId
@@ -19,9 +29,12 @@ interface MindMapProps {
 }
 
 export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) {
-  const { progress } = useProgress()
+  const { progress, upgradeBuilding } = useProgress()
   const easy = isEasy(progress)
   const graph = mindGraph(plotId, progress)
+  const applied = appliedTier(plotId, progress)
+  const ready = canUpgrade(plotId, progress)
+  const need = nextUpgradeNeed(plotId, progress, easy)
   const litCount =
     graph.ideas.filter((item) => item.lit).length +
     graph.tools.filter((item) => item.lit).length
@@ -40,13 +53,19 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
   }
 
   return (
-    <div className="mind-map" role="dialog" aria-label={`${graph.placeTitle} · ${scrapbookLabel(easy)}`}>
-      <button type="button" className="mind-map-scrim" aria-label="Close mind map" onClick={onClose} />
+    <div
+      className="mind-map is-manage"
+      role="dialog"
+      aria-label={`Manage ${graph.placeTitle}`}
+    >
+      <button type="button" className="mind-map-scrim" aria-label="Close building" onClick={onClose} />
       <div className="mind-map-card">
         <header className="mind-map-head">
           <Avatar who={graph.person.id} size="md" />
           <div>
-            <p className="eyebrow">{scrapbookLabel(easy, litCount)}</p>
+            <p className="eyebrow">
+              {easy ? EASY.manage : 'Manage'} · {easy ? 'Level' : 'Level'} {applied} · {tierTitle(applied, easy)}
+            </p>
             <h2>{graph.placeTitle}</h2>
             <p className="quiet">{lotWhy(graph.plotId, easy)}</p>
           </div>
@@ -54,6 +73,22 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
             Close
           </button>
         </header>
+
+        <WordGloss words={[WORDS.upgrade]} />
+        {easy ? <p className="quiet">{WORDS.claim.teach}</p> : null}
+
+        <p className="build-job">{tierJob(applied, easy)}</p>
+        <p className={`build-next ${need.ready ? 'is-ready' : ''}`}>{need.line}</p>
+
+        {ready ? (
+          <button
+            type="button"
+            className="btn gold xl build-upgrade"
+            onClick={() => upgradeBuilding(plotId)}
+          >
+            {easy ? 'Upgrade this building' : 'Upgrade'}
+          </button>
+        ) : null}
 
         <div className="mind-web" aria-label="Linked nodes">
           <div className="mind-node is-place is-lit">
@@ -100,9 +135,18 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
           ) : null}
         </div>
 
+        <p className="quiet scrap-kicker">{scrapbookLabel(easy, litCount)}</p>
+        {applied >= TIER_MAX ? null : (
+          <p className="quiet build-cap">
+            {easy
+              ? `${applied} of ${TIER_MAX} looks. Learn more to earn the next.`
+              : `${applied} of ${TIER_MAX} looks earned by learning.`}
+          </p>
+        )}
+
         <div className="mind-map-actions">
           <button type="button" className="btn primary" onClick={() => onEnter(plotId)}>
-            Enter {graph.placeTitle}
+            {easy ? `Walk ${graph.placeTitle}` : `Enter ${graph.placeTitle}`}
           </button>
         </div>
       </div>
