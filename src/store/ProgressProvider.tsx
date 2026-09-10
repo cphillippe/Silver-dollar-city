@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState, type ReactNode } from 'react'
 import { learningFromReview, upsertLearning } from '../lib/learning'
 import {
   applyMiss,
+  applySnooze,
   applySuccess,
   emptyTrace,
   masteryFromReview,
@@ -125,6 +126,22 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       return write(next)
     })
     return kept
+  }, [write])
+
+  const snoozeReviews = useCallback((ids: string[], today: string) => {
+    if (ids.length === 0) return
+    setProgress((current) => {
+      let changed = false
+      const memory = { ...current.memory }
+      for (const id of ids) {
+        const prior = memory[id]
+        if (!prior) continue
+        memory[id] = applySnooze(prior, today)
+        changed = true
+      }
+      if (!changed) return current
+      return write({ ...current, memory })
+    })
   }, [write])
 
   const recordStars = useCallback((challengeId: string, stars: StarCount) => {
@@ -272,6 +289,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       recordStars,
       recordHeld,
       recordReview,
+      snoozeReviews,
       markMiss,
       recordNight,
       setTheme,
@@ -290,6 +308,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       recordHeld,
       recordNight,
       recordReview,
+      snoozeReviews,
       recordStars,
       reset,
       saveMeta,

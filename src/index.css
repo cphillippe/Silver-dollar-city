@@ -2837,6 +2837,42 @@ img.gem-heart {
   padding-bottom: 8px;
 }
 
+.recall-offer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 0 14px;
+  padding: 14px 14px 12px;
+  border-radius: 18px;
+  border: 1px solid color-mix(in srgb, var(--gold) 35%, var(--line));
+  background: color-mix(in srgb, var(--panel) 88%, #1a0840);
+}
+
+.recall-offer h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.recall-offer .btn.primary {
+  width: 100%;
+}
+
+.recall-skip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+  margin: 8px 0 0;
+}
+
+.recall-skip .text-link {
+  min-height: 44px;
+  padding: 8px 0;
+}
+
+.recall-gate.is-deeper .next-tap {
+  color: #ffe08a;
+}
+
 .recall-gate {
   animation: pop-in 0.32s ease;
 }
@@ -5932,6 +5968,25 @@ html[data-theme='dusk'] .hub.is-town .street-link {
   font-size: 0.72rem;
 }
 
+.link-block.is-picture {
+  min-height: 148px;
+  gap: 8px;
+  padding: 12px 10px;
+}
+
+.link-block.is-picture .place-glyph,
+.link-block.is-picture .avatar,
+.link-block.is-picture .gem {
+  width: 88px;
+  height: 88px;
+}
+
+.link-block.is-picture .link-label {
+  max-height: 3.2em;
+  font-size: 0.95rem;
+  font-weight: 650;
+}
+
 .link-block.is-selected {
   border-color: #ffcc33;
   box-shadow: 0 0 0 2px rgba(255, 204, 51, 0.45), 0 0 16px rgba(255, 90, 122, 0.35);
@@ -6407,6 +6462,11 @@ html[data-theme='dusk'] .mind-map-card {
 
 .play.is-easy-link .link-block {
   min-height: 56px;
+}
+
+.play.is-easy-link .link-block.is-picture,
+html[data-easy='on'] .link-block.is-picture {
+  min-height: 168px;
 }
 
 html[data-easy='on'] .btn,

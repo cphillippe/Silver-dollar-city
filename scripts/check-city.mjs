@@ -446,6 +446,8 @@ assert.doesNotMatch(dailyTrailSrc, /Tomorrow:/)
 assert.match(dailyTrailSrc, /TeachUnlock/)
 assert.match(dailyTrailSrc, /is-teach/)
 assert.match(dailyTrailSrc, /is-arming/)
+assert.doesNotMatch(dailyTrailSrc, /morningReview/)
+assert.doesNotMatch(dailyTrailSrc, /isReview/)
 
 const puzzleLeadSrc = readFileSync(
   new URL('../src/components/challenges/PuzzleLead.tsx', import.meta.url),
@@ -473,6 +475,10 @@ assert.match(recallSrc, /Read why it stands, then tap Done/)
 assert.match(recallSrc, /reasonLocked/)
 assert.match(recallSrc, /btn gold xl recall-done/)
 assert.match(recallSrc, /That reason holds/)
+assert.match(recallSrc, /Not today/)
+assert.match(recallSrc, /Later/)
+assert.match(recallSrc, /is-deeper/)
+assert.match(recallSrc, /visits/)
 assert.match(dailyTrailSrc, /tile\.bin === 'keep'/)
 
 const matchSrc = readFileSync(
@@ -997,7 +1003,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.3')
+assert.equal(APP_VERSION, '1.4.4')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -1121,6 +1127,10 @@ assert.match(linkPlaySrc, /This link is complete/)
 assert.match(linkPlaySrc, /wizard-step/)
 assert.match(linkPlaySrc, /Connect sentence → place → person/)
 assert.match(linkPlaySrc, /is-wizard/)
+assert.match(linkPlaySrc, /is-picture/)
+assert.match(linkPlaySrc, /PlaceGlyph/)
+assert.match(linkPlaySrc, /size="lg"/)
+assert.match(linkPlaySrc, /daily-lantern/)
 
 const puzzleSrc = readFileSync(
   new URL('../src/components/PuzzlePlay.tsx', import.meta.url),
@@ -1136,6 +1146,17 @@ assert.match(hubSrc, /street-link/)
 assert.match(hubSrc, /Manage/)
 assert.match(hubSrc, /setMindPlot/)
 assert.match(hubSrc, /town-tools/)
+assert.match(hubSrc, /RecallOffer/)
+assert.match(hubSrc, /skipNotToday/)
+assert.doesNotMatch(hubSrc, /dustOff/)
+assert.match(
+  readFileSync(new URL('../src/components/RecallOffer.tsx', import.meta.url), 'utf8'),
+  /RECALL_SESSION_CAP/,
+)
+assert.match(
+  readFileSync(new URL('../src/content/changelog.ts', import.meta.url), 'utf8'),
+  /A sitting is about 3 pages/,
+)
 assert.match(mapSrc, /setMindPlot/)
 assert.match(mapSrc, /MindMap/)
 assert.match(mapSrc, /mindMapHasLit/)

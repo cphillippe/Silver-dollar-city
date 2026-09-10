@@ -17,7 +17,10 @@ interface RecallGateProps {
   kicker?: string
   pillar?: string
   mode?: 'encode' | 'review'
+  /** Prior successful/failed recalls. 1+ means this is a later revisit. */
+  visits?: number
   onHeld: (result: { clean: boolean }) => void
+  onSkip?: (how: 'later' | 'not-today') => void
 }
 
 type Phase = 'claim' | 'reason' | 'teach'
@@ -26,6 +29,7 @@ type Phase = 'claim' | 'reason' | 'teach'
  * Encode (right after lock-in): player taps the Keep they will hold, then
  * Why-it-stands for THAT line — no inversions, no silent auto-pick.
  * Review (dust-off): choose among decoys that are not word-flips of the keep.
+ * Later revisits start on a sharper reason ask and open Dig deeper — not the first teach again.
  * After every tap: Next/Done or loud success/miss. Reason never sits still.
  */
 export function RecallGate({
@@ -33,11 +37,14 @@ export function RecallGate({
   keeps,
   kicker = STORY.tapTakeaway,
   mode = 'encode',
+  visits = 0,
   onHeld,
+  onSkip,
 }: RecallGateProps) {
   const { progress } = useProgress()
   const easy = isEasy(progress)
   const encode = mode === 'encode'
+  const deeper = !encode && visits >= 1
   const tool = toolForEvidence(brief.id)
   const picture = learningPicture(brief.id, tool)
   const beat = learningBeat(brief.id)
@@ -59,15 +66,17 @@ export function RecallGate({
     const miss = pool.find((line) => line !== correct)
     return shuffle([correct, miss].filter((line): line is string => Boolean(line)))
   }, [brief.id, brief.reason, brief.reasonChoices, encode, chosen, easy])
-  const [phase, setPhase] = useState<Phase>('claim')
+  const [phase, setPhase] = useState<Phase>(deeper ? 'reason' : 'claim')
   const [misses, setMisses] = useState(0)
   const [flash, setFlash] = useState<string | null>(null)
   const [shake, setShake] = useState(false)
   const [heldNote, setHeldNote] = useState(false)
   const [reasonLocked, setReasonLocked] = useState(false)
+  const [sealed, setSealed] = useState(false)
   const heldClaim = chosen?.claim ?? brief.claim
   const heldReason = chosen?.reason ?? brief.reason
   const confirmReason = encode || reasonOptions.length === 1 || reasonLocked
+  const showDeeperBeat = deeper && (sealed || reasonLocked || phase === 'teach')
 
   const nextTap =
     phase === 'teach'
@@ -76,17 +85,29 @@ export function RecallGate({
         ? confirmReason
           ? easy
             ? reasonLocked
-              ? 'That reason holds. Tap Done.'
+              ? deeper
+                ? 'That still holds. Tap Done.'
+                : 'That reason holds. Tap Done.'
               : 'Read why it stands, then tap Done.'
-            : 'Tap Done when you have the reason.'
+            : deeper
+              ? 'Tap Done when the sharper hold is clear.'
+              : 'Tap Done when you have the reason.'
           : easy
-            ? 'Tap the reason that still holds.'
-            : 'Tap the reason that holds.'
+            ? deeper
+              ? 'What still makes this stand?'
+              : 'Tap the reason that still holds.'
+            : deeper
+              ? 'What still makes this stand — not the first teach.'
+              : 'Tap the reason that holds.'
         : easy
           ? encode
             ? 'Choose the sentence to remember.'
-            : 'Tap the sentence you still remember.'
-          : kicker
+            : deeper
+              ? 'Which sentence was the hold?'
+              : 'Tap the sentence you still remember.'
+          : deeper
+            ? 'Which sentence was the hold?'
+            : kicker
 
   function settle(clean: boolean) {
     onHeld({ clean })
@@ -130,6 +151,15 @@ export function RecallGate({
     if (line === brief.claim || (encode && !own)) {
       setHeldNote(true)
     }
+    if (deeper) {
+      if (line === brief.claim) {
+        setHeldNote(true)
+        setSealed(true)
+        return
+      }
+      pick(line, brief.claim, 'done')
+      return
+    }
     pick(line, brief.claim, 'reason')
   }
 
@@ -139,7 +169,7 @@ export function RecallGate({
 
   return (
     <section
-      className={`recall-gate ${shake ? 'is-shake' : ''} phase-${phase} ${encode ? 'is-encode' : 'is-review'} ${own ? 'is-own' : ''}`}
+      className={`recall-gate ${shake ? 'is-shake' : ''} phase-${phase} ${encode ? 'is-encode' : 'is-review'} ${own ? 'is-own' : ''} ${deeper ? 'is-deeper' : ''}`}
       aria-label={STORY.takeaway}
     >
       <p className="eyebrow">{brief.source ? brief.source : 'Hold'}</p>
@@ -155,26 +185,49 @@ export function RecallGate({
         )
       ) : (
         <p className="quiet">
-          {easy
-            ? `${EASY.claimTeach} Then the reason — why it stands.`
-            : 'Rebuild the map — claim, then why it stands.'}
+          {deeper
+            ? easy
+              ? `${EASY.claimTeach} A new angle — not the first read again.`
+              : 'A new angle on a line you already hold — not the first teach again.'
+            : easy
+              ? `${EASY.claimTeach} Then the reason — why it stands.`
+              : 'Rebuild the map — claim, then why it stands.'}
         </p>
       )}
-      <PlainTalk id={brief.id} />
+      {deeper ? null : <PlainTalk id={brief.id} />}
 
       {phase === 'claim' ? (
-        <div className="recall-choices">
-          {claimOptions.map((line) => (
-            <button
-              key={line}
-              type="button"
-              className={`match-card recall-card ${flash === line ? 'is-flash' : ''}`}
-              onClick={() => pickClaim(line)}
-            >
-              {line}
-            </button>
-          ))}
-        </div>
+        <>
+          <div className="recall-choices">
+            {claimOptions.map((line) => (
+              <button
+                key={line}
+                type="button"
+                className={`match-card recall-card ${flash === line ? 'is-flash' : ''} ${sealed && line === heldClaim ? 'is-locked' : ''}`}
+                onClick={() => {
+                  if (!sealed) pickClaim(line)
+                }}
+              >
+                {line}
+              </button>
+            ))}
+          </div>
+          {sealed ? (
+            <>
+              <p className="match-toast" role="status">
+                <strong>That still holds.</strong>
+              </p>
+              {showDeeperBeat ? <DigDeeper id={brief.id} compact /> : null}
+              <button
+                type="button"
+                className="btn gold xl recall-done"
+                onClick={() => settle(misses === 0)}
+              >
+                Done
+              </button>
+            </>
+          ) : null}
+        </>
       ) : null}
 
       {phase === 'reason' ? (
@@ -186,16 +239,25 @@ export function RecallGate({
             </p>
           ) : null}
           <p className="recall-line rehearse-stem">{heldClaim}</p>
-          <h2>{easy ? `${WORDS.reason.term} — ${WORDS.reason.sense}` : STORY.whyItStands}</h2>
-          {easy ? <p className="quiet">{WORDS.reason.teach}</p> : null}
+          <h2>
+            {deeper
+              ? easy
+                ? 'What still makes it stand?'
+                : 'A sharper hold'
+              : easy
+                ? `${WORDS.reason.term} — ${WORDS.reason.sense}`
+                : STORY.whyItStands}
+          </h2>
+          {easy && !deeper ? <p className="quiet">{WORDS.reason.teach}</p> : null}
           {reasonLocked ? (
             <p className="match-toast" role="status">
-              <strong>That reason holds.</strong>
+              <strong>{deeper ? 'That still holds.' : 'That reason holds.'}</strong>
             </p>
           ) : null}
           {confirmReason ? (
             <>
               <p className="reason-held">{heldReason}</p>
+              {showDeeperBeat ? <DigDeeper id={brief.id} compact /> : null}
               <button
                 type="button"
                 className="btn gold xl recall-done"
@@ -211,7 +273,9 @@ export function RecallGate({
                   key={line}
                   type="button"
                   className={`match-card recall-card ${flash === line ? 'is-flash' : ''}`}
-                  onClick={() => pick(line, heldReason, 'lock')}
+                  onClick={() =>
+                    pick(line, heldReason, deeper ? 'claim' : 'lock')
+                  }
                 >
                   {line}
                 </button>
@@ -223,7 +287,7 @@ export function RecallGate({
 
       {phase === 'teach' ? (
         <>
-          <h2>Here’s the line.</h2>
+          <h2>{deeper ? 'Here’s the sharper line.' : 'Here’s the line.'}</h2>
           <article className="unlock-card pop-in">
             <p className="recall-line">{heldClaim}</p>
             <p>{heldReason}</p>
@@ -234,6 +298,17 @@ export function RecallGate({
           </button>
           <DigDeeper id={brief.id} />
         </>
+      ) : null}
+
+      {!encode && onSkip ? (
+        <div className="recall-skip">
+          <button type="button" className="text-link" onClick={() => onSkip('later')}>
+            Later
+          </button>
+          <button type="button" className="text-link" onClick={() => onSkip('not-today')}>
+            Not today
+          </button>
+        </div>
       ) : null}
     </section>
   )

@@ -12,12 +12,8 @@ import {
 } from '../content'
 import { isEasy } from '../lib/easy'
 import { localDateKey } from '../lib/dates'
-import {
-  dueTraces,
-  nextGapLabel,
-  pickInterleaved,
-  type ReviewEvent,
-} from '../lib/memory'
+import { dueTraces, nextGapLabel, type ReviewEvent } from '../lib/memory'
+import { sessionDue, type RecallLaterState } from '../lib/recall'
 import {
   emptyProgress,
   loadSave,
@@ -139,11 +135,9 @@ export function dailyDoneToday(
 export function morningReview(
   progress: ProgressState,
   today = localDateKey(),
+  later?: RecallLaterState,
 ) {
-  const due = dueTraces(progress.memory, today).filter(
-    (trace) => Boolean(findPlayable(trace.id) && evidenceFor(trace.id)),
-  )
-  return pickInterleaved(due, today, progress.lastReviewPillar)
+  return sessionDue(progress, today, later)[0]
 }
 
 export function dueForRecall(
@@ -168,15 +162,10 @@ export function getNextGoal(
   today = localDateKey(),
 ): NextGoal {
   if (!dailyDoneToday(progress, today)) {
-    const due = morningReview(progress, today)
     return {
       kind: 'daily',
       title: 'Today’s Trail',
-      detail: due
-        ? isEasy(progress)
-          ? 'Read a saved page · about a minute'
-          : 'Time to dust off a page · about a minute'
-        : `${dailyForDate(today, progress.dailyDates.filter((d) => d !== today).length).challenge.title} · about a minute`,
+      detail: `${dailyForDate(today, progress.dailyDates.filter((d) => d !== today).length).challenge.title} · about a minute`,
     }
   }
 
@@ -234,7 +223,15 @@ export function nextRebuildHint(
   cta: string
   go: View
 } {
-  const due = dueForRecall(progress, today).find((item) => item.brief)
+  const due = sessionDue(progress, today)
+    .map((trace) => ({
+      trace,
+      brief: evidenceFor(trace.id),
+      entry:
+        journalForChallenge(trace.id) ??
+        journalEntries.find((item) => item.id === trace.id),
+    }))
+    .find((item) => item.brief)
   if (due) {
     const claim = due.brief?.claim ?? due.entry?.title ?? 'A held line'
     const go = {
@@ -481,6 +478,7 @@ export interface ProgressApi {
   recordStars: (challengeId: string, stars: StarCount) => StarCount
   recordHeld: (evidenceId: string) => void
   recordReview: (event: ReviewEvent) => StarCount
+  snoozeReviews: (ids: string[], today: string) => void
   markMiss: (challengeId: string) => void
   recordNight: (dateKey: string) => void
   setTheme: (theme: AppTheme) => void

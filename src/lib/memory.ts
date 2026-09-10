@@ -52,7 +52,17 @@ export function pickInterleaved(
   dateKey: string,
   lastPillar?: string,
 ): MemoryTrace | undefined {
-  if (due.length === 0) return undefined
+  return pickSessionDue(due, dateKey, lastPillar, 1)[0]
+}
+
+/** Mix pillars and take at most `cap` — never dump the whole library. */
+export function pickSessionDue(
+  due: MemoryTrace[],
+  dateKey: string,
+  lastPillar?: string,
+  cap = 3,
+): MemoryTrace[] {
+  if (due.length === 0 || cap <= 0) return []
   const mixed = lastPillar
     ? due.filter((trace) => trace.pillar !== lastPillar)
     : due
@@ -61,7 +71,30 @@ export function pickInterleaved(
     a.pillar === b.pillar ? a.id.localeCompare(b.id) : a.pillar.localeCompare(b.pillar),
   )
   const index = hashString(`silver-city-space:${dateKey}`) % sorted.length
-  return sorted[index]
+  const rotated = [...sorted.slice(index), ...sorted.slice(0, index)]
+  const out: MemoryTrace[] = []
+  const seen = new Set<string>()
+  for (const trace of rotated) {
+    if (out.length >= cap) break
+    if (seen.has(trace.pillar)) continue
+    out.push(trace)
+    seen.add(trace.pillar)
+  }
+  for (const trace of rotated) {
+    if (out.length >= cap) break
+    if (out.some((item) => item.id === trace.id)) continue
+    out.push(trace)
+  }
+  return out
+}
+
+export function recallsDoneToday(
+  memory: Record<string, MemoryTrace>,
+  today: string,
+): number {
+  return Object.values(memory).filter(
+    (trace) => trace.lastReviewAt === today && trace.reviews > 0,
+  ).length
 }
 
 export function applySuccess(trace: MemoryTrace, today: string): MemoryTrace {
@@ -74,6 +107,14 @@ export function applySuccess(trace: MemoryTrace, today: string): MemoryTrace {
     lastReviewAt: today,
     reviews: trace.reviews + 1,
     cleanRecalls: trace.cleanRecalls + 1,
+  }
+}
+
+/** Skip without a grade — the line waits until tomorrow. */
+export function applySnooze(trace: MemoryTrace, today: string): MemoryTrace {
+  return {
+    ...trace,
+    nextReviewAt: addLocalDays(today, 1),
   }
 }
 

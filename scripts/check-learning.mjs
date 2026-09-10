@@ -2,11 +2,15 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { emptyProgress } from '../src/lib/save.ts'
 import {
+  applySnooze,
   applySuccess,
   emptyTrace,
   isDue,
   nextGapLabel,
+  pickSessionDue,
+  recallsDoneToday,
 } from '../src/lib/memory.ts'
+import { RECALL_SESSION_CAP, sessionDue } from '../src/lib/recall.ts'
 import {
   learningAnchor,
   learningBeat,
@@ -108,9 +112,8 @@ const hubSrc = readFileSync(
   new URL('../src/components/Hub.tsx', import.meta.url),
   'utf8',
 )
-assert.match(hubSrc, /Dust off today’s line/)
-assert.match(hubSrc, /sameDay/)
-assert.match(hubSrc, /held\./)
+assert.match(hubSrc, /RecallOffer/)
+assert.doesNotMatch(hubSrc, /dustOff/)
 assert.match(hubSrc, /Learn · hold · deploy/)
 
 const recallSrc = readFileSync(
@@ -119,6 +122,33 @@ const recallSrc = readFileSync(
 )
 assert.match(recallSrc, /Picture this/)
 assert.match(recallSrc, /Rebuild the map/)
+assert.match(recallSrc, /Not today/)
+assert.match(recallSrc, /is-deeper/)
+assert.match(recallSrc, /A new angle/)
+
+const fiveDue = ['a', 'b', 'c', 'd', 'e'].map((id, index) =>
+  emptyTrace(id, `pillar-${index}`, '2026-09-10'),
+)
+assert.equal(pickSessionDue(fiveDue, '2026-09-10', undefined, RECALL_SESSION_CAP).length, 3)
+assert.equal(pickSessionDue(fiveDue, '2026-09-10', undefined, 1).length, 1)
+
+const snoozed = applySnooze(emptyTrace('ph-road', 'parable-hollow', '2026-09-10'), '2026-09-10')
+assert.equal(snoozed.nextReviewAt, '2026-09-11')
+assert.equal(snoozed.reviews, 0)
+assert.equal(isDue(snoozed, '2026-09-10'), false)
+
+const reviewed = applySuccess(emptyTrace('ph-road', 'parable-hollow', '2026-09-10'), '2026-09-10')
+assert.equal(recallsDoneToday({ 'ph-road': reviewed }, '2026-09-10'), 1)
+
+const loaded = emptyProgress()
+loaded.memory = {
+  'ph-road': emptyTrace('ph-road', 'parable-hollow', '2026-09-10'),
+}
+assert.ok(sessionDue(loaded, '2026-09-10').length <= RECALL_SESSION_CAP)
+assert.deepEqual(
+  sessionDue(loaded, '2026-09-10', { day: '2026-09-10', ids: [], dismissed: true }),
+  [],
+)
 
 assert.equal(
   readFileSync(new URL('../src/config/app.ts', import.meta.url), 'utf8').includes(

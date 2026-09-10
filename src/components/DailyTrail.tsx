@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { findPlayable, pillarFor } from '../content'
+import { pillarFor } from '../content'
 import { dailyForDate } from '../content/daily'
 import { evidenceFor } from '../content/evidence'
 import { STORY, townVoice } from '../content/story'
-import { EASY, isEasy } from '../lib/easy'
+import { isEasy } from '../lib/easy'
 import { localDateKey } from '../lib/dates'
 import { useJuiceHandoff } from '../lib/juice'
 import { findLearning } from '../lib/learning'
@@ -13,11 +13,7 @@ import { RecallGate } from './RecallGate'
 import { StoredLine } from './StoredLine'
 import { TeachUnlock } from './TeachUnlock'
 import { TownReturn } from './TownReturn'
-import {
-  dailyDoneToday,
-  morningReview,
-  useProgress,
-} from '../store/progress'
+import { dailyDoneToday, useProgress } from '../store/progress'
 import type { View } from '../types'
 
 interface DailyTrailProps {
@@ -33,39 +29,26 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
 
   const [session] = useState(() => {
     const already = dailyDoneToday(progress, today)
-    const due = already ? undefined : morningReview(progress, today)
-    const reviewBrief = due ? evidenceFor(due.id) : undefined
-    const isReview = Boolean(due && reviewBrief)
     const fresh = dailyForDate(today, morningsBefore)
-    const playable =
-      due && isReview
-        ? findPlayable(due.id)
-        : {
-            areaId: pillarFor(fresh.challenge.id),
-            challenge: fresh.challenge,
-          }
-    const brief = reviewBrief ?? evidenceFor(fresh.challenge.id)
-    const pillar = due?.pillar ?? pillarFor(fresh.challenge.id)
+    const brief = evidenceFor(fresh.challenge.id)
+    const pillar = pillarFor(fresh.challenge.id)
     return {
       already,
-      isReview,
-      challenge: playable?.challenge ?? fresh.challenge,
+      challenge: fresh.challenge,
       brief,
       pillar,
     }
   })
 
-  const { isReview, challenge, brief, pillar } = session
+  const { challenge, brief, pillar } = session
   const { juiceDone: solved, afterJuice } = useJuiceHandoff(session.already)
   const savedWin = useRef(false)
   const [missed, setMissed] = useState(false)
   const [peeked, setPeeked] = useState(false)
   const [held, setHeld] = useState(
-    () =>
-      !brief ||
-      (Boolean(progress.held.includes(brief.id)) && !isReview),
+    () => !brief || Boolean(progress.held.includes(brief.id)),
   )
-  const [taught, setTaught] = useState(() => !brief || isReview)
+  const [taught, setTaught] = useState(() => !brief)
   const [arming, setArming] = useState(false)
 
   const showNext = solved && held
@@ -77,7 +60,7 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
     if (session.already || savedWin.current) return
     savedWin.current = true
     completeDaily(today)
-    if (brief && !isReview) {
+    if (brief) {
       recordReview({
         id: brief.id,
         pillar,
@@ -97,17 +80,7 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
   function settleRecall(result: { clean: boolean }) {
     setHeld(true)
     if (!brief) return
-    if (isReview) {
-      recordReview({
-        id: brief.id,
-        pillar,
-        kind: 'recall',
-        today,
-        clean: result.clean && !missed && !peeked,
-        peeked,
-        elaborated: Boolean(progress.memory[brief.id]?.elaborated),
-      })
-    }
+    void result
   }
 
   const rehearsing = solved && Boolean(brief) && !held
@@ -136,9 +109,7 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
           />
         ) : (
           <>
-            <h1 className="puzzle-title">
-              {isReview ? (easy ? EASY.readAgain : 'Time to dust off this one') : challenge.title}
-            </h1>
+            <h1 className="puzzle-title">{challenge.title}</h1>
             <PuzzlePlay
               challenge={challenge}
               onMiss={() => setMissed(true)}
@@ -158,14 +129,14 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
                     ? challenge.tiles.filter((tile) => tile.bin === 'keep')
                     : undefined
                 }
-                mode={isReview ? 'review' : 'encode'}
+                mode="encode"
                 kicker={STORY.tapTakeaway}
                 onHeld={settleRecall}
               />
             </div>
           ) : null}
 
-          {showNext && brief && !isReview ? (
+          {showNext && brief ? (
             <StoredLine
               learning={
                 findLearning(progress, brief.id) ?? {
