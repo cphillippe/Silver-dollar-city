@@ -1,11 +1,10 @@
 import { useMemo, useState } from 'react'
-import type { GemId, LinkChallenge, LinkKind, LinkNode } from '../../types'
-import { plainFor } from '../../content/plain'
+import type { LinkChallenge, LinkKind, LinkNode } from '../../types'
+import { linkCaption, linkPicture } from '../../content/links'
 import { isEasy } from '../../lib/easy'
 import { shuffle } from '../../lib/shuffle'
 import { useProgress } from '../../store/progress'
 import { Avatar } from '../Avatar'
-import { GemMark } from '../GemMark'
 import { PlaceGlyph } from '../Landmark'
 import { PuzzleHint } from './PuzzleHint'
 import { PuzzleLead } from './PuzzleLead'
@@ -29,25 +28,22 @@ function pairKey(a: string, b: string) {
   return a < b ? `${a}:${b}` : `${b}:${a}`
 }
 
-function faceOf(node: LinkNode, easy: boolean) {
-  if (!easy || node.kind !== 'idea' || !node.evidenceId) return node.text
-  return plainFor(node.evidenceId)?.gloss ?? node.text
-}
-
-function ideaGem(node: LinkNode): GemId | undefined {
-  if (node.evidenceId === 'daily-lantern') return 'lamp'
-  return undefined
-}
-
-function LinkFace({ node, easy }: { node: LinkNode; easy: boolean }) {
-  const gem = ideaGem(node)
-  const picture = Boolean(node.who || node.plotId || gem)
+function LinkFace({
+  node,
+  easy,
+  challenge,
+}: {
+  node: LinkNode
+  easy: boolean
+  challenge: LinkChallenge
+}) {
+  const pic = linkPicture(node, challenge)
+  const picture = Boolean(pic.who || pic.plotId)
   return (
     <>
-      {node.who ? <Avatar who={node.who} size="lg" /> : null}
-      {node.plotId ? <PlaceGlyph plotId={node.plotId} /> : null}
-      {gem ? <GemMark gem={gem} size="md" /> : null}
-      <span className={picture ? 'link-label' : undefined}>{faceOf(node, easy)}</span>
+      {pic.who ? <Avatar who={pic.who} size="xl" /> : null}
+      {pic.plotId ? <PlaceGlyph plotId={pic.plotId} /> : null}
+      <span className={picture ? 'link-label' : undefined}>{linkCaption(node, easy)}</span>
     </>
   )
 }
@@ -288,16 +284,19 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
         <div className="link-grid is-wizard">
           <div className={`link-col is-${step}`}>
             <p className="match-col-label">{stepLabel(step, easy)}</p>
-            {stepOptions.map((node) => (
+            {stepOptions.map((node) => {
+              const pic = linkPicture(node, challenge)
+              return (
               <button
                 key={node.id}
                 type="button"
-                className={`link-block is-${node.kind} ${node.who || node.plotId || ideaGem(node) ? 'is-picture' : ''} ${picked === node.id ? 'is-selected' : ''} ${flash === node.id ? 'is-flash' : ''} ${focusIds?.has(node.id) ? 'is-focus' : ''}`}
+                className={`link-block is-${node.kind} ${pic.who || pic.plotId ? 'is-picture' : ''} ${picked === node.id ? 'is-selected' : ''} ${flash === node.id ? 'is-flash' : ''} ${focusIds?.has(node.id) ? 'is-focus' : ''}`}
                 onClick={() => choose(node.id)}
               >
-                <LinkFace node={node} easy={easy} />
+                <LinkFace node={node} easy={easy} challenge={challenge} />
               </button>
-            ))}
+              )
+            })}
           </div>
         </div>
       )}

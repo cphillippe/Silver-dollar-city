@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.6',
+    title: 'Link starts with the picture',
+    when: '2026-09-10',
+    items: [
+      'Link the street leads with a big picture when we have one — porch lamp, creek, bench, faces — then a short label. Not a wall of sentences.',
+      'Dig deeper chips still read Scripture, Ancient, Classic, and Modern · believing.',
+    ],
+  },
+  {
     version: '1.4.5',
     title: 'Sticky next tap',
     when: '2026-09-10',
