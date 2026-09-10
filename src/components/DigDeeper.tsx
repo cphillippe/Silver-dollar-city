@@ -71,7 +71,7 @@ export function DigDeeper({
   if (compact) {
     return (
       <details className="dig-deeper is-compact">
-        <summary>Why it stands · Dig deeper</summary>
+        <summary>{easy ? 'Read more' : 'Why it stands · Dig deeper'}</summary>
         {body}
       </details>
     )
@@ -79,7 +79,7 @@ export function DigDeeper({
 
   return (
     <nav className="dig-deeper" aria-label="Dig deeper">
-      <p className="eyebrow">Dig deeper</p>
+      <p className="eyebrow">{easy ? 'Read more' : 'Dig deeper'}</p>
       {body}
     </nav>
   )

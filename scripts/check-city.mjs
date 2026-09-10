@@ -1009,7 +1009,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.8')
+assert.equal(APP_VERSION, '1.4.9')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -1418,6 +1418,16 @@ assert.match(
 )
 assert.match(hubSrc, /Do this next/)
 assert.match(hubSrc, /do-next/)
+assert.match(hubSrc, /Tap this next/)
+assert.match(hubSrc, /is-easy-town/)
+assert.match(cssSrc, /tap-next-dock/)
+assert.match(defendSrc, /You missed the walker/)
+assert.match(defendSrc, /Porch flickered/)
+assert.doesNotMatch(TOWN_PATH_EASY, /scrapbook/)
+assert.match(
+  readFileSync(new URL('../src/components/DigDeeper.tsx', import.meta.url), 'utf8'),
+  /Read more/,
+)
 assert.match(
   readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
   /Match idea · place · person/,

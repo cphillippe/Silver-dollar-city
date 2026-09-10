@@ -81,8 +81,7 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
         <div className="mind-map-scroll">
         <p className="quiet">{lotWhy(graph.plotId, easy)}</p>
 
-        <WordGloss words={[WORDS.upgrade]} />
-        {easy ? <p className="quiet">{WORDS.claim.teach}</p> : null}
+        {easy ? null : <WordGloss words={[WORDS.upgrade]} />}
 
         <p className="build-job">{tierJob(applied, easy)}</p>
         {ideaLock ? (
@@ -140,7 +139,7 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
           ) : null}
         </div>
 
-        <p className="quiet scrap-kicker">{scrapbookLabel(easy, litCount)}</p>
+        {easy ? null : <p className="quiet scrap-kicker">{scrapbookLabel(easy, litCount)}</p>}
         {applied >= TIER_MAX || ready ? null : (
           <p className="quiet build-cap">
             {easy

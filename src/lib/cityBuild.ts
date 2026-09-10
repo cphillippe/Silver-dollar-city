@@ -42,7 +42,7 @@ export const TIER_JOB: Record<number, { hard: string; easy: string }> = {
   },
   3: {
     hard: 'Rooms for more ideas. Dig deeper opens on lines you have kept.',
-    easy: 'More rooms. You can open Dig deeper on lines you kept.',
+    easy: 'More rooms. You can Read more on lines you kept.',
   },
   4: {
     hard: 'Lamps hold. Tap a lit idea to say the line again.',

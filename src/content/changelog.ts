@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.9',
+    title: 'Easy Tap this next',
+    when: '2026-09-10',
+    items: [
+      'Easy Town keeps one gold Tap this next. Link and Night Watch stay in the tool row — not a stack of poetic cards.',
+      'A Night Watch miss on Easy says: You missed the walker — tap the moving person.',
+      'Easy manage and Night Watch drop scrapbook, deploy, held-line, and cheap-claim chrome. Dig deeper reads Read more. Claim is not wallpaper.',
+    ],
+  },
+  {
     version: '1.4.8',
     title: 'Easy Link clue + one-tap Night Watch',
     when: '2026-09-10',

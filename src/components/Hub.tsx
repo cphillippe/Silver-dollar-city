@@ -125,22 +125,24 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
   }
 
   return (
-    <main className="hub is-town is-inhabited" aria-label="The town">
+    <main className={`hub is-town is-inhabited ${easy ? 'is-easy-town' : ''}`} aria-label="The town">
+      {easy ? null : (
       <section className="next-card do-next" aria-label="Do this next">
         <p className="eyebrow">Do this next</p>
         <h2>{nextTitle}</h2>
         <p className="do-next-detail">{nextDetail}</p>
         {waiting > 0 ? (
           <p className="quiet">
-            {waiting} {easy ? 'pages you can read again' : 'pages due'} — offered below, not forced.
+            {waiting} pages due — offered below, not forced.
           </p>
         ) : null}
         <button type="button" className="btn primary xl" onClick={goNext}>
           {nextCta}
         </button>
       </section>
+      )}
 
-      {!streetDone && (doneToday || progress.completed.length > 0) ? (
+      {!easy && !streetDone && (doneToday || progress.completed.length > 0) ? (
         <section className="street-link" aria-label="Link the street">
           <div className="card-lead">
             <Avatar who="mercy" size="sm" />
@@ -182,7 +184,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
           title:
             journalForChallenge(trace.id)?.title ??
             findPlayable(trace.id)?.challenge.title ??
-            'A held line',
+            (easy ? 'A sentence you kept' : 'A held line'),
         }))}
         onOpen={openRecall}
         onLater={skipLater}
@@ -195,11 +197,20 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
         </button>
         <button
           type="button"
-          className="btn tiny gold"
+          className={`btn tiny ${easy ? '' : 'gold'}`}
           onClick={() => onNavigate({ name: 'link' })}
         >
           Link the street
         </button>
+        {easy ? (
+          <button
+            type="button"
+            className="btn tiny"
+            onClick={() => onNavigate({ name: 'defend' })}
+          >
+            Night Watch
+          </button>
+        ) : null}
         <button
           type="button"
           className="btn tiny"
@@ -209,6 +220,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
         </button>
       </nav>
 
+      {easy ? null : (
       <section
         className={`night-watch ${progress.defense.cleared ? 'is-held' : ''}`}
         aria-label="Night Watch"
@@ -255,6 +267,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
           {easy ? EASY.nightDo : 'Hold the night'}
         </button>
       </section>
+      )}
 
       <AdSlot slot="hub-banner" />
 
@@ -357,7 +370,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
 
       <AdSlot slot="between-districts" />
 
-      {goal.kind === 'vista' ? (
+      {easy || goal.kind !== 'vista' ? null : (
         <button
           type="button"
           className="btn gold"
@@ -365,6 +378,14 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
         >
           Stand at the lookout
         </button>
+      )}
+
+      {easy ? (
+        <div className="tap-next-dock" aria-label="Tap this next">
+          <button type="button" className="btn gold xl" onClick={goNext}>
+            Tap this next
+          </button>
+        </div>
       ) : null}
     </main>
   )

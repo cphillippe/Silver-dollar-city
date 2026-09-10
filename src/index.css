@@ -6611,6 +6611,19 @@ html[data-easy='on'] .mind-node em {
   order: -1;
 }
 
+.hub.is-easy-town .tap-next-dock {
+  position: sticky;
+  bottom: 0;
+  z-index: 8;
+  margin-top: auto;
+  padding: 10px 0 calc(8px + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(180deg, transparent, rgba(20, 8, 48, 0.96) 22%);
+}
+
+.hub.is-easy-town .tap-next-dock .btn {
+  width: 100%;
+}
+
 .hub.is-town .do-next,
 .hub.is-town .street-link {
   display: flex;
