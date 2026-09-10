@@ -6064,6 +6064,18 @@ html[data-theme='dusk'] .hub.is-town .street-link {
   font-weight: 650;
 }
 
+.link-clue {
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 204, 51, 0.14);
+  border: 1px solid rgba(255, 204, 51, 0.38);
+  font-size: 1.08rem;
+  font-weight: 650;
+  line-height: 1.35;
+  color: #fff6e8;
+}
+
 .link-complete {
   margin: 4px 0 8px;
   font-size: 1.2rem;

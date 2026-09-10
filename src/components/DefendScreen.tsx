@@ -77,10 +77,10 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const pads = defendPads(progress)
   const unlocked = unlockedWatchAbilities(progress)
   const [ability, setAbility] = useState<WatchAbility>(() => unlocked[0] ?? 'love')
-  const [taught, setTaught] = useState(false)
+  const [taught, setTaught] = useState(easy)
   const [toolLock, setToolLock] = useState<string | null>(null)
   const [arming, setArming] = useState(false)
-  const [phase, setPhase] = useState<'plant' | 'wave' | 'lost'>('plant')
+  const [phase, setPhase] = useState<'plant' | 'wave' | 'lost'>(easy ? 'wave' : 'plant')
   const [planted, setPlanted] = useState<CityPlotId[]>(() => [...pads])
   const [hearts, setHearts] = useState(DEFEND_HEARTS)
   const [raiders, setRaiders] = useState<Raider[]>([])
@@ -325,7 +325,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   }
 
   function retry() {
-    setPhase('plant')
+    setPhase(easy ? 'wave' : 'plant')
     setWon(false)
     setRaiders([])
     setDowned(0)
@@ -402,7 +402,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           />
           <TownReturn
             who="juniper"
-            line="Night held. The road turned toward heaven."
+            line={easy ? 'Night held.' : 'Night held. The road turned toward heaven.'}
             action="See the town"
             onGo={() => onNavigate({ name: 'hub' })}
           />
@@ -411,12 +411,10 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         <>
           <p className="eyebrow">{easy ? 'Night Watch' : WATCH_KICKER}</p>
           <h1 className="defend-title">
-            {phase === 'wave'
-              ? easy
-                ? 'Tap cheap lines toward heaven.'
-                : 'Turn them toward heaven.'
-              : easy
-                ? EASY.nightWhat
+            {easy
+              ? EASY.nightTap
+              : phase === 'wave'
+                ? 'Turn them toward heaven.'
                 : WATCH_LEAD}
           </h1>
           <div className={`defend-frame ${shake ? 'is-shake' : ''} ${won ? 'is-clear' : ''}`}>
@@ -746,14 +744,12 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           {phase === 'wave' ? (
             <p className="defend-tip">
               {easy
-                ? `${EASY.deployTeach} Match the walker, then tap.`
+                ? EASY.nightTap
                 : 'Match the walker. Deploy the held argument — the wrong tool only nudges.'}
             </p>
           ) : (
             <p className="defend-tip">
-              {easy
-                ? `${EASY.nightWhat} ${EASY.deployTeach} Love is ready. Plant a lamp, then ${EASY.nightDo.toLowerCase()}.`
-                : 'Learn · hold · deploy. Love is ready. Logic, reason, and science unlock as you keep lines.'}
+              Learn · hold · deploy. Love is ready. Logic, reason, and science unlock as you keep lines.
             </p>
           )}
         </>

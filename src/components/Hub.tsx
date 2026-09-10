@@ -219,19 +219,21 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
           <div>
             <p className="eyebrow">{progress.defense.cleared ? 'Still watched' : 'Night Watch'}</p>
             <h2>{easy ? 'Use a sentence you kept' : 'Hold the night'}</h2>
-            <p className="quiet">
-              {easy ? `${EASY.claimTeach} ${EASY.deployTeach}` : 'Learn · hold · deploy'}
-            </p>
-            <p className="town-line">
-              {easy
-                ? EASY.nightWhat
-                : 'Held lines turn the night toward heaven'}
-              {progress.defense.cleared
-                ? ` · ${progress.defense.cleared} night${progress.defense.cleared === 1 ? '' : 's'} held.`
-                : easy
-                  ? ''
+            {easy ? null : <p className="quiet">Learn · hold · deploy</p>}
+            {easy ? (
+              progress.defense.cleared ? (
+                <p className="town-line">
+                  {progress.defense.cleared} night{progress.defense.cleared === 1 ? '' : 's'} held.
+                </p>
+              ) : null
+            ) : (
+              <p className="town-line">
+                Held lines turn the night toward heaven
+                {progress.defense.cleared
+                  ? ` · ${progress.defense.cleared} night${progress.defense.cleared === 1 ? '' : 's'} held.`
                   : '.'}
-            </p>
+              </p>
+            )}
             <p className="night-watch-gems" aria-label="Night abilities">
               {WATCH_TOOLS.map((tool) => (
                 <span

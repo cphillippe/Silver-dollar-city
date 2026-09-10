@@ -32,7 +32,7 @@ import {
   WATCH_TOOLS,
 } from '../src/lib/watchTools.ts'
 import { ideaUnlocked, mindGraph, mindMapHasLit } from '../src/lib/mindMap.ts'
-import { linkCaption, linkPicture, STREET_CHALLENGE, STREET_LIGHTS, STREET_WHYS } from '../src/content/links.ts'
+import { linkCaption, linkClue, linkMiss, linkPicture, STREET_CHALLENGE, STREET_LIGHTS, STREET_WHYS } from '../src/content/links.ts'
 import { LOT_STORY, TOWN_PATH_EASY, TOWN_PATH_HARD } from '../src/content/lots.ts'
 import {
   appliedTier,
@@ -1009,7 +1009,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.7')
+assert.equal(APP_VERSION, '1.4.8')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -1139,8 +1139,11 @@ assert.match(linkPlaySrc, /PlaceGlyph/)
 assert.match(linkPlaySrc, /size="xl"/)
 assert.match(linkPlaySrc, /linkPicture/)
 assert.match(linkPlaySrc, /linkCaption/)
+assert.match(linkPlaySrc, /linkClue/)
+assert.match(linkPlaySrc, /linkMiss/)
+assert.match(linkPlaySrc, /link-clue/)
 assert.match(linkPlaySrc, /link-dock/)
-assert.match(linkPlaySrc, /Wrong place/)
+assert.match(linkPlaySrc, /Wrong lot/)
 assert.doesNotMatch(linkPlaySrc, /Those don/)
 {
   const mercy = STREET_CHALLENGE.nodes.find((node) => node.id === 'idea-mercy')
@@ -1151,6 +1154,13 @@ assert.doesNotMatch(linkPlaySrc, /Those don/)
   assert.equal(linkPicture(lamp, STREET_CHALLENGE).plotId, 'porch')
   assert.match(linkCaption(mercy, true), /mercy/i)
   assert.doesNotMatch(linkCaption(creed, false), /Paul hands on/)
+  assert.match(linkClue('mercy-hollow', 'idea'), /Mercy|neighbor|road/)
+  assert.match(linkClue('silas-bench', 'place'), /square/)
+  assert.match(linkClue('juniper-porch', 'person'), /Juniper|porch/)
+  assert.match(linkMiss('mercy-hollow', 'idea'), /Wrong sentence/)
+  assert.match(linkMiss('mercy-hollow', 'idea'), /creek|Mercy|neighbor/)
+  assert.match(linkMiss('silas-bench', 'place'), /Wrong place/)
+  assert.match(linkMiss('juniper-porch', 'person'), /Wrong person/)
 }
 assert.match(
   readFileSync(new URL('../src/components/MindMap.tsx', import.meta.url), 'utf8'),
@@ -1383,6 +1393,28 @@ assert.match(
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
   /Connect sentence → place → person/,
+)
+assert.doesNotMatch(
+  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  /toward heaven/,
+)
+assert.doesNotMatch(
+  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  /cheap lines/,
+)
+assert.doesNotMatch(hubSrc, /EASY\.nightWhat/)
+assert.doesNotMatch(defendSrc, /EASY\.nightWhat/)
+assert.match(defendSrc, /EASY\.nightTap/)
+assert.match(
+  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  /Tap the walker/,
+)
+assert.match(defendSrc, /useState\(easy\)/)
+assert.match(defendSrc, /easy \? 'wave'/)
+assert.match(cssSrc, /link-clue/)
+assert.match(
+  readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
+  /Start/,
 )
 assert.match(hubSrc, /Do this next/)
 assert.match(hubSrc, /do-next/)

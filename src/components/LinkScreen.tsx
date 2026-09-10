@@ -67,25 +67,31 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
           <section className="recall-gate is-encode teach-gate" aria-label="Unlock the links">
             <p className="eyebrow">Match idea · place · person.</p>
             <p className="recall-line rehearse-stem">
-              Link the idea to its place and person.
+              {easy
+                ? 'Pick the sentence, then the place, then the person.'
+                : 'Link the idea to its place and person.'}
             </p>
             <LinkDemo easy={easy} />
-            <PlainTalk id={challenge.id} />
+            {easy ? null : <PlainTalk id={challenge.id} />}
             <p className="quiet">
               {easy
-                ? `${EASY.claimTeach} Pick the sentence, then the place, then the person. You’ll reopen them from your scrapbook of links.`
+                ? 'You’ll reopen them from your scrapbook of links.'
                 : 'Each match lights a spot on the town map. Tap the place later to open that idea again.'}
             </p>
-            <ul className="word-school street-whys" aria-label="Why each place">
-              {challenge.triples.map((triple) => (
-                <li key={triple.id}>{easy ? STREET_WHYS[triple.id].easy : STREET_WHYS[triple.id].hard}</li>
-              ))}
-            </ul>
-            <ol className={`teach-beats ${easy ? 'is-easy' : ''}`}>
-              {STREET_BEATS.map((beat) => (
-                <li key={beat}>{beat}</li>
-              ))}
-            </ol>
+            {easy ? null : (
+              <ul className="word-school street-whys" aria-label="Why each place">
+                {challenge.triples.map((triple) => (
+                  <li key={triple.id}>{STREET_WHYS[triple.id].hard}</li>
+                ))}
+              </ul>
+            )}
+            {easy ? null : (
+              <ol className="teach-beats">
+                {STREET_BEATS.map((beat) => (
+                  <li key={beat}>{beat}</li>
+                ))}
+              </ol>
+            )}
             <button
               type="button"
               className="btn primary xl"
@@ -95,7 +101,7 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
                 window.setTimeout(() => setArming(false), 360)
               }}
             >
-              Unlock the links
+              {easy ? 'Start' : 'Unlock the links'}
             </button>
           </section>
         ) : (
@@ -112,7 +118,6 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
         <section className="after-win">
           <article className="stored-line is-spoken" aria-label="Street takeaway">
             <p className="eyebrow">Say this out loud</p>
-            {easy ? <p className="quiet">A claim is what we hold to be true.</p> : null}
             <p className="stored-claim">An idea lives at a place, with a person.</p>
             <p className="link-takeaway">
               {easy

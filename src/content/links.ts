@@ -116,6 +116,57 @@ export function linkPicture(
   return {}
 }
 
+type LinkStep = 'idea' | 'place' | 'person'
+
+const LINK_CLUES: Record<string, Record<LinkStep, string>> = {
+  'mercy-hollow': {
+    idea: 'Mercy’s Jesus story — the neighbor who stops on the road.',
+    place: 'That story lives at the creek.',
+    person: 'Mercy keeps that creek.',
+  },
+  'silas-bench': {
+    idea: 'Silas’s public names — died, buried, raised, appeared.',
+    place: 'Those names sit at the square.',
+    person: 'Silas keeps that square.',
+  },
+  'juniper-porch': {
+    idea: 'Juniper’s lamp — a light meant to be seen.',
+    place: 'That lamp lives on the porch.',
+    person: 'Juniper keeps that porch.',
+  },
+}
+
+const LINK_MISSES: Record<string, Record<LinkStep, string>> = {
+  'mercy-hollow': {
+    idea: 'Wrong sentence. This story is Mercy’s neighbor-line at the creek.',
+    place: 'Wrong place. Mercy’s neighbor-line lives at the creek.',
+    person: 'Wrong person. Mercy keeps that creek.',
+  },
+  'silas-bench': {
+    idea: 'Wrong sentence. This story is Silas’s public names at the square.',
+    place: 'Wrong place. Silas’s names live at the square.',
+    person: 'Wrong person. Silas keeps that square.',
+  },
+  'juniper-porch': {
+    idea: 'Wrong sentence. This story is Juniper’s lamp on the porch.',
+    place: 'Wrong place. Juniper’s lamp lives on the porch.',
+    person: 'Wrong person. Juniper keeps that porch.',
+  },
+}
+
+/** Easy who/where/story hint so the first pick is learnable, not a coin flip. */
+export function linkClue(tripleId: string, step: LinkStep): string {
+  return LINK_CLUES[tripleId]?.[step] ?? 'Pick the match for this story.'
+}
+
+/** Easy miss: one sentence why this pick is wrong for this story. */
+export function linkMiss(tripleId: string, step: LinkStep): string {
+  return (
+    LINK_MISSES[tripleId]?.[step] ??
+    'Wrong pick. Match the sentence, then its place, then its person.'
+  )
+}
+
 /** Short label under the picture — not the full claim wall. */
 export function linkCaption(node: LinkNode, easy: boolean): string {
   if (node.kind === 'idea') {
