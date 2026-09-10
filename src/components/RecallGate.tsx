@@ -218,13 +218,15 @@ export function RecallGate({
                 <strong>That still holds.</strong>
               </p>
               {showDeeperBeat ? <DigDeeper id={brief.id} compact /> : null}
-              <button
-                type="button"
-                className="btn gold xl recall-done"
-                onClick={() => settle(misses === 0)}
-              >
-                Done
-              </button>
+              <div className="cta-dock">
+                <button
+                  type="button"
+                  className="btn gold xl recall-done"
+                  onClick={() => settle(misses === 0)}
+                >
+                  Done
+                </button>
+              </div>
             </>
           ) : null}
         </>
@@ -258,13 +260,15 @@ export function RecallGate({
             <>
               <p className="reason-held">{heldReason}</p>
               {showDeeperBeat ? <DigDeeper id={brief.id} compact /> : null}
-              <button
-                type="button"
-                className="btn gold xl recall-done"
-                onClick={() => settle(misses === 0)}
-              >
-                Done
-              </button>
+              <div className="cta-dock">
+                <button
+                  type="button"
+                  className="btn gold xl recall-done"
+                  onClick={() => settle(misses === 0)}
+                >
+                  Done
+                </button>
+              </div>
             </>
           ) : (
             <div className="recall-choices">

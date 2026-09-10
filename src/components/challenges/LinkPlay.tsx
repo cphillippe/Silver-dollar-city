@@ -272,6 +272,12 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
         </button>
       ) : null}
 
+      <p className="match-score">
+        {easy
+          ? `${challenge.triples.filter((item) => needed(item.id).every((need) => edges.some((edge) => edge.triple === item.id && pairKey(edge.a, edge.b) === need))).length} of ${challenge.triples.length} links`
+          : `${challenge.triples.length * 2 - edges.length} links left · ${edges.length} / ${challenge.triples.length * 2} snapped`}
+      </p>
+
       {step === 'linked' ? (
         <div className="link-dock">
           <button type="button" className="btn primary xl link-next" onClick={nextLink}>
@@ -295,12 +301,6 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
           </div>
         </div>
       )}
-
-      <p className="match-score">
-        {easy
-          ? `${challenge.triples.filter((item) => needed(item.id).every((need) => edges.some((edge) => edge.triple === item.id && pairKey(edge.a, edge.b) === need))).length} of ${challenge.triples.length} links`
-          : `${challenge.triples.length * 2 - edges.length} links left · ${edges.length} / ${challenge.triples.length * 2} snapped`}
-      </p>
     </div>
   )
 }
