@@ -1,7 +1,8 @@
+import { useState } from 'react'
 import { areas, findPlayable } from '../content'
 import { STORY, townVoice } from '../content/story'
 import { formatDeviceLocalDate, localDateKey } from '../lib/dates'
-import { CITY_PLOTS, nextPlotId } from '../lib/city'
+import { CITY_PLOTS, nextPlotId, type CityPlotId } from '../lib/city'
 import { Avatar } from './Avatar'
 import { DeviceDay } from './DeviceDay'
 import { Landmark } from './Landmark'
@@ -39,10 +40,15 @@ export function Hub({ onNavigate }: HubProps) {
   const goal = getNextGoal(progress, today)
   const nextId = nextPlotId(progress, doneToday)
   const watchOpen = unlockedWatchAbilities(progress)
+  const [mindPlot, setMindPlot] = useState<CityPlotId | null>(null)
 
   return (
     <main className="hub is-town is-inhabited" aria-label="The town">
-      <CityMap onNavigate={onNavigate} />
+      <CityMap
+        onNavigate={onNavigate}
+        mindPlot={mindPlot}
+        onMindPlot={setMindPlot}
+      />
 
       <section
         className={`street-link ${progress.completed.includes('ln-street') ? 'is-held' : ''}`}
@@ -187,6 +193,13 @@ export function Hub({ onNavigate }: HubProps) {
                   {current ? <span className="street-next">Next</span> : null}
                 </div>
               </div>
+              <button
+                type="button"
+                className="btn tiny"
+                onClick={() => setMindPlot(plot.id)}
+              >
+                Mind map
+              </button>
               <button
                 type="button"
                 className={`btn tiny ${complete && unlocked ? 'street-rehearse' : ''} ${current && unlocked && !complete ? 'gold' : ''}`}

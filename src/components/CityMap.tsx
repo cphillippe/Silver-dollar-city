@@ -50,6 +50,9 @@ import { MindMap } from './MindMap'
 interface CityMapProps {
   onNavigate: (view: View) => void
   mode?: 'live' | 'poster'
+  /** Hub can open the same place mind map from the street list. */
+  mindPlot?: CityPlotId | null
+  onMindPlot?: (id: CityPlotId | null) => void
 }
 
 const ANCHOR: Record<CityPlotId, { x: number; y: number }> = {
@@ -85,7 +88,12 @@ function viewBoxOf(cam: { x: number; y: number; w: number; h: number }) {
   return `${cam.x} ${cam.y} ${cam.w} ${cam.h}`
 }
 
-export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
+export function CityMap({
+  onNavigate,
+  mode = 'live',
+  mindPlot: mindPlotProp,
+  onMindPlot,
+}: CityMapProps) {
   const { progress } = useProgress()
   const today = localDateKey()
   const doneToday = dailyDoneToday(progress, today)
@@ -101,7 +109,9 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
   const [homecoming, setHomecoming] = useState(false)
   const [beat, setBeat] = useState<CityUpgrade | null>(null)
   const [tapped, setTapped] = useState<CityPlotId | null>(null)
-  const [mindPlot, setMindPlot] = useState<CityPlotId | null>(null)
+  const [mindPlotLocal, setMindPlotLocal] = useState<CityPlotId | null>(null)
+  const mindPlot = mindPlotProp !== undefined ? mindPlotProp : mindPlotLocal
+  const setMindPlot = onMindPlot ?? setMindPlotLocal
   const [cam, setCam] = useState(FULL_CAM)
   const playing = useRef(false)
   const timers = useRef<number[]>([])
