@@ -11,7 +11,7 @@ A stranger should know in 60 seconds: this is a **Christian reasoning game**. So
 **Sticky public preview (GitHub Pages):**  
 https://cphillippe.github.io/Silver-dollar-city/
 
-Hard-reload once if you still see the old game (the PWA can keep a cached copy). Live bundle is `index-CHoQFc80.js` — V0 **1.3.2**; tap a place on the town map for its mind map.
+Hard-reload once if you still see the old game (the PWA can keep a cached copy). Live bundle is `index-BcheE80F.js` — V0 **1.3.2**; tap a place on the town map for its mind map.
 
 Pages deploys `docs/` from `main` once that source is selected. Until then the same `docs/` is also on `cursor/silver-city-unending-evidence-8233`. Hard-reload github.io after it updates.
 
