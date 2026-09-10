@@ -1,8 +1,7 @@
 /**
  * Dig deeper — hawk-filtered dossier.
- * Scripture / Aristotle / Aquinas / Ghazālī / Philoponus first.
- * Modern links are faithful Christians only, and only as secondary
- * (or when the evidence itself is modern: fine-tuning, manuscripts).
+ * Prefer Scripture and older witnesses when they carry the claim.
+ * Later faithful sources are welcome when they help.
  * Never cite skeptic hubs, Wikipedia, or mainstream academics as the teaching voice.
  */
 
@@ -140,7 +139,7 @@ const FINE_TUNING: DeeperLink[] = [
   modern(
     'Robin Collins, The Fine-Tuning Design Argument',
     'https://rintintin.colorado.edu/~vancecd/phil201/Collins.pdf',
-    'Robin Collins · believing philosopher',
+    'Robin Collins',
   ),
 ]
 
@@ -519,6 +518,6 @@ export function deeperLinksFor(
 export function eraLabel(era: DeeperEra): string {
   if (era === 'scripture') return 'Scripture'
   if (era === 'ancient') return 'Ancient'
-  if (era === 'classic') return 'Pre-Reformation'
+  if (era === 'classic') return 'Classic'
   return 'Modern · believing'
 }
