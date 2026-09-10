@@ -42,7 +42,7 @@ import {
   emptyCityBuilt,
 } from '../src/lib/cityBuild.ts'
 import { WORDS } from '../src/lib/words.ts'
-import { deeperLinksFor } from '../src/content/deeper.ts'
+import { deeperLinksFor, eraLabel } from '../src/content/deeper.ts'
 import { allEvidenceIds, evidenceFor } from '../src/content/evidence.ts'
 import { plainFor } from '../src/content/plain.ts'
 import { profileInventory } from '../src/lib/profile.ts'
@@ -997,7 +997,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.2')
+assert.equal(APP_VERSION, '1.4.3')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -1172,6 +1172,12 @@ assert.match(deeperSrc, /Robin Collins/)
 assert.match(deeperSrc, /Edward Feser|Feser/)
 assert.match(deeperSrc, /Philoponus/)
 assert.match(deeperSrc, /Ghazālī|Ghazali/)
+assert.doesNotMatch(deeperSrc, /Pre-Reformation/)
+assert.doesNotMatch(deeperSrc, /pre-Reform/)
+assert.equal(eraLabel('classic'), 'Classic')
+assert.equal(eraLabel('modern'), 'Modern · believing')
+assert.equal(eraLabel('scripture'), 'Scripture')
+assert.equal(eraLabel('ancient'), 'Ancient')
 
 for (const id of allEvidenceIds()) {
   assert.ok(
@@ -1228,9 +1234,16 @@ const isaiah = deeperLinksFor('daily-isaiah')
 assert.ok(isaiah.some((link) => /Isaiah/.test(link.href)))
 assert.ok(isaiah.some((link) => /City of God XVIII/.test(link.label)))
 
-assert.match(
+assert.doesNotMatch(
   readFileSync(new URL('../src/components/DigDeeper.tsx', import.meta.url), 'utf8'),
-  /Dig deeper/,
+  /Pre-Reformation|pre-Reform/,
+)
+const changelogSrc = readFileSync(new URL('../src/content/changelog.ts', import.meta.url), 'utf8')
+assert.doesNotMatch(changelogSrc, /modern believing scholars only/)
+assert.doesNotMatch(changelogSrc, /Pre-Reformation|pre-Reform/)
+assert.match(
+  changelogSrc,
+  /Dig deeper: Scripture and older witnesses when they fit; later faithful sources welcome when they help\./,
 )
 assert.match(
   readFileSync(new URL('../src/components/StoredLine.tsx', import.meta.url), 'utf8'),

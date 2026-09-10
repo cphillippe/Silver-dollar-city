@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.3',
+    title: 'Classic sources',
+    when: '2026-09-10',
+    items: [
+      'Dig deeper: Scripture and older witnesses when they fit; later faithful sources welcome when they help.',
+      'Source chips read Scripture, Ancient, Classic, and Modern · believing.',
+    ],
+  },
+  {
     version: '1.4.2',
     title: 'Done, then Build this',
     when: '2026-09-10',
@@ -103,7 +112,7 @@ export const CHANGELOG: ChangeNote[] = [
     when: '2026-09-10',
     items: [
       'Profile gathers River’s unlocks — held ideas, places, people, tools, and mind-map links. Open it from Town or Settings.',
-      'Dig deeper on Hold, Journal, mind map, and Profile: Scripture and the Fathers first; modern believing scholars only when the evidence is modern.',
+      'Dig deeper: Scripture and older witnesses when they fit; later faithful sources welcome when they help.',
       'Reset progress is buried in Settings → Danger zone and asks before it wipes the save. It is not on the town screen.',
       'Claims, journal, mind map, and link blocks wrap or scroll on a phone — no clipped takeaways.',
       'Isaiah 53’s Servant is the Jesus the church confesses. Witness, kalām, beauty, and life lines lead with the hold.',

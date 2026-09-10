@@ -12,7 +12,7 @@ interface DigDeeperProps {
   source?: string
 }
 
-/** Openable Dig deeper list. Ancient / pre-Reform first; modern believing voices only. */
+/** Openable Dig deeper list. Scripture / Ancient / Classic / Modern · believing. */
 export function DigDeeper({
   id,
   surface = 'hold',
