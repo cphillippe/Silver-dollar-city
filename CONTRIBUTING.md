@@ -2,7 +2,7 @@
 
 Content is data, not engine work. Read this first:
 
-- [`src/content/README.md`](src/content/README.md) — add a district, challenge, journal card, and evidence line
+- [`src/content/README.md`](src/content/README.md) — add a district, challenge, journal card, evidence line, or a later content pack (`packs.ts` + `changelog.ts`)
 - [`PLAYTEST.md`](PLAYTEST.md) — fun / clarity / retention bars and the release smoke list
 
 ## App version

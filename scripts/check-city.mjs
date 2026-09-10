@@ -14,6 +14,9 @@ import {
   plotFill,
   plotStage,
 } from '../src/lib/city.ts'
+import { APP_VERSION } from '../src/config/app.ts'
+import { CHANGELOG, latestChange } from '../src/content/changelog.ts'
+import { CONTENT_PACKS } from '../src/content/packs.ts'
 import { DAILY_POOL, dailyForDate } from '../src/content/daily.ts'
 import { highLookout } from '../src/content/highLookout.ts'
 import { observatory } from '../src/content/observatory.ts'
@@ -936,6 +939,19 @@ assert.match(
   readFileSync(new URL('../src/components/Welcome.tsx', import.meta.url), 'utf8'),
   /is-alive/,
 )
+assert.match(
+  readFileSync(new URL('../src/components/Welcome.tsx', import.meta.url), 'utf8'),
+  /welcome-version/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
+  /whats-new/,
+)
+assert.equal(APP_VERSION, '1.3.0')
+assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
+assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
+assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
+assert.ok(CHANGELOG.some((note) => note.title === 'V0 launch'))
 assert.match(
   readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8'),
   /is-inhabited/,
