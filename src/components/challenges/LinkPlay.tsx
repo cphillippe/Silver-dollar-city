@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { LinkChallenge, LinkKind, LinkNode } from '../../types'
-import { linkCaption, linkPicture } from '../../content/links'
+import { linkCaption, linkClue, linkMiss, linkPicture } from '../../content/links'
 import { isEasy } from '../../lib/easy'
 import { shuffle } from '../../lib/shuffle'
 import { useProgress } from '../../store/progress'
@@ -190,17 +190,14 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
           ? 'Connect sentence → place → person'
           : 'Tap idea → place → person'
 
+  const missStep = step === 'linked' ? 'idea' : step
   const missNeed =
-    step === 'place'
-      ? easy
-        ? 'Wrong place. This sentence lives at its own lot — pick that place.'
-        : 'Wrong lot. Snap the idea to the place that keeps it.'
-      : step === 'person'
-        ? easy
-          ? 'Wrong person. Pick who keeps this place.'
-          : 'Wrong keeper. The person who lives on that lot is the match.'
-        : easy
-          ? 'Wrong sentence. Pick the sentence for this story, then its place, then its person.'
+    easy && currentTriple
+      ? linkMiss(currentTriple.id, missStep)
+      : step === 'place'
+        ? 'Wrong lot. Snap the idea to the place that keeps it.'
+        : step === 'person'
+          ? 'Wrong keeper. The person who lives on that lot is the match.'
           : 'Wrong idea. Pick the claim, then its place, then its person.'
 
   const wizardCue =
@@ -238,11 +235,10 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
     <div
       className={`play is-link is-wizard ${easy ? 'is-easy-link' : ''} ${shake ? 'is-shake' : ''}`}
     >
-      <PuzzleLead challenge={challenge} />
-      <PuzzleHint text={challenge.context} id={challenge.id} onPeek={onPeek} />
-      <p className="next-tap">{nextTap}</p>
+      {easy ? null : <PuzzleLead challenge={challenge} />}
+      {easy ? null : <PuzzleHint text={challenge.context} id={challenge.id} onPeek={onPeek} />}
+      {easy ? null : <p className="next-tap">{nextTap}</p>}
       {wizardCue ? <p className="quiet wizard-step">{wizardCue}</p> : null}
-      {easy ? <p className="quiet">A claim is what we hold to be true. Pick the sentence, then the place, then the person.</p> : null}
 
       <ol className="link-checks" aria-label="Link steps">
         <li className={marks.idea ? 'is-done' : step === 'idea' ? 'is-now' : ''}>
@@ -283,6 +279,9 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
       ) : (
         <div className="link-grid is-wizard">
           <div className={`link-col is-${step}`}>
+            {easy && currentTriple ? (
+              <p className="link-clue">{linkClue(currentTriple.id, step)}</p>
+            ) : null}
             <p className="match-col-label">{stepLabel(step, easy)}</p>
             {stepOptions.map((node) => {
               const pic = linkPicture(node, challenge)

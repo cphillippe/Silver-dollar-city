@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.8',
+    title: 'Easy Link clue + one-tap Night Watch',
+    when: '2026-09-10',
+    items: [
+      'Easy Link shows a short who/where/story clue with the picture so the first pick is learnable. A miss still says why that choice is wrong.',
+      'Easy Night Watch is one tap: Do this, then tap the walker. No Unlock → Plant chain, and no “turn cheap lines toward heaven” on Easy chrome.',
+      'Easy keeps plain verbs. Claim, hold, and deploy get a one-line gloss only when a locked tool needs them.',
+    ],
+  },
+  {
     version: '1.4.7',
     title: 'Build this stays on screen',
     when: '2026-09-10',
