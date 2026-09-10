@@ -976,7 +976,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.3.4')
+assert.equal(APP_VERSION, '1.3.5')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -1003,6 +1003,10 @@ assert.match(gemSrc, /watchTool\(ability\)\?\.gem/)
 assert.match(
   readFileSync(new URL('../src/components/StoredLine.tsx', import.meta.url), 'utf8'),
   /Stored learning/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/StoredLine.tsx', import.meta.url), 'utf8'),
+  /Say this out loud/,
 )
 assert.match(challengeSrc, /StoredLine/)
 assert.match(cssSrc, /\.stored-line/)

@@ -304,7 +304,6 @@ export function CityMap({
     })
   }
 
-  const nextSpec = CITY_PLOTS.find((plot) => plot.id === nextId)
   const nextStage = stageOf(nextId)
   const nextAt = ANCHOR[nextId]
   const kicker = nextKicker(nextStage, nextId, doneToday)
@@ -640,13 +639,6 @@ export function CityMap({
               {doneToday ? (
                 <p className="city-morrow">Town held. A lamp waits tomorrow.</p>
               ) : null}
-              <button type="button" className="btn primary" onClick={() => enter(nextId)}>
-                {nextId === 'porch' && !doneToday
-                  ? 'Walk the east porch'
-                  : nextStage === 'scaffold' || nextStage === 'empty'
-                    ? `Build ${nextSpec?.title ?? 'next'}`
-                    : `Enter ${nextSpec?.title ?? 'the town'}`}
-              </button>
             </>
           )}
         </div>

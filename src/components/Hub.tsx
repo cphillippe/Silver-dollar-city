@@ -136,7 +136,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
         </button>
       </section>
 
-      {!streetDone ? (
+      {!streetDone && (doneToday || progress.completed.length > 0) ? (
         <section className="street-link" aria-label="Link the street">
           <div className="card-lead">
             <Avatar who="mercy" size="sm" />
