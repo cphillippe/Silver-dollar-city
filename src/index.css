@@ -5969,7 +5969,7 @@ html[data-theme='dusk'] .hub.is-town .street-link {
 }
 
 .link-block.is-picture {
-  min-height: 148px;
+  min-height: 188px;
   gap: 8px;
   padding: 12px 10px;
 }
@@ -5977,13 +5977,13 @@ html[data-theme='dusk'] .hub.is-town .street-link {
 .link-block.is-picture .place-glyph,
 .link-block.is-picture .avatar,
 .link-block.is-picture .gem {
-  width: 88px;
-  height: 88px;
+  width: 128px;
+  height: 128px;
 }
 
 .link-block.is-picture .link-label {
-  max-height: 3.2em;
-  font-size: 0.95rem;
+  max-height: 2.6em;
+  font-size: 1rem;
   font-weight: 650;
 }
 
@@ -6528,7 +6528,16 @@ html[data-theme='dusk'] .mind-map-card {
 
 .play.is-easy-link .link-block.is-picture,
 html[data-easy='on'] .link-block.is-picture {
-  min-height: 168px;
+  min-height: 220px;
+}
+
+.play.is-easy-link .link-block.is-picture .place-glyph,
+.play.is-easy-link .link-block.is-picture .avatar,
+html[data-easy='on'] .link-block.is-picture .place-glyph,
+html[data-easy='on'] .link-block.is-picture .avatar,
+html[data-easy='on'] .link-block.is-picture .gem {
+  width: 148px;
+  height: 148px;
 }
 
 html[data-easy='on'] .btn,

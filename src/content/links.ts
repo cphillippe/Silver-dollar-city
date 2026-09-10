@@ -1,4 +1,4 @@
-import type { LinkChallenge } from '../types.ts'
+import type { LinkChallenge, LinkNode } from '../types.ts'
 
 /**
  * Idea ↔ place ↔ person using claims already on the trail.
@@ -100,6 +100,33 @@ export const STREET_BEATS = [
   'Silas Page · Witness Bench · died, buried, raised, appeared.',
   'Juniper · East porch · A lamp is meant to be seen.',
 ]
+
+/** Concrete picture for a Link chip — idea borrows its lot’s art (lamp, creek, bench). */
+export function linkPicture(
+  node: LinkNode,
+  challenge: LinkChallenge,
+): { plotId?: string; who?: LinkNode['who'] } {
+  if (node.who) return { who: node.who }
+  if (node.plotId) return { plotId: node.plotId }
+  const triple = challenge.triples.find((item) => item.ideaId === node.id)
+  const place = challenge.nodes.find((item) => item.id === triple?.placeId)
+  if (place?.plotId) return { plotId: place.plotId }
+  const person = challenge.nodes.find((item) => item.id === triple?.personId)
+  if (person?.who) return { who: person.who }
+  return {}
+}
+
+/** Short label under the picture — not the full claim wall. */
+export function linkCaption(node: LinkNode, easy: boolean): string {
+  if (node.kind === 'idea') {
+    if (node.evidenceId === 'daily-lantern') return 'A lamp is meant to be seen.'
+    if (node.evidenceId === 'ph-road') {
+      return easy ? 'Neighbor shows mercy.' : 'Neighbor is the one who shows mercy.'
+    }
+    if (node.evidenceId === 'wb-creed') return 'Died, buried, raised, appeared.'
+  }
+  return node.text
+}
 
 /** Why each street triple lives where it lives. Teach before the match. */
 export const STREET_WHYS: Record<(typeof STREET_CHALLENGE.triples)[number]['id'], { easy: string; hard: string }> = {

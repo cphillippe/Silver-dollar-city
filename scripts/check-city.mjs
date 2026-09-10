@@ -32,7 +32,7 @@ import {
   WATCH_TOOLS,
 } from '../src/lib/watchTools.ts'
 import { ideaUnlocked, mindGraph, mindMapHasLit } from '../src/lib/mindMap.ts'
-import { STREET_CHALLENGE, STREET_LIGHTS, STREET_WHYS } from '../src/content/links.ts'
+import { linkCaption, linkPicture, STREET_CHALLENGE, STREET_LIGHTS, STREET_WHYS } from '../src/content/links.ts'
 import { LOT_STORY, TOWN_PATH_EASY, TOWN_PATH_HARD } from '../src/content/lots.ts'
 import {
   appliedTier,
@@ -1009,7 +1009,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.5')
+assert.equal(APP_VERSION, '1.4.6')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -1136,10 +1136,22 @@ assert.match(linkPlaySrc, /Connect sentence → place → person/)
 assert.match(linkPlaySrc, /is-wizard/)
 assert.match(linkPlaySrc, /is-picture/)
 assert.match(linkPlaySrc, /PlaceGlyph/)
-assert.match(linkPlaySrc, /size="lg"/)
-assert.match(linkPlaySrc, /daily-lantern/)
+assert.match(linkPlaySrc, /size="xl"/)
+assert.match(linkPlaySrc, /linkPicture/)
+assert.match(linkPlaySrc, /linkCaption/)
 assert.match(linkPlaySrc, /link-dock/)
 assert.match(linkPlaySrc, /Wrong place/)
+assert.doesNotMatch(linkPlaySrc, /Those don/)
+{
+  const mercy = STREET_CHALLENGE.nodes.find((node) => node.id === 'idea-mercy')
+  const creed = STREET_CHALLENGE.nodes.find((node) => node.id === 'idea-silas')
+  const lamp = STREET_CHALLENGE.nodes.find((node) => node.id === 'idea-juniper')
+  assert.equal(linkPicture(mercy, STREET_CHALLENGE).plotId, 'hollow')
+  assert.equal(linkPicture(creed, STREET_CHALLENGE).plotId, 'bench')
+  assert.equal(linkPicture(lamp, STREET_CHALLENGE).plotId, 'porch')
+  assert.match(linkCaption(mercy, true), /mercy/i)
+  assert.doesNotMatch(linkCaption(creed, false), /Paul hands on/)
+}
 assert.match(
   readFileSync(new URL('../src/components/MindMap.tsx', import.meta.url), 'utf8'),
   /mind-map-dock/,
