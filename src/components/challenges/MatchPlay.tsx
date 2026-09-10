@@ -119,8 +119,18 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
       <PuzzleLead challenge={challenge} />
       <PuzzleHint text={challenge.context} id={challenge.id} onPeek={onPeek} />
       <p className="sort-how">
-        <strong>Tap a picture</strong>, then the claim that belongs
-        {guided ? ' · two choices' : ''}
+        {isEasy(progress) ? (
+          <>
+            <strong>A claim is what we hold to be true.</strong> Tap a picture, then the claim
+            that belongs
+            {guided ? ' · two choices' : ''}
+          </>
+        ) : (
+          <>
+            <strong>Tap a picture</strong>, then the claim that belongs
+            {guided ? ' · two choices' : ''}
+          </>
+        )}
       </p>
 
       {status === 'wrong' || misses > 0 ? (

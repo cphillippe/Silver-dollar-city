@@ -220,7 +220,12 @@ export function BuildArgumentPlay({
       <PuzzleLead challenge={challenge} />
       <PuzzleHint text={challenge.context} id={challenge.id} onPeek={onPeek} />
       <p className="sort-how">
-        {guided ? (
+        {isEasy(progress) ? (
+          <>
+            <strong>A premise is a building block of an argument.</strong> Tap the next stone
+            {guided ? ' · two choices' : ''}
+          </>
+        ) : guided ? (
           <>
             <strong>Tap the next stone</strong> · two choices
           </>

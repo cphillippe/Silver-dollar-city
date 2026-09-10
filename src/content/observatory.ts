@@ -99,15 +99,15 @@ export const observatory: Area = {
       cards: [
         {
           id: 'narrow',
-          text: 'Several physical parameters appear to have a life-permitting range that is extraordinarily narrow among conceivable values.',
+          text: 'Several physical dials appear to have a life-permitting range that is extraordinarily narrow among conceivable values.',
         },
         {
           id: 'surprise',
-          text: 'That narrowness is surprising if the parameters are a brute accident with no further explanation.',
+          text: 'That narrowness is surprising if the dials are a brute accident with no further explanation.',
         },
         {
           id: 'expect',
-          text: 'A mind that intended a habitable cosmos would lead us to expect such parameters.',
+          text: 'A mind that intended a habitable cosmos would lead us to expect such dials.',
         },
         {
           id: 'live',

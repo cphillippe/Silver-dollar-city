@@ -48,7 +48,9 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
             <p className="eyebrow">{scrapbookLabel(easy, litCount)}</p>
             <h2>{graph.placeTitle}</h2>
             <p className="quiet">
-              {easy ? `${graph.person.name} · this lot` : `${graph.person.name} · where + who + what claim`}
+              {easy
+                ? `${graph.person.name} · this lot`
+                : `${graph.person.name} · place · person · claim`}
             </p>
           </div>
           <button type="button" className="btn tiny" onClick={onClose}>

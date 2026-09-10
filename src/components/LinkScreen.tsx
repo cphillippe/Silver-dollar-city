@@ -73,7 +73,7 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
             <PlainTalk id={challenge.id} />
             <p className="quiet">
               {easy
-                ? 'You’ll open them again from your scrapbook of links. One story at a time.'
+                ? 'Places on the map: Parable Hollow, the Witness Bench, Juniper’s east porch. You’ll open them again from your scrapbook of links. One story at a time.'
                 : 'You’ll reopen them from the town map — not a flat list only.'}
             </p>
             <ol className={`teach-beats ${easy ? 'is-easy' : ''}`}>
@@ -107,6 +107,7 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
         <section className="after-win">
           <article className="stored-line is-spoken" aria-label="Street takeaway">
             <p className="eyebrow">Say this out loud</p>
+            {easy ? <p className="quiet">A claim is what we hold to be true.</p> : null}
             <p className="stored-claim">An idea lives at a place, with a person.</p>
             <p className="link-takeaway">
               {easy

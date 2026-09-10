@@ -97,6 +97,12 @@ const teachSrc = readFileSync(
 )
 assert.match(teachSrc, /Acquire/)
 assert.match(teachSrc, /Hold this line to deploy/)
+assert.match(teachSrc, /A claim is what we hold to be true/)
+assert.match(teachSrc, /Learn first/)
+assert.ok(
+  teachSrc.indexOf('teach-reason') < teachSrc.indexOf('brief.claim'),
+  'TeachUnlock must tell the story before the claim line',
+)
 
 const hubSrc = readFileSync(
   new URL('../src/components/Hub.tsx', import.meta.url),

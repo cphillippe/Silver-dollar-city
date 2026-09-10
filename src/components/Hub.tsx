@@ -111,7 +111,9 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
         ? `${duePlay.challenge.title} · an older walk.`
         : 'An older page is waiting to be rebuilt.'
     : easy
-      ? goal.detail.replace(/\bparable\b/gi, EASY.parable).replace(/\bcreed\b/gi, EASY.creed)
+      ? goal.detail
+          .replace(/\bparable\b/gi, `parable (${EASY.parable})`)
+          .replace(/\bcreed\b/gi, `creed (${EASY.creed})`)
       : goal.detail
 
   return (
