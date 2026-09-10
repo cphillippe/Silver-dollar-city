@@ -53,7 +53,7 @@ import {
   visualFills,
   visualSnapshot,
 } from '../lib/cityBuild'
-import { TOWN_PATH_EASY, TOWN_PATH_HARD } from '../content/lots'
+import { TOWN_PATH_HARD } from '../content/lots'
 import { Avatar } from './Avatar'
 import { GemMark } from './GemMark'
 import { MindMap } from './MindMap'
@@ -662,6 +662,16 @@ export function CityMap({
           {celebrating ? (
             <p className="eyebrow">{beat?.beat}</p>
           ) : (
+            isEasy(progress) ? (
+              <>
+                {lockNote ? (
+                  <p className="city-lock-toast" role="status">
+                    {lockNote}
+                  </p>
+                ) : null}
+                <p className="city-map-hint">Tap a building to open it.</p>
+              </>
+            ) : (
             <>
               <p className="eyebrow">Eden → City of Heaven</p>
               <ol className="city-age-track" aria-label="Journey ages">
@@ -682,13 +692,12 @@ export function CityMap({
                   {lockNote}
                 </p>
               ) : null}
-              <p className="city-map-hint">
-                {isEasy(progress) ? TOWN_PATH_EASY : TOWN_PATH_HARD}
-              </p>
+              <p className="city-map-hint">{TOWN_PATH_HARD}</p>
               {doneToday ? (
                 <p className="city-morrow">Town held. A lamp waits tomorrow.</p>
               ) : null}
             </>
+            )
           )}
         </div>
       ) : null}

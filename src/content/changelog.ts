@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.10',
+    title: 'Easy short card + named next tap',
+    when: '2026-09-10',
+    items: [
+      'Easy Tap this next names what opens — Tap this next — short Jesus story. The story is a short card with Continue and Skip reading, not a wall.',
+      'Easy Town hides the Eden-to-Heaven legend dump. Link the street is Match sentence → place → person.',
+      'A claim is the main idea we hold to be true — taught once, then Easy chrome says main idea. Parable Hollow gets a Jesus-story creek subtitle.',
+    ],
+  },
+  {
     version: '1.4.9',
     title: 'Easy Tap this next',
     when: '2026-09-10',

@@ -196,7 +196,7 @@ export function Settings({ onNavigate }: SettingsProps) {
       <section className="settings-card">
         <p className="eyebrow">Reading</p>
         <p>
-          A claim is what we hold to be true. Easy mode teaches that first, then
+          A claim is the main idea we hold to be true. Easy mode teaches that first, then
           uses shorter sentences and bigger taps. The claims stay the same — the
           words around them get plainer.
         </p>

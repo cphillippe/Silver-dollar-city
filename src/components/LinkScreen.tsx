@@ -106,7 +106,7 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
           </section>
         ) : (
           <>
-            <h1 className="puzzle-title">{challenge.title}</h1>
+            <h1 className="puzzle-title">{easy ? EASY.linkStreet : challenge.title}</h1>
             <PuzzlePlay
               challenge={challenge}
               onMiss={() => markMiss(challenge.id)}

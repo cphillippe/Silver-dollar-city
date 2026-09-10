@@ -101,7 +101,7 @@ export function RecallGate({
               : 'Tap the reason that holds.'
         : easy
           ? encode
-            ? 'Choose the sentence to remember.'
+            ? EASY.rememberSentence
             : deeper
               ? 'Which sentence was the hold?'
               : 'Tap the sentence you still remember.'
@@ -176,7 +176,7 @@ export function RecallGate({
       <p className="next-tap">{nextTap}</p>
       {encode ? (
         easy ? (
-          <p className="quiet">{EASY.claimTeach} You will hold this same line.</p>
+          <p className="quiet">{EASY.claimTeach} You will keep this main idea.</p>
         ) : (
           <p className="learning-store">
             {picture ? <GemMark gem={picture} size="sm" /> : null}

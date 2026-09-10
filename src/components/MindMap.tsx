@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { evidenceFor } from '../content/evidence'
 import { journalForChallenge } from '../content'
 import { plainFor } from '../content/plain'
-import { LOT_STORY, lotWhy } from '../content/lots'
+import { LOT_STORY, easyPlaceSub, lotWhy } from '../content/lots'
 import { EASY, isEasy, scrapbookLabel } from '../lib/easy'
 import { mindGraph } from '../lib/mindMap'
 import {
@@ -73,6 +73,9 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
                 : `Manage · Level ${applied} · ${tierTitle(applied, easy)}`}
             </p>
             <h2>{graph.placeTitle}</h2>
+            {easy && easyPlaceSub(plotId) ? (
+              <p className="quiet place-sub">{easyPlaceSub(plotId)}</p>
+            ) : null}
           </div>
           <button type="button" className="btn tiny" onClick={onClose}>
             Close
@@ -115,7 +118,7 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
                   setIdeaLock(ideaLockWhy(easy))
                 }}
               >
-                <span className="mind-kicker">{idea.lit ? 'Idea' : 'Locked'}</span>
+                <span className="mind-kicker">{idea.lit ? (easy ? 'Main idea' : 'Idea') : 'Locked'}</span>
                 <strong>{idea.lit && easy ? (plainFor(idea.id)?.gloss ?? idea.claim) : idea.claim}</strong>
                 {idea.lit && idea.source && !easy ? <em>{idea.source}</em> : null}
               </button>

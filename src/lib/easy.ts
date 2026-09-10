@@ -10,19 +10,44 @@ export const EASY = {
   parable: 'Jesus story',
   mindMap: 'your scrapbook of links',
   mindMapShort: 'Scrapbook',
-  linkMatch: 'Connect sentence → place → person.',
-  linkDemo: 'Connect sentence → place → person',
-  connectLink: 'Connect sentence → place → person',
+  linkMatch: 'Match sentence → place → person.',
+  linkDemo: 'Match sentence → place → person',
+  connectLink: 'Match sentence → place → person',
+  linkStreet: 'Match sentence → place → person',
   readStory: 'Read today’s story.',
-  rememberSentence: 'Choose the sentence to remember.',
+  rememberSentence: 'Choose the main idea to remember.',
   readAgain: 'Read this one again.',
-  claimTeach: 'A claim is what we hold to be true.',
+  claimTeach: 'A claim is the main idea we hold to be true.',
+  mainIdea: 'main idea',
   upgrade: 'Build this — raise the next look you earned by learning',
   manage: 'Building',
   nightDo: 'Do this',
   nightTap: 'Tap the walker.',
   deployTeach: 'Deploy means use a claim you held.',
 } as const
+
+/** Gold Town next tap — name what opens, not a bare “Tap this next.” */
+export function easyTapNext(goal: { kind: string; areaId?: string }): string {
+  if (goal.kind === 'daily') return 'Tap this next — short Jesus story'
+  if (goal.kind === 'vista') return 'Tap this next — the lookout'
+  if (goal.kind === 'welcome') return 'Tap this next — begin'
+  if (goal.areaId === 'parable-hollow') return 'Tap this next — Jesus-story walk'
+  if (goal.areaId === 'witness-bench') return 'Tap this next — public names'
+  if (goal.areaId === 'observatory') return 'Tap this next — sky walk'
+  if (goal.areaId === 'first-gate') return 'Tap this next — why a world'
+  if (goal.areaId === 'high-lookout') return 'Tap this next — meaning walk'
+  return 'Tap this next'
+}
+
+function firstSentence(text: string): string {
+  const cut = text.trim().split(/(?<=[.!?])\s+/)[0] ?? text
+  return cut.length > 160 ? `${cut.slice(0, 157)}…` : cut
+}
+
+/** One-or-two-line Easy story card — not the teach wall. */
+export function easyStoryCard(text: string): string {
+  return firstSentence(text)
+}
 
 export function scrapbookLabel(easy: boolean, lit?: number) {
   if (!easy) {

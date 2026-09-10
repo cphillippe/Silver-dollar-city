@@ -101,8 +101,9 @@ const teachSrc = readFileSync(
 )
 assert.match(teachSrc, /Acquire/)
 assert.match(teachSrc, /Hold this line to deploy/)
-assert.match(teachSrc, /A claim is what we hold to be true/)
-assert.match(teachSrc, /Learn first/)
+assert.match(teachSrc, /A claim is the main idea we hold to be true/)
+assert.match(teachSrc, /Short story/)
+assert.match(teachSrc, /Skip reading/)
 assert.ok(
   teachSrc.indexOf('teach-reason') < teachSrc.indexOf('brief.claim'),
   'TeachUnlock must tell the story before the claim line',

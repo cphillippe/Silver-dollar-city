@@ -59,7 +59,7 @@ export function Welcome({ onNavigate }: WelcomeProps) {
           </label>
           <p className="quiet welcome-easy-note">
             Optional. You can turn this on later in Settings → Reading. We teach hard words
-            first — a claim is what we hold to be true.
+            first — a claim is the main idea we hold to be true.
           </p>
           <button type="button" className="btn primary xl" onClick={begin}>
             {returning ? 'Back to town' : 'Begin the trail'}

@@ -64,6 +64,17 @@ export function lotWhy(id: CityPlotId, easy: boolean): string {
   return easy ? row.whyEasy : row.whyHard
 }
 
+/** Soften formal place names on Easy — title can stay; this is the subtitle. */
+export function easyPlaceSub(id: CityPlotId): string | null {
+  if (id === 'hollow') return 'Jesus-story creek · Mercy’s place'
+  if (id === 'bench') return 'the square · Silas’s place'
+  if (id === 'porch') return 'Juniper’s lamp'
+  if (id === 'observatory') return 'Nora’s sky watch'
+  if (id === 'gate') return 'Ansel’s why-a-world gate'
+  if (id === 'lookout') return 'Hope’s high look'
+  return null
+}
+
 export const TOWN_PATH_EASY =
   'Porch lamp → creek stories → square names → ridge sky. Tap a building to open it.'
 

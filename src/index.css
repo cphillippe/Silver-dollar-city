@@ -6624,6 +6624,20 @@ html[data-easy='on'] .mind-node em {
   width: 100%;
 }
 
+.easy-story-card .teach-reason {
+  margin: 0 0 10px;
+  font-size: 1.12rem;
+  line-height: 1.4;
+}
+
+.easy-story-dock {
+  margin-top: 14px;
+}
+
+.place-sub {
+  margin: 2px 0 0;
+}
+
 .hub.is-town .do-next,
 .hub.is-town .street-link {
   display: flex;
