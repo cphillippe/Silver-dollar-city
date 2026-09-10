@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.7',
+    title: 'Build this stays on screen',
+    when: '2026-09-10',
+    items: [
+      'Manage is a phone-bottom sheet. Build this and Walk stay on screen at 390px — Dig deeper and tool tiles scroll above them.',
+      'Night Watch in Easy still opens with one big Do this.',
+    ],
+  },
+  {
     version: '1.4.6',
     title: 'Link starts with the picture',
     when: '2026-09-10',
