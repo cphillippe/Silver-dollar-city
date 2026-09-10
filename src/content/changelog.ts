@@ -8,6 +8,17 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.3.6',
+    title: 'Teach the words',
+    when: '2026-09-10',
+    items: [
+      'Hard words are taught first: a claim is what we hold to be true. Reason is why it stands. Source is where it comes from. Creed, parable, fine-tuning, and premise get a kid-plain gloss before they show up in play.',
+      'Teach still comes before the Hold lock — story and picture first, then the claim. Easy mode uses stronger glosses. Mystery can wait until after the line is taught.',
+      'Unread jargon (contingency, qualia, raw parameters) stays in Hard / Dig deeper, or is taught as “might not have been,” “felt redness,” and “life’s dials.” Kalām is taught as the beginning argument first.',
+      'Easy mode is still off until you ask — Welcome checkbox or Settings → Reading.',
+    ],
+  },
+  {
     version: '1.3.5',
     title: 'Say the line',
     when: '2026-09-10',

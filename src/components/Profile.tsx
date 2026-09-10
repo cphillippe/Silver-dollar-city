@@ -43,6 +43,9 @@ export function Profile({ onNavigate }: ProfileProps) {
       <section className="profile-section" aria-label="Held ideas">
         <p className="eyebrow">Held ideas / proofs</p>
         <h2>What you can still say</h2>
+        {easy ? (
+          <p className="quiet">A claim is what we hold to be true. These are the claims you kept.</p>
+        ) : null}
         {inv.ideas.length === 0 ? (
           <p className="quiet">
             Walk the Trail, then Hold the takeaway — lines you keep land here.

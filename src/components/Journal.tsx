@@ -3,6 +3,7 @@ import { areas, journalEntries, pillarFor } from '../content'
 import { evidenceFor, evidenceForJournal } from '../content/evidence'
 import { guideForArea, STORY } from '../content/story'
 import { localDateKey } from '../lib/dates'
+import { EASY, isEasy } from '../lib/easy'
 import { isDue, nextGapLabel } from '../lib/memory'
 import { starLegend } from '../lib/stars'
 import { deployLabel, findLearning, storedLearnings, withLearningBeat } from '../lib/learning'
@@ -32,6 +33,7 @@ interface JournalProps {
 
 export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
   const { progress, recordReview } = useProgress()
+  const easy = isEasy(progress)
   const today = localDateKey()
   const { open, total, percent } = journalCompletion(progress)
   const trailNotes = journalEntries.filter((entry) => entry.areaId === 'daily-trail')
@@ -164,9 +166,10 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
         <p>
           {open} of {total} unsealed · {percent}% of the dossier · {heldCount}{' '}
           lines held from memory
-          {waiting ? ` · ${waiting} due to dust off` : ''}. Open pages start
-          face-down — rebuild the claim, then read. Forgetting is why a page
-          comes back.
+          {waiting ? ` · ${waiting} due to dust off` : ''}.{' '}
+          {easy
+            ? `${EASY.claimTeach} Open pages start face-down — rebuild the claim, then read.`
+            : 'Open pages start face-down — rebuild the claim, then read. Forgetting is why a page comes back.'}
         </p>
         <div
           className="journal-meter"
@@ -187,7 +190,11 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
             <Avatar who="juniper" size="sm" />
             <div>
               <h2>Stored lines</h2>
-              <p>Each learning is its own unit: claim · reason · source · anchor · picture · tool.</p>
+              <p>
+                {easy
+                  ? 'Each learning is a claim (what we hold), a reason (why it stands), and a source (where it comes from) — plus the picture and tool.'
+                  : 'Each learning is its own unit: claim · reason · source · anchor · picture · tool.'}
+              </p>
             </div>
           </div>
           <div className="card-grid">

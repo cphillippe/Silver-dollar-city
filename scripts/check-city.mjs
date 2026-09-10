@@ -976,7 +976,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.3.5')
+assert.equal(APP_VERSION, '1.3.6')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -1284,5 +1284,24 @@ assert.match(
   readFileSync(new URL('../src/config/app.ts', import.meta.url), 'utf8'),
   /SAVE_SCHEMA_VERSION = 1/,
 )
+assert.match(
+  readFileSync(new URL('../src/lib/words.ts', import.meta.url), 'utf8'),
+  /A claim is what we hold to be true/,
+)
+assert.match(
+  readFileSync(new URL('../src/lib/words.ts', import.meta.url), 'utf8'),
+  /building block of an argument/,
+)
+assert.match(teachSrc, /A claim is what we hold to be true/)
+assert.match(teachSrc, /The claim you will hold/)
+assert.ok(
+  teachSrc.indexOf('teach-reason') < teachSrc.indexOf('brief.claim'),
+  'teach story before the claim line',
+)
+assert.match(matchSrc, /match-col-label/)
+assert.match(matchSrc, />Claim</)
+assert.match(matchSrc, /A claim is what we hold to be true/)
+assert.match(cssSrc, /\.word-school/)
+assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
 
 console.log('check-city: ok')

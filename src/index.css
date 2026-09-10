@@ -2562,6 +2562,29 @@ img.gem-heart {
   opacity: 0.92;
 }
 
+.word-school {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  list-style: none;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: var(--mist);
+}
+
+.word-school li {
+  margin: 0 0 6px;
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+.word-school li:last-child {
+  margin-bottom: 0;
+}
+
+.hold-kicker {
+  margin: 12px 0 4px;
+}
+
 .teach-beats {
   margin: 0 0 16px;
   padding: 0 0 0 1.15em;

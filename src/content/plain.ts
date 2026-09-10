@@ -78,14 +78,14 @@ const PLAIN: Record<string, PlainLine> = {
     'The universe is finely tuned for life — that fit points to a Designer.',
     'Life needs very tight numbers: how fast space expands, how atoms stick, how tidy the start was. Design predicts a world we can live in. Blind chance does not.',
     {
-      term: 'Finely tuned',
-      sense: 'set in a very narrow, life-permitting range',
+      term: 'Fine-tuning',
+      sense: 'life’s dials fit in a very narrow range',
       hint: 'Tap the picture, then the mark that belongs. Two choices.',
     },
   ),
   'ob-design': line(
     'Fine-tuning is best explained by a mind that intended a habitable world.',
-    'The ranges are extravagantly narrow. A Designer who wants observers leads us to expect that fit. Blank indifference does not.',
+    'The ranges are extravagantly narrow. A Designer who wants observers leads us to expect that fit. A world that does not care does not.',
     {
       term: 'Habitable',
       sense: 'a world where living things can exist',
@@ -110,12 +110,20 @@ const PLAIN: Record<string, PlainLine> = {
   'fg-contingent': line(
     'What might not have been needs a ground.',
     'You exist, but you might not have. A world of only “might-not-have-beens” does not explain why anything is here. Classical theism names the necessary ground God.',
-    { term: 'Contingent', sense: 'it is real, but it could have failed to be', hint: 'Assemble the chain. Leave the joke cards.' },
+    {
+      term: 'Might not have been',
+      sense: 'it is real, but it could have failed to be',
+      hint: 'Assemble the chain. Leave the joke cards.',
+    },
   ),
   'fg-kalam': line(
     'Whatever begins still asks for a cause.',
     'If something begins, it has a cause. If this universe began, it has a cause. Naming Abraham’s God takes further historical steps.',
-    { term: 'Cause', sense: 'what makes a beginning happen — not yet the whole Christian confession', hint: 'Keep the careful kalām reading. Toss the flattenings.' },
+    {
+      term: 'Kalām',
+      sense: 'the beginning argument — what starts still asks for a cause',
+      hint: 'Keep the beginning argument. Toss the flattenings.',
+    },
   ),
   'fg-limits': line(
     'A first cause is not yet the whole Christian faith.',
@@ -130,7 +138,11 @@ const PLAIN: Record<string, PlainLine> = {
   'hl-mind': line(
     'Inner experience is not captured by a scan.',
     'Felt redness, thoughts about things, and the pull of truth are not just collisions. Mind is at home if the world’s ground is a living God.',
-    { term: 'Hard problem', sense: 'why a physical process is accompanied by felt life at all', hint: 'Match each leftover mystery. Two choices.' },
+    {
+      term: 'Felt life',
+      sense: 'what it is like on the inside — not a scan number',
+      hint: 'Match each leftover mystery. Two choices.',
+    },
   ),
   'hl-meaning': line(
     'You can build a local meaning. The lookout asks if it is also received.',

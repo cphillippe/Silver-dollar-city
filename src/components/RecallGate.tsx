@@ -2,7 +2,8 @@ import { useMemo, useState } from 'react'
 import { shuffle } from '../lib/shuffle'
 import { takeawayLines, type EvidenceBrief } from '../content/evidence'
 import { STORY } from '../content/story'
-import { isEasy } from '../lib/easy'
+import { EASY, isEasy } from '../lib/easy'
+import { WORDS } from '../lib/words'
 import { learningBeat } from '../lib/learning'
 import { learningPicture, toolForEvidence } from '../lib/watchTools'
 import { useProgress } from '../store/progress'
@@ -109,13 +110,13 @@ export function RecallGate({
       <p className="next-tap">
         {easy
           ? encode
-            ? 'Tap the line you will keep'
-            : 'Tap the line you still hold'
+            ? 'Tap the claim you will keep'
+            : 'Tap the claim you still hold'
           : kicker}
       </p>
       {encode ? (
         easy ? (
-          <p className="quiet">You will hold this same line.</p>
+          <p className="quiet">{EASY.claimTeach} You will hold this same line.</p>
         ) : (
           <p className="learning-store">
             {picture ? <GemMark gem={picture} size="sm" /> : null}
@@ -124,7 +125,9 @@ export function RecallGate({
         )
       ) : (
         <p className="quiet">
-          {easy ? 'Pick the true line. Then why it stands.' : 'Rebuild the map — claim, then why it stands.'}
+          {easy
+            ? `${EASY.claimTeach} Then the reason — why it stands.`
+            : 'Rebuild the map — claim, then why it stands.'}
         </p>
       )}
       <PlainTalk id={brief.id} />
@@ -147,7 +150,7 @@ export function RecallGate({
       {phase === 'reason' ? (
         <>
           <p className="recall-line rehearse-stem">{heldClaim}</p>
-          <h2>{STORY.whyItStands}</h2>
+          <h2>{easy ? `${WORDS.reason.term} — ${WORDS.reason.sense}` : STORY.whyItStands}</h2>
           <div className="recall-choices">
             {reasonOptions.map((line) => (
               <button

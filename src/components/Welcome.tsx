@@ -58,7 +58,8 @@ export function Welcome({ onNavigate }: WelcomeProps) {
             New here? Easier words · bigger taps
           </label>
           <p className="quiet welcome-easy-note">
-            Optional. You can turn this on later in Settings → Reading.
+            Optional. You can turn this on later in Settings → Reading. We teach hard words
+            first — a claim is what we hold to be true.
           </p>
           <button type="button" className="btn primary xl" onClick={begin}>
             {returning ? 'Back to town' : 'Begin the trail'}

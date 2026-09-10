@@ -4,7 +4,7 @@ export function isEasy(progress: Pick<ProgressState, 'easyMode'> | { easyMode?: 
   return Boolean(progress.easyMode)
 }
 
-/** Easy-mode chrome. Same truths — simpler labels. */
+/** Easy-mode chrome. Same truths — simpler labels. Teach hard words; don’t silently drop them. */
 export const EASY = {
   creed: 'old shared belief',
   parable: 'Jesus story',
@@ -12,6 +12,7 @@ export const EASY = {
   mindMapShort: 'Scrapbook',
   linkMatch: 'Match idea · place · person.',
   linkDemo: 'Tap idea → place → person',
+  claimTeach: 'A claim is what we hold to be true.',
 } as const
 
 export function scrapbookLabel(easy: boolean, lit?: number) {
