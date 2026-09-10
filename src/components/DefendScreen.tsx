@@ -749,11 +749,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
               </button>
             </div>
           ) : null}
-          {phase === 'wave' ? (
+          {easy ? (
+            phase === 'lost' ? null : <p className="defend-tip">{EASY.nightTap}</p>
+          ) : phase === 'wave' ? (
             <p className="defend-tip">
-              {easy
-                ? EASY.nightTap
-                : 'Match the walker. Deploy the held argument — the wrong tool only nudges.'}
+              Match the walker. Deploy the held argument — the wrong tool only nudges.
             </p>
           ) : (
             <p className="defend-tip">
