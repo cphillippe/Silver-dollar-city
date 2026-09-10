@@ -16,6 +16,7 @@ export function unlockLabel(kind: Challenge['kind']) {
   if (kind === 'sort') return 'Unlock the sort'
   if (kind === 'sequence') return 'Unlock the order'
   if (kind === 'build-argument') return 'Unlock the stones'
+  if (kind === 'link') return 'Unlock the links'
   return 'Unlock the pairs'
 }
 

@@ -133,6 +133,8 @@ export function kindLabel(kind: string): string {
       return 'Snap pairs'
     case 'sort':
       return 'Keep or toss'
+    case 'link':
+      return 'Link blocks'
     default:
       return kind
   }

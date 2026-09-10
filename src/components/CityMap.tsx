@@ -42,8 +42,10 @@ import { localDateKey } from '../lib/dates'
 import type { View } from '../types'
 import riverWalk from '../assets/cast/portrait-river.png'
 import juniperWalk from '../assets/cast/portrait-juniper.png'
+import { mindMapHasLit } from '../lib/mindMap'
 import { Avatar } from './Avatar'
 import { GemMark } from './GemMark'
+import { MindMap } from './MindMap'
 
 interface CityMapProps {
   onNavigate: (view: View) => void
@@ -99,6 +101,7 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
   const [homecoming, setHomecoming] = useState(false)
   const [beat, setBeat] = useState<CityUpgrade | null>(null)
   const [tapped, setTapped] = useState<CityPlotId | null>(null)
+  const [mindPlot, setMindPlot] = useState<CityPlotId | null>(null)
   const [cam, setCam] = useState(FULL_CAM)
   const playing = useRef(false)
   const timers = useRef<number[]>([])
@@ -110,17 +113,12 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
     return shown[id]
   }
 
-  function open(id: CityPlotId) {
+  function enter(id: CityPlotId) {
     if (mode === 'poster' || playing.current) return
-    setTapped(id)
-    window.setTimeout(() => {
-      setTapped((cur) => (cur === id ? null : cur))
-    }, 340)
-    const st = stageOf(id)
-    if (st === 'empty' && id !== nextId) return
     const spec = CITY_PLOTS.find((plot) => plot.id === id)
     const areaId = spec?.areaId
     const unlocked = areaId ? isAreaUnlocked(areaId, progress.completed) : true
+    setMindPlot(null)
     if (id === 'porch' && doneToday) {
       onNavigate(rehearseGo(progress, 'porch'))
       return
@@ -137,6 +135,17 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
       }
     }
     onNavigate(plotView(id, unlocked))
+  }
+
+  function open(id: CityPlotId) {
+    if (mode === 'poster' || playing.current) return
+    setTapped(id)
+    window.setTimeout(() => {
+      setTapped((cur) => (cur === id ? null : cur))
+    }, 340)
+    const st = stageOf(id)
+    if (st === 'empty' && id !== nextId && !mindMapHasLit(id, progress)) return
+    setMindPlot(id)
   }
 
   useEffect(() => {
@@ -615,7 +624,7 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
               {doneToday ? (
                 <p className="city-morrow">Town held. A lamp waits tomorrow.</p>
               ) : null}
-              <button type="button" className="btn primary" onClick={() => open(nextId)}>
+              <button type="button" className="btn primary" onClick={() => enter(nextId)}>
                 {nextId === 'porch' && !doneToday
                   ? 'Walk the east porch'
                   : nextStage === 'scaffold' || nextStage === 'empty'
@@ -625,6 +634,15 @@ export function CityMap({ onNavigate, mode = 'live' }: CityMapProps) {
             </>
           )}
         </div>
+      ) : null}
+
+      {mode === 'live' && mindPlot ? (
+        <MindMap
+          plotId={mindPlot}
+          onClose={() => setMindPlot(null)}
+          onEnter={enter}
+          onNavigate={onNavigate}
+        />
       ) : null}
     </section>
   )

@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.3.2',
+    title: 'Town mind map',
+    when: '2026-09-10',
+    items: [
+      'Tap a place on the town map to open its mind map — person, place, and the ideas you unlocked.',
+      'Link the street: snap idea ↔ place ↔ person. Those links light nodes you can reopen from the map.',
+      'River’s portrait is a cleaner fair-blonde candy face.',
+    ],
+  },
+  {
     version: '1.3.1',
     title: 'River’s look',
     when: '2026-09-10',

@@ -45,6 +45,32 @@ export function Hub({ onNavigate }: HubProps) {
       <CityMap onNavigate={onNavigate} />
 
       <section
+        className={`street-link ${progress.completed.includes('ln-street') ? 'is-held' : ''}`}
+        aria-label="Link the street"
+      >
+        <div className="card-lead">
+          <Avatar who="mercy" size="sm" />
+          <div>
+            <p className="eyebrow">
+              {progress.completed.includes('ln-street') ? 'Street linked' : 'Mind map'}
+            </p>
+            <h2>Link the street</h2>
+            <p className="quiet">Idea · place · person</p>
+            <p className="town-line">
+              Snap a claim to its lot and keeper. Lit nodes reopen from the town map.
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          className="btn gold"
+          onClick={() => onNavigate({ name: 'link' })}
+        >
+          Link the street
+        </button>
+      </section>
+
+      <section
         className={`night-watch ${progress.defense.cleared ? 'is-held' : ''}`}
         aria-label="Night Watch"
       >

@@ -1,4 +1,4 @@
-export type ChallengeKind = 'sequence' | 'build-argument' | 'match' | 'sort'
+export type ChallengeKind = 'sequence' | 'build-argument' | 'match' | 'sort' | 'link'
 
 /** Candy picture-marks for early boards. Later walks may omit these. */
 export type GemId = 'lamp' | 'seed' | 'heart' | 'star' | 'cup' | 'tree' | 'door' | 'coin'
@@ -114,11 +114,46 @@ export interface MatchChallenge {
   deeper?: string
 }
 
+export type LinkKind = 'idea' | 'place' | 'person'
+
+export interface LinkNode {
+  id: string
+  kind: LinkKind
+  text: string
+  /** Person chip — candy portrait. */
+  who?: 'river' | 'juniper' | 'mercy' | 'silas' | 'nora' | 'ansel' | 'hope'
+  /** Place chip — town plot. */
+  plotId?: string
+  /** Idea chip — existing evidence / walk id. */
+  evidenceId?: string
+}
+
+export interface LinkTriple {
+  id: string
+  ideaId: string
+  placeId: string
+  personId: string
+}
+
+export interface LinkChallenge {
+  kind: 'link'
+  id: string
+  title: string
+  idea?: string
+  prompt: string
+  context?: string
+  nodes: LinkNode[]
+  triples: LinkTriple[]
+  teachOnWrong: string
+  deeper?: string
+}
+
 export type Challenge =
   | SequenceChallenge
   | BuildArgumentChallenge
   | MatchChallenge
   | SortChallenge
+  | LinkChallenge
 
 export interface Area {
   id: string
@@ -237,3 +272,4 @@ export type View =
   | { name: 'vista' }
   | { name: 'settings' }
   | { name: 'defend' }
+  | { name: 'link' }
