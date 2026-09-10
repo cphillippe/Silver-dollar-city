@@ -1,5 +1,6 @@
 import { APP_VERSION, SAVE_SCHEMA_VERSION, STORAGE_BACKUP_KEY, STORAGE_KEY } from '../config/app.ts'
 import { localDateKey } from './dates.ts'
+import { emptyCityBuilt, snapshotCityBuilt } from './cityBuild.ts'
 import { emptyDefense } from './defend.ts'
 import { emptyTrace } from './memory.ts'
 import type {
@@ -74,6 +75,7 @@ export function emptyProgress(): ProgressState {
     theme: 'candy',
     easyMode: false,
     learnings: [],
+    cityBuilt: emptyCityBuilt(),
   }
 }
 
@@ -208,9 +210,23 @@ export function normalizeProgress(parsed: Partial<ProgressState> | ProgressState
     theme: asTheme(parsed.theme),
     easyMode: parsed.easyMode === true,
     learnings: asLearningArray(parsed.learnings),
+    cityBuilt: emptyCityBuilt(),
   }
   base.memory = migrateMemory({ ...base, memory: parsed.memory ?? {} })
+  base.cityBuilt =
+    parsed.cityBuilt === undefined
+      ? snapshotCityBuilt(base)
+      : asCityBuilt(parsed.cityBuilt)
   return base
+}
+
+function asCityBuilt(value: unknown): Record<string, number> {
+  const next = emptyCityBuilt()
+  if (!isPlainObject(value)) return next
+  for (const key of Object.keys(next)) {
+    next[key as keyof typeof next] = finiteInt(value[key], 0, 4, 0)
+  }
+  return next
 }
 
 function asTheme(value: unknown): AppTheme {

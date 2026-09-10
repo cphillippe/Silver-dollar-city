@@ -4,7 +4,7 @@ import { STORY, townVoice } from '../content/story'
 import { LOT_STORY } from '../content/lots'
 import { formatDeviceLocalDate, localDateKey } from '../lib/dates'
 import { CITY_PLOTS, nextPlotId, type CityPlotId } from '../lib/city'
-import { EASY, isEasy, scrapbookLabel } from '../lib/easy'
+import { EASY, isEasy } from '../lib/easy'
 import { Avatar } from './Avatar'
 import { DeviceDay } from './DeviceDay'
 import { ShareInvite } from './ShareInvite'
@@ -177,7 +177,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
 
       <nav className="town-tools" aria-label="Town actions">
         <button type="button" className="btn tiny" onClick={() => setPlot(nextId)}>
-          {scrapbookLabel(easy)}
+          {easy ? EASY.manage : 'Manage'}
         </button>
         <button
           type="button"
@@ -272,7 +272,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
                 className="btn tiny"
                 onClick={() => setPlot(plot.id)}
               >
-                {easy ? EASY.mindMapShort : 'Mind map'}
+                {easy ? EASY.manage : 'Manage'}
               </button>
               <button
                 type="button"

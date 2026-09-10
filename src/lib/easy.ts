@@ -13,6 +13,8 @@ export const EASY = {
   linkMatch: 'Match idea · place · person.',
   linkDemo: 'Tap idea → place → person',
   claimTeach: 'A claim is what we hold to be true.',
+  upgrade: 'a better building you earn by learning',
+  manage: 'Building',
 } as const
 
 export function scrapbookLabel(easy: boolean, lit?: number) {

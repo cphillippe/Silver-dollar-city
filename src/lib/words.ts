@@ -52,6 +52,11 @@ export const WORDS = {
     sense: 'the beginning argument — what starts still asks for a cause',
     teach: 'Kalām is the beginning argument: whatever begins still asks for a cause.',
   },
+  upgrade: {
+    term: 'Upgrade',
+    sense: 'a better look and use you earn by keeping a line',
+    teach: 'An upgrade is a better building you earn by learning — not by paying.',
+  },
 } as const satisfies Record<string, WordSense>
 
 export type WordKey = keyof typeof WORDS

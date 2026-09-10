@@ -65,7 +65,7 @@ export function lotWhy(id: CityPlotId, easy: boolean): string {
 }
 
 export const TOWN_PATH_EASY =
-  'Porch lamp → creek stories → square names → ridge sky. Tap a lit place for your scrapbook of links.'
+  'Porch lamp → creek stories → square names → ridge sky. Tap a building to manage it. Your scrapbook of links lives there.'
 
 export const TOWN_PATH_HARD =
-  'Arrive at the porch. Stories at the creek. Names on the square. Sky, gate, and lookout climb toward Heaven. Tap a lit place to open that idea again.'
+  'Arrive at the porch. Stories at the creek. Names on the square. Sky, gate, and lookout climb toward Heaven. Tap a building to manage and upgrade it.'

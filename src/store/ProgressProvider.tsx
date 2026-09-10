@@ -15,7 +15,8 @@ import {
 } from '../lib/save'
 import { bestStars, type StarCount } from '../lib/stars'
 import { streakAfterPlay } from '../lib/streak'
-import { citySnapshot, forgetCitySeen, writeCitySeen } from '../lib/city'
+import { citySnapshot, forgetCitySeen, writeCitySeen, type CityPlotId } from '../lib/city'
+import { applyUpgrade } from '../lib/cityBuild'
 import type { AppTheme, ProgressState } from '../types'
 import {
   cardsUnlockedBy,
@@ -228,6 +229,14 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     })
   }, [write])
 
+  const upgradeBuilding = useCallback((id: CityPlotId) => {
+    setProgress((current) => {
+      const next = applyUpgrade(current, id)
+      if (next === current) return current
+      return write(next)
+    })
+  }, [write])
+
   const reset = useCallback(() => {
     setMissed([])
     forgetCitySeen()
@@ -267,6 +276,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       recordNight,
       setTheme,
       setEasyMode,
+      upgradeBuilding,
       reset,
       importSaveText,
     }),
@@ -286,6 +296,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       setEasyMode,
       setTheme,
       start,
+      upgradeBuilding,
     ],
   )
 

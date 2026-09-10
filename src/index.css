@@ -3334,10 +3334,15 @@ img.gem-heart {
   isolation: isolate;
 }
 
+.hub.is-town .city-overworld.is-city-build {
+  margin: 0 -6px 16px;
+}
+
 .city-svg {
   display: block;
   width: 100%;
   height: auto;
+  min-height: 268px;
   border-radius: 24px;
   border: 2px solid rgba(255, 204, 51, 0.45);
   box-shadow: 0 18px 44px rgba(58, 20, 128, 0.45);
@@ -3345,6 +3350,12 @@ img.gem-heart {
   overflow: hidden;
   position: relative;
   z-index: 1;
+}
+
+@media (max-width: 430px) {
+  .city-svg {
+    min-height: 300px;
+  }
 }
 
 .city-overworld.is-revealing .city-svg {
@@ -5845,6 +5856,29 @@ html[data-theme='dusk'] .hub.is-town .street-link {
   line-height: 1.35;
 }
 
+.build-job,
+.build-next,
+.build-cap,
+.scrap-kicker {
+  margin: 0.35rem 0 0;
+  font-size: 0.86rem;
+  line-height: 1.35;
+}
+
+.build-next.is-ready {
+  color: var(--gold);
+  font-weight: 650;
+}
+
+.build-upgrade {
+  width: 100%;
+  margin: 10px 0 4px;
+}
+
+.mind-map.is-manage .mind-map-card {
+  max-height: min(78vh, 560px);
+}
+
 .hub.is-town .street-link {
   background:
     radial-gradient(140px 70px at 8% -10%, rgba(61, 204, 122, 0.35), transparent 70%),
@@ -5920,6 +5954,25 @@ html[data-theme='dusk'] .hub.is-town .street-link {
   fill: transparent;
   pointer-events: all;
   cursor: pointer;
+}
+
+.city-plot.is-ready .city-plot-hit {
+  stroke: var(--gold);
+  stroke-width: 3;
+  opacity: 0.85;
+  animation: city-pulse 2.4s ease-in-out infinite;
+}
+
+.city-plot-tag {
+  fill: #fffce8;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  paint-order: stroke;
+  stroke: #3a1480;
+  stroke-width: 3.5px;
+  pointer-events: none;
 }
 
 .mind-map {

@@ -44,6 +44,13 @@ import type { View } from '../types'
 import riverWalk from '../assets/cast/portrait-river.png'
 import juniperWalk from '../assets/cast/portrait-juniper.png'
 import { mindMapHasLit } from '../lib/mindMap'
+import {
+  anyUpgradeReady,
+  canUpgrade,
+  plotTag,
+  visualFills,
+  visualSnapshot,
+} from '../lib/cityBuild'
 import { TOWN_PATH_EASY, TOWN_PATH_HARD } from '../content/lots'
 import { Avatar } from './Avatar'
 import { GemMark } from './GemMark'
@@ -58,25 +65,27 @@ interface CityMapProps {
 }
 
 const ANCHOR: Record<CityPlotId, { x: number; y: number }> = {
-  lookout: { x: 520, y: 72 },
-  observatory: { x: 464, y: 118 },
-  hollow: { x: 108, y: 286 },
-  journal: { x: 288, y: 248 },
-  bench: { x: 350, y: 278 },
-  lamps: { x: 258, y: 300 },
-  gate: { x: 498, y: 268 },
-  porch: { x: 564, y: 292 },
+  lookout: { x: 532, y: 62 },
+  observatory: { x: 422, y: 126 },
+  hollow: { x: 92, y: 294 },
+  journal: { x: 262, y: 244 },
+  bench: { x: 368, y: 288 },
+  lamps: { x: 208, y: 318 },
+  gate: { x: 486, y: 256 },
+  porch: { x: 582, y: 306 },
 }
 
+const BUILD_SCALE = 1.58
+
 const FOLK: Record<CityPlotId, { x: number; y: number }> = {
-  lookout: { x: 556, y: 132 },
-  observatory: { x: 512, y: 168 },
-  hollow: { x: 156, y: 336 },
-  journal: { x: 328, y: 308 },
-  bench: { x: 396, y: 334 },
-  lamps: { x: 232, y: 348 },
-  gate: { x: 548, y: 334 },
-  porch: { x: 518, y: 348 },
+  lookout: { x: 568, y: 118 },
+  observatory: { x: 472, y: 178 },
+  hollow: { x: 148, y: 352 },
+  journal: { x: 312, y: 300 },
+  bench: { x: 420, y: 344 },
+  lamps: { x: 178, y: 358 },
+  gate: { x: 538, y: 322 },
+  porch: { x: 534, y: 356 },
 }
 
 const FULL_CAM = { x: 0, y: 0, w: 640, h: 420 }
@@ -102,8 +111,8 @@ export function CityMap({
   const nextId = mode === 'poster' ? 'porch' : nextPlotId(progress, doneToday)
   const { standing, possible } = cityStanding(progress)
   const age = mode === 'poster' ? 'eden' : cityAge(progress)
-  const liveSnap = citySnapshot(progress)
-  const liveFills = fillSnapshot(progress)
+  const liveSnap = mode === 'poster' ? citySnapshot(progress) : visualSnapshot(progress)
+  const liveFills = mode === 'poster' ? fillSnapshot(progress) : visualFills(progress)
 
   const [shown, setShown] = useState(liveSnap)
   const [shownFill, setShownFill] = useState(liveFills)
@@ -156,7 +165,8 @@ export function CityMap({
       setTapped((cur) => (cur === id ? null : cur))
     }, 340)
     const st = stageOf(id)
-    if (st === 'empty' && id !== nextId && !mindMapHasLit(id, progress)) return
+    if (st === 'empty' && id !== nextId && !mindMapHasLit(id, progress) && !canUpgrade(id, progress))
+      return
     setMindPlot(id)
   }
 
@@ -169,8 +179,8 @@ export function CityMap({
 
   useEffect(() => {
     if (mode !== 'live') return
-    const now = citySnapshot(progress)
-    const fills = fillSnapshot(progress)
+    const now = visualSnapshot(progress)
+    const fills = visualFills(progress)
     const prev = readCitySeen()
     const prevFill = readFillsSeen()
     if (!prev) {
@@ -307,14 +317,20 @@ export function CityMap({
 
   const nextStage = stageOf(nextId)
   const nextAt = ANCHOR[nextId]
-  const kicker = nextKicker(nextStage, nextId, doneToday)
-  const gift = nextGift(nextId, nextStage, shownFill[nextId] ?? 0)
+  const kicker = canUpgrade(nextId, progress)
+    ? 'Upgrade'
+    : nextKicker(nextStage, nextId, doneToday)
+  const gift = anyUpgradeReady(progress)
+    ? isEasy(progress)
+      ? 'A building is ready. Tap it and Upgrade — you earn looks by learning.'
+      : 'A building is ready to upgrade. Tap it — learning raises the house.'
+    : nextGift(nextId, nextStage, shownFill[nextId] ?? 0)
   const celebrating = Boolean(beat) || homecoming
   const beatVoice = beat ? townVoice(beat.id) : townVoice(nextId)
 
   return (
     <section
-      className={`city-overworld is-age-${age} is-alive ${mode === 'poster' ? 'is-poster' : ''} ${celebrating ? 'is-revealing' : ''} ${homecoming ? 'is-homecoming' : ''}`}
+      className={`city-overworld is-city-build is-age-${age} is-alive ${mode === 'poster' ? 'is-poster' : ''} ${celebrating ? 'is-revealing' : ''} ${homecoming ? 'is-homecoming' : ''}`}
     >
       <svg
         className="city-svg"
@@ -497,6 +513,7 @@ export function CityMap({
           next={nextId === 'lookout'}
           rising={rising === 'lookout'}
           tapped={tapped === 'lookout'}
+          ready={canUpgrade('lookout', progress)}
           onOpen={open}
         />
 
@@ -507,6 +524,7 @@ export function CityMap({
           next={nextId === 'observatory'}
           rising={rising === 'observatory'}
           tapped={tapped === 'observatory'}
+          ready={canUpgrade('observatory', progress)}
           onOpen={open}
         />
 
@@ -517,6 +535,7 @@ export function CityMap({
           next={nextId === 'hollow'}
           rising={rising === 'hollow'}
           tapped={tapped === 'hollow'}
+          ready={canUpgrade('hollow', progress)}
           onOpen={open}
         />
 
@@ -527,6 +546,7 @@ export function CityMap({
           next={nextId === 'journal'}
           rising={rising === 'journal'}
           tapped={tapped === 'journal'}
+          ready={canUpgrade('journal', progress)}
           onOpen={open}
         />
 
@@ -537,6 +557,7 @@ export function CityMap({
           next={nextId === 'bench'}
           rising={rising === 'bench'}
           tapped={tapped === 'bench'}
+          ready={canUpgrade('bench', progress)}
           onOpen={open}
         />
 
@@ -547,6 +568,7 @@ export function CityMap({
           next={nextId === 'lamps'}
           rising={rising === 'lamps'}
           tapped={tapped === 'lamps'}
+          ready={canUpgrade('lamps', progress)}
           onOpen={open}
         />
 
@@ -557,6 +579,7 @@ export function CityMap({
           next={nextId === 'gate'}
           rising={rising === 'gate'}
           tapped={tapped === 'gate'}
+          ready={canUpgrade('gate', progress)}
           onOpen={open}
         />
 
@@ -567,6 +590,7 @@ export function CityMap({
           next={nextId === 'porch'}
           rising={rising === 'porch'}
           tapped={tapped === 'porch'}
+          ready={canUpgrade('porch', progress)}
           onOpen={open}
         />
 
@@ -727,6 +751,7 @@ function PlotGroup({
   next,
   rising,
   tapped,
+  ready,
   onOpen,
 }: {
   id: CityPlotId
@@ -735,17 +760,19 @@ function PlotGroup({
   next: boolean
   rising: boolean
   tapped: boolean
+  ready: boolean
   onOpen: (id: CityPlotId) => void
 }) {
-  const clickable = stage !== 'empty' || next
+  const clickable = stage !== 'empty' || next || ready
   const at = ANCHOR[id]
-  const vacant = stage === 'empty' && !next
+  const vacant = stage === 'empty' && !next && !ready
+  const title = CITY_PLOTS.find((plot) => plot.id === id)?.title ?? id
   return (
     <g
-      className={`city-plot is-${stage} ${next ? 'is-next' : ''} ${rising ? 'is-rising' : ''} ${tapped ? 'is-tapped' : ''}`}
+      className={`city-plot is-${stage} ${next ? 'is-next' : ''} ${rising ? 'is-rising' : ''} ${tapped ? 'is-tapped' : ''} ${ready ? 'is-ready' : ''}`}
       role={clickable ? 'button' : undefined}
       tabIndex={clickable ? 0 : undefined}
-      aria-label={`${CITY_PLOTS.find((plot) => plot.id === id)?.title ?? id} ${stage}${next ? ', next to build' : ''}${rising ? ', just rose' : ''}`}
+      aria-label={`${title} ${stage}${ready ? ', upgrade ready' : ''}${next ? ', next to build' : ''}${rising ? ', just rose' : ''}`}
       onClick={() => {
         if (clickable) onOpen(id)
       }}
@@ -758,11 +785,11 @@ function PlotGroup({
       }}
     >
       {clickable ? (
-        <circle className="city-plot-hit" cx={at.x} cy={at.y} r="36" />
+        <circle className="city-plot-hit" cx={at.x} cy={at.y} r="42" />
       ) : null}
       {vacant ? (
         next ? (
-          <g className="city-lot is-staked" transform={`translate(${at.x} ${at.y})`}>
+          <g className="city-lot is-staked" transform={`translate(${at.x} ${at.y}) scale(${BUILD_SCALE})`}>
             <ellipse rx="20" ry="9" className="city-earth" />
             <path
               className="city-timber"
@@ -771,16 +798,23 @@ function PlotGroup({
           </g>
         ) : null
       ) : (
-        <PlotArt id={id} stage={stage} fill={fill} rising={rising} />
+        <g transform={`translate(${at.x} ${at.y}) scale(${BUILD_SCALE}) translate(${-at.x} ${-at.y})`}>
+          <PlotArt id={id} stage={stage} fill={fill} rising={rising} />
+        </g>
       )}
+      {clickable ? (
+        <text className="city-plot-tag" x={at.x} y={at.y + 46} textAnchor="middle">
+          {plotTag(id)}
+        </text>
+      ) : null}
       {rising ? (
         <g className="city-sparks" transform={`translate(${at.x} ${at.y})`}>
-          <circle r="22" className="city-flash" />
+          <circle r="28" className="city-flash" />
           {SPARKS.map((deg) => (
             <circle
               key={deg}
               className="city-spark"
-              r="3.5"
+              r="4.2"
               style={{ ['--deg' as string]: `${deg}deg` }}
             />
           ))}
