@@ -8,6 +8,17 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.4',
+    title: 'Recall, then Later',
+    when: '2026-09-10',
+    items: [
+      'A held line is an offer, not a pin. Later keeps it for this walk. Not today waits until morning. No guilt.',
+      'A sitting is about 3 pages — never the whole journal.',
+      'A second look at a hold comes at a new angle, with Dig deeper — not the first teach again.',
+      'Link the street leads with a picture when we have one: faces, creek, bench, porch lamp.',
+    ],
+  },
+  {
     version: '1.4.3',
     title: 'Classic sources',
     when: '2026-09-10',

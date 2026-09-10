@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
-import { areas, findPlayable } from '../content'
+import { areas, findPlayable, journalForChallenge } from '../content'
 import { STORY, townVoice } from '../content/story'
 import { LOT_STORY } from '../content/lots'
-import { formatDeviceLocalDate, localDateKey } from '../lib/dates'
+import { localDateKey } from '../lib/dates'
 import { CITY_PLOTS, nextPlotId, type CityPlotId } from '../lib/city'
 import { EASY, isEasy } from '../lib/easy'
+import { markLater, readLater, sessionDue } from '../lib/recall'
 import { Avatar } from './Avatar'
-import { DeviceDay } from './DeviceDay'
 import { ShareInvite } from './ShareInvite'
 import { AdSlot } from './AdSlot'
 import { CityMap } from './CityMap'
@@ -19,12 +19,12 @@ import {
   getNextGoal,
   isAreaComplete,
   isAreaUnlocked,
-  morningReview,
   nextWalkView,
   rehearseGo,
   useProgress,
 } from '../store/progress'
 import type { View } from '../types'
+import { RecallOffer } from './RecallOffer'
 
 interface HubProps {
   onNavigate: (view: View) => void
@@ -32,14 +32,12 @@ interface HubProps {
 }
 
 export function Hub({ onNavigate, openPlot }: HubProps) {
-  const { progress } = useProgress()
+  const { progress, snoozeReviews } = useProgress()
   const today = localDateKey()
   const doneToday = dailyDoneToday(progress, today)
-  const due = morningReview(progress, today)
-  const duePlay = due ? findPlayable(due.id) : undefined
   const waiting = dueCount(progress, today)
-  const sameDay = Boolean(due && doneToday)
-  const dustOff = sameDay
+  const [later, setLater] = useState(() => readLater(today))
+  const recallItems = sessionDue(progress, today, later)
   const goal = getNextGoal(progress, today)
   const nextId = nextPlotId(progress, doneToday)
   const watchOpen = unlockedWatchAbilities(progress)
@@ -60,11 +58,8 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
     if (!id && openPlot) onNavigate({ name: 'hub' })
   }
 
-  const nextCta = dustOff
-    ? easy
-      ? EASY.rememberSentence
-      : 'Dust this one off'
-    : goal.kind === 'daily'
+  const nextCta =
+    goal.kind === 'daily'
       ? easy
         ? EASY.readStory
         : 'Walk today’s trail'
@@ -75,10 +70,6 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
           : 'Do this next'
 
   function goNext() {
-    if (dustOff) {
-      onNavigate(sameDay ? rehearseGo(progress) : { name: 'daily' })
-      return
-    }
     if (goal.kind === 'daily') {
       onNavigate({ name: 'daily' })
       return
@@ -104,50 +95,42 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
     }
   }
 
-  const nextTitle = dustOff
-    ? sameDay
-      ? easy
-        ? EASY.readAgain
-        : 'Dust off today’s line'
-      : easy
-        ? EASY.readAgain
-        : 'Time to dust off this one'
-    : easy && goal.kind === 'daily'
-      ? EASY.readStory
-      : goal.title
-  const nextDetail = dustOff
-    ? sameDay
-      ? easy
-        ? `${EASY.claimTeach} ${EASY.rememberSentence}`
-        : 'You stored it this morning. Map the claim again — not a checkbox.'
-      : duePlay
-        ? `${duePlay.challenge.title} · an older walk.`
-        : easy
-          ? 'An older page is waiting to be read again.'
-          : 'An older page is waiting to be rebuilt.'
-    : easy
-      ? goal.detail
-          .replace(/\bparable\b/gi, `parable (${EASY.parable})`)
-          .replace(/\bcreed\b/gi, `creed (${EASY.creed})`)
-      : goal.detail
+  const nextTitle = easy && goal.kind === 'daily' ? EASY.readStory : goal.title
+  const nextDetail = easy
+    ? goal.detail
+        .replace(/\bparable\b/gi, `parable (${EASY.parable})`)
+        .replace(/\bcreed\b/gi, `creed (${EASY.creed})`)
+    : goal.detail
+
+  function openRecall(id: string) {
+    onNavigate({
+      name: 'journal',
+      focusId: journalForChallenge(id)?.id ?? id,
+      autoQuiz: true,
+    })
+  }
+
+  function skipLater() {
+    setLater(markLater(today, recallItems.map((item) => item.id), true))
+  }
+
+  function skipNotToday() {
+    snoozeReviews(
+      recallItems.map((item) => item.id),
+      today,
+    )
+    setLater(markLater(today, recallItems.map((item) => item.id), true))
+  }
 
   return (
     <main className="hub is-town is-inhabited" aria-label="The town">
       <section className="next-card do-next" aria-label="Do this next">
         <p className="eyebrow">Do this next</p>
-        {dustOff ? <DeviceDay /> : null}
         <h2>{nextTitle}</h2>
         <p className="do-next-detail">{nextDetail}</p>
-        {dustOff ? (
+        {waiting > 0 ? (
           <p className="quiet">
-            {waiting > 1
-              ? `${waiting} pages due · about a minute`
-              : sameDay
-                ? easy
-                  ? 'Same-day read-again · about a minute'
-                  : 'Same-day dust-off · mapping + recall'
-                : 'A spaced recall · about a minute'}
-            {dustOff ? ` · ${formatDeviceLocalDate()}` : ''}
+            {waiting} {easy ? 'pages you can read again' : 'pages due'} — offered below, not forced.
           </p>
         ) : null}
         <button type="button" className="btn primary xl" onClick={goNext}>
@@ -189,6 +172,19 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
         onNavigate={onNavigate}
         mindPlot={mindPlot}
         onMindPlot={setPlot}
+      />
+
+      <RecallOffer
+        items={recallItems.map((trace) => ({
+          id: trace.id,
+          title:
+            journalForChallenge(trace.id)?.title ??
+            findPlayable(trace.id)?.challenge.title ??
+            'A held line',
+        }))}
+        onOpen={openRecall}
+        onLater={skipLater}
+        onNotToday={skipNotToday}
       />
 
       <nav className="town-tools" aria-label="Town actions">

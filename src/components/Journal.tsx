@@ -17,11 +17,12 @@ import { ShareInvite } from './ShareInvite'
 import { StarRow } from './StarRow'
 import {
   dueCount,
-  dueForRecall,
   journalCompletion,
   nextRebuildHint,
   useProgress,
 } from '../store/progress'
+import { markLater, readLater, sessionDue } from '../lib/recall'
+import { RecallOffer } from './RecallOffer'
 import { trailDaysRequired } from '../lib/streak'
 import type { JournalEntry, Learning, MemoryTrace, View } from '../types'
 
@@ -32,7 +33,7 @@ interface JournalProps {
 }
 
 export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
-  const { progress, recordReview } = useProgress()
+  const { progress, recordReview, snoozeReviews } = useProgress()
   const easy = isEasy(progress)
   const today = localDateKey()
   const { open, total, percent } = journalCompletion(progress)
@@ -42,7 +43,17 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
     entries: journalEntries.filter((entry) => entry.areaId === area.id),
   }))
   const heldCount = progress.held.length
-  const dueItems = dueForRecall(progress, today).filter((item) => item.brief)
+  const [later, setLater] = useState(() => readLater(today))
+  const sessionItems = sessionDue(progress, today, later)
+  const dueItems = sessionItems
+    .map((trace) => ({
+      trace,
+      brief: evidenceFor(trace.id),
+      entry:
+        journalEntries.find((item) => item.unlockAfter === trace.id) ??
+        journalEntries.find((item) => item.id === trace.id),
+    }))
+    .filter((item) => item.brief)
   const waiting = dueCount(progress, today)
   const nextStep = nextRebuildHint(progress, today)
   const focusedEntry = journalEntries.find(
@@ -79,6 +90,7 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
           <RecallGate
             brief={quizBrief}
             mode="review"
+            visits={progress.memory[quizBrief.id]?.reviews ?? 0}
             kicker={STORY.tapTakeaway}
             onHeld={(result) => {
               recordReview({
@@ -96,6 +108,15 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
                   : { name: 'journal' },
               )
             }}
+            onSkip={(how) => {
+              if (how === 'not-today') snoozeReviews([quizBrief.id], today)
+              setLater(markLater(today, [quizBrief.id], true))
+              onNavigate(
+                focusedEntry
+                  ? { name: 'journal', focusId: focusedEntry.id }
+                  : { name: 'journal' },
+              )
+            }}
           />
         </section>
       </main>
@@ -106,44 +127,30 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
     <main className={`journal ${dueItems.length ? 'has-due' : ''}`}>
       {dueItems.length > 0 ? (
         <section className="journal-chapter due-chapter">
-          <div className="chapter-head">
-            <Avatar who="juniper" size="sm" />
-            <div>
-              <h2>
-                {dueItems.some((item) => item.trace.reviews === 0)
-                  ? 'Dust off today'
-                  : 'Due this morning'}
-              </h2>
-              <p>Mapping and recall — not a checkbox. Rebuild the line, then the page opens.</p>
-            </div>
-          </div>
-          <div className="card-grid">
-            {dueItems.map((item) => (
-              <article key={item.trace.id} className="dossier is-open is-due">
-                <Landmark pillar={item.trace.pillar} compact />
-                <p className="eyebrow">Due this morning · Face-down</p>
-                <h3>{item.entry?.title ?? 'A held line'}</h3>
-                <StarRow
-                  count={progress.stars[item.trace.id] ?? 0}
-                  compact
-                  label={starLegend(progress.stars[item.trace.id] ?? 0)}
-                />
-                <button
-                  type="button"
-                  className="btn primary"
-                  onClick={() =>
-                    onNavigate({
-                      name: 'journal',
-                      focusId: item.entry?.id ?? item.trace.id,
-                      autoQuiz: true,
-                    })
-                  }
-                >
-                  {easy ? EASY.rememberSentence : STORY.tapTakeaway}
-                </button>
-              </article>
-            ))}
-          </div>
+          <RecallOffer
+            items={dueItems.map((item) => ({
+              id: item.trace.id,
+              title: item.entry?.title ?? item.brief?.claim ?? 'A held line',
+            }))}
+            onOpen={(id) => {
+              const hit = dueItems.find((item) => item.trace.id === id)
+              onNavigate({
+                name: 'journal',
+                focusId: hit?.entry?.id ?? id,
+                autoQuiz: true,
+              })
+            }}
+            onLater={() =>
+              setLater(markLater(today, dueItems.map((item) => item.trace.id), true))
+            }
+            onNotToday={() => {
+              snoozeReviews(
+                dueItems.map((item) => item.trace.id),
+                today,
+              )
+              setLater(markLater(today, dueItems.map((item) => item.trace.id), true))
+            }}
+          />
         </section>
       ) : (
         <section className="next-rebuild">
@@ -319,7 +326,7 @@ function JournalCard({
   learning?: Learning
   today: string
 }) {
-  const { recordHeld, recordReview, progress } = useProgress()
+  const { recordHeld, recordReview, snoozeReviews, progress } = useProgress()
   const easy = isEasy(progress)
   const need = trailDaysRequired(entry.unlockAfter)
   const brief = evidenceForJournal(entry.unlockAfter, entry.id)
@@ -383,6 +390,16 @@ function JournalCard({
                 brief={brief}
                 kicker={due ? STORY.tapTakeaway : 'Journal recall'}
                 mode={due ? 'review' : 'encode'}
+                visits={trace?.reviews ?? 0}
+                onSkip={
+                  due
+                    ? (how) => {
+                        if (how === 'not-today') snoozeReviews([brief.id], today)
+                        setFace('read')
+                        setQuizAgain(false)
+                      }
+                    : undefined
+                }
                 onHeld={(result) => {
                   if (due) {
                     recordReview({

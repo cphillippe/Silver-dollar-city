@@ -11,7 +11,7 @@ A stranger should know in 60 seconds: this is a **Christian reasoning game**. So
 **Sticky public preview (GitHub Pages):**  
 https://cphillippe.github.io/Silver-dollar-city/
 
-Hard-reload once if you still see the old game (the PWA can keep a cached copy). Live bundle is published with V0 **1.4.3**. **Easy mode** is off by default — check **Easier words · bigger taps** on Welcome, or Settings → Reading → Easy mode. We teach hard words first: a claim is what we hold to be true. After a win, say the claim out loud; Dig deeper holds the reason. Open **Profile** from Town or Settings for every unlock.
+Hard-reload once if you still see the old game (the PWA can keep a cached copy). Live bundle is published with V0 **1.4.4**. **Easy mode** is off by default — check **Easier words · bigger taps** on Welcome, or Settings → Reading → Easy mode. We teach hard words first: a claim is what we hold to be true. After a win, say the claim out loud; Dig deeper holds the reason. Open **Profile** from Town or Settings for every unlock.
 
 Pages deploys `docs/` from `main` once that source is selected. Until then the same `docs/` is also on `cursor/silver-city-unending-evidence-8233`. Hard-reload github.io after it updates.
 
@@ -85,9 +85,9 @@ Gradle writes `android/app/build/outputs/apk/debug/app-debug.apk`. Copy it to `r
 
 ## How it works
 
-1. **Today’s Trail** — one short puzzle each local calendar day. If a page is **due for recall**, Juniper dusts that one off instead of only serving something new. Completing the walk marks a gentle streak and can unseal trail notes. Miss a day and **the trail waits** — marks you already made stay. After a solve you see a locked **tomorrow teaser**.
-2. **Recall Loop** — after the snap, the teaching folds. You rebuild **one claim + one reason** (retrieval practice). Two misses and the line is spoken, then you walk on. A peek marks the attempt as helped. Held lines are the real score.
-3. **Spacing** — each locked line stores `nextReviewAt` in `localStorage`. Clean recalls expand the gap (~1, then 3, then 7, then 21 local days). A miss or peek brings it back tomorrow, warmly: *Time to dust off this one.* The morning queue **interleaves districts** so you don’t drill one pillar in a block.
+1. **Today’s Trail** — one short puzzle each local calendar day. Completing the walk marks a gentle streak and can unseal trail notes. Miss a day and **the trail waits** — marks you already made stay. After a solve you see a locked **tomorrow teaser**.
+2. **Recall Loop** — after the snap, the teaching folds. You rebuild **one claim + one reason** (retrieval practice). Two misses and the line is spoken, then you walk on. A peek marks the attempt as helped. Held lines are the real score. A later revisit uses a new angle and Dig deeper — not the first teach again.
+3. **Spacing** — each locked line stores `nextReviewAt` in `localStorage`. Clean recalls expand the gap (~1, then 3, then 7, then 21 local days). A miss or peek brings it back tomorrow. Due pages are an **offer** — Later or Not today, no guilt — and a sitting is about **3**, not the whole journal. The queue **interleaves districts** so you don’t drill one pillar in a block.
 4. **Say it back** — optional, skippable once: pick the load-bearing premise, and (if you want) one local sentence in your own words. That teach-back is how a line reaches 3★.
 5. **Map** — five districts on one trail. Completing a district unbars the next. Finished districts stay playable. Stars are **mastery**, not a no-miss trophy: 1★ first walk, 2★ held after a rest, 3★ held after a rest and said back (or a second clean recall later).
 6. **Puzzles** — order chains, snap-pairs, keep-or-toss bins, and build-the-argument. Misses shake and retry before a fuller hint.
@@ -144,7 +144,7 @@ Saves are **offline-first**. Nothing requires a login.
 - **Schema:** `SAVE_SCHEMA_VERSION` in `src/config/app.ts`. Bump it only when the persisted shape changes, and add a step in `src/lib/save.ts` `migrateToCurrent`. Do not wipe on upgrade.
 - **Move devices:** Settings → **Export JSON** (file) or **Copy share code** (`SC1.…`). Import file or paste on the other device. Import replaces this device’s save and keeps a backup key (`silver-city-progress-v1.bak`).
 - **Cloud:** not shipped. `cloudSyncStatus()` is `local-only` until there is real auth. Optional keys can be added later without dropping v1 fields.
-- **UI:** Hub is the **overworld town**. Completing Daily / districts / journal / stars lights buildings you **manage and upgrade** by tapping. Tap a place to open its **manage** sheet (person + idea nodes). **Profile** (Town tools or Settings) lists River plus every unlock. **Dig deeper** on Hold, Journal, mind map, and Profile: Scripture and older witnesses when they fit; later faithful sources welcome when they help. Settings shows **What’s new** plus schema and app version (`1.4.3`). **Easy mode** (Welcome checkbox or Settings → Reading) teaches hard words first (a claim is what we hold to be true) and uses shorter sentences and bigger taps; claims stay the same. After every win you say the claim out loud. Reset progress lives only in Settings → Danger zone.
+- **UI:** Hub is the **overworld town**. Completing Daily / districts / journal / stars lights buildings you **manage and upgrade** by tapping. Tap a place to open its **manage** sheet (person + idea nodes). **Profile** (Town tools or Settings) lists River plus every unlock. **Dig deeper** on Hold, Journal, mind map, and Profile: Scripture and older witnesses when they fit; later faithful sources welcome when they help. Settings shows **What’s new** plus schema and app version (`1.4.4`). **Easy mode** (Welcome checkbox or Settings → Reading) teaches hard words first (a claim is what we hold to be true) and uses shorter sentences and bigger taps; claims stay the same. After every win you say the claim out loud. Reset progress lives only in Settings → Danger zone.
 
 ## The town
 
@@ -173,7 +173,7 @@ Wire a test unit later by teaching `AdSlot` to render the network creative when 
 
 ## Support
 
-- **Version:** app `1.4.3` V0 (`package.json`, `src/config/app.ts`, Android `versionName`). Capacitor id `city.silver.unending`. `npm run android:apk` still builds the debug APK. Settings → **What’s new** (`src/content/changelog.ts`) is the hook for later packs.
+- **Version:** app `1.4.4` V0 (`package.json`, `src/config/app.ts`, Android `versionName`). Capacitor id `city.silver.unending`. `npm run android:apk` still builds the debug APK. Settings → **What’s new** (`src/content/changelog.ts`) is the hook for later packs.
 - **Content packs:** core trail is `CONTENT_PACKS` in [`src/content/packs.ts`](src/content/packs.ts). Next drop: new Area module → register in `index.ts` → one pack row → changelog row → journal/evidence/city/tools. Details: [`src/content/README.md`](src/content/README.md).
 - **Release smoke:** [`PLAYTEST.md`](PLAYTEST.md) (fun / clarity / retention plus the short checklist).
 - **Playtest notes:** same file.
