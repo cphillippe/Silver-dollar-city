@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react'
 import { shuffle } from '../../lib/shuffle'
+import { isEasy } from '../../lib/easy'
+import { useProgress } from '../../store/progress'
 import type { SequenceChallenge, SequenceItem } from '../../types'
 import { GemMark } from '../GemMark'
 import { burstStyle } from '../../lib/juice'
@@ -38,8 +40,9 @@ function keepDecoy(
 }
 
 export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePlayProps) {
+  const { progress } = useProgress()
   const seed = useMemo(() => shuffle(challenge.items), [challenge.items])
-  const progressive = challenge.items.length >= 4
+  const progressive = isEasy(progress) || challenge.items.length >= 4
   const [order, setOrder] = useState(seed)
   const [seats, setSeats] = useState<(SequenceItem | null)[]>(seed)
   const [chain, setChain] = useState<(SequenceItem | null)[]>(() =>
@@ -149,7 +152,7 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
     >
       <WinBurst play={status === 'ok'} />
       <PuzzleLead challenge={challenge} />
-      <PuzzleHint text={challenge.context} onPeek={onPeek} />
+      <PuzzleHint text={challenge.context} id={challenge.id} onPeek={onPeek} />
       <p className="sort-how is-order-how">
         {challenge.items.map((item, index) => (
           <span
@@ -244,7 +247,9 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
         body={
           status === 'wrong'
             ? misses >= 2
-              ? challenge.teachOnWrong
+              ? isEasy(progress)
+                ? 'Tap the stone that comes next.'
+                : challenge.teachOnWrong
               : 'No lecture — just find the stone that jumped the line.'
             : undefined
         }

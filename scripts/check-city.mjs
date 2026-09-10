@@ -34,7 +34,8 @@ import {
 import { ideaUnlocked, mindGraph, mindMapHasLit } from '../src/lib/mindMap.ts'
 import { STREET_CHALLENGE, STREET_LIGHTS } from '../src/content/links.ts'
 import { deeperLinksFor } from '../src/content/deeper.ts'
-import { allEvidenceIds } from '../src/content/evidence.ts'
+import { allEvidenceIds, evidenceFor } from '../src/content/evidence.ts'
+import { plainFor } from '../src/content/plain.ts'
 import { profileInventory } from '../src/lib/profile.ts'
 
 const progressSrc = readFileSync(
@@ -975,7 +976,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.3.3')
+assert.equal(APP_VERSION, '1.3.4')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -1179,10 +1180,105 @@ const inv = profileInventory({
   learnings: [],
   defense: { cleared: 0, nights: [] },
   theme: 'candy',
+  easyMode: false,
 })
 assert.ok(inv.ideas.some((item) => item.id === 'ph-road'))
 assert.equal(inv.streetLinked, true)
 assert.ok(inv.links.length >= 3)
 assert.ok(inv.places.some((plot) => plot.id === 'porch'))
+
+assert.match(
+  readFileSync(new URL('../src/content/plain.ts', import.meta.url), 'utf8'),
+  /old shared belief/,
+)
+assert.match(
+  readFileSync(new URL('../src/content/plain.ts', import.meta.url), 'utf8'),
+  /Jesus story/,
+)
+assert.match(
+  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  /scrapbook of links/,
+)
+assert.match(hubSrc, /Do this next/)
+assert.match(hubSrc, /do-next/)
+assert.match(
+  readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
+  /Match idea · place · person/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
+  /link-demo/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
+  /Tap idea → place → person/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
+  /link-takeaway/,
+)
+assert.doesNotMatch(
+  readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
+  /Acquire · where/,
+)
+assert.match(cssSrc, /next-tap/)
+assert.match(cssSrc, /link-demo/)
+
+assert.equal(
+  plainFor('ob-tuning')?.gloss,
+  evidenceFor('ob-tuning')?.claim,
+)
+assert.equal(
+  plainFor('ob-design')?.gloss,
+  evidenceFor('ob-design')?.claim,
+)
+assert.equal(
+  plainFor('ob-tuning')?.gloss,
+  'The universe is finely tuned for life — that fit points to a Designer.',
+)
+assert.equal(
+  plainFor('ob-design')?.gloss,
+  'Fine-tuning is best explained by a mind that intended a habitable world.',
+)
+assert.match(
+  readFileSync(new URL('../src/components/TeachUnlock.tsx', import.meta.url), 'utf8'),
+  /brief\.claim/,
+)
+assert.match(matchSrc, /isEasy\(progress\) \|\| challenge\.id\.startsWith\('ob-'\)/)
+assert.match(sortSrc, /is-easy-sort/)
+assert.match(sortSrc, /sort-one/)
+assert.match(linkPlaySrc, /focusIds/)
+assert.match(linkPlaySrc, /currentTriple/)
+assert.match(challengeSrc, /isEasy\(progress\) \|\| areaId === 'observatory'/)
+assert.match(
+  readFileSync(new URL('../src/components/Welcome.tsx', import.meta.url), 'utf8'),
+  /welcome-easy/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/Welcome.tsx', import.meta.url), 'utf8'),
+  /Easier words/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
+  /Easy mode/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
+  /setEasyMode\(true\)/,
+)
+assert.match(cssSrc, /html\[data-easy='on'\]/)
+assert.match(cssSrc, /min-height: 52px/)
+assert.match(
+  cssSrc,
+  /\.is-puzzle \.play\.is-build \.hint-peek \{[\s\S]*?display: none/,
+)
+assert.match(
+  readFileSync(new URL('../src/lib/save.ts', import.meta.url), 'utf8'),
+  /easyMode: parsed\.easyMode === true/,
+)
+assert.match(
+  readFileSync(new URL('../src/config/app.ts', import.meta.url), 'utf8'),
+  /SAVE_SCHEMA_VERSION = 1/,
+)
 
 console.log('check-city: ok')

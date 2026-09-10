@@ -65,6 +65,7 @@ assert.equal(fromLegacy.envelope.kind, 'silver-city-save')
 assert.equal(fromLegacy.progress.defense.cleared, 0)
 assert.deepEqual(fromLegacy.progress.defense.nights, [])
 assert.equal(fromLegacy.progress.theme, 'candy')
+assert.equal(fromLegacy.progress.easyMode, false)
 assert.deepEqual(fromLegacy.progress.learnings, [])
 
 const withBeat = {
@@ -103,6 +104,14 @@ assert.equal(roundTrip.ok, true)
 if (!roundTrip.ok) throw new Error('envelope parse')
 assert.equal(roundTrip.meta.source, 'envelope')
 assert.deepEqual(roundTrip.progress.journal, legacy.journal)
+
+const easyOn = parseIncomingSave(
+  JSON.stringify(wrapSave({ ...fromLegacy.progress, easyMode: true })),
+)
+assert.equal(easyOn.ok, true)
+if (!easyOn.ok) throw new Error('easy parse')
+assert.equal(easyOn.progress.easyMode, true)
+assert.equal(easyOn.meta.schemaVersion, 1)
 
 const junk = parseIncomingSave('not-json')
 assert.equal(junk.ok, false)
@@ -147,6 +156,9 @@ assert.match(settingsSrc, /code like a secret/)
 assert.match(settingsSrc, /setTheme/)
 assert.match(settingsSrc, /Dusk town/)
 assert.match(settingsSrc, /Clean parchment/)
+assert.match(settingsSrc, /Easy mode/)
+assert.match(settingsSrc, /setEasyMode/)
+assert.match(settingsSrc, /eyebrow">Reading/)
 assert.ok(
   settingsSrc.indexOf('eyebrow">Look') < settingsSrc.indexOf('Export JSON'),
   'Look picker should sit above export so a cold player can switch themes',
@@ -157,6 +169,16 @@ assert.match(shellSrc, /view\.name === 'journal'/)
 assert.match(shellSrc, /hideGoalbar/)
 assert.doesNotMatch(shellSrc, />Reset</)
 assert.match(shellSrc, /view\.name === 'profile'/)
+assert.match(shellSrc, /data-easy/)
+
+const welcomeSrc = readFileSync(
+  new URL('../src/components/Welcome.tsx', import.meta.url),
+  'utf8',
+)
+assert.match(welcomeSrc, /welcome-easy/)
+assert.match(welcomeSrc, /setEasyMode/)
+assert.match(welcomeSrc, /STORY\.purpose/)
+assert.match(welcomeSrc, /STORY\.who/)
 
 const capSrc = readFileSync(new URL('../capacitor.config.ts', import.meta.url), 'utf8')
 assert.match(capSrc, /allowMixedContent:\s*false/)

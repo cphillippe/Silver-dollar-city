@@ -3,6 +3,7 @@ import { getArea, getChallenge } from '../content'
 import { evidenceFor } from '../content/evidence'
 import { STORY, townVoiceForArea } from '../content/story'
 import { localDateKey } from '../lib/dates'
+import { isEasy } from '../lib/easy'
 import { useJuiceHandoff } from '../lib/juice'
 import { isDue } from '../lib/memory'
 import { findLearning } from '../lib/learning'
@@ -48,7 +49,7 @@ export function ChallengeScreen({
   const [recalled, setRecalled] = useState(false)
   const teachFirst =
     Boolean(brief) &&
-    (areaId === 'observatory' || challenge?.kind === 'sequence')
+    (isEasy(progress) || areaId === 'observatory' || challenge?.kind === 'sequence')
   const [taught, setTaught] = useState(() => !teachFirst || reviewing)
   const [arming, setArming] = useState(false)
 
@@ -150,14 +151,14 @@ export function ChallengeScreen({
             beats={
               challenge.kind === 'sequence'
                 ? challenge.items
-                : areaId === 'observatory' && challenge.kind === 'match'
+                : (isEasy(progress) || areaId === 'observatory') && challenge.kind === 'match'
                   ? challenge.pairs.map((pair) => ({ id: pair.id, text: pair.left }))
-                  : areaId === 'observatory' && challenge.kind === 'build-argument'
+                  : (isEasy(progress) || areaId === 'observatory') && challenge.kind === 'build-argument'
                     ? challenge.slots.map((slot) => {
                         const card = challenge.cards.find((item) => item.id === slot.correctCardId)
                         return { id: slot.id, text: card?.text ?? slot.label }
                       })
-                    : areaId === 'observatory' && challenge.kind === 'sort'
+                    : (isEasy(progress) || areaId === 'observatory') && challenge.kind === 'sort'
                       ? challenge.tiles
                           .filter((tile) => tile.bin === 'keep')
                           .map((tile) => ({ id: tile.id, text: tile.text }))

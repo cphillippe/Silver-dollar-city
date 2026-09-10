@@ -1,7 +1,10 @@
 import { useMemo, useState } from 'react'
 import type { LinkChallenge, LinkKind, LinkNode } from '../../types'
+import { plainFor } from '../../content/plain'
+import { isEasy } from '../../lib/easy'
 import { burstStyle } from '../../lib/juice'
 import { shuffle } from '../../lib/shuffle'
+import { useProgress } from '../../store/progress'
 import { Avatar } from '../Avatar'
 import { PuzzleHint } from './PuzzleHint'
 import { PuzzleLead } from './PuzzleLead'
@@ -30,7 +33,14 @@ function nodeOf(nodes: LinkNode[], id: string) {
   return nodes.find((node) => node.id === id)
 }
 
+function faceOf(node: LinkNode, easy: boolean) {
+  if (!easy || node.kind !== 'idea' || !node.evidenceId) return node.text
+  return plainFor(node.evidenceId)?.gloss ?? node.text
+}
+
 export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps) {
+  const { progress } = useProgress()
+  const easy = isEasy(progress)
   const columns = useMemo(() => {
     return KIND_ORDER.map((kind) => ({
       kind,
@@ -114,17 +124,27 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
   }
 
   const locked = new Set(edges.flatMap((edge) => [edge.a, edge.b]))
+  const currentTriple = challenge.triples.find((item) => {
+    const have = new Set(
+      edges
+        .filter((edge) => edge.triple === item.id)
+        .map((edge) => pairKey(edge.a, edge.b)),
+    )
+    return !needed(item.id).every((need) => have.has(need))
+  })
+  const focusIds =
+    easy && currentTriple
+      ? new Set([currentTriple.ideaId, currentTriple.placeId, currentTriple.personId])
+      : null
 
   return (
     <div
-      className={`play is-link ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}
+      className={`play is-link ${easy ? 'is-easy-link' : ''} ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}
     >
       <WinBurst play={status === 'ok'} />
       <PuzzleLead challenge={challenge} />
-      <PuzzleHint text={challenge.context} onPeek={onPeek} />
-      <p className="sort-how">
-        <strong>Tap a block</strong>, then the place or person that belongs
-      </p>
+      <PuzzleHint text={challenge.context} id={challenge.id} onPeek={onPeek} />
+      <p className="next-tap">{easy ? 'Tap idea → place → person' : 'Tap a block, then the place or person that belongs'}</p>
 
       {status === 'wrong' || misses > 0 ? (
         <p className="match-toast" role="status">
@@ -135,7 +155,11 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
                 : 'Those don’t snap.'
               : 'Try another pair.'}
           </strong>{' '}
-          {misses >= 2 ? challenge.teachOnWrong : 'Same story: idea, place, person.'}
+          {misses >= 2
+            ? isEasy(progress)
+              ? 'Same story: idea, place, person.'
+              : challenge.teachOnWrong
+            : 'Same story: idea, place, person.'}
         </p>
       ) : null}
 
@@ -155,7 +179,9 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
                   ? 'Place'
                   : 'Person'}
             </p>
-            {column.nodes.map((node, index) => {
+            {column.nodes
+              .filter((node) => !focusIds || focusIds.has(node.id))
+              .map((node, index) => {
               const snapped = locked.has(node.id)
               return (
                 <button
@@ -166,7 +192,7 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
                   onClick={() => choose(node.id)}
                 >
                   {node.who ? <Avatar who={node.who} size="sm" /> : null}
-                  <span>{node.text}</span>
+                  <span>{faceOf(node, easy)}</span>
                 </button>
               )
             })}

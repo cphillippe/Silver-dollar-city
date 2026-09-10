@@ -2,6 +2,8 @@ import { useMemo, useState } from 'react'
 import { shuffle } from '../../lib/shuffle'
 import type { SortChallenge, SortTile } from '../../types'
 import { STORY } from '../../content/story'
+import { isEasy } from '../../lib/easy'
+import { useProgress } from '../../store/progress'
 import { GemMark } from '../GemMark'
 import { burstStyle } from '../../lib/juice'
 import { PuzzleHint } from './PuzzleHint'
@@ -19,6 +21,8 @@ interface SortPlayProps {
 type Bin = 'keep' | 'discard'
 
 export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps) {
+  const { progress } = useProgress()
+  const easy = isEasy(progress)
   const seed = useMemo(() => shuffle(challenge.tiles), [challenge.tiles])
   const order = seed
   const [slots, setSlots] = useState<(SortTile | null)[]>(seed)
@@ -122,18 +126,63 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
 
   const selected = picked ? takeTile(picked) : undefined
   const ready = status !== 'ok' && filledSlots().length === 0
+  const nextTile = filledSlots()[0]
 
   return (
     <div
-      className={`play ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''} ${ready ? 'is-ready' : ''}`}
+      className={`play ${easy ? 'is-easy-sort' : ''} ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''} ${ready ? 'is-ready' : ''}`}
     >
       <WinBurst play={status === 'ok'} />
       <PuzzleLead challenge={challenge} />
-      <PuzzleHint text={challenge.context} onPeek={onPeek} />
+      <PuzzleHint text={challenge.context} id={challenge.id} onPeek={onPeek} />
       <p className="sort-how">
-        <strong>Keep</strong> belongs · <strong>Toss</strong> a distractor
+        {easy ? (
+          <>
+            <strong>Keep</strong> this, or <strong>Toss</strong> it — one line at a time
+          </>
+        ) : (
+          <>
+            <strong>Keep</strong> belongs · <strong>Toss</strong> a distractor
+          </>
+        )}
       </p>
 
+      {easy ? (
+        nextTile ? (
+          <div className="sort-one">
+            <p className="sort-one-line">
+              {nextTile.gem ? <GemMark gem={nextTile.gem} size="sm" /> : null}
+              {nextTile.text}
+            </p>
+            <div className="sort-actions">
+              <button
+                type="button"
+                className="btn xl keep"
+                onClick={() => place(nextTile.id, 'keep')}
+              >
+                Keep
+              </button>
+              <button
+                type="button"
+                className="btn xl toss"
+                onClick={() => place(nextTile.id, 'discard')}
+              >
+                Toss
+              </button>
+            </div>
+          </div>
+        ) : ready ? (
+          <div className="sort-lock">
+            <button
+              type="button"
+              className="btn primary xl snap-bins"
+              onClick={() => evaluate()}
+            >
+              {STORY.lockSort}
+            </button>
+          </div>
+        ) : null
+      ) : (
       <div className="bank is-sort">
         {order.map((home, index) => {
           const live = slots[index]?.id === home.id
@@ -208,8 +257,10 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
           )
         })}
       </div>
+      )}
 
-      <div className={`sort-bins ${ready ? 'is-ready' : ''}`}>
+      {easy && keep.length === 0 && discard.length === 0 ? null : (
+      <div className={`sort-bins ${easy ? 'bins-easy' : ''} ${ready ? 'is-ready' : ''}`}>
         <div
           className={`bin keep ${picked ? 'awaiting' : ''}`}
           onClick={() => drop('keep')}
@@ -289,6 +340,7 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
           </span>
         </div>
       </div>
+      )}
 
       {misses > 0 && status !== 'ok' ? (
         <button
@@ -303,7 +355,7 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
         </button>
       ) : null}
 
-      {ready ? (
+      {!easy && ready ? (
         <div className="sort-lock">
           <button
             type="button"
@@ -334,7 +386,9 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
         body={
           status === 'wrong'
             ? misses >= 2
-              ? challenge.teachOnWrong
+              ? easy
+                ? 'Keep what belongs with the claim. Toss the rest.'
+                : challenge.teachOnWrong
               : 'Keep the lines that belong. Toss (set aside) the rest.'
             : undefined
         }

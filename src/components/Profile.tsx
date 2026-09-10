@@ -1,10 +1,12 @@
 import { CAST } from '../content/story'
+import { isEasy } from '../lib/easy'
 import { profileInventory, openIdeaView, openPlaceView } from '../lib/profile'
 import { useProgress } from '../store/progress'
 import type { View } from '../types'
 import { Avatar } from './Avatar'
 import { AbilityMark } from './GemMark'
 import { DigDeeper } from './DigDeeper'
+import { PlainTalk } from './PlainTalk'
 
 interface ProfileProps {
   onNavigate: (view: View) => void
@@ -12,6 +14,7 @@ interface ProfileProps {
 
 export function Profile({ onNavigate }: ProfileProps) {
   const { progress } = useProgress()
+  const easy = isEasy(progress)
   const inv = profileInventory(progress)
   const you = CAST.river
 
@@ -56,7 +59,8 @@ export function Profile({ onNavigate }: ProfileProps) {
                   {idea.held ? 'Held' : idea.stored ? 'Stored' : 'Walked'} · {idea.source}
                 </p>
                 <strong>{idea.claim}</strong>
-                <p>{idea.reason}</p>
+                <PlainTalk id={idea.id} />
+                {easy ? null : <p>{idea.reason}</p>}
               </button>
               <DigDeeper id={idea.id} surface="profile" compact />
             </article>
@@ -173,7 +177,9 @@ export function Profile({ onNavigate }: ProfileProps) {
           ))
         ) : (
           <p className="quiet">
-            Link the street from Town to snap idea · place · person. Lit nodes reopen here.
+            {easy
+              ? 'Link the street from Town to match idea · place · person. Lit nodes reopen in your scrapbook of links.'
+              : 'Link the street from Town to snap idea · place · person. Lit nodes reopen here.'}
           </p>
         )}
       </section>

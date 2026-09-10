@@ -72,6 +72,7 @@ export function emptyProgress(): ProgressState {
     elaborations: {},
     defense: emptyDefense(),
     theme: 'candy',
+    easyMode: false,
     learnings: [],
   }
 }
@@ -205,6 +206,7 @@ export function normalizeProgress(parsed: Partial<ProgressState> | ProgressState
     lastReviewPillar: isSafeId(parsed.lastReviewPillar) ? parsed.lastReviewPillar : undefined,
     defense: asDefense(parsed.defense),
     theme: asTheme(parsed.theme),
+    easyMode: parsed.easyMode === true,
     learnings: asLearningArray(parsed.learnings),
   }
   base.memory = migrateMemory({ ...base, memory: parsed.memory ?? {} })

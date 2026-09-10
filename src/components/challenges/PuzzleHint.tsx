@@ -1,14 +1,26 @@
 import { useState } from 'react'
+import { plainFor } from '../../content/plain'
+import { isEasy } from '../../lib/easy'
+import { useProgress } from '../../store/progress'
 
 export function PuzzleHint({
   text,
+  id,
   onPeek,
 }: {
   text?: string
+  id?: string
   onPeek?: () => void
 }) {
+  const { progress } = useProgress()
+  const easy = isEasy(progress)
+  const hint = easy && id ? (plainFor(id)?.hint ?? text) : text
   const [open, setOpen] = useState(false)
-  if (!text) return null
+  if (!hint) return null
+
+  if (easy) {
+    return <p className="easy-hint">{hint}</p>
+  }
 
   return (
     <div className="hint-peek">

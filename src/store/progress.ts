@@ -465,6 +465,7 @@ export interface ProgressApi {
   markMiss: (challengeId: string) => void
   recordNight: (dateKey: string) => void
   setTheme: (theme: AppTheme) => void
+  setEasyMode: (easy: boolean) => void
   reset: () => void
   importSaveText: (raw: string) => { ok: true } | { ok: false; error: string }
 }
