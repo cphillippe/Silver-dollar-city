@@ -1146,7 +1146,12 @@ assert.match(
 )
 assert.match(cssSrc, /mind-map-dock/)
 assert.match(cssSrc, /link-dock/)
+assert.match(cssSrc, /cta-dock/)
 assert.match(cssSrc, /city-lock-toast/)
+assert.match(
+  readFileSync(new URL('../src/components/RecallGate.tsx', import.meta.url), 'utf8'),
+  /cta-dock/,
+)
 {
   const fresh = emptyProgress()
   const benchWhy = lotTapWhy(

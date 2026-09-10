@@ -5925,7 +5925,7 @@ html[data-theme='dusk'] .hub.is-town .street-link {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  min-height: 0;
+  min-height: 100%;
 }
 
 .link-grid {
@@ -6255,6 +6255,7 @@ html[data-theme='dusk'] .hub.is-town .street-link {
   width: 100%;
 }
 
+.cta-dock,
 .link-dock {
   position: sticky;
   bottom: 0;
@@ -6267,6 +6268,7 @@ html[data-theme='dusk'] .hub.is-town .street-link {
   background: linear-gradient(180deg, transparent, rgba(20, 8, 48, 0.94) 24%);
 }
 
+.cta-dock .btn,
 .link-dock .btn {
   width: 100%;
 }
