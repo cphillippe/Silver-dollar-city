@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.3.1',
+    title: 'River’s look',
+    when: '2026-09-10',
+    items: [
+      'River — the traveler you play — is the fair blonde candy portrait on Welcome, town, and Settings.',
+    ],
+  },
+  {
     version: '1.3.0',
     title: 'V0 launch',
     when: '2026-09-10',
