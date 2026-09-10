@@ -80,17 +80,17 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
         {easy ? <p className="quiet">{WORDS.claim.teach}</p> : null}
 
         <p className="build-job">{tierJob(applied, easy)}</p>
-        <p className={`build-next ${need.ready ? 'is-ready' : ''}`}>{need.line}</p>
-
         {ready ? (
           <button
             type="button"
             className="btn gold xl build-upgrade"
             onClick={() => upgradeBuilding(plotId)}
           >
-            {easy ? 'Upgrade this building' : 'Upgrade'}
+            Upgrade
           </button>
-        ) : null}
+        ) : (
+          <p className="build-next">{need.line}</p>
+        )}
 
         <div className="mind-web" aria-label="Linked nodes">
           <div className="mind-node is-place is-lit">
@@ -138,7 +138,7 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
         </div>
 
         <p className="quiet scrap-kicker">{scrapbookLabel(easy, litCount)}</p>
-        {applied >= TIER_MAX ? null : (
+        {applied >= TIER_MAX || ready ? null : (
           <p className="quiet build-cap">
             {easy
               ? `${applied} of ${TIER_MAX} looks. Learn more to earn the next.`

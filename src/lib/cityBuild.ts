@@ -184,7 +184,7 @@ export function nextUpgradeNeed(
     return {
       ready: true,
       line: easy
-        ? 'You earned the next look by learning. Tap Upgrade — you do not pay.'
+        ? 'Upgrade — a better building you earn by learning, not by paying.'
         : 'You earned the next look by keeping a line. Tap Upgrade — learning raises the house, not payment.',
     }
   }
@@ -194,13 +194,13 @@ export function nextUpgradeNeed(
 function needForTier(id: CityPlotId, want: number, easy: boolean): string {
   if (id === 'porch') {
     if (want <= 1) return easy ? 'Arrive. The porch lot is yours.' : 'Arrive. The east porch lot is yours.'
-    if (want === 2) return easy ? 'Walk today’s trail once.' : 'Walk today’s trail and keep the morning line.'
+    if (want === 2) return easy ? 'Walk today’s story once.' : 'Walk today’s trail and keep the morning line.'
     if (want === 3)
       return easy
-        ? 'Walk a second morning — or Link the street.'
+        ? 'Walk a second morning, or connect sentence → place → person.'
         : 'A second morning, hold the lamp line, or Link the street furnishes the porch.'
     return easy
-      ? 'Three mornings, or hold the lamp line.'
+      ? 'Come back three mornings.'
       : 'Three mornings kept — or hold the lamp line — lights the porch.'
   }
   if (id === 'journal') {
@@ -226,11 +226,11 @@ function needForTier(id: CityPlotId, want: number, easy: boolean): string {
   if (want === 3) {
     if (STREET_LOTS.includes(id)) {
       return easy
-        ? 'Finish a second walk, hold a claim, or Link the street.'
+        ? 'Finish a second walk here, or connect sentence → place → person.'
         : 'A second walk, a held claim, or Link the street furnishes this house.'
     }
     return easy
-      ? 'Finish a second walk here, or hold a claim from this lot.'
+      ? 'Finish a second walk here, or hold a claim — a claim is what we hold to be true.'
       : 'A second walk or a held claim from this lot furnishes the rooms.'
   }
   return easy

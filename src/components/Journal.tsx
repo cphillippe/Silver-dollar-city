@@ -74,8 +74,8 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
           ← Journal
         </button>
         <section className="rehearse-anchor">
-          <p className="eyebrow">Takeaway</p>
-          <h1>{focusedEntry?.title ?? STORY.tapTakeaway}</h1>
+          <p className="eyebrow">{easy ? 'The sentence to remember' : 'Takeaway'}</p>
+          <h1>{focusedEntry?.title ?? (easy ? EASY.rememberSentence : STORY.tapTakeaway)}</h1>
           <RecallGate
             brief={quizBrief}
             mode="review"
@@ -139,7 +139,7 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
                     })
                   }
                 >
-                  {STORY.tapTakeaway}
+                  {easy ? EASY.rememberSentence : STORY.tapTakeaway}
                 </button>
               </article>
             ))}
@@ -166,7 +166,7 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
         <p>
           {open} of {total} unsealed · {percent}% of the dossier · {heldCount}{' '}
           lines held from memory
-          {waiting ? ` · ${waiting} due to dust off` : ''}.{' '}
+          {waiting ? ` · ${waiting} ${easy ? 'due to read again' : 'due to dust off'}` : ''}.{' '}
           {easy
             ? `${EASY.claimTeach} Open pages start face-down — rebuild the claim, then read.`
             : 'Open pages start face-down — rebuild the claim, then read. Forgetting is why a page comes back.'}
@@ -319,7 +319,8 @@ function JournalCard({
   learning?: Learning
   today: string
 }) {
-  const { recordHeld, recordReview } = useProgress()
+  const { recordHeld, recordReview, progress } = useProgress()
+  const easy = isEasy(progress)
   const need = trailDaysRequired(entry.unlockAfter)
   const brief = evidenceForJournal(entry.unlockAfter, entry.id)
   const due = trace ? isDue(trace, today) : false
@@ -372,12 +373,12 @@ function JournalCard({
                 className="btn primary"
                 onClick={() => setQuizAgain(true)}
               >
-                {STORY.tapTakeaway}
+                {easy ? EASY.rememberSentence : STORY.tapTakeaway}
               </button>
             </>
           ) : brief && quizAgain ? (
             <>
-              <p className="eyebrow">{STORY.tapTakeaway}</p>
+              <p className="eyebrow">{easy ? EASY.rememberSentence : STORY.tapTakeaway}</p>
               <RecallGate
                 brief={brief}
                 kicker={due ? STORY.tapTakeaway : 'Journal recall'}

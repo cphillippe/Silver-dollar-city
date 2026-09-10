@@ -10,6 +10,7 @@ import {
   pillarFor,
   totalChallenges,
 } from '../content'
+import { isEasy } from '../lib/easy'
 import { localDateKey } from '../lib/dates'
 import {
   dueTraces,
@@ -172,7 +173,9 @@ export function getNextGoal(
       kind: 'daily',
       title: 'Today’s Trail',
       detail: due
-        ? 'Time to dust off a page · about a minute'
+        ? isEasy(progress)
+          ? 'Read a saved page · about a minute'
+          : 'Time to dust off a page · about a minute'
         : `${dailyForDate(today, progress.dailyDates.filter((d) => d !== today).length).challenge.title} · about a minute`,
     }
   }
@@ -212,7 +215,9 @@ export function getNextGoal(
   return {
     kind: 'vista',
     title: 'The lookout is yours',
-    detail: 'Every area is open. Sit with the journal — or rehearse a takeaway.',
+    detail: isEasy(progress)
+      ? 'Every area is open. Sit with the journal — or choose a sentence to remember.'
+      : 'Every area is open. Sit with the journal — or rehearse a takeaway.',
   }
 }
 
@@ -232,23 +237,34 @@ export function nextRebuildHint(
   const due = dueForRecall(progress, today).find((item) => item.brief)
   if (due) {
     const claim = due.brief?.claim ?? due.entry?.title ?? 'A held line'
+    const go = {
+      name: 'journal' as const,
+      focusId: due.entry?.id ?? journalFocusForTrace(due.trace.id),
+      autoQuiz: true,
+    }
+    if (isEasy(progress)) {
+      return {
+        title: 'Choose the sentence to remember.',
+        detail: `${claim} · due this morning`,
+        cta: 'Choose the sentence to remember.',
+        go,
+      }
+    }
     return {
       title: STORY.tapTakeaway,
       detail: `${claim} · due this morning`,
       cta: STORY.tapTakeaway,
-      go: {
-        name: 'journal',
-        focusId: due.entry?.id ?? journalFocusForTrace(due.trace.id),
-        autoQuiz: true,
-      },
+      go,
     }
   }
 
   if (!dailyDoneToday(progress, today)) {
     return {
-      title: 'Next walk',
-      detail: `${dailyForDate(today, progress.dailyDates.filter((d) => d !== today).length).challenge.title} · today’s trail · fold, then rehearse the claim`,
-      cta: 'Walk today’s trail',
+      title: isEasy(progress) ? 'Read today’s story.' : 'Next walk',
+      detail: isEasy(progress)
+        ? `${dailyForDate(today, progress.dailyDates.filter((d) => d !== today).length).challenge.title} · today’s trail`
+        : `${dailyForDate(today, progress.dailyDates.filter((d) => d !== today).length).challenge.title} · today’s trail · fold, then rehearse the claim`,
+      cta: isEasy(progress) ? 'Read today’s story.' : 'Walk today’s trail',
       go: { name: 'daily' },
     }
   }
@@ -261,9 +277,9 @@ export function nextRebuildHint(
   if (upcoming) {
     const brief = evidenceFor(upcoming.id)
     return {
-      title: STORY.tapTakeaway,
+      title: isEasy(progress) ? 'Choose the sentence to remember.' : STORY.tapTakeaway,
       detail: `${brief?.claim ?? findPlayable(upcoming.id)?.challenge.title ?? 'A held line'} · ${nextGapLabel(upcoming, today)}`,
-      cta: STORY.tapTakeaway,
+      cta: isEasy(progress) ? 'Choose the sentence to remember.' : STORY.tapTakeaway,
       go: {
         name: 'journal',
         focusId: journalFocusForTrace(upcoming.id),
@@ -297,7 +313,9 @@ export function nextRebuildHint(
   if (goal.kind === 'vista') {
     return {
       title: 'Next rebuild',
-      detail: 'Sit with a journal page, or rehearse a takeaway.',
+      detail: isEasy(progress)
+        ? 'Sit with a journal page, or choose a sentence to remember.'
+        : 'Sit with a journal page, or rehearse a takeaway.',
       cta: 'Open the journal',
       go: { name: 'journal' },
     }

@@ -1,7 +1,7 @@
 import type { Challenge, SequenceItem } from '../types'
 import type { EvidenceBrief } from '../content/evidence'
 import { plainFor } from '../content/plain'
-import { isEasy } from '../lib/easy'
+import { EASY, isEasy } from '../lib/easy'
 import { WORDS, schoolWordsFor } from '../lib/words'
 import { learningBeat } from '../lib/learning'
 import { learningPicture, toolForEvidence } from '../lib/watchTools'
@@ -37,6 +37,7 @@ export function TeachUnlock({ brief, kind, onUnlock, unlock, beats }: TeachUnloc
   return (
     <section className="recall-gate is-encode teach-gate" aria-label="Today’s line">
       <p className="eyebrow">{easy ? 'Learn first' : 'Learn'}</p>
+      <p className="next-tap">{easy ? EASY.readStory : 'Read this, then unlock the play.'}</p>
       {picture ? <GemMark gem={picture} size="sm" /> : null}
       <p className="teach-reason">{story}</p>
       <WordGloss words={school} extra={easy ? plain?.word : undefined} />

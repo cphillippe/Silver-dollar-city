@@ -61,9 +61,13 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
   }
 
   const nextCta = dustOff
-    ? 'Dust this one off'
+    ? easy
+      ? EASY.rememberSentence
+      : 'Dust this one off'
     : goal.kind === 'daily'
-      ? 'Walk today’s trail'
+      ? easy
+        ? EASY.readStory
+        : 'Walk today’s trail'
       : goal.kind === 'vista'
         ? 'Stand at the lookout'
         : goal.kind === 'challenge'
@@ -102,15 +106,25 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
 
   const nextTitle = dustOff
     ? sameDay
-      ? 'Dust off today’s line'
-      : 'Time to dust off this one'
-    : goal.title
+      ? easy
+        ? EASY.readAgain
+        : 'Dust off today’s line'
+      : easy
+        ? EASY.readAgain
+        : 'Time to dust off this one'
+    : easy && goal.kind === 'daily'
+      ? EASY.readStory
+      : goal.title
   const nextDetail = dustOff
     ? sameDay
-      ? 'You stored it this morning. Map the claim again — not a checkbox.'
+      ? easy
+        ? `${EASY.claimTeach} ${EASY.rememberSentence}`
+        : 'You stored it this morning. Map the claim again — not a checkbox.'
       : duePlay
         ? `${duePlay.challenge.title} · an older walk.`
-        : 'An older page is waiting to be rebuilt.'
+        : easy
+          ? 'An older page is waiting to be read again.'
+          : 'An older page is waiting to be rebuilt.'
     : easy
       ? goal.detail
           .replace(/\bparable\b/gi, `parable (${EASY.parable})`)
@@ -129,7 +143,9 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
             {waiting > 1
               ? `${waiting} pages due · about a minute`
               : sameDay
-                ? 'Same-day dust-off · mapping + recall'
+                ? easy
+                  ? 'Same-day read-again · about a minute'
+                  : 'Same-day dust-off · mapping + recall'
                 : 'A spaced recall · about a minute'}
             {dustOff ? ` · ${formatDeviceLocalDate()}` : ''}
           </p>
@@ -144,12 +160,12 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
           <div className="card-lead">
             <Avatar who="mercy" size="sm" />
             <div>
-              <p className="eyebrow">Match idea · place · person.</p>
+              <p className="eyebrow">{easy ? EASY.connectLink : 'Match idea · place · person.'}</p>
               <h2>Link the street</h2>
-              <p className="quiet">{easy ? EASY.linkDemo : 'Idea · place · person'}</p>
+              <p className="quiet">{easy ? EASY.connectLink : 'Idea · place · person'}</p>
               <p className="town-line">
                 {easy
-                  ? 'Match each idea to its place and person. Then it lives in your scrapbook of links.'
+                  ? 'You’ll reopen them from your scrapbook of links. One story at a time.'
                   : 'Snap a claim to its lot and keeper. Lit nodes reopen from the town map.'}
               </p>
               <p className="street-lot-why">

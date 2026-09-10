@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { STREET_BEATS, STREET_CHALLENGE, STREET_WHYS } from '../content/links'
 import { STORY } from '../content/story'
-import { isEasy } from '../lib/easy'
+import { EASY, isEasy } from '../lib/easy'
 import { useJuiceHandoff } from '../lib/juice'
 import { PuzzlePlay } from './PuzzlePlay'
 import { TownReturn } from './TownReturn'
@@ -14,11 +14,11 @@ interface LinkScreenProps {
   onNavigate: (view: View) => void
 }
 
-function LinkDemo() {
+function LinkDemo({ easy }: { easy: boolean }) {
   return (
     <div className="link-demo" aria-label="How to match">
       <div className="link-demo-row">
-        <span className="link-demo-step is-idea">Idea</span>
+        <span className="link-demo-step is-idea">{easy ? 'Sentence' : 'Idea'}</span>
         <span className="link-demo-arrow" aria-hidden>
           →
         </span>
@@ -28,7 +28,7 @@ function LinkDemo() {
         </span>
         <span className="link-demo-step is-person">Person</span>
       </div>
-      <p className="next-tap">Tap idea → place → person</p>
+      <p className="next-tap">{easy ? EASY.connectLink : 'Tap idea → place → person'}</p>
     </div>
   )
 }
@@ -69,7 +69,7 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
             <p className="recall-line rehearse-stem">
               Link the idea to its place and person.
             </p>
-            <LinkDemo />
+            <LinkDemo easy={easy} />
             <PlainTalk id={challenge.id} />
             <p className="quiet">
               {easy
