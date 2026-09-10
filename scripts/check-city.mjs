@@ -982,7 +982,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.3.7')
+assert.equal(APP_VERSION, '1.3.8')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -1230,6 +1230,18 @@ assert.match(
 assert.doesNotMatch(
   readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
   /Acquire · where/,
+)
+assert.doesNotMatch(
+  readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
+  /flat list only/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
+  /Each match lights a spot on the town map/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
+  /You’ll reopen them from your scrapbook of links/,
 )
 assert.match(cssSrc, /next-tap/)
 assert.match(cssSrc, /link-demo/)
