@@ -7,7 +7,6 @@ import { useProgress } from '../../store/progress'
 import { Avatar } from '../Avatar'
 import { PuzzleHint } from './PuzzleHint'
 import { PuzzleLead } from './PuzzleLead'
-import { WinBurst } from './WinBurst'
 
 interface LinkPlayProps {
   challenge: LinkChallenge
@@ -186,11 +185,28 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
           ? '2 of 3 — pick the place.'
           : '3 of 3 — pick the person.'
 
+  if (status === 'ok') {
+    return (
+      <div className="play is-link is-wizard is-finale">
+        <p className="link-complete" role="status">
+          All 3 links complete
+        </p>
+        <ol className="link-checks" aria-label="All links">
+          <li className="is-done">✓ {easy ? 'Sentence' : 'Idea'}</li>
+          <li className="is-done">✓ Place</li>
+          <li className="is-done">✓ Person</li>
+        </ol>
+        <button type="button" className="btn gold xl link-next" onClick={finishStreet}>
+          Done
+        </button>
+      </div>
+    )
+  }
+
   return (
     <div
-      className={`play is-link is-wizard ${easy ? 'is-easy-link' : ''} ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}
+      className={`play is-link is-wizard ${easy ? 'is-easy-link' : ''} ${shake ? 'is-shake' : ''}`}
     >
-      <WinBurst play={status === 'ok'} />
       <PuzzleLead challenge={challenge} />
       <PuzzleHint text={challenge.context} id={challenge.id} onPeek={onPeek} />
       <p className="next-tap">{nextTap}</p>
@@ -229,30 +245,17 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
         </p>
       ) : null}
 
-      {misses > 0 && status !== 'ok' && step !== 'linked' ? (
+      {misses > 0 && step !== 'linked' ? (
         <button type="button" className="btn tiny match-recover" onClick={recover}>
           Try again
         </button>
       ) : null}
 
-      {status === 'ok' ? (
-        <>
-          <p className="link-complete" role="status">
-            All 3 links complete
-          </p>
-          <button type="button" className="btn gold xl link-next" onClick={finishStreet}>
-            Done
-          </button>
-        </>
-      ) : null}
-
-      {step === 'linked' && status !== 'ok' ? (
+      {step === 'linked' ? (
         <button type="button" className="btn primary xl link-next" onClick={nextLink}>
           Next
         </button>
-      ) : null}
-
-      {step !== 'linked' && status !== 'ok' ? (
+      ) : (
         <div className="link-grid is-wizard">
           <div className={`link-col is-${step}`}>
             <p className="match-col-label">{stepLabel(step, easy)}</p>
@@ -269,7 +272,7 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
             ))}
           </div>
         </div>
-      ) : null}
+      )}
 
       <p className="match-score">
         {easy
