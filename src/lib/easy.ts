@@ -28,7 +28,5 @@ export function scrapbookLabel(easy: boolean, lit?: number) {
   if (!easy) {
     return lit === undefined ? 'Mind map' : `Mind map · ${lit} lit`
   }
-  return lit === undefined
-    ? 'Your scrapbook of links'
-    : `Your scrapbook of links · ${lit} lit`
+  return lit === undefined ? 'What you matched' : `What you matched · ${lit} lit`
 }

@@ -711,7 +711,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                     }
                     setToolLock(
                       easy
-                        ? `${tool.label} is locked. Hold a matching claim — a claim is what we hold to be true — to deploy it.`
+                        ? `${tool.label} is locked. Keep a matching sentence first.`
                         : `${tool.label} is locked. Hold a matching line to deploy this tool.`,
                     )
                   }}
@@ -724,9 +724,13 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                   <span className="defend-ability-claim">
                     {open
                       ? heldLine?.claim ??
-                        (tool.id === 'love' ? 'A true line can turn a cheap claim.' : 'Hold a line to name this tool.')
+                        (tool.id === 'love'
+                          ? easy
+                            ? 'Love is ready.'
+                            : 'A true line can turn a cheap claim.'
+                          : 'Hold a line to name this tool.')
                       : easy
-                        ? 'Locked — hold a matching claim to deploy it.'
+                        ? 'Locked — keep a matching sentence first.'
                         : 'Hold a matching line'}
                   </span>
                 </button>
@@ -735,7 +739,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           </div>
           {phase === 'lost' ? (
             <div className="defend-lost">
-              <p>Porch flickered. Turn them again.</p>
+              <p>
+                {easy
+                  ? 'You missed the walker — tap the moving person.'
+                  : 'Porch flickered. Turn them again.'}
+              </p>
               <button type="button" className="btn primary" onClick={retry}>
                 Try the night again
               </button>
