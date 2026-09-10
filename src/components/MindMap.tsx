@@ -64,15 +64,17 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
           <Avatar who={graph.person.id} size="md" />
           <div>
             <p className="eyebrow">
-              {easy ? EASY.manage : 'Manage'} · {easy ? 'Level' : 'Level'} {applied} · {tierTitle(applied, easy)}
+              {easy
+                ? `${EASY.manage} · ${applied} · ${tierTitle(applied, easy)}`
+                : `Manage · Level ${applied} · ${tierTitle(applied, easy)}`}
             </p>
             <h2>{graph.placeTitle}</h2>
-            <p className="quiet">{lotWhy(graph.plotId, easy)}</p>
           </div>
           <button type="button" className="btn tiny" onClick={onClose}>
             Close
           </button>
         </header>
+        <p className="quiet">{lotWhy(graph.plotId, easy)}</p>
 
         <WordGloss words={[WORDS.upgrade]} />
         {easy ? <p className="quiet">{WORDS.claim.teach}</p> : null}
