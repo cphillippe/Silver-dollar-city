@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.27',
+    title: 'The town grows into Heaven',
+    when: '2026-09-11',
+    items: [
+      'The map starts as Eden — porch, creek garden, a star on the ridge. Streets and houses appear as you walk, hold, and Build this.',
+      'Heaven is earned. The trail climbs as you keep the lines. City of Heaven stands when the lookout is lit and the lines still hold.',
+    ],
+  },
+  {
     version: '1.4.26',
     title: 'Town names sit in their own slots',
     when: '2026-09-11',

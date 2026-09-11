@@ -4181,6 +4181,18 @@ img.gem-heart {
   stroke-linecap: round;
 }
 
+.city-street.is-empty,
+.city-creek.is-empty {
+  stroke: rgba(244, 234, 210, 0.04);
+  stroke-width: 3;
+}
+
+.city-street.is-scaffold,
+.city-creek.is-scaffold {
+  stroke: rgba(255, 159, 26, 0.45);
+  stroke-width: 5;
+}
+
 .city-street.is-built,
 .city-creek.is-built {
   stroke: #ff9f1a;
@@ -4312,6 +4324,13 @@ img.gem-heart {
   --city-sky-3: #2a1070;
 }
 
+:root:not([data-theme='dusk']):not([data-theme='parchment']) .city-overworld.is-age-town .city-svg {
+  --city-sky-0: #ffcc33;
+  --city-sky-1: #ff5a7a;
+  --city-sky-2: #c86bff;
+  --city-sky-3: #3a1480;
+}
+
 :root:not([data-theme='dusk']):not([data-theme='parchment']) .city-overworld.is-age-gold .city-svg {
   --city-sky-0: #fff6b8;
   --city-sky-1: #ffcc33;
@@ -4352,20 +4371,17 @@ img.gem-heart {
   stroke: rgba(255, 246, 184, 0.28);
   stroke-width: 3.5;
   stroke-linecap: round;
-  stroke-dasharray: 5 8;
 }
 
 .city-spine.is-village .city-spine-line,
 .city-spine.is-town .city-spine-line {
   stroke: rgba(255, 204, 51, 0.55);
-  stroke-dasharray: 8 6;
 }
 
 .city-spine.is-gold .city-spine-line,
 .city-spine.is-heaven .city-spine-line {
   stroke: #ffcc33;
   stroke-width: 5;
-  stroke-dasharray: none;
   filter: url(#city-glow);
 }
 
@@ -4379,28 +4395,47 @@ img.gem-heart {
   fill: #ffcc33;
 }
 
+.city-spine-mark.is-wait {
+  opacity: 0.28;
+}
+
 .city-spine-core {
   fill: #fff6d4;
 }
 
 .city-heaven {
-  opacity: 0.32;
+  cursor: pointer;
 }
 
-.city-heaven.is-village {
-  opacity: 0.42;
-}
-
-.city-heaven.is-town {
-  opacity: 0.58;
-}
-
-.city-heaven.is-gold {
-  opacity: 0.84;
-}
-
-.city-heaven.is-heaven {
+.city-heaven.is-seed,
+.city-heaven.is-wait {
   opacity: 1;
+}
+
+.city-heaven.is-rise {
+  opacity: 0.86;
+}
+
+.city-heaven.is-ridge {
+  opacity: 0.94;
+}
+
+.city-heaven.is-city {
+  opacity: 1;
+}
+
+.city-heaven-seed {
+  fill: #fffce8;
+  stroke: #ffcc33;
+  stroke-width: 2;
+  filter: url(#city-glow);
+}
+
+.city-heaven-foot {
+  fill: none;
+  stroke: rgba(255, 246, 184, 0.7);
+  stroke-width: 3;
+  stroke-linecap: round;
 }
 
 .city-heaven-gate {
