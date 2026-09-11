@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.18',
+    title: 'Only one person on the road',
+    when: '2026-09-11',
+    items: [
+      'Night Watch hides the road lamps while Tap this person is up, so only one glowing person is on the board.',
+      'A wrong match starts Wrong. Tap This one. then names the card.',
+      'Love says Love — tap the person until you tap.',
+    ],
+  },
+  {
     version: '1.4.17',
     title: 'Only one person + tap order',
     when: '2026-09-11',
