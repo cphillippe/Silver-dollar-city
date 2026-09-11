@@ -679,7 +679,11 @@ export function CityMap({
           ) : (
             isEasy(progress) ? (
               <>
-                <p className="eyebrow">{CITY_AGE_TITLE[age]} — growing toward Heaven</p>
+                <p className="eyebrow">
+                  {age === 'heaven'
+                    ? 'City of Heaven — you kept the trail'
+                    : `${CITY_AGE_TITLE[age]} — growing toward Heaven`}
+                </p>
                 <p className="city-gift">{gift}</p>
                 {lockNote ? (
                   <p className="city-lock-toast" role="status">
