@@ -2398,6 +2398,19 @@ img.gem-heart {
   margin-bottom: 28px;
 }
 
+.saved-tree > summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.saved-tree > summary::-webkit-details-marker {
+  display: none;
+}
+
+.saved-tree[open] > summary {
+  margin-bottom: 12px;
+}
+
 .chapter-head {
   display: flex;
   gap: 12px;
@@ -3378,7 +3391,8 @@ img.gem-heart {
   display: block;
   width: 100%;
   height: auto;
-  min-height: 268px;
+  aspect-ratio: 640 / 420;
+  min-height: 0;
   border-radius: 24px;
   border: 2px solid rgba(255, 204, 51, 0.45);
   box-shadow: 0 18px 44px rgba(58, 20, 128, 0.45);
@@ -3386,12 +3400,6 @@ img.gem-heart {
   overflow: hidden;
   position: relative;
   z-index: 1;
-}
-
-@media (max-width: 430px) {
-  .city-svg {
-    min-height: 300px;
-  }
 }
 
 .city-overworld.is-revealing .city-svg {
@@ -4349,10 +4357,13 @@ img.gem-heart {
 .city-heaven-label {
   fill: #fffce8;
   font-family: var(--sans);
-  font-size: 9px;
-  letter-spacing: 0.12em;
+  font-size: 11px;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  font-weight: 700;
+  font-weight: 800;
+  paint-order: stroke;
+  stroke: #3a1480;
+  stroke-width: 3px;
 }
 
 .theme-picks {
@@ -4687,7 +4698,7 @@ html[data-theme='dusk'] .hub.is-town .street-link {
   width: 100%;
   height: auto;
   min-height: 0;
-  max-height: 36vh;
+  max-height: none;
 }
 
 .hub.is-town .city-legend {
@@ -6376,19 +6387,13 @@ html[data-easy='on'] .link-block.is-not {
 }
 
 html[data-easy='on'] .city-plot-tag {
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 800;
-  stroke-width: 5px;
+  stroke-width: 4px;
 }
 
 html[data-easy='on'] .city-plot-tag-bg {
-  fill: rgba(28, 8, 56, 0.88);
-}
-
-@media (max-width: 430px) {
-  html[data-easy='on'] .hub.is-town .city-svg {
-    min-height: 340px;
-  }
+  fill: rgba(28, 8, 56, 0.92);
 }
 
 .mind-map {
@@ -6652,6 +6657,18 @@ html[data-theme='dusk'] .mind-map-card {
 
 .profile-section {
   margin: 0 0 22px;
+}
+
+.profile-section.saved-tree > summary {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  margin: 0;
+}
+
+.profile-section.saved-tree > summary strong {
+  font-size: 1.2rem;
 }
 
 .profile-section h2 {

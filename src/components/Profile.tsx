@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { CAST } from '../content/story'
 import { EASY, easyFacingLine, isEasy } from '../lib/easy'
 import { profileInventory, openIdeaView, openPlaceView } from '../lib/profile'
@@ -44,9 +45,11 @@ export function Profile({ onNavigate }: ProfileProps) {
         </div>
       </header>
 
-      <section className="profile-section" aria-label={easy ? EASY.saved : 'Held ideas'}>
-        <p className="eyebrow">{easy ? EASY.saved : 'Held ideas / proofs'}</p>
-        <h2>What you can still say</h2>
+      <TreeFold
+        open
+        label={easy ? EASY.saved : 'Held ideas / proofs'}
+        title="What you can still say"
+      >
         {easy ? (
           <p className="quiet">These are the main ideas you kept.</p>
         ) : null}
@@ -84,11 +87,9 @@ export function Profile({ onNavigate }: ProfileProps) {
             </article>
           ))
         )}
-      </section>
+      </TreeFold>
 
-      <section className="profile-section" aria-label="Places">
-        <p className="eyebrow">Places</p>
-        <h2>Lots that remember you</h2>
+      <TreeFold label="Places" title="Lots that remember you">
         {inv.places.map((place) => (
           <article key={place.id} className="profile-unlock">
             <button
@@ -118,11 +119,9 @@ export function Profile({ onNavigate }: ProfileProps) {
             </button>
           </article>
         ))}
-      </section>
+      </TreeFold>
 
-      <section className="profile-section" aria-label="People">
-        <p className="eyebrow">People</p>
-        <h2>Who walks with you</h2>
+      <TreeFold label="People" title="Who walks with you">
         {inv.people.length === 0 ? (
           <p className="quiet">Juniper waits on the east porch.</p>
         ) : (
@@ -144,11 +143,12 @@ export function Profile({ onNavigate }: ProfileProps) {
             </article>
           ))
         )}
-      </section>
+      </TreeFold>
 
-      <section className="profile-section" aria-label={easy ? EASY.uses : 'Tools'}>
-        <p className="eyebrow">{easy ? EASY.uses : 'Tools / abilities'}</p>
-        <h2>{easy ? EASY.uses : 'What you can deploy'}</h2>
+      <TreeFold
+        label={easy ? EASY.uses : 'Tools / abilities'}
+        title={easy ? EASY.uses : 'What you can deploy'}
+      >
         {inv.tools.map((tool) => (
           <article
             key={tool.id}
@@ -183,11 +183,12 @@ export function Profile({ onNavigate }: ProfileProps) {
             )}
           </article>
         ))}
-      </section>
+      </TreeFold>
 
-      <section className="profile-section" aria-label={easy ? EASY.connections : 'Mind-map links'}>
-        <p className="eyebrow">{easy ? EASY.connections : 'Mind-map links'}</p>
-        <h2>{easy ? 'Places linked' : 'Idea · place · person'}</h2>
+      <TreeFold
+        label={easy ? EASY.connections : 'Mind-map links'}
+        title={easy ? 'Places linked' : 'Idea · place · person'}
+      >
         {inv.streetLinked ? (
           inv.links.map((link) => (
             <article key={link.id} className="profile-unlock">
@@ -220,7 +221,29 @@ export function Profile({ onNavigate }: ProfileProps) {
               : 'Link the street from Town to snap idea · place · person. Lit nodes reopen here.'}
           </p>
         )}
-      </section>
+      </TreeFold>
     </main>
+  )
+}
+
+function TreeFold({
+  open = false,
+  label,
+  title,
+  children,
+}: {
+  open?: boolean
+  label: string
+  title: string
+  children: ReactNode
+}) {
+  return (
+    <details className="profile-section saved-tree" open={open}>
+      <summary>
+        <span className="eyebrow">{label}</span>
+        <strong>{title}</strong>
+      </summary>
+      {children}
+    </details>
   )
 }

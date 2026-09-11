@@ -31,7 +31,6 @@ import {
   type CityUpgrade,
 } from '../lib/city'
 import {
-  areaGateCopy,
   dailyDoneToday,
   isAreaComplete,
   isAreaUnlocked,
@@ -44,11 +43,9 @@ import { isEasy } from '../lib/easy'
 import type { View } from '../types'
 import riverWalk from '../assets/cast/portrait-river.png'
 import juniperWalk from '../assets/cast/portrait-juniper.png'
-import { mindMapHasLit } from '../lib/mindMap'
 import {
   anyUpgradeReady,
   canUpgrade,
-  lotTapWhy,
   easyPlotTag,
   plotTag,
   visualFills,
@@ -89,6 +86,18 @@ const FOLK: Record<CityPlotId, { x: number; y: number }> = {
   lamps: { x: 178, y: 358 },
   gate: { x: 538, y: 322 },
   porch: { x: 534, y: 356 },
+}
+
+/** Easy chips sit under portraits, inside the 640×420 viewBox, without overlapping. */
+const EASY_TAG_SLOT: Record<CityPlotId, { x: number; y: number }> = {
+  hollow: { x: 128, y: 368 },
+  journal: { x: 258, y: 214 },
+  bench: { x: 392, y: 368 },
+  porch: { x: 500, y: 368 },
+  lamps: { x: 196, y: 348 },
+  gate: { x: 498, y: 230 },
+  observatory: { x: 410, y: 96 },
+  lookout: { x: 508, y: 52 },
 }
 
 const FULL_CAM = { x: 0, y: 0, w: 640, h: 420 }
@@ -168,33 +177,6 @@ export function CityMap({
     window.setTimeout(() => {
       setTapped((cur) => (cur === id ? null : cur))
     }, 340)
-    const st = stageOf(id)
-    const why = (() => {
-      const spec = CITY_PLOTS.find((plot) => plot.id === id)
-      const areaId = spec?.areaId
-      const unlocked = areaId ? isAreaUnlocked(areaId, progress.completed) : true
-      return lotTapWhy(
-        id,
-        progress,
-        isEasy(progress),
-        unlocked,
-        areaId ? areaGateCopy(areaId, progress.completed, isEasy(progress)) : '',
-        doneToday,
-      )
-    })()
-    const easyStreet =
-      isEasy(progress) && (id === 'porch' || id === 'hollow' || id === 'bench')
-    if (st === 'empty' && id !== nextId && !mindMapHasLit(id, progress) && !canUpgrade(id, progress)) {
-      if (easyStreet) {
-        setLockNote(null)
-        setMindPlot(id)
-        return
-      }
-      setLockNote(why ?? (isEasy(progress)
-        ? 'This lot is locked. Finish the street before it first.'
-        : 'This lot is still empty. Finish the earlier street so this lot unlocks.'))
-      return
-    }
     setLockNote(null)
     setMindPlot(id)
   }
@@ -526,6 +508,8 @@ export function CityMap({
           </g>
         ) : null}
 
+        <path d="M-10 368 Q 180 340 320 358 T 660 372 V430 H-10 Z" fill="#148a48" />
+
         {mode === 'live' && !celebrating ? (
           <g className="city-next-mark" transform={`translate(${nextAt.x} ${nextAt.y})`}>
             <circle r="34" className="city-next-halo" />
@@ -622,8 +606,6 @@ export function CityMap({
           ready={canUpgrade('porch', progress)}
           onOpen={open}
         />
-
-        <path d="M-10 368 Q 180 340 320 358 T 660 372 V430 H-10 Z" fill="#148a48" />
 
         {mode === 'live'
           ? CITY_PLOTS.map((plot) => (
@@ -783,7 +765,7 @@ function HeavenCity({ age }: { age: CityAge }) {
       <rect className="city-heaven-tower" x="602" y="14" width="10" height="26" rx="1" />
       <path className="city-heaven-spire" d="M543 18 l5-10 5 10" />
       <path className="city-heaven-spire" d="M607 14 l5-12 5 12" />
-      <text className="city-heaven-label" x="575" y="8" textAnchor="middle">
+      <text className="city-heaven-label" x="548" y="22" textAnchor="middle">
         City of Heaven
       </text>
     </g>
@@ -819,12 +801,17 @@ function PlotGroup({
     easy && id === 'journal'
       ? 'River’s pages'
       : (CITY_PLOTS.find((plot) => plot.id === id)?.title ?? id)
-  const scale = easy ? 1.92 : BUILD_SCALE
-  const hit = easy ? 64 : 42
+  const scale = BUILD_SCALE
+  const hit = easy ? 56 : 42
   const tag = easy ? easyPlotTag(id) : plotTag(id)
-  const showTag = clickable || (easy && streetLot)
-  const tagW = Math.max(easy ? 96 : 64, tag.length * (easy ? 11 : 8) + 24)
-  const tagX = Math.min(632 - tagW / 2, Math.max(tagW / 2 + 8, at.x))
+  const showTag = easy ? streetLot : clickable
+  const slot = easy ? EASY_TAG_SLOT[id] : null
+  const tagW = Math.max(easy ? 88 : 64, tag.length * (easy ? 9 : 8) + 20)
+  const tagX = slot
+    ? Math.min(632 - tagW / 2, Math.max(tagW / 2 + 8, slot.x))
+    : Math.min(632 - tagW / 2, Math.max(tagW / 2 + 8, at.x))
+  const tagY = slot ? slot.y : at.y + 32
+  const tagH = easy ? 24 : 18
   return (
     <g
       className={`city-plot is-${stage} ${next ? 'is-next' : ''} ${rising ? 'is-rising' : ''} ${tapped ? 'is-tapped' : ''} ${ready ? 'is-ready' : ''} ${easy ? 'is-easy-lot' : ''}`}
@@ -865,12 +852,12 @@ function PlotGroup({
           <rect
             className="city-plot-tag-bg"
             x={tagX - tagW / 2}
-            y={at.y + (easy ? 36 : 32)}
+            y={tagY - (easy ? 16 : 14)}
             width={tagW}
-            height={easy ? 28 : 18}
+            height={tagH}
             rx={easy ? 10 : 7}
           />
-          <text className="city-plot-tag" x={tagX} y={at.y + (easy ? 56 : 46)} textAnchor="middle">
+          <text className="city-plot-tag" x={tagX} y={tagY} textAnchor="middle">
             {tag}
           </text>
         </>

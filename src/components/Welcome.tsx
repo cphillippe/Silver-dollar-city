@@ -50,18 +50,29 @@ export function Welcome({ onNavigate }: WelcomeProps) {
           </figure>
         </div>
         <div className="welcome-actions">
-          <label className="welcome-easy">
-            <input
-              type="checkbox"
-              checked={Boolean(progress.easyMode)}
-              onChange={(event) => setEasyMode(event.target.checked)}
-            />
-            New here? Easier words · bigger taps
-          </label>
+          <p className="eyebrow">Reading</p>
+          <div className="settings-actions">
+            <button
+              type="button"
+              className={`btn ${progress.easyMode ? 'primary' : ''}`}
+              aria-pressed={Boolean(progress.easyMode)}
+              onClick={() => setEasyMode(true)}
+            >
+              Easy
+            </button>
+            <button
+              type="button"
+              className={`btn ${progress.easyMode ? '' : 'primary'}`}
+              aria-pressed={!progress.easyMode}
+              onClick={() => setEasyMode(false)}
+            >
+              Hard
+            </button>
+          </div>
           <p className="quiet welcome-easy-note">
             {progress.easyMode
-              ? `${EASY.claimTeach} Shorter sentences and bigger taps. You can change this in Settings.`
-              : 'Optional. You can turn this on later in Settings → Reading. We teach hard words first — a claim is the main idea we hold to be true.'}
+              ? `${EASY.claimTeach} Easier words · bigger taps. You can change this in Settings.`
+              : 'Hard keeps the full voice. You can switch anytime in Settings → Reading. We teach hard words first — a claim is the main idea we hold to be true.'}
           </p>
           {progress.easyMode ? (
             <p className="teach-chip" role="note">
