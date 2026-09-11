@@ -90,7 +90,7 @@ export function easyTapNext(goal: { kind: string; areaId?: string }): string {
   if (goal.kind === 'daily') return 'Tap this next — short Jesus story'
   if (goal.kind === 'vista') return 'Tap this next — the lookout'
   if (goal.kind === 'welcome') return 'Tap this next — begin'
-  if (goal.areaId === 'parable-hollow') return 'Tap this next — Jesus-story walk'
+  if (goal.areaId === 'parable-hollow') return 'Tap this next — Mercy’s creek'
   if (goal.areaId === 'witness-bench') return 'Tap this next — public names'
   if (goal.areaId === 'observatory') return 'Tap this next — sky walk'
   if (goal.areaId === 'first-gate') return 'Tap this next — why a world'

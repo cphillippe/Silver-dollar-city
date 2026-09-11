@@ -45,7 +45,7 @@ export function Profile({ onNavigate }: ProfileProps) {
       </header>
 
       <section className="profile-section" aria-label="Held ideas">
-        <p className="eyebrow">Held ideas / proofs</p>
+        <p className="eyebrow">{easy ? 'Held ideas' : 'Held ideas / proofs'}</p>
         <h2>What you can still say</h2>
         {easy ? (
           <p className="quiet">These are the main ideas you kept.</p>
@@ -85,9 +85,25 @@ export function Profile({ onNavigate }: ProfileProps) {
               className="profile-unlock-hit"
               onClick={() => onNavigate(openPlaceView(place.id))}
             >
-              <p className="eyebrow">{place.stage}</p>
-              <strong>{place.title}</strong>
-              <p>{place.blurb}</p>
+              <p className="eyebrow">
+                {easy
+                  ? place.stage === 'scaffold'
+                    ? 'Wood up'
+                    : place.stage === 'empty'
+                      ? 'Empty lot'
+                      : place.stage === 'lit'
+                        ? 'Lamps on'
+                        : 'House up'
+                  : place.stage}
+              </p>
+              <strong>
+                {easy && place.id === 'journal' ? 'River’s pages' : place.title}
+              </strong>
+              <p>
+                {easy && place.id === 'bench'
+                  ? 'Silas copies names on the square. Public names, not parables.'
+                  : place.blurb}
+              </p>
             </button>
           </article>
         ))}

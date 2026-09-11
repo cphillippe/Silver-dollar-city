@@ -23,7 +23,7 @@ export const LOT_STORY: Record<CityPlotId, LotStory> = {
   },
   bench: {
     path: 'Names',
-    whyEasy: 'Silas copies names at the square. Public reports live in a ledger, not under the oaks.',
+    whyEasy: 'Silas copies names at the square. Public names live here, not under the oaks.',
     whyHard:
       'The Witness Bench faces the square. Died, buried, raised, appeared is a public creed — Silas keeps it where names and dates are copied.',
   },
@@ -66,7 +66,7 @@ export function lotWhy(id: CityPlotId, easy: boolean): string {
 
 /** Soften formal place names on Easy — title can stay; this is the subtitle. */
 export function easyPlaceSub(id: CityPlotId): string | null {
-  if (id === 'hollow') return 'Jesus-story creek · Mercy’s place'
+  if (id === 'hollow') return 'Mercy’s creek · Jesus stories'
   if (id === 'bench') return 'the square · Silas’s place'
   if (id === 'porch') return 'Juniper’s lamp'
   if (id === 'observatory') return 'Nora’s sky watch'

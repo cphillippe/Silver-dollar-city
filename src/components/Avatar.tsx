@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import type { CharacterId } from '../content/story'
 import { CAST } from '../content/story'
 import ansel from '../assets/cast/portrait-ansel.png'
@@ -57,9 +58,11 @@ export function Avatar({ who, size = 'md', className = '' }: AvatarProps) {
 export function WalkerFace({
   kind,
   className = '',
+  style,
 }: {
   kind: WalkerKind
   className?: string
+  style?: CSSProperties
 }) {
   return (
     <img
@@ -68,6 +71,7 @@ export function WalkerFace({
       alt=""
       draggable={false}
       aria-hidden
+      style={style}
     />
   )
 }

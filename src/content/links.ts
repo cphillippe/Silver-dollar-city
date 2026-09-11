@@ -138,19 +138,19 @@ const LINK_CLUES: Record<string, Record<LinkStep, string>> = {
 
 const LINK_MISSES: Record<string, Record<LinkStep, string>> = {
   'mercy-hollow': {
-    idea: 'Wrong match. This story is Mercy’s Jesus story — the neighbor who stops on the road.',
-    place: 'Wrong match. That story lives at the creek with Mercy.',
-    person: 'Wrong match. Mercy keeps that creek.',
+    idea: 'Wrong match. Pick the sentence about the neighbor who stops to help.',
+    place: 'Wrong match. Pick the creek — that is Mercy’s place.',
+    person: 'Wrong match. Pick Mercy — she keeps that creek.',
   },
   'silas-bench': {
-    idea: 'Wrong match. This story is Silas’s public names at the square.',
-    place: 'Wrong match. Those names sit at the square.',
-    person: 'Wrong match. Silas keeps that square.',
+    idea: 'Wrong match. Pick the sentence about died, buried, raised, appeared.',
+    place: 'Wrong match. Pick the square — that is Silas’s place.',
+    person: 'Wrong match. Pick Silas — he keeps that square.',
   },
   'juniper-porch': {
-    idea: 'Wrong match. This story is Juniper’s lamp on the porch.',
-    place: 'Wrong match. That lamp lives on the porch.',
-    person: 'Wrong match. Juniper keeps that porch.',
+    idea: 'Wrong match. Pick the sentence about a lamp meant to be seen.',
+    place: 'Wrong match. Pick the porch — that is where the lamp lives.',
+    person: 'Wrong match. Pick Juniper — she keeps that porch.',
   },
 }
 
@@ -163,13 +163,13 @@ export function linkClue(tripleId: string, step: LinkStep): string {
 export function linkMiss(tripleId: string, step: LinkStep): string {
   return (
     LINK_MISSES[tripleId]?.[step] ??
-    'Wrong match. Pick the sentence, then the place, then the person.'
+    'Wrong match. Pick the sentence that fits this story.'
   )
 }
 
 /** Short label under the picture — not the full claim wall. */
 export function linkCaption(node: LinkNode, easy: boolean): string {
-  if (easy && node.id === 'place-hollow') return 'Jesus-story creek'
+  if (easy && node.id === 'place-hollow') return 'Mercy’s creek'
   if (node.kind === 'idea') {
     if (node.evidenceId === 'daily-lantern') return 'A lamp is meant to be seen.'
     if (node.evidenceId === 'ph-road') {
@@ -187,7 +187,7 @@ export const STREET_WHYS: Record<(typeof STREET_CHALLENGE.triples)[number]['id']
     hard: 'Mercy Wren keeps Parable Hollow: Jesus taught in pictures by the road and the water. Neighbor is the one who shows mercy — that line belongs with the storyteller, not the clerk.',
   },
   'silas-bench': {
-    easy: 'Silas copies names at the square. The old shared belief — died, buried, raised — sits in a public ledger.',
+    easy: 'Silas copies names at the square. The old shared belief — died, buried, raised — sits with the public names.',
     hard: 'Silas Page keeps the Witness Bench on the square. Died, buried, raised, appeared is a public creed. It belongs in a ledger hall, not under the oaks.',
   },
   'juniper-porch': {

@@ -84,13 +84,19 @@ export function towerCooldown(stage: CityStage): number {
   return 700
 }
 
+/** Easy walker face is HTML CSS px — not SVG viewBox units (those get crushed). */
+export const EASY_WALKER_FACE_PX = 128
+export const EASY_WALKER_HIT_PX = 160
+export const EASY_CUE_HOLD_MS = 1800
+export const EASY_MISS_HOLD_MS = 1400
+
 export function waveSpeed(easy = false): number {
-  if (easy) return prefersReducedMotion() ? 0.02 : 0.032
+  if (easy) return prefersReducedMotion() ? 0.008 : 0.01
   return prefersReducedMotion() ? 0.042 : 0.086
 }
 
 export function waveSpawnEvery(easy = false): number {
-  if (easy) return prefersReducedMotion() ? 3.4 : 2.4
+  if (easy) return prefersReducedMotion() ? 4.2 : 3.8
   return prefersReducedMotion() ? 2.05 : 1.08
 }
 

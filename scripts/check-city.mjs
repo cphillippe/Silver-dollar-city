@@ -22,7 +22,16 @@ import { highLookout } from '../src/content/highLookout.ts'
 import { observatory } from '../src/content/observatory.ts'
 import { parableHollow } from '../src/content/parableHollow.ts'
 import { witnessBench } from '../src/content/witnessBench.ts'
-import { abilityRange, defendPads, heavenPoint, raidForWave, unlockedWatchAbilities } from '../src/lib/defend.ts'
+import {
+  abilityRange,
+  defendPads,
+  EASY_CUE_HOLD_MS,
+  EASY_WALKER_FACE_PX,
+  EASY_WALKER_HIT_PX,
+  heavenPoint,
+  raidForWave,
+  unlockedWatchAbilities,
+} from '../src/lib/defend.ts'
 import {
   deployFit,
   toolForEvidence,
@@ -1009,7 +1018,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.14')
+assert.equal(APP_VERSION, '1.4.15')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -1158,8 +1167,9 @@ assert.doesNotMatch(linkPlaySrc, /Those don/)
   assert.match(linkClue('silas-bench', 'place'), /square/)
   assert.match(linkClue('juniper-porch', 'person'), /Juniper|porch/)
   assert.match(linkMiss('mercy-hollow', 'idea'), /Wrong match/)
-  assert.match(linkMiss('mercy-hollow', 'idea'), /creek|Mercy|neighbor/)
+  assert.match(linkMiss('mercy-hollow', 'idea'), /Pick the sentence about the neighbor who stops to help/)
   assert.doesNotMatch(linkMiss('mercy-hollow', 'idea'), /neighbor-line/)
+  assert.doesNotMatch(linkMiss('mercy-hollow', 'idea'), /This story is Mercy/)
   assert.match(linkMiss('silas-bench', 'place'), /Wrong match/)
   assert.match(linkMiss('juniper-porch', 'person'), /Wrong match/)
 }
@@ -1188,7 +1198,7 @@ assert.match(
     fresh,
     true,
     false,
-    'This street is locked. Finish 2 Jesus-story walks at the creek (0/2), then the square opens.',
+    'This street is locked. Finish 2 Jesus stories at the creek (0/2), then the square opens.',
     false,
   )
   assert.match(benchWhy ?? '', /locked/)
@@ -1474,7 +1484,7 @@ assert.match(hubSrc, /easyTapNext/)
 assert.match(hubSrc, /EASY\.linkStreet/)
 assert.match(
   readFileSync(new URL('../src/content/lots.ts', import.meta.url), 'utf8'),
-  /Jesus-story creek/,
+  /Mercy’s creek · Jesus stories/,
 )
 assert.doesNotMatch(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
@@ -1502,6 +1512,20 @@ assert.match(
 )
 assert.match(defendSrc, /is-easy-walker/)
 assert.match(defendSrc, /waveSpeed\(easy\)/)
+assert.match(defendSrc, /holdWalkers/)
+assert.match(defendSrc, /easy-walker-face/)
+assert.match(defendSrc, /EASY_CUE_HOLD_MS/)
+assert.match(cssSrc, /easy-walker-face/)
+assert.equal(EASY_WALKER_FACE_PX, 128)
+assert.equal(EASY_WALKER_HIT_PX, 160)
+assert.equal(EASY_CUE_HOLD_MS, 1800)
+assert.doesNotMatch(
+  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  /dossier|ledger|scaffold|proofs|Jesus-story walk/,
+)
+assert.doesNotMatch(LOT_STORY.hollow.whyEasy, /dossier|ledger|scaffold|proofs/)
+assert.doesNotMatch(LOT_STORY.bench.whyEasy, /dossier|ledger|scaffold|proofs/)
+assert.doesNotMatch(STREET_WHYS['silas-bench'].easy, /dossier|ledger|scaffold|proofs/)
 assert.doesNotMatch(
   readFileSync(new URL('../src/content/links.ts', import.meta.url), 'utf8'),
   /neighbor-line/,

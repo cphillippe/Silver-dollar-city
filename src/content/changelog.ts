@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.15',
+    title: 'Easy Night Watch crawl + next-pick miss',
+    when: '2026-09-11',
+    items: [
+      'Easy Night Watch walkers are a real HTML face (~128px), not an SVG sprite crushed by the phone board. They freeze under Tap this person, then crawl.',
+      'Easy miss names the next pick: Wrong match. Pick the sentence about the neighbor who stops to help.',
+      'Easy chrome drops dossier, ledger, scaffold, proofs, and Jesus-story walk walls. Main idea stays after the one teach.',
+    ],
+  },
+  {
     version: '1.4.14',
     title: 'Easy Wrong match + bigger Night Watch walkers',
     when: '2026-09-11',

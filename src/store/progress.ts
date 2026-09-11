@@ -77,7 +77,7 @@ export function areaGateCopy(areaId: string, completed: string[], easy = false):
   if (areaId === 'witness-bench') {
     const have = hollowWalksDone(completed)
     return easy
-      ? `This street is locked. Finish 2 Jesus-story walks at the creek (${have}/2), then the square opens.`
+      ? `This street is locked. Finish 2 Jesus stories at the creek (${have}/2), then the square opens.`
       : `Walk ${HOLLOW_WALKS_TO_WITNESS} scenes in Parable Hollow (${have}/${HOLLOW_WALKS_TO_WITNESS}) — then Silas. Unpayable can wait.`
   }
   const area = areas.find((item) => item.id === areaId)

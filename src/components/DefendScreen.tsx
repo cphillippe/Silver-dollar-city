@@ -24,6 +24,10 @@ import {
   unlockedWatchAbilities,
   waveSpawnEvery,
   waveSpeed,
+  EASY_CUE_HOLD_MS,
+  EASY_MISS_HOLD_MS,
+  EASY_WALKER_FACE_PX,
+  EASY_WALKER_HIT_PX,
   type WatchAbility,
 } from '../lib/defend'
 import { findLearning, learningForTool } from '../lib/learning'
@@ -33,7 +37,7 @@ import { useJuiceHandoff } from '../lib/juice'
 import { CITY_PLOTS, type CityPlotId } from '../lib/city'
 import { useProgress } from '../store/progress'
 import type { View, WalkerKind } from '../types'
-import { walkerSrc } from './Avatar'
+import { walkerSrc, WalkerFace } from './Avatar'
 import { AbilityMark } from './GemMark'
 import { RecallGate } from './RecallGate'
 import { TeachUnlock } from './TeachUnlock'
@@ -80,6 +84,10 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const [taught, setTaught] = useState(easy)
   const [walkerCue, setWalkerCue] = useState(easy)
   const walkerCueRef = useRef(easy)
+  const freezeRef = useRef(easy)
+  const holdTimer = useRef(0)
+  const boardRef = useRef<SVGSVGElement>(null)
+  const [boardBox, setBoardBox] = useState({ w: 640, h: 420 })
   const [toolLock, setToolLock] = useState<string | null>(null)
   const [arming, setArming] = useState(false)
   const [phase, setPhase] = useState<'plant' | 'wave' | 'lost'>(easy ? 'wave' : 'plant')
@@ -102,8 +110,23 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const saved = useRef(false)
   const afterJuiceRef = useRef(afterJuice)
   const markMissRef = useRef(markMiss)
+  const holdWalkersRef = useRef((ms: number) => {
+    void ms
+  })
   afterJuiceRef.current = afterJuice
   markMissRef.current = markMiss
+
+  function holdWalkers(ms: number) {
+    if (!easy) return
+    freezeRef.current = true
+    walkerCueRef.current = true
+    setWalkerCue(true)
+    window.clearTimeout(holdTimer.current)
+    holdTimer.current = window.setTimeout(() => {
+      freezeRef.current = false
+    }, ms)
+  }
+  holdWalkersRef.current = holdWalkers
   const live = useRef({
     raiders: [] as Raider[],
     spawned: 0,
@@ -153,14 +176,13 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       const dt = Math.min(0.05, (now - last) / 1000)
       last = now
       spawnAt += dt
-      const cue = walkerCueRef.current
       const next = live.current.raiders.map((item) => {
         if (item.turned) {
           const tool = item.turned ? watchTool(item.turned) : undefined
           const tier = tool ? toolTier(tool, progress) : 1
           return { ...item, heavenT: (item.heavenT ?? 0) + heavenSpeed(tier, easy) * dt }
         }
-        if (cue) return { ...item, t: Math.max(item.t, 0.42) }
+        if (freezeRef.current) return { ...item, t: Math.max(item.t, 0.42) }
         return { ...item, t: item.t + waveSpeed(easy) * dt }
       })
       let leaked = 0
@@ -182,17 +204,18 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         setLeakFlash(true)
         window.setTimeout(() => setLeakFlash(false), 220)
         markMissRef.current(DEFEND_BRIEF_ID)
+        if (easy) holdWalkersRef.current(EASY_MISS_HOLD_MS)
       }
       if (
         live.current.spawned < DEFEND_WAVE_SIZE &&
-        (spawnAt >= waveSpawnEvery(easy) || (cue && live.current.spawned === 0))
+        (spawnAt >= waveSpawnEvery(easy) || (easy && live.current.spawned === 0))
       ) {
         spawnAt = 0
         const id = live.current.spawned
         const cast = raidForWave(progress.defense.cleared, id)
         walking.push({
           id,
-          t: cue && id === 0 ? 0.42 : 0,
+          t: easy && id === 0 ? 0.42 : 0,
           text: cast.text,
           kind: cast.kind,
         })
@@ -213,12 +236,26 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       }
       frame = requestAnimationFrame(tick)
     }
+    if (easy) holdWalkersRef.current(EASY_CUE_HOLD_MS)
     frame = requestAnimationFrame(tick)
     return () => {
       live.current.playing = false
       cancelAnimationFrame(frame)
     }
   }, [phase, easy, progress.defense.cleared])
+
+  useEffect(() => {
+    const node = boardRef.current
+    if (!node) return
+    const sync = () => {
+      const rect = node.getBoundingClientRect()
+      setBoardBox({ w: rect.width, h: rect.height })
+    }
+    sync()
+    const observer = new ResizeObserver(sync)
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [phase, taught, easy])
 
   function togglePad(id: CityPlotId) {
     if (phase !== 'plant') return
@@ -341,6 +378,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   function retry() {
     walkerCueRef.current = easy
     setWalkerCue(easy)
+    freezeRef.current = easy
+    if (easy) holdWalkers(EASY_CUE_HOLD_MS)
     setPhase(easy ? 'wave' : 'plant')
     setWon(false)
     setRaiders([])
@@ -361,11 +400,19 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     )
   }
 
+  function boardPoint(x: number, y: number) {
+    const scale = Math.min(boardBox.w / 640, boardBox.h / 420)
+    return {
+      left: (boardBox.w - 640 * scale) / 2 + x * scale,
+      top: (boardBox.h - 420 * scale) / 2 + y * scale,
+    }
+  }
+
   const after = juiceDone && won
 
   return (
     <main
-      className={`defend-page ${taught ? 'is-puzzle' : 'is-teach'} ${arming ? 'is-arming' : ''} ${won ? 'is-win' : ''} ${shake ? 'is-shake' : ''} ${leakFlash ? 'is-leak' : ''} ${firing ? 'is-firing' : ''}`}
+      className={`defend-page ${taught ? 'is-puzzle' : 'is-teach'} ${arming ? 'is-arming' : ''} ${won ? 'is-win' : ''} ${shake ? 'is-shake' : ''} ${leakFlash ? 'is-leak' : ''} ${firing ? 'is-firing' : ''} ${easy ? 'is-easy-watch' : ''}`}
       aria-label={WATCH_TITLE}
     >
       {!taught ? (
@@ -451,6 +498,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
               </span>
             </p>
             <svg
+              ref={boardRef}
               className={`defend-board ${shake ? 'is-shake' : ''} ${won ? 'is-clear' : ''}`}
               viewBox="0 0 640 420"
               preserveAspectRatio="xMidYMid meet"
@@ -639,7 +687,9 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                   <circle className="defend-impact" cx={shot.to.x} cy={shot.to.y} r="22" />
                 </g>
               ))}
-              {raiders.map((raider) => {
+              {easy
+                ? null
+                : raiders.map((raider) => {
                 const at = raiderAt(raider)
                 const cueTarget =
                   easy &&
@@ -727,6 +777,51 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                 </g>
               ))}
             </svg>
+            {easy ? (
+              <div className="easy-walkers" aria-label="Tap the walking person">
+                {raiders
+                  .filter((raider) => !raider.turned)
+                  .map((raider) => {
+                    const at = raiderAt(raider)
+                    const pos = boardPoint(at.x, at.y)
+                    const cueTarget =
+                      walkerCue && raiders.find((item) => !item.turned)?.id === raider.id
+                    return (
+                      <button
+                        key={raider.id}
+                        type="button"
+                        className={`easy-walker is-easy-walker ${cueTarget ? 'is-cue' : ''}`}
+                        style={{
+                          left: pos.left,
+                          top: pos.top,
+                          width: EASY_WALKER_HIT_PX,
+                          height: EASY_WALKER_HIT_PX,
+                        }}
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          clearWalkerCue()
+                          fireBest()
+                        }}
+                      >
+                        {cueTarget ? (
+                          <span className="easy-walker-arrow" aria-hidden>
+                            ▼
+                          </span>
+                        ) : null}
+                        {cueTarget ? <span className="easy-walker-cue-label">Tap this person</span> : null}
+                        <WalkerFace
+                          kind={raider.kind}
+                          className="easy-walker-face"
+                          style={{
+                            width: EASY_WALKER_FACE_PX,
+                            height: EASY_WALKER_FACE_PX,
+                          }}
+                        />
+                      </button>
+                    )
+                  })}
+              </div>
+            ) : null}
           </div>
           {phase === 'plant' ? (
             <button
