@@ -78,6 +78,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const unlocked = unlockedWatchAbilities(progress)
   const [ability, setAbility] = useState<WatchAbility>(() => unlocked[0] ?? 'love')
   const [taught, setTaught] = useState(easy)
+  const [walkerCue, setWalkerCue] = useState(easy)
+  const walkerCueRef = useRef(easy)
   const [toolLock, setToolLock] = useState<string | null>(null)
   const [arming, setArming] = useState(false)
   const [phase, setPhase] = useState<'plant' | 'wave' | 'lost'>(easy ? 'wave' : 'plant')
@@ -151,12 +153,14 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       const dt = Math.min(0.05, (now - last) / 1000)
       last = now
       spawnAt += dt
+      const cue = walkerCueRef.current
       const next = live.current.raiders.map((item) => {
         if (item.turned) {
           const tool = item.turned ? watchTool(item.turned) : undefined
           const tier = tool ? toolTier(tool, progress) : 1
           return { ...item, heavenT: (item.heavenT ?? 0) + heavenSpeed(tier) * dt }
         }
+        if (cue) return { ...item, t: Math.max(item.t, 0.42) }
         return { ...item, t: item.t + waveSpeed() * dt }
       })
       let leaked = 0
@@ -181,14 +185,14 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       }
       if (
         live.current.spawned < DEFEND_WAVE_SIZE &&
-        spawnAt >= waveSpawnEvery()
+        (spawnAt >= waveSpawnEvery() || (cue && live.current.spawned === 0))
       ) {
         spawnAt = 0
         const id = live.current.spawned
         const cast = raidForWave(progress.defense.cleared, id)
         walking.push({
           id,
-          t: 0,
+          t: cue && id === 0 ? 0.42 : 0,
           text: cast.text,
           kind: cast.kind,
         })
@@ -305,8 +309,14 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     setDowned(live.current.downed)
   }
 
+  function clearWalkerCue() {
+    walkerCueRef.current = false
+    setWalkerCue(false)
+  }
+
   function fireBest() {
     if (phase !== 'wave' || won) return
+    if (walkerCueRef.current) clearWalkerCue()
     let pick: CityPlotId | null = null
     let bestD = Infinity
     for (const id of live.current.planted) {
@@ -329,6 +339,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   }
 
   function retry() {
+    walkerCueRef.current = easy
+    setWalkerCue(easy)
     setPhase(easy ? 'wave' : 'plant')
     setWon(false)
     setRaiders([])
@@ -445,7 +457,10 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
               role="img"
               aria-label="Night road through Silver City"
               onClick={() => {
-                if (phase === 'wave') fireBest()
+                if (phase === 'wave') {
+                  if (walkerCue) clearWalkerCue()
+                  fireBest()
+                }
               }}
             >
               <defs>
@@ -626,12 +641,29 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
               ))}
               {raiders.map((raider) => {
                 const at = raiderAt(raider)
+                const cueTarget =
+                  easy &&
+                  walkerCue &&
+                  !raider.turned &&
+                  raiders.find((item) => !item.turned)?.id === raider.id
                 return (
                   <g
                     key={raider.id}
-                    className={`defend-raider ${raider.turned ? 'is-turned' : ''}`}
+                    className={`defend-raider ${raider.turned ? 'is-turned' : ''} ${cueTarget ? 'is-cue' : ''}`}
                     transform={`translate(${at.x} ${at.y})`}
                   >
+                    {cueTarget ? (
+                      <g className="walker-cue" aria-hidden>
+                        <circle className="walker-cue-pulse" cx="0" cy="-6" r="34" />
+                        <path
+                          className="walker-cue-arrow"
+                          d="M0 -96 L18 -62 L6 -62 L6 -46 L-6 -46 L-6 -62 L-18 -62 Z"
+                        />
+                        <text className="walker-cue-label" y="-108" textAnchor="middle">
+                          Tap this person
+                        </text>
+                      </g>
+                    ) : null}
                     <ellipse className="defend-raider-shadow" cy="12" rx="13" ry="4.6" />
                     <image
                       className="defend-raider-face"

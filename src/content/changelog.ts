@@ -8,6 +8,17 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.13',
+    title: 'Easy kid-plain Journal + first Night Watch cue',
+    when: '2026-09-11',
+    items: [
+      'Easy Journal meta is who · where · picture · tool — no Anchored, deploys, or after-quote dump.',
+      'Easy chrome drops cheap claim, dossier, unsealed, soils, and Trail notes. Reason says why this is true.',
+      'First Easy Night Watch pauses the walker with a pulse arrow: Tap this person.',
+      'Link prompt: Pick the sentence that fits this story. Match miss: Wrong match — try again. Picture-match still Keep / Remove / Save your picks.',
+    ],
+  },
+  {
     version: '1.4.12',
     title: 'Easy main idea lines + full lot names',
     when: '2026-09-10',

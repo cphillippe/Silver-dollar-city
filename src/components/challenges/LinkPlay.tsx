@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import type { LinkChallenge, LinkKind, LinkNode } from '../../types'
 import { linkCaption, linkClue, linkMiss, linkPicture } from '../../content/links'
-import { isEasy } from '../../lib/easy'
+import { EASY, isEasy } from '../../lib/easy'
 import { shuffle } from '../../lib/shuffle'
 import { useProgress } from '../../store/progress'
 import { Avatar } from '../Avatar'
@@ -205,7 +205,7 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
       ? null
       : step === 'idea'
         ? easy
-          ? '1 of 3 — pick the sentence.'
+          ? EASY.linkCue
           : '1 of 3 — pick the idea.'
         : step === 'place'
           ? '2 of 3 — pick the place.'

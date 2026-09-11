@@ -68,7 +68,7 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
             <p className="eyebrow">Match idea · place · person.</p>
             <p className="recall-line rehearse-stem">
               {easy
-                ? 'Pick the sentence, then the place, then the person.'
+                ? 'Pick the sentence that fits this story, then the place, then the person.'
                 : 'Link the idea to its place and person.'}
             </p>
             <LinkDemo easy={easy} />

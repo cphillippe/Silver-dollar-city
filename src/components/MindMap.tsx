@@ -34,7 +34,10 @@ interface MindMapProps {
 export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) {
   const { progress, upgradeBuilding } = useProgress()
   const easy = isEasy(progress)
-  const graph = mindGraph(plotId, progress)
+  const graph = (() => {
+    const raw = mindGraph(plotId, progress)
+    return easy && plotId === 'journal' ? { ...raw, placeTitle: 'River’s pages' } : raw
+  })()
   const applied = appliedTier(plotId, progress)
   const ready = canUpgrade(plotId, progress)
   const need = nextUpgradeNeed(plotId, progress, easy)

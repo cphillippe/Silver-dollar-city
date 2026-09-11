@@ -1,4 +1,4 @@
-import { easyFacingLine, isEasy } from '../lib/easy'
+import { EASY, easyFacingLine, isEasy } from '../lib/easy'
 import { WORDS } from '../lib/words'
 import { useProgress } from '../store/progress'
 import type { Learning } from '../types'
@@ -23,8 +23,8 @@ export function StoredLine({ learning, when }: StoredLineProps) {
       {easy ? <PlainTalk id={learning.id} /> : null}
       {easy ? (
         <p className="quiet">
-          <strong>{WORDS.reason.term}</strong> — why the main idea stands.{' '}
-          <strong>{WORDS.source.term}</strong> — where the main idea comes from.
+          <strong>{WORDS.reason.term}</strong> — {EASY.reasonSense}.{' '}
+          <strong>{WORDS.source.term}</strong> — {EASY.sourceSense}.
         </p>
       ) : null}
       <DigDeeper
