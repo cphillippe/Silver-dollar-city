@@ -1022,7 +1022,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.22')
+assert.equal(APP_VERSION, '1.4.23')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -1111,6 +1111,11 @@ assert.match(STREET_WHYS['mercy-hollow'].easy, /creek/)
 assert.match(STREET_WHYS['silas-bench'].easy, /square|ledger/)
 assert.match(STREET_WHYS['juniper-porch'].easy, /lamp|porch/)
 assert.match(TOWN_PATH_EASY, /Porch lamp/)
+assert.match(TOWN_PATH_EASY, /Manage/)
+assert.match(TOWN_PATH_EASY, /Build this/)
+assert.match(mapSrc, /TOWN_PATH_EASY/)
+assert.match(mapSrc, /easyStreet/)
+assert.match(hubSrc, /EASY\.matchCta/)
 assert.match(TOWN_PATH_HARD, /Heaven/)
 assert.match(mapSrc, /TOWN_PATH/)
 assert.match(
@@ -1549,7 +1554,7 @@ assert.match(defendSrc, /easyTapTarget/)
 assert.match(defendSrc, /data-person-node="walker"/)
 assert.doesNotMatch(defendSrc, /walkerCue|easySolo|clearWalkerCue|hideOther/)
 assert.match(defendSrc, /EASY\.loveCue/)
-assert.equal(EASY.loveCue, 'Love — tap the face')
+assert.equal(EASY.loveCue, 'Love — a true line turns a mean line')
 assert.doesNotMatch(defendSrc, /is-dim/)
 assert.match(linkPlaySrc, /is-need/)
 assert.match(cssSrc, /easy-walker-face/)
@@ -1622,6 +1627,18 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /Settings · \$\{APP_VERSION\}/,
 )
+assert.match(
+  readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
+  /EASY\.claimTeach/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/Welcome.tsx', import.meta.url), 'utf8'),
+  /EASY\.claimTeach/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/TeachUnlock.tsx', import.meta.url), 'utf8'),
+  /EASY\.claimTeach/,
+)
 assert.match(cssSrc, /easy-steps/)
 assert.match(
   readFileSync(new URL('../src/components/AppShell.tsx', import.meta.url), 'utf8'),
@@ -1634,7 +1651,10 @@ assert.match(
   /Tap a sentence/,
 )
 assert.match(linkPlaySrc, /is-screen-\$\{screen\}/)
-assert.match(defendSrc, /easyTap && tool\.id !== ability/)
+assert.doesNotMatch(defendSrc, /easyTap && tool\.id !== ability/)
+assert.match(defendSrc, /WATCH_TOOLS\.map/)
+assert.match(defendSrc, /Turn the mean line/)
+assert.match(defendSrc, /You missed\. Tap the face/)
 assert.match(defendSrc, /walking\.some\(\(item\) => !item\.turned\)/)
 assert.doesNotMatch(defendSrc, /matching sentence/)
 assert.match(

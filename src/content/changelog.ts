@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.23',
+    title: 'Manage and Build this back on the map',
+    when: '2026-09-11',
+    items: [
+      'Easy map names Manage and Build this again. Tap a creek or square lot to open it.',
+      'Love shows the line you kept. Love, Logic, Reason, and Science stay on Easy Night Watch.',
+      'A claim is the main idea we hold to be true — taught once on Easy.',
+    ],
+  },
+  {
     version: '1.4.22',
     title: 'Tap the face · numbered match steps',
     when: '2026-09-11',

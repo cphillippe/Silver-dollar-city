@@ -60,7 +60,7 @@ export function Welcome({ onNavigate }: WelcomeProps) {
           </label>
           <p className="quiet welcome-easy-note">
             {progress.easyMode
-              ? 'Shorter sentences and bigger taps. You can change this in Settings.'
+              ? `${EASY.claimTeach} Shorter sentences and bigger taps. You can change this in Settings.`
               : 'Optional. You can turn this on later in Settings → Reading. We teach hard words first — a claim is the main idea we hold to be true.'}
           </p>
           {progress.easyMode ? (

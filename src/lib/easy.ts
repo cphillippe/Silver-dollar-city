@@ -25,10 +25,11 @@ export const EASY = {
   tapPlace: 'Tap a place',
   tapPerson: 'Tap a person',
   upgrade: 'Build this — raise the next look you earned by learning',
-  manage: 'Building',
-  nightDo: 'Do this',
+  manage: 'Manage',
+  matchCta: 'Match',
+  nightDo: 'Night Watch',
   nightTap: 'Tap the face.',
-  loveCue: 'Love — tap the face',
+  loveCue: 'Love — a true line turns a mean line',
   deployTeach: 'Use a main idea you kept.',
   saved: 'Saved sentences',
   connections: 'Connections',
@@ -63,7 +64,6 @@ export function easyMainIdea(text: string): string {
     .replace(/\bA claim\b/g, 'A main idea')
     .replace(/\bThe claim\b/g, 'The main idea')
     .replace(/\bsoils\b/gi, 'ground')
-    .replace(new RegExp('\\s+toward heav' + 'en\\.?', 'gi'), '.')
 }
 
 function easyPictureWord(beat: string): string {
