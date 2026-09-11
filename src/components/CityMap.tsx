@@ -49,6 +49,7 @@ import juniperWalk from '../assets/cast/portrait-juniper.png'
 import {
   anyUpgradeReady,
   canUpgrade,
+  EASY_FOLK_LIFT,
   EASY_NAMED_PLOTS,
   EASY_TAG_SLOT,
   easyTagMetrics,
@@ -627,7 +628,11 @@ export function CityMap({
                 stage={stageOf(plot.id)}
                 next={nextId === plot.id}
                 rising={rising === plot.id}
-                speaking={beat?.id === plot.id || (nextId === plot.id && !celebrating)}
+                speaking={
+                  easy
+                    ? false
+                    : beat?.id === plot.id || (nextId === plot.id && !celebrating)
+                }
                 ack={beat?.id === plot.id ? beat.beat : undefined}
               />
             ))
@@ -1350,7 +1355,9 @@ function TownFolk({
 }) {
   const { progress } = useProgress()
   if (stage === 'empty' && !next) return null
-  const at = FOLK[id]
+  const easy = isEasy(progress)
+  const seat = FOLK[id]
+  const at = easy ? { x: seat.x, y: seat.y - EASY_FOLK_LIFT } : seat
   const voice = townVoice(id)
   const line = ack ? townAck(id, ack, isEasy(progress)) : voice.here
   const short = line.length > 22 ? `${line.slice(0, 20)}…` : line
@@ -1365,7 +1372,7 @@ function TownFolk({
           <path className="city-porch-rail" d="M-16 2 H16 M-16 2 v-8 M0 2 v-8 M16 2 v-8" />
         ) : null}
         {stage === 'lit' ? <circle className="city-lamp" cx="18" cy="-4" r="3.8" /> : null}
-        <foreignObject x="-22" y="-50" width="44" height="44">
+        <foreignObject x="-22" y="-50" width="44" height="44" overflow="hidden">
           <div className="city-portrait">
             <Avatar who={voice.who} size="sm" />
           </div>

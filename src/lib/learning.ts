@@ -74,7 +74,7 @@ export function whoForEvidence(id: string) {
 export function learningBeat(id: string): string {
   const idea = ideaOf(id)
   if (idea) return idea
-  if (id === 'td-watch') return 'a mean line turns when a true one is planted'
+  if (id === 'td-watch') return 'an unkind sentence turns when a true one is planted'
   const tool = toolForEvidence(id)
   return tool ? `a picture you can still hold for ${tool.label}` : 'a picture you can still hold'
 }

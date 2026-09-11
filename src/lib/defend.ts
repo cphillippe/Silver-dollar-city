@@ -1,7 +1,7 @@
 import type { ProgressState, WalkerKind } from '../types.ts'
 import { CITY_PLOTS, plotStage, type CityPlotId, type CityStage } from './city.ts'
 import { prefersReducedMotion } from './juice.ts'
-import { toolTier, unlockedWatchTools, watchTool, WATCH_TOOLS } from './watchTools.ts'
+import { deployFit, toolTier, unlockedWatchTools, watchTool, WATCH_TOOLS } from './watchTools.ts'
 
 export const DEFEND_BRIEF_ID = 'td-watch'
 export const DEFEND_HEARTS = 3
@@ -102,6 +102,23 @@ export function easyTapTarget<T extends { turned?: string }>(raiders: T[]): T | 
 
 export function easyTapPersonCount(raiders: { turned?: string }[]): number {
   return easyTapTarget(raiders) ? 1 : 0
+}
+
+/** Easy TAP: a face tap always turns. Hard still matches tool to walker kind. */
+export function easyTapFit(easy: boolean, toolId: string, kind: WalkerKind): 'match' | 'weak' {
+  if (easy) return 'match'
+  return deployFit(toolId, kind)
+}
+
+/** Easy wins on 6 downs even if a flyer is still on the board. Hard waits for an empty road. */
+export function waveIsClear(
+  easy: boolean,
+  downed: number,
+  spawned: number,
+  walking: number,
+): boolean {
+  if (easy) return downed >= DEFEND_WAVE_SIZE
+  return spawned >= DEFEND_WAVE_SIZE && walking === 0
 }
 
 export function waveSpeed(easy = false): number {
