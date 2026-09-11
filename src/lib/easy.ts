@@ -13,6 +13,7 @@ export const EASY = {
   connectLink: 'Tap the sentence, then the place, then the person.',
   readStory: 'Read today’s story.',
   rememberSentence: 'Choose the main idea to remember.',
+  keepThis: 'Keep this',
   readAgain: 'Read this one again.',
   claimTeach: 'A claim is the main idea we hold to be true.',
   mainIdeaTeach: 'Main idea = the short true line we keep.',
