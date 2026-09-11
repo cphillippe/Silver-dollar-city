@@ -13,6 +13,8 @@ import {
   cityUpgrades,
   fillGrows,
   fillSnapshot,
+  heavenChip,
+  heavenForm,
   nextGift,
   nextKicker,
   nextPlotId,
@@ -21,6 +23,7 @@ import {
   readCitySeen,
   readFillsSeen,
   readHomecomingDay,
+  SPINE_GROW,
   writeCitySeen,
   writeFillsSeen,
   writeHomecomingDay,
@@ -345,7 +348,7 @@ export function CityMap({
             ? 'A garden valley. The City of Heaven waits on the ridge.'
             : celebrating
               ? `${beat?.beat} ${beat?.title}`
-              : `Silver City, ${CITY_AGE_TITLE[age]}. ${standing} of ${possible} landmarks standing. The City of Heaven waits on the ridge.`
+              : `Silver City, ${CITY_AGE_TITLE[age]}. ${standing} of ${possible} landmarks standing. The town grows toward the City of Heaven.`
         }
       >
         <defs>
@@ -430,7 +433,20 @@ export function CityMap({
           opacity="0.55"
         />
 
-        <HeavenCity age={age} />
+        <HeavenCity
+          age={age}
+          onOpen={() => {
+            if (age === 'eden' || age === 'village') {
+              setLockNote(
+                easy
+                  ? 'Heaven waits on the ridge. Keep today’s line, then walk the creek.'
+                  : 'Heaven waits on the ridge. Keep the trail — porch, creek, square, then the climb.',
+              )
+              return
+            }
+            open('lookout')
+          }}
+        />
         <EdenGrove age={age} />
         <SpinePath age={age} />
 
@@ -468,15 +484,17 @@ export function CityMap({
               height="32"
               clipPath="url(#city-face-clip)"
             />
-            <image
-              className="city-walker city-walker-b"
-              href={juniperWalk}
-              x="408"
-              y="266"
-              width="30"
-              height="30"
-              clipPath="url(#city-face-clip)"
-            />
+            {age !== 'eden' ? (
+              <image
+                className="city-walker city-walker-b"
+                href={juniperWalk}
+                x="408"
+                y="266"
+                width="30"
+                height="30"
+                clipPath="url(#city-face-clip)"
+              />
+            ) : null}
           </g>
         ) : null}
 
@@ -617,7 +635,10 @@ export function CityMap({
 
         {mode === 'live' && easy ? (
           <g className="city-easy-tags" pointerEvents="none">
-            {EASY_NAMED_PLOTS.map((id) => (
+            {EASY_NAMED_PLOTS.filter((id) => {
+              const stage = stageOf(id)
+              return stage !== 'empty' || nextId === id
+            }).map((id) => (
               <EasyPlotChip key={`tag-${id}`} id={id} />
             ))}
           </g>
@@ -658,6 +679,7 @@ export function CityMap({
           ) : (
             isEasy(progress) ? (
               <>
+                <p className="eyebrow">{CITY_AGE_TITLE[age]} — growing toward Heaven</p>
                 <p className="city-gift">{gift}</p>
                 {lockNote ? (
                   <p className="city-lock-toast" role="status">
@@ -741,14 +763,21 @@ function EdenGrove({ age }: { age: CityAge }) {
 }
 
 function SpinePath({ age }: { age: CityAge }) {
+  const grown = SPINE_GROW[age]
   return (
     <g className={`city-spine is-${age}`} aria-hidden>
       <path
         className="city-spine-line"
+        pathLength={1}
+        strokeDasharray={`${grown} ${1 - grown}`}
         d="M58 338 C 100 312, 160 300, 280 292 C 380 286, 460 220, 520 80 C 540 48, 560 32, 572 36"
       />
       {SPINE_MARKS.map((mark) => (
-        <g key={mark.age} className={`city-spine-mark ${cityAgeReached(mark.age, age) ? 'is-lit' : ''}`} transform={`translate(${mark.x} ${mark.y})`}>
+        <g
+          key={mark.age}
+          className={`city-spine-mark ${cityAgeReached(mark.age, age) ? 'is-lit' : 'is-wait'}`}
+          transform={`translate(${mark.x} ${mark.y})`}
+        >
           <circle r="7" />
           <circle r="3.2" className="city-spine-core" />
         </g>
@@ -774,19 +803,66 @@ function EasyPlotChip({ id }: { id: CityPlotId }) {
   )
 }
 
-function HeavenCity({ age }: { age: CityAge }) {
+function HeavenCity({
+  age,
+  onOpen,
+}: {
+  age: CityAge
+  onOpen: () => void
+}) {
+  const form = heavenForm(age)
+  const chip = heavenChip(age)
+  const earned = form === 'city'
   return (
-    <g className={`city-heaven is-${age}`} aria-label="City of Heaven">
-      <circle className="city-heaven-glory" cx="575" cy="28" r="46" fill="url(#city-glory)" />
-      <path className="city-heaven-wall" d="M530 48 l18-22 16 10 14-18 16 12 18-16 16 20 v22 H530 Z" fill="url(#city-heaven-wall)" />
-      <path className="city-heaven-gate" d="M568 58 v-16 a8 10 0 0 1 16 0 v16" />
-      <rect className="city-heaven-tower" x="538" y="18" width="10" height="22" rx="1" />
-      <rect className="city-heaven-tower" x="602" y="14" width="10" height="26" rx="1" />
-      <path className="city-heaven-spire" d="M543 18 l5-10 5 10" />
-      <path className="city-heaven-spire" d="M607 14 l5-12 5 12" />
-      <text className="city-heaven-label" x={HEAVEN_TAG.x} y={HEAVEN_TAG.y} textAnchor="middle">
-        City of Heaven
-      </text>
+    <g
+      className={`city-heaven is-${age} is-${form}`}
+      aria-label={chip ?? 'Heaven waits on the ridge'}
+      role="button"
+      tabIndex={0}
+      onClick={onOpen}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          onOpen()
+        }
+      }}
+    >
+      {form === 'seed' || form === 'wait' ? (
+        <circle className="city-heaven-seed" cx="575" cy="36" r={form === 'wait' ? 7 : 5} />
+      ) : (
+        <circle className="city-heaven-glory" cx="575" cy="28" r={earned ? 46 : 28} fill="url(#city-glory)" />
+      )}
+      {form === 'wait' || form === 'rise' ? (
+        <path
+          className="city-heaven-foot"
+          d="M538 62 h76"
+        />
+      ) : null}
+      {form === 'rise' || form === 'ridge' || form === 'city' ? (
+        <path
+          className="city-heaven-wall"
+          d="M530 48 l18-22 16 10 14-18 16 12 18-16 16 20 v22 H530 Z"
+          fill="url(#city-heaven-wall)"
+        />
+      ) : null}
+      {form === 'ridge' || form === 'city' ? (
+        <>
+          <path className="city-heaven-gate" d="M568 58 v-16 a8 10 0 0 1 16 0 v16" />
+          <rect className="city-heaven-tower" x="538" y="18" width="10" height="22" rx="1" />
+          <rect className="city-heaven-tower" x="602" y="14" width="10" height="26" rx="1" />
+        </>
+      ) : null}
+      {earned ? (
+        <>
+          <path className="city-heaven-spire" d="M543 18 l5-10 5 10" />
+          <path className="city-heaven-spire" d="M607 14 l5-12 5 12" />
+        </>
+      ) : null}
+      {chip ? (
+        <text className="city-heaven-label" x={HEAVEN_TAG.x} y={HEAVEN_TAG.y} textAnchor="middle">
+          {chip}
+        </text>
+      ) : null}
     </g>
   )
 }
@@ -812,8 +888,7 @@ function PlotGroup({
 }) {
   const { progress } = useProgress()
   const easy = isEasy(progress)
-  const streetLot = id === 'porch' || id === 'hollow' || id === 'bench'
-  const clickable = stage !== 'empty' || next || ready || (easy && streetLot)
+  const clickable = stage !== 'empty' || next || ready
   const at = ANCHOR[id]
   const vacant = stage === 'empty' && !next && !ready
   const title =
@@ -849,7 +924,7 @@ function PlotGroup({
         <circle className="city-plot-hit" cx={at.x} cy={at.y} r={hit} />
       ) : null}
       {vacant ? (
-        next || (easy && streetLot) ? (
+        next || ready ? (
           <g className="city-lot is-staked" transform={`translate(${at.x} ${at.y}) scale(${scale})`}>
             <ellipse rx="20" ry="9" className="city-earth" />
             <path

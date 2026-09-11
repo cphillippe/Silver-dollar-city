@@ -7,12 +7,15 @@ import {
   cityUpgrades,
   fillGrows,
   fillSnapshot,
+  heavenChip,
+  heavenForm,
   newestStanding,
   nextGift,
   nextKicker,
   nextPlotId,
   plotFill,
   plotStage,
+  SPINE_GROW,
 } from '../src/lib/city.ts'
 import { APP_VERSION } from '../src/config/app.ts'
 import { CHANGELOG, latestChange } from '../src/content/changelog.ts'
@@ -92,6 +95,13 @@ assert.equal(plotStage('observatory', empty), 'empty')
 assert.equal(plotStage('journal', empty), 'empty')
 assert.equal(nextPlotId(empty, false), 'porch')
 assert.equal(cityAge(empty), 'eden')
+assert.equal(heavenForm('eden'), 'seed')
+assert.equal(heavenChip('eden'), null)
+assert.equal(heavenChip('village'), 'Heaven waits')
+assert.equal(heavenChip('heaven'), 'City of Heaven')
+assert.ok(SPINE_GROW.eden < SPINE_GROW.village)
+assert.ok(SPINE_GROW.gold < SPINE_GROW.heaven)
+assert.equal(heavenForm(cityAge(empty)), 'seed')
 
 const afterDaily = {
   ...empty,
@@ -138,7 +148,9 @@ assert.match(mapSrc, /EdenGrove/)
 assert.match(mapSrc, /SpinePath/)
 assert.match(mapSrc, /City of Heaven/)
 assert.match(mapSrc, /Eden → City of Heaven/)
-assert.match(mapSrc, /city-age-track/)
+assert.match(mapSrc, /heavenForm/)
+assert.match(mapSrc, /SPINE_GROW/)
+assert.match(mapSrc, /Heaven waits/)
 
 const twoHollow = {
   ...afterDaily,
@@ -219,6 +231,7 @@ const heavenish = {
 }
 assert.equal(plotStage('lookout', heavenish), 'lit')
 assert.equal(cityAge(heavenish), 'heaven')
+assert.equal(heavenForm('heaven'), 'city')
 
 const grown = {
   ...empty,
@@ -701,6 +714,8 @@ assert.match(cssSrc, /#ff5a7a/)
 assert.match(cssSrc, /background: #3a1480/)
 assert.doesNotMatch(cssSrc, /#1c1810/)
 assert.match(cssSrc, /city-heaven/)
+assert.match(cssSrc, /city-heaven-seed/)
+assert.match(cssSrc, /is-age-town/)
 assert.match(cssSrc, /city-spine/)
 assert.match(cssSrc, /city-age-track/)
 assert.match(cssSrc, /data-theme='parchment'/)
@@ -1024,7 +1039,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.26')
+assert.equal(APP_VERSION, '1.4.27')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
