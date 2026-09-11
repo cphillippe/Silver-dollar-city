@@ -27,7 +27,7 @@ export function Profile({ onNavigate }: ProfileProps) {
         className="text-link"
         onClick={() => onNavigate({ name: 'hub' })}
       >
-        ← The town
+        ← {easy ? EASY.home : 'The town'}
       </button>
 
       <header className="profile-hero">
@@ -199,7 +199,7 @@ export function Profile({ onNavigate }: ProfileProps) {
 
       <TreeFold
         label={easy ? EASY.connections : 'Connections'}
-        lead={easy ? 'Places linked from Town.' : 'Idea · place · person — lit nodes reopen here.'}
+        lead={easy ? 'Places you matched.' : 'Idea · place · person — lit nodes reopen here.'}
         count={inv.streetLinked ? inv.links.length : 0}
       >
         {inv.streetLinked ? (
@@ -230,7 +230,7 @@ export function Profile({ onNavigate }: ProfileProps) {
         ) : (
           <p className="quiet">
             {easy
-              ? `${EASY.connectLink} Start from Town. Tap a place later to open what you matched.`
+              ? `${EASY.connectLink} Start from Match. Open Saved later to see what you held.`
               : 'Link the street from Town to snap idea · place · person. Lit nodes reopen here.'}
           </p>
         )}

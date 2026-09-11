@@ -59,7 +59,7 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
         className="text-link"
         onClick={() => onNavigate({ name: 'hub' })}
       >
-        ← The town
+        ← {easy ? EASY.home : 'The town'}
       </button>
 
       {!showNext ? (
@@ -78,7 +78,7 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
             {easy ? null : <PlainTalk id={challenge.id} />}
             <p className="quiet">
               {easy
-                ? 'You’ll reopen them from Town — tap the place you matched.'
+                ? 'You’ll keep them in Saved.'
                 : 'Each match lights a spot on the town map. Tap the place later to open that idea again.'}
             </p>
             {easy ? null : (
@@ -133,11 +133,11 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
             who="juniper"
             line={
               easy
-                ? 'Tap a place on the map to see what you matched.'
+                ? 'Your matches wait in Saved.'
                 : 'Tap a place on the map — the mind map holds what you linked.'
             }
-            action="See the town"
-            onGo={() => onNavigate({ name: 'hub' })}
+            action={easy ? 'See Saved' : 'See the town'}
+            onGo={() => onNavigate(easy ? { name: 'journal' } : { name: 'hub' })}
           />
         </section>
       )}

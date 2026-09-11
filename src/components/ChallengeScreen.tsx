@@ -3,7 +3,7 @@ import { getArea, getChallenge } from '../content'
 import { evidenceFor } from '../content/evidence'
 import { STORY, townVoiceForArea } from '../content/story'
 import { localDateKey } from '../lib/dates'
-import { isEasy } from '../lib/easy'
+import { EASY, isEasy } from '../lib/easy'
 import { useJuiceHandoff } from '../lib/juice'
 import { isDue } from '../lib/memory'
 import { findLearning } from '../lib/learning'
@@ -32,6 +32,7 @@ export function ChallengeScreen({
   onNavigate,
 }: ChallengeScreenProps) {
   const { completeChallenge, recordReview, markMiss, progress } = useProgress()
+  const easy = isEasy(progress)
   const area = getArea(areaId)
   const challenge = getChallenge(areaId, challengeId)
   const brief = evidenceFor(challengeId)
@@ -235,7 +236,7 @@ export function ChallengeScreen({
             <TownReturn
               who={voice.who}
               line={voice.afterWin}
-              action="See the town"
+              action={easy ? EASY.home : 'See the town'}
               onGo={goNext}
             />
           ) : null}

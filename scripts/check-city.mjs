@@ -1043,7 +1043,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.30')
+assert.equal(APP_VERSION, '1.4.31')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -1433,6 +1433,10 @@ assert.match(
 )
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  /Town \(soon\)/,
+)
+assert.match(
+  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
   /scrapbook of matches/,
 )
 assert.match(
@@ -1531,6 +1535,17 @@ assert.match(
   /Skip reading/,
 )
 assert.match(hubSrc, /easyTapNext/)
+assert.match(hubSrc, /is-easy-home/)
+assert.match(hubSrc, /EASY\.townSoon/)
+assert.match(hubSrc, /EASY\.saved/)
+assert.match(hubSrc, /EASY\.nightDo/)
+assert.match(
+  readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
+  /EASY\.townSoon/,
+)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Town \(soon\)/)
+assert.match(cssSrc, /is-easy-home/)
+assert.match(cssSrc, /easy-core/)
 assert.match(hubSrc, /EASY\.connectLink/)
 assert.match(
   readFileSync(new URL('../src/content/lots.ts', import.meta.url), 'utf8'),
@@ -1816,7 +1831,7 @@ assert.match(
 )
 assert.match(
   readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
-  /You’ll reopen them from Town/,
+  /You’ll keep them in Saved/,
 )
 assert.match(cssSrc, /next-tap/)
 assert.match(cssSrc, /link-demo/)
