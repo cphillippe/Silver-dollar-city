@@ -24,7 +24,7 @@ export function AppShell({ view, onNavigate, children }: AppShellProps) {
     view.name === 'link' ||
     view.name === 'profile'
   const townView = view.name === 'hub'
-  const hideGoalbar = hideChrome || playView || townView
+  const hideGoalbar = hideChrome || playView || townView || easy
 
   function followGoal() {
     if (goal.kind === 'daily') {
