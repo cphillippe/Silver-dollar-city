@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { LinkChallenge, LinkKind, LinkNode } from '../../types'
 import { linkCaption, linkClue, linkMiss, linkPicture } from '../../content/links'
 import { EASY, isEasy } from '../../lib/easy'
@@ -191,7 +191,7 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
           ? 'This match is complete. Tap Next.'
           : 'This link is complete. Tap Next.'
         : easy
-          ? 'Connect sentence → place → person'
+          ? EASY.connectLink
           : 'Tap idea → place → person'
 
   const missStep = step === 'linked' ? 'idea' : step
@@ -214,13 +214,21 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
   const wizardCue =
     step === 'linked' || status === 'ok'
       ? null
-      : step === 'idea'
-        ? easy
-          ? EASY.linkCue
-          : '1 of 3 — pick the idea.'
-        : step === 'place'
-          ? '2 of 3 — pick the place.'
-          : '3 of 3 — pick the person.'
+      : easy
+        ? EASY.linkCue
+        : step === 'idea'
+          ? '1 of 3 — pick the idea.'
+          : step === 'place'
+            ? '2 of 3 — pick the place.'
+            : '3 of 3 — pick the person.'
+
+  useEffect(() => {
+    if (!easy || misses === 0 || !needId) return
+    const card = document.querySelector('.link-block.is-need')
+    if (card instanceof HTMLElement) {
+      card.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    }
+  }, [easy, misses, needId, step])
 
   if (status === 'ok') {
     return (
@@ -300,9 +308,12 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
               <button
                 key={node.id}
                 type="button"
-                className={`link-block is-${node.kind} ${pic.who || pic.plotId ? 'is-picture' : ''} ${picked === node.id ? 'is-selected' : ''} ${flash === node.id ? 'is-flash' : ''} ${focusIds?.has(node.id) ? 'is-focus' : ''} ${easy && misses > 0 && node.id === needId ? 'is-need' : ''}`}
+                className={`link-block is-${node.kind} ${pic.who || pic.plotId ? 'is-picture' : ''} ${picked === node.id ? 'is-selected' : ''} ${flash === node.id ? 'is-flash' : ''} ${focusIds?.has(node.id) ? 'is-focus' : ''} ${easy && misses > 0 && node.id === needId ? 'is-need' : ''} ${easy && misses > 0 && node.id !== needId ? 'is-not' : ''}`}
                 onClick={() => choose(node.id)}
               >
+                {easy && misses > 0 && node.id === needId ? (
+                  <span className="need-chip">This one</span>
+                ) : null}
                 <LinkFace node={node} easy={easy} challenge={challenge} />
               </button>
               )

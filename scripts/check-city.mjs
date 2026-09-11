@@ -1018,7 +1018,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.16')
+assert.equal(APP_VERSION, '1.4.17')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -1141,7 +1141,10 @@ assert.match(linkPlaySrc, /link-block/)
 assert.match(linkPlaySrc, /All 3 links complete/)
 assert.match(linkPlaySrc, /This link is complete/)
 assert.match(linkPlaySrc, /wizard-step/)
-assert.match(linkPlaySrc, /Connect sentence → place → person/)
+assert.match(linkPlaySrc, /EASY\.connectLink/)
+assert.match(linkPlaySrc, /This one/)
+assert.match(linkPlaySrc, /scrollIntoView/)
+assert.match(linkPlaySrc, /is-not/)
 assert.match(linkPlaySrc, /is-wizard/)
 assert.match(linkPlaySrc, /is-picture/)
 assert.match(linkPlaySrc, /PlaceGlyph/)
@@ -1410,7 +1413,7 @@ assert.match(
 )
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /Match sentence → place → person/,
+  /Tap the sentence, then the place, then the person/,
 )
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
@@ -1438,7 +1441,7 @@ assert.match(
 )
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /Pick the sentence that fits this story/,
+  /Tap the sentence, then the place, then the person/,
 )
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
@@ -1518,9 +1521,9 @@ assert.match(defendSrc, /waveSpeed\(easy\)/)
 assert.match(defendSrc, /holdWalkers/)
 assert.match(defendSrc, /easy-walker-face/)
 assert.match(defendSrc, /EASY_CUE_HOLD_MS/)
-assert.match(defendSrc, /is-dim/)
 assert.match(defendSrc, /holdSpawn/)
 assert.match(defendSrc, /hideOther/)
+assert.doesNotMatch(defendSrc, /is-dim/)
 assert.match(linkPlaySrc, /is-need/)
 assert.match(cssSrc, /easy-walker-face/)
 assert.equal(EASY_WALKER_FACE_PX, 128)

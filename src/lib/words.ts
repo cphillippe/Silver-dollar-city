@@ -113,7 +113,7 @@ export function schoolWordsFor(
 /** Easy puzzle leads: bury unread jargon; keep claim/parable/creed after they are taught. */
 export function easyLead(id: string, prompt: string): string {
   if (id === 'ln-street') {
-    return 'Connect sentence → place → person. One story at a time.'
+    return 'Tap the sentence, then the place, then the person. One story at a time.'
   }
   if (id === 'ph-father') {
     return 'Toss the wrong picks. Keep what Luke 15 is actually pressing.'
