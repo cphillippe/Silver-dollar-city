@@ -212,6 +212,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
             Night Watch
           </button>
         ) : null}
+        {easy ? null : (
         <button
           type="button"
           className="btn tiny"
@@ -219,6 +220,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
         >
           Profile
         </button>
+        )}
       </nav>
 
       {easy ? null : (
@@ -270,8 +272,9 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
       </section>
       )}
 
-      <AdSlot slot="hub-banner" />
+      {easy ? null : <AdSlot slot="hub-banner" />}
 
+      {easy ? null : (
       <details className="street-drawer">
         <summary>Homes on the street</summary>
         <ol className="city-streets">
@@ -368,8 +371,9 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
       </ol>
         {(progress.completed.length > 0 || doneToday) && <ShareInvite compact />}
       </details>
+      )}
 
-      <AdSlot slot="between-districts" />
+      {easy ? null : <AdSlot slot="between-districts" />}
 
       {easy || goal.kind !== 'vista' ? null : (
         <button

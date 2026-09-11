@@ -102,7 +102,7 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
         <div className="mind-map-scroll">
         <p className="quiet">{lotWhy(graph.plotId, easy)}</p>
 
-        <WordGloss words={[WORDS.upgrade]} />
+        {easy ? null : <WordGloss words={[WORDS.upgrade]} />}
 
         <p className="build-job">{tierJob(applied, easy)}</p>
         {ideaLock ? (

@@ -58,7 +58,7 @@ import {
   visualFills,
   visualSnapshot,
 } from '../lib/cityBuild'
-import { TOWN_PATH_EASY, TOWN_PATH_HARD } from '../content/lots'
+import { TOWN_PATH_HARD } from '../content/lots'
 import { Avatar } from './Avatar'
 import { GemMark } from './GemMark'
 import { MindMap } from './MindMap'
@@ -436,12 +436,15 @@ export function CityMap({
 
         <HeavenCity
           age={age}
+          easy={easy}
           onOpen={() => {
+            if (easy) {
+              setLockNote('Tap a building to walk or Manage it.')
+              return
+            }
             if (age === 'eden' || age === 'village') {
               setLockNote(
-                easy
-                  ? 'Heaven waits on the ridge. Keep today’s line, then walk the creek.'
-                  : 'Heaven waits on the ridge. Keep the trail — porch, creek, square, then the climb.',
+                'Heaven waits on the ridge. Keep the trail — porch, creek, square, then the climb.',
               )
               return
             }
@@ -449,7 +452,7 @@ export function CityMap({
           }}
         />
         <EdenGrove age={age} />
-        <SpinePath age={age} />
+        {easy ? null : <SpinePath age={age} />}
 
         <path
           className={`city-street city-street-main is-${stageOf('hollow')} is-${stageOf('bench')}`}
@@ -684,18 +687,12 @@ export function CityMap({
           ) : (
             isEasy(progress) ? (
               <>
-                <p className="eyebrow">
-                  {age === 'heaven'
-                    ? 'City of Heaven — you kept the trail'
-                    : `${CITY_AGE_TITLE[age]} — growing toward Heaven`}
-                </p>
                 <p className="city-gift">{gift}</p>
                 {lockNote ? (
                   <p className="city-lock-toast" role="status">
                     {lockNote}
                   </p>
                 ) : null}
-                <p className="city-map-hint">{TOWN_PATH_EASY}</p>
               </>
             ) : (
             <>
@@ -814,13 +811,15 @@ function EasyPlotChip({ id }: { id: CityPlotId }) {
 
 function HeavenCity({
   age,
+  easy,
   onOpen,
 }: {
   age: CityAge
+  easy?: boolean
   onOpen: () => void
 }) {
-  const form = heavenForm(age)
-  const chip = heavenChip(age)
+  const form = easy ? 'seed' : heavenForm(age)
+  const chip = easy ? null : heavenChip(age)
   const earned = form === 'city'
   return (
     <g
