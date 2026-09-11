@@ -183,9 +183,13 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
 
   const nextTap =
     status === 'ok'
-      ? 'All 3 links complete'
+      ? easy
+        ? 'All 3 matches complete'
+        : 'All 3 links complete'
       : step === 'linked'
-        ? 'This link is complete. Tap Next.'
+        ? easy
+          ? 'This match is complete. Tap Next.'
+          : 'This link is complete. Tap Next.'
         : easy
           ? 'Connect sentence → place → person'
           : 'Tap idea → place → person'
@@ -215,9 +219,9 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
     return (
       <div className="play is-link is-wizard is-finale">
         <p className="link-complete" role="status">
-          All 3 links complete
+          {easy ? 'All 3 matches complete' : 'All 3 links complete'}
         </p>
-        <ol className="link-checks" aria-label="All links">
+        <ol className="link-checks" aria-label={easy ? 'All matches' : 'All links'}>
           <li className="is-done">✓ {easy ? 'Sentence' : 'Idea'}</li>
           <li className="is-done">✓ Place</li>
           <li className="is-done">✓ Person</li>
@@ -266,7 +270,7 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
 
       <p className="match-score">
         {easy
-          ? `${challenge.triples.filter((item) => needed(item.id).every((need) => edges.some((edge) => edge.triple === item.id && pairKey(edge.a, edge.b) === need))).length} of ${challenge.triples.length} links`
+          ? `${challenge.triples.filter((item) => needed(item.id).every((need) => edges.some((edge) => edge.triple === item.id && pairKey(edge.a, edge.b) === need))).length} of ${challenge.triples.length} matches`
           : `${challenge.triples.length * 2 - edges.length} links left · ${edges.length} / ${challenge.triples.length * 2} snapped`}
       </p>
 

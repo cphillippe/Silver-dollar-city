@@ -13,6 +13,7 @@ import {
   wrapSave,
 } from '../lib/save'
 import { localDateKey } from '../lib/dates'
+import { EASY } from '../lib/easy'
 import { useAdsPref } from './AdSlot'
 import { useProgress } from '../store/progress'
 import type { AppTheme, View } from '../types'
@@ -200,6 +201,11 @@ export function Settings({ onNavigate }: SettingsProps) {
           then buttons say main idea. Shorter sentences and bigger taps. The main
           ideas stay the same — the words around them get plainer.
         </p>
+        {progress.easyMode ? (
+          <p className="teach-chip" role="note">
+            {EASY.mainIdeaTeach}
+          </p>
+        ) : null}
         <div className="settings-actions">
           <button
             type="button"

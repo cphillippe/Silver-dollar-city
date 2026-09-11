@@ -176,7 +176,12 @@ export function RecallGate({
       <p className="next-tap">{nextTap}</p>
       {encode ? (
         easy ? (
-          <p className="quiet">You will keep this main idea.</p>
+          <>
+            <p className="teach-chip" role="note">
+              {EASY.mainIdeaTeach}
+            </p>
+            <p className="quiet">You will keep this main idea.</p>
+          </>
         ) : (
           <p className="learning-store">
             {picture ? <GemMark gem={picture} size="sm" /> : null}

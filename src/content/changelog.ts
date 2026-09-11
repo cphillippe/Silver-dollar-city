@@ -8,6 +8,17 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.14',
+    title: 'Easy Wrong match + bigger Night Watch walkers',
+    when: '2026-09-11',
+    items: [
+      'Easy miss copy is Wrong match plus a plain why — no neighbor-line jargon.',
+      'Easy Night Watch walkers are bigger and slower. Hard pace stays.',
+      'Love tool line: A true main idea can turn a mean line around. No cheap line on Easy chrome.',
+      'First Easy teach chip: Main idea = the short true line we keep. Easy chrome prefers match over link.',
+    ],
+  },
+  {
     version: '1.4.13',
     title: 'Easy kid-plain Journal + first Night Watch cue',
     when: '2026-09-11',

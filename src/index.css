@@ -5544,6 +5544,14 @@ html[data-theme='dusk'] .hub.is-town .street-link {
   letter-spacing: 0.02em;
 }
 
+.defend-raider.is-easy-walker .walker-cue-label {
+  font-size: 15px;
+}
+
+.defend-raider.is-easy-walker .defend-raider-call text {
+  font-size: 9px;
+}
+
 @keyframes walker-cue-pulse {
   0%,
   100% {
@@ -6556,6 +6564,18 @@ html[data-theme='dusk'] .mind-map-card {
 
 .welcome-easy-note {
   margin: 0;
+  text-align: center;
+}
+
+.teach-chip {
+  margin: 8px 0 0;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 204, 51, 0.5);
+  background: rgba(255, 204, 51, 0.16);
+  color: #fff6b8;
+  font-size: 0.95rem;
+  font-weight: 700;
   text-align: center;
 }
 

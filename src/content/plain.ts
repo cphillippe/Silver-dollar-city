@@ -230,14 +230,14 @@ const PLAIN: Record<string, PlainLine> = {
     { term: 'Door', sense: 'a real way in — not a wall', hint: 'Keep the right pictures. Remove wrong picks.' },
   ),
   'td-watch': line(
-    'A true main idea can turn a cheap line.',
+    'A true main idea can turn a mean line around.',
     'Love, logic, reason, and science you have kept can send a false step up the ridge.',
-    { term: 'Use', sense: 'use a main idea you kept — not a new lecture', hint: 'Plant the true line. Turn the cheap one.' },
+    { term: 'Use', sense: 'use a main idea you kept — not a new lecture', hint: 'Plant the true line. Turn the mean one.' },
   ),
   'ln-street': line(
     'An idea lives at a place, with a person.',
-    'Mercy tells Jesus stories at the creek — that is why the neighbor-line lives at Parable Hollow. Silas copies names on the square — that is why the old shared belief lives at the Witness Bench. Juniper’s lamp is on the porch so today’s line can be seen.',
-    { term: 'Link', sense: 'connect the sentence to its place and person', hint: 'Connect sentence → place → person. One story at a time.' },
+    'Mercy tells Jesus stories at the creek — that is why the neighbor who stops on the road lives at Parable Hollow. Silas copies names on the square — that is why the old shared belief lives at the Witness Bench. Juniper’s lamp is on the porch so today’s line can be seen.',
+    { term: 'Match', sense: 'connect the sentence to its place and person', hint: 'Match sentence → place → person. One story at a time.' },
   ),
 }
 

@@ -1,5 +1,6 @@
 import { APP_VERSION } from '../config/app'
 import { STORY } from '../content/story'
+import { EASY } from '../lib/easy'
 import { Avatar } from './Avatar'
 import { CityMap } from './CityMap'
 import { dailyDoneToday, useProgress } from '../store/progress'
@@ -61,6 +62,11 @@ export function Welcome({ onNavigate }: WelcomeProps) {
             Optional. You can turn this on later in Settings → Reading. We teach hard words
             first — a claim is the main idea we hold to be true.
           </p>
+          {progress.easyMode ? (
+            <p className="teach-chip" role="note">
+              {EASY.mainIdeaTeach}
+            </p>
+          ) : null}
           <button type="button" className="btn primary xl" onClick={begin}>
             {returning ? 'Back to town' : 'Begin the trail'}
           </button>
