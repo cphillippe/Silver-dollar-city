@@ -8,6 +8,17 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.33',
+    title: 'Easy core loop',
+    when: '2026-09-11',
+    items: [
+      'Easy home has no Town map and no sticky fog box over the buttons. Match, Saved, and Night Watch sit clean on the page.',
+      'Town (soon) waits under Settings → More. Hard still has the streets.',
+      'Easy Hold is still the teach chip, one main-idea line, a scrollable reason, and Keep this.',
+      'Easy Night Watch finishes at 6/6. Match stays sentence → place → person with a named miss.',
+    ],
+  },
+  {
     version: '1.4.32',
     title: 'Easy core loop',
     when: '2026-09-11',
