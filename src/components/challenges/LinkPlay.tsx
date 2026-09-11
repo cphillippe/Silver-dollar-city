@@ -195,6 +195,13 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
           : 'Tap idea → place → person'
 
   const missStep = step === 'linked' ? 'idea' : step
+  const needId = currentTriple
+    ? missStep === 'idea'
+      ? currentTriple.ideaId
+      : missStep === 'place'
+        ? currentTriple.placeId
+        : currentTriple.personId
+    : null
   const missNeed =
     easy && currentTriple
       ? linkMiss(currentTriple.id, missStep)
@@ -293,7 +300,7 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
               <button
                 key={node.id}
                 type="button"
-                className={`link-block is-${node.kind} ${pic.who || pic.plotId ? 'is-picture' : ''} ${picked === node.id ? 'is-selected' : ''} ${flash === node.id ? 'is-flash' : ''} ${focusIds?.has(node.id) ? 'is-focus' : ''}`}
+                className={`link-block is-${node.kind} ${pic.who || pic.plotId ? 'is-picture' : ''} ${picked === node.id ? 'is-selected' : ''} ${flash === node.id ? 'is-flash' : ''} ${focusIds?.has(node.id) ? 'is-focus' : ''} ${easy && misses > 0 && node.id === needId ? 'is-need' : ''}`}
                 onClick={() => choose(node.id)}
               >
                 <LinkFace node={node} easy={easy} challenge={challenge} />

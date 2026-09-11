@@ -168,7 +168,7 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
       )}
 
       <header className="page-head journal-head">
-        <p className="eyebrow">Evidence Journal</p>
+        <p className="eyebrow">{easy ? EASY.saved : 'Evidence Journal'}</p>
         <h1>What you can still say</h1>
         <p>
           {easy

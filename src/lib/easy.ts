@@ -31,6 +31,9 @@ export const EASY = {
   nightDo: 'Do this',
   nightTap: 'Tap this person.',
   deployTeach: 'Use a main idea you kept.',
+  saved: 'Saved sentences',
+  connections: 'Connections',
+  uses: 'Things you can use',
 } as const
 
 const EASY_LINES: Record<string, string> = {
@@ -112,5 +115,5 @@ export function scrapbookLabel(easy: boolean, lit?: number) {
   if (!easy) {
     return lit === undefined ? 'Mind map' : `Mind map · ${lit} lit`
   }
-  return lit === undefined ? 'What you matched' : `What you matched · ${lit} lit`
+  return lit === undefined ? EASY.connections : `${EASY.connections} · ${lit} lit`
 }

@@ -13,7 +13,7 @@ import {
   wrapSave,
 } from '../lib/save'
 import { localDateKey } from '../lib/dates'
-import { EASY } from '../lib/easy'
+import { EASY, isEasy } from '../lib/easy'
 import { useAdsPref } from './AdSlot'
 import { useProgress } from '../store/progress'
 import type { AppTheme, View } from '../types'
@@ -24,6 +24,7 @@ interface SettingsProps {
 
 export function Settings({ onNavigate }: SettingsProps) {
   const { progress, saveMeta, importSaveText, reset, setTheme, setEasyMode } = useProgress()
+  const easy = isEasy(progress)
   const adsPref = useAdsPref()
   const fileRef = useRef<HTMLInputElement>(null)
   const [paste, setPaste] = useState('')
@@ -104,7 +105,9 @@ export function Settings({ onNavigate }: SettingsProps) {
 
   function confirmReset() {
     const ok = window.confirm(
-      'Reset progress? This wipes the save on this device — all held lines, journal pages, Night Watch, and mind-map links — and returns to the start. A backup of this save stays until the next import or reset.',
+      easy
+        ? 'Reset this walk? That clears saved sentences, Night Watch, and connections on this device, then starts over.'
+        : 'Reset progress? This wipes the save on this device — all held lines, journal pages, Night Watch, and mind-map links — and returns to the start. A backup of this save stays until the next import or reset.',
     )
     if (!ok) return
     reset()
@@ -134,8 +137,9 @@ export function Settings({ onNavigate }: SettingsProps) {
       <section className="settings-card">
         <p className="eyebrow">You</p>
         <p>
-          River’s unlocks in one place — held ideas, places, people, tools, and
-          mind-map links.
+          {easy
+            ? `River’s unlocks in one place — ${EASY.saved}, places, people, ${EASY.uses}, and ${EASY.connections}.`
+            : 'River’s unlocks in one place — held ideas, places, people, tools, and mind-map links.'}
         </p>
         <div className="settings-actions">
           <button
@@ -157,7 +161,7 @@ export function Settings({ onNavigate }: SettingsProps) {
             <li key={item}>{item}</li>
           ))}
         </ul>
-        {CHANGELOG.length > 1 ? (
+        {CHANGELOG.length > 1 && !easy ? (
           <details className="whats-new-more">
             <summary>Earlier drops</summary>
             {CHANGELOG.filter((note) => note.version !== APP_VERSION).map((note) => (
@@ -228,21 +232,27 @@ export function Settings({ onNavigate }: SettingsProps) {
 
       <section className="settings-card">
         <p className="eyebrow">This device</p>
-        <p>
-          Schema v{saveMeta.schemaVersion || SAVE_SCHEMA_VERSION} · app{' '}
-          {APP_VERSION} · {APP_ID}
-        </p>
+        {easy ? (
+          <p>This walk is saved on this device.</p>
+        ) : (
+          <p>
+            Schema v{saveMeta.schemaVersion || SAVE_SCHEMA_VERSION} · app{' '}
+            {APP_VERSION} · {APP_ID}
+          </p>
+        )}
         <p className="quiet">
-          {held} held lines · {open} journal pages · {progress.completed.length}{' '}
-          district walks · streak {progress.streak}
-          {cloudSyncStatus() === 'local-only'
-            ? ' · local only (no cloud login)'
-            : ''}
+          {easy
+            ? `${held} ${EASY.saved.toLowerCase()} · ${open} pages · ${progress.completed.length} walks · streak ${progress.streak}`
+            : `${held} held lines · ${open} journal pages · ${progress.completed.length} district walks · streak ${progress.streak}${
+                cloudSyncStatus() === 'local-only' ? ' · local only (no cloud login)' : ''
+              }`}
         </p>
-        <p className="quiet">
-          Offline-first. The same key keeps working across updates; a schema
-          version migrates old saves instead of wiping them.
-        </p>
+        {easy ? null : (
+          <p className="quiet">
+            Offline-first. The same key keeps working across updates; a schema
+            version migrates old saves instead of wiping them.
+          </p>
+        )}
       </section>
 
       <section className="settings-card">
@@ -318,12 +328,15 @@ export function Settings({ onNavigate }: SettingsProps) {
         <p className="eyebrow">Ad placeholders</p>
         <p>
           Playtest default is off. Placeholders are labeled slots for a later
-          network — they never cover Keep/Toss, the takeaway step, or Journal.
+          network — they never cover Keep/Toss, the takeaway step, or{' '}
+          {easy ? EASY.saved : 'Journal'}.
         </p>
-        <p className="quiet">
-          Product flag <code>adsEnabled</code> is {adsEnabledDefault ? 'on' : 'off'}{' '}
-          in config. This toggle is a this-device override.
-        </p>
+        {easy ? null : (
+          <p className="quiet">
+            Product flag <code>adsEnabled</code> is {adsEnabledDefault ? 'on' : 'off'}{' '}
+            in config. This toggle is a this-device override.
+          </p>
+        )}
         <div className="settings-actions">
           <button
             type="button"
@@ -346,9 +359,9 @@ export function Settings({ onNavigate }: SettingsProps) {
         <summary>Danger zone · wipe this device</summary>
         <p className="eyebrow">Reset progress</p>
         <p>
-          Wipe ALL progress on this device — held lines, journal, Night Watch, and
-          mind-map links — and return to the start. Export first if you want the
-          walk back. This is not on the town screen.
+          {easy
+            ? 'Wipe this walk on this device — saved sentences, Night Watch, and connections — and start over. Export first if you want it back.'
+            : 'Wipe ALL progress on this device — held lines, journal, Night Watch, and mind-map links — and return to the start. Export first if you want the walk back. This is not on the town screen.'}
         </p>
         <button type="button" className="btn" onClick={confirmReset}>
           Reset progress

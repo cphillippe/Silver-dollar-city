@@ -5215,8 +5215,23 @@ img.walker-face.easy-walker-face,
   box-shadow: 0 0 0 5px #ffcc33, 0 10px 22px rgba(10, 8, 6, 0.45);
 }
 
+.easy-walker.is-cue {
+  z-index: 6;
+}
+
 .easy-walker.is-cue .easy-walker-face {
   animation: easy-walker-pulse 1s ease-in-out infinite;
+}
+
+.easy-walker.is-dim {
+  z-index: 1;
+  opacity: 0.32;
+  filter: grayscale(0.85);
+  pointer-events: none;
+}
+
+.easy-walker.is-dim .easy-walker-face {
+  box-shadow: 0 0 0 3px rgba(180, 170, 150, 0.35);
 }
 
 .easy-walker-arrow {
@@ -6139,6 +6154,13 @@ img.walker-face.easy-walker-face,
 .link-block.is-selected {
   border-color: #ffcc33;
   box-shadow: 0 0 0 2px rgba(255, 204, 51, 0.45), 0 0 16px rgba(255, 90, 122, 0.35);
+}
+
+.play.is-easy-link .link-block.is-need,
+html[data-easy='on'] .link-block.is-need {
+  border-color: #ffcc33;
+  box-shadow: 0 0 0 3px #ffcc33, 0 0 18px rgba(255, 204, 51, 0.45);
+  font-weight: 800;
 }
 
 .link-block.is-locked {

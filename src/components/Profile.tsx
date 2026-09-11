@@ -1,5 +1,5 @@
 import { CAST } from '../content/story'
-import { easyFacingLine, isEasy } from '../lib/easy'
+import { EASY, easyFacingLine, isEasy } from '../lib/easy'
 import { profileInventory, openIdeaView, openPlaceView } from '../lib/profile'
 import { useProgress } from '../store/progress'
 import type { View } from '../types'
@@ -44,8 +44,8 @@ export function Profile({ onNavigate }: ProfileProps) {
         </div>
       </header>
 
-      <section className="profile-section" aria-label="Held ideas">
-        <p className="eyebrow">{easy ? 'Held ideas' : 'Held ideas / proofs'}</p>
+      <section className="profile-section" aria-label={easy ? EASY.saved : 'Held ideas'}>
+        <p className="eyebrow">{easy ? EASY.saved : 'Held ideas / proofs'}</p>
         <h2>What you can still say</h2>
         {easy ? (
           <p className="quiet">These are the main ideas you kept.</p>
@@ -63,7 +63,18 @@ export function Profile({ onNavigate }: ProfileProps) {
                 onClick={() => onNavigate(openIdeaView(progress, idea.id))}
               >
                 <p className="eyebrow">
-                  {idea.held ? 'Held' : idea.stored ? 'Stored' : 'Walked'} · {idea.source}
+                  {easy
+                    ? idea.held
+                      ? 'Saved'
+                      : idea.stored
+                        ? 'Kept'
+                        : 'Walked'
+                    : idea.held
+                      ? 'Held'
+                      : idea.stored
+                        ? 'Stored'
+                        : 'Walked'}{' '}
+                  · {idea.source}
                 </p>
                 <strong>{easy ? easyFacingLine(idea.id, idea.claim) : idea.claim}</strong>
                 <PlainTalk id={idea.id} />
@@ -135,9 +146,9 @@ export function Profile({ onNavigate }: ProfileProps) {
         )}
       </section>
 
-      <section className="profile-section" aria-label="Tools">
-        <p className="eyebrow">Tools / abilities</p>
-        <h2>{easy ? 'What you can use' : 'What you can deploy'}</h2>
+      <section className="profile-section" aria-label={easy ? EASY.uses : 'Tools'}>
+        <p className="eyebrow">{easy ? EASY.uses : 'Tools / abilities'}</p>
+        <h2>{easy ? EASY.uses : 'What you can deploy'}</h2>
         {inv.tools.map((tool) => (
           <article
             key={tool.id}
@@ -174,8 +185,8 @@ export function Profile({ onNavigate }: ProfileProps) {
         ))}
       </section>
 
-      <section className="profile-section" aria-label="Mind-map links">
-        <p className="eyebrow">Mind-map links</p>
+      <section className="profile-section" aria-label={easy ? EASY.connections : 'Mind-map links'}>
+        <p className="eyebrow">{easy ? EASY.connections : 'Mind-map links'}</p>
         <h2>Idea · place · person</h2>
         {inv.streetLinked ? (
           inv.links.map((link) => (
