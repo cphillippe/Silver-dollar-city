@@ -1022,7 +1022,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.21')
+assert.equal(APP_VERSION, '1.4.22')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -1522,9 +1522,9 @@ assert.match(
 )
 assert.match(defendSrc, /is-easy-walker/)
 assert.match(defendSrc, /waveSpeed\(easy\)/)
-assert.match(defendSrc, /holdWalkers/)
+assert.match(defendSrc, /easy && item.id === targetId/)
 assert.match(defendSrc, /easy-walker-face/)
-assert.match(defendSrc, /EASY_CUE_HOLD_MS/)
+assert.doesNotMatch(defendSrc, /holdWalkers/)
 assert.match(defendSrc, /holdSpawn/)
 assert.equal(easyTapMode(true, 'wave', false), true)
 assert.equal(easyTapMode(true, 'wave', true), false)
@@ -1549,7 +1549,7 @@ assert.match(defendSrc, /easyTapTarget/)
 assert.match(defendSrc, /data-person-node="walker"/)
 assert.doesNotMatch(defendSrc, /walkerCue|easySolo|clearWalkerCue|hideOther/)
 assert.match(defendSrc, /EASY\.loveCue/)
-assert.equal(EASY.loveCue, 'Love — tap the person')
+assert.equal(EASY.loveCue, 'Love — tap the face')
 assert.doesNotMatch(defendSrc, /is-dim/)
 assert.match(linkPlaySrc, /is-need/)
 assert.match(cssSrc, /easy-walker-face/)
@@ -1576,7 +1576,7 @@ assert.doesNotMatch(defendSrc, /EASY\.nightWhat/)
 assert.match(defendSrc, /EASY\.nightTap/)
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /Tap this person/,
+  /Tap the face/,
 )
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
@@ -1619,13 +1619,16 @@ assert.match(
   /This walk is saved on this device/,
 )
 assert.match(
+  readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
+  /Settings · \$\{APP_VERSION\}/,
+)
+assert.match(cssSrc, /easy-steps/)
+assert.match(
   readFileSync(new URL('../src/components/AppShell.tsx', import.meta.url), 'utf8'),
   /easy \? 'Saved' : 'Journal'/,
 )
-assert.match(
-  readFileSync(new URL('../src/components/challenges/LinkPlay.tsx', import.meta.url), 'utf8'),
-  /easyLinkStep/,
-)
+assert.match(linkPlaySrc, /easy-steps/)
+assert.match(linkPlaySrc, /1 · Sentence/)
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
   /Tap a sentence/,
@@ -1652,7 +1655,7 @@ assert.match(hubSrc, /do-next/)
 assert.match(hubSrc, /Tap this next/)
 assert.match(hubSrc, /is-easy-town/)
 assert.match(cssSrc, /tap-next-dock/)
-assert.match(defendSrc, /You missed the walker/)
+assert.match(defendSrc, /Tap the face/)
 assert.match(defendSrc, /Porch flickered/)
 assert.doesNotMatch(TOWN_PATH_EASY, /scrapbook/)
 assert.match(

@@ -129,7 +129,7 @@ export function Settings({ onNavigate }: SettingsProps) {
       </button>
 
       <header className="page-head">
-        <p className="eyebrow">Settings · V0 · {APP_VERSION}</p>
+        <p className="eyebrow">{easy ? `Settings · ${APP_VERSION}` : `Settings · V0 · ${APP_VERSION}`}</p>
         <h1>Progress & support</h1>
         <p>{savedLabel}</p>
       </header>
@@ -138,7 +138,7 @@ export function Settings({ onNavigate }: SettingsProps) {
         <p className="eyebrow">You</p>
         <p>
           {easy
-            ? `River’s unlocks in one place — ${EASY.saved}, places, people, ${EASY.uses}, and ${EASY.connections}.`
+            ? `What River has opened — ${EASY.saved}, places, people, ${EASY.uses}, and ${EASY.connections}.`
             : 'River’s unlocks in one place — held ideas, places, people, tools, and mind-map links.'}
         </p>
         <div className="settings-actions">
@@ -201,9 +201,15 @@ export function Settings({ onNavigate }: SettingsProps) {
       <section className="settings-card">
         <p className="eyebrow">Reading</p>
         <p>
-          A claim is the main idea we hold to be true. Easy mode teaches that once,
-          then buttons say main idea. Shorter sentences and bigger taps. The main
-          ideas stay the same — the words around them get plainer.
+          {easy ? (
+            <>Easy mode: shorter sentences and bigger taps. You can switch anytime.</>
+          ) : (
+            <>
+              A claim is the main idea we hold to be true. Easy mode teaches that once,
+              then buttons say main idea. Shorter sentences and bigger taps. The main
+              ideas stay the same — the words around them get plainer.
+            </>
+          )}
         </p>
         {progress.easyMode ? (
           <p className="teach-chip" role="note">
@@ -242,7 +248,7 @@ export function Settings({ onNavigate }: SettingsProps) {
         )}
         <p className="quiet">
           {easy
-            ? `${held} ${EASY.saved.toLowerCase()} · ${open} pages · ${progress.completed.length} walks · streak ${progress.streak}`
+            ? `${held} ${EASY.saved.toLowerCase()} · ${open} pages · ${progress.completed.length} walks`
             : `${held} held lines · ${open} journal pages · ${progress.completed.length} district walks · streak ${progress.streak}${
                 cloudSyncStatus() === 'local-only' ? ' · local only (no cloud login)' : ''
               }`}
