@@ -295,7 +295,71 @@ export function easyPlotTag(id: CityPlotId): string {
   if (id === 'hollow') return 'Parable Hollow'
   if (id === 'bench') return 'Witness Bench'
   if (id === 'porch') return 'East porch'
+  if (id === 'lamps') return 'Star lamps'
   return plotTag(id)
+}
+
+/** Named Easy chips. Fewer than every lot — stacked, measured for 390×844. */
+export const EASY_NAMED_PLOTS: CityPlotId[] = ['hollow', 'lamps', 'journal', 'bench', 'porch']
+
+/**
+ * Chip centers in the 640×420 viewBox. Street names sit in a bottom band
+ * under portraits; Pages sits above the mid lot. Inset from the 24px corner.
+ */
+export const EASY_TAG_SLOT: Record<CityPlotId, { x: number; y: number }> = {
+  hollow: { x: 96, y: 388 },
+  lamps: { x: 208, y: 388 },
+  journal: { x: 268, y: 198 },
+  bench: { x: 392, y: 388 },
+  porch: { x: 536, y: 388 },
+  gate: { x: 498, y: 230 },
+  observatory: { x: 410, y: 96 },
+  lookout: { x: 508, y: 52 },
+}
+
+/** City of Heaven — left of the ridge city, clear of the clipped corner. */
+export const HEAVEN_TAG = { x: 418, y: 36 }
+
+/** Keep chips inside the rounded SVG (24px CSS ≈ 39 viewBox units at 390px). */
+export const EASY_MAP_SAFE = { x0: 44, y0: 26, x1: 596, y1: 412 }
+
+export function easyTagLines(tag: string): string[] {
+  return tag.includes(' ') ? tag.split(' ') : [tag]
+}
+
+export function easyTagMetrics(id: CityPlotId) {
+  const tag = easyPlotTag(id)
+  const lines = easyTagLines(tag)
+  const slot = EASY_TAG_SLOT[id]
+  const longest = Math.max(...lines.map((line) => line.length))
+  const w = Math.max(70, longest * 8.4 + 16)
+  const h = lines.length * 13 + 6
+  const x0 = slot.x - w / 2
+  const x1 = slot.x + w / 2
+  const y0 = slot.y - 14
+  const y1 = y0 + h
+  return { id, tag, lines, x0, x1, y0, y1, w, h }
+}
+
+export function easyTagsFit(ids: CityPlotId[] = EASY_NAMED_PLOTS) {
+  const boxes = ids.map(easyTagMetrics)
+  const { x0: sx0, y0: sy0, x1: sx1, y1: sy1 } = EASY_MAP_SAFE
+  const gap = 8
+  for (const box of boxes) {
+    if (box.x0 < sx0 || box.x1 > sx1 || box.y0 < sy0 || box.y1 > sy1) {
+      return { ok: false, reason: `${box.id} outside safe`, boxes }
+    }
+  }
+  for (let i = 0; i < boxes.length; i += 1) {
+    for (let j = i + 1; j < boxes.length; j += 1) {
+      const a = boxes[i]
+      const b = boxes[j]
+      const hit =
+        a.x0 < b.x1 + gap && a.x1 + gap > b.x0 && a.y0 < b.y1 + gap && a.y1 + gap > b.y0
+      if (hit) return { ok: false, reason: `${a.id} overlaps ${b.id}`, boxes }
+    }
+  }
+  return { ok: true, reason: '', boxes }
 }
 
 export const STREET_LIGHT_PLOTS = STREET_LIGHTS

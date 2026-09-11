@@ -53,6 +53,8 @@ import {
   earnedTier,
   emptyCityBuilt,
   lotTapWhy,
+  easyTagsFit,
+  easyPlotTag,
 } from '../src/lib/cityBuild.ts'
 import { emptyProgress } from '../src/lib/save.ts'
 import { EASY, easyWrongTap } from '../src/lib/easy.ts'
@@ -1022,7 +1024,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.25')
+assert.equal(APP_VERSION, '1.4.26')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -1491,6 +1493,16 @@ assert.match(
   readFileSync(new URL('../src/lib/cityBuild.ts', import.meta.url), 'utf8'),
   /East porch/,
 )
+assert.match(
+  readFileSync(new URL('../src/lib/cityBuild.ts', import.meta.url), 'utf8'),
+  /Star lamps/,
+)
+assert.equal(easyPlotTag('lamps'), 'Star lamps')
+assert.equal(easyPlotTag('journal'), 'Pages')
+{
+  const fit = easyTagsFit()
+  assert.equal(fit.ok, true, fit.reason)
+}
 assert.match(cssSrc, /aspect-ratio: 640 \/ 420/)
 assert.doesNotMatch(cssSrc, /min-height: 340px/)
 assert.match(cssSrc, /html\[data-easy='on'\] \.city-plot-tag/)

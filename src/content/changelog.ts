@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.26',
+    title: 'Town names sit in their own slots',
+    when: '2026-09-11',
+    items: [
+      'Town chips stack so every full name stays readable at phone width — Parable Hollow, Witness Bench, East porch, Star lamps, Pages, City of Heaven.',
+      'Portraits sit above the name band. Names no longer cover each other.',
+    ],
+  },
+  {
     version: '1.4.25',
     title: 'Saved folds by section',
     when: '2026-09-11',
