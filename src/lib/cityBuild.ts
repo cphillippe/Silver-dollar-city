@@ -290,9 +290,11 @@ export function plotTag(id: CityPlotId): string {
   }
 }
 
-/** Easy map chips — Square, not Bench, so the street reads at 390px. */
+/** Easy map chips — full place names, not Hollow / Square / Porch. */
 export function easyPlotTag(id: CityPlotId): string {
-  if (id === 'bench') return 'Square'
+  if (id === 'hollow') return 'Parable Hollow'
+  if (id === 'bench') return 'Witness Bench'
+  if (id === 'porch') return 'East porch'
   return plotTag(id)
 }
 

@@ -3,7 +3,7 @@ import { areas, journalEntries, pillarFor } from '../content'
 import { evidenceFor, evidenceForJournal } from '../content/evidence'
 import { guideForArea, STORY } from '../content/story'
 import { localDateKey } from '../lib/dates'
-import { EASY, isEasy } from '../lib/easy'
+import { EASY, easyFacingLine, isEasy } from '../lib/easy'
 import { isDue, nextGapLabel } from '../lib/memory'
 import { starLegend } from '../lib/stars'
 import { deployLabel, findLearning, storedLearnings, withLearningBeat } from '../lib/learning'
@@ -213,14 +213,14 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
                 <article key={learning.id} id={`learn-${learning.id}`} className="dossier is-open is-stored">
                   <p className="eyebrow">Stored · {learning.source}</p>
                   {learning.picture ? <GemMark gem={learning.picture} size="sm" /> : null}
-                  <h3>{learning.claim}</h3>
+                  <h3>{easy ? easyFacingLine(learning.id, learning.claim) : learning.claim}</h3>
                   <p>{learning.reason}</p>
                   <p className="learning-store">
                     {learning.picture ? <GemMark gem={learning.picture} size="sm" /> : null}
                     <span>
                       Anchored to {learning.anchor}
                       {learning.beat ? ` · pictured as ${learning.beat}` : ''}
-                      {tool ? ` · deploys as ${tool}` : ''}
+                      {tool ? (easy ? ` · use as ${tool}` : ` · deploys as ${tool}`) : ''}
                     </span>
                   </p>
                   {trace ? <p className="quiet">{nextGapLabel(trace, today, easy)}</p> : null}

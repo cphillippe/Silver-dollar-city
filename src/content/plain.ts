@@ -43,7 +43,7 @@ const PLAIN: Record<string, PlainLine> = {
   'ph-seeds': line(
     'The kingdom comes in Jesus stories you can hold — not slogans.',
     'Soil, a search, a tiny seed, and a trust. Each Jesus story asks what you will do with what you heard.',
-    { term: 'Parable', sense: 'a Jesus story that asks you to decide', hint: 'Keep the pictures. Toss the slogans.' },
+    { term: 'Parable', sense: 'a Jesus story that asks you to decide', hint: 'Keep the right pictures. Remove wrong picks.' },
   ),
   'ph-debt': line(
     'If you were forgiven a huge debt, you cannot choke a neighbor over a small one.',
@@ -157,12 +157,12 @@ const PLAIN: Record<string, PlainLine> = {
   'daily-lantern': line(
     'A lamp is meant to be seen.',
     'Jesus uses an ordinary lamp and a city on a hill. Public without being proud.',
-    { term: 'Lamp', sense: 'a light others can actually see', hint: 'Snap the picture to the sentence.' },
+    { term: 'Lamp', sense: 'a light others can actually see', hint: 'Keep the right pictures. Remove wrong picks.' },
   ),
   'daily-gems': line(
     'Jesus taught with pictures you can hold.',
     'A lamp is seen. Seed meets different hearts. The cup is poured for many — gift, not wage.',
-    { term: 'Gift', sense: 'given, not earned as a wage', hint: 'Snap each picture to its line.' },
+    { term: 'Gift', sense: 'given, not earned as a wage', hint: 'Keep the right pictures. Remove wrong picks.' },
   ),
   'daily-seed': line(
     'The same word meets different soils. Some seed is lost.',
@@ -227,12 +227,12 @@ const PLAIN: Record<string, PlainLine> = {
   'daily-door': line(
     'Jesus’ “door” is a particular way in with a wide anyone.',
     'You may refuse it. The town will not lock you in a pew.',
-    { term: 'Door', sense: 'a real way in — not a wall', hint: 'Snap the image to the gift.' },
+    { term: 'Door', sense: 'a real way in — not a wall', hint: 'Keep the right pictures. Remove wrong picks.' },
   ),
   'td-watch': line(
-    'A true line can turn a cheap claim toward heaven.',
+    'A true main idea can turn a cheap line.',
     'Love, logic, reason, and science you have kept can send a false step up the ridge.',
-    { term: 'Deploy', sense: 'use a line you already hold — not a new lecture', hint: 'Plant the true line. Turn the cheap one.' },
+    { term: 'Use', sense: 'use a main idea you kept — not a new lecture', hint: 'Plant the true line. Turn the cheap one.' },
   ),
   'ln-street': line(
     'An idea lives at a place, with a person.',

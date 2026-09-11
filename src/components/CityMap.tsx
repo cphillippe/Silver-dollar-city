@@ -810,7 +810,8 @@ function PlotGroup({
   const hit = easy ? 64 : 42
   const tag = easy ? easyPlotTag(id) : plotTag(id)
   const showTag = clickable || (easy && streetLot)
-  const tagW = Math.max(easy ? 86 : 64, tag.length * (easy ? 13 : 8) + 20)
+  const tagW = Math.max(easy ? 96 : 64, tag.length * (easy ? 11 : 8) + 24)
+  const tagX = Math.min(632 - tagW / 2, Math.max(tagW / 2 + 8, at.x))
   return (
     <g
       className={`city-plot is-${stage} ${next ? 'is-next' : ''} ${rising ? 'is-rising' : ''} ${tapped ? 'is-tapped' : ''} ${ready ? 'is-ready' : ''} ${easy ? 'is-easy-lot' : ''}`}
@@ -850,13 +851,13 @@ function PlotGroup({
         <>
           <rect
             className="city-plot-tag-bg"
-            x={at.x - tagW / 2}
+            x={tagX - tagW / 2}
             y={at.y + (easy ? 36 : 32)}
             width={tagW}
             height={easy ? 28 : 18}
             rx={easy ? 10 : 7}
           />
-          <text className="city-plot-tag" x={at.x} y={at.y + (easy ? 56 : 46)} textAnchor="middle">
+          <text className="city-plot-tag" x={tagX} y={at.y + (easy ? 56 : 46)} textAnchor="middle">
             {tag}
           </text>
         </>

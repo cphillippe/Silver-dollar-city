@@ -19,13 +19,37 @@ export const EASY = {
   readAgain: 'Read this one again.',
   claimTeach: 'A claim is the main idea we hold to be true.',
   mainIdea: 'main idea',
+  reasonSense: 'why the main idea stands',
+  sourceSense: 'where the main idea comes from',
   lockIn: 'Save your picks.',
+  matchHow: 'Keep the right pictures. Remove wrong picks.',
+  matchMiss: 'Wrong pair — try a different main idea.',
   upgrade: 'Build this — raise the next look you earned by learning',
   manage: 'Building',
   nightDo: 'Do this',
   nightTap: 'Tap the walker.',
-  deployTeach: 'Deploy means use a main idea you kept.',
+  deployTeach: 'Use a main idea you kept.',
 } as const
+
+const EASY_LINES: Record<string, string> = {
+  'td-watch': 'A true main idea can turn a cheap line.',
+}
+
+/** After the one teach, Easy never wallpapers the word claim. */
+export function easyMainIdea(text: string): string {
+  return text
+    .replace(/\bcheap claim\b/gi, 'cheap line')
+    .replace(/\bthe claims\b/gi, 'the main ideas')
+    .replace(/\ba claim\b/gi, 'a main idea')
+    .replace(/\bthe claim\b/gi, 'the main idea')
+    .replace(/\bA claim\b/g, 'A main idea')
+    .replace(/\bThe claim\b/g, 'The main idea')
+}
+
+export function easyFacingLine(id: string | undefined, text: string): string {
+  if (id && EASY_LINES[id]) return EASY_LINES[id]
+  return easyMainIdea(text)
+}
 
 /** Gold Town next tap — name what opens, not a bare “Tap this next.” */
 export function easyTapNext(goal: { kind: string; areaId?: string }): string {
