@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.20',
+    title: 'One person for the whole night',
+    when: '2026-09-11',
+    items: [
+      'Night Watch keeps one glowing person and Love — tap the person for every tap, not just the first.',
+      'Road lamps and locked tools stay hidden until that Easy night is done.',
+      'A right match waits on Next before new cards show.',
+    ],
+  },
+  {
     version: '1.4.19',
     title: 'One tap line at a time',
     when: '2026-09-11',

@@ -112,7 +112,7 @@ export function Profile({ onNavigate }: ProfileProps) {
               </strong>
               <p>
                 {easy && place.id === 'bench'
-                  ? 'Silas copies names on the square. Public names, not parables.'
+                  ? 'Silas copies names on the square. Public names, not stories.'
                   : place.blurb}
               </p>
             </button>
