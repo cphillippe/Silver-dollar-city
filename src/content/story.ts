@@ -27,7 +27,7 @@ export const CAST: Record<CharacterId, Character> = {
   },
   juniper: {
     id: 'juniper',
-    name: 'Juniper',
+    name: 'Juniper Wick',
     shortName: 'Juniper',
     role: 'Morning lantern',
     seeking: 'One honest line you can still say at breakfast.',
@@ -42,7 +42,7 @@ export const CAST: Record<CharacterId, Character> = {
   },
   silas: {
     id: 'silas',
-    name: 'Silas Page',
+    name: 'Silas Whitman',
     shortName: 'Silas',
     role: 'Witness clerk',
     seeking: 'Names, dates, and what the first reports actually said.',
@@ -50,7 +50,7 @@ export const CAST: Record<CharacterId, Character> = {
   },
   nora: {
     id: 'nora',
-    name: 'Nora Vale',
+    name: 'Nora Skye',
     shortName: 'Nora',
     role: 'Observatory keeper',
     seeking: 'Wonder that is not afraid of a telescope.',
@@ -66,7 +66,7 @@ export const CAST: Record<CharacterId, Character> = {
   },
   hope: {
     id: 'hope',
-    name: 'Hope Lind',
+    name: 'Hope Ridge',
     shortName: 'Hope',
     role: 'Lookout',
     seeking: 'Duty, mind, meaning, and beauty — without mocking the person still walking.',

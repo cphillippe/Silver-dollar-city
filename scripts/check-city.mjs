@@ -18,6 +18,7 @@ import {
   SPINE_GROW,
 } from '../src/lib/city.ts'
 import { APP_VERSION } from '../src/config/app.ts'
+import { CAST } from '../src/content/story.ts'
 import { CHANGELOG, latestChange } from '../src/content/changelog.ts'
 import { CONTENT_PACKS } from '../src/content/packs.ts'
 import { DAILY_POOL, dailyForDate } from '../src/content/daily.ts'
@@ -1045,7 +1046,24 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.35')
+assert.equal(APP_VERSION, '1.4.36')
+assert.equal(CAST.river.name, 'River')
+assert.equal(CAST.juniper.name, 'Juniper Wick')
+assert.equal(CAST.mercy.name, 'Mercy Wren')
+assert.equal(CAST.silas.name, 'Silas Whitman')
+assert.equal(CAST.nora.name, 'Nora Skye')
+assert.equal(CAST.ansel.name, 'Ansel Gate')
+assert.equal(CAST.hope.name, 'Hope Ridge')
+assert.equal(CAST.juniper.id, 'juniper')
+assert.equal(CAST.silas.id, 'silas')
+assert.equal(
+  STREET_CHALLENGE.nodes.find((node) => node.id === 'person-silas')?.text,
+  'Silas Whitman',
+)
+assert.equal(
+  STREET_CHALLENGE.nodes.find((node) => node.id === 'person-juniper')?.text,
+  'Juniper Wick',
+)
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
