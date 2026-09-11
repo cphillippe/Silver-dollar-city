@@ -1,4 +1,4 @@
-import { EASY, isEasy } from '../lib/easy'
+import { EASY, easyFacingLine, isEasy } from '../lib/easy'
 import { RECALL_SESSION_CAP } from '../lib/recall'
 import { useProgress } from '../store/progress'
 
@@ -25,7 +25,7 @@ export function RecallOffer({ items, onOpen, onLater, onNotToday }: RecallOfferP
   return (
     <section className="recall-offer" aria-label="A held line is ready">
       <p className="eyebrow">{easy ? 'A sentence you kept' : 'A held line is ready'}</p>
-      <h2>{first.title}</h2>
+      <h2>{easy ? easyFacingLine(first.id, first.title) : first.title}</h2>
       <p className="quiet">
         {easy
           ? `Up to ${RECALL_SESSION_CAP} this sitting — not every page.`
