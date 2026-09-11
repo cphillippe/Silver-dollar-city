@@ -65,21 +65,21 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
         <nav className="easy-core" aria-label="Play">
           <button
             type="button"
-            className="btn gold xl"
+            className="btn primary xl"
             onClick={() => onNavigate({ name: 'link' })}
           >
             {EASY.matchCta}
           </button>
           <button
             type="button"
-            className="btn primary xl"
+            className="btn gold xl"
             onClick={() => onNavigate({ name: 'journal' })}
           >
             {EASY.saved}
           </button>
           <button
             type="button"
-            className="btn xl"
+            className="btn gold xl"
             onClick={() => onNavigate({ name: 'defend' })}
           >
             {EASY.nightDo}
