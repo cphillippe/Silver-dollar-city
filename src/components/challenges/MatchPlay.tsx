@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { shuffle } from '../../lib/shuffle'
-import { EASY, isEasy } from '../../lib/easy'
+import { EASY, easyWrongTap, isEasy } from '../../lib/easy'
 import { useProgress } from '../../store/progress'
 import type { MatchChallenge, MatchSceneId } from '../../types'
 import { MatchScene } from '../MatchScene'
@@ -115,6 +115,8 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
   const shownRight = guided
     ? right.filter((item) => item.id === focusId || item.id === decoyId)
     : right
+  const needPair = left.find((pair) => pair.id === (picked?.id ?? focusId))
+  const missCard = picked?.side === 'left' ? needPair?.right : needPair?.left
 
   return (
     <div
@@ -138,7 +140,7 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
       {status === 'wrong' || misses > 0 ? (
         <p className="match-toast" role="status">
           {easy ? (
-            <strong>{EASY.matchMiss}</strong>
+            <strong>{easyWrongTap(missCard ?? 'this card')}</strong>
           ) : (
             <>
               <strong>
