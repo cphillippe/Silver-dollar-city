@@ -59,7 +59,7 @@ export function easyWrongTap(card: string): string {
 }
 
 const EASY_LINES: Record<string, string> = {
-  'td-watch': 'A true main idea can turn an unkind sentence around.',
+  'td-watch': 'A true line can turn an unkind sentence toward heaven.',
 }
 
 const EASY_CHROME: Record<string, string> = {

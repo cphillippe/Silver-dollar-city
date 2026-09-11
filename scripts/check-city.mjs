@@ -1052,7 +1052,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.39')
+assert.equal(APP_VERSION, '1.4.40')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1660,9 +1660,9 @@ assert.match(
   readFileSync(new URL('../src/content/lots.ts', import.meta.url), 'utf8'),
   /Story Creek · Jesus stories/,
 )
-assert.doesNotMatch(
+assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /toward heaven/,
+  /A true line can turn an unkind sentence toward heaven/,
 )
 assert.doesNotMatch(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
@@ -1676,10 +1676,15 @@ assert.doesNotMatch(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
   /neighbor-line/,
 )
-assert.match(
+assert.doesNotMatch(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /unkind sentence around/,
+  /A true main idea can turn/,
 )
+assert.doesNotMatch(
+  readFileSync(new URL('../src/content/plain.ts', import.meta.url), 'utf8'),
+  /A true main idea can turn/,
+)
+assert.doesNotMatch(latestChange(APP_VERSION).items.join('\n'), /A true main idea can turn/)
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
   /Main idea = the short true line we keep/,
@@ -2086,7 +2091,8 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(watch.claim, 'A true line can turn a cheap claim toward heaven.')
   const claim = easyFacingLine(watch.id, watch.claim)
   const decoy = easyFacingLine(watch.id, watch.claimChoices[1])
-  assert.equal(claim, 'A true main idea can turn an unkind sentence around.')
+  assert.equal(claim, 'A true line can turn an unkind sentence toward heaven.')
+  assert.equal(plainFor('td-watch')?.gloss, 'A true line can turn an unkind sentence toward heaven.')
   assert.notEqual(decoy, claim)
   assert.equal(new Set(watch.claimChoices.map((line) => easyFacingLine(watch.id, line))).size, 3)
 
