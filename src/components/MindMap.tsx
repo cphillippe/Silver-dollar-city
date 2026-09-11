@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { evidenceFor } from '../content/evidence'
-import { journalForChallenge } from '../content'
+import { areas, journalForChallenge } from '../content'
 import { plainFor } from '../content/plain'
 import { LOT_STORY, easyPlaceSub, lotWhy } from '../content/lots'
 import { EASY, isEasy, scrapbookLabel } from '../lib/easy'
@@ -15,9 +15,16 @@ import {
   tierJob,
   tierTitle,
 } from '../lib/cityBuild'
-import type { CityPlotId } from '../lib/city'
+import { CITY_PLOTS, type CityPlotId } from '../lib/city'
 import { WORDS } from '../lib/words'
-import { rehearseGo, useProgress } from '../store/progress'
+import {
+  areaGateCopy,
+  gateWalkArea,
+  isAreaUnlocked,
+  nextWalkView,
+  rehearseGo,
+  useProgress,
+} from '../store/progress'
 import type { View } from '../types'
 import { Avatar } from './Avatar'
 import { AbilityMark } from './GemMark'
@@ -41,6 +48,14 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
   const applied = appliedTier(plotId, progress)
   const ready = canUpgrade(plotId, progress)
   const need = nextUpgradeNeed(plotId, progress, easy)
+  const plotSpec = CITY_PLOTS.find((plot) => plot.id === plotId)
+  const areaId = plotSpec?.areaId
+  const areaOpen = areaId ? isAreaUnlocked(areaId, progress.completed) : true
+  const gate = areaId && !areaOpen ? areaGateCopy(areaId, progress.completed, easy) : null
+  const gateArea = areaId && !areaOpen ? gateWalkArea(areaId) : null
+  const gateTitle = gateArea
+    ? (areas.find((item) => item.id === gateArea)?.title ?? gateArea)
+    : ''
   const [ideaLock, setIdeaLock] = useState<string | null>(null)
   const litCount =
     graph.ideas.filter((item) => item.lit).length +
@@ -156,8 +171,16 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
         </div>
 
         <div className="mind-map-dock">
-          {ready ? null : <p className="build-next">{need.line}</p>}
-          {ready ? (
+          {gate ? <p className="build-next">{gate}</p> : ready ? null : <p className="build-next">{need.line}</p>}
+          {gate && gateArea ? (
+            <button
+              type="button"
+              className="btn gold xl"
+              onClick={() => onNavigate(nextWalkView(gateArea, progress.completed))}
+            >
+              {easy ? `Walk ${gateTitle} next` : `Walk ${gateTitle}`}
+            </button>
+          ) : ready ? (
             <button
               type="button"
               className="btn gold xl build-upgrade"
@@ -170,7 +193,11 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
               {easy ? `Walk ${graph.placeTitle}` : `Enter ${graph.placeTitle}`}
             </button>
           )}
-          {ready ? (
+          {gate ? (
+            <button type="button" className="text-link mind-map-walk" onClick={onClose}>
+              Stay on the map
+            </button>
+          ) : ready ? (
             <button type="button" className="text-link mind-map-walk" onClick={() => onEnter(plotId)}>
               {easy ? `Walk ${graph.placeTitle}` : `Enter ${graph.placeTitle}`}
             </button>
