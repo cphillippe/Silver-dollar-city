@@ -8,6 +8,7 @@ import { Avatar } from './Avatar'
 import { AbilityMark } from './GemMark'
 import { DigDeeper } from './DigDeeper'
 import { PlainTalk } from './PlainTalk'
+import { SavedTree, SavedTreeSummary } from './SavedTree'
 
 interface ProfileProps {
   onNavigate: (view: View) => void
@@ -46,13 +47,15 @@ export function Profile({ onNavigate }: ProfileProps) {
       </header>
 
       <TreeFold
-        open
-        label={easy ? EASY.saved : 'Held ideas / proofs'}
-        title="What you can still say"
+        startOpen
+        label={easy ? EASY.saved : 'Held ideas'}
+        lead={
+          easy
+            ? 'These are the main ideas you kept.'
+            : 'Claims you still hold — reason and source stay with the line.'
+        }
+        count={inv.ideas.length}
       >
-        {easy ? (
-          <p className="quiet">These are the main ideas you kept.</p>
-        ) : null}
         {inv.ideas.length === 0 ? (
           <p className="quiet">
             Walk the Trail, then Hold the takeaway — lines you keep land here.
@@ -89,7 +92,11 @@ export function Profile({ onNavigate }: ProfileProps) {
         )}
       </TreeFold>
 
-      <TreeFold label="Places" title="Lots that remember you">
+      <TreeFold
+        label="Places"
+        lead="Lots that remember you."
+        count={inv.places.length}
+      >
         {inv.places.map((place) => (
           <article key={place.id} className="profile-unlock">
             <button
@@ -121,7 +128,11 @@ export function Profile({ onNavigate }: ProfileProps) {
         ))}
       </TreeFold>
 
-      <TreeFold label="People" title="Who walks with you">
+      <TreeFold
+        label="People"
+        lead="Who walks with you."
+        count={inv.people.length}
+      >
         {inv.people.length === 0 ? (
           <p className="quiet">Juniper waits on the east porch.</p>
         ) : (
@@ -146,8 +157,9 @@ export function Profile({ onNavigate }: ProfileProps) {
       </TreeFold>
 
       <TreeFold
-        label={easy ? EASY.uses : 'Tools / abilities'}
-        title={easy ? EASY.uses : 'What you can deploy'}
+        label={easy ? EASY.uses : 'Tools'}
+        lead={easy ? 'Night Watch lines you can use.' : 'What you can deploy on Night Watch.'}
+        count={inv.tools.length}
       >
         {inv.tools.map((tool) => (
           <article
@@ -186,8 +198,9 @@ export function Profile({ onNavigate }: ProfileProps) {
       </TreeFold>
 
       <TreeFold
-        label={easy ? EASY.connections : 'Mind-map links'}
-        title={easy ? 'Places linked' : 'Idea · place · person'}
+        label={easy ? EASY.connections : 'Connections'}
+        lead={easy ? 'Places linked from Town.' : 'Idea · place · person — lit nodes reopen here.'}
+        count={inv.streetLinked ? inv.links.length : 0}
       >
         {inv.streetLinked ? (
           inv.links.map((link) => (
@@ -227,23 +240,23 @@ export function Profile({ onNavigate }: ProfileProps) {
 }
 
 function TreeFold({
-  open = false,
+  startOpen = false,
   label,
-  title,
+  lead,
+  count,
   children,
 }: {
-  open?: boolean
+  startOpen?: boolean
   label: string
-  title: string
+  lead?: string
+  count?: number
   children: ReactNode
 }) {
   return (
-    <details className="profile-section saved-tree" open={open}>
-      <summary>
-        <span className="eyebrow">{label}</span>
-        <strong>{title}</strong>
-      </summary>
+    <SavedTree startOpen={startOpen} className="profile-section">
+      <SavedTreeSummary label={label} count={count} />
+      {lead ? <p className="quiet saved-tree-lead">{lead}</p> : null}
       {children}
-    </details>
+    </SavedTree>
   )
 }
