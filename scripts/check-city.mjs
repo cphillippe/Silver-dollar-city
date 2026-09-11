@@ -1043,7 +1043,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.28')
+assert.equal(APP_VERSION, '1.4.29')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -1134,7 +1134,7 @@ assert.match(STREET_WHYS['juniper-porch'].easy, /lamp|porch/)
 assert.match(TOWN_PATH_EASY, /Porch lamp/)
 assert.match(TOWN_PATH_EASY, /Manage/)
 assert.match(TOWN_PATH_EASY, /Build this/)
-assert.match(mapSrc, /TOWN_PATH_EASY/)
+assert.match(mapSrc, /TOWN_PATH_HARD/)
 assert.match(mapSrc, /EASY_TAG_SLOT/)
 assert.match(mapSrc, /setMindPlot\(id\)/)
 assert.match(hubSrc, /EASY\.matchCta/)
@@ -1626,13 +1626,26 @@ assert.equal(EASY_FOLK_LIFT, 56)
 }
 assert.match(defendSrc, /spawnNow/)
 assert.match(defendSrc, /waveIsClear/)
+assert.match(defendSrc, /easyTapMode/)
 assert.match(
   readFileSync(new URL('../src/components/challenges/SortPlay.tsx', import.meta.url), 'utf8'),
   /easyChromeLine/,
 )
-assert.match(latestChange(APP_VERSION).title, /Heaven/)
+assert.match(hubSrc, /easy \? null : <AdSlot slot="hub-banner"/)
+assert.match(
+  readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
+  /settings-advanced/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/DigDeeper.tsx', import.meta.url), 'utf8'),
+  /if \(easy\) return null/,
+)
+assert.match(mapSrc, /easy \? 'seed'/)
+assert.match(mapSrc, /easy \? null : <SpinePath/)
+assert.doesNotMatch(latestChange(APP_VERSION).title, /Heaven/)
+assert.match(latestChange(APP_VERSION).title, /core/)
 assert.match(latestChange(APP_VERSION).items.join('\n'), /6\/6/)
-assert.match(defendSrc, /easyTapMode/)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Match/)
 assert.match(defendSrc, /easyTapTarget/)
 assert.match(defendSrc, /data-person-node="walker"/)
 assert.doesNotMatch(defendSrc, /walkerCue|easySolo|clearWalkerCue|hideOther/)
@@ -1723,7 +1736,7 @@ assert.match(
 )
 assert.match(
   readFileSync(new URL('../src/components/TeachUnlock.tsx', import.meta.url), 'utf8'),
-  /EASY\.claimTeach/,
+  /easyStoryCard/,
 )
 assert.match(cssSrc, /easy-steps/)
 assert.match(

@@ -4998,6 +4998,27 @@ html[data-theme='dusk'] .hub.is-town .street-link {
   margin-top: 10px;
 }
 
+.settings-flat {
+  display: contents;
+}
+
+.settings-flat > summary {
+  display: none;
+}
+
+.settings-advanced {
+  margin: 0 0 18px;
+  border: 2px solid rgba(255, 204, 51, 0.28);
+  border-radius: 16px;
+  padding: 8px 12px 12px;
+}
+
+.settings-advanced > summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--gold);
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     scroll-behavior: auto !important;
