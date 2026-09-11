@@ -8,13 +8,23 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.25',
+    title: 'Saved folds by section',
+    when: '2026-09-11',
+    items: [
+      'Saved, Journal, and Profile fold by section. Tap a row to open it. The first section starts open.',
+      'Each fold shows a short name and a count — not a wall of pages.',
+      'Journal nests street pages under Places. Profile folds sentences, places, people, things you can use, and connections.',
+    ],
+  },
+  {
     version: '1.4.24',
     title: 'Town map labels · Easy and Hard',
     when: '2026-09-11',
     items: [
       'Town map labels no longer pile up. The picture fills the panel — no purple empty bands.',
       'Witness Bench opens Manage. If the square is still locked, it says why and offers Walk Parable Hollow next.',
-      'Reading is Easy and Hard. Saved folds by section.',
+      'Reading is Easy and Hard. Claim teach stays once. Hard Night Watch is unchanged.',
     ],
   },
   {
