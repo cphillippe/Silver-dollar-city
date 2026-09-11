@@ -49,6 +49,7 @@ import juniperWalk from '../assets/cast/portrait-juniper.png'
 import {
   anyUpgradeReady,
   canUpgrade,
+  EASY_FOLK_LIFT,
   EASY_NAMED_PLOTS,
   EASY_TAG_SLOT,
   easyTagMetrics,
@@ -57,7 +58,7 @@ import {
   visualFills,
   visualSnapshot,
 } from '../lib/cityBuild'
-import { TOWN_PATH_EASY, TOWN_PATH_HARD } from '../content/lots'
+import { TOWN_PATH_HARD } from '../content/lots'
 import { Avatar } from './Avatar'
 import { GemMark } from './GemMark'
 import { MindMap } from './MindMap'
@@ -435,12 +436,15 @@ export function CityMap({
 
         <HeavenCity
           age={age}
+          easy={easy}
           onOpen={() => {
+            if (easy) {
+              setLockNote('Tap a building to walk or Manage it.')
+              return
+            }
             if (age === 'eden' || age === 'village') {
               setLockNote(
-                easy
-                  ? 'Heaven waits on the ridge. Keep today’s line, then walk the creek.'
-                  : 'Heaven waits on the ridge. Keep the trail — porch, creek, square, then the climb.',
+                'Heaven waits on the ridge. Keep the trail — porch, creek, square, then the climb.',
               )
               return
             }
@@ -448,7 +452,7 @@ export function CityMap({
           }}
         />
         <EdenGrove age={age} />
-        <SpinePath age={age} />
+        {easy ? null : <SpinePath age={age} />}
 
         <path
           className={`city-street city-street-main is-${stageOf('hollow')} is-${stageOf('bench')}`}
@@ -627,7 +631,11 @@ export function CityMap({
                 stage={stageOf(plot.id)}
                 next={nextId === plot.id}
                 rising={rising === plot.id}
-                speaking={beat?.id === plot.id || (nextId === plot.id && !celebrating)}
+                speaking={
+                  easy
+                    ? false
+                    : beat?.id === plot.id || (nextId === plot.id && !celebrating)
+                }
                 ack={beat?.id === plot.id ? beat.beat : undefined}
               />
             ))
@@ -679,18 +687,12 @@ export function CityMap({
           ) : (
             isEasy(progress) ? (
               <>
-                <p className="eyebrow">
-                  {age === 'heaven'
-                    ? 'City of Heaven — you kept the trail'
-                    : `${CITY_AGE_TITLE[age]} — growing toward Heaven`}
-                </p>
                 <p className="city-gift">{gift}</p>
                 {lockNote ? (
                   <p className="city-lock-toast" role="status">
                     {lockNote}
                   </p>
                 ) : null}
-                <p className="city-map-hint">{TOWN_PATH_EASY}</p>
               </>
             ) : (
             <>
@@ -809,13 +811,15 @@ function EasyPlotChip({ id }: { id: CityPlotId }) {
 
 function HeavenCity({
   age,
+  easy,
   onOpen,
 }: {
   age: CityAge
+  easy?: boolean
   onOpen: () => void
 }) {
-  const form = heavenForm(age)
-  const chip = heavenChip(age)
+  const form = easy ? 'seed' : heavenForm(age)
+  const chip = easy ? null : heavenChip(age)
   const earned = form === 'city'
   return (
     <g
@@ -1350,7 +1354,9 @@ function TownFolk({
 }) {
   const { progress } = useProgress()
   if (stage === 'empty' && !next) return null
-  const at = FOLK[id]
+  const easy = isEasy(progress)
+  const seat = FOLK[id]
+  const at = easy ? { x: seat.x, y: seat.y - EASY_FOLK_LIFT } : seat
   const voice = townVoice(id)
   const line = ack ? townAck(id, ack, isEasy(progress)) : voice.here
   const short = line.length > 22 ? `${line.slice(0, 20)}…` : line
@@ -1365,7 +1371,7 @@ function TownFolk({
           <path className="city-porch-rail" d="M-16 2 H16 M-16 2 v-8 M0 2 v-8 M16 2 v-8" />
         ) : null}
         {stage === 'lit' ? <circle className="city-lamp" cx="18" cy="-4" r="3.8" /> : null}
-        <foreignObject x="-22" y="-50" width="44" height="44">
+        <foreignObject x="-22" y="-50" width="44" height="44" overflow="hidden">
           <div className="city-portrait">
             <Avatar who={voice.who} size="sm" />
           </div>

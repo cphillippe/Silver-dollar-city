@@ -31,12 +31,14 @@ import {
   EASY_CUE_HOLD_MS,
   EASY_WALKER_FACE_PX,
   EASY_WALKER_HIT_PX,
+  easyTapFit,
   easyTapMode,
   easyTapPersonCount,
   easyTapTarget,
   heavenPoint,
   raidForWave,
   unlockedWatchAbilities,
+  waveIsClear,
 } from '../src/lib/defend.ts'
 import {
   deployFit,
@@ -58,9 +60,11 @@ import {
   lotTapWhy,
   easyTagsFit,
   easyPlotTag,
+  easyTagMetrics,
+  EASY_FOLK_LIFT,
 } from '../src/lib/cityBuild.ts'
 import { emptyProgress } from '../src/lib/save.ts'
-import { EASY, easyWrongTap } from '../src/lib/easy.ts'
+import { EASY, easyChromeLine, easyWrongTap } from '../src/lib/easy.ts'
 import { WORDS } from '../src/lib/words.ts'
 import { deeperLinksFor, eraLabel } from '../src/content/deeper.ts'
 import { allEvidenceIds, evidenceFor } from '../src/content/evidence.ts'
@@ -351,7 +355,7 @@ assert.match(sortSrc, /is-gone/)
 assert.match(sortSrc, /sort-seat/)
 assert.match(sortSrc, /was-keep/)
 assert.match(sortSrc, /was-toss/)
-assert.match(sortSrc, /Return \$\{home\.text\} to its seat/)
+assert.match(sortSrc, /Return \$\{easy \? easyChromeLine\(home\.text\) : home\.text\} to its seat/)
 assert.match(sortSrc, /\[slots, setSlots\]/)
 assert.match(sortSrc, /bank is-sort/)
 assert.doesNotMatch(sortSrc, /bank\.length/)
@@ -869,7 +873,7 @@ assert.match(defendSrc, /Turn them toward heaven/)
 assert.match(defendSrc, /unlockedWatchAbilities/)
 assert.match(defendSrc, /heavenPoint/)
 assert.match(defendSrc, /AbilityMark/)
-assert.match(defendSrc, /deployFit/)
+assert.match(defendSrc, /easyTapFit/)
 assert.match(defendSrc, /raidForWave/)
 assert.match(defendSrc, /WALKER_LABEL/)
 assert.match(defendSrc, /learningForTool/)
@@ -1039,7 +1043,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.27')
+assert.equal(APP_VERSION, '1.4.29')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -1130,7 +1134,7 @@ assert.match(STREET_WHYS['juniper-porch'].easy, /lamp|porch/)
 assert.match(TOWN_PATH_EASY, /Porch lamp/)
 assert.match(TOWN_PATH_EASY, /Manage/)
 assert.match(TOWN_PATH_EASY, /Build this/)
-assert.match(mapSrc, /TOWN_PATH_EASY/)
+assert.match(mapSrc, /TOWN_PATH_HARD/)
 assert.match(mapSrc, /EASY_TAG_SLOT/)
 assert.match(mapSrc, /setMindPlot\(id\)/)
 assert.match(hubSrc, /EASY\.matchCta/)
@@ -1550,7 +1554,7 @@ assert.doesNotMatch(
 )
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /mean line around/,
+  /unkind sentence around/,
 )
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
@@ -1580,12 +1584,76 @@ assert.equal(easyTapMode(false, 'wave', false), false)
   assert.equal(easyTapTarget(midWave3)?.id, 3)
   assert.equal(easyTapPersonCount([{ id: 0, turned: 'love' }]), 0)
 }
+assert.equal(easyTapFit(true, 'love', 'physical'), 'match')
+assert.equal(easyTapFit(true, 'love', 'pagan'), 'match')
+assert.equal(easyTapFit(false, 'love', 'physical'), 'weak')
+{
+  let downed = 0
+  for (let i = 0; i < 6; i += 1) {
+    const cast = raidForWave(2, i)
+    assert.equal(easyTapFit(true, 'love', cast.kind), 'match')
+    downed += 1
+  }
+  assert.equal(downed, 6)
+  assert.equal(waveIsClear(true, 6, 6, 1), true)
+  assert.equal(waveIsClear(false, 6, 6, 1), false)
+  assert.equal(waveIsClear(false, 6, 6, 0), true)
+}
+assert.equal(
+  easyChromeLine('Received mercy makes refusing mercy a contradiction.'),
+  'If you were forgiven a huge debt, you cannot choke a neighbor over a small one.',
+)
+assert.equal(
+  easyChromeLine('Jesus is only reforming first-century banking.'),
+  'Jesus is only talking about old money rules.',
+)
+assert.doesNotMatch(easyChromeLine('Keep the mercy. Toss the throttle.'), /throttle/)
+assert.doesNotMatch(EASY.loveCue, /mean line/)
+assert.doesNotMatch(EASY.nightLead, /mean line|claim|throttle/)
+assert.match(mapSrc, /EASY_FOLK_LIFT/)
+assert.match(mapSrc, /easy\s*\?\s*false/)
+assert.equal(EASY_FOLK_LIFT, 56)
+{
+  const folkY = { hollow: 352, lamps: 358, bench: 344, porch: 356 }
+  for (const [id, y] of Object.entries(folkY)) {
+    const portraitBottom = y - EASY_FOLK_LIFT - 50 + 44
+    const chipTop = easyTagMetrics(id).y0
+    assert.ok(
+      portraitBottom + 8 < chipTop,
+      `${id} Easy portrait ${portraitBottom} covers chip ${chipTop}`,
+    )
+  }
+}
+assert.match(defendSrc, /spawnNow/)
+assert.match(defendSrc, /waveIsClear/)
 assert.match(defendSrc, /easyTapMode/)
+assert.match(
+  readFileSync(new URL('../src/components/challenges/SortPlay.tsx', import.meta.url), 'utf8'),
+  /easyChromeLine/,
+)
+assert.match(hubSrc, /easy \? null : <AdSlot slot="hub-banner"/)
+assert.match(
+  readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
+  /settings-advanced/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/DigDeeper.tsx', import.meta.url), 'utf8'),
+  /if \(easy\) return null/,
+)
+assert.match(mapSrc, /easy \? 'seed'/)
+assert.match(mapSrc, /easy \? null : <SpinePath/)
+assert.doesNotMatch(latestChange(APP_VERSION).title, /Heaven/)
+assert.match(latestChange(APP_VERSION).title, /core/)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /6\/6/)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Match/)
 assert.match(defendSrc, /easyTapTarget/)
 assert.match(defendSrc, /data-person-node="walker"/)
 assert.doesNotMatch(defendSrc, /walkerCue|easySolo|clearWalkerCue|hideOther/)
 assert.match(defendSrc, /EASY\.loveCue/)
-assert.equal(EASY.loveCue, 'Love — a true line turns a mean line')
+assert.equal(
+  EASY.loveCue,
+  'Love — kindness turns an unkind sentence. Example: you were forgiven, so forgive.',
+)
 assert.doesNotMatch(defendSrc, /is-dim/)
 assert.match(linkPlaySrc, /is-need/)
 assert.match(cssSrc, /easy-walker-face/)
@@ -1668,7 +1736,7 @@ assert.match(
 )
 assert.match(
   readFileSync(new URL('../src/components/TeachUnlock.tsx', import.meta.url), 'utf8'),
-  /EASY\.claimTeach/,
+  /easyStoryCard/,
 )
 assert.match(cssSrc, /easy-steps/)
 assert.match(
@@ -1684,7 +1752,9 @@ assert.match(
 assert.match(linkPlaySrc, /is-screen-\$\{screen\}/)
 assert.doesNotMatch(defendSrc, /easyTap && tool\.id !== ability/)
 assert.match(defendSrc, /WATCH_TOOLS\.map/)
-assert.match(defendSrc, /Turn the mean line/)
+assert.match(defendSrc, /EASY\.nightLead/)
+assert.equal(EASY.nightLead, 'Tap the face six times.')
+assert.match(defendSrc, /TAP \$\{downed\}/)
 assert.match(defendSrc, /You missed\. Tap the face/)
 assert.match(defendSrc, /walking\.some\(\(item\) => !item\.turned\)/)
 assert.doesNotMatch(defendSrc, /matching sentence/)

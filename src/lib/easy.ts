@@ -29,7 +29,8 @@ export const EASY = {
   matchCta: 'Match',
   nightDo: 'Night Watch',
   nightTap: 'Tap the face.',
-  loveCue: 'Love — a true line turns a mean line',
+  nightLead: 'Tap the face six times.',
+  loveCue: 'Love — kindness turns an unkind sentence. Example: you were forgiven, so forgive.',
   deployTeach: 'Use a main idea you kept.',
   saved: 'Saved sentences',
   connections: 'Connections',
@@ -50,20 +51,44 @@ export function easyWrongTap(card: string): string {
 }
 
 const EASY_LINES: Record<string, string> = {
-  'td-watch': 'A true main idea can turn a mean line around.',
+  'td-watch': 'A true main idea can turn an unkind sentence around.',
+}
+
+const EASY_CHROME: Record<string, string> = {
+  'Received mercy makes refusing mercy a contradiction.':
+    'If you were forgiven a huge debt, you cannot choke a neighbor over a small one.',
+  'Jesus is only reforming first-century banking.':
+    'Jesus is only talking about old money rules.',
+  'Forgiveness is a limited coupon on God’s spreadsheet.':
+    'Forgiveness is a limited coupon — like God ran out of stamps.',
+  'The first servant was right to demand prison for a small debt.':
+    'The first servant was right to jail a neighbor over a tiny bill.',
 }
 
 /** After the one teach, Easy never wallpapers the word claim. */
 export function easyMainIdea(text: string): string {
   return text
-    .replace(new RegExp('\\bcheap cla' + 'im\\b', 'gi'), 'mean line')
-    .replace(new RegExp('\\bcheap li' + 'ne\\b', 'gi'), 'mean line')
+    .replace(new RegExp('\\bcheap cla' + 'im\\b', 'gi'), 'unkind sentence')
+    .replace(new RegExp('\\bcheap li' + 'ne\\b', 'gi'), 'unkind sentence')
+    .replace(/\bmean lines\b/gi, 'unkind sentences')
+    .replace(/\bmean line\b/gi, 'unkind sentence')
     .replace(/\bthe claims\b/gi, 'the main ideas')
     .replace(/\ba claim\b/gi, 'a main idea')
     .replace(/\bthe claim\b/gi, 'the main idea')
     .replace(/\bA claim\b/g, 'A main idea')
     .replace(/\bThe claim\b/g, 'The main idea')
     .replace(/\bsoils\b/gi, 'ground')
+}
+
+/** Easy buttons, tiles, and hints — plain words plus a short example. Hard copy stays. */
+export function easyChromeLine(text: string): string {
+  const direct = EASY_CHROME[text]
+  if (direct) return direct
+  return easyMainIdea(text)
+    .replace(/first-century banking/gi, 'old money rules')
+    .replace(/\bcontradiction\b/gi, "doesn't add up")
+    .replace(/\bthrottles\b/gi, 'chokes')
+    .replace(/\bthrottle\b/gi, 'choke')
 }
 
 function easyPictureWord(beat: string): string {
@@ -74,7 +99,12 @@ function easyPictureWord(beat: string): string {
   if (text.includes('bread') || text.includes('table') || text.includes('cup')) return 'shared-table picture'
   if (text.includes('seed') || text.includes('ground') || text.includes('soil')) return 'seed picture'
   if (text.includes('lamp') || text.includes('light')) return 'lamp picture'
-  if (text.includes('mean line') || text.includes('true one') || text.includes('true line')) {
+  if (
+    text.includes('unkind sentence') ||
+    text.includes('mean line') ||
+    text.includes('true one') ||
+    text.includes('true line')
+  ) {
     return 'true-line picture'
   }
   return 'story picture'

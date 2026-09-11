@@ -135,70 +135,6 @@ export function Settings({ onNavigate }: SettingsProps) {
       </header>
 
       <section className="settings-card">
-        <p className="eyebrow">You</p>
-        <p>
-          {easy
-            ? `What River has opened — ${EASY.saved}, places, people, ${EASY.uses}, and ${EASY.connections}.`
-            : 'River’s unlocks in one place — held ideas, places, people, tools, and mind-map links.'}
-        </p>
-        <div className="settings-actions">
-          <button
-            type="button"
-            className="btn primary"
-            onClick={() => onNavigate({ name: 'profile' })}
-          >
-            Open Profile
-          </button>
-        </div>
-      </section>
-
-      <section className="settings-card whats-new" aria-label="What’s new">
-        <p className="eyebrow">What’s new · {APP_VERSION}</p>
-        <h2>{drop.title}</h2>
-        <p className="quiet">{drop.when}</p>
-        <ul className="whats-new-list">
-          {drop.items.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
-        {CHANGELOG.length > 1 && !easy ? (
-          <details className="whats-new-more">
-            <summary>Earlier drops</summary>
-            {CHANGELOG.filter((note) => note.version !== APP_VERSION).map((note) => (
-              <div key={note.version} className="whats-new-past">
-                <p className="eyebrow">
-                  {note.version} · {note.title}
-                </p>
-                <ul className="whats-new-list">
-                  {note.items.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </details>
-        ) : null}
-      </section>
-
-      <section className="settings-card">
-        <p className="eyebrow">Look</p>
-        <p>Candy is the default. Switch anytime — the walk and the save stay.</p>
-        <div className="settings-actions theme-picks">
-          {(['candy', 'dusk', 'parchment'] as const).map((theme) => (
-            <button
-              key={theme}
-              type="button"
-              className={`btn ${progress.theme === theme ? 'primary' : ''}`}
-              aria-pressed={progress.theme === theme}
-              onClick={() => setTheme(theme)}
-            >
-              {themeLabel(theme)}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <section className="settings-card">
         <p className="eyebrow">Reading</p>
         <p>
           {easy ? (
@@ -262,6 +198,73 @@ export function Settings({ onNavigate }: SettingsProps) {
             version migrates old saves instead of wiping them.
           </p>
         )}
+      </section>
+
+      <details className={easy ? 'settings-advanced' : 'settings-flat'}>
+        <summary>More</summary>
+
+      <section className="settings-card">
+        <p className="eyebrow">You</p>
+        <p>
+          {easy
+            ? `What River has opened — ${EASY.saved}, places, people, ${EASY.uses}, and ${EASY.connections}.`
+            : 'River’s unlocks in one place — held ideas, places, people, tools, and mind-map links.'}
+        </p>
+        <div className="settings-actions">
+          <button
+            type="button"
+            className="btn primary"
+            onClick={() => onNavigate({ name: 'profile' })}
+          >
+            Open Profile
+          </button>
+        </div>
+      </section>
+
+      <section className="settings-card whats-new" aria-label="What’s new">
+        <p className="eyebrow">What’s new · {APP_VERSION}</p>
+        <h2>{drop.title}</h2>
+        <p className="quiet">{drop.when}</p>
+        <ul className="whats-new-list">
+          {drop.items.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+        {CHANGELOG.length > 1 && !easy ? (
+          <details className="whats-new-more">
+            <summary>Earlier drops</summary>
+            {CHANGELOG.filter((note) => note.version !== APP_VERSION).map((note) => (
+              <div key={note.version} className="whats-new-past">
+                <p className="eyebrow">
+                  {note.version} · {note.title}
+                </p>
+                <ul className="whats-new-list">
+                  {note.items.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </details>
+        ) : null}
+      </section>
+
+      <section className="settings-card">
+        <p className="eyebrow">Look</p>
+        <p>Candy is the default. Switch anytime — the walk and the save stay.</p>
+        <div className="settings-actions theme-picks">
+          {(['candy', 'dusk', 'parchment'] as const).map((theme) => (
+            <button
+              key={theme}
+              type="button"
+              className={`btn ${progress.theme === theme ? 'primary' : ''}`}
+              aria-pressed={progress.theme === theme}
+              onClick={() => setTheme(theme)}
+            >
+              {themeLabel(theme)}
+            </button>
+          ))}
+        </div>
       </section>
 
       <section className="settings-card">
@@ -363,6 +366,8 @@ export function Settings({ onNavigate }: SettingsProps) {
           </button>
         </div>
       </section>
+
+      </details>
 
       <details className="settings-card settings-danger">
         <summary>Danger zone · wipe this device</summary>

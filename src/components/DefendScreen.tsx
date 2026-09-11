@@ -26,13 +26,15 @@ import {
   waveSpeed,
   EASY_WALKER_FACE_PX,
   EASY_WALKER_HIT_PX,
+  easyTapFit,
   easyTapMode,
   easyTapTarget,
+  waveIsClear,
   type WatchAbility,
 } from '../lib/defend'
 import { findLearning, learningForTool } from '../lib/learning'
 import { nextGapLabel } from '../lib/memory'
-import { deployFit, TIER_MARK, toolTier, WALKER_LABEL, watchTool, WATCH_TOOLS } from '../lib/watchTools'
+import { TIER_MARK, toolTier, WALKER_LABEL, watchTool, WATCH_TOOLS } from '../lib/watchTools'
 import { useJuiceHandoff } from '../lib/juice'
 import { CITY_PLOTS, type CityPlotId } from '../lib/city'
 import { useProgress } from '../store/progress'
@@ -117,6 +119,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     planted,
     cool: {} as Record<string, number>,
     playing: false,
+    spawnNow: false,
   })
 
   useEffect(() => {
@@ -146,6 +149,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     live.current.downed = 0
     live.current.hearts = DEFEND_HEARTS
     live.current.cool = {}
+    live.current.spawnNow = false
     setRaiders([])
     setDowned(0)
     setHearts(DEFEND_HEARTS)
@@ -172,6 +176,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       let leaked = 0
       const walking = next.filter((item) => {
         if (item.turned) {
+          if (easy) return false
           if ((item.heavenT ?? 0) >= 1) return false
           return true
         }
@@ -193,8 +198,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       if (
         live.current.spawned < DEFEND_WAVE_SIZE &&
         !holdSpawn &&
-        (spawnAt >= waveSpawnEvery(easy) || (easy && live.current.spawned === 0))
+        (live.current.spawnNow ||
+          spawnAt >= waveSpawnEvery(easy) ||
+          (easy && live.current.spawned === 0))
       ) {
+        live.current.spawnNow = false
         spawnAt = 0
         const id = live.current.spawned
         const cast = raidForWave(progress.defense.cleared, id)
@@ -213,7 +221,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         setPhase('lost')
         return
       }
-      if (live.current.spawned >= DEFEND_WAVE_SIZE && walking.length === 0) {
+      if (waveIsClear(easy, live.current.downed, live.current.spawned, walking.length)) {
         live.current.playing = false
         setWon(true)
         afterJuiceRef.current()
@@ -283,7 +291,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     window.setTimeout(() => setFiring(false), 220)
     if (!best) return
     const to = raiderAt(best)
-    const fit = deployFit(using, best.kind)
+    const fit = easyTapFit(easy, using, best.kind)
     const heldLine = learningForTool(progress, using)
     comboRef.current += 1
     const nextCombo = comboRef.current
@@ -320,6 +328,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           : item,
       )
       live.current.downed += 1
+      if (easy) live.current.spawnNow = true
     } else {
       live.current.raiders = live.current.raiders.map((item) =>
         item.id === best.id
@@ -453,7 +462,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           <p className="eyebrow">{easy ? 'Night Watch' : WATCH_KICKER}</p>
           <h1 className="defend-title">
             {easy
-              ? 'Turn the mean line.'
+              ? EASY.nightLead
               : phase === 'wave'
                 ? 'Turn them toward heaven.'
                 : WATCH_LEAD}
@@ -467,11 +476,13 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                   </span>
                 ))}
               </span>
-              <span className={`defend-count ${combo > 1 ? 'is-combo' : ''}`}>
+              <span className={`defend-count ${!easy && combo > 1 ? 'is-combo' : ''}`}>
                 {phase === 'wave'
-                  ? combo > 1
-                    ? `×${combo}  ${downed}/${DEFEND_WAVE_SIZE}`
-                    : `${downed}/${DEFEND_WAVE_SIZE} · TAP`
+                  ? easy
+                    ? `TAP ${downed}/${DEFEND_WAVE_SIZE}`
+                    : combo > 1
+                      ? `×${combo}  ${downed}/${DEFEND_WAVE_SIZE}`
+                      : `${downed}/${DEFEND_WAVE_SIZE} · TAP`
                   : `${planted.length} lamp${planted.length === 1 ? '' : 's'}`}
               </span>
             </p>
@@ -714,7 +725,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                   <path className="defend-shard is-2" d="M4 2 L28 8 L8 8 Z" />
                   <path className="defend-shard is-3" d="M-4 4 L-26 16 L-8 8 Z" />
                   <path className="defend-shard is-4" d="M2 6 L10 26 L-2 10 Z" />
-                  {blast.combo > 1 ? (
+                  {!easy && blast.combo > 1 ? (
                     <text className="defend-combo-pop" y="-34" textAnchor="middle">
                       ×{blast.combo}
                     </text>

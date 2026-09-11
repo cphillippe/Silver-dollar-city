@@ -43,11 +43,11 @@ export function RecallOffer({ items, onOpen, onLater, onNotToday }: RecallOfferP
           Not today
         </button>
       </div>
+      {easy ? null : (
       <p className="quiet">
-        {easy
-          ? 'Later keeps them for this walk. Not today waits until morning. No guilt.'
-          : 'Later leaves them for this walk. Not today puts them off until morning. No guilt.'}
+        Later leaves them for this walk. Not today puts them off until morning. No guilt.
       </p>
+      )}
     </section>
   )
 }

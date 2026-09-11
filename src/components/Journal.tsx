@@ -172,14 +172,11 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
         <h1>What you can still say</h1>
         <p>
           {easy
-            ? `${open} of ${total} pages open · ${percent}% remembered · ${heldCount} lines kept`
-            : `${open} of ${total} unsealed · ${percent}% of the dossier · ${heldCount} lines held from memory`}
-          {waiting ? ` · ${waiting} ${easy ? 'due to read again' : 'due to dust off'}` : ''}
-          {'. '}
-          {easy
-            ? 'Open pages start face-down — rebuild the main idea, then read.'
-            : 'Open pages start face-down — rebuild the claim, then read. Forgetting is why a page comes back.'}
+            ? `${heldCount} sentences kept${waiting ? ` · ${waiting} due to read again` : ''}.`
+            : `${open} of ${total} unsealed · ${percent}% of the dossier · ${heldCount} lines held from memory${waiting ? ` · ${waiting} due to dust off` : ''}. Forgetting is why a page comes back.`}
         </p>
+        {easy ? null : (
+        <>
         <div
           className="journal-meter"
           role="img"
@@ -197,6 +194,8 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
             : `${open} unsealed · ${total - open} sealed · ${heldCount} held`}
           {waiting ? ` · ${waiting} due this morning` : ''}
         </p>
+        </>
+        )}
       </header>
 
       {progress.learnings.length > 0 ? (
@@ -211,7 +210,7 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
           />
           <p className="quiet saved-tree-lead">
             {easy
-              ? 'Each learning is a main idea (what we hold), a reason (why this is true), and a source (where it comes from) — plus the picture and tool.'
+              ? 'Sentences you kept.'
               : 'Each learning is its own unit: claim · reason · source · anchor · picture · tool.'}
           </p>
           <div className="card-grid">
@@ -224,7 +223,9 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
                   <p className="eyebrow">Stored · {learning.source}</p>
                   {learning.picture ? <GemMark gem={learning.picture} size="sm" /> : null}
                   <h3>{easy ? easyFacingLine(learning.id, learning.claim) : learning.claim}</h3>
+                  {easy ? null : (
                   <p>{learning.reason}</p>
+                  )}
                   <p className="learning-store">
                     {learning.picture ? <GemMark gem={learning.picture} size="sm" /> : null}
                     <span>
@@ -234,12 +235,14 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
                     </span>
                   </p>
                   {trace ? <p className="quiet">{nextGapLabel(trace, today, easy)}</p> : null}
+                  {easy ? null : (
                   <DigDeeper
                     id={learning.id}
                     surface="journal"
                     why={learning.reason}
                     source={learning.source}
                   />
+                  )}
                 </article>
               )
             })}
@@ -247,6 +250,8 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
         </SavedTree>
       ) : null}
 
+      {easy ? null : (
+      <>
       <SavedTree
         className="journal-chapter"
         startOpen={
@@ -331,8 +336,10 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
           </SavedTree>
         ))}
       </SavedTree>
+      </>
+      )}
 
-      <ShareInvite />
+      {easy ? null : <ShareInvite />}
 
       <button
         type="button"

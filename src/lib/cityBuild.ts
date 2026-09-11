@@ -302,6 +302,9 @@ export function easyPlotTag(id: CityPlotId): string {
 /** Named Easy chips. Fewer than every lot — stacked, measured for 390×844. */
 export const EASY_NAMED_PLOTS: CityPlotId[] = ['hollow', 'lamps', 'journal', 'bench', 'porch']
 
+/** Easy portraits sit on the buildings, not on the name-chip band. */
+export const EASY_FOLK_LIFT = 56
+
 /**
  * Chip centers in the 640×420 viewBox. Street names sit in a bottom band
  * under portraits; Pages sits above the mid lot. Inset from the 24px corner.

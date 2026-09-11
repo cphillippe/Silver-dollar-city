@@ -22,6 +22,7 @@ export function DigDeeper({
 }: DigDeeperProps) {
   const { progress } = useProgress()
   const easy = isEasy(progress)
+  if (easy) return null
   const links = deeperLinksFor(id, surface)
   if (links.length === 0 && !why && !source) return null
 
