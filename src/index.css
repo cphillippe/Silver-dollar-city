@@ -2286,9 +2286,9 @@ img.gem-heart {
   border-radius: 14px;
 }
 
-.match-scene.is-photo {
-  object-fit: cover;
-  object-position: center 42%;
+.match-scene.is-tile {
+  object-fit: contain;
+  background: #1a0840;
 }
 
 .match-caption {
@@ -6271,12 +6271,10 @@ img.walker-face.easy-walker-face,
 
 .link-block.is-picture .link-art {
   display: block;
-  width: min(100%, 300px);
-  height: auto;
-  aspect-ratio: 16 / 9;
-  object-fit: cover;
-  object-position: center 42%;
-  border-radius: 16px;
+  width: 128px;
+  height: 128px;
+  object-fit: contain;
+  border-radius: 22px;
 }
 
 .link-block.is-picture .link-label {
@@ -7044,7 +7042,8 @@ html[data-easy='on'] .link-block.is-picture .gem {
 
 .play.is-easy-link .link-block.is-picture .link-art,
 html[data-easy='on'] .link-block.is-picture .link-art {
-  width: min(100%, 340px);
+  width: 148px;
+  height: 148px;
 }
 
 html[data-easy='on'] .btn,

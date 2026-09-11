@@ -293,14 +293,7 @@ export function MatchScene({ scene }: { scene: MatchSceneId }) {
         </SceneFrame>
       )
     case 'mercy-road':
-      return (
-        <img
-          className="match-scene is-photo"
-          src={MATCH_ART['ph-road']}
-          alt=""
-          draggable={false}
-        />
-      )
+      return <img className="match-scene is-tile" src={MATCH_ART['ph-road']} alt="" draggable={false} />
   }
 }
 

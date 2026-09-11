@@ -44,12 +44,7 @@ function LinkFace({
   return (
     <>
       {pic.art ? (
-        <img
-          className="link-art"
-          src={MATCH_ART[pic.art]}
-          alt=""
-          draggable={false}
-        />
+        <img className="place-glyph link-art" src={MATCH_ART[pic.art]} alt="" draggable={false} />
       ) : null}
       {pic.who ? <Avatar who={pic.who} size="xl" /> : null}
       {pic.plotId ? <PlaceGlyph plotId={pic.plotId} /> : null}

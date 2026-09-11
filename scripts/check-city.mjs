@@ -1045,7 +1045,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.34')
+assert.equal(APP_VERSION, '1.4.35')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -1189,6 +1189,7 @@ assert.match(linkPlaySrc, /link-art/)
 assert.match(linkPlaySrc, /MATCH_ART/)
 assert.match(linkPlaySrc, /neighbor-shows-mercy|matchArt/)
 assert.match(cssSrc, /\.link-art/)
+assert.doesNotMatch(cssSrc, /is-photo/)
 assert.ok(
   existsSync(new URL('../src/assets/match/neighbor-shows-mercy.png', import.meta.url)),
   'Neighbor shows mercy Match art',
