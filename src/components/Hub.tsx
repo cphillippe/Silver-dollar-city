@@ -5,7 +5,7 @@ import { LOT_STORY } from '../content/lots'
 import { localDateKey } from '../lib/dates'
 import { CITY_PLOTS, nextPlotId, type CityPlotId } from '../lib/city'
 import { lotTapWhy } from '../lib/cityBuild'
-import { EASY, easyTapNext, isEasy } from '../lib/easy'
+import { EASY, isEasy } from '../lib/easy'
 import { markLater, readLater, sessionDue } from '../lib/recall'
 import { Avatar } from './Avatar'
 import { ShareInvite } from './ShareInvite'
@@ -166,7 +166,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
   }
 
   return (
-    <main className={`hub is-town is-inhabited ${easy ? 'is-easy-town' : ''}`} aria-label="The town">
+    <main className="hub is-town is-inhabited" aria-label="The town">
       {easy ? null : (
       <section className="next-card do-next" aria-label="Do this next">
         <p className="eyebrow">Do this next</p>
@@ -426,13 +426,6 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
         </button>
       )}
 
-      {easy ? (
-        <div className="tap-next-dock" aria-label="Tap this next">
-          <button type="button" className="btn gold xl" onClick={goNext}>
-            {easyTapNext(goal)}
-          </button>
-        </div>
-      ) : null}
     </main>
   )
 }
