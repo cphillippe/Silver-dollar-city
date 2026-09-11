@@ -10,7 +10,7 @@ import type { Learning, ProgressState } from '../types.ts'
 import { CITY_PLOTS } from './city.ts'
 import type { ReviewEvent } from './memory.ts'
 import { isDue } from './memory.ts'
-import { learningPicture, toolForEvidence, watchTool } from './watchTools.ts'
+import { isToolHowTo, learningPicture, toolForEvidence, watchTool } from './watchTools.ts'
 
 /**
  * Memory-science spine for every learning.
@@ -74,7 +74,7 @@ export function whoForEvidence(id: string) {
 export function learningBeat(id: string): string {
   const idea = ideaOf(id)
   if (idea) return idea
-  if (id === 'td-watch') return 'an unkind sentence turns when a true one is planted'
+  if (id === 'td-watch') return 'when compassion moves you, help like the Samaritan'
   const tool = toolForEvidence(id)
   return tool ? `a picture you can still hold for ${tool.label}` : 'a picture you can still hold'
 }
@@ -95,6 +95,7 @@ export function learningFromReview(
   event: ReviewEvent,
   progress: ProgressState,
 ): Learning | undefined {
+  if (isToolHowTo(event.id)) return undefined
   const brief = evidenceFor(event.id)
   if (!brief) return undefined
   const tool = toolForEvidence(event.id)
@@ -123,12 +124,14 @@ export function learningForTool(
   progress: ProgressState,
   toolId: string,
 ): Learning | undefined {
-  const hits = (progress.learnings ?? []).filter((item) => item.toolId === toolId)
+  const hits = (progress.learnings ?? []).filter(
+    (item) => item.toolId === toolId && !isToolHowTo(item.id),
+  )
   return hits.at(-1)
 }
 
 export function storedLearnings(progress: ProgressState): Learning[] {
-  return [...(progress.learnings ?? [])].reverse()
+  return [...(progress.learnings ?? [])].filter((item) => !isToolHowTo(item.id)).reverse()
 }
 
 export function withLearningBeat(learning: Learning): Learning {
