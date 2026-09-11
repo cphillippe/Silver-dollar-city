@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { LinkChallenge, LinkKind, LinkNode } from '../../types'
+import { MATCH_ART } from '../../content/matchArt'
 import { linkCaption, linkClue, linkMiss, linkPicture } from '../../content/links'
 import { EASY, isEasy } from '../../lib/easy'
 import { shuffle } from '../../lib/shuffle'
@@ -39,9 +40,12 @@ function LinkFace({
   challenge: LinkChallenge
 }) {
   const pic = linkPicture(node, challenge)
-  const picture = Boolean(pic.who || pic.plotId)
+  const picture = Boolean(pic.who || pic.plotId || pic.art)
   return (
     <>
+      {pic.art ? (
+        <img className="place-glyph link-art" src={MATCH_ART[pic.art]} alt="" draggable={false} />
+      ) : null}
       {pic.who ? <Avatar who={pic.who} size="xl" /> : null}
       {pic.plotId ? <PlaceGlyph plotId={pic.plotId} /> : null}
       <span className={picture ? 'link-label' : undefined}>{linkCaption(node, easy)}</span>
@@ -387,7 +391,7 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
                 <button
                   key={node.id}
                   type="button"
-                  className={`link-block is-${node.kind} ${pic.who || pic.plotId ? 'is-picture' : ''} ${picked === node.id ? 'is-selected' : ''} ${flash === node.id ? 'is-flash' : ''} ${!easy && focusIds?.has(node.id) ? 'is-focus' : ''} ${teach ? 'is-need' : ''} ${dimDecoy ? 'is-not' : ''}`}
+                  className={`link-block is-${node.kind} ${pic.who || pic.plotId || pic.art ? 'is-picture' : ''} ${picked === node.id ? 'is-selected' : ''} ${flash === node.id ? 'is-flash' : ''} ${!easy && focusIds?.has(node.id) ? 'is-focus' : ''} ${teach ? 'is-need' : ''} ${dimDecoy ? 'is-not' : ''}`}
                   onClick={() => choose(node.id)}
                 >
                   {teach ? <span className="need-chip">This one</span> : null}
