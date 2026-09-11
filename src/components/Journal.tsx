@@ -8,8 +8,8 @@ import { isDue, nextGapLabel } from '../lib/memory'
 import { starLegend } from '../lib/stars'
 import { deployLabel, findLearning, storedLearnings, withLearningBeat } from '../lib/learning'
 import { watchTool } from '../lib/watchTools'
-import { Avatar } from './Avatar'
 import { DigDeeper } from './DigDeeper'
+import { SavedTree, SavedTreeSummary } from './SavedTree'
 import { GemMark } from './GemMark'
 import { Landmark } from './Landmark'
 import { RecallGate } from './RecallGate'
@@ -200,21 +200,20 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
       </header>
 
       {progress.learnings.length > 0 ? (
-        <details
-          className="journal-chapter stored-chapter saved-tree"
-          open={!focusedEntry || Boolean(focusId?.startsWith('learn-'))}
+        <SavedTree
+          className="journal-chapter stored-chapter"
+          startOpen={!focusedEntry || Boolean(focusId?.startsWith('learn-'))}
         >
-          <summary className="chapter-head">
-            <Avatar who="juniper" size="sm" />
-            <div>
-              <h2>Stored lines</h2>
-              <p>
-                {easy
-                  ? 'Each learning is a main idea (what we hold), a reason (why this is true), and a source (where it comes from) — plus the picture and tool.'
-                  : 'Each learning is its own unit: claim · reason · source · anchor · picture · tool.'}
-              </p>
-            </div>
-          </summary>
+          <SavedTreeSummary
+            who="juniper"
+            label={easy ? EASY.saved : 'Stored lines'}
+            count={progress.learnings.length}
+          />
+          <p className="quiet saved-tree-lead">
+            {easy
+              ? 'Each learning is a main idea (what we hold), a reason (why this is true), and a source (where it comes from) — plus the picture and tool.'
+              : 'Each learning is its own unit: claim · reason · source · anchor · picture · tool.'}
+          </p>
           <div className="card-grid">
             {storedLearnings(progress).map((raw) => {
               const learning = withLearningBeat(raw)
@@ -245,27 +244,26 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
               )
             })}
           </div>
-        </details>
+        </SavedTree>
       ) : null}
 
-      <details
-        className="journal-chapter saved-tree"
-        open={
+      <SavedTree
+        className="journal-chapter"
+        startOpen={
           focusedEntry?.areaId === 'daily-trail' ||
           (progress.learnings.length === 0 && !focusedEntry)
         }
       >
-        <summary className="chapter-head">
-          <Avatar who="juniper" size="sm" />
-          <div>
-            <h2>{easy ? 'Juniper’s pages' : 'Trail notes'}</h2>
-            <p>
-              {easy
-                ? 'Juniper’s pages — they open when you come back, not only when you finish a street.'
-                : 'Juniper’s pages — they open when you return, not only when you clear a district.'}
-            </p>
-          </div>
-        </summary>
+        <SavedTreeSummary
+          who="juniper"
+          label={easy ? 'Juniper’s pages' : 'Trail notes'}
+          count={trailNotes.length}
+        />
+        <p className="quiet saved-tree-lead">
+          {easy
+            ? 'They open when you come back, not only when you finish a street.'
+            : 'They open when you return, not only when you clear a district.'}
+        </p>
         <div className="card-grid">
           {trailNotes.map((entry) => (
             <JournalCard
@@ -285,40 +283,54 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
             />
           ))}
         </div>
-      </details>
+      </SavedTree>
 
-      {districtChapters.map(({ area, entries }) => (
-        <details
-          key={area.id}
-          className="journal-chapter saved-tree"
-          open={focusedEntry?.areaId === area.id}
-        >
-          <summary className="chapter-head">
-            <Avatar who={guideForArea(area.id).id} size="sm" />
-            <div>
-              <h2>{area.title}</h2>
-              <p>
-                {guideForArea(area.id).name} · {area.subtitle}
-              </p>
+      <SavedTree
+        className="journal-chapter"
+        startOpen={Boolean(focusedEntry && focusedEntry.areaId !== 'daily-trail')}
+      >
+        <SavedTreeSummary
+          who="river"
+          label="Places"
+          count={districtChapters.reduce((n, chapter) => n + chapter.entries.length, 0)}
+        />
+        <p className="quiet saved-tree-lead">
+          {easy
+            ? 'Pages from each street you walked. Tap a street to open it.'
+            : 'District chapters. Unsealed pages keep the claim.'}
+        </p>
+        {districtChapters.map(({ area, entries }) => (
+          <SavedTree
+            key={area.id}
+            className="saved-tree-nested"
+            startOpen={focusedEntry?.areaId === area.id}
+          >
+            <SavedTreeSummary
+              who={guideForArea(area.id).id}
+              label={area.shortTitle}
+              count={entries.length}
+            />
+            <p className="quiet saved-tree-lead">
+              {guideForArea(area.id).name} · {area.subtitle}
+            </p>
+            <div className="card-grid">
+              {entries.map((entry) => (
+                <JournalCard
+                  key={entry.id}
+                  entry={entry}
+                  open={progress.journal.includes(entry.id)}
+                  focused={focusId === entry.id}
+                  stars={progress.stars[entry.unlockAfter]}
+                  held={progress.held.includes(entry.unlockAfter)}
+                  trace={progress.memory[entry.unlockAfter]}
+                  learning={findLearning(progress, entry.unlockAfter)}
+                  today={today}
+                />
+              ))}
             </div>
-          </summary>
-          <div className="card-grid">
-            {entries.map((entry) => (
-              <JournalCard
-                key={entry.id}
-                entry={entry}
-                open={progress.journal.includes(entry.id)}
-                focused={focusId === entry.id}
-                stars={progress.stars[entry.unlockAfter]}
-                held={progress.held.includes(entry.unlockAfter)}
-                trace={progress.memory[entry.unlockAfter]}
-                learning={findLearning(progress, entry.unlockAfter)}
-                today={today}
-              />
-            ))}
-          </div>
-        </details>
-      ))}
+          </SavedTree>
+        ))}
+      </SavedTree>
 
       <ShareInvite />
 

@@ -1022,7 +1022,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.24')
+assert.equal(APP_VERSION, '1.4.25')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -1780,13 +1780,27 @@ assert.match(
   /export function gateWalkArea/,
 )
 assert.match(
-  readFileSync(new URL('../src/components/Profile.tsx', import.meta.url), 'utf8'),
-  /saved-tree/,
+  readFileSync(new URL('../src/components/SavedTree.tsx', import.meta.url), 'utf8'),
+  /saved-tree-summary/,
 )
 assert.match(
   readFileSync(new URL('../src/components/Journal.tsx', import.meta.url), 'utf8'),
+  /SavedTree/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/Journal.tsx', import.meta.url), 'utf8'),
+  /label="Places"/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/Profile.tsx', import.meta.url), 'utf8'),
+  /SavedTree/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/Profile.tsx', import.meta.url), 'utf8'),
   /saved-tree/,
 )
+assert.match(cssSrc, /saved-tree-summary/)
+assert.match(cssSrc, /saved-tree-nested/)
 assert.match(cssSrc, /saved-tree/)
 assert.match(cssSrc, /html\[data-easy='on'\]/)
 assert.match(cssSrc, /min-height: 52px/)

@@ -2403,12 +2403,74 @@ img.gem-heart {
   list-style: none;
 }
 
-.saved-tree > summary::-webkit-details-marker {
+.saved-tree > summary::-webkit-details-marker,
+.saved-tree > summary::marker {
   display: none;
+  content: '';
+}
+
+.saved-tree-summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  padding: 10px 8px;
+  border-radius: 14px;
+}
+
+.saved-tree-summary:hover,
+.saved-tree-summary:focus-visible {
+  background: var(--mist);
+}
+
+.saved-tree-copy {
+  min-width: 0;
+  flex: 1;
+  font-size: 1.12rem;
+  line-height: 1.25;
+  font-weight: 700;
+}
+
+.saved-tree-count {
+  margin: 0 4px 0 auto;
+  font-size: 0.92rem;
+  font-style: normal;
+  font-weight: 700;
+  opacity: 0.78;
+}
+
+.saved-tree-summary::after {
+  content: '▸';
+  flex: 0 0 auto;
+  font-size: 1.1rem;
+  opacity: 0.7;
+}
+
+.saved-tree[open] > .saved-tree-summary::after {
+  content: '▾';
+}
+
+.saved-tree-lead {
+  margin: 0 0 12px;
 }
 
 .saved-tree[open] > summary {
-  margin-bottom: 12px;
+  margin-bottom: 8px;
+}
+
+.saved-tree-nested {
+  margin: 0 0 8px 4px;
+  padding-left: 12px;
+  border-left: 2px solid var(--line);
+}
+
+.journal-chapter.saved-tree {
+  margin-bottom: 8px;
+}
+
+.journal-chapter.saved-tree[open] {
+  margin-bottom: 18px;
 }
 
 .chapter-head {
@@ -6659,16 +6721,16 @@ html[data-theme='dusk'] .mind-map-card {
   margin: 0 0 22px;
 }
 
-.profile-section.saved-tree > summary {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-  margin: 0;
+.profile-section.saved-tree {
+  margin: 0 0 8px;
 }
 
-.profile-section.saved-tree > summary strong {
-  font-size: 1.2rem;
+.profile-section.saved-tree[open] {
+  margin: 0 0 18px;
+}
+
+.profile-section.saved-tree > summary {
+  margin: 0;
 }
 
 .profile-section h2 {
