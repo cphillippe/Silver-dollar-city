@@ -50,7 +50,7 @@ export const STREET_CHALLENGE: LinkChallenge = {
     {
       id: 'person-silas',
       kind: 'person',
-      text: 'Silas Page',
+      text: 'Silas Whitman',
       who: 'silas',
     },
     {
@@ -68,7 +68,7 @@ export const STREET_CHALLENGE: LinkChallenge = {
     {
       id: 'person-juniper',
       kind: 'person',
-      text: 'Juniper',
+      text: 'Juniper Wick',
       who: 'juniper',
     },
   ],
@@ -99,8 +99,8 @@ export const STREET_CHALLENGE: LinkChallenge = {
 
 export const STREET_BEATS = [
   'Mercy Wren · Parable Hollow · Neighbor is the one who shows mercy.',
-  'Silas Page · Witness Bench · died, buried, raised, appeared.',
-  'Juniper · East porch · A lamp is meant to be seen.',
+  'Silas Whitman · Witness Bench · died, buried, raised, appeared.',
+  'Juniper Wick · East porch · A lamp is meant to be seen.',
 ]
 
 /** Concrete picture for a Link chip — idea borrows its lot’s art unless a card has its own. */
@@ -184,10 +184,10 @@ export const STREET_WHYS: Record<(typeof STREET_CHALLENGE.triples)[number]['id']
   },
   'silas-bench': {
     easy: 'Silas copies names at the square. The old shared belief — died, buried, raised — sits with the public names.',
-    hard: 'Silas Page keeps the Witness Bench on the square. Died, buried, raised, appeared is a public creed. It belongs in a ledger hall, not under the oaks.',
+    hard: 'Silas Whitman keeps the Witness Bench on the square. Died, buried, raised, appeared is a public creed. It belongs in a ledger hall, not under the oaks.',
   },
   'juniper-porch': {
     easy: 'Juniper’s lamp is on the porch so today’s line can be seen.',
-    hard: 'Juniper keeps the east porch. A lamp is meant to be seen — so the morning line lives at the lamp, where the trail starts.',
+    hard: 'Juniper Wick keeps the east porch. A lamp is meant to be seen — so the morning line lives at the lamp, where the trail starts.',
   },
 }
