@@ -4420,7 +4420,7 @@ img.gem-heart {
   fill: #fffce8;
   font-family: var(--sans);
   font-size: 11px;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   font-weight: 800;
   paint-order: stroke;
@@ -6449,9 +6449,9 @@ html[data-easy='on'] .link-block.is-not {
 }
 
 html[data-easy='on'] .city-plot-tag {
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 800;
-  stroke-width: 4px;
+  stroke-width: 3.5px;
 }
 
 html[data-easy='on'] .city-plot-tag-bg {
