@@ -1210,6 +1210,10 @@ assert.match(hubSrc, /Manage/)
 assert.match(hubSrc, /setMindPlot/)
 assert.match(hubSrc, /town-tools/)
 assert.match(hubSrc, /RecallOffer/)
+assert.match(
+  readFileSync(new URL('../src/components/RecallOffer.tsx', import.meta.url), 'utf8'),
+  /easyFacingLine/,
+)
 assert.match(hubSrc, /skipNotToday/)
 assert.doesNotMatch(hubSrc, /dustOff/)
 assert.match(

@@ -224,7 +224,12 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
                     </span>
                   </p>
                   {trace ? <p className="quiet">{nextGapLabel(trace, today, easy)}</p> : null}
-                  <DigDeeper id={learning.id} surface="journal" />
+                  <DigDeeper
+                    id={learning.id}
+                    surface="journal"
+                    why={learning.reason}
+                    source={learning.source}
+                  />
                 </article>
               )
             })}
