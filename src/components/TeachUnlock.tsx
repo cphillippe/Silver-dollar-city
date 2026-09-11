@@ -1,7 +1,7 @@
 import type { Challenge, SequenceItem } from '../types'
 import type { EvidenceBrief } from '../content/evidence'
 import { plainFor } from '../content/plain'
-import { easyFacingLine, easyStoryCard, isEasy } from '../lib/easy'
+import { EASY, easyFacingLine, easyStoryCard, isEasy } from '../lib/easy'
 import { WORDS, schoolWordsFor } from '../lib/words'
 import { learningBeat } from '../lib/learning'
 import { learningPicture, toolForEvidence } from '../lib/watchTools'
@@ -41,6 +41,7 @@ export function TeachUnlock({ brief, kind, onUnlock, unlock, beats }: TeachUnloc
         <p className="eyebrow">Short story</p>
         {picture ? <GemMark gem={picture} size="sm" /> : null}
         <p className="teach-reason">{easyStoryCard(story)}</p>
+        <p className="quiet">{EASY.claimTeach}</p>
         <p className="eyebrow hold-kicker">The main idea you will keep</p>
         <p className="recall-line rehearse-stem">{easyFacingLine(brief.id, brief.claim)}</p>
         <div className="cta-dock easy-story-dock">

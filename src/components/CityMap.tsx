@@ -54,7 +54,7 @@ import {
   visualFills,
   visualSnapshot,
 } from '../lib/cityBuild'
-import { TOWN_PATH_HARD } from '../content/lots'
+import { TOWN_PATH_EASY, TOWN_PATH_HARD } from '../content/lots'
 import { Avatar } from './Avatar'
 import { GemMark } from './GemMark'
 import { MindMap } from './MindMap'
@@ -182,7 +182,14 @@ export function CityMap({
         doneToday,
       )
     })()
+    const easyStreet =
+      isEasy(progress) && (id === 'porch' || id === 'hollow' || id === 'bench')
     if (st === 'empty' && id !== nextId && !mindMapHasLit(id, progress) && !canUpgrade(id, progress)) {
+      if (easyStreet) {
+        setLockNote(null)
+        setMindPlot(id)
+        return
+      }
       setLockNote(why ?? (isEasy(progress)
         ? 'This lot is locked. Finish the street before it first.'
         : 'This lot is still empty. Finish the earlier street so this lot unlocks.'))
@@ -667,12 +674,13 @@ export function CityMap({
           ) : (
             isEasy(progress) ? (
               <>
+                <p className="city-gift">{gift}</p>
                 {lockNote ? (
                   <p className="city-lock-toast" role="status">
                     {lockNote}
                   </p>
                 ) : null}
-                <p className="city-map-hint">Tap a building to open it.</p>
+                <p className="city-map-hint">{TOWN_PATH_EASY}</p>
               </>
             ) : (
             <>

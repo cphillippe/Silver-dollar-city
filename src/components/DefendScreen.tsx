@@ -443,7 +443,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           />
           <TownReturn
             who="juniper"
-            line={easy ? 'Night held.' : 'Night held. The road turned toward heaven.'}
+            line="Night held. The road turned toward heaven."
             action="See the town"
             onGo={() => onNavigate({ name: 'hub' })}
           />
@@ -453,7 +453,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           <p className="eyebrow">{easy ? 'Night Watch' : WATCH_KICKER}</p>
           <h1 className="defend-title">
             {easy
-              ? EASY.nightTap
+              ? 'Turn the mean line.'
               : phase === 'wave'
                 ? 'Turn them toward heaven.'
                 : WATCH_LEAD}
@@ -776,7 +776,6 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           <div className="defend-abilities" role="group" aria-label="Night abilities">
             {WATCH_TOOLS.map((tool) => {
               const open = unlocked.includes(tool.id)
-              if (easyTap && tool.id !== ability) return null
               const heldLine = learningForTool(progress, tool.id)
               const tier = toolTier(tool, progress)
               return (
@@ -806,21 +805,21 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                     </span>
                   )}
                   <span className="defend-ability-claim">
-                    {easyTap && tool.id === 'love'
-                      ? EASY.loveCue
-                      : open
-                        ? (heldLine
+                    {open
+                      ? (heldLine
+                          ? easy
+                            ? easyFacingLine(heldLine.id, heldLine.claim)
+                            : heldLine.claim
+                          : tool.id === 'love'
                             ? easy
-                              ? easyFacingLine(heldLine.id, heldLine.claim)
-                              : heldLine.claim
-                            : tool.id === 'love'
-                              ? easy
-                                ? 'Love is ready.'
-                                : 'A true line can turn a cheap claim.'
+                              ? EASY.loveCue
+                              : 'A true line can turn a cheap claim.'
+                            : easy
+                              ? 'Keep a main idea to name this tool.'
                               : 'Hold a line to name this tool.')
-                        : easy
-                          ? 'Locked — keep a sentence first.'
-                          : 'Hold a matching line'}
+                      : easy
+                        ? `${tool.label} is locked. Keep a main idea that opens it.`
+                        : 'Hold a matching line'}
                   </span>
                 </button>
               )
@@ -830,7 +829,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
             <div className="defend-lost">
               <p>
                 {easy
-                  ? 'Tap the face.'
+                  ? 'You missed. Tap the face.'
                   : 'Porch flickered. Turn them again.'}
               </p>
               <button type="button" className="btn primary" onClick={retry}>
