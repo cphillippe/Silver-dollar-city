@@ -852,6 +852,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           <div className="defend-abilities" role="group" aria-label="Night abilities">
             {WATCH_TOOLS.map((tool) => {
               const open = unlocked.includes(tool.id)
+              if (easy && walkerCue && tool.id !== ability) return null
               const heldLine = learningForTool(progress, tool.id)
               const tier = toolTier(tool, progress)
               return (

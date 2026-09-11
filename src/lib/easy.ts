@@ -26,6 +26,9 @@ export const EASY = {
   matchHow: 'Keep the right pictures. Remove wrong picks.',
   matchMiss: 'Wrong match — try again.',
   linkCue: 'Tap the sentence, then the place, then the person.',
+  tapSentence: 'Tap a sentence',
+  tapPlace: 'Tap a place',
+  tapPerson: 'Tap a person',
   upgrade: 'Build this — raise the next look you earned by learning',
   manage: 'Building',
   nightDo: 'Do this',
@@ -35,6 +38,13 @@ export const EASY = {
   connections: 'Connections',
   uses: 'Things you can use',
 } as const
+
+/** One short play cue — full tap-order sentence stays on the Start screen. */
+export function easyLinkStep(step: 'idea' | 'place' | 'person'): string {
+  if (step === 'idea') return EASY.tapSentence
+  if (step === 'place') return EASY.tapPlace
+  return EASY.tapPerson
+}
 
 const EASY_LINES: Record<string, string> = {
   'td-watch': 'A true main idea can turn a mean line around.',

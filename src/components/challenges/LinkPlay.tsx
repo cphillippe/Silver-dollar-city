@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { LinkChallenge, LinkKind, LinkNode } from '../../types'
 import { linkCaption, linkClue, linkMiss, linkPicture } from '../../content/links'
-import { EASY, isEasy } from '../../lib/easy'
+import { EASY, easyLinkStep, isEasy } from '../../lib/easy'
 import { shuffle } from '../../lib/shuffle'
 import { useProgress } from '../../store/progress'
 import { Avatar } from '../Avatar'
@@ -211,11 +211,12 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
           ? 'Wrong keeper. The person who lives on that lot is the match.'
           : 'Wrong idea. Pick the claim, then its place, then its person.'
 
+  const recovering = easy && misses > 0 && step !== 'linked'
   const wizardCue =
-    step === 'linked' || status === 'ok'
+    step === 'linked' || status === 'ok' || recovering
       ? null
       : easy
-        ? EASY.linkCue
+        ? easyLinkStep(step)
         : step === 'idea'
           ? '1 of 3 — pick the idea.'
           : step === 'place'
@@ -252,16 +253,17 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
 
   return (
     <div
-      className={`play is-link is-wizard ${easy ? 'is-easy-link' : ''} ${shake ? 'is-shake' : ''}`}
+      className={`play is-link is-wizard ${easy ? 'is-easy-link' : ''} ${recovering ? 'is-easy-miss' : ''} ${shake ? 'is-shake' : ''}`}
     >
       {easy ? null : <PuzzleLead challenge={challenge} />}
       {easy ? null : <PuzzleHint text={challenge.context} id={challenge.id} onPeek={onPeek} />}
       {easy ? null : <p className="next-tap">{nextTap}</p>}
       {wizardCue ? <p className="quiet wizard-step">{wizardCue}</p> : null}
 
+      {easy ? null : (
       <ol className="link-checks" aria-label="Link steps">
         <li className={marks.idea ? 'is-done' : step === 'idea' ? 'is-now' : ''}>
-          {marks.idea ? '✓' : '1'} {easy ? 'Sentence' : 'Idea'}
+          {marks.idea ? '✓' : '1'} Idea
         </li>
         <li className={marks.place ? 'is-done' : step === 'place' ? 'is-now' : ''}>
           {marks.place ? '✓' : '2'} Place
@@ -270,6 +272,7 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
           {marks.person ? '✓' : '3'} Person
         </li>
       </ol>
+      )}
 
       {status === 'wrong' || misses > 0 ? (
         <p className="match-toast" role="status">
@@ -277,17 +280,17 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
         </p>
       ) : null}
 
-      {misses > 0 && step !== 'linked' ? (
+      {!easy && misses > 0 && step !== 'linked' ? (
         <button type="button" className="btn tiny match-recover" onClick={recover}>
           Try again
         </button>
       ) : null}
 
+      {easy ? null : (
       <p className="match-score">
-        {easy
-          ? `${challenge.triples.filter((item) => needed(item.id).every((need) => edges.some((edge) => edge.triple === item.id && pairKey(edge.a, edge.b) === need))).length} of ${challenge.triples.length} matches`
-          : `${challenge.triples.length * 2 - edges.length} links left · ${edges.length} / ${challenge.triples.length * 2} snapped`}
+        {`${challenge.triples.length * 2 - edges.length} links left · ${edges.length} / ${challenge.triples.length * 2} snapped`}
       </p>
+      )}
 
       {step === 'linked' ? (
         <div className="link-dock">
@@ -298,10 +301,10 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
       ) : (
         <div className="link-grid is-wizard">
           <div className={`link-col is-${step}`}>
-            {easy && currentTriple ? (
+            {easy && currentTriple && !recovering ? (
               <p className="link-clue">{linkClue(currentTriple.id, step)}</p>
             ) : null}
-            <p className="match-col-label">{stepLabel(step, easy)}</p>
+            {easy ? null : <p className="match-col-label">{stepLabel(step, easy)}</p>}
             {stepOptions.map((node) => {
               const pic = linkPicture(node, challenge)
               return (

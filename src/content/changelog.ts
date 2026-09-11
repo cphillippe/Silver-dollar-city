@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.19',
+    title: 'One tap line at a time',
+    when: '2026-09-11',
+    items: [
+      'A match now says Tap a sentence, then Tap a place, then Tap a person — one short line.',
+      'A miss is one line: Wrong. Tap this one: Neighbor shows mercy.',
+      'Night Watch hides locked tools while Tap this person is up, so only Love stays.',
+    ],
+  },
+  {
     version: '1.4.18',
     title: 'Only one person on the road',
     when: '2026-09-11',
