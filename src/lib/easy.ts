@@ -1,4 +1,5 @@
 import type { ProgressState } from '../types.ts'
+import { evidenceFor } from '../content/evidence.ts'
 
 export function isEasy(progress: Pick<ProgressState, 'easyMode'> | { easyMode?: boolean }): boolean {
   return Boolean(progress.easyMode)
@@ -12,13 +13,16 @@ export const EASY = {
   mindMapShort: 'Scrapbook',
   connectLink: 'Tap the sentence, then the place, then the person.',
   readStory: 'Read today’s story.',
-  rememberSentence: 'Choose the main idea to remember.',
+  rememberSentence: 'Tap the line you just kept.',
+  tapWhy: 'Tap why it stands.',
   keepThis: 'Keep this',
   readAgain: 'Read this one again.',
   claimTeach: 'A claim is the main idea we hold to be true.',
   mainIdeaTeach: 'Main idea = the short true line we keep.',
   mainIdea: 'main idea',
-  reasonSense: 'why this is true',
+  reasonTeach: 'A reason is why it stands.',
+  reasonSense: 'why it stands',
+  whyStands: 'Why it stands.',
   sourceSense: 'where this comes from',
   lockIn: 'Save your picks.',
   matchHow: 'Keep the right pictures. Remove wrong picks.',
@@ -31,6 +35,7 @@ export const EASY = {
   nightDo: 'Night Watch',
   nightTap: 'Tap the face.',
   nightLead: 'Tap the face six times.',
+  nightMiss: 'Wrong — tap the glowing face',
   home: 'Home',
   townSoon: 'Town (soon)',
   loveCue: 'Love — kindness turns an unkind sentence. Example: you were forgiven, so forgive.',
@@ -129,8 +134,34 @@ export function easyJournalMeta(learning: {
 }
 
 export function easyFacingLine(id: string | undefined, text: string): string {
-  if (id && EASY_LINES[id]) return EASY_LINES[id]
+  if (id && EASY_LINES[id]) {
+    const easy = EASY_LINES[id]
+    if (text === easy || text === evidenceFor(id)?.claim) return easy
+  }
   return easyMainIdea(text)
+}
+
+/** Hold review chips: one button per shown line. Keep the true answer; drop identical faces. */
+export function uniqueHoldChoices(
+  lines: readonly string[],
+  face: (line: string) => string,
+  keep: string,
+): string[] {
+  const seen = new Set<string>()
+  const picked: string[] = []
+  const queue = [keep, ...lines.filter((line) => line !== keep)]
+  for (const line of queue) {
+    const label = face(line).trim()
+    if (!label || seen.has(label)) continue
+    seen.add(label)
+    picked.push(line)
+  }
+  const order = new Map<string, number>()
+  lines.forEach((line, index) => {
+    if (!order.has(line)) order.set(line, index)
+  })
+  if (!order.has(keep)) order.set(keep, -1)
+  return picked.sort((a, b) => (order.get(a) ?? 99) - (order.get(b) ?? 99))
 }
 
 /** Gold Town next tap — name what opens, not a bare “Tap this next.” */

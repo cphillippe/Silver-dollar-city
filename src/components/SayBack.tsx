@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { shuffle } from '../lib/shuffle'
 import type { EvidenceBrief } from '../content/evidence'
+import { uniqueHoldChoices } from '../lib/easy'
 
 interface SayBackProps {
   brief: EvidenceBrief
@@ -10,8 +11,8 @@ interface SayBackProps {
 /** Optional bonus snap — skippable, one-tap credit when the reason chips. */
 export function SayBack({ brief, onDone }: SayBackProps) {
   const choices = useMemo(
-    () => shuffle([...brief.reasonChoices]),
-    [brief.id, brief.reasonChoices],
+    () => uniqueHoldChoices(shuffle([...brief.reasonChoices]), (line) => line, brief.reason),
+    [brief.id, brief.reason, brief.reasonChoices],
   )
   const [picked, setPicked] = useState<string | null>(null)
   const [text, setText] = useState('')
@@ -41,7 +42,7 @@ export function SayBack({ brief, onDone }: SayBackProps) {
           Skip
         </button>
       </div>
-      <h2>Tap the reason it stands.</h2>
+      <h2>Tap why it stands.</h2>
       <div className="recall-choices">
         {choices.map((line) => (
           <button
