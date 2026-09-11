@@ -1,4 +1,5 @@
 import { useId, type ReactNode } from 'react'
+import { MATCH_ART } from '../content/matchArt'
 import type { MatchSceneId } from '../types'
 
 export function MatchScene({ scene }: { scene: MatchSceneId }) {
@@ -291,6 +292,8 @@ export function MatchScene({ scene }: { scene: MatchSceneId }) {
           <path d="M32 20v24M25 26h14M25 38h14" stroke="#8a5a22" strokeWidth="2.4" strokeLinecap="round" />
         </SceneFrame>
       )
+    case 'mercy-road':
+      return <img className="match-scene is-tile" src={MATCH_ART['ph-road']} alt="" draggable={false} />
   }
 }
 
