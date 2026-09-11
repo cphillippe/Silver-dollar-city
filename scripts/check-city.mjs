@@ -1045,7 +1045,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.32')
+assert.equal(APP_VERSION, '1.4.33')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -1537,7 +1537,8 @@ assert.match(
   readFileSync(new URL('../src/components/TeachUnlock.tsx', import.meta.url), 'utf8'),
   /Skip reading/,
 )
-assert.match(hubSrc, /easyTapNext/)
+assert.doesNotMatch(hubSrc, /easyTapNext/)
+assert.doesNotMatch(hubSrc, /tap-next-dock/)
 assert.match(hubSrc, /is-easy-home/)
 assert.match(hubSrc, /EASY\.townSoon/)
 assert.match(hubSrc, /EASY\.saved/)
@@ -1794,9 +1795,10 @@ assert.match(
 )
 assert.match(hubSrc, /Do this next/)
 assert.match(hubSrc, /do-next/)
-assert.match(hubSrc, /Tap this next/)
-assert.match(hubSrc, /is-easy-town/)
-assert.match(cssSrc, /tap-next-dock/)
+assert.doesNotMatch(hubSrc, /Tap this next/)
+assert.match(hubSrc, /is-easy-home/)
+assert.doesNotMatch(cssSrc, /tap-next-dock/)
+assert.doesNotMatch(cssSrc, /is-easy-town/)
 assert.match(defendSrc, /Tap the face/)
 assert.match(defendSrc, /Porch flickered/)
 assert.doesNotMatch(TOWN_PATH_EASY, /scrapbook/)
