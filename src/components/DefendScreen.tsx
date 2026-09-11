@@ -82,7 +82,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const boardRef = useRef<SVGSVGElement>(null)
   const [boardBox, setBoardBox] = useState({ w: 640, h: 420 })
   const [toolLock, setToolLock] = useState<string | null>(null)
-  const [arming, setArming] = useState(false)
+  const arming = false
   const [phase, setPhase] = useState<'plant' | 'wave' | 'lost'>(easy ? 'wave' : 'plant')
   const [planted, setPlanted] = useState<CityPlotId[]>(() => [...pads])
   const [hearts, setHearts] = useState(DEFEND_HEARTS)
