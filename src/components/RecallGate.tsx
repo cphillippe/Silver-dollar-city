@@ -78,6 +78,8 @@ export function RecallGate({
   const confirmReason = encode || reasonOptions.length === 1 || reasonLocked
   const showDeeperBeat = deeper && (sealed || reasonLocked || phase === 'teach')
 
+  const easyEncode = easy && encode
+  const easyLineReady = !own || Boolean(chosen)
   const nextTap =
     phase === 'teach'
       ? 'Read this, then tap Got it.'
@@ -167,6 +169,58 @@ export function RecallGate({
     settle(false)
   }
 
+  if (easyEncode) {
+    return (
+      <section
+        className={`recall-gate is-encode is-easy-hold ${shake ? 'is-shake' : ''} ${own ? 'is-own' : ''}`}
+        aria-label={STORY.takeaway}
+      >
+        <p className="eyebrow">{brief.source ? brief.source : 'Hold'}</p>
+        <p className="teach-chip" role="note">
+          {EASY.mainIdeaTeach}
+        </p>
+        {!easyLineReady ? (
+          <>
+            <p className="next-tap">{EASY.rememberSentence}</p>
+            <div className="recall-choices">
+              {claimOptions.map((line) => (
+                <button
+                  key={line}
+                  type="button"
+                  className={`match-card recall-card ${flash === line ? 'is-flash' : ''}`}
+                  onClick={() => pickClaim(line)}
+                >
+                  {easyFacingLine(brief.id, line)}
+                </button>
+              ))}
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="recall-line rehearse-stem">
+              {easyFacingLine(brief.id, heldClaim)}
+            </p>
+            <h2>
+              {WORDS.reason.term} — {EASY.reasonSense}
+            </h2>
+            <div className="reason-scroll">
+              <p className="reason-held">{easyMainIdea(heldReason)}</p>
+            </div>
+            <div className="cta-dock">
+              <button
+                type="button"
+                className="btn primary xl recall-done"
+                onClick={() => settle(true)}
+              >
+                {EASY.keepThis}
+              </button>
+            </div>
+          </>
+        )}
+      </section>
+    )
+  }
+
   return (
     <section
       className={`recall-gate ${shake ? 'is-shake' : ''} phase-${phase} ${encode ? 'is-encode' : 'is-review'} ${own ? 'is-own' : ''} ${deeper ? 'is-deeper' : ''}`}
@@ -175,19 +229,10 @@ export function RecallGate({
       <p className="eyebrow">{brief.source ? brief.source : 'Hold'}</p>
       <p className="next-tap">{nextTap}</p>
       {encode ? (
-        easy ? (
-          <>
-            <p className="teach-chip" role="note">
-              {EASY.mainIdeaTeach}
-            </p>
-            <p className="quiet">You will keep this main idea.</p>
-          </>
-        ) : (
-          <p className="learning-store">
-            {picture ? <GemMark gem={picture} size="sm" /> : null}
-            <span>Picture this: {beat}</span>
-          </p>
-        )
+        <p className="learning-store">
+          {picture ? <GemMark gem={picture} size="sm" /> : null}
+          <span>Picture this: {beat}</span>
+        </p>
       ) : (
         <p className="quiet">
           {deeper
@@ -199,7 +244,7 @@ export function RecallGate({
               : 'Rebuild the map — claim, then why it stands.'}
         </p>
       )}
-      {deeper ? null : <PlainTalk id={brief.id} />}
+      {deeper || easy ? null : <PlainTalk id={brief.id} />}
 
       {phase === 'claim' ? (
         <>
