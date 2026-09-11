@@ -5184,6 +5184,12 @@ html[data-theme='dusk'] .hub.is-town .street-link {
   max-height: 380px;
 }
 
+.defend-page.is-easy-watch.is-cue-solo .defend-pad,
+.defend-page.is-easy-watch.is-cue-solo .defend-gate,
+.defend-page.is-easy-watch.is-cue-solo .defend-raider {
+  display: none !important;
+}
+
 .easy-walkers {
   position: absolute;
   inset: 0;
@@ -6251,6 +6257,21 @@ html[data-easy='on'] .link-block.is-not {
 .wizard-step {
   margin: 0 0 6px;
   font-weight: 650;
+}
+
+.play.is-easy-link .wizard-step {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(26, 16, 48, 0.94);
+  border: 1px solid rgba(255, 204, 51, 0.4);
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1.3;
+  color: #fff6e8;
 }
 
 .link-clue {

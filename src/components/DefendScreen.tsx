@@ -419,7 +419,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
 
   return (
     <main
-      className={`defend-page ${taught ? 'is-puzzle' : 'is-teach'} ${arming ? 'is-arming' : ''} ${won ? 'is-win' : ''} ${shake ? 'is-shake' : ''} ${leakFlash ? 'is-leak' : ''} ${firing ? 'is-firing' : ''} ${easy ? 'is-easy-watch' : ''}`}
+      className={`defend-page ${taught ? 'is-puzzle' : 'is-teach'} ${arming ? 'is-arming' : ''} ${won ? 'is-win' : ''} ${shake ? 'is-shake' : ''} ${leakFlash ? 'is-leak' : ''} ${firing ? 'is-firing' : ''} ${easy ? 'is-easy-watch' : ''} ${easy && walkerCue ? 'is-cue-solo' : ''}`}
       aria-label={WATCH_TITLE}
     >
       {!taught ? (
@@ -616,11 +616,15 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                 <rect x="-16" y="-4" width="32" height="26" rx="2" />
                 <rect className="defend-porch-window" x="-5" y="4" width="10" height="9" rx="1" />
               </g>
+              {easy && walkerCue ? null : (
               <g className="defend-gate" transform={`translate(${DEFEND_PATH[0].x} ${DEFEND_PATH[0].y})`}>
                 <path d="M-10 6 V-16 M10 6 V-16" />
                 <path d="M-12 -16 H12" />
               </g>
-              {pads.map((id) => {
+              )}
+              {easy && walkerCue
+                ? null
+                : pads.map((id) => {
                 const at = DEFEND_ANCHOR[id]
                 const on = planted.includes(id)
                 const stage = padStage(id, progress)
@@ -637,6 +641,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                 return (
                   <g
                     key={id}
+                    data-person-node="pad"
                     className={`defend-pad is-${stage} ${on ? 'is-planted' : ''} ${hot ? 'is-hot' : ''} ${flash === id ? 'is-flash' : ''}`}
                     transform={`translate(${at.x} ${at.y})`}
                     role="button"
@@ -796,6 +801,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                       <button
                         key={raider.id}
                         type="button"
+                        data-person-node="walker"
                         className={`easy-walker is-easy-walker ${cueTarget ? 'is-cue' : ''}`}
                         style={{
                           left: pos.left,
@@ -869,23 +875,27 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                 >
                   <AbilityMark ability={tool.id} size="md" />
                   {tool.label}
-                  <span className="defend-ability-tier" aria-hidden>
-                    {TIER_MARK[tier]}
-                  </span>
+                  {easy && walkerCue ? null : (
+                    <span className="defend-ability-tier" aria-hidden>
+                      {TIER_MARK[tier]}
+                    </span>
+                  )}
                   <span className="defend-ability-claim">
-                    {open
-                      ? (heldLine
-                          ? easy
-                            ? easyFacingLine(heldLine.id, heldLine.claim)
-                            : heldLine.claim
-                          : tool.id === 'love'
+                    {easy && walkerCue && tool.id === 'love'
+                      ? 'Love — tap the person'
+                      : open
+                        ? (heldLine
                             ? easy
-                              ? 'Love is ready.'
-                              : 'A true line can turn a cheap claim.'
-                            : 'Hold a line to name this tool.')
-                      : easy
-                        ? 'Locked — keep a matching sentence first.'
-                        : 'Hold a matching line'}
+                              ? easyFacingLine(heldLine.id, heldLine.claim)
+                              : heldLine.claim
+                            : tool.id === 'love'
+                              ? easy
+                                ? 'Love is ready.'
+                                : 'A true line can turn a cheap claim.'
+                              : 'Hold a line to name this tool.')
+                        : easy
+                          ? 'Locked — keep a matching sentence first.'
+                          : 'Hold a matching line'}
                   </span>
                 </button>
               )
