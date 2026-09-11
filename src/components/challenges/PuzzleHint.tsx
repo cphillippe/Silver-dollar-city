@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { plainFor } from '../../content/plain'
-import { isEasy } from '../../lib/easy'
+import { easyChromeLine, isEasy } from '../../lib/easy'
 import { useProgress } from '../../store/progress'
 
 export function PuzzleHint({
@@ -14,7 +14,7 @@ export function PuzzleHint({
 }) {
   const { progress } = useProgress()
   const easy = isEasy(progress)
-  const hint = easy && id ? (plainFor(id)?.hint ?? text) : text
+  const hint = easy && id ? easyChromeLine(plainFor(id)?.hint ?? text ?? '') : text
   const [open, setOpen] = useState(false)
   if (!hint) return null
 

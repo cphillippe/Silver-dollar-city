@@ -47,8 +47,8 @@ const PLAIN: Record<string, PlainLine> = {
   ),
   'ph-debt': line(
     'If you were forgiven a huge debt, you cannot choke a neighbor over a small one.',
-    'A king wipes an unpayable bill. That same servant then jails a peer for a tiny sum. Received mercy makes refusing mercy a contradiction.',
-    { term: 'Debt', sense: 'what you owe and cannot pay', hint: 'Keep the mercy. Toss the throttle.' },
+    'A king wipes an unpayable bill. That same servant then jails a peer for a tiny sum. Example: huge debt forgiven — then a tiny one demanded.',
+    { term: 'Debt', sense: 'what you owe and cannot pay', hint: 'Keep the mercy. Toss the choke. Example: a huge bill wiped, then a tiny one demanded.' },
   ),
   'wb-creed': line(
     'Paul hands on an old shared belief: died, buried, raised, appeared.',
@@ -230,9 +230,9 @@ const PLAIN: Record<string, PlainLine> = {
     { term: 'Door', sense: 'a real way in — not a wall', hint: 'Keep the right pictures. Remove wrong picks.' },
   ),
   'td-watch': line(
-    'A true main idea can turn a mean line around.',
+    'A true main idea can turn an unkind sentence around.',
     'Love, logic, reason, and science you have kept can send a false step up the ridge.',
-    { term: 'Use', sense: 'use a main idea you kept — not a new lecture', hint: 'Plant the true line. Turn the mean one.' },
+    { term: 'Use', sense: 'use a main idea you kept — not a new lecture', hint: 'Tap the face six times. Example: tap the glowing person.' },
   ),
   'ln-street': line(
     'An idea lives at a place, with a person.',

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { shuffle } from '../../lib/shuffle'
 import type { SortChallenge, SortTile } from '../../types'
 import { STORY } from '../../content/story'
-import { EASY, isEasy } from '../../lib/easy'
+import { EASY, easyChromeLine, isEasy } from '../../lib/easy'
 import { useProgress } from '../../store/progress'
 import { GemMark } from '../GemMark'
 import { burstStyle } from '../../lib/juice'
@@ -152,7 +152,7 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
           <div className="sort-one">
             <p className="sort-one-line">
               {nextTile.gem ? <GemMark gem={nextTile.gem} size="sm" /> : null}
-              {nextTile.text}
+              {easy ? easyChromeLine(nextTile.text) : nextTile.text}
             </p>
             <div className="sort-actions">
               <button
@@ -206,8 +206,10 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
                 tabIndex={0}
                 aria-label={
                   live
-                    ? home.text
-                    : `Return ${home.text} to its seat`
+                    ? easy
+                      ? easyChromeLine(home.text)
+                      : home.text
+                    : `Return ${easy ? easyChromeLine(home.text) : home.text} to its seat`
                 }
                 onClick={() => {
                   if (live) setPicked(home.id === picked ? null : home.id)
@@ -215,7 +217,7 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
                 }}
               >
                 {home.gem ? <GemMark gem={home.gem} size="sm" /> : null}
-                {home.text}
+                {easy ? easyChromeLine(home.text) : home.text}
                 {goneTo === 'keep' ? (
                   <span className="sort-mark" aria-hidden>
                     ✓
@@ -278,7 +280,7 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
             {keep.length === 0 ? (
               <span className="placeholder">
                 {selected
-                  ? `Keep: ${selected.text}`
+                  ? `Keep: ${easy ? easyChromeLine(selected.text) : selected.text}`
                   : 'Belongs here'}
               </span>
             ) : (
@@ -294,7 +296,7 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
                   }}
                 >
                   {tile.gem ? <GemMark gem={tile.gem} size="sm" /> : null}
-                  {tile.text}
+                  {easy ? easyChromeLine(tile.text) : tile.text}
                 </button>
               ))
             )}
@@ -317,7 +319,7 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
             {discard.length === 0 ? (
               <span className="placeholder">
                 {selected
-                  ? `Toss: ${selected.text}`
+                  ? `Toss: ${easy ? easyChromeLine(selected.text) : selected.text}`
                   : 'Set aside'}
               </span>
             ) : (
@@ -333,7 +335,7 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
                   }}
                 >
                   {tile.gem ? <GemMark gem={tile.gem} size="sm" /> : null}
-                  {tile.text}
+                  {easy ? easyChromeLine(tile.text) : tile.text}
                 </button>
               ))
             )}

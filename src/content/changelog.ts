@@ -8,6 +8,29 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.29',
+    title: 'Easy core loop',
+    when: '2026-09-11',
+    items: [
+      'Easy Town is Match, Hold, Night Watch, and a readable map. Tap a building to Manage it, walk, or Build this when you earned it.',
+      'Easy Night Watch finishes at 6/6. TAP n/6 is the score. Six face taps win the night.',
+      'Match stays sentence → place → person with a named miss and Next.',
+      'Saved keeps the sentences you held. Dig deeper, What’s new, themes, and Heaven-growth theater wait under Settings → More.',
+    ],
+  },
+  {
+    version: '1.4.28',
+    title: 'The town grows into Heaven',
+    when: '2026-09-11',
+    items: [
+      'The map starts as Eden — porch, creek garden, a star on the ridge. Streets and houses appear as you walk, hold, and Build this.',
+      'Heaven is earned. The trail climbs as you keep the lines. City of Heaven stands when the lookout is lit and the lines still hold.',
+      'Easy Night Watch finishes at 6/6 — six face taps, or a clear win. Hearts stay hearts; TAP n/6 is the score.',
+      'Town names stay in their slots while the town grows. Portraits and speech bubbles no longer cover the chips.',
+      'Easy chrome uses plain instructions and examples — unkind sentence, not mean line; Keep/Toss tiles drop throttle, first-century banking, and contradiction.',
+    ],
+  },
+  {
     version: '1.4.27',
     title: 'The town grows into Heaven',
     when: '2026-09-11',

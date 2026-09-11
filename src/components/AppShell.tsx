@@ -114,7 +114,9 @@ export function AppShell({ view, onNavigate, children }: AppShellProps) {
           <p className="score" title={easy ? 'Sentences you kept' : 'Held lines are claims you rebuilt from memory'}>
             {easy ? 'Saved' : 'Held'} {progress.held.length}
             {waiting ? ` · due ${waiting}` : ''}
-            <span className="score-sub"> · insight {insightScore(progress)}</span>
+            {easy ? null : (
+              <span className="score-sub"> · insight {insightScore(progress)}</span>
+            )}
           </p>
         </footer>
       ) : null}

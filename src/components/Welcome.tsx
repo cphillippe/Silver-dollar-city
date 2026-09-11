@@ -36,8 +36,8 @@ export function Welcome({ onNavigate }: WelcomeProps) {
           Silver City
           <span>Unending Evidence</span>
         </h1>
-        <p className="welcome-goal">{STORY.purpose}</p>
-        <p className="welcome-who">{STORY.who}</p>
+        {progress.easyMode ? null : <p className="welcome-goal">{STORY.purpose}</p>}
+        {progress.easyMode ? null : <p className="welcome-who">{STORY.who}</p>}
         <div className="welcome-cast">
           <figure>
             <Avatar who="river" size="lg" />
@@ -71,12 +71,12 @@ export function Welcome({ onNavigate }: WelcomeProps) {
           </div>
           <p className="quiet welcome-easy-note">
             {progress.easyMode
-              ? `${EASY.claimTeach} Easier words · bigger taps. You can change this in Settings.`
+              ? 'Easier words · bigger taps. You can change this in Settings.'
               : 'Hard keeps the full voice. You can switch anytime in Settings → Reading. We teach hard words first — a claim is the main idea we hold to be true.'}
           </p>
           {progress.easyMode ? (
             <p className="teach-chip" role="note">
-              {EASY.mainIdeaTeach}
+              {EASY.claimTeach}
             </p>
           ) : null}
           <button type="button" className="btn primary xl" onClick={begin}>

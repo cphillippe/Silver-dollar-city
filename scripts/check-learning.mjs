@@ -53,7 +53,7 @@ const linked = learningFromReview(event, { ...empty, held: ['wb-creed'] })
 assert.match(linked?.anchor ?? '', /after/)
 assert.match(linked?.anchor ?? '', /creed/)
 
-assert.match(learningBeat('td-watch'), /mean line/)
+assert.match(learningBeat('td-watch'), /unkind sentence/)
 assert.match(learningAnchor(empty, 'td-watch'), /Mercy Wren/)
 
 const fresh = emptyTrace('ph-road', 'parable-hollow', '2026-09-09')
