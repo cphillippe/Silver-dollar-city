@@ -26,6 +26,7 @@ export type MatchSceneId =
   | 'twelve'
   | 'welcome'
   | 'mindsky'
+  | 'mercy-road'
 
 export interface SortTile {
   id: string
