@@ -3,8 +3,8 @@ import type { Area } from '../types'
 export const firstGate: Area = {
   id: 'first-gate',
   order: 4,
-  title: 'The First Gate',
-  shortTitle: 'Gate',
+  title: 'Why Gate',
+  shortTitle: 'Why',
   subtitle: 'Why is there a world at all?',
   blurb:
     'Aristotle walked this road; Aquinas drew the map; the question has not aged out.',

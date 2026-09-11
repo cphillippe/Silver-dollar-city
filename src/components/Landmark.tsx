@@ -60,7 +60,7 @@ const MARKS: Record<string, { label: string; path: string }> = {
     path: 'M18 70c0-22 14-38 30-38s30 16 30 38M48 32v10',
   },
   'first-gate': {
-    label: 'The First Gate',
+    label: 'Why Gate',
     path: 'M22 78V38l26-16 26 16v40M48 78V50',
   },
   'high-lookout': {
