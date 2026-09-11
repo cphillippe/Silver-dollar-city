@@ -28,7 +28,7 @@ function line(
 const PLAIN: Record<string, PlainLine> = {
   'ph-road': line(
     'A neighbor is the person who shows mercy — not the person who looks like you.',
-    'Jesus tells a story. A hurt man lies on the road. Religious men walk past. A Samaritan stops and helps. Then Jesus asks who *proved* to be a neighbor.',
+    'Jesus tells a story. A hurt man lies on the road. Religious men walk past. A Samaritan is moved with compassion and helps. Then Jesus asks who *proved* to be a neighbor.',
     {
       term: 'Samaritan',
       sense: 'someone the listener did not expect to be the hero',
@@ -230,9 +230,9 @@ const PLAIN: Record<string, PlainLine> = {
     { term: 'Door', sense: 'a real way in — not a wall', hint: 'Keep the right pictures. Remove wrong picks.' },
   ),
   'td-watch': line(
-    'A true line can turn an unkind sentence toward heaven.',
-    'Love, logic, reason, and science you have kept can send a false step up the ridge.',
-    { term: 'Use', sense: 'use a main idea you kept — not a new lecture', hint: 'Tap the face six times. Example: tap the glowing person.' },
+    'Love — when compassion moves you, help like the Samaritan. Tap the glowing face.',
+    'Tap the glowing face. When compassion moves you, help like the Samaritan.',
+    { term: 'Love', sense: 'the Night Watch tool — how to use it, not a new main idea', hint: 'Tap the face six times. Example: tap the glowing person.' },
   ),
   'ln-street': line(
     'An idea lives at a place, with a person.',

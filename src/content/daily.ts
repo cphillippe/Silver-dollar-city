@@ -328,7 +328,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
       ],
       cards: [
         { id: 'wounded', text: 'A man is left wounded on the road' },
-        { id: 'helped', text: 'An unlikely traveler stops and helps' },
+        { id: 'helped', text: 'An unlikely traveler is moved with compassion and helps' },
         { id: 'mercy', text: 'Neighbor is the one who showed mercy' },
         { id: 'priest', text: 'The priest who passed by is the hero', distractor: true },
       ],
