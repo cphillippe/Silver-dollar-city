@@ -2,8 +2,7 @@ import { useMemo, useState } from 'react'
 import { shuffle } from '../lib/shuffle'
 import { takeawayLines, type EvidenceBrief } from '../content/evidence'
 import { STORY } from '../content/story'
-import { EASY, easyFacingLine, easyMainIdea, isEasy } from '../lib/easy'
-import { WORDS } from '../lib/words'
+import { EASY, easyFacingLine, easyMainIdea, isEasy, uniqueHoldChoices } from '../lib/easy'
 import { learningBeat } from '../lib/learning'
 import { learningPicture, toolForEvidence } from '../lib/watchTools'
 import { useProgress } from '../store/progress'
@@ -51,20 +50,35 @@ export function RecallGate({
   const lines = useMemo(() => takeawayLines(brief, keeps), [brief, keeps])
   const own = encode && lines.length > 1
   const [chosen, setChosen] = useState<(typeof lines)[0] | null>(own ? null : lines[0] ?? null)
+  const claimFace = (line: string) => (easy ? easyFacingLine(brief.id, line) : line)
+  const reasonFace = (line: string) => (easy ? easyMainIdea(line) : line)
   const claimOptions = useMemo(() => {
-    if (encode) return own ? lines.map((item) => item.claim) : [brief.claim]
+    if (encode) {
+      const raw = own ? lines.map((item) => item.claim) : [brief.claim]
+      return uniqueHoldChoices(raw, claimFace, raw[0] ?? brief.claim)
+    }
     const pool = shuffle([...brief.claimChoices])
-    if (!easy) return pool
-    const miss = pool.find((line) => line !== brief.claim)
-    return shuffle([brief.claim, miss].filter((line): line is string => Boolean(line)))
+    const raw = easy
+      ? shuffle(
+          [brief.claim, pool.find((line) => line !== brief.claim)].filter(
+            (line): line is string => Boolean(line),
+          ),
+        )
+      : pool
+    return uniqueHoldChoices(raw, claimFace, brief.claim)
   }, [brief.id, brief.claim, brief.claimChoices, encode, own, lines, easy])
   const reasonOptions = useMemo(() => {
-    if (encode) return [chosen?.reason ?? brief.reason]
-    const pool = shuffle([...brief.reasonChoices])
-    if (!easy) return pool
     const correct = chosen?.reason ?? brief.reason
-    const miss = pool.find((line) => line !== correct)
-    return shuffle([correct, miss].filter((line): line is string => Boolean(line)))
+    if (encode) return uniqueHoldChoices([correct], reasonFace, correct)
+    const pool = shuffle([...brief.reasonChoices])
+    const raw = easy
+      ? shuffle(
+          [correct, pool.find((line) => line !== correct)].filter(
+            (line): line is string => Boolean(line),
+          ),
+        )
+      : pool
+    return uniqueHoldChoices(raw, reasonFace, correct)
   }, [brief.id, brief.reason, brief.reasonChoices, encode, chosen, easy])
   const [phase, setPhase] = useState<Phase>(deeper ? 'reason' : 'claim')
   const [misses, setMisses] = useState(0)
@@ -90,23 +104,17 @@ export function RecallGate({
               ? deeper
                 ? 'That still holds. Tap Done.'
                 : 'That reason holds. Tap Done.'
-              : 'Read why this is true, then tap Done.'
+              : EASY.whyStands
             : deeper
               ? 'Tap Done when the sharper hold is clear.'
               : 'Tap Done when you have the reason.'
           : easy
-            ? deeper
-              ? 'Why is this still true?'
-              : 'Tap the reason that still holds.'
+            ? EASY.tapWhy
             : deeper
               ? 'What still makes this stand — not the first teach.'
               : 'Tap the reason that holds.'
         : easy
-          ? encode
-            ? EASY.rememberSentence
-            : deeper
-              ? 'Which sentence was the hold?'
-              : 'Tap the sentence you still remember.'
+          ? EASY.rememberSentence
           : deeper
             ? 'Which sentence was the hold?'
             : kicker
@@ -176,11 +184,11 @@ export function RecallGate({
         aria-label={STORY.takeaway}
       >
         <p className="eyebrow">{brief.source ? brief.source : 'Hold'}</p>
-        <p className="teach-chip" role="note">
-          {EASY.mainIdeaTeach}
-        </p>
         {!easyLineReady ? (
           <>
+            <p className="teach-chip" role="note">
+              {EASY.mainIdeaTeach}
+            </p>
             <p className="next-tap">{EASY.rememberSentence}</p>
             <div className="recall-choices">
               {claimOptions.map((line) => (
@@ -197,12 +205,14 @@ export function RecallGate({
           </>
         ) : (
           <>
+            <p className="teach-chip" role="note">
+              {EASY.reasonTeach}
+            </p>
+            <p className="next-tap">{EASY.tapWhy}</p>
             <p className="recall-line rehearse-stem">
               {easyFacingLine(brief.id, heldClaim)}
             </p>
-            <h2>
-              {WORDS.reason.term} — {EASY.reasonSense}
-            </h2>
+            <h2>{EASY.whyStands}</h2>
             <div className="reason-scroll">
               <p className="reason-held">{easyMainIdea(heldReason)}</p>
             </div>
@@ -240,7 +250,7 @@ export function RecallGate({
               ? 'A new angle — not the first read again.'
               : 'A new angle on a line you already hold — not the first teach again.'
             : easy
-              ? 'Then the reason — why this is true.'
+              ? EASY.tapWhy
               : 'Rebuild the map — claim, then why it stands.'}
         </p>
       )}
@@ -287,7 +297,7 @@ export function RecallGate({
           {heldNote ? (
             <p className="match-toast" role="status">
               <strong>Held.</strong>{' '}
-              {easy ? 'That sentence is yours to remember.' : 'That claim is yours to keep.'}
+              {easy ? 'That line is yours to keep.' : 'That claim is yours to keep.'}
             </p>
           ) : null}
           <p className="recall-line rehearse-stem">
@@ -296,10 +306,10 @@ export function RecallGate({
           <h2>
             {deeper
               ? easy
-                ? 'Why is this still true?'
+                ? EASY.whyStands
                 : 'A sharper hold'
               : easy
-                ? `${WORDS.reason.term} — ${EASY.reasonSense}`
+                ? EASY.whyStands
                 : STORY.whyItStands}
           </h2>
           {reasonLocked ? (

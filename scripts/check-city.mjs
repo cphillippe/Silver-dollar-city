@@ -68,8 +68,8 @@ import {
   EASY_FOLK_LIFT,
 } from '../src/lib/cityBuild.ts'
 import { emptyProgress } from '../src/lib/save.ts'
-import { EASY, easyChromeLine, easyWrongTap } from '../src/lib/easy.ts'
-import { WORDS } from '../src/lib/words.ts'
+import { EASY, easyChromeLine, easyFacingLine, easyWrongTap, uniqueHoldChoices } from '../src/lib/easy.ts'
+import { WORDS, easyLead } from '../src/lib/words.ts'
 import { deeperLinksFor, eraLabel } from '../src/content/deeper.ts'
 import { allEvidenceIds, evidenceFor } from '../src/content/evidence.ts'
 import { plainFor } from '../src/content/plain.ts'
@@ -511,7 +511,10 @@ assert.match(recallSrc, /recall-done/)
 assert.match(recallSrc, /EASY.rememberSentence/)
 assert.match(recallSrc, /is-easy-hold/)
 assert.match(recallSrc, /EASY\.keepThis/)
-assert.match(recallSrc, /Read why this is true, then tap Done/)
+assert.match(recallSrc, /EASY\.tapWhy/)
+assert.match(recallSrc, /EASY\.reasonTeach/)
+assert.match(recallSrc, /uniqueHoldChoices/)
+assert.doesNotMatch(recallSrc, /Tap the sentence you still remember/)
 assert.match(recallSrc, /reasonLocked/)
 assert.match(recallSrc, /btn gold xl recall-done/)
 assert.match(recallSrc, /That reason holds/)
@@ -1049,7 +1052,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.38')
+assert.equal(APP_VERSION, '1.4.39')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1542,7 +1545,15 @@ assert.match(
 )
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /Choose the main idea to remember/,
+  /Tap the line you just kept/,
+)
+assert.match(
+  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  /Tap why it stands/,
+)
+assert.match(
+  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  /A reason is why it stands/,
 )
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
@@ -1562,7 +1573,7 @@ assert.match(
 )
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /why this is true/,
+  /why it stands/,
 )
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
@@ -1874,6 +1885,11 @@ assert.doesNotMatch(defendSrc, /easyTap && tool\.id !== ability/)
 assert.match(defendSrc, /WATCH_TOOLS\.map/)
 assert.match(defendSrc, /EASY\.nightLead/)
 assert.equal(EASY.nightLead, 'Tap the face six times.')
+assert.equal(EASY.rememberSentence, 'Tap the line you just kept.')
+assert.equal(EASY.tapWhy, 'Tap why it stands.')
+assert.equal(EASY.reasonTeach, 'A reason is why it stands.')
+assert.equal(EASY.nightMiss, 'Wrong — tap the glowing face')
+assert.match(defendSrc, /EASY\.nightMiss/)
 assert.match(defendSrc, /TAP \$\{downed\}/)
 assert.match(defendSrc, /You missed\. Tap the face/)
 assert.match(defendSrc, /walking\.some\(\(item\) => !item\.turned\)/)
@@ -2063,5 +2079,58 @@ assert.match(matchSrc, /EASY\.lockIn/)
 assert.doesNotMatch(matchSrc, /A claim is the main idea we hold to be true/)
 assert.match(cssSrc, /\.word-school/)
 assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
+
+{
+  const watch = evidenceFor('td-watch')
+  assert.ok(watch)
+  assert.equal(watch.claim, 'A true line can turn a cheap claim toward heaven.')
+  const claim = easyFacingLine(watch.id, watch.claim)
+  const decoy = easyFacingLine(watch.id, watch.claimChoices[1])
+  assert.equal(claim, 'A true main idea can turn an unkind sentence around.')
+  assert.notEqual(decoy, claim)
+  assert.equal(new Set(watch.claimChoices.map((line) => easyFacingLine(watch.id, line))).size, 3)
+
+  const sameFace = uniqueHoldChoices(
+    [watch.claim, watch.claim, watch.claimChoices[1], watch.claimChoices[1]],
+    (line) => easyFacingLine(watch.id, line),
+    watch.claim,
+  )
+  assert.deepEqual(
+    sameFace.map((line) => easyFacingLine(watch.id, line)),
+    [...new Set(sameFace.map((line) => easyFacingLine(watch.id, line)))],
+  )
+  assert.ok(sameFace.includes(watch.claim))
+  assert.equal(sameFace.length, 2)
+
+  const ident = uniqueHoldChoices(['Keep the line.', 'Keep the line.', 'A miss.'], (line) => line, 'Keep the line.')
+  assert.deepEqual(ident, ['Keep the line.', 'A miss.'])
+
+  const reasons = uniqueHoldChoices(
+    [watch.reason, watch.reason, watch.reasonChoices[1]],
+    (line) => line,
+    watch.reason,
+  )
+  assert.ok(reasons.includes(watch.reason))
+  assert.equal(reasons.length, 2)
+  assert.equal(new Set(reasons).size, reasons.length)
+
+  assert.equal(easyLead('ph-father', 'x'), 'Toss the wrong picks. Keep the father running to his son.')
+  assert.equal(easyLead('ph-seeds', 'x'), 'Match each Jesus story to the short line it is making.')
+  assert.equal(easyLead('daily-gems', 'x'), 'Match each picture to the short line.')
+  assert.equal(easyLead('fg-kalam', 'x'), 'Keep the beginning argument. Toss the rest.')
+}
+
+assert.match(
+  latestChange(APP_VERSION).items.join('\n'),
+  /Tap the line you just kept/,
+)
+assert.match(
+  latestChange(APP_VERSION).items.join('\n'),
+  /Tap why it stands/,
+)
+assert.match(
+  latestChange(APP_VERSION).items.join('\n'),
+  /Wrong — tap the glowing face/,
+)
 
 console.log('check-city: ok')
