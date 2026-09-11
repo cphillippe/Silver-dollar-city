@@ -242,10 +242,14 @@ export function townVoiceForArea(areaId: string) {
 export function townAck(
   plotId: string,
   beat: 'Built!' | 'Lit!' | 'Unlocked' | 'Grew!',
+  easy = false,
 ): string {
   const voice = townVoice(plotId)
   if (beat === 'Lit!') return voice.lit
-  if (beat === 'Built!') return voice.built
+  if (beat === 'Built!') {
+    if (easy && plotId === 'journal') return 'Page house is up.'
+    return voice.built
+  }
   if (beat === 'Grew!') return voice.grew
   return voice.unlocked
 }

@@ -105,7 +105,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
   },
   {
     id: 'trail-names',
-    teaser: 'The bench ledger has two new names in the margin.',
+    teaser: 'The bench has two new names in the margin.',
     districtFlavor: 'The Witness Bench · names that stay',
     challenge: {
       kind: 'match',

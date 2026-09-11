@@ -643,7 +643,9 @@ export function CityMap({
           <Avatar who={beatVoice.who} size="sm" />
           <div>
             <strong>{beat.beat}</strong>
-            <span>{beat.title}</span>
+            <span>
+              {isEasy(progress) && beat.id === 'journal' ? 'River’s pages' : beat.title}
+            </span>
           </div>
         </div>
       ) : null}
@@ -1256,10 +1258,11 @@ function TownFolk({
   speaking: boolean
   ack?: CityUpgrade['beat']
 }) {
+  const { progress } = useProgress()
   if (stage === 'empty' && !next) return null
   const at = FOLK[id]
   const voice = townVoice(id)
-  const line = ack ? townAck(id, ack) : voice.here
+  const line = ack ? townAck(id, ack, isEasy(progress)) : voice.here
   const short = line.length > 22 ? `${line.slice(0, 20)}…` : line
   const home = stage === 'built' || stage === 'lit'
   return (
