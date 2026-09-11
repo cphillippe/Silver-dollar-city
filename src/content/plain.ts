@@ -230,7 +230,7 @@ const PLAIN: Record<string, PlainLine> = {
     { term: 'Door', sense: 'a real way in — not a wall', hint: 'Keep the right pictures. Remove wrong picks.' },
   ),
   'td-watch': line(
-    'A true main idea can turn an unkind sentence around.',
+    'A true line can turn an unkind sentence toward heaven.',
     'Love, logic, reason, and science you have kept can send a false step up the ridge.',
     { term: 'Use', sense: 'use a main idea you kept — not a new lecture', hint: 'Tap the face six times. Example: tap the glowing person.' },
   ),

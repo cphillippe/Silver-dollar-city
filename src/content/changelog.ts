@@ -8,6 +8,19 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.40',
+    title: 'Easy core loop',
+    when: '2026-09-11',
+    items: [
+      'Easy Night Watch / Hold facing line is now A true line can turn an unkind sentence toward heaven. Hard claim stays A true line can turn a cheap claim toward heaven.',
+      'Easy Hold is kid-plain: Tap the line you just kept. then Tap why it stands. A reason is why it stands — taught once, then the chrome stays plain. Keep this still sits under the reason.',
+      'Hold review chips drop identical duplicate buttons. The true line stays; a second button that reads the same is gone.',
+      'Night Watch miss says Wrong — tap the glowing face, so locked tools do not look like the task. Easy Night Watch still finishes at 6/6.',
+      'Place titles stay Story Creek, Witness Square, Sky Watch, Meaning Ridge. Easy home is still Match, Saved, and Night Watch — Town (soon) waits under Settings → More.',
+      'Match stays sentence → place → person with a named miss and Next. A few Easy prompts now name the line instead of asking you to infer it.',
+    ],
+  },
+  {
     version: '1.4.39',
     title: 'Easy core loop',
     when: '2026-09-11',
@@ -276,7 +289,7 @@ export const CHANGELOG: ChangeNote[] = [
     items: [
       'Easy miss copy is Wrong match plus a plain why — no neighbor-line jargon.',
       'Easy Night Watch walkers are bigger and slower. Hard pace stays.',
-      'Love tool line: A true main idea can turn a mean line around. No cheap line on Easy chrome.',
+      'Love tool line: A true line can turn an unkind sentence toward heaven. No cheap line on Easy chrome.',
       'First Easy teach chip: Main idea = the short true line we keep. Easy chrome prefers match over link.',
     ],
   },
