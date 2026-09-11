@@ -19,15 +19,16 @@ export const EASY = {
   readAgain: 'Read this one again.',
   claimTeach: 'A claim is the main idea we hold to be true.',
   mainIdea: 'main idea',
-  reasonSense: 'why the main idea stands',
-  sourceSense: 'where the main idea comes from',
+  reasonSense: 'why this is true',
+  sourceSense: 'where this comes from',
   lockIn: 'Save your picks.',
   matchHow: 'Keep the right pictures. Remove wrong picks.',
-  matchMiss: 'Wrong pair — try a different main idea.',
+  matchMiss: 'Wrong match — try again.',
+  linkCue: 'Pick the sentence that fits this story.',
   upgrade: 'Build this — raise the next look you earned by learning',
   manage: 'Building',
   nightDo: 'Do this',
-  nightTap: 'Tap the walker.',
+  nightTap: 'Tap this person.',
   deployTeach: 'Use a main idea you kept.',
 } as const
 
@@ -44,6 +45,36 @@ export function easyMainIdea(text: string): string {
     .replace(/\bthe claim\b/gi, 'the main idea')
     .replace(/\bA claim\b/g, 'A main idea')
     .replace(/\bThe claim\b/g, 'The main idea')
+    .replace(/\bsoils\b/gi, 'ground')
+}
+
+function easyPictureWord(beat: string): string {
+  const text = beat.toLowerCase()
+  if (text.includes('neighbor')) return 'neighbor picture'
+  if (text.includes('tomb') || text.includes('empty')) return 'empty-tomb picture'
+  if (text.includes('star') || text.includes('sky') || text.includes('heaven')) return 'star picture'
+  if (text.includes('bread') || text.includes('table') || text.includes('cup')) return 'shared-table picture'
+  if (text.includes('seed') || text.includes('ground') || text.includes('soil')) return 'seed picture'
+  if (text.includes('lamp') || text.includes('light')) return 'lamp picture'
+  if (text.includes('cheap line') || text.includes('true one') || text.includes('true line')) {
+    return 'true-line picture'
+  }
+  return 'story picture'
+}
+
+/** Easy Journal meta: who · where · picture · tool. No Anchored / deploys / after-quote. */
+export function easyJournalMeta(learning: {
+  anchor: string
+  beat?: string
+  tool?: string
+}): string {
+  const bits = learning.anchor.split(' · ').map((part) => part.trim())
+  const who = bits[0] || 'Juniper'
+  const where = (bits[1] ?? '').replace(/\s*after\s+.*/i, '').trim() || 'East porch'
+  const picture = easyPictureWord(learning.beat ?? '')
+  const parts = [who, where, picture]
+  if (learning.tool) parts.push(`used as ${learning.tool}`)
+  return parts.join(' · ')
 }
 
 export function easyFacingLine(id: string | undefined, text: string): string {

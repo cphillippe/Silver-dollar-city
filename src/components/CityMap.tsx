@@ -346,7 +346,7 @@ export function CityMap({
     ? isEasy(progress)
       ? 'A building is ready. Tap it, then Build this.'
       : 'A building is ready. Tap it, then Build this — learning raises the house.'
-    : nextGift(nextId, nextStage, shownFill[nextId] ?? 0)
+    : nextGift(nextId, nextStage, shownFill[nextId] ?? 0, isEasy(progress))
   const celebrating = Boolean(beat) || homecoming
   const beatVoice = beat ? townVoice(beat.id) : townVoice(nextId)
 
@@ -805,7 +805,10 @@ function PlotGroup({
   const clickable = stage !== 'empty' || next || ready || (easy && streetLot)
   const at = ANCHOR[id]
   const vacant = stage === 'empty' && !next && !ready
-  const title = CITY_PLOTS.find((plot) => plot.id === id)?.title ?? id
+  const title =
+    easy && id === 'journal'
+      ? 'River’s pages'
+      : (CITY_PLOTS.find((plot) => plot.id === id)?.title ?? id)
   const scale = easy ? 1.92 : BUILD_SCALE
   const hit = easy ? 64 : 42
   const tag = easy ? easyPlotTag(id) : plotTag(id)

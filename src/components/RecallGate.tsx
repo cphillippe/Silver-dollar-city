@@ -88,13 +88,13 @@ export function RecallGate({
               ? deeper
                 ? 'That still holds. Tap Done.'
                 : 'That reason holds. Tap Done.'
-              : 'Read why it stands, then tap Done.'
+              : 'Read why this is true, then tap Done.'
             : deeper
               ? 'Tap Done when the sharper hold is clear.'
               : 'Tap Done when you have the reason.'
           : easy
             ? deeper
-              ? 'What still makes this stand?'
+              ? 'Why is this still true?'
               : 'Tap the reason that still holds.'
             : deeper
               ? 'What still makes this stand — not the first teach.'
@@ -190,7 +190,7 @@ export function RecallGate({
               ? 'A new angle — not the first read again.'
               : 'A new angle on a line you already hold — not the first teach again.'
             : easy
-              ? 'Then the reason — why it stands.'
+              ? 'Then the reason — why this is true.'
               : 'Rebuild the map — claim, then why it stands.'}
         </p>
       )}
@@ -246,7 +246,7 @@ export function RecallGate({
           <h2>
             {deeper
               ? easy
-                ? 'What still makes it stand?'
+                ? 'Why is this still true?'
                 : 'A sharper hold'
               : easy
                 ? `${WORDS.reason.term} — ${EASY.reasonSense}`

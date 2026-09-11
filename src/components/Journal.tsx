@@ -3,7 +3,7 @@ import { areas, journalEntries, pillarFor } from '../content'
 import { evidenceFor, evidenceForJournal } from '../content/evidence'
 import { guideForArea, STORY } from '../content/story'
 import { localDateKey } from '../lib/dates'
-import { EASY, easyFacingLine, isEasy } from '../lib/easy'
+import { EASY, easyFacingLine, easyJournalMeta, isEasy } from '../lib/easy'
 import { isDue, nextGapLabel } from '../lib/memory'
 import { starLegend } from '../lib/stars'
 import { deployLabel, findLearning, storedLearnings, withLearningBeat } from '../lib/learning'
@@ -171,9 +171,11 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
         <p className="eyebrow">Evidence Journal</p>
         <h1>What you can still say</h1>
         <p>
-          {open} of {total} unsealed · {percent}% of the dossier · {heldCount}{' '}
-          lines held from memory
-          {waiting ? ` · ${waiting} ${easy ? 'due to read again' : 'due to dust off'}` : ''}.{' '}
+          {easy
+            ? `${open} of ${total} pages open · ${percent}% remembered · ${heldCount} lines kept`
+            : `${open} of ${total} unsealed · ${percent}% of the dossier · ${heldCount} lines held from memory`}
+          {waiting ? ` · ${waiting} ${easy ? 'due to read again' : 'due to dust off'}` : ''}
+          {'. '}
           {easy
             ? 'Open pages start face-down — rebuild the main idea, then read.'
             : 'Open pages start face-down — rebuild the claim, then read. Forgetting is why a page comes back.'}
@@ -181,12 +183,18 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
         <div
           className="journal-meter"
           role="img"
-          aria-label={`${percent} percent of the journal unsealed, ${heldCount} held, ${waiting} due`}
+          aria-label={
+            easy
+              ? `${percent} percent of journal pages open, ${heldCount} kept, ${waiting} due`
+              : `${percent} percent of the journal unsealed, ${heldCount} held, ${waiting} due`
+          }
         >
           <span style={{ width: `${percent}%` }} />
         </div>
         <p className="journal-split">
-          {open} unsealed · {total - open} sealed · {heldCount} held
+          {easy
+            ? `${open} open · ${total - open} still closed · ${heldCount} kept`
+            : `${open} unsealed · ${total - open} sealed · ${heldCount} held`}
           {waiting ? ` · ${waiting} due this morning` : ''}
         </p>
       </header>
@@ -199,7 +207,7 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
               <h2>Stored lines</h2>
               <p>
                 {easy
-                  ? 'Each learning is a main idea (what we hold), a reason (why it stands), and a source (where it comes from) — plus the picture and tool.'
+                  ? 'Each learning is a main idea (what we hold), a reason (why this is true), and a source (where it comes from) — plus the picture and tool.'
                   : 'Each learning is its own unit: claim · reason · source · anchor · picture · tool.'}
               </p>
             </div>
@@ -218,9 +226,9 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
                   <p className="learning-store">
                     {learning.picture ? <GemMark gem={learning.picture} size="sm" /> : null}
                     <span>
-                      Anchored to {learning.anchor}
-                      {learning.beat ? ` · pictured as ${learning.beat}` : ''}
-                      {tool ? (easy ? ` · use as ${tool}` : ` · deploys as ${tool}`) : ''}
+                      {easy
+                        ? easyJournalMeta({ ...learning, tool })
+                        : `Anchored to ${learning.anchor}${learning.beat ? ` · pictured as ${learning.beat}` : ''}${tool ? ` · deploys as ${tool}` : ''}`}
                     </span>
                   </p>
                   {trace ? <p className="quiet">{nextGapLabel(trace, today, easy)}</p> : null}
@@ -241,8 +249,12 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
         <div className="chapter-head">
           <Avatar who="juniper" size="sm" />
           <div>
-            <h2>Trail notes</h2>
-            <p>Juniper’s pages — they open when you return, not only when you clear a district.</p>
+            <h2>{easy ? 'Juniper’s pages' : 'Trail notes'}</h2>
+            <p>
+              {easy
+                ? 'Juniper’s pages — they open when you come back, not only when you finish a street.'
+                : 'Juniper’s pages — they open when you return, not only when you clear a district.'}
+            </p>
           </div>
         </div>
         <div className="card-grid">
@@ -364,13 +376,22 @@ function JournalCard({
             <p className="learning-store">
               {learning.picture ? <GemMark gem={learning.picture} size="sm" /> : null}
               <span>
-                Anchored to {learning.anchor}
-                {withLearningBeat(learning).beat
-                  ? ` · pictured as ${withLearningBeat(learning).beat}`
-                  : ''}
-                {learning.toolId
-                  ? ` · deploys as ${watchTool(learning.toolId)?.label ?? learning.toolId}`
-                  : ''}
+                {easy
+                  ? easyJournalMeta({
+                      ...withLearningBeat(learning),
+                      tool: learning.toolId
+                        ? watchTool(learning.toolId)?.label ?? learning.toolId
+                        : undefined,
+                    })
+                  : `Anchored to ${learning.anchor}${
+                      withLearningBeat(learning).beat
+                        ? ` · pictured as ${withLearningBeat(learning).beat}`
+                        : ''
+                    }${
+                      learning.toolId
+                        ? ` · deploys as ${watchTool(learning.toolId)?.label ?? learning.toolId}`
+                        : ''
+                    }`}
               </span>
             </p>
           ) : null}
@@ -461,20 +482,28 @@ function JournalCard({
         </>
       ) : mystery ? (
         <>
-          <p className="eyebrow">A mystery page</p>
-          <h3>A trail note waits here</h3>
+          <p className="eyebrow">{easy ? 'A hidden page' : 'A mystery page'}</p>
+          <h3>{easy ? 'A page waits here' : 'A trail note waits here'}</h3>
           <p>
             {need
-              ? `Walk ${need} distinct morning${need === 1 ? '' : 's'} on Today’s Trail to unseal this — you have ${daysWalked}.`
-              : 'Return for Daily Trail mornings to unseal this page.'}
+              ? easy
+                ? `Walk ${need} morning${need === 1 ? '' : 's'} on Today’s Trail to open this — you have ${daysWalked}.`
+                : `Walk ${need} distinct morning${need === 1 ? '' : 's'} on Today’s Trail to unseal this — you have ${daysWalked}.`
+              : easy
+                ? 'Come back for Daily Trail mornings to open this page.'
+                : 'Return for Daily Trail mornings to unseal this page.'}
           </p>
           <p className="quiet">The trail waits. Nothing here is taken back.</p>
         </>
       ) : (
         <>
-          <p className="eyebrow">Sealed</p>
+          <p className="eyebrow">{easy ? 'Still closed' : 'Sealed'}</p>
           <h3>A card waits here</h3>
-          <p>Complete the matching challenge to unseal this page.</p>
+          <p>
+            {easy
+              ? 'Finish the matching walk to open this page.'
+              : 'Complete the matching challenge to unseal this page.'}
+          </p>
         </>
       )}
     </article>

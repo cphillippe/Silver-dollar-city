@@ -5522,6 +5522,50 @@ html[data-theme='dusk'] .hub.is-town .street-link {
   }
 }
 
+.walker-cue-pulse {
+  fill: none;
+  stroke: #ffcc33;
+  stroke-width: 4;
+  opacity: 0.9;
+  animation: walker-cue-pulse 1s ease-in-out infinite;
+}
+
+.walker-cue-arrow {
+  fill: #ffcc33;
+  stroke: #2a0d58;
+  stroke-width: 1.4;
+  animation: walker-cue-bob 0.8s ease-in-out infinite;
+}
+
+.walker-cue-label {
+  fill: #fff6b8;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+@keyframes walker-cue-pulse {
+  0%,
+  100% {
+    r: 28;
+    opacity: 0.95;
+  }
+  50% {
+    r: 40;
+    opacity: 0.35;
+  }
+}
+
+@keyframes walker-cue-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(6px);
+  }
+}
+
 .defend-raider-call rect {
   fill: rgba(42, 13, 88, 0.88);
   stroke: rgba(255, 246, 184, 0.55);

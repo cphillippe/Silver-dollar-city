@@ -473,7 +473,7 @@ assert.match(recallSrc, /\[brief\.claim\]/)
 assert.match(recallSrc, /pickClaim/)
 assert.match(recallSrc, /recall-done/)
 assert.match(recallSrc, /EASY.rememberSentence/)
-assert.match(recallSrc, /Read why it stands, then tap Done/)
+assert.match(recallSrc, /Read why this is true, then tap Done/)
 assert.match(recallSrc, /reasonLocked/)
 assert.match(recallSrc, /btn gold xl recall-done/)
 assert.match(recallSrc, /That reason holds/)
@@ -1009,7 +1009,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.12')
+assert.equal(APP_VERSION, '1.4.13')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -1412,7 +1412,23 @@ assert.match(
 )
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /why the main idea stands/,
+  /why this is true/,
+)
+assert.match(
+  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  /easyJournalMeta/,
+)
+assert.match(
+  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  /used as/,
+)
+assert.match(
+  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  /Pick the sentence that fits this story/,
+)
+assert.match(
+  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  /Wrong match — try again/,
 )
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
@@ -1472,10 +1488,25 @@ assert.doesNotMatch(defendSrc, /EASY\.nightWhat/)
 assert.match(defendSrc, /EASY\.nightTap/)
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /Tap the walker/,
+  /Tap this person/,
 )
 assert.match(defendSrc, /useState\(easy\)/)
+assert.match(defendSrc, /walkerCue/)
+assert.match(defendSrc, /walker-cue/)
 assert.match(defendSrc, /easy \? 'wave'/)
+assert.match(cssSrc, /walker-cue-pulse/)
+assert.match(
+  readFileSync(new URL('../src/components/Journal.tsx', import.meta.url), 'utf8'),
+  /easyJournalMeta/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/Journal.tsx', import.meta.url), 'utf8'),
+  /Juniper’s pages/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/challenges/LinkPlay.tsx', import.meta.url), 'utf8'),
+  /EASY\.linkCue/,
+)
 assert.match(cssSrc, /link-clue/)
 assert.match(
   readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),

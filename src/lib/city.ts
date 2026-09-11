@@ -263,7 +263,7 @@ export function nextKicker(stage: CityStage, plotId: CityPlotId, dailyDone: bool
 }
 
 /** What visibly appears if the player takes the next build. */
-export function nextGift(id: CityPlotId, stage: CityStage, fill: number): string {
+export function nextGift(id: CityPlotId, stage: CityStage, fill: number, easy = false): string {
   switch (id) {
     case 'porch':
       if (stage === 'scaffold' || stage === 'empty') return 'Juniper’s porch roof will go on'
@@ -300,7 +300,9 @@ export function nextGift(id: CityPlotId, stage: CityStage, fill: number): string
       if (fill < 4) return 'The last timber will set'
       return 'The ridge lantern will hold'
     case 'journal':
-      if (stage === 'empty' || stage === 'scaffold') return 'The dossier house will stand'
+      if (stage === 'empty' || stage === 'scaffold') {
+        return easy ? 'River’s page house will stand' : 'The dossier house will stand'
+      }
       if (fill < 4) return 'Another page will land'
       if (fill < 12) return 'The window will glow'
       return 'The pages will glow'
