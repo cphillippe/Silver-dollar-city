@@ -159,12 +159,24 @@ export function linkClue(tripleId: string, step: LinkStep): string {
   return LINK_CLUES[tripleId]?.[step] ?? 'Pick the match for this story.'
 }
 
-/** Easy miss: one sentence why this pick is wrong for this story. */
+/** Exact Easy card text for the next pick. */
+export function linkNeedLabel(tripleId: string, step: LinkStep): string | null {
+  const triple = STREET_CHALLENGE.triples.find((item) => item.id === tripleId)
+  if (!triple) return null
+  const id =
+    step === 'idea' ? triple.ideaId : step === 'place' ? triple.placeId : triple.personId
+  const node = STREET_CHALLENGE.nodes.find((item) => item.id === id)
+  if (!node) return null
+  return linkCaption(node, true)
+}
+
+/** Easy miss: why, then the exact card to tap. */
 export function linkMiss(tripleId: string, step: LinkStep): string {
-  return (
+  const why =
     LINK_MISSES[tripleId]?.[step] ??
     'Wrong match. Pick the sentence that fits this story.'
-  )
+  const tap = linkNeedLabel(tripleId, step)
+  return tap ? `${why} Tap: “${tap}”` : why
 }
 
 /** Short label under the picture — not the full claim wall. */

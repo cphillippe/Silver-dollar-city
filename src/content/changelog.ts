@@ -8,13 +8,23 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.15',
-    title: 'Easy Night Watch crawl + next-pick miss',
+    version: '1.4.16',
+    title: 'One person to tap + plainer words',
     when: '2026-09-11',
     items: [
-      'Easy Night Watch walkers are a real HTML face (~128px), not an SVG sprite crushed by the phone board. They freeze under Tap this person, then crawl.',
-      'Easy miss names the next pick: Wrong match. Pick the sentence about the neighbor who stops to help.',
-      'Easy chrome drops dossier, ledger, scaffold, proofs, and Jesus-story walk walls. Main idea stays after the one teach.',
+      'Night Watch shows one glowing person to tap. Other walkers fade and step aside.',
+      'A wrong match names the exact card: Tap: “Neighbor shows mercy.”',
+      'Easy labels say Saved sentences, Connections, and Things you can use.',
+    ],
+  },
+  {
+    version: '1.4.15',
+    title: 'Big Night Watch people + next pick',
+    when: '2026-09-11',
+    items: [
+      'Night Watch people are big and slow. They pause with Tap this person, then crawl.',
+      'A wrong match says which sentence to pick next.',
+      'Easy words stay short. Main idea stays after the one teach.',
     ],
   },
   {

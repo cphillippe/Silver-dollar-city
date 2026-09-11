@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { dueCount, getNextGoal, insightScore, useProgress } from '../store/progress'
+import { isEasy } from '../lib/easy'
 import { Avatar } from './Avatar'
 import type { View } from '../types'
 
@@ -11,6 +12,7 @@ interface AppShellProps {
 
 export function AppShell({ view, onNavigate, children }: AppShellProps) {
   const { progress } = useProgress()
+  const easy = isEasy(progress)
   const goal = getNextGoal(progress)
   const waiting = dueCount(progress)
   const hideChrome = view.name === 'welcome'
@@ -87,7 +89,7 @@ export function AppShell({ view, onNavigate, children }: AppShellProps) {
               className={view.name === 'journal' ? 'is-active' : ''}
               onClick={() => onNavigate({ name: 'journal' })}
             >
-              Journal
+              {easy ? 'Saved' : 'Journal'}
             </button>
             <button
               type="button"
@@ -110,7 +112,7 @@ export function AppShell({ view, onNavigate, children }: AppShellProps) {
             <em>{goal.detail}</em>
           </button>
           <p className="score" title="Held lines are claims you rebuilt from memory">
-            Held {progress.held.length}
+            {easy ? 'Saved' : 'Held'} {progress.held.length}
             {waiting ? ` · due ${waiting}` : ''}
             <span className="score-sub"> · insight {insightScore(progress)}</span>
           </p>

@@ -176,13 +176,15 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       const dt = Math.min(0.05, (now - last) / 1000)
       last = now
       spawnAt += dt
+      const targetId = live.current.raiders.find((item) => !item.turned)?.id
       const next = live.current.raiders.map((item) => {
         if (item.turned) {
           const tool = item.turned ? watchTool(item.turned) : undefined
           const tier = tool ? toolTier(tool, progress) : 1
           return { ...item, heavenT: (item.heavenT ?? 0) + heavenSpeed(tier, easy) * dt }
         }
-        if (freezeRef.current) return { ...item, t: Math.max(item.t, 0.42) }
+        const freezeTarget = freezeRef.current && (!easy || item.id === targetId)
+        if (freezeTarget) return { ...item }
         return { ...item, t: item.t + waveSpeed(easy) * dt }
       })
       let leaked = 0
@@ -206,8 +208,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         markMissRef.current(DEFEND_BRIEF_ID)
         if (easy) holdWalkersRef.current(EASY_MISS_HOLD_MS)
       }
+      const holdSpawn =
+        easy && live.current.spawned > 0 && (walkerCueRef.current || freezeRef.current)
       if (
         live.current.spawned < DEFEND_WAVE_SIZE &&
+        !holdSpawn &&
         (spawnAt >= waveSpawnEvery(easy) || (easy && live.current.spawned === 0))
       ) {
         spawnAt = 0
@@ -781,24 +786,38 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
               <div className="easy-walkers" aria-label="Tap the walking person">
                 {raiders
                   .filter((raider) => !raider.turned)
-                  .map((raider) => {
+                  .map((raider, index, walking) => {
+                    const target = walking[0]
+                    const cueTarget = walkerCue && target?.id === raider.id
+                    const hideOther = walkerCue && !cueTarget
+                    if (hideOther) return null
                     const at = raiderAt(raider)
                     const pos = boardPoint(at.x, at.y)
-                    const cueTarget =
-                      walkerCue && raiders.find((item) => !item.turned)?.id === raider.id
+                    let left = pos.left
+                    let top = pos.top
+                    const dim = Boolean(target && raider.id !== target.id)
+                    if (dim && target) {
+                      const home = boardPoint(raiderAt(target).x, raiderAt(target).y)
+                      const gap = EASY_WALKER_HIT_PX + 12
+                      if (Math.abs(left - home.left) < gap) {
+                        left = home.left + (index % 2 === 0 ? -gap : gap)
+                      }
+                      if (Math.abs(top - home.top) < 48) top = home.top + 36
+                    }
                     return (
                       <button
                         key={raider.id}
                         type="button"
-                        className={`easy-walker is-easy-walker ${cueTarget ? 'is-cue' : ''}`}
+                        className={`easy-walker is-easy-walker ${cueTarget ? 'is-cue' : ''} ${dim ? 'is-dim' : ''}`}
                         style={{
-                          left: pos.left,
-                          top: pos.top,
+                          left,
+                          top,
                           width: EASY_WALKER_HIT_PX,
                           height: EASY_WALKER_HIT_PX,
                         }}
                         onClick={(event) => {
                           event.stopPropagation()
+                          if (dim) return
                           clearWalkerCue()
                           fireBest()
                         }}

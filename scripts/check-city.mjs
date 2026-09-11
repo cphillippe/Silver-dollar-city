@@ -1018,7 +1018,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.15')
+assert.equal(APP_VERSION, '1.4.16')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -1168,10 +1168,13 @@ assert.doesNotMatch(linkPlaySrc, /Those don/)
   assert.match(linkClue('juniper-porch', 'person'), /Juniper|porch/)
   assert.match(linkMiss('mercy-hollow', 'idea'), /Wrong match/)
   assert.match(linkMiss('mercy-hollow', 'idea'), /Pick the sentence about the neighbor who stops to help/)
+  assert.match(linkMiss('mercy-hollow', 'idea'), /Tap: “Neighbor shows mercy\.”/)
   assert.doesNotMatch(linkMiss('mercy-hollow', 'idea'), /neighbor-line/)
   assert.doesNotMatch(linkMiss('mercy-hollow', 'idea'), /This story is Mercy/)
   assert.match(linkMiss('silas-bench', 'place'), /Wrong match/)
+  assert.match(linkMiss('silas-bench', 'place'), /Tap:/)
   assert.match(linkMiss('juniper-porch', 'person'), /Wrong match/)
+  assert.match(linkMiss('juniper-porch', 'person'), /Tap:/)
 }
 assert.match(
   readFileSync(new URL('../src/components/MindMap.tsx', import.meta.url), 'utf8'),
@@ -1515,6 +1518,10 @@ assert.match(defendSrc, /waveSpeed\(easy\)/)
 assert.match(defendSrc, /holdWalkers/)
 assert.match(defendSrc, /easy-walker-face/)
 assert.match(defendSrc, /EASY_CUE_HOLD_MS/)
+assert.match(defendSrc, /is-dim/)
+assert.match(defendSrc, /holdSpawn/)
+assert.match(defendSrc, /hideOther/)
+assert.match(linkPlaySrc, /is-need/)
 assert.match(cssSrc, /easy-walker-face/)
 assert.equal(EASY_WALKER_FACE_PX, 128)
 assert.equal(EASY_WALKER_HIT_PX, 160)
@@ -1541,6 +1548,22 @@ assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
   /Tap this person/,
 )
+assert.match(
+  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  /Saved sentences/,
+)
+assert.match(
+  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  /Connections/,
+)
+assert.match(
+  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  /Things you can use/,
+)
+assert.doesNotMatch(
+  latestChange(APP_VERSION).items.join('\n'),
+  /dossier|ledger|scaffold|proofs|offline-first|schema|mind-map|held ideas|Evidence Journal/i,
+)
 assert.match(defendSrc, /useState\(easy\)/)
 assert.match(defendSrc, /walkerCue/)
 assert.match(defendSrc, /walker-cue/)
@@ -1553,6 +1576,22 @@ assert.match(
 assert.match(
   readFileSync(new URL('../src/components/Journal.tsx', import.meta.url), 'utf8'),
   /Juniper’s pages/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/Journal.tsx', import.meta.url), 'utf8'),
+  /EASY\.saved/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
+  /EASY\.saved/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
+  /This walk is saved on this device/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/AppShell.tsx', import.meta.url), 'utf8'),
+  /easy \? 'Saved' : 'Journal'/,
 )
 assert.match(
   readFileSync(new URL('../src/components/challenges/LinkPlay.tsx', import.meta.url), 'utf8'),
