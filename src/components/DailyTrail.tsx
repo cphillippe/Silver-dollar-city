@@ -3,7 +3,7 @@ import { pillarFor } from '../content'
 import { dailyForDate } from '../content/daily'
 import { evidenceFor } from '../content/evidence'
 import { STORY, townVoice } from '../content/story'
-import { isEasy } from '../lib/easy'
+import { EASY, isEasy } from '../lib/easy'
 import { localDateKey } from '../lib/dates'
 import { useJuiceHandoff } from '../lib/juice'
 import { findLearning } from '../lib/learning'
@@ -92,7 +92,7 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
         className="text-link"
         onClick={() => onNavigate({ name: 'hub' })}
       >
-        ← The town
+        ← {easy ? EASY.home : 'The town'}
       </button>
 
       {!solved ? (
@@ -162,7 +162,7 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
             <TownReturn
               who={townVoice('porch').who}
               line={townVoice('porch').afterWin}
-              action="See the town"
+              action={easy ? EASY.home : 'See the town'}
               onGo={() => onNavigate({ name: 'hub' })}
             />
           ) : null}

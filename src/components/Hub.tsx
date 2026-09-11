@@ -55,6 +55,47 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
     setMindPlot(requested)
   }, [requested])
 
+  if (easy) {
+    return (
+      <main className="hub is-easy-home" aria-label="Home">
+        <header className="easy-home-head">
+          <p className="eyebrow">Silver City</p>
+          <h1>Play</h1>
+        </header>
+        <nav className="easy-core" aria-label="Play">
+          <button
+            type="button"
+            className="btn primary xl"
+            onClick={() => onNavigate({ name: 'link' })}
+          >
+            {EASY.matchCta}
+          </button>
+          <button
+            type="button"
+            className="btn gold xl"
+            onClick={() => onNavigate({ name: 'journal' })}
+          >
+            {EASY.saved}
+          </button>
+          <button
+            type="button"
+            className="btn gold xl"
+            onClick={() => onNavigate({ name: 'defend' })}
+          >
+            {EASY.nightDo}
+          </button>
+        </nav>
+        <button
+          type="button"
+          className="text-link town-soon"
+          onClick={() => onNavigate({ name: 'settings' })}
+        >
+          {EASY.townSoon}
+        </button>
+      </main>
+    )
+  }
+
   function setPlot(id: CityPlotId | null) {
     setMindPlot(id)
     if (!id && openPlot) onNavigate({ name: 'hub' })

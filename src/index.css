@@ -7041,6 +7041,43 @@ html[data-easy='on'] .mind-node em {
   width: 100%;
 }
 
+.hub.is-easy-home {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 8px 0 20px;
+}
+
+.easy-home-head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.easy-home-head h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.easy-core {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.easy-core .btn {
+  width: 100%;
+}
+
+.town-soon {
+  margin-top: auto;
+  align-self: center;
+  opacity: 0.72;
+  font-size: 0.95rem;
+}
+
 .easy-story-card .teach-reason {
   margin: 0 0 10px;
   font-size: 1.12rem;

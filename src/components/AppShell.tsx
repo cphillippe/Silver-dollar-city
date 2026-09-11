@@ -24,7 +24,7 @@ export function AppShell({ view, onNavigate, children }: AppShellProps) {
     view.name === 'link' ||
     view.name === 'profile'
   const townView = view.name === 'hub'
-  const hideGoalbar = hideChrome || playView || townView
+  const hideGoalbar = hideChrome || playView || townView || easy
 
   function followGoal() {
     if (goal.kind === 'daily') {
@@ -75,8 +75,9 @@ export function AppShell({ view, onNavigate, children }: AppShellProps) {
               className={view.name === 'hub' ? 'is-active' : ''}
               onClick={() => onNavigate({ name: 'hub' })}
             >
-              Town
+              {easy ? 'Home' : 'Town'}
             </button>
+            {easy ? null : (
             <button
               type="button"
               className={view.name === 'daily' ? 'is-active' : ''}
@@ -84,6 +85,7 @@ export function AppShell({ view, onNavigate, children }: AppShellProps) {
             >
               Trail
             </button>
+            )}
             <button
               type="button"
               className={view.name === 'journal' ? 'is-active' : ''}

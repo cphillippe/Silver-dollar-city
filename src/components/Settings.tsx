@@ -125,7 +125,7 @@ export function Settings({ onNavigate }: SettingsProps) {
         className="text-link"
         onClick={() => onNavigate({ name: 'hub' })}
       >
-        ← The town
+        ← {easy ? EASY.home : 'The town'}
       </button>
 
       <header className="page-head">
@@ -202,6 +202,16 @@ export function Settings({ onNavigate }: SettingsProps) {
 
       <details className={easy ? 'settings-advanced' : 'settings-flat'}>
         <summary>More</summary>
+
+      {easy ? (
+        <section className="settings-card" aria-label="Town">
+          <p className="eyebrow">Town</p>
+          <p>
+            {EASY.townSoon} — the map waits until the game is right. Hard still has
+            the streets.
+          </p>
+        </section>
+      ) : null}
 
       <section className="settings-card">
         <p className="eyebrow">You</p>

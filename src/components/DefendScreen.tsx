@@ -452,8 +452,12 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           />
           <TownReturn
             who="juniper"
-            line="Night held. The road turned toward heaven."
-            action="See the town"
+            line={
+              easy
+                ? 'Night held. Six taps.'
+                : 'Night held. The road turned toward heaven.'
+            }
+            action={easy ? EASY.home : 'See the town'}
             onGo={() => onNavigate({ name: 'hub' })}
           />
         </>

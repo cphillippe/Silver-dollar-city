@@ -30,6 +30,8 @@ export const EASY = {
   nightDo: 'Night Watch',
   nightTap: 'Tap the face.',
   nightLead: 'Tap the face six times.',
+  home: 'Home',
+  townSoon: 'Town (soon)',
   loveCue: 'Love — kindness turns an unkind sentence. Example: you were forgiven, so forgive.',
   deployTeach: 'Use a main idea you kept.',
   saved: 'Saved sentences',
