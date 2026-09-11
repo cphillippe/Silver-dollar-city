@@ -90,11 +90,11 @@ const FOLK: Record<CityPlotId, { x: number; y: number }> = {
 
 /** Easy chips sit under portraits, inside the 640×420 viewBox, without overlapping. */
 const EASY_TAG_SLOT: Record<CityPlotId, { x: number; y: number }> = {
-  hollow: { x: 128, y: 402 },
+  hollow: { x: 128, y: 368 },
   journal: { x: 258, y: 214 },
-  bench: { x: 392, y: 402 },
-  porch: { x: 548, y: 402 },
-  lamps: { x: 196, y: 372 },
+  bench: { x: 392, y: 368 },
+  porch: { x: 500, y: 368 },
+  lamps: { x: 196, y: 348 },
   gate: { x: 498, y: 230 },
   observatory: { x: 410, y: 96 },
   lookout: { x: 508, y: 52 },
@@ -508,6 +508,8 @@ export function CityMap({
           </g>
         ) : null}
 
+        <path d="M-10 368 Q 180 340 320 358 T 660 372 V430 H-10 Z" fill="#148a48" />
+
         {mode === 'live' && !celebrating ? (
           <g className="city-next-mark" transform={`translate(${nextAt.x} ${nextAt.y})`}>
             <circle r="34" className="city-next-halo" />
@@ -604,8 +606,6 @@ export function CityMap({
           ready={canUpgrade('porch', progress)}
           onOpen={open}
         />
-
-        <path d="M-10 368 Q 180 340 320 358 T 660 372 V430 H-10 Z" fill="#148a48" />
 
         {mode === 'live'
           ? CITY_PLOTS.map((plot) => (
@@ -804,7 +804,7 @@ function PlotGroup({
   const scale = BUILD_SCALE
   const hit = easy ? 56 : 42
   const tag = easy ? easyPlotTag(id) : plotTag(id)
-  const showTag = clickable || (easy && streetLot)
+  const showTag = easy ? streetLot : clickable
   const slot = easy ? EASY_TAG_SLOT[id] : null
   const tagW = Math.max(easy ? 88 : 64, tag.length * (easy ? 9 : 8) + 20)
   const tagX = slot
