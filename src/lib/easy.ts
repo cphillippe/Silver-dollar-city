@@ -10,10 +10,7 @@ export const EASY = {
   parable: 'Jesus story',
   mindMap: 'your scrapbook of matches',
   mindMapShort: 'Scrapbook',
-  linkMatch: 'Tap the sentence, then the place, then the person.',
-  linkDemo: 'Tap the sentence, then the place, then the person.',
   connectLink: 'Tap the sentence, then the place, then the person.',
-  linkStreet: 'Tap the sentence, then the place, then the person.',
   readStory: 'Read today’s story.',
   rememberSentence: 'Choose the main idea to remember.',
   readAgain: 'Read this one again.',
@@ -24,8 +21,6 @@ export const EASY = {
   sourceSense: 'where this comes from',
   lockIn: 'Save your picks.',
   matchHow: 'Keep the right pictures. Remove wrong picks.',
-  matchMiss: 'Wrong match — try again.',
-  linkCue: 'Tap the sentence, then the place, then the person.',
   tapSentence: 'Tap a sentence',
   tapPlace: 'Tap a place',
   tapPerson: 'Tap a person',
@@ -33,6 +28,7 @@ export const EASY = {
   manage: 'Building',
   nightDo: 'Do this',
   nightTap: 'Tap this person.',
+  loveCue: 'Love — tap the person',
   deployTeach: 'Use a main idea you kept.',
   saved: 'Saved sentences',
   connections: 'Connections',
@@ -44,6 +40,12 @@ export function easyLinkStep(step: 'idea' | 'place' | 'person'): string {
   if (step === 'idea') return EASY.tapSentence
   if (step === 'place') return EASY.tapPlace
   return EASY.tapPerson
+}
+
+/** One Easy miss line. Names the card to tap. */
+export function easyWrongTap(card: string): string {
+  const label = card.replace(/\.$/, '').trim()
+  return `Wrong. Tap this one: ${label}.`
 }
 
 const EASY_LINES: Record<string, string> = {

@@ -90,6 +90,20 @@ export const EASY_WALKER_HIT_PX = 160
 export const EASY_CUE_HOLD_MS = 1800
 export const EASY_MISS_HOLD_MS = 1400
 
+/** One Easy TAP mode: live wave, not plant / lost / win. */
+export function easyTapMode(easy: boolean, phase: string, won: boolean): boolean {
+  return easy && phase === 'wave' && !won
+}
+
+/** The one person Easy TAP shows. Mid-wave count stays 1. */
+export function easyTapTarget<T extends { turned?: string }>(raiders: T[]): T | undefined {
+  return raiders.find((item) => !item.turned)
+}
+
+export function easyTapPersonCount(raiders: { turned?: string }[]): number {
+  return easyTapTarget(raiders) ? 1 : 0
+}
+
 export function waveSpeed(easy = false): number {
   if (easy) return prefersReducedMotion() ? 0.008 : 0.01
   return prefersReducedMotion() ? 0.042 : 0.086

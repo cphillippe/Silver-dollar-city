@@ -200,7 +200,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
           className={`btn tiny ${easy ? '' : 'gold'}`}
           onClick={() => onNavigate({ name: 'link' })}
         >
-          {easy ? EASY.linkStreet : 'Link the street'}
+          {easy ? EASY.connectLink : 'Link the street'}
         </button>
         {easy ? (
           <button

@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.21',
+    title: 'One Easy Night Watch path',
+    when: '2026-09-11',
+    items: [
+      'Night Watch Easy is one glowing person and Love — tap the person for the whole wave.',
+      'A match is three screens: pick, then Wrong. Tap this one: …, then Next.',
+      'Hard Night Watch and Hard links stay the same.',
+    ],
+  },
+  {
     version: '1.4.20',
     title: 'One person for the whole night',
     when: '2026-09-11',

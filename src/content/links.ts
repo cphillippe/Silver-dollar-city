@@ -1,4 +1,5 @@
 import type { LinkChallenge, LinkNode } from '../types.ts'
+import { easyWrongTap } from '../lib/easy.ts'
 
 /**
  * Idea ↔ place ↔ person using claims already on the trail.
@@ -136,24 +137,6 @@ const LINK_CLUES: Record<string, Record<LinkStep, string>> = {
   },
 }
 
-const LINK_MISSES: Record<string, Record<LinkStep, string>> = {
-  'mercy-hollow': {
-    idea: 'Wrong match. Pick the sentence about the neighbor who stops to help.',
-    place: 'Wrong match. Pick the creek — that is Mercy’s place.',
-    person: 'Wrong match. Pick Mercy — she keeps that creek.',
-  },
-  'silas-bench': {
-    idea: 'Wrong match. Pick the sentence about died, buried, raised, appeared.',
-    place: 'Wrong match. Pick the square — that is Silas’s place.',
-    person: 'Wrong match. Pick Silas — he keeps that square.',
-  },
-  'juniper-porch': {
-    idea: 'Wrong match. Pick the sentence about a lamp meant to be seen.',
-    place: 'Wrong match. Pick the porch — that is where the lamp lives.',
-    person: 'Wrong match. Pick Juniper — she keeps that porch.',
-  },
-}
-
 /** Easy who/where/story hint so the first pick is learnable, not a coin flip. */
 export function linkClue(tripleId: string, step: LinkStep): string {
   return LINK_CLUES[tripleId]?.[step] ?? 'Pick the match for this story.'
@@ -173,9 +156,7 @@ export function linkNeedLabel(tripleId: string, step: LinkStep): string | null {
 /** Easy miss: one line that names the glowing card. */
 export function linkMiss(tripleId: string, step: LinkStep): string {
   const tap = linkNeedLabel(tripleId, step)
-  const why = LINK_MISSES[tripleId]?.[step]
-  const label = tap?.replace(/\.$/, '')
-  return label ? `Wrong. Tap this one: ${label}.` : why ?? 'Wrong. Tap this one.'
+  return tap ? easyWrongTap(tap) : easyWrongTap('this one')
 }
 
 /** Short label under the picture — not the full claim wall. */
