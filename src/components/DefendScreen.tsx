@@ -28,6 +28,8 @@ import {
   EASY_MISS_HOLD_MS,
   EASY_WALKER_FACE_PX,
   EASY_WALKER_HIT_PX,
+  easyTapMode,
+  easyTapTarget,
   type WatchAbility,
 } from '../lib/defend'
 import { findLearning, learningForTool } from '../lib/learning'
@@ -82,8 +84,6 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const unlocked = unlockedWatchAbilities(progress)
   const [ability, setAbility] = useState<WatchAbility>(() => unlocked[0] ?? 'love')
   const [taught, setTaught] = useState(easy)
-  const [walkerCue, setWalkerCue] = useState(easy)
-  const walkerCueRef = useRef(easy)
   const freezeRef = useRef(easy)
   const holdTimer = useRef(0)
   const boardRef = useRef<SVGSVGElement>(null)
@@ -119,8 +119,6 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   function holdWalkers(ms: number) {
     if (!easy) return
     freezeRef.current = true
-    walkerCueRef.current = true
-    setWalkerCue(true)
     window.clearTimeout(holdTimer.current)
     holdTimer.current = window.setTimeout(() => {
       freezeRef.current = false
@@ -351,11 +349,6 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     setDowned(live.current.downed)
   }
 
-  function clearWalkerCue() {
-    walkerCueRef.current = false
-    setWalkerCue(false)
-  }
-
   function fireBest() {
     if (phase !== 'wave' || won) return
     let pick: CityPlotId | null = null
@@ -376,15 +369,10 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         }
       }
     }
-    if (pick) {
-      if (!easy && walkerCueRef.current) clearWalkerCue()
-      fire(pick)
-    }
+    if (pick) fire(pick)
   }
 
   function retry() {
-    walkerCueRef.current = easy
-    setWalkerCue(easy)
     freezeRef.current = easy
     if (easy) holdWalkers(EASY_CUE_HOLD_MS)
     setPhase(easy ? 'wave' : 'plant')
@@ -416,11 +404,13 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   }
 
   const after = juiceDone && won
-  const easySolo = easy && phase === 'wave' && !won
+  const easyTap = easyTapMode(easy, phase, won)
+  const tapTarget = easyTap ? easyTapTarget(raiders) : undefined
+  const tapPos = tapTarget ? boardPoint(raiderAt(tapTarget).x, raiderAt(tapTarget).y) : null
 
   return (
     <main
-      className={`defend-page ${taught ? 'is-puzzle' : 'is-teach'} ${arming ? 'is-arming' : ''} ${won ? 'is-win' : ''} ${shake ? 'is-shake' : ''} ${leakFlash ? 'is-leak' : ''} ${firing ? 'is-firing' : ''} ${easy ? 'is-easy-watch' : ''} ${easySolo ? 'is-cue-solo' : ''}`}
+      className={`defend-page ${taught ? 'is-puzzle' : 'is-teach'} ${arming ? 'is-arming' : ''} ${won ? 'is-win' : ''} ${shake ? 'is-shake' : ''} ${leakFlash ? 'is-leak' : ''} ${firing ? 'is-firing' : ''} ${easy ? 'is-easy-watch' : ''} ${easyTap ? 'is-easy-tap' : ''}`}
       aria-label={WATCH_TITLE}
     >
       {!taught ? (
@@ -617,13 +607,13 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                 <rect x="-16" y="-4" width="32" height="26" rx="2" />
                 <rect className="defend-porch-window" x="-5" y="4" width="10" height="9" rx="1" />
               </g>
-              {easySolo ? null : (
+              {easyTap ? null : (
               <g className="defend-gate" transform={`translate(${DEFEND_PATH[0].x} ${DEFEND_PATH[0].y})`}>
                 <path d="M-10 6 V-16 M10 6 V-16" />
                 <path d="M-12 -16 H12" />
               </g>
               )}
-              {easySolo
+              {easyTap
                 ? null
                 : pads.map((id) => {
                 const at = DEFEND_ANCHOR[id]
@@ -701,46 +691,20 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                 ? null
                 : raiders.map((raider) => {
                 const at = raiderAt(raider)
-                const cueTarget =
-                  easy &&
-                  walkerCue &&
-                  !raider.turned &&
-                  raiders.find((item) => !item.turned)?.id === raider.id
                 return (
                   <g
                     key={raider.id}
-                    className={`defend-raider ${raider.turned ? 'is-turned' : ''} ${cueTarget ? 'is-cue' : ''} ${easy ? 'is-easy-walker' : ''}`}
+                    className={`defend-raider ${raider.turned ? 'is-turned' : ''}`}
                     transform={`translate(${at.x} ${at.y})`}
                   >
-                    {cueTarget ? (
-                      <g className="walker-cue" aria-hidden>
-                        <circle className="walker-cue-pulse" cx="0" cy="-10" r={easy ? 52 : 34} />
-                        <path
-                          className="walker-cue-arrow"
-                          d={
-                            easy
-                              ? 'M0 -132 L24 -86 L8 -86 L8 -64 L-8 -64 L-8 -86 L-24 -86 Z'
-                              : 'M0 -96 L18 -62 L6 -62 L6 -46 L-6 -46 L-6 -62 L-18 -62 Z'
-                          }
-                        />
-                        <text className="walker-cue-label" y={easy ? -146 : -108} textAnchor="middle">
-                          Tap this person
-                        </text>
-                      </g>
-                    ) : null}
-                    <ellipse
-                      className="defend-raider-shadow"
-                      cy={easy ? 22 : 12}
-                      rx={easy ? 26 : 13}
-                      ry={easy ? 9 : 4.6}
-                    />
+                    <ellipse className="defend-raider-shadow" cy={12} rx={13} ry={4.6} />
                     <image
                       className="defend-raider-face"
                       href={walkerSrc(raider.kind)}
-                      x={easy ? -40 : -18}
-                      y={easy ? -56 : -24}
-                      width={easy ? 80 : 36}
-                      height={easy ? 80 : 36}
+                      x={-18}
+                      y={-24}
+                      width={36}
+                      height={36}
                       clipPath="url(#defend-face-clip)"
                     />
                     {raider.turned ? (
@@ -751,17 +715,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                       </g>
                     ) : null}
                     <g className="defend-raider-call">
-                      <rect
-                        x={easy ? -52 : -40}
-                        y={easy ? -94 : -42}
-                        width={easy ? 104 : 80}
-                        height={easy ? 34 : 28}
-                        rx="8"
-                      />
-                      <text className="defend-raider-kind" y={easy ? -82 : -32} textAnchor="middle">
+                      <rect x={-40} y={-42} width={80} height={28} rx="8" />
+                      <text className="defend-raider-kind" y={-32} textAnchor="middle">
                         {WALKER_LABEL[raider.kind]}
                       </text>
-                      <text y={easy ? -68 : -20} textAnchor="middle">
+                      <text y={-20} textAnchor="middle">
                         {raider.text}
                       </text>
                     </g>
@@ -787,51 +745,36 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                 </g>
               ))}
             </svg>
-            {easy ? (
+            {easyTap && tapTarget && tapPos ? (
               <div className="easy-walkers" aria-label="Tap the walking person">
-                {raiders
-                  .filter((raider) => !raider.turned)
-                  .map((raider, _index, walking) => {
-                    const target = walking[0]
-                    const cueTarget = target?.id === raider.id
-                    const hideOther = !cueTarget
-                    if (hideOther) return null
-                    const at = raiderAt(raider)
-                    const pos = boardPoint(at.x, at.y)
-                    return (
-                      <button
-                        key={raider.id}
-                        type="button"
-                        data-person-node="walker"
-                        className={`easy-walker is-easy-walker ${cueTarget ? 'is-cue' : ''}`}
-                        style={{
-                          left: pos.left,
-                          top: pos.top,
-                          width: EASY_WALKER_HIT_PX,
-                          height: EASY_WALKER_HIT_PX,
-                        }}
-                        onClick={(event) => {
-                          event.stopPropagation()
-                          fireBest()
-                        }}
-                      >
-                        {cueTarget ? (
-                          <span className="easy-walker-arrow" aria-hidden>
-                            ▼
-                          </span>
-                        ) : null}
-                        {cueTarget ? <span className="easy-walker-cue-label">Tap this person</span> : null}
-                        <WalkerFace
-                          kind={raider.kind}
-                          className="easy-walker-face"
-                          style={{
-                            width: EASY_WALKER_FACE_PX,
-                            height: EASY_WALKER_FACE_PX,
-                          }}
-                        />
-                      </button>
-                    )
-                  })}
+                <button
+                  type="button"
+                  data-person-node="walker"
+                  className="easy-walker is-easy-walker is-cue"
+                  style={{
+                    left: tapPos.left,
+                    top: tapPos.top,
+                    width: EASY_WALKER_HIT_PX,
+                    height: EASY_WALKER_HIT_PX,
+                  }}
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    fireBest()
+                  }}
+                >
+                  <span className="easy-walker-arrow" aria-hidden>
+                    ▼
+                  </span>
+                  <span className="easy-walker-cue-label">{EASY.nightTap}</span>
+                  <WalkerFace
+                    kind={tapTarget.kind}
+                    className="easy-walker-face"
+                    style={{
+                      width: EASY_WALKER_FACE_PX,
+                      height: EASY_WALKER_FACE_PX,
+                    }}
+                  />
+                </button>
               </div>
             ) : null}
           </div>
@@ -853,7 +796,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           <div className="defend-abilities" role="group" aria-label="Night abilities">
             {WATCH_TOOLS.map((tool) => {
               const open = unlocked.includes(tool.id)
-              if (easySolo && tool.id !== ability) return null
+              if (easyTap && tool.id !== ability) return null
               const heldLine = learningForTool(progress, tool.id)
               const tier = toolTier(tool, progress)
               return (
@@ -877,14 +820,14 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                 >
                   <AbilityMark ability={tool.id} size="md" />
                   {tool.label}
-                  {easySolo ? null : (
+                  {easyTap ? null : (
                     <span className="defend-ability-tier" aria-hidden>
                       {TIER_MARK[tier]}
                     </span>
                   )}
                   <span className="defend-ability-claim">
-                    {easySolo && tool.id === 'love'
-                      ? 'Love — tap the person'
+                    {easyTap && tool.id === 'love'
+                      ? EASY.loveCue
                       : open
                         ? (heldLine
                             ? easy

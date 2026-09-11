@@ -23,6 +23,7 @@ interface Edge {
 }
 
 type WizardStep = 'idea' | 'place' | 'person' | 'linked'
+type EasyScreen = 'choose' | 'miss' | 'next'
 
 function pairKey(a: string, b: string) {
   return a < b ? `${a}:${b}` : `${b}:${a}`
@@ -54,6 +55,13 @@ function stepLabel(step: Exclude<WizardStep, 'linked'>, easy: boolean) {
   return 'Person'
 }
 
+function wantFor(triple: { ideaId: string; placeId: string; personId: string }, step: WizardStep) {
+  if (step === 'idea') return triple.ideaId
+  if (step === 'place') return triple.placeId
+  if (step === 'person') return triple.personId
+  return null
+}
+
 export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps) {
   const { progress } = useProgress()
   const easy = isEasy(progress)
@@ -65,7 +73,7 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
   const [misses, setMisses] = useState(0)
   const [picked, setPicked] = useState<string | null>(null)
   const [streetDone, setStreetDone] = useState(false)
-  const [awaitNext, setAwaitNext] = useState(false)
+  const [screen, setScreen] = useState<EasyScreen>('choose')
 
   function needed(tripleId: string) {
     const triple = challenge.triples.find((item) => item.id === tripleId)
@@ -84,26 +92,50 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
     )
     return !needed(item.id).every((need) => have.has(need))
   })
+  const wantId = currentTriple ? wantFor(currentTriple, step) : null
   const focusIds =
     currentTriple
       ? new Set([currentTriple.ideaId, currentTriple.placeId, currentTriple.personId])
       : null
 
   const marks = {
-    idea: Boolean(currentTriple && edges.some((edge) => edge.triple === currentTriple.id && (edge.a === currentTriple.ideaId || edge.b === currentTriple.ideaId))) || step === 'place' || step === 'person' || step === 'linked',
-    place: Boolean(currentTriple && edges.some((edge) => edge.triple === currentTriple.id && pairKey(edge.a, edge.b) === pairKey(currentTriple.ideaId, currentTriple.placeId))) || step === 'person' || step === 'linked',
-    person: step === 'linked' || Boolean(currentTriple && needed(currentTriple.id).every((need) => edges.some((edge) => edge.triple === currentTriple.id && pairKey(edge.a, edge.b) === need))),
+    idea:
+      Boolean(
+        currentTriple &&
+          edges.some(
+            (edge) =>
+              edge.triple === currentTriple.id &&
+              (edge.a === currentTriple.ideaId || edge.b === currentTriple.ideaId),
+          ),
+      ) ||
+      step === 'place' ||
+      step === 'person' ||
+      step === 'linked',
+    place:
+      Boolean(
+        currentTriple &&
+          edges.some(
+            (edge) =>
+              edge.triple === currentTriple.id &&
+              pairKey(edge.a, edge.b) === pairKey(currentTriple.ideaId, currentTriple.placeId),
+          ),
+      ) ||
+      step === 'person' ||
+      step === 'linked',
+    person:
+      step === 'linked' ||
+      Boolean(
+        currentTriple &&
+          needed(currentTriple.id).every((need) =>
+            edges.some((edge) => edge.triple === currentTriple.id && pairKey(edge.a, edge.b) === need),
+          ),
+      ),
   }
 
   const stepOptions = useMemo(() => {
     if (!currentTriple || step === 'linked') return []
     const kind = step as LinkKind
-    const want =
-      step === 'idea'
-        ? currentTriple.ideaId
-        : step === 'place'
-          ? currentTriple.placeId
-          : currentTriple.personId
+    const want = wantFor(currentTriple, step)
     const pool = challenge.nodes.filter((node) => node.kind === kind)
     const hit = pool.find((node) => node.id === want)
     const decoys = shuffle(pool.filter((node) => node.id !== want))
@@ -116,17 +148,7 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
     setShake(false)
     setStatus('idle')
     setPicked(null)
-    setAwaitNext(false)
-  }
-
-  function advanceStep() {
-    if (!currentTriple) return
-    setAwaitNext(false)
-    setPicked(null)
-    setFlash(null)
-    if (step === 'idea') setStep('place')
-    else if (step === 'place') setStep('person')
-    else finishTriple(currentTriple)
+    setScreen('choose')
   }
 
   function finishTriple(triple: NonNullable<typeof currentTriple>) {
@@ -152,25 +174,35 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
       setStatus('ok')
       return
     }
+    if (easy) {
+      setStep('idea')
+      setScreen('choose')
+      return
+    }
     setStep('linked')
   }
 
+  function advanceFromPick() {
+    if (!currentTriple) return
+    setScreen('choose')
+    setPicked(null)
+    setFlash(null)
+    if (step === 'idea') setStep('place')
+    else if (step === 'place') setStep('person')
+    else finishTriple(currentTriple)
+  }
+
   function choose(id: string) {
-    if (status === 'ok' || step === 'linked' || awaitNext || !currentTriple) return
-    if (shake) recover()
-    const want =
-      step === 'idea'
-        ? currentTriple.ideaId
-        : step === 'place'
-          ? currentTriple.placeId
-          : currentTriple.personId
-    if (id === want) {
+    if (status === 'ok' || step === 'linked' || !currentTriple || !wantId) return
+    if (easy && screen === 'next') return
+    if (!easy && shake) recover()
+    if (id === wantId) {
       setPicked(id)
       setFlash(id)
       setStatus('idle')
       setMisses(0)
       if (easy) {
-        setAwaitNext(true)
+        setScreen('next')
         return
       }
       window.setTimeout(() => setFlash(null), 380)
@@ -184,6 +216,7 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
     setStatus('wrong')
     setShake(true)
     setMisses((count) => count + 1)
+    if (easy) setScreen('miss')
     onMiss()
   }
 
@@ -212,13 +245,6 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
           : 'Tap idea → place → person'
 
   const missStep = step === 'linked' ? 'idea' : step
-  const needId = currentTriple
-    ? missStep === 'idea'
-      ? currentTriple.ideaId
-      : missStep === 'place'
-        ? currentTriple.placeId
-        : currentTriple.personId
-    : null
   const missNeed =
     easy && currentTriple
       ? linkMiss(currentTriple.id, missStep)
@@ -228,29 +254,29 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
           ? 'Wrong keeper. The person who lives on that lot is the match.'
           : 'Wrong idea. Pick the claim, then its place, then its person.'
 
-  const recovering = easy && misses > 0 && step !== 'linked' && !awaitNext
   const wizardCue =
-    step === 'linked' || status === 'ok'
+    step === 'linked' || status === 'ok' || (easy && screen !== 'choose')
       ? null
-      : awaitNext
-        ? 'Tap Next'
-        : recovering
-          ? null
-          : easy
-            ? easyLinkStep(step)
-            : step === 'idea'
+      : easy
+        ? easyLinkStep(step)
+        : step === 'idea'
           ? '1 of 3 — pick the idea.'
           : step === 'place'
             ? '2 of 3 — pick the place.'
             : '3 of 3 — pick the person.'
 
+  const shownOptions = stepOptions.filter((node) => {
+    if (easy && screen === 'next') return node.id === picked || node.id === wantId
+    return true
+  })
+
   useEffect(() => {
-    if (!easy || misses === 0 || !needId) return
+    if (!easy || screen !== 'miss' || !wantId) return
     const card = document.querySelector('.link-block.is-need')
     if (card instanceof HTMLElement) {
       card.scrollIntoView({ block: 'center', behavior: 'smooth' })
     }
-  }, [easy, misses, needId, step])
+  }, [easy, screen, wantId, step])
 
   if (status === 'ok') {
     return (
@@ -274,7 +300,7 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
 
   return (
     <div
-      className={`play is-link is-wizard ${easy ? 'is-easy-link' : ''} ${recovering ? 'is-easy-miss' : ''} ${awaitNext ? 'is-await-next' : ''} ${shake ? 'is-shake' : ''}`}
+      className={`play is-link is-wizard ${easy ? `is-easy-link is-screen-${screen}` : ''} ${shake ? 'is-shake' : ''}`}
     >
       {easy ? null : <PuzzleLead challenge={challenge} />}
       {easy ? null : <PuzzleHint text={challenge.context} id={challenge.id} onPeek={onPeek} />}
@@ -282,24 +308,34 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
       {wizardCue ? <p className="quiet wizard-step">{wizardCue}</p> : null}
 
       {easy ? null : (
-      <ol className="link-checks" aria-label="Link steps">
-        <li className={marks.idea ? 'is-done' : step === 'idea' ? 'is-now' : ''}>
-          {marks.idea ? '✓' : '1'} Idea
-        </li>
-        <li className={marks.place ? 'is-done' : step === 'place' ? 'is-now' : ''}>
-          {marks.place ? '✓' : '2'} Place
-        </li>
-        <li className={marks.person ? 'is-done' : step === 'person' ? 'is-now' : ''}>
-          {marks.person ? '✓' : '3'} Person
-        </li>
-      </ol>
+        <ol className="link-checks" aria-label="Link steps">
+          <li className={marks.idea ? 'is-done' : step === 'idea' ? 'is-now' : ''}>
+            {marks.idea ? '✓' : '1'} Idea
+          </li>
+          <li className={marks.place ? 'is-done' : step === 'place' ? 'is-now' : ''}>
+            {marks.place ? '✓' : '2'} Place
+          </li>
+          <li className={marks.person ? 'is-done' : step === 'person' ? 'is-now' : ''}>
+            {marks.person ? '✓' : '3'} Person
+          </li>
+        </ol>
       )}
 
-      {status === 'wrong' || misses > 0 ? (
-        <p className="match-toast" role="status">
-          {missNeed}
-        </p>
-      ) : null}
+      {easy
+        ? screen === 'miss'
+          ? (
+              <p className="match-toast" role="status">
+                {missNeed}
+              </p>
+            )
+          : null
+        : status === 'wrong' || misses > 0
+          ? (
+              <p className="match-toast" role="status">
+                {missNeed}
+              </p>
+            )
+          : null}
 
       {!easy && misses > 0 && step !== 'linked' ? (
         <button type="button" className="btn tiny match-recover" onClick={recover}>
@@ -308,9 +344,9 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
       ) : null}
 
       {easy ? null : (
-      <p className="match-score">
-        {`${challenge.triples.length * 2 - edges.length} links left · ${edges.length} / ${challenge.triples.length * 2} snapped`}
-      </p>
+        <p className="match-score">
+          {`${challenge.triples.length * 2 - edges.length} links left · ${edges.length} / ${challenge.triples.length * 2} snapped`}
+        </p>
       )}
 
       {step === 'linked' ? (
@@ -322,36 +358,33 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
       ) : (
         <div className="link-grid is-wizard">
           <div className={`link-col is-${step}`}>
-            {easy && currentTriple && !recovering && !awaitNext ? (
+            {easy && currentTriple && screen === 'choose' ? (
               <p className="link-clue">{linkClue(currentTriple.id, step)}</p>
             ) : null}
             {easy ? null : <p className="match-col-label">{stepLabel(step, easy)}</p>}
-            {stepOptions
-              .filter((node) => !awaitNext || node.id === picked || node.id === needId)
-              .map((node) => {
+            {shownOptions.map((node) => {
               const pic = linkPicture(node, challenge)
-              const active = node.id === needId
-              if (awaitNext && !active) return null
+              const need = node.id === wantId
+              const dimDecoy = easy && screen === 'miss' && !need
+              const teach = easy && screen === 'miss' && need
               return (
-              <button
-                key={node.id}
-                type="button"
-                className={`link-block is-${node.kind} ${pic.who || pic.plotId ? 'is-picture' : ''} ${picked === node.id ? 'is-selected' : ''} ${flash === node.id ? 'is-flash' : ''} ${focusIds?.has(node.id) ? 'is-focus' : ''} ${easy && active ? (misses > 0 ? 'is-need' : 'is-focus') : ''} ${easy && !active ? 'is-not' : ''}`}
-                onClick={() => choose(node.id)}
-              >
-                {easy && misses > 0 && active ? (
-                  <span className="need-chip">This one</span>
-                ) : null}
-                <LinkFace node={node} easy={easy} challenge={challenge} />
-              </button>
+                <button
+                  key={node.id}
+                  type="button"
+                  className={`link-block is-${node.kind} ${pic.who || pic.plotId ? 'is-picture' : ''} ${picked === node.id ? 'is-selected' : ''} ${flash === node.id ? 'is-flash' : ''} ${!easy && focusIds?.has(node.id) ? 'is-focus' : ''} ${teach ? 'is-need' : ''} ${dimDecoy ? 'is-not' : ''}`}
+                  onClick={() => choose(node.id)}
+                >
+                  {teach ? <span className="need-chip">This one</span> : null}
+                  <LinkFace node={node} easy={easy} challenge={challenge} />
+                </button>
               )
             })}
           </div>
         </div>
       )}
-      {awaitNext && step !== 'linked' ? (
+      {easy && screen === 'next' && step !== 'linked' ? (
         <div className="link-dock">
-          <button type="button" className="btn primary xl link-next" onClick={advanceStep}>
+          <button type="button" className="btn primary xl link-next" onClick={advanceFromPick}>
             Next
           </button>
         </div>

@@ -28,6 +28,9 @@ import {
   EASY_CUE_HOLD_MS,
   EASY_WALKER_FACE_PX,
   EASY_WALKER_HIT_PX,
+  easyTapMode,
+  easyTapPersonCount,
+  easyTapTarget,
   heavenPoint,
   raidForWave,
   unlockedWatchAbilities,
@@ -52,6 +55,7 @@ import {
   lotTapWhy,
 } from '../src/lib/cityBuild.ts'
 import { emptyProgress } from '../src/lib/save.ts'
+import { EASY, easyWrongTap } from '../src/lib/easy.ts'
 import { WORDS } from '../src/lib/words.ts'
 import { deeperLinksFor, eraLabel } from '../src/content/deeper.ts'
 import { allEvidenceIds, evidenceFor } from '../src/content/evidence.ts'
@@ -1018,7 +1022,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.20')
+assert.equal(APP_VERSION, '1.4.21')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -1145,6 +1149,8 @@ assert.match(linkPlaySrc, /EASY\.connectLink/)
 assert.match(linkPlaySrc, /This one/)
 assert.match(linkPlaySrc, /scrollIntoView/)
 assert.match(linkPlaySrc, /is-not/)
+assert.match(linkPlaySrc, /'choose' \| 'miss' \| 'next'/)
+assert.match(linkPlaySrc, /wantId/)
 assert.match(linkPlaySrc, /is-wizard/)
 assert.match(linkPlaySrc, /is-picture/)
 assert.match(linkPlaySrc, /PlaceGlyph/)
@@ -1169,12 +1175,13 @@ assert.doesNotMatch(linkPlaySrc, /Those don/)
   assert.match(linkClue('mercy-hollow', 'idea'), /Mercy|neighbor|road/)
   assert.match(linkClue('silas-bench', 'place'), /square/)
   assert.match(linkClue('juniper-porch', 'person'), /Juniper|porch/)
-  assert.match(linkMiss('mercy-hollow', 'idea'), /Wrong\. Tap this one: Neighbor shows mercy\./)
+  assert.equal(easyWrongTap('Neighbor shows mercy.'), 'Wrong. Tap this one: Neighbor shows mercy.')
+  assert.equal(linkMiss('mercy-hollow', 'idea'), easyWrongTap('Neighbor shows mercy.'))
   assert.doesNotMatch(linkMiss('mercy-hollow', 'idea'), /Tap This one\. Tap:/)
   assert.doesNotMatch(linkMiss('mercy-hollow', 'idea'), /neighbor-line/)
   assert.doesNotMatch(linkMiss('mercy-hollow', 'idea'), /This story is Mercy/)
-  assert.match(linkMiss('silas-bench', 'place'), /Wrong\. Tap this one:/)
-  assert.match(linkMiss('juniper-porch', 'person'), /Wrong\. Tap this one:/)
+  assert.match(linkMiss('silas-bench', 'place'), /^Wrong\. Tap this one: .+\.$/)
+  assert.match(linkMiss('juniper-porch', 'person'), /^Wrong\. Tap this one: .+\.$/)
 }
 assert.match(
   readFileSync(new URL('../src/components/MindMap.tsx', import.meta.url), 'utf8'),
@@ -1442,7 +1449,7 @@ assert.match(
 )
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /Wrong match — try again/,
+  /Wrong\. Tap this one: \$\{label\}/,
 )
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
@@ -1484,7 +1491,7 @@ assert.match(
   /Skip reading/,
 )
 assert.match(hubSrc, /easyTapNext/)
-assert.match(hubSrc, /EASY\.linkStreet/)
+assert.match(hubSrc, /EASY\.connectLink/)
 assert.match(
   readFileSync(new URL('../src/content/lots.ts', import.meta.url), 'utf8'),
   /Mercy’s creek · Jesus stories/,
@@ -1519,10 +1526,30 @@ assert.match(defendSrc, /holdWalkers/)
 assert.match(defendSrc, /easy-walker-face/)
 assert.match(defendSrc, /EASY_CUE_HOLD_MS/)
 assert.match(defendSrc, /holdSpawn/)
-assert.match(defendSrc, /hideOther/)
-assert.match(defendSrc, /is-cue-solo/)
-assert.match(defendSrc, /data-person-node/)
-assert.match(defendSrc, /Love — tap the person/)
+assert.equal(easyTapMode(true, 'wave', false), true)
+assert.equal(easyTapMode(true, 'wave', true), false)
+assert.equal(easyTapMode(true, 'lost', false), false)
+assert.equal(easyTapMode(false, 'wave', false), false)
+{
+  const midWave1 = [{ id: 0, turned: 'love' }, { id: 1 }]
+  const midWave3 = [
+    { id: 0, turned: 'love' },
+    { id: 1, turned: 'love' },
+    { id: 2, turned: 'love' },
+    { id: 3 },
+    { id: 4 },
+  ]
+  assert.equal(easyTapPersonCount(midWave1), 1)
+  assert.equal(easyTapPersonCount(midWave3), 1)
+  assert.equal(easyTapTarget(midWave3)?.id, 3)
+  assert.equal(easyTapPersonCount([{ id: 0, turned: 'love' }]), 0)
+}
+assert.match(defendSrc, /easyTapMode/)
+assert.match(defendSrc, /easyTapTarget/)
+assert.match(defendSrc, /data-person-node="walker"/)
+assert.doesNotMatch(defendSrc, /walkerCue|easySolo|clearWalkerCue|hideOther/)
+assert.match(defendSrc, /EASY\.loveCue/)
+assert.equal(EASY.loveCue, 'Love — tap the person')
 assert.doesNotMatch(defendSrc, /is-dim/)
 assert.match(linkPlaySrc, /is-need/)
 assert.match(cssSrc, /easy-walker-face/)
@@ -1568,10 +1595,9 @@ assert.doesNotMatch(
   /dossier|ledger|scaffold|proofs|offline-first|schema|mind-map|held ideas|Evidence Journal/i,
 )
 assert.match(defendSrc, /useState\(easy\)/)
-assert.match(defendSrc, /walkerCue/)
-assert.match(defendSrc, /walker-cue/)
+assert.match(defendSrc, /easy-walker-cue-label/)
 assert.match(defendSrc, /easy \? 'wave'/)
-assert.match(cssSrc, /walker-cue-pulse/)
+assert.match(cssSrc, /easy-walker-cue-label/)
 assert.match(
   readFileSync(new URL('../src/components/Journal.tsx', import.meta.url), 'utf8'),
   /easyJournalMeta/,
@@ -1601,24 +1627,20 @@ assert.match(
   /easyLinkStep/,
 )
 assert.match(
-  readFileSync(new URL('../src/components/challenges/LinkPlay.tsx', import.meta.url), 'utf8'),
-  /is-easy-miss/,
-)
-assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
   /Tap a sentence/,
 )
-assert.match(cssSrc, /is-easy-miss/)
-assert.match(defendSrc, /easySolo && tool\.id !== ability/)
+assert.match(linkPlaySrc, /is-screen-\$\{screen\}/)
+assert.match(defendSrc, /easyTap && tool\.id !== ability/)
 assert.match(defendSrc, /walking\.some\(\(item\) => !item\.turned\)/)
 assert.doesNotMatch(defendSrc, /matching sentence/)
 assert.match(
   readFileSync(new URL('../src/components/challenges/LinkPlay.tsx', import.meta.url), 'utf8'),
-  /awaitNext/,
+  /screen === 'next'/,
 )
 assert.match(
   readFileSync(new URL('../src/components/challenges/LinkPlay.tsx', import.meta.url), 'utf8'),
-  /Tap Next/,
+  />\s*Next\s*</,
 )
 assert.match(cssSrc, /link-clue/)
 assert.match(
@@ -1752,7 +1774,7 @@ assert.ok(
 assert.match(matchSrc, /match-col-label/)
 assert.match(matchSrc, /Main idea' : 'Claim'/)
 assert.match(matchSrc, /EASY\.matchHow/)
-assert.match(matchSrc, /EASY\.matchMiss/)
+assert.match(matchSrc, /easyWrongTap/)
 assert.match(matchSrc, /EASY\.lockIn/)
 assert.doesNotMatch(matchSrc, /A claim is the main idea we hold to be true/)
 assert.match(cssSrc, /\.word-school/)
