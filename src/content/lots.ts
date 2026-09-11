@@ -76,7 +76,7 @@ export function easyPlaceSub(id: CityPlotId): string | null {
 }
 
 export const TOWN_PATH_EASY =
-  'Porch lamp → creek stories → square names → ridge sky. Tap a building to Manage it. Build this when you earned the next look.'
+  'Town grows toward Heaven. Porch lamp → creek stories → square names → ridge sky. Tap a building to Manage it. Build this when you earned the next look.'
 
 export const TOWN_PATH_HARD =
   'Arrive at the porch. Stories at the creek. Names on the square. Sky, gate, and lookout climb toward Heaven. Tap a building to manage and upgrade it.'
