@@ -116,16 +116,16 @@ export function easyLead(id: string, prompt: string): string {
     return 'Tap the sentence, then the place, then the person. One story at a time.'
   }
   if (id === 'ph-father') {
-    return 'Toss the wrong picks. Keep what Luke 15 is actually pressing.'
+    return 'Toss the wrong picks. Keep the father running to his son.'
   }
   if (id === 'ph-seeds') {
-    return 'Match each Jesus story to the main idea it is actually making.'
+    return 'Match each Jesus story to the short line it is making.'
   }
   if (id === 'ph-debt') {
     return 'Sort the sentences. Only one belongs in the keep bin.'
   }
   if (id === 'daily-gems') {
-    return 'Match each picture to the short main idea.'
+    return 'Match each picture to the short line.'
   }
   if (id === 'wb-early' || id === 'wb-method') {
     return prompt.replace(/historical claim/, 'historical line').replace(/overclaims/, 'stretch')
@@ -134,7 +134,7 @@ export function easyLead(id: string, prompt: string): string {
     return 'Stack the stones: things that might not have been still need a ground.'
   }
   if (id === 'fg-kalam') {
-    return 'Keep the beginning argument. Toss the flattenings.'
+    return 'Keep the beginning argument. Toss the rest.'
   }
   return prompt.replace(/\bclaims\b/g, 'sentences').replace(/\bclaim\b/g, 'main idea')
 }

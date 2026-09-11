@@ -361,6 +361,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       }
     }
     if (pick) fire(pick)
+    else if (easy) setToolLock(EASY.nightMiss)
   }
 
   function retry() {
@@ -807,7 +808,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                     }
                     setToolLock(
                       easy
-                        ? `${tool.label} is locked. Keep a sentence first.`
+                        ? EASY.nightMiss
                         : `${tool.label} is locked. Hold a matching line to deploy this tool.`,
                     )
                   }}
@@ -833,7 +834,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                               ? 'Keep a main idea to name this tool.'
                               : 'Hold a line to name this tool.')
                       : easy
-                        ? `${tool.label} is locked. Keep a main idea that opens it.`
+                        ? 'Locked — tap the glowing face'
                         : 'Hold a matching line'}
                   </span>
                 </button>
