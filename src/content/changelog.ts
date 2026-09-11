@@ -8,6 +8,17 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.34',
+    title: 'Easy core loop',
+    when: '2026-09-11',
+    items: [
+      'Match shows the Jericho-road picture first on Neighbor shows mercy, then the words. Mercy’s creek still uses the creek tile.',
+      'Easy home is still Match, Saved, and Night Watch — Town (soon) waits under Settings → More.',
+      'Easy Night Watch finishes at 6/6. TAP n/6 is the score. Six face taps win the night.',
+      'Match stays sentence → place → person with a named miss and Next.',
+    ],
+  },
+  {
     version: '1.4.33',
     title: 'Easy core loop',
     when: '2026-09-11',

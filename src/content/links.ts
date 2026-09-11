@@ -1,3 +1,4 @@
+import type { MatchArtId } from './matchArt.ts'
 import type { LinkChallenge, LinkNode } from '../types.ts'
 import { easyWrongTap } from '../lib/easy.ts'
 
@@ -102,13 +103,16 @@ export const STREET_BEATS = [
   'Juniper · East porch · A lamp is meant to be seen.',
 ]
 
-/** Concrete picture for a Link chip — idea borrows its lot’s art (lamp, creek, bench). */
+/** Concrete picture for a Link chip — idea borrows its lot’s art unless a card has its own. */
 export function linkPicture(
   node: LinkNode,
   challenge: LinkChallenge,
-): { plotId?: string; who?: LinkNode['who'] } {
+): { plotId?: string; who?: LinkNode['who']; art?: MatchArtId } {
   if (node.who) return { who: node.who }
   if (node.plotId) return { plotId: node.plotId }
+  if (node.evidenceId === 'ph-road') {
+    return { art: 'ph-road' }
+  }
   const triple = challenge.triples.find((item) => item.ideaId === node.id)
   const place = challenge.nodes.find((item) => item.id === triple?.placeId)
   if (place?.plotId) return { plotId: place.plotId }

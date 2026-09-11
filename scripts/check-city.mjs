@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import {
   CITY_HOLLOW_TO_WITNESS,
   cityAge,
@@ -1045,7 +1045,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.33')
+assert.equal(APP_VERSION, '1.4.34')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -1185,6 +1185,22 @@ assert.match(linkPlaySrc, /is-picture/)
 assert.match(linkPlaySrc, /PlaceGlyph/)
 assert.match(linkPlaySrc, /size="xl"/)
 assert.match(linkPlaySrc, /linkPicture/)
+assert.match(linkPlaySrc, /link-art/)
+assert.match(linkPlaySrc, /MATCH_ART/)
+assert.match(linkPlaySrc, /neighbor-shows-mercy|matchArt/)
+assert.match(cssSrc, /\.link-art/)
+assert.ok(
+  existsSync(new URL('../src/assets/match/neighbor-shows-mercy.png', import.meta.url)),
+  'Neighbor shows mercy Match art',
+)
+assert.match(
+  readFileSync(new URL('../src/content/matchArt.ts', import.meta.url), 'utf8'),
+  /ph-road/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/MatchScene.tsx', import.meta.url), 'utf8'),
+  /mercy-road/,
+)
 assert.match(linkPlaySrc, /linkCaption/)
 assert.match(linkPlaySrc, /linkClue/)
 assert.match(linkPlaySrc, /linkMiss/)
@@ -1196,9 +1212,13 @@ assert.doesNotMatch(linkPlaySrc, /Those don/)
   const mercy = STREET_CHALLENGE.nodes.find((node) => node.id === 'idea-mercy')
   const creed = STREET_CHALLENGE.nodes.find((node) => node.id === 'idea-silas')
   const lamp = STREET_CHALLENGE.nodes.find((node) => node.id === 'idea-juniper')
-  assert.equal(linkPicture(mercy, STREET_CHALLENGE).plotId, 'hollow')
+    assert.equal(linkPicture(mercy, STREET_CHALLENGE).art, 'ph-road')
+  assert.equal(linkPicture(mercy, STREET_CHALLENGE).plotId, undefined)
   assert.equal(linkPicture(creed, STREET_CHALLENGE).plotId, 'bench')
   assert.equal(linkPicture(lamp, STREET_CHALLENGE).plotId, 'porch')
+  const creek = STREET_CHALLENGE.nodes.find((node) => node.id === 'place-hollow')
+  assert.equal(linkPicture(creek, STREET_CHALLENGE).plotId, 'hollow')
+  assert.equal(linkPicture(creek, STREET_CHALLENGE).art, undefined)
   assert.match(linkCaption(mercy, true), /mercy/i)
   assert.doesNotMatch(linkCaption(creed, false), /Paul hands on/)
   assert.match(linkClue('mercy-hollow', 'idea'), /Mercy|neighbor|road/)

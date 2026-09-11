@@ -2286,6 +2286,11 @@ img.gem-heart {
   border-radius: 14px;
 }
 
+.match-scene.is-photo {
+  object-fit: cover;
+  object-position: center 42%;
+}
+
 .match-caption {
   display: block;
   margin: 0;
@@ -6264,6 +6269,16 @@ img.walker-face.easy-walker-face,
   height: 128px;
 }
 
+.link-block.is-picture .link-art {
+  display: block;
+  width: min(100%, 300px);
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  object-position: center 42%;
+  border-radius: 16px;
+}
+
 .link-block.is-picture .link-label {
   max-height: 2.6em;
   font-size: 1rem;
@@ -7025,6 +7040,11 @@ html[data-easy='on'] .link-block.is-picture .avatar,
 html[data-easy='on'] .link-block.is-picture .gem {
   width: 148px;
   height: 148px;
+}
+
+.play.is-easy-link .link-block.is-picture .link-art,
+html[data-easy='on'] .link-block.is-picture .link-art {
+  width: min(100%, 340px);
 }
 
 html[data-easy='on'] .btn,
