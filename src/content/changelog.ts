@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.24',
+    title: 'Town map labels · Easy and Hard',
+    when: '2026-09-11',
+    items: [
+      'Town map labels no longer pile up. The picture fills the panel — no purple empty bands.',
+      'Witness Bench opens Manage. If the square is still locked, it says why and offers Walk Parable Hollow next.',
+      'Reading is Easy and Hard. Saved folds by section.',
+    ],
+  },
+  {
     version: '1.4.23',
     title: 'Manage and Build this back on the map',
     when: '2026-09-11',
