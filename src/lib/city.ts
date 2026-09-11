@@ -219,6 +219,34 @@ export const CITY_AGE_LINE: Record<CityAge, string> = {
 /** Held lines needed with a lit lookout before the ridge city fully opens. */
 export const HEAVEN_HELD = 8
 
+/** How far the trail line has grown toward the ridge (0–1). */
+export const SPINE_GROW: Record<CityAge, number> = {
+  eden: 0.14,
+  village: 0.34,
+  town: 0.56,
+  gold: 0.8,
+  heaven: 1,
+}
+
+export type HeavenForm = 'seed' | 'wait' | 'rise' | 'ridge' | 'city'
+
+export function heavenForm(age: CityAge): HeavenForm {
+  if (age === 'eden') return 'seed'
+  if (age === 'village') return 'wait'
+  if (age === 'town') return 'rise'
+  if (age === 'gold') return 'ridge'
+  return 'city'
+}
+
+/** Map chip for the ridge. Eden has a star only — no wallpaper name. */
+export function heavenChip(age: CityAge): string | null {
+  if (age === 'eden') return null
+  if (age === 'village') return 'Heaven waits'
+  if (age === 'town') return 'Toward Heaven'
+  if (age === 'gold') return 'The ridge'
+  return 'City of Heaven'
+}
+
 export function cityAge(progress: ProgressState): CityAge {
   const snap = citySnapshot(progress)
   const held = progress.held?.length ?? 0
