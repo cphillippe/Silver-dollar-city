@@ -4,7 +4,7 @@ import { AREA_LINES, guideForArea } from '../content/story'
 import { Avatar, Say } from './Avatar'
 import { Landmark } from './Landmark'
 import { kindLabel } from './icons'
-import { isEasy } from '../lib/easy'
+import { EASY, isEasy } from '../lib/easy'
 import { starLegend } from '../lib/stars'
 import { StarRow } from './StarRow'
 import {
@@ -25,6 +25,7 @@ interface AreaViewProps {
 
 export function AreaView({ areaId, onNavigate }: AreaViewProps) {
   const { progress } = useProgress()
+  const easy = isEasy(progress)
   const area = getArea(areaId)
 
   if (!area) {
@@ -50,7 +51,7 @@ export function AreaView({ areaId, onNavigate }: AreaViewProps) {
         className="text-link"
         onClick={() => onNavigate({ name: 'hub' })}
       >
-        ← The town
+        ← {easy ? EASY.home : 'The town'}
       </button>
 
       <header

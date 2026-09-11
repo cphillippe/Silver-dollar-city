@@ -346,7 +346,7 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
         className="btn ghost"
         onClick={() => onNavigate({ name: 'hub' })}
       >
-        Return to the map
+        {easy ? EASY.home : 'Return to the map'}
       </button>
     </main>
   )
