@@ -7070,19 +7070,6 @@ html[data-easy='on'] .mind-node em {
   order: -1;
 }
 
-.hub.is-easy-town .tap-next-dock {
-  position: sticky;
-  bottom: 0;
-  z-index: 8;
-  margin-top: auto;
-  padding: 10px 0 calc(8px + env(safe-area-inset-bottom, 0px));
-  background: none;
-}
-
-.hub.is-easy-town .tap-next-dock .btn {
-  width: 100%;
-}
-
 .hub.is-easy-home {
   flex: 1;
   min-height: 0;
