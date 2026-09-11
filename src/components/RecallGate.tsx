@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { shuffle } from '../lib/shuffle'
 import { takeawayLines, type EvidenceBrief } from '../content/evidence'
 import { STORY } from '../content/story'
-import { EASY, isEasy } from '../lib/easy'
+import { EASY, easyFacingLine, easyMainIdea, isEasy } from '../lib/easy'
 import { WORDS } from '../lib/words'
 import { learningBeat } from '../lib/learning'
 import { learningPicture, toolForEvidence } from '../lib/watchTools'
@@ -208,7 +208,7 @@ export function RecallGate({
                   if (!sealed) pickClaim(line)
                 }}
               >
-                {line}
+                {easy ? easyFacingLine(brief.id, line) : line}
               </button>
             ))}
           </div>
@@ -240,17 +240,18 @@ export function RecallGate({
               {easy ? 'That sentence is yours to remember.' : 'That claim is yours to keep.'}
             </p>
           ) : null}
-          <p className="recall-line rehearse-stem">{heldClaim}</p>
+          <p className="recall-line rehearse-stem">
+            {easy ? easyFacingLine(brief.id, heldClaim) : heldClaim}
+          </p>
           <h2>
             {deeper
               ? easy
                 ? 'What still makes it stand?'
                 : 'A sharper hold'
               : easy
-                ? `${WORDS.reason.term} — ${WORDS.reason.sense}`
+                ? `${WORDS.reason.term} — ${EASY.reasonSense}`
                 : STORY.whyItStands}
           </h2>
-          {easy && !deeper ? <p className="quiet">{WORDS.reason.teach}</p> : null}
           {reasonLocked ? (
             <p className="match-toast" role="status">
               <strong>{deeper ? 'That still holds.' : 'That reason holds.'}</strong>
@@ -281,7 +282,7 @@ export function RecallGate({
                     pick(line, heldReason, deeper ? 'claim' : 'lock')
                   }
                 >
-                  {line}
+                  {easy ? easyMainIdea(line) : line}
                 </button>
               ))}
             </div>
@@ -293,7 +294,7 @@ export function RecallGate({
         <>
           <h2>{deeper ? 'Here’s the sharper line.' : 'Here’s the line.'}</h2>
           <article className="unlock-card pop-in">
-            <p className="recall-line">{heldClaim}</p>
+            <p className="recall-line">{easy ? easyFacingLine(brief.id, heldClaim) : heldClaim}</p>
             <p>{heldReason}</p>
             <PlainTalk id={brief.id} teach />
           </article>

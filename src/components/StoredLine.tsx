@@ -1,4 +1,4 @@
-import { isEasy } from '../lib/easy'
+import { easyFacingLine, isEasy } from '../lib/easy'
 import { WORDS } from '../lib/words'
 import { useProgress } from '../store/progress'
 import type { Learning } from '../types'
@@ -19,7 +19,7 @@ export function StoredLine({ learning, when }: StoredLineProps) {
     <article className="stored-line is-spoken" aria-label="Stored learning">
       <p className="eyebrow">Say this out loud</p>
       {learning.picture ? <GemMark gem={learning.picture} size="md" /> : null}
-      <p className="stored-claim">{learning.claim}</p>
+      <p className="stored-claim">{easy ? easyFacingLine(learning.id, learning.claim) : learning.claim}</p>
       {easy ? <PlainTalk id={learning.id} /> : null}
       {easy ? (
         <p className="quiet">

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { evidenceFor } from '../content/evidence'
 import { WATCH_KICKER, WATCH_LEAD, WATCH_TITLE } from '../content/defend'
 import { STORY } from '../content/story'
-import { EASY, isEasy } from '../lib/easy'
+import { EASY, easyFacingLine, isEasy } from '../lib/easy'
 import { localDateKey } from '../lib/dates'
 import {
   DEFEND_ANCHOR,
@@ -271,7 +271,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       y: to.y,
       line:
         fit === 'match'
-          ? heldLine?.claim ?? `${WATCH_ABILITY_LABEL[using]} matches`
+          ? (heldLine
+              ? easy
+                ? easyFacingLine(heldLine.id, heldLine.claim)
+                : heldLine.claim
+              : `${WATCH_ABILITY_LABEL[using]} matches`)
           : `${WATCH_ABILITY_LABEL[using]} is weak here`,
       combo: nextCombo,
     }
@@ -723,12 +727,15 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                   </span>
                   <span className="defend-ability-claim">
                     {open
-                      ? heldLine?.claim ??
-                        (tool.id === 'love'
+                      ? (heldLine
                           ? easy
-                            ? 'Love is ready.'
-                            : 'A true line can turn a cheap claim.'
-                          : 'Hold a line to name this tool.')
+                            ? easyFacingLine(heldLine.id, heldLine.claim)
+                            : heldLine.claim
+                          : tool.id === 'love'
+                            ? easy
+                              ? 'Love is ready.'
+                              : 'A true line can turn a cheap claim.'
+                            : 'Hold a line to name this tool.')
                       : easy
                         ? 'Locked — keep a matching sentence first.'
                         : 'Hold a matching line'}

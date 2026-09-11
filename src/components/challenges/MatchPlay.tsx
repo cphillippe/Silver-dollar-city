@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { shuffle } from '../../lib/shuffle'
-import { isEasy } from '../../lib/easy'
+import { EASY, isEasy } from '../../lib/easy'
 import { useProgress } from '../../store/progress'
 import type { MatchChallenge, MatchSceneId } from '../../types'
 import { MatchScene } from '../MatchScene'
@@ -42,6 +42,8 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
   const [status, setStatus] = useState<'idle' | 'wrong' | 'ok'>('idle')
   const [shake, setShake] = useState(false)
   const [misses, setMisses] = useState(0)
+  const [ready, setReady] = useState(false)
+  const easy = isEasy(progress)
   const focusId = left.find((pair) => !locked.includes(pair.id))?.id
   const [decoyId, setDecoyId] = useState(() =>
     focusId ? decoyFor(left.map((pair) => pair.id), focusId, []) : '',
@@ -85,8 +87,12 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
       setFlash(id)
       window.setTimeout(() => setFlash(null), 380)
       if (next.length === challenge.pairs.length) {
-        setStatus('ok')
-        onSolved()
+        if (easy) {
+          setReady(true)
+        } else {
+          setStatus('ok')
+          onSolved()
+        }
       }
       return
     }
@@ -119,11 +125,8 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
       <PuzzleLead challenge={challenge} />
       <PuzzleHint text={challenge.context} id={challenge.id} onPeek={onPeek} />
       <p className="sort-how">
-        {isEasy(progress) ? (
-          <>
-            <strong>Tap a picture</strong>, then the main idea that belongs
-            {guided ? ' · two choices' : ''}
-          </>
+        {easy ? (
+          EASY.matchHow
         ) : (
           <>
             <strong>Tap a picture</strong>, then the claim that belongs
@@ -134,20 +137,20 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
 
       {status === 'wrong' || misses > 0 ? (
         <p className="match-toast" role="status">
-          <strong>
-            {status === 'wrong'
-              ? misses >= 2
-                ? 'One more look.'
-                : 'Those don’t snap.'
-              : isEasy(progress)
-                ? 'Try the other main idea.'
-                : 'Try the other claim.'}
-          </strong>{' '}
-          {misses >= 2
-            ? isEasy(progress)
-              ? 'Look again. Two choices.'
-              : challenge.teachOnWrong
-            : 'Pick a new pair.'}
+          {easy ? (
+            <strong>{EASY.matchMiss}</strong>
+          ) : (
+            <>
+              <strong>
+                {status === 'wrong'
+                  ? misses >= 2
+                    ? 'One more look.'
+                    : 'Those don’t snap.'
+                  : 'Try the other claim.'}
+              </strong>{' '}
+              {misses >= 2 ? challenge.teachOnWrong : 'Pick a new pair.'}
+            </>
+          )}
         </p>
       ) : null}
 
@@ -187,7 +190,7 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
           })}
         </div>
         <div className="match-col is-claims">
-          <p className="match-col-label">{isEasy(progress) ? 'Main idea' : 'Claim'}</p>
+          <p className="match-col-label">{easy ? 'Main idea' : 'Claim'}</p>
           {shownRight.map((item, index) => (
             <button
               key={item.id}
@@ -206,9 +209,24 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
       </div>
 
       <p className="match-score">
-        {challenge.pairs.length - locked.length} left · {locked.length} /{' '}
-        {challenge.pairs.length} snapped
+        {easy
+          ? `${challenge.pairs.length - locked.length} left · ${locked.length} / ${challenge.pairs.length} kept`
+          : `${challenge.pairs.length - locked.length} left · ${locked.length} / ${challenge.pairs.length} snapped`}
       </p>
+      {easy && ready && status !== 'ok' ? (
+        <div className="cta-dock">
+          <button
+            type="button"
+            className="btn gold xl snap-bins"
+            onClick={() => {
+              setStatus('ok')
+              onSolved()
+            }}
+          >
+            {EASY.lockIn}
+          </button>
+        </div>
+      ) : null}
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import { CAST } from '../content/story'
-import { isEasy } from '../lib/easy'
+import { easyFacingLine, isEasy } from '../lib/easy'
 import { profileInventory, openIdeaView, openPlaceView } from '../lib/profile'
 import { useProgress } from '../store/progress'
 import type { View } from '../types'
@@ -36,7 +36,11 @@ export function Profile({ onNavigate }: ProfileProps) {
           <p className="quiet">
             {you.role} · {you.seeking}
           </p>
-          <p className="memory-pipe">Learn {inv.learned} · Hold {inv.held} · Deploy {inv.deployed}</p>
+          <p className="memory-pipe">
+            {easy
+              ? `Learn ${inv.learned} · Hold ${inv.held} · Use ${inv.deployed}`
+              : `Learn ${inv.learned} · Hold ${inv.held} · Deploy ${inv.deployed}`}
+          </p>
         </div>
       </header>
 
@@ -61,7 +65,7 @@ export function Profile({ onNavigate }: ProfileProps) {
                 <p className="eyebrow">
                   {idea.held ? 'Held' : idea.stored ? 'Stored' : 'Walked'} · {idea.source}
                 </p>
-                <strong>{idea.claim}</strong>
+                <strong>{easy ? easyFacingLine(idea.id, idea.claim) : idea.claim}</strong>
                 <PlainTalk id={idea.id} />
                 {easy ? null : <p>{idea.reason}</p>}
               </button>
@@ -117,7 +121,7 @@ export function Profile({ onNavigate }: ProfileProps) {
 
       <section className="profile-section" aria-label="Tools">
         <p className="eyebrow">Tools / abilities</p>
-        <h2>What you can deploy</h2>
+        <h2>{easy ? 'What you can use' : 'What you can deploy'}</h2>
         {inv.tools.map((tool) => (
           <article
             key={tool.id}
@@ -134,7 +138,7 @@ export function Profile({ onNavigate }: ProfileProps) {
                   <strong>
                     {tool.label} {tool.tierMark}
                   </strong>
-                  <p>Night Watch · Learn → Hold → Deploy</p>
+                  <p>{easy ? 'Night Watch · Learn → Hold → Use' : 'Night Watch · Learn → Hold → Deploy'}</p>
                 </span>
               </button>
             ) : (

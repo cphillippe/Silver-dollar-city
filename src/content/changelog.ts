@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.12',
+    title: 'Easy main idea lines + full lot names',
+    when: '2026-09-10',
+    items: [
+      'Easy Night Watch, Journal, and Use chrome say main idea — not claim or Deploy wallpaper.',
+      'Picture-match: Keep the right pictures. Remove wrong picks. Miss: Wrong pair — try a different main idea. Lock-in is Save your picks.',
+      'Easy map labels are full names: Parable Hollow, Witness Bench, East porch.',
+    ],
+  },
+  {
     version: '1.4.11',
     title: 'Easy main idea chrome + bigger map labels',
     when: '2026-09-10',

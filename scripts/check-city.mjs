@@ -1009,7 +1009,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.11')
+assert.equal(APP_VERSION, '1.4.12')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -1403,6 +1403,27 @@ assert.match(
   /Save your picks/,
 )
 assert.match(
+  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  /easyFacingLine/,
+)
+assert.match(
+  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  /why the main idea stands/,
+)
+assert.match(
+  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  /Keep the right pictures/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/DigDeeper.tsx', import.meta.url), 'utf8'),
+  /EASY\.reasonSense/,
+)
+assert.match(defendSrc, /easyFacingLine/)
+assert.doesNotMatch(
+  readFileSync(new URL('../src/content/plain.ts', import.meta.url), 'utf8'),
+  /Keep the pictures\. Toss the slogans/,
+)
+assert.match(
   readFileSync(new URL('../src/lib/words.ts', import.meta.url), 'utf8'),
   /Toss the wrong picks/,
 )
@@ -1412,9 +1433,17 @@ assert.match(
 )
 assert.match(
   readFileSync(new URL('../src/lib/cityBuild.ts', import.meta.url), 'utf8'),
-  /Square/,
+  /Parable Hollow/,
 )
-assert.match(cssSrc, /font-size: 22px/)
+assert.match(
+  readFileSync(new URL('../src/lib/cityBuild.ts', import.meta.url), 'utf8'),
+  /Witness Bench/,
+)
+assert.match(
+  readFileSync(new URL('../src/lib/cityBuild.ts', import.meta.url), 'utf8'),
+  /East porch/,
+)
+assert.match(cssSrc, /font-size: 20px/)
 assert.match(sortSrc, /EASY\.lockIn/)
 assert.match(
   readFileSync(new URL('../src/components/TeachUnlock.tsx', import.meta.url), 'utf8'),
@@ -1574,7 +1603,9 @@ assert.ok(
 )
 assert.match(matchSrc, /match-col-label/)
 assert.match(matchSrc, /Main idea' : 'Claim'/)
-assert.match(matchSrc, /main idea that belongs/)
+assert.match(matchSrc, /EASY\.matchHow/)
+assert.match(matchSrc, /EASY\.matchMiss/)
+assert.match(matchSrc, /EASY\.lockIn/)
 assert.doesNotMatch(matchSrc, /A claim is the main idea we hold to be true/)
 assert.match(cssSrc, /\.word-school/)
 assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)

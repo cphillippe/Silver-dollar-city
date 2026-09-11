@@ -1,5 +1,5 @@
 import { deeperLinksFor, eraLabel, type DeeperSurface } from '../content/deeper'
-import { isEasy } from '../lib/easy'
+import { EASY, isEasy } from '../lib/easy'
 import { WORDS } from '../lib/words'
 import { useProgress } from '../store/progress'
 
@@ -46,7 +46,7 @@ export function DigDeeper({
         <p className="stored-reason">
           {easy ? (
             <>
-              <strong>{WORDS.reason.term}</strong> — {WORDS.reason.sense}. {why}
+              <strong>{WORDS.reason.term}</strong> — {EASY.reasonSense}. {why}
             </>
           ) : (
             why
@@ -57,7 +57,7 @@ export function DigDeeper({
         <p className="quiet">
           {easy ? (
             <>
-              <strong>{WORDS.source.term}</strong> — {WORDS.source.sense}: {source}
+              <strong>{WORDS.source.term}</strong> — {EASY.sourceSense}: {source}
             </>
           ) : (
             source
