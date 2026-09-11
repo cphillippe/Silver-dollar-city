@@ -35,7 +35,7 @@ export const EVIDENCE: Record<string, EvidenceBrief> = {
   'ph-road': brief(
     'ph-road',
     'Neighbor is the one who shows mercy.',
-    'Jesus makes the listener identify with the wounded man, then with the Samaritan who stops.',
+    'Jesus makes the listener identify with the wounded man, then with the Samaritan moved with compassion.',
     'Luke 10:25–37',
     'Neighbor means the person who already looks like you.',
     'The priest is the hero because he kept the law.',
@@ -434,7 +434,7 @@ export const EVIDENCE: Record<string, EvidenceBrief> = {
   ),
   'td-watch': brief(
     'td-watch',
-    'A true line can turn a cheap claim toward heaven.',
+    'Love — tap the matching face. A true line turns a cheap claim toward heaven.',
     'Love, logic, reason, and science you have kept can divert a false step up the ridge.',
     'Luke 10:25–37 · the night road',
     'A town holds because the streets are pretty.',

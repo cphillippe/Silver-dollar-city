@@ -11,6 +11,7 @@ import {
   totalChallenges,
 } from '../content'
 import { isEasy } from '../lib/easy'
+import { isToolHowTo } from '../lib/watchTools'
 import { localDateKey } from '../lib/dates'
 import { dueTraces, nextGapLabel, type ReviewEvent } from '../lib/memory'
 import { sessionDue, type RecallLaterState } from '../lib/recall'
@@ -159,13 +160,15 @@ export function dueForRecall(
   progress: ProgressState,
   today = localDateKey(),
 ) {
-  return dueTraces(progress.memory, today).map((trace) => ({
-    trace,
-    brief: evidenceFor(trace.id),
-    entry:
-      journalForChallenge(trace.id) ??
-      journalEntries.find((item) => item.id === trace.id),
-  }))
+  return dueTraces(progress.memory, today)
+    .filter((trace) => !isToolHowTo(trace.id))
+    .map((trace) => ({
+      trace,
+      brief: evidenceFor(trace.id),
+      entry:
+        journalForChallenge(trace.id) ??
+        journalEntries.find((item) => item.id === trace.id),
+    }))
 }
 
 export function dueCount(progress: ProgressState, today = localDateKey()) {
@@ -282,7 +285,7 @@ export function nextRebuildHint(
   }
 
   const upcoming = Object.values(progress.memory)
-    .filter((trace) => trace.nextReviewAt > today)
+    .filter((trace) => trace.nextReviewAt > today && !isToolHowTo(trace.id))
     .sort((a, b) => a.nextReviewAt.localeCompare(b.nextReviewAt))[0]
   const goal = getNextGoal(progress, today)
 
@@ -379,7 +382,7 @@ export function rehearseGo(
     }
   }
 
-  const heldNewest = [...progress.held].reverse()
+  const heldNewest = [...progress.held].filter((id) => !isToolHowTo(id)).reverse()
   const held =
     heldNewest.find((id) =>
       matchesRehearseScope(

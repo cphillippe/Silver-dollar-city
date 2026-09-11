@@ -42,7 +42,7 @@ export const parableHollow: Area = {
         {
           id: 'd',
           gem: 'lamp',
-          text: 'A Samaritan binds the wounds, takes him to an inn, and pays.',
+          text: 'Moved with compassion, a Samaritan binds the wounds, takes him to an inn, and pays.',
         },
         {
           id: 'e',

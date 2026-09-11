@@ -864,9 +864,11 @@ const defendSrc = readFileSync(
 )
 assert.match(defendSrc, /The road is coming/)
 assert.match(defendSrc, /EASY.nightDo/)
-assert.match(defendSrc, /Unlock the lamps/)
-assert.match(defendSrc, /TeachUnlock/)
-assert.match(defendSrc, /RecallGate/)
+assert.match(defendSrc, /How to use Love/)
+assert.match(defendSrc, /Love tip/)
+assert.match(defendSrc, /loveHowTo/)
+assert.doesNotMatch(defendSrc, /TeachUnlock/)
+assert.doesNotMatch(defendSrc, /RecallGate/)
 assert.match(defendSrc, /defendPads/)
 assert.match(defendSrc, /afterJuiceRef/)
 assert.match(defendSrc, /}, \[phase, easy, progress\.defense\.cleared\]/)
@@ -886,7 +888,8 @@ assert.match(defendSrc, /easyTapFit/)
 assert.match(defendSrc, /raidForWave/)
 assert.match(defendSrc, /WALKER_LABEL/)
 assert.match(defendSrc, /learningForTool/)
-assert.match(defendSrc, /kind: 'encode'/)
+assert.match(defendSrc, /recordNight/)
+assert.doesNotMatch(defendSrc, /kind: 'encode'/)
 assert.match(defendSrc, /WATCH_ABILITY_LABEL/)
 assert.match(defendSrc, /WATCH_TOOLS\.map/)
 assert.match(defendSrc, /TIER_MARK/)
@@ -1052,7 +1055,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.39')
+assert.equal(APP_VERSION, '1.4.41')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1660,9 +1663,13 @@ assert.match(
   readFileSync(new URL('../src/content/lots.ts', import.meta.url), 'utf8'),
   /Story Creek · Jesus stories/,
 )
-assert.doesNotMatch(
+assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /toward heaven/,
+  /Love — when compassion moves you, help like the Samaritan/,
+)
+assert.match(
+  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  /Love — tap the matching face\. A true line turns a cheap claim toward heaven/,
 )
 assert.doesNotMatch(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
@@ -1676,10 +1683,15 @@ assert.doesNotMatch(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
   /neighbor-line/,
 )
-assert.match(
+assert.doesNotMatch(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /unkind sentence around/,
+  /A true main idea can turn/,
 )
+assert.doesNotMatch(
+  readFileSync(new URL('../src/content/plain.ts', import.meta.url), 'utf8'),
+  /A true main idea can turn/,
+)
+assert.doesNotMatch(latestChange(APP_VERSION).items.join('\n'), /A true main idea can turn/)
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
   /Main idea = the short true line we keep/,
@@ -1780,10 +1792,10 @@ assert.match(latestChange(APP_VERSION).items.join('\n'), /Meaning Ridge/)
 assert.match(defendSrc, /easyTapTarget/)
 assert.match(defendSrc, /data-person-node="walker"/)
 assert.doesNotMatch(defendSrc, /walkerCue|easySolo|clearWalkerCue|hideOther/)
-assert.match(defendSrc, /EASY\.loveCue/)
+assert.match(defendSrc, /loveHowTo/)
 assert.equal(
   EASY.loveCue,
-  'Love — kindness turns an unkind sentence. Example: you were forgiven, so forgive.',
+  'Love — when compassion moves you, help like the Samaritan. Tap the glowing face.',
 )
 assert.doesNotMatch(defendSrc, /is-dim/)
 assert.match(linkPlaySrc, /is-need/)
@@ -1829,7 +1841,7 @@ assert.doesNotMatch(
   latestChange(APP_VERSION).items.join('\n'),
   /dossier|ledger|scaffold|proofs|offline-first|schema|mind-map|held ideas|Evidence Journal/i,
 )
-assert.match(defendSrc, /useState\(easy\)/)
+assert.match(defendSrc, /taught = true/)
 assert.match(defendSrc, /easy-walker-cue-label/)
 assert.match(defendSrc, /easy \? 'wave'/)
 assert.match(cssSrc, /easy-walker-cue-label/)
@@ -2083,12 +2095,19 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
 {
   const watch = evidenceFor('td-watch')
   assert.ok(watch)
-  assert.equal(watch.claim, 'A true line can turn a cheap claim toward heaven.')
+  assert.equal(watch.claim, 'Love — tap the matching face. A true line turns a cheap claim toward heaven.')
   const claim = easyFacingLine(watch.id, watch.claim)
   const decoy = easyFacingLine(watch.id, watch.claimChoices[1])
-  assert.equal(claim, 'A true main idea can turn an unkind sentence around.')
+  assert.equal(claim, EASY.loveCue)
+  assert.equal(plainFor('td-watch')?.gloss, EASY.loveCue)
   assert.notEqual(decoy, claim)
   assert.equal(new Set(watch.claimChoices.map((line) => easyFacingLine(watch.id, line))).size, 3)
+  assert.equal(evidenceFor('ph-road')?.claim, 'Neighbor is the one who shows mercy.')
+  assert.match(EASY.loveCue, /compassion/)
+  assert.match(EASY.loveCue, /^Love /)
+  assert.doesNotMatch(EASY.loveCue, /A true main idea can turn/)
+  assert.match(latestChange(APP_VERSION).items.join('\n'), /tool how-to, not a claim/)
+  assert.match(latestChange(APP_VERSION).items.join('\n'), /Luke 10/)
 
   const sameFace = uniqueHoldChoices(
     [watch.claim, watch.claim, watch.claimChoices[1], watch.claimChoices[1]],

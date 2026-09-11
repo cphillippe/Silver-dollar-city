@@ -91,6 +91,11 @@ export function toolUnlocked(tool: WatchTool, progress: ProgressState): boolean 
   return tool.unlockKeys.some((id) => held.has(id) || completed.has(id))
 }
 
+/** Night Watch Love brief — tool how-to, not a held apologetics claim. */
+export function isToolHowTo(id: string): boolean {
+  return id === 'td-watch'
+}
+
 /** Starter tools with no unlockKeys grow from the night brief + stored learnings. */
 export function masteryKeys(tool: WatchTool): string[] {
   if (tool.unlockKeys.length > 0) return tool.unlockKeys

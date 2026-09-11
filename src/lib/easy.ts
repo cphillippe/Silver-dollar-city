@@ -38,7 +38,7 @@ export const EASY = {
   nightMiss: 'Wrong — tap the glowing face',
   home: 'Home',
   townSoon: 'Town (soon)',
-  loveCue: 'Love — kindness turns an unkind sentence. Example: you were forgiven, so forgive.',
+  loveCue: 'Love — when compassion moves you, help like the Samaritan. Tap the glowing face.',
   deployTeach: 'Use a main idea you kept.',
   saved: 'Saved sentences',
   connections: 'Connections',
@@ -58,8 +58,16 @@ export function easyWrongTap(card: string): string {
   return `Wrong. Tap this one: ${label}.`
 }
 
+/** Hard Night Watch Love chrome — mechanic how-to, not a claim to hold. */
+export const LOVE_HOW_HARD =
+  'Love — tap the matching face. A true line turns a cheap claim toward heaven.'
+
 const EASY_LINES: Record<string, string> = {
-  'td-watch': 'A true main idea can turn an unkind sentence around.',
+  'td-watch': EASY.loveCue,
+}
+
+export function loveHowTo(easy: boolean): string {
+  return easy ? EASY.loveCue : LOVE_HOW_HARD
 }
 
 const EASY_CHROME: Record<string, string> = {
