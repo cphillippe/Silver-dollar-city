@@ -3,9 +3,9 @@ import type { Area } from '../types'
 export const parableHollow: Area = {
   id: 'parable-hollow',
   order: 1,
-  title: 'Parable Hollow',
-  shortTitle: 'Hollow',
-  subtitle: 'Stories that walk around inside you',
+  title: 'Story Creek',
+  shortTitle: 'Creek',
+  subtitle: 'Jesus stories that stick',
   blurb:
     'The Teacher spoke in pictures — not to hide the truth, but to make it move.',
   intro: [

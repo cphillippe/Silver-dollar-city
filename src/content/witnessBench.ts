@@ -3,8 +3,8 @@ import type { Area } from '../types'
 export const witnessBench: Area = {
   id: 'witness-bench',
   order: 2,
-  title: 'The Witness Bench',
-  shortTitle: 'Bench',
+  title: 'Witness Square',
+  shortTitle: 'Witness',
   subtitle: 'What can we know about events we did not see?',
   blurb:
     'Historians cannot rerun the past. They weigh sources, time, and motive.',

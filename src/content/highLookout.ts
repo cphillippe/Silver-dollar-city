@@ -3,8 +3,8 @@ import type { Area } from '../types'
 export const highLookout: Area = {
   id: 'high-lookout',
   order: 5,
-  title: 'The High Lookout',
-  shortTitle: 'Lookout',
+  title: 'Meaning Ridge',
+  shortTitle: 'Meaning',
   subtitle: 'Mind, duty, meaning, and beauty',
   blurb:
     'The trail turns inward: why do we know good, and why does beauty wound us?',

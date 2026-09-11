@@ -30,19 +30,19 @@ export const CITY_PLOTS: CityPlotSpec[] = [
   },
   {
     id: 'hollow',
-    title: 'Parable Hollow',
+    title: 'Story Creek',
     blurb: 'Mercy’s creek. Jesus stories live where pictures can walk.',
     areaId: 'parable-hollow',
   },
   {
     id: 'bench',
-    title: 'Witness Bench',
+    title: 'Witness Square',
     blurb: 'Silas’s ledger on the square. Public names, not parables.',
     areaId: 'witness-bench',
   },
   {
     id: 'observatory',
-    title: 'The Observatory',
+    title: 'Sky Watch',
     blurb: 'Nora’s dome. The sky’s fit belongs on the ridge.',
     areaId: 'observatory',
   },
@@ -54,7 +54,7 @@ export const CITY_PLOTS: CityPlotSpec[] = [
   },
   {
     id: 'lookout',
-    title: 'High Lookout',
+    title: 'Meaning Ridge',
     blurb: 'Hope’s tower. Duty, mind, meaning, and beauty look over the town.',
     areaId: 'high-lookout',
   },
@@ -209,7 +209,7 @@ export const CITY_AGE_SHORT: Record<CityAge, string> = {
 }
 
 export const CITY_AGE_LINE: Record<CityAge, string> = {
-  eden: 'You arrive at Juniper’s lamp. The creek garden — Parable Hollow — holds Jesus stories. Heaven waits on the ridge.',
+  eden: 'You arrive at Juniper’s lamp. The creek garden — Story Creek — holds Jesus stories. Heaven waits on the ridge.',
   village: 'Mercy’s oaks and Silas’s square. Stories first, then public names.',
   town: 'Nora’s dome looks up. Fine-tuning lives with the sky.',
   gold: 'Ansel’s gate asks why there is a world. The lookout is close enough to see.',

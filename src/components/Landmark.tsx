@@ -2,8 +2,8 @@ import { CAST, guideForArea } from '../content/story'
 import { Avatar } from './Avatar'
 
 const PLOT_ART: Record<string, { label: string; creek?: boolean; lamp?: boolean; bench?: boolean }> = {
-  hollow: { label: 'Parable Hollow', creek: true },
-  bench: { label: 'Witness Bench', bench: true },
+  hollow: { label: 'Story Creek', creek: true },
+  bench: { label: 'Witness Square', bench: true },
   porch: { label: 'East porch', lamp: true },
 }
 
@@ -48,15 +48,15 @@ export function PlaceGlyph({
 
 const MARKS: Record<string, { label: string; path: string }> = {
   'parable-hollow': {
-    label: 'Parable Hollow',
+    label: 'Story Creek',
     path: 'M16 70c8-18 14-28 20-28 4 0 6 8 8 16 4-14 10-22 16-22 8 0 14 18 20 34',
   },
   'witness-bench': {
-    label: 'Witness Bench',
+    label: 'Witness Square',
     path: 'M18 58h60M24 58v16h48V58M20 74h56',
   },
   observatory: {
-    label: 'The Observatory',
+    label: 'Sky Watch',
     path: 'M18 70c0-22 14-38 30-38s30 16 30 38M48 32v10',
   },
   'first-gate': {
@@ -64,7 +64,7 @@ const MARKS: Record<string, { label: string; path: string }> = {
     path: 'M22 78V38l26-16 26 16v40M48 78V50',
   },
   'high-lookout': {
-    label: 'High Lookout',
+    label: 'Meaning Ridge',
     path: 'M8 70 28 42l14 12 18-28 28 44',
   },
   'daily-trail': {

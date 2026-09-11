@@ -17,7 +17,7 @@ export const AD_SLOTS = {
   'between-districts': {
     id: 'between-districts',
     label: 'Between districts',
-    where: 'Map, once between Parable Hollow and Witness Bench',
+    where: 'Map, once between Story Creek and Witness Square',
   },
   'after-daily': {
     id: 'after-daily',

@@ -26,7 +26,7 @@ export const STREET_CHALLENGE: LinkChallenge = {
     {
       id: 'place-hollow',
       kind: 'place',
-      text: 'Parable Hollow',
+      text: 'Story Creek',
       plotId: 'hollow',
     },
     {
@@ -44,7 +44,7 @@ export const STREET_CHALLENGE: LinkChallenge = {
     {
       id: 'place-bench',
       kind: 'place',
-      text: 'Witness Bench',
+      text: 'Witness Square',
       plotId: 'bench',
     },
     {
@@ -98,8 +98,8 @@ export const STREET_CHALLENGE: LinkChallenge = {
 }
 
 export const STREET_BEATS = [
-  'Mercy Wren · Parable Hollow · Neighbor is the one who shows mercy.',
-  'Silas Whitman · Witness Bench · died, buried, raised, appeared.',
+  'Mercy Wren · Story Creek · Neighbor is the one who shows mercy.',
+  'Silas Whitman · Witness Square · died, buried, raised, appeared.',
   'Juniper Wick · East porch · A lamp is meant to be seen.',
 ]
 
@@ -179,12 +179,12 @@ export function linkCaption(node: LinkNode, easy: boolean): string {
 /** Why each street triple lives where it lives. Teach before the match. */
 export const STREET_WHYS: Record<(typeof STREET_CHALLENGE.triples)[number]['id'], { easy: string; hard: string }> = {
   'mercy-hollow': {
-    easy: 'Mercy lives at the creek because she tells Jesus stories. The neighbor who stops on the road is a picture, so it lives at Parable Hollow.',
-    hard: 'Mercy Wren keeps Parable Hollow: Jesus taught in pictures by the road and the water. Neighbor is the one who shows mercy — that line belongs with the storyteller, not the clerk.',
+    easy: 'Mercy lives at the creek because she tells Jesus stories. The neighbor who stops on the road is a picture, so it lives at Story Creek.',
+    hard: 'Mercy Wren keeps Story Creek: Jesus taught in pictures by the road and the water. Neighbor is the one who shows mercy — that line belongs with the storyteller, not the clerk.',
   },
   'silas-bench': {
     easy: 'Silas copies names at the square. The old shared belief — died, buried, raised — sits with the public names.',
-    hard: 'Silas Whitman keeps the Witness Bench on the square. Died, buried, raised, appeared is a public creed. It belongs in a ledger hall, not under the oaks.',
+    hard: 'Silas Whitman keeps Witness Square. Died, buried, raised, appeared is a public creed. It belongs in a ledger hall, not under the oaks.',
   },
   'juniper-porch': {
     easy: 'Juniper’s lamp is on the porch so today’s line can be seen.',

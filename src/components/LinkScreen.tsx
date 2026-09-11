@@ -124,7 +124,7 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
             <p className="stored-claim">An idea lives at a place, with a person.</p>
             <p className="link-takeaway">
               {easy
-                ? 'Mercy tells Jesus stories at the creek — that is why the neighbor who stops on the road lives at Parable Hollow. Silas copies names on the square — that is why the old shared belief lives at the Witness Bench. Juniper’s lamp is on the porch so today’s line can be seen.'
+                ? 'Mercy tells Jesus stories at the creek — that is why the neighbor who stops on the road lives at Story Creek. Silas copies names on the square — that is why the old shared belief lives at Witness Square. Juniper’s lamp is on the porch so today’s line can be seen.'
                 : 'Mercy keeps the creek because Jesus taught in pictures. Silas keeps the square because the creed is a public report. Juniper keeps the porch because a lamp is meant to be seen.'}
             </p>
             <DigDeeper id={challenge.id} compact />

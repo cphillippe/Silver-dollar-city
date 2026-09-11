@@ -8,6 +8,17 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.38',
+    title: 'Easy core loop',
+    when: '2026-09-11',
+    items: [
+      'Place titles now say what the stop is for: Story Creek, Witness Square, Sky Watch, Meaning Ridge. Area and plot ids stay so saves do not break.',
+      'Easy home is still Match, Saved, and Night Watch — Town (soon) waits under Settings → More.',
+      'Easy Night Watch finishes at 6/6. TAP n/6 is the score. Six face taps win the night.',
+      'Match stays sentence → place → person with a named miss and Next.',
+    ],
+  },
+  {
     version: '1.4.37',
     title: 'Easy core loop',
     when: '2026-09-11',
@@ -132,7 +143,7 @@ export const CHANGELOG: ChangeNote[] = [
     title: 'Town names sit in their own slots',
     when: '2026-09-11',
     items: [
-      'Town chips stack so every full name stays readable at phone width — Parable Hollow, Witness Bench, East porch, Star lamps, Pages, City of Heaven.',
+      'Town chips stack so every full name stays readable at phone width — Story Creek, Witness Square, East porch, Star lamps, Pages, City of Heaven.',
       'Portraits sit above the name band. Names no longer cover each other.',
     ],
   },
@@ -152,7 +163,7 @@ export const CHANGELOG: ChangeNote[] = [
     when: '2026-09-11',
     items: [
       'Town map labels no longer pile up. The picture fills the panel — no purple empty bands.',
-      'Witness Bench opens Manage. If the square is still locked, it says why and offers Walk Parable Hollow next.',
+      'Witness Square opens Manage. If the square is still locked, it says why and offers Walk Story Creek next.',
       'Reading is Easy and Hard. Claim teach stays once. Hard Night Watch is unchanged.',
     ],
   },
@@ -275,7 +286,7 @@ export const CHANGELOG: ChangeNote[] = [
     items: [
       'Easy Night Watch, Journal, and Use chrome say main idea — not claim or Deploy wallpaper.',
       'Picture-match: Keep the right pictures. Remove wrong picks. Miss: Wrong pair — try a different main idea. Lock-in is Save your picks.',
-      'Easy map labels are full names: Parable Hollow, Witness Bench, East porch.',
+      'Easy map labels are full names: Story Creek, Witness Square, East porch.',
     ],
   },
   {
@@ -295,7 +306,7 @@ export const CHANGELOG: ChangeNote[] = [
     items: [
       'Easy Tap this next names what opens — Tap this next — short Jesus story. The story is a short card with Continue and Skip reading, not a wall.',
       'Easy Town hides the Eden-to-Heaven legend dump. Link the street is Match sentence → place → person.',
-      'A claim is the main idea we hold to be true — taught once, then Easy chrome says main idea. Parable Hollow gets a Jesus-story creek subtitle.',
+      'A claim is the main idea we hold to be true — taught once, then Easy chrome says main idea. Story Creek gets a Jesus-story creek subtitle.',
     ],
   },
   {
@@ -422,7 +433,7 @@ export const CHANGELOG: ChangeNote[] = [
     when: '2026-09-10',
     items: [
       'Why Gate journal: the kalām syllogism leads cleanly — what begins has a cause. Sources are Philoponus and al-Ghazālī first; Craig is the modern statement only.',
-      'Witness Bench: Luke’s inquiry posture stands to be weighed.',
+      'Witness Square: Luke’s inquiry posture stands to be weighed.',
     ],
   },
   {
@@ -493,7 +504,7 @@ export const CHANGELOG: ChangeNote[] = [
     items: [
       'Candy faces live on the town; lamps, creek, and folk idle and cheer.',
       'Night Watch hits harder — tools stay below the board on a phone.',
-      'Observatory teaches first, then two choices. Miss, Try again, finish.',
+      'Sky Watch teaches first, then two choices. Miss, Try again, finish.',
       'This list is the hook for later packs. Settings always shows the live version.',
     ],
   },
@@ -502,7 +513,7 @@ export const CHANGELOG: ChangeNote[] = [
     title: 'Designer hold',
     when: '2026-09-09',
     items: [
-      'Fine-tuning Hold stays Designer-first. The triad is only on two Observatory clues.',
+      'Fine-tuning Hold stays Designer-first. The triad is only on two Sky Watch clues.',
     ],
   },
 ]

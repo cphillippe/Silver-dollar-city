@@ -12,9 +12,9 @@ Two bars, scored equally. A dry lesson that nobody finishes fails. A candy puzzl
 Run before a public URL or APK drop. Do not skip the retention chrome.
 
 1. Cold open → 60-second lead **before** companions → Begin the trail → Daily puzzle (Goal + today’s idea) → fold → takeaway. Footer absent on Trail. Then Map: mostly empty town, east porch glowing.
-2. Hub overworld: complete walks and watch Hollow / Bench / lamps construct. Grown city has lit roofs and a gold “build next” ring.
+2. Hub overworld: complete walks and watch Story Creek / Witness Square / lamps construct. Grown city has lit roofs and a gold “build next” ring.
 2. Hub: “Progress saved on this device”. Settings → Export JSON, copy share code, Import pasted code (use a second browser profile or reset+import). Stars/journal/Daily survive.
-3. Two Hollow walks unlock Witness. Star key readable: `1★ first walk · 2★ held after a rest · 3★ held and said back`.
+3. Two Story Creek walks unlock Witness Square. Star key readable: `1★ first walk · 2★ held after a rest · 3★ held and said back`.
 4. Journal: no What’s-next footer; due cards + takeaway copy at the top when a line is due.
 5. Settings → Show placeholders: hub banner and between-districts appear; Trail/Journal still have no ad over Keep/Toss or the takeaway. Hide slots again for playtest.
 6. Reload / Android APK: same save key; version in Settings matches `package.json`.
@@ -24,8 +24,8 @@ Run before a public URL or APK drop. Do not skip the retention chrome.
 
 1. Cold open — is the goal obvious in 15 seconds?
 2. Today’s Trail + fold/recall.
-3. **Parable Hollow end-to-end** (sequence, sort, match, sort).
-4. **Witness Bench** — at least two challenges.
+3. **Story Creek end-to-end** (sequence, sort, match, sort).
+4. **Witness Square** — at least two challenges.
 5. Journal — does it feel rewarding?
 6. Daily / streak / stars / dust-off if due.
 7. Mobile ~390px and desktop.
@@ -98,7 +98,7 @@ Playtest said evidence retention is the remaining gap, and the footer still ate 
 
 1. **Puzzle chrome** — The What’s next footer **collapses on Trail and challenge screens**. Short heights (~390–430px and short laptops) also shrink the top bar and hide Say/Landmark during the puzzle so Keep/Toss and Lock in the sort stay on-screen.
 2. **Takeaway, above the fold** — After a solve, the puzzle and burst chrome fold away. Choose the one-sentence takeaway you can repeat tomorrow, then choose why it stands. Claim chips first (no extra Fold-the-page tap). A snapped claim echoes in large type, then stays visible while you pick the reason.
-3. **Witness Bench** — Unlocks after **two** Parable Hollow walks, not Unpayable. Hub copy: *Two Hollow walks open this.*
+3. **Witness Square** — Unlocks after **two** Story Creek walks, not Unpayable. Hub copy: *Walk 2 scenes in Story Creek.*
 4. **Journal Next recommended** — If a page is due (or waiting), the button is the takeaway line and jumps straight into that claim rebuild, not a long journal scroll.
 
 ## What still sucks
