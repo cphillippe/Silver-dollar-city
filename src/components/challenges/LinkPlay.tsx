@@ -326,9 +326,12 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
               <p className="link-clue">{linkClue(currentTriple.id, step)}</p>
             ) : null}
             {easy ? null : <p className="match-col-label">{stepLabel(step, easy)}</p>}
-            {stepOptions.map((node) => {
+            {stepOptions
+              .filter((node) => !awaitNext || node.id === picked || node.id === needId)
+              .map((node) => {
               const pic = linkPicture(node, challenge)
               const active = node.id === needId
+              if (awaitNext && !active) return null
               return (
               <button
                 key={node.id}
