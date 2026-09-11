@@ -63,7 +63,7 @@ export function isAreaComplete(area: Area, completed: string[]): boolean {
   return area.challenges.every((challenge) => completed.includes(challenge.id))
 }
 
-/** Witness Bench opens after this many Parable Hollow walks — Unpayable can wait. */
+/** Witness Square opens after this many Story Creek walks — Unpayable can wait. */
 export const HOLLOW_WALKS_TO_WITNESS = 2
 
 export function hollowWalksDone(completed: string[]): number {
@@ -78,7 +78,7 @@ export function areaGateCopy(areaId: string, completed: string[], easy = false):
     const have = hollowWalksDone(completed)
     return easy
       ? `This street is locked. Finish 2 Jesus stories at the creek (${have}/2), then the square opens.`
-      : `Walk ${HOLLOW_WALKS_TO_WITNESS} scenes in Parable Hollow (${have}/${HOLLOW_WALKS_TO_WITNESS}) — then Silas. Unpayable can wait.`
+      : `Walk ${HOLLOW_WALKS_TO_WITNESS} scenes in Story Creek (${have}/${HOLLOW_WALKS_TO_WITNESS}) — then Silas. Unpayable can wait.`
   }
   const area = areas.find((item) => item.id === areaId)
   const previous = area
@@ -187,7 +187,7 @@ export function getNextGoal(
   if (!progress.started) {
     return {
       kind: 'welcome',
-      title: 'Begin in Parable Hollow',
+      title: 'Begin in Story Creek',
       detail: 'After today’s short walk, the longer trail opens here.',
       areaId: 'parable-hollow',
     }

@@ -1049,27 +1049,66 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.37')
+assert.equal(APP_VERSION, '1.4.38')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
 assert.equal(CAST.silas.name, 'Silas Whitman')
 assert.equal(CAST.nora.name, 'Nora Skye')
+assert.equal(CAST.nora.role, 'Sky-watch keeper')
 assert.equal(CAST.ansel.name, 'Ansel Gate')
 assert.equal(CAST.ansel.role, 'Why-gate keeper')
 assert.equal(CAST.ansel.id, 'ansel')
 assert.equal(CAST.ansel.areaId, 'first-gate')
+assert.equal(parableHollow.id, 'parable-hollow')
+assert.equal(parableHollow.title, 'Story Creek')
+assert.equal(parableHollow.shortTitle, 'Creek')
+assert.equal(parableHollow.subtitle, 'Jesus stories that stick')
+assert.equal(witnessBench.id, 'witness-bench')
+assert.equal(witnessBench.title, 'Witness Square')
+assert.equal(witnessBench.shortTitle, 'Witness')
+assert.equal(witnessBench.subtitle, 'What can we know about events we did not see?')
+assert.equal(observatory.id, 'observatory')
+assert.equal(observatory.title, 'Sky Watch')
+assert.equal(observatory.shortTitle, 'Sky')
 assert.equal(firstGate.id, 'first-gate')
 assert.equal(firstGate.title, 'Why Gate')
 assert.equal(firstGate.shortTitle, 'Why')
 assert.equal(firstGate.subtitle, 'Why is there a world at all?')
+assert.equal(highLookout.id, 'high-lookout')
+assert.equal(highLookout.title, 'Meaning Ridge')
+assert.equal(highLookout.shortTitle, 'Meaning')
+assert.equal(highLookout.subtitle, 'Mind, duty, meaning, and beauty')
+assert.equal(CITY_PLOTS.find((plot) => plot.id === 'hollow')?.title, 'Story Creek')
+assert.equal(CITY_PLOTS.find((plot) => plot.id === 'hollow')?.areaId, 'parable-hollow')
+assert.equal(CITY_PLOTS.find((plot) => plot.id === 'bench')?.title, 'Witness Square')
+assert.equal(CITY_PLOTS.find((plot) => plot.id === 'bench')?.areaId, 'witness-bench')
+assert.equal(CITY_PLOTS.find((plot) => plot.id === 'observatory')?.title, 'Sky Watch')
+assert.equal(CITY_PLOTS.find((plot) => plot.id === 'observatory')?.areaId, 'observatory')
 assert.equal(CITY_PLOTS.find((plot) => plot.id === 'gate')?.title, 'Why Gate')
 assert.equal(CITY_PLOTS.find((plot) => plot.id === 'gate')?.areaId, 'first-gate')
+assert.equal(CITY_PLOTS.find((plot) => plot.id === 'lookout')?.title, 'Meaning Ridge')
+assert.equal(CITY_PLOTS.find((plot) => plot.id === 'lookout')?.areaId, 'high-lookout')
+assert.equal(plotTag('hollow'), 'Story Creek')
+assert.equal(plotTag('bench'), 'Witness Square')
+assert.equal(plotTag('observatory'), 'Sky Watch')
 assert.equal(plotTag('gate'), 'Why Gate')
+assert.equal(plotTag('lookout'), 'Meaning Ridge')
+assert.equal(easyPlotTag('hollow'), 'Story Creek')
+assert.equal(easyPlotTag('bench'), 'Witness Square')
+assert.equal(easyPlaceSub('hollow'), 'Story Creek · Jesus stories')
+assert.equal(easyPlaceSub('bench'), 'Witness Square · public names')
+assert.equal(easyPlaceSub('observatory'), 'Nora’s Sky Watch')
 assert.equal(easyPlaceSub('gate'), 'Ansel’s why-a-world gate')
+assert.equal(easyPlaceSub('lookout'), 'Hope’s Meaning Ridge')
 assert.equal(LOT_STORY.gate.path, 'Why a world')
+assert.match(LOT_STORY.hollow.whyHard, /^Story Creek /)
+assert.match(LOT_STORY.bench.whyHard, /^Witness Square /)
+assert.match(LOT_STORY.observatory.whyHard, /^Sky Watch /)
 assert.match(LOT_STORY.gate.whyHard, /^Why Gate /)
+assert.match(LOT_STORY.lookout.whyHard, /^Meaning Ridge /)
 assert.equal(CAST.hope.name, 'Hope Ridge')
+assert.equal(CAST.hope.role, 'Meaning-ridge keeper')
 assert.equal(CAST.juniper.id, 'juniper')
 assert.equal(CAST.silas.id, 'silas')
 assert.equal(
@@ -1178,7 +1217,7 @@ assert.match(TOWN_PATH_HARD, /Heaven/)
 assert.match(mapSrc, /TOWN_PATH/)
 assert.match(
   readFileSync(new URL('../src/components/Landmark.tsx', import.meta.url), 'utf8'),
-  /Parable Hollow/,
+  /Story Creek/,
 )
 assert.doesNotMatch(
   readFileSync(new URL('../src/components/Landmark.tsx', import.meta.url), 'utf8'),
@@ -1564,11 +1603,11 @@ assert.match(
 )
 assert.match(
   readFileSync(new URL('../src/lib/cityBuild.ts', import.meta.url), 'utf8'),
-  /Parable Hollow/,
+  /Story Creek/,
 )
 assert.match(
   readFileSync(new URL('../src/lib/cityBuild.ts', import.meta.url), 'utf8'),
-  /Witness Bench/,
+  /Witness Square/,
 )
 assert.match(
   readFileSync(new URL('../src/lib/cityBuild.ts', import.meta.url), 'utf8'),
@@ -1723,7 +1762,10 @@ assert.doesNotMatch(latestChange(APP_VERSION).title, /Heaven/)
 assert.match(latestChange(APP_VERSION).title, /core/)
 assert.match(latestChange(APP_VERSION).items.join('\n'), /6\/6/)
 assert.match(latestChange(APP_VERSION).items.join('\n'), /Match/)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Why Gate/)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Story Creek/)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Witness Square/)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Sky Watch/)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Meaning Ridge/)
 assert.match(defendSrc, /easyTapTarget/)
 assert.match(defendSrc, /data-person-node="walker"/)
 assert.doesNotMatch(defendSrc, /walkerCue|easySolo|clearWalkerCue|hideOther/)

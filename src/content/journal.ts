@@ -5,7 +5,7 @@ export const journalEntries: JournalEntry[] = [
     id: 'j-ph-1',
     areaId: 'parable-hollow',
     title: 'The Teacher who taught in stories',
-    kicker: 'Parable Hollow',
+    kicker: 'Story Creek',
     unlockAfter: 'ph-road',
     body: [
       'The Gospels present Jesus as a teacher whose most characteristic form is the parable. These are not children’s decorations added to a lecture. They are the lecture — they force a decision about mercy, pride, and the identity of God.',
@@ -17,7 +17,7 @@ export const journalEntries: JournalEntry[] = [
     id: 'j-ph-2',
     areaId: 'parable-hollow',
     title: 'Mercy that runs',
-    kicker: 'Parable Hollow',
+    kicker: 'Story Creek',
     unlockAfter: 'ph-father',
     body: [
       'Luke 15 stacks three lost-and-found stories after a complaint: this man welcomes sinners and eats with them. The father’s run (Luke 15:20) is the theological center of the third story. Honor is spent so that the son can be embraced before he finishes his hired-hand speech.',
@@ -29,7 +29,7 @@ export const journalEntries: JournalEntry[] = [
     id: 'j-ph-3',
     areaId: 'parable-hollow',
     title: 'Seeds, search, and a trust',
-    kicker: 'Parable Hollow',
+    kicker: 'Story Creek',
     unlockAfter: 'ph-seeds',
     body: [
       'Taken together, the sower, the lost sheep, the mustard seed, and the talents sketch a God who speaks, seeks, grows a kingdom from small beginnings, and will ask what was done with a trust.',
@@ -46,7 +46,7 @@ export const journalEntries: JournalEntry[] = [
     id: 'j-ph-4',
     areaId: 'parable-hollow',
     title: 'The measure you use',
-    kicker: 'Parable Hollow',
+    kicker: 'Story Creek',
     unlockAfter: 'ph-debt',
     body: [
       'Matthew 18:21–35 is severe because grace is severe in the opposite direction from cruelty: it creates a world. To be forgiven an unpayable debt and then throttle a neighbor is to live as if the king’s mercy never happened.',
@@ -58,7 +58,7 @@ export const journalEntries: JournalEntry[] = [
     id: 'j-wb-1',
     areaId: 'witness-bench',
     title: 'Of first importance',
-    kicker: 'The Witness Bench',
+    kicker: 'Witness Square',
     unlockAfter: 'wb-creed',
     body: [
       '1 Corinthians 15:3–5 is a compressed public claim: death, burial, raising, appearances. Paul presents it as received tradition, not as a private dream. Burial resists a merely “spiritual” death; appearances resist a merely “spiritual” raising.',
@@ -70,7 +70,7 @@ export const journalEntries: JournalEntry[] = [
     id: 'j-wb-2',
     areaId: 'witness-bench',
     title: 'Early is not the same as easy',
-    kicker: 'The Witness Bench',
+    kicker: 'Witness Square',
     unlockAfter: 'wb-early',
     body: [
       'Historians cannot rewind the world. They ask how close a report stands to the events, how formulaic it is, and whether the author is appealing to known people (Cephas, the Twelve, James, a large group, Paul himself).',
@@ -82,7 +82,7 @@ export const journalEntries: JournalEntry[] = [
     id: 'j-wb-3',
     areaId: 'witness-bench',
     title: 'How the past is weighed',
-    kicker: 'The Witness Bench',
+    kicker: 'Witness Square',
     unlockAfter: 'wb-method',
     body: [
       'Multiple attestation, embarrassment, early testimony, and contextual credibility are ordinary tools. They do not replace reading. They resist the story that every Christian report is a late pious novel.',
@@ -96,7 +96,7 @@ export const journalEntries: JournalEntry[] = [
     id: 'j-wb-4',
     areaId: 'witness-bench',
     title: 'Awkward beginnings',
-    kicker: 'The Witness Bench',
+    kicker: 'Witness Square',
     unlockAfter: 'wb-women',
     body: [
       'The tomb stories begin with women, and Luke records that the apostles dismissed them (Luke 24:11). That is an odd opening if the only goal is later public respectability.',
@@ -114,7 +114,7 @@ export const journalEntries: JournalEntry[] = [
     id: 'j-ob-1',
     areaId: 'observatory',
     title: 'The universe is finely tuned for life',
-    kicker: 'The Observatory',
+    kicker: 'Sky Watch',
     unlockAfter: 'ob-tuning',
     body: [
       'The universe is finely tuned for life — that fit points to a Designer.',
@@ -130,7 +130,7 @@ export const journalEntries: JournalEntry[] = [
     id: 'j-ob-2',
     areaId: 'observatory',
     title: 'A mind that intended a habitable world',
-    kicker: 'The Observatory',
+    kicker: 'Sky Watch',
     unlockAfter: 'ob-design',
     body: [
       'Fine-tuning is best explained by a mind that intended a habitable world.',
@@ -145,7 +145,7 @@ export const journalEntries: JournalEntry[] = [
     id: 'j-ob-3',
     areaId: 'observatory',
     title: 'The question beneath physics',
-    kicker: 'The Observatory',
+    kicker: 'Sky Watch',
     unlockAfter: 'ob-leibniz',
     body: [
       'Leibniz’s question — why is there something rather than nothing? — is not retired by a successful cosmological model. Models describe a world that is already given.',
@@ -160,7 +160,7 @@ export const journalEntries: JournalEntry[] = [
     id: 'j-ob-4',
     areaId: 'observatory',
     title: 'Life’s open threshold',
-    kicker: 'The Observatory',
+    kicker: 'Sky Watch',
     unlockAfter: 'ob-life',
     body: [
       'Life’s specified information is a mark of mind. Cells require coordinated function. That is not a rumor; it is biology.',
@@ -236,7 +236,7 @@ export const journalEntries: JournalEntry[] = [
     id: 'j-hl-1',
     areaId: 'high-lookout',
     title: 'The moral grain of the world',
-    kicker: 'The High Lookout',
+    kicker: 'Meaning Ridge',
     unlockAfter: 'hl-moral',
     body: [
       'Duty presents itself as more than taste. A good God is the ground of a good law — the home that fits. Romans 2 treats that knowledge as widely shared, which is why injustice still has a name.',
@@ -248,7 +248,7 @@ export const journalEntries: JournalEntry[] = [
     id: 'j-hl-2',
     areaId: 'high-lookout',
     title: 'The inside of mind',
-    kicker: 'The High Lookout',
+    kicker: 'Meaning Ridge',
     unlockAfter: 'hl-mind',
     body: [
       'Qualia, aboutness, the hard problem, and the norm of reason are not parlor tricks. They are what it is like to be a knower. A story of the world that cannot find a home for mind is a story that cannot find a home for the storyteller.',
@@ -264,7 +264,7 @@ export const journalEntries: JournalEntry[] = [
     id: 'j-hl-3',
     areaId: 'high-lookout',
     title: 'Meaning that can be found',
-    kicker: 'The High Lookout',
+    kicker: 'Meaning Ridge',
     unlockAfter: 'hl-meaning',
     body: [
       'You can build a local meaning without naming God. The lookout asks whether that meaning is only assembled, or also received — whether the hunger for a final good has an object.',
@@ -276,7 +276,7 @@ export const journalEntries: JournalEntry[] = [
     id: 'j-hl-4',
     areaId: 'high-lookout',
     title: 'Beauty as a signpost',
-    kicker: 'The High Lookout',
+    kicker: 'Meaning Ridge',
     unlockAfter: 'hl-beauty',
     body: [
       'Beauty wakes a hunger it cannot feed — longing for a country the sunset cannot give. Hungers like that usually correspond to real countries.',

@@ -11,7 +11,7 @@ A stranger should know in 60 seconds: this is a **Christian reasoning game**. So
 **Sticky public preview (GitHub Pages):**  
 https://cphillippe.github.io/Silver-dollar-city/
 
-Hard-reload once if you still see the old game (the PWA can keep a cached copy). Live bundle is published with V0 **1.4.37**. **Easy mode** is off by default — check **Easier words · bigger taps** on Welcome, or Settings → Reading → Easy mode. Easy home is Match → Saved → Night Watch; Town (soon) waits under Settings → More. We teach hard words first: a claim is the main idea we hold to be true. After that, Easy buttons say main idea. After a win, say the line out loud; Dig deeper holds the reason. Open **Profile** from Town or Settings for every unlock.
+Hard-reload once if you still see the old game (the PWA can keep a cached copy). Live bundle is published with V0 **1.4.38**. **Easy mode** is off by default — check **Easier words · bigger taps** on Welcome, or Settings → Reading → Easy mode. Easy home is Match → Saved → Night Watch; Town (soon) waits under Settings → More. We teach hard words first: a claim is the main idea we hold to be true. After that, Easy buttons say main idea. After a win, say the line out loud; Dig deeper holds the reason. Open **Profile** from Town or Settings for every unlock.
 
 Pages deploys `docs/` from `main` once that source is selected. Until then the same `docs/` is also on `cursor/silver-city-unending-evidence-8233`. Hard-reload github.io after it updates.
 
@@ -23,11 +23,11 @@ Skip older trycloudflare links. Skip StackBlitz.
 
 | Guide | District | Role |
 | --- | --- | --- |
-| Mercy Wren | Parable Hollow | Parable-teller |
-| Silas Whitman | The Witness Bench | Witness clerk |
-| Nora Skye | The Observatory | Observatory keeper |
+| Mercy Wren | Story Creek | Parable-teller |
+| Silas Whitman | Witness Square | Witness clerk |
+| Nora Skye | Sky Watch | Sky-watch keeper |
 | Ansel Gate | Why Gate | Why-gate keeper |
-| Hope Ridge | The High Lookout | Lookout |
+| Hope Ridge | Meaning Ridge | Meaning-ridge keeper |
 
 Portraits are candy circular faces (`src/assets/cast/`, `src/components/Avatar.tsx`). Light dialogue, not sermons.
 
@@ -129,11 +129,11 @@ Playtest notes live in [`PLAYTEST.md`](PLAYTEST.md).
 
 | District | Pillar |
 | --- | --- |
-| Parable Hollow | Biblical narrative and lessons |
-| The Witness Bench | Gospels, the 1 Corinthians 15 creed, historical method |
-| The Observatory | Fine-tuning, “why something rather than nothing,” origin of life (carefully framed) |
+| Story Creek | Biblical narrative and lessons |
+| Witness Square | Gospels, the 1 Corinthians 15 creed, historical method |
+| Sky Watch | Fine-tuning, “why something rather than nothing,” origin of life (carefully framed) |
 | Why Gate | First mover, contingency, kalām — and what those arguments do *not* yet prove |
-| The High Lookout | Morality, consciousness, meaning, beauty |
+| Meaning Ridge | Morality, consciousness, meaning, beauty |
 
 ## Progress
 
@@ -144,7 +144,7 @@ Saves are **offline-first**. Nothing requires a login.
 - **Schema:** `SAVE_SCHEMA_VERSION` in `src/config/app.ts`. Bump it only when the persisted shape changes, and add a step in `src/lib/save.ts` `migrateToCurrent`. Do not wipe on upgrade.
 - **Move devices:** Settings → **Export JSON** (file) or **Copy share code** (`SC1.…`). Import file or paste on the other device. Import replaces this device’s save and keeps a backup key (`silver-city-progress-v1.bak`).
 - **Cloud:** not shipped. `cloudSyncStatus()` is `local-only` until there is real auth. Optional keys can be added later without dropping v1 fields.
-- **UI:** Hub is the **overworld town** on Hard. Completing Daily / districts / journal / stars lights buildings you **manage and upgrade** by tapping. Tap a place to open its **manage** sheet (person + idea nodes). **Profile** (Town tools or Settings) lists River plus every unlock. **Dig deeper** on Hold, Journal, mind map, and Profile: Scripture and older witnesses when they fit; later faithful sources welcome when they help. Settings shows **What’s new** plus schema and app version (`1.4.37`). **Easy mode** (Welcome or Settings → Reading) hides the Town map: home is Match → Saved → Night Watch, and Town (soon) waits under Settings → More. Easy teaches hard words first (a claim is the main idea we hold to be true) and then uses main idea in buttons. After every win you say the line out loud. Reset progress lives only in Settings → Danger zone.
+- **UI:** Hub is the **overworld town** on Hard. Completing Daily / districts / journal / stars lights buildings you **manage and upgrade** by tapping. Tap a place to open its **manage** sheet (person + idea nodes). **Profile** (Town tools or Settings) lists River plus every unlock. **Dig deeper** on Hold, Journal, mind map, and Profile: Scripture and older witnesses when they fit; later faithful sources welcome when they help. Settings shows **What’s new** plus schema and app version (`1.4.38`). **Easy mode** (Welcome or Settings → Reading) hides the Town map: home is Match → Saved → Night Watch, and Town (soon) waits under Settings → More. Easy teaches hard words first (a claim is the main idea we hold to be true) and then uses main idea in buttons. After every win you say the line out loud. Reset progress lives only in Settings → Danger zone.
 
 ## The town
 
@@ -153,9 +153,9 @@ The hub is an **overworld map**, not a locked list. Buildings are derived from t
 | Landmark | Appears | Lights |
 | --- | --- | --- |
 | East porch | Always (scaffold) | 1 Daily built · 3 mornings lit |
-| Parable Hollow | After first Daily | Walks build it · all four light it |
-| Witness Bench | After **two** Hollow walks | Same pattern |
-| Observatory / Why Gate / High Lookout | After the previous district is finished | Same |
+| Story Creek | After first Daily | Walks build it · all four light it |
+| Witness Square | After **two** Creek walks | Same pattern |
+| Sky Watch / Why Gate / Meaning Ridge | After the previous district is finished | Same |
 | Dossier house | First journal page | 4 pages built · 12 lit |
 | Star lamps | First star | 4★ built · 12★ lit |
 
@@ -166,14 +166,14 @@ The gold ring is **what to unlock next**. Tap a building to open that lot’s **
 No live ad network in this build. Slots are empty, labeled placeholders behind a flag.
 
 - **Flag:** `adsEnabledDefault` in `src/config/ads.ts` is **false** (playtest). Settings can show placeholders on this device only.
-- **Slots:** hub banner (under Today’s Trail), once between Parable Hollow and Witness Bench, after Daily **complete** (teaser screen).
+- **Slots:** hub banner (under Today’s Trail), once between Story Creek and Witness Square, after Daily **complete** (teaser screen).
 - **Must never be blocked or covered:** Keep/Toss and Lock in the sort; takeaway / RecallGate; Journal due cards; puzzle boards. Ads are in-flow boxes, not overlays, and they do not mount on Trail/challenge/Journal play chrome.
 
 Wire a test unit later by teaching `AdSlot` to render the network creative when `adsEnabledDefault` is true — still only in those three slots.
 
 ## Support
 
-- **Version:** app `1.4.37` V0 (`package.json`, `src/config/app.ts`, Android `versionName`). Capacitor id `city.silver.unending`. `npm run android:apk` still builds the debug APK. Settings → **What’s new** (`src/content/changelog.ts`) is the hook for later packs.
+- **Version:** app `1.4.38` V0 (`package.json`, `src/config/app.ts`, Android `versionName`). Capacitor id `city.silver.unending`. `npm run android:apk` still builds the debug APK. Settings → **What’s new** (`src/content/changelog.ts`) is the hook for later packs.
 - **Content packs:** core trail is `CONTENT_PACKS` in [`src/content/packs.ts`](src/content/packs.ts). Next drop: new Area module → register in `index.ts` → one pack row → changelog row → journal/evidence/city/tools. Details: [`src/content/README.md`](src/content/README.md).
 - **Release smoke:** [`PLAYTEST.md`](PLAYTEST.md) (fun / clarity / retention plus the short checklist).
 - **Playtest notes:** same file.

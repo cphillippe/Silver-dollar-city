@@ -19,7 +19,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
     id: 'trail-gems',
     early: true,
     teaser: 'Juniper set three gems on the east-porch rail.',
-    districtFlavor: 'Parable Hollow · porch gems',
+    districtFlavor: 'Story Creek · porch gems',
     challenge: {
       kind: 'match',
       id: 'daily-gems',
@@ -41,7 +41,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
     id: 'trail-lantern',
     early: true,
     teaser: 'A lantern is already lit on the east porch.',
-    districtFlavor: 'Parable Hollow · a small lamp',
+    districtFlavor: 'Story Creek · a small lamp',
     challenge: {
       kind: 'sequence',
       id: 'daily-lantern',
@@ -64,7 +64,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
     id: 'trail-seed',
     early: true,
     teaser: 'Someone has been turning soil behind the chapel.',
-    districtFlavor: 'Parable Hollow · a handful of seed',
+    districtFlavor: 'Story Creek · a handful of seed',
     challenge: {
       kind: 'sort',
       id: 'daily-seed',
@@ -106,7 +106,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
   {
     id: 'trail-names',
     teaser: 'The bench has two new names in the margin.',
-    districtFlavor: 'The Witness Bench · names that stay',
+    districtFlavor: 'Witness Square · names that stay',
     challenge: {
       kind: 'match',
       id: 'daily-names',
@@ -128,7 +128,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
   {
     id: 'trail-creed',
     teaser: 'A folded card from an old church bulletin sits on the rail.',
-    districtFlavor: 'The Witness Bench · an early creed',
+    districtFlavor: 'Witness Square · an early creed',
     challenge: {
       kind: 'sequence',
       id: 'daily-creed',
@@ -149,7 +149,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
   {
     id: 'trail-stars',
     teaser: 'The observatory dome is cracked just enough for Orion.',
-    districtFlavor: 'The Observatory · night air',
+    districtFlavor: 'Sky Watch · night air',
     challenge: {
       kind: 'sort',
       id: 'daily-stars',
@@ -188,7 +188,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
   {
     id: 'trail-life',
     teaser: 'A biologist left a note under the eyepiece: “still not cheap.”',
-    districtFlavor: 'The Observatory · living cells',
+    districtFlavor: 'Sky Watch · living cells',
     challenge: {
       kind: 'match',
       id: 'daily-life',
@@ -271,7 +271,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
     id: 'trail-grace',
     early: true,
     teaser: 'A pew card says only: “not a wage.”',
-    districtFlavor: 'The High Lookout · unearned',
+    districtFlavor: 'Meaning Ridge · unearned',
     challenge: {
       kind: 'match',
       id: 'daily-grace',
@@ -293,7 +293,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
     id: 'trail-rest',
     early: true,
     teaser: 'The lookout bench is empty on purpose.',
-    districtFlavor: 'The High Lookout · come and rest',
+    districtFlavor: 'Meaning Ridge · come and rest',
     challenge: {
       kind: 'sequence',
       id: 'daily-rest',
@@ -313,7 +313,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
   {
     id: 'trail-neighbor',
     teaser: 'A child left chalk arrows toward the well.',
-    districtFlavor: 'Parable Hollow · who is near',
+    districtFlavor: 'Story Creek · who is near',
     challenge: {
       kind: 'build-argument',
       id: 'daily-neighbor',
@@ -340,7 +340,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
   {
     id: 'trail-empty',
     teaser: 'Dawn light on an unused grave cloth.',
-    districtFlavor: 'The Witness Bench · morning',
+    districtFlavor: 'Witness Square · morning',
     challenge: {
       kind: 'sort',
       id: 'daily-empty',
@@ -381,7 +381,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
   {
     id: 'trail-cosmos',
     teaser: 'The chalkboard still says “why anything at all?”',
-    districtFlavor: 'The Observatory · a first question',
+    districtFlavor: 'Sky Watch · a first question',
     challenge: {
       kind: 'build-argument',
       id: 'daily-cosmos',
@@ -408,7 +408,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
   {
     id: 'trail-door',
     teaser: 'Someone chalked a small door on the lookout wall.',
-    districtFlavor: 'The High Lookout · a door, not a wall',
+    districtFlavor: 'Meaning Ridge · a door, not a wall',
     challenge: {
       kind: 'match',
       id: 'daily-door',

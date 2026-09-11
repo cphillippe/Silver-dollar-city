@@ -3,8 +3,8 @@ import type { Area } from '../types'
 export const observatory: Area = {
   id: 'observatory',
   order: 3,
-  title: 'The Observatory',
-  shortTitle: 'Ridge',
+  title: 'Sky Watch',
+  shortTitle: 'Sky',
   subtitle: 'A sky that did not have to be this way',
   blurb:
     'Science maps how the world runs. It does not forbid the question why.',

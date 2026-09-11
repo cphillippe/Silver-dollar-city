@@ -19,19 +19,19 @@ export const LOT_STORY: Record<CityPlotId, LotStory> = {
     path: 'Eden stories',
     whyEasy: 'Mercy tells Jesus stories by the creek. Pictures live where water and oaks are.',
     whyHard:
-      'Parable Hollow is the garden of the case. Jesus taught in pictures; Mercy keeps the creek so those stories can walk around inside you.',
+      'Story Creek is the garden of the case. Jesus taught in pictures; Mercy keeps the creek so those stories can walk around inside you.',
   },
   bench: {
     path: 'Names',
     whyEasy: 'Silas copies names at the square. Public names live here, not under the oaks.',
     whyHard:
-      'The Witness Bench faces the square. Died, buried, raised, appeared is a public creed — Silas keeps it where names and dates are copied.',
+      'Witness Square is the ledger on the square. Died, buried, raised, appeared is a public creed — Silas keeps it where names and dates are copied.',
   },
   observatory: {
     path: 'Sky',
     whyEasy: 'Nora’s dome looks up. Fine-tuning and the sky’s fit live on the ridge.',
     whyHard:
-      'The Observatory sits on the north ridge so you look up. Life’s dials and “why anything at all” belong with a telescope, not a creek story.',
+      'Sky Watch sits on the north ridge so you look up. Life’s dials and “why anything at all” belong with a telescope, not a creek story.',
   },
   gate: {
     path: 'Why a world',
@@ -43,7 +43,7 @@ export const LOT_STORY: Record<CityPlotId, LotStory> = {
     path: 'Meaning',
     whyEasy: 'Hope’s tower looks over the whole town. Duty, mind, meaning, and beauty live up here.',
     whyHard:
-      'High Lookout is the last ridge. Inner life, duty, hunger, and beauty are what it is like to be a person looking down on the walk you kept.',
+      'Meaning Ridge is the last ridge. Inner life, duty, hunger, and beauty are what it is like to be a person looking down on the walk you kept.',
   },
   journal: {
     path: 'Pages',
@@ -66,12 +66,12 @@ export function lotWhy(id: CityPlotId, easy: boolean): string {
 
 /** Soften formal place names on Easy — title can stay; this is the subtitle. */
 export function easyPlaceSub(id: CityPlotId): string | null {
-  if (id === 'hollow') return 'Mercy’s creek · Jesus stories'
-  if (id === 'bench') return 'the square · Silas’s place'
+  if (id === 'hollow') return 'Story Creek · Jesus stories'
+  if (id === 'bench') return 'Witness Square · public names'
   if (id === 'porch') return 'Juniper’s lamp'
-  if (id === 'observatory') return 'Nora’s sky watch'
+  if (id === 'observatory') return 'Nora’s Sky Watch'
   if (id === 'gate') return 'Ansel’s why-a-world gate'
-  if (id === 'lookout') return 'Hope’s high look'
+  if (id === 'lookout') return 'Hope’s Meaning Ridge'
   return null
 }
 

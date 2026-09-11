@@ -274,15 +274,15 @@ export function plotTag(id: CityPlotId): string {
     case 'porch':
       return 'Porch'
     case 'hollow':
-      return 'Hollow'
+      return 'Story Creek'
     case 'bench':
-      return 'Bench'
+      return 'Witness Square'
     case 'observatory':
-      return 'Sky'
+      return 'Sky Watch'
     case 'gate':
       return 'Why Gate'
     case 'lookout':
-      return 'Lookout'
+      return 'Meaning Ridge'
     case 'journal':
       return 'Pages'
     case 'lamps':
@@ -290,10 +290,10 @@ export function plotTag(id: CityPlotId): string {
   }
 }
 
-/** Easy map chips — full place names, not Hollow / Square / Porch. */
+/** Easy map chips — full place names, not Creek / Square / Porch. */
 export function easyPlotTag(id: CityPlotId): string {
-  if (id === 'hollow') return 'Parable Hollow'
-  if (id === 'bench') return 'Witness Bench'
+  if (id === 'hollow') return 'Story Creek'
+  if (id === 'bench') return 'Witness Square'
   if (id === 'porch') return 'East porch'
   if (id === 'lamps') return 'Star lamps'
   return plotTag(id)
