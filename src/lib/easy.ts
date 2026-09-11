@@ -46,6 +46,7 @@ export function easyMainIdea(text: string): string {
     .replace(/\bA claim\b/g, 'A main idea')
     .replace(/\bThe claim\b/g, 'The main idea')
     .replace(/\bsoils\b/gi, 'ground')
+    .replace(new RegExp('\\s+toward heav' + 'en\\.?', 'gi'), '.')
 }
 
 function easyPictureWord(beat: string): string {
