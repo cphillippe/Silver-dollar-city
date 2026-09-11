@@ -210,7 +210,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
   {
     id: 'trail-scroll',
     teaser: 'The archive clerk set out one short Hebrew line.',
-    districtFlavor: 'The First Gate · a copied line',
+    districtFlavor: 'Why Gate · a copied line',
     challenge: {
       kind: 'sequence',
       id: 'daily-scroll',
@@ -231,7 +231,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
   {
     id: 'trail-isaiah',
     teaser: 'Someone underlined “with his wounds” in a visitor Bible.',
-    districtFlavor: 'The First Gate · a hard poem',
+    districtFlavor: 'Why Gate · a hard poem',
     challenge: {
       kind: 'sort',
       id: 'daily-isaiah',
