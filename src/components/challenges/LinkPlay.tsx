@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { LinkChallenge, LinkKind, LinkNode } from '../../types'
 import { linkCaption, linkClue, linkMiss, linkPicture } from '../../content/links'
-import { EASY, easyLinkStep, isEasy } from '../../lib/easy'
+import { EASY, isEasy } from '../../lib/easy'
 import { shuffle } from '../../lib/shuffle'
 import { useProgress } from '../../store/progress'
 import { Avatar } from '../Avatar'
@@ -255,15 +255,16 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
           : 'Wrong idea. Pick the claim, then its place, then its person.'
 
   const wizardCue =
-    step === 'linked' || status === 'ok' || (easy && screen !== 'choose')
+    easy || step === 'linked' || status === 'ok'
       ? null
-      : easy
-        ? easyLinkStep(step)
-        : step === 'idea'
-          ? '1 of 3 — pick the idea.'
-          : step === 'place'
-            ? '2 of 3 — pick the place.'
-            : '3 of 3 — pick the person.'
+      : step === 'idea'
+        ? '1 of 3 — pick the idea.'
+        : step === 'place'
+          ? '2 of 3 — pick the place.'
+          : '3 of 3 — pick the person.'
+
+  const easyNow =
+    step === 'place' ? 'place' : step === 'person' ? 'person' : 'idea'
 
   const shownOptions = stepOptions.filter((node) => {
     if (easy && screen === 'next') return node.id === picked || node.id === wantId
@@ -307,7 +308,32 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
       {easy ? null : <p className="next-tap">{nextTap}</p>}
       {wizardCue ? <p className="quiet wizard-step">{wizardCue}</p> : null}
 
-      {easy ? null : (
+      {easy ? (
+        <div className="easy-teach">
+          <p className="easy-steps" aria-label="Match steps">
+            <span className={easyNow === 'idea' ? 'is-now' : marks.idea ? 'is-done' : ''}>
+              1 · Sentence
+            </span>
+            <span className="easy-steps-arrow" aria-hidden>
+              →
+            </span>
+            <span className={easyNow === 'place' ? 'is-now' : marks.place ? 'is-done' : ''}>
+              2 · Place
+            </span>
+            <span className="easy-steps-arrow" aria-hidden>
+              →
+            </span>
+            <span className={easyNow === 'person' ? 'is-now' : marks.person ? 'is-done' : ''}>
+              3 · Person
+            </span>
+          </p>
+          {screen === 'miss' ? (
+            <p className="match-toast" role="status">
+              {missNeed}
+            </p>
+          ) : null}
+        </div>
+      ) : (
         <ol className="link-checks" aria-label="Link steps">
           <li className={marks.idea ? 'is-done' : step === 'idea' ? 'is-now' : ''}>
             {marks.idea ? '✓' : '1'} Idea
@@ -321,21 +347,11 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
         </ol>
       )}
 
-      {easy
-        ? screen === 'miss'
-          ? (
-              <p className="match-toast" role="status">
-                {missNeed}
-              </p>
-            )
-          : null
-        : status === 'wrong' || misses > 0
-          ? (
-              <p className="match-toast" role="status">
-                {missNeed}
-              </p>
-            )
-          : null}
+      {!easy && (status === 'wrong' || misses > 0) ? (
+        <p className="match-toast" role="status">
+          {missNeed}
+        </p>
+      ) : null}
 
       {!easy && misses > 0 && step !== 'linked' ? (
         <button type="button" className="btn tiny match-recover" onClick={recover}>
