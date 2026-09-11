@@ -5184,12 +5184,6 @@ html[data-theme='dusk'] .hub.is-town .street-link {
   max-height: 380px;
 }
 
-.defend-page.is-easy-watch.is-cue-solo .defend-pad,
-.defend-page.is-easy-watch.is-cue-solo .defend-gate,
-.defend-page.is-easy-watch.is-cue-solo .defend-raider {
-  display: none !important;
-}
-
 .easy-walkers {
   position: absolute;
   inset: 0;
@@ -5227,17 +5221,6 @@ img.walker-face.easy-walker-face,
 
 .easy-walker.is-cue .easy-walker-face {
   animation: easy-walker-pulse 1s ease-in-out infinite;
-}
-
-.easy-walker.is-dim {
-  z-index: 1;
-  opacity: 0.32;
-  filter: grayscale(0.85);
-  pointer-events: none;
-}
-
-.easy-walker.is-dim .easy-walker-face {
-  box-shadow: 0 0 0 3px rgba(180, 170, 150, 0.35);
 }
 
 .easy-walker-arrow {
@@ -5638,14 +5621,6 @@ img.walker-face.easy-walker-face,
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.02em;
-}
-
-.defend-raider.is-easy-walker .walker-cue-label {
-  font-size: 15px;
-}
-
-.defend-raider.is-easy-walker .defend-raider-call text {
-  font-size: 9px;
 }
 
 @keyframes walker-cue-pulse {
@@ -6260,7 +6235,7 @@ html[data-easy='on'] .link-block.is-not {
 }
 
 .play.is-easy-link .wizard-step,
-.play.is-easy-link.is-easy-miss .match-toast {
+.play.is-easy-link .match-toast {
   position: sticky;
   top: 0;
   z-index: 5;
@@ -6273,26 +6248,6 @@ html[data-easy='on'] .link-block.is-not {
   font-weight: 800;
   line-height: 1.3;
   color: #fff6e8;
-}
-
-.play.is-easy-link .link-checks,
-.play.is-easy-link .match-score,
-.play.is-easy-link .match-recover,
-.play.is-easy-link .match-col-label,
-.play.is-easy-link.is-easy-miss .link-checks,
-.play.is-easy-link.is-easy-miss .link-clue,
-.play.is-easy-link.is-easy-miss .match-score,
-.play.is-easy-link.is-easy-miss .match-recover,
-.play.is-easy-link.is-easy-miss .match-col-label {
-  display: none !important;
-}
-
-.defend-page.is-easy-watch.is-cue-solo .defend-ability.is-locked {
-  display: none !important;
-}
-
-.play.is-easy-link.is-await-next .link-clue {
-  display: none !important;
 }
 
 .play.is-easy-link .link-dock {
