@@ -202,7 +202,10 @@ export function Settings({ onNavigate }: SettingsProps) {
         <p className="eyebrow">Reading</p>
         <p>
           {easy ? (
-            <>Easy mode: shorter sentences and bigger taps. You can switch anytime.</>
+            <>
+              {EASY.claimTeach} Easy mode then says main idea. Shorter sentences and bigger taps.
+              You can switch anytime.
+            </>
           ) : (
             <>
               A claim is the main idea we hold to be true. Easy mode teaches that once,
