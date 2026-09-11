@@ -18,7 +18,7 @@ export function Welcome({ onNavigate }: WelcomeProps) {
 
   function begin() {
     start()
-    if (returning) {
+    if (progress.easyMode || returning) {
       onNavigate({ name: 'hub' })
       return
     }
@@ -30,7 +30,7 @@ export function Welcome({ onNavigate }: WelcomeProps) {
       <div className="welcome-sky" aria-hidden />
       <div className="welcome-ridge" aria-hidden />
       <div className="welcome-hero">
-        <CityMap mode="poster" onNavigate={onNavigate} />
+        {progress.easyMode ? null : <CityMap mode="poster" onNavigate={onNavigate} />}
         <p className="eyebrow">60 seconds</p>
         <h1>
           Silver City
@@ -80,7 +80,13 @@ export function Welcome({ onNavigate }: WelcomeProps) {
             </p>
           ) : null}
           <button type="button" className="btn primary xl" onClick={begin}>
-            {returning ? 'Back to town' : 'Begin the trail'}
+            {progress.easyMode
+              ? returning
+                ? EASY.home
+                : 'Play'
+              : returning
+                ? 'Back to town'
+                : 'Begin the trail'}
           </button>
           <p className="welcome-version">{progress.easyMode ? APP_VERSION : `V0 · ${APP_VERSION}`}</p>
         </div>
