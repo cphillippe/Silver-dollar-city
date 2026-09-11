@@ -1,5 +1,6 @@
 import type { MemoryTrace, ProgressState } from '../types.ts'
 import { evidenceFor } from '../content/evidence.ts'
+import { isToolHowTo } from './watchTools.ts'
 import {
   dueTraces,
   pickSessionDue,
@@ -60,7 +61,9 @@ export function markLater(
 }
 
 export function playableDue(progress: ProgressState, today: string): MemoryTrace[] {
-  return dueTraces(progress.memory, today).filter((trace) => Boolean(evidenceFor(trace.id)))
+  return dueTraces(progress.memory, today).filter(
+    (trace) => Boolean(evidenceFor(trace.id)) && !isToolHowTo(trace.id),
+  )
 }
 
 /** Due items for this sitting: skip Later ids, cap leftover slots at 3. */

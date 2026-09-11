@@ -16,6 +16,7 @@ import {
   learningBeat,
   learningFromReview,
   MEMORY_STAGES,
+  storedLearnings,
 } from '../src/lib/learning.ts'
 
 assert.deepEqual(MEMORY_STAGES, [
@@ -53,8 +54,22 @@ const linked = learningFromReview(event, { ...empty, held: ['wb-creed'] })
 assert.match(linked?.anchor ?? '', /after/)
 assert.match(linked?.anchor ?? '', /creed/)
 
-assert.match(learningBeat('td-watch'), /unkind sentence/)
+assert.match(learningBeat('td-watch'), /compassion/)
 assert.match(learningAnchor(empty, 'td-watch'), /Mercy Wren/)
+assert.equal(
+  learningFromReview({ ...event, id: 'td-watch' }, empty),
+  undefined,
+)
+assert.deepEqual(
+  storedLearnings({
+    ...empty,
+    learnings: [
+      { id: 'td-watch', claim: 'Love tip', reason: '', source: '', anchor: '', acquiredAt: '2026-09-11' },
+      { id: 'ph-road', claim: 'Neighbor is the one who shows mercy.', reason: '', source: '', anchor: '', acquiredAt: '2026-09-11' },
+    ],
+  }).map((item) => item.id),
+  ['ph-road'],
+)
 
 const fresh = emptyTrace('ph-road', 'parable-hollow', '2026-09-09')
 assert.equal(fresh.nextReviewAt, '2026-09-09')

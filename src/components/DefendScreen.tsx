@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { evidenceFor } from '../content/evidence'
 import { WATCH_KICKER, WATCH_LEAD, WATCH_TITLE } from '../content/defend'
-import { STORY } from '../content/story'
-import { EASY, easyFacingLine, isEasy } from '../lib/easy'
+import { EASY, easyFacingLine, isEasy, loveHowTo } from '../lib/easy'
 import { localDateKey } from '../lib/dates'
 import {
   DEFEND_ANCHOR,
@@ -32,8 +31,7 @@ import {
   waveIsClear,
   type WatchAbility,
 } from '../lib/defend'
-import { findLearning, learningForTool } from '../lib/learning'
-import { nextGapLabel } from '../lib/memory'
+import { learningForTool } from '../lib/learning'
 import { TIER_MARK, toolTier, WALKER_LABEL, watchTool, WATCH_TOOLS } from '../lib/watchTools'
 import { useJuiceHandoff } from '../lib/juice'
 import { CITY_PLOTS, type CityPlotId } from '../lib/city'
@@ -41,9 +39,6 @@ import { useProgress } from '../store/progress'
 import type { View, WalkerKind } from '../types'
 import { walkerSrc, WalkerFace } from './Avatar'
 import { AbilityMark } from './GemMark'
-import { RecallGate } from './RecallGate'
-import { TeachUnlock } from './TeachUnlock'
-import { StoredLine } from './StoredLine'
 import { TownReturn } from './TownReturn'
 import { WinBurst } from './challenges/WinBurst'
 
@@ -76,14 +71,14 @@ interface Blast {
 }
 
 export function DefendScreen({ onNavigate }: DefendScreenProps) {
-  const { progress, recordNight, recordReview, markMiss } = useProgress()
+  const { progress, recordNight, markMiss } = useProgress()
   const easy = isEasy(progress)
   const today = localDateKey()
   const brief = evidenceFor(DEFEND_BRIEF_ID)
   const pads = defendPads(progress)
   const unlocked = unlockedWatchAbilities(progress)
   const [ability, setAbility] = useState<WatchAbility>(() => unlocked[0] ?? 'love')
-  const [taught, setTaught] = useState(easy)
+  const taught = true
   const boardRef = useRef<SVGSVGElement>(null)
   const [boardBox, setBoardBox] = useState({ w: 640, h: 420 })
   const [toolLock, setToolLock] = useState<string | null>(null)
@@ -102,8 +97,6 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const [won, setWon] = useState(false)
   const [firing, setFiring] = useState(false)
   const comboRef = useRef(0)
-  const [recalled, setRecalled] = useState(false)
-  const [missedNight, setMissedNight] = useState(false)
   const { juiceDone, afterJuice } = useJuiceHandoff()
   const saved = useRef(false)
   const afterJuiceRef = useRef(afterJuice)
@@ -130,16 +123,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     if (!juiceDone || saved.current || !brief) return
     saved.current = true
     recordNight(today)
-    recordReview({
-      id: brief.id,
-      pillar: 'parable-hollow',
-      kind: 'encode',
-      today,
-      clean: !missedNight,
-      peeked: false,
-      elaborated: false,
-    })
-  }, [juiceDone, brief, missedNight, recordNight, recordReview, today])
+  }, [juiceDone, brief, recordNight, today])
 
   useEffect(() => {
     if (phase !== 'wave') return
@@ -187,7 +171,6 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       if (leaked) {
         live.current.hearts = Math.max(0, live.current.hearts - leaked)
         setHearts(live.current.hearts)
-        setMissedNight(true)
         comboRef.current = 0
         setCombo(0)
         setLeakFlash(true)
@@ -403,54 +386,13 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       className={`defend-page ${taught ? 'is-puzzle' : 'is-teach'} ${arming ? 'is-arming' : ''} ${won ? 'is-win' : ''} ${shake ? 'is-shake' : ''} ${leakFlash ? 'is-leak' : ''} ${firing ? 'is-firing' : ''} ${easy ? 'is-easy-watch' : ''} ${easyTap ? 'is-easy-tap' : ''}`}
       aria-label={WATCH_TITLE}
     >
-      {!taught ? (
-        <TeachUnlock
-          brief={brief}
-          kind="sort"
-          unlock="Unlock the lamps"
-          onUnlock={() => {
-            recordReview({
-              id: brief.id,
-              pillar: 'parable-hollow',
-              kind: 'encode',
-              today,
-              clean: true,
-              peeked: false,
-              elaborated: false,
-            })
-            setTaught(true)
-            setArming(true)
-            window.setTimeout(() => setArming(false), 360)
-          }}
-        />
-      ) : after && !recalled ? (
-        <RecallGate
-          brief={brief}
-          kicker={STORY.takeaway}
-          mode="encode"
-          onHeld={() => setRecalled(true)}
-        />
-      ) : after && recalled ? (
+      {after ? (
         <>
-          <StoredLine
-            learning={
-              findLearning(progress, brief.id) ?? {
-                id: brief.id,
-                claim: brief.claim,
-                reason: brief.reason,
-                source: brief.source,
-                anchor: 'Juniper’s east porch',
-                acquiredAt: today,
-              }
-            }
-            when={
-              progress.memory[brief.id]
-                ? nextGapLabel(progress.memory[brief.id], today, easy)
-                : easy
-                  ? 'Read this again today'
-                  : 'Dust off today'
-            }
-          />
+          <article className="stored-line" aria-label={easy ? 'How to use Love' : 'Love tip'}>
+            <p className="eyebrow">{easy ? 'How to use Love' : 'Love tip'}</p>
+            <p className="stored-claim">{loveHowTo(easy)}</p>
+            {easy ? <p className="quiet">{EASY.nightTap}</p> : null}
+          </article>
           <TownReturn
             who="juniper"
             line={
@@ -822,17 +764,15 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                   )}
                   <span className="defend-ability-claim">
                     {open
-                      ? (heldLine
+                      ? tool.id === 'love'
+                        ? loveHowTo(easy)
+                        : heldLine
                           ? easy
                             ? easyFacingLine(heldLine.id, heldLine.claim)
                             : heldLine.claim
-                          : tool.id === 'love'
-                            ? easy
-                              ? EASY.loveCue
-                              : 'A true line can turn a cheap claim.'
-                            : easy
-                              ? 'Keep a main idea to name this tool.'
-                              : 'Hold a line to name this tool.')
+                          : easy
+                            ? 'Keep a main idea to name this tool.'
+                            : 'Hold a line to name this tool.'
                       : easy
                         ? 'Locked — tap the glowing face'
                         : 'Hold a matching line'}

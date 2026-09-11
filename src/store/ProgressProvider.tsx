@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState, type ReactNode } from 'react'
 import { learningFromReview, upsertLearning } from '../lib/learning'
+import { isToolHowTo } from '../lib/watchTools'
 import {
   applyMiss,
   applySnooze,
@@ -64,7 +65,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
 
   const recordHeld = useCallback((evidenceId: string) => {
     setProgress((current) => {
-      if (current.held.includes(evidenceId)) return current
+      if (isToolHowTo(evidenceId) || current.held.includes(evidenceId)) return current
       const next: ProgressState = {
         ...current,
         held: [...current.held, evidenceId],
@@ -111,9 +112,10 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         ...current,
         memory: { ...current.memory, [event.id]: nextTrace },
         stars: { ...current.stars, [event.id]: kept },
-        held: current.held.includes(event.id)
-          ? current.held
-          : [...current.held, event.id],
+        held:
+          isToolHowTo(event.id) || current.held.includes(event.id)
+            ? current.held
+            : [...current.held, event.id],
         lastReviewPillar: event.pillar,
         elaborations: event.text
           ? { ...current.elaborations, [event.id]: event.text }

@@ -84,7 +84,7 @@ function ideaFrom(
   progress: ProgressState,
   id: string,
 ): ProfileIdea | undefined {
-  if (id === 'ln-street') return undefined
+  if (id === 'ln-street' || id === 'td-watch') return undefined
   const brief = evidenceFor(id)
   const stored = findLearning(progress, id)
   const claim = brief?.claim ?? stored?.claim
