@@ -1043,7 +1043,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.29')
+assert.equal(APP_VERSION, '1.4.30')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -1642,6 +1642,9 @@ assert.match(
 )
 assert.match(mapSrc, /easy \? 'seed'/)
 assert.match(mapSrc, /easy \? null : <SpinePath/)
+assert.match(mapSrc, /if \(isEasy\(progress\)\) return/)
+assert.match(mapSrc, /if \(playing\.current && !isEasy\(progress\)\) return/)
+assert.match(mapSrc, /Tap a building to Manage it/)
 assert.doesNotMatch(latestChange(APP_VERSION).title, /Heaven/)
 assert.match(latestChange(APP_VERSION).title, /core/)
 assert.match(latestChange(APP_VERSION).items.join('\n'), /6\/6/)

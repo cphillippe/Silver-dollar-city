@@ -8,6 +8,17 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.30',
+    title: 'Easy core loop',
+    when: '2026-09-11',
+    items: [
+      'Easy Town stays a full readable map. No Lit! zoom. Tap a building to Manage it, walk, or Build this.',
+      'Easy Night Watch finishes at 6/6. TAP n/6 is the score. Six face taps win the night.',
+      'Match stays sentence → place → person with a named miss and Next.',
+      'Saved keeps the sentences you held. Dig deeper, What’s new, themes, and Heaven-growth theater wait under Settings → More.',
+    ],
+  },
+  {
     version: '1.4.29',
     title: 'Easy core loop',
     when: '2026-09-11',

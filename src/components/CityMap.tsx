@@ -167,7 +167,8 @@ export function CityMap({
   }
 
   function open(id: CityPlotId) {
-    if (mode === 'poster' || playing.current) return
+    if (mode === 'poster') return
+    if (playing.current && !isEasy(progress)) return
     setTapped(id)
     window.setTimeout(() => {
       setTapped((cur) => (cur === id ? null : cur))
@@ -187,6 +188,13 @@ export function CityMap({
     if (mode !== 'live') return
     const now = visualSnapshot(progress)
     const fills = visualFills(progress)
+    if (isEasy(progress)) {
+      writeCitySeen(now)
+      writeFillsSeen(fills)
+      setShown(now)
+      setShownFill(fills)
+      return
+    }
     const prev = readCitySeen()
     const prevFill = readFillsSeen()
     if (!prev) {
@@ -299,6 +307,7 @@ export function CityMap({
   }
 
   function maybeHomecoming(snap: ReturnType<typeof citySnapshot>) {
+    if (isEasy(progress)) return
     if (playing.current) return
     if (readHomecomingDay() === today) return
     const id = newestStanding(snap)
@@ -347,9 +356,11 @@ export function CityMap({
         aria-label={
           mode === 'poster'
             ? 'A garden valley. The City of Heaven waits on the ridge.'
-            : celebrating
-              ? `${beat?.beat} ${beat?.title}`
-              : `Silver City, ${CITY_AGE_TITLE[age]}. ${standing} of ${possible} landmarks standing. The town grows toward the City of Heaven.`
+            : easy
+              ? 'Silver City. Tap a building to Manage it, walk, or Build this.'
+              : celebrating
+                ? `${beat?.beat} ${beat?.title}`
+                : `Silver City, ${CITY_AGE_TITLE[age]}. ${standing} of ${possible} landmarks standing. The town grows toward the City of Heaven.`
         }
       >
         <defs>
@@ -653,7 +664,7 @@ export function CityMap({
         ) : null}
       </svg>
 
-      {beat ? (
+      {beat && !easy ? (
         <div className="city-beat" role="status">
           <span className="city-beat-gems" aria-hidden>
             <GemMark gem="lamp" size="sm" />
@@ -670,7 +681,7 @@ export function CityMap({
         </div>
       ) : null}
 
-      {homecoming && !beat ? (
+      {homecoming && !beat && !easy ? (
         <div className="city-beat is-home" role="status">
           <Avatar who="juniper" size="sm" />
           <div>
