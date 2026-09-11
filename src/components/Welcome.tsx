@@ -59,8 +59,9 @@ export function Welcome({ onNavigate }: WelcomeProps) {
             New here? Easier words · bigger taps
           </label>
           <p className="quiet welcome-easy-note">
-            Optional. You can turn this on later in Settings → Reading. We teach hard words
-            first — a claim is the main idea we hold to be true.
+            {progress.easyMode
+              ? 'Shorter sentences and bigger taps. You can change this in Settings.'
+              : 'Optional. You can turn this on later in Settings → Reading. We teach hard words first — a claim is the main idea we hold to be true.'}
           </p>
           {progress.easyMode ? (
             <p className="teach-chip" role="note">
@@ -70,7 +71,7 @@ export function Welcome({ onNavigate }: WelcomeProps) {
           <button type="button" className="btn primary xl" onClick={begin}>
             {returning ? 'Back to town' : 'Begin the trail'}
           </button>
-          <p className="welcome-version">V0 · {APP_VERSION}</p>
+          <p className="welcome-version">{progress.easyMode ? APP_VERSION : `V0 · ${APP_VERSION}`}</p>
         </div>
       </div>
     </main>

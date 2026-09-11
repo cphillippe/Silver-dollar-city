@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.22',
+    title: 'Tap the face · numbered match steps',
+    when: '2026-09-11',
+    items: [
+      'Night Watch Easy freezes the glowing face under the arrow. Tap the face.',
+      'A match keeps 1 · Sentence → 2 · Place → 3 · Person at the top.',
+      'Easy Settings drop V0, unlocks, and streak wallpaper. Hard words stay on Hard.',
+    ],
+  },
+  {
     version: '1.4.21',
     title: 'One Easy Night Watch path',
     when: '2026-09-11',
