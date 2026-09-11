@@ -826,7 +826,7 @@ assert.match(defendSrc, /TeachUnlock/)
 assert.match(defendSrc, /RecallGate/)
 assert.match(defendSrc, /defendPads/)
 assert.match(defendSrc, /afterJuiceRef/)
-assert.match(defendSrc, /}, \[phase\]/)
+assert.match(defendSrc, /}, \[phase, easy, progress\.defense\.cleared\]/)
 assert.match(defendSrc, /fireBest/)
 assert.match(defendSrc, /defend-lantern/)
 assert.match(defendSrc, /defend-ridge/)
@@ -1009,7 +1009,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.13')
+assert.equal(APP_VERSION, '1.4.14')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -1157,10 +1157,11 @@ assert.doesNotMatch(linkPlaySrc, /Those don/)
   assert.match(linkClue('mercy-hollow', 'idea'), /Mercy|neighbor|road/)
   assert.match(linkClue('silas-bench', 'place'), /square/)
   assert.match(linkClue('juniper-porch', 'person'), /Juniper|porch/)
-  assert.match(linkMiss('mercy-hollow', 'idea'), /Wrong sentence/)
+  assert.match(linkMiss('mercy-hollow', 'idea'), /Wrong match/)
   assert.match(linkMiss('mercy-hollow', 'idea'), /creek|Mercy|neighbor/)
-  assert.match(linkMiss('silas-bench', 'place'), /Wrong place/)
-  assert.match(linkMiss('juniper-porch', 'person'), /Wrong person/)
+  assert.doesNotMatch(linkMiss('mercy-hollow', 'idea'), /neighbor-line/)
+  assert.match(linkMiss('silas-bench', 'place'), /Wrong match/)
+  assert.match(linkMiss('juniper-porch', 'person'), /Wrong match/)
 }
 assert.match(
   readFileSync(new URL('../src/components/MindMap.tsx', import.meta.url), 'utf8'),
@@ -1384,7 +1385,7 @@ assert.match(
 )
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /scrapbook of links/,
+  /scrapbook of matches/,
 )
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
@@ -1482,6 +1483,32 @@ assert.doesNotMatch(
 assert.doesNotMatch(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
   /cheap lines/,
+)
+assert.doesNotMatch(
+  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  /cheap line/,
+)
+assert.doesNotMatch(
+  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  /neighbor-line/,
+)
+assert.match(
+  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  /mean line around/,
+)
+assert.match(
+  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  /Main idea = the short true line we keep/,
+)
+assert.match(defendSrc, /is-easy-walker/)
+assert.match(defendSrc, /waveSpeed\(easy\)/)
+assert.doesNotMatch(
+  readFileSync(new URL('../src/content/links.ts', import.meta.url), 'utf8'),
+  /neighbor-line/,
+)
+assert.doesNotMatch(
+  readFileSync(new URL('../src/content/plain.ts', import.meta.url), 'utf8'),
+  /neighbor-line/,
 )
 assert.doesNotMatch(hubSrc, /EASY\.nightWhat/)
 assert.doesNotMatch(defendSrc, /EASY\.nightWhat/)

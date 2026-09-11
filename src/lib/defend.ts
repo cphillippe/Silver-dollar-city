@@ -84,11 +84,13 @@ export function towerCooldown(stage: CityStage): number {
   return 700
 }
 
-export function waveSpeed(): number {
+export function waveSpeed(easy = false): number {
+  if (easy) return prefersReducedMotion() ? 0.02 : 0.032
   return prefersReducedMotion() ? 0.042 : 0.086
 }
 
-export function waveSpawnEvery(): number {
+export function waveSpawnEvery(easy = false): number {
+  if (easy) return prefersReducedMotion() ? 3.4 : 2.4
   return prefersReducedMotion() ? 2.05 : 1.08
 }
 
@@ -142,8 +144,8 @@ export function abilityRange(
   return towerRange(stage) + reach
 }
 
-export function heavenSpeed(tier = 1): number {
-  return waveSpeed() * (1.7 + Math.max(0, tier - 1) * 0.08)
+export function heavenSpeed(tier = 1, easy = false): number {
+  return waveSpeed(easy) * (1.7 + Math.max(0, tier - 1) * 0.08)
 }
 
 export function dist(

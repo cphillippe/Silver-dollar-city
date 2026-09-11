@@ -158,10 +158,10 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         if (item.turned) {
           const tool = item.turned ? watchTool(item.turned) : undefined
           const tier = tool ? toolTier(tool, progress) : 1
-          return { ...item, heavenT: (item.heavenT ?? 0) + heavenSpeed(tier) * dt }
+          return { ...item, heavenT: (item.heavenT ?? 0) + heavenSpeed(tier, easy) * dt }
         }
         if (cue) return { ...item, t: Math.max(item.t, 0.42) }
-        return { ...item, t: item.t + waveSpeed() * dt }
+        return { ...item, t: item.t + waveSpeed(easy) * dt }
       })
       let leaked = 0
       const walking = next.filter((item) => {
@@ -185,7 +185,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       }
       if (
         live.current.spawned < DEFEND_WAVE_SIZE &&
-        (spawnAt >= waveSpawnEvery() || (cue && live.current.spawned === 0))
+        (spawnAt >= waveSpawnEvery(easy) || (cue && live.current.spawned === 0))
       ) {
         spawnAt = 0
         const id = live.current.spawned
@@ -218,7 +218,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       live.current.playing = false
       cancelAnimationFrame(frame)
     }
-  }, [phase])
+  }, [phase, easy, progress.defense.cleared])
 
   function togglePad(id: CityPlotId) {
     if (phase !== 'plant') return
@@ -649,29 +649,38 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                 return (
                   <g
                     key={raider.id}
-                    className={`defend-raider ${raider.turned ? 'is-turned' : ''} ${cueTarget ? 'is-cue' : ''}`}
+                    className={`defend-raider ${raider.turned ? 'is-turned' : ''} ${cueTarget ? 'is-cue' : ''} ${easy ? 'is-easy-walker' : ''}`}
                     transform={`translate(${at.x} ${at.y})`}
                   >
                     {cueTarget ? (
                       <g className="walker-cue" aria-hidden>
-                        <circle className="walker-cue-pulse" cx="0" cy="-6" r="34" />
+                        <circle className="walker-cue-pulse" cx="0" cy="-10" r={easy ? 52 : 34} />
                         <path
                           className="walker-cue-arrow"
-                          d="M0 -96 L18 -62 L6 -62 L6 -46 L-6 -46 L-6 -62 L-18 -62 Z"
+                          d={
+                            easy
+                              ? 'M0 -132 L24 -86 L8 -86 L8 -64 L-8 -64 L-8 -86 L-24 -86 Z'
+                              : 'M0 -96 L18 -62 L6 -62 L6 -46 L-6 -46 L-6 -62 L-18 -62 Z'
+                          }
                         />
-                        <text className="walker-cue-label" y="-108" textAnchor="middle">
+                        <text className="walker-cue-label" y={easy ? -146 : -108} textAnchor="middle">
                           Tap this person
                         </text>
                       </g>
                     ) : null}
-                    <ellipse className="defend-raider-shadow" cy="12" rx="13" ry="4.6" />
+                    <ellipse
+                      className="defend-raider-shadow"
+                      cy={easy ? 22 : 12}
+                      rx={easy ? 26 : 13}
+                      ry={easy ? 9 : 4.6}
+                    />
                     <image
                       className="defend-raider-face"
                       href={walkerSrc(raider.kind)}
-                      x="-18"
-                      y="-24"
-                      width="36"
-                      height="36"
+                      x={easy ? -40 : -18}
+                      y={easy ? -56 : -24}
+                      width={easy ? 80 : 36}
+                      height={easy ? 80 : 36}
                       clipPath="url(#defend-face-clip)"
                     />
                     {raider.turned ? (
@@ -682,11 +691,17 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                       </g>
                     ) : null}
                     <g className="defend-raider-call">
-                      <rect x="-40" y="-42" width="80" height="28" rx="8" />
-                      <text className="defend-raider-kind" y="-32" textAnchor="middle">
+                      <rect
+                        x={easy ? -52 : -40}
+                        y={easy ? -94 : -42}
+                        width={easy ? 104 : 80}
+                        height={easy ? 34 : 28}
+                        rx="8"
+                      />
+                      <text className="defend-raider-kind" y={easy ? -82 : -32} textAnchor="middle">
                         {WALKER_LABEL[raider.kind]}
                       </text>
-                      <text y="-20" textAnchor="middle">
+                      <text y={easy ? -68 : -20} textAnchor="middle">
                         {raider.text}
                       </text>
                     </g>

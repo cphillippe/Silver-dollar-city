@@ -138,19 +138,19 @@ const LINK_CLUES: Record<string, Record<LinkStep, string>> = {
 
 const LINK_MISSES: Record<string, Record<LinkStep, string>> = {
   'mercy-hollow': {
-    idea: 'Wrong sentence. This story is Mercy’s neighbor-line at the creek.',
-    place: 'Wrong place. Mercy’s neighbor-line lives at the creek.',
-    person: 'Wrong person. Mercy keeps that creek.',
+    idea: 'Wrong match. This story is Mercy’s Jesus story — the neighbor who stops on the road.',
+    place: 'Wrong match. That story lives at the creek with Mercy.',
+    person: 'Wrong match. Mercy keeps that creek.',
   },
   'silas-bench': {
-    idea: 'Wrong sentence. This story is Silas’s public names at the square.',
-    place: 'Wrong place. Silas’s names live at the square.',
-    person: 'Wrong person. Silas keeps that square.',
+    idea: 'Wrong match. This story is Silas’s public names at the square.',
+    place: 'Wrong match. Those names sit at the square.',
+    person: 'Wrong match. Silas keeps that square.',
   },
   'juniper-porch': {
-    idea: 'Wrong sentence. This story is Juniper’s lamp on the porch.',
-    place: 'Wrong place. Juniper’s lamp lives on the porch.',
-    person: 'Wrong person. Juniper keeps that porch.',
+    idea: 'Wrong match. This story is Juniper’s lamp on the porch.',
+    place: 'Wrong match. That lamp lives on the porch.',
+    person: 'Wrong match. Juniper keeps that porch.',
   },
 }
 
@@ -163,7 +163,7 @@ export function linkClue(tripleId: string, step: LinkStep): string {
 export function linkMiss(tripleId: string, step: LinkStep): string {
   return (
     LINK_MISSES[tripleId]?.[step] ??
-    'Wrong pick. Match the sentence, then its place, then its person.'
+    'Wrong match. Pick the sentence, then the place, then the person.'
   )
 }
 
@@ -183,7 +183,7 @@ export function linkCaption(node: LinkNode, easy: boolean): string {
 /** Why each street triple lives where it lives. Teach before the match. */
 export const STREET_WHYS: Record<(typeof STREET_CHALLENGE.triples)[number]['id'], { easy: string; hard: string }> = {
   'mercy-hollow': {
-    easy: 'Mercy lives at the creek because she tells Jesus stories. The neighbor-line is a picture, so it lives at Parable Hollow.',
+    easy: 'Mercy lives at the creek because she tells Jesus stories. The neighbor who stops on the road is a picture, so it lives at Parable Hollow.',
     hard: 'Mercy Wren keeps Parable Hollow: Jesus taught in pictures by the road and the water. Neighbor is the one who shows mercy — that line belongs with the storyteller, not the clerk.',
   },
   'silas-bench': {

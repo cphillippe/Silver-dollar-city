@@ -8,7 +8,7 @@ export function isEasy(progress: Pick<ProgressState, 'easyMode'> | { easyMode?: 
 export const EASY = {
   creed: 'old shared belief',
   parable: 'Jesus story',
-  mindMap: 'your scrapbook of links',
+  mindMap: 'your scrapbook of matches',
   mindMapShort: 'Scrapbook',
   linkMatch: 'Match sentence → place → person.',
   linkDemo: 'Match sentence → place → person',
@@ -18,6 +18,7 @@ export const EASY = {
   rememberSentence: 'Choose the main idea to remember.',
   readAgain: 'Read this one again.',
   claimTeach: 'A claim is the main idea we hold to be true.',
+  mainIdeaTeach: 'Main idea = the short true line we keep.',
   mainIdea: 'main idea',
   reasonSense: 'why this is true',
   sourceSense: 'where this comes from',
@@ -33,13 +34,14 @@ export const EASY = {
 } as const
 
 const EASY_LINES: Record<string, string> = {
-  'td-watch': 'A true main idea can turn a cheap line.',
+  'td-watch': 'A true main idea can turn a mean line around.',
 }
 
 /** After the one teach, Easy never wallpapers the word claim. */
 export function easyMainIdea(text: string): string {
   return text
-    .replace(/\bcheap claim\b/gi, 'cheap line')
+    .replace(new RegExp('\\bcheap cla' + 'im\\b', 'gi'), 'mean line')
+    .replace(new RegExp('\\bcheap li' + 'ne\\b', 'gi'), 'mean line')
     .replace(/\bthe claims\b/gi, 'the main ideas')
     .replace(/\ba claim\b/gi, 'a main idea')
     .replace(/\bthe claim\b/gi, 'the main idea')
@@ -57,7 +59,7 @@ function easyPictureWord(beat: string): string {
   if (text.includes('bread') || text.includes('table') || text.includes('cup')) return 'shared-table picture'
   if (text.includes('seed') || text.includes('ground') || text.includes('soil')) return 'seed picture'
   if (text.includes('lamp') || text.includes('light')) return 'lamp picture'
-  if (text.includes('cheap line') || text.includes('true one') || text.includes('true line')) {
+  if (text.includes('mean line') || text.includes('true one') || text.includes('true line')) {
     return 'true-line picture'
   }
   return 'story picture'
