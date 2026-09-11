@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { existsSync, readFileSync } from 'node:fs'
 import {
   CITY_HOLLOW_TO_WITNESS,
+  CITY_PLOTS,
   cityAge,
   citySnapshot,
   cityUpgrades,
@@ -51,7 +52,8 @@ import {
 } from '../src/lib/watchTools.ts'
 import { ideaUnlocked, mindGraph, mindMapHasLit } from '../src/lib/mindMap.ts'
 import { linkCaption, linkClue, linkMiss, linkPicture, STREET_CHALLENGE, STREET_LIGHTS, STREET_WHYS } from '../src/content/links.ts'
-import { LOT_STORY, TOWN_PATH_EASY, TOWN_PATH_HARD } from '../src/content/lots.ts'
+import { firstGate } from '../src/content/firstGate.ts'
+import { easyPlaceSub, LOT_STORY, TOWN_PATH_EASY, TOWN_PATH_HARD } from '../src/content/lots.ts'
 import {
   appliedTier,
   applyUpgrade,
@@ -62,6 +64,7 @@ import {
   easyTagsFit,
   easyPlotTag,
   easyTagMetrics,
+  plotTag,
   EASY_FOLK_LIFT,
 } from '../src/lib/cityBuild.ts'
 import { emptyProgress } from '../src/lib/save.ts'
@@ -1046,13 +1049,26 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.36')
+assert.equal(APP_VERSION, '1.4.37')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
 assert.equal(CAST.silas.name, 'Silas Whitman')
 assert.equal(CAST.nora.name, 'Nora Skye')
 assert.equal(CAST.ansel.name, 'Ansel Gate')
+assert.equal(CAST.ansel.role, 'Why-gate keeper')
+assert.equal(CAST.ansel.id, 'ansel')
+assert.equal(CAST.ansel.areaId, 'first-gate')
+assert.equal(firstGate.id, 'first-gate')
+assert.equal(firstGate.title, 'Why Gate')
+assert.equal(firstGate.shortTitle, 'Why')
+assert.equal(firstGate.subtitle, 'Why is there a world at all?')
+assert.equal(CITY_PLOTS.find((plot) => plot.id === 'gate')?.title, 'Why Gate')
+assert.equal(CITY_PLOTS.find((plot) => plot.id === 'gate')?.areaId, 'first-gate')
+assert.equal(plotTag('gate'), 'Why Gate')
+assert.equal(easyPlaceSub('gate'), 'Ansel’s why-a-world gate')
+assert.equal(LOT_STORY.gate.path, 'Why a world')
+assert.match(LOT_STORY.gate.whyHard, /^Why Gate /)
 assert.equal(CAST.hope.name, 'Hope Ridge')
 assert.equal(CAST.juniper.id, 'juniper')
 assert.equal(CAST.silas.id, 'silas')
@@ -1707,6 +1723,7 @@ assert.doesNotMatch(latestChange(APP_VERSION).title, /Heaven/)
 assert.match(latestChange(APP_VERSION).title, /core/)
 assert.match(latestChange(APP_VERSION).items.join('\n'), /6\/6/)
 assert.match(latestChange(APP_VERSION).items.join('\n'), /Match/)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Why Gate/)
 assert.match(defendSrc, /easyTapTarget/)
 assert.match(defendSrc, /data-person-node="walker"/)
 assert.doesNotMatch(defendSrc, /walkerCue|easySolo|clearWalkerCue|hideOther/)

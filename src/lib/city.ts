@@ -48,7 +48,7 @@ export const CITY_PLOTS: CityPlotSpec[] = [
   },
   {
     id: 'gate',
-    title: 'The First Gate',
+    title: 'Why Gate',
     blurb: 'Ansel’s arch. The stone asks why there is a world at all.',
     areaId: 'first-gate',
   },
