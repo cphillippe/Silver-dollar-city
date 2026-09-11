@@ -175,7 +175,7 @@ export function Profile({ onNavigate }: ProfileProps) {
                   <strong>{tool.label}</strong>
                   <em>
                     {easy
-                      ? 'Still locked — keep a main idea that opens it.'
+                      ? 'Still closed — keep a main idea that opens it.'
                       : 'Still locked — hold a line that opens it.'}
                   </em>
                 </span>

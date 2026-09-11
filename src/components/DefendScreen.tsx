@@ -24,8 +24,6 @@ import {
   unlockedWatchAbilities,
   waveSpawnEvery,
   waveSpeed,
-  EASY_CUE_HOLD_MS,
-  EASY_MISS_HOLD_MS,
   EASY_WALKER_FACE_PX,
   EASY_WALKER_HIT_PX,
   easyTapMode,
@@ -84,8 +82,6 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const unlocked = unlockedWatchAbilities(progress)
   const [ability, setAbility] = useState<WatchAbility>(() => unlocked[0] ?? 'love')
   const [taught, setTaught] = useState(easy)
-  const freezeRef = useRef(easy)
-  const holdTimer = useRef(0)
   const boardRef = useRef<SVGSVGElement>(null)
   const [boardBox, setBoardBox] = useState({ w: 640, h: 420 })
   const [toolLock, setToolLock] = useState<string | null>(null)
@@ -110,21 +106,9 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const saved = useRef(false)
   const afterJuiceRef = useRef(afterJuice)
   const markMissRef = useRef(markMiss)
-  const holdWalkersRef = useRef((ms: number) => {
-    void ms
-  })
   afterJuiceRef.current = afterJuice
   markMissRef.current = markMiss
 
-  function holdWalkers(ms: number) {
-    if (!easy) return
-    freezeRef.current = true
-    window.clearTimeout(holdTimer.current)
-    holdTimer.current = window.setTimeout(() => {
-      freezeRef.current = false
-    }, ms)
-  }
-  holdWalkersRef.current = holdWalkers
   const live = useRef({
     raiders: [] as Raider[],
     spawned: 0,
@@ -181,7 +165,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           const tier = tool ? toolTier(tool, progress) : 1
           return { ...item, heavenT: (item.heavenT ?? 0) + heavenSpeed(tier, easy) * dt }
         }
-        const freezeTarget = freezeRef.current && (!easy || item.id === targetId)
+        const freezeTarget = easy && item.id === targetId
         if (freezeTarget) return { ...item }
         return { ...item, t: item.t + waveSpeed(easy) * dt }
       })
@@ -204,7 +188,6 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         setLeakFlash(true)
         window.setTimeout(() => setLeakFlash(false), 220)
         markMissRef.current(DEFEND_BRIEF_ID)
-        if (easy) holdWalkersRef.current(EASY_MISS_HOLD_MS)
       }
       const holdSpawn = easy && walking.some((item) => !item.turned)
       if (
@@ -217,7 +200,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         const cast = raidForWave(progress.defense.cleared, id)
         walking.push({
           id,
-          t: easy && id === 0 ? 0.42 : 0,
+          t: easy ? 0.42 : 0,
           text: cast.text,
           kind: cast.kind,
         })
@@ -238,7 +221,6 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       }
       frame = requestAnimationFrame(tick)
     }
-    if (easy) holdWalkersRef.current(EASY_CUE_HOLD_MS)
     frame = requestAnimationFrame(tick)
     return () => {
       live.current.playing = false
@@ -373,8 +355,6 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   }
 
   function retry() {
-    freezeRef.current = easy
-    if (easy) holdWalkers(EASY_CUE_HOLD_MS)
     setPhase(easy ? 'wave' : 'plant')
     setWon(false)
     setRaiders([])
@@ -850,7 +830,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
             <div className="defend-lost">
               <p>
                 {easy
-                  ? 'You missed the walker — tap the moving person.'
+                  ? 'Tap the face.'
                   : 'Porch flickered. Turn them again.'}
               </p>
               <button type="button" className="btn primary" onClick={retry}>

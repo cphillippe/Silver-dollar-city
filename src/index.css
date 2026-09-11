@@ -6234,6 +6234,45 @@ html[data-easy='on'] .link-block.is-not {
   font-weight: 650;
 }
 
+.play.is-easy-link .easy-teach {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  margin: 0 0 10px;
+}
+
+.play.is-easy-link .easy-steps {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin: 0;
+  padding: 8px 8px;
+  border-radius: 12px;
+  background: rgba(26, 16, 48, 0.94);
+  border: 1px solid rgba(255, 204, 51, 0.4);
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #fff6e8;
+  white-space: nowrap;
+}
+
+.play.is-easy-link .easy-steps .is-now {
+  color: #ffcc33;
+  font-weight: 800;
+}
+
+.play.is-easy-link .easy-steps .is-done {
+  opacity: 0.72;
+}
+
+.play.is-easy-link .easy-steps-arrow {
+  opacity: 0.55;
+  font-weight: 600;
+}
+
 .play.is-easy-link .wizard-step,
 .play.is-easy-link .match-toast {
   position: sticky;
@@ -6248,6 +6287,11 @@ html[data-easy='on'] .link-block.is-not {
   font-weight: 800;
   line-height: 1.3;
   color: #fff6e8;
+}
+
+.play.is-easy-link .easy-teach .match-toast {
+  position: static;
+  margin: 8px 0 0;
 }
 
 .play.is-easy-link .link-dock {
