@@ -237,7 +237,7 @@ const PLAIN: Record<string, PlainLine> = {
   'ln-street': line(
     'An idea lives at a place, with a person.',
     'Mercy tells Jesus stories at the creek — that is why the neighbor who stops on the road lives at Parable Hollow. Silas copies names on the square — that is why the old shared belief lives at the Witness Bench. Juniper’s lamp is on the porch so today’s line can be seen.',
-    { term: 'Match', sense: 'connect the sentence to its place and person', hint: 'Match sentence → place → person. One story at a time.' },
+    { term: 'Match', sense: 'connect the sentence to its place and person', hint: 'Tap the sentence, then the place, then the person. One story at a time.' },
   ),
 }
 

@@ -6158,9 +6158,43 @@ img.walker-face.easy-walker-face,
 
 .play.is-easy-link .link-block.is-need,
 html[data-easy='on'] .link-block.is-need {
+  position: relative;
   border-color: #ffcc33;
-  box-shadow: 0 0 0 3px #ffcc33, 0 0 18px rgba(255, 204, 51, 0.45);
+  box-shadow: 0 0 0 4px #ffcc33, 0 0 28px rgba(255, 204, 51, 0.7);
   font-weight: 800;
+  animation: need-pulse 0.9s ease-in-out infinite;
+}
+
+.play.is-easy-link .link-block.is-not,
+html[data-easy='on'] .link-block.is-not {
+  opacity: 0.38;
+  filter: grayscale(0.55);
+}
+
+.need-chip {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #ffcc33;
+  color: #2a1408;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+@keyframes need-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 4px #ffcc33, 0 0 18px rgba(255, 204, 51, 0.45);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(255, 204, 51, 0.55), 0 0 32px rgba(255, 204, 51, 0.8);
+    transform: scale(1.02);
+  }
 }
 
 .link-block.is-locked {

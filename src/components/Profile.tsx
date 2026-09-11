@@ -187,7 +187,7 @@ export function Profile({ onNavigate }: ProfileProps) {
 
       <section className="profile-section" aria-label={easy ? EASY.connections : 'Mind-map links'}>
         <p className="eyebrow">{easy ? EASY.connections : 'Mind-map links'}</p>
-        <h2>Idea · place · person</h2>
+        <h2>{easy ? 'Places linked' : 'Idea · place · person'}</h2>
         {inv.streetLinked ? (
           inv.links.map((link) => (
             <article key={link.id} className="profile-unlock">
@@ -216,7 +216,7 @@ export function Profile({ onNavigate }: ProfileProps) {
         ) : (
           <p className="quiet">
             {easy
-              ? 'Match sentence → place → person from Town. Tap a place later to open what you matched.'
+              ? `${EASY.connectLink} Start from Town. Tap a place later to open what you matched.`
               : 'Link the street from Town to snap idea · place · person. Lit nodes reopen here.'}
           </p>
         )}

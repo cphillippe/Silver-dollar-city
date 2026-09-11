@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.17',
+    title: 'Only one person + tap order',
+    when: '2026-09-11',
+    items: [
+      'Night Watch shows only the glowing person while Tap this person is up. Other walkers stay hidden until you tap them.',
+      'Match says: Tap the sentence, then the place, then the person.',
+      'A wrong match pulses the right card and marks it This one.',
+    ],
+  },
+  {
     version: '1.4.16',
     title: 'One person to tap + plainer words',
     when: '2026-09-11',

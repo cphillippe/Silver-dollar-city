@@ -66,12 +66,12 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
         !taught ? (
           <section
             className="recall-gate is-encode teach-gate"
-            aria-label={easy ? 'Match sentence, place, and person' : 'Unlock the links'}
+            aria-label={easy ? EASY.connectLink : 'Unlock the links'}
           >
-            <p className="eyebrow">Match idea · place · person.</p>
+            <p className="eyebrow">{easy ? 'Match' : 'Match idea · place · person.'}</p>
             <p className="recall-line rehearse-stem">
               {easy
-                ? 'Pick the sentence that fits this story, then the place, then the person.'
+                ? EASY.connectLink
                 : 'Link the idea to its place and person.'}
             </p>
             <LinkDemo easy={easy} />
