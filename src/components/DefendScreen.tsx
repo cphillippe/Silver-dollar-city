@@ -208,8 +208,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         markMissRef.current(DEFEND_BRIEF_ID)
         if (easy) holdWalkersRef.current(EASY_MISS_HOLD_MS)
       }
-      const holdSpawn =
-        easy && live.current.spawned > 0 && (walkerCueRef.current || freezeRef.current)
+      const holdSpawn = easy && walking.some((item) => !item.turned)
       if (
         live.current.spawned < DEFEND_WAVE_SIZE &&
         !holdSpawn &&
@@ -315,12 +314,13 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       key: now,
       x: to.x,
       y: to.y,
-      line:
-        fit === 'match'
+      line: easy
+        ? fit === 'match'
+          ? 'Yes'
+          : 'Try Love'
+        : fit === 'match'
           ? (heldLine
-              ? easy
-                ? easyFacingLine(heldLine.id, heldLine.claim)
-                : heldLine.claim
+              ? heldLine.claim
               : `${WATCH_ABILITY_LABEL[using]} matches`)
           : `${WATCH_ABILITY_LABEL[using]} is weak here`,
       combo: nextCombo,
@@ -377,7 +377,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       }
     }
     if (pick) {
-      if (walkerCueRef.current) clearWalkerCue()
+      if (!easy && walkerCueRef.current) clearWalkerCue()
       fire(pick)
     }
   }
@@ -416,10 +416,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   }
 
   const after = juiceDone && won
+  const easySolo = easy && phase === 'wave' && !won
 
   return (
     <main
-      className={`defend-page ${taught ? 'is-puzzle' : 'is-teach'} ${arming ? 'is-arming' : ''} ${won ? 'is-win' : ''} ${shake ? 'is-shake' : ''} ${leakFlash ? 'is-leak' : ''} ${firing ? 'is-firing' : ''} ${easy ? 'is-easy-watch' : ''} ${easy && walkerCue ? 'is-cue-solo' : ''}`}
+      className={`defend-page ${taught ? 'is-puzzle' : 'is-teach'} ${arming ? 'is-arming' : ''} ${won ? 'is-win' : ''} ${shake ? 'is-shake' : ''} ${leakFlash ? 'is-leak' : ''} ${firing ? 'is-firing' : ''} ${easy ? 'is-easy-watch' : ''} ${easySolo ? 'is-cue-solo' : ''}`}
       aria-label={WATCH_TITLE}
     >
       {!taught ? (
@@ -616,13 +617,13 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                 <rect x="-16" y="-4" width="32" height="26" rx="2" />
                 <rect className="defend-porch-window" x="-5" y="4" width="10" height="9" rx="1" />
               </g>
-              {easy && walkerCue ? null : (
+              {easySolo ? null : (
               <g className="defend-gate" transform={`translate(${DEFEND_PATH[0].x} ${DEFEND_PATH[0].y})`}>
                 <path d="M-10 6 V-16 M10 6 V-16" />
                 <path d="M-12 -16 H12" />
               </g>
               )}
-              {easy && walkerCue
+              {easySolo
                 ? null
                 : pads.map((id) => {
                 const at = DEFEND_ANCHOR[id]
@@ -792,8 +793,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                   .filter((raider) => !raider.turned)
                   .map((raider, _index, walking) => {
                     const target = walking[0]
-                    const cueTarget = Boolean(walkerCue && target?.id === raider.id)
-                    const hideOther = walkerCue && !cueTarget
+                    const cueTarget = target?.id === raider.id
+                    const hideOther = !cueTarget
                     if (hideOther) return null
                     const at = raiderAt(raider)
                     const pos = boardPoint(at.x, at.y)
@@ -852,7 +853,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           <div className="defend-abilities" role="group" aria-label="Night abilities">
             {WATCH_TOOLS.map((tool) => {
               const open = unlocked.includes(tool.id)
-              if (easy && walkerCue && tool.id !== ability) return null
+              if (easySolo && tool.id !== ability) return null
               const heldLine = learningForTool(progress, tool.id)
               const tier = toolTier(tool, progress)
               return (
@@ -869,20 +870,20 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                     }
                     setToolLock(
                       easy
-                        ? `${tool.label} is locked. Keep a matching sentence first.`
+                        ? `${tool.label} is locked. Keep a sentence first.`
                         : `${tool.label} is locked. Hold a matching line to deploy this tool.`,
                     )
                   }}
                 >
                   <AbilityMark ability={tool.id} size="md" />
                   {tool.label}
-                  {easy && walkerCue ? null : (
+                  {easySolo ? null : (
                     <span className="defend-ability-tier" aria-hidden>
                       {TIER_MARK[tier]}
                     </span>
                   )}
                   <span className="defend-ability-claim">
-                    {easy && walkerCue && tool.id === 'love'
+                    {easySolo && tool.id === 'love'
                       ? 'Love — tap the person'
                       : open
                         ? (heldLine
@@ -895,7 +896,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                                 : 'A true line can turn a cheap claim.'
                               : 'Hold a line to name this tool.')
                         : easy
-                          ? 'Locked — keep a matching sentence first.'
+                          ? 'Locked — keep a sentence first.'
                           : 'Hold a matching line'}
                   </span>
                 </button>

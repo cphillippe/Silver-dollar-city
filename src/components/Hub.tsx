@@ -100,7 +100,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
   const nextTitle = easy && goal.kind === 'daily' ? EASY.readStory : goal.title
   const nextDetail = easy
     ? goal.detail
-        .replace(/\bparable\b/gi, `parable (${EASY.parable})`)
+        .replace(/\bparable\b/gi, EASY.parable)
         .replace(/\bcreed\b/gi, `creed (${EASY.creed})`)
     : goal.detail
 

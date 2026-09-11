@@ -1018,7 +1018,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.19')
+assert.equal(APP_VERSION, '1.4.20')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -1609,7 +1609,17 @@ assert.match(
   /Tap a sentence/,
 )
 assert.match(cssSrc, /is-easy-miss/)
-assert.match(defendSrc, /walkerCue && tool\.id !== ability/)
+assert.match(defendSrc, /easySolo && tool\.id !== ability/)
+assert.match(defendSrc, /walking\.some\(\(item\) => !item\.turned\)/)
+assert.doesNotMatch(defendSrc, /matching sentence/)
+assert.match(
+  readFileSync(new URL('../src/components/challenges/LinkPlay.tsx', import.meta.url), 'utf8'),
+  /awaitNext/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/challenges/LinkPlay.tsx', import.meta.url), 'utf8'),
+  /Tap Next/,
+)
 assert.match(cssSrc, /link-clue/)
 assert.match(
   readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
