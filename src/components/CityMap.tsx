@@ -46,7 +46,10 @@ import juniperWalk from '../assets/cast/portrait-juniper.png'
 import {
   anyUpgradeReady,
   canUpgrade,
-  easyPlotTag,
+  EASY_NAMED_PLOTS,
+  EASY_TAG_SLOT,
+  easyTagMetrics,
+  HEAVEN_TAG,
   plotTag,
   visualFills,
   visualSnapshot,
@@ -86,18 +89,6 @@ const FOLK: Record<CityPlotId, { x: number; y: number }> = {
   lamps: { x: 178, y: 358 },
   gate: { x: 538, y: 322 },
   porch: { x: 534, y: 356 },
-}
-
-/** Easy chips sit under portraits, inside the 640×420 viewBox, without overlapping. */
-const EASY_TAG_SLOT: Record<CityPlotId, { x: number; y: number }> = {
-  hollow: { x: 128, y: 368 },
-  journal: { x: 258, y: 214 },
-  bench: { x: 392, y: 368 },
-  porch: { x: 500, y: 368 },
-  lamps: { x: 196, y: 348 },
-  gate: { x: 498, y: 230 },
-  observatory: { x: 410, y: 96 },
-  lookout: { x: 508, y: 52 },
 }
 
 const FULL_CAM = { x: 0, y: 0, w: 640, h: 420 }
@@ -338,6 +329,7 @@ export function CityMap({
     : nextGift(nextId, nextStage, shownFill[nextId] ?? 0, isEasy(progress))
   const celebrating = Boolean(beat) || homecoming
   const beatVoice = beat ? townVoice(beat.id) : townVoice(nextId)
+  const easy = isEasy(progress)
 
   return (
     <section
@@ -512,10 +504,12 @@ export function CityMap({
 
         {mode === 'live' && !celebrating ? (
           <g className="city-next-mark" transform={`translate(${nextAt.x} ${nextAt.y})`}>
-            <circle r="34" className="city-next-halo" />
-            <text y="-40" textAnchor="middle">
-              {kicker}
-            </text>
+            <circle r={easy ? 22 : 34} className="city-next-halo" />
+            {easy ? null : (
+              <text y="-40" textAnchor="middle">
+                {kicker}
+              </text>
+            )}
           </g>
         ) : null}
 
@@ -620,6 +614,14 @@ export function CityMap({
               />
             ))
           : null}
+
+        {mode === 'live' && easy ? (
+          <g className="city-easy-tags" pointerEvents="none">
+            {EASY_NAMED_PLOTS.map((id) => (
+              <EasyPlotChip key={`tag-${id}`} id={id} />
+            ))}
+          </g>
+        ) : null}
       </svg>
 
       {beat ? (
@@ -755,6 +757,23 @@ function SpinePath({ age }: { age: CityAge }) {
   )
 }
 
+function EasyPlotChip({ id }: { id: CityPlotId }) {
+  const { lines, x0, y0, w, h } = easyTagMetrics(id)
+  const slot = EASY_TAG_SLOT[id]
+  return (
+    <g className="city-easy-chip">
+      <rect className="city-plot-tag-bg" x={x0} y={y0} width={w} height={h} rx={10} />
+      <text className="city-plot-tag" x={slot.x} y={slot.y} textAnchor="middle">
+        {lines.map((line, i) => (
+          <tspan key={line} x={slot.x} dy={i === 0 ? 0 : 13}>
+            {line}
+          </tspan>
+        ))}
+      </text>
+    </g>
+  )
+}
+
 function HeavenCity({ age }: { age: CityAge }) {
   return (
     <g className={`city-heaven is-${age}`} aria-label="City of Heaven">
@@ -765,7 +784,7 @@ function HeavenCity({ age }: { age: CityAge }) {
       <rect className="city-heaven-tower" x="602" y="14" width="10" height="26" rx="1" />
       <path className="city-heaven-spire" d="M543 18 l5-10 5 10" />
       <path className="city-heaven-spire" d="M607 14 l5-12 5 12" />
-      <text className="city-heaven-label" x="548" y="22" textAnchor="middle">
+      <text className="city-heaven-label" x={HEAVEN_TAG.x} y={HEAVEN_TAG.y} textAnchor="middle">
         City of Heaven
       </text>
     </g>
@@ -803,15 +822,12 @@ function PlotGroup({
       : (CITY_PLOTS.find((plot) => plot.id === id)?.title ?? id)
   const scale = BUILD_SCALE
   const hit = easy ? 56 : 42
-  const tag = easy ? easyPlotTag(id) : plotTag(id)
-  const showTag = easy ? streetLot : clickable
-  const slot = easy ? EASY_TAG_SLOT[id] : null
-  const tagW = Math.max(easy ? 88 : 64, tag.length * (easy ? 9 : 8) + 20)
-  const tagX = slot
-    ? Math.min(632 - tagW / 2, Math.max(tagW / 2 + 8, slot.x))
-    : Math.min(632 - tagW / 2, Math.max(tagW / 2 + 8, at.x))
-  const tagY = slot ? slot.y : at.y + 32
-  const tagH = easy ? 24 : 18
+  const tag = plotTag(id)
+  const showTag = !easy && clickable
+  const tagW = Math.max(64, tag.length * 8 + 20)
+  const tagX = Math.min(632 - tagW / 2, Math.max(tagW / 2 + 8, at.x))
+  const tagY = at.y + 32
+  const tagH = 18
   return (
     <g
       className={`city-plot is-${stage} ${next ? 'is-next' : ''} ${rising ? 'is-rising' : ''} ${tapped ? 'is-tapped' : ''} ${ready ? 'is-ready' : ''} ${easy ? 'is-easy-lot' : ''}`}
@@ -852,10 +868,10 @@ function PlotGroup({
           <rect
             className="city-plot-tag-bg"
             x={tagX - tagW / 2}
-            y={tagY - (easy ? 16 : 14)}
+            y={tagY - 14}
             width={tagW}
             height={tagH}
-            rx={easy ? 10 : 7}
+            rx={7}
           />
           <text className="city-plot-tag" x={tagX} y={tagY} textAnchor="middle">
             {tag}
