@@ -68,7 +68,7 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
             className="recall-gate is-encode teach-gate"
             aria-label={easy ? EASY.connectLink : 'Unlock the links'}
           >
-            <p className="eyebrow">{easy ? 'Match' : 'Match idea · place · person.'}</p>
+            {easy ? null : <p className="eyebrow">Match idea · place · person.</p>}
             <p className="recall-line rehearse-stem">
               {easy
                 ? EASY.connectLink
@@ -109,7 +109,7 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
           </section>
         ) : (
           <>
-            <h1 className="puzzle-title">{easy ? EASY.linkStreet : challenge.title}</h1>
+            {easy ? null : <h1 className="puzzle-title">{challenge.title}</h1>}
             <PuzzlePlay
               challenge={challenge}
               onMiss={() => markMiss(challenge.id)}

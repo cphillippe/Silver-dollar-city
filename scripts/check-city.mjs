@@ -1018,7 +1018,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.18')
+assert.equal(APP_VERSION, '1.4.19')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -1169,14 +1169,12 @@ assert.doesNotMatch(linkPlaySrc, /Those don/)
   assert.match(linkClue('mercy-hollow', 'idea'), /Mercy|neighbor|road/)
   assert.match(linkClue('silas-bench', 'place'), /square/)
   assert.match(linkClue('juniper-porch', 'person'), /Juniper|porch/)
-  assert.match(linkMiss('mercy-hollow', 'idea'), /Wrong\. Tap This one/)
-  assert.match(linkMiss('mercy-hollow', 'idea'), /Tap: “Neighbor shows mercy\.”/)
+  assert.match(linkMiss('mercy-hollow', 'idea'), /Wrong\. Tap this one: Neighbor shows mercy\./)
+  assert.doesNotMatch(linkMiss('mercy-hollow', 'idea'), /Tap This one\. Tap:/)
   assert.doesNotMatch(linkMiss('mercy-hollow', 'idea'), /neighbor-line/)
   assert.doesNotMatch(linkMiss('mercy-hollow', 'idea'), /This story is Mercy/)
-  assert.match(linkMiss('silas-bench', 'place'), /Wrong\. Tap This one/)
-  assert.match(linkMiss('silas-bench', 'place'), /Tap:/)
-  assert.match(linkMiss('juniper-porch', 'person'), /Wrong\. Tap This one/)
-  assert.match(linkMiss('juniper-porch', 'person'), /Tap:/)
+  assert.match(linkMiss('silas-bench', 'place'), /Wrong\. Tap this one:/)
+  assert.match(linkMiss('juniper-porch', 'person'), /Wrong\. Tap this one:/)
 }
 assert.match(
   readFileSync(new URL('../src/components/MindMap.tsx', import.meta.url), 'utf8'),
@@ -1600,8 +1598,18 @@ assert.match(
 )
 assert.match(
   readFileSync(new URL('../src/components/challenges/LinkPlay.tsx', import.meta.url), 'utf8'),
-  /EASY\.linkCue/,
+  /easyLinkStep/,
 )
+assert.match(
+  readFileSync(new URL('../src/components/challenges/LinkPlay.tsx', import.meta.url), 'utf8'),
+  /is-easy-miss/,
+)
+assert.match(
+  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  /Tap a sentence/,
+)
+assert.match(cssSrc, /is-easy-miss/)
+assert.match(defendSrc, /walkerCue && tool\.id !== ability/)
 assert.match(cssSrc, /link-clue/)
 assert.match(
   readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),

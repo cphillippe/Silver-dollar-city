@@ -170,11 +170,12 @@ export function linkNeedLabel(tripleId: string, step: LinkStep): string | null {
   return linkCaption(node, true)
 }
 
-/** Easy miss: lead with the chip, then the exact card to tap. */
+/** Easy miss: one line that names the glowing card. */
 export function linkMiss(tripleId: string, step: LinkStep): string {
   const tap = linkNeedLabel(tripleId, step)
   const why = LINK_MISSES[tripleId]?.[step]
-  return tap ? `Wrong. Tap This one. Tap: “${tap}”` : why ?? 'Wrong. Tap This one.'
+  const label = tap?.replace(/\.$/, '')
+  return label ? `Wrong. Tap this one: ${label}.` : why ?? 'Wrong. Tap this one.'
 }
 
 /** Short label under the picture — not the full claim wall. */
