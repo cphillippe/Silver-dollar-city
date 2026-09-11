@@ -8,6 +8,17 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.32',
+    title: 'Easy core loop',
+    when: '2026-09-11',
+    items: [
+      'Easy Hold is one line: the teach chip, the main idea, a scrollable reason, and Keep this. The sentence is not the button.',
+      'Sticky Keep this / Done never covers the reason. Easy home is still Match, Saved, and Night Watch — Town (soon) waits under Settings → More.',
+      'Easy Night Watch finishes at 6/6. TAP n/6 is the score. Six face taps win the night.',
+      'Match stays sentence → place → person with a named miss and Next.',
+    ],
+  },
+  {
     version: '1.4.31',
     title: 'Easy core loop',
     when: '2026-09-11',
