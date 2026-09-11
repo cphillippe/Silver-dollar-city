@@ -1647,7 +1647,7 @@ assert.match(cssSrc, /easy-core/)
 assert.match(hubSrc, /EASY\.connectLink/)
 assert.match(
   readFileSync(new URL('../src/content/lots.ts', import.meta.url), 'utf8'),
-  /Mercy’s creek · Jesus stories/,
+  /Story Creek · Jesus stories/,
 )
 assert.doesNotMatch(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
