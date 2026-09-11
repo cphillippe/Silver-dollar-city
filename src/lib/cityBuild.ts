@@ -280,7 +280,7 @@ export function plotTag(id: CityPlotId): string {
     case 'observatory':
       return 'Sky'
     case 'gate':
-      return 'Gate'
+      return 'Why Gate'
     case 'lookout':
       return 'Lookout'
     case 'journal':

@@ -37,7 +37,7 @@ export const LOT_STORY: Record<CityPlotId, LotStory> = {
     path: 'Why a world',
     whyEasy: 'Ansel’s stone asks why there is a world at all. That question lives at the gate you walked in by.',
     whyHard:
-      'The First Gate is the east-road arch beside the porch. After the sky, you come back to the stone: first mover, might-not-have-been, the beginning argument — then the high ridge.',
+      'Why Gate is the east-road arch beside the porch. After the sky, you come back to the stone: first mover, might-not-have-been, the beginning argument — then the high ridge.',
   },
   lookout: {
     path: 'Meaning',

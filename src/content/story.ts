@@ -60,7 +60,7 @@ export const CAST: Record<CharacterId, Character> = {
     id: 'ansel',
     name: 'Ansel Gate',
     shortName: 'Ansel',
-    role: 'Gatekeeper',
+    role: 'Why-gate keeper',
     seeking: 'Why there is a world at all — and the God who answers it.',
     areaId: 'first-gate',
   },

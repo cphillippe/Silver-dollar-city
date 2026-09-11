@@ -175,7 +175,7 @@ export const journalEntries: JournalEntry[] = [
     id: 'j-fg-1',
     areaId: 'first-gate',
     title: 'Unmoved mover',
-    kicker: 'The First Gate',
+    kicker: 'Why Gate',
     unlockAfter: 'fg-mover',
     body: [
       'Aristotle and Aquinas begin with change: the everyday passage from potential to actual. If nothing explains its own becoming, and a stack of unexplained becomings is not an explanation, then there is a first actuality that is not itself a receiver of change.',
@@ -190,7 +190,7 @@ export const journalEntries: JournalEntry[] = [
     id: 'j-fg-2',
     areaId: 'first-gate',
     title: 'Necessary being',
-    kicker: 'The First Gate',
+    kicker: 'Why Gate',
     unlockAfter: 'fg-contingent',
     body: [
       'Contingent things exist. A world made only of “might-not-have-beens” does not contain the reason why there is anything. Classical theism names the necessary ground God.',
@@ -205,7 +205,7 @@ export const journalEntries: JournalEntry[] = [
     id: 'j-fg-3',
     areaId: 'first-gate',
     title: 'Beginning and cause',
-    kicker: 'The First Gate',
+    kicker: 'Why Gate',
     unlockAfter: 'fg-kalam',
     body: [
       'The kalām form is clean: what begins has a cause; the universe began; therefore it has a cause. The second premise is argued from the impossibility of an infinite past and from the cosmos we actually observe.',
@@ -221,7 +221,7 @@ export const journalEntries: JournalEntry[] = [
     id: 'j-fg-4',
     areaId: 'first-gate',
     title: 'Honest limits',
-    kicker: 'The First Gate',
+    kicker: 'Why Gate',
     unlockAfter: 'fg-limits',
     body: [
       'A sound cosmological argument is already a great deal. It is not yet the sermon on the mount, and it does not need to be. Aquinas does not stop at the Five Ways; he argues onward. The New Testament adds public claims about a particular life, death, and raising.',

@@ -8,6 +8,17 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.37',
+    title: 'Easy core loop',
+    when: '2026-09-11',
+    items: [
+      'The First Gate is now Why Gate — the stop that asks why there is a world at all. Ansel Gate still keeps it.',
+      'Easy home is still Match, Saved, and Night Watch — Town (soon) waits under Settings → More.',
+      'Easy Night Watch finishes at 6/6. TAP n/6 is the score. Six face taps win the night.',
+      'Match stays sentence → place → person with a named miss and Next.',
+    ],
+  },
+  {
     version: '1.4.36',
     title: 'Easy core loop',
     when: '2026-09-11',
@@ -410,7 +421,7 @@ export const CHANGELOG: ChangeNote[] = [
     title: 'Kalām, positively',
     when: '2026-09-10',
     items: [
-      'First Gate journal: the kalām syllogism leads cleanly — what begins has a cause. Sources are Philoponus and al-Ghazālī first; Craig is the modern statement only.',
+      'Why Gate journal: the kalām syllogism leads cleanly — what begins has a cause. Sources are Philoponus and al-Ghazālī first; Craig is the modern statement only.',
       'Witness Bench: Luke’s inquiry posture stands to be weighed.',
     ],
   },
