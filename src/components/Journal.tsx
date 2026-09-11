@@ -200,8 +200,11 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
       </header>
 
       {progress.learnings.length > 0 ? (
-        <section className="journal-chapter stored-chapter">
-          <div className="chapter-head">
+        <details
+          className="journal-chapter stored-chapter saved-tree"
+          open={!focusedEntry || Boolean(focusId?.startsWith('learn-'))}
+        >
+          <summary className="chapter-head">
             <Avatar who="juniper" size="sm" />
             <div>
               <h2>Stored lines</h2>
@@ -211,7 +214,7 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
                   : 'Each learning is its own unit: claim · reason · source · anchor · picture · tool.'}
               </p>
             </div>
-          </div>
+          </summary>
           <div className="card-grid">
             {storedLearnings(progress).map((raw) => {
               const learning = withLearningBeat(raw)
@@ -242,11 +245,17 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
               )
             })}
           </div>
-        </section>
+        </details>
       ) : null}
 
-      <section className="journal-chapter">
-        <div className="chapter-head">
+      <details
+        className="journal-chapter saved-tree"
+        open={
+          focusedEntry?.areaId === 'daily-trail' ||
+          (progress.learnings.length === 0 && !focusedEntry)
+        }
+      >
+        <summary className="chapter-head">
           <Avatar who="juniper" size="sm" />
           <div>
             <h2>{easy ? 'Juniper’s pages' : 'Trail notes'}</h2>
@@ -256,7 +265,7 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
                 : 'Juniper’s pages — they open when you return, not only when you clear a district.'}
             </p>
           </div>
-        </div>
+        </summary>
         <div className="card-grid">
           {trailNotes.map((entry) => (
             <JournalCard
@@ -276,11 +285,15 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
             />
           ))}
         </div>
-      </section>
+      </details>
 
       {districtChapters.map(({ area, entries }) => (
-        <section key={area.id} className="journal-chapter">
-          <div className="chapter-head">
+        <details
+          key={area.id}
+          className="journal-chapter saved-tree"
+          open={focusedEntry?.areaId === area.id}
+        >
+          <summary className="chapter-head">
             <Avatar who={guideForArea(area.id).id} size="sm" />
             <div>
               <h2>{area.title}</h2>
@@ -288,7 +301,7 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
                 {guideForArea(area.id).name} · {area.subtitle}
               </p>
             </div>
-          </div>
+          </summary>
           <div className="card-grid">
             {entries.map((entry) => (
               <JournalCard
@@ -304,7 +317,7 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
               />
             ))}
           </div>
-        </section>
+        </details>
       ))}
 
       <ShareInvite />

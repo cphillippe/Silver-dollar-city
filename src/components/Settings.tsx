@@ -226,7 +226,7 @@ export function Settings({ onNavigate }: SettingsProps) {
             aria-pressed={progress.easyMode}
             onClick={() => setEasyMode(true)}
           >
-            Easy mode
+            Easy
           </button>
           <button
             type="button"
@@ -234,7 +234,7 @@ export function Settings({ onNavigate }: SettingsProps) {
             aria-pressed={!progress.easyMode}
             onClick={() => setEasyMode(false)}
           >
-            Standard
+            Hard
           </button>
         </div>
       </section>

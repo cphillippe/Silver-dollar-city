@@ -1022,7 +1022,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.23')
+assert.equal(APP_VERSION, '1.4.24')
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
@@ -1114,7 +1114,8 @@ assert.match(TOWN_PATH_EASY, /Porch lamp/)
 assert.match(TOWN_PATH_EASY, /Manage/)
 assert.match(TOWN_PATH_EASY, /Build this/)
 assert.match(mapSrc, /TOWN_PATH_EASY/)
-assert.match(mapSrc, /easyStreet/)
+assert.match(mapSrc, /EASY_TAG_SLOT/)
+assert.match(mapSrc, /setMindPlot\(id\)/)
 assert.match(hubSrc, /EASY\.matchCta/)
 assert.match(TOWN_PATH_HARD, /Heaven/)
 assert.match(mapSrc, /TOWN_PATH/)
@@ -1252,7 +1253,8 @@ assert.match(
 )
 assert.match(mapSrc, /setMindPlot/)
 assert.match(mapSrc, /MindMap/)
-assert.match(mapSrc, /mindMapHasLit/)
+assert.match(mapSrc, /EASY_TAG_SLOT/)
+assert.match(mapSrc, /setMindPlot\(id\)/)
 assert.match(mapSrc, /city-plot-hit/)
 assert.match(
   readFileSync(new URL('../src/components/MindMap.tsx', import.meta.url), 'utf8'),
@@ -1489,7 +1491,9 @@ assert.match(
   readFileSync(new URL('../src/lib/cityBuild.ts', import.meta.url), 'utf8'),
   /East porch/,
 )
-assert.match(cssSrc, /font-size: 20px/)
+assert.match(cssSrc, /aspect-ratio: 640 \/ 420/)
+assert.doesNotMatch(cssSrc, /min-height: 340px/)
+assert.match(cssSrc, /html\[data-easy='on'\] \.city-plot-tag/)
 assert.match(sortSrc, /EASY\.lockIn/)
 assert.match(
   readFileSync(new URL('../src/components/TeachUnlock.tsx', import.meta.url), 'utf8'),
@@ -1759,6 +1763,31 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /setEasyMode\(true\)/,
 )
+assert.match(
+  readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
+  />\s*Hard\s*</,
+)
+assert.match(
+  readFileSync(new URL('../src/components/Welcome.tsx', import.meta.url), 'utf8'),
+  />\s*Hard\s*</,
+)
+assert.match(
+  readFileSync(new URL('../src/components/MindMap.tsx', import.meta.url), 'utf8'),
+  /gateWalkArea/,
+)
+assert.match(
+  readFileSync(new URL('../src/store/progress.ts', import.meta.url), 'utf8'),
+  /export function gateWalkArea/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/Profile.tsx', import.meta.url), 'utf8'),
+  /saved-tree/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/Journal.tsx', import.meta.url), 'utf8'),
+  /saved-tree/,
+)
+assert.match(cssSrc, /saved-tree/)
 assert.match(cssSrc, /html\[data-easy='on'\]/)
 assert.match(cssSrc, /min-height: 52px/)
 assert.match(

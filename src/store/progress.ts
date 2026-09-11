@@ -104,6 +104,16 @@ export function isAreaUnlocked(areaId: string, completed: string[]): boolean {
   return isAreaComplete(previous, completed)
 }
 
+/** Area to walk when this lot is still gated. */
+export function gateWalkArea(areaId: string): string {
+  if (areaId === 'witness-bench') return 'parable-hollow'
+  const area = areas.find((item) => item.id === areaId)
+  const previous = area
+    ? areas.find((item) => item.order === area.order - 1)
+    : undefined
+  return previous?.id ?? areaId
+}
+
 export function nextChallengeInArea(
   area: Area,
   completed: string[],
