@@ -521,6 +521,14 @@ assert.match(recallSrc, /easyChromeLine/)
   assert.doesNotMatch(easyHold, /EASY\.reasonTeach/)
   assert.doesNotMatch(easyHold, /EASY\.whyStands/)
 }
+assert.doesNotMatch(
+  readFileSync(new URL('../src/components/RecallGate.tsx', import.meta.url), 'utf8'),
+  /easy\s*\?\s*\n\s*EASY\.tapWhy/,
+)
+assert.doesNotMatch(
+  readFileSync(new URL('../src/components/Journal.tsx', import.meta.url), 'utf8'),
+  /<h1>\{focusedEntry\?\.title \?\? \(easy \? EASY\.rememberSentence/,
+)
 assert.match(recallSrc, /uniqueHoldChoices/)
 assert.doesNotMatch(recallSrc, /Tap the sentence you still remember/)
 assert.match(recallSrc, /reasonLocked/)

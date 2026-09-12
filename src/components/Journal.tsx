@@ -82,11 +82,11 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
             )
           }
         >
-          ← Journal
+          ← {easy ? EASY.saved : 'Journal'}
         </button>
         <section className="rehearse-anchor">
-          <p className="eyebrow">{easy ? 'The sentence to remember' : 'Takeaway'}</p>
-          <h1>{focusedEntry?.title ?? (easy ? EASY.rememberSentence : STORY.tapTakeaway)}</h1>
+          <p className="eyebrow">{easy ? EASY.saved : 'Takeaway'}</p>
+          <h1>{focusedEntry?.title ?? (easy ? EASY.saved : STORY.tapTakeaway)}</h1>
           <RecallGate
             brief={quizBrief}
             mode="review"
@@ -443,7 +443,7 @@ function JournalCard({
             </>
           ) : brief && quizAgain ? (
             <>
-              <p className="eyebrow">{easy ? EASY.rememberSentence : STORY.tapTakeaway}</p>
+              <p className="eyebrow">{easy ? EASY.saved : STORY.tapTakeaway}</p>
               <RecallGate
                 brief={brief}
                 kicker={due ? STORY.tapTakeaway : 'Journal recall'}

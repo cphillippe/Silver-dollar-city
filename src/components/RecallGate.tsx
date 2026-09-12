@@ -258,15 +258,15 @@ export function RecallGate({
           {picture ? <GemMark gem={picture} size="sm" /> : null}
           <span>Picture this: {beat}</span>
         </p>
+      ) : easy ? (
+        deeper ? (
+          <p className="quiet">A new angle — not the first read again.</p>
+        ) : null
       ) : (
         <p className="quiet">
           {deeper
-            ? easy
-              ? 'A new angle — not the first read again.'
-              : 'A new angle on a line you already hold — not the first teach again.'
-            : easy
-              ? EASY.tapWhy
-              : 'Rebuild the map — claim, then why it stands.'}
+            ? 'A new angle on a line you already hold — not the first teach again.'
+            : 'Rebuild the map — claim, then why it stands.'}
         </p>
       )}
       {deeper || easy ? null : <PlainTalk id={brief.id} />}
