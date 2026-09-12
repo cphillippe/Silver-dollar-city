@@ -5,7 +5,7 @@ import { LOT_STORY } from '../content/lots'
 import { localDateKey } from '../lib/dates'
 import { CITY_PLOTS, nextPlotId, type CityPlotId } from '../lib/city'
 import { lotTapWhy } from '../lib/cityBuild'
-import { EASY, easyMatchReady, isEasy } from '../lib/easy'
+import { EASY, easyHoldView, easyMatchReady, isEasy } from '../lib/easy'
 import { markLater, readLater, sessionDue } from '../lib/recall'
 import { Avatar } from './Avatar'
 import { ShareInvite } from './ShareInvite'
@@ -86,7 +86,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
           <button
             type="button"
             className="btn gold xl"
-            onClick={() => onNavigate({ name: 'journal' })}
+            onClick={() => onNavigate(easyHoldView(progress))}
           >
             {EASY.saved}
           </button>

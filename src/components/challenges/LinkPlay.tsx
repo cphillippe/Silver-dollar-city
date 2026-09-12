@@ -26,7 +26,7 @@ interface Edge {
 }
 
 type WizardStep = 'idea' | 'place' | 'person' | 'linked'
-type EasyScreen = 'choose' | 'miss' | 'next'
+type EasyScreen = 'choose' | 'miss'
 
 function pairKey(a: string, b: string) {
   return a < b ? `${a}:${b}` : `${b}:${a}`
@@ -183,7 +183,7 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek, onEasyStop }: Li
     setStep('linked')
   }
 
-  function advanceFromPick() {
+  function goNextStep() {
     if (!currentTriple) return
     setScreen('choose')
     setPicked(null)
@@ -195,7 +195,6 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek, onEasyStop }: Li
 
   function choose(id: string) {
     if (status === 'ok' || step === 'linked' || !currentTriple || !wantId) return
-    if (easy && screen === 'next') return
     if (!easy && shake) recover()
     if (id === wantId) {
       setPicked(id)
@@ -203,7 +202,7 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek, onEasyStop }: Li
       setStatus('idle')
       setMisses(0)
       if (easy) {
-        setScreen('next')
+        goNextStep()
         return
       }
       window.setTimeout(() => setFlash(null), 380)
@@ -267,10 +266,7 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek, onEasyStop }: Li
   const easyNow =
     step === 'place' ? 'place' : step === 'person' ? 'person' : 'idea'
 
-  const shownOptions = stepOptions.filter((node) => {
-    if (easy && screen === 'next') return node.id === picked || node.id === wantId
-    return true
-  })
+  const shownOptions = stepOptions
 
   useEffect(() => {
     if (!easy || screen !== 'miss' || !wantId) return
@@ -419,13 +415,6 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek, onEasyStop }: Li
           </div>
         </div>
       )}
-      {easy && screen === 'next' && step !== 'linked' ? (
-        <div className="link-dock">
-          <button type="button" className="btn primary xl link-next" onClick={advanceFromPick}>
-            Next
-          </button>
-        </div>
-      ) : null}
     </div>
   )
 }
