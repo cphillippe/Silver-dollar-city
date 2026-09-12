@@ -51,7 +51,7 @@ import {
   WATCH_TOOLS,
 } from '../src/lib/watchTools.ts'
 import { ideaUnlocked, mindGraph, mindMapHasLit } from '../src/lib/mindMap.ts'
-import { linkCaption, linkClue, linkMiss, linkPicture, STREET_CHALLENGE, STREET_LIGHTS, STREET_WHYS } from '../src/content/links.ts'
+import { easyStreetChallenge, linkCaption, linkClue, linkMiss, linkPicture, STREET_CHALLENGE, STREET_LIGHTS, streetTripleForLine, STREET_WHYS } from '../src/content/links.ts'
 import { firstGate } from '../src/content/firstGate.ts'
 import { easyPlaceSub, LOT_STORY, TOWN_PATH_EASY, TOWN_PATH_HARD } from '../src/content/lots.ts'
 import {
@@ -68,7 +68,7 @@ import {
   EASY_FOLK_LIFT,
 } from '../src/lib/cityBuild.ts'
 import { emptyProgress } from '../src/lib/save.ts'
-import { EASY, easyChromeLine, easyFacingLine, easyLearnLine, easyLineLearned, easyMatchReady, easyWhoWhere, easyWhoWhereLine, easyWhyLine, easyWhyWordCount, easyWrongTap, uniqueHoldChoices } from '../src/lib/easy.ts'
+import { EASY, easyChromeLine, easyFacingLine, easyHoldLine, easyHoldPractice, easyHoldView, easyLearnLine, easyLineHeld, easyLineLearned, easyLoopLine, easyMatchLine, easyMatchReady, easyWhoWhere, easyWhoWhereLine, easyWhyLine, easyWhyWordCount, easyWrongTap, uniqueHoldChoices } from '../src/lib/easy.ts'
 import { WORDS, easyLead } from '../src/lib/words.ts'
 import { deeperLinksFor, eraLabel } from '../src/content/deeper.ts'
 import { allEvidenceIds, evidenceFor } from '../src/content/evidence.ts'
@@ -1070,7 +1070,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.45')
+assert.equal(APP_VERSION, '1.4.46')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1279,7 +1279,8 @@ assert.match(linkPlaySrc, /EASY\.connectLink/)
 assert.match(linkPlaySrc, /This one/)
 assert.match(linkPlaySrc, /scrollIntoView/)
 assert.match(linkPlaySrc, /is-not/)
-assert.match(linkPlaySrc, /'choose' \| 'miss' \| 'next'/)
+assert.match(linkPlaySrc, /'choose' \| 'miss'/)
+assert.doesNotMatch(linkPlaySrc, /'choose' \| 'miss' \| 'next'/)
 assert.match(linkPlaySrc, /wantId/)
 assert.match(linkPlaySrc, /is-wizard/)
 assert.match(linkPlaySrc, /is-picture/)
@@ -1698,11 +1699,43 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
 {
   const fresh = emptyProgress()
   assert.equal(easyLearnLine(fresh), 'ph-road')
+  assert.equal(easyMatchLine(fresh), 'ph-road')
+  assert.equal(easyHoldLine(fresh), 'ph-road')
+  assert.equal(easyLoopLine(fresh), 'ph-road')
   assert.equal(easyMatchReady(fresh), false)
+  assert.equal(easyHoldPractice(fresh), false)
   assert.equal(easyLineLearned(fresh, 'ph-road'), false)
-  assert.equal(easyMatchReady({ ...fresh, taught: ['ph-road'] }), true)
+  const taughtMercy = { ...fresh, taught: ['ph-road'] }
+  assert.equal(easyLearnLine(taughtMercy), 'ph-road')
+  assert.equal(easyMatchLine(taughtMercy), 'ph-road')
+  assert.equal(easyHoldLine(taughtMercy), 'ph-road')
+  assert.equal(easyMatchReady(taughtMercy), true)
+  assert.equal(easyHoldPractice(taughtMercy), true)
+  assert.deepEqual(easyHoldView(taughtMercy), {
+    name: 'journal',
+    focusId: 'ph-road',
+    autoQuiz: true,
+  })
+  assert.equal(streetTripleForLine('ph-road'), 'mercy-hollow')
+  assert.equal(easyStreetChallenge('ph-road').triples[0]?.id, 'mercy-hollow')
+  assert.equal(easyStreetChallenge('ph-road').triples.length, 1)
   assert.equal(easyMatchReady({ ...fresh, completed: ['ph-road'] }), true)
-  assert.equal(easyLearnLine({ ...fresh, taught: ['ph-road'] }), 'wb-creed')
+  assert.equal(easyLearnLine({ ...fresh, taught: ['ph-road'] }), 'ph-road')
+  const heldMercy = { ...fresh, taught: ['ph-road'], held: ['ph-road'] }
+  assert.equal(easyLineHeld(heldMercy, 'ph-road'), true)
+  assert.equal(easyLearnLine(heldMercy), 'wb-creed')
+  assert.equal(easyMatchLine(heldMercy), 'wb-creed')
+  assert.equal(easyHoldLine(heldMercy), 'wb-creed')
+  assert.equal(easyMatchReady(heldMercy), false)
+  assert.equal(easyHoldPractice(heldMercy), false)
+  const taughtCreed = { ...fresh, taught: ['ph-road', 'wb-creed'], held: ['ph-road'] }
+  assert.equal(easyLearnLine(taughtCreed), 'wb-creed')
+  assert.equal(easyMatchLine(taughtCreed), 'wb-creed')
+  assert.equal(easyHoldLine(taughtCreed), 'wb-creed')
+  assert.equal(easyMatchReady(taughtCreed), true)
+  assert.equal(streetTripleForLine('wb-creed'), 'silas-bench')
+  assert.equal(easyStreetChallenge('wb-creed').triples[0]?.id, 'silas-bench')
+  assert.equal(easyStreetChallenge('wb-creed').triples.length, 1)
   assert.deepEqual(easyWhoWhere('ph-road'), {
     who: 'Mercy',
     whoName: 'Mercy Wren',
@@ -1766,7 +1799,11 @@ assert.match(
 )
 assert.match(
   readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
-  /easy \? \{ name: 'journal' \} : \{ name: 'hub' \}/,
+  /easyHoldView/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
+  /easyStreetChallenge/,
 )
 assert.match(
   readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
@@ -1910,6 +1947,18 @@ assert.equal(
     'Honor is spent so the son can be embraced; the older brother shows nearness without joy.',
   ),
   'The father hugs him first.',
+)
+assert.equal(
+  easyWhyLine(
+    'Jesus makes the listener identify with the wounded man, then with the Samaritan moved with compassion.',
+  ),
+  'First the hurt man, then help.',
+)
+assert.doesNotMatch(
+  easyWhyLine(
+    'Jesus makes the listener identify with the wounded man, then with the Samaritan moved with compassion.',
+  ),
+  /stands you with the hurt man/,
 )
 assert.equal(easyWhyWordCount('The father hugs him first.'), 5)
 assert.ok(easyWhyWordCount(easyWhyLine('The servant forgiven an unpayable debt then throttles a peer over a small sum.')) <= 12)
@@ -2056,6 +2105,13 @@ assert.match(
   /EASY\.saved/,
 )
 assert.match(
+  readFileSync(new URL('../src/components/Journal.tsx', import.meta.url), 'utf8'),
+  /is-easy-hold-practice/,
+)
+assert.match(hubSrc, /easyHoldView/)
+assert.match(cssSrc, /is-easy-hold-practice/)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /one lesson loop, leaner Match, less Hold clutter/)
+assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /EASY\.saved/,
 )
@@ -2110,9 +2166,13 @@ assert.match(defendSrc, /TAP \$\{downed\}/)
 assert.match(defendSrc, /You missed\. Tap the face/)
 assert.match(defendSrc, /walking\.some\(\(item\) => !item\.turned\)/)
 assert.doesNotMatch(defendSrc, /matching sentence/)
-assert.match(
+assert.doesNotMatch(
   readFileSync(new URL('../src/components/challenges/LinkPlay.tsx', import.meta.url), 'utf8'),
   /screen === 'next'/,
+)
+assert.doesNotMatch(
+  readFileSync(new URL('../src/components/challenges/LinkPlay.tsx', import.meta.url), 'utf8'),
+  /EasyScreen = 'choose' \| 'miss' \| 'next'/,
 )
 assert.match(
   readFileSync(new URL('../src/components/challenges/LinkPlay.tsx', import.meta.url), 'utf8'),

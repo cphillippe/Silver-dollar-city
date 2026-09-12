@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
-import { STREET_BEATS, STREET_CHALLENGE, STREET_WHYS } from '../content/links'
+import { STREET_BEATS, STREET_CHALLENGE, STREET_WHYS, easyStreetChallenge } from '../content/links'
 import { STORY } from '../content/story'
-import { EASY, easyMatchReady, isEasy } from '../lib/easy'
+import { EASY, easyHoldView, easyMatchLine, easyMatchReady, isEasy } from '../lib/easy'
 import { useJuiceHandoff } from '../lib/juice'
 import { PuzzlePlay } from './PuzzlePlay'
 import { TownReturn } from './TownReturn'
@@ -39,8 +39,8 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
   const savedWin = useRef(false)
   const [taught, setTaught] = useState(() => isEasy(progress) && easyMatchReady(progress))
   const [arming, setArming] = useState(false)
-  const challenge = STREET_CHALLENGE
   const easy = isEasy(progress)
+  const challenge = easy ? easyStreetChallenge(easyMatchLine(progress)) : STREET_CHALLENGE
 
   function markStreet() {
     if (savedWin.current) return
@@ -55,7 +55,7 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
 
   function easyStop(dest: 'hold' | 'home') {
     markStreet()
-    onNavigate(dest === 'hold' ? { name: 'journal' } : { name: 'hub' })
+    onNavigate(dest === 'hold' ? easyHoldView(progress) : { name: 'hub' })
   }
 
   return (
