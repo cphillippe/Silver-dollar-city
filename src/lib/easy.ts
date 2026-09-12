@@ -358,8 +358,8 @@ export function easyWhoWhere(id: string): EasyWhoWhere {
 }
 
 export function easyWhoWhereLine(id: string): string {
-  const { whoName, place } = easyWhoWhere(id)
-  return `This idea lives at ${place}, with ${whoName}.`
+  const { who, place } = easyWhoWhere(id)
+  return `This idea lives at ${place}, with ${who}.`
 }
 
 type TaughtProgress = Pick<ProgressState, 'taught' | 'completed' | 'held' | 'learnings'>

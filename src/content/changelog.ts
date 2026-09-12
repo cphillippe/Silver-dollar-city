@@ -14,7 +14,7 @@ export const CHANGELOG: ChangeNote[] = [
     items: [
       'Easy: Learn before Match (teach-before-test)',
       'Easy home is Learn → Match → Hold. Read the story first. Match stays locked until that teach. After Learn, Match is the clear tap. After a Match win, Hold next.',
-      'First Learn teaches the story plus who keeps it and where it lives — this idea lives at Story Creek, with Mercy Wren. Then Match asks sentence ↔ place ↔ person.',
+      'First Learn teaches the story plus who keeps it and where it lives — this idea lives at Story Creek, with Mercy. Then Match asks sentence ↔ place ↔ person.',
       'If Match opens early: Learn this first.',
       'Easy: Night Watch fully hidden until Match→Hold solid',
       'Town (soon) waits under Settings → More. Night Watch stays on Hard.',
