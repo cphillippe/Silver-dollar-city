@@ -1,7 +1,7 @@
 import type { Challenge, SequenceItem } from '../types'
 import type { EvidenceBrief } from '../content/evidence'
 import { plainFor } from '../content/plain'
-import { easyFacingLine, easyStoryCard, easyWhoWhere, easyWhoWhereLine, isEasy } from '../lib/easy'
+import { easyFacingLine, easyWhoWhere, easyWhoWhereLine, isEasy } from '../lib/easy'
 import { WORDS, schoolWordsFor } from '../lib/words'
 import { learningBeat } from '../lib/learning'
 import { learningPicture, toolForEvidence } from '../lib/watchTools'
@@ -42,7 +42,7 @@ export function TeachUnlock({ brief, kind, onUnlock, unlock, beats }: TeachUnloc
       <section className="recall-gate is-encode teach-gate easy-story-card" aria-label="Short story">
         <p className="eyebrow">Short story</p>
         {picture ? <GemMark gem={picture} size="sm" /> : null}
-        <p className="teach-reason">{easyStoryCard(story)}</p>
+        <p className="teach-reason">{story}</p>
         <div className="easy-who-where" aria-label={`${home.who} · ${home.place}`}>
           <p className="easy-who-where-line">{easyWhoWhereLine(brief.id)}</p>
           <div className="easy-who-where-row">

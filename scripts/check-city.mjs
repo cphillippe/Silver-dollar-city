@@ -2075,6 +2075,10 @@ assert.match(
 )
 assert.match(
   readFileSync(new URL('../src/components/TeachUnlock.tsx', import.meta.url), 'utf8'),
+  /plain\.teach/,
+)
+assert.doesNotMatch(
+  readFileSync(new URL('../src/components/TeachUnlock.tsx', import.meta.url), 'utf8'),
   /easyStoryCard/,
 )
 assert.match(cssSrc, /easy-steps/)
