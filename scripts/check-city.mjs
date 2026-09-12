@@ -1709,7 +1709,9 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
     whoId: 'mercy',
     place: 'Story Creek',
   })
-  assert.equal(easyWhoWhereLine('ph-road'), 'Mercy Wren keeps this at Story Creek.')
+  assert.equal(easyWhoWhereLine('ph-road'), 'This idea lives at Story Creek, with Mercy Wren.')
+  assert.equal(easyWhoWhereLine('wb-creed'), 'This idea lives at Witness Square, with Silas Whitman.')
+  assert.equal(easyWhoWhereLine('daily-lantern'), 'This idea lives at East porch, with Juniper Wick.')
   assert.equal(easyWhoWhere('wb-creed').who, 'Silas')
   assert.equal(easyWhoWhere('wb-creed').place, 'Witness Square')
   assert.equal(easyWhoWhere('daily-lantern').who, 'Juniper')
