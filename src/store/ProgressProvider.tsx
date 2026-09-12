@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState, type ReactNode } from 'react'
+import { markEasyHeld, markEasyTaught } from '../lib/easy'
 import { learningFromReview, upsertLearning } from '../lib/learning'
 import { isToolHowTo } from '../lib/watchTools'
 import {
@@ -65,10 +66,18 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
 
   const recordHeld = useCallback((evidenceId: string) => {
     setProgress((current) => {
-      if (isToolHowTo(evidenceId) || current.held.includes(evidenceId)) return current
+      if (isToolHowTo(evidenceId)) return current
+      const held = current.held.includes(evidenceId)
+        ? current.held
+        : [...current.held, evidenceId]
+      const easyHeld = current.easyMode
+        ? markEasyHeld(current, evidenceId)
+        : (current.easyHeld ?? [])
+      if (held === current.held && easyHeld === (current.easyHeld ?? [])) return current
       const next: ProgressState = {
         ...current,
-        held: [...current.held, evidenceId],
+        held,
+        easyHeld,
       }
       return write(next)
     })
@@ -116,6 +125,10 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
           isToolHowTo(event.id) || current.held.includes(event.id)
             ? current.held
             : [...current.held, event.id],
+        easyHeld:
+          current.easyMode && !isToolHowTo(event.id)
+            ? markEasyHeld(current, event.id)
+            : (current.easyHeld ?? []),
         lastReviewPillar: event.pillar,
         elaborations: event.text
           ? { ...current.elaborations, [event.id]: event.text }
@@ -251,8 +264,12 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
   const recordTaught = useCallback((evidenceId: string) => {
     setProgress((current) => {
       const taught = current.taught ?? []
-      if (taught.includes(evidenceId)) return current
-      return write({ ...current, taught: [...taught, evidenceId] })
+      const nextTaught = taught.includes(evidenceId) ? taught : [...taught, evidenceId]
+      const easyTaught = current.easyMode
+        ? markEasyTaught(current, evidenceId)
+        : (current.easyTaught ?? [])
+      if (nextTaught === taught && easyTaught === (current.easyTaught ?? [])) return current
+      return write({ ...current, taught: nextTaught, easyTaught })
     })
   }, [write])
 

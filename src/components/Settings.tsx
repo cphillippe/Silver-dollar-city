@@ -106,7 +106,7 @@ export function Settings({ onNavigate }: SettingsProps) {
   function confirmReset() {
     const ok = window.confirm(
       easy
-        ? 'Reset this walk? That clears saved sentences and connections on this device, then starts over.'
+        ? 'Reset this walk? That clears saved sentences and connections on this device, then starts Easy at Mercy’s Story Creek line.'
         : 'Reset progress? This wipes the save on this device — all held lines, journal pages, Night Watch, and mind-map links — and returns to the start. A backup of this save stays until the next import or reset.',
     )
     if (!ok) return
@@ -384,7 +384,7 @@ export function Settings({ onNavigate }: SettingsProps) {
         <p className="eyebrow">Reset progress</p>
         <p>
           {easy
-            ? 'Wipe this walk on this device — saved sentences and connections — and start over. Export first if you want it back.'
+            ? 'Wipe this walk on this device — saved sentences and connections — and start Easy at Mercy’s Story Creek line. Export first if you want it back.'
             : 'Wipe ALL progress on this device — held lines, journal, Night Watch, and mind-map links — and return to the start. Export first if you want the walk back. This is not on the town screen.'}
         </p>
         <button type="button" className="btn" onClick={confirmReset}>
