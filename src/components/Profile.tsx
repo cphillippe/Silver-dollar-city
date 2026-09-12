@@ -158,7 +158,7 @@ export function Profile({ onNavigate }: ProfileProps) {
 
       <TreeFold
         label={easy ? EASY.uses : 'Tools'}
-        lead={easy ? 'Night Watch lines you can use.' : 'What you can deploy on Night Watch.'}
+        lead={easy ? `${EASY.nightSoon} — tools wait here.` : 'What you can deploy on Night Watch.'}
         count={inv.tools.length}
       >
         {inv.tools.map((tool) => (
@@ -167,6 +167,17 @@ export function Profile({ onNavigate }: ProfileProps) {
             className={`profile-unlock ${tool.unlocked ? '' : 'is-dim'}`}
           >
             {tool.unlocked ? (
+              easy ? (
+                <p className="profile-unlock-hit is-tool">
+                  <AbilityMark ability={tool.id} size="sm" />
+                  <span>
+                    <strong>
+                      {tool.label} {tool.tierMark}
+                    </strong>
+                    <p>{EASY.nightSoon}</p>
+                  </span>
+                </p>
+              ) : (
               <button
                 type="button"
                 className="profile-unlock-hit is-tool"
@@ -177,9 +188,10 @@ export function Profile({ onNavigate }: ProfileProps) {
                   <strong>
                     {tool.label} {tool.tierMark}
                   </strong>
-                  <p>{easy ? 'Night Watch · Learn → Hold → Use' : 'Night Watch · Learn → Hold → Deploy'}</p>
+                  <p>Night Watch · Learn → Hold → Deploy</p>
                 </span>
               </button>
+              )
             ) : (
               <p className="profile-unlock-hit is-tool is-locked">
                 <AbilityMark ability={tool.id} size="sm" />

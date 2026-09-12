@@ -7119,11 +7119,23 @@ html[data-easy='on'] .mind-node em {
   width: 100%;
 }
 
+.easy-soon {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
 .town-soon {
   margin-top: auto;
   align-self: center;
   opacity: 0.72;
   font-size: 0.95rem;
+}
+
+.easy-soon .town-soon {
+  margin-top: 0;
 }
 
 .easy-story-card .teach-reason {

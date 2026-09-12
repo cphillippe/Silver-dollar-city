@@ -213,6 +213,16 @@ export function Settings({ onNavigate }: SettingsProps) {
         </section>
       ) : null}
 
+      {easy ? (
+        <section className="settings-card" aria-label="Night Watch">
+          <p className="eyebrow">Night Watch</p>
+          <p>
+            {EASY.nightSoon} — waits until Match → Saved (Hold) is solid. Hard still
+            has the night.
+          </p>
+        </section>
+      ) : null}
+
       <section className="settings-card">
         <p className="eyebrow">You</p>
         <p>
