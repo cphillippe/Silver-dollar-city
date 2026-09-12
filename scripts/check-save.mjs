@@ -67,6 +67,7 @@ assert.deepEqual(fromLegacy.progress.defense.nights, [])
 assert.equal(fromLegacy.progress.theme, 'candy')
 assert.equal(fromLegacy.progress.easyMode, false)
 assert.deepEqual(fromLegacy.progress.learnings, [])
+assert.deepEqual(fromLegacy.progress.taught, [])
 assert.equal(fromLegacy.progress.cityBuilt.porch, 2)
 assert.equal(fromLegacy.progress.cityBuilt.hollow, 3)
 

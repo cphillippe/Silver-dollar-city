@@ -8,6 +8,26 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.45',
+    title: 'Easy core loop',
+    when: '2026-09-12',
+    items: [
+      'Easy: Learn before Match (teach-before-test)',
+      'Easy home is Learn → Match → Hold. Read the story first. Match stays locked until that teach. After Learn, Match is the clear tap. After a Match win, Hold next.',
+      'First Learn teaches the story plus who keeps it and where it lives — Mercy at Story Creek for the neighbor line. Then Match asks sentence ↔ place ↔ person.',
+      'If Match opens early: Learn this first.',
+      'Easy: Night Watch fully hidden until Match→Hold solid',
+      'Town (soon) waits under Settings → More. Night Watch stays on Hard.',
+      'Easy Match stop + shorter Hold why chips for Plain 5/5',
+      'Easy Match ends after one sentence → place → person. Win burst, then Hold next or Home — no looping matches.',
+      'Easy Hold why-chips are short plain sentences (~8–12 words). Luke 15: The father hugs him first. Hold prompts stay Tap the line you kept. then Tap why this is true.',
+      'Night Watch miss says Wrong — tap the glowing face, so locked tools do not look like the task.',
+      'Night Watch Love line is tool how-to, not a claim. Luke 10 split: Love names the tool (v27). Compassion is the Samaritan’s move (v33). The held claim stays Neighbor is the one who shows mercy (v36–37).',
+      'Easy Night Watch still finishes at 6/6.',
+      'Place titles stay Story Creek, Witness Square, Sky Watch, Meaning Ridge.',
+    ],
+  },
+  {
     version: '1.4.44',
     title: 'Easy core loop',
     when: '2026-09-12',

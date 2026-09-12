@@ -68,7 +68,7 @@ import {
   EASY_FOLK_LIFT,
 } from '../src/lib/cityBuild.ts'
 import { emptyProgress } from '../src/lib/save.ts'
-import { EASY, easyChromeLine, easyFacingLine, easyWhyLine, easyWhyWordCount, easyWrongTap, uniqueHoldChoices } from '../src/lib/easy.ts'
+import { EASY, easyChromeLine, easyFacingLine, easyLearnLine, easyLineLearned, easyMatchReady, easyWhoWhere, easyWhoWhereLine, easyWhyLine, easyWhyWordCount, easyWrongTap, uniqueHoldChoices } from '../src/lib/easy.ts'
 import { WORDS, easyLead } from '../src/lib/words.ts'
 import { deeperLinksFor, eraLabel } from '../src/content/deeper.ts'
 import { allEvidenceIds, evidenceFor } from '../src/content/evidence.ts'
@@ -1070,7 +1070,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.44')
+assert.equal(APP_VERSION, '1.4.45')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1674,14 +1674,46 @@ assert.match(hubSrc, /EASY\.saved/)
 assert.match(hubSrc, /EASY\.matchCta/)
 assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
 {
-  const easyHome = hubSrc.match(/if \(easy\) \{\s*return \(([\s\S]*?)\n  \}/)?.[1] ?? ''
+  const easyHome = hubSrc.match(/className="hub is-easy-home"[\s\S]*?<\/main>/)?.[0] ?? ''
+  assert.match(easyHome, /name: 'learn'/)
+  assert.match(easyHome, /EASY\.learnCta|EASY\.readStory/)
   assert.match(easyHome, /EASY\.matchCta/)
   assert.match(easyHome, /EASY\.saved/)
   assert.match(easyHome, /EASY\.townSoon/)
+  assert.match(easyHome, /matchReady/)
+  assert.match(hubSrc, /easyMatchReady/)
+  assert.ok(
+    easyHome.indexOf("name: 'learn'") < easyHome.indexOf('EASY.matchCta'),
+    'Easy home order is Learn before Match',
+  )
+  assert.ok(
+    easyHome.indexOf('EASY.matchCta') < easyHome.indexOf('EASY.saved'),
+    'Easy home order is Match before Hold',
+  )
   assert.doesNotMatch(easyHome, /Night Watch/)
   assert.doesNotMatch(easyHome, /EASY\.nightSoon/)
   assert.doesNotMatch(easyHome, /EASY\.nightDo/)
   assert.doesNotMatch(easyHome, /name: 'defend'/)
+}
+{
+  const fresh = emptyProgress()
+  assert.equal(easyLearnLine(fresh), 'ph-road')
+  assert.equal(easyMatchReady(fresh), false)
+  assert.equal(easyLineLearned(fresh, 'ph-road'), false)
+  assert.equal(easyMatchReady({ ...fresh, taught: ['ph-road'] }), true)
+  assert.equal(easyMatchReady({ ...fresh, completed: ['ph-road'] }), true)
+  assert.equal(easyLearnLine({ ...fresh, taught: ['ph-road'] }), 'wb-creed')
+  assert.deepEqual(easyWhoWhere('ph-road'), {
+    who: 'Mercy',
+    whoName: 'Mercy Wren',
+    whoId: 'mercy',
+    place: 'Story Creek',
+  })
+  assert.equal(easyWhoWhereLine('ph-road'), 'Mercy Wren keeps this at Story Creek.')
+  assert.equal(easyWhoWhere('wb-creed').who, 'Silas')
+  assert.equal(easyWhoWhere('wb-creed').place, 'Witness Square')
+  assert.equal(easyWhoWhere('daily-lantern').who, 'Juniper')
+  assert.equal(easyWhoWhere('daily-lantern').place, 'East porch')
 }
 {
   const settingsSrc = readFileSync(
@@ -1704,6 +1736,10 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
 assert.match(latestChange(APP_VERSION).items.join('\n'), /Town \(soon\)/)
 assert.match(
   latestChange(APP_VERSION).items.join('\n'),
+  /Easy: Learn before Match \(teach-before-test\)/,
+)
+assert.match(
+  latestChange(APP_VERSION).items.join('\n'),
   /Night Watch fully hidden until Match→Hold solid/,
 )
 assert.match(
@@ -1715,8 +1751,28 @@ assert.match(
   /view\.name === 'defend' && !easy/,
 )
 assert.match(
+  readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8'),
+  /LearnScreen/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/LearnScreen.tsx', import.meta.url), 'utf8'),
+  /easyLearnLine/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/LearnScreen.tsx', import.meta.url), 'utf8'),
+  /recordTaught/,
+)
+assert.match(
   readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
   /easy \? \{ name: 'journal' \} : \{ name: 'hub' \}/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
+  /EASY\.learnThisFirst/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
+  /name: 'learn'/,
 )
 assert.match(
   readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
@@ -1740,6 +1796,9 @@ assert.match(
 )
 assert.match(cssSrc, /is-easy-home/)
 assert.match(cssSrc, /easy-core/)
+assert.match(cssSrc, /easy-who-where/)
+assert.match(cssSrc, /easy-place-chip/)
+assert.match(cssSrc, /easy-match-lock/)
 assert.match(hubSrc, /EASY\.connectLink/)
 assert.match(
   readFileSync(new URL('../src/content/lots.ts', import.meta.url), 'utf8'),
@@ -1871,6 +1930,9 @@ assert.ok(easyWhyWordCount(easyWhyLine('The servant forgiven an unpayable debt t
   assert.ok(faces.length > 20)
 }
 assert.equal(EASY.holdNext, 'Hold next')
+assert.equal(EASY.learnCta, 'Learn')
+assert.equal(EASY.readStoryFirst, 'Read the story first')
+assert.equal(EASY.learnThisFirst, 'Learn this first.')
 assert.equal(EASY.matchDone, 'Match done')
 assert.equal(EASY.matchWin, 'Matched!')
 assert.equal(EASY.home, 'Home')
@@ -2196,6 +2258,10 @@ assert.match(
 )
 assert.match(
   readFileSync(new URL('../src/lib/save.ts', import.meta.url), 'utf8'),
+  /taught: asStringArray\(parsed\.taught\)/,
+)
+assert.match(
+  readFileSync(new URL('../src/lib/save.ts', import.meta.url), 'utf8'),
   /cityBuilt/,
 )
 assert.match(
@@ -2218,6 +2284,13 @@ assert.doesNotMatch(teachSrc, /A claim is the main idea we hold to be true/)
 assert.ok(
   teachSrc.indexOf('teach-reason') < teachSrc.indexOf('brief.claim'),
   'teach story before the claim line',
+)
+assert.match(teachSrc, /easyWhoWhere/)
+assert.match(teachSrc, /easy-who-where/)
+assert.match(teachSrc, /easy-place-chip/)
+assert.ok(
+  teachSrc.indexOf('easyWhoWhere') < teachSrc.indexOf('The main idea you will keep'),
+  'Easy teach names person and place before the sentence',
 )
 assert.match(matchSrc, /match-col-label/)
 assert.match(matchSrc, /Main idea' : 'Claim'/)

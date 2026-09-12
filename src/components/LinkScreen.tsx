@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { STREET_BEATS, STREET_CHALLENGE, STREET_WHYS } from '../content/links'
 import { STORY } from '../content/story'
-import { EASY, isEasy } from '../lib/easy'
+import { EASY, easyMatchReady, isEasy } from '../lib/easy'
 import { useJuiceHandoff } from '../lib/juice'
 import { PuzzlePlay } from './PuzzlePlay'
 import { TownReturn } from './TownReturn'
@@ -37,7 +37,7 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
   const { completeChallenge, markMiss, progress } = useProgress()
   const { juiceDone: showNext, afterJuice } = useJuiceHandoff()
   const savedWin = useRef(false)
-  const [taught, setTaught] = useState(false)
+  const [taught, setTaught] = useState(() => isEasy(progress) && easyMatchReady(progress))
   const [arming, setArming] = useState(false)
   const challenge = STREET_CHALLENGE
   const easy = isEasy(progress)
@@ -71,7 +71,19 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
         ← {easy ? EASY.home : 'The town'}
       </button>
 
-      {!showNext ? (
+      {!showNext && easy && !easyMatchReady(progress) ? (
+        <section className="recall-gate is-encode teach-gate" aria-label={EASY.learnThisFirst}>
+          <p className="recall-line rehearse-stem">{EASY.learnThisFirst}</p>
+          <p className="quiet">{EASY.readStoryFirst}</p>
+          <button
+            type="button"
+            className="btn primary xl"
+            onClick={() => onNavigate({ name: 'learn' })}
+          >
+            {EASY.learnCta}
+          </button>
+        </section>
+      ) : !showNext ? (
         !taught ? (
           <section
             className="recall-gate is-encode teach-gate"
