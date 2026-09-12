@@ -79,22 +79,13 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
             {EASY.saved}
           </button>
         </nav>
-        <div className="easy-soon">
-          <button
-            type="button"
-            className="text-link town-soon"
-            onClick={() => onNavigate({ name: 'settings' })}
-          >
-            {EASY.townSoon}
-          </button>
-          <button
-            type="button"
-            className="text-link town-soon"
-            onClick={() => onNavigate({ name: 'settings' })}
-          >
-            {EASY.nightSoon}
-          </button>
-        </div>
+        <button
+          type="button"
+          className="text-link town-soon"
+          onClick={() => onNavigate({ name: 'settings' })}
+        >
+          {EASY.townSoon}
+        </button>
       </main>
     )
   }

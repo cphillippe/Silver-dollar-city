@@ -1070,7 +1070,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.42')
+assert.equal(APP_VERSION, '1.4.43')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1665,28 +1665,48 @@ assert.match(hubSrc, /is-easy-home/)
 assert.match(hubSrc, /EASY\.townSoon/)
 assert.match(hubSrc, /EASY\.saved/)
 assert.match(hubSrc, /EASY\.matchCta/)
-assert.match(hubSrc, /EASY\.nightSoon/)
+assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
 {
   const easyHome = hubSrc.match(/if \(easy\) \{\s*return \(([\s\S]*?)\n  \}/)?.[1] ?? ''
   assert.match(easyHome, /EASY\.matchCta/)
   assert.match(easyHome, /EASY\.saved/)
   assert.match(easyHome, /EASY\.townSoon/)
-  assert.match(easyHome, /EASY\.nightSoon/)
+  assert.doesNotMatch(easyHome, /Night Watch/)
+  assert.doesNotMatch(easyHome, /EASY\.nightSoon/)
   assert.doesNotMatch(easyHome, /EASY\.nightDo/)
   assert.doesNotMatch(easyHome, /name: 'defend'/)
-  assert.doesNotMatch(easyHome, /className="btn gold xl"[\s\S]*Night Watch/)
 }
-assert.match(
-  readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
-  /EASY\.townSoon/,
-)
-assert.match(
-  readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
-  /EASY\.nightSoon/,
-)
+{
+  const settingsSrc = readFileSync(
+    new URL('../src/components/Settings.tsx', import.meta.url),
+    'utf8',
+  )
+  const easyReset = settingsSrc.match(/\? 'Reset this walk\?[^']+'/)?.[0] ?? ''
+  const easyWipe = settingsSrc.match(/\? 'Wipe this walk[^']+'/)?.[0] ?? ''
+  const easyMore = settingsSrc.match(
+    /<details className=\{easy \? 'settings-advanced'[\s\S]*?<\/details>/,
+  )?.[0] ?? ''
+  assert.match(settingsSrc, /EASY\.townSoon/)
+  assert.doesNotMatch(settingsSrc, /EASY\.nightSoon/)
+  assert.doesNotMatch(settingsSrc, /aria-label="Night Watch"/)
+  assert.doesNotMatch(easyReset, /Night Watch/)
+  assert.doesNotMatch(easyWipe, /Night Watch/)
+  assert.doesNotMatch(easyMore, /Night Watch/)
+  assert.doesNotMatch(easyMore, /nightSoon/)
+}
 assert.match(latestChange(APP_VERSION).items.join('\n'), /Town \(soon\)/)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Night Watch hidden until Match→Hold/)
-assert.equal(EASY.nightSoon, 'Night Watch (soon)')
+assert.match(
+  latestChange(APP_VERSION).items.join('\n'),
+  /Night Watch fully hidden until Match→Hold solid/,
+)
+assert.match(
+  readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8'),
+  /easy && next\.name === 'defend'/,
+)
+assert.match(
+  readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8'),
+  /view\.name === 'defend' && !easy/,
+)
 assert.match(
   readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
   /easy \? \{ name: 'journal' \} : \{ name: 'hub' \}/,
@@ -1695,7 +1715,7 @@ assert.doesNotMatch(
   readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
   /name: 'defend'/,
 )
-assert.match(
+assert.doesNotMatch(
   readFileSync(new URL('../src/components/Profile.tsx', import.meta.url), 'utf8'),
   /EASY\.nightSoon/,
 )
@@ -1798,6 +1818,16 @@ assert.equal(
 assert.equal(
   easyChromeLine('The first servant was right to demand prison.'),
   'Jail him over a tiny debt.',
+)
+assert.equal(
+  easyChromeLine(
+    'Honor is spent so the son can be embraced; the older brother shows nearness without joy.',
+  ),
+  'The father hugs him first. The older brother is home — and angry.',
+)
+assert.equal(
+  easyChromeLine('The older brother is the hero for staying home.'),
+  'The older brother is the hero just for staying.',
 )
 assert.doesNotMatch(
   easyChromeLine('The servant forgiven an unpayable debt then throttles a peer over a small sum.'),

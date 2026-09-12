@@ -85,6 +85,10 @@ const EASY_CHROME: Record<string, string> = {
     'Jail him over a tiny debt.',
   'The first servant was right to demand prison.': 'Jail him over a tiny debt.',
   'Peter’s “seven times” was already the full measure.': 'Seven times was already enough.',
+  'Honor is spent so the son can be embraced; the older brother shows nearness without joy.':
+    'The father hugs him first. The older brother is home — and angry.',
+  'The older brother is the hero for staying home.':
+    'The older brother is the hero just for staying.',
 }
 
 /** After the one teach, Easy never wallpapers the word claim. */

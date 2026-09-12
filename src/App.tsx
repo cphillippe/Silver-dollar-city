@@ -11,17 +11,40 @@ import { LinkScreen } from './components/LinkScreen'
 import { Profile } from './components/Profile'
 import { Vista } from './components/Vista'
 import { Welcome } from './components/Welcome'
+import { isEasy } from './lib/easy'
 import { useProgress } from './store/progress'
 import type { View } from './types'
 
+function easyNightWatchHit(): boolean {
+  if (typeof window === 'undefined') return false
+  const blob = `${window.location.hash} ${window.location.search} ${window.location.pathname}`
+  return /defend|night-?watch/i.test(blob)
+}
+
 export default function App() {
   const { progress } = useProgress()
+  const easy = isEasy(progress)
   const [view, setView] = useState<View>(() => {
     const walked =
       progress.completed.length > 0 || Boolean(progress.lastDailyDate)
     if (progress.started && walked) return { name: 'hub' }
     return { name: 'welcome' }
   })
+
+  function go(next: View) {
+    if (easy && next.name === 'defend') {
+      setView({ name: 'hub' })
+      return
+    }
+    setView(next)
+  }
+
+  useEffect(() => {
+    if (!easy) return
+    if (view.name === 'defend' || easyNightWatchHit()) {
+      setView({ name: 'hub' })
+    }
+  }, [easy, view.name])
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -41,35 +64,35 @@ export default function App() {
   }, [view])
 
   return (
-    <AppShell view={view} onNavigate={setView}>
-      {view.name === 'welcome' ? <Welcome onNavigate={setView} /> : null}
+    <AppShell view={view} onNavigate={go}>
+      {view.name === 'welcome' ? <Welcome onNavigate={go} /> : null}
       {view.name === 'hub' ? (
-        <Hub onNavigate={setView} openPlot={view.mindPlot} />
+        <Hub onNavigate={go} openPlot={view.mindPlot} />
       ) : null}
-      {view.name === 'daily' ? <DailyTrail onNavigate={setView} /> : null}
+      {view.name === 'daily' ? <DailyTrail onNavigate={go} /> : null}
       {view.name === 'area' ? (
-        <AreaView areaId={view.areaId} onNavigate={setView} />
+        <AreaView areaId={view.areaId} onNavigate={go} />
       ) : null}
       {view.name === 'challenge' ? (
         <ChallengeScreen
           key={`${view.areaId}-${view.challengeId}`}
           areaId={view.areaId}
           challengeId={view.challengeId}
-          onNavigate={setView}
+          onNavigate={go}
         />
       ) : null}
       {view.name === 'journal' ? (
         <Journal
           focusId={view.focusId}
           autoQuiz={view.autoQuiz}
-          onNavigate={setView}
+          onNavigate={go}
         />
       ) : null}
-      {view.name === 'vista' ? <Vista onNavigate={setView} /> : null}
-      {view.name === 'settings' ? <Settings onNavigate={setView} /> : null}
-      {view.name === 'defend' ? <DefendScreen onNavigate={setView} /> : null}
-      {view.name === 'link' ? <LinkScreen onNavigate={setView} /> : null}
-      {view.name === 'profile' ? <Profile onNavigate={setView} /> : null}
+      {view.name === 'vista' ? <Vista onNavigate={go} /> : null}
+      {view.name === 'settings' ? <Settings onNavigate={go} /> : null}
+      {view.name === 'defend' && !easy ? <DefendScreen onNavigate={go} /> : null}
+      {view.name === 'link' ? <LinkScreen onNavigate={go} /> : null}
+      {view.name === 'profile' ? <Profile onNavigate={go} /> : null}
     </AppShell>
   )
 }
