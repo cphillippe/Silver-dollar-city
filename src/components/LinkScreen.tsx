@@ -105,7 +105,7 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
             {easy ? null : (
               <ul className="word-school street-whys" aria-label="Why each place">
                 {challenge.triples.map((triple) => (
-                  <li key={triple.id}>{STREET_WHYS[triple.id].hard}</li>
+                  <li key={triple.id}>{STREET_WHYS[triple.id]?.hard}</li>
                 ))}
               </ul>
             )}
