@@ -5,7 +5,7 @@ import { LOT_STORY } from '../content/lots'
 import { localDateKey } from '../lib/dates'
 import { CITY_PLOTS, nextPlotId, type CityPlotId } from '../lib/city'
 import { lotTapWhy } from '../lib/cityBuild'
-import { EASY, easyHoldView, easyMatchReady, isEasy } from '../lib/easy'
+import { EASY, EASY_MATCH_LINE, easyHoldView, easyLineHeld, easyMatchReady, isEasy } from '../lib/easy'
 import { markLater, readLater, sessionDue } from '../lib/recall'
 import { Avatar } from './Avatar'
 import { ShareInvite } from './ShareInvite'
@@ -57,19 +57,25 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
 
   if (easy) {
     const matchReady = easyMatchReady(progress)
+    const mercyHeld = easyLineHeld(progress, EASY_MATCH_LINE)
+    const learnPrimary = !mercyHeld && !matchReady
     return (
       <main className="hub is-easy-home" aria-label="Home">
         <header className="easy-home-head">
           <p className="eyebrow">Silver City</p>
           <h1>Play</h1>
           <p className="quiet">
-            {matchReady ? 'Match a sentence. Hold the line.' : EASY.readStoryFirst}
+            {matchReady
+              ? 'Match a sentence. Hold the line.'
+              : mercyHeld
+                ? EASY.readStoryFirst
+                : 'Read Mercy’s story at Story Creek first.'}
           </p>
         </header>
         <nav className="easy-core" aria-label="Play">
           <button
             type="button"
-            className={`btn xl ${matchReady ? '' : 'primary'}`}
+            className={`btn xl ${learnPrimary ? 'primary' : ''}`}
             onClick={() => onNavigate({ name: 'learn' })}
           >
             {matchReady ? EASY.learnCta : EASY.readStory}

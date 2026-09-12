@@ -362,59 +362,60 @@ export function easyWhoWhereLine(id: string): string {
   return `This idea lives at ${place}, with ${who}.`
 }
 
-type TaughtProgress = Pick<ProgressState, 'taught' | 'completed' | 'held' | 'learnings'>
+type EasyLoopProgress = Pick<ProgressState, 'easyTaught' | 'easyHeld'>
 
-/** Story unlock, a finished walk, or a held line all count as learned. */
-export function easyLineLearned(progress: TaughtProgress, id: string): boolean {
-  if ((progress.taught ?? []).includes(id)) return true
-  if ((progress.completed ?? []).includes(id)) return true
-  if ((progress.held ?? []).includes(id)) return true
-  return (progress.learnings ?? []).some((item) => item.id === id)
+/** Easy Learn unlock — Hard taught / completed / held do not count. */
+export function easyLineTaught(progress: EasyLoopProgress, id: string): boolean {
+  return (progress.easyTaught ?? []).includes(id)
 }
 
-export function easyLineHeld(progress: Pick<ProgressState, 'held'>, id: string): boolean {
-  return (progress.held ?? []).includes(id)
+/** Easy Hold unlock — Hard or older held lines do not count. */
+export function easyLineHeld(progress: EasyLoopProgress, id: string): boolean {
+  return (progress.easyHeld ?? []).includes(id)
+}
+
+/** Easy loop “learned” means taught on Easy. */
+export function easyLineLearned(progress: EasyLoopProgress, id: string): boolean {
+  return easyLineTaught(progress, id)
 }
 
 /**
- * One Easy triad at a time. Stay on a taught line until it is held.
- * If Learn taught creed/Silas, Match + Hold stay on creed. Mercy stays mercy.
+ * One Easy triad at a time. Prefer the first line not yet held on Easy,
+ * in mercy-first order: ph-road → wb-creed → daily-lantern.
+ * Hard / older taught, completed, held, or learnings do not advance this.
  */
-export function easyLoopLine(progress: TaughtProgress): string {
+export function easyLoopLine(progress: EasyLoopProgress): string {
   for (const id of EASY_LINE_ORDER) {
-    if (easyLineLearned(progress, id) && !easyLineHeld(progress, id)) return id
-  }
-  for (const id of EASY_LINE_ORDER) {
-    if (!easyLineLearned(progress, id)) return id
+    if (!easyLineHeld(progress, id)) return id
   }
   return EASY_MATCH_LINE
 }
 
 /** Next Easy story — same line as Match and Hold until that triad is held. */
-export function easyLearnLine(progress: TaughtProgress): string {
+export function easyLearnLine(progress: EasyLoopProgress): string {
   return easyLoopLine(progress)
 }
 
-export function easyMatchLine(progress: TaughtProgress): string {
+export function easyMatchLine(progress: EasyLoopProgress): string {
   return easyLoopLine(progress)
 }
 
-export function easyHoldLine(progress: TaughtProgress): string {
+export function easyHoldLine(progress: EasyLoopProgress): string {
   return easyLoopLine(progress)
 }
 
-/** Match unlocks only after the current loop line is taught. */
-export function easyMatchReady(progress: TaughtProgress): boolean {
-  return easyLineLearned(progress, easyLoopLine(progress))
+/** Match unlocks only after the current loop line is taught on Easy. */
+export function easyMatchReady(progress: EasyLoopProgress): boolean {
+  return easyLineTaught(progress, easyLoopLine(progress))
 }
 
 /** Hold practice for the open triad — hide the saved-line filing cabinet. */
-export function easyHoldPractice(progress: TaughtProgress): boolean {
+export function easyHoldPractice(progress: EasyLoopProgress): boolean {
   const id = easyLoopLine(progress)
-  return easyLineLearned(progress, id) && !easyLineHeld(progress, id)
+  return easyLineTaught(progress, id) && !easyLineHeld(progress, id)
 }
 
-export function easyHoldView(progress: TaughtProgress): {
+export function easyHoldView(progress: EasyLoopProgress): {
   name: 'journal'
   focusId?: string
   autoQuiz?: boolean
@@ -423,6 +424,21 @@ export function easyHoldView(progress: TaughtProgress): {
     return { name: 'journal', focusId: easyHoldLine(progress), autoQuiz: true }
   }
   return { name: 'journal' }
+}
+
+function appendUnique(list: string[] | undefined, id: string): string[] {
+  const next = list ?? []
+  return next.includes(id) ? next : [...next, id]
+}
+
+/** Record an Easy Learn. Hard-mode teach does not write this. */
+export function markEasyTaught(progress: EasyLoopProgress, id: string): string[] {
+  return appendUnique(progress.easyTaught, id)
+}
+
+/** Record an Easy Hold. Hard or older held lines do not write this. */
+export function markEasyHeld(progress: EasyLoopProgress, id: string): string[] {
+  return appendUnique(progress.easyHeld, id)
 }
 
 export function scrapbookLabel(easy: boolean, lit?: number) {
