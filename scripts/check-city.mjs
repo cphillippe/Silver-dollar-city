@@ -51,7 +51,7 @@ import {
   WATCH_TOOLS,
 } from '../src/lib/watchTools.ts'
 import { ideaUnlocked, mindGraph, mindMapHasLit } from '../src/lib/mindMap.ts'
-import { easyStreetChallenge, linkCaption, linkClue, linkMiss, linkPicture, STREET_CHALLENGE, STREET_LIGHTS, streetTripleForLine, STREET_WHYS } from '../src/content/links.ts'
+import { easyStreetChallenge, linkCaption, linkClue, linkMiss, linkPicture, STREET_CHALLENGE, STREET_LIGHTS, STREET_TRIPLES, streetTripleForLine, STREET_WHYS } from '../src/content/links.ts'
 import { firstGate } from '../src/content/firstGate.ts'
 import { easyPlaceSub, LOT_STORY, TOWN_PATH_EASY, TOWN_PATH_HARD } from '../src/content/lots.ts'
 import {
@@ -68,7 +68,7 @@ import {
   EASY_FOLK_LIFT,
 } from '../src/lib/cityBuild.ts'
 import { emptyProgress } from '../src/lib/save.ts'
-import { EASY, easyChromeLine, easyFacingLine, easyHoldLine, easyHoldPractice, easyHoldView, easyLearnLine, easyLineHeld, easyLineLearned, easyLineTaught, easyLoopLine, easyMatchLine, easyMatchReady, markEasyHeld, markEasyTaught, easyWhoWhere, easyWhoWhereLine, easyWhyLine, easyWhyWordCount, easyWrongTap, uniqueHoldChoices } from '../src/lib/easy.ts'
+import { EASY, EASY_LINE_ORDER, easyChromeLine, easyFacingLine, easyHoldLine, easyHoldPractice, easyHoldView, easyLearnLine, easyLineHeld, easyLineLearned, easyLineTaught, easyLoopLine, easyMatchLine, easyMatchReady, markEasyHeld, markEasyTaught, easyWhoWhere, easyWhoWhereLine, easyWhyLine, easyWhyWordCount, easyWrongTap, uniqueHoldChoices } from '../src/lib/easy.ts'
 import { WORDS, easyLead } from '../src/lib/words.ts'
 import { deeperLinksFor, eraLabel } from '../src/content/deeper.ts'
 import { allEvidenceIds, evidenceFor } from '../src/content/evidence.ts'
@@ -1070,7 +1070,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.47')
+assert.equal(APP_VERSION, '1.4.48')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1240,6 +1240,18 @@ assert.match(
   readFileSync(new URL('../src/components/Landmark.tsx', import.meta.url), 'utf8'),
   /Story Creek/,
 )
+assert.match(
+  readFileSync(new URL('../src/components/Landmark.tsx', import.meta.url), 'utf8'),
+  /observatory: \{ label: 'Sky Watch'/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/Landmark.tsx', import.meta.url), 'utf8'),
+  /gate: \{ label: 'Why Gate'/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/Landmark.tsx', import.meta.url), 'utf8'),
+  /lookout: \{ label: 'Meaning Ridge'/,
+)
 assert.doesNotMatch(
   readFileSync(new URL('../src/components/Landmark.tsx', import.meta.url), 'utf8'),
   /cracked dome/,
@@ -1334,6 +1346,30 @@ assert.doesNotMatch(linkPlaySrc, /Those don/)
   assert.doesNotMatch(linkMiss('mercy-hollow', 'idea'), /This story is Mercy/)
   assert.match(linkMiss('silas-bench', 'place'), /^Wrong\. Tap this one: .+\.$/)
   assert.match(linkMiss('juniper-porch', 'person'), /^Wrong\. Tap this one: .+\.$/)
+  const father = STREET_CHALLENGE.nodes.find((node) => node.id === 'idea-father')
+  const women = easyStreetChallenge('wb-women').nodes.find((node) => node.id === 'idea-women')
+  const stars = easyStreetChallenge('daily-stars').nodes.find((node) => node.id === 'idea-stars')
+  const cosmos = easyStreetChallenge('daily-cosmos').nodes.find((node) => node.id === 'idea-cosmos')
+  const moral = easyStreetChallenge('hl-moral').nodes.find((node) => node.id === 'idea-moral')
+  const sky = easyStreetChallenge('daily-stars').nodes.find((node) => node.id === 'place-sky')
+  const gate = easyStreetChallenge('daily-cosmos').nodes.find((node) => node.id === 'place-gate')
+  const ridge = easyStreetChallenge('hl-moral').nodes.find((node) => node.id === 'place-lookout')
+  assert.equal(streetTripleForLine('ph-father'), 'father-hollow')
+  assert.equal(linkCaption(women, true), 'Women first saw the tomb.')
+  assert.equal(linkCaption(stars, true), 'The heavens speak of a Maker.')
+  assert.equal(linkCaption(cosmos, true), 'The world did not have to exist.')
+  assert.equal(linkCaption(moral, true), 'Duty is more than taste.')
+  assert.equal(linkPicture(stars, easyStreetChallenge('daily-stars')).plotId, 'observatory')
+  assert.equal(linkPicture(cosmos, easyStreetChallenge('daily-cosmos')).plotId, 'gate')
+  assert.equal(linkPicture(moral, easyStreetChallenge('hl-moral')).plotId, 'lookout')
+  assert.equal(linkPicture(sky, easyStreetChallenge('daily-stars')).plotId, 'observatory')
+  assert.equal(linkPicture(gate, easyStreetChallenge('daily-cosmos')).plotId, 'gate')
+  assert.equal(linkPicture(ridge, easyStreetChallenge('hl-moral')).plotId, 'lookout')
+  assert.equal(father, undefined)
+  assert.match(linkClue('father-hollow', 'idea'), /father/)
+  assert.match(linkClue('nora-sky', 'place'), /Sky Watch/)
+  assert.match(linkMiss('father-hollow', 'idea'), /father runs with mercy/)
+  assert.doesNotMatch(plainFor('daily-stars')?.teach ?? '', /multiverse/)
 }
 assert.match(
   readFileSync(new URL('../src/components/MindMap.tsx', import.meta.url), 'utf8'),
@@ -1737,20 +1773,21 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
   assert.equal(easyLearnLine({ ...fresh, taught: ['ph-road'], held: ['ph-road'] }), 'ph-road')
   const heldMercy = { ...fresh, easyTaught: ['ph-road'], easyHeld: ['ph-road'] }
   assert.equal(easyLineHeld(heldMercy, 'ph-road'), true)
-  assert.equal(easyLearnLine(heldMercy), 'wb-creed')
-  assert.equal(easyMatchLine(heldMercy), 'wb-creed')
-  assert.equal(easyHoldLine(heldMercy), 'wb-creed')
+  assert.equal(easyLearnLine(heldMercy), 'ph-father')
+  assert.equal(easyMatchLine(heldMercy), 'ph-father')
+  assert.equal(easyHoldLine(heldMercy), 'ph-father')
+  assert.notEqual(easyLearnLine(heldMercy), 'wb-creed')
   assert.equal(easyMatchReady(heldMercy), false)
   assert.equal(easyHoldPractice(heldMercy), false)
-  const taughtCreed = {
+  const taughtFather = {
     ...fresh,
-    easyTaught: ['ph-road', 'wb-creed'],
+    easyTaught: ['ph-road', 'ph-father'],
     easyHeld: ['ph-road'],
   }
-  assert.equal(easyLearnLine(taughtCreed), 'wb-creed')
-  assert.equal(easyMatchLine(taughtCreed), 'wb-creed')
-  assert.equal(easyHoldLine(taughtCreed), 'wb-creed')
-  assert.equal(easyMatchReady(taughtCreed), true)
+  assert.equal(easyLearnLine(taughtFather), 'ph-father')
+  assert.equal(easyMatchLine(taughtFather), 'ph-father')
+  assert.equal(easyHoldLine(taughtFather), 'ph-father')
+  assert.equal(easyMatchReady(taughtFather), true)
   assert.deepEqual(markEasyTaught(fresh, 'ph-road'), ['ph-road'])
   assert.deepEqual(markEasyHeld(taughtMercy, 'ph-road'), ['ph-road'])
   assert.equal(streetTripleForLine('wb-creed'), 'silas-bench')
@@ -1769,6 +1806,68 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
   assert.equal(easyWhoWhere('wb-creed').place, 'Witness Square')
   assert.equal(easyWhoWhere('daily-lantern').who, 'Juniper')
   assert.equal(easyWhoWhere('daily-lantern').place, 'East porch')
+  assert.deepEqual([...EASY_LINE_ORDER], [
+    'ph-road',
+    'ph-father',
+    'ph-debt',
+    'wb-creed',
+    'wb-women',
+    'daily-lantern',
+    'daily-stars',
+    'daily-cosmos',
+    'hl-moral',
+  ])
+  assert.equal(EASY_LINE_ORDER[0], 'ph-road')
+  const homes = {
+    'ph-road': { who: 'Mercy', place: 'Story Creek' },
+    'ph-father': { who: 'Mercy', place: 'Story Creek' },
+    'ph-debt': { who: 'Mercy', place: 'Story Creek' },
+    'wb-creed': { who: 'Silas', place: 'Witness Square' },
+    'wb-women': { who: 'Silas', place: 'Witness Square' },
+    'daily-lantern': { who: 'Juniper', place: 'East porch' },
+    'daily-stars': { who: 'Nora', place: 'Sky Watch' },
+    'daily-cosmos': { who: 'Ansel', place: 'Why Gate' },
+    'hl-moral': { who: 'Hope', place: 'Meaning Ridge' },
+  }
+  const triples = {
+    'ph-road': 'mercy-hollow',
+    'ph-father': 'father-hollow',
+    'ph-debt': 'debt-hollow',
+    'wb-creed': 'silas-bench',
+    'wb-women': 'women-bench',
+    'daily-lantern': 'juniper-porch',
+    'daily-stars': 'nora-sky',
+    'daily-cosmos': 'ansel-gate',
+    'hl-moral': 'hope-lookout',
+  }
+  let walked = []
+  for (const id of EASY_LINE_ORDER) {
+    const home = easyWhoWhere(id)
+    assert.equal(home.who, homes[id].who, `${id} who`)
+    assert.equal(home.place, homes[id].place, `${id} place`)
+    assert.match(easyWhoWhereLine(id), new RegExp(homes[id].place))
+    assert.match(easyWhoWhereLine(id), new RegExp(homes[id].who))
+    assert.ok(plainFor(id)?.teach, `${id} Learn teach`)
+    assert.ok(evidenceFor(id), `${id} evidence`)
+    assert.equal(streetTripleForLine(id), triples[id])
+    const street = easyStreetChallenge(id)
+    assert.equal(street.triples.length, 1, `${id} one Match triad`)
+    assert.equal(street.triples[0]?.id, triples[id])
+    const triple = STREET_TRIPLES.find((item) => item.id === triples[id])
+    assert.ok(triple, `${id} street triple`)
+    assert.ok(
+      street.nodes.some((node) => node.id === triple.ideaId && node.evidenceId === id),
+      `${id} idea node`,
+    )
+    assert.ok(street.nodes.some((node) => node.id === triple.placeId), `${id} place node`)
+    assert.ok(street.nodes.some((node) => node.id === triple.personId), `${id} person node`)
+    assert.ok(STREET_WHYS[triples[id]]?.easy, `${id} why`)
+    assert.equal(easyLoopLine({ easyTaught: walked, easyHeld: walked }), id)
+    walked = [...walked, id]
+  }
+  assert.equal(easyLoopLine({ easyTaught: walked, easyHeld: walked }), 'ph-road')
+  assert.equal(STREET_TRIPLES.length, 9)
+  assert.equal(STREET_CHALLENGE.triples.length, 3)
 }
 {
   const settingsSrc = readFileSync(
@@ -2133,6 +2232,8 @@ assert.match(cssSrc, /is-easy-hold-practice/)
 assert.match(latestChange(APP_VERSION).items.join('\n'), /one lesson loop, leaner Match, less Hold clutter/)
 assert.match(latestChange(APP_VERSION).items.join('\n'), /mercy-first until held on Easy/)
 assert.match(latestChange(APP_VERSION).items.join('\n'), /Reset this walk starts Easy at Mercy/)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Easy lesson pack: 9 Learn→Match→Hold lines/)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /father-run/)
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
   /easyTaught/,
