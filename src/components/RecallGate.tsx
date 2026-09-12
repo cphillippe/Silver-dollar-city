@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { shuffle } from '../lib/shuffle'
 import { takeawayLines, type EvidenceBrief } from '../content/evidence'
 import { STORY } from '../content/story'
-import { EASY, easyFacingLine, easyMainIdea, isEasy, uniqueHoldChoices } from '../lib/easy'
+import { EASY, easyChromeLine, easyFacingLine, isEasy, uniqueHoldChoices } from '../lib/easy'
 import { learningBeat } from '../lib/learning'
 import { learningPicture, toolForEvidence } from '../lib/watchTools'
 import { useProgress } from '../store/progress'
@@ -51,7 +51,7 @@ export function RecallGate({
   const own = encode && lines.length > 1
   const [chosen, setChosen] = useState<(typeof lines)[0] | null>(own ? null : lines[0] ?? null)
   const claimFace = (line: string) => (easy ? easyFacingLine(brief.id, line) : line)
-  const reasonFace = (line: string) => (easy ? easyMainIdea(line) : line)
+  const reasonFace = (line: string) => (easy ? easyChromeLine(line) : line)
   const claimOptions = useMemo(() => {
     if (encode) {
       const raw = own ? lines.map((item) => item.claim) : [brief.claim]
@@ -212,9 +212,8 @@ export function RecallGate({
             <p className="recall-line rehearse-stem">
               {easyFacingLine(brief.id, heldClaim)}
             </p>
-            <h2>{EASY.whyStands}</h2>
             <div className="reason-scroll">
-              <p className="reason-held">{easyMainIdea(heldReason)}</p>
+              <p className="reason-held">{easyChromeLine(heldReason)}</p>
             </div>
             <div className="cta-dock">
               <button
@@ -303,15 +302,11 @@ export function RecallGate({
           <p className="recall-line rehearse-stem">
             {easy ? easyFacingLine(brief.id, heldClaim) : heldClaim}
           </p>
+          {easy ? null : (
           <h2>
-            {deeper
-              ? easy
-                ? EASY.whyStands
-                : 'A sharper hold'
-              : easy
-                ? EASY.whyStands
-                : STORY.whyItStands}
+            {deeper ? 'A sharper hold' : STORY.whyItStands}
           </h2>
+          )}
           {reasonLocked ? (
             <p className="match-toast" role="status">
               <strong>{deeper ? 'That still holds.' : 'That reason holds.'}</strong>
@@ -342,7 +337,7 @@ export function RecallGate({
                     pick(line, heldReason, deeper ? 'claim' : 'lock')
                   }
                 >
-                  {easy ? easyMainIdea(line) : line}
+                  {easy ? easyChromeLine(line) : line}
                 </button>
               ))}
             </div>

@@ -61,7 +61,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
         <header className="easy-home-head">
           <p className="eyebrow">Silver City</p>
           <h1>Play</h1>
-          <p className="quiet">Match a sentence. Keep it in Saved.</p>
+          <p className="quiet">Match a sentence. Hold the line.</p>
         </header>
         <nav className="easy-core" aria-label="Play">
           <button

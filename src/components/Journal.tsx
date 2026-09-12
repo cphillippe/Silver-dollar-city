@@ -169,10 +169,10 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
 
       <header className="page-head journal-head">
         <p className="eyebrow">{easy ? EASY.saved : 'Evidence Journal'}</p>
-        <h1>What you can still say</h1>
+        <h1>{easy ? EASY.saved : 'What you can still say'}</h1>
         <p>
           {easy
-            ? `${heldCount} sentences kept${waiting ? ` · ${waiting} due to read again` : ''}.`
+            ? `${heldCount} ${EASY.savedSub}${waiting ? ` · ${waiting} due to read again` : ''}.`
             : `${open} of ${total} unsealed · ${percent}% of the dossier · ${heldCount} lines held from memory${waiting ? ` · ${waiting} due to dust off` : ''}. Forgetting is why a page comes back.`}
         </p>
         {easy ? null : (
@@ -210,7 +210,7 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
           />
           <p className="quiet saved-tree-lead">
             {easy
-              ? 'Sentences you kept.'
+              ? `${EASY.savedSub} you can still say.`
               : 'Each learning is its own unit: claim · reason · source · anchor · picture · tool.'}
           </p>
           <div className="card-grid">

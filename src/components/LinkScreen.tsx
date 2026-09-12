@@ -136,7 +136,7 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
                 ? 'Your matches wait in Saved.'
                 : 'Tap a place on the map — the mind map holds what you linked.'
             }
-            action={easy ? 'See Saved' : 'See the town'}
+            action={easy ? `See ${EASY.saved}` : 'See the town'}
             onGo={() => onNavigate(easy ? { name: 'journal' } : { name: 'hub' })}
           />
         </section>
