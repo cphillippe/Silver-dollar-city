@@ -99,7 +99,7 @@ const EASY_CHROME: Record<string, string> = {
   'The older brother is the hero for staying home.':
     'The older brother is the hero just for staying.',
   'Jesus makes the listener identify with the wounded man, then with the Samaritan moved with compassion.':
-    'Jesus stands you with the hurt man, then the helper.',
+    'First the hurt man, then help.',
   'The story is mainly a map of the Jericho road.': 'The story is only a road map.',
   'Mercy is optional once you have classified the victim.':
     'Mercy is optional after you sort people.',
@@ -372,17 +372,57 @@ export function easyLineLearned(progress: TaughtProgress, id: string): boolean {
   return (progress.learnings ?? []).some((item) => item.id === id)
 }
 
-/** Next Easy story to teach — mercy neighbor first. */
-export function easyLearnLine(progress: TaughtProgress): string {
+export function easyLineHeld(progress: Pick<ProgressState, 'held'>, id: string): boolean {
+  return (progress.held ?? []).includes(id)
+}
+
+/**
+ * One Easy triad at a time. Stay on a taught line until it is held.
+ * If Learn taught creed/Silas, Match + Hold stay on creed. Mercy stays mercy.
+ */
+export function easyLoopLine(progress: TaughtProgress): string {
+  for (const id of EASY_LINE_ORDER) {
+    if (easyLineLearned(progress, id) && !easyLineHeld(progress, id)) return id
+  }
   for (const id of EASY_LINE_ORDER) {
     if (!easyLineLearned(progress, id)) return id
   }
   return EASY_MATCH_LINE
 }
 
-/** Match stays locked until the line it asks (neighbor / Story Creek) is taught. */
+/** Next Easy story — same line as Match and Hold until that triad is held. */
+export function easyLearnLine(progress: TaughtProgress): string {
+  return easyLoopLine(progress)
+}
+
+export function easyMatchLine(progress: TaughtProgress): string {
+  return easyLoopLine(progress)
+}
+
+export function easyHoldLine(progress: TaughtProgress): string {
+  return easyLoopLine(progress)
+}
+
+/** Match unlocks only after the current loop line is taught. */
 export function easyMatchReady(progress: TaughtProgress): boolean {
-  return easyLineLearned(progress, EASY_MATCH_LINE)
+  return easyLineLearned(progress, easyLoopLine(progress))
+}
+
+/** Hold practice for the open triad — hide the saved-line filing cabinet. */
+export function easyHoldPractice(progress: TaughtProgress): boolean {
+  const id = easyLoopLine(progress)
+  return easyLineLearned(progress, id) && !easyLineHeld(progress, id)
+}
+
+export function easyHoldView(progress: TaughtProgress): {
+  name: 'journal'
+  focusId?: string
+  autoQuiz?: boolean
+} {
+  if (easyHoldPractice(progress)) {
+    return { name: 'journal', focusId: easyHoldLine(progress), autoQuiz: true }
+  }
+  return { name: 'journal' }
 }
 
 export function scrapbookLabel(easy: boolean, lit?: number) {

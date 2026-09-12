@@ -7089,6 +7089,19 @@ html[data-easy='on'] .mind-node em {
   order: -1;
 }
 
+.journal.is-easy-hold-practice .saved-tree,
+.journal.is-easy-hold-practice .due-chapter,
+.journal.is-easy-hold-practice .next-rebuild,
+.journal.is-easy-hold-practice .journal-head,
+.journal.is-easy-hold .due-chapter,
+.journal.is-easy-hold .next-rebuild {
+  display: none;
+}
+
+.journal.is-easy-hold .saved-tree:not([open]) > .saved-tree-summary {
+  opacity: 0.86;
+}
+
 .hub.is-easy-home {
   flex: 1;
   min-height: 0;
