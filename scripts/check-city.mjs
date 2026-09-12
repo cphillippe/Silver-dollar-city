@@ -68,7 +68,7 @@ import {
   EASY_FOLK_LIFT,
 } from '../src/lib/cityBuild.ts'
 import { emptyProgress } from '../src/lib/save.ts'
-import { EASY, easyChromeLine, easyFacingLine, easyHoldLine, easyHoldPractice, easyHoldView, easyLearnLine, easyLineHeld, easyLineLearned, easyLoopLine, easyMatchLine, easyMatchReady, easyWhoWhere, easyWhoWhereLine, easyWhyLine, easyWhyWordCount, easyWrongTap, uniqueHoldChoices } from '../src/lib/easy.ts'
+import { EASY, easyChromeLine, easyFacingLine, easyHoldLine, easyHoldPractice, easyHoldView, easyLearnLine, easyLineHeld, easyLineLearned, easyLineTaught, easyLoopLine, easyMatchLine, easyMatchReady, markEasyHeld, markEasyTaught, easyWhoWhere, easyWhoWhereLine, easyWhyLine, easyWhyWordCount, easyWrongTap, uniqueHoldChoices } from '../src/lib/easy.ts'
 import { WORDS, easyLead } from '../src/lib/words.ts'
 import { deeperLinksFor, eraLabel } from '../src/content/deeper.ts'
 import { allEvidenceIds, evidenceFor } from '../src/content/evidence.ts'
@@ -1070,7 +1070,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.46')
+assert.equal(APP_VERSION, '1.4.47')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1705,7 +1705,21 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
   assert.equal(easyMatchReady(fresh), false)
   assert.equal(easyHoldPractice(fresh), false)
   assert.equal(easyLineLearned(fresh, 'ph-road'), false)
-  const taughtMercy = { ...fresh, taught: ['ph-road'] }
+  assert.equal(easyLineTaught(fresh, 'ph-road'), false)
+  const hardPrior = {
+    ...fresh,
+    taught: ['ph-road', 'wb-creed'],
+    completed: ['ph-road', 'wb-creed'],
+    held: ['ph-road', 'wb-creed'],
+    learnings: [{ id: 'ph-road' }],
+  }
+  assert.equal(easyLoopLine(hardPrior), 'ph-road')
+  assert.equal(easyLearnLine(hardPrior), 'ph-road')
+  assert.equal(easyMatchLine(hardPrior), 'ph-road')
+  assert.equal(easyHoldLine(hardPrior), 'ph-road')
+  assert.equal(easyMatchReady(hardPrior), false)
+  assert.equal(easyLineHeld(hardPrior, 'ph-road'), false)
+  const taughtMercy = { ...fresh, easyTaught: ['ph-road'] }
   assert.equal(easyLearnLine(taughtMercy), 'ph-road')
   assert.equal(easyMatchLine(taughtMercy), 'ph-road')
   assert.equal(easyHoldLine(taughtMercy), 'ph-road')
@@ -1719,20 +1733,26 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
   assert.equal(streetTripleForLine('ph-road'), 'mercy-hollow')
   assert.equal(easyStreetChallenge('ph-road').triples[0]?.id, 'mercy-hollow')
   assert.equal(easyStreetChallenge('ph-road').triples.length, 1)
-  assert.equal(easyMatchReady({ ...fresh, completed: ['ph-road'] }), true)
-  assert.equal(easyLearnLine({ ...fresh, taught: ['ph-road'] }), 'ph-road')
-  const heldMercy = { ...fresh, taught: ['ph-road'], held: ['ph-road'] }
+  assert.equal(easyMatchReady({ ...fresh, completed: ['ph-road'] }), false)
+  assert.equal(easyLearnLine({ ...fresh, taught: ['ph-road'], held: ['ph-road'] }), 'ph-road')
+  const heldMercy = { ...fresh, easyTaught: ['ph-road'], easyHeld: ['ph-road'] }
   assert.equal(easyLineHeld(heldMercy, 'ph-road'), true)
   assert.equal(easyLearnLine(heldMercy), 'wb-creed')
   assert.equal(easyMatchLine(heldMercy), 'wb-creed')
   assert.equal(easyHoldLine(heldMercy), 'wb-creed')
   assert.equal(easyMatchReady(heldMercy), false)
   assert.equal(easyHoldPractice(heldMercy), false)
-  const taughtCreed = { ...fresh, taught: ['ph-road', 'wb-creed'], held: ['ph-road'] }
+  const taughtCreed = {
+    ...fresh,
+    easyTaught: ['ph-road', 'wb-creed'],
+    easyHeld: ['ph-road'],
+  }
   assert.equal(easyLearnLine(taughtCreed), 'wb-creed')
   assert.equal(easyMatchLine(taughtCreed), 'wb-creed')
   assert.equal(easyHoldLine(taughtCreed), 'wb-creed')
   assert.equal(easyMatchReady(taughtCreed), true)
+  assert.deepEqual(markEasyTaught(fresh, 'ph-road'), ['ph-road'])
+  assert.deepEqual(markEasyHeld(taughtMercy, 'ph-road'), ['ph-road'])
   assert.equal(streetTripleForLine('wb-creed'), 'silas-bench')
   assert.equal(easyStreetChallenge('wb-creed').triples[0]?.id, 'silas-bench')
   assert.equal(easyStreetChallenge('wb-creed').triples.length, 1)
@@ -2111,6 +2131,32 @@ assert.match(
 assert.match(hubSrc, /easyHoldView/)
 assert.match(cssSrc, /is-easy-hold-practice/)
 assert.match(latestChange(APP_VERSION).items.join('\n'), /one lesson loop, leaner Match, less Hold clutter/)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /mercy-first until held on Easy/)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Reset this walk starts Easy at Mercy/)
+assert.match(
+  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  /easyTaught/,
+)
+assert.match(
+  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  /prefer the first line not yet held on Easy/i,
+)
+assert.match(
+  readFileSync(new URL('../src/components/Welcome.tsx', import.meta.url), 'utf8'),
+  /easyLineHeld/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8'),
+  /Mercy’s story at Story Creek/,
+)
+assert.match(
+  readFileSync(new URL('../src/store/ProgressProvider.tsx', import.meta.url), 'utf8'),
+  /markEasyHeld/,
+)
+assert.match(
+  readFileSync(new URL('../src/store/ProgressProvider.tsx', import.meta.url), 'utf8'),
+  /markEasyTaught/,
+)
 assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /EASY\.saved/,
@@ -2325,6 +2371,14 @@ assert.match(
 assert.match(
   readFileSync(new URL('../src/lib/save.ts', import.meta.url), 'utf8'),
   /taught: asStringArray\(parsed\.taught\)/,
+)
+assert.match(
+  readFileSync(new URL('../src/lib/save.ts', import.meta.url), 'utf8'),
+  /easyTaught: asStringArray\(parsed\.easyTaught\)/,
+)
+assert.match(
+  readFileSync(new URL('../src/lib/save.ts', import.meta.url), 'utf8'),
+  /easyHeld: asStringArray\(parsed\.easyHeld\)/,
 )
 assert.match(
   readFileSync(new URL('../src/lib/save.ts', import.meta.url), 'utf8'),

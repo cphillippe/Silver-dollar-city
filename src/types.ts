@@ -272,6 +272,16 @@ export interface ProgressState {
    */
   taught: string[]
   /**
+   * Lines taught on Easy (Learn). Optional on old saves; normalize fills [].
+   * Easy loop ignores Hard taught / completed / held. Schema stays 1.
+   */
+  easyTaught: string[]
+  /**
+   * Lines held on Easy (Hold). Optional on old saves; normalize fills [].
+   * Mercy stays first until ph-road is here. Schema stays 1.
+   */
+  easyHeld: string[]
+  /**
    * Applied building looks (0–4) per lot. Optional on old saves;
    * normalize snapshots what learning already earned so the city does not vanish.
    * Schema stays 1 — do not wipe. Further looks are tapped as Upgrade.

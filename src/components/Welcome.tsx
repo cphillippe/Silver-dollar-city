@@ -1,6 +1,6 @@
 import { APP_VERSION } from '../config/app'
 import { STORY } from '../content/story'
-import { EASY } from '../lib/easy'
+import { EASY, EASY_MATCH_LINE, easyLineHeld } from '../lib/easy'
 import { Avatar } from './Avatar'
 import { CityMap } from './CityMap'
 import { dailyDoneToday, useProgress } from '../store/progress'
@@ -18,7 +18,15 @@ export function Welcome({ onNavigate }: WelcomeProps) {
 
   function begin() {
     start()
-    if (progress.easyMode || returning) {
+    if (progress.easyMode) {
+      onNavigate(
+        easyLineHeld(progress, EASY_MATCH_LINE)
+          ? { name: 'hub' }
+          : { name: 'learn' },
+      )
+      return
+    }
+    if (returning) {
       onNavigate({ name: 'hub' })
       return
     }
