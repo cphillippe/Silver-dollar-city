@@ -512,7 +512,23 @@ assert.match(recallSrc, /EASY.rememberSentence/)
 assert.match(recallSrc, /is-easy-hold/)
 assert.match(recallSrc, /EASY\.keepThis/)
 assert.match(recallSrc, /EASY\.tapWhy/)
-assert.match(recallSrc, /EASY\.reasonTeach/)
+assert.match(recallSrc, /easyChromeLine/)
+{
+  const easyHold = recallSrc.match(/if \(easyEncode\) \{\s*return \(([\s\S]*?)\n  \}/)?.[1] ?? ''
+  assert.match(easyHold, /EASY\.tapWhy/)
+  assert.match(easyHold, /EASY\.rememberSentence/)
+  assert.match(easyHold, /reasonOptions\.map/)
+  assert.doesNotMatch(easyHold, /EASY\.reasonTeach/)
+  assert.doesNotMatch(easyHold, /EASY\.whyStands/)
+}
+assert.doesNotMatch(
+  readFileSync(new URL('../src/components/RecallGate.tsx', import.meta.url), 'utf8'),
+  /easy\s*\?\s*\n\s*EASY\.tapWhy/,
+)
+assert.doesNotMatch(
+  readFileSync(new URL('../src/components/Journal.tsx', import.meta.url), 'utf8'),
+  /<h1>\{focusedEntry\?\.title \?\? \(easy \? EASY\.rememberSentence/,
+)
 assert.match(recallSrc, /uniqueHoldChoices/)
 assert.doesNotMatch(recallSrc, /Tap the sentence you still remember/)
 assert.match(recallSrc, /reasonLocked/)
@@ -849,7 +865,6 @@ assert.deepEqual(defendPads(empty), ['porch'])
 assert.match(hubSrc, /Hold the night/)
 assert.match(hubSrc, /night-watch/)
 assert.match(hubSrc, /Held lines turn the night toward heaven/)
-assert.match(hubSrc, /EASY.nightDo/)
 assert.match(hubSrc, /Why locked/)
 assert.match(hubSrc, /street-lock/)
 assert.doesNotMatch(hubSrc, /standing lot/i)
@@ -1055,7 +1070,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.41')
+assert.equal(APP_VERSION, '1.4.42')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1321,7 +1336,6 @@ assert.match(
   /createPortal/,
 )
 assert.match(cssSrc, /position:\s*fixed/)
-assert.match(hubSrc, /EASY\.nightDo/)
 assert.match(cssSrc, /mind-map-dock/)
 assert.match(cssSrc, /link-dock/)
 assert.match(cssSrc, /cta-dock/)
@@ -1548,15 +1562,15 @@ assert.match(
 )
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /Tap the line you just kept/,
+  /Tap the line you kept/,
 )
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /Tap why it stands/,
+  /Tap why this is true/,
 )
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /A reason is why it stands/,
+  /A reason is why this is true/,
 )
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
@@ -1576,7 +1590,7 @@ assert.match(
 )
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /why it stands/,
+  /why this is true/,
 )
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
@@ -1650,12 +1664,45 @@ assert.doesNotMatch(hubSrc, /tap-next-dock/)
 assert.match(hubSrc, /is-easy-home/)
 assert.match(hubSrc, /EASY\.townSoon/)
 assert.match(hubSrc, /EASY\.saved/)
-assert.match(hubSrc, /EASY\.nightDo/)
+assert.match(hubSrc, /EASY\.matchCta/)
+assert.match(hubSrc, /EASY\.nightSoon/)
+{
+  const easyHome = hubSrc.match(/if \(easy\) \{\s*return \(([\s\S]*?)\n  \}/)?.[1] ?? ''
+  assert.match(easyHome, /EASY\.matchCta/)
+  assert.match(easyHome, /EASY\.saved/)
+  assert.match(easyHome, /EASY\.townSoon/)
+  assert.match(easyHome, /EASY\.nightSoon/)
+  assert.doesNotMatch(easyHome, /EASY\.nightDo/)
+  assert.doesNotMatch(easyHome, /name: 'defend'/)
+  assert.doesNotMatch(easyHome, /className="btn gold xl"[\s\S]*Night Watch/)
+}
 assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /EASY\.townSoon/,
 )
+assert.match(
+  readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
+  /EASY\.nightSoon/,
+)
 assert.match(latestChange(APP_VERSION).items.join('\n'), /Town \(soon\)/)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Night Watch hidden until Match→Hold/)
+assert.equal(EASY.nightSoon, 'Night Watch (soon)')
+assert.match(
+  readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
+  /easy \? \{ name: 'journal' \} : \{ name: 'hub' \}/,
+)
+assert.doesNotMatch(
+  readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
+  /name: 'defend'/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/Profile.tsx', import.meta.url), 'utf8'),
+  /EASY\.nightSoon/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/Profile.tsx', import.meta.url), 'utf8'),
+  /easy \? \(/,
+)
 assert.match(cssSrc, /is-easy-home/)
 assert.match(cssSrc, /easy-core/)
 assert.match(hubSrc, /EASY\.connectLink/)
@@ -1744,6 +1791,18 @@ assert.equal(
   'Jesus is only talking about old money rules.',
 )
 assert.doesNotMatch(easyChromeLine('Keep the mercy. Toss the throttle.'), /throttle/)
+assert.equal(
+  easyChromeLine('The servant forgiven an unpayable debt then throttles a peer over a small sum.'),
+  'He was forgiven a huge debt, then choked a neighbor over a small one.',
+)
+assert.equal(
+  easyChromeLine('The first servant was right to demand prison.'),
+  'Jail him over a tiny debt.',
+)
+assert.doesNotMatch(
+  easyChromeLine('The servant forgiven an unpayable debt then throttles a peer over a small sum.'),
+  /throttles a peer/,
+)
 assert.doesNotMatch(EASY.loveCue, /mean line/)
 assert.doesNotMatch(EASY.nightLead, /mean line|claim|throttle/)
 assert.match(mapSrc, /EASY_FOLK_LIFT/)
@@ -1827,7 +1886,7 @@ assert.match(
 )
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /Saved sentences/,
+  /saved: 'Hold'/,
 )
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
@@ -1884,7 +1943,7 @@ assert.match(
 assert.match(cssSrc, /easy-steps/)
 assert.match(
   readFileSync(new URL('../src/components/AppShell.tsx', import.meta.url), 'utf8'),
-  /easy \? 'Saved' : 'Journal'/,
+  /easy \? EASY\.saved : 'Journal'/,
 )
 assert.match(linkPlaySrc, /easy-steps/)
 assert.match(linkPlaySrc, /1 · Sentence/)
@@ -1897,9 +1956,11 @@ assert.doesNotMatch(defendSrc, /easyTap && tool\.id !== ability/)
 assert.match(defendSrc, /WATCH_TOOLS\.map/)
 assert.match(defendSrc, /EASY\.nightLead/)
 assert.equal(EASY.nightLead, 'Tap the face six times.')
-assert.equal(EASY.rememberSentence, 'Tap the line you just kept.')
-assert.equal(EASY.tapWhy, 'Tap why it stands.')
-assert.equal(EASY.reasonTeach, 'A reason is why it stands.')
+assert.equal(EASY.rememberSentence, 'Tap the line you kept.')
+assert.equal(EASY.tapWhy, 'Tap why this is true.')
+assert.equal(EASY.reasonTeach, 'A reason is why this is true.')
+assert.equal(EASY.saved, 'Hold')
+assert.equal(EASY.savedSub, 'saved lines')
 assert.equal(EASY.nightMiss, 'Wrong — tap the glowing face')
 assert.match(defendSrc, /EASY\.nightMiss/)
 assert.match(defendSrc, /TAP \$\{downed\}/)
@@ -1962,7 +2023,7 @@ assert.match(
 )
 assert.match(
   readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
-  /You’ll keep them in Saved/,
+  /You’ll keep them in \$\{EASY\.saved\}/,
 )
 assert.match(cssSrc, /next-tap/)
 assert.match(cssSrc, /link-demo/)
@@ -2141,11 +2202,11 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
 
 assert.match(
   latestChange(APP_VERSION).items.join('\n'),
-  /Tap the line you just kept/,
+  /Tap the line you kept/,
 )
 assert.match(
   latestChange(APP_VERSION).items.join('\n'),
-  /Tap why it stands/,
+  /Tap why this is true/,
 )
 assert.match(
   latestChange(APP_VERSION).items.join('\n'),

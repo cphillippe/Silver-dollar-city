@@ -13,16 +13,16 @@ export const EASY = {
   mindMapShort: 'Scrapbook',
   connectLink: 'Tap the sentence, then the place, then the person.',
   readStory: 'Read today’s story.',
-  rememberSentence: 'Tap the line you just kept.',
-  tapWhy: 'Tap why it stands.',
+  rememberSentence: 'Tap the line you kept.',
+  tapWhy: 'Tap why this is true.',
   keepThis: 'Keep this',
   readAgain: 'Read this one again.',
   claimTeach: 'A claim is the main idea we hold to be true.',
   mainIdeaTeach: 'Main idea = the short true line we keep.',
   mainIdea: 'main idea',
-  reasonTeach: 'A reason is why it stands.',
-  reasonSense: 'why it stands',
-  whyStands: 'Why it stands.',
+  reasonTeach: 'A reason is why this is true.',
+  reasonSense: 'why this is true',
+  whyStands: 'Why this is true.',
   sourceSense: 'where this comes from',
   lockIn: 'Save your picks.',
   matchHow: 'Keep the right pictures. Remove wrong picks.',
@@ -33,6 +33,7 @@ export const EASY = {
   manage: 'Manage',
   matchCta: 'Match',
   nightDo: 'Night Watch',
+  nightSoon: 'Night Watch (soon)',
   nightTap: 'Tap the face.',
   nightLead: 'Tap the face six times.',
   nightMiss: 'Wrong — tap the glowing face',
@@ -40,7 +41,8 @@ export const EASY = {
   townSoon: 'Town (soon)',
   loveCue: 'Love — when compassion moves you, help like the Samaritan. Tap the glowing face.',
   deployTeach: 'Use a main idea you kept.',
-  saved: 'Saved sentences',
+  saved: 'Hold',
+  savedSub: 'saved lines',
   connections: 'Connections',
   uses: 'Things you can use',
 } as const
@@ -73,12 +75,16 @@ export function loveHowTo(easy: boolean): string {
 const EASY_CHROME: Record<string, string> = {
   'Received mercy makes refusing mercy a contradiction.':
     'If you were forgiven a huge debt, you cannot choke a neighbor over a small one.',
+  'The servant forgiven an unpayable debt then throttles a peer over a small sum.':
+    'He was forgiven a huge debt, then choked a neighbor over a small one.',
   'Jesus is only reforming first-century banking.':
     'Jesus is only talking about old money rules.',
   'Forgiveness is a limited coupon on God’s spreadsheet.':
     'Forgiveness is a limited coupon — like God ran out of stamps.',
   'The first servant was right to demand prison for a small debt.':
-    'The first servant was right to jail a neighbor over a tiny bill.',
+    'Jail him over a tiny debt.',
+  'The first servant was right to demand prison.': 'Jail him over a tiny debt.',
+  'Peter’s “seven times” was already the full measure.': 'Seven times was already enough.',
 }
 
 /** After the one teach, Easy never wallpapers the word claim. */
