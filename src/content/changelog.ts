@@ -19,7 +19,7 @@ export const CHANGELOG: ChangeNote[] = [
       'Easy why-options are short plain sentences. Matthew 18: He was forgiven a huge debt, then choked a neighbor over a small one. Wrong: Jail him over a tiny debt.',
       'Hold review chips drop identical duplicate buttons. The true line stays; a second button that reads the same is gone.',
       'Night Watch miss says Wrong — tap the glowing face, so locked tools do not look like the task. Easy Night Watch still finishes at 6/6.',
-      'Place titles stay Story Creek, Witness Square, Sky Watch, Meaning Ridge. Easy home is Match and Saved — Night Watch (soon) and Town (soon) wait under Settings → More.',
+      'Place titles stay Story Creek, Witness Square, Sky Watch, Meaning Ridge. Easy home is Match and Hold — Night Watch (soon) and Town (soon) wait under Settings → More.',
       'Match stays sentence → place → person with a named miss and Next. A few Easy prompts now name the line instead of asking you to infer it.',
     ],
   },
