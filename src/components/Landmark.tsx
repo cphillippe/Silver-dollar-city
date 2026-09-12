@@ -1,13 +1,19 @@
 import { CAST, guideForArea } from '../content/story'
 import { Avatar } from './Avatar'
 
-const PLOT_ART: Record<string, { label: string; creek?: boolean; lamp?: boolean; bench?: boolean }> = {
+const PLOT_ART: Record<
+  string,
+  { label: string; creek?: boolean; lamp?: boolean; bench?: boolean; sky?: boolean; gate?: boolean; ridge?: boolean }
+> = {
   hollow: { label: 'Story Creek', creek: true },
   bench: { label: 'Witness Square', bench: true },
   porch: { label: 'East porch', lamp: true },
+  observatory: { label: 'Sky Watch', sky: true },
+  gate: { label: 'Why Gate', gate: true },
+  lookout: { label: 'Meaning Ridge', ridge: true },
 }
 
-/** Big place picture for Link — creek, bench, or porch lamp. */
+/** Big place picture for Link — creek, bench, lamp, sky, gate, or ridge. */
 export function PlaceGlyph({
   plotId,
   className = '',
@@ -33,6 +39,25 @@ export function PlaceGlyph({
           <rect x="20" y="38" width="8" height="14" fill="#8a5a22" />
           <rect x="68" y="38" width="8" height="14" fill="#8a5a22" />
           <circle cx="72" cy="18" r="10" fill="#ffcc33" />
+        </>
+      ) : art?.sky ? (
+        <>
+          <path d="M18 78c0-24 12-40 30-40s30 16 30 40" fill="#1a3a78" />
+          <circle cx="48" cy="42" r="10" fill="#ffcc33" />
+          <circle cx="22" cy="22" r="2.5" fill="#fff6b8" />
+          <circle cx="72" cy="18" r="2" fill="#fff6b8" />
+          <circle cx="78" cy="32" r="1.8" fill="#ffe680" />
+        </>
+      ) : art?.gate ? (
+        <>
+          <path d="M20 78V40l28-18 28 18v38" fill="#8a6a3a" />
+          <path d="M36 78V52h24v26" fill="#2a0d58" />
+          <rect x="22" y="70" width="52" height="8" fill="#5a3a1a" />
+        </>
+      ) : art?.ridge ? (
+        <>
+          <path d="M6 78 28 42l14 14 16-28 32 50Z" fill="#3d7ccc" />
+          <path d="M42 28 58 6l20 36" fill="#ffe680" />
         </>
       ) : (
         <>

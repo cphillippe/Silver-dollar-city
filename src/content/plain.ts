@@ -132,7 +132,7 @@ const PLAIN: Record<string, PlainLine> = {
   ),
   'hl-moral': line(
     'Duty feels real — not like a taste for tea.',
-    'We treat some acts as truly wrong, not just disliked. A good God is a fitting home for that grain. Rivals exist. Keep the disagreement visible.',
+    'Duty is more than a taste. Romans 2 says strangers already know enough to accuse one another.',
     { term: 'Duty', sense: 'what you ought to do, even when you do not feel like it', hint: 'Build the modest chain. Leave contempt and collapse.' },
   ),
   'hl-mind': line(
@@ -181,7 +181,7 @@ const PLAIN: Record<string, PlainLine> = {
   ),
   'daily-stars': line(
     'The heavens already speak of a Maker. Fine-tuning fits that voice.',
-    'Psalm 19 and Romans 1 treat the created order as speech. The tight fit of the cosmos lands in the same grain.',
+    'Psalm 19 and Romans 1 treat the sky as speech. The heavens already speak of a Maker.',
     { term: 'Maker', sense: 'the One who intended this world', hint: 'Keep the sky as speech. Toss “silent decoration.”' },
   ),
   'daily-life': line(
@@ -221,7 +221,7 @@ const PLAIN: Record<string, PlainLine> = {
   ),
   'daily-cosmos': line(
     'The universe exists and did not have to — so a Source is worth naming.',
-    'The psalms ask the question out loud and expect a Giver, not a shrug.',
+    'The world is here, and it did not have to be. The psalms name a Giver — not a shrug.',
     { term: 'Source', sense: 'the One from whom this world comes', hint: 'Keep the question. Toss the shrug.' },
   ),
   'daily-door': line(
