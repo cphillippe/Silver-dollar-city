@@ -121,6 +121,10 @@ assert.match(teachSrc, /The main idea you will keep/)
 assert.doesNotMatch(teachSrc, /A claim is the main idea we hold to be true/)
 assert.match(teachSrc, /Short story/)
 assert.match(teachSrc, /Skip reading/)
+assert.match(teachSrc, /easyWhoWhere/)
+assert.match(teachSrc, /easyWhoWhereLine/)
+assert.match(teachSrc, /easy-who-where/)
+assert.match(teachSrc, /easy-place-chip/)
 assert.ok(
   teachSrc.indexOf('teach-reason') < teachSrc.indexOf('brief.claim'),
   'TeachUnlock must tell the story before the claim line',

@@ -248,6 +248,14 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     })
   }, [write])
 
+  const recordTaught = useCallback((evidenceId: string) => {
+    setProgress((current) => {
+      const taught = current.taught ?? []
+      if (taught.includes(evidenceId)) return current
+      return write({ ...current, taught: [...taught, evidenceId] })
+    })
+  }, [write])
+
   const upgradeBuilding = useCallback((id: CityPlotId) => {
     setProgress((current) => {
       const next = applyUpgrade(current, id)
@@ -296,6 +304,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       recordNight,
       setTheme,
       setEasyMode,
+      recordTaught,
       upgradeBuilding,
       reset,
       importSaveText,
@@ -314,6 +323,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       recordStars,
       reset,
       saveMeta,
+      recordTaught,
       setEasyMode,
       setTheme,
       start,
