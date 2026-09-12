@@ -61,6 +61,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
         <header className="easy-home-head">
           <p className="eyebrow">Silver City</p>
           <h1>Play</h1>
+          <p className="quiet">Match a sentence. Hold the line.</p>
         </header>
         <nav className="easy-core" aria-label="Play">
           <button
@@ -77,21 +78,23 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
           >
             {EASY.saved}
           </button>
+        </nav>
+        <div className="easy-soon">
           <button
             type="button"
-            className="btn gold xl"
-            onClick={() => onNavigate({ name: 'defend' })}
+            className="text-link town-soon"
+            onClick={() => onNavigate({ name: 'settings' })}
           >
-            {EASY.nightDo}
+            {EASY.townSoon}
           </button>
-        </nav>
-        <button
-          type="button"
-          className="text-link town-soon"
-          onClick={() => onNavigate({ name: 'settings' })}
-        >
-          {EASY.townSoon}
-        </button>
+          <button
+            type="button"
+            className="text-link town-soon"
+            onClick={() => onNavigate({ name: 'settings' })}
+          >
+            {EASY.nightSoon}
+          </button>
+        </div>
       </main>
     )
   }
@@ -244,15 +247,6 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
         >
           {easy ? EASY.matchCta : 'Link the street'}
         </button>
-        {easy ? (
-          <button
-            type="button"
-            className="btn tiny"
-            onClick={() => onNavigate({ name: 'defend' })}
-          >
-            Night Watch
-          </button>
-        ) : null}
         {easy ? null : (
         <button
           type="button"
@@ -274,22 +268,14 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
           <Avatar who="juniper" size="sm" />
           <div>
             <p className="eyebrow">{progress.defense.cleared ? 'Still watched' : 'Night Watch'}</p>
-            <h2>{easy ? 'Use a sentence you kept' : 'Hold the night'}</h2>
-            {easy ? null : <p className="quiet">Learn · hold · deploy</p>}
-            {easy ? (
-              progress.defense.cleared ? (
-                <p className="town-line">
-                  {progress.defense.cleared} night{progress.defense.cleared === 1 ? '' : 's'} held.
-                </p>
-              ) : null
-            ) : (
-              <p className="town-line">
-                Held lines turn the night toward heaven
-                {progress.defense.cleared
-                  ? ` · ${progress.defense.cleared} night${progress.defense.cleared === 1 ? '' : 's'} held.`
-                  : '.'}
-              </p>
-            )}
+            <h2>Hold the night</h2>
+            <p className="quiet">Learn · hold · deploy</p>
+            <p className="town-line">
+              Held lines turn the night toward heaven
+              {progress.defense.cleared
+                ? ` · ${progress.defense.cleared} night${progress.defense.cleared === 1 ? '' : 's'} held.`
+                : '.'}
+            </p>
             <p className="night-watch-gems" aria-label="Night abilities">
               {WATCH_TOOLS.map((tool) => (
                 <span
@@ -308,7 +294,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
           className="btn gold xl"
           onClick={() => onNavigate({ name: 'defend' })}
         >
-          {easy ? EASY.nightDo : 'Hold the night'}
+          Hold the night
         </button>
       </section>
       )}

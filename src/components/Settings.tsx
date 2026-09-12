@@ -187,7 +187,7 @@ export function Settings({ onNavigate }: SettingsProps) {
         )}
         <p className="quiet">
           {easy
-            ? `${held} ${EASY.saved.toLowerCase()} · ${open} pages · ${progress.completed.length} walks`
+            ? `${held} ${EASY.savedSub} · ${open} pages · ${progress.completed.length} walks`
             : `${held} held lines · ${open} journal pages · ${progress.completed.length} district walks · streak ${progress.streak}${
                 cloudSyncStatus() === 'local-only' ? ' · local only (no cloud login)' : ''
               }`}
@@ -209,6 +209,16 @@ export function Settings({ onNavigate }: SettingsProps) {
           <p>
             {EASY.townSoon} — the map waits until the game is right. Hard still has
             the streets.
+          </p>
+        </section>
+      ) : null}
+
+      {easy ? (
+        <section className="settings-card" aria-label="Night Watch">
+          <p className="eyebrow">Night Watch</p>
+          <p>
+            {EASY.nightSoon} — waits until Match → Hold is solid. Hard still
+            has the night.
           </p>
         </section>
       ) : null}

@@ -78,7 +78,7 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
             {easy ? null : <PlainTalk id={challenge.id} />}
             <p className="quiet">
               {easy
-                ? 'You’ll keep them in Saved.'
+                ? `You’ll keep them in ${EASY.saved}.`
                 : 'Each match lights a spot on the town map. Tap the place later to open that idea again.'}
             </p>
             {easy ? null : (
@@ -133,10 +133,10 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
             who="juniper"
             line={
               easy
-                ? 'Your matches wait in Saved.'
+                ? `Your matches wait in ${EASY.saved}.`
                 : 'Tap a place on the map — the mind map holds what you linked.'
             }
-            action={easy ? 'See Saved' : 'See the town'}
+            action={easy ? `See ${EASY.saved}` : 'See the town'}
             onGo={() => onNavigate(easy ? { name: 'journal' } : { name: 'hub' })}
           />
         </section>
