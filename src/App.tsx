@@ -7,6 +7,7 @@ import { Hub } from './components/Hub'
 import { Journal } from './components/Journal'
 import { Settings } from './components/Settings'
 import { DefendScreen } from './components/DefendScreen'
+import { LearnScreen } from './components/LearnScreen'
 import { LinkScreen } from './components/LinkScreen'
 import { Profile } from './components/Profile'
 import { Vista } from './components/Vista'
@@ -92,6 +93,7 @@ export default function App() {
       {view.name === 'settings' ? <Settings onNavigate={go} /> : null}
       {view.name === 'defend' && !easy ? <DefendScreen onNavigate={go} /> : null}
       {view.name === 'link' ? <LinkScreen onNavigate={go} /> : null}
+      {view.name === 'learn' ? <LearnScreen onNavigate={go} /> : null}
       {view.name === 'profile' ? <Profile onNavigate={go} /> : null}
     </AppShell>
   )

@@ -501,6 +501,7 @@ export interface ProgressApi {
   recordNight: (dateKey: string) => void
   setTheme: (theme: AppTheme) => void
   setEasyMode: (easy: boolean) => void
+  recordTaught: (evidenceId: string) => void
   upgradeBuilding: (id: CityPlotId) => void
   reset: () => void
   importSaveText: (raw: string) => { ok: true } | { ok: false; error: string }

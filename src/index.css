@@ -7148,6 +7148,54 @@ html[data-easy='on'] .mind-node em {
   margin-top: 14px;
 }
 
+.easy-who-where {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.easy-who-where-line {
+  margin: 0;
+  font-size: 1.02rem;
+  line-height: 1.35;
+}
+
+.easy-who-where-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.easy-who-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.easy-who-chip figcaption {
+  margin: 0;
+  font-weight: 650;
+}
+
+.easy-place-chip {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--mist);
+  font-weight: 650;
+}
+
+.easy-match-lock {
+  margin: -4px 0 0;
+}
+
+.easy-core .btn.is-locked {
+  opacity: 0.62;
+}
+
 .place-sub {
   margin: 2px 0 0;
 }

@@ -1,5 +1,8 @@
 import type { ProgressState } from '../types.ts'
+import type { CharacterId } from '../content/story.ts'
+import { CAST } from '../content/story.ts'
 import { evidenceFor } from '../content/evidence.ts'
+import { CITY_PLOTS, type CityPlotId } from './city.ts'
 
 export function isEasy(progress: Pick<ProgressState, 'easyMode'> | { easyMode?: boolean }): boolean {
   return Boolean(progress.easyMode)
@@ -13,6 +16,9 @@ export const EASY = {
   mindMapShort: 'Scrapbook',
   connectLink: 'Tap the sentence, then the place, then the person.',
   readStory: 'Read today’s story.',
+  learnCta: 'Learn',
+  readStoryFirst: 'Read the story first',
+  learnThisFirst: 'Learn this first.',
   rememberSentence: 'Tap the line you kept.',
   tapWhy: 'Tap why this is true.',
   keepThis: 'Keep this',
@@ -309,6 +315,74 @@ function firstSentence(text: string): string {
 /** One-or-two-line Easy story card — not the teach wall. */
 export function easyStoryCard(text: string): string {
   return firstSentence(text)
+}
+
+/** Easy street lines in teach order — first is the mercy neighbor Match. */
+export const EASY_LINE_ORDER = ['ph-road', 'wb-creed', 'daily-lantern'] as const
+export const EASY_MATCH_LINE = EASY_LINE_ORDER[0]
+
+const LINE_HOME: Record<string, { whoId: CharacterId; plotId: CityPlotId }> = {
+  'ph-road': { whoId: 'mercy', plotId: 'hollow' },
+  'wb-creed': { whoId: 'silas', plotId: 'bench' },
+  'daily-lantern': { whoId: 'juniper', plotId: 'porch' },
+}
+
+function homeFor(id: string): { whoId: CharacterId; plotId: CityPlotId } {
+  if (LINE_HOME[id]) return LINE_HOME[id]
+  if (id.startsWith('ph-') || id === 'td-watch') return { whoId: 'mercy', plotId: 'hollow' }
+  if (id.startsWith('wb-')) return { whoId: 'silas', plotId: 'bench' }
+  if (id.startsWith('ob-')) return { whoId: 'nora', plotId: 'observatory' }
+  if (id.startsWith('fg-')) return { whoId: 'ansel', plotId: 'gate' }
+  if (id.startsWith('hl-')) return { whoId: 'hope', plotId: 'lookout' }
+  return { whoId: 'juniper', plotId: 'porch' }
+}
+
+export interface EasyWhoWhere {
+  who: string
+  whoName: string
+  whoId: CharacterId
+  place: string
+}
+
+/** First Learn names who keeps the line and where it lives. */
+export function easyWhoWhere(id: string): EasyWhoWhere {
+  const home = homeFor(id)
+  const keeper = CAST[home.whoId]
+  const lot = CITY_PLOTS.find((plot) => plot.id === home.plotId)
+  return {
+    who: keeper.shortName,
+    whoName: keeper.name,
+    whoId: keeper.id,
+    place: lot?.title ?? 'East porch',
+  }
+}
+
+export function easyWhoWhereLine(id: string): string {
+  const { whoName, place } = easyWhoWhere(id)
+  return `This idea lives at ${place}, with ${whoName}.`
+}
+
+type TaughtProgress = Pick<ProgressState, 'taught' | 'completed' | 'held' | 'learnings'>
+
+/** Story unlock, a finished walk, or a held line all count as learned. */
+export function easyLineLearned(progress: TaughtProgress, id: string): boolean {
+  if ((progress.taught ?? []).includes(id)) return true
+  if ((progress.completed ?? []).includes(id)) return true
+  if ((progress.held ?? []).includes(id)) return true
+  return (progress.learnings ?? []).some((item) => item.id === id)
+}
+
+/** Next Easy story to teach — mercy neighbor first. */
+export function easyLearnLine(progress: TaughtProgress): string {
+  for (const id of EASY_LINE_ORDER) {
+    if (!easyLineLearned(progress, id)) return id
+  }
+  return EASY_MATCH_LINE
+}
+
+/** Match stays locked until the line it asks (neighbor / Story Creek) is taught. */
+export function easyMatchReady(progress: TaughtProgress): boolean {
+  return easyLineLearned(progress, EASY_MATCH_LINE)
 }
 
 export function scrapbookLabel(easy: boolean, lit?: number) {

@@ -75,6 +75,7 @@ export function emptyProgress(): ProgressState {
     theme: 'candy',
     easyMode: false,
     learnings: [],
+    taught: [],
     cityBuilt: emptyCityBuilt(),
   }
 }
@@ -210,6 +211,7 @@ export function normalizeProgress(parsed: Partial<ProgressState> | ProgressState
     theme: asTheme(parsed.theme),
     easyMode: parsed.easyMode === true,
     learnings: asLearningArray(parsed.learnings),
+    taught: asStringArray(parsed.taught),
     cityBuilt: emptyCityBuilt(),
   }
   base.memory = migrateMemory({ ...base, memory: parsed.memory ?? {} })
