@@ -21,7 +21,7 @@ interface DailyTrailProps {
 }
 
 export function DailyTrail({ onNavigate }: DailyTrailProps) {
-  const { completeDaily, recordReview, progress } = useProgress()
+  const { completeDaily, recordReview, recordTaught, progress } = useProgress()
   const easy = isEasy(progress)
   const now = new Date()
   const today = localDateKey(now)
@@ -102,6 +102,7 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
             kind={challenge.kind}
             beats={challenge.kind === 'sequence' ? challenge.items : undefined}
             onUnlock={() => {
+              recordTaught(brief.id)
               setTaught(true)
               setArming(true)
               window.setTimeout(() => setArming(false), 360)

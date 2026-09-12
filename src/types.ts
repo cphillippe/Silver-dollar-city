@@ -267,6 +267,11 @@ export interface ProgressState {
    */
   learnings: Learning[]
   /**
+   * Easy teach-unlocks (story + who + where). Optional on old saves;
+   * normalize fills []. Schema stays 1 — do not wipe.
+   */
+  taught: string[]
+  /**
    * Applied building looks (0–4) per lot. Optional on old saves;
    * normalize snapshots what learning already earned so the city does not vanish.
    * Schema stays 1 — do not wipe. Further looks are tapped as Upgrade.
@@ -285,4 +290,5 @@ export type View =
   | { name: 'settings' }
   | { name: 'defend' }
   | { name: 'link' }
+  | { name: 'learn' }
   | { name: 'profile' }

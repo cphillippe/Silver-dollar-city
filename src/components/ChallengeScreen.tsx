@@ -31,7 +31,7 @@ export function ChallengeScreen({
   challengeId,
   onNavigate,
 }: ChallengeScreenProps) {
-  const { completeChallenge, recordReview, markMiss, progress } = useProgress()
+  const { completeChallenge, recordReview, recordTaught, markMiss, progress } = useProgress()
   const easy = isEasy(progress)
   const area = getArea(areaId)
   const challenge = getChallenge(areaId, challengeId)
@@ -173,6 +173,7 @@ export function ChallengeScreen({
                       : undefined
             }
             onUnlock={() => {
+              if (brief) recordTaught(brief.id)
               setTaught(true)
               setArming(true)
               window.setTimeout(() => setArming(false), 360)
