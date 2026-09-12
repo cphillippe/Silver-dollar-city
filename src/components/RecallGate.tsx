@@ -69,7 +69,7 @@ export function RecallGate({
   }, [brief.id, brief.claim, brief.claimChoices, encode, own, lines, easy])
   const reasonOptions = useMemo(() => {
     const correct = chosen?.reason ?? brief.reason
-    if (encode) return uniqueHoldChoices([correct], reasonFace, correct)
+    if (encode && !easy) return uniqueHoldChoices([correct], reasonFace, correct)
     const pool = shuffle([...brief.reasonChoices])
     const raw = easy
       ? shuffle(
@@ -77,7 +77,9 @@ export function RecallGate({
             (line): line is string => Boolean(line),
           ),
         )
-      : pool
+      : encode
+        ? [correct]
+        : pool
     return uniqueHoldChoices(raw, reasonFace, correct)
   }, [brief.id, brief.reason, brief.reasonChoices, encode, chosen, easy])
   const [phase, setPhase] = useState<Phase>(deeper ? 'reason' : 'claim')
@@ -205,25 +207,39 @@ export function RecallGate({
           </>
         ) : (
           <>
-            <p className="teach-chip" role="note">
-              {EASY.reasonTeach}
-            </p>
-            <p className="next-tap">{EASY.tapWhy}</p>
+            <p className="next-tap">{reasonLocked ? EASY.keepThis : EASY.tapWhy}</p>
             <p className="recall-line rehearse-stem">
               {easyFacingLine(brief.id, heldClaim)}
             </p>
-            <div className="reason-scroll">
-              <p className="reason-held">{easyChromeLine(heldReason)}</p>
-            </div>
-            <div className="cta-dock">
-              <button
-                type="button"
-                className="btn primary xl recall-done"
-                onClick={() => settle(true)}
-              >
-                {EASY.keepThis}
-              </button>
-            </div>
+            {reasonLocked ? (
+              <>
+                <div className="reason-scroll">
+                  <p className="reason-held">{easyChromeLine(heldReason)}</p>
+                </div>
+                <div className="cta-dock">
+                  <button
+                    type="button"
+                    className="btn primary xl recall-done"
+                    onClick={() => settle(true)}
+                  >
+                    {EASY.keepThis}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="recall-choices">
+                {reasonOptions.map((line) => (
+                  <button
+                    key={line}
+                    type="button"
+                    className={`match-card recall-card ${flash === line ? 'is-flash' : ''}`}
+                    onClick={() => pick(line, heldReason, 'lock')}
+                  >
+                    {easyChromeLine(line)}
+                  </button>
+                ))}
+              </div>
+            )}
           </>
         )}
       </section>

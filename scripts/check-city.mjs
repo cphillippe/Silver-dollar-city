@@ -512,12 +512,13 @@ assert.match(recallSrc, /EASY.rememberSentence/)
 assert.match(recallSrc, /is-easy-hold/)
 assert.match(recallSrc, /EASY\.keepThis/)
 assert.match(recallSrc, /EASY\.tapWhy/)
-assert.match(recallSrc, /EASY\.reasonTeach/)
 assert.match(recallSrc, /easyChromeLine/)
 {
   const easyHold = recallSrc.match(/if \(easyEncode\) \{\s*return \(([\s\S]*?)\n  \}/)?.[1] ?? ''
   assert.match(easyHold, /EASY\.tapWhy/)
-  assert.match(easyHold, /EASY\.reasonTeach/)
+  assert.match(easyHold, /EASY\.rememberSentence/)
+  assert.match(easyHold, /reasonOptions\.map/)
+  assert.doesNotMatch(easyHold, /EASY\.reasonTeach/)
   assert.doesNotMatch(easyHold, /EASY\.whyStands/)
 }
 assert.match(recallSrc, /uniqueHoldChoices/)
@@ -2014,7 +2015,7 @@ assert.match(
 )
 assert.match(
   readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
-  /You’ll keep them in Saved/,
+  /You’ll keep them in \$\{EASY\.saved\}/,
 )
 assert.match(cssSrc, /next-tap/)
 assert.match(cssSrc, /link-demo/)
