@@ -158,7 +158,7 @@ export function Profile({ onNavigate }: ProfileProps) {
 
       <TreeFold
         label={easy ? EASY.uses : 'Tools'}
-        lead={easy ? `${EASY.nightSoon} — tools wait here.` : 'What you can deploy on Night Watch.'}
+        lead={easy ? 'Tools wait until later.' : 'What you can deploy on Night Watch.'}
         count={inv.tools.length}
       >
         {inv.tools.map((tool) => (
@@ -174,7 +174,7 @@ export function Profile({ onNavigate }: ProfileProps) {
                     <strong>
                       {tool.label} {tool.tierMark}
                     </strong>
-                    <p>{EASY.nightSoon}</p>
+                    <p>Saved for later.</p>
                   </span>
                 </p>
               ) : (

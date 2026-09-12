@@ -8,6 +8,22 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.43',
+    title: 'Easy core loop',
+    when: '2026-09-12',
+    items: [
+      'Easy: Night Watch fully hidden until Match→Hold solid',
+      'Easy home is Match and Hold. Town (soon) waits under Settings → More. Night Watch stays on Hard.',
+      'Night Watch Love line is tool how-to, not a claim. Luke 10 split: Love names the tool (v27). Compassion is the Samaritan’s move (v33). The held claim stays Neighbor is the one who shows mercy (v36–37). Mercy Wren stays the keeper name.',
+      'Easy home, nav, and tree say Hold — saved lines stay a subtitle, not the only name.',
+      'Easy Hold is kid-plain: Tap the line you kept. then Tap why this is true. One prompt on screen — no duplicate. A reason is why this is true — taught once, then the chrome stays plain. Keep this still sits under the reason.',
+      'Easy why-options stay short. Luke 15: The father hugs him first. The older brother is home — and angry. Wrong: The older brother is the hero just for staying.',
+      'Night Watch miss says Wrong — tap the glowing face, so locked tools do not look like the task. Easy Night Watch still finishes at 6/6.',
+      'Place titles stay Story Creek, Witness Square, Sky Watch, Meaning Ridge.',
+      'Match stays sentence → place → person with a named miss and Next.',
+    ],
+  },
+  {
     version: '1.4.42',
     title: 'Easy core loop',
     when: '2026-09-12',
