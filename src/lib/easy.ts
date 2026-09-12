@@ -318,13 +318,29 @@ export function easyStoryCard(text: string): string {
 }
 
 /** Easy street lines in teach order — first is the mercy neighbor Match. */
-export const EASY_LINE_ORDER = ['ph-road', 'wb-creed', 'daily-lantern'] as const
+export const EASY_LINE_ORDER = [
+  'ph-road',
+  'ph-father',
+  'ph-debt',
+  'wb-creed',
+  'wb-women',
+  'daily-lantern',
+  'daily-stars',
+  'daily-cosmos',
+  'hl-moral',
+] as const
 export const EASY_MATCH_LINE = EASY_LINE_ORDER[0]
 
 const LINE_HOME: Record<string, { whoId: CharacterId; plotId: CityPlotId }> = {
   'ph-road': { whoId: 'mercy', plotId: 'hollow' },
+  'ph-father': { whoId: 'mercy', plotId: 'hollow' },
+  'ph-debt': { whoId: 'mercy', plotId: 'hollow' },
   'wb-creed': { whoId: 'silas', plotId: 'bench' },
+  'wb-women': { whoId: 'silas', plotId: 'bench' },
   'daily-lantern': { whoId: 'juniper', plotId: 'porch' },
+  'daily-stars': { whoId: 'nora', plotId: 'observatory' },
+  'daily-cosmos': { whoId: 'ansel', plotId: 'gate' },
+  'hl-moral': { whoId: 'hope', plotId: 'lookout' },
 }
 
 function homeFor(id: string): { whoId: CharacterId; plotId: CityPlotId } {
@@ -381,7 +397,8 @@ export function easyLineLearned(progress: EasyLoopProgress, id: string): boolean
 
 /**
  * One Easy triad at a time. Prefer the first line not yet held on Easy,
- * in mercy-first order: ph-road → wb-creed → daily-lantern.
+ * in mercy-first order: ph-road → ph-father → ph-debt → wb-creed →
+ * wb-women → daily-lantern → daily-stars → daily-cosmos → hl-moral.
  * Hard / older taught, completed, held, or learnings do not advance this.
  */
 export function easyLoopLine(progress: EasyLoopProgress): string {
