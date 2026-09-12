@@ -97,6 +97,22 @@ export const STREET_CHALLENGE: LinkChallenge = {
     'Mercy keeps the creek because Jesus taught in pictures (Luke 10:36). Silas keeps the square because the creed is a public report. Juniper keeps the porch because a lamp is meant to be seen.',
 }
 
+/** Easy Match uses one taught line’s triad — not a jump to another street story. */
+export function streetTripleForLine(lineId: string): (typeof STREET_CHALLENGE.triples)[number]['id'] {
+  if (lineId === 'wb-creed') return 'silas-bench'
+  if (lineId === 'daily-lantern') return 'juniper-porch'
+  return 'mercy-hollow'
+}
+
+export function easyStreetChallenge(lineId: string): LinkChallenge {
+  const tripleId = streetTripleForLine(lineId)
+  const triple = STREET_CHALLENGE.triples.find((item) => item.id === tripleId)
+  return {
+    ...STREET_CHALLENGE,
+    triples: triple ? [triple] : [STREET_CHALLENGE.triples[0]],
+  }
+}
+
 export const STREET_BEATS = [
   'Mercy Wren · Story Creek · Neighbor is the one who shows mercy.',
   'Silas Whitman · Witness Square · died, buried, raised, appeared.',

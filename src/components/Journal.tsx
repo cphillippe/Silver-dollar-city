@@ -33,7 +33,7 @@ interface JournalProps {
 }
 
 export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
-  const { progress, recordReview, snoozeReviews } = useProgress()
+  const { progress, recordHeld, recordReview, snoozeReviews } = useProgress()
   const easy = isEasy(progress)
   const today = localDateKey()
   const { open, total, percent } = journalCompletion(progress)
@@ -67,32 +67,44 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
     : undefined
   const quizBrief = focusedBrief ?? (focusId ? evidenceFor(focusId) : undefined)
 
-  if (autoQuiz && quizBrief && (!focusedEntry || focusedOpen)) {
+  const holdPractice =
+    Boolean(autoQuiz && quizBrief && (easy || !focusedEntry || focusedOpen))
+
+  if (holdPractice && quizBrief) {
     const pillar = focusedEntry?.areaId ?? pillarFor(quizBrief.id)
+    const firstHold = !progress.held.includes(quizBrief.id)
     return (
-      <main className="journal is-rehearse">
+      <main className={`journal is-rehearse ${easy ? 'is-easy-hold-practice' : ''}`}>
         <button
           type="button"
           className="text-link"
-          onClick={() =>
-            onNavigate(
-              focusedEntry
-                ? { name: 'journal', focusId: focusedEntry.id }
-                : { name: 'journal' },
-            )
-          }
+          onClick={() => onNavigate({ name: easy ? 'hub' : 'journal' })}
         >
-          ← {easy ? EASY.saved : 'Journal'}
+          ← {easy ? EASY.home : 'Journal'}
         </button>
         <section className="rehearse-anchor">
           <p className="eyebrow">{easy ? EASY.saved : 'Takeaway'}</p>
-          <h1>{focusedEntry?.title ?? (easy ? EASY.saved : STORY.tapTakeaway)}</h1>
+          {easy ? null : <h1>{focusedEntry?.title ?? STORY.tapTakeaway}</h1>}
           <RecallGate
             brief={quizBrief}
-            mode="review"
+            mode={easy && firstHold ? 'encode' : 'review'}
             visits={progress.memory[quizBrief.id]?.reviews ?? 0}
             kicker={STORY.tapTakeaway}
             onHeld={(result) => {
+              if (easy && firstHold) {
+                recordHeld(quizBrief.id)
+                recordReview({
+                  id: quizBrief.id,
+                  pillar,
+                  kind: 'encode',
+                  today,
+                  clean: result.clean,
+                  peeked: false,
+                  elaborated: false,
+                })
+                onNavigate({ name: 'hub' })
+                return
+              }
               recordReview({
                 id: quizBrief.id,
                 pillar,
@@ -103,20 +115,26 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
                 elaborated: false,
               })
               onNavigate(
-                focusedEntry
-                  ? { name: 'journal', focusId: focusedEntry.id }
-                  : { name: 'journal' },
+                easy
+                  ? { name: 'hub' }
+                  : focusedEntry
+                    ? { name: 'journal', focusId: focusedEntry.id }
+                    : { name: 'journal' },
               )
             }}
-            onSkip={(how) => {
-              if (how === 'not-today') snoozeReviews([quizBrief.id], today)
-              setLater(markLater(today, [quizBrief.id], true))
-              onNavigate(
-                focusedEntry
-                  ? { name: 'journal', focusId: focusedEntry.id }
-                  : { name: 'journal' },
-              )
-            }}
+            onSkip={
+              easy
+                ? undefined
+                : (how) => {
+                    if (how === 'not-today') snoozeReviews([quizBrief.id], today)
+                    setLater(markLater(today, [quizBrief.id], true))
+                    onNavigate(
+                      focusedEntry
+                        ? { name: 'journal', focusId: focusedEntry.id }
+                        : { name: 'journal' },
+                    )
+                  }
+            }
           />
         </section>
       </main>
@@ -124,8 +142,8 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
   }
 
   return (
-    <main className={`journal ${dueItems.length ? 'has-due' : ''}`}>
-      {dueItems.length > 0 ? (
+    <main className={`journal ${dueItems.length ? 'has-due' : ''} ${easy ? 'is-easy-hold' : ''}`}>
+      {easy ? null : dueItems.length > 0 ? (
         <section className="journal-chapter due-chapter">
           <RecallOffer
             items={dueItems.map((item) => ({
@@ -152,7 +170,7 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
             }}
           />
         </section>
-      ) : (
+      ) : easy ? null : (
         <section className="next-rebuild">
           <p className="eyebrow">Next recommended</p>
           <h2>{nextStep.title}</h2>
@@ -201,7 +219,7 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
       {progress.learnings.length > 0 ? (
         <SavedTree
           className="journal-chapter stored-chapter"
-          startOpen={!focusedEntry || Boolean(focusId?.startsWith('learn-'))}
+          startOpen={easy ? false : !focusedEntry || Boolean(focusId?.startsWith('learn-'))}
         >
           <SavedTreeSummary
             who="juniper"
