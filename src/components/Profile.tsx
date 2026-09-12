@@ -71,7 +71,7 @@ export function Profile({ onNavigate }: ProfileProps) {
                 <p className="eyebrow">
                   {easy
                     ? idea.held
-                      ? 'Saved'
+                      ? EASY.saved
                       : idea.stored
                         ? 'Kept'
                         : 'Walked'

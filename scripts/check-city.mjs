@@ -513,6 +513,13 @@ assert.match(recallSrc, /is-easy-hold/)
 assert.match(recallSrc, /EASY\.keepThis/)
 assert.match(recallSrc, /EASY\.tapWhy/)
 assert.match(recallSrc, /EASY\.reasonTeach/)
+assert.match(recallSrc, /easyChromeLine/)
+{
+  const easyHold = recallSrc.match(/if \(easyEncode\) \{\s*return \(([\s\S]*?)\n  \}/)?.[1] ?? ''
+  assert.match(easyHold, /EASY\.tapWhy/)
+  assert.match(easyHold, /EASY\.reasonTeach/)
+  assert.doesNotMatch(easyHold, /EASY\.whyStands/)
+}
 assert.match(recallSrc, /uniqueHoldChoices/)
 assert.doesNotMatch(recallSrc, /Tap the sentence you still remember/)
 assert.match(recallSrc, /reasonLocked/)
@@ -1546,15 +1553,15 @@ assert.match(
 )
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /Tap the line you just kept/,
+  /Tap the line you kept/,
 )
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /Tap why it stands/,
+  /Tap why this is true/,
 )
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /A reason is why it stands/,
+  /A reason is why this is true/,
 )
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
@@ -1574,7 +1581,7 @@ assert.match(
 )
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /why it stands/,
+  /why this is true/,
 )
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
@@ -1775,6 +1782,18 @@ assert.equal(
   'Jesus is only talking about old money rules.',
 )
 assert.doesNotMatch(easyChromeLine('Keep the mercy. Toss the throttle.'), /throttle/)
+assert.equal(
+  easyChromeLine('The servant forgiven an unpayable debt then throttles a peer over a small sum.'),
+  'He was forgiven a huge debt, then choked a neighbor over a small one.',
+)
+assert.equal(
+  easyChromeLine('The first servant was right to demand prison.'),
+  'Jail him over a tiny debt.',
+)
+assert.doesNotMatch(
+  easyChromeLine('The servant forgiven an unpayable debt then throttles a peer over a small sum.'),
+  /throttles a peer/,
+)
 assert.doesNotMatch(EASY.loveCue, /mean line/)
 assert.doesNotMatch(EASY.nightLead, /mean line|claim|throttle/)
 assert.match(mapSrc, /EASY_FOLK_LIFT/)
@@ -1858,7 +1877,7 @@ assert.match(
 )
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /Saved sentences/,
+  /saved: 'Hold'/,
 )
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
@@ -1915,7 +1934,7 @@ assert.match(
 assert.match(cssSrc, /easy-steps/)
 assert.match(
   readFileSync(new URL('../src/components/AppShell.tsx', import.meta.url), 'utf8'),
-  /easy \? 'Saved' : 'Journal'/,
+  /easy \? EASY\.saved : 'Journal'/,
 )
 assert.match(linkPlaySrc, /easy-steps/)
 assert.match(linkPlaySrc, /1 · Sentence/)
@@ -1928,9 +1947,11 @@ assert.doesNotMatch(defendSrc, /easyTap && tool\.id !== ability/)
 assert.match(defendSrc, /WATCH_TOOLS\.map/)
 assert.match(defendSrc, /EASY\.nightLead/)
 assert.equal(EASY.nightLead, 'Tap the face six times.')
-assert.equal(EASY.rememberSentence, 'Tap the line you just kept.')
-assert.equal(EASY.tapWhy, 'Tap why it stands.')
-assert.equal(EASY.reasonTeach, 'A reason is why it stands.')
+assert.equal(EASY.rememberSentence, 'Tap the line you kept.')
+assert.equal(EASY.tapWhy, 'Tap why this is true.')
+assert.equal(EASY.reasonTeach, 'A reason is why this is true.')
+assert.equal(EASY.saved, 'Hold')
+assert.equal(EASY.savedSub, 'saved lines')
 assert.equal(EASY.nightMiss, 'Wrong — tap the glowing face')
 assert.match(defendSrc, /EASY\.nightMiss/)
 assert.match(defendSrc, /TAP \$\{downed\}/)
@@ -2172,11 +2193,11 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
 
 assert.match(
   latestChange(APP_VERSION).items.join('\n'),
-  /Tap the line you just kept/,
+  /Tap the line you kept/,
 )
 assert.match(
   latestChange(APP_VERSION).items.join('\n'),
-  /Tap why it stands/,
+  /Tap why this is true/,
 )
 assert.match(
   latestChange(APP_VERSION).items.join('\n'),
