@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { shuffle } from '../lib/shuffle'
 import { takeawayLines, type EvidenceBrief } from '../content/evidence'
 import { STORY } from '../content/story'
-import { EASY, easyChromeLine, easyFacingLine, isEasy, uniqueHoldChoices } from '../lib/easy'
+import { EASY, easyFacingLine, easyWhyLine, isEasy, uniqueHoldChoices } from '../lib/easy'
 import { learningBeat } from '../lib/learning'
 import { learningPicture, toolForEvidence } from '../lib/watchTools'
 import { useProgress } from '../store/progress'
@@ -51,7 +51,7 @@ export function RecallGate({
   const own = encode && lines.length > 1
   const [chosen, setChosen] = useState<(typeof lines)[0] | null>(own ? null : lines[0] ?? null)
   const claimFace = (line: string) => (easy ? easyFacingLine(brief.id, line) : line)
-  const reasonFace = (line: string) => (easy ? easyChromeLine(line) : line)
+  const reasonFace = (line: string) => (easy ? easyWhyLine(line) : line)
   const claimOptions = useMemo(() => {
     if (encode) {
       const raw = own ? lines.map((item) => item.claim) : [brief.claim]
@@ -214,7 +214,7 @@ export function RecallGate({
             {reasonLocked ? (
               <>
                 <div className="reason-scroll">
-                  <p className="reason-held">{easyChromeLine(heldReason)}</p>
+                  <p className="reason-held">{easyWhyLine(heldReason)}</p>
                 </div>
                 <div className="cta-dock">
                   <button
@@ -235,7 +235,7 @@ export function RecallGate({
                     className={`match-card recall-card ${flash === line ? 'is-flash' : ''}`}
                     onClick={() => pick(line, heldReason, 'lock')}
                   >
-                    {easyChromeLine(line)}
+                    {easyWhyLine(line)}
                   </button>
                 ))}
               </div>
@@ -353,7 +353,7 @@ export function RecallGate({
                     pick(line, heldReason, deeper ? 'claim' : 'lock')
                   }
                 >
-                  {easy ? easyChromeLine(line) : line}
+                  {easy ? easyWhyLine(line) : line}
                 </button>
               ))}
             </div>

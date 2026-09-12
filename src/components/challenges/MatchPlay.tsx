@@ -87,10 +87,10 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
       setFlash(id)
       window.setTimeout(() => setFlash(null), 380)
       if (next.length === challenge.pairs.length) {
+        setStatus('ok')
         if (easy) {
           setReady(true)
         } else {
-          setStatus('ok')
           onSolved()
         }
       }
@@ -123,7 +123,7 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
       className={`play is-match ${guided ? 'is-deal' : ''} ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}
       style={{ ['--match-rows' as string]: guided ? 2 : left.length }}
     >
-      <WinBurst play={status === 'ok'} />
+      <WinBurst play={status === 'ok'} stamp={easy ? EASY.matchWin : 'Locked!'} />
       <PuzzleLead challenge={challenge} />
       <PuzzleHint text={challenge.context} id={challenge.id} onPeek={onPeek} />
       <p className="sort-how">
@@ -215,17 +215,14 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
           ? `${challenge.pairs.length - locked.length} left · ${locked.length} / ${challenge.pairs.length} kept`
           : `${challenge.pairs.length - locked.length} left · ${locked.length} / ${challenge.pairs.length} snapped`}
       </p>
-      {easy && ready && status !== 'ok' ? (
+      {easy && ready ? (
         <div className="cta-dock">
           <button
             type="button"
             className="btn gold xl snap-bins"
-            onClick={() => {
-              setStatus('ok')
-              onSolved()
-            }}
+            onClick={onSolved}
           >
-            {EASY.lockIn}
+            {EASY.holdNext}
           </button>
         </div>
       ) : null}

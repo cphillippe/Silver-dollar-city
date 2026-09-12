@@ -9,12 +9,14 @@ import { Avatar } from '../Avatar'
 import { PlaceGlyph } from '../Landmark'
 import { PuzzleHint } from './PuzzleHint'
 import { PuzzleLead } from './PuzzleLead'
+import { WinBurst } from './WinBurst'
 
 interface LinkPlayProps {
   challenge: LinkChallenge
   onMiss: () => void
   onSolved: () => void
   onPeek?: () => void
+  onEasyStop?: (dest: 'hold' | 'home') => void
 }
 
 interface Edge {
@@ -66,7 +68,7 @@ function wantFor(triple: { ideaId: string; placeId: string; personId: string }, 
   return null
 }
 
-export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps) {
+export function LinkPlay({ challenge, onMiss, onSolved, onPeek, onEasyStop }: LinkPlayProps) {
   const { progress } = useProgress()
   const easy = isEasy(progress)
   const [edges, setEdges] = useState<Edge[]>([])
@@ -173,14 +175,9 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
       )
       return needed(item.id).every((need) => have.has(need))
     })
-    if (done) {
+    if (easy || done) {
       setStep('linked')
       setStatus('ok')
-      return
-    }
-    if (easy) {
-      setStep('idea')
-      setScreen('choose')
       return
     }
     setStep('linked')
@@ -286,18 +283,38 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek }: LinkPlayProps)
   if (status === 'ok') {
     return (
       <div className="play is-link is-wizard is-finale">
+        {easy ? <WinBurst play stamp={EASY.matchWin} /> : null}
         <p className="link-complete" role="status">
-          {easy ? 'All 3 matches complete' : 'All 3 links complete'}
+          {easy ? EASY.matchDone : 'All 3 links complete'}
         </p>
-        <ol className="link-checks" aria-label={easy ? 'All matches' : 'All links'}>
+        <ol className="link-checks" aria-label={easy ? 'This match' : 'All links'}>
           <li className="is-done">✓ {easy ? 'Sentence' : 'Idea'}</li>
           <li className="is-done">✓ Place</li>
           <li className="is-done">✓ Person</li>
         </ol>
         <div className="link-dock">
-          <button type="button" className="btn gold xl link-next" onClick={finishStreet}>
-            Done
-          </button>
+          {easy ? (
+            <>
+              <button
+                type="button"
+                className="btn gold xl link-next"
+                onClick={() => (onEasyStop ? onEasyStop('hold') : finishStreet())}
+              >
+                {EASY.holdNext}
+              </button>
+              <button
+                type="button"
+                className="btn xl link-next"
+                onClick={() => (onEasyStop ? onEasyStop('home') : finishStreet())}
+              >
+                {EASY.home}
+              </button>
+            </>
+          ) : (
+            <button type="button" className="btn gold xl link-next" onClick={finishStreet}>
+              Done
+            </button>
+          )}
         </div>
       </div>
     )

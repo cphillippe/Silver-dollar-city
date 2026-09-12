@@ -10,6 +10,7 @@ interface PuzzlePlayProps {
   onMiss: () => void
   onSolved: () => void
   onPeek?: () => void
+  onEasyStop?: (dest: 'hold' | 'home') => void
 }
 
 export function PuzzlePlay({
@@ -17,6 +18,7 @@ export function PuzzlePlay({
   onMiss,
   onSolved,
   onPeek,
+  onEasyStop,
 }: PuzzlePlayProps) {
   if (challenge.kind === 'sort') {
     return (
@@ -55,6 +57,7 @@ export function PuzzlePlay({
         onMiss={onMiss}
         onSolved={onSolved}
         onPeek={onPeek}
+        onEasyStop={onEasyStop}
       />
     )
   }
