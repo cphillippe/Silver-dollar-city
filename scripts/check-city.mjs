@@ -1709,9 +1709,9 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
     whoId: 'mercy',
     place: 'Story Creek',
   })
-  assert.equal(easyWhoWhereLine('ph-road'), 'This idea lives at Story Creek, with Mercy Wren.')
-  assert.equal(easyWhoWhereLine('wb-creed'), 'This idea lives at Witness Square, with Silas Whitman.')
-  assert.equal(easyWhoWhereLine('daily-lantern'), 'This idea lives at East porch, with Juniper Wick.')
+  assert.equal(easyWhoWhereLine('ph-road'), 'This idea lives at Story Creek, with Mercy.')
+  assert.equal(easyWhoWhereLine('wb-creed'), 'This idea lives at Witness Square, with Silas.')
+  assert.equal(easyWhoWhereLine('daily-lantern'), 'This idea lives at East porch, with Juniper.')
   assert.equal(easyWhoWhere('wb-creed').who, 'Silas')
   assert.equal(easyWhoWhere('wb-creed').place, 'Witness Square')
   assert.equal(easyWhoWhere('daily-lantern').who, 'Juniper')
@@ -2294,10 +2294,18 @@ assert.ok(
 assert.match(teachSrc, /easyWhoWhere/)
 assert.match(teachSrc, /easy-who-where/)
 assert.match(teachSrc, /easy-place-chip/)
-assert.ok(
-  teachSrc.indexOf('easyWhoWhere') < teachSrc.indexOf('The main idea you will keep'),
-  'Easy teach names person and place before the sentence',
-)
+{
+  const card = teachSrc.slice(
+    teachSrc.indexOf('easy-story-card'),
+    teachSrc.indexOf('easy-story-dock'),
+  )
+  assert.ok(card.includes('easyFacingLine'), 'Easy Learn names the idea')
+  assert.ok(card.includes('easyWhoWhereLine'), 'Easy Learn binds place and person')
+  assert.ok(
+    card.indexOf('easyFacingLine') < card.indexOf('easyWhoWhereLine'),
+    'Easy Learn encodes the idea first, then this idea lives at this place, with this person',
+  )
+}
 assert.match(matchSrc, /match-col-label/)
 assert.match(matchSrc, /Main idea' : 'Claim'/)
 assert.match(matchSrc, /EASY\.matchHow/)

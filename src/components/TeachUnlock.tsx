@@ -43,6 +43,8 @@ export function TeachUnlock({ brief, kind, onUnlock, unlock, beats }: TeachUnloc
         <p className="eyebrow">Short story</p>
         {picture ? <GemMark gem={picture} size="sm" /> : null}
         <p className="teach-reason">{story}</p>
+        <p className="eyebrow hold-kicker">The main idea you will keep</p>
+        <p className="recall-line rehearse-stem">{easyFacingLine(brief.id, brief.claim)}</p>
         <div className="easy-who-where" aria-label={`${home.who} · ${home.place}`}>
           <p className="easy-who-where-line">{easyWhoWhereLine(brief.id)}</p>
           <div className="easy-who-where-row">
@@ -53,8 +55,6 @@ export function TeachUnlock({ brief, kind, onUnlock, unlock, beats }: TeachUnloc
             <p className="easy-place-chip">{home.place}</p>
           </div>
         </div>
-        <p className="eyebrow hold-kicker">The main idea you will keep</p>
-        <p className="recall-line rehearse-stem">{easyFacingLine(brief.id, brief.claim)}</p>
         <div className="cta-dock easy-story-dock">
           <button type="button" className="btn gold xl" onClick={onUnlock}>
             Continue
