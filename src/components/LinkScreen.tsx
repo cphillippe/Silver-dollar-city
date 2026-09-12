@@ -42,11 +42,20 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
   const challenge = STREET_CHALLENGE
   const easy = isEasy(progress)
 
-  function solved() {
-    afterJuice()
+  function markStreet() {
     if (savedWin.current) return
     savedWin.current = true
     completeChallenge('street', challenge.id)
+  }
+
+  function solved() {
+    afterJuice()
+    markStreet()
+  }
+
+  function easyStop(dest: 'hold' | 'home') {
+    markStreet()
+    onNavigate(dest === 'hold' ? { name: 'journal' } : { name: 'hub' })
   }
 
   return (
@@ -114,6 +123,7 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
               challenge={challenge}
               onMiss={() => markMiss(challenge.id)}
               onSolved={solved}
+              onEasyStop={easyStop}
             />
           </>
         )

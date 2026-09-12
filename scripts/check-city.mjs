@@ -68,7 +68,7 @@ import {
   EASY_FOLK_LIFT,
 } from '../src/lib/cityBuild.ts'
 import { emptyProgress } from '../src/lib/save.ts'
-import { EASY, easyChromeLine, easyFacingLine, easyWrongTap, uniqueHoldChoices } from '../src/lib/easy.ts'
+import { EASY, easyChromeLine, easyFacingLine, easyWhyLine, easyWhyWordCount, easyWrongTap, uniqueHoldChoices } from '../src/lib/easy.ts'
 import { WORDS, easyLead } from '../src/lib/words.ts'
 import { deeperLinksFor, eraLabel } from '../src/content/deeper.ts'
 import { allEvidenceIds, evidenceFor } from '../src/content/evidence.ts'
@@ -512,7 +512,7 @@ assert.match(recallSrc, /EASY.rememberSentence/)
 assert.match(recallSrc, /is-easy-hold/)
 assert.match(recallSrc, /EASY\.keepThis/)
 assert.match(recallSrc, /EASY\.tapWhy/)
-assert.match(recallSrc, /easyChromeLine/)
+assert.match(recallSrc, /easyWhyLine/)
 {
   const easyHold = recallSrc.match(/if \(easyEncode\) \{\s*return \(([\s\S]*?)\n  \}/)?.[1] ?? ''
   assert.match(easyHold, /EASY\.tapWhy/)
@@ -1070,7 +1070,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.43')
+assert.equal(APP_VERSION, '1.4.44')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1267,6 +1267,13 @@ assert.match(linkPlaySrc, /setStatus\('idle'\)/)
 assert.match(linkPlaySrc, /link-block/)
 assert.match(linkPlaySrc, /All 3 links complete/)
 assert.match(linkPlaySrc, /This link is complete/)
+assert.match(linkPlaySrc, /WinBurst/)
+assert.match(linkPlaySrc, /EASY\.matchDone/)
+assert.match(linkPlaySrc, /EASY\.holdNext/)
+assert.match(linkPlaySrc, /EASY\.home/)
+assert.match(linkPlaySrc, /onEasyStop/)
+assert.match(linkPlaySrc, /easy \|\| done/)
+assert.doesNotMatch(linkPlaySrc, /setStep\('idea'\)\s*\n\s*setScreen\('choose'\)/)
 assert.match(linkPlaySrc, /wizard-step/)
 assert.match(linkPlaySrc, /EASY\.connectLink/)
 assert.match(linkPlaySrc, /This one/)
@@ -1711,6 +1718,14 @@ assert.match(
   readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
   /easy \? \{ name: 'journal' \} : \{ name: 'hub' \}/,
 )
+assert.match(
+  readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
+  /onEasyStop=\{easyStop\}/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
+  /dest === 'hold'/,
+)
 assert.doesNotMatch(
   readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
   /name: 'defend'/,
@@ -1804,7 +1819,7 @@ assert.equal(easyTapFit(false, 'love', 'physical'), 'weak')
 }
 assert.equal(
   easyChromeLine('Received mercy makes refusing mercy a contradiction.'),
-  'If you were forgiven a huge debt, you cannot choke a neighbor over a small one.',
+  'Forgiven a huge debt — do not choke a neighbor.',
 )
 assert.equal(
   easyChromeLine('Jesus is only reforming first-century banking.'),
@@ -1813,7 +1828,7 @@ assert.equal(
 assert.doesNotMatch(easyChromeLine('Keep the mercy. Toss the throttle.'), /throttle/)
 assert.equal(
   easyChromeLine('The servant forgiven an unpayable debt then throttles a peer over a small sum.'),
-  'He was forgiven a huge debt, then choked a neighbor over a small one.',
+  'He was forgiven much, then choked a neighbor.',
 )
 assert.equal(
   easyChromeLine('The first servant was right to demand prison.'),
@@ -1823,12 +1838,42 @@ assert.equal(
   easyChromeLine(
     'Honor is spent so the son can be embraced; the older brother shows nearness without joy.',
   ),
-  'The father hugs him first. The older brother is home — and angry.',
+  'The father hugs him first.',
 )
 assert.equal(
   easyChromeLine('The older brother is the hero for staying home.'),
   'The older brother is the hero just for staying.',
 )
+assert.equal(
+  easyWhyLine(
+    'Honor is spent so the son can be embraced; the older brother shows nearness without joy.',
+  ),
+  'The father hugs him first.',
+)
+assert.equal(easyWhyWordCount('The father hugs him first.'), 5)
+assert.ok(easyWhyWordCount(easyWhyLine('The servant forgiven an unpayable debt then throttles a peer over a small sum.')) <= 12)
+{
+  const faces = []
+  for (const id of allEvidenceIds()) {
+    const brief = evidenceFor(id)
+    assert.ok(brief, id)
+    const whyFaces = brief.reasonChoices.map((line) => easyWhyLine(line))
+    assert.equal(new Set(whyFaces).size, whyFaces.length, `${id} duplicate Easy why faces`)
+    for (const face of whyFaces) {
+      const words = easyWhyWordCount(face)
+      assert.ok(words <= 12, `${id} Easy why too long (${words}): ${face}`)
+      assert.ok(words >= 3, `${id} Easy why too short: ${face}`)
+      assert.doesNotMatch(face, /throttl/i)
+      assert.doesNotMatch(face, /[.!?]\s+\S/, `${id} stacked Easy why: ${face}`)
+      faces.push(face)
+    }
+  }
+  assert.ok(faces.length > 20)
+}
+assert.equal(EASY.holdNext, 'Hold next')
+assert.equal(EASY.matchDone, 'Match done')
+assert.equal(EASY.matchWin, 'Matched!')
+assert.equal(EASY.home, 'Home')
 assert.doesNotMatch(
   easyChromeLine('The servant forgiven an unpayable debt then throttles a peer over a small sum.'),
   /throttles a peer/,
@@ -2178,7 +2223,7 @@ assert.match(matchSrc, /match-col-label/)
 assert.match(matchSrc, /Main idea' : 'Claim'/)
 assert.match(matchSrc, /EASY\.matchHow/)
 assert.match(matchSrc, /easyWrongTap/)
-assert.match(matchSrc, /EASY\.lockIn/)
+assert.match(matchSrc, /EASY\.holdNext/)
 assert.doesNotMatch(matchSrc, /A claim is the main idea we hold to be true/)
 assert.match(cssSrc, /\.word-school/)
 assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
@@ -2230,6 +2275,18 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(easyLead('fg-kalam', 'x'), 'Keep the beginning argument. Toss the rest.')
 }
 
+assert.match(
+  latestChange(APP_VERSION).items.join('\n'),
+  /Easy Match stop \+ shorter Hold why chips for Plain 5\/5/,
+)
+assert.match(
+  latestChange(APP_VERSION).items.join('\n'),
+  /Hold next or Home/,
+)
+assert.match(
+  latestChange(APP_VERSION).items.join('\n'),
+  /The father hugs him first/,
+)
 assert.match(
   latestChange(APP_VERSION).items.join('\n'),
   /Tap the line you kept/,
