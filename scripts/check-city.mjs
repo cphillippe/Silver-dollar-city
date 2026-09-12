@@ -849,7 +849,6 @@ assert.deepEqual(defendPads(empty), ['porch'])
 assert.match(hubSrc, /Hold the night/)
 assert.match(hubSrc, /night-watch/)
 assert.match(hubSrc, /Held lines turn the night toward heaven/)
-assert.match(hubSrc, /EASY.nightDo/)
 assert.match(hubSrc, /Why locked/)
 assert.match(hubSrc, /street-lock/)
 assert.doesNotMatch(hubSrc, /standing lot/i)
@@ -1055,7 +1054,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.41')
+assert.equal(APP_VERSION, '1.4.42')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1321,7 +1320,6 @@ assert.match(
   /createPortal/,
 )
 assert.match(cssSrc, /position:\s*fixed/)
-assert.match(hubSrc, /EASY\.nightDo/)
 assert.match(cssSrc, /mind-map-dock/)
 assert.match(cssSrc, /link-dock/)
 assert.match(cssSrc, /cta-dock/)
@@ -1650,12 +1648,45 @@ assert.doesNotMatch(hubSrc, /tap-next-dock/)
 assert.match(hubSrc, /is-easy-home/)
 assert.match(hubSrc, /EASY\.townSoon/)
 assert.match(hubSrc, /EASY\.saved/)
-assert.match(hubSrc, /EASY\.nightDo/)
+assert.match(hubSrc, /EASY\.matchCta/)
+assert.match(hubSrc, /EASY\.nightSoon/)
+{
+  const easyHome = hubSrc.match(/if \(easy\) \{\s*return \(([\s\S]*?)\n  \}/)?.[1] ?? ''
+  assert.match(easyHome, /EASY\.matchCta/)
+  assert.match(easyHome, /EASY\.saved/)
+  assert.match(easyHome, /EASY\.townSoon/)
+  assert.match(easyHome, /EASY\.nightSoon/)
+  assert.doesNotMatch(easyHome, /EASY\.nightDo/)
+  assert.doesNotMatch(easyHome, /name: 'defend'/)
+  assert.doesNotMatch(easyHome, /className="btn gold xl"[\s\S]*Night Watch/)
+}
 assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /EASY\.townSoon/,
 )
+assert.match(
+  readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
+  /EASY\.nightSoon/,
+)
 assert.match(latestChange(APP_VERSION).items.join('\n'), /Town \(soon\)/)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Night Watch hidden until Match→Hold/)
+assert.equal(EASY.nightSoon, 'Night Watch (soon)')
+assert.match(
+  readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
+  /easy \? \{ name: 'journal' \} : \{ name: 'hub' \}/,
+)
+assert.doesNotMatch(
+  readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
+  /name: 'defend'/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/Profile.tsx', import.meta.url), 'utf8'),
+  /EASY\.nightSoon/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/Profile.tsx', import.meta.url), 'utf8'),
+  /easy \? \(/,
+)
 assert.match(cssSrc, /is-easy-home/)
 assert.match(cssSrc, /easy-core/)
 assert.match(hubSrc, /EASY\.connectLink/)

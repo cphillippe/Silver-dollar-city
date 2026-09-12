@@ -33,6 +33,7 @@ export const EASY = {
   manage: 'Manage',
   matchCta: 'Match',
   nightDo: 'Night Watch',
+  nightSoon: 'Night Watch (soon)',
   nightTap: 'Tap the face.',
   nightLead: 'Tap the face six times.',
   nightMiss: 'Wrong — tap the glowing face',
