@@ -8,6 +8,19 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.43',
+    title: 'Easy core loop',
+    when: '2026-09-12',
+    items: [
+      'Easy: Night Watch fully hidden until Match→Hold solid',
+      'Easy home is Match and Hold. Town (soon) waits under Settings → More. Night Watch stays on Hard.',
+      'Easy home, nav, and tree say Hold — saved lines stay a subtitle, not the only name.',
+      'Easy Hold is kid-plain: Tap the line you kept. then Tap why this is true. One prompt on screen — no duplicate. A reason is why this is true — taught once, then the chrome stays plain. Keep this still sits under the reason.',
+      'Easy why-options stay short. Luke 15: The father hugs him first. The older brother is home — and angry. Wrong: The older brother is the hero just for staying.',
+      'Match stays sentence → place → person with a named miss and Next.',
+    ],
+  },
+  {
     version: '1.4.42',
     title: 'Easy core loop',
     when: '2026-09-12',
