@@ -839,6 +839,16 @@ const burstSrc = readFileSync(
   'utf8',
 )
 assert.match(burstSrc, /Locked!/)
+assert.match(burstSrc, /win-stamp is-badge/)
+{
+  const stampCss = cssSrc.match(/\/\* Overlay label[\s\S]*?\.win-stamp \{[\s\S]*?\n\}/)?.[0] ?? ''
+  assert.match(stampCss, /\.win-stamp \{/)
+  assert.doesNotMatch(
+    stampCss,
+    /#e09412|candy-lip|#fff6b8/,
+    'win stamp must not share primary-button gold fill / candy lip',
+  )
+}
 assert.match(juiceSrc, /WIN_BURST_MS = 1100/)
 assert.match(juiceSrc, /useJuiceHandoff/)
 
@@ -1070,7 +1080,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.50')
+assert.equal(APP_VERSION, '1.4.51')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1285,6 +1295,7 @@ assert.match(linkPlaySrc, /This link is complete/)
 assert.match(linkPlaySrc, /WinBurst/)
 assert.match(linkPlaySrc, /EASY\.matchDone/)
 assert.match(linkPlaySrc, /EASY\.holdNext/)
+assert.match(linkPlaySrc, /btn primary xl link-next/)
 assert.match(linkPlaySrc, /EASY\.home/)
 assert.match(linkPlaySrc, /onEasyStop/)
 assert.match(linkPlaySrc, /kind === 'idea'/)
@@ -1960,7 +1971,8 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
   assert.equal(linkPicture(lantern, STREET_CHALLENGE).plotId, 'porch')
   assert.equal(linkPicture(seeds, STREET_CHALLENGE).art, undefined)
   assert.doesNotMatch(STREET_CHALLENGE.context, /maybe|perhaps God|if God exists/i)
-  assert.match(latestChange(APP_VERSION).items.join('\n'), /Full Hard street — all game facts/)
+  assert.match(latestChange(APP_VERSION).items.join('\n'), /MATCHED! is a badge/)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Full Hard street — all game facts/)
 assert.match(latestChange(APP_VERSION).items.join('\n'), /tonight’s street/)
 assert.match(latestChange(APP_VERSION).items.join('\n'), /gold CTA is Read today’s story/)
 }
