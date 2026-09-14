@@ -51,7 +51,7 @@ import {
   WATCH_TOOLS,
 } from '../src/lib/watchTools.ts'
 import { ideaUnlocked, mindGraph, mindMapHasLit } from '../src/lib/mindMap.ts'
-import { easyStreetChallenge, linkCaption, linkClue, linkMiss, linkPicture, STREET_CHALLENGE, STREET_LIGHTS, STREET_TRIPLES, streetTripleForLine, STREET_WHYS } from '../src/content/links.ts'
+import { easyStreetChallenge, linkCaption, linkClue, linkMiss, linkPicture, STREET_CHALLENGE, STREET_FACT_IDS, STREET_LIGHTS, STREET_SKIP_IDS, STREET_TRIPLES, streetTripleForLine, STREET_WHYS } from '../src/content/links.ts'
 import { firstGate } from '../src/content/firstGate.ts'
 import { easyPlaceSub, LOT_STORY, TOWN_PATH_EASY, TOWN_PATH_HARD } from '../src/content/lots.ts'
 import {
@@ -1070,7 +1070,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.48')
+assert.equal(APP_VERSION, '1.4.49')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1185,7 +1185,10 @@ assert.match(cssSrc, /town-tools/)
 assert.equal(STREET_CHALLENGE.kind, 'link')
 assert.equal(STREET_CHALLENGE.id, 'ln-street')
 assert.deepEqual([...STREET_LIGHTS], ['ph-road', 'wb-creed', 'daily-lantern'])
-assert.equal(STREET_CHALLENGE.triples.length, 3)
+assert.equal(STREET_CHALLENGE.triples.length, STREET_TRIPLES.length)
+assert.ok(STREET_CHALLENGE.triples.length > 3, 'Hard street is more than the early three triples')
+assert.equal(STREET_CHALLENGE.triples.length, 35)
+assert.equal(STREET_FACT_IDS.length, 35)
 assert.equal(earnedTier('porch', empty), 1)
 assert.equal(earnedTier('porch', afterDaily), 2)
 assert.equal(earnedTier('hollow', hollowTwice), 3)
@@ -1284,7 +1287,7 @@ assert.match(linkPlaySrc, /EASY\.matchDone/)
 assert.match(linkPlaySrc, /EASY\.holdNext/)
 assert.match(linkPlaySrc, /EASY\.home/)
 assert.match(linkPlaySrc, /onEasyStop/)
-assert.match(linkPlaySrc, /easy \|\| done/)
+assert.match(linkPlaySrc, /kind === 'idea'/)
 assert.doesNotMatch(linkPlaySrc, /setStep\('idea'\)\s*\n\s*setScreen\('choose'\)/)
 assert.match(linkPlaySrc, /wizard-step/)
 assert.match(linkPlaySrc, /EASY\.connectLink/)
@@ -1365,11 +1368,13 @@ assert.doesNotMatch(linkPlaySrc, /Those don/)
   assert.equal(linkPicture(sky, easyStreetChallenge('daily-stars')).plotId, 'observatory')
   assert.equal(linkPicture(gate, easyStreetChallenge('daily-cosmos')).plotId, 'gate')
   assert.equal(linkPicture(ridge, easyStreetChallenge('hl-moral')).plotId, 'lookout')
-  assert.equal(father, undefined)
+  assert.equal(father?.evidenceId, 'ph-father')
   assert.match(linkClue('father-hollow', 'idea'), /father/)
   assert.match(linkClue('nora-sky', 'place'), /Sky Watch/)
   assert.match(linkMiss('father-hollow', 'idea'), /father runs with mercy/)
   assert.doesNotMatch(plainFor('daily-stars')?.teach ?? '', /multiverse/)
+  assert.doesNotMatch(STREET_WHYS['nora-sky'].hard, /multiverse/)
+  assert.match(STREET_WHYS['tuning-sky'].hard, /Designer/)
 }
 assert.match(
   readFileSync(new URL('../src/components/MindMap.tsx', import.meta.url), 'utf8'),
@@ -1866,8 +1871,53 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
     walked = [...walked, id]
   }
   assert.equal(easyLoopLine({ easyTaught: walked, easyHeld: walked }), 'ph-road')
-  assert.equal(STREET_TRIPLES.length, 9)
-  assert.equal(STREET_CHALLENGE.triples.length, 3)
+  assert.equal(STREET_TRIPLES.length, 35)
+  assert.equal(STREET_CHALLENGE.triples.length, 35)
+  assert.equal(STREET_CHALLENGE.nodes.length, STREET_TRIPLES.length + 12)
+  const skip = new Set(STREET_SKIP_IDS)
+  const onStreet = new Set(STREET_FACT_IDS)
+  for (const id of STREET_SKIP_IDS) {
+    assert.equal(onStreet.has(id), false, `${id} stays off the street`)
+  }
+  for (const id of allEvidenceIds()) {
+    if (skip.has(id)) continue
+    assert.ok(onStreet.has(id), `${id} belongs on the street`)
+    const tripleId = streetTripleForLine(id)
+    assert.notEqual(tripleId, undefined, `${id} triple`)
+    const triple = STREET_TRIPLES.find((item) => item.id === tripleId)
+    assert.ok(triple, `${id} street triple`)
+    assert.ok(
+      STREET_CHALLENGE.nodes.some((node) => node.id === triple.ideaId && node.evidenceId === id),
+      `${id} Hard idea node`,
+    )
+    assert.ok(STREET_WHYS[tripleId]?.hard, `${id} Hard why`)
+    assert.equal(easyStreetChallenge(id).triples[0]?.id, tripleId)
+  }
+  assert.equal(streetTripleForLine('ph-seeds'), 'seeds-hollow')
+  assert.equal(streetTripleForLine('wb-early'), 'early-bench')
+  assert.equal(streetTripleForLine('ob-tuning'), 'tuning-sky')
+  assert.equal(streetTripleForLine('fg-mover'), 'mover-gate')
+  assert.equal(streetTripleForLine('hl-beauty'), 'beauty-lookout')
+  assert.equal(streetTripleForLine('daily-neighbor'), 'neighbor-porch')
+  assert.equal(streetTripleForLine('daily-names'), 'names-bench')
+  assert.equal(streetTripleForLine('daily-life'), 'daily-life-sky')
+  assert.equal(streetTripleForLine('daily-scroll'), 'scroll-gate')
+  assert.equal(streetTripleForLine('daily-grace'), 'grace-lookout')
+  const seeds = STREET_CHALLENGE.nodes.find((node) => node.evidenceId === 'ph-seeds')
+  const creed = STREET_CHALLENGE.nodes.find((node) => node.evidenceId === 'wb-creed')
+  const tuning = STREET_CHALLENGE.nodes.find((node) => node.evidenceId === 'ob-tuning')
+  const mover = STREET_CHALLENGE.nodes.find((node) => node.evidenceId === 'fg-mover')
+  const beauty = STREET_CHALLENGE.nodes.find((node) => node.evidenceId === 'hl-beauty')
+  const lantern = STREET_CHALLENGE.nodes.find((node) => node.evidenceId === 'daily-lantern')
+  assert.equal(linkPicture(seeds, STREET_CHALLENGE).plotId, 'hollow')
+  assert.equal(linkPicture(creed, STREET_CHALLENGE).plotId, 'bench')
+  assert.equal(linkPicture(tuning, STREET_CHALLENGE).plotId, 'observatory')
+  assert.equal(linkPicture(mover, STREET_CHALLENGE).plotId, 'gate')
+  assert.equal(linkPicture(beauty, STREET_CHALLENGE).plotId, 'lookout')
+  assert.equal(linkPicture(lantern, STREET_CHALLENGE).plotId, 'porch')
+  assert.equal(linkPicture(seeds, STREET_CHALLENGE).art, undefined)
+  assert.doesNotMatch(STREET_CHALLENGE.context, /maybe|perhaps God|if God exists/i)
+  assert.match(latestChange(APP_VERSION).items.join('\n'), /Full Hard street — all game facts/)
 }
 {
   const settingsSrc = readFileSync(
@@ -1923,6 +1973,10 @@ assert.match(
 assert.match(
   readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
   /easyStreetChallenge/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
+  /STREET_PLACE_WHYS/,
 )
 assert.match(
   readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),

@@ -145,7 +145,7 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek, onEasyStop }: Li
     const pool = challenge.nodes.filter((node) => node.kind === kind)
     const hit = pool.find((node) => node.id === want)
     const decoys = shuffle(pool.filter((node) => node.id !== want))
-    const take = easy ? decoys.slice(0, 1) : decoys
+    const take = easy ? decoys.slice(0, 1) : kind === 'idea' ? decoys.slice(0, 3) : decoys
     return shuffle([hit, ...take].filter((node): node is LinkNode => Boolean(node)))
   }, [challenge.nodes, currentTriple?.id, step, easy])
 
