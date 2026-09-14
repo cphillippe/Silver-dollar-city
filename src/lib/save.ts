@@ -80,6 +80,9 @@ export function emptyProgress(): ProgressState {
     easyHeld: [],
     cityBuilt: emptyCityBuilt(),
     streetLinked: [],
+    lessonTier: {},
+    lessonScore: {},
+    tierTaught: {},
   }
 }
 
@@ -162,6 +165,35 @@ function asStringMap(value: unknown): Record<string, string> {
   return next
 }
 
+function asTierMap(value: unknown): Record<string, 'easy' | 'medium' | 'hard'> {
+  const next = Object.create(null) as Record<string, 'easy' | 'medium' | 'hard'>
+  if (!isPlainObject(value)) return next
+  let count = 0
+  for (const [key, raw] of Object.entries(value)) {
+    if (count >= SAVE_MAX_MAP) break
+    if (isDangerousKey(key) || !isSafeId(key)) continue
+    if (raw === 'easy' || raw === 'medium' || raw === 'hard') {
+      next[key] = raw
+      count += 1
+    }
+  }
+  return next
+}
+
+function asScoreMap(value: unknown): Record<string, number> {
+  const next = Object.create(null) as Record<string, number>
+  if (!isPlainObject(value)) return next
+  let count = 0
+  for (const [key, raw] of Object.entries(value)) {
+    if (count >= SAVE_MAX_MAP) break
+    if (isDangerousKey(key) || !isSafeId(key)) continue
+    next[key] = finiteInt(raw, 0, 15, 0)
+    if (next[key] === 0) delete next[key]
+    else count += 1
+  }
+  return next
+}
+
 function asStarMap(value: unknown): Record<string, StarCount> {
   const next = Object.create(null) as Record<string, StarCount>
   if (!isPlainObject(value)) return next
@@ -219,6 +251,9 @@ export function normalizeProgress(parsed: Partial<ProgressState> | ProgressState
     easyHeld: asStringArray(parsed.easyHeld),
     cityBuilt: emptyCityBuilt(),
     streetLinked: asStringArray(parsed.streetLinked),
+    lessonTier: asTierMap(parsed.lessonTier),
+    lessonScore: asScoreMap(parsed.lessonScore),
+    tierTaught: asTierMap(parsed.tierTaught),
   }
   base.memory = migrateMemory({ ...base, memory: parsed.memory ?? {} })
   base.cityBuilt =

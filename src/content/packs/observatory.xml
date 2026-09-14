@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<area schemaVersion="3" id="observatory" order="3" title="Sky Watch" shortTitle="Sky" subtitle="A sky that did not have to be this way" icon="star" accent="#7f9ec7">
+  <blurb>Science maps how the world runs. It does not forbid the question why.</blurb>
+  <intro>Above the ridge a small observatory points at winter stars. The question here is not “Does a lab experiment prove God?” That would confuse the tools.</intro>
+  <intro>The question is: what kind of universe is this? Why are its laws hospitable to life? Why is there a concrete world with laws at all?</intro>
+  <intro>Fine-tuning, origins, and “something rather than nothing” begin from public facts and make a case for God. Hold the claim. Deploy it. The sky is not a shrug.</intro>
+  <lesson id="ob-tuning" title="Narrow ranges" idea="the universe is finely tuned for life — that fit points to a Designer">
+    <claim>The universe is finely tuned for life — that fit points to a Designer.</claim>
+    <plain>The universe is finely tuned for life — that fit points to a Designer.</plain>
+    <source>Fine-tuning of physical constants and initial conditions (e.g. cosmological constant; a low-entropy start — initial condition, not another force dial).</source>
+    <loci place="Sky Watch" person="Nora Skye" plotId="observatory" who="nora" />
+    <journal title="The universe is finely tuned for life" kicker="Sky Watch">
+      <body>The universe is finely tuned for life — that fit points to a Designer.</body>
+      <body>Life-permitting ranges are extravagantly narrow across independent parameters; design predicts a habitable cosmos, blank chance does not.</body>
+      <cite>Fine-tuning of physical constants and initial conditions (e.g. cosmological constant; a low-entropy start — an initial condition, not another force dial).</cite>
+      <cite>Aquinas, ST I, q.2, a.3 (Fifth Way); Psalm 19; Romans 1</cite>
+      <cite>Robin Collins, The Fine-Tuning Design Argument</cite>
+    </journal>
+    <easy points="10" easyOrder="16">
+      <learn>Life needs very tight numbers: how fast space expands, how atoms stick, how tidy the start was. Design predicts a world we can live in. Blind chance does not.</learn>
+      <match sentence="The universe is finely tuned for life — that fit points to a Designer." place="Sky Watch" person="Nora Skye" />
+      <hold levelUpTo="medium" onFail="easy">
+        <why>Life needs tight numbers — chance does not explain that.</why>
+        <claimMiss>Fine-tuning is a rumor with no name in science.</claimMiss>
+        <claimMiss>A habitable cosmos needs no explanation at all.</claimMiss>
+        <whyMiss>Life-permitting ranges are wide; blank chance predicts a habitable cosmos just as well.</whyMiss>
+        <whyMiss>The fittedness is only a rumor in the numbers.</whyMiss>
+      </hold>
+    </easy>
+    <medium points="12">
+      <learn>Life-permitting ranges are extravagantly narrow across independent parameters; design predicts a habitable cosmos, blank chance does not.</learn>
+      <match sentence="The universe is finely tuned for life — that fit points to a Designer." place="Sky Watch" person="Nora Skye" />
+      <hold levelUpTo="hard" onFail="easy">
+        <why>Life-permitting ranges are extravagantly narrow across independent parameters; design predicts a habitable cosmos, blank chance does not.</why>
+        <claimMiss>Fine-tuning is a rumor with no name in science.</claimMiss>
+        <claimMiss>A habitable cosmos needs no explanation at all.</claimMiss>
+        <whyMiss>Life-permitting ranges are wide; blank chance predicts a habitable cosmos just as well.</whyMiss>
+        <whyMiss>The fittedness is only a rumor in the numbers.</whyMiss>
+      </hold>
+    </medium>
+    <hard points="15">
+      <learn>Design predicts this cosmos: cosmological constant, nuclear binding, a low-entropy start, gravity against electromagnetism — extravagantly narrow, habitable. That fit points to a Designer.</learn>
+      <match sentence="The universe is finely tuned for life — that fit points to a Designer." place="Sky Watch" person="Nora Skye" />
+      <hold onFail="easy">
+        <why>Life-permitting ranges are extravagantly narrow across independent parameters; design predicts a habitable cosmos, blank chance does not.</why>
+        <claimMiss>Fine-tuning is a rumor with no name in science.</claimMiss>
+        <claimMiss>A habitable cosmos needs no explanation at all.</claimMiss>
+        <whyMiss>Life-permitting ranges are wide; blank chance predicts a habitable cosmos just as well.</whyMiss>
+        <whyMiss>The fittedness is only a rumor in the numbers.</whyMiss>
+      </hold>
+    </hard>
+  </lesson>
+  <lesson id="ob-design" title="A habitable cosmos" idea="fine-tuning is best explained by a mind that intended a habitable world">
+    <claim>Fine-tuning is best explained by a mind that intended a habitable world.</claim>
+    <plain>Fine-tuning is best explained by a mind that intended a habitable world.</plain>
+    <source>Likelihood / fine-tuning arguments (Collins). A low-entropy start is an initial condition, not another force dial.</source>
+    <loci place="Sky Watch" person="Nora Skye" plotId="observatory" who="nora" />
+    <journal title="A mind that intended a habitable world" kicker="Sky Watch">
+      <body>Fine-tuning is best explained by a mind that intended a habitable world.</body>
+      <body>Life-permitting ranges are extravagantly narrow; a Designer who wants observers leads us to expect that fit — blank indifference does not.</body>
+      <cite>Likelihood / fine-tuning arguments (Collins). A low-entropy start is an initial condition, not another force dial.</cite>
+      <cite>Aquinas, ST I, q.2, a.3 (Fifth Way); Psalm 19; Romans 1</cite>
+    </journal>
+    <easy points="10" easyOrder="17">
+      <learn>The ranges are extravagantly narrow. A Designer who wants observers leads us to expect that fit. A world that does not care does not.</learn>
+      <match sentence="Fine-tuning is best explained by a mind that intended a habitable world." place="Sky Watch" person="Nora Skye" />
+      <hold levelUpTo="medium" onFail="easy">
+        <why>A Designer who wants people fits these numbers.</why>
+        <claimMiss>A habitable cosmos needs no Designer.</claimMiss>
+        <claimMiss>Fine-tuning already proves a particular gospel.</claimMiss>
+        <whyMiss>A mind wanting observers would not expect life-permitting numbers.</whyMiss>
+        <whyMiss>Likelihood arguments are automatically dishonest.</whyMiss>
+      </hold>
+    </easy>
+    <medium points="12">
+      <learn>Life-permitting ranges are extravagantly narrow; a Designer who wants observers leads us to expect that fit — blank indifference does not.</learn>
+      <match sentence="Fine-tuning is best explained by a mind that intended a habitable world." place="Sky Watch" person="Nora Skye" />
+      <hold levelUpTo="hard" onFail="easy">
+        <why>Life-permitting ranges are extravagantly narrow; a Designer who wants observers leads us to expect that fit — blank indifference does not.</why>
+        <claimMiss>A habitable cosmos needs no Designer.</claimMiss>
+        <claimMiss>Fine-tuning already proves a particular gospel.</claimMiss>
+        <whyMiss>A mind wanting observers would not expect life-permitting numbers.</whyMiss>
+        <whyMiss>Likelihood arguments are automatically dishonest.</whyMiss>
+      </hold>
+    </medium>
+    <hard points="15">
+      <learn>A Designer who wants observers predicts this habitable fit. The narrow ranges are the evidence. Hold the Designer.</learn>
+      <match sentence="Fine-tuning is best explained by a mind that intended a habitable world." place="Sky Watch" person="Nora Skye" />
+      <hold onFail="easy">
+        <why>Life-permitting ranges are extravagantly narrow; a Designer who wants observers leads us to expect that fit — blank indifference does not.</why>
+        <claimMiss>A habitable cosmos needs no Designer.</claimMiss>
+        <claimMiss>Fine-tuning already proves a particular gospel.</claimMiss>
+        <whyMiss>A mind wanting observers would not expect life-permitting numbers.</whyMiss>
+        <whyMiss>Likelihood arguments are automatically dishonest.</whyMiss>
+      </hold>
+    </hard>
+  </lesson>
+  <lesson id="ob-leibniz" title="Something rather than nothing" idea="physics maps how the world runs; it does not finish why">
+    <claim>Why is there something rather than nothing remains after a cosmological model.</claim>
+    <plain>Physics maps how the world runs. It does not finish why there is a world.</plain>
+    <source>Leibniz; the vacuum/nothing distinction</source>
+    <loci place="Sky Watch" person="Nora Skye" plotId="observatory" who="nora" />
+    <journal title="The question beneath physics" kicker="Sky Watch">
+      <body>Leibniz’s question — why is there something rather than nothing? — is not retired by a successful cosmological model. Models describe a world that is already given.</body>
+      <body>When popular writing says the universe came from “nothing,” check whether the word still names a vacuum, a law, or a formalism. Those are somethings. The metaphysical question remains on the table.</body>
+      <cite>Leibniz, “On the Ultimate Origination of Things”</cite>
+      <cite>Standard distinction between physical vacua and metaphysical nothing</cite>
+    </journal>
+    <easy points="10" easyOrder="18">
+      <learn>A hot early state is still something. Empty space in a lab is still something. The question remains: why is there anything at all?</learn>
+      <match sentence="Why is there something rather than nothing remains after a cosmological model." place="Sky Watch" person="Nora Skye" />
+      <hold levelUpTo="medium" onFail="easy">
+        <why>A model still starts with something there.</why>
+        <claimMiss>A successful model retires the metaphysical question.</claimMiss>
+        <claimMiss>“Nothing” in popular writing always means metaphysical nothing.</claimMiss>
+        <whyMiss>Laws and vacua are not somethings.</whyMiss>
+        <whyMiss>The question only applies to Tuesdays.</whyMiss>
+      </hold>
+    </easy>
+    <medium points="12">
+      <learn>Models describe a world already given; a physical “vacuum” is still something.</learn>
+      <match sentence="Why is there something rather than nothing remains after a cosmological model." place="Sky Watch" person="Nora Skye" />
+      <hold levelUpTo="hard" onFail="easy">
+        <why>Models describe a world already given; a physical “vacuum” is still something.</why>
+        <claimMiss>A successful model retires the metaphysical question.</claimMiss>
+        <claimMiss>“Nothing” in popular writing always means metaphysical nothing.</claimMiss>
+        <whyMiss>Laws and vacua are not somethings.</whyMiss>
+        <whyMiss>The question only applies to Tuesdays.</whyMiss>
+      </hold>
+    </medium>
+    <hard points="15">
+      <learn>Fine-tuning and “why anything?” are siblings, not twins. One asks why this world’s numbers permit us; the other asks why there is a world.</learn>
+      <match sentence="Why is there something rather than nothing remains after a cosmological model." place="Sky Watch" person="Nora Skye" />
+      <hold onFail="easy">
+        <why>Models describe a world already given; a physical “vacuum” is still something.</why>
+        <claimMiss>A successful model retires the metaphysical question.</claimMiss>
+        <claimMiss>“Nothing” in popular writing always means metaphysical nothing.</claimMiss>
+        <whyMiss>Laws and vacua are not somethings.</whyMiss>
+        <whyMiss>The question only applies to Tuesdays.</whyMiss>
+      </hold>
+    </hard>
+  </lesson>
+  <lesson id="ob-life" title="The threshold of life" idea="life’s specified information is a mark of mind">
+    <claim>Life’s specified information is a mark of mind.</claim>
+    <plain>Life’s specified information is a mark of mind.</plain>
+    <source>Abiogenesis as an open program; Genesis 1 as theology</source>
+    <loci place="Sky Watch" person="Nora Skye" plotId="observatory" who="nora" />
+    <journal title="Life’s open threshold" kicker="Sky Watch">
+      <body>Life’s specified information is a mark of mind. Cells require coordinated function. That is not a rumor; it is biology.</body>
+      <body>Treat the unfinished story as a place for wonder and for more work — and as a mark of mind. Do not stop the lab. Do not shrug the information away.</body>
+      <cite>Contemporary abiogenesis research as an open program</cite>
+      <cite>Genesis 1 as theological, not a lab protocol</cite>
+    </journal>
+    <easy points="10" easyOrder="19">
+      <learn>Cells store instructions and run a coordinated life. That looks like the work of mind. Wonder is rational. So is more lab work. Do not shrug it away.</learn>
+      <match sentence="Life’s specified information is a mark of mind." place="Sky Watch" person="Nora Skye" />
+      <hold levelUpTo="medium" onFail="easy">
+        <why>Cells store info that looks like a mind’s work.</why>
+        <claimMiss>A flask has already demonstrated a miracle.</claimMiss>
+        <claimMiss>Cells require no coordinated information.</claimMiss>
+        <whyMiss>The unfinished story means we should end research.</whyMiss>
+        <whyMiss>Genesis 1 is a lab protocol.</whyMiss>
+      </hold>
+    </easy>
+    <medium points="12">
+      <learn>Cells store coordinated information; that looks like the work of a mind — wonder is rational, and so is more work.</learn>
+      <match sentence="Life’s specified information is a mark of mind." place="Sky Watch" person="Nora Skye" />
+      <hold levelUpTo="hard" onFail="easy">
+        <why>Cells store coordinated information; that looks like the work of a mind — wonder is rational, and so is more work.</why>
+        <claimMiss>A flask has already demonstrated a miracle.</claimMiss>
+        <claimMiss>Cells require no coordinated information.</claimMiss>
+        <whyMiss>The unfinished story means we should end research.</whyMiss>
+        <whyMiss>Genesis 1 is a lab protocol.</whyMiss>
+      </hold>
+    </medium>
+    <hard points="15">
+      <learn>Life’s information looks like the work of mind. Wonder is rational. So is more work. Do not trade the mark for a shrug.</learn>
+      <match sentence="Life’s specified information is a mark of mind." place="Sky Watch" person="Nora Skye" />
+      <hold onFail="easy">
+        <why>Cells store coordinated information; that looks like the work of a mind — wonder is rational, and so is more work.</why>
+        <claimMiss>A flask has already demonstrated a miracle.</claimMiss>
+        <claimMiss>Cells require no coordinated information.</claimMiss>
+        <whyMiss>The unfinished story means we should end research.</whyMiss>
+        <whyMiss>Genesis 1 is a lab protocol.</whyMiss>
+      </hold>
+    </hard>
+  </lesson>
+  <lesson id="daily-stars" title="Night air" idea="the heavens already speak of a Maker">
+    <claim>The heavens already speak of a Maker; fine-tuning fits that voice.</claim>
+    <plain>The heavens already speak of a Maker. Fine-tuning fits that voice.</plain>
+    <source>Psalm 19:1–4; Romans 1:20</source>
+    <loci place="Sky Watch" person="Nora Skye" plotId="observatory" who="nora" />
+    <easy points="10" easyOrder="20">
+      <learn>Psalm 19 and Romans 1 treat the sky as speech. The heavens already speak of a Maker.</learn>
+      <match sentence="The heavens already speak of a Maker; fine-tuning fits that voice." place="Sky Watch" person="Nora Skye" />
+      <hold levelUpTo="medium" onFail="easy">
+        <why>The sky speaks of a Maker — the numbers fit that.</why>
+        <claimMiss>The heavens are silent about a Maker.</claimMiss>
+        <claimMiss>Fine-tuning contradicts the psalm.</claimMiss>
+        <whyMiss>Scripture treats the sky as decoration only.</whyMiss>
+        <whyMiss>Design inference and “the heavens declare” cannot share a grain.</whyMiss>
+      </hold>
+    </easy>
+    <medium points="12">
+      <learn>Scripture treats the created order as intelligible testimony — design inference and “the heavens declare” land in the same grain.</learn>
+      <match sentence="The heavens already speak of a Maker; fine-tuning fits that voice." place="Sky Watch" person="Nora Skye" />
+      <hold levelUpTo="hard" onFail="easy">
+        <why>Scripture treats the created order as intelligible testimony — design inference and “the heavens declare” land in the same grain.</why>
+        <claimMiss>The heavens are silent about a Maker.</claimMiss>
+        <claimMiss>Fine-tuning contradicts the psalm.</claimMiss>
+        <whyMiss>Scripture treats the sky as decoration only.</whyMiss>
+        <whyMiss>Design inference and “the heavens declare” cannot share a grain.</whyMiss>
+      </hold>
+    </medium>
+    <hard points="15">
+      <learn>The heavens declare the glory of God, and the sky above proclaims his handiwork.</learn>
+      <match sentence="The heavens already speak of a Maker; fine-tuning fits that voice." place="Sky Watch" person="Nora Skye" />
+      <hold onFail="easy">
+        <why>Scripture treats the created order as intelligible testimony — design inference and “the heavens declare” land in the same grain.</why>
+        <claimMiss>The heavens are silent about a Maker.</claimMiss>
+        <claimMiss>Fine-tuning contradicts the psalm.</claimMiss>
+        <whyMiss>Scripture treats the sky as decoration only.</whyMiss>
+        <whyMiss>Design inference and “the heavens declare” cannot share a grain.</whyMiss>
+      </hold>
+    </hard>
+  </lesson>
+  <lesson id="daily-life" title="Not cheap" idea="living cells are not a cheap accident">
+    <claim>Life, place, and mind are not cheap facts.</claim>
+    <plain>Life, place, and mind are not cheap facts.</plain>
+    <source>Acts 17:24–25</source>
+    <loci place="Sky Watch" person="Nora Skye" plotId="observatory" who="nora" />
+    <easy points="10" easyOrder="21">
+      <learn>Copying cells, a habitable band, and a mind that can do science all look given — the marks of a Maker.</learn>
+      <match sentence="Life, place, and mind are not cheap facts." place="Sky Watch" person="Nora Skye" />
+      <hold levelUpTo="medium" onFail="easy">
+        <why>Life, a livable world, and minds look given.</why>
+        <claimMiss>Chemistry is easy to dismiss.</claimMiss>
+        <claimMiss>“It happened” is automatically the last word.</claimMiss>
+        <whyMiss>A habitable band is an unremarkable accident with no question.</whyMiss>
+        <whyMiss>Minds that do science need no home in the story.</whyMiss>
+      </hold>
+    </easy>
+    <medium points="12">
+      <learn>Copying cells, a habitable band, and a mind that can do science all look given — the marks of a Maker.</learn>
+      <match sentence="Life, place, and mind are not cheap facts." place="Sky Watch" person="Nora Skye" />
+      <hold levelUpTo="hard" onFail="easy">
+        <why>Copying cells, a habitable band, and a mind that can do science all look given — the marks of a Maker.</why>
+        <claimMiss>Chemistry is easy to dismiss.</claimMiss>
+        <claimMiss>“It happened” is automatically the last word.</claimMiss>
+        <whyMiss>A habitable band is an unremarkable accident with no question.</whyMiss>
+        <whyMiss>Minds that do science need no home in the story.</whyMiss>
+      </hold>
+    </medium>
+    <hard points="15">
+      <learn>Acts 17:24–25: the God who made the world… gives to all mankind life and breath and everything.</learn>
+      <match sentence="Life, place, and mind are not cheap facts." place="Sky Watch" person="Nora Skye" />
+      <hold onFail="easy">
+        <why>Copying cells, a habitable band, and a mind that can do science all look given — the marks of a Maker.</why>
+        <claimMiss>Chemistry is easy to dismiss.</claimMiss>
+        <claimMiss>“It happened” is automatically the last word.</claimMiss>
+        <whyMiss>A habitable band is an unremarkable accident with no question.</whyMiss>
+        <whyMiss>Minds that do science need no home in the story.</whyMiss>
+      </hold>
+    </hard>
+  </lesson>
+</area>

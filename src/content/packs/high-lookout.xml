@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<area schemaVersion="3" id="high-lookout" order="5" title="Meaning Ridge" shortTitle="Meaning" subtitle="Mind, duty, meaning, and beauty" icon="peak" accent="#b86b8a">
+  <blurb>The trail turns inward: why do we know good, and why does beauty wound us?</blurb>
+  <intro>The path ends — and does not end — on a lookout where the whole town lies below. Here the clues are closer than stars: conscience, consciousness, the ache for meaning, the strange authority of beauty.</intro>
+  <intro>These are not laboratory instruments. They are the conditions under which any instrument is used. Ignore them, and the case for God is thinner than it should be. Inflate them, and you preach at a wound instead of thinking with it.</intro>
+  <intro>Take each as a signpost. Signposts do not drag you. They tell you a country may be real.</intro>
+  <lesson id="hl-moral" title="The grain of duty" idea="duty feels real, not like a taste for tea">
+    <claim>Duty presents itself as more than taste — and theism is a natural home for that.</claim>
+    <plain>Duty feels real — not like a taste for tea.</plain>
+    <source>Romans 2:14–15</source>
+    <loci place="Meaning Ridge" person="Hope Ridge" plotId="lookout" who="hope" />
+    <journal title="The moral grain of the world" kicker="Meaning Ridge">
+      <body>Duty presents itself as more than taste. A good God is the ground of a good law — the home that fits. Romans 2 treats that knowledge as widely shared, which is why injustice still has a name.</body>
+      <body>Romans 2:14–15 treats moral knowledge as widely shared. That is why strangers can still accuse one another of injustice and expect the accusation to mean something.</body>
+      <cite>Romans 2:14–15</cite>
+      <cite>Aquinas, ST I-II, q.91</cite>
+      <cite>Augustine, City of God XIX</cite>
+    </journal>
+    <easy points="10" easyOrder="29">
+      <learn>Duty is more than a taste. Romans 2 says strangers already know enough to accuse one another.</learn>
+      <match sentence="Duty presents itself as more than taste — and theism is a natural home for that." place="Meaning Ridge" person="Hope Ridge" />
+      <hold levelUpTo="medium" onFail="easy">
+        <why>We all know duty — strangers can still accuse.</why>
+        <claimMiss>Duty is only a preference we pretend is law.</claimMiss>
+        <claimMiss>Atheist moral realism is impossible to name.</claimMiss>
+        <whyMiss>Moral argument is a sneer at people who doubt.</whyMiss>
+        <whyMiss>Strangers cannot expect injustice to mean anything.</whyMiss>
+      </hold>
+    </easy>
+    <medium points="12">
+      <learn>Romans 2 treats moral knowledge as widely shared, which is why strangers can accuse one another.</learn>
+      <match sentence="Duty presents itself as more than taste — and theism is a natural home for that." place="Meaning Ridge" person="Hope Ridge" />
+      <hold levelUpTo="hard" onFail="easy">
+        <why>Romans 2 treats moral knowledge as widely shared, which is why strangers can accuse one another.</why>
+        <claimMiss>Duty is only a preference we pretend is law.</claimMiss>
+        <claimMiss>Atheist moral realism is impossible to name.</claimMiss>
+        <whyMiss>Moral argument is a sneer at people who doubt.</whyMiss>
+        <whyMiss>Strangers cannot expect injustice to mean anything.</whyMiss>
+      </hold>
+    </medium>
+    <hard points="15">
+      <learn>Romans 2:14–15 speaks of a law “written on the heart.” That is not a sneer at people who doubt. It is a claim that moral knowledge is widely shared — which is why we can argue about it at all.</learn>
+      <match sentence="Duty presents itself as more than taste — and theism is a natural home for that." place="Meaning Ridge" person="Hope Ridge" />
+      <hold onFail="easy">
+        <why>Romans 2 treats moral knowledge as widely shared, which is why strangers can accuse one another.</why>
+        <claimMiss>Duty is only a preference we pretend is law.</claimMiss>
+        <claimMiss>Atheist moral realism is impossible to name.</claimMiss>
+        <whyMiss>Moral argument is a sneer at people who doubt.</whyMiss>
+        <whyMiss>Strangers cannot expect injustice to mean anything.</whyMiss>
+      </hold>
+    </hard>
+  </lesson>
+  <lesson id="hl-mind" title="The inside of mind" idea="inner experience is not captured by a scan">
+    <claim>A story of the world must find a home for mind — including the storyteller.</claim>
+    <plain>Inner experience is not captured by a scan.</plain>
+    <source>The hard problem; classical theism on intellect</source>
+    <loci place="Meaning Ridge" person="Hope Ridge" plotId="lookout" who="hope" />
+    <journal title="The inside of mind" kicker="Meaning Ridge">
+      <body>Qualia, aboutness, the hard problem, and the norm of reason are not parlor tricks. They are what it is like to be a knower. A story of the world that cannot find a home for mind is a story that cannot find a home for the storyteller.</body>
+      <body>A living God is the home of mind: not an accident at the end of an indifferent process, but present at the beginning.</body>
+      <cite>Augustine, De Trinitate X</cite>
+      <cite>John 1:1–4</cite>
+      <cite>Classical theism on God as living intellect</cite>
+    </journal>
+    <easy points="10" easyOrder="30">
+      <learn>Felt redness, thoughts about things, and the pull of truth are not just collisions. Mind is at home if the world’s ground is a living God.</learn>
+      <match sentence="A story of the world must find a home for mind — including the storyteller." place="Meaning Ridge" person="Hope Ridge" />
+      <hold levelUpTo="medium" onFail="easy">
+        <why>Mind is there at the start — not a late accident.</why>
+        <claimMiss>Qualia and aboutness are parlor tricks.</claimMiss>
+        <claimMiss>Theism is the only reply anyone has offered.</claimMiss>
+        <whyMiss>A story without mind can still house the storyteller with no remainder.</whyMiss>
+        <whyMiss>Mind is easy to treat as leftover steam.</whyMiss>
+      </hold>
+    </easy>
+    <medium points="12">
+      <learn>Theism is a reply in which mind is present at the beginning, not only an accident at the end.</learn>
+      <match sentence="A story of the world must find a home for mind — including the storyteller." place="Meaning Ridge" person="Hope Ridge" />
+      <hold levelUpTo="hard" onFail="easy">
+        <why>Theism is a reply in which mind is present at the beginning, not only an accident at the end.</why>
+        <claimMiss>Qualia and aboutness are parlor tricks.</claimMiss>
+        <claimMiss>Theism is the only reply anyone has offered.</claimMiss>
+        <whyMiss>A story without mind can still house the storyteller with no remainder.</whyMiss>
+        <whyMiss>Mind is easy to treat as leftover steam.</whyMiss>
+      </hold>
+    </medium>
+    <hard points="15">
+      <learn>A living God is the home of mind. Materialism hopes a future theory will close the gap. Hold the claim: inner life is not an accident at the end of indifference.</learn>
+      <match sentence="A story of the world must find a home for mind — including the storyteller." place="Meaning Ridge" person="Hope Ridge" />
+      <hold onFail="easy">
+        <why>Theism is a reply in which mind is present at the beginning, not only an accident at the end.</why>
+        <claimMiss>Qualia and aboutness are parlor tricks.</claimMiss>
+        <claimMiss>Theism is the only reply anyone has offered.</claimMiss>
+        <whyMiss>A story without mind can still house the storyteller with no remainder.</whyMiss>
+        <whyMiss>Mind is easy to treat as leftover steam.</whyMiss>
+      </hold>
+    </hard>
+  </lesson>
+  <lesson id="hl-meaning" title="Invented or found" idea="meaning is found, not only invented">
+    <claim>Local meaning can be built — the lookout asks whether it is also received.</claim>
+    <plain>You can build a local meaning. The lookout asks if it is also received.</plain>
+    <source>Ecclesiastes 2; 9; 12</source>
+    <loci place="Meaning Ridge" person="Hope Ridge" plotId="lookout" who="hope" />
+    <journal title="Meaning that can be found" kicker="Meaning Ridge">
+      <body>You can build a local meaning without naming God. The lookout asks whether that meaning is only assembled, or also received — whether the hunger for a final good has an object.</body>
+      <body>Ecclesiastes refuses to let work and pleasure pretend to be the final good, and also refuses to call them worthless as gifts. That double honesty is part of biblical wisdom.</body>
+      <cite>Ecclesiastes 2:24; 9:7–10; 12:13</cite>
+    </journal>
+    <easy points="10" easyOrder="31">
+      <learn>Work and pleasure are gifts. They are not the final good. Ecclesiastes keeps both truths.</learn>
+      <match sentence="Local meaning can be built — the lookout asks whether it is also received." place="Meaning Ridge" person="Hope Ridge" />
+      <hold levelUpTo="medium" onFail="easy">
+        <why>Work and fun are gifts — not the last good.</why>
+        <claimMiss>Work and pleasure are the final good.</claimMiss>
+        <claimMiss>Ecclesiastes calls every gift worthless.</claimMiss>
+        <whyMiss>The hunger for a final good has no question attached.</whyMiss>
+        <whyMiss>You cannot build any local meaning without naming God.</whyMiss>
+      </hold>
+    </easy>
+    <medium points="12">
+      <learn>Ecclesiastes refuses to let work and pleasure pretend to be the final good, and refuses to call them worthless as gifts.</learn>
+      <match sentence="Local meaning can be built — the lookout asks whether it is also received." place="Meaning Ridge" person="Hope Ridge" />
+      <hold levelUpTo="hard" onFail="easy">
+        <why>Ecclesiastes refuses to let work and pleasure pretend to be the final good, and refuses to call them worthless as gifts.</why>
+        <claimMiss>Work and pleasure are the final good.</claimMiss>
+        <claimMiss>Ecclesiastes calls every gift worthless.</claimMiss>
+        <whyMiss>The hunger for a final good has no question attached.</whyMiss>
+        <whyMiss>You cannot build any local meaning without naming God.</whyMiss>
+      </hold>
+    </medium>
+    <hard points="15">
+      <learn>If God is the good that created goods point toward, ordinary loves are not canceled. They are promised a future.</learn>
+      <match sentence="Local meaning can be built — the lookout asks whether it is also received." place="Meaning Ridge" person="Hope Ridge" />
+      <hold onFail="easy">
+        <why>Ecclesiastes refuses to let work and pleasure pretend to be the final good, and refuses to call them worthless as gifts.</why>
+        <claimMiss>Work and pleasure are the final good.</claimMiss>
+        <claimMiss>Ecclesiastes calls every gift worthless.</claimMiss>
+        <whyMiss>The hunger for a final good has no question attached.</whyMiss>
+        <whyMiss>You cannot build any local meaning without naming God.</whyMiss>
+      </hold>
+    </hard>
+  </lesson>
+  <lesson id="hl-beauty" title="Homesick at the music" idea="beauty wakes a hunger it cannot feed">
+    <claim>Beauty wakes a hunger it cannot feed — hungers usually correspond to real countries.</claim>
+    <plain>Beauty wakes a hunger it cannot feed — longing for a country the sunset cannot give.</plain>
+    <source>Lewis, Weight of Glory; Psalm 19:1–4</source>
+    <loci place="Meaning Ridge" person="Hope Ridge" plotId="lookout" who="hope" />
+    <journal title="Beauty as a signpost" kicker="Meaning Ridge">
+      <body>Beauty wakes a hunger it cannot feed — longing for a country the sunset cannot give. Hungers like that usually correspond to real countries.</body>
+      <body>Psalm 19 treats the sky as speech. The observatory and the lookout are the same ridge at two hours of the day: measurement at dusk, longing after dark. The trail is unending because the object, if real, is not smaller than a game.</body>
+      <cite>C. S. Lewis, “The Weight of Glory”; Surprised by Joy</cite>
+      <cite>Psalm 19:1–4</cite>
+    </journal>
+    <easy points="10" easyOrder="32">
+      <learn>Psalm 19 treats the sky as speech. Hungers like that usually correspond to real countries.</learn>
+      <match sentence="Beauty wakes a hunger it cannot feed — hungers usually correspond to real countries." place="Meaning Ridge" person="Hope Ridge" />
+      <hold levelUpTo="medium" onFail="easy">
+        <why>The sunset wakes a hunger it cannot feed.</why>
+        <claimMiss>A sunset deducts God as a theorem.</claimMiss>
+        <claimMiss>Hungers never correspond to real countries.</claimMiss>
+        <whyMiss>Psalm 19 treats the sky as silent decoration.</whyMiss>
+        <whyMiss>The lookout and the observatory cannot share a ridge.</whyMiss>
+      </hold>
+    </easy>
+    <medium points="12">
+      <learn>Longing for a country the sunset cannot give is a mark that we were made for that country; Psalm 19 treats the sky as speech.</learn>
+      <match sentence="Beauty wakes a hunger it cannot feed — hungers usually correspond to real countries." place="Meaning Ridge" person="Hope Ridge" />
+      <hold levelUpTo="hard" onFail="easy">
+        <why>Longing for a country the sunset cannot give is a mark that we were made for that country; Psalm 19 treats the sky as speech.</why>
+        <claimMiss>A sunset deducts God as a theorem.</claimMiss>
+        <claimMiss>Hungers never correspond to real countries.</claimMiss>
+        <whyMiss>Psalm 19 treats the sky as silent decoration.</whyMiss>
+        <whyMiss>The lookout and the observatory cannot share a ridge.</whyMiss>
+      </hold>
+    </medium>
+    <hard points="15">
+      <learn>Beauty does not replace the earlier areas. It keeps them from becoming only a brief.</learn>
+      <match sentence="Beauty wakes a hunger it cannot feed — hungers usually correspond to real countries." place="Meaning Ridge" person="Hope Ridge" />
+      <hold onFail="easy">
+        <why>Longing for a country the sunset cannot give is a mark that we were made for that country; Psalm 19 treats the sky as speech.</why>
+        <claimMiss>A sunset deducts God as a theorem.</claimMiss>
+        <claimMiss>Hungers never correspond to real countries.</claimMiss>
+        <whyMiss>Psalm 19 treats the sky as silent decoration.</whyMiss>
+        <whyMiss>The lookout and the observatory cannot share a ridge.</whyMiss>
+      </hold>
+    </hard>
+  </lesson>
+  <lesson id="daily-grace" title="Not a wage" idea="grace is a gift, not a wage">
+    <claim>Grace is gift, not wage; faith receives; boast starves.</claim>
+    <plain>Grace is gift, not wage. Faith receives. Boast starves.</plain>
+    <source>Ephesians 2:8–9</source>
+    <loci place="Meaning Ridge" person="Hope Ridge" plotId="lookout" who="hope" />
+    <easy points="10" easyOrder="33">
+      <learn>God moves first. You did not finish a map that earned this.</learn>
+      <match sentence="Grace is gift, not wage; faith receives; boast starves." place="Meaning Ridge" person="Hope Ridge" />
+      <hold levelUpTo="medium" onFail="easy">
+        <why>God moves first — you did not finish the map.</why>
+        <claimMiss>Grace is a prize for high scores.</claimMiss>
+        <claimMiss>Faith is a wage God owes you.</claimMiss>
+        <whyMiss>Boast is what the gift is for.</whyMiss>
+        <whyMiss>Salvation is your own doing.</whyMiss>
+      </hold>
+    </easy>
+    <medium points="12">
+      <learn>The claim is that God moves first — not that you finished the map.</learn>
+      <match sentence="Grace is gift, not wage; faith receives; boast starves." place="Meaning Ridge" person="Hope Ridge" />
+      <hold levelUpTo="hard" onFail="easy">
+        <why>The claim is that God moves first — not that you finished the map.</why>
+        <claimMiss>Grace is a prize for high scores.</claimMiss>
+        <claimMiss>Faith is a wage God owes you.</claimMiss>
+        <whyMiss>Boast is what the gift is for.</whyMiss>
+        <whyMiss>Salvation is your own doing.</whyMiss>
+      </hold>
+    </medium>
+    <hard points="15">
+      <learn>By grace you have been saved through faith. And this is not your own doing; it is the gift of God.</learn>
+      <match sentence="Grace is gift, not wage; faith receives; boast starves." place="Meaning Ridge" person="Hope Ridge" />
+      <hold onFail="easy">
+        <why>The claim is that God moves first — not that you finished the map.</why>
+        <claimMiss>Grace is a prize for high scores.</claimMiss>
+        <claimMiss>Faith is a wage God owes you.</claimMiss>
+        <whyMiss>Boast is what the gift is for.</whyMiss>
+        <whyMiss>Salvation is your own doing.</whyMiss>
+      </hold>
+    </hard>
+  </lesson>
+  <lesson id="daily-rest" title="Come and rest" idea="rest is offered to tired people first">
+    <claim>Tired people are named first; rest is the gift, not a steeper hill.</claim>
+    <plain>Tired people are named first. Rest is the gift, not a steeper hill.</plain>
+    <source>Matthew 11:28</source>
+    <loci place="Meaning Ridge" person="Hope Ridge" plotId="lookout" who="hope" />
+    <easy points="10" easyOrder="34">
+      <learn>The invitation is to a person — “Come to me” — not a performance.</learn>
+      <match sentence="Tired people are named first; rest is the gift, not a steeper hill." place="Meaning Ridge" person="Hope Ridge" />
+      <hold levelUpTo="medium" onFail="easy">
+        <why>Come to me — rest is a gift, not a show.</why>
+        <claimMiss>Rest is a prize for climbing harder.</claimMiss>
+        <claimMiss>Jesus names the energetic first.</claimMiss>
+        <whyMiss>The invitation is to a steeper program.</whyMiss>
+        <whyMiss>Weariness disqualifies you.</whyMiss>
+      </hold>
+    </easy>
+    <medium points="12">
+      <learn>The invitation is to a person — “Come to me” — not a performance.</learn>
+      <match sentence="Tired people are named first; rest is the gift, not a steeper hill." place="Meaning Ridge" person="Hope Ridge" />
+      <hold levelUpTo="hard" onFail="easy">
+        <why>The invitation is to a person — “Come to me” — not a performance.</why>
+        <claimMiss>Rest is a prize for climbing harder.</claimMiss>
+        <claimMiss>Jesus names the energetic first.</claimMiss>
+        <whyMiss>The invitation is to a steeper program.</whyMiss>
+        <whyMiss>Weariness disqualifies you.</whyMiss>
+      </hold>
+    </medium>
+    <hard points="15">
+      <learn>Come to me, all who labor and are heavy laden, and I will give you rest.</learn>
+      <match sentence="Tired people are named first; rest is the gift, not a steeper hill." place="Meaning Ridge" person="Hope Ridge" />
+      <hold onFail="easy">
+        <why>The invitation is to a person — “Come to me” — not a performance.</why>
+        <claimMiss>Rest is a prize for climbing harder.</claimMiss>
+        <claimMiss>Jesus names the energetic first.</claimMiss>
+        <whyMiss>The invitation is to a steeper program.</whyMiss>
+        <whyMiss>Weariness disqualifies you.</whyMiss>
+      </hold>
+    </hard>
+  </lesson>
+  <lesson id="daily-door" title="A door, not a wall" idea="Jesus claims to be a door in, not a wall">
+    <claim>Jesus’ “door” is a particular way in with a wide anyone.</claim>
+    <plain>Jesus’ “door” is a particular way in with a wide anyone.</plain>
+    <source>John 10:9</source>
+    <loci place="Meaning Ridge" person="Hope Ridge" plotId="lookout" who="hope" />
+    <easy points="10" easyOrder="35">
+      <learn>You may refuse it. The town will not lock you in a pew.</learn>
+      <match sentence="Jesus’ “door” is a particular way in with a wide anyone." place="Meaning Ridge" person="Hope Ridge" />
+      <hold levelUpTo="medium" onFail="easy">
+        <why>You may refuse — no one locks you in a pew.</why>
+        <claimMiss>The door is a dead end.</claimMiss>
+        <claimMiss>Pasture is denied on the other side.</claimMiss>
+        <whyMiss>“Anyone” is narrowed to insiders only.</whyMiss>
+        <whyMiss>The image is a wall, not an entrance.</whyMiss>
+      </hold>
+    </easy>
+    <medium points="12">
+      <learn>You may refuse it; the town will not lock you in a pew.</learn>
+      <match sentence="Jesus’ “door” is a particular way in with a wide anyone." place="Meaning Ridge" person="Hope Ridge" />
+      <hold levelUpTo="hard" onFail="easy">
+        <why>You may refuse it; the town will not lock you in a pew.</why>
+        <claimMiss>The door is a dead end.</claimMiss>
+        <claimMiss>Pasture is denied on the other side.</claimMiss>
+        <whyMiss>“Anyone” is narrowed to insiders only.</whyMiss>
+        <whyMiss>The image is a wall, not an entrance.</whyMiss>
+      </hold>
+    </medium>
+    <hard points="15">
+      <learn>I am the door. If anyone enters by me, he will be saved and will go in and out and find pasture.</learn>
+      <match sentence="Jesus’ “door” is a particular way in with a wide anyone." place="Meaning Ridge" person="Hope Ridge" />
+      <hold onFail="easy">
+        <why>You may refuse it; the town will not lock you in a pew.</why>
+        <claimMiss>The door is a dead end.</claimMiss>
+        <claimMiss>Pasture is denied on the other side.</claimMiss>
+        <whyMiss>“Anyone” is narrowed to insiders only.</whyMiss>
+        <whyMiss>The image is a wall, not an entrance.</whyMiss>
+      </hold>
+    </hard>
+  </lesson>
+</area>

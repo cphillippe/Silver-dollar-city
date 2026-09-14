@@ -293,6 +293,22 @@ export interface ProgressState {
    * the catalog; a sitting only plays tonight’s street chunk.
    */
   streetLinked: string[]
+  /**
+   * Current Learn→Match→Hold tier per idea (easy / medium / hard).
+   * Optional on old saves; normalize fills {}. Schema stays 1 — do not wipe.
+   * Hold fail always returns this idea to easy. Best score is kept separately.
+   */
+  lessonTier: Record<string, 'easy' | 'medium' | 'hard'>
+  /**
+   * Best-tier journal points per idea (10 / 12 / 15). Optional on old saves;
+   * normalize fills {}. Schema stays 1 — do not wipe.
+   */
+  lessonScore: Record<string, number>
+  /**
+   * Highest Learn teach finished per idea. Optional on old saves;
+   * normalize fills {}. Schema stays 1 — do not wipe.
+   */
+  tierTaught: Record<string, 'easy' | 'medium' | 'hard'>
 }
 
 export type View =

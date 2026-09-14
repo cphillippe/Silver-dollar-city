@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState, type ReactNode } from 'react'
 import { markEasyHeld, markEasyTaught } from '../lib/easy'
+import { applyHoldFail, applyHoldSuccess, currentLessonTier } from '../lib/tiers'
 import { appendStreetLinks, STREET_TRIPLES } from '../content/links'
 import { learningFromReview, upsertLearning } from '../lib/learning'
 import { isToolHowTo } from '../lib/watchTools'
@@ -269,8 +270,27 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       const easyTaught = current.easyMode
         ? markEasyTaught(current, evidenceId)
         : (current.easyTaught ?? [])
-      if (nextTaught === taught && easyTaught === (current.easyTaught ?? [])) return current
-      return write({ ...current, taught: nextTaught, easyTaught })
+      const tierTaught = current.easyMode
+        ? { ...(current.tierTaught ?? {}), [evidenceId]: currentLessonTier(current, evidenceId) }
+        : (current.tierTaught ?? {})
+      if (
+        nextTaught === taught &&
+        easyTaught === (current.easyTaught ?? []) &&
+        tierTaught[evidenceId] === current.tierTaught?.[evidenceId]
+      ) {
+        return current
+      }
+      return write({ ...current, taught: nextTaught, easyTaught, tierTaught })
+    })
+  }, [write])
+
+  const recordLessonHold = useCallback((evidenceId: string, clean: boolean) => {
+    if (isToolHowTo(evidenceId)) return
+    setProgress((current) => {
+      const patch = clean
+        ? applyHoldSuccess(current, evidenceId)
+        : applyHoldFail(current, evidenceId)
+      return write({ ...current, ...patch })
     })
   }, [write])
 
@@ -343,6 +363,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       recordStars,
       recordHeld,
       recordReview,
+      recordLessonHold,
       snoozeReviews,
       markMiss,
       recordNight,
@@ -364,6 +385,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       recordHeld,
       recordNight,
       recordReview,
+      recordLessonHold,
       snoozeReviews,
       recordStars,
       reset,

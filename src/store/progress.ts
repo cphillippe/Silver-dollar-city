@@ -496,6 +496,7 @@ export interface ProgressApi {
   recordStars: (challengeId: string, stars: StarCount) => StarCount
   recordHeld: (evidenceId: string) => void
   recordReview: (event: ReviewEvent) => StarCount
+  recordLessonHold: (evidenceId: string, clean: boolean) => void
   snoozeReviews: (ids: string[], today: string) => void
   markMiss: (challengeId: string) => void
   recordNight: (dateKey: string) => void

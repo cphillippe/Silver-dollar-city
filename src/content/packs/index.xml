@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<packIndex schemaVersion="3" id="core-v0" title="Core trail">
+  <area file="parable-hollow.xml" id="parable-hollow" />
+  <area file="witness-bench.xml" id="witness-bench" />
+  <area file="observatory.xml" id="observatory" />
+  <area file="first-gate.xml" id="first-gate" />
+  <area file="high-lookout.xml" id="high-lookout" />
+  <area id="east-porch" order="0" title="East porch" shortTitle="Porch" subtitle="A lamp is meant to be seen" icon="lamp" accent="#ffcc33">
+    <blurb>Juniper’s lamp. You arrive here so today’s line can be seen.</blurb>
+    <intro>The east porch is where a line can be seen. Juniper keeps the lamp.</intro>
+  <lesson id="daily-lantern" title="The porch lamp" idea="a city on a hill is meant to be seen">
+    <claim>A lamp is meant to be seen.</claim>
+    <plain>A lamp is meant to be seen.</plain>
+    <source>Matthew 5:14–16</source>
+    <loci place="East porch" person="Juniper Wick" plotId="porch" who="juniper" />
+    <easy points="10" easyOrder="12">
+      <learn>Jesus uses an ordinary lamp and a city on a hill. Public without being proud.</learn>
+      <match sentence="A lamp is meant to be seen." place="East porch" person="Juniper Wick" />
+      <hold levelUpTo="medium" onFail="easy">
+        <why>A lamp and a hill city are meant to be seen.</why>
+        <claimMiss>We are told to become the sun.</claimMiss>
+        <claimMiss>Light is only for insiders behind a door.</claimMiss>
+        <whyMiss>The picture is a command to boast.</whyMiss>
+        <whyMiss>A hidden lamp is the point of the saying.</whyMiss>
+      </hold>
+    </easy>
+    <medium points="12">
+      <learn>Jesus uses an ordinary lamp and a city on a hill — public without being proud.</learn>
+      <match sentence="A lamp is meant to be seen." place="East porch" person="Juniper Wick" />
+      <hold levelUpTo="hard" onFail="easy">
+        <why>Jesus uses an ordinary lamp and a city on a hill — public without being proud.</why>
+        <claimMiss>We are told to become the sun.</claimMiss>
+        <claimMiss>Light is only for insiders behind a door.</claimMiss>
+        <whyMiss>The picture is a command to boast.</whyMiss>
+        <whyMiss>A hidden lamp is the point of the saying.</whyMiss>
+      </hold>
+    </medium>
+    <hard points="15">
+      <learn>“You are the light of the world. A city set on a hill cannot be hidden.” The picture is public without being proud.</learn>
+      <match sentence="A lamp is meant to be seen." place="East porch" person="Juniper Wick" />
+      <hold onFail="easy">
+        <why>Jesus uses an ordinary lamp and a city on a hill — public without being proud.</why>
+        <claimMiss>We are told to become the sun.</claimMiss>
+        <claimMiss>Light is only for insiders behind a door.</claimMiss>
+        <whyMiss>The picture is a command to boast.</whyMiss>
+        <whyMiss>A hidden lamp is the point of the saying.</whyMiss>
+      </hold>
+    </hard>
+  </lesson>
+  <lesson id="daily-gems" title="Porch gems" idea="Jesus taught with pictures you can hold">
+    <claim>Jesus taught with pictures you can hold.</claim>
+    <plain>Jesus taught with pictures you can hold.</plain>
+    <source>Matthew 5; Mark 4; Matthew 26:28; Luke 22:20</source>
+    <loci place="East porch" person="Juniper Wick" plotId="porch" who="juniper" />
+    <easy points="10" easyOrder="13">
+      <learn>A lamp is seen. Seed meets different hearts. The cup is poured for many — gift, not wage.</learn>
+      <match sentence="Jesus taught with pictures you can hold." place="East porch" person="Juniper Wick" />
+      <hold levelUpTo="medium" onFail="easy">
+        <why>Lamp, seed, and cup are gifts you can hold.</why>
+        <claimMiss>Pictures are only decoration.</claimMiss>
+        <claimMiss>Mercy is a wage you finish earning.</claimMiss>
+        <whyMiss>Every heart is the same soil.</whyMiss>
+        <whyMiss>A hidden lamp is the point.</whyMiss>
+      </hold>
+    </easy>
+    <medium points="12">
+      <learn>A lamp is seen, seed meets different hearts, and the cup is poured for many — gift, not wage.</learn>
+      <match sentence="Jesus taught with pictures you can hold." place="East porch" person="Juniper Wick" />
+      <hold levelUpTo="hard" onFail="easy">
+        <why>A lamp is seen, seed meets different hearts, and the cup is poured for many — gift, not wage.</why>
+        <claimMiss>Pictures are only decoration.</claimMiss>
+        <claimMiss>Mercy is a wage you finish earning.</claimMiss>
+        <whyMiss>Every heart is the same soil.</whyMiss>
+        <whyMiss>A hidden lamp is the point.</whyMiss>
+      </hold>
+    </medium>
+    <hard points="15">
+      <learn>Jesus taught with lamps, seed, and a cup. The cup of the new covenant is poured for many (Matthew 26:28; Luke 22:20) — gift, not wage.</learn>
+      <match sentence="Jesus taught with pictures you can hold." place="East porch" person="Juniper Wick" />
+      <hold onFail="easy">
+        <why>A lamp is seen, seed meets different hearts, and the cup is poured for many — gift, not wage.</why>
+        <claimMiss>Pictures are only decoration.</claimMiss>
+        <claimMiss>Mercy is a wage you finish earning.</claimMiss>
+        <whyMiss>Every heart is the same soil.</whyMiss>
+        <whyMiss>A hidden lamp is the point.</whyMiss>
+      </hold>
+    </hard>
+  </lesson>
+  <lesson id="daily-seed" title="A handful of seed" idea="the same word meets very different hearts">
+    <claim>The same word meets different soils; some seed is lost.</claim>
+    <plain>The same word meets different soils. Some seed is lost.</plain>
+    <source>Mark 4:1–9</source>
+    <loci place="East porch" person="Juniper Wick" plotId="porch" who="juniper" />
+    <easy points="10" easyOrder="14">
+      <learn>This Jesus story invites hearing. It does not flatter every field.</learn>
+      <match sentence="The same word meets different soils; some seed is lost." place="East porch" person="Juniper Wick" />
+      <hold levelUpTo="medium" onFail="easy">
+        <why>Not every field is good soil.</why>
+        <claimMiss>Every field is guaranteed a harvest.</claimMiss>
+        <claimMiss>Lost seed means the sower failed.</claimMiss>
+        <whyMiss>Good soil is a slogan, not a way of hearing.</whyMiss>
+        <whyMiss>Jesus never names withering or birds.</whyMiss>
+      </hold>
+    </easy>
+    <medium points="12">
+      <learn>The parable invites hearing; it does not flatter every field.</learn>
+      <match sentence="The same word meets different soils; some seed is lost." place="East porch" person="Juniper Wick" />
+      <hold levelUpTo="hard" onFail="easy">
+        <why>The parable invites hearing; it does not flatter every field.</why>
+        <claimMiss>Every field is guaranteed a harvest.</claimMiss>
+        <claimMiss>Lost seed means the sower failed.</claimMiss>
+        <whyMiss>Good soil is a slogan, not a way of hearing.</whyMiss>
+        <whyMiss>Jesus never names withering or birds.</whyMiss>
+      </hold>
+    </medium>
+    <hard points="15">
+      <learn>“He who has ears to hear, let him hear.” The story asks for a kind of soil, not a slogan.</learn>
+      <match sentence="The same word meets different soils; some seed is lost." place="East porch" person="Juniper Wick" />
+      <hold onFail="easy">
+        <why>The parable invites hearing; it does not flatter every field.</why>
+        <claimMiss>Every field is guaranteed a harvest.</claimMiss>
+        <claimMiss>Lost seed means the sower failed.</claimMiss>
+        <whyMiss>Good soil is a slogan, not a way of hearing.</whyMiss>
+        <whyMiss>Jesus never names withering or birds.</whyMiss>
+      </hold>
+    </hard>
+  </lesson>
+  <lesson id="daily-neighbor" title="Who is near" idea="neighbor is the one who shows mercy">
+    <claim>Mercy makes a neighbor; pedigree does not.</claim>
+    <plain>Mercy makes a neighbor. Pedigree does not.</plain>
+    <source>Luke 10:36–37</source>
+    <loci place="East porch" person="Juniper Wick" plotId="porch" who="juniper" />
+    <easy points="10" easyOrder="15">
+      <learn>Jesus asks who *proved* to be a neighbor — the one who showed mercy.</learn>
+      <match sentence="Mercy makes a neighbor; pedigree does not." place="East porch" person="Juniper Wick" />
+      <hold levelUpTo="medium" onFail="easy">
+        <why>Jesus asks who showed mercy — that one is neighbor.</why>
+        <claimMiss>The priest who passed by is the measure.</claimMiss>
+        <claimMiss>Neighbor is settled before anyone crosses the road.</claimMiss>
+        <whyMiss>Mercy is unrelated to the question.</whyMiss>
+        <whyMiss>The wounded man must first classify the helper.</whyMiss>
+      </hold>
+    </easy>
+    <medium points="12">
+      <learn>Jesus asks who *proved* to be a neighbor — the one who showed mercy.</learn>
+      <match sentence="Mercy makes a neighbor; pedigree does not." place="East porch" person="Juniper Wick" />
+      <hold levelUpTo="hard" onFail="easy">
+        <why>Jesus asks who *proved* to be a neighbor — the one who showed mercy.</why>
+        <claimMiss>The priest who passed by is the measure.</claimMiss>
+        <claimMiss>Neighbor is settled before anyone crosses the road.</claimMiss>
+        <whyMiss>Mercy is unrelated to the question.</whyMiss>
+        <whyMiss>The wounded man must first classify the helper.</whyMiss>
+      </hold>
+    </medium>
+    <hard points="15">
+      <learn>He said, “The one who showed him mercy.” And Jesus said, “You go, and do likewise.”</learn>
+      <match sentence="Mercy makes a neighbor; pedigree does not." place="East porch" person="Juniper Wick" />
+      <hold onFail="easy">
+        <why>Jesus asks who *proved* to be a neighbor — the one who showed mercy.</why>
+        <claimMiss>The priest who passed by is the measure.</claimMiss>
+        <claimMiss>Neighbor is settled before anyone crosses the road.</claimMiss>
+        <whyMiss>Mercy is unrelated to the question.</whyMiss>
+        <whyMiss>The wounded man must first classify the helper.</whyMiss>
+      </hold>
+    </hard>
+  </lesson>
+  </area>
+</packIndex>
