@@ -1,0 +1,1071 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<areaPack id="witness-bench" schemaVersion="3" appVersion="1.4.50" generated="2026-09-14T13:15:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/" title="Witness Square" place="Witness Square" person="Silas Whitman" personId="silas" plotId="bench">
+  <howToEdit>RUNTIME CONTENT: the game loads this file as the source of truth for this area. Change player-facing text in place inside each &lt;lesson&gt;. Stable id attributes (ph-father, …) are engine keys — do not rename without a migration. Three tiers per fact: &lt;easy easyOrder="N"&gt;, &lt;medium&gt;, and &lt;hard&gt; — each with &lt;learn&gt;, &lt;match&gt;, and &lt;hold&gt;. Easy Learn: shortStory/mainIdea/loci. Medium Learn: mediumTeach (clearer than Hard, richer than Easy). Hard Learn: hardTeach/fullTeach. Held claim·reason·source stay plain and identical on all three. Hold level-up: see hold @levelUpTo / @onFail and index &lt;holdRules&gt;. Empty optional elements are intentional. Escape &amp; &lt; &gt; in text.</howToEdit>
+  <meta>
+    <title>Silver City — Witness Square</title>
+    <subtitle>Public names and early reports</subtitle>
+    <blurb>A ledger hall of names: died, buried, raised, appeared.</blurb>
+    <notes>Runtime/build content pack. Engine maps lesson fields 1:1 to Learn / Match / Hold / Journal / street.</notes>
+  </meta>
+  <easyShelf order="wb-creed,wb-women,wb-early,wb-method,daily-names,daily-creed,daily-empty">
+    <line id="wb-creed" easyOrder="4">wb-creed</line>
+    <line id="wb-women" easyOrder="5">wb-women</line>
+    <line id="wb-early" easyOrder="11">wb-early</line>
+    <line id="wb-method" easyOrder="12">wb-method</line>
+    <line id="daily-names" easyOrder="13">daily-names</line>
+    <line id="daily-creed" easyOrder="14">daily-creed</line>
+    <line id="daily-empty" easyOrder="15">daily-empty</line>
+  </easyShelf>
+  <lessons>
+    <lesson id="wb-creed" place="Witness Square" person="Silas Whitman" tripleId="silas-bench" ideaId="idea-silas" ideaLabel="Died, buried, raised, appeared." challengeKind="sequence" challengeTitle="What Paul received">
+      <easy points="10" easyOrder="4">
+        <learn>
+          <shortStory>This is not Paul’s private dream. He says the churches were already saying it: Christ died, was buried, was raised, and was seen.</shortStory>
+          <mainIdea>Paul hands on an early public creed: died, buried, raised, appeared.</mainIdea>
+          <gloss>Paul hands on an old shared belief: died, buried, raised, appeared.</gloss>
+          <loci>This idea lives at Witness Square, with Silas.</loci>
+          <word>
+            <term>Creed</term>
+            <sense>an old shared belief the churches already said out loud</sense>
+          </word>
+          <hint>Death, burial, raising, appearances — in that order.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>Paul hands on an early public creed: died, buried, raised, appeared.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>The creed is Paul’s private dream from decades later.</miss>
+            <miss>Paul invented the formula on the spot in Corinth.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at the square.</placePrompt>
+          <personPrompt>Silas keeps that square.</personPrompt>
+          <ideaPrompt>Silas’s public names — died, buried, raised, appeared.</ideaPrompt>
+          <ideaLabel>Died, buried, raised, appeared.</ideaLabel>
+          <whyEasy>Silas copies names at the square. The old shared belief — died, buried, raised — sits with the public names.</whyEasy>
+        </match>
+        <hold levelUpTo="medium" onFail="easy">
+          <claim>Paul hands on an early public creed: died, buried, raised, appeared.</claim>
+          <reason>Burial resists a merely “spiritual” death; appearances resist a merely “spiritual” raising.</reason>
+          <source>1 Corinthians 15:3–8</source>
+          <whyCorrect>Burial resists a merely “spiritual” death; appearances resist a merely “spiritual” raising.</whyCorrect>
+          <whyMisses>
+            <miss>“Buried” is only poetic decoration.</miss>
+            <miss>Appearances are admitted to be visions with no named people.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Paul hands on an early public creed: died, buried, raised, appeared.</choice>
+            <choice>The creed is Paul’s private dream from decades later.</choice>
+            <choice>Paul invented the formula on the spot in Corinth.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>Burial resists a merely “spiritual” death; appearances resist a merely “spiritual” raising.</choice>
+            <choice>“Buried” is only poetic decoration.</choice>
+            <choice>Appearances are admitted to be visions with no named people.</choice>
+          </reasonChoices>
+        </hold>
+      </easy>
+      <medium points="12">
+        <learn>
+          <mediumTeach>1 Corinthians 15:3–5. Paul hands on what the churches were already saying: Christ died, was buried, was raised, and appeared. He presents it as received “of first importance” — a public creed, not a private dream from a later age.</mediumTeach>
+          <mainIdea>Paul hands on an early public creed: died, buried, raised, appeared.</mainIdea>
+          <gloss>Paul hands on an old shared belief: died, buried, raised, appeared.</gloss>
+          <loci>This idea lives at Witness Square, with Silas.</loci>
+          <word>
+            <term>Creed</term>
+            <sense>an old shared belief the churches already said out loud</sense>
+          </word>
+          <hint>Death, burial, raising, appearances — in that order.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>Paul hands on an early public creed: died, buried, raised, appeared.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>The creed is Paul’s private dream from decades later.</miss>
+            <miss>Paul invented the formula on the spot in Corinth.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at the square.</placePrompt>
+          <personPrompt>Silas keeps that square.</personPrompt>
+          <ideaPrompt>Silas’s public names — died, buried, raised, appeared.</ideaPrompt>
+          <ideaLabel>Died, buried, raised, appeared.</ideaLabel>
+          <whyMedium>Silas copies names at the square. The old shared belief — died, buried, raised — sits with the public names.</whyMedium>
+        </match>
+        <hold levelUpTo="hard" onFail="easy">
+          <claim>Paul hands on an early public creed: died, buried, raised, appeared.</claim>
+          <reason>Burial resists a merely “spiritual” death; appearances resist a merely “spiritual” raising.</reason>
+          <source>1 Corinthians 15:3–8</source>
+          <whyCorrect>Burial resists a merely “spiritual” death; appearances resist a merely “spiritual” raising.</whyCorrect>
+          <whyMisses>
+            <miss>“Buried” is only poetic decoration.</miss>
+            <miss>Appearances are admitted to be visions with no named people.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Paul hands on an early public creed: died, buried, raised, appeared.</choice>
+            <choice>The creed is Paul’s private dream from decades later.</choice>
+            <choice>Paul invented the formula on the spot in Corinth.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>Burial resists a merely “spiritual” death; appearances resist a merely “spiritual” raising.</choice>
+            <choice>“Buried” is only poetic decoration.</choice>
+            <choice>Appearances are admitted to be visions with no named people.</choice>
+          </reasonChoices>
+        </hold>
+      </medium>
+      <hard points="15">
+        <learn>
+          <hardTeach>1 Corinthians 15:3–5. Paul is writing to a church he founded, likely in the mid-50s AD. He presents this not as a new idea but as a received formula “of first importance.”
+Verses 6–8 widen the circle: more than five hundred, James, “all the apostles,” and last of all Paul. A creed is not a video. It is a public, early summary of what the churches were already saying.</hardTeach>
+          <fullTeach>1 Corinthians 15:3–5. Paul is writing to a church he founded, likely in the mid-50s AD. He presents this not as a new idea but as a received formula “of first importance.”
+Verses 6–8 widen the circle: more than five hundred, James, “all the apostles,” and last of all Paul. A creed is not a video. It is a public, early summary of what the churches were already saying.</fullTeach>
+          <prompt>Order the core of the tradition Paul says he “delivered” and “received.”</prompt>
+          <teachOnWrong>Paul’s wording is tightly patterned: death, burial, raising, appearances (1 Cor 15:3–5). Burial underlines that death was real; appearances underlines that “raised” is not only a metaphor.</teachOnWrong>
+          <challengeTiles />
+        </learn>
+        <match>
+          <sentenceCorrect>Paul hands on an early public creed: died, buried, raised, appeared.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>The creed is Paul’s private dream from decades later.</miss>
+            <miss>Paul invented the formula on the spot in Corinth.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at the square.</placePrompt>
+          <personPrompt>Silas keeps that square.</personPrompt>
+          <ideaPrompt>Silas’s public names — died, buried, raised, appeared.</ideaPrompt>
+          <ideaLabel>Died, buried, raised, appeared.</ideaLabel>
+          <whyHard>Silas Whitman keeps Witness Square. Died, buried, raised, appeared is a public creed. It belongs in a ledger hall, not under the oaks.</whyHard>
+        </match>
+        <hold onFail="easy">
+          <claim>Paul hands on an early public creed: died, buried, raised, appeared.</claim>
+          <reason>Burial resists a merely “spiritual” death; appearances resist a merely “spiritual” raising.</reason>
+          <source>1 Corinthians 15:3–8</source>
+          <whyCorrect>Burial resists a merely “spiritual” death; appearances resist a merely “spiritual” raising.</whyCorrect>
+          <whyMisses>
+            <miss>“Buried” is only poetic decoration.</miss>
+            <miss>Appearances are admitted to be visions with no named people.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Paul hands on an early public creed: died, buried, raised, appeared.</choice>
+            <choice>The creed is Paul’s private dream from decades later.</choice>
+            <choice>Paul invented the formula on the spot in Corinth.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>Burial resists a merely “spiritual” death; appearances resist a merely “spiritual” raising.</choice>
+            <choice>“Buried” is only poetic decoration.</choice>
+            <choice>Appearances are admitted to be visions with no named people.</choice>
+          </reasonChoices>
+        </hold>
+      </hard>
+      <journal id="j-wb-1" title="Of first importance" kicker="Witness Square" unlockAfter="wb-creed" scoreFromHeldTier="true">
+        <p>1 Corinthians 15:3–5 is a compressed public claim: death, burial, raising, appearances. Paul presents it as received tradition, not as a private dream. Burial resists a merely “spiritual” death; appearances resist a merely “spiritual” raising.</p>
+        <p>This is what the churches were already handing on when Paul wrote — a mid-first-century letter appealing to a still-earlier formula.</p>
+        <sources>
+          <source>1 Corinthians 15:3–8</source>
+        </sources>
+      </journal>
+    </lesson>
+    <lesson id="wb-early" place="Witness Square" person="Silas Whitman" tripleId="early-bench" ideaId="idea-early" ideaLabel="The claim sits close to the events." challengeKind="sort" challengeTitle="Why historians call it early">
+      <easy points="10" easyOrder="11">
+        <learn>
+          <shortStory>Paul wrote in the mid-first century. He says he received this core and passed it on. That is close to the events — not a monk’s later add-on.</shortStory>
+          <mainIdea>The resurrection claim sits close to the events, not as a late legend.</mainIdea>
+          <gloss>That old shared belief is early testimony, not a medieval insert.</gloss>
+          <loci>This idea lives at Witness Square, with Silas.</loci>
+          <word>
+            <term>Testimony</term>
+            <sense>a report from people who claim to have seen</sense>
+          </word>
+          <hint>Keep “received and delivered.” Toss lab-proof talk.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>The resurrection claim sits close to the events, not as a late legend.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Early is the same as laboratory proof.</miss>
+            <miss>No first-century writer claims to have asked witnesses.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at the square.</placePrompt>
+          <personPrompt>Silas keeps that square.</personPrompt>
+          <ideaPrompt>Silas’s public names — the claim sits close to the events.</ideaPrompt>
+          <ideaLabel>The claim sits close to the events.</ideaLabel>
+          <whyEasy>Silas keeps the square. The claim sits close to the events — not a late legend.</whyEasy>
+        </match>
+        <hold levelUpTo="medium" onFail="easy">
+          <claim>The resurrection claim sits close to the events, not as a late legend.</claim>
+          <reason>Paul quotes a received formula and names known people; Luke claims inquiry among witnesses.</reason>
+          <source>1 Corinthians 15:3–7; Luke 1:1–4</source>
+          <whyCorrect>Paul quotes a received formula and names known people; Luke claims inquiry among witnesses.</whyCorrect>
+          <whyMisses>
+            <miss>Named people make a report less testable.</miss>
+            <miss>Distance in time is the only historical question that matters.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>The resurrection claim sits close to the events, not as a late legend.</choice>
+            <choice>Early is the same as laboratory proof.</choice>
+            <choice>No first-century writer claims to have asked witnesses.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>Paul quotes a received formula and names known people; Luke claims inquiry among witnesses.</choice>
+            <choice>Named people make a report less testable.</choice>
+            <choice>Distance in time is the only historical question that matters.</choice>
+          </reasonChoices>
+        </hold>
+      </easy>
+      <medium points="12">
+        <learn>
+          <mediumTeach>1 Corinthians 15:3–5. Paul wrote in the mid-first century and says he received and delivered this core. The resurrection claim sits close to the events — early public testimony, not a monk’s late legend.</mediumTeach>
+          <mainIdea>The resurrection claim sits close to the events, not as a late legend.</mainIdea>
+          <gloss>That old shared belief is early testimony, not a medieval insert.</gloss>
+          <loci>This idea lives at Witness Square, with Silas.</loci>
+          <word>
+            <term>Testimony</term>
+            <sense>a report from people who claim to have seen</sense>
+          </word>
+          <hint>Keep “received and delivered.” Toss lab-proof talk.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>The resurrection claim sits close to the events, not as a late legend.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Early is the same as laboratory proof.</miss>
+            <miss>No first-century writer claims to have asked witnesses.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at the square.</placePrompt>
+          <personPrompt>Silas keeps that square.</personPrompt>
+          <ideaPrompt>Silas’s public names — the claim sits close to the events.</ideaPrompt>
+          <ideaLabel>The claim sits close to the events.</ideaLabel>
+          <whyMedium>Silas keeps the square. The claim sits close to the events — not a late legend.</whyMedium>
+        </match>
+        <hold levelUpTo="hard" onFail="easy">
+          <claim>The resurrection claim sits close to the events, not as a late legend.</claim>
+          <reason>Paul quotes a received formula and names known people; Luke claims inquiry among witnesses.</reason>
+          <source>1 Corinthians 15:3–7; Luke 1:1–4</source>
+          <whyCorrect>Paul quotes a received formula and names known people; Luke claims inquiry among witnesses.</whyCorrect>
+          <whyMisses>
+            <miss>Named people make a report less testable.</miss>
+            <miss>Distance in time is the only historical question that matters.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>The resurrection claim sits close to the events, not as a late legend.</choice>
+            <choice>Early is the same as laboratory proof.</choice>
+            <choice>No first-century writer claims to have asked witnesses.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>Paul quotes a received formula and names known people; Luke claims inquiry among witnesses.</choice>
+            <choice>Named people make a report less testable.</choice>
+            <choice>Distance in time is the only historical question that matters.</choice>
+          </reasonChoices>
+        </hold>
+      </medium>
+      <hard points="15">
+        <learn>
+          <hardTeach>1 Corinthians 15:3–5. Paul “received” and “delivered” the early core — died, buried, raised, appeared.
+Compare Luke 1:1–4: a first-century writer claiming inquiry among eyewitnesses. That posture can be tested. It stands to be weighed.</hardTeach>
+          <fullTeach>1 Corinthians 15:3–5. Paul “received” and “delivered” the early core — died, buried, raised, appeared.
+Compare Luke 1:1–4: a first-century writer claiming inquiry among eyewitnesses. That posture can be tested. It stands to be weighed.</fullTeach>
+          <prompt>Keep the careful historical claim. Toss the overclaims.</prompt>
+          <teachOnWrong>The letter is mid-first-century. “I received / I delivered” is tradition language — weighty testimony, not a lab rerun.</teachOnWrong>
+          <challengeTiles>
+            <keep>Paul “received” and “delivered” the early core: died, buried, raised, appeared (1 Cor 15:3–5).</keep>
+            <discard>A medieval monk wrote the creed and copied it into Paul.</discard>
+            <discard>The creed is a lab result that proves the resurrection like a chemical reaction.</discard>
+            <discard>Paul invented the list in the second century after the Gospels.</discard>
+          </challengeTiles>
+        </learn>
+        <match>
+          <sentenceCorrect>The resurrection claim sits close to the events, not as a late legend.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Early is the same as laboratory proof.</miss>
+            <miss>No first-century writer claims to have asked witnesses.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at the square.</placePrompt>
+          <personPrompt>Silas keeps that square.</personPrompt>
+          <ideaPrompt>Silas’s public names — the claim sits close to the events.</ideaPrompt>
+          <ideaLabel>The claim sits close to the events.</ideaLabel>
+          <whyHard>Silas Whitman keeps Witness Square. Paul quotes a received formula and names known people; the claim sits close to the events.</whyHard>
+        </match>
+        <hold onFail="easy">
+          <claim>The resurrection claim sits close to the events, not as a late legend.</claim>
+          <reason>Paul quotes a received formula and names known people; Luke claims inquiry among witnesses.</reason>
+          <source>1 Corinthians 15:3–7; Luke 1:1–4</source>
+          <whyCorrect>Paul quotes a received formula and names known people; Luke claims inquiry among witnesses.</whyCorrect>
+          <whyMisses>
+            <miss>Named people make a report less testable.</miss>
+            <miss>Distance in time is the only historical question that matters.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>The resurrection claim sits close to the events, not as a late legend.</choice>
+            <choice>Early is the same as laboratory proof.</choice>
+            <choice>No first-century writer claims to have asked witnesses.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>Paul quotes a received formula and names known people; Luke claims inquiry among witnesses.</choice>
+            <choice>Named people make a report less testable.</choice>
+            <choice>Distance in time is the only historical question that matters.</choice>
+          </reasonChoices>
+        </hold>
+      </hard>
+      <journal id="j-wb-2" title="Early is not the same as easy" kicker="Witness Square" unlockAfter="wb-early" scoreFromHeldTier="true">
+        <p>Historians cannot rewind the world. They ask how close a report stands to the events, how formulaic it is, and whether the author is appealing to known people (Cephas, the Twelve, James, a large group, Paul himself).</p>
+        <p>Luke 1:1–4 shows another first-century Christian writer claiming the posture of inquiry among eyewitnesses. That posture can be tested. It stands to be weighed.</p>
+        <sources>
+          <source>1 Corinthians 15:3–7</source>
+          <source>Luke 1:1–4</source>
+        </sources>
+      </journal>
+    </lesson>
+    <lesson id="wb-method" place="Witness Square" person="Silas Whitman" tripleId="method-bench" ideaId="idea-method" ideaLabel="History tools weigh testimony." challengeKind="match" challengeTitle="Tools of the ancient historian">
+      <easy points="10" easyOrder="12">
+        <learn>
+          <shortStory>Ask: how many reports? How awkward is the detail? How soon was it said? Does it fit that world? Those tools test a report. They are not a chemistry lab.</shortStory>
+          <mainIdea>Ordinary historical tools weigh testimony; they do not replace reading.</mainIdea>
+          <gloss>Historians weigh sources. They cannot rerun the past.</gloss>
+          <loci>This idea lives at Witness Square, with Silas.</loci>
+          <word>
+            <term>Historian</term>
+            <sense>someone who weighs old reports, not a person who reruns last Tuesday</sense>
+          </word>
+          <hint>Match each tool to what it tests.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>Ordinary historical tools weigh testimony; they do not replace reading.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>An early creed is already a laboratory proof.</miss>
+            <miss>Every Christian report is automatically a late novel.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at the square.</placePrompt>
+          <personPrompt>Silas keeps that square.</personPrompt>
+          <ideaPrompt>Silas’s ledger — ordinary tools weigh testimony.</ideaPrompt>
+          <ideaLabel>History tools weigh testimony.</ideaLabel>
+          <whyEasy>Silas keeps the square. Ordinary tools weigh testimony; they do not replace reading.</whyEasy>
+        </match>
+        <hold levelUpTo="medium" onFail="easy">
+          <claim>Ordinary historical tools weigh testimony; they do not replace reading.</claim>
+          <reason>Multiple attestation, embarrassment, early reports, and context resist “late pious novel.”</reason>
+          <source>Standard historical method</source>
+          <whyCorrect>Multiple attestation, embarrassment, early reports, and context resist “late pious novel.”</whyCorrect>
+          <whyMisses>
+            <miss>Method is a way to skip the texts themselves.</miss>
+            <miss>Embarrassment means a story must be false.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Ordinary historical tools weigh testimony; they do not replace reading.</choice>
+            <choice>An early creed is already a laboratory proof.</choice>
+            <choice>Every Christian report is automatically a late novel.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>Multiple attestation, embarrassment, early reports, and context resist “late pious novel.”</choice>
+            <choice>Method is a way to skip the texts themselves.</choice>
+            <choice>Embarrassment means a story must be false.</choice>
+          </reasonChoices>
+        </hold>
+      </easy>
+      <medium points="12">
+        <learn>
+          <mediumTeach>Ordinary historical tools weigh testimony: how many reports, how awkward the detail, how soon it was said, whether it fits that world. They test a report; they do not replace reading the text. They are not a chemistry lab — and they still matter.</mediumTeach>
+          <mainIdea>Ordinary historical tools weigh testimony; they do not replace reading.</mainIdea>
+          <gloss>Historians weigh sources. They cannot rerun the past.</gloss>
+          <loci>This idea lives at Witness Square, with Silas.</loci>
+          <word>
+            <term>Historian</term>
+            <sense>someone who weighs old reports, not a person who reruns last Tuesday</sense>
+          </word>
+          <hint>Match each tool to what it tests.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>Ordinary historical tools weigh testimony; they do not replace reading.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>An early creed is already a laboratory proof.</miss>
+            <miss>Every Christian report is automatically a late novel.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at the square.</placePrompt>
+          <personPrompt>Silas keeps that square.</personPrompt>
+          <ideaPrompt>Silas’s ledger — ordinary tools weigh testimony.</ideaPrompt>
+          <ideaLabel>History tools weigh testimony.</ideaLabel>
+          <whyMedium>Silas keeps the square. Ordinary tools weigh testimony; they do not replace reading.</whyMedium>
+        </match>
+        <hold levelUpTo="hard" onFail="easy">
+          <claim>Ordinary historical tools weigh testimony; they do not replace reading.</claim>
+          <reason>Multiple attestation, embarrassment, early reports, and context resist “late pious novel.”</reason>
+          <source>Standard historical method</source>
+          <whyCorrect>Multiple attestation, embarrassment, early reports, and context resist “late pious novel.”</whyCorrect>
+          <whyMisses>
+            <miss>Method is a way to skip the texts themselves.</miss>
+            <miss>Embarrassment means a story must be false.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Ordinary historical tools weigh testimony; they do not replace reading.</choice>
+            <choice>An early creed is already a laboratory proof.</choice>
+            <choice>Every Christian report is automatically a late novel.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>Multiple attestation, embarrassment, early reports, and context resist “late pious novel.”</choice>
+            <choice>Method is a way to skip the texts themselves.</choice>
+            <choice>Embarrassment means a story must be false.</choice>
+          </reasonChoices>
+        </hold>
+      </medium>
+      <hard points="15">
+        <learn>
+          <hardTeach>Used in historical Jesus research (and ancient history more broadly). These tools show which reports are hard to dismiss as late invention — early public testimony, not a lab rerun.
+These criteria can be overused. They do not replace reading texts as wholes. They do resist a lazy story: “Someone, somewhere, made everything up much later.”</hardTeach>
+          <fullTeach>Used in historical Jesus research (and ancient history more broadly). These tools show which reports are hard to dismiss as late invention — early public testimony, not a lab rerun.
+These criteria can be overused. They do not replace reading texts as wholes. They do resist a lazy story: “Someone, somewhere, made everything up much later.”</fullTeach>
+          <prompt>Match each criterion to what it is actually testing.</prompt>
+          <teachOnWrong>Each tool answers a different question: how many streams, how awkward, how soon, how at-home in the period. Try pairing again.</teachOnWrong>
+          <challengeTiles>
+            <pair>
+              <left>Multiple attestation</left>
+              <right>Independent sources carrying the same core</right>
+            </pair>
+            <pair>
+              <left>Embarrassment</left>
+              <right>Details early Christians would be unlikely to invent</right>
+            </pair>
+            <pair>
+              <left>Early testimony</left>
+              <right>Closer in time, less room for legend to harden</right>
+            </pair>
+            <pair>
+              <left>Contextual credibility</left>
+              <right>Fits the known first-century Jewish and Roman world</right>
+            </pair>
+          </challengeTiles>
+        </learn>
+        <match>
+          <sentenceCorrect>Ordinary historical tools weigh testimony; they do not replace reading.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>An early creed is already a laboratory proof.</miss>
+            <miss>Every Christian report is automatically a late novel.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at the square.</placePrompt>
+          <personPrompt>Silas keeps that square.</personPrompt>
+          <ideaPrompt>Silas’s ledger — ordinary tools weigh testimony.</ideaPrompt>
+          <ideaLabel>History tools weigh testimony.</ideaLabel>
+          <whyHard>Silas Whitman keeps Witness Square. Multiple attestation and early reports weigh testimony — they do not skip the texts.</whyHard>
+        </match>
+        <hold onFail="easy">
+          <claim>Ordinary historical tools weigh testimony; they do not replace reading.</claim>
+          <reason>Multiple attestation, embarrassment, early reports, and context resist “late pious novel.”</reason>
+          <source>Standard historical method</source>
+          <whyCorrect>Multiple attestation, embarrassment, early reports, and context resist “late pious novel.”</whyCorrect>
+          <whyMisses>
+            <miss>Method is a way to skip the texts themselves.</miss>
+            <miss>Embarrassment means a story must be false.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Ordinary historical tools weigh testimony; they do not replace reading.</choice>
+            <choice>An early creed is already a laboratory proof.</choice>
+            <choice>Every Christian report is automatically a late novel.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>Multiple attestation, embarrassment, early reports, and context resist “late pious novel.”</choice>
+            <choice>Method is a way to skip the texts themselves.</choice>
+            <choice>Embarrassment means a story must be false.</choice>
+          </reasonChoices>
+        </hold>
+      </hard>
+      <journal id="j-wb-3" title="How the past is weighed" kicker="Witness Square" unlockAfter="wb-method" scoreFromHeldTier="true">
+        <p>Multiple attestation, embarrassment, early testimony, and contextual credibility are ordinary tools. They do not replace reading. They resist the story that every Christian report is a late pious novel.</p>
+        <p>Used honestly, they also resist the opposite laziness: “an early creed is already a laboratory proof.” History gives testimony, not a rerun.</p>
+        <sources>
+          <source>Standard historical method as used in ancient history and historical Jesus studies</source>
+        </sources>
+      </journal>
+    </lesson>
+    <lesson id="wb-women" place="Witness Square" person="Silas Whitman" tripleId="women-bench" ideaId="idea-women" ideaLabel="Women first saw the tomb." challengeKind="sort" challengeTitle="Idle talk">
+      <easy points="10" easyOrder="5">
+        <learn>
+          <shortStory>The tomb stories begin with women. Luke says the men called it idle talk. If you only wanted later respect, you would more likely lead with respected men.</shortStory>
+          <mainIdea>The first tomb reports begin with women — an awkward opening if invented for respectability.</mainIdea>
+          <gloss>Women as first witnesses is an awkward detail to invent.</gloss>
+          <loci>This idea lives at Witness Square, with Silas.</loci>
+          <word>
+            <term>Witness</term>
+            <sense>someone who says what they saw</sense>
+          </word>
+          <hint>Keep the costly opening. Toss overclaims.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>The first tomb reports begin with women — an awkward opening if invented for respectability.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>The Gospels open with the Roman senate converting overnight.</miss>
+            <miss>Women were the most legally impressive public witnesses.</miss>
+          </sentenceMisses>
+          <placePrompt>That report sits at the square.</placePrompt>
+          <personPrompt>Silas keeps that square.</personPrompt>
+          <ideaPrompt>Silas’s first report — women saw the tomb first.</ideaPrompt>
+          <ideaLabel>Women first saw the tomb.</ideaLabel>
+          <whyEasy>Silas keeps the square. Women saw the tomb first — an awkward first report.</whyEasy>
+        </match>
+        <hold levelUpTo="medium" onFail="easy">
+          <claim>The first tomb reports begin with women — an awkward opening if invented for respectability.</claim>
+          <reason>Luke records that the apostles dismissed them — a costly opening if the goal were instant respectability.</reason>
+          <source>Luke 24:1–11</source>
+          <whyCorrect>Luke records that the apostles dismissed them — a costly opening if the goal were instant respectability.</whyCorrect>
+          <whyMisses>
+            <miss>Luke sands away any dismissal of the first report.</miss>
+            <miss>Outside writers never mention Christus or Pilate.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>The first tomb reports begin with women — an awkward opening if invented for respectability.</choice>
+            <choice>The Gospels open with the Roman senate converting overnight.</choice>
+            <choice>Women were the most legally impressive public witnesses.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>Luke records that the apostles dismissed them — a costly opening if the goal were instant respectability.</choice>
+            <choice>Luke sands away any dismissal of the first report.</choice>
+            <choice>Outside writers never mention Christus or Pilate.</choice>
+          </reasonChoices>
+        </hold>
+      </easy>
+      <medium points="12">
+        <learn>
+          <mediumTeach>The tomb stories begin with women (Mark 16; Luke 24; John 20). Luke says the men called it idle talk. If you only wanted later respectability, you would more likely lead with respected men — an awkward opening that fits honest report more than polished invention.</mediumTeach>
+          <mainIdea>The first tomb reports begin with women — an awkward opening if invented for respectability.</mainIdea>
+          <gloss>Women as first witnesses is an awkward detail to invent.</gloss>
+          <loci>This idea lives at Witness Square, with Silas.</loci>
+          <word>
+            <term>Witness</term>
+            <sense>someone who says what they saw</sense>
+          </word>
+          <hint>Keep the costly opening. Toss overclaims.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>The first tomb reports begin with women — an awkward opening if invented for respectability.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>The Gospels open with the Roman senate converting overnight.</miss>
+            <miss>Women were the most legally impressive public witnesses.</miss>
+          </sentenceMisses>
+          <placePrompt>That report sits at the square.</placePrompt>
+          <personPrompt>Silas keeps that square.</personPrompt>
+          <ideaPrompt>Silas’s first report — women saw the tomb first.</ideaPrompt>
+          <ideaLabel>Women first saw the tomb.</ideaLabel>
+          <whyMedium>Silas keeps the square. Women saw the tomb first — an awkward first report.</whyMedium>
+        </match>
+        <hold levelUpTo="hard" onFail="easy">
+          <claim>The first tomb reports begin with women — an awkward opening if invented for respectability.</claim>
+          <reason>Luke records that the apostles dismissed them — a costly opening if the goal were instant respectability.</reason>
+          <source>Luke 24:1–11</source>
+          <whyCorrect>Luke records that the apostles dismissed them — a costly opening if the goal were instant respectability.</whyCorrect>
+          <whyMisses>
+            <miss>Luke sands away any dismissal of the first report.</miss>
+            <miss>Outside writers never mention Christus or Pilate.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>The first tomb reports begin with women — an awkward opening if invented for respectability.</choice>
+            <choice>The Gospels open with the Roman senate converting overnight.</choice>
+            <choice>Women were the most legally impressive public witnesses.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>Luke records that the apostles dismissed them — a costly opening if the goal were instant respectability.</choice>
+            <choice>Luke sands away any dismissal of the first report.</choice>
+            <choice>Outside writers never mention Christus or Pilate.</choice>
+          </reasonChoices>
+        </hold>
+      </medium>
+      <hard points="15">
+        <learn>
+          <hardTeach>Women are first at the tomb (Mark 16:1–8; Luke 24:1–11; John 20). Luke 24:11: the report sounded like “idle talk.”
+Josephus, Antiquities 18.63–64, is partly disputed because of later Christian touches. Honesty about that dispute belongs in the dossier.</hardTeach>
+          <fullTeach>Women are first at the tomb (Mark 16:1–8; Luke 24:1–11; John 20). Luke 24:11: the report sounded like “idle talk.”
+Josephus, Antiquities 18.63–64, is partly disputed because of later Christian touches. Honesty about that dispute belongs in the dossier.</fullTeach>
+          <prompt>Keep the careful historical move. Toss the overclaims.</prompt>
+          <teachOnWrong>This is a costly detail that counts for the report’s honesty. Tacitus 15.44 notes the execution, not the tomb. Do not invent citations.</teachOnWrong>
+          <challengeTiles>
+            <keep>An inventor hunting courtroom credibility would more likely lead with respected men.</keep>
+            <discard>Named women automatically make every detail certain.</discard>
+            <discard>Luke 24:11 means the evangelists wanted readers to distrust women.</discard>
+            <discard>Tacitus wrote the tomb story in Annals 15.44.</discard>
+          </challengeTiles>
+        </learn>
+        <match>
+          <sentenceCorrect>The first tomb reports begin with women — an awkward opening if invented for respectability.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>The Gospels open with the Roman senate converting overnight.</miss>
+            <miss>Women were the most legally impressive public witnesses.</miss>
+          </sentenceMisses>
+          <placePrompt>That report sits at the square.</placePrompt>
+          <personPrompt>Silas keeps that square.</personPrompt>
+          <ideaPrompt>Silas’s first report — women saw the tomb first.</ideaPrompt>
+          <ideaLabel>Women first saw the tomb.</ideaLabel>
+          <whyHard>Silas Whitman keeps Witness Square. Women as first tomb witnesses is a public report, not a creek picture.</whyHard>
+        </match>
+        <hold onFail="easy">
+          <claim>The first tomb reports begin with women — an awkward opening if invented for respectability.</claim>
+          <reason>Luke records that the apostles dismissed them — a costly opening if the goal were instant respectability.</reason>
+          <source>Luke 24:1–11</source>
+          <whyCorrect>Luke records that the apostles dismissed them — a costly opening if the goal were instant respectability.</whyCorrect>
+          <whyMisses>
+            <miss>Luke sands away any dismissal of the first report.</miss>
+            <miss>Outside writers never mention Christus or Pilate.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>The first tomb reports begin with women — an awkward opening if invented for respectability.</choice>
+            <choice>The Gospels open with the Roman senate converting overnight.</choice>
+            <choice>Women were the most legally impressive public witnesses.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>Luke records that the apostles dismissed them — a costly opening if the goal were instant respectability.</choice>
+            <choice>Luke sands away any dismissal of the first report.</choice>
+            <choice>Outside writers never mention Christus or Pilate.</choice>
+          </reasonChoices>
+        </hold>
+      </hard>
+      <journal id="j-wb-4" title="Awkward beginnings" kicker="Witness Square" unlockAfter="wb-women" scoreFromHeldTier="true">
+        <p>The tomb stories begin with women, and Luke records that the apostles dismissed them (Luke 24:11). That is an odd opening if the only goal is later public respectability.</p>
+        <p>Outside the Gospels, Tacitus (Annals 15.44) notes Christus executed under Pilate and a movement that spread to Rome. Josephus (Antiquities 18.63–64) is partly disputed because of later Christian touches, and honesty about that dispute belongs in the dossier.</p>
+        <sources>
+          <source>Mark 16:1–8</source>
+          <source>Luke 24:1–11</source>
+          <source>John 20:1–18</source>
+          <source>Tacitus, Annals 15.44</source>
+          <source>Josephus, Antiquities 18.63–64</source>
+        </sources>
+      </journal>
+    </lesson>
+    <lesson id="daily-names" place="Witness Square" person="Silas Whitman" tripleId="names-bench" ideaId="idea-names" ideaLabel="Named witnesses, not one private voice." challengeKind="match" challengeTitle="Names that stay">
+      <easy points="10" easyOrder="13">
+        <learn>
+          <shortStory>Paul lists Cephas, the Twelve, and more than five hundred — many still living then.</shortStory>
+          <mainIdea>The resurrection claim stacks named witnesses, not one private voice.</mainIdea>
+          <gloss>The resurrection claim stacks named witnesses, not one private voice.</gloss>
+          <loci>This idea lives at Witness Square, with Silas.</loci>
+          <word>
+            <term>Witness</term>
+            <sense>a named person who was said to have seen</sense>
+          </word>
+          <hint>Keep the names. Toss the anonymous dream.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>The resurrection claim stacks named witnesses, not one private voice.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Paul refuses to name anyone.</miss>
+            <miss>Only one anonymous dreamer is cited.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at the square.</placePrompt>
+          <personPrompt>Silas keeps that square.</personPrompt>
+          <ideaPrompt>Silas’s public names — Cephas, the Twelve, five hundred.</ideaPrompt>
+          <ideaLabel>Named witnesses, not one private voice.</ideaLabel>
+          <whyEasy>Silas keeps the square. Named witnesses — not one private voice.</whyEasy>
+        </match>
+        <hold levelUpTo="medium" onFail="easy">
+          <claim>The resurrection claim stacks named witnesses, not one private voice.</claim>
+          <reason>Paul lists Cephas, the Twelve, and more than five hundred — many still living then.</reason>
+          <source>1 Corinthians 15:5–6</source>
+          <whyCorrect>Paul lists Cephas, the Twelve, and more than five hundred — many still living then.</whyCorrect>
+          <whyMisses>
+            <miss>A crowd appearance would have been hidden.</miss>
+            <miss>Cephas is left off the list.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>The resurrection claim stacks named witnesses, not one private voice.</choice>
+            <choice>Paul refuses to name anyone.</choice>
+            <choice>Only one anonymous dreamer is cited.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>Paul lists Cephas, the Twelve, and more than five hundred — many still living then.</choice>
+            <choice>A crowd appearance would have been hidden.</choice>
+            <choice>Cephas is left off the list.</choice>
+          </reasonChoices>
+        </hold>
+      </easy>
+      <medium points="12">
+        <learn>
+          <mediumTeach>1 Corinthians 15:5–6. Paul lists Cephas, the Twelve, and more than five hundred brothers — many still living when he wrote. The resurrection claim stacks named witnesses, not one private voice.</mediumTeach>
+          <mainIdea>The resurrection claim stacks named witnesses, not one private voice.</mainIdea>
+          <gloss>The resurrection claim stacks named witnesses, not one private voice.</gloss>
+          <loci>This idea lives at Witness Square, with Silas.</loci>
+          <word>
+            <term>Witness</term>
+            <sense>a named person who was said to have seen</sense>
+          </word>
+          <hint>Keep the names. Toss the anonymous dream.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>The resurrection claim stacks named witnesses, not one private voice.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Paul refuses to name anyone.</miss>
+            <miss>Only one anonymous dreamer is cited.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at the square.</placePrompt>
+          <personPrompt>Silas keeps that square.</personPrompt>
+          <ideaPrompt>Silas’s public names — Cephas, the Twelve, five hundred.</ideaPrompt>
+          <ideaLabel>Named witnesses, not one private voice.</ideaLabel>
+          <whyMedium>Silas keeps the square. Named witnesses — not one private voice.</whyMedium>
+        </match>
+        <hold levelUpTo="hard" onFail="easy">
+          <claim>The resurrection claim stacks named witnesses, not one private voice.</claim>
+          <reason>Paul lists Cephas, the Twelve, and more than five hundred — many still living then.</reason>
+          <source>1 Corinthians 15:5–6</source>
+          <whyCorrect>Paul lists Cephas, the Twelve, and more than five hundred — many still living then.</whyCorrect>
+          <whyMisses>
+            <miss>A crowd appearance would have been hidden.</miss>
+            <miss>Cephas is left off the list.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>The resurrection claim stacks named witnesses, not one private voice.</choice>
+            <choice>Paul refuses to name anyone.</choice>
+            <choice>Only one anonymous dreamer is cited.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>Paul lists Cephas, the Twelve, and more than five hundred — many still living then.</choice>
+            <choice>A crowd appearance would have been hidden.</choice>
+            <choice>Cephas is left off the list.</choice>
+          </reasonChoices>
+        </hold>
+      </medium>
+      <hard points="15">
+        <learn>
+          <hardTeach>1 Corinthians 15:5–6. The New Testament does not rest on one voice. It stacks named people.
+He appeared to Cephas, then to the twelve. Then he appeared to more than five hundred brothers at one time.</hardTeach>
+          <fullTeach>1 Corinthians 15:5–6. The New Testament does not rest on one voice. It stacks named people.
+He appeared to Cephas, then to the twelve. Then he appeared to more than five hundred brothers at one time.</fullTeach>
+          <prompt>Match the person to the kind of witness they left.</prompt>
+          <teachOnWrong>Paul is listing appearances, not inventing titles. Look at who is named, then snap again.</teachOnWrong>
+          <challengeTiles>
+            <pair>
+              <left>Cephas (Peter)</left>
+              <right>Named first in Paul’s list</right>
+            </pair>
+            <pair>
+              <left>The Twelve</left>
+              <right>The gathered apprentices</right>
+            </pair>
+            <pair>
+              <left>More than five hundred</left>
+              <right>A crowd, many still living then</right>
+            </pair>
+          </challengeTiles>
+        </learn>
+        <match>
+          <sentenceCorrect>The resurrection claim stacks named witnesses, not one private voice.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Paul refuses to name anyone.</miss>
+            <miss>Only one anonymous dreamer is cited.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at the square.</placePrompt>
+          <personPrompt>Silas keeps that square.</personPrompt>
+          <ideaPrompt>Silas’s public names — Cephas, the Twelve, five hundred.</ideaPrompt>
+          <ideaLabel>Named witnesses, not one private voice.</ideaLabel>
+          <whyHard>Silas Whitman keeps Witness Square. Cephas, the Twelve, and more than five hundred are public names, not a private dream.</whyHard>
+        </match>
+        <hold onFail="easy">
+          <claim>The resurrection claim stacks named witnesses, not one private voice.</claim>
+          <reason>Paul lists Cephas, the Twelve, and more than five hundred — many still living then.</reason>
+          <source>1 Corinthians 15:5–6</source>
+          <whyCorrect>Paul lists Cephas, the Twelve, and more than five hundred — many still living then.</whyCorrect>
+          <whyMisses>
+            <miss>A crowd appearance would have been hidden.</miss>
+            <miss>Cephas is left off the list.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>The resurrection claim stacks named witnesses, not one private voice.</choice>
+            <choice>Paul refuses to name anyone.</choice>
+            <choice>Only one anonymous dreamer is cited.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>Paul lists Cephas, the Twelve, and more than five hundred — many still living then.</choice>
+            <choice>A crowd appearance would have been hidden.</choice>
+            <choice>Cephas is left off the list.</choice>
+          </reasonChoices>
+        </hold>
+      </hard>
+      <journal id="" title="" kicker="" unlockAfter="daily-names" scoreFromHeldTier="true">
+        <p />
+        <sources>
+          <source />
+        </sources>
+      </journal>
+    </lesson>
+    <lesson id="daily-creed" place="Witness Square" person="Silas Whitman" tripleId="creed-bench" ideaId="idea-daily-creed" ideaLabel="The creed sits close to the event." challengeKind="sequence" challengeTitle="Older than the letter">
+      <easy points="10" easyOrder="14">
+        <learn>
+          <shortStory>If that short line is early, the claim is close to what it names: died, buried, raised.</shortStory>
+          <mainIdea>The creed sits between the event and Paul’s letter.</mainIdea>
+          <gloss>The old shared belief sits between the event and Paul’s letter.</gloss>
+          <loci>This idea lives at Witness Square, with Silas.</loci>
+          <word>
+            <term>Creed</term>
+            <sense>an old shared belief the churches already said out loud</sense>
+          </word>
+          <hint>Keep “received.” Toss “Paul invented it while writing.”</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>The creed sits between the event and Paul’s letter.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Paul invents the creed as he writes.</miss>
+            <miss>Burial is skipped because it does not matter.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at the square.</placePrompt>
+          <personPrompt>Silas keeps that square.</personPrompt>
+          <ideaPrompt>Silas’s handed-on creed — close to the event, then Paul’s letter.</ideaPrompt>
+          <ideaLabel>The creed sits close to the event.</ideaLabel>
+          <whyEasy>Silas keeps the square. The creed sits close to the event, then Paul’s letter.</whyEasy>
+        </match>
+        <hold levelUpTo="medium" onFail="easy">
+          <claim>The creed sits between the event and Paul’s letter.</claim>
+          <reason>If the formula is early, the claim is close to what it names: died, buried, raised.</reason>
+          <source>1 Corinthians 15:3–4</source>
+          <whyCorrect>If the formula is early, the claim is close to what it names: died, buried, raised.</whyCorrect>
+          <whyMisses>
+            <miss>The letter is older than any tradition it quotes.</miss>
+            <miss>Nothing was handed on; it was only felt.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>The creed sits between the event and Paul’s letter.</choice>
+            <choice>Paul invents the creed as he writes.</choice>
+            <choice>Burial is skipped because it does not matter.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>If the formula is early, the claim is close to what it names: died, buried, raised.</choice>
+            <choice>The letter is older than any tradition it quotes.</choice>
+            <choice>Nothing was handed on; it was only felt.</choice>
+          </reasonChoices>
+        </hold>
+      </easy>
+      <medium points="12">
+        <learn>
+          <mediumTeach>1 Corinthians 15:3–4. The short creed sits between the event and Paul’s letter: died, buried, raised. If that line is early, the claim is close to what it names — not a late add-on.</mediumTeach>
+          <mainIdea>The creed sits between the event and Paul’s letter.</mainIdea>
+          <gloss>The old shared belief sits between the event and Paul’s letter.</gloss>
+          <loci>This idea lives at Witness Square, with Silas.</loci>
+          <word>
+            <term>Creed</term>
+            <sense>an old shared belief the churches already said out loud</sense>
+          </word>
+          <hint>Keep “received.” Toss “Paul invented it while writing.”</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>The creed sits between the event and Paul’s letter.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Paul invents the creed as he writes.</miss>
+            <miss>Burial is skipped because it does not matter.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at the square.</placePrompt>
+          <personPrompt>Silas keeps that square.</personPrompt>
+          <ideaPrompt>Silas’s handed-on creed — close to the event, then Paul’s letter.</ideaPrompt>
+          <ideaLabel>The creed sits close to the event.</ideaLabel>
+          <whyMedium>Silas keeps the square. The creed sits close to the event, then Paul’s letter.</whyMedium>
+        </match>
+        <hold levelUpTo="hard" onFail="easy">
+          <claim>The creed sits between the event and Paul’s letter.</claim>
+          <reason>If the formula is early, the claim is close to what it names: died, buried, raised.</reason>
+          <source>1 Corinthians 15:3–4</source>
+          <whyCorrect>If the formula is early, the claim is close to what it names: died, buried, raised.</whyCorrect>
+          <whyMisses>
+            <miss>The letter is older than any tradition it quotes.</miss>
+            <miss>Nothing was handed on; it was only felt.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>The creed sits between the event and Paul’s letter.</choice>
+            <choice>Paul invents the creed as he writes.</choice>
+            <choice>Burial is skipped because it does not matter.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>If the formula is early, the claim is close to what it names: died, buried, raised.</choice>
+            <choice>The letter is older than any tradition it quotes.</choice>
+            <choice>Nothing was handed on; it was only felt.</choice>
+          </reasonChoices>
+        </hold>
+      </medium>
+      <hard points="15">
+        <learn>
+          <hardTeach>1 Corinthians 15:3–4. If the creed is early, the claim is close to the event it names.
+Christ died… he was buried… he was raised on the third day. Burial and raising are both named.</hardTeach>
+          <fullTeach>1 Corinthians 15:3–4. If the creed is early, the claim is close to the event it names.
+Christ died… he was buried… he was raised on the third day. Burial and raising are both named.</fullTeach>
+          <prompt>Scholars often date this creed earlier than the letter that quotes it. Order the steps.</prompt>
+          <teachOnWrong>Paul is handing on something he received. The creed sits between the event and the letter. Try the chain again.</teachOnWrong>
+          <challengeTiles />
+        </learn>
+        <match>
+          <sentenceCorrect>The creed sits between the event and Paul’s letter.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Paul invents the creed as he writes.</miss>
+            <miss>Burial is skipped because it does not matter.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at the square.</placePrompt>
+          <personPrompt>Silas keeps that square.</personPrompt>
+          <ideaPrompt>Silas’s handed-on creed — close to the event, then Paul’s letter.</ideaPrompt>
+          <ideaLabel>The creed sits close to the event.</ideaLabel>
+          <whyHard>Silas Whitman keeps Witness Square. The creed sits between the event and Paul’s letter — died, buried, raised.</whyHard>
+        </match>
+        <hold onFail="easy">
+          <claim>The creed sits between the event and Paul’s letter.</claim>
+          <reason>If the formula is early, the claim is close to what it names: died, buried, raised.</reason>
+          <source>1 Corinthians 15:3–4</source>
+          <whyCorrect>If the formula is early, the claim is close to what it names: died, buried, raised.</whyCorrect>
+          <whyMisses>
+            <miss>The letter is older than any tradition it quotes.</miss>
+            <miss>Nothing was handed on; it was only felt.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>The creed sits between the event and Paul’s letter.</choice>
+            <choice>Paul invents the creed as he writes.</choice>
+            <choice>Burial is skipped because it does not matter.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>If the formula is early, the claim is close to what it names: died, buried, raised.</choice>
+            <choice>The letter is older than any tradition it quotes.</choice>
+            <choice>Nothing was handed on; it was only felt.</choice>
+          </reasonChoices>
+        </hold>
+      </hard>
+      <journal id="" title="" kicker="" unlockAfter="daily-creed" scoreFromHeldTier="true">
+        <p />
+        <sources>
+          <source />
+        </sources>
+      </journal>
+    </lesson>
+    <lesson id="daily-empty" place="Witness Square" person="Silas Whitman" tripleId="empty-bench" ideaId="idea-empty" ideaLabel="Easter begins with an empty place." challengeKind="sort" challengeTitle="Morning">
+      <easy points="10" easyOrder="15">
+        <learn>
+          <shortStory>The first Easter reports are not tidy. They include an empty place, women, fear, and wonder. The town does not sand that awkwardness into a fake triumph.</shortStory>
+          <mainIdea>The first Easter reports include an empty place, women, fear, and wonder.</mainIdea>
+          <gloss>The first Easter reports include an empty place, women, fear, and wonder.</gloss>
+          <loci>This idea lives at Witness Square, with Silas.</loci>
+          <word>
+            <term>Empty</term>
+            <sense>the place was not occupied when they looked</sense>
+          </word>
+          <hint>Keep the awkward opening. Toss the senate conversion.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>The first Easter reports include an empty place, women, fear, and wonder.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Rome instantly converts the senate.</miss>
+            <miss>Women are absent from the first reports.</miss>
+          </sentenceMisses>
+          <placePrompt>That report sits at the square.</placePrompt>
+          <personPrompt>Silas keeps that square.</personPrompt>
+          <ideaPrompt>Silas’s first Easter — empty place, women, fear, and wonder.</ideaPrompt>
+          <ideaLabel>Easter begins with an empty place.</ideaLabel>
+          <whyEasy>Silas keeps the square. Easter begins with an empty place, women, fear, and wonder.</whyEasy>
+        </match>
+        <hold levelUpTo="medium" onFail="easy">
+          <claim>The first Easter reports include an empty place, women, fear, and wonder.</claim>
+          <reason>The town does not sand that awkwardness into a tidy triumph.</reason>
+          <source>Luke 24:2–3</source>
+          <whyCorrect>The town does not sand that awkwardness into a tidy triumph.</whyCorrect>
+          <whyMisses>
+            <miss>The tomb is found occupied and explained.</miss>
+            <miss>Fear is edited out of the opening.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>The first Easter reports include an empty place, women, fear, and wonder.</choice>
+            <choice>Rome instantly converts the senate.</choice>
+            <choice>Women are absent from the first reports.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>The town does not sand that awkwardness into a tidy triumph.</choice>
+            <choice>The tomb is found occupied and explained.</choice>
+            <choice>Fear is edited out of the opening.</choice>
+          </reasonChoices>
+        </hold>
+      </easy>
+      <medium points="12">
+        <learn>
+          <mediumTeach>The first Easter reports include an empty place, women, fear, and wonder. They are not a tidy triumph parade. The town does not sand that awkwardness away — honesty before polish.</mediumTeach>
+          <mainIdea>The first Easter reports include an empty place, women, fear, and wonder.</mainIdea>
+          <gloss>The first Easter reports include an empty place, women, fear, and wonder.</gloss>
+          <loci>This idea lives at Witness Square, with Silas.</loci>
+          <word>
+            <term>Empty</term>
+            <sense>the place was not occupied when they looked</sense>
+          </word>
+          <hint>Keep the awkward opening. Toss the senate conversion.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>The first Easter reports include an empty place, women, fear, and wonder.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Rome instantly converts the senate.</miss>
+            <miss>Women are absent from the first reports.</miss>
+          </sentenceMisses>
+          <placePrompt>That report sits at the square.</placePrompt>
+          <personPrompt>Silas keeps that square.</personPrompt>
+          <ideaPrompt>Silas’s first Easter — empty place, women, fear, and wonder.</ideaPrompt>
+          <ideaLabel>Easter begins with an empty place.</ideaLabel>
+          <whyMedium>Silas keeps the square. Easter begins with an empty place, women, fear, and wonder.</whyMedium>
+        </match>
+        <hold levelUpTo="hard" onFail="easy">
+          <claim>The first Easter reports include an empty place, women, fear, and wonder.</claim>
+          <reason>The town does not sand that awkwardness into a tidy triumph.</reason>
+          <source>Luke 24:2–3</source>
+          <whyCorrect>The town does not sand that awkwardness into a tidy triumph.</whyCorrect>
+          <whyMisses>
+            <miss>The tomb is found occupied and explained.</miss>
+            <miss>Fear is edited out of the opening.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>The first Easter reports include an empty place, women, fear, and wonder.</choice>
+            <choice>Rome instantly converts the senate.</choice>
+            <choice>Women are absent from the first reports.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>The town does not sand that awkwardness into a tidy triumph.</choice>
+            <choice>The tomb is found occupied and explained.</choice>
+            <choice>Fear is edited out of the opening.</choice>
+          </reasonChoices>
+        </hold>
+      </medium>
+      <hard points="15">
+        <learn>
+          <hardTeach>The first reports are not tidy. They include women, fear, and an empty place. The town does not sand that down.
+They found the stone rolled away from the tomb, but when they went in they did not find the body.</hardTeach>
+          <fullTeach>The first reports are not tidy. They include women, fear, and an empty place. The town does not sand that down.
+They found the stone rolled away from the tomb, but when they went in they did not find the body.</fullTeach>
+          <prompt>Which details belong in the first Easter reports?</prompt>
+          <teachOnWrong>Luke 24 begins with an empty place and a dismissed report. Keep the awkwardness; toss the tidy triumph.</teachOnWrong>
+          <challengeTiles>
+            <keep>The tomb is found empty.</keep>
+            <keep>Women are among the first witnesses.</keep>
+            <keep>Fear and wonder sit side by side.</keep>
+            <discard>Rome instantly converts the senate.</discard>
+          </challengeTiles>
+        </learn>
+        <match>
+          <sentenceCorrect>The first Easter reports include an empty place, women, fear, and wonder.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Rome instantly converts the senate.</miss>
+            <miss>Women are absent from the first reports.</miss>
+          </sentenceMisses>
+          <placePrompt>That report sits at the square.</placePrompt>
+          <personPrompt>Silas keeps that square.</personPrompt>
+          <ideaPrompt>Silas’s first Easter — empty place, women, fear, and wonder.</ideaPrompt>
+          <ideaLabel>Easter begins with an empty place.</ideaLabel>
+          <whyHard>Silas Whitman keeps Witness Square. The first Easter reports include an empty place — the town does not sand that awkwardness away.</whyHard>
+        </match>
+        <hold onFail="easy">
+          <claim>The first Easter reports include an empty place, women, fear, and wonder.</claim>
+          <reason>The town does not sand that awkwardness into a tidy triumph.</reason>
+          <source>Luke 24:2–3</source>
+          <whyCorrect>The town does not sand that awkwardness into a tidy triumph.</whyCorrect>
+          <whyMisses>
+            <miss>The tomb is found occupied and explained.</miss>
+            <miss>Fear is edited out of the opening.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>The first Easter reports include an empty place, women, fear, and wonder.</choice>
+            <choice>Rome instantly converts the senate.</choice>
+            <choice>Women are absent from the first reports.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>The town does not sand that awkwardness into a tidy triumph.</choice>
+            <choice>The tomb is found occupied and explained.</choice>
+            <choice>Fear is edited out of the opening.</choice>
+          </reasonChoices>
+        </hold>
+      </hard>
+      <journal id="" title="" kicker="" unlockAfter="daily-empty" scoreFromHeldTier="true">
+        <p />
+        <sources>
+          <source />
+        </sources>
+      </journal>
+    </lesson>
+  </lessons>
+  <streetFacts>
+    <fact evidenceId="wb-creed" tripleId="silas-bench" ideaId="idea-silas" place="Witness Square" person="Silas Whitman" ideaLabel="Died, buried, raised, appeared." />
+    <fact evidenceId="wb-early" tripleId="early-bench" ideaId="idea-early" place="Witness Square" person="Silas Whitman" ideaLabel="The claim sits close to the events." />
+    <fact evidenceId="wb-method" tripleId="method-bench" ideaId="idea-method" place="Witness Square" person="Silas Whitman" ideaLabel="History tools weigh testimony." />
+    <fact evidenceId="wb-women" tripleId="women-bench" ideaId="idea-women" place="Witness Square" person="Silas Whitman" ideaLabel="Women first saw the tomb." />
+    <fact evidenceId="daily-names" tripleId="names-bench" ideaId="idea-names" place="Witness Square" person="Silas Whitman" ideaLabel="Named witnesses, not one private voice." />
+    <fact evidenceId="daily-creed" tripleId="creed-bench" ideaId="idea-daily-creed" place="Witness Square" person="Silas Whitman" ideaLabel="The creed sits close to the event." />
+    <fact evidenceId="daily-empty" tripleId="empty-bench" ideaId="idea-empty" place="Witness Square" person="Silas Whitman" ideaLabel="Easter begins with an empty place." />
+  </streetFacts>
+</areaPack>

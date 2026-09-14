@@ -1,14 +1,15 @@
 {
   "name": "silver-city",
   "private": true,
-  "version": "1.4.52",
+  "version": "1.4.53",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "start": "vite",
-    "build": "tsc -b && vite build",
+    "build": "node scripts/embed-packs.mjs && tsc -b && vite build",
     "preview": "vite preview",
-    "test": "TZ=America/Chicago node --experimental-strip-types scripts/check-dates.mjs && TZ=UTC node --experimental-strip-types scripts/check-dates.mjs && node --experimental-strip-types scripts/check-progress.mjs && node --experimental-strip-types scripts/check-save.mjs && node --experimental-strip-types scripts/check-learning.mjs && node --experimental-strip-types scripts/check-city.mjs",
+    "embed:packs": "node scripts/embed-packs.mjs",
+    "test": "node scripts/embed-packs.mjs && TZ=America/Chicago node --experimental-strip-types scripts/check-dates.mjs && TZ=UTC node --experimental-strip-types scripts/check-dates.mjs && node --experimental-strip-types scripts/check-progress.mjs && node --experimental-strip-types scripts/check-save.mjs && node --experimental-strip-types scripts/check-learning.mjs && node --experimental-strip-types scripts/check-packs.mjs && node --experimental-strip-types scripts/check-city.mjs",
     "android:sync": "npm run build && npx cap sync android",
     "android:apk": "npm run android:sync && node scripts/write-android-local-properties.mjs && cd android && ./gradlew assembleDebug"
   },

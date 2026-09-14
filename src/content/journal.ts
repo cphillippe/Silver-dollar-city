@@ -1,4 +1,5 @@
 import type { JournalEntry } from '../types'
+import { PACK_CATALOG } from './packCatalog.ts'
 
 export const journalEntries: JournalEntry[] = [
   {
@@ -344,3 +345,16 @@ export const journalEntries: JournalEntry[] = [
     sources: ['A trail note for seven unique mornings'],
   },
 ]
+
+for (const lesson of PACK_CATALOG.lessons) {
+  const pack = lesson.journal
+  if (!pack?.body.length) continue
+  const entry = journalEntries.find(
+    (item) => item.unlockAfter === lesson.id || item.id === pack.id,
+  )
+  if (!entry) continue
+  if (pack.title) entry.title = pack.title
+  if (pack.kicker) entry.kicker = pack.kicker
+  entry.body = pack.body
+  if (pack.sources.length) entry.sources = pack.sources
+}
