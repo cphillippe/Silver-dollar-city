@@ -2367,7 +2367,7 @@ assert.match(
 )
 assert.match(hubSrc, /easyHomeFocus/)
 assert.match(hubSrc, /easyHoldView/)
-assert.match(hubSrc, /focus === 'learn' \? 'primary'/)
+assert.match(hubSrc, /focus === 'match' \? 'primary'/)
 assert.match(hubSrc, /midStreet/)
 assert.match(hubSrc, /EASY\.continueStreet/)
 assert.match(hubSrc, /Tonight’s street/)
