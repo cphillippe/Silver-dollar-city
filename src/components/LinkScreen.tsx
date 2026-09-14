@@ -186,7 +186,7 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
               easy
                 ? `Your matches wait in ${EASY.saved}.`
                 : streetFactsLeft(progress.streetLinked ?? []) > 0
-                  ? `${streetFactsLeft(progress.streetLinked ?? [])} facts still wait — Continue from Town when you want one more round.`
+                  ? 'Continue from Town when you want one more round.'
                   : 'Tap a place on the map — the mind map holds what you linked.'
             }
             action={easy ? `See ${EASY.saved}` : 'See the town'}

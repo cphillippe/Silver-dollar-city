@@ -48,6 +48,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
   const streetDone = streetIsComplete(progress)
   const streetLinked = progress.streetLinked ?? []
   const tonight = nextStreetWalk(streetLinked)
+  const midStreet = !streetDone && streetLinked.length > 0
   const requested =
     openPlot && CITY_PLOTS.some((plot) => plot.id === openPlot)
       ? (openPlot as CityPlotId)
@@ -79,23 +80,25 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
         <nav className="easy-core" aria-label="Play">
           <button
             type="button"
-            className={`btn xl ${focus === 'learn' ? 'gold' : ''}`}
+            className={`btn xl ${focus === 'learn' ? 'primary' : ''}`}
             onClick={() => onNavigate({ name: 'learn' })}
           >
             {matchReady ? EASY.learnCta : EASY.readStory}
           </button>
           <button
             type="button"
-            className={`btn xl ${focus === 'match' ? 'gold' : matchReady ? '' : 'is-locked'}`}
+            className={`btn xl ${focus === 'match' ? 'primary' : matchReady ? '' : 'is-locked'}`}
             aria-disabled={!matchReady}
             onClick={() => onNavigate({ name: 'link' })}
           >
             {EASY.matchCta}
           </button>
-          {!matchReady ? <p className="quiet easy-match-lock">{EASY.readStoryFirst}</p> : null}
+          {!matchReady && coldMercy ? (
+            <p className="quiet easy-match-lock">{EASY.readStoryFirst}</p>
+          ) : null}
           <button
             type="button"
-            className={`btn xl ${focus === 'hold' ? 'gold' : ''}`}
+            className={`btn xl ${focus === 'hold' ? 'primary' : ''}`}
             onClick={() => onNavigate(easyHoldView(progress))}
           >
             {EASY.saved}
@@ -183,7 +186,24 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
 
   return (
     <main className="hub is-town is-inhabited" aria-label="The town">
-      {easy ? null : (
+      {easy ? null : midStreet ? (
+      <section className="next-card do-next" aria-label="Do this next">
+        <p className="eyebrow">Do this next</p>
+        <h2>Tonight’s street</h2>
+        <p className="do-next-detail">
+          {streetLinked.length} of {STREET_TRIPLES.length} facts · {tonight?.placeTitle ?? 'next place'} tonight
+        </p>
+        <p className="quiet">
+          {STREET_TRIPLES.length - streetLinked.length} facts still wait. One more round, then stop.
+        </p>
+        <button type="button" className="btn primary xl" onClick={() => onNavigate({ name: 'link' })}>
+          {EASY.continueStreet}
+        </button>
+        <button type="button" className="btn xl" onClick={goNext}>
+          {nextCta}
+        </button>
+      </section>
+      ) : (
       <section className="next-card do-next" aria-label="Do this next">
         <p className="eyebrow">Do this next</p>
         <h2>{nextTitle}</h2>
@@ -199,22 +219,16 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
       </section>
       )}
 
-      {!easy && !streetDone ? (
+      {!easy && !streetDone && !midStreet ? (
         <section className="street-link" aria-label="Link the street">
           <div className="card-lead">
             <Avatar who="mercy" size="sm" />
             <div>
-              <p className="eyebrow">{streetLinked.length > 0 ? 'Continue' : 'Match idea · place · person.'}</p>
-              <h2>{streetLinked.length > 0 ? 'Tonight’s street' : 'Link the street'}</h2>
-              <p className="quiet">
-                {streetLinked.length > 0
-                  ? `${streetLinked.length} of ${STREET_TRIPLES.length} facts · ${tonight?.placeTitle ?? 'next place'} tonight`
-                  : 'Idea · place · person · one place per sitting'}
-              </p>
+              <p className="eyebrow">Match idea · place · person.</p>
+              <h2>Link the street</h2>
+              <p className="quiet">Idea · place · person · one place per sitting</p>
               <p className="town-line">
-                {streetLinked.length > 0
-                  ? `${STREET_TRIPLES.length - streetLinked.length} facts still wait. One more round, then stop.`
-                  : 'Snap a claim to its lot and keeper. A sitting is tonight’s street — not all 35 facts at once.'}
+                Snap a claim to its lot and keeper. A sitting is tonight’s street — not all 35 facts at once.
               </p>
               <p className="street-lot-why">
                 Mercy’s pictures at the creek. Silas’s ledger at the square. Juniper’s lamp on the porch — meant to be seen.
@@ -226,7 +240,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
             className="btn gold xl"
             onClick={() => onNavigate({ name: 'link' })}
           >
-            {streetLinked.length > 0 ? EASY.continueStreet : 'Link the street'}
+            Link the street
           </button>
         </section>
       ) : null}
