@@ -11,6 +11,7 @@ import {
   type PackLoci,
   type PackMatch,
   type PackTier,
+  type PackWord,
 } from './packTypes.ts'
 
 export interface PackParseIssue {
@@ -30,6 +31,14 @@ const ENTITIES: Record<string, string> = {
   '&amp;': '&',
   '&quot;': '"',
   '&apos;': "'",
+}
+
+const AREA_ORDER: Record<string, number> = {
+  'parable-hollow': 1,
+  'witness-bench': 2,
+  observatory: 3,
+  'first-gate': 4,
+  'high-lookout': 5,
 }
 
 function decode(text: string): string {
@@ -110,14 +119,53 @@ function intAttr(attrs: Record<string, string>, key: string, fallback: number): 
   return Number.isFinite(n) ? n : fallback
 }
 
-function parseLoci(xml: string, fallback: PackLoci): PackLoci {
+function attrsToString(attrs: Record<string, string>): string {
+  const keys = Object.keys(attrs)
+  if (keys.length === 0) return ''
+  return ` ${keys.map((key) => `${key}="${attrs[key].replace(/"/g, '&quot;')}"`).join(' ')}`
+}
+
+function areaRoot(xml: string): El | undefined {
+  return child(xml, 'areaPack') ?? child(xml, 'area')
+}
+
+function indexRoot(xml: string): El | undefined {
+  return child(xml, 'silverCityPackIndex') ?? child(xml, 'packIndex') ?? child(xml, 'index')
+}
+
+function lociFromNames(place: string, person: string): Pick<PackLoci, 'plotId' | 'who'> | undefined {
+  const blob = `${place} ${person}`.toLowerCase()
+  if (blob.includes('juniper') || blob.includes('porch')) {
+    return { plotId: 'porch', who: 'juniper' }
+  }
+  if (blob.includes('mercy') || blob.includes('creek') || blob.includes('hollow')) {
+    return { plotId: 'hollow', who: 'mercy' }
+  }
+  if (blob.includes('silas') || blob.includes('witness') || blob.includes('square')) {
+    return { plotId: 'bench', who: 'silas' }
+  }
+  if (blob.includes('nora') || blob.includes('sky watch') || blob.includes('observatory')) {
+    return { plotId: 'observatory', who: 'nora' }
+  }
+  if (blob.includes('ansel') || blob.includes('why gate')) {
+    return { plotId: 'gate', who: 'ansel' }
+  }
+  if (blob.includes('hope') || blob.includes('ridge') || blob.includes('lookout') || blob.includes('meaning')) {
+    return { plotId: 'lookout', who: 'hope' }
+  }
+  return undefined
+}
+
+function parseLoci(xml: string, fallback: PackLoci, lessonAttrs: Record<string, string> = {}): PackLoci {
   const hit = child(xml, 'loci')
-  if (!hit) return fallback
+  const place = lessonAttrs.place || hit?.attrs.place || fallback.place
+  const person = lessonAttrs.person || hit?.attrs.person || fallback.person
+  const named = lociFromNames(place, person)
   return {
-    place: hit.attrs.place || fallback.place,
-    person: hit.attrs.person || fallback.person,
-    plotId: hit.attrs.plotId || fallback.plotId,
-    who: hit.attrs.who || fallback.who,
+    place,
+    person,
+    plotId: lessonAttrs.plotId || hit?.attrs.plotId || named?.plotId || fallback.plotId,
+    who: lessonAttrs.who || lessonAttrs.personId || hit?.attrs.who || named?.who || fallback.who,
   }
 }
 
@@ -127,13 +175,17 @@ function parseMatch(xml: string, claim: string, loci: PackLoci): PackMatch {
     return { sentence: claim, place: loci.place, person: loci.person }
   }
   return {
-    sentence: hit.attrs.sentence || textOf(hit.inner, 'sentence') || claim,
+    sentence:
+      textOf(hit.inner, 'sentenceCorrect') ||
+      hit.attrs.sentence ||
+      textOf(hit.inner, 'sentence') ||
+      claim,
     place: hit.attrs.place || textOf(hit.inner, 'place') || loci.place,
     person: hit.attrs.person || textOf(hit.inner, 'person') || loci.person,
   }
 }
 
-function parseHold(xml: string, whyFallback: string, tier: LessonTierId): PackHold {
+function parseHold(xml: string, whyFallback: string, tier: LessonTierId, claim: string): PackHold {
   const hit = child(xml, 'hold')
   const inner = hit?.inner ?? ''
   const levelRaw = hit?.attrs.levelUpTo
@@ -144,24 +196,104 @@ function parseHold(xml: string, whyFallback: string, tier: LessonTierId): PackHo
       : tier === 'medium'
         ? 'hard'
         : undefined
+  const holdClaim = textOf(inner, 'claim') || claim
+  const choicesWrap = child(inner, 'claimChoices')
+  const claimChoices = choicesWrap ? textsOf(choicesWrap.inner, 'choice') : []
   const claimMisses = [
+    ...claimChoices.filter((line) => line && line !== holdClaim),
     ...textsOf(inner, 'claimMiss'),
     ...children(inner, 'miss')
-      .filter((item) => (item.attrs.kind || 'claim') === 'claim')
+      .filter((item) => item.attrs.kind === 'claim')
       .map((item) => strip(item.inner)),
   ].filter(Boolean)
+  const whyWrap = child(inner, 'whyMisses')
   const whyMisses = [
+    ...(whyWrap ? textsOf(whyWrap.inner, 'miss') : []),
     ...textsOf(inner, 'whyMiss'),
     ...children(inner, 'miss')
       .filter((item) => item.attrs.kind === 'why' || item.attrs.kind === 'reason')
       .map((item) => strip(item.inner)),
   ].filter(Boolean)
+  const why =
+    textOf(inner, 'whyCorrect') ||
+    textOf(inner, 'reason') ||
+    textOf(inner, 'why') ||
+    whyFallback
   return {
     levelUpTo,
     onFail: 'easy',
-    why: textOf(inner, 'why') || strip(inner.replace(/<[^>]+>[\s\S]*?<\/[^>]+>/g, '')) || whyFallback,
-    claimMisses,
-    whyMisses,
+    why,
+    claimMisses: uniqueLines(claimMisses),
+    whyMisses: uniqueLines(whyMisses),
+  }
+}
+
+function uniqueLines(lines: string[]): string[] {
+  const seen = new Set<string>()
+  const next: string[] = []
+  for (const line of lines) {
+    if (seen.has(line)) continue
+    seen.add(line)
+    next.push(line)
+  }
+  return next
+}
+
+function parseLearnBody(tierInner: string, name: LessonTierId, fallback: string): string {
+  const learn = child(tierInner, 'learn')
+  const inner = learn?.inner ?? tierInner
+  if (name === 'easy') {
+    return textOf(inner, 'shortStory') || textOf(inner, 'teach') || looseLearnText(inner) || fallback
+  }
+  if (name === 'medium') {
+    return textOf(inner, 'mediumTeach') || textOf(inner, 'teach') || looseLearnText(inner) || fallback
+  }
+  return (
+    textOf(inner, 'hardTeach') ||
+    textOf(inner, 'fullTeach') ||
+    textOf(inner, 'teach') ||
+    looseLearnText(inner) ||
+    fallback
+  )
+}
+
+function looseLearnText(inner: string): string {
+  const stripped = inner.replace(
+    /<(mainIdea|gloss|loci|word|hint|prompt|teachOnWrong|challengeTiles|shortStory|mediumTeach|hardTeach|fullTeach)\b[\s\S]*?<\/\1>/gi,
+    '',
+  )
+  const leftover = strip(stripped.replace(/<[^>]+>/g, ' '))
+  return leftover
+}
+
+function parseWord(tierInner: string): PackWord | undefined {
+  const learn = child(tierInner, 'learn')
+  const inner = learn?.inner ?? tierInner
+  const word = child(inner, 'word')
+  if (!word) return undefined
+  const term = textOf(word.inner, 'term')
+  const sense = textOf(word.inner, 'sense')
+  if (!term || !sense) return undefined
+  return { term, sense }
+}
+
+function parseHint(tierInner: string): string {
+  const learn = child(tierInner, 'learn')
+  return textOf(learn?.inner ?? tierInner, 'hint')
+}
+
+function parseGloss(tierInner: string, fallback: string): string {
+  const learn = child(tierInner, 'learn')
+  return textOf(learn?.inner ?? tierInner, 'gloss') || textOf(learn?.inner ?? tierInner, 'mainIdea') || fallback
+}
+
+function holdFields(tierInner: string): { claim: string; reason: string; source: string } {
+  const hold = child(tierInner, 'hold')
+  const inner = hold?.inner ?? ''
+  return {
+    claim: textOf(inner, 'claim'),
+    reason: textOf(inner, 'whyCorrect') || textOf(inner, 'reason'),
+    source: textOf(inner, 'source'),
   }
 }
 
@@ -177,14 +309,20 @@ function parseTier(
   if (!hit) return undefined
   const points = intAttr(hit.attrs, 'points', TIER_POINTS[name])
   const easyOrder = name === 'easy' ? intAttr(hit.attrs, 'easyOrder', 0) : undefined
-  const learn = textOf(hit.inner, 'learn') || textOf(hit.inner, 'shortStory') || textOf(hit.inner, 'teach') || learnFallback
+  const learn = parseLearnBody(hit.inner, name, learnFallback)
   const match = parseMatch(hit.inner, claim, loci)
-  const hold = parseHold(hit.inner, whyFallback, name)
+  const hold = parseHold(hit.inner, whyFallback, name, claim)
+  const word = parseWord(hit.inner)
+  const hint = parseHint(hit.inner)
+  const gloss = parseGloss(hit.inner, learnFallback)
   return {
     id: name,
     points,
     easyOrder: easyOrder && easyOrder > 0 ? easyOrder : undefined,
     learn,
+    gloss,
+    word,
+    hint: hint || undefined,
     match,
     hold,
   }
@@ -220,10 +358,23 @@ function parseJournal(xml: string): PackLesson['journal'] | undefined {
   if (!hit) return undefined
   const title = hit.attrs.title || textOf(hit.inner, 'title')
   const kicker = hit.attrs.kicker || textOf(hit.inner, 'kicker')
-  const body = textsOf(hit.inner, 'body')
-  const sources = [...textsOf(hit.inner, 'cite'), ...textsOf(hit.inner, 'source')].filter(Boolean)
+  const paragraphs = textsOf(hit.inner, 'p')
+  const body = paragraphs.length ? paragraphs : textsOf(hit.inner, 'body')
+  const sourcesWrap = child(hit.inner, 'sources')
+  const sources = [
+    ...(sourcesWrap ? textsOf(sourcesWrap.inner, 'source') : []),
+    ...textsOf(hit.inner, 'cite'),
+    ...(sourcesWrap ? [] : textsOf(hit.inner, 'source')),
+  ].filter(Boolean)
   if (!title && body.length === 0) return undefined
-  return { title, kicker, body, sources }
+  return {
+    id: hit.attrs.id || undefined,
+    title,
+    kicker,
+    body,
+    sources: uniqueLines(sources),
+    unlockAfter: hit.attrs.unlockAfter || undefined,
+  }
 }
 
 function parseLesson(xml: string, areaId: string, areaLoci: PackLoci): PackLesson | undefined {
@@ -231,16 +382,28 @@ function parseLesson(xml: string, areaId: string, areaLoci: PackLoci): PackLesso
   const el = child(wrap, 'lesson') ?? { name: 'lesson', attrs: {}, inner: xml }
   const id = el.attrs.id
   if (!id) return undefined
-  const claim = textOf(el.inner, 'claim')
-  const plain = textOf(el.inner, 'plain') || claim
-  const source = textOf(el.inner, 'source')
-  const loci = parseLoci(el.inner, areaLoci)
-  const why = textOf(el.inner, 'why') || plain || claim
+  const easyEl = child(el.inner, 'easy')
+  const mediumEl = child(el.inner, 'medium')
+  const hardEl = child(el.inner, 'hard')
+  const easyHold = holdFields(easyEl?.inner ?? '')
+  const mediumHold = holdFields(mediumEl?.inner ?? '')
+  const hardHold = holdFields(hardEl?.inner ?? '')
+  const claim =
+    easyHold.claim ||
+    mediumHold.claim ||
+    hardHold.claim ||
+    textOf(el.inner, 'claim') ||
+    el.attrs.ideaLabel
+  const gloss = parseGloss(easyEl?.inner ?? el.inner, '')
+  const plain = textOf(el.inner, 'plain') || gloss || claim
+  const source = easyHold.source || textOf(el.inner, 'source') || mediumHold.source || hardHold.source
+  const loci = parseLoci(el.inner, areaLoci, el.attrs)
+  const why = easyHold.reason || textOf(el.inner, 'why') || plain || claim
   const easyOrder = intAttr(el.attrs, 'easyOrder', 0)
+  if (!claim) return undefined
   const easy =
     parseTier(el.inner, 'easy', claim, loci, plain || claim, why) ??
     defaultTier('easy', claim, loci, plain || claim, why, easyOrder || undefined)
-  const easyEl = child(el.inner, 'easy')
   if (!easy.easyOrder) {
     easy.easyOrder = easyOrder || (easyEl ? intAttr(easyEl.attrs, 'easyOrder', 0) : 0) || undefined
   }
@@ -250,12 +413,11 @@ function parseLesson(xml: string, areaId: string, areaLoci: PackLoci): PackLesso
   const hard =
     parseTier(el.inner, 'hard', claim, loci, why || claim, why) ??
     defaultTier('hard', claim, loci, why || claim, why, undefined, easy.hold)
-  if (!claim) return undefined
   return {
     id,
     areaId: el.attrs.areaId || areaId,
-    title: el.attrs.title || claim,
-    idea: el.attrs.idea || undefined,
+    title: el.attrs.challengeTitle || el.attrs.title || el.attrs.ideaLabel || claim,
+    idea: el.attrs.ideaLabel || el.attrs.idea || undefined,
     claim,
     plain,
     source,
@@ -267,7 +429,16 @@ function parseLesson(xml: string, areaId: string, areaLoci: PackLoci): PackLesso
   }
 }
 
-function areaLociFallback(areaId: string, title: string): PackLoci {
+function areaLociFallback(areaId: string, title: string, attrs: Record<string, string> = {}): PackLoci {
+  const named = lociFromNames(attrs.place || title, attrs.person || '')
+  if (attrs.place && attrs.person && (attrs.plotId || attrs.personId || named)) {
+    return {
+      place: attrs.place,
+      person: attrs.person,
+      plotId: attrs.plotId || named?.plotId || 'porch',
+      who: attrs.personId || named?.who || 'juniper',
+    }
+  }
   if (areaId === 'parable-hollow') {
     return { place: title || 'Story Creek', person: 'Mercy Wren', plotId: 'hollow', who: 'mercy' }
   }
@@ -287,9 +458,9 @@ function areaLociFallback(areaId: string, title: string): PackLoci {
 }
 
 export function parseAreaXml(xml: string, file: string, issues: PackParseIssue[] = []): PackArea | undefined {
-  const root = child(xml, 'area')
+  const root = areaRoot(xml)
   if (!root) {
-    issues.push({ file, message: 'Missing <area> root' })
+    issues.push({ file, message: 'Missing <areaPack> or <area> root' })
     return undefined
   }
   const schemaVersion = intAttr(root.attrs, 'schemaVersion', PACK_SCHEMA_VERSION)
@@ -297,9 +468,14 @@ export function parseAreaXml(xml: string, file: string, issues: PackParseIssue[]
     issues.push({ file, message: `Expected schemaVersion ${PACK_SCHEMA_VERSION}, got ${schemaVersion}` })
   }
   const id = root.attrs.id || file.replace(/\.xml$/, '')
-  const title = root.attrs.title || id
-  const loci = areaLociFallback(id, title)
-  const lessons = children(root.inner, 'lesson')
+  const meta = child(root.inner, 'meta')
+  const title = root.attrs.title || (meta ? textOf(meta.inner, 'title') : '') || id
+  const subtitle = root.attrs.subtitle || (meta ? textOf(meta.inner, 'subtitle') : '') || ''
+  const blurb = (meta ? textOf(meta.inner, 'blurb') : '') || textOf(root.inner, 'blurb') || root.attrs.blurb || ''
+  const loci = areaLociFallback(id, title, root.attrs)
+  const lessonParent = child(root.inner, 'lessons')
+  const lessonXml = lessonParent?.inner ?? root.inner
+  const lessons = children(lessonXml, 'lesson')
     .map((item) => parseLesson(`<lesson${attrsToString(item.attrs)}>${item.inner}</lesson>`, id, loci))
     .filter((item): item is PackLesson => Boolean(item))
   if (lessons.length === 0) {
@@ -308,11 +484,11 @@ export function parseAreaXml(xml: string, file: string, issues: PackParseIssue[]
   return {
     id,
     file,
-    order: intAttr(root.attrs, 'order', 0),
+    order: intAttr(root.attrs, 'order', AREA_ORDER[id] ?? 0),
     title,
     shortTitle: root.attrs.shortTitle || title,
-    subtitle: root.attrs.subtitle || '',
-    blurb: textOf(root.inner, 'blurb') || root.attrs.blurb || '',
+    subtitle,
+    blurb,
     intro: textsOf(root.inner, 'intro'),
     icon: root.attrs.icon || '',
     accent: root.attrs.accent || '',
@@ -320,23 +496,34 @@ export function parseAreaXml(xml: string, file: string, issues: PackParseIssue[]
   }
 }
 
-function attrsToString(attrs: Record<string, string>): string {
-  const keys = Object.keys(attrs)
-  if (keys.length === 0) return ''
-  return ` ${keys.map((key) => `${key}="${attrs[key].replace(/"/g, '&quot;')}"`).join(' ')}`
+function parseEasyShelf(xml: string): string[] {
+  const shelf = child(xml, 'easyShelf')
+  if (!shelf) return []
+  const fromLines = children(shelf.inner, 'line')
+    .slice()
+    .sort((a, b) => intAttr(a.attrs, 'easyOrder', 0) - intAttr(b.attrs, 'easyOrder', 0))
+    .map((item) => item.attrs.id || strip(item.inner))
+    .filter(Boolean)
+  if (fromLines.length) return fromLines
+  return (shelf.attrs.order || '')
+    .split(',')
+    .map((id) => id.trim())
+    .filter(Boolean)
 }
 
 export function parseIndexXml(xml: string, file = 'index.xml', issues: PackParseIssue[] = []): PackIndex {
-  const root = child(xml, 'packIndex') ?? child(xml, 'index') ?? child(xml, 'area')
+  const root = indexRoot(xml) ?? child(xml, 'area')
   if (!root) {
-    issues.push({ file, message: 'Missing <packIndex> root' })
-    return { schemaVersion: PACK_SCHEMA_VERSION, id: 'core-v0', title: 'Core trail', files: [] }
+    issues.push({ file, message: 'Missing pack index root' })
+    return { schemaVersion: PACK_SCHEMA_VERSION, id: 'core-v0', title: 'Core trail', files: [], easyShelf: [] }
   }
   const schemaVersion = intAttr(root.attrs, 'schemaVersion', PACK_SCHEMA_VERSION)
   if (schemaVersion !== PACK_SCHEMA_VERSION) {
     issues.push({ file, message: `Expected schemaVersion ${PACK_SCHEMA_VERSION}, got ${schemaVersion}` })
   }
-  const files = children(root.inner, 'area')
+  const packsWrap = child(root.inner, 'packs')
+  const packEls = packsWrap ? children(packsWrap.inner, 'pack') : children(root.inner, 'area')
+  const files = packEls
     .filter((item) => item.attrs.file)
     .map((item) => ({
       file: item.attrs.file,
@@ -348,6 +535,7 @@ export function parseIndexXml(xml: string, file = 'index.xml', issues: PackParse
     id: root.attrs.id || 'core-v0',
     title: root.attrs.title || 'Core trail',
     files,
+    easyShelf: parseEasyShelf(root.inner),
   }
 }
 
@@ -357,6 +545,15 @@ function xmlByBasename(files: Record<string, string>): Record<string, string> {
     next[key.split('/').pop() ?? key] = xml
   }
   return next
+}
+
+function applyEasyShelf(lessons: PackLesson[], shelf: string[]) {
+  if (!shelf.length) return
+  const order = new Map(shelf.map((id, index) => [id, index + 1]))
+  for (const lesson of lessons) {
+    const n = order.get(lesson.id)
+    if (n) lesson.easy.easyOrder = n
+  }
 }
 
 export function catalogFromXml(
@@ -371,7 +568,9 @@ export function catalogFromXml(
 
   function addArea(file: string, xml: string) {
     const base = file.split('/').pop() ?? file
-    if (seen.has(base) || seen.has(`id:${child(xml, 'area')?.attrs.id ?? ''}`)) return
+    const root = areaRoot(xml)
+    const areaId = root?.attrs.id ?? ''
+    if (seen.has(base) || (areaId && seen.has(`id:${areaId}`))) return
     const area = parseAreaXml(xml, base, issues)
     if (!area) return
     seen.add(base)
@@ -379,9 +578,9 @@ export function catalogFromXml(
     areas.push(area)
   }
 
-  const indexRoot = child(indexXml, 'packIndex') ?? child(indexXml, 'index')
-  if (indexRoot) {
-    for (const item of children(indexRoot.inner, 'area')) {
+  const idx = indexRoot(indexXml)
+  if (idx) {
+    for (const item of children(idx.inner, 'area')) {
       if (children(item.inner, 'lesson').length === 0) continue
       addArea(
         item.attrs.file || `${item.attrs.id || 'east-porch'}.xml`,
@@ -408,6 +607,8 @@ export function catalogFromXml(
     .slice()
     .sort((a, b) => a.order - b.order || a.id.localeCompare(b.id))
     .flatMap((area) => area.lessons)
+
+  applyEasyShelf(lessons, index.easyShelf)
 
   const ordered = lessons.slice().sort((a, b) => {
     const ao = a.easy.easyOrder ?? 999
