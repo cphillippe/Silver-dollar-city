@@ -8,10 +8,12 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.50',
-    title: 'Fun polish · Easy core loop · Hard street sessions',
+    version: '1.4.51',
+    title: 'Fun polish · Easy core loop · Match win juice',
     when: '2026-09-14',
     items: [
+      'Easy Match win: MATCHED! is a badge, not a tappable gold pill — Hold next is the primary tap',
+      'Hard Match and street win stamps use the same juice — not a fake button',
       'Easy after Hold: gold CTA is Read today’s story — next Learn, not Hold',
       'Easy Match sentence matches the held claim — Neighbor is the one who shows mercy',
       'Mercy Match place and person prompts differ for the road, the father-run, and the debt',

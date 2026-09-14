@@ -313,7 +313,7 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek, onEasyStop, stre
             <>
               <button
                 type="button"
-                className="btn gold xl link-next"
+                className="btn primary xl link-next"
                 onClick={() => (onEasyStop ? onEasyStop('hold') : finishStreet())}
               >
                 {EASY.holdNext}
@@ -327,7 +327,7 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek, onEasyStop, stre
               </button>
             </>
           ) : (
-            <button type="button" className="btn gold xl link-next" onClick={finishStreet}>
+            <button type="button" className="btn primary xl link-next" onClick={finishStreet}>
               Done
             </button>
           )}
