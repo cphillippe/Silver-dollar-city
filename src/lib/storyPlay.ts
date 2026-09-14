@@ -1,12 +1,13 @@
 import { gemWordsFor } from './gemSearch.ts'
 import { storyPanelsFor, type StoryPanel } from './storyPanels.ts'
+import { FATHER_RUN_LINE } from './fatherRun.ts'
 
 /**
  * How this lesson is *played*. Same shell always: teach beats → play → Hold.
- * This climb is panel blast only. Queued later (do not mount): father-run
- * timing dash, Samaritan road-swipe, claim-merge, story-night TD.
+ * panel-blast for mercy and the rest of Easy. ph-father is father-run.
+ * Queued later (do not mount): Samaritan road-swipe, claim-merge, story-night TD.
  */
-export type StoryPlayKind = 'panel-blast'
+export type StoryPlayKind = 'panel-blast' | 'father-run'
 
 export interface LessonStory {
   lineId: string
@@ -15,8 +16,8 @@ export interface LessonStory {
 }
 
 /** Mechanic for this lesson. Hold does not read this. */
-export function storyPlayFor(_lineId: string): StoryPlayKind {
-  void _lineId
+export function storyPlayFor(lineId: string): StoryPlayKind {
+  if (lineId === FATHER_RUN_LINE) return 'father-run'
   return 'panel-blast'
 }
 

@@ -3,6 +3,7 @@ import { isEasy, easyMatchLine } from '../lib/easy'
 import { lessonStory } from '../lib/storyPlay'
 import { useProgress } from '../store/progress'
 import { BuildArgumentPlay } from './challenges/BuildArgumentPlay'
+import { FatherRunPlay } from './challenges/FatherRunPlay'
 import { GemSearchPlay } from './challenges/GemSearchPlay'
 import { LinkPlay } from './challenges/LinkPlay'
 import { MatchPlay } from './challenges/MatchPlay'
@@ -61,6 +62,16 @@ export function PuzzlePlay({
     if (isEasy(progress)) {
       const story = lessonStory(easyMatchLine(progress))
       switch (story.play) {
+        case 'father-run':
+          return (
+            <FatherRunPlay
+              lineId={story.lineId}
+              beats={story.beats}
+              onMiss={onMiss}
+              onClear={onSolved}
+              onEasyStop={onEasyStop}
+            />
+          )
         case 'panel-blast':
         default:
           return (
