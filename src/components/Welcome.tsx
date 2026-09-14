@@ -22,7 +22,7 @@ export function Welcome({ onNavigate }: WelcomeProps) {
       onNavigate(
         easyLineHeld(progress, EASY_MATCH_LINE)
           ? { name: 'hub' }
-          : { name: 'learn' },
+          : { name: 'link' },
       )
       return
     }
