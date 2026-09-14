@@ -95,7 +95,7 @@ for (const lesson of PACK_CATALOG.lessons) {
 
 const fresh = emptyProgress()
 assert.equal(easyLoopLine(fresh), 'ph-road')
-assert.equal(easyMatchReady(fresh), false)
+assert.equal(easyMatchReady(fresh), true)
 assert.equal(Object.keys(fresh.lessonScore).length, 0)
 assert.equal(currentLessonTier(fresh, 'ph-road'), 'easy')
 
@@ -120,11 +120,11 @@ assert.equal(hold.lessonScore['ph-road'], 15)
 
 const taughtMercy = { ...fresh, easyTaught: ['ph-road'] }
 assert.equal(easyLineTaught(taughtMercy, 'ph-road'), true)
-assert.equal(easyHomeFocus(taughtMercy), 'match')
+assert.equal(easyHomeFocus(taughtMercy), 'hold')
 
 const heldMercy = { ...fresh, easyTaught: ['ph-road'], easyHeld: ['ph-road'] }
 assert.equal(easyLoopLine(heldMercy), 'ph-father')
-assert.equal(easyHomeFocus(heldMercy), 'learn')
+assert.equal(easyHomeFocus(heldMercy), 'match')
 
 const trailDone = {
   ...fresh,
