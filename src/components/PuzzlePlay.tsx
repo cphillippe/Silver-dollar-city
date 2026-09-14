@@ -11,6 +11,7 @@ interface PuzzlePlayProps {
   onSolved: () => void
   onPeek?: () => void
   onEasyStop?: (dest: 'hold' | 'home') => void
+  streetBeat?: { place: string; linkedAfter: number; total: number; left: number }
 }
 
 export function PuzzlePlay({
@@ -19,6 +20,7 @@ export function PuzzlePlay({
   onSolved,
   onPeek,
   onEasyStop,
+  streetBeat,
 }: PuzzlePlayProps) {
   if (challenge.kind === 'sort') {
     return (
@@ -58,6 +60,7 @@ export function PuzzlePlay({
         onSolved={onSolved}
         onPeek={onPeek}
         onEasyStop={onEasyStop}
+        streetBeat={streetBeat}
       />
     )
   }

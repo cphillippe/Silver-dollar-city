@@ -47,7 +47,7 @@ const PLAIN: Record<string, PlainLine> = {
   ),
   'ph-debt': line(
     'If you were forgiven a huge debt, you cannot choke a neighbor over a small one.',
-    'A king wipes an unpayable bill. That same servant then jails a peer for a tiny sum. Example: huge debt forgiven — then a tiny one demanded.',
+    'A king wipes an unpayable bill. That same servant then chokes a neighbor over a tiny sum. Example: huge debt forgiven — then a tiny one demanded.',
     { term: 'Debt', sense: 'what you owe and cannot pay', hint: 'Keep the mercy. Toss the choke. Example: a huge bill wiped, then a tiny one demanded.' },
   ),
   'wb-creed': line(

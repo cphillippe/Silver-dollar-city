@@ -41,6 +41,7 @@ export const EASY = {
   matchDone: 'Match done',
   matchWin: 'Matched!',
   holdNext: 'Hold next',
+  continueStreet: 'Continue tonight’s street',
   nightDo: 'Night Watch',
   nightSoon: 'Night Watch (soon)',
   nightTap: 'Tap the face.',
@@ -91,8 +92,8 @@ const EASY_CHROME: Record<string, string> = {
   'Forgiveness is a limited coupon on God’s spreadsheet.':
     'Forgiveness is not a limited coupon.',
   'The first servant was right to demand prison for a small debt.':
-    'Jail him over a tiny debt.',
-  'The first servant was right to demand prison.': 'Jail him over a tiny debt.',
+    'He was right to refuse mercy.',
+  'The first servant was right to demand prison.': 'He was right to refuse mercy.',
   'Peter’s “seven times” was already the full measure.': 'Seven times was already enough.',
   'Honor is spent so the son can be embraced; the older brother shows nearness without joy.':
     'The father hugs him first.',
@@ -424,6 +425,19 @@ export function easyHoldLine(progress: EasyLoopProgress): string {
 /** Match unlocks only after the current loop line is taught on Easy. */
 export function easyMatchReady(progress: EasyLoopProgress): boolean {
   return easyLineTaught(progress, easyLoopLine(progress))
+}
+
+/**
+ * Gold home tap for the open triad. After Hold, Learn is next — Hold stays
+ * available but is not the mid-shelf primary.
+ */
+export type EasyHomeFocus = 'learn' | 'match' | 'hold'
+
+export function easyHomeFocus(progress: EasyLoopProgress): EasyHomeFocus {
+  const id = easyLoopLine(progress)
+  if (!easyLineTaught(progress, id)) return 'learn'
+  if (!easyLineHeld(progress, id)) return 'match'
+  return 'learn'
 }
 
 /** Hold practice for the open triad — hide the saved-line filing cabinet. */
