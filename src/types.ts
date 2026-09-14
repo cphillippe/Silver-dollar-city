@@ -287,6 +287,12 @@ export interface ProgressState {
    * Schema stays 1 — do not wipe. Further looks are tapped as Upgrade.
    */
   cityBuilt: Record<string, number>
+  /**
+   * Hard Link-the-street triples finished this walk. Optional on old saves;
+   * normalize fills []. Schema stays 1 — do not wipe. All 35 facts stay in
+   * the catalog; a sitting only plays tonight’s street chunk.
+   */
+  streetLinked: string[]
 }
 
 export type View =

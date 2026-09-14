@@ -132,7 +132,7 @@ const STREET_FACTS: StreetFact[] = [
     placeId: 'place-hollow',
     personId: 'person-mercy',
     text: 'The father runs with mercy before the speech is done.',
-    caption: 'The father runs with mercy.',
+    caption: 'The father runs with mercy before the speech is done.',
   },
   {
     evidenceId: 'ph-seeds',
@@ -150,7 +150,7 @@ const STREET_FACTS: StreetFact[] = [
     placeId: 'place-hollow',
     personId: 'person-mercy',
     text: 'Received mercy makes refusing mercy a contradiction.',
-    caption: 'Received mercy must give mercy.',
+    caption: 'Received mercy makes refusing mercy a contradiction.',
   },
   {
     evidenceId: 'wb-creed',
@@ -455,6 +455,101 @@ const LINE_TRIPLE: Record<string, string> = Object.fromEntries(
 
 export const STREET_FACT_IDS = STREET_FACTS.map((fact) => fact.evidenceId)
 
+/** A sitting of Hard Link the street — one place, at most five facts. */
+export interface StreetWalk {
+  id: string
+  placeId: StreetPlaceId
+  placeTitle: string
+  personName: string
+  triples: LinkTriple[]
+}
+
+function splitStreetGroup<T>(items: T[]): T[][] {
+  if (items.length <= 5) return [items]
+  const first = Math.ceil(items.length / 2)
+  return [items.slice(0, first), items.slice(first)]
+}
+
+/** All 35 facts, grouped so a visit is ~one area / 3–5 triples — never a 70-link slog. */
+export function streetWalks(): StreetWalk[] {
+  const walks: StreetWalk[] = []
+  for (const place of PLACE_NODES) {
+    const facts = STREET_FACTS.filter((fact) => fact.placeId === place.id)
+    const groups = splitStreetGroup(facts)
+    groups.forEach((group, index) => {
+      const more = groups.length > 1 && index > 0
+      const keeper = PERSON_NODES.find((node) => node.id === group[0]?.personId)
+      walks.push({
+        id: more ? `${place.id}-more` : place.id,
+        placeId: place.id,
+        placeTitle: more ? `${place.text} · more` : place.text,
+        personName: keeper?.text ?? '',
+        triples: group.map((fact) => ({
+          id: fact.tripleId,
+          ideaId: fact.ideaId,
+          placeId: fact.placeId,
+          personId: fact.personId,
+        })),
+      })
+    })
+  }
+  return walks
+}
+
+export function appendStreetLinks(linked: readonly string[], added: readonly string[]): string[] {
+  const have = new Set(linked)
+  for (const id of added) have.add(id)
+  return STREET_TRIPLES.map((item) => item.id).filter((id) => have.has(id))
+}
+
+export function streetFactsLeft(linked: readonly string[]): number {
+  const have = new Set(linked)
+  return STREET_TRIPLES.filter((item) => !have.has(item.id)).length
+}
+
+/** ln-street on completed still means the catalog is finished for this walk. */
+export function streetIsComplete(progress: {
+  streetLinked?: string[]
+  completed?: string[]
+}): boolean {
+  if ((progress.completed ?? []).includes('ln-street')) return true
+  return streetFactsLeft(progress.streetLinked ?? []) <= 0
+}
+
+export function nextStreetWalk(linked: readonly string[]): StreetWalk | undefined {
+  const have = new Set(linked)
+  for (const walk of streetWalks()) {
+    const rest = walk.triples.filter((item) => !have.has(item.id))
+    if (rest.length > 0) return { ...walk, triples: rest }
+  }
+  return undefined
+}
+
+/** Tonight’s Hard street — remaining triples in the next unfinished walk. */
+export function hardStreetChallenge(linked: readonly string[]): LinkChallenge {
+  const walk = nextStreetWalk(linked)
+  return {
+    ...STREET_CHALLENGE,
+    title: walk ? `Tonight’s street · ${walk.placeTitle}` : STREET_CHALLENGE.title,
+    triples: walk?.triples ?? [],
+  }
+}
+
+export function streetWalkTakeaway(walk: StreetWalk | undefined, left: number): string {
+  if (!walk || left <= 0) {
+    return STREET_CHALLENGE.deeper ?? 'An idea lives at a place, with a person.'
+  }
+  const why = STREET_WHYS[walk.triples[0]?.id ?? '']?.hard ?? ''
+  const first = (why.split(/(?<=[.!?])\s+/)[0] ?? why).trim()
+  const lead = first || `${walk.personName} keeps ${walk.placeTitle}.`
+  return `${lead} ${left} fact${left === 1 ? '' : 's'} still wait on the street.`
+}
+
+/** Jericho-road art stays on ph-road’s own tile — never a distractor. */
+export function streetDecoyNodes(pool: LinkNode[], wantId: string): LinkNode[] {
+  return pool.filter((node) => node.id !== wantId && node.evidenceId !== 'ph-road')
+}
+
 export const STREET_CHALLENGE: LinkChallenge = {
   kind: 'link',
   id: 'ln-street',
@@ -575,13 +670,13 @@ const PLACE_CLUES: Record<StreetPlaceId, { place: string; person: string }> = {
 const LINK_CLUES: Record<string, Record<LinkStep, string>> = {
   'mercy-hollow': {
     idea: 'Mercy’s Jesus story — the neighbor who stops on the road.',
-    place: 'That story lives at the creek.',
-    person: 'Mercy keeps that creek.',
+    place: 'The neighbor-road story lives at Story Creek.',
+    person: 'Mercy Wren keeps the neighbor who stops.',
   },
   'father-hollow': {
     idea: 'Mercy’s Jesus story — the father who runs first.',
-    place: 'That story lives at the creek.',
-    person: 'Mercy keeps that creek.',
+    place: 'The father-run story lives at Story Creek.',
+    person: 'Mercy Wren keeps the father who runs.',
   },
   'seeds-hollow': {
     idea: 'Mercy’s Jesus stories — the kingdom arrives in pictures.',
@@ -590,8 +685,8 @@ const LINK_CLUES: Record<string, Record<LinkStep, string>> = {
   },
   'debt-hollow': {
     idea: 'Mercy’s Jesus story — forgiven much, then show mercy.',
-    place: 'That story lives at the creek.',
-    person: 'Mercy keeps that creek.',
+    place: 'The forgiven-debt story lives at Story Creek.',
+    person: 'Mercy Wren keeps the two servants.',
   },
   'silas-bench': {
     idea: 'Silas’s public names — died, buried, raised, appeared.',
@@ -777,13 +872,10 @@ export function linkMiss(tripleId: string, step: LinkStep): string {
   return tap ? easyWrongTap(tap) : easyWrongTap('this one')
 }
 
-/** Short label under the picture — not the full claim wall. */
+/** Short label under the picture — Match sentence matches the held claim. */
 export function linkCaption(node: LinkNode, easy: boolean): string {
   if (easy && node.id === 'place-hollow') return 'Mercy’s creek'
   if (node.kind === 'idea') {
-    if (node.evidenceId === 'ph-road') {
-      return easy ? 'Neighbor shows mercy.' : 'Neighbor is the one who shows mercy.'
-    }
     const fact = streetFact(node.evidenceId ?? '')
     if (fact) return fact.caption
   }

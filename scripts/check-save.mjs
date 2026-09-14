@@ -70,6 +70,7 @@ assert.deepEqual(fromLegacy.progress.learnings, [])
 assert.deepEqual(fromLegacy.progress.taught, [])
 assert.deepEqual(fromLegacy.progress.easyTaught, [])
 assert.deepEqual(fromLegacy.progress.easyHeld, [])
+assert.deepEqual(fromLegacy.progress.streetLinked, [])
 assert.equal(fromLegacy.progress.cityBuilt.porch, 2)
 assert.equal(fromLegacy.progress.cityBuilt.hollow, 3)
 
