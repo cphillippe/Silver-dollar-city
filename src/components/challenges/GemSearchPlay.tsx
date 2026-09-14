@@ -6,6 +6,7 @@ import {
   cellsStillNeeded,
   gemHue,
   matchGemWord,
+  sameCell,
   tryAddToPath,
   type GemCoord,
 } from '../../lib/gemSearch'
@@ -42,7 +43,9 @@ export function GemSearchPlay({ lineId, onMiss, onEasyStop }: GemSearchPlayProps
   const [toast, setToast] = useState('')
   const [status, setStatus] = useState<'play' | 'ok'>('play')
   const drag = useRef(false)
+  const moved = useRef(false)
   const pathRef = useRef<GemCoord[]>([])
+  const foundRef = useRef<string[]>([])
   const needed = cellsStillNeeded(puzzle, found)
   const nextWord = puzzle.words.find((word) => !found.includes(word.id))
   const left = puzzle.words.length - found.length
@@ -57,6 +60,7 @@ export function GemSearchPlay({ lineId, onMiss, onEasyStop }: GemSearchPlayProps
 
   useEffect(() => {
     setFound([])
+    foundRef.current = []
     pathRef.current = []
     setPath([])
     setBurst([])
@@ -107,9 +111,10 @@ export function GemSearchPlay({ lineId, onMiss, onEasyStop }: GemSearchPlayProps
   }
 
   function submit(nextPath: GemCoord[]) {
-    const hit = matchGemWord(nextPath, puzzle, found)
+    const hit = matchGemWord(nextPath, puzzle, foundRef.current)
     if (hit) {
-      const nextFound = [...found, hit.id]
+      const nextFound = [...foundRef.current, hit.id]
+      foundRef.current = nextFound
       const done = nextFound.length === puzzle.words.length
       setFound(nextFound)
       writePath([])
@@ -119,8 +124,13 @@ export function GemSearchPlay({ lineId, onMiss, onEasyStop }: GemSearchPlayProps
       if (done) {
         setStatus('ok')
       }
-      return
+      return true
     }
+    return false
+  }
+
+  function missIfSwipe(nextPath: GemCoord[]) {
+    if (submit(nextPath)) return
     if (nextPath.length < 3) {
       writePath([])
       return
@@ -137,27 +147,49 @@ export function GemSearchPlay({ lineId, onMiss, onEasyStop }: GemSearchPlayProps
     }, 420)
   }
 
-  function onDown(event: ReactPointerEvent<HTMLDivElement>) {
+  function applyCell(cell: GemCoord, mode: 'tap' | 'drag') {
     if (status === 'ok') return
-    const cell = cellFromPoint(event.clientX, event.clientY)
-    if (!cell) return
-    drag.current = true
-    event.currentTarget.setPointerCapture(event.pointerId)
-    writePath([cell])
-    setShake(false)
+    const current = pathRef.current
+    let next = current
+    if (!current.length) {
+      next = [cell]
+    } else if (sameCell(current[current.length - 1]!, cell)) {
+      next = current
+    } else {
+      const trial = tryAddToPath(current, cell)
+      if (trial.length > current.length) next = trial
+      else if (mode === 'tap') next = [cell]
+    }
+    writePath(next)
+    submit(next)
   }
 
-  function onMove(event: ReactPointerEvent<HTMLDivElement>) {
+  function onCellDown(event: ReactPointerEvent<HTMLDivElement>, cell: GemCoord) {
+    if (status === 'ok') return
+    event.preventDefault()
+    event.stopPropagation()
+    drag.current = true
+    moved.current = false
+    setShake(false)
+    applyCell(cell, 'tap')
+  }
+
+  function onBoardMove(event: ReactPointerEvent<HTMLDivElement>) {
     if (!drag.current || status === 'ok') return
     const cell = cellFromPoint(event.clientX, event.clientY)
     if (!cell) return
-    writePath((current) => tryAddToPath(current, cell))
+    const last = pathRef.current[pathRef.current.length - 1]
+    if (last && sameCell(last, cell)) return
+    moved.current = true
+    applyCell(cell, 'drag')
   }
 
-  function onUp() {
+  function onBoardUp() {
     if (!drag.current) return
     drag.current = false
-    submit(pathRef.current)
+    if (moved.current && !matchGemWord(pathRef.current, puzzle, foundRef.current)) {
+      missIfSwipe(pathRef.current)
+    }
   }
 
   const selected = new Set(path.map(cellKey))
@@ -166,6 +198,8 @@ export function GemSearchPlay({ lineId, onMiss, onEasyStop }: GemSearchPlayProps
     <div
       className={`play is-gem-search ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''} ${burst.length ? 'is-boom' : ''}`}
       style={{ ['--gem-size' as string]: puzzle.size }}
+      onPointerUp={onBoardUp}
+      onPointerCancel={onBoardUp}
     >
       <WinBurst play={status === 'ok'} stamp={EASY.matchWin} />
       <p className="sort-how">{EASY.matchHunt}</p>
@@ -191,10 +225,9 @@ export function GemSearchPlay({ lineId, onMiss, onEasyStop }: GemSearchPlayProps
         className="gem-board"
         role="grid"
         aria-label="Letter gems"
-        onPointerDown={onDown}
-        onPointerMove={onMove}
-        onPointerUp={onUp}
-        onPointerCancel={onUp}
+        onPointerMove={onBoardMove}
+        onPointerUp={onBoardUp}
+        onPointerCancel={onBoardUp}
       >
         {puzzle.letters.flatMap((row, r) =>
           row.map((letter, c) => {
@@ -212,6 +245,7 @@ export function GemSearchPlay({ lineId, onMiss, onEasyStop }: GemSearchPlayProps
                 data-gem-cell
                 data-r={r}
                 data-c={c}
+                onPointerDown={(event) => onCellDown(event, { r, c })}
                 className={`gem-cell hue-${gemHue(letter, r, c)} ${selected.has(key) ? 'is-sel' : ''} ${popping ? 'is-burst' : ''} ${cleared ? 'is-clear' : ''} ${kept && found.length > 0 && !selected.has(key) ? 'is-live' : ''} ${hint.includes(key) ? 'is-hint' : ''}`}
               >
                 <span className="gem-letter">{letter}</span>

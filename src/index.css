@@ -7428,6 +7428,10 @@ html[data-easy='on'] .next-tap {
   font-family: var(--sans);
   font-size: clamp(0.92rem, 4.4vw, 1.28rem);
   font-weight: 800;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
   cursor: pointer;
   overflow: hidden;
   background: linear-gradient(180deg, #fffce8 0%, var(--gem, #ffcc33) 46%, var(--gem-deep, #e09412) 100%);
