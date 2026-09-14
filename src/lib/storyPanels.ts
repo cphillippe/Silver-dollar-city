@@ -24,7 +24,10 @@ export type StoryScene =
   | 'keep'
   | 'creek'
 
-/** Still now; a later short loop can drop in without changing Hold. */
+/**
+ * Still now; a later short loop can drop in without changing Hold.
+ * Gemini stills: `src/content/storyPanelPrompts.ts` keyed by beatId.
+ */
 export type StoryMediaKind = 'still' | 'loop'
 
 export interface StoryMediaSlot {

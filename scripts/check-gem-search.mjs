@@ -15,6 +15,7 @@ import {
   storyFromPanels,
   storyPanelsFor,
 } from '../src/lib/storyPanels.ts'
+import { GEMINI_PANEL_PROMPTS, geminiPromptFor } from '../src/content/storyPanelPrompts.ts'
 
 const mercyWords = gemWordsFor('ph-road')
 assert.ok(mercyWords.some((word) => word.text === 'MERCY'), 'Mercy the person')
@@ -112,6 +113,20 @@ const mercyPanels = storyPanelsFor('ph-road', mercyWords.length)
 assert.equal(storyFromPanels(mercyPanels), mercyStory)
 assert.ok(mercyPanels.some((panel) => panel.scene === 'help' || panel.scene === 'hurt'))
 assert.ok(mercyPanels.every((panel) => panel.media.kind === 'still' && panel.beatId.includes('ph-road')))
+assert.deepEqual(
+  mercyPanels.map((panel) => panel.scene),
+  ['hurt', 'walk-past', 'help', 'neighbor'],
+)
+assert.ok(fatherPanels.some((panel) => panel.scene === 'father-run'))
+assert.match(geminiPromptFor('ph-father:father-run:1')?.prompt ?? '', /RUNS/)
+assert.match(geminiPromptFor('ph-father:father-run:1')?.prompt ?? '', /still far/)
+for (const panel of [...mercyPanels, ...fatherPanels]) {
+  const row = geminiPromptFor(panel.beatId)
+  assert.ok(row, `${panel.beatId} has a Gemini prompt`)
+  assert.equal(row.slot, 'live')
+  assert.match(row.prompt, /No letters/)
+}
+assert.ok(GEMINI_PANEL_PROMPTS.some((row) => row.beatId === 'ph-father:son-leave:spare'))
 assert.equal(splitStorySentences(mercyStory).length, 5)
 
 for (const id of EASY_LINE_ORDER) {
