@@ -110,6 +110,8 @@ assert.match(puzzleSrc, /isEasy\(progress\)/)
 assert.match(puzzleSrc, /onClear=\{onSolved\}/)
 assert.match(puzzleSrc, /lessonStory/)
 assert.match(puzzleSrc, /panel-blast/)
+assert.match(puzzleSrc, /FatherRunPlay/)
+assert.match(puzzleSrc, /father-run/)
 assert.doesNotMatch(puzzleSrc, /timing-dash|road-swipe|claim-merge|story-night/)
 
 const fatherStory = packLesson('ph-father')?.easy.learn ?? ''
@@ -128,8 +130,9 @@ for (const id of EASY_LINE_ORDER) {
   const puzzle = buildGemPuzzle(id)
   const panels = storyPanelsFor(id, puzzle.words.length)
   const story = lessonStory(id, puzzle.words.length)
-  assert.equal(storyPlayFor(id), 'panel-blast', `${id} play`)
-  assert.equal(story.play, 'panel-blast')
+  const play = id === 'ph-father' ? 'father-run' : 'panel-blast'
+  assert.equal(storyPlayFor(id), play, `${id} play`)
+  assert.equal(story.play, play)
   assert.deepEqual(story.beats, panels)
   assert.equal(panels.length, Math.max(3, Math.min(4, puzzle.words.length)), `${id} panel count`)
   assert.ok(panels.every((panel) => panel.text.trim().length > 0), `${id} panel text`)

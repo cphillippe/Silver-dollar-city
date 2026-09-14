@@ -1080,7 +1080,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.56')
+assert.equal(APP_VERSION, '1.4.57')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -2397,6 +2397,14 @@ assert.match(
 assert.match(
   readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8'),
   /Mercy’s story at Story Creek/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8'),
+  /EASY\.runHome/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8'),
+  /storyPlayFor/,
 )
 assert.match(
   readFileSync(new URL('../src/store/ProgressProvider.tsx', import.meta.url), 'utf8'),
