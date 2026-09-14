@@ -62,6 +62,7 @@ export function PuzzlePlay({
         <GemSearchPlay
           lineId={easyMatchLine(progress)}
           onMiss={onMiss}
+          onClear={onSolved}
           onEasyStop={onEasyStop}
         />
       )
