@@ -51,6 +51,7 @@ export function GemSearchPlay({ lineId, onMiss, onClear, onEasyStop }: GemSearch
   const [shake, setShake] = useState(false)
   const [toast, setToast] = useState('')
   const [status, setStatus] = useState<'play' | 'ok'>('play')
+  const [winStamp, setWinStamp] = useState(false)
   const drag = useRef(false)
   const moved = useRef(false)
   const pathRef = useRef<GemCoord[]>([])
@@ -80,6 +81,7 @@ export function GemSearchPlay({ lineId, onMiss, onClear, onEasyStop }: GemSearch
     setMisses(0)
     setToast('')
     setStatus('play')
+    setWinStamp(false)
     setOpened(0)
     setFlipping(null)
   }, [lineId])
@@ -147,11 +149,15 @@ export function GemSearchPlay({ lineId, onMiss, onClear, onEasyStop }: GemSearch
       setMisses(0)
       explode(nextPath, hit.label, done, nextFound.length)
       if (done) {
-        setStatus('ok')
         if (!cleared.current) {
           cleared.current = true
           onClear?.()
         }
+        const stampAt = prefersReducedMotion() ? 80 : 880
+        window.setTimeout(() => {
+          setWinStamp(true)
+          setStatus('ok')
+        }, stampAt)
       }
       return true
     }
@@ -177,7 +183,7 @@ export function GemSearchPlay({ lineId, onMiss, onClear, onEasyStop }: GemSearch
   }
 
   function applyCell(cell: GemCoord, mode: 'tap' | 'drag') {
-    if (status === 'ok') return
+    if (status === 'ok' || cleared.current) return
     const current = pathRef.current
     let next = current
     if (!current.length) {
@@ -194,7 +200,7 @@ export function GemSearchPlay({ lineId, onMiss, onClear, onEasyStop }: GemSearch
   }
 
   function onCellDown(event: ReactPointerEvent<HTMLDivElement>, cell: GemCoord) {
-    if (status === 'ok') return
+    if (status === 'ok' || cleared.current) return
     event.preventDefault()
     event.stopPropagation()
     drag.current = true
@@ -204,7 +210,7 @@ export function GemSearchPlay({ lineId, onMiss, onClear, onEasyStop }: GemSearch
   }
 
   function onBoardMove(event: ReactPointerEvent<HTMLDivElement>) {
-    if (!drag.current || status === 'ok') return
+    if (!drag.current || status === 'ok' || cleared.current) return
     const cell = cellFromPoint(event.clientX, event.clientY)
     if (!cell) return
     const last = pathRef.current[pathRef.current.length - 1]
@@ -230,7 +236,7 @@ export function GemSearchPlay({ lineId, onMiss, onClear, onEasyStop }: GemSearch
       onPointerUp={onBoardUp}
       onPointerCancel={onBoardUp}
     >
-      <WinBurst play={status === 'ok'} stamp={EASY.matchWin} />
+      <WinBurst play={winStamp} stamp={EASY.matchWin} />
       <p className="sort-how">{EASY.matchHunt}</p>
       <StoryStrip
         kicker={`${home.who} · ${home.place}`}

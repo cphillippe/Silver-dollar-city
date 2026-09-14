@@ -13,7 +13,8 @@ export const CHANGELOG: ChangeNote[] = [
     when: '2026-09-14',
     items: [
       'Easy Match panel blast: each gem-word find flips the next comic story panel from the harvest short story — play the story, don’t read a wall then quiz',
-      'Candy comic panels (existing Jericho-road art plus flat candy scenes) flip with the gem explosion. MATCHED! is a badge, not a tappable gold pill — Hold next is the primary tap',
+      'Candy comic panels (painted candy beats for mercy and the father-run, plus flat candy scenes) flip with the gem explosion. MATCHED! is a badge, not a tappable gold pill — Hold next is the primary tap',
+      'A large hero panel shows the latest beat; sealed foil packs flip into art. MATCHED! waits for the last flip',
       'Full board clear completes the short story through play, then Hold next locks the same claim · reason · source',
       'Easy home is Match → Hold. Finding gems opens story panels. After a Match win, Hold next. Learn stays as an unboxed re-read',
       'Easy after Hold: gold CTA is Find the gems — next Match, not Hold',

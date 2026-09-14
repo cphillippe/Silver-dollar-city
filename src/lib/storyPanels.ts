@@ -24,11 +24,22 @@ export type StoryScene =
   | 'keep'
   | 'creek'
 
+/** Still now; a later short loop can drop in without changing Hold. */
+export type StoryMediaKind = 'still' | 'loop'
+
+export interface StoryMediaSlot {
+  kind: StoryMediaKind
+  still?: string
+  loop?: string
+}
+
 export interface StoryPanel {
   id: string
+  beatId: string
   text: string
   scene: StoryScene
   fromStory: boolean
+  media: StoryMediaSlot
 }
 
 const LESSON_SCENES: Record<string, StoryScene[]> = {
@@ -134,12 +145,17 @@ export function storyPanelsFor(lineId: string, wordCount = gemWordsFor(lineId).l
   while (beats.length < count) beats.push('Keep this line.')
   beats = beats.slice(0, count)
   const scenes = scenesFor(lineId, beats.length, beats)
-  return beats.map((text, index) => ({
-    id: `${lineId}-panel-${index}`,
-    text,
-    scene: scenes[index] ?? 'keep',
-    fromStory: index < fromStoryCount,
-  }))
+  return beats.map((text, index) => {
+    const scene = scenes[index] ?? 'keep'
+    return {
+      id: `${lineId}-panel-${index}`,
+      beatId: `${lineId}:${scene}:${index}`,
+      text,
+      scene,
+      fromStory: index < fromStoryCount,
+      media: { kind: 'still' },
+    }
+  })
 }
 
 export function storyCaption(panels: StoryPanel[], opened: number): string {
