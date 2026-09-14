@@ -14,7 +14,7 @@ export function WinBurst({
       <span className="win-flash" />
       <span className="win-ring" />
       <span className="win-stamp-wrap">
-        <strong className="win-stamp">{stamp}</strong>
+        <strong className="win-stamp is-badge">{stamp}</strong>
       </span>
       {BURST_SPARKS.map((i) => (
         <span
