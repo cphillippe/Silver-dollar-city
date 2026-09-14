@@ -7153,6 +7153,20 @@ html[data-easy='on'] .mind-node em {
   margin-top: 0;
 }
 
+/* Living story on the page — no gold app-shell card around the whole block. */
+.easy-story-card,
+html[data-theme='parchment'] .easy-story-card,
+html[data-theme='dusk'] .easy-story-card {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  margin-bottom: 0;
+}
+
+.easy-story-card::before {
+  content: none;
+}
+
 .easy-story-card .teach-reason {
   margin: 0 0 10px;
   font-size: 1.12rem;
@@ -7161,6 +7175,9 @@ html[data-easy='on'] .mind-node em {
 
 .easy-story-dock {
   margin-top: 14px;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .easy-who-where {
