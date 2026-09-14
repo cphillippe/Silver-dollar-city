@@ -8,6 +8,16 @@ import { easyWrongTap } from '../lib/easy.ts'
  */
 export const STREET_LIGHTS = ['ph-road', 'wb-creed', 'daily-lantern'] as const
 
+/** Not claim·reason·source encodes — Love how-to and trail thank-you cards. */
+export const STREET_SKIP_IDS = [
+  'td-watch',
+  'j-trail-1',
+  'j-trail-2',
+  'j-trail-3',
+  'j-trail-5',
+  'j-trail-7',
+] as const
+
 const PLACE_NODES: LinkNode[] = [
   {
     id: 'place-hollow',
@@ -86,147 +96,364 @@ const PERSON_NODES: LinkNode[] = [
   },
 ]
 
-const IDEA_NODES: LinkNode[] = [
+type StreetPlaceId = (typeof PLACE_NODES)[number]['id']
+type StreetPersonId = (typeof PERSON_NODES)[number]['id']
+
+interface StreetFact {
+  evidenceId: string
+  ideaId: string
+  tripleId: string
+  placeId: StreetPlaceId
+  personId: StreetPersonId
+  text: string
+  caption: string
+}
+
+/**
+ * Every claim·reason·source fact on the street.
+ * Easy Match ids (mercy/father/debt/silas/women/juniper/nora/ansel/hope) keep
+ * their existing idea, triple, place, and person bindings.
+ * daily-cosmos stays at Why Gate with Ansel — Easy Learn already teaches that home.
+ */
+const STREET_FACTS: StreetFact[] = [
   {
-    id: 'idea-mercy',
-    kind: 'idea',
-    text: 'Neighbor is the one who shows mercy.',
     evidenceId: 'ph-road',
+    ideaId: 'idea-mercy',
+    tripleId: 'mercy-hollow',
+    placeId: 'place-hollow',
+    personId: 'person-mercy',
+    text: 'Neighbor is the one who shows mercy.',
+    caption: 'Neighbor is the one who shows mercy.',
   },
   {
-    id: 'idea-father',
-    kind: 'idea',
-    text: 'The father runs with mercy before the speech is done.',
     evidenceId: 'ph-father',
+    ideaId: 'idea-father',
+    tripleId: 'father-hollow',
+    placeId: 'place-hollow',
+    personId: 'person-mercy',
+    text: 'The father runs with mercy before the speech is done.',
+    caption: 'The father runs with mercy.',
   },
   {
-    id: 'idea-debt',
-    kind: 'idea',
-    text: 'Received mercy makes refusing mercy a contradiction.',
+    evidenceId: 'ph-seeds',
+    ideaId: 'idea-seeds',
+    tripleId: 'seeds-hollow',
+    placeId: 'place-hollow',
+    personId: 'person-mercy',
+    text: 'The kingdom arrives in pictures, not slogans.',
+    caption: 'The kingdom arrives in pictures.',
+  },
+  {
     evidenceId: 'ph-debt',
+    ideaId: 'idea-debt',
+    tripleId: 'debt-hollow',
+    placeId: 'place-hollow',
+    personId: 'person-mercy',
+    text: 'Received mercy makes refusing mercy a contradiction.',
+    caption: 'Received mercy must give mercy.',
   },
   {
-    id: 'idea-silas',
-    kind: 'idea',
-    text: 'Paul hands on an early public creed: died, buried, raised, appeared.',
     evidenceId: 'wb-creed',
+    ideaId: 'idea-silas',
+    tripleId: 'silas-bench',
+    placeId: 'place-bench',
+    personId: 'person-silas',
+    text: 'Paul hands on an early public creed: died, buried, raised, appeared.',
+    caption: 'Died, buried, raised, appeared.',
   },
   {
-    id: 'idea-women',
-    kind: 'idea',
-    text: 'The first tomb reports begin with women — an awkward opening if invented for respectability.',
+    evidenceId: 'wb-early',
+    ideaId: 'idea-early',
+    tripleId: 'early-bench',
+    placeId: 'place-bench',
+    personId: 'person-silas',
+    text: 'The resurrection claim sits close to the events, not as a late legend.',
+    caption: 'The claim sits close to the events.',
+  },
+  {
+    evidenceId: 'wb-method',
+    ideaId: 'idea-method',
+    tripleId: 'method-bench',
+    placeId: 'place-bench',
+    personId: 'person-silas',
+    text: 'Ordinary historical tools weigh testimony; they do not replace reading.',
+    caption: 'History tools weigh testimony.',
+  },
+  {
     evidenceId: 'wb-women',
+    ideaId: 'idea-women',
+    tripleId: 'women-bench',
+    placeId: 'place-bench',
+    personId: 'person-silas',
+    text: 'The first tomb reports begin with women — an awkward opening if invented for respectability.',
+    caption: 'Women first saw the tomb.',
   },
   {
-    id: 'idea-juniper',
-    kind: 'idea',
-    text: 'A lamp is meant to be seen.',
+    evidenceId: 'daily-names',
+    ideaId: 'idea-names',
+    tripleId: 'names-bench',
+    placeId: 'place-bench',
+    personId: 'person-silas',
+    text: 'The resurrection claim stacks named witnesses, not one private voice.',
+    caption: 'Named witnesses, not one private voice.',
+  },
+  {
+    evidenceId: 'daily-creed',
+    ideaId: 'idea-daily-creed',
+    tripleId: 'creed-bench',
+    placeId: 'place-bench',
+    personId: 'person-silas',
+    text: 'The creed sits between the event and Paul’s letter.',
+    caption: 'The creed sits close to the event.',
+  },
+  {
+    evidenceId: 'daily-empty',
+    ideaId: 'idea-empty',
+    tripleId: 'empty-bench',
+    placeId: 'place-bench',
+    personId: 'person-silas',
+    text: 'The first Easter reports include an empty place, women, fear, and wonder.',
+    caption: 'Easter begins with an empty place.',
+  },
+  {
     evidenceId: 'daily-lantern',
+    ideaId: 'idea-juniper',
+    tripleId: 'juniper-porch',
+    placeId: 'place-porch',
+    personId: 'person-juniper',
+    text: 'A lamp is meant to be seen.',
+    caption: 'A lamp is meant to be seen.',
   },
   {
-    id: 'idea-stars',
-    kind: 'idea',
-    text: 'The heavens already speak of a Maker; fine-tuning fits that voice.',
+    evidenceId: 'daily-gems',
+    ideaId: 'idea-gems',
+    tripleId: 'gems-porch',
+    placeId: 'place-porch',
+    personId: 'person-juniper',
+    text: 'Jesus taught with pictures you can hold.',
+    caption: 'Jesus taught with pictures you can hold.',
+  },
+  {
+    evidenceId: 'daily-seed',
+    ideaId: 'idea-seed',
+    tripleId: 'seed-porch',
+    placeId: 'place-porch',
+    personId: 'person-juniper',
+    text: 'The same word meets different soils; some seed is lost.',
+    caption: 'The same word meets different soils.',
+  },
+  {
+    evidenceId: 'daily-neighbor',
+    ideaId: 'idea-neighbor',
+    tripleId: 'neighbor-porch',
+    placeId: 'place-porch',
+    personId: 'person-juniper',
+    text: 'Mercy makes a neighbor; pedigree does not.',
+    caption: 'Mercy makes a neighbor.',
+  },
+  {
+    evidenceId: 'ob-tuning',
+    ideaId: 'idea-tuning',
+    tripleId: 'tuning-sky',
+    placeId: 'place-sky',
+    personId: 'person-nora',
+    text: 'The universe is finely tuned for life — that fit points to a Designer.',
+    caption: 'Fine-tuning points to a Designer.',
+  },
+  {
+    evidenceId: 'ob-design',
+    ideaId: 'idea-design',
+    tripleId: 'design-sky',
+    placeId: 'place-sky',
+    personId: 'person-nora',
+    text: 'Fine-tuning is best explained by a mind that intended a habitable world.',
+    caption: 'A mind intended a habitable world.',
+  },
+  {
+    evidenceId: 'ob-leibniz',
+    ideaId: 'idea-leibniz',
+    tripleId: 'leibniz-sky',
+    placeId: 'place-sky',
+    personId: 'person-nora',
+    text: 'Why is there something rather than nothing remains after a cosmological model.',
+    caption: 'Why something rather than nothing.',
+  },
+  {
+    evidenceId: 'ob-life',
+    ideaId: 'idea-ob-life',
+    tripleId: 'ob-life-sky',
+    placeId: 'place-sky',
+    personId: 'person-nora',
+    text: 'Life’s specified information is a mark of mind.',
+    caption: 'Life’s information is a mark of mind.',
+  },
+  {
     evidenceId: 'daily-stars',
+    ideaId: 'idea-stars',
+    tripleId: 'nora-sky',
+    placeId: 'place-sky',
+    personId: 'person-nora',
+    text: 'The heavens already speak of a Maker; fine-tuning fits that voice.',
+    caption: 'The heavens speak of a Maker.',
   },
   {
-    id: 'idea-cosmos',
-    kind: 'idea',
-    text: 'The universe exists and did not have to — so a Source is worth naming.',
+    evidenceId: 'daily-life',
+    ideaId: 'idea-daily-life',
+    tripleId: 'daily-life-sky',
+    placeId: 'place-sky',
+    personId: 'person-nora',
+    text: 'Life, place, and mind are not cheap facts.',
+    caption: 'Life, place, and mind are not cheap facts.',
+  },
+  {
     evidenceId: 'daily-cosmos',
+    ideaId: 'idea-cosmos',
+    tripleId: 'ansel-gate',
+    placeId: 'place-gate',
+    personId: 'person-ansel',
+    text: 'The universe exists and did not have to — so a Source is worth naming.',
+    caption: 'The world did not have to exist.',
   },
   {
-    id: 'idea-moral',
-    kind: 'idea',
-    text: 'Duty presents itself as more than taste — and theism is a natural home for that.',
+    evidenceId: 'fg-mover',
+    ideaId: 'idea-mover',
+    tripleId: 'mover-gate',
+    placeId: 'place-gate',
+    personId: 'person-ansel',
+    text: 'Change here and now needs a first actuality that is not itself a receiver of change.',
+    caption: 'Change needs a first actuality.',
+  },
+  {
+    evidenceId: 'fg-contingent',
+    ideaId: 'idea-contingent',
+    tripleId: 'contingent-gate',
+    placeId: 'place-gate',
+    personId: 'person-ansel',
+    text: 'A world of might-not-have-beens still needs a necessary ground.',
+    caption: 'Might-not-have-beens need a necessary ground.',
+  },
+  {
+    evidenceId: 'fg-kalam',
+    ideaId: 'idea-kalam',
+    tripleId: 'kalam-gate',
+    placeId: 'place-gate',
+    personId: 'person-ansel',
+    text: 'If what begins has a cause and the universe began, it has a cause.',
+    caption: 'What begins has a cause.',
+  },
+  {
+    evidenceId: 'fg-limits',
+    ideaId: 'idea-limits',
+    tripleId: 'limits-gate',
+    placeId: 'place-gate',
+    personId: 'person-ansel',
+    text: 'A cosmological argument is already a great deal — and not yet the sermon on the mount.',
+    caption: 'A first cause is not yet the whole gospel.',
+  },
+  {
+    evidenceId: 'daily-scroll',
+    ideaId: 'idea-scroll',
+    tripleId: 'scroll-gate',
+    placeId: 'place-gate',
+    personId: 'person-ansel',
+    text: 'We hold a river of copies, not the first ink.',
+    caption: 'We hold a river of copies.',
+  },
+  {
+    evidenceId: 'daily-isaiah',
+    ideaId: 'idea-isaiah',
+    tripleId: 'isaiah-gate',
+    placeId: 'place-gate',
+    personId: 'person-ansel',
+    text: 'Isaiah 53’s Servant is the Jesus the church confesses — wounded for others, silent like a lamb.',
+    caption: 'Isaiah’s Servant is Jesus.',
+  },
+  {
     evidenceId: 'hl-moral',
+    ideaId: 'idea-moral',
+    tripleId: 'hope-lookout',
+    placeId: 'place-lookout',
+    personId: 'person-hope',
+    text: 'Duty presents itself as more than taste — and theism is a natural home for that.',
+    caption: 'Duty is more than taste.',
+  },
+  {
+    evidenceId: 'hl-mind',
+    ideaId: 'idea-mind',
+    tripleId: 'mind-lookout',
+    placeId: 'place-lookout',
+    personId: 'person-hope',
+    text: 'A story of the world must find a home for mind — including the storyteller.',
+    caption: 'The story must house the storyteller’s mind.',
+  },
+  {
+    evidenceId: 'hl-meaning',
+    ideaId: 'idea-meaning',
+    tripleId: 'meaning-lookout',
+    placeId: 'place-lookout',
+    personId: 'person-hope',
+    text: 'Local meaning can be built — the lookout asks whether it is also received.',
+    caption: 'Meaning may be received, not only built.',
+  },
+  {
+    evidenceId: 'hl-beauty',
+    ideaId: 'idea-beauty',
+    tripleId: 'beauty-lookout',
+    placeId: 'place-lookout',
+    personId: 'person-hope',
+    text: 'Beauty wakes a hunger it cannot feed — hungers usually correspond to real countries.',
+    caption: 'Beauty wakes a hunger it cannot feed.',
+  },
+  {
+    evidenceId: 'daily-grace',
+    ideaId: 'idea-grace',
+    tripleId: 'grace-lookout',
+    placeId: 'place-lookout',
+    personId: 'person-hope',
+    text: 'Grace is gift, not wage; faith receives; boast starves.',
+    caption: 'Grace is gift, not wage.',
+  },
+  {
+    evidenceId: 'daily-rest',
+    ideaId: 'idea-rest',
+    tripleId: 'rest-lookout',
+    placeId: 'place-lookout',
+    personId: 'person-hope',
+    text: 'Tired people are named first; rest is the gift, not a steeper hill.',
+    caption: 'Rest is the gift, not a steeper hill.',
+  },
+  {
+    evidenceId: 'daily-door',
+    ideaId: 'idea-door',
+    tripleId: 'door-lookout',
+    placeId: 'place-lookout',
+    personId: 'person-hope',
+    text: 'Jesus’ “door” is a particular way in with a wide anyone.',
+    caption: 'Jesus is a door with a wide anyone.',
   },
 ]
 
-const HARD_NODE_IDS = new Set([
-  'idea-mercy',
-  'place-hollow',
-  'person-mercy',
-  'idea-silas',
-  'place-bench',
-  'person-silas',
-  'idea-juniper',
-  'place-porch',
-  'person-juniper',
-])
+const IDEA_NODES: LinkNode[] = STREET_FACTS.map((fact) => ({
+  id: fact.ideaId,
+  kind: 'idea',
+  text: fact.text,
+  evidenceId: fact.evidenceId,
+}))
 
 export const STREET_NODES: LinkNode[] = [...IDEA_NODES, ...PLACE_NODES, ...PERSON_NODES]
 
-export const STREET_TRIPLES: LinkTriple[] = [
-  {
-    id: 'mercy-hollow',
-    ideaId: 'idea-mercy',
-    placeId: 'place-hollow',
-    personId: 'person-mercy',
-  },
-  {
-    id: 'father-hollow',
-    ideaId: 'idea-father',
-    placeId: 'place-hollow',
-    personId: 'person-mercy',
-  },
-  {
-    id: 'debt-hollow',
-    ideaId: 'idea-debt',
-    placeId: 'place-hollow',
-    personId: 'person-mercy',
-  },
-  {
-    id: 'silas-bench',
-    ideaId: 'idea-silas',
-    placeId: 'place-bench',
-    personId: 'person-silas',
-  },
-  {
-    id: 'women-bench',
-    ideaId: 'idea-women',
-    placeId: 'place-bench',
-    personId: 'person-silas',
-  },
-  {
-    id: 'juniper-porch',
-    ideaId: 'idea-juniper',
-    placeId: 'place-porch',
-    personId: 'person-juniper',
-  },
-  {
-    id: 'nora-sky',
-    ideaId: 'idea-stars',
-    placeId: 'place-sky',
-    personId: 'person-nora',
-  },
-  {
-    id: 'ansel-gate',
-    ideaId: 'idea-cosmos',
-    placeId: 'place-gate',
-    personId: 'person-ansel',
-  },
-  {
-    id: 'hope-lookout',
-    ideaId: 'idea-moral',
-    placeId: 'place-lookout',
-    personId: 'person-hope',
-  },
-]
+export const STREET_TRIPLES: LinkTriple[] = STREET_FACTS.map((fact) => ({
+  id: fact.tripleId,
+  ideaId: fact.ideaId,
+  placeId: fact.placeId,
+  personId: fact.personId,
+}))
 
-const HARD_TRIPLE_IDS = ['mercy-hollow', 'silas-bench', 'juniper-porch'] as const
+const LINE_TRIPLE: Record<string, string> = Object.fromEntries(
+  STREET_FACTS.map((fact) => [fact.evidenceId, fact.tripleId]),
+)
 
-const LINE_TRIPLE: Record<string, (typeof STREET_TRIPLES)[number]['id']> = {
-  'ph-road': 'mercy-hollow',
-  'ph-father': 'father-hollow',
-  'ph-debt': 'debt-hollow',
-  'wb-creed': 'silas-bench',
-  'wb-women': 'women-bench',
-  'daily-lantern': 'juniper-porch',
-  'daily-stars': 'nora-sky',
-  'daily-cosmos': 'ansel-gate',
-  'hl-moral': 'hope-lookout',
-}
+export const STREET_FACT_IDS = STREET_FACTS.map((fact) => fact.evidenceId)
 
 export const STREET_CHALLENGE: LinkChallenge = {
   kind: 'link',
@@ -235,14 +462,12 @@ export const STREET_CHALLENGE: LinkChallenge = {
   idea: 'an idea lives at a place, with a person',
   prompt: 'Tap a block, then the place or person that belongs with it.',
   context:
-    'Mercy at the creek because Jesus stories live there. Silas at the square because names belong in a ledger. Juniper on the east porch because a lamp is meant to be seen.',
-  nodes: STREET_NODES.filter((node) => HARD_NODE_IDS.has(node.id)),
-  triples: STREET_TRIPLES.filter((triple) =>
-    (HARD_TRIPLE_IDS as readonly string[]).includes(triple.id),
-  ),
+    'An idea lives at a place, with a person. Mercy at the creek because Jesus stories live there. Silas at the square because names belong in a ledger. Juniper on the east porch because a lamp is meant to be seen. Nora at Sky Watch because the heavens already speak of a Maker. Ansel at Why Gate because the world exists and did not have to. Hope at Meaning Ridge because duty, mind, meaning, and beauty look over the town.',
+  nodes: STREET_NODES,
+  triples: STREET_TRIPLES,
   teachOnWrong: 'Same story: idea, the lot it lives on, and the person who keeps it — for a reason.',
   deeper:
-    'Mercy keeps the creek because Jesus taught in pictures (Luke 10:36). Silas keeps the square because the creed is a public report. Juniper keeps the porch because a lamp is meant to be seen.',
+    'Mercy keeps the creek because Jesus taught in pictures (Luke 10:36). Silas keeps the square because the creed is a public report. Juniper keeps the porch because a lamp is meant to be seen. Nora keeps the ridge because the heavens declare a Maker. Ansel keeps the gate because what exists did not have to. Hope keeps the lookout because duty is more than taste.',
 }
 
 function streetTriple(id: string): LinkTriple | undefined {
@@ -251,6 +476,14 @@ function streetTriple(id: string): LinkTriple | undefined {
 
 function streetNode(id: string): LinkNode | undefined {
   return STREET_NODES.find((item) => item.id === id)
+}
+
+function streetFact(evidenceId: string): StreetFact | undefined {
+  return STREET_FACTS.find((item) => item.evidenceId === evidenceId)
+}
+
+function streetFactByTriple(tripleId: string): StreetFact | undefined {
+  return STREET_FACTS.find((item) => item.tripleId === tripleId)
 }
 
 /** Easy Match uses one taught line’s triad — not a jump to another street story. */
@@ -272,6 +505,19 @@ export const STREET_BEATS = [
   'Mercy Wren · Story Creek · Neighbor is the one who shows mercy.',
   'Silas Whitman · Witness Square · died, buried, raised, appeared.',
   'Juniper Wick · East porch · A lamp is meant to be seen.',
+  'Nora Skye · Sky Watch · The heavens speak of a Maker.',
+  'Ansel Gate · Why Gate · The world did not have to exist.',
+  'Hope Ridge · Meaning Ridge · Duty is more than taste.',
+]
+
+/** One Hard teach line per lot — not every fact on the street. */
+export const STREET_PLACE_WHYS = [
+  'Mercy Wren keeps Story Creek: Jesus taught in pictures by the road and the water.',
+  'Silas Whitman keeps Witness Square: died, buried, raised, appeared is a public creed.',
+  'Juniper Wick keeps the east porch: a lamp is meant to be seen.',
+  'Nora Skye keeps Sky Watch: the heavens declare a Maker, and fine-tuning fits that voice.',
+  'Ansel Gate keeps Why Gate: the world exists and did not have to.',
+  'Hope Ridge keeps Meaning Ridge: duty, mind, meaning, and beauty look over the town.',
 ]
 
 /** Concrete picture for a Link chip — idea borrows its lot’s art unless a card has its own. */
@@ -289,10 +535,42 @@ export function linkPicture(
   if (place?.plotId) return { plotId: place.plotId }
   const person = challenge.nodes.find((item) => item.id === triple?.personId)
   if (person?.who) return { who: person.who }
+  const home = streetFact(node.evidenceId ?? '')
+  if (home) {
+    const lot = PLACE_NODES.find((item) => item.id === home.placeId)
+    if (lot?.plotId) return { plotId: lot.plotId }
+  }
   return {}
 }
 
 type LinkStep = 'idea' | 'place' | 'person'
+
+const PLACE_CLUES: Record<StreetPlaceId, { place: string; person: string }> = {
+  'place-hollow': {
+    place: 'That story lives at the creek.',
+    person: 'Mercy keeps that creek.',
+  },
+  'place-bench': {
+    place: 'Those names sit at the square.',
+    person: 'Silas keeps that square.',
+  },
+  'place-porch': {
+    place: 'That lamp lives on the porch.',
+    person: 'Juniper keeps that porch.',
+  },
+  'place-sky': {
+    place: 'That voice lives at Sky Watch.',
+    person: 'Nora keeps that sky.',
+  },
+  'place-gate': {
+    place: 'That question lives at Why Gate.',
+    person: 'Ansel keeps that gate.',
+  },
+  'place-lookout': {
+    place: 'That line lives at Meaning Ridge.',
+    person: 'Hope keeps that ridge.',
+  },
+}
 
 const LINK_CLUES: Record<string, Record<LinkStep, string>> = {
   'mercy-hollow': {
@@ -302,6 +580,11 @@ const LINK_CLUES: Record<string, Record<LinkStep, string>> = {
   },
   'father-hollow': {
     idea: 'Mercy’s Jesus story — the father who runs first.',
+    place: 'That story lives at the creek.',
+    person: 'Mercy keeps that creek.',
+  },
+  'seeds-hollow': {
+    idea: 'Mercy’s Jesus stories — the kingdom arrives in pictures.',
     place: 'That story lives at the creek.',
     person: 'Mercy keeps that creek.',
   },
@@ -315,8 +598,33 @@ const LINK_CLUES: Record<string, Record<LinkStep, string>> = {
     place: 'Those names sit at the square.',
     person: 'Silas keeps that square.',
   },
+  'early-bench': {
+    idea: 'Silas’s public names — the claim sits close to the events.',
+    place: 'Those names sit at the square.',
+    person: 'Silas keeps that square.',
+  },
+  'method-bench': {
+    idea: 'Silas’s ledger — ordinary tools weigh testimony.',
+    place: 'Those names sit at the square.',
+    person: 'Silas keeps that square.',
+  },
   'women-bench': {
     idea: 'Silas’s first report — women saw the tomb first.',
+    place: 'That report sits at the square.',
+    person: 'Silas keeps that square.',
+  },
+  'names-bench': {
+    idea: 'Silas’s public names — Cephas, the Twelve, five hundred.',
+    place: 'Those names sit at the square.',
+    person: 'Silas keeps that square.',
+  },
+  'creed-bench': {
+    idea: 'Silas’s handed-on creed — close to the event, then Paul’s letter.',
+    place: 'Those names sit at the square.',
+    person: 'Silas keeps that square.',
+  },
+  'empty-bench': {
+    idea: 'Silas’s first Easter — empty place, women, fear, and wonder.',
     place: 'That report sits at the square.',
     person: 'Silas keeps that square.',
   },
@@ -325,8 +633,48 @@ const LINK_CLUES: Record<string, Record<LinkStep, string>> = {
     place: 'That lamp lives on the porch.',
     person: 'Juniper keeps that porch.',
   },
+  'gems-porch': {
+    idea: 'Juniper’s morning pictures — lamp, seed, and cup you can hold.',
+    place: 'That lamp lives on the porch.',
+    person: 'Juniper keeps that porch.',
+  },
+  'seed-porch': {
+    idea: 'Juniper’s seed — the same word meets different soils.',
+    place: 'That lamp lives on the porch.',
+    person: 'Juniper keeps that porch.',
+  },
+  'neighbor-porch': {
+    idea: 'Juniper’s porch line — mercy makes a neighbor.',
+    place: 'That lamp lives on the porch.',
+    person: 'Juniper keeps that porch.',
+  },
   'nora-sky': {
     idea: 'Nora’s sky — the heavens speak of a Maker.',
+    place: 'That voice lives at Sky Watch.',
+    person: 'Nora keeps that sky.',
+  },
+  'tuning-sky': {
+    idea: 'Nora’s sky — fine-tuning points to a Designer.',
+    place: 'That voice lives at Sky Watch.',
+    person: 'Nora keeps that sky.',
+  },
+  'design-sky': {
+    idea: 'Nora’s sky — a mind intended a habitable world.',
+    place: 'That voice lives at Sky Watch.',
+    person: 'Nora keeps that sky.',
+  },
+  'leibniz-sky': {
+    idea: 'Nora’s sky — why something rather than nothing.',
+    place: 'That voice lives at Sky Watch.',
+    person: 'Nora keeps that sky.',
+  },
+  'ob-life-sky': {
+    idea: 'Nora’s sky — life’s information is a mark of mind.',
+    place: 'That voice lives at Sky Watch.',
+    person: 'Nora keeps that sky.',
+  },
+  'daily-life-sky': {
+    idea: 'Nora’s sky — life, place, and mind are given.',
     place: 'That voice lives at Sky Watch.',
     person: 'Nora keeps that sky.',
   },
@@ -335,8 +683,68 @@ const LINK_CLUES: Record<string, Record<LinkStep, string>> = {
     place: 'That question lives at Why Gate.',
     person: 'Ansel keeps that gate.',
   },
+  'mover-gate': {
+    idea: 'Ansel’s why — change needs a first actuality.',
+    place: 'That question lives at Why Gate.',
+    person: 'Ansel keeps that gate.',
+  },
+  'contingent-gate': {
+    idea: 'Ansel’s why — might-not-have-beens need a necessary ground.',
+    place: 'That question lives at Why Gate.',
+    person: 'Ansel keeps that gate.',
+  },
+  'kalam-gate': {
+    idea: 'Ansel’s why — what begins has a cause.',
+    place: 'That question lives at Why Gate.',
+    person: 'Ansel keeps that gate.',
+  },
+  'limits-gate': {
+    idea: 'Ansel’s why — a first cause is not yet the whole gospel.',
+    place: 'That question lives at Why Gate.',
+    person: 'Ansel keeps that gate.',
+  },
+  'scroll-gate': {
+    idea: 'Ansel’s pages — we hold a river of copies.',
+    place: 'That question lives at Why Gate.',
+    person: 'Ansel keeps that gate.',
+  },
+  'isaiah-gate': {
+    idea: 'Ansel’s scroll — Isaiah’s Servant is Jesus.',
+    place: 'That question lives at Why Gate.',
+    person: 'Ansel keeps that gate.',
+  },
   'hope-lookout': {
     idea: 'Hope’s ridge — duty is more than a taste.',
+    place: 'That line lives at Meaning Ridge.',
+    person: 'Hope keeps that ridge.',
+  },
+  'mind-lookout': {
+    idea: 'Hope’s ridge — the story must house the storyteller’s mind.',
+    place: 'That line lives at Meaning Ridge.',
+    person: 'Hope keeps that ridge.',
+  },
+  'meaning-lookout': {
+    idea: 'Hope’s ridge — meaning may be received, not only built.',
+    place: 'That line lives at Meaning Ridge.',
+    person: 'Hope keeps that ridge.',
+  },
+  'beauty-lookout': {
+    idea: 'Hope’s ridge — beauty wakes a hunger it cannot feed.',
+    place: 'That line lives at Meaning Ridge.',
+    person: 'Hope keeps that ridge.',
+  },
+  'grace-lookout': {
+    idea: 'Hope’s ridge — grace is gift, not wage.',
+    place: 'That line lives at Meaning Ridge.',
+    person: 'Hope keeps that ridge.',
+  },
+  'rest-lookout': {
+    idea: 'Hope’s ridge — rest is the gift, not a steeper hill.',
+    place: 'That line lives at Meaning Ridge.',
+    person: 'Hope keeps that ridge.',
+  },
+  'door-lookout': {
+    idea: 'Hope’s ridge — Jesus is a door with a wide anyone.',
     place: 'That line lives at Meaning Ridge.',
     person: 'Hope keeps that ridge.',
   },
@@ -344,7 +752,12 @@ const LINK_CLUES: Record<string, Record<LinkStep, string>> = {
 
 /** Easy who/where/story hint so the first pick is learnable, not a coin flip. */
 export function linkClue(tripleId: string, step: LinkStep): string {
-  return LINK_CLUES[tripleId]?.[step] ?? 'Pick the match for this story.'
+  const written = LINK_CLUES[tripleId]?.[step]
+  if (written) return written
+  const fact = streetFactByTriple(tripleId)
+  if (!fact) return 'Pick the match for this story.'
+  if (step === 'idea') return fact.caption
+  return PLACE_CLUES[fact.placeId][step]
 }
 
 /** Exact Easy card text for the next pick. */
@@ -368,17 +781,11 @@ export function linkMiss(tripleId: string, step: LinkStep): string {
 export function linkCaption(node: LinkNode, easy: boolean): string {
   if (easy && node.id === 'place-hollow') return 'Mercy’s creek'
   if (node.kind === 'idea') {
-    if (node.evidenceId === 'daily-lantern') return 'A lamp is meant to be seen.'
     if (node.evidenceId === 'ph-road') {
       return easy ? 'Neighbor shows mercy.' : 'Neighbor is the one who shows mercy.'
     }
-    if (node.evidenceId === 'ph-father') return 'The father runs with mercy.'
-    if (node.evidenceId === 'ph-debt') return 'Received mercy must give mercy.'
-    if (node.evidenceId === 'wb-creed') return 'Died, buried, raised, appeared.'
-    if (node.evidenceId === 'wb-women') return 'Women first saw the tomb.'
-    if (node.evidenceId === 'daily-stars') return 'The heavens speak of a Maker.'
-    if (node.evidenceId === 'daily-cosmos') return 'The world did not have to exist.'
-    if (node.evidenceId === 'hl-moral') return 'Duty is more than taste.'
+    const fact = streetFact(node.evidenceId ?? '')
+    if (fact) return fact.caption
   }
   return node.text
 }
@@ -393,6 +800,10 @@ export const STREET_WHYS: Record<string, { easy: string; hard: string }> = {
     easy: 'Mercy tells the father-run story at the creek. The father runs with mercy, so it lives at Story Creek.',
     hard: 'Mercy Wren keeps Story Creek. The father runs before the speech is done — a Jesus story, not a square report.',
   },
+  'seeds-hollow': {
+    easy: 'Mercy tells kingdom pictures at the creek. The kingdom arrives in pictures, not slogans.',
+    hard: 'Mercy Wren keeps Story Creek. Soil, search, a tiny seed — Jesus taught the kingdom in pictures, not slogans.',
+  },
   'debt-hollow': {
     easy: 'Mercy tells the forgiven-debt story at the creek. Received mercy must give mercy.',
     hard: 'Mercy Wren keeps Story Creek. Received mercy making refusal a contradiction is a Jesus story of two servants.',
@@ -401,24 +812,124 @@ export const STREET_WHYS: Record<string, { easy: string; hard: string }> = {
     easy: 'Silas copies names at the square. The old shared belief — died, buried, raised — sits with the public names.',
     hard: 'Silas Whitman keeps Witness Square. Died, buried, raised, appeared is a public creed. It belongs in a ledger hall, not under the oaks.',
   },
+  'early-bench': {
+    easy: 'Silas keeps the square. The claim sits close to the events — not a late legend.',
+    hard: 'Silas Whitman keeps Witness Square. Paul quotes a received formula and names known people; the claim sits close to the events.',
+  },
+  'method-bench': {
+    easy: 'Silas keeps the square. Ordinary tools weigh testimony; they do not replace reading.',
+    hard: 'Silas Whitman keeps Witness Square. Multiple attestation and early reports weigh testimony — they do not skip the texts.',
+  },
   'women-bench': {
     easy: 'Silas keeps the square. Women saw the tomb first — an awkward first report.',
     hard: 'Silas Whitman keeps Witness Square. Women as first tomb witnesses is a public report, not a creek picture.',
+  },
+  'names-bench': {
+    easy: 'Silas keeps the square. Named witnesses — not one private voice.',
+    hard: 'Silas Whitman keeps Witness Square. Cephas, the Twelve, and more than five hundred are public names, not a private dream.',
+  },
+  'creed-bench': {
+    easy: 'Silas keeps the square. The creed sits close to the event, then Paul’s letter.',
+    hard: 'Silas Whitman keeps Witness Square. The creed sits between the event and Paul’s letter — died, buried, raised.',
+  },
+  'empty-bench': {
+    easy: 'Silas keeps the square. Easter begins with an empty place, women, fear, and wonder.',
+    hard: 'Silas Whitman keeps Witness Square. The first Easter reports include an empty place — the town does not sand that awkwardness away.',
   },
   'juniper-porch': {
     easy: 'Juniper’s lamp is on the porch so today’s line can be seen.',
     hard: 'Juniper Wick keeps the east porch. A lamp is meant to be seen — so the morning line lives at the lamp, where the trail starts.',
   },
+  'gems-porch': {
+    easy: 'Juniper’s lamp is on the porch. Jesus taught with pictures you can hold.',
+    hard: 'Juniper Wick keeps the east porch. Lamp, seed, and cup are pictures you can hold — gift, not wage.',
+  },
+  'seed-porch': {
+    easy: 'Juniper’s lamp is on the porch. The same word meets different soils.',
+    hard: 'Juniper Wick keeps the east porch. The parable invites hearing; it does not flatter every field.',
+  },
+  'neighbor-porch': {
+    easy: 'Juniper’s lamp is on the porch. Mercy makes a neighbor.',
+    hard: 'Juniper Wick keeps the east porch. Mercy makes a neighbor; pedigree does not — the morning lamp holds that line.',
+  },
   'nora-sky': {
     easy: 'Nora watches the sky. The heavens speak of a Maker.',
     hard: 'Nora Skye keeps Sky Watch. The heavens declare a Maker — that voice belongs on the ridge, not the porch lamp.',
+  },
+  'tuning-sky': {
+    easy: 'Nora watches the sky. Fine-tuning points to a Designer.',
+    hard: 'Nora Skye keeps Sky Watch. Life-permitting ranges are extravagantly narrow. Necessity, chance, and a sprawling multiverse get named so they can be set down — time still goes to a Designer who wanted a habitable world.',
+  },
+  'design-sky': {
+    easy: 'Nora watches the sky. A mind intended a habitable world.',
+    hard: 'Nora Skye keeps Sky Watch. A Designer who wants observers leads us to expect that fit — blank indifference does not.',
+  },
+  'leibniz-sky': {
+    easy: 'Nora watches the sky. Why something rather than nothing still stands.',
+    hard: 'Nora Skye keeps Sky Watch. Models describe a world already given; why there is something rather than nothing remains.',
+  },
+  'ob-life-sky': {
+    easy: 'Nora watches the sky. Life’s information is a mark of mind.',
+    hard: 'Nora Skye keeps Sky Watch. Cells store coordinated information — that looks like the work of a mind.',
+  },
+  'daily-life-sky': {
+    easy: 'Nora watches the sky. Life, place, and mind are not cheap facts.',
+    hard: 'Nora Skye keeps Sky Watch. Copying cells, a habitable band, and a mind that can do science all look given — the marks of a Maker.',
   },
   'ansel-gate': {
     easy: 'Ansel keeps Why Gate. The world exists — and did not have to.',
     hard: 'Ansel Gate keeps Why Gate. That the universe exists and did not have to is the why-a-world stone.',
   },
+  'mover-gate': {
+    easy: 'Ansel keeps Why Gate. Change needs a first actuality.',
+    hard: 'Ansel Gate keeps Why Gate. Nothing reduces itself from potential to actual; present change needs a first actuality.',
+  },
+  'contingent-gate': {
+    easy: 'Ansel keeps Why Gate. Might-not-have-beens need a necessary ground.',
+    hard: 'Ansel Gate keeps Why Gate. A world of might-not-have-beens still needs a necessary ground — not a shrug.',
+  },
+  'kalam-gate': {
+    easy: 'Ansel keeps Why Gate. What begins has a cause.',
+    hard: 'Ansel Gate keeps Why Gate. If what begins has a cause and the universe began, it has a Cause of the beginning.',
+  },
+  'limits-gate': {
+    easy: 'Ansel keeps Why Gate. A first cause is not yet the whole gospel.',
+    hard: 'Ansel Gate keeps Why Gate. A cosmological argument is already a great deal — and not yet the sermon on the mount.',
+  },
+  'scroll-gate': {
+    easy: 'Ansel keeps Why Gate. We hold a river of copies, not the first ink.',
+    hard: 'Ansel Gate keeps Why Gate. Scribes copy, later hands compare — we hold a river of copies, not the first ink.',
+  },
+  'isaiah-gate': {
+    easy: 'Ansel keeps Why Gate. Isaiah’s Servant is Jesus.',
+    hard: 'Ansel Gate keeps Why Gate. Isaiah 53’s Servant is the Jesus the church confesses — wounded for others, silent like a lamb.',
+  },
   'hope-lookout': {
     easy: 'Hope keeps Meaning Ridge. Duty is more than a taste.',
     hard: 'Hope Ridge keeps Meaning Ridge. Duty as more than taste looks over the town from the lookout.',
+  },
+  'mind-lookout': {
+    easy: 'Hope keeps Meaning Ridge. The story must house the storyteller’s mind.',
+    hard: 'Hope Ridge keeps Meaning Ridge. Theism is a reply in which mind is present at the beginning, not only an accident at the end.',
+  },
+  'meaning-lookout': {
+    easy: 'Hope keeps Meaning Ridge. Meaning may be received, not only built.',
+    hard: 'Hope Ridge keeps Meaning Ridge. Local meaning can be built — the lookout asks whether it is also received.',
+  },
+  'beauty-lookout': {
+    easy: 'Hope keeps Meaning Ridge. Beauty wakes a hunger it cannot feed.',
+    hard: 'Hope Ridge keeps Meaning Ridge. Beauty wakes a hunger it cannot feed — hungers usually correspond to real countries.',
+  },
+  'grace-lookout': {
+    easy: 'Hope keeps Meaning Ridge. Grace is gift, not wage.',
+    hard: 'Hope Ridge keeps Meaning Ridge. Grace is gift, not wage; faith receives; boast starves.',
+  },
+  'rest-lookout': {
+    easy: 'Hope keeps Meaning Ridge. Rest is the gift, not a steeper hill.',
+    hard: 'Hope Ridge keeps Meaning Ridge. Tired people are named first; rest is the gift, not a steeper hill.',
+  },
+  'door-lookout': {
+    easy: 'Hope keeps Meaning Ridge. Jesus is a door with a wide anyone.',
+    hard: 'Hope Ridge keeps Meaning Ridge. Jesus’ door is a particular way in with a wide anyone.',
   },
 }
