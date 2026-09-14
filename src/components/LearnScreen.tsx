@@ -9,16 +9,15 @@ interface LearnScreenProps {
   onNavigate: (view: View) => void
 }
 
-/** Easy first teach: story + who keeps it + where it lives. Then Match unlocks. */
+/** Easy re-read: unboxed short story. Match panel blast is the teach. */
 export function LearnScreen({ onNavigate }: LearnScreenProps) {
-  const { progress, recordTaught } = useProgress()
+  const { progress } = useProgress()
   const easy = isEasy(progress)
   const lineId = easyLearnLine(progress)
   const brief = evidenceFor(lineId)
 
   function unlock() {
-    recordTaught(lineId)
-    onNavigate({ name: 'hub' })
+    onNavigate({ name: 'link' })
   }
 
   return (

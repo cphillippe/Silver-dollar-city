@@ -1080,7 +1080,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.55')
+assert.equal(APP_VERSION, '1.4.56')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1758,8 +1758,8 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
   assert.match(easyHome, /matchReady/)
   assert.match(hubSrc, /easyMatchReady/)
   assert.ok(
-    easyHome.indexOf("name: 'learn'") < easyHome.indexOf('EASY.matchCta'),
-    'Easy home order is Learn before Match',
+    easyHome.indexOf('EASY.matchCta') < easyHome.indexOf("name: 'learn'"),
+    'Easy home order is Match before Learn re-read',
   )
   assert.ok(
     easyHome.indexOf('EASY.matchCta') < easyHome.indexOf('EASY.saved'),
@@ -1776,7 +1776,7 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
   assert.equal(easyMatchLine(fresh), 'ph-road')
   assert.equal(easyHoldLine(fresh), 'ph-road')
   assert.equal(easyLoopLine(fresh), 'ph-road')
-  assert.equal(easyMatchReady(fresh), false)
+  assert.equal(easyMatchReady(fresh), true)
   assert.equal(easyHoldPractice(fresh), false)
   assert.equal(easyLineLearned(fresh, 'ph-road'), false)
   assert.equal(easyLineTaught(fresh, 'ph-road'), false)
@@ -1791,7 +1791,7 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
   assert.equal(easyLearnLine(hardPrior), 'ph-road')
   assert.equal(easyMatchLine(hardPrior), 'ph-road')
   assert.equal(easyHoldLine(hardPrior), 'ph-road')
-  assert.equal(easyMatchReady(hardPrior), false)
+  assert.equal(easyMatchReady(hardPrior), true)
   assert.equal(easyLineHeld(hardPrior, 'ph-road'), false)
   const taughtMercy = { ...fresh, easyTaught: ['ph-road'] }
   assert.equal(easyLearnLine(taughtMercy), 'ph-road')
@@ -1807,7 +1807,7 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
   assert.equal(streetTripleForLine('ph-road'), 'mercy-hollow')
   assert.equal(easyStreetChallenge('ph-road').triples[0]?.id, 'mercy-hollow')
   assert.equal(easyStreetChallenge('ph-road').triples.length, 1)
-  assert.equal(easyMatchReady({ ...fresh, completed: ['ph-road'] }), false)
+  assert.equal(easyMatchReady({ ...fresh, completed: ['ph-road'] }), true)
   assert.equal(easyLearnLine({ ...fresh, taught: ['ph-road'], held: ['ph-road'] }), 'ph-road')
   const heldMercy = { ...fresh, easyTaught: ['ph-road'], easyHeld: ['ph-road'] }
   assert.equal(easyLineHeld(heldMercy, 'ph-road'), true)
@@ -1815,11 +1815,11 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
   assert.equal(easyMatchLine(heldMercy), 'ph-father')
   assert.equal(easyHoldLine(heldMercy), 'ph-father')
   assert.notEqual(easyLearnLine(heldMercy), 'wb-creed')
-  assert.equal(easyMatchReady(heldMercy), false)
+  assert.equal(easyMatchReady(heldMercy), true)
   assert.equal(easyHoldPractice(heldMercy), false)
-  assert.equal(easyHomeFocus(fresh), 'learn')
-  assert.equal(easyHomeFocus(taughtMercy), 'match')
-  assert.equal(easyHomeFocus(heldMercy), 'learn')
+  assert.equal(easyHomeFocus(fresh), 'match')
+  assert.equal(easyHomeFocus(taughtMercy), 'hold')
+  assert.equal(easyHomeFocus(heldMercy), 'match')
   const taughtFather = {
     ...fresh,
     easyTaught: ['ph-road', 'ph-father'],
@@ -1993,7 +1993,7 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
   assert.match(latestChange(APP_VERSION).items.join('\n'), /MATCHED! is a badge/)
 assert.match(latestChange(APP_VERSION).items.join('\n'), /Full Hard street — all game facts/)
 assert.match(latestChange(APP_VERSION).items.join('\n'), /tonight’s street/)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /gold CTA is Read today’s story/)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /gold CTA is Find the gems/)
 }
 {
   const settingsSrc = readFileSync(
@@ -2016,7 +2016,7 @@ assert.match(latestChange(APP_VERSION).items.join('\n'), /gold CTA is Read today
 assert.match(latestChange(APP_VERSION).items.join('\n'), /Town \(soon\)/)
 assert.match(
   latestChange(APP_VERSION).items.join('\n'),
-  /Easy: Learn before Match \(teach-before-test\)/,
+  /Easy: Match panel blast teaches the story/,
 )
 assert.match(
   latestChange(APP_VERSION).items.join('\n'),
@@ -2040,7 +2040,7 @@ assert.match(
 )
 assert.match(
   readFileSync(new URL('../src/components/LearnScreen.tsx', import.meta.url), 'utf8'),
-  /recordTaught/,
+  /name: 'link'/,
 )
 assert.match(
   readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
@@ -2056,11 +2056,7 @@ assert.match(
 )
 assert.match(
   readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
-  /EASY\.learnThisFirst/,
-)
-assert.match(
-  readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
-  /name: 'learn'/,
+  /recordTaught/,
 )
 assert.match(
   readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
@@ -2371,7 +2367,7 @@ assert.match(
 )
 assert.match(hubSrc, /easyHomeFocus/)
 assert.match(hubSrc, /easyHoldView/)
-assert.match(hubSrc, /focus === 'learn' \? 'primary'/)
+assert.match(hubSrc, /focus === 'match' \? 'primary'/)
 assert.match(hubSrc, /midStreet/)
 assert.match(hubSrc, /EASY\.continueStreet/)
 assert.match(hubSrc, /Tonight’s street/)

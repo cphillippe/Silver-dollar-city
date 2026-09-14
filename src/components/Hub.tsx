@@ -70,38 +70,37 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
           <p className="eyebrow">Silver City</p>
           <h1>Play</h1>
           <p className="quiet">
-            {focus === 'match'
-              ? 'Find the words. Hold the line.'
+            {focus === 'hold'
+              ? 'The story is open. Hold the line.'
               : coldMercy
-                ? 'Read Mercy’s story at Story Creek first.'
-                : EASY.readStoryFirst}
+                ? 'Find Mercy’s story at Story Creek.'
+                : 'Find the gems. The story opens as you play.'}
           </p>
         </header>
         <nav className="easy-core" aria-label="Play">
           <button
             type="button"
-            className={`btn xl ${focus === 'learn' ? 'primary' : ''}`}
-            onClick={() => onNavigate({ name: 'learn' })}
-          >
-            {matchReady ? EASY.learnCta : EASY.readStory}
-          </button>
-          <button
-            type="button"
-            className={`btn xl ${focus === 'match' ? 'primary' : matchReady ? '' : 'is-locked'}`}
-            aria-disabled={!matchReady}
+            className={`btn xl ${focus === 'match' ? 'primary' : ''}`}
             onClick={() => onNavigate({ name: 'link' })}
           >
             {EASY.matchCta}
           </button>
-          {!matchReady && coldMercy ? (
-            <p className="quiet easy-match-lock">{EASY.readStoryFirst}</p>
-          ) : null}
           <button
             type="button"
             className={`btn xl ${focus === 'hold' ? 'primary' : ''}`}
             onClick={() => onNavigate(easyHoldView(progress))}
           >
             {EASY.saved}
+          </button>
+          {matchReady ? null : (
+            <p className="quiet easy-match-lock">{EASY.readStoryFirst}</p>
+          )}
+          <button
+            type="button"
+            className="text-link"
+            onClick={() => onNavigate({ name: 'learn' })}
+          >
+            {EASY.readStory}
           </button>
         </nav>
         <button

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { EASY_LINE_ORDER } from '../src/lib/easy.ts'
+import { packLesson } from '../src/content/packCatalog.ts'
 import {
   buildGemPuzzle,
   gemWordsFor,
@@ -9,6 +10,11 @@ import {
   pathLetters,
   tryAddToPath,
 } from '../src/lib/gemSearch.ts'
+import {
+  splitStorySentences,
+  storyFromPanels,
+  storyPanelsFor,
+} from '../src/lib/storyPanels.ts'
 
 const mercyWords = gemWordsFor('ph-road')
 assert.ok(mercyWords.some((word) => word.text === 'MERCY'), 'Mercy the person')
@@ -68,10 +74,51 @@ assert.match(playSrc, /EASY\.matchWin/)
 assert.match(playSrc, /EASY\.holdNext/)
 assert.match(playSrc, /EASY\.matchHunt/)
 assert.match(playSrc, /Try this word/)
+assert.match(playSrc, /is-panel-blast/)
+assert.match(playSrc, /StoryStrip/)
+assert.match(playSrc, /onClear/)
+assert.match(playSrc, /revealPanel/)
+assert.match(playSrc, /winStamp/)
+assert.match(
+  readFileSync(new URL('../src/components/StoryStrip.tsx', import.meta.url), 'utf8'),
+  /story-hero/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/StoryStrip.tsx', import.meta.url), 'utf8'),
+  /story-thumbs/,
+)
 assert.doesNotMatch(playSrc, /Tap a sentence/)
+
+const artSrc = readFileSync(
+  new URL('../src/components/StoryPanelArt.tsx', import.meta.url),
+  'utf8',
+)
+assert.match(artSrc, /panel-hurt\.webp/)
+assert.match(artSrc, /panel-father-run\.webp/)
+assert.match(artSrc, /panel-help\.webp/)
 
 const puzzleSrc = readFileSync(new URL('../src/components/PuzzlePlay.tsx', import.meta.url), 'utf8')
 assert.match(puzzleSrc, /GemSearchPlay/)
 assert.match(puzzleSrc, /isEasy\(progress\)/)
+assert.match(puzzleSrc, /onClear=\{onSolved\}/)
+
+const fatherStory = packLesson('ph-father')?.easy.learn ?? ''
+const fatherPanels = storyPanelsFor('ph-father', gemWordsFor('ph-father').length)
+assert.equal(storyFromPanels(fatherPanels), fatherStory)
+assert.ok(fatherPanels.length >= 3 && fatherPanels.length <= 4)
+
+const mercyStory = packLesson('ph-road')?.easy.learn ?? ''
+const mercyPanels = storyPanelsFor('ph-road', mercyWords.length)
+assert.equal(storyFromPanels(mercyPanels), mercyStory)
+assert.ok(mercyPanels.some((panel) => panel.scene === 'help' || panel.scene === 'hurt'))
+assert.ok(mercyPanels.every((panel) => panel.media.kind === 'still' && panel.beatId.includes('ph-road')))
+assert.equal(splitStorySentences(mercyStory).length, 5)
+
+for (const id of EASY_LINE_ORDER) {
+  const puzzle = buildGemPuzzle(id)
+  const panels = storyPanelsFor(id, puzzle.words.length)
+  assert.equal(panels.length, Math.max(3, Math.min(4, puzzle.words.length)), `${id} panel count`)
+  assert.ok(panels.every((panel) => panel.text.trim().length > 0), `${id} panel text`)
+}
 
 console.log('check-gem-search: ok')

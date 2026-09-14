@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
-import { EASY } from '../../lib/easy'
+import { EASY, easyWhoWhere } from '../../lib/easy'
 import {
   buildGemPuzzle,
   cellKey,
@@ -10,12 +10,15 @@ import {
   tryAddToPath,
   type GemCoord,
 } from '../../lib/gemSearch'
-import { GEM_BURST, playGemPop } from '../../lib/juice'
+import { storyPanelsFor } from '../../lib/storyPanels'
+import { GEM_BURST, playGemPop, prefersReducedMotion } from '../../lib/juice'
+import { StoryStrip } from '../StoryStrip'
 import { WinBurst } from './WinBurst'
 
 interface GemSearchPlayProps {
   lineId: string
   onMiss: () => void
+  onClear?: () => void
   onEasyStop?: (dest: 'hold' | 'home') => void
 }
 
@@ -32,9 +35,15 @@ function cellFromPoint(x: number, y: number): GemCoord | null {
   return { r, c }
 }
 
-export function GemSearchPlay({ lineId, onMiss, onEasyStop }: GemSearchPlayProps) {
+export function GemSearchPlay({ lineId, onMiss, onClear, onEasyStop }: GemSearchPlayProps) {
   const puzzle = useMemo(() => buildGemPuzzle(lineId), [lineId])
+  const panels = useMemo(
+    () => storyPanelsFor(lineId, puzzle.words.length),
+    [lineId, puzzle.words.length],
+  )
   const [found, setFound] = useState<string[]>([])
+  const [opened, setOpened] = useState(0)
+  const [flipping, setFlipping] = useState<number | null>(null)
   const [path, setPath] = useState<GemCoord[]>([])
   const [burst, setBurst] = useState<string[]>([])
   const [hint, setHint] = useState<string[]>([])
@@ -42,10 +51,13 @@ export function GemSearchPlay({ lineId, onMiss, onEasyStop }: GemSearchPlayProps
   const [shake, setShake] = useState(false)
   const [toast, setToast] = useState('')
   const [status, setStatus] = useState<'play' | 'ok'>('play')
+  const [winStamp, setWinStamp] = useState(false)
   const drag = useRef(false)
   const moved = useRef(false)
   const pathRef = useRef<GemCoord[]>([])
   const foundRef = useRef<string[]>([])
+  const cleared = useRef(false)
+  const home = easyWhoWhere(lineId)
   const needed = cellsStillNeeded(puzzle, found)
   const nextWord = puzzle.words.find((word) => !found.includes(word.id))
   const left = puzzle.words.length - found.length
@@ -62,12 +74,16 @@ export function GemSearchPlay({ lineId, onMiss, onEasyStop }: GemSearchPlayProps
     setFound([])
     foundRef.current = []
     pathRef.current = []
+    cleared.current = false
     setPath([])
     setBurst([])
     setHint([])
     setMisses(0)
     setToast('')
     setStatus('play')
+    setWinStamp(false)
+    setOpened(0)
+    setFlipping(null)
   }, [lineId])
 
   function flashToast(line: string) {
@@ -75,11 +91,22 @@ export function GemSearchPlay({ lineId, onMiss, onEasyStop }: GemSearchPlayProps
     window.setTimeout(() => setToast((current) => (current === line ? '' : current)), 1600)
   }
 
-  function explode(cells: GemCoord[], wordLabel: string, done: boolean) {
+  function revealPanel(count: number) {
+    const index = count - 1
+    const delay = prefersReducedMotion() ? 0 : 180
+    window.setTimeout(() => {
+      setOpened(count)
+      setFlipping(index)
+      window.setTimeout(() => setFlipping((current) => (current === index ? null : current)), 520)
+    }, delay)
+  }
+
+  function explode(cells: GemCoord[], wordLabel: string, done: boolean, foundCount: number) {
     const keys = cells.map(cellKey)
     setBurst(keys)
     playGemPop(done ? 'win' : 'find')
     flashToast(`${wordLabel}!`)
+    revealPanel(foundCount)
     if (done) {
       window.setTimeout(() => {
         const rest: string[] = []
@@ -120,9 +147,17 @@ export function GemSearchPlay({ lineId, onMiss, onEasyStop }: GemSearchPlayProps
       writePath([])
       setHint([])
       setMisses(0)
-      explode(nextPath, hit.label, done)
+      explode(nextPath, hit.label, done, nextFound.length)
       if (done) {
-        setStatus('ok')
+        if (!cleared.current) {
+          cleared.current = true
+          onClear?.()
+        }
+        const stampAt = prefersReducedMotion() ? 80 : 880
+        window.setTimeout(() => {
+          setWinStamp(true)
+          setStatus('ok')
+        }, stampAt)
       }
       return true
     }
@@ -148,7 +183,7 @@ export function GemSearchPlay({ lineId, onMiss, onEasyStop }: GemSearchPlayProps
   }
 
   function applyCell(cell: GemCoord, mode: 'tap' | 'drag') {
-    if (status === 'ok') return
+    if (status === 'ok' || cleared.current) return
     const current = pathRef.current
     let next = current
     if (!current.length) {
@@ -165,7 +200,7 @@ export function GemSearchPlay({ lineId, onMiss, onEasyStop }: GemSearchPlayProps
   }
 
   function onCellDown(event: ReactPointerEvent<HTMLDivElement>, cell: GemCoord) {
-    if (status === 'ok') return
+    if (status === 'ok' || cleared.current) return
     event.preventDefault()
     event.stopPropagation()
     drag.current = true
@@ -175,7 +210,7 @@ export function GemSearchPlay({ lineId, onMiss, onEasyStop }: GemSearchPlayProps
   }
 
   function onBoardMove(event: ReactPointerEvent<HTMLDivElement>) {
-    if (!drag.current || status === 'ok') return
+    if (!drag.current || status === 'ok' || cleared.current) return
     const cell = cellFromPoint(event.clientX, event.clientY)
     if (!cell) return
     const last = pathRef.current[pathRef.current.length - 1]
@@ -196,13 +231,20 @@ export function GemSearchPlay({ lineId, onMiss, onEasyStop }: GemSearchPlayProps
 
   return (
     <div
-      className={`play is-gem-search ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''} ${burst.length ? 'is-boom' : ''}`}
+      className={`play is-gem-search is-panel-blast ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''} ${burst.length ? 'is-boom' : ''}`}
       style={{ ['--gem-size' as string]: puzzle.size }}
       onPointerUp={onBoardUp}
       onPointerCancel={onBoardUp}
     >
-      <WinBurst play={status === 'ok'} stamp={EASY.matchWin} />
+      <WinBurst play={winStamp} stamp={EASY.matchWin} />
       <p className="sort-how">{EASY.matchHunt}</p>
+      <StoryStrip
+        kicker={`${home.who} · ${home.place}`}
+        panels={panels}
+        opened={opened}
+        flipping={flipping}
+        complete={status === 'ok'}
+      />
       <ul className="gem-words" aria-label="Words to find">
         {puzzle.words.map((word) => (
           <li

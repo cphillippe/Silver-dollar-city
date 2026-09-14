@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { STREET_BEATS, STREET_PLACE_WHYS, STREET_TRIPLES, appendStreetLinks, easyStreetChallenge, hardStreetChallenge, nextStreetWalk, streetFactsLeft, streetWalkTakeaway } from '../content/links'
 import { STORY } from '../content/story'
-import { EASY, easyHoldView, easyMatchLine, easyMatchReady, isEasy } from '../lib/easy'
+import { EASY, easyHoldView, easyMatchLine, isEasy } from '../lib/easy'
 import { useJuiceHandoff } from '../lib/juice'
 import { PuzzlePlay } from './PuzzlePlay'
 import { TownReturn } from './TownReturn'
@@ -34,11 +34,11 @@ function LinkDemo({ easy }: { easy: boolean }) {
 }
 
 export function LinkScreen({ onNavigate }: LinkScreenProps) {
-  const { completeChallenge, markMiss, progress, recordStreetLinks } = useProgress()
+  const { completeChallenge, markMiss, progress, recordStreetLinks, recordTaught } = useProgress()
   const { juiceDone: showNext, afterJuice } = useJuiceHandoff()
   const savedWin = useRef(false)
   const finishedWalk = useRef<ReturnType<typeof nextStreetWalk>>(undefined)
-  const [taught, setTaught] = useState(() => isEasy(progress) && easyMatchReady(progress))
+  const [taught, setTaught] = useState(() => isEasy(progress))
   const [arming, setArming] = useState(false)
   const easy = isEasy(progress)
   const linked = progress.streetLinked ?? []
@@ -64,11 +64,12 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
   }
 
   function solved() {
-    afterJuice()
     if (easy) {
+      recordTaught(easyMatchLine(progress))
       markStreet()
       return
     }
+    afterJuice()
     if (savedWin.current) return
     savedWin.current = true
     finishedWalk.current = walk
@@ -94,19 +95,7 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
         ← {easy ? EASY.home : 'The town'}
       </button>
 
-      {!showNext && easy && !easyMatchReady(progress) ? (
-        <section className="recall-gate is-encode teach-gate" aria-label={EASY.learnThisFirst}>
-          <p className="recall-line rehearse-stem">{EASY.learnThisFirst}</p>
-          <p className="quiet">{EASY.readStoryFirst}</p>
-          <button
-            type="button"
-            className="btn primary xl"
-            onClick={() => onNavigate({ name: 'learn' })}
-          >
-            {EASY.learnCta}
-          </button>
-        </section>
-      ) : !showNext ? (
+      {!showNext ? (
         !taught ? (
           <section
             className="recall-gate is-encode teach-gate"
