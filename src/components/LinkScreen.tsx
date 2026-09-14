@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { STREET_BEATS, STREET_CHALLENGE, STREET_WHYS, easyStreetChallenge } from '../content/links'
+import { STREET_BEATS, STREET_CHALLENGE, STREET_PLACE_WHYS, easyStreetChallenge } from '../content/links'
 import { STORY } from '../content/story'
 import { EASY, easyHoldView, easyMatchLine, easyMatchReady, isEasy } from '../lib/easy'
 import { useJuiceHandoff } from '../lib/juice'
@@ -104,8 +104,8 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
             </p>
             {easy ? null : (
               <ul className="word-school street-whys" aria-label="Why each place">
-                {challenge.triples.map((triple) => (
-                  <li key={triple.id}>{STREET_WHYS[triple.id]?.hard}</li>
+                {STREET_PLACE_WHYS.map((why) => (
+                  <li key={why}>{why}</li>
                 ))}
               </ul>
             )}
@@ -147,7 +147,7 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
             <p className="link-takeaway">
               {easy
                 ? 'Mercy tells Jesus stories at the creek — that is why the neighbor who stops on the road lives at Story Creek. Silas copies names on the square — that is why the old shared belief lives at Witness Square. Juniper’s lamp is on the porch so today’s line can be seen.'
-                : 'Mercy keeps the creek because Jesus taught in pictures. Silas keeps the square because the creed is a public report. Juniper keeps the porch because a lamp is meant to be seen.'}
+                : 'Mercy keeps the creek because Jesus taught in pictures. Silas keeps the square because the creed is a public report. Juniper keeps the porch because a lamp is meant to be seen. Nora keeps Sky Watch because the heavens declare a Maker. Ansel keeps Why Gate because the world exists and did not have to. Hope keeps Meaning Ridge because duty is more than taste.'}
             </p>
             <DigDeeper id={challenge.id} compact />
           </article>
