@@ -30,6 +30,39 @@ export function prefersReducedMotion(): boolean {
   )
 }
 
+let gemAudio: AudioContext | null = null
+
+/** Short candy pop — fail quiet if the browser blocks audio. */
+export function playGemPop(kind: 'find' | 'win' | 'miss' = 'find') {
+  if (typeof window === 'undefined' || prefersReducedMotion()) return
+  try {
+    gemAudio ??= new AudioContext()
+    const ctx = gemAudio
+    void ctx.resume()
+    const now = ctx.currentTime
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.type = kind === 'miss' ? 'sawtooth' : 'triangle'
+    const start = kind === 'win' ? 660 : kind === 'miss' ? 180 : 880
+    const end = kind === 'win' ? 1320 : kind === 'miss' ? 90 : 240
+    osc.frequency.setValueAtTime(start, now)
+    osc.frequency.exponentialRampToValueAtTime(end, now + (kind === 'win' ? 0.28 : 0.16))
+    gain.gain.setValueAtTime(kind === 'miss' ? 0.04 : 0.11, now)
+    gain.gain.exponentialRampToValueAtTime(0.001, now + (kind === 'win' ? 0.32 : 0.18))
+    osc.connect(gain)
+    gain.connect(ctx.destination)
+    osc.start(now)
+    osc.stop(now + 0.34)
+  } catch {
+    /* autoplay / WebAudio can fail — juice still reads as motion */
+  }
+  try {
+    if (kind !== 'miss') window.navigator.vibrate?.(kind === 'win' ? [18, 40, 24] : 16)
+  } catch {
+    /* vibration is optional */
+  }
+}
+
 /** Wait for the burst, then swap to takeaway. Progress saves after juiceDone. */
 export function useJuiceHandoff(already = false) {
   const [ready, setReady] = useState(already)

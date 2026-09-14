@@ -71,7 +71,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
           <h1>Play</h1>
           <p className="quiet">
             {focus === 'match'
-              ? 'Match a sentence. Hold the line.'
+              ? 'Find the words. Hold the line.'
               : coldMercy
                 ? 'Read Mercy’s story at Story Creek first.'
                 : EASY.readStoryFirst}
