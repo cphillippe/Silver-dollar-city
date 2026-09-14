@@ -1,64 +1,178 @@
-# Silver City content packs — schemaVersion 3
+# Silver City area pack schema (runtime content)
 
-Per-area XML is the **content source of truth** for Learn → Match → Hold. TypeScript modules adapt packs into the play engine (puzzles, Night Watch, and chrome stay in TS).
+**Purpose:** These XML files are the intended **build/runtime content source of truth**. The game should load them (or a build step should compile them into the app) so Learn / Match / Hold / Journal / street map 1:1 from pack fields.
 
-## Files
+**Engine loader climb next** — packs + this schema only. No loader implementation in-repo from this harvest.
 
-| File | Role |
-| --- | --- |
-| `index.xml` | Pack manifest (`schemaVersion="3"`). Lists area files. May include East porch / trail lessons. |
-| `parable-hollow.xml` | Story Creek |
-| `witness-bench.xml` | Witness Square |
-| `observatory.xml` | Sky Watch |
-| `first-gate.xml` | Why Gate |
-| `high-lookout.xml` | Meaning Ridge |
+**schemaVersion:** `3` — three tiers per fact (`easy` / `medium` / `hard`) + Hold level-up / fail→Easy.
 
-One XML file per district area, plus `index.xml`.
+## Layout
 
-## Root
-
-```xml
-<packIndex schemaVersion="3" id="core-v0" title="Core trail">
-  <area file="parable-hollow.xml" id="parable-hollow" />
-  …
-</packIndex>
+```
+silver-city-packs/
+  index.xml              # pack list, Easy trail 1–35, holdRules, scoring, tools, trailNotes, uiChrome
+  parable-hollow.xml     # Story Creek (+ East porch dailies)
+  witness-bench.xml      # Witness Square
+  observatory.xml        # Sky Watch
+  first-gate.xml         # Why Gate
+  high-lookout.xml       # Meaning Ridge
+  SCHEMA.md
+  README.txt
 ```
 
-Area documents:
+One file per area/pillar. Editors change one street without opening others.
+
+## Root: `<areaPack>`
+
+| Attribute | Role |
+|-----------|------|
+| `id` | Area id (`parable-hollow`, …) — matches game `Area.id` |
+| `schemaVersion` | Pack format version (`3`) |
+| `appVersion` | Harvested `APP_VERSION` (e.g. `1.4.50`) |
+| `generated` | ISO-8601 timestamp (America/Chicago offset) |
+| `host` | Live game host URL |
+| `title` / `place` / `person` / `personId` / `plotId` | Area chrome + street home |
+
+Children: `howToEdit`, `meta`, `easyShelf`, `lessons`, `streetFacts`.
+
+## Lesson: `<lesson>` (engine unit)
+
+One claim·reason·source fact = one `<lesson>`. **Easy, Medium, and Hard share the same lesson** — tiers are tracks inside the fact, not forks.
+
+| Attribute | Role |
+|-----------|------|
+| `id` | Stable evidence id (`ph-father`, …) — **engine key** |
+| `place` / `person` | Street home |
+| `tripleId` / `ideaId` / `ideaLabel` | Street Match bindings |
+| `challengeKind` / `challengeTitle` | Area/daily challenge metadata |
+
+### Three tracks (every lesson)
 
 ```xml
-<area schemaVersion="3" id="parable-hollow" order="1" title="Story Creek" …>
-  <blurb>…</blurb>
-  <intro>…</intro>
-  <lesson id="ph-road" title="The Good Samaritan">…</lesson>
-</area>
+<lesson id="ph-father" place="…" person="…" …>
+  <easy points="10" easyOrder="N">
+    <learn> shortStory, mainIdea, loci, gloss, word, hint … </learn>
+    <match> … </match>
+    <hold levelUpTo="medium" onFail="easy"> claim, reason, source, why… (PLAIN) </hold>
+  </easy>
+  <medium points="12">
+    <learn> mediumTeach, mainIdea, loci, gloss … </learn>
+    <match> … </match>
+    <hold levelUpTo="hard" onFail="easy"> same clear claim · reason · source </hold>
+  </medium>
+  <hard points="15">
+    <learn> hardTeach / fullTeach, prompt, challengeTiles, teachOnWrong … </learn>
+    <match> … </match>
+    <hold onFail="easy"> same clear claim · reason · source (do not mysterious-ize) </hold>
+  </hard>
+  <journal scoreFromHeldTier="true">…</journal>
+</lesson>
 ```
 
-## Lesson
+| Tier | Learn voice | Hold claim | Journal points |
+|------|-------------|------------|----------------|
+| **easy** | Plain kid/normie `shortStory`; teach-before-test; first Learn still idea+person+place | Clear / plain | `points="10"` |
+| **medium** | `mediumTeach` — clearer than Hard, richer than Easy | **Same** clear line | `points="12"` |
+| **hard** | Deeper / mysterious teach OK (`hardTeach` / `fullTeach`) | **Same** clear line | `points="15"` |
 
-- **Held claim** (`<claim>`) is identical and plain on every tier.
-- **`<plain>`** restates the claim in short speech. It does not replace the stored line.
-- **`<source>`** is the citation.
-- **`<loci>`** names who keeps the line and where it lives (Match place / person).
+### `<learn>` by tier
 
-Each lesson has three tiers:
+| Tag | Tier | Maps to |
+|-----|------|---------|
+| `shortStory` | easy | Easy Learn body |
+| `mediumTeach` | medium | Medium Learn body |
+| `mainIdea` / `gloss` / `loci` | easy (+ copied on medium) | Main idea + street home |
+| `hardTeach` / `fullTeach` | hard | Hard challenge context + deeper |
+| `prompt` / `teachOnWrong` | hard | Challenge prompt / miss teach |
+| `word/term` / `word/sense` / `hint` | easy (optional on medium) | Vocab chip |
+| `challengeTiles` | hard | keep/discard/sequence/pair puzzle UIs |
 
-| Tier | Points | Hold `levelUpTo` | Hold `onFail` |
-| --- | --- | --- | --- |
-| `<easy points="10" easyOrder="N">` | 10 | `medium` | `easy` |
-| `<medium points="12">` | 12 | `hard` | `easy` |
-| `<hard points="15">` | 15 | (omit — top) | `easy` |
+### `<match>` → Match / Link the street
 
-`easyOrder` is global across all packs. The Easy trail walks **all 35 facts** in that order. First is Mercy at Story Creek (`ph-road`).
+| Tag | Maps to |
+|-----|---------|
+| `sentenceCorrect` | Correct idea sentence (claim) |
+| `sentenceMisses/miss` | Claim distractors |
+| `placePrompt` / `personPrompt` / `ideaPrompt` | Link clues |
+| `ideaLabel` | Short street caption |
+| `whyEasy` / `whyMedium` / `whyHard` | Pre-match “why it lives here” (tier-specific) |
 
-### Tier body
+### `<hold>` → Hold / evidence quiz + level-up
 
-- **`<learn>`** — teach-before-test. Easy stays kid-plain. Hard teach may go deeper. No skeptic hedges in takeaways. Fine-tuning stays Designer-first. `daily-stars` stays pure positive (heavens speak of a Maker).
-- **`<match>`** — sentence ↔ place ↔ person (loci). Same held claim on every tier.
-- **`<hold>`** — claim + why chips. `levelUpTo` Easy → Medium → Hard. `onFail="easy"` always.
+| Tag / attr | Maps to |
+|------------|---------|
+| `claim` / `reason` / `source` | Evidence brief — **identical plain text on all tiers** |
+| `whyCorrect` / `whyMisses` | Reason faces |
+| `claimChoices` / `reasonChoices` | Quiz faces |
+| `@levelUpTo` | Optional next tier: `medium` (from easy) or `hard` (from medium) |
+| `@onFail` | Always `easy` — fail Hold or fail level-up → Easy teach path |
 
-Journal scores **best tier** per idea (10 / 12 / 15) and shows that score on the page. Failing Hold drops the idea back to Easy play without erasing the best score.
+## Hold level-up + fail → Easy
 
-## Voice
+Documented in `index.xml` `<holdRules>` and encoded on every tier’s `<hold>`:
 
-Apologist. Daily-stars pure positive. Designer on fine-tuning. No skeptic hedges in takeaways. Designer may still fine-tune copy in these files — the engine must not invent conflicting lesson text once a pack is loaded.
+1. **Level-up:** After (or during) Hold at the current tier, the player may attempt the next tier’s Hold faces (`levelUpTo`).
+2. **Fail → Easy:** If they fail the level-up **or** fail Hold at the current tier, route to **Easy** Learn→Match→Hold for the same lesson (`onFail="easy"`). Teach-before-test retry — not punish.
+3. **Hard** has no `levelUpTo` (top teach tier) but still `onFail="easy"`.
+4. Held claim stays clear for kids/normies on **all** modes; Hard may use mysterious language only in teach.
+
+## Journal scoring (Bill’s Journal)
+
+Documented in `index.xml` `<scoring>` and encoded on every tier + journal:
+
+| Difficulty | Points (`@points` on `<easy>` / `<medium>` / `<hard>`) |
+|------------|--------------------------------------------------------|
+| Easy | **10** |
+| Medium | **12** |
+| Hard | **15** |
+
+Rules:
+
+1. **Score per level (tier):** Journal may show a score contribution for each tier, but each **idea** (lesson/fact held) contributes from its **best tier successfully held** — not a sum of Easy+Medium+Hard.
+2. **Best tier held:** If the player holds Hard for an idea, that idea is worth **15** (not 10+12+15). Medium hold without Hard = **12**; Easy only = **10**.
+3. **Level-up Hold:** Award the higher tier’s points when the level-up Hold succeeds (replace the prior best for that idea).
+4. **Fail → Easy:** On fail→Easy, award Easy points **only if** Easy Hold then succeeds.
+5. Pack attrs: every lesson tier carries `@points`; each `<journal>` may set `scoreFromHeldTier="true"`. Index `<scoring>/<journal showScorePerLevel="true" scoreFromHeldTier="true"/>` is the global default.
+
+## Easy trail order
+
+All **35** facts sit on the Easy trail with `easyOrder` 1–35 (see `index.xml` `<easyShelf>`):
+
+1. Keep former Easy shelf 1–9 first.
+2. Then remaining facts by area: finish Story Creek → Witness leftovers → porch leftovers → Sky Watch → Why Gate → Meaning Ridge.
+
+Medium and Hard are available via mode select or Hold level-up — not a separate fact list.
+
+## Content locks (Bill / CoS)
+
+- Held claim stays clear for kids/normies on Easy, Medium, and Hard
+- Hard may use mysterious language in teach; Lock-in/Hold claim stays plain
+- Easy = Learn→Match→Hold teach-before-test; first Learn still idea+person+place
+- Luke 10: Love tool / Compassion story / Mercy claim — don’t flatten
+- Apologist voice; no skeptic hedges in takeaways
+- `daily-stars` pure positive; fine-tuning Designer takeaway
+
+## Index extras (`index.xml`)
+
+- `<packs>` — five area files + lesson counts
+- `<easyShelf>` — global Easy trail order 1–35 with `pack=` pointer
+- `<holdRules>` — level-up on Hold; fail → Easy
+- `<scoring>` — idea points by tier (10/12/15); journal showScorePerLevel + scoreFromHeldTier (best tier held)
+- `<tools>` — `td-watch` Love how-to (not a held claim)
+- `<trailNotes>` — `j-trail-*` thank-you cards
+- `<uiChrome>` — player-facing hub/match/hold constants
+
+## Loader sketch (for the climb)
+
+1. Fetch or bundle `index.xml` → discover area files + `holdRules`.
+2. Parse each `areaPack` → register lessons by `id`.
+3. Easy mode: iterate all lessons ordered by `easy/@easyOrder` (1–35).
+4. Medium / Hard mode: use `<medium>` / `<hard>` tracks on the same lesson id.
+5. Street: build triples from each lesson’s `tripleId` / place / person / `ideaLabel`.
+6. Hold: use that tier’s `claim` / `reason` / `source` + choices; honor `@levelUpTo` / `@onFail`.
+7. Journal score: for each held idea, take `@points` of the **highest tier successfully held** (easy=10, medium=12, hard=15). Honor `index` `<scoring>` + per-tier `@points` + `journal/@scoreFromHeldTier`.
+8. Ignore `<tools>` / `<trailNotes>` as claim lessons. Do not gate Journal.
+
+## Validation
+
+Well-formed XML 1.0, UTF-8. Every lesson must have `<easy>`, `<medium>`, and `<hard>`. Empty optional elements are intentional. Escape `&`, `<`, `>` in text.

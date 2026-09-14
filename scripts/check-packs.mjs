@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { statSync } from 'node:fs'
 import { emptyProgress } from '../src/lib/save.ts'
 import { PACK_CATALOG, PACK_ISSUES, packLesson } from '../src/content/packCatalog.ts'
 import { PACK_SCHEMA_VERSION } from '../src/content/packTypes.ts'
@@ -18,7 +19,27 @@ import { evidenceFor, evidenceForTier } from '../src/content/evidence.ts'
 assert.equal(PACK_ISSUES.length, 0, PACK_ISSUES.map((item) => `${item.file}: ${item.message}`).join('\n'))
 assert.equal(PACK_CATALOG.schemaVersion, PACK_SCHEMA_VERSION)
 assert.equal(PACK_CATALOG.lessons.length, 35)
+assert.ok(statSync(new URL('../src/content/packs/parable-hollow.xml', import.meta.url)).size > 50000)
+assert.ok(statSync(new URL('../src/content/packs/witness-bench.xml', import.meta.url)).size > 50000)
+assert.ok(statSync(new URL('../src/content/packs/observatory.xml', import.meta.url)).size > 50000)
+assert.ok(statSync(new URL('../src/content/packs/first-gate.xml', import.meta.url)).size > 50000)
+assert.ok(statSync(new URL('../src/content/packs/high-lookout.xml', import.meta.url)).size > 50000)
+assert.deepEqual(
+  PACK_CATALOG.lessons.map((lesson) => lesson.easy.easyOrder).sort((a, b) => (a ?? 0) - (b ?? 0)),
+  Array.from({ length: 35 }, (_, i) => i + 1),
+)
 assert.equal(EASY_LINE_ORDER.length, 35)
+assert.deepEqual(EASY_LINE_ORDER.slice(0, 9), [
+  'ph-road',
+  'ph-father',
+  'ph-debt',
+  'wb-creed',
+  'wb-women',
+  'daily-lantern',
+  'daily-stars',
+  'daily-cosmos',
+  'hl-moral',
+])
 assert.equal(EASY_LINE_ORDER[0], 'ph-road')
 assert.equal(EASY_LINE_ORDER[1], 'ph-father')
 assert.ok(EASY_LINE_ORDER.indexOf('ph-father') < EASY_LINE_ORDER.indexOf('wb-creed'))
@@ -43,9 +64,9 @@ assert.ok(mercy.hard.learn.length > mercy.easy.learn.length)
 
 const father = packLesson('ph-father')
 assert.ok(father)
-assert.match(
+assert.equal(
   father.easy.learn,
-  /his father sees him while he is still a long way off and runs/,
+  'Jesus tells about a son who takes his share early and wastes it far from home. Hungry and ashamed, he starts a hired-hand speech to ask for work. But his father sees him while he is still a long way off and runs — mercy before the speech is done. He hugs the son. Honor is spent so the lost one can be welcomed; the feast is the father’s idea.',
 )
 
 const stars = packLesson('daily-stars')
@@ -59,6 +80,9 @@ assert.ok(tuning)
 assert.match(tuning.claim, /Designer/)
 
 for (const lesson of PACK_CATALOG.lessons) {
+  assert.equal(lesson.easy.points, 10, `${lesson.id} Easy points`)
+  assert.equal(lesson.medium.points, 12, `${lesson.id} Medium points`)
+  assert.equal(lesson.hard.points, 15, `${lesson.id} Hard points`)
   assert.equal(lesson.easy.match.sentence, lesson.claim, `${lesson.id} Easy match claim`)
   assert.equal(lesson.medium.match.sentence, lesson.claim, `${lesson.id} Medium match claim`)
   assert.equal(lesson.hard.match.sentence, lesson.claim, `${lesson.id} Hard match claim`)
@@ -121,6 +145,8 @@ assert.deepEqual(easyWhoWhere('ph-road'), {
   whoId: 'mercy',
   place: 'Story Creek',
 })
+assert.equal(easyWhoWhere('daily-lantern').whoId, 'juniper')
+assert.equal(easyWhoWhere('daily-lantern').place, 'East porch')
 
 const areaIds = new Set(PACK_CATALOG.areas.map((area) => area.id))
 assert.ok(areaIds.has('parable-hollow'))

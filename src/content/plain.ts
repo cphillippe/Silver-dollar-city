@@ -247,10 +247,10 @@ export function plainFor(id: string): PlainLine | undefined {
   const base = PLAIN[id]
   if (lesson) {
     return {
-      gloss: lesson.plain || base?.gloss || lesson.claim,
+      gloss: lesson.easy.gloss || lesson.plain || base?.gloss || lesson.claim,
       teach: lesson.easy.learn || base?.teach || lesson.claim,
-      word: base?.word,
-      hint: base?.hint,
+      word: lesson.easy.word || base?.word,
+      hint: lesson.easy.hint || base?.hint,
     }
   }
   if (base) return base

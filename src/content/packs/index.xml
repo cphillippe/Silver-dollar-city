@@ -1,168 +1,144 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<packIndex schemaVersion="3" id="core-v0" title="Core trail">
-  <area file="parable-hollow.xml" id="parable-hollow" />
-  <area file="witness-bench.xml" id="witness-bench" />
-  <area file="observatory.xml" id="observatory" />
-  <area file="first-gate.xml" id="first-gate" />
-  <area file="high-lookout.xml" id="high-lookout" />
-  <area id="east-porch" order="0" title="East porch" shortTitle="Porch" subtitle="A lamp is meant to be seen" icon="lamp" accent="#ffcc33">
-    <blurb>Juniper’s lamp. You arrive here so today’s line can be seen.</blurb>
-    <intro>The east porch is where a line can be seen. Juniper keeps the lamp.</intro>
-  <lesson id="daily-lantern" title="The porch lamp" idea="a city on a hill is meant to be seen">
-    <claim>A lamp is meant to be seen.</claim>
-    <plain>A lamp is meant to be seen.</plain>
-    <source>Matthew 5:14–16</source>
-    <loci place="East porch" person="Juniper Wick" plotId="porch" who="juniper" />
-    <easy points="10" easyOrder="12">
-      <learn>Jesus uses an ordinary lamp and a city on a hill. Public without being proud.</learn>
-      <match sentence="A lamp is meant to be seen." place="East porch" person="Juniper Wick" />
-      <hold levelUpTo="medium" onFail="easy">
-        <why>A lamp and a hill city are meant to be seen.</why>
-        <claimMiss>We are told to become the sun.</claimMiss>
-        <claimMiss>Light is only for insiders behind a door.</claimMiss>
-        <whyMiss>The picture is a command to boast.</whyMiss>
-        <whyMiss>A hidden lamp is the point of the saying.</whyMiss>
-      </hold>
-    </easy>
-    <medium points="12">
-      <learn>Jesus uses an ordinary lamp and a city on a hill — public without being proud.</learn>
-      <match sentence="A lamp is meant to be seen." place="East porch" person="Juniper Wick" />
-      <hold levelUpTo="hard" onFail="easy">
-        <why>Jesus uses an ordinary lamp and a city on a hill — public without being proud.</why>
-        <claimMiss>We are told to become the sun.</claimMiss>
-        <claimMiss>Light is only for insiders behind a door.</claimMiss>
-        <whyMiss>The picture is a command to boast.</whyMiss>
-        <whyMiss>A hidden lamp is the point of the saying.</whyMiss>
-      </hold>
-    </medium>
-    <hard points="15">
-      <learn>“You are the light of the world. A city set on a hill cannot be hidden.” The picture is public without being proud.</learn>
-      <match sentence="A lamp is meant to be seen." place="East porch" person="Juniper Wick" />
-      <hold onFail="easy">
-        <why>Jesus uses an ordinary lamp and a city on a hill — public without being proud.</why>
-        <claimMiss>We are told to become the sun.</claimMiss>
-        <claimMiss>Light is only for insiders behind a door.</claimMiss>
-        <whyMiss>The picture is a command to boast.</whyMiss>
-        <whyMiss>A hidden lamp is the point of the saying.</whyMiss>
-      </hold>
-    </hard>
-  </lesson>
-  <lesson id="daily-gems" title="Porch gems" idea="Jesus taught with pictures you can hold">
-    <claim>Jesus taught with pictures you can hold.</claim>
-    <plain>Jesus taught with pictures you can hold.</plain>
-    <source>Matthew 5; Mark 4; Matthew 26:28; Luke 22:20</source>
-    <loci place="East porch" person="Juniper Wick" plotId="porch" who="juniper" />
-    <easy points="10" easyOrder="13">
-      <learn>A lamp is seen. Seed meets different hearts. The cup is poured for many — gift, not wage.</learn>
-      <match sentence="Jesus taught with pictures you can hold." place="East porch" person="Juniper Wick" />
-      <hold levelUpTo="medium" onFail="easy">
-        <why>Lamp, seed, and cup are gifts you can hold.</why>
-        <claimMiss>Pictures are only decoration.</claimMiss>
-        <claimMiss>Mercy is a wage you finish earning.</claimMiss>
-        <whyMiss>Every heart is the same soil.</whyMiss>
-        <whyMiss>A hidden lamp is the point.</whyMiss>
-      </hold>
-    </easy>
-    <medium points="12">
-      <learn>A lamp is seen, seed meets different hearts, and the cup is poured for many — gift, not wage.</learn>
-      <match sentence="Jesus taught with pictures you can hold." place="East porch" person="Juniper Wick" />
-      <hold levelUpTo="hard" onFail="easy">
-        <why>A lamp is seen, seed meets different hearts, and the cup is poured for many — gift, not wage.</why>
-        <claimMiss>Pictures are only decoration.</claimMiss>
-        <claimMiss>Mercy is a wage you finish earning.</claimMiss>
-        <whyMiss>Every heart is the same soil.</whyMiss>
-        <whyMiss>A hidden lamp is the point.</whyMiss>
-      </hold>
-    </medium>
-    <hard points="15">
-      <learn>Jesus taught with lamps, seed, and a cup. The cup of the new covenant is poured for many (Matthew 26:28; Luke 22:20) — gift, not wage.</learn>
-      <match sentence="Jesus taught with pictures you can hold." place="East porch" person="Juniper Wick" />
-      <hold onFail="easy">
-        <why>A lamp is seen, seed meets different hearts, and the cup is poured for many — gift, not wage.</why>
-        <claimMiss>Pictures are only decoration.</claimMiss>
-        <claimMiss>Mercy is a wage you finish earning.</claimMiss>
-        <whyMiss>Every heart is the same soil.</whyMiss>
-        <whyMiss>A hidden lamp is the point.</whyMiss>
-      </hold>
-    </hard>
-  </lesson>
-  <lesson id="daily-seed" title="A handful of seed" idea="the same word meets very different hearts">
-    <claim>The same word meets different soils; some seed is lost.</claim>
-    <plain>The same word meets different soils. Some seed is lost.</plain>
-    <source>Mark 4:1–9</source>
-    <loci place="East porch" person="Juniper Wick" plotId="porch" who="juniper" />
-    <easy points="10" easyOrder="14">
-      <learn>This Jesus story invites hearing. It does not flatter every field.</learn>
-      <match sentence="The same word meets different soils; some seed is lost." place="East porch" person="Juniper Wick" />
-      <hold levelUpTo="medium" onFail="easy">
-        <why>Not every field is good soil.</why>
-        <claimMiss>Every field is guaranteed a harvest.</claimMiss>
-        <claimMiss>Lost seed means the sower failed.</claimMiss>
-        <whyMiss>Good soil is a slogan, not a way of hearing.</whyMiss>
-        <whyMiss>Jesus never names withering or birds.</whyMiss>
-      </hold>
-    </easy>
-    <medium points="12">
-      <learn>The parable invites hearing; it does not flatter every field.</learn>
-      <match sentence="The same word meets different soils; some seed is lost." place="East porch" person="Juniper Wick" />
-      <hold levelUpTo="hard" onFail="easy">
-        <why>The parable invites hearing; it does not flatter every field.</why>
-        <claimMiss>Every field is guaranteed a harvest.</claimMiss>
-        <claimMiss>Lost seed means the sower failed.</claimMiss>
-        <whyMiss>Good soil is a slogan, not a way of hearing.</whyMiss>
-        <whyMiss>Jesus never names withering or birds.</whyMiss>
-      </hold>
-    </medium>
-    <hard points="15">
-      <learn>“He who has ears to hear, let him hear.” The story asks for a kind of soil, not a slogan.</learn>
-      <match sentence="The same word meets different soils; some seed is lost." place="East porch" person="Juniper Wick" />
-      <hold onFail="easy">
-        <why>The parable invites hearing; it does not flatter every field.</why>
-        <claimMiss>Every field is guaranteed a harvest.</claimMiss>
-        <claimMiss>Lost seed means the sower failed.</claimMiss>
-        <whyMiss>Good soil is a slogan, not a way of hearing.</whyMiss>
-        <whyMiss>Jesus never names withering or birds.</whyMiss>
-      </hold>
-    </hard>
-  </lesson>
-  <lesson id="daily-neighbor" title="Who is near" idea="neighbor is the one who shows mercy">
-    <claim>Mercy makes a neighbor; pedigree does not.</claim>
-    <plain>Mercy makes a neighbor. Pedigree does not.</plain>
-    <source>Luke 10:36–37</source>
-    <loci place="East porch" person="Juniper Wick" plotId="porch" who="juniper" />
-    <easy points="10" easyOrder="15">
-      <learn>Jesus asks who *proved* to be a neighbor — the one who showed mercy.</learn>
-      <match sentence="Mercy makes a neighbor; pedigree does not." place="East porch" person="Juniper Wick" />
-      <hold levelUpTo="medium" onFail="easy">
-        <why>Jesus asks who showed mercy — that one is neighbor.</why>
-        <claimMiss>The priest who passed by is the measure.</claimMiss>
-        <claimMiss>Neighbor is settled before anyone crosses the road.</claimMiss>
-        <whyMiss>Mercy is unrelated to the question.</whyMiss>
-        <whyMiss>The wounded man must first classify the helper.</whyMiss>
-      </hold>
-    </easy>
-    <medium points="12">
-      <learn>Jesus asks who *proved* to be a neighbor — the one who showed mercy.</learn>
-      <match sentence="Mercy makes a neighbor; pedigree does not." place="East porch" person="Juniper Wick" />
-      <hold levelUpTo="hard" onFail="easy">
-        <why>Jesus asks who *proved* to be a neighbor — the one who showed mercy.</why>
-        <claimMiss>The priest who passed by is the measure.</claimMiss>
-        <claimMiss>Neighbor is settled before anyone crosses the road.</claimMiss>
-        <whyMiss>Mercy is unrelated to the question.</whyMiss>
-        <whyMiss>The wounded man must first classify the helper.</whyMiss>
-      </hold>
-    </medium>
-    <hard points="15">
-      <learn>He said, “The one who showed him mercy.” And Jesus said, “You go, and do likewise.”</learn>
-      <match sentence="Mercy makes a neighbor; pedigree does not." place="East porch" person="Juniper Wick" />
-      <hold onFail="easy">
-        <why>Jesus asks who *proved* to be a neighbor — the one who showed mercy.</why>
-        <claimMiss>The priest who passed by is the measure.</claimMiss>
-        <claimMiss>Neighbor is settled before anyone crosses the road.</claimMiss>
-        <whyMiss>Mercy is unrelated to the question.</whyMiss>
-        <whyMiss>The wounded man must first classify the helper.</whyMiss>
-      </hold>
-    </hard>
-  </lesson>
-  </area>
-</packIndex>
+<silverCityPackIndex schemaVersion="3" appVersion="1.4.50" generated="2026-09-14T13:15:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/">
+  <howToEdit>Load one areaPack XML per area. Every lesson has three tiers: &lt;easy easyOrder="N"&gt;, &lt;medium&gt;, and &lt;hard&gt; — each with Learn/Match/Hold. Held claim stays plain on all tiers. Hold level-up / fail→Easy: see &lt;holdRules&gt;. Do not fork facts into separate files. Engine loader climb next.</howToEdit>
+  <packs>
+    <pack id="parable-hollow" file="parable-hollow.xml" title="Story Creek" person="Mercy Wren" lessonCount="8" />
+    <pack id="witness-bench" file="witness-bench.xml" title="Witness Square" person="Silas Whitman" lessonCount="7" />
+    <pack id="observatory" file="observatory.xml" title="Sky Watch" person="Nora Skye" lessonCount="6" />
+    <pack id="first-gate" file="first-gate.xml" title="Why Gate" person="Ansel Gate" lessonCount="7" />
+    <pack id="high-lookout" file="high-lookout.xml" title="Meaning Ridge" person="Hope Ridge" lessonCount="7" />
+  </packs>
+  <easyShelf order="ph-road,ph-father,ph-debt,wb-creed,wb-women,daily-lantern,daily-stars,daily-cosmos,hl-moral,ph-seeds,wb-early,wb-method,daily-names,daily-creed,daily-empty,daily-gems,daily-seed,daily-neighbor,ob-tuning,ob-design,ob-leibniz,ob-life,daily-life,fg-mover,fg-contingent,fg-kalam,fg-limits,daily-scroll,daily-isaiah,hl-mind,hl-meaning,hl-beauty,daily-grace,daily-rest,daily-door">
+    <line id="ph-road" easyOrder="1" pack="parable-hollow">ph-road</line>
+    <line id="ph-father" easyOrder="2" pack="parable-hollow">ph-father</line>
+    <line id="ph-debt" easyOrder="3" pack="parable-hollow">ph-debt</line>
+    <line id="wb-creed" easyOrder="4" pack="witness-bench">wb-creed</line>
+    <line id="wb-women" easyOrder="5" pack="witness-bench">wb-women</line>
+    <line id="daily-lantern" easyOrder="6" pack="parable-hollow">daily-lantern</line>
+    <line id="daily-stars" easyOrder="7" pack="observatory">daily-stars</line>
+    <line id="daily-cosmos" easyOrder="8" pack="first-gate">daily-cosmos</line>
+    <line id="hl-moral" easyOrder="9" pack="high-lookout">hl-moral</line>
+    <line id="ph-seeds" easyOrder="10" pack="parable-hollow">ph-seeds</line>
+    <line id="wb-early" easyOrder="11" pack="witness-bench">wb-early</line>
+    <line id="wb-method" easyOrder="12" pack="witness-bench">wb-method</line>
+    <line id="daily-names" easyOrder="13" pack="witness-bench">daily-names</line>
+    <line id="daily-creed" easyOrder="14" pack="witness-bench">daily-creed</line>
+    <line id="daily-empty" easyOrder="15" pack="witness-bench">daily-empty</line>
+    <line id="daily-gems" easyOrder="16" pack="parable-hollow">daily-gems</line>
+    <line id="daily-seed" easyOrder="17" pack="parable-hollow">daily-seed</line>
+    <line id="daily-neighbor" easyOrder="18" pack="parable-hollow">daily-neighbor</line>
+    <line id="ob-tuning" easyOrder="19" pack="observatory">ob-tuning</line>
+    <line id="ob-design" easyOrder="20" pack="observatory">ob-design</line>
+    <line id="ob-leibniz" easyOrder="21" pack="observatory">ob-leibniz</line>
+    <line id="ob-life" easyOrder="22" pack="observatory">ob-life</line>
+    <line id="daily-life" easyOrder="23" pack="observatory">daily-life</line>
+    <line id="fg-mover" easyOrder="24" pack="first-gate">fg-mover</line>
+    <line id="fg-contingent" easyOrder="25" pack="first-gate">fg-contingent</line>
+    <line id="fg-kalam" easyOrder="26" pack="first-gate">fg-kalam</line>
+    <line id="fg-limits" easyOrder="27" pack="first-gate">fg-limits</line>
+    <line id="daily-scroll" easyOrder="28" pack="first-gate">daily-scroll</line>
+    <line id="daily-isaiah" easyOrder="29" pack="first-gate">daily-isaiah</line>
+    <line id="hl-mind" easyOrder="30" pack="high-lookout">hl-mind</line>
+    <line id="hl-meaning" easyOrder="31" pack="high-lookout">hl-meaning</line>
+    <line id="hl-beauty" easyOrder="32" pack="high-lookout">hl-beauty</line>
+    <line id="daily-grace" easyOrder="33" pack="high-lookout">daily-grace</line>
+    <line id="daily-rest" easyOrder="34" pack="high-lookout">daily-rest</line>
+    <line id="daily-door" easyOrder="35" pack="high-lookout">daily-door</line>
+  </easyShelf>
+  <holdRules>
+    <summary>On Hold, the player may attempt a level-up to the next tier’s claim/why. If they fail the level-up — or fail Hold at the current tier — fall back to Easy (retry Easy Learn→Match→Hold: teach-before-test, not punish).</summary>
+    <levelUp>easy Hold may set levelUpTo="medium"; medium Hold may set levelUpTo="hard". Hard is the top teach tier (no further levelUpTo).</levelUp>
+    <onFail>Every Hold sets onFail="easy". Failed Hold or failed level-up returns the player to the Easy teach path for that same lesson id.</onFail>
+    <heldClaim>Claim · reason · source stay the same clear/plain line across easy, medium, and hard. Do not mysterious-ize the held line on Hard.</heldClaim>
+  </holdRules>
+  <scoring>
+    <ideaPoints easy="10" medium="12" hard="15"/>
+    <journal showScorePerLevel="true" scoreFromHeldTier="true"/>
+    <notes>Points awarded when the idea is held at that tier. Level-up Hold awards the higher tier’s points (replace or add — prefer: journal records best tier held for that idea; score for an idea = points of highest tier successfully held). On fail→Easy, award Easy only if Easy Hold succeeds.</notes>
+  </scoring>
+  <tools>
+    <tool id="td-watch" kind="love-how-to">
+      <easy>Love — when compassion moves you, help like the Samaritan. Tap the glowing face.</easy>
+      <hard>Love — tap the matching face. A true line turns a cheap claim toward heaven.</hard>
+      <note>Mechanic how-to, not a held claim lesson.</note>
+      <claimFacingHard>Love — tap the matching face. A true line turns a cheap claim toward heaven.</claimFacingHard>
+      <reason>Love, logic, reason, and science you have kept can divert a false step up the ridge.</reason>
+      <source>Luke 10:25–37 · the night road</source>
+      <plainTeach>Tap the glowing face. When compassion moves you, help like the Samaritan.</plainTeach>
+    </tool>
+  </tools>
+  <trailNotes>
+    <note id="j-trail-1">
+      <claim>A morning walked is kept — not as a trophy, as a thank-you.</claim>
+      <reason>If you are away, the trail waits; nothing already gathered is taken back.</reason>
+      <source>Daily Trail</source>
+      <title>First frost on the rail</title>
+      <kicker>Daily Trail</kicker>
+      <p>You walked a morning that will not come again. The town keeps a small mark for that — not a trophy, a thank-you.</p>
+      <p>The trail will be here tomorrow. If you are away, it waits. Nothing you have already gathered is taken back.</p>
+    </note>
+    <note id="j-trail-2">
+      <claim>Two mornings are enough for the path to know your step.</claim>
+      <reason>Nothing is owed; the bench is still free.</reason>
+      <source>Daily Trail</source>
+      <title>A second lantern</title>
+      <kicker>Daily Trail</kicker>
+      <p>Two distinct mornings. The path is starting to know your step. Nothing is owed; the bench is still free.</p>
+    </note>
+    <note id="j-trail-3">
+      <claim>Return is a kind of courage.</claim>
+      <reason>Three distinct days are marked without scolding the ones you missed.</reason>
+      <source>Daily Trail</source>
+      <title>Margin note from the clerk</title>
+      <kicker>Daily Trail</kicker>
+      <p>Three distinct days on the trail. The archive clerk left this: “Return is a kind of courage.”</p>
+    </note>
+    <note id="j-trail-5">
+      <claim>Five skies are saved; empty days are not scolded.</claim>
+      <reason>The town only keeps a page for when you are here.</reason>
+      <source>Daily Trail</source>
+      <title>Five weather reports</title>
+      <kicker>Daily Trail</kicker>
+      <p>Five different skies. The town does not scold the days you were away. It only saves a page for when you are here.</p>
+    </note>
+    <note id="j-trail-7">
+      <claim>Seven unique mornings still leave tomorrow free.</claim>
+      <reason>If you miss, the trail waits; marks you made stay in the journal.</reason>
+      <source>Daily Trail</source>
+      <title>A week of porches</title>
+      <kicker>Daily Trail</kicker>
+      <p>Seven unique mornings. If you miss tomorrow, the trail waits. The marks you already made stay in the journal.</p>
+    </note>
+  </trailNotes>
+  <uiChrome>
+    <learnCta>Learn</learnCta>
+    <matchCta>Match</matchCta>
+    <matchDone>Match done</matchDone>
+    <matchWin>Matched!</matchWin>
+    <hold>Hold</hold>
+    <holdNext>Hold next</holdNext>
+    <home>Home</home>
+    <connectLink>Tap the sentence, then the place, then the person.</connectLink>
+    <readStory>Read today’s story.</readStory>
+    <learnThisFirst>Learn this first.</learnThisFirst>
+    <rememberSentence>Tap the line you kept.</rememberSentence>
+    <tapWhy>Tap why this is true.</tapWhy>
+    <keepThis>Keep this</keepThis>
+    <mainIdeaTeach>Main idea = the short true line we keep.</mainIdeaTeach>
+    <claimTeach>A claim is the main idea we hold to be true.</claimTeach>
+    <reasonTeach>A reason is why this is true.</reasonTeach>
+    <lockIn>Save your picks.</lockIn>
+    <continueStreet>Continue tonight’s street</continueStreet>
+    <nightDo>Night Watch</nightDo>
+    <nightLead>Tap the face six times.</nightLead>
+    <hubEasyLead>Match a sentence. Hold the line.</hubEasyLead>
+    <holdTheNight>Hold the night</holdTheNight>
+    <learnHoldDeploy>Learn · hold · deploy</learnHoldDeploy>
+    <homesOnTheStreet>Homes on the street</homesOnTheStreet>
+  </uiChrome>
+  <flags>
+    <lessonsWithThreeTiers>35/35</lessonsWithThreeTiers>
+    <easyTrailCount>35</easyTrailCount>
+    <holdFailFallback>easy</holdFailFallback>
+  </flags>
+</silverCityPackIndex>

@@ -38,7 +38,7 @@ export function TeachUnlock({ brief, kind, onUnlock, unlock, beats }: TeachUnloc
   const lesson = packLesson(brief.id)
   const tier = currentLessonTier(progress, brief.id)
   const packLearn = lesson?.[tier]?.learn
-  const story = easy ? packLearn || (plain ? plain.teach : brief.reason) : brief.reason
+  const story = packLearn || (easy && plain ? plain.teach : brief.reason)
   const school = schoolWordsFor(brief.id, easy)
 
   if (easy) {

@@ -13,6 +13,7 @@ export const CHANGELOG: ChangeNote[] = [
     when: '2026-09-14',
     items: [
       'Learn → Match → Hold copy loads from per-area XML packs (one file per street plus the porch index)',
+      'Full CoS harvest packs: Easy short story, Medium and Hard teach, Hold 10 / 12 / 15 — father-run Easy short story stays locked verbatim',
       'Easy trail: all 35 facts in easyOrder',
       'Easy Learn → Match → Hold still starts at Mercy / Story Creek and stays mercy-first — father-run before creed',
       'Medium and Hard tiers; Hold levels up Easy → Medium → Hard; fail returns that idea to Easy',

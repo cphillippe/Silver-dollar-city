@@ -35,20 +35,30 @@ export interface PackHold {
   whyMisses: string[]
 }
 
+export interface PackWord {
+  term: string
+  sense: string
+}
+
 export interface PackTier {
   id: LessonTierId
   points: number
   easyOrder?: number
   learn: string
+  gloss?: string
+  word?: PackWord
+  hint?: string
   match: PackMatch
   hold: PackHold
 }
 
 export interface PackJournal {
+  id?: string
   title: string
   kicker: string
   body: string[]
   sources: string[]
+  unlockAfter?: string
 }
 
 export interface PackLesson {
@@ -85,6 +95,7 @@ export interface PackIndex {
   id: string
   title: string
   files: { file: string; id: string }[]
+  easyShelf: string[]
 }
 
 export interface PackCatalog {
