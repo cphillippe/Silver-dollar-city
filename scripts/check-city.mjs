@@ -1080,7 +1080,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.54')
+assert.equal(APP_VERSION, '1.4.55')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1443,6 +1443,11 @@ const puzzleSrc = readFileSync(
 )
 assert.match(puzzleSrc, /kind === 'link'/)
 assert.match(puzzleSrc, /LinkPlay/)
+assert.match(puzzleSrc, /GemSearchPlay/)
+assert.match(puzzleSrc, /isEasy\(progress\)/)
+assert.match(cssSrc, /gem-board/)
+assert.match(cssSrc, /gem-cell\.is-burst/)
+assert.match(cssSrc, /gem-shard/)
 
 assert.match(teachSrc, /Unlock the links/)
 assert.match(hubSrc, /Link the street/)

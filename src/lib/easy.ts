@@ -17,6 +17,7 @@ export const EASY = {
   mindMap: 'your scrapbook of matches',
   mindMapShort: 'Scrapbook',
   connectLink: 'Tap the sentence, then the place, then the person.',
+  matchHunt: 'Swipe or tap the gems. Find today’s words.',
   readStory: 'Read today’s story.',
   learnCta: 'Learn',
   readStoryFirst: 'Read the story first',
