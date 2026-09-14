@@ -1,5 +1,6 @@
 import type { Challenge } from '../types'
 import { isEasy, easyMatchLine } from '../lib/easy'
+import { lessonStory } from '../lib/storyPlay'
 import { useProgress } from '../store/progress'
 import { BuildArgumentPlay } from './challenges/BuildArgumentPlay'
 import { GemSearchPlay } from './challenges/GemSearchPlay'
@@ -58,14 +59,20 @@ export function PuzzlePlay({
   }
   if (challenge.kind === 'link') {
     if (isEasy(progress)) {
-      return (
-        <GemSearchPlay
-          lineId={easyMatchLine(progress)}
-          onMiss={onMiss}
-          onClear={onSolved}
-          onEasyStop={onEasyStop}
-        />
-      )
+      const story = lessonStory(easyMatchLine(progress))
+      switch (story.play) {
+        case 'panel-blast':
+        default:
+          return (
+            <GemSearchPlay
+              lineId={story.lineId}
+              beats={story.beats}
+              onMiss={onMiss}
+              onClear={onSolved}
+              onEasyStop={onEasyStop}
+            />
+          )
+      }
     }
     return (
       <LinkPlay
