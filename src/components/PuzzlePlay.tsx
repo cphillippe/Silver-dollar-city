@@ -1,5 +1,8 @@
 import type { Challenge } from '../types'
+import { isEasy, easyMatchLine } from '../lib/easy'
+import { useProgress } from '../store/progress'
 import { BuildArgumentPlay } from './challenges/BuildArgumentPlay'
+import { GemSearchPlay } from './challenges/GemSearchPlay'
 import { LinkPlay } from './challenges/LinkPlay'
 import { MatchPlay } from './challenges/MatchPlay'
 import { SequencePlay } from './challenges/SequencePlay'
@@ -22,6 +25,7 @@ export function PuzzlePlay({
   onEasyStop,
   streetBeat,
 }: PuzzlePlayProps) {
+  const { progress } = useProgress()
   if (challenge.kind === 'sort') {
     return (
       <SortPlay
@@ -53,6 +57,15 @@ export function PuzzlePlay({
     )
   }
   if (challenge.kind === 'link') {
+    if (isEasy(progress)) {
+      return (
+        <GemSearchPlay
+          lineId={easyMatchLine(progress)}
+          onMiss={onMiss}
+          onEasyStop={onEasyStop}
+        />
+      )
+    }
     return (
       <LinkPlay
         challenge={challenge}
