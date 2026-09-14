@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { LinkChallenge, LinkKind, LinkNode } from '../../types'
 import { MATCH_ART } from '../../content/matchArt'
-import { linkCaption, linkClue, linkMiss, linkPicture } from '../../content/links'
+import { linkCaption, linkClue, linkMiss, linkPicture, streetDecoyNodes } from '../../content/links'
 import { EASY, isEasy } from '../../lib/easy'
 import { shuffle } from '../../lib/shuffle'
 import { useProgress } from '../../store/progress'
@@ -17,6 +17,7 @@ interface LinkPlayProps {
   onSolved: () => void
   onPeek?: () => void
   onEasyStop?: (dest: 'hold' | 'home') => void
+  streetBeat?: { place: string; linkedAfter: number; total: number; left: number }
 }
 
 interface Edge {
@@ -68,7 +69,7 @@ function wantFor(triple: { ideaId: string; placeId: string; personId: string }, 
   return null
 }
 
-export function LinkPlay({ challenge, onMiss, onSolved, onPeek, onEasyStop }: LinkPlayProps) {
+export function LinkPlay({ challenge, onMiss, onSolved, onPeek, onEasyStop, streetBeat }: LinkPlayProps) {
   const { progress } = useProgress()
   const easy = isEasy(progress)
   const [edges, setEdges] = useState<Edge[]>([])
@@ -144,7 +145,7 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek, onEasyStop }: Li
     const want = wantFor(currentTriple, step)
     const pool = challenge.nodes.filter((node) => node.kind === kind)
     const hit = pool.find((node) => node.id === want)
-    const decoys = shuffle(pool.filter((node) => node.id !== want))
+    const decoys = shuffle(streetDecoyNodes(pool, want ?? ''))
     const take = easy ? decoys.slice(0, 1) : kind === 'idea' ? decoys.slice(0, 3) : decoys
     return shuffle([hit, ...take].filter((node): node is LinkNode => Boolean(node)))
   }, [challenge.nodes, currentTriple?.id, step, easy])
@@ -235,7 +236,9 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek, onEasyStop }: Li
     status === 'ok'
       ? easy
         ? 'All 3 matches complete'
-        : 'All 3 links complete'
+        : streetBeat
+          ? 'Tonight’s street is done'
+          : 'All 3 links complete'
       : step === 'linked'
         ? easy
           ? 'This match is complete. Tap Next.'
@@ -277,13 +280,30 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek, onEasyStop }: Li
   }, [easy, screen, wantId, step])
 
   if (status === 'ok') {
+    const hardStamp = streetBeat
+      ? streetBeat.left > 0
+        ? 'Tonight’s street'
+        : 'Street linked'
+      : 'All 3 links complete'
     return (
       <div className="play is-link is-wizard is-finale">
-        {easy ? <WinBurst play stamp={EASY.matchWin} /> : null}
+        <WinBurst play stamp={easy ? EASY.matchWin : hardStamp} />
         <p className="link-complete" role="status">
-          {easy ? EASY.matchDone : 'All 3 links complete'}
+          {easy
+            ? EASY.matchDone
+            : streetBeat
+              ? streetBeat.left > 0
+                ? `${streetBeat.place} is lit`
+                : 'The whole street is linked'
+              : 'All 3 links complete'}
         </p>
-        <ol className="link-checks" aria-label={easy ? 'This match' : 'All links'}>
+        {easy || !streetBeat ? null : (
+          <p className="quiet">
+            {streetBeat.linkedAfter} of {streetBeat.total} facts
+            {streetBeat.left > 0 ? ` · ${streetBeat.left} still wait` : ''}
+          </p>
+        )}
+        <ol className="link-checks" aria-label={easy ? 'This match' : 'Tonight’s links'}>
           <li className="is-done">✓ {easy ? 'Sentence' : 'Idea'}</li>
           <li className="is-done">✓ Place</li>
           <li className="is-done">✓ Person</li>
@@ -378,7 +398,9 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek, onEasyStop }: Li
 
       {easy ? null : (
         <p className="match-score">
-          {`${challenge.triples.length * 2 - edges.length} links left · ${edges.length} / ${challenge.triples.length * 2} snapped`}
+          {streetBeat
+            ? `${challenge.triples.length * 2 - edges.length} links left tonight · ${streetBeat.linkedAfter - challenge.triples.length + edges.length / 2} / ${streetBeat.total} facts`
+            : `${challenge.triples.length * 2 - edges.length} links left · ${edges.length} / ${challenge.triples.length * 2} snapped`}
         </p>
       )}
 

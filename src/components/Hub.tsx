@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
 import { areas, findPlayable, journalForChallenge } from '../content'
+import { STREET_TRIPLES, nextStreetWalk, streetIsComplete } from '../content/links'
 import { STORY, townVoice } from '../content/story'
 import { LOT_STORY } from '../content/lots'
 import { localDateKey } from '../lib/dates'
 import { CITY_PLOTS, nextPlotId, type CityPlotId } from '../lib/city'
 import { lotTapWhy } from '../lib/cityBuild'
-import { EASY, EASY_MATCH_LINE, easyHoldView, easyLineHeld, easyMatchReady, isEasy } from '../lib/easy'
+import { EASY, EASY_MATCH_LINE, easyHomeFocus, easyHoldView, easyLineHeld, easyLoopLine, easyMatchReady, isEasy } from '../lib/easy'
 import { markLater, readLater, sessionDue } from '../lib/recall'
 import { Avatar } from './Avatar'
 import { ShareInvite } from './ShareInvite'
@@ -44,7 +45,9 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
   const nextId = nextPlotId(progress, doneToday)
   const watchOpen = unlockedWatchAbilities(progress)
   const easy = isEasy(progress)
-  const streetDone = progress.completed.includes('ln-street')
+  const streetDone = streetIsComplete(progress)
+  const streetLinked = progress.streetLinked ?? []
+  const tonight = nextStreetWalk(streetLinked)
   const requested =
     openPlot && CITY_PLOTS.some((plot) => plot.id === openPlot)
       ? (openPlot as CityPlotId)
@@ -57,32 +60,33 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
 
   if (easy) {
     const matchReady = easyMatchReady(progress)
-    const mercyHeld = easyLineHeld(progress, EASY_MATCH_LINE)
-    const learnPrimary = !mercyHeld && !matchReady
+    const focus = easyHomeFocus(progress)
+    const loopId = easyLoopLine(progress)
+    const coldMercy = loopId === EASY_MATCH_LINE && !easyLineHeld(progress, EASY_MATCH_LINE)
     return (
       <main className="hub is-easy-home" aria-label="Home">
         <header className="easy-home-head">
           <p className="eyebrow">Silver City</p>
           <h1>Play</h1>
           <p className="quiet">
-            {matchReady
+            {focus === 'match'
               ? 'Match a sentence. Hold the line.'
-              : mercyHeld
-                ? EASY.readStoryFirst
-                : 'Read Mercy’s story at Story Creek first.'}
+              : coldMercy
+                ? 'Read Mercy’s story at Story Creek first.'
+                : EASY.readStoryFirst}
           </p>
         </header>
         <nav className="easy-core" aria-label="Play">
           <button
             type="button"
-            className={`btn xl ${learnPrimary ? 'primary' : ''}`}
+            className={`btn xl ${focus === 'learn' ? 'gold' : ''}`}
             onClick={() => onNavigate({ name: 'learn' })}
           >
             {matchReady ? EASY.learnCta : EASY.readStory}
           </button>
           <button
             type="button"
-            className={`btn xl ${matchReady ? 'primary' : 'is-locked'}`}
+            className={`btn xl ${focus === 'match' ? 'gold' : matchReady ? '' : 'is-locked'}`}
             aria-disabled={!matchReady}
             onClick={() => onNavigate({ name: 'link' })}
           >
@@ -91,7 +95,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
           {!matchReady ? <p className="quiet easy-match-lock">{EASY.readStoryFirst}</p> : null}
           <button
             type="button"
-            className="btn gold xl"
+            className={`btn xl ${focus === 'hold' ? 'gold' : ''}`}
             onClick={() => onNavigate(easyHoldView(progress))}
           >
             {EASY.saved}
@@ -195,23 +199,25 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
       </section>
       )}
 
-      {!easy && !streetDone && (doneToday || progress.completed.length > 0) ? (
+      {!easy && !streetDone ? (
         <section className="street-link" aria-label="Link the street">
           <div className="card-lead">
             <Avatar who="mercy" size="sm" />
             <div>
-              <p className="eyebrow">{easy ? EASY.connectLink : 'Match idea · place · person.'}</p>
-              <h2>Link the street</h2>
-              <p className="quiet">{easy ? EASY.connectLink : 'Idea · place · person'}</p>
+              <p className="eyebrow">{streetLinked.length > 0 ? 'Continue' : 'Match idea · place · person.'}</p>
+              <h2>{streetLinked.length > 0 ? 'Tonight’s street' : 'Link the street'}</h2>
+              <p className="quiet">
+                {streetLinked.length > 0
+                  ? `${streetLinked.length} of ${STREET_TRIPLES.length} facts · ${tonight?.placeTitle ?? 'next place'} tonight`
+                  : 'Idea · place · person · one place per sitting'}
+              </p>
               <p className="town-line">
-                {easy
-                  ? 'You’ll reopen them from your scrapbook of links. One story at a time.'
-                  : 'Snap a claim to its lot and keeper. Lit nodes reopen from the town map.'}
+                {streetLinked.length > 0
+                  ? `${STREET_TRIPLES.length - streetLinked.length} facts still wait. One more round, then stop.`
+                  : 'Snap a claim to its lot and keeper. A sitting is tonight’s street — not all 35 facts at once.'}
               </p>
               <p className="street-lot-why">
-                {easy
-                  ? 'Mercy at the creek. Silas at the square. Juniper’s lamp on the porch.'
-                  : 'Mercy’s pictures at the creek. Silas’s ledger at the square. Juniper’s lamp on the porch — meant to be seen.'}
+                Mercy’s pictures at the creek. Silas’s ledger at the square. Juniper’s lamp on the porch — meant to be seen.
               </p>
             </div>
           </div>
@@ -220,7 +226,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
             className="btn gold xl"
             onClick={() => onNavigate({ name: 'link' })}
           >
-            Link the street
+            {streetLinked.length > 0 ? EASY.continueStreet : 'Link the street'}
           </button>
         </section>
       ) : null}

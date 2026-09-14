@@ -502,6 +502,7 @@ export interface ProgressApi {
   setTheme: (theme: AppTheme) => void
   setEasyMode: (easy: boolean) => void
   recordTaught: (evidenceId: string) => void
+  recordStreetLinks: (tripleIds: string[]) => void
   upgradeBuilding: (id: CityPlotId) => void
   reset: () => void
   importSaveText: (raw: string) => { ok: true } | { ok: false; error: string }
