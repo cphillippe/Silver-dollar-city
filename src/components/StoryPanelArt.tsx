@@ -1,94 +1,33 @@
 import { useId, type ReactNode } from 'react'
-import { MATCH_ART } from '../content/matchArt'
 import type { StoryScene } from '../lib/storyPanels'
+import panelFatherRun from '../assets/story/panel-father-run.webp'
+import panelHelp from '../assets/story/panel-help.webp'
+import panelHug from '../assets/story/panel-hug.webp'
+import panelHungry from '../assets/story/panel-hungry.webp'
+import panelHurt from '../assets/story/panel-hurt.webp'
+import panelNeighbor from '../assets/story/panel-neighbor.webp'
+import panelSonLeave from '../assets/story/panel-son-leave.webp'
+import panelWalkPast from '../assets/story/panel-walk-past.webp'
+
+const PANEL_ART: Partial<Record<StoryScene, string>> = {
+  hurt: panelHurt,
+  'walk-past': panelWalkPast,
+  help: panelHelp,
+  neighbor: panelNeighbor,
+  'son-leave': panelSonLeave,
+  hungry: panelHungry,
+  'father-run': panelFatherRun,
+  hug: panelHug,
+  feast: panelHug,
+}
 
 export function StoryPanelArt({ scene }: { scene: StoryScene }) {
+  const painted = PANEL_ART[scene]
+  if (painted) {
+    return <img className="story-art-tile" src={painted} alt="" draggable={false} />
+  }
   const uid = useId().replace(/:/g, '')
   switch (scene) {
-    case 'hurt':
-      return (
-        <Frame uid={uid} from="#ff9f1a" to="#7a1a40">
-          <path d="M0 44c18-8 28-4 40-6 10-2 16-8 24-4v30H0Z" fill="#c4922a" />
-          <path d="M0 50h64v14H0Z" fill="#8a5a22" />
-          <ellipse cx="28" cy="46" rx="14" ry="6" fill="#6a3a18" opacity=".35" />
-          <path d="M16 42c2-10 8-16 14-16 4 0 8 3 10 8 2 6-2 14-8 16-8 2-16-2-16-8Z" fill="#ffe7b8" />
-          <circle cx="24" cy="30" r="6" fill="#ffe7b8" />
-          <path d="M20 28c3 2 6 2 8 0" stroke="#c01840" strokeWidth="1.6" fill="none" strokeLinecap="round" />
-          <path d="M48 18c6 4 8 12 4 18" stroke="#fff6b8" strokeWidth="3" fill="none" strokeLinecap="round" />
-          <circle cx="54" cy="14" r="4" fill="#ffcc33" />
-        </Frame>
-      )
-    case 'walk-past':
-      return (
-        <Frame uid={uid} from="#3a1480" to="#1a0840">
-          <path d="M0 48h64v16H0Z" fill="#5a3a18" />
-          <circle cx="14" cy="50" r="5" fill="#ffe7b8" />
-          <path d="M8 58c0-6 3-10 6-10s6 4 6 10" fill="#ffe7b8" />
-          <Person x={34} y={36} fill="#fff6b8" />
-          <Person x={50} y={34} fill="#c86bff" />
-          <path d="M30 28c8-2 16-2 24 2" stroke="#ffcc33" strokeWidth="2" fill="none" strokeDasharray="3 3" />
-        </Frame>
-      )
-    case 'help':
-      return <img className="story-art-tile" src={MATCH_ART['ph-road']} alt="" draggable={false} />
-    case 'neighbor':
-      return (
-        <Frame uid={uid} from="#4a1a88" to="#1a0840">
-          <path d="M32 54 10 32c-7-7-2-18 9-18 6 0 9 4 13 8 4-4 7-8 13-8 11 0 16 11 9 18Z" fill="#ff5a7a" />
-          <circle cx="22" cy="24" r="3.4" fill="#fff6e8" opacity=".85" />
-          <Person x={48} y={46} fill="#ffcc33" scale={0.72} />
-        </Frame>
-      )
-    case 'son-leave':
-      return (
-        <Frame uid={uid} from="#2a0d58" to="#7a1a40">
-          <rect x="6" y="22" width="18" height="28" rx="3" fill="#ffe7b8" />
-          <path d="M4 22 15 12l13 10" fill="#ffcc33" />
-          <rect x="12" y="32" width="6" height="12" fill="#c4922a" />
-          <Person x={44} y={40} fill="#fff6b8" />
-          <circle cx="52" cy="28" r="7" fill="#ffcc33" stroke="#fff8dc" strokeWidth="2" />
-          <path d="M52 24v8M49 27h6" stroke="#8a5a22" strokeWidth="1.8" strokeLinecap="round" />
-        </Frame>
-      )
-    case 'hungry':
-      return (
-        <Frame uid={uid} from="#1a2848" to="#2a0d58">
-          <path d="M0 40c16-10 28-4 40-8s16-8 24-2v34H0Z" fill="#3d5a38" />
-          <Person x={30} y={42} fill="#ffe7b8" />
-          <path d="M24 30c4 4 8 4 12 0" stroke="#c01840" strokeWidth="2" fill="none" />
-          <circle cx="50" cy="16" r="6" fill="#fff6b8" opacity=".55" />
-        </Frame>
-      )
-    case 'father-run':
-      return (
-        <Frame uid={uid} from="#ff9f1a" to="#3a1480">
-          <path d="M0 48h64v16H0Z" fill="#3dcc7a" />
-          <path d="M8 50c10-16 18-18 28-10 6 4 10 4 18 0" stroke="#fff6b8" strokeWidth="3" fill="none" />
-          <Person x={22} y={38} fill="#c86bff" />
-          <Person x={46} y={34} fill="#ffe7b8" />
-          <path d="M28 28c8-8 16-8 24-2" stroke="#ffcc33" strokeWidth="2.4" fill="none" strokeLinecap="round" />
-        </Frame>
-      )
-    case 'hug':
-      return (
-        <Frame uid={uid} from="#ff5a7a" to="#2a0d58">
-          <Person x={26} y={40} fill="#ffe7b8" />
-          <Person x={38} y={40} fill="#c86bff" />
-          <path d="M18 36c6 8 22 8 28 0" stroke="#fff6b8" strokeWidth="3.2" fill="none" strokeLinecap="round" />
-          <circle cx="32" cy="16" r="6" fill="#ffcc33" />
-          <path d="M32 8v4M26 16h4M34 16h4" stroke="#fff6e8" strokeWidth="2" strokeLinecap="round" />
-        </Frame>
-      )
-    case 'feast':
-      return (
-        <Frame uid={uid} from="#3a1480" to="#1a0840">
-          <ellipse cx="32" cy="46" rx="22" ry="8" fill="#8a5a22" />
-          <path d="M16 28h32c3 10 3 16-6 20H22c-9-4-9-10-6-20Z" fill="#ffcc33" />
-          <path d="M27 48h10v8H27Z" fill="#c4922a" />
-          <circle cx="18" cy="18" r="4" fill="#7dffb0" />
-          <circle cx="46" cy="16" r="5" fill="#ff5a7a" />
-        </Frame>
-      )
     case 'forgive':
       return (
         <Frame uid={uid} from="#2a0d58" to="#148a48">
