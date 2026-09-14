@@ -10,13 +10,14 @@ import {
   tryAddToPath,
   type GemCoord,
 } from '../../lib/gemSearch'
-import { storyPanelsFor } from '../../lib/storyPanels'
+import { storyPanelsFor, type StoryPanel } from '../../lib/storyPanels'
 import { GEM_BURST, playGemPop, prefersReducedMotion } from '../../lib/juice'
 import { StoryStrip } from '../StoryStrip'
 import { WinBurst } from './WinBurst'
 
 interface GemSearchPlayProps {
   lineId: string
+  beats?: StoryPanel[]
   onMiss: () => void
   onClear?: () => void
   onEasyStop?: (dest: 'hold' | 'home') => void
@@ -35,11 +36,11 @@ function cellFromPoint(x: number, y: number): GemCoord | null {
   return { r, c }
 }
 
-export function GemSearchPlay({ lineId, onMiss, onClear, onEasyStop }: GemSearchPlayProps) {
+export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: GemSearchPlayProps) {
   const puzzle = useMemo(() => buildGemPuzzle(lineId), [lineId])
   const panels = useMemo(
-    () => storyPanelsFor(lineId, puzzle.words.length),
-    [lineId, puzzle.words.length],
+    () => beats ?? storyPanelsFor(lineId, puzzle.words.length),
+    [beats, lineId, puzzle.words.length],
   )
   const [found, setFound] = useState<string[]>([])
   const [opened, setOpened] = useState(0)

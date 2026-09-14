@@ -16,6 +16,7 @@ import {
   storyFromPanels,
   storyPanelsFor,
 } from '../src/lib/storyPanels.ts'
+import { lessonStory, storyPlayFor } from '../src/lib/storyPlay.ts'
 
 const mercyWords = gemWordsFor('ph-road')
 assert.ok(mercyWords.some((word) => word.text === 'MERCY'), 'Mercy the person')
@@ -107,6 +108,9 @@ const puzzleSrc = readFileSync(new URL('../src/components/PuzzlePlay.tsx', impor
 assert.match(puzzleSrc, /GemSearchPlay/)
 assert.match(puzzleSrc, /isEasy\(progress\)/)
 assert.match(puzzleSrc, /onClear=\{onSolved\}/)
+assert.match(puzzleSrc, /lessonStory/)
+assert.match(puzzleSrc, /panel-blast/)
+assert.doesNotMatch(puzzleSrc, /timing-dash|road-swipe|claim-merge|story-night/)
 
 const fatherStory = packLesson('ph-father')?.easy.learn ?? ''
 const fatherPanels = storyPanelsFor('ph-father', gemWordsFor('ph-father').length)
@@ -123,8 +127,13 @@ assert.equal(splitStorySentences(mercyStory).length, 5)
 for (const id of EASY_LINE_ORDER) {
   const puzzle = buildGemPuzzle(id)
   const panels = storyPanelsFor(id, puzzle.words.length)
+  const story = lessonStory(id, puzzle.words.length)
+  assert.equal(storyPlayFor(id), 'panel-blast', `${id} play`)
+  assert.equal(story.play, 'panel-blast')
+  assert.deepEqual(story.beats, panels)
   assert.equal(panels.length, Math.max(3, Math.min(4, puzzle.words.length)), `${id} panel count`)
   assert.ok(panels.every((panel) => panel.text.trim().length > 0), `${id} panel text`)
+  assert.ok(panels.every((panel) => panel.media && panel.beatId), `${id} beat + media`)
 }
 
 console.log('check-gem-search: ok')
