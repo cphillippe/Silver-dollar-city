@@ -80,6 +80,14 @@ assert.match(playSrc, /onClear/)
 assert.match(playSrc, /revealPanel/)
 assert.doesNotMatch(playSrc, /Tap a sentence/)
 
+const artSrc = readFileSync(
+  new URL('../src/components/StoryPanelArt.tsx', import.meta.url),
+  'utf8',
+)
+assert.match(artSrc, /panel-hurt\.webp/)
+assert.match(artSrc, /panel-father-run\.webp/)
+assert.match(artSrc, /panel-help\.webp/)
+
 const puzzleSrc = readFileSync(new URL('../src/components/PuzzlePlay.tsx', import.meta.url), 'utf8')
 assert.match(puzzleSrc, /GemSearchPlay/)
 assert.match(puzzleSrc, /isEasy\(progress\)/)
