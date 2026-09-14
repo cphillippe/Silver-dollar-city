@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { STREET_BEATS, STREET_CHALLENGE, STREET_PLACE_WHYS, easyStreetChallenge } from '../content/links'
+import { STREET_BEATS, STREET_PLACE_WHYS, STREET_TRIPLES, appendStreetLinks, easyStreetChallenge, hardStreetChallenge, nextStreetWalk, streetFactsLeft, streetWalkTakeaway } from '../content/links'
 import { STORY } from '../content/story'
 import { EASY, easyHoldView, easyMatchLine, easyMatchReady, isEasy } from '../lib/easy'
 import { useJuiceHandoff } from '../lib/juice'
@@ -34,13 +34,28 @@ function LinkDemo({ easy }: { easy: boolean }) {
 }
 
 export function LinkScreen({ onNavigate }: LinkScreenProps) {
-  const { completeChallenge, markMiss, progress } = useProgress()
+  const { completeChallenge, markMiss, progress, recordStreetLinks } = useProgress()
   const { juiceDone: showNext, afterJuice } = useJuiceHandoff()
   const savedWin = useRef(false)
+  const finishedWalk = useRef<ReturnType<typeof nextStreetWalk>>(undefined)
   const [taught, setTaught] = useState(() => isEasy(progress) && easyMatchReady(progress))
   const [arming, setArming] = useState(false)
   const easy = isEasy(progress)
-  const challenge = easy ? easyStreetChallenge(easyMatchLine(progress)) : STREET_CHALLENGE
+  const linked = progress.streetLinked ?? []
+  const walk = easy ? undefined : nextStreetWalk(linked)
+  const challenge = easy ? easyStreetChallenge(easyMatchLine(progress)) : hardStreetChallenge(linked)
+  const linkedAfter = walk ? appendStreetLinks(linked, walk.triples.map((item) => item.id)).length : linked.length
+  const leftAfter = streetFactsLeft(appendStreetLinks(linked, walk?.triples.map((item) => item.id) ?? []))
+  const streetBeat = easy
+    ? undefined
+    : walk
+      ? {
+          place: walk.placeTitle,
+          linkedAfter,
+          total: STREET_TRIPLES.length,
+          left: leftAfter,
+        }
+      : undefined
 
   function markStreet() {
     if (savedWin.current) return
@@ -50,7 +65,15 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
 
   function solved() {
     afterJuice()
-    markStreet()
+    if (easy) {
+      markStreet()
+      return
+    }
+    if (savedWin.current) return
+    savedWin.current = true
+    finishedWalk.current = walk
+    const ids = challenge.triples.map((item) => item.id)
+    recordStreetLinks(ids)
   }
 
   function easyStop(dest: 'hold' | 'home') {
@@ -100,7 +123,9 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
             <p className="quiet">
               {easy
                 ? `You’ll keep them in ${EASY.saved}.`
-                : 'Each match lights a spot on the town map. Tap the place later to open that idea again.'}
+                : walk
+                  ? `Tonight’s street is ${walk.placeTitle} — ${walk.triples.length} fact${walk.triples.length === 1 ? '' : 's'}, not the whole catalog. ${linked.length} of ${STREET_TRIPLES.length} facts already linked.`
+                  : 'Each match lights a spot on the town map. Tap the place later to open that idea again.'}
             </p>
             {easy ? null : (
               <ul className="word-school street-whys" aria-label="Why each place">
@@ -125,7 +150,7 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
                 window.setTimeout(() => setArming(false), 360)
               }}
             >
-              {easy ? 'Start' : 'Unlock the links'}
+              {easy ? 'Start' : walk && linked.length > 0 ? EASY.continueStreet : 'Unlock the links'}
             </button>
           </section>
         ) : (
@@ -136,6 +161,7 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
               onMiss={() => markMiss(challenge.id)}
               onSolved={solved}
               onEasyStop={easyStop}
+              streetBeat={streetBeat}
             />
           </>
         )
@@ -147,7 +173,10 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
             <p className="link-takeaway">
               {easy
                 ? 'Mercy tells Jesus stories at the creek — that is why the neighbor who stops on the road lives at Story Creek. Silas copies names on the square — that is why the old shared belief lives at Witness Square. Juniper’s lamp is on the porch so today’s line can be seen.'
-                : 'Mercy keeps the creek because Jesus taught in pictures. Silas keeps the square because the creed is a public report. Juniper keeps the porch because a lamp is meant to be seen. Nora keeps Sky Watch because the heavens declare a Maker. Ansel keeps Why Gate because the world exists and did not have to. Hope keeps Meaning Ridge because duty is more than taste.'}
+                : streetWalkTakeaway(
+                    finishedWalk.current,
+                    streetFactsLeft(progress.streetLinked ?? []),
+                  )}
             </p>
             <DigDeeper id={challenge.id} compact />
           </article>
@@ -156,7 +185,9 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
             line={
               easy
                 ? `Your matches wait in ${EASY.saved}.`
-                : 'Tap a place on the map — the mind map holds what you linked.'
+                : streetFactsLeft(progress.streetLinked ?? []) > 0
+                  ? 'Continue from Town when you want one more round.'
+                  : 'Tap a place on the map — the mind map holds what you linked.'
             }
             action={easy ? `See ${EASY.saved}` : 'See the town'}
             onGo={() => onNavigate(easy ? { name: 'journal' } : { name: 'hub' })}

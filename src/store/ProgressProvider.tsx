@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState, type ReactNode } from 'react'
 import { markEasyHeld, markEasyTaught } from '../lib/easy'
+import { appendStreetLinks, STREET_TRIPLES } from '../content/links'
 import { learningFromReview, upsertLearning } from '../lib/learning'
 import { isToolHowTo } from '../lib/watchTools'
 import {
@@ -273,6 +274,32 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     })
   }, [write])
 
+  const recordStreetLinks = useCallback((tripleIds: string[]) => {
+    if (tripleIds.length === 0) return
+    setProgress((current) => {
+      const streetLinked = appendStreetLinks(current.streetLinked ?? [], tripleIds)
+      const allDone = streetLinked.length >= STREET_TRIPLES.length
+      const completed =
+        allDone && !current.completed.includes('ln-street')
+          ? [...current.completed, 'ln-street']
+          : current.completed
+      if (
+        streetLinked.length === (current.streetLinked ?? []).length &&
+        completed === current.completed
+      ) {
+        return current
+      }
+      return write({
+        ...current,
+        started: true,
+        streetLinked,
+        completed,
+        lastAreaId: 'street',
+        lastChallengeId: 'ln-street',
+      })
+    })
+  }, [write])
+
   const upgradeBuilding = useCallback((id: CityPlotId) => {
     setProgress((current) => {
       const next = applyUpgrade(current, id)
@@ -322,6 +349,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       setTheme,
       setEasyMode,
       recordTaught,
+      recordStreetLinks,
       upgradeBuilding,
       reset,
       importSaveText,
@@ -341,6 +369,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       reset,
       saveMeta,
       recordTaught,
+      recordStreetLinks,
       setEasyMode,
       setTheme,
       start,

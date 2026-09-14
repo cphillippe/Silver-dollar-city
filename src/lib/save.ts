@@ -79,6 +79,7 @@ export function emptyProgress(): ProgressState {
     easyTaught: [],
     easyHeld: [],
     cityBuilt: emptyCityBuilt(),
+    streetLinked: [],
   }
 }
 
@@ -217,6 +218,7 @@ export function normalizeProgress(parsed: Partial<ProgressState> | ProgressState
     easyTaught: asStringArray(parsed.easyTaught),
     easyHeld: asStringArray(parsed.easyHeld),
     cityBuilt: emptyCityBuilt(),
+    streetLinked: asStringArray(parsed.streetLinked),
   }
   base.memory = migrateMemory({ ...base, memory: parsed.memory ?? {} })
   base.cityBuilt =
