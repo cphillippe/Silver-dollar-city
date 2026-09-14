@@ -1,5 +1,7 @@
 import { journalEntries } from './journal.ts'
 import { hashString } from '../lib/dates.ts'
+import { briefFromPack, packBrief, PACK_CATALOG } from './packCatalog.ts'
+import type { LessonTierId } from './packTypes.ts'
 
 export interface EvidenceBrief {
   id: string
@@ -444,8 +446,19 @@ export const EVIDENCE: Record<string, EvidenceBrief> = {
   ),
 }
 
+for (const lesson of PACK_CATALOG.lessons) {
+  EVIDENCE[lesson.id] = briefFromPack(lesson, 'medium')
+}
+
 export function evidenceFor(id: string): EvidenceBrief | undefined {
   return EVIDENCE[id]
+}
+
+export function evidenceForTier(
+  id: string,
+  tier: LessonTierId = 'medium',
+): EvidenceBrief | undefined {
+  return packBrief(id, tier) ?? EVIDENCE[id]
 }
 
 export interface TakeawayLine {

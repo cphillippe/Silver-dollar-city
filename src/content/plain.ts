@@ -1,4 +1,5 @@
 import { evidenceFor } from './evidence.ts'
+import { packLesson } from './packCatalog.ts'
 
 /** Grade ~6–8 glosses. Same truths as the held claim — simpler words around it. */
 export interface PlainLine {
@@ -242,7 +243,17 @@ const PLAIN: Record<string, PlainLine> = {
 }
 
 export function plainFor(id: string): PlainLine | undefined {
-  if (PLAIN[id]) return PLAIN[id]
+  const lesson = packLesson(id)
+  const base = PLAIN[id]
+  if (lesson) {
+    return {
+      gloss: lesson.plain || base?.gloss || lesson.claim,
+      teach: lesson.easy.learn || base?.teach || lesson.claim,
+      word: base?.word,
+      hint: base?.hint,
+    }
+  }
+  if (base) return base
   const brief = evidenceFor(id)
   if (!brief) return undefined
   return {

@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { areas, journalEntries, pillarFor } from '../content'
-import { evidenceFor, evidenceForJournal } from '../content/evidence'
+import { evidenceFor, evidenceForJournal, evidenceForTier } from '../content/evidence'
 import { guideForArea, STORY } from '../content/story'
 import { localDateKey } from '../lib/dates'
 import { EASY, easyFacingLine, easyJournalMeta, isEasy } from '../lib/easy'
 import { isDue, nextGapLabel } from '../lib/memory'
 import { starLegend } from '../lib/stars'
 import { deployLabel, findLearning, storedLearnings, withLearningBeat } from '../lib/learning'
+import { journalPoints, journalTierCounts, needsTierHold, currentLessonTier, scoreFace } from '../lib/tiers'
 import { watchTool } from '../lib/watchTools'
 import { DigDeeper } from './DigDeeper'
 import { SavedTree, SavedTreeSummary } from './SavedTree'
@@ -33,7 +34,7 @@ interface JournalProps {
 }
 
 export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
-  const { progress, recordHeld, recordReview, snoozeReviews } = useProgress()
+  const { progress, recordHeld, recordReview, recordLessonHold, snoozeReviews } = useProgress()
   const easy = isEasy(progress)
   const today = localDateKey()
   const { open, total, percent } = journalCompletion(progress)
@@ -43,6 +44,11 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
     entries: journalEntries.filter((entry) => entry.areaId === area.id),
   }))
   const heldCount = progress.held.length
+  const packPts = journalPoints(progress)
+  const packTiers = journalTierCounts(progress)
+  const packScoreLine = packPts
+    ? ` · ${packPts} pts · ${packTiers.easy} Easy · ${packTiers.medium} Medium · ${packTiers.hard} Hard`
+    : ''
   const [later, setLater] = useState(() => readLater(today))
   const sessionItems = sessionDue(progress, today, later)
   const dueItems = sessionItems
@@ -65,7 +71,10 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
   const focusedBrief = focusedEntry
     ? evidenceForJournal(focusedEntry.unlockAfter, focusedEntry.id)
     : undefined
-  const quizBrief = focusedBrief ?? (focusId ? evidenceFor(focusId) : undefined)
+  const holdId = focusedBrief?.id ?? focusId
+  const quizBrief = holdId
+    ? evidenceForTier(holdId, currentLessonTier(progress, holdId)) ?? evidenceFor(holdId)
+    : undefined
 
   const holdPractice =
     Boolean(autoQuiz && quizBrief && (easy || !focusedEntry || focusedOpen))
@@ -73,6 +82,7 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
   if (holdPractice && quizBrief) {
     const pillar = focusedEntry?.areaId ?? pillarFor(quizBrief.id)
     const firstHold = !progress.held.includes(quizBrief.id)
+    const advancing = firstHold || needsTierHold(progress, quizBrief.id)
     return (
       <main className={`journal is-rehearse ${easy ? 'is-easy-hold-practice' : ''}`}>
         <button
@@ -87,21 +97,26 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
           {easy ? null : <h1>{focusedEntry?.title ?? STORY.tapTakeaway}</h1>}
           <RecallGate
             brief={quizBrief}
-            mode={easy && firstHold ? 'encode' : 'review'}
+            mode={easy && advancing ? 'encode' : 'review'}
             visits={progress.memory[quizBrief.id]?.reviews ?? 0}
             kicker={STORY.tapTakeaway}
             onHeld={(result) => {
-              if (easy && firstHold) {
-                recordHeld(quizBrief.id)
-                recordReview({
-                  id: quizBrief.id,
-                  pillar,
-                  kind: 'encode',
-                  today,
-                  clean: result.clean,
-                  peeked: false,
-                  elaborated: false,
-                })
+              if (easy && advancing) {
+                if (result.clean) {
+                  recordHeld(quizBrief.id)
+                  recordReview({
+                    id: quizBrief.id,
+                    pillar,
+                    kind: 'encode',
+                    today,
+                    clean: true,
+                    peeked: false,
+                    elaborated: false,
+                  })
+                  recordLessonHold(quizBrief.id, true)
+                } else {
+                  recordLessonHold(quizBrief.id, false)
+                }
                 onNavigate({ name: 'hub' })
                 return
               }
@@ -114,6 +129,7 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
                 peeked: false,
                 elaborated: false,
               })
+              if (!result.clean) recordLessonHold(quizBrief.id, false)
               onNavigate(
                 easy
                   ? { name: 'hub' }
@@ -190,8 +206,8 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
         <h1>{easy ? EASY.saved : 'What you can still say'}</h1>
         <p>
           {easy
-            ? `${heldCount} ${EASY.savedSub}${waiting ? ` · ${waiting} due to read again` : ''}.`
-            : `${open} of ${total} unsealed · ${percent}% of the dossier · ${heldCount} lines held from memory${waiting ? ` · ${waiting} due to dust off` : ''}. Forgetting is why a page comes back.`}
+            ? `${heldCount} ${EASY.savedSub}${waiting ? ` · ${waiting} due to read again` : ''}${packScoreLine}.`
+            : `${open} of ${total} unsealed · ${percent}% of the dossier · ${heldCount} lines held from memory${packScoreLine}${waiting ? ` · ${waiting} due to dust off` : ''}. Forgetting is why a page comes back.`}
         </p>
         {easy ? null : (
         <>
@@ -241,6 +257,9 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
                   <p className="eyebrow">Stored · {learning.source}</p>
                   {learning.picture ? <GemMark gem={learning.picture} size="sm" /> : null}
                   <h3>{easy ? easyFacingLine(learning.id, learning.claim) : learning.claim}</h3>
+                  {scoreFace(progress.lessonScore?.[learning.id]) ? (
+                    <p className="quiet">{scoreFace(progress.lessonScore?.[learning.id])}</p>
+                  ) : null}
                   {easy ? null : (
                   <p>{learning.reason}</p>
                   )}
@@ -298,6 +317,7 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
               daysWalked={progress.dailyDates.length}
               stars={progress.stars[entry.unlockAfter] ?? progress.stars[entry.id]}
               held={progress.held.includes(entry.unlockAfter) || progress.held.includes(entry.id)}
+              score={progress.lessonScore?.[entry.unlockAfter] ?? progress.lessonScore?.[entry.id]}
               trace={progress.memory[entry.unlockAfter] ?? progress.memory[entry.id]}
               learning={
                 findLearning(progress, entry.unlockAfter) ?? findLearning(progress, entry.id)
@@ -345,6 +365,7 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
                   focused={focusId === entry.id}
                   stars={progress.stars[entry.unlockAfter]}
                   held={progress.held.includes(entry.unlockAfter)}
+                  score={progress.lessonScore?.[entry.unlockAfter]}
                   trace={progress.memory[entry.unlockAfter]}
                   learning={findLearning(progress, entry.unlockAfter)}
                   today={today}
@@ -378,6 +399,7 @@ function JournalCard({
   daysWalked = 0,
   stars,
   held,
+  score,
   trace,
   learning,
   today,
@@ -389,14 +411,18 @@ function JournalCard({
   daysWalked?: number
   stars?: 1 | 2 | 3
   held?: boolean
+  score?: number
   trace?: MemoryTrace
   learning?: Learning
   today: string
 }) {
-  const { recordHeld, recordReview, snoozeReviews, progress } = useProgress()
+  const { recordHeld, recordReview, recordLessonHold, snoozeReviews, progress } = useProgress()
   const easy = isEasy(progress)
   const need = trailDaysRequired(entry.unlockAfter)
-  const brief = evidenceForJournal(entry.unlockAfter, entry.id)
+  const lineId = entry.unlockAfter
+  const brief =
+    evidenceForTier(lineId, currentLessonTier(progress, lineId)) ??
+    evidenceForJournal(entry.unlockAfter, entry.id)
   const due = trace ? isDue(trace, today) : false
   const [face, setFace] = useState<'recall' | 'read'>(held ? 'read' : 'recall')
   const [quizAgain, setQuizAgain] = useState(
@@ -418,6 +444,7 @@ function JournalCard({
             {stars ? <span className="held-mark">{starLegend(stars)}</span> : null}
             {due ? <span className="due-mark">Due this morning</span> : null}
             {held && !due ? <span className="held-mark">Held</span> : null}
+            {scoreFace(score) ? <span className="held-mark">{scoreFace(score)}</span> : null}
           </div>
           {trace && !due ? (
             <p className="quiet">{nextGapLabel(trace, today, easy)}</p>
@@ -487,8 +514,12 @@ function JournalCard({
                       peeked: false,
                       elaborated: false,
                     })
-                  } else {
+                    if (!result.clean) recordLessonHold(brief.id, false)
+                  } else if (result.clean) {
                     recordHeld(brief.id)
+                    recordLessonHold(brief.id, true)
+                  } else {
+                    recordLessonHold(brief.id, false)
                   }
                   setFace('read')
                   setQuizAgain(false)

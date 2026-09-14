@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<area schemaVersion="3" id="parable-hollow" order="1" title="Story Creek" shortTitle="Creek" subtitle="Jesus stories that stick" icon="oak" accent="#6b8f71">
+  <blurb>The Teacher spoke in pictures — not to hide the truth, but to make it move.</blurb>
+  <intro>A creek path, oaks, and pictures you can hold: a road, a table, a lost coin in the dust.</intro>
+  <intro>Jesus taught in pictures. Play them. Then keep one true line.</intro>
+  <lesson id="ph-road" title="The Good Samaritan" idea="neighbor is the one who shows mercy">
+    <claim>Neighbor is the one who shows mercy.</claim>
+    <plain>A neighbor is the person who shows mercy — not the person who looks like you.</plain>
+    <source>Luke 10:25–37</source>
+    <loci place="Story Creek" person="Mercy Wren" plotId="hollow" who="mercy" />
+    <journal title="The Teacher who taught in stories" kicker="Story Creek">
+      <body>The Gospels present Jesus as a teacher whose most characteristic form is the parable. These are not children’s decorations added to a lecture. They are the lecture — they force a decision about mercy, pride, and the identity of God.</body>
+      <body>The Good Samaritan (Luke 10:25–37) relocates the word “neighbor” from a boundary question to a mercy question. The listener is not first invited to classify others. The listener is invited to become the kind of person who crosses the road.</body>
+      <cite>Luke 10:25–37</cite>
+      <cite>Luke 10:29</cite>
+    </journal>
+    <easy points="10" easyOrder="1">
+      <learn>Jesus tells a story. A hurt man lies on the road. Religious men walk past. A Samaritan is moved with compassion and helps. Then Jesus asks who *proved* to be a neighbor.</learn>
+      <match sentence="Neighbor is the one who shows mercy." place="Story Creek" person="Mercy Wren" />
+      <hold levelUpTo="medium" onFail="easy">
+        <why>First the hurt man, then help.</why>
+        <claimMiss>Neighbor means the person who already looks like you.</claimMiss>
+        <claimMiss>The priest is the hero because he kept the law.</claimMiss>
+        <whyMiss>The story is mainly a map of the Jericho road.</whyMiss>
+        <whyMiss>Mercy is optional once you have classified the victim.</whyMiss>
+      </hold>
+    </easy>
+    <medium points="12">
+      <learn>Jesus makes the listener identify with the wounded man, then with the Samaritan moved with compassion.</learn>
+      <match sentence="Neighbor is the one who shows mercy." place="Story Creek" person="Mercy Wren" />
+      <hold levelUpTo="hard" onFail="easy">
+        <why>Jesus makes the listener identify with the wounded man, then with the Samaritan moved with compassion.</why>
+        <claimMiss>Neighbor means the person who already looks like you.</claimMiss>
+        <claimMiss>The priest is the hero because he kept the law.</claimMiss>
+        <whyMiss>The story is mainly a map of the Jericho road.</whyMiss>
+        <whyMiss>Mercy is optional once you have classified the victim.</whyMiss>
+      </hold>
+    </medium>
+    <hard points="15">
+      <learn>Samaritans and Judeans were divided by worship and memory (see John 4:9). Jesus flips the question (Luke 10:36): mercy proves who the neighbor is. He makes the listener identify with the wounded man — and then with costly mercy.</learn>
+      <match sentence="Neighbor is the one who shows mercy." place="Story Creek" person="Mercy Wren" />
+      <hold onFail="easy">
+        <why>Jesus makes the listener identify with the wounded man, then with the Samaritan moved with compassion.</why>
+        <claimMiss>Neighbor means the person who already looks like you.</claimMiss>
+        <claimMiss>The priest is the hero because he kept the law.</claimMiss>
+        <whyMiss>The story is mainly a map of the Jericho road.</whyMiss>
+        <whyMiss>Mercy is optional once you have classified the victim.</whyMiss>
+      </hold>
+    </hard>
+  </lesson>
+  <lesson id="ph-father" title="The father’s run" idea="the father runs before the apology is finished">
+    <claim>The father runs with mercy before the speech is done.</claim>
+    <plain>The father runs with mercy before the son finishes his speech.</plain>
+    <source>Luke 15:11–32</source>
+    <loci place="Story Creek" person="Mercy Wren" plotId="hollow" who="mercy" />
+    <journal title="Mercy that runs" kicker="Story Creek">
+      <body>Luke 15 stacks three lost-and-found stories after a complaint: this man welcomes sinners and eats with them. The father’s run (Luke 15:20) is the theological center of the third story. Honor is spent so that the son can be embraced before he finishes his hired-hand speech.</body>
+      <body>The older brother shows that you can live in the house and still refuse the feast. Nearness without joy at another’s return is a second lostness.</body>
+      <cite>Luke 15:1–32</cite>
+    </journal>
+    <easy points="10" easyOrder="2">
+      <learn>Jesus tells about a son who takes his share early and wastes it far from home. Hungry and ashamed, he starts a hired-hand speech to ask for work. But his father sees him while he is still a long way off and runs — mercy before the speech is done. He hugs the son. Honor is spent so the lost one can be welcomed; the feast is the father’s idea.</learn>
+      <match sentence="The father runs with mercy before the speech is done." place="Story Creek" person="Mercy Wren" />
+      <hold levelUpTo="medium" onFail="easy">
+        <why>The father hugs him first.</why>
+        <claimMiss>The son earned the feast by writing a good apology.</claimMiss>
+        <claimMiss>The story is mainly about dividing an estate.</claimMiss>
+        <whyMiss>The father waits until justice is complete.</whyMiss>
+        <whyMiss>The older brother is the hero for staying home.</whyMiss>
+      </hold>
+    </easy>
+    <medium points="12">
+      <learn>Honor is spent so the son can be embraced; the older brother shows nearness without joy.</learn>
+      <match sentence="The father runs with mercy before the speech is done." place="Story Creek" person="Mercy Wren" />
+      <hold levelUpTo="hard" onFail="easy">
+        <why>Honor is spent so the son can be embraced; the older brother shows nearness without joy.</why>
+        <claimMiss>The son earned the feast by writing a good apology.</claimMiss>
+        <claimMiss>The story is mainly about dividing an estate.</claimMiss>
+        <whyMiss>The father waits until justice is complete.</whyMiss>
+        <whyMiss>The older brother is the hero for staying home.</whyMiss>
+      </hold>
+    </medium>
+    <hard points="15">
+      <learn>Luke 15 stacks three lost-and-found stories. God is not only willing to receive. God seeks. The feast is the Father’s idea.</learn>
+      <match sentence="The father runs with mercy before the speech is done." place="Story Creek" person="Mercy Wren" />
+      <hold onFail="easy">
+        <why>Honor is spent so the son can be embraced; the older brother shows nearness without joy.</why>
+        <claimMiss>The son earned the feast by writing a good apology.</claimMiss>
+        <claimMiss>The story is mainly about dividing an estate.</claimMiss>
+        <whyMiss>The father waits until justice is complete.</whyMiss>
+        <whyMiss>The older brother is the hero for staying home.</whyMiss>
+      </hold>
+    </hard>
+  </lesson>
+  <lesson id="ph-seeds" title="Pictures of the kingdom" idea="the kingdom arrives in pictures, not slogans">
+    <claim>The kingdom arrives in pictures, not slogans.</claim>
+    <plain>The kingdom comes in Jesus stories you can hold — not slogans.</plain>
+    <source>Matthew 13; Luke 15; Matthew 25</source>
+    <loci place="Story Creek" person="Mercy Wren" plotId="hollow" who="mercy" />
+    <journal title="Seeds, search, and a trust" kicker="Story Creek">
+      <body>Taken together, the sower, the lost sheep, the mustard seed, and the talents sketch a God who speaks, seeks, grows a kingdom from small beginnings, and will ask what was done with a trust.</body>
+      <body>That is already a case of a sort: not a syllogism, but a coherent portrait. If the portrait is true, the world is personal before it is mechanical.</body>
+      <cite>Matthew 13:1–23</cite>
+      <cite>Matthew 13:31–32</cite>
+      <cite>Luke 15:1–7</cite>
+      <cite>Matthew 25:14–30</cite>
+    </journal>
+    <easy points="10" easyOrder="3">
+      <learn>Soil, a search, a tiny seed, and a trust. Each Jesus story asks what you will do with what you heard.</learn>
+      <match sentence="The kingdom arrives in pictures, not slogans." place="Story Creek" person="Mercy Wren" />
+      <hold levelUpTo="medium" onFail="easy">
+        <why>Pictures tell it — not a slogan.</why>
+        <claimMiss>Every parable is an allegory of every detail.</claimMiss>
+        <claimMiss>The kingdom is only for people who already understand.</claimMiss>
+        <whyMiss>The sower proves every heart is the same.</whyMiss>
+        <whyMiss>The talents story is about hiding gifts until heaven.</whyMiss>
+      </hold>
+    </easy>
+    <medium points="12">
+      <learn>Soil, search, a tiny seed, and a trust form a portrait — not a slogan.</learn>
+      <match sentence="The kingdom arrives in pictures, not slogans." place="Story Creek" person="Mercy Wren" />
+      <hold levelUpTo="hard" onFail="easy">
+        <why>Soil, search, a tiny seed, and a trust form a portrait — not a slogan.</why>
+        <claimMiss>Every parable is an allegory of every detail.</claimMiss>
+        <claimMiss>The kingdom is only for people who already understand.</claimMiss>
+        <whyMiss>The sower proves every heart is the same.</whyMiss>
+        <whyMiss>The talents story is about hiding gifts until heaven.</whyMiss>
+      </hold>
+    </medium>
+    <hard points="15">
+      <learn>Jesus’ stories assume a God who speaks, seeks, grows a kingdom, and will ask what we did with a trust. They are not proofs. They are a portrait — and a demand.</learn>
+      <match sentence="The kingdom arrives in pictures, not slogans." place="Story Creek" person="Mercy Wren" />
+      <hold onFail="easy">
+        <why>Soil, search, a tiny seed, and a trust form a portrait — not a slogan.</why>
+        <claimMiss>Every parable is an allegory of every detail.</claimMiss>
+        <claimMiss>The kingdom is only for people who already understand.</claimMiss>
+        <whyMiss>The sower proves every heart is the same.</whyMiss>
+        <whyMiss>The talents story is about hiding gifts until heaven.</whyMiss>
+      </hold>
+    </hard>
+  </lesson>
+  <lesson id="ph-debt" title="An unpayable account" idea="received mercy makes refusing mercy a contradiction">
+    <claim>Received mercy makes refusing mercy a contradiction.</claim>
+    <plain>If you were forgiven a huge debt, you cannot choke a neighbor over a small one.</plain>
+    <source>Matthew 18:21–35</source>
+    <loci place="Story Creek" person="Mercy Wren" plotId="hollow" who="mercy" />
+    <journal title="The measure you use" kicker="Story Creek">
+      <body>Matthew 18:21–35 is severe because grace is severe in the opposite direction from cruelty: it creates a world. To be forgiven an unpayable debt and then throttle a neighbor is to live as if the king’s mercy never happened.</body>
+      <body>Jesus teaches his disciples to pray “forgive us our debts, as we also have forgiven our debtors” (Matt 6:12). The petition assumes the same moral grain.</body>
+      <cite>Matthew 18:21–35</cite>
+      <cite>Matthew 6:12–15</cite>
+    </journal>
+    <easy points="10" easyOrder="4">
+      <learn>A king wipes an unpayable bill. That same servant then chokes a neighbor over a tiny sum. Example: huge debt forgiven — then a tiny one demanded.</learn>
+      <match sentence="Received mercy makes refusing mercy a contradiction." place="Story Creek" person="Mercy Wren" />
+      <hold levelUpTo="medium" onFail="easy">
+        <why>He was forgiven much, then choked a neighbor.</why>
+        <claimMiss>Forgiveness is a limited coupon on God’s spreadsheet.</claimMiss>
+        <claimMiss>Jesus is only reforming first-century banking.</claimMiss>
+        <whyMiss>Peter’s “seven times” was already the full measure.</whyMiss>
+        <whyMiss>The first servant was right to demand prison.</whyMiss>
+      </hold>
+    </easy>
+    <medium points="12">
+      <learn>The servant forgiven an unpayable debt then throttles a peer over a small sum.</learn>
+      <match sentence="Received mercy makes refusing mercy a contradiction." place="Story Creek" person="Mercy Wren" />
+      <hold levelUpTo="hard" onFail="easy">
+        <why>The servant forgiven an unpayable debt then throttles a peer over a small sum.</why>
+        <claimMiss>Forgiveness is a limited coupon on God’s spreadsheet.</claimMiss>
+        <claimMiss>Jesus is only reforming first-century banking.</claimMiss>
+        <whyMiss>Peter’s “seven times” was already the full measure.</whyMiss>
+        <whyMiss>The first servant was right to demand prison.</whyMiss>
+      </hold>
+    </medium>
+    <hard points="15">
+      <learn>Mercy is not softness. It is the grain of God’s world — and then a question: will you live against that grain? See also Matt 6:12–15.</learn>
+      <match sentence="Received mercy makes refusing mercy a contradiction." place="Story Creek" person="Mercy Wren" />
+      <hold onFail="easy">
+        <why>The servant forgiven an unpayable debt then throttles a peer over a small sum.</why>
+        <claimMiss>Forgiveness is a limited coupon on God’s spreadsheet.</claimMiss>
+        <claimMiss>Jesus is only reforming first-century banking.</claimMiss>
+        <whyMiss>Peter’s “seven times” was already the full measure.</whyMiss>
+        <whyMiss>The first servant was right to demand prison.</whyMiss>
+      </hold>
+    </hard>
+  </lesson>
+</area>
