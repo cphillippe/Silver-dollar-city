@@ -242,7 +242,7 @@ export function Profile({ onNavigate }: ProfileProps) {
         ) : (
           <p className="quiet">
             {easy
-              ? `${EASY.connectLink} Start from Match. Open Saved later to see what you held.`
+              ? `${EASY.matchHunt} Then Hold the line.`
               : 'Link the street from Town to snap idea · place · person. Lit nodes reopen here.'}
           </p>
         )}
