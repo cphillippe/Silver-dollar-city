@@ -542,7 +542,7 @@ export function streetWalkTakeaway(walk: StreetWalk | undefined, left: number): 
   const why = STREET_WHYS[walk.triples[0]?.id ?? '']?.hard ?? ''
   const first = (why.split(/(?<=[.!?])\s+/)[0] ?? why).trim()
   const lead = first || `${walk.personName} keeps ${walk.placeTitle}.`
-  return `${lead} ${left} fact${left === 1 ? '' : 's'} still wait on the street.`
+  return lead
 }
 
 /** Jericho-road art stays on ph-road’s own tile — never a distractor. */

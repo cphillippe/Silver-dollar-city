@@ -18,6 +18,7 @@ export const CHANGELOG: ChangeNote[] = [
       'Jericho-road Match art stays on the neighbor-road tile — not a distractor on other lines',
       'Hold why chips keep choke on the true debt line — the miss is He was right to refuse mercy',
       'Hard tonight’s street: ~one place / 3–5 facts per sitting, saved mid-street, Continue from Town',
+      'Hard after a sitting: Continue tonight’s street is the gold Town CTA — Walk today’s trail stays available, not the main next tap',
       'Full Hard street — all game facts',
       'Hard Link the street now matches every claim · reason · source fact to a place and person. Night Watch Love how-to and trail thank-you cards stay off the street.',
       'Easy lesson pack: 9 Learn→Match→Hold lines',

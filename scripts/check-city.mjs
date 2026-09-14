@@ -2340,9 +2340,15 @@ assert.match(
 )
 assert.match(hubSrc, /easyHomeFocus/)
 assert.match(hubSrc, /easyHoldView/)
-assert.match(hubSrc, /focus === 'learn' \? 'gold'/)
+assert.match(hubSrc, /focus === 'learn' \? 'primary'/)
+assert.match(hubSrc, /midStreet/)
 assert.match(hubSrc, /EASY\.continueStreet/)
 assert.match(hubSrc, /Tonight’s street/)
+assert.match(
+  readFileSync(new URL('../src/components/challenges/LinkPlay.tsx', import.meta.url), 'utf8'),
+  /of \$\{streetBeat\.total\} facts/,
+)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Continue tonight’s street is the gold Town CTA/)
 assert.match(cssSrc, /is-easy-hold-practice/)
 assert.match(latestChange(APP_VERSION).items.join('\n'), /one lesson loop, leaner Match, less Hold clutter/)
 assert.match(latestChange(APP_VERSION).items.join('\n'), /mercy-first until held on Easy/)

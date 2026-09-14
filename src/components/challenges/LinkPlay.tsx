@@ -340,8 +340,10 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek, onEasyStop, stre
     <div
       className={`play is-link is-wizard ${easy ? `is-easy-link is-screen-${screen}` : ''} ${shake ? 'is-shake' : ''}`}
     >
-      {easy ? null : <PuzzleLead challenge={challenge} />}
-      {easy ? null : <PuzzleHint text={challenge.context} id={challenge.id} onPeek={onPeek} />}
+      {easy || step === 'linked' ? null : <PuzzleLead challenge={challenge} />}
+      {easy || step === 'linked' ? null : (
+        <PuzzleHint text={challenge.context} id={challenge.id} onPeek={onPeek} />
+      )}
       {easy ? null : <p className="next-tap">{nextTap}</p>}
       {wizardCue ? <p className="quiet wizard-step">{wizardCue}</p> : null}
 
@@ -399,7 +401,7 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek, onEasyStop, stre
       {easy ? null : (
         <p className="match-score">
           {streetBeat
-            ? `${challenge.triples.length * 2 - edges.length} links left tonight · ${streetBeat.linkedAfter - challenge.triples.length + edges.length / 2} / ${streetBeat.total} facts`
+            ? `${challenge.triples.length * 2 - edges.length} links left tonight · ${streetBeat.linkedAfter - challenge.triples.length + edges.length / 2} of ${streetBeat.total} facts`
             : `${challenge.triples.length * 2 - edges.length} links left · ${edges.length} / ${challenge.triples.length * 2} snapped`}
         </p>
       )}
