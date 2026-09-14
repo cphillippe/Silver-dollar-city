@@ -1080,7 +1080,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.53')
+assert.equal(APP_VERSION, '1.4.54')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1410,6 +1410,13 @@ assert.match(cssSrc, /is-easy-hold/)
   assert.doesNotMatch(dockCss, /#16062e/, 'sticky CTA docks must not be an opaque black slab')
 }
 assert.match(latestChange(APP_VERSION).items.join('\n'), /glass over the card/)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /gold card frame/)
+{
+  const storyCardCss = cssSrc.match(/\.easy-story-card,[\s\S]*?\.easy-story-card::before \{[\s\S]*?\n\}/)?.[0] ?? ''
+  assert.match(storyCardCss, /border:\s*0/)
+  assert.match(storyCardCss, /background:\s*transparent/)
+  assert.match(storyCardCss, /content:\s*none/)
+}
 assert.match(cssSrc, /city-lock-toast/)
 assert.match(
   readFileSync(new URL('../src/components/RecallGate.tsx', import.meta.url), 'utf8'),
