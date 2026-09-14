@@ -33,6 +33,16 @@ export interface StoryMediaSlot {
   loop?: string
 }
 
+/** Prefer a later short loop; otherwise a still. No player — just which src to show. */
+export function resolveStoryMedia(media?: StoryMediaSlot): {
+  kind: 'still' | 'loop'
+  still?: string
+  loop?: string
+} {
+  if (media?.loop) return { kind: 'loop', still: media.still, loop: media.loop }
+  return { kind: 'still', still: media?.still }
+}
+
 export interface StoryPanel {
   id: string
   beatId: string
