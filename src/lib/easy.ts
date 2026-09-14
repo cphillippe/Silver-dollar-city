@@ -17,11 +17,13 @@ export const EASY = {
   mindMap: 'your scrapbook of matches',
   mindMapShort: 'Scrapbook',
   connectLink: 'Tap the sentence, then the place, then the person.',
-  matchHunt: 'Swipe or tap the gems. Find today’s words.',
+  matchHunt: 'Find a word. A story panel opens.',
   readStory: 'Read today’s story.',
   learnCta: 'Learn',
   readStoryFirst: 'Read the story first',
   learnThisFirst: 'Learn this first.',
+  findGems: 'Find the gems',
+  panelCue: 'Find a word to flip the first panel.',
   rememberSentence: 'Tap the line you kept.',
   tapWhy: 'Tap why this is true.',
   keepThis: 'Keep this',
@@ -458,23 +460,24 @@ export function easyHoldLine(progress: EasyLoopProgress): string {
   return easyLoopLine(progress)
 }
 
-/** Match unlocks only after the current loop line is taught on Easy. */
+/** Easy Match is the story — open for the current loop line. */
 export function easyMatchReady(progress: EasyLoopProgress): boolean {
-  return easyLineTaught(progress, easyLoopLine(progress))
+  void progress
+  return true
 }
 
 /**
- * Gold home tap for the open triad. After Hold, Learn is next — Hold stays
- * available but is not the mid-shelf primary. After Easy is held, Match
- * reopens only when this idea’s next tier still needs a Hold.
+ * Gold home tap for the open triad. Match teaches through panel blast.
+ * After the board is cleared (taught), Hold is next. After Hold, the next
+ * line’s Match. Learn stays a re-read, not the gate.
  */
 export type EasyHomeFocus = 'learn' | 'match' | 'hold'
 
 export function easyHomeFocus(progress: EasyLoopProgress): EasyHomeFocus {
   const id = easyLoopLine(progress)
-  if (!easyLineTaught(progress, id)) return 'learn'
-  if (!easyLineHeld(progress, id) || needsTierHold(progress, id)) return 'match'
-  return 'learn'
+  if (!easyLineTaught(progress, id)) return 'match'
+  if (!easyLineHeld(progress, id) || needsTierHold(progress, id)) return 'hold'
+  return 'match'
 }
 
 /** Hold practice for the open triad — hide the saved-line filing cabinet. */
