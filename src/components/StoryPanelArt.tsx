@@ -1,5 +1,5 @@
 import { useId, type ReactNode } from 'react'
-import type { StoryScene } from '../lib/storyPanels'
+import type { StoryMediaSlot, StoryScene } from '../lib/storyPanels'
 import panelFatherRun from '../assets/story/panel-father-run.webp'
 import panelHelp from '../assets/story/panel-help.webp'
 import panelHug from '../assets/story/panel-hug.webp'
@@ -7,11 +7,9 @@ import panelHungry from '../assets/story/panel-hungry.webp'
 import panelHurt from '../assets/story/panel-hurt.webp'
 import panelNeighbor from '../assets/story/panel-neighbor.webp'
 import panelSonLeave from '../assets/story/panel-son-leave.webp'
-import panelWalkPast from '../assets/story/panel-walk-past.webp'
 
 const PANEL_ART: Partial<Record<StoryScene, string>> = {
   hurt: panelHurt,
-  'walk-past': panelWalkPast,
   help: panelHelp,
   neighbor: panelNeighbor,
   'son-leave': panelSonLeave,
@@ -21,13 +19,27 @@ const PANEL_ART: Partial<Record<StoryScene, string>> = {
   feast: panelHug,
 }
 
-export function StoryPanelArt({ scene }: { scene: StoryScene }) {
-  const painted = PANEL_ART[scene]
+export function StoryPanelArt({ scene, media }: { scene: StoryScene; media?: StoryMediaSlot }) {
+  const painted = media?.still || PANEL_ART[scene]
   if (painted) {
     return <img className="story-art-tile" src={painted} alt="" draggable={false} />
   }
   const uid = useId().replace(/:/g, '')
   switch (scene) {
+    case 'walk-past':
+      return (
+        <Frame uid={uid} from="#3a1480" to="#ff9f1a">
+          <path d="M8 40c18-10 22 6 40-6" stroke="#ffcc33" strokeWidth="10" fill="none" strokeLinecap="round" />
+          <path d="M6 44c20-8 22 4 44-4" stroke="#fff6b8" strokeWidth="2.4" fill="none" opacity="0.7" />
+          <Person x={18} y={36} fill="#ffe7b8" scale={0.72} />
+          <ellipse cx="18" cy="40" rx="9" ry="3" fill="#c01840" opacity="0.35" />
+          <path d="M14 36h8" stroke="#ff5a7a" strokeWidth="1.6" strokeLinecap="round" />
+          <Person x={40} y={22} fill="#6a28b8" scale={0.78} />
+          <Person x={52} y={20} fill="#fff6e8" scale={0.72} />
+          <circle cx="40" cy="8" r="3" fill="#ffcc33" />
+          <circle cx="52" cy="7" r="2.4" fill="#fff6b8" />
+        </Frame>
+      )
     case 'forgive':
       return (
         <Frame uid={uid} from="#2a0d58" to="#148a48">

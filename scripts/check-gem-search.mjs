@@ -78,6 +78,15 @@ assert.match(playSrc, /is-panel-blast/)
 assert.match(playSrc, /StoryStrip/)
 assert.match(playSrc, /onClear/)
 assert.match(playSrc, /revealPanel/)
+assert.match(playSrc, /winStamp/)
+assert.match(
+  readFileSync(new URL('../src/components/StoryStrip.tsx', import.meta.url), 'utf8'),
+  /story-hero/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/StoryStrip.tsx', import.meta.url), 'utf8'),
+  /story-thumbs/,
+)
 assert.doesNotMatch(playSrc, /Tap a sentence/)
 
 const artSrc = readFileSync(
@@ -102,6 +111,7 @@ const mercyStory = packLesson('ph-road')?.easy.learn ?? ''
 const mercyPanels = storyPanelsFor('ph-road', mercyWords.length)
 assert.equal(storyFromPanels(mercyPanels), mercyStory)
 assert.ok(mercyPanels.some((panel) => panel.scene === 'help' || panel.scene === 'hurt'))
+assert.ok(mercyPanels.every((panel) => panel.media.kind === 'still' && panel.beatId.includes('ph-road')))
 assert.equal(splitStorySentences(mercyStory).length, 5)
 
 for (const id of EASY_LINE_ORDER) {
