@@ -1,5 +1,5 @@
 import { useId, type ReactNode } from 'react'
-import type { StoryMediaSlot, StoryScene } from '../lib/storyPanels'
+import { resolveStoryMedia, type StoryMediaSlot, type StoryScene } from '../lib/storyPanels'
 import panelFatherRun from '../assets/story/panel-father-run.webp'
 import panelHelp from '../assets/story/panel-help.webp'
 import panelHug from '../assets/story/panel-hug.webp'
@@ -22,7 +22,22 @@ const PANEL_ART: Partial<Record<StoryScene, string>> = {
 }
 
 export function StoryPanelArt({ scene, media }: { scene: StoryScene; media?: StoryMediaSlot }) {
-  const painted = media?.still || PANEL_ART[scene]
+  const resolved = resolveStoryMedia(media)
+  if (resolved.loop) {
+    return (
+      <video
+        className="story-art-tile"
+        src={resolved.loop}
+        poster={resolved.still || PANEL_ART[scene]}
+        muted
+        loop
+        playsInline
+        autoPlay
+        aria-hidden
+      />
+    )
+  }
+  const painted = resolved.still || PANEL_ART[scene]
   if (painted) {
     return <img className="story-art-tile" src={painted} alt="" draggable={false} />
   }
