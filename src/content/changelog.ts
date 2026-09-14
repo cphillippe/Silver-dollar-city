@@ -8,10 +8,12 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.51',
-    title: 'Fun polish · Easy core loop · Match win juice',
+    version: '1.4.52',
+    title: 'Fun polish · Easy core loop · glass Hold CTA',
     when: '2026-09-14',
     items: [
+      'Hold Done footer is glass over the card — not an opaque black slab',
+      'Match Hold next and other sticky CTA docks share the same translucent chrome',
       'Easy Match win: MATCHED! is a badge, not a tappable gold pill — Hold next is the primary tap',
       'Hard Match and street win stamps use the same juice — not a fake button',
       'Easy after Hold: gold CTA is Read today’s story — next Learn, not Hold',
