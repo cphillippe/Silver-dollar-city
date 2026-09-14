@@ -1080,7 +1080,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.52')
+assert.equal(APP_VERSION, '1.4.53')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1835,18 +1835,12 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
   assert.equal(easyWhoWhere('wb-creed').place, 'Witness Square')
   assert.equal(easyWhoWhere('daily-lantern').who, 'Juniper')
   assert.equal(easyWhoWhere('daily-lantern').place, 'East porch')
-  assert.deepEqual([...EASY_LINE_ORDER], [
-    'ph-road',
-    'ph-father',
-    'ph-debt',
-    'wb-creed',
-    'wb-women',
-    'daily-lantern',
-    'daily-stars',
-    'daily-cosmos',
-    'hl-moral',
-  ])
+  assert.equal(EASY_LINE_ORDER.length, 35)
   assert.equal(EASY_LINE_ORDER[0], 'ph-road')
+  assert.equal(EASY_LINE_ORDER[1], 'ph-father')
+  assert.ok(EASY_LINE_ORDER.indexOf('ph-father') < EASY_LINE_ORDER.indexOf('wb-creed'))
+  assert.ok(EASY_LINE_ORDER.includes('ph-debt'))
+  assert.ok(EASY_LINE_ORDER.includes('hl-moral'))
   const homes = {
     'ph-road': { who: 'Mercy', place: 'Story Creek' },
     'ph-father': { who: 'Mercy', place: 'Story Creek' },
@@ -1871,26 +1865,32 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
   }
   let walked = []
   for (const id of EASY_LINE_ORDER) {
-    const home = easyWhoWhere(id)
-    assert.equal(home.who, homes[id].who, `${id} who`)
-    assert.equal(home.place, homes[id].place, `${id} place`)
-    assert.match(easyWhoWhereLine(id), new RegExp(homes[id].place))
-    assert.match(easyWhoWhereLine(id), new RegExp(homes[id].who))
+    if (homes[id]) {
+      const home = easyWhoWhere(id)
+      assert.equal(home.who, homes[id].who, `${id} who`)
+      assert.equal(home.place, homes[id].place, `${id} place`)
+      assert.match(easyWhoWhereLine(id), new RegExp(homes[id].place))
+      assert.match(easyWhoWhereLine(id), new RegExp(homes[id].who))
+    }
     assert.ok(plainFor(id)?.teach, `${id} Learn teach`)
     assert.ok(evidenceFor(id), `${id} evidence`)
-    assert.equal(streetTripleForLine(id), triples[id])
-    const street = easyStreetChallenge(id)
-    assert.equal(street.triples.length, 1, `${id} one Match triad`)
-    assert.equal(street.triples[0]?.id, triples[id])
-    const triple = STREET_TRIPLES.find((item) => item.id === triples[id])
-    assert.ok(triple, `${id} street triple`)
-    assert.ok(
-      street.nodes.some((node) => node.id === triple.ideaId && node.evidenceId === id),
-      `${id} idea node`,
-    )
-    assert.ok(street.nodes.some((node) => node.id === triple.placeId), `${id} place node`)
-    assert.ok(street.nodes.some((node) => node.id === triple.personId), `${id} person node`)
-    assert.ok(STREET_WHYS[triples[id]]?.easy, `${id} why`)
+    if (triples[id]) {
+      assert.equal(streetTripleForLine(id), triples[id])
+      const street = easyStreetChallenge(id)
+      assert.equal(street.triples.length, 1, `${id} one Match triad`)
+      assert.equal(street.triples[0]?.id, triples[id])
+      const triple = STREET_TRIPLES.find((item) => item.id === triples[id])
+      assert.ok(triple, `${id} street triple`)
+      assert.ok(
+        street.nodes.some((node) => node.id === triple.ideaId && node.evidenceId === id),
+        `${id} idea node`,
+      )
+      assert.ok(street.nodes.some((node) => node.id === triple.placeId), `${id} place node`)
+      assert.ok(street.nodes.some((node) => node.id === triple.personId), `${id} person node`)
+      assert.ok(STREET_WHYS[triples[id]]?.easy, `${id} why`)
+    } else {
+      assert.equal(easyStreetChallenge(id).triples.length, 1, `${id} one Match triad`)
+    }
     assert.equal(easyLoopLine({ easyTaught: walked, easyHeld: walked }), id)
     walked = [...walked, id]
   }
@@ -2372,7 +2372,7 @@ assert.match(cssSrc, /is-easy-hold-practice/)
 assert.match(latestChange(APP_VERSION).items.join('\n'), /one lesson loop, leaner Match, less Hold clutter/)
 assert.match(latestChange(APP_VERSION).items.join('\n'), /mercy-first until held on Easy/)
 assert.match(latestChange(APP_VERSION).items.join('\n'), /Reset this walk starts Easy at Mercy/)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Easy lesson pack: 9 Learn→Match→Hold lines/)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Easy trail: all 35 facts in easyOrder/)
 assert.match(latestChange(APP_VERSION).items.join('\n'), /father-run/)
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),

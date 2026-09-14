@@ -1,14 +1,12 @@
 import { APP_VERSION } from '../config/app.ts'
 
 /**
- * Content-pack registry. The engine already reads one Area module at a time.
- * A future pack is a new file + one row here — not a rewrite of play code.
+ * Content-pack registry. Schema v3 XML in `src/content/packs/` is the
+ * Learn → Match → Hold source of truth. The engine adapts those files
+ * (`packCatalog.ts`); TypeScript area modules still own district puzzles.
  *
- * Add a pack:
- * 1. `src/content/<packArea>.ts` exporting an `Area`
- * 2. Push it onto `areas` in `src/content/index.ts` (order is the trail)
- * 3. Journal cards, evidence briefs, city plot ids, optional WATCH_TOOLS row
- * 4. One `CONTENT_PACKS` row + a `CHANGELOG` entry
+ * Drop CoS packs into `src/content/packs/` (index.xml + one file per area),
+ * then `node scripts/embed-packs.mjs`.
  */
 export interface ContentPackSpec {
   id: string
@@ -32,7 +30,7 @@ export const CONTENT_PACKS: ContentPackSpec[] = [
       'high-lookout',
     ],
     toolIds: ['love', 'logic', 'reason', 'science'],
-    notes: 'V0 ship-in-place. Next drop is a new Area module plus one row.',
+    notes: 'Schema v3 XML packs in src/content/packs/. Easy trail is all 35 facts in easyOrder.',
   },
 ]
 

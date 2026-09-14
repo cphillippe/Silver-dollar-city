@@ -1,14 +1,14 @@
 # Adding areas and challenges
 
-Silver City is content-driven. The game engine does not need to change when you add a district or a later **content pack**.
+Silver City is content-driven. **Schema v3 XML packs** in `src/content/packs/` are the Learn → Match → Hold source of truth (one file per area + `index.xml`). TypeScript area modules still own district puzzles. After dropping XML, run `node scripts/embed-packs.mjs`.
 
 **Pack path (V0 and after):**
 
-1. New `Area` module in `src/content/` (copy an existing district file).
-2. Push it onto `areas` in `src/content/index.ts` (order is the trail).
+1. Lesson copy lives in `src/content/packs/*.xml` (`SCHEMA.md`). Do not invent conflicting claims once those files are in place.
+2. District puzzles stay in `src/content/<area>.ts` and `areas` in `src/content/index.ts`.
 3. One row on `CONTENT_PACKS` in `src/content/packs.ts`.
 4. A `CHANGELOG` row in `src/content/changelog.ts` (Settings → What’s new).
-5. Journal cards, evidence briefs, optional `WATCH_TOOLS` row, city plot ids in `src/lib/city.ts`.
+5. Optional `WATCH_TOOLS` row, city plot ids in `src/lib/city.ts`.
 6. Bump `APP_VERSION` (`package.json`, `src/config/app.ts`, Android `versionName`) — do not bump save schema unless the save shape changes.
 
 1. Create a module in `src/content/` that exports an `Area`.

@@ -2,7 +2,9 @@ import type { ProgressState } from '../types.ts'
 import type { CharacterId } from '../content/story.ts'
 import { CAST } from '../content/story.ts'
 import { evidenceFor } from '../content/evidence.ts'
+import { packEasyOrder, packLesson } from '../content/packCatalog.ts'
 import { CITY_PLOTS, type CityPlotId } from './city.ts'
+import { currentLessonTier, needsTierHold, tierRank } from './tiers.ts'
 
 export function isEasy(progress: Pick<ProgressState, 'easyMode'> | { easyMode?: boolean }): boolean {
   return Boolean(progress.easyMode)
@@ -318,8 +320,8 @@ export function easyStoryCard(text: string): string {
   return firstSentence(text)
 }
 
-/** Easy street lines in teach order — first is the mercy neighbor Match. */
-export const EASY_LINE_ORDER = [
+/** Easy street lines in teach order — packs set easyOrder; first is still mercy. */
+const FALLBACK_EASY_ORDER = [
   'ph-road',
   'ph-father',
   'ph-debt',
@@ -330,7 +332,12 @@ export const EASY_LINE_ORDER = [
   'daily-cosmos',
   'hl-moral',
 ] as const
-export const EASY_MATCH_LINE = EASY_LINE_ORDER[0]
+
+const PACK_ORDER = packEasyOrder()
+export const EASY_LINE_ORDER = (
+  PACK_ORDER.length ? PACK_ORDER : [...FALLBACK_EASY_ORDER]
+) as readonly string[]
+export const EASY_MATCH_LINE = EASY_LINE_ORDER[0] ?? 'ph-road'
 
 const LINE_HOME: Record<string, { whoId: CharacterId; plotId: CityPlotId }> = {
   'ph-road': { whoId: 'mercy', plotId: 'hollow' },
@@ -363,6 +370,23 @@ export interface EasyWhoWhere {
 
 /** First Learn names who keeps the line and where it lives. */
 export function easyWhoWhere(id: string): EasyWhoWhere {
+  const lesson = packLesson(id)
+  if (lesson?.loci) {
+    const whoId = (lesson.loci.who as CharacterId) in CAST
+      ? (lesson.loci.who as CharacterId)
+      : homeFor(id).whoId
+    const keeper = CAST[whoId] ?? CAST.juniper
+    return {
+      who: keeper.shortName,
+      whoName: keeper.name,
+      whoId: keeper.id,
+      place: lesson.loci.place || easyWhoWhereFallback(id).place,
+    }
+  }
+  return easyWhoWhereFallback(id)
+}
+
+function easyWhoWhereFallback(id: string): EasyWhoWhere {
   const home = homeFor(id)
   const keeper = CAST[home.whoId]
   const lot = CITY_PLOTS.find((plot) => plot.id === home.plotId)
@@ -379,11 +403,18 @@ export function easyWhoWhereLine(id: string): string {
   return `This idea lives at ${place}, with ${who}.`
 }
 
-type EasyLoopProgress = Pick<ProgressState, 'easyTaught' | 'easyHeld'>
+type EasyLoopProgress = Pick<
+  ProgressState,
+  'easyTaught' | 'easyHeld' | 'lessonTier' | 'lessonScore' | 'tierTaught'
+>
 
 /** Easy Learn unlock — Hard taught / completed / held do not count. */
 export function easyLineTaught(progress: EasyLoopProgress, id: string): boolean {
-  return (progress.easyTaught ?? []).includes(id)
+  const current = currentLessonTier(progress, id)
+  if (current === 'easy') return (progress.easyTaught ?? []).includes(id)
+  const taught = progress.tierTaught?.[id]
+  if (!taught) return false
+  return taught === current || tierRank(taught) >= tierRank(current)
 }
 
 /** Easy Hold unlock — Hard or older held lines do not count. */
@@ -398,13 +429,17 @@ export function easyLineLearned(progress: EasyLoopProgress, id: string): boolean
 
 /**
  * One Easy triad at a time. Prefer the first line not yet held on Easy,
- * in mercy-first order: ph-road → ph-father → ph-debt → wb-creed →
- * wb-women → daily-lantern → daily-stars → daily-cosmos → hl-moral.
+ * in pack easyOrder — mercy-first (ph-road), then the rest of the 35 facts.
+ * After every Easy hold, the next unheld Easy line is Learn — not a Medium jump.
+ * When the Easy trail is done, loop the first idea still below Hard.
  * Hard / older taught, completed, held, or learnings do not advance this.
  */
 export function easyLoopLine(progress: EasyLoopProgress): string {
   for (const id of EASY_LINE_ORDER) {
     if (!easyLineHeld(progress, id)) return id
+  }
+  for (const id of EASY_LINE_ORDER) {
+    if (currentLessonTier(progress, id) !== 'hard') return id
   }
   return EASY_MATCH_LINE
 }
@@ -429,21 +464,24 @@ export function easyMatchReady(progress: EasyLoopProgress): boolean {
 
 /**
  * Gold home tap for the open triad. After Hold, Learn is next — Hold stays
- * available but is not the mid-shelf primary.
+ * available but is not the mid-shelf primary. After Easy is held, Match
+ * reopens only when this idea’s next tier still needs a Hold.
  */
 export type EasyHomeFocus = 'learn' | 'match' | 'hold'
 
 export function easyHomeFocus(progress: EasyLoopProgress): EasyHomeFocus {
   const id = easyLoopLine(progress)
   if (!easyLineTaught(progress, id)) return 'learn'
-  if (!easyLineHeld(progress, id)) return 'match'
+  if (!easyLineHeld(progress, id) || needsTierHold(progress, id)) return 'match'
   return 'learn'
 }
 
 /** Hold practice for the open triad — hide the saved-line filing cabinet. */
 export function easyHoldPractice(progress: EasyLoopProgress): boolean {
   const id = easyLoopLine(progress)
-  return easyLineTaught(progress, id) && !easyLineHeld(progress, id)
+  if (!easyLineTaught(progress, id)) return false
+  if (!easyLineHeld(progress, id)) return true
+  return needsTierHold(progress, id)
 }
 
 export function easyHoldView(progress: EasyLoopProgress): {

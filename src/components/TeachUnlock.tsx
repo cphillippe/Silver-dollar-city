@@ -1,7 +1,9 @@
 import type { Challenge, SequenceItem } from '../types'
 import type { EvidenceBrief } from '../content/evidence'
+import { packLesson } from '../content/packCatalog'
 import { plainFor } from '../content/plain'
 import { easyFacingLine, easyWhoWhere, easyWhoWhereLine, isEasy } from '../lib/easy'
+import { currentLessonTier } from '../lib/tiers'
 import { WORDS, schoolWordsFor } from '../lib/words'
 import { learningBeat } from '../lib/learning'
 import { learningPicture, toolForEvidence } from '../lib/watchTools'
@@ -33,7 +35,10 @@ export function TeachUnlock({ brief, kind, onUnlock, unlock, beats }: TeachUnloc
   const tool = toolForEvidence(brief.id)
   const picture = learningPicture(brief.id, tool)
   const plain = plainFor(brief.id)
-  const story = easy && plain ? plain.teach : brief.reason
+  const lesson = packLesson(brief.id)
+  const tier = currentLessonTier(progress, brief.id)
+  const packLearn = lesson?.[tier]?.learn
+  const story = packLearn || (easy && plain ? plain.teach : brief.reason)
   const school = schoolWordsFor(brief.id, easy)
 
   if (easy) {

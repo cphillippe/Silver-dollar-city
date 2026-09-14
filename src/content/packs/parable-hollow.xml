@@ -1,0 +1,1225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<areaPack id="parable-hollow" schemaVersion="3" appVersion="1.4.50" generated="2026-09-14T13:15:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/" title="Story Creek" place="Story Creek" person="Mercy Wren" personId="mercy" plotId="hollow">
+  <howToEdit>RUNTIME CONTENT: the game loads this file as the source of truth for this area. Change player-facing text in place inside each &lt;lesson&gt;. Stable id attributes (ph-father, …) are engine keys — do not rename without a migration. Three tiers per fact: &lt;easy easyOrder="N"&gt;, &lt;medium&gt;, and &lt;hard&gt; — each with &lt;learn&gt;, &lt;match&gt;, and &lt;hold&gt;. Easy Learn: shortStory/mainIdea/loci. Medium Learn: mediumTeach (clearer than Hard, richer than Easy). Hard Learn: hardTeach/fullTeach. Held claim·reason·source stay plain and identical on all three. Hold level-up: see hold @levelUpTo / @onFail and index &lt;holdRules&gt;. Empty optional elements are intentional. Escape &amp; &lt; &gt; in text.</howToEdit>
+  <meta>
+    <title>Silver City — Story Creek</title>
+    <subtitle>Jesus stories that stick</subtitle>
+    <blurb>The Teacher spoke in pictures — not to hide the truth, but to make it move.</blurb>
+    <notes>Runtime/build content pack. Engine maps lesson fields 1:1 to Learn / Match / Hold / Journal / street.</notes>
+    <porchNote>East porch (Juniper) dailies ship with this pack — same mercy/picture pillar.</porchNote>
+  </meta>
+  <easyShelf order="ph-road,ph-father,ph-debt,daily-lantern,ph-seeds,daily-gems,daily-seed,daily-neighbor">
+    <line id="ph-road" easyOrder="1">ph-road</line>
+    <line id="ph-father" easyOrder="2">ph-father</line>
+    <line id="ph-debt" easyOrder="3">ph-debt</line>
+    <line id="daily-lantern" easyOrder="6">daily-lantern</line>
+    <line id="ph-seeds" easyOrder="10">ph-seeds</line>
+    <line id="daily-gems" easyOrder="16">daily-gems</line>
+    <line id="daily-seed" easyOrder="17">daily-seed</line>
+    <line id="daily-neighbor" easyOrder="18">daily-neighbor</line>
+  </easyShelf>
+  <lessons>
+    <lesson id="ph-road" place="Story Creek" person="Mercy Wren" tripleId="mercy-hollow" ideaId="idea-mercy" ideaLabel="Neighbor is the one who shows mercy." challengeKind="sequence" challengeTitle="The Good Samaritan">
+      <easy points="10" easyOrder="1">
+        <learn>
+          <shortStory>Jesus tells a story. A hurt man lies on the road. Religious men walk past. A Samaritan is moved with compassion and helps. Then Jesus asks who *proved* to be a neighbor.</shortStory>
+          <mainIdea>Neighbor is the one who shows mercy.</mainIdea>
+          <gloss>A neighbor is the person who shows mercy — not the person who looks like you.</gloss>
+          <loci>This idea lives at Story Creek, with Mercy.</loci>
+          <word>
+            <term>Samaritan</term>
+            <sense>someone the listener did not expect to be the hero</sense>
+          </word>
+          <hint>Mercy is the test — not the family name.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>Neighbor is the one who shows mercy.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Neighbor means the person who already looks like you.</miss>
+            <miss>The priest is the hero because he kept the law.</miss>
+          </sentenceMisses>
+          <placePrompt>The neighbor-road story lives at Story Creek.</placePrompt>
+          <personPrompt>Mercy Wren keeps the neighbor who stops.</personPrompt>
+          <ideaPrompt>Mercy’s Jesus story — the neighbor who stops on the road.</ideaPrompt>
+          <ideaLabel>Neighbor is the one who shows mercy.</ideaLabel>
+          <whyEasy>Mercy lives at the creek because she tells Jesus stories. The neighbor who stops on the road is a picture, so it lives at Story Creek.</whyEasy>
+        </match>
+        <hold levelUpTo="medium" onFail="easy">
+          <claim>Neighbor is the one who shows mercy.</claim>
+          <reason>Jesus makes the listener identify with the wounded man, then with the Samaritan moved with compassion.</reason>
+          <source>Luke 10:25–37</source>
+          <whyCorrect>Jesus makes the listener identify with the wounded man, then with the Samaritan moved with compassion.</whyCorrect>
+          <whyMisses>
+            <miss>The story is mainly a map of the Jericho road.</miss>
+            <miss>Mercy is optional once you have classified the victim.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Neighbor is the one who shows mercy.</choice>
+            <choice>Neighbor means the person who already looks like you.</choice>
+            <choice>The priest is the hero because he kept the law.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>Jesus makes the listener identify with the wounded man, then with the Samaritan moved with compassion.</choice>
+            <choice>The story is mainly a map of the Jericho road.</choice>
+            <choice>Mercy is optional once you have classified the victim.</choice>
+          </reasonChoices>
+        </hold>
+      </easy>
+      <medium points="12">
+        <learn>
+          <mediumTeach>Luke 10:25–37. A lawyer asks who counts as neighbor. Jesus answers with a story on a dangerous road: religious men pass by; a Samaritan is moved with compassion and helps. Then Jesus flips the question — who *proved* to be a neighbor? Mercy is the test, not the family name.</mediumTeach>
+          <mainIdea>Neighbor is the one who shows mercy.</mainIdea>
+          <gloss>A neighbor is the person who shows mercy — not the person who looks like you.</gloss>
+          <loci>This idea lives at Story Creek, with Mercy.</loci>
+          <word>
+            <term>Samaritan</term>
+            <sense>someone the listener did not expect to be the hero</sense>
+          </word>
+          <hint>Mercy is the test — not the family name.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>Neighbor is the one who shows mercy.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Neighbor means the person who already looks like you.</miss>
+            <miss>The priest is the hero because he kept the law.</miss>
+          </sentenceMisses>
+          <placePrompt>The neighbor-road story lives at Story Creek.</placePrompt>
+          <personPrompt>Mercy Wren keeps the neighbor who stops.</personPrompt>
+          <ideaPrompt>Mercy’s Jesus story — the neighbor who stops on the road.</ideaPrompt>
+          <ideaLabel>Neighbor is the one who shows mercy.</ideaLabel>
+          <whyMedium>Mercy lives at the creek because she tells Jesus stories. The neighbor who stops on the road is a picture, so it lives at Story Creek.</whyMedium>
+        </match>
+        <hold levelUpTo="hard" onFail="easy">
+          <claim>Neighbor is the one who shows mercy.</claim>
+          <reason>Jesus makes the listener identify with the wounded man, then with the Samaritan moved with compassion.</reason>
+          <source>Luke 10:25–37</source>
+          <whyCorrect>Jesus makes the listener identify with the wounded man, then with the Samaritan moved with compassion.</whyCorrect>
+          <whyMisses>
+            <miss>The story is mainly a map of the Jericho road.</miss>
+            <miss>Mercy is optional once you have classified the victim.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Neighbor is the one who shows mercy.</choice>
+            <choice>Neighbor means the person who already looks like you.</choice>
+            <choice>The priest is the hero because he kept the law.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>Jesus makes the listener identify with the wounded man, then with the Samaritan moved with compassion.</choice>
+            <choice>The story is mainly a map of the Jericho road.</choice>
+            <choice>Mercy is optional once you have classified the victim.</choice>
+          </reasonChoices>
+        </hold>
+      </medium>
+      <hard points="15">
+        <learn>
+          <hardTeach>Luke 10:25–37. A lawyer asks, “Who is my neighbor?” Jesus answers with a story set on the Jerusalem–Jericho road — a real, dangerous descent.
+Samaritans and Judeans were divided by worship and memory (see John 4:9). Jesus flips the question (Luke 10:36): mercy proves who the neighbor is. He makes the listener identify with the wounded man — and then with costly mercy.</hardTeach>
+          <fullTeach>Luke 10:25–37. A lawyer asks, “Who is my neighbor?” Jesus answers with a story set on the Jerusalem–Jericho road — a real, dangerous descent.
+Samaritans and Judeans were divided by worship and memory (see John 4:9). Jesus flips the question (Luke 10:36): mercy proves who the neighbor is. He makes the listener identify with the wounded man — and then with costly mercy.</fullTeach>
+          <prompt>Place the Good Samaritan in the order Luke tells it.</prompt>
+          <teachOnWrong>Luke’s force depends on order: religious insiders fail first; the unexpected outsider becomes the measure of neighbor-love. Try again.</teachOnWrong>
+          <challengeTiles>
+            <sequenceItem>A lawyer asks Jesus, “And who is my neighbor?”</sequenceItem>
+            <sequenceItem>A man is beaten and left half-dead on the road.</sequenceItem>
+            <sequenceItem>A priest and then a Levite see him and pass by.</sequenceItem>
+            <sequenceItem>Moved with compassion, a Samaritan binds the wounds, takes him to an inn, and pays.</sequenceItem>
+            <sequenceItem>Jesus: “Go and do likewise.”</sequenceItem>
+          </challengeTiles>
+        </learn>
+        <match>
+          <sentenceCorrect>Neighbor is the one who shows mercy.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Neighbor means the person who already looks like you.</miss>
+            <miss>The priest is the hero because he kept the law.</miss>
+          </sentenceMisses>
+          <placePrompt>The neighbor-road story lives at Story Creek.</placePrompt>
+          <personPrompt>Mercy Wren keeps the neighbor who stops.</personPrompt>
+          <ideaPrompt>Mercy’s Jesus story — the neighbor who stops on the road.</ideaPrompt>
+          <ideaLabel>Neighbor is the one who shows mercy.</ideaLabel>
+          <whyHard>Mercy Wren keeps Story Creek: Jesus taught in pictures by the road and the water. Neighbor is the one who shows mercy — that line belongs with the storyteller, not the clerk.</whyHard>
+        </match>
+        <hold onFail="easy">
+          <claim>Neighbor is the one who shows mercy.</claim>
+          <reason>Jesus makes the listener identify with the wounded man, then with the Samaritan moved with compassion.</reason>
+          <source>Luke 10:25–37</source>
+          <whyCorrect>Jesus makes the listener identify with the wounded man, then with the Samaritan moved with compassion.</whyCorrect>
+          <whyMisses>
+            <miss>The story is mainly a map of the Jericho road.</miss>
+            <miss>Mercy is optional once you have classified the victim.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Neighbor is the one who shows mercy.</choice>
+            <choice>Neighbor means the person who already looks like you.</choice>
+            <choice>The priest is the hero because he kept the law.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>Jesus makes the listener identify with the wounded man, then with the Samaritan moved with compassion.</choice>
+            <choice>The story is mainly a map of the Jericho road.</choice>
+            <choice>Mercy is optional once you have classified the victim.</choice>
+          </reasonChoices>
+        </hold>
+      </hard>
+      <journal id="j-ph-1" title="The Teacher who taught in stories" kicker="Story Creek" unlockAfter="ph-road" scoreFromHeldTier="true">
+        <p>The Gospels present Jesus as a teacher whose most characteristic form is the parable. These are not children’s decorations added to a lecture. They are the lecture — they force a decision about mercy, pride, and the identity of God.</p>
+        <p>The Good Samaritan (Luke 10:25–37) relocates the word “neighbor” from a boundary question to a mercy question. The listener is not first invited to classify others. The listener is invited to become the kind of person who crosses the road.</p>
+        <sources>
+          <source>Luke 10:25–37</source>
+          <source>Luke 10:29</source>
+        </sources>
+      </journal>
+    </lesson>
+    <lesson id="ph-father" place="Story Creek" person="Mercy Wren" tripleId="father-hollow" ideaId="idea-father" ideaLabel="The father runs with mercy before the speech is done." challengeKind="sort" challengeTitle="The father’s run">
+      <easy points="10" easyOrder="2">
+        <learn>
+          <shortStory>Jesus tells about a son who takes his share early and wastes it far from home. Hungry and ashamed, he starts a hired-hand speech to ask for work. But his father sees him while he is still a long way off and runs — mercy before the speech is done. He hugs the son. Honor is spent so the lost one can be welcomed; the feast is the father’s idea.</shortStory>
+          <mainIdea>The father runs with mercy before the speech is done.</mainIdea>
+          <gloss>The father runs with mercy before the son finishes his speech.</gloss>
+          <loci>This idea lives at Story Creek, with Mercy.</loci>
+          <word>
+            <term>Mercy</term>
+            <sense>kindness you did not earn</sense>
+          </word>
+          <hint>The run comes before the apology is done.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>The father runs with mercy before the speech is done.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>The son earned the feast by writing a good apology.</miss>
+            <miss>The story is mainly about dividing an estate.</miss>
+          </sentenceMisses>
+          <placePrompt>The father-run story lives at Story Creek.</placePrompt>
+          <personPrompt>Mercy Wren keeps the father who runs.</personPrompt>
+          <ideaPrompt>Mercy’s Jesus story — the father who runs first.</ideaPrompt>
+          <ideaLabel>The father runs with mercy before the speech is done.</ideaLabel>
+          <whyEasy>Mercy tells the father-run story at the creek. The father runs with mercy, so it lives at Story Creek.</whyEasy>
+        </match>
+        <hold levelUpTo="medium" onFail="easy">
+          <claim>The father runs with mercy before the speech is done.</claim>
+          <reason>Honor is spent so the son can be embraced; the older brother shows nearness without joy.</reason>
+          <source>Luke 15:11–32</source>
+          <whyCorrect>Honor is spent so the son can be embraced; the older brother shows nearness without joy.</whyCorrect>
+          <whyMisses>
+            <miss>The father waits until justice is complete.</miss>
+            <miss>The older brother is the hero for staying home.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>The father runs with mercy before the speech is done.</choice>
+            <choice>The son earned the feast by writing a good apology.</choice>
+            <choice>The story is mainly about dividing an estate.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>Honor is spent so the son can be embraced; the older brother shows nearness without joy.</choice>
+            <choice>The father waits until justice is complete.</choice>
+            <choice>The older brother is the hero for staying home.</choice>
+          </reasonChoices>
+        </hold>
+      </easy>
+      <medium points="12">
+        <learn>
+          <mediumTeach>Luke 15:11–32. A son wastes his share and comes home rehearsing a hired-hand speech. The father runs first — mercy before the apology is finished. In that world a patriarch running spent honor; the feast is the father’s idea. The older brother stays near the house but refuses the joy.</mediumTeach>
+          <mainIdea>The father runs with mercy before the speech is done.</mainIdea>
+          <gloss>The father runs with mercy before the son finishes his speech.</gloss>
+          <loci>This idea lives at Story Creek, with Mercy.</loci>
+          <word>
+            <term>Mercy</term>
+            <sense>kindness you did not earn</sense>
+          </word>
+          <hint>The run comes before the apology is done.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>The father runs with mercy before the speech is done.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>The son earned the feast by writing a good apology.</miss>
+            <miss>The story is mainly about dividing an estate.</miss>
+          </sentenceMisses>
+          <placePrompt>The father-run story lives at Story Creek.</placePrompt>
+          <personPrompt>Mercy Wren keeps the father who runs.</personPrompt>
+          <ideaPrompt>Mercy’s Jesus story — the father who runs first.</ideaPrompt>
+          <ideaLabel>The father runs with mercy before the speech is done.</ideaLabel>
+          <whyMedium>Mercy tells the father-run story at the creek. The father runs with mercy, so it lives at Story Creek.</whyMedium>
+        </match>
+        <hold levelUpTo="hard" onFail="easy">
+          <claim>The father runs with mercy before the speech is done.</claim>
+          <reason>Honor is spent so the son can be embraced; the older brother shows nearness without joy.</reason>
+          <source>Luke 15:11–32</source>
+          <whyCorrect>Honor is spent so the son can be embraced; the older brother shows nearness without joy.</whyCorrect>
+          <whyMisses>
+            <miss>The father waits until justice is complete.</miss>
+            <miss>The older brother is the hero for staying home.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>The father runs with mercy before the speech is done.</choice>
+            <choice>The son earned the feast by writing a good apology.</choice>
+            <choice>The story is mainly about dividing an estate.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>Honor is spent so the son can be embraced; the older brother shows nearness without joy.</choice>
+            <choice>The father waits until justice is complete.</choice>
+            <choice>The older brother is the hero for staying home.</choice>
+          </reasonChoices>
+        </hold>
+      </medium>
+      <hard points="15">
+        <learn>
+          <hardTeach>Luke 15:11–32. In that world a patriarch running was undignified. The father runs before the son finishes his hired-hand speech.
+Luke 15 stacks three lost-and-found stories. God is not only willing to receive. God seeks. The feast is the Father’s idea.</hardTeach>
+          <fullTeach>Luke 15:11–32. In that world a patriarch running was undignified. The father runs before the son finishes his hired-hand speech.
+Luke 15 stacks three lost-and-found stories. God is not only willing to receive. God seeks. The feast is the Father’s idea.</fullTeach>
+          <prompt>Toss the weak readings. Keep what Luke 15 is actually pressing.</prompt>
+          <teachOnWrong>Grace arrives before the speech is done (Luke 15:20). The older brother is dutiful — and furious at mercy. Try the bins again.</teachOnWrong>
+          <challengeTiles>
+            <keep>The father runs with mercy — before the speech is done.</keep>
+            <discard>The son earned the feast by writing a good apology.</discard>
+            <discard>The older brother is the hero simply for staying home.</discard>
+            <discard>The story is mainly about estate planning.</discard>
+          </challengeTiles>
+        </learn>
+        <match>
+          <sentenceCorrect>The father runs with mercy before the speech is done.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>The son earned the feast by writing a good apology.</miss>
+            <miss>The story is mainly about dividing an estate.</miss>
+          </sentenceMisses>
+          <placePrompt>The father-run story lives at Story Creek.</placePrompt>
+          <personPrompt>Mercy Wren keeps the father who runs.</personPrompt>
+          <ideaPrompt>Mercy’s Jesus story — the father who runs first.</ideaPrompt>
+          <ideaLabel>The father runs with mercy before the speech is done.</ideaLabel>
+          <whyHard>Mercy Wren keeps Story Creek. The father runs before the speech is done — a Jesus story, not a square report.</whyHard>
+        </match>
+        <hold onFail="easy">
+          <claim>The father runs with mercy before the speech is done.</claim>
+          <reason>Honor is spent so the son can be embraced; the older brother shows nearness without joy.</reason>
+          <source>Luke 15:11–32</source>
+          <whyCorrect>Honor is spent so the son can be embraced; the older brother shows nearness without joy.</whyCorrect>
+          <whyMisses>
+            <miss>The father waits until justice is complete.</miss>
+            <miss>The older brother is the hero for staying home.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>The father runs with mercy before the speech is done.</choice>
+            <choice>The son earned the feast by writing a good apology.</choice>
+            <choice>The story is mainly about dividing an estate.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>Honor is spent so the son can be embraced; the older brother shows nearness without joy.</choice>
+            <choice>The father waits until justice is complete.</choice>
+            <choice>The older brother is the hero for staying home.</choice>
+          </reasonChoices>
+        </hold>
+      </hard>
+      <journal id="j-ph-2" title="Mercy that runs" kicker="Story Creek" unlockAfter="ph-father" scoreFromHeldTier="true">
+        <p>Luke 15 stacks three lost-and-found stories after a complaint: this man welcomes sinners and eats with them. The father’s run (Luke 15:20) is the theological center of the third story. Honor is spent so that the son can be embraced before he finishes his hired-hand speech.</p>
+        <p>The older brother shows that you can live in the house and still refuse the feast. Nearness without joy at another’s return is a second lostness.</p>
+        <sources>
+          <source>Luke 15:1–32</source>
+        </sources>
+      </journal>
+    </lesson>
+    <lesson id="ph-seeds" place="Story Creek" person="Mercy Wren" tripleId="seeds-hollow" ideaId="idea-seeds" ideaLabel="The kingdom arrives in pictures." challengeKind="match" challengeTitle="Pictures of the kingdom">
+      <easy points="10" easyOrder="10">
+        <learn>
+          <shortStory>Jesus tells many kingdom stories: seed on different soils, a lost sheep sought, a tiny mustard seed that grows into shelter, and a trust you must use. Each picture asks what you will do with what you heard — the kingdom arrives in stories you can hold, not slogans.</shortStory>
+          <mainIdea>The kingdom arrives in pictures, not slogans.</mainIdea>
+          <gloss>The kingdom comes in Jesus stories you can hold — not slogans.</gloss>
+          <loci>This idea lives at Story Creek, with Mercy.</loci>
+          <word>
+            <term>Parable</term>
+            <sense>a Jesus story that asks you to decide</sense>
+          </word>
+          <hint>Keep the right pictures. Remove wrong picks.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>The kingdom arrives in pictures, not slogans.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Every parable is an allegory of every detail.</miss>
+            <miss>The kingdom is only for people who already understand.</miss>
+          </sentenceMisses>
+          <placePrompt>That story lives at the creek.</placePrompt>
+          <personPrompt>Mercy keeps that creek.</personPrompt>
+          <ideaPrompt>Mercy’s Jesus stories — the kingdom arrives in pictures.</ideaPrompt>
+          <ideaLabel>The kingdom arrives in pictures.</ideaLabel>
+          <whyEasy>Mercy tells kingdom pictures at the creek. The kingdom arrives in pictures, not slogans.</whyEasy>
+        </match>
+        <hold levelUpTo="medium" onFail="easy">
+          <claim>The kingdom arrives in pictures, not slogans.</claim>
+          <reason>Soil, search, a tiny seed, and a trust form a portrait — not a slogan.</reason>
+          <source>Matthew 13; Luke 15; Matthew 25</source>
+          <whyCorrect>Soil, search, a tiny seed, and a trust form a portrait — not a slogan.</whyCorrect>
+          <whyMisses>
+            <miss>The sower proves every heart is the same.</miss>
+            <miss>The talents story is about hiding gifts until heaven.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>The kingdom arrives in pictures, not slogans.</choice>
+            <choice>Every parable is an allegory of every detail.</choice>
+            <choice>The kingdom is only for people who already understand.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>Soil, search, a tiny seed, and a trust form a portrait — not a slogan.</choice>
+            <choice>The sower proves every heart is the same.</choice>
+            <choice>The talents story is about hiding gifts until heaven.</choice>
+          </reasonChoices>
+        </hold>
+      </easy>
+      <medium points="12">
+        <learn>
+          <mediumTeach>Jesus’ kingdom stories — soil, a search, a tiny seed, a trust — are among the best-attested teachings in the Gospels. Each picture has a main thrust: hear, seek, grow, steward. They are not slogans. They are a portrait that asks what you will do.</mediumTeach>
+          <mainIdea>The kingdom arrives in pictures, not slogans.</mainIdea>
+          <gloss>The kingdom comes in Jesus stories you can hold — not slogans.</gloss>
+          <loci>This idea lives at Story Creek, with Mercy.</loci>
+          <word>
+            <term>Parable</term>
+            <sense>a Jesus story that asks you to decide</sense>
+          </word>
+          <hint>Keep the right pictures. Remove wrong picks.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>The kingdom arrives in pictures, not slogans.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Every parable is an allegory of every detail.</miss>
+            <miss>The kingdom is only for people who already understand.</miss>
+          </sentenceMisses>
+          <placePrompt>That story lives at the creek.</placePrompt>
+          <personPrompt>Mercy keeps that creek.</personPrompt>
+          <ideaPrompt>Mercy’s Jesus stories — the kingdom arrives in pictures.</ideaPrompt>
+          <ideaLabel>The kingdom arrives in pictures.</ideaLabel>
+          <whyMedium>Mercy tells kingdom pictures at the creek. The kingdom arrives in pictures, not slogans.</whyMedium>
+        </match>
+        <hold levelUpTo="hard" onFail="easy">
+          <claim>The kingdom arrives in pictures, not slogans.</claim>
+          <reason>Soil, search, a tiny seed, and a trust form a portrait — not a slogan.</reason>
+          <source>Matthew 13; Luke 15; Matthew 25</source>
+          <whyCorrect>Soil, search, a tiny seed, and a trust form a portrait — not a slogan.</whyCorrect>
+          <whyMisses>
+            <miss>The sower proves every heart is the same.</miss>
+            <miss>The talents story is about hiding gifts until heaven.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>The kingdom arrives in pictures, not slogans.</choice>
+            <choice>Every parable is an allegory of every detail.</choice>
+            <choice>The kingdom is only for people who already understand.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>Soil, search, a tiny seed, and a trust form a portrait — not a slogan.</choice>
+            <choice>The sower proves every heart is the same.</choice>
+            <choice>The talents story is about hiding gifts until heaven.</choice>
+          </reasonChoices>
+        </hold>
+      </medium>
+      <hard points="15">
+        <learn>
+          <hardTeach>These are among the most-attested teachings in the Synoptic Gospels. A parable can have one main thrust — resist turning every detail into an allegory.
+Jesus’ stories assume a God who speaks, seeks, grows a kingdom, and will ask what we did with a trust. They are not proofs. They are a portrait — and a demand.</hardTeach>
+          <fullTeach>These are among the most-attested teachings in the Synoptic Gospels. A parable can have one main thrust — resist turning every detail into an allegory.
+Jesus’ stories assume a God who speaks, seeks, grows a kingdom, and will ask what we did with a trust. They are not proofs. They are a portrait — and a demand.</fullTeach>
+          <prompt>Match each parable to the claim it is actually making.</prompt>
+          <teachOnWrong>Look again at the main action of each story — soil, search, growth, or stewardship — rather than a moral you already liked.</teachOnWrong>
+          <challengeTiles>
+            <pair>
+              <left>The sower</left>
+              <right>Same word, different hearts</right>
+            </pair>
+            <pair>
+              <left>Lost sheep</left>
+              <right>The one is sought</right>
+            </pair>
+            <pair>
+              <left>Mustard seed</left>
+              <right>Small start, later shelter</right>
+            </pair>
+            <pair>
+              <left>The talents</left>
+              <right>Use the trust; don’t bury it</right>
+            </pair>
+          </challengeTiles>
+        </learn>
+        <match>
+          <sentenceCorrect>The kingdom arrives in pictures, not slogans.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Every parable is an allegory of every detail.</miss>
+            <miss>The kingdom is only for people who already understand.</miss>
+          </sentenceMisses>
+          <placePrompt>That story lives at the creek.</placePrompt>
+          <personPrompt>Mercy keeps that creek.</personPrompt>
+          <ideaPrompt>Mercy’s Jesus stories — the kingdom arrives in pictures.</ideaPrompt>
+          <ideaLabel>The kingdom arrives in pictures.</ideaLabel>
+          <whyHard>Mercy Wren keeps Story Creek. Soil, search, a tiny seed — Jesus taught the kingdom in pictures, not slogans.</whyHard>
+        </match>
+        <hold onFail="easy">
+          <claim>The kingdom arrives in pictures, not slogans.</claim>
+          <reason>Soil, search, a tiny seed, and a trust form a portrait — not a slogan.</reason>
+          <source>Matthew 13; Luke 15; Matthew 25</source>
+          <whyCorrect>Soil, search, a tiny seed, and a trust form a portrait — not a slogan.</whyCorrect>
+          <whyMisses>
+            <miss>The sower proves every heart is the same.</miss>
+            <miss>The talents story is about hiding gifts until heaven.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>The kingdom arrives in pictures, not slogans.</choice>
+            <choice>Every parable is an allegory of every detail.</choice>
+            <choice>The kingdom is only for people who already understand.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>Soil, search, a tiny seed, and a trust form a portrait — not a slogan.</choice>
+            <choice>The sower proves every heart is the same.</choice>
+            <choice>The talents story is about hiding gifts until heaven.</choice>
+          </reasonChoices>
+        </hold>
+      </hard>
+      <journal id="j-ph-3" title="Seeds, search, and a trust" kicker="Story Creek" unlockAfter="ph-seeds" scoreFromHeldTier="true">
+        <p>Taken together, the sower, the lost sheep, the mustard seed, and the talents sketch a God who speaks, seeks, grows a kingdom from small beginnings, and will ask what was done with a trust.</p>
+        <p>That is already a case of a sort: not a syllogism, but a coherent portrait. If the portrait is true, the world is personal before it is mechanical.</p>
+        <sources>
+          <source>Matthew 13:1–23</source>
+          <source>Matthew 13:31–32</source>
+          <source>Luke 15:1–7</source>
+          <source>Matthew 25:14–30</source>
+        </sources>
+      </journal>
+    </lesson>
+    <lesson id="ph-debt" place="Story Creek" person="Mercy Wren" tripleId="debt-hollow" ideaId="idea-debt" ideaLabel="Received mercy makes refusing mercy a contradiction." challengeKind="sort" challengeTitle="An unpayable account">
+      <easy points="10" easyOrder="3">
+        <learn>
+          <shortStory>Jesus tells about a king who wipes an unpayable bill. That same servant then chokes a neighbor over a tiny sum. Received mercy makes refusing mercy a contradiction — the story will not let you keep both.</shortStory>
+          <mainIdea>Received mercy makes refusing mercy a contradiction.</mainIdea>
+          <gloss>If you were forgiven a huge debt, you cannot choke a neighbor over a small one.</gloss>
+          <loci>This idea lives at Story Creek, with Mercy.</loci>
+          <word>
+            <term>Debt</term>
+            <sense>what you owe and cannot pay</sense>
+          </word>
+          <hint>Keep the mercy. Toss the choke. Example: a huge bill wiped, then a tiny one demanded.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>Received mercy makes refusing mercy a contradiction.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Forgiveness is a limited coupon on God’s spreadsheet.</miss>
+            <miss>Jesus is only reforming first-century banking.</miss>
+          </sentenceMisses>
+          <placePrompt>The forgiven-debt story lives at Story Creek.</placePrompt>
+          <personPrompt>Mercy Wren keeps the two servants.</personPrompt>
+          <ideaPrompt>Mercy’s Jesus story — forgiven much, then show mercy.</ideaPrompt>
+          <ideaLabel>Received mercy makes refusing mercy a contradiction.</ideaLabel>
+          <whyEasy>Mercy tells the forgiven-debt story at the creek. Received mercy must give mercy.</whyEasy>
+        </match>
+        <hold levelUpTo="medium" onFail="easy">
+          <claim>Received mercy makes refusing mercy a contradiction.</claim>
+          <reason>The servant forgiven an unpayable debt then throttles a peer over a small sum.</reason>
+          <source>Matthew 18:21–35</source>
+          <whyCorrect>The servant forgiven an unpayable debt then throttles a peer over a small sum.</whyCorrect>
+          <whyMisses>
+            <miss>Peter’s “seven times” was already the full measure.</miss>
+            <miss>The first servant was right to demand prison.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Received mercy makes refusing mercy a contradiction.</choice>
+            <choice>Forgiveness is a limited coupon on God’s spreadsheet.</choice>
+            <choice>Jesus is only reforming first-century banking.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>The servant forgiven an unpayable debt then throttles a peer over a small sum.</choice>
+            <choice>Peter’s “seven times” was already the full measure.</choice>
+            <choice>The first servant was right to demand prison.</choice>
+          </reasonChoices>
+        </hold>
+      </easy>
+      <medium points="12">
+        <learn>
+          <mediumTeach>Matthew 18:21–35. A king wipes an unpayable debt. That same servant then chokes a peer over a tiny sum — and the king reinstates the first debt. Received mercy makes refusing mercy a contradiction. Mercy is not softness; it is the grain of God’s world.</mediumTeach>
+          <mainIdea>Received mercy makes refusing mercy a contradiction.</mainIdea>
+          <gloss>If you were forgiven a huge debt, you cannot choke a neighbor over a small one.</gloss>
+          <loci>This idea lives at Story Creek, with Mercy.</loci>
+          <word>
+            <term>Debt</term>
+            <sense>what you owe and cannot pay</sense>
+          </word>
+          <hint>Keep the mercy. Toss the choke. Example: a huge bill wiped, then a tiny one demanded.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>Received mercy makes refusing mercy a contradiction.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Forgiveness is a limited coupon on God’s spreadsheet.</miss>
+            <miss>Jesus is only reforming first-century banking.</miss>
+          </sentenceMisses>
+          <placePrompt>The forgiven-debt story lives at Story Creek.</placePrompt>
+          <personPrompt>Mercy Wren keeps the two servants.</personPrompt>
+          <ideaPrompt>Mercy’s Jesus story — forgiven much, then show mercy.</ideaPrompt>
+          <ideaLabel>Received mercy makes refusing mercy a contradiction.</ideaLabel>
+          <whyMedium>Mercy tells the forgiven-debt story at the creek. Received mercy must give mercy.</whyMedium>
+        </match>
+        <hold levelUpTo="hard" onFail="easy">
+          <claim>Received mercy makes refusing mercy a contradiction.</claim>
+          <reason>The servant forgiven an unpayable debt then throttles a peer over a small sum.</reason>
+          <source>Matthew 18:21–35</source>
+          <whyCorrect>The servant forgiven an unpayable debt then throttles a peer over a small sum.</whyCorrect>
+          <whyMisses>
+            <miss>Peter’s “seven times” was already the full measure.</miss>
+            <miss>The first servant was right to demand prison.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Received mercy makes refusing mercy a contradiction.</choice>
+            <choice>Forgiveness is a limited coupon on God’s spreadsheet.</choice>
+            <choice>Jesus is only reforming first-century banking.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>The servant forgiven an unpayable debt then throttles a peer over a small sum.</choice>
+            <choice>Peter’s “seven times” was already the full measure.</choice>
+            <choice>The first servant was right to demand prison.</choice>
+          </reasonChoices>
+        </hold>
+      </medium>
+      <hard points="15">
+        <learn>
+          <hardTeach>Matthew 18:21–35. A servant forgiven an unpayable debt then throttles a peer over a small sum. The king reinstates the first debt.
+Mercy is not softness. It is the grain of God’s world — and then a question: will you live against that grain? See also Matt 6:12–15.</hardTeach>
+          <fullTeach>Matthew 18:21–35. A servant forgiven an unpayable debt then throttles a peer over a small sum. The king reinstates the first debt.
+Mercy is not softness. It is the grain of God’s world — and then a question: will you live against that grain? See also Matt 6:12–15.</fullTeach>
+          <prompt>Sort the claims. Only one belongs in the keep bin.</prompt>
+          <teachOnWrong>Peter offered seven. Jesus breaks coupon-logic (Matt 18:22). The horror is ingratitude, not arithmetic.</teachOnWrong>
+          <challengeTiles>
+            <keep>Received mercy makes refusing mercy a contradiction.</keep>
+            <discard>Forgiveness is a limited coupon on God’s spreadsheet.</discard>
+            <discard>The first servant was right to demand prison for a small debt.</discard>
+            <discard>Jesus is only reforming first-century banking.</discard>
+          </challengeTiles>
+        </learn>
+        <match>
+          <sentenceCorrect>Received mercy makes refusing mercy a contradiction.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Forgiveness is a limited coupon on God’s spreadsheet.</miss>
+            <miss>Jesus is only reforming first-century banking.</miss>
+          </sentenceMisses>
+          <placePrompt>The forgiven-debt story lives at Story Creek.</placePrompt>
+          <personPrompt>Mercy Wren keeps the two servants.</personPrompt>
+          <ideaPrompt>Mercy’s Jesus story — forgiven much, then show mercy.</ideaPrompt>
+          <ideaLabel>Received mercy makes refusing mercy a contradiction.</ideaLabel>
+          <whyHard>Mercy Wren keeps Story Creek. Received mercy making refusal a contradiction is a Jesus story of two servants.</whyHard>
+        </match>
+        <hold onFail="easy">
+          <claim>Received mercy makes refusing mercy a contradiction.</claim>
+          <reason>The servant forgiven an unpayable debt then throttles a peer over a small sum.</reason>
+          <source>Matthew 18:21–35</source>
+          <whyCorrect>The servant forgiven an unpayable debt then throttles a peer over a small sum.</whyCorrect>
+          <whyMisses>
+            <miss>Peter’s “seven times” was already the full measure.</miss>
+            <miss>The first servant was right to demand prison.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Received mercy makes refusing mercy a contradiction.</choice>
+            <choice>Forgiveness is a limited coupon on God’s spreadsheet.</choice>
+            <choice>Jesus is only reforming first-century banking.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>The servant forgiven an unpayable debt then throttles a peer over a small sum.</choice>
+            <choice>Peter’s “seven times” was already the full measure.</choice>
+            <choice>The first servant was right to demand prison.</choice>
+          </reasonChoices>
+        </hold>
+      </hard>
+      <journal id="j-ph-4" title="The measure you use" kicker="Story Creek" unlockAfter="ph-debt" scoreFromHeldTier="true">
+        <p>Matthew 18:21–35 is severe because grace is severe in the opposite direction from cruelty: it creates a world. To be forgiven an unpayable debt and then throttle a neighbor is to live as if the king’s mercy never happened.</p>
+        <p>Jesus teaches his disciples to pray “forgive us our debts, as we also have forgiven our debtors” (Matt 6:12). The petition assumes the same moral grain.</p>
+        <sources>
+          <source>Matthew 18:21–35</source>
+          <source>Matthew 6:12–15</source>
+        </sources>
+      </journal>
+    </lesson>
+    <lesson id="daily-lantern" place="East porch" person="Juniper Wick" tripleId="juniper-porch" ideaId="idea-juniper" ideaLabel="A lamp is meant to be seen." challengeKind="sequence" challengeTitle="The porch lamp">
+      <easy points="10" easyOrder="6">
+        <learn>
+          <shortStory>Jesus talks about an ordinary lamp and a city on a hill. Light is meant to be seen — public without being proud, so others can find their way.</shortStory>
+          <mainIdea>A lamp is meant to be seen.</mainIdea>
+          <gloss>A lamp is meant to be seen.</gloss>
+          <loci>This idea lives at East porch, with Juniper.</loci>
+          <word>
+            <term>Lamp</term>
+            <sense>a light others can actually see</sense>
+          </word>
+          <hint>Keep the right pictures. Remove wrong picks.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>A lamp is meant to be seen.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>We are told to become the sun.</miss>
+            <miss>Light is only for insiders behind a door.</miss>
+          </sentenceMisses>
+          <placePrompt>That lamp lives on the porch.</placePrompt>
+          <personPrompt>Juniper keeps that porch.</personPrompt>
+          <ideaPrompt>Juniper’s lamp — a light meant to be seen.</ideaPrompt>
+          <ideaLabel>A lamp is meant to be seen.</ideaLabel>
+          <whyEasy>Juniper’s lamp is on the porch so today’s line can be seen.</whyEasy>
+        </match>
+        <hold levelUpTo="medium" onFail="easy">
+          <claim>A lamp is meant to be seen.</claim>
+          <reason>Jesus uses an ordinary lamp and a city on a hill — public without being proud.</reason>
+          <source>Matthew 5:14–16</source>
+          <whyCorrect>Jesus uses an ordinary lamp and a city on a hill — public without being proud.</whyCorrect>
+          <whyMisses>
+            <miss>The picture is a command to boast.</miss>
+            <miss>A hidden lamp is the point of the saying.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>A lamp is meant to be seen.</choice>
+            <choice>We are told to become the sun.</choice>
+            <choice>Light is only for insiders behind a door.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>Jesus uses an ordinary lamp and a city on a hill — public without being proud.</choice>
+            <choice>The picture is a command to boast.</choice>
+            <choice>A hidden lamp is the point of the saying.</choice>
+          </reasonChoices>
+        </hold>
+      </easy>
+      <medium points="12">
+        <learn>
+          <mediumTeach>Matthew 5:14–16. Jesus uses an ordinary lamp and a city on a hill: a life meant to be seen. Public without being proud — light that helps others see, not a show for its own sake.</mediumTeach>
+          <mainIdea>A lamp is meant to be seen.</mainIdea>
+          <gloss>A lamp is meant to be seen.</gloss>
+          <loci>This idea lives at East porch, with Juniper.</loci>
+          <word>
+            <term>Lamp</term>
+            <sense>a light others can actually see</sense>
+          </word>
+          <hint>Keep the right pictures. Remove wrong picks.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>A lamp is meant to be seen.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>We are told to become the sun.</miss>
+            <miss>Light is only for insiders behind a door.</miss>
+          </sentenceMisses>
+          <placePrompt>That lamp lives on the porch.</placePrompt>
+          <personPrompt>Juniper keeps that porch.</personPrompt>
+          <ideaPrompt>Juniper’s lamp — a light meant to be seen.</ideaPrompt>
+          <ideaLabel>A lamp is meant to be seen.</ideaLabel>
+          <whyMedium>Juniper’s lamp is on the porch so today’s line can be seen.</whyMedium>
+        </match>
+        <hold levelUpTo="hard" onFail="easy">
+          <claim>A lamp is meant to be seen.</claim>
+          <reason>Jesus uses an ordinary lamp and a city on a hill — public without being proud.</reason>
+          <source>Matthew 5:14–16</source>
+          <whyCorrect>Jesus uses an ordinary lamp and a city on a hill — public without being proud.</whyCorrect>
+          <whyMisses>
+            <miss>The picture is a command to boast.</miss>
+            <miss>A hidden lamp is the point of the saying.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>A lamp is meant to be seen.</choice>
+            <choice>We are told to become the sun.</choice>
+            <choice>Light is only for insiders behind a door.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>Jesus uses an ordinary lamp and a city on a hill — public without being proud.</choice>
+            <choice>The picture is a command to boast.</choice>
+            <choice>A hidden lamp is the point of the saying.</choice>
+          </reasonChoices>
+        </hold>
+      </medium>
+      <hard points="15">
+        <learn>
+          <hardTeach>Matthew 5:14–16. Jesus used ordinary light to talk about a life that is seen.
+“You are the light of the world. A city set on a hill cannot be hidden.” The picture is public without being proud.</hardTeach>
+          <fullTeach>Matthew 5:14–16. Jesus used ordinary light to talk about a life that is seen.
+“You are the light of the world. A city set on a hill cannot be hidden.” The picture is public without being proud.</fullTeach>
+          <prompt>A neighbor leaves a lamp on the porch. Put the picture in order.</prompt>
+          <teachOnWrong>The claim is not that we become the sun — only that we do not hide what we have received. Try the order again.</teachOnWrong>
+          <challengeTiles>
+            <sequenceItem>Evening comes. The street grows dim.</sequenceItem>
+            <sequenceItem>Someone sets a lamp where it can be seen.</sequenceItem>
+            <sequenceItem>A walker finds the stoop.</sequenceItem>
+          </challengeTiles>
+        </learn>
+        <match>
+          <sentenceCorrect>A lamp is meant to be seen.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>We are told to become the sun.</miss>
+            <miss>Light is only for insiders behind a door.</miss>
+          </sentenceMisses>
+          <placePrompt>That lamp lives on the porch.</placePrompt>
+          <personPrompt>Juniper keeps that porch.</personPrompt>
+          <ideaPrompt>Juniper’s lamp — a light meant to be seen.</ideaPrompt>
+          <ideaLabel>A lamp is meant to be seen.</ideaLabel>
+          <whyHard>Juniper Wick keeps the east porch. A lamp is meant to be seen — so the morning line lives at the lamp, where the trail starts.</whyHard>
+        </match>
+        <hold onFail="easy">
+          <claim>A lamp is meant to be seen.</claim>
+          <reason>Jesus uses an ordinary lamp and a city on a hill — public without being proud.</reason>
+          <source>Matthew 5:14–16</source>
+          <whyCorrect>Jesus uses an ordinary lamp and a city on a hill — public without being proud.</whyCorrect>
+          <whyMisses>
+            <miss>The picture is a command to boast.</miss>
+            <miss>A hidden lamp is the point of the saying.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>A lamp is meant to be seen.</choice>
+            <choice>We are told to become the sun.</choice>
+            <choice>Light is only for insiders behind a door.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>Jesus uses an ordinary lamp and a city on a hill — public without being proud.</choice>
+            <choice>The picture is a command to boast.</choice>
+            <choice>A hidden lamp is the point of the saying.</choice>
+          </reasonChoices>
+        </hold>
+      </hard>
+      <journal id="" title="" kicker="" unlockAfter="daily-lantern" scoreFromHeldTier="true">
+        <p />
+        <sources>
+          <source />
+        </sources>
+      </journal>
+    </lesson>
+    <lesson id="daily-gems" place="East porch" person="Juniper Wick" tripleId="gems-porch" ideaId="idea-gems" ideaLabel="Jesus taught with pictures you can hold." challengeKind="match" challengeTitle="Porch gems">
+      <easy points="10" easyOrder="16">
+        <learn>
+          <shortStory>On the East porch Juniper keeps Jesus pictures you can hold: a lamp meant to be seen, seed that meets different hearts, and a cup poured for many. The Teacher spoke in pictures so the truth could walk around — gift, not wage.</shortStory>
+          <mainIdea>Jesus taught with pictures you can hold.</mainIdea>
+          <gloss>Jesus taught with pictures you can hold.</gloss>
+          <loci>This idea lives at East porch, with Juniper.</loci>
+          <word>
+            <term>Gift</term>
+            <sense>given, not earned as a wage</sense>
+          </word>
+          <hint>Keep the right pictures. Remove wrong picks.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>Jesus taught with pictures you can hold.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Pictures are only decoration.</miss>
+            <miss>Mercy is a wage you finish earning.</miss>
+          </sentenceMisses>
+          <placePrompt>That lamp lives on the porch.</placePrompt>
+          <personPrompt>Juniper keeps that porch.</personPrompt>
+          <ideaPrompt>Juniper’s morning pictures — lamp, seed, and cup you can hold.</ideaPrompt>
+          <ideaLabel>Jesus taught with pictures you can hold.</ideaLabel>
+          <whyEasy>Juniper’s lamp is on the porch. Jesus taught with pictures you can hold.</whyEasy>
+        </match>
+        <hold levelUpTo="medium" onFail="easy">
+          <claim>Jesus taught with pictures you can hold.</claim>
+          <reason>A lamp is seen, seed meets different hearts, and the cup is poured for many — gift, not wage.</reason>
+          <source>Matthew 5; Mark 4; Matthew 26:28; Luke 22:20</source>
+          <whyCorrect>A lamp is seen, seed meets different hearts, and the cup is poured for many — gift, not wage.</whyCorrect>
+          <whyMisses>
+            <miss>Every heart is the same soil.</miss>
+            <miss>A hidden lamp is the point.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Jesus taught with pictures you can hold.</choice>
+            <choice>Pictures are only decoration.</choice>
+            <choice>Mercy is a wage you finish earning.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>A lamp is seen, seed meets different hearts, and the cup is poured for many — gift, not wage.</choice>
+            <choice>Every heart is the same soil.</choice>
+            <choice>A hidden lamp is the point.</choice>
+          </reasonChoices>
+        </hold>
+      </easy>
+      <medium points="12">
+        <learn>
+          <mediumTeach>Jesus taught with pictures you can hold: lamp, seed, and a cup poured for many. The Teacher spoke so the truth could walk around inside you — gift, not wage. Keep the pictures; do not flatten them into slogans.</mediumTeach>
+          <mainIdea>Jesus taught with pictures you can hold.</mainIdea>
+          <gloss>Jesus taught with pictures you can hold.</gloss>
+          <loci>This idea lives at East porch, with Juniper.</loci>
+          <word>
+            <term>Gift</term>
+            <sense>given, not earned as a wage</sense>
+          </word>
+          <hint>Keep the right pictures. Remove wrong picks.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>Jesus taught with pictures you can hold.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Pictures are only decoration.</miss>
+            <miss>Mercy is a wage you finish earning.</miss>
+          </sentenceMisses>
+          <placePrompt>That lamp lives on the porch.</placePrompt>
+          <personPrompt>Juniper keeps that porch.</personPrompt>
+          <ideaPrompt>Juniper’s morning pictures — lamp, seed, and cup you can hold.</ideaPrompt>
+          <ideaLabel>Jesus taught with pictures you can hold.</ideaLabel>
+          <whyMedium>Juniper’s lamp is on the porch. Jesus taught with pictures you can hold.</whyMedium>
+        </match>
+        <hold levelUpTo="hard" onFail="easy">
+          <claim>Jesus taught with pictures you can hold.</claim>
+          <reason>A lamp is seen, seed meets different hearts, and the cup is poured for many — gift, not wage.</reason>
+          <source>Matthew 5; Mark 4; Matthew 26:28; Luke 22:20</source>
+          <whyCorrect>A lamp is seen, seed meets different hearts, and the cup is poured for many — gift, not wage.</whyCorrect>
+          <whyMisses>
+            <miss>Every heart is the same soil.</miss>
+            <miss>A hidden lamp is the point.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Jesus taught with pictures you can hold.</choice>
+            <choice>Pictures are only decoration.</choice>
+            <choice>Mercy is a wage you finish earning.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>A lamp is seen, seed meets different hearts, and the cup is poured for many — gift, not wage.</choice>
+            <choice>Every heart is the same soil.</choice>
+            <choice>A hidden lamp is the point.</choice>
+          </reasonChoices>
+        </hold>
+      </medium>
+      <hard points="15">
+        <learn>
+          <hardTeach>The Teacher spoke in pictures so the truth could walk around inside you.
+Jesus taught with lamps, seed, and a cup. The cup of the new covenant is poured for many (Matthew 26:28; Luke 22:20) — gift, not wage.</hardTeach>
+          <fullTeach>The Teacher spoke in pictures so the truth could walk around inside you.
+Jesus taught with lamps, seed, and a cup. The cup of the new covenant is poured for many (Matthew 26:28; Luke 22:20) — gift, not wage.</fullTeach>
+          <prompt>Match each picture to the short claim.</prompt>
+          <teachOnWrong>Each gem is a short true claim. Snap the picture to its sentence.</teachOnWrong>
+          <challengeTiles>
+            <pair>
+              <left>Lamp</left>
+              <right>A light is meant to be seen</right>
+            </pair>
+            <pair>
+              <left>Seed</left>
+              <right>The same word meets different hearts</right>
+            </pair>
+            <pair>
+              <left>Cup</left>
+              <right>Poured for many — gift, not wage</right>
+            </pair>
+          </challengeTiles>
+        </learn>
+        <match>
+          <sentenceCorrect>Jesus taught with pictures you can hold.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Pictures are only decoration.</miss>
+            <miss>Mercy is a wage you finish earning.</miss>
+          </sentenceMisses>
+          <placePrompt>That lamp lives on the porch.</placePrompt>
+          <personPrompt>Juniper keeps that porch.</personPrompt>
+          <ideaPrompt>Juniper’s morning pictures — lamp, seed, and cup you can hold.</ideaPrompt>
+          <ideaLabel>Jesus taught with pictures you can hold.</ideaLabel>
+          <whyHard>Juniper Wick keeps the east porch. Lamp, seed, and cup are pictures you can hold — gift, not wage.</whyHard>
+        </match>
+        <hold onFail="easy">
+          <claim>Jesus taught with pictures you can hold.</claim>
+          <reason>A lamp is seen, seed meets different hearts, and the cup is poured for many — gift, not wage.</reason>
+          <source>Matthew 5; Mark 4; Matthew 26:28; Luke 22:20</source>
+          <whyCorrect>A lamp is seen, seed meets different hearts, and the cup is poured for many — gift, not wage.</whyCorrect>
+          <whyMisses>
+            <miss>Every heart is the same soil.</miss>
+            <miss>A hidden lamp is the point.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Jesus taught with pictures you can hold.</choice>
+            <choice>Pictures are only decoration.</choice>
+            <choice>Mercy is a wage you finish earning.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>A lamp is seen, seed meets different hearts, and the cup is poured for many — gift, not wage.</choice>
+            <choice>Every heart is the same soil.</choice>
+            <choice>A hidden lamp is the point.</choice>
+          </reasonChoices>
+        </hold>
+      </hard>
+      <journal id="" title="" kicker="" unlockAfter="daily-gems" scoreFromHeldTier="true">
+        <p />
+        <sources>
+          <source />
+        </sources>
+      </journal>
+    </lesson>
+    <lesson id="daily-seed" place="East porch" person="Juniper Wick" tripleId="seed-porch" ideaId="idea-seed" ideaLabel="The same word meets different soils." challengeKind="sort" challengeTitle="A handful of seed">
+      <easy points="10" easyOrder="17">
+        <learn>
+          <shortStory>Jesus tells about a sower. The same word lands on different soils — path, rocks, thorns, and good ground. Some seed is lost. The story invites hearing; it does not flatter every field.</shortStory>
+          <mainIdea>The same word meets different soils; some seed is lost.</mainIdea>
+          <gloss>The same word meets different soils. Some seed is lost.</gloss>
+          <loci>This idea lives at East porch, with Juniper.</loci>
+          <word>
+            <term>Parable</term>
+            <sense>a Jesus story that asks you to decide</sense>
+          </word>
+          <hint>Keep the honest field. Toss “every field wins.”</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>The same word meets different soils; some seed is lost.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Every field is guaranteed a harvest.</miss>
+            <miss>Lost seed means the sower failed.</miss>
+          </sentenceMisses>
+          <placePrompt>That lamp lives on the porch.</placePrompt>
+          <personPrompt>Juniper keeps that porch.</personPrompt>
+          <ideaPrompt>Juniper’s seed — the same word meets different soils.</ideaPrompt>
+          <ideaLabel>The same word meets different soils.</ideaLabel>
+          <whyEasy>Juniper’s lamp is on the porch. The same word meets different soils.</whyEasy>
+        </match>
+        <hold levelUpTo="medium" onFail="easy">
+          <claim>The same word meets different soils; some seed is lost.</claim>
+          <reason>The parable invites hearing; it does not flatter every field.</reason>
+          <source>Mark 4:1–9</source>
+          <whyCorrect>The parable invites hearing; it does not flatter every field.</whyCorrect>
+          <whyMisses>
+            <miss>Good soil is a slogan, not a way of hearing.</miss>
+            <miss>Jesus never names withering or birds.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>The same word meets different soils; some seed is lost.</choice>
+            <choice>Every field is guaranteed a harvest.</choice>
+            <choice>Lost seed means the sower failed.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>The parable invites hearing; it does not flatter every field.</choice>
+            <choice>Good soil is a slogan, not a way of hearing.</choice>
+            <choice>Jesus never names withering or birds.</choice>
+          </reasonChoices>
+        </hold>
+      </easy>
+      <medium points="12">
+        <learn>
+          <mediumTeach>Mark 4:1–9. The same word meets different soils — path, rocks, thorns, good ground. Some seed is lost. “He who has ears to hear, let him hear.” The story asks for a kind of soil, not a slogan that flatters every field.</mediumTeach>
+          <mainIdea>The same word meets different soils; some seed is lost.</mainIdea>
+          <gloss>The same word meets different soils. Some seed is lost.</gloss>
+          <loci>This idea lives at East porch, with Juniper.</loci>
+          <word>
+            <term>Parable</term>
+            <sense>a Jesus story that asks you to decide</sense>
+          </word>
+          <hint>Keep the honest field. Toss “every field wins.”</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>The same word meets different soils; some seed is lost.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Every field is guaranteed a harvest.</miss>
+            <miss>Lost seed means the sower failed.</miss>
+          </sentenceMisses>
+          <placePrompt>That lamp lives on the porch.</placePrompt>
+          <personPrompt>Juniper keeps that porch.</personPrompt>
+          <ideaPrompt>Juniper’s seed — the same word meets different soils.</ideaPrompt>
+          <ideaLabel>The same word meets different soils.</ideaLabel>
+          <whyMedium>Juniper’s lamp is on the porch. The same word meets different soils.</whyMedium>
+        </match>
+        <hold levelUpTo="hard" onFail="easy">
+          <claim>The same word meets different soils; some seed is lost.</claim>
+          <reason>The parable invites hearing; it does not flatter every field.</reason>
+          <source>Mark 4:1–9</source>
+          <whyCorrect>The parable invites hearing; it does not flatter every field.</whyCorrect>
+          <whyMisses>
+            <miss>Good soil is a slogan, not a way of hearing.</miss>
+            <miss>Jesus never names withering or birds.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>The same word meets different soils; some seed is lost.</choice>
+            <choice>Every field is guaranteed a harvest.</choice>
+            <choice>Lost seed means the sower failed.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>The parable invites hearing; it does not flatter every field.</choice>
+            <choice>Good soil is a slogan, not a way of hearing.</choice>
+            <choice>Jesus never names withering or birds.</choice>
+          </reasonChoices>
+        </hold>
+      </medium>
+      <hard points="15">
+        <learn>
+          <hardTeach>Mark 4:1–9. The parable does not flatter every listener. Some seed is lost.
+“He who has ears to hear, let him hear.” The story asks for a kind of soil, not a slogan.</hardTeach>
+          <fullTeach>Mark 4:1–9. The parable does not flatter every listener. Some seed is lost.
+“He who has ears to hear, let him hear.” The story asks for a kind of soil, not a slogan.</fullTeach>
+          <prompt>Which lines belong with Jesus’ picture of seed and soil?</prompt>
+          <teachOnWrong>Jesus names loss and hearing in the same breath. The invitation is still to hear — not a promise that every soil is the same.</teachOnWrong>
+          <challengeTiles>
+            <keep>Some seed is eaten before it roots.</keep>
+            <keep>Good soil hears and holds the word.</keep>
+            <keep>Shallow ground withers under heat.</keep>
+            <discard>Every field is guaranteed a harvest.</discard>
+          </challengeTiles>
+        </learn>
+        <match>
+          <sentenceCorrect>The same word meets different soils; some seed is lost.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Every field is guaranteed a harvest.</miss>
+            <miss>Lost seed means the sower failed.</miss>
+          </sentenceMisses>
+          <placePrompt>That lamp lives on the porch.</placePrompt>
+          <personPrompt>Juniper keeps that porch.</personPrompt>
+          <ideaPrompt>Juniper’s seed — the same word meets different soils.</ideaPrompt>
+          <ideaLabel>The same word meets different soils.</ideaLabel>
+          <whyHard>Juniper Wick keeps the east porch. The parable invites hearing; it does not flatter every field.</whyHard>
+        </match>
+        <hold onFail="easy">
+          <claim>The same word meets different soils; some seed is lost.</claim>
+          <reason>The parable invites hearing; it does not flatter every field.</reason>
+          <source>Mark 4:1–9</source>
+          <whyCorrect>The parable invites hearing; it does not flatter every field.</whyCorrect>
+          <whyMisses>
+            <miss>Good soil is a slogan, not a way of hearing.</miss>
+            <miss>Jesus never names withering or birds.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>The same word meets different soils; some seed is lost.</choice>
+            <choice>Every field is guaranteed a harvest.</choice>
+            <choice>Lost seed means the sower failed.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>The parable invites hearing; it does not flatter every field.</choice>
+            <choice>Good soil is a slogan, not a way of hearing.</choice>
+            <choice>Jesus never names withering or birds.</choice>
+          </reasonChoices>
+        </hold>
+      </hard>
+      <journal id="" title="" kicker="" unlockAfter="daily-seed" scoreFromHeldTier="true">
+        <p />
+        <sources>
+          <source />
+        </sources>
+      </journal>
+    </lesson>
+    <lesson id="daily-neighbor" place="East porch" person="Juniper Wick" tripleId="neighbor-porch" ideaId="idea-neighbor" ideaLabel="Mercy makes a neighbor." challengeKind="build-argument" challengeTitle="Who is near">
+      <easy points="10" easyOrder="18">
+        <learn>
+          <shortStory>On the porch Juniper retells the road story. Jesus asks who proved to be a neighbor — and the answer is the one who showed mercy, not the one with the right pedigree.</shortStory>
+          <mainIdea>Mercy makes a neighbor; pedigree does not.</mainIdea>
+          <gloss>Mercy makes a neighbor. Pedigree does not.</gloss>
+          <loci>This idea lives at East porch, with Juniper.</loci>
+          <word>
+            <term>Pedigree</term>
+            <sense>family name or in-group badge</sense>
+          </word>
+          <hint>Keep mercy. Toss “already my people.”</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>Mercy makes a neighbor; pedigree does not.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>The priest who passed by is the measure.</miss>
+            <miss>Neighbor is settled before anyone crosses the road.</miss>
+          </sentenceMisses>
+          <placePrompt>That lamp lives on the porch.</placePrompt>
+          <personPrompt>Juniper keeps that porch.</personPrompt>
+          <ideaPrompt>Juniper’s porch line — mercy makes a neighbor.</ideaPrompt>
+          <ideaLabel>Mercy makes a neighbor.</ideaLabel>
+          <whyEasy>Juniper’s lamp is on the porch. Mercy makes a neighbor.</whyEasy>
+        </match>
+        <hold levelUpTo="medium" onFail="easy">
+          <claim>Mercy makes a neighbor; pedigree does not.</claim>
+          <reason>Jesus asks who *proved* to be a neighbor — the one who showed mercy.</reason>
+          <source>Luke 10:36–37</source>
+          <whyCorrect>Jesus asks who *proved* to be a neighbor — the one who showed mercy.</whyCorrect>
+          <whyMisses>
+            <miss>Mercy is unrelated to the question.</miss>
+            <miss>The wounded man must first classify the helper.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Mercy makes a neighbor; pedigree does not.</choice>
+            <choice>The priest who passed by is the measure.</choice>
+            <choice>Neighbor is settled before anyone crosses the road.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>Jesus asks who *proved* to be a neighbor — the one who showed mercy.</choice>
+            <choice>Mercy is unrelated to the question.</choice>
+            <choice>The wounded man must first classify the helper.</choice>
+          </reasonChoices>
+        </hold>
+      </easy>
+      <medium points="12">
+        <learn>
+          <mediumTeach>Luke 10:36–37. Jesus turns “who is my neighbor?” around. Mercy makes a neighbor; pedigree does not. “The one who showed him mercy… Go and do likewise.” Compassion is the measure.</mediumTeach>
+          <mainIdea>Mercy makes a neighbor; pedigree does not.</mainIdea>
+          <gloss>Mercy makes a neighbor. Pedigree does not.</gloss>
+          <loci>This idea lives at East porch, with Juniper.</loci>
+          <word>
+            <term>Pedigree</term>
+            <sense>family name or in-group badge</sense>
+          </word>
+          <hint>Keep mercy. Toss “already my people.”</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>Mercy makes a neighbor; pedigree does not.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>The priest who passed by is the measure.</miss>
+            <miss>Neighbor is settled before anyone crosses the road.</miss>
+          </sentenceMisses>
+          <placePrompt>That lamp lives on the porch.</placePrompt>
+          <personPrompt>Juniper keeps that porch.</personPrompt>
+          <ideaPrompt>Juniper’s porch line — mercy makes a neighbor.</ideaPrompt>
+          <ideaLabel>Mercy makes a neighbor.</ideaLabel>
+          <whyMedium>Juniper’s lamp is on the porch. Mercy makes a neighbor.</whyMedium>
+        </match>
+        <hold levelUpTo="hard" onFail="easy">
+          <claim>Mercy makes a neighbor; pedigree does not.</claim>
+          <reason>Jesus asks who *proved* to be a neighbor — the one who showed mercy.</reason>
+          <source>Luke 10:36–37</source>
+          <whyCorrect>Jesus asks who *proved* to be a neighbor — the one who showed mercy.</whyCorrect>
+          <whyMisses>
+            <miss>Mercy is unrelated to the question.</miss>
+            <miss>The wounded man must first classify the helper.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Mercy makes a neighbor; pedigree does not.</choice>
+            <choice>The priest who passed by is the measure.</choice>
+            <choice>Neighbor is settled before anyone crosses the road.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>Jesus asks who *proved* to be a neighbor — the one who showed mercy.</choice>
+            <choice>Mercy is unrelated to the question.</choice>
+            <choice>The wounded man must first classify the helper.</choice>
+          </reasonChoices>
+        </hold>
+      </medium>
+      <hard points="15">
+        <learn>
+          <hardTeach>Luke 10:36–37. The question “who is my neighbor?” is turned around. Mercy makes a neighbor.
+He said, “The one who showed him mercy.” And Jesus said, “You go, and do likewise.”</hardTeach>
+          <fullTeach>Luke 10:36–37. The question “who is my neighbor?” is turned around. Mercy makes a neighbor.
+He said, “The one who showed him mercy.” And Jesus said, “You go, and do likewise.”</fullTeach>
+          <prompt>Build the Samaritan’s answer from the stones provided.</prompt>
+          <teachOnWrong>Jesus asks which man *proved* to be a neighbor. Mercy, not pedigree, is the measure. Leave the decoy in the bank.</teachOnWrong>
+          <challengeTiles />
+        </learn>
+        <match>
+          <sentenceCorrect>Mercy makes a neighbor; pedigree does not.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>The priest who passed by is the measure.</miss>
+            <miss>Neighbor is settled before anyone crosses the road.</miss>
+          </sentenceMisses>
+          <placePrompt>That lamp lives on the porch.</placePrompt>
+          <personPrompt>Juniper keeps that porch.</personPrompt>
+          <ideaPrompt>Juniper’s porch line — mercy makes a neighbor.</ideaPrompt>
+          <ideaLabel>Mercy makes a neighbor.</ideaLabel>
+          <whyHard>Juniper Wick keeps the east porch. Mercy makes a neighbor; pedigree does not — the morning lamp holds that line.</whyHard>
+        </match>
+        <hold onFail="easy">
+          <claim>Mercy makes a neighbor; pedigree does not.</claim>
+          <reason>Jesus asks who *proved* to be a neighbor — the one who showed mercy.</reason>
+          <source>Luke 10:36–37</source>
+          <whyCorrect>Jesus asks who *proved* to be a neighbor — the one who showed mercy.</whyCorrect>
+          <whyMisses>
+            <miss>Mercy is unrelated to the question.</miss>
+            <miss>The wounded man must first classify the helper.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Mercy makes a neighbor; pedigree does not.</choice>
+            <choice>The priest who passed by is the measure.</choice>
+            <choice>Neighbor is settled before anyone crosses the road.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>Jesus asks who *proved* to be a neighbor — the one who showed mercy.</choice>
+            <choice>Mercy is unrelated to the question.</choice>
+            <choice>The wounded man must first classify the helper.</choice>
+          </reasonChoices>
+        </hold>
+      </hard>
+      <journal id="" title="" kicker="" unlockAfter="daily-neighbor" scoreFromHeldTier="true">
+        <p />
+        <sources>
+          <source />
+        </sources>
+      </journal>
+    </lesson>
+  </lessons>
+  <streetFacts>
+    <fact evidenceId="ph-road" tripleId="mercy-hollow" ideaId="idea-mercy" place="Story Creek" person="Mercy Wren" ideaLabel="Neighbor is the one who shows mercy." />
+    <fact evidenceId="ph-father" tripleId="father-hollow" ideaId="idea-father" place="Story Creek" person="Mercy Wren" ideaLabel="The father runs with mercy before the speech is done." />
+    <fact evidenceId="ph-seeds" tripleId="seeds-hollow" ideaId="idea-seeds" place="Story Creek" person="Mercy Wren" ideaLabel="The kingdom arrives in pictures." />
+    <fact evidenceId="ph-debt" tripleId="debt-hollow" ideaId="idea-debt" place="Story Creek" person="Mercy Wren" ideaLabel="Received mercy makes refusing mercy a contradiction." />
+    <fact evidenceId="daily-lantern" tripleId="juniper-porch" ideaId="idea-juniper" place="East porch" person="Juniper Wick" ideaLabel="A lamp is meant to be seen." />
+    <fact evidenceId="daily-gems" tripleId="gems-porch" ideaId="idea-gems" place="East porch" person="Juniper Wick" ideaLabel="Jesus taught with pictures you can hold." />
+    <fact evidenceId="daily-seed" tripleId="seed-porch" ideaId="idea-seed" place="East porch" person="Juniper Wick" ideaLabel="The same word meets different soils." />
+    <fact evidenceId="daily-neighbor" tripleId="neighbor-porch" ideaId="idea-neighbor" place="East porch" person="Juniper Wick" ideaLabel="Mercy makes a neighbor." />
+  </streetFacts>
+</areaPack>
