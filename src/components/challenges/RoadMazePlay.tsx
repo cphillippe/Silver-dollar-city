@@ -153,6 +153,8 @@ export function RoadMazePlay({
     if (!canWin(bag, nextHelped, cell) || wonRef.current) return
     wonRef.current = true
     setWon(true)
+    setToast('')
+    setToastWhy('')
     playGemPop('win')
     if (!cleared.current) {
       cleared.current = true
