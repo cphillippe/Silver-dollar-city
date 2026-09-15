@@ -92,12 +92,16 @@ const gemLib = readFileSync(new URL('../src/lib/gemSearch.ts', import.meta.url),
 assert.match(gemLib, /MIN_LEN = 3/)
 assert.match(gemLib, /BONUS_MAX_LEN = BONUS_WORD_MAX/)
 assert.match(gemLib, /COMMON_BONUS_WORDS/)
-assert.match(gemLib, /planted/)
+assert.match(gemLib, /plantCandidates/)
+assert.match(gemLib, /MIN_BONUS_PLANT = 4/)
+assert.match(gemLib, /MAX_BONUS_PLANT = 6/)
 
 const bonusDict = readFileSync(new URL('../src/lib/commonBonusWords.ts', import.meta.url), 'utf8')
 assert.match(bonusDict, /BONUS_WORD_MAX = 6/)
 assert.match(bonusDict, /BONUS_WORD_MIN = 3/)
 assert.match(bonusDict, /\bBED\b/)
-assert.match(bonusDict, /PLANTED_EXTRAS/)
+assert.match(bonusDict, /isKidFriendlyBonusWord/)
+assert.match(bonusDict, /isPreferredPlantWord/)
+assert.doesNotMatch(bonusDict, /PLANTED_EXTRAS/)
 
 console.log('check-why-blast: ok')
