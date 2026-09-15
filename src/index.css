@@ -6588,19 +6588,15 @@ html[data-easy='on'] .link-block.is-not {
 }
 
 .miss-plus {
-  position: fixed;
-  left: 50%;
-  top: 42%;
-  z-index: 40;
+  display: block;
   margin: 0;
-  transform: translate(-50%, -50%);
-  color: #ffe0e6;
+  color: #fff6e8;
   font-family: var(--sans);
-  font-size: clamp(1.8rem, 9vw, 2.6rem);
+  font-size: clamp(1.35rem, 7vw, 1.9rem);
   font-weight: 800;
-  letter-spacing: 0.04em;
-  text-shadow: 0 4px 0 #a32d48, 0 0 18px rgba(255, 90, 122, 0.7);
-  pointer-events: none;
+  letter-spacing: 0.06em;
+  line-height: 1.05;
+  text-shadow: 0 3px 0 #a32d48;
 }
 
 .why-blast.is-miss .why-score {

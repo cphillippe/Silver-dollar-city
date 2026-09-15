@@ -78,14 +78,9 @@ export function WhyBlastPlay({ id, claim, reason, packMisses, onDone }: WhyBlast
         </p>
       </div>
       {missFlash ? (
-        <>
-          <p className="miss-banner" role="status">
-            <strong>{HOLD_MISS_FACE}</strong>
-          </p>
-          <p className="miss-plus" aria-hidden>
-            {HOLD_MISS_FACE}
-          </p>
-        </>
+        <p className="miss-banner" role="status">
+          <strong className="miss-plus">{HOLD_MISS_FACE}</strong>
+        </p>
       ) : null}
       <div className="why-arena">
         {chips.map((line, index) => {
