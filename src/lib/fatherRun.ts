@@ -22,7 +22,7 @@ export const HOLD_SPEED = 0.078
 export const HOLD_SPEED_REDUCED = 0.12
 export const DASH_BOOST = 0.16
 export const DASH_PERIOD_MS = 2300
-export const DASH_WINDOW_MS = 480
+export const DASH_WINDOW_MS = 560
 export const RETRY_CLOSER = 0.18
 export const MIN_START_GAP = 0.42
 

@@ -8241,6 +8241,15 @@ html[data-easy='on'] .next-tap {
   transform: translateX(-50%);
 }
 
+.cta-dock.run-dock {
+  gap: 0;
+}
+
+.cta-dock.run-dock .run-pad,
+.cta-dock.run-dock .btn {
+  width: 100%;
+}
+
 .run-pad {
   min-height: 72px;
   border: 0;
