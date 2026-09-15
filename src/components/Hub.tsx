@@ -73,11 +73,13 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
           <p className="quiet">
             {focus === 'hold'
               ? 'The story is open. Hold the line.'
-              : coldMercy
-                ? 'Find Mercy’s story at Story Creek.'
-                : storyPlayFor(loopId) === 'father-run'
-                  ? EASY.runHome
-                  : 'Find the gems. The story opens as you play.'}
+              : storyPlayFor(loopId) === 'father-run'
+                ? EASY.runHome
+                : storyPlayFor(loopId) === 'road-maze'
+                  ? EASY.mazeHome
+                  : coldMercy
+                    ? 'Find Mercy’s story at Story Creek.'
+                    : 'Find the gems. The story opens as you play.'}
           </p>
         </header>
         <nav className="easy-core" aria-label="Play">
@@ -86,7 +88,11 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
             className={`btn xl ${focus === 'match' ? 'primary' : ''}`}
             onClick={() => onNavigate({ name: 'link' })}
           >
-            {storyPlayFor(loopId) === 'father-run' ? EASY.runMatch : EASY.matchCta}
+            {storyPlayFor(loopId) === 'father-run'
+              ? EASY.runMatch
+              : storyPlayFor(loopId) === 'road-maze'
+                ? EASY.mazeMatch
+                : EASY.matchCta}
           </button>
           <button
             type="button"

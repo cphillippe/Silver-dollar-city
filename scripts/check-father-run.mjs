@@ -35,10 +35,10 @@ assert.equal(FATHER_RUN_CLAIM, 'The father runs with mercy before the speech is 
 assert.equal(FATHER_RUN_HINT, 'The run comes before the apology is done.')
 assert.equal(FATHER_RUN_WIN, 'Hugged!')
 assert.equal(storyPlayFor('ph-father'), 'father-run')
-assert.equal(storyPlayFor('ph-road'), 'panel-blast')
+assert.equal(storyPlayFor('ph-road'), 'road-maze')
 assert.equal(storyPlayFor('ph-debt'), 'panel-blast')
 assert.equal(lessonStory('ph-father').play, 'father-run')
-assert.equal(lessonStory('ph-road').play, 'panel-blast')
+assert.equal(lessonStory('ph-road').play, 'road-maze')
 
 const harvest = packLesson('ph-father')?.easy.learn ?? ''
 assert.match(harvest, /hired-hand speech/)

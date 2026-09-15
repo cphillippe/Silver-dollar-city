@@ -2,6 +2,7 @@ import { evidenceFor } from '../content/evidence.ts'
 import { packLesson } from '../content/packCatalog.ts'
 import { EASY, easyChromeLine, easyWhyLine } from './easy.ts'
 import { FATHER_RUN_CLAIM } from './fatherRun.ts'
+import { ROAD_MAZE_CLAIM } from './roadMaze.ts'
 import type { GemWord } from './gemSearch.ts'
 
 export interface SuccessBeat {
@@ -49,4 +50,8 @@ export function holdSuccessBeat(claim: string, why: string): SuccessBeat {
 
 export function fatherWinBeat(): SuccessBeat {
   return { title: `Yes · ${FATHER_RUN_CLAIM.replace(/\.$/, '')}`, why: EASY.fatherWinWhy }
+}
+
+export function mazeWinBeat(): SuccessBeat {
+  return { title: `Yes · ${ROAD_MAZE_CLAIM.replace(/\.$/, '')}`, why: EASY.mazeWinWhy }
 }
