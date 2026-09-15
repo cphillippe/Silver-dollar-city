@@ -8278,7 +8278,9 @@ html[data-easy='on'] .next-tap {
 }
 
 .play.is-father-run .win-stamp-wrap {
-  top: 38%;
+  position: absolute;
+  top: 64px;
+  left: 50%;
 }
 
 @keyframes run-bob {
