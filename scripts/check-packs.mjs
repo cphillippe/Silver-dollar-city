@@ -103,6 +103,10 @@ let hold = applyHoldSuccess(fresh, 'ph-road')
 assert.equal(hold.lessonScore['ph-road'], 10)
 assert.equal(hold.lessonTier['ph-road'], 'medium')
 assert.equal(journalPoints(hold), 10)
+assert.equal(
+  journalPoints({ ...hold, matchBonus: { 'ph-road': 100 } }),
+  110,
+)
 assert.deepEqual(journalTierCounts(hold), { easy: 1, medium: 0, hard: 0 })
 
 hold = applyHoldSuccess({ ...fresh, ...hold }, 'ph-road')

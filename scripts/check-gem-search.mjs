@@ -3,13 +3,22 @@ import { readFileSync } from 'node:fs'
 import { EASY_LINE_ORDER } from '../src/lib/easy.ts'
 import { packLesson } from '../src/content/packCatalog.ts'
 import {
+  bonusWordsFor,
   buildGemPuzzle,
   gemWordsFor,
   isStraightPath,
+  matchBonusWord,
   matchGemWord,
   pathLetters,
   tryAddToPath,
 } from '../src/lib/gemSearch.ts'
+import {
+  applyMatchBonus,
+  bonusFace,
+  consumeMatchExtra,
+  MATCH_BONUS_POINTS,
+} from '../src/lib/matchBonus.ts'
+import { gemBonusBeat, gemTargetBeat, matchClearBeat } from '../src/lib/successBeat.ts'
 import {
   splitStorySentences,
   resolveStoryMedia,
@@ -51,6 +60,32 @@ const grown = tryAddToPath(
 )
 assert.equal(grown.length, 2)
 
+const mercyBonusPool = bonusWordsFor('ph-road')
+assert.ok(mercyBonusPool.includes('ROAD'), 'road is a mercy bonus')
+assert.ok(mercyBonusPool.includes('HELP'), 'help is a mercy bonus')
+assert.ok(
+  mercyBonusPool.every((word) => !mercyWords.some((target) => target.text === word)),
+  'bonus is not a required chip',
+)
+assert.equal(MATCH_BONUS_POINTS, 100)
+const planted = mercy.bonus.filter((word) => (mercy.bonusPaths[word.id] ?? []).length === word.text.length)
+assert.ok(planted.length >= 1, 'mercy plants a bonus word')
+for (const word of planted) {
+  assert.equal(pathLetters(mercy.bonusPaths[word.id], mercy.letters), word.text)
+  assert.equal(isStraightPath(mercy.bonusPaths[word.id]), true)
+  assert.equal(matchBonusWord(mercy.bonusPaths[word.id], mercy, [])?.text, word.text)
+  assert.equal(matchGemWord(mercy.bonusPaths[word.id], mercy, []), null)
+}
+const awarded = applyMatchBonus({ matchBonus: {}, matchExtra: {} }, 'ph-road')
+assert.equal(awarded.matchBonus['ph-road'], 100)
+assert.equal(awarded.matchExtra['ph-road'], 1)
+assert.equal(bonusFace(100), '+100 bonus')
+assert.equal(consumeMatchExtra(awarded, 'ph-road').matchExtra['ph-road'], undefined)
+assert.match(gemBonusBeat('Help').title, /\+100/)
+assert.match(gemBonusBeat('Help').why, /extra try/i)
+assert.match(gemTargetBeat(mercyWords[0]).title, /Yes/)
+assert.match(matchClearBeat('ph-road').title, /Neighbor/)
+
 for (const id of EASY_LINE_ORDER) {
   const puzzle = buildGemPuzzle(id)
   assert.ok(puzzle.words.length >= 3, `${id} has words`)
@@ -81,6 +116,25 @@ assert.match(playSrc, /StoryStrip/)
 assert.match(playSrc, /onClear/)
 assert.match(playSrc, /revealPanel/)
 assert.match(playSrc, /winStamp/)
+assert.match(playSrc, /recordMatchBonus/)
+assert.match(playSrc, /EASY\.moreMatch/)
+assert.match(playSrc, /EASY\.bonusHint/)
+assert.match(playSrc, /\+100/)
+assert.match(playSrc, /bonus-plus/)
+assert.match(playSrc, /match-yes/)
+assert.match(playSrc, /matchBonusWord/)
+assert.match(
+  readFileSync(new URL('../src/components/Journal.tsx', import.meta.url), 'utf8'),
+  /\+100 bonus|bonusFace/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/RecallGate.tsx', import.meta.url), 'utf8'),
+  /holdSuccessBeat/,
+)
+assert.match(
+  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  /Yes — keep this/,
+)
 assert.match(
   readFileSync(new URL('../src/components/StoryStrip.tsx', import.meta.url), 'utf8'),
   /story-hero/,

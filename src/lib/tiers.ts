@@ -70,8 +70,16 @@ export function applyHoldFail<T extends Pick<ProgressState, 'lessonTier'>>(
   return { lessonTier: { ...(progress.lessonTier ?? {}), [id]: 'easy' } }
 }
 
-export function journalPoints(progress: Pick<ProgressState, 'lessonScore'>): number {
+export function journalHoldPoints(progress: Pick<ProgressState, 'lessonScore'>): number {
   return Object.values(progress.lessonScore ?? {}).reduce((sum, value) => sum + value, 0)
+}
+
+export function journalPoints(
+  progress: Pick<ProgressState, 'lessonScore' | 'matchBonus'>,
+): number {
+  const hold = journalHoldPoints(progress)
+  const bonus = Object.values(progress.matchBonus ?? {}).reduce((sum, value) => sum + value, 0)
+  return hold + bonus
 }
 
 export function journalTierCounts(progress: Pick<ProgressState, 'lessonScore'>): {

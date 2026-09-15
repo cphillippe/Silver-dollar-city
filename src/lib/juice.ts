@@ -33,7 +33,7 @@ export function prefersReducedMotion(): boolean {
 let gemAudio: AudioContext | null = null
 
 /** Short candy pop — fail quiet if the browser blocks audio. */
-export function playGemPop(kind: 'find' | 'win' | 'miss' = 'find') {
+export function playGemPop(kind: 'find' | 'win' | 'miss' | 'bonus' = 'find') {
   if (typeof window === 'undefined' || prefersReducedMotion()) return
   try {
     gemAudio ??= new AudioContext()
@@ -42,22 +42,22 @@ export function playGemPop(kind: 'find' | 'win' | 'miss' = 'find') {
     const now = ctx.currentTime
     const osc = ctx.createOscillator()
     const gain = ctx.createGain()
-    osc.type = kind === 'miss' ? 'sawtooth' : 'triangle'
-    const start = kind === 'win' ? 660 : kind === 'miss' ? 180 : 880
-    const end = kind === 'win' ? 1320 : kind === 'miss' ? 90 : 240
+    osc.type = kind === 'miss' ? 'sawtooth' : kind === 'bonus' ? 'sine' : 'triangle'
+    const start = kind === 'win' ? 660 : kind === 'bonus' ? 990 : kind === 'miss' ? 180 : 880
+    const end = kind === 'win' ? 1320 : kind === 'bonus' ? 1560 : kind === 'miss' ? 90 : 240
     osc.frequency.setValueAtTime(start, now)
-    osc.frequency.exponentialRampToValueAtTime(end, now + (kind === 'win' ? 0.28 : 0.16))
-    gain.gain.setValueAtTime(kind === 'miss' ? 0.04 : 0.11, now)
-    gain.gain.exponentialRampToValueAtTime(0.001, now + (kind === 'win' ? 0.32 : 0.18))
+    osc.frequency.exponentialRampToValueAtTime(end, now + (kind === 'win' ? 0.28 : kind === 'bonus' ? 0.22 : 0.16))
+    gain.gain.setValueAtTime(kind === 'miss' ? 0.04 : kind === 'bonus' ? 0.13 : 0.11, now)
+    gain.gain.exponentialRampToValueAtTime(0.001, now + (kind === 'win' ? 0.32 : kind === 'bonus' ? 0.26 : 0.18))
     osc.connect(gain)
     gain.connect(ctx.destination)
     osc.start(now)
-    osc.stop(now + 0.34)
+    osc.stop(now + (kind === 'bonus' ? 0.4 : 0.34))
   } catch {
     /* autoplay / WebAudio can fail — juice still reads as motion */
   }
   try {
-    if (kind !== 'miss') window.navigator.vibrate?.(kind === 'win' ? [18, 40, 24] : 16)
+    if (kind !== 'miss') window.navigator.vibrate?.(kind === 'win' ? [18, 40, 24] : kind === 'bonus' ? [12, 20, 18] : 16)
   } catch {
     /* vibration is optional */
   }

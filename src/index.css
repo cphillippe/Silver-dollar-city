@@ -8375,13 +8375,131 @@ html[data-easy='on'] .next-tap {
   }
 }
 
+.gem-bonus-hint {
+  margin: 0;
+  text-align: center;
+  color: #ffe7a8;
+  font-size: 0.82rem;
+  line-height: 1.3;
+}
+
+.gem-toast.is-yes,
+.gem-toast.is-bonus {
+  display: grid;
+  gap: 2px;
+}
+
+.gem-toast.is-bonus {
+  background: rgba(255, 204, 51, 0.28);
+  border-color: rgba(255, 230, 120, 0.85);
+  color: #fff8d2;
+  box-shadow: 0 0 18px rgba(255, 204, 51, 0.35);
+}
+
+.toast-why {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  opacity: 0.92;
+}
+
+.bonus-plus {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  z-index: 4;
+  margin: 0;
+  transform: translate(-50%, -50%);
+  color: #fff6c8;
+  font-family: var(--sans);
+  font-size: clamp(2rem, 10vw, 3rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-shadow: 0 4px 0 #e09412, 0 0 18px rgba(255, 204, 51, 0.8);
+  animation: bonus-plus-pop 0.9s cubic-bezier(0.2, 1.4, 0.3, 1) both;
+  pointer-events: none;
+}
+
+@keyframes bonus-plus-pop {
+  0% {
+    transform: translate(-50%, -20%) scale(0.4);
+    opacity: 0;
+  }
+  35% {
+    transform: translate(-50%, -55%) scale(1.12);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -80%) scale(1);
+    opacity: 0;
+  }
+}
+
+.play.is-gem-search {
+  position: relative;
+}
+
+.match-score .bonus-pts,
+.bonus-mark {
+  color: #ffe566;
+  font-weight: 800;
+}
+
+.held-mark.bonus-mark {
+  background: rgba(255, 204, 51, 0.22);
+  color: #fff3b0;
+}
+
+.match-yes {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255, 204, 51, 0.28), rgba(255, 90, 122, 0.16));
+  border: 1px solid rgba(255, 230, 140, 0.7);
+  color: #fff8e8;
+  text-align: center;
+}
+
+.match-yes strong {
+  font-size: 1.02rem;
+  line-height: 1.25;
+}
+
+.match-yes span {
+  font-size: 0.88rem;
+  font-weight: 650;
+  opacity: 0.92;
+}
+
+.hold-kept {
+  margin: 8px 0 0;
+  color: #fff3b0;
+  font-weight: 700;
+  text-align: center;
+}
+
+.btn.more-match {
+  box-shadow: 0 4px 0 #e09412, inset 0 2px 0 rgba(255, 255, 255, 0.55);
+}
+
+.gem-cell.is-bonus-burst {
+  box-shadow:
+    0 0 16px rgba(255, 204, 51, 0.85),
+    0 4px 0 #e09412,
+    inset 0 3px 0 rgba(255, 255, 255, 0.88);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .play.is-father-run.is-running .run-actor.is-father,
   .play.is-father-run.is-running .run-leg.is-a,
   .play.is-father-run.is-running .run-leg.is-b,
   .run-dust,
   .run-thumb.is-flip,
-  .run-hearts {
+  .run-hearts,
+  .bonus-plus {
     animation: none;
   }
 }

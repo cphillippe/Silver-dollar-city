@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState, type ReactNode } from 'react'
 import { markEasyHeld, markEasyTaught } from '../lib/easy'
+import { applyMatchBonus, consumeMatchExtra as spendMatchExtra } from '../lib/matchBonus'
 import { applyHoldFail, applyHoldSuccess, currentLessonTier } from '../lib/tiers'
 import { appendStreetLinks, STREET_TRIPLES } from '../content/links'
 import { learningFromReview, upsertLearning } from '../lib/learning'
@@ -294,6 +295,19 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     })
   }, [write])
 
+  const recordMatchBonus = useCallback((lineId: string) => {
+    if (!lineId) return
+    setProgress((current) => write({ ...current, ...applyMatchBonus(current, lineId) }))
+  }, [write])
+
+  const consumeMatchExtra = useCallback((lineId: string) => {
+    if (!lineId) return
+    setProgress((current) => {
+      if (!(current.matchExtra?.[lineId] ?? 0)) return current
+      return write({ ...current, ...spendMatchExtra(current, lineId) })
+    })
+  }, [write])
+
   const recordStreetLinks = useCallback((tripleIds: string[]) => {
     if (tripleIds.length === 0) return
     setProgress((current) => {
@@ -364,6 +378,8 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       recordHeld,
       recordReview,
       recordLessonHold,
+      recordMatchBonus,
+      consumeMatchExtra,
       snoozeReviews,
       markMiss,
       recordNight,
@@ -386,6 +402,8 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       recordNight,
       recordReview,
       recordLessonHold,
+      recordMatchBonus,
+      consumeMatchExtra,
       snoozeReviews,
       recordStars,
       reset,

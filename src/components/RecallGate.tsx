@@ -3,6 +3,7 @@ import { shuffle } from '../lib/shuffle'
 import { takeawayLines, type EvidenceBrief } from '../content/evidence'
 import { STORY } from '../content/story'
 import { EASY, easyFacingLine, easyWhyLine, isEasy, uniqueHoldChoices } from '../lib/easy'
+import { holdSuccessBeat } from '../lib/successBeat'
 import { learningBeat } from '../lib/learning'
 import { learningPicture, toolForEvidence } from '../lib/watchTools'
 import { useProgress } from '../store/progress'
@@ -207,7 +208,11 @@ export function RecallGate({
           </>
         ) : (
           <>
-            <p className="next-tap">{reasonLocked ? EASY.keepThis : EASY.tapWhy}</p>
+            <p className="next-tap">
+              {reasonLocked
+                ? holdSuccessBeat(heldClaim, easyWhyLine(heldReason)).title
+                : EASY.tapWhy}
+            </p>
             <p className="recall-line rehearse-stem">
               {easyFacingLine(brief.id, heldClaim)}
             </p>
@@ -215,6 +220,7 @@ export function RecallGate({
               <>
                 <div className="reason-scroll">
                   <p className="reason-held">{easyWhyLine(heldReason)}</p>
+                  <p className="hold-kept">{EASY.holdKept}</p>
                 </div>
                 <div className="cta-dock">
                   <button
