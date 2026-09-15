@@ -5,6 +5,7 @@ import {
   cellKey,
   cellsStillNeeded,
   gemHue,
+  isStraightPath,
   matchBonusWord,
   matchGemWord,
   sameCell,
@@ -41,7 +42,7 @@ function cellFromPoint(x: number, y: number): GemCoord | null {
 }
 
 export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: GemSearchPlayProps) {
-  const { progress, recordMatchBonus, consumeMatchExtra } = useProgress()
+  const { progress, recordMatchBonus, recordMatchMiss, consumeMatchExtra } = useProgress()
   const [round, setRound] = useState(0)
   const puzzle = useMemo(() => buildGemPuzzle(lineId, round), [lineId, round])
   const panels = useMemo(
@@ -61,6 +62,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   const [toast, setToast] = useState('')
   const [toastWhy, setToastWhy] = useState('')
   const [toastBonus, setToastBonus] = useState(false)
+  const [toastMiss, setToastMiss] = useState(false)
   const [plusFlash, setPlusFlash] = useState(false)
   const [status, setStatus] = useState<'play' | 'ok'>('play')
   const [winStamp, setWinStamp] = useState(false)
@@ -101,6 +103,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     setToast('')
     setToastWhy('')
     setToastBonus(false)
+    setToastMiss(false)
     setPlusFlash(false)
     setStatus('play')
     setWinStamp(false)
@@ -122,19 +125,21 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [round])
 
-  function flashToast(line: string, why = '', bonus = false) {
+  function flashToast(line: string, why = '', bonus = false, miss = false) {
     setToast(line)
     setToastWhy(why)
     setToastBonus(bonus)
+    setToastMiss(miss)
     window.setTimeout(
       () =>
         setToast((current) => {
           if (current !== line) return current
           setToastWhy('')
           setToastBonus(false)
+          setToastMiss(false)
           return ''
         }),
-      bonus ? 2800 : 1800,
+      bonus || miss ? 2800 : 1800,
     )
   }
 
@@ -196,13 +201,11 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     const trail = puzzle.paths[nextWord.id] ?? []
     if (count >= 4 && trail.length) {
       setHint(trail.map(cellKey))
-      flashToast(`Try this word: ${nextWord.label}.`)
       return
     }
     if (count >= 2) {
       const first = trail[0]
       setHint(first ? [cellKey(first)] : [])
-      flashToast(`Try this word: ${nextWord.label}.`)
     }
   }
 
@@ -248,7 +251,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
 
   function missIfSwipe(nextPath: GemCoord[]) {
     if (submit(nextPath)) return
-    if (nextPath.length < 3) {
+    if (nextPath.length < 2) {
       writePath([])
       return
     }
@@ -257,6 +260,14 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     const count = misses + 1
     setMisses(count)
     onMiss()
+    const straight = isStraightPath(nextPath)
+    const why = !straight || nextPath.length < 3 ? EASY.bonusMissStraight : EASY.bonusMissWord
+    recordMatchMiss(lineId)
+    if (count >= 2 && nextWord) {
+      flashToast(EASY.missPenalty, `Try this word: ${nextWord.label}.`, false, true)
+    } else {
+      flashToast(EASY.missPenalty, why, false, true)
+    }
     teachHint(count)
     window.setTimeout(() => {
       setShake(false)
@@ -364,6 +375,11 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       ) : null}
       {toastBonus && toast ? (
         <p className="bonus-banner" role="status">
+          <strong>{toast}</strong>
+          {toastWhy ? <span>{toastWhy}</span> : null}
+        </p>
+      ) : toastMiss && toast ? (
+        <p className="miss-banner" role="status">
           <strong>{toast}</strong>
           {toastWhy ? <span>{toastWhy}</span> : null}
         </p>

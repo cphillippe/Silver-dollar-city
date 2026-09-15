@@ -1,6 +1,10 @@
 import { useCallback, useMemo, useState, type ReactNode } from 'react'
 import { markEasyHeld, markEasyTaught } from '../lib/easy'
-import { applyMatchBonus, consumeMatchExtra as spendMatchExtra } from '../lib/matchBonus'
+import {
+  applyMatchBonus,
+  applyMatchMiss,
+  consumeMatchExtra as spendMatchExtra,
+} from '../lib/matchBonus'
 import { applyHoldFail, applyHoldSuccess, currentLessonTier } from '../lib/tiers'
 import { appendStreetLinks, STREET_TRIPLES } from '../content/links'
 import { learningFromReview, upsertLearning } from '../lib/learning'
@@ -300,6 +304,11 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     setProgress((current) => write({ ...current, ...applyMatchBonus(current, lineId) }))
   }, [write])
 
+  const recordMatchMiss = useCallback((lineId: string) => {
+    if (!lineId) return
+    setProgress((current) => write({ ...current, ...applyMatchMiss(current, lineId) }))
+  }, [write])
+
   const consumeMatchExtra = useCallback((lineId: string) => {
     if (!lineId) return
     setProgress((current) => {
@@ -379,6 +388,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       recordReview,
       recordLessonHold,
       recordMatchBonus,
+      recordMatchMiss,
       consumeMatchExtra,
       snoozeReviews,
       markMiss,
@@ -403,6 +413,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       recordReview,
       recordLessonHold,
       recordMatchBonus,
+      recordMatchMiss,
       consumeMatchExtra,
       snoozeReviews,
       recordStars,
