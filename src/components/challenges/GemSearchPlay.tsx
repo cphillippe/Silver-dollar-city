@@ -43,8 +43,9 @@ function cellFromPoint(x: number, y: number): GemCoord | null {
 
 export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: GemSearchPlayProps) {
   const { progress, recordMatchBonus, recordMatchMiss, consumeMatchExtra } = useProgress()
+  const [deal, setDeal] = useState(() => 1 + Math.floor(Math.random() * 1_000_000))
   const [round, setRound] = useState(0)
-  const puzzle = useMemo(() => buildGemPuzzle(lineId, round), [lineId, round])
+  const puzzle = useMemo(() => buildGemPuzzle(lineId, deal + round), [lineId, deal, round])
   const panels = useMemo(
     () => beats ?? storyPanelsFor(lineId, puzzle.words.length),
     [beats, lineId, puzzle.words.length],
@@ -112,6 +113,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   }
 
   useEffect(() => {
+    setDeal(1 + Math.floor(Math.random() * 1_000_000))
     setRound(0)
     resetBoard(false)
     // line change only

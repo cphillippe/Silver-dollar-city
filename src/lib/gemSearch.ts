@@ -4,7 +4,12 @@ import { easyChromeLine, easyWhoWhere } from './easy.ts'
 import {
   BONUS_WORD_MAX,
   COMMON_BONUS_WORDS,
-  PLANTED_EXTRAS,
+  PLANT_LENGTHS,
+  PLANT_LONGER_MIN,
+  PLANT_WORD_MAX,
+  PLANT_WORD_MIN,
+  isKidFriendlyPlant,
+  plantableBonusWords,
 } from './commonBonusWords.ts'
 
 export type GemKind = 'person' | 'place' | 'idea'
@@ -137,8 +142,9 @@ const MIN_LEN = 3
 const MAX_LEN = 8
 const MAX_WORDS = 4
 const BONUS_MAX_LEN = BONUS_WORD_MAX
-const MAX_BONUS_PLANT = 5
-const SHARED_BONUS = [...PLANTED_EXTRAS, 'HELP', 'CARE', 'KIND', 'GIFT', 'ROAD']
+const MIN_BONUS_PLANT = 4
+const MAX_BONUS_PLANT = 6
+const SHARED_BONUS = ['HELP', 'CARE', 'KIND', 'GIFT', 'ROAD']
 
 /**
  * Short English extras (3–6). Straight-line Set lookup — Bill’s Gap/Bed swipe.
@@ -360,16 +366,63 @@ function tryPlaceWord(
   word: string,
   starts: GemCoord[],
   rand: () => number,
+  blocked?: Set<string>,
 ): GemCoord[] | null {
   const dirs = shuffleSeed(EASY_DIRS, rand)
   const spots = shuffleSeed(starts, rand)
   for (const dir of dirs) {
     for (const start of spots) {
       if (!canPlace(grid, word, start, dir)) continue
+      if (blocked && placementHits(start, dir, word.length, blocked)) continue
       return writeWord(grid, word, start, dir)
     }
   }
   return null
+}
+
+function placementHits(start: GemCoord, dir: GemCoord, len: number, blocked: Set<string>): boolean {
+  for (let i = 0; i < len; i += 1) {
+    if (blocked.has(cellKey({ r: start.r + dir.r * i, c: start.c + dir.c * i }))) return true
+  }
+  return false
+}
+
+function requiredCells(paths: Record<string, GemCoord[]>): Set<string> {
+  const blocked = new Set<string>()
+  for (const path of Object.values(paths)) {
+    for (const cell of path) blocked.add(cellKey(cell))
+  }
+  return blocked
+}
+
+/** Fresh mix of 3/4/5/6-letter extras — shuffled per Match salt, never a hardcoded five. */
+export function plantQueueFor(targets: Set<string>, rand: () => number): string[] {
+  const buckets: Record<number, string[]> = { 3: [], 4: [], 5: [], 6: [] }
+  for (const word of plantableBonusWords()) {
+    if (!isKidFriendlyPlant(word)) continue
+    if (targets.has(word) || STOP.has(word)) continue
+    if ([...targets].some((chip) => chip.includes(word) || word.includes(chip))) continue
+    if (word.length < PLANT_WORD_MIN || word.length > PLANT_WORD_MAX) continue
+    buckets[word.length]?.push(word)
+  }
+  for (const len of PLANT_LENGTHS) {
+    buckets[len] = shuffleSeed(buckets[len] ?? [], rand)
+  }
+  const mixed: string[] = []
+  const used = new Set<string>()
+  for (const len of shuffleSeed([...PLANT_LENGTHS], rand)) {
+    const pick = (buckets[len] ?? []).find((word) => !used.has(word))
+    if (!pick) continue
+    used.add(pick)
+    mixed.push(pick)
+  }
+  const leftover = shuffleSeed(
+    PLANT_LENGTHS.flatMap((len) => (buckets[len] ?? []).filter((word) => !used.has(word))),
+    rand,
+  )
+  const longer = leftover.filter((word) => word.length >= PLANT_LONGER_MIN)
+  const shorts = leftover.filter((word) => word.length === PLANT_WORD_MIN)
+  return [...mixed, ...longer, ...shorts]
 }
 
 function scanBonusOnBoard(
@@ -433,20 +486,40 @@ export function buildGemPuzzle(lineId: string, salt = 0): GemPuzzle {
   const plantedWords: GemWord[] = []
   const planted = new Set<string>()
   const targets = new Set(words.map((word) => word.text))
-  const prefer = ['BED', 'GAP', ...PLANTED_EXTRAS, ...(LESSON_BONUS[lineId] ?? []), ...SHARED_BONUS].filter(
-    (text, index, all) =>
-      all.indexOf(text) === index && bonusBitOk(text) && !targets.has(text),
-  )
-  const rest = bonusPool.filter((text) => !prefer.includes(text))
-  for (const text of [...prefer, ...rest]) {
-    if (plantedWords.length >= MAX_BONUS_PLANT) break
-    const placed = tryPlaceWord(grid, text, starts, rand) ?? placeFallback(grid, text)
-    if (!placed) continue
+  const blocked = requiredCells(paths)
+  const want = MIN_BONUS_PLANT + Math.floor(rand() * (MAX_BONUS_PLANT - MIN_BONUS_PLANT + 1))
+  const queue = plantQueueFor(targets, rand)
+
+  const plantOne = (text: string): boolean => {
+    if (planted.has(text)) return false
+    const placed =
+      tryPlaceWord(grid, text, starts, rand, blocked) ??
+      tryPlaceWord(grid, text, starts, rand) ??
+      placeFallback(grid, text)
+    if (!placed) return false
     const word = makeBonusWord(text)
     plantedWords.push(word)
     bonus.push(word)
     bonusPaths[word.id] = placed
     planted.add(text)
+    return true
+  }
+
+  for (const text of queue) {
+    if (plantedWords.length >= want) break
+    plantOne(text)
+  }
+  if (
+    plantedWords.length < MIN_BONUS_PLANT ||
+    !plantedWords.some((word) => word.text.length >= PLANT_LONGER_MIN)
+  ) {
+    for (const text of queue) {
+      const hasLonger = plantedWords.some((word) => word.text.length >= PLANT_LONGER_MIN)
+      if (hasLonger && plantedWords.length >= MIN_BONUS_PLANT) break
+      if (!hasLonger && text.length < PLANT_LONGER_MIN) continue
+      if (plantedWords.length >= MAX_BONUS_PLANT) break
+      plantOne(text)
+    }
   }
 
   const letters = grid.map((row) =>
