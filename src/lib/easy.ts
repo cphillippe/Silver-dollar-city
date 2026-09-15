@@ -44,6 +44,7 @@ export const EASY = {
   bonusHint: 'Find lesson words — extras give +100 & another try',
   bonusMissWord: 'Not a bonus word',
   bonusMissStraight: 'Try a full straight word',
+  missPenalty: 'Miss −25',
   fatherWinWhy: 'The father hugs him first.',
   readAgain: 'Read this one again.',
   claimTeach: 'A claim is the main idea we hold to be true.',

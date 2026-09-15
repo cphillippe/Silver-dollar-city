@@ -23,9 +23,11 @@ import {
 } from '../src/lib/gemSearch.ts'
 import {
   applyMatchBonus,
+  applyMatchMiss,
   bonusFace,
   consumeMatchExtra,
   MATCH_BONUS_POINTS,
+  MATCH_MISS_POINTS,
 } from '../src/lib/matchBonus.ts'
 import { gemBonusBeat, gemTargetBeat, matchClearBeat } from '../src/lib/successBeat.ts'
 import {
@@ -77,9 +79,10 @@ assert.ok(
   'bonus is not a required chip',
 )
 assert.equal(MATCH_BONUS_POINTS, 100)
+assert.equal(MATCH_MISS_POINTS, 25)
 const planted = mercy.bonus.filter((word) => (mercy.bonusPaths[word.id] ?? []).length === word.text.length)
-assert.ok(planted.length >= 2, 'mercy plants bonus words')
-assert.ok(mercy.planted.length >= 2, 'planted extras on the board')
+assert.ok(planted.length >= 5, 'mercy plants bonus words')
+assert.ok(mercy.planted.length >= 5, 'planted extras on the board')
 assert.ok(
   mercy.planted.some((word) => word.text === 'GAP' || word.text === 'ROAD' || word.text === 'HELP'),
 )
@@ -140,7 +143,14 @@ for (const word of planted) {
 const awarded = applyMatchBonus({ matchBonus: {}, matchExtra: {} }, 'ph-road')
 assert.equal(awarded.matchBonus['ph-road'], 100)
 assert.equal(awarded.matchExtra['ph-road'], 1)
+const afterMiss = applyMatchMiss(awarded, 'ph-road')
+assert.equal(afterMiss.matchBonus['ph-road'], 75)
+assert.equal(awarded.matchExtra['ph-road'], 1, 'miss does not spend extra tries')
+assert.equal(applyMatchMiss({ matchBonus: {} }, 'ph-road').matchBonus['ph-road'], undefined)
+assert.equal(applyMatchMiss({ matchBonus: { 'ph-road': 20 } }, 'ph-road').matchBonus['ph-road'], undefined)
 assert.equal(bonusFace(100), '+100 bonus')
+assert.equal(bonusFace(75), '+75 bonus')
+assert.equal(bonusFace(0), '')
 assert.equal(consumeMatchExtra(awarded, 'ph-road').matchExtra['ph-road'], undefined)
 assert.match(gemBonusBeat('Help').title, /BONUS! \+100/)
 assert.match(gemBonusBeat('Help').why, /Extra try/)
@@ -156,6 +166,11 @@ for (const id of EASY_LINE_ORDER) {
     `${id} does not require Bed as a chip`,
   )
   assert.ok(puzzle.planted.some((word) => word.text === 'BED'), `${id} plants Bed`)
+  assert.ok(puzzle.planted.length >= 5, `${id} plants several extras`)
+  assert.ok(
+    new Set(puzzle.planted.map((word) => word.text)).size >= 4,
+    `${id} plants distinct extras`,
+  )
   for (const word of puzzle.words) {
     assert.ok(word.text.length >= 3 && word.text.length <= 8, `${id} ${word.text} length`)
     const path = puzzle.paths[word.id]
@@ -183,6 +198,7 @@ assert.match(playSrc, /onClear/)
 assert.match(playSrc, /revealPanel/)
 assert.match(playSrc, /winStamp/)
 assert.match(playSrc, /recordMatchBonus/)
+assert.match(playSrc, /recordMatchMiss/)
 assert.match(playSrc, /EASY\.moreMatch/)
 assert.match(playSrc, /bonus-banner/)
 assert.match(playSrc, /EASY\.bonusHint/)
@@ -193,6 +209,7 @@ assert.match(playSrc, /match-yes/)
 assert.match(playSrc, /matchBonusWord/)
 assert.match(playSrc, /EASY\.bonusMissWord/)
 assert.match(playSrc, /EASY\.bonusMissStraight/)
+assert.match(playSrc, /EASY\.missPenalty/)
 assert.match(playSrc, /is-miss/)
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
@@ -201,6 +218,10 @@ assert.match(
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
   /Try a full straight word/,
+)
+assert.match(
+  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  /Miss −25/,
 )
 
 const debtBoard = buildGemPuzzle('ph-debt')

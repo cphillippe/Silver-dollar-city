@@ -13,6 +13,8 @@ export const CHANGELOG: ChangeNote[] = [
     when: '2026-09-15',
     items: [
       'Easy Match extras: a tiny offline dictionary of common English words (length 3–6) scores BONUS! +100 and Extra try! on a straight-line swipe — Bed is in the set and planted on boards',
+      'Each Easy gem board plants several extras (Bed, Gap, Cat, Hat, Run and more) so more than one short word is actually findable',
+      'A wrong, non-word, or non-straight extra swipe costs Miss −25 (floor 0) with a shake — it does not wipe the round or required chips',
       'Failed swipes shake and say Not a bonus word or Try a full straight word, so extras never fail silently',
       'Required lesson chips still unlock story panels. Father-run and road-maze stay their own games',
 
