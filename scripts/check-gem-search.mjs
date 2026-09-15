@@ -5,7 +5,9 @@ import { packLesson } from '../src/content/packCatalog.ts'
 import {
   bonusWordsFor,
   buildGemPuzzle,
+  findStraightSpelling,
   gemWordsFor,
+  isBonusSpelling,
   isStraightPath,
   matchBonusWord,
   matchGemWord,
@@ -69,7 +71,33 @@ assert.ok(
 )
 assert.equal(MATCH_BONUS_POINTS, 100)
 const planted = mercy.bonus.filter((word) => (mercy.bonusPaths[word.id] ?? []).length === word.text.length)
-assert.ok(planted.length >= 1, 'mercy plants a bonus word')
+assert.ok(planted.length >= 2, 'mercy plants bonus words')
+assert.ok(mercy.planted.length >= 2, 'planted extras on the board')
+assert.ok(
+  mercy.planted.some((word) => word.text === 'GAP' || word.text === 'ROAD' || word.text === 'HELP'),
+)
+assert.ok(mercyBonusPool.includes('GAP'), 'gap is a shared extra')
+
+const fatherBoard = buildGemPuzzle('ph-father')
+assert.ok(fatherBoard.planted.some((word) => word.text === 'GAP'), 'father plants Gap')
+assert.equal(isBonusSpelling('GAP', fatherBoard), true)
+assert.equal(isBonusSpelling('QQQ', fatherBoard), false)
+assert.equal(isBonusSpelling('FAT', fatherBoard), false, 'FAT is a piece of FATHER')
+const gapPath =
+  fatherBoard.bonusPaths[fatherBoard.planted.find((word) => word.text === 'GAP')?.id ?? ''] ??
+  findStraightSpelling(fatherBoard.letters, 'GAP')
+assert.ok(gapPath && gapPath.length === 3, 'Gap sits on the father board')
+assert.equal(pathLetters(gapPath, fatherBoard.letters), 'GAP')
+assert.equal(matchBonusWord(gapPath, fatherBoard, [])?.text, 'GAP')
+assert.equal(matchGemWord(gapPath, fatherBoard, []), null)
+assert.equal(matchBonusWord([...gapPath].reverse(), fatherBoard, [])?.text, 'GAP')
+const mercyChip = fatherBoard.words.find((word) => word.text === 'MERCY')
+if (mercyChip) {
+  assert.equal(matchGemWord(fatherBoard.paths[mercyChip.id], fatherBoard, [])?.text, 'MERCY')
+  assert.equal(matchBonusWord(fatherBoard.paths[mercyChip.id], fatherBoard, []), null)
+}
+const reverseHelp = [...(mercy.bonusPaths[mercy.planted[0].id] ?? [])].reverse()
+assert.equal(matchBonusWord(reverseHelp, mercy, [])?.text, mercy.planted[0].text)
 for (const word of planted) {
   assert.equal(pathLetters(mercy.bonusPaths[word.id], mercy.letters), word.text)
   assert.equal(isStraightPath(mercy.bonusPaths[word.id]), true)
@@ -81,8 +109,8 @@ assert.equal(awarded.matchBonus['ph-road'], 100)
 assert.equal(awarded.matchExtra['ph-road'], 1)
 assert.equal(bonusFace(100), '+100 bonus')
 assert.equal(consumeMatchExtra(awarded, 'ph-road').matchExtra['ph-road'], undefined)
-assert.match(gemBonusBeat('Help').title, /\+100/)
-assert.match(gemBonusBeat('Help').why, /extra try/i)
+assert.match(gemBonusBeat('Help').title, /BONUS! \+100/)
+assert.match(gemBonusBeat('Help').why, /Extra try/)
 assert.match(gemTargetBeat(mercyWords[0]).title, /Yes/)
 assert.match(matchClearBeat('ph-road').title, /Neighbor/)
 
@@ -118,7 +146,9 @@ assert.match(playSrc, /revealPanel/)
 assert.match(playSrc, /winStamp/)
 assert.match(playSrc, /recordMatchBonus/)
 assert.match(playSrc, /EASY\.moreMatch/)
+assert.match(playSrc, /bonus-banner/)
 assert.match(playSrc, /EASY\.bonusHint/)
+assert.match(playSrc, /is-bonus/)
 assert.match(playSrc, /\+100/)
 assert.match(playSrc, /bonus-plus/)
 assert.match(playSrc, /match-yes/)
@@ -197,7 +227,7 @@ for (const id of EASY_LINE_ORDER) {
   const puzzle = buildGemPuzzle(id)
   const panels = storyPanelsFor(id, puzzle.words.length)
   const story = lessonStory(id, puzzle.words.length)
-  const play = id === 'ph-father' ? 'father-run' : id === 'ph-road' ? 'road-maze' : 'panel-blast'
+  const play = 'panel-blast'
   assert.equal(storyPlayFor(id), play, `${id} play`)
   assert.equal(story.play, play)
   assert.deepEqual(story.beats, panels)

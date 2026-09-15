@@ -26,6 +26,8 @@ export interface GemPuzzle {
   bonusPool: string[]
   /** Planted or discovered bonus words on this board. */
   bonus: GemWord[]
+  /** Bonus words placed on purpose so extras are actually findable. */
+  planted: GemWord[]
   bonusPaths: Record<string, GemCoord[]>
 }
 
@@ -131,11 +133,76 @@ const MAX_LEN = 8
 const MAX_WORDS = 4
 const BONUS_MAX_LEN = 6
 const MAX_BONUS_PLANT = 2
+const SHARED_BONUS = ['GAP', 'HELP', 'CARE', 'KIND', 'GIFT', 'ROAD']
 
-/** Authored extras so random fill junk does not score. Lesson text fills the rest. */
+/**
+ * Short English words that often show up in filler (Bill’s Gap swipe).
+ * Straight-line extras on the board score even when they are not lesson chips.
+ */
+const COMMON_BONUS = new Set(
+  `
+  GAP CAP TAP TAG BAG BAT CAT HAT MAT PAT RAT SAT VAT
+  GEM GUM GUN HUG RUN SUN FUN BUN CUP CUT
+  CARE KIND HELP ROAD GIFT HOME ARMS RING
+  SON HUG RUN OIL INN HURT DEBT KING JAIL
+  LAMP HILL CITY LIGHT SKY STAR TOLD DAWN TOMB
+  HEART GRACE CROSS PEACE TRUTH MERCY LOVE HOPE
+  PAD PAN PEN PET PIT POT PUT MAP MAN MEN
+  BIG BIT BUS DAY DIG DIP DOG DOT DRY EAR EAT
+  END FAN FAR FED FIG FIN FIT FLY FUN FUR
+  GET GOT HAM HEN HID HIP HIT HOP HOT HUM HUT
+  JAM JAR JAW JET JOB JOY KEY KID KIT LAB LAP
+  LAW LAY LED LEG LET LID LIP LIT LOG LOT LOW
+  MAD MAP MUD MUG NAP NET NEW NOD NUT OAK
+  OAR OAT ODD OIL OLD OWL PAD PAL PAN PAT
+  PAW PAY PEA PEN PET PIE PIG PIN PIT POD
+  POP POT PUN PUP RAG RAN RAP RAT RAW RAY
+  RED RID RIG RIM RIP ROB ROD ROT ROW RUB
+  RUG RUN SAD SAG SAT SAW SAY SEA SET SIP
+  SIR SIT SIX SKY SOB SON SOW SPA SPY SUM
+  SUN TAB TAG TAN TAP TAR TEA TEN TIE TIN
+  TIP TOE TON TOP TOW TOY TRY TUB TUG VAN
+  WAG WAR WAX WAY WEB WED WET WIN WIT WON
+  YAM YES YET
+  BARN BIRD BLUE BOLD BOND BONE BOOK BORN
+  CAKE CALM CAMP CARD CART CAVE COIN COLD
+  CORN DARK DISH DOOR DOWN DRAW DRUM EACH
+  FACE FAIR FARM FAST FEAR FIRE FISH FLAG
+  FLAT FLOW FOOD FOOT FORT GAME GATE GOLD
+  GOOD GROW HAND HANG HARD HARM HEAD HEAL
+  HEAR HEAT HIDE HOLD HOLE HOLY HOUR HUNT
+  HURT IDEA IRON JOIN JUMP KEEP KISS KITE
+  LAKE LAMP LAND LANE LAST LEFT LIFE LIFT
+  LION LIST LONG LOOK LORD LOST LUCK MADE
+  MAIL MAKE MARK MEAL MEAN MELT MILK MIND
+  MINE MOON NAME NEAR NEAT NEED NEST NOSE
+  NOTE OPEN PACK PAGE PAIN PAIR PARK PART
+  PASS PATH PICK PILE PINK PLAN PLAY PLOT
+  PLUS POND POUR PRAY PULL PUSH RAIL RAIN
+  READ REAL REST RIDE RING RISE ROCK ROLL
+  ROOF ROOM ROSE SAFE SAIL SALE SALT SAND
+  SAVE SEAL SEED SEEK SEEM SELF SEND SHIP
+  SHOP SHOW SHUT SIDE SIGN SILK SING SINK
+  SLIP SLOW SNOW SOAP SOFT SOIL SONG SOON
+  SORT SPIN SPOT STAR STEP STOP SUCH SURE
+  SWIM TALE TALK TALL TAME TEAM TELL TENT
+  THAN THAT THEM THEN THIS TIDE TIME TINY
+  TIRE TOLD TONE TOOL TORN TOWN TREE TRIP
+  TRUE TURN UNDO UNIT UPON USED VAST VIEW
+  WAIT WALK WALL WANT WARM WARN WASH WAVE
+  WEAK WEAR WEEK WELL WENT WEST WIDE WIFE
+  WILD WIND WINE WING WIRE WISH WOLF WOOD
+  WORD WORK WORM WRAP YARD YEAH YEAR
+  `
+    .trim()
+    .split(/\s+/)
+    .filter((bit) => bit.length >= MIN_LEN && bit.length <= BONUS_MAX_LEN && !STOP.has(bit)),
+)
+
+/** Authored extras plus common board words. Lesson text fills the rest. */
 const LESSON_BONUS: Record<string, string[]> = {
-  'ph-road': ['ROAD', 'HELP', 'HURT', 'CARE', 'OIL', 'INN', 'KIND'],
-  'ph-father': ['SON', 'HUG', 'RUN', 'HOME', 'ARMS', 'RING'],
+  'ph-road': ['ROAD', 'HELP', 'HURT', 'CARE', 'OIL', 'INN', 'KIND', 'GAP'],
+  'ph-father': ['GAP', 'SON', 'HUG', 'RUN', 'HOME', 'ARMS', 'RING'],
   'ph-debt': ['DEBT', 'KING', 'JAIL', 'SUM', 'PEER'],
   'wb-creed': ['CREED', 'DIED', 'ROSE', 'PAUL', 'NAMES'],
   'wb-women': ['TOMB', 'WOMEN', 'DAWN', 'TOLD'],
@@ -263,7 +330,7 @@ export function bonusWordsFor(lineId: string): string[] {
   ]
   const seen = new Set<string>()
   const pool: string[] = []
-  for (const bit of [...authored, ...fromText]) {
+  for (const bit of [...authored, ...fromText, ...SHARED_BONUS]) {
     if (!bonusBitOk(bit) || targets.has(bit) || seen.has(bit)) continue
     seen.add(bit)
     pool.push(bit)
@@ -385,6 +452,7 @@ function scanBonusOnBoard(
           if (!ok) continue
           const spelled = pathLetters(path, letters)
           if (!allow.has(spelled) || seen.has(spelled)) continue
+          if ([...taken].some((item) => item.includes(spelled))) continue
           seen.add(spelled)
           found.push({ word: makeBonusWord(spelled), path })
         }
@@ -415,12 +483,20 @@ export function buildGemPuzzle(lineId: string, salt = 0): GemPuzzle {
       paths[word.id] = tryPlaceWord(grid, word.text, starts, rand) ?? placeFallback(grid, word.text) ?? []
     })
 
+  const plantedWords: GemWord[] = []
   const planted = new Set<string>()
-  for (const text of shuffleSeed(bonusPool, rand)) {
-    if (bonus.length >= MAX_BONUS_PLANT) break
-    const placed = tryPlaceWord(grid, text, starts, rand)
+  const targets = new Set(words.map((word) => word.text))
+  const prefer = ['GAP', ...(LESSON_BONUS[lineId] ?? []), ...SHARED_BONUS].filter(
+    (text, index, all) =>
+      all.indexOf(text) === index && bonusBitOk(text) && !targets.has(text),
+  )
+  const rest = bonusPool.filter((text) => !prefer.includes(text))
+  for (const text of [...prefer, ...rest]) {
+    if (plantedWords.length >= MAX_BONUS_PLANT) break
+    const placed = tryPlaceWord(grid, text, starts, rand) ?? placeFallback(grid, text)
     if (!placed) continue
     const word = makeBonusWord(text)
+    plantedWords.push(word)
     bonus.push(word)
     bonusPaths[word.id] = placed
     planted.add(text)
@@ -434,12 +510,13 @@ export function buildGemPuzzle(lineId: string, salt = 0): GemPuzzle {
   )
 
   const taken = new Set([...words.map((word) => word.text), ...planted])
-  for (const hit of scanBonusOnBoard(letters, bonusPool, taken)) {
+  const scanPool = [...new Set([...bonusPool, ...COMMON_BONUS])]
+  for (const hit of scanBonusOnBoard(letters, scanPool, taken)) {
     bonus.push(hit.word)
     bonusPaths[hit.word.id] = hit.path
   }
 
-  return { id: lineId, size, words, letters, paths, bonusPool, bonus, bonusPaths }
+  return { id: lineId, size, words, letters, paths, bonusPool, bonus, planted: plantedWords, bonusPaths }
 }
 
 export function sameCell(a: GemCoord, b: GemCoord) {
@@ -479,6 +556,51 @@ export function pathLetters(path: GemCoord[], letters: string[][]): string {
   return path.map((cell) => letters[cell.r]?.[cell.c] ?? '').join('')
 }
 
+function reverseLetters(text: string): string {
+  return text.split('').reverse().join('')
+}
+
+export function pathSpellings(path: GemCoord[], letters: string[][]): string[] {
+  const fwd = pathLetters(path, letters)
+  const back = reverseLetters(fwd)
+  return fwd === back ? [fwd] : [fwd, back]
+}
+
+/** First straight (or reverse) run of `word` on the letter grid. */
+export function findStraightSpelling(letters: string[][], word: string): GemCoord[] | null {
+  const size = letters.length
+  for (let r = 0; r < size; r += 1) {
+    for (let c = 0; c < size; c += 1) {
+      for (const dir of EASY_DIRS) {
+        const path: GemCoord[] = []
+        let ok = true
+        for (let i = 0; i < word.length; i += 1) {
+          const rr = r + dir.r * i
+          const cc = c + dir.c * i
+          if (rr < 0 || cc < 0 || rr >= size || cc >= size) {
+            ok = false
+            break
+          }
+          path.push({ r: rr, c: cc })
+        }
+        if (!ok) continue
+        const spelled = pathLetters(path, letters)
+        if (spelled === word) return path
+        if (reverseLetters(spelled) === word) return [...path].reverse()
+      }
+    }
+  }
+  return null
+}
+
+/** Non-chip extra: curated lesson pool or a common English word on the board. */
+export function isBonusSpelling(text: string, puzzle: GemPuzzle): boolean {
+  if (!bonusBitOk(text)) return false
+  if (puzzle.words.some((word) => word.text === text)) return false
+  if (puzzle.words.some((word) => word.text.includes(text))) return false
+  return puzzle.bonusPool.includes(text) || COMMON_BONUS.has(text)
+}
+
 export function tryAddToPath(path: GemCoord[], next: GemCoord): GemCoord[] {
   if (path.some((cell) => sameCell(cell, next))) {
     if (path.length >= 2 && sameCell(path[path.length - 2]!, next)) {
@@ -496,22 +618,25 @@ export function tryAddToPath(path: GemCoord[], next: GemCoord): GemCoord[] {
 
 export function matchGemWord(path: GemCoord[], puzzle: GemPuzzle, found: string[]): GemWord | null {
   if (!isStraightPath(path)) return null
-  const spelled = pathLetters(path, puzzle.letters)
-  return puzzle.words.find((word) => word.text === spelled && !found.includes(word.id)) ?? null
+  const spells = pathSpellings(path, puzzle.letters)
+  return (
+    puzzle.words.find((word) => spells.includes(word.text) && !found.includes(word.id)) ?? null
+  )
 }
 
-/** Curated extra word — not a required chip, not random junk. */
+/** Extra word on a straight line — not a required chip. Forward or reverse swipe. */
 export function matchBonusWord(
   path: GemCoord[],
   puzzle: GemPuzzle,
   foundBonus: string[],
 ): GemWord | null {
   if (!isStraightPath(path)) return null
-  const spelled = pathLetters(path, puzzle.letters)
-  if (puzzle.words.some((word) => word.text === spelled)) return null
-  if (!puzzle.bonusPool.includes(spelled)) return null
+  const spells = pathSpellings(path, puzzle.letters)
+  if (puzzle.words.some((word) => spells.includes(word.text))) return null
+  const spelled = spells.find((text) => isBonusSpelling(text, puzzle))
+  if (!spelled) return null
   const word = puzzle.bonus.find((item) => item.text === spelled) ?? makeBonusWord(spelled)
-  if (foundBonus.includes(word.id)) return null
+  if (foundBonus.includes(word.id) || foundBonus.includes(spelled)) return null
   return word
 }
 

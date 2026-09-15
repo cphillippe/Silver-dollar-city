@@ -26,11 +26,11 @@ import { mazeWinBeat } from '../src/lib/successBeat.ts'
 assert.equal(ROAD_MAZE_LINE, 'ph-road')
 assert.equal(ROAD_MAZE_CLAIM, 'Neighbor is the one who shows mercy.')
 assert.equal(ROAD_MAZE_WIN, 'Helped!')
-assert.equal(storyPlayFor('ph-road'), 'road-maze')
-assert.equal(storyPlayFor('ph-father'), 'father-run')
+assert.equal(storyPlayFor('ph-road'), 'panel-blast')
+assert.equal(storyPlayFor('ph-father'), 'panel-blast')
 assert.equal(storyPlayFor('ph-debt'), 'panel-blast')
-assert.equal(lessonStory('ph-road').play, 'road-maze')
-assert.equal(lessonStory('ph-father').play, 'father-run')
+assert.equal(lessonStory('ph-road').play, 'panel-blast')
+assert.equal(lessonStory('ph-father').play, 'panel-blast')
 
 assert.equal(MAZE_ITEMS.length, 3)
 assert.deepEqual(
