@@ -7,7 +7,8 @@ import {
   BONUS_WORD_MIN,
   COMMON_BONUS_COUNT,
   COMMON_BONUS_WORDS,
-  PLANTED_EXTRAS,
+  isKidFriendlyBonusWord,
+  isPlantableBonusWord,
 } from '../src/lib/commonBonusWords.ts'
 import {
   bonusWordsFor,
@@ -18,7 +19,10 @@ import {
   isStraightPath,
   matchBonusWord,
   matchGemWord,
+  MAX_BONUS_PLANT,
+  MIN_BONUS_PLANT,
   pathLetters,
+  plantCandidates,
   tryAddToPath,
 } from '../src/lib/gemSearch.ts'
 import {
@@ -81,11 +85,9 @@ assert.ok(
 assert.equal(MATCH_BONUS_POINTS, 100)
 assert.equal(MATCH_MISS_POINTS, 25)
 const planted = mercy.bonus.filter((word) => (mercy.bonusPaths[word.id] ?? []).length === word.text.length)
-assert.ok(planted.length >= 5, 'mercy plants bonus words')
-assert.ok(mercy.planted.length >= 5, 'planted extras on the board')
-assert.ok(
-  mercy.planted.some((word) => word.text === 'GAP' || word.text === 'ROAD' || word.text === 'HELP'),
-)
+assert.ok(planted.length >= MIN_BONUS_PLANT, 'mercy plants bonus words')
+assert.ok(mercy.planted.length >= MIN_BONUS_PLANT, 'planted extras on the board')
+assert.ok(mercy.planted.length <= MAX_BONUS_PLANT, 'planted extras stay a handful')
 assert.ok(mercyBonusPool.includes('GAP'), 'gap is a shared extra')
 assert.equal(BONUS_WORD_MIN, 3)
 assert.equal(BONUS_WORD_MAX, 6)
@@ -96,37 +98,33 @@ assert.ok(COMMON_BONUS_WORDS.has('RUN'))
 assert.ok(COMMON_BONUS_WORDS.has('SON'))
 assert.ok(COMMON_BONUS_WORDS.has('YES'))
 assert.ok(COMMON_BONUS_WORDS.has('NET'))
+assert.equal(isKidFriendlyBonusWord('BED'), true)
+assert.equal(isKidFriendlyBonusWord('NUDE'), false)
+assert.equal(isKidFriendlyBonusWord('SUCK'), false)
+assert.equal(isKidFriendlyBonusWord('HELL'), false)
+assert.equal(isPlantableBonusWord('BED'), true)
+assert.equal(isPlantableBonusWord('NUDE'), false)
 assert.equal(COMMON_BONUS_COUNT, COMMON_BONUS_WORDS.size)
 assert.ok(COMMON_BONUS_COUNT >= 900, `dict too thin: ${COMMON_BONUS_COUNT}`)
 for (const word of COMMON_BONUS_WORDS) {
   assert.ok(word.length >= 3 && word.length <= 6, `${word} length band`)
 }
-assert.deepEqual([...PLANTED_EXTRAS], ['BED', 'CAT', 'HAT', 'RUN', 'SON', 'GAP', 'YES', 'NET'])
 
 const fatherBoard = buildGemPuzzle('ph-father')
-assert.ok(fatherBoard.planted.some((word) => word.text === 'GAP'), 'father plants Gap')
-assert.ok(fatherBoard.planted.some((word) => word.text === 'BED'), 'father plants Bed')
-assert.equal(isBonusSpelling('GAP', fatherBoard), true)
-assert.equal(isBonusSpelling('BED', fatherBoard), true)
+assert.ok(fatherBoard.planted.length >= MIN_BONUS_PLANT, 'father plants several extras')
+assert.equal(isBonusSpelling('BED', fatherBoard), true, 'Bed stays in the bonus dict')
 assert.equal(isBonusSpelling('QQQ', fatherBoard), false)
 assert.equal(isBonusSpelling('FAT', fatherBoard), false, 'FAT is a piece of FATHER')
 assert.equal(isBonusSpelling('NEIGHBOR', fatherBoard), false, '7+ letters stay off the bonus band')
-const gapPath =
-  fatherBoard.bonusPaths[fatherBoard.planted.find((word) => word.text === 'GAP')?.id ?? ''] ??
-  findStraightSpelling(fatherBoard.letters, 'GAP')
-assert.ok(gapPath && gapPath.length === 3, 'Gap sits on the father board')
-assert.equal(pathLetters(gapPath, fatherBoard.letters), 'GAP')
-assert.equal(matchBonusWord(gapPath, fatherBoard, [])?.text, 'GAP')
-assert.equal(matchGemWord(gapPath, fatherBoard, []), null)
-assert.equal(matchBonusWord([...gapPath].reverse(), fatherBoard, [])?.text, 'GAP')
-const bedPath =
-  fatherBoard.bonusPaths[fatherBoard.planted.find((word) => word.text === 'BED')?.id ?? ''] ??
-  findStraightSpelling(fatherBoard.letters, 'BED')
-assert.ok(bedPath && bedPath.length === 3, 'Bed sits on the father board')
-assert.equal(pathLetters(bedPath, fatherBoard.letters), 'BED')
-assert.equal(matchBonusWord(bedPath, fatherBoard, [])?.text, 'BED')
-assert.equal(matchGemWord(bedPath, fatherBoard, []), null)
-assert.equal(matchBonusWord([...bedPath].reverse(), fatherBoard, [])?.text, 'BED')
+assert.equal(isBonusSpelling('NUDE', fatherBoard), false, 'rude extras do not score')
+const fatherSample = fatherBoard.planted[0]
+assert.ok(fatherSample, 'father has a planted extra')
+const fatherSamplePath = fatherBoard.bonusPaths[fatherSample.id] ?? findStraightSpelling(fatherBoard.letters, fatherSample.text)
+assert.ok(fatherSamplePath && fatherSamplePath.length === fatherSample.text.length, 'planted extra sits on the father board')
+assert.equal(pathLetters(fatherSamplePath, fatherBoard.letters), fatherSample.text)
+assert.equal(matchBonusWord(fatherSamplePath, fatherBoard, [])?.text, fatherSample.text)
+assert.equal(matchGemWord(fatherSamplePath, fatherBoard, []), null)
+assert.equal(matchBonusWord([...fatherSamplePath].reverse(), fatherBoard, [])?.text, fatherSample.text)
 const mercyChip = fatherBoard.words.find((word) => word.text === 'MERCY')
 if (mercyChip) {
   assert.equal(matchGemWord(fatherBoard.paths[mercyChip.id], fatherBoard, [])?.text, 'MERCY')
@@ -165,12 +163,29 @@ for (const id of EASY_LINE_ORDER) {
     puzzle.words.every((word) => word.text !== 'BED'),
     `${id} does not require Bed as a chip`,
   )
-  assert.ok(puzzle.planted.some((word) => word.text === 'BED'), `${id} plants Bed`)
-  assert.ok(puzzle.planted.length >= 5, `${id} plants several extras`)
+  assert.ok(puzzle.planted.length >= MIN_BONUS_PLANT, `${id} plants several extras`)
+  assert.ok(puzzle.planted.length <= MAX_BONUS_PLANT, `${id} does not flood extras`)
   assert.ok(
-    new Set(puzzle.planted.map((word) => word.text)).size >= 4,
+    new Set(puzzle.planted.map((word) => word.text)).size >= MIN_BONUS_PLANT,
     `${id} plants distinct extras`,
   )
+  const chips = new Set(puzzle.words.map((word) => word.text))
+  for (const word of puzzle.planted) {
+    assert.equal(isPlantableBonusWord(word.text), true, `${id} ${word.text} from dict`)
+    assert.equal(isKidFriendlyBonusWord(word.text), true, `${id} ${word.text} kid-friendly`)
+    assert.equal(chips.has(word.text), false, `${id} ${word.text} is not a required chip`)
+    assert.ok(
+      ![...chips].some((chip) => chip.includes(word.text)),
+      `${id} ${word.text} is not inside a chip`,
+    )
+    const path = puzzle.bonusPaths[word.id]
+    assert.ok(path && path.length === word.text.length, `${id} ${word.text} placed`)
+    assert.equal(pathLetters(path, puzzle.letters), word.text, `${id} ${word.text} letters`)
+    assert.equal(isStraightPath(path), true, `${id} ${word.text} straight`)
+    assert.equal(matchBonusWord(path, puzzle, [])?.text, word.text)
+    assert.equal(matchGemWord(path, puzzle, []), null)
+    assert.equal(matchBonusWord([...path].reverse(), puzzle, [])?.text, word.text)
+  }
   for (const word of puzzle.words) {
     assert.ok(word.text.length >= 3 && word.text.length <= 8, `${id} ${word.text} length`)
     const path = puzzle.paths[word.id]
@@ -179,6 +194,28 @@ for (const id of EASY_LINE_ORDER) {
     assert.equal(isStraightPath(path), true, `${id} ${word.text} straight`)
   }
 }
+
+const leftoverFive = ['BED', 'GAP', 'CAT', 'HAT', 'RUN']
+const plantedSets = [0, 1, 2, 3, 4, 5, 6, 7].map((salt) =>
+  buildGemPuzzle('ph-debt', salt)
+    .planted.map((word) => word.text)
+    .sort()
+    .join(','),
+)
+assert.ok(new Set(plantedSets).size >= 5, 'extra-try salt reshuffles planted extras')
+assert.notEqual(
+  buildGemPuzzle('ph-debt').planted.map((word) => word.text).sort().join(','),
+  buildGemPuzzle('wb-creed').planted.map((word) => word.text).sort().join(','),
+  'lessons draw different planted extras',
+)
+assert.deepEqual(
+  buildGemPuzzle('ph-debt', 4).planted.map((word) => word.text),
+  buildGemPuzzle('ph-debt', 4).planted.map((word) => word.text),
+  'same lesson + salt stays stable',
+)
+const alwaysLeftover = plantedSets.every((set) => leftoverFive.every((word) => set.split(',').includes(word)))
+assert.equal(alwaysLeftover, false, 'not the leftover Bed/Gap/Cat/Hat/Run set forever')
+assert.ok(plantCandidates(new Set(['NEIGHBOR']), () => 0.3).length >= 100, 'dict-sized plant pool')
 
 const playSrc = readFileSync(
   new URL('../src/components/challenges/GemSearchPlay.tsx', import.meta.url),
@@ -200,6 +237,8 @@ assert.match(playSrc, /winStamp/)
 assert.match(playSrc, /recordMatchBonus/)
 assert.match(playSrc, /recordMatchMiss/)
 assert.match(playSrc, /EASY\.moreMatch/)
+assert.match(playSrc, /Date\.now\(\)/)
+assert.match(playSrc, /setRound\(\(current\) => current \+ 1\)/)
 assert.match(playSrc, /bonus-banner/)
 assert.match(playSrc, /EASY\.bonusHint/)
 assert.match(playSrc, /is-bonus/)
@@ -225,13 +264,14 @@ assert.match(
 )
 
 const debtBoard = buildGemPuzzle('ph-debt')
-assert.ok(debtBoard.planted.some((word) => word.text === 'BED'), 'debt gem board plants Bed')
-assert.equal(isBonusSpelling('BED', debtBoard), true)
-const debtBed =
-  debtBoard.bonusPaths[debtBoard.planted.find((word) => word.text === 'BED')?.id ?? ''] ??
-  findStraightSpelling(debtBoard.letters, 'BED')
-assert.ok(debtBed && debtBed.length === 3)
-assert.equal(matchBonusWord(debtBed, debtBoard, [])?.text, 'BED')
+assert.ok(debtBoard.planted.length >= MIN_BONUS_PLANT, 'debt gem board plants extras')
+assert.equal(isBonusSpelling('BED', debtBoard), true, 'Bed still counts if it appears')
+const debtSample = debtBoard.planted[0]
+assert.ok(debtSample)
+const debtPath =
+  debtBoard.bonusPaths[debtSample.id] ?? findStraightSpelling(debtBoard.letters, debtSample.text)
+assert.ok(debtPath && debtPath.length === debtSample.text.length)
+assert.equal(matchBonusWord(debtPath, debtBoard, [])?.text, debtSample.text)
 assert.match(
   readFileSync(new URL('../src/components/Journal.tsx', import.meta.url), 'utf8'),
   /\+100 bonus|bonusFace/,
