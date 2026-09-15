@@ -6587,6 +6587,28 @@ html[data-easy='on'] .link-block.is-not {
   line-height: 1.05;
 }
 
+.miss-plus {
+  position: fixed;
+  left: 50%;
+  top: 42%;
+  z-index: 40;
+  margin: 0;
+  transform: translate(-50%, -50%);
+  color: #ffe0e6;
+  font-family: var(--sans);
+  font-size: clamp(1.8rem, 9vw, 2.6rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-shadow: 0 4px 0 #a32d48, 0 0 18px rgba(255, 90, 122, 0.7);
+  pointer-events: none;
+}
+
+.why-blast.is-miss .why-score {
+  color: #fff6e8;
+  background: rgba(160, 40, 70, 0.85);
+  border-color: rgba(255, 140, 160, 0.9);
+}
+
 .why-arena {
   position: relative;
   display: grid;
@@ -6654,9 +6676,14 @@ html[data-easy='on'] .link-block.is-not {
 }
 
 .why-chip.is-gone {
+  animation: none;
   opacity: 0;
+  visibility: hidden;
   pointer-events: none;
-  transform: scale(0.2) translateY(-40px);
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  transform: scale(0);
 }
 
 .why-blast.is-win .why-chip.is-clear:not(.is-lock) {
