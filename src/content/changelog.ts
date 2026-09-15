@@ -8,16 +8,19 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.61',
-    title: 'Easy Match extras · Bed · Easy core loop',
+    version: '1.4.62',
+    title: 'Easy Hold why-blast · Easy core loop',
     when: '2026-09-15',
     items: [
+      'Easy Hold why-blast: four why-chips around the held claim — tap the true reason. LOCKED! names what they got right and why it matters',
+      'Wrong tap shakes and shows Miss −25 (floor 0); that chip pops out. Not a silent soft-fail',
+      'XML harvest packs stay the why/distractor source of truth. Each Hold aims at three misses; the engine invents orthodox extras when a pack is short',
+      'Easy path Learn → story play → Hold. Night Watch and Town stay hidden on Easy',
       'Easy Match extras: a tiny offline dictionary of common English words (length 3–6) scores BONUS! +100 and Extra try! on a straight-line swipe — Bed is in the set and planted on boards',
       'Each Easy gem board plants several extras (Bed, Gap, Cat, Hat, Run and more) so more than one short word is actually findable',
       'A wrong, non-word, or non-straight extra swipe costs Miss −25 (floor 0) with a shake — it does not wipe the round or required chips',
       'Failed swipes shake and say Not a bonus word or Try a full straight word, so extras never fail silently',
       'Required lesson chips still unlock story panels. Father-run and road-maze stay their own games',
-
       'Easy Mercy / ph-road is a road-maze: tap or swipe the candy road, collect oil, cloth, and the inn coin, help the hurt man, then take him to the inn',
       'Win locks Neighbor is the one who shows mercy. HELPED! is a badge; Hold next is the primary tap. A blocked rock only reroutes — no lives',
       'Easy father-run timing dash is live on ph-father: hold to run, press the glow to dash, hug the son before the hired-hand speech is done',

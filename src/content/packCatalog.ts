@@ -19,6 +19,24 @@ function padChoices(keep: string, misses: string[]): [string, string, string] {
   return [keep, extra[0] || `${keep} — not this.`, extra[1] || `${keep} — a weaker reading.`]
 }
 
+function padWhyChoices(keep: string, misses: string[]): string[] {
+  const extra = misses.filter((line) => line && line !== keep)
+  const padded = [
+    keep,
+    extra[0] || `${keep} — not this.`,
+    extra[1] || `${keep} — a weaker reading.`,
+    ...extra.slice(2),
+  ]
+  const seen = new Set<string>()
+  const next: string[] = []
+  for (const line of padded) {
+    if (!line || seen.has(line)) continue
+    seen.add(line)
+    next.push(line)
+  }
+  return next
+}
+
 export function briefFromPack(
   lesson: PackLesson,
   tier: LessonTierId = 'medium',
@@ -31,7 +49,7 @@ export function briefFromPack(
     reason: why,
     source: lesson.source,
     claimChoices: padChoices(lesson.claim, pack.hold.claimMisses),
-    reasonChoices: padChoices(why, pack.hold.whyMisses),
+    reasonChoices: padWhyChoices(why, pack.hold.whyMisses),
   }
 }
 

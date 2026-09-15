@@ -104,21 +104,17 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
             kicker={STORY.tapTakeaway}
             onHeld={(result) => {
               if (easy && advancing) {
-                if (result.clean) {
-                  recordHeld(quizBrief.id)
-                  recordReview({
-                    id: quizBrief.id,
-                    pillar,
-                    kind: 'encode',
-                    today,
-                    clean: true,
-                    peeked: false,
-                    elaborated: false,
-                  })
-                  recordLessonHold(quizBrief.id, true)
-                } else {
-                  recordLessonHold(quizBrief.id, false)
-                }
+                recordHeld(quizBrief.id)
+                recordReview({
+                  id: quizBrief.id,
+                  pillar,
+                  kind: 'encode',
+                  today,
+                  clean: result.clean,
+                  peeked: false,
+                  elaborated: false,
+                })
+                recordLessonHold(quizBrief.id, result.clean)
                 onNavigate({ name: 'hub' })
                 return
               }

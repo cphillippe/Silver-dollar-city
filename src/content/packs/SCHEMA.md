@@ -102,7 +102,7 @@ One claim·reason·source fact = one `<lesson>`. **Easy, Medium, and Hard share 
 | Tag / attr | Maps to |
 |------------|---------|
 | `claim` / `reason` / `source` | Evidence brief — **identical plain text on all tiers** |
-| `whyCorrect` / `whyMisses` | Reason faces |
+| `whyCorrect` / `whyMisses` | Reason faces. Easy why-blast needs **≥3** unique misses (4 chips: 1 true + 3 toss). Engine invents orthodox extras if a pack is short. |
 | `claimChoices` / `reasonChoices` | Quiz faces |
 | `@levelUpTo` | Optional next tier: `medium` (from easy) or `hard` (from medium) |
 | `@onFail` | Always `easy` — fail Hold or fail level-up → Easy teach path |

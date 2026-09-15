@@ -52,6 +52,7 @@
           <whyMisses>
             <miss>The story is mainly a map of the Jericho road.</miss>
             <miss>Mercy is optional once you have classified the victim.</miss>
+            <miss>The priest is the hero just for staying.</miss>
           </whyMisses>
           <claimChoices>
             <choice>Neighbor is the one who shows mercy.</choice>
@@ -97,6 +98,7 @@
           <whyMisses>
             <miss>The story is mainly a map of the Jericho road.</miss>
             <miss>Mercy is optional once you have classified the victim.</miss>
+            <miss>The priest is the hero just for staying.</miss>
           </whyMisses>
           <claimChoices>
             <choice>Neighbor is the one who shows mercy.</choice>
@@ -146,6 +148,7 @@ Samaritans and Judeans were divided by worship and memory (see John 4:9). Jesus 
           <whyMisses>
             <miss>The story is mainly a map of the Jericho road.</miss>
             <miss>Mercy is optional once you have classified the victim.</miss>
+            <miss>The priest is the hero just for staying.</miss>
           </whyMisses>
           <claimChoices>
             <choice>Neighbor is the one who shows mercy.</choice>
@@ -201,6 +204,7 @@ Samaritans and Judeans were divided by worship and memory (see John 4:9). Jesus 
           <whyMisses>
             <miss>The father waits until justice is complete.</miss>
             <miss>The older brother is the hero for staying home.</miss>
+            <miss>The son earned the feast with a speech.</miss>
           </whyMisses>
           <claimChoices>
             <choice>The father runs with mercy before the speech is done.</choice>
@@ -246,6 +250,7 @@ Samaritans and Judeans were divided by worship and memory (see John 4:9). Jesus 
           <whyMisses>
             <miss>The father waits until justice is complete.</miss>
             <miss>The older brother is the hero for staying home.</miss>
+            <miss>The son earned the feast with a speech.</miss>
           </whyMisses>
           <claimChoices>
             <choice>The father runs with mercy before the speech is done.</choice>
@@ -294,6 +299,7 @@ Luke 15 stacks three lost-and-found stories. God is not only willing to receive.
           <whyMisses>
             <miss>The father waits until justice is complete.</miss>
             <miss>The older brother is the hero for staying home.</miss>
+            <miss>The son earned the feast with a speech.</miss>
           </whyMisses>
           <claimChoices>
             <choice>The father runs with mercy before the speech is done.</choice>
@@ -348,6 +354,7 @@ Luke 15 stacks three lost-and-found stories. God is not only willing to receive.
           <whyMisses>
             <miss>The sower proves every heart is the same.</miss>
             <miss>The talents story is about hiding gifts until heaven.</miss>
+            <miss>Every picture maps every tiny detail.</miss>
           </whyMisses>
           <claimChoices>
             <choice>The kingdom arrives in pictures, not slogans.</choice>
@@ -393,6 +400,7 @@ Luke 15 stacks three lost-and-found stories. God is not only willing to receive.
           <whyMisses>
             <miss>The sower proves every heart is the same.</miss>
             <miss>The talents story is about hiding gifts until heaven.</miss>
+            <miss>Every picture maps every tiny detail.</miss>
           </whyMisses>
           <claimChoices>
             <choice>The kingdom arrives in pictures, not slogans.</choice>
@@ -453,6 +461,7 @@ Jesus’ stories assume a God who speaks, seeks, grows a kingdom, and will ask w
           <whyMisses>
             <miss>The sower proves every heart is the same.</miss>
             <miss>The talents story is about hiding gifts until heaven.</miss>
+            <miss>Every picture maps every tiny detail.</miss>
           </whyMisses>
           <claimChoices>
             <choice>The kingdom arrives in pictures, not slogans.</choice>
@@ -510,6 +519,7 @@ Jesus’ stories assume a God who speaks, seeks, grows a kingdom, and will ask w
           <whyMisses>
             <miss>Peter’s “seven times” was already the full measure.</miss>
             <miss>The first servant was right to demand prison.</miss>
+            <miss>Jail him over a tiny debt.</miss>
           </whyMisses>
           <claimChoices>
             <choice>Received mercy makes refusing mercy a contradiction.</choice>
@@ -555,6 +565,7 @@ Jesus’ stories assume a God who speaks, seeks, grows a kingdom, and will ask w
           <whyMisses>
             <miss>Peter’s “seven times” was already the full measure.</miss>
             <miss>The first servant was right to demand prison.</miss>
+            <miss>Jail him over a tiny debt.</miss>
           </whyMisses>
           <claimChoices>
             <choice>Received mercy makes refusing mercy a contradiction.</choice>
@@ -603,6 +614,7 @@ Mercy is not softness. It is the grain of God’s world — and then a question:
           <whyMisses>
             <miss>Peter’s “seven times” was already the full measure.</miss>
             <miss>The first servant was right to demand prison.</miss>
+            <miss>Jail him over a tiny debt.</miss>
           </whyMisses>
           <claimChoices>
             <choice>Received mercy makes refusing mercy a contradiction.</choice>
@@ -658,6 +670,7 @@ Mercy is not softness. It is the grain of God’s world — and then a question:
           <whyMisses>
             <miss>The picture is a command to boast.</miss>
             <miss>A hidden lamp is the point of the saying.</miss>
+            <miss>A lamp is meant to stay hidden.</miss>
           </whyMisses>
           <claimChoices>
             <choice>A lamp is meant to be seen.</choice>
@@ -703,6 +716,7 @@ Mercy is not softness. It is the grain of God’s world — and then a question:
           <whyMisses>
             <miss>The picture is a command to boast.</miss>
             <miss>A hidden lamp is the point of the saying.</miss>
+            <miss>A lamp is meant to stay hidden.</miss>
           </whyMisses>
           <claimChoices>
             <choice>A lamp is meant to be seen.</choice>
@@ -750,6 +764,7 @@ Mercy is not softness. It is the grain of God’s world — and then a question:
           <whyMisses>
             <miss>The picture is a command to boast.</miss>
             <miss>A hidden lamp is the point of the saying.</miss>
+            <miss>A lamp is meant to stay hidden.</miss>
           </whyMisses>
           <claimChoices>
             <choice>A lamp is meant to be seen.</choice>
@@ -803,6 +818,7 @@ Mercy is not softness. It is the grain of God’s world — and then a question:
           <whyMisses>
             <miss>Every heart is the same soil.</miss>
             <miss>A hidden lamp is the point.</miss>
+            <miss>Pictures do not tell the story.</miss>
           </whyMisses>
           <claimChoices>
             <choice>Jesus taught with pictures you can hold.</choice>
@@ -848,6 +864,7 @@ Mercy is not softness. It is the grain of God’s world — and then a question:
           <whyMisses>
             <miss>Every heart is the same soil.</miss>
             <miss>A hidden lamp is the point.</miss>
+            <miss>Pictures do not tell the story.</miss>
           </whyMisses>
           <claimChoices>
             <choice>Jesus taught with pictures you can hold.</choice>
@@ -904,6 +921,7 @@ Jesus taught with lamps, seed, and a cup. The cup of the new covenant is poured 
           <whyMisses>
             <miss>Every heart is the same soil.</miss>
             <miss>A hidden lamp is the point.</miss>
+            <miss>Pictures do not tell the story.</miss>
           </whyMisses>
           <claimChoices>
             <choice>Jesus taught with pictures you can hold.</choice>
@@ -957,6 +975,7 @@ Jesus taught with lamps, seed, and a cup. The cup of the new covenant is poured 
           <whyMisses>
             <miss>Good soil is a slogan, not a way of hearing.</miss>
             <miss>Jesus never names withering or birds.</miss>
+            <miss>The parable flatters every field.</miss>
           </whyMisses>
           <claimChoices>
             <choice>The same word meets different soils; some seed is lost.</choice>
@@ -1002,6 +1021,7 @@ Jesus taught with lamps, seed, and a cup. The cup of the new covenant is poured 
           <whyMisses>
             <miss>Good soil is a slogan, not a way of hearing.</miss>
             <miss>Jesus never names withering or birds.</miss>
+            <miss>The parable flatters every field.</miss>
           </whyMisses>
           <claimChoices>
             <choice>The same word meets different soils; some seed is lost.</choice>
@@ -1050,6 +1070,7 @@ Jesus taught with lamps, seed, and a cup. The cup of the new covenant is poured 
           <whyMisses>
             <miss>Good soil is a slogan, not a way of hearing.</miss>
             <miss>Jesus never names withering or birds.</miss>
+            <miss>The parable flatters every field.</miss>
           </whyMisses>
           <claimChoices>
             <choice>The same word meets different soils; some seed is lost.</choice>
@@ -1103,6 +1124,7 @@ Jesus taught with lamps, seed, and a cup. The cup of the new covenant is poured 
           <whyMisses>
             <miss>Mercy is unrelated to the question.</miss>
             <miss>The wounded man must first classify the helper.</miss>
+            <miss>Neighbor means whoever already looks like you.</miss>
           </whyMisses>
           <claimChoices>
             <choice>Mercy makes a neighbor; pedigree does not.</choice>
@@ -1148,6 +1170,7 @@ Jesus taught with lamps, seed, and a cup. The cup of the new covenant is poured 
           <whyMisses>
             <miss>Mercy is unrelated to the question.</miss>
             <miss>The wounded man must first classify the helper.</miss>
+            <miss>Neighbor means whoever already looks like you.</miss>
           </whyMisses>
           <claimChoices>
             <choice>Mercy makes a neighbor; pedigree does not.</choice>
@@ -1191,6 +1214,7 @@ He said, “The one who showed him mercy.” And Jesus said, “You go, and do l
           <whyMisses>
             <miss>Mercy is unrelated to the question.</miss>
             <miss>The wounded man must first classify the helper.</miss>
+            <miss>Neighbor means whoever already looks like you.</miss>
           </whyMisses>
           <claimChoices>
             <choice>Mercy makes a neighbor; pedigree does not.</choice>
