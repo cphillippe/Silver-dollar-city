@@ -227,7 +227,7 @@ for (const id of EASY_LINE_ORDER) {
   const puzzle = buildGemPuzzle(id)
   const panels = storyPanelsFor(id, puzzle.words.length)
   const story = lessonStory(id, puzzle.words.length)
-  const play = id === 'ph-father' ? 'father-run' : 'panel-blast'
+  const play = id === 'ph-father' ? 'father-run' : id === 'ph-road' ? 'road-maze' : 'panel-blast'
   assert.equal(storyPlayFor(id), play, `${id} play`)
   assert.equal(story.play, play)
   assert.deepEqual(story.beats, panels)
