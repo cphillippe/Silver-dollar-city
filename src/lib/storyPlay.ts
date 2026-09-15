@@ -1,10 +1,11 @@
+import { FATHER_RUN_LINE } from './fatherRun.ts'
 import { gemWordsFor } from './gemSearch.ts'
 import { storyPanelsFor, type StoryPanel } from './storyPanels.ts'
 
 /**
  * How this lesson is *played*. Same shell always: teach beats → play → Hold.
- * Every Easy Match is panel-blast (gem board) so extras like Gap can ship.
- * Father-run and road-maze stay in the tree, unmounted until bonus words are live.
+ * ph-father is the hold-to-run timing dash. Other Easy lessons stay panel-blast
+ * so gem extras (Gap, +100) keep working. Road-maze stays unmounted until next.
  * Queued later (do not mount): claim-merge, story-night TD.
  */
 export type StoryPlayKind = 'panel-blast' | 'father-run' | 'road-maze'
@@ -16,7 +17,8 @@ export interface LessonStory {
 }
 
 /** Mechanic for this lesson. Hold does not read this. */
-export function storyPlayFor(_lineId: string): StoryPlayKind {
+export function storyPlayFor(lineId: string): StoryPlayKind {
+  if (lineId === FATHER_RUN_LINE) return 'father-run'
   return 'panel-blast'
 }
 
