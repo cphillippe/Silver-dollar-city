@@ -8463,9 +8463,16 @@ html[data-easy='on'] .next-tap {
 }
 
 .gem-toast.is-yes,
-.gem-toast.is-bonus {
+.gem-toast.is-bonus,
+.gem-toast.is-miss {
   display: grid;
   gap: 2px;
+}
+
+.gem-toast.is-miss {
+  background: rgba(255, 90, 122, 0.22);
+  border-color: rgba(255, 180, 196, 0.8);
+  color: #ffe8ee;
 }
 
 .gem-toast.is-bonus {
