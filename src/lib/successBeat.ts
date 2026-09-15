@@ -23,7 +23,7 @@ export function gemTargetBeat(word: GemWord): SuccessBeat {
 
 /** Kid-plain beat after a bonus word — names the +100 and the extra try. */
 export function gemBonusBeat(label: string): SuccessBeat {
-  return { title: `+100 · ${label}!`, why: EASY.bonusWhy }
+  return { title: EASY.bonusToast, why: `${label} · ${EASY.bonusWhy}` }
 }
 
 export function matchClaimLine(lineId: string): string {

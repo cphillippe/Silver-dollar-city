@@ -134,7 +134,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
           setToastBonus(false)
           return ''
         }),
-      bonus ? 2200 : 1800,
+      bonus ? 2800 : 1800,
     )
   }
 
@@ -346,11 +346,29 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
           </li>
         ))}
       </ul>
-      {status === 'play' && puzzle.bonusPool.length ? (
-        <p className="gem-bonus-hint">{EASY.bonusHint}</p>
+      {status === 'play' ? (
+        <p className="gem-bonus-hint is-loud">{EASY.bonusHint}</p>
       ) : null}
-      {toast ? (
-        <p className={`match-toast gem-toast ${toastBonus ? 'is-bonus' : 'is-yes'}`} role="status">
+      {puzzle.planted.length ? (
+        <ul className="gem-words is-bonus" aria-label="Bonus words">
+          {puzzle.planted.map((word) => (
+            <li
+              key={word.id}
+              className={`gem-word is-bonus ${bonusFound.includes(word.id) ? 'is-found' : ''}`}
+            >
+              <span className="gem-word-label">{word.label}</span>
+              <span className="gem-word-kind">bonus</span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {toastBonus && toast ? (
+        <p className="bonus-banner" role="status">
+          <strong>{toast}</strong>
+          {toastWhy ? <span>{toastWhy}</span> : null}
+        </p>
+      ) : toast ? (
+        <p className="match-toast gem-toast is-yes" role="status">
           <strong>{toast}</strong>
           {toastWhy ? <span className="toast-why">{toastWhy}</span> : null}
         </p>
