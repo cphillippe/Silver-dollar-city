@@ -26,10 +26,10 @@ import { mazeWinBeat } from '../src/lib/successBeat.ts'
 assert.equal(ROAD_MAZE_LINE, 'ph-road')
 assert.equal(ROAD_MAZE_CLAIM, 'Neighbor is the one who shows mercy.')
 assert.equal(ROAD_MAZE_WIN, 'Helped!')
-assert.equal(storyPlayFor('ph-road'), 'panel-blast')
+assert.equal(storyPlayFor('ph-road'), 'road-maze')
 assert.equal(storyPlayFor('ph-father'), 'father-run')
 assert.equal(storyPlayFor('ph-debt'), 'panel-blast')
-assert.equal(lessonStory('ph-road').play, 'panel-blast')
+assert.equal(lessonStory('ph-road').play, 'road-maze')
 assert.equal(lessonStory('ph-father').play, 'father-run')
 
 assert.equal(MAZE_ITEMS.length, 3)
@@ -92,6 +92,11 @@ assert.match(playSrc, /panel-help/)
 assert.match(playSrc, /panel-hurt/)
 assert.match(playSrc, /mazeWinBeat/)
 assert.match(playSrc, /maze-win-art/)
+assert.doesNotMatch(
+  playSrc,
+  /blocked\([\s\S]*onMiss\(\)/,
+  'a blocked rock only reroutes — no lives',
+)
 assert.match(playSrc, /ROAD_MAZE_CLAIM/)
 assert.doesNotMatch(playSrc, /road-swipe|claim-merge|story-night/)
 

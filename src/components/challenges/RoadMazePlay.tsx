@@ -53,7 +53,7 @@ const STEP_MS = 90
 export function RoadMazePlay({
   lineId,
   beats,
-  onMiss,
+  onMiss: _onMiss,
   onClear,
   onEasyStop,
 }: RoadMazePlayProps) {
@@ -122,7 +122,6 @@ export function RoadMazePlay({
     setShake(true)
     playGemPop('miss')
     misses.current += 1
-    onMiss()
     flashToast(message)
     bumpHint(misses.current)
     window.setTimeout(() => setShake(false), 360)
@@ -154,9 +153,9 @@ export function RoadMazePlay({
     if (!canWin(bag, nextHelped, cell) || wonRef.current) return
     wonRef.current = true
     setWon(true)
+    setToast('')
+    setToastWhy('')
     playGemPop('win')
-    const beat = mazeWinBeat()
-    flashToast(beat.title, beat.why)
     if (!cleared.current) {
       cleared.current = true
       onClear?.()
