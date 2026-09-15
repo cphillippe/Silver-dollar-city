@@ -4,7 +4,9 @@ import { easyChromeLine, easyWhoWhere } from './easy.ts'
 import {
   BONUS_WORD_MAX,
   COMMON_BONUS_WORDS,
-  PLANTED_EXTRAS,
+  isKidFriendlyBonusWord,
+  isPlantableBonusWord,
+  isPreferredPlantWord,
 } from './commonBonusWords.ts'
 
 export type GemKind = 'person' | 'place' | 'idea'
@@ -137,12 +139,13 @@ const MIN_LEN = 3
 const MAX_LEN = 8
 const MAX_WORDS = 4
 const BONUS_MAX_LEN = BONUS_WORD_MAX
-const MAX_BONUS_PLANT = 5
-const SHARED_BONUS = [...PLANTED_EXTRAS, 'HELP', 'CARE', 'KIND', 'GIFT', 'ROAD']
+export const MIN_BONUS_PLANT = 4
+export const MAX_BONUS_PLANT = 6
+const SHARED_BONUS = ['HELP', 'CARE', 'KIND', 'GIFT', 'ROAD', 'BED', 'GAP']
 
 /**
- * Short English extras (3–6). Straight-line Set lookup — Bill’s Gap/Bed swipe.
- * Lesson chips stay required; these only score BONUS! +100.
+ * Short English extras (3–6). Straight-line Set lookup.
+ * Lesson chips stay required; planted extras shuffle from the dict and only score BONUS! +100.
  */
 const COMMON_BONUS = COMMON_BONUS_WORDS
 
@@ -259,6 +262,26 @@ export function gemWordsFor(lineId: string): GemWord[] {
 
 function bonusBitOk(bit: string): boolean {
   return bit.length >= MIN_LEN && bit.length <= BONUS_MAX_LEN && !STOP.has(bit)
+}
+
+function collidesRequired(text: string, chips: Set<string>): boolean {
+  if (chips.has(text)) return true
+  for (const chip of chips) {
+    if (chip.includes(text) || text.includes(chip)) return true
+  }
+  return false
+}
+
+/** Fresh extras for this board — shuffled dict, kid-friendly, not required chips. */
+export function plantCandidates(chips: Set<string>, rand: () => number): string[] {
+  const prefer: string[] = []
+  const rest: string[] = []
+  for (const text of COMMON_BONUS_WORDS) {
+    if (!isPlantableBonusWord(text) || !bonusBitOk(text) || collidesRequired(text, chips)) continue
+    if (isPreferredPlantWord(text)) prefer.push(text)
+    else rest.push(text)
+  }
+  return [...shuffleSeed(prefer, rand), ...shuffleSeed(rest, rand)]
 }
 
 /** Small curated pool — lesson words only, never required chips. */
@@ -433,12 +456,7 @@ export function buildGemPuzzle(lineId: string, salt = 0): GemPuzzle {
   const plantedWords: GemWord[] = []
   const planted = new Set<string>()
   const targets = new Set(words.map((word) => word.text))
-  const prefer = ['BED', 'GAP', ...PLANTED_EXTRAS, ...(LESSON_BONUS[lineId] ?? []), ...SHARED_BONUS].filter(
-    (text, index, all) =>
-      all.indexOf(text) === index && bonusBitOk(text) && !targets.has(text),
-  )
-  const rest = bonusPool.filter((text) => !prefer.includes(text))
-  for (const text of [...prefer, ...rest]) {
+  for (const text of plantCandidates(targets, rand)) {
     if (plantedWords.length >= MAX_BONUS_PLANT) break
     const placed = tryPlaceWord(grid, text, starts, rand) ?? placeFallback(grid, text)
     if (!placed) continue
@@ -457,7 +475,12 @@ export function buildGemPuzzle(lineId: string, salt = 0): GemPuzzle {
   )
 
   const taken = new Set([...words.map((word) => word.text), ...planted])
-  const scanPool = [...new Set([...bonusPool, ...COMMON_BONUS])]
+  const scanPool = [
+    ...new Set([
+      ...bonusPool,
+      ...[...COMMON_BONUS].filter((text) => isKidFriendlyBonusWord(text)),
+    ]),
+  ]
   for (const hit of scanBonusOnBoard(letters, scanPool, taken)) {
     bonus.push(hit.word)
     bonusPaths[hit.word.id] = hit.path
@@ -468,6 +491,16 @@ export function buildGemPuzzle(lineId: string, salt = 0): GemPuzzle {
 
 export function sameCell(a: GemCoord, b: GemCoord) {
   return a.r === b.r && a.c === b.c
+}
+
+function sameTrail(a: GemCoord[], b: GemCoord[]): boolean {
+  if (a.length !== b.length) return false
+  return a.every((cell, i) => sameCell(cell, b[i]!))
+}
+
+function trailMatches(placed: GemCoord[], path: GemCoord[]): boolean {
+  if (sameTrail(placed, path)) return true
+  return sameTrail([...placed].reverse(), path)
 }
 
 export function cellKey(cell: GemCoord) {
@@ -545,7 +578,8 @@ export function isBonusSpelling(text: string, puzzle: GemPuzzle): boolean {
   if (!bonusBitOk(text)) return false
   if (puzzle.words.some((word) => word.text === text)) return false
   if (puzzle.words.some((word) => word.text.includes(text))) return false
-  return puzzle.bonusPool.includes(text) || COMMON_BONUS.has(text)
+  if (puzzle.bonusPool.includes(text)) return true
+  return COMMON_BONUS.has(text) && isKidFriendlyBonusWord(text)
 }
 
 export function tryAddToPath(path: GemCoord[], next: GemCoord): GemCoord[] {
@@ -580,6 +614,12 @@ export function matchBonusWord(
   if (!isStraightPath(path)) return null
   const spells = pathSpellings(path, puzzle.letters)
   if (puzzle.words.some((word) => spells.includes(word.text))) return null
+  const plantedHit = puzzle.planted.find((word) => {
+    if (foundBonus.includes(word.id) || foundBonus.includes(word.text)) return false
+    const placed = puzzle.bonusPaths[word.id]
+    return Boolean(placed && trailMatches(placed, path))
+  })
+  if (plantedHit) return plantedHit
   const spelled = spells.find((text) => isBonusSpelling(text, puzzle))
   if (!spelled) return null
   const word = puzzle.bonus.find((item) => item.text === spelled) ?? makeBonusWord(spelled)
