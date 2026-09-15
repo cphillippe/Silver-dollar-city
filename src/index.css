@@ -8462,10 +8462,44 @@ html[data-easy='on'] .next-tap {
   font-weight: 800;
 }
 
-.gem-toast.is-yes,
-.gem-toast.is-bonus {
+.miss-banner {
   display: grid;
   gap: 2px;
+  margin: 0;
+  padding: 12px 12px 10px;
+  border-radius: 16px;
+  text-align: center;
+  color: #fff4f7;
+  background: linear-gradient(180deg, #ff8aa3, #ff5a7a 55%, #d63d62);
+  border: 2px solid #ffe0e8;
+  box-shadow:
+    0 5px 0 #b8284c,
+    0 0 22px rgba(255, 90, 122, 0.45);
+  animation: bonus-banner-pop 0.42s cubic-bezier(0.2, 1.4, 0.3, 1) both;
+}
+
+.miss-banner strong {
+  font-size: clamp(1.55rem, 8vw, 2.15rem);
+  letter-spacing: 0.04em;
+  line-height: 1.05;
+}
+
+.miss-banner span {
+  font-size: 1.02rem;
+  font-weight: 800;
+}
+
+.gem-toast.is-yes,
+.gem-toast.is-bonus,
+.gem-toast.is-miss {
+  display: grid;
+  gap: 2px;
+}
+
+.gem-toast.is-miss {
+  background: rgba(255, 90, 122, 0.22);
+  border-color: rgba(255, 180, 196, 0.8);
+  color: #ffe8ee;
 }
 
 .gem-toast.is-bonus {
