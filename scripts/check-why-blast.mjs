@@ -98,6 +98,7 @@ const bonusDict = readFileSync(new URL('../src/lib/commonBonusWords.ts', import.
 assert.match(bonusDict, /BONUS_WORD_MAX = 6/)
 assert.match(bonusDict, /BONUS_WORD_MIN = 3/)
 assert.match(bonusDict, /\bBED\b/)
-assert.match(bonusDict, /PLANTED_EXTRAS/)
+assert.match(bonusDict, /plantableBonusWords/)
+assert.match(bonusDict, /PLANT_LENGTHS/)
 
 console.log('check-why-blast: ok')
