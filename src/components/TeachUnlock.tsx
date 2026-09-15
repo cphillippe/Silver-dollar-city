@@ -3,6 +3,7 @@ import type { EvidenceBrief } from '../content/evidence'
 import { packLesson } from '../content/packCatalog'
 import { plainFor } from '../content/plain'
 import { EASY, easyFacingLine, easyWhoWhere, easyWhoWhereLine, isEasy } from '../lib/easy'
+import { storyPlayFor } from '../lib/storyPlay'
 import { currentLessonTier } from '../lib/tiers'
 import { WORDS, schoolWordsFor } from '../lib/words'
 import { learningBeat } from '../lib/learning'
@@ -62,7 +63,11 @@ export function TeachUnlock({ brief, kind, onUnlock, unlock, beats }: TeachUnloc
         </div>
         <div className="cta-dock easy-story-dock">
           <button type="button" className="btn gold xl" onClick={onUnlock}>
-            {EASY.findGems}
+            {storyPlayFor(brief.id) === 'father-run'
+              ? EASY.runCta
+              : storyPlayFor(brief.id) === 'road-maze'
+                ? EASY.mazeCta
+                : EASY.findGems}
           </button>
           <button type="button" className="text-link" onClick={onUnlock}>
             Skip reading

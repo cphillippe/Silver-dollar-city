@@ -18,6 +18,15 @@ export const EASY = {
   mindMapShort: 'Scrapbook',
   connectLink: 'Tap the sentence, then the place, then the person.',
   matchHunt: 'Find a word. A story panel opens.',
+  runHunt: 'Hold to run. When it glows, press again.',
+  runCta: 'Run to him',
+  runMatch: 'Run',
+  runHome: 'Hold to run. Hug him before the speech is done.',
+  mazeHunt: 'Tap the road. Pick up help. Take him to the inn.',
+  mazeCta: 'Help on the road',
+  mazeMatch: 'Help',
+  mazeHome: 'Help on the road. Take him to the inn.',
+  mazeWinWhy: 'First the hurt man, then help.',
   readStory: 'Read today’s story.',
   learnCta: 'Learn',
   readStoryFirst: 'Read the story first',
@@ -26,7 +35,14 @@ export const EASY = {
   panelCue: 'Find a word to flip the first panel.',
   rememberSentence: 'Tap the line you kept.',
   tapWhy: 'Tap why this is true.',
-  keepThis: 'Keep this',
+  keepThis: 'Yes — keep this',
+  holdYes: 'Yes!',
+  holdKept: 'That’s the line.',
+  bonusToast: 'BONUS! +100',
+  bonusWhy: 'Extra try!',
+  moreMatch: 'One more Match',
+  bonusHint: 'Find lesson words — extras give +100 & another try',
+  fatherWinWhy: 'The father hugs him first.',
   readAgain: 'Read this one again.',
   claimTeach: 'A claim is the main idea we hold to be true.',
   mainIdeaTeach: 'Main idea = the short true line we keep.',
@@ -467,7 +483,7 @@ export function easyMatchReady(progress: EasyLoopProgress): boolean {
 }
 
 /**
- * Gold home tap for the open triad. Match teaches through panel blast.
+ * Gold home tap for the open triad. Match teaches through the lesson play.
  * After the board is cleared (taught), Hold is next. After Hold, the next
  * line’s Match. Learn stays a re-read, not the gate.
  */

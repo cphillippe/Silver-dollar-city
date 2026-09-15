@@ -7,6 +7,7 @@ import { localDateKey } from '../lib/dates'
 import { CITY_PLOTS, nextPlotId, type CityPlotId } from '../lib/city'
 import { lotTapWhy } from '../lib/cityBuild'
 import { EASY, EASY_MATCH_LINE, easyHomeFocus, easyHoldView, easyLineHeld, easyLoopLine, easyMatchReady, isEasy } from '../lib/easy'
+import { storyPlayFor } from '../lib/storyPlay'
 import { markLater, readLater, sessionDue } from '../lib/recall'
 import { Avatar } from './Avatar'
 import { ShareInvite } from './ShareInvite'
@@ -72,9 +73,13 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
           <p className="quiet">
             {focus === 'hold'
               ? 'The story is open. Hold the line.'
-              : coldMercy
-                ? 'Find Mercy’s story at Story Creek.'
-                : 'Find the gems. The story opens as you play.'}
+              : storyPlayFor(loopId) === 'father-run'
+                ? EASY.runHome
+                : storyPlayFor(loopId) === 'road-maze'
+                  ? EASY.mazeHome
+                  : coldMercy
+                    ? 'Find Mercy’s story at Story Creek.'
+                    : 'Find the gems. The story opens as you play.'}
           </p>
         </header>
         <nav className="easy-core" aria-label="Play">
@@ -83,7 +88,11 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
             className={`btn xl ${focus === 'match' ? 'primary' : ''}`}
             onClick={() => onNavigate({ name: 'link' })}
           >
-            {EASY.matchCta}
+            {storyPlayFor(loopId) === 'father-run'
+              ? EASY.runMatch
+              : storyPlayFor(loopId) === 'road-maze'
+                ? EASY.mazeMatch
+                : EASY.matchCta}
           </button>
           <button
             type="button"

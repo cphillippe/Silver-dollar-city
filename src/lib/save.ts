@@ -1,6 +1,7 @@
 import { APP_VERSION, SAVE_SCHEMA_VERSION, STORAGE_BACKUP_KEY, STORAGE_KEY } from '../config/app.ts'
 import { localDateKey } from './dates.ts'
 import { emptyCityBuilt, snapshotCityBuilt } from './cityBuild.ts'
+import { MATCH_BONUS_MAX, MATCH_EXTRA_MAX } from './matchBonus.ts'
 import { emptyDefense } from './defend.ts'
 import { emptyTrace } from './memory.ts'
 import type {
@@ -83,6 +84,8 @@ export function emptyProgress(): ProgressState {
     lessonTier: {},
     lessonScore: {},
     tierTaught: {},
+    matchBonus: {},
+    matchExtra: {},
   }
 }
 
@@ -194,6 +197,20 @@ function asScoreMap(value: unknown): Record<string, number> {
   return next
 }
 
+function asCountMap(value: unknown, max: number): Record<string, number> {
+  const next = Object.create(null) as Record<string, number>
+  if (!isPlainObject(value)) return next
+  let count = 0
+  for (const [key, raw] of Object.entries(value)) {
+    if (count >= SAVE_MAX_MAP) break
+    if (isDangerousKey(key) || !isSafeId(key)) continue
+    next[key] = finiteInt(raw, 0, max, 0)
+    if (next[key] === 0) delete next[key]
+    else count += 1
+  }
+  return next
+}
+
 function asStarMap(value: unknown): Record<string, StarCount> {
   const next = Object.create(null) as Record<string, StarCount>
   if (!isPlainObject(value)) return next
@@ -254,6 +271,8 @@ export function normalizeProgress(parsed: Partial<ProgressState> | ProgressState
     lessonTier: asTierMap(parsed.lessonTier),
     lessonScore: asScoreMap(parsed.lessonScore),
     tierTaught: asTierMap(parsed.tierTaught),
+    matchBonus: asCountMap(parsed.matchBonus, MATCH_BONUS_MAX),
+    matchExtra: asCountMap(parsed.matchExtra, MATCH_EXTRA_MAX),
   }
   base.memory = migrateMemory({ ...base, memory: parsed.memory ?? {} })
   base.cityBuilt =

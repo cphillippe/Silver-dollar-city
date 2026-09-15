@@ -3,9 +3,12 @@ import { shuffle } from '../lib/shuffle'
 import { takeawayLines, type EvidenceBrief } from '../content/evidence'
 import { STORY } from '../content/story'
 import { EASY, easyFacingLine, easyWhyLine, isEasy, uniqueHoldChoices } from '../lib/easy'
+import { holdSuccessBeat } from '../lib/successBeat'
 import { learningBeat } from '../lib/learning'
 import { learningPicture, toolForEvidence } from '../lib/watchTools'
+import { playGemPop } from '../lib/juice'
 import { useProgress } from '../store/progress'
+import { WinBurst } from './challenges/WinBurst'
 import { DigDeeper } from './DigDeeper'
 import { GemMark } from './GemMark'
 import { PlainTalk } from './PlainTalk'
@@ -134,6 +137,7 @@ export function RecallGate({
       if (next === 'lock') {
         setReasonLocked(true)
         setFlash(line)
+        playGemPop('win')
         return
       }
       setPhase(next)
@@ -182,7 +186,7 @@ export function RecallGate({
   if (easyEncode) {
     return (
       <section
-        className={`recall-gate is-encode is-easy-hold ${shake ? 'is-shake' : ''} ${own ? 'is-own' : ''}`}
+        className={`recall-gate is-encode is-easy-hold ${shake ? 'is-shake' : ''} ${own ? 'is-own' : ''} ${reasonLocked ? 'is-yes' : ''}`}
         aria-label={STORY.takeaway}
       >
         <p className="eyebrow">{brief.source ? brief.source : 'Hold'}</p>
@@ -207,15 +211,13 @@ export function RecallGate({
           </>
         ) : (
           <>
-            <p className="next-tap">{reasonLocked ? EASY.keepThis : EASY.tapWhy}</p>
-            <p className="recall-line rehearse-stem">
-              {easyFacingLine(brief.id, heldClaim)}
-            </p>
             {reasonLocked ? (
               <>
-                <div className="reason-scroll">
-                  <p className="reason-held">{easyWhyLine(heldReason)}</p>
-                </div>
+                <WinBurst play stamp={EASY.holdYes} />
+                <p className="match-yes" role="status">
+                  <strong>{holdSuccessBeat(heldClaim, easyWhyLine(heldReason)).title}</strong>
+                  <span>{holdSuccessBeat(heldClaim, easyWhyLine(heldReason)).why}</span>
+                </p>
                 <div className="cta-dock">
                   <button
                     type="button"
@@ -227,18 +229,24 @@ export function RecallGate({
                 </div>
               </>
             ) : (
-              <div className="recall-choices">
-                {reasonOptions.map((line) => (
-                  <button
-                    key={line}
-                    type="button"
-                    className={`match-card recall-card ${flash === line ? 'is-flash' : ''}`}
-                    onClick={() => pick(line, heldReason, 'lock')}
-                  >
-                    {easyWhyLine(line)}
-                  </button>
-                ))}
-              </div>
+              <>
+                <p className="next-tap">{EASY.tapWhy}</p>
+                <p className="recall-line rehearse-stem">
+                  {easyFacingLine(brief.id, heldClaim)}
+                </p>
+                <div className="recall-choices">
+                  {reasonOptions.map((line) => (
+                    <button
+                      key={line}
+                      type="button"
+                      className={`match-card recall-card ${flash === line ? 'is-flash' : ''}`}
+                      onClick={() => pick(line, heldReason, 'lock')}
+                    >
+                      {easyWhyLine(line)}
+                    </button>
+                  ))}
+                </div>
+              </>
             )}
           </>
         )}

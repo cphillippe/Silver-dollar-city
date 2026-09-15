@@ -7,6 +7,7 @@ import { EASY, easyFacingLine, easyJournalMeta, isEasy } from '../lib/easy'
 import { isDue, nextGapLabel } from '../lib/memory'
 import { starLegend } from '../lib/stars'
 import { deployLabel, findLearning, storedLearnings, withLearningBeat } from '../lib/learning'
+import { bonusFace, journalBonusPoints, lineBonusPoints } from '../lib/matchBonus'
 import { journalPoints, journalTierCounts, needsTierHold, currentLessonTier, scoreFace } from '../lib/tiers'
 import { watchTool } from '../lib/watchTools'
 import { DigDeeper } from './DigDeeper'
@@ -46,8 +47,9 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
   const heldCount = progress.held.length
   const packPts = journalPoints(progress)
   const packTiers = journalTierCounts(progress)
+  const bonusPts = journalBonusPoints(progress)
   const packScoreLine = packPts
-    ? ` · ${packPts} pts · ${packTiers.easy} Easy · ${packTiers.medium} Medium · ${packTiers.hard} Hard`
+    ? ` · ${packPts} pts${bonusPts ? ` · +${bonusPts} bonus` : ''} · ${packTiers.easy} Easy · ${packTiers.medium} Medium · ${packTiers.hard} Hard`
     : ''
   const [later, setLater] = useState(() => readLater(today))
   const sessionItems = sessionDue(progress, today, later)
@@ -260,6 +262,9 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
                   {scoreFace(progress.lessonScore?.[learning.id]) ? (
                     <p className="quiet">{scoreFace(progress.lessonScore?.[learning.id])}</p>
                   ) : null}
+                  {bonusFace(lineBonusPoints(progress, learning.id)) ? (
+                    <p className="bonus-mark">{bonusFace(lineBonusPoints(progress, learning.id))}</p>
+                  ) : null}
                   {easy ? null : (
                   <p>{learning.reason}</p>
                   )}
@@ -445,6 +450,11 @@ function JournalCard({
             {due ? <span className="due-mark">Due this morning</span> : null}
             {held && !due ? <span className="held-mark">Held</span> : null}
             {scoreFace(score) ? <span className="held-mark">{scoreFace(score)}</span> : null}
+            {bonusFace(lineBonusPoints(progress, entry.unlockAfter ?? entry.id)) ? (
+              <span className="held-mark bonus-mark">
+                {bonusFace(lineBonusPoints(progress, entry.unlockAfter ?? entry.id))}
+              </span>
+            ) : null}
           </div>
           {trace && !due ? (
             <p className="quiet">{nextGapLabel(trace, today, easy)}</p>

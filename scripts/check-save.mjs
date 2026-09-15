@@ -74,6 +74,8 @@ assert.deepEqual(fromLegacy.progress.streetLinked, [])
 assert.equal(Object.keys(fromLegacy.progress.lessonTier).length, 0)
 assert.equal(Object.keys(fromLegacy.progress.lessonScore).length, 0)
 assert.equal(Object.keys(fromLegacy.progress.tierTaught).length, 0)
+assert.equal(Object.keys(fromLegacy.progress.matchBonus).length, 0)
+assert.equal(Object.keys(fromLegacy.progress.matchExtra).length, 0)
 assert.equal(fromLegacy.progress.cityBuilt.porch, 2)
 assert.equal(fromLegacy.progress.cityBuilt.hollow, 3)
 
@@ -121,6 +123,21 @@ assert.equal(easyOn.ok, true)
 if (!easyOn.ok) throw new Error('easy parse')
 assert.equal(easyOn.progress.easyMode, true)
 assert.equal(easyOn.meta.schemaVersion, 1)
+
+const bonusTrip = parseIncomingSave(
+  JSON.stringify(
+    wrapSave({
+      ...fromLegacy.progress,
+      matchBonus: { 'ph-road': 100 },
+      matchExtra: { 'ph-road': 1 },
+    }),
+  ),
+)
+assert.equal(bonusTrip.ok, true)
+if (!bonusTrip.ok) throw new Error('bonus parse')
+assert.equal(bonusTrip.progress.matchBonus['ph-road'], 100)
+assert.equal(bonusTrip.progress.matchExtra['ph-road'], 1)
+assert.equal(bonusTrip.progress.lessonScore['ph-road'], undefined)
 
 const junk = parseIncomingSave('not-json')
 assert.equal(junk.ok, false)
