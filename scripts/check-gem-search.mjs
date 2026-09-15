@@ -158,11 +158,11 @@ assert.match(
   /\+100 bonus|bonusFace/,
 )
 assert.match(
-  readFileSync(new URL('../src/components/RecallGate.tsx', import.meta.url), 'utf8'),
+  readFileSync(new URL('../src/components/challenges/WhyBlastPlay.tsx', import.meta.url), 'utf8'),
   /holdSuccessBeat/,
 )
 assert.match(
-  readFileSync(new URL('../src/components/RecallGate.tsx', import.meta.url), 'utf8'),
+  readFileSync(new URL('../src/components/challenges/WhyBlastPlay.tsx', import.meta.url), 'utf8'),
   /WinBurst/,
 )
 assert.match(
@@ -170,7 +170,7 @@ assert.match(
   /playGemPop/,
 )
 assert.match(
-  readFileSync(new URL('../src/components/RecallGate.tsx', import.meta.url), 'utf8'),
+  readFileSync(new URL('../src/components/challenges/WhyBlastPlay.tsx', import.meta.url), 'utf8'),
   /match-yes/,
 )
 assert.match(matchClearBeat('ph-road').why, /hurt man|help|mercy/i)

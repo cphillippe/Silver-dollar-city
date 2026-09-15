@@ -37,6 +37,8 @@ export const EASY = {
   tapWhy: 'Tap why this is true.',
   keepThis: 'Yes — keep this',
   holdYes: 'Yes!',
+  holdLocked: 'LOCKED!',
+  missPenalty: 'Miss −25',
   holdKept: 'That’s the line.',
   bonusToast: 'BONUS! +100',
   bonusWhy: 'Extra try!',

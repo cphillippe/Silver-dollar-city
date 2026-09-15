@@ -49,6 +49,7 @@
           <whyMisses>
             <miss>Life-permitting ranges are wide; blank chance predicts a habitable cosmos just as well.</miss>
             <miss>The fittedness is only a rumor in the numbers.</miss>
+            <miss>The fittedness is only a rumor.</miss>
           </whyMisses>
           <claimChoices>
             <choice>The universe is finely tuned for life — that fit points to a Designer.</choice>
@@ -94,6 +95,7 @@
           <whyMisses>
             <miss>Life-permitting ranges are wide; blank chance predicts a habitable cosmos just as well.</miss>
             <miss>The fittedness is only a rumor in the numbers.</miss>
+            <miss>The fittedness is only a rumor.</miss>
           </whyMisses>
           <claimChoices>
             <choice>The universe is finely tuned for life — that fit points to a Designer.</choice>
@@ -154,6 +156,7 @@ Design predicts this cosmos: cosmological constant, nuclear binding, a low-entro
           <whyMisses>
             <miss>Life-permitting ranges are wide; blank chance predicts a habitable cosmos just as well.</miss>
             <miss>The fittedness is only a rumor in the numbers.</miss>
+            <miss>The fittedness is only a rumor.</miss>
           </whyMisses>
           <claimChoices>
             <choice>The universe is finely tuned for life — that fit points to a Designer.</choice>
@@ -210,6 +213,7 @@ Design predicts this cosmos: cosmological constant, nuclear binding, a low-entro
           <whyMisses>
             <miss>A mind wanting observers would not expect life-permitting numbers.</miss>
             <miss>Likelihood arguments are automatically dishonest.</miss>
+            <miss>Likelihood arguments are always dishonest.</miss>
           </whyMisses>
           <claimChoices>
             <choice>Fine-tuning is best explained by a mind that intended a habitable world.</choice>
@@ -255,6 +259,7 @@ Design predicts this cosmos: cosmological constant, nuclear binding, a low-entro
           <whyMisses>
             <miss>A mind wanting observers would not expect life-permitting numbers.</miss>
             <miss>Likelihood arguments are automatically dishonest.</miss>
+            <miss>Likelihood arguments are always dishonest.</miss>
           </whyMisses>
           <claimChoices>
             <choice>Fine-tuning is best explained by a mind that intended a habitable world.</choice>
@@ -298,6 +303,7 @@ A Designer who wants observers predicts this habitable fit. The narrow ranges ar
           <whyMisses>
             <miss>A mind wanting observers would not expect life-permitting numbers.</miss>
             <miss>Likelihood arguments are automatically dishonest.</miss>
+            <miss>Likelihood arguments are always dishonest.</miss>
           </whyMisses>
           <claimChoices>
             <choice>Fine-tuning is best explained by a mind that intended a habitable world.</choice>
@@ -353,6 +359,7 @@ A Designer who wants observers predicts this habitable fit. The narrow ranges ar
           <whyMisses>
             <miss>Laws and vacua are not somethings.</miss>
             <miss>The question only applies to Tuesdays.</miss>
+            <miss>Nothing needs a reason to exist.</miss>
           </whyMisses>
           <claimChoices>
             <choice>Why is there something rather than nothing remains after a cosmological model.</choice>
@@ -398,6 +405,7 @@ A Designer who wants observers predicts this habitable fit. The narrow ranges ar
           <whyMisses>
             <miss>Laws and vacua are not somethings.</miss>
             <miss>The question only applies to Tuesdays.</miss>
+            <miss>Nothing needs a reason to exist.</miss>
           </whyMisses>
           <claimChoices>
             <choice>Why is there something rather than nothing remains after a cosmological model.</choice>
@@ -446,6 +454,7 @@ Fine-tuning and “why anything?” are siblings, not twins. One asks why this w
           <whyMisses>
             <miss>Laws and vacua are not somethings.</miss>
             <miss>The question only applies to Tuesdays.</miss>
+            <miss>Nothing needs a reason to exist.</miss>
           </whyMisses>
           <claimChoices>
             <choice>Why is there something rather than nothing remains after a cosmological model.</choice>
@@ -501,6 +510,7 @@ Fine-tuning and “why anything?” are siblings, not twins. One asks why this w
           <whyMisses>
             <miss>The unfinished story means we should end research.</miss>
             <miss>Genesis 1 is a lab protocol.</miss>
+            <miss>We should end research now.</miss>
           </whyMisses>
           <claimChoices>
             <choice>Life’s specified information is a mark of mind.</choice>
@@ -546,6 +556,7 @@ Fine-tuning and “why anything?” are siblings, not twins. One asks why this w
           <whyMisses>
             <miss>The unfinished story means we should end research.</miss>
             <miss>Genesis 1 is a lab protocol.</miss>
+            <miss>We should end research now.</miss>
           </whyMisses>
           <claimChoices>
             <choice>Life’s specified information is a mark of mind.</choice>
@@ -594,6 +605,7 @@ Life’s information looks like the work of mind. Wonder is rational. So is more
           <whyMisses>
             <miss>The unfinished story means we should end research.</miss>
             <miss>Genesis 1 is a lab protocol.</miss>
+            <miss>We should end research now.</miss>
           </whyMisses>
           <claimChoices>
             <choice>Life’s specified information is a mark of mind.</choice>
@@ -649,6 +661,7 @@ Life’s information looks like the work of mind. Wonder is rational. So is more
           <whyMisses>
             <miss>Scripture treats the sky as decoration only.</miss>
             <miss>Design inference and “the heavens declare” cannot share a grain.</miss>
+            <miss>The sky is silent decoration.</miss>
           </whyMisses>
           <claimChoices>
             <choice>The heavens already speak of a Maker; fine-tuning fits that voice.</choice>
@@ -694,6 +707,7 @@ Life’s information looks like the work of mind. Wonder is rational. So is more
           <whyMisses>
             <miss>Scripture treats the sky as decoration only.</miss>
             <miss>Design inference and “the heavens declare” cannot share a grain.</miss>
+            <miss>The sky is silent decoration.</miss>
           </whyMisses>
           <claimChoices>
             <choice>The heavens already speak of a Maker; fine-tuning fits that voice.</choice>
@@ -742,6 +756,7 @@ The heavens declare the glory of God, and the sky above proclaims his handiwork.
           <whyMisses>
             <miss>Scripture treats the sky as decoration only.</miss>
             <miss>Design inference and “the heavens declare” cannot share a grain.</miss>
+            <miss>The sky is silent decoration.</miss>
           </whyMisses>
           <claimChoices>
             <choice>The heavens already speak of a Maker; fine-tuning fits that voice.</choice>
@@ -795,6 +810,7 @@ The heavens declare the glory of God, and the sky above proclaims his handiwork.
           <whyMisses>
             <miss>A habitable band is an unremarkable accident with no question.</miss>
             <miss>Minds that do science need no home in the story.</miss>
+            <miss>Minds that do science need no home.</miss>
           </whyMisses>
           <claimChoices>
             <choice>Life, place, and mind are not cheap facts.</choice>
@@ -840,6 +856,7 @@ The heavens declare the glory of God, and the sky above proclaims his handiwork.
           <whyMisses>
             <miss>A habitable band is an unremarkable accident with no question.</miss>
             <miss>Minds that do science need no home in the story.</miss>
+            <miss>Minds that do science need no home.</miss>
           </whyMisses>
           <claimChoices>
             <choice>Life, place, and mind are not cheap facts.</choice>
@@ -896,6 +913,7 @@ Acts 17:24–25: the God who made the world… gives to all mankind life and bre
           <whyMisses>
             <miss>A habitable band is an unremarkable accident with no question.</miss>
             <miss>Minds that do science need no home in the story.</miss>
+            <miss>Minds that do science need no home.</miss>
           </whyMisses>
           <claimChoices>
             <choice>Life, place, and mind are not cheap facts.</choice>

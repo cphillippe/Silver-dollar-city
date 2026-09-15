@@ -510,14 +510,17 @@ assert.match(recallSrc, /pickClaim/)
 assert.match(recallSrc, /recall-done/)
 assert.match(recallSrc, /EASY.rememberSentence/)
 assert.match(recallSrc, /is-easy-hold/)
-assert.match(recallSrc, /EASY\.keepThis/)
+assert.match(
+  readFileSync(new URL('../src/components/challenges/WhyBlastPlay.tsx', import.meta.url), 'utf8'),
+  /EASY\.keepThis/,
+)
 assert.match(recallSrc, /EASY\.tapWhy/)
 assert.match(recallSrc, /easyWhyLine/)
 {
   const easyHold = recallSrc.match(/if \(easyEncode\) \{\s*return \(([\s\S]*?)\n  \}/)?.[1] ?? ''
-  assert.match(easyHold, /EASY\.tapWhy/)
+  assert.match(easyHold, /WhyBlastPlay/)
   assert.match(easyHold, /EASY\.rememberSentence/)
-  assert.match(easyHold, /reasonOptions\.map/)
+  assert.doesNotMatch(easyHold, /reasonOptions\.map/)
   assert.doesNotMatch(easyHold, /EASY\.reasonTeach/)
   assert.doesNotMatch(easyHold, /EASY\.whyStands/)
 }
@@ -1080,7 +1083,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.60')
+assert.equal(APP_VERSION, '1.4.62')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')

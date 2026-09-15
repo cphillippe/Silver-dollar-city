@@ -49,6 +49,7 @@
     <summary>On Hold, the player may attempt a level-up to the next tier’s claim/why. If they fail the level-up — or fail Hold at the current tier — fall back to Easy (retry Easy Learn→Match→Hold: teach-before-test, not punish).</summary>
     <levelUp>easy Hold may set levelUpTo="medium"; medium Hold may set levelUpTo="hard". Hard is the top teach tier (no further levelUpTo).</levelUp>
     <onFail>Every Hold sets onFail="easy". Failed Hold or failed level-up returns the player to the Easy teach path for that same lesson id.</onFail>
+    <whyBlast>Easy Hold why-step is a 4-chip why-blast (claim center, four why faces). Packs should ship ≥3 unique whyMisses. Wrong tap is Miss −25 (floor 0) and that chip pops out. Correct lock-in is LOCKED! plus a short why-this-is-true takeaway.</whyBlast>
     <heldClaim>Claim · reason · source stay the same clear/plain line across easy, medium, and hard. Do not mysterious-ize the held line on Hard.</heldClaim>
   </holdRules>
   <scoring>
@@ -123,7 +124,9 @@
     <learnThisFirst>Learn this first.</learnThisFirst>
     <rememberSentence>Tap the line you kept.</rememberSentence>
     <tapWhy>Tap why this is true.</tapWhy>
-    <keepThis>Keep this</keepThis>
+    <keepThis>Yes — keep this</keepThis>
+    <holdLocked>LOCKED!</holdLocked>
+    <missPenalty>Miss −25</missPenalty>
     <mainIdeaTeach>Main idea = the short true line we keep.</mainIdeaTeach>
     <claimTeach>A claim is the main idea we hold to be true.</claimTeach>
     <reasonTeach>A reason is why this is true.</reasonTeach>

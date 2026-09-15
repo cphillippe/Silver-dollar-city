@@ -3,12 +3,11 @@ import { shuffle } from '../lib/shuffle'
 import { takeawayLines, type EvidenceBrief } from '../content/evidence'
 import { STORY } from '../content/story'
 import { EASY, easyFacingLine, easyWhyLine, isEasy, uniqueHoldChoices } from '../lib/easy'
-import { holdSuccessBeat } from '../lib/successBeat'
+import { WhyBlastPlay } from './challenges/WhyBlastPlay'
 import { learningBeat } from '../lib/learning'
 import { learningPicture, toolForEvidence } from '../lib/watchTools'
 import { playGemPop } from '../lib/juice'
 import { useProgress } from '../store/progress'
-import { WinBurst } from './challenges/WinBurst'
 import { DigDeeper } from './DigDeeper'
 import { GemMark } from './GemMark'
 import { PlainTalk } from './PlainTalk'
@@ -74,15 +73,10 @@ export function RecallGate({
     const correct = chosen?.reason ?? brief.reason
     if (encode && !easy) return uniqueHoldChoices([correct], reasonFace, correct)
     const pool = shuffle([...brief.reasonChoices])
-    const raw = easy
-      ? shuffle(
-          [correct, pool.find((line) => line !== correct)].filter(
-            (line): line is string => Boolean(line),
-          ),
-        )
-      : encode
-        ? [correct]
-        : pool
+    if (easy) {
+      return uniqueHoldChoices(pool, reasonFace, correct)
+    }
+    const raw = encode ? [correct] : pool
     return uniqueHoldChoices(raw, reasonFace, correct)
   }, [brief.id, brief.reason, brief.reasonChoices, encode, chosen, easy])
   const [phase, setPhase] = useState<Phase>(deeper ? 'reason' : 'claim')
@@ -186,7 +180,7 @@ export function RecallGate({
   if (easyEncode) {
     return (
       <section
-        className={`recall-gate is-encode is-easy-hold ${shake ? 'is-shake' : ''} ${own ? 'is-own' : ''} ${reasonLocked ? 'is-yes' : ''}`}
+        className={`recall-gate is-encode is-easy-hold is-why-blast ${shake ? 'is-shake' : ''} ${own ? 'is-own' : ''}`}
         aria-label={STORY.takeaway}
       >
         <p className="eyebrow">{brief.source ? brief.source : 'Hold'}</p>
@@ -211,43 +205,13 @@ export function RecallGate({
           </>
         ) : (
           <>
-            {reasonLocked ? (
-              <>
-                <WinBurst play stamp={EASY.holdYes} />
-                <p className="match-yes" role="status">
-                  <strong>{holdSuccessBeat(heldClaim, easyWhyLine(heldReason)).title}</strong>
-                  <span>{holdSuccessBeat(heldClaim, easyWhyLine(heldReason)).why}</span>
-                </p>
-                <div className="cta-dock">
-                  <button
-                    type="button"
-                    className="btn primary xl recall-done"
-                    onClick={() => settle(true)}
-                  >
-                    {EASY.keepThis}
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <p className="next-tap">{EASY.tapWhy}</p>
-                <p className="recall-line rehearse-stem">
-                  {easyFacingLine(brief.id, heldClaim)}
-                </p>
-                <div className="recall-choices">
-                  {reasonOptions.map((line) => (
-                    <button
-                      key={line}
-                      type="button"
-                      className={`match-card recall-card ${flash === line ? 'is-flash' : ''}`}
-                      onClick={() => pick(line, heldReason, 'lock')}
-                    >
-                      {easyWhyLine(line)}
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
+            <WhyBlastPlay
+              id={brief.id}
+              claim={heldClaim}
+              reason={heldReason}
+              packMisses={brief.reasonChoices}
+              onDone={(result) => settle(result.clean)}
+            />
           </>
         )}
       </section>

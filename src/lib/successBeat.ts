@@ -42,10 +42,14 @@ export function matchClearBeat(lineId: string): SuccessBeat {
   }
 }
 
-/** Hold lock-in — names the line they got right. */
+/** Hold lock-in — names the line they got right and why it matters. */
 export function holdSuccessBeat(claim: string, why: string): SuccessBeat {
   const face = easyChromeLine(claim).replace(/\.$/, '')
-  return { title: `Yes! ${face}`, why }
+  const reason = why.replace(/\.$/, '').trim()
+  return {
+    title: `Yes! ${face}`,
+    why: reason ? `${reason}. That’s why this is true.` : EASY.whyStands,
+  }
 }
 
 export function fatherWinBeat(): SuccessBeat {

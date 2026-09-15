@@ -206,19 +206,22 @@ function parseHold(xml: string, whyFallback: string, tier: LessonTierId, claim: 
       .filter((item) => item.attrs.kind === 'claim')
       .map((item) => strip(item.inner)),
   ].filter(Boolean)
-  const whyWrap = child(inner, 'whyMisses')
-  const whyMisses = [
-    ...(whyWrap ? textsOf(whyWrap.inner, 'miss') : []),
-    ...textsOf(inner, 'whyMiss'),
-    ...children(inner, 'miss')
-      .filter((item) => item.attrs.kind === 'why' || item.attrs.kind === 'reason')
-      .map((item) => strip(item.inner)),
-  ].filter(Boolean)
   const why =
     textOf(inner, 'whyCorrect') ||
     textOf(inner, 'reason') ||
     textOf(inner, 'why') ||
     whyFallback
+  const whyWrap = child(inner, 'whyMisses')
+  const reasonWrap = child(inner, 'reasonChoices')
+  const reasonChoices = reasonWrap ? textsOf(reasonWrap.inner, 'choice') : []
+  const whyMisses = [
+    ...(whyWrap ? textsOf(whyWrap.inner, 'miss') : []),
+    ...textsOf(inner, 'whyMiss'),
+    ...reasonChoices.filter((line) => line && line !== why),
+    ...children(inner, 'miss')
+      .filter((item) => item.attrs.kind === 'why' || item.attrs.kind === 'reason')
+      .map((item) => strip(item.inner)),
+  ].filter(Boolean)
   return {
     levelUpTo,
     onFail: 'easy',
