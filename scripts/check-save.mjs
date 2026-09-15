@@ -139,6 +139,19 @@ assert.equal(bonusTrip.progress.matchBonus['ph-road'], 100)
 assert.equal(bonusTrip.progress.matchExtra['ph-road'], 1)
 assert.equal(bonusTrip.progress.lessonScore['ph-road'], undefined)
 
+const missFloor = parseIncomingSave(
+  JSON.stringify(
+    wrapSave({
+      ...fromLegacy.progress,
+      matchBonus: { 'ph-road': 0, 'ph-father': -40 },
+    }),
+  ),
+)
+assert.equal(missFloor.ok, true)
+if (!missFloor.ok) throw new Error('miss floor parse')
+assert.equal(missFloor.progress.matchBonus['ph-road'], undefined)
+assert.equal(missFloor.progress.matchBonus['ph-father'], undefined)
+
 const junk = parseIncomingSave('not-json')
 assert.equal(junk.ok, false)
 
