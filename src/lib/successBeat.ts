@@ -1,6 +1,6 @@
 import { evidenceFor } from '../content/evidence.ts'
 import { packLesson } from '../content/packCatalog.ts'
-import { EASY, easyChromeLine } from './easy.ts'
+import { EASY, easyChromeLine, easyWhyLine } from './easy.ts'
 import { FATHER_RUN_CLAIM } from './fatherRun.ts'
 import type { GemWord } from './gemSearch.ts'
 
@@ -17,7 +17,7 @@ export function gemTargetBeat(word: GemWord): SuccessBeat {
   if (word.kind === 'place') {
     return { title: `Yes · ${word.label}`, why: 'The story lives here.' }
   }
-  return { title: `Yes · ${word.label}`, why: 'That word belongs to the main idea.' }
+  return { title: `Yes · ${word.label}`, why: 'That’s the main idea.' }
 }
 
 /** Kid-plain beat after a bonus word — names the +100 and the extra try. */
@@ -33,9 +33,11 @@ export function matchClaimLine(lineId: string): string {
 
 /** After every required chip is found. */
 export function matchClearBeat(lineId: string): SuccessBeat {
+  const lesson = packLesson(lineId)
+  const why = easyWhyLine(lesson?.easy.hold.why || evidenceFor(lineId)?.reason || '')
   return {
     title: `Yes · ${matchClaimLine(lineId)}`,
-    why: 'You found every required word.',
+    why: why || 'You found the story.',
   }
 }
 

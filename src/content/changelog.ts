@@ -16,7 +16,7 @@ export const CHANGELOG: ChangeNote[] = [
       'Bonus dictionary stays small and lesson-related so random letter junk does not score. Required finds still clear gems and flip story panels',
       'Journal shows the +100 bonus on the score line and the stored card',
       'After MATCHED, One more Match spends the extra try. Hold next stays the primary tap',
-      'Easy success names what they got right and why — gem finds, bonus words, MATCHED, Hold lock-in, and father-run hug. Keep this becomes Yes — keep this',
+      'Easy success names what they got right and why — gem finds, bonus words, MATCHED, Hold lock-in, and father-run hug. Hold pops Yes! then the claim; Keep this becomes Yes — keep this',
       'Easy father-run timing dash for ph-father: hold to run, press the glow to dash, hug the son before the hired-hand speech is done',
       'Win locks the same claim — The father runs with mercy before the speech is done. HUGGED! is a badge; Hold next is the primary tap',
       'Miss is teach-friendly: The run comes before the apology is done. Retry starts closer — one more round, not a dead end',

@@ -132,6 +132,19 @@ assert.match(
   /holdSuccessBeat/,
 )
 assert.match(
+  readFileSync(new URL('../src/components/RecallGate.tsx', import.meta.url), 'utf8'),
+  /WinBurst/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/RecallGate.tsx', import.meta.url), 'utf8'),
+  /playGemPop/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/RecallGate.tsx', import.meta.url), 'utf8'),
+  /match-yes/,
+)
+assert.match(matchClearBeat('ph-road').why, /hurt man|help|mercy/i)
+assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
   /Yes — keep this/,
 )
