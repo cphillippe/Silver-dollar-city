@@ -6505,11 +6505,22 @@ html[data-easy='on'] .link-block.is-not {
 }
 
 .recall-gate.is-easy-hold {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 10px;
   min-height: min(68vh, 540px);
   padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+}
+
+.recall-gate.is-easy-hold.is-yes {
+  box-shadow: 0 0 28px rgba(255, 204, 51, 0.42);
+  border-color: rgba(255, 230, 140, 0.7);
+}
+
+.recall-gate.is-easy-hold .win-stamp-wrap {
+  position: absolute;
+  top: 16%;
 }
 
 .recall-gate.is-easy-hold .recall-line {
