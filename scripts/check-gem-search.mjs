@@ -210,7 +210,7 @@ assert.match(playSrc, /matchBonusWord/)
 assert.match(playSrc, /EASY\.bonusMissWord/)
 assert.match(playSrc, /EASY\.bonusMissStraight/)
 assert.match(playSrc, /EASY\.missPenalty/)
-assert.match(playSrc, /is-miss/)
+assert.match(playSrc, /miss-banner/)
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
   /Not a bonus word/,
