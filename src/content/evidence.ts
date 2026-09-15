@@ -9,7 +9,7 @@ export interface EvidenceBrief {
   reason: string
   source: string
   claimChoices: [string, string, string]
-  reasonChoices: [string, string, string]
+  reasonChoices: string[]
 }
 
 function brief(
