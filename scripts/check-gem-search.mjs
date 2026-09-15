@@ -3,13 +3,24 @@ import { readFileSync } from 'node:fs'
 import { EASY_LINE_ORDER } from '../src/lib/easy.ts'
 import { packLesson } from '../src/content/packCatalog.ts'
 import {
+  bonusWordsFor,
   buildGemPuzzle,
+  findStraightSpelling,
   gemWordsFor,
+  isBonusSpelling,
   isStraightPath,
+  matchBonusWord,
   matchGemWord,
   pathLetters,
   tryAddToPath,
 } from '../src/lib/gemSearch.ts'
+import {
+  applyMatchBonus,
+  bonusFace,
+  consumeMatchExtra,
+  MATCH_BONUS_POINTS,
+} from '../src/lib/matchBonus.ts'
+import { gemBonusBeat, gemTargetBeat, matchClearBeat } from '../src/lib/successBeat.ts'
 import {
   splitStorySentences,
   resolveStoryMedia,
@@ -51,6 +62,58 @@ const grown = tryAddToPath(
 )
 assert.equal(grown.length, 2)
 
+const mercyBonusPool = bonusWordsFor('ph-road')
+assert.ok(mercyBonusPool.includes('ROAD'), 'road is a mercy bonus')
+assert.ok(mercyBonusPool.includes('HELP'), 'help is a mercy bonus')
+assert.ok(
+  mercyBonusPool.every((word) => !mercyWords.some((target) => target.text === word)),
+  'bonus is not a required chip',
+)
+assert.equal(MATCH_BONUS_POINTS, 100)
+const planted = mercy.bonus.filter((word) => (mercy.bonusPaths[word.id] ?? []).length === word.text.length)
+assert.ok(planted.length >= 2, 'mercy plants bonus words')
+assert.ok(mercy.planted.length >= 2, 'planted extras on the board')
+assert.ok(
+  mercy.planted.some((word) => word.text === 'GAP' || word.text === 'ROAD' || word.text === 'HELP'),
+)
+assert.ok(mercyBonusPool.includes('GAP'), 'gap is a shared extra')
+
+const fatherBoard = buildGemPuzzle('ph-father')
+assert.ok(fatherBoard.planted.some((word) => word.text === 'GAP'), 'father plants Gap')
+assert.equal(isBonusSpelling('GAP', fatherBoard), true)
+assert.equal(isBonusSpelling('QQQ', fatherBoard), false)
+assert.equal(isBonusSpelling('FAT', fatherBoard), false, 'FAT is a piece of FATHER')
+const gapPath =
+  fatherBoard.bonusPaths[fatherBoard.planted.find((word) => word.text === 'GAP')?.id ?? ''] ??
+  findStraightSpelling(fatherBoard.letters, 'GAP')
+assert.ok(gapPath && gapPath.length === 3, 'Gap sits on the father board')
+assert.equal(pathLetters(gapPath, fatherBoard.letters), 'GAP')
+assert.equal(matchBonusWord(gapPath, fatherBoard, [])?.text, 'GAP')
+assert.equal(matchGemWord(gapPath, fatherBoard, []), null)
+assert.equal(matchBonusWord([...gapPath].reverse(), fatherBoard, [])?.text, 'GAP')
+const mercyChip = fatherBoard.words.find((word) => word.text === 'MERCY')
+if (mercyChip) {
+  assert.equal(matchGemWord(fatherBoard.paths[mercyChip.id], fatherBoard, [])?.text, 'MERCY')
+  assert.equal(matchBonusWord(fatherBoard.paths[mercyChip.id], fatherBoard, []), null)
+}
+const reverseHelp = [...(mercy.bonusPaths[mercy.planted[0].id] ?? [])].reverse()
+assert.equal(matchBonusWord(reverseHelp, mercy, [])?.text, mercy.planted[0].text)
+for (const word of planted) {
+  assert.equal(pathLetters(mercy.bonusPaths[word.id], mercy.letters), word.text)
+  assert.equal(isStraightPath(mercy.bonusPaths[word.id]), true)
+  assert.equal(matchBonusWord(mercy.bonusPaths[word.id], mercy, [])?.text, word.text)
+  assert.equal(matchGemWord(mercy.bonusPaths[word.id], mercy, []), null)
+}
+const awarded = applyMatchBonus({ matchBonus: {}, matchExtra: {} }, 'ph-road')
+assert.equal(awarded.matchBonus['ph-road'], 100)
+assert.equal(awarded.matchExtra['ph-road'], 1)
+assert.equal(bonusFace(100), '+100 bonus')
+assert.equal(consumeMatchExtra(awarded, 'ph-road').matchExtra['ph-road'], undefined)
+assert.match(gemBonusBeat('Help').title, /BONUS! \+100/)
+assert.match(gemBonusBeat('Help').why, /Extra try/)
+assert.match(gemTargetBeat(mercyWords[0]).title, /Yes/)
+assert.match(matchClearBeat('ph-road').title, /Neighbor/)
+
 for (const id of EASY_LINE_ORDER) {
   const puzzle = buildGemPuzzle(id)
   assert.ok(puzzle.words.length >= 3, `${id} has words`)
@@ -81,6 +144,40 @@ assert.match(playSrc, /StoryStrip/)
 assert.match(playSrc, /onClear/)
 assert.match(playSrc, /revealPanel/)
 assert.match(playSrc, /winStamp/)
+assert.match(playSrc, /recordMatchBonus/)
+assert.match(playSrc, /EASY\.moreMatch/)
+assert.match(playSrc, /bonus-banner/)
+assert.match(playSrc, /EASY\.bonusHint/)
+assert.match(playSrc, /is-bonus/)
+assert.match(playSrc, /\+100/)
+assert.match(playSrc, /bonus-plus/)
+assert.match(playSrc, /match-yes/)
+assert.match(playSrc, /matchBonusWord/)
+assert.match(
+  readFileSync(new URL('../src/components/Journal.tsx', import.meta.url), 'utf8'),
+  /\+100 bonus|bonusFace/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/RecallGate.tsx', import.meta.url), 'utf8'),
+  /holdSuccessBeat/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/RecallGate.tsx', import.meta.url), 'utf8'),
+  /WinBurst/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/RecallGate.tsx', import.meta.url), 'utf8'),
+  /playGemPop/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/RecallGate.tsx', import.meta.url), 'utf8'),
+  /match-yes/,
+)
+assert.match(matchClearBeat('ph-road').why, /hurt man|help|mercy/i)
+assert.match(
+  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  /Yes — keep this/,
+)
 assert.match(
   readFileSync(new URL('../src/components/StoryStrip.tsx', import.meta.url), 'utf8'),
   /story-hero/,
@@ -110,6 +207,8 @@ assert.match(puzzleSrc, /isEasy\(progress\)/)
 assert.match(puzzleSrc, /onClear=\{onSolved\}/)
 assert.match(puzzleSrc, /lessonStory/)
 assert.match(puzzleSrc, /panel-blast/)
+assert.match(puzzleSrc, /FatherRunPlay/)
+assert.match(puzzleSrc, /father-run/)
 assert.doesNotMatch(puzzleSrc, /timing-dash|road-swipe|claim-merge|story-night/)
 
 const fatherStory = packLesson('ph-father')?.easy.learn ?? ''
@@ -128,8 +227,9 @@ for (const id of EASY_LINE_ORDER) {
   const puzzle = buildGemPuzzle(id)
   const panels = storyPanelsFor(id, puzzle.words.length)
   const story = lessonStory(id, puzzle.words.length)
-  assert.equal(storyPlayFor(id), 'panel-blast', `${id} play`)
-  assert.equal(story.play, 'panel-blast')
+  const play = 'panel-blast'
+  assert.equal(storyPlayFor(id), play, `${id} play`)
+  assert.equal(story.play, play)
   assert.deepEqual(story.beats, panels)
   assert.equal(panels.length, Math.max(3, Math.min(4, puzzle.words.length)), `${id} panel count`)
   assert.ok(panels.every((panel) => panel.text.trim().length > 0), `${id} panel text`)

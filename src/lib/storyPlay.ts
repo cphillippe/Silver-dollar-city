@@ -3,10 +3,11 @@ import { storyPanelsFor, type StoryPanel } from './storyPanels.ts'
 
 /**
  * How this lesson is *played*. Same shell always: teach beats → play → Hold.
- * This climb is panel blast only. Queued later (do not mount): father-run
- * timing dash, Samaritan road-swipe, claim-merge, story-night TD.
+ * Every Easy Match is panel-blast (gem board) so extras like Gap can ship.
+ * Father-run and road-maze stay in the tree, unmounted until bonus words are live.
+ * Queued later (do not mount): claim-merge, story-night TD.
  */
-export type StoryPlayKind = 'panel-blast'
+export type StoryPlayKind = 'panel-blast' | 'father-run' | 'road-maze'
 
 export interface LessonStory {
   lineId: string
@@ -16,7 +17,6 @@ export interface LessonStory {
 
 /** Mechanic for this lesson. Hold does not read this. */
 export function storyPlayFor(_lineId: string): StoryPlayKind {
-  void _lineId
   return 'panel-blast'
 }
 
