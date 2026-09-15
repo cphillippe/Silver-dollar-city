@@ -1,13 +1,45 @@
 /**
  * Tiny offline bonus dictionary for Easy gem Match extras.
  * Bill: Set lookup, straight-line only, length 3–6. BED must be in the set.
+ * Plants mix those lengths — never the same five 3-letter chips.
  */
 
 export const BONUS_WORD_MIN = 3
 export const BONUS_WORD_MAX = 6
+export const PLANT_WORD_MIN = 3
+export const PLANT_WORD_MAX = 6
+export const PLANT_LONGER_MIN = 4
+export const PLANT_LENGTHS = [3, 4, 5, 6] as const
 
-/** Kid-friendly extras we plant so they actually appear on boards. */
-export const PLANTED_EXTRAS = ['BED', 'CAT', 'HAT', 'RUN', 'SON', 'GAP', 'YES', 'NET'] as const
+/** Vulgar / mean extras we never plant on a kid board. Dict scoring still uses the set. */
+const SKIP_RUDE_PLANT = new Set([
+  'ASS',
+  'BOOB',
+  'BUM',
+  'COCK',
+  'CRAP',
+  'CUM',
+  'DAMN',
+  'DICK',
+  'DUMB',
+  'FAG',
+  'FART',
+  'FUCK',
+  'HELL',
+  'NUDE',
+  'PISS',
+  'POO',
+  'PORN',
+  'SEX',
+  'SHIT',
+  'SLUR',
+  'SLUT',
+  'SUCK',
+  'THUG',
+  'TIT',
+  'TURD',
+  'WHORE',
+])
 
 const RAW = `
 BED CAT HAT RUN SON GAP YES NET
@@ -275,4 +307,19 @@ export const COMMON_BONUS_COUNT = COMMON_BONUS_WORDS.size
 
 export function isCommonBonusWord(text: string): boolean {
   return COMMON_BONUS_WORDS.has(text)
+}
+
+export function isKidFriendlyPlant(text: string): boolean {
+  return !SKIP_RUDE_PLANT.has(text)
+}
+
+/** Tiny-dict words we may plant (length 3–6, kid-friendly). */
+export function plantableBonusWords(): string[] {
+  const words: string[] = []
+  for (const word of COMMON_BONUS_WORDS) {
+    if (word.length < PLANT_WORD_MIN || word.length > PLANT_WORD_MAX) continue
+    if (!isKidFriendlyPlant(word)) continue
+    words.push(word)
+  }
+  return words
 }
