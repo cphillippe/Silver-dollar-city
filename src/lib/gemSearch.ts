@@ -137,7 +137,7 @@ const MIN_LEN = 3
 const MAX_LEN = 8
 const MAX_WORDS = 4
 const BONUS_MAX_LEN = BONUS_WORD_MAX
-const MAX_BONUS_PLANT = 3
+const MAX_BONUS_PLANT = 5
 const SHARED_BONUS = [...PLANTED_EXTRAS, 'HELP', 'CARE', 'KIND', 'GIFT', 'ROAD']
 
 /**
