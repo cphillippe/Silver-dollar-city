@@ -63,7 +63,11 @@ export function TeachUnlock({ brief, kind, onUnlock, unlock, beats }: TeachUnloc
         </div>
         <div className="cta-dock easy-story-dock">
           <button type="button" className="btn gold xl" onClick={onUnlock}>
-            {storyPlayFor(brief.id) === 'father-run' ? EASY.runCta : EASY.findGems}
+            {storyPlayFor(brief.id) === 'father-run'
+              ? EASY.runCta
+              : storyPlayFor(brief.id) === 'road-maze'
+                ? EASY.mazeCta
+                : EASY.findGems}
           </button>
           <button type="button" className="text-link" onClick={onUnlock}>
             Skip reading
