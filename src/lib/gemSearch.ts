@@ -22,6 +22,11 @@ export interface GemPuzzle {
   words: GemWord[]
   letters: string[][]
   paths: Record<string, GemCoord[]>
+  /** Curated lesson words that are not required chips. */
+  bonusPool: string[]
+  /** Planted or discovered bonus words on this board. */
+  bonus: GemWord[]
+  bonusPaths: Record<string, GemCoord[]>
 }
 
 const STOP = new Set([
@@ -124,6 +129,21 @@ const GRID = 8
 const MIN_LEN = 3
 const MAX_LEN = 8
 const MAX_WORDS = 4
+const BONUS_MAX_LEN = 6
+const MAX_BONUS_PLANT = 2
+
+/** Authored extras so random fill junk does not score. Lesson text fills the rest. */
+const LESSON_BONUS: Record<string, string[]> = {
+  'ph-road': ['ROAD', 'HELP', 'HURT', 'CARE', 'OIL', 'INN', 'KIND'],
+  'ph-father': ['SON', 'HUG', 'RUN', 'HOME', 'ARMS', 'RING'],
+  'ph-debt': ['DEBT', 'KING', 'JAIL', 'SUM', 'PEER'],
+  'wb-creed': ['CREED', 'DIED', 'ROSE', 'PAUL', 'NAMES'],
+  'wb-women': ['TOMB', 'WOMEN', 'DAWN', 'TOLD'],
+  'daily-lantern': ['LAMP', 'HILL', 'CITY', 'LIGHT'],
+  'daily-stars': ['SKY', 'STARS', 'MAKER', 'SPEAK'],
+  'daily-cosmos': ['WORLD', 'LIFE', 'FIT', 'GIVEN'],
+  'hl-moral': ['DUTY', 'HEART', 'RIGHT', 'KNOW'],
+}
 
 export function lettersOnly(text: string): string {
   return text.toUpperCase().replace(/[^A-Z]/g, '')
@@ -223,6 +243,43 @@ export function gemWordsFor(lineId: string): GemWord[] {
   return picked.slice(0, MAX_WORDS)
 }
 
+function bonusBitOk(bit: string): boolean {
+  return bit.length >= MIN_LEN && bit.length <= BONUS_MAX_LEN && !STOP.has(bit)
+}
+
+/** Small curated pool — lesson words only, never required chips. */
+export function bonusWordsFor(lineId: string): string[] {
+  const lesson = packLesson(lineId)
+  const targets = new Set(gemWordsFor(lineId).map((word) => word.text))
+  const authored = LESSON_BONUS[lineId] ?? []
+  const fromText = [
+    ...tokens(lesson?.easy.learn ?? ''),
+    ...tokens(lesson?.easy.gloss ?? ''),
+    ...tokens(lesson?.easy.word?.term ?? ''),
+    ...tokens(lesson?.easy.hint ?? ''),
+    ...tokens(lesson?.claim ?? ''),
+    ...tokens(easyChromeLine(lesson?.claim ?? '')),
+    ...tokens(easyChromeLine(lesson?.plain ?? '')),
+  ]
+  const seen = new Set<string>()
+  const pool: string[] = []
+  for (const bit of [...authored, ...fromText]) {
+    if (!bonusBitOk(bit) || targets.has(bit) || seen.has(bit)) continue
+    seen.add(bit)
+    pool.push(bit)
+  }
+  return pool
+}
+
+function makeBonusWord(text: string): GemWord {
+  return {
+    id: `bonus-${text.toLowerCase()}`,
+    text,
+    label: titleWord(text),
+    kind: 'idea',
+  }
+}
+
 function emptyGrid(size: number): (string | '')[][] {
   return Array.from({ length: size }, () => Array.from({ length: size }, () => ''))
 }
@@ -284,12 +341,68 @@ export function gemHue(letter: string, r: number, c: number): number {
   return (letter.charCodeAt(0) + r * 3 + c * 5) % 6
 }
 
-export function buildGemPuzzle(lineId: string): GemPuzzle {
+function tryPlaceWord(
+  grid: (string | '')[][],
+  word: string,
+  starts: GemCoord[],
+  rand: () => number,
+): GemCoord[] | null {
+  const dirs = shuffleSeed(EASY_DIRS, rand)
+  const spots = shuffleSeed(starts, rand)
+  for (const dir of dirs) {
+    for (const start of spots) {
+      if (!canPlace(grid, word, start, dir)) continue
+      return writeWord(grid, word, start, dir)
+    }
+  }
+  return null
+}
+
+function scanBonusOnBoard(
+  letters: string[][],
+  pool: string[],
+  taken: Set<string>,
+): { word: GemWord; path: GemCoord[] }[] {
+  const allow = new Set(pool)
+  const found: { word: GemWord; path: GemCoord[] }[] = []
+  const seen = new Set(taken)
+  const size = letters.length
+  for (let r = 0; r < size; r += 1) {
+    for (let c = 0; c < size; c += 1) {
+      for (const dir of EASY_DIRS) {
+        for (let len = MIN_LEN; len <= BONUS_MAX_LEN; len += 1) {
+          const path: GemCoord[] = []
+          let ok = true
+          for (let i = 0; i < len; i += 1) {
+            const rr = r + dir.r * i
+            const cc = c + dir.c * i
+            if (rr < 0 || cc < 0 || rr >= size || cc >= size) {
+              ok = false
+              break
+            }
+            path.push({ r: rr, c: cc })
+          }
+          if (!ok) continue
+          const spelled = pathLetters(path, letters)
+          if (!allow.has(spelled) || seen.has(spelled)) continue
+          seen.add(spelled)
+          found.push({ word: makeBonusWord(spelled), path })
+        }
+      }
+    }
+  }
+  return found
+}
+
+export function buildGemPuzzle(lineId: string, salt = 0): GemPuzzle {
   const words = gemWordsFor(lineId)
+  const bonusPool = bonusWordsFor(lineId)
   const size = GRID
-  const rand = rng(hashSeed(lineId))
+  const rand = rng(salt === 0 ? hashSeed(lineId) : hashSeed(`${lineId}:${salt}`))
   const grid = emptyGrid(size)
   const paths: Record<string, GemCoord[]> = {}
+  const bonusPaths: Record<string, GemCoord[]> = {}
+  const bonus: GemWord[] = []
   const starts: GemCoord[] = []
   for (let r = 0; r < size; r += 1) {
     for (let c = 0; c < size; c += 1) starts.push({ r, c })
@@ -299,19 +412,19 @@ export function buildGemPuzzle(lineId: string): GemPuzzle {
     .slice()
     .sort((a, b) => b.text.length - a.text.length)
     .forEach((word) => {
-      const dirs = shuffleSeed(EASY_DIRS, rand)
-      const spots = shuffleSeed(starts, rand)
-      let placed: GemCoord[] | null = null
-      for (const dir of dirs) {
-        for (const start of spots) {
-          if (!canPlace(grid, word.text, start, dir)) continue
-          placed = writeWord(grid, word.text, start, dir)
-          break
-        }
-        if (placed) break
-      }
-      paths[word.id] = placed ?? placeFallback(grid, word.text) ?? []
+      paths[word.id] = tryPlaceWord(grid, word.text, starts, rand) ?? placeFallback(grid, word.text) ?? []
     })
+
+  const planted = new Set<string>()
+  for (const text of shuffleSeed(bonusPool, rand)) {
+    if (bonus.length >= MAX_BONUS_PLANT) break
+    const placed = tryPlaceWord(grid, text, starts, rand)
+    if (!placed) continue
+    const word = makeBonusWord(text)
+    bonus.push(word)
+    bonusPaths[word.id] = placed
+    planted.add(text)
+  }
 
   const letters = grid.map((row) =>
     row.map((cell) => {
@@ -320,7 +433,13 @@ export function buildGemPuzzle(lineId: string): GemPuzzle {
     }),
   )
 
-  return { id: lineId, size, words, letters, paths }
+  const taken = new Set([...words.map((word) => word.text), ...planted])
+  for (const hit of scanBonusOnBoard(letters, bonusPool, taken)) {
+    bonus.push(hit.word)
+    bonusPaths[hit.word.id] = hit.path
+  }
+
+  return { id: lineId, size, words, letters, paths, bonusPool, bonus, bonusPaths }
 }
 
 export function sameCell(a: GemCoord, b: GemCoord) {
@@ -379,6 +498,21 @@ export function matchGemWord(path: GemCoord[], puzzle: GemPuzzle, found: string[
   if (!isStraightPath(path)) return null
   const spelled = pathLetters(path, puzzle.letters)
   return puzzle.words.find((word) => word.text === spelled && !found.includes(word.id)) ?? null
+}
+
+/** Curated extra word — not a required chip, not random junk. */
+export function matchBonusWord(
+  path: GemCoord[],
+  puzzle: GemPuzzle,
+  foundBonus: string[],
+): GemWord | null {
+  if (!isStraightPath(path)) return null
+  const spelled = pathLetters(path, puzzle.letters)
+  if (puzzle.words.some((word) => word.text === spelled)) return null
+  if (!puzzle.bonusPool.includes(spelled)) return null
+  const word = puzzle.bonus.find((item) => item.text === spelled) ?? makeBonusWord(spelled)
+  if (foundBonus.includes(word.id)) return null
+  return word
 }
 
 export function cellsStillNeeded(puzzle: GemPuzzle, found: string[]): Set<string> {

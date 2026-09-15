@@ -309,6 +309,16 @@ export interface ProgressState {
    * normalize fills {}. Schema stays 1 — do not wipe.
    */
   tierTaught: Record<string, 'easy' | 'medium' | 'hard'>
+  /**
+   * Bonus-word points from Easy gem Match (100 each). Not 10/12/15 Hold scores.
+   * Optional on old saves; normalize fills {}. Schema stays 1 — do not wipe.
+   */
+  matchBonus: Record<string, number>
+  /**
+   * Extra Match tries banked from bonus words. Optional on old saves;
+   * normalize fills {}. Schema stays 1 — do not wipe.
+   */
+  matchExtra: Record<string, number>
 }
 
 export type View =

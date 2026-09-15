@@ -7,6 +7,7 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from 'react'
 import { EASY, easyWhoWhere } from '../../lib/easy'
+import { fatherWinBeat } from '../../lib/successBeat'
 import {
   applyDash,
   beatsOpened,
@@ -161,7 +162,7 @@ export function FatherRunPlay({
     setPhase('hug')
     writeProgress(1)
     playGemPop('win')
-    flashToast(FATHER_RUN_CLAIM)
+    flashToast(fatherWinBeat().title)
     if (!cleared.current) {
       cleared.current = true
       onClear?.()
@@ -302,8 +303,9 @@ export function FatherRunPlay({
         </div>
       )}
       {toast ? (
-        <p className="match-toast gem-toast" role="status">
+        <p className={`match-toast gem-toast ${phase === 'hug' ? 'is-yes' : ''}`} role="status">
           <strong>{toast}</strong>
+          {phase === 'hug' ? <span className="toast-why">{fatherWinBeat().why}</span> : null}
         </p>
       ) : null}
       {phase === 'miss' ? (
@@ -315,6 +317,11 @@ export function FatherRunPlay({
           </button>
         </div>
       ) : phase === 'hug' ? (
+        <>
+        <p className="match-yes" role="status">
+          <strong>{fatherWinBeat().title}</strong>
+          <span>{fatherWinBeat().why}</span>
+        </p>
         <div className="cta-dock">
           <button
             type="button"
@@ -327,6 +334,7 @@ export function FatherRunPlay({
             {EASY.home}
           </button>
         </div>
+        </>
       ) : (
         <button
           type="button"

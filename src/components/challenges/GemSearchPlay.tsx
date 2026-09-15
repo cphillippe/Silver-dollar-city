@@ -5,13 +5,17 @@ import {
   cellKey,
   cellsStillNeeded,
   gemHue,
+  matchBonusWord,
   matchGemWord,
   sameCell,
   tryAddToPath,
   type GemCoord,
 } from '../../lib/gemSearch'
+import { lineBonusPoints, lineExtraTries } from '../../lib/matchBonus'
+import { gemBonusBeat, gemTargetBeat, matchClearBeat } from '../../lib/successBeat'
 import { storyPanelsFor, type StoryPanel } from '../../lib/storyPanels'
 import { GEM_BURST, playGemPop, prefersReducedMotion } from '../../lib/juice'
+import { useProgress } from '../../store/progress'
 import { StoryStrip } from '../StoryStrip'
 import { WinBurst } from './WinBurst'
 
@@ -37,12 +41,16 @@ function cellFromPoint(x: number, y: number): GemCoord | null {
 }
 
 export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: GemSearchPlayProps) {
-  const puzzle = useMemo(() => buildGemPuzzle(lineId), [lineId])
+  const { progress, recordMatchBonus, consumeMatchExtra } = useProgress()
+  const [round, setRound] = useState(0)
+  const puzzle = useMemo(() => buildGemPuzzle(lineId, round), [lineId, round])
   const panels = useMemo(
     () => beats ?? storyPanelsFor(lineId, puzzle.words.length),
     [beats, lineId, puzzle.words.length],
   )
   const [found, setFound] = useState<string[]>([])
+  const [bonusFound, setBonusFound] = useState<string[]>([])
+  const [bonusCleared, setBonusCleared] = useState<string[]>([])
   const [opened, setOpened] = useState(0)
   const [flipping, setFlipping] = useState<number | null>(null)
   const [path, setPath] = useState<GemCoord[]>([])
@@ -51,17 +59,24 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   const [misses, setMisses] = useState(0)
   const [shake, setShake] = useState(false)
   const [toast, setToast] = useState('')
+  const [toastWhy, setToastWhy] = useState('')
+  const [toastBonus, setToastBonus] = useState(false)
+  const [plusFlash, setPlusFlash] = useState(false)
   const [status, setStatus] = useState<'play' | 'ok'>('play')
   const [winStamp, setWinStamp] = useState(false)
   const drag = useRef(false)
   const moved = useRef(false)
   const pathRef = useRef<GemCoord[]>([])
   const foundRef = useRef<string[]>([])
+  const bonusRef = useRef<string[]>([])
   const cleared = useRef(false)
   const home = easyWhoWhere(lineId)
   const needed = cellsStillNeeded(puzzle, found)
   const nextWord = puzzle.words.find((word) => !found.includes(word.id))
   const left = puzzle.words.length - found.length
+  const bonusPts = lineBonusPoints(progress, lineId)
+  const extras = lineExtraTries(progress, lineId)
+  const clearBeat = matchClearBeat(lineId)
 
   function writePath(next: GemCoord[] | ((current: GemCoord[]) => GemCoord[])) {
     setPath((current) => {
@@ -71,25 +86,56 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     })
   }
 
-  useEffect(() => {
-    setFound([])
+  function resetBoard(keepTaught: boolean) {
     foundRef.current = []
+    bonusRef.current = []
     pathRef.current = []
-    cleared.current = false
+    if (!keepTaught) cleared.current = false
+    setFound([])
+    setBonusFound([])
+    setBonusCleared([])
     setPath([])
     setBurst([])
     setHint([])
     setMisses(0)
     setToast('')
+    setToastWhy('')
+    setToastBonus(false)
+    setPlusFlash(false)
     setStatus('play')
     setWinStamp(false)
     setOpened(0)
     setFlipping(null)
+  }
+
+  useEffect(() => {
+    setRound(0)
+    resetBoard(false)
+    // line change only
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lineId])
 
-  function flashToast(line: string) {
+  useEffect(() => {
+    if (round === 0) return
+    resetBoard(true)
+    // extra try reshuffle
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [round])
+
+  function flashToast(line: string, why = '', bonus = false) {
     setToast(line)
-    window.setTimeout(() => setToast((current) => (current === line ? '' : current)), 1600)
+    setToastWhy(why)
+    setToastBonus(bonus)
+    window.setTimeout(
+      () =>
+        setToast((current) => {
+          if (current !== line) return current
+          setToastWhy('')
+          setToastBonus(false)
+          return ''
+        }),
+      bonus ? 2200 : 1800,
+    )
   }
 
   function revealPanel(count: number) {
@@ -106,7 +152,15 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     const keys = cells.map(cellKey)
     setBurst(keys)
     playGemPop(done ? 'win' : 'find')
-    flashToast(`${wordLabel}!`)
+    const beat = gemTargetBeat(
+      puzzle.words.find((word) => word.label === wordLabel) ?? {
+        id: wordLabel,
+        text: wordLabel.toUpperCase(),
+        label: wordLabel,
+        kind: 'idea',
+      },
+    )
+    flashToast(beat.title, beat.why)
     revealPanel(foundCount)
     if (done) {
       window.setTimeout(() => {
@@ -121,6 +175,20 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       }, 160)
     }
     window.setTimeout(() => setBurst([]), done ? 880 : 520)
+  }
+
+  function explodeBonus(cells: GemCoord[], label: string) {
+    const need = cellsStillNeeded(puzzle, foundRef.current)
+    const pop = cells.filter((cell) => !need.has(cellKey(cell)))
+    const keys = pop.map(cellKey)
+    setBurst(keys)
+    setBonusCleared((current) => [...current, ...keys])
+    playGemPop('bonus')
+    setPlusFlash(true)
+    window.setTimeout(() => setPlusFlash(false), 900)
+    const beat = gemBonusBeat(label)
+    flashToast(beat.title, beat.why, true)
+    window.setTimeout(() => setBurst([]), 640)
   }
 
   function teachHint(count: number) {
@@ -138,6 +206,18 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     }
   }
 
+  function finishBoard() {
+    if (!cleared.current) {
+      cleared.current = true
+      onClear?.()
+    }
+    const stampAt = prefersReducedMotion() ? 80 : 880
+    window.setTimeout(() => {
+      setWinStamp(true)
+      setStatus('ok')
+    }, stampAt)
+  }
+
   function submit(nextPath: GemCoord[]) {
     const hit = matchGemWord(nextPath, puzzle, foundRef.current)
     if (hit) {
@@ -149,17 +229,18 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       setHint([])
       setMisses(0)
       explode(nextPath, hit.label, done, nextFound.length)
-      if (done) {
-        if (!cleared.current) {
-          cleared.current = true
-          onClear?.()
-        }
-        const stampAt = prefersReducedMotion() ? 80 : 880
-        window.setTimeout(() => {
-          setWinStamp(true)
-          setStatus('ok')
-        }, stampAt)
-      }
+      if (done) finishBoard()
+      return true
+    }
+    const extra = matchBonusWord(nextPath, puzzle, bonusRef.current)
+    if (extra) {
+      const nextBonus = [...bonusRef.current, extra.id]
+      bonusRef.current = nextBonus
+      setBonusFound(nextBonus)
+      writePath([])
+      setMisses(0)
+      recordMatchBonus(lineId)
+      explodeBonus(nextPath, extra.label)
       return true
     }
     return false
@@ -184,7 +265,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   }
 
   function applyCell(cell: GemCoord, mode: 'tap' | 'drag') {
-    if (status === 'ok' || cleared.current) return
+    if (status === 'ok') return
     const current = pathRef.current
     let next = current
     if (!current.length) {
@@ -201,7 +282,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   }
 
   function onCellDown(event: ReactPointerEvent<HTMLDivElement>, cell: GemCoord) {
-    if (status === 'ok' || cleared.current) return
+    if (status === 'ok') return
     event.preventDefault()
     event.stopPropagation()
     drag.current = true
@@ -211,7 +292,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   }
 
   function onBoardMove(event: ReactPointerEvent<HTMLDivElement>) {
-    if (!drag.current || status === 'ok' || cleared.current) return
+    if (!drag.current || status === 'ok') return
     const cell = cellFromPoint(event.clientX, event.clientY)
     if (!cell) return
     const last = pathRef.current[pathRef.current.length - 1]
@@ -223,16 +304,22 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   function onBoardUp() {
     if (!drag.current) return
     drag.current = false
-    if (moved.current && !matchGemWord(pathRef.current, puzzle, foundRef.current)) {
+    if (moved.current && pathRef.current.length) {
       missIfSwipe(pathRef.current)
     }
+  }
+
+  function playExtraTry() {
+    if (!extras) return
+    consumeMatchExtra(lineId)
+    setRound((current) => current + 1)
   }
 
   const selected = new Set(path.map(cellKey))
 
   return (
     <div
-      className={`play is-gem-search is-panel-blast ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''} ${burst.length ? 'is-boom' : ''}`}
+      className={`play is-gem-search is-panel-blast ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''} ${burst.length ? 'is-boom' : ''} ${plusFlash ? 'is-bonus-pop' : ''}`}
       style={{ ['--gem-size' as string]: puzzle.size }}
       onPointerUp={onBoardUp}
       onPointerCancel={onBoardUp}
@@ -259,9 +346,18 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
           </li>
         ))}
       </ul>
+      {status === 'play' && puzzle.bonusPool.length ? (
+        <p className="gem-bonus-hint">{EASY.bonusHint}</p>
+      ) : null}
       {toast ? (
-        <p className="match-toast gem-toast" role="status">
+        <p className={`match-toast gem-toast ${toastBonus ? 'is-bonus' : 'is-yes'}`} role="status">
           <strong>{toast}</strong>
+          {toastWhy ? <span className="toast-why">{toastWhy}</span> : null}
+        </p>
+      ) : null}
+      {plusFlash ? (
+        <p className="bonus-plus" aria-hidden>
+          +100
         </p>
       ) : null}
       <div
@@ -277,10 +373,12 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
             const key = `${r}:${c}`
             const popping = burst.includes(key)
             const kept = needed.has(key)
-            const cleared = !kept && puzzle.words.some((word) => {
+            const targetClear = !kept && puzzle.words.some((word) => {
               if (!found.includes(word.id)) return false
               return (puzzle.paths[word.id] ?? []).some((cell) => cell.r === r && cell.c === c)
             })
+            const bonusClear = !kept && bonusCleared.includes(key)
+            const cellClear = targetClear || bonusClear
             return (
               <div
                 key={key}
@@ -289,7 +387,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
                 data-r={r}
                 data-c={c}
                 onPointerDown={(event) => onCellDown(event, { r, c })}
-                className={`gem-cell hue-${gemHue(letter, r, c)} ${selected.has(key) ? 'is-sel' : ''} ${popping ? 'is-burst' : ''} ${cleared ? 'is-clear' : ''} ${kept && found.length > 0 && !selected.has(key) ? 'is-live' : ''} ${hint.includes(key) ? 'is-hint' : ''}`}
+                className={`gem-cell hue-${gemHue(letter, r, c)} ${selected.has(key) ? 'is-sel' : ''} ${popping ? 'is-burst' : ''} ${cellClear ? 'is-clear' : ''} ${kept && found.length > 0 && !selected.has(key) ? 'is-live' : ''} ${hint.includes(key) ? 'is-hint' : ''} ${popping && bonusClear ? 'is-bonus-burst' : ''}`}
               >
                 <span className="gem-letter">{letter}</span>
                 {popping
@@ -317,20 +415,33 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       </div>
       <p className="match-score">
         {left} left · {found.length} / {puzzle.words.length} found
+        {bonusFound.length ? ` · ${bonusFound.length} bonus` : ''}
+        {bonusPts ? <span className="bonus-pts"> · +{bonusPts} bonus</span> : null}
       </p>
       {status === 'ok' ? (
-        <div className="cta-dock">
-          <button
-            type="button"
-            className="btn primary xl snap-bins"
-            onClick={() => onEasyStop?.('hold')}
-          >
-            {EASY.holdNext}
-          </button>
-          <button type="button" className="btn xl" onClick={() => onEasyStop?.('home')}>
-            {EASY.home}
-          </button>
-        </div>
+        <>
+          <p className="match-yes" role="status">
+            <strong>{clearBeat.title}</strong>
+            <span>{clearBeat.why}</span>
+          </p>
+          <div className="cta-dock">
+            <button
+              type="button"
+              className="btn primary xl snap-bins"
+              onClick={() => onEasyStop?.('hold')}
+            >
+              {EASY.holdNext}
+            </button>
+            {extras > 0 ? (
+              <button type="button" className="btn gold xl more-match" onClick={playExtraTry}>
+                {EASY.moreMatch}
+              </button>
+            ) : null}
+            <button type="button" className="btn xl" onClick={() => onEasyStop?.('home')}>
+              {EASY.home}
+            </button>
+          </div>
+        </>
       ) : null}
     </div>
   )
