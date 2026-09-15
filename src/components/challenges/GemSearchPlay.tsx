@@ -139,7 +139,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
           setToastMiss(false)
           return ''
         }),
-      bonus ? 2800 : 1800,
+      bonus || miss ? 2800 : 1800,
     )
   }
 
@@ -378,11 +378,13 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
           <strong>{toast}</strong>
           {toastWhy ? <span>{toastWhy}</span> : null}
         </p>
+      ) : toastMiss && toast ? (
+        <p className="miss-banner" role="status">
+          <strong>{toast}</strong>
+          {toastWhy ? <span>{toastWhy}</span> : null}
+        </p>
       ) : toast ? (
-        <p
-          className={`match-toast gem-toast ${toastMiss ? 'is-miss' : 'is-yes'}`}
-          role="status"
-        >
+        <p className="match-toast gem-toast is-yes" role="status">
           <strong>{toast}</strong>
           {toastWhy ? <span className="toast-why">{toastWhy}</span> : null}
         </p>
