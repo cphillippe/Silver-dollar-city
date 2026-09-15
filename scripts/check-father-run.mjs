@@ -99,6 +99,8 @@ const playSrc = readFileSync(
 )
 assert.match(playSrc, /is-father-run/)
 assert.match(playSrc, /Hold to run/)
+assert.match(playSrc, /onPadKeyDown/)
+assert.match(playSrc, /panel-father-run/)
 assert.match(playSrc, /Run again/)
 assert.match(playSrc, /FATHER_RUN_HINT/)
 assert.match(playSrc, /FATHER_RUN_CLAIM/)

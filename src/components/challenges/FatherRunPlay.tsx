@@ -1,4 +1,11 @@
-import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type PointerEvent as ReactPointerEvent,
+} from 'react'
 import { EASY, easyWhoWhere } from '../../lib/easy'
 import {
   applyDash,
@@ -19,6 +26,8 @@ import {
 import { playGemPop, prefersReducedMotion } from '../../lib/juice'
 import { storyPanelsFor, type StoryPanel } from '../../lib/storyPanels'
 import { StoryPanelArt } from '../StoryPanelArt'
+import panelFatherRun from '../../assets/story/panel-father-run.webp'
+import panelHungry from '../../assets/story/panel-hungry.webp'
 import { WinBurst } from './WinBurst'
 
 interface FatherRunPlayProps {
@@ -171,10 +180,9 @@ export function FatherRunPlay({
     onMiss()
   }
 
-  function onPadDown(event: ReactPointerEvent<HTMLButtonElement>) {
+  function beginHold(fromPad?: HTMLButtonElement, pointerId?: number) {
     if (phaseRef.current === 'hug' || phaseRef.current === 'miss') return
-    event.preventDefault()
-    event.currentTarget.setPointerCapture(event.pointerId)
+    if (fromPad && pointerId !== undefined) fromPad.setPointerCapture(pointerId)
     const wasHolding = holdingRef.current
     if (!clockOn.current) {
       clockOn.current = true
@@ -201,9 +209,27 @@ export function FatherRunPlay({
     setHolding(true)
   }
 
+  function onPadDown(event: ReactPointerEvent<HTMLButtonElement>) {
+    if (phaseRef.current === 'hug' || phaseRef.current === 'miss') return
+    event.preventDefault()
+    beginHold(event.currentTarget, event.pointerId)
+  }
+
   function onPadUp() {
     holdingRef.current = false
     setHolding(false)
+  }
+
+  function onPadKeyDown(event: ReactKeyboardEvent<HTMLButtonElement>) {
+    if (event.code !== 'Space' && event.key !== ' ') return
+    event.preventDefault()
+    if (!holdingRef.current) beginHold()
+  }
+
+  function onPadKeyUp(event: ReactKeyboardEvent<HTMLButtonElement>) {
+    if (event.code !== 'Space' && event.key !== ' ') return
+    event.preventDefault()
+    onPadUp()
   }
 
   const fatherLeft = 8 + progress * 64
@@ -231,16 +257,10 @@ export function FatherRunPlay({
           ? DUST.map((i) => <span key={i} className="run-dust" style={{ ['--i' as string]: i }} />)
           : null}
         <div className="run-actor is-father" style={{ left: `${fatherLeft}%` }}>
-          <span className="run-body" />
-          <span className="run-head" />
-          <span className="run-robe" />
-          <span className="run-leg is-a" />
-          <span className="run-leg is-b" />
+          <img src={panelFatherRun} alt="" draggable={false} />
         </div>
         <div className="run-actor is-son" style={{ left: `${sonLeft}%` }}>
-          <span className="run-body" />
-          <span className="run-head" />
-          <span className="run-robe" />
+          <img src={panelHungry} alt="" draggable={false} />
         </div>
         {phase === 'hug' ? (
           <div className="run-hug-art">
@@ -311,9 +331,12 @@ export function FatherRunPlay({
         <button
           type="button"
           className={`run-pad ${holding ? 'is-held' : ''} ${dash.inWindow ? 'is-glow' : ''}`}
+          aria-pressed={holding}
           onPointerDown={onPadDown}
           onPointerUp={onPadUp}
           onPointerCancel={onPadUp}
+          onKeyDown={onPadKeyDown}
+          onKeyUp={onPadKeyUp}
         >
           {dash.inWindow && phase === 'run' ? 'Press again — mercy!' : 'Hold to run'}
         </button>

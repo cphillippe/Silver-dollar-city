@@ -18,7 +18,7 @@ export const HIRED_HAND_SPEECH = [
 ] as const
 
 export const SPEECH_PHRASE_MS = 2600
-export const HOLD_SPEED = 0.072
+export const HOLD_SPEED = 0.078
 export const HOLD_SPEED_REDUCED = 0.12
 export const DASH_BOOST = 0.16
 export const DASH_PERIOD_MS = 2300
