@@ -162,7 +162,6 @@ export function FatherRunPlay({
     setPhase('hug')
     writeProgress(1)
     playGemPop('win')
-    flashToast(fatherWinBeat().title)
     if (!cleared.current) {
       cleared.current = true
       onClear?.()
@@ -302,19 +301,20 @@ export function FatherRunPlay({
           <span className="run-rail-gem" style={{ left: `${6 + dash.travel * 78}%` }} />
         </div>
       )}
-      {toast ? (
-        <p className={`match-toast gem-toast ${phase === 'hug' ? 'is-yes' : ''}`} role="status">
+      {toast && phase !== 'hug' ? (
+        <p className="match-toast gem-toast" role="status">
           <strong>{toast}</strong>
-          {phase === 'hug' ? <span className="toast-why">{fatherWinBeat().why}</span> : null}
         </p>
       ) : null}
       {phase === 'miss' ? (
         <div className="run-miss" role="status">
           <p className="run-miss-hint">{FATHER_RUN_HINT}</p>
           <p className="quiet">Try again — you start closer.</p>
-          <button type="button" className="btn gold xl" onClick={() => resetRound(attempt + 1)}>
-            Run again
-          </button>
+          <div className="cta-dock run-dock">
+            <button type="button" className="btn gold xl" onClick={() => resetRound(attempt + 1)}>
+              Run again
+            </button>
+          </div>
         </div>
       ) : phase === 'hug' ? (
         <>
@@ -336,18 +336,20 @@ export function FatherRunPlay({
         </div>
         </>
       ) : (
-        <button
-          type="button"
-          className={`run-pad ${holding ? 'is-held' : ''} ${dash.inWindow ? 'is-glow' : ''}`}
-          aria-pressed={holding}
-          onPointerDown={onPadDown}
-          onPointerUp={onPadUp}
-          onPointerCancel={onPadUp}
-          onKeyDown={onPadKeyDown}
-          onKeyUp={onPadKeyUp}
-        >
-          {dash.inWindow && phase === 'run' ? 'Press again — mercy!' : 'Hold to run'}
-        </button>
+        <div className="cta-dock run-dock">
+          <button
+            type="button"
+            className={`run-pad ${holding ? 'is-held' : ''} ${dash.inWindow ? 'is-glow' : ''}`}
+            aria-pressed={holding}
+            onPointerDown={onPadDown}
+            onPointerUp={onPadUp}
+            onPointerCancel={onPadUp}
+            onKeyDown={onPadKeyDown}
+            onKeyUp={onPadKeyUp}
+          >
+            {dash.inWindow && phase === 'run' ? 'Press again — mercy!' : 'Hold to run'}
+          </button>
+        </div>
       )}
     </div>
   )
