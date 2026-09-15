@@ -8672,6 +8672,26 @@ html[data-easy='on'] .next-tap {
   top: 22%;
 }
 
+.maze-win-art {
+  width: min(100%, 280px);
+  margin: 0 auto;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 3px rgba(255, 204, 51, 0.9),
+    0 8px 20px rgba(20, 4, 48, 0.35);
+}
+
+.maze-win-art .story-art-tile {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.play.is-road-maze.is-win .match-yes {
+  margin-top: 4px;
+}
+
 @media (max-width: 420px) {
   .maze-board {
     width: min(100%, 390px);

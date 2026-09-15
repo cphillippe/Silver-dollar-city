@@ -24,6 +24,7 @@ import {
   mazeItemAt,
   mazeKey,
   mazeSame,
+  ROAD_MAZE_CLAIM,
   ROAD_MAZE_HINT,
   ROAD_MAZE_WIN,
   shortestMazePath,
@@ -286,7 +287,7 @@ export function RoadMazePlay({
         })}
       </ol>
       <p className="story-caption" role="status">
-        {latest?.text ?? caption}
+        {won ? ROAD_MAZE_CLAIM : (latest?.text ?? caption)}
       </p>
       <ul className="maze-kit" aria-label="Help to collect">
         {MAZE_ITEMS.map((item) => (
@@ -307,6 +308,11 @@ export function RoadMazePlay({
           {plusFlash}!
         </p>
       ) : null}
+      {won ? (
+        <div className="maze-win-art" aria-hidden>
+          <StoryPanelArt scene="neighbor" media={panels[panels.length - 1]?.media} />
+        </div>
+      ) : (
       <div
         className="maze-board"
         role="grid"
@@ -366,6 +372,7 @@ export function RoadMazePlay({
           }),
         )}
       </div>
+      )}
       <p className="match-score">
         {got.length} / 3 help
         {helped ? ' · he is with you' : ''}

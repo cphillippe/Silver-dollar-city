@@ -91,6 +91,8 @@ assert.match(playSrc, /ROAD_MAZE_WIN/)
 assert.match(playSrc, /panel-help/)
 assert.match(playSrc, /panel-hurt/)
 assert.match(playSrc, /mazeWinBeat/)
+assert.match(playSrc, /maze-win-art/)
+assert.match(playSrc, /ROAD_MAZE_CLAIM/)
 assert.doesNotMatch(playSrc, /road-swipe|claim-merge|story-night/)
 
 const puzzleSrc = readFileSync(new URL('../src/components/PuzzlePlay.tsx', import.meta.url), 'utf8')
