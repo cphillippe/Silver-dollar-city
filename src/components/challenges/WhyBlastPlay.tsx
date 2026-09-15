@@ -27,7 +27,7 @@ interface WhyBlastPlayProps {
 export function WhyBlastPlay({ id, claim, reason, packMisses, onDone }: WhyBlastPlayProps) {
   const chips = useMemo(
     () => whyBlastChoices(reason, packMisses, whyBlastExtras(id), easyWhyLine),
-    [id, reason, packMisses],
+    [id, reason, packMisses.join('\0')],
   )
   const [gone, setGone] = useState<string[]>([])
   const [tossing, setTossing] = useState<string | null>(null)
@@ -51,16 +51,17 @@ export function WhyBlastPlay({ id, claim, reason, packMisses, onDone }: WhyBlast
       setTossing(null)
       setShake(false)
     }, 420)
-    window.setTimeout(() => setMissFlash(false), 900)
   }
 
   function hit() {
     if (locked || tossing) return
+    setMissFlash(false)
     setLocked(true)
     playGemPop('win')
   }
 
   function pick(line: string) {
+    if (gone.includes(line) || tossing) return
     if (line === reason) hit()
     else miss(line)
   }
@@ -77,9 +78,14 @@ export function WhyBlastPlay({ id, claim, reason, packMisses, onDone }: WhyBlast
         </p>
       </div>
       {missFlash ? (
-        <p className="miss-banner" role="status">
-          <strong>{HOLD_MISS_FACE}</strong>
-        </p>
+        <>
+          <p className="miss-banner" role="status">
+            <strong>{HOLD_MISS_FACE}</strong>
+          </p>
+          <p className="miss-plus" aria-hidden>
+            {HOLD_MISS_FACE}
+          </p>
+        </>
       ) : null}
       <div className="why-arena">
         {chips.map((line, index) => {

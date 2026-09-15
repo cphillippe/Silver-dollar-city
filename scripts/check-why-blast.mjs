@@ -60,7 +60,8 @@ const blastSrc = readFileSync(
   'utf8',
 )
 assert.match(blastSrc, /why-blast/)
-assert.match(blastSrc, /HOLD_MISS_FACE/)
+assert.match(blastSrc, /miss-banner/)
+assert.match(blastSrc, /miss-plus/)
 assert.match(blastSrc, /HOLD_LOCKED_STAMP/)
 assert.match(blastSrc, /applyHoldMiss/)
 assert.match(blastSrc, /why-chip/)
