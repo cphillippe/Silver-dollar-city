@@ -3,7 +3,7 @@ import { readFileSync, statSync } from 'node:fs'
 import { emptyProgress } from '../src/lib/save.ts'
 import { PACK_CATALOG, PACK_ISSUES, packLesson } from '../src/content/packCatalog.ts'
 import { PACK_SCHEMA_VERSION } from '../src/content/packTypes.ts'
-import { EASY_LINE_ORDER, FOUNDATION_ARC, DIG_ARC, NAMES_ARC, STONE_ARC, easyHomeFocus, easyHoldPractice, easyLineTaught, easyLoopLine, easyMatchReady, easyWhoWhere } from '../src/lib/easy.ts'
+import { EASY_LINE_ORDER, FOUNDATION_ARC, DIG_ARC, NAMES_ARC, STONE_ARC, INK_ARC, easyHomeFocus, easyHoldPractice, easyLineTaught, easyLoopLine, easyMatchReady, easyWhoWhere } from '../src/lib/easy.ts'
 import {
   applyHoldFail,
   applyHoldSuccess,
@@ -18,18 +18,19 @@ import { evidenceFor, evidenceForTier } from '../src/content/evidence.ts'
 
 assert.equal(PACK_ISSUES.length, 0, PACK_ISSUES.map((item) => `${item.file}: ${item.message}`).join('\n'))
 assert.equal(PACK_CATALOG.schemaVersion, PACK_SCHEMA_VERSION)
-assert.equal(PACK_CATALOG.lessons.length, 42)
+assert.equal(PACK_CATALOG.lessons.length, 45)
 assert.ok(statSync(new URL('../src/content/packs/parable-hollow.xml', import.meta.url)).size > 50000)
 assert.ok(statSync(new URL('../src/content/packs/witness-bench.xml', import.meta.url)).size > 50000)
 assert.ok(statSync(new URL('../src/content/packs/observatory.xml', import.meta.url)).size > 50000)
 assert.ok(statSync(new URL('../src/content/packs/first-gate.xml', import.meta.url)).size > 50000)
 assert.ok(statSync(new URL('../src/content/packs/high-lookout.xml', import.meta.url)).size > 50000)
 assert.ok(statSync(new URL('../src/content/packs/stone-court.xml', import.meta.url)).size > 20000)
+assert.ok(statSync(new URL('../src/content/packs/ink-court.xml', import.meta.url)).size > 20000)
 assert.deepEqual(
   PACK_CATALOG.lessons.map((lesson) => lesson.easy.easyOrder).sort((a, b) => (a ?? 0) - (b ?? 0)),
-  Array.from({ length: 42 }, (_, i) => i + 1),
+  Array.from({ length: 45 }, (_, i) => i + 1),
 )
-assert.equal(EASY_LINE_ORDER.length, 42)
+assert.equal(EASY_LINE_ORDER.length, 45)
 assert.deepEqual(EASY_LINE_ORDER.slice(0, 7), [
   'ph-road',
   'ph-father',
@@ -158,11 +159,13 @@ assert.ok(areaIds.has('observatory'))
 assert.ok(areaIds.has('first-gate'))
 assert.ok(areaIds.has('high-lookout'))
 assert.ok(areaIds.has('stone-court'))
+assert.ok(areaIds.has('ink-court'))
 
 assert.deepEqual([...FOUNDATION_ARC], ['fg-order', 'fg-reason', 'fg-ought', 'fg-ground'])
 assert.deepEqual([...DIG_ARC], ['wb-creed', 'wb-women', 'wb-early', 'wb-method'])
 assert.deepEqual([...NAMES_ARC], ['daily-names', 'daily-creed', 'daily-empty'])
 assert.deepEqual([...STONE_ARC], ['sc-tacitus', 'sc-james', 'sc-pliny'])
+assert.deepEqual([...INK_ARC], ['ic-trajan', 'ic-suetonius', 'ic-lucian'])
 assert.ok(EASY_LINE_ORDER.indexOf('ph-debt') < EASY_LINE_ORDER.indexOf('fg-order'))
 assert.ok(EASY_LINE_ORDER.indexOf('fg-ground') < EASY_LINE_ORDER.indexOf('wb-creed'))
 assert.ok(EASY_LINE_ORDER.indexOf('fg-ground') < EASY_LINE_ORDER.indexOf('fg-mover'))
@@ -465,6 +468,56 @@ assert.equal(
     easyHeld: [...EASY_LINE_ORDER.slice(0, 39), 'sc-tacitus', 'sc-james'],
   }),
   'sc-pliny',
+)
+assert.deepEqual(EASY_LINE_ORDER.slice(42, 45), [...INK_ARC])
+assert.equal(easyWhoWhere('ic-trajan').place, 'Ink Court')
+assert.equal(easyWhoWhere('ic-suetonius').place, 'Ink Court')
+assert.equal(easyWhoWhere('ic-lucian').place, 'Ink Court')
+const trajan = packLesson('ic-trajan')
+assert.ok(trajan)
+assert.match(trajan.claim, /do not hunt/)
+assert.match(trajan.source, /10\.97/)
+assert.doesNotMatch(trajan.easy.learn, /^If /)
+const suetonius = packLesson('ic-suetonius')
+assert.ok(suetonius)
+assert.match(suetonius.claim, /Nero/)
+assert.match(suetonius.source, /16\.2/)
+assert.doesNotMatch(suetonius.claim, /Chrestus/)
+assert.doesNotMatch(suetonius.easy.learn, /^If /)
+const lucian = packLesson('ic-lucian')
+assert.ok(lucian)
+assert.match(lucian.claim, /crucified/)
+assert.match(lucian.source, /Peregrinus/)
+assert.doesNotMatch(lucian.claim, /believed/)
+assert.doesNotMatch(lucian.easy.learn, /^If /)
+
+for (const id of INK_ARC) {
+  const lesson = packLesson(id)
+  assert.ok(lesson, id)
+  assert.match(lesson.claim, /Christ/)
+  assert.doesNotMatch(lesson.claim, /if invented|might be|perhaps/i, `${id} claim hedge`)
+  assert.doesNotMatch(lesson.easy.hold.why, /If |might be|perhaps/i, `${id} reason hedge`)
+}
+assert.equal(
+  easyLoopLine({
+    ...emptyProgress(),
+    easyHeld: [...EASY_LINE_ORDER.slice(0, 42)],
+  }),
+  'ic-trajan',
+)
+assert.equal(
+  easyLoopLine({
+    ...emptyProgress(),
+    easyHeld: [...EASY_LINE_ORDER.slice(0, 42), 'ic-trajan'],
+  }),
+  'ic-suetonius',
+)
+assert.equal(
+  easyLoopLine({
+    ...emptyProgress(),
+    easyHeld: [...EASY_LINE_ORDER.slice(0, 42), 'ic-trajan', 'ic-suetonius'],
+  }),
+  'ic-lucian',
 )
 
 const kalam = packLesson('fg-kalam')

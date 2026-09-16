@@ -28,7 +28,7 @@ export function StoryStrip({ kicker, panels, opened, flipping, complete }: Story
       >
         <div className="story-hero-inner">
           <div className="story-hero-face is-front">
-            {latest ? <StoryPanelArt scene={latest.scene} media={latest.media} /> : null}
+            {latest ? <StoryPanelArt scene={latest.scene} media={latest.media} size="hero" /> : null}
           </div>
           <div className="story-hero-face is-back">
             <span className="story-hero-foil">
@@ -51,7 +51,7 @@ export function StoryStrip({ kicker, panels, opened, flipping, complete }: Story
             >
               <div className="story-thumb-inner">
                 <div className="story-thumb-face is-front">
-                  <StoryPanelArt scene={panel.scene} media={panel.media} />
+                  <StoryPanelArt scene={panel.scene} media={panel.media} size="thumb" />
                 </div>
                 <div className="story-thumb-face is-back" aria-hidden>
                   <span className="story-thumb-seal">{index + 1}</span>
