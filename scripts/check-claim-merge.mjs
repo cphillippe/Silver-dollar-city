@@ -22,6 +22,7 @@ import {
   MERGE_MISS_FACE,
   MERGE_MISS_PENALTY,
   MERGE_SKINS,
+  MISS_PUSH,
   mergeBeatsOpened,
   mergePoints,
   mergeSkin,
@@ -59,6 +60,12 @@ assert.equal(mergeSkin(2).label, 'Buried')
 assert.equal(mergeSkin(3).label, 'Raised')
 assert.equal(mergeSkin(4).label, 'Creed')
 assert.ok(DROP_BAG.every((rank) => rank <= 2))
+assert.ok(
+  DROP_BAG.filter((rank) => rank === 1).length >= DROP_BAG.filter((rank) => rank === 0).length,
+  'next-drop bag leans Died so Creed climbs are not a pip slog',
+)
+assert.ok(MISS_PUSH >= 400, 'wrong-smash bounce is a fair pop, not a nudge')
+assert.ok(MERGE_GAP >= 1, 'merge on contact, not after a deep overlap')
 assert.equal(mergePoints(2, 1), mergeSkin(2).points)
 assert.equal(mergePoints(2, 3), mergeSkin(2).points * 3)
 assert.equal(applyMergeMiss(40), 15)
@@ -75,6 +82,10 @@ assert.equal(open.length, 3)
 assert.equal(open.filter((ball) => ball.rank === 1).length, 2)
 assert.ok(open.every((ball) => ball.x > 0 && ball.x < BOWL_WIDTH))
 assert.ok(open.every((ball) => ball.y < BOWL_HEIGHT))
+const diedPair = open.filter((ball) => ball.rank === 1)
+const diedGap = Math.abs((diedPair[0]?.x ?? 0) - (diedPair[1]?.x ?? 0))
+assert.ok(diedGap <= 90, 'opening Died pair is close enough to smash on a phone')
+assert.ok(diedGap >= mergeSkin(1).radius * 2, 'opening Died pair does not auto-merge')
 
 let game = createMergeGame(3, 0)
 assert.equal(canDrop(game), true)
@@ -121,6 +132,12 @@ assert.equal(miss.events[0]?.kind, 'miss')
 assert.equal(miss.score, 0)
 assert.equal(miss.won, false)
 assert.equal(miss.balls.length, 3)
+const bounced = miss.balls.find((ball) => ball.id === pip.id)
+assert.ok(bounced)
+assert.ok(
+  Math.hypot(bounced.vx, bounced.vy) >= 400,
+  'wrong smash bounces off instead of sticking',
+)
 
 let gravity = createMergeGame(8, 0)
 gravity = { ...gravity, balls: [] }
@@ -153,14 +170,29 @@ const playSrc = readFileSync(
 assert.match(playSrc, /is-claim-merge/)
 assert.match(playSrc, /merge-bowl/)
 assert.match(playSrc, /COMBO/)
-assert.ok(MERGE_GAP >= 1, 'merge on contact, not after a deep overlap')
+assert.match(playSrc, /merge-drop-guide/)
+assert.match(playSrc, /merge-drop-chip/)
+assert.match(playSrc, /merge-ghost is-loud/)
+assert.match(playSrc, /Smash the Died pair/)
+assert.match(playSrc, /WinBurst play=\{view\.won\}/)
+const mergeCss = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
+assert.match(mergeCss, /merge-drop-chip/)
+assert.match(
+  mergeCss,
+  /\.play\.is-claim-merge \.win-stamp-wrap[\s\S]{0,280}transform:\s*translateX\(-50%\)/,
+  'MERGED! stamp stays centered in the bowl, not shifted off the left rim',
+)
 assert.match(playSrc, /One more bowl/)
 assert.match(playSrc, /btn primary xl snap-bins/)
 assert.ok(
-  playSrc.indexOf('One more bowl') < playSrc.indexOf("EASY.holdNext"),
-  'One more bowl is the first tap after MERGED!',
+  playSrc.indexOf("EASY.holdNext") < playSrc.indexOf('One more bowl'),
+  'Hold next is the first tap after the takeaway',
 )
 assert.match(playSrc, /Merge again/)
+assert.ok(
+  playSrc.indexOf('Merge again') > playSrc.indexOf('view.overflow'),
+  'Bowl full still offers Merge again',
+)
 assert.match(playSrc, /onBowlKey/)
 assert.match(playSrc, /CLAIM_MERGE_WIN/)
 assert.match(playSrc, /EASY\.holdNext/)

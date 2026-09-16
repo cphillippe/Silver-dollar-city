@@ -19,19 +19,21 @@ export const BOWL_HEIGHT = 520
 export const BOWL_WALL = 10
 export const DANGER_Y = 72
 
-export const GRAVITY = 2800
-export const RESTITUTION = 0.18
-export const FLOOR_FRICTION = 0.78
-export const AIR_DRAG = 0.994
+export const GRAVITY = 2400
+export const RESTITUTION = 0.12
+export const FLOOR_FRICTION = 0.72
+export const AIR_DRAG = 0.992
 export const MAX_SPEED = 1800
-export const REST_SPEED = 32
-export const MERGE_GAP = 1.05
-export const MERGE_ARM_MS = 48
-export const COMBO_WINDOW_MS = 820
-export const OVERFLOW_HOLD_MS = 700
+export const REST_SPEED = 40
+export const MERGE_GAP = 1.12
+export const MERGE_ARM_MS = 28
+export const COMBO_WINDOW_MS = 1100
+export const OVERFLOW_HOLD_MS = 820
 export const WIN_RANK = 4
 export const MAX_DROP_RANK = 2
-export const DROP_VY = 260
+export const DROP_VY = 420
+export const MERGE_POP_VY = -220
+export const MISS_PUSH = 420
 
 export interface MergeSkin {
   rank: number
@@ -53,8 +55,8 @@ export const MERGE_SKINS: readonly MergeSkin[] = [
   { rank: 4, label: 'Creed', radius: 66, points: 400, hue: 'lock' },
 ] as const
 
-/** Next-drop bag — mostly small candy, like Suika. Never drops the lock fruit. */
-export const DROP_BAG = [0, 0, 0, 1, 1, 1, 1, 2, 2] as const
+/** Next-drop bag — mostly Died so the creed climb is a game, not a pip slog. Never drops the lock fruit. */
+export const DROP_BAG = [0, 0, 1, 1, 1, 1, 1, 2, 2] as const
 
 export interface MergeBall {
   id: number
@@ -163,15 +165,15 @@ function drawNext(seed: number): { rank: number; preview: number; nextSeed: numb
   return { rank: first.rank, preview: second.rank, nextSeed: second.nextSeed }
 }
 
-/** Two matching Died already in the bowl — smash them. Instant arcade, not a blank quiz. */
+/** Two matching Died already in the bowl, close enough to smash on a phone. Pip sits aside. */
 export function openingBalls(now = 0): MergeBall[] {
   const floor = BOWL_HEIGHT - BOWL_WALL
   const died = mergeSkin(1)
   const pip = mergeSkin(0)
   return [
-    makeBall(1, 1, 92, floor - died.radius, now),
-    makeBall(2, 1, 268, floor - died.radius, now),
-    makeBall(3, 0, 180, floor - pip.radius, now),
+    makeBall(1, 1, 138, floor - died.radius, now),
+    makeBall(2, 1, 222, floor - died.radius, now),
+    makeBall(3, 0, 52, floor - pip.radius, now),
   ]
 }
 
@@ -303,7 +305,7 @@ function mergePair(
   const y = (a.y + b.y) / 2
   const spawned = makeBall(state.nextId, nextRank, x, y, now, {
     vx: (a.vx + b.vx) / 4,
-    vy: Math.min(0, (a.vy + b.vy) / 4),
+    vy: Math.min(MERGE_POP_VY, (a.vy + b.vy) / 4),
   })
   const won = nextRank >= WIN_RANK || state.won
   const events: MergeEvent[] = [
@@ -346,10 +348,10 @@ export function releaseGrab(state: MergeState, now: number): MergeState {
   if (other && other.rank !== grabbed.rank) {
     const dx = grabbed.x - other.x
     const dy = grabbed.y - other.y
-    const dist = Math.max(1, Math.hypot(dx, dy))
-    const nx = dx / dist
-    const ny = dy / dist
-    const push = 220
+    const dist = Math.hypot(dx, dy)
+    const nx = dist < 1 ? (grabbed.x >= other.x ? 1 : -1) : dx / dist
+    const ny = dist < 1 ? -0.35 : dy / dist
+    const push = MISS_PUSH
     return {
       ...state,
       score: applyMergeMiss(state.score),
@@ -358,10 +360,10 @@ export function releaseGrab(state: MergeState, now: number): MergeState {
       comboUntil: 0,
       balls: state.balls.map((ball) => {
         if (ball.id === grabbed.id) {
-          return { ...ball, held: false, vx: nx * push, vy: ny * push }
+          return { ...ball, held: false, vx: nx * push, vy: ny * push - 180 }
         }
         if (ball.id === other.id) {
-          return { ...ball, vx: -nx * push * 0.6, vy: -ny * push * 0.6 }
+          return { ...ball, vx: -nx * push * 0.65, vy: -ny * push * 0.65 - 90 }
         }
         return ball
       }),
@@ -498,12 +500,12 @@ export function stepMerge(state: MergeState, dtSec: number, now: number): MergeS
 
   const dropping = next.balls.find((ball) => ball.id === next.droppingId)
   if (dropping) {
-    const settled = !dropping.held && Math.hypot(dropping.vx, dropping.vy) < REST_SPEED * 1.4 && dropping.y > BOWL_HEIGHT * 0.35
+    const settled = !dropping.held && Math.hypot(dropping.vx, dropping.vy) < REST_SPEED * 2.2 && dropping.y > BOWL_HEIGHT * 0.28
     const stacked = next.balls.some(
       (ball) =>
         ball.id !== dropping.id &&
-        overlapPair(dropping, ball) > dropping.r * 0.12 &&
-        Math.abs(dropping.vy) < 220,
+        overlapPair(dropping, ball) > dropping.r * 0.08 &&
+        Math.abs(dropping.vy) < 340,
     )
     if (settled || stacked) {
       next = {
