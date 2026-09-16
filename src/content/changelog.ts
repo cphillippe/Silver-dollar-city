@@ -8,6 +8,18 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.86',
+    title: 'Easy Match SNAG · Easy core trail',
+    when: '2026-09-16',
+    items: [
+      'Easy Match: SNAG is a real English word and scores as a bonus (+100). Swiping a chip or bonus during a drag never takes Miss −25 on finger-up',
+      'SKIP_BONUS still blocks rude / crude / insult extras. Ordinary words like SNAG plant and score again. Shared-letter ghost/crack from 1.4.84 stays',
+      'Ink Court 1.4.85 and panel-blast wire 1.4.84 stay. Support Silver City 1.4.83 stays. Stores stay parked. Play / AdMob / Apple flags stay blank',
+      'Core Easy 45 facts stay free. Night Watch and Town stay hidden on Easy. Journal ungated. Never a hard paywall',
+      'Place titles stay Story Creek, Witness Square, Sky Watch, Why Gate, Meaning Ridge — Stone Court and Ink Court are Silas’s street names',
+    ],
+  },
+  {
     version: '1.4.85',
     title: 'Ink Court · regenerated B3 · Easy core trail',
     when: '2026-09-16',
@@ -25,7 +37,7 @@ export const CHANGELOG: ChangeNote[] = [
     when: '2026-09-16',
     items: [
       'Easy Mercy / road-maze (ph-road, Samaritan LOCKED) and the father-run (ph-father) now show the Gemini panel-blast stills at public/assets/panel-blast/. Hero frames use @1024; thumbs use @512. Father B3 is 03-speech-road — sorry + headed home — not a before-* archive',
-      'Easy Match skips SNAG as a bonus word. Finding a bonus that shares letters with another unfound planted extra ghosts/cracks those cells so they stay swipeable — exclusive bonus cells still clear. Lesson chips stay protected',
+      'Finding a bonus that shares letters with another unfound planted extra ghosts/cracks those cells so they stay swipeable — exclusive bonus cells still clear. Lesson chips stay protected',
       'Teach stays Learn → play → Hold. One more loops stay. Stores stay parked. Play Billing, StoreKit, and AdMob flags stay blank. Pages still cannot charge',
       'Support Silver City 1.4.83, Stone Court 1.4.82, and Fun arcade juice stay. Night Watch and Town stay hidden on Easy. Journal ungated. Never a hard paywall',
     ],
@@ -1707,6 +1719,10 @@ export function latestChange(version: string): ChangeNote {
   const note = CHANGELOG.find((item) => item.version === version) ?? CHANGELOG[0]
   if (!note) {
     return { version, title: 'Easy core trail', when: '', items: [] }
+  }
+  if (note.version === '1.4.86') {
+    const prior = latestChange('1.4.85')
+    return { ...note, items: [...note.items, ...prior.items] }
   }
   if (note.version === '1.4.85') {
     const prior = latestChange('1.4.84')

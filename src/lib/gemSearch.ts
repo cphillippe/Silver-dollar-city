@@ -678,6 +678,16 @@ export function matchGemWord(path: GemCoord[], puzzle: GemPuzzle, found: string[
   )
 }
 
+/**
+ * Finger-up Miss after a swipe. No penalty if this gesture already scored
+ * a chip or bonus, or if the snapped path is empty / a single cell.
+ */
+export function shouldMissAfterSwipe(scoredThisGesture: boolean, lineLength: number): boolean {
+  if (scoredThisGesture) return false
+  if (lineLength < 2) return false
+  return true
+}
+
 /** Extra word on a straight line — not a required chip. Forward or reverse swipe. */
 export function matchBonusWord(
   path: GemCoord[],
