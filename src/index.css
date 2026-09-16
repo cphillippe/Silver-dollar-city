@@ -1055,6 +1055,10 @@ p {
   animation: miss-shake 0.82s cubic-bezier(0.36, 0.07, 0.19, 0.97);
 }
 
+.play.is-gem-search.is-shake {
+  animation: none;
+}
+
 .recall-gate.is-shake {
   animation: miss-shake 0.58s cubic-bezier(0.36, 0.07, 0.19, 0.97);
 }
@@ -8040,6 +8044,62 @@ html[data-easy='on'] .next-tap {
   box-shadow:
     inset 0 1px 0 rgba(255, 246, 232, 0.18),
     0 10px 28px rgba(20, 4, 48, 0.45);
+}
+
+.play.is-gem-search .gem-stage {
+  position: relative;
+  width: min(100%, 390px);
+  margin: 0 auto;
+}
+
+.play.is-gem-search .gem-stage .bonus-banner,
+.play.is-gem-search .gem-stage .miss-banner,
+.play.is-gem-search .gem-stage .match-toast {
+  position: absolute;
+  left: 50%;
+  top: 12%;
+  z-index: 8;
+  width: min(92%, 240px);
+  margin: 0;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.play.is-gem-search .gem-stage .bonus-banner {
+  animation: gem-overlay-pop 0.32s cubic-bezier(0.2, 1.4, 0.3, 1) both;
+}
+
+.play.is-gem-search .gem-stage .miss-banner {
+  padding: 5px 10px 4px;
+  gap: 0;
+  border-width: 1.5px;
+  border-radius: 12px;
+  box-shadow:
+    0 2px 0 #b8284c,
+    0 0 10px rgba(255, 90, 122, 0.32);
+  animation: gem-overlay-pop 0.28s cubic-bezier(0.2, 1.2, 0.3, 1) both;
+}
+
+.play.is-gem-search .gem-stage .miss-banner strong {
+  font-size: 0.92rem;
+  letter-spacing: 0.04em;
+  line-height: 1.15;
+}
+
+.play.is-gem-search .gem-stage .miss-banner span {
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+@keyframes gem-overlay-pop {
+  0% {
+    transform: translateX(-50%) scale(0.86);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+  }
 }
 
 .play.is-gem-search .match-score.is-juice {

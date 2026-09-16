@@ -9,6 +9,7 @@ import {
   matchBonusWord,
   matchGemWord,
   sameCell,
+  snapFingerPath,
   tryAddToPath,
   type GemCoord,
 } from '../../lib/gemSearch'
@@ -70,6 +71,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   const drag = useRef(false)
   const moved = useRef(false)
   const pathRef = useRef<GemCoord[]>([])
+  const rawRef = useRef<GemCoord[]>([])
   const foundRef = useRef<string[]>([])
   const bonusRef = useRef<string[]>([])
   const comboRef = useRef(0)
@@ -94,6 +96,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     foundRef.current = []
     bonusRef.current = []
     pathRef.current = []
+    rawRef.current = []
     if (!keepTaught) cleared.current = false
     setFound([])
     setBonusFound([])
@@ -268,8 +271,10 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   }
 
   function missIfSwipe(nextPath: GemCoord[]) {
-    if (submit(nextPath)) return
-    if (nextPath.length < 2) {
+    const line = snapFingerPath(nextPath, puzzle.size)
+    writePath(line)
+    if (submit(line)) return
+    if (line.length < 2) {
       writePath([])
       return
     }
@@ -279,8 +284,8 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     const count = misses + 1
     setMisses(count)
     onMiss()
-    const straight = isStraightPath(nextPath)
-    const why = !straight || nextPath.length < 3 ? EASY.bonusMissStraight : EASY.bonusMissWord
+    const straight = isStraightPath(line)
+    const why = !straight || line.length < 3 ? EASY.bonusMissStraight : EASY.bonusMissWord
     recordMatchMiss(lineId)
     if (count >= 2 && nextWord) {
       flashToast(EASY.missPenalty, `Try this word: ${nextWord.label}.`, false, true)
@@ -296,6 +301,16 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
 
   function applyCell(cell: GemCoord, mode: 'tap' | 'drag') {
     if (status === 'ok') return
+    if (mode === 'drag') {
+      const raw = rawRef.current
+      const last = raw[raw.length - 1]
+      if (!last) rawRef.current = [cell]
+      else if (!sameCell(last, cell)) rawRef.current = [...raw, cell]
+      const line = snapFingerPath(rawRef.current, puzzle.size)
+      writePath(line)
+      submit(line)
+      return
+    }
     const current = pathRef.current
     let next = current
     if (!current.length) {
@@ -303,12 +318,14 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     } else if (sameCell(current[current.length - 1]!, cell)) {
       next = current
     } else {
-      const trial = tryAddToPath(current, cell)
+      const trial = tryAddToPath(current, cell, puzzle.size)
       if (trial.length > current.length) next = trial
-      else if (mode === 'tap') next = [cell]
+      else next = [cell]
     }
-    writePath(next)
-    submit(next)
+    rawRef.current = next
+    const line = snapFingerPath(next, puzzle.size)
+    writePath(line)
+    submit(line)
   }
 
   function onCellDown(event: ReactPointerEvent<HTMLDivElement>, cell: GemCoord) {
@@ -318,6 +335,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     drag.current = true
     moved.current = false
     setShake(false)
+    rawRef.current = [cell]
     applyCell(cell, 'tap')
   }
 
@@ -334,8 +352,10 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   function onBoardUp() {
     if (!drag.current) return
     drag.current = false
-    if (moved.current && pathRef.current.length) {
-      missIfSwipe(pathRef.current)
+    const nextPath = rawRef.current.length ? rawRef.current : pathRef.current
+    if (!nextPath.length) return
+    if (moved.current || nextPath.length >= 3) {
+      missIfSwipe(nextPath)
     }
   }
 
@@ -390,6 +410,17 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
           ))}
         </ul>
       ) : null}
+      {plusFlash ? (
+        <p className="bonus-plus" aria-hidden>
+          +100
+        </p>
+      ) : null}
+      {comboFlash > 1 ? (
+        <p className="gem-combo" role="status">
+          Combo ×{comboFlash}
+        </p>
+      ) : null}
+      <div className="gem-stage">
       {toastBonus && toast ? (
         <p className="bonus-banner" role="status">
           <strong>{toast}</strong>
@@ -404,16 +435,6 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
         <p className="match-toast gem-toast is-yes" role="status">
           <strong>{toast}</strong>
           {toastWhy ? <span className="toast-why">{toastWhy}</span> : null}
-        </p>
-      ) : null}
-      {plusFlash ? (
-        <p className="bonus-plus" aria-hidden>
-          +100
-        </p>
-      ) : null}
-      {comboFlash > 1 ? (
-        <p className="gem-combo" role="status">
-          Combo ×{comboFlash}
         </p>
       ) : null}
       <div
@@ -469,6 +490,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
             )
           }),
         )}
+      </div>
       </div>
       <p className={`match-score ${plusFlash || comboFlash > 1 ? 'is-juice' : ''}`}>
         {left} left · {found.length} / {puzzle.words.length} found
