@@ -13,6 +13,8 @@ import {
 import {
   bonusWordsFor,
   buildGemPuzzle,
+  cellKey,
+  cellsNeededByOpenPlanted,
   findStraightSpelling,
   gemWordsFor,
   isBonusSpelling,
@@ -104,8 +106,10 @@ assert.equal(isKidFriendlyBonusWord('BED'), true)
 assert.equal(isKidFriendlyBonusWord('NUDE'), false)
 assert.equal(isKidFriendlyBonusWord('SUCK'), false)
 assert.equal(isKidFriendlyBonusWord('HELL'), false)
+assert.equal(isKidFriendlyBonusWord('SNAG'), false, 'SNAG is not a kid-friendly bonus')
 assert.equal(isPlantableBonusWord('BED'), true)
 assert.equal(isPlantableBonusWord('NUDE'), false)
+assert.equal(isPlantableBonusWord('SNAG'), false, 'SNAG never plants')
 assert.equal(COMMON_BONUS_COUNT, COMMON_BONUS_WORDS.size)
 assert.ok(COMMON_BONUS_COUNT >= 900, `dict too thin: ${COMMON_BONUS_COUNT}`)
 for (const word of COMMON_BONUS_WORDS) {
@@ -117,6 +121,7 @@ assert.ok(fatherBoard.planted.length >= MIN_BONUS_PLANT, 'father plants several 
 assert.equal(isBonusSpelling('BED', fatherBoard), true, 'Bed stays in the bonus dict')
 assert.equal(isBonusSpelling('QQQ', fatherBoard), false)
 assert.equal(isBonusSpelling('FAT', fatherBoard), false, 'FAT stays on the rude skip list')
+assert.equal(isBonusSpelling('SNAG', fatherBoard), false, 'SNAG never scores as a bonus')
 assert.equal(isBonusSpelling('NEIGHBOR', fatherBoard), false, '7+ letters stay off the bonus band')
 assert.equal(isBonusSpelling('NUDE', fatherBoard), false, 'rude extras do not score')
 assert.ok(COMMON_BONUS_WORDS.has('GET'), 'GET is in the shipped bonus dictionary')
@@ -196,6 +201,31 @@ const missPath = [
 assert.equal(pathLetters(missPath, lettersFromRows(['QQQXXXXX'])), 'QQQ')
 assert.equal(isBonusSpelling('QQQ', puzzleFrom(lettersFromRows(['QQQXXXXX']))), false)
 assert.equal(matchBonusWord(missPath, puzzleFrom(lettersFromRows(['QQQXXXXX'])), []), null)
+
+const overlapBoard = {
+  ...puzzleFrom(lettersFromRows(['CATXXXXX', 'XXRXXXXX', 'XXRXXXXX'])),
+  planted: [
+    { id: 'bonus-cat', text: 'CAT', label: 'Cat', kind: 'idea' },
+    { id: 'bonus-car', text: 'CAR', label: 'Car', kind: 'idea' },
+  ],
+  bonusPaths: {
+    'bonus-cat': [
+      { r: 0, c: 0 },
+      { r: 0, c: 1 },
+      { r: 0, c: 2 },
+    ],
+    'bonus-car': [
+      { r: 0, c: 2 },
+      { r: 1, c: 2 },
+      { r: 2, c: 2 },
+    ],
+  },
+}
+const afterCat = cellsNeededByOpenPlanted(overlapBoard, ['bonus-cat'])
+assert.equal(afterCat.has(cellKey({ r: 0, c: 2 })), true, 'shared C stays needed for CAR')
+assert.equal(afterCat.has(cellKey({ r: 1, c: 2 })), true)
+assert.equal(afterCat.has(cellKey({ r: 0, c: 0 })), false, 'exclusive CAT cells drop after CAT is found')
+assert.equal(cellsNeededByOpenPlanted(overlapBoard, ['bonus-cat', 'bonus-car']).size, 0)
 const fatherSample = fatherBoard.planted[0]
 assert.ok(fatherSample, 'father has a planted extra')
 const fatherSamplePath = fatherBoard.bonusPaths[fatherSample.id] ?? findStraightSpelling(fatherBoard.letters, fatherSample.text)
@@ -327,6 +357,10 @@ assert.match(playSrc, /setRound\(\(current\) => current \+ 1\)/)
 assert.match(playSrc, /bonus-banner/)
 assert.match(playSrc, /EASY\.bonusHint/)
 assert.match(playSrc, /is-bonus/)
+assert.match(playSrc, /cellsNeededByOpenPlanted/)
+assert.match(playSrc, /bonusGhosted/)
+assert.match(playSrc, /is-cracked/)
+assert.match(playSrc, /setBonusGhosted\(\[\]\)/)
 assert.match(playSrc, /\+100/)
 assert.match(playSrc, /bonus-plus/)
 assert.match(playSrc, /MatchTakeaway/)
@@ -347,6 +381,10 @@ assert.match(gemCss, /play\.is-gem-search\.is-shake \{\s*animation: none/)
 assert.match(gemCss, /gem-stage \.miss-banner/)
 assert.match(gemCss, /gem-overlay-pop/)
 assert.match(gemCss, /pointer-events: none/)
+assert.match(gemCss, /\.gem-cell\.is-cracked \{/)
+const crackedRule = gemCss.match(/\.gem-cell\.is-cracked \{[^}]+\}/)?.[0] ?? ''
+assert.match(crackedRule, /opacity: 0\.55/)
+assert.doesNotMatch(crackedRule, /pointer-events/, 'cracked bonus cells stay swipeable')
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
   /Not a bonus word/,
