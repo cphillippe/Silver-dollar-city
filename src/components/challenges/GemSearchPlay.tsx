@@ -3,6 +3,7 @@ import { EASY, easyWhoWhere } from '../../lib/easy'
 import {
   buildGemPuzzle,
   cellKey,
+  cellsNeededByOpenPlanted,
   cellsStillNeeded,
   gemHue,
   isStraightPath,
@@ -54,6 +55,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   const [found, setFound] = useState<string[]>([])
   const [bonusFound, setBonusFound] = useState<string[]>([])
   const [bonusCleared, setBonusCleared] = useState<string[]>([])
+  const [bonusGhosted, setBonusGhosted] = useState<string[]>([])
   const [opened, setOpened] = useState(0)
   const [flipping, setFlipping] = useState<number | null>(null)
   const [path, setPath] = useState<GemCoord[]>([])
@@ -102,6 +104,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     setFound([])
     setBonusFound([])
     setBonusCleared([])
+    setBonusGhosted([])
     setPath([])
     setBurst([])
     setHint([])
@@ -195,11 +198,25 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   }
 
   function explodeBonus(cells: GemCoord[], label: string) {
-    const need = cellsStillNeeded(puzzle, foundRef.current)
-    const pop = cells.filter((cell) => !need.has(cellKey(cell)))
-    const keys = pop.map(cellKey)
-    setBurst(keys)
-    setBonusCleared((current) => [...current, ...keys])
+    // Never delete letters still needed for lesson chips OR remaining planted bonuses.
+    // Exclusive bonus cells clear; shared cells ghost/crack and stay playable.
+    const needLesson = cellsStillNeeded(puzzle, foundRef.current)
+    const needPlanted = cellsNeededByOpenPlanted(puzzle, bonusRef.current)
+    const keep = new Set<string>([...needLesson, ...needPlanted])
+    const clearKeys: string[] = []
+    const ghostKeys: string[] = []
+    for (const cell of cells) {
+      const key = cellKey(cell)
+      if (keep.has(key)) ghostKeys.push(key)
+      else clearKeys.push(key)
+    }
+    setBurst([...clearKeys, ...ghostKeys])
+    if (clearKeys.length) {
+      setBonusCleared((current) => [...current, ...clearKeys])
+    }
+    if (ghostKeys.length) {
+      setBonusGhosted((current) => [...current, ...ghostKeys.filter((k) => !current.includes(k))])
+    }
     playGemPop('bonus')
     setPlusFlash(true)
     window.setTimeout(() => setPlusFlash(false), 900)
@@ -457,6 +474,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
               return (puzzle.paths[word.id] ?? []).some((cell) => cell.r === r && cell.c === c)
             })
             const bonusClear = !kept && bonusCleared.includes(key)
+            const bonusGhost = !bonusClear && bonusGhosted.includes(key)
             const cellClear = targetClear || bonusClear
             return (
               <div
@@ -466,7 +484,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
                 data-r={r}
                 data-c={c}
                 onPointerDown={(event) => onCellDown(event, { r, c })}
-                className={`gem-cell hue-${gemHue(letter, r, c)} ${selected.has(key) ? 'is-sel' : ''} ${popping ? 'is-burst' : ''} ${cellClear ? 'is-clear' : ''} ${kept && found.length > 0 && !selected.has(key) ? 'is-live' : ''} ${hint.includes(key) ? 'is-hint' : ''} ${popping && bonusClear ? 'is-bonus-burst' : ''}`}
+                className={`gem-cell hue-${gemHue(letter, r, c)} ${selected.has(key) ? 'is-sel' : ''} ${popping ? 'is-burst' : ''} ${cellClear ? 'is-clear' : ''} ${bonusGhost ? 'is-cracked' : ''} ${kept && found.length > 0 && !selected.has(key) ? 'is-live' : ''} ${hint.includes(key) ? 'is-hint' : ''} ${popping && (bonusClear || bonusGhost) ? 'is-bonus-burst' : ''}`}
               >
                 <span className="gem-letter">{letter}</span>
                 {popping
