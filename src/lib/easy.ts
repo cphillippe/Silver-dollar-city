@@ -355,7 +355,7 @@ export function foundationPrior(id: string): string | undefined {
 export function foundationReady(progress: Pick<ProgressState, 'easyHeld'>, id: string): boolean {
   const prior = foundationPrior(id)
   if (!prior) return true
-  return easyLineHeld(progress, prior)
+  return (progress.easyHeld ?? []).includes(prior)
 }
 
 /** Easy street lines in teach order — packs set easyOrder; first is still mercy. */
