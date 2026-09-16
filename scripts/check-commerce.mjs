@@ -12,6 +12,7 @@ import {
   grantRemoveAds,
   normalizeCommerce,
   packIsUnlocked,
+  readCommerce,
   restoreCommerce,
   writeCommerce,
 } from '../src/lib/commerce.ts'
@@ -28,6 +29,7 @@ assert.ok(paidPacks().every((pack) => !pack.included))
 assert.equal(paidPacks().length, 2)
 
 writeCommerce(emptyCommerce())
+assert.equal(readCommerce(), readCommerce(), 'commerce snapshot stays referentially stable')
 assert.equal(packIsUnlocked(CORE_PACK_ID), true)
 assert.equal(packIsUnlocked('mill-street'), false)
 assert.equal(packIsUnlocked('harbor-walk'), false)
@@ -37,6 +39,8 @@ assert.equal(adsEnabledDefault, false)
 
 const grantedAds = grantRemoveAds()
 assert.equal(grantedAds.removeAds, true)
+assert.equal(readCommerce(), grantedAds)
+assert.equal(readCommerce(), readCommerce())
 assert.equal(softAdsVisible('on', grantedAds.removeAds), false)
 
 const mill = grantPack('mill-street')
@@ -101,6 +105,10 @@ assert.ok(
   hubSrc.indexOf('easy-core') < hubSrc.indexOf('easy-extra-streets'),
   'Core Easy play stays above extra streets',
 )
+
+const adSlotSrc = readFileSync(new URL('../src/components/AdSlot.tsx', import.meta.url), 'utf8')
+assert.match(adSlotSrc, /EMPTY_COMMERCE/)
+assert.doesNotMatch(adSlotSrc, /unlockedPacks: \[\] as string\[\]/)
 
 const shopSrc = readFileSync(new URL('../src/components/Shop.tsx', import.meta.url), 'utf8')
 assert.match(shopSrc, /Unlock on this device/)

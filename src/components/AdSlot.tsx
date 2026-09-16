@@ -5,7 +5,7 @@ import {
   type AdSlotId,
   AD_SLOTS,
 } from '../config/ads'
-import { readCommerce } from '../lib/commerce'
+import { EMPTY_COMMERCE, readCommerce } from '../lib/commerce'
 
 function subscribeAds(onStoreChange: () => void) {
   if (typeof window === 'undefined') return () => {}
@@ -36,10 +36,7 @@ export function useRemoveAds() {
 }
 
 export function useCommerce() {
-  return useSyncExternalStore(subscribeAds, readCommerce, () => ({
-    removeAds: false,
-    unlockedPacks: [] as string[],
-  }))
+  return useSyncExternalStore(subscribeAds, readCommerce, () => EMPTY_COMMERCE)
 }
 
 interface AdSlotProps {

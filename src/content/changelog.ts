@@ -21,6 +21,7 @@ export const CHANGELOG: ChangeNote[] = [
       'Night Watch and Town stay hidden on Easy. Foundation gate, Match extras, and Hold why-blast stay',
       'Claim-merge bowl juice: snappier drops and contact merges, bigger pops, combos linger, 390px bowl uses more of the phone',
       'After MERGED!, One more bowl is the gold tap — arcade-first, Hold next still there. Bowl full stays Merge again',
+      'Home and Packs stay playable — no black screen when returning from play or opening the shop',
     ],
   },
   {
