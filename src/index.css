@@ -7823,8 +7823,33 @@ html[data-easy='on'] .next-tap {
   color: var(--parchment);
 }
 
+.play.is-gem-search.is-panel-blast .gem-board .win-burst {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.play.is-gem-search .win-flash,
+.play.is-gem-search .win-ring {
+  position: absolute;
+}
+
 .play.is-gem-search.is-panel-blast .win-stamp-wrap {
-  top: 58%;
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  right: auto;
+  width: max-content;
+  max-width: 92%;
+  transform: translateX(-50%);
+  z-index: 8;
+}
+
+.play.is-gem-search.is-win .win-stamp {
+  font-size: clamp(1.05rem, 5vw, 1.45rem);
+  letter-spacing: 0.14em;
 }
 
 @keyframes story-panel-pop {
@@ -7967,6 +7992,7 @@ html[data-easy='on'] .next-tap {
 }
 
 .gem-board {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(var(--gem-size, 8), minmax(0, 1fr));
   gap: 3px;
@@ -7983,8 +8009,22 @@ html[data-easy='on'] .next-tap {
     0 10px 28px rgba(20, 4, 48, 0.45);
 }
 
-.play.is-gem-search.is-boom .gem-board {
-  animation: gem-board-thump 0.42s cubic-bezier(0.2, 1.4, 0.3, 1);
+.play.is-gem-search .match-score.is-juice {
+  animation: merge-score-pop 0.42s cubic-bezier(0.12, 1.45, 0.28, 1);
+}
+
+.gem-combo {
+  position: absolute;
+  left: 50%;
+  top: 36%;
+  z-index: 5;
+  margin: 0;
+  transform: translateX(-50%);
+  color: #fff6c8;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-shadow: 0 3px 0 #e09412;
+  pointer-events: none;
 }
 
 .gem-cell {
@@ -9934,6 +9974,7 @@ html[data-easy='on'] .next-tap {
   .run-shard,
   .run-burst,
   .bonus-plus,
+  .gem-combo,
   .play.is-road-maze.is-shake .maze-board,
   .maze-drop,
   .maze-kit-item.is-pop,

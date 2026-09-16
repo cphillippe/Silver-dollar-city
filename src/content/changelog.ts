@@ -8,6 +8,19 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.72',
+    title: 'Fun one more Match · Easy core trail',
+    when: '2026-09-16',
+    items: [
+      'Easy Match / panel-blast keeps the gem board after MATCHED — the letters stay a game, not a dead end',
+      'A two-find streak is Combo. Bonus words still pop BONUS! +100. Miss −25 stays',
+      'After MATCHED, one takeaway then Hold next is the filled tap. One more Match is the gold replay on every win — a fresh board, not gated on leftover extras',
+      'Night Watch and Town stay hidden on Easy',
+      'Freemium 1.4.66 through One more dig 1.4.71 stay. Soft ads never cover Match, Hold, or arcade (including source-dig). Journal ungated. Core Easy free',
+      'Father-run, road-maze, claim-merge, source-dig, and Hold Why Blast stay. Place titles stay Story Creek, Witness Square, Sky Watch, Why Gate, Meaning Ridge',
+    ],
+  },
+  {
     version: '1.4.71',
     title: 'Fun one more dig · Easy core trail',
     when: '2026-09-16',
@@ -1531,6 +1544,10 @@ export function latestChange(version: string): ChangeNote {
   const note = CHANGELOG.find((item) => item.version === version) ?? CHANGELOG[0]
   if (!note) {
     return { version, title: 'Easy core trail', when: '', items: [] }
+  }
+  if (note.version === '1.4.72') {
+    const prior = latestChange('1.4.71')
+    return { ...note, items: [...note.items, ...prior.items] }
   }
   if (note.version === '1.4.71') {
     const prior = latestChange('1.4.70')
