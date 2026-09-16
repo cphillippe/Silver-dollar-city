@@ -83,16 +83,27 @@ npm run android:apk
 
 Gradle writes `android/app/build/outputs/apk/debug/app-debug.apk`. Copy it to `releases/silver_city_debug.apk` if you want the committed download file updated.
 
-## Play Console / ads (one-time)
+## iOS (Xcode on a Mac)
+
+```bash
+npm install
+npm run ios:sync
+npx cap open ios
+```
+
+`ios:sync` copies the web build into `ios/`. CocoaPods / Archive need a Mac. Linux still copies web assets so the repo stays dual-path.
+
+## Play Console / App Store / ads (one-time)
 
 Leave the env keys blank to keep the Pages demo (`cannotCharge`). This build does not take store money until a plugin **and** these flags are present. CheckoutSheet, `grantRemoveAds`, `grantPack`, and SceneAd stay the same surfaces — no product rewrite when keys land.
 
-1. Create the three Play products with the SKUs in `src/config/commerce.ts` (`city.silver.unending.removeads`, `.pack.mill`, `.pack.harbor`).
-2. Add a Play Billing Capacitor plugin, set `VITE_PLAY_BILLING=1` (see `.env.example`), then `npx cap sync android`.
-3. Create an AdMob app and **one interstitial** unit. Set `VITE_ADS_ENABLED=1`, `VITE_ADMOB_APP_ID`, `VITE_ADMOB_INTERSTITIAL_ID`, add the AdMob `APPLICATION_ID` meta-data, then `npx cap sync android`.
-4. Soft pause / interstitial still never covers Match, Hold, arcade, source-dig, or Journal. Core Easy stays free. Journal stays ungated.
+1. Create the three products with the SKUs in `src/config/commerce.ts` (`city.silver.unending.removeads`, `.pack.mill`, `.pack.harbor`) in **Play Console** and **App Store Connect**. Same ids.
+2. Android: add a Play Billing Capacitor plugin, set `VITE_PLAY_BILLING=1` (see `.env.example`), then `npm run android:sync`.
+3. iOS: add a StoreKit Capacitor plugin, set `VITE_STOREKIT=1`, then `npm run ios:sync`. Xcode on a Mac finishes signing and Archive.
+4. Create an AdMob app per store and **one interstitial** unit each. Set `VITE_ADS_ENABLED=1`, `VITE_ADMOB_APP_ID` / `VITE_ADMOB_INTERSTITIAL_ID` for Android and `VITE_ADMOB_APP_ID_IOS` / `VITE_ADMOB_INTERSTITIAL_ID_IOS` for iPhone. Add the AdMob `APPLICATION_ID` meta-data, then sync.
+5. Soft pause / interstitial still never covers Match, Hold, arcade, source-dig, or Journal. Core Easy stays free. Journal stays ungated.
 
-No weekly send. No outreach. After this connect, Restore asks Play for the same SKUs.
+No weekly send. No outreach. After this connect, Restore asks Play or the App Store for the same SKUs.
 
 ## How it works
 

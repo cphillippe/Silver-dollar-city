@@ -251,6 +251,7 @@ assert.match(welcomeSrc, /STORY\.who/)
 const capSrc = readFileSync(new URL('../capacitor.config.ts', import.meta.url), 'utf8')
 assert.match(capSrc, /allowMixedContent:\s*false/)
 assert.doesNotMatch(capSrc, /allowMixedContent:\s*true/)
+assert.match(capSrc, /ios:/)
 
 const viteSrc = readFileSync(new URL('../vite.config.ts', import.meta.url), 'utf8')
 assert.doesNotMatch(viteSrc, /allowedHosts:\s*true/)

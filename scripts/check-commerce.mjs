@@ -7,7 +7,7 @@ import {
   scenePauseMountsOn,
   softAdsVisible,
 } from '../src/config/ads.ts'
-import { billedSkus, resetStoreFlagsForTest, setStoreFlagsForTest, storeFlags } from '../src/config/store.ts'
+import { billedSkus, liveAdmobIds, resetStoreFlagsForTest, setStoreFlagsForTest, storeFlags } from '../src/config/store.ts'
 import {
   liveInterstitialReady,
   resetAdAdapterForTest,
@@ -15,6 +15,11 @@ import {
   showBetweenSceneInterstitial,
 } from '../src/lib/adAdapter.ts'
 import { iapCanCharge, resetIapAdapterForTest, setBillingPluginForTest } from '../src/lib/iapAdapter.ts'
+import {
+  resetStoreSurfaceForTest,
+  setStoreSurfaceForTest,
+  storeSurface,
+} from '../src/lib/nativeStore.ts'
 import {
   emptyCommerce,
   grantPack,
@@ -173,12 +178,15 @@ assert.match(shopSrc, /TRAIL_SUBTITLE/)
 assert.match(shopSrc, /TRAIL_NAME/)
 assert.match(shopSrc, /is-locked/)
 assert.doesNotMatch(shopSrc, /window\.confirm/)
-assert.doesNotMatch(shopSrc, /hard paywall/i)
+assert.match(shopSrc, /App Store/)
+assert.match(shopSrc, /StoreKit/)
 
 const checkoutSrc = readFileSync(new URL('../src/components/CheckoutSheet.tsx', import.meta.url), 'utf8')
 assert.match(checkoutSrc, /cannotCharge/)
 assert.match(checkoutSrc, /Unlock on this device/)
 assert.match(checkoutSrc, /this device cannot charge/)
+assert.match(checkoutSrc, /App Store/)
+assert.match(checkoutSrc, /StoreKit/)
 
 const packStreetSrc = readFileSync(new URL('../src/components/PackStreet.tsx', import.meta.url), 'utf8')
 assert.match(packStreetSrc, /CheckoutSheet/)
@@ -214,7 +222,7 @@ for (const src of [matchSrc, holdSrc, mergeSrc, runSrc, mazeSrc, digPlaySrc]) {
 }
 
 const commerceCfg = readFileSync(new URL('../src/config/commerce.ts', import.meta.url), 'utf8')
-assert.match(commerceCfg, /Play Billing/)
+assert.match(commerceCfg, /StoreKit \+ Play Billing/)
 assert.match(commerceCfg, /grantRemoveAds/)
 assert.match(commerceCfg, /grantPack/)
 assert.match(commerceCfg, /A quiet pause on the trail/)
@@ -232,28 +240,39 @@ assert.match(billingSrc, /restorePurchases/)
 assert.match(billingSrc, /restoreFromStore/)
 assert.match(billingSrc, /cannotCharge/)
 assert.match(billingSrc, /web-demo/)
-assert.match(billingSrc, /source: 'play'/)
+assert.match(billingSrc, /app-store/)
+assert.match(billingSrc, /paidSource/)
 
 const adapterSrc = readFileSync(new URL('../src/lib/iapAdapter.ts', import.meta.url), 'utf8')
 assert.match(adapterSrc, /iapCanCharge/)
 assert.match(adapterSrc, /InAppPurchases/)
+assert.match(adapterSrc, /StoreKit/)
+assert.match(adapterSrc, /VITE_STOREKIT/)
+
+const storeSrc = readFileSync(new URL('../src/config/store.ts', import.meta.url), 'utf8')
+assert.match(storeSrc, /VITE_PLAY_BILLING/)
+assert.match(storeSrc, /VITE_STOREKIT/)
+assert.match(storeSrc, /VITE_ADMOB_INTERSTITIAL_ID/)
+assert.match(storeSrc, /VITE_ADMOB_INTERSTITIAL_ID_IOS/)
+assert.match(storeSrc, /liveAdmobIds/)
 
 const adAdapterSrc = readFileSync(new URL('../src/lib/adAdapter.ts', import.meta.url), 'utf8')
 assert.match(adAdapterSrc, /liveInterstitialReady/)
 assert.match(adAdapterSrc, /showBetweenSceneInterstitial/)
 assert.match(adAdapterSrc, /scenePauseMountsOn/)
+assert.match(adAdapterSrc, /liveAdmobIds/)
 
-const storeSrc = readFileSync(new URL('../src/config/store.ts', import.meta.url), 'utf8')
-assert.match(storeSrc, /VITE_PLAY_BILLING/)
-assert.match(storeSrc, /VITE_ADMOB_INTERSTITIAL_ID/)
 assert.deepEqual(billedSkus(), [
   PLAY_SKUS.removeAds,
   PLAY_SKUS.millStreet,
   PLAY_SKUS.harborWalk,
 ])
 assert.equal(storeFlags().playBilling, false)
+assert.equal(storeFlags().storeKit, false)
 assert.equal(storeFlags().adsEnabled, false)
 assert.equal(iapCanCharge(), false)
+assert.equal(storeSurface(), 'web')
+assert.deepEqual(liveAdmobIds(), { appId: '', unitId: '' })
 assert.equal(liveInterstitialReady(), false)
 assert.equal(await showBetweenSceneInterstitial('hub'), 'soft')
 assert.equal(await showBetweenSceneInterstitial('link'), 'skip')
@@ -314,6 +333,31 @@ assert.equal(demoAgain.status, 'purchased')
 assert.equal(demoAgain.cannotCharge, true)
 assert.equal(demoAgain.receipt?.source, 'web-demo')
 
+setStoreSurfaceForTest('app-store')
+setStoreFlagsForTest({ storeKit: true })
+setBillingPluginForTest({
+  async purchase(sku) {
+    return { sku, orderId: '100000001', token: 'sk-tok-1' }
+  },
+  async restore() {
+    return []
+  },
+})
+assert.equal(storeSurface(), 'app-store')
+assert.equal(iapCanCharge(), true)
+resetBilling()
+const appleBuy = await checkoutOffer({ kind: 'remove-ads' })
+assert.equal(appleBuy.status, 'purchased')
+assert.equal(appleBuy.cannotCharge, false)
+assert.equal(appleBuy.receipt?.source, 'app-store')
+assert.equal(appleBuy.commerce.removeAds, true)
+resetStoreSurfaceForTest()
+setBillingPluginForTest(undefined)
+resetStoreFlagsForTest()
+resetIapAdapterForTest()
+resetBilling()
+assert.equal(cannotCharge(), true)
+
 setStoreFlagsForTest({ adsEnabled: true, interstitialUnitId: 'ca-app-pub-test/interstitial' })
 assert.equal(liveInterstitialReady(), false)
 let shown = 0
@@ -341,8 +385,66 @@ resetAdAdapterForTest()
 resetStoreFlagsForTest()
 resetBilling()
 
+setStoreSurfaceForTest('app-store')
+setStoreFlagsForTest({
+  adsEnabled: true,
+  interstitialUnitId: 'ca-app-pub-android/interstitial',
+  interstitialUnitIdIos: 'ca-app-pub-ios/interstitial',
+})
+assert.deepEqual(liveAdmobIds(), {
+  appId: '',
+  unitId: 'ca-app-pub-ios/interstitial',
+})
+let iosShown = 0
+setAdPluginForTest({
+  async prepare(unitId) {
+    assert.equal(unitId, 'ca-app-pub-ios/interstitial')
+  },
+  async show() {
+    iosShown += 1
+    return 'shown'
+  },
+})
+assert.equal(liveInterstitialReady(), true)
+assert.equal(await showBetweenSceneInterstitial('hub'), 'live')
+assert.equal(iosShown, 1)
+assert.equal(await showBetweenSceneInterstitial('link'), 'skip')
+resetStoreSurfaceForTest()
+setAdPluginForTest(undefined)
+resetAdAdapterForTest()
+resetStoreFlagsForTest()
+resetBilling()
+
+const pkgJson = JSON.parse(
+  readFileSync(new URL('../package.json', import.meta.url), 'utf8'),
+)
+assert.equal(pkgJson.scripts['ios:sync']?.includes('cap-sync.mjs ios'), true)
+assert.equal(pkgJson.scripts['android:sync']?.includes('cap-sync.mjs android'), true)
+assert.ok(pkgJson.dependencies['@capacitor/ios'])
+assert.ok(pkgJson.dependencies['@capacitor/android'])
+
+const envExample = readFileSync(new URL('../.env.example', import.meta.url), 'utf8')
+assert.match(envExample, /VITE_STOREKIT=/)
+assert.match(envExample, /VITE_ADMOB_APP_ID_IOS=/)
+assert.match(envExample, /VITE_ADMOB_INTERSTITIAL_ID_IOS=/)
+
+const capSrc = readFileSync(new URL('../capacitor.config.ts', import.meta.url), 'utf8')
+assert.match(capSrc, /ios:/)
+assert.match(capSrc, /allowMixedContent:\s*false/)
+
 const manifestSrc = readFileSync(new URL('../android/app/src/main/AndroidManifest.xml', import.meta.url), 'utf8')
 assert.match(manifestSrc, /com\.android\.vending\.BILLING/)
+
+const iosPlist = readFileSync(new URL('../ios/App/App/Info.plist', import.meta.url), 'utf8')
+assert.match(iosPlist, /Silver City/)
+assert.match(iosPlist, /ITSAppUsesNonExemptEncryption/)
+const iosProj = readFileSync(
+  new URL('../ios/App/App.xcodeproj/project.pbxproj', import.meta.url),
+  'utf8',
+)
+assert.match(iosProj, /PRODUCT_BUNDLE_IDENTIFIER = city.silver.unending/)
+assert.match(iosProj, /MARKETING_VERSION = 1.4.79/)
+assert.match(iosProj, /CURRENT_PROJECT_VERSION = 93/)
 
 resetBilling()
 
