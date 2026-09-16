@@ -15,7 +15,7 @@ import { Profile } from './components/Profile'
 import { SceneAd } from './components/SceneAd'
 import { Vista } from './components/Vista'
 import { Welcome } from './components/Welcome'
-import { adsAreVisible, isBetweenSceneTransition } from './config/ads'
+import { adsAreVisible, isBetweenSceneTransition, scenePauseMountsOn } from './config/ads'
 import { isEasy } from './lib/easy'
 import { useProgress } from './store/progress'
 import type { View } from './types'
@@ -28,7 +28,7 @@ function easyNightWatchHit(): boolean {
   return /defend|night-?watch/i.test(blob)
 }
 
-function isLessonView(view: View): boolean {
+function isLessonEnterView(view: View): boolean {
   return (
     view.name === 'learn' ||
     view.name === 'link' ||
@@ -36,6 +36,10 @@ function isLessonView(view: View): boolean {
     view.name === 'challenge' ||
     view.name === 'pack-street'
   )
+}
+
+function isSceneLeaveView(view: View): boolean {
+  return isLessonEnterView(view) || view.name === 'journal'
 }
 
 export default function App() {
@@ -63,14 +67,14 @@ export default function App() {
     const cooled = Date.now() - lastAdAt.current >= AD_COOLDOWN_MS
     const between = isBetweenSceneTransition(view.name, next.name)
 
-    if (adsOn && cooled && between && view.name === 'hub' && isLessonView(next)) {
+    if (adsOn && cooled && between && view.name === 'hub' && isLessonEnterView(next)) {
       lastAdAt.current = Date.now()
       setPending(next)
       setSceneAd(true)
       return
     }
 
-    if (adsOn && cooled && between && isLessonView(view) && next.name === 'hub') {
+    if (adsOn && cooled && between && isSceneLeaveView(view) && next.name === 'hub') {
       lastAdAt.current = Date.now()
       setPending(null)
       setView({ name: 'hub' })
@@ -155,7 +159,7 @@ export default function App() {
       {view.name === 'link' ? <LinkScreen onNavigate={go} /> : null}
       {view.name === 'learn' ? <LearnScreen onNavigate={go} /> : null}
       {view.name === 'profile' ? <Profile onNavigate={go} /> : null}
-      {sceneAd && view.name === 'hub' ? (
+      {sceneAd && scenePauseMountsOn(view.name) ? (
         <SceneAd onContinue={continueFromAd} onSupport={supportFromAd} />
       ) : null}
     </AppShell>

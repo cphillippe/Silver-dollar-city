@@ -7,15 +7,17 @@ import {
   TRAIL_SUBTITLE,
   packPaywallLine,
 } from '../config/commerce'
+import { billingSurface, packIsUnlocked } from '../lib/commerce'
 import {
-  billingSurface,
-  grantPack,
-  grantRemoveAds,
-  packIsUnlocked,
-  restoreCommerce,
-} from '../lib/commerce'
+  cancelPurchase,
+  packStreetLocked,
+  purchaseOffer,
+  restorePurchases,
+  type BillingOffer,
+} from '../lib/billing'
 import { EASY, isEasy } from '../lib/easy'
 import { useProgress } from '../store/progress'
+import { CheckoutSheet } from './CheckoutSheet'
 import { useCommerce } from './AdSlot'
 import type { View } from '../types'
 
@@ -30,31 +32,44 @@ export function Shop({ onNavigate }: ShopProps) {
   const removeAds = commerce.removeAds
   const surface = billingSurface()
   const [message, setMessage] = useState('')
+  const [checkout, setCheckout] = useState<BillingOffer | null>(null)
 
   function afterGrant(note: string) {
     setMessage(note)
   }
 
-  function unlockWeb(kind: 'ads' | 'pack', packId?: string) {
-    const ok = window.confirm(
-      surface === 'play'
-        ? 'Play Billing is not wired in this build. Unlock on this device with the same flag Play will set later?'
-        : 'This Pages build cannot charge yet. Unlock on this device? The same flag is what Play IAP will set later.',
-    )
-    if (!ok) return
-    if (kind === 'ads') {
-      grantRemoveAds()
+  function confirmCheckout() {
+    if (!checkout) return
+    const result = purchaseOffer(checkout)
+    const offer = checkout
+    setCheckout(null)
+    if (result.status === 'canceled' || result.status === 'unavailable') {
+      afterGrant('Purchase did not finish.')
+      return
+    }
+    if (result.status === 'already') {
+      afterGrant(
+        offer.kind === 'remove-ads'
+          ? 'Ads were already off on this device.'
+          : 'That street is already unlocked on this device.',
+      )
+      if (offer.kind === 'pack' && offer.packId && !packStreetLocked(offer.packId, result.commerce)) {
+        onNavigate({ name: 'pack-street', packId: offer.packId })
+      }
+      return
+    }
+    if (offer.kind === 'remove-ads') {
       afterGrant('Ads off on this device. Thank you for supporting the trail.')
       return
     }
-    if (packId) {
-      grantPack(packId)
+    if (offer.kind === 'pack' && offer.packId) {
       afterGrant('Street unlocked on this device.')
+      onNavigate({ name: 'pack-street', packId: offer.packId })
     }
   }
 
   function restore() {
-    const next = restoreCommerce()
+    const next = restorePurchases()
     if (next.removeAds || next.unlockedPacks.length) {
       afterGrant(
         next.removeAds
@@ -106,7 +121,7 @@ export function Shop({ onNavigate }: ShopProps) {
               Ads off on this device. Thank you.
             </p>
           ) : (
-            <button type="button" className="btn gold" onClick={() => unlockWeb('ads')}>
+            <button type="button" className="btn gold" onClick={() => setCheckout({ kind: 'remove-ads' })}>
               {REMOVE_ADS_PRODUCT.title} · {REMOVE_ADS_PRODUCT.priceLabel}
             </button>
           )}
@@ -122,13 +137,19 @@ export function Shop({ onNavigate }: ShopProps) {
         <p className="quiet">{PACK_LINE}</p>
         <ul className="shop-pack-list">
           {SHOP_PACKS.map((pack) => {
-                const open = packIsUnlocked(pack.id, commerce)
+            const open = packIsUnlocked(pack.id, commerce)
             return (
-              <li key={pack.id} className={`shop-pack ${pack.included ? 'is-free' : ''} ${open ? 'is-open' : ''}`}>
-                <p className="eyebrow">{pack.street}</p>
+              <li key={pack.id} className={`shop-pack ${pack.included ? 'is-free' : ''} ${open ? 'is-open' : 'is-locked'}`}>
+                <p className="eyebrow">{pack.included ? pack.street : open ? pack.street : `${pack.street} · locked`}</p>
                 <h3>{pack.title}</h3>
                 <p>{pack.included ? pack.blurb : packPaywallLine(pack.street)}</p>
-                <p className="quiet">{pack.included ? 'Included' : `${PACK_LINE} · ${pack.priceLabel}`}</p>
+                <p className="quiet">
+                  {pack.included
+                    ? 'Included'
+                    : open
+                      ? `${PACK_LINE} · unlocked on this device`
+                      : `${PACK_LINE} · ${pack.priceLabel} · ${pack.sku}`}
+                </p>
                 {pack.included ? (
                   <button
                     type="button"
@@ -149,7 +170,7 @@ export function Shop({ onNavigate }: ShopProps) {
                   <button
                     type="button"
                     className="btn gold"
-                    onClick={() => unlockWeb('pack', pack.id)}
+                    onClick={() => setCheckout({ kind: 'pack', packId: pack.id })}
                   >
                     Unlock {pack.street} · {pack.priceLabel}
                   </button>
@@ -161,6 +182,16 @@ export function Shop({ onNavigate }: ShopProps) {
       </section>
 
       {message ? <p className="settings-msg">{message}</p> : null}
+      {checkout ? (
+        <CheckoutSheet
+          offer={checkout}
+          onConfirm={confirmCheckout}
+          onCancel={() => {
+            cancelPurchase()
+            setCheckout(null)
+          }}
+        />
+      ) : null}
     </main>
   )
 }
