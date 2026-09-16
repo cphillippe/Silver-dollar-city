@@ -209,6 +209,7 @@ export function RecallGate({
               id={brief.id}
               claim={heldClaim}
               reason={heldReason}
+              source={brief.source}
               packMisses={brief.reasonChoices}
               onDone={(result) => settle(result.clean)}
             />

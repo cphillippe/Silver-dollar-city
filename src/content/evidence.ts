@@ -78,7 +78,7 @@ export const EVIDENCE: Record<string, EvidenceBrief> = {
   'wb-creed': brief(
     'wb-creed',
     'Paul hands on an early public creed: died, buried, raised, appeared.',
-    'Burial resists a merely “spiritual” death; appearances resist a merely “spiritual” raising.',
+    'Christ was buried and seen — not only a spirit story.',
     '1 Corinthians 15:3–8',
     'The creed is Paul’s private dream from decades later.',
     'Paul invented the formula on the spot in Corinth.',
@@ -87,8 +87,8 @@ export const EVIDENCE: Record<string, EvidenceBrief> = {
   ),
   'wb-early': brief(
     'wb-early',
-    'The resurrection claim sits close to the events, not as a late legend.',
-    'Paul quotes a received formula and names known people; Luke claims inquiry among witnesses.',
+    'The churches named the risen Christ close to the events.',
+    'Paul names people who saw him; Luke asked witnesses.',
     '1 Corinthians 15:3–7; Luke 1:1–4',
     'Early is the same as laboratory proof.',
     'No first-century writer claims to have asked witnesses.',
@@ -97,9 +97,9 @@ export const EVIDENCE: Record<string, EvidenceBrief> = {
   ),
   'wb-method': brief(
     'wb-method',
-    'Ordinary historical tools weigh testimony; they do not replace reading.',
-    'Multiple attestation, embarrassment, early reports, and context resist “late pious novel.”',
-    'Standard historical method',
+    'We weigh named reports of Jesus; we still read them.',
+    'Many early, awkward reports beat a late tale.',
+    'Luke 1:1–4 · 1 Corinthians 15:5–6',
     'An early creed is already a laboratory proof.',
     'Every Christian report is automatically a late novel.',
     'Method is a way to skip the texts themselves.',
@@ -107,8 +107,8 @@ export const EVIDENCE: Record<string, EvidenceBrief> = {
   ),
   'wb-women': brief(
     'wb-women',
-    'The first tomb reports begin with women — an awkward opening if invented for respectability.',
-    'Luke records that the apostles dismissed them — a costly opening if the goal were instant respectability.',
+    'Women were first to report Jesus’ empty tomb.',
+    'The apostles first called them wrong — Luke still wrote it.',
     'Luke 24:1–11',
     'The Gospels open with the Roman senate converting overnight.',
     'Women were the most legally impressive public witnesses.',
@@ -167,7 +167,7 @@ export const EVIDENCE: Record<string, EvidenceBrief> = {
   ),
   'fg-reason': brief(
     'fg-reason',
-    'The reason you already trust needs a real ground.',
+    'The mind you already trust needs a real ground.',
     'The Word is the true light that makes God knowable.',
     'John 1:1–9 · Romans 1:19–20',
     'Reason is a free-floating trick with no ground.',
@@ -177,7 +177,7 @@ export const EVIDENCE: Record<string, EvidenceBrief> = {
   ),
   'fg-ought': brief(
     'fg-ought',
-    'Finite nature cannot ground the ought you already trust.',
+    'Rocks cannot write the law you already trust.',
     'A limited world cannot write the law on the heart.',
     'Romans 2:14–15',
     'Rocks and weather write the law on the heart.',

@@ -101,12 +101,15 @@ const journalSrc = readFileSync(
 assert.match(journalSrc, /stored-chapter/)
 assert.match(journalSrc, /Stored lines/)
 assert.match(journalSrc, /pictured as/)
+assert.match(journalSrc, /HeldTriad/)
 
 const storeSrc = readFileSync(
   new URL('../src/components/StoredLine.tsx', import.meta.url),
   'utf8',
 )
 assert.match(storeSrc, /Say this out loud/)
+assert.match(storeSrc, /HeldTriad/)
+assert.match(storeSrc, /sayTomorrow/)
 assert.match(storeSrc, /stored-claim/)
 assert.match(storeSrc, /DigDeeper/)
 
@@ -125,6 +128,7 @@ assert.match(teachSrc, /easyWhoWhere/)
 assert.match(teachSrc, /easyWhoWhereLine/)
 assert.match(teachSrc, /easy-who-where/)
 assert.match(teachSrc, /easy-place-chip/)
+assert.match(teachSrc, /HeldTriad/)
 assert.ok(
   teachSrc.indexOf('teach-reason') < teachSrc.indexOf('brief.claim'),
   'TeachUnlock must tell the story before the claim line',

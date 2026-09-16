@@ -6103,6 +6103,39 @@ img.walker-face.easy-walker-face,
   margin: 0;
 }
 
+.held-triad {
+  display: grid;
+  gap: 10px;
+  margin: 8px 0 0;
+}
+
+.held-triad .eyebrow {
+  margin: 0;
+}
+
+.held-triad dt {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.held-triad dd {
+  margin: 2px 0 0;
+  font-size: 1.02rem;
+  line-height: 1.35;
+}
+
+.held-triad .recall-line {
+  font-size: 1.2rem;
+}
+
+.held-from {
+  margin: 8px 0 0;
+  text-align: center;
+}
+
 .memory-pipe {
   margin: 0;
   font-size: 0.72rem;

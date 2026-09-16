@@ -68,8 +68,11 @@ export const EASY = {
   mainIdea: 'main idea',
   reasonTeach: 'A reason is why this is true.',
   reasonSense: 'why this is true',
+  sayWhy: 'Why this is true',
   whyStands: 'Why this is true.',
   sourceSense: 'where this comes from',
+  sayFrom: 'From',
+  sayTomorrow: 'Say this tomorrow',
   lockIn: 'Save your picks.',
   matchHow: 'Keep the right pictures. Remove wrong picks.',
   tapSentence: 'Tap a sentence',
@@ -151,17 +154,17 @@ const EASY_CHROME: Record<string, string> = {
   'Soil, search, a tiny seed, and a trust form a portrait — not a slogan.':
     'Pictures tell it — not a slogan.',
   'Burial resists a merely “spiritual” death; appearances resist a merely “spiritual” raising.':
-    'Buried and seen — not only a spirit story.',
+    'Christ was buried and seen — not only a spirit story.',
   'Appearances are admitted to be visions with no named people.':
     'The seen people are only nameless visions.',
   'Paul quotes a received formula and names known people; Luke claims inquiry among witnesses.':
-    'Paul names known people who saw it.',
+    'Paul names people who saw him; Luke asked witnesses.',
   'Distance in time is the only historical question that matters.':
     'Only the date matters — names do not.',
   'Multiple attestation, embarrassment, early reports, and context resist “late pious novel.”':
     'Many early, awkward reports beat a late tale.',
   'Luke records that the apostles dismissed them — a costly opening if the goal were instant respectability.':
-    'The men first called the women wrong.',
+    'The apostles first called them wrong — Luke still wrote it.',
   'Life-permitting ranges are extravagantly narrow across independent parameters; design predicts a habitable cosmos, blank chance does not.':
     'Life needs tight numbers — chance does not explain that.',
   'Life-permitting ranges are wide; blank chance predicts a habitable cosmos just as well.':

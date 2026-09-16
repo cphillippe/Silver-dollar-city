@@ -640,7 +640,10 @@ assert.doesNotMatch(evidenceSrc, /philosophical clue/)
 assert.doesNotMatch(evidenceSrc, /Clean is not uncontested/)
 assert.match(evidenceSrc, /Isaiah 53:4–12/)
 assert.match(evidenceSrc, /That yields a Cause of the beginning/)
-assert.match(evidenceSrc, /costly opening if the goal were instant respectability/)
+assert.match(evidenceSrc, /Women were first to report Jesus’ empty tomb/)
+assert.match(evidenceSrc, /The apostles first called them wrong/)
+assert.doesNotMatch(evidenceSrc, /costly opening if the goal were instant respectability/)
+assert.doesNotMatch(evidenceSrc, /if invented for respectability/)
 assert.match(evidenceSrc, /Life’s specified information is a mark of mind/)
 assert.match(evidenceSrc, /Matthew 26:28; Luke 22:20/)
 
@@ -1083,7 +1086,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.72')
+assert.equal(APP_VERSION, '1.4.73')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
