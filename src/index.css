@@ -9748,9 +9748,13 @@ html[data-easy='on'] .next-tap {
   position: absolute;
 }
 
+.play.is-source-dig.is-win .dig-board {
+  padding-top: 54px;
+}
+
 .play.is-source-dig .win-stamp-wrap {
   position: absolute;
-  top: 16%;
+  top: 12px;
   left: 50%;
   right: auto;
   width: max-content;
