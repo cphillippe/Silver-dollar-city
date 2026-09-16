@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<areaPack id="first-gate" schemaVersion="3" appVersion="1.4.64" generated="2026-09-16T09:00:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/" title="Why Gate" place="Why Gate" person="Ansel Gate" personId="ansel" plotId="gate">
+<areaPack id="first-gate" schemaVersion="3" appVersion="1.4.73" generated="2026-09-16T09:00:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/" title="Why Gate" place="Why Gate" person="Ansel Gate" personId="ansel" plotId="gate">
   <howToEdit>RUNTIME CONTENT: the game loads this file as the source of truth for this area. Change player-facing text in place inside each &lt;lesson&gt;. Stable id attributes (ph-father, …) are engine keys — do not rename without a migration. Three tiers per fact: &lt;easy easyOrder="N"&gt;, &lt;medium&gt;, and &lt;hard&gt; — each with &lt;learn&gt;, &lt;match&gt;, and &lt;hold&gt;. Easy Learn: shortStory/mainIdea/loci. Medium Learn: mediumTeach (clearer than Hard, richer than Easy). Hard Learn: hardTeach/fullTeach. Held claim·reason·source stay plain and identical on all three. Hold level-up: see hold @levelUpTo / @onFail and index &lt;holdRules&gt;. Empty optional elements are intentional. Escape &amp; &lt; &gt; in text.</howToEdit>
   <meta>
     <title>Silver City — Why Gate</title>
@@ -166,12 +166,12 @@
         </sources>
       </journal>
     </lesson>
-    <lesson id="fg-reason" place="Why Gate" person="Ansel Gate" tripleId="reason-gate" ideaId="idea-reason" ideaLabel="Reason needs a real ground." challengeKind="sequence" challengeTitle="Trust needs a ground">
+    <lesson id="fg-reason" place="Why Gate" person="Ansel Gate" tripleId="reason-gate" ideaId="idea-reason" ideaLabel="The mind needs a real ground." challengeKind="sequence" challengeTitle="Trust needs a ground">
       <easy points="10" easyOrder="5">
         <learn>
-          <shortStory>You already trust your mind enough to argue, count, and ask why. That trust is not a trick hanging in midair. John calls the Word the true light. Romans says what can be known of God is plain in what is made. Reason needs a real ground.</shortStory>
-          <mainIdea>The reason you already trust needs a real ground.</mainIdea>
-          <gloss>The reason you already trust needs a real ground.</gloss>
+          <shortStory>You already trust your mind enough to argue, count, and ask why. That trust is not a trick hanging in midair. John calls the Word the true light. Romans says what can be known of God is plain in what is made. The mind needs a real ground.</shortStory>
+          <mainIdea>The mind you already trust needs a real ground.</mainIdea>
+          <gloss>The mind you already trust needs a real ground.</gloss>
           <loci>This idea lives at Why Gate, with Ansel.</loci>
           <word>
             <term>Ground</term>
@@ -180,19 +180,19 @@
           <hint>Keep the ground. Toss the floating trick.</hint>
         </learn>
         <match>
-          <sentenceCorrect>The reason you already trust needs a real ground.</sentenceCorrect>
+          <sentenceCorrect>The mind you already trust needs a real ground.</sentenceCorrect>
           <sentenceMisses>
             <miss>Reason is a free-floating trick with no ground.</miss>
             <miss>Darkness is the last word about the world.</miss>
           </sentenceMisses>
           <placePrompt>That question lives at Why Gate.</placePrompt>
           <personPrompt>Ansel keeps that gate.</personPrompt>
-          <ideaPrompt>Ansel’s why — reason needs a real ground.</ideaPrompt>
-          <ideaLabel>Reason needs a real ground.</ideaLabel>
-          <whyEasy>Ansel keeps Why Gate. Reason needs a real ground.</whyEasy>
+          <ideaPrompt>Ansel’s why — the mind needs a real ground.</ideaPrompt>
+          <ideaLabel>The mind needs a real ground.</ideaLabel>
+          <whyEasy>Ansel keeps Why Gate. The mind needs a real ground.</whyEasy>
         </match>
         <hold levelUpTo="medium" onFail="easy">
-          <claim>The reason you already trust needs a real ground.</claim>
+          <claim>The mind you already trust needs a real ground.</claim>
           <reason>The Word is the true light that makes God knowable.</reason>
           <source>John 1:1–9 · Romans 1:19–20</source>
           <whyCorrect>The Word is the true light that makes God knowable.</whyCorrect>
@@ -202,7 +202,7 @@
             <miss>Made things hide God.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>The reason you already trust needs a real ground.</choice>
+            <choice>The mind you already trust needs a real ground.</choice>
             <choice>Reason is a free-floating trick with no ground.</choice>
             <choice>Darkness is the last word about the world.</choice>
           </claimChoices>
@@ -216,8 +216,8 @@
       <medium points="12">
         <learn>
           <mediumTeach>You already trust reason — you argue, count, and ask why. That trust is not free-floating. John 1 names the Word as the true light that gives light to everyone. Romans 1:19–20 says what can be known of God is plain in what is made. Light makes the world knowable because God made it knowable.</mediumTeach>
-          <mainIdea>The reason you already trust needs a real ground.</mainIdea>
-          <gloss>The reason you already trust needs a real ground.</gloss>
+          <mainIdea>The mind you already trust needs a real ground.</mainIdea>
+          <gloss>The mind you already trust needs a real ground.</gloss>
           <loci>This idea lives at Why Gate, with Ansel.</loci>
           <word>
             <term>Ground</term>
@@ -226,19 +226,19 @@
           <hint>Keep the ground. Toss the floating trick.</hint>
         </learn>
         <match>
-          <sentenceCorrect>The reason you already trust needs a real ground.</sentenceCorrect>
+          <sentenceCorrect>The mind you already trust needs a real ground.</sentenceCorrect>
           <sentenceMisses>
             <miss>Reason is a free-floating trick with no ground.</miss>
             <miss>Darkness is the last word about the world.</miss>
           </sentenceMisses>
           <placePrompt>That question lives at Why Gate.</placePrompt>
           <personPrompt>Ansel keeps that gate.</personPrompt>
-          <ideaPrompt>Ansel’s why — reason needs a real ground.</ideaPrompt>
-          <ideaLabel>Reason needs a real ground.</ideaLabel>
-          <whyMedium>Ansel keeps Why Gate. Reason needs a real ground.</whyMedium>
+          <ideaPrompt>Ansel’s why — the mind needs a real ground.</ideaPrompt>
+          <ideaLabel>The mind needs a real ground.</ideaLabel>
+          <whyMedium>Ansel keeps Why Gate. The mind needs a real ground.</whyMedium>
         </match>
         <hold levelUpTo="hard" onFail="easy">
-          <claim>The reason you already trust needs a real ground.</claim>
+          <claim>The mind you already trust needs a real ground.</claim>
           <reason>The Word is the true light that makes God knowable.</reason>
           <source>John 1:1–9 · Romans 1:19–20</source>
           <whyCorrect>The Word is the true light that makes God knowable.</whyCorrect>
@@ -248,7 +248,7 @@
             <miss>Made things hide God.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>The reason you already trust needs a real ground.</choice>
+            <choice>The mind you already trust needs a real ground.</choice>
             <choice>Reason is a free-floating trick with no ground.</choice>
             <choice>Darkness is the last word about the world.</choice>
           </claimChoices>
@@ -268,19 +268,19 @@
           <challengeTiles />
         </learn>
         <match>
-          <sentenceCorrect>The reason you already trust needs a real ground.</sentenceCorrect>
+          <sentenceCorrect>The mind you already trust needs a real ground.</sentenceCorrect>
           <sentenceMisses>
             <miss>Reason is a free-floating trick with no ground.</miss>
             <miss>Darkness is the last word about the world.</miss>
           </sentenceMisses>
           <placePrompt>That question lives at Why Gate.</placePrompt>
           <personPrompt>Ansel keeps that gate.</personPrompt>
-          <ideaPrompt>Ansel’s why — reason needs a real ground.</ideaPrompt>
-          <ideaLabel>Reason needs a real ground.</ideaLabel>
-          <whyHard>Ansel Gate keeps Why Gate. The reason you already trust is not free-floating — John names the Light.</whyHard>
+          <ideaPrompt>Ansel’s why — the mind needs a real ground.</ideaPrompt>
+          <ideaLabel>The mind needs a real ground.</ideaLabel>
+          <whyHard>Ansel Gate keeps Why Gate. The mind you already trust is not free-floating — John names the Light.</whyHard>
         </match>
         <hold onFail="easy">
-          <claim>The reason you already trust needs a real ground.</claim>
+          <claim>The mind you already trust needs a real ground.</claim>
           <reason>The Word is the true light that makes God knowable.</reason>
           <source>John 1:1–9 · Romans 1:19–20</source>
           <whyCorrect>The Word is the true light that makes God knowable.</whyCorrect>
@@ -290,7 +290,7 @@
             <miss>Made things hide God.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>The reason you already trust needs a real ground.</choice>
+            <choice>The mind you already trust needs a real ground.</choice>
             <choice>Reason is a free-floating trick with no ground.</choice>
             <choice>Darkness is the last word about the world.</choice>
           </claimChoices>
@@ -312,12 +312,12 @@
         </sources>
       </journal>
     </lesson>
-    <lesson id="fg-ought" place="Why Gate" person="Ansel Gate" tripleId="ought-gate" ideaId="idea-ought" ideaLabel="Nature cannot ground ought." challengeKind="sort" challengeTitle="Nature alone is not enough">
+    <lesson id="fg-ought" place="Why Gate" person="Ansel Gate" tripleId="ought-gate" ideaId="idea-ought" ideaLabel="Rocks cannot write the law." challengeKind="sort" challengeTitle="Nature alone is not enough">
       <easy points="10" easyOrder="6">
         <learn>
-          <shortStory>You already treat some things as really wrong, not only “I don’t like it.” Rocks and weather do not invent that pull. Finite nature — a changing, limited world — cannot be the ground of ought. Romans says the law is already written on the heart.</shortStory>
-          <mainIdea>Finite nature cannot ground the ought you already trust.</mainIdea>
-          <gloss>Finite nature cannot ground the ought you already trust.</gloss>
+          <shortStory>You already treat some things as really wrong, not only “I don’t like it.” Rocks and weather do not invent that pull. A limited world cannot write that law. Romans says the law is already written on the heart.</shortStory>
+          <mainIdea>Rocks cannot write the law you already trust.</mainIdea>
+          <gloss>Rocks cannot write the law you already trust.</gloss>
           <loci>This idea lives at Why Gate, with Ansel.</loci>
           <word>
             <term>Ought</term>
@@ -326,19 +326,19 @@
           <hint>Keep the law on the heart. Toss nature-as-enough.</hint>
         </learn>
         <match>
-          <sentenceCorrect>Finite nature cannot ground the ought you already trust.</sentenceCorrect>
+          <sentenceCorrect>Rocks cannot write the law you already trust.</sentenceCorrect>
           <sentenceMisses>
             <miss>Rocks and weather write the law on the heart.</miss>
             <miss>Ought is only a mood you can drop.</miss>
           </sentenceMisses>
           <placePrompt>That question lives at Why Gate.</placePrompt>
           <personPrompt>Ansel keeps that gate.</personPrompt>
-          <ideaPrompt>Ansel’s why — nature cannot ground ought.</ideaPrompt>
-          <ideaLabel>Nature cannot ground ought.</ideaLabel>
-          <whyEasy>Ansel keeps Why Gate. Nature cannot ground ought.</whyEasy>
+          <ideaPrompt>Ansel’s why — rocks cannot write the law.</ideaPrompt>
+          <ideaLabel>Rocks cannot write the law.</ideaLabel>
+          <whyEasy>Ansel keeps Why Gate. Rocks cannot write the law.</whyEasy>
         </match>
         <hold levelUpTo="medium" onFail="easy">
-          <claim>Finite nature cannot ground the ought you already trust.</claim>
+          <claim>Rocks cannot write the law you already trust.</claim>
           <reason>A limited world cannot write the law on the heart.</reason>
           <source>Romans 2:14–15</source>
           <whyCorrect>A limited world cannot write the law on the heart.</whyCorrect>
@@ -348,7 +348,7 @@
             <miss>Nature as a pile is enough.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>Finite nature cannot ground the ought you already trust.</choice>
+            <choice>Rocks cannot write the law you already trust.</choice>
             <choice>Rocks and weather write the law on the heart.</choice>
             <choice>Ought is only a mood you can drop.</choice>
           </claimChoices>
@@ -362,8 +362,8 @@
       <medium points="12">
         <learn>
           <mediumTeach>You already trust ought: some things are really wrong. Finite nature cannot be that ground. A changing, limited world does not write a law on the heart. Romans 2:14–15 says the nations already show that law at work. This is not Hope’s later ridge on duty-as-taste. This is Ansel’s step: nature alone is not enough.</mediumTeach>
-          <mainIdea>Finite nature cannot ground the ought you already trust.</mainIdea>
-          <gloss>Finite nature cannot ground the ought you already trust.</gloss>
+          <mainIdea>Rocks cannot write the law you already trust.</mainIdea>
+          <gloss>Rocks cannot write the law you already trust.</gloss>
           <loci>This idea lives at Why Gate, with Ansel.</loci>
           <word>
             <term>Ought</term>
@@ -372,19 +372,19 @@
           <hint>Keep the law on the heart. Toss nature-as-enough.</hint>
         </learn>
         <match>
-          <sentenceCorrect>Finite nature cannot ground the ought you already trust.</sentenceCorrect>
+          <sentenceCorrect>Rocks cannot write the law you already trust.</sentenceCorrect>
           <sentenceMisses>
             <miss>Rocks and weather write the law on the heart.</miss>
             <miss>Ought is only a mood you can drop.</miss>
           </sentenceMisses>
           <placePrompt>That question lives at Why Gate.</placePrompt>
           <personPrompt>Ansel keeps that gate.</personPrompt>
-          <ideaPrompt>Ansel’s why — nature cannot ground ought.</ideaPrompt>
-          <ideaLabel>Nature cannot ground ought.</ideaLabel>
-          <whyMedium>Ansel keeps Why Gate. Nature cannot ground ought.</whyMedium>
+          <ideaPrompt>Ansel’s why — rocks cannot write the law.</ideaPrompt>
+          <ideaLabel>Rocks cannot write the law.</ideaLabel>
+          <whyMedium>Ansel keeps Why Gate. Rocks cannot write the law.</whyMedium>
         </match>
         <hold levelUpTo="hard" onFail="easy">
-          <claim>Finite nature cannot ground the ought you already trust.</claim>
+          <claim>Rocks cannot write the law you already trust.</claim>
           <reason>A limited world cannot write the law on the heart.</reason>
           <source>Romans 2:14–15</source>
           <whyCorrect>A limited world cannot write the law on the heart.</whyCorrect>
@@ -394,7 +394,7 @@
             <miss>Nature as a pile is enough.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>Finite nature cannot ground the ought you already trust.</choice>
+            <choice>Rocks cannot write the law you already trust.</choice>
             <choice>Rocks and weather write the law on the heart.</choice>
             <choice>Ought is only a mood you can drop.</choice>
           </claimChoices>
@@ -414,19 +414,19 @@
           <challengeTiles />
         </learn>
         <match>
-          <sentenceCorrect>Finite nature cannot ground the ought you already trust.</sentenceCorrect>
+          <sentenceCorrect>Rocks cannot write the law you already trust.</sentenceCorrect>
           <sentenceMisses>
             <miss>Rocks and weather write the law on the heart.</miss>
             <miss>Ought is only a mood you can drop.</miss>
           </sentenceMisses>
           <placePrompt>That question lives at Why Gate.</placePrompt>
           <personPrompt>Ansel keeps that gate.</personPrompt>
-          <ideaPrompt>Ansel’s why — nature cannot ground ought.</ideaPrompt>
-          <ideaLabel>Nature cannot ground ought.</ideaLabel>
-          <whyHard>Ansel Gate keeps Why Gate. Finite nature cannot ground the ought you already trust — the law is on the heart.</whyHard>
+          <ideaPrompt>Ansel’s why — rocks cannot write the law.</ideaPrompt>
+          <ideaLabel>Rocks cannot write the law.</ideaLabel>
+          <whyHard>Ansel Gate keeps Why Gate. Rocks cannot write the law you already trust — the law is on the heart.</whyHard>
         </match>
         <hold onFail="easy">
-          <claim>Finite nature cannot ground the ought you already trust.</claim>
+          <claim>Rocks cannot write the law you already trust.</claim>
           <reason>A limited world cannot write the law on the heart.</reason>
           <source>Romans 2:14–15</source>
           <whyCorrect>A limited world cannot write the law on the heart.</whyCorrect>
@@ -436,7 +436,7 @@
             <miss>Nature as a pile is enough.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>Finite nature cannot ground the ought you already trust.</choice>
+            <choice>Rocks cannot write the law you already trust.</choice>
             <choice>Rocks and weather write the law on the heart.</choice>
             <choice>Ought is only a mood you can drop.</choice>
           </claimChoices>

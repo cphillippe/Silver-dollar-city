@@ -8,6 +8,20 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.73',
+    title: 'Clear reasons · Easy core trail',
+    when: '2026-09-16',
+    items: [
+      'Easy held lines are a sayable claim · reason · source: Learn teaches why and from under the main idea; Hold Why Blast lock-in names the source; Journal and the win card keep the three-part line for tomorrow',
+      'Dig deeper Easy takeaways drop skeptic hedges. Women were first to report Jesus’ empty tomb. The churches named the risen Christ close to the events. We weigh named reports of Jesus; we still read them. Creed keep is still died, buried, raised, appeared — the reason now names Christ was buried and seen',
+      'Why Gate Easy claims stay plain: the mind you already trust needs a real ground; rocks cannot write the law you already trust. Order still names Christ. The living God is still the foundation',
+      'Hold Why Blast stays lock-in — Yes — keep this, not a one-more loop. No new quiz chrome',
+      'Night Watch and Town stay hidden on Easy',
+      'Freemium 1.4.66 through One more Match 1.4.72 stay. Soft ads never cover Match, Hold, arcade, or source-dig. Journal ungated. Core Easy free',
+      'Father-run, road-maze, claim-merge, source-dig, Match extras, and Hold Why Blast stay. Place titles stay Story Creek, Witness Square, Sky Watch, Why Gate, Meaning Ridge',
+    ],
+  },
+  {
     version: '1.4.72',
     title: 'Fun one more Match · Easy core trail',
     when: '2026-09-16',
@@ -1544,6 +1558,10 @@ export function latestChange(version: string): ChangeNote {
   const note = CHANGELOG.find((item) => item.version === version) ?? CHANGELOG[0]
   if (!note) {
     return { version, title: 'Easy core trail', when: '', items: [] }
+  }
+  if (note.version === '1.4.73') {
+    const prior = latestChange('1.4.72')
+    return { ...note, items: [...note.items, ...prior.items] }
   }
   if (note.version === '1.4.72') {
     const prior = latestChange('1.4.71')

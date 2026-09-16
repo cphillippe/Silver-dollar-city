@@ -1,8 +1,9 @@
-import { easyFacingLine, isEasy } from '../lib/easy'
+import { EASY, isEasy } from '../lib/easy'
 import { useProgress } from '../store/progress'
 import type { Learning } from '../types'
 import { GemMark } from './GemMark'
 import { DigDeeper } from './DigDeeper'
+import { HeldTriad } from './HeldTriad'
 import { PlainTalk } from './PlainTalk'
 
 interface StoredLineProps {
@@ -10,23 +11,32 @@ interface StoredLineProps {
   when?: string
 }
 
-/** After a win: one spoken claim. Reason and source live in Dig deeper. */
+/** After a win: claim · reason · source kids can say tomorrow. */
 export function StoredLine({ learning, when }: StoredLineProps) {
   const { progress } = useProgress()
   const easy = isEasy(progress)
   return (
     <article className="stored-line is-spoken" aria-label="Stored learning">
-      <p className="eyebrow">Say this out loud</p>
+      <p className="eyebrow">{easy ? EASY.sayTomorrow : 'Say this out loud'}</p>
       {learning.picture ? <GemMark gem={learning.picture} size="md" /> : null}
-      <p className="stored-claim">{easy ? easyFacingLine(learning.id, learning.claim) : learning.claim}</p>
-      {easy ? null : <PlainTalk id={learning.id} />}
-      {easy ? null : (
-        <DigDeeper
+      {easy ? (
+        <HeldTriad
           id={learning.id}
-          compact
-          why={learning.reason}
+          claim={learning.claim}
+          reason={learning.reason}
           source={learning.source}
         />
+      ) : (
+        <>
+          <p className="stored-claim">{learning.claim}</p>
+          <PlainTalk id={learning.id} />
+          <DigDeeper
+            id={learning.id}
+            compact
+            why={learning.reason}
+            source={learning.source}
+          />
+        </>
       )}
       {when ? <p className="quiet">{when}</p> : null}
     </article>
