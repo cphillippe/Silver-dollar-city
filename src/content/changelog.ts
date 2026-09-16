@@ -8,6 +8,19 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.75',
+    title: 'Street Packs earn path · Easy core trail',
+    when: '2026-09-16',
+    items: [
+      'Street Packs checkout is production-shaped: SKU, price, receipt, then the same grant Play Billing will send. Pages still cannot charge. No store money until a real IAP plugin and ad network are live',
+      'Restore re-applies this-device receipts even if unlock flags were wiped. Remove-ads stays off until that receipt is present',
+      'Locked extra streets (Mill Street, Harbor Walk) open a gate with SKU and price. Core Easy 39 facts stay free. Paid ids never skip Mercy',
+      'Soft pause actually fires after leaving Match, Hold, arcade, or source-dig back to Home — and before entering Match from Home. It never mounts over Match, Hold, arcade, source-dig, or Journal',
+      'Night Watch and Town stay hidden on Easy. Journal ungated. Never a hard paywall',
+      'Fun 1.4.66–1.4.72, Clear reasons 1.4.73, and Names that stay 1.4.74 stay. Place titles stay Story Creek, Witness Square, Sky Watch, Why Gate, Meaning Ridge',
+    ],
+  },
+  {
     version: '1.4.74',
     title: 'Names that stay · Easy core trail',
     when: '2026-09-16',
@@ -1571,6 +1584,10 @@ export function latestChange(version: string): ChangeNote {
   const note = CHANGELOG.find((item) => item.version === version) ?? CHANGELOG[0]
   if (!note) {
     return { version, title: 'Easy core trail', when: '', items: [] }
+  }
+  if (note.version === '1.4.75') {
+    const prior = latestChange('1.4.74')
+    return { ...note, items: [...note.items, ...prior.items] }
   }
   if (note.version === '1.4.74') {
     const prior = latestChange('1.4.73')

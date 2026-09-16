@@ -1,9 +1,13 @@
 import { useState } from 'react'
 import { paidStreetForPack } from '../content/paidStreets'
+import { shopPack, packPaywallLine } from '../config/commerce'
 import { localDateKey } from '../lib/dates'
 import { packIsUnlocked } from '../lib/commerce'
+import { packStreetLocked, purchaseOffer, type BillingOffer } from '../lib/billing'
 import { EASY, isEasy } from '../lib/easy'
 import { RecallGate } from './RecallGate'
+import { CheckoutSheet } from './CheckoutSheet'
+import { useCommerce } from './AdSlot'
 import { useProgress } from '../store/progress'
 import type { View } from '../types'
 
@@ -15,9 +19,12 @@ interface PackStreetProps {
 export function PackStreet({ packId, onNavigate }: PackStreetProps) {
   const { progress, recordHeld, recordLessonHold, recordReview } = useProgress()
   const easy = isEasy(progress)
+  const commerce = useCommerce()
   const street = paidStreetForPack(packId)
-  const unlocked = packIsUnlocked(packId)
+  const pack = shopPack(packId)
+  const unlocked = packIsUnlocked(packId, commerce)
   const [phase, setPhase] = useState<'learn' | 'hold'>('learn')
+  const [checkout, setCheckout] = useState<BillingOffer | null>(null)
 
   if (!street) {
     return (
@@ -32,18 +39,48 @@ export function PackStreet({ packId, onNavigate }: PackStreetProps) {
 
   if (!unlocked) {
     return (
-      <main className="pack-street page">
+      <main className="pack-street page is-locked" aria-label={street.place}>
         <button type="button" className="text-link" onClick={() => onNavigate({ name: 'shop' })}>
           ← Street Packs
         </button>
         <header className="page-head">
-          <p className="eyebrow">{street.place}</p>
+          <p className="eyebrow">{street.place} · locked</p>
           <h1>{street.title}</h1>
-          <p>This street is extra. The core Easy trail stays free — never a paywall on Mercy, Match, or Hold.</p>
+          <p>
+            This street is extra. The core Easy trail stays free — never a paywall on Mercy,
+            Match, or Hold.
+          </p>
+          <p className="quiet">{packPaywallLine(street.place)}</p>
+          {pack ? (
+            <p className="teach-chip" role="note">
+              {pack.priceLabel} · {pack.sku}
+            </p>
+          ) : null}
         </header>
-        <button type="button" className="btn gold xl" onClick={() => onNavigate({ name: 'shop' })}>
-          Unlock in Street Packs
+        <button
+          type="button"
+          className="btn gold xl"
+          onClick={() => setCheckout({ kind: 'pack', packId })}
+        >
+          Unlock {street.place}
+          {pack ? ` · ${pack.priceLabel}` : ''}
         </button>
+        <button type="button" className="btn" onClick={() => onNavigate({ name: 'shop' })}>
+          Street Packs
+        </button>
+        {checkout ? (
+          <CheckoutSheet
+            offer={checkout}
+            onConfirm={() => {
+              const result = purchaseOffer(checkout)
+              setCheckout(null)
+              if (result.status === 'purchased' || result.status === 'already') {
+                if (!packStreetLocked(packId, result.commerce)) setPhase('learn')
+              }
+            }}
+            onCancel={() => setCheckout(null)}
+          />
+        ) : null}
       </main>
     )
   }
