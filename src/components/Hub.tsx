@@ -77,9 +77,11 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
                 ? EASY.runHome
                 : storyPlayFor(loopId) === 'road-maze'
                   ? EASY.mazeHome
-                  : coldMercy
-                    ? 'Find Mercy’s story at Story Creek.'
-                    : 'Find the gems. The story opens as you play.'}
+                  : storyPlayFor(loopId) === 'claim-merge'
+                    ? EASY.mergeHome
+                    : coldMercy
+                      ? 'Find Mercy’s story at Story Creek.'
+                      : 'Find the gems. The story opens as you play.'}
           </p>
         </header>
         <nav className="easy-core" aria-label="Play">
@@ -92,7 +94,9 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
               ? EASY.runMatch
               : storyPlayFor(loopId) === 'road-maze'
                 ? EASY.mazeMatch
-                : EASY.matchCta}
+                : storyPlayFor(loopId) === 'claim-merge'
+                  ? EASY.mergeMatch
+                  : EASY.matchCta}
           </button>
           <button
             type="button"

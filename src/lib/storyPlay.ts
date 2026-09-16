@@ -1,3 +1,4 @@
+import { CLAIM_MERGE_LINE } from './claimMerge.ts'
 import { FATHER_RUN_LINE } from './fatherRun.ts'
 import { gemWordsFor } from './gemSearch.ts'
 import { ROAD_MAZE_LINE } from './roadMaze.ts'
@@ -6,10 +7,10 @@ import { storyPanelsFor, type StoryPanel } from './storyPanels.ts'
 /**
  * How this lesson is *played*. Same shell always: teach beats → play → Hold.
  * ph-father is the hold-to-run timing dash. ph-road is the Samaritan collect maze.
- * Other Easy lessons stay panel-blast so gem extras (Gap, +100) keep working.
- * Queued later (do not mount): claim-merge, story-night TD.
+ * wb-creed is the candy merge bowl (Suika). Other Easy lessons stay panel-blast
+ * so gem extras (Gap, +100) keep working. Queued later (do not mount): story-night TD.
  */
-export type StoryPlayKind = 'panel-blast' | 'father-run' | 'road-maze'
+export type StoryPlayKind = 'panel-blast' | 'father-run' | 'road-maze' | 'claim-merge'
 
 export interface LessonStory {
   lineId: string
@@ -21,6 +22,7 @@ export interface LessonStory {
 export function storyPlayFor(lineId: string): StoryPlayKind {
   if (lineId === FATHER_RUN_LINE) return 'father-run'
   if (lineId === ROAD_MAZE_LINE) return 'road-maze'
+  if (lineId === CLAIM_MERGE_LINE) return 'claim-merge'
   return 'panel-blast'
 }
 

@@ -9,7 +9,7 @@ interface LearnScreenProps {
   onNavigate: (view: View) => void
 }
 
-/** Easy re-read: unboxed short story. Match play (panel blast / father-run) is the teach. */
+/** Easy re-read: unboxed short story. Match play (panel blast / father-run / merge) is the teach. */
 export function LearnScreen({ onNavigate }: LearnScreenProps) {
   const { progress } = useProgress()
   const easy = isEasy(progress)
