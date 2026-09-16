@@ -175,6 +175,13 @@ assert.match(playSrc, /merge-drop-chip/)
 assert.match(playSrc, /merge-ghost is-loud/)
 assert.match(playSrc, /Smash the Died pair/)
 assert.match(playSrc, /WinBurst play=\{view\.won\}/)
+const mergeCss = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
+assert.match(mergeCss, /merge-drop-chip/)
+assert.match(
+  mergeCss,
+  /\.play\.is-claim-merge \.win-stamp-wrap[\s\S]{0,280}transform:\s*translateX\(-50%\)/,
+  'MERGED! stamp stays centered in the bowl, not shifted off the left rim',
+)
 assert.match(playSrc, /One more bowl/)
 assert.match(playSrc, /btn primary xl snap-bins/)
 assert.ok(
