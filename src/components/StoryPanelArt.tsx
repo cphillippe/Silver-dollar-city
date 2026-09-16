@@ -24,7 +24,15 @@ const PANEL_ART: Partial<Record<StoryScene, string>> = {
   feast: panelHug,
 }
 
-export function StoryPanelArt({ scene, media }: { scene: StoryScene; media?: StoryMediaSlot }) {
+export function StoryPanelArt({
+  scene,
+  media,
+  size = 'hero',
+}: {
+  scene: StoryScene
+  media?: StoryMediaSlot
+  size?: 'hero' | 'thumb'
+}) {
   const resolved = resolveStoryMedia(media)
   if (resolved.loop) {
     return (
@@ -40,7 +48,8 @@ export function StoryPanelArt({ scene, media }: { scene: StoryScene; media?: Sto
       />
     )
   }
-  const painted = resolved.still || PANEL_ART[scene]
+  const painted =
+    (size === 'thumb' ? resolved.thumb : undefined) || resolved.still || PANEL_ART[scene]
   if (painted) {
     return <img className="story-art-tile" src={painted} alt="" draggable={false} />
   }
