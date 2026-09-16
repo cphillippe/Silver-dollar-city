@@ -1,9 +1,10 @@
 /**
  * Freemium SKUs and shop copy.
  *
- * Play Billing adapter (`src/lib/iapAdapter.ts`):
- * 1. One-time: add a Play Billing Capacitor plugin, set VITE_PLAY_BILLING=1.
- * 2. Product IDs below must match Play Console. Do not rename without a migration.
+ * StoreKit + Play Billing adapters (`src/lib/iapAdapter.ts`):
+ * 1. One-time: add the store plugin, set VITE_PLAY_BILLING=1 (Android) or
+ *    VITE_STOREKIT=1 (iOS). Same SKUs. Same grantRemoveAds / grantPack.
+ * 2. Product IDs below must match Play Console and App Store Connect.
  * 3. On purchase or restore success, call `grantRemoveAds()` or `grantPack(id)`
  *    — CheckoutSheet / checkoutOffer already do that. Do not add a second gate.
  * 4. Core Easy trail (Learn → play → Hold, 39 facts) ignores these flags except

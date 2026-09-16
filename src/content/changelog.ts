@@ -8,6 +8,18 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.79',
+    title: 'iOS + Android dual path · Easy core trail',
+    when: '2026-09-16',
+    items: [
+      'Capacitor iOS sits beside Android: same SKUs, same grantRemoveAds / grantPack, StoreKit flag VITE_STOREKIT next to VITE_PLAY_BILLING. Pages still cannot charge',
+      'AdMob interstitial prefers VITE_ADMOB_*_IOS on iPhone. Soft pause still never covers Match, Hold, arcade, source-dig, or Journal',
+      'ios:sync / android:sync rebuild the web shell into the native projects. Linux copy-falls-back when CocoaPods is missing',
+      'Night Watch and Town stay hidden on Easy. Journal ungated. Core Easy 39 facts stay free. Never a hard paywall',
+      'Get/her, mercy maze, run timing, and Settings Debug jumps from 1.4.78 stay. Place titles stay Story Creek, Witness Square, Sky Watch, Why Gate, Meaning Ridge',
+    ],
+  },
+  {
     version: '1.4.78',
     title: 'Get, her, the road, and the run · Easy core trail',
     when: '2026-09-16',
@@ -1625,6 +1637,10 @@ export function latestChange(version: string): ChangeNote {
   const note = CHANGELOG.find((item) => item.version === version) ?? CHANGELOG[0]
   if (!note) {
     return { version, title: 'Easy core trail', when: '', items: [] }
+  }
+  if (note.version === '1.4.79') {
+    const prior = latestChange('1.4.78')
+    return { ...note, items: [...note.items, ...prior.items] }
   }
   if (note.version === '1.4.78') {
     const prior = latestChange('1.4.77')

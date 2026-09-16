@@ -1,11 +1,13 @@
 /**
- * Play Billing adapter. Uses a Capacitor plugin when present + VITE_PLAY_BILLING.
- * Pages and this APK stay on the cannotCharge demo until both are set.
- * Grants still go through grantRemoveAds / grantPack — never a second gate.
+ * StoreKit (iOS) + Play Billing (Android) adapter.
+ * Uses a Capacitor plugin when present + the matching env flag
+ * (VITE_STOREKIT / VITE_PLAY_BILLING). Pages and this APK/IPA stay on the
+ * cannotCharge demo until both are set. Grants still go through
+ * grantRemoveAds / grantPack — never a second gate.
  */
 
 import { storeFlags } from '../config/store.ts'
-import { billingSurface } from './commerce.ts'
+import { storeSurface } from './nativeStore.ts'
 
 export interface StorePurchase {
   sku: string
@@ -55,7 +57,12 @@ function capacitorPlugin(): BillingPlugin | undefined {
   ).Capacitor
   const plugins = cap?.Plugins
   if (!plugins) return undefined
-  const candidate = plugins.InAppPurchases ?? plugins.Billing ?? plugins.CdvPurchase
+  const candidate =
+    plugins.InAppPurchases ??
+    plugins.StoreKit ??
+    plugins.Billing ??
+    plugins.CdvPurchase ??
+    plugins.IAP
   return isPlugin(candidate) ? candidate : undefined
 }
 
@@ -64,19 +71,34 @@ export function readBillingPlugin(): BillingPlugin | undefined {
   return capacitorPlugin()
 }
 
-/** Plugin + config present. Native Play or a test double. Not store money by itself. */
+function iapFlagOn(): boolean {
+  const flags = storeFlags()
+  const surface = storeSurface()
+  if (surface === 'play') return flags.playBilling
+  if (surface === 'app-store') return flags.storeKit
+  if (injected) return flags.playBilling || flags.storeKit
+  return false
+}
+
+/** Plugin + matching store flag. Native Play / StoreKit or a test double. Not store money by itself. */
 export function iapCanCharge(): boolean {
-  if (!storeFlags().playBilling) return false
+  if (!iapFlagOn()) return false
   if (!readBillingPlugin()) return false
   if (injected) return true
-  return billingSurface() === 'play'
+  const surface = storeSurface()
+  return surface === 'play' || surface === 'app-store'
 }
 
 export function isCancelError(error: unknown): boolean {
   if (!error || typeof error !== 'object') return false
   const value = error as { status?: unknown; code?: unknown; message?: unknown }
   const blob = `${String(value.status ?? '')} ${String(value.code ?? '')} ${String(value.message ?? '')}`.toLowerCase()
-  return blob.includes('cancel') || blob.includes('user_canceled')
+  return (
+    blob.includes('cancel') ||
+    blob.includes('user_canceled') ||
+    blob.includes('paymentcancelled') ||
+    blob.includes('skerrorpaymentcancelled')
+  )
 }
 
 export async function pluginPurchase(sku: string): Promise<StorePurchase> {
