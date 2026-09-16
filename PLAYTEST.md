@@ -16,7 +16,7 @@ Run before a public URL or APK drop. Do not skip the retention chrome.
 2. Hub: “Progress saved on this device”. Settings → Export JSON, copy share code, Import pasted code (use a second browser profile or reset+import). Stars/journal/Daily survive.
 3. Two Story Creek walks unlock Witness Square. Star key readable: `1★ first walk · 2★ held after a rest · 3★ held and said back`.
 4. Journal: no What’s-next footer; due cards + takeaway copy at the top when a line is due.
-5. Settings → Show placeholders: hub banner and between-districts appear; Trail/Journal still have no ad over Keep/Toss or the takeaway. Hide slots again for playtest.
+5. Settings → Support the trail: Packs shop lists Core Easy (free) plus extra streets; Remove ads / Restore. Tap Match from Easy home: a dismissible between-scene pause may appear — Continue, then Match/Hold/arcade have no overlay. Journal still opens from the nav. Hide pauses in Settings → More is playtest-only.
 6. Reload / Android APK: same save key; version in Settings matches `package.json`.
 7. `npm test` and `npm run android:apk`.
 

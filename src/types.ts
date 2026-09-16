@@ -334,3 +334,5 @@ export type View =
   | { name: 'link' }
   | { name: 'learn' }
   | { name: 'profile' }
+  | { name: 'shop' }
+  | { name: 'pack-street'; packId: string }

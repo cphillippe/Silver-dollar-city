@@ -19,18 +19,19 @@ export const BOWL_HEIGHT = 520
 export const BOWL_WALL = 10
 export const DANGER_Y = 72
 
-export const GRAVITY = 2400
-export const RESTITUTION = 0.16
-export const FLOOR_FRICTION = 0.82
-export const AIR_DRAG = 0.995
-export const MAX_SPEED = 1600
-export const REST_SPEED = 28
-export const MERGE_GAP = 0.9
-export const MERGE_ARM_MS = 90
-export const COMBO_WINDOW_MS = 520
-export const OVERFLOW_HOLD_MS = 900
+export const GRAVITY = 2800
+export const RESTITUTION = 0.18
+export const FLOOR_FRICTION = 0.78
+export const AIR_DRAG = 0.994
+export const MAX_SPEED = 1800
+export const REST_SPEED = 32
+export const MERGE_GAP = 1.05
+export const MERGE_ARM_MS = 48
+export const COMBO_WINDOW_MS = 820
+export const OVERFLOW_HOLD_MS = 700
 export const WIN_RANK = 4
 export const MAX_DROP_RANK = 2
+export const DROP_VY = 260
 
 export interface MergeSkin {
   rank: number
@@ -210,7 +211,7 @@ export function dropNext(state: MergeState, now: number): MergeState {
   const x = clampAim(state.aimX, skin.radius)
   const ball = makeBall(state.nextId, state.nextRank, x, skin.radius + 8, now, {
     dropping: true,
-    vy: 40,
+    vy: DROP_VY,
   })
   const draw = drawNext(state.rng)
   return {

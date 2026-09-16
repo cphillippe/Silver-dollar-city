@@ -6,12 +6,14 @@ import { LOT_STORY } from '../content/lots'
 import { localDateKey } from '../lib/dates'
 import { CITY_PLOTS, nextPlotId, type CityPlotId } from '../lib/city'
 import { lotTapWhy } from '../lib/cityBuild'
+import { extraStreetPacks } from '../content/paidStreets'
+import { packIsUnlocked } from '../lib/commerce'
 import { EASY, EASY_MATCH_LINE, easyHomeFocus, easyHoldView, easyLineHeld, easyLoopLine, easyMatchReady, isEasy } from '../lib/easy'
 import { storyPlayFor } from '../lib/storyPlay'
 import { markLater, readLater, sessionDue } from '../lib/recall'
 import { Avatar } from './Avatar'
 import { ShareInvite } from './ShareInvite'
-import { AdSlot } from './AdSlot'
+import { useCommerce } from './AdSlot'
 import { CityMap } from './CityMap'
 import { AbilityMark } from './GemMark'
 import { unlockedWatchAbilities } from '../lib/defend'
@@ -46,6 +48,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
   const nextId = nextPlotId(progress, doneToday)
   const watchOpen = unlockedWatchAbilities(progress)
   const easy = isEasy(progress)
+  const commerce = useCommerce()
   const streetDone = streetIsComplete(progress)
   const streetLinked = progress.streetLinked ?? []
   const tonight = nextStreetWalk(streetLinked)
@@ -116,6 +119,34 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
             {EASY.readStory}
           </button>
         </nav>
+        <section className="easy-extra-streets" aria-label="Extra streets">
+          <p className="eyebrow">{EASY.packs}</p>
+          {extraStreetPacks().map((pack) => {
+            const open = packIsUnlocked(pack.id, commerce)
+            return (
+              <button
+                key={pack.id}
+                type="button"
+                className="btn"
+                onClick={() =>
+                  onNavigate(
+                    open ? { name: 'pack-street', packId: pack.id } : { name: 'shop' },
+                  )
+                }
+              >
+                {open ? pack.street : `${pack.street} · ${pack.priceLabel}`}
+              </button>
+            )
+          })}
+        </section>
+        <div className="easy-soon">
+        <button
+          type="button"
+          className="text-link"
+          onClick={() => onNavigate({ name: 'shop' })}
+        >
+          {EASY.supportTrail}
+        </button>
         <button
           type="button"
           className="text-link town-soon"
@@ -123,6 +154,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
         >
           {EASY.townSoon}
         </button>
+        </div>
       </main>
     )
   }
@@ -289,6 +321,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
           {easy ? EASY.matchCta : 'Link the street'}
         </button>
         {easy ? null : (
+        <>
         <button
           type="button"
           className="btn tiny"
@@ -296,6 +329,14 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
         >
           Profile
         </button>
+        <button
+          type="button"
+          className="btn tiny"
+          onClick={() => onNavigate({ name: 'shop' })}
+        >
+          Support the trail
+        </button>
+        </>
         )}
       </nav>
 
@@ -339,8 +380,6 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
         </button>
       </section>
       )}
-
-      {easy ? null : <AdSlot slot="hub-banner" />}
 
       {easy ? null : (
       <details className="street-drawer">
@@ -440,8 +479,6 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
         {(progress.completed.length > 0 || doneToday) && <ShareInvite compact />}
       </details>
       )}
-
-      {easy ? null : <AdSlot slot="between-districts" />}
 
       {easy || goal.kind !== 'vista' ? null : (
         <button

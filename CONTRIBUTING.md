@@ -15,7 +15,11 @@ Saves stay **offline-first** on this device. Players move devices with **Export 
 
 ## Ads
 
-`src/config/ads.ts` — `adsEnabledDefault` is **false** for playtest. Placeholders never mount on Keep/Toss, the takeaway step, or Journal. See README → Ads.
+`src/config/ads.ts` — live network flag `adsEnabledDefault` is **false**. Soft pauses default on between home and a lesson until Remove ads is granted. Never mount over Keep/Toss, Match, Hold, arcade play, or Journal. See README → Ads.
+
+## Freemium
+
+`src/config/commerce.ts` + `src/lib/commerce.ts` — `grantRemoveAds()` / `grantPack(id)` are the only unlock flags. Web Shop is an honest stub. Play Billing should call those same functions.
 
 ## Android
 

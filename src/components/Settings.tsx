@@ -3,6 +3,7 @@ import { APP_ID, APP_VERSION, SAVE_SCHEMA_VERSION } from '../config/app'
 import { CHANGELOG, latestChange } from '../content/changelog'
 import {
   adsEnabledDefault,
+  softAdsVisible,
   writeAdsPref,
   type AdsPref,
 } from '../config/ads'
@@ -133,6 +134,28 @@ export function Settings({ onNavigate }: SettingsProps) {
         <h1>Progress & support</h1>
         <p>{savedLabel}</p>
       </header>
+
+      <section className="settings-card" aria-label="Support the trail">
+        <p className="eyebrow">{easy ? EASY.supportTrail : 'Support the trail'}</p>
+        <h2>{easy ? EASY.supportTrail : 'Support the trail'}</h2>
+        <p>
+          The Easy trail stays free. Soft pauses sit between home and a lesson —
+          never over Match, Hold, or arcade play, and never on Journal. Packs
+          unlock extra streets only.
+        </p>
+        <div className="settings-actions">
+          <button
+            type="button"
+            className="btn gold"
+            onClick={() => onNavigate({ name: 'shop' })}
+          >
+            {easy ? EASY.removeAds : 'Remove ads'} / {easy ? EASY.packs : 'Packs'}
+          </button>
+          <button type="button" className="btn primary" onClick={() => onNavigate({ name: 'shop' })}>
+            {easy ? EASY.supportTrail : 'Support the trail'}
+          </button>
+        </div>
+      </section>
 
       <section className="settings-card">
         <p className="eyebrow">Reading</p>
@@ -347,32 +370,33 @@ export function Settings({ onNavigate }: SettingsProps) {
       </section>
 
       <section className="settings-card">
-        <p className="eyebrow">Ad placeholders</p>
+        <p className="eyebrow">Between-scene pauses</p>
         <p>
-          Playtest default is off. Placeholders are labeled slots for a later
-          network — they never cover Keep/Toss, the takeaway step, or{' '}
-          {easy ? EASY.saved : 'Journal'}.
+          Unpaid walks may see a dismissible pause between home and a lesson.
+          They never cover Match, Hold, Journal, or arcade play. Remove ads in
+          Packs is the supporter path; this toggle is a this-device hide for
+          playtest.
         </p>
         {easy ? null : (
           <p className="quiet">
-            Product flag <code>adsEnabled</code> is {adsEnabledDefault ? 'on' : 'off'}{' '}
-            in config. This toggle is a this-device override.
+            Live ad-network flag is {adsEnabledDefault ? 'on' : 'off'}. Soft
+            pauses default on until Remove ads is granted.
           </p>
         )}
         <div className="settings-actions">
           <button
             type="button"
-            className={`btn ${adsPref === 'off' || (adsPref === 'default' && !adsEnabledDefault) ? 'primary' : ''}`}
+            className={`btn ${adsPref === 'off' || !adsAreOn(adsPref) ? 'primary' : ''}`}
             onClick={() => setAds('off')}
           >
-            Hide slots
+            Hide pauses
           </button>
           <button
             type="button"
             className={`btn ${adsAreOn(adsPref) ? 'gold' : ''}`}
             onClick={() => setAds('on')}
           >
-            Show placeholders
+            Show pauses
           </button>
         </div>
       </section>
@@ -396,9 +420,7 @@ export function Settings({ onNavigate }: SettingsProps) {
 }
 
 function adsAreOn(pref: AdsPref) {
-  if (pref === 'on') return true
-  if (pref === 'off') return false
-  return adsEnabledDefault
+  return softAdsVisible(pref)
 }
 
 function themeLabel(theme: AppTheme) {
