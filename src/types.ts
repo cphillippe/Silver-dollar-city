@@ -331,7 +331,7 @@ export type View =
   | { name: 'vista' }
   | { name: 'settings' }
   | { name: 'defend' }
-  | { name: 'link' }
+  | { name: 'link'; debugLine?: string }
   | { name: 'learn' }
   | { name: 'profile' }
   | { name: 'shop' }

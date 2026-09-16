@@ -55,7 +55,7 @@ npm run preview
 
 `vite preview` listens on **127.0.0.1**. Do not tunnel `vite --host` (unbound / `0.0.0.0`) or the Vite **dev** server. A playtest tunnel should front `vite preview` or the `docs/` build only.
 
-Progress is stored **offline-first on this device** (versioned save, same localStorage key). Open **Settings** for Export / Import. **Profile** (Town tools or Settings) lists every unlock. **Reset progress** lives only in Settings → Danger zone and asks before it wipes the save.
+Progress is stored **offline-first on this device** (versioned save, same localStorage key). Open **Settings** for Export / Import. **Profile** (Town tools or Settings) lists every unlock. **Reset progress** lives only in Settings → Danger zone and asks before it wipes the save. **Developer · mini-game jumps** is the same burial: one-tap every Easy play (lesson id + short name). Not on Easy home.
 
 Installable as a PWA (Add to Home Screen) after a production build, or as an Android debug APK (below).
 

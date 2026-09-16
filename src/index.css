@@ -882,6 +882,14 @@ p {
   overflow: auto;
 }
 
+.challenge-page.is-puzzle .play.is-road-maze {
+  overflow: hidden;
+}
+
+.challenge-page.is-puzzle .play.is-road-maze.is-win {
+  overflow: auto;
+}
+
 .daily-page.is-puzzle .play.is-win,
 .challenge-page.is-puzzle .play.is-win {
   overflow: visible;
@@ -5086,6 +5094,16 @@ html[data-theme='dusk'] .hub.is-town .street-link {
   margin-top: 10px;
 }
 
+.settings-debug .settings-debug-group .settings-actions {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.settings-debug .settings-debug-group .btn {
+  margin-top: 0;
+  text-align: left;
+}
+
 .settings-flat {
   display: contents;
 }
@@ -9115,10 +9133,17 @@ html[data-easy='on'] .next-tap {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   width: min(100%, 390px);
   margin: 0 auto;
   min-height: 0;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+}
+
+.play.is-road-maze.is-win {
+  overflow: auto;
 }
 
 .play.is-road-maze .sort-how {
@@ -9126,7 +9151,7 @@ html[data-easy='on'] .next-tap {
   text-align: center;
 }
 
-.maze-kit {
+.maze-beats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
@@ -9135,28 +9160,35 @@ html[data-easy='on'] .next-tap {
   list-style: none;
 }
 
-.maze-kit-item {
+.maze-beat {
   display: grid;
   justify-items: center;
   gap: 2px;
-  padding: 6px 4px;
+  padding: 5px 4px 4px;
   border-radius: 12px;
   background: rgba(18, 6, 46, 0.45);
   color: #fff6e8;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 750;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
-  opacity: 0.55;
+  opacity: 0.5;
 }
 
-.maze-kit-item.is-got {
+.maze-beat.is-got {
   opacity: 1;
   background: rgba(255, 204, 51, 0.22);
   box-shadow: 0 0 0 1.5px rgba(255, 230, 140, 0.7);
 }
 
-.maze-kit-item.is-pop {
+.maze-beat.is-now {
+  opacity: 1;
+  box-shadow:
+    0 0 0 2px rgba(255, 204, 51, 0.95),
+    0 0 12px rgba(255, 204, 51, 0.35);
+}
+
+.maze-beat.is-pop {
   animation: maze-kit-pop 0.42s cubic-bezier(0.12, 1.45, 0.28, 1);
 }
 
@@ -9166,27 +9198,52 @@ html[data-easy='on'] .next-tap {
   100% { transform: scale(1); }
 }
 
-.maze-kit-icon {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
+.maze-beat-face {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 2px 0 rgba(80, 20, 40, 0.28);
 }
 
-.maze-kit-item.is-oil .maze-kit-icon,
-.maze-drop.is-oil {
-  background: radial-gradient(circle at 35% 30%, #fff6b8, #ff9f1a 55%, #c46810);
+.maze-beat-inn {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px 8px 6px 6px;
+  background: linear-gradient(180deg, #ff8aa3, #c01840);
+  clip-path: polygon(50% 0, 100% 32%, 100% 100%, 0 100%, 0 32%);
 }
 
-.maze-kit-item.is-cloth .maze-kit-icon,
-.maze-drop.is-cloth {
-  background: linear-gradient(180deg, #fffce8, #7dffb0 70%, #148a48);
-  border-radius: 4px;
+.maze-stage {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: min(100%, 390px);
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.maze-kit-item.is-coin .maze-kit-icon,
-.maze-drop.is-coin {
-  background: radial-gradient(circle at 35% 30%, #fffce8, #ffcc33 50%, #e09412);
-  box-shadow: inset 0 0 0 2px #c4922a;
+.play.is-road-maze .maze-stage .match-toast,
+.play.is-road-maze .maze-stage .bonus-plus,
+.play.is-road-maze .maze-stage .maze-combo {
+  position: absolute;
+  left: 50%;
+  z-index: 8;
+  margin: 0;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.play.is-road-maze .maze-stage .match-toast {
+  top: 10%;
+  width: min(92%, 240px);
+}
+
+.play.is-road-maze .maze-stage .bonus-plus,
+.play.is-road-maze .maze-stage .maze-combo {
+  top: 38%;
 }
 
 .maze-board {
@@ -9195,7 +9252,10 @@ html[data-easy='on'] .next-tap {
   grid-template-columns: repeat(var(--maze-cols, 5), minmax(0, 1fr));
   grid-template-rows: repeat(var(--maze-rows, 7), minmax(0, 1fr));
   gap: 4px;
-  width: min(100%, 390px);
+  width: min(100%, 340px, calc(48dvh * 5 / 7));
+  height: auto;
+  max-height: min(48dvh, 420px);
+  aspect-ratio: 5 / 7;
   margin: 0 auto;
   padding: 8px;
   border-radius: 18px;
@@ -9205,7 +9265,7 @@ html[data-easy='on'] .next-tap {
   box-shadow:
     inset 0 1px 0 rgba(255, 246, 232, 0.18),
     0 10px 28px rgba(20, 4, 48, 0.45);
-  touch-action: none;
+  touch-action: pan-y;
   user-select: none;
 }
 
@@ -9219,10 +9279,16 @@ html[data-easy='on'] .next-tap {
   overflow: hidden;
 }
 
+.play.is-road-maze .maze-cell {
+  aspect-ratio: auto;
+  height: 100%;
+}
+
 .maze-cell.is-rock {
   background: linear-gradient(180deg, #4a2468, #24103a);
   box-shadow: inset 0 0 0 1px rgba(255, 90, 122, 0.18);
   cursor: default;
+  touch-action: pan-y;
 }
 
 .maze-cell.is-road {
@@ -9231,6 +9297,7 @@ html[data-easy='on'] .next-tap {
     0 3px 0 #8a5a22,
     inset 0 2px 0 rgba(255, 255, 255, 0.55);
   cursor: pointer;
+  touch-action: none;
 }
 
 .maze-cell.is-hint {
@@ -9263,6 +9330,41 @@ html[data-easy='on'] .next-tap {
   height: 100%;
   object-fit: cover;
   border-radius: 28%;
+}
+
+.maze-cell.is-hurt,
+.maze-cell.is-inn {
+  overflow: visible;
+}
+
+.maze-cell-label {
+  position: absolute;
+  left: 50%;
+  bottom: 3px;
+  z-index: 2;
+  transform: translateX(-50%);
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: rgba(18, 6, 46, 0.82);
+  color: #fff6e8;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  line-height: 1.2;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.maze-cell.is-help-cue .maze-cell-label {
+  background: #ffcc33;
+  color: #2a0d58;
+  box-shadow: 0 0 10px rgba(255, 204, 51, 0.55);
+}
+
+.maze-actor.is-hurt.is-with-you {
+  inset: auto 4% 28% auto;
+  width: 42%;
+  height: 42%;
 }
 
 .maze-drop {
@@ -10051,9 +10153,19 @@ html[data-easy='on'] .next-tap {
 
 @media (max-width: 420px) {
   .maze-board {
-    width: min(100%, 390px);
+    width: min(100%, calc(44dvh * 5 / 7));
+    max-height: min(44dvh, 380px);
     gap: 3px;
     padding: 6px;
+  }
+
+  .play.is-road-maze .story-caption {
+    min-height: 0;
+    font-size: 0.9rem;
+  }
+
+  .play.is-road-maze .run-thumb {
+    max-height: 40px;
   }
 }
 
@@ -10070,7 +10182,7 @@ html[data-easy='on'] .next-tap {
   .gem-combo,
   .play.is-road-maze.is-shake .maze-board,
   .maze-drop,
-  .maze-kit-item.is-pop,
+  .maze-beat.is-pop,
   .maze-cell.is-pop .maze-shard,
   .maze-cell.is-pop .maze-burst,
   .play.is-claim-merge.is-shake .merge-bowl,

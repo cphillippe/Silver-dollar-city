@@ -20,6 +20,8 @@ interface PuzzlePlayProps {
   onPeek?: () => void
   onEasyStop?: (dest: 'hold' | 'home') => void
   streetBeat?: { place: string; linkedAfter: number; total: number; left: number }
+  /** Settings Debug jump — play this line instead of the open Easy loop. */
+  lineId?: string
 }
 
 export function PuzzlePlay({
@@ -29,6 +31,7 @@ export function PuzzlePlay({
   onPeek,
   onEasyStop,
   streetBeat,
+  lineId,
 }: PuzzlePlayProps) {
   const { progress } = useProgress()
   if (challenge.kind === 'sort') {
@@ -62,8 +65,8 @@ export function PuzzlePlay({
     )
   }
   if (challenge.kind === 'link') {
-    if (isEasy(progress)) {
-      const story = lessonStory(easyMatchLine(progress))
+    if (isEasy(progress) || lineId) {
+      const story = lessonStory(lineId ?? easyMatchLine(progress))
       switch (story.play) {
         case 'father-run':
           return (

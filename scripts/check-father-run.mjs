@@ -19,8 +19,10 @@ import {
   FATHER_RUN_LINE,
   FATHER_RUN_WIN,
   HIRED_HAND_SPEECH,
+  HOLD_CAP,
   holdStep,
   hugBeforeSpeech,
+  MIN_DASHES_TO_HUG,
   MIN_START_GAP,
   RETRY_CLOSER,
   runOutcome,
@@ -29,6 +31,8 @@ import {
   speechFinished,
   speechIndexAt,
   speechPhraseAt,
+  STALL_AFTER_MS,
+  stumbleIfHeldThrough,
 } from '../src/lib/fatherRun.ts'
 import { lessonStory, storyPlayFor } from '../src/lib/storyPlay.ts'
 import { gemWordsFor } from '../src/lib/gemSearch.ts'
@@ -75,9 +79,35 @@ assert.equal(fatherReached(0.99), false)
 
 assert.equal(holdStep(0, 1, false), 0)
 assert.ok(holdStep(0, 1, true) > 0)
-assert.equal(holdStep(0.95, 10, true), 1)
+assert.ok(holdStep(0, 20, true) <= HOLD_CAP + 1e-9, 'sit-forever cannot crawl past the cap')
 assert.equal(applyDash(0.5), 0.5 + DASH_BOOST)
 assert.equal(applyDash(0.95), 1)
+assert.equal(MIN_DASHES_TO_HUG, 2)
+
+const holdForever = holdStep(0, speechDurationMs() / 1000, true, false, speechDurationMs())
+assert.ok(holdForever < 1, 'hold-only first try should miss — dash is the juice')
+assert.ok(holdForever <= HOLD_CAP + 1e-9)
+const holdRetry = holdStep(fatherStartProgress(8), speechDurationMs() / 1000, true, false, speechDurationMs())
+assert.ok(holdRetry < 1, 'retries still cannot sit-to-hug')
+assert.equal(hugBeforeSpeech(1, speechDurationMs() - 1, 0), false, 'a hug still needs timed presses')
+assert.equal(hugBeforeSpeech(1, speechDurationMs() - 1, MIN_DASHES_TO_HUG), true)
+const skilled = applyDash(applyDash(HOLD_CAP))
+assert.ok(skilled >= 1)
+assert.ok(hugBeforeSpeech(Math.min(1, skilled), speechDurationMs() - 1, MIN_DASHES_TO_HUG))
+assert.equal(
+  stumbleIfHeldThrough(0.5, true, false, true, false) < 0.5,
+  true,
+  'holding through a glow without a fresh press stumbles',
+)
+assert.equal(stumbleIfHeldThrough(0.5, true, false, true, true), 0.5)
+assert.ok(STALL_AFTER_MS > 0)
+
+assert.equal(hugBeforeSpeech(1, speechDurationMs()), false)
+assert.equal(hugBeforeSpeech(0.8, speechDurationMs() - 1, 2), false)
+assert.equal(runOutcome(1, speechDurationMs() - 40, MIN_DASHES_TO_HUG), 'hug')
+assert.equal(runOutcome(1, speechDurationMs() - 40, 0), 'run')
+assert.equal(runOutcome(0.7, speechDurationMs(), 2), 'miss')
+assert.equal(runOutcome(0.4, 800, 0), 'run')
 
 const earlyDash = dashPhase(100)
 assert.equal(earlyDash.inWindow, false)
@@ -89,17 +119,20 @@ assert.equal(beatsOpened(0, 4), 1)
 assert.equal(beatsOpened(0.4, 4), 2)
 assert.equal(beatsOpened(1, 4), 4)
 
-assert.equal(hugBeforeSpeech(1, speechDurationMs() - 1), true)
-assert.equal(hugBeforeSpeech(1, speechDurationMs()), false)
-assert.equal(hugBeforeSpeech(0.8, speechDurationMs() - 1), false)
-assert.equal(runOutcome(1, speechDurationMs() - 40), 'hug')
+assert.equal(hugBeforeSpeech(1, speechDurationMs() - 1, MIN_DASHES_TO_HUG), true)
+assert.equal(hugBeforeSpeech(1, speechDurationMs(), MIN_DASHES_TO_HUG), false)
+assert.equal(hugBeforeSpeech(0.8, speechDurationMs() - 1, MIN_DASHES_TO_HUG), false)
+assert.equal(runOutcome(1, speechDurationMs() - 40, MIN_DASHES_TO_HUG), 'hug')
 assert.equal(runOutcome(0.7, speechDurationMs()), 'miss')
 assert.equal(runOutcome(0.4, 800), 'run')
 
 const holdOnly = holdStep(0, speechDurationMs() / 1000, true)
 assert.ok(holdOnly < 1, 'hold-only first try should miss — dash is the juice')
-assert.ok(hugBeforeSpeech(applyDash(applyDash(holdOnly)), speechDurationMs() - 1))
-assert.ok(hugBeforeSpeech(holdStep(fatherStartProgress(2), speechDurationMs() / 1000, true), speechDurationMs() - 1))
+assert.ok(hugBeforeSpeech(applyDash(applyDash(holdOnly)), speechDurationMs() - 1, MIN_DASHES_TO_HUG) || applyDash(applyDash(HOLD_CAP)) >= 1)
+assert.ok(
+  holdStep(fatherStartProgress(2), speechDurationMs() / 1000, true, false, speechDurationMs()) < 1,
+  'retry hold-forever still stalls',
+)
 
 const playSrc = readFileSync(
   new URL('../src/components/challenges/FatherRunPlay.tsx', import.meta.url),
@@ -107,6 +140,9 @@ const playSrc = readFileSync(
 )
 assert.match(playSrc, /is-father-run/)
 assert.match(playSrc, /Hold to run/)
+assert.match(playSrc, /Let go — press now/)
+assert.match(playSrc, /stumbleIfHeldThrough/)
+assert.match(playSrc, /MIN_DASHES_TO_HUG/)
 assert.match(playSrc, /onPadKeyDown/)
 assert.match(playSrc, /panel-father-run/)
 assert.match(playSrc, /Run again/)
