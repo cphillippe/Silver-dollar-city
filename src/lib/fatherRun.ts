@@ -9,6 +9,11 @@ export const FATHER_RUN_HINT = 'The run comes before the apology is done.'
 
 export const FATHER_RUN_WIN = 'Hugged!'
 
+export const FATHER_RUN_AGAIN = 'One more run'
+
+export const FATHER_RUN_DASH_SCORE = 25
+export const FATHER_RUN_HUG_SCORE = 100
+
 /** Luke 15 hired-hand speech — the clock. Hug before the last phrase lands. */
 export const HIRED_HAND_SPEECH = [
   'Father, I have sinned against heaven',
