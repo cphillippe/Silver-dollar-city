@@ -3,7 +3,7 @@ import { statSync } from 'node:fs'
 import { emptyProgress } from '../src/lib/save.ts'
 import { PACK_CATALOG, PACK_ISSUES, packLesson } from '../src/content/packCatalog.ts'
 import { PACK_SCHEMA_VERSION } from '../src/content/packTypes.ts'
-import { EASY_LINE_ORDER, FOUNDATION_ARC, easyHomeFocus, easyHoldPractice, easyLineTaught, easyLoopLine, easyMatchReady, easyWhoWhere } from '../src/lib/easy.ts'
+import { EASY_LINE_ORDER, FOUNDATION_ARC, DIG_ARC, easyHomeFocus, easyHoldPractice, easyLineTaught, easyLoopLine, easyMatchReady, easyWhoWhere } from '../src/lib/easy.ts'
 import {
   applyHoldFail,
   applyHoldSuccess,
@@ -158,10 +158,18 @@ assert.ok(areaIds.has('first-gate'))
 assert.ok(areaIds.has('high-lookout'))
 
 assert.deepEqual([...FOUNDATION_ARC], ['fg-order', 'fg-reason', 'fg-ought', 'fg-ground'])
+assert.deepEqual([...DIG_ARC], ['wb-creed', 'wb-women', 'wb-early', 'wb-method'])
 assert.ok(EASY_LINE_ORDER.indexOf('ph-debt') < EASY_LINE_ORDER.indexOf('fg-order'))
 assert.ok(EASY_LINE_ORDER.indexOf('fg-ground') < EASY_LINE_ORDER.indexOf('wb-creed'))
 assert.ok(EASY_LINE_ORDER.indexOf('fg-ground') < EASY_LINE_ORDER.indexOf('fg-mover'))
 assert.ok(EASY_LINE_ORDER.indexOf('ob-tuning') < EASY_LINE_ORDER.indexOf('fg-mover'))
+assert.deepEqual(EASY_LINE_ORDER.slice(7, 12), [
+  'wb-creed',
+  'wb-women',
+  'wb-early',
+  'wb-method',
+  'daily-lantern',
+])
 
 const creekHeld = {
   ...emptyProgress(),
@@ -187,6 +195,20 @@ assert.equal(
     easyHeld: [...creekHeld.easyHeld, ...FOUNDATION_ARC],
   }),
   'wb-creed',
+)
+assert.equal(
+  easyLoopLine({
+    ...creekHeld,
+    easyHeld: [...creekHeld.easyHeld, ...FOUNDATION_ARC, 'wb-creed'],
+  }),
+  'wb-women',
+)
+assert.equal(
+  easyLoopLine({
+    ...creekHeld,
+    easyHeld: [...creekHeld.easyHeld, ...FOUNDATION_ARC, ...DIG_ARC],
+  }),
+  'daily-lantern',
 )
 
 const order = packLesson('fg-order')

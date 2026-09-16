@@ -1,7 +1,7 @@
 Silver City — area content packs (runtime source of truth)
 ==========================================================
 
-appVersion: 1.4.64  (from src/config/app.ts on main)
+appVersion: 1.4.68  (from src/config/app.ts on main)
 schemaVersion: 3
 generated: see each file’s generated= attribute (America/Chicago)
 host: https://cphillippe.github.io/Silver-dollar-city/
@@ -70,13 +70,13 @@ EASY TRAIL ORDER (easyOrder 1–39)
    7 fg-ground        first-gate
    8 wb-creed         witness-bench
    9 wb-women         witness-bench
-  10 daily-lantern    parable-hollow
-  11 daily-stars      observatory
-  12 daily-cosmos     first-gate
-  13 hl-moral         high-lookout
-  14 ph-seeds         parable-hollow
-  15 wb-early         witness-bench
-  16 wb-method        witness-bench
+  10 wb-early         witness-bench
+  11 wb-method        witness-bench
+  12 daily-lantern    parable-hollow
+  13 daily-stars      observatory
+  14 daily-cosmos     first-gate
+  15 hl-moral         high-lookout
+  16 ph-seeds         parable-hollow
   17 daily-names      witness-bench
   18 daily-creed      witness-bench
   19 daily-empty      witness-bench
@@ -102,8 +102,9 @@ EASY TRAIL ORDER (easyOrder 1–39)
   39 daily-door       high-lookout
 
 Sequence: mercy-first Story Creek opening, then Why Gate foundation pack
-(stepped unlock), then Witness leftovers → porch leftovers → Sky Watch
-(fine-tuning stays here) → Why Gate cosmological walks → Meaning Ridge.
+(stepped unlock), then Witness Square Dig deeper (creed → women → early →
+method, stepped unlock), then porch leftovers → Sky Watch (fine-tuning
+stays here) → Why Gate cosmological walks → Meaning Ridge.
 
 INCLUDED
 --------

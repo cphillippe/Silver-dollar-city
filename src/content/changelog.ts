@@ -8,6 +8,19 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.68',
+    title: 'Dig deeper pack · Easy core trail',
+    when: '2026-09-16',
+    items: [
+      'After Why Gate, Witness Square Dig deeper is a short arcade pack: creed merge, then women / early / method tap-ins. Next opens only after the prior Easy Hold',
+      'Women, early, and method play is a source-dig: tap the glowing tablet. Scripture first, then ancient names. DUG! then one takeaway, then Hold next. Miss −25 on a wrong tap. Not a reading quiz',
+      'Easy Dig deeper is Dig the names — two or three in-app scripture/ancient taps, not New Advent essay homework',
+      'Creed stays the candy merge bowl. Christ is named on the early and method tablets. Plain claim · reason · source. Teach before test. Apologist voice',
+      'Night Watch and Town stay hidden on Easy. Freemium 1.4.66 and claim-merge juice 1.4.67 stay. Soft ads never cover Match, Hold, or arcade (including source-dig). Journal ungated. Core Easy free',
+      'Father-run, road-maze, Match extras, Hold Why Blast, and Why Gate foundation stay. Place titles stay Story Creek, Witness Square, Sky Watch, Why Gate, Meaning Ridge',
+    ],
+  },
+  {
     version: '1.4.67',
     title: 'Fun claim-merge · Easy core trail',
     when: '2026-09-16',
@@ -1479,6 +1492,10 @@ export function latestChange(version: string): ChangeNote {
   const note = CHANGELOG.find((item) => item.version === version) ?? CHANGELOG[0]
   if (!note) {
     return { version, title: 'Easy core trail', when: '', items: [] }
+  }
+  if (note.version === '1.4.68') {
+    const prior = latestChange('1.4.67')
+    return { ...note, items: [...note.items, ...prior.items] }
   }
   if (note.version === '1.4.67') {
     const prior = latestChange('1.4.66')

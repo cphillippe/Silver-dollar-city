@@ -5,6 +5,8 @@
  * Never cite skeptic hubs, Wikipedia, or mainstream academics as the teaching voice.
  */
 
+import { digTablets, isSourceDigLine } from '../lib/sourceDig.ts'
+
 export type DeeperEra = 'scripture' | 'ancient' | 'classic' | 'modern'
 export type DeeperSurface = 'hold' | 'journal' | 'map' | 'profile'
 
@@ -616,6 +618,21 @@ export function deeperLinksFor(
   const key = ALIAS[id] ?? id
   const rows = DOSSIERS[key] ?? []
   return rows.filter((link) => (surface === 'journal' ? true : !link.journalOnly))
+}
+
+/** Easy Dig deeper — scripture and ancient only, bite-sized, no essay dump. */
+export function easyDigTaps(id: string, surface: DeeperSurface = 'hold'): DeeperLink[] {
+  if (isSourceDigLine(id)) {
+    return digTablets(id).map((tablet) => ({
+      label: tablet.title,
+      href: `#dig-${id}-${tablet.id}`,
+      era: tablet.era,
+      source: tablet.bite,
+    }))
+  }
+  return deeperLinksFor(id, surface)
+    .filter((link) => link.era === 'scripture' || link.era === 'ancient')
+    .slice(0, 3)
 }
 
 export function eraLabel(era: DeeperEra): string {
