@@ -47,7 +47,7 @@ const PLAIN: Record<string, PlainLine> = {
     { term: 'Parable', sense: 'a Jesus story that asks you to decide', hint: 'Keep the right pictures. Remove wrong picks.' },
   ),
   'ph-debt': line(
-    'If you were forgiven a huge debt, you cannot choke a neighbor over a small one.',
+    'Forgiven much, you cannot choke a neighbor over a little debt.',
     'A king wipes an unpayable bill. That same servant then chokes a neighbor over a tiny sum. Example: huge debt forgiven — then a tiny one demanded.',
     { term: 'Debt', sense: 'what you owe and cannot pay', hint: 'Keep the mercy. Toss the choke. Example: a huge bill wiped, then a tiny one demanded.' },
   ),
@@ -105,7 +105,7 @@ const PLAIN: Record<string, PlainLine> = {
   ),
   'fg-order': line(
     'You already trust that the world holds together in Christ.',
-    'You already live as if the world hangs together — clocks, roads, promises. Colossians names Christ: all things were made through him, and in him they hold together.',
+    'You already live like the world hangs together — clocks, roads, promises. Colossians names Christ: all things were made through him, and in him they hold together.',
     { term: 'Order', sense: 'the world hanging together — not a lucky pile', hint: 'Keep the lived trust. Toss the lucky pile.' },
   ),
   'fg-reason': line(
@@ -130,7 +130,7 @@ const PLAIN: Record<string, PlainLine> = {
   ),
   'fg-contingent': line(
     'What might not have been needs a ground.',
-    'You exist, but you might not have. A world of only “might-not-have-beens” does not explain why anything is here. Classical theism names the necessary ground God.',
+    'You exist, but you might not have. A world of only “might-not-have-beens” does not explain why anything is here. God is the necessary ground — not a shrug.',
     {
       term: 'Might not have been',
       sense: 'it is real, but it could have failed to be',
@@ -139,7 +139,7 @@ const PLAIN: Record<string, PlainLine> = {
   ),
   'fg-kalam': line(
     'Whatever begins still asks for a cause.',
-    'If something begins, it has a cause. If this universe began, it has a cause. Naming Abraham’s God takes further historical steps.',
+    'What begins has a cause. The universe began, so it has a Cause. Naming Abraham’s God takes further steps.',
     {
       term: 'Kalām',
       sense: 'the beginning argument — what starts still asks for a cause',
@@ -148,7 +148,7 @@ const PLAIN: Record<string, PlainLine> = {
   ),
   'fg-limits': line(
     'A first cause is not yet the whole Christian faith.',
-    'If the argument works, you have a first cause. Intellect, goodness, and the gospel are further steps — not leaks.',
+    'A working argument names a first cause. Intellect, goodness, and the gospel are further steps — not leaks.',
     { term: 'Creed', sense: 'the full Christian confession — more than “a first cause”', hint: 'Keep the honest limit. Toss “all done” and “worthless.”' },
   ),
   'hl-moral': line(
@@ -158,7 +158,7 @@ const PLAIN: Record<string, PlainLine> = {
   ),
   'hl-mind': line(
     'Inner experience is not captured by a scan.',
-    'Felt redness, thoughts about things, and the pull of truth are not just collisions. Mind is at home if the world’s ground is a living God.',
+    'Felt redness, thoughts about things, and the pull of truth are not just collisions. Mind is at home when the world’s ground is a living God.',
     {
       term: 'Felt life',
       sense: 'what it is like on the inside — not a scan number',
@@ -196,8 +196,8 @@ const PLAIN: Record<string, PlainLine> = {
     { term: 'Witness', sense: 'a named person who was said to have seen', hint: 'Keep the names. Toss the anonymous dream.' },
   ),
   'daily-creed': line(
-    'The churches already named Christ died, buried, raised before Paul’s letter.',
-    'Paul hands on what he received — not a line he invented while writing.',
+    'The churches named Christ died, buried, and raised before Paul wrote.',
+    'Paul received this line — he did not invent it.',
     { term: 'Creed', sense: 'an old shared belief the churches already said out loud', hint: 'Keep “received.” Toss “Paul invented it while writing.”' },
   ),
   'daily-stars': line(
@@ -216,7 +216,7 @@ const PLAIN: Record<string, PlainLine> = {
     { term: 'Copies', sense: 'later hands writing the same line — not cheating', hint: 'Keep the river of copies. Toss “we hold the first ink.”' },
   ),
   'daily-isaiah': line(
-    'Isaiah 53’s Servant is the Jesus the church confesses — wounded for others, silent like a lamb.',
+    'Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.',
     'The poem’s Servant suffers for others and does not answer with a sword. The church names that Servant as Jesus.',
     { term: 'Servant', sense: 'the wounded one in Isaiah 53 — not a general on a horse', hint: 'Keep the wounds. Toss the sword.' },
   ),
@@ -236,12 +236,12 @@ const PLAIN: Record<string, PlainLine> = {
     { term: 'Pedigree', sense: 'family name or in-group badge', hint: 'Keep mercy. Toss “already my people.”' },
   ),
   'daily-empty': line(
-    'The first Easter reports of Jesus include an empty tomb, women, fear, and wonder.',
+    'Jesus’ tomb was empty — women saw it first, with fear and wonder.',
     'They found the stone rolled away — they did not find the body.',
     { term: 'Empty', sense: 'the place was not occupied when they looked', hint: 'Keep the awkward opening. Toss the senate conversion.' },
   ),
   'daily-cosmos': line(
-    'The universe exists and did not have to — so a Source is worth naming.',
+    'The world is here, and it did not have to be — the psalms name a Giver.',
     'The world is here, and it did not have to be. The psalms name a Giver — not a shrug.',
     { term: 'Source', sense: 'the One from whom this world comes', hint: 'Keep the question. Toss the shrug.' },
   ),

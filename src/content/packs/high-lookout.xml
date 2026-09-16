@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<areaPack id="high-lookout" schemaVersion="3" appVersion="1.4.50" generated="2026-09-14T13:15:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/" title="Meaning Ridge" place="Meaning Ridge" person="Hope Ridge" personId="hope" plotId="lookout">
+<areaPack id="high-lookout" schemaVersion="3" appVersion="1.4.77" generated="2026-09-14T13:15:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/" title="Meaning Ridge" place="Meaning Ridge" person="Hope Ridge" personId="hope" plotId="lookout">
   <howToEdit>RUNTIME CONTENT: the game loads this file as the source of truth for this area. Change player-facing text in place inside each &lt;lesson&gt;. Stable id attributes (ph-father, …) are engine keys — do not rename without a migration. Three tiers per fact: &lt;easy easyOrder="N"&gt;, &lt;medium&gt;, and &lt;hard&gt; — each with &lt;learn&gt;, &lt;match&gt;, and &lt;hold&gt;. Easy Learn: shortStory/mainIdea/loci. Medium Learn: mediumTeach (clearer than Hard, richer than Easy). Hard Learn: hardTeach/fullTeach. Held claim·reason·source stay plain and identical on all three. Hold level-up: see hold @levelUpTo / @onFail and index &lt;holdRules&gt;. Empty optional elements are intentional. Escape &amp; &lt; &gt; in text.</howToEdit>
   <meta>
     <title>Silver City — Meaning Ridge</title>
@@ -21,7 +21,7 @@
       <easy points="10" easyOrder="9">
         <learn>
           <shortStory>Duty feels like more than a taste or a mood. Romans 2 says even strangers already know enough to accuse one another — a pull toward real right and wrong that fits a good God.</shortStory>
-          <mainIdea>Duty presents itself as more than taste — and theism is a natural home for that.</mainIdea>
+          <mainIdea>Duty is more than taste — a good God fits that pull.</mainIdea>
           <gloss>Duty feels real — not like a taste for tea.</gloss>
           <loci>This idea lives at Meaning Ridge, with Hope.</loci>
           <word>
@@ -31,7 +31,7 @@
           <hint>Build the modest chain. Leave contempt and collapse.</hint>
         </learn>
         <match>
-          <sentenceCorrect>Duty presents itself as more than taste — and theism is a natural home for that.</sentenceCorrect>
+          <sentenceCorrect>Duty is more than taste — a good God fits that pull.</sentenceCorrect>
           <sentenceMisses>
             <miss>Duty is only a preference we pretend is law.</miss>
             <miss>Atheist moral realism is impossible to name.</miss>
@@ -43,22 +43,22 @@
           <whyEasy>Hope keeps Meaning Ridge. Duty is more than a taste.</whyEasy>
         </match>
         <hold levelUpTo="medium" onFail="easy">
-          <claim>Duty presents itself as more than taste — and theism is a natural home for that.</claim>
-          <reason>Romans 2 treats moral knowledge as widely shared, which is why strangers can accuse one another.</reason>
+          <claim>Duty is more than taste — a good God fits that pull.</claim>
+          <reason>We all know duty — strangers can still accuse.</reason>
           <source>Romans 2:14–15</source>
-          <whyCorrect>Romans 2 treats moral knowledge as widely shared, which is why strangers can accuse one another.</whyCorrect>
+          <whyCorrect>We all know duty — strangers can still accuse.</whyCorrect>
           <whyMisses>
             <miss>Moral argument is a sneer at people who doubt.</miss>
             <miss>Strangers cannot expect injustice to mean anything.</miss>
             <miss>Duty is only a private feeling.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>Duty presents itself as more than taste — and theism is a natural home for that.</choice>
+            <choice>Duty is more than taste — a good God fits that pull.</choice>
             <choice>Duty is only a preference we pretend is law.</choice>
             <choice>Atheist moral realism is impossible to name.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Romans 2 treats moral knowledge as widely shared, which is why strangers can accuse one another.</choice>
+            <choice>We all know duty — strangers can still accuse.</choice>
             <choice>Moral argument is a sneer at people who doubt.</choice>
             <choice>Strangers cannot expect injustice to mean anything.</choice>
           </reasonChoices>
@@ -66,8 +66,8 @@
       </easy>
       <medium points="12">
         <learn>
-          <mediumTeach>Duty presents itself as more than taste. Romans 2 says even strangers already know enough to accuse one another. If objective moral duties are real, theism is a natural home for that pull — not a shrug that calls every “ought” a preference.</mediumTeach>
-          <mainIdea>Duty presents itself as more than taste — and theism is a natural home for that.</mainIdea>
+          <mediumTeach>Duty is more than taste. Romans 2 says even strangers already know enough to accuse one another. A good God is a natural home for that pull — not a shrug that calls every “ought” a preference.</mediumTeach>
+          <mainIdea>Duty is more than taste — a good God fits that pull.</mainIdea>
           <gloss>Duty feels real — not like a taste for tea.</gloss>
           <loci>This idea lives at Meaning Ridge, with Hope.</loci>
           <word>
@@ -77,7 +77,7 @@
           <hint>Build the modest chain. Leave contempt and collapse.</hint>
         </learn>
         <match>
-          <sentenceCorrect>Duty presents itself as more than taste — and theism is a natural home for that.</sentenceCorrect>
+          <sentenceCorrect>Duty is more than taste — a good God fits that pull.</sentenceCorrect>
           <sentenceMisses>
             <miss>Duty is only a preference we pretend is law.</miss>
             <miss>Atheist moral realism is impossible to name.</miss>
@@ -89,22 +89,22 @@
           <whyMedium>Hope keeps Meaning Ridge. Duty is more than a taste.</whyMedium>
         </match>
         <hold levelUpTo="hard" onFail="easy">
-          <claim>Duty presents itself as more than taste — and theism is a natural home for that.</claim>
-          <reason>Romans 2 treats moral knowledge as widely shared, which is why strangers can accuse one another.</reason>
+          <claim>Duty is more than taste — a good God fits that pull.</claim>
+          <reason>We all know duty — strangers can still accuse.</reason>
           <source>Romans 2:14–15</source>
-          <whyCorrect>Romans 2 treats moral knowledge as widely shared, which is why strangers can accuse one another.</whyCorrect>
+          <whyCorrect>We all know duty — strangers can still accuse.</whyCorrect>
           <whyMisses>
             <miss>Moral argument is a sneer at people who doubt.</miss>
             <miss>Strangers cannot expect injustice to mean anything.</miss>
             <miss>Duty is only a private feeling.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>Duty presents itself as more than taste — and theism is a natural home for that.</choice>
+            <choice>Duty is more than taste — a good God fits that pull.</choice>
             <choice>Duty is only a preference we pretend is law.</choice>
             <choice>Atheist moral realism is impossible to name.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Romans 2 treats moral knowledge as widely shared, which is why strangers can accuse one another.</choice>
+            <choice>We all know duty — strangers can still accuse.</choice>
             <choice>Moral argument is a sneer at people who doubt.</choice>
             <choice>Strangers cannot expect injustice to mean anything.</choice>
           </reasonChoices>
@@ -121,7 +121,7 @@ Romans 2:14–15 speaks of a law “written on the heart.” That is not a sneer
           <challengeTiles />
         </learn>
         <match>
-          <sentenceCorrect>Duty presents itself as more than taste — and theism is a natural home for that.</sentenceCorrect>
+          <sentenceCorrect>Duty is more than taste — a good God fits that pull.</sentenceCorrect>
           <sentenceMisses>
             <miss>Duty is only a preference we pretend is law.</miss>
             <miss>Atheist moral realism is impossible to name.</miss>
@@ -133,22 +133,22 @@ Romans 2:14–15 speaks of a law “written on the heart.” That is not a sneer
           <whyHard>Hope Ridge keeps Meaning Ridge. Duty as more than taste looks over the town from the lookout.</whyHard>
         </match>
         <hold onFail="easy">
-          <claim>Duty presents itself as more than taste — and theism is a natural home for that.</claim>
-          <reason>Romans 2 treats moral knowledge as widely shared, which is why strangers can accuse one another.</reason>
+          <claim>Duty is more than taste — a good God fits that pull.</claim>
+          <reason>We all know duty — strangers can still accuse.</reason>
           <source>Romans 2:14–15</source>
-          <whyCorrect>Romans 2 treats moral knowledge as widely shared, which is why strangers can accuse one another.</whyCorrect>
+          <whyCorrect>We all know duty — strangers can still accuse.</whyCorrect>
           <whyMisses>
             <miss>Moral argument is a sneer at people who doubt.</miss>
             <miss>Strangers cannot expect injustice to mean anything.</miss>
             <miss>Duty is only a private feeling.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>Duty presents itself as more than taste — and theism is a natural home for that.</choice>
+            <choice>Duty is more than taste — a good God fits that pull.</choice>
             <choice>Duty is only a preference we pretend is law.</choice>
             <choice>Atheist moral realism is impossible to name.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Romans 2 treats moral knowledge as widely shared, which is why strangers can accuse one another.</choice>
+            <choice>We all know duty — strangers can still accuse.</choice>
             <choice>Moral argument is a sneer at people who doubt.</choice>
             <choice>Strangers cannot expect injustice to mean anything.</choice>
           </reasonChoices>
@@ -167,7 +167,7 @@ Romans 2:14–15 speaks of a law “written on the heart.” That is not a sneer
     <lesson id="hl-mind" place="Meaning Ridge" person="Hope Ridge" tripleId="mind-lookout" ideaId="idea-mind" ideaLabel="The story must house the storyteller’s mind." challengeKind="match" challengeTitle="The inside of mind">
       <easy points="10" easyOrder="30">
         <learn>
-          <shortStory>Felt redness, thoughts about things, and the pull of truth are not just collisions. Mind is at home if the world’s ground is a living God.</shortStory>
+          <shortStory>Felt redness, thoughts about things, and the pull of truth are not just collisions. Mind is at home when the world’s ground is a living God.</shortStory>
           <mainIdea>A story of the world must find a home for mind — including the storyteller.</mainIdea>
           <gloss>Inner experience is not captured by a scan.</gloss>
           <loci>This idea lives at Meaning Ridge, with Hope.</loci>
@@ -191,9 +191,9 @@ Romans 2:14–15 speaks of a law “written on the heart.” That is not a sneer
         </match>
         <hold levelUpTo="medium" onFail="easy">
           <claim>A story of the world must find a home for mind — including the storyteller.</claim>
-          <reason>Theism is a reply in which mind is present at the beginning, not only an accident at the end.</reason>
-          <source>The hard problem; classical theism on intellect</source>
-          <whyCorrect>Theism is a reply in which mind is present at the beginning, not only an accident at the end.</whyCorrect>
+          <reason>Mind is there at the start — not a late accident.</reason>
+          <source>John 1:1–4; Acts 17:28</source>
+          <whyCorrect>Mind is there at the start — not a late accident.</whyCorrect>
           <whyMisses>
             <miss>A story without mind can still house the storyteller with no remainder.</miss>
             <miss>Mind is easy to treat as leftover steam.</miss>
@@ -205,7 +205,7 @@ Romans 2:14–15 speaks of a law “written on the heart.” That is not a sneer
             <choice>Theism is the only reply anyone has offered.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Theism is a reply in which mind is present at the beginning, not only an accident at the end.</choice>
+            <choice>Mind is there at the start — not a late accident.</choice>
             <choice>A story without mind can still house the storyteller with no remainder.</choice>
             <choice>Mind is easy to treat as leftover steam.</choice>
           </reasonChoices>
@@ -213,7 +213,7 @@ Romans 2:14–15 speaks of a law “written on the heart.” That is not a sneer
       </easy>
       <medium points="12">
         <learn>
-          <mediumTeach>Felt redness, thoughts about things, and the pull of truth are not just particle collisions. A story of the world must find a home for mind — including the storyteller. Mind is at home if the world’s ground is a living God.</mediumTeach>
+          <mediumTeach>Felt redness, thoughts about things, and the pull of truth are not just particle collisions. A story of the world must find a home for mind — including the storyteller. Mind is at home when the world’s ground is a living God.</mediumTeach>
           <mainIdea>A story of the world must find a home for mind — including the storyteller.</mainIdea>
           <gloss>Inner experience is not captured by a scan.</gloss>
           <loci>This idea lives at Meaning Ridge, with Hope.</loci>
@@ -237,9 +237,9 @@ Romans 2:14–15 speaks of a law “written on the heart.” That is not a sneer
         </match>
         <hold levelUpTo="hard" onFail="easy">
           <claim>A story of the world must find a home for mind — including the storyteller.</claim>
-          <reason>Theism is a reply in which mind is present at the beginning, not only an accident at the end.</reason>
-          <source>The hard problem; classical theism on intellect</source>
-          <whyCorrect>Theism is a reply in which mind is present at the beginning, not only an accident at the end.</whyCorrect>
+          <reason>Mind is there at the start — not a late accident.</reason>
+          <source>John 1:1–4; Acts 17:28</source>
+          <whyCorrect>Mind is there at the start — not a late accident.</whyCorrect>
           <whyMisses>
             <miss>A story without mind can still house the storyteller with no remainder.</miss>
             <miss>Mind is easy to treat as leftover steam.</miss>
@@ -251,7 +251,7 @@ Romans 2:14–15 speaks of a law “written on the heart.” That is not a sneer
             <choice>Theism is the only reply anyone has offered.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Theism is a reply in which mind is present at the beginning, not only an accident at the end.</choice>
+            <choice>Mind is there at the start — not a late accident.</choice>
             <choice>A story without mind can still house the storyteller with no remainder.</choice>
             <choice>Mind is easy to treat as leftover steam.</choice>
           </reasonChoices>
@@ -259,9 +259,9 @@ Romans 2:14–15 speaks of a law “written on the heart.” That is not a sneer
       </medium>
       <hard points="15">
         <learn>
-          <hardTeach>Inner experience is not captured by a scan. The “hard problem” is why physical process is accompanied by felt life at all. Mind is at home if the world’s ground is a living God — not an indifferent process.
+          <hardTeach>Inner experience is not captured by a scan. The “hard problem” is why physical process is accompanied by felt life at all. Mind is at home when the world’s ground is a living God — not an indifferent process.
 A living God is the home of mind. Materialism hopes a future theory will close the gap. Hold the claim: inner life is not an accident at the end of indifference.</hardTeach>
-          <fullTeach>Inner experience is not captured by a scan. The “hard problem” is why physical process is accompanied by felt life at all. Mind is at home if the world’s ground is a living God — not an indifferent process.
+          <fullTeach>Inner experience is not captured by a scan. The “hard problem” is why physical process is accompanied by felt life at all. Mind is at home when the world’s ground is a living God — not an indifferent process.
 A living God is the home of mind. Materialism hopes a future theory will close the gap. Hold the claim: inner life is not an accident at the end of indifference.</fullTeach>
           <prompt>Match each feature of mind to what physical description still leaves standing.</prompt>
           <teachOnWrong>Pair the everyday word with the leftover mystery. Wavelengths, brain scans, and causes are real — they are not yet the felt, the about, the why-it-is-like-something, or the ought-of-logic.</teachOnWrong>
@@ -294,13 +294,13 @@ A living God is the home of mind. Materialism hopes a future theory will close t
           <personPrompt>Hope keeps that ridge.</personPrompt>
           <ideaPrompt>Hope’s ridge — the story must house the storyteller’s mind.</ideaPrompt>
           <ideaLabel>The story must house the storyteller’s mind.</ideaLabel>
-          <whyHard>Hope Ridge keeps Meaning Ridge. Theism is a reply in which mind is present at the beginning, not only an accident at the end.</whyHard>
+          <whyHard>Hope Ridge keeps Meaning Ridge. Mind is there at the start — not a late accident.</whyHard>
         </match>
         <hold onFail="easy">
           <claim>A story of the world must find a home for mind — including the storyteller.</claim>
-          <reason>Theism is a reply in which mind is present at the beginning, not only an accident at the end.</reason>
-          <source>The hard problem; classical theism on intellect</source>
-          <whyCorrect>Theism is a reply in which mind is present at the beginning, not only an accident at the end.</whyCorrect>
+          <reason>Mind is there at the start — not a late accident.</reason>
+          <source>John 1:1–4; Acts 17:28</source>
+          <whyCorrect>Mind is there at the start — not a late accident.</whyCorrect>
           <whyMisses>
             <miss>A story without mind can still house the storyteller with no remainder.</miss>
             <miss>Mind is easy to treat as leftover steam.</miss>
@@ -312,7 +312,7 @@ A living God is the home of mind. Materialism hopes a future theory will close t
             <choice>Theism is the only reply anyone has offered.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Theism is a reply in which mind is present at the beginning, not only an accident at the end.</choice>
+            <choice>Mind is there at the start — not a late accident.</choice>
             <choice>A story without mind can still house the storyteller with no remainder.</choice>
             <choice>Mind is easy to treat as leftover steam.</choice>
           </reasonChoices>
@@ -355,9 +355,9 @@ A living God is the home of mind. Materialism hopes a future theory will close t
         </match>
         <hold levelUpTo="medium" onFail="easy">
           <claim>Local meaning can be built — the lookout asks whether it is also received.</claim>
-          <reason>Ecclesiastes refuses to let work and pleasure pretend to be the final good, and refuses to call them worthless as gifts.</reason>
+          <reason>Work and fun are gifts — not the last good.</reason>
           <source>Ecclesiastes 2; 9; 12</source>
-          <whyCorrect>Ecclesiastes refuses to let work and pleasure pretend to be the final good, and refuses to call them worthless as gifts.</whyCorrect>
+          <whyCorrect>Work and fun are gifts — not the last good.</whyCorrect>
           <whyMisses>
             <miss>The hunger for a final good has no question attached.</miss>
             <miss>You cannot build any local meaning without naming God.</miss>
@@ -369,7 +369,7 @@ A living God is the home of mind. Materialism hopes a future theory will close t
             <choice>Ecclesiastes calls every gift worthless.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Ecclesiastes refuses to let work and pleasure pretend to be the final good, and refuses to call them worthless as gifts.</choice>
+            <choice>Work and fun are gifts — not the last good.</choice>
             <choice>The hunger for a final good has no question attached.</choice>
             <choice>You cannot build any local meaning without naming God.</choice>
           </reasonChoices>
@@ -401,9 +401,9 @@ A living God is the home of mind. Materialism hopes a future theory will close t
         </match>
         <hold levelUpTo="hard" onFail="easy">
           <claim>Local meaning can be built — the lookout asks whether it is also received.</claim>
-          <reason>Ecclesiastes refuses to let work and pleasure pretend to be the final good, and refuses to call them worthless as gifts.</reason>
+          <reason>Work and fun are gifts — not the last good.</reason>
           <source>Ecclesiastes 2; 9; 12</source>
-          <whyCorrect>Ecclesiastes refuses to let work and pleasure pretend to be the final good, and refuses to call them worthless as gifts.</whyCorrect>
+          <whyCorrect>Work and fun are gifts — not the last good.</whyCorrect>
           <whyMisses>
             <miss>The hunger for a final good has no question attached.</miss>
             <miss>You cannot build any local meaning without naming God.</miss>
@@ -415,7 +415,7 @@ A living God is the home of mind. Materialism hopes a future theory will close t
             <choice>Ecclesiastes calls every gift worthless.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Ecclesiastes refuses to let work and pleasure pretend to be the final good, and refuses to call them worthless as gifts.</choice>
+            <choice>Work and fun are gifts — not the last good.</choice>
             <choice>The hunger for a final good has no question attached.</choice>
             <choice>You cannot build any local meaning without naming God.</choice>
           </reasonChoices>
@@ -450,9 +450,9 @@ If God is the good that created goods point toward, ordinary loves are not cance
         </match>
         <hold onFail="easy">
           <claim>Local meaning can be built — the lookout asks whether it is also received.</claim>
-          <reason>Ecclesiastes refuses to let work and pleasure pretend to be the final good, and refuses to call them worthless as gifts.</reason>
+          <reason>Work and fun are gifts — not the last good.</reason>
           <source>Ecclesiastes 2; 9; 12</source>
-          <whyCorrect>Ecclesiastes refuses to let work and pleasure pretend to be the final good, and refuses to call them worthless as gifts.</whyCorrect>
+          <whyCorrect>Work and fun are gifts — not the last good.</whyCorrect>
           <whyMisses>
             <miss>The hunger for a final good has no question attached.</miss>
             <miss>You cannot build any local meaning without naming God.</miss>
@@ -464,7 +464,7 @@ If God is the good that created goods point toward, ordinary loves are not cance
             <choice>Ecclesiastes calls every gift worthless.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Ecclesiastes refuses to let work and pleasure pretend to be the final good, and refuses to call them worthless as gifts.</choice>
+            <choice>Work and fun are gifts — not the last good.</choice>
             <choice>The hunger for a final good has no question attached.</choice>
             <choice>You cannot build any local meaning without naming God.</choice>
           </reasonChoices>
@@ -505,9 +505,9 @@ If God is the good that created goods point toward, ordinary loves are not cance
         </match>
         <hold levelUpTo="medium" onFail="easy">
           <claim>Beauty wakes a hunger it cannot feed — hungers usually correspond to real countries.</claim>
-          <reason>Longing for a country the sunset cannot give is a mark that we were made for that country; Psalm 19 treats the sky as speech.</reason>
+          <reason>The sunset wakes a hunger it cannot feed.</reason>
           <source>Lewis, Weight of Glory; Psalm 19:1–4</source>
-          <whyCorrect>Longing for a country the sunset cannot give is a mark that we were made for that country; Psalm 19 treats the sky as speech.</whyCorrect>
+          <whyCorrect>The sunset wakes a hunger it cannot feed.</whyCorrect>
           <whyMisses>
             <miss>Psalm 19 treats the sky as silent decoration.</miss>
             <miss>The lookout and the observatory cannot share a ridge.</miss>
@@ -519,7 +519,7 @@ If God is the good that created goods point toward, ordinary loves are not cance
             <choice>Hungers never correspond to real countries.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Longing for a country the sunset cannot give is a mark that we were made for that country; Psalm 19 treats the sky as speech.</choice>
+            <choice>The sunset wakes a hunger it cannot feed.</choice>
             <choice>Psalm 19 treats the sky as silent decoration.</choice>
             <choice>The lookout and the observatory cannot share a ridge.</choice>
           </reasonChoices>
@@ -551,9 +551,9 @@ If God is the good that created goods point toward, ordinary loves are not cance
         </match>
         <hold levelUpTo="hard" onFail="easy">
           <claim>Beauty wakes a hunger it cannot feed — hungers usually correspond to real countries.</claim>
-          <reason>Longing for a country the sunset cannot give is a mark that we were made for that country; Psalm 19 treats the sky as speech.</reason>
+          <reason>The sunset wakes a hunger it cannot feed.</reason>
           <source>Lewis, Weight of Glory; Psalm 19:1–4</source>
-          <whyCorrect>Longing for a country the sunset cannot give is a mark that we were made for that country; Psalm 19 treats the sky as speech.</whyCorrect>
+          <whyCorrect>The sunset wakes a hunger it cannot feed.</whyCorrect>
           <whyMisses>
             <miss>Psalm 19 treats the sky as silent decoration.</miss>
             <miss>The lookout and the observatory cannot share a ridge.</miss>
@@ -565,7 +565,7 @@ If God is the good that created goods point toward, ordinary loves are not cance
             <choice>Hungers never correspond to real countries.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Longing for a country the sunset cannot give is a mark that we were made for that country; Psalm 19 treats the sky as speech.</choice>
+            <choice>The sunset wakes a hunger it cannot feed.</choice>
             <choice>Psalm 19 treats the sky as silent decoration.</choice>
             <choice>The lookout and the observatory cannot share a ridge.</choice>
           </reasonChoices>
@@ -600,9 +600,9 @@ Beauty does not replace the earlier areas. It keeps them from becoming only a br
         </match>
         <hold onFail="easy">
           <claim>Beauty wakes a hunger it cannot feed — hungers usually correspond to real countries.</claim>
-          <reason>Longing for a country the sunset cannot give is a mark that we were made for that country; Psalm 19 treats the sky as speech.</reason>
+          <reason>The sunset wakes a hunger it cannot feed.</reason>
           <source>Lewis, Weight of Glory; Psalm 19:1–4</source>
-          <whyCorrect>Longing for a country the sunset cannot give is a mark that we were made for that country; Psalm 19 treats the sky as speech.</whyCorrect>
+          <whyCorrect>The sunset wakes a hunger it cannot feed.</whyCorrect>
           <whyMisses>
             <miss>Psalm 19 treats the sky as silent decoration.</miss>
             <miss>The lookout and the observatory cannot share a ridge.</miss>
@@ -614,7 +614,7 @@ Beauty does not replace the earlier areas. It keeps them from becoming only a br
             <choice>Hungers never correspond to real countries.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Longing for a country the sunset cannot give is a mark that we were made for that country; Psalm 19 treats the sky as speech.</choice>
+            <choice>The sunset wakes a hunger it cannot feed.</choice>
             <choice>Psalm 19 treats the sky as silent decoration.</choice>
             <choice>The lookout and the observatory cannot share a ridge.</choice>
           </reasonChoices>

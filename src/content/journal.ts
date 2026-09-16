@@ -150,10 +150,10 @@ export const journalEntries: JournalEntry[] = [
     unlockAfter: 'ob-tuning',
     body: [
       'The universe is finely tuned for life — that fit points to a Designer.',
-      'Life-permitting ranges are extravagantly narrow across independent parameters; design predicts a habitable cosmos, blank chance does not.',
+      'Life needs tight numbers — chance does not explain that.',
     ],
     sources: [
-      'Fine-tuning of physical constants and initial conditions (e.g. cosmological constant; a low-entropy start — an initial condition, not another force dial).',
+      'Psalm 19:1–4; Romans 1:20',
       'Aquinas, ST I, q.2, a.3 (Fifth Way); Psalm 19; Romans 1',
       'Robin Collins, The Fine-Tuning Design Argument',
     ],
@@ -166,10 +166,10 @@ export const journalEntries: JournalEntry[] = [
     unlockAfter: 'ob-design',
     body: [
       'Fine-tuning is best explained by a mind that intended a habitable world.',
-      'Life-permitting ranges are extravagantly narrow; a Designer who wants observers leads us to expect that fit — blank indifference does not.',
+      'A Designer who wants people fits these numbers.',
     ],
     sources: [
-      'Likelihood / fine-tuning arguments (Collins). A low-entropy start is an initial condition, not another force dial.',
+      'Romans 1:20; fine-tuning (Collins)',
       'Aquinas, ST I, q.2, a.3 (Fifth Way); Psalm 19; Romans 1',
     ],
   },
@@ -210,7 +210,7 @@ export const journalEntries: JournalEntry[] = [
     kicker: 'Why Gate',
     unlockAfter: 'fg-order',
     body: [
-      'You already live as if the world hangs together. Clocks, roads, and promises only work because order is real. That is not a slogan. It is the trust you already spend.',
+      'You already live like the world hangs together. Clocks, roads, and promises only work because order is real. That is not a slogan. It is the trust you already spend.',
       'Colossians 1:16–17 names the holder: all things were made through Christ, and in him they hold together. Augustine and Aquinas read that given order as creation’s grain — not a lucky pile. The first foundation beat is this lived trust, with Christ named on the card.',
     ],
     sources: ['Colossians 1:16–17', 'Augustine, City of God XI', 'Aquinas, ST I, q.44'],
