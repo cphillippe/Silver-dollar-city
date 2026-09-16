@@ -13,6 +13,7 @@ export const CHANGELOG: ChangeNote[] = [
     when: '2026-09-16',
     items: [
       'Easy Mercy / road-maze (ph-road, Samaritan LOCKED) and the father-run (ph-father) now show the Gemini panel-blast stills at public/assets/panel-blast/. Hero frames use @1024; thumbs use @512. Father B3 is 03-speech-road — sorry + headed home — not a before-* archive',
+      'Easy Match skips SNAG as a bonus word. Finding a bonus that shares letters with another unfound planted extra ghosts/cracks those cells so they stay swipeable — exclusive bonus cells still clear. Lesson chips stay protected',
       'Teach stays Learn → play → Hold. One more loops stay. Stores stay parked. Play Billing, StoreKit, and AdMob flags stay blank. Pages still cannot charge',
       'Support Silver City 1.4.83, Stone Court 1.4.82, and Fun arcade juice stay. Night Watch and Town stay hidden on Easy. Journal ungated. Never a hard paywall',
     ],

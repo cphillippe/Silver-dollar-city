@@ -57,6 +57,7 @@ const SKIP_BONUS = new Set([
   'SLOB',
   'SNOB',
   'SMUG',
+  'SNAG',
   'THUG',
   'PUNK',
   'WIMP',
