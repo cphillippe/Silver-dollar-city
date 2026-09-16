@@ -17,8 +17,12 @@ export const DIG_ARC = ['wb-creed', 'wb-women', 'wb-early', 'wb-method'] as cons
 /** Witness leftovers after Dig deeper Hold — names → creed close → empty tomb. */
 export const NAMES_ARC = ['daily-names', 'daily-creed', 'daily-empty'] as const
 
+/** After the Easy door — outside names, ancient-first: Tacitus → James → Pliny. */
+export const STONE_ARC = ['sc-tacitus', 'sc-james', 'sc-pliny'] as const
+
 export type DigArcId = (typeof DIG_ARC)[number]
 export type NamesArcId = (typeof NAMES_ARC)[number]
+export type StoneArcId = (typeof STONE_ARC)[number]
 
 export function isDigArc(id: string): id is DigArcId {
   return (DIG_ARC as readonly string[]).includes(id)
@@ -28,13 +32,18 @@ export function isNamesArc(id: string): id is NamesArcId {
   return (NAMES_ARC as readonly string[]).includes(id)
 }
 
+export function isStoneArc(id: string): id is StoneArcId {
+  return (STONE_ARC as readonly string[]).includes(id)
+}
+
 /** Play is tap-in digs. Creed keeps the merge bowl. */
 export function isSourceDigLine(id: string): boolean {
   return (
     id === 'wb-women' ||
     id === 'wb-early' ||
     id === 'wb-method' ||
-    isNamesArc(id)
+    isNamesArc(id) ||
+    isStoneArc(id)
   )
 }
 
@@ -48,6 +57,12 @@ export function namesPrior(id: string): string | undefined {
   const index = (NAMES_ARC as readonly string[]).indexOf(id)
   if (index <= 0) return undefined
   return NAMES_ARC[index - 1]
+}
+
+export function stonePrior(id: string): string | undefined {
+  const index = (STONE_ARC as readonly string[]).indexOf(id)
+  if (index <= 0) return undefined
+  return STONE_ARC[index - 1]
 }
 
 export interface DigTablet {
@@ -176,6 +191,66 @@ const TABLETS: Record<string, DigTablet[]> = {
       era: 'ancient',
       title: 'Ignatius',
       bite: 'Ignatius names Jesus truly raised — not a ghost story over an occupied tomb.',
+    },
+  ],
+  'sc-tacitus': [
+    {
+      id: 0,
+      era: 'ancient',
+      title: 'Tacitus',
+      bite: 'Christus suffered the extreme penalty under Pontius Pilate. A Roman names Christ.',
+    },
+    {
+      id: 1,
+      era: 'ancient',
+      title: 'Rome',
+      bite: 'Tacitus says the movement then broke out again in Rome — not a private club.',
+    },
+    {
+      id: 2,
+      era: 'scripture',
+      title: 'Luke 23',
+      bite: 'The Gospels already name Pilate. Tacitus names the same public death of Christ.',
+    },
+  ],
+  'sc-james': [
+    {
+      id: 0,
+      era: 'ancient',
+      title: 'Josephus',
+      bite: 'Josephus names James, the brother of Jesus who was called Christ.',
+    },
+    {
+      id: 1,
+      era: 'ancient',
+      title: 'Ananus',
+      bite: 'Ananus has James stoned. An outside court names Jesus — not a church pamphlet.',
+    },
+    {
+      id: 2,
+      era: 'scripture',
+      title: 'Galatians 1',
+      bite: 'Paul names James the Lord’s brother. Josephus names the same Jesus called Christ.',
+    },
+  ],
+  'sc-pliny': [
+    {
+      id: 0,
+      era: 'ancient',
+      title: 'Pliny',
+      bite: 'Pliny writes that Christians sing a hymn to Christ as to a god.',
+    },
+    {
+      id: 1,
+      era: 'ancient',
+      title: 'Trajan',
+      bite: 'A Roman governor treated Christ’s name as public practice, not a hidden password.',
+    },
+    {
+      id: 2,
+      era: 'scripture',
+      title: 'Colossians 3',
+      bite: 'The churches already sang to Christ. Pliny overheard that public name from outside.',
     },
   ],
 }

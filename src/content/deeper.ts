@@ -328,6 +328,54 @@ const DOSSIERS: Record<string, DeeperLink[]> = {
   'j-fg-3': KALAM,
   'wb-women': [...WOMEN_HOLD, ...WOMEN_OUTSIDE],
   'j-wb-4': [...WOMEN_HOLD, ...WOMEN_OUTSIDE],
+  'sc-tacitus': [
+    father(
+      'Tacitus, Annals 15.44',
+      'https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.02.0078%3Abook%3D15%3Achapter%3D44',
+      'Tacitus · Christus under Pilate',
+    ),
+    rsv('Luke 23:1–25'),
+  ],
+  'j-sc-1': [
+    father(
+      'Tacitus, Annals 15.44',
+      'https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.02.0078%3Abook%3D15%3Achapter%3D44',
+      'Tacitus · Christus under Pilate',
+    ),
+    rsv('Luke 23:1–25'),
+  ],
+  'sc-james': [
+    father(
+      'Josephus, Antiquities 20.200',
+      'https://penelope.uchicago.edu/josephus/ant-20.html',
+      'Josephus · James the brother of Jesus called Christ',
+    ),
+    rsv('Galatians 1:19'),
+  ],
+  'j-sc-2': [
+    father(
+      'Josephus, Antiquities 20.200',
+      'https://penelope.uchicago.edu/josephus/ant-20.html',
+      'Josephus · James the brother of Jesus called Christ',
+    ),
+    rsv('Galatians 1:19'),
+  ],
+  'sc-pliny': [
+    father(
+      'Pliny the Younger, Letters 10.96',
+      'https://www.perseus.tufts.edu/hopper/text?doc=Plin.+Ep.+10.96',
+      'Pliny · hymn to Christ as to a god',
+    ),
+    rsv('Colossians 3:16'),
+  ],
+  'j-sc-3': [
+    father(
+      'Pliny the Younger, Letters 10.96',
+      'https://www.perseus.tufts.edu/hopper/text?doc=Plin.+Ep.+10.96',
+      'Pliny · hymn to Christ as to a god',
+    ),
+    rsv('Colossians 3:16'),
+  ],
   'wb-method': [
     rsv('Luke 1:1–4'),
     rsv('1 Corinthians 15:3–8'),

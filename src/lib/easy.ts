@@ -5,9 +5,17 @@ import { evidenceFor } from '../content/evidence.ts'
 import { packEasyOrder, packLesson } from '../content/packCatalog.ts'
 import { CITY_PLOTS, type CityPlotId } from './city.ts'
 import { currentLessonTier, needsTierHold, tierRank } from './tiers.ts'
-import { digPrior, namesPrior } from './sourceDig.ts'
+import { digPrior, namesPrior, stonePrior } from './sourceDig.ts'
 
-export { DIG_ARC, NAMES_ARC, digPrior, isSourceDigLine, namesPrior } from './sourceDig.ts'
+export {
+  DIG_ARC,
+  NAMES_ARC,
+  STONE_ARC,
+  digPrior,
+  isSourceDigLine,
+  namesPrior,
+  stonePrior,
+} from './sourceDig.ts'
 
 export function isEasy(progress: Pick<ProgressState, 'easyMode'> | { easyMode?: boolean }): boolean {
   return Boolean(progress.easyMode)
@@ -373,6 +381,7 @@ export function easyTapNext(goal: { kind: string; areaId?: string }): string {
   if (goal.areaId === 'observatory') return 'Tap this next — sky walk'
   if (goal.areaId === 'first-gate') return 'Tap this next — why a world'
   if (goal.areaId === 'high-lookout') return 'Tap this next — meaning walk'
+  if (goal.areaId === 'stone-court') return 'Tap this next — old names'
   return 'Tap this next'
 }
 
@@ -409,6 +418,12 @@ export function digReady(progress: Pick<ProgressState, 'easyHeld'>, id: string):
 
 export function namesReady(progress: Pick<ProgressState, 'easyHeld'>, id: string): boolean {
   const prior = namesPrior(id)
+  if (!prior) return true
+  return (progress.easyHeld ?? []).includes(prior)
+}
+
+export function stoneReady(progress: Pick<ProgressState, 'easyHeld'>, id: string): boolean {
+  const prior = stonePrior(id)
   if (!prior) return true
   return (progress.easyHeld ?? []).includes(prior)
 }
@@ -450,6 +465,9 @@ const LINE_HOME: Record<string, { whoId: CharacterId; plotId: CityPlotId }> = {
   'daily-names': { whoId: 'silas', plotId: 'bench' },
   'daily-creed': { whoId: 'silas', plotId: 'bench' },
   'daily-empty': { whoId: 'silas', plotId: 'bench' },
+  'sc-tacitus': { whoId: 'silas', plotId: 'bench' },
+  'sc-james': { whoId: 'silas', plotId: 'bench' },
+  'sc-pliny': { whoId: 'silas', plotId: 'bench' },
   'daily-lantern': { whoId: 'juniper', plotId: 'porch' },
   'daily-stars': { whoId: 'nora', plotId: 'observatory' },
   'daily-cosmos': { whoId: 'ansel', plotId: 'gate' },
@@ -459,7 +477,7 @@ const LINE_HOME: Record<string, { whoId: CharacterId; plotId: CityPlotId }> = {
 function homeFor(id: string): { whoId: CharacterId; plotId: CityPlotId } {
   if (LINE_HOME[id]) return LINE_HOME[id]
   if (id.startsWith('ph-') || id === 'td-watch') return { whoId: 'mercy', plotId: 'hollow' }
-  if (id.startsWith('wb-')) return { whoId: 'silas', plotId: 'bench' }
+  if (id.startsWith('wb-') || id.startsWith('sc-')) return { whoId: 'silas', plotId: 'bench' }
   if (id.startsWith('ob-')) return { whoId: 'nora', plotId: 'observatory' }
   if (id.startsWith('fg-')) return { whoId: 'ansel', plotId: 'gate' }
   if (id.startsWith('hl-')) return { whoId: 'hope', plotId: 'lookout' }
@@ -537,7 +555,8 @@ export function easyLineLearned(progress: EasyLoopProgress, id: string): boolean
  * in pack easyOrder — mercy-first (ph-road), Story Creek opening, then the
  * Why Gate foundation arc (order → reason → ought → ground), then Witness
  * Square Dig deeper (creed → women → early → method), then Names that stay
- * (names → creed close → empty). Each arc stays gated: the next opens only
+ * (names → creed close → empty), then after the Easy door Stone Court
+ * (Tacitus → James → Pliny). Each arc stays gated: the next opens only
  * after the prior Easy Hold.
  * After every Easy hold, the next unheld Easy line is Learn — not a Medium jump.
  * When the Easy trail is done, loop the first idea still below Hard.
@@ -549,6 +568,7 @@ export function easyLoopLine(progress: EasyLoopProgress): string {
     if (!foundationReady(progress, id)) continue
     if (!digReady(progress, id)) continue
     if (!namesReady(progress, id)) continue
+    if (!stoneReady(progress, id)) continue
     return id
   }
   for (const id of EASY_LINE_ORDER) {

@@ -104,7 +104,7 @@ assert.deepEqual(proto.unlockedPacks.sort(), ['harbor-walk', 'mill-street'])
 
 writeCommerce(emptyCommerce())
 
-assert.equal(EASY_LINE_ORDER.length, 39)
+assert.equal(EASY_LINE_ORDER.length, 42)
 assert.equal(EASY_LINE_ORDER[0], 'ph-road')
 assert.deepEqual(FOUNDATION_ARC, ['fg-order', 'fg-reason', 'fg-ought', 'fg-ground'])
 for (const street of PAID_STREETS) {
@@ -443,8 +443,8 @@ const iosProj = readFileSync(
   'utf8',
 )
 assert.match(iosProj, /PRODUCT_BUNDLE_IDENTIFIER = city.silver.unending/)
-assert.match(iosProj, /MARKETING_VERSION = 1.4.81/)
-assert.match(iosProj, /CURRENT_PROJECT_VERSION = 95/)
+assert.match(iosProj, /MARKETING_VERSION = 1.4.82/)
+assert.match(iosProj, /CURRENT_PROJECT_VERSION = 96/)
 
 resetBilling()
 

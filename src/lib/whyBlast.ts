@@ -54,6 +54,9 @@ export const WHY_BLAST_EXTRAS: Record<string, string[]> = {
   'daily-grace': ['Grace is a wage you earned.'],
   'daily-rest': ['The invitation is a steeper program.'],
   'daily-door': ['The image is a wall, not a door.'],
+  'sc-tacitus': ['Tacitus writes that he saw the empty tomb.'],
+  'sc-james': ['Josephus writes that he saw the risen Christ.'],
+  'sc-pliny': ['Pliny writes that Christians hide Christ’s name.'],
 }
 
 const GENERIC_WHY_MISSES = [

@@ -39,6 +39,7 @@ const AREA_ORDER: Record<string, number> = {
   observatory: 3,
   'first-gate': 4,
   'high-lookout': 5,
+  'stone-court': 6,
 }
 
 function decode(text: string): string {
@@ -141,7 +142,7 @@ function lociFromNames(place: string, person: string): Pick<PackLoci, 'plotId' |
   if (blob.includes('mercy') || blob.includes('creek') || blob.includes('hollow')) {
     return { plotId: 'hollow', who: 'mercy' }
   }
-  if (blob.includes('silas') || blob.includes('witness') || blob.includes('square')) {
+  if (blob.includes('court') || blob.includes('silas') || blob.includes('witness') || blob.includes('square')) {
     return { plotId: 'bench', who: 'silas' }
   }
   if (blob.includes('nora') || blob.includes('sky watch') || blob.includes('observatory')) {
@@ -456,6 +457,9 @@ function areaLociFallback(areaId: string, title: string, attrs: Record<string, s
   }
   if (areaId === 'high-lookout') {
     return { place: title || 'Meaning Ridge', person: 'Hope Ridge', plotId: 'lookout', who: 'hope' }
+  }
+  if (areaId === 'stone-court') {
+    return { place: title || 'Stone Court', person: 'Silas Whitman', plotId: 'bench', who: 'silas' }
   }
   return { place: title || 'East porch', person: 'Juniper Wick', plotId: 'porch', who: 'juniper' }
 }

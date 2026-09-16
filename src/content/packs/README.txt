@@ -1,7 +1,7 @@
 Silver City — area content packs (runtime source of truth)
 ==========================================================
 
-appVersion: 1.4.68  (from src/config/app.ts on main)
+appVersion: 1.4.82  (from src/config/app.ts on main)
 schemaVersion: 3
 generated: see each file’s generated= attribute (America/Chicago)
 host: https://cphillippe.github.io/Silver-dollar-city/
@@ -16,15 +16,16 @@ FILES
   observatory.xml      Sky Watch / Nora — 6 lessons
   first-gate.xml       Why Gate / Ansel — 11 lessons
   high-lookout.xml     Meaning Ridge / Hope — 7 lessons
-  index.xml            Pack list, Easy trail 1–39, holdRules, scoring, tools, trail notes, uiChrome
+  stone-court.xml      Stone Court / Silas — 3 lessons (after Easy door)
+  index.xml            Pack list, Easy trail 1–42, holdRules, scoring, tools, trail notes, uiChrome
   SCHEMA.md            How the game should load packs (1:1 field map)
 
 TOTALS
 ------
-  Lessons (claim·reason·source street facts): 39
-  Tiers per lesson: easy + medium + hard (39/39)
-  Easy trail lines: 39 (easyOrder 1–39)
-  Street facts: 39 (same as lessons)
+  Lessons (claim·reason·source street facts): 42
+  Tiers per lesson: easy + medium + hard (42/42)
+  Easy trail lines: 42 (easyOrder 1–42)
+  Street facts: 42 (same as lessons)
   Excluded from lessons: td-watch (Love how-to → index <tools>)
                          j-trail-* (thank-you cards → index <trailNotes>)
 
@@ -59,7 +60,7 @@ JOURNAL SCORING (score per level / best tier held)
   Encoded in: index.xml <scoring>, every lesson tier @points, journal
   scoreFromHeldTier="true". See SCHEMA.md.
 
-EASY TRAIL ORDER (easyOrder 1–39)
+EASY TRAIL ORDER (easyOrder 1–42)
 ---------------------------------
    1 ph-road          parable-hollow
    2 ph-father        parable-hollow
@@ -72,14 +73,14 @@ EASY TRAIL ORDER (easyOrder 1–39)
    9 wb-women         witness-bench
   10 wb-early         witness-bench
   11 wb-method        witness-bench
-  12 daily-lantern    parable-hollow
-  13 daily-stars      observatory
-  14 daily-cosmos     first-gate
-  15 hl-moral         high-lookout
-  16 ph-seeds         parable-hollow
-  17 daily-names      witness-bench
-  18 daily-creed      witness-bench
-  19 daily-empty      witness-bench
+  12 daily-names      witness-bench
+  13 daily-creed      witness-bench
+  14 daily-empty      witness-bench
+  15 daily-lantern    parable-hollow
+  16 daily-stars      observatory
+  17 daily-cosmos     first-gate
+  18 hl-moral         high-lookout
+  19 ph-seeds         parable-hollow
   20 daily-gems       parable-hollow
   21 daily-seed       parable-hollow
   22 daily-neighbor   parable-hollow
@@ -100,11 +101,15 @@ EASY TRAIL ORDER (easyOrder 1–39)
   37 daily-grace      high-lookout
   38 daily-rest       high-lookout
   39 daily-door       high-lookout
+  40 sc-tacitus       stone-court
+  41 sc-james         stone-court
+  42 sc-pliny         stone-court
 
 Sequence: mercy-first Story Creek opening, then Why Gate foundation pack
 (stepped unlock), then Witness Square Dig deeper (creed → women → early →
-method, stepped unlock), then porch leftovers → Sky Watch (fine-tuning
-stays here) → Why Gate cosmological walks → Meaning Ridge.
+method, stepped unlock), then Names that stay, then porch leftovers → Sky Watch
+(fine-tuning stays here) → Why Gate cosmological walks → Meaning Ridge, then
+Stone Court after the Easy door (Tacitus → James → Pliny, ancient-first source-dig).
 
 INCLUDED
 --------

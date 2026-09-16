@@ -10,9 +10,9 @@ import { storyPanelsFor, type StoryPanel } from './storyPanels.ts'
  * ph-father is the hold-to-run timing dash — sit-forever cannot hug.
  * ph-road is the Samaritan mercy maze (hurt man → help → inn).
  * wb-creed is the candy merge bowl (Suika). Witness Square Dig deeper (women /
- * early / method) and Names that stay (names / creed close / empty) are
- * source-dig tap-ins. Other Easy lessons stay panel-blast so gem extras
- * (Gap, +100) keep working. Queued later (do not mount): story-night TD.
+ * early / method), Names that stay (names / creed close / empty), and Stone Court
+ * (Tacitus / James / Pliny) are source-dig tap-ins. Other Easy lessons stay
+ * panel-blast so gem extras (Gap, +100) keep working. Queued later (do not mount): story-night TD.
  */
 export type StoryPlayKind = 'panel-blast' | 'father-run' | 'road-maze' | 'claim-merge' | 'source-dig'
 

@@ -68,6 +68,7 @@ export function pillarFor(id: string): string {
   for (const area of areas) {
     if (area.challenges.some((challenge) => challenge.id === id)) return area.id
   }
+  if (id.startsWith('sc-')) return 'stone-court'
   if (DAILY_PILLAR[id]) return DAILY_PILLAR[id]
   if (id === 'td-watch') return 'parable-hollow'
   const entry = journalEntries.find((item) => item.id === id || item.unlockAfter === id)

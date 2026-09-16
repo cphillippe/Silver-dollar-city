@@ -3,10 +3,11 @@ import { readFileSync } from 'node:fs'
 import { packLesson } from '../src/content/packCatalog.ts'
 import { easyDigTaps } from '../src/content/deeper.ts'
 import { emptyProgress } from '../src/lib/save.ts'
-import { DIG_ARC, EASY, EASY_LINE_ORDER, FOUNDATION_ARC, NAMES_ARC, easyLoopLine } from '../src/lib/easy.ts'
+import { DIG_ARC, EASY, EASY_LINE_ORDER, FOUNDATION_ARC, NAMES_ARC, STONE_ARC, easyLoopLine } from '../src/lib/easy.ts'
 import {
   DIG_ARC as SOURCE_DIG_ARC,
   NAMES_ARC as SOURCE_NAMES_ARC,
+  STONE_ARC as SOURCE_STONE_ARC,
   SOURCE_DIG_AGAIN,
   SOURCE_DIG_HINT,
   SOURCE_DIG_MISS,
@@ -22,8 +23,10 @@ import { storyPlayFor } from '../src/lib/storyPlay.ts'
 
 assert.deepEqual([...SOURCE_DIG_ARC], [...DIG_ARC])
 assert.deepEqual([...SOURCE_NAMES_ARC], [...NAMES_ARC])
+assert.deepEqual([...SOURCE_STONE_ARC], [...STONE_ARC])
 assert.deepEqual([...DIG_ARC], ['wb-creed', 'wb-women', 'wb-early', 'wb-method'])
 assert.deepEqual([...NAMES_ARC], ['daily-names', 'daily-creed', 'daily-empty'])
+assert.deepEqual([...STONE_ARC], ['sc-tacitus', 'sc-james', 'sc-pliny'])
 assert.equal(storyPlayFor('wb-creed'), 'claim-merge')
 assert.equal(storyPlayFor('wb-women'), 'source-dig')
 assert.equal(storyPlayFor('wb-early'), 'source-dig')
@@ -31,11 +34,16 @@ assert.equal(storyPlayFor('wb-method'), 'source-dig')
 assert.equal(storyPlayFor('daily-names'), 'source-dig')
 assert.equal(storyPlayFor('daily-creed'), 'source-dig')
 assert.equal(storyPlayFor('daily-empty'), 'source-dig')
+assert.equal(storyPlayFor('sc-tacitus'), 'source-dig')
+assert.equal(storyPlayFor('sc-james'), 'source-dig')
+assert.equal(storyPlayFor('sc-pliny'), 'source-dig')
 assert.equal(storyPlayFor('ph-debt'), 'panel-blast')
 assert.ok(!isSourceDigLine('wb-creed'))
 assert.ok(isSourceDigLine('wb-women'))
 assert.ok(isSourceDigLine('daily-names'))
 assert.ok(isSourceDigLine('daily-empty'))
+assert.ok(isSourceDigLine('sc-tacitus'))
+assert.ok(isSourceDigLine('sc-pliny'))
 
 assert.equal(SOURCE_DIG_WIN, 'DUG!')
 assert.equal(SOURCE_DIG_AGAIN, 'One more dig')
@@ -65,6 +73,27 @@ for (const id of ['wb-women', 'wb-early', 'wb-method', ...NAMES_ARC]) {
   )
 }
 
+for (const id of STONE_ARC) {
+  const tablets = digTablets(id)
+  assert.equal(tablets.length, 3, `${id} has three tablets`)
+  assert.equal(tablets[0]?.era, 'ancient', `${id} leads with an ancient name`)
+  assert.ok(tablets.some((row) => row.era === 'scripture'), `${id} has a Scripture support tap`)
+  assert.equal(digClaim(id), packLesson(id)?.claim)
+  assert.match(digClaim(id), /Christ/)
+  const taps = easyDigTaps(id)
+  assert.ok(taps.length >= 2 && taps.length <= 3, `${id} Dig the names is 2–3 taps`)
+  assert.ok(
+    taps.every((row) => row.era === 'scripture' || row.era === 'ancient'),
+    `${id} Easy taps stay scripture/ancient`,
+  )
+  const seated = seatTablets(id, 7)
+  assert.equal(seated.length, 3)
+  assert.deepEqual(
+    [...seated].map((row) => row.id).sort(),
+    [0, 1, 2],
+  )
+}
+
 assert.match(digTablets('wb-women')[2]?.bite ?? '', /Luke still writes/)
 assert.doesNotMatch(digTablets('wb-women')[2]?.bite ?? '', /If the churches invented/)
 assert.match(digTablets('wb-early')[0]?.bite ?? '', /Christ/)
@@ -75,9 +104,17 @@ assert.match(digTablets('daily-creed')[0]?.bite ?? '', /Christ/)
 assert.match(digTablets('daily-empty')[0]?.bite ?? '', /Jesus/)
 assert.doesNotMatch(digTablets('daily-creed')[0]?.bite ?? '', /If the creed is early/)
 
+assert.match(digTablets('sc-tacitus')[0]?.bite ?? '', /Christus|Pilate|Christ/)
+assert.doesNotMatch(digTablets('sc-tacitus')[0]?.bite ?? '', /empty tomb/)
+assert.match(digTablets('sc-james')[0]?.bite ?? '', /Christ/)
+assert.doesNotMatch(digTablets('sc-james')[0]?.bite ?? '', /18\.63|Testimonium/)
+assert.match(digTablets('sc-pliny')[0]?.bite ?? '', /Christ/)
+
 assert.ok(EASY_LINE_ORDER.indexOf('fg-ground') < EASY_LINE_ORDER.indexOf('wb-creed'))
 assert.deepEqual(EASY_LINE_ORDER.slice(7, 14), [...DIG_ARC, ...NAMES_ARC])
 assert.ok(EASY_LINE_ORDER.indexOf('daily-empty') < EASY_LINE_ORDER.indexOf('daily-lantern'))
+assert.ok(EASY_LINE_ORDER.indexOf('daily-door') < EASY_LINE_ORDER.indexOf('sc-tacitus'))
+assert.deepEqual(EASY_LINE_ORDER.slice(39, 42), [...STONE_ARC])
 
 const creek = {
   ...emptyProgress(),
@@ -112,6 +149,17 @@ assert.equal(
 assert.equal(
   easyLoopLine({ ...creek, easyHeld: [...creek.easyHeld, ...DIG_ARC, ...NAMES_ARC] }),
   'daily-lantern',
+)
+
+const afterDoor = {
+  ...emptyProgress(),
+  easyHeld: [...EASY_LINE_ORDER.slice(0, 39)],
+}
+assert.equal(easyLoopLine(afterDoor), 'sc-tacitus')
+assert.equal(easyLoopLine({ ...afterDoor, easyHeld: [...afterDoor.easyHeld, 'sc-tacitus'] }), 'sc-james')
+assert.equal(
+  easyLoopLine({ ...afterDoor, easyHeld: [...afterDoor.easyHeld, 'sc-tacitus', 'sc-james'] }),
+  'sc-pliny',
 )
 
 const playSrc = readFileSync(
