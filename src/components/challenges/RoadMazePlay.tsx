@@ -24,6 +24,10 @@ import {
   mazeItemAt,
   mazeKey,
   mazeSame,
+  MAZE_HELP_SCORE,
+  MAZE_INN_SCORE,
+  MAZE_ITEM_SCORE,
+  ROAD_MAZE_AGAIN,
   ROAD_MAZE_CLAIM,
   ROAD_MAZE_HINT,
   ROAD_MAZE_WIN,
@@ -33,7 +37,7 @@ import {
   type MazeItemId,
 } from '../../lib/roadMaze'
 import { mazeWinBeat } from '../../lib/successBeat'
-import { playGemPop, prefersReducedMotion } from '../../lib/juice'
+import { GEM_BURST, playGemPop, prefersReducedMotion } from '../../lib/juice'
 import { storyPanelsFor, type StoryPanel } from '../../lib/storyPanels'
 import { StoryPanelArt } from '../StoryPanelArt'
 import panelHelp from '../../assets/story/panel-help.webp'
@@ -48,7 +52,8 @@ interface RoadMazePlayProps {
   onEasyStop?: (dest: 'hold' | 'home') => void
 }
 
-const STEP_MS = 90
+const STEP_MS = 64
+const POP_SHARDS = [0, 1, 2, 3, 4]
 
 export function RoadMazePlay({
   lineId,
@@ -72,6 +77,10 @@ export function RoadMazePlay({
   const [winStamp, setWinStamp] = useState(false)
   const [plusFlash, setPlusFlash] = useState('')
   const [walking, setWalking] = useState(false)
+  const [score, setScore] = useState(0)
+  const [popAt, setPopAt] = useState('')
+  const [kitPop, setKitPop] = useState('')
+  const [comboFlash, setComboFlash] = useState(0)
   const atRef = useRef(at)
   const gotRef = useRef(got)
   const helpedRef = useRef(helped)
@@ -80,6 +89,7 @@ export function RoadMazePlay({
   const swipe = useRef<{ x: number; y: number } | null>(null)
   const usedTap = useRef(false)
   const misses = useRef(0)
+  const comboRef = useRef(0)
   const openedRef = useRef(1)
   const cleared = useRef(false)
 
@@ -118,6 +128,49 @@ export function RoadMazePlay({
     flashToast(goal.hint)
   }
 
+  function juiceCollect(cell: MazeCoord, itemId: MazeItemId) {
+    comboRef.current += 1
+    const next = comboRef.current
+    if (next >= 2) {
+      setComboFlash(next)
+      window.setTimeout(() => setComboFlash(0), 700)
+    }
+    setScore((pts) => pts + MAZE_ITEM_SCORE)
+    setPopAt(mazeKey(cell))
+    setKitPop(itemId)
+    setPlusFlash(`+${MAZE_ITEM_SCORE}`)
+    window.setTimeout(() => setPopAt(''), 420)
+    window.setTimeout(() => setKitPop(''), 480)
+    window.setTimeout(() => setPlusFlash(''), 800)
+  }
+
+  function replay() {
+    window.clearTimeout(walkRef.current)
+    atRef.current = MAZE_START
+    gotRef.current = []
+    helpedRef.current = false
+    wonRef.current = false
+    cleared.current = false
+    misses.current = 0
+    comboRef.current = 0
+    openedRef.current = 1
+    setAt(MAZE_START)
+    setGot([])
+    setHelped(false)
+    setWon(false)
+    setWinStamp(false)
+    setToast('')
+    setToastWhy('')
+    setPlusFlash('')
+    setHintCell('')
+    setWalking(false)
+    setFlipping(null)
+    setScore(0)
+    setPopAt('')
+    setKitPop('')
+    setComboFlash(0)
+  }
+
   function blocked(message: string) {
     setShake(true)
     playGemPop('miss')
@@ -134,8 +187,7 @@ export function RoadMazePlay({
       gotRef.current = bag
       setGot(bag)
       playGemPop('bonus')
-      setPlusFlash(item.label)
-      window.setTimeout(() => setPlusFlash(''), 800)
+      juiceCollect(cell, item.id)
       flashToast(item.yes, item.why)
       return bag
     }
@@ -143,6 +195,11 @@ export function RoadMazePlay({
       helpedRef.current = true
       setHelped(true)
       playGemPop('find')
+      setScore((pts) => pts + MAZE_HELP_SCORE)
+      setPlusFlash(`+${MAZE_HELP_SCORE}`)
+      setPopAt(mazeKey(cell))
+      window.setTimeout(() => setPopAt(''), 420)
+      window.setTimeout(() => setPlusFlash(''), 800)
       flashToast('Yes · You stopped.', 'You bind him and take him on.')
       return nextGot
     }
@@ -155,6 +212,7 @@ export function RoadMazePlay({
     setWon(true)
     setToast('')
     setToastWhy('')
+    setScore((pts) => pts + MAZE_INN_SCORE)
     playGemPop('win')
     if (!cleared.current) {
       cleared.current = true
@@ -266,7 +324,6 @@ export function RoadMazePlay({
       className={`play is-road-maze ${shake ? 'is-shake' : ''} ${won ? 'is-win' : ''} ${helped ? 'is-helped' : ''}`}
       style={{ ['--maze-cols' as string]: MAZE_COLS, ['--maze-rows' as string]: MAZE_ROWS }}
     >
-      <WinBurst play={winStamp} stamp={ROAD_MAZE_WIN} />
       <p className="sort-how">{EASY.mazeHunt}</p>
       <p className="story-kicker">
         {home.who} · {home.place}
@@ -290,7 +347,7 @@ export function RoadMazePlay({
       </p>
       <ul className="maze-kit" aria-label="Help to collect">
         {MAZE_ITEMS.map((item) => (
-          <li key={item.id} className={`maze-kit-item is-${item.id} ${got.includes(item.id) ? 'is-got' : ''}`}>
+          <li key={item.id} className={`maze-kit-item is-${item.id} ${got.includes(item.id) ? 'is-got' : ''} ${kitPop === item.id ? 'is-pop' : ''}`}>
             <span className="maze-kit-icon" aria-hidden />
             <span>{item.label}</span>
           </li>
@@ -307,11 +364,11 @@ export function RoadMazePlay({
           {plusFlash}!
         </p>
       ) : null}
-      {won ? (
-        <div className="maze-win-art" aria-hidden>
-          <StoryPanelArt scene="neighbor" media={panels[panels.length - 1]?.media} />
-        </div>
-      ) : (
+      {comboFlash > 1 ? (
+        <p className="maze-combo" role="status">
+          Combo ×{comboFlash}
+        </p>
+      ) : null}
       <div
         className="maze-board"
         role="grid"
@@ -324,6 +381,7 @@ export function RoadMazePlay({
         }}
         onKeyDown={onBoardKey}
       >
+        <WinBurst play={winStamp} stamp={ROAD_MAZE_WIN} />
         {Array.from({ length: MAZE_ROWS }, (_, r) =>
           Array.from({ length: MAZE_COLS }, (__, c) => {
             const cell = { r, c }
@@ -351,7 +409,7 @@ export function RoadMazePlay({
                   }
                   onCellDown(event, cell)
                 }}
-                className={`maze-cell ${road ? 'is-road' : 'is-rock'} ${here ? 'is-here' : ''} ${hurt ? 'is-hurt' : ''} ${inn ? 'is-inn' : ''} ${item && !taken ? `is-item is-${item.id}` : ''} ${glow ? 'is-hint' : ''}`}
+                className={`maze-cell ${road ? 'is-road' : 'is-rock'} ${here ? 'is-here' : ''} ${hurt ? 'is-hurt' : ''} ${inn ? 'is-inn' : ''} ${item && !taken ? `is-item is-${item.id}` : ''} ${glow ? 'is-hint' : ''} ${popAt === mazeKey(cell) ? 'is-pop' : ''}`}
               >
                 {here ? (
                   <span className="maze-actor is-you">
@@ -366,13 +424,29 @@ export function RoadMazePlay({
                 {helped && here ? <span className="maze-carry" aria-hidden /> : null}
                 {inn ? <span className="maze-inn" aria-hidden /> : null}
                 {item && !taken && !here ? <span className={`maze-drop is-${item.id}`} aria-hidden /> : null}
+                {popAt === mazeKey(cell)
+                  ? POP_SHARDS.map((i) => (
+                      <i key={i} className="maze-shard" style={{ ['--i' as string]: i }} />
+                    ))
+                  : null}
+                {popAt === mazeKey(cell)
+                  ? GEM_BURST.slice(0, 4).map((i) => (
+                      <b key={`p-${i}`} className="maze-burst" style={{ ['--i' as string]: i }} />
+                    ))
+                  : null}
               </button>
             )
           }),
         )}
+        {won ? (
+          <div className="maze-win-art" aria-hidden>
+            <StoryPanelArt scene="neighbor" media={panels[panels.length - 1]?.media} />
+          </div>
+        ) : null}
       </div>
-      )}
-      <p className="match-score">
+      <p className={`match-score ${plusFlash ? 'is-juice' : ''}`}>
+        {score}
+        {' · '}
         {got.length} / 3 help
         {helped ? ' · he is with you' : ''}
       </p>
@@ -389,6 +463,9 @@ export function RoadMazePlay({
               onClick={() => onEasyStop?.('hold')}
             >
               {EASY.holdNext}
+            </button>
+            <button type="button" className="btn gold xl" data-maze-again onClick={replay}>
+              {ROAD_MAZE_AGAIN}
             </button>
             <button type="button" className="btn xl" onClick={() => onEasyStop?.('home')}>
               {EASY.home}
