@@ -174,7 +174,7 @@ export function SourceDigPlay({
       <p className={`match-score ${plusFlash ? 'is-juice' : ''}`}>
         {score}
         {' · '}
-        {open.length} / {seats.length} dug
+        {open.length} / {seats.length}
       </p>
       {won ? (
         <>
