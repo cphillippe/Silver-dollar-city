@@ -2,7 +2,6 @@ import { useMemo, useRef, useState } from 'react'
 import { EASY, easyWhoWhere } from '../../lib/easy'
 import {
   SOURCE_DIG_AGAIN,
-  SOURCE_DIG_HINT,
   SOURCE_DIG_MISS,
   SOURCE_DIG_TAP_SCORE,
   SOURCE_DIG_WIN,
