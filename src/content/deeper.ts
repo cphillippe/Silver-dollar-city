@@ -143,6 +143,83 @@ const FINE_TUNING: DeeperLink[] = [
   ),
 ]
 
+const ORDER_HOLD: DeeperLink[] = [
+  rsv('Colossians 1:16–17'),
+  father(
+    'Augustine, City of God XI',
+    'https://www.newadvent.org/fathers/120111.htm',
+    'Augustine · creation’s given order',
+  ),
+  classic(
+    'Aquinas, ST I, q.44',
+    'https://www.newadvent.org/summa/1044.htm',
+    'Thomas Aquinas · God as cause of being and order',
+  ),
+  modern(
+    'Feser on classical theism (secondary)',
+    'https://edwardfeser.blogspot.com/2011/07/so-you-think-you-understand.html',
+    'Edward Feser · secondary guide only',
+  ),
+]
+
+const REASON_HOLD: DeeperLink[] = [
+  rsv('John 1:1–9'),
+  rsv('Romans 1:19–20'),
+  father(
+    'Augustine, Confessions VII',
+    'https://www.newadvent.org/fathers/110107.htm',
+    'Augustine · the Light that makes truth seen',
+  ),
+  classic(
+    'Aquinas, ST I, q.84 — how the soul knows',
+    'https://www.newadvent.org/summa/1084.htm',
+    'Thomas Aquinas · intellect and being',
+  ),
+  modern(
+    'Feser on classical theism (secondary)',
+    'https://edwardfeser.blogspot.com/2011/07/so-you-think-you-understand.html',
+    'Edward Feser · secondary guide only',
+  ),
+]
+
+const OUGHT_HOLD: DeeperLink[] = [
+  rsv('Romans 2:14–15'),
+  father(
+    'Augustine, City of God XIX',
+    'https://www.newadvent.org/fathers/120119.htm',
+    'Augustine · peace, law, and the good',
+  ),
+  classic(
+    'Aquinas, ST I-II, q.91 — kinds of law',
+    'https://www.newadvent.org/summa/2091.htm',
+    'Thomas Aquinas · natural law as share in eternal law',
+  ),
+  modern(
+    'Feser on classical theism (secondary)',
+    'https://edwardfeser.blogspot.com/2011/07/so-you-think-you-understand.html',
+    'Edward Feser · secondary guide only',
+  ),
+]
+
+const GROUND_HOLD: DeeperLink[] = [
+  rsv('Acts 17:24–28'),
+  father(
+    'Augustine, Confessions I.1',
+    'https://www.newadvent.org/fathers/110101.htm',
+    'Augustine · restless until it rests in you',
+  ),
+  classic(
+    'Aquinas, ST I, q.3 — the simplicity of God',
+    'https://www.newadvent.org/summa/1003.htm',
+    'Thomas Aquinas · God is not a first brick',
+  ),
+  modern(
+    'Feser on classical theism (secondary)',
+    'https://edwardfeser.blogspot.com/2011/07/so-you-think-you-understand.html',
+    'Edward Feser · secondary guide only',
+  ),
+]
+
 const FIRST_WAY: DeeperLink[] = [
   father(
     'Aristotle, Physics VIII',
@@ -235,6 +312,14 @@ const DOSSIERS: Record<string, DeeperLink[]> = {
   'ob-design': FINE_TUNING,
   'j-ob-1': FINE_TUNING,
   'j-ob-2': FINE_TUNING,
+  'fg-order': ORDER_HOLD,
+  'j-fg-order': ORDER_HOLD,
+  'fg-reason': REASON_HOLD,
+  'j-fg-reason': REASON_HOLD,
+  'fg-ought': OUGHT_HOLD,
+  'j-fg-ought': OUGHT_HOLD,
+  'fg-ground': GROUND_HOLD,
+  'j-fg-ground': GROUND_HOLD,
   'fg-mover': FIRST_WAY,
   'j-fg-1': FIRST_WAY,
   'fg-kalam': KALAM,

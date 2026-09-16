@@ -315,6 +315,42 @@ const STREET_FACTS: StreetFact[] = [
     caption: 'The world did not have to exist.',
   },
   {
+    evidenceId: 'fg-order',
+    ideaId: 'idea-order',
+    tripleId: 'order-gate',
+    placeId: 'place-gate',
+    personId: 'person-ansel',
+    text: 'You already trust that the world holds together in Christ.',
+    caption: 'The world holds together in Christ.',
+  },
+  {
+    evidenceId: 'fg-reason',
+    ideaId: 'idea-reason',
+    tripleId: 'reason-gate',
+    placeId: 'place-gate',
+    personId: 'person-ansel',
+    text: 'The reason you already trust needs a real ground.',
+    caption: 'Reason needs a real ground.',
+  },
+  {
+    evidenceId: 'fg-ought',
+    ideaId: 'idea-ought',
+    tripleId: 'ought-gate',
+    placeId: 'place-gate',
+    personId: 'person-ansel',
+    text: 'Finite nature cannot ground the ought you already trust.',
+    caption: 'Nature cannot ground ought.',
+  },
+  {
+    evidenceId: 'fg-ground',
+    ideaId: 'idea-ground',
+    tripleId: 'ground-gate',
+    placeId: 'place-gate',
+    personId: 'person-ansel',
+    text: 'The living God is the foundation of order, reason, and ought.',
+    caption: 'The living God is the foundation.',
+  },
+  {
     evidenceId: 'fg-mover',
     ideaId: 'idea-mover',
     tripleId: 'mover-gate',
@@ -466,11 +502,19 @@ export interface StreetWalk {
 
 function splitStreetGroup<T>(items: T[]): T[][] {
   if (items.length <= 5) return [items]
-  const first = Math.ceil(items.length / 2)
-  return [items.slice(0, first), items.slice(first)]
+  const groups: T[][] = []
+  let i = 0
+  while (i < items.length) {
+    const remaining = items.length - i
+    let n = Math.min(5, remaining)
+    if (remaining > 5 && remaining - n < 3) n = remaining - 3
+    groups.push(items.slice(i, i + n))
+    i += n
+  }
+  return groups
 }
 
-/** All 35 facts, grouped so a visit is ~one area / 3–5 triples — never a 70-link slog. */
+/** All 39 facts, grouped so a visit is ~one area / 3–5 triples — never a 70-link slog. */
 export function streetWalks(): StreetWalk[] {
   const walks: StreetWalk[] = []
   for (const place of PLACE_NODES) {
@@ -778,6 +822,26 @@ const LINK_CLUES: Record<string, Record<LinkStep, string>> = {
     place: 'That question lives at Why Gate.',
     person: 'Ansel keeps that gate.',
   },
+  'order-gate': {
+    idea: 'Ansel’s why — the world holds together in Christ.',
+    place: 'That question lives at Why Gate.',
+    person: 'Ansel keeps that gate.',
+  },
+  'reason-gate': {
+    idea: 'Ansel’s why — reason needs a real ground.',
+    place: 'That question lives at Why Gate.',
+    person: 'Ansel keeps that gate.',
+  },
+  'ought-gate': {
+    idea: 'Ansel’s why — nature cannot ground ought.',
+    place: 'That question lives at Why Gate.',
+    person: 'Ansel keeps that gate.',
+  },
+  'ground-gate': {
+    idea: 'Ansel’s why — the living God is the foundation.',
+    place: 'That question lives at Why Gate.',
+    person: 'Ansel keeps that gate.',
+  },
   'mover-gate': {
     idea: 'Ansel’s why — change needs a first actuality.',
     place: 'That question lives at Why Gate.',
@@ -971,6 +1035,22 @@ export const STREET_WHYS: Record<string, { easy: string; hard: string }> = {
   'ansel-gate': {
     easy: 'Ansel keeps Why Gate. The world exists — and did not have to.',
     hard: 'Ansel Gate keeps Why Gate. That the universe exists and did not have to is the why-a-world stone.',
+  },
+  'order-gate': {
+    easy: 'Ansel keeps Why Gate. The world holds together in Christ.',
+    hard: 'Ansel Gate keeps Why Gate. You already trust order — and Colossians names Christ as the One who holds all things.',
+  },
+  'reason-gate': {
+    easy: 'Ansel keeps Why Gate. Reason needs a real ground.',
+    hard: 'Ansel Gate keeps Why Gate. The reason you already trust is not free-floating — John names the Light.',
+  },
+  'ought-gate': {
+    easy: 'Ansel keeps Why Gate. Nature cannot ground ought.',
+    hard: 'Ansel Gate keeps Why Gate. Finite nature cannot ground the ought you already trust — the law is on the heart.',
+  },
+  'ground-gate': {
+    easy: 'Ansel keeps Why Gate. The living God is the foundation.',
+    hard: 'Ansel Gate keeps Why Gate. The living God is the foundation of order, reason, and ought — in him we live.',
   },
   'mover-gate': {
     easy: 'Ansel keeps Why Gate. Change needs a first actuality.',

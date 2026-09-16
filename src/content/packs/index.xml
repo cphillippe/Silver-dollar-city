@@ -1,49 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<silverCityPackIndex schemaVersion="3" appVersion="1.4.50" generated="2026-09-14T13:15:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/">
+<silverCityPackIndex schemaVersion="3" appVersion="1.4.64" generated="2026-09-16T09:00:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/">
   <howToEdit>Load one areaPack XML per area. Every lesson has three tiers: &lt;easy easyOrder="N"&gt;, &lt;medium&gt;, and &lt;hard&gt; — each with Learn/Match/Hold. Held claim stays plain on all tiers. Hold level-up / fail→Easy: see &lt;holdRules&gt;. Do not fork facts into separate files. Engine loader climb next.</howToEdit>
   <packs>
     <pack id="parable-hollow" file="parable-hollow.xml" title="Story Creek" person="Mercy Wren" lessonCount="8" />
     <pack id="witness-bench" file="witness-bench.xml" title="Witness Square" person="Silas Whitman" lessonCount="7" />
     <pack id="observatory" file="observatory.xml" title="Sky Watch" person="Nora Skye" lessonCount="6" />
-    <pack id="first-gate" file="first-gate.xml" title="Why Gate" person="Ansel Gate" lessonCount="7" />
+    <pack id="first-gate" file="first-gate.xml" title="Why Gate" person="Ansel Gate" lessonCount="11" />
     <pack id="high-lookout" file="high-lookout.xml" title="Meaning Ridge" person="Hope Ridge" lessonCount="7" />
   </packs>
-  <easyShelf order="ph-road,ph-father,ph-debt,wb-creed,wb-women,daily-lantern,daily-stars,daily-cosmos,hl-moral,ph-seeds,wb-early,wb-method,daily-names,daily-creed,daily-empty,daily-gems,daily-seed,daily-neighbor,ob-tuning,ob-design,ob-leibniz,ob-life,daily-life,fg-mover,fg-contingent,fg-kalam,fg-limits,daily-scroll,daily-isaiah,hl-mind,hl-meaning,hl-beauty,daily-grace,daily-rest,daily-door">
+  <easyShelf order="ph-road,ph-father,ph-debt,fg-order,fg-reason,fg-ought,fg-ground,wb-creed,wb-women,daily-lantern,daily-stars,daily-cosmos,hl-moral,ph-seeds,wb-early,wb-method,daily-names,daily-creed,daily-empty,daily-gems,daily-seed,daily-neighbor,ob-tuning,ob-design,ob-leibniz,ob-life,daily-life,fg-mover,fg-contingent,fg-kalam,fg-limits,daily-scroll,daily-isaiah,hl-mind,hl-meaning,hl-beauty,daily-grace,daily-rest,daily-door">
     <line id="ph-road" easyOrder="1" pack="parable-hollow">ph-road</line>
     <line id="ph-father" easyOrder="2" pack="parable-hollow">ph-father</line>
     <line id="ph-debt" easyOrder="3" pack="parable-hollow">ph-debt</line>
-    <line id="wb-creed" easyOrder="4" pack="witness-bench">wb-creed</line>
-    <line id="wb-women" easyOrder="5" pack="witness-bench">wb-women</line>
-    <line id="daily-lantern" easyOrder="6" pack="parable-hollow">daily-lantern</line>
-    <line id="daily-stars" easyOrder="7" pack="observatory">daily-stars</line>
-    <line id="daily-cosmos" easyOrder="8" pack="first-gate">daily-cosmos</line>
-    <line id="hl-moral" easyOrder="9" pack="high-lookout">hl-moral</line>
-    <line id="ph-seeds" easyOrder="10" pack="parable-hollow">ph-seeds</line>
-    <line id="wb-early" easyOrder="11" pack="witness-bench">wb-early</line>
-    <line id="wb-method" easyOrder="12" pack="witness-bench">wb-method</line>
-    <line id="daily-names" easyOrder="13" pack="witness-bench">daily-names</line>
-    <line id="daily-creed" easyOrder="14" pack="witness-bench">daily-creed</line>
-    <line id="daily-empty" easyOrder="15" pack="witness-bench">daily-empty</line>
-    <line id="daily-gems" easyOrder="16" pack="parable-hollow">daily-gems</line>
-    <line id="daily-seed" easyOrder="17" pack="parable-hollow">daily-seed</line>
-    <line id="daily-neighbor" easyOrder="18" pack="parable-hollow">daily-neighbor</line>
-    <line id="ob-tuning" easyOrder="19" pack="observatory">ob-tuning</line>
-    <line id="ob-design" easyOrder="20" pack="observatory">ob-design</line>
-    <line id="ob-leibniz" easyOrder="21" pack="observatory">ob-leibniz</line>
-    <line id="ob-life" easyOrder="22" pack="observatory">ob-life</line>
-    <line id="daily-life" easyOrder="23" pack="observatory">daily-life</line>
-    <line id="fg-mover" easyOrder="24" pack="first-gate">fg-mover</line>
-    <line id="fg-contingent" easyOrder="25" pack="first-gate">fg-contingent</line>
-    <line id="fg-kalam" easyOrder="26" pack="first-gate">fg-kalam</line>
-    <line id="fg-limits" easyOrder="27" pack="first-gate">fg-limits</line>
-    <line id="daily-scroll" easyOrder="28" pack="first-gate">daily-scroll</line>
-    <line id="daily-isaiah" easyOrder="29" pack="first-gate">daily-isaiah</line>
-    <line id="hl-mind" easyOrder="30" pack="high-lookout">hl-mind</line>
-    <line id="hl-meaning" easyOrder="31" pack="high-lookout">hl-meaning</line>
-    <line id="hl-beauty" easyOrder="32" pack="high-lookout">hl-beauty</line>
-    <line id="daily-grace" easyOrder="33" pack="high-lookout">daily-grace</line>
-    <line id="daily-rest" easyOrder="34" pack="high-lookout">daily-rest</line>
-    <line id="daily-door" easyOrder="35" pack="high-lookout">daily-door</line>
+    <line id="fg-order" easyOrder="4" pack="first-gate">fg-order</line>
+    <line id="fg-reason" easyOrder="5" pack="first-gate">fg-reason</line>
+    <line id="fg-ought" easyOrder="6" pack="first-gate">fg-ought</line>
+    <line id="fg-ground" easyOrder="7" pack="first-gate">fg-ground</line>
+    <line id="wb-creed" easyOrder="8" pack="witness-bench">wb-creed</line>
+    <line id="wb-women" easyOrder="9" pack="witness-bench">wb-women</line>
+    <line id="daily-lantern" easyOrder="10" pack="parable-hollow">daily-lantern</line>
+    <line id="daily-stars" easyOrder="11" pack="observatory">daily-stars</line>
+    <line id="daily-cosmos" easyOrder="12" pack="first-gate">daily-cosmos</line>
+    <line id="hl-moral" easyOrder="13" pack="high-lookout">hl-moral</line>
+    <line id="ph-seeds" easyOrder="14" pack="parable-hollow">ph-seeds</line>
+    <line id="wb-early" easyOrder="15" pack="witness-bench">wb-early</line>
+    <line id="wb-method" easyOrder="16" pack="witness-bench">wb-method</line>
+    <line id="daily-names" easyOrder="17" pack="witness-bench">daily-names</line>
+    <line id="daily-creed" easyOrder="18" pack="witness-bench">daily-creed</line>
+    <line id="daily-empty" easyOrder="19" pack="witness-bench">daily-empty</line>
+    <line id="daily-gems" easyOrder="20" pack="parable-hollow">daily-gems</line>
+    <line id="daily-seed" easyOrder="21" pack="parable-hollow">daily-seed</line>
+    <line id="daily-neighbor" easyOrder="22" pack="parable-hollow">daily-neighbor</line>
+    <line id="ob-tuning" easyOrder="23" pack="observatory">ob-tuning</line>
+    <line id="ob-design" easyOrder="24" pack="observatory">ob-design</line>
+    <line id="ob-leibniz" easyOrder="25" pack="observatory">ob-leibniz</line>
+    <line id="ob-life" easyOrder="26" pack="observatory">ob-life</line>
+    <line id="daily-life" easyOrder="27" pack="observatory">daily-life</line>
+    <line id="fg-mover" easyOrder="28" pack="first-gate">fg-mover</line>
+    <line id="fg-contingent" easyOrder="29" pack="first-gate">fg-contingent</line>
+    <line id="fg-kalam" easyOrder="30" pack="first-gate">fg-kalam</line>
+    <line id="fg-limits" easyOrder="31" pack="first-gate">fg-limits</line>
+    <line id="daily-scroll" easyOrder="32" pack="first-gate">daily-scroll</line>
+    <line id="daily-isaiah" easyOrder="33" pack="first-gate">daily-isaiah</line>
+    <line id="hl-mind" easyOrder="34" pack="high-lookout">hl-mind</line>
+    <line id="hl-meaning" easyOrder="35" pack="high-lookout">hl-meaning</line>
+    <line id="hl-beauty" easyOrder="36" pack="high-lookout">hl-beauty</line>
+    <line id="daily-grace" easyOrder="37" pack="high-lookout">daily-grace</line>
+    <line id="daily-rest" easyOrder="38" pack="high-lookout">daily-rest</line>
+    <line id="daily-door" easyOrder="39" pack="high-lookout">daily-door</line>
   </easyShelf>
   <holdRules>
     <summary>On Hold, the player may attempt a level-up to the next tier’s claim/why. If they fail the level-up — or fail Hold at the current tier — fall back to Easy (retry Easy Learn→Match→Hold: teach-before-test, not punish).</summary>
@@ -140,8 +144,8 @@
     <homesOnTheStreet>Homes on the street</homesOnTheStreet>
   </uiChrome>
   <flags>
-    <lessonsWithThreeTiers>35/35</lessonsWithThreeTiers>
-    <easyTrailCount>35</easyTrailCount>
+    <lessonsWithThreeTiers>39/39</lessonsWithThreeTiers>
+    <easyTrailCount>39</easyTrailCount>
     <holdFailFallback>easy</holdFailFallback>
   </flags>
 </silverCityPackIndex>

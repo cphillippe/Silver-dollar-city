@@ -65,6 +65,10 @@ const LESSON_SCENES: Record<string, StoryScene[]> = {
   'wb-women': ['tomb', 'tell', 'keep'],
   'daily-stars': ['sky', 'tell', 'keep'],
   'daily-cosmos': ['sky', 'keep', 'tell'],
+  'fg-order': ['keep', 'tell', 'creek'],
+  'fg-reason': ['lamp', 'tell', 'keep'],
+  'fg-ought': ['keep', 'tell', 'creek'],
+  'fg-ground': ['keep', 'tell', 'sky'],
 }
 
 /** Split pack shortStory on sentence ends — do not rewrite the words. */

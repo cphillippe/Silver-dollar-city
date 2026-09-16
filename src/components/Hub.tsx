@@ -236,7 +236,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
               <h2>Link the street</h2>
               <p className="quiet">Idea · place · person · one place per sitting</p>
               <p className="town-line">
-                Snap a claim to its lot and keeper. A sitting is tonight’s street — not all 35 facts at once.
+                Snap a claim to its lot and keeper. A sitting is tonight’s street — not all 39 facts at once.
               </p>
               <p className="street-lot-why">
                 Mercy’s pictures at the creek. Silas’s ledger at the square. Juniper’s lamp on the porch — meant to be seen.

@@ -103,6 +103,26 @@ const PLAIN: Record<string, PlainLine> = {
     'Cells store instructions and run a coordinated life. That looks like the work of mind. Wonder is rational. So is more lab work. Do not shrug it away.',
     { term: 'Specified information', sense: 'ordered instructions that do a real job — not random noise', hint: 'Keep the careful line. Toss both shrugs.' },
   ),
+  'fg-order': line(
+    'You already trust that the world holds together in Christ.',
+    'You already live as if the world hangs together — clocks, roads, promises. Colossians names Christ: all things were made through him, and in him they hold together.',
+    { term: 'Order', sense: 'the world hanging together — not a lucky pile', hint: 'Keep the lived trust. Toss the lucky pile.' },
+  ),
+  'fg-reason': line(
+    'The reason you already trust needs a real ground.',
+    'You already trust your mind enough to argue, count, and ask why. That trust is not a trick hanging in midair. John calls the Word the true light. Romans says what can be known of God is plain in what is made.',
+    { term: 'Ground', sense: 'what holds a trust up — not a shrug in midair', hint: 'Keep the ground. Toss the floating trick.' },
+  ),
+  'fg-ought': line(
+    'Finite nature cannot ground the ought you already trust.',
+    'You already treat some things as really wrong, not only a mood. Rocks and weather do not invent that pull. Romans says the law is already written on the heart.',
+    { term: 'Ought', sense: 'real right and wrong — not only a mood', hint: 'Keep the law on the heart. Toss nature-as-enough.' },
+  ),
+  'fg-ground': line(
+    'The living God is the foundation of order, reason, and ought.',
+    'Paul at Athens names the God who made the world and gives life and breath — the One in whom we live and move and have our being. That living God is the foundation.',
+    { term: 'Foundation', sense: 'the living God who holds what you already trust', hint: 'Keep the living God. Toss the dead brick.' },
+  ),
   'fg-mover': line(
     'Change here and now still asks for a first changer.',
     'Things go from “can be” to “is.” Nothing gives itself that step. A stack of receivers is not an answer. There is a first changer not itself changed.',

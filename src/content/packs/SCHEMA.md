@@ -10,7 +10,7 @@
 
 ```
 silver-city-packs/
-  index.xml              # pack list, Easy trail 1–35, holdRules, scoring, tools, trailNotes, uiChrome
+  index.xml              # pack list, Easy trail 1–39, holdRules, scoring, tools, trailNotes, uiChrome
   parable-hollow.xml     # Story Creek (+ East porch dailies)
   witness-bench.xml      # Witness Square
   observatory.xml        # Sky Watch
@@ -136,10 +136,11 @@ Rules:
 
 ## Easy trail order
 
-All **35** facts sit on the Easy trail with `easyOrder` 1–35 (see `index.xml` `<easyShelf>`):
+All **39** facts sit on the Easy trail with `easyOrder` 1–39 (see `index.xml` `<easyShelf>`):
 
-1. Keep former Easy shelf 1–9 first.
-2. Then remaining facts by area: finish Story Creek → Witness leftovers → porch leftovers → Sky Watch → Why Gate → Meaning Ridge.
+1. Keep mercy-first Story Creek opening (`ph-road`, `ph-father`, `ph-debt`).
+2. Why Gate foundation pack next, stepped: `fg-order` → `fg-reason` → `fg-ought` → `fg-ground` (next opens after prior Hold).
+3. Then remaining facts by area: Witness leftovers → porch leftovers → Sky Watch (fine-tuning stays here) → Why Gate cosmological walks → Meaning Ridge.
 
 Medium and Hard are available via mode select or Hold level-up — not a separate fact list.
 
@@ -155,7 +156,7 @@ Medium and Hard are available via mode select or Hold level-up — not a separat
 ## Index extras (`index.xml`)
 
 - `<packs>` — five area files + lesson counts
-- `<easyShelf>` — global Easy trail order 1–35 with `pack=` pointer
+- `<easyShelf>` — global Easy trail order 1–39 with `pack=` pointer
 - `<holdRules>` — level-up on Hold; fail → Easy
 - `<scoring>` — idea points by tier (10/12/15); journal showScorePerLevel + scoreFromHeldTier (best tier held)
 - `<tools>` — `td-watch` Love how-to (not a held claim)
@@ -166,7 +167,7 @@ Medium and Hard are available via mode select or Hold level-up — not a separat
 
 1. Fetch or bundle `index.xml` → discover area files + `holdRules`.
 2. Parse each `areaPack` → register lessons by `id`.
-3. Easy mode: iterate all lessons ordered by `easy/@easyOrder` (1–35).
+3. Easy mode: iterate all lessons ordered by `easy/@easyOrder` (1–39).
 4. Medium / Hard mode: use `<medium>` / `<hard>` tracks on the same lesson id.
 5. Street: build triples from each lesson’s `tripleId` / place / person / `ideaLabel`.
 6. Hold: use that tier’s `claim` / `reason` / `source` + choices; honor `@levelUpTo` / `@onFail`.

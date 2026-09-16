@@ -173,6 +173,63 @@ export const journalEntries: JournalEntry[] = [
     ],
   },
   {
+    id: 'j-fg-order',
+    areaId: 'first-gate',
+    title: 'We already trust order',
+    kicker: 'Why Gate',
+    unlockAfter: 'fg-order',
+    body: [
+      'You already live as if the world hangs together. Clocks, roads, and promises only work because order is real. That is not a slogan. It is the trust you already spend.',
+      'Colossians 1:16–17 names the holder: all things were made through Christ, and in him they hold together. Augustine and Aquinas read that given order as creation’s grain — not a lucky pile. The first foundation beat is this lived trust, with Christ named on the card.',
+    ],
+    sources: ['Colossians 1:16–17', 'Augustine, City of God XI', 'Aquinas, ST I, q.44'],
+  },
+  {
+    id: 'j-fg-reason',
+    areaId: 'first-gate',
+    title: 'Trust needs a ground',
+    kicker: 'Why Gate',
+    unlockAfter: 'fg-reason',
+    body: [
+      'You already trust reason. You argue, count, and ask why. That trust is not a trick hanging in midair. Free-floating reason explains nothing; it still borrows the light it uses.',
+      'John 1:1–9 names the Word as the true light. Romans 1:19–20 says what can be known of God is plain in what is made. Augustine’s illumination and Aquinas on intellect as measured by being both read that Light as the ground of our seeing — not a late accident at the end of a dark story.',
+    ],
+    sources: [
+      'John 1:1–9',
+      'Romans 1:19–20',
+      'Augustine, De Magistro; Confessions VII',
+      'Aquinas, ST I, q.16; q.84',
+    ],
+  },
+  {
+    id: 'j-fg-ought',
+    areaId: 'first-gate',
+    title: 'Nature alone is not enough',
+    kicker: 'Why Gate',
+    unlockAfter: 'fg-ought',
+    body: [
+      'You already trust ought. Some things are really wrong. Finite nature cannot be the ground of that pull. Rocks and weather do not write a law on the heart.',
+      'Romans 2:14–15 treats that law as already shared. Augustine locates the eternal law in God; Aquinas calls natural law our share in it. This is Ansel’s gate step — not Hope’s later ridge that duty is more than taste. Nature as a pile of facts is not enough.',
+    ],
+    sources: [
+      'Romans 2:14–15',
+      'Augustine, On Free Choice of the Will; City of God XIX',
+      'Aquinas, ST I-II, q.91',
+    ],
+  },
+  {
+    id: 'j-fg-ground',
+    areaId: 'first-gate',
+    title: 'God as living foundation',
+    kicker: 'Why Gate',
+    unlockAfter: 'fg-ground',
+    body: [
+      'Order, reason, and ought are not free-floating. Finite nature cannot hold them up. The foundation is the living God — not a dead first brick.',
+      'Acts 17:24–28 names the God who made the world and gives life and breath: in him we live and move and have our being. Augustine’s restless heart and Aquinas’s ipsum esse read that same living source. This beat is distinct from the later first-mover and kalām walks. It is the case-for-God foundation under the trusts you already spend.',
+    ],
+    sources: ['Acts 17:24–28', 'Augustine, Confessions I.1', 'Aquinas, ST I, q.3; q.44'],
+  },
+  {
     id: 'j-fg-1',
     areaId: 'first-gate',
     title: 'Unmoved mover',
@@ -352,7 +409,18 @@ for (const lesson of PACK_CATALOG.lessons) {
   const entry = journalEntries.find(
     (item) => item.unlockAfter === lesson.id || item.id === pack.id,
   )
-  if (!entry) continue
+  if (!entry) {
+    journalEntries.push({
+      id: pack.id || `j-${lesson.id}`,
+      areaId: lesson.areaId,
+      title: pack.title || lesson.title,
+      kicker: pack.kicker || '',
+      unlockAfter: pack.unlockAfter || lesson.id,
+      body: pack.body,
+      sources: pack.sources,
+    })
+    continue
+  }
   if (pack.title) entry.title = pack.title
   if (pack.kicker) entry.kicker = pack.kicker
   entry.body = pack.body
