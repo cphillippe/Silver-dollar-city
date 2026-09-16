@@ -135,12 +135,10 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
                 type="button"
                 className="btn"
                 onClick={() =>
-                  onNavigate(
-                    open ? { name: 'pack-street', packId: pack.id } : { name: 'shop' },
-                  )
+                  onNavigate({ name: 'pack-street', packId: pack.id })
                 }
               >
-                {open ? pack.street : `${pack.street} · ${pack.priceLabel}`}
+                {open ? pack.street : `Locked · ${pack.street} · ${pack.priceLabel}`}
               </button>
             )
           })}
