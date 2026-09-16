@@ -41,6 +41,7 @@ import {
   storyPanelsFor,
 } from '../src/lib/storyPanels.ts'
 import { lessonStory, storyPlayFor } from '../src/lib/storyPlay.ts'
+import { isSourceDigLine } from '../src/lib/sourceDig.ts'
 
 const mercyWords = gemWordsFor('ph-road')
 assert.ok(mercyWords.some((word) => word.text === 'MERCY'), 'Mercy the person')
@@ -329,6 +330,8 @@ assert.match(puzzleSrc, /panel-blast/)
 assert.match(puzzleSrc, /FatherRunPlay/)
 assert.match(puzzleSrc, /father-run/)
 assert.match(puzzleSrc, /claim-merge/)
+assert.match(puzzleSrc, /source-dig/)
+assert.match(puzzleSrc, /SourceDigPlay/)
 assert.doesNotMatch(puzzleSrc, /timing-dash|road-swipe|story-night/)
 
 const fatherStory = packLesson('ph-father')?.easy.learn ?? ''
@@ -348,7 +351,15 @@ for (const id of EASY_LINE_ORDER) {
   const panels = storyPanelsFor(id, puzzle.words.length)
   const story = lessonStory(id, puzzle.words.length)
   const play =
-    id === 'ph-father' ? 'father-run' : id === 'ph-road' ? 'road-maze' : id === 'wb-creed' ? 'claim-merge' : 'panel-blast'
+    id === 'ph-father'
+      ? 'father-run'
+      : id === 'ph-road'
+        ? 'road-maze'
+        : id === 'wb-creed'
+          ? 'claim-merge'
+          : isSourceDigLine(id)
+            ? 'source-dig'
+            : 'panel-blast'
   assert.equal(storyPlayFor(id), play, `${id} play`)
   assert.equal(story.play, play)
   assert.deepEqual(story.beats, panels)

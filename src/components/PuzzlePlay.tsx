@@ -7,6 +7,7 @@ import { ClaimMergePlay } from './challenges/ClaimMergePlay'
 import { FatherRunPlay } from './challenges/FatherRunPlay'
 import { GemSearchPlay } from './challenges/GemSearchPlay'
 import { RoadMazePlay } from './challenges/RoadMazePlay'
+import { SourceDigPlay } from './challenges/SourceDigPlay'
 import { LinkPlay } from './challenges/LinkPlay'
 import { MatchPlay } from './challenges/MatchPlay'
 import { SequencePlay } from './challenges/SequencePlay'
@@ -89,6 +90,15 @@ export function PuzzlePlay({
             <ClaimMergePlay
               lineId={story.lineId}
               beats={story.beats}
+              onMiss={onMiss}
+              onClear={onSolved}
+              onEasyStop={onEasyStop}
+            />
+          )
+        case 'source-dig':
+          return (
+            <SourceDigPlay
+              lineId={story.lineId}
               onMiss={onMiss}
               onClear={onSolved}
               onEasyStop={onEasyStop}

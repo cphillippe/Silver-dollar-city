@@ -95,7 +95,7 @@ assert.match(appSrc, /name === 'journal'/)
 assert.doesNotMatch(appSrc, /hub-banner/)
 
 const hubSrc = readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8')
-assert.match(hubSrc, /EASY\.matchCta|EASY\.mazeMatch|EASY\.runMatch|EASY\.mergeMatch/)
+assert.match(hubSrc, /EASY\.matchCta|EASY\.mazeMatch|EASY\.runMatch|EASY\.mergeMatch|EASY\.digMatch/)
 assert.match(hubSrc, /EASY\.saved/)
 assert.match(hubSrc, /EASY\.supportTrail/)
 assert.match(hubSrc, /extraStreetPacks/)

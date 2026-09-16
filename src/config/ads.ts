@@ -34,7 +34,7 @@ export const ADS_NEVER_COVER = [
   'Held Journal / evidence pages',
   'Match boards (gem panel-blast and extras)',
   'Hold Why Blast chips',
-  'Arcade play (claim-merge, panel-blast, father-run, road-maze)',
+  'Arcade play (claim-merge, panel-blast, father-run, road-maze, source-dig)',
   'Puzzle boards (sequence, match, sort, argument)',
   'What’s next footer on Map (ads sit between scenes, not as overlays on play)',
 ] as const
