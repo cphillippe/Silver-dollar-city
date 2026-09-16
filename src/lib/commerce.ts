@@ -121,15 +121,6 @@ export function unlockedPaidPacks(state: CommerceState = readCommerce()): ShopPa
   return SHOP_PACKS.filter((pack) => !pack.included && packIsUnlocked(pack.id, state))
 }
 
-export function billingSurface(): 'play' | 'web' {
-  if (typeof window === 'undefined') return 'web'
-  const cap = (
-    window as unknown as {
-      Capacitor?: { isNativePlatform?: () => boolean }
-    }
-  ).Capacitor
-  if (cap?.isNativePlatform?.()) return 'play'
-  return 'web'
-}
+export { storeSurface as billingSurface } from './nativeStore.ts'
 
 export { EMPTY as EMPTY_COMMERCE }

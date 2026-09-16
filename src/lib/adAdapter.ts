@@ -5,7 +5,7 @@
  */
 
 import { scenePauseMountsOn } from '../config/ads.ts'
-import { storeFlags } from '../config/store.ts'
+import { liveAdmobIds, storeFlags } from '../config/store.ts'
 import { readCommerce } from './commerce.ts'
 
 export type InterstitialResult = 'shown' | 'failed' | 'skipped'
@@ -49,7 +49,8 @@ export function readAdPlugin(): InterstitialPlugin | undefined {
 
 export function liveInterstitialConfigured(): boolean {
   const flags = storeFlags()
-  return flags.adsEnabled && flags.interstitialUnitId.length > 0
+  const { unitId } = liveAdmobIds()
+  return flags.adsEnabled && unitId.length > 0
 }
 
 export function liveInterstitialReady(): boolean {
@@ -79,7 +80,7 @@ export async function showBetweenSceneInterstitial(viewName: string): Promise<Be
   if (readCommerce().removeAds) return 'skip'
   if (!liveInterstitialReady()) return 'soft'
   const plugin = readAdPlugin()
-  const unitId = storeFlags().interstitialUnitId
+  const { unitId } = liveAdmobIds()
   if (!plugin || !unitId) return 'soft'
   try {
     await plugin.prepare(unitId)

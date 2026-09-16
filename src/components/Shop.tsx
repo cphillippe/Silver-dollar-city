@@ -79,11 +79,13 @@ export function Shop({ onNavigate }: ShopProps) {
       )
       return
     }
-    afterGrant(
-      surface === 'play'
-        ? 'Nothing to restore here yet. On Play, this will ask Google Play for the same SKUs.'
-        : 'Nothing to restore on this device yet.',
-    )
+      afterGrant(
+        surface === 'play'
+          ? 'Nothing to restore here yet. On Play, this will ask Google Play for the same SKUs.'
+          : surface === 'app-store'
+            ? 'Nothing to restore here yet. On iPhone, this will ask the App Store for the same SKUs.'
+            : 'Nothing to restore on this device yet.',
+      )
   }
 
   function openStreet(packId: string) {
@@ -115,8 +117,12 @@ export function Shop({ onNavigate }: ShopProps) {
           {cannotCharge()
             ? surface === 'play'
               ? `Play product ${REMOVE_ADS_PRODUCT.sku} uses the IAP adapter when the plugin is connected.`
-              : 'This Pages build cannot charge. Unlock on this device — the same flag Play will set later.'
-            : 'Play Billing will charge this SKU. Restore asks Google Play for the same products.'}
+              : surface === 'app-store'
+                ? `App Store product ${REMOVE_ADS_PRODUCT.sku} uses StoreKit when the plugin is connected.`
+                : 'This Pages build cannot charge. Unlock on this device — the same flag Play / App Store will set later.'
+            : surface === 'app-store'
+              ? 'StoreKit will charge this SKU. Restore asks the App Store for the same products.'
+              : 'Play Billing will charge this SKU. Restore asks Google Play for the same products.'}
         </p>
         <div className="settings-actions">
           {removeAds ? (

@@ -20,20 +20,28 @@ export function CheckoutSheet({ offer, onConfirm, onCancel }: CheckoutSheetProps
         <h2 id="checkout-title">{product.title}</h2>
         <p>{product.blurb}</p>
         <p className="teach-chip" role="note">
-          {demo ? `${product.priceLabel} · this device cannot charge` : `${product.priceLabel} · Play Billing`}
+          {demo
+            ? `${product.priceLabel} · this device cannot charge`
+            : `${product.priceLabel} · ${surface === 'app-store' ? 'App Store' : 'Play Billing'}`}
         </p>
         <p className="quiet">
           {demo
             ? surface === 'play'
               ? 'Play Billing plugin is not connected. Unlock writes the same grant Play will send later.'
-              : 'This Pages build cannot charge. Unlock on this device — the same flag Play IAP will set later.'
-            : 'Google Play will charge this SKU. The same grantRemoveAds / grantPack flags apply.'}
+              : surface === 'app-store'
+                ? 'StoreKit plugin is not connected. Unlock writes the same grant the App Store will send later.'
+                : 'This Pages build cannot charge. Unlock on this device — the same flag Play / App Store IAP will set later.'
+            : surface === 'app-store'
+              ? 'The App Store will charge this SKU. The same grantRemoveAds / grantPack flags apply.'
+              : 'Google Play will charge this SKU. The same grantRemoveAds / grantPack flags apply.'}
         </p>
         <div className="scene-ad-actions">
           <button type="button" className="btn gold xl" onClick={onConfirm}>
             {demo
               ? `Unlock on this device · ${product.priceLabel}`
-              : `Buy with Play · ${product.priceLabel}`}
+              : surface === 'app-store'
+                ? `Buy with App Store · ${product.priceLabel}`
+                : `Buy with Play · ${product.priceLabel}`}
           </button>
           <button type="button" className="btn" onClick={onCancel}>
             Cancel
