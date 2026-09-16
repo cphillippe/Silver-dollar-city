@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<silverCityPackIndex schemaVersion="3" appVersion="1.4.82" generated="2026-09-16T09:00:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/">
+<silverCityPackIndex schemaVersion="3" appVersion="1.4.84" generated="2026-09-16T16:00:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/">
   <howToEdit>Load one areaPack XML per area. Every lesson has three tiers: &lt;easy easyOrder="N"&gt;, &lt;medium&gt;, and &lt;hard&gt; — each with Learn/Match/Hold. Held claim stays plain on all tiers. Hold level-up / fail→Easy: see &lt;holdRules&gt;. Do not fork facts into separate files. Engine loader climb next.</howToEdit>
   <packs>
     <pack id="parable-hollow" file="parable-hollow.xml" title="Story Creek" person="Mercy Wren" lessonCount="8" />
@@ -8,8 +8,9 @@
     <pack id="first-gate" file="first-gate.xml" title="Why Gate" person="Ansel Gate" lessonCount="11" />
     <pack id="high-lookout" file="high-lookout.xml" title="Meaning Ridge" person="Hope Ridge" lessonCount="7" />
     <pack id="stone-court" file="stone-court.xml" title="Stone Court" person="Silas Whitman" lessonCount="3" />
+    <pack id="ink-court" file="ink-court.xml" title="Ink Court" person="Silas Whitman" lessonCount="3" />
   </packs>
-  <easyShelf order="ph-road,ph-father,ph-debt,fg-order,fg-reason,fg-ought,fg-ground,wb-creed,wb-women,wb-early,wb-method,daily-names,daily-creed,daily-empty,daily-lantern,daily-stars,daily-cosmos,hl-moral,ph-seeds,daily-gems,daily-seed,daily-neighbor,ob-tuning,ob-design,ob-leibniz,ob-life,daily-life,fg-mover,fg-contingent,fg-kalam,fg-limits,daily-scroll,daily-isaiah,hl-mind,hl-meaning,hl-beauty,daily-grace,daily-rest,daily-door,sc-tacitus,sc-james,sc-pliny">
+  <easyShelf order="ph-road,ph-father,ph-debt,fg-order,fg-reason,fg-ought,fg-ground,wb-creed,wb-women,wb-early,wb-method,daily-names,daily-creed,daily-empty,daily-lantern,daily-stars,daily-cosmos,hl-moral,ph-seeds,daily-gems,daily-seed,daily-neighbor,ob-tuning,ob-design,ob-leibniz,ob-life,daily-life,fg-mover,fg-contingent,fg-kalam,fg-limits,daily-scroll,daily-isaiah,hl-mind,hl-meaning,hl-beauty,daily-grace,daily-rest,daily-door,sc-tacitus,sc-james,sc-pliny,ic-trajan,ic-suetonius,ic-lucian">
     <line id="ph-road" easyOrder="1" pack="parable-hollow">ph-road</line>
     <line id="ph-father" easyOrder="2" pack="parable-hollow">ph-father</line>
     <line id="ph-debt" easyOrder="3" pack="parable-hollow">ph-debt</line>
@@ -52,6 +53,9 @@
     <line id="sc-tacitus" easyOrder="40" pack="stone-court">sc-tacitus</line>
     <line id="sc-james" easyOrder="41" pack="stone-court">sc-james</line>
     <line id="sc-pliny" easyOrder="42" pack="stone-court">sc-pliny</line>
+    <line id="ic-trajan" easyOrder="43" pack="ink-court">ic-trajan</line>
+    <line id="ic-suetonius" easyOrder="44" pack="ink-court">ic-suetonius</line>
+    <line id="ic-lucian" easyOrder="45" pack="ink-court">ic-lucian</line>
   </easyShelf>
   <holdRules>
     <summary>On Hold, the player may attempt a level-up to the next tier’s claim/why. If they fail the level-up — or fail Hold at the current tier — fall back to Easy (retry Easy Learn→Match→Hold: teach-before-test, not punish).</summary>
@@ -151,8 +155,8 @@
     <homesOnTheStreet>Homes on the street</homesOnTheStreet>
   </uiChrome>
   <flags>
-    <lessonsWithThreeTiers>42/42</lessonsWithThreeTiers>
-    <easyTrailCount>42</easyTrailCount>
+    <lessonsWithThreeTiers>45/45</lessonsWithThreeTiers>
+    <easyTrailCount>45</easyTrailCount>
     <holdFailFallback>easy</holdFailFallback>
   </flags>
 </silverCityPackIndex>

@@ -1,0 +1,472 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<areaPack id="ink-court" schemaVersion="3" appVersion="1.4.84" generated="2026-09-16T16:00:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/" title="Ink Court" place="Ink Court" person="Silas Whitman" personId="silas" plotId="bench">
+  <howToEdit>RUNTIME CONTENT: the game loads this file as the source of truth for this area. Change player-facing text in place inside each &lt;lesson&gt;. Stable id attributes (ph-father, …) are engine keys — do not rename without a migration. Three tiers per fact: &lt;easy easyOrder="N"&gt;, &lt;medium&gt;, and &lt;hard&gt; — each with &lt;learn&gt;, &lt;match&gt;, and &lt;hold&gt;. Held claim·reason·source stay plain and identical on all three. Hold level-up: see hold @levelUpTo / @onFail and index &lt;holdRules&gt;. Empty optional elements are intentional. Escape &amp; &lt; &gt; in text.</howToEdit>
+  <meta>
+    <title>Silver City — Ink Court</title>
+    <subtitle>More outside ink for Christ</subtitle>
+    <blurb>After Stone Court’s Pliny Hold, a new street of ink: Trajan, Suetonius, Lucian — Christ named by writers who were not the church.</blurb>
+    <notes>Runtime/build content pack. After Pliny, a new street: ancient-first source-dig. Engine maps lesson fields 1:1 to Learn / Match / Hold / Journal / street.</notes>
+  </meta>
+  <easyShelf order="ic-trajan,ic-suetonius,ic-lucian">
+    <line id="ic-trajan" easyOrder="43">ic-trajan</line>
+    <line id="ic-suetonius" easyOrder="44">ic-suetonius</line>
+    <line id="ic-lucian" easyOrder="45">ic-lucian</line>
+  </easyShelf>
+  <lessons>
+    <lesson id="ic-trajan" place="Ink Court" person="Silas Whitman" tripleId="trajan-ink" ideaId="idea-trajan" ideaLabel="Trajan writes: do not hunt Christians out." challengeKind="sort" challengeTitle="Do not hunt them out">
+      <easy points="10" easyOrder="43">
+        <learn>
+          <shortStory>The emperor Trajan writes back to Pliny. Do not hunt Christians out. If someone is accused and they keep the name, punish. Christ’s name is already a public Roman case.</shortStory>
+          <mainIdea>Trajan writes: do not hunt Christians out.</mainIdea>
+          <gloss>Trajan writes: do not hunt Christians out.</gloss>
+          <loci>This idea lives at Ink Court, with Silas.</loci>
+          <word>
+            <term>Trajan</term>
+            <sense>the Roman emperor Pliny asked about Christians</sense>
+          </word>
+          <hint>Keep the public case. Toss a secret hunt.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>Trajan writes: do not hunt Christians out.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Trajan orders every Christian found in secret.</miss>
+            <miss>Trajan says Christ is only a private password.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at Ink Court.</placePrompt>
+          <personPrompt>Silas keeps that court.</personPrompt>
+          <ideaPrompt>Silas’s outside name — Trajan writes: do not hunt Christians out.</ideaPrompt>
+          <ideaLabel>Trajan writes: do not hunt Christians out.</ideaLabel>
+          <whyEasy>Silas keeps Ink Court. Trajan writes: do not hunt Christians out.</whyEasy>
+        </match>
+        <hold levelUpTo="medium" onFail="easy">
+          <claim>Trajan writes: do not hunt Christians out.</claim>
+          <reason>The emperor treats Christ’s name as a public case, not a secret hunt.</reason>
+          <source>Pliny the Younger, Letters 10.97</source>
+          <whyCorrect>The emperor treats Christ’s name as a public case, not a secret hunt.</whyCorrect>
+          <whyMisses>
+            <miss>Trajan orders every Christian found in secret.</miss>
+            <miss>Christ’s name is only a private club password.</miss>
+            <miss>Trajan says they must hide Christ’s name.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Trajan writes: do not hunt Christians out.</choice>
+            <choice>Trajan orders every Christian found in secret.</choice>
+            <choice>Trajan says Christ is only a private password.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>The emperor treats Christ’s name as a public case, not a secret hunt.</choice>
+            <choice>Trajan orders every Christian found in secret.</choice>
+            <choice>Christ’s name is only a private club password.</choice>
+          </reasonChoices>
+        </hold>
+      </easy>
+      <medium points="12">
+        <learn>
+          <mediumTeach>Pliny, Letters 10.97. Trajan answers a governor who asked what to do with people called Christians. Do not hunt them out. If they are accused and persist, punish. Christ’s name is already on a Roman desk — not a hidden password Pliny invented.</mediumTeach>
+          <mainIdea>Trajan writes: do not hunt Christians out.</mainIdea>
+          <gloss>Trajan writes: do not hunt Christians out.</gloss>
+          <loci>This idea lives at Ink Court, with Silas.</loci>
+          <word>
+            <term>Trajan</term>
+            <sense>the Roman emperor Pliny asked about Christians</sense>
+          </word>
+          <hint>Keep the public case. Toss a secret hunt.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>Trajan writes: do not hunt Christians out.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Trajan orders every Christian found in secret.</miss>
+            <miss>Trajan says Christ is only a private password.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at Ink Court.</placePrompt>
+          <personPrompt>Silas keeps that court.</personPrompt>
+          <ideaPrompt>Silas’s outside name — Trajan writes: do not hunt Christians out.</ideaPrompt>
+          <ideaLabel>Trajan writes: do not hunt Christians out.</ideaLabel>
+          <whyMedium>Silas keeps Ink Court. Trajan writes: do not hunt Christians out.</whyMedium>
+        </match>
+        <hold levelUpTo="hard" onFail="easy">
+          <claim>Trajan writes: do not hunt Christians out.</claim>
+          <reason>The emperor treats Christ’s name as a public case, not a secret hunt.</reason>
+          <source>Pliny the Younger, Letters 10.97</source>
+          <whyCorrect>The emperor treats Christ’s name as a public case, not a secret hunt.</whyCorrect>
+          <whyMisses>
+            <miss>Trajan orders every Christian found in secret.</miss>
+            <miss>Christ’s name is only a private club password.</miss>
+            <miss>Trajan says they must hide Christ’s name.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Trajan writes: do not hunt Christians out.</choice>
+            <choice>Trajan orders every Christian found in secret.</choice>
+            <choice>Trajan says Christ is only a private password.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>The emperor treats Christ’s name as a public case, not a secret hunt.</choice>
+            <choice>Trajan orders every Christian found in secret.</choice>
+            <choice>Christ’s name is only a private club password.</choice>
+          </reasonChoices>
+        </hold>
+      </medium>
+      <hard points="15">
+        <learn>
+          <hardTeach>Pliny, Letters 10.97. Trajan’s rescript: they are not to be hunted out. If they are brought and persist, they are to be punished. If they deny and worship our gods, they are to be pardoned.
+Christ’s name is already a public Roman problem. Trajan does not invent a secret club. He answers a governor who already heard Christians sing to Christ. Do not claim Trajan wrote a Gospel. Hold the edict: do not hunt them out.</hardTeach>
+          <fullTeach>Pliny, Letters 10.97. Trajan’s rescript: they are not to be hunted out. If they are brought and persist, they are to be punished. If they deny and worship our gods, they are to be pardoned.
+Christ’s name is already a public Roman problem. Trajan does not invent a secret club. He answers a governor who already heard Christians sing to Christ. Do not claim Trajan wrote a Gospel. Hold the edict: do not hunt them out.</fullTeach>
+          <prompt>What does this outside name actually hold?</prompt>
+          <teachOnWrong>Trajan writes: do not hunt Christians out. The emperor treats Christ’s name as a public case, not a secret hunt.</teachOnWrong>
+          <challengeTiles>
+            <keep>Trajan writes: do not hunt Christians out.</keep>
+            <keep>The emperor treats Christ’s name as a public case, not a secret hunt.</keep>
+            <keep>An outside writer names Christ without a church pamphlet.</keep>
+            <discard>Trajan orders every Christian found in secret.</discard>
+          </challengeTiles>
+        </learn>
+        <match>
+          <sentenceCorrect>Trajan writes: do not hunt Christians out.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Trajan orders every Christian found in secret.</miss>
+            <miss>Trajan says Christ is only a private password.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at Ink Court.</placePrompt>
+          <personPrompt>Silas keeps that court.</personPrompt>
+          <ideaPrompt>Silas’s outside name — Trajan writes: do not hunt Christians out.</ideaPrompt>
+          <ideaLabel>Trajan writes: do not hunt Christians out.</ideaLabel>
+          <whyHard>Silas Whitman keeps Ink Court. Trajan writes: do not hunt Christians out — a Roman ink name, not a creek picture.</whyHard>
+        </match>
+        <hold onFail="easy">
+          <claim>Trajan writes: do not hunt Christians out.</claim>
+          <reason>The emperor treats Christ’s name as a public case, not a secret hunt.</reason>
+          <source>Pliny the Younger, Letters 10.97</source>
+          <whyCorrect>The emperor treats Christ’s name as a public case, not a secret hunt.</whyCorrect>
+          <whyMisses>
+            <miss>Trajan orders every Christian found in secret.</miss>
+            <miss>Christ’s name is only a private club password.</miss>
+            <miss>Trajan says they must hide Christ’s name.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Trajan writes: do not hunt Christians out.</choice>
+            <choice>Trajan orders every Christian found in secret.</choice>
+            <choice>Trajan says Christ is only a private password.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>The emperor treats Christ’s name as a public case, not a secret hunt.</choice>
+            <choice>Trajan orders every Christian found in secret.</choice>
+            <choice>Christ’s name is only a private club password.</choice>
+          </reasonChoices>
+        </hold>
+      </hard>
+      <journal id="j-ic-trajan" title="Do not hunt them out" kicker="Ink Court" unlockAfter="ic-trajan" scoreFromHeldTier="true">
+        <p>Trajan writes: do not hunt Christians out. The emperor treats Christ’s name as a public case, not a secret hunt. Pliny already heard them sing to Christ. Trajan answers with an edict, not a Gospel.</p>
+        <p>The churches already named Christ in the open. Rome had to decide what to do with that name.</p>
+        <sources>
+          <source>Pliny the Younger, Letters 10.97</source>
+        </sources>
+      </journal>
+    </lesson>
+    <lesson id="ic-suetonius" place="Ink Court" person="Silas Whitman" tripleId="suetonius-ink" ideaId="idea-suetonius" ideaLabel="Suetonius names Christians among Nero’s punishments." challengeKind="sort" challengeTitle="Nero punished Christians">
+      <easy points="10" easyOrder="44">
+        <learn>
+          <shortStory>Suetonius writes a life of Nero. He names Christians as a class Nero punished. A Roman book treats the name of Christ as a public people in Rome, not a later church invention.</shortStory>
+          <mainIdea>Suetonius names Christians among the people Nero punished.</mainIdea>
+          <gloss>Suetonius names Christians among the people Nero punished.</gloss>
+          <loci>This idea lives at Ink Court, with Silas.</loci>
+          <word>
+            <term>Suetonius</term>
+            <sense>a Roman writer of emperors’ lives</sense>
+          </word>
+          <hint>Keep Nero 16. Do not rest Easy on Chrestus.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>Suetonius names Christians among the people Nero punished.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Suetonius writes that he saw the risen Christ.</miss>
+            <miss>Suetonius says Christians never lived in Rome.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at Ink Court.</placePrompt>
+          <personPrompt>Silas keeps that court.</personPrompt>
+          <ideaPrompt>Silas’s outside name — Suetonius names Christians among Nero’s punishments.</ideaPrompt>
+          <ideaLabel>Suetonius names Christians among Nero’s punishments.</ideaLabel>
+          <whyEasy>Silas keeps Ink Court. Suetonius names Christians among the people Nero punished.</whyEasy>
+        </match>
+        <hold levelUpTo="medium" onFail="easy">
+          <claim>Suetonius names Christians among the people Nero punished.</claim>
+          <reason>A Roman biographer treats the name of Christ as a public class in Rome.</reason>
+          <source>Suetonius, Nero 16.2</source>
+          <whyCorrect>A Roman biographer treats the name of Christ as a public class in Rome.</whyCorrect>
+          <whyMisses>
+            <miss>Suetonius writes that he saw the risen Christ.</miss>
+            <miss>The name Christians is only a later church pamphlet.</miss>
+            <miss>Easy Hold rests on Claudius and Chrestus alone.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Suetonius names Christians among the people Nero punished.</choice>
+            <choice>Suetonius writes that he saw the risen Christ.</choice>
+            <choice>Suetonius says Christians never lived in Rome.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>A Roman biographer treats the name of Christ as a public class in Rome.</choice>
+            <choice>Suetonius writes that he saw the risen Christ.</choice>
+            <choice>The name Christians is only a later church pamphlet.</choice>
+          </reasonChoices>
+        </hold>
+      </easy>
+      <medium points="12">
+        <learn>
+          <mediumTeach>Suetonius, Nero 16.2. In a list of Nero’s public acts, a Roman biographer names punishment inflicted on the Christians — a class of people given to a new superstition. He is not telling Easter. He is naming a people already known in Rome by Christ’s name. Easy does not rest on the harder Claudius / Chrestus line.</mediumTeach>
+          <mainIdea>Suetonius names Christians among the people Nero punished.</mainIdea>
+          <gloss>Suetonius names Christians among the people Nero punished.</gloss>
+          <loci>This idea lives at Ink Court, with Silas.</loci>
+          <word>
+            <term>Suetonius</term>
+            <sense>a Roman writer of emperors’ lives</sense>
+          </word>
+          <hint>Keep Nero 16. Do not rest Easy on Chrestus.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>Suetonius names Christians among the people Nero punished.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Suetonius writes that he saw the risen Christ.</miss>
+            <miss>Suetonius says Christians never lived in Rome.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at Ink Court.</placePrompt>
+          <personPrompt>Silas keeps that court.</personPrompt>
+          <ideaPrompt>Silas’s outside name — Suetonius names Christians among Nero’s punishments.</ideaPrompt>
+          <ideaLabel>Suetonius names Christians among Nero’s punishments.</ideaLabel>
+          <whyMedium>Silas keeps Ink Court. Suetonius names Christians among the people Nero punished.</whyMedium>
+        </match>
+        <hold levelUpTo="hard" onFail="easy">
+          <claim>Suetonius names Christians among the people Nero punished.</claim>
+          <reason>A Roman biographer treats the name of Christ as a public class in Rome.</reason>
+          <source>Suetonius, Nero 16.2</source>
+          <whyCorrect>A Roman biographer treats the name of Christ as a public class in Rome.</whyCorrect>
+          <whyMisses>
+            <miss>Suetonius writes that he saw the risen Christ.</miss>
+            <miss>The name Christians is only a later church pamphlet.</miss>
+            <miss>Easy Hold rests on Claudius and Chrestus alone.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Suetonius names Christians among the people Nero punished.</choice>
+            <choice>Suetonius writes that he saw the risen Christ.</choice>
+            <choice>Suetonius says Christians never lived in Rome.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>A Roman biographer treats the name of Christ as a public class in Rome.</choice>
+            <choice>Suetonius writes that he saw the risen Christ.</choice>
+            <choice>The name Christians is only a later church pamphlet.</choice>
+          </reasonChoices>
+        </hold>
+      </medium>
+      <hard points="15">
+        <learn>
+          <hardTeach>Suetonius, Nero 16.2. Punishment was inflicted on the Christians, a class of men given to a new and mischievous superstition.
+That is a Roman life of Nero, not a church tract. Tacitus also names Nero’s punishment of people called Christians. Hold Nero 16.2. Claudius 25.4 (Chrestus) is a different sentence and a later fight — Easy does not rest on it. Christ is named here as the people called Christians.</hardTeach>
+          <fullTeach>Suetonius, Nero 16.2. Punishment was inflicted on the Christians, a class of men given to a new and mischievous superstition.
+That is a Roman life of Nero, not a church tract. Tacitus also names Nero’s punishment of people called Christians. Hold Nero 16.2. Claudius 25.4 (Chrestus) is a different sentence and a later fight — Easy does not rest on it. Christ is named here as the people called Christians.</fullTeach>
+          <prompt>What does this outside name actually hold?</prompt>
+          <teachOnWrong>Suetonius names Christians among the people Nero punished. A Roman biographer treats the name of Christ as a public class in Rome.</teachOnWrong>
+          <challengeTiles>
+            <keep>Suetonius names Christians among the people Nero punished.</keep>
+            <keep>A Roman biographer treats the name of Christ as a public class in Rome.</keep>
+            <keep>An outside writer names Christ without a church pamphlet.</keep>
+            <discard>Suetonius writes that he saw the risen Christ.</discard>
+          </challengeTiles>
+        </learn>
+        <match>
+          <sentenceCorrect>Suetonius names Christians among the people Nero punished.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Suetonius writes that he saw the risen Christ.</miss>
+            <miss>Suetonius says Christians never lived in Rome.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at Ink Court.</placePrompt>
+          <personPrompt>Silas keeps that court.</personPrompt>
+          <ideaPrompt>Silas’s outside name — Suetonius names Christians among Nero’s punishments.</ideaPrompt>
+          <ideaLabel>Suetonius names Christians among Nero’s punishments.</ideaLabel>
+          <whyHard>Silas Whitman keeps Ink Court. Suetonius names Christians among the people Nero punished — a Roman ink name, not a creek picture.</whyHard>
+        </match>
+        <hold onFail="easy">
+          <claim>Suetonius names Christians among the people Nero punished.</claim>
+          <reason>A Roman biographer treats the name of Christ as a public class in Rome.</reason>
+          <source>Suetonius, Nero 16.2</source>
+          <whyCorrect>A Roman biographer treats the name of Christ as a public class in Rome.</whyCorrect>
+          <whyMisses>
+            <miss>Suetonius writes that he saw the risen Christ.</miss>
+            <miss>The name Christians is only a later church pamphlet.</miss>
+            <miss>Easy Hold rests on Claudius and Chrestus alone.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Suetonius names Christians among the people Nero punished.</choice>
+            <choice>Suetonius writes that he saw the risen Christ.</choice>
+            <choice>Suetonius says Christians never lived in Rome.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>A Roman biographer treats the name of Christ as a public class in Rome.</choice>
+            <choice>Suetonius writes that he saw the risen Christ.</choice>
+            <choice>The name Christians is only a later church pamphlet.</choice>
+          </reasonChoices>
+        </hold>
+      </hard>
+      <journal id="j-ic-suetonius" title="Nero punished Christians" kicker="Ink Court" unlockAfter="ic-suetonius" scoreFromHeldTier="true">
+        <p>Suetonius names Christians among the people Nero punished. A Roman biographer treats the name of Christ as a public class in Rome. Easy Hold stays on Nero 16.2 — not the harder Chrestus line.</p>
+        <p>Tacitus already named Nero’s fire and the Christians. Suetonius names the same public class.</p>
+        <sources>
+          <source>Suetonius, Nero 16.2</source>
+        </sources>
+      </journal>
+    </lesson>
+    <lesson id="ic-lucian" place="Ink Court" person="Silas Whitman" tripleId="lucian-ink" ideaId="idea-lucian" ideaLabel="Lucian writes they still worship the crucified man." challengeKind="sort" challengeTitle="They still worship the crucified man">
+      <easy points="10" easyOrder="45">
+        <learn>
+          <shortStory>Lucian was a Greek writer who liked to mock. He writes that Christians still worship the man who was crucified in Palestine. An outside voice still names the crucified Christ they will not drop.</shortStory>
+          <mainIdea>Lucian writes that Christians still worship the man crucified in Palestine.</mainIdea>
+          <gloss>Lucian writes that Christians still worship the man crucified in Palestine.</gloss>
+          <loci>This idea lives at Ink Court, with Silas.</loci>
+          <word>
+            <term>Lucian</term>
+            <sense>a Greek writer who mocked Christians from outside</sense>
+          </word>
+          <hint>Keep the crucified man. Toss “Lucian believed.”</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>Lucian writes that Christians still worship the man crucified in Palestine.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Lucian writes that he believed in the risen Christ.</miss>
+            <miss>Lucian says they worship the emperor only.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at Ink Court.</placePrompt>
+          <personPrompt>Silas keeps that court.</personPrompt>
+          <ideaPrompt>Silas’s outside name — Lucian writes they still worship the crucified man.</ideaPrompt>
+          <ideaLabel>Lucian writes they still worship the crucified man.</ideaLabel>
+          <whyEasy>Silas keeps Ink Court. Lucian writes that Christians still worship the man crucified in Palestine.</whyEasy>
+        </match>
+        <hold levelUpTo="medium" onFail="easy">
+          <claim>Lucian writes that Christians still worship the man crucified in Palestine.</claim>
+          <reason>An outside mocker still names the crucified Christ they worship.</reason>
+          <source>Lucian, The Passing of Peregrinus 11–13</source>
+          <whyCorrect>An outside mocker still names the crucified Christ they worship.</whyCorrect>
+          <whyMisses>
+            <miss>Lucian writes that he believed in the risen Christ.</miss>
+            <miss>The crucified man is only a later church add-on.</miss>
+            <miss>Lucian says they hide Christ’s name.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Lucian writes that Christians still worship the man crucified in Palestine.</choice>
+            <choice>Lucian writes that he believed in the risen Christ.</choice>
+            <choice>Lucian says they worship the emperor only.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>An outside mocker still names the crucified Christ they worship.</choice>
+            <choice>Lucian writes that he believed in the risen Christ.</choice>
+            <choice>The crucified man is only a later church add-on.</choice>
+          </reasonChoices>
+        </hold>
+      </easy>
+      <medium points="12">
+        <learn>
+          <mediumTeach>Lucian, The Passing of Peregrinus. A satirist describes people called Christians who still worship that crucified sophist — the man crucified in Palestine. He is laughing. He still names the worship of the crucified Christ from outside the church.</mediumTeach>
+          <mainIdea>Lucian writes that Christians still worship the man crucified in Palestine.</mainIdea>
+          <gloss>Lucian writes that Christians still worship the man crucified in Palestine.</gloss>
+          <loci>This idea lives at Ink Court, with Silas.</loci>
+          <word>
+            <term>Lucian</term>
+            <sense>a Greek writer who mocked Christians from outside</sense>
+          </word>
+          <hint>Keep the crucified man. Toss “Lucian believed.”</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>Lucian writes that Christians still worship the man crucified in Palestine.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Lucian writes that he believed in the risen Christ.</miss>
+            <miss>Lucian says they worship the emperor only.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at Ink Court.</placePrompt>
+          <personPrompt>Silas keeps that court.</personPrompt>
+          <ideaPrompt>Silas’s outside name — Lucian writes they still worship the crucified man.</ideaPrompt>
+          <ideaLabel>Lucian writes they still worship the crucified man.</ideaLabel>
+          <whyMedium>Silas keeps Ink Court. Lucian writes that Christians still worship the man crucified in Palestine.</whyMedium>
+        </match>
+        <hold levelUpTo="hard" onFail="easy">
+          <claim>Lucian writes that Christians still worship the man crucified in Palestine.</claim>
+          <reason>An outside mocker still names the crucified Christ they worship.</reason>
+          <source>Lucian, The Passing of Peregrinus 11–13</source>
+          <whyCorrect>An outside mocker still names the crucified Christ they worship.</whyCorrect>
+          <whyMisses>
+            <miss>Lucian writes that he believed in the risen Christ.</miss>
+            <miss>The crucified man is only a later church add-on.</miss>
+            <miss>Lucian says they hide Christ’s name.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Lucian writes that Christians still worship the man crucified in Palestine.</choice>
+            <choice>Lucian writes that he believed in the risen Christ.</choice>
+            <choice>Lucian says they worship the emperor only.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>An outside mocker still names the crucified Christ they worship.</choice>
+            <choice>Lucian writes that he believed in the risen Christ.</choice>
+            <choice>The crucified man is only a later church add-on.</choice>
+          </reasonChoices>
+        </hold>
+      </medium>
+      <hard points="15">
+        <learn>
+          <hardTeach>Lucian, The Passing of Peregrinus 11–13. They still worship that crucified sophist, the man who was crucified in Palestine. Lucian is not a disciple. He is mocking a people who will not drop the crucified Christ.
+Do not claim Lucian believed. Hold the outside report: Christians still worship the man crucified in Palestine. Paul already preached Christ crucified. Lucian overheard that public name and laughed.</hardTeach>
+          <fullTeach>Lucian, The Passing of Peregrinus 11–13. They still worship that crucified sophist, the man who was crucified in Palestine. Lucian is not a disciple. He is mocking a people who will not drop the crucified Christ.
+Do not claim Lucian believed. Hold the outside report: Christians still worship the man crucified in Palestine. Paul already preached Christ crucified. Lucian overheard that public name and laughed.</fullTeach>
+          <prompt>What does this outside name actually hold?</prompt>
+          <teachOnWrong>Lucian writes that Christians still worship the man crucified in Palestine. An outside mocker still names the crucified Christ they worship.</teachOnWrong>
+          <challengeTiles>
+            <keep>Lucian writes that Christians still worship the man crucified in Palestine.</keep>
+            <keep>An outside mocker still names the crucified Christ they worship.</keep>
+            <keep>An outside writer names Christ without a church pamphlet.</keep>
+            <discard>Lucian writes that he believed in the risen Christ.</discard>
+          </challengeTiles>
+        </learn>
+        <match>
+          <sentenceCorrect>Lucian writes that Christians still worship the man crucified in Palestine.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Lucian writes that he believed in the risen Christ.</miss>
+            <miss>Lucian says they worship the emperor only.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at Ink Court.</placePrompt>
+          <personPrompt>Silas keeps that court.</personPrompt>
+          <ideaPrompt>Silas’s outside name — Lucian writes they still worship the crucified man.</ideaPrompt>
+          <ideaLabel>Lucian writes they still worship the crucified man.</ideaLabel>
+          <whyHard>Silas Whitman keeps Ink Court. Lucian writes that Christians still worship the man crucified in Palestine — a Roman ink name, not a creek picture.</whyHard>
+        </match>
+        <hold onFail="easy">
+          <claim>Lucian writes that Christians still worship the man crucified in Palestine.</claim>
+          <reason>An outside mocker still names the crucified Christ they worship.</reason>
+          <source>Lucian, The Passing of Peregrinus 11–13</source>
+          <whyCorrect>An outside mocker still names the crucified Christ they worship.</whyCorrect>
+          <whyMisses>
+            <miss>Lucian writes that he believed in the risen Christ.</miss>
+            <miss>The crucified man is only a later church add-on.</miss>
+            <miss>Lucian says they hide Christ’s name.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Lucian writes that Christians still worship the man crucified in Palestine.</choice>
+            <choice>Lucian writes that he believed in the risen Christ.</choice>
+            <choice>Lucian says they worship the emperor only.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>An outside mocker still names the crucified Christ they worship.</choice>
+            <choice>Lucian writes that he believed in the risen Christ.</choice>
+            <choice>The crucified man is only a later church add-on.</choice>
+          </reasonChoices>
+        </hold>
+      </hard>
+      <journal id="j-ic-lucian" title="They still worship the crucified man" kicker="Ink Court" unlockAfter="ic-lucian" scoreFromHeldTier="true">
+        <p>Lucian writes that Christians still worship the man crucified in Palestine. An outside mocker still names the crucified Christ they worship. He does not believe. He still names the worship.</p>
+        <p>Paul already preached Christ crucified. Lucian overheard that public name from outside.</p>
+        <sources>
+          <source>Lucian, The Passing of Peregrinus 11–13</source>
+        </sources>
+      </journal>
+    </lesson>
+  </lessons>
+  <streetFacts>
+    <fact evidenceId="ic-trajan" tripleId="trajan-ink" ideaId="idea-trajan" place="Ink Court" person="Silas Whitman" ideaLabel="Trajan writes: do not hunt Christians out." />
+    <fact evidenceId="ic-suetonius" tripleId="suetonius-ink" ideaId="idea-suetonius" place="Ink Court" person="Silas Whitman" ideaLabel="Suetonius names Christians among Nero’s punishments." />
+    <fact evidenceId="ic-lucian" tripleId="lucian-ink" ideaId="idea-lucian" place="Ink Court" person="Silas Whitman" ideaLabel="Lucian writes they still worship the crucified man." />
+  </streetFacts>
+</areaPack>

@@ -1,7 +1,7 @@
 Silver City — area content packs (runtime source of truth)
 ==========================================================
 
-appVersion: 1.4.82  (from src/config/app.ts on main)
+appVersion: 1.4.84  (from src/config/app.ts on main)
 schemaVersion: 3
 generated: see each file’s generated= attribute (America/Chicago)
 host: https://cphillippe.github.io/Silver-dollar-city/
@@ -17,15 +17,16 @@ FILES
   first-gate.xml       Why Gate / Ansel — 11 lessons
   high-lookout.xml     Meaning Ridge / Hope — 7 lessons
   stone-court.xml      Stone Court / Silas — 3 lessons (after Easy door)
-  index.xml            Pack list, Easy trail 1–42, holdRules, scoring, tools, trail notes, uiChrome
+  ink-court.xml        Ink Court / Silas — 3 lessons (after Pliny Hold)
+  index.xml            Pack list, Easy trail 1–45, holdRules, scoring, tools, trail notes, uiChrome
   SCHEMA.md            How the game should load packs (1:1 field map)
 
 TOTALS
 ------
-  Lessons (claim·reason·source street facts): 42
-  Tiers per lesson: easy + medium + hard (42/42)
-  Easy trail lines: 42 (easyOrder 1–42)
-  Street facts: 42 (same as lessons)
+  Lessons (claim·reason·source street facts): 45
+  Tiers per lesson: easy + medium + hard (45/45)
+  Easy trail lines: 45 (easyOrder 1–45)
+  Street facts: 45 (same as lessons)
   Excluded from lessons: td-watch (Love how-to → index <tools>)
                          j-trail-* (thank-you cards → index <trailNotes>)
 
@@ -60,7 +61,7 @@ JOURNAL SCORING (score per level / best tier held)
   Encoded in: index.xml <scoring>, every lesson tier @points, journal
   scoreFromHeldTier="true". See SCHEMA.md.
 
-EASY TRAIL ORDER (easyOrder 1–42)
+EASY TRAIL ORDER (easyOrder 1–45)
 ---------------------------------
    1 ph-road          parable-hollow
    2 ph-father        parable-hollow
@@ -104,12 +105,16 @@ EASY TRAIL ORDER (easyOrder 1–42)
   40 sc-tacitus       stone-court
   41 sc-james         stone-court
   42 sc-pliny         stone-court
+  43 ic-trajan        ink-court
+  44 ic-suetonius     ink-court
+  45 ic-lucian        ink-court
 
 Sequence: mercy-first Story Creek opening, then Why Gate foundation pack
 (stepped unlock), then Witness Square Dig deeper (creed → women → early →
 method, stepped unlock), then Names that stay, then porch leftovers → Sky Watch
 (fine-tuning stays here) → Why Gate cosmological walks → Meaning Ridge, then
-Stone Court after the Easy door (Tacitus → James → Pliny, ancient-first source-dig).
+Stone Court after the Easy door (Tacitus → James → Pliny, ancient-first source-dig),
+then Ink Court after Pliny Hold (Trajan → Suetonius → Lucian, ancient-first source-dig).
 
 INCLUDED
 --------

@@ -68,7 +68,7 @@ import {
   EASY_FOLK_LIFT,
 } from '../src/lib/cityBuild.ts'
 import { emptyProgress } from '../src/lib/save.ts'
-import { EASY, EASY_LINE_ORDER, DIG_ARC, NAMES_ARC, STONE_ARC, easyChromeLine, easyFacingLine, easyHomeFocus, easyHoldLine, easyHoldPractice, easyHoldView, easyLearnLine, easyLineHeld, easyLineLearned, easyLineTaught, easyLoopLine, easyMatchLine, easyMatchReady, markEasyHeld, markEasyTaught, easyWhoWhere, easyWhoWhereLine, easyWhyLine, easyWhyWordCount, easyWrongTap, uniqueHoldChoices } from '../src/lib/easy.ts'
+import { EASY, EASY_LINE_ORDER, DIG_ARC, NAMES_ARC, STONE_ARC, INK_ARC, easyChromeLine, easyFacingLine, easyHomeFocus, easyHoldLine, easyHoldPractice, easyHoldView, easyLearnLine, easyLineHeld, easyLineLearned, easyLineTaught, easyLoopLine, easyMatchLine, easyMatchReady, markEasyHeld, markEasyTaught, easyWhoWhere, easyWhoWhereLine, easyWhyLine, easyWhyWordCount, easyWrongTap, uniqueHoldChoices } from '../src/lib/easy.ts'
 import { WORDS, easyLead } from '../src/lib/words.ts'
 import { deeperLinksFor, eraLabel } from '../src/content/deeper.ts'
 import { allEvidenceIds, evidenceFor } from '../src/content/evidence.ts'
@@ -1087,7 +1087,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.83')
+assert.equal(APP_VERSION, '1.4.84')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1160,7 +1160,7 @@ assert.equal(
 assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
-assert.ok(CONTENT_PACKS[0]?.areaIds.includes('stone-court'))
+assert.ok(CONTENT_PACKS[0]?.areaIds.includes('ink-court'))
 assert.ok(CHANGELOG.some((note) => note.title === 'V0 launch'))
 assert.match(
   readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8'),
@@ -1205,8 +1205,8 @@ assert.equal(STREET_CHALLENGE.id, 'ln-street')
 assert.deepEqual([...STREET_LIGHTS], ['ph-road', 'wb-creed', 'daily-lantern'])
 assert.equal(STREET_CHALLENGE.triples.length, STREET_TRIPLES.length)
 assert.ok(STREET_CHALLENGE.triples.length > 3, 'Hard street is more than the early three triples')
-assert.equal(STREET_CHALLENGE.triples.length, 42)
-assert.equal(STREET_FACT_IDS.length, 42)
+assert.equal(STREET_CHALLENGE.triples.length, 45)
+assert.equal(STREET_FACT_IDS.length, 45)
 assert.equal(earnedTier('porch', empty), 1)
 assert.equal(earnedTier('porch', afterDaily), 2)
 assert.equal(earnedTier('hollow', hollowTwice), 3)
@@ -1860,7 +1860,7 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
   assert.equal(easyWhoWhere('wb-creed').place, 'Witness Square')
   assert.equal(easyWhoWhere('daily-lantern').who, 'Juniper')
   assert.equal(easyWhoWhere('daily-lantern').place, 'East porch')
-  assert.equal(EASY_LINE_ORDER.length, 42)
+  assert.equal(EASY_LINE_ORDER.length, 45)
   assert.equal(EASY_LINE_ORDER[0], 'ph-road')
   assert.equal(EASY_LINE_ORDER[1], 'ph-father')
   assert.ok(EASY_LINE_ORDER.indexOf('ph-father') < EASY_LINE_ORDER.indexOf('wb-creed'))
@@ -1869,8 +1869,10 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
   assert.deepEqual([...DIG_ARC], ['wb-creed', 'wb-women', 'wb-early', 'wb-method'])
   assert.deepEqual([...NAMES_ARC], ['daily-names', 'daily-creed', 'daily-empty'])
   assert.deepEqual([...STONE_ARC], ['sc-tacitus', 'sc-james', 'sc-pliny'])
+  assert.deepEqual([...INK_ARC], ['ic-trajan', 'ic-suetonius', 'ic-lucian'])
   assert.deepEqual(EASY_LINE_ORDER.slice(7, 14), [...DIG_ARC, ...NAMES_ARC])
   assert.deepEqual(EASY_LINE_ORDER.slice(39, 42), [...STONE_ARC])
+  assert.deepEqual(EASY_LINE_ORDER.slice(42, 45), [...INK_ARC])
   const homes = {
     'ph-road': { who: 'Mercy', place: 'Story Creek' },
     'ph-father': { who: 'Mercy', place: 'Story Creek' },
@@ -1884,6 +1886,9 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
     'sc-tacitus': { who: 'Silas', place: 'Stone Court' },
     'sc-james': { who: 'Silas', place: 'Stone Court' },
     'sc-pliny': { who: 'Silas', place: 'Stone Court' },
+    'ic-trajan': { who: 'Silas', place: 'Ink Court' },
+    'ic-suetonius': { who: 'Silas', place: 'Ink Court' },
+    'ic-lucian': { who: 'Silas', place: 'Ink Court' },
   }
   const triples = {
     'ph-road': 'mercy-hollow',
@@ -1898,6 +1903,9 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
     'sc-tacitus': 'tacitus-court',
     'sc-james': 'james-court',
     'sc-pliny': 'pliny-court',
+    'ic-trajan': 'trajan-ink',
+    'ic-suetonius': 'suetonius-ink',
+    'ic-lucian': 'lucian-ink',
   }
   let walked = []
   for (const id of EASY_LINE_ORDER) {
@@ -1931,14 +1939,14 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
     walked = [...walked, id]
   }
   assert.equal(easyLoopLine({ easyTaught: walked, easyHeld: walked }), 'ph-road')
-  assert.equal(STREET_TRIPLES.length, 42)
-  assert.equal(STREET_CHALLENGE.triples.length, 42)
-  assert.equal(STREET_CHALLENGE.nodes.length, STREET_TRIPLES.length + 13)
+  assert.equal(STREET_TRIPLES.length, 45)
+  assert.equal(STREET_CHALLENGE.triples.length, 45)
+  assert.equal(STREET_CHALLENGE.nodes.length, STREET_TRIPLES.length + 14)
   {
     const walks = streetWalks()
     const covered = walks.flatMap((walk) => walk.triples.map((item) => item.id))
-    assert.equal(covered.length, 42)
-    assert.equal(new Set(covered).size, 42)
+    assert.equal(covered.length, 45)
+    assert.equal(new Set(covered).size, 45)
     assert.ok(walks.every((walk) => walk.triples.length >= 3 && walk.triples.length <= 5))
     const first = nextStreetWalk([])
     assert.ok(first)
@@ -1947,7 +1955,7 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
     assert.equal(hardStreetChallenge([]).triples.length, first.triples.length)
     assert.ok(hardStreetChallenge([]).triples.length < STREET_TRIPLES.length)
     const afterFirst = appendStreetLinks([], first.triples.map((item) => item.id))
-    assert.equal(streetFactsLeft(afterFirst), 42 - first.triples.length)
+    assert.equal(streetFactsLeft(afterFirst), 45 - first.triples.length)
     assert.equal(streetIsComplete({ streetLinked: afterFirst }), false)
     assert.equal(streetIsComplete({ completed: ['ln-street'] }), true)
     const second = nextStreetWalk(afterFirst)

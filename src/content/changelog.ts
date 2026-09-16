@@ -8,6 +8,18 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.84',
+    title: 'Ink Court · Gemini panels · Easy core trail',
+    when: '2026-09-16',
+    items: [
+      'Easy Mercy road-maze and father-run now show Gemini panel-blast art: hurt / walk-past / help / neighbor on the Jericho road, then share-early / far-waste / speech-road / father-runs / hug-feast. Helped! uses the road claim badge. Learn → play → Hold and One more stay',
+      'After Stone Court’s Pliny Hold, a new free street opens: Ink Court, with Silas. Trajan writes do not hunt Christians out, then Suetonius names Christians among Nero’s punishments, then Lucian writes they still worship the man crucified in Palestine. Ancient-first source-dig. Next opens only after the prior Easy Hold',
+      'Easy Hold stays claim · reason · From. Christ is named on all three Ink Court takeaways. Do not rest Easy on Chrestus. Do not claim Lucian believed. Teach before test. Apologist voice',
+      'Core Easy 45 facts stay free. Support Silver City 1.4.83 stays: Tip · Packs (external) · stores coming later. Mill Street and Harbor Walk stay paid extras. Night Watch and Town stay hidden on Easy. Journal ungated. Never a hard paywall. Play / AdMob / Apple flags stay blank',
+      'Place titles stay Story Creek, Witness Square, Sky Watch, Why Gate, Meaning Ridge — Stone Court and Ink Court are Silas’s street names',
+    ],
+  },
+  {
     version: '1.4.83',
     title: 'Support Silver City · Easy core trail',
     when: '2026-09-16',
@@ -1684,6 +1696,10 @@ export function latestChange(version: string): ChangeNote {
   const note = CHANGELOG.find((item) => item.version === version) ?? CHANGELOG[0]
   if (!note) {
     return { version, title: 'Easy core trail', when: '', items: [] }
+  }
+  if (note.version === '1.4.84') {
+    const prior = latestChange('1.4.83')
+    return { ...note, items: [...note.items, ...prior.items] }
   }
   if (note.version === '1.4.83') {
     const prior = latestChange('1.4.82')

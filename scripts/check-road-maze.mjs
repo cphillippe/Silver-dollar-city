@@ -146,6 +146,7 @@ assert.ok(playSrc.indexOf('className="maze-board"') < playSrc.indexOf('maze-win-
 assert.match(playSrc, /ROAD_MAZE_WIN/)
 assert.match(playSrc, /panel-help/)
 assert.match(playSrc, /panel-hurt/)
+assert.match(playSrc, /panel-road-claim/)
 assert.match(playSrc, /mazeWinBeat/)
 assert.match(playSrc, /MatchTakeaway/)
 assert.match(playSrc, /maze-win-art/)

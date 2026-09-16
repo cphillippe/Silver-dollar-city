@@ -32,7 +32,7 @@ function streetBrief(
 }
 
 /**
- * Extra streets sold as packs. Not part of the free 42-fact Easy trail.
+ * Extra streets sold as packs. Not part of the free 45-fact Easy trail.
  * Plain claims; apologist voice — no slogans, no pew-lock.
  */
 export const PAID_STREETS: PaidStreetLesson[] = [
