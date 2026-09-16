@@ -5051,12 +5051,19 @@ html[data-theme='dusk'] .hub.is-town .street-link {
   margin: 12px 0 4px;
   padding: 12px 14px;
   border-radius: 14px;
-  background: color-mix(in srgb, var(--card, #fff) 92%, #ffcc33);
+  background: var(--mist);
+  border: 1px solid var(--line);
+  color: var(--parchment, #fff6e8);
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
 }
 
 .support-toast p {
-  margin: 0;
+  margin: 0 0 10px;
+  color: var(--parchment, #fff6e8);
+}
+
+.support-toast .btn {
+  color: var(--parchment, #fff6e8);
 }
 
 button.btn:disabled {

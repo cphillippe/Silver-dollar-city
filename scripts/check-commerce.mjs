@@ -318,6 +318,10 @@ assert.equal(supportUrls().mill, MILL_PACK_URL)
 assert.equal(supportUrls().harbor, HARBOR_PACK_URL)
 assert.match(STORES_COMING, /Coming with stores/)
 
+const toastCss = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
+assert.match(toastCss, /\.support-toast[\s\S]{0,280}color:\s*var\(--parchment/)
+assert.doesNotMatch(toastCss, /var\(--card/)
+
 resetSupportToastForTest()
 assert.equal(supportToastPending(), false)
 offerSupportToast()
