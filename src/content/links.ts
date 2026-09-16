@@ -439,7 +439,7 @@ const STREET_FACTS: StreetFact[] = [
     tripleId: 'beauty-lookout',
     placeId: 'place-lookout',
     personId: 'person-hope',
-    text: 'Beauty wakes a hunger it cannot feed — hungers usually correspond to real countries.',
+    text: 'Beauty wakes a hunger it cannot feed — that hunger names a real country.',
     caption: 'Beauty wakes a hunger it cannot feed.',
   },
   {
@@ -1028,11 +1028,11 @@ export const STREET_WHYS: Record<string, { easy: string; hard: string }> = {
   },
   'ob-life-sky': {
     easy: 'Nora watches the sky. Life’s information is a mark of mind.',
-    hard: 'Nora Skye keeps Sky Watch. Cells store coordinated information — that looks like the work of a mind.',
+    hard: 'Nora Skye keeps Sky Watch. Cells store info the way a mind writes.',
   },
   'daily-life-sky': {
     easy: 'Nora watches the sky. Life, place, and mind are not cheap facts.',
-    hard: 'Nora Skye keeps Sky Watch. Copying cells, a habitable band, and a mind that can do science all look given — the marks of a Maker.',
+    hard: 'Nora Skye keeps Sky Watch. Life, a livable world, and minds are gifts from a Maker.',
   },
   'ansel-gate': {
     easy: 'Ansel keeps Why Gate. The world exists — and did not have to.',
@@ -1092,7 +1092,7 @@ export const STREET_WHYS: Record<string, { easy: string; hard: string }> = {
   },
   'beauty-lookout': {
     easy: 'Hope keeps Meaning Ridge. Beauty wakes a hunger it cannot feed.',
-    hard: 'Hope Ridge keeps Meaning Ridge. Beauty wakes a hunger it cannot feed — hungers usually correspond to real countries.',
+    hard: 'Hope Ridge keeps Meaning Ridge. Beauty wakes a hunger it cannot feed — that hunger names a real country.',
   },
   'grace-lookout': {
     easy: 'Hope keeps Meaning Ridge. Grace is gift, not wage.',

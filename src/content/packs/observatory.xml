@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<areaPack id="observatory" schemaVersion="3" appVersion="1.4.80" generated="2026-09-14T13:15:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/" title="Sky Watch" place="Sky Watch" person="Nora Skye" personId="nora" plotId="observatory">
+<areaPack id="observatory" schemaVersion="3" appVersion="1.4.81" generated="2026-09-14T13:15:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/" title="Sky Watch" place="Sky Watch" person="Nora Skye" personId="nora" plotId="observatory">
   <howToEdit>RUNTIME CONTENT: the game loads this file as the source of truth for this area. Change player-facing text in place inside each &lt;lesson&gt;. Stable id attributes (ph-father, …) are engine keys — do not rename without a migration. Three tiers per fact: &lt;easy easyOrder="N"&gt;, &lt;medium&gt;, and &lt;hard&gt; — each with &lt;learn&gt;, &lt;match&gt;, and &lt;hold&gt;. Easy Learn: shortStory/mainIdea/loci. Medium Learn: mediumTeach (clearer than Hard, richer than Easy). Hard Learn: hardTeach/fullTeach. Held claim·reason·source stay plain and identical on all three. Hold level-up: see hold @levelUpTo / @onFail and index &lt;holdRules&gt;. Empty optional elements are intentional. Escape &amp; &lt; &gt; in text.</howToEdit>
   <meta>
     <title>Silver City — Sky Watch</title>
@@ -353,9 +353,9 @@ A Designer who wants observers predicts this habitable fit. The narrow ranges ar
         </match>
         <hold levelUpTo="medium" onFail="easy">
           <claim>Something is here — it did not have to be.</claim>
-          <reason>A model still starts with something there.</reason>
+          <reason>Psalm 8 looks up and names a Maker.</reason>
           <source>Psalm 8:3–4; Leibniz</source>
-          <whyCorrect>A model still starts with something there.</whyCorrect>
+          <whyCorrect>Psalm 8 looks up and names a Maker.</whyCorrect>
           <whyMisses>
             <miss>Laws and vacua are not somethings.</miss>
             <miss>The question only applies to Tuesdays.</miss>
@@ -367,7 +367,7 @@ A Designer who wants observers predicts this habitable fit. The narrow ranges ar
             <choice>“Nothing” in popular writing always means metaphysical nothing.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>A model still starts with something there.</choice>
+            <choice>Psalm 8 looks up and names a Maker.</choice>
             <choice>Laws and vacua are not somethings.</choice>
             <choice>The question only applies to Tuesdays.</choice>
           </reasonChoices>
@@ -399,9 +399,9 @@ A Designer who wants observers predicts this habitable fit. The narrow ranges ar
         </match>
         <hold levelUpTo="hard" onFail="easy">
           <claim>Something is here — it did not have to be.</claim>
-          <reason>A model still starts with something there.</reason>
+          <reason>Psalm 8 looks up and names a Maker.</reason>
           <source>Psalm 8:3–4; Leibniz</source>
-          <whyCorrect>A model still starts with something there.</whyCorrect>
+          <whyCorrect>Psalm 8 looks up and names a Maker.</whyCorrect>
           <whyMisses>
             <miss>Laws and vacua are not somethings.</miss>
             <miss>The question only applies to Tuesdays.</miss>
@@ -413,7 +413,7 @@ A Designer who wants observers predicts this habitable fit. The narrow ranges ar
             <choice>“Nothing” in popular writing always means metaphysical nothing.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>A model still starts with something there.</choice>
+            <choice>Psalm 8 looks up and names a Maker.</choice>
             <choice>Laws and vacua are not somethings.</choice>
             <choice>The question only applies to Tuesdays.</choice>
           </reasonChoices>
@@ -448,9 +448,9 @@ Fine-tuning and “why anything?” are siblings, not twins. One asks why this w
         </match>
         <hold onFail="easy">
           <claim>Something is here — it did not have to be.</claim>
-          <reason>A model still starts with something there.</reason>
+          <reason>Psalm 8 looks up and names a Maker.</reason>
           <source>Psalm 8:3–4; Leibniz</source>
-          <whyCorrect>A model still starts with something there.</whyCorrect>
+          <whyCorrect>Psalm 8 looks up and names a Maker.</whyCorrect>
           <whyMisses>
             <miss>Laws and vacua are not somethings.</miss>
             <miss>The question only applies to Tuesdays.</miss>
@@ -462,7 +462,7 @@ Fine-tuning and “why anything?” are siblings, not twins. One asks why this w
             <choice>“Nothing” in popular writing always means metaphysical nothing.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>A model still starts with something there.</choice>
+            <choice>Psalm 8 looks up and names a Maker.</choice>
             <choice>Laws and vacua are not somethings.</choice>
             <choice>The question only applies to Tuesdays.</choice>
           </reasonChoices>
@@ -480,7 +480,7 @@ Fine-tuning and “why anything?” are siblings, not twins. One asks why this w
     <lesson id="ob-life" place="Sky Watch" person="Nora Skye" tripleId="ob-life-sky" ideaId="idea-ob-life" ideaLabel="Life’s information is a mark of mind." challengeKind="sort" challengeTitle="The threshold of life">
       <easy points="10" easyOrder="22">
         <learn>
-          <shortStory>Cells store instructions and run a coordinated life. That looks like the work of mind. Wonder is rational. So is more lab work. Do not shrug it away.</shortStory>
+          <shortStory>Cells store instructions the way a mind writes. Wonder is rational. So is more lab work. Do not shrug it away.</shortStory>
           <mainIdea>Life’s specified information is a mark of mind.</mainIdea>
           <gloss>Life’s specified information is a mark of mind.</gloss>
           <loci>This idea lives at Sky Watch, with Nora.</loci>
@@ -504,9 +504,9 @@ Fine-tuning and “why anything?” are siblings, not twins. One asks why this w
         </match>
         <hold levelUpTo="medium" onFail="easy">
           <claim>Life’s specified information is a mark of mind.</claim>
-          <reason>Cells store coordinated information; that looks like the work of a mind — wonder is rational, and so is more work.</reason>
+          <reason>Cells store info the way a mind writes.</reason>
           <source>Genesis 1</source>
-          <whyCorrect>Cells store coordinated information; that looks like the work of a mind — wonder is rational, and so is more work.</whyCorrect>
+          <whyCorrect>Cells store info the way a mind writes.</whyCorrect>
           <whyMisses>
             <miss>The unfinished story means we should end research.</miss>
             <miss>Genesis 1 is a lab protocol.</miss>
@@ -518,7 +518,7 @@ Fine-tuning and “why anything?” are siblings, not twins. One asks why this w
             <choice>Cells require no coordinated information.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Cells store coordinated information; that looks like the work of a mind — wonder is rational, and so is more work.</choice>
+            <choice>Cells store info the way a mind writes.</choice>
             <choice>The unfinished story means we should end research.</choice>
             <choice>Genesis 1 is a lab protocol.</choice>
           </reasonChoices>
@@ -550,9 +550,9 @@ Fine-tuning and “why anything?” are siblings, not twins. One asks why this w
         </match>
         <hold levelUpTo="hard" onFail="easy">
           <claim>Life’s specified information is a mark of mind.</claim>
-          <reason>Cells store coordinated information; that looks like the work of a mind — wonder is rational, and so is more work.</reason>
+          <reason>Cells store info the way a mind writes.</reason>
           <source>Genesis 1</source>
-          <whyCorrect>Cells store coordinated information; that looks like the work of a mind — wonder is rational, and so is more work.</whyCorrect>
+          <whyCorrect>Cells store info the way a mind writes.</whyCorrect>
           <whyMisses>
             <miss>The unfinished story means we should end research.</miss>
             <miss>Genesis 1 is a lab protocol.</miss>
@@ -564,7 +564,7 @@ Fine-tuning and “why anything?” are siblings, not twins. One asks why this w
             <choice>Cells require no coordinated information.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Cells store coordinated information; that looks like the work of a mind — wonder is rational, and so is more work.</choice>
+            <choice>Cells store info the way a mind writes.</choice>
             <choice>The unfinished story means we should end research.</choice>
             <choice>Genesis 1 is a lab protocol.</choice>
           </reasonChoices>
@@ -595,13 +595,13 @@ Life’s information looks like the work of mind. Wonder is rational. So is more
           <personPrompt>Nora keeps that sky.</personPrompt>
           <ideaPrompt>Nora’s sky — life’s information is a mark of mind.</ideaPrompt>
           <ideaLabel>Life’s information is a mark of mind.</ideaLabel>
-          <whyHard>Nora Skye keeps Sky Watch. Cells store coordinated information — that looks like the work of a mind.</whyHard>
+          <whyHard>Nora Skye keeps Sky Watch. Cells store info the way a mind writes.</whyHard>
         </match>
         <hold onFail="easy">
           <claim>Life’s specified information is a mark of mind.</claim>
-          <reason>Cells store coordinated information; that looks like the work of a mind — wonder is rational, and so is more work.</reason>
+          <reason>Cells store info the way a mind writes.</reason>
           <source>Genesis 1</source>
-          <whyCorrect>Cells store coordinated information; that looks like the work of a mind — wonder is rational, and so is more work.</whyCorrect>
+          <whyCorrect>Cells store info the way a mind writes.</whyCorrect>
           <whyMisses>
             <miss>The unfinished story means we should end research.</miss>
             <miss>Genesis 1 is a lab protocol.</miss>
@@ -613,7 +613,7 @@ Life’s information looks like the work of mind. Wonder is rational. So is more
             <choice>Cells require no coordinated information.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Cells store coordinated information; that looks like the work of a mind — wonder is rational, and so is more work.</choice>
+            <choice>Cells store info the way a mind writes.</choice>
             <choice>The unfinished story means we should end research.</choice>
             <choice>Genesis 1 is a lab protocol.</choice>
           </reasonChoices>
@@ -780,7 +780,7 @@ The heavens declare the glory of God, and the sky above proclaims his handiwork.
     <lesson id="daily-life" place="Sky Watch" person="Nora Skye" tripleId="daily-life-sky" ideaId="idea-daily-life" ideaLabel="Life, place, and mind are not cheap facts." challengeKind="match" challengeTitle="Not cheap">
       <easy points="10" easyOrder="23">
         <learn>
-          <shortStory>Copying cells, a habitable band, and a mind that can do science all look given — the marks of a Maker.</shortStory>
+          <shortStory>Life, a livable world, and minds are gifts from a Maker — not leftover accidents.</shortStory>
           <mainIdea>Life, place, and mind are not cheap facts.</mainIdea>
           <gloss>Life, place, and mind are not cheap facts.</gloss>
           <loci>This idea lives at Sky Watch, with Nora.</loci>
@@ -804,9 +804,9 @@ The heavens declare the glory of God, and the sky above proclaims his handiwork.
         </match>
         <hold levelUpTo="medium" onFail="easy">
           <claim>Life, place, and mind are not cheap facts.</claim>
-          <reason>Copying cells, a habitable band, and a mind that can do science all look given — the marks of a Maker.</reason>
+          <reason>Life, a livable world, and minds are gifts from a Maker.</reason>
           <source>Acts 17:24–25</source>
-          <whyCorrect>Copying cells, a habitable band, and a mind that can do science all look given — the marks of a Maker.</whyCorrect>
+          <whyCorrect>Life, a livable world, and minds are gifts from a Maker.</whyCorrect>
           <whyMisses>
             <miss>A habitable band is an unremarkable accident with no question.</miss>
             <miss>Minds that do science need no home in the story.</miss>
@@ -818,7 +818,7 @@ The heavens declare the glory of God, and the sky above proclaims his handiwork.
             <choice>“It happened” is automatically the last word.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Copying cells, a habitable band, and a mind that can do science all look given — the marks of a Maker.</choice>
+            <choice>Life, a livable world, and minds are gifts from a Maker.</choice>
             <choice>A habitable band is an unremarkable accident with no question.</choice>
             <choice>Minds that do science need no home in the story.</choice>
           </reasonChoices>
@@ -850,9 +850,9 @@ The heavens declare the glory of God, and the sky above proclaims his handiwork.
         </match>
         <hold levelUpTo="hard" onFail="easy">
           <claim>Life, place, and mind are not cheap facts.</claim>
-          <reason>Copying cells, a habitable band, and a mind that can do science all look given — the marks of a Maker.</reason>
+          <reason>Life, a livable world, and minds are gifts from a Maker.</reason>
           <source>Acts 17:24–25</source>
-          <whyCorrect>Copying cells, a habitable band, and a mind that can do science all look given — the marks of a Maker.</whyCorrect>
+          <whyCorrect>Life, a livable world, and minds are gifts from a Maker.</whyCorrect>
           <whyMisses>
             <miss>A habitable band is an unremarkable accident with no question.</miss>
             <miss>Minds that do science need no home in the story.</miss>
@@ -864,7 +864,7 @@ The heavens declare the glory of God, and the sky above proclaims his handiwork.
             <choice>“It happened” is automatically the last word.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Copying cells, a habitable band, and a mind that can do science all look given — the marks of a Maker.</choice>
+            <choice>Life, a livable world, and minds are gifts from a Maker.</choice>
             <choice>A habitable band is an unremarkable accident with no question.</choice>
             <choice>Minds that do science need no home in the story.</choice>
           </reasonChoices>
@@ -903,13 +903,13 @@ Acts 17:24–25: the God who made the world… gives to all mankind life and bre
           <personPrompt>Nora keeps that sky.</personPrompt>
           <ideaPrompt>Nora’s sky — life, place, and mind are given.</ideaPrompt>
           <ideaLabel>Life, place, and mind are not cheap facts.</ideaLabel>
-          <whyHard>Nora Skye keeps Sky Watch. Copying cells, a habitable band, and a mind that can do science all look given — the marks of a Maker.</whyHard>
+          <whyHard>Nora Skye keeps Sky Watch. Life, a livable world, and minds are gifts from a Maker.</whyHard>
         </match>
         <hold onFail="easy">
           <claim>Life, place, and mind are not cheap facts.</claim>
-          <reason>Copying cells, a habitable band, and a mind that can do science all look given — the marks of a Maker.</reason>
+          <reason>Life, a livable world, and minds are gifts from a Maker.</reason>
           <source>Acts 17:24–25</source>
-          <whyCorrect>Copying cells, a habitable band, and a mind that can do science all look given — the marks of a Maker.</whyCorrect>
+          <whyCorrect>Life, a livable world, and minds are gifts from a Maker.</whyCorrect>
           <whyMisses>
             <miss>A habitable band is an unremarkable accident with no question.</miss>
             <miss>Minds that do science need no home in the story.</miss>
@@ -921,7 +921,7 @@ Acts 17:24–25: the God who made the world… gives to all mankind life and bre
             <choice>“It happened” is automatically the last word.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Copying cells, a habitable band, and a mind that can do science all look given — the marks of a Maker.</choice>
+            <choice>Life, a livable world, and minds are gifts from a Maker.</choice>
             <choice>A habitable band is an unremarkable accident with no question.</choice>
             <choice>Minds that do science need no home in the story.</choice>
           </reasonChoices>

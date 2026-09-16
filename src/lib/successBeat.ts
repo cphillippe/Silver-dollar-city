@@ -88,7 +88,7 @@ export function mergeWinBeat(): SuccessBeat {
   const take = lineTakeaway(CLAIM_MERGE_LINE)
   return {
     title: CLAIM_MERGE_WIN,
-    why: take.claim ? `${take.claim}.` : '',
+    why: take.why || (take.claim ? `${take.claim}.` : ''),
     from: take.from,
   }
 }

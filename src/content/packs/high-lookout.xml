@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<areaPack id="high-lookout" schemaVersion="3" appVersion="1.4.80" generated="2026-09-14T13:15:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/" title="Meaning Ridge" place="Meaning Ridge" person="Hope Ridge" personId="hope" plotId="lookout">
+<areaPack id="high-lookout" schemaVersion="3" appVersion="1.4.81" generated="2026-09-14T13:15:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/" title="Meaning Ridge" place="Meaning Ridge" person="Hope Ridge" personId="hope" plotId="lookout">
   <howToEdit>RUNTIME CONTENT: the game loads this file as the source of truth for this area. Change player-facing text in place inside each &lt;lesson&gt;. Stable id attributes (ph-father, …) are engine keys — do not rename without a migration. Three tiers per fact: &lt;easy easyOrder="N"&gt;, &lt;medium&gt;, and &lt;hard&gt; — each with &lt;learn&gt;, &lt;match&gt;, and &lt;hold&gt;. Easy Learn: shortStory/mainIdea/loci. Medium Learn: mediumTeach (clearer than Hard, richer than Easy). Hard Learn: hardTeach/fullTeach. Held claim·reason·source stay plain and identical on all three. Hold level-up: see hold @levelUpTo / @onFail and index &lt;holdRules&gt;. Empty optional elements are intentional. Escape &amp; &lt; &gt; in text.</howToEdit>
   <meta>
     <title>Silver City — Meaning Ridge</title>
@@ -481,8 +481,8 @@ If God is the good that created goods point toward, ordinary loves are not cance
     <lesson id="hl-beauty" place="Meaning Ridge" person="Hope Ridge" tripleId="beauty-lookout" ideaId="idea-beauty" ideaLabel="Beauty wakes a hunger it cannot feed." challengeKind="sort" challengeTitle="Homesick at the music">
       <easy points="10" easyOrder="32">
         <learn>
-          <shortStory>Psalm 19 treats the sky as speech. Hungers like that usually correspond to real countries.</shortStory>
-          <mainIdea>Beauty wakes a hunger it cannot feed — hungers usually correspond to real countries.</mainIdea>
+          <shortStory>Psalm 19 treats the sky as speech. That hunger names a real country.</shortStory>
+          <mainIdea>Beauty wakes a hunger it cannot feed — that hunger names a real country.</mainIdea>
           <gloss>Beauty wakes a hunger it cannot feed — longing for a country the sunset cannot give.</gloss>
           <loci>This idea lives at Meaning Ridge, with Hope.</loci>
           <word>
@@ -492,7 +492,7 @@ If God is the good that created goods point toward, ordinary loves are not cance
           <hint>Keep the signpost. Toss “only taste.”</hint>
         </learn>
         <match>
-          <sentenceCorrect>Beauty wakes a hunger it cannot feed — hungers usually correspond to real countries.</sentenceCorrect>
+          <sentenceCorrect>Beauty wakes a hunger it cannot feed — that hunger names a real country.</sentenceCorrect>
           <sentenceMisses>
             <miss>A sunset deducts God as a theorem.</miss>
             <miss>Hungers never correspond to real countries.</miss>
@@ -504,22 +504,22 @@ If God is the good that created goods point toward, ordinary loves are not cance
           <whyEasy>Hope keeps Meaning Ridge. Beauty wakes a hunger it cannot feed.</whyEasy>
         </match>
         <hold levelUpTo="medium" onFail="easy">
-          <claim>Beauty wakes a hunger it cannot feed — hungers usually correspond to real countries.</claim>
-          <reason>The sunset wakes a hunger it cannot feed.</reason>
+          <claim>Beauty wakes a hunger it cannot feed — that hunger names a real country.</claim>
+          <reason>Psalm 19 treats the sky as speech.</reason>
           <source>Lewis, Weight of Glory; Psalm 19:1–4</source>
-          <whyCorrect>The sunset wakes a hunger it cannot feed.</whyCorrect>
+          <whyCorrect>Psalm 19 treats the sky as speech.</whyCorrect>
           <whyMisses>
             <miss>Psalm 19 treats the sky as silent decoration.</miss>
             <miss>The lookout and the observatory cannot share a ridge.</miss>
             <miss>The sunset feeds the hunger it wakes.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>Beauty wakes a hunger it cannot feed — hungers usually correspond to real countries.</choice>
+            <choice>Beauty wakes a hunger it cannot feed — that hunger names a real country.</choice>
             <choice>A sunset deducts God as a theorem.</choice>
             <choice>Hungers never correspond to real countries.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>The sunset wakes a hunger it cannot feed.</choice>
+            <choice>Psalm 19 treats the sky as speech.</choice>
             <choice>Psalm 19 treats the sky as silent decoration.</choice>
             <choice>The lookout and the observatory cannot share a ridge.</choice>
           </reasonChoices>
@@ -528,7 +528,7 @@ If God is the good that created goods point toward, ordinary loves are not cance
       <medium points="12">
         <learn>
           <mediumTeach>Beauty wakes a hunger it cannot feed — as if a memory of a country you have not visited. Psalm 19 treats the sky as speech. Hungers like that usually correspond to real countries; beauty keeps the earlier areas from becoming only arguments.</mediumTeach>
-          <mainIdea>Beauty wakes a hunger it cannot feed — hungers usually correspond to real countries.</mainIdea>
+          <mainIdea>Beauty wakes a hunger it cannot feed — that hunger names a real country.</mainIdea>
           <gloss>Beauty wakes a hunger it cannot feed — longing for a country the sunset cannot give.</gloss>
           <loci>This idea lives at Meaning Ridge, with Hope.</loci>
           <word>
@@ -538,7 +538,7 @@ If God is the good that created goods point toward, ordinary loves are not cance
           <hint>Keep the signpost. Toss “only taste.”</hint>
         </learn>
         <match>
-          <sentenceCorrect>Beauty wakes a hunger it cannot feed — hungers usually correspond to real countries.</sentenceCorrect>
+          <sentenceCorrect>Beauty wakes a hunger it cannot feed — that hunger names a real country.</sentenceCorrect>
           <sentenceMisses>
             <miss>A sunset deducts God as a theorem.</miss>
             <miss>Hungers never correspond to real countries.</miss>
@@ -550,22 +550,22 @@ If God is the good that created goods point toward, ordinary loves are not cance
           <whyMedium>Hope keeps Meaning Ridge. Beauty wakes a hunger it cannot feed.</whyMedium>
         </match>
         <hold levelUpTo="hard" onFail="easy">
-          <claim>Beauty wakes a hunger it cannot feed — hungers usually correspond to real countries.</claim>
-          <reason>The sunset wakes a hunger it cannot feed.</reason>
+          <claim>Beauty wakes a hunger it cannot feed — that hunger names a real country.</claim>
+          <reason>Psalm 19 treats the sky as speech.</reason>
           <source>Lewis, Weight of Glory; Psalm 19:1–4</source>
-          <whyCorrect>The sunset wakes a hunger it cannot feed.</whyCorrect>
+          <whyCorrect>Psalm 19 treats the sky as speech.</whyCorrect>
           <whyMisses>
             <miss>Psalm 19 treats the sky as silent decoration.</miss>
             <miss>The lookout and the observatory cannot share a ridge.</miss>
             <miss>The sunset feeds the hunger it wakes.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>Beauty wakes a hunger it cannot feed — hungers usually correspond to real countries.</choice>
+            <choice>Beauty wakes a hunger it cannot feed — that hunger names a real country.</choice>
             <choice>A sunset deducts God as a theorem.</choice>
             <choice>Hungers never correspond to real countries.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>The sunset wakes a hunger it cannot feed.</choice>
+            <choice>Psalm 19 treats the sky as speech.</choice>
             <choice>Psalm 19 treats the sky as silent decoration.</choice>
             <choice>The lookout and the observatory cannot share a ridge.</choice>
           </reasonChoices>
@@ -587,7 +587,7 @@ Beauty does not replace the earlier areas. It keeps them from becoming only a br
           </challengeTiles>
         </learn>
         <match>
-          <sentenceCorrect>Beauty wakes a hunger it cannot feed — hungers usually correspond to real countries.</sentenceCorrect>
+          <sentenceCorrect>Beauty wakes a hunger it cannot feed — that hunger names a real country.</sentenceCorrect>
           <sentenceMisses>
             <miss>A sunset deducts God as a theorem.</miss>
             <miss>Hungers never correspond to real countries.</miss>
@@ -596,25 +596,25 @@ Beauty does not replace the earlier areas. It keeps them from becoming only a br
           <personPrompt>Hope keeps that ridge.</personPrompt>
           <ideaPrompt>Hope’s ridge — beauty wakes a hunger it cannot feed.</ideaPrompt>
           <ideaLabel>Beauty wakes a hunger it cannot feed.</ideaLabel>
-          <whyHard>Hope Ridge keeps Meaning Ridge. Beauty wakes a hunger it cannot feed — hungers usually correspond to real countries.</whyHard>
+          <whyHard>Hope Ridge keeps Meaning Ridge. Beauty wakes a hunger it cannot feed — that hunger names a real country.</whyHard>
         </match>
         <hold onFail="easy">
-          <claim>Beauty wakes a hunger it cannot feed — hungers usually correspond to real countries.</claim>
-          <reason>The sunset wakes a hunger it cannot feed.</reason>
+          <claim>Beauty wakes a hunger it cannot feed — that hunger names a real country.</claim>
+          <reason>Psalm 19 treats the sky as speech.</reason>
           <source>Lewis, Weight of Glory; Psalm 19:1–4</source>
-          <whyCorrect>The sunset wakes a hunger it cannot feed.</whyCorrect>
+          <whyCorrect>Psalm 19 treats the sky as speech.</whyCorrect>
           <whyMisses>
             <miss>Psalm 19 treats the sky as silent decoration.</miss>
             <miss>The lookout and the observatory cannot share a ridge.</miss>
             <miss>The sunset feeds the hunger it wakes.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>Beauty wakes a hunger it cannot feed — hungers usually correspond to real countries.</choice>
+            <choice>Beauty wakes a hunger it cannot feed — that hunger names a real country.</choice>
             <choice>A sunset deducts God as a theorem.</choice>
             <choice>Hungers never correspond to real countries.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>The sunset wakes a hunger it cannot feed.</choice>
+            <choice>Psalm 19 treats the sky as speech.</choice>
             <choice>Psalm 19 treats the sky as silent decoration.</choice>
             <choice>The lookout and the observatory cannot share a ridge.</choice>
           </reasonChoices>
@@ -656,9 +656,9 @@ Beauty does not replace the earlier areas. It keeps them from becoming only a br
         </match>
         <hold levelUpTo="medium" onFail="easy">
           <claim>Grace is gift, not wage; faith receives; boast starves.</claim>
-          <reason>The claim is that God moves first — not that you finished the map.</reason>
+          <reason>God moves first — you did not finish the map.</reason>
           <source>Ephesians 2:8–9</source>
-          <whyCorrect>The claim is that God moves first — not that you finished the map.</whyCorrect>
+          <whyCorrect>God moves first — you did not finish the map.</whyCorrect>
           <whyMisses>
             <miss>Boast is what the gift is for.</miss>
             <miss>Salvation is your own doing.</miss>
@@ -670,7 +670,7 @@ Beauty does not replace the earlier areas. It keeps them from becoming only a br
             <choice>Faith is a wage God owes you.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>The claim is that God moves first — not that you finished the map.</choice>
+            <choice>God moves first — you did not finish the map.</choice>
             <choice>Boast is what the gift is for.</choice>
             <choice>Salvation is your own doing.</choice>
           </reasonChoices>
@@ -702,9 +702,9 @@ Beauty does not replace the earlier areas. It keeps them from becoming only a br
         </match>
         <hold levelUpTo="hard" onFail="easy">
           <claim>Grace is gift, not wage; faith receives; boast starves.</claim>
-          <reason>The claim is that God moves first — not that you finished the map.</reason>
+          <reason>God moves first — you did not finish the map.</reason>
           <source>Ephesians 2:8–9</source>
-          <whyCorrect>The claim is that God moves first — not that you finished the map.</whyCorrect>
+          <whyCorrect>God moves first — you did not finish the map.</whyCorrect>
           <whyMisses>
             <miss>Boast is what the gift is for.</miss>
             <miss>Salvation is your own doing.</miss>
@@ -716,7 +716,7 @@ Beauty does not replace the earlier areas. It keeps them from becoming only a br
             <choice>Faith is a wage God owes you.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>The claim is that God moves first — not that you finished the map.</choice>
+            <choice>God moves first — you did not finish the map.</choice>
             <choice>Boast is what the gift is for.</choice>
             <choice>Salvation is your own doing.</choice>
           </reasonChoices>
@@ -759,9 +759,9 @@ By grace you have been saved through faith. And this is not your own doing; it i
         </match>
         <hold onFail="easy">
           <claim>Grace is gift, not wage; faith receives; boast starves.</claim>
-          <reason>The claim is that God moves first — not that you finished the map.</reason>
+          <reason>God moves first — you did not finish the map.</reason>
           <source>Ephesians 2:8–9</source>
-          <whyCorrect>The claim is that God moves first — not that you finished the map.</whyCorrect>
+          <whyCorrect>God moves first — you did not finish the map.</whyCorrect>
           <whyMisses>
             <miss>Boast is what the gift is for.</miss>
             <miss>Salvation is your own doing.</miss>
@@ -773,7 +773,7 @@ By grace you have been saved through faith. And this is not your own doing; it i
             <choice>Faith is a wage God owes you.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>The claim is that God moves first — not that you finished the map.</choice>
+            <choice>God moves first — you did not finish the map.</choice>
             <choice>Boast is what the gift is for.</choice>
             <choice>Salvation is your own doing.</choice>
           </reasonChoices>
