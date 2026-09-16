@@ -1,5 +1,5 @@
 {
-  "version": "1.4.84",
+  "version": "1.4.85",
   "stories": {
     "ph-road": [
       {
@@ -62,7 +62,7 @@
       },
       {
         "id": "03-speech-road",
-        "sourcePng": "/workspace/silver-city-art/panel-blast/set-b/ph-father-03-speech-road.png",
+        "sourcePng": "/home/ubuntu/.cursor/projects/workspace/uploads/ph-father-03-speech-road_af88.png",
         "files": {
           "512": "public/assets/panel-blast/ph-father/03-speech-road@512.webp",
           "1024": "public/assets/panel-blast/ph-father/03-speech-road@1024.webp"
