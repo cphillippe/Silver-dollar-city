@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<areaPack id="observatory" schemaVersion="3" appVersion="1.4.79" generated="2026-09-14T13:15:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/" title="Sky Watch" place="Sky Watch" person="Nora Skye" personId="nora" plotId="observatory">
+<areaPack id="observatory" schemaVersion="3" appVersion="1.4.80" generated="2026-09-14T13:15:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/" title="Sky Watch" place="Sky Watch" person="Nora Skye" personId="nora" plotId="observatory">
   <howToEdit>RUNTIME CONTENT: the game loads this file as the source of truth for this area. Change player-facing text in place inside each &lt;lesson&gt;. Stable id attributes (ph-father, …) are engine keys — do not rename without a migration. Three tiers per fact: &lt;easy easyOrder="N"&gt;, &lt;medium&gt;, and &lt;hard&gt; — each with &lt;learn&gt;, &lt;match&gt;, and &lt;hold&gt;. Easy Learn: shortStory/mainIdea/loci. Medium Learn: mediumTeach (clearer than Hard, richer than Easy). Hard Learn: hardTeach/fullTeach. Held claim·reason·source stay plain and identical on all three. Hold level-up: see hold @levelUpTo / @onFail and index &lt;holdRules&gt;. Empty optional elements are intentional. Escape &amp; &lt; &gt; in text.</howToEdit>
   <meta>
     <title>Silver City — Sky Watch</title>
@@ -330,7 +330,7 @@ A Designer who wants observers predicts this habitable fit. The narrow ranges ar
       <easy points="10" easyOrder="21">
         <learn>
           <shortStory>A hot early state is still something. Empty space in a lab is still something. The question remains: why is there anything at all?</shortStory>
-          <mainIdea>Why is there something rather than nothing remains after a cosmological model.</mainIdea>
+          <mainIdea>Something is here — it did not have to be.</mainIdea>
           <gloss>Physics maps how the world runs. It does not finish why there is a world.</gloss>
           <loci>This idea lives at Sky Watch, with Nora.</loci>
           <word>
@@ -340,7 +340,7 @@ A Designer who wants observers predicts this habitable fit. The narrow ranges ar
           <hint>Keep the careful reading. Toss “free lunch.”</hint>
         </learn>
         <match>
-          <sentenceCorrect>Why is there something rather than nothing remains after a cosmological model.</sentenceCorrect>
+          <sentenceCorrect>Something is here — it did not have to be.</sentenceCorrect>
           <sentenceMisses>
             <miss>A successful model retires the metaphysical question.</miss>
             <miss>“Nothing” in popular writing always means metaphysical nothing.</miss>
@@ -352,22 +352,22 @@ A Designer who wants observers predicts this habitable fit. The narrow ranges ar
           <whyEasy>Nora watches the sky. Why something rather than nothing still stands.</whyEasy>
         </match>
         <hold levelUpTo="medium" onFail="easy">
-          <claim>Why is there something rather than nothing remains after a cosmological model.</claim>
-          <reason>Models describe a world already given; a physical “vacuum” is still something.</reason>
-          <source>Leibniz; the vacuum/nothing distinction</source>
-          <whyCorrect>Models describe a world already given; a physical “vacuum” is still something.</whyCorrect>
+          <claim>Something is here — it did not have to be.</claim>
+          <reason>A model still starts with something there.</reason>
+          <source>Psalm 8:3–4; Leibniz</source>
+          <whyCorrect>A model still starts with something there.</whyCorrect>
           <whyMisses>
             <miss>Laws and vacua are not somethings.</miss>
             <miss>The question only applies to Tuesdays.</miss>
             <miss>Nothing needs a reason to exist.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>Why is there something rather than nothing remains after a cosmological model.</choice>
+            <choice>Something is here — it did not have to be.</choice>
             <choice>A successful model retires the metaphysical question.</choice>
             <choice>“Nothing” in popular writing always means metaphysical nothing.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Models describe a world already given; a physical “vacuum” is still something.</choice>
+            <choice>A model still starts with something there.</choice>
             <choice>Laws and vacua are not somethings.</choice>
             <choice>The question only applies to Tuesdays.</choice>
           </reasonChoices>
@@ -376,7 +376,7 @@ A Designer who wants observers predicts this habitable fit. The narrow ranges ar
       <medium points="12">
         <learn>
           <mediumTeach>Leibniz asked: why is there something rather than nothing? A hot early state is still something; empty space in a lab is still something. A cosmological model describes *how* early stuff behaved — it does not erase the deeper question of why anything is here at all.</mediumTeach>
-          <mainIdea>Why is there something rather than nothing remains after a cosmological model.</mainIdea>
+          <mainIdea>Something is here — it did not have to be.</mainIdea>
           <gloss>Physics maps how the world runs. It does not finish why there is a world.</gloss>
           <loci>This idea lives at Sky Watch, with Nora.</loci>
           <word>
@@ -386,7 +386,7 @@ A Designer who wants observers predicts this habitable fit. The narrow ranges ar
           <hint>Keep the careful reading. Toss “free lunch.”</hint>
         </learn>
         <match>
-          <sentenceCorrect>Why is there something rather than nothing remains after a cosmological model.</sentenceCorrect>
+          <sentenceCorrect>Something is here — it did not have to be.</sentenceCorrect>
           <sentenceMisses>
             <miss>A successful model retires the metaphysical question.</miss>
             <miss>“Nothing” in popular writing always means metaphysical nothing.</miss>
@@ -398,22 +398,22 @@ A Designer who wants observers predicts this habitable fit. The narrow ranges ar
           <whyMedium>Nora watches the sky. Why something rather than nothing still stands.</whyMedium>
         </match>
         <hold levelUpTo="hard" onFail="easy">
-          <claim>Why is there something rather than nothing remains after a cosmological model.</claim>
-          <reason>Models describe a world already given; a physical “vacuum” is still something.</reason>
-          <source>Leibniz; the vacuum/nothing distinction</source>
-          <whyCorrect>Models describe a world already given; a physical “vacuum” is still something.</whyCorrect>
+          <claim>Something is here — it did not have to be.</claim>
+          <reason>A model still starts with something there.</reason>
+          <source>Psalm 8:3–4; Leibniz</source>
+          <whyCorrect>A model still starts with something there.</whyCorrect>
           <whyMisses>
             <miss>Laws and vacua are not somethings.</miss>
             <miss>The question only applies to Tuesdays.</miss>
             <miss>Nothing needs a reason to exist.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>Why is there something rather than nothing remains after a cosmological model.</choice>
+            <choice>Something is here — it did not have to be.</choice>
             <choice>A successful model retires the metaphysical question.</choice>
             <choice>“Nothing” in popular writing always means metaphysical nothing.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Models describe a world already given; a physical “vacuum” is still something.</choice>
+            <choice>A model still starts with something there.</choice>
             <choice>Laws and vacua are not somethings.</choice>
             <choice>The question only applies to Tuesdays.</choice>
           </reasonChoices>
@@ -435,7 +435,7 @@ Fine-tuning and “why anything?” are siblings, not twins. One asks why this w
           </challengeTiles>
         </learn>
         <match>
-          <sentenceCorrect>Why is there something rather than nothing remains after a cosmological model.</sentenceCorrect>
+          <sentenceCorrect>Something is here — it did not have to be.</sentenceCorrect>
           <sentenceMisses>
             <miss>A successful model retires the metaphysical question.</miss>
             <miss>“Nothing” in popular writing always means metaphysical nothing.</miss>
@@ -447,22 +447,22 @@ Fine-tuning and “why anything?” are siblings, not twins. One asks why this w
           <whyHard>Nora Skye keeps Sky Watch. Models describe a world already given; why there is something rather than nothing remains.</whyHard>
         </match>
         <hold onFail="easy">
-          <claim>Why is there something rather than nothing remains after a cosmological model.</claim>
-          <reason>Models describe a world already given; a physical “vacuum” is still something.</reason>
-          <source>Leibniz; the vacuum/nothing distinction</source>
-          <whyCorrect>Models describe a world already given; a physical “vacuum” is still something.</whyCorrect>
+          <claim>Something is here — it did not have to be.</claim>
+          <reason>A model still starts with something there.</reason>
+          <source>Psalm 8:3–4; Leibniz</source>
+          <whyCorrect>A model still starts with something there.</whyCorrect>
           <whyMisses>
             <miss>Laws and vacua are not somethings.</miss>
             <miss>The question only applies to Tuesdays.</miss>
             <miss>Nothing needs a reason to exist.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>Why is there something rather than nothing remains after a cosmological model.</choice>
+            <choice>Something is here — it did not have to be.</choice>
             <choice>A successful model retires the metaphysical question.</choice>
             <choice>“Nothing” in popular writing always means metaphysical nothing.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Models describe a world already given; a physical “vacuum” is still something.</choice>
+            <choice>A model still starts with something there.</choice>
             <choice>Laws and vacua are not somethings.</choice>
             <choice>The question only applies to Tuesdays.</choice>
           </reasonChoices>

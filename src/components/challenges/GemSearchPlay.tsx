@@ -15,6 +15,7 @@ import {
 } from '../../lib/gemSearch'
 import { lineBonusPoints } from '../../lib/matchBonus'
 import { gemBonusBeat, gemTargetBeat, matchClearBeat } from '../../lib/successBeat'
+import { MatchTakeaway } from '../HeldTriad'
 import { storyPanelsFor, type StoryPanel } from '../../lib/storyPanels'
 import { GEM_BURST, playGemPop, prefersReducedMotion } from '../../lib/juice'
 import { useProgress } from '../../store/progress'
@@ -499,10 +500,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       </p>
       {status === 'ok' ? (
         <>
-          <p className="match-yes" role="status">
-            <strong>{clearBeat.title}</strong>
-            <span>{clearBeat.why}</span>
-          </p>
+          <MatchTakeaway lineId={lineId} title={clearBeat.title} />
           <div className="cta-dock">
             <button
               type="button"

@@ -26,8 +26,8 @@ import {
   type MergeEvent,
   type MergeState,
 } from '../../lib/claimMerge'
-import { mergeWinBeat } from '../../lib/successBeat'
 import { GEM_BURST, playGemPop, prefersReducedMotion } from '../../lib/juice'
+import { MatchTakeaway } from '../HeldTriad'
 import type { StoryPanel } from '../../lib/storyPanels'
 import { WinBurst } from './WinBurst'
 
@@ -75,7 +75,6 @@ export function ClaimMergePlay({
   const last = useRef(0)
   const peak = highestMergeRank(view.balls)
   const opened = mergeBeatsOpened(peak, view.won)
-  const takeaway = mergeWinBeat()
 
   function publish(next: MergeState) {
     stateRef.current = next
@@ -358,9 +357,7 @@ export function ClaimMergePlay({
       </ol>
       {view.won ? (
         <>
-          <p className="match-yes" role="status">
-            <strong>{takeaway.why}</strong>
-          </p>
+          <MatchTakeaway lineId={lineId} />
           <div className="cta-dock">
             <button
               type="button"

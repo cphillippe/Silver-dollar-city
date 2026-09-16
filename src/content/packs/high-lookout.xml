@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<areaPack id="high-lookout" schemaVersion="3" appVersion="1.4.79" generated="2026-09-14T13:15:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/" title="Meaning Ridge" place="Meaning Ridge" person="Hope Ridge" personId="hope" plotId="lookout">
+<areaPack id="high-lookout" schemaVersion="3" appVersion="1.4.80" generated="2026-09-14T13:15:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/" title="Meaning Ridge" place="Meaning Ridge" person="Hope Ridge" personId="hope" plotId="lookout">
   <howToEdit>RUNTIME CONTENT: the game loads this file as the source of truth for this area. Change player-facing text in place inside each &lt;lesson&gt;. Stable id attributes (ph-father, …) are engine keys — do not rename without a migration. Three tiers per fact: &lt;easy easyOrder="N"&gt;, &lt;medium&gt;, and &lt;hard&gt; — each with &lt;learn&gt;, &lt;match&gt;, and &lt;hold&gt;. Easy Learn: shortStory/mainIdea/loci. Medium Learn: mediumTeach (clearer than Hard, richer than Easy). Hard Learn: hardTeach/fullTeach. Held claim·reason·source stay plain and identical on all three. Hold level-up: see hold @levelUpTo / @onFail and index &lt;holdRules&gt;. Empty optional elements are intentional. Escape &amp; &lt; &gt; in text.</howToEdit>
   <meta>
     <title>Silver City — Meaning Ridge</title>
@@ -328,12 +328,12 @@ A living God is the home of mind. Materialism hopes a future theory will close t
         </sources>
       </journal>
     </lesson>
-    <lesson id="hl-meaning" place="Meaning Ridge" person="Hope Ridge" tripleId="meaning-lookout" ideaId="idea-meaning" ideaLabel="Meaning may be received, not only built." challengeKind="sort" challengeTitle="Invented or found">
+    <lesson id="hl-meaning" place="Meaning Ridge" person="Hope Ridge" tripleId="meaning-lookout" ideaId="idea-meaning" ideaLabel="Meaning is received, not only built." challengeKind="sort" challengeTitle="Invented or found">
       <easy points="10" easyOrder="31">
         <learn>
           <shortStory>Work and pleasure are gifts. They are not the final good. Ecclesiastes keeps both truths.</shortStory>
-          <mainIdea>Local meaning can be built — the lookout asks whether it is also received.</mainIdea>
-          <gloss>You can build a local meaning. The lookout asks if it is also received.</gloss>
+          <mainIdea>Meaning is received, not only built.</mainIdea>
+          <gloss>You can build a local meaning. The last good is received.</gloss>
           <loci>This idea lives at Meaning Ridge, with Hope.</loci>
           <word>
             <term>Meaning</term>
@@ -342,7 +342,7 @@ A living God is the home of mind. Materialism hopes a future theory will close t
           <hint>Keep the hunger. Toss “only a mood.”</hint>
         </learn>
         <match>
-          <sentenceCorrect>Local meaning can be built — the lookout asks whether it is also received.</sentenceCorrect>
+          <sentenceCorrect>Meaning is received, not only built.</sentenceCorrect>
           <sentenceMisses>
             <miss>Work and pleasure are the final good.</miss>
             <miss>Ecclesiastes calls every gift worthless.</miss>
@@ -350,11 +350,11 @@ A living God is the home of mind. Materialism hopes a future theory will close t
           <placePrompt>That line lives at Meaning Ridge.</placePrompt>
           <personPrompt>Hope keeps that ridge.</personPrompt>
           <ideaPrompt>Hope’s ridge — meaning may be received, not only built.</ideaPrompt>
-          <ideaLabel>Meaning may be received, not only built.</ideaLabel>
-          <whyEasy>Hope keeps Meaning Ridge. Meaning may be received, not only built.</whyEasy>
+          <ideaLabel>Meaning is received, not only built.</ideaLabel>
+          <whyEasy>Hope keeps Meaning Ridge. Meaning is received, not only built.</whyEasy>
         </match>
         <hold levelUpTo="medium" onFail="easy">
-          <claim>Local meaning can be built — the lookout asks whether it is also received.</claim>
+          <claim>Meaning is received, not only built.</claim>
           <reason>Work and fun are gifts — not the last good.</reason>
           <source>Ecclesiastes 2; 9; 12</source>
           <whyCorrect>Work and fun are gifts — not the last good.</whyCorrect>
@@ -364,7 +364,7 @@ A living God is the home of mind. Materialism hopes a future theory will close t
             <miss>Work and fun are the last good.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>Local meaning can be built — the lookout asks whether it is also received.</choice>
+            <choice>Meaning is received, not only built.</choice>
             <choice>Work and pleasure are the final good.</choice>
             <choice>Ecclesiastes calls every gift worthless.</choice>
           </claimChoices>
@@ -378,8 +378,8 @@ A living God is the home of mind. Materialism hopes a future theory will close t
       <medium points="12">
         <learn>
           <mediumTeach>Work and pleasure are real gifts. They are not the final good. Ecclesiastes keeps both truths and asks whether local meaning is also received. The lookout refuses cheap cheer and cheap despair.</mediumTeach>
-          <mainIdea>Local meaning can be built — the lookout asks whether it is also received.</mainIdea>
-          <gloss>You can build a local meaning. The lookout asks if it is also received.</gloss>
+          <mainIdea>Meaning is received, not only built.</mainIdea>
+          <gloss>You can build a local meaning. The last good is received.</gloss>
           <loci>This idea lives at Meaning Ridge, with Hope.</loci>
           <word>
             <term>Meaning</term>
@@ -388,7 +388,7 @@ A living God is the home of mind. Materialism hopes a future theory will close t
           <hint>Keep the hunger. Toss “only a mood.”</hint>
         </learn>
         <match>
-          <sentenceCorrect>Local meaning can be built — the lookout asks whether it is also received.</sentenceCorrect>
+          <sentenceCorrect>Meaning is received, not only built.</sentenceCorrect>
           <sentenceMisses>
             <miss>Work and pleasure are the final good.</miss>
             <miss>Ecclesiastes calls every gift worthless.</miss>
@@ -396,11 +396,11 @@ A living God is the home of mind. Materialism hopes a future theory will close t
           <placePrompt>That line lives at Meaning Ridge.</placePrompt>
           <personPrompt>Hope keeps that ridge.</personPrompt>
           <ideaPrompt>Hope’s ridge — meaning may be received, not only built.</ideaPrompt>
-          <ideaLabel>Meaning may be received, not only built.</ideaLabel>
-          <whyMedium>Hope keeps Meaning Ridge. Meaning may be received, not only built.</whyMedium>
+          <ideaLabel>Meaning is received, not only built.</ideaLabel>
+          <whyMedium>Hope keeps Meaning Ridge. Meaning is received, not only built.</whyMedium>
         </match>
         <hold levelUpTo="hard" onFail="easy">
-          <claim>Local meaning can be built — the lookout asks whether it is also received.</claim>
+          <claim>Meaning is received, not only built.</claim>
           <reason>Work and fun are gifts — not the last good.</reason>
           <source>Ecclesiastes 2; 9; 12</source>
           <whyCorrect>Work and fun are gifts — not the last good.</whyCorrect>
@@ -410,7 +410,7 @@ A living God is the home of mind. Materialism hopes a future theory will close t
             <miss>Work and fun are the last good.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>Local meaning can be built — the lookout asks whether it is also received.</choice>
+            <choice>Meaning is received, not only built.</choice>
             <choice>Work and pleasure are the final good.</choice>
             <choice>Ecclesiastes calls every gift worthless.</choice>
           </claimChoices>
@@ -437,7 +437,7 @@ If God is the good that created goods point toward, ordinary loves are not cance
           </challengeTiles>
         </learn>
         <match>
-          <sentenceCorrect>Local meaning can be built — the lookout asks whether it is also received.</sentenceCorrect>
+          <sentenceCorrect>Meaning is received, not only built.</sentenceCorrect>
           <sentenceMisses>
             <miss>Work and pleasure are the final good.</miss>
             <miss>Ecclesiastes calls every gift worthless.</miss>
@@ -445,11 +445,11 @@ If God is the good that created goods point toward, ordinary loves are not cance
           <placePrompt>That line lives at Meaning Ridge.</placePrompt>
           <personPrompt>Hope keeps that ridge.</personPrompt>
           <ideaPrompt>Hope’s ridge — meaning may be received, not only built.</ideaPrompt>
-          <ideaLabel>Meaning may be received, not only built.</ideaLabel>
-          <whyHard>Hope Ridge keeps Meaning Ridge. Local meaning can be built — the lookout asks whether it is also received.</whyHard>
+          <ideaLabel>Meaning is received, not only built.</ideaLabel>
+          <whyHard>Hope Ridge keeps Meaning Ridge. Meaning is received, not only built.</whyHard>
         </match>
         <hold onFail="easy">
-          <claim>Local meaning can be built — the lookout asks whether it is also received.</claim>
+          <claim>Meaning is received, not only built.</claim>
           <reason>Work and fun are gifts — not the last good.</reason>
           <source>Ecclesiastes 2; 9; 12</source>
           <whyCorrect>Work and fun are gifts — not the last good.</whyCorrect>
@@ -459,7 +459,7 @@ If God is the good that created goods point toward, ordinary loves are not cance
             <miss>Work and fun are the last good.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>Local meaning can be built — the lookout asks whether it is also received.</choice>
+            <choice>Meaning is received, not only built.</choice>
             <choice>Work and pleasure are the final good.</choice>
             <choice>Ecclesiastes calls every gift worthless.</choice>
           </claimChoices>
@@ -471,7 +471,7 @@ If God is the good that created goods point toward, ordinary loves are not cance
         </hold>
       </hard>
       <journal id="j-hl-3" title="Meaning that can be found" kicker="Meaning Ridge" unlockAfter="hl-meaning" scoreFromHeldTier="true">
-        <p>You can build a local meaning without naming God. The lookout asks whether that meaning is only assembled, or also received — whether the hunger for a final good has an object.</p>
+        <p>You can build a local meaning. Meaning is also received — the hunger for a final good has an object.</p>
         <p>Ecclesiastes refuses to let work and pleasure pretend to be the final good, and also refuses to call them worthless as gifts. That double honesty is part of biblical wisdom.</p>
         <sources>
           <source>Ecclesiastes 2:24; 9:7–10; 12:13</source>
@@ -937,7 +937,7 @@ Come to me, all who labor and are heavy laden, and I will give you rest.</fullTe
     <lesson id="daily-door" place="Meaning Ridge" person="Hope Ridge" tripleId="door-lookout" ideaId="idea-door" ideaLabel="Jesus is a door with a wide anyone." challengeKind="match" challengeTitle="A door, not a wall">
       <easy points="10" easyOrder="35">
         <learn>
-          <shortStory>Jesus says, “I am the door.” It is a particular way in — and a wide anyone. You may refuse it. The town will not lock you in a pew.</shortStory>
+          <shortStory>Jesus says, “I am the door.” Anyone who enters by him is saved. It is a particular way in — and a wide anyone. You may refuse it. The town will not lock you in a pew.</shortStory>
           <mainIdea>Jesus’ “door” is a particular way in with a wide anyone.</mainIdea>
           <gloss>Jesus’ “door” is a particular way in with a wide anyone.</gloss>
           <loci>This idea lives at Meaning Ridge, with Hope.</loci>
@@ -961,9 +961,9 @@ Come to me, all who labor and are heavy laden, and I will give you rest.</fullTe
         </match>
         <hold levelUpTo="medium" onFail="easy">
           <claim>Jesus’ “door” is a particular way in with a wide anyone.</claim>
-          <reason>You may refuse it; the town will not lock you in a pew.</reason>
+          <reason>Anyone who enters by me is saved — Jesus is the door.</reason>
           <source>John 10:9</source>
-          <whyCorrect>You may refuse it; the town will not lock you in a pew.</whyCorrect>
+          <whyCorrect>Anyone who enters by me is saved — Jesus is the door.</whyCorrect>
           <whyMisses>
             <miss>“Anyone” is narrowed to insiders only.</miss>
             <miss>The image is a wall, not an entrance.</miss>
@@ -975,7 +975,7 @@ Come to me, all who labor and are heavy laden, and I will give you rest.</fullTe
             <choice>Pasture is denied on the other side.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>You may refuse it; the town will not lock you in a pew.</choice>
+            <choice>Anyone who enters by me is saved — Jesus is the door.</choice>
             <choice>“Anyone” is narrowed to insiders only.</choice>
             <choice>The image is a wall, not an entrance.</choice>
           </reasonChoices>
@@ -1007,9 +1007,9 @@ Come to me, all who labor and are heavy laden, and I will give you rest.</fullTe
         </match>
         <hold levelUpTo="hard" onFail="easy">
           <claim>Jesus’ “door” is a particular way in with a wide anyone.</claim>
-          <reason>You may refuse it; the town will not lock you in a pew.</reason>
+          <reason>Anyone who enters by me is saved — Jesus is the door.</reason>
           <source>John 10:9</source>
-          <whyCorrect>You may refuse it; the town will not lock you in a pew.</whyCorrect>
+          <whyCorrect>Anyone who enters by me is saved — Jesus is the door.</whyCorrect>
           <whyMisses>
             <miss>“Anyone” is narrowed to insiders only.</miss>
             <miss>The image is a wall, not an entrance.</miss>
@@ -1021,7 +1021,7 @@ Come to me, all who labor and are heavy laden, and I will give you rest.</fullTe
             <choice>Pasture is denied on the other side.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>You may refuse it; the town will not lock you in a pew.</choice>
+            <choice>Anyone who enters by me is saved — Jesus is the door.</choice>
             <choice>“Anyone” is narrowed to insiders only.</choice>
             <choice>The image is a wall, not an entrance.</choice>
           </reasonChoices>
@@ -1064,9 +1064,9 @@ I am the door. If anyone enters by me, he will be saved and will go in and out a
         </match>
         <hold onFail="easy">
           <claim>Jesus’ “door” is a particular way in with a wide anyone.</claim>
-          <reason>You may refuse it; the town will not lock you in a pew.</reason>
+          <reason>Anyone who enters by me is saved — Jesus is the door.</reason>
           <source>John 10:9</source>
-          <whyCorrect>You may refuse it; the town will not lock you in a pew.</whyCorrect>
+          <whyCorrect>Anyone who enters by me is saved — Jesus is the door.</whyCorrect>
           <whyMisses>
             <miss>“Anyone” is narrowed to insiders only.</miss>
             <miss>The image is a wall, not an entrance.</miss>
@@ -1078,7 +1078,7 @@ I am the door. If anyone enters by me, he will be saved and will go in and out a
             <choice>Pasture is denied on the other side.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>You may refuse it; the town will not lock you in a pew.</choice>
+            <choice>Anyone who enters by me is saved — Jesus is the door.</choice>
             <choice>“Anyone” is narrowed to insiders only.</choice>
             <choice>The image is a wall, not an entrance.</choice>
           </reasonChoices>
@@ -1095,7 +1095,7 @@ I am the door. If anyone enters by me, he will be saved and will go in and out a
   <streetFacts>
     <fact evidenceId="hl-moral" tripleId="hope-lookout" ideaId="idea-moral" place="Meaning Ridge" person="Hope Ridge" ideaLabel="Duty is more than taste." />
     <fact evidenceId="hl-mind" tripleId="mind-lookout" ideaId="idea-mind" place="Meaning Ridge" person="Hope Ridge" ideaLabel="The story must house the storyteller’s mind." />
-    <fact evidenceId="hl-meaning" tripleId="meaning-lookout" ideaId="idea-meaning" place="Meaning Ridge" person="Hope Ridge" ideaLabel="Meaning may be received, not only built." />
+    <fact evidenceId="hl-meaning" tripleId="meaning-lookout" ideaId="idea-meaning" place="Meaning Ridge" person="Hope Ridge" ideaLabel="Meaning is received, not only built." />
     <fact evidenceId="hl-beauty" tripleId="beauty-lookout" ideaId="idea-beauty" place="Meaning Ridge" person="Hope Ridge" ideaLabel="Beauty wakes a hunger it cannot feed." />
     <fact evidenceId="daily-grace" tripleId="grace-lookout" ideaId="idea-grace" place="Meaning Ridge" person="Hope Ridge" ideaLabel="Grace is gift, not wage." />
     <fact evidenceId="daily-rest" tripleId="rest-lookout" ideaId="idea-rest" place="Meaning Ridge" person="Hope Ridge" ideaLabel="Rest is the gift, not a steeper hill." />

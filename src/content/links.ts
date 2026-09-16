@@ -277,8 +277,8 @@ const STREET_FACTS: StreetFact[] = [
     tripleId: 'leibniz-sky',
     placeId: 'place-sky',
     personId: 'person-nora',
-    text: 'Why is there something rather than nothing remains after a cosmological model.',
-    caption: 'Why something rather than nothing.',
+    text: 'Something is here — it did not have to be.',
+    caption: 'Something is here — it did not have to be.',
   },
   {
     evidenceId: 'ob-life',
@@ -430,8 +430,8 @@ const STREET_FACTS: StreetFact[] = [
     tripleId: 'meaning-lookout',
     placeId: 'place-lookout',
     personId: 'person-hope',
-    text: 'Local meaning can be built — the lookout asks whether it is also received.',
-    caption: 'Meaning may be received, not only built.',
+    text: 'Meaning is received, not only built.',
+    caption: 'Meaning is received, not only built.',
   },
   {
     evidenceId: 'hl-beauty',
@@ -1087,8 +1087,8 @@ export const STREET_WHYS: Record<string, { easy: string; hard: string }> = {
     hard: 'Hope Ridge keeps Meaning Ridge. Mind is there at the start — not a late accident.',
   },
   'meaning-lookout': {
-    easy: 'Hope keeps Meaning Ridge. Meaning may be received, not only built.',
-    hard: 'Hope Ridge keeps Meaning Ridge. Local meaning can be built — the lookout asks whether it is also received.',
+    easy: 'Hope keeps Meaning Ridge. Meaning is received, not only built.',
+    hard: 'Hope Ridge keeps Meaning Ridge. Meaning is received, not only built.',
   },
   'beauty-lookout': {
     easy: 'Hope keeps Meaning Ridge. Beauty wakes a hunger it cannot feed.',
