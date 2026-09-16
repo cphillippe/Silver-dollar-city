@@ -28,9 +28,10 @@ export const CONTENT_PACKS: ContentPackSpec[] = [
       'observatory',
       'first-gate',
       'high-lookout',
+      'stone-court',
     ],
     toolIds: ['love', 'logic', 'reason', 'science'],
-    notes: 'Schema v3 XML packs in src/content/packs/. Easy trail is all 39 facts in easyOrder. Paid extra streets live in src/config/commerce.ts (shop flags), not this core pack.',
+    notes: 'Schema v3 XML packs in src/content/packs/. Easy trail is all 42 facts in easyOrder. Paid extra streets live in src/config/commerce.ts (shop flags), not this core pack.',
   },
 ]
 

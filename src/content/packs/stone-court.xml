@@ -1,0 +1,471 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<areaPack id="stone-court" schemaVersion="3" appVersion="1.4.82" generated="2026-09-16T09:00:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/" title="Stone Court" place="Stone Court" person="Silas Whitman" personId="silas" plotId="bench">
+  <howToEdit>RUNTIME CONTENT: the game loads this file as the source of truth for this area. Change player-facing text in place inside each &lt;lesson&gt;. Stable id attributes (ph-father, …) are engine keys — do not rename without a migration. Three tiers per fact: &lt;easy easyOrder="N"&gt;, &lt;medium&gt;, and &lt;hard&gt; — each with &lt;learn&gt;, &lt;match&gt;, and &lt;hold&gt;. Easy Learn: shortStory/mainIdea/loci. Medium Learn: mediumTeach (clearer than Hard, richer than Easy). Hard Learn: hardTeach/fullTeach. Held claim·reason·source stay plain and identical on all three. Hold level-up: see hold @levelUpTo / @onFail and index &lt;holdRules&gt;. Empty optional elements are intentional. Escape &amp; &lt; &gt; in text.</howToEdit>
+  <meta>
+    <title>Silver City — Stone Court</title>
+    <subtitle>Outside names for Christ</subtitle>
+    <blurb>A stone court of old names: Tacitus, Josephus, Pliny — Christ named by writers who were not the church.</blurb>
+    <notes>Runtime/build content pack. After the Easy door, a new street: ancient-first source-dig. Engine maps lesson fields 1:1 to Learn / Match / Hold / Journal / street.</notes>
+  </meta>
+  <easyShelf order="sc-tacitus,sc-james,sc-pliny">
+    <line id="sc-tacitus" easyOrder="40">sc-tacitus</line>
+    <line id="sc-james" easyOrder="41">sc-james</line>
+    <line id="sc-pliny" easyOrder="42">sc-pliny</line>
+  </easyShelf>
+  <lessons>
+    <lesson id="sc-tacitus" place="Stone Court" person="Silas Whitman" tripleId="tacitus-court" ideaId="idea-tacitus" ideaLabel="Tacitus names Christus under Pilate." challengeKind="sort" challengeTitle="A Roman names Christus">
+      <easy points="10" easyOrder="40">
+        <learn>
+          <shortStory>A Roman historian named Tacitus wrote about Christus. He says Christus was executed under Pontius Pilate. The movement then spread as far as Rome.</shortStory>
+          <mainIdea>Tacitus names Christus executed under Pontius Pilate.</mainIdea>
+          <gloss>Tacitus names Christus executed under Pontius Pilate.</gloss>
+          <loci>This idea lives at Stone Court, with Silas.</loci>
+          <word>
+            <term>Christus</term>
+            <sense>the Latin name Tacitus uses for Christ</sense>
+          </word>
+          <hint>Keep Pilate. Toss the empty-tomb claim.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>Tacitus names Christus executed under Pontius Pilate.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Tacitus writes that he saw the empty tomb.</miss>
+            <miss>Tacitus says Christus never lived.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at Stone Court.</placePrompt>
+          <personPrompt>Silas keeps that court.</personPrompt>
+          <ideaPrompt>Silas’s outside name — Christus under Pilate.</ideaPrompt>
+          <ideaLabel>Tacitus names Christus under Pilate.</ideaLabel>
+          <whyEasy>Silas keeps Stone Court. Tacitus names Christus executed under Pontius Pilate.</whyEasy>
+        </match>
+        <hold levelUpTo="medium" onFail="easy">
+          <claim>Tacitus names Christus executed under Pontius Pilate.</claim>
+          <reason>A Roman historian wrote the movement spread to Rome.</reason>
+          <source>Tacitus, Annals 15.44</source>
+          <whyCorrect>A Roman historian wrote the movement spread to Rome.</whyCorrect>
+          <whyMisses>
+            <miss>Tacitus writes that he saw the empty tomb.</miss>
+            <miss>Tacitus is a church pamphlet, not a Roman history.</miss>
+            <miss>Pilate is only a later church add-on.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Tacitus names Christus executed under Pontius Pilate.</choice>
+            <choice>Tacitus writes that he saw the empty tomb.</choice>
+            <choice>Tacitus says Christus never lived.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>A Roman historian wrote the movement spread to Rome.</choice>
+            <choice>Tacitus writes that he saw the empty tomb.</choice>
+            <choice>Tacitus is a church pamphlet, not a Roman history.</choice>
+          </reasonChoices>
+        </hold>
+      </easy>
+      <medium points="12">
+        <learn>
+          <mediumTeach>Tacitus, Annals 15.44. Writing early in the second century, a Roman senator names Christus, executed under Pontius Pilate in Judea. He is not telling the church’s Easter story. He is explaining why the name spread to Rome.</mediumTeach>
+          <mainIdea>Tacitus names Christus executed under Pontius Pilate.</mainIdea>
+          <gloss>Tacitus names Christus executed under Pontius Pilate.</gloss>
+          <loci>This idea lives at Stone Court, with Silas.</loci>
+          <word>
+            <term>Christus</term>
+            <sense>the Latin name Tacitus uses for Christ</sense>
+          </word>
+          <hint>Keep Pilate. Toss the empty-tomb claim.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>Tacitus names Christus executed under Pontius Pilate.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Tacitus writes that he saw the empty tomb.</miss>
+            <miss>Tacitus says Christus never lived.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at Stone Court.</placePrompt>
+          <personPrompt>Silas keeps that court.</personPrompt>
+          <ideaPrompt>Silas’s outside name — Christus under Pilate.</ideaPrompt>
+          <ideaLabel>Tacitus names Christus under Pilate.</ideaLabel>
+          <whyMedium>Silas keeps Stone Court. Tacitus names Christus executed under Pontius Pilate.</whyMedium>
+        </match>
+        <hold levelUpTo="hard" onFail="easy">
+          <claim>Tacitus names Christus executed under Pontius Pilate.</claim>
+          <reason>A Roman historian wrote the movement spread to Rome.</reason>
+          <source>Tacitus, Annals 15.44</source>
+          <whyCorrect>A Roman historian wrote the movement spread to Rome.</whyCorrect>
+          <whyMisses>
+            <miss>Tacitus writes that he saw the empty tomb.</miss>
+            <miss>Tacitus is a church pamphlet, not a Roman history.</miss>
+            <miss>Pilate is only a later church add-on.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Tacitus names Christus executed under Pontius Pilate.</choice>
+            <choice>Tacitus writes that he saw the empty tomb.</choice>
+            <choice>Tacitus says Christus never lived.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>A Roman historian wrote the movement spread to Rome.</choice>
+            <choice>Tacitus writes that he saw the empty tomb.</choice>
+            <choice>Tacitus is a church pamphlet, not a Roman history.</choice>
+          </reasonChoices>
+        </hold>
+      </medium>
+      <hard points="15">
+        <learn>
+          <hardTeach>Tacitus, Annals 15.44. Nero’s fire in Rome. To shift the blame, Nero punishes people called Christians. Tacitus pauses to explain the name: Christus, from whom the name had its origin, suffered the extreme penalty during the reign of Tiberius at the hands of one of our procurators, Pontius Pilate.
+He is hostile. He is not a Gospel writer. He still names Christ under Pilate, and he says the movement then broke out again in Rome. Do not claim Tacitus wrote the tomb. Hold the Roman name.</hardTeach>
+          <fullTeach>Tacitus, Annals 15.44. Nero’s fire in Rome. To shift the blame, Nero punishes people called Christians. Tacitus pauses to explain the name: Christus, from whom the name had its origin, suffered the extreme penalty during the reign of Tiberius at the hands of one of our procurators, Pontius Pilate.
+He is hostile. He is not a Gospel writer. He still names Christ under Pilate, and he says the movement then broke out again in Rome. Do not claim Tacitus wrote the tomb. Hold the Roman name.</fullTeach>
+          <prompt>What does Tacitus actually name?</prompt>
+          <teachOnWrong>Tacitus names Christus executed under Pontius Pilate, and a movement that spread to Rome. He does not write the empty tomb.</teachOnWrong>
+          <challengeTiles>
+            <keep>Christus suffered under Pontius Pilate.</keep>
+            <keep>The movement then spread as far as Rome.</keep>
+            <keep>Tacitus is a Roman historian, not a church pamphlet.</keep>
+            <discard>Tacitus writes that he saw the empty tomb.</discard>
+          </challengeTiles>
+        </learn>
+        <match>
+          <sentenceCorrect>Tacitus names Christus executed under Pontius Pilate.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Tacitus writes that he saw the empty tomb.</miss>
+            <miss>Tacitus says Christus never lived.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at Stone Court.</placePrompt>
+          <personPrompt>Silas keeps that court.</personPrompt>
+          <ideaPrompt>Silas’s outside name — Christus under Pilate.</ideaPrompt>
+          <ideaLabel>Tacitus names Christus under Pilate.</ideaLabel>
+          <whyHard>Silas Whitman keeps Stone Court. Tacitus names Christus executed under Pontius Pilate — a Roman name, not a creek picture.</whyHard>
+        </match>
+        <hold onFail="easy">
+          <claim>Tacitus names Christus executed under Pontius Pilate.</claim>
+          <reason>A Roman historian wrote the movement spread to Rome.</reason>
+          <source>Tacitus, Annals 15.44</source>
+          <whyCorrect>A Roman historian wrote the movement spread to Rome.</whyCorrect>
+          <whyMisses>
+            <miss>Tacitus writes that he saw the empty tomb.</miss>
+            <miss>Tacitus is a church pamphlet, not a Roman history.</miss>
+            <miss>Pilate is only a later church add-on.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Tacitus names Christus executed under Pontius Pilate.</choice>
+            <choice>Tacitus writes that he saw the empty tomb.</choice>
+            <choice>Tacitus says Christus never lived.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>A Roman historian wrote the movement spread to Rome.</choice>
+            <choice>Tacitus writes that he saw the empty tomb.</choice>
+            <choice>Tacitus is a church pamphlet, not a Roman history.</choice>
+          </reasonChoices>
+        </hold>
+      </hard>
+      <journal id="j-sc-1" title="A Roman names Christus" kicker="Stone Court" unlockAfter="sc-tacitus" scoreFromHeldTier="true">
+        <p>Tacitus names Christus executed under Pontius Pilate. A Roman historian wrote the movement spread to Rome. He does not write the empty tomb. He still names Christ.</p>
+        <p>The Gospels already name Pilate. Tacitus is an outside voice who names the same public death.</p>
+        <sources>
+          <source>Tacitus, Annals 15.44</source>
+        </sources>
+      </journal>
+    </lesson>
+    <lesson id="sc-james" place="Stone Court" person="Silas Whitman" tripleId="james-court" ideaId="idea-james" ideaLabel="Josephus names James, brother of Jesus." challengeKind="sort" challengeTitle="James, the brother of Jesus">
+      <easy points="10" easyOrder="41">
+        <learn>
+          <shortStory>Josephus was a Jewish writer, not a church teacher. He names James, the brother of Jesus who was called Christ. An outside court names Jesus without telling the church’s Easter story.</shortStory>
+          <mainIdea>Josephus names James, the brother of Jesus called Christ.</mainIdea>
+          <gloss>Josephus names James, the brother of Jesus called Christ.</gloss>
+          <loci>This idea lives at Stone Court, with Silas.</loci>
+          <word>
+            <term>Josephus</term>
+            <sense>a Jewish historian who wrote outside the church</sense>
+          </word>
+          <hint>Keep James the brother. Toss the disputed Testimonium as the Easy hold.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>Josephus names James, the brother of Jesus called Christ.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Josephus writes that he saw the risen Christ.</miss>
+            <miss>Josephus says Jesus had no family.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at Stone Court.</placePrompt>
+          <personPrompt>Silas keeps that court.</personPrompt>
+          <ideaPrompt>Silas’s outside name — James, brother of Jesus called Christ.</ideaPrompt>
+          <ideaLabel>Josephus names James, brother of Jesus.</ideaLabel>
+          <whyEasy>Silas keeps Stone Court. Josephus names James, the brother of Jesus called Christ.</whyEasy>
+        </match>
+        <hold levelUpTo="medium" onFail="easy">
+          <claim>Josephus names James, the brother of Jesus called Christ.</claim>
+          <reason>An outside writer names Jesus without the church’s story.</reason>
+          <source>Josephus, Antiquities 20.200</source>
+          <whyCorrect>An outside writer names Jesus without the church’s story.</whyCorrect>
+          <whyMisses>
+            <miss>Josephus writes that he saw the risen Christ.</miss>
+            <miss>The James line is only a church pamphlet.</miss>
+            <miss>Jesus is never named outside the Gospels.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Josephus names James, the brother of Jesus called Christ.</choice>
+            <choice>Josephus writes that he saw the risen Christ.</choice>
+            <choice>Josephus says Jesus had no family.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>An outside writer names Jesus without the church’s story.</choice>
+            <choice>Josephus writes that he saw the risen Christ.</choice>
+            <choice>The James line is only a church pamphlet.</choice>
+          </reasonChoices>
+        </hold>
+      </easy>
+      <medium points="12">
+        <learn>
+          <mediumTeach>Josephus, Antiquities 20.200. Ananus has James stoned — James, the brother of Jesus who was called Christ. Josephus is naming a public execution in Jerusalem, not writing a church creed. Hold this James line. The longer Testimonium at 18.63–64 is a later fight; Easy does not rest on it.</mediumTeach>
+          <mainIdea>Josephus names James, the brother of Jesus called Christ.</mainIdea>
+          <gloss>Josephus names James, the brother of Jesus called Christ.</gloss>
+          <loci>This idea lives at Stone Court, with Silas.</loci>
+          <word>
+            <term>Josephus</term>
+            <sense>a Jewish historian who wrote outside the church</sense>
+          </word>
+          <hint>Keep James the brother. Toss the disputed Testimonium as the Easy hold.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>Josephus names James, the brother of Jesus called Christ.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Josephus writes that he saw the risen Christ.</miss>
+            <miss>Josephus says Jesus had no family.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at Stone Court.</placePrompt>
+          <personPrompt>Silas keeps that court.</personPrompt>
+          <ideaPrompt>Silas’s outside name — James, brother of Jesus called Christ.</ideaPrompt>
+          <ideaLabel>Josephus names James, brother of Jesus.</ideaLabel>
+          <whyMedium>Silas keeps Stone Court. Josephus names James, the brother of Jesus called Christ.</whyMedium>
+        </match>
+        <hold levelUpTo="hard" onFail="easy">
+          <claim>Josephus names James, the brother of Jesus called Christ.</claim>
+          <reason>An outside writer names Jesus without the church’s story.</reason>
+          <source>Josephus, Antiquities 20.200</source>
+          <whyCorrect>An outside writer names Jesus without the church’s story.</whyCorrect>
+          <whyMisses>
+            <miss>Josephus writes that he saw the risen Christ.</miss>
+            <miss>The James line is only a church pamphlet.</miss>
+            <miss>Jesus is never named outside the Gospels.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Josephus names James, the brother of Jesus called Christ.</choice>
+            <choice>Josephus writes that he saw the risen Christ.</choice>
+            <choice>Josephus says Jesus had no family.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>An outside writer names Jesus without the church’s story.</choice>
+            <choice>Josephus writes that he saw the risen Christ.</choice>
+            <choice>The James line is only a church pamphlet.</choice>
+          </reasonChoices>
+        </hold>
+      </medium>
+      <hard points="15">
+        <learn>
+          <hardTeach>Josephus, Antiquities 20.9.1 (§200). High priest Ananus has James stoned. Josephus identifies him as “the brother of Jesus, who was called Christ.” Almost every serious reader grants this sentence.
+Antiquities 18.63–64 (the Testimonium Flavianum) is a different paragraph. Later Christian touches there are disputed. Easy Hold does not rest on that fight. Hold the James line: an outside writer names Jesus called Christ.</hardTeach>
+          <fullTeach>Josephus, Antiquities 20.9.1 (§200). High priest Ananus has James stoned. Josephus identifies him as “the brother of Jesus, who was called Christ.” Almost every serious reader grants this sentence.
+Antiquities 18.63–64 (the Testimonium Flavianum) is a different paragraph. Later Christian touches there are disputed. Easy Hold does not rest on that fight. Hold the James line: an outside writer names Jesus called Christ.</fullTeach>
+          <prompt>Which Josephus line does Easy hold?</prompt>
+          <teachOnWrong>Hold Antiquities 20.200 — James, the brother of Jesus called Christ. Do not rest Easy on the disputed Testimonium at 18.63–64.</teachOnWrong>
+          <challengeTiles>
+            <keep>James is named as the brother of Jesus called Christ.</keep>
+            <keep>Josephus writes outside the church.</keep>
+            <keep>Ananus has James stoned in Jerusalem.</keep>
+            <discard>Easy Hold rests on the disputed Testimonium at 18.63–64.</discard>
+          </challengeTiles>
+        </learn>
+        <match>
+          <sentenceCorrect>Josephus names James, the brother of Jesus called Christ.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Josephus writes that he saw the risen Christ.</miss>
+            <miss>Josephus says Jesus had no family.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at Stone Court.</placePrompt>
+          <personPrompt>Silas keeps that court.</personPrompt>
+          <ideaPrompt>Silas’s outside name — James, brother of Jesus called Christ.</ideaPrompt>
+          <ideaLabel>Josephus names James, brother of Jesus.</ideaLabel>
+          <whyHard>Silas Whitman keeps Stone Court. Josephus names James, the brother of Jesus called Christ — an outside ledger, not a creek picture.</whyHard>
+        </match>
+        <hold onFail="easy">
+          <claim>Josephus names James, the brother of Jesus called Christ.</claim>
+          <reason>An outside writer names Jesus without the church’s story.</reason>
+          <source>Josephus, Antiquities 20.200</source>
+          <whyCorrect>An outside writer names Jesus without the church’s story.</whyCorrect>
+          <whyMisses>
+            <miss>Josephus writes that he saw the risen Christ.</miss>
+            <miss>The James line is only a church pamphlet.</miss>
+            <miss>Jesus is never named outside the Gospels.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Josephus names James, the brother of Jesus called Christ.</choice>
+            <choice>Josephus writes that he saw the risen Christ.</choice>
+            <choice>Josephus says Jesus had no family.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>An outside writer names Jesus without the church’s story.</choice>
+            <choice>Josephus writes that he saw the risen Christ.</choice>
+            <choice>The James line is only a church pamphlet.</choice>
+          </reasonChoices>
+        </hold>
+      </hard>
+      <journal id="j-sc-2" title="James, called Christ’s brother" kicker="Stone Court" unlockAfter="sc-james" scoreFromHeldTier="true">
+        <p>Josephus names James, the brother of Jesus called Christ. An outside writer names Jesus without the church’s story. Easy Hold stays on Antiquities 20.200 — not the disputed Testimonium.</p>
+        <p>Paul already names James the Lord’s brother. Josephus is an outside court who names the same Jesus.</p>
+        <sources>
+          <source>Josephus, Antiquities 20.200</source>
+        </sources>
+      </journal>
+    </lesson>
+    <lesson id="sc-pliny" place="Stone Court" person="Silas Whitman" tripleId="pliny-court" ideaId="idea-pliny" ideaLabel="Christians sing to Christ as to a god." challengeKind="sort" challengeTitle="They sing to Christ">
+      <easy points="10" easyOrder="42">
+        <learn>
+          <shortStory>Pliny was a Roman governor. He writes to the emperor that Christians meet and sing to Christ as to a god. Christ’s name is public practice, not a hidden password.</shortStory>
+          <mainIdea>Pliny writes that Christians sing to Christ as to a god.</mainIdea>
+          <gloss>Pliny writes that Christians sing to Christ as to a god.</gloss>
+          <loci>This idea lives at Stone Court, with Silas.</loci>
+          <word>
+            <term>Pliny</term>
+            <sense>a Roman governor who asked what to do with Christians</sense>
+          </word>
+          <hint>Keep the hymn to Christ. Toss private-club talk.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>Pliny writes that Christians sing to Christ as to a god.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Pliny writes that Christians hide Christ’s name.</miss>
+            <miss>Pliny says they only sing to the emperor.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at Stone Court.</placePrompt>
+          <personPrompt>Silas keeps that court.</personPrompt>
+          <ideaPrompt>Silas’s outside name — they sing to Christ as to a god.</ideaPrompt>
+          <ideaLabel>Christians sing to Christ as to a god.</ideaLabel>
+          <whyEasy>Silas keeps Stone Court. Pliny writes that Christians sing to Christ as to a god.</whyEasy>
+        </match>
+        <hold levelUpTo="medium" onFail="easy">
+          <claim>Pliny writes that Christians sing to Christ as to a god.</claim>
+          <reason>A Roman governor treated Christ’s name as public practice.</reason>
+          <source>Pliny the Younger, Letters 10.96</source>
+          <whyCorrect>A Roman governor treated Christ’s name as public practice.</whyCorrect>
+          <whyMisses>
+            <miss>Pliny writes that Christians hide Christ’s name.</miss>
+            <miss>The hymn is only a private club password.</miss>
+            <miss>Pliny says they refuse to name Christ at all.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Pliny writes that Christians sing to Christ as to a god.</choice>
+            <choice>Pliny writes that Christians hide Christ’s name.</choice>
+            <choice>Pliny says they only sing to the emperor.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>A Roman governor treated Christ’s name as public practice.</choice>
+            <choice>Pliny writes that Christians hide Christ’s name.</choice>
+            <choice>The hymn is only a private club password.</choice>
+          </reasonChoices>
+        </hold>
+      </easy>
+      <medium points="12">
+        <learn>
+          <mediumTeach>Pliny the Younger, Letters 10.96. A governor in Bithynia asks Trajan what to do with people called Christians. He has learned they meet on a fixed day and sing a hymn to Christ as to a god. He treats that name as public practice — enough to investigate, not a hidden password.</mediumTeach>
+          <mainIdea>Pliny writes that Christians sing to Christ as to a god.</mainIdea>
+          <gloss>Pliny writes that Christians sing to Christ as to a god.</gloss>
+          <loci>This idea lives at Stone Court, with Silas.</loci>
+          <word>
+            <term>Pliny</term>
+            <sense>a Roman governor who asked what to do with Christians</sense>
+          </word>
+          <hint>Keep the hymn to Christ. Toss private-club talk.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>Pliny writes that Christians sing to Christ as to a god.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Pliny writes that Christians hide Christ’s name.</miss>
+            <miss>Pliny says they only sing to the emperor.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at Stone Court.</placePrompt>
+          <personPrompt>Silas keeps that court.</personPrompt>
+          <ideaPrompt>Silas’s outside name — they sing to Christ as to a god.</ideaPrompt>
+          <ideaLabel>Christians sing to Christ as to a god.</ideaLabel>
+          <whyMedium>Silas keeps Stone Court. Pliny writes that Christians sing to Christ as to a god.</whyMedium>
+        </match>
+        <hold levelUpTo="hard" onFail="easy">
+          <claim>Pliny writes that Christians sing to Christ as to a god.</claim>
+          <reason>A Roman governor treated Christ’s name as public practice.</reason>
+          <source>Pliny the Younger, Letters 10.96</source>
+          <whyCorrect>A Roman governor treated Christ’s name as public practice.</whyCorrect>
+          <whyMisses>
+            <miss>Pliny writes that Christians hide Christ’s name.</miss>
+            <miss>The hymn is only a private club password.</miss>
+            <miss>Pliny says they refuse to name Christ at all.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Pliny writes that Christians sing to Christ as to a god.</choice>
+            <choice>Pliny writes that Christians hide Christ’s name.</choice>
+            <choice>Pliny says they only sing to the emperor.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>A Roman governor treated Christ’s name as public practice.</choice>
+            <choice>Pliny writes that Christians hide Christ’s name.</choice>
+            <choice>The hymn is only a private club password.</choice>
+          </reasonChoices>
+        </hold>
+      </medium>
+      <hard points="15">
+        <learn>
+          <hardTeach>Pliny the Younger, Letters 10.96–97. Around AD 112 a provincial governor writes Trajan. He has tortured deaconesses. He has learned the pattern: they meet on a stated day before dawn, sing a hymn to Christ as to a god, bind themselves not to crime, then eat a common meal.
+Trajan answers: do not hunt them out. If accused and they persist, punish. Christ’s name is already a public Roman problem — not a secret club Pliny invented. The churches already sang to Christ. Pliny overheard the practice from the outside.</hardTeach>
+          <fullTeach>Pliny the Younger, Letters 10.96–97. Around AD 112 a provincial governor writes Trajan. He has tortured deaconesses. He has learned the pattern: they meet on a stated day before dawn, sing a hymn to Christ as to a god, bind themselves not to crime, then eat a common meal.
+Trajan answers: do not hunt them out. If accused and they persist, punish. Christ’s name is already a public Roman problem — not a secret club Pliny invented. The churches already sang to Christ. Pliny overheard the practice from the outside.</fullTeach>
+          <prompt>What does Pliny say Christians do with Christ’s name?</prompt>
+          <teachOnWrong>They sing a hymn to Christ as to a god. A Roman governor treated that name as public practice, not a hidden password.</teachOnWrong>
+          <challengeTiles>
+            <keep>They sing a hymn to Christ as to a god.</keep>
+            <keep>A Roman governor writes the emperor about it.</keep>
+            <keep>Christ’s name is public practice.</keep>
+            <discard>They hide Christ’s name as a private password.</discard>
+          </challengeTiles>
+        </learn>
+        <match>
+          <sentenceCorrect>Pliny writes that Christians sing to Christ as to a god.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Pliny writes that Christians hide Christ’s name.</miss>
+            <miss>Pliny says they only sing to the emperor.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at Stone Court.</placePrompt>
+          <personPrompt>Silas keeps that court.</personPrompt>
+          <ideaPrompt>Silas’s outside name — they sing to Christ as to a god.</ideaPrompt>
+          <ideaLabel>Christians sing to Christ as to a god.</ideaLabel>
+          <whyHard>Silas Whitman keeps Stone Court. Pliny writes that Christians sing to Christ as to a god — a Roman report, not a creek picture.</whyHard>
+        </match>
+        <hold onFail="easy">
+          <claim>Pliny writes that Christians sing to Christ as to a god.</claim>
+          <reason>A Roman governor treated Christ’s name as public practice.</reason>
+          <source>Pliny the Younger, Letters 10.96</source>
+          <whyCorrect>A Roman governor treated Christ’s name as public practice.</whyCorrect>
+          <whyMisses>
+            <miss>Pliny writes that Christians hide Christ’s name.</miss>
+            <miss>The hymn is only a private club password.</miss>
+            <miss>Pliny says they refuse to name Christ at all.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Pliny writes that Christians sing to Christ as to a god.</choice>
+            <choice>Pliny writes that Christians hide Christ’s name.</choice>
+            <choice>Pliny says they only sing to the emperor.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>A Roman governor treated Christ’s name as public practice.</choice>
+            <choice>Pliny writes that Christians hide Christ’s name.</choice>
+            <choice>The hymn is only a private club password.</choice>
+          </reasonChoices>
+        </hold>
+      </hard>
+      <journal id="j-sc-3" title="They sing to Christ" kicker="Stone Court" unlockAfter="sc-pliny" scoreFromHeldTier="true">
+        <p>Pliny writes that Christians sing to Christ as to a god. A Roman governor treated Christ’s name as public practice. The churches already sang. Pliny overheard it from the outside.</p>
+        <sources>
+          <source>Pliny the Younger, Letters 10.96</source>
+        </sources>
+      </journal>
+    </lesson>
+  </lessons>
+  <streetFacts>
+    <fact evidenceId="sc-tacitus" tripleId="tacitus-court" ideaId="idea-tacitus" place="Stone Court" person="Silas Whitman" ideaLabel="Tacitus names Christus under Pilate." />
+    <fact evidenceId="sc-james" tripleId="james-court" ideaId="idea-james" place="Stone Court" person="Silas Whitman" ideaLabel="Josephus names James, brother of Jesus." />
+    <fact evidenceId="sc-pliny" tripleId="pliny-court" ideaId="idea-pliny" place="Stone Court" person="Silas Whitman" ideaLabel="Christians sing to Christ as to a god." />
+  </streetFacts>
+</areaPack>

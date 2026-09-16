@@ -57,6 +57,12 @@ const PLACE_NODES: LinkNode[] = [
     text: 'Meaning Ridge',
     plotId: 'lookout',
   },
+  {
+    id: 'place-court',
+    kind: 'place',
+    text: 'Stone Court',
+    plotId: 'bench',
+  },
 ]
 
 const PERSON_NODES: LinkNode[] = [
@@ -469,6 +475,33 @@ const STREET_FACTS: StreetFact[] = [
     text: 'Jesus’ “door” is a particular way in with a wide anyone.',
     caption: 'Jesus is a door with a wide anyone.',
   },
+  {
+    evidenceId: 'sc-tacitus',
+    ideaId: 'idea-tacitus',
+    tripleId: 'tacitus-court',
+    placeId: 'place-court',
+    personId: 'person-silas',
+    text: 'Tacitus names Christus executed under Pontius Pilate.',
+    caption: 'Tacitus names Christus under Pilate.',
+  },
+  {
+    evidenceId: 'sc-james',
+    ideaId: 'idea-james',
+    tripleId: 'james-court',
+    placeId: 'place-court',
+    personId: 'person-silas',
+    text: 'Josephus names James, the brother of Jesus called Christ.',
+    caption: 'Josephus names James, brother of Jesus.',
+  },
+  {
+    evidenceId: 'sc-pliny',
+    ideaId: 'idea-pliny',
+    tripleId: 'pliny-court',
+    placeId: 'place-court',
+    personId: 'person-silas',
+    text: 'Pliny writes that Christians sing to Christ as to a god.',
+    caption: 'Christians sing to Christ as to a god.',
+  },
 ]
 
 const IDEA_NODES: LinkNode[] = STREET_FACTS.map((fact) => ({
@@ -516,7 +549,7 @@ function splitStreetGroup<T>(items: T[]): T[][] {
   return groups
 }
 
-/** All 39 facts, grouped so a visit is ~one area / 3–5 triples — never a 70-link slog. */
+/** All 42 facts, grouped so a visit is ~one area / 3–5 triples — never a 70-link slog. */
 export function streetWalks(): StreetWalk[] {
   const walks: StreetWalk[] = []
   for (const place of PLACE_NODES) {
@@ -649,6 +682,7 @@ export const STREET_BEATS = [
   'Nora Skye · Sky Watch · The heavens speak of a Maker.',
   'Ansel Gate · Why Gate · The world did not have to exist.',
   'Hope Ridge · Meaning Ridge · Duty is more than taste.',
+  'Silas Whitman · Stone Court · Tacitus names Christus under Pilate.',
 ]
 
 /** One Hard teach line per lot — not every fact on the street. */
@@ -659,6 +693,7 @@ export const STREET_PLACE_WHYS = [
   'Nora Skye keeps Sky Watch: the heavens declare a Maker, and fine-tuning fits that voice.',
   'Ansel Gate keeps Why Gate: the world exists and did not have to.',
   'Hope Ridge keeps Meaning Ridge: duty, mind, meaning, and beauty look over the town.',
+  'Silas Whitman keeps Stone Court: Tacitus, Josephus, and Pliny name Christ from outside.',
 ]
 
 /** Concrete picture for a Link chip — idea borrows its lot’s art unless a card has its own. */
@@ -941,6 +976,7 @@ export function linkMiss(tripleId: string, step: LinkStep): string {
 /** Short label under the picture — Match sentence matches the held claim. */
 export function linkCaption(node: LinkNode, easy: boolean): string {
   if (easy && node.id === 'place-hollow') return 'Mercy’s creek'
+  if (easy && node.id === 'place-court') return 'Silas’s court'
   if (node.kind === 'idea') {
     const fact = streetFact(node.evidenceId ?? '')
     if (fact) return fact.caption
@@ -1105,5 +1141,17 @@ export const STREET_WHYS: Record<string, { easy: string; hard: string }> = {
   'door-lookout': {
     easy: 'Hope keeps Meaning Ridge. Jesus is a door with a wide anyone.',
     hard: 'Hope Ridge keeps Meaning Ridge. Jesus’ door is a particular way in with a wide anyone.',
+  },
+  'tacitus-court': {
+    easy: 'Silas keeps Stone Court. Tacitus names Christus executed under Pontius Pilate.',
+    hard: 'Silas Whitman keeps Stone Court. Tacitus names Christus executed under Pontius Pilate — a Roman name, not a creek picture.',
+  },
+  'james-court': {
+    easy: 'Silas keeps Stone Court. Josephus names James, the brother of Jesus called Christ.',
+    hard: 'Silas Whitman keeps Stone Court. Josephus names James, the brother of Jesus called Christ — an outside ledger, not a creek picture.',
+  },
+  'pliny-court': {
+    easy: 'Silas keeps Stone Court. Pliny writes that Christians sing to Christ as to a god.',
+    hard: 'Silas Whitman keeps Stone Court. Pliny writes that Christians sing to Christ as to a god — a Roman report, not a creek picture.',
   },
 }
