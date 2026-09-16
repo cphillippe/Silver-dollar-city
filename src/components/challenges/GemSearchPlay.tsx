@@ -12,7 +12,7 @@ import {
   tryAddToPath,
   type GemCoord,
 } from '../../lib/gemSearch'
-import { lineBonusPoints, lineExtraTries } from '../../lib/matchBonus'
+import { lineBonusPoints } from '../../lib/matchBonus'
 import { gemBonusBeat, gemTargetBeat, matchClearBeat } from '../../lib/successBeat'
 import { storyPanelsFor, type StoryPanel } from '../../lib/storyPanels'
 import { GEM_BURST, playGemPop, prefersReducedMotion } from '../../lib/juice'
@@ -42,7 +42,7 @@ function cellFromPoint(x: number, y: number): GemCoord | null {
 }
 
 export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: GemSearchPlayProps) {
-  const { progress, recordMatchBonus, recordMatchMiss, consumeMatchExtra } = useProgress()
+  const { progress, recordMatchBonus, recordMatchMiss } = useProgress()
   const [round, setRound] = useState(() => Date.now())
   const puzzle = useMemo(() => buildGemPuzzle(lineId, round), [lineId, round])
   const panels = useMemo(
@@ -64,6 +64,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   const [toastBonus, setToastBonus] = useState(false)
   const [toastMiss, setToastMiss] = useState(false)
   const [plusFlash, setPlusFlash] = useState(false)
+  const [comboFlash, setComboFlash] = useState(0)
   const [status, setStatus] = useState<'play' | 'ok'>('play')
   const [winStamp, setWinStamp] = useState(false)
   const drag = useRef(false)
@@ -71,13 +72,14 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   const pathRef = useRef<GemCoord[]>([])
   const foundRef = useRef<string[]>([])
   const bonusRef = useRef<string[]>([])
+  const comboRef = useRef(0)
+  const replayToast = useRef(false)
   const cleared = useRef(false)
   const home = easyWhoWhere(lineId)
   const needed = cellsStillNeeded(puzzle, found)
   const nextWord = puzzle.words.find((word) => !found.includes(word.id))
   const left = puzzle.words.length - found.length
   const bonusPts = lineBonusPoints(progress, lineId)
-  const extras = lineExtraTries(progress, lineId)
   const clearBeat = matchClearBeat(lineId)
 
   function writePath(next: GemCoord[] | ((current: GemCoord[]) => GemCoord[])) {
@@ -105,6 +107,8 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     setToastBonus(false)
     setToastMiss(false)
     setPlusFlash(false)
+    setComboFlash(0)
+    comboRef.current = 0
     setStatus('play')
     setWinStamp(false)
     setOpened(0)
@@ -121,7 +125,11 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   useEffect(() => {
     if (round === 0) return
     resetBoard(true)
-    // extra try reshuffle
+    if (replayToast.current) {
+      replayToast.current = false
+      flashToast('One more Match. Find the gems.')
+    }
+    // extra try / One more Match reshuffle
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [round])
 
@@ -231,6 +239,11 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       writePath([])
       setHint([])
       setMisses(0)
+      comboRef.current += 1
+      if (comboRef.current >= 2) {
+        setComboFlash(comboRef.current)
+        window.setTimeout(() => setComboFlash(0), 700)
+      }
       explode(nextPath, hit.label, done, nextFound.length)
       if (done) finishBoard()
       return true
@@ -242,6 +255,11 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       setBonusFound(nextBonus)
       writePath([])
       setMisses(0)
+      comboRef.current += 1
+      if (comboRef.current >= 2) {
+        setComboFlash(comboRef.current)
+        window.setTimeout(() => setComboFlash(0), 700)
+      }
       recordMatchBonus(lineId)
       explodeBonus(nextPath, extra.label)
       return true
@@ -257,6 +275,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     }
     setShake(true)
     playGemPop('miss')
+    comboRef.current = 0
     const count = misses + 1
     setMisses(count)
     onMiss()
@@ -320,9 +339,8 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     }
   }
 
-  function playExtraTry() {
-    if (!extras) return
-    consumeMatchExtra(lineId)
+  function replay() {
+    replayToast.current = true
     setRound((current) => current + 1)
   }
 
@@ -335,7 +353,6 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       onPointerUp={onBoardUp}
       onPointerCancel={onBoardUp}
     >
-      <WinBurst play={winStamp} stamp={EASY.matchWin} />
       <p className="sort-how">{EASY.matchHunt}</p>
       <StoryStrip
         kicker={`${home.who} · ${home.place}`}
@@ -394,6 +411,11 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
           +100
         </p>
       ) : null}
+      {comboFlash > 1 ? (
+        <p className="gem-combo" role="status">
+          Combo ×{comboFlash}
+        </p>
+      ) : null}
       <div
         className="gem-board"
         role="grid"
@@ -402,6 +424,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
         onPointerUp={onBoardUp}
         onPointerCancel={onBoardUp}
       >
+        <WinBurst play={winStamp} stamp={EASY.matchWin} />
         {puzzle.letters.flatMap((row, r) =>
           row.map((letter, c) => {
             const key = `${r}:${c}`
@@ -447,7 +470,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
           }),
         )}
       </div>
-      <p className="match-score">
+      <p className={`match-score ${plusFlash || comboFlash > 1 ? 'is-juice' : ''}`}>
         {left} left · {found.length} / {puzzle.words.length} found
         {bonusFound.length ? ` · ${bonusFound.length} bonus` : ''}
         {bonusPts ? <span className="bonus-pts"> · +{bonusPts} bonus</span> : null}
@@ -466,11 +489,14 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
             >
               {EASY.holdNext}
             </button>
-            {extras > 0 ? (
-              <button type="button" className="btn gold xl more-match" onClick={playExtraTry}>
-                {EASY.moreMatch}
-              </button>
-            ) : null}
+            <button
+              type="button"
+              className="btn gold xl more-match"
+              data-match-again
+              onClick={replay}
+            >
+              {EASY.moreMatch}
+            </button>
             <button type="button" className="btn xl" onClick={() => onEasyStop?.('home')}>
               {EASY.home}
             </button>
