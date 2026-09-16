@@ -8,6 +8,19 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.71',
+    title: 'Fun one more dig · Easy core trail',
+    when: '2026-09-16',
+    items: [
+      'Witness Square source-dig keeps the tablets after DUG! — the dig stays a game, not a reading card',
+      'Each glow tap pops +25 shards. A two-tap streak is Combo. DUG! is +100',
+      'After DUG!, one takeaway then Hold next is the filled tap. One more dig is the gold replay — same loop as One more bowl / road / run',
+      'A wrong tablet is still Miss −25. Night Watch and Town stay hidden on Easy',
+      'Freemium 1.4.66, claim-merge juice 1.4.67, Dig deeper 1.4.68, One more road 1.4.69, and One more run 1.4.70 stay. Soft ads never cover Match, Hold, or arcade (including source-dig). Journal ungated. Core Easy free',
+      'Match extras and Hold Why Blast stay. Place titles stay Story Creek, Witness Square, Sky Watch, Why Gate, Meaning Ridge',
+    ],
+  },
+  {
     version: '1.4.70',
     title: 'Fun one more run · Easy core trail',
     when: '2026-09-16',
@@ -1518,6 +1531,10 @@ export function latestChange(version: string): ChangeNote {
   const note = CHANGELOG.find((item) => item.version === version) ?? CHANGELOG[0]
   if (!note) {
     return { version, title: 'Easy core trail', when: '', items: [] }
+  }
+  if (note.version === '1.4.71') {
+    const prior = latestChange('1.4.70')
+    return { ...note, items: [...note.items, ...prior.items] }
   }
   if (note.version === '1.4.70') {
     const prior = latestChange('1.4.69')

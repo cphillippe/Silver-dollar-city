@@ -3,12 +3,15 @@ import { readFileSync } from 'node:fs'
 import { packLesson } from '../src/content/packCatalog.ts'
 import { easyDigTaps } from '../src/content/deeper.ts'
 import { emptyProgress } from '../src/lib/save.ts'
-import { DIG_ARC, EASY_LINE_ORDER, FOUNDATION_ARC, easyLoopLine } from '../src/lib/easy.ts'
+import { DIG_ARC, EASY, EASY_LINE_ORDER, FOUNDATION_ARC, easyLoopLine } from '../src/lib/easy.ts'
 import {
   DIG_ARC as SOURCE_DIG_ARC,
+  SOURCE_DIG_AGAIN,
   SOURCE_DIG_HINT,
   SOURCE_DIG_MISS,
+  SOURCE_DIG_TAP_SCORE,
   SOURCE_DIG_WIN,
+  SOURCE_DIG_WIN_SCORE,
   digClaim,
   digTablets,
   isSourceDigLine,
@@ -27,6 +30,10 @@ assert.ok(!isSourceDigLine('wb-creed'))
 assert.ok(isSourceDigLine('wb-women'))
 
 assert.equal(SOURCE_DIG_WIN, 'DUG!')
+assert.equal(SOURCE_DIG_AGAIN, 'One more dig')
+assert.equal(EASY.digAgain, SOURCE_DIG_AGAIN)
+assert.equal(SOURCE_DIG_TAP_SCORE, 25)
+assert.equal(SOURCE_DIG_WIN_SCORE, 100)
 assert.equal(SOURCE_DIG_HINT, 'Tap the glowing tablet.')
 assert.equal(SOURCE_DIG_MISS, 'Miss −25')
 
@@ -90,7 +97,12 @@ assert.match(playSrc, /is-source-dig/)
 assert.match(playSrc, /dig-tablet/)
 assert.match(playSrc, /SOURCE_DIG_WIN/)
 assert.match(playSrc, /EASY\.holdNext/)
-assert.ok(playSrc.indexOf('EASY.holdNext') < playSrc.indexOf('Dig again'))
+assert.match(playSrc, /SOURCE_DIG_AGAIN/)
+assert.ok(playSrc.lastIndexOf('EASY.holdNext') < playSrc.lastIndexOf('SOURCE_DIG_AGAIN'))
+assert.match(playSrc, /function replay/)
+assert.match(playSrc, /data-dig-again/)
+assert.match(playSrc, /dig-shard/)
+assert.match(playSrc, /Combo/)
 assert.doesNotMatch(playSrc, /tapWhy|claimChoices|reasonChoices|whyCorrect/)
 
 const puzzleSrc = readFileSync(new URL('../src/components/PuzzlePlay.tsx', import.meta.url), 'utf8')

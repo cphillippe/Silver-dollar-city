@@ -141,7 +141,8 @@ const holdSrc = readFileSync(new URL('../src/components/challenges/WhyBlastPlay.
 const mergeSrc = readFileSync(new URL('../src/components/challenges/ClaimMergePlay.tsx', import.meta.url), 'utf8')
 const runSrc = readFileSync(new URL('../src/components/challenges/FatherRunPlay.tsx', import.meta.url), 'utf8')
 const mazeSrc = readFileSync(new URL('../src/components/challenges/RoadMazePlay.tsx', import.meta.url), 'utf8')
-for (const src of [matchSrc, holdSrc, mergeSrc, runSrc, mazeSrc]) {
+const digPlaySrc = readFileSync(new URL('../src/components/challenges/SourceDigPlay.tsx', import.meta.url), 'utf8')
+for (const src of [matchSrc, holdSrc, mergeSrc, runSrc, mazeSrc, digPlaySrc]) {
   assert.doesNotMatch(src, /SceneAd/)
   assert.doesNotMatch(src, /AdSlot/)
 }
