@@ -8366,13 +8366,61 @@ html[data-easy='on'] .next-tap {
 
 .run-hug-art {
   position: absolute;
-  inset: 10px 18%;
-  border-radius: 18px;
+  right: 8px;
+  bottom: 8px;
+  z-index: 5;
+  width: 72px;
+  margin: 0;
+  border-radius: 14px;
   overflow: hidden;
-  z-index: 3;
+  pointer-events: none;
   box-shadow:
     0 0 0 3px rgba(255, 204, 51, 0.9),
-    0 4px 0 rgba(80, 20, 40, 0.3);
+    0 8px 20px rgba(20, 4, 48, 0.35);
+}
+
+.run-hug-art .story-art-tile {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.run-shard,
+.run-burst {
+  position: absolute;
+  bottom: 28%;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: #fff6c8;
+  z-index: 4;
+  animation: run-shard 0.42s ease forwards;
+}
+
+.run-burst {
+  width: 14px;
+  height: 14px;
+  background: #ff5a7a;
+  animation-duration: 0.48s;
+}
+
+.run-combo {
+  position: absolute;
+  left: 50%;
+  top: 22%;
+  z-index: 6;
+  margin: 0;
+  transform: translateX(-50%);
+  color: #fff6c8;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-shadow: 0 3px 0 #e09412;
+  pointer-events: none;
+}
+
+.play.is-father-run .match-score.is-juice {
+  animation: merge-score-pop 0.42s cubic-bezier(0.12, 1.45, 0.28, 1);
 }
 
 .run-hearts {
@@ -8584,10 +8632,37 @@ html[data-easy='on'] .next-tap {
   color: var(--parchment);
 }
 
+.play.is-father-run .run-scene .win-burst {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.play.is-father-run .win-flash,
+.play.is-father-run .win-ring {
+  position: absolute;
+}
+
 .play.is-father-run .win-stamp-wrap {
   position: absolute;
-  top: 64px;
+  top: 16%;
   left: 50%;
+  right: auto;
+  width: max-content;
+  max-width: 92%;
+  transform: translateX(-50%);
+  z-index: 8;
+}
+
+.play.is-father-run.is-win .win-stamp {
+  font-size: clamp(1.05rem, 5vw, 1.45rem);
+  letter-spacing: 0.14em;
+}
+
+.play.is-father-run.is-win .match-yes {
+  margin-top: 4px;
 }
 
 @keyframes run-bob {
@@ -8644,6 +8719,17 @@ html[data-easy='on'] .next-tap {
   100% {
     opacity: 0;
     transform: translateX(-50%) rotate(-45deg) translateY(-18px) scale(1.2);
+  }
+}
+
+@keyframes run-shard {
+  0% {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(-50% + (var(--i) - 2) * 18px), -22px) scale(0.15);
+    opacity: 0;
   }
 }
 
@@ -9781,6 +9867,8 @@ html[data-easy='on'] .next-tap {
   .run-dust,
   .run-thumb.is-flip,
   .run-hearts,
+  .run-shard,
+  .run-burst,
   .bonus-plus,
   .play.is-road-maze.is-shake .maze-board,
   .maze-drop,

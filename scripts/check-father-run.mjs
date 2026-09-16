@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { packLesson } from '../src/content/packCatalog.ts'
+import { EASY } from '../src/lib/easy.ts'
 import {
   applyDash,
   beatsOpened,
@@ -10,8 +11,11 @@ import {
   DASH_WINDOW_MS,
   fatherReached,
   fatherStartProgress,
+  FATHER_RUN_AGAIN,
   FATHER_RUN_CLAIM,
+  FATHER_RUN_DASH_SCORE,
   FATHER_RUN_HINT,
+  FATHER_RUN_HUG_SCORE,
   FATHER_RUN_LINE,
   FATHER_RUN_WIN,
   HIRED_HAND_SPEECH,
@@ -34,6 +38,10 @@ assert.equal(FATHER_RUN_LINE, 'ph-father')
 assert.equal(FATHER_RUN_CLAIM, 'The father runs with mercy before the speech is done.')
 assert.equal(FATHER_RUN_HINT, 'The run comes before the apology is done.')
 assert.equal(FATHER_RUN_WIN, 'Hugged!')
+assert.equal(FATHER_RUN_AGAIN, 'One more run')
+assert.equal(EASY.runAgain, FATHER_RUN_AGAIN)
+assert.equal(FATHER_RUN_DASH_SCORE, 25)
+assert.equal(FATHER_RUN_HUG_SCORE, 100)
 assert.equal(storyPlayFor('ph-father'), 'father-run')
 assert.equal(storyPlayFor('ph-road'), 'road-maze')
 assert.equal(storyPlayFor('ph-debt'), 'panel-blast')
@@ -105,6 +113,15 @@ assert.match(playSrc, /Run again/)
 assert.match(playSrc, /FATHER_RUN_HINT/)
 assert.match(playSrc, /FATHER_RUN_CLAIM/)
 assert.match(playSrc, /EASY\.holdNext/)
+assert.match(playSrc, /FATHER_RUN_AGAIN/)
+assert.ok(playSrc.lastIndexOf('EASY.holdNext') < playSrc.lastIndexOf('FATHER_RUN_AGAIN'))
+assert.match(playSrc, /function replay/)
+assert.match(playSrc, /resetRound\(0\)/)
+assert.match(playSrc, /data-run-again/)
+assert.match(playSrc, /run-shard/)
+assert.match(playSrc, /Combo/)
+assert.match(playSrc, /run-hug-art/)
+assert.match(playSrc, /FATHER_RUN_WIN/)
 assert.match(playSrc, /cta-dock/)
 assert.match(playSrc, /onClear/)
 assert.doesNotMatch(playSrc, /road-swipe|story-night/)

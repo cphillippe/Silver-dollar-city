@@ -13,8 +13,11 @@ import {
   beatsOpened,
   dashPhase,
   fatherStartProgress,
+  FATHER_RUN_AGAIN,
   FATHER_RUN_CLAIM,
+  FATHER_RUN_DASH_SCORE,
   FATHER_RUN_HINT,
+  FATHER_RUN_HUG_SCORE,
   FATHER_RUN_WIN,
   HIRED_HAND_SPEECH,
   holdStep,
@@ -24,7 +27,7 @@ import {
   speechIndexAt,
   speechPhraseAt,
 } from '../../lib/fatherRun'
-import { playGemPop, prefersReducedMotion } from '../../lib/juice'
+import { GEM_BURST, playGemPop, prefersReducedMotion } from '../../lib/juice'
 import { storyPanelsFor, type StoryPanel } from '../../lib/storyPanels'
 import { StoryPanelArt } from '../StoryPanelArt'
 import panelFatherRun from '../../assets/story/panel-father-run.webp'
@@ -40,6 +43,7 @@ interface FatherRunPlayProps {
 }
 
 const DUST = [0, 1, 2, 3, 4]
+const DASH_SHARDS = [0, 1, 2, 3, 4]
 
 export function FatherRunPlay({
   lineId,
@@ -60,6 +64,10 @@ export function FatherRunPlay({
   const [dashFlash, setDashFlash] = useState(false)
   const [winStamp, setWinStamp] = useState(false)
   const [flipping, setFlipping] = useState<number | null>(null)
+  const [score, setScore] = useState(0)
+  const [plusFlash, setPlusFlash] = useState('')
+  const [comboFlash, setComboFlash] = useState(0)
+  const dashCount = useRef(0)
   const holdingRef = useRef(false)
   const progressRef = useRef(0)
   const elapsedRef = useRef(0)
@@ -107,7 +115,16 @@ export function FatherRunPlay({
     setWinStamp(false)
     setDashFlash(false)
     setFlipping(null)
+    setScore(0)
+    setPlusFlash('')
+    setComboFlash(0)
+    dashCount.current = 0
     flashToast(nextAttempt > 0 ? 'Closer this time. Hold — then press the glow.' : '')
+  }
+
+  function replay() {
+    resetRound(0)
+    flashToast('One more run. Hold — then press the glow.')
   }
 
   useEffect(() => {
@@ -162,6 +179,9 @@ export function FatherRunPlay({
     setPhase('hug')
     writeProgress(1)
     playGemPop('win')
+    setScore((pts) => pts + FATHER_RUN_HUG_SCORE)
+    setPlusFlash(`+${FATHER_RUN_HUG_SCORE}`)
+    window.setTimeout(() => setPlusFlash(''), 800)
     if (!cleared.current) {
       cleared.current = true
       onClear?.()
@@ -198,8 +218,16 @@ export function FatherRunPlay({
       writeProgress(next)
       setDashFlash(true)
       playGemPop('find')
+      dashCount.current += 1
+      setScore((pts) => pts + FATHER_RUN_DASH_SCORE)
+      setPlusFlash(`+${FATHER_RUN_DASH_SCORE}`)
+      if (dashCount.current >= 2) {
+        setComboFlash(dashCount.current)
+        window.setTimeout(() => setComboFlash(0), 700)
+      }
       flashToast('Mercy!')
       window.setTimeout(() => setDashFlash(false), 320)
+      window.setTimeout(() => setPlusFlash(''), 800)
       if (hugBeforeSpeech(next, elapsedRef.current)) {
         winRound()
         return
@@ -240,12 +268,12 @@ export function FatherRunPlay({
     <div
       className={`play is-father-run ${holding ? 'is-running' : ''} ${dash.inWindow && phase === 'run' ? 'is-glow' : ''} ${dashFlash ? 'is-dash' : ''} ${phase === 'hug' ? 'is-win is-hug' : ''} ${phase === 'miss' ? 'is-miss' : ''}`}
     >
-      <WinBurst play={winStamp} stamp={FATHER_RUN_WIN} />
       <p className="sort-how">{EASY.runHunt}</p>
       <p className="story-kicker">
         {home.who} · {home.place}
       </p>
       <div className="run-scene" aria-hidden>
+        <WinBurst play={winStamp} stamp={FATHER_RUN_WIN} />
         <div className="run-sky" />
         <div className="run-haze" />
         <div className="run-house" />
@@ -262,13 +290,34 @@ export function FatherRunPlay({
         <div className="run-actor is-son" style={{ left: `${sonLeft}%` }}>
           <img src={panelHungry} alt="" draggable={false} />
         </div>
+        {dashFlash
+          ? DASH_SHARDS.map((i) => (
+              <i key={i} className="run-shard" style={{ ['--i' as string]: i, left: `${fatherLeft}%` }} />
+            ))
+          : null}
+        {dashFlash
+          ? GEM_BURST.slice(0, 4).map((i) => (
+              <b key={`p-${i}`} className="run-burst" style={{ ['--i' as string]: i, left: `${fatherLeft}%` }} />
+            ))
+          : null}
         {phase === 'hug' ? (
-          <div className="run-hug-art">
+          <div className="run-hug-art" aria-hidden>
             <StoryPanelArt scene="hug" media={panels[panels.length - 1]?.media} />
           </div>
         ) : null}
         {phase === 'hug' ? <span className="run-hearts" /> : null}
+        {plusFlash ? (
+          <p className="bonus-plus" aria-hidden>
+            {plusFlash}!
+          </p>
+        ) : null}
+        {comboFlash > 1 ? (
+          <p className="run-combo" role="status">
+            Combo ×{comboFlash}
+          </p>
+        ) : null}
       </div>
+      <p className={`match-score ${plusFlash ? 'is-juice' : ''}`}>{score}</p>
       <ol className="run-thumbs" aria-label="Story beats" style={{ ['--story-n' as string]: panels.length }}>
         {panels.map((panel, index) => {
           const open = index < opened || phase === 'hug'
@@ -329,6 +378,9 @@ export function FatherRunPlay({
             onClick={() => onEasyStop?.('hold')}
           >
             {EASY.holdNext}
+          </button>
+          <button type="button" className="btn gold xl" data-run-again onClick={replay}>
+            {FATHER_RUN_AGAIN}
           </button>
           <button type="button" className="btn xl" onClick={() => onEasyStop?.('home')}>
             {EASY.home}
