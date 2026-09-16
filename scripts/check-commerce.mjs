@@ -443,8 +443,8 @@ const iosProj = readFileSync(
   'utf8',
 )
 assert.match(iosProj, /PRODUCT_BUNDLE_IDENTIFIER = city.silver.unending/)
-assert.match(iosProj, /MARKETING_VERSION = 1.4.79/)
-assert.match(iosProj, /CURRENT_PROJECT_VERSION = 93/)
+assert.match(iosProj, /MARKETING_VERSION = 1.4.80/)
+assert.match(iosProj, /CURRENT_PROJECT_VERSION = 94/)
 
 resetBilling()
 

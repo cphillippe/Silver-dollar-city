@@ -8,6 +8,18 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.80',
+    title: 'Clear reasons 10 · Easy core trail',
+    when: '2026-09-16',
+    items: [
+      'Easy held lines stay a kid-plain claim · reason · source. After MATCHED, DUG!, MERGED!, Helped!, Hugged!, and Hold LOCKED!, the win card names why and From — one breath, not a quiz',
+      'Leftover hedges drop: Meaning is received, not only built. Something is here — it did not have to be. Jesus is the door — anyone who enters is saved. The Word names Christ. A first cause is not yet the gospel of Jesus Christ',
+      'Teach stays Learn → play → Hold. Arcade juice and One more loops stay. No new quiz chrome',
+      'Night Watch and Town stay hidden on Easy. Journal ungated. Core Easy 39 facts stay free. Never a hard paywall',
+      'iOS + Android dual path 1.4.79 stays. Pages still cannot charge. Place titles stay Story Creek, Witness Square, Sky Watch, Why Gate, Meaning Ridge',
+    ],
+  },
+  {
     version: '1.4.79',
     title: 'iOS + Android dual path · Easy core trail',
     when: '2026-09-16',
@@ -1637,6 +1649,10 @@ export function latestChange(version: string): ChangeNote {
   const note = CHANGELOG.find((item) => item.version === version) ?? CHANGELOG[0]
   if (!note) {
     return { version, title: 'Easy core trail', when: '', items: [] }
+  }
+  if (note.version === '1.4.80') {
+    const prior = latestChange('1.4.79')
+    return { ...note, items: [...note.items, ...prior.items] }
   }
   if (note.version === '1.4.79') {
     const prior = latestChange('1.4.78')

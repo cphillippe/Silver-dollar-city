@@ -1,4 +1,5 @@
 import { EASY, easyFacingLine, easyWhyLine, isEasy } from '../lib/easy'
+import { lineTakeaway } from '../lib/successBeat'
 import { WORDS } from '../lib/words'
 import { useProgress } from '../store/progress'
 
@@ -44,5 +45,27 @@ export function HeldTriad({
         <dd>{source}</dd>
       </div>
     </dl>
+  )
+}
+
+/** Arcade / Match win card: one sayable triad, no quiz chips. */
+export function MatchTakeaway({
+  lineId,
+  title,
+}: {
+  lineId: string
+  title?: string
+}) {
+  const take = lineTakeaway(lineId)
+  return (
+    <p className="match-yes" role="status">
+      <strong>{title ?? take.claim}</strong>
+      <span>{take.why}</span>
+      {take.from ? (
+        <span className="held-from">
+          {EASY.sayFrom} {take.from}
+        </span>
+      ) : null}
+    </p>
   )
 }

@@ -9111,6 +9111,13 @@ html[data-easy='on'] .next-tap {
   opacity: 0.92;
 }
 
+.match-yes .held-from {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  opacity: 0.86;
+}
+
 .hold-kept {
   margin: 8px 0 0;
   color: #fff3b0;
