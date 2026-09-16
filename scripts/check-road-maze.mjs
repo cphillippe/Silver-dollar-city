@@ -17,15 +17,25 @@ import {
   ROAD_MAZE_HINT,
   ROAD_MAZE_LINE,
   ROAD_MAZE_WIN,
+  ROAD_MAZE_AGAIN,
+  MAZE_HELP_SCORE,
+  MAZE_INN_SCORE,
+  MAZE_ITEM_SCORE,
   shortestMazePath,
   swipeStep,
 } from '../src/lib/roadMaze.ts'
+import { EASY } from '../src/lib/easy.ts'
 import { lessonStory, storyPlayFor } from '../src/lib/storyPlay.ts'
 import { mazeWinBeat } from '../src/lib/successBeat.ts'
 
 assert.equal(ROAD_MAZE_LINE, 'ph-road')
 assert.equal(ROAD_MAZE_CLAIM, 'Neighbor is the one who shows mercy.')
 assert.equal(ROAD_MAZE_WIN, 'Helped!')
+assert.equal(ROAD_MAZE_AGAIN, 'One more road')
+assert.equal(EASY.mazeAgain, ROAD_MAZE_AGAIN)
+assert.equal(MAZE_ITEM_SCORE, 25)
+assert.equal(MAZE_HELP_SCORE, 50)
+assert.equal(MAZE_INN_SCORE, 100)
 assert.equal(storyPlayFor('ph-road'), 'road-maze')
 assert.equal(storyPlayFor('ph-father'), 'father-run')
 assert.equal(storyPlayFor('ph-debt'), 'panel-blast')
@@ -87,6 +97,12 @@ assert.match(playSrc, /maze-board/)
 assert.match(playSrc, /onBoardKey/)
 assert.match(playSrc, /EASY\.mazeHunt/)
 assert.match(playSrc, /EASY\.holdNext/)
+assert.match(playSrc, /ROAD_MAZE_AGAIN/)
+assert.ok(playSrc.lastIndexOf('EASY.holdNext') < playSrc.lastIndexOf('ROAD_MAZE_AGAIN'))
+assert.match(playSrc, /function replay/)
+assert.match(playSrc, /maze-shard/)
+assert.match(playSrc, /Combo/)
+assert.ok(playSrc.indexOf('className="maze-board"') < playSrc.indexOf('maze-win-art'))
 assert.match(playSrc, /ROAD_MAZE_WIN/)
 assert.match(playSrc, /panel-help/)
 assert.match(playSrc, /panel-hurt/)
@@ -110,6 +126,7 @@ assert.doesNotMatch(puzzleSrc, /timing-dash|road-swipe|story-night/)
 
 const hubSrc = readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8')
 assert.match(hubSrc, /EASY\.mazeHome/)
+assert.match(hubSrc, /EASY\.mazeMatch/)
 assert.match(hubSrc, /EASY\.mazeMatch/)
 assert.match(hubSrc, /EASY\.matchCta/)
 
