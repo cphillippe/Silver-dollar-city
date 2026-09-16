@@ -196,8 +196,8 @@ const STREET_FACTS: StreetFact[] = [
     tripleId: 'names-bench',
     placeId: 'place-bench',
     personId: 'person-silas',
-    text: 'The resurrection claim stacks named witnesses, not one private voice.',
-    caption: 'Named witnesses, not one private voice.',
+    text: 'Named people saw the risen Christ — not one private voice.',
+    caption: 'Named people saw the risen Christ.',
   },
   {
     evidenceId: 'daily-creed',
@@ -205,8 +205,8 @@ const STREET_FACTS: StreetFact[] = [
     tripleId: 'creed-bench',
     placeId: 'place-bench',
     personId: 'person-silas',
-    text: 'The creed sits between the event and Paul’s letter.',
-    caption: 'The creed sits close to the event.',
+    text: 'The churches already named Christ died, buried, raised before Paul’s letter.',
+    caption: 'The churches already named Christ.',
   },
   {
     evidenceId: 'daily-empty',
@@ -214,8 +214,8 @@ const STREET_FACTS: StreetFact[] = [
     tripleId: 'empty-bench',
     placeId: 'place-bench',
     personId: 'person-silas',
-    text: 'The first Easter reports include an empty place, women, fear, and wonder.',
-    caption: 'Easter begins with an empty place.',
+    text: 'The first Easter reports of Jesus include an empty tomb, women, fear, and wonder.',
+    caption: 'Easter begins with an empty tomb.',
   },
   {
     evidenceId: 'daily-lantern',
@@ -760,12 +760,12 @@ const LINK_CLUES: Record<string, Record<LinkStep, string>> = {
     person: 'Silas keeps that square.',
   },
   'creed-bench': {
-    idea: 'Silas’s handed-on creed — close to the event, then Paul’s letter.',
+    idea: 'Silas’s handed-on creed — the churches already named Christ, then Paul’s letter.',
     place: 'Those names sit at the square.',
     person: 'Silas keeps that square.',
   },
   'empty-bench': {
-    idea: 'Silas’s first Easter — empty place, women, fear, and wonder.',
+    idea: 'Silas’s first Easter — empty tomb, women, fear, and wonder.',
     place: 'That report sits at the square.',
     person: 'Silas keeps that square.',
   },
@@ -983,16 +983,16 @@ export const STREET_WHYS: Record<string, { easy: string; hard: string }> = {
     hard: 'Silas Whitman keeps Witness Square. Women as first tomb witnesses is a public report, not a creek picture.',
   },
   'names-bench': {
-    easy: 'Silas keeps the square. Named witnesses — not one private voice.',
+    easy: 'Silas keeps the square. Named people saw the risen Christ — not one private voice.',
     hard: 'Silas Whitman keeps Witness Square. Cephas, the Twelve, and more than five hundred are public names, not a private dream.',
   },
   'creed-bench': {
-    easy: 'Silas keeps the square. The creed sits close to the event, then Paul’s letter.',
-    hard: 'Silas Whitman keeps Witness Square. The creed sits between the event and Paul’s letter — died, buried, raised.',
+    easy: 'Silas keeps the square. The churches already named Christ died, buried, raised before Paul’s letter.',
+    hard: 'Silas Whitman keeps Witness Square. The churches already named Christ died, buried, raised before Paul’s letter.',
   },
   'empty-bench': {
-    easy: 'Silas keeps the square. Easter begins with an empty place, women, fear, and wonder.',
-    hard: 'Silas Whitman keeps Witness Square. The first Easter reports include an empty place — the town does not sand that awkwardness away.',
+    easy: 'Silas keeps the square. Easter begins with an empty tomb of Jesus — women, fear, and wonder.',
+    hard: 'Silas Whitman keeps Witness Square. The first Easter reports of Jesus include an empty tomb — they did not find the body.',
   },
   'juniper-porch': {
     easy: 'Juniper’s lamp is on the porch so today’s line can be seen.',
