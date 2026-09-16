@@ -307,7 +307,7 @@ export const EVIDENCE: Record<string, EvidenceBrief> = {
   ),
   'daily-names': brief(
     'daily-names',
-    'The resurrection claim stacks named witnesses, not one private voice.',
+    'Named people saw the risen Christ — not one private voice.',
     'Paul lists Cephas, the Twelve, and more than five hundred — many still living then.',
     '1 Corinthians 15:5–6',
     'Paul refuses to name anyone.',
@@ -317,8 +317,8 @@ export const EVIDENCE: Record<string, EvidenceBrief> = {
   ),
   'daily-creed': brief(
     'daily-creed',
-    'The creed sits between the event and Paul’s letter.',
-    'If the formula is early, the claim is close to what it names: died, buried, raised.',
+    'The churches already named Christ died, buried, raised before Paul’s letter.',
+    'Paul hands on what he received — not a line he invented while writing.',
     '1 Corinthians 15:3–4',
     'Paul invents the creed as he writes.',
     'Burial is skipped because it does not matter.',
@@ -397,8 +397,8 @@ export const EVIDENCE: Record<string, EvidenceBrief> = {
   ),
   'daily-empty': brief(
     'daily-empty',
-    'The first Easter reports include an empty place, women, fear, and wonder.',
-    'The town does not sand that awkwardness into a tidy triumph.',
+    'The first Easter reports of Jesus include an empty tomb, women, fear, and wonder.',
+    'They found the stone rolled away — they did not find the body.',
     'Luke 24:2–3',
     'Rome instantly converts the senate.',
     'Women are absent from the first reports.',

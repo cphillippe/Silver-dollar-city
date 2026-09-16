@@ -110,6 +110,39 @@ export const journalEntries: JournalEntry[] = [
     ],
   },
   {
+    id: 'j-wb-5',
+    areaId: 'witness-bench',
+    title: 'Names that stay',
+    kicker: 'Witness Square',
+    unlockAfter: 'daily-names',
+    body: [
+      'Paul names Cephas, the Twelve, and more than five hundred — many still living then. Named people saw the risen Christ, not one private voice.',
+    ],
+    sources: ['1 Corinthians 15:5–6'],
+  },
+  {
+    id: 'j-wb-6',
+    areaId: 'witness-bench',
+    title: 'Older than the letter',
+    kicker: 'Witness Square',
+    unlockAfter: 'daily-creed',
+    body: [
+      'Paul hands on what he received. The churches already named Christ died, buried, raised before the letter.',
+    ],
+    sources: ['1 Corinthians 15:3–4'],
+  },
+  {
+    id: 'j-wb-7',
+    areaId: 'witness-bench',
+    title: 'Morning',
+    kicker: 'Witness Square',
+    unlockAfter: 'daily-empty',
+    body: [
+      'Luke begins with an empty tomb. They did not find the body of Jesus. Women, fear, and wonder stay in the first report.',
+    ],
+    sources: ['Luke 24:2–3'],
+  },
+  {
     id: 'j-ob-1',
     areaId: 'observatory',
     title: 'The universe is finely tuned for life',

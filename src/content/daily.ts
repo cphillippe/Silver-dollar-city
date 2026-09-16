@@ -111,10 +111,10 @@ export const DAILY_POOL: DailyPuzzle[] = [
       kind: 'match',
       id: 'daily-names',
       title: 'Names that stay',
-      idea: 'the resurrection claim rests on named witnesses',
+      idea: 'named people saw the risen Christ',
       prompt: 'Match the person to the kind of witness they left.',
       context:
-        '1 Corinthians 15:5–6. The New Testament does not rest on one voice. It stacks named people.',
+        '1 Corinthians 15:5–6. Named people saw the risen Christ — not one private voice.',
       pairs: [
         { id: 'cephas', gem: 'heart', scene: 'first', left: 'Cephas (Peter)', right: 'Named first in Paul’s list' },
         { id: 'twelve', gem: 'star', scene: 'twelve', left: 'The Twelve', right: 'The gathered apprentices' },
@@ -133,16 +133,16 @@ export const DAILY_POOL: DailyPuzzle[] = [
       kind: 'sequence',
       id: 'daily-creed',
       title: 'Older than the letter',
-      idea: 'the first church already said he died, was buried, and was raised',
-      prompt: 'Scholars often date this creed earlier than the letter that quotes it. Order the steps.',
-      context: '1 Corinthians 15:3–4. If the creed is early, the claim is close to the event it names.',
+      idea: 'the churches already named Christ died, buried, raised before Paul’s letter',
+      prompt: 'Order the steps the churches already named: died, buried, raised.',
+      context: '1 Corinthians 15:3–4. Paul hands on what he received — not a line he invented while writing.',
       items: [
         { id: 'a', text: 'Jesus is executed and buried.' },
         { id: 'b', text: 'The first believers pass a short creed.' },
         { id: 'c', text: 'Paul quotes that creed in a letter to Corinth.' },
       ],
       teachOnWrong:
-        'Paul is handing on something he received. The creed sits between the event and the letter. Try the chain again.',
+        'Paul is handing on something he received. The churches already named Christ died, buried, raised. Try the chain again.',
       deeper: 'Christ died… he was buried… he was raised on the third day. Burial and raising are both named.',
     },
   },
@@ -345,10 +345,10 @@ export const DAILY_POOL: DailyPuzzle[] = [
       kind: 'sort',
       id: 'daily-empty',
       title: 'Morning',
-      idea: 'the first Easter reports are awkward on purpose',
-      prompt: 'Which details belong in the first Easter reports?',
+      idea: 'the first Easter reports of Jesus include an empty tomb',
+      prompt: 'Which details belong in the first Easter reports of Jesus?',
       context:
-        'The first reports are not tidy. They include women, fear, and an empty place. The town does not sand that down.',
+        'The first Easter reports of Jesus include an empty tomb, women, fear, and wonder. They found the stone rolled away — they did not find the body.',
       keepLabel: 'In the reports',
       discardLabel: 'Later invention?',
       tiles: [
@@ -356,7 +356,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
           id: 'a',
           text: 'The tomb is found empty.',
           bin: 'keep',
-          why: 'The first reports open with an empty place, not a tidy triumph.',
+          why: 'The first reports open with an empty tomb, not a tidy triumph.',
         },
         {
           id: 'b',
@@ -373,7 +373,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
         },
       ],
       teachOnWrong:
-        'Luke 24 begins with an empty place and a dismissed report. Keep the awkwardness; toss the tidy triumph.',
+        'Luke 24 begins with an empty tomb. They did not find the body of Jesus. Keep that opening; toss the tidy triumph.',
       deeper:
         'They found the stone rolled away from the tomb, but when they went in they did not find the body.',
     },

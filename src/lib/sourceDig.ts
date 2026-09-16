@@ -14,21 +14,40 @@ export const SOURCE_DIG_WIN_SCORE = 100
 
 export const DIG_ARC = ['wb-creed', 'wb-women', 'wb-early', 'wb-method'] as const
 
+/** Witness leftovers after Dig deeper Hold — names → creed close → empty tomb. */
+export const NAMES_ARC = ['daily-names', 'daily-creed', 'daily-empty'] as const
+
 export type DigArcId = (typeof DIG_ARC)[number]
+export type NamesArcId = (typeof NAMES_ARC)[number]
 
 export function isDigArc(id: string): id is DigArcId {
   return (DIG_ARC as readonly string[]).includes(id)
 }
 
+export function isNamesArc(id: string): id is NamesArcId {
+  return (NAMES_ARC as readonly string[]).includes(id)
+}
+
 /** Play is tap-in digs. Creed keeps the merge bowl. */
 export function isSourceDigLine(id: string): boolean {
-  return id === 'wb-women' || id === 'wb-early' || id === 'wb-method'
+  return (
+    id === 'wb-women' ||
+    id === 'wb-early' ||
+    id === 'wb-method' ||
+    isNamesArc(id)
+  )
 }
 
 export function digPrior(id: string): string | undefined {
   const index = (DIG_ARC as readonly string[]).indexOf(id)
   if (index <= 0) return undefined
   return DIG_ARC[index - 1]
+}
+
+export function namesPrior(id: string): string | undefined {
+  const index = (NAMES_ARC as readonly string[]).indexOf(id)
+  if (index <= 0) return undefined
+  return NAMES_ARC[index - 1]
 }
 
 export interface DigTablet {
@@ -97,6 +116,66 @@ const TABLETS: Record<string, DigTablet[]> = {
       era: 'ancient',
       title: 'Irenaeus',
       bite: 'Irenaeus says the apostles handed the same gospel on. Tools weigh that handing-on.',
+    },
+  ],
+  'daily-names': [
+    {
+      id: 0,
+      era: 'scripture',
+      title: '1 Cor 15',
+      bite: 'He appeared to Cephas, then to the Twelve. Named people saw the risen Christ.',
+    },
+    {
+      id: 1,
+      era: 'scripture',
+      title: 'Five hundred',
+      bite: 'Then more than five hundred at once — many still living when Paul wrote.',
+    },
+    {
+      id: 2,
+      era: 'ancient',
+      title: 'Irenaeus',
+      bite: 'Irenaeus names the apostles who handed the same gospel on. Public names, not one private voice.',
+    },
+  ],
+  'daily-creed': [
+    {
+      id: 0,
+      era: 'scripture',
+      title: '1 Cor 15',
+      bite: 'Paul hands on what he received: Christ died for our sins.',
+    },
+    {
+      id: 1,
+      era: 'scripture',
+      title: 'Buried, raised',
+      bite: 'He was buried. He was raised on the third day. The churches already said it.',
+    },
+    {
+      id: 2,
+      era: 'ancient',
+      title: 'Ignatius',
+      bite: 'Ignatius names Jesus Christ: truly died, truly raised — the same public line.',
+    },
+  ],
+  'daily-empty': [
+    {
+      id: 0,
+      era: 'scripture',
+      title: 'Luke 24',
+      bite: 'They found the stone rolled away. They did not find the body of Jesus.',
+    },
+    {
+      id: 1,
+      era: 'scripture',
+      title: 'Mark 16',
+      bite: 'Women go at dawn. The tomb is empty. Fear and wonder sit together.',
+    },
+    {
+      id: 2,
+      era: 'ancient',
+      title: 'Ignatius',
+      bite: 'Ignatius names Jesus truly raised — not a ghost story over an occupied tomb.',
     },
   ],
 }
