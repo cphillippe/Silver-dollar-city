@@ -8,6 +8,10 @@ import {
   type AdsPref,
 } from '../config/ads'
 import {
+  SETTINGS_SUPPORT_LINE,
+  TRAIL_SUBTITLE,
+} from '../config/commerce'
+import {
   cloudSyncStatus,
   encodeShareCode,
   SAVE_MAX_BYTES,
@@ -137,11 +141,13 @@ export function Settings({ onNavigate }: SettingsProps) {
 
       <section className="settings-card" aria-label="Support the trail">
         <p className="eyebrow">{easy ? EASY.supportTrail : 'Support the trail'}</p>
-        <h2>{easy ? EASY.supportTrail : 'Support the trail'}</h2>
+        <h2>Street Packs · Remove ads</h2>
+        <p>{SETTINGS_SUPPORT_LINE}</p>
+        <p className="quiet">{TRAIL_SUBTITLE}</p>
         <p>
           The Easy trail stays free. Soft pauses sit between home and a lesson —
-          never over Match, Hold, or arcade play, and never on Journal. Packs
-          unlock extra streets only.
+          never over Match, Hold, or arcade play, and never on Journal. Street
+          Packs unlock extra streets only.
         </p>
         <div className="settings-actions">
           <button
@@ -149,10 +155,10 @@ export function Settings({ onNavigate }: SettingsProps) {
             className="btn gold"
             onClick={() => onNavigate({ name: 'shop' })}
           >
-            {easy ? EASY.removeAds : 'Remove ads'} / {easy ? EASY.packs : 'Packs'}
+            {easy ? EASY.packs : 'Street Packs'}
           </button>
           <button type="button" className="btn primary" onClick={() => onNavigate({ name: 'shop' })}>
-            {easy ? EASY.supportTrail : 'Support the trail'}
+            {easy ? EASY.removeAds : 'Remove ads'}
           </button>
         </div>
       </section>

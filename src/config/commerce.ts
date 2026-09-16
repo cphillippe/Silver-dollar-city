@@ -46,7 +46,7 @@ export const SHOP_PACKS: ShopPack[] = [
     sku: PLAY_SKUS.millStreet,
     title: 'Mill Street',
     street: 'Mill Street',
-    blurb: 'A new street on daily bread as gift — not a wage we earn from God.',
+    blurb: 'New street. Same trail. More lines you can still say tomorrow.',
     priceLabel: '$1.99',
     included: false,
     lineId: 'ms-bread',
@@ -56,18 +56,31 @@ export const SHOP_PACKS: ShopPack[] = [
     sku: PLAY_SKUS.harborWalk,
     title: 'Harbor Walk',
     street: 'Harbor Walk',
-    blurb: 'A quiet street on hope that waits for what we do not yet see.',
+    blurb: 'New street. Same trail. More lines you can still say tomorrow.',
     priceLabel: '$1.99',
     included: false,
     lineId: 'hw-hope',
   },
 ]
 
+export const TRAIL_NAME = 'Silver City: Unending Evidence'
+export const TRAIL_SUBTITLE = 'Puzzle trail. Fold the page. Keep the evidence.'
+export const SCENE_PAUSE_COPY =
+  'A quiet pause on the trail. The walk continues in a moment.'
+export const PACK_LINE =
+  'New street. Same trail. More lines you can still say tomorrow.'
+export const SETTINGS_SUPPORT_LINE =
+  'Street Packs · Remove ads · Progress stays on this device (export/import)'
+
+export function packPaywallLine(packName: string): string {
+  return `You’ve kept the first streets. Unlock ${packName} for new walks — everything you’ve already held stays free.`
+}
+
 export const REMOVE_ADS_PRODUCT = {
   id: 'remove-ads',
   sku: PLAY_SKUS.removeAds,
-  title: 'Remove ads',
-  blurb: 'A supporter gift. Soft pauses between home and a lesson go away. Journal, Hold, and the core trail stay open either way.',
+  title: 'Keep the quiet trail — Remove ads.',
+  blurb: 'Keep the quiet trail — Remove ads. Soft pauses between home and a lesson go away. Journal, Hold, and the core trail stay open either way.',
   priceLabel: '$2.99',
 } as const
 

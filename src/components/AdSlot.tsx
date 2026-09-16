@@ -6,6 +6,7 @@ import {
   AD_SLOTS,
 } from '../config/ads'
 import { EMPTY_COMMERCE, readCommerce } from '../lib/commerce'
+import { SCENE_PAUSE_COPY } from '../config/commerce'
 
 function subscribeAds(onStoreChange: () => void) {
   if (typeof window === 'undefined') return () => {}
@@ -53,6 +54,7 @@ export function AdSlot({ slot }: AdSlotProps) {
       <p className="eyebrow">A quiet pause · not a live ad yet</p>
       <p className="ad-slot-label">{spec.label}</p>
       <p className="quiet">{spec.where}</p>
+      <p className="quiet">{SCENE_PAUSE_COPY}</p>
     </aside>
   )
 }

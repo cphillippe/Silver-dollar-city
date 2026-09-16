@@ -116,7 +116,17 @@ assert.match(shopSrc, /Restore/)
 assert.match(shopSrc, /grantRemoveAds/)
 assert.match(shopSrc, /grantPack/)
 assert.match(shopSrc, /Walk the free trail/)
+assert.match(shopSrc, /packPaywallLine/)
+assert.match(shopSrc, /TRAIL_SUBTITLE/)
 assert.doesNotMatch(shopSrc, /hard paywall/i)
+
+const sceneAdSrc = readFileSync(new URL('../src/components/SceneAd.tsx', import.meta.url), 'utf8')
+assert.match(sceneAdSrc, /SCENE_PAUSE_COPY/)
+assert.match(sceneAdSrc, /REMOVE_ADS_PRODUCT\.title/)
+
+const settingsSrc = readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8')
+assert.match(settingsSrc, /SETTINGS_SUPPORT_LINE/)
+assert.match(settingsSrc, /Street Packs/)
 
 const journalSrc = readFileSync(new URL('../src/components/Journal.tsx', import.meta.url), 'utf8')
 assert.doesNotMatch(journalSrc, /SceneAd/)
@@ -136,5 +146,10 @@ const commerceCfg = readFileSync(new URL('../src/config/commerce.ts', import.met
 assert.match(commerceCfg, /Play Billing/)
 assert.match(commerceCfg, /grantRemoveAds/)
 assert.match(commerceCfg, /grantPack/)
+assert.match(commerceCfg, /A quiet pause on the trail/)
+assert.match(commerceCfg, /Keep the quiet trail/)
+assert.match(commerceCfg, /New street. Same trail/)
+assert.match(commerceCfg, /Street Packs · Remove ads/)
+assert.match(commerceCfg, /Puzzle trail. Fold the page/)
 
 console.log('check-commerce: ok')
