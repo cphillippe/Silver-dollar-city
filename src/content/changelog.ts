@@ -8,6 +8,18 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.77',
+    title: 'Sayable triad · Easy core trail',
+    when: '2026-09-16',
+    items: [
+      'Easy held lines stay a sayable claim · reason · source: Story Creek forgiven-debt, Names creed and empty tomb, Why Gate beginning, Meaning Ridge duty and mind. Learn, Hold, and Journal keep the three-part line — Hold names From under the claim, not only after LOCKED',
+      'Leftover hedges drop: no contradiction on the forgiven-debt line, no If-hedge on the beginning argument, no theism jargon on Easy duty or mind. Christ is named where the names, creed, and empty takeaways lock',
+      'Hold Why Blast stays lock-in — Yes — keep this, not a one-more loop. No new quiz chrome. Arcade DUG! / MATCHED stay claim-only by Fun design',
+      'Night Watch and Town stay hidden on Easy. Journal ungated. Core Easy 39 facts stay free. Never a hard paywall',
+      'Fun 1.4.66–1.4.72, Clear reasons 1.4.73, Names that stay 1.4.74, Street Packs earn path 1.4.75, and Play adapters 1.4.76 stay. Soft ads never cover Match, Hold, arcade, or source-dig. Place titles stay Story Creek, Witness Square, Sky Watch, Why Gate, Meaning Ridge',
+    ],
+  },
+  {
     version: '1.4.76',
     title: 'Play adapters · Easy core trail',
     when: '2026-09-16',
@@ -1597,6 +1609,10 @@ export function latestChange(version: string): ChangeNote {
   const note = CHANGELOG.find((item) => item.version === version) ?? CHANGELOG[0]
   if (!note) {
     return { version, title: 'Easy core trail', when: '', items: [] }
+  }
+  if (note.version === '1.4.77') {
+    const prior = latestChange('1.4.76')
+    return { ...note, items: [...note.items, ...prior.items] }
   }
   if (note.version === '1.4.76') {
     const prior = latestChange('1.4.75')

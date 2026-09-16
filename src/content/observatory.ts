@@ -24,7 +24,7 @@ export const observatory: Area = {
       prompt:
         'Tap a picture, then the mark that belongs. Two choices at a time.',
       context:
-        'The universe is finely tuned for life — that fit points to a Designer. Life-permitting ranges are extravagantly narrow across independent parameters; design predicts a habitable cosmos, blank chance does not. Necessity, chance (often a multiverse — asserted to cancel the surprise — no evidence), or design: the fit still points to a Designer.',
+        'The universe is finely tuned for life — that fit points to a Designer. Life needs tight numbers — chance does not explain that. Necessity, chance (often a multiverse — asserted to cancel the surprise — no evidence), or design: the fit still points to a Designer.',
       pairs: [
         {
           id: 'lambda',
@@ -69,7 +69,7 @@ export const observatory: Area = {
       prompt:
         'Place the next stone. Two choices. Leave the overclaims.',
       context:
-        'Fine-tuning is best explained by a mind that intended a habitable world. Life-permitting ranges are extravagantly narrow; a Designer who wants observers leads us to expect that fit — blank indifference does not. Necessity, chance (often a multiverse — asserted to cancel the surprise — no evidence), or design: hold the Designer.',
+        'Fine-tuning is best explained by a mind that intended a habitable world. A Designer who wants people fits these numbers. Necessity, chance (often a multiverse — asserted to cancel the surprise — no evidence), or design: hold the Designer.',
       slots: [
         {
           id: 'p1',

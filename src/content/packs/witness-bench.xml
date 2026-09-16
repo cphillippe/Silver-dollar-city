@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<areaPack id="witness-bench" schemaVersion="3" appVersion="1.4.74" generated="2026-09-16T09:00:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/" title="Witness Square" place="Witness Square" person="Silas Whitman" personId="silas" plotId="bench">
+<areaPack id="witness-bench" schemaVersion="3" appVersion="1.4.77" generated="2026-09-16T09:00:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/" title="Witness Square" place="Witness Square" person="Silas Whitman" personId="silas" plotId="bench">
   <howToEdit>RUNTIME CONTENT: the game loads this file as the source of truth for this area. Change player-facing text in place inside each &lt;lesson&gt;. Stable id attributes (ph-father, …) are engine keys — do not rename without a migration. Three tiers per fact: &lt;easy easyOrder="N"&gt;, &lt;medium&gt;, and &lt;hard&gt; — each with &lt;learn&gt;, &lt;match&gt;, and &lt;hold&gt;. Easy Learn: shortStory/mainIdea/loci. Medium Learn: mediumTeach (clearer than Hard, richer than Easy). Hard Learn: hardTeach/fullTeach. Held claim·reason·source stay plain and identical on all three. Hold level-up: see hold @levelUpTo / @onFail and index &lt;holdRules&gt;. Empty optional elements are intentional. Escape &amp; &lt; &gt; in text.</howToEdit>
   <meta>
     <title>Silver City — Witness Square</title>
@@ -790,8 +790,8 @@ He appeared to Cephas, then to the twelve. Then he appeared to more than five hu
       <easy points="10" easyOrder="13">
         <learn>
           <shortStory>Paul says he handed on what he received. The churches already named Christ died, buried, raised — then he wrote the letter.</shortStory>
-          <mainIdea>The churches already named Christ died, buried, raised before Paul’s letter.</mainIdea>
-          <gloss>The churches already named Christ died, buried, raised before Paul’s letter.</gloss>
+          <mainIdea>The churches named Christ died, buried, and raised before Paul wrote.</mainIdea>
+          <gloss>The churches named Christ died, buried, and raised before Paul wrote.</gloss>
           <loci>This idea lives at Witness Square, with Silas.</loci>
           <word>
             <term>Creed</term>
@@ -800,7 +800,7 @@ He appeared to Cephas, then to the twelve. Then he appeared to more than five hu
           <hint>Keep “received.” Toss “Paul invented it while writing.”</hint>
         </learn>
         <match>
-          <sentenceCorrect>The churches already named Christ died, buried, raised before Paul’s letter.</sentenceCorrect>
+          <sentenceCorrect>The churches named Christ died, buried, and raised before Paul wrote.</sentenceCorrect>
           <sentenceMisses>
             <miss>Paul invents the creed as he writes.</miss>
             <miss>Burial is skipped because it does not matter.</miss>
@@ -809,25 +809,25 @@ He appeared to Cephas, then to the twelve. Then he appeared to more than five hu
           <personPrompt>Silas keeps that square.</personPrompt>
           <ideaPrompt>Silas’s handed-on creed — close to the event, then Paul’s letter.</ideaPrompt>
           <ideaLabel>The churches already named Christ.</ideaLabel>
-          <whyEasy>Silas keeps the square. The churches already named Christ died, buried, raised before Paul’s letter.</whyEasy>
+          <whyEasy>Silas keeps the square. The churches named Christ died, buried, and raised before Paul wrote.</whyEasy>
         </match>
         <hold levelUpTo="medium" onFail="easy">
-          <claim>The churches already named Christ died, buried, raised before Paul’s letter.</claim>
-          <reason>Paul hands on what he received — not a line he invented while writing.</reason>
+          <claim>The churches named Christ died, buried, and raised before Paul wrote.</claim>
+          <reason>Paul received this line — he did not invent it.</reason>
           <source>1 Corinthians 15:3–4</source>
-          <whyCorrect>Paul hands on what he received — not a line he invented while writing.</whyCorrect>
+          <whyCorrect>Paul received this line — he did not invent it.</whyCorrect>
           <whyMisses>
             <miss>The letter is older than any tradition it quotes.</miss>
             <miss>Nothing was handed on; it was only felt.</miss>
             <miss>The line is late, far from the event.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>The churches already named Christ died, buried, raised before Paul’s letter.</choice>
+            <choice>The churches named Christ died, buried, and raised before Paul wrote.</choice>
             <choice>Paul invents the creed as he writes.</choice>
             <choice>Burial is skipped because it does not matter.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Paul hands on what he received — not a line he invented while writing.</choice>
+            <choice>Paul received this line — he did not invent it.</choice>
             <choice>The letter is older than any tradition it quotes.</choice>
             <choice>Nothing was handed on; it was only felt.</choice>
           </reasonChoices>
@@ -836,8 +836,8 @@ He appeared to Cephas, then to the twelve. Then he appeared to more than five hu
       <medium points="12">
         <learn>
           <mediumTeach>1 Corinthians 15:3–4. Paul hands on what he received. The churches already named Christ died, buried, raised — then he wrote the letter. Not a line he invented while writing.</mediumTeach>
-          <mainIdea>The churches already named Christ died, buried, raised before Paul’s letter.</mainIdea>
-          <gloss>The churches already named Christ died, buried, raised before Paul’s letter.</gloss>
+          <mainIdea>The churches named Christ died, buried, and raised before Paul wrote.</mainIdea>
+          <gloss>The churches named Christ died, buried, and raised before Paul wrote.</gloss>
           <loci>This idea lives at Witness Square, with Silas.</loci>
           <word>
             <term>Creed</term>
@@ -846,7 +846,7 @@ He appeared to Cephas, then to the twelve. Then he appeared to more than five hu
           <hint>Keep “received.” Toss “Paul invented it while writing.”</hint>
         </learn>
         <match>
-          <sentenceCorrect>The churches already named Christ died, buried, raised before Paul’s letter.</sentenceCorrect>
+          <sentenceCorrect>The churches named Christ died, buried, and raised before Paul wrote.</sentenceCorrect>
           <sentenceMisses>
             <miss>Paul invents the creed as he writes.</miss>
             <miss>Burial is skipped because it does not matter.</miss>
@@ -855,25 +855,25 @@ He appeared to Cephas, then to the twelve. Then he appeared to more than five hu
           <personPrompt>Silas keeps that square.</personPrompt>
           <ideaPrompt>Silas’s handed-on creed — close to the event, then Paul’s letter.</ideaPrompt>
           <ideaLabel>The churches already named Christ.</ideaLabel>
-          <whyMedium>Silas keeps the square. The churches already named Christ died, buried, raised before Paul’s letter.</whyMedium>
+          <whyMedium>Silas keeps the square. The churches named Christ died, buried, and raised before Paul wrote.</whyMedium>
         </match>
         <hold levelUpTo="hard" onFail="easy">
-          <claim>The churches already named Christ died, buried, raised before Paul’s letter.</claim>
-          <reason>Paul hands on what he received — not a line he invented while writing.</reason>
+          <claim>The churches named Christ died, buried, and raised before Paul wrote.</claim>
+          <reason>Paul received this line — he did not invent it.</reason>
           <source>1 Corinthians 15:3–4</source>
-          <whyCorrect>Paul hands on what he received — not a line he invented while writing.</whyCorrect>
+          <whyCorrect>Paul received this line — he did not invent it.</whyCorrect>
           <whyMisses>
             <miss>The letter is older than any tradition it quotes.</miss>
             <miss>Nothing was handed on; it was only felt.</miss>
             <miss>The line is late, far from the event.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>The churches already named Christ died, buried, raised before Paul’s letter.</choice>
+            <choice>The churches named Christ died, buried, and raised before Paul wrote.</choice>
             <choice>Paul invents the creed as he writes.</choice>
             <choice>Burial is skipped because it does not matter.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Paul hands on what he received — not a line he invented while writing.</choice>
+            <choice>Paul received this line — he did not invent it.</choice>
             <choice>The letter is older than any tradition it quotes.</choice>
             <choice>Nothing was handed on; it was only felt.</choice>
           </reasonChoices>
@@ -890,7 +890,7 @@ Christ died… he was buried… he was raised on the third day. Burial and raisi
           <challengeTiles />
         </learn>
         <match>
-          <sentenceCorrect>The churches already named Christ died, buried, raised before Paul’s letter.</sentenceCorrect>
+          <sentenceCorrect>The churches named Christ died, buried, and raised before Paul wrote.</sentenceCorrect>
           <sentenceMisses>
             <miss>Paul invents the creed as he writes.</miss>
             <miss>Burial is skipped because it does not matter.</miss>
@@ -899,25 +899,25 @@ Christ died… he was buried… he was raised on the third day. Burial and raisi
           <personPrompt>Silas keeps that square.</personPrompt>
           <ideaPrompt>Silas’s handed-on creed — close to the event, then Paul’s letter.</ideaPrompt>
           <ideaLabel>The churches already named Christ.</ideaLabel>
-          <whyHard>Silas Whitman keeps Witness Square. The churches already named Christ died, buried, raised before Paul’s letter.</whyHard>
+          <whyHard>Silas Whitman keeps Witness Square. The churches named Christ died, buried, and raised before Paul wrote.</whyHard>
         </match>
         <hold onFail="easy">
-          <claim>The churches already named Christ died, buried, raised before Paul’s letter.</claim>
-          <reason>Paul hands on what he received — not a line he invented while writing.</reason>
+          <claim>The churches named Christ died, buried, and raised before Paul wrote.</claim>
+          <reason>Paul received this line — he did not invent it.</reason>
           <source>1 Corinthians 15:3–4</source>
-          <whyCorrect>Paul hands on what he received — not a line he invented while writing.</whyCorrect>
+          <whyCorrect>Paul received this line — he did not invent it.</whyCorrect>
           <whyMisses>
             <miss>The letter is older than any tradition it quotes.</miss>
             <miss>Nothing was handed on; it was only felt.</miss>
             <miss>The line is late, far from the event.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>The churches already named Christ died, buried, raised before Paul’s letter.</choice>
+            <choice>The churches named Christ died, buried, and raised before Paul wrote.</choice>
             <choice>Paul invents the creed as he writes.</choice>
             <choice>Burial is skipped because it does not matter.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Paul hands on what he received — not a line he invented while writing.</choice>
+            <choice>Paul received this line — he did not invent it.</choice>
             <choice>The letter is older than any tradition it quotes.</choice>
             <choice>Nothing was handed on; it was only felt.</choice>
           </reasonChoices>
@@ -933,9 +933,9 @@ Christ died… he was buried… he was raised on the third day. Burial and raisi
     <lesson id="daily-empty" place="Witness Square" person="Silas Whitman" tripleId="empty-bench" ideaId="idea-empty" ideaLabel="Easter begins with an empty tomb." challengeKind="sort" challengeTitle="Morning">
       <easy points="10" easyOrder="14">
         <learn>
-          <shortStory>The first Easter reports of Jesus are not a tidy parade. They include an empty tomb, women, fear, and wonder.</shortStory>
-          <mainIdea>The first Easter reports of Jesus include an empty tomb, women, fear, and wonder.</mainIdea>
-          <gloss>The first Easter reports of Jesus include an empty tomb, women, fear, and wonder.</gloss>
+          <shortStory>Jesus’ tomb was empty. Women saw it first, with fear and wonder. They found the stone rolled away — they did not find the body.</shortStory>
+          <mainIdea>Jesus’ tomb was empty — women saw it first, with fear and wonder.</mainIdea>
+          <gloss>Jesus’ tomb was empty — women saw it first, with fear and wonder.</gloss>
           <loci>This idea lives at Witness Square, with Silas.</loci>
           <word>
             <term>Empty</term>
@@ -944,7 +944,7 @@ Christ died… he was buried… he was raised on the third day. Burial and raisi
           <hint>Keep the awkward opening. Toss the senate conversion.</hint>
         </learn>
         <match>
-          <sentenceCorrect>The first Easter reports of Jesus include an empty tomb, women, fear, and wonder.</sentenceCorrect>
+          <sentenceCorrect>Jesus’ tomb was empty — women saw it first, with fear and wonder.</sentenceCorrect>
           <sentenceMisses>
             <miss>Rome instantly converts the senate.</miss>
             <miss>Women are absent from the first reports.</miss>
@@ -956,7 +956,7 @@ Christ died… he was buried… he was raised on the third day. Burial and raisi
           <whyEasy>Silas keeps the square. Easter begins with an empty tomb of Jesus — women, fear, and wonder.</whyEasy>
         </match>
         <hold levelUpTo="medium" onFail="easy">
-          <claim>The first Easter reports of Jesus include an empty tomb, women, fear, and wonder.</claim>
+          <claim>Jesus’ tomb was empty — women saw it first, with fear and wonder.</claim>
           <reason>They found the stone rolled away — they did not find the body.</reason>
           <source>Luke 24:2–3</source>
           <whyCorrect>They found the stone rolled away — they did not find the body.</whyCorrect>
@@ -966,7 +966,7 @@ Christ died… he was buried… he was raised on the third day. Burial and raisi
             <miss>The tomb story is only a vision.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>The first Easter reports of Jesus include an empty tomb, women, fear, and wonder.</choice>
+            <choice>Jesus’ tomb was empty — women saw it first, with fear and wonder.</choice>
             <choice>Rome instantly converts the senate.</choice>
             <choice>Women are absent from the first reports.</choice>
           </claimChoices>
@@ -979,9 +979,9 @@ Christ died… he was buried… he was raised on the third day. Burial and raisi
       </easy>
       <medium points="12">
         <learn>
-          <mediumTeach>The first Easter reports of Jesus include an empty tomb, women, fear, and wonder. They found the stone rolled away — they did not find the body.</mediumTeach>
-          <mainIdea>The first Easter reports of Jesus include an empty tomb, women, fear, and wonder.</mainIdea>
-          <gloss>The first Easter reports of Jesus include an empty tomb, women, fear, and wonder.</gloss>
+          <mediumTeach>Jesus’ tomb was empty — women saw it first, with fear and wonder. They found the stone rolled away — they did not find the body.</mediumTeach>
+          <mainIdea>Jesus’ tomb was empty — women saw it first, with fear and wonder.</mainIdea>
+          <gloss>Jesus’ tomb was empty — women saw it first, with fear and wonder.</gloss>
           <loci>This idea lives at Witness Square, with Silas.</loci>
           <word>
             <term>Empty</term>
@@ -990,7 +990,7 @@ Christ died… he was buried… he was raised on the third day. Burial and raisi
           <hint>Keep the awkward opening. Toss the senate conversion.</hint>
         </learn>
         <match>
-          <sentenceCorrect>The first Easter reports of Jesus include an empty tomb, women, fear, and wonder.</sentenceCorrect>
+          <sentenceCorrect>Jesus’ tomb was empty — women saw it first, with fear and wonder.</sentenceCorrect>
           <sentenceMisses>
             <miss>Rome instantly converts the senate.</miss>
             <miss>Women are absent from the first reports.</miss>
@@ -1002,7 +1002,7 @@ Christ died… he was buried… he was raised on the third day. Burial and raisi
           <whyMedium>Silas keeps the square. Easter begins with an empty tomb of Jesus — women, fear, and wonder.</whyMedium>
         </match>
         <hold levelUpTo="hard" onFail="easy">
-          <claim>The first Easter reports of Jesus include an empty tomb, women, fear, and wonder.</claim>
+          <claim>Jesus’ tomb was empty — women saw it first, with fear and wonder.</claim>
           <reason>They found the stone rolled away — they did not find the body.</reason>
           <source>Luke 24:2–3</source>
           <whyCorrect>They found the stone rolled away — they did not find the body.</whyCorrect>
@@ -1012,7 +1012,7 @@ Christ died… he was buried… he was raised on the third day. Burial and raisi
             <miss>The tomb story is only a vision.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>The first Easter reports of Jesus include an empty tomb, women, fear, and wonder.</choice>
+            <choice>Jesus’ tomb was empty — women saw it first, with fear and wonder.</choice>
             <choice>Rome instantly converts the senate.</choice>
             <choice>Women are absent from the first reports.</choice>
           </claimChoices>
@@ -1039,7 +1039,7 @@ They found the stone rolled away from the tomb, but when they went in they did n
           </challengeTiles>
         </learn>
         <match>
-          <sentenceCorrect>The first Easter reports of Jesus include an empty tomb, women, fear, and wonder.</sentenceCorrect>
+          <sentenceCorrect>Jesus’ tomb was empty — women saw it first, with fear and wonder.</sentenceCorrect>
           <sentenceMisses>
             <miss>Rome instantly converts the senate.</miss>
             <miss>Women are absent from the first reports.</miss>
@@ -1051,7 +1051,7 @@ They found the stone rolled away from the tomb, but when they went in they did n
           <whyHard>Silas Whitman keeps Witness Square. The first Easter reports of Jesus include an empty tomb — they did not find the body.</whyHard>
         </match>
         <hold onFail="easy">
-          <claim>The first Easter reports of Jesus include an empty tomb, women, fear, and wonder.</claim>
+          <claim>Jesus’ tomb was empty — women saw it first, with fear and wonder.</claim>
           <reason>They found the stone rolled away — they did not find the body.</reason>
           <source>Luke 24:2–3</source>
           <whyCorrect>They found the stone rolled away — they did not find the body.</whyCorrect>
@@ -1061,7 +1061,7 @@ They found the stone rolled away from the tomb, but when they went in they did n
             <miss>The tomb story is only a vision.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>The first Easter reports of Jesus include an empty tomb, women, fear, and wonder.</choice>
+            <choice>Jesus’ tomb was empty — women saw it first, with fear and wonder.</choice>
             <choice>Rome instantly converts the senate.</choice>
             <choice>Women are absent from the first reports.</choice>
           </claimChoices>

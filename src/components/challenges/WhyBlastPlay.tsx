@@ -99,6 +99,9 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
           )
         })}
         <p className="why-claim recall-line rehearse-stem">{easyFacingLine(id, claim)}</p>
+        <p className="held-from quiet">
+          {EASY.sayFrom} {source}
+        </p>
         {locked
           ? GEM_BURST.slice(0, 6).map((i) => (
               <span key={i} className="why-pop" style={{ ['--i' as string]: i }} aria-hidden />
@@ -110,9 +113,6 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
           <p className="match-yes" role="status">
             <strong>{beat.title}</strong>
             <span>{beat.why}</span>
-          </p>
-          <p className="held-from quiet">
-            {EASY.sayFrom} {source}
           </p>
           <div className="cta-dock">
             <button
