@@ -39,7 +39,7 @@ interface ClaimMergePlayProps {
   onEasyStop?: (dest: 'hold' | 'home') => void
 }
 
-const SHARDS = [0, 1, 2, 3, 4, 5]
+const SHARDS = [0, 1, 2, 3, 4, 5, 6, 7]
 
 function bowlPoint(node: HTMLElement, event: { clientX: number; clientY: number }) {
   const box = node.getBoundingClientRect()
@@ -63,10 +63,10 @@ export function ClaimMergePlay({
   const [toast, setToast] = useState('')
   const [toastMiss, setToastMiss] = useState(false)
   const [comboFlash, setComboFlash] = useState(0)
-  const [pops, setPops] = useState<{ id: number; x: number; y: number; rank: number }[]>([])
+  const [pops, setPops] = useState<{ id: number; x: number; y: number; rank: number; miss?: boolean }[]>([])
   const [plus, setPlus] = useState('')
   const [shake, setShake] = useState(false)
-  const [winStamp, setWinStamp] = useState(false)
+  const [cued, setCued] = useState(true)
   const bowlRef = useRef<HTMLDivElement | null>(null)
   const aiming = useRef(false)
   const grabbing = useRef(false)
@@ -98,28 +98,36 @@ export function ClaimMergePlay({
         if (event.x !== undefined && event.y !== undefined && event.rank !== undefined) {
           const id = popId.current + 1
           popId.current = id
-          setPops((current) => [...current.slice(-5), { id, x: event.x ?? 0, y: event.y ?? 0, rank: event.rank ?? 0 }])
+          setPops((current) => [...current.slice(-6), { id, x: event.x ?? 0, y: event.y ?? 0, rank: event.rank ?? 0 }])
           window.setTimeout(() => {
             setPops((current) => current.filter((pop) => pop.id !== id))
-          }, 780)
+          }, 920)
         }
         setToast('')
         setToastMiss(false)
+        setCued(false)
       } else if (event.kind === 'miss') {
         playGemPop('miss')
         setShake(true)
         setToast(MERGE_MISS_FACE)
         setToastMiss(true)
+        setCued(false)
         onMiss()
-        window.setTimeout(() => setShake(false), 360)
+        if (event.x !== undefined && event.y !== undefined) {
+          const id = popId.current + 1
+          popId.current = id
+          setPops((current) => [...current.slice(-6), { id, x: event.x ?? 0, y: event.y ?? 0, rank: 1, miss: true }])
+          window.setTimeout(() => {
+            setPops((current) => current.filter((pop) => pop.id !== id))
+          }, 720)
+        }
+        window.setTimeout(() => setShake(false), 420)
         window.setTimeout(() => {
           setToast((current) => (current === MERGE_MISS_FACE ? '' : current))
           setToastMiss(false)
-        }, 900)
+        }, 980)
       } else if (event.kind === 'win') {
         playGemPop('win')
-        setWinStamp(true)
-        window.setTimeout(() => setWinStamp(false), prefersReducedMotion() ? 700 : 1200)
         if (!cleared.current) {
           cleared.current = true
           onClear?.()
@@ -132,6 +140,7 @@ export function ClaimMergePlay({
         window.setTimeout(() => setShake(false), 420)
       } else if (event.kind === 'drop') {
         playGemPop('find')
+        setCued(false)
       }
     }
   }
@@ -158,12 +167,12 @@ export function ClaimMergePlay({
 
   function replay() {
     cleared.current = false
-    setWinStamp(false)
     setToast('')
     setToastMiss(false)
     setPops([])
     setPlus('')
     setComboFlash(0)
+    setCued(true)
     publish(resetMergeRound(Date.now() % 9999, performance.now(), view.won ? 0 : view.score))
   }
 
@@ -177,6 +186,7 @@ export function ClaimMergePlay({
     if (hit && !hit.dropping && stateRef.current.droppingId === null) {
       grabbing.current = true
       aiming.current = false
+      setCued(false)
       publish(grabBall(stateRef.current, hit.id))
       event.currentTarget.setPointerCapture(event.pointerId)
       return
@@ -225,6 +235,10 @@ export function ClaimMergePlay({
     }
   }
 
+  const cueDied = cued && !view.won && !view.overflow
+    ? view.balls.filter((ball) => ball.rank === 1 && !ball.dropping)
+    : []
+  const showCue = cueDied.length >= 2
   const nextSkin = mergeSkin(view.nextRank)
   const previewSkin = mergeSkin(view.previewRank)
   const ghostX = view.aimX
@@ -239,7 +253,7 @@ export function ClaimMergePlay({
         {home.who} · {home.place}
       </p>
       <div className="merge-hud">
-        <p className="merge-score" aria-live="polite">
+        <p className={`merge-score ${plus ? 'is-juice' : ''}`} aria-live="polite">
           {view.score}
         </p>
         {view.won ? (
@@ -279,30 +293,47 @@ export function ClaimMergePlay({
         onKeyDown={onBowlKey}
         style={{ ['--bowl-w' as string]: `${BOWL_WIDTH}px`, ['--bowl-h' as string]: `${BOWL_HEIGHT}px` }}
       >
-        <WinBurst play={winStamp} stamp={CLAIM_MERGE_WIN} />
+        <WinBurst play={view.won} stamp={CLAIM_MERGE_WIN} />
         <span className="merge-danger" style={{ top: `${(DANGER_Y / BOWL_HEIGHT) * 100}%` }} />
         {!view.won && !view.overflow ? (
-          <span
-            className={`merge-ghost hue-${nextSkin.hue}`}
-            style={{
-              left: `${(ghostX / BOWL_WIDTH) * 100}%`,
-              width: ghostR * 2,
-              height: ghostR * 2,
-            }}
-          />
+          <>
+            <span
+              className="merge-drop-guide"
+              style={{ left: `${(ghostX / BOWL_WIDTH) * 100}%` }}
+            />
+            <span
+              className={`merge-ghost is-loud hue-${nextSkin.hue}`}
+              style={{
+                left: `${(ghostX / BOWL_WIDTH) * 100}%`,
+                width: ghostR * 2,
+                height: ghostR * 2,
+              }}
+            />
+            <span
+              className="merge-drop-chip"
+              style={{ left: `${(ghostX / BOWL_WIDTH) * 100}%` }}
+            >
+              Drop
+            </span>
+          </>
+        ) : null}
+        {showCue ? (
+          <p className="merge-smash-hint" role="status">
+            Smash the Died pair
+          </p>
         ) : null}
         {view.balls.map((ball) => (
-          <MergeCandy key={ball.id} ball={ball} />
+          <MergeCandy key={ball.id} ball={ball} cue={showCue && ball.rank === 1} />
         ))}
         {pops.map((pop) => (
           <span
             key={pop.id}
-            className={`merge-pop hue-${mergeSkin(pop.rank).hue}`}
+            className={`merge-pop hue-${mergeSkin(pop.rank).hue} ${pop.miss ? 'is-miss' : ''}`}
             style={{
               left: `${(pop.x / BOWL_WIDTH) * 100}%`,
               top: `${(pop.y / BOWL_HEIGHT) * 100}%`,
-              width: 36 + pop.rank * 14,
-              height: 36 + pop.rank * 14,
+              width: 48 + pop.rank * 16,
+              height: 48 + pop.rank * 16,
             }}
           >
             {SHARDS.map((i) => (
@@ -331,15 +362,15 @@ export function ClaimMergePlay({
             <strong>{takeaway.why}</strong>
           </p>
           <div className="cta-dock">
-            <button type="button" className="btn primary xl snap-bins" onClick={replay}>
-              One more bowl
-            </button>
             <button
               type="button"
-              className="btn gold xl"
+              className="btn primary xl snap-bins"
               onClick={() => onEasyStop?.('hold')}
             >
               {EASY.holdNext}
+            </button>
+            <button type="button" className="btn gold xl" onClick={replay}>
+              One more bowl
             </button>
             <button type="button" className="btn xl" onClick={() => onEasyStop?.('home')}>
               {EASY.home}
@@ -349,7 +380,7 @@ export function ClaimMergePlay({
       ) : view.overflow ? (
         <div className="cta-dock">
           <p className="quiet">{CLAIM_MERGE_HINT}</p>
-          <button type="button" className="btn gold xl" onClick={replay}>
+          <button type="button" className="btn primary xl snap-bins" onClick={replay}>
             Merge again
           </button>
         </div>
@@ -358,12 +389,12 @@ export function ClaimMergePlay({
   )
 }
 
-function MergeCandy({ ball }: { ball: MergeBall }) {
+function MergeCandy({ ball, cue }: { ball: MergeBall; cue?: boolean }) {
   const skin = mergeSkin(ball.rank)
   const showWord = skin.rank > 0
   return (
     <span
-      className={`merge-ball hue-${skin.hue} ${ball.held ? 'is-held' : ''} ${ball.dropping ? 'is-drop' : ''} ${ball.rank >= WIN_RANK ? 'is-lock' : ''}`}
+      className={`merge-ball hue-${skin.hue} ${ball.held ? 'is-held' : ''} ${ball.dropping ? 'is-drop' : ''} ${ball.rank >= WIN_RANK ? 'is-lock' : ''} ${cue ? 'is-cue' : ''}`}
       data-merge-ball={ball.id}
       data-rank={ball.rank}
       style={{

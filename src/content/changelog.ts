@@ -8,6 +8,19 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.67',
+    title: 'Fun claim-merge · Easy core trail',
+    when: '2026-09-16',
+    items: [
+      'Witness Square candy merge juice: loud Drop ghost at 390px, Smash the Died pair cue, closer opening Died, more Died in the bag so Creed climbs are a game not a pip slog',
+      'Smash / combo / Miss pops are bigger; score pulses on points; wrong-smash bounce is a fair pop (Miss −25 stays)',
+      'Bowl full is Merge again — filled gold tap, no dead end. Soft physics settle faster on a phone',
+      'After MERGED!, the Creed lock stays on the bowl. One takeaway line under the bowl, then Hold next is the filled tap. One more bowl stays secondary',
+      'Night Watch and Town stay hidden on Easy. Freemium 1.4.66 stays: Street Packs, Remove ads, soft pause never over Match/Hold/arcade, Journal ungated, Core Easy free',
+      'Father-run, road-maze, Match extras, Hold Why Blast, and Why Gate foundation stay',
+    ],
+  },
+  {
     version: '1.4.66',
     title: 'Freemium V0 · Easy core trail',
     when: '2026-09-16',
@@ -1464,6 +1477,10 @@ export const CHANGELOG: ChangeNote[] = [
 
 export function latestChange(version: string) {
   const note = CHANGELOG.find((item) => item.version === version) ?? CHANGELOG[0]
+  if (note.version === '1.4.67') {
+    const prior = latestChange('1.4.66')
+    return { ...note, items: [...note.items, ...prior.items] }
+  }
   if (note.version === '1.4.66') {
     const prior = CHANGELOG.find((item) => item.version === '1.4.65')
     if (!prior) return note
