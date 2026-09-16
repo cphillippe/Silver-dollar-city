@@ -9,6 +9,22 @@ import {
 } from '../src/config/ads.ts'
 import { billedSkus, liveAdmobIds, resetStoreFlagsForTest, setStoreFlagsForTest, storeFlags } from '../src/config/store.ts'
 import {
+  HARBOR_PACK_URL,
+  MILL_PACK_URL,
+  STORES_COMING,
+  SUPPORT_HEADING,
+  SUPPORT_LINE,
+  TIP_CTA,
+  TIP_URL,
+  supportUrls,
+} from '../src/config/support.ts'
+import {
+  markSupportToastShown,
+  offerSupportToast,
+  resetSupportToastForTest,
+  supportToastPending,
+} from '../src/lib/supportToast.ts'
+import {
   liveInterstitialReady,
   resetAdAdapterForTest,
   setAdPluginForTest,
@@ -152,6 +168,8 @@ const hubSrc = readFileSync(new URL('../src/components/Hub.tsx', import.meta.url
 assert.match(hubSrc, /EASY\.matchCta|EASY\.mazeMatch|EASY\.runMatch|EASY\.mergeMatch|EASY\.digMatch/)
 assert.match(hubSrc, /EASY\.saved/)
 assert.match(hubSrc, /EASY\.supportTrail/)
+assert.match(hubSrc, /SupportToast/)
+assert.match(hubSrc, /name: 'settings'/)
 assert.match(hubSrc, /extraStreetPacks/)
 assert.doesNotMatch(hubSrc, /slot="hub-banner"/)
 assert.doesNotMatch(hubSrc, /slot="between-districts"/)
@@ -205,10 +223,21 @@ assert.match(sceneAdSrc, /REMOVE_ADS_PRODUCT\.title/)
 const settingsSrc = readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8')
 assert.match(settingsSrc, /SETTINGS_SUPPORT_LINE/)
 assert.match(settingsSrc, /Street Packs/)
+assert.match(settingsSrc, /Support Silver City/)
+assert.match(settingsSrc, /TIP_CTA|EASY\.tip/)
+assert.match(settingsSrc, /data-support-tip/)
+assert.match(settingsSrc, /data-support-mill/)
+assert.match(settingsSrc, /data-support-harbor/)
+assert.match(settingsSrc, /STORES_COMING/)
+assert.match(settingsSrc, /disabled/)
+assert.doesNotMatch(settingsSrc, /Subscribe/)
+assert.doesNotMatch(settingsSrc, /VITE_PLAY_BILLING\s*=\s*1/)
 
 const journalSrc = readFileSync(new URL('../src/components/Journal.tsx', import.meta.url), 'utf8')
 assert.doesNotMatch(journalSrc, /SceneAd/)
 assert.doesNotMatch(journalSrc, /AdSlot/)
+assert.match(journalSrc, /offerSupportToast/)
+assert.doesNotMatch(journalSrc, /data-support-toast/)
 
 const matchSrc = readFileSync(new URL('../src/components/challenges/MatchPlay.tsx', import.meta.url), 'utf8')
 const holdSrc = readFileSync(new URL('../src/components/challenges/WhyBlastPlay.tsx', import.meta.url), 'utf8')
@@ -219,6 +248,8 @@ const digPlaySrc = readFileSync(new URL('../src/components/challenges/SourceDigP
 for (const src of [matchSrc, holdSrc, mergeSrc, runSrc, mazeSrc, digPlaySrc]) {
   assert.doesNotMatch(src, /SceneAd/)
   assert.doesNotMatch(src, /AdSlot/)
+  assert.doesNotMatch(src, /SupportToast/)
+  assert.doesNotMatch(src, /data-support-toast/)
 }
 
 const commerceCfg = readFileSync(new URL('../src/config/commerce.ts', import.meta.url), 'utf8')
@@ -228,7 +259,7 @@ assert.match(commerceCfg, /grantPack/)
 assert.match(commerceCfg, /A quiet pause on the trail/)
 assert.match(commerceCfg, /title: 'Keep the quiet trail — Remove ads'/)
 assert.match(commerceCfg, /New street. Same trail/)
-assert.match(commerceCfg, /Street Packs · Remove ads/)
+assert.match(commerceCfg, /Tip · Packs \(external\)/)
 assert.match(commerceCfg, /Puzzle trail. Fold the page/)
 assert.match(commerceCfg, /Silver City: Unending Evidence/)
 
@@ -272,6 +303,30 @@ assert.equal(storeFlags().storeKit, false)
 assert.equal(storeFlags().adsEnabled, false)
 assert.equal(iapCanCharge(), false)
 assert.equal(storeSurface(), 'web')
+
+assert.equal(TIP_CTA, 'Tip')
+assert.equal(SUPPORT_HEADING, 'Support Silver City')
+assert.match(SUPPORT_LINE, /Tip/)
+assert.match(SUPPORT_LINE, /stores coming later/)
+assert.doesNotMatch(TIP_CTA, /Subscribe/)
+assert.doesNotMatch(SUPPORT_HEADING, /Subscribe/)
+assert.match(TIP_URL, /^https:\/\//)
+assert.match(MILL_PACK_URL, /^https:\/\//)
+assert.match(HARBOR_PACK_URL, /^https:\/\//)
+assert.equal(supportUrls().tip, TIP_URL)
+assert.equal(supportUrls().mill, MILL_PACK_URL)
+assert.equal(supportUrls().harbor, HARBOR_PACK_URL)
+assert.match(STORES_COMING, /Coming with stores/)
+
+resetSupportToastForTest()
+assert.equal(supportToastPending(), false)
+offerSupportToast()
+assert.equal(supportToastPending(), true)
+markSupportToastShown()
+assert.equal(supportToastPending(), false)
+offerSupportToast()
+assert.equal(supportToastPending(), false, 'toast is once per session')
+resetSupportToastForTest()
 assert.deepEqual(liveAdmobIds(), { appId: '', unitId: '' })
 assert.equal(liveInterstitialReady(), false)
 assert.equal(await showBetweenSceneInterstitial('hub'), 'soft')
@@ -427,6 +482,13 @@ const envExample = readFileSync(new URL('../.env.example', import.meta.url), 'ut
 assert.match(envExample, /VITE_STOREKIT=/)
 assert.match(envExample, /VITE_ADMOB_APP_ID_IOS=/)
 assert.match(envExample, /VITE_ADMOB_INTERSTITIAL_ID_IOS=/)
+assert.match(envExample, /VITE_TIP_URL=/)
+assert.match(envExample, /VITE_MILL_PACK_URL=/)
+assert.match(envExample, /VITE_HARBOR_PACK_URL=/)
+assert.match(envExample, /VITE_PLAY_BILLING=\n/)
+assert.doesNotMatch(envExample, /VITE_PLAY_BILLING=1/)
+assert.doesNotMatch(envExample, /VITE_STOREKIT=1/)
+assert.doesNotMatch(envExample, /VITE_ADS_ENABLED=1/)
 
 const capSrc = readFileSync(new URL('../capacitor.config.ts', import.meta.url), 'utf8')
 assert.match(capSrc, /ios:/)
@@ -443,8 +505,8 @@ const iosProj = readFileSync(
   'utf8',
 )
 assert.match(iosProj, /PRODUCT_BUNDLE_IDENTIFIER = city.silver.unending/)
-assert.match(iosProj, /MARKETING_VERSION = 1.4.82/)
-assert.match(iosProj, /CURRENT_PROJECT_VERSION = 96/)
+assert.match(iosProj, /MARKETING_VERSION = 1.4.83/)
+assert.match(iosProj, /CURRENT_PROJECT_VERSION = 97/)
 
 resetBilling()
 
