@@ -98,14 +98,15 @@ assert.doesNotMatch(
   'a blocked rock only reroutes — no lives',
 )
 assert.match(playSrc, /ROAD_MAZE_CLAIM/)
-assert.doesNotMatch(playSrc, /road-swipe|claim-merge|story-night/)
+assert.doesNotMatch(playSrc, /road-swipe|story-night/)
 
 const puzzleSrc = readFileSync(new URL('../src/components/PuzzlePlay.tsx', import.meta.url), 'utf8')
 assert.match(puzzleSrc, /RoadMazePlay/)
 assert.match(puzzleSrc, /case 'road-maze'/)
 assert.match(puzzleSrc, /case 'father-run'/)
 assert.match(puzzleSrc, /case 'panel-blast'/)
-assert.doesNotMatch(puzzleSrc, /timing-dash|road-swipe|claim-merge|story-night/)
+assert.match(puzzleSrc, /case 'claim-merge'/)
+assert.doesNotMatch(puzzleSrc, /timing-dash|road-swipe|story-night/)
 
 const hubSrc = readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8')
 assert.match(hubSrc, /EASY\.mazeHome/)

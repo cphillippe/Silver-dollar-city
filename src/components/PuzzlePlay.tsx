@@ -3,6 +3,7 @@ import { isEasy, easyMatchLine } from '../lib/easy'
 import { lessonStory } from '../lib/storyPlay'
 import { useProgress } from '../store/progress'
 import { BuildArgumentPlay } from './challenges/BuildArgumentPlay'
+import { ClaimMergePlay } from './challenges/ClaimMergePlay'
 import { FatherRunPlay } from './challenges/FatherRunPlay'
 import { GemSearchPlay } from './challenges/GemSearchPlay'
 import { RoadMazePlay } from './challenges/RoadMazePlay'
@@ -76,6 +77,16 @@ export function PuzzlePlay({
         case 'road-maze':
           return (
             <RoadMazePlay
+              lineId={story.lineId}
+              beats={story.beats}
+              onMiss={onMiss}
+              onClear={onSolved}
+              onEasyStop={onEasyStop}
+            />
+          )
+        case 'claim-merge':
+          return (
+            <ClaimMergePlay
               lineId={story.lineId}
               beats={story.beats}
               onMiss={onMiss}
