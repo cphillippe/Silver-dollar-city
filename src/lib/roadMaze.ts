@@ -9,6 +9,12 @@ export const ROAD_MAZE_WIN = 'Helped!'
 
 export const ROAD_MAZE_HINT = 'Stay on the open road.'
 
+export const ROAD_MAZE_AGAIN = 'One more road'
+
+export const MAZE_ITEM_SCORE = 25
+export const MAZE_HELP_SCORE = 50
+export const MAZE_INN_SCORE = 100
+
 export type MazeItemId = 'oil' | 'cloth' | 'coin'
 
 export interface MazeCoord {
