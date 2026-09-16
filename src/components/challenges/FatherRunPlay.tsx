@@ -33,8 +33,7 @@ import {
 import { GEM_BURST, playGemPop, prefersReducedMotion } from '../../lib/juice'
 import { storyPanelsFor, type StoryPanel } from '../../lib/storyPanels'
 import { StoryPanelArt } from '../StoryPanelArt'
-import panelFatherRun from '../../assets/story/panel-father-run.webp'
-import panelHungry from '../../assets/story/panel-hungry.webp'
+import { FATHER_HUG_MEDIA, FATHER_RUN_FACE, FATHER_SON_FACE } from '../../content/panelBlast'
 import { WinBurst } from './WinBurst'
 
 interface FatherRunPlayProps {
@@ -314,10 +313,10 @@ export function FatherRunPlay({
           ? DUST.map((i) => <span key={i} className="run-dust" style={{ ['--i' as string]: i }} />)
           : null}
         <div className="run-actor is-father" style={{ left: `${fatherLeft}%` }}>
-          <img src={panelFatherRun} alt="" draggable={false} />
+          <img src={FATHER_RUN_FACE} alt="" draggable={false} />
         </div>
         <div className="run-actor is-son" style={{ left: `${sonLeft}%` }}>
-          <img src={panelHungry} alt="" draggable={false} />
+          <img src={FATHER_SON_FACE} alt="" draggable={false} />
         </div>
         {dashFlash
           ? DASH_SHARDS.map((i) => (
@@ -331,7 +330,7 @@ export function FatherRunPlay({
           : null}
         {phase === 'hug' ? (
           <div className="run-hug-art" aria-hidden>
-            <StoryPanelArt scene="hug" media={panels[panels.length - 1]?.media} />
+            <StoryPanelArt scene="hug" media={FATHER_HUG_MEDIA} size="hero" />
           </div>
         ) : null}
         {phase === 'hug' ? <span className="run-hearts" /> : null}
@@ -356,7 +355,7 @@ export function FatherRunPlay({
               data-beat={panel.beatId}
               className={`run-thumb ${open ? 'is-open' : ''} ${index === opened - 1 ? 'is-now' : ''} ${flipping === index ? 'is-flip' : ''}`}
             >
-              <StoryPanelArt scene={panel.scene} media={panel.media} />
+              <StoryPanelArt scene={panel.scene} media={panel.media} size="thumb" />
             </li>
           )
         })}

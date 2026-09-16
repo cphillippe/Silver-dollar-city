@@ -1,5 +1,6 @@
 import { packLesson } from '../content/packCatalog.ts'
 import { evidenceFor } from '../content/evidence.ts'
+import { panelBlastBeatMedia } from '../content/panelBlast.ts'
 import { easyChromeLine, easyWhoWhere } from './easy.ts'
 import { gemWordsFor } from './gemSearch.ts'
 
@@ -30,6 +31,7 @@ export type StoryMediaKind = 'still' | 'loop'
 export interface StoryMediaSlot {
   kind: StoryMediaKind
   still?: string
+  thumb?: string
   loop?: string
 }
 
@@ -37,10 +39,11 @@ export interface StoryMediaSlot {
 export function resolveStoryMedia(media?: StoryMediaSlot): {
   kind: 'still' | 'loop'
   still?: string
+  thumb?: string
   loop?: string
 } {
-  if (media?.loop) return { kind: 'loop', still: media.still, loop: media.loop }
-  return { kind: 'still', still: media?.still }
+  if (media?.loop) return { kind: 'loop', still: media.still, thumb: media.thumb, loop: media.loop }
+  return { kind: 'still', still: media?.still, thumb: media?.thumb }
 }
 
 export interface StoryPanel {
@@ -167,7 +170,7 @@ export function storyPanelsFor(lineId: string, wordCount = gemWordsFor(lineId).l
       text,
       scene,
       fromStory: index < fromStoryCount,
-      media: { kind: 'still' },
+      media: panelBlastBeatMedia(lineId, index),
     }
   })
 }

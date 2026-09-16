@@ -1,0 +1,89 @@
+{
+  "version": "1.4.84",
+  "stories": {
+    "ph-road": [
+      {
+        "id": "01-hurt-road",
+        "sourcePng": "/workspace/silver-city-art/panel-blast/set-a/ph-road-01-hurt-road.png",
+        "files": {
+          "512": "public/assets/panel-blast/ph-road/01-hurt-road@512.webp",
+          "1024": "public/assets/panel-blast/ph-road/01-hurt-road@1024.webp"
+        }
+      },
+      {
+        "id": "02-walk-past",
+        "sourcePng": "/workspace/silver-city-art/panel-blast/set-a/ph-road-02-walk-past.png",
+        "files": {
+          "512": "public/assets/panel-blast/ph-road/02-walk-past@512.webp",
+          "1024": "public/assets/panel-blast/ph-road/02-walk-past@1024.webp"
+        }
+      },
+      {
+        "id": "03-compassion-helps",
+        "sourcePng": "/workspace/silver-city-art/panel-blast/set-a/ph-road-03-compassion-helps.png",
+        "files": {
+          "512": "public/assets/panel-blast/ph-road/03-compassion-helps@512.webp",
+          "1024": "public/assets/panel-blast/ph-road/03-compassion-helps@1024.webp"
+        }
+      },
+      {
+        "id": "04-proved-neighbor",
+        "sourcePng": "/workspace/silver-city-art/panel-blast/set-a/ph-road-04-proved-neighbor.png",
+        "files": {
+          "512": "public/assets/panel-blast/ph-road/04-proved-neighbor@512.webp",
+          "1024": "public/assets/panel-blast/ph-road/04-proved-neighbor@1024.webp"
+        }
+      },
+      {
+        "id": "claim-badge",
+        "sourcePng": "/workspace/silver-city-art/panel-blast/set-a/ph-road-claim-badge.png",
+        "files": {
+          "512": "public/assets/panel-blast/ph-road/claim-badge@512.webp",
+          "1024": "public/assets/panel-blast/ph-road/claim-badge@1024.webp"
+        }
+      }
+    ],
+    "ph-father": [
+      {
+        "id": "01-share-early",
+        "sourcePng": "/workspace/silver-city-art/panel-blast/set-b/ph-father-01-share-early.png",
+        "files": {
+          "512": "public/assets/panel-blast/ph-father/01-share-early@512.webp",
+          "1024": "public/assets/panel-blast/ph-father/01-share-early@1024.webp"
+        }
+      },
+      {
+        "id": "02-far-waste",
+        "sourcePng": "/workspace/silver-city-art/panel-blast/set-b/ph-father-02-far-waste.png",
+        "files": {
+          "512": "public/assets/panel-blast/ph-father/02-far-waste@512.webp",
+          "1024": "public/assets/panel-blast/ph-father/02-far-waste@1024.webp"
+        }
+      },
+      {
+        "id": "03-speech-road",
+        "sourcePng": "/workspace/silver-city-art/panel-blast/set-b/ph-father-03-speech-road.png",
+        "files": {
+          "512": "public/assets/panel-blast/ph-father/03-speech-road@512.webp",
+          "1024": "public/assets/panel-blast/ph-father/03-speech-road@1024.webp"
+        }
+      },
+      {
+        "id": "04-father-runs",
+        "sourcePng": "/workspace/silver-city-art/panel-blast/set-b/ph-father-04-father-runs.png",
+        "files": {
+          "512": "public/assets/panel-blast/ph-father/04-father-runs@512.webp",
+          "1024": "public/assets/panel-blast/ph-father/04-father-runs@1024.webp"
+        }
+      },
+      {
+        "id": "05-hug-feast-hint",
+        "sourcePng": "/workspace/silver-city-art/panel-blast/set-b/ph-father-05-hug-feast-hint.png",
+        "files": {
+          "512": "public/assets/panel-blast/ph-father/05-hug-feast-hint@512.webp",
+          "1024": "public/assets/panel-blast/ph-father/05-hug-feast-hint@1024.webp"
+        }
+      }
+    ]
+  }
+}
