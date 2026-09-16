@@ -8,6 +8,19 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.69',
+    title: 'Fun one more road · Easy core trail',
+    when: '2026-09-16',
+    items: [
+      'Cold Easy Mercy / Story Creek road-maze keeps the candy road after Helped! — the board stays a game, not a story card swap',
+      'Oil, cloth, and coin pop with shards and a score pulse. A two-pick streak is Combo. Walk is snappier on a phone',
+      'After Helped!, one takeaway then Hold next is the filled tap. One more road is the gold replay — same loop as One more bowl, not a dead end',
+      'A blocked rock still only reroutes (no lives). Night Watch and Town stay hidden on Easy',
+      'Freemium 1.4.66, claim-merge juice 1.4.67, and Dig deeper 1.4.68 stay. Soft ads never cover Match, Hold, or arcade (including source-dig). Journal ungated. Core Easy free',
+      'Father-run, Match extras, Hold Why Blast, creed merge, and Witness Square source-dig stay. Place titles stay Story Creek, Witness Square, Sky Watch, Why Gate, Meaning Ridge',
+    ],
+  },
+  {
     version: '1.4.68',
     title: 'Dig deeper pack · Easy core trail',
     when: '2026-09-16',
@@ -1492,6 +1505,10 @@ export function latestChange(version: string): ChangeNote {
   const note = CHANGELOG.find((item) => item.version === version) ?? CHANGELOG[0]
   if (!note) {
     return { version, title: 'Easy core trail', when: '', items: [] }
+  }
+  if (note.version === '1.4.69') {
+    const prior = latestChange('1.4.68')
+    return { ...note, items: [...note.items, ...prior.items] }
   }
   if (note.version === '1.4.68') {
     const prior = latestChange('1.4.67')
