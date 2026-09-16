@@ -10,6 +10,7 @@ import {
   whyBlastChoices,
   whyBlastExtras,
 } from '../../lib/whyBlast'
+import { MatchTakeaway } from '../HeldTriad'
 import { WinBurst } from './WinBurst'
 
 interface WhyBlastPlayProps {
@@ -37,7 +38,7 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
   const [misses, setMisses] = useState(0)
   const [shake, setShake] = useState(false)
   const [missFlash, setMissFlash] = useState(false)
-  const beat = holdSuccessBeat(claim, easyWhyLine(reason))
+  const beat = holdSuccessBeat(claim, easyWhyLine(reason), source)
 
   function miss(line: string) {
     if (locked || tossing || gone.includes(line)) return
@@ -99,9 +100,11 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
           )
         })}
         <p className="why-claim recall-line rehearse-stem">{easyFacingLine(id, claim)}</p>
-        <p className="held-from quiet">
-          {EASY.sayFrom} {source}
-        </p>
+        {locked ? null : (
+          <p className="held-from quiet">
+            {EASY.sayFrom} {source}
+          </p>
+        )}
         {locked
           ? GEM_BURST.slice(0, 6).map((i) => (
               <span key={i} className="why-pop" style={{ ['--i' as string]: i }} aria-hidden />
@@ -110,10 +113,7 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
       </div>
       {locked ? (
         <>
-          <p className="match-yes" role="status">
-            <strong>{beat.title}</strong>
-            <span>{beat.why}</span>
-          </p>
+          <MatchTakeaway lineId={id} title={beat.title} />
           <div className="cta-dock">
             <button
               type="button"

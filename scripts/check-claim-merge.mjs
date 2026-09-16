@@ -161,12 +161,14 @@ assert.equal(again.won, false)
 assert.equal(again.balls.length, 3)
 
 assert.match(mergeWinBeat().title, /MERGED/)
-assert.equal(mergeWinBeat().why, CLAIM_MERGE_CLAIM)
+assert.match(mergeWinBeat().why, /died, buried, raised, appeared/)
+assert.match(mergeWinBeat().from ?? '', /1 Cor/)
 
 const playSrc = readFileSync(
   new URL('../src/components/challenges/ClaimMergePlay.tsx', import.meta.url),
   'utf8',
 )
+assert.match(playSrc, /MatchTakeaway/)
 assert.match(playSrc, /is-claim-merge/)
 assert.match(playSrc, /merge-bowl/)
 assert.match(playSrc, /COMBO/)

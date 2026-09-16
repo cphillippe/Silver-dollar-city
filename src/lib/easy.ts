@@ -228,6 +228,12 @@ const EASY_CHROME: Record<string, string> = {
     'The first report stays awkward — not a tidy win.',
   'The psalms ask the question out loud and expect a Giver, not a shrug.':
     'The psalms ask why — and expect a Giver.',
+  'The Word — Christ — is the true light that makes God knowable.':
+    'Christ the Word is the true light.',
+  'The first-cause walk is not yet the gospel of Jesus Christ.':
+    'A first cause is not yet Jesus Christ.',
+  'Anyone who enters by me is saved — Jesus is the door.':
+    'Anyone who enters by Jesus is saved.',
   'You may refuse it; the town will not lock you in a pew.':
     'You may refuse — no one locks you in a pew.',
   'Love, logic, reason, and science you have kept can divert a false step up the ridge.':

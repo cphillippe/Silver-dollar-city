@@ -6,11 +6,11 @@ import {
   SOURCE_DIG_TAP_SCORE,
   SOURCE_DIG_WIN,
   SOURCE_DIG_WIN_SCORE,
-  digClaim,
   seatTablets,
   type DigTablet,
 } from '../../lib/sourceDig'
 import { GEM_BURST, playGemPop, prefersReducedMotion } from '../../lib/juice'
+import { MatchTakeaway } from '../HeldTriad'
 import { WinBurst } from './WinBurst'
 
 interface SourceDigPlayProps {
@@ -29,7 +29,6 @@ export function SourceDigPlay({
   onEasyStop,
 }: SourceDigPlayProps) {
   const home = easyWhoWhere(lineId)
-  const claim = digClaim(lineId)
   const reduced = prefersReducedMotion()
   const [seed, setSeed] = useState(() => Date.now() % 9999)
   const seats = useMemo(() => seatTablets(lineId, seed), [lineId, seed])
@@ -178,9 +177,7 @@ export function SourceDigPlay({
       </p>
       {won ? (
         <>
-          <p className="match-yes" role="status">
-            <strong>{claim}</strong>
-          </p>
+          <MatchTakeaway lineId={lineId} />
           <div className="cta-dock">
             <button
               type="button"

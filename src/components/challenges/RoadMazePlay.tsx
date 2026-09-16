@@ -37,6 +37,7 @@ import {
   type MazeCoord,
 } from '../../lib/roadMaze'
 import { mazeWinBeat } from '../../lib/successBeat'
+import { MatchTakeaway } from '../HeldTriad'
 import { GEM_BURST, playGemPop, prefersReducedMotion } from '../../lib/juice'
 import { storyPanelsFor, type StoryPanel } from '../../lib/storyPanels'
 import { StoryPanelArt } from '../StoryPanelArt'
@@ -504,10 +505,7 @@ export function RoadMazePlay({
       </p>
       {won ? (
         <>
-          <p className="match-yes" role="status">
-            <strong>{win.title}</strong>
-            <span>{win.why}</span>
-          </p>
+          <MatchTakeaway lineId={lineId} title={win.title} />
           <div className="cta-dock">
             <button
               type="button"

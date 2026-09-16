@@ -166,7 +166,7 @@ const PLAIN: Record<string, PlainLine> = {
     },
   ),
   'hl-meaning': line(
-    'You can build a local meaning. The lookout asks if it is also received.',
+    'You can build a local meaning. The last good is received.',
     'Work and pleasure are gifts. They are not the final good. Ecclesiastes keeps both truths.',
     { term: 'Meaning', sense: 'a good that can be found — not only assembled', hint: 'Keep the hunger. Toss “only a mood.”' },
   ),

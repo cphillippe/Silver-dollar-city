@@ -121,6 +121,7 @@ const playSrc = readFileSync(
 assert.match(playSrc, /is-source-dig/)
 assert.match(playSrc, /dig-tablet/)
 assert.match(playSrc, /SOURCE_DIG_WIN/)
+assert.match(playSrc, /MatchTakeaway/)
 assert.match(playSrc, /EASY\.holdNext/)
 assert.match(playSrc, /SOURCE_DIG_AGAIN/)
 assert.ok(playSrc.lastIndexOf('EASY.holdNext') < playSrc.lastIndexOf('SOURCE_DIG_AGAIN'))
