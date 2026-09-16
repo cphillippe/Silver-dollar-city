@@ -80,6 +80,10 @@ const SCHOOL_BY_ID: Record<string, WordKey[]> = {
   'ob-tuning': ['fineTuning'],
   'ob-design': ['fineTuning', 'premise'],
   'daily-stars': ['fineTuning'],
+  'fg-order': ['premise'],
+  'fg-reason': ['premise'],
+  'fg-ought': ['premise'],
+  'fg-ground': ['premise'],
   'fg-kalam': ['kalam'],
   'fg-mover': ['premise'],
   'fg-contingent': ['premise'],
@@ -129,6 +133,18 @@ export function easyLead(id: string, prompt: string): string {
   }
   if (id === 'wb-early' || id === 'wb-method') {
     return prompt.replace(/historical claim/, 'historical line').replace(/overclaims/, 'stretch')
+  }
+  if (id === 'fg-order') {
+    return 'Keep the lived trust. Toss the lucky pile that will not name Christ.'
+  }
+  if (id === 'fg-reason') {
+    return 'Keep the ground. Toss the floating trick.'
+  }
+  if (id === 'fg-ought') {
+    return 'Keep the law on the heart. Toss nature-as-enough.'
+  }
+  if (id === 'fg-ground') {
+    return 'Keep the living God. Toss the dead brick.'
   }
   if (id === 'fg-contingent') {
     return 'Stack the stones: things that might not have been still need a ground.'

@@ -1,7 +1,7 @@
 Silver City — area content packs (runtime source of truth)
 ==========================================================
 
-appVersion: 1.4.50  (from src/config/app.ts on main)
+appVersion: 1.4.64  (from src/config/app.ts on main)
 schemaVersion: 3
 generated: see each file’s generated= attribute (America/Chicago)
 host: https://cphillippe.github.io/Silver-dollar-city/
@@ -14,17 +14,17 @@ FILES
   parable-hollow.xml   Story Creek / Mercy (+ East porch Juniper dailies) — 8 lessons
   witness-bench.xml    Witness Square / Silas — 7 lessons
   observatory.xml      Sky Watch / Nora — 6 lessons
-  first-gate.xml       Why Gate / Ansel — 7 lessons
+  first-gate.xml       Why Gate / Ansel — 11 lessons
   high-lookout.xml     Meaning Ridge / Hope — 7 lessons
-  index.xml            Pack list, Easy trail 1–35, holdRules, scoring, tools, trail notes, uiChrome
+  index.xml            Pack list, Easy trail 1–39, holdRules, scoring, tools, trail notes, uiChrome
   SCHEMA.md            How the game should load packs (1:1 field map)
 
 TOTALS
 ------
-  Lessons (claim·reason·source street facts): 35
-  Tiers per lesson: easy + medium + hard (35/35)
-  Easy trail lines: 35 (easyOrder 1–35)
-  Street facts: 35 (same as lessons)
+  Lessons (claim·reason·source street facts): 39
+  Tiers per lesson: easy + medium + hard (39/39)
+  Easy trail lines: 39 (easyOrder 1–39)
+  Street facts: 39 (same as lessons)
   Excluded from lessons: td-watch (Love how-to → index <tools>)
                          j-trail-* (thank-you cards → index <trailNotes>)
 
@@ -59,46 +59,51 @@ JOURNAL SCORING (score per level / best tier held)
   Encoded in: index.xml <scoring>, every lesson tier @points, journal
   scoreFromHeldTier="true". See SCHEMA.md.
 
-EASY TRAIL ORDER (easyOrder 1–35)
+EASY TRAIL ORDER (easyOrder 1–39)
 ---------------------------------
    1 ph-road          parable-hollow
    2 ph-father        parable-hollow
    3 ph-debt          parable-hollow
-   4 wb-creed         witness-bench
-   5 wb-women         witness-bench
-   6 daily-lantern    parable-hollow
-   7 daily-stars      observatory
-   8 daily-cosmos     first-gate
-   9 hl-moral         high-lookout
-  10 ph-seeds         parable-hollow
-  11 wb-early         witness-bench
-  12 wb-method        witness-bench
-  13 daily-names      witness-bench
-  14 daily-creed      witness-bench
-  15 daily-empty      witness-bench
-  16 daily-gems       parable-hollow
-  17 daily-seed       parable-hollow
-  18 daily-neighbor   parable-hollow
-  19 ob-tuning        observatory
-  20 ob-design        observatory
-  21 ob-leibniz       observatory
-  22 ob-life          observatory
-  23 daily-life       observatory
-  24 fg-mover         first-gate
-  25 fg-contingent    first-gate
-  26 fg-kalam         first-gate
-  27 fg-limits        first-gate
-  28 daily-scroll     first-gate
-  29 daily-isaiah     first-gate
-  30 hl-mind          high-lookout
-  31 hl-meaning       high-lookout
-  32 hl-beauty        high-lookout
-  33 daily-grace      high-lookout
-  34 daily-rest       high-lookout
-  35 daily-door       high-lookout
+   4 fg-order         first-gate
+   5 fg-reason        first-gate
+   6 fg-ought         first-gate
+   7 fg-ground        first-gate
+   8 wb-creed         witness-bench
+   9 wb-women         witness-bench
+  10 daily-lantern    parable-hollow
+  11 daily-stars      observatory
+  12 daily-cosmos     first-gate
+  13 hl-moral         high-lookout
+  14 ph-seeds         parable-hollow
+  15 wb-early         witness-bench
+  16 wb-method        witness-bench
+  17 daily-names      witness-bench
+  18 daily-creed      witness-bench
+  19 daily-empty      witness-bench
+  20 daily-gems       parable-hollow
+  21 daily-seed       parable-hollow
+  22 daily-neighbor   parable-hollow
+  23 ob-tuning        observatory
+  24 ob-design        observatory
+  25 ob-leibniz       observatory
+  26 ob-life          observatory
+  27 daily-life       observatory
+  28 fg-mover         first-gate
+  29 fg-contingent    first-gate
+  30 fg-kalam         first-gate
+  31 fg-limits        first-gate
+  32 daily-scroll     first-gate
+  33 daily-isaiah     first-gate
+  34 hl-mind          high-lookout
+  35 hl-meaning       high-lookout
+  36 hl-beauty        high-lookout
+  37 daily-grace      high-lookout
+  38 daily-rest       high-lookout
+  39 daily-door       high-lookout
 
-Sequence: former Easy 1–9 first; then finish Story Creek → Witness leftovers →
-porch leftovers → Sky Watch → Why Gate → Meaning Ridge.
+Sequence: mercy-first Story Creek opening, then Why Gate foundation pack
+(stepped unlock), then Witness leftovers → porch leftovers → Sky Watch
+(fine-tuning stays here) → Why Gate cosmological walks → Meaning Ridge.
 
 INCLUDED
 --------

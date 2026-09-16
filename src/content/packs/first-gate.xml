@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<areaPack id="first-gate" schemaVersion="3" appVersion="1.4.50" generated="2026-09-14T13:15:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/" title="Why Gate" place="Why Gate" person="Ansel Gate" personId="ansel" plotId="gate">
+<areaPack id="first-gate" schemaVersion="3" appVersion="1.4.64" generated="2026-09-16T09:00:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/" title="Why Gate" place="Why Gate" person="Ansel Gate" personId="ansel" plotId="gate">
   <howToEdit>RUNTIME CONTENT: the game loads this file as the source of truth for this area. Change player-facing text in place inside each &lt;lesson&gt;. Stable id attributes (ph-father, …) are engine keys — do not rename without a migration. Three tiers per fact: &lt;easy easyOrder="N"&gt;, &lt;medium&gt;, and &lt;hard&gt; — each with &lt;learn&gt;, &lt;match&gt;, and &lt;hold&gt;. Easy Learn: shortStory/mainIdea/loci. Medium Learn: mediumTeach (clearer than Hard, richer than Easy). Hard Learn: hardTeach/fullTeach. Held claim·reason·source stay plain and identical on all three. Hold level-up: see hold @levelUpTo / @onFail and index &lt;holdRules&gt;. Empty optional elements are intentional. Escape &amp; &lt; &gt; in text.</howToEdit>
   <meta>
     <title>Silver City — Why Gate</title>
@@ -7,18 +7,603 @@
     <blurb>The world exists and did not have to.</blurb>
     <notes>Runtime/build content pack. Engine maps lesson fields 1:1 to Learn / Match / Hold / Journal / street.</notes>
   </meta>
-  <easyShelf order="daily-cosmos,fg-mover,fg-contingent,fg-kalam,fg-limits,daily-scroll,daily-isaiah">
-    <line id="daily-cosmos" easyOrder="8">daily-cosmos</line>
-    <line id="fg-mover" easyOrder="24">fg-mover</line>
-    <line id="fg-contingent" easyOrder="25">fg-contingent</line>
-    <line id="fg-kalam" easyOrder="26">fg-kalam</line>
-    <line id="fg-limits" easyOrder="27">fg-limits</line>
-    <line id="daily-scroll" easyOrder="28">daily-scroll</line>
-    <line id="daily-isaiah" easyOrder="29">daily-isaiah</line>
+  <easyShelf order="fg-order,fg-reason,fg-ought,fg-ground,daily-cosmos,fg-mover,fg-contingent,fg-kalam,fg-limits,daily-scroll,daily-isaiah">
+    <line id="fg-order" easyOrder="4">fg-order</line>
+    <line id="fg-reason" easyOrder="5">fg-reason</line>
+    <line id="fg-ought" easyOrder="6">fg-ought</line>
+    <line id="fg-ground" easyOrder="7">fg-ground</line>
+    <line id="daily-cosmos" easyOrder="12">daily-cosmos</line>
+    <line id="fg-mover" easyOrder="28">fg-mover</line>
+    <line id="fg-contingent" easyOrder="29">fg-contingent</line>
+    <line id="fg-kalam" easyOrder="30">fg-kalam</line>
+    <line id="fg-limits" easyOrder="31">fg-limits</line>
+    <line id="daily-scroll" easyOrder="32">daily-scroll</line>
+    <line id="daily-isaiah" easyOrder="33">daily-isaiah</line>
   </easyShelf>
   <lessons>
+    <lesson id="fg-order" place="Why Gate" person="Ansel Gate" tripleId="order-gate" ideaId="idea-order" ideaLabel="The world holds together in Christ." challengeKind="sort" challengeTitle="We already trust order">
+      <easy points="10" easyOrder="4">
+        <learn>
+          <shortStory>You already live as if the world hangs together — clocks, roads, promises. That is not a mood. Colossians names Christ: all things were made through him, and in him they hold together.</shortStory>
+          <mainIdea>You already trust that the world holds together in Christ.</mainIdea>
+          <gloss>You already trust that the world holds together in Christ.</gloss>
+          <loci>This idea lives at Why Gate, with Ansel.</loci>
+          <word>
+            <term>Order</term>
+            <sense>the world hanging together — not a lucky pile</sense>
+          </word>
+          <hint>Keep the lived trust. Toss the lucky pile.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>You already trust that the world holds together in Christ.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>The world is a lucky pile with no holder.</miss>
+            <miss>You do not actually trust order in ordinary life.</miss>
+          </sentenceMisses>
+          <placePrompt>That question lives at Why Gate.</placePrompt>
+          <personPrompt>Ansel keeps that gate.</personPrompt>
+          <ideaPrompt>Ansel’s why — the world holds together in Christ.</ideaPrompt>
+          <ideaLabel>The world holds together in Christ.</ideaLabel>
+          <whyEasy>Ansel keeps Why Gate. The world holds together in Christ.</whyEasy>
+        </match>
+        <hold levelUpTo="medium" onFail="easy">
+          <claim>You already trust that the world holds together in Christ.</claim>
+          <reason>All things were made through him and hold together in him.</reason>
+          <source>Colossians 1:16–17</source>
+          <whyCorrect>All things were made through him and hold together in him.</whyCorrect>
+          <whyMisses>
+            <miss>Nothing holds the world together.</miss>
+            <miss>Order is only a mood.</miss>
+            <miss>Colossians never names Christ.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>You already trust that the world holds together in Christ.</choice>
+            <choice>The world is a lucky pile with no holder.</choice>
+            <choice>You do not actually trust order in ordinary life.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>All things were made through him and hold together in him.</choice>
+            <choice>Nothing holds the world together.</choice>
+            <choice>Order is only a mood.</choice>
+          </reasonChoices>
+        </hold>
+      </easy>
+      <medium points="12">
+        <learn>
+          <mediumTeach>You already trust order: you count on a world that hangs together. That lived trust is real. Colossians does not leave the holder unnamed — all things were made through Christ and hold together in him. The world is not a lucky pile.</mediumTeach>
+          <mainIdea>You already trust that the world holds together in Christ.</mainIdea>
+          <gloss>You already trust that the world holds together in Christ.</gloss>
+          <loci>This idea lives at Why Gate, with Ansel.</loci>
+          <word>
+            <term>Order</term>
+            <sense>the world hanging together — not a lucky pile</sense>
+          </word>
+          <hint>Keep the lived trust. Toss the lucky pile.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>You already trust that the world holds together in Christ.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>The world is a lucky pile with no holder.</miss>
+            <miss>You do not actually trust order in ordinary life.</miss>
+          </sentenceMisses>
+          <placePrompt>That question lives at Why Gate.</placePrompt>
+          <personPrompt>Ansel keeps that gate.</personPrompt>
+          <ideaPrompt>Ansel’s why — the world holds together in Christ.</ideaPrompt>
+          <ideaLabel>The world holds together in Christ.</ideaLabel>
+          <whyMedium>Ansel keeps Why Gate. The world holds together in Christ.</whyMedium>
+        </match>
+        <hold levelUpTo="hard" onFail="easy">
+          <claim>You already trust that the world holds together in Christ.</claim>
+          <reason>All things were made through him and hold together in him.</reason>
+          <source>Colossians 1:16–17</source>
+          <whyCorrect>All things were made through him and hold together in him.</whyCorrect>
+          <whyMisses>
+            <miss>Nothing holds the world together.</miss>
+            <miss>Order is only a mood.</miss>
+            <miss>Colossians never names Christ.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>You already trust that the world holds together in Christ.</choice>
+            <choice>The world is a lucky pile with no holder.</choice>
+            <choice>You do not actually trust order in ordinary life.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>All things were made through him and hold together in him.</choice>
+            <choice>Nothing holds the world together.</choice>
+            <choice>Order is only a mood.</choice>
+          </reasonChoices>
+        </hold>
+      </medium>
+      <hard points="15">
+        <learn>
+          <hardTeach>Colossians 1:16–17: all things were created through Christ and in him they hold together. Augustine reads creation as given order, not a lucky scatter (City of God XI). Aquinas treats God as the cause of the world’s being and order (ST I, q.44). You already live this trust every time a promise, a clock, or a road still means something. The holder is Christ — named, not hinted.</hardTeach>
+          <fullTeach>Colossians 1:16–17: all things were created through Christ and in him they hold together. Augustine reads creation as given order, not a lucky scatter (City of God XI). Aquinas treats God as the cause of the world’s being and order (ST I, q.44). You already live this trust every time a promise, a clock, or a road still means something. The holder is Christ — named, not hinted.</fullTeach>
+          <prompt>Keep the lived trust that the world holds together. Toss the lucky pile that will not name Christ.</prompt>
+          <teachOnWrong>You already trust order in ordinary life. Colossians names Christ as the One through whom all things were made and in whom they hold together. Do not leave the holder unnamed.</teachOnWrong>
+          <challengeTiles />
+        </learn>
+        <match>
+          <sentenceCorrect>You already trust that the world holds together in Christ.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>The world is a lucky pile with no holder.</miss>
+            <miss>You do not actually trust order in ordinary life.</miss>
+          </sentenceMisses>
+          <placePrompt>That question lives at Why Gate.</placePrompt>
+          <personPrompt>Ansel keeps that gate.</personPrompt>
+          <ideaPrompt>Ansel’s why — the world holds together in Christ.</ideaPrompt>
+          <ideaLabel>The world holds together in Christ.</ideaLabel>
+          <whyHard>Ansel Gate keeps Why Gate. You already trust order — and Colossians names Christ as the One who holds all things.</whyHard>
+        </match>
+        <hold onFail="easy">
+          <claim>You already trust that the world holds together in Christ.</claim>
+          <reason>All things were made through him and hold together in him.</reason>
+          <source>Colossians 1:16–17</source>
+          <whyCorrect>All things were made through him and hold together in him.</whyCorrect>
+          <whyMisses>
+            <miss>Nothing holds the world together.</miss>
+            <miss>Order is only a mood.</miss>
+            <miss>Colossians never names Christ.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>You already trust that the world holds together in Christ.</choice>
+            <choice>The world is a lucky pile with no holder.</choice>
+            <choice>You do not actually trust order in ordinary life.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>All things were made through him and hold together in him.</choice>
+            <choice>Nothing holds the world together.</choice>
+            <choice>Order is only a mood.</choice>
+          </reasonChoices>
+        </hold>
+      </hard>
+      <journal id="j-fg-order" title="We already trust order" kicker="Why Gate" unlockAfter="fg-order" scoreFromHeldTier="true">
+        <p>You already live as if the world hangs together. Clocks, roads, and promises only work because order is real. That is not a slogan. It is the trust you already spend.</p>
+        <p>Colossians 1:16–17 names the holder: all things were made through Christ, and in him they hold together. Augustine and Aquinas read that given order as creation’s grain — not a lucky pile. The first foundation beat is this lived trust, with Christ named on the card.</p>
+        <sources>
+          <source>Colossians 1:16–17</source>
+          <source>Augustine, City of God XI</source>
+          <source>Aquinas, ST I, q.44</source>
+        </sources>
+      </journal>
+    </lesson>
+    <lesson id="fg-reason" place="Why Gate" person="Ansel Gate" tripleId="reason-gate" ideaId="idea-reason" ideaLabel="Reason needs a real ground." challengeKind="sequence" challengeTitle="Trust needs a ground">
+      <easy points="10" easyOrder="5">
+        <learn>
+          <shortStory>You already trust your mind enough to argue, count, and ask why. That trust is not a trick hanging in midair. John calls the Word the true light. Romans says what can be known of God is plain in what is made. Reason needs a real ground.</shortStory>
+          <mainIdea>The reason you already trust needs a real ground.</mainIdea>
+          <gloss>The reason you already trust needs a real ground.</gloss>
+          <loci>This idea lives at Why Gate, with Ansel.</loci>
+          <word>
+            <term>Ground</term>
+            <sense>what holds a trust up — not a shrug in midair</sense>
+          </word>
+          <hint>Keep the ground. Toss the floating trick.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>The reason you already trust needs a real ground.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Reason is a free-floating trick with no ground.</miss>
+            <miss>Darkness is the last word about the world.</miss>
+          </sentenceMisses>
+          <placePrompt>That question lives at Why Gate.</placePrompt>
+          <personPrompt>Ansel keeps that gate.</personPrompt>
+          <ideaPrompt>Ansel’s why — reason needs a real ground.</ideaPrompt>
+          <ideaLabel>Reason needs a real ground.</ideaLabel>
+          <whyEasy>Ansel keeps Why Gate. Reason needs a real ground.</whyEasy>
+        </match>
+        <hold levelUpTo="medium" onFail="easy">
+          <claim>The reason you already trust needs a real ground.</claim>
+          <reason>The Word is the true light that makes God knowable.</reason>
+          <source>John 1:1–9 · Romans 1:19–20</source>
+          <whyCorrect>The Word is the true light that makes God knowable.</whyCorrect>
+          <whyMisses>
+            <miss>Reason floats with no ground.</miss>
+            <miss>The world is finally dark.</miss>
+            <miss>Made things hide God.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>The reason you already trust needs a real ground.</choice>
+            <choice>Reason is a free-floating trick with no ground.</choice>
+            <choice>Darkness is the last word about the world.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>The Word is the true light that makes God knowable.</choice>
+            <choice>Reason floats with no ground.</choice>
+            <choice>The world is finally dark.</choice>
+          </reasonChoices>
+        </hold>
+      </easy>
+      <medium points="12">
+        <learn>
+          <mediumTeach>You already trust reason — you argue, count, and ask why. That trust is not free-floating. John 1 names the Word as the true light that gives light to everyone. Romans 1:19–20 says what can be known of God is plain in what is made. Light makes the world knowable because God made it knowable.</mediumTeach>
+          <mainIdea>The reason you already trust needs a real ground.</mainIdea>
+          <gloss>The reason you already trust needs a real ground.</gloss>
+          <loci>This idea lives at Why Gate, with Ansel.</loci>
+          <word>
+            <term>Ground</term>
+            <sense>what holds a trust up — not a shrug in midair</sense>
+          </word>
+          <hint>Keep the ground. Toss the floating trick.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>The reason you already trust needs a real ground.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Reason is a free-floating trick with no ground.</miss>
+            <miss>Darkness is the last word about the world.</miss>
+          </sentenceMisses>
+          <placePrompt>That question lives at Why Gate.</placePrompt>
+          <personPrompt>Ansel keeps that gate.</personPrompt>
+          <ideaPrompt>Ansel’s why — reason needs a real ground.</ideaPrompt>
+          <ideaLabel>Reason needs a real ground.</ideaLabel>
+          <whyMedium>Ansel keeps Why Gate. Reason needs a real ground.</whyMedium>
+        </match>
+        <hold levelUpTo="hard" onFail="easy">
+          <claim>The reason you already trust needs a real ground.</claim>
+          <reason>The Word is the true light that makes God knowable.</reason>
+          <source>John 1:1–9 · Romans 1:19–20</source>
+          <whyCorrect>The Word is the true light that makes God knowable.</whyCorrect>
+          <whyMisses>
+            <miss>Reason floats with no ground.</miss>
+            <miss>The world is finally dark.</miss>
+            <miss>Made things hide God.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>The reason you already trust needs a real ground.</choice>
+            <choice>Reason is a free-floating trick with no ground.</choice>
+            <choice>Darkness is the last word about the world.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>The Word is the true light that makes God knowable.</choice>
+            <choice>Reason floats with no ground.</choice>
+            <choice>The world is finally dark.</choice>
+          </reasonChoices>
+        </hold>
+      </medium>
+      <hard points="15">
+        <learn>
+          <hardTeach>John 1:1–9: the Word was with God and was God; he is the true light. Romans 1:19–20: what can be known of God is plain in the things that have been made. Augustine’s illumination (De Magistro; Confessions VII) treats our seeing of truth as participation in that Light. Aquinas: the intellect is measured by being, and being is from God (ST I, q.16; q.84). Reason is not a late accident. It already leans on a ground.</hardTeach>
+          <fullTeach>John 1:1–9: the Word was with God and was God; he is the true light. Romans 1:19–20: what can be known of God is plain in the things that have been made. Augustine’s illumination (De Magistro; Confessions VII) treats our seeing of truth as participation in that Light. Aquinas: the intellect is measured by being, and being is from God (ST I, q.16; q.84). Reason is not a late accident. It already leans on a ground.</fullTeach>
+          <prompt>Order the walk: lived trust in reason, then the need for a ground, then the Light Scripture names.</prompt>
+          <teachOnWrong>Do not leave reason hanging in midair. John names the Word as true light. Romans says the made world makes God knowable. That is a ground, not a shrug.</teachOnWrong>
+          <challengeTiles />
+        </learn>
+        <match>
+          <sentenceCorrect>The reason you already trust needs a real ground.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Reason is a free-floating trick with no ground.</miss>
+            <miss>Darkness is the last word about the world.</miss>
+          </sentenceMisses>
+          <placePrompt>That question lives at Why Gate.</placePrompt>
+          <personPrompt>Ansel keeps that gate.</personPrompt>
+          <ideaPrompt>Ansel’s why — reason needs a real ground.</ideaPrompt>
+          <ideaLabel>Reason needs a real ground.</ideaLabel>
+          <whyHard>Ansel Gate keeps Why Gate. The reason you already trust is not free-floating — John names the Light.</whyHard>
+        </match>
+        <hold onFail="easy">
+          <claim>The reason you already trust needs a real ground.</claim>
+          <reason>The Word is the true light that makes God knowable.</reason>
+          <source>John 1:1–9 · Romans 1:19–20</source>
+          <whyCorrect>The Word is the true light that makes God knowable.</whyCorrect>
+          <whyMisses>
+            <miss>Reason floats with no ground.</miss>
+            <miss>The world is finally dark.</miss>
+            <miss>Made things hide God.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>The reason you already trust needs a real ground.</choice>
+            <choice>Reason is a free-floating trick with no ground.</choice>
+            <choice>Darkness is the last word about the world.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>The Word is the true light that makes God knowable.</choice>
+            <choice>Reason floats with no ground.</choice>
+            <choice>The world is finally dark.</choice>
+          </reasonChoices>
+        </hold>
+      </hard>
+      <journal id="j-fg-reason" title="Trust needs a ground" kicker="Why Gate" unlockAfter="fg-reason" scoreFromHeldTier="true">
+        <p>You already trust reason. You argue, count, and ask why. That trust is not a trick hanging in midair. Free-floating reason explains nothing; it still borrows the light it uses.</p>
+        <p>John 1:1–9 names the Word as the true light. Romans 1:19–20 says what can be known of God is plain in what is made. Augustine’s illumination and Aquinas on intellect as measured by being both read that Light as the ground of our seeing — not a late accident at the end of a dark story.</p>
+        <sources>
+          <source>John 1:1–9</source>
+          <source>Romans 1:19–20</source>
+          <source>Augustine, De Magistro; Confessions VII</source>
+          <source>Aquinas, ST I, q.16; q.84</source>
+        </sources>
+      </journal>
+    </lesson>
+    <lesson id="fg-ought" place="Why Gate" person="Ansel Gate" tripleId="ought-gate" ideaId="idea-ought" ideaLabel="Nature cannot ground ought." challengeKind="sort" challengeTitle="Nature alone is not enough">
+      <easy points="10" easyOrder="6">
+        <learn>
+          <shortStory>You already treat some things as really wrong, not only “I don’t like it.” Rocks and weather do not invent that pull. Finite nature — a changing, limited world — cannot be the ground of ought. Romans says the law is already written on the heart.</shortStory>
+          <mainIdea>Finite nature cannot ground the ought you already trust.</mainIdea>
+          <gloss>Finite nature cannot ground the ought you already trust.</gloss>
+          <loci>This idea lives at Why Gate, with Ansel.</loci>
+          <word>
+            <term>Ought</term>
+            <sense>real right and wrong — not only a mood</sense>
+          </word>
+          <hint>Keep the law on the heart. Toss nature-as-enough.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>Finite nature cannot ground the ought you already trust.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Rocks and weather write the law on the heart.</miss>
+            <miss>Ought is only a mood you can drop.</miss>
+          </sentenceMisses>
+          <placePrompt>That question lives at Why Gate.</placePrompt>
+          <personPrompt>Ansel keeps that gate.</personPrompt>
+          <ideaPrompt>Ansel’s why — nature cannot ground ought.</ideaPrompt>
+          <ideaLabel>Nature cannot ground ought.</ideaLabel>
+          <whyEasy>Ansel keeps Why Gate. Nature cannot ground ought.</whyEasy>
+        </match>
+        <hold levelUpTo="medium" onFail="easy">
+          <claim>Finite nature cannot ground the ought you already trust.</claim>
+          <reason>A limited world cannot write the law on the heart.</reason>
+          <source>Romans 2:14–15</source>
+          <whyCorrect>A limited world cannot write the law on the heart.</whyCorrect>
+          <whyMisses>
+            <miss>Rocks write the law on the heart.</miss>
+            <miss>Ought is only a mood.</miss>
+            <miss>Nature as a pile is enough.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Finite nature cannot ground the ought you already trust.</choice>
+            <choice>Rocks and weather write the law on the heart.</choice>
+            <choice>Ought is only a mood you can drop.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>A limited world cannot write the law on the heart.</choice>
+            <choice>Rocks write the law on the heart.</choice>
+            <choice>Ought is only a mood.</choice>
+          </reasonChoices>
+        </hold>
+      </easy>
+      <medium points="12">
+        <learn>
+          <mediumTeach>You already trust ought: some things are really wrong. Finite nature cannot be that ground. A changing, limited world does not write a law on the heart. Romans 2:14–15 says the nations already show that law at work. This is not Hope’s later ridge on duty-as-taste. This is Ansel’s step: nature alone is not enough.</mediumTeach>
+          <mainIdea>Finite nature cannot ground the ought you already trust.</mainIdea>
+          <gloss>Finite nature cannot ground the ought you already trust.</gloss>
+          <loci>This idea lives at Why Gate, with Ansel.</loci>
+          <word>
+            <term>Ought</term>
+            <sense>real right and wrong — not only a mood</sense>
+          </word>
+          <hint>Keep the law on the heart. Toss nature-as-enough.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>Finite nature cannot ground the ought you already trust.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Rocks and weather write the law on the heart.</miss>
+            <miss>Ought is only a mood you can drop.</miss>
+          </sentenceMisses>
+          <placePrompt>That question lives at Why Gate.</placePrompt>
+          <personPrompt>Ansel keeps that gate.</personPrompt>
+          <ideaPrompt>Ansel’s why — nature cannot ground ought.</ideaPrompt>
+          <ideaLabel>Nature cannot ground ought.</ideaLabel>
+          <whyMedium>Ansel keeps Why Gate. Nature cannot ground ought.</whyMedium>
+        </match>
+        <hold levelUpTo="hard" onFail="easy">
+          <claim>Finite nature cannot ground the ought you already trust.</claim>
+          <reason>A limited world cannot write the law on the heart.</reason>
+          <source>Romans 2:14–15</source>
+          <whyCorrect>A limited world cannot write the law on the heart.</whyCorrect>
+          <whyMisses>
+            <miss>Rocks write the law on the heart.</miss>
+            <miss>Ought is only a mood.</miss>
+            <miss>Nature as a pile is enough.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Finite nature cannot ground the ought you already trust.</choice>
+            <choice>Rocks and weather write the law on the heart.</choice>
+            <choice>Ought is only a mood you can drop.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>A limited world cannot write the law on the heart.</choice>
+            <choice>Rocks write the law on the heart.</choice>
+            <choice>Ought is only a mood.</choice>
+          </reasonChoices>
+        </hold>
+      </medium>
+      <hard points="15">
+        <learn>
+          <hardTeach>Romans 2:14–15: the nations show the work of the law written on their hearts. Augustine: the eternal law is in God; our hearts participate, they do not invent it (On Free Choice of the Will; City of God XIX). Aquinas: natural law is the rational creature’s share in the eternal law (ST I-II, q.91). Finite nature — this changing world — cannot be the source of that share. This beat is not the later ridge that duty is more than taste. It is the gate step: nature alone is not enough to ground the ought you already trust.</hardTeach>
+          <fullTeach>Romans 2:14–15: the nations show the work of the law written on their hearts. Augustine: the eternal law is in God; our hearts participate, they do not invent it (On Free Choice of the Will; City of God XIX). Aquinas: natural law is the rational creature’s share in the eternal law (ST I-II, q.91). Finite nature — this changing world — cannot be the source of that share. This beat is not the later ridge that duty is more than taste. It is the gate step: nature alone is not enough to ground the ought you already trust.</fullTeach>
+          <prompt>Keep the line that finite nature cannot ground ought. Toss rocks-as-law and ought-as-mood.</prompt>
+          <teachOnWrong>You already trust ought. A limited world cannot write that law. Romans says it is already on the heart. Nature as a pile of facts is not enough.</teachOnWrong>
+          <challengeTiles />
+        </learn>
+        <match>
+          <sentenceCorrect>Finite nature cannot ground the ought you already trust.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Rocks and weather write the law on the heart.</miss>
+            <miss>Ought is only a mood you can drop.</miss>
+          </sentenceMisses>
+          <placePrompt>That question lives at Why Gate.</placePrompt>
+          <personPrompt>Ansel keeps that gate.</personPrompt>
+          <ideaPrompt>Ansel’s why — nature cannot ground ought.</ideaPrompt>
+          <ideaLabel>Nature cannot ground ought.</ideaLabel>
+          <whyHard>Ansel Gate keeps Why Gate. Finite nature cannot ground the ought you already trust — the law is on the heart.</whyHard>
+        </match>
+        <hold onFail="easy">
+          <claim>Finite nature cannot ground the ought you already trust.</claim>
+          <reason>A limited world cannot write the law on the heart.</reason>
+          <source>Romans 2:14–15</source>
+          <whyCorrect>A limited world cannot write the law on the heart.</whyCorrect>
+          <whyMisses>
+            <miss>Rocks write the law on the heart.</miss>
+            <miss>Ought is only a mood.</miss>
+            <miss>Nature as a pile is enough.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Finite nature cannot ground the ought you already trust.</choice>
+            <choice>Rocks and weather write the law on the heart.</choice>
+            <choice>Ought is only a mood you can drop.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>A limited world cannot write the law on the heart.</choice>
+            <choice>Rocks write the law on the heart.</choice>
+            <choice>Ought is only a mood.</choice>
+          </reasonChoices>
+        </hold>
+      </hard>
+      <journal id="j-fg-ought" title="Nature alone is not enough" kicker="Why Gate" unlockAfter="fg-ought" scoreFromHeldTier="true">
+        <p>You already trust ought. Some things are really wrong. Finite nature cannot be the ground of that pull. Rocks and weather do not write a law on the heart.</p>
+        <p>Romans 2:14–15 treats that law as already shared. Augustine locates the eternal law in God; Aquinas calls natural law our share in it. This is Ansel’s gate step — not Hope’s later ridge that duty is more than taste. Nature as a pile of facts is not enough.</p>
+        <sources>
+          <source>Romans 2:14–15</source>
+          <source>Augustine, On Free Choice of the Will; City of God XIX</source>
+          <source>Aquinas, ST I-II, q.91</source>
+        </sources>
+      </journal>
+    </lesson>
+    <lesson id="fg-ground" place="Why Gate" person="Ansel Gate" tripleId="ground-gate" ideaId="idea-ground" ideaLabel="The living God is the foundation." challengeKind="sequence" challengeTitle="God as living foundation">
+      <easy points="10" easyOrder="7">
+        <learn>
+          <shortStory>Order, reason, and ought are not free-floating, and finite nature cannot hold them up. Paul at Athens does not point to a cold first brick. He names the God who made the world and gives life and breath — the One in whom we live and move and have our being. That living God is the foundation.</shortStory>
+          <mainIdea>The living God is the foundation of order, reason, and ought.</mainIdea>
+          <gloss>The living God is the foundation of order, reason, and ought.</gloss>
+          <loci>This idea lives at Why Gate, with Ansel.</loci>
+          <word>
+            <term>Foundation</term>
+            <sense>the living God who holds what you already trust</sense>
+          </word>
+          <hint>Keep the living God. Toss the dead brick.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>The living God is the foundation of order, reason, and ought.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>The foundation is a dead first brick, not the living God.</miss>
+            <miss>We live by accident, not in God.</miss>
+          </sentenceMisses>
+          <placePrompt>That question lives at Why Gate.</placePrompt>
+          <personPrompt>Ansel keeps that gate.</personPrompt>
+          <ideaPrompt>Ansel’s why — the living God is the foundation.</ideaPrompt>
+          <ideaLabel>The living God is the foundation.</ideaLabel>
+          <whyEasy>Ansel keeps Why Gate. The living God is the foundation.</whyEasy>
+        </match>
+        <hold levelUpTo="medium" onFail="easy">
+          <claim>The living God is the foundation of order, reason, and ought.</claim>
+          <reason>In him we live and move and have our being.</reason>
+          <source>Acts 17:24–28</source>
+          <whyCorrect>In him we live and move and have our being.</whyCorrect>
+          <whyMisses>
+            <miss>The foundation is a dead brick.</miss>
+            <miss>We live by accident, not in God.</miss>
+            <miss>Acts never names the living God.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>The living God is the foundation of order, reason, and ought.</choice>
+            <choice>The foundation is a dead first brick, not the living God.</choice>
+            <choice>We live by accident, not in God.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>In him we live and move and have our being.</choice>
+            <choice>The foundation is a dead brick.</choice>
+            <choice>We live by accident, not in God.</choice>
+          </reasonChoices>
+        </hold>
+      </easy>
+      <medium points="12">
+        <learn>
+          <mediumTeach>You already trust order, reason, and ought. Those trusts need a ground, and finite nature cannot be it. Acts 17:24–28 names the living God who made the world and gives life and breath. In him we live and move and have our being. That is not a dead first brick. That is God — the foundation you already leaned on.</mediumTeach>
+          <mainIdea>The living God is the foundation of order, reason, and ought.</mainIdea>
+          <gloss>The living God is the foundation of order, reason, and ought.</gloss>
+          <loci>This idea lives at Why Gate, with Ansel.</loci>
+          <word>
+            <term>Foundation</term>
+            <sense>the living God who holds what you already trust</sense>
+          </word>
+          <hint>Keep the living God. Toss the dead brick.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>The living God is the foundation of order, reason, and ought.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>The foundation is a dead first brick, not the living God.</miss>
+            <miss>We live by accident, not in God.</miss>
+          </sentenceMisses>
+          <placePrompt>That question lives at Why Gate.</placePrompt>
+          <personPrompt>Ansel keeps that gate.</personPrompt>
+          <ideaPrompt>Ansel’s why — the living God is the foundation.</ideaPrompt>
+          <ideaLabel>The living God is the foundation.</ideaLabel>
+          <whyMedium>Ansel keeps Why Gate. The living God is the foundation.</whyMedium>
+        </match>
+        <hold levelUpTo="hard" onFail="easy">
+          <claim>The living God is the foundation of order, reason, and ought.</claim>
+          <reason>In him we live and move and have our being.</reason>
+          <source>Acts 17:24–28</source>
+          <whyCorrect>In him we live and move and have our being.</whyCorrect>
+          <whyMisses>
+            <miss>The foundation is a dead brick.</miss>
+            <miss>We live by accident, not in God.</miss>
+            <miss>Acts never names the living God.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>The living God is the foundation of order, reason, and ought.</choice>
+            <choice>The foundation is a dead first brick, not the living God.</choice>
+            <choice>We live by accident, not in God.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>In him we live and move and have our being.</choice>
+            <choice>The foundation is a dead brick.</choice>
+            <choice>We live by accident, not in God.</choice>
+          </reasonChoices>
+        </hold>
+      </medium>
+      <hard points="15">
+        <learn>
+          <hardTeach>Acts 17:24–28: the God who made the world and everything in it does not live in temples made by hands; he gives to all life and breath and everything; in him we live and move and have our being. Augustine: our heart is restless until it rests in God (Confessions I.1). Aquinas: God is ipsum esse subsistens — not a first brick in the pile, the living source of being (ST I, q.3; q.44). Feser (secondary) traces that same classical theism for modern readers. This is the foundation beat. It is not the later first-mover or kalām walk. It is the living God under the trusts you already spend.</hardTeach>
+          <fullTeach>Acts 17:24–28: the God who made the world and everything in it does not live in temples made by hands; he gives to all life and breath and everything; in him we live and move and have our being. Augustine: our heart is restless until it rests in God (Confessions I.1). Aquinas: God is ipsum esse subsistens — not a first brick in the pile, the living source of being (ST I, q.3; q.44). Feser (secondary) traces that same classical theism for modern readers. This is the foundation beat. It is not the later first-mover or kalām walk. It is the living God under the trusts you already spend.</fullTeach>
+          <prompt>Order the walk to the living God: trusts, nature’s limit, then Acts 17’s foundation.</prompt>
+          <teachOnWrong>Do not stop at a dead first brick. Paul names the living God in whom we live and move and have our being. That is the foundation of order, reason, and ought.</teachOnWrong>
+          <challengeTiles />
+        </learn>
+        <match>
+          <sentenceCorrect>The living God is the foundation of order, reason, and ought.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>The foundation is a dead first brick, not the living God.</miss>
+            <miss>We live by accident, not in God.</miss>
+          </sentenceMisses>
+          <placePrompt>That question lives at Why Gate.</placePrompt>
+          <personPrompt>Ansel keeps that gate.</personPrompt>
+          <ideaPrompt>Ansel’s why — the living God is the foundation.</ideaPrompt>
+          <ideaLabel>The living God is the foundation.</ideaLabel>
+          <whyHard>Ansel Gate keeps Why Gate. The living God is the foundation of order, reason, and ought — in him we live.</whyHard>
+        </match>
+        <hold onFail="easy">
+          <claim>The living God is the foundation of order, reason, and ought.</claim>
+          <reason>In him we live and move and have our being.</reason>
+          <source>Acts 17:24–28</source>
+          <whyCorrect>In him we live and move and have our being.</whyCorrect>
+          <whyMisses>
+            <miss>The foundation is a dead brick.</miss>
+            <miss>We live by accident, not in God.</miss>
+            <miss>Acts never names the living God.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>The living God is the foundation of order, reason, and ought.</choice>
+            <choice>The foundation is a dead first brick, not the living God.</choice>
+            <choice>We live by accident, not in God.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>In him we live and move and have our being.</choice>
+            <choice>The foundation is a dead brick.</choice>
+            <choice>We live by accident, not in God.</choice>
+          </reasonChoices>
+        </hold>
+      </hard>
+      <journal id="j-fg-ground" title="God as living foundation" kicker="Why Gate" unlockAfter="fg-ground" scoreFromHeldTier="true">
+        <p>Order, reason, and ought are not free-floating. Finite nature cannot hold them up. The foundation is the living God — not a dead first brick.</p>
+        <p>Acts 17:24–28 names the God who made the world and gives life and breath: in him we live and move and have our being. Augustine’s restless heart and Aquinas’s ipsum esse read that same living source. This beat is distinct from the later first-mover and kalām walks. It is the case-for-God foundation under the trusts you already spend.</p>
+        <sources>
+          <source>Acts 17:24–28</source>
+          <source>Augustine, Confessions I.1</source>
+          <source>Aquinas, ST I, q.3; q.44</source>
+        </sources>
+      </journal>
+    </lesson>
     <lesson id="fg-mover" place="Why Gate" person="Ansel Gate" tripleId="mover-gate" ideaId="idea-mover" ideaLabel="Change needs a first actuality." challengeKind="sequence" challengeTitle="The unmoved mover">
-      <easy points="10" easyOrder="24">
+      <easy points="10" easyOrder="28">
         <learn>
           <shortStory>Things go from “can be” to “is.” Nothing gives itself that step. A stack of receivers is not an answer. There is a first changer not itself changed.</shortStory>
           <mainIdea>Change here and now needs a first actuality that is not itself a receiver of change.</mainIdea>
@@ -164,7 +749,7 @@ Critics ask whether quantum events or a past-eternal cosmos break the chain. Def
       </journal>
     </lesson>
     <lesson id="fg-contingent" place="Why Gate" person="Ansel Gate" tripleId="contingent-gate" ideaId="idea-contingent" ideaLabel="Might-not-have-beens need a necessary ground." challengeKind="build-argument" challengeTitle="What might not have been">
-      <easy points="10" easyOrder="25">
+      <easy points="10" easyOrder="29">
         <learn>
           <shortStory>You exist, but you might not have. A world of only “might-not-have-beens” does not explain why anything is here. Classical theism names the necessary ground God.</shortStory>
           <mainIdea>A world of might-not-have-beens still needs a necessary ground.</mainIdea>
@@ -310,7 +895,7 @@ Atheist replies include: the universe itself is necessary; or “brute fact” i
       </journal>
     </lesson>
     <lesson id="fg-kalam" place="Why Gate" person="Ansel Gate" tripleId="kalam-gate" ideaId="idea-kalam" ideaLabel="What begins has a cause." challengeKind="sort" challengeTitle="Whatever begins">
-      <easy points="10" easyOrder="26">
+      <easy points="10" easyOrder="30">
         <learn>
           <shortStory>If something begins, it has a cause. If this universe began, it has a cause. Naming Abraham’s God takes further historical steps.</shortStory>
           <mainIdea>If what begins has a cause and the universe began, it has a cause.</mainIdea>
@@ -462,7 +1047,7 @@ Write the argument, then the best objection, then the reply. That is how these a
       </journal>
     </lesson>
     <lesson id="fg-limits" place="Why Gate" person="Ansel Gate" tripleId="limits-gate" ideaId="idea-limits" ideaLabel="A first cause is not yet the whole gospel." challengeKind="sort" challengeTitle="What the gate opens">
-      <easy points="10" easyOrder="27">
+      <easy points="10" easyOrder="31">
         <learn>
           <shortStory>If the argument works, you have a first cause. Intellect, goodness, and the gospel are further steps — not leaks.</shortStory>
           <mainIdea>A cosmological argument is already a great deal — and not yet the sermon on the mount.</mainIdea>
@@ -613,7 +1198,7 @@ Pascal’s warning about the God of the philosophers is a warning against stoppi
       </journal>
     </lesson>
     <lesson id="daily-cosmos" place="Why Gate" person="Ansel Gate" tripleId="ansel-gate" ideaId="idea-cosmos" ideaLabel="The world did not have to exist." challengeKind="build-argument" challengeTitle="Why anything at all">
-      <easy points="10" easyOrder="8">
+      <easy points="10" easyOrder="12">
         <learn>
           <shortStory>The world is here, and it did not have to be. The psalms name a Giver for that gift — not a shrug that pretends the question never arises.</shortStory>
           <mainIdea>The universe exists and did not have to — so a Source is worth naming.</mainIdea>
@@ -757,7 +1342,7 @@ Psalm 8: when I look at your heavens… what is man that you are mindful of him?
       </journal>
     </lesson>
     <lesson id="daily-scroll" place="Why Gate" person="Ansel Gate" tripleId="scroll-gate" ideaId="idea-scroll" ideaLabel="We hold a river of copies." challengeKind="sequence" challengeTitle="A copied line">
-      <easy points="10" easyOrder="28">
+      <easy points="10" easyOrder="32">
         <learn>
           <shortStory>Scribes copy. Later hands compare. Then a page prints a recovered text. The word still stands.</shortStory>
           <mainIdea>We hold a river of copies, not the first ink.</mainIdea>
@@ -901,7 +1486,7 @@ Isaiah 40:8: the grass withers, the flower fades, but the word of our God will s
       </journal>
     </lesson>
     <lesson id="daily-isaiah" place="Why Gate" person="Ansel Gate" tripleId="isaiah-gate" ideaId="idea-isaiah" ideaLabel="Isaiah’s Servant is Jesus." challengeKind="sort" challengeTitle="A hard poem">
-      <easy points="10" easyOrder="29">
+      <easy points="10" easyOrder="33">
         <learn>
           <shortStory>The poem’s Servant suffers for others and does not answer with a sword. The church names that Servant as Jesus.</shortStory>
           <mainIdea>Isaiah 53’s Servant is the Jesus the church confesses — wounded for others, silent like a lamb.</mainIdea>

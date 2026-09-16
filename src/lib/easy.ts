@@ -343,6 +343,21 @@ export function easyStoryCard(text: string): string {
   return firstSentence(text)
 }
 
+/** Why Gate foundation arc — unlock in order after Story Creek; next after prior Easy Hold. */
+export const FOUNDATION_ARC = ['fg-order', 'fg-reason', 'fg-ought', 'fg-ground'] as const
+
+export function foundationPrior(id: string): string | undefined {
+  const index = (FOUNDATION_ARC as readonly string[]).indexOf(id)
+  if (index <= 0) return undefined
+  return FOUNDATION_ARC[index - 1]
+}
+
+export function foundationReady(progress: Pick<ProgressState, 'easyHeld'>, id: string): boolean {
+  const prior = foundationPrior(id)
+  if (!prior) return true
+  return easyLineHeld(progress, prior)
+}
+
 /** Easy street lines in teach order — packs set easyOrder; first is still mercy. */
 const FALLBACK_EASY_ORDER = [
   'ph-road',
@@ -452,14 +467,18 @@ export function easyLineLearned(progress: EasyLoopProgress, id: string): boolean
 
 /**
  * One Easy triad at a time. Prefer the first line not yet held on Easy,
- * in pack easyOrder — mercy-first (ph-road), then the rest of the 35 facts.
+ * in pack easyOrder — mercy-first (ph-road), Story Creek opening, then the
+ * Why Gate foundation arc (order → reason → ought → ground), then the rest.
+ * Foundation lessons stay gated: the next opens only after the prior Easy Hold.
  * After every Easy hold, the next unheld Easy line is Learn — not a Medium jump.
  * When the Easy trail is done, loop the first idea still below Hard.
  * Hard / older taught, completed, held, or learnings do not advance this.
  */
 export function easyLoopLine(progress: EasyLoopProgress): string {
   for (const id of EASY_LINE_ORDER) {
-    if (!easyLineHeld(progress, id)) return id
+    if (easyLineHeld(progress, id)) continue
+    if (!foundationReady(progress, id)) continue
+    return id
   }
   for (const id of EASY_LINE_ORDER) {
     if (currentLessonTier(progress, id) !== 'hard') return id

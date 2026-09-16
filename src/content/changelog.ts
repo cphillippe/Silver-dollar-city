@@ -8,6 +8,20 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.64',
+    title: 'Why Gate foundation pack · Easy core loop',
+    when: '2026-09-16',
+    items: [
+      'Why Gate foundation pack: four stepped Easy lessons after Story Creek — we already trust order, trust needs a ground, nature is not enough, God is the living foundation',
+      'Easy trail: all 39 facts in easyOrder. ph-road still leads. Foundation unlocks in order after the Story Creek opening (ph-road, ph-father, ph-debt); next opens after the prior Easy Hold',
+      'Held claim · reason · source stay plain. Order names Christ (Col 1:16–17). Reason is John 1 and Romans 1. Ought is Romans 2. Ground is Acts 17’s living God',
+      'Observatory fine-tuning (ob-tuning / ob-design) stays separate. First-mover and kalām stay later Why Gate walks — not this trust→ground arc',
+      'Dig deeper: Augustine and Aquinas first; Feser secondary. Night Watch and Town stay hidden on Easy',
+      'Easy path Learn → story play → Hold. Match bonus shuffle, Hold Why Blast, panel-blast, father-run, and road-maze stay',
+      'Hard Why Gate opens with the foundation sequence, then mover / contingency / kalām / limits',
+    ],
+  },
+  {
     version: '1.4.63',
     title: 'Easy Match extras shuffle · Easy core loop',
     when: '2026-09-15',
@@ -1334,5 +1348,9 @@ export const CHANGELOG: ChangeNote[] = [
 ]
 
 export function latestChange(version: string) {
-  return CHANGELOG.find((note) => note.version === version) ?? CHANGELOG[0]
+  const note = CHANGELOG.find((item) => item.version === version) ?? CHANGELOG[0]
+  if (note.version !== '1.4.64') return note
+  const prior = CHANGELOG.find((item) => item.version === '1.4.63')
+  if (!prior) return note
+  return { ...note, items: [...note.items, ...prior.items] }
 }

@@ -160,6 +160,10 @@ const LESSON_BONUS: Record<string, string[]> = {
   'daily-stars': ['SKY', 'STARS', 'MAKER', 'SPEAK'],
   'daily-cosmos': ['WORLD', 'LIFE', 'FIT', 'GIVEN'],
   'hl-moral': ['DUTY', 'HEART', 'RIGHT', 'KNOW'],
+  'fg-order': ['ORDER', 'HOLD', 'WORLD', 'CHRIST'],
+  'fg-reason': ['LIGHT', 'MIND', 'KNOW', 'WORD'],
+  'fg-ought': ['OUGHT', 'HEART', 'LAW', 'NATURE'],
+  'fg-ground': ['GOD', 'LIVE', 'MOVE', 'GROUND'],
 }
 
 export function lettersOnly(text: string): string {

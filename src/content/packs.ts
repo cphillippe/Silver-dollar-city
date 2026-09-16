@@ -30,7 +30,7 @@ export const CONTENT_PACKS: ContentPackSpec[] = [
       'high-lookout',
     ],
     toolIds: ['love', 'logic', 'reason', 'science'],
-    notes: 'Schema v3 XML packs in src/content/packs/. Easy trail is all 35 facts in easyOrder.',
+    notes: 'Schema v3 XML packs in src/content/packs/. Easy trail is all 39 facts in easyOrder.',
   },
 ]
 

@@ -3,7 +3,7 @@ import { statSync } from 'node:fs'
 import { emptyProgress } from '../src/lib/save.ts'
 import { PACK_CATALOG, PACK_ISSUES, packLesson } from '../src/content/packCatalog.ts'
 import { PACK_SCHEMA_VERSION } from '../src/content/packTypes.ts'
-import { EASY_LINE_ORDER, easyHomeFocus, easyHoldPractice, easyLineTaught, easyLoopLine, easyMatchReady, easyWhoWhere } from '../src/lib/easy.ts'
+import { EASY_LINE_ORDER, FOUNDATION_ARC, easyHomeFocus, easyHoldPractice, easyLineTaught, easyLoopLine, easyMatchReady, easyWhoWhere } from '../src/lib/easy.ts'
 import {
   applyHoldFail,
   applyHoldSuccess,
@@ -18,7 +18,7 @@ import { evidenceFor, evidenceForTier } from '../src/content/evidence.ts'
 
 assert.equal(PACK_ISSUES.length, 0, PACK_ISSUES.map((item) => `${item.file}: ${item.message}`).join('\n'))
 assert.equal(PACK_CATALOG.schemaVersion, PACK_SCHEMA_VERSION)
-assert.equal(PACK_CATALOG.lessons.length, 35)
+assert.equal(PACK_CATALOG.lessons.length, 39)
 assert.ok(statSync(new URL('../src/content/packs/parable-hollow.xml', import.meta.url)).size > 50000)
 assert.ok(statSync(new URL('../src/content/packs/witness-bench.xml', import.meta.url)).size > 50000)
 assert.ok(statSync(new URL('../src/content/packs/observatory.xml', import.meta.url)).size > 50000)
@@ -26,19 +26,17 @@ assert.ok(statSync(new URL('../src/content/packs/first-gate.xml', import.meta.ur
 assert.ok(statSync(new URL('../src/content/packs/high-lookout.xml', import.meta.url)).size > 50000)
 assert.deepEqual(
   PACK_CATALOG.lessons.map((lesson) => lesson.easy.easyOrder).sort((a, b) => (a ?? 0) - (b ?? 0)),
-  Array.from({ length: 35 }, (_, i) => i + 1),
+  Array.from({ length: 39 }, (_, i) => i + 1),
 )
-assert.equal(EASY_LINE_ORDER.length, 35)
-assert.deepEqual(EASY_LINE_ORDER.slice(0, 9), [
+assert.equal(EASY_LINE_ORDER.length, 39)
+assert.deepEqual(EASY_LINE_ORDER.slice(0, 7), [
   'ph-road',
   'ph-father',
   'ph-debt',
-  'wb-creed',
-  'wb-women',
-  'daily-lantern',
-  'daily-stars',
-  'daily-cosmos',
-  'hl-moral',
+  'fg-order',
+  'fg-reason',
+  'fg-ought',
+  'fg-ground',
 ])
 assert.equal(EASY_LINE_ORDER[0], 'ph-road')
 assert.equal(EASY_LINE_ORDER[1], 'ph-father')
@@ -158,5 +156,77 @@ assert.ok(areaIds.has('witness-bench'))
 assert.ok(areaIds.has('observatory'))
 assert.ok(areaIds.has('first-gate'))
 assert.ok(areaIds.has('high-lookout'))
+
+assert.deepEqual([...FOUNDATION_ARC], ['fg-order', 'fg-reason', 'fg-ought', 'fg-ground'])
+assert.ok(EASY_LINE_ORDER.indexOf('ph-debt') < EASY_LINE_ORDER.indexOf('fg-order'))
+assert.ok(EASY_LINE_ORDER.indexOf('fg-ground') < EASY_LINE_ORDER.indexOf('wb-creed'))
+assert.ok(EASY_LINE_ORDER.indexOf('fg-ground') < EASY_LINE_ORDER.indexOf('fg-mover'))
+assert.ok(EASY_LINE_ORDER.indexOf('ob-tuning') < EASY_LINE_ORDER.indexOf('fg-mover'))
+
+const creekHeld = {
+  ...emptyProgress(),
+  easyTaught: ['ph-road', 'ph-father', 'ph-debt'],
+  easyHeld: ['ph-road', 'ph-father', 'ph-debt'],
+}
+assert.equal(easyLoopLine(creekHeld), 'fg-order')
+assert.equal(easyLoopLine({ ...creekHeld, easyHeld: [...creekHeld.easyHeld, 'fg-order'] }), 'fg-reason')
+assert.equal(
+  easyLoopLine({ ...creekHeld, easyHeld: [...creekHeld.easyHeld, 'fg-order', 'fg-reason'] }),
+  'fg-ought',
+)
+assert.equal(
+  easyLoopLine({
+    ...creekHeld,
+    easyHeld: [...creekHeld.easyHeld, 'fg-order', 'fg-reason', 'fg-ought'],
+  }),
+  'fg-ground',
+)
+assert.equal(
+  easyLoopLine({
+    ...creekHeld,
+    easyHeld: [...creekHeld.easyHeld, ...FOUNDATION_ARC],
+  }),
+  'wb-creed',
+)
+
+const order = packLesson('fg-order')
+assert.ok(order)
+assert.match(order.claim, /Christ/)
+assert.match(order.source, /Colossians 1:16/)
+assert.doesNotMatch(order.claim, /Designer/)
+assert.doesNotMatch(order.easy.learn, /fine-tun/i)
+assert.doesNotMatch(order.easy.learn, /Pre-Reformation/i)
+
+const reason = packLesson('fg-reason')
+assert.ok(reason)
+assert.match(reason.source, /John 1:1/)
+assert.match(reason.source, /Romans 1:19/)
+assert.doesNotMatch(reason.claim, /\bmaybe\b/i)
+assert.doesNotMatch(reason.easy.learn, /Pre-Reformation/i)
+
+const ought = packLesson('fg-ought')
+assert.ok(ought)
+assert.match(ought.source, /Romans 2:14/)
+assert.match(ought.claim, /Finite nature/)
+assert.doesNotMatch(ought.easy.learn, /fine-tun/i)
+assert.doesNotMatch(ought.easy.learn, /Pre-Reformation/i)
+
+const ground = packLesson('fg-ground')
+assert.ok(ground)
+assert.match(ground.claim, /living God/)
+assert.match(ground.source, /Acts 17:24/)
+assert.doesNotMatch(ground.claim, /might be/i)
+assert.doesNotMatch(ground.easy.learn, /fine-tun/i)
+assert.doesNotMatch(ground.easy.learn, /Pre-Reformation/i)
+
+assert.deepEqual(easyWhoWhere('fg-order'), {
+  who: 'Ansel',
+  whoName: 'Ansel Gate',
+  whoId: 'ansel',
+  place: 'Why Gate',
+})
+
+assert.match(tuning.claim, /Designer/)
+assert.notEqual(tuning.claim, ground.claim)
 
 console.log('check-packs: ok')
