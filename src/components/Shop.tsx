@@ -10,9 +10,10 @@ import {
 import { billingSurface, packIsUnlocked } from '../lib/commerce'
 import {
   cancelPurchase,
+  cannotCharge,
+  checkoutOffer,
   packStreetLocked,
-  purchaseOffer,
-  restorePurchases,
+  restoreFromStore,
   type BillingOffer,
 } from '../lib/billing'
 import { EASY, isEasy } from '../lib/easy'
@@ -38,10 +39,10 @@ export function Shop({ onNavigate }: ShopProps) {
     setMessage(note)
   }
 
-  function confirmCheckout() {
+  async function confirmCheckout() {
     if (!checkout) return
-    const result = purchaseOffer(checkout)
     const offer = checkout
+    const result = await checkoutOffer(offer)
     setCheckout(null)
     if (result.status === 'canceled' || result.status === 'unavailable') {
       afterGrant('Purchase did not finish.')
@@ -68,8 +69,8 @@ export function Shop({ onNavigate }: ShopProps) {
     }
   }
 
-  function restore() {
-    const next = restorePurchases()
+  async function restore() {
+    const next = await restoreFromStore()
     if (next.removeAds || next.unlockedPacks.length) {
       afterGrant(
         next.removeAds
@@ -111,9 +112,11 @@ export function Shop({ onNavigate }: ShopProps) {
         <h2>{REMOVE_ADS_PRODUCT.title}</h2>
         <p>{REMOVE_ADS_PRODUCT.blurb}</p>
         <p className="quiet">
-          {surface === 'play'
-            ? `Play product ${REMOVE_ADS_PRODUCT.sku} will call the same unlock later.`
-            : 'This Pages build cannot charge. Unlock on this device — the same flag Play will set later.'}
+          {cannotCharge()
+            ? surface === 'play'
+              ? `Play product ${REMOVE_ADS_PRODUCT.sku} uses the IAP adapter when the plugin is connected.`
+              : 'This Pages build cannot charge. Unlock on this device — the same flag Play will set later.'
+            : 'Play Billing will charge this SKU. Restore asks Google Play for the same products.'}
         </p>
         <div className="settings-actions">
           {removeAds ? (

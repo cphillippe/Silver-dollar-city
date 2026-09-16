@@ -1,9 +1,10 @@
 /**
  * Soft ads for V0 freemium.
  *
- * Live ad-network SDK is still off (`adsEnabledDefault`). Between-scene
- * pauses are in-app copy, dismissible, and never mount over Match / Hold /
- * arcade play. Remove-ads (supporter IAP / web stub) hides them.
+ * Live interstitial runs only from `src/lib/adAdapter.ts` when adsEnabled
+ * + a unit id + plugin are present. Between-scene pauses stay in-app copy
+ * otherwise — dismissible, Home only, never over Match / Hold / arcade /
+ * source-dig / Journal. Remove-ads hides both.
  */
 
 import { readCommerce } from '../lib/commerce.ts'
