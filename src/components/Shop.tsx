@@ -3,6 +3,7 @@ import {
   PACK_LINE,
   REMOVE_ADS_PRODUCT,
   SHOP_PACKS,
+  TRAIL_NAME,
   TRAIL_SUBTITLE,
   packPaywallLine,
 } from '../config/commerce'
@@ -81,7 +82,7 @@ export function Shop({ onNavigate }: ShopProps) {
       </button>
 
       <header className="page-head">
-        <p className="eyebrow">{easy ? EASY.supportTrail : 'Support the trail'}</p>
+        <p className="eyebrow">{TRAIL_NAME}</p>
         <h1>Street Packs</h1>
         <p>{TRAIL_SUBTITLE}</p>
         <p>

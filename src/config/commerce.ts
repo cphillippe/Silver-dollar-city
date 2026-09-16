@@ -79,7 +79,7 @@ export function packPaywallLine(packName: string): string {
 export const REMOVE_ADS_PRODUCT = {
   id: 'remove-ads',
   sku: PLAY_SKUS.removeAds,
-  title: 'Keep the quiet trail — Remove ads.',
+  title: 'Keep the quiet trail — Remove ads',
   blurb: 'Keep the quiet trail — Remove ads. Soft pauses between home and a lesson go away. Journal, Hold, and the core trail stay open either way.',
   priceLabel: '$2.99',
 } as const
