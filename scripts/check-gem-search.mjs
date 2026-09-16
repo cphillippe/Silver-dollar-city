@@ -328,7 +328,8 @@ assert.match(puzzleSrc, /lessonStory/)
 assert.match(puzzleSrc, /panel-blast/)
 assert.match(puzzleSrc, /FatherRunPlay/)
 assert.match(puzzleSrc, /father-run/)
-assert.doesNotMatch(puzzleSrc, /timing-dash|road-swipe|claim-merge|story-night/)
+assert.match(puzzleSrc, /claim-merge/)
+assert.doesNotMatch(puzzleSrc, /timing-dash|road-swipe|story-night/)
 
 const fatherStory = packLesson('ph-father')?.easy.learn ?? ''
 const fatherPanels = storyPanelsFor('ph-father', gemWordsFor('ph-father').length)
@@ -346,7 +347,8 @@ for (const id of EASY_LINE_ORDER) {
   const puzzle = buildGemPuzzle(id)
   const panels = storyPanelsFor(id, puzzle.words.length)
   const story = lessonStory(id, puzzle.words.length)
-  const play = id === 'ph-father' ? 'father-run' : id === 'ph-road' ? 'road-maze' : 'panel-blast'
+  const play =
+    id === 'ph-father' ? 'father-run' : id === 'ph-road' ? 'road-maze' : id === 'wb-creed' ? 'claim-merge' : 'panel-blast'
   assert.equal(storyPlayFor(id), play, `${id} play`)
   assert.equal(story.play, play)
   assert.deepEqual(story.beats, panels)
