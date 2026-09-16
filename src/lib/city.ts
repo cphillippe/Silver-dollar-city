@@ -73,16 +73,7 @@ export const CITY_PLOTS: CityPlotSpec[] = [
 const HOLLOW = ['ph-road', 'ph-father', 'ph-seeds', 'ph-debt']
 const BENCH = ['wb-creed', 'wb-early', 'wb-method', 'wb-women']
 const OBS = ['ob-tuning', 'ob-design', 'ob-leibniz', 'ob-life']
-const GATE = [
-  'fg-order',
-  'fg-reason',
-  'fg-ought',
-  'fg-ground',
-  'fg-mover',
-  'fg-contingent',
-  'fg-kalam',
-  'fg-limits',
-]
+const GATE = ['fg-mover', 'fg-contingent', 'fg-kalam', 'fg-limits']
 const LOOK = ['hl-moral', 'hl-mind', 'hl-meaning', 'hl-beauty']
 
 function countHits(ids: string[], completed: string[]): number {
