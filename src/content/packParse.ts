@@ -40,6 +40,7 @@ const AREA_ORDER: Record<string, number> = {
   'first-gate': 4,
   'high-lookout': 5,
   'stone-court': 6,
+  'ink-court': 7,
 }
 
 function decode(text: string): string {
@@ -458,8 +459,8 @@ function areaLociFallback(areaId: string, title: string, attrs: Record<string, s
   if (areaId === 'high-lookout') {
     return { place: title || 'Meaning Ridge', person: 'Hope Ridge', plotId: 'lookout', who: 'hope' }
   }
-  if (areaId === 'stone-court') {
-    return { place: title || 'Stone Court', person: 'Silas Whitman', plotId: 'bench', who: 'silas' }
+  if (areaId === 'ink-court') {
+    return { place: title || 'Ink Court', person: 'Silas Whitman', plotId: 'bench', who: 'silas' }
   }
   return { place: title || 'East porch', person: 'Juniper Wick', plotId: 'porch', who: 'juniper' }
 }

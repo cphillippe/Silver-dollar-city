@@ -63,6 +63,12 @@ const PLACE_NODES: LinkNode[] = [
     text: 'Stone Court',
     plotId: 'bench',
   },
+  {
+    id: 'place-ink',
+    kind: 'place',
+    text: 'Ink Court',
+    plotId: 'bench',
+  },
 ]
 
 const PERSON_NODES: LinkNode[] = [
@@ -502,6 +508,33 @@ const STREET_FACTS: StreetFact[] = [
     text: 'Pliny writes that Christians sing to Christ as to a god.',
     caption: 'Christians sing to Christ as to a god.',
   },
+  {
+    evidenceId: 'ic-trajan',
+    ideaId: 'idea-trajan',
+    tripleId: 'trajan-ink',
+    placeId: 'place-ink',
+    personId: 'person-silas',
+    text: 'Trajan writes: do not hunt Christians out.',
+    caption: 'Trajan writes: do not hunt Christians out.',
+  },
+  {
+    evidenceId: 'ic-suetonius',
+    ideaId: 'idea-suetonius',
+    tripleId: 'suetonius-ink',
+    placeId: 'place-ink',
+    personId: 'person-silas',
+    text: 'Suetonius names Christians among the people Nero punished.',
+    caption: 'Suetonius names Christians among Nero’s punishments.',
+  },
+  {
+    evidenceId: 'ic-lucian',
+    ideaId: 'idea-lucian',
+    tripleId: 'lucian-ink',
+    placeId: 'place-ink',
+    personId: 'person-silas',
+    text: 'Lucian writes that Christians still worship the man crucified in Palestine.',
+    caption: 'They still worship the crucified man.',
+  },
 ]
 
 const IDEA_NODES: LinkNode[] = STREET_FACTS.map((fact) => ({
@@ -549,7 +582,7 @@ function splitStreetGroup<T>(items: T[]): T[][] {
   return groups
 }
 
-/** All 42 facts, grouped so a visit is ~one area / 3–5 triples — never a 70-link slog. */
+/** All 45 facts, grouped so a visit is ~one area / 3–5 triples — never a 70-link slog. */
 export function streetWalks(): StreetWalk[] {
   const walks: StreetWalk[] = []
   for (const place of PLACE_NODES) {
@@ -745,6 +778,14 @@ const PLACE_CLUES: Record<StreetPlaceId, { place: string; person: string }> = {
   'place-lookout': {
     place: 'That line lives at Meaning Ridge.',
     person: 'Hope keeps that ridge.',
+  },
+  'place-court': {
+    place: 'Those names sit at Stone Court.',
+    person: 'Silas keeps that court.',
+  },
+  'place-ink': {
+    place: 'Those names sit at Ink Court.',
+    person: 'Silas keeps that court.',
   },
 }
 
@@ -977,6 +1018,7 @@ export function linkMiss(tripleId: string, step: LinkStep): string {
 export function linkCaption(node: LinkNode, easy: boolean): string {
   if (easy && node.id === 'place-hollow') return 'Mercy’s creek'
   if (easy && node.id === 'place-court') return 'Silas’s court'
+  if (easy && node.id === 'place-ink') return 'Silas’s ink court'
   if (node.kind === 'idea') {
     const fact = streetFact(node.evidenceId ?? '')
     if (fact) return fact.caption
@@ -1153,5 +1195,17 @@ export const STREET_WHYS: Record<string, { easy: string; hard: string }> = {
   'pliny-court': {
     easy: 'Silas keeps Stone Court. Pliny writes that Christians sing to Christ as to a god.',
     hard: 'Silas Whitman keeps Stone Court. Pliny writes that Christians sing to Christ as to a god — a Roman report, not a creek picture.',
+  },
+  'trajan-ink': {
+    easy: 'Silas keeps Ink Court. Trajan writes: do not hunt Christians out.',
+    hard: 'Silas Whitman keeps Ink Court. Trajan writes: do not hunt Christians out — a Roman ink name, not a creek picture.',
+  },
+  'suetonius-ink': {
+    easy: 'Silas keeps Ink Court. Suetonius names Christians among the people Nero punished.',
+    hard: 'Silas Whitman keeps Ink Court. Suetonius names Christians among the people Nero punished — a Roman ink name, not a creek picture.',
+  },
+  'lucian-ink': {
+    easy: 'Silas keeps Ink Court. Lucian writes that Christians still worship the man crucified in Palestine.',
+    hard: 'Silas Whitman keeps Ink Court. Lucian writes that Christians still worship the man crucified in Palestine — a Roman ink name, not a creek picture.',
   },
 }

@@ -57,6 +57,9 @@ export const WHY_BLAST_EXTRAS: Record<string, string[]> = {
   'sc-tacitus': ['Tacitus writes that he saw the empty tomb.'],
   'sc-james': ['Josephus writes that he saw the risen Christ.'],
   'sc-pliny': ['Pliny writes that Christians hide Christ’s name.'],
+  'ic-trajan': ['Trajan orders every Christian found in secret.'],
+  'ic-suetonius': ['Suetonius writes that he saw the risen Christ.'],
+  'ic-lucian': ['Lucian writes that he believed in the risen Christ.'],
 }
 
 const GENERIC_WHY_MISSES = [

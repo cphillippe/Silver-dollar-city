@@ -376,6 +376,54 @@ const DOSSIERS: Record<string, DeeperLink[]> = {
     ),
     rsv('Colossians 3:16'),
   ],
+  'ic-trajan': [
+    father(
+      'Pliny the Younger, Letters 10.97',
+      'https://www.perseus.tufts.edu/hopper/text?doc=Plin.+Ep.+10.97',
+      'Trajan · do not hunt Christians out',
+    ),
+    rsv('1 Peter 2:13–17'),
+  ],
+  'j-ic-trajan': [
+    father(
+      'Pliny the Younger, Letters 10.97',
+      'https://www.perseus.tufts.edu/hopper/text?doc=Plin.+Ep.+10.97',
+      'Trajan · do not hunt Christians out',
+    ),
+    rsv('1 Peter 2:13–17'),
+  ],
+  'ic-suetonius': [
+    father(
+      'Suetonius, Nero 16.2',
+      'https://penelope.uchicago.edu/Thayer/E/Roman/Texts/Suetonius/12Caesars/Nero*.html#16',
+      'Suetonius · Christians among Nero’s punishments',
+    ),
+    rsv('Philippians 4:22'),
+  ],
+  'j-ic-suetonius': [
+    father(
+      'Suetonius, Nero 16.2',
+      'https://penelope.uchicago.edu/Thayer/E/Roman/Texts/Suetonius/12Caesars/Nero*.html#16',
+      'Suetonius · Christians among Nero’s punishments',
+    ),
+    rsv('Philippians 4:22'),
+  ],
+  'ic-lucian': [
+    father(
+      'Lucian, The Passing of Peregrinus 11–13',
+      'https://www.tertullian.org/rpearse/lucian/peregrinus.htm',
+      'Lucian · they still worship the crucified man',
+    ),
+    rsv('1 Corinthians 1:23'),
+  ],
+  'j-ic-lucian': [
+    father(
+      'Lucian, The Passing of Peregrinus 11–13',
+      'https://www.tertullian.org/rpearse/lucian/peregrinus.htm',
+      'Lucian · they still worship the crucified man',
+    ),
+    rsv('1 Corinthians 1:23'),
+  ],
   'wb-method': [
     rsv('Luke 1:1–4'),
     rsv('1 Corinthians 15:3–8'),

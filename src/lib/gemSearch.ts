@@ -678,6 +678,16 @@ export function matchGemWord(path: GemCoord[], puzzle: GemPuzzle, found: string[
   )
 }
 
+/**
+ * Finger-up Miss after a swipe. No penalty if this gesture already scored
+ * a chip or bonus, or if the snapped path is empty / a single cell.
+ */
+export function shouldMissAfterSwipe(scoredThisGesture: boolean, lineLength: number): boolean {
+  if (scoredThisGesture) return false
+  if (lineLength < 2) return false
+  return true
+}
+
 /** Extra word on a straight line — not a required chip. Forward or reverse swipe. */
 export function matchBonusWord(
   path: GemCoord[],
@@ -699,6 +709,17 @@ export function matchBonusWord(
   const word = puzzle.bonus.find((item) => item.text === spelled) ?? makeBonusWord(spelled)
   if (foundBonus.includes(word.id) || foundBonus.includes(spelled)) return null
   return word
+}
+
+
+/** Cells still required by planted bonus words the player has not found yet. */
+export function cellsNeededByOpenPlanted(puzzle: GemPuzzle, foundBonus: string[]): Set<string> {
+  const need = new Set<string>()
+  for (const word of puzzle.planted) {
+    if (foundBonus.includes(word.id) || foundBonus.includes(word.text)) continue
+    for (const cell of puzzle.bonusPaths[word.id] ?? []) need.add(cellKey(cell))
+  }
+  return need
 }
 
 export function cellsStillNeeded(puzzle: GemPuzzle, found: string[]): Set<string> {
