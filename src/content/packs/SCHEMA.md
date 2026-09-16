@@ -10,12 +10,13 @@
 
 ```
 silver-city-packs/
-  index.xml              # pack list, Easy trail 1–39, holdRules, scoring, tools, trailNotes, uiChrome
+  index.xml              # pack list, Easy trail 1–42, holdRules, scoring, tools, trailNotes, uiChrome
   parable-hollow.xml     # Story Creek (+ East porch dailies)
   witness-bench.xml      # Witness Square
   observatory.xml        # Sky Watch
   first-gate.xml         # Why Gate
   high-lookout.xml       # Meaning Ridge
+  stone-court.xml        # Stone Court (outside names after the Easy door)
   SCHEMA.md
   README.txt
 ```
@@ -136,11 +137,11 @@ Rules:
 
 ## Easy trail order
 
-All **39** facts sit on the Easy trail with `easyOrder` 1–39 (see `index.xml` `<easyShelf>`):
+All **42** facts sit on the Easy trail with `easyOrder` 1–42 (see `index.xml` `<easyShelf>`):
 
 1. Keep mercy-first Story Creek opening (`ph-road`, `ph-father`, `ph-debt`).
 2. Why Gate foundation pack next, stepped: `fg-order` → `fg-reason` → `fg-ought` → `fg-ground` (next opens after prior Hold).
-3. After Dig deeper, Witness leftovers **Names that stay** pack, stepped: `daily-names` → `daily-creed` → `daily-empty` (next opens after prior Hold; source-dig arcade). Then porch leftovers → Sky Watch (fine-tuning stays here) → Why Gate cosmological walks → Meaning Ridge.
+3. After Dig deeper, Witness leftovers **Names that stay** pack, stepped: `daily-names` → `daily-creed` → `daily-empty` (next opens after prior Hold; source-dig arcade). Then porch leftovers → Sky Watch (fine-tuning stays here) → Why Gate cosmological walks → Meaning Ridge. After the Easy door, **Stone Court** pack, stepped: `sc-tacitus` → `sc-james` → `sc-pliny` (ancient-first source-dig; next opens after prior Hold).
 
 Medium and Hard are available via mode select or Hold level-up — not a separate fact list.
 
@@ -155,8 +156,8 @@ Medium and Hard are available via mode select or Hold level-up — not a separat
 
 ## Index extras (`index.xml`)
 
-- `<packs>` — five area files + lesson counts
-- `<easyShelf>` — global Easy trail order 1–39 with `pack=` pointer
+- `<packs>` — six area files + lesson counts
+- `<easyShelf>` — global Easy trail order 1–42 with `pack=` pointer
 - `<holdRules>` — level-up on Hold; fail → Easy
 - `<scoring>` — idea points by tier (10/12/15); journal showScorePerLevel + scoreFromHeldTier (best tier held)
 - `<tools>` — `td-watch` Love how-to (not a held claim)
@@ -167,7 +168,7 @@ Medium and Hard are available via mode select or Hold level-up — not a separat
 
 1. Fetch or bundle `index.xml` → discover area files + `holdRules`.
 2. Parse each `areaPack` → register lessons by `id`.
-3. Easy mode: iterate all lessons ordered by `easy/@easyOrder` (1–39).
+3. Easy mode: iterate all lessons ordered by `easy/@easyOrder` (1–42).
 4. Medium / Hard mode: use `<medium>` / `<hard>` tracks on the same lesson id.
 5. Street: build triples from each lesson’s `tripleId` / place / person / `ideaLabel`.
 6. Hold: use that tier’s `claim` / `reason` / `source` + choices; honor `@levelUpTo` / `@onFail`.

@@ -7,7 +7,7 @@
  * 2. Product IDs below must match Play Console and App Store Connect.
  * 3. On purchase or restore success, call `grantRemoveAds()` or `grantPack(id)`
  *    — CheckoutSheet / checkoutOffer already do that. Do not add a second gate.
- * 4. Core Easy trail (Learn → play → Hold, 39 facts) ignores these flags except
+ * 4. Core Easy trail (Learn → play → Hold, 42 facts) ignores these flags except
  *    to hide between-scene ads and to open extra streets.
  * Blank flags keep the cannotCharge demo. No store money until plugin + flags.
  */
