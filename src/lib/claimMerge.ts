@@ -348,9 +348,9 @@ export function releaseGrab(state: MergeState, now: number): MergeState {
   if (other && other.rank !== grabbed.rank) {
     const dx = grabbed.x - other.x
     const dy = grabbed.y - other.y
-    const dist = Math.max(1, Math.hypot(dx, dy))
-    const nx = dx / dist
-    const ny = dy / dist
+    const dist = Math.hypot(dx, dy)
+    const nx = dist < 1 ? (grabbed.x >= other.x ? 1 : -1) : dx / dist
+    const ny = dist < 1 ? -0.35 : dy / dist
     const push = MISS_PUSH
     return {
       ...state,

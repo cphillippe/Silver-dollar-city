@@ -1475,8 +1475,11 @@ export const CHANGELOG: ChangeNote[] = [
   },
 ]
 
-export function latestChange(version: string) {
+export function latestChange(version: string): ChangeNote {
   const note = CHANGELOG.find((item) => item.version === version) ?? CHANGELOG[0]
+  if (!note) {
+    return { version, title: 'Easy core trail', when: '', items: [] }
+  }
   if (note.version === '1.4.67') {
     const prior = latestChange('1.4.66')
     return { ...note, items: [...note.items, ...prior.items] }
@@ -1487,7 +1490,7 @@ export function latestChange(version: string) {
     return { ...note, items: [...note.items, ...prior.items] }
   }
   if (note.version !== '1.4.64') return note
-  const prior = CHANGELOG.find((item) => item.version === '1.4.63')
-  if (!prior) return note
-  return { ...note, items: [...note.items, ...prior.items] }
+  const older = CHANGELOG.find((item) => item.version === '1.4.63')
+  if (!older) return note
+  return { ...note, items: [...note.items, ...older.items] }
 }
