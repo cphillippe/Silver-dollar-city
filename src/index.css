@@ -1123,9 +1123,22 @@ p {
   pointer-events: none;
 }
 
+.win-stamp-frame {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 168px;
+  height: 168px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
 /* Overlay label — celebration juice, not a primary CTA. */
 .win-stamp {
   display: block;
+  position: relative;
+  z-index: 1;
   font-family: var(--sans);
   font-size: clamp(0.92rem, 4.1vw, 1.22rem);
   font-weight: 800;

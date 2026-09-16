@@ -410,6 +410,7 @@ const artSrc = readFileSync(
 )
 assert.match(artSrc, /panel-hurt\.webp/)
 assert.match(artSrc, /panel-father-run\.webp/)
+assert.match(artSrc, /panel-speech\.webp/)
 assert.match(artSrc, /panel-help\.webp/)
 assert.match(artSrc, /<video/)
 assert.match(artSrc, /playsInline/)
@@ -433,7 +434,11 @@ assert.doesNotMatch(puzzleSrc, /timing-dash|road-swipe|story-night/)
 const fatherStory = packLesson('ph-father')?.easy.learn ?? ''
 const fatherPanels = storyPanelsFor('ph-father', gemWordsFor('ph-father').length)
 assert.equal(storyFromPanels(fatherPanels), fatherStory)
-assert.ok(fatherPanels.length >= 3 && fatherPanels.length <= 4)
+assert.equal(fatherPanels.length, 5)
+assert.deepEqual(
+  fatherPanels.map((panel) => panel.scene),
+  ['son-leave', 'hungry', 'speech', 'father-run', 'hug'],
+)
 
 const mercyStory = packLesson('ph-road')?.easy.learn ?? ''
 const mercyPanels = storyPanelsFor('ph-road', mercyWords.length)
@@ -459,7 +464,9 @@ for (const id of EASY_LINE_ORDER) {
   assert.equal(storyPlayFor(id), play, `${id} play`)
   assert.equal(story.play, play)
   assert.deepEqual(story.beats, panels)
-  assert.equal(panels.length, Math.max(3, Math.min(4, puzzle.words.length)), `${id} panel count`)
+  const expect =
+    id === 'ph-father' ? 5 : Math.max(3, Math.min(4, puzzle.words.length))
+  assert.equal(panels.length, expect, `${id} panel count`)
   assert.ok(panels.every((panel) => panel.text.trim().length > 0), `${id} panel text`)
   assert.ok(panels.every((panel) => panel.media && panel.beatId), `${id} beat + media`)
 }

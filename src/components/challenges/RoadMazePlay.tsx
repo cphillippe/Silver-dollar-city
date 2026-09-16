@@ -43,6 +43,7 @@ import { storyPanelsFor, type StoryPanel } from '../../lib/storyPanels'
 import { StoryPanelArt } from '../StoryPanelArt'
 import panelHelp from '../../assets/story/panel-help.webp'
 import panelHurt from '../../assets/story/panel-hurt.webp'
+import panelRoadClaim from '../../assets/story/panel-road-claim.webp'
 import { WinBurst } from './WinBurst'
 
 interface RoadMazePlayProps {
@@ -436,7 +437,7 @@ export function RoadMazePlay({
         }}
         onKeyDown={onBoardKey}
       >
-        <WinBurst play={winStamp} stamp={ROAD_MAZE_WIN} />
+        <WinBurst play={winStamp} stamp={ROAD_MAZE_WIN} frame={panelRoadClaim} />
         {Array.from({ length: MAZE_ROWS }, (_, r) =>
           Array.from({ length: MAZE_COLS }, (__, c) => {
             const cell = { r, c }

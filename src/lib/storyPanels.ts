@@ -11,6 +11,7 @@ export type StoryScene =
   | 'neighbor'
   | 'son-leave'
   | 'hungry'
+  | 'speech'
   | 'father-run'
   | 'hug'
   | 'feast'
@@ -54,7 +55,7 @@ export interface StoryPanel {
 
 const LESSON_SCENES: Record<string, StoryScene[]> = {
   'ph-road': ['hurt', 'walk-past', 'help', 'neighbor'],
-  'ph-father': ['son-leave', 'hungry', 'father-run', 'hug', 'feast'],
+  'ph-father': ['son-leave', 'hungry', 'speech', 'father-run', 'hug'],
   'ph-debt': ['forgive', 'choke', 'keep'],
   'ph-seeds': ['tell', 'seed', 'keep'],
   'daily-lantern': ['lamp', 'tell', 'keep'],
@@ -96,6 +97,9 @@ function sceneFromText(text: string, fallback: StoryScene): StoryScene {
   if (line.includes('feast') || line.includes('welcome')) return 'feast'
   if (/\brun/.test(line) && line.includes('father')) return 'father-run'
   if (line.includes('hungry') || line.includes('ashamed')) return 'hungry'
+  if (line.includes('hired-hand') || (line.includes('speech') && !line.includes('father'))) {
+    return 'speech'
+  }
   if (line.includes('wastes') || line.includes('share early')) return 'son-leave'
   if (line.includes('choke')) return 'choke'
   if (line.includes('bill') || line.includes('forgiv') || line.includes('wipes')) return 'forgive'
@@ -128,6 +132,10 @@ function scenesFor(lineId: string, count: number, texts: string[]): StoryScene[]
   const picked: StoryScene[] = []
   for (let i = 0; i < count; i += 1) {
     const fromList = authored?.[Math.min(i, (authored?.length ?? 1) - 1)]
+    if (lineId === 'ph-father' && fromList) {
+      picked.push(fromList)
+      continue
+    }
     const text = texts[i] ?? ''
     picked.push(sceneFromText(text, fromList ?? 'keep'))
   }
@@ -139,7 +147,8 @@ export function storyPanelsFor(lineId: string, wordCount = gemWordsFor(lineId).l
   const lesson = packLesson(lineId)
   const story = lesson?.easy.learn ?? evidenceFor(lineId)?.reason ?? ''
   const sentences = splitStorySentences(story)
-  const count = Math.max(3, Math.min(4, wordCount || 4))
+  const count =
+    lineId === 'ph-father' ? 5 : Math.max(3, Math.min(4, wordCount || 4))
   let beats = packStoryBeats(sentences, count)
   const fromStoryCount = beats.length
   const fillers = padCopy(lineId)

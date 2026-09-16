@@ -4,9 +4,11 @@ import { BURST_SPARKS, GEM_BURST } from '../../lib/juice'
 export function WinBurst({
   play,
   stamp = 'Locked!',
+  frame,
 }: {
   play: boolean
   stamp?: string
+  frame?: string
 }) {
   if (!play) return null
   return (
@@ -14,6 +16,9 @@ export function WinBurst({
       <span className="win-flash" />
       <span className="win-ring" />
       <span className="win-stamp-wrap">
+        {frame ? (
+          <img className="win-stamp-frame" src={frame} alt="" draggable={false} />
+        ) : null}
         <strong className="win-stamp is-badge">{stamp}</strong>
       </span>
       {BURST_SPARKS.map((i) => (
