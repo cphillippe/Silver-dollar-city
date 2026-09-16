@@ -8,6 +8,19 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.78',
+    title: 'Get and her extras · Easy core trail',
+    when: '2026-09-16',
+    items: [
+      'Easy gem Match extras: Get and Her score BONUS! +100 and Extra try on a straight swipe — too-common 3-letter words stay in the dict, not skipped',
+      'An exact 3–6 letter dict swipe counts even when those letters sit inside a longer chip (Father still holds Her; Target still holds Get). Reverse swipe still counts',
+      'A wobbly finger still counts: the swipe snaps to the nearest row, column, or diagonal so Get and Her can land',
+      'Miss −25 is a small overlay on the gems — it never grows the page or shoves the board. A miss that is not a word always shows Not a bonus word — never silent. Rude skips (Fat, Nude) stay off the candy extras',
+      'Night Watch and Town stay hidden on Easy. Journal ungated. Core Easy 39 facts stay free. Never a hard paywall',
+      'Fun 1.4.66–1.4.72, Clear reasons 1.4.73, Names that stay 1.4.74, Street Packs earn path 1.4.75, Play adapters 1.4.76, and Sayable triad 1.4.77 stay. Soft ads never cover Match, Hold, arcade, or source-dig. Place titles stay Story Creek, Witness Square, Sky Watch, Why Gate, Meaning Ridge',
+    ],
+  },
+  {
     version: '1.4.77',
     title: 'Sayable triad · Easy core trail',
     when: '2026-09-16',
@@ -1609,6 +1622,10 @@ export function latestChange(version: string): ChangeNote {
   const note = CHANGELOG.find((item) => item.version === version) ?? CHANGELOG[0]
   if (!note) {
     return { version, title: 'Easy core trail', when: '', items: [] }
+  }
+  if (note.version === '1.4.78') {
+    const prior = latestChange('1.4.77')
+    return { ...note, items: [...note.items, ...prior.items] }
   }
   if (note.version === '1.4.77') {
     const prior = latestChange('1.4.76')
