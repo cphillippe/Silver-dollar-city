@@ -155,7 +155,11 @@ assert.match(playSrc, /merge-bowl/)
 assert.match(playSrc, /COMBO/)
 assert.ok(MERGE_GAP >= 1, 'merge on contact, not after a deep overlap')
 assert.match(playSrc, /One more bowl/)
-assert.match(playSrc, /btn gold xl snap-bins/)
+assert.match(playSrc, /btn primary xl snap-bins/)
+assert.ok(
+  playSrc.indexOf('One more bowl') < playSrc.indexOf("EASY.holdNext"),
+  'One more bowl is the first tap after MERGED!',
+)
 assert.match(playSrc, /Merge again/)
 assert.match(playSrc, /onBowlKey/)
 assert.match(playSrc, /CLAIM_MERGE_WIN/)

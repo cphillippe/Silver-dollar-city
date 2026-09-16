@@ -331,12 +331,12 @@ export function ClaimMergePlay({
             <strong>{takeaway.why}</strong>
           </p>
           <div className="cta-dock">
-            <button type="button" className="btn gold xl snap-bins" onClick={replay}>
+            <button type="button" className="btn primary xl snap-bins" onClick={replay}>
               One more bowl
             </button>
             <button
               type="button"
-              className="btn primary xl"
+              className="btn gold xl"
               onClick={() => onEasyStop?.('hold')}
             >
               {EASY.holdNext}
