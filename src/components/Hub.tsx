@@ -32,6 +32,7 @@ import {
 } from '../store/progress'
 import type { View } from '../types'
 import { RecallOffer } from './RecallOffer'
+import { SupportToast } from './SupportToast'
 
 interface HubProps {
   onNavigate: (view: View) => void
@@ -147,7 +148,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
         <button
           type="button"
           className="text-link"
-          onClick={() => onNavigate({ name: 'shop' })}
+          onClick={() => onNavigate({ name: 'settings' })}
         >
           {EASY.supportTrail}
         </button>
@@ -159,6 +160,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
           {EASY.townSoon}
         </button>
         </div>
+        <SupportToast />
       </main>
     )
   }
@@ -336,7 +338,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
         <button
           type="button"
           className="btn tiny"
-          onClick={() => onNavigate({ name: 'shop' })}
+          onClick={() => onNavigate({ name: 'settings' })}
         >
           Support the trail
         </button>
@@ -494,6 +496,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
         </button>
       )}
 
+      <SupportToast />
     </main>
   )
 }

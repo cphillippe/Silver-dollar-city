@@ -12,6 +12,17 @@ import {
   TRAIL_SUBTITLE,
 } from '../config/commerce'
 import {
+  HARBOR_PACK_CTA,
+  MILL_PACK_CTA,
+  PACKS_EXTERNAL_LINE,
+  STORES_COMING,
+  SUPPORT_HEADING,
+  SUPPORT_LINE,
+  TIP_BLURB,
+  TIP_CTA,
+  supportUrls,
+} from '../config/support'
+import {
   cloudSyncStatus,
   encodeShareCode,
   SAVE_MAX_BYTES,
@@ -140,26 +151,58 @@ export function Settings({ onNavigate }: SettingsProps) {
         <p>{savedLabel}</p>
       </header>
 
-      <section className="settings-card" aria-label="Support the trail">
+      <section className="settings-card" aria-label="Support Silver City">
         <p className="eyebrow">{easy ? EASY.supportTrail : 'Support the trail'}</p>
-        <h2>Street Packs · Remove ads</h2>
-        <p>{SETTINGS_SUPPORT_LINE}</p>
+        <h2>{SUPPORT_HEADING}</h2>
+        <p>{SUPPORT_LINE}</p>
+        <p>{TIP_BLURB}</p>
         <p className="quiet">{TRAIL_SUBTITLE}</p>
         <p>
           The Easy trail stays free. Soft pauses sit between home and a lesson —
-          never over Match, Hold, or arcade play, and never on Journal. Street
-          Packs unlock extra streets only.
+          never over Match, Hold, or arcade play, and never on Journal. Never a
+          hard paywall.
         </p>
         <div className="settings-actions">
+          <a
+            className="btn gold"
+            href={supportUrls().tip}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-support-tip
+          >
+            {easy ? EASY.tip : TIP_CTA}
+          </a>
+          <a
+            className="btn"
+            href={supportUrls().mill}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-support-mill
+          >
+            {MILL_PACK_CTA}
+          </a>
+          <a
+            className="btn"
+            href={supportUrls().harbor}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-support-harbor
+          >
+            {HARBOR_PACK_CTA}
+          </a>
+        </div>
+        <p className="quiet">{PACKS_EXTERNAL_LINE}</p>
+        <p className="quiet">{SETTINGS_SUPPORT_LINE}</p>
+        <div className="settings-actions">
+          <button type="button" className="btn" disabled data-remove-ads-coming>
+            {STORES_COMING}
+          </button>
           <button
             type="button"
-            className="btn gold"
+            className="text-link"
             onClick={() => onNavigate({ name: 'shop' })}
           >
-            {easy ? EASY.packs : 'Street Packs'}
-          </button>
-          <button type="button" className="btn primary" onClick={() => onNavigate({ name: 'shop' })}>
-            {easy ? EASY.removeAds : 'Remove ads'}
+            This-device Street Packs
           </button>
         </div>
       </section>
@@ -380,9 +423,9 @@ export function Settings({ onNavigate }: SettingsProps) {
         <p className="eyebrow">Between-scene pauses</p>
         <p>
           Unpaid walks may see a dismissible pause between home and a lesson.
-          They never cover Match, Hold, Journal, or arcade play. Remove ads in
-          Packs is the supporter path; this toggle is a this-device hide for
-          playtest.
+          They never cover Match, Hold, Journal, or arcade play. A tip is the
+          supporter path until stores return. Remove ads comes with stores; this
+          toggle is a this-device hide for playtest.
         </p>
         {easy ? null : (
           <p className="quiet">

@@ -103,6 +103,7 @@ export const EASY = {
   supportTrail: 'Support the trail',
   removeAds: 'Remove ads',
   packs: 'Street Packs',
+  tip: 'Tip',
   loveCue: 'Love — when compassion moves you, help like the Samaritan. Tap the glowing face.',
   deployTeach: 'Use a main idea you kept.',
   saved: 'Hold',
