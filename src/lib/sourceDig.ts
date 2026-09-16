@@ -3,8 +3,14 @@
 import { packLesson } from '../content/packCatalog.ts'
 
 export const SOURCE_DIG_WIN = 'DUG!'
+
+export const SOURCE_DIG_AGAIN = 'One more dig'
+
 export const SOURCE_DIG_HINT = 'Tap the glowing tablet.'
 export const SOURCE_DIG_MISS = 'Miss −25'
+
+export const SOURCE_DIG_TAP_SCORE = 25
+export const SOURCE_DIG_WIN_SCORE = 100
 
 export const DIG_ARC = ['wb-creed', 'wb-women', 'wb-early', 'wb-method'] as const
 
