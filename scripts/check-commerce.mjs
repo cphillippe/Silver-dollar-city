@@ -7,6 +7,14 @@ import {
   scenePauseMountsOn,
   softAdsVisible,
 } from '../src/config/ads.ts'
+import { billedSkus, resetStoreFlagsForTest, setStoreFlagsForTest, storeFlags } from '../src/config/store.ts'
+import {
+  liveInterstitialReady,
+  resetAdAdapterForTest,
+  setAdPluginForTest,
+  showBetweenSceneInterstitial,
+} from '../src/lib/adAdapter.ts'
+import { iapCanCharge, resetIapAdapterForTest, setBillingPluginForTest } from '../src/lib/iapAdapter.ts'
 import {
   emptyCommerce,
   grantPack,
@@ -18,10 +26,12 @@ import {
 } from '../src/lib/commerce.ts'
 import {
   cannotCharge,
+  checkoutOffer,
   packStreetLocked,
   purchaseOffer,
   readReceipts,
   resetBilling,
+  restoreFromStore,
   restorePurchases,
 } from '../src/lib/billing.ts'
 import { PAID_STREETS } from '../src/content/paidStreets.ts'
@@ -129,6 +139,8 @@ assert.match(appSrc, /pack-street/)
 assert.match(appSrc, /name === 'journal'/)
 assert.match(appSrc, /scenePauseMountsOn/)
 assert.match(appSrc, /isSceneLeaveView/)
+assert.match(appSrc, /liveInterstitialReady/)
+assert.match(appSrc, /showBetweenSceneInterstitial/)
 assert.doesNotMatch(appSrc, /hub-banner/)
 
 const hubSrc = readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8')
@@ -152,8 +164,8 @@ assert.doesNotMatch(adSlotSrc, /unlockedPacks: \[\] as string\[\]/)
 const shopSrc = readFileSync(new URL('../src/components/Shop.tsx', import.meta.url), 'utf8')
 assert.match(shopSrc, /Unlock on this device/)
 assert.match(shopSrc, /Restore/)
-assert.match(shopSrc, /purchaseOffer/)
-assert.match(shopSrc, /restorePurchases/)
+assert.match(shopSrc, /checkoutOffer/)
+assert.match(shopSrc, /restoreFromStore/)
 assert.match(shopSrc, /CheckoutSheet/)
 assert.match(shopSrc, /Walk the free trail/)
 assert.match(shopSrc, /packPaywallLine/)
@@ -170,7 +182,7 @@ assert.match(checkoutSrc, /this device cannot charge/)
 
 const packStreetSrc = readFileSync(new URL('../src/components/PackStreet.tsx', import.meta.url), 'utf8')
 assert.match(packStreetSrc, /CheckoutSheet/)
-assert.match(packStreetSrc, /purchaseOffer/)
+assert.match(packStreetSrc, /checkoutOffer/)
 assert.match(packStreetSrc, /pack\.sku/)
 assert.match(packStreetSrc, /is-locked/)
 assert.doesNotMatch(packStreetSrc, /window\.confirm/)
@@ -215,9 +227,122 @@ assert.match(commerceCfg, /Silver City: Unending Evidence/)
 const billingSrc = readFileSync(new URL('../src/lib/billing.ts', import.meta.url), 'utf8')
 assert.match(billingSrc, /RECEIPTS_KEY/)
 assert.match(billingSrc, /purchaseOffer/)
+assert.match(billingSrc, /checkoutOffer/)
 assert.match(billingSrc, /restorePurchases/)
+assert.match(billingSrc, /restoreFromStore/)
 assert.match(billingSrc, /cannotCharge/)
 assert.match(billingSrc, /web-demo/)
+assert.match(billingSrc, /source: 'play'/)
+
+const adapterSrc = readFileSync(new URL('../src/lib/iapAdapter.ts', import.meta.url), 'utf8')
+assert.match(adapterSrc, /iapCanCharge/)
+assert.match(adapterSrc, /InAppPurchases/)
+
+const adAdapterSrc = readFileSync(new URL('../src/lib/adAdapter.ts', import.meta.url), 'utf8')
+assert.match(adAdapterSrc, /liveInterstitialReady/)
+assert.match(adAdapterSrc, /showBetweenSceneInterstitial/)
+assert.match(adAdapterSrc, /scenePauseMountsOn/)
+
+const storeSrc = readFileSync(new URL('../src/config/store.ts', import.meta.url), 'utf8')
+assert.match(storeSrc, /VITE_PLAY_BILLING/)
+assert.match(storeSrc, /VITE_ADMOB_INTERSTITIAL_ID/)
+assert.deepEqual(billedSkus(), [
+  PLAY_SKUS.removeAds,
+  PLAY_SKUS.millStreet,
+  PLAY_SKUS.harborWalk,
+])
+assert.equal(storeFlags().playBilling, false)
+assert.equal(storeFlags().adsEnabled, false)
+assert.equal(iapCanCharge(), false)
+assert.equal(liveInterstitialReady(), false)
+assert.equal(await showBetweenSceneInterstitial('hub'), 'soft')
+assert.equal(await showBetweenSceneInterstitial('link'), 'skip')
+assert.equal(await showBetweenSceneInterstitial('journal'), 'skip')
+
+setStoreFlagsForTest({ playBilling: true })
+const pluginSkus = []
+setBillingPluginForTest({
+  async purchase(sku) {
+    pluginSkus.push(sku)
+    return { sku, orderId: 'GPA.test-1', token: 'tok-1' }
+  },
+  async restore() {
+    return [
+      { sku: PLAY_SKUS.removeAds, orderId: 'GPA.rest-ads', token: 'tok-ads' },
+      { sku: PLAY_SKUS.millStreet, orderId: 'GPA.rest-mill', token: 'tok-mill' },
+    ]
+  },
+})
+assert.equal(iapCanCharge(), true)
+assert.equal(cannotCharge(), false)
+resetBilling()
+const liveBuy = await checkoutOffer({ kind: 'remove-ads' })
+assert.equal(liveBuy.status, 'purchased')
+assert.equal(liveBuy.cannotCharge, false)
+assert.equal(liveBuy.receipt?.source, 'play')
+assert.equal(liveBuy.commerce.removeAds, true)
+assert.deepEqual(pluginSkus, [PLAY_SKUS.removeAds])
+assert.equal(await checkoutOffer({ kind: 'remove-ads' }).then((row) => row.status), 'already')
+
+writeCommerce(emptyCommerce())
+assert.equal(readCommerce().removeAds, false)
+const liveRestored = await restoreFromStore()
+assert.equal(liveRestored.removeAds, true)
+assert.ok(liveRestored.unlockedPacks.includes('mill-street'))
+
+setBillingPluginForTest({
+  async purchase() {
+    throw new Error('user canceled')
+  },
+  async restore() {
+    return []
+  },
+})
+resetBilling()
+const canceled = await checkoutOffer({ kind: 'pack', packId: 'mill-street' })
+assert.equal(canceled.status, 'canceled')
+assert.equal(canceled.cannotCharge, false)
+assert.equal(packIsUnlocked('mill-street'), false, 'plugin cancel must not demo-grant')
+
+setBillingPluginForTest(undefined)
+resetStoreFlagsForTest()
+resetIapAdapterForTest()
+assert.equal(cannotCharge(), true)
+resetBilling()
+const demoAgain = await checkoutOffer({ kind: 'pack', packId: 'harbor-walk' })
+assert.equal(demoAgain.status, 'purchased')
+assert.equal(demoAgain.cannotCharge, true)
+assert.equal(demoAgain.receipt?.source, 'web-demo')
+
+setStoreFlagsForTest({ adsEnabled: true, interstitialUnitId: 'ca-app-pub-test/interstitial' })
+assert.equal(liveInterstitialReady(), false)
+let shown = 0
+setAdPluginForTest({
+  async prepare(unitId) {
+    assert.equal(unitId, 'ca-app-pub-test/interstitial')
+  },
+  async show() {
+    shown += 1
+    return 'shown'
+  },
+})
+assert.equal(liveInterstitialReady(), true)
+assert.equal(await showBetweenSceneInterstitial('hub'), 'live')
+assert.equal(shown, 1)
+assert.equal(await showBetweenSceneInterstitial('link'), 'skip')
+assert.equal(await showBetweenSceneInterstitial('journal'), 'skip')
+assert.equal(await showBetweenSceneInterstitial('learn'), 'skip')
+assert.equal(shown, 1, 'live interstitial never runs over Match/Hold/arcade')
+grantRemoveAds()
+assert.equal(liveInterstitialReady(), false)
+
+setAdPluginForTest(undefined)
+resetAdAdapterForTest()
+resetStoreFlagsForTest()
+resetBilling()
+
+const manifestSrc = readFileSync(new URL('../android/app/src/main/AndroidManifest.xml', import.meta.url), 'utf8')
+assert.match(manifestSrc, /com\.android\.vending\.BILLING/)
 
 resetBilling()
 

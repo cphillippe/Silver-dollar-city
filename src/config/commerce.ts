@@ -1,13 +1,14 @@
 /**
  * Freemium SKUs and shop copy.
  *
- * Play Billing plug-in (later — do not add a second gate):
- * 1. Add a Play Billing plugin (for example @capacitor-community/in-app-purchases).
+ * Play Billing adapter (`src/lib/iapAdapter.ts`):
+ * 1. One-time: add a Play Billing Capacitor plugin, set VITE_PLAY_BILLING=1.
  * 2. Product IDs below must match Play Console. Do not rename without a migration.
  * 3. On purchase or restore success, call `grantRemoveAds()` or `grantPack(id)`
- *    in `src/lib/commerce.ts`. Those are the same flags the web stub sets.
+ *    — CheckoutSheet / checkoutOffer already do that. Do not add a second gate.
  * 4. Core Easy trail (Learn → play → Hold, 39 facts) ignores these flags except
  *    to hide between-scene ads and to open extra streets.
+ * Blank flags keep the cannotCharge demo. No store money until plugin + flags.
  */
 
 export const COMMERCE_KEY = 'silver-city-commerce-v1'

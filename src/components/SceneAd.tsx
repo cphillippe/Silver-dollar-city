@@ -7,7 +7,7 @@ interface SceneAdProps {
 
 /**
  * Dismissible pause between home and a lesson.
- * Mount only on hub — never over Match, Hold, or arcade play.
+ * Mount only on hub — never over Match, Hold, arcade, or source-dig.
  */
 export function SceneAd({ onContinue, onSupport }: SceneAdProps) {
   return (

@@ -8,6 +8,19 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.76',
+    title: 'Play adapters · Easy core trail',
+    when: '2026-09-16',
+    items: [
+      'Android/Capacitor IAP adapter sits behind CheckoutSheet: Play Billing when a plugin and VITE_PLAY_BILLING are present, otherwise the cannotCharge demo grant from 1.4.75',
+      'Restore asks the plugin for the same SKUs when it can charge, then re-applies this-device receipts. grantRemoveAds / grantPack stay the only unlock flags',
+      'Interstitial adapter runs only when adsEnabled, a unit id, and a plugin are present — and only on Home. Soft pause still never covers Match, Hold, arcade, source-dig, or Journal',
+      'Store keys are env flags (.env.example). One-time Play Console / AdMob connect. No weekly Bill send. Pages still cannot charge. No store money until plugin and keys are live',
+      'Night Watch and Town stay hidden on Easy. Journal ungated. Core Easy 39 facts stay free. Never a hard paywall',
+      'Fun 1.4.66–1.4.72, Clear reasons 1.4.73, Names that stay 1.4.74, and Street Packs earn path 1.4.75 stay. Place titles stay Story Creek, Witness Square, Sky Watch, Why Gate, Meaning Ridge',
+    ],
+  },
+  {
     version: '1.4.75',
     title: 'Street Packs earn path · Easy core trail',
     when: '2026-09-16',
@@ -1584,6 +1597,10 @@ export function latestChange(version: string): ChangeNote {
   const note = CHANGELOG.find((item) => item.version === version) ?? CHANGELOG[0]
   if (!note) {
     return { version, title: 'Easy core trail', when: '', items: [] }
+  }
+  if (note.version === '1.4.76') {
+    const prior = latestChange('1.4.75')
+    return { ...note, items: [...note.items, ...prior.items] }
   }
   if (note.version === '1.4.75') {
     const prior = latestChange('1.4.74')
