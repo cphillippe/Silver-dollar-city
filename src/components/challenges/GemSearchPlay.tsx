@@ -10,6 +10,7 @@ import {
   matchBonusWord,
   matchGemWord,
   sameCell,
+  shouldMissAfterSwipe,
   snapFingerPath,
   tryAddToPath,
   type GemCoord,
@@ -80,6 +81,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   const comboRef = useRef(0)
   const replayToast = useRef(false)
   const cleared = useRef(false)
+  const scoredThisGesture = useRef(false)
   const home = easyWhoWhere(lineId)
   const needed = cellsStillNeeded(puzzle, found)
   const nextWord = puzzle.words.find((word) => !found.includes(word.id))
@@ -100,6 +102,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     bonusRef.current = []
     pathRef.current = []
     rawRef.current = []
+    scoredThisGesture.current = false
     if (!keepTaught) cleared.current = false
     setFound([])
     setBonusFound([])
@@ -257,7 +260,9 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       foundRef.current = nextFound
       const done = nextFound.length === puzzle.words.length
       setFound(nextFound)
+      scoredThisGesture.current = true
       writePath([])
+      rawRef.current = []
       setHint([])
       setMisses(0)
       comboRef.current += 1
@@ -274,7 +279,9 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       const nextBonus = [...bonusRef.current, extra.id]
       bonusRef.current = nextBonus
       setBonusFound(nextBonus)
+      scoredThisGesture.current = true
       writePath([])
+      rawRef.current = []
       setMisses(0)
       comboRef.current += 1
       if (comboRef.current >= 2) {
@@ -289,10 +296,15 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   }
 
   function missIfSwipe(nextPath: GemCoord[]) {
+    if (scoredThisGesture.current) return
     const line = snapFingerPath(nextPath, puzzle.size)
+    if (!shouldMissAfterSwipe(scoredThisGesture.current, line.length)) {
+      writePath([])
+      return
+    }
     writePath(line)
     if (submit(line)) return
-    if (line.length < 2) {
+    if (!shouldMissAfterSwipe(scoredThisGesture.current, line.length)) {
       writePath([])
       return
     }
@@ -352,6 +364,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     event.stopPropagation()
     drag.current = true
     moved.current = false
+    scoredThisGesture.current = false
     setShake(false)
     rawRef.current = [cell]
     applyCell(cell, 'tap')
@@ -370,6 +383,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   function onBoardUp() {
     if (!drag.current) return
     drag.current = false
+    if (scoredThisGesture.current) return
     const nextPath = rawRef.current.length ? rawRef.current : pathRef.current
     if (!nextPath.length) return
     if (moved.current || nextPath.length >= 3) {

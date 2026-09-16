@@ -25,6 +25,7 @@ import {
   MIN_BONUS_PLANT,
   pathLetters,
   plantCandidates,
+  shouldMissAfterSwipe,
   snapFingerPath,
   tryAddToPath,
 } from '../src/lib/gemSearch.ts'
@@ -106,10 +107,14 @@ assert.equal(isKidFriendlyBonusWord('BED'), true)
 assert.equal(isKidFriendlyBonusWord('NUDE'), false)
 assert.equal(isKidFriendlyBonusWord('SUCK'), false)
 assert.equal(isKidFriendlyBonusWord('HELL'), false)
-assert.equal(isKidFriendlyBonusWord('SNAG'), false, 'SNAG is not a kid-friendly bonus')
+assert.equal(isKidFriendlyBonusWord('SNAG'), true, 'SNAG is a real English bonus')
+assert.equal(isKidFriendlyBonusWord('SNAP'), true)
+assert.equal(isKidFriendlyBonusWord('SNOW'), true)
 assert.equal(isPlantableBonusWord('BED'), true)
 assert.equal(isPlantableBonusWord('NUDE'), false)
-assert.equal(isPlantableBonusWord('SNAG'), false, 'SNAG never plants')
+assert.equal(isPlantableBonusWord('SNAG'), true, 'SNAG plants and scores')
+assert.equal(isPlantableBonusWord('FAT'), false)
+assert.equal(isPlantableBonusWord('HOLE'), false, 'HOLE stays on the crude skip list')
 assert.equal(COMMON_BONUS_COUNT, COMMON_BONUS_WORDS.size)
 assert.ok(COMMON_BONUS_COUNT >= 900, `dict too thin: ${COMMON_BONUS_COUNT}`)
 for (const word of COMMON_BONUS_WORDS) {
@@ -121,7 +126,7 @@ assert.ok(fatherBoard.planted.length >= MIN_BONUS_PLANT, 'father plants several 
 assert.equal(isBonusSpelling('BED', fatherBoard), true, 'Bed stays in the bonus dict')
 assert.equal(isBonusSpelling('QQQ', fatherBoard), false)
 assert.equal(isBonusSpelling('FAT', fatherBoard), false, 'FAT stays on the rude skip list')
-assert.equal(isBonusSpelling('SNAG', fatherBoard), false, 'SNAG never scores as a bonus')
+assert.equal(isBonusSpelling('SNAG', fatherBoard), true, 'SNAG scores as a bonus')
 assert.equal(isBonusSpelling('NEIGHBOR', fatherBoard), false, '7+ letters stay off the bonus band')
 assert.equal(isBonusSpelling('NUDE', fatherBoard), false, 'rude extras do not score')
 assert.ok(COMMON_BONUS_WORDS.has('GET'), 'GET is in the shipped bonus dictionary')
@@ -201,6 +206,24 @@ const missPath = [
 assert.equal(pathLetters(missPath, lettersFromRows(['QQQXXXXX'])), 'QQQ')
 assert.equal(isBonusSpelling('QQQ', puzzleFrom(lettersFromRows(['QQQXXXXX']))), false)
 assert.equal(matchBonusWord(missPath, puzzleFrom(lettersFromRows(['QQQXXXXX'])), []), null)
+
+const snagBoard = puzzleFrom(lettersFromRows(['SNAGXXXX']))
+const snagPath = [
+  { r: 0, c: 0 },
+  { r: 0, c: 1 },
+  { r: 0, c: 2 },
+  { r: 0, c: 3 },
+]
+assert.equal(pathLetters(snagPath, snagBoard.letters), 'SNAG')
+assert.equal(isBonusSpelling('SNAG', snagBoard), true, 'SNAG is a dict bonus')
+assert.equal(matchBonusWord(snagPath, snagBoard, [])?.text, 'SNAG')
+assert.equal(matchBonusWord([...snagPath].reverse(), snagBoard, [])?.text, 'SNAG')
+assert.equal(matchBonusWord(snagPath, snagBoard, ['bonus-snag']), null, 'already-found SNAG does not rematch')
+assert.equal(shouldMissAfterSwipe(true, 4), false, 'already scored — no Miss on finger-up')
+assert.equal(shouldMissAfterSwipe(true, 0), false, 'empty path after a successful clear — no Miss')
+assert.equal(shouldMissAfterSwipe(false, 0), false)
+assert.equal(shouldMissAfterSwipe(false, 1), false)
+assert.equal(shouldMissAfterSwipe(false, 4), true, 'unscored swipe of 4 can miss')
 
 const overlapBoard = {
   ...puzzleFrom(lettersFromRows(['CATXXXXX', 'XXRXXXXX', 'XXRXXXXX'])),
@@ -369,6 +392,11 @@ assert.match(playSrc, /EASY\.bonusMissWord/)
 assert.match(playSrc, /EASY\.bonusMissStraight/)
 assert.match(playSrc, /EASY\.missPenalty/)
 assert.match(playSrc, /miss-banner/)
+assert.match(playSrc, /scoredThisGesture/)
+assert.match(playSrc, /scoredThisGesture\.current = true/)
+assert.match(playSrc, /scoredThisGesture\.current = false/)
+assert.match(playSrc, /if \(scoredThisGesture\.current\) return/)
+assert.match(playSrc, /shouldMissAfterSwipe/)
 assert.match(playSrc, /nextPath\.length >= 3/)
 assert.match(playSrc, /snapFingerPath/)
 assert.match(playSrc, /gem-stage/)
