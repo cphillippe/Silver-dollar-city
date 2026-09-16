@@ -62,7 +62,7 @@ export const journalEntries: JournalEntry[] = [
     kicker: 'Witness Square',
     unlockAfter: 'wb-creed',
     body: [
-      '1 Corinthians 15:3–5 is a compressed public claim: death, burial, raising, appearances. Paul presents it as received tradition, not as a private dream. Burial resists a merely “spiritual” death; appearances resist a merely “spiritual” raising.',
+      '1 Corinthians 15:3–5 is a compressed public claim: death, burial, raising, appearances. Paul presents it as received tradition, not as a private dream. Christ was buried and seen — not only a spirit story.',
       'This is what the churches were already handing on when Paul wrote — a mid-first-century letter appealing to a still-earlier formula.',
     ],
     sources: ['1 Corinthians 15:3–8'],
@@ -89,9 +89,7 @@ export const journalEntries: JournalEntry[] = [
       'Multiple attestation, embarrassment, early testimony, and contextual credibility are ordinary tools. They do not replace reading. They resist the story that every Christian report is a late pious novel.',
       'Used honestly, they also resist the opposite laziness: “an early creed is already a laboratory proof.” History gives testimony, not a rerun.',
     ],
-    sources: [
-      'Standard historical method as used in ancient history and historical Jesus studies',
-    ],
+    sources: ['Luke 1:1–4', '1 Corinthians 15:5–6'],
   },
   {
     id: 'j-wb-4',
@@ -100,7 +98,7 @@ export const journalEntries: JournalEntry[] = [
     kicker: 'Witness Square',
     unlockAfter: 'wb-women',
     body: [
-      'The tomb stories begin with women, and Luke records that the apostles dismissed them (Luke 24:11). That is an odd opening if the only goal is later public respectability.',
+      'The tomb stories begin with women, and Luke records that the apostles dismissed them (Luke 24:11). The church kept that first report of Jesus’ empty tomb.',
       'Outside the Gospels, Tacitus (Annals 15.44) notes Christus executed under Pilate and a movement that spread to Rome. Josephus (Antiquities 18.63–64) is partly disputed because of later Christian touches, and honesty about that dispute belongs in the dossier.',
     ],
     sources: [

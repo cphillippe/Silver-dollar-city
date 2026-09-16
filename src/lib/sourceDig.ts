@@ -56,7 +56,7 @@ const TABLETS: Record<string, DigTablet[]> = {
       id: 2,
       era: 'ancient',
       title: 'Awkward first',
-      bite: 'If the churches invented a tidy win, they would not start with women at a tomb.',
+      bite: 'Women go first. Luke still writes that the men called it idle talk.',
     },
   ],
   'wb-early': [
@@ -70,7 +70,7 @@ const TABLETS: Record<string, DigTablet[]> = {
       id: 1,
       era: 'ancient',
       title: 'Ignatius',
-      bite: 'Ignatius names Jesus Christ: truly died, truly raised — close to the events, not a late legend.',
+      bite: 'Ignatius names Jesus Christ: truly died, truly raised — close to the events.',
     },
     {
       id: 2,

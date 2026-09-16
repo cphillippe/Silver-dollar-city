@@ -57,6 +57,8 @@ for (const id of ['wb-women', 'wb-early', 'wb-method']) {
   )
 }
 
+assert.match(digTablets('wb-women')[2]?.bite ?? '', /Luke still writes/)
+assert.doesNotMatch(digTablets('wb-women')[2]?.bite ?? '', /If the churches invented/)
 assert.match(digTablets('wb-early')[0]?.bite ?? '', /Christ/)
 assert.match(digTablets('wb-method')[1]?.bite ?? '', /Christ/)
 

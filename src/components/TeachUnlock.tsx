@@ -11,6 +11,7 @@ import { learningPicture, toolForEvidence } from '../lib/watchTools'
 import { useProgress } from '../store/progress'
 import { Avatar } from './Avatar'
 import { GemMark } from './GemMark'
+import { HeldTriad } from './HeldTriad'
 import { WordGloss } from './WordGloss'
 
 interface TeachUnlockProps {
@@ -51,6 +52,13 @@ export function TeachUnlock({ brief, kind, onUnlock, unlock, beats }: TeachUnloc
         <p className="teach-reason">{story}</p>
         <p className="eyebrow hold-kicker">The main idea you will keep</p>
         <p className="recall-line rehearse-stem">{easyFacingLine(brief.id, brief.claim)}</p>
+        <HeldTriad
+          id={brief.id}
+          claim={brief.claim}
+          reason={brief.reason}
+          source={brief.source}
+          omitClaim
+        />
         <div className="easy-who-where" aria-label={`${home.who} · ${home.place}`}>
           <p className="easy-who-where-line">{easyWhoWhereLine(brief.id)}</p>
           <div className="easy-who-where-row">
