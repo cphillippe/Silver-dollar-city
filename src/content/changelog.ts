@@ -8,6 +8,17 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.83',
+    title: 'Support Silver City · Easy core trail',
+    when: '2026-09-16',
+    items: [
+      'Settings opens Support Silver City: Tip · Packs (external) · stores coming later. A tip is a Ko-fi page Bill can point with TIP_URL / VITE_TIP_URL. Mill Street and Harbor Walk open wishlist links until stores return. Remove ads stays Coming with stores — disabled, not a paywall',
+      'Home Support the trail opens Settings, not a charge sheet. After Easy Hold, a one-session toast on Home may invite a tip. It never covers Match, Hold, arcade, source-dig, or Journal. Never a hard paywall. Easy stays free. Journal stays open',
+      'Play Billing, StoreKit, and AdMob flags stay blank. Pages still cannot charge. Night Watch and Town stay hidden on Easy',
+      'Stone Court 1.4.82, Clear reasons 1.4.81, and Fun arcade juice stay. Place titles stay Story Creek, Witness Square, Sky Watch, Why Gate, Meaning Ridge — Stone Court is Silas’s street name',
+    ],
+  },
+  {
     version: '1.4.82',
     title: 'Stone Court · Easy core trail',
     when: '2026-09-16',
@@ -1673,6 +1684,10 @@ export function latestChange(version: string): ChangeNote {
   const note = CHANGELOG.find((item) => item.version === version) ?? CHANGELOG[0]
   if (!note) {
     return { version, title: 'Easy core trail', when: '', items: [] }
+  }
+  if (note.version === '1.4.83') {
+    const prior = latestChange('1.4.82')
+    return { ...note, items: [...note.items, ...prior.items] }
   }
   if (note.version === '1.4.82') {
     const prior = latestChange('1.4.81')
