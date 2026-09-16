@@ -5,6 +5,9 @@ import { evidenceFor } from '../content/evidence.ts'
 import { packEasyOrder, packLesson } from '../content/packCatalog.ts'
 import { CITY_PLOTS, type CityPlotId } from './city.ts'
 import { currentLessonTier, needsTierHold, tierRank } from './tiers.ts'
+import { digPrior } from './sourceDig.ts'
+
+export { DIG_ARC, digPrior, isSourceDigLine } from './sourceDig.ts'
 
 export function isEasy(progress: Pick<ProgressState, 'easyMode'> | { easyMode?: boolean }): boolean {
   return Boolean(progress.easyMode)
@@ -32,6 +35,10 @@ export const EASY = {
   mergeMatch: 'Merge',
   mergeHome: 'Drop candy. Smash two of a kind. Make the creed.',
   mergeWinWhy: 'Died, buried, raised, appeared.',
+  digHunt: 'Tap the glowing tablet. Dig the old names.',
+  digCta: 'Dig the names',
+  digMatch: 'Dig',
+  digHome: 'Tap the glowing tablet. Dig the old names.',
   readStory: 'Read today’s story.',
   learnCta: 'Learn',
   readStoryFirst: 'Read the story first',
@@ -366,13 +373,25 @@ export function foundationReady(progress: Pick<ProgressState, 'easyHeld'>, id: s
   return (progress.easyHeld ?? []).includes(prior)
 }
 
+export function digReady(progress: Pick<ProgressState, 'easyHeld'>, id: string): boolean {
+  const prior = digPrior(id)
+  if (!prior) return true
+  return (progress.easyHeld ?? []).includes(prior)
+}
+
 /** Easy street lines in teach order — packs set easyOrder; first is still mercy. */
 const FALLBACK_EASY_ORDER = [
   'ph-road',
   'ph-father',
   'ph-debt',
+  'fg-order',
+  'fg-reason',
+  'fg-ought',
+  'fg-ground',
   'wb-creed',
   'wb-women',
+  'wb-early',
+  'wb-method',
   'daily-lantern',
   'daily-stars',
   'daily-cosmos',
@@ -476,8 +495,9 @@ export function easyLineLearned(progress: EasyLoopProgress, id: string): boolean
 /**
  * One Easy triad at a time. Prefer the first line not yet held on Easy,
  * in pack easyOrder — mercy-first (ph-road), Story Creek opening, then the
- * Why Gate foundation arc (order → reason → ought → ground), then the rest.
- * Foundation lessons stay gated: the next opens only after the prior Easy Hold.
+ * Why Gate foundation arc (order → reason → ought → ground), then Witness
+ * Square Dig deeper (creed → women → early → method). Each arc stays gated:
+ * the next opens only after the prior Easy Hold.
  * After every Easy hold, the next unheld Easy line is Learn — not a Medium jump.
  * When the Easy trail is done, loop the first idea still below Hard.
  * Hard / older taught, completed, held, or learnings do not advance this.
@@ -486,6 +506,7 @@ export function easyLoopLine(progress: EasyLoopProgress): string {
   for (const id of EASY_LINE_ORDER) {
     if (easyLineHeld(progress, id)) continue
     if (!foundationReady(progress, id)) continue
+    if (!digReady(progress, id)) continue
     return id
   }
   for (const id of EASY_LINE_ORDER) {
