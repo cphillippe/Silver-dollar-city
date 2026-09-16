@@ -10,3 +10,7 @@ node_modules/.tmp
 android/local.properties
 android/.gradle
 android/**/build
+.env
+.env.*
+!.env.example
+

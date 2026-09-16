@@ -16,6 +16,7 @@ import { SceneAd } from './components/SceneAd'
 import { Vista } from './components/Vista'
 import { Welcome } from './components/Welcome'
 import { adsAreVisible, isBetweenSceneTransition, scenePauseMountsOn } from './config/ads'
+import { liveInterstitialReady, showBetweenSceneInterstitial } from './lib/adAdapter'
 import { isEasy } from './lib/easy'
 import { useProgress } from './store/progress'
 import type { View } from './types'
@@ -70,6 +71,18 @@ export default function App() {
     if (adsOn && cooled && between && view.name === 'hub' && isLessonEnterView(next)) {
       lastAdAt.current = Date.now()
       setPending(next)
+      if (liveInterstitialReady() && scenePauseMountsOn(view.name)) {
+        void showBetweenSceneInterstitial(view.name).then((result) => {
+          if (result === 'live') {
+            setSceneAd(false)
+            setPending(null)
+            setView(next)
+            return
+          }
+          setSceneAd(true)
+        })
+        return
+      }
       setSceneAd(true)
       return
     }
@@ -78,6 +91,16 @@ export default function App() {
       lastAdAt.current = Date.now()
       setPending(null)
       setView({ name: 'hub' })
+      if (liveInterstitialReady() && scenePauseMountsOn('hub')) {
+        void showBetweenSceneInterstitial('hub').then((result) => {
+          if (result === 'live') {
+            setSceneAd(false)
+            return
+          }
+          setSceneAd(true)
+        })
+        return
+      }
       setSceneAd(true)
       return
     }
