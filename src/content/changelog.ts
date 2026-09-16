@@ -8,6 +8,41 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.86',
+    title: 'Easy Match SNAG · Easy core trail',
+    when: '2026-09-16',
+    items: [
+      'Easy Match: SNAG is a real English word and scores as a bonus (+100). Swiping a chip or bonus during a drag never takes Miss −25 on finger-up',
+      'SKIP_BONUS still blocks rude / crude / insult extras. Ordinary words like SNAG plant and score again. Shared-letter ghost/crack from 1.4.84 stays',
+      'Ink Court 1.4.85 and panel-blast wire 1.4.84 stay. Support Silver City 1.4.83 stays. Stores stay parked. Play / AdMob / Apple flags stay blank',
+      'Core Easy 45 facts stay free. Night Watch and Town stay hidden on Easy. Journal ungated. Never a hard paywall',
+      'Place titles stay Story Creek, Witness Square, Sky Watch, Why Gate, Meaning Ridge — Stone Court and Ink Court are Silas’s street names',
+    ],
+  },
+  {
+    version: '1.4.85',
+    title: 'Ink Court · regenerated B3 · Easy core trail',
+    when: '2026-09-16',
+    items: [
+      'Father-run B3 (03-speech-road) uses Bill’s regenerated Gemini still: sorry and headed home, candy arch and lantern. Not a before-* archive. Mercy road-maze and father-run stills stay at public/assets/panel-blast/. Learn → play → Hold and One more stay',
+      'After Stone Court’s Pliny Hold, a new free street opens: Ink Court, with Silas. Trajan writes do not hunt Christians out, then Suetonius names Christians among Nero’s punishments, then Lucian writes they still worship the man crucified in Palestine. Ancient-first source-dig. Next opens only after the prior Easy Hold',
+      'Easy Hold stays claim · reason · From. Christ is named on all three Ink Court takeaways. Do not rest Easy on Chrestus. Do not claim Lucian believed. Teach before test. Apologist voice',
+      'Core Easy 45 facts stay free. Panel-blast wire 1.4.84 and Support Silver City 1.4.83 stay. Mill Street and Harbor Walk stay paid extras. Night Watch and Town stay hidden on Easy. Journal ungated. Never a hard paywall. Play / AdMob / Apple flags stay blank',
+      'Place titles stay Story Creek, Witness Square, Sky Watch, Why Gate, Meaning Ridge — Stone Court and Ink Court are Silas’s street names',
+    ],
+  },
+  {
+    version: '1.4.84',
+    title: 'Panel-blast wire · Easy core trail',
+    when: '2026-09-16',
+    items: [
+      'Easy Mercy / road-maze (ph-road, Samaritan LOCKED) and the father-run (ph-father) now show the Gemini panel-blast stills at public/assets/panel-blast/. Hero frames use @1024; thumbs use @512. Father B3 is 03-speech-road — sorry + headed home — not a before-* archive',
+      'Finding a bonus that shares letters with another unfound planted extra ghosts/cracks those cells so they stay swipeable — exclusive bonus cells still clear. Lesson chips stay protected',
+      'Teach stays Learn → play → Hold. One more loops stay. Stores stay parked. Play Billing, StoreKit, and AdMob flags stay blank. Pages still cannot charge',
+      'Support Silver City 1.4.83, Stone Court 1.4.82, and Fun arcade juice stay. Night Watch and Town stay hidden on Easy. Journal ungated. Never a hard paywall',
+    ],
+  },
+  {
     version: '1.4.83',
     title: 'Support Silver City · Easy core trail',
     when: '2026-09-16',
@@ -1684,6 +1719,18 @@ export function latestChange(version: string): ChangeNote {
   const note = CHANGELOG.find((item) => item.version === version) ?? CHANGELOG[0]
   if (!note) {
     return { version, title: 'Easy core trail', when: '', items: [] }
+  }
+  if (note.version === '1.4.86') {
+    const prior = latestChange('1.4.85')
+    return { ...note, items: [...note.items, ...prior.items] }
+  }
+  if (note.version === '1.4.85') {
+    const prior = latestChange('1.4.84')
+    return { ...note, items: [...note.items, ...prior.items] }
+  }
+  if (note.version === '1.4.84') {
+    const prior = latestChange('1.4.83')
+    return { ...note, items: [...note.items, ...prior.items] }
   }
   if (note.version === '1.4.83') {
     const prior = latestChange('1.4.82')

@@ -7,8 +7,10 @@ import panelHungry from '../assets/story/panel-hungry.webp'
 import panelHurt from '../assets/story/panel-hurt.webp'
 import panelNeighbor from '../assets/story/panel-neighbor.webp'
 import panelSonLeave from '../assets/story/panel-son-leave.webp'
+import panelSpeech from '../assets/story/panel-speech.webp'
 import panelWalkPast from '../assets/story/panel-walk-past.webp'
 
+/** Gemini panel-blast stills (CoS set A ph-road / set B ph-father). */
 const PANEL_ART: Partial<Record<StoryScene, string>> = {
   hurt: panelHurt,
   'walk-past': panelWalkPast,
@@ -16,12 +18,21 @@ const PANEL_ART: Partial<Record<StoryScene, string>> = {
   neighbor: panelNeighbor,
   'son-leave': panelSonLeave,
   hungry: panelHungry,
+  speech: panelSpeech,
   'father-run': panelFatherRun,
   hug: panelHug,
   feast: panelHug,
 }
 
-export function StoryPanelArt({ scene, media }: { scene: StoryScene; media?: StoryMediaSlot }) {
+export function StoryPanelArt({
+  scene,
+  media,
+  size = 'hero',
+}: {
+  scene: StoryScene
+  media?: StoryMediaSlot
+  size?: 'hero' | 'thumb'
+}) {
   const resolved = resolveStoryMedia(media)
   if (resolved.loop) {
     return (
@@ -37,7 +48,8 @@ export function StoryPanelArt({ scene, media }: { scene: StoryScene; media?: Sto
       />
     )
   }
-  const painted = resolved.still || PANEL_ART[scene]
+  const painted =
+    (size === 'thumb' ? resolved.thumb : undefined) || resolved.still || PANEL_ART[scene]
   if (painted) {
     return <img className="story-art-tile" src={painted} alt="" draggable={false} />
   }

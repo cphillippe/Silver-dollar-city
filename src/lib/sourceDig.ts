@@ -20,9 +20,13 @@ export const NAMES_ARC = ['daily-names', 'daily-creed', 'daily-empty'] as const
 /** After the Easy door — outside names, ancient-first: Tacitus → James → Pliny. */
 export const STONE_ARC = ['sc-tacitus', 'sc-james', 'sc-pliny'] as const
 
+/** After Pliny Hold — more outside ink: Trajan → Suetonius → Lucian. */
+export const INK_ARC = ['ic-trajan', 'ic-suetonius', 'ic-lucian'] as const
+
 export type DigArcId = (typeof DIG_ARC)[number]
 export type NamesArcId = (typeof NAMES_ARC)[number]
 export type StoneArcId = (typeof STONE_ARC)[number]
+export type InkArcId = (typeof INK_ARC)[number]
 
 export function isDigArc(id: string): id is DigArcId {
   return (DIG_ARC as readonly string[]).includes(id)
@@ -36,6 +40,10 @@ export function isStoneArc(id: string): id is StoneArcId {
   return (STONE_ARC as readonly string[]).includes(id)
 }
 
+export function isInkArc(id: string): id is InkArcId {
+  return (INK_ARC as readonly string[]).includes(id)
+}
+
 /** Play is tap-in digs. Creed keeps the merge bowl. */
 export function isSourceDigLine(id: string): boolean {
   return (
@@ -43,7 +51,8 @@ export function isSourceDigLine(id: string): boolean {
     id === 'wb-early' ||
     id === 'wb-method' ||
     isNamesArc(id) ||
-    isStoneArc(id)
+    isStoneArc(id) ||
+    isInkArc(id)
   )
 }
 
@@ -63,6 +72,12 @@ export function stonePrior(id: string): string | undefined {
   const index = (STONE_ARC as readonly string[]).indexOf(id)
   if (index <= 0) return undefined
   return STONE_ARC[index - 1]
+}
+
+export function inkPrior(id: string): string | undefined {
+  const index = (INK_ARC as readonly string[]).indexOf(id)
+  if (index <= 0) return undefined
+  return INK_ARC[index - 1]
 }
 
 export interface DigTablet {
@@ -251,6 +266,66 @@ const TABLETS: Record<string, DigTablet[]> = {
       era: 'scripture',
       title: 'Colossians 3',
       bite: 'The churches already sang to Christ. Pliny overheard that public name from outside.',
+    },
+  ],
+  'ic-trajan': [
+    {
+      id: 0,
+      era: 'ancient',
+      title: 'Trajan',
+      bite: 'Trajan writes: do not hunt Christians out. Christ’s name is already a public case.',
+    },
+    {
+      id: 1,
+      era: 'ancient',
+      title: 'Pliny 10.97',
+      bite: 'The emperor answers Pliny. If they keep the name, punish. Do not hunt them.',
+    },
+    {
+      id: 2,
+      era: 'scripture',
+      title: '1 Peter 2',
+      bite: 'Honor the emperor. The churches already named Christ in the open under Rome.',
+    },
+  ],
+  'ic-suetonius': [
+    {
+      id: 0,
+      era: 'ancient',
+      title: 'Suetonius',
+      bite: 'Suetonius names Christians among the people Nero punished. A Roman book names Christ.',
+    },
+    {
+      id: 1,
+      era: 'ancient',
+      title: 'Nero 16',
+      bite: 'A class of people called Christians. Easy Hold stays here — not the Chrestus fight.',
+    },
+    {
+      id: 2,
+      era: 'scripture',
+      title: 'Philippians 4',
+      bite: 'Saints in Caesar’s household. Christ’s name already lived in Rome.',
+    },
+  ],
+  'ic-lucian': [
+    {
+      id: 0,
+      era: 'ancient',
+      title: 'Lucian',
+      bite: 'Lucian writes that Christians still worship the man crucified in Palestine — the crucified Christ.',
+    },
+    {
+      id: 1,
+      era: 'ancient',
+      title: 'Peregrinus',
+      bite: 'He mocks that crucified sophist. He still names the worship they will not drop.',
+    },
+    {
+      id: 2,
+      era: 'scripture',
+      title: '1 Cor 1',
+      bite: 'We preach Christ crucified. Lucian overheard that public name from outside.',
     },
   ],
 }

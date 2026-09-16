@@ -10,6 +10,7 @@ export const BONUS_WORD_MAX = 6
 /**
  * Rude / crude / slang / insult / adult. Stay in the raw dump for size,
  * but never plant or score as candy extras.
+ * Ordinary real English (SNAG, SNAP, BED, …) must stay off this list.
  */
 const SKIP_BONUS = new Set([
   'NUDE',

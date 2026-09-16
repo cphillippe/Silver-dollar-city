@@ -13,6 +13,8 @@ import {
 import {
   bonusWordsFor,
   buildGemPuzzle,
+  cellKey,
+  cellsNeededByOpenPlanted,
   findStraightSpelling,
   gemWordsFor,
   isBonusSpelling,
@@ -23,6 +25,7 @@ import {
   MIN_BONUS_PLANT,
   pathLetters,
   plantCandidates,
+  shouldMissAfterSwipe,
   snapFingerPath,
   tryAddToPath,
 } from '../src/lib/gemSearch.ts'
@@ -104,8 +107,14 @@ assert.equal(isKidFriendlyBonusWord('BED'), true)
 assert.equal(isKidFriendlyBonusWord('NUDE'), false)
 assert.equal(isKidFriendlyBonusWord('SUCK'), false)
 assert.equal(isKidFriendlyBonusWord('HELL'), false)
+assert.equal(isKidFriendlyBonusWord('SNAG'), true, 'SNAG is a real English bonus')
+assert.equal(isKidFriendlyBonusWord('SNAP'), true)
+assert.equal(isKidFriendlyBonusWord('SNOW'), true)
 assert.equal(isPlantableBonusWord('BED'), true)
 assert.equal(isPlantableBonusWord('NUDE'), false)
+assert.equal(isPlantableBonusWord('SNAG'), true, 'SNAG plants and scores')
+assert.equal(isPlantableBonusWord('FAT'), false)
+assert.equal(isPlantableBonusWord('HOLE'), false, 'HOLE stays on the crude skip list')
 assert.equal(COMMON_BONUS_COUNT, COMMON_BONUS_WORDS.size)
 assert.ok(COMMON_BONUS_COUNT >= 900, `dict too thin: ${COMMON_BONUS_COUNT}`)
 for (const word of COMMON_BONUS_WORDS) {
@@ -117,6 +126,7 @@ assert.ok(fatherBoard.planted.length >= MIN_BONUS_PLANT, 'father plants several 
 assert.equal(isBonusSpelling('BED', fatherBoard), true, 'Bed stays in the bonus dict')
 assert.equal(isBonusSpelling('QQQ', fatherBoard), false)
 assert.equal(isBonusSpelling('FAT', fatherBoard), false, 'FAT stays on the rude skip list')
+assert.equal(isBonusSpelling('SNAG', fatherBoard), true, 'SNAG scores as a bonus')
 assert.equal(isBonusSpelling('NEIGHBOR', fatherBoard), false, '7+ letters stay off the bonus band')
 assert.equal(isBonusSpelling('NUDE', fatherBoard), false, 'rude extras do not score')
 assert.ok(COMMON_BONUS_WORDS.has('GET'), 'GET is in the shipped bonus dictionary')
@@ -196,6 +206,49 @@ const missPath = [
 assert.equal(pathLetters(missPath, lettersFromRows(['QQQXXXXX'])), 'QQQ')
 assert.equal(isBonusSpelling('QQQ', puzzleFrom(lettersFromRows(['QQQXXXXX']))), false)
 assert.equal(matchBonusWord(missPath, puzzleFrom(lettersFromRows(['QQQXXXXX'])), []), null)
+
+const snagBoard = puzzleFrom(lettersFromRows(['SNAGXXXX']))
+const snagPath = [
+  { r: 0, c: 0 },
+  { r: 0, c: 1 },
+  { r: 0, c: 2 },
+  { r: 0, c: 3 },
+]
+assert.equal(pathLetters(snagPath, snagBoard.letters), 'SNAG')
+assert.equal(isBonusSpelling('SNAG', snagBoard), true, 'SNAG is a dict bonus')
+assert.equal(matchBonusWord(snagPath, snagBoard, [])?.text, 'SNAG')
+assert.equal(matchBonusWord([...snagPath].reverse(), snagBoard, [])?.text, 'SNAG')
+assert.equal(matchBonusWord(snagPath, snagBoard, ['bonus-snag']), null, 'already-found SNAG does not rematch')
+assert.equal(shouldMissAfterSwipe(true, 4), false, 'already scored — no Miss on finger-up')
+assert.equal(shouldMissAfterSwipe(true, 0), false, 'empty path after a successful clear — no Miss')
+assert.equal(shouldMissAfterSwipe(false, 0), false)
+assert.equal(shouldMissAfterSwipe(false, 1), false)
+assert.equal(shouldMissAfterSwipe(false, 4), true, 'unscored swipe of 4 can miss')
+
+const overlapBoard = {
+  ...puzzleFrom(lettersFromRows(['CATXXXXX', 'XXRXXXXX', 'XXRXXXXX'])),
+  planted: [
+    { id: 'bonus-cat', text: 'CAT', label: 'Cat', kind: 'idea' },
+    { id: 'bonus-car', text: 'CAR', label: 'Car', kind: 'idea' },
+  ],
+  bonusPaths: {
+    'bonus-cat': [
+      { r: 0, c: 0 },
+      { r: 0, c: 1 },
+      { r: 0, c: 2 },
+    ],
+    'bonus-car': [
+      { r: 0, c: 2 },
+      { r: 1, c: 2 },
+      { r: 2, c: 2 },
+    ],
+  },
+}
+const afterCat = cellsNeededByOpenPlanted(overlapBoard, ['bonus-cat'])
+assert.equal(afterCat.has(cellKey({ r: 0, c: 2 })), true, 'shared C stays needed for CAR')
+assert.equal(afterCat.has(cellKey({ r: 1, c: 2 })), true)
+assert.equal(afterCat.has(cellKey({ r: 0, c: 0 })), false, 'exclusive CAT cells drop after CAT is found')
+assert.equal(cellsNeededByOpenPlanted(overlapBoard, ['bonus-cat', 'bonus-car']).size, 0)
 const fatherSample = fatherBoard.planted[0]
 assert.ok(fatherSample, 'father has a planted extra')
 const fatherSamplePath = fatherBoard.bonusPaths[fatherSample.id] ?? findStraightSpelling(fatherBoard.letters, fatherSample.text)
@@ -327,6 +380,10 @@ assert.match(playSrc, /setRound\(\(current\) => current \+ 1\)/)
 assert.match(playSrc, /bonus-banner/)
 assert.match(playSrc, /EASY\.bonusHint/)
 assert.match(playSrc, /is-bonus/)
+assert.match(playSrc, /cellsNeededByOpenPlanted/)
+assert.match(playSrc, /bonusGhosted/)
+assert.match(playSrc, /is-cracked/)
+assert.match(playSrc, /setBonusGhosted\(\[\]\)/)
 assert.match(playSrc, /\+100/)
 assert.match(playSrc, /bonus-plus/)
 assert.match(playSrc, /MatchTakeaway/)
@@ -335,6 +392,11 @@ assert.match(playSrc, /EASY\.bonusMissWord/)
 assert.match(playSrc, /EASY\.bonusMissStraight/)
 assert.match(playSrc, /EASY\.missPenalty/)
 assert.match(playSrc, /miss-banner/)
+assert.match(playSrc, /scoredThisGesture/)
+assert.match(playSrc, /scoredThisGesture\.current = true/)
+assert.match(playSrc, /scoredThisGesture\.current = false/)
+assert.match(playSrc, /if \(scoredThisGesture\.current\) return/)
+assert.match(playSrc, /shouldMissAfterSwipe/)
 assert.match(playSrc, /nextPath\.length >= 3/)
 assert.match(playSrc, /snapFingerPath/)
 assert.match(playSrc, /gem-stage/)
@@ -347,6 +409,10 @@ assert.match(gemCss, /play\.is-gem-search\.is-shake \{\s*animation: none/)
 assert.match(gemCss, /gem-stage \.miss-banner/)
 assert.match(gemCss, /gem-overlay-pop/)
 assert.match(gemCss, /pointer-events: none/)
+assert.match(gemCss, /\.gem-cell\.is-cracked \{/)
+const crackedRule = gemCss.match(/\.gem-cell\.is-cracked \{[^}]+\}/)?.[0] ?? ''
+assert.match(crackedRule, /opacity: 0\.55/)
+assert.doesNotMatch(crackedRule, /pointer-events/, 'cracked bonus cells stay swipeable')
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
   /Not a bonus word/,
@@ -410,6 +476,7 @@ const artSrc = readFileSync(
 )
 assert.match(artSrc, /panel-hurt\.webp/)
 assert.match(artSrc, /panel-father-run\.webp/)
+assert.match(artSrc, /panel-speech\.webp/)
 assert.match(artSrc, /panel-help\.webp/)
 assert.match(artSrc, /<video/)
 assert.match(artSrc, /playsInline/)
@@ -433,13 +500,22 @@ assert.doesNotMatch(puzzleSrc, /timing-dash|road-swipe|story-night/)
 const fatherStory = packLesson('ph-father')?.easy.learn ?? ''
 const fatherPanels = storyPanelsFor('ph-father', gemWordsFor('ph-father').length)
 assert.equal(storyFromPanels(fatherPanels), fatherStory)
-assert.ok(fatherPanels.length >= 3 && fatherPanels.length <= 4)
+assert.equal(fatherPanels.length, 5)
+assert.deepEqual(
+  fatherPanels.map((panel) => panel.scene),
+  ['son-leave', 'hungry', 'speech', 'father-run', 'hug'],
+)
 
 const mercyStory = packLesson('ph-road')?.easy.learn ?? ''
 const mercyPanels = storyPanelsFor('ph-road', mercyWords.length)
 assert.equal(storyFromPanels(mercyPanels), mercyStory)
 assert.ok(mercyPanels.some((panel) => panel.scene === 'help' || panel.scene === 'hurt'))
 assert.ok(mercyPanels.every((panel) => panel.media.kind === 'still' && panel.beatId.includes('ph-road')))
+assert.ok(
+  mercyPanels.every((panel) => panel.media.still?.includes('panel-blast/ph-road/') && panel.media.thumb?.includes('@512.webp')),
+  'ph-road Easy Match panels use panel-blast stills',
+)
+assert.ok(fatherPanels[2]?.media.still?.includes('03-speech-road@1024.webp'), 'father B3 is 03-speech-road')
 assert.equal(splitStorySentences(mercyStory).length, 5)
 
 for (const id of EASY_LINE_ORDER) {
@@ -459,7 +535,9 @@ for (const id of EASY_LINE_ORDER) {
   assert.equal(storyPlayFor(id), play, `${id} play`)
   assert.equal(story.play, play)
   assert.deepEqual(story.beats, panels)
-  assert.equal(panels.length, Math.max(3, Math.min(4, puzzle.words.length)), `${id} panel count`)
+  const expect =
+    id === 'ph-father' ? 5 : Math.max(3, Math.min(4, puzzle.words.length))
+  assert.equal(panels.length, expect, `${id} panel count`)
   assert.ok(panels.every((panel) => panel.text.trim().length > 0), `${id} panel text`)
   assert.ok(panels.every((panel) => panel.media && panel.beatId), `${id} beat + media`)
 }
