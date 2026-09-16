@@ -1,6 +1,7 @@
 import { evidenceFor } from '../content/evidence.ts'
 import { packLesson } from '../content/packCatalog.ts'
 import { EASY, easyChromeLine, easyWhyLine } from './easy.ts'
+import { CLAIM_MERGE_CLAIM, CLAIM_MERGE_WIN } from './claimMerge.ts'
 import { FATHER_RUN_CLAIM } from './fatherRun.ts'
 import { ROAD_MAZE_CLAIM } from './roadMaze.ts'
 import type { GemWord } from './gemSearch.ts'
@@ -58,4 +59,9 @@ export function fatherWinBeat(): SuccessBeat {
 
 export function mazeWinBeat(): SuccessBeat {
   return { title: `Yes · ${ROAD_MAZE_CLAIM.replace(/\.$/, '')}`, why: EASY.mazeWinWhy }
+}
+
+/** After the arcade win only — one takeaway line, not a why-quiz. */
+export function mergeWinBeat(): SuccessBeat {
+  return { title: CLAIM_MERGE_WIN, why: CLAIM_MERGE_CLAIM }
 }

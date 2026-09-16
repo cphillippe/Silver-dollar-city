@@ -107,13 +107,14 @@ assert.match(playSrc, /FATHER_RUN_CLAIM/)
 assert.match(playSrc, /EASY\.holdNext/)
 assert.match(playSrc, /cta-dock/)
 assert.match(playSrc, /onClear/)
-assert.doesNotMatch(playSrc, /road-swipe|claim-merge|story-night/)
+assert.doesNotMatch(playSrc, /road-swipe|story-night/)
 
 const puzzleSrc = readFileSync(new URL('../src/components/PuzzlePlay.tsx', import.meta.url), 'utf8')
 assert.match(puzzleSrc, /FatherRunPlay/)
 assert.match(puzzleSrc, /case 'father-run'/)
 assert.match(puzzleSrc, /case 'panel-blast'/)
-assert.doesNotMatch(puzzleSrc, /timing-dash|road-swipe|claim-merge|story-night/)
+assert.match(puzzleSrc, /case 'claim-merge'/)
+assert.doesNotMatch(puzzleSrc, /timing-dash|road-swipe|story-night/)
 
 const xml = readFileSync(new URL('../src/content/packs/parable-hollow.xml', import.meta.url), 'utf8')
 assert.match(
