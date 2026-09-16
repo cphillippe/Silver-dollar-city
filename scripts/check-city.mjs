@@ -1083,7 +1083,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.65')
+assert.equal(APP_VERSION, '1.4.66')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -2274,7 +2274,12 @@ assert.match(
   readFileSync(new URL('../src/components/challenges/SortPlay.tsx', import.meta.url), 'utf8'),
   /easyChromeLine/,
 )
-assert.match(hubSrc, /easy \? null : <AdSlot slot="hub-banner"/)
+assert.doesNotMatch(hubSrc, /slot="hub-banner"/)
+assert.match(hubSrc, /EASY\.supportTrail/)
+assert.match(
+  readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8'),
+  /SceneAd/,
+)
 assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /settings-advanced/,

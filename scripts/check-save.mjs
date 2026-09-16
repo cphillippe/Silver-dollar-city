@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import { adsAreVisible, adsEnabledDefault, AD_SLOTS, ADS_NEVER_COVER } from '../src/config/ads.ts'
+import { adsAreVisible, adsEnabledDefault, AD_SLOTS, ADS_NEVER_COVER, isBetweenSceneTransition, softAdsDefault, softAdsVisible } from '../src/config/ads.ts'
 import { APP_VERSION, SAVE_SCHEMA_VERSION } from '../src/config/app.ts'
 import {
   encodeShareCode,
@@ -16,14 +16,25 @@ assert.equal(pkg.version, APP_VERSION, 'package.json version must match APP_VERS
 assert.equal(SAVE_SCHEMA_VERSION, 1)
 
 assert.equal(adsEnabledDefault, false)
-assert.equal(adsAreVisible('default'), false)
-assert.equal(adsAreVisible('on'), true)
+assert.equal(softAdsDefault, true)
 assert.equal(adsAreVisible('off'), false)
-assert.ok(AD_SLOTS['hub-banner'])
-assert.ok(AD_SLOTS['after-daily'])
-assert.ok(AD_SLOTS['between-districts'])
+assert.equal(softAdsVisible('default', false), true)
+assert.equal(softAdsVisible('default', true), false)
+assert.equal(softAdsVisible('off', false), false)
+assert.equal(softAdsVisible('on', true), false)
+assert.ok(AD_SLOTS['between-scenes'])
+assert.equal(Object.keys(AD_SLOTS).includes('hub-banner'), false)
 assert.ok(ADS_NEVER_COVER.some((line) => /takeaway/i.test(line)))
 assert.ok(ADS_NEVER_COVER.some((line) => /Keep/i.test(line)))
+assert.ok(ADS_NEVER_COVER.some((line) => /Journal/i.test(line)))
+assert.ok(ADS_NEVER_COVER.some((line) => /claim-merge/i.test(line)))
+assert.ok(ADS_NEVER_COVER.some((line) => /father-run/i.test(line)))
+assert.ok(isBetweenSceneTransition('hub', 'link'))
+assert.ok(isBetweenSceneTransition('link', 'hub'))
+assert.ok(isBetweenSceneTransition('hub', 'learn'))
+assert.equal(isBetweenSceneTransition('hub', 'journal'), false)
+assert.equal(isBetweenSceneTransition('learn', 'link'), false)
+assert.equal(isBetweenSceneTransition('hub', 'settings'), false)
 
 const legacy = {
   started: true,
@@ -198,6 +209,13 @@ assert.match(settingsSrc, /Clean parchment/)
 assert.match(settingsSrc, /Easy mode/)
 assert.match(settingsSrc, /setEasyMode/)
 assert.match(settingsSrc, /eyebrow">Reading/)
+assert.match(settingsSrc, /Support the trail/)
+assert.match(settingsSrc, /Remove ads/)
+assert.match(settingsSrc, /name: 'shop'/)
+assert.ok(
+  settingsSrc.indexOf('Support the trail') < settingsSrc.indexOf('eyebrow">Reading'),
+  'Support the trail should sit above Reading',
+)
 assert.ok(
   settingsSrc.indexOf('eyebrow">Look') < settingsSrc.indexOf('Export JSON'),
   'Look picker should sit above export so a cold player can switch themes',

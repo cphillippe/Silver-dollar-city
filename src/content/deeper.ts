@@ -572,6 +572,24 @@ const DOSSIERS: Record<string, DeeperLink[]> = {
     rsv('1 Corinthians 15:3–8'),
     rsv('Matthew 5:14–16'),
   ],
+  'ms-bread': [
+    rsv('Matthew 6:9–11'),
+    rsv('Matthew 6:25–33'),
+    father(
+      'Augustine, Sermon on the Mount II',
+      'https://www.newadvent.org/fathers/16012.htm',
+      'Augustine · daily bread as gift',
+    ),
+  ],
+  'hw-hope': [
+    rsv('Romans 8:24–25'),
+    rsv('Hebrews 11:1'),
+    father(
+      'Augustine, Confessions X',
+      'https://www.newadvent.org/fathers/110110.htm',
+      'Augustine · hope for what is not yet seen',
+    ),
+  ],
   'j-trail-1': [rsv('Lamentations 3:22–23')],
   'j-trail-2': [rsv('Lamentations 3:22–23')],
   'j-trail-3': [rsv('Luke 15:20')],

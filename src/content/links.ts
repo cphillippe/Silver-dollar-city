@@ -16,6 +16,8 @@ export const STREET_SKIP_IDS = [
   'j-trail-3',
   'j-trail-5',
   'j-trail-7',
+  'ms-bread',
+  'hw-hope',
 ] as const
 
 const PLACE_NODES: LinkNode[] = [

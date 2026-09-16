@@ -89,7 +89,7 @@ export function ClaimMergePlay({
         playGemPop(event.rank && event.rank >= WIN_RANK - 1 ? 'win' : event.combo && event.combo > 1 ? 'bonus' : 'find')
         if (event.combo && event.combo > 1) {
           setComboFlash(event.combo)
-          window.setTimeout(() => setComboFlash(0), 700)
+          window.setTimeout(() => setComboFlash(0), 880)
         }
         if (event.points) {
           setPlus(`+${event.points}`)
@@ -101,7 +101,7 @@ export function ClaimMergePlay({
           setPops((current) => [...current.slice(-5), { id, x: event.x ?? 0, y: event.y ?? 0, rank: event.rank ?? 0 }])
           window.setTimeout(() => {
             setPops((current) => current.filter((pop) => pop.id !== id))
-          }, 620)
+          }, 780)
         }
         setToast('')
         setToastMiss(false)
@@ -298,7 +298,12 @@ export function ClaimMergePlay({
           <span
             key={pop.id}
             className={`merge-pop hue-${mergeSkin(pop.rank).hue}`}
-            style={{ left: `${(pop.x / BOWL_WIDTH) * 100}%`, top: `${(pop.y / BOWL_HEIGHT) * 100}%` }}
+            style={{
+              left: `${(pop.x / BOWL_WIDTH) * 100}%`,
+              top: `${(pop.y / BOWL_HEIGHT) * 100}%`,
+              width: 36 + pop.rank * 14,
+              height: 36 + pop.rank * 14,
+            }}
           >
             {SHARDS.map((i) => (
               <i key={i} style={{ ['--i' as string]: i }} />
@@ -326,18 +331,18 @@ export function ClaimMergePlay({
             <strong>{takeaway.why}</strong>
           </p>
           <div className="cta-dock">
+            <button type="button" className="btn gold xl snap-bins" onClick={replay}>
+              One more bowl
+            </button>
             <button
               type="button"
-              className="btn primary xl snap-bins"
+              className="btn primary xl"
               onClick={() => onEasyStop?.('hold')}
             >
               {EASY.holdNext}
             </button>
             <button type="button" className="btn xl" onClick={() => onEasyStop?.('home')}>
               {EASY.home}
-            </button>
-            <button type="button" className="text-link" onClick={replay}>
-              One more bowl
             </button>
           </div>
         </>

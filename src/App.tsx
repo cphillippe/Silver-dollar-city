@@ -1,25 +1,41 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { AreaView } from './components/AreaView'
 import { AppShell } from './components/AppShell'
 import { ChallengeScreen } from './components/ChallengeScreen'
 import { DailyTrail } from './components/DailyTrail'
 import { Hub } from './components/Hub'
 import { Journal } from './components/Journal'
+import { PackStreet } from './components/PackStreet'
 import { Settings } from './components/Settings'
+import { Shop } from './components/Shop'
 import { DefendScreen } from './components/DefendScreen'
 import { LearnScreen } from './components/LearnScreen'
 import { LinkScreen } from './components/LinkScreen'
 import { Profile } from './components/Profile'
+import { SceneAd } from './components/SceneAd'
 import { Vista } from './components/Vista'
 import { Welcome } from './components/Welcome'
+import { adsAreVisible, isBetweenSceneTransition } from './config/ads'
 import { isEasy } from './lib/easy'
 import { useProgress } from './store/progress'
 import type { View } from './types'
+
+const AD_COOLDOWN_MS = 20_000
 
 function easyNightWatchHit(): boolean {
   if (typeof window === 'undefined') return false
   const blob = `${window.location.hash} ${window.location.search} ${window.location.pathname}`
   return /defend|night-?watch/i.test(blob)
+}
+
+function isLessonView(view: View): boolean {
+  return (
+    view.name === 'learn' ||
+    view.name === 'link' ||
+    view.name === 'daily' ||
+    view.name === 'challenge' ||
+    view.name === 'pack-street'
+  )
 }
 
 export default function App() {
@@ -31,13 +47,53 @@ export default function App() {
     if (progress.started && walked) return { name: 'hub' }
     return { name: 'welcome' }
   })
+  const [sceneAd, setSceneAd] = useState(false)
+  const [pending, setPending] = useState<View | null>(null)
+  const lastAdAt = useRef(0)
 
-  function go(next: View) {
+  function go(next: View, skipAd = false) {
     if (easy && next.name === 'defend') {
+      setSceneAd(false)
+      setPending(null)
       setView({ name: 'hub' })
       return
     }
+
+    const adsOn = !skipAd && adsAreVisible()
+    const cooled = Date.now() - lastAdAt.current >= AD_COOLDOWN_MS
+    const between = isBetweenSceneTransition(view.name, next.name)
+
+    if (adsOn && cooled && between && view.name === 'hub' && isLessonView(next)) {
+      lastAdAt.current = Date.now()
+      setPending(next)
+      setSceneAd(true)
+      return
+    }
+
+    if (adsOn && cooled && between && isLessonView(view) && next.name === 'hub') {
+      lastAdAt.current = Date.now()
+      setPending(null)
+      setView({ name: 'hub' })
+      setSceneAd(true)
+      return
+    }
+
+    setSceneAd(false)
+    setPending(null)
     setView(next)
+  }
+
+  function continueFromAd() {
+    const dest = pending ?? { name: 'hub' as const }
+    setSceneAd(false)
+    setPending(null)
+    setView(dest)
+  }
+
+  function supportFromAd() {
+    setSceneAd(false)
+    setPending(null)
+    setView({ name: 'shop' })
   }
 
   useEffect(() => {
@@ -91,10 +147,17 @@ export default function App() {
       ) : null}
       {view.name === 'vista' ? <Vista onNavigate={go} /> : null}
       {view.name === 'settings' ? <Settings onNavigate={go} /> : null}
+      {view.name === 'shop' ? <Shop onNavigate={go} /> : null}
+      {view.name === 'pack-street' ? (
+        <PackStreet packId={view.packId} onNavigate={go} />
+      ) : null}
       {view.name === 'defend' && !easy ? <DefendScreen onNavigate={go} /> : null}
       {view.name === 'link' ? <LinkScreen onNavigate={go} /> : null}
       {view.name === 'learn' ? <LearnScreen onNavigate={go} /> : null}
       {view.name === 'profile' ? <Profile onNavigate={go} /> : null}
+      {sceneAd && view.name === 'hub' ? (
+        <SceneAd onContinue={continueFromAd} onSupport={supportFromAd} />
+      ) : null}
     </AppShell>
   )
 }

@@ -4916,6 +4916,84 @@ html[data-theme='dusk'] .hub.is-town .street-link {
   display: none;
 }
 
+.scene-ad {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 16px 16px calc(var(--safe-bottom) + 12px);
+  background: rgba(18, 6, 46, 0.72);
+}
+
+.scene-ad-card {
+  width: min(420px, 100%);
+  padding: 18px 16px 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--dusk-2);
+  box-shadow: var(--shadow);
+}
+
+.scene-ad-card h2 {
+  margin: 0 0 8px;
+  font-size: 1.45rem;
+}
+
+.scene-ad-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.scene-ad-actions .btn {
+  width: 100%;
+}
+
+.easy-extra-streets {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.easy-extra-streets .btn {
+  width: 100%;
+  opacity: 0.92;
+}
+
+.shop-pack-list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.shop-pack {
+  padding: 12px 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(244, 234, 210, 0.04);
+}
+
+.shop-pack h3 {
+  margin: 0 0 6px;
+  font-size: 1.15rem;
+}
+
+.shop-pack .btn {
+  margin-top: 10px;
+  width: 100%;
+}
+
+.pack-street .btn.xl {
+  width: 100%;
+  margin-top: 14px;
+}
+
 .settings-card {
   background: var(--mist);
   border: 1px solid var(--line);
@@ -9129,7 +9207,7 @@ html[data-easy='on'] .next-tap {
   overflow: hidden;
   width: min(100%, 390px);
   aspect-ratio: 360 / 520;
-  max-height: min(52vh, 430px);
+  max-height: min(64vh, 520px);
   margin: 0 auto;
   border-radius: 28px 28px 42px 42px;
   touch-action: none;
@@ -9185,6 +9263,7 @@ html[data-easy='on'] .next-tap {
   text-transform: uppercase;
   text-align: center;
   line-height: 1.05;
+  animation: merge-pop-in 0.22s cubic-bezier(0.12, 1.45, 0.28, 1);
   box-shadow:
     0 6px 0 rgba(40, 8, 24, 0.4),
     inset 0 6px 0 rgba(255, 255, 255, 0.55),
@@ -9219,8 +9298,8 @@ html[data-easy='on'] .next-tap {
 }
 
 .merge-pop {
-  width: 28px;
-  height: 28px;
+  width: 48px;
+  height: 48px;
   z-index: 5;
   pointer-events: none;
 }
@@ -9230,22 +9309,31 @@ html[data-easy='on'] .next-tap {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: #fff6b8;
-  animation: merge-shard 0.55s ease-out forwards;
-  animation-delay: calc(var(--i) * 18ms);
+  animation: merge-shard 0.7s ease-out forwards;
+  animation-delay: calc(var(--i) * 16ms);
 }
 
 .merge-pop b {
-  width: 12px;
-  height: 12px;
+  width: 16px;
+  height: 16px;
   background: #ffcc33;
 }
 
 .merge-combo {
   margin: 0;
+  font-size: 1.15rem;
+}
+
+.play.is-claim-merge.is-combo .merge-bowl {
+  box-shadow:
+    inset 0 0 0 4px rgba(255, 204, 51, 0.85),
+    inset 0 -18px 0 rgba(80, 20, 40, 0.35),
+    0 10px 0 rgba(80, 20, 40, 0.4),
+    0 0 28px rgba(255, 204, 51, 0.45);
 }
 
 .hue-lime,
@@ -9280,7 +9368,7 @@ html[data-easy='on'] .next-tap {
 }
 
 .play.is-claim-merge.is-win .merge-bowl {
-  max-height: min(38vh, 320px);
+  max-height: min(48vh, 400px);
 }
 
 .play.is-claim-merge .merge-bowl .win-burst {
@@ -9311,13 +9399,25 @@ html[data-easy='on'] .next-tap {
   }
 }
 
+@keyframes merge-pop-in {
+  0% {
+    transform: translate(-50%, -50%) scale(0.55);
+  }
+  70% {
+    transform: translate(-50%, -50%) scale(1.12);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
 @keyframes merge-shard {
   0% {
     transform: translate(-50%, -50%) scale(1);
     opacity: 1;
   }
   100% {
-    transform: translate(calc(-50% + (var(--i) - 2.5) * 18px), calc(-50% - 36px)) scale(0.2);
+    transform: translate(calc(-50% + (var(--i) - 2.5) * 28px), calc(-50% - 52px)) scale(0.15);
     opacity: 0;
   }
 }
@@ -9341,6 +9441,7 @@ html[data-easy='on'] .next-tap {
   .play.is-road-maze.is-shake .maze-board,
   .play.is-claim-merge.is-shake .merge-bowl,
   .merge-ball.is-lock,
+  .merge-ball,
   .merge-pop i,
   .merge-pop b {
     animation: none;

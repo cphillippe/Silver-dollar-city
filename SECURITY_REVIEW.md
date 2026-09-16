@@ -190,9 +190,9 @@ Google Fonts (`fonts.googleapis.com` / `fonts.gstatic.com`) must be allowlisted 
 
 ### 3. Ad-slot injection (current code)
 
-**None found for live third-party script load.** `adsEnabledDefault` is `false`. `AdSlot` renders static labeled placeholders (`src/components/AdSlot.tsx`, `src/config/ads.ts`) on Hub (`hub-banner`, `between-districts`). `after-daily` is defined but not mounted. The Settings toggle only shows those placeholders; it does not inject a network SDK.
+**None found for live third-party script load.** `adsEnabledDefault` is `false`. Between-scene `SceneAd` is static in-app copy (`src/components/SceneAd.tsx`, `src/config/ads.ts`) mounted on hub only. Shop is an on-device stub (no checkout script). Settings / Shop toggles do not inject a network SDK.
 
-**Release note (still do this before going live with ads):** load the official SDK only (no `innerHTML` of ad markup, no remote script URL from `localStorage`). Treat `silver-city-ads` as a UX pref, not a security control. Extend CSP (MED-5) with vendor origins. Never cover Keep/Toss, RecallGate, or Journal (already documented in `ADS_NEVER_COVER`).
+**Release note (still do this before going live with ads):** load the official SDK only (no `innerHTML` of ad markup, no remote script URL from `localStorage`). Treat `silver-city-ads` as a UX pref, not a security control. Extend CSP (MED-5) with vendor origins. Never cover Keep/Toss, RecallGate, Match, Hold, arcade play, or Journal (already documented in `ADS_NEVER_COVER`).
 
 ### 4. Secrets in repo
 

@@ -23,7 +23,9 @@ export function AppShell({ view, onNavigate, children }: AppShellProps) {
     view.name === 'defend' ||
     view.name === 'link' ||
     view.name === 'learn' ||
-    view.name === 'profile'
+    view.name === 'profile' ||
+    view.name === 'shop' ||
+    view.name === 'pack-street'
   const townView = view.name === 'hub'
   const hideGoalbar = hideChrome || playView || townView || easy
 
@@ -96,7 +98,7 @@ export function AppShell({ view, onNavigate, children }: AppShellProps) {
             </button>
             <button
               type="button"
-              className={view.name === 'settings' ? 'is-active' : ''}
+              className={view.name === 'settings' || view.name === 'shop' ? 'is-active' : ''}
               onClick={() => onNavigate({ name: 'settings' })}
             >
               Settings

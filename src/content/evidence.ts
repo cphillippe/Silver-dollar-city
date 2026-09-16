@@ -1,6 +1,7 @@
 import { journalEntries } from './journal.ts'
 import { hashString } from '../lib/dates.ts'
 import { briefFromPack, packBrief, PACK_CATALOG } from './packCatalog.ts'
+import { PAID_STREETS } from './paidStreets.ts'
 import type { LessonTierId } from './packTypes.ts'
 
 export interface EvidenceBrief {
@@ -488,6 +489,9 @@ export const EVIDENCE: Record<string, EvidenceBrief> = {
 
 for (const lesson of PACK_CATALOG.lessons) {
   EVIDENCE[lesson.id] = briefFromPack(lesson, 'medium')
+}
+for (const street of PAID_STREETS) {
+  EVIDENCE[street.id] = street.brief
 }
 
 export function evidenceFor(id: string): EvidenceBrief | undefined {
