@@ -78,7 +78,6 @@ export function RoadMazePlay({
   const [plusFlash, setPlusFlash] = useState('')
   const [walking, setWalking] = useState(false)
   const [score, setScore] = useState(0)
-  const [combo, setCombo] = useState(0)
   const [popAt, setPopAt] = useState('')
   const [kitPop, setKitPop] = useState('')
   const [comboFlash, setComboFlash] = useState(0)
@@ -90,6 +89,7 @@ export function RoadMazePlay({
   const swipe = useRef<{ x: number; y: number } | null>(null)
   const usedTap = useRef(false)
   const misses = useRef(0)
+  const comboRef = useRef(0)
   const openedRef = useRef(1)
   const cleared = useRef(false)
 
@@ -129,14 +129,12 @@ export function RoadMazePlay({
   }
 
   function juiceCollect(cell: MazeCoord, itemId: MazeItemId) {
-    setCombo((n) => {
-      const next = n + 1
-      if (next >= 2) {
-        setComboFlash(next)
-        window.setTimeout(() => setComboFlash(0), 700)
-      }
-      return next
-    })
+    comboRef.current += 1
+    const next = comboRef.current
+    if (next >= 2) {
+      setComboFlash(next)
+      window.setTimeout(() => setComboFlash(0), 700)
+    }
     setScore((pts) => pts + MAZE_ITEM_SCORE)
     setPopAt(mazeKey(cell))
     setKitPop(itemId)
@@ -154,6 +152,7 @@ export function RoadMazePlay({
     wonRef.current = false
     cleared.current = false
     misses.current = 0
+    comboRef.current = 0
     openedRef.current = 1
     setAt(MAZE_START)
     setGot([])
@@ -167,7 +166,6 @@ export function RoadMazePlay({
     setWalking(false)
     setFlipping(null)
     setScore(0)
-    setCombo(0)
     setPopAt('')
     setKitPop('')
     setComboFlash(0)
