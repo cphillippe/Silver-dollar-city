@@ -9738,21 +9738,61 @@ html[data-easy='on'] .next-tap {
 .play.is-source-dig .dig-board .win-burst {
   position: absolute;
   inset: 0;
-  z-index: 4;
+  z-index: 6;
   pointer-events: none;
+  overflow: visible;
+}
+
+.play.is-source-dig .win-flash,
+.play.is-source-dig .win-ring {
+  position: absolute;
+}
+
+.play.is-source-dig.is-win .dig-board {
+  padding-top: 54px;
 }
 
 .play.is-source-dig .win-stamp-wrap {
   position: absolute;
-  top: 12%;
+  top: 12px;
   left: 50%;
   right: auto;
-  transform: translateX(-50%);
-  z-index: 5;
   width: max-content;
+  max-width: 92%;
+  transform: translateX(-50%);
+  z-index: 8;
+}
+
+.play.is-source-dig.is-win .win-stamp {
+  font-size: clamp(1.05rem, 5vw, 1.45rem);
+  letter-spacing: 0.14em;
+}
+
+.play.is-source-dig.is-win .match-yes {
+  margin-top: 4px;
+}
+
+.play.is-source-dig .match-score.is-juice {
+  animation: merge-score-pop 0.42s cubic-bezier(0.12, 1.45, 0.28, 1);
+}
+
+.dig-combo {
+  position: absolute;
+  left: 50%;
+  top: 28%;
+  z-index: 5;
+  margin: 0;
+  transform: translateX(-50%);
+  color: #fff6c8;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-shadow: 0 3px 0 #e09412;
+  pointer-events: none;
 }
 
 .dig-tablet {
+  position: relative;
+  overflow: hidden;
   display: grid;
   gap: 4px;
   justify-items: start;
@@ -9786,6 +9826,30 @@ html[data-easy='on'] .next-tap {
 
 .dig-tablet.is-open {
   cursor: default;
+}
+
+.dig-tablet.is-pop .dig-shard,
+.dig-tablet.is-pop .dig-burst {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: #fff6c8;
+  z-index: 3;
+}
+
+.dig-tablet.is-pop .dig-shard {
+  animation: maze-shard 0.42s ease forwards;
+}
+
+.dig-tablet.is-pop .dig-burst {
+  width: 14px;
+  height: 14px;
+  background: #ff5a7a;
+  animation: maze-shard 0.48s ease forwards;
 }
 
 .dig-era {
@@ -9878,6 +9942,8 @@ html[data-easy='on'] .next-tap {
   .play.is-claim-merge.is-shake .merge-bowl,
   .play.is-source-dig.is-shake .dig-board,
   .dig-tablet.is-glow,
+  .dig-tablet.is-pop .dig-shard,
+  .dig-tablet.is-pop .dig-burst,
   .merge-ball.is-lock,
   .merge-ball.is-cue,
   .merge-ball,
