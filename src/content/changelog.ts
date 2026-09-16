@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.84',
+    title: 'Panel-blast wire · Easy core trail',
+    when: '2026-09-16',
+    items: [
+      'Easy Mercy / road-maze (ph-road, Samaritan LOCKED) and the father-run (ph-father) now show the Gemini panel-blast stills at public/assets/panel-blast/. Hero frames use @1024; thumbs use @512. Father B3 is 03-speech-road — sorry + headed home — not a before-* archive',
+      'Teach stays Learn → play → Hold. One more loops stay. Stores stay parked. Play Billing, StoreKit, and AdMob flags stay blank. Pages still cannot charge',
+      'Support Silver City 1.4.83, Stone Court 1.4.82, and Fun arcade juice stay. Night Watch and Town stay hidden on Easy. Journal ungated. Never a hard paywall',
+    ],
+  },
+  {
     version: '1.4.83',
     title: 'Support Silver City · Easy core trail',
     when: '2026-09-16',
@@ -1684,6 +1694,10 @@ export function latestChange(version: string): ChangeNote {
   const note = CHANGELOG.find((item) => item.version === version) ?? CHANGELOG[0]
   if (!note) {
     return { version, title: 'Easy core trail', when: '', items: [] }
+  }
+  if (note.version === '1.4.84') {
+    const prior = latestChange('1.4.83')
+    return { ...note, items: [...note.items, ...prior.items] }
   }
   if (note.version === '1.4.83') {
     const prior = latestChange('1.4.82')

@@ -440,6 +440,11 @@ const mercyPanels = storyPanelsFor('ph-road', mercyWords.length)
 assert.equal(storyFromPanels(mercyPanels), mercyStory)
 assert.ok(mercyPanels.some((panel) => panel.scene === 'help' || panel.scene === 'hurt'))
 assert.ok(mercyPanels.every((panel) => panel.media.kind === 'still' && panel.beatId.includes('ph-road')))
+assert.ok(
+  mercyPanels.every((panel) => panel.media.still?.includes('panel-blast/ph-road/') && panel.media.thumb?.includes('@512.webp')),
+  'ph-road Easy Match panels use panel-blast stills',
+)
+assert.ok(fatherPanels[2]?.media.still?.includes('03-speech-road@1024.webp'), 'father B3 is 03-speech-road')
 assert.equal(splitStorySentences(mercyStory).length, 5)
 
 for (const id of EASY_LINE_ORDER) {
