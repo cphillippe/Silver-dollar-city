@@ -317,10 +317,7 @@ export function FatherRunPlay({
           </p>
         ) : null}
       </div>
-      <p className={`match-score ${plusFlash ? 'is-juice' : ''}`}>
-        {score}
-        {phase === 'hug' ? ' · hugged' : ''}
-      </p>
+      <p className={`match-score ${plusFlash ? 'is-juice' : ''}`}>{score}</p>
       <ol className="run-thumbs" aria-label="Story beats" style={{ ['--story-n' as string]: panels.length }}>
         {panels.map((panel, index) => {
           const open = index < opened || phase === 'hug'
