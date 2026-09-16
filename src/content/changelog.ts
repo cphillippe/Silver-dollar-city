@@ -8,6 +8,19 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.70',
+    title: 'Fun one more run · Easy core trail',
+    when: '2026-09-16',
+    items: [
+      'Story Creek father-run keeps the road after Hugged! — the dash stays a game, not a story card swap',
+      'Mercy dashes pop +25 shards. A two-dash streak is Combo. The hug is +100',
+      'After Hugged!, one takeaway then Hold next is the filled tap. One more run is the gold replay — a full dash from the start, not the miss closer',
+      'A miss still Run again with a closer start. Night Watch and Town stay hidden on Easy',
+      'Freemium 1.4.66, claim-merge juice 1.4.67, Dig deeper 1.4.68, and One more road 1.4.69 stay. Soft ads never cover Match, Hold, or arcade (including source-dig). Journal ungated. Core Easy free',
+      'Match extras and Hold Why Blast stay. Place titles stay Story Creek, Witness Square, Sky Watch, Why Gate, Meaning Ridge',
+    ],
+  },
+  {
     version: '1.4.69',
     title: 'Fun one more road · Easy core trail',
     when: '2026-09-16',
@@ -1505,6 +1518,10 @@ export function latestChange(version: string): ChangeNote {
   const note = CHANGELOG.find((item) => item.version === version) ?? CHANGELOG[0]
   if (!note) {
     return { version, title: 'Easy core trail', when: '', items: [] }
+  }
+  if (note.version === '1.4.70') {
+    const prior = latestChange('1.4.69')
+    return { ...note, items: [...note.items, ...prior.items] }
   }
   if (note.version === '1.4.69') {
     const prior = latestChange('1.4.68')
