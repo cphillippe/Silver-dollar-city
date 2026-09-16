@@ -3,7 +3,7 @@ import { paidStreetForPack } from '../content/paidStreets'
 import { shopPack, packPaywallLine } from '../config/commerce'
 import { localDateKey } from '../lib/dates'
 import { packIsUnlocked } from '../lib/commerce'
-import { packStreetLocked, purchaseOffer, type BillingOffer } from '../lib/billing'
+import { checkoutOffer, packStreetLocked, type BillingOffer } from '../lib/billing'
 import { EASY, isEasy } from '../lib/easy'
 import { RecallGate } from './RecallGate'
 import { CheckoutSheet } from './CheckoutSheet'
@@ -72,11 +72,12 @@ export function PackStreet({ packId, onNavigate }: PackStreetProps) {
           <CheckoutSheet
             offer={checkout}
             onConfirm={() => {
-              const result = purchaseOffer(checkout)
-              setCheckout(null)
-              if (result.status === 'purchased' || result.status === 'already') {
-                if (!packStreetLocked(packId, result.commerce)) setPhase('learn')
-              }
+              void checkoutOffer(checkout).then((result) => {
+                setCheckout(null)
+                if (result.status === 'purchased' || result.status === 'already') {
+                  if (!packStreetLocked(packId, result.commerce)) setPhase('learn')
+                }
+              })
             }}
             onCancel={() => setCheckout(null)}
           />
