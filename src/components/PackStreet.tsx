@@ -23,7 +23,7 @@ export function PackStreet({ packId, onNavigate }: PackStreetProps) {
     return (
       <main className="pack-street page">
         <button type="button" className="text-link" onClick={() => onNavigate({ name: 'shop' })}>
-          ← Packs
+          ← Street Packs
         </button>
         <p>That street is not in this build.</p>
       </main>
@@ -34,7 +34,7 @@ export function PackStreet({ packId, onNavigate }: PackStreetProps) {
     return (
       <main className="pack-street page">
         <button type="button" className="text-link" onClick={() => onNavigate({ name: 'shop' })}>
-          ← Packs
+          ← Street Packs
         </button>
         <header className="page-head">
           <p className="eyebrow">{street.place}</p>
@@ -42,7 +42,7 @@ export function PackStreet({ packId, onNavigate }: PackStreetProps) {
           <p>This street is extra. The core Easy trail stays free — never a paywall on Mercy, Match, or Hold.</p>
         </header>
         <button type="button" className="btn gold xl" onClick={() => onNavigate({ name: 'shop' })}>
-          Unlock in Packs
+          Unlock in Street Packs
         </button>
       </main>
     )

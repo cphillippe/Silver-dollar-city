@@ -18,6 +18,7 @@ export const CHANGELOG: ChangeNote[] = [
       'Packs shop: Mill Street and Harbor Walk are extra streets behind unlock flags. Core 39 facts stay included',
       'Remove ads is “Keep the quiet trail — Remove ads.” On Pages it is an honest web stub (Unlock on this device + Restore) that flips the same flag Play Billing will set later',
       'Settings opens with Street Packs · Remove ads · Progress stays on this device (export/import). Easy home keeps Match and Hold first',
+      'Welcome Easy names the walk: Puzzle trail. Fold the page. Keep the evidence',
       'Night Watch and Town stay hidden on Easy. Foundation gate, Match extras, and Hold why-blast stay',
       'Claim-merge bowl juice: snappier drops and contact merges, bigger pops, combos linger, 390px bowl uses more of the phone',
       'After MERGED!, One more bowl is the gold tap — arcade-first, Hold next still there. Bowl full stays Merge again',

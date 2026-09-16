@@ -1,4 +1,5 @@
 import { APP_VERSION } from '../config/app'
+import { TRAIL_SUBTITLE } from '../config/commerce'
 import { STORY } from '../content/story'
 import { EASY, EASY_MATCH_LINE, easyLineHeld } from '../lib/easy'
 import { Avatar } from './Avatar'
@@ -44,7 +45,7 @@ export function Welcome({ onNavigate }: WelcomeProps) {
           Silver City
           <span>Unending Evidence</span>
         </h1>
-        {progress.easyMode ? null : <p className="welcome-goal">{STORY.purpose}</p>}
+        <p className="welcome-goal">{progress.easyMode ? TRAIL_SUBTITLE : STORY.purpose}</p>
         {progress.easyMode ? null : <p className="welcome-who">{STORY.who}</p>}
         <div className="welcome-cast">
           <figure>
