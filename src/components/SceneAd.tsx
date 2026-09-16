@@ -16,7 +16,7 @@ export function SceneAd({ onContinue, onSupport }: SceneAdProps) {
         <p className="eyebrow">Between scenes</p>
         <h2 id="scene-ad-title">A quiet pause</h2>
         <p>{SCENE_PAUSE_COPY}</p>
-        <p className="quiet">Never over Match, Hold, or arcade play.</p>
+        <p className="quiet">Never over Match, Hold, arcade, or source-dig.</p>
         <div className="scene-ad-actions">
           <button type="button" className="btn primary xl" onClick={onContinue}>
             Continue the trail

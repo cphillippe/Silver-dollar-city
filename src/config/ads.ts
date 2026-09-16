@@ -20,7 +20,7 @@ export const AD_SLOTS = {
   'between-scenes': {
     id: 'between-scenes',
     label: 'Between scenes',
-    where: 'Home ↔ lesson transitions only — never over Match, Hold, or arcade play',
+    where: 'Home ↔ lesson transitions only — never over Match, Hold, arcade, or source-dig',
   },
 } as const
 
@@ -76,11 +76,24 @@ export type ViewName = string
 
 const HOME = new Set(['hub'])
 const LESSON = new Set(['learn', 'link', 'daily', 'challenge', 'pack-street'])
-const NEVER = new Set(['journal', 'settings', 'profile', 'shop', 'welcome', 'defend', 'vista', 'area'])
+const LEAVE_TO_HOME = new Set(['learn', 'link', 'daily', 'challenge', 'pack-street', 'journal'])
+const NEVER_ENTER = new Set(['journal', 'settings', 'profile', 'shop', 'welcome', 'defend', 'vista', 'area'])
 
-/** Soft ads only between home and a lesson — never Journal, never play chrome. */
+/**
+ * Soft pause sits on Home only.
+ * Fires hub → Match/Learn/arcade (before play mounts) and
+ * Match/Hold/arcade/Journal → hub (after those boards unmount).
+ * Never delays Hold (hub → journal) and never covers play chrome.
+ */
 export function isBetweenSceneTransition(fromName: ViewName, toName: ViewName): boolean {
   if (fromName === toName) return false
-  if (NEVER.has(fromName) || NEVER.has(toName)) return false
-  return (HOME.has(fromName) && LESSON.has(toName)) || (LESSON.has(fromName) && HOME.has(toName))
+  if (HOME.has(fromName) && LESSON.has(toName)) return true
+  if (LEAVE_TO_HOME.has(fromName) && HOME.has(toName)) return true
+  if (NEVER_ENTER.has(toName)) return false
+  return false
+}
+
+/** SceneAd may mount only on Home — never over Match, Hold, arcade, source-dig, Journal. */
+export function scenePauseMountsOn(viewName: ViewName): boolean {
+  return viewName === 'hub'
 }

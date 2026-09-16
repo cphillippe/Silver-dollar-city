@@ -105,9 +105,9 @@ export function grantPack(id: string): CommerceState {
   return commit({ unlockedPacks: [...current.unlockedPacks, id] })
 }
 
-/** Web stub + later Play restore hit the same grants. */
+/** Replay this-device receipts. Play restore will hit the same grants. */
 export function restoreCommerce(): CommerceState {
-  return writeCommerce(readCommerce())
+  return readCommerce()
 }
 
 export function packIsUnlocked(id: string, state: CommerceState = readCommerce()): boolean {
