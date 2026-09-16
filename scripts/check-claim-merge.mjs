@@ -161,7 +161,7 @@ assert.equal(again.won, false)
 assert.equal(again.balls.length, 3)
 
 assert.match(mergeWinBeat().title, /MERGED/)
-assert.match(mergeWinBeat().why, /died, buried, raised, appeared/)
+assert.match(mergeWinBeat().why, /Christ was buried and seen/)
 assert.match(mergeWinBeat().from ?? '', /1 Cor/)
 
 const playSrc = readFileSync(

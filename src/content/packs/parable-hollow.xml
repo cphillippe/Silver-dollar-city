@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<areaPack id="parable-hollow" schemaVersion="3" appVersion="1.4.80" generated="2026-09-14T13:15:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/" title="Story Creek" place="Story Creek" person="Mercy Wren" personId="mercy" plotId="hollow">
+<areaPack id="parable-hollow" schemaVersion="3" appVersion="1.4.81" generated="2026-09-14T13:15:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/" title="Story Creek" place="Story Creek" person="Mercy Wren" personId="mercy" plotId="hollow">
   <howToEdit>RUNTIME CONTENT: the game loads this file as the source of truth for this area. Change player-facing text in place inside each &lt;lesson&gt;. Stable id attributes (ph-father, …) are engine keys — do not rename without a migration. Three tiers per fact: &lt;easy easyOrder="N"&gt;, &lt;medium&gt;, and &lt;hard&gt; — each with &lt;learn&gt;, &lt;match&gt;, and &lt;hold&gt;. Easy Learn: shortStory/mainIdea/loci. Medium Learn: mediumTeach (clearer than Hard, richer than Easy). Hard Learn: hardTeach/fullTeach. Held claim·reason·source stay plain and identical on all three. Hold level-up: see hold @levelUpTo / @onFail and index &lt;holdRules&gt;. Empty optional elements are intentional. Escape &amp; &lt; &gt; in text.</howToEdit>
   <meta>
     <title>Silver City — Story Creek</title>
@@ -664,9 +664,9 @@ Mercy is not softness. It is the grain of God’s world — and then a question:
         </match>
         <hold levelUpTo="medium" onFail="easy">
           <claim>A lamp is meant to be seen.</claim>
-          <reason>Jesus uses an ordinary lamp and a city on a hill — public without being proud.</reason>
+          <reason>A city on a hill cannot be hidden.</reason>
           <source>Matthew 5:14–16</source>
-          <whyCorrect>Jesus uses an ordinary lamp and a city on a hill — public without being proud.</whyCorrect>
+          <whyCorrect>A city on a hill cannot be hidden.</whyCorrect>
           <whyMisses>
             <miss>The picture is a command to boast.</miss>
             <miss>A hidden lamp is the point of the saying.</miss>
@@ -678,7 +678,7 @@ Mercy is not softness. It is the grain of God’s world — and then a question:
             <choice>Light is only for insiders behind a door.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Jesus uses an ordinary lamp and a city on a hill — public without being proud.</choice>
+            <choice>A city on a hill cannot be hidden.</choice>
             <choice>The picture is a command to boast.</choice>
             <choice>A hidden lamp is the point of the saying.</choice>
           </reasonChoices>
@@ -710,9 +710,9 @@ Mercy is not softness. It is the grain of God’s world — and then a question:
         </match>
         <hold levelUpTo="hard" onFail="easy">
           <claim>A lamp is meant to be seen.</claim>
-          <reason>Jesus uses an ordinary lamp and a city on a hill — public without being proud.</reason>
+          <reason>A city on a hill cannot be hidden.</reason>
           <source>Matthew 5:14–16</source>
-          <whyCorrect>Jesus uses an ordinary lamp and a city on a hill — public without being proud.</whyCorrect>
+          <whyCorrect>A city on a hill cannot be hidden.</whyCorrect>
           <whyMisses>
             <miss>The picture is a command to boast.</miss>
             <miss>A hidden lamp is the point of the saying.</miss>
@@ -724,7 +724,7 @@ Mercy is not softness. It is the grain of God’s world — and then a question:
             <choice>Light is only for insiders behind a door.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Jesus uses an ordinary lamp and a city on a hill — public without being proud.</choice>
+            <choice>A city on a hill cannot be hidden.</choice>
             <choice>The picture is a command to boast.</choice>
             <choice>A hidden lamp is the point of the saying.</choice>
           </reasonChoices>
@@ -758,9 +758,9 @@ Mercy is not softness. It is the grain of God’s world — and then a question:
         </match>
         <hold onFail="easy">
           <claim>A lamp is meant to be seen.</claim>
-          <reason>Jesus uses an ordinary lamp and a city on a hill — public without being proud.</reason>
+          <reason>A city on a hill cannot be hidden.</reason>
           <source>Matthew 5:14–16</source>
-          <whyCorrect>Jesus uses an ordinary lamp and a city on a hill — public without being proud.</whyCorrect>
+          <whyCorrect>A city on a hill cannot be hidden.</whyCorrect>
           <whyMisses>
             <miss>The picture is a command to boast.</miss>
             <miss>A hidden lamp is the point of the saying.</miss>
@@ -772,7 +772,7 @@ Mercy is not softness. It is the grain of God’s world — and then a question:
             <choice>Light is only for insiders behind a door.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Jesus uses an ordinary lamp and a city on a hill — public without being proud.</choice>
+            <choice>A city on a hill cannot be hidden.</choice>
             <choice>The picture is a command to boast.</choice>
             <choice>A hidden lamp is the point of the saying.</choice>
           </reasonChoices>

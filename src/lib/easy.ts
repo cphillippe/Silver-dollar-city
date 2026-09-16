@@ -173,8 +173,12 @@ const EASY_CHROME: Record<string, string> = {
     'A Designer who wants people fits these numbers.',
   'Models describe a world already given; a physical “vacuum” is still something.':
     'A model still starts with something there.',
+  'A model still starts with something there.':
+    'Psalm 8 looks up and names a Maker.',
   'Cells store coordinated information; that looks like the work of a mind — wonder is rational, and so is more work.':
-    'Cells store info that looks like a mind’s work.',
+    'Cells store info the way a mind writes.',
+  'Cells store info that looks like a mind’s work.':
+    'Cells store info the way a mind writes.',
   'Nothing reduces itself from potential to actual; an unexplained stack of changers is not an explanation.':
     'Nothing changes itself without a first mover.',
   'Contingent things exist; “it just is” is also a metaphysics, not automatically cheaper.':
@@ -193,9 +197,15 @@ const EASY_CHROME: Record<string, string> = {
   'Ecclesiastes refuses to let work and pleasure pretend to be the final good, and refuses to call them worthless as gifts.':
     'Work and fun are gifts — not the last good.',
   'Longing for a country the sunset cannot give is a mark that we were made for that country; Psalm 19 treats the sky as speech.':
-    'The sunset wakes a hunger it cannot feed.',
+    'Psalm 19 treats the sky as speech.',
+  'The sunset wakes a hunger it cannot feed.':
+    'Psalm 19 treats the sky as speech.',
+  'Beauty wakes a hunger it cannot feed — hungers usually correspond to real countries.':
+    'Beauty wakes a hunger it cannot feed — that hunger names a real country.',
   'Jesus uses an ordinary lamp and a city on a hill — public without being proud.':
-    'A lamp and a hill city are meant to be seen.',
+    'A city on a hill cannot be hidden.',
+  'A lamp and a hill city are meant to be seen.':
+    'A city on a hill cannot be hidden.',
   'A lamp is seen, seed meets different hearts, and the cup is poured for many — gift, not wage.':
     'Lamp, seed, and cup are gifts you can hold.',
   'The parable invites hearing; it does not flatter every field.':
@@ -211,7 +221,9 @@ const EASY_CHROME: Record<string, string> = {
   'Scripture treats the created order as intelligible testimony — design inference and “the heavens declare” land in the same grain.':
     'The sky speaks of a Maker — the numbers fit that.',
   'Copying cells, a habitable band, and a mind that can do science all look given — the marks of a Maker.':
-    'Life, a livable world, and minds look given.',
+    'Life, a livable world, and minds are gifts from a Maker.',
+  'Life, a livable world, and minds look given.':
+    'Life, a livable world, and minds are gifts from a Maker.',
   'Scribes copy, later hands compare, then a modern page prints a recovered text.':
     'Scribes copy, later hands compare, then we print it.',
   'The poem’s Servant suffers for others and does not answer with a sword; the church names that Servant as Jesus.':

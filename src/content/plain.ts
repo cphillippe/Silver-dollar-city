@@ -100,7 +100,7 @@ const PLAIN: Record<string, PlainLine> = {
   ),
   'ob-life': line(
     'Life’s specified information is a mark of mind.',
-    'Cells store instructions and run a coordinated life. That looks like the work of mind. Wonder is rational. So is more lab work. Do not shrug it away.',
+    'Cells store instructions the way a mind writes. Wonder is rational. So is more lab work. Do not shrug it away.',
     { term: 'Specified information', sense: 'ordered instructions that do a real job — not random noise', hint: 'Keep the careful line. Toss both shrugs.' },
   ),
   'fg-order': line(
@@ -171,13 +171,13 @@ const PLAIN: Record<string, PlainLine> = {
     { term: 'Meaning', sense: 'a good that can be found — not only assembled', hint: 'Keep the hunger. Toss “only a mood.”' },
   ),
   'hl-beauty': line(
-    'Beauty wakes a hunger it cannot feed — longing for a country the sunset cannot give.',
-    'Psalm 19 treats the sky as speech. Hungers like that usually correspond to real countries.',
+    'Beauty wakes a hunger it cannot feed — that hunger names a real country.',
+    'Psalm 19 treats the sky as speech. That hunger names a real country.',
     { term: 'Beauty', sense: 'a glory that calls you — not only a nice feeling', hint: 'Keep the signpost. Toss “only taste.”' },
   ),
   'daily-lantern': line(
     'A lamp is meant to be seen.',
-    'Jesus uses an ordinary lamp and a city on a hill. Public without being proud.',
+    'Jesus talks about an ordinary lamp and a city on a hill. A city on a hill cannot be hidden.',
     { term: 'Lamp', sense: 'a light others can actually see', hint: 'Keep the right pictures. Remove wrong picks.' },
   ),
   'daily-gems': line(
@@ -207,7 +207,7 @@ const PLAIN: Record<string, PlainLine> = {
   ),
   'daily-life': line(
     'Life, place, and mind are not cheap facts.',
-    'Copying cells, a habitable band, and a mind that can do science all look given — the marks of a Maker.',
+    'Life, a livable world, and minds are gifts from a Maker — not leftover accidents.',
     { term: 'Given', sense: 'received, not cheap leftover', hint: 'Keep the marks. Toss “it just happened.”' },
   ),
   'daily-scroll': line(

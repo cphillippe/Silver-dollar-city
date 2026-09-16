@@ -8,6 +8,18 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.81',
+    title: 'Clear reasons 10 · leftover Easy lines · Easy core trail',
+    when: '2026-09-16',
+    items: [
+      'Leftover Easy held lines now keep a distinct claim · reason · source: a lamp is seen because a city on a hill cannot be hidden; beauty’s hunger names a real country, From Psalm 19; something is here because Psalm 8 names a Maker; cells write like a mind; life, place, and mind are gifts; God moves first',
+      'Hold miss-teach names From with the line — not claim and why only. Arcade MATCHED / DUG! / MERGED! / Helped! / Hugged! / LOCKED! win cards from 1.4.80 stay one-breath triads, not a quiz',
+      'Teach stays Learn → play → Hold. Arcade juice and One more loops stay. No new quiz chrome',
+      'Night Watch and Town stay hidden on Easy. Journal ungated. Core Easy 39 facts stay free. Never a hard paywall',
+      'iOS + Android dual path 1.4.79 stays. Pages still cannot charge. Place titles stay Story Creek, Witness Square, Sky Watch, Why Gate, Meaning Ridge',
+    ],
+  },
+  {
     version: '1.4.80',
     title: 'Clear reasons 10 · Easy core trail',
     when: '2026-09-16',
@@ -1649,6 +1661,10 @@ export function latestChange(version: string): ChangeNote {
   const note = CHANGELOG.find((item) => item.version === version) ?? CHANGELOG[0]
   if (!note) {
     return { version, title: 'Easy core trail', when: '', items: [] }
+  }
+  if (note.version === '1.4.81') {
+    const prior = latestChange('1.4.80')
+    return { ...note, items: [...note.items, ...prior.items] }
   }
   if (note.version === '1.4.80') {
     const prior = latestChange('1.4.79')

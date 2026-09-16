@@ -137,8 +137,8 @@ export const EVIDENCE: Record<string, EvidenceBrief> = {
   ),
   'ob-leibniz': brief(
     'ob-leibniz',
-    'Why is there something rather than nothing remains after a cosmological model.',
-    'Models describe a world already given; a physical “vacuum” is still something.',
+    'Something is here — it did not have to be.',
+    'Psalm 8 looks up and names a Maker.',
     'Leibniz; the vacuum/nothing distinction',
     'A successful model retires the metaphysical question.',
     '“Nothing” in popular writing always means metaphysical nothing.',
@@ -148,7 +148,7 @@ export const EVIDENCE: Record<string, EvidenceBrief> = {
   'ob-life': brief(
     'ob-life',
     'Life’s specified information is a mark of mind.',
-    'Cells store coordinated information; that looks like the work of a mind — wonder is rational, and so is more work.',
+    'Cells store info the way a mind writes.',
     'Genesis 1',
     'A flask has already demonstrated a miracle.',
     'Cells require no coordinated information.',
@@ -267,8 +267,8 @@ export const EVIDENCE: Record<string, EvidenceBrief> = {
   ),
   'hl-beauty': brief(
     'hl-beauty',
-    'Beauty wakes a hunger it cannot feed — hungers usually correspond to real countries.',
-    'The sunset wakes a hunger it cannot feed.',
+    'Beauty wakes a hunger it cannot feed — that hunger names a real country.',
+    'Psalm 19 treats the sky as speech.',
     'Lewis, Weight of Glory; Psalm 19:1–4',
     'A sunset deducts God as a theorem.',
     'Hungers never correspond to real countries.',
@@ -278,7 +278,7 @@ export const EVIDENCE: Record<string, EvidenceBrief> = {
   'daily-lantern': brief(
     'daily-lantern',
     'A lamp is meant to be seen.',
-    'Jesus uses an ordinary lamp and a city on a hill — public without being proud.',
+    'A city on a hill cannot be hidden.',
     'Matthew 5:14–16',
     'We are told to become the sun.',
     'Light is only for insiders behind a door.',
@@ -338,7 +338,7 @@ export const EVIDENCE: Record<string, EvidenceBrief> = {
   'daily-life': brief(
     'daily-life',
     'Life, place, and mind are not cheap facts.',
-    'Copying cells, a habitable band, and a mind that can do science all look given — the marks of a Maker.',
+    'Life, a livable world, and minds are gifts from a Maker.',
     'Acts 17:24–25',
     'Chemistry is easy to dismiss.',
     '“It happened” is automatically the last word.',
@@ -368,7 +368,7 @@ export const EVIDENCE: Record<string, EvidenceBrief> = {
   'daily-grace': brief(
     'daily-grace',
     'Grace is gift, not wage; faith receives; boast starves.',
-    'The claim is that God moves first — not that you finished the map.',
+    'God moves first — you did not finish the map.',
     'Ephesians 2:8–9',
     'Grace is a prize for high scores.',
     'Faith is a wage God owes you.',
