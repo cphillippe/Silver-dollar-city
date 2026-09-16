@@ -140,7 +140,7 @@ All **39** facts sit on the Easy trail with `easyOrder` 1–39 (see `index.xml` 
 
 1. Keep mercy-first Story Creek opening (`ph-road`, `ph-father`, `ph-debt`).
 2. Why Gate foundation pack next, stepped: `fg-order` → `fg-reason` → `fg-ought` → `fg-ground` (next opens after prior Hold).
-3. Then remaining facts by area: Witness leftovers → porch leftovers → Sky Watch (fine-tuning stays here) → Why Gate cosmological walks → Meaning Ridge.
+3. After Dig deeper, Witness leftovers **Names that stay** pack, stepped: `daily-names` → `daily-creed` → `daily-empty` (next opens after prior Hold; source-dig arcade). Then porch leftovers → Sky Watch (fine-tuning stays here) → Why Gate cosmological walks → Meaning Ridge.
 
 Medium and Hard are available via mode select or Hold level-up — not a separate fact list.
 

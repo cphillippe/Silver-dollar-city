@@ -8,6 +8,19 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.74',
+    title: 'Names that stay · Easy core trail',
+    when: '2026-09-16',
+    items: [
+      'After Dig deeper Hold, Witness leftovers open as Names that stay: named people saw the risen Christ, then the churches already named Christ died, buried, raised, then the empty tomb. Next opens only after the prior Easy Hold',
+      'Names, creed-close, and empty play is a source-dig: tap the glowing tablet. Scripture first, then ancient names. DUG! then one takeaway, then Hold next. One more dig stays. Miss −25 on a wrong tap. Not a reading quiz',
+      'Porch lantern waits until this pack is held. Sky Watch fine-tuning and daily-stars stay later. Night Watch and Town stay hidden on Easy',
+      'Held lines stay claim · reason · source from 1.4.73. Christ is named on the names, creed, and empty takeaways. Teach before test. Apologist voice',
+      'Freemium 1.4.66 through Clear reasons 1.4.73 stay. Soft ads never cover Match, Hold, arcade, or source-dig. Journal ungated. Core Easy free',
+      'Father-run, road-maze, claim-merge, Dig deeper, Match extras, and Hold Why Blast stay. Place titles stay Story Creek, Witness Square, Sky Watch, Why Gate, Meaning Ridge',
+    ],
+  },
+  {
     version: '1.4.73',
     title: 'Clear reasons · Easy core trail',
     when: '2026-09-16',
@@ -1558,6 +1571,10 @@ export function latestChange(version: string): ChangeNote {
   const note = CHANGELOG.find((item) => item.version === version) ?? CHANGELOG[0]
   if (!note) {
     return { version, title: 'Easy core trail', when: '', items: [] }
+  }
+  if (note.version === '1.4.74') {
+    const prior = latestChange('1.4.73')
+    return { ...note, items: [...note.items, ...prior.items] }
   }
   if (note.version === '1.4.73') {
     const prior = latestChange('1.4.72')

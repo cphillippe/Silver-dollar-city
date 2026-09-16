@@ -3,7 +3,7 @@ import { readFileSync, statSync } from 'node:fs'
 import { emptyProgress } from '../src/lib/save.ts'
 import { PACK_CATALOG, PACK_ISSUES, packLesson } from '../src/content/packCatalog.ts'
 import { PACK_SCHEMA_VERSION } from '../src/content/packTypes.ts'
-import { EASY_LINE_ORDER, FOUNDATION_ARC, DIG_ARC, easyHomeFocus, easyHoldPractice, easyLineTaught, easyLoopLine, easyMatchReady, easyWhoWhere } from '../src/lib/easy.ts'
+import { EASY_LINE_ORDER, FOUNDATION_ARC, DIG_ARC, NAMES_ARC, easyHomeFocus, easyHoldPractice, easyLineTaught, easyLoopLine, easyMatchReady, easyWhoWhere } from '../src/lib/easy.ts'
 import {
   applyHoldFail,
   applyHoldSuccess,
@@ -159,17 +159,15 @@ assert.ok(areaIds.has('high-lookout'))
 
 assert.deepEqual([...FOUNDATION_ARC], ['fg-order', 'fg-reason', 'fg-ought', 'fg-ground'])
 assert.deepEqual([...DIG_ARC], ['wb-creed', 'wb-women', 'wb-early', 'wb-method'])
+assert.deepEqual([...NAMES_ARC], ['daily-names', 'daily-creed', 'daily-empty'])
 assert.ok(EASY_LINE_ORDER.indexOf('ph-debt') < EASY_LINE_ORDER.indexOf('fg-order'))
 assert.ok(EASY_LINE_ORDER.indexOf('fg-ground') < EASY_LINE_ORDER.indexOf('wb-creed'))
 assert.ok(EASY_LINE_ORDER.indexOf('fg-ground') < EASY_LINE_ORDER.indexOf('fg-mover'))
 assert.ok(EASY_LINE_ORDER.indexOf('ob-tuning') < EASY_LINE_ORDER.indexOf('fg-mover'))
-assert.deepEqual(EASY_LINE_ORDER.slice(7, 12), [
-  'wb-creed',
-  'wb-women',
-  'wb-early',
-  'wb-method',
-  'daily-lantern',
-])
+assert.ok(EASY_LINE_ORDER.indexOf('wb-method') < EASY_LINE_ORDER.indexOf('daily-names'))
+assert.ok(EASY_LINE_ORDER.indexOf('daily-empty') < EASY_LINE_ORDER.indexOf('daily-lantern'))
+assert.ok(EASY_LINE_ORDER.indexOf('daily-stars') > EASY_LINE_ORDER.indexOf('daily-lantern'))
+assert.deepEqual(EASY_LINE_ORDER.slice(7, 14), [...DIG_ARC, ...NAMES_ARC])
 
 const creekHeld = {
   ...emptyProgress(),
@@ -207,6 +205,27 @@ assert.equal(
   easyLoopLine({
     ...creekHeld,
     easyHeld: [...creekHeld.easyHeld, ...FOUNDATION_ARC, ...DIG_ARC],
+  }),
+  'daily-names',
+)
+assert.equal(
+  easyLoopLine({
+    ...creekHeld,
+    easyHeld: [...creekHeld.easyHeld, ...FOUNDATION_ARC, ...DIG_ARC, 'daily-names'],
+  }),
+  'daily-creed',
+)
+assert.equal(
+  easyLoopLine({
+    ...creekHeld,
+    easyHeld: [...creekHeld.easyHeld, ...FOUNDATION_ARC, ...DIG_ARC, 'daily-names', 'daily-creed'],
+  }),
+  'daily-empty',
+)
+assert.equal(
+  easyLoopLine({
+    ...creekHeld,
+    easyHeld: [...creekHeld.easyHeld, ...FOUNDATION_ARC, ...DIG_ARC, ...NAMES_ARC],
   }),
   'daily-lantern',
 )
@@ -285,6 +304,31 @@ for (const id of DIG_ARC) {
   assert.ok(lesson, id)
   assert.doesNotMatch(lesson.claim, /if invented|late legend|pious novel/i, `${id} claim hedge`)
   assert.doesNotMatch(lesson.easy.hold.why, /if invented|if the goal were/i, `${id} reason hedge`)
+}
+
+const names = packLesson('daily-names')
+assert.ok(names)
+assert.match(names.claim, /Christ/)
+assert.doesNotMatch(names.claim, /resurrection claim stacks/i)
+
+const creedClose = packLesson('daily-creed')
+assert.ok(creedClose)
+assert.match(creedClose.claim, /Christ/)
+assert.doesNotMatch(creedClose.claim, /creed sits between/i)
+assert.doesNotMatch(creedClose.easy.hold.why, /If the formula is early/i)
+assert.doesNotMatch(creedClose.easy.learn, /If that short line is early/i)
+
+const emptyTomb = packLesson('daily-empty')
+assert.ok(emptyTomb)
+assert.match(emptyTomb.claim, /Jesus/)
+assert.match(emptyTomb.easy.hold.why, /stone rolled away/)
+assert.doesNotMatch(emptyTomb.easy.hold.why, /does not sand/i)
+
+for (const id of NAMES_ARC) {
+  const lesson = packLesson(id)
+  assert.ok(lesson, id)
+  assert.doesNotMatch(lesson.claim, /if invented|if the formula is early|late legend/i, `${id} claim hedge`)
+  assert.doesNotMatch(lesson.easy.hold.why, /If the formula is early|does not sand/i, `${id} reason hedge`)
 }
 
 const teachSrc = readFileSync(new URL('../src/components/TeachUnlock.tsx', import.meta.url), 'utf8')

@@ -9,8 +9,9 @@ import { storyPanelsFor, type StoryPanel } from './storyPanels.ts'
  * How this lesson is *played*. Same shell always: teach beats → play → Hold.
  * ph-father is the hold-to-run timing dash. ph-road is the Samaritan collect maze.
  * wb-creed is the candy merge bowl (Suika). Witness Square Dig deeper (women /
- * early / method) is a source-dig tap-in. Other Easy lessons stay panel-blast
- * so gem extras (Gap, +100) keep working. Queued later (do not mount): story-night TD.
+ * early / method) and Names that stay (names / creed close / empty) are
+ * source-dig tap-ins. Other Easy lessons stay panel-blast so gem extras
+ * (Gap, +100) keep working. Queued later (do not mount): story-night TD.
  */
 export type StoryPlayKind = 'panel-blast' | 'father-run' | 'road-maze' | 'claim-merge' | 'source-dig'
 

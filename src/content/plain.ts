@@ -191,13 +191,13 @@ const PLAIN: Record<string, PlainLine> = {
     { term: 'Parable', sense: 'a Jesus story that asks you to decide', hint: 'Keep the honest field. Toss “every field wins.”' },
   ),
   'daily-names': line(
-    'The resurrection claim stacks named witnesses, not one private voice.',
+    'Named people saw the risen Christ — not one private voice.',
     'Paul lists Cephas, the Twelve, and more than five hundred — many still living then.',
     { term: 'Witness', sense: 'a named person who was said to have seen', hint: 'Keep the names. Toss the anonymous dream.' },
   ),
   'daily-creed': line(
-    'The old shared belief sits between the event and Paul’s letter.',
-    'If that short line is early, the claim is close to what it names: died, buried, raised.',
+    'The churches already named Christ died, buried, raised before Paul’s letter.',
+    'Paul hands on what he received — not a line he invented while writing.',
     { term: 'Creed', sense: 'an old shared belief the churches already said out loud', hint: 'Keep “received.” Toss “Paul invented it while writing.”' },
   ),
   'daily-stars': line(
@@ -236,8 +236,8 @@ const PLAIN: Record<string, PlainLine> = {
     { term: 'Pedigree', sense: 'family name or in-group badge', hint: 'Keep mercy. Toss “already my people.”' },
   ),
   'daily-empty': line(
-    'The first Easter reports include an empty place, women, fear, and wonder.',
-    'The town does not sand that awkwardness into a tidy triumph.',
+    'The first Easter reports of Jesus include an empty tomb, women, fear, and wonder.',
+    'They found the stone rolled away — they did not find the body.',
     { term: 'Empty', sense: 'the place was not occupied when they looked', hint: 'Keep the awkward opening. Toss the senate conversion.' },
   ),
   'daily-cosmos': line(
