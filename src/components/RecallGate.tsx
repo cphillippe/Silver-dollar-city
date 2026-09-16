@@ -339,7 +339,12 @@ export function RecallGate({
           <h2>{deeper ? 'Here’s the sharper line.' : 'Here’s the line.'}</h2>
           <article className="unlock-card pop-in">
             <p className="recall-line">{easy ? easyFacingLine(brief.id, heldClaim) : heldClaim}</p>
-            <p>{heldReason}</p>
+            <p>{easy ? reasonFace(heldReason) : heldReason}</p>
+            {brief.source ? (
+              <p className="held-from">
+                {easy ? EASY.sayFrom : 'From'} {brief.source}
+              </p>
+            ) : null}
             <PlainTalk id={brief.id} teach />
           </article>
           <button type="button" className="btn primary xl" onClick={finishFromTeach}>
