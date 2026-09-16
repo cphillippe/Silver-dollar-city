@@ -1778,6 +1778,9 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
   assert.doesNotMatch(easyHome, /EASY\.nightSoon/)
   assert.doesNotMatch(easyHome, /EASY\.nightDo/)
   assert.doesNotMatch(easyHome, /name: 'defend'/)
+  assert.doesNotMatch(easyHome, /debugLine/)
+  assert.doesNotMatch(easyHome, /mini-game jumps/)
+  assert.doesNotMatch(easyHome, /debugPlayGroups/)
 }
 {
   const fresh = emptyProgress()
