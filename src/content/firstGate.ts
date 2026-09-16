@@ -30,7 +30,7 @@ export const firstGate: Area = {
       tiles: [
         {
           id: 'a',
-          text: 'You already live as if the world hangs together; Colossians names Christ as the One who holds all things.',
+          text: 'You already live like the world hangs together; Colossians names Christ as the One who holds all things.',
           bin: 'keep',
         },
         {

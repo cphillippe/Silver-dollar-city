@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<areaPack id="parable-hollow" schemaVersion="3" appVersion="1.4.50" generated="2026-09-14T13:15:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/" title="Story Creek" place="Story Creek" person="Mercy Wren" personId="mercy" plotId="hollow">
+<areaPack id="parable-hollow" schemaVersion="3" appVersion="1.4.78" generated="2026-09-14T13:15:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/" title="Story Creek" place="Story Creek" person="Mercy Wren" personId="mercy" plotId="hollow">
   <howToEdit>RUNTIME CONTENT: the game loads this file as the source of truth for this area. Change player-facing text in place inside each &lt;lesson&gt;. Stable id attributes (ph-father, …) are engine keys — do not rename without a migration. Three tiers per fact: &lt;easy easyOrder="N"&gt;, &lt;medium&gt;, and &lt;hard&gt; — each with &lt;learn&gt;, &lt;match&gt;, and &lt;hold&gt;. Easy Learn: shortStory/mainIdea/loci. Medium Learn: mediumTeach (clearer than Hard, richer than Easy). Hard Learn: hardTeach/fullTeach. Held claim·reason·source stay plain and identical on all three. Hold level-up: see hold @levelUpTo / @onFail and index &lt;holdRules&gt;. Empty optional elements are intentional. Escape &amp; &lt; &gt; in text.</howToEdit>
   <meta>
     <title>Silver City — Story Creek</title>
@@ -486,12 +486,12 @@ Jesus’ stories assume a God who speaks, seeks, grows a kingdom, and will ask w
         </sources>
       </journal>
     </lesson>
-    <lesson id="ph-debt" place="Story Creek" person="Mercy Wren" tripleId="debt-hollow" ideaId="idea-debt" ideaLabel="Received mercy makes refusing mercy a contradiction." challengeKind="sort" challengeTitle="An unpayable account">
+    <lesson id="ph-debt" place="Story Creek" person="Mercy Wren" tripleId="debt-hollow" ideaId="idea-debt" ideaLabel="Forgiven much, you cannot choke a neighbor over a little debt." challengeKind="sort" challengeTitle="An unpayable account">
       <easy points="10" easyOrder="3">
         <learn>
-          <shortStory>Jesus tells about a king who wipes an unpayable bill. That same servant then chokes a neighbor over a tiny sum. Received mercy makes refusing mercy a contradiction — the story will not let you keep both.</shortStory>
-          <mainIdea>Received mercy makes refusing mercy a contradiction.</mainIdea>
-          <gloss>If you were forgiven a huge debt, you cannot choke a neighbor over a small one.</gloss>
+          <shortStory>Jesus tells about a king who wipes an unpayable bill. That same servant then chokes a neighbor over a tiny sum. Forgiven much, you cannot choke a neighbor over a little debt — the story will not let you keep both.</shortStory>
+          <mainIdea>Forgiven much, you cannot choke a neighbor over a little debt.</mainIdea>
+          <gloss>Forgiven much, you cannot choke a neighbor over a little debt.</gloss>
           <loci>This idea lives at Story Creek, with Mercy.</loci>
           <word>
             <term>Debt</term>
@@ -500,7 +500,7 @@ Jesus’ stories assume a God who speaks, seeks, grows a kingdom, and will ask w
           <hint>Keep the mercy. Toss the choke. Example: a huge bill wiped, then a tiny one demanded.</hint>
         </learn>
         <match>
-          <sentenceCorrect>Received mercy makes refusing mercy a contradiction.</sentenceCorrect>
+          <sentenceCorrect>Forgiven much, you cannot choke a neighbor over a little debt.</sentenceCorrect>
           <sentenceMisses>
             <miss>Forgiveness is a limited coupon on God’s spreadsheet.</miss>
             <miss>Jesus is only reforming first-century banking.</miss>
@@ -508,26 +508,26 @@ Jesus’ stories assume a God who speaks, seeks, grows a kingdom, and will ask w
           <placePrompt>The forgiven-debt story lives at Story Creek.</placePrompt>
           <personPrompt>Mercy Wren keeps the two servants.</personPrompt>
           <ideaPrompt>Mercy’s Jesus story — forgiven much, then show mercy.</ideaPrompt>
-          <ideaLabel>Received mercy makes refusing mercy a contradiction.</ideaLabel>
+          <ideaLabel>Forgiven much, you cannot choke a neighbor over a little debt.</ideaLabel>
           <whyEasy>Mercy tells the forgiven-debt story at the creek. Received mercy must give mercy.</whyEasy>
         </match>
         <hold levelUpTo="medium" onFail="easy">
-          <claim>Received mercy makes refusing mercy a contradiction.</claim>
-          <reason>The servant forgiven an unpayable debt then throttles a peer over a small sum.</reason>
+          <claim>Forgiven much, you cannot choke a neighbor over a little debt.</claim>
+          <reason>He was forgiven much, then choked a neighbor.</reason>
           <source>Matthew 18:21–35</source>
-          <whyCorrect>The servant forgiven an unpayable debt then throttles a peer over a small sum.</whyCorrect>
+          <whyCorrect>He was forgiven much, then choked a neighbor.</whyCorrect>
           <whyMisses>
             <miss>Peter’s “seven times” was already the full measure.</miss>
             <miss>The first servant was right to demand prison.</miss>
             <miss>Jail him over a tiny debt.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>Received mercy makes refusing mercy a contradiction.</choice>
+            <choice>Forgiven much, you cannot choke a neighbor over a little debt.</choice>
             <choice>Forgiveness is a limited coupon on God’s spreadsheet.</choice>
             <choice>Jesus is only reforming first-century banking.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>The servant forgiven an unpayable debt then throttles a peer over a small sum.</choice>
+            <choice>He was forgiven much, then choked a neighbor.</choice>
             <choice>Peter’s “seven times” was already the full measure.</choice>
             <choice>The first servant was right to demand prison.</choice>
           </reasonChoices>
@@ -535,9 +535,9 @@ Jesus’ stories assume a God who speaks, seeks, grows a kingdom, and will ask w
       </easy>
       <medium points="12">
         <learn>
-          <mediumTeach>Matthew 18:21–35. A king wipes an unpayable debt. That same servant then chokes a peer over a tiny sum — and the king reinstates the first debt. Received mercy makes refusing mercy a contradiction. Mercy is not softness; it is the grain of God’s world.</mediumTeach>
-          <mainIdea>Received mercy makes refusing mercy a contradiction.</mainIdea>
-          <gloss>If you were forgiven a huge debt, you cannot choke a neighbor over a small one.</gloss>
+          <mediumTeach>Matthew 18:21–35. A king wipes an unpayable debt. That same servant then chokes a peer over a tiny sum — and the king reinstates the first debt. Forgiven much, you cannot choke a neighbor over a little debt. Mercy is not softness; it is the grain of God’s world.</mediumTeach>
+          <mainIdea>Forgiven much, you cannot choke a neighbor over a little debt.</mainIdea>
+          <gloss>Forgiven much, you cannot choke a neighbor over a little debt.</gloss>
           <loci>This idea lives at Story Creek, with Mercy.</loci>
           <word>
             <term>Debt</term>
@@ -546,7 +546,7 @@ Jesus’ stories assume a God who speaks, seeks, grows a kingdom, and will ask w
           <hint>Keep the mercy. Toss the choke. Example: a huge bill wiped, then a tiny one demanded.</hint>
         </learn>
         <match>
-          <sentenceCorrect>Received mercy makes refusing mercy a contradiction.</sentenceCorrect>
+          <sentenceCorrect>Forgiven much, you cannot choke a neighbor over a little debt.</sentenceCorrect>
           <sentenceMisses>
             <miss>Forgiveness is a limited coupon on God’s spreadsheet.</miss>
             <miss>Jesus is only reforming first-century banking.</miss>
@@ -554,26 +554,26 @@ Jesus’ stories assume a God who speaks, seeks, grows a kingdom, and will ask w
           <placePrompt>The forgiven-debt story lives at Story Creek.</placePrompt>
           <personPrompt>Mercy Wren keeps the two servants.</personPrompt>
           <ideaPrompt>Mercy’s Jesus story — forgiven much, then show mercy.</ideaPrompt>
-          <ideaLabel>Received mercy makes refusing mercy a contradiction.</ideaLabel>
+          <ideaLabel>Forgiven much, you cannot choke a neighbor over a little debt.</ideaLabel>
           <whyMedium>Mercy tells the forgiven-debt story at the creek. Received mercy must give mercy.</whyMedium>
         </match>
         <hold levelUpTo="hard" onFail="easy">
-          <claim>Received mercy makes refusing mercy a contradiction.</claim>
-          <reason>The servant forgiven an unpayable debt then throttles a peer over a small sum.</reason>
+          <claim>Forgiven much, you cannot choke a neighbor over a little debt.</claim>
+          <reason>He was forgiven much, then choked a neighbor.</reason>
           <source>Matthew 18:21–35</source>
-          <whyCorrect>The servant forgiven an unpayable debt then throttles a peer over a small sum.</whyCorrect>
+          <whyCorrect>He was forgiven much, then choked a neighbor.</whyCorrect>
           <whyMisses>
             <miss>Peter’s “seven times” was already the full measure.</miss>
             <miss>The first servant was right to demand prison.</miss>
             <miss>Jail him over a tiny debt.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>Received mercy makes refusing mercy a contradiction.</choice>
+            <choice>Forgiven much, you cannot choke a neighbor over a little debt.</choice>
             <choice>Forgiveness is a limited coupon on God’s spreadsheet.</choice>
             <choice>Jesus is only reforming first-century banking.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>The servant forgiven an unpayable debt then throttles a peer over a small sum.</choice>
+            <choice>He was forgiven much, then choked a neighbor.</choice>
             <choice>Peter’s “seven times” was already the full measure.</choice>
             <choice>The first servant was right to demand prison.</choice>
           </reasonChoices>
@@ -588,14 +588,14 @@ Mercy is not softness. It is the grain of God’s world — and then a question:
           <prompt>Sort the claims. Only one belongs in the keep bin.</prompt>
           <teachOnWrong>Peter offered seven. Jesus breaks coupon-logic (Matt 18:22). The horror is ingratitude, not arithmetic.</teachOnWrong>
           <challengeTiles>
-            <keep>Received mercy makes refusing mercy a contradiction.</keep>
+            <keep>Forgiven much, you cannot choke a neighbor over a little debt.</keep>
             <discard>Forgiveness is a limited coupon on God’s spreadsheet.</discard>
             <discard>The first servant was right to demand prison for a small debt.</discard>
             <discard>Jesus is only reforming first-century banking.</discard>
           </challengeTiles>
         </learn>
         <match>
-          <sentenceCorrect>Received mercy makes refusing mercy a contradiction.</sentenceCorrect>
+          <sentenceCorrect>Forgiven much, you cannot choke a neighbor over a little debt.</sentenceCorrect>
           <sentenceMisses>
             <miss>Forgiveness is a limited coupon on God’s spreadsheet.</miss>
             <miss>Jesus is only reforming first-century banking.</miss>
@@ -603,26 +603,26 @@ Mercy is not softness. It is the grain of God’s world — and then a question:
           <placePrompt>The forgiven-debt story lives at Story Creek.</placePrompt>
           <personPrompt>Mercy Wren keeps the two servants.</personPrompt>
           <ideaPrompt>Mercy’s Jesus story — forgiven much, then show mercy.</ideaPrompt>
-          <ideaLabel>Received mercy makes refusing mercy a contradiction.</ideaLabel>
+          <ideaLabel>Forgiven much, you cannot choke a neighbor over a little debt.</ideaLabel>
           <whyHard>Mercy Wren keeps Story Creek. Received mercy making refusal a contradiction is a Jesus story of two servants.</whyHard>
         </match>
         <hold onFail="easy">
-          <claim>Received mercy makes refusing mercy a contradiction.</claim>
-          <reason>The servant forgiven an unpayable debt then throttles a peer over a small sum.</reason>
+          <claim>Forgiven much, you cannot choke a neighbor over a little debt.</claim>
+          <reason>He was forgiven much, then choked a neighbor.</reason>
           <source>Matthew 18:21–35</source>
-          <whyCorrect>The servant forgiven an unpayable debt then throttles a peer over a small sum.</whyCorrect>
+          <whyCorrect>He was forgiven much, then choked a neighbor.</whyCorrect>
           <whyMisses>
             <miss>Peter’s “seven times” was already the full measure.</miss>
             <miss>The first servant was right to demand prison.</miss>
             <miss>Jail him over a tiny debt.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>Received mercy makes refusing mercy a contradiction.</choice>
+            <choice>Forgiven much, you cannot choke a neighbor over a little debt.</choice>
             <choice>Forgiveness is a limited coupon on God’s spreadsheet.</choice>
             <choice>Jesus is only reforming first-century banking.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>The servant forgiven an unpayable debt then throttles a peer over a small sum.</choice>
+            <choice>He was forgiven much, then choked a neighbor.</choice>
             <choice>Peter’s “seven times” was already the full measure.</choice>
             <choice>The first servant was right to demand prison.</choice>
           </reasonChoices>
@@ -1240,7 +1240,7 @@ He said, “The one who showed him mercy.” And Jesus said, “You go, and do l
     <fact evidenceId="ph-road" tripleId="mercy-hollow" ideaId="idea-mercy" place="Story Creek" person="Mercy Wren" ideaLabel="Neighbor is the one who shows mercy." />
     <fact evidenceId="ph-father" tripleId="father-hollow" ideaId="idea-father" place="Story Creek" person="Mercy Wren" ideaLabel="The father runs with mercy before the speech is done." />
     <fact evidenceId="ph-seeds" tripleId="seeds-hollow" ideaId="idea-seeds" place="Story Creek" person="Mercy Wren" ideaLabel="The kingdom arrives in pictures." />
-    <fact evidenceId="ph-debt" tripleId="debt-hollow" ideaId="idea-debt" place="Story Creek" person="Mercy Wren" ideaLabel="Received mercy makes refusing mercy a contradiction." />
+    <fact evidenceId="ph-debt" tripleId="debt-hollow" ideaId="idea-debt" place="Story Creek" person="Mercy Wren" ideaLabel="Forgiven much, you cannot choke a neighbor over a little debt." />
     <fact evidenceId="daily-lantern" tripleId="juniper-porch" ideaId="idea-juniper" place="East porch" person="Juniper Wick" ideaLabel="A lamp is meant to be seen." />
     <fact evidenceId="daily-gems" tripleId="gems-porch" ideaId="idea-gems" place="East porch" person="Juniper Wick" ideaLabel="Jesus taught with pictures you can hold." />
     <fact evidenceId="daily-seed" tripleId="seed-porch" ideaId="idea-seed" place="East porch" person="Juniper Wick" ideaLabel="The same word meets different soils." />

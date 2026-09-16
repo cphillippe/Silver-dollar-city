@@ -1,4 +1,4 @@
-/** Good Samaritan road-maze — collect help, then take him to the inn. */
+/** Good Samaritan road-maze — find the hurt man, help him, take him to the inn. */
 
 export const ROAD_MAZE_LINE = 'ph-road'
 
@@ -11,29 +11,31 @@ export const ROAD_MAZE_HINT = 'Stay on the open road.'
 
 export const ROAD_MAZE_AGAIN = 'One more road'
 
-export const MAZE_ITEM_SCORE = 25
+/** Tiny Luke 10 flavor after Help — never a collectible headline. */
+export const MAZE_CARE_WHY = 'You bind his wounds.'
+
+export const MAZE_FIND_SCORE = 25
 export const MAZE_HELP_SCORE = 50
 export const MAZE_INN_SCORE = 100
 
-export type MazeItemId = 'oil' | 'cloth' | 'coin'
+export type MazeBeatId = 'hurt' | 'help' | 'inn'
 
 export interface MazeCoord {
   r: number
   c: number
 }
 
-export interface MazeItem {
-  id: MazeItemId
+export interface MazeBeat {
+  id: MazeBeatId
   label: string
-  yes: string
-  why: string
+  hint: string
 }
 
-/** Luke 10:34–35 — oil, bind the wounds, two denarii for the inn. */
-export const MAZE_ITEMS: readonly MazeItem[] = [
-  { id: 'oil', label: 'Oil', yes: 'Yes · Oil', why: 'He pours oil on the wounds.' },
-  { id: 'cloth', label: 'Cloth', yes: 'Yes · Cloth', why: 'He binds the hurt man.' },
-  { id: 'coin', label: 'Coin', yes: 'Yes · Coin', why: 'He pays the inn to keep him.' },
+/** Mercy arc the player can read at a glance — not an inventory. */
+export const MAZE_BEATS: readonly MazeBeat[] = [
+  { id: 'hurt', label: 'Hurt man', hint: 'Find the hurt man.' },
+  { id: 'help', label: 'Help', hint: 'Stop and help him.' },
+  { id: 'inn', label: 'Inn', hint: 'Take him to the inn.' },
 ] as const
 
 export const MAZE_COLS = 5
@@ -42,12 +44,6 @@ export const MAZE_ROWS = 7
 export const MAZE_START: MazeCoord = { r: 0, c: 0 }
 export const MAZE_HURT: MazeCoord = { r: 4, c: 4 }
 export const MAZE_INN: MazeCoord = { r: 6, c: 0 }
-
-export const MAZE_ITEM_AT: Record<MazeItemId, MazeCoord> = {
-  oil: { r: 0, c: 4 },
-  cloth: { r: 2, c: 4 },
-  coin: { r: 6, c: 2 },
-}
 
 /** 1 = open road. Authored Jericho-road bend — not a random junk maze. */
 export const MAZE_ROADS: readonly (readonly number[])[] = [
@@ -83,10 +79,9 @@ export function mazeNeighbors(cell: MazeCoord): MazeCoord[] {
   return DIRS.map((dir) => ({ r: cell.r + dir.r, c: cell.c + dir.c })).filter(isMazeRoad)
 }
 
-export function mazeItemAt(cell: MazeCoord): MazeItem | null {
-  for (const item of MAZE_ITEMS) {
-    if (mazeSame(cell, MAZE_ITEM_AT[item.id])) return item
-  }
+export function mazeBeatAt(cell: MazeCoord): MazeBeat | null {
+  if (mazeSame(cell, MAZE_HURT)) return MAZE_BEATS[0] ?? null
+  if (mazeSame(cell, MAZE_INN)) return MAZE_BEATS[2] ?? null
   return null
 }
 
@@ -118,60 +113,84 @@ export function swipeStep(from: MazeCoord, dr: number, dc: number): MazeCoord | 
   return isMazeRoad(step) ? step : null
 }
 
+/** Finger moved this far before it counts as a maze step, not a fidget. */
+export const MAZE_SWIPE_MIN = 28
+
+/** Play-chrome scroll of this many px is a look, not a miss. */
+export const MAZE_LOOK_SCROLL = 8
+
+/** Scroll / off-road pan to peek Hurt man · Help · Inn — not a path swipe. */
+export function isMazeLookPan(input: {
+  dx: number
+  dy: number
+  scrolled: number
+  startedOnRoad: boolean
+}): boolean {
+  if (Math.abs(input.scrolled) >= MAZE_LOOK_SCROLL) return true
+  if (!input.startedOnRoad) return true
+  return false
+}
+
+/** Intentional step: started on the open road, did not scroll the play, moved far enough. */
+export function isMazePathSwipe(input: {
+  dx: number
+  dy: number
+  scrolled: number
+  startedOnRoad: boolean
+}): boolean {
+  if (isMazeLookPan(input)) return false
+  return Math.abs(input.dx) >= MAZE_SWIPE_MIN || Math.abs(input.dy) >= MAZE_SWIPE_MIN
+}
+
 export interface MazeGoal {
-  kind: 'item' | 'hurt' | 'inn'
-  id?: MazeItemId
+  kind: MazeBeatId
   at: MazeCoord
+  label: string
   hint: string
 }
 
-export function mazeGoal(got: readonly MazeItemId[], helped: boolean): MazeGoal {
-  if (!got.includes('oil')) {
-    return { kind: 'item', id: 'oil', at: MAZE_ITEM_AT.oil, hint: 'Get the oil first.' }
-  }
-  if (!got.includes('cloth')) {
-    return { kind: 'item', id: 'cloth', at: MAZE_ITEM_AT.cloth, hint: 'Get the cloth next.' }
+export function mazeGoal(found: boolean, helped: boolean): MazeGoal {
+  if (!found) {
+    return { kind: 'hurt', at: MAZE_HURT, label: 'Hurt man', hint: 'Find the hurt man.' }
   }
   if (!helped) {
-    return { kind: 'hurt', at: MAZE_HURT, hint: 'Now go to the hurt man.' }
+    return { kind: 'help', at: MAZE_HURT, label: 'Help', hint: 'Stop and help him.' }
   }
-  if (!got.includes('coin')) {
-    return { kind: 'item', id: 'coin', at: MAZE_ITEM_AT.coin, hint: 'The inn needs the coin.' }
-  }
-  return { kind: 'inn', at: MAZE_INN, hint: 'Take him to the inn.' }
+  return { kind: 'inn', at: MAZE_INN, label: 'Inn', hint: 'Take him to the inn.' }
 }
 
-export function canHelp(got: readonly MazeItemId[]): boolean {
-  return got.includes('oil') && got.includes('cloth')
+/** Help is the mercy verb at the man — not an inventory gate. */
+export function canHelp(found: boolean, helped: boolean): boolean {
+  return found && !helped
 }
 
-export function canWin(got: readonly MazeItemId[], helped: boolean, at: MazeCoord): boolean {
-  return helped && got.includes('coin') && mazeSame(at, MAZE_INN)
+export function canWin(helped: boolean, at: MazeCoord): boolean {
+  return helped && mazeSame(at, MAZE_INN)
 }
 
-export function mazeBlockedHint(at: MazeCoord, got: readonly MazeItemId[], helped: boolean): string {
-  if (mazeSame(at, MAZE_HURT) && !canHelp(got)) return 'Get oil and cloth first.'
+export function mazeBlockedHint(at: MazeCoord, found: boolean, helped: boolean): string {
   if (mazeSame(at, MAZE_INN) && !helped) return 'Help the hurt man first.'
-  if (mazeSame(at, MAZE_INN) && helped && !got.includes('coin')) return 'The inn needs the coin.'
+  if (mazeSame(at, MAZE_HURT) && found && !helped) return 'Stop and help him.'
   return ROAD_MAZE_HINT
 }
 
 /** Story panels: hurt → walk-past → help → neighbor. */
-export function mazeBeatsOpened(got: readonly MazeItemId[], helped: boolean, won: boolean): number {
+export function mazeBeatsOpened(found: boolean, helped: boolean, won: boolean): number {
   if (won) return 4
   if (helped) return 3
-  if (got.length >= 1) return 2
+  if (found) return 2
   return 1
 }
 
-export function mazeCaption(
-  got: readonly MazeItemId[],
-  helped: boolean,
-  won: boolean,
-): string {
+export function mazeCaption(found: boolean, helped: boolean, won: boolean): string {
   if (won) return ROAD_MAZE_CLAIM
-  if (helped && !got.includes('coin')) return 'He is on the road. The inn needs the coin.'
   if (helped) return 'Take him to the inn.'
-  if (canHelp(got)) return 'You have what he needs. Go to him.'
-  return mazeGoal(got, helped).hint
+  if (found) return 'Stop. Help the hurt man.'
+  return 'Find the hurt man.'
+}
+
+export function mazeBeatDone(id: MazeBeatId, found: boolean, helped: boolean, won: boolean): boolean {
+  if (id === 'hurt') return found
+  if (id === 'help') return helped
+  return won
 }

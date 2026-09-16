@@ -179,7 +179,13 @@ export default function App() {
         <PackStreet packId={view.packId} onNavigate={go} />
       ) : null}
       {view.name === 'defend' && !easy ? <DefendScreen onNavigate={go} /> : null}
-      {view.name === 'link' ? <LinkScreen onNavigate={go} /> : null}
+      {view.name === 'link' ? (
+        <LinkScreen
+          key={view.debugLine ?? 'loop'}
+          debugLine={view.debugLine}
+          onNavigate={go}
+        />
+      ) : null}
       {view.name === 'learn' ? <LearnScreen onNavigate={go} /> : null}
       {view.name === 'profile' ? <Profile onNavigate={go} /> : null}
       {sceneAd && scenePauseMountsOn(view.name) ? (

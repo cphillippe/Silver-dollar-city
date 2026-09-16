@@ -23,13 +23,19 @@ export const HIRED_HAND_SPEECH = [
 ] as const
 
 export const SPEECH_PHRASE_MS = 2600
-export const HOLD_SPEED = 0.078
-export const HOLD_SPEED_REDUCED = 0.12
-export const DASH_BOOST = 0.16
-export const DASH_PERIOD_MS = 2300
-export const DASH_WINDOW_MS = 560
-export const RETRY_CLOSER = 0.18
-export const MIN_START_GAP = 0.42
+export const HOLD_SPEED = 0.05
+export const HOLD_SPEED_REDUCED = 0.062
+/** Holding never closes the hug — sit-forever stalls here. */
+export const HOLD_CAP = 0.58
+export const DASH_BOOST = 0.22
+export const DASH_PERIOD_MS = 2100
+export const DASH_WINDOW_MS = 500
+export const STALL_AFTER_MS = 900
+export const STALL_FACTOR = 0.38
+export const STUMBLE = 0.05
+export const MIN_DASHES_TO_HUG = 2
+export const RETRY_CLOSER = 0.1
+export const MIN_START_GAP = 0.5
 
 export type FatherRunPhase = 'ready' | 'run' | 'hug' | 'miss'
 
@@ -39,7 +45,8 @@ export function speechDurationMs(): number {
 
 export function fatherStartProgress(attempt: number): number {
   if (attempt <= 0) return 0
-  return Math.min(1 - MIN_START_GAP, attempt * RETRY_CLOSER)
+  const cap = Math.min(HOLD_CAP - 0.08, 1 - MIN_START_GAP)
+  return Math.min(cap, attempt * RETRY_CLOSER)
 }
 
 export function speechIndexAt(elapsedMs: number): number {
@@ -74,14 +81,30 @@ export function holdStep(
   dtSec: number,
   holding: boolean,
   reduced = false,
+  heldMs = 0,
 ): number {
   if (!holding || dtSec <= 0) return progress
-  const speed = reduced ? HOLD_SPEED_REDUCED : HOLD_SPEED
-  return Math.min(1, progress + speed * dtSec)
+  let speed = reduced ? HOLD_SPEED_REDUCED : HOLD_SPEED
+  if (heldMs >= STALL_AFTER_MS) speed *= STALL_FACTOR
+  const next = progress + speed * dtSec
+  if (progress >= HOLD_CAP) return Math.min(1, next)
+  return Math.min(HOLD_CAP, next)
 }
 
 export function applyDash(progress: number): number {
   return Math.min(1, progress + DASH_BOOST)
+}
+
+/** Held through a glow without a fresh press — a small stumble, not a brick wall. */
+export function stumbleIfHeldThrough(
+  progress: number,
+  wasInWindow: boolean,
+  inWindow: boolean,
+  holding: boolean,
+  dashedThisWindow: boolean,
+): number {
+  if (!wasInWindow || inWindow || !holding || dashedThisWindow) return progress
+  return Math.max(0, progress - STUMBLE)
 }
 
 /** How many story beats are open. First beat is up before the run; hug opens the last. */
@@ -97,16 +120,17 @@ export function fatherReached(progress: number): boolean {
   return progress >= 1
 }
 
-/** Win = hug lands while the hired-hand speech is still unfinished. */
-export function hugBeforeSpeech(progress: number, elapsedMs: number): boolean {
-  return fatherReached(progress) && !speechFinished(elapsedMs)
+/** Win = hug lands while the hired-hand speech is still unfinished, and the glow was timed. */
+export function hugBeforeSpeech(progress: number, elapsedMs: number, dashes = 0): boolean {
+  return fatherReached(progress) && !speechFinished(elapsedMs) && dashes >= MIN_DASHES_TO_HUG
 }
 
 export function runOutcome(
   progress: number,
   elapsedMs: number,
+  dashes = 0,
 ): 'run' | 'hug' | 'miss' {
-  if (hugBeforeSpeech(progress, elapsedMs)) return 'hug'
-  if (speechFinished(elapsedMs) && !fatherReached(progress)) return 'miss'
+  if (hugBeforeSpeech(progress, elapsedMs, dashes)) return 'hug'
+  if (speechFinished(elapsedMs) && !hugBeforeSpeech(progress, elapsedMs, dashes)) return 'miss'
   return 'run'
 }

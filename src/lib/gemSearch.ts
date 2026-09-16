@@ -264,8 +264,17 @@ export function gemWordsFor(lineId: string): GemWord[] {
   return picked.slice(0, MAX_WORDS)
 }
 
+function inBonusBand(bit: string): boolean {
+  return bit.length >= MIN_LEN && bit.length <= BONUS_MAX_LEN
+}
+
+/** STOP is for required-chip tokens only — too-common 3-letter dict words still score. */
+function plantBitOk(bit: string): boolean {
+  return inBonusBand(bit) && !STOP.has(bit)
+}
+
 function bonusBitOk(bit: string): boolean {
-  return bit.length >= MIN_LEN && bit.length <= BONUS_MAX_LEN && !STOP.has(bit)
+  return inBonusBand(bit)
 }
 
 function collidesRequired(text: string, chips: Set<string>): boolean {
@@ -281,7 +290,7 @@ export function plantCandidates(chips: Set<string>, rand: () => number): string[
   const prefer: string[] = []
   const rest: string[] = []
   for (const text of COMMON_BONUS_WORDS) {
-    if (!isPlantableBonusWord(text) || !bonusBitOk(text) || collidesRequired(text, chips)) continue
+    if (!isPlantableBonusWord(text) || !plantBitOk(text) || collidesRequired(text, chips)) continue
     if (isPreferredPlantWord(text)) prefer.push(text)
     else rest.push(text)
   }
@@ -305,7 +314,7 @@ export function bonusWordsFor(lineId: string): string[] {
   const seen = new Set<string>()
   const pool: string[] = []
   for (const bit of [...authored, ...fromText, ...SHARED_BONUS]) {
-    if (!bonusBitOk(bit) || targets.has(bit) || seen.has(bit)) continue
+    if (!plantBitOk(bit) || targets.has(bit) || seen.has(bit)) continue
     seen.add(bit)
     pool.push(bit)
   }
@@ -426,7 +435,6 @@ function scanBonusOnBoard(
           if (!ok) continue
           const spelled = pathLetters(path, letters)
           if (!allow.has(spelled) || seen.has(spelled)) continue
-          if ([...taken].some((item) => item.includes(spelled))) continue
           seen.add(spelled)
           found.push({ word: makeBonusWord(spelled), path })
         }
@@ -517,6 +525,32 @@ export function isAdjacent(a: GemCoord, b: GemCoord) {
   return dr >= -1 && dr <= 1 && dc >= -1 && dc <= 1 && !(dr === 0 && dc === 0)
 }
 
+const SNAP_DIRS: GemCoord[] = [
+  { r: 0, c: 1 },
+  { r: 0, c: -1 },
+  { r: 1, c: 0 },
+  { r: -1, c: 0 },
+  { r: 1, c: 1 },
+  { r: 1, c: -1 },
+  { r: -1, c: 1 },
+  { r: -1, c: -1 },
+]
+
+function chebyshev(a: GemCoord, b: GemCoord): number {
+  return Math.max(Math.abs(a.r - b.r), Math.abs(a.c - b.c))
+}
+
+function buildRay(start: GemCoord, dir: GemCoord, len: number, size: number): GemCoord[] | null {
+  const path: GemCoord[] = []
+  for (let i = 0; i < len; i += 1) {
+    const r = start.r + dir.r * i
+    const c = start.c + dir.c * i
+    if (r < 0 || c < 0 || r >= size || c >= size) return null
+    path.push({ r, c })
+  }
+  return path
+}
+
 /** Straight line of steps after the first cell — Easy word-search swipe. */
 export function isStraightPath(path: GemCoord[]): boolean {
   if (path.length < 2) return false
@@ -534,6 +568,42 @@ export function isStraightPath(path: GemCoord[]): boolean {
     if (next.r - prev.r !== dr || next.c - prev.c !== dc) return false
   }
   return true
+}
+
+/** Snap a wobbly finger trail to the nearest row, column, or diagonal. */
+export function snapFingerPath(path: GemCoord[], size = GRID): GemCoord[] {
+  if (path.length < 2 || size < 2) return path
+  if (isStraightPath(path)) return path
+  const start = path[0]
+  if (!start) return path
+  let best: GemCoord[] | null = null
+  let bestScore = -Infinity
+  for (const dir of SNAP_DIRS) {
+    let hits = 0
+    let maxT = 0
+    const denom = dir.r * dir.r + dir.c * dir.c
+    if (!denom) continue
+    for (const cell of path) {
+      const t = Math.round(((cell.r - start.r) * dir.r + (cell.c - start.c) * dir.c) / denom)
+      if (t < 0) continue
+      const on = { r: start.r + dir.r * t, c: start.c + dir.c * t }
+      if (on.r < 0 || on.c < 0 || on.r >= size || on.c >= size) continue
+      if (chebyshev(cell, on) > 1) continue
+      hits += 1
+      if (t > maxT) maxT = t
+    }
+    const len = Math.min(MAX_LEN, maxT + 1)
+    if (len < 2) continue
+    const line = buildRay(start, dir, len, size)
+    if (!line) continue
+    const last = path[path.length - 1]!
+    const score = hits * 100 + len * 10 - chebyshev(last, line[line.length - 1]!)
+    if (score > bestScore) {
+      bestScore = score
+      best = line
+    }
+  }
+  return best ?? path
 }
 
 export function pathLetters(path: GemCoord[], letters: string[][]): string {
@@ -577,16 +647,16 @@ export function findStraightSpelling(letters: string[][], word: string): GemCoor
   return null
 }
 
-/** Non-chip extra: curated lesson pool or a common English word on the board. */
+/** Non-chip extra: curated lesson pool or a common English word on the board.
+ * Exact 3–6 letter dict swipe scores even when those letters sit inside a longer chip. */
 export function isBonusSpelling(text: string, puzzle: GemPuzzle): boolean {
   if (!bonusBitOk(text)) return false
   if (puzzle.words.some((word) => word.text === text)) return false
-  if (puzzle.words.some((word) => word.text.includes(text))) return false
   if (puzzle.bonusPool.includes(text)) return true
   return COMMON_BONUS.has(text) && isKidFriendlyBonusWord(text)
 }
 
-export function tryAddToPath(path: GemCoord[], next: GemCoord): GemCoord[] {
+export function tryAddToPath(path: GemCoord[], next: GemCoord, size = GRID): GemCoord[] {
   if (path.some((cell) => sameCell(cell, next))) {
     if (path.length >= 2 && sameCell(path[path.length - 2]!, next)) {
       return path.slice(0, -1)
@@ -595,15 +665,14 @@ export function tryAddToPath(path: GemCoord[], next: GemCoord): GemCoord[] {
   }
   const last = path[path.length - 1]
   if (!last) return [next]
-  if (!isAdjacent(last, next)) return path
-  const trial = [...path, next]
-  if (trial.length >= 3 && !isStraightPath(trial)) return path
-  return trial
+  if (chebyshev(last, next) > 2) return path
+  return snapFingerPath([...path, next], size)
 }
 
 export function matchGemWord(path: GemCoord[], puzzle: GemPuzzle, found: string[]): GemWord | null {
-  if (!isStraightPath(path)) return null
-  const spells = pathSpellings(path, puzzle.letters)
+  const line = snapFingerPath(path, puzzle.size)
+  if (!isStraightPath(line)) return null
+  const spells = pathSpellings(line, puzzle.letters)
   return (
     puzzle.words.find((word) => spells.includes(word.text) && !found.includes(word.id)) ?? null
   )
@@ -615,13 +684,14 @@ export function matchBonusWord(
   puzzle: GemPuzzle,
   foundBonus: string[],
 ): GemWord | null {
-  if (!isStraightPath(path)) return null
-  const spells = pathSpellings(path, puzzle.letters)
+  const line = snapFingerPath(path, puzzle.size)
+  if (!isStraightPath(line)) return null
+  const spells = pathSpellings(line, puzzle.letters)
   if (puzzle.words.some((word) => spells.includes(word.text))) return null
   const plantedHit = puzzle.planted.find((word) => {
     if (foundBonus.includes(word.id) || foundBonus.includes(word.text)) return false
     const placed = puzzle.bonusPaths[word.id]
-    return Boolean(placed && trailMatches(placed, path))
+    return Boolean(placed && trailMatches(placed, line))
   })
   if (plantedHit) return plantedHit
   const spelled = spells.find((text) => isBonusSpelling(text, puzzle))

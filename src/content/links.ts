@@ -151,8 +151,8 @@ const STREET_FACTS: StreetFact[] = [
     tripleId: 'debt-hollow',
     placeId: 'place-hollow',
     personId: 'person-mercy',
-    text: 'Received mercy makes refusing mercy a contradiction.',
-    caption: 'Received mercy makes refusing mercy a contradiction.',
+    text: 'Forgiven much, you cannot choke a neighbor over a little debt.',
+    caption: 'Forgiven much, you cannot choke a neighbor over a little debt.',
   },
   {
     evidenceId: 'wb-creed',
@@ -205,7 +205,7 @@ const STREET_FACTS: StreetFact[] = [
     tripleId: 'creed-bench',
     placeId: 'place-bench',
     personId: 'person-silas',
-    text: 'The churches already named Christ died, buried, raised before Paul’s letter.',
+    text: 'The churches named Christ died, buried, and raised before Paul wrote.',
     caption: 'The churches already named Christ.',
   },
   {
@@ -214,7 +214,7 @@ const STREET_FACTS: StreetFact[] = [
     tripleId: 'empty-bench',
     placeId: 'place-bench',
     personId: 'person-silas',
-    text: 'The first Easter reports of Jesus include an empty tomb, women, fear, and wonder.',
+    text: 'Jesus’ tomb was empty — women saw it first, with fear and wonder.',
     caption: 'Easter begins with an empty tomb.',
   },
   {
@@ -313,7 +313,7 @@ const STREET_FACTS: StreetFact[] = [
     tripleId: 'ansel-gate',
     placeId: 'place-gate',
     personId: 'person-ansel',
-    text: 'The universe exists and did not have to — so a Source is worth naming.',
+    text: 'The world is here, and it did not have to be — the psalms name a Giver.',
     caption: 'The world did not have to exist.',
   },
   {
@@ -358,7 +358,7 @@ const STREET_FACTS: StreetFact[] = [
     tripleId: 'mover-gate',
     placeId: 'place-gate',
     personId: 'person-ansel',
-    text: 'Change here and now needs a first actuality that is not itself a receiver of change.',
+    text: 'Change now needs a first mover that is not itself changing.',
     caption: 'Change needs a first actuality.',
   },
   {
@@ -367,7 +367,7 @@ const STREET_FACTS: StreetFact[] = [
     tripleId: 'contingent-gate',
     placeId: 'place-gate',
     personId: 'person-ansel',
-    text: 'A world of might-not-have-beens still needs a necessary ground.',
+    text: 'Things that might not exist still need a necessary ground.',
     caption: 'Might-not-have-beens need a necessary ground.',
   },
   {
@@ -376,7 +376,7 @@ const STREET_FACTS: StreetFact[] = [
     tripleId: 'kalam-gate',
     placeId: 'place-gate',
     personId: 'person-ansel',
-    text: 'If what begins has a cause and the universe began, it has a cause.',
+    text: 'What begins has a cause — the universe began, so it has a Cause.',
     caption: 'What begins has a cause.',
   },
   {
@@ -385,7 +385,7 @@ const STREET_FACTS: StreetFact[] = [
     tripleId: 'limits-gate',
     placeId: 'place-gate',
     personId: 'person-ansel',
-    text: 'A cosmological argument is already a great deal — and not yet the sermon on the mount.',
+    text: 'A first cause is a great deal — not yet the whole gospel.',
     caption: 'A first cause is not yet the whole gospel.',
   },
   {
@@ -403,7 +403,7 @@ const STREET_FACTS: StreetFact[] = [
     tripleId: 'isaiah-gate',
     placeId: 'place-gate',
     personId: 'person-ansel',
-    text: 'Isaiah 53’s Servant is the Jesus the church confesses — wounded for others, silent like a lamb.',
+    text: 'Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.',
     caption: 'Isaiah’s Servant is Jesus.',
   },
   {
@@ -412,7 +412,7 @@ const STREET_FACTS: StreetFact[] = [
     tripleId: 'hope-lookout',
     placeId: 'place-lookout',
     personId: 'person-hope',
-    text: 'Duty presents itself as more than taste — and theism is a natural home for that.',
+    text: 'Duty is more than taste — a good God fits that pull.',
     caption: 'Duty is more than taste.',
   },
   {
@@ -987,8 +987,8 @@ export const STREET_WHYS: Record<string, { easy: string; hard: string }> = {
     hard: 'Silas Whitman keeps Witness Square. Cephas, the Twelve, and more than five hundred are public names, not a private dream.',
   },
   'creed-bench': {
-    easy: 'Silas keeps the square. The churches already named Christ died, buried, raised before Paul’s letter.',
-    hard: 'Silas Whitman keeps Witness Square. The churches already named Christ died, buried, raised before Paul’s letter.',
+    easy: 'Silas keeps the square. The churches named Christ died, buried, and raised before Paul wrote.',
+    hard: 'Silas Whitman keeps Witness Square. The churches named Christ died, buried, and raised before Paul wrote.',
   },
   'empty-bench': {
     easy: 'Silas keeps the square. Easter begins with an empty tomb of Jesus — women, fear, and wonder.',
@@ -1064,11 +1064,11 @@ export const STREET_WHYS: Record<string, { easy: string; hard: string }> = {
   },
   'kalam-gate': {
     easy: 'Ansel keeps Why Gate. What begins has a cause.',
-    hard: 'Ansel Gate keeps Why Gate. If what begins has a cause and the universe began, it has a Cause of the beginning.',
+    hard: 'Ansel Gate keeps Why Gate. What begins has a cause — the universe began, so it has a Cause of the beginning.',
   },
   'limits-gate': {
     easy: 'Ansel keeps Why Gate. A first cause is not yet the whole gospel.',
-    hard: 'Ansel Gate keeps Why Gate. A cosmological argument is already a great deal — and not yet the sermon on the mount.',
+    hard: 'Ansel Gate keeps Why Gate. A first cause is a great deal — not yet the whole gospel.',
   },
   'scroll-gate': {
     easy: 'Ansel keeps Why Gate. We hold a river of copies, not the first ink.',
@@ -1076,7 +1076,7 @@ export const STREET_WHYS: Record<string, { easy: string; hard: string }> = {
   },
   'isaiah-gate': {
     easy: 'Ansel keeps Why Gate. Isaiah’s Servant is Jesus.',
-    hard: 'Ansel Gate keeps Why Gate. Isaiah 53’s Servant is the Jesus the church confesses — wounded for others, silent like a lamb.',
+    hard: 'Ansel Gate keeps Why Gate. Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.',
   },
   'hope-lookout': {
     easy: 'Hope keeps Meaning Ridge. Duty is more than a taste.',
@@ -1084,7 +1084,7 @@ export const STREET_WHYS: Record<string, { easy: string; hard: string }> = {
   },
   'mind-lookout': {
     easy: 'Hope keeps Meaning Ridge. The story must house the storyteller’s mind.',
-    hard: 'Hope Ridge keeps Meaning Ridge. Theism is a reply in which mind is present at the beginning, not only an accident at the end.',
+    hard: 'Hope Ridge keeps Meaning Ridge. Mind is there at the start — not a late accident.',
   },
   'meaning-lookout': {
     easy: 'Hope keeps Meaning Ridge. Meaning may be received, not only built.',

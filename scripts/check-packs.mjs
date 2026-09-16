@@ -331,6 +331,30 @@ for (const id of NAMES_ARC) {
   assert.doesNotMatch(lesson.easy.hold.why, /If the formula is early|does not sand/i, `${id} reason hedge`)
 }
 
+const debtLine = packLesson('ph-debt')
+assert.ok(debtLine)
+assert.match(debtLine.claim, /Forgiven much/)
+assert.doesNotMatch(debtLine.claim, /contradiction/)
+assert.doesNotMatch(debtLine.easy.hold.why, /throttl|contradiction/i)
+assert.doesNotMatch(debtLine.easy.learn, /contradiction/)
+assert.doesNotMatch(debtLine.easy.gloss ?? '', /^If /)
+
+const moral = packLesson('hl-moral')
+assert.ok(moral)
+assert.match(moral.claim, /Duty is more than taste/)
+assert.doesNotMatch(moral.claim, /theism/i)
+
+const mind = packLesson('hl-mind')
+assert.ok(mind)
+assert.match(mind.easy.hold.why, /Mind is there at the start/)
+assert.doesNotMatch(mind.easy.hold.why, /Theism/)
+
+const kalam = packLesson('fg-kalam')
+assert.ok(kalam)
+assert.match(kalam.claim, /What begins has a cause/)
+assert.doesNotMatch(kalam.claim, /^If /)
+assert.doesNotMatch(kalam.easy.learn, /^If /)
+
 const teachSrc = readFileSync(new URL('../src/components/TeachUnlock.tsx', import.meta.url), 'utf8')
 assert.match(teachSrc, /HeldTriad/)
 assert.match(teachSrc, /omitClaim/)
@@ -346,6 +370,8 @@ const blastSrc = readFileSync(
 )
 assert.match(blastSrc, /EASY\.sayFrom/)
 assert.match(blastSrc, /source/)
+assert.match(blastSrc, /why-claim[\s\S]*?EASY\.sayFrom[\s\S]*?\{locked/)
+assert.doesNotMatch(blastSrc.slice(blastSrc.indexOf('match-yes')), /held-from/)
 assert.doesNotMatch(blastSrc, /One more/)
 
 console.log('check-packs: ok')

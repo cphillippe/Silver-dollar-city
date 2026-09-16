@@ -18,6 +18,7 @@ import {
   wrapSave,
 } from '../lib/save'
 import { localDateKey } from '../lib/dates'
+import { debugJumpView, debugPlayGroups, debugPlayLabel } from '../lib/debugPlays'
 import { EASY, isEasy } from '../lib/easy'
 import { useAdsPref } from './AdSlot'
 import { useProgress } from '../store/progress'
@@ -420,6 +421,35 @@ export function Settings({ onNavigate }: SettingsProps) {
         <button type="button" className="btn" onClick={confirmReset}>
           Reset progress
         </button>
+      </details>
+
+      <details className="settings-card settings-danger settings-debug">
+        <summary>Developer · mini-game jumps</summary>
+        <p className="eyebrow">Debug</p>
+        <p>
+          One-tap every Easy play. Labels are lesson id + short name. This is
+          not on Home.
+        </p>
+        {debugPlayGroups().map((group) => (
+          <section key={group.play} className="settings-debug-group" aria-label={group.heading}>
+            <p className="eyebrow">{group.heading}</p>
+            <div className="settings-actions">
+              {group.items.map((item) => (
+                <button
+                  key={`${item.play}-${item.lineId}`}
+                  type="button"
+                  className="btn"
+                  onClick={() => {
+                    setEasyMode(true)
+                    onNavigate(debugJumpView(item))
+                  }}
+                >
+                  {debugPlayLabel(item)}
+                </button>
+              ))}
+            </div>
+          </section>
+        ))}
       </details>
     </main>
   )
