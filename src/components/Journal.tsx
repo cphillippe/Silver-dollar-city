@@ -4,6 +4,7 @@ import { evidenceFor, evidenceForJournal, evidenceForTier } from '../content/evi
 import { guideForArea, STORY } from '../content/story'
 import { localDateKey } from '../lib/dates'
 import { EASY, easyFacingLine, easyJournalMeta, isEasy } from '../lib/easy'
+import { offerSupportToast } from '../lib/supportToast'
 import { isDue, nextGapLabel } from '../lib/memory'
 import { starLegend } from '../lib/stars'
 import { deployLabel, findLearning, storedLearnings, withLearningBeat } from '../lib/learning'
@@ -116,6 +117,7 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
                   elaborated: false,
                 })
                 recordLessonHold(quizBrief.id, result.clean)
+                offerSupportToast()
                 onNavigate({ name: 'hub' })
                 return
               }

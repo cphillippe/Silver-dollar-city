@@ -120,7 +120,7 @@ export default function App() {
   function supportFromAd() {
     setSceneAd(false)
     setPending(null)
-    setView({ name: 'shop' })
+    setView({ name: 'settings' })
   }
 
   useEffect(() => {

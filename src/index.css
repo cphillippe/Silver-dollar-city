@@ -5047,6 +5047,23 @@ html[data-theme='dusk'] .hub.is-town .street-link {
   margin: 10px 0 12px;
 }
 
+.support-toast {
+  margin: 12px 0 4px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--card, #fff) 92%, #ffcc33);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
+}
+
+.support-toast p {
+  margin: 0;
+}
+
+button.btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
 .settings-paste,
 .settings-paste textarea,
 .share-code-out {
