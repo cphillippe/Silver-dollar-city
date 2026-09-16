@@ -68,7 +68,7 @@ import {
   EASY_FOLK_LIFT,
 } from '../src/lib/cityBuild.ts'
 import { emptyProgress } from '../src/lib/save.ts'
-import { EASY, EASY_LINE_ORDER, DIG_ARC, easyChromeLine, easyFacingLine, easyHomeFocus, easyHoldLine, easyHoldPractice, easyHoldView, easyLearnLine, easyLineHeld, easyLineLearned, easyLineTaught, easyLoopLine, easyMatchLine, easyMatchReady, markEasyHeld, markEasyTaught, easyWhoWhere, easyWhoWhereLine, easyWhyLine, easyWhyWordCount, easyWrongTap, uniqueHoldChoices } from '../src/lib/easy.ts'
+import { EASY, EASY_LINE_ORDER, DIG_ARC, NAMES_ARC, easyChromeLine, easyFacingLine, easyHomeFocus, easyHoldLine, easyHoldPractice, easyHoldView, easyLearnLine, easyLineHeld, easyLineLearned, easyLineTaught, easyLoopLine, easyMatchLine, easyMatchReady, markEasyHeld, markEasyTaught, easyWhoWhere, easyWhoWhereLine, easyWhyLine, easyWhyWordCount, easyWrongTap, uniqueHoldChoices } from '../src/lib/easy.ts'
 import { WORDS, easyLead } from '../src/lib/words.ts'
 import { deeperLinksFor, eraLabel } from '../src/content/deeper.ts'
 import { allEvidenceIds, evidenceFor } from '../src/content/evidence.ts'
@@ -1086,7 +1086,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.73')
+assert.equal(APP_VERSION, '1.4.74')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1862,7 +1862,8 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
   assert.ok(EASY_LINE_ORDER.includes('ph-debt'))
   assert.ok(EASY_LINE_ORDER.includes('hl-moral'))
   assert.deepEqual([...DIG_ARC], ['wb-creed', 'wb-women', 'wb-early', 'wb-method'])
-  assert.deepEqual(EASY_LINE_ORDER.slice(7, 12), [...DIG_ARC, 'daily-lantern'])
+  assert.deepEqual([...NAMES_ARC], ['daily-names', 'daily-creed', 'daily-empty'])
+  assert.deepEqual(EASY_LINE_ORDER.slice(7, 14), [...DIG_ARC, ...NAMES_ARC])
   const homes = {
     'ph-road': { who: 'Mercy', place: 'Story Creek' },
     'ph-father': { who: 'Mercy', place: 'Story Creek' },

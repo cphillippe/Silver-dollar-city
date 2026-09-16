@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<areaPack id="witness-bench" schemaVersion="3" appVersion="1.4.73" generated="2026-09-16T09:00:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/" title="Witness Square" place="Witness Square" person="Silas Whitman" personId="silas" plotId="bench">
+<areaPack id="witness-bench" schemaVersion="3" appVersion="1.4.74" generated="2026-09-16T09:00:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/" title="Witness Square" place="Witness Square" person="Silas Whitman" personId="silas" plotId="bench">
   <howToEdit>RUNTIME CONTENT: the game loads this file as the source of truth for this area. Change player-facing text in place inside each &lt;lesson&gt;. Stable id attributes (ph-father, …) are engine keys — do not rename without a migration. Three tiers per fact: &lt;easy easyOrder="N"&gt;, &lt;medium&gt;, and &lt;hard&gt; — each with &lt;learn&gt;, &lt;match&gt;, and &lt;hold&gt;. Easy Learn: shortStory/mainIdea/loci. Medium Learn: mediumTeach (clearer than Hard, richer than Easy). Hard Learn: hardTeach/fullTeach. Held claim·reason·source stay plain and identical on all three. Hold level-up: see hold @levelUpTo / @onFail and index &lt;holdRules&gt;. Empty optional elements are intentional. Escape &amp; &lt; &gt; in text.</howToEdit>
   <meta>
     <title>Silver City — Witness Square</title>
@@ -12,9 +12,9 @@
     <line id="wb-women" easyOrder="9">wb-women</line>
     <line id="wb-early" easyOrder="10">wb-early</line>
     <line id="wb-method" easyOrder="11">wb-method</line>
-    <line id="daily-names" easyOrder="17">daily-names</line>
-    <line id="daily-creed" easyOrder="18">daily-creed</line>
-    <line id="daily-empty" easyOrder="19">daily-empty</line>
+    <line id="daily-names" easyOrder="12">daily-names</line>
+    <line id="daily-creed" easyOrder="13">daily-creed</line>
+    <line id="daily-empty" easyOrder="14">daily-empty</line>
   </easyShelf>
   <lessons>
     <lesson id="wb-creed" place="Witness Square" person="Silas Whitman" tripleId="silas-bench" ideaId="idea-silas" ideaLabel="Died, buried, raised, appeared." challengeKind="sequence" challengeTitle="What Paul received">
@@ -629,12 +629,12 @@ Josephus, Antiquities 18.63–64, is partly disputed because of later Christian 
         </sources>
       </journal>
     </lesson>
-    <lesson id="daily-names" place="Witness Square" person="Silas Whitman" tripleId="names-bench" ideaId="idea-names" ideaLabel="Named witnesses, not one private voice." challengeKind="match" challengeTitle="Names that stay">
-      <easy points="10" easyOrder="13">
+    <lesson id="daily-names" place="Witness Square" person="Silas Whitman" tripleId="names-bench" ideaId="idea-names" ideaLabel="Named people saw the risen Christ." challengeKind="match" challengeTitle="Names that stay">
+      <easy points="10" easyOrder="12">
         <learn>
           <shortStory>Paul lists Cephas, the Twelve, and more than five hundred — many still living then.</shortStory>
-          <mainIdea>The resurrection claim stacks named witnesses, not one private voice.</mainIdea>
-          <gloss>The resurrection claim stacks named witnesses, not one private voice.</gloss>
+          <mainIdea>Named people saw the risen Christ — not one private voice.</mainIdea>
+          <gloss>Named people saw the risen Christ — not one private voice.</gloss>
           <loci>This idea lives at Witness Square, with Silas.</loci>
           <word>
             <term>Witness</term>
@@ -643,7 +643,7 @@ Josephus, Antiquities 18.63–64, is partly disputed because of later Christian 
           <hint>Keep the names. Toss the anonymous dream.</hint>
         </learn>
         <match>
-          <sentenceCorrect>The resurrection claim stacks named witnesses, not one private voice.</sentenceCorrect>
+          <sentenceCorrect>Named people saw the risen Christ — not one private voice.</sentenceCorrect>
           <sentenceMisses>
             <miss>Paul refuses to name anyone.</miss>
             <miss>Only one anonymous dreamer is cited.</miss>
@@ -651,11 +651,11 @@ Josephus, Antiquities 18.63–64, is partly disputed because of later Christian 
           <placePrompt>Those names sit at the square.</placePrompt>
           <personPrompt>Silas keeps that square.</personPrompt>
           <ideaPrompt>Silas’s public names — Cephas, the Twelve, five hundred.</ideaPrompt>
-          <ideaLabel>Named witnesses, not one private voice.</ideaLabel>
-          <whyEasy>Silas keeps the square. Named witnesses — not one private voice.</whyEasy>
+          <ideaLabel>Named people saw the risen Christ.</ideaLabel>
+          <whyEasy>Silas keeps the square. Named people saw the risen Christ — not one private voice.</whyEasy>
         </match>
         <hold levelUpTo="medium" onFail="easy">
-          <claim>The resurrection claim stacks named witnesses, not one private voice.</claim>
+          <claim>Named people saw the risen Christ — not one private voice.</claim>
           <reason>Paul lists Cephas, the Twelve, and more than five hundred — many still living then.</reason>
           <source>1 Corinthians 15:5–6</source>
           <whyCorrect>Paul lists Cephas, the Twelve, and more than five hundred — many still living then.</whyCorrect>
@@ -665,7 +665,7 @@ Josephus, Antiquities 18.63–64, is partly disputed because of later Christian 
             <miss>Paul names no one who was alive.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>The resurrection claim stacks named witnesses, not one private voice.</choice>
+            <choice>Named people saw the risen Christ — not one private voice.</choice>
             <choice>Paul refuses to name anyone.</choice>
             <choice>Only one anonymous dreamer is cited.</choice>
           </claimChoices>
@@ -678,9 +678,9 @@ Josephus, Antiquities 18.63–64, is partly disputed because of later Christian 
       </easy>
       <medium points="12">
         <learn>
-          <mediumTeach>1 Corinthians 15:5–6. Paul lists Cephas, the Twelve, and more than five hundred brothers — many still living when he wrote. The resurrection claim stacks named witnesses, not one private voice.</mediumTeach>
-          <mainIdea>The resurrection claim stacks named witnesses, not one private voice.</mainIdea>
-          <gloss>The resurrection claim stacks named witnesses, not one private voice.</gloss>
+          <mediumTeach>1 Corinthians 15:5–6. Paul lists Cephas, the Twelve, and more than five hundred brothers — many still living when he wrote. Named people saw the risen Christ — not one private voice.</mediumTeach>
+          <mainIdea>Named people saw the risen Christ — not one private voice.</mainIdea>
+          <gloss>Named people saw the risen Christ — not one private voice.</gloss>
           <loci>This idea lives at Witness Square, with Silas.</loci>
           <word>
             <term>Witness</term>
@@ -689,7 +689,7 @@ Josephus, Antiquities 18.63–64, is partly disputed because of later Christian 
           <hint>Keep the names. Toss the anonymous dream.</hint>
         </learn>
         <match>
-          <sentenceCorrect>The resurrection claim stacks named witnesses, not one private voice.</sentenceCorrect>
+          <sentenceCorrect>Named people saw the risen Christ — not one private voice.</sentenceCorrect>
           <sentenceMisses>
             <miss>Paul refuses to name anyone.</miss>
             <miss>Only one anonymous dreamer is cited.</miss>
@@ -697,11 +697,11 @@ Josephus, Antiquities 18.63–64, is partly disputed because of later Christian 
           <placePrompt>Those names sit at the square.</placePrompt>
           <personPrompt>Silas keeps that square.</personPrompt>
           <ideaPrompt>Silas’s public names — Cephas, the Twelve, five hundred.</ideaPrompt>
-          <ideaLabel>Named witnesses, not one private voice.</ideaLabel>
-          <whyMedium>Silas keeps the square. Named witnesses — not one private voice.</whyMedium>
+          <ideaLabel>Named people saw the risen Christ.</ideaLabel>
+          <whyMedium>Silas keeps the square. Named people saw the risen Christ — not one private voice.</whyMedium>
         </match>
         <hold levelUpTo="hard" onFail="easy">
-          <claim>The resurrection claim stacks named witnesses, not one private voice.</claim>
+          <claim>Named people saw the risen Christ — not one private voice.</claim>
           <reason>Paul lists Cephas, the Twelve, and more than five hundred — many still living then.</reason>
           <source>1 Corinthians 15:5–6</source>
           <whyCorrect>Paul lists Cephas, the Twelve, and more than five hundred — many still living then.</whyCorrect>
@@ -711,7 +711,7 @@ Josephus, Antiquities 18.63–64, is partly disputed because of later Christian 
             <miss>Paul names no one who was alive.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>The resurrection claim stacks named witnesses, not one private voice.</choice>
+            <choice>Named people saw the risen Christ — not one private voice.</choice>
             <choice>Paul refuses to name anyone.</choice>
             <choice>Only one anonymous dreamer is cited.</choice>
           </claimChoices>
@@ -746,7 +746,7 @@ He appeared to Cephas, then to the twelve. Then he appeared to more than five hu
           </challengeTiles>
         </learn>
         <match>
-          <sentenceCorrect>The resurrection claim stacks named witnesses, not one private voice.</sentenceCorrect>
+          <sentenceCorrect>Named people saw the risen Christ — not one private voice.</sentenceCorrect>
           <sentenceMisses>
             <miss>Paul refuses to name anyone.</miss>
             <miss>Only one anonymous dreamer is cited.</miss>
@@ -754,11 +754,11 @@ He appeared to Cephas, then to the twelve. Then he appeared to more than five hu
           <placePrompt>Those names sit at the square.</placePrompt>
           <personPrompt>Silas keeps that square.</personPrompt>
           <ideaPrompt>Silas’s public names — Cephas, the Twelve, five hundred.</ideaPrompt>
-          <ideaLabel>Named witnesses, not one private voice.</ideaLabel>
+          <ideaLabel>Named people saw the risen Christ.</ideaLabel>
           <whyHard>Silas Whitman keeps Witness Square. Cephas, the Twelve, and more than five hundred are public names, not a private dream.</whyHard>
         </match>
         <hold onFail="easy">
-          <claim>The resurrection claim stacks named witnesses, not one private voice.</claim>
+          <claim>Named people saw the risen Christ — not one private voice.</claim>
           <reason>Paul lists Cephas, the Twelve, and more than five hundred — many still living then.</reason>
           <source>1 Corinthians 15:5–6</source>
           <whyCorrect>Paul lists Cephas, the Twelve, and more than five hundred — many still living then.</whyCorrect>
@@ -768,7 +768,7 @@ He appeared to Cephas, then to the twelve. Then he appeared to more than five hu
             <miss>Paul names no one who was alive.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>The resurrection claim stacks named witnesses, not one private voice.</choice>
+            <choice>Named people saw the risen Christ — not one private voice.</choice>
             <choice>Paul refuses to name anyone.</choice>
             <choice>Only one anonymous dreamer is cited.</choice>
           </claimChoices>
@@ -779,19 +779,19 @@ He appeared to Cephas, then to the twelve. Then he appeared to more than five hu
           </reasonChoices>
         </hold>
       </hard>
-      <journal id="" title="" kicker="" unlockAfter="daily-names" scoreFromHeldTier="true">
-        <p />
+      <journal id="j-wb-5" title="Names that stay" kicker="Witness Square" unlockAfter="daily-names" scoreFromHeldTier="true">
+        <p>Paul names Cephas, the Twelve, and more than five hundred — many still living then. Named people saw the risen Christ, not one private voice.</p>
         <sources>
-          <source />
+          <source>1 Corinthians 15:5–6</source>
         </sources>
       </journal>
     </lesson>
-    <lesson id="daily-creed" place="Witness Square" person="Silas Whitman" tripleId="creed-bench" ideaId="idea-daily-creed" ideaLabel="The creed sits close to the event." challengeKind="sequence" challengeTitle="Older than the letter">
-      <easy points="10" easyOrder="14">
+    <lesson id="daily-creed" place="Witness Square" person="Silas Whitman" tripleId="creed-bench" ideaId="idea-daily-creed" ideaLabel="The churches already named Christ." challengeKind="sequence" challengeTitle="Older than the letter">
+      <easy points="10" easyOrder="13">
         <learn>
-          <shortStory>If that short line is early, the claim is close to what it names: died, buried, raised.</shortStory>
-          <mainIdea>The creed sits between the event and Paul’s letter.</mainIdea>
-          <gloss>The old shared belief sits between the event and Paul’s letter.</gloss>
+          <shortStory>Paul says he handed on what he received. The churches already named Christ died, buried, raised — then he wrote the letter.</shortStory>
+          <mainIdea>The churches already named Christ died, buried, raised before Paul’s letter.</mainIdea>
+          <gloss>The churches already named Christ died, buried, raised before Paul’s letter.</gloss>
           <loci>This idea lives at Witness Square, with Silas.</loci>
           <word>
             <term>Creed</term>
@@ -800,7 +800,7 @@ He appeared to Cephas, then to the twelve. Then he appeared to more than five hu
           <hint>Keep “received.” Toss “Paul invented it while writing.”</hint>
         </learn>
         <match>
-          <sentenceCorrect>The creed sits between the event and Paul’s letter.</sentenceCorrect>
+          <sentenceCorrect>The churches already named Christ died, buried, raised before Paul’s letter.</sentenceCorrect>
           <sentenceMisses>
             <miss>Paul invents the creed as he writes.</miss>
             <miss>Burial is skipped because it does not matter.</miss>
@@ -808,26 +808,26 @@ He appeared to Cephas, then to the twelve. Then he appeared to more than five hu
           <placePrompt>Those names sit at the square.</placePrompt>
           <personPrompt>Silas keeps that square.</personPrompt>
           <ideaPrompt>Silas’s handed-on creed — close to the event, then Paul’s letter.</ideaPrompt>
-          <ideaLabel>The creed sits close to the event.</ideaLabel>
-          <whyEasy>Silas keeps the square. The creed sits close to the event, then Paul’s letter.</whyEasy>
+          <ideaLabel>The churches already named Christ.</ideaLabel>
+          <whyEasy>Silas keeps the square. The churches already named Christ died, buried, raised before Paul’s letter.</whyEasy>
         </match>
         <hold levelUpTo="medium" onFail="easy">
-          <claim>The creed sits between the event and Paul’s letter.</claim>
-          <reason>If the formula is early, the claim is close to what it names: died, buried, raised.</reason>
+          <claim>The churches already named Christ died, buried, raised before Paul’s letter.</claim>
+          <reason>Paul hands on what he received — not a line he invented while writing.</reason>
           <source>1 Corinthians 15:3–4</source>
-          <whyCorrect>If the formula is early, the claim is close to what it names: died, buried, raised.</whyCorrect>
+          <whyCorrect>Paul hands on what he received — not a line he invented while writing.</whyCorrect>
           <whyMisses>
             <miss>The letter is older than any tradition it quotes.</miss>
             <miss>Nothing was handed on; it was only felt.</miss>
             <miss>The line is late, far from the event.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>The creed sits between the event and Paul’s letter.</choice>
+            <choice>The churches already named Christ died, buried, raised before Paul’s letter.</choice>
             <choice>Paul invents the creed as he writes.</choice>
             <choice>Burial is skipped because it does not matter.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>If the formula is early, the claim is close to what it names: died, buried, raised.</choice>
+            <choice>Paul hands on what he received — not a line he invented while writing.</choice>
             <choice>The letter is older than any tradition it quotes.</choice>
             <choice>Nothing was handed on; it was only felt.</choice>
           </reasonChoices>
@@ -835,9 +835,9 @@ He appeared to Cephas, then to the twelve. Then he appeared to more than five hu
       </easy>
       <medium points="12">
         <learn>
-          <mediumTeach>1 Corinthians 15:3–4. The short creed sits between the event and Paul’s letter: died, buried, raised. If that line is early, the claim is close to what it names — not a late add-on.</mediumTeach>
-          <mainIdea>The creed sits between the event and Paul’s letter.</mainIdea>
-          <gloss>The old shared belief sits between the event and Paul’s letter.</gloss>
+          <mediumTeach>1 Corinthians 15:3–4. Paul hands on what he received. The churches already named Christ died, buried, raised — then he wrote the letter. Not a line he invented while writing.</mediumTeach>
+          <mainIdea>The churches already named Christ died, buried, raised before Paul’s letter.</mainIdea>
+          <gloss>The churches already named Christ died, buried, raised before Paul’s letter.</gloss>
           <loci>This idea lives at Witness Square, with Silas.</loci>
           <word>
             <term>Creed</term>
@@ -846,7 +846,7 @@ He appeared to Cephas, then to the twelve. Then he appeared to more than five hu
           <hint>Keep “received.” Toss “Paul invented it while writing.”</hint>
         </learn>
         <match>
-          <sentenceCorrect>The creed sits between the event and Paul’s letter.</sentenceCorrect>
+          <sentenceCorrect>The churches already named Christ died, buried, raised before Paul’s letter.</sentenceCorrect>
           <sentenceMisses>
             <miss>Paul invents the creed as he writes.</miss>
             <miss>Burial is skipped because it does not matter.</miss>
@@ -854,26 +854,26 @@ He appeared to Cephas, then to the twelve. Then he appeared to more than five hu
           <placePrompt>Those names sit at the square.</placePrompt>
           <personPrompt>Silas keeps that square.</personPrompt>
           <ideaPrompt>Silas’s handed-on creed — close to the event, then Paul’s letter.</ideaPrompt>
-          <ideaLabel>The creed sits close to the event.</ideaLabel>
-          <whyMedium>Silas keeps the square. The creed sits close to the event, then Paul’s letter.</whyMedium>
+          <ideaLabel>The churches already named Christ.</ideaLabel>
+          <whyMedium>Silas keeps the square. The churches already named Christ died, buried, raised before Paul’s letter.</whyMedium>
         </match>
         <hold levelUpTo="hard" onFail="easy">
-          <claim>The creed sits between the event and Paul’s letter.</claim>
-          <reason>If the formula is early, the claim is close to what it names: died, buried, raised.</reason>
+          <claim>The churches already named Christ died, buried, raised before Paul’s letter.</claim>
+          <reason>Paul hands on what he received — not a line he invented while writing.</reason>
           <source>1 Corinthians 15:3–4</source>
-          <whyCorrect>If the formula is early, the claim is close to what it names: died, buried, raised.</whyCorrect>
+          <whyCorrect>Paul hands on what he received — not a line he invented while writing.</whyCorrect>
           <whyMisses>
             <miss>The letter is older than any tradition it quotes.</miss>
             <miss>Nothing was handed on; it was only felt.</miss>
             <miss>The line is late, far from the event.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>The creed sits between the event and Paul’s letter.</choice>
+            <choice>The churches already named Christ died, buried, raised before Paul’s letter.</choice>
             <choice>Paul invents the creed as he writes.</choice>
             <choice>Burial is skipped because it does not matter.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>If the formula is early, the claim is close to what it names: died, buried, raised.</choice>
+            <choice>Paul hands on what he received — not a line he invented while writing.</choice>
             <choice>The letter is older than any tradition it quotes.</choice>
             <choice>Nothing was handed on; it was only felt.</choice>
           </reasonChoices>
@@ -881,16 +881,16 @@ He appeared to Cephas, then to the twelve. Then he appeared to more than five hu
       </medium>
       <hard points="15">
         <learn>
-          <hardTeach>1 Corinthians 15:3–4. If the creed is early, the claim is close to the event it names.
+          <hardTeach>1 Corinthians 15:3–4. Paul hands on what he received. The churches already named Christ died, buried, raised — then he wrote the letter.
 Christ died… he was buried… he was raised on the third day. Burial and raising are both named.</hardTeach>
-          <fullTeach>1 Corinthians 15:3–4. If the creed is early, the claim is close to the event it names.
+          <fullTeach>1 Corinthians 15:3–4. Paul hands on what he received. The churches already named Christ died, buried, raised — then he wrote the letter.
 Christ died… he was buried… he was raised on the third day. Burial and raising are both named.</fullTeach>
-          <prompt>Scholars often date this creed earlier than the letter that quotes it. Order the steps.</prompt>
-          <teachOnWrong>Paul is handing on something he received. The creed sits between the event and the letter. Try the chain again.</teachOnWrong>
+          <prompt>Order the steps the churches already named: died, buried, raised.</prompt>
+          <teachOnWrong>Paul is handing on something he received. The churches already named Christ died, buried, raised. Try the chain again.</teachOnWrong>
           <challengeTiles />
         </learn>
         <match>
-          <sentenceCorrect>The creed sits between the event and Paul’s letter.</sentenceCorrect>
+          <sentenceCorrect>The churches already named Christ died, buried, raised before Paul’s letter.</sentenceCorrect>
           <sentenceMisses>
             <miss>Paul invents the creed as he writes.</miss>
             <miss>Burial is skipped because it does not matter.</miss>
@@ -898,44 +898,44 @@ Christ died… he was buried… he was raised on the third day. Burial and raisi
           <placePrompt>Those names sit at the square.</placePrompt>
           <personPrompt>Silas keeps that square.</personPrompt>
           <ideaPrompt>Silas’s handed-on creed — close to the event, then Paul’s letter.</ideaPrompt>
-          <ideaLabel>The creed sits close to the event.</ideaLabel>
-          <whyHard>Silas Whitman keeps Witness Square. The creed sits between the event and Paul’s letter — died, buried, raised.</whyHard>
+          <ideaLabel>The churches already named Christ.</ideaLabel>
+          <whyHard>Silas Whitman keeps Witness Square. The churches already named Christ died, buried, raised before Paul’s letter.</whyHard>
         </match>
         <hold onFail="easy">
-          <claim>The creed sits between the event and Paul’s letter.</claim>
-          <reason>If the formula is early, the claim is close to what it names: died, buried, raised.</reason>
+          <claim>The churches already named Christ died, buried, raised before Paul’s letter.</claim>
+          <reason>Paul hands on what he received — not a line he invented while writing.</reason>
           <source>1 Corinthians 15:3–4</source>
-          <whyCorrect>If the formula is early, the claim is close to what it names: died, buried, raised.</whyCorrect>
+          <whyCorrect>Paul hands on what he received — not a line he invented while writing.</whyCorrect>
           <whyMisses>
             <miss>The letter is older than any tradition it quotes.</miss>
             <miss>Nothing was handed on; it was only felt.</miss>
             <miss>The line is late, far from the event.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>The creed sits between the event and Paul’s letter.</choice>
+            <choice>The churches already named Christ died, buried, raised before Paul’s letter.</choice>
             <choice>Paul invents the creed as he writes.</choice>
             <choice>Burial is skipped because it does not matter.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>If the formula is early, the claim is close to what it names: died, buried, raised.</choice>
+            <choice>Paul hands on what he received — not a line he invented while writing.</choice>
             <choice>The letter is older than any tradition it quotes.</choice>
             <choice>Nothing was handed on; it was only felt.</choice>
           </reasonChoices>
         </hold>
       </hard>
-      <journal id="" title="" kicker="" unlockAfter="daily-creed" scoreFromHeldTier="true">
-        <p />
+      <journal id="j-wb-6" title="Older than the letter" kicker="Witness Square" unlockAfter="daily-creed" scoreFromHeldTier="true">
+        <p>Paul hands on what he received. The churches already named Christ died, buried, raised before the letter.</p>
         <sources>
-          <source />
+          <source>1 Corinthians 15:3–4</source>
         </sources>
       </journal>
     </lesson>
-    <lesson id="daily-empty" place="Witness Square" person="Silas Whitman" tripleId="empty-bench" ideaId="idea-empty" ideaLabel="Easter begins with an empty place." challengeKind="sort" challengeTitle="Morning">
-      <easy points="10" easyOrder="15">
+    <lesson id="daily-empty" place="Witness Square" person="Silas Whitman" tripleId="empty-bench" ideaId="idea-empty" ideaLabel="Easter begins with an empty tomb." challengeKind="sort" challengeTitle="Morning">
+      <easy points="10" easyOrder="14">
         <learn>
-          <shortStory>The first Easter reports are not tidy. They include an empty place, women, fear, and wonder. The town does not sand that awkwardness into a fake triumph.</shortStory>
-          <mainIdea>The first Easter reports include an empty place, women, fear, and wonder.</mainIdea>
-          <gloss>The first Easter reports include an empty place, women, fear, and wonder.</gloss>
+          <shortStory>The first Easter reports of Jesus are not a tidy parade. They include an empty tomb, women, fear, and wonder.</shortStory>
+          <mainIdea>The first Easter reports of Jesus include an empty tomb, women, fear, and wonder.</mainIdea>
+          <gloss>The first Easter reports of Jesus include an empty tomb, women, fear, and wonder.</gloss>
           <loci>This idea lives at Witness Square, with Silas.</loci>
           <word>
             <term>Empty</term>
@@ -944,34 +944,34 @@ Christ died… he was buried… he was raised on the third day. Burial and raisi
           <hint>Keep the awkward opening. Toss the senate conversion.</hint>
         </learn>
         <match>
-          <sentenceCorrect>The first Easter reports include an empty place, women, fear, and wonder.</sentenceCorrect>
+          <sentenceCorrect>The first Easter reports of Jesus include an empty tomb, women, fear, and wonder.</sentenceCorrect>
           <sentenceMisses>
             <miss>Rome instantly converts the senate.</miss>
             <miss>Women are absent from the first reports.</miss>
           </sentenceMisses>
           <placePrompt>That report sits at the square.</placePrompt>
           <personPrompt>Silas keeps that square.</personPrompt>
-          <ideaPrompt>Silas’s first Easter — empty place, women, fear, and wonder.</ideaPrompt>
-          <ideaLabel>Easter begins with an empty place.</ideaLabel>
-          <whyEasy>Silas keeps the square. Easter begins with an empty place, women, fear, and wonder.</whyEasy>
+          <ideaPrompt>Silas’s first Easter — empty tomb, women, fear, and wonder.</ideaPrompt>
+          <ideaLabel>Easter begins with an empty tomb.</ideaLabel>
+          <whyEasy>Silas keeps the square. Easter begins with an empty tomb of Jesus — women, fear, and wonder.</whyEasy>
         </match>
         <hold levelUpTo="medium" onFail="easy">
-          <claim>The first Easter reports include an empty place, women, fear, and wonder.</claim>
-          <reason>The town does not sand that awkwardness into a tidy triumph.</reason>
+          <claim>The first Easter reports of Jesus include an empty tomb, women, fear, and wonder.</claim>
+          <reason>They found the stone rolled away — they did not find the body.</reason>
           <source>Luke 24:2–3</source>
-          <whyCorrect>The town does not sand that awkwardness into a tidy triumph.</whyCorrect>
+          <whyCorrect>They found the stone rolled away — they did not find the body.</whyCorrect>
           <whyMisses>
             <miss>The tomb is found occupied and explained.</miss>
             <miss>Fear is edited out of the opening.</miss>
             <miss>The tomb story is only a vision.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>The first Easter reports include an empty place, women, fear, and wonder.</choice>
+            <choice>The first Easter reports of Jesus include an empty tomb, women, fear, and wonder.</choice>
             <choice>Rome instantly converts the senate.</choice>
             <choice>Women are absent from the first reports.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>The town does not sand that awkwardness into a tidy triumph.</choice>
+            <choice>They found the stone rolled away — they did not find the body.</choice>
             <choice>The tomb is found occupied and explained.</choice>
             <choice>Fear is edited out of the opening.</choice>
           </reasonChoices>
@@ -979,9 +979,9 @@ Christ died… he was buried… he was raised on the third day. Burial and raisi
       </easy>
       <medium points="12">
         <learn>
-          <mediumTeach>The first Easter reports include an empty place, women, fear, and wonder. They are not a tidy triumph parade. The town does not sand that awkwardness away — honesty before polish.</mediumTeach>
-          <mainIdea>The first Easter reports include an empty place, women, fear, and wonder.</mainIdea>
-          <gloss>The first Easter reports include an empty place, women, fear, and wonder.</gloss>
+          <mediumTeach>The first Easter reports of Jesus include an empty tomb, women, fear, and wonder. They found the stone rolled away — they did not find the body.</mediumTeach>
+          <mainIdea>The first Easter reports of Jesus include an empty tomb, women, fear, and wonder.</mainIdea>
+          <gloss>The first Easter reports of Jesus include an empty tomb, women, fear, and wonder.</gloss>
           <loci>This idea lives at Witness Square, with Silas.</loci>
           <word>
             <term>Empty</term>
@@ -990,34 +990,34 @@ Christ died… he was buried… he was raised on the third day. Burial and raisi
           <hint>Keep the awkward opening. Toss the senate conversion.</hint>
         </learn>
         <match>
-          <sentenceCorrect>The first Easter reports include an empty place, women, fear, and wonder.</sentenceCorrect>
+          <sentenceCorrect>The first Easter reports of Jesus include an empty tomb, women, fear, and wonder.</sentenceCorrect>
           <sentenceMisses>
             <miss>Rome instantly converts the senate.</miss>
             <miss>Women are absent from the first reports.</miss>
           </sentenceMisses>
           <placePrompt>That report sits at the square.</placePrompt>
           <personPrompt>Silas keeps that square.</personPrompt>
-          <ideaPrompt>Silas’s first Easter — empty place, women, fear, and wonder.</ideaPrompt>
-          <ideaLabel>Easter begins with an empty place.</ideaLabel>
-          <whyMedium>Silas keeps the square. Easter begins with an empty place, women, fear, and wonder.</whyMedium>
+          <ideaPrompt>Silas’s first Easter — empty tomb, women, fear, and wonder.</ideaPrompt>
+          <ideaLabel>Easter begins with an empty tomb.</ideaLabel>
+          <whyMedium>Silas keeps the square. Easter begins with an empty tomb of Jesus — women, fear, and wonder.</whyMedium>
         </match>
         <hold levelUpTo="hard" onFail="easy">
-          <claim>The first Easter reports include an empty place, women, fear, and wonder.</claim>
-          <reason>The town does not sand that awkwardness into a tidy triumph.</reason>
+          <claim>The first Easter reports of Jesus include an empty tomb, women, fear, and wonder.</claim>
+          <reason>They found the stone rolled away — they did not find the body.</reason>
           <source>Luke 24:2–3</source>
-          <whyCorrect>The town does not sand that awkwardness into a tidy triumph.</whyCorrect>
+          <whyCorrect>They found the stone rolled away — they did not find the body.</whyCorrect>
           <whyMisses>
             <miss>The tomb is found occupied and explained.</miss>
             <miss>Fear is edited out of the opening.</miss>
             <miss>The tomb story is only a vision.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>The first Easter reports include an empty place, women, fear, and wonder.</choice>
+            <choice>The first Easter reports of Jesus include an empty tomb, women, fear, and wonder.</choice>
             <choice>Rome instantly converts the senate.</choice>
             <choice>Women are absent from the first reports.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>The town does not sand that awkwardness into a tidy triumph.</choice>
+            <choice>They found the stone rolled away — they did not find the body.</choice>
             <choice>The tomb is found occupied and explained.</choice>
             <choice>Fear is edited out of the opening.</choice>
           </reasonChoices>
@@ -1025,12 +1025,12 @@ Christ died… he was buried… he was raised on the third day. Burial and raisi
       </medium>
       <hard points="15">
         <learn>
-          <hardTeach>The first reports are not tidy. They include women, fear, and an empty place. The town does not sand that down.
+          <hardTeach>The first Easter reports of Jesus are not a tidy parade. They include women, fear, and an empty tomb.
 They found the stone rolled away from the tomb, but when they went in they did not find the body.</hardTeach>
-          <fullTeach>The first reports are not tidy. They include women, fear, and an empty place. The town does not sand that down.
+          <fullTeach>The first Easter reports of Jesus are not a tidy parade. They include women, fear, and an empty tomb.
 They found the stone rolled away from the tomb, but when they went in they did not find the body.</fullTeach>
-          <prompt>Which details belong in the first Easter reports?</prompt>
-          <teachOnWrong>Luke 24 begins with an empty place and a dismissed report. Keep the awkwardness; toss the tidy triumph.</teachOnWrong>
+          <prompt>Which details belong in the first Easter reports of Jesus?</prompt>
+          <teachOnWrong>Luke 24 begins with an empty tomb. They did not find the body of Jesus. Keep that opening; toss the tidy triumph.</teachOnWrong>
           <challengeTiles>
             <keep>The tomb is found empty.</keep>
             <keep>Women are among the first witnesses.</keep>
@@ -1039,43 +1039,43 @@ They found the stone rolled away from the tomb, but when they went in they did n
           </challengeTiles>
         </learn>
         <match>
-          <sentenceCorrect>The first Easter reports include an empty place, women, fear, and wonder.</sentenceCorrect>
+          <sentenceCorrect>The first Easter reports of Jesus include an empty tomb, women, fear, and wonder.</sentenceCorrect>
           <sentenceMisses>
             <miss>Rome instantly converts the senate.</miss>
             <miss>Women are absent from the first reports.</miss>
           </sentenceMisses>
           <placePrompt>That report sits at the square.</placePrompt>
           <personPrompt>Silas keeps that square.</personPrompt>
-          <ideaPrompt>Silas’s first Easter — empty place, women, fear, and wonder.</ideaPrompt>
-          <ideaLabel>Easter begins with an empty place.</ideaLabel>
-          <whyHard>Silas Whitman keeps Witness Square. The first Easter reports include an empty place — the town does not sand that awkwardness away.</whyHard>
+          <ideaPrompt>Silas’s first Easter — empty tomb, women, fear, and wonder.</ideaPrompt>
+          <ideaLabel>Easter begins with an empty tomb.</ideaLabel>
+          <whyHard>Silas Whitman keeps Witness Square. The first Easter reports of Jesus include an empty tomb — they did not find the body.</whyHard>
         </match>
         <hold onFail="easy">
-          <claim>The first Easter reports include an empty place, women, fear, and wonder.</claim>
-          <reason>The town does not sand that awkwardness into a tidy triumph.</reason>
+          <claim>The first Easter reports of Jesus include an empty tomb, women, fear, and wonder.</claim>
+          <reason>They found the stone rolled away — they did not find the body.</reason>
           <source>Luke 24:2–3</source>
-          <whyCorrect>The town does not sand that awkwardness into a tidy triumph.</whyCorrect>
+          <whyCorrect>They found the stone rolled away — they did not find the body.</whyCorrect>
           <whyMisses>
             <miss>The tomb is found occupied and explained.</miss>
             <miss>Fear is edited out of the opening.</miss>
             <miss>The tomb story is only a vision.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>The first Easter reports include an empty place, women, fear, and wonder.</choice>
+            <choice>The first Easter reports of Jesus include an empty tomb, women, fear, and wonder.</choice>
             <choice>Rome instantly converts the senate.</choice>
             <choice>Women are absent from the first reports.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>The town does not sand that awkwardness into a tidy triumph.</choice>
+            <choice>They found the stone rolled away — they did not find the body.</choice>
             <choice>The tomb is found occupied and explained.</choice>
             <choice>Fear is edited out of the opening.</choice>
           </reasonChoices>
         </hold>
       </hard>
-      <journal id="" title="" kicker="" unlockAfter="daily-empty" scoreFromHeldTier="true">
-        <p />
+      <journal id="j-wb-7" title="Morning" kicker="Witness Square" unlockAfter="daily-empty" scoreFromHeldTier="true">
+        <p>Luke begins with an empty tomb. They did not find the body of Jesus. Women, fear, and wonder stay in the first report.</p>
         <sources>
-          <source />
+          <source>Luke 24:2–3</source>
         </sources>
       </journal>
     </lesson>
@@ -1085,8 +1085,8 @@ They found the stone rolled away from the tomb, but when they went in they did n
     <fact evidenceId="wb-early" tripleId="early-bench" ideaId="idea-early" place="Witness Square" person="Silas Whitman" ideaLabel="The risen Christ is named close by." />
     <fact evidenceId="wb-method" tripleId="method-bench" ideaId="idea-method" place="Witness Square" person="Silas Whitman" ideaLabel="We still read the named reports." />
     <fact evidenceId="wb-women" tripleId="women-bench" ideaId="idea-women" place="Witness Square" person="Silas Whitman" ideaLabel="Women first saw the tomb." />
-    <fact evidenceId="daily-names" tripleId="names-bench" ideaId="idea-names" place="Witness Square" person="Silas Whitman" ideaLabel="Named witnesses, not one private voice." />
-    <fact evidenceId="daily-creed" tripleId="creed-bench" ideaId="idea-daily-creed" place="Witness Square" person="Silas Whitman" ideaLabel="The creed sits close to the event." />
-    <fact evidenceId="daily-empty" tripleId="empty-bench" ideaId="idea-empty" place="Witness Square" person="Silas Whitman" ideaLabel="Easter begins with an empty place." />
+    <fact evidenceId="daily-names" tripleId="names-bench" ideaId="idea-names" place="Witness Square" person="Silas Whitman" ideaLabel="Named people saw the risen Christ." />
+    <fact evidenceId="daily-creed" tripleId="creed-bench" ideaId="idea-daily-creed" place="Witness Square" person="Silas Whitman" ideaLabel="The churches already named Christ." />
+    <fact evidenceId="daily-empty" tripleId="empty-bench" ideaId="idea-empty" place="Witness Square" person="Silas Whitman" ideaLabel="Easter begins with an empty tomb." />
   </streetFacts>
 </areaPack>
