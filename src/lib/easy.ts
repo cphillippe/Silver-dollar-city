@@ -81,7 +81,7 @@ export const EASY = {
   townSoon: 'Town (soon)',
   supportTrail: 'Support the trail',
   removeAds: 'Remove ads',
-  packs: 'Packs',
+  packs: 'Street Packs',
   loveCue: 'Love — when compassion moves you, help like the Samaritan. Tap the glowing face.',
   deployTeach: 'Use a main idea you kept.',
   saved: 'Hold',

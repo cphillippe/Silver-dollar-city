@@ -14,10 +14,10 @@ export const CHANGELOG: ChangeNote[] = [
     items: [
       'Core Easy trail stays free — Learn → play → Hold is never paywalled',
       'No hard paywall. Held Journal and evidence stay open',
-      'Soft pauses only between home and a lesson (dismissible). Never over Match, Hold, or arcade play (claim-merge, panel-blast, father-run, road-maze)',
+      'Soft pauses only between home and a lesson: “A quiet pause on the trail. The walk continues in a moment.” Never over Match, Hold, or arcade play (claim-merge, panel-blast, father-run, road-maze)',
       'Packs shop: Mill Street and Harbor Walk are extra streets behind unlock flags. Core 39 facts stay included',
-      'Remove ads is a supporter gift. On Pages it is an honest web stub (Unlock on this device + Restore) that flips the same flag Play Billing will set later',
-      'Settings opens with Support the trail / Remove ads / Packs. Easy home keeps Match and Hold first',
+      'Remove ads is “Keep the quiet trail — Remove ads.” On Pages it is an honest web stub (Unlock on this device + Restore) that flips the same flag Play Billing will set later',
+      'Settings opens with Street Packs · Remove ads · Progress stays on this device (export/import). Easy home keeps Match and Hold first',
       'Night Watch and Town stay hidden on Easy. Foundation gate, Match extras, and Hold why-blast stay',
       'Claim-merge bowl juice: snappier drops and contact merges, bigger pops, combos linger, 390px bowl uses more of the phone',
       'After MERGED!, One more bowl is the gold tap — arcade-first, Hold next still there. Bowl full stays Merge again',

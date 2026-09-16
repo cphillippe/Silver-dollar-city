@@ -7,6 +7,7 @@ import { localDateKey } from '../lib/dates'
 import { CITY_PLOTS, nextPlotId, type CityPlotId } from '../lib/city'
 import { lotTapWhy } from '../lib/cityBuild'
 import { extraStreetPacks } from '../content/paidStreets'
+import { PACK_LINE } from '../config/commerce'
 import { packIsUnlocked } from '../lib/commerce'
 import { EASY, EASY_MATCH_LINE, easyHomeFocus, easyHoldView, easyLineHeld, easyLoopLine, easyMatchReady, isEasy } from '../lib/easy'
 import { storyPlayFor } from '../lib/storyPlay'
@@ -121,6 +122,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
         </nav>
         <section className="easy-extra-streets" aria-label="Extra streets">
           <p className="eyebrow">{EASY.packs}</p>
+          <p className="quiet">{PACK_LINE}</p>
           {extraStreetPacks().map((pack) => {
             const open = packIsUnlocked(pack.id, commerce)
             return (

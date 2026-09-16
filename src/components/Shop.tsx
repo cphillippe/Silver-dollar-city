@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import {
+  PACK_LINE,
   REMOVE_ADS_PRODUCT,
   SHOP_PACKS,
+  TRAIL_SUBTITLE,
+  packPaywallLine,
 } from '../config/commerce'
 import {
   billingSurface,
@@ -79,11 +82,11 @@ export function Shop({ onNavigate }: ShopProps) {
 
       <header className="page-head">
         <p className="eyebrow">{easy ? EASY.supportTrail : 'Support the trail'}</p>
-        <h1>Packs & support</h1>
+        <h1>Street Packs</h1>
+        <p>{TRAIL_SUBTITLE}</p>
         <p>
           The Easy trail stays free. Journal pages you already hold stay open.
-          New streets are optional packs. Remove-ads is a supporter gift, not a
-          lock on the walk.
+          Street Packs add new walks only.
         </p>
       </header>
 
@@ -103,7 +106,7 @@ export function Shop({ onNavigate }: ShopProps) {
             </p>
           ) : (
             <button type="button" className="btn gold" onClick={() => unlockWeb('ads')}>
-              {easy ? EASY.removeAds : 'Remove ads'} · {REMOVE_ADS_PRODUCT.priceLabel}
+              {REMOVE_ADS_PRODUCT.title} · {REMOVE_ADS_PRODUCT.priceLabel}
             </button>
           )}
           <button type="button" className="btn" onClick={restore}>
@@ -112,10 +115,10 @@ export function Shop({ onNavigate }: ShopProps) {
         </div>
       </section>
 
-      <section className="settings-card" aria-label="Content packs">
-        <p className="eyebrow">{easy ? EASY.packs : 'Content packs'}</p>
-        <h2>Streets</h2>
-        <p className="quiet">Core Easy stays included. Paid rows unlock extra streets only.</p>
+      <section className="settings-card" aria-label="Street Packs">
+        <p className="eyebrow">{easy ? EASY.packs : 'Street Packs'}</p>
+        <h2>Street Packs</h2>
+        <p className="quiet">{PACK_LINE}</p>
         <ul className="shop-pack-list">
           {SHOP_PACKS.map((pack) => {
                 const open = packIsUnlocked(pack.id, commerce)
@@ -123,8 +126,8 @@ export function Shop({ onNavigate }: ShopProps) {
               <li key={pack.id} className={`shop-pack ${pack.included ? 'is-free' : ''} ${open ? 'is-open' : ''}`}>
                 <p className="eyebrow">{pack.street}</p>
                 <h3>{pack.title}</h3>
-                <p>{pack.blurb}</p>
-                <p className="quiet">{pack.included ? 'Included' : pack.priceLabel}</p>
+                <p>{pack.included ? pack.blurb : packPaywallLine(pack.street)}</p>
+                <p className="quiet">{pack.included ? 'Included' : `${PACK_LINE} · ${pack.priceLabel}`}</p>
                 {pack.included ? (
                   <button
                     type="button"
