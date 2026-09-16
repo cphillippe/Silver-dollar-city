@@ -99,7 +99,7 @@ export default function App() {
   useEffect(() => {
     if (!easy) return
     if (view.name === 'defend' || easyNightWatchHit()) {
-      setView({ name: 'hub' })
+      if (view.name !== 'hub') setView({ name: 'hub' })
     }
   }, [easy, view.name])
 

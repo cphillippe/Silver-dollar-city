@@ -16,9 +16,15 @@ const EMPTY: CommerceState = {
   unlockedPacks: [],
 }
 
-let memory: CommerceState = { ...EMPTY }
+let memory: CommerceState = EMPTY
 
 const DANGEROUS_KEYS = new Set(['__proto__', 'constructor', 'prototype'])
+
+function sameCommerce(a: CommerceState, b: CommerceState): boolean {
+  if (a.removeAds !== b.removeAds) return false
+  if (a.unlockedPacks.length !== b.unlockedPacks.length) return false
+  return a.unlockedPacks.every((id, i) => id === b.unlockedPacks[i])
+}
 
 function isSafePackId(value: unknown): value is string {
   return (
@@ -45,18 +51,30 @@ export function normalizeCommerce(raw: unknown): CommerceState {
 }
 
 export function readCommerce(): CommerceState {
-  if (typeof localStorage === 'undefined') return normalizeCommerce(memory)
-  try {
-    const raw = localStorage.getItem(COMMERCE_KEY)
-    if (!raw) return normalizeCommerce(memory)
-    return normalizeCommerce(JSON.parse(raw) as unknown)
-  } catch {
-    return normalizeCommerce(memory)
+  let next = memory
+  if (typeof localStorage !== 'undefined') {
+    try {
+      const raw = localStorage.getItem(COMMERCE_KEY)
+      next = raw ? normalizeCommerce(JSON.parse(raw) as unknown) : normalizeCommerce(memory)
+    } catch {
+      next = normalizeCommerce(memory)
+    }
+  } else {
+    next = normalizeCommerce(memory)
   }
+  if (sameCommerce(memory, next)) return memory
+  memory = next
+  return memory
 }
 
 export function writeCommerce(next: CommerceState): CommerceState {
   const clean = normalizeCommerce(next)
+  if (sameCommerce(memory, clean)) {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(COMMERCE_KEY, JSON.stringify(memory))
+    }
+    return memory
+  }
   memory = clean
   if (typeof localStorage !== 'undefined') {
     localStorage.setItem(COMMERCE_KEY, JSON.stringify(clean))
@@ -64,7 +82,7 @@ export function writeCommerce(next: CommerceState): CommerceState {
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new Event('silver-city-commerce'))
   }
-  return clean
+  return memory
 }
 
 function commit(patch: Partial<CommerceState>): CommerceState {
