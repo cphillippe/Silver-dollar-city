@@ -12,6 +12,8 @@ import type { View } from '../types'
 
 interface LinkScreenProps {
   onNavigate: (view: View) => void
+  /** Settings Debug — one-tap this Easy line’s play, not the open loop. */
+  debugLine?: string
 }
 
 function LinkDemo({ easy }: { easy: boolean }) {
@@ -33,17 +35,18 @@ function LinkDemo({ easy }: { easy: boolean }) {
   )
 }
 
-export function LinkScreen({ onNavigate }: LinkScreenProps) {
+export function LinkScreen({ onNavigate, debugLine }: LinkScreenProps) {
   const { completeChallenge, markMiss, progress, recordStreetLinks, recordTaught } = useProgress()
   const { juiceDone: showNext, afterJuice } = useJuiceHandoff()
   const savedWin = useRef(false)
   const finishedWalk = useRef<ReturnType<typeof nextStreetWalk>>(undefined)
-  const [taught, setTaught] = useState(() => isEasy(progress))
+  const [taught, setTaught] = useState(() => isEasy(progress) || Boolean(debugLine))
   const [arming, setArming] = useState(false)
-  const easy = isEasy(progress)
+  const easy = isEasy(progress) || Boolean(debugLine)
+  const lineId = debugLine ?? easyMatchLine(progress)
   const linked = progress.streetLinked ?? []
   const walk = easy ? undefined : nextStreetWalk(linked)
-  const challenge = easy ? easyStreetChallenge(easyMatchLine(progress)) : hardStreetChallenge(linked)
+  const challenge = easy ? easyStreetChallenge(lineId) : hardStreetChallenge(linked)
   const linkedAfter = walk ? appendStreetLinks(linked, walk.triples.map((item) => item.id)).length : linked.length
   const leftAfter = streetFactsLeft(appendStreetLinks(linked, walk?.triples.map((item) => item.id) ?? []))
   const streetBeat = easy
@@ -65,8 +68,10 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
 
   function solved() {
     if (easy) {
-      recordTaught(easyMatchLine(progress))
-      markStreet()
+      if (!debugLine) {
+        recordTaught(lineId)
+        markStreet()
+      }
       return
     }
     afterJuice()
@@ -78,6 +83,14 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
   }
 
   function easyStop(dest: 'hold' | 'home') {
+    if (debugLine) {
+      onNavigate(
+        dest === 'hold'
+          ? { name: 'journal', focusId: lineId, autoQuiz: true }
+          : { name: 'settings' },
+      )
+      return
+    }
     markStreet()
     onNavigate(dest === 'hold' ? easyHoldView(progress) : { name: 'hub' })
   }
@@ -90,9 +103,9 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
       <button
         type="button"
         className="text-link"
-        onClick={() => onNavigate({ name: 'hub' })}
+        onClick={() => onNavigate({ name: debugLine ? 'settings' : 'hub' })}
       >
-        ← {easy ? EASY.home : 'The town'}
+        ← {debugLine ? 'Settings' : easy ? EASY.home : 'The town'}
       </button>
 
       {!showNext ? (
@@ -147,6 +160,7 @@ export function LinkScreen({ onNavigate }: LinkScreenProps) {
             {easy ? null : <h1 className="puzzle-title">{challenge.title}</h1>}
             <PuzzlePlay
               challenge={challenge}
+              lineId={easy ? lineId : undefined}
               onMiss={() => markMiss(challenge.id)}
               onSolved={solved}
               onEasyStop={easyStop}

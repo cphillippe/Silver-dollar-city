@@ -135,7 +135,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
       title: 'Older than the letter',
       idea: 'the churches already named Christ died, buried, raised before Paul’s letter',
       prompt: 'Order the steps the churches already named: died, buried, raised.',
-      context: '1 Corinthians 15:3–4. Paul hands on what he received — not a line he invented while writing.',
+      context: '1 Corinthians 15:3–4. Paul received this line — he did not invent it.',
       items: [
         { id: 'a', text: 'Jesus is executed and buried.' },
         { id: 'b', text: 'The first believers pass a short creed.' },
@@ -164,7 +164,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
           id: 'a',
           text: 'The heavens already speak of a Maker.',
           bin: 'keep',
-          why: 'Scripture treats the created order as intelligible testimony — design inference and “the heavens declare” land in the same grain.',
+          why: 'The sky speaks of a Maker — the numbers fit that.',
         },
         {
           id: 'b',
@@ -177,11 +177,11 @@ export const DAILY_POOL: DailyPuzzle[] = [
           id: 'd',
           text: 'The sky is worth looking at slowly.',
           bin: 'keep',
-          why: 'Scripture treats the created order as intelligible testimony — design inference and “the heavens declare” land in the same grain.',
+          why: 'The sky speaks of a Maker — the numbers fit that.',
         },
       ],
       teachOnWrong:
-        'Scripture treats the created order as intelligible testimony — design inference and “the heavens declare” land in the same grain. Keep that voice; toss the false choice.',
+        'The sky speaks of a Maker — the numbers fit that. Keep that voice; toss the false choice.',
       deeper: 'The heavens declare the glory of God, and the sky above proclaims his handiwork.',
     },
   },
@@ -239,7 +239,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
       idea: 'Isaiah 53’s Servant is the Jesus the church confesses',
       prompt: 'Which lines belong with Isaiah 53’s servant?',
       context:
-        'Isaiah 53’s Servant is the Jesus the church confesses — wounded for others, silent like a lamb.',
+        'Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.',
       keepLabel: 'In the poem',
       discardLabel: 'Not the claim',
       tiles: [
@@ -348,7 +348,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
       idea: 'the first Easter reports of Jesus include an empty tomb',
       prompt: 'Which details belong in the first Easter reports of Jesus?',
       context:
-        'The first Easter reports of Jesus include an empty tomb, women, fear, and wonder. They found the stone rolled away — they did not find the body.',
+        'Jesus’ tomb was empty — women saw it first, with fear and wonder. They found the stone rolled away — they did not find the body.',
       keepLabel: 'In the reports',
       discardLabel: 'Later invention?',
       tiles: [

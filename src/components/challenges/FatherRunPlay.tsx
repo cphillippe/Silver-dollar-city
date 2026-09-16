@@ -22,10 +22,12 @@ import {
   HIRED_HAND_SPEECH,
   holdStep,
   hugBeforeSpeech,
+  MIN_DASHES_TO_HUG,
   runOutcome,
   SPEECH_PHRASE_MS,
   speechIndexAt,
   speechPhraseAt,
+  stumbleIfHeldThrough,
 } from '../../lib/fatherRun'
 import { GEM_BURST, playGemPop, prefersReducedMotion } from '../../lib/juice'
 import { storyPanelsFor, type StoryPanel } from '../../lib/storyPanels'
@@ -69,6 +71,9 @@ export function FatherRunPlay({
   const [comboFlash, setComboFlash] = useState(0)
   const dashCount = useRef(0)
   const holdingRef = useRef(false)
+  const heldMsRef = useRef(0)
+  const inWindowRef = useRef(false)
+  const dashedWindowRef = useRef(false)
   const progressRef = useRef(0)
   const elapsedRef = useRef(0)
   const clockOn = useRef(false)
@@ -119,6 +124,9 @@ export function FatherRunPlay({
     setPlusFlash('')
     setComboFlash(0)
     dashCount.current = 0
+    heldMsRef.current = 0
+    inWindowRef.current = false
+    dashedWindowRef.current = false
     flashToast(nextAttempt > 0 ? 'Closer this time. Hold — then press the glow.' : '')
   }
 
@@ -153,11 +161,29 @@ export function FatherRunPlay({
       const dt = Math.min(0.05, (now - prev) / 1000)
       const nextElapsed = elapsedRef.current + dt * 1000
       elapsedRef.current = nextElapsed
-      const nextProgress = holdStep(progressRef.current, dt, holdingRef.current, reduced)
+      if (holdingRef.current) heldMsRef.current += dt * 1000
+      else heldMsRef.current = 0
+      const windowNow = dashPhase(nextElapsed).inWindow
+      let nextProgress = holdStep(
+        progressRef.current,
+        dt,
+        holdingRef.current,
+        reduced,
+        heldMsRef.current,
+      )
+      nextProgress = stumbleIfHeldThrough(
+        nextProgress,
+        inWindowRef.current,
+        windowNow,
+        holdingRef.current,
+        dashedWindowRef.current,
+      )
+      if (inWindowRef.current && !windowNow) dashedWindowRef.current = false
+      inWindowRef.current = windowNow
       progressRef.current = nextProgress
       setElapsed(nextElapsed)
       setProgress(nextProgress)
-      const outcome = runOutcome(nextProgress, nextElapsed)
+      const outcome = runOutcome(nextProgress, nextElapsed, dashCount.current)
       if (outcome === 'hug') {
         winRound()
         return
@@ -213,22 +239,24 @@ export function FatherRunPlay({
       setElapsed(0)
     }
     const windowOpen = dashPhase(elapsedRef.current).inWindow
-    if (windowOpen && !wasHolding && !reduced) {
+    if (windowOpen && !wasHolding) {
       const next = applyDash(progressRef.current)
       writeProgress(next)
+      dashedWindowRef.current = true
+      heldMsRef.current = 0
       setDashFlash(true)
       playGemPop('find')
       dashCount.current += 1
       setScore((pts) => pts + FATHER_RUN_DASH_SCORE)
       setPlusFlash(`+${FATHER_RUN_DASH_SCORE}`)
-      if (dashCount.current >= 2) {
+      if (dashCount.current >= MIN_DASHES_TO_HUG) {
         setComboFlash(dashCount.current)
         window.setTimeout(() => setComboFlash(0), 700)
       }
       flashToast('Mercy!')
       window.setTimeout(() => setDashFlash(false), 320)
       window.setTimeout(() => setPlusFlash(''), 800)
-      if (hugBeforeSpeech(next, elapsedRef.current)) {
+      if (hugBeforeSpeech(next, elapsedRef.current, dashCount.current)) {
         winRound()
         return
       }
@@ -399,7 +427,7 @@ export function FatherRunPlay({
             onKeyDown={onPadKeyDown}
             onKeyUp={onPadKeyUp}
           >
-            {dash.inWindow && phase === 'run' ? 'Press again — mercy!' : 'Hold to run'}
+            {dash.inWindow && phase === 'run' ? 'Let go — press now!' : 'Hold to run'}
           </button>
         </div>
       )}

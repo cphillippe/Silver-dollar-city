@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<areaPack id="first-gate" schemaVersion="3" appVersion="1.4.73" generated="2026-09-16T09:00:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/" title="Why Gate" place="Why Gate" person="Ansel Gate" personId="ansel" plotId="gate">
+<areaPack id="first-gate" schemaVersion="3" appVersion="1.4.78" generated="2026-09-16T09:00:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/" title="Why Gate" place="Why Gate" person="Ansel Gate" personId="ansel" plotId="gate">
   <howToEdit>RUNTIME CONTENT: the game loads this file as the source of truth for this area. Change player-facing text in place inside each &lt;lesson&gt;. Stable id attributes (ph-father, …) are engine keys — do not rename without a migration. Three tiers per fact: &lt;easy easyOrder="N"&gt;, &lt;medium&gt;, and &lt;hard&gt; — each with &lt;learn&gt;, &lt;match&gt;, and &lt;hold&gt;. Easy Learn: shortStory/mainIdea/loci. Medium Learn: mediumTeach (clearer than Hard, richer than Easy). Hard Learn: hardTeach/fullTeach. Held claim·reason·source stay plain and identical on all three. Hold level-up: see hold @levelUpTo / @onFail and index &lt;holdRules&gt;. Empty optional elements are intentional. Escape &amp; &lt; &gt; in text.</howToEdit>
   <meta>
     <title>Silver City — Why Gate</title>
@@ -24,7 +24,7 @@
     <lesson id="fg-order" place="Why Gate" person="Ansel Gate" tripleId="order-gate" ideaId="idea-order" ideaLabel="The world holds together in Christ." challengeKind="sort" challengeTitle="We already trust order">
       <easy points="10" easyOrder="4">
         <learn>
-          <shortStory>You already live as if the world hangs together — clocks, roads, promises. That is not a mood. Colossians names Christ: all things were made through him, and in him they hold together.</shortStory>
+          <shortStory>You already live like the world hangs together — clocks, roads, promises. That is not a mood. Colossians names Christ: all things were made through him, and in him they hold together.</shortStory>
           <mainIdea>You already trust that the world holds together in Christ.</mainIdea>
           <gloss>You already trust that the world holds together in Christ.</gloss>
           <loci>This idea lives at Why Gate, with Ansel.</loci>
@@ -157,7 +157,7 @@
         </hold>
       </hard>
       <journal id="j-fg-order" title="We already trust order" kicker="Why Gate" unlockAfter="fg-order" scoreFromHeldTier="true">
-        <p>You already live as if the world hangs together. Clocks, roads, and promises only work because order is real. That is not a slogan. It is the trust you already spend.</p>
+        <p>You already live like the world hangs together. Clocks, roads, and promises only work because order is real. That is not a slogan. It is the trust you already spend.</p>
         <p>Colossians 1:16–17 names the holder: all things were made through Christ, and in him they hold together. Augustine and Aquinas read that given order as creation’s grain — not a lucky pile. The first foundation beat is this lived trust, with Christ named on the card.</p>
         <sources>
           <source>Colossians 1:16–17</source>
@@ -606,7 +606,7 @@
       <easy points="10" easyOrder="28">
         <learn>
           <shortStory>Things go from “can be” to “is.” Nothing gives itself that step. A stack of receivers is not an answer. There is a first changer not itself changed.</shortStory>
-          <mainIdea>Change here and now needs a first actuality that is not itself a receiver of change.</mainIdea>
+          <mainIdea>Change now needs a first mover that is not itself changing.</mainIdea>
           <gloss>Change here and now still asks for a first changer.</gloss>
           <loci>This idea lives at Why Gate, with Ansel.</loci>
           <word>
@@ -616,7 +616,7 @@
           <hint>Order the chain of change. Two choices at a time.</hint>
         </learn>
         <match>
-          <sentenceCorrect>Change here and now needs a first actuality that is not itself a receiver of change.</sentenceCorrect>
+          <sentenceCorrect>Change now needs a first mover that is not itself changing.</sentenceCorrect>
           <sentenceMisses>
             <miss>This is only a story about dominoes at the Big Bang.</miss>
             <miss>Each changing thing explains itself.</miss>
@@ -628,22 +628,22 @@
           <whyEasy>Ansel keeps Why Gate. Change needs a first actuality.</whyEasy>
         </match>
         <hold levelUpTo="medium" onFail="easy">
-          <claim>Change here and now needs a first actuality that is not itself a receiver of change.</claim>
-          <reason>Nothing reduces itself from potential to actual; an unexplained stack of changers is not an explanation.</reason>
+          <claim>Change now needs a first mover that is not itself changing.</claim>
+          <reason>Nothing changes itself without a first mover.</reason>
           <source>Aquinas, ST I, q.2, a.3 (First Way)</source>
-          <whyCorrect>Nothing reduces itself from potential to actual; an unexplained stack of changers is not an explanation.</whyCorrect>
+          <whyCorrect>Nothing changes itself without a first mover.</whyCorrect>
           <whyMisses>
             <miss>“First” here means the earliest date on a calendar.</miss>
             <miss>Infinite backlog automatically explains present change.</miss>
             <miss>Things change themselves with no mover.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>Change here and now needs a first actuality that is not itself a receiver of change.</choice>
+            <choice>Change now needs a first mover that is not itself changing.</choice>
             <choice>This is only a story about dominoes at the Big Bang.</choice>
             <choice>Each changing thing explains itself.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Nothing reduces itself from potential to actual; an unexplained stack of changers is not an explanation.</choice>
+            <choice>Nothing changes itself without a first mover.</choice>
             <choice>“First” here means the earliest date on a calendar.</choice>
             <choice>Infinite backlog automatically explains present change.</choice>
           </reasonChoices>
@@ -652,7 +652,7 @@
       <medium points="12">
         <learn>
           <mediumTeach>Things go from “can be” to “is.” Nothing gives itself that step. A stack of receivers is not an explanation. Change here and now needs a first actuality that is not itself only a receiver of change — classical theism’s first mover.</mediumTeach>
-          <mainIdea>Change here and now needs a first actuality that is not itself a receiver of change.</mainIdea>
+          <mainIdea>Change now needs a first mover that is not itself changing.</mainIdea>
           <gloss>Change here and now still asks for a first changer.</gloss>
           <loci>This idea lives at Why Gate, with Ansel.</loci>
           <word>
@@ -662,7 +662,7 @@
           <hint>Order the chain of change. Two choices at a time.</hint>
         </learn>
         <match>
-          <sentenceCorrect>Change here and now needs a first actuality that is not itself a receiver of change.</sentenceCorrect>
+          <sentenceCorrect>Change now needs a first mover that is not itself changing.</sentenceCorrect>
           <sentenceMisses>
             <miss>This is only a story about dominoes at the Big Bang.</miss>
             <miss>Each changing thing explains itself.</miss>
@@ -674,22 +674,22 @@
           <whyMedium>Ansel keeps Why Gate. Change needs a first actuality.</whyMedium>
         </match>
         <hold levelUpTo="hard" onFail="easy">
-          <claim>Change here and now needs a first actuality that is not itself a receiver of change.</claim>
-          <reason>Nothing reduces itself from potential to actual; an unexplained stack of changers is not an explanation.</reason>
+          <claim>Change now needs a first mover that is not itself changing.</claim>
+          <reason>Nothing changes itself without a first mover.</reason>
           <source>Aquinas, ST I, q.2, a.3 (First Way)</source>
-          <whyCorrect>Nothing reduces itself from potential to actual; an unexplained stack of changers is not an explanation.</whyCorrect>
+          <whyCorrect>Nothing changes itself without a first mover.</whyCorrect>
           <whyMisses>
             <miss>“First” here means the earliest date on a calendar.</miss>
             <miss>Infinite backlog automatically explains present change.</miss>
             <miss>Things change themselves with no mover.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>Change here and now needs a first actuality that is not itself a receiver of change.</choice>
+            <choice>Change now needs a first mover that is not itself changing.</choice>
             <choice>This is only a story about dominoes at the Big Bang.</choice>
             <choice>Each changing thing explains itself.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Nothing reduces itself from potential to actual; an unexplained stack of changers is not an explanation.</choice>
+            <choice>Nothing changes itself without a first mover.</choice>
             <choice>“First” here means the earliest date on a calendar.</choice>
             <choice>Infinite backlog automatically explains present change.</choice>
           </reasonChoices>
@@ -706,7 +706,7 @@ Critics ask whether quantum events or a past-eternal cosmos break the chain. Def
           <challengeTiles />
         </learn>
         <match>
-          <sentenceCorrect>Change here and now needs a first actuality that is not itself a receiver of change.</sentenceCorrect>
+          <sentenceCorrect>Change now needs a first mover that is not itself changing.</sentenceCorrect>
           <sentenceMisses>
             <miss>This is only a story about dominoes at the Big Bang.</miss>
             <miss>Each changing thing explains itself.</miss>
@@ -718,22 +718,22 @@ Critics ask whether quantum events or a past-eternal cosmos break the chain. Def
           <whyHard>Ansel Gate keeps Why Gate. Nothing reduces itself from potential to actual; present change needs a first actuality.</whyHard>
         </match>
         <hold onFail="easy">
-          <claim>Change here and now needs a first actuality that is not itself a receiver of change.</claim>
-          <reason>Nothing reduces itself from potential to actual; an unexplained stack of changers is not an explanation.</reason>
+          <claim>Change now needs a first mover that is not itself changing.</claim>
+          <reason>Nothing changes itself without a first mover.</reason>
           <source>Aquinas, ST I, q.2, a.3 (First Way)</source>
-          <whyCorrect>Nothing reduces itself from potential to actual; an unexplained stack of changers is not an explanation.</whyCorrect>
+          <whyCorrect>Nothing changes itself without a first mover.</whyCorrect>
           <whyMisses>
             <miss>“First” here means the earliest date on a calendar.</miss>
             <miss>Infinite backlog automatically explains present change.</miss>
             <miss>Things change themselves with no mover.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>Change here and now needs a first actuality that is not itself a receiver of change.</choice>
+            <choice>Change now needs a first mover that is not itself changing.</choice>
             <choice>This is only a story about dominoes at the Big Bang.</choice>
             <choice>Each changing thing explains itself.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Nothing reduces itself from potential to actual; an unexplained stack of changers is not an explanation.</choice>
+            <choice>Nothing changes itself without a first mover.</choice>
             <choice>“First” here means the earliest date on a calendar.</choice>
             <choice>Infinite backlog automatically explains present change.</choice>
           </reasonChoices>
@@ -751,8 +751,8 @@ Critics ask whether quantum events or a past-eternal cosmos break the chain. Def
     <lesson id="fg-contingent" place="Why Gate" person="Ansel Gate" tripleId="contingent-gate" ideaId="idea-contingent" ideaLabel="Might-not-have-beens need a necessary ground." challengeKind="build-argument" challengeTitle="What might not have been">
       <easy points="10" easyOrder="29">
         <learn>
-          <shortStory>You exist, but you might not have. A world of only “might-not-have-beens” does not explain why anything is here. Classical theism names the necessary ground God.</shortStory>
-          <mainIdea>A world of might-not-have-beens still needs a necessary ground.</mainIdea>
+          <shortStory>You exist, but you might not have. A world of only “might-not-have-beens” does not explain why anything is here. God is the necessary ground — not a shrug.</shortStory>
+          <mainIdea>Things that might not exist still need a necessary ground.</mainIdea>
           <gloss>What might not have been needs a ground.</gloss>
           <loci>This idea lives at Why Gate, with Ansel.</loci>
           <word>
@@ -762,7 +762,7 @@ Critics ask whether quantum events or a past-eternal cosmos break the chain. Def
           <hint>Assemble the chain. Leave the joke cards.</hint>
         </learn>
         <match>
-          <sentenceCorrect>A world of might-not-have-beens still needs a necessary ground.</sentenceCorrect>
+          <sentenceCorrect>Things that might not exist still need a necessary ground.</sentenceCorrect>
           <sentenceMisses>
             <miss>Contingent things contain the reason why there is anything.</miss>
             <miss>Rivals are unintelligible and need not be named.</miss>
@@ -774,22 +774,22 @@ Critics ask whether quantum events or a past-eternal cosmos break the chain. Def
           <whyEasy>Ansel keeps Why Gate. Might-not-have-beens need a necessary ground.</whyEasy>
         </match>
         <hold levelUpTo="medium" onFail="easy">
-          <claim>A world of might-not-have-beens still needs a necessary ground.</claim>
-          <reason>Contingent things exist; “it just is” is also a metaphysics, not automatically cheaper.</reason>
+          <claim>Things that might not exist still need a necessary ground.</claim>
+          <reason>Things that might not exist still need a ground.</reason>
           <source>Aquinas’s Third Way; Leibniz on sufficient reason</source>
-          <whyCorrect>Contingent things exist; “it just is” is also a metaphysics, not automatically cheaper.</whyCorrect>
+          <whyCorrect>Things that might not exist still need a ground.</whyCorrect>
           <whyMisses>
             <miss>Necessary being is only a weather report.</miss>
             <miss>Brute fact is not a metaphysical move.</miss>
             <miss>It just is — that is enough.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>A world of might-not-have-beens still needs a necessary ground.</choice>
+            <choice>Things that might not exist still need a necessary ground.</choice>
             <choice>Contingent things contain the reason why there is anything.</choice>
             <choice>Rivals are unintelligible and need not be named.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Contingent things exist; “it just is” is also a metaphysics, not automatically cheaper.</choice>
+            <choice>Things that might not exist still need a ground.</choice>
             <choice>Necessary being is only a weather report.</choice>
             <choice>Brute fact is not a metaphysical move.</choice>
           </reasonChoices>
@@ -798,7 +798,7 @@ Critics ask whether quantum events or a past-eternal cosmos break the chain. Def
       <medium points="12">
         <learn>
           <mediumTeach>You exist, but you might not have. Contingent means: it is here, yet it could have failed to be. A world of only might-not-have-beens does not explain why anything is here. Classical theism names the necessary ground God.</mediumTeach>
-          <mainIdea>A world of might-not-have-beens still needs a necessary ground.</mainIdea>
+          <mainIdea>Things that might not exist still need a necessary ground.</mainIdea>
           <gloss>What might not have been needs a ground.</gloss>
           <loci>This idea lives at Why Gate, with Ansel.</loci>
           <word>
@@ -808,7 +808,7 @@ Critics ask whether quantum events or a past-eternal cosmos break the chain. Def
           <hint>Assemble the chain. Leave the joke cards.</hint>
         </learn>
         <match>
-          <sentenceCorrect>A world of might-not-have-beens still needs a necessary ground.</sentenceCorrect>
+          <sentenceCorrect>Things that might not exist still need a necessary ground.</sentenceCorrect>
           <sentenceMisses>
             <miss>Contingent things contain the reason why there is anything.</miss>
             <miss>Rivals are unintelligible and need not be named.</miss>
@@ -820,22 +820,22 @@ Critics ask whether quantum events or a past-eternal cosmos break the chain. Def
           <whyMedium>Ansel keeps Why Gate. Might-not-have-beens need a necessary ground.</whyMedium>
         </match>
         <hold levelUpTo="hard" onFail="easy">
-          <claim>A world of might-not-have-beens still needs a necessary ground.</claim>
-          <reason>Contingent things exist; “it just is” is also a metaphysics, not automatically cheaper.</reason>
+          <claim>Things that might not exist still need a necessary ground.</claim>
+          <reason>Things that might not exist still need a ground.</reason>
           <source>Aquinas’s Third Way; Leibniz on sufficient reason</source>
-          <whyCorrect>Contingent things exist; “it just is” is also a metaphysics, not automatically cheaper.</whyCorrect>
+          <whyCorrect>Things that might not exist still need a ground.</whyCorrect>
           <whyMisses>
             <miss>Necessary being is only a weather report.</miss>
             <miss>Brute fact is not a metaphysical move.</miss>
             <miss>It just is — that is enough.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>A world of might-not-have-beens still needs a necessary ground.</choice>
+            <choice>Things that might not exist still need a necessary ground.</choice>
             <choice>Contingent things contain the reason why there is anything.</choice>
             <choice>Rivals are unintelligible and need not be named.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Contingent things exist; “it just is” is also a metaphysics, not automatically cheaper.</choice>
+            <choice>Things that might not exist still need a ground.</choice>
             <choice>Necessary being is only a weather report.</choice>
             <choice>Brute fact is not a metaphysical move.</choice>
           </reasonChoices>
@@ -852,7 +852,7 @@ Atheist replies include: the universe itself is necessary; or “brute fact” i
           <challengeTiles />
         </learn>
         <match>
-          <sentenceCorrect>A world of might-not-have-beens still needs a necessary ground.</sentenceCorrect>
+          <sentenceCorrect>Things that might not exist still need a necessary ground.</sentenceCorrect>
           <sentenceMisses>
             <miss>Contingent things contain the reason why there is anything.</miss>
             <miss>Rivals are unintelligible and need not be named.</miss>
@@ -864,22 +864,22 @@ Atheist replies include: the universe itself is necessary; or “brute fact” i
           <whyHard>Ansel Gate keeps Why Gate. A world of might-not-have-beens still needs a necessary ground — not a shrug.</whyHard>
         </match>
         <hold onFail="easy">
-          <claim>A world of might-not-have-beens still needs a necessary ground.</claim>
-          <reason>Contingent things exist; “it just is” is also a metaphysics, not automatically cheaper.</reason>
+          <claim>Things that might not exist still need a necessary ground.</claim>
+          <reason>Things that might not exist still need a ground.</reason>
           <source>Aquinas’s Third Way; Leibniz on sufficient reason</source>
-          <whyCorrect>Contingent things exist; “it just is” is also a metaphysics, not automatically cheaper.</whyCorrect>
+          <whyCorrect>Things that might not exist still need a ground.</whyCorrect>
           <whyMisses>
             <miss>Necessary being is only a weather report.</miss>
             <miss>Brute fact is not a metaphysical move.</miss>
             <miss>It just is — that is enough.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>A world of might-not-have-beens still needs a necessary ground.</choice>
+            <choice>Things that might not exist still need a necessary ground.</choice>
             <choice>Contingent things contain the reason why there is anything.</choice>
             <choice>Rivals are unintelligible and need not be named.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Contingent things exist; “it just is” is also a metaphysics, not automatically cheaper.</choice>
+            <choice>Things that might not exist still need a ground.</choice>
             <choice>Necessary being is only a weather report.</choice>
             <choice>Brute fact is not a metaphysical move.</choice>
           </reasonChoices>
@@ -897,8 +897,8 @@ Atheist replies include: the universe itself is necessary; or “brute fact” i
     <lesson id="fg-kalam" place="Why Gate" person="Ansel Gate" tripleId="kalam-gate" ideaId="idea-kalam" ideaLabel="What begins has a cause." challengeKind="sort" challengeTitle="Whatever begins">
       <easy points="10" easyOrder="30">
         <learn>
-          <shortStory>If something begins, it has a cause. If this universe began, it has a cause. Naming Abraham’s God takes further historical steps.</shortStory>
-          <mainIdea>If what begins has a cause and the universe began, it has a cause.</mainIdea>
+          <shortStory>What begins has a cause. The universe began, so it has a Cause. Naming Abraham’s God takes further steps.</shortStory>
+          <mainIdea>What begins has a cause — the universe began, so it has a Cause.</mainIdea>
           <gloss>Whatever begins still asks for a cause.</gloss>
           <loci>This idea lives at Why Gate, with Ansel.</loci>
           <word>
@@ -908,7 +908,7 @@ Atheist replies include: the universe itself is necessary; or “brute fact” i
           <hint>Keep the beginning argument. Toss the flattenings.</hint>
         </learn>
         <match>
-          <sentenceCorrect>If what begins has a cause and the universe began, it has a cause.</sentenceCorrect>
+          <sentenceCorrect>What begins has a cause — the universe began, so it has a Cause.</sentenceCorrect>
           <sentenceMisses>
             <miss>A cause of the beginning is already the whole creed.</miss>
             <miss>The form never mentions a beginning.</miss>
@@ -920,22 +920,22 @@ Atheist replies include: the universe itself is necessary; or “brute fact” i
           <whyEasy>Ansel keeps Why Gate. What begins has a cause.</whyEasy>
         </match>
         <hold levelUpTo="medium" onFail="easy">
-          <claim>If what begins has a cause and the universe began, it has a cause.</claim>
-          <reason>That yields a Cause of the beginning; naming Abraham’s God takes further historical steps.</reason>
-          <source>Kalām tradition; contemporary analytic statements</source>
-          <whyCorrect>That yields a Cause of the beginning; naming Abraham’s God takes further historical steps.</whyCorrect>
+          <claim>What begins has a cause — the universe began, so it has a Cause.</claim>
+          <reason>A beginning has a Cause — more steps name God.</reason>
+          <source>Genesis 1:1; Kalām tradition</source>
+          <whyCorrect>A beginning has a Cause — more steps name God.</whyCorrect>
           <whyMisses>
             <miss>The second premise cannot be argued at all.</miss>
             <miss>A first cause automatically names Jesus.</miss>
             <miss>A beginning needs no Cause.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>If what begins has a cause and the universe began, it has a cause.</choice>
+            <choice>What begins has a cause — the universe began, so it has a Cause.</choice>
             <choice>A cause of the beginning is already the whole creed.</choice>
             <choice>The form never mentions a beginning.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>That yields a Cause of the beginning; naming Abraham’s God takes further historical steps.</choice>
+            <choice>A beginning has a Cause — more steps name God.</choice>
             <choice>The second premise cannot be argued at all.</choice>
             <choice>A first cause automatically names Jesus.</choice>
           </reasonChoices>
@@ -944,7 +944,7 @@ Atheist replies include: the universe itself is necessary; or “brute fact” i
       <medium points="12">
         <learn>
           <mediumTeach>Whatever begins to exist has a cause. If this universe began, it has a cause. That is already a great deal. Naming Abraham’s God takes further historical steps — not a leak in the argument, a next chapter.</mediumTeach>
-          <mainIdea>If what begins has a cause and the universe began, it has a cause.</mainIdea>
+          <mainIdea>What begins has a cause — the universe began, so it has a Cause.</mainIdea>
           <gloss>Whatever begins still asks for a cause.</gloss>
           <loci>This idea lives at Why Gate, with Ansel.</loci>
           <word>
@@ -954,7 +954,7 @@ Atheist replies include: the universe itself is necessary; or “brute fact” i
           <hint>Keep the beginning argument. Toss the flattenings.</hint>
         </learn>
         <match>
-          <sentenceCorrect>If what begins has a cause and the universe began, it has a cause.</sentenceCorrect>
+          <sentenceCorrect>What begins has a cause — the universe began, so it has a Cause.</sentenceCorrect>
           <sentenceMisses>
             <miss>A cause of the beginning is already the whole creed.</miss>
             <miss>The form never mentions a beginning.</miss>
@@ -966,22 +966,22 @@ Atheist replies include: the universe itself is necessary; or “brute fact” i
           <whyMedium>Ansel keeps Why Gate. What begins has a cause.</whyMedium>
         </match>
         <hold levelUpTo="hard" onFail="easy">
-          <claim>If what begins has a cause and the universe began, it has a cause.</claim>
-          <reason>That yields a Cause of the beginning; naming Abraham’s God takes further historical steps.</reason>
-          <source>Kalām tradition; contemporary analytic statements</source>
-          <whyCorrect>That yields a Cause of the beginning; naming Abraham’s God takes further historical steps.</whyCorrect>
+          <claim>What begins has a cause — the universe began, so it has a Cause.</claim>
+          <reason>A beginning has a Cause — more steps name God.</reason>
+          <source>Genesis 1:1; Kalām tradition</source>
+          <whyCorrect>A beginning has a Cause — more steps name God.</whyCorrect>
           <whyMisses>
             <miss>The second premise cannot be argued at all.</miss>
             <miss>A first cause automatically names Jesus.</miss>
             <miss>A beginning needs no Cause.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>If what begins has a cause and the universe began, it has a cause.</choice>
+            <choice>What begins has a cause — the universe began, so it has a Cause.</choice>
             <choice>A cause of the beginning is already the whole creed.</choice>
             <choice>The form never mentions a beginning.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>That yields a Cause of the beginning; naming Abraham’s God takes further historical steps.</choice>
+            <choice>A beginning has a Cause — more steps name God.</choice>
             <choice>The second premise cannot be argued at all.</choice>
             <choice>A first cause automatically names Jesus.</choice>
           </reasonChoices>
@@ -1003,7 +1003,7 @@ Write the argument, then the best objection, then the reply. That is how these a
           </challengeTiles>
         </learn>
         <match>
-          <sentenceCorrect>If what begins has a cause and the universe began, it has a cause.</sentenceCorrect>
+          <sentenceCorrect>What begins has a cause — the universe began, so it has a Cause.</sentenceCorrect>
           <sentenceMisses>
             <miss>A cause of the beginning is already the whole creed.</miss>
             <miss>The form never mentions a beginning.</miss>
@@ -1012,25 +1012,25 @@ Write the argument, then the best objection, then the reply. That is how these a
           <personPrompt>Ansel keeps that gate.</personPrompt>
           <ideaPrompt>Ansel’s why — what begins has a cause.</ideaPrompt>
           <ideaLabel>What begins has a cause.</ideaLabel>
-          <whyHard>Ansel Gate keeps Why Gate. If what begins has a cause and the universe began, it has a Cause of the beginning.</whyHard>
+          <whyHard>Ansel Gate keeps Why Gate. What begins has a cause — the universe began, so it has a Cause of the beginning.</whyHard>
         </match>
         <hold onFail="easy">
-          <claim>If what begins has a cause and the universe began, it has a cause.</claim>
-          <reason>That yields a Cause of the beginning; naming Abraham’s God takes further historical steps.</reason>
-          <source>Kalām tradition; contemporary analytic statements</source>
-          <whyCorrect>That yields a Cause of the beginning; naming Abraham’s God takes further historical steps.</whyCorrect>
+          <claim>What begins has a cause — the universe began, so it has a Cause.</claim>
+          <reason>A beginning has a Cause — more steps name God.</reason>
+          <source>Genesis 1:1; Kalām tradition</source>
+          <whyCorrect>A beginning has a Cause — more steps name God.</whyCorrect>
           <whyMisses>
             <miss>The second premise cannot be argued at all.</miss>
             <miss>A first cause automatically names Jesus.</miss>
             <miss>A beginning needs no Cause.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>If what begins has a cause and the universe began, it has a cause.</choice>
+            <choice>What begins has a cause — the universe began, so it has a Cause.</choice>
             <choice>A cause of the beginning is already the whole creed.</choice>
             <choice>The form never mentions a beginning.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>That yields a Cause of the beginning; naming Abraham’s God takes further historical steps.</choice>
+            <choice>A beginning has a Cause — more steps name God.</choice>
             <choice>The second premise cannot be argued at all.</choice>
             <choice>A first cause automatically names Jesus.</choice>
           </reasonChoices>
@@ -1049,8 +1049,8 @@ Write the argument, then the best objection, then the reply. That is how these a
     <lesson id="fg-limits" place="Why Gate" person="Ansel Gate" tripleId="limits-gate" ideaId="idea-limits" ideaLabel="A first cause is not yet the whole gospel." challengeKind="sort" challengeTitle="What the gate opens">
       <easy points="10" easyOrder="31">
         <learn>
-          <shortStory>If the argument works, you have a first cause. Intellect, goodness, and the gospel are further steps — not leaks.</shortStory>
-          <mainIdea>A cosmological argument is already a great deal — and not yet the sermon on the mount.</mainIdea>
+          <shortStory>A working argument names a first cause. Intellect, goodness, and the gospel are further steps — not leaks.</shortStory>
+          <mainIdea>A first cause is a great deal — not yet the whole gospel.</mainIdea>
           <gloss>A first cause is not yet the whole Christian faith.</gloss>
           <loci>This idea lives at Why Gate, with Ansel.</loci>
           <word>
@@ -1060,7 +1060,7 @@ Write the argument, then the best objection, then the reply. That is how these a
           <hint>Keep the honest limit. Toss “all done” and “worthless.”</hint>
         </learn>
         <match>
-          <sentenceCorrect>A cosmological argument is already a great deal — and not yet the sermon on the mount.</sentenceCorrect>
+          <sentenceCorrect>A first cause is a great deal — not yet the whole gospel.</sentenceCorrect>
           <sentenceMisses>
             <miss>The Five Ways are already the whole gospel.</miss>
             <miss>Pascal commands you to skip the philosophers.</miss>
@@ -1072,22 +1072,22 @@ Write the argument, then the best objection, then the reply. That is how these a
           <whyEasy>Ansel keeps Why Gate. A first cause is not yet the whole gospel.</whyEasy>
         </match>
         <hold levelUpTo="medium" onFail="easy">
-          <claim>A cosmological argument is already a great deal — and not yet the sermon on the mount.</claim>
-          <reason>Aquinas argues onward from the Ways; the New Testament adds a particular history.</reason>
+          <claim>A first cause is a great deal — not yet the whole gospel.</claim>
+          <reason>The first-cause walk is not yet the whole gospel.</reason>
           <source>Aquinas ST I; Pascal on philosophers and Abraham</source>
-          <whyCorrect>Aquinas argues onward from the Ways; the New Testament adds a particular history.</whyCorrect>
+          <whyCorrect>The first-cause walk is not yet the whole gospel.</whyCorrect>
           <whyMisses>
             <miss>Stopping at a first cause is required.</miss>
             <miss>History has nothing further to add.</miss>
             <miss>The first-cause walk is the whole gospel.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>A cosmological argument is already a great deal — and not yet the sermon on the mount.</choice>
+            <choice>A first cause is a great deal — not yet the whole gospel.</choice>
             <choice>The Five Ways are already the whole gospel.</choice>
             <choice>Pascal commands you to skip the philosophers.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Aquinas argues onward from the Ways; the New Testament adds a particular history.</choice>
+            <choice>The first-cause walk is not yet the whole gospel.</choice>
             <choice>Stopping at a first cause is required.</choice>
             <choice>History has nothing further to add.</choice>
           </reasonChoices>
@@ -1096,7 +1096,7 @@ Write the argument, then the best objection, then the reply. That is how these a
       <medium points="12">
         <learn>
           <mediumTeach>A cosmological argument, if it works, gives a first cause or necessary being — already a great deal. It is not yet the sermon on the mount. Intellect, goodness, and the gospel are further steps, not proofs that the first step failed.</mediumTeach>
-          <mainIdea>A cosmological argument is already a great deal — and not yet the sermon on the mount.</mainIdea>
+          <mainIdea>A first cause is a great deal — not yet the whole gospel.</mainIdea>
           <gloss>A first cause is not yet the whole Christian faith.</gloss>
           <loci>This idea lives at Why Gate, with Ansel.</loci>
           <word>
@@ -1106,7 +1106,7 @@ Write the argument, then the best objection, then the reply. That is how these a
           <hint>Keep the honest limit. Toss “all done” and “worthless.”</hint>
         </learn>
         <match>
-          <sentenceCorrect>A cosmological argument is already a great deal — and not yet the sermon on the mount.</sentenceCorrect>
+          <sentenceCorrect>A first cause is a great deal — not yet the whole gospel.</sentenceCorrect>
           <sentenceMisses>
             <miss>The Five Ways are already the whole gospel.</miss>
             <miss>Pascal commands you to skip the philosophers.</miss>
@@ -1118,22 +1118,22 @@ Write the argument, then the best objection, then the reply. That is how these a
           <whyMedium>Ansel keeps Why Gate. A first cause is not yet the whole gospel.</whyMedium>
         </match>
         <hold levelUpTo="hard" onFail="easy">
-          <claim>A cosmological argument is already a great deal — and not yet the sermon on the mount.</claim>
-          <reason>Aquinas argues onward from the Ways; the New Testament adds a particular history.</reason>
+          <claim>A first cause is a great deal — not yet the whole gospel.</claim>
+          <reason>The first-cause walk is not yet the whole gospel.</reason>
           <source>Aquinas ST I; Pascal on philosophers and Abraham</source>
-          <whyCorrect>Aquinas argues onward from the Ways; the New Testament adds a particular history.</whyCorrect>
+          <whyCorrect>The first-cause walk is not yet the whole gospel.</whyCorrect>
           <whyMisses>
             <miss>Stopping at a first cause is required.</miss>
             <miss>History has nothing further to add.</miss>
             <miss>The first-cause walk is the whole gospel.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>A cosmological argument is already a great deal — and not yet the sermon on the mount.</choice>
+            <choice>A first cause is a great deal — not yet the whole gospel.</choice>
             <choice>The Five Ways are already the whole gospel.</choice>
             <choice>Pascal commands you to skip the philosophers.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Aquinas argues onward from the Ways; the New Testament adds a particular history.</choice>
+            <choice>The first-cause walk is not yet the whole gospel.</choice>
             <choice>Stopping at a first cause is required.</choice>
             <choice>History has nothing further to add.</choice>
           </reasonChoices>
@@ -1155,7 +1155,7 @@ Pascal’s warning about the God of the philosophers is a warning against stoppi
           </challengeTiles>
         </learn>
         <match>
-          <sentenceCorrect>A cosmological argument is already a great deal — and not yet the sermon on the mount.</sentenceCorrect>
+          <sentenceCorrect>A first cause is a great deal — not yet the whole gospel.</sentenceCorrect>
           <sentenceMisses>
             <miss>The Five Ways are already the whole gospel.</miss>
             <miss>Pascal commands you to skip the philosophers.</miss>
@@ -1164,25 +1164,25 @@ Pascal’s warning about the God of the philosophers is a warning against stoppi
           <personPrompt>Ansel keeps that gate.</personPrompt>
           <ideaPrompt>Ansel’s why — a first cause is not yet the whole gospel.</ideaPrompt>
           <ideaLabel>A first cause is not yet the whole gospel.</ideaLabel>
-          <whyHard>Ansel Gate keeps Why Gate. A cosmological argument is already a great deal — and not yet the sermon on the mount.</whyHard>
+          <whyHard>Ansel Gate keeps Why Gate. A first cause is a great deal — not yet the whole gospel.</whyHard>
         </match>
         <hold onFail="easy">
-          <claim>A cosmological argument is already a great deal — and not yet the sermon on the mount.</claim>
-          <reason>Aquinas argues onward from the Ways; the New Testament adds a particular history.</reason>
+          <claim>A first cause is a great deal — not yet the whole gospel.</claim>
+          <reason>The first-cause walk is not yet the whole gospel.</reason>
           <source>Aquinas ST I; Pascal on philosophers and Abraham</source>
-          <whyCorrect>Aquinas argues onward from the Ways; the New Testament adds a particular history.</whyCorrect>
+          <whyCorrect>The first-cause walk is not yet the whole gospel.</whyCorrect>
           <whyMisses>
             <miss>Stopping at a first cause is required.</miss>
             <miss>History has nothing further to add.</miss>
             <miss>The first-cause walk is the whole gospel.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>A cosmological argument is already a great deal — and not yet the sermon on the mount.</choice>
+            <choice>A first cause is a great deal — not yet the whole gospel.</choice>
             <choice>The Five Ways are already the whole gospel.</choice>
             <choice>Pascal commands you to skip the philosophers.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Aquinas argues onward from the Ways; the New Testament adds a particular history.</choice>
+            <choice>The first-cause walk is not yet the whole gospel.</choice>
             <choice>Stopping at a first cause is required.</choice>
             <choice>History has nothing further to add.</choice>
           </reasonChoices>
@@ -1201,8 +1201,8 @@ Pascal’s warning about the God of the philosophers is a warning against stoppi
       <easy points="10" easyOrder="12">
         <learn>
           <shortStory>The world is here, and it did not have to be. The psalms name a Giver for that gift — not a shrug that pretends the question never arises.</shortStory>
-          <mainIdea>The universe exists and did not have to — so a Source is worth naming.</mainIdea>
-          <gloss>The universe exists and did not have to — so a Source is worth naming.</gloss>
+          <mainIdea>The world is here, and it did not have to be — the psalms name a Giver.</mainIdea>
+          <gloss>The world is here, and it did not have to be — the psalms name a Giver.</gloss>
           <loci>This idea lives at Why Gate, with Ansel.</loci>
           <word>
             <term>Source</term>
@@ -1211,7 +1211,7 @@ Pascal’s warning about the God of the philosophers is a warning against stoppi
           <hint>Keep the question. Toss the shrug.</hint>
         </learn>
         <match>
-          <sentenceCorrect>The universe exists and did not have to — so a Source is worth naming.</sentenceCorrect>
+          <sentenceCorrect>The world is here, and it did not have to be — the psalms name a Giver.</sentenceCorrect>
           <sentenceMisses>
             <miss>Questions about a source are impolite.</miss>
             <miss>Existence plus contingency yields no question.</miss>
@@ -1223,7 +1223,7 @@ Pascal’s warning about the God of the philosophers is a warning against stoppi
           <whyEasy>Ansel keeps Why Gate. The world exists — and did not have to.</whyEasy>
         </match>
         <hold levelUpTo="medium" onFail="easy">
-          <claim>The universe exists and did not have to — so a Source is worth naming.</claim>
+          <claim>The world is here, and it did not have to be — the psalms name a Giver.</claim>
           <reason>The psalms ask the question out loud and expect a Giver, not a shrug.</reason>
           <source>Psalm 8:3–4</source>
           <whyCorrect>The psalms ask the question out loud and expect a Giver, not a shrug.</whyCorrect>
@@ -1233,7 +1233,7 @@ Pascal’s warning about the God of the philosophers is a warning against stoppi
             <miss>Chance is enough for a livable world.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>The universe exists and did not have to — so a Source is worth naming.</choice>
+            <choice>The world is here, and it did not have to be — the psalms name a Giver.</choice>
             <choice>Questions about a source are impolite.</choice>
             <choice>Existence plus contingency yields no question.</choice>
           </claimChoices>
@@ -1247,8 +1247,8 @@ Pascal’s warning about the God of the philosophers is a warning against stoppi
       <medium points="12">
         <learn>
           <mediumTeach>The universe exists and did not have to. The psalms name a Giver — not a shrug. Why there is a world at all points to a Source worth naming, not to polite silence.</mediumTeach>
-          <mainIdea>The universe exists and did not have to — so a Source is worth naming.</mainIdea>
-          <gloss>The universe exists and did not have to — so a Source is worth naming.</gloss>
+          <mainIdea>The world is here, and it did not have to be — the psalms name a Giver.</mainIdea>
+          <gloss>The world is here, and it did not have to be — the psalms name a Giver.</gloss>
           <loci>This idea lives at Why Gate, with Ansel.</loci>
           <word>
             <term>Source</term>
@@ -1257,7 +1257,7 @@ Pascal’s warning about the God of the philosophers is a warning against stoppi
           <hint>Keep the question. Toss the shrug.</hint>
         </learn>
         <match>
-          <sentenceCorrect>The universe exists and did not have to — so a Source is worth naming.</sentenceCorrect>
+          <sentenceCorrect>The world is here, and it did not have to be — the psalms name a Giver.</sentenceCorrect>
           <sentenceMisses>
             <miss>Questions about a source are impolite.</miss>
             <miss>Existence plus contingency yields no question.</miss>
@@ -1269,7 +1269,7 @@ Pascal’s warning about the God of the philosophers is a warning against stoppi
           <whyMedium>Ansel keeps Why Gate. The world exists — and did not have to.</whyMedium>
         </match>
         <hold levelUpTo="hard" onFail="easy">
-          <claim>The universe exists and did not have to — so a Source is worth naming.</claim>
+          <claim>The world is here, and it did not have to be — the psalms name a Giver.</claim>
           <reason>The psalms ask the question out loud and expect a Giver, not a shrug.</reason>
           <source>Psalm 8:3–4</source>
           <whyCorrect>The psalms ask the question out loud and expect a Giver, not a shrug.</whyCorrect>
@@ -1279,7 +1279,7 @@ Pascal’s warning about the God of the philosophers is a warning against stoppi
             <miss>Chance is enough for a livable world.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>The universe exists and did not have to — so a Source is worth naming.</choice>
+            <choice>The world is here, and it did not have to be — the psalms name a Giver.</choice>
             <choice>Questions about a source are impolite.</choice>
             <choice>Existence plus contingency yields no question.</choice>
           </claimChoices>
@@ -1301,7 +1301,7 @@ Psalm 8: when I look at your heavens… what is man that you are mindful of him?
           <challengeTiles />
         </learn>
         <match>
-          <sentenceCorrect>The universe exists and did not have to — so a Source is worth naming.</sentenceCorrect>
+          <sentenceCorrect>The world is here, and it did not have to be — the psalms name a Giver.</sentenceCorrect>
           <sentenceMisses>
             <miss>Questions about a source are impolite.</miss>
             <miss>Existence plus contingency yields no question.</miss>
@@ -1313,7 +1313,7 @@ Psalm 8: when I look at your heavens… what is man that you are mindful of him?
           <whyHard>Ansel Gate keeps Why Gate. That the universe exists and did not have to is the why-a-world stone.</whyHard>
         </match>
         <hold onFail="easy">
-          <claim>The universe exists and did not have to — so a Source is worth naming.</claim>
+          <claim>The world is here, and it did not have to be — the psalms name a Giver.</claim>
           <reason>The psalms ask the question out loud and expect a Giver, not a shrug.</reason>
           <source>Psalm 8:3–4</source>
           <whyCorrect>The psalms ask the question out loud and expect a Giver, not a shrug.</whyCorrect>
@@ -1323,7 +1323,7 @@ Psalm 8: when I look at your heavens… what is man that you are mindful of him?
             <miss>Chance is enough for a livable world.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>The universe exists and did not have to — so a Source is worth naming.</choice>
+            <choice>The world is here, and it did not have to be — the psalms name a Giver.</choice>
             <choice>Questions about a source are impolite.</choice>
             <choice>Existence plus contingency yields no question.</choice>
           </claimChoices>
@@ -1489,8 +1489,8 @@ Isaiah 40:8: the grass withers, the flower fades, but the word of our God will s
       <easy points="10" easyOrder="33">
         <learn>
           <shortStory>The poem’s Servant suffers for others and does not answer with a sword. The church names that Servant as Jesus.</shortStory>
-          <mainIdea>Isaiah 53’s Servant is the Jesus the church confesses — wounded for others, silent like a lamb.</mainIdea>
-          <gloss>Isaiah 53’s Servant is the Jesus the church confesses — wounded for others, silent like a lamb.</gloss>
+          <mainIdea>Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.</mainIdea>
+          <gloss>Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.</gloss>
           <loci>This idea lives at Why Gate, with Ansel.</loci>
           <word>
             <term>Servant</term>
@@ -1499,7 +1499,7 @@ Isaiah 40:8: the grass withers, the flower fades, but the word of our God will s
           <hint>Keep the wounds. Toss the sword.</hint>
         </learn>
         <match>
-          <sentenceCorrect>Isaiah 53’s Servant is the Jesus the church confesses — wounded for others, silent like a lamb.</sentenceCorrect>
+          <sentenceCorrect>Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.</sentenceCorrect>
           <sentenceMisses>
             <miss>The servant conquers Rome by sword.</miss>
             <miss>The poem is about estate planning.</miss>
@@ -1511,7 +1511,7 @@ Isaiah 40:8: the grass withers, the flower fades, but the word of our God will s
           <whyEasy>Ansel keeps Why Gate. Isaiah’s Servant is Jesus.</whyEasy>
         </match>
         <hold levelUpTo="medium" onFail="easy">
-          <claim>Isaiah 53’s Servant is the Jesus the church confesses — wounded for others, silent like a lamb.</claim>
+          <claim>Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.</claim>
           <reason>The poem’s Servant suffers for others and does not answer with a sword; the church names that Servant as Jesus.</reason>
           <source>Isaiah 53:4–12</source>
           <whyCorrect>The poem’s Servant suffers for others and does not answer with a sword; the church names that Servant as Jesus.</whyCorrect>
@@ -1521,7 +1521,7 @@ Isaiah 40:8: the grass withers, the flower fades, but the word of our God will s
             <miss>The Servant answers with a sword.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>Isaiah 53’s Servant is the Jesus the church confesses — wounded for others, silent like a lamb.</choice>
+            <choice>Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.</choice>
             <choice>The servant conquers Rome by sword.</choice>
             <choice>The poem is about estate planning.</choice>
           </claimChoices>
@@ -1535,8 +1535,8 @@ Isaiah 40:8: the grass withers, the flower fades, but the word of our God will s
       <medium points="12">
         <learn>
           <mediumTeach>Isaiah 53’s Servant suffers for others and does not answer with a sword — wounded, silent like a lamb. The church confesses that Servant as Jesus. The poem and the gospel meet without flattening either.</mediumTeach>
-          <mainIdea>Isaiah 53’s Servant is the Jesus the church confesses — wounded for others, silent like a lamb.</mainIdea>
-          <gloss>Isaiah 53’s Servant is the Jesus the church confesses — wounded for others, silent like a lamb.</gloss>
+          <mainIdea>Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.</mainIdea>
+          <gloss>Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.</gloss>
           <loci>This idea lives at Why Gate, with Ansel.</loci>
           <word>
             <term>Servant</term>
@@ -1545,7 +1545,7 @@ Isaiah 40:8: the grass withers, the flower fades, but the word of our God will s
           <hint>Keep the wounds. Toss the sword.</hint>
         </learn>
         <match>
-          <sentenceCorrect>Isaiah 53’s Servant is the Jesus the church confesses — wounded for others, silent like a lamb.</sentenceCorrect>
+          <sentenceCorrect>Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.</sentenceCorrect>
           <sentenceMisses>
             <miss>The servant conquers Rome by sword.</miss>
             <miss>The poem is about estate planning.</miss>
@@ -1557,7 +1557,7 @@ Isaiah 40:8: the grass withers, the flower fades, but the word of our God will s
           <whyMedium>Ansel keeps Why Gate. Isaiah’s Servant is Jesus.</whyMedium>
         </match>
         <hold levelUpTo="hard" onFail="easy">
-          <claim>Isaiah 53’s Servant is the Jesus the church confesses — wounded for others, silent like a lamb.</claim>
+          <claim>Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.</claim>
           <reason>The poem’s Servant suffers for others and does not answer with a sword; the church names that Servant as Jesus.</reason>
           <source>Isaiah 53:4–12</source>
           <whyCorrect>The poem’s Servant suffers for others and does not answer with a sword; the church names that Servant as Jesus.</whyCorrect>
@@ -1567,7 +1567,7 @@ Isaiah 40:8: the grass withers, the flower fades, but the word of our God will s
             <miss>The Servant answers with a sword.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>Isaiah 53’s Servant is the Jesus the church confesses — wounded for others, silent like a lamb.</choice>
+            <choice>Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.</choice>
             <choice>The servant conquers Rome by sword.</choice>
             <choice>The poem is about estate planning.</choice>
           </claimChoices>
@@ -1580,9 +1580,9 @@ Isaiah 40:8: the grass withers, the flower fades, but the word of our God will s
       </medium>
       <hard points="15">
         <learn>
-          <hardTeach>Isaiah 53’s Servant is the Jesus the church confesses — wounded for others, silent like a lamb.
+          <hardTeach>Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.
 He was pierced for our transgressions… and with his wounds we are healed.</hardTeach>
-          <fullTeach>Isaiah 53’s Servant is the Jesus the church confesses — wounded for others, silent like a lamb.
+          <fullTeach>Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.
 He was pierced for our transgressions… and with his wounds we are healed.</fullTeach>
           <prompt>Which lines belong with Isaiah 53’s servant?</prompt>
           <teachOnWrong>Isaiah 53 is a suffering servant, not a general on a horse. Keep the wounds; toss the sword.</teachOnWrong>
@@ -1594,7 +1594,7 @@ He was pierced for our transgressions… and with his wounds we are healed.</ful
           </challengeTiles>
         </learn>
         <match>
-          <sentenceCorrect>Isaiah 53’s Servant is the Jesus the church confesses — wounded for others, silent like a lamb.</sentenceCorrect>
+          <sentenceCorrect>Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.</sentenceCorrect>
           <sentenceMisses>
             <miss>The servant conquers Rome by sword.</miss>
             <miss>The poem is about estate planning.</miss>
@@ -1603,10 +1603,10 @@ He was pierced for our transgressions… and with his wounds we are healed.</ful
           <personPrompt>Ansel keeps that gate.</personPrompt>
           <ideaPrompt>Ansel’s scroll — Isaiah’s Servant is Jesus.</ideaPrompt>
           <ideaLabel>Isaiah’s Servant is Jesus.</ideaLabel>
-          <whyHard>Ansel Gate keeps Why Gate. Isaiah 53’s Servant is the Jesus the church confesses — wounded for others, silent like a lamb.</whyHard>
+          <whyHard>Ansel Gate keeps Why Gate. Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.</whyHard>
         </match>
         <hold onFail="easy">
-          <claim>Isaiah 53’s Servant is the Jesus the church confesses — wounded for others, silent like a lamb.</claim>
+          <claim>Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.</claim>
           <reason>The poem’s Servant suffers for others and does not answer with a sword; the church names that Servant as Jesus.</reason>
           <source>Isaiah 53:4–12</source>
           <whyCorrect>The poem’s Servant suffers for others and does not answer with a sword; the church names that Servant as Jesus.</whyCorrect>
@@ -1616,7 +1616,7 @@ He was pierced for our transgressions… and with his wounds we are healed.</ful
             <miss>The Servant answers with a sword.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>Isaiah 53’s Servant is the Jesus the church confesses — wounded for others, silent like a lamb.</choice>
+            <choice>Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.</choice>
             <choice>The servant conquers Rome by sword.</choice>
             <choice>The poem is about estate planning.</choice>
           </claimChoices>

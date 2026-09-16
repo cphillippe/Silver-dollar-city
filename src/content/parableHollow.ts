@@ -139,17 +139,17 @@ export const parableHollow: Area = {
       kind: 'sort',
       id: 'ph-debt',
       title: 'An unpayable account',
-      idea: 'received mercy makes refusing mercy a contradiction',
+      idea: 'forgiven much, you cannot choke a neighbor over a little debt',
       prompt: 'Sort the claims. Only one belongs in the keep bin.',
       context:
-        'Matthew 18:21–35. A servant forgiven an unpayable debt then throttles a peer over a small sum. The king reinstates the first debt.',
+        'Matthew 18:21–35. A servant forgiven an unpayable debt then chokes a neighbor over a small sum. The king reinstates the first debt.',
       keepLabel: 'Keep',
       discardLabel: 'Toss',
       tiles: [
         {
           id: 'a',
           gem: 'cup',
-          text: 'Received mercy makes refusing mercy a contradiction.',
+          text: 'Forgiven much, you cannot choke a neighbor over a little debt.',
           bin: 'keep',
         },
         {

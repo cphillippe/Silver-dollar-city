@@ -7,7 +7,8 @@ import { storyPanelsFor, type StoryPanel } from './storyPanels.ts'
 
 /**
  * How this lesson is *played*. Same shell always: teach beats → play → Hold.
- * ph-father is the hold-to-run timing dash. ph-road is the Samaritan collect maze.
+ * ph-father is the hold-to-run timing dash — sit-forever cannot hug.
+ * ph-road is the Samaritan mercy maze (hurt man → help → inn).
  * wb-creed is the candy merge bowl (Suika). Witness Square Dig deeper (women /
  * early / method) and Names that stay (names / creed close / empty) are
  * source-dig tap-ins. Other Easy lessons stay panel-blast so gem extras

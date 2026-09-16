@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<areaPack id="observatory" schemaVersion="3" appVersion="1.4.50" generated="2026-09-14T13:15:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/" title="Sky Watch" place="Sky Watch" person="Nora Skye" personId="nora" plotId="observatory">
+<areaPack id="observatory" schemaVersion="3" appVersion="1.4.78" generated="2026-09-14T13:15:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/" title="Sky Watch" place="Sky Watch" person="Nora Skye" personId="nora" plotId="observatory">
   <howToEdit>RUNTIME CONTENT: the game loads this file as the source of truth for this area. Change player-facing text in place inside each &lt;lesson&gt;. Stable id attributes (ph-father, …) are engine keys — do not rename without a migration. Three tiers per fact: &lt;easy easyOrder="N"&gt;, &lt;medium&gt;, and &lt;hard&gt; — each with &lt;learn&gt;, &lt;match&gt;, and &lt;hold&gt;. Easy Learn: shortStory/mainIdea/loci. Medium Learn: mediumTeach (clearer than Hard, richer than Easy). Hard Learn: hardTeach/fullTeach. Held claim·reason·source stay plain and identical on all three. Hold level-up: see hold @levelUpTo / @onFail and index &lt;holdRules&gt;. Empty optional elements are intentional. Escape &amp; &lt; &gt; in text.</howToEdit>
   <meta>
     <title>Silver City — Sky Watch</title>
@@ -43,9 +43,9 @@
         </match>
         <hold levelUpTo="medium" onFail="easy">
           <claim>The universe is finely tuned for life — that fit points to a Designer.</claim>
-          <reason>Life-permitting ranges are extravagantly narrow across independent parameters; design predicts a habitable cosmos, blank chance does not.</reason>
-          <source>Fine-tuning of physical constants and initial conditions (e.g. cosmological constant; a low-entropy start — initial condition, not another force dial).</source>
-          <whyCorrect>Life-permitting ranges are extravagantly narrow across independent parameters; design predicts a habitable cosmos, blank chance does not.</whyCorrect>
+          <reason>Life needs tight numbers — chance does not explain that.</reason>
+          <source>Psalm 19:1–4; Romans 1:20</source>
+          <whyCorrect>Life needs tight numbers — chance does not explain that.</whyCorrect>
           <whyMisses>
             <miss>Life-permitting ranges are wide; blank chance predicts a habitable cosmos just as well.</miss>
             <miss>The fittedness is only a rumor in the numbers.</miss>
@@ -57,7 +57,7 @@
             <choice>A habitable cosmos needs no explanation at all.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Life-permitting ranges are extravagantly narrow across independent parameters; design predicts a habitable cosmos, blank chance does not.</choice>
+            <choice>Life needs tight numbers — chance does not explain that.</choice>
             <choice>Life-permitting ranges are wide; blank chance predicts a habitable cosmos just as well.</choice>
             <choice>The fittedness is only a rumor in the numbers.</choice>
           </reasonChoices>
@@ -89,9 +89,9 @@
         </match>
         <hold levelUpTo="hard" onFail="easy">
           <claim>The universe is finely tuned for life — that fit points to a Designer.</claim>
-          <reason>Life-permitting ranges are extravagantly narrow across independent parameters; design predicts a habitable cosmos, blank chance does not.</reason>
-          <source>Fine-tuning of physical constants and initial conditions (e.g. cosmological constant; a low-entropy start — initial condition, not another force dial).</source>
-          <whyCorrect>Life-permitting ranges are extravagantly narrow across independent parameters; design predicts a habitable cosmos, blank chance does not.</whyCorrect>
+          <reason>Life needs tight numbers — chance does not explain that.</reason>
+          <source>Psalm 19:1–4; Romans 1:20</source>
+          <whyCorrect>Life needs tight numbers — chance does not explain that.</whyCorrect>
           <whyMisses>
             <miss>Life-permitting ranges are wide; blank chance predicts a habitable cosmos just as well.</miss>
             <miss>The fittedness is only a rumor in the numbers.</miss>
@@ -103,7 +103,7 @@
             <choice>A habitable cosmos needs no explanation at all.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Life-permitting ranges are extravagantly narrow across independent parameters; design predicts a habitable cosmos, blank chance does not.</choice>
+            <choice>Life needs tight numbers — chance does not explain that.</choice>
             <choice>Life-permitting ranges are wide; blank chance predicts a habitable cosmos just as well.</choice>
             <choice>The fittedness is only a rumor in the numbers.</choice>
           </reasonChoices>
@@ -111,9 +111,9 @@
       </medium>
       <hard points="15">
         <learn>
-          <hardTeach>The universe is finely tuned for life — that fit points to a Designer. Life-permitting ranges are extravagantly narrow across independent parameters; design predicts a habitable cosmos, blank chance does not. Necessity, chance (often a multiverse — asserted to cancel the surprise — no evidence), or design: the fit still points to a Designer.
+          <hardTeach>The universe is finely tuned for life — that fit points to a Designer. Life needs tight numbers — chance does not explain that. Necessity, chance (often a multiverse — asserted to cancel the surprise — no evidence), or design: the fit still points to a Designer.
 Design predicts this cosmos: cosmological constant, nuclear binding, a low-entropy start, gravity against electromagnetism — extravagantly narrow, habitable. That fit points to a Designer.</hardTeach>
-          <fullTeach>The universe is finely tuned for life — that fit points to a Designer. Life-permitting ranges are extravagantly narrow across independent parameters; design predicts a habitable cosmos, blank chance does not. Necessity, chance (often a multiverse — asserted to cancel the surprise — no evidence), or design: the fit still points to a Designer.
+          <fullTeach>The universe is finely tuned for life — that fit points to a Designer. Life needs tight numbers — chance does not explain that. Necessity, chance (often a multiverse — asserted to cancel the surprise — no evidence), or design: the fit still points to a Designer.
 Design predicts this cosmos: cosmological constant, nuclear binding, a low-entropy start, gravity against electromagnetism — extravagantly narrow, habitable. That fit points to a Designer.</fullTeach>
           <prompt>Tap a picture, then the mark that belongs. Two choices at a time.</prompt>
           <teachOnWrong>Ask what breaks if the number moves. Those extravagantly narrow, habitable ranges are the mark of a Designer.</teachOnWrong>
@@ -150,9 +150,9 @@ Design predicts this cosmos: cosmological constant, nuclear binding, a low-entro
         </match>
         <hold onFail="easy">
           <claim>The universe is finely tuned for life — that fit points to a Designer.</claim>
-          <reason>Life-permitting ranges are extravagantly narrow across independent parameters; design predicts a habitable cosmos, blank chance does not.</reason>
-          <source>Fine-tuning of physical constants and initial conditions (e.g. cosmological constant; a low-entropy start — initial condition, not another force dial).</source>
-          <whyCorrect>Life-permitting ranges are extravagantly narrow across independent parameters; design predicts a habitable cosmos, blank chance does not.</whyCorrect>
+          <reason>Life needs tight numbers — chance does not explain that.</reason>
+          <source>Psalm 19:1–4; Romans 1:20</source>
+          <whyCorrect>Life needs tight numbers — chance does not explain that.</whyCorrect>
           <whyMisses>
             <miss>Life-permitting ranges are wide; blank chance predicts a habitable cosmos just as well.</miss>
             <miss>The fittedness is only a rumor in the numbers.</miss>
@@ -164,7 +164,7 @@ Design predicts this cosmos: cosmological constant, nuclear binding, a low-entro
             <choice>A habitable cosmos needs no explanation at all.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Life-permitting ranges are extravagantly narrow across independent parameters; design predicts a habitable cosmos, blank chance does not.</choice>
+            <choice>Life needs tight numbers — chance does not explain that.</choice>
             <choice>Life-permitting ranges are wide; blank chance predicts a habitable cosmos just as well.</choice>
             <choice>The fittedness is only a rumor in the numbers.</choice>
           </reasonChoices>
@@ -172,9 +172,9 @@ Design predicts this cosmos: cosmological constant, nuclear binding, a low-entro
       </hard>
       <journal id="j-ob-1" title="The universe is finely tuned for life" kicker="Sky Watch" unlockAfter="ob-tuning" scoreFromHeldTier="true">
         <p>The universe is finely tuned for life — that fit points to a Designer.</p>
-        <p>Life-permitting ranges are extravagantly narrow across independent parameters; design predicts a habitable cosmos, blank chance does not.</p>
+        <p>Life needs tight numbers — chance does not explain that.</p>
         <sources>
-          <source>Fine-tuning of physical constants and initial conditions (e.g. cosmological constant; a low-entropy start — an initial condition, not another force dial).</source>
+          <source>Psalm 19:1–4; Romans 1:20</source>
           <source>Aquinas, ST I, q.2, a.3 (Fifth Way); Psalm 19; Romans 1</source>
           <source>Robin Collins, The Fine-Tuning Design Argument</source>
         </sources>
@@ -207,9 +207,9 @@ Design predicts this cosmos: cosmological constant, nuclear binding, a low-entro
         </match>
         <hold levelUpTo="medium" onFail="easy">
           <claim>Fine-tuning is best explained by a mind that intended a habitable world.</claim>
-          <reason>Life-permitting ranges are extravagantly narrow; a Designer who wants observers leads us to expect that fit — blank indifference does not.</reason>
-          <source>Likelihood / fine-tuning arguments (Collins). A low-entropy start is an initial condition, not another force dial.</source>
-          <whyCorrect>Life-permitting ranges are extravagantly narrow; a Designer who wants observers leads us to expect that fit — blank indifference does not.</whyCorrect>
+          <reason>A Designer who wants people fits these numbers.</reason>
+          <source>Romans 1:20; fine-tuning (Collins)</source>
+          <whyCorrect>A Designer who wants people fits these numbers.</whyCorrect>
           <whyMisses>
             <miss>A mind wanting observers would not expect life-permitting numbers.</miss>
             <miss>Likelihood arguments are automatically dishonest.</miss>
@@ -221,7 +221,7 @@ Design predicts this cosmos: cosmological constant, nuclear binding, a low-entro
             <choice>Fine-tuning already proves a particular gospel.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Life-permitting ranges are extravagantly narrow; a Designer who wants observers leads us to expect that fit — blank indifference does not.</choice>
+            <choice>A Designer who wants people fits these numbers.</choice>
             <choice>A mind wanting observers would not expect life-permitting numbers.</choice>
             <choice>Likelihood arguments are automatically dishonest.</choice>
           </reasonChoices>
@@ -253,9 +253,9 @@ Design predicts this cosmos: cosmological constant, nuclear binding, a low-entro
         </match>
         <hold levelUpTo="hard" onFail="easy">
           <claim>Fine-tuning is best explained by a mind that intended a habitable world.</claim>
-          <reason>Life-permitting ranges are extravagantly narrow; a Designer who wants observers leads us to expect that fit — blank indifference does not.</reason>
-          <source>Likelihood / fine-tuning arguments (Collins). A low-entropy start is an initial condition, not another force dial.</source>
-          <whyCorrect>Life-permitting ranges are extravagantly narrow; a Designer who wants observers leads us to expect that fit — blank indifference does not.</whyCorrect>
+          <reason>A Designer who wants people fits these numbers.</reason>
+          <source>Romans 1:20; fine-tuning (Collins)</source>
+          <whyCorrect>A Designer who wants people fits these numbers.</whyCorrect>
           <whyMisses>
             <miss>A mind wanting observers would not expect life-permitting numbers.</miss>
             <miss>Likelihood arguments are automatically dishonest.</miss>
@@ -267,7 +267,7 @@ Design predicts this cosmos: cosmological constant, nuclear binding, a low-entro
             <choice>Fine-tuning already proves a particular gospel.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Life-permitting ranges are extravagantly narrow; a Designer who wants observers leads us to expect that fit — blank indifference does not.</choice>
+            <choice>A Designer who wants people fits these numbers.</choice>
             <choice>A mind wanting observers would not expect life-permitting numbers.</choice>
             <choice>Likelihood arguments are automatically dishonest.</choice>
           </reasonChoices>
@@ -275,9 +275,9 @@ Design predicts this cosmos: cosmological constant, nuclear binding, a low-entro
       </medium>
       <hard points="15">
         <learn>
-          <hardTeach>Fine-tuning is best explained by a mind that intended a habitable world. Life-permitting ranges are extravagantly narrow; a Designer who wants observers leads us to expect that fit — blank indifference does not. Necessity, chance (often a multiverse — asserted to cancel the surprise — no evidence), or design: hold the Designer.
+          <hardTeach>Fine-tuning is best explained by a mind that intended a habitable world. A Designer who wants people fits these numbers. Necessity, chance (often a multiverse — asserted to cancel the surprise — no evidence), or design: hold the Designer.
 A Designer who wants observers predicts this habitable fit. The narrow ranges are the evidence. Hold the Designer.</hardTeach>
-          <fullTeach>Fine-tuning is best explained by a mind that intended a habitable world. Life-permitting ranges are extravagantly narrow; a Designer who wants observers leads us to expect that fit — blank indifference does not. Necessity, chance (often a multiverse — asserted to cancel the surprise — no evidence), or design: hold the Designer.
+          <fullTeach>Fine-tuning is best explained by a mind that intended a habitable world. A Designer who wants people fits these numbers. Necessity, chance (often a multiverse — asserted to cancel the surprise — no evidence), or design: hold the Designer.
 A Designer who wants observers predicts this habitable fit. The narrow ranges are the evidence. Hold the Designer.</fullTeach>
           <prompt>Place the next stone. Two choices. Leave the overclaims.</prompt>
           <teachOnWrong>Leave the two overclaims. The narrow habitable fit lands a Designer, not which gospel.</teachOnWrong>
@@ -297,9 +297,9 @@ A Designer who wants observers predicts this habitable fit. The narrow ranges ar
         </match>
         <hold onFail="easy">
           <claim>Fine-tuning is best explained by a mind that intended a habitable world.</claim>
-          <reason>Life-permitting ranges are extravagantly narrow; a Designer who wants observers leads us to expect that fit — blank indifference does not.</reason>
-          <source>Likelihood / fine-tuning arguments (Collins). A low-entropy start is an initial condition, not another force dial.</source>
-          <whyCorrect>Life-permitting ranges are extravagantly narrow; a Designer who wants observers leads us to expect that fit — blank indifference does not.</whyCorrect>
+          <reason>A Designer who wants people fits these numbers.</reason>
+          <source>Romans 1:20; fine-tuning (Collins)</source>
+          <whyCorrect>A Designer who wants people fits these numbers.</whyCorrect>
           <whyMisses>
             <miss>A mind wanting observers would not expect life-permitting numbers.</miss>
             <miss>Likelihood arguments are automatically dishonest.</miss>
@@ -311,7 +311,7 @@ A Designer who wants observers predicts this habitable fit. The narrow ranges ar
             <choice>Fine-tuning already proves a particular gospel.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Life-permitting ranges are extravagantly narrow; a Designer who wants observers leads us to expect that fit — blank indifference does not.</choice>
+            <choice>A Designer who wants people fits these numbers.</choice>
             <choice>A mind wanting observers would not expect life-permitting numbers.</choice>
             <choice>Likelihood arguments are automatically dishonest.</choice>
           </reasonChoices>
@@ -319,9 +319,9 @@ A Designer who wants observers predicts this habitable fit. The narrow ranges ar
       </hard>
       <journal id="j-ob-2" title="A mind that intended a habitable world" kicker="Sky Watch" unlockAfter="ob-design" scoreFromHeldTier="true">
         <p>Fine-tuning is best explained by a mind that intended a habitable world.</p>
-        <p>Life-permitting ranges are extravagantly narrow; a Designer who wants observers leads us to expect that fit — blank indifference does not.</p>
+        <p>A Designer who wants people fits these numbers.</p>
         <sources>
-          <source>Likelihood / fine-tuning arguments (Collins). A low-entropy start is an initial condition, not another force dial.</source>
+          <source>Romans 1:20; fine-tuning (Collins)</source>
           <source>Aquinas, ST I, q.2, a.3 (Fifth Way); Psalm 19; Romans 1</source>
         </sources>
       </journal>
@@ -505,7 +505,7 @@ Fine-tuning and “why anything?” are siblings, not twins. One asks why this w
         <hold levelUpTo="medium" onFail="easy">
           <claim>Life’s specified information is a mark of mind.</claim>
           <reason>Cells store coordinated information; that looks like the work of a mind — wonder is rational, and so is more work.</reason>
-          <source>Abiogenesis as an open program; Genesis 1 as theology</source>
+          <source>Genesis 1</source>
           <whyCorrect>Cells store coordinated information; that looks like the work of a mind — wonder is rational, and so is more work.</whyCorrect>
           <whyMisses>
             <miss>The unfinished story means we should end research.</miss>
@@ -551,7 +551,7 @@ Fine-tuning and “why anything?” are siblings, not twins. One asks why this w
         <hold levelUpTo="hard" onFail="easy">
           <claim>Life’s specified information is a mark of mind.</claim>
           <reason>Cells store coordinated information; that looks like the work of a mind — wonder is rational, and so is more work.</reason>
-          <source>Abiogenesis as an open program; Genesis 1 as theology</source>
+          <source>Genesis 1</source>
           <whyCorrect>Cells store coordinated information; that looks like the work of a mind — wonder is rational, and so is more work.</whyCorrect>
           <whyMisses>
             <miss>The unfinished story means we should end research.</miss>
@@ -600,7 +600,7 @@ Life’s information looks like the work of mind. Wonder is rational. So is more
         <hold onFail="easy">
           <claim>Life’s specified information is a mark of mind.</claim>
           <reason>Cells store coordinated information; that looks like the work of a mind — wonder is rational, and so is more work.</reason>
-          <source>Abiogenesis as an open program; Genesis 1 as theology</source>
+          <source>Genesis 1</source>
           <whyCorrect>Cells store coordinated information; that looks like the work of a mind — wonder is rational, and so is more work.</whyCorrect>
           <whyMisses>
             <miss>The unfinished story means we should end research.</miss>
@@ -655,9 +655,9 @@ Life’s information looks like the work of mind. Wonder is rational. So is more
         </match>
         <hold levelUpTo="medium" onFail="easy">
           <claim>The heavens already speak of a Maker; fine-tuning fits that voice.</claim>
-          <reason>Scripture treats the created order as intelligible testimony — design inference and “the heavens declare” land in the same grain.</reason>
+          <reason>The sky speaks of a Maker — the numbers fit that.</reason>
           <source>Psalm 19:1–4; Romans 1:20</source>
-          <whyCorrect>Scripture treats the created order as intelligible testimony — design inference and “the heavens declare” land in the same grain.</whyCorrect>
+          <whyCorrect>The sky speaks of a Maker — the numbers fit that.</whyCorrect>
           <whyMisses>
             <miss>Scripture treats the sky as decoration only.</miss>
             <miss>Design inference and “the heavens declare” cannot share a grain.</miss>
@@ -669,7 +669,7 @@ Life’s information looks like the work of mind. Wonder is rational. So is more
             <choice>Fine-tuning contradicts the psalm.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Scripture treats the created order as intelligible testimony — design inference and “the heavens declare” land in the same grain.</choice>
+            <choice>The sky speaks of a Maker — the numbers fit that.</choice>
             <choice>Scripture treats the sky as decoration only.</choice>
             <choice>Design inference and “the heavens declare” cannot share a grain.</choice>
           </reasonChoices>
@@ -701,9 +701,9 @@ Life’s information looks like the work of mind. Wonder is rational. So is more
         </match>
         <hold levelUpTo="hard" onFail="easy">
           <claim>The heavens already speak of a Maker; fine-tuning fits that voice.</claim>
-          <reason>Scripture treats the created order as intelligible testimony — design inference and “the heavens declare” land in the same grain.</reason>
+          <reason>The sky speaks of a Maker — the numbers fit that.</reason>
           <source>Psalm 19:1–4; Romans 1:20</source>
-          <whyCorrect>Scripture treats the created order as intelligible testimony — design inference and “the heavens declare” land in the same grain.</whyCorrect>
+          <whyCorrect>The sky speaks of a Maker — the numbers fit that.</whyCorrect>
           <whyMisses>
             <miss>Scripture treats the sky as decoration only.</miss>
             <miss>Design inference and “the heavens declare” cannot share a grain.</miss>
@@ -715,7 +715,7 @@ Life’s information looks like the work of mind. Wonder is rational. So is more
             <choice>Fine-tuning contradicts the psalm.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Scripture treats the created order as intelligible testimony — design inference and “the heavens declare” land in the same grain.</choice>
+            <choice>The sky speaks of a Maker — the numbers fit that.</choice>
             <choice>Scripture treats the sky as decoration only.</choice>
             <choice>Design inference and “the heavens declare” cannot share a grain.</choice>
           </reasonChoices>
@@ -728,7 +728,7 @@ The heavens declare the glory of God, and the sky above proclaims his handiwork.
           <fullTeach>Psalm 19:1–4; Romans 1:20. Fine-tuning fits that voice.
 The heavens declare the glory of God, and the sky above proclaims his handiwork.</fullTeach>
           <prompt>Which notes belong in a careful night of looking?</prompt>
-          <teachOnWrong>Scripture treats the created order as intelligible testimony — design inference and “the heavens declare” land in the same grain. Keep that voice; toss the false choice.</teachOnWrong>
+          <teachOnWrong>The sky speaks of a Maker — the numbers fit that. Keep that voice; toss the false choice.</teachOnWrong>
           <challengeTiles>
             <keep>The heavens already speak of a Maker.</keep>
             <keep>Fine-tuning fits the voice the heavens already speak.</keep>
@@ -750,9 +750,9 @@ The heavens declare the glory of God, and the sky above proclaims his handiwork.
         </match>
         <hold onFail="easy">
           <claim>The heavens already speak of a Maker; fine-tuning fits that voice.</claim>
-          <reason>Scripture treats the created order as intelligible testimony — design inference and “the heavens declare” land in the same grain.</reason>
+          <reason>The sky speaks of a Maker — the numbers fit that.</reason>
           <source>Psalm 19:1–4; Romans 1:20</source>
-          <whyCorrect>Scripture treats the created order as intelligible testimony — design inference and “the heavens declare” land in the same grain.</whyCorrect>
+          <whyCorrect>The sky speaks of a Maker — the numbers fit that.</whyCorrect>
           <whyMisses>
             <miss>Scripture treats the sky as decoration only.</miss>
             <miss>Design inference and “the heavens declare” cannot share a grain.</miss>
@@ -764,7 +764,7 @@ The heavens declare the glory of God, and the sky above proclaims his handiwork.
             <choice>Fine-tuning contradicts the psalm.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Scripture treats the created order as intelligible testimony — design inference and “the heavens declare” land in the same grain.</choice>
+            <choice>The sky speaks of a Maker — the numbers fit that.</choice>
             <choice>Scripture treats the sky as decoration only.</choice>
             <choice>Design inference and “the heavens declare” cannot share a grain.</choice>
           </reasonChoices>

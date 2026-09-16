@@ -23,6 +23,7 @@ import {
   MIN_BONUS_PLANT,
   pathLetters,
   plantCandidates,
+  snapFingerPath,
   tryAddToPath,
 } from '../src/lib/gemSearch.ts'
 import {
@@ -115,9 +116,86 @@ const fatherBoard = buildGemPuzzle('ph-father')
 assert.ok(fatherBoard.planted.length >= MIN_BONUS_PLANT, 'father plants several extras')
 assert.equal(isBonusSpelling('BED', fatherBoard), true, 'Bed stays in the bonus dict')
 assert.equal(isBonusSpelling('QQQ', fatherBoard), false)
-assert.equal(isBonusSpelling('FAT', fatherBoard), false, 'FAT is a piece of FATHER')
+assert.equal(isBonusSpelling('FAT', fatherBoard), false, 'FAT stays on the rude skip list')
 assert.equal(isBonusSpelling('NEIGHBOR', fatherBoard), false, '7+ letters stay off the bonus band')
 assert.equal(isBonusSpelling('NUDE', fatherBoard), false, 'rude extras do not score')
+assert.ok(COMMON_BONUS_WORDS.has('GET'), 'GET is in the shipped bonus dictionary')
+assert.ok(COMMON_BONUS_WORDS.has('HER'), 'HER is in the shipped bonus dictionary')
+assert.equal(isKidFriendlyBonusWord('GET'), true)
+assert.equal(isKidFriendlyBonusWord('HER'), true)
+assert.equal(isBonusSpelling('GET', fatherBoard), true, 'GET is not skipped as too common')
+assert.equal(isBonusSpelling('HER', fatherBoard), true, 'HER is not skipped as too common')
+
+function lettersFromRows(rows) {
+  return Array.from({ length: 8 }, (_, r) =>
+    Array.from({ length: 8 }, (_, c) => rows[r]?.[c] ?? 'X'),
+  )
+}
+
+function puzzleFrom(letters, words = []) {
+  return {
+    id: 'get-her',
+    size: 8,
+    words,
+    letters,
+    paths: {},
+    bonusPool: [],
+    bonus: [],
+    planted: [],
+    bonusPaths: {},
+  }
+}
+
+const nestedBoard = puzzleFrom(lettersFromRows(['FATHERXX', 'TARGETXX']), [
+  { id: 'idea-father', text: 'FATHER', label: 'Father', kind: 'idea' },
+  { id: 'idea-target', text: 'TARGET', label: 'Target', kind: 'idea' },
+])
+const herPath = [
+  { r: 0, c: 3 },
+  { r: 0, c: 4 },
+  { r: 0, c: 5 },
+]
+const getPath = [
+  { r: 1, c: 3 },
+  { r: 1, c: 4 },
+  { r: 1, c: 5 },
+]
+assert.equal(pathLetters(herPath, nestedBoard.letters), 'HER')
+assert.equal(pathLetters(getPath, nestedBoard.letters), 'GET')
+assert.equal(isBonusSpelling('HER', nestedBoard), true, 'HER scores even inside FATHER')
+assert.equal(isBonusSpelling('GET', nestedBoard), true, 'GET scores even inside TARGET')
+assert.equal(matchBonusWord(herPath, nestedBoard, [])?.text, 'HER')
+assert.equal(matchBonusWord(getPath, nestedBoard, [])?.text, 'GET')
+assert.equal(matchBonusWord([...herPath].reverse(), nestedBoard, [])?.text, 'HER')
+assert.equal(matchBonusWord([...getPath].reverse(), nestedBoard, [])?.text, 'GET')
+assert.equal(matchGemWord(herPath, nestedBoard, []), null)
+assert.equal(matchGemWord(getPath, nestedBoard, []), null)
+const wobbleGet = [
+  { r: 1, c: 3 },
+  { r: 1, c: 4 },
+  { r: 2, c: 4 },
+  { r: 1, c: 5 },
+]
+const wobbleHer = [
+  { r: 0, c: 3 },
+  { r: 1, c: 3 },
+  { r: 0, c: 4 },
+  { r: 0, c: 5 },
+]
+assert.equal(pathLetters(snapFingerPath(wobbleGet, 8), nestedBoard.letters), 'GET')
+assert.equal(pathLetters(snapFingerPath(wobbleHer, 8), nestedBoard.letters), 'HER')
+assert.equal(matchBonusWord(wobbleGet, nestedBoard, [])?.text, 'GET', 'wobbly GET still scores')
+assert.equal(matchBonusWord(wobbleHer, nestedBoard, [])?.text, 'HER', 'wobbly HER still scores')
+assert.equal(isStraightPath(wobbleGet), false)
+assert.equal(isStraightPath(snapFingerPath(wobbleGet, 8)), true)
+const missPath = [
+  { r: 0, c: 0 },
+  { r: 0, c: 1 },
+  { r: 0, c: 2 },
+]
+assert.equal(pathLetters(missPath, lettersFromRows(['QQQXXXXX'])), 'QQQ')
+assert.equal(isBonusSpelling('QQQ', puzzleFrom(lettersFromRows(['QQQXXXXX']))), false)
+assert.equal(matchBonusWord(missPath, puzzleFrom(lettersFromRows(['QQQXXXXX'])), []), null)
 const fatherSample = fatherBoard.planted[0]
 assert.ok(fatherSample, 'father has a planted extra')
 const fatherSamplePath = fatherBoard.bonusPaths[fatherSample.id] ?? findStraightSpelling(fatherBoard.letters, fatherSample.text)
@@ -256,6 +334,18 @@ assert.match(playSrc, /EASY\.bonusMissWord/)
 assert.match(playSrc, /EASY\.bonusMissStraight/)
 assert.match(playSrc, /EASY\.missPenalty/)
 assert.match(playSrc, /miss-banner/)
+assert.match(playSrc, /nextPath\.length >= 3/)
+assert.match(playSrc, /snapFingerPath/)
+assert.match(playSrc, /gem-stage/)
+assert.match(
+  playSrc,
+  /className="gem-stage"[\s\S]*miss-banner[\s\S]*className="gem-board"/,
+)
+const gemCss = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
+assert.match(gemCss, /play\.is-gem-search\.is-shake \{\s*animation: none/)
+assert.match(gemCss, /gem-stage \.miss-banner/)
+assert.match(gemCss, /gem-overlay-pop/)
+assert.match(gemCss, /pointer-events: none/)
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
   /Not a bonus word/,

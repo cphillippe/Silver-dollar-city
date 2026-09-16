@@ -8,33 +8,33 @@ import {
 } from 'react'
 import { EASY, easyWhoWhere } from '../../lib/easy'
 import {
-  canHelp,
   canWin,
+  MAZE_BEATS,
   MAZE_COLS,
+  MAZE_FIND_SCORE,
   MAZE_HURT,
   MAZE_INN,
-  MAZE_ITEMS,
   MAZE_ROWS,
   MAZE_START,
+  mazeBeatDone,
   mazeBeatsOpened,
   mazeBlockedHint,
   mazeCaption,
   mazeGoal,
   isMazeRoad,
-  mazeItemAt,
   mazeKey,
   mazeSame,
+  MAZE_CARE_WHY,
   MAZE_HELP_SCORE,
   MAZE_INN_SCORE,
-  MAZE_ITEM_SCORE,
   ROAD_MAZE_AGAIN,
   ROAD_MAZE_CLAIM,
   ROAD_MAZE_HINT,
   ROAD_MAZE_WIN,
+  isMazePathSwipe,
   shortestMazePath,
   swipeStep,
   type MazeCoord,
-  type MazeItemId,
 } from '../../lib/roadMaze'
 import { mazeWinBeat } from '../../lib/successBeat'
 import { GEM_BURST, playGemPop, prefersReducedMotion } from '../../lib/juice'
@@ -66,7 +66,7 @@ export function RoadMazePlay({
   const home = easyWhoWhere(lineId)
   const reduced = prefersReducedMotion()
   const [at, setAt] = useState<MazeCoord>(MAZE_START)
-  const [got, setGot] = useState<MazeItemId[]>([])
+  const [found, setFound] = useState(false)
   const [helped, setHelped] = useState(false)
   const [won, setWon] = useState(false)
   const [toast, setToast] = useState('')
@@ -79,28 +79,50 @@ export function RoadMazePlay({
   const [walking, setWalking] = useState(false)
   const [score, setScore] = useState(0)
   const [popAt, setPopAt] = useState('')
-  const [kitPop, setKitPop] = useState('')
+  const [beatPop, setBeatPop] = useState('')
   const [comboFlash, setComboFlash] = useState(0)
   const atRef = useRef(at)
-  const gotRef = useRef(got)
+  const foundRef = useRef(found)
   const helpedRef = useRef(helped)
   const wonRef = useRef(won)
   const walkRef = useRef(0)
-  const swipe = useRef<{ x: number; y: number } | null>(null)
+  const playRef = useRef<HTMLDivElement>(null)
+  const swipe = useRef<{ x: number; y: number; scroll: number; onRoad: boolean } | null>(null)
   const usedTap = useRef(false)
+  const peeking = useRef(false)
+  const peekTimer = useRef(0)
   const misses = useRef(0)
   const comboRef = useRef(0)
   const openedRef = useRef(1)
   const cleared = useRef(false)
 
-  const opened = mazeBeatsOpened(got, helped, won)
-  const goal = mazeGoal(got, helped)
-  const caption = mazeCaption(got, helped, won)
+  const opened = mazeBeatsOpened(found, helped, won)
+  const goal = mazeGoal(found, helped)
+  const caption = mazeCaption(found, helped, won)
   const latest = panels[Math.min(opened, panels.length) - 1]
 
   useEffect(() => {
     atRef.current = at
   }, [at])
+
+  useEffect(() => {
+    const node = playRef.current
+    const markPeek = () => {
+      peeking.current = true
+      swipe.current = null
+      window.clearTimeout(peekTimer.current)
+      peekTimer.current = window.setTimeout(() => {
+        peeking.current = false
+      }, 200)
+    }
+    node?.addEventListener('scroll', markPeek, { passive: true })
+    window.addEventListener('scroll', markPeek, { passive: true })
+    return () => {
+      node?.removeEventListener('scroll', markPeek)
+      window.removeEventListener('scroll', markPeek)
+      window.clearTimeout(peekTimer.current)
+    }
+  }, [])
 
   useEffect(() => {
     if (opened === openedRef.current) return
@@ -128,26 +150,26 @@ export function RoadMazePlay({
     flashToast(goal.hint)
   }
 
-  function juiceCollect(cell: MazeCoord, itemId: MazeItemId) {
+  function juiceBeat(cell: MazeCoord, beatId: string, pts: number) {
     comboRef.current += 1
     const next = comboRef.current
     if (next >= 2) {
       setComboFlash(next)
       window.setTimeout(() => setComboFlash(0), 700)
     }
-    setScore((pts) => pts + MAZE_ITEM_SCORE)
+    setScore((ptsNow) => ptsNow + pts)
     setPopAt(mazeKey(cell))
-    setKitPop(itemId)
-    setPlusFlash(`+${MAZE_ITEM_SCORE}`)
+    setBeatPop(beatId)
+    setPlusFlash(`+${pts}`)
     window.setTimeout(() => setPopAt(''), 420)
-    window.setTimeout(() => setKitPop(''), 480)
+    window.setTimeout(() => setBeatPop(''), 480)
     window.setTimeout(() => setPlusFlash(''), 800)
   }
 
   function replay() {
     window.clearTimeout(walkRef.current)
     atRef.current = MAZE_START
-    gotRef.current = []
+    foundRef.current = false
     helpedRef.current = false
     wonRef.current = false
     cleared.current = false
@@ -155,7 +177,7 @@ export function RoadMazePlay({
     comboRef.current = 0
     openedRef.current = 1
     setAt(MAZE_START)
-    setGot([])
+    setFound(false)
     setHelped(false)
     setWon(false)
     setWinStamp(false)
@@ -167,7 +189,7 @@ export function RoadMazePlay({
     setFlipping(null)
     setScore(0)
     setPopAt('')
-    setKitPop('')
+    setBeatPop('')
     setComboFlash(0)
   }
 
@@ -180,34 +202,26 @@ export function RoadMazePlay({
     window.setTimeout(() => setShake(false), 360)
   }
 
-  function collectHere(cell: MazeCoord, nextGot: MazeItemId[], nextHelped: boolean) {
-    const item = mazeItemAt(cell)
-    if (item && !nextGot.includes(item.id)) {
-      const bag = [...nextGot, item.id]
-      gotRef.current = bag
-      setGot(bag)
-      playGemPop('bonus')
-      juiceCollect(cell, item.id)
-      flashToast(item.yes, item.why)
-      return bag
-    }
-    if (mazeSame(cell, MAZE_HURT) && !nextHelped && canHelp(nextGot)) {
-      helpedRef.current = true
-      setHelped(true)
-      playGemPop('find')
-      setScore((pts) => pts + MAZE_HELP_SCORE)
-      setPlusFlash(`+${MAZE_HELP_SCORE}`)
-      setPopAt(mazeKey(cell))
-      window.setTimeout(() => setPopAt(''), 420)
-      window.setTimeout(() => setPlusFlash(''), 800)
-      flashToast('Yes · You stopped.', 'You bind him and take him on.')
-      return nextGot
-    }
-    return nextGot
+  function markFound(cell: MazeCoord) {
+    if (foundRef.current) return
+    foundRef.current = true
+    setFound(true)
+    playGemPop('find')
+    juiceBeat(cell, 'hurt', MAZE_FIND_SCORE)
+    flashToast('You found him.', 'A man is hurt on the road.')
   }
 
-  function finishIfWon(cell: MazeCoord, bag: MazeItemId[], nextHelped: boolean) {
-    if (!canWin(bag, nextHelped, cell) || wonRef.current) return
+  function markHelped(cell: MazeCoord) {
+    if (helpedRef.current || !foundRef.current) return
+    helpedRef.current = true
+    setHelped(true)
+    playGemPop('bonus')
+    juiceBeat(cell, 'help', MAZE_HELP_SCORE)
+    flashToast('You help him.', MAZE_CARE_WHY)
+  }
+
+  function finishIfWon(cell: MazeCoord, nextHelped: boolean) {
+    if (!canWin(nextHelped, cell) || wonRef.current) return
     wonRef.current = true
     setWon(true)
     setToast('')
@@ -224,13 +238,12 @@ export function RoadMazePlay({
   function landOn(cell: MazeCoord) {
     atRef.current = cell
     setAt(cell)
-    const bag = collectHere(cell, gotRef.current, helpedRef.current)
-    if (mazeSame(cell, MAZE_HURT) && !helpedRef.current && !canHelp(bag)) {
-      flashToast('Get oil and cloth first.')
-    } else if (mazeSame(cell, MAZE_INN) && !canWin(bag, helpedRef.current, cell)) {
-      flashToast(mazeBlockedHint(cell, bag, helpedRef.current))
+    if (mazeSame(cell, MAZE_HURT) && !foundRef.current) {
+      markFound(cell)
+    } else if (mazeSame(cell, MAZE_INN) && !canWin(helpedRef.current, cell)) {
+      flashToast(mazeBlockedHint(cell, foundRef.current, helpedRef.current))
     }
-    finishIfWon(cell, bag, helpedRef.current)
+    finishIfWon(cell, helpedRef.current)
   }
 
   function walkPath(path: MazeCoord[]) {
@@ -257,14 +270,23 @@ export function RoadMazePlay({
     tick()
   }
 
+  function playScroll() {
+    return playRef.current?.scrollTop ?? window.scrollY
+  }
+
   function tryGo(target: MazeCoord) {
-    if (wonRef.current || walking) return
+    if (wonRef.current || walking || peeking.current) return
     if (!isFiniteCell(target)) return
     const here = atRef.current
-    if (mazeSame(here, target)) return
+    if (mazeSame(here, target)) {
+      if (mazeSame(target, MAZE_HURT) && foundRef.current && !helpedRef.current) {
+        markHelped(target)
+      }
+      return
+    }
     const path = shortestMazePath(here, target)
     if (!path) {
-      blocked(mazeBlockedHint(target, gotRef.current, helpedRef.current))
+      blocked(mazeBlockedHint(target, foundRef.current, helpedRef.current))
       return
     }
     walkPath(path)
@@ -278,7 +300,15 @@ export function RoadMazePlay({
   }
 
   function onBoardDown(event: ReactPointerEvent<HTMLDivElement>) {
-    swipe.current = { x: event.clientX, y: event.clientY }
+    const hit = event.target
+    const cell = hit instanceof Element ? hit.closest('[data-maze-cell]') : null
+    const onRoad = cell instanceof HTMLElement && cell.classList.contains('is-road')
+    swipe.current = {
+      x: event.clientX,
+      y: event.clientY,
+      scroll: playScroll(),
+      onRoad,
+    }
   }
 
   function onBoardUp(event: ReactPointerEvent<HTMLDivElement>) {
@@ -288,10 +318,19 @@ export function RoadMazePlay({
       usedTap.current = false
       return
     }
-    if (!start || walking || wonRef.current) return
+    if (!start || walking || wonRef.current || peeking.current) return
     const dx = event.clientX - start.x
     const dy = event.clientY - start.y
-    if (Math.abs(dx) < 24 && Math.abs(dy) < 24) return
+    if (
+      !isMazePathSwipe({
+        dx,
+        dy,
+        scrolled: playScroll() - start.scroll,
+        startedOnRoad: start.onRoad,
+      })
+    ) {
+      return
+    }
     const step =
       Math.abs(dx) > Math.abs(dy)
         ? swipeStep(atRef.current, 0, dx)
@@ -321,7 +360,8 @@ export function RoadMazePlay({
 
   return (
     <div
-      className={`play is-road-maze ${shake ? 'is-shake' : ''} ${won ? 'is-win' : ''} ${helped ? 'is-helped' : ''}`}
+      ref={playRef}
+      className={`play is-road-maze ${shake ? 'is-shake' : ''} ${won ? 'is-win' : ''} ${helped ? 'is-helped' : ''} ${found ? 'is-found' : ''}`}
       style={{ ['--maze-cols' as string]: MAZE_COLS, ['--maze-rows' as string]: MAZE_ROWS }}
     >
       <p className="sort-how">{EASY.mazeHunt}</p>
@@ -345,14 +385,28 @@ export function RoadMazePlay({
       <p className="story-caption" role="status">
         {won ? ROAD_MAZE_CLAIM : (latest?.text ?? caption)}
       </p>
-      <ul className="maze-kit" aria-label="Help to collect">
-        {MAZE_ITEMS.map((item) => (
-          <li key={item.id} className={`maze-kit-item is-${item.id} ${got.includes(item.id) ? 'is-got' : ''} ${kitPop === item.id ? 'is-pop' : ''}`}>
-            <span className="maze-kit-icon" aria-hidden />
-            <span>{item.label}</span>
-          </li>
-        ))}
+      <ul className="maze-beats" aria-label="Mercy on the road">
+        {MAZE_BEATS.map((beat) => {
+          const done = mazeBeatDone(beat.id, found, helped, won)
+          const now = goal.kind === beat.id
+          return (
+            <li
+              key={beat.id}
+              className={`maze-beat is-${beat.id} ${done ? 'is-got' : ''} ${now ? 'is-now' : ''} ${beatPop === beat.id ? 'is-pop' : ''}`}
+            >
+              {beat.id === 'hurt' ? (
+                <img className="maze-beat-face" src={panelHurt} alt="" draggable={false} />
+              ) : beat.id === 'help' ? (
+                <img className="maze-beat-face" src={panelHelp} alt="" draggable={false} />
+              ) : (
+                <span className="maze-beat-inn" aria-hidden />
+              )}
+              <span>{beat.label}</span>
+            </li>
+          )
+        })}
       </ul>
+      <div className="maze-stage">
       {toast ? (
         <p className={`match-toast gem-toast is-yes`} role="status">
           <strong>{toast}</strong>
@@ -389,9 +443,8 @@ export function RoadMazePlay({
             const here = mazeSame(at, cell)
             const hurt = mazeSame(cell, MAZE_HURT)
             const inn = mazeSame(cell, MAZE_INN)
-            const item = mazeItemAt(cell)
-            const taken = item ? got.includes(item.id) : false
             const glow = hintCell === mazeKey(cell)
+            const helpCue = hurt && found && here && !helped
             return (
               <button
                 key={mazeKey(cell)}
@@ -402,28 +455,27 @@ export function RoadMazePlay({
                 data-r={r}
                 data-c={c}
                 onPointerDown={(event) => {
-                  if (!road) {
-                    event.preventDefault()
-                    blocked(ROAD_MAZE_HINT)
-                    return
-                  }
+                  if (!road) return
                   onCellDown(event, cell)
                 }}
-                className={`maze-cell ${road ? 'is-road' : 'is-rock'} ${here ? 'is-here' : ''} ${hurt ? 'is-hurt' : ''} ${inn ? 'is-inn' : ''} ${item && !taken ? `is-item is-${item.id}` : ''} ${glow ? 'is-hint' : ''} ${popAt === mazeKey(cell) ? 'is-pop' : ''}`}
+                className={`maze-cell ${road ? 'is-road' : 'is-rock'} ${here ? 'is-here' : ''} ${hurt ? 'is-hurt' : ''} ${inn ? 'is-inn' : ''} ${helpCue ? 'is-help-cue' : ''} ${glow ? 'is-hint' : ''} ${popAt === mazeKey(cell) ? 'is-pop' : ''}`}
               >
                 {here ? (
                   <span className="maze-actor is-you">
                     <img src={panelHelp} alt="" draggable={false} />
                   </span>
                 ) : null}
-                {hurt && !here && !helped ? (
-                  <span className="maze-actor is-hurt">
+                {hurt && !helped ? (
+                  <span className={`maze-actor is-hurt ${here ? 'is-with-you' : ''}`}>
                     <img src={panelHurt} alt="" draggable={false} />
                   </span>
                 ) : null}
                 {helped && here ? <span className="maze-carry" aria-hidden /> : null}
                 {inn ? <span className="maze-inn" aria-hidden /> : null}
-                {item && !taken && !here ? <span className={`maze-drop is-${item.id}`} aria-hidden /> : null}
+                {hurt && !helped ? (
+                  <span className="maze-cell-label">{helpCue ? 'Help' : 'Hurt man'}</span>
+                ) : null}
+                {inn ? <span className="maze-cell-label">Inn</span> : null}
                 {popAt === mazeKey(cell)
                   ? POP_SHARDS.map((i) => (
                       <i key={i} className="maze-shard" style={{ ['--i' as string]: i }} />
@@ -444,11 +496,11 @@ export function RoadMazePlay({
           </div>
         ) : null}
       </div>
+      </div>
       <p className={`match-score ${plusFlash ? 'is-juice' : ''}`}>
         {score}
         {' · '}
-        {got.length} / 3 help
-        {helped ? ' · he is with you' : ''}
+        {won ? 'Safe at the inn' : helped ? 'He is with you' : found ? 'Help him' : 'Find the hurt man'}
       </p>
       {won ? (
         <>

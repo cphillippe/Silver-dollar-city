@@ -221,6 +221,16 @@ assert.ok(
   settingsSrc.indexOf('eyebrow">Look') < settingsSrc.indexOf('Export JSON'),
   'Look picker should sit above export so a cold player can switch themes',
 )
+assert.match(settingsSrc, /Developer · mini-game jumps/)
+assert.match(settingsSrc, /settings-debug/)
+assert.ok(
+  settingsSrc.indexOf('Danger zone') < settingsSrc.indexOf('Developer · mini-game jumps'),
+  'Debug is buried with Reset, after Danger zone',
+)
+assert.doesNotMatch(
+  readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8'),
+  /Developer · mini-game jumps/,
+)
 
 const shellSrc = readFileSync(new URL('../src/components/AppShell.tsx', import.meta.url), 'utf8')
 assert.match(shellSrc, /view\.name === 'journal'/)
