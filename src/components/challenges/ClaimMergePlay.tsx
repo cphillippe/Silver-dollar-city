@@ -119,6 +119,7 @@ export function ClaimMergePlay({
       } else if (event.kind === 'win') {
         playGemPop('win')
         setWinStamp(true)
+        window.setTimeout(() => setWinStamp(false), prefersReducedMotion() ? 700 : 1200)
         if (!cleared.current) {
           cleared.current = true
           onClear?.()
@@ -233,8 +234,7 @@ export function ClaimMergePlay({
     <div
       className={`play is-claim-merge ${shake ? 'is-shake' : ''} ${view.won ? 'is-win' : ''} ${view.overflow ? 'is-full' : ''} ${comboFlash > 1 ? 'is-combo' : ''}`}
     >
-      <WinBurst play={winStamp} stamp={CLAIM_MERGE_WIN} />
-      <p className="sort-how">{EASY.mergeHunt}</p>
+      {view.won ? null : <p className="sort-how">{EASY.mergeHunt}</p>}
       <p className="story-kicker">
         {home.who} · {home.place}
       </p>
@@ -242,11 +242,15 @@ export function ClaimMergePlay({
         <p className="merge-score" aria-live="polite">
           {view.score}
         </p>
-        <div className="merge-next" aria-label="Next candy">
-          <span className={`merge-mini hue-${nextSkin.hue}`}>{nextSkin.rank === 0 ? '' : nextSkin.label}</span>
-          <span className="merge-next-label">Next</span>
-          <span className={`merge-mini is-preview hue-${previewSkin.hue}`}>{previewSkin.rank === 0 ? '' : previewSkin.label}</span>
-        </div>
+        {view.won ? (
+          <p className="merge-next-label">Creed</p>
+        ) : (
+          <div className="merge-next" aria-label="Next candy">
+            <span className={`merge-mini hue-${nextSkin.hue}`}>{nextSkin.rank === 0 ? '' : nextSkin.label}</span>
+            <span className="merge-next-label">Next</span>
+            <span className={`merge-mini is-preview hue-${previewSkin.hue}`}>{previewSkin.rank === 0 ? '' : previewSkin.label}</span>
+          </div>
+        )}
       </div>
       {comboFlash > 1 ? (
         <p className="bonus-banner merge-combo" role="status">
@@ -262,12 +266,6 @@ export function ClaimMergePlay({
           {plus}
         </p>
       ) : null}
-      {view.won ? (
-        <p className="match-yes" role="status">
-          <strong>{takeaway.title}</strong>
-          <span>{takeaway.why}</span>
-        </p>
-      ) : null}
       <div
         ref={bowlRef}
         className="merge-bowl"
@@ -281,6 +279,7 @@ export function ClaimMergePlay({
         onKeyDown={onBowlKey}
         style={{ ['--bowl-w' as string]: `${BOWL_WIDTH}px`, ['--bowl-h' as string]: `${BOWL_HEIGHT}px` }}
       >
+        <WinBurst play={winStamp} stamp={CLAIM_MERGE_WIN} />
         <span className="merge-danger" style={{ top: `${(DANGER_Y / BOWL_HEIGHT) * 100}%` }} />
         {!view.won && !view.overflow ? (
           <span
@@ -322,21 +321,26 @@ export function ClaimMergePlay({
         ))}
       </ol>
       {view.won ? (
-        <div className="cta-dock">
-          <button
-            type="button"
-            className="btn primary xl snap-bins"
-            onClick={() => onEasyStop?.('hold')}
-          >
-            {EASY.holdNext}
-          </button>
-          <button type="button" className="btn xl" onClick={() => onEasyStop?.('home')}>
-            {EASY.home}
-          </button>
-          <button type="button" className="text-link" onClick={replay}>
-            One more bowl
-          </button>
-        </div>
+        <>
+          <p className="match-yes" role="status">
+            <strong>{takeaway.why}</strong>
+          </p>
+          <div className="cta-dock">
+            <button
+              type="button"
+              className="btn primary xl snap-bins"
+              onClick={() => onEasyStop?.('hold')}
+            >
+              {EASY.holdNext}
+            </button>
+            <button type="button" className="btn xl" onClick={() => onEasyStop?.('home')}>
+              {EASY.home}
+            </button>
+            <button type="button" className="text-link" onClick={replay}>
+              One more bowl
+            </button>
+          </div>
+        </>
       ) : view.overflow ? (
         <div className="cta-dock">
           <p className="quiet">{CLAIM_MERGE_HINT}</p>

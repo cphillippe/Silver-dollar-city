@@ -9129,6 +9129,7 @@ html[data-easy='on'] .next-tap {
   overflow: hidden;
   width: min(100%, 390px);
   aspect-ratio: 360 / 520;
+  max-height: min(52vh, 430px);
   margin: 0 auto;
   border-radius: 28px 28px 42px 42px;
   touch-action: none;
@@ -9278,9 +9279,22 @@ html[data-easy='on'] .next-tap {
   animation: shake 0.36s ease;
 }
 
+.play.is-claim-merge.is-win .merge-bowl {
+  max-height: min(38vh, 320px);
+}
+
+.play.is-claim-merge .merge-bowl .win-burst {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+}
+
 .play.is-claim-merge .win-stamp-wrap {
   position: absolute;
-  top: 18%;
+  top: 28%;
+  left: 0;
+  right: 0;
 }
 
 .play.is-claim-merge.is-win .match-yes {
