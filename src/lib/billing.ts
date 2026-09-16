@@ -1,8 +1,9 @@
 /**
- * Production-shaped billing. Pages cannot charge unless a Play Billing
- * plugin AND VITE_PLAY_BILLING are present. Demo purchases write a receipt
- * + the same grant Play will send later. Restore re-applies receipts, then
- * asks the plugin when it can charge. No store money until that connect.
+ * Production-shaped billing. Pages cannot charge unless a store plugin
+ * AND the matching flag (VITE_PLAY_BILLING / VITE_STOREKIT) are present.
+ * Demo purchases write a receipt + the same grant Play / App Store will
+ * send later. Restore re-applies receipts, then asks the plugin when it
+ * can charge. No store money until that connect.
  */
 
 import {
@@ -26,6 +27,7 @@ import {
   emptyCommerce,
   type CommerceState,
 } from './commerce.ts'
+import { storeSurface } from './nativeStore.ts'
 
 export const RECEIPTS_KEY = 'silver-city-receipts-v1'
 
@@ -52,7 +54,7 @@ export interface PurchaseReceipt {
   packId?: string
   purchasedAt: string
   token: string
-  source: 'web-demo' | 'play-demo' | 'play'
+  source: 'web-demo' | 'play-demo' | 'play' | 'app-store-demo' | 'app-store'
 }
 
 export type PurchaseStatus = 'purchased' | 'already' | 'canceled' | 'unavailable'
@@ -68,14 +70,14 @@ const EMPTY_RECEIPTS: PurchaseReceipt[] = []
 let receiptMemory: PurchaseReceipt[] = EMPTY_RECEIPTS
 
 function billingSource(): PurchaseReceipt['source'] {
-  if (typeof window === 'undefined') return 'web-demo'
-  const cap = (
-    window as unknown as {
-      Capacitor?: { isNativePlatform?: () => boolean }
-    }
-  ).Capacitor
-  if (cap?.isNativePlatform?.()) return 'play-demo'
+  const surface = storeSurface()
+  if (surface === 'play') return 'play-demo'
+  if (surface === 'app-store') return 'app-store-demo'
   return 'web-demo'
+}
+
+function paidSource(): PurchaseReceipt['source'] {
+  return storeSurface() === 'app-store' ? 'app-store' : 'play'
 }
 
 export function cannotCharge(): boolean {
@@ -121,7 +123,13 @@ function isSafeReceipt(raw: unknown): raw is PurchaseReceipt {
   if (value.kind !== 'remove-ads' && value.kind !== 'pack') return false
   if (typeof value.purchasedAt !== 'string' || value.purchasedAt.length > 40) return false
   if (typeof value.token !== 'string' || value.token.length > 80) return false
-  if (value.source !== 'web-demo' && value.source !== 'play-demo' && value.source !== 'play') {
+  if (
+    value.source !== 'web-demo' &&
+    value.source !== 'play-demo' &&
+    value.source !== 'play' &&
+    value.source !== 'app-store-demo' &&
+    value.source !== 'app-store'
+  ) {
     return false
   }
   if (value.kind === 'pack' && typeof value.packId !== 'string') return false
@@ -251,7 +259,7 @@ export async function checkoutOffer(offer: BillingOffer): Promise<PurchaseResult
       packId: product.packId,
       purchasedAt: new Date().toISOString(),
       token: paid.token,
-      source: 'play',
+      source: paidSource(),
     }
     appendReceipt(receipt)
     return { status: 'purchased', cannotCharge: false, receipt, commerce: applyReceipt(receipt) }
@@ -283,7 +291,7 @@ export async function restoreFromStore(): Promise<CommerceState> {
           packId: product.packId,
           purchasedAt: new Date().toISOString(),
           token: row.token,
-          source: 'play',
+          source: paidSource(),
         }
         appendReceipt(receipt)
         applyReceipt(receipt)
