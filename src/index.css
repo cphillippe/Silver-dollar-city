@@ -9482,13 +9482,23 @@ html[data-easy='on'] .next-tap {
   inset: 0;
   z-index: 6;
   pointer-events: none;
+  overflow: visible;
+}
+
+.play.is-claim-merge .win-flash,
+.play.is-claim-merge .win-ring {
+  position: absolute;
 }
 
 .play.is-claim-merge .win-stamp-wrap {
   position: absolute;
-  top: 28%;
-  left: 0;
-  right: 0;
+  top: 16%;
+  left: 50%;
+  right: auto;
+  width: max-content;
+  max-width: 92%;
+  transform: translateX(-50%);
+  z-index: 8;
 }
 
 .play.is-claim-merge.is-win .match-yes {
