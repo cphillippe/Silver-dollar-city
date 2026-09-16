@@ -389,7 +389,7 @@ const blastSrc = readFileSync(
 )
 assert.match(blastSrc, /EASY\.sayFrom/)
 assert.match(blastSrc, /source/)
-assert.match(blastSrc, /why-claim[\s\S]*?EASY\.sayFrom[\s\S]*?\{locked/)
+assert.match(blastSrc, /why-claim[\s\S]*?\{locked[\s\S]*?EASY\.sayFrom/)
 assert.match(blastSrc, /MatchTakeaway/)
 assert.doesNotMatch(blastSrc, /One more/)
 
