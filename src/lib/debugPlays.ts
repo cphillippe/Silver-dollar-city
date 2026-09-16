@@ -47,6 +47,7 @@ export const DEBUG_LAYER_LINES = {
   'source-dig': 'wb-women',
   'names-dig': 'daily-names',
   'stone-dig': 'sc-tacitus',
+  'ink-dig': 'ic-trajan',
   'why-blast': ROAD_MAZE_LINE,
 } as const
 
