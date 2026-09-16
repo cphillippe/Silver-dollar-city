@@ -8,6 +8,7 @@ import {
 } from 'react'
 import { EASY, easyWhoWhere } from '../../lib/easy'
 import { fatherWinBeat } from '../../lib/successBeat'
+import { MatchTakeaway } from '../HeldTriad'
 import {
   applyDash,
   beatsOpened,
@@ -395,10 +396,7 @@ export function FatherRunPlay({
         </div>
       ) : phase === 'hug' ? (
         <>
-        <p className="match-yes" role="status">
-          <strong>{fatherWinBeat().title}</strong>
-          <span>{fatherWinBeat().why}</span>
-        </p>
+        <MatchTakeaway lineId={lineId} title={fatherWinBeat().title} />
         <div className="cta-dock">
           <button
             type="button"

@@ -118,6 +118,7 @@ assert.equal(
 
 assert.match(mazeWinBeat().title, /Neighbor/)
 assert.match(mazeWinBeat().why, /hurt man|help/i)
+assert.match(mazeWinBeat().from ?? '', /Luke 10/)
 
 const playSrc = readFileSync(
   new URL('../src/components/challenges/RoadMazePlay.tsx', import.meta.url),
@@ -146,6 +147,7 @@ assert.match(playSrc, /ROAD_MAZE_WIN/)
 assert.match(playSrc, /panel-help/)
 assert.match(playSrc, /panel-hurt/)
 assert.match(playSrc, /mazeWinBeat/)
+assert.match(playSrc, /MatchTakeaway/)
 assert.match(playSrc, /maze-win-art/)
 assert.match(playSrc, /maze-stage/)
 assert.match(playSrc, /isMazePathSwipe/)

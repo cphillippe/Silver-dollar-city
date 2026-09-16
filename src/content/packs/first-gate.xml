@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<areaPack id="first-gate" schemaVersion="3" appVersion="1.4.79" generated="2026-09-16T09:00:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/" title="Why Gate" place="Why Gate" person="Ansel Gate" personId="ansel" plotId="gate">
+<areaPack id="first-gate" schemaVersion="3" appVersion="1.4.80" generated="2026-09-16T09:00:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/" title="Why Gate" place="Why Gate" person="Ansel Gate" personId="ansel" plotId="gate">
   <howToEdit>RUNTIME CONTENT: the game loads this file as the source of truth for this area. Change player-facing text in place inside each &lt;lesson&gt;. Stable id attributes (ph-father, …) are engine keys — do not rename without a migration. Three tiers per fact: &lt;easy easyOrder="N"&gt;, &lt;medium&gt;, and &lt;hard&gt; — each with &lt;learn&gt;, &lt;match&gt;, and &lt;hold&gt;. Easy Learn: shortStory/mainIdea/loci. Medium Learn: mediumTeach (clearer than Hard, richer than Easy). Hard Learn: hardTeach/fullTeach. Held claim·reason·source stay plain and identical on all three. Hold level-up: see hold @levelUpTo / @onFail and index &lt;holdRules&gt;. Empty optional elements are intentional. Escape &amp; &lt; &gt; in text.</howToEdit>
   <meta>
     <title>Silver City — Why Gate</title>
@@ -169,7 +169,7 @@
     <lesson id="fg-reason" place="Why Gate" person="Ansel Gate" tripleId="reason-gate" ideaId="idea-reason" ideaLabel="The mind needs a real ground." challengeKind="sequence" challengeTitle="Trust needs a ground">
       <easy points="10" easyOrder="5">
         <learn>
-          <shortStory>You already trust your mind enough to argue, count, and ask why. That trust is not a trick hanging in midair. John calls the Word the true light. Romans says what can be known of God is plain in what is made. The mind needs a real ground.</shortStory>
+          <shortStory>You already trust your mind enough to argue, count, and ask why. That trust is not a trick hanging in midair. John calls the Word — Christ — the true light. Romans says what can be known of God is plain in what is made. The mind needs a real ground.</shortStory>
           <mainIdea>The mind you already trust needs a real ground.</mainIdea>
           <gloss>The mind you already trust needs a real ground.</gloss>
           <loci>This idea lives at Why Gate, with Ansel.</loci>
@@ -193,9 +193,9 @@
         </match>
         <hold levelUpTo="medium" onFail="easy">
           <claim>The mind you already trust needs a real ground.</claim>
-          <reason>The Word is the true light that makes God knowable.</reason>
+          <reason>The Word — Christ — is the true light that makes God knowable.</reason>
           <source>John 1:1–9 · Romans 1:19–20</source>
-          <whyCorrect>The Word is the true light that makes God knowable.</whyCorrect>
+          <whyCorrect>The Word — Christ — is the true light that makes God knowable.</whyCorrect>
           <whyMisses>
             <miss>Reason floats with no ground.</miss>
             <miss>The world is finally dark.</miss>
@@ -207,7 +207,7 @@
             <choice>Darkness is the last word about the world.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>The Word is the true light that makes God knowable.</choice>
+            <choice>The Word — Christ — is the true light that makes God knowable.</choice>
             <choice>Reason floats with no ground.</choice>
             <choice>The world is finally dark.</choice>
           </reasonChoices>
@@ -239,9 +239,9 @@
         </match>
         <hold levelUpTo="hard" onFail="easy">
           <claim>The mind you already trust needs a real ground.</claim>
-          <reason>The Word is the true light that makes God knowable.</reason>
+          <reason>The Word — Christ — is the true light that makes God knowable.</reason>
           <source>John 1:1–9 · Romans 1:19–20</source>
-          <whyCorrect>The Word is the true light that makes God knowable.</whyCorrect>
+          <whyCorrect>The Word — Christ — is the true light that makes God knowable.</whyCorrect>
           <whyMisses>
             <miss>Reason floats with no ground.</miss>
             <miss>The world is finally dark.</miss>
@@ -253,7 +253,7 @@
             <choice>Darkness is the last word about the world.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>The Word is the true light that makes God knowable.</choice>
+            <choice>The Word — Christ — is the true light that makes God knowable.</choice>
             <choice>Reason floats with no ground.</choice>
             <choice>The world is finally dark.</choice>
           </reasonChoices>
@@ -281,9 +281,9 @@
         </match>
         <hold onFail="easy">
           <claim>The mind you already trust needs a real ground.</claim>
-          <reason>The Word is the true light that makes God knowable.</reason>
+          <reason>The Word — Christ — is the true light that makes God knowable.</reason>
           <source>John 1:1–9 · Romans 1:19–20</source>
-          <whyCorrect>The Word is the true light that makes God knowable.</whyCorrect>
+          <whyCorrect>The Word — Christ — is the true light that makes God knowable.</whyCorrect>
           <whyMisses>
             <miss>Reason floats with no ground.</miss>
             <miss>The world is finally dark.</miss>
@@ -295,7 +295,7 @@
             <choice>Darkness is the last word about the world.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>The Word is the true light that makes God knowable.</choice>
+            <choice>The Word — Christ — is the true light that makes God knowable.</choice>
             <choice>Reason floats with no ground.</choice>
             <choice>The world is finally dark.</choice>
           </reasonChoices>
@@ -1073,9 +1073,9 @@ Write the argument, then the best objection, then the reply. That is how these a
         </match>
         <hold levelUpTo="medium" onFail="easy">
           <claim>A first cause is a great deal — not yet the whole gospel.</claim>
-          <reason>The first-cause walk is not yet the whole gospel.</reason>
+          <reason>The first-cause walk is not yet the gospel of Jesus Christ.</reason>
           <source>Aquinas ST I; Pascal on philosophers and Abraham</source>
-          <whyCorrect>The first-cause walk is not yet the whole gospel.</whyCorrect>
+          <whyCorrect>The first-cause walk is not yet the gospel of Jesus Christ.</whyCorrect>
           <whyMisses>
             <miss>Stopping at a first cause is required.</miss>
             <miss>History has nothing further to add.</miss>
@@ -1087,7 +1087,7 @@ Write the argument, then the best objection, then the reply. That is how these a
             <choice>Pascal commands you to skip the philosophers.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>The first-cause walk is not yet the whole gospel.</choice>
+            <choice>The first-cause walk is not yet the gospel of Jesus Christ.</choice>
             <choice>Stopping at a first cause is required.</choice>
             <choice>History has nothing further to add.</choice>
           </reasonChoices>
@@ -1119,9 +1119,9 @@ Write the argument, then the best objection, then the reply. That is how these a
         </match>
         <hold levelUpTo="hard" onFail="easy">
           <claim>A first cause is a great deal — not yet the whole gospel.</claim>
-          <reason>The first-cause walk is not yet the whole gospel.</reason>
+          <reason>The first-cause walk is not yet the gospel of Jesus Christ.</reason>
           <source>Aquinas ST I; Pascal on philosophers and Abraham</source>
-          <whyCorrect>The first-cause walk is not yet the whole gospel.</whyCorrect>
+          <whyCorrect>The first-cause walk is not yet the gospel of Jesus Christ.</whyCorrect>
           <whyMisses>
             <miss>Stopping at a first cause is required.</miss>
             <miss>History has nothing further to add.</miss>
@@ -1133,7 +1133,7 @@ Write the argument, then the best objection, then the reply. That is how these a
             <choice>Pascal commands you to skip the philosophers.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>The first-cause walk is not yet the whole gospel.</choice>
+            <choice>The first-cause walk is not yet the gospel of Jesus Christ.</choice>
             <choice>Stopping at a first cause is required.</choice>
             <choice>History has nothing further to add.</choice>
           </reasonChoices>
@@ -1168,9 +1168,9 @@ Pascal’s warning about the God of the philosophers is a warning against stoppi
         </match>
         <hold onFail="easy">
           <claim>A first cause is a great deal — not yet the whole gospel.</claim>
-          <reason>The first-cause walk is not yet the whole gospel.</reason>
+          <reason>The first-cause walk is not yet the gospel of Jesus Christ.</reason>
           <source>Aquinas ST I; Pascal on philosophers and Abraham</source>
-          <whyCorrect>The first-cause walk is not yet the whole gospel.</whyCorrect>
+          <whyCorrect>The first-cause walk is not yet the gospel of Jesus Christ.</whyCorrect>
           <whyMisses>
             <miss>Stopping at a first cause is required.</miss>
             <miss>History has nothing further to add.</miss>
@@ -1182,7 +1182,7 @@ Pascal’s warning about the God of the philosophers is a warning against stoppi
             <choice>Pascal commands you to skip the philosophers.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>The first-cause walk is not yet the whole gospel.</choice>
+            <choice>The first-cause walk is not yet the gospel of Jesus Christ.</choice>
             <choice>Stopping at a first cause is required.</choice>
             <choice>History has nothing further to add.</choice>
           </reasonChoices>

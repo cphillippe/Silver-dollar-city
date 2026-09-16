@@ -233,6 +233,7 @@ assert.match(gemBonusBeat('Help').title, /BONUS! \+100/)
 assert.match(gemBonusBeat('Help').why, /Extra try/)
 assert.match(gemTargetBeat(mercyWords[0]).title, /Yes/)
 assert.match(matchClearBeat('ph-road').title, /Neighbor/)
+assert.match(matchClearBeat('ph-road').from ?? '', /Luke 10/)
 
 for (const id of EASY_LINE_ORDER) {
   const puzzle = buildGemPuzzle(id)
@@ -328,7 +329,7 @@ assert.match(playSrc, /EASY\.bonusHint/)
 assert.match(playSrc, /is-bonus/)
 assert.match(playSrc, /\+100/)
 assert.match(playSrc, /bonus-plus/)
-assert.match(playSrc, /match-yes/)
+assert.match(playSrc, /MatchTakeaway/)
 assert.match(playSrc, /matchBonusWord/)
 assert.match(playSrc, /EASY\.bonusMissWord/)
 assert.match(playSrc, /EASY\.bonusMissStraight/)
@@ -386,7 +387,7 @@ assert.match(
 )
 assert.match(
   readFileSync(new URL('../src/components/challenges/WhyBlastPlay.tsx', import.meta.url), 'utf8'),
-  /match-yes/,
+  /MatchTakeaway/,
 )
 assert.match(matchClearBeat('ph-road').why, /hurt man|help|mercy/i)
 assert.match(
