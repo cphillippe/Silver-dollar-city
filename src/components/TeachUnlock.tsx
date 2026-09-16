@@ -69,7 +69,9 @@ export function TeachUnlock({ brief, kind, onUnlock, unlock, beats }: TeachUnloc
                 ? EASY.mazeCta
                 : storyPlayFor(brief.id) === 'claim-merge'
                   ? EASY.mergeCta
-                  : EASY.findGems}
+                  : storyPlayFor(brief.id) === 'source-dig'
+                    ? EASY.digCta
+                    : EASY.findGems}
           </button>
           <button type="button" className="text-link" onClick={onUnlock}>
             Skip reading

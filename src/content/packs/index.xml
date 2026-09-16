@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<silverCityPackIndex schemaVersion="3" appVersion="1.4.64" generated="2026-09-16T09:00:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/">
+<silverCityPackIndex schemaVersion="3" appVersion="1.4.68" generated="2026-09-16T09:00:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/">
   <howToEdit>Load one areaPack XML per area. Every lesson has three tiers: &lt;easy easyOrder="N"&gt;, &lt;medium&gt;, and &lt;hard&gt; — each with Learn/Match/Hold. Held claim stays plain on all tiers. Hold level-up / fail→Easy: see &lt;holdRules&gt;. Do not fork facts into separate files. Engine loader climb next.</howToEdit>
   <packs>
     <pack id="parable-hollow" file="parable-hollow.xml" title="Story Creek" person="Mercy Wren" lessonCount="8" />
@@ -8,7 +8,7 @@
     <pack id="first-gate" file="first-gate.xml" title="Why Gate" person="Ansel Gate" lessonCount="11" />
     <pack id="high-lookout" file="high-lookout.xml" title="Meaning Ridge" person="Hope Ridge" lessonCount="7" />
   </packs>
-  <easyShelf order="ph-road,ph-father,ph-debt,fg-order,fg-reason,fg-ought,fg-ground,wb-creed,wb-women,daily-lantern,daily-stars,daily-cosmos,hl-moral,ph-seeds,wb-early,wb-method,daily-names,daily-creed,daily-empty,daily-gems,daily-seed,daily-neighbor,ob-tuning,ob-design,ob-leibniz,ob-life,daily-life,fg-mover,fg-contingent,fg-kalam,fg-limits,daily-scroll,daily-isaiah,hl-mind,hl-meaning,hl-beauty,daily-grace,daily-rest,daily-door">
+  <easyShelf order="ph-road,ph-father,ph-debt,fg-order,fg-reason,fg-ought,fg-ground,wb-creed,wb-women,wb-early,wb-method,daily-lantern,daily-stars,daily-cosmos,hl-moral,ph-seeds,daily-names,daily-creed,daily-empty,daily-gems,daily-seed,daily-neighbor,ob-tuning,ob-design,ob-leibniz,ob-life,daily-life,fg-mover,fg-contingent,fg-kalam,fg-limits,daily-scroll,daily-isaiah,hl-mind,hl-meaning,hl-beauty,daily-grace,daily-rest,daily-door">
     <line id="ph-road" easyOrder="1" pack="parable-hollow">ph-road</line>
     <line id="ph-father" easyOrder="2" pack="parable-hollow">ph-father</line>
     <line id="ph-debt" easyOrder="3" pack="parable-hollow">ph-debt</line>
@@ -18,13 +18,13 @@
     <line id="fg-ground" easyOrder="7" pack="first-gate">fg-ground</line>
     <line id="wb-creed" easyOrder="8" pack="witness-bench">wb-creed</line>
     <line id="wb-women" easyOrder="9" pack="witness-bench">wb-women</line>
-    <line id="daily-lantern" easyOrder="10" pack="parable-hollow">daily-lantern</line>
-    <line id="daily-stars" easyOrder="11" pack="observatory">daily-stars</line>
-    <line id="daily-cosmos" easyOrder="12" pack="first-gate">daily-cosmos</line>
-    <line id="hl-moral" easyOrder="13" pack="high-lookout">hl-moral</line>
-    <line id="ph-seeds" easyOrder="14" pack="parable-hollow">ph-seeds</line>
-    <line id="wb-early" easyOrder="15" pack="witness-bench">wb-early</line>
-    <line id="wb-method" easyOrder="16" pack="witness-bench">wb-method</line>
+    <line id="wb-early" easyOrder="10" pack="witness-bench">wb-early</line>
+    <line id="wb-method" easyOrder="11" pack="witness-bench">wb-method</line>
+    <line id="daily-lantern" easyOrder="12" pack="parable-hollow">daily-lantern</line>
+    <line id="daily-stars" easyOrder="13" pack="observatory">daily-stars</line>
+    <line id="daily-cosmos" easyOrder="14" pack="first-gate">daily-cosmos</line>
+    <line id="hl-moral" easyOrder="15" pack="high-lookout">hl-moral</line>
+    <line id="ph-seeds" easyOrder="16" pack="parable-hollow">ph-seeds</line>
     <line id="daily-names" easyOrder="17" pack="witness-bench">daily-names</line>
     <line id="daily-creed" easyOrder="18" pack="witness-bench">daily-creed</line>
     <line id="daily-empty" easyOrder="19" pack="witness-bench">daily-empty</line>

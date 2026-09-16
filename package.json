@@ -1,7 +1,7 @@
 {
   "name": "silver-city",
   "private": true,
-  "version": "1.4.67",
+  "version": "1.4.68",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,7 +9,7 @@
     "build": "node scripts/embed-packs.mjs && tsc -b && vite build",
     "preview": "vite preview",
     "embed:packs": "node scripts/embed-packs.mjs",
-    "test": "node scripts/embed-packs.mjs && TZ=America/Chicago node --experimental-strip-types scripts/check-dates.mjs && TZ=UTC node --experimental-strip-types scripts/check-dates.mjs && node --experimental-strip-types scripts/check-progress.mjs && node --experimental-strip-types scripts/check-save.mjs && node --experimental-strip-types scripts/check-learning.mjs && node --experimental-strip-types scripts/check-packs.mjs && node --experimental-strip-types scripts/check-gem-search.mjs && node --experimental-strip-types scripts/check-why-blast.mjs && node --experimental-strip-types scripts/check-father-run.mjs && node --experimental-strip-types scripts/check-road-maze.mjs && node --experimental-strip-types scripts/check-claim-merge.mjs && node --experimental-strip-types scripts/check-city.mjs && node --experimental-strip-types scripts/check-commerce.mjs",
+    "test": "node scripts/embed-packs.mjs && TZ=America/Chicago node --experimental-strip-types scripts/check-dates.mjs && TZ=UTC node --experimental-strip-types scripts/check-dates.mjs && node --experimental-strip-types scripts/check-progress.mjs && node --experimental-strip-types scripts/check-save.mjs && node --experimental-strip-types scripts/check-learning.mjs && node --experimental-strip-types scripts/check-packs.mjs && node --experimental-strip-types scripts/check-gem-search.mjs && node --experimental-strip-types scripts/check-why-blast.mjs && node --experimental-strip-types scripts/check-father-run.mjs && node --experimental-strip-types scripts/check-road-maze.mjs && node --experimental-strip-types scripts/check-claim-merge.mjs && node --experimental-strip-types scripts/check-source-dig.mjs && node --experimental-strip-types scripts/check-city.mjs && node --experimental-strip-types scripts/check-commerce.mjs",
     "android:sync": "npm run build && npx cap sync android",
     "android:apk": "npm run android:sync && node scripts/write-android-local-properties.mjs && cd android && ./gradlew assembleDebug"
   },

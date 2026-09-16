@@ -68,7 +68,7 @@ import {
   EASY_FOLK_LIFT,
 } from '../src/lib/cityBuild.ts'
 import { emptyProgress } from '../src/lib/save.ts'
-import { EASY, EASY_LINE_ORDER, easyChromeLine, easyFacingLine, easyHomeFocus, easyHoldLine, easyHoldPractice, easyHoldView, easyLearnLine, easyLineHeld, easyLineLearned, easyLineTaught, easyLoopLine, easyMatchLine, easyMatchReady, markEasyHeld, markEasyTaught, easyWhoWhere, easyWhoWhereLine, easyWhyLine, easyWhyWordCount, easyWrongTap, uniqueHoldChoices } from '../src/lib/easy.ts'
+import { EASY, EASY_LINE_ORDER, DIG_ARC, easyChromeLine, easyFacingLine, easyHomeFocus, easyHoldLine, easyHoldPractice, easyHoldView, easyLearnLine, easyLineHeld, easyLineLearned, easyLineTaught, easyLoopLine, easyMatchLine, easyMatchReady, markEasyHeld, markEasyTaught, easyWhoWhere, easyWhoWhereLine, easyWhyLine, easyWhyWordCount, easyWrongTap, uniqueHoldChoices } from '../src/lib/easy.ts'
 import { WORDS, easyLead } from '../src/lib/words.ts'
 import { deeperLinksFor, eraLabel } from '../src/content/deeper.ts'
 import { allEvidenceIds, evidenceFor } from '../src/content/evidence.ts'
@@ -1083,7 +1083,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.67')
+assert.equal(APP_VERSION, '1.4.68')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1448,6 +1448,8 @@ assert.match(puzzleSrc, /kind === 'link'/)
 assert.match(puzzleSrc, /LinkPlay/)
 assert.match(puzzleSrc, /GemSearchPlay/)
 assert.match(puzzleSrc, /isEasy\(progress\)/)
+assert.match(puzzleSrc, /SourceDigPlay/)
+assert.match(puzzleSrc, /source-dig/)
 assert.match(cssSrc, /gem-board/)
 assert.match(cssSrc, /gem-cell\.is-burst/)
 assert.match(cssSrc, /gem-shard/)
@@ -1856,6 +1858,8 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
   assert.ok(EASY_LINE_ORDER.indexOf('ph-father') < EASY_LINE_ORDER.indexOf('wb-creed'))
   assert.ok(EASY_LINE_ORDER.includes('ph-debt'))
   assert.ok(EASY_LINE_ORDER.includes('hl-moral'))
+  assert.deepEqual([...DIG_ARC], ['wb-creed', 'wb-women', 'wb-early', 'wb-method'])
+  assert.deepEqual(EASY_LINE_ORDER.slice(7, 12), [...DIG_ARC, 'daily-lantern'])
   const homes = {
     'ph-road': { who: 'Mercy', place: 'Story Creek' },
     'ph-father': { who: 'Mercy', place: 'Story Creek' },
@@ -2286,7 +2290,11 @@ assert.match(
 )
 assert.match(
   readFileSync(new URL('../src/components/DigDeeper.tsx', import.meta.url), 'utf8'),
-  /if \(easy\) return null/,
+  /easyDigTaps/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/DigDeeper.tsx', import.meta.url), 'utf8'),
+  /is-easy-dig/,
 )
 assert.match(mapSrc, /easy \? 'seed'/)
 assert.match(mapSrc, /easy \? null : <SpinePath/)
@@ -2505,7 +2513,7 @@ assert.match(defendSrc, /Porch flickered/)
 assert.doesNotMatch(TOWN_PATH_EASY, /scrapbook/)
 assert.match(
   readFileSync(new URL('../src/components/DigDeeper.tsx', import.meta.url), 'utf8'),
-  /Read more/,
+  /Dig the names/,
 )
 assert.match(
   readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
