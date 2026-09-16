@@ -61,18 +61,18 @@ const PLAIN: Record<string, PlainLine> = {
     },
   ),
   'wb-early': line(
-    'That old shared belief is early testimony, not a medieval insert.',
-    'Paul wrote in the mid-first century. He says he received this core and passed it on. That is close to the events — not a monk’s later add-on.',
+    'The churches named the risen Christ close to the events.',
+    'Paul wrote in the mid-first century. He says he received this core and passed it on: Christ died, was buried, was raised, and was seen. That is close to the events.',
     { term: 'Testimony', sense: 'a report from people who claim to have seen', hint: 'Keep “received and delivered.” Toss lab-proof talk.' },
   ),
   'wb-method': line(
-    'Historians weigh sources. They cannot rerun the past.',
-    'Ask: how many reports? How awkward is the detail? How soon was it said? Does it fit that world? Those tools test a report. They are not a chemistry lab.',
+    'We weigh named reports of Jesus; we still read them.',
+    'Luke checked what many already wrote. Paul lists people who saw the risen Christ. We weigh those named reports; we still read the texts.',
     { term: 'Historian', sense: 'someone who weighs old reports, not a person who reruns last Tuesday', hint: 'Match each tool to what it tests.' },
   ),
   'wb-women': line(
-    'Women as first witnesses is an awkward detail to invent.',
-    'The tomb stories begin with women. Luke says the men called it idle talk. If you only wanted later respect, you would more likely lead with respected men.',
+    'Women were first to report Jesus’ empty tomb.',
+    'Women go to Jesus’ tomb at dawn and find it empty. They tell the apostles. Luke says the men called it idle talk. The report still begins with the women.',
     { term: 'Witness', sense: 'someone who says what they saw', hint: 'Keep the costly opening. Toss overclaims.' },
   ),
   'ob-tuning': line(
@@ -109,12 +109,12 @@ const PLAIN: Record<string, PlainLine> = {
     { term: 'Order', sense: 'the world hanging together — not a lucky pile', hint: 'Keep the lived trust. Toss the lucky pile.' },
   ),
   'fg-reason': line(
-    'The reason you already trust needs a real ground.',
+    'The mind you already trust needs a real ground.',
     'You already trust your mind enough to argue, count, and ask why. That trust is not a trick hanging in midair. John calls the Word the true light. Romans says what can be known of God is plain in what is made.',
     { term: 'Ground', sense: 'what holds a trust up — not a shrug in midair', hint: 'Keep the ground. Toss the floating trick.' },
   ),
   'fg-ought': line(
-    'Finite nature cannot ground the ought you already trust.',
+    'Rocks cannot write the law you already trust.',
     'You already treat some things as really wrong, not only a mood. Rocks and weather do not invent that pull. Romans says the law is already written on the heart.',
     { term: 'Ought', sense: 'real right and wrong — not only a mood', hint: 'Keep the law on the heart. Toss nature-as-enough.' },
   ),

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { CAST } from '../content/story'
-import { EASY, easyFacingLine, isEasy } from '../lib/easy'
+import { EASY, easyFacingLine, easyWhyLine, isEasy } from '../lib/easy'
 import { profileInventory, openIdeaView, openPlaceView } from '../lib/profile'
 import { useProgress } from '../store/progress'
 import type { View } from '../types'
@@ -84,7 +84,13 @@ export function Profile({ onNavigate }: ProfileProps) {
                 </p>
                 <strong>{easy ? easyFacingLine(idea.id, idea.claim) : idea.claim}</strong>
                 <PlainTalk id={idea.id} />
-                {easy ? null : <p>{idea.reason}</p>}
+                {easy ? (
+                  <p className="quiet">
+                    {EASY.sayWhy}. {easyWhyLine(idea.reason)} {EASY.sayFrom} {idea.source}
+                  </p>
+                ) : (
+                  <p>{idea.reason}</p>
+                )}
               </button>
               <DigDeeper id={idea.id} surface="profile" compact />
             </article>

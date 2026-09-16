@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { statSync } from 'node:fs'
+import { readFileSync, statSync } from 'node:fs'
 import { emptyProgress } from '../src/lib/save.ts'
 import { PACK_CATALOG, PACK_ISSUES, packLesson } from '../src/content/packCatalog.ts'
 import { PACK_SCHEMA_VERSION } from '../src/content/packTypes.ts'
@@ -223,13 +223,15 @@ const reason = packLesson('fg-reason')
 assert.ok(reason)
 assert.match(reason.source, /John 1:1/)
 assert.match(reason.source, /Romans 1:19/)
-assert.doesNotMatch(reason.claim, /\bmaybe\b/i)
+assert.match(reason.claim, /mind you already trust/)
+assert.doesNotMatch(reason.claim, /The reason you already trust/)
 assert.doesNotMatch(reason.easy.learn, /Pre-Reformation/i)
 
 const ought = packLesson('fg-ought')
 assert.ok(ought)
 assert.match(ought.source, /Romans 2:14/)
-assert.match(ought.claim, /Finite nature/)
+assert.match(ought.claim, /Rocks cannot write/)
+assert.doesNotMatch(ought.claim, /Finite nature/)
 assert.doesNotMatch(ought.easy.learn, /fine-tun/i)
 assert.doesNotMatch(ought.easy.learn, /Pre-Reformation/i)
 
@@ -250,5 +252,56 @@ assert.deepEqual(easyWhoWhere('fg-order'), {
 
 assert.match(tuning.claim, /Designer/)
 assert.notEqual(tuning.claim, ground.claim)
+
+const creed = packLesson('wb-creed')
+assert.ok(creed)
+assert.equal(creed.claim, 'Paul hands on an early public creed: died, buried, raised, appeared.')
+assert.match(creed.easy.hold.why, /Christ was buried and seen/)
+assert.doesNotMatch(creed.easy.hold.why, /resists a merely/)
+
+const women = packLesson('wb-women')
+assert.ok(women)
+assert.match(women.claim, /Jesus/)
+assert.doesNotMatch(women.claim, /if invented/)
+assert.doesNotMatch(women.easy.hold.why, /if the goal were/)
+assert.doesNotMatch(women.easy.learn, /If you only wanted/)
+
+const early = packLesson('wb-early')
+assert.ok(early)
+assert.match(early.claim, /Christ/)
+assert.doesNotMatch(early.claim, /late legend/)
+assert.doesNotMatch(early.easy.hold.why, /received formula/)
+
+const method = packLesson('wb-method')
+assert.ok(method)
+assert.match(method.claim, /Jesus/)
+assert.match(method.source, /Luke 1:1/)
+assert.doesNotMatch(method.source, /Standard historical method/)
+assert.doesNotMatch(method.claim, /Ordinary historical tools/)
+assert.doesNotMatch(method.easy.hold.why, /Multiple attestation/)
+
+for (const id of DIG_ARC) {
+  const lesson = packLesson(id)
+  assert.ok(lesson, id)
+  assert.doesNotMatch(lesson.claim, /if invented|late legend|pious novel/i, `${id} claim hedge`)
+  assert.doesNotMatch(lesson.easy.hold.why, /if invented|if the goal were/i, `${id} reason hedge`)
+}
+
+const teachSrc = readFileSync(new URL('../src/components/TeachUnlock.tsx', import.meta.url), 'utf8')
+assert.match(teachSrc, /HeldTriad/)
+assert.match(teachSrc, /omitClaim/)
+const storeSrc = readFileSync(new URL('../src/components/StoredLine.tsx', import.meta.url), 'utf8')
+assert.match(storeSrc, /HeldTriad/)
+assert.match(storeSrc, /sayTomorrow/)
+const journalSrc = readFileSync(new URL('../src/components/Journal.tsx', import.meta.url), 'utf8')
+assert.match(journalSrc, /HeldTriad/)
+assert.match(journalSrc, /claim, why, and from/)
+const blastSrc = readFileSync(
+  new URL('../src/components/challenges/WhyBlastPlay.tsx', import.meta.url),
+  'utf8',
+)
+assert.match(blastSrc, /EASY\.sayFrom/)
+assert.match(blastSrc, /source/)
+assert.doesNotMatch(blastSrc, /One more/)
 
 console.log('check-packs: ok')

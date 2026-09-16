@@ -169,8 +169,8 @@ const STREET_FACTS: StreetFact[] = [
     tripleId: 'early-bench',
     placeId: 'place-bench',
     personId: 'person-silas',
-    text: 'The resurrection claim sits close to the events, not as a late legend.',
-    caption: 'The claim sits close to the events.',
+    text: 'The churches named the risen Christ close to the events.',
+    caption: 'The risen Christ is named close by.',
   },
   {
     evidenceId: 'wb-method',
@@ -178,8 +178,8 @@ const STREET_FACTS: StreetFact[] = [
     tripleId: 'method-bench',
     placeId: 'place-bench',
     personId: 'person-silas',
-    text: 'Ordinary historical tools weigh testimony; they do not replace reading.',
-    caption: 'History tools weigh testimony.',
+    text: 'We weigh named reports of Jesus; we still read them.',
+    caption: 'We still read the named reports.',
   },
   {
     evidenceId: 'wb-women',
@@ -187,7 +187,7 @@ const STREET_FACTS: StreetFact[] = [
     tripleId: 'women-bench',
     placeId: 'place-bench',
     personId: 'person-silas',
-    text: 'The first tomb reports begin with women — an awkward opening if invented for respectability.',
+    text: 'Women were first to report Jesus’ empty tomb.',
     caption: 'Women first saw the tomb.',
   },
   {
@@ -331,8 +331,8 @@ const STREET_FACTS: StreetFact[] = [
     tripleId: 'reason-gate',
     placeId: 'place-gate',
     personId: 'person-ansel',
-    text: 'The reason you already trust needs a real ground.',
-    caption: 'Reason needs a real ground.',
+    text: 'The mind you already trust needs a real ground.',
+    caption: 'The mind needs a real ground.',
   },
   {
     evidenceId: 'fg-ought',
@@ -340,8 +340,8 @@ const STREET_FACTS: StreetFact[] = [
     tripleId: 'ought-gate',
     placeId: 'place-gate',
     personId: 'person-ansel',
-    text: 'Finite nature cannot ground the ought you already trust.',
-    caption: 'Nature cannot ground ought.',
+    text: 'Rocks cannot write the law you already trust.',
+    caption: 'Rocks cannot write the law.',
   },
   {
     evidenceId: 'fg-ground',
@@ -830,12 +830,12 @@ const LINK_CLUES: Record<string, Record<LinkStep, string>> = {
     person: 'Ansel keeps that gate.',
   },
   'reason-gate': {
-    idea: 'Ansel’s why — reason needs a real ground.',
+    idea: 'Ansel’s why — the mind needs a real ground.',
     place: 'That question lives at Why Gate.',
     person: 'Ansel keeps that gate.',
   },
   'ought-gate': {
-    idea: 'Ansel’s why — nature cannot ground ought.',
+    idea: 'Ansel’s why — rocks cannot write the law.',
     place: 'That question lives at Why Gate.',
     person: 'Ansel keeps that gate.',
   },
@@ -971,15 +971,15 @@ export const STREET_WHYS: Record<string, { easy: string; hard: string }> = {
     hard: 'Silas Whitman keeps Witness Square. Died, buried, raised, appeared is a public creed. It belongs in a ledger hall, not under the oaks.',
   },
   'early-bench': {
-    easy: 'Silas keeps the square. The claim sits close to the events — not a late legend.',
-    hard: 'Silas Whitman keeps Witness Square. Paul quotes a received formula and names known people; the claim sits close to the events.',
+    easy: 'Silas keeps the square. The churches named the risen Christ close to the events.',
+    hard: 'Silas Whitman keeps Witness Square. Paul names people who saw him; Luke asked witnesses. The risen Christ is named close to the events.',
   },
   'method-bench': {
-    easy: 'Silas keeps the square. Ordinary tools weigh testimony; they do not replace reading.',
-    hard: 'Silas Whitman keeps Witness Square. Multiple attestation and early reports weigh testimony — they do not skip the texts.',
+    easy: 'Silas keeps the square. We weigh named reports of Jesus; we still read them.',
+    hard: 'Silas Whitman keeps Witness Square. Named early reports weigh testimony — they do not skip the texts.',
   },
   'women-bench': {
-    easy: 'Silas keeps the square. Women saw the tomb first — an awkward first report.',
+    easy: 'Silas keeps the square. Women were first to report Jesus’ empty tomb.',
     hard: 'Silas Whitman keeps Witness Square. Women as first tomb witnesses is a public report, not a creek picture.',
   },
   'names-bench': {
@@ -1043,12 +1043,12 @@ export const STREET_WHYS: Record<string, { easy: string; hard: string }> = {
     hard: 'Ansel Gate keeps Why Gate. You already trust order — and Colossians names Christ as the One who holds all things.',
   },
   'reason-gate': {
-    easy: 'Ansel keeps Why Gate. Reason needs a real ground.',
-    hard: 'Ansel Gate keeps Why Gate. The reason you already trust is not free-floating — John names the Light.',
+    easy: 'Ansel keeps Why Gate. The mind needs a real ground.',
+    hard: 'Ansel Gate keeps Why Gate. The mind you already trust is not free-floating — John names the Light.',
   },
   'ought-gate': {
-    easy: 'Ansel keeps Why Gate. Nature cannot ground ought.',
-    hard: 'Ansel Gate keeps Why Gate. Finite nature cannot ground the ought you already trust — the law is on the heart.',
+    easy: 'Ansel keeps Why Gate. Rocks cannot write the law.',
+    hard: 'Ansel Gate keeps Why Gate. Rocks cannot write the law you already trust — the law is on the heart.',
   },
   'ground-gate': {
     easy: 'Ansel keeps Why Gate. The living God is the foundation.',

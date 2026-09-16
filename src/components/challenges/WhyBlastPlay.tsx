@@ -16,6 +16,7 @@ interface WhyBlastPlayProps {
   id: string
   claim: string
   reason: string
+  source: string
   packMisses: readonly string[]
   onDone: (result: { clean: boolean }) => void
 }
@@ -24,7 +25,7 @@ interface WhyBlastPlayProps {
  * Easy Hold why-step: claim stays center, four why-chips float around it.
  * Correct → blast + LOCKED!. Wrong → shake + Miss −25 and that chip pops out.
  */
-export function WhyBlastPlay({ id, claim, reason, packMisses, onDone }: WhyBlastPlayProps) {
+export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: WhyBlastPlayProps) {
   const chips = useMemo(
     () => whyBlastChoices(reason, packMisses, whyBlastExtras(id), easyWhyLine),
     [id, reason, packMisses.join('\0')],
@@ -109,6 +110,9 @@ export function WhyBlastPlay({ id, claim, reason, packMisses, onDone }: WhyBlast
           <p className="match-yes" role="status">
             <strong>{beat.title}</strong>
             <span>{beat.why}</span>
+          </p>
+          <p className="held-from quiet">
+            {EASY.sayFrom} {source}
           </p>
           <div className="cta-dock">
             <button

@@ -11,6 +11,7 @@ import { bonusFace, journalBonusPoints, lineBonusPoints } from '../lib/matchBonu
 import { journalPoints, journalTierCounts, needsTierHold, currentLessonTier, scoreFace } from '../lib/tiers'
 import { watchTool } from '../lib/watchTools'
 import { DigDeeper } from './DigDeeper'
+import { HeldTriad } from './HeldTriad'
 import { SavedTree, SavedTreeSummary } from './SavedTree'
 import { GemMark } from './GemMark'
 import { Landmark } from './Landmark'
@@ -242,7 +243,7 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
           />
           <p className="quiet saved-tree-lead">
             {easy
-              ? `${EASY.savedSub} you can still say.`
+              ? `${EASY.savedSub} you can still say — claim, why, and from.`
               : 'Each learning is its own unit: claim · reason · source · anchor · picture · tool.'}
           </p>
           <div className="card-grid">
@@ -261,8 +262,16 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
                   {bonusFace(lineBonusPoints(progress, learning.id)) ? (
                     <p className="bonus-mark">{bonusFace(lineBonusPoints(progress, learning.id))}</p>
                   ) : null}
-                  {easy ? null : (
-                  <p>{learning.reason}</p>
+                  {easy ? (
+                    <HeldTriad
+                      id={learning.id}
+                      claim={learning.claim}
+                      reason={learning.reason}
+                      source={learning.source}
+                      omitClaim
+                    />
+                  ) : (
+                    <p>{learning.reason}</p>
                   )}
                   <p className="learning-store">
                     {learning.picture ? <GemMark gem={learning.picture} size="sm" /> : null}
