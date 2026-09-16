@@ -250,6 +250,33 @@ const PLAIN: Record<string, PlainLine> = {
     'You may refuse it. The town will not lock you in a pew.',
     { term: 'Door', sense: 'a real way in — not a wall', hint: 'Keep the right pictures. Remove wrong picks.' },
   ),
+  'sc-tacitus': line(
+    'Tacitus names Christus executed under Pontius Pilate.',
+    'A Roman historian named Tacitus wrote about Christus. He says Christus was executed under Pontius Pilate. The movement then spread as far as Rome.',
+    {
+      term: 'Christus',
+      sense: 'the Latin name Tacitus uses for Christ',
+      hint: 'Keep Pilate. Toss the empty-tomb claim.',
+    },
+  ),
+  'sc-james': line(
+    'Josephus names James, the brother of Jesus called Christ.',
+    'Josephus was a Jewish writer, not a church teacher. He names James, the brother of Jesus who was called Christ. An outside court names Jesus without telling the church’s Easter story.',
+    {
+      term: 'Josephus',
+      sense: 'a Jewish historian who wrote outside the church',
+      hint: 'Keep James the brother. Toss the disputed Testimonium as the Easy hold.',
+    },
+  ),
+  'sc-pliny': line(
+    'Pliny writes that Christians sing to Christ as to a god.',
+    'Pliny was a Roman governor. He writes to the emperor that Christians meet and sing to Christ as to a god. Christ’s name is public practice, not a hidden password.',
+    {
+      term: 'Pliny',
+      sense: 'a Roman governor who asked what to do with Christians',
+      hint: 'Keep the hymn to Christ. Toss private-club talk.',
+    },
+  ),
   'td-watch': line(
     'Love — when compassion moves you, help like the Samaritan. Tap the glowing face.',
     'Tap the glowing face. When compassion moves you, help like the Samaritan.',

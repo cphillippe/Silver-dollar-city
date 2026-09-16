@@ -8,6 +8,18 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.82',
+    title: 'Stone Court · Easy core trail',
+    when: '2026-09-16',
+    items: [
+      'After the Easy door, a new street opens: Stone Court, with Silas. Tacitus names Christus under Pilate, then Josephus names James the brother of Jesus called Christ, then Pliny writes that Christians sing to Christ as to a god. Next opens only after the prior Easy Hold',
+      'Stone Court play is a source-dig: tap the glowing tablet. Ancient names first, then Scripture beside them. DUG! then one takeaway, then Hold next. One more dig stays. Miss −25 on a wrong tap. Not a reading quiz',
+      'Easy Hold stays claim · reason · From. Do not claim Tacitus wrote the tomb. Josephus Easy hold is Antiquities 20.200 — not the disputed Testimonium. Christ is named on all three takeaways. Teach before test. Apologist voice',
+      'Core Easy 42 facts stay free. Mill Street and Harbor Walk stay paid extras. Night Watch and Town stay hidden on Easy. Journal ungated. Never a hard paywall',
+      'Clear reasons 1.4.81 win cards stay. Fun arcade juice and One more loops stay. iOS + Android dual path 1.4.79 stays. Soft ads never cover Match, Hold, arcade, source-dig, or Journal. Place titles stay Story Creek, Witness Square, Sky Watch, Why Gate, Meaning Ridge — Stone Court is the new street name on Silas’s lot',
+    ],
+  },
+  {
     version: '1.4.81',
     title: 'Clear reasons 10 · leftover Easy lines · Easy core trail',
     when: '2026-09-16',
@@ -1661,6 +1673,10 @@ export function latestChange(version: string): ChangeNote {
   const note = CHANGELOG.find((item) => item.version === version) ?? CHANGELOG[0]
   if (!note) {
     return { version, title: 'Easy core trail', when: '', items: [] }
+  }
+  if (note.version === '1.4.82') {
+    const prior = latestChange('1.4.81')
+    return { ...note, items: [...note.items, ...prior.items] }
   }
   if (note.version === '1.4.81') {
     const prior = latestChange('1.4.80')
