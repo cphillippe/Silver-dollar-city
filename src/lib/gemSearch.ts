@@ -701,6 +701,17 @@ export function matchBonusWord(
   return word
 }
 
+
+/** Cells still required by planted bonus words the player has not found yet. */
+export function cellsNeededByOpenPlanted(puzzle: GemPuzzle, foundBonus: string[]): Set<string> {
+  const need = new Set<string>()
+  for (const word of puzzle.planted) {
+    if (foundBonus.includes(word.id) || foundBonus.includes(word.text)) continue
+    for (const cell of puzzle.bonusPaths[word.id] ?? []) need.add(cellKey(cell))
+  }
+  return need
+}
+
 export function cellsStillNeeded(puzzle: GemPuzzle, found: string[]): Set<string> {
   const need = new Set<string>()
   for (const word of puzzle.words) {

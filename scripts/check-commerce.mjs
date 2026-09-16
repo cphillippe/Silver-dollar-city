@@ -509,8 +509,8 @@ const iosProj = readFileSync(
   'utf8',
 )
 assert.match(iosProj, /PRODUCT_BUNDLE_IDENTIFIER = city.silver.unending/)
-assert.match(iosProj, /MARKETING_VERSION = 1.4.84/)
-assert.match(iosProj, /CURRENT_PROJECT_VERSION = 98/)
+assert.match(iosProj, /MARKETING_VERSION = 1.4.85/)
+assert.match(iosProj, /CURRENT_PROJECT_VERSION = 99/)
 
 resetBilling()
 

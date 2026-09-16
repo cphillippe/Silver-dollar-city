@@ -1,7 +1,7 @@
 Silver City — area content packs (runtime source of truth)
 ==========================================================
 
-appVersion: 1.4.84  (from src/config/app.ts on main)
+appVersion: 1.4.85  (from src/config/app.ts on main)
 schemaVersion: 3
 generated: see each file’s generated= attribute (America/Chicago)
 host: https://cphillippe.github.io/Silver-dollar-city/
