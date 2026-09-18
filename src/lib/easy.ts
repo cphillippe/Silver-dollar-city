@@ -1,1 +1,1 @@
-@file:///tmp/easy-patched.ts
+PLACEHOLDER_WILL_REPLACE
