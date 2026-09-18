@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.88',
+    title: 'Dig Papyrus Vault · Easy core trail',
+    when: '2026-09-18',
+    items: [
+      'After Ink Court’s Lucian Hold, a new free street opens: Papyrus Vault, with Silas. P52, then P46, then P66. Earliest Gospel pages from Egyptian sands. Next opens only after the prior Easy Hold',
+      'Support soft juice 1.4.87 stays. Stores stay parked. Play / AdMob / Apple flags stay blank. Core Easy stays free. Night Watch and Town stay hidden on Easy. Journal ungated. Never a hard paywall',
+    ],
+  },
+  {
     version: '1.4.87',
     title: 'Support soft juice · Easy core trail',
     when: '2026-09-18',
@@ -1729,6 +1738,10 @@ export function latestChange(version: string): ChangeNote {
   const note = CHANGELOG.find((item) => item.version === version) ?? CHANGELOG[0]
   if (!note) {
     return { version, title: 'Easy core trail', when: '', items: [] }
+  }
+  if (note.version === '1.4.88') {
+    const prior = latestChange('1.4.87')
+    return { ...note, items: [...note.items, ...prior.items] }
   }
   if (note.version === '1.4.87') {
     const prior = latestChange('1.4.86')

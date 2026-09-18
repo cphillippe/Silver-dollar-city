@@ -9,8 +9,9 @@
     <pack id="high-lookout" file="high-lookout.xml" title="Meaning Ridge" person="Hope Ridge" lessonCount="7" />
     <pack id="stone-court" file="stone-court.xml" title="Stone Court" person="Silas Whitman" lessonCount="3" />
     <pack id="ink-court" file="ink-court.xml" title="Ink Court" person="Silas Whitman" lessonCount="3" />
+    <pack id="papyrus-vault" file="papyrus-vault.xml" title="Papyrus Vault" person="Silas Whitman" lessonCount="3" />
   </packs>
-  <easyShelf order="ph-road,ph-father,ph-debt,fg-order,fg-reason,fg-ought,fg-ground,wb-creed,wb-women,wb-early,wb-method,daily-names,daily-creed,daily-empty,daily-lantern,daily-stars,daily-cosmos,hl-moral,ph-seeds,daily-gems,daily-seed,daily-neighbor,ob-tuning,ob-design,ob-leibniz,ob-life,daily-life,fg-mover,fg-contingent,fg-kalam,fg-limits,daily-scroll,daily-isaiah,hl-mind,hl-meaning,hl-beauty,daily-grace,daily-rest,daily-door,sc-tacitus,sc-james,sc-pliny,ic-trajan,ic-suetonius,ic-lucian">
+  <easyShelf order="ph-road,ph-father,ph-debt,fg-order,fg-reason,fg-ought,fg-ground,wb-creed,wb-women,wb-early,wb-method,daily-names,daily-creed,daily-empty,daily-lantern,daily-stars,daily-cosmos,hl-moral,ph-seeds,daily-gems,daily-seed,daily-neighbor,ob-tuning,ob-design,ob-leibniz,ob-life,daily-life,fg-mover,fg-contingent,fg-kalam,fg-limits,daily-scroll,daily-isaiah,hl-mind,hl-meaning,hl-beauty,daily-grace,daily-rest,daily-door,sc-tacitus,sc-james,sc-pliny,ic-trajan,ic-suetonius,ic-lucian,papr-p52,papr-p46,papr-p66">
     <line id="ph-road" easyOrder="1" pack="parable-hollow">ph-road</line>
     <line id="ph-father" easyOrder="2" pack="parable-hollow">ph-father</line>
     <line id="ph-debt" easyOrder="3" pack="parable-hollow">ph-debt</line>
@@ -56,6 +57,9 @@
     <line id="ic-trajan" easyOrder="43" pack="ink-court">ic-trajan</line>
     <line id="ic-suetonius" easyOrder="44" pack="ink-court">ic-suetonius</line>
     <line id="ic-lucian" easyOrder="45" pack="ink-court">ic-lucian</line>
+    <line id="papr-p52" easyOrder="88" pack="papyrus-vault">papr-p52</line>
+    <line id="papr-p46" easyOrder="89" pack="papyrus-vault">papr-p46</line>
+    <line id="papr-p66" easyOrder="90" pack="papyrus-vault">papr-p66</line>
   </easyShelf>
   <holdRules>
     <summary>On Hold, the player may attempt a level-up to the next tier’s claim/why. If they fail the level-up — or fail Hold at the current tier — fall back to Easy (retry Easy Learn→Match→Hold: teach-before-test, not punish).</summary>
@@ -155,8 +159,8 @@
     <homesOnTheStreet>Homes on the street</homesOnTheStreet>
   </uiChrome>
   <flags>
-    <lessonsWithThreeTiers>45/45</lessonsWithThreeTiers>
-    <easyTrailCount>45</easyTrailCount>
+    <lessonsWithThreeTiers>48/48</lessonsWithThreeTiers>
+    <easyTrailCount>48</easyTrailCount>
     <holdFailFallback>easy</holdFailFallback>
   </flags>
 </silverCityPackIndex>
