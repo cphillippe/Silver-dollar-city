@@ -9,16 +9,18 @@ export const MILL_PACK_URL = 'https://ko-fi.com/'
 export const HARBOR_PACK_URL = 'https://ko-fi.com/'
 
 export const SUPPORT_HEADING = 'Support Silver City'
-export const SUPPORT_LINE = 'Tip · Packs (external) · stores coming later'
+export const SUPPORT_LINE = 'Tip keeps new streets coming. Easy stays free. Journal stays open.'
 export const TIP_CTA = 'Tip'
 export const TIP_BLURB =
-  'A small tip keeps the trail growing. Easy stays free. Journal stays open.'
+  'A small tip helps keep wholesome evidence walks growing for kids and families. Easy stays free. Journal stays open.'
 export const STORES_COMING = 'Remove ads · Coming with stores'
-export const TIP_TOAST = 'A tip keeps the trail growing. Easy stays free.'
+export const TIP_TOAST_TITLE = 'Support the trail'
+export const TIP_TOAST = 'A tip keeps new streets coming. Easy stays free.'
+export const NOT_NOW = 'Not now'
 export const MILL_PACK_CTA = 'Mill Street'
 export const HARBOR_PACK_CTA = 'Harbor Walk'
 export const PACKS_EXTERNAL_LINE =
-  'Street Packs: Mill Street and Harbor Walk are extra streets. Until stores return, these open a wishlist page — not a paywall.'
+  'Mill Street and Harbor Walk are wishlist links for now — not a paywall. Stores return later.'
 
 function readVite(key: string): string {
   try {
