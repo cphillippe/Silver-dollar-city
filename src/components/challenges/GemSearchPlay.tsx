@@ -328,7 +328,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     const softEmpty = straight && line.length >= 3
     const why =
       count >= 2 && nextWord
-        ? `Try: ${nextWord.label}`
+        ? `Try this word: ${nextWord.label}`
         : softEmpty
           ? ''
           : !straight || line.length < 3
