@@ -97,14 +97,14 @@ export function TeachUnlock({ brief, kind, onUnlock, unlock, beats }: TeachUnloc
       <p className="teach-reason">{story}</p>
       <WordGloss words={school} extra={plain?.word} />
       <p className="quiet">{WORDS.claim.teach}</p>
-      <p className="eyebrow hold-kicker">The claim you will hold</p>
+      <p className="eyebrow hold-kicker">The claim you will lock in</p>
       <p className="recall-line rehearse-stem">{brief.claim}</p>
       <p className="quiet">
         {WORDS.source.term} — {WORDS.source.sense}: {brief.source}.
       </p>
       <p className="quiet">Pictured as {learningBeat(brief.id)}.</p>
       <p className="quiet">
-        Acquire — learn this line so you can hold it. Hold this line to deploy{' '}
+        Acquire — learn this line so you can lock it in. Lock in this line to deploy{' '}
         {tool?.label ?? 'Love'} on the night road.
       </p>
       {beats && beats.length > 0 ? (
