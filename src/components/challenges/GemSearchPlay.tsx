@@ -70,6 +70,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   const [toastMiss, setToastMiss] = useState(false)
   const [plusFlash, setPlusFlash] = useState(false)
   const [comboFlash, setComboFlash] = useState(0)
+  const [findPop, setFindPop] = useState(0)
   const [status, setStatus] = useState<'play' | 'ok'>('play')
   const [winStamp, setWinStamp] = useState(false)
   const drag = useRef(false)
@@ -118,6 +119,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     setToastMiss(false)
     setPlusFlash(false)
     setComboFlash(0)
+    setFindPop(0)
     comboRef.current = 0
     setStatus('play')
     setWinStamp(false)
@@ -148,6 +150,8 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     setToastWhy(why)
     setToastBonus(bonus)
     setToastMiss(miss)
+    // Miss −25 stays tight (no long soft lines). Bonus SNAG stays punchy. Find gets a beat longer.
+    const holdMs = miss ? 1100 : bonus ? 2200 : 2000
     window.setTimeout(
       () =>
         setToast((current) => {
@@ -157,7 +161,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
           setToastMiss(false)
           return ''
         }),
-      bonus || miss ? 2800 : 1800,
+      holdMs,
     )
   }
 
@@ -175,6 +179,10 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     const keys = cells.map(cellKey)
     setBurst(keys)
     playGemPop(done ? 'win' : 'find')
+    // Stronger find juice: large +N score pop (letter count as local stamp).
+    const popPts = Math.max(25, cells.length * 10)
+    setFindPop(popPts)
+    window.setTimeout(() => setFindPop(0), done ? 1200 : 980)
     const beat = gemTargetBeat(
       puzzle.words.find((word) => word.label === wordLabel) ?? {
         id: wordLabel,
@@ -197,7 +205,8 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
         setBurst([...keys, ...rest])
       }, 160)
     }
-    window.setTimeout(() => setBurst([]), done ? 880 : 520)
+    // Longer burst stamp on required finds (keep explode).
+    window.setTimeout(() => setBurst([]), done ? 980 : 720)
   }
 
   function explodeBonus(cells: GemCoord[], label: string) {
@@ -268,7 +277,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       comboRef.current += 1
       if (comboRef.current >= 2) {
         setComboFlash(comboRef.current)
-        window.setTimeout(() => setComboFlash(0), 700)
+        window.setTimeout(() => setComboFlash(0), 1100)
       }
       explode(nextPath, hit.label, done, nextFound.length)
       if (done) finishBoard()
@@ -286,7 +295,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       comboRef.current += 1
       if (comboRef.current >= 2) {
         setComboFlash(comboRef.current)
-        window.setTimeout(() => setComboFlash(0), 700)
+        window.setTimeout(() => setComboFlash(0), 1100)
       }
       recordMatchBonus(lineId)
       explodeBonus(nextPath, extra.label)
@@ -315,18 +324,23 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     setMisses(count)
     onMiss()
     const straight = isStraightPath(line)
-    const why = !straight || line.length < 3 ? EASY.bonusMissStraight : EASY.bonusMissWord
+    // Soft/empty swipe ≥3: Miss −25 tight — no long soft toast lines.
+    const softEmpty = straight && line.length >= 3
+    const why =
+      count >= 2 && nextWord
+        ? `Try: ${nextWord.label}`
+        : softEmpty
+          ? ''
+          : !straight || line.length < 3
+            ? EASY.bonusMissStraight
+            : EASY.bonusMissWord
     recordMatchMiss(lineId)
-    if (count >= 2 && nextWord) {
-      flashToast(EASY.missPenalty, `Try this word: ${nextWord.label}.`, false, true)
-    } else {
-      flashToast(EASY.missPenalty, why, false, true)
-    }
+    flashToast(EASY.missPenalty, why, false, true)
     teachHint(count)
     window.setTimeout(() => {
       setShake(false)
       writePath([])
-    }, 420)
+    }, softEmpty ? 280 : 360)
   }
 
   function applyCell(cell: GemCoord, mode: 'tap' | 'drag') {
@@ -400,7 +414,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
 
   return (
     <div
-      className={`play is-gem-search is-panel-blast ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''} ${burst.length ? 'is-boom' : ''} ${plusFlash ? 'is-bonus-pop' : ''}`}
+      className={`play is-gem-search is-panel-blast ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''} ${burst.length ? 'is-boom' : ''} ${plusFlash ? 'is-bonus-pop' : ''} ${findPop ? 'is-find-pop' : ''}`}
       style={{ ['--gem-size' as string]: puzzle.size }}
       onPointerUp={onBoardUp}
       onPointerCancel={onBoardUp}
@@ -447,8 +461,13 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
           +100
         </p>
       ) : null}
+      {findPop > 0 ? (
+        <p className="gem-find-pop" aria-hidden>
+          +{findPop}
+        </p>
+      ) : null}
       {comboFlash > 1 ? (
-        <p className="gem-combo" role="status">
+        <p className="gem-combo is-loud" role="status">
           Combo ×{comboFlash}
         </p>
       ) : null}
@@ -525,7 +544,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
         )}
       </div>
       </div>
-      <p className={`match-score ${plusFlash || comboFlash > 1 ? 'is-juice' : ''}`}>
+      <p className={`match-score ${plusFlash || findPop > 0 || comboFlash > 1 ? 'is-juice' : ''}`}>
         {left} left · {found.length} / {puzzle.words.length} found
         {bonusFound.length ? ` · ${bonusFound.length} bonus` : ''}
         {bonusPts ? <span className="bonus-pts"> · +{bonusPts} bonus</span> : null}
