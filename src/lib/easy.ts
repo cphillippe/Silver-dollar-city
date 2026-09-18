@@ -1,1 +1,1 @@
-FILE:/tmp/easy-patched.ts
+@file:///tmp/easy-patched.ts
