@@ -5060,24 +5060,52 @@ html[data-theme='dusk'] .hub.is-town .street-link {
   margin: 10px 0 12px;
 }
 
+/* 1.4.87 Support soft juice — replace .support-toast block */
 .support-toast {
   margin: 12px 0 4px;
-  padding: 12px 14px;
-  border-radius: 14px;
-  background: var(--mist);
-  border: 1px solid var(--line);
-  color: var(--parchment, #fff6e8);
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #fff8ee 0%, #f3e6d2 100%);
+  border: 1px solid rgba(120, 72, 24, 0.22);
+  color: #2a1a0e;
+  box-shadow: 0 8px 22px rgba(40, 22, 8, 0.12), 0 1px 0 rgba(255, 255, 255, 0.55) inset;
+  animation: support-toast-in 280ms ease-out;
 }
 
+.support-toast .eyebrow {
+  margin: 0 0 4px;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #7a4a1e;
+  opacity: 0.9;
+}
+
+.support-toast-body,
 .support-toast p {
-  margin: 0 0 10px;
-  color: var(--parchment, #fff6e8);
+  margin: 0 0 12px;
+  color: #2a1a0e;
+  font-size: 0.98rem;
+  line-height: 1.35;
 }
 
 .support-toast .btn {
-  color: var(--parchment, #fff6e8);
+  color: inherit;
 }
+
+.support-toast .btn.gold {
+  box-shadow: 0 2px 0 rgba(120, 72, 24, 0.25);
+}
+
+.support-toast.is-juiced .settings-actions {
+  gap: 8px;
+}
+
+@keyframes support-toast-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 
 button.btn:disabled {
   opacity: 0.65;
