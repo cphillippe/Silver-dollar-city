@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import {
+  NOT_NOW,
   SUPPORT_HEADING,
   TIP_CTA,
   TIP_TOAST,
+  TIP_TOAST_TITLE,
   supportUrls,
 } from '../config/support.ts'
 import { markSupportToastShown, supportToastPending } from '../lib/supportToast.ts'
@@ -18,8 +20,9 @@ export function SupportToast() {
   }
 
   return (
-    <aside className="support-toast" data-support-toast aria-label={SUPPORT_HEADING}>
-      <p>{TIP_TOAST}</p>
+    <aside className="support-toast is-juiced" data-support-toast aria-label={SUPPORT_HEADING}>
+      <p className="eyebrow">{TIP_TOAST_TITLE}</p>
+      <p className="support-toast-body">{TIP_TOAST}</p>
       <div className="settings-actions">
         <a
           className="btn gold"
@@ -27,11 +30,12 @@ export function SupportToast() {
           target="_blank"
           rel="noopener noreferrer"
           onClick={close}
+          data-support-tip
         >
           {TIP_CTA}
         </a>
-        <button type="button" className="btn" onClick={close}>
-          Not now
+        <button type="button" className="btn" onClick={close} data-support-dismiss>
+          {NOT_NOW}
         </button>
       </div>
     </aside>

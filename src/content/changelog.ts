@@ -1720,6 +1720,9 @@ export function latestChange(version: string): ChangeNote {
   if (!note) {
     return { version, title: 'Easy core trail', when: '', items: [] }
   }
+  if (note.version === '1.4.87') {
+    return 'Support soft juice — tip toast after Hold; wishlist packs; stores still parked.'
+  }
   if (note.version === '1.4.86') {
     const prior = latestChange('1.4.85')
     return { ...note, items: [...note.items, ...prior.items] }
