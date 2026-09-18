@@ -77,7 +77,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
           <h1>Play</h1>
           <p className="quiet">
             {focus === 'hold'
-              ? 'The story is open. Hold the line.'
+              ? 'The story is open. Lock in the line.'
               : storyPlayFor(loopId) === 'father-run'
                 ? EASY.runHome
                 : storyPlayFor(loopId) === 'road-maze'
@@ -471,7 +471,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
                 {!unlocked
                   ? 'Why locked'
                   : complete
-                    ? 'Hold the line'
+                    ? 'Lock in the line'
                     : current
                       ? plot.id === 'porch'
                         ? 'Walk next'
