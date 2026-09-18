@@ -1,0 +1,116 @@
+/* Fun Match less-waste juice — import after gem styles in main/index.
+ * 1.4.89 denser payoff-biased fill + louder find juice. No Dig / Hold / Story Snap. */
+
+/* Stronger find score pop — larger / longer than soft empty feedback. */
+.gem-find-pop {
+  position: absolute;
+  left: 50%;
+  top: 28%;
+  z-index: 6;
+  margin: 0;
+  transform: translateX(-50%);
+  color: #fffce8;
+  font-size: clamp(1.6rem, 7vw, 2.2rem);
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  text-shadow:
+    0 3px 0 #c46a08,
+    0 0 18px rgba(255, 204, 51, 0.75);
+  pointer-events: none;
+  animation: gem-find-pop 0.98s cubic-bezier(0.2, 1.45, 0.3, 1) both;
+}
+
+@keyframes gem-find-pop {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.55) translateY(12px);
+  }
+  28% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.18) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) scale(1.05) translateY(-28px);
+  }
+}
+
+/* Amplify combo stamp when finds chain. */
+.gem-combo.is-loud {
+  font-size: clamp(1.15rem, 5vw, 1.45rem);
+  animation: gem-combo-loud 1.1s cubic-bezier(0.2, 1.4, 0.3, 1) both;
+}
+
+@keyframes gem-combo-loud {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.7);
+  }
+  30% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) scale(1) translateY(-16px);
+  }
+}
+
+/* Required find board thump when burst is live. */
+.play.is-gem-search.is-find-pop .gem-board,
+.play.is-gem-search.is-boom .gem-board {
+  animation: gem-board-thump 0.42s cubic-bezier(0.12, 1.2, 0.28, 1);
+}
+
+/* Longer / punchier explode on required finds. */
+.play.is-gem-search.is-find-pop .gem-cell.is-burst {
+  animation: gem-explode-loud 0.72s cubic-bezier(0.12, 0.8, 0.28, 1) both;
+}
+
+@keyframes gem-explode-loud {
+  0% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  24% {
+    transform: scale(1.38) rotate(10deg);
+    filter: brightness(2);
+  }
+  100% {
+    transform: scale(0.15) rotate(32deg);
+    filter: brightness(2.4);
+    opacity: 0.12;
+  }
+}
+
+/* BONUS! +100 SNAG — punchy, not soft. */
+.play.is-gem-search .gem-stage .bonus-banner {
+  animation: gem-overlay-pop 0.28s cubic-bezier(0.15, 1.55, 0.3, 1) both;
+  box-shadow:
+    0 3px 0 #c46a08,
+    0 0 22px rgba(255, 204, 51, 0.55);
+}
+
+.play.is-gem-search .gem-stage .bonus-banner strong {
+  font-size: 1.08rem;
+  letter-spacing: 0.06em;
+}
+
+/* Miss −25 stays tight — short overlay, no soft linger. */
+.play.is-gem-search .gem-stage .miss-banner {
+  animation: gem-overlay-pop 0.2s cubic-bezier(0.2, 1.1, 0.3, 1) both;
+}
+
+.play.is-gem-search .gem-stage .miss-banner span:empty {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gem-find-pop,
+  .gem-combo.is-loud,
+  .play.is-gem-search.is-find-pop .gem-board,
+  .play.is-gem-search.is-boom .gem-board,
+  .play.is-gem-search.is-find-pop .gem-cell.is-burst {
+    animation: none;
+  }
+}

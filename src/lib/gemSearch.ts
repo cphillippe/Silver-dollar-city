@@ -444,6 +444,86 @@ function scanBonusOnBoard(
   return found
 }
 
+/** Letters already written (chips + planted) — payoff bag for dense fill. */
+export function letterWeightsFromWords(words: string[]): string[] {
+  const bag: string[] = []
+  for (const word of words) {
+    for (const ch of word.toUpperCase()) {
+      if (ch >= 'A' && ch <= 'Z') bag.push(ch)
+    }
+  }
+  return bag
+}
+
+/** High-frequency letters from plantable / bonus-pool words (3–6). */
+export function letterWeightsFromBonusPool(pool: Iterable<string>): string[] {
+  const counts = new Map<string, number>()
+  for (const raw of pool) {
+    const word = raw.toUpperCase()
+    if (word.length < 3 || word.length > BONUS_WORD_MAX) continue
+    for (const ch of word) {
+      if (ch < 'A' || ch > 'Z') continue
+      counts.set(ch, (counts.get(ch) ?? 0) + 1)
+    }
+  }
+  const bag: string[] = []
+  for (const [ch, n] of counts) {
+    const weight = Math.max(1, Math.ceil(n / 3))
+    for (let i = 0; i < weight; i += 1) bag.push(ch)
+  }
+  return bag.length ? bag : FILL.slice(0, 12)
+}
+
+function lettersOnGrid(grid: (string | '')[][]): string[] {
+  const bag: string[] = []
+  for (const row of grid) {
+    for (const cell of row) {
+      if (cell) bag.push(cell)
+    }
+  }
+  return bag
+}
+
+function pickLetter(bag: string[], rand: () => number): string {
+  if (!bag.length) return FILL[Math.floor(rand() * FILL.length)] ?? 'A'
+  return bag[Math.floor(rand() * bag.length)] ?? 'A'
+}
+
+/**
+ * Payoff-biased fill — less dead/filler cells.
+ * ~70% planted+chip letter bag, ~20% high-freq bonus-pool letters, ~10% FILL texture.
+ * Never pure uniform FILL.
+ */
+export function fillGridDense(
+  grid: (string | '')[][],
+  rand: () => number,
+  weightLetters: string[] = [],
+): string[][] {
+  const chipBag = weightLetters.length ? [...weightLetters] : lettersOnGrid(grid)
+  const plantedBag = chipBag.length ? chipBag : FILL.slice(0, 12)
+  const bonusBag = letterWeightsFromBonusPool(COMMON_BONUS_WORDS)
+  const rareBag = FILL
+
+  return grid.map((row) =>
+    row.map((cell) => {
+      if (cell) return cell
+      const roll = rand()
+      if (roll < 0.7) return pickLetter(plantedBag, rand)
+      if (roll < 0.9) return pickLetter(bonusBag, rand)
+      return pickLetter(rareBag, rand)
+    }),
+  )
+}
+
+/** Thin wrapper — callers stay stable; optional weightLetters from buildGemPuzzle. */
+export function fillGrid(
+  grid: (string | '')[][],
+  rand: () => number,
+  weightLetters: string[] = [],
+): string[][] {
+  return fillGridDense(grid, rand, weightLetters)
+}
+
 export function buildGemPuzzle(lineId: string, salt = 0): GemPuzzle {
   const words = gemWordsFor(lineId)
   const bonusPool = bonusWordsFor(lineId)
@@ -479,12 +559,26 @@ export function buildGemPuzzle(lineId: string, salt = 0): GemPuzzle {
     planted.add(text)
   }
 
-  const letters = grid.map((row) =>
-    row.map((cell) => {
-      if (cell) return cell
-      return FILL[Math.floor(rand() * FILL.length)] ?? 'A'
-    }),
-  )
+  // Dense bump: try 1–2 more short preferred plants into remaining gaps (cap MAX+2).
+  const denserCap = MAX_BONUS_PLANT + 2
+  for (const text of plantCandidates(targets, rand)) {
+    if (plantedWords.length >= denserCap) break
+    if (planted.has(text) || targets.has(text)) continue
+    if (!isPreferredPlantWord(text) || text.length > 4) continue
+    const placed = tryPlaceWord(grid, text, starts, rand) ?? placeFallback(grid, text)
+    if (!placed) continue
+    const word = makeBonusWord(text)
+    plantedWords.push(word)
+    bonus.push(word)
+    bonusPaths[word.id] = placed
+    planted.add(text)
+  }
+
+  const weightLetters = letterWeightsFromWords([
+    ...words.map((word) => word.text),
+    ...plantedWords.map((word) => word.text),
+  ])
+  const letters = fillGrid(grid, rand, weightLetters)
 
   const taken = new Set([...words.map((word) => word.text), ...planted])
   const scanPool = [
