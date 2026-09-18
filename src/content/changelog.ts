@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.87',
+    title: 'Support soft juice · Easy core trail',
+    when: '2026-09-18',
+    items: [
+      'Support soft juice: cream hub toast after Easy Hold with Tip and Not now. Easy stays free. Journal stays open. Wishlist packs stay links, not a paywall',
+      'Stores stay parked. Play / AdMob / Apple flags stay blank. Remove ads stays Coming with stores',
+      'Easy Match SNAG from 1.4.86 stays. Core Easy 45 facts stay free. Night Watch and Town stay hidden on Easy. Journal ungated. Never a hard paywall',
+    ],
+  },
+  {
     version: '1.4.86',
     title: 'Easy Match SNAG · Easy core trail',
     when: '2026-09-16',
@@ -1721,7 +1731,8 @@ export function latestChange(version: string): ChangeNote {
     return { version, title: 'Easy core trail', when: '', items: [] }
   }
   if (note.version === '1.4.87') {
-    return 'Support soft juice — tip toast after Hold; wishlist packs; stores still parked.'
+    const prior = latestChange('1.4.86')
+    return { ...note, items: [...note.items, ...prior.items] }
   }
   if (note.version === '1.4.86') {
     const prior = latestChange('1.4.85')
