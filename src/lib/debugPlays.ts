@@ -3,6 +3,7 @@ import { CLAIM_MERGE_LINE } from './claimMerge.ts'
 import { EASY_LINE_ORDER } from './easy.ts'
 import { FATHER_RUN_LINE } from './fatherRun.ts'
 import { ROAD_MAZE_LINE } from './roadMaze.ts'
+import { STORY_SNAP_LINE } from './storySnap.ts'
 import { storyPlayFor, type StoryPlayKind } from './storyPlay.ts'
 
 /** Hold Why Blast is journal lock-in, not a Match arcade. */
@@ -23,6 +24,7 @@ export interface DebugPlayGroup {
 const PLAY_HEADING: Record<DebugPlayKind, string> = {
   'road-maze': 'Road maze',
   'father-run': 'Father run',
+  'story-snap': 'Story snap',
   'panel-blast': 'Gem Match / word search',
   'claim-merge': 'Claim merge',
   'source-dig': 'Source dig',
@@ -32,6 +34,7 @@ const PLAY_HEADING: Record<DebugPlayKind, string> = {
 const LAYER_ORDER: DebugPlayKind[] = [
   'road-maze',
   'father-run',
+  'story-snap',
   'panel-blast',
   'claim-merge',
   'source-dig',
@@ -42,6 +45,7 @@ const LAYER_ORDER: DebugPlayKind[] = [
 export const DEBUG_LAYER_LINES = {
   'road-maze': ROAD_MAZE_LINE,
   'father-run': FATHER_RUN_LINE,
+  'story-snap': STORY_SNAP_LINE,
   'panel-blast': 'ph-debt',
   'claim-merge': CLAIM_MERGE_LINE,
   'source-dig': 'wb-women',
