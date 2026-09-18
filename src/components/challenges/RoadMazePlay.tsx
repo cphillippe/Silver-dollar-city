@@ -41,7 +41,7 @@ import { MatchTakeaway } from '../HeldTriad'
 import { GEM_BURST, playGemPop, prefersReducedMotion } from '../../lib/juice'
 import { storyPanelsFor, type StoryPanel } from '../../lib/storyPanels'
 import { StoryPanelArt } from '../StoryPanelArt'
-import { ROAD_CLAIM_MEDIA, ROAD_HELP_FACE, ROAD_HURT_FACE } from '../../content/panelBlast'
+import { ROAD_HELP_FACE, ROAD_HURT_FACE } from '../../content/panelBlast'
 import { WinBurst } from './WinBurst'
 
 interface RoadMazePlayProps {
@@ -435,7 +435,7 @@ export function RoadMazePlay({
         }}
         onKeyDown={onBoardKey}
       >
-        <WinBurst play={winStamp} stamp={ROAD_MAZE_WIN} frame={ROAD_CLAIM_MEDIA.still} />
+        <WinBurst play={winStamp} stamp={ROAD_MAZE_WIN} />
         {Array.from({ length: MAZE_ROWS }, (_, r) =>
           Array.from({ length: MAZE_COLS }, (__, c) => {
             const cell = { r, c }
@@ -472,10 +472,6 @@ export function RoadMazePlay({
                 ) : null}
                 {helped && here ? <span className="maze-carry" aria-hidden /> : null}
                 {inn ? <span className="maze-inn" aria-hidden /> : null}
-                {hurt && !helped ? (
-                  <span className="maze-cell-label">{helpCue ? 'Help' : 'Hurt man'}</span>
-                ) : null}
-                {inn ? <span className="maze-cell-label">Inn</span> : null}
                 {popAt === mazeKey(cell)
                   ? POP_SHARDS.map((i) => (
                       <i key={i} className="maze-shard" style={{ ['--i' as string]: i }} />
@@ -490,11 +486,6 @@ export function RoadMazePlay({
             )
           }),
         )}
-        {won ? (
-          <div className="maze-win-art" aria-hidden>
-            <StoryPanelArt scene="neighbor" media={ROAD_CLAIM_MEDIA} size="hero" />
-          </div>
-        ) : null}
       </div>
       </div>
       <p className={`match-score ${plusFlash ? 'is-juice' : ''}`}>

@@ -69,7 +69,7 @@ assert.equal(resolveStoryMedia({ kind: 'still', thumb: 't.webp' }).thumb, 't.web
 const mazeSrc = readFileSync(new URL('../src/components/challenges/RoadMazePlay.tsx', import.meta.url), 'utf8')
 assert.match(mazeSrc, /ROAD_HURT_FACE/)
 assert.match(mazeSrc, /ROAD_HELP_FACE/)
-assert.match(mazeSrc, /ROAD_CLAIM_MEDIA/)
+assert.doesNotMatch(mazeSrc, /ROAD_CLAIM_MEDIA/)
 assert.match(mazeSrc, /panelBlast/)
 
 const runSrc = readFileSync(new URL('../src/components/challenges/FatherRunPlay.tsx', import.meta.url), 'utf8')

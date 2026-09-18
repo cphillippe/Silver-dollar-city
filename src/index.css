@@ -9276,6 +9276,39 @@ html[data-easy='on'] .next-tap {
   overflow: auto;
 }
 
+.play.is-road-maze.is-win .maze-beats {
+  display: none;
+}
+
+.play.is-road-maze.is-win .run-thumbs {
+  max-height: 28px;
+  overflow: hidden;
+  opacity: 0.45;
+}
+
+.play.is-road-maze.is-win .maze-stage {
+  flex: 0 0 auto;
+}
+
+.play.is-road-maze.is-win .maze-board {
+  max-height: min(28dvh, 220px);
+  background:
+    linear-gradient(180deg, rgba(255, 180, 90, 0.1), rgba(42, 13, 88, 0.28)),
+    linear-gradient(180deg, #3a1480, #1a0840);
+}
+
+.play.is-road-maze.is-win .maze-cell {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.play.is-road-maze.is-win .match-yes,
+.play.is-road-maze.is-win .cta-dock {
+  position: relative;
+  z-index: 4;
+}
+
 .play.is-road-maze .sort-how {
   margin: 0;
   text-align: center;
@@ -9621,7 +9654,7 @@ html[data-easy='on'] .next-tap {
 }
 
 .play.is-road-maze.is-win .match-yes {
-  margin-top: 4px;
+  margin-top: 8px;
 }
 
 .play.is-claim-merge {
