@@ -1,1 +1,1 @@
-import type { ProgressState } from '../types.ts'
+file:///workspace/Silver-dollar-city/src/lib/easy.ts
