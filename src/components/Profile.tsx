@@ -40,8 +40,8 @@ export function Profile({ onNavigate }: ProfileProps) {
           </p>
           <p className="memory-pipe">
             {easy
-              ? `Learn ${inv.learned} · Hold ${inv.held} · Use ${inv.deployed}`
-              : `Learn ${inv.learned} · Hold ${inv.held} · Deploy ${inv.deployed}`}
+              ? `Learn ${inv.learned} · Lock In ${inv.held} · Use ${inv.deployed}`
+              : `Learn ${inv.learned} · Lock In ${inv.held} · Deploy ${inv.deployed}`}
           </p>
         </div>
       </header>
@@ -58,7 +58,7 @@ export function Profile({ onNavigate }: ProfileProps) {
       >
         {inv.ideas.length === 0 ? (
           <p className="quiet">
-            Walk the Trail, then Hold the takeaway — lines you keep land here.
+            Walk the Trail, then Lock In the takeaway — lines you keep land here.
           </p>
         ) : (
           inv.ideas.map((idea) => (
@@ -194,7 +194,7 @@ export function Profile({ onNavigate }: ProfileProps) {
                   <strong>
                     {tool.label} {tool.tierMark}
                   </strong>
-                  <p>Night Watch · Learn → Hold → Deploy</p>
+                  <p>Night Watch · Learn → Lock In → Deploy</p>
                 </span>
               </button>
               )
@@ -248,7 +248,7 @@ export function Profile({ onNavigate }: ProfileProps) {
         ) : (
           <p className="quiet">
             {easy
-              ? `${EASY.matchHunt} Then Hold the line.`
+              ? `${EASY.matchHunt} Then lock in the line.`
               : 'Link the street from Town to snap idea · place · person. Lit nodes reopen here.'}
           </p>
         )}
