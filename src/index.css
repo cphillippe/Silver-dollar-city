@@ -10078,7 +10078,9 @@ html[data-easy='on'] .next-tap {
 }
 
 .play.is-source-dig.is-win .dig-board {
+  min-height: auto;
   padding-top: 54px;
+  padding-bottom: 18px;
 }
 
 .play.is-source-dig .win-stamp-wrap {
@@ -10155,6 +10157,22 @@ html[data-easy='on'] .next-tap {
 
 .dig-tablet.is-open {
   cursor: default;
+  overflow: visible;
+  min-height: auto;
+  height: auto;
+  align-content: start;
+  padding-bottom: 12px;
+}
+
+.dig-tablet.is-open em {
+  display: block;
+  white-space: normal;
+  overflow: visible;
+  max-height: none;
+}
+
+.play.is-source-dig.is-win .dig-tablet {
+  min-height: auto;
 }
 
 .dig-tablet.is-pop .dig-shard,

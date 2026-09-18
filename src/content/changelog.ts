@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.90',
+    title: 'Dig tablets readable · Easy core trail',
+    when: '2026-09-18',
+    items: [
+      'Dig open tablets show full bite text after DUG! (no clip on third card)',
+    ],
+  },
+  {
     version: '1.4.89',
     title: 'Fun Match less-waste · Easy core trail',
     when: '2026-09-18',
@@ -1746,6 +1754,10 @@ export function latestChange(version: string): ChangeNote {
   const note = CHANGELOG.find((item) => item.version === version) ?? CHANGELOG[0]
   if (!note) {
     return { version, title: 'Easy core trail', when: '', items: [] }
+  }
+  if (note.version === '1.4.90') {
+    const prior = latestChange('1.4.89')
+    return { ...note, items: [...note.items, ...prior.items] }
   }
   if (note.version === '1.4.89') {
     const prior = latestChange('1.4.88')
