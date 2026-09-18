@@ -132,8 +132,8 @@
     <matchCta>Match</matchCta>
     <matchDone>Match done</matchDone>
     <matchWin>Matched!</matchWin>
-    <hold>Hold</hold>
-    <holdNext>Hold next</holdNext>
+    <hold>Lock In</hold>
+    <holdNext>Lock In next</holdNext>
     <home>Home</home>
     <connectLink>Tap the sentence, then the place, then the person.</connectLink>
     <readStory>Read today’s story.</readStory>
@@ -153,9 +153,9 @@
     <continueStreet>Continue tonight’s street</continueStreet>
     <nightDo>Night Watch</nightDo>
     <nightLead>Tap the face six times.</nightLead>
-    <hubEasyLead>Match a sentence. Hold the line.</hubEasyLead>
+    <hubEasyLead>Match a sentence. Lock in the line.</hubEasyLead>
     <holdTheNight>Hold the night</holdTheNight>
-    <learnHoldDeploy>Learn · hold · deploy</learnHoldDeploy>
+    <learnHoldDeploy>Learn · lock in · deploy</learnHoldDeploy>
     <homesOnTheStreet>Homes on the street</homesOnTheStreet>
   </uiChrome>
   <flags>
