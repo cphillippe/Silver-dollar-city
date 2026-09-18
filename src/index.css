@@ -7736,7 +7736,43 @@ html[data-easy='on'] .next-tap {
 }
 
 .play.is-gem-search.is-panel-blast {
+  display: flex;
+  flex-direction: column;
   gap: 6px;
+  min-height: 0;
+  overflow: hidden; /* whole play no longer scrolls as one blob */
+}
+
+.play.is-gem-search.is-panel-blast .sort-how {
+  flex-shrink: 0;
+}
+
+.play.is-gem-search.is-panel-blast .story-strip {
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  padding-bottom: 4px;
+  background: linear-gradient(180deg, rgba(26, 8, 64, 0.96), rgba(26, 8, 64, 0.88));
+}
+
+.play.is-gem-search.is-panel-blast .gem-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Parent play already scrolls today — disable that for panel-blast Match */
+.daily-page.is-puzzle .play.is-gem-search.is-panel-blast,
+.challenge-page.is-puzzle .play.is-gem-search.is-panel-blast,
+.daily-page.is-puzzle .play.is-gem-search.is-panel-blast.is-win,
+.challenge-page.is-puzzle .play.is-gem-search.is-panel-blast.is-win {
+  overflow: hidden;
 }
 
 .story-strip {

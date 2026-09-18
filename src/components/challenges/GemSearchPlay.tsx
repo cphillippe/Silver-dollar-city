@@ -427,6 +427,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
         flipping={flipping}
         complete={status === 'ok'}
       />
+      <div className="gem-scroll">
       <ul className="gem-words" aria-label="Words to find">
         {puzzle.words.map((word) => (
           <li
@@ -574,6 +575,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
           </div>
         </>
       ) : null}
+      </div>
     </div>
   )
 }

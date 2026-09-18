@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.91',
+    title: 'Fun Match pin story strip · Easy core trail',
+    when: '2026-09-18',
+    items: [
+      'Match pins story pictures while the crossword scrolls',
+    ],
+  },
+  {
     version: '1.4.90',
     title: 'Dig tablets readable · Easy core trail',
     when: '2026-09-18',
@@ -1754,6 +1762,10 @@ export function latestChange(version: string): ChangeNote {
   const note = CHANGELOG.find((item) => item.version === version) ?? CHANGELOG[0]
   if (!note) {
     return { version, title: 'Easy core trail', when: '', items: [] }
+  }
+  if (note.version === '1.4.91') {
+    const prior = latestChange('1.4.90')
+    return { ...note, items: [...note.items, ...prior.items] }
   }
   if (note.version === '1.4.90') {
     const prior = latestChange('1.4.89')
