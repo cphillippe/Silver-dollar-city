@@ -21,7 +21,7 @@ export const AD_SLOTS = {
   'between-scenes': {
     id: 'between-scenes',
     label: 'Between scenes',
-    where: 'Home ↔ lesson transitions only — never over Match, Hold, arcade, or source-dig',
+    where: 'Home ↔ lesson transitions only — never over Match, Lock In, arcade, or source-dig',
   },
 } as const
 
