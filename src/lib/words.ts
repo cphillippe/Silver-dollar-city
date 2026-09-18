@@ -13,9 +13,9 @@ export const WORDS = {
     teach: 'A claim is the main idea we hold to be true.',
   },
   hold: {
-    term: 'Hold',
+    term: 'Lock In',
     sense: 'keep a true line you can still say tomorrow',
-    teach: 'To hold a claim is to keep it so you can still say it tomorrow.',
+    teach: 'To lock in a claim is to keep it so you can still say it tomorrow.',
   },
   reason: {
     term: 'Reason',
