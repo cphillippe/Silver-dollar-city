@@ -1,0 +1,409 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<areaPack id="papyrus-vault" schemaVersion="3" appVersion="1.4.103" generated="2026-09-18T06:45:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/" title="Papyrus Vault" place="Papyrus Vault" person="Silas Whitman" personId="silas" plotId="bench">
+  <howToEdit>RUNTIME CONTENT. Three tiers. Held claim·reason·source identical.</howToEdit>
+  <meta><title>Silver City — Papyrus Vault</title><subtitle>Ancient Egyptian Sands Reveal the Earliest Pages of Christ's Gospels</subtitle><blurb>Skeptics claim the story of Jesus Christ was invented centuries later like a long game of telephone. Step into the Papyrus Vault to inspect the oldest surviving New Testament pages pulled from desert sands, proving the Gospels were written, copied, and read across the Roman world from the earliest generations.</blurb>
+    <notes>Unlock after Iron Spike Way. Objection: The Gospels about Jesus Christ were invented hundreds of years later as evolving folklore.</notes></meta>
+  <easyShelf order="papr-p52,papr-p46,papr-p66">
+    <line id="papr-p52" easyOrder="88">papr-p52</line>
+    <line id="papr-p46" easyOrder="89">papr-p46</line>
+    <line id="papr-p66" easyOrder="90">papr-p66</line>
+  </easyShelf>
+  <lessons>
+    <lesson id="papr-p52" place="Papyrus Vault" person="Silas Whitman" tripleId="p52-dig" ideaId="idea-p52" ideaLabel="Earliest Gospel Fragment" challengeKind="sort" challengeTitle="The Egyptian Scrap">
+      <easy points="10" easyOrder="88">
+        <learn>
+          <shortStory>In a quiet Egyptian village, an early believer treasured a papyrus scrap of John chapter 18. Centuries later, scholars discovered this fragment, realizing it was written just decades after John lived. It utterly crushed claims that the Gospel of Jesus Christ was invented centuries later.</shortStory>
+          <mainIdea>Papyrus P52 proves the Gospel of Jesus Christ was copied and read in early Egypt.</mainIdea>
+          <gloss>Papyrus P52 proves the Gospel of Jesus Christ was copied and read in early Egypt.</gloss>
+          <loci>This idea lives at Papyrus Vault, with Silas.</loci>
+          <word><term>Papyrus P52</term><sense>a tiny second-century Egyptian scrap of the Gospel of John</sense></word>
+          <hint>Silas points to the tiny scrap of John's Gospel found buried in the dry Egyptian sand.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>Papyrus P52 proves the Gospel of Jesus Christ was copied and read in early Egypt.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Papyrus P52 was forged in medieval Europe to support church councils.</miss>
+            <miss>Skeptics proved this Egyptian scrap dates to a thousand years after Christ.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at Papyrus Vault.</placePrompt>
+          <personPrompt>Silas keeps that street.</personPrompt>
+          <ideaPrompt>Silas’s dig — Earliest Gospel Fragment</ideaPrompt>
+          <ideaLabel>Earliest Gospel Fragment</ideaLabel>
+          <whyEasy>Papyrus P52 proves the Gospel of Jesus Christ was copied and read in early Egypt.</whyEasy>
+        </match>
+        <hold levelUpTo="medium" onFail="easy">
+          <claim>Papyrus P52 proves the Gospel of Jesus Christ was copied and read in early Egypt.</claim>
+          <reason>The scrap preserves John's trial text within decades of the original writing.</reason>
+          <source>Papyrus P52 (Rylands Greek Papyrus 457)</source>
+          <whyCorrect>The scrap preserves John's trial text within decades of the original writing.</whyCorrect>
+          <whyMisses>
+            <miss>Papyrus P52 comes from second-century Egypt, not medieval Europe.</miss>
+            <miss>Scientific dating places the scrap right after the apostolic era, not a millennium later.</miss>
+            <miss>The text confirms rapid transmission, not delayed folklore.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Papyrus P52 proves the Gospel of Jesus Christ was copied and read in early Egypt.</choice>
+            <choice>Papyrus P52 proves the Gospel accounts were altered over centuries of oral folklore.</choice>
+            <choice>Papyrus P52 shows the apostles wrote in Latin rather than early Greek.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>The scrap preserves John's trial text within decades of the original writing.</choice>
+            <choice>It was composed hundreds of years after the apostles were already dead.</choice>
+            <choice>The fragment contains poetry instead of historical accounts of Jesus.</choice>
+          </reasonChoices>
+        </hold>
+      </easy>
+      <medium points="12">
+        <learn>
+          <mediumTeach>Silas Whitman shows you Papyrus P52, a scrap of John 18 found in Egypt. It dates to the early second century, showing Christ's Gospel was read far from Jerusalem.</mediumTeach>
+          <mainIdea>Papyrus P52 proves the Gospel of Jesus Christ was copied and read in early Egypt.</mainIdea>
+          <gloss>Papyrus P52 proves the Gospel of Jesus Christ was copied and read in early Egypt.</gloss>
+          <loci>This idea lives at Papyrus Vault, with Silas.</loci>
+          <word><term>Papyrus P52</term><sense>a tiny second-century Egyptian scrap of the Gospel of John</sense></word>
+          <hint>Silas points to the tiny scrap of John's Gospel found buried in the dry Egyptian sand.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>Papyrus P52 proves the Gospel of Jesus Christ was copied and read in early Egypt.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Papyrus P52 was forged in medieval Europe to support church councils.</miss>
+            <miss>Skeptics proved this Egyptian scrap dates to a thousand years after Christ.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at Papyrus Vault.</placePrompt>
+          <personPrompt>Silas keeps that street.</personPrompt>
+          <ideaPrompt>Silas’s dig — Earliest Gospel Fragment</ideaPrompt>
+          <ideaLabel>Earliest Gospel Fragment</ideaLabel>
+          <whyEasy>Papyrus P52 proves the Gospel of Jesus Christ was copied and read in early Egypt.</whyEasy>
+        </match>
+        <hold levelUpTo="hard" onFail="easy">
+          <claim>Papyrus P52 proves the Gospel of Jesus Christ was copied and read in early Egypt.</claim>
+          <reason>The scrap preserves John's trial text within decades of the original writing.</reason>
+          <source>Papyrus P52 (Rylands Greek Papyrus 457)</source>
+          <whyCorrect>The scrap preserves John's trial text within decades of the original writing.</whyCorrect>
+          <whyMisses>
+            <miss>Papyrus P52 comes from second-century Egypt, not medieval Europe.</miss>
+            <miss>Scientific dating places the scrap right after the apostolic era, not a millennium later.</miss>
+            <miss>The text confirms rapid transmission, not delayed folklore.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Papyrus P52 proves the Gospel of Jesus Christ was copied and read in early Egypt.</choice>
+            <choice>Papyrus P52 proves the Gospel accounts were altered over centuries of oral folklore.</choice>
+            <choice>Papyrus P52 shows the apostles wrote in Latin rather than early Greek.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>The scrap preserves John's trial text within decades of the original writing.</choice>
+            <choice>It was composed hundreds of years after the apostles were already dead.</choice>
+            <choice>The fragment contains poetry instead of historical accounts of Jesus.</choice>
+          </reasonChoices>
+        </hold>
+      </medium>
+      <hard points="15">
+        <learn>
+          <hardTeach>Papyrus P52 was copied around 125 AD. Because John was written in Asia Minor, finding this copy in Egypt proves the Gospel of Jesus Christ spread rapidly as trusted Scripture, not slow folklore.</hardTeach>
+          <fullTeach>Papyrus P52 was copied around 125 AD. Because John was written in Asia Minor, finding this copy in Egypt proves the Gospel of Jesus Christ spread rapidly as trusted Scripture, not slow folklore.</fullTeach>
+          <mainIdea>Papyrus P52 proves the Gospel of Jesus Christ was copied and read in early Egypt.</mainIdea>
+          <gloss>Papyrus P52 proves the Gospel of Jesus Christ was copied and read in early Egypt.</gloss>
+          <loci>This idea lives at Papyrus Vault, with Silas.</loci>
+          <word><term>Papyrus P52</term><sense>a tiny second-century Egyptian scrap of the Gospel of John</sense></word>
+          <hint>Silas points to the tiny scrap of John's Gospel found buried in the dry Egyptian sand.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>Papyrus P52 proves the Gospel of Jesus Christ was copied and read in early Egypt.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Papyrus P52 was forged in medieval Europe to support church councils.</miss>
+            <miss>Skeptics proved this Egyptian scrap dates to a thousand years after Christ.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at Papyrus Vault.</placePrompt>
+          <personPrompt>Silas keeps that street.</personPrompt>
+          <ideaPrompt>Silas’s dig — Earliest Gospel Fragment</ideaPrompt>
+          <ideaLabel>Earliest Gospel Fragment</ideaLabel>
+          <whyEasy>Papyrus P52 proves the Gospel of Jesus Christ was copied and read in early Egypt.</whyEasy>
+        </match>
+        <hold onFail="easy">
+          <claim>Papyrus P52 proves the Gospel of Jesus Christ was copied and read in early Egypt.</claim>
+          <reason>The scrap preserves John's trial text within decades of the original writing.</reason>
+          <source>Papyrus P52 (Rylands Greek Papyrus 457)</source>
+          <whyCorrect>The scrap preserves John's trial text within decades of the original writing.</whyCorrect>
+          <whyMisses>
+            <miss>Papyrus P52 comes from second-century Egypt, not medieval Europe.</miss>
+            <miss>Scientific dating places the scrap right after the apostolic era, not a millennium later.</miss>
+            <miss>The text confirms rapid transmission, not delayed folklore.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Papyrus P52 proves the Gospel of Jesus Christ was copied and read in early Egypt.</choice>
+            <choice>Papyrus P52 proves the Gospel accounts were altered over centuries of oral folklore.</choice>
+            <choice>Papyrus P52 shows the apostles wrote in Latin rather than early Greek.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>The scrap preserves John's trial text within decades of the original writing.</choice>
+            <choice>It was composed hundreds of years after the apostles were already dead.</choice>
+            <choice>The fragment contains poetry instead of historical accounts of Jesus.</choice>
+          </reasonChoices>
+        </hold>
+      </hard>
+    </lesson>
+    <lesson id="papr-p46" place="Papyrus Vault" person="Silas Whitman" tripleId="p46-dig" ideaId="idea-p46" ideaLabel="Paul's Bound Epistles" challengeKind="sort" challengeTitle="The Ancient Letters Codex">
+      <easy points="10" easyOrder="89">
+        <learn>
+          <shortStory>A faithful craftsman stitched papyrus leaves together along the Nile to make a durable codex. This booklet gathered Paul's letters so local congregations could study the deity and resurrection of Jesus Christ together. Its survival shows believers cherished these teachings as Scripture.</shortStory>
+          <mainIdea>Papyrus P46 proves Christians collected letters honoring Jesus Christ around 200 AD.</mainIdea>
+          <gloss>Papyrus P46 proves Christians collected letters honoring Jesus Christ around 200 AD.</gloss>
+          <loci>This idea lives at Papyrus Vault, with Silas.</loci>
+          <word><term>Papyrus P46</term><sense>an ancient bound booklet of Paul's letters dating to around 200 AD</sense></word>
+          <hint>Silas points to an early bound book of letters that celebrates Christ's resurrection.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>Papyrus P46 proves Christians collected letters honoring Jesus Christ around 200 AD.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Papyrus P46 is a Roman tax record that makes no mention of early church leaders.</miss>
+            <miss>Early believers avoided reading Paul's letters until the fifth century.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at Papyrus Vault.</placePrompt>
+          <personPrompt>Silas keeps that street.</personPrompt>
+          <ideaPrompt>Silas’s dig — Paul's Bound Epistles</ideaPrompt>
+          <ideaLabel>Paul's Bound Epistles</ideaLabel>
+          <whyEasy>Papyrus P46 proves Christians collected letters honoring Jesus Christ around 200 AD.</whyEasy>
+        </match>
+        <hold levelUpTo="medium" onFail="easy">
+          <claim>Papyrus P46 proves Christians collected letters honoring Jesus Christ around 200 AD.</claim>
+          <reason>This early bound codex holds Paul's epistles celebrating the risen Savior.</reason>
+          <source>Papyrus P46 (Chester Beatty Papyrus II)</source>
+          <whyCorrect>This early bound codex holds Paul's epistles celebrating the risen Savior.</whyCorrect>
+          <whyMisses>
+            <miss>Papyrus P46 is a Christian codex of Paul's letters, not a tax ledger.</miss>
+            <miss>Christians bound and read Paul's letters by 200 AD, not centuries later.</miss>
+            <miss>The codex proclaims Jesus Christ as risen Lord, not legendary myth.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Papyrus P46 proves Christians collected letters honoring Jesus Christ around 200 AD.</choice>
+            <choice>Papyrus P46 proves Paul's letters were discarded and ignored by early believers.</choice>
+            <choice>Papyrus P46 proves the early church had no written texts about Jesus Christ.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>This early bound codex holds Paul's epistles celebrating the risen Savior.</choice>
+            <choice>The booklet contains non-Christian philosophy unrelated to the New Testament.</choice>
+            <choice>The pages were fabricated by fourth-century emperors to change church history.</choice>
+          </reasonChoices>
+        </hold>
+      </easy>
+      <medium points="12">
+        <learn>
+          <mediumTeach>Silas explains that Papyrus P46 is one of the oldest surviving Christian books. Dated to about 200 AD, it contains eight of Paul's letters honoring Jesus Christ.</mediumTeach>
+          <mainIdea>Papyrus P46 proves Christians collected letters honoring Jesus Christ around 200 AD.</mainIdea>
+          <gloss>Papyrus P46 proves Christians collected letters honoring Jesus Christ around 200 AD.</gloss>
+          <loci>This idea lives at Papyrus Vault, with Silas.</loci>
+          <word><term>Papyrus P46</term><sense>an ancient bound booklet of Paul's letters dating to around 200 AD</sense></word>
+          <hint>Silas points to an early bound book of letters that celebrates Christ's resurrection.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>Papyrus P46 proves Christians collected letters honoring Jesus Christ around 200 AD.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Papyrus P46 is a Roman tax record that makes no mention of early church leaders.</miss>
+            <miss>Early believers avoided reading Paul's letters until the fifth century.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at Papyrus Vault.</placePrompt>
+          <personPrompt>Silas keeps that street.</personPrompt>
+          <ideaPrompt>Silas’s dig — Paul's Bound Epistles</ideaPrompt>
+          <ideaLabel>Paul's Bound Epistles</ideaLabel>
+          <whyEasy>Papyrus P46 proves Christians collected letters honoring Jesus Christ around 200 AD.</whyEasy>
+        </match>
+        <hold levelUpTo="hard" onFail="easy">
+          <claim>Papyrus P46 proves Christians collected letters honoring Jesus Christ around 200 AD.</claim>
+          <reason>This early bound codex holds Paul's epistles celebrating the risen Savior.</reason>
+          <source>Papyrus P46 (Chester Beatty Papyrus II)</source>
+          <whyCorrect>This early bound codex holds Paul's epistles celebrating the risen Savior.</whyCorrect>
+          <whyMisses>
+            <miss>Papyrus P46 is a Christian codex of Paul's letters, not a tax ledger.</miss>
+            <miss>Christians bound and read Paul's letters by 200 AD, not centuries later.</miss>
+            <miss>The codex proclaims Jesus Christ as risen Lord, not legendary myth.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Papyrus P46 proves Christians collected letters honoring Jesus Christ around 200 AD.</choice>
+            <choice>Papyrus P46 proves Paul's letters were discarded and ignored by early believers.</choice>
+            <choice>Papyrus P46 proves the early church had no written texts about Jesus Christ.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>This early bound codex holds Paul's epistles celebrating the risen Savior.</choice>
+            <choice>The booklet contains non-Christian philosophy unrelated to the New Testament.</choice>
+            <choice>The pages were fabricated by fourth-century emperors to change church history.</choice>
+          </reasonChoices>
+        </hold>
+      </medium>
+      <hard points="15">
+        <learn>
+          <hardTeach>Papyrus P46 proves that Paul's epistles were circulating as an authoritative collection around 200 AD. Believers used the codex format to keep Christ's apostolic message intact.</hardTeach>
+          <fullTeach>Papyrus P46 proves that Paul's epistles were circulating as an authoritative collection around 200 AD. Believers used the codex format to keep Christ's apostolic message intact.</fullTeach>
+          <mainIdea>Papyrus P46 proves Christians collected letters honoring Jesus Christ around 200 AD.</mainIdea>
+          <gloss>Papyrus P46 proves Christians collected letters honoring Jesus Christ around 200 AD.</gloss>
+          <loci>This idea lives at Papyrus Vault, with Silas.</loci>
+          <word><term>Papyrus P46</term><sense>an ancient bound booklet of Paul's letters dating to around 200 AD</sense></word>
+          <hint>Silas points to an early bound book of letters that celebrates Christ's resurrection.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>Papyrus P46 proves Christians collected letters honoring Jesus Christ around 200 AD.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Papyrus P46 is a Roman tax record that makes no mention of early church leaders.</miss>
+            <miss>Early believers avoided reading Paul's letters until the fifth century.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at Papyrus Vault.</placePrompt>
+          <personPrompt>Silas keeps that street.</personPrompt>
+          <ideaPrompt>Silas’s dig — Paul's Bound Epistles</ideaPrompt>
+          <ideaLabel>Paul's Bound Epistles</ideaLabel>
+          <whyEasy>Papyrus P46 proves Christians collected letters honoring Jesus Christ around 200 AD.</whyEasy>
+        </match>
+        <hold onFail="easy">
+          <claim>Papyrus P46 proves Christians collected letters honoring Jesus Christ around 200 AD.</claim>
+          <reason>This early bound codex holds Paul's epistles celebrating the risen Savior.</reason>
+          <source>Papyrus P46 (Chester Beatty Papyrus II)</source>
+          <whyCorrect>This early bound codex holds Paul's epistles celebrating the risen Savior.</whyCorrect>
+          <whyMisses>
+            <miss>Papyrus P46 is a Christian codex of Paul's letters, not a tax ledger.</miss>
+            <miss>Christians bound and read Paul's letters by 200 AD, not centuries later.</miss>
+            <miss>The codex proclaims Jesus Christ as risen Lord, not legendary myth.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Papyrus P46 proves Christians collected letters honoring Jesus Christ around 200 AD.</choice>
+            <choice>Papyrus P46 proves Paul's letters were discarded and ignored by early believers.</choice>
+            <choice>Papyrus P46 proves the early church had no written texts about Jesus Christ.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>This early bound codex holds Paul's epistles celebrating the risen Savior.</choice>
+            <choice>The booklet contains non-Christian philosophy unrelated to the New Testament.</choice>
+            <choice>The pages were fabricated by fourth-century emperors to change church history.</choice>
+          </reasonChoices>
+        </hold>
+      </hard>
+    </lesson>
+    <lesson id="papr-p66" place="Papyrus Vault" person="Silas Whitman" tripleId="p66-dig" ideaId="idea-p66" ideaLabel="The Intact Gospel" challengeKind="sort" challengeTitle="The Faithful Copyist">
+      <easy points="10" easyOrder="90">
+        <learn>
+          <shortStory>Deep in Egypt, a careful scribe dipped his reed pen in ink, copying John's Gospel line by line. When he made an error, he painstakingly corrected it in the margin. Today, Papyrus P66 reveals the exact same Gospel message of Jesus Christ that we read in our Bibles today.</shortStory>
+          <mainIdea>Papyrus P66 proves the full Gospel of Jesus Christ was carefully preserved by 200 AD.</mainIdea>
+          <gloss>Papyrus P66 proves the full Gospel of Jesus Christ was carefully preserved by 200 AD.</gloss>
+          <loci>This idea lives at Papyrus Vault, with Silas.</loci>
+          <word><term>Papyrus P66</term><sense>a nearly complete papyrus codex of the Gospel of John from around 200 AD</sense></word>
+          <hint>Silas highlights a nearly complete Gospel book showing John's words preserved accurately.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>Papyrus P66 proves the full Gospel of Jesus Christ was carefully preserved by 200 AD.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Papyrus P66 shows that scribes rewrote John's Gospel to invent new miracles.</miss>
+            <miss>The Bodmer papyri were created by nineteenth-century desert wanderers.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at Papyrus Vault.</placePrompt>
+          <personPrompt>Silas keeps that street.</personPrompt>
+          <ideaPrompt>Silas’s dig — The Intact Gospel</ideaPrompt>
+          <ideaLabel>The Intact Gospel</ideaLabel>
+          <whyEasy>Papyrus P66 proves the full Gospel of Jesus Christ was carefully preserved by 200 AD.</whyEasy>
+        </match>
+        <hold levelUpTo="medium" onFail="easy">
+          <claim>Papyrus P66 proves the full Gospel of Jesus Christ was carefully preserved by 200 AD.</claim>
+          <reason>This nearly complete booklet records John's testimony without mythological changes.</reason>
+          <source>Papyrus P66 (Bodmer Papyrus II)</source>
+          <whyCorrect>This nearly complete booklet records John's testimony without mythological changes.</whyCorrect>
+          <whyMisses>
+            <miss>Papyrus P66 shows strict scribal care and matches modern Gospel texts.</miss>
+            <miss>The manuscript dates to around 200 AD, not the nineteenth century.</miss>
+            <miss>The text confirms John's authentic eyewitness account of Jesus Christ.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Papyrus P66 proves the full Gospel of Jesus Christ was carefully preserved by 200 AD.</choice>
+            <choice>Papyrus P66 shows that the Gospels were heavily altered through centuries of drift.</choice>
+            <choice>Papyrus P66 proves John was originally an oral legend without any early manuscripts.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>This nearly complete booklet records John's testimony without mythological changes.</choice>
+            <choice>The manuscript contains a totally different story of Jesus with late inventions.</choice>
+            <choice>The scribe erased John's words to replace them with Roman political speeches.</choice>
+          </reasonChoices>
+        </hold>
+      </easy>
+      <medium points="12">
+        <learn>
+          <mediumTeach>Silas points out Papyrus P66, an almost complete copy of John from around 200 AD. It matches what we read today, refuting claims of legendary distortion.</mediumTeach>
+          <mainIdea>Papyrus P66 proves the full Gospel of Jesus Christ was carefully preserved by 200 AD.</mainIdea>
+          <gloss>Papyrus P66 proves the full Gospel of Jesus Christ was carefully preserved by 200 AD.</gloss>
+          <loci>This idea lives at Papyrus Vault, with Silas.</loci>
+          <word><term>Papyrus P66</term><sense>a nearly complete papyrus codex of the Gospel of John from around 200 AD</sense></word>
+          <hint>Silas highlights a nearly complete Gospel book showing John's words preserved accurately.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>Papyrus P66 proves the full Gospel of Jesus Christ was carefully preserved by 200 AD.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Papyrus P66 shows that scribes rewrote John's Gospel to invent new miracles.</miss>
+            <miss>The Bodmer papyri were created by nineteenth-century desert wanderers.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at Papyrus Vault.</placePrompt>
+          <personPrompt>Silas keeps that street.</personPrompt>
+          <ideaPrompt>Silas’s dig — The Intact Gospel</ideaPrompt>
+          <ideaLabel>The Intact Gospel</ideaLabel>
+          <whyEasy>Papyrus P66 proves the full Gospel of Jesus Christ was carefully preserved by 200 AD.</whyEasy>
+        </match>
+        <hold levelUpTo="hard" onFail="easy">
+          <claim>Papyrus P66 proves the full Gospel of Jesus Christ was carefully preserved by 200 AD.</claim>
+          <reason>This nearly complete booklet records John's testimony without mythological changes.</reason>
+          <source>Papyrus P66 (Bodmer Papyrus II)</source>
+          <whyCorrect>This nearly complete booklet records John's testimony without mythological changes.</whyCorrect>
+          <whyMisses>
+            <miss>Papyrus P66 shows strict scribal care and matches modern Gospel texts.</miss>
+            <miss>The manuscript dates to around 200 AD, not the nineteenth century.</miss>
+            <miss>The text confirms John's authentic eyewitness account of Jesus Christ.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Papyrus P66 proves the full Gospel of Jesus Christ was carefully preserved by 200 AD.</choice>
+            <choice>Papyrus P66 shows that the Gospels were heavily altered through centuries of drift.</choice>
+            <choice>Papyrus P66 proves John was originally an oral legend without any early manuscripts.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>This nearly complete booklet records John's testimony without mythological changes.</choice>
+            <choice>The manuscript contains a totally different story of Jesus with late inventions.</choice>
+            <choice>The scribe erased John's words to replace them with Roman political speeches.</choice>
+          </reasonChoices>
+        </hold>
+      </medium>
+      <hard points="15">
+        <learn>
+          <hardTeach>Discovered near Dishna, Egypt, Papyrus P66 contains most of John's Gospel. Its careful scribal corrections show how faithfully early Christians guarded the true witness of Jesus Christ.</hardTeach>
+          <fullTeach>Discovered near Dishna, Egypt, Papyrus P66 contains most of John's Gospel. Its careful scribal corrections show how faithfully early Christians guarded the true witness of Jesus Christ.</fullTeach>
+          <mainIdea>Papyrus P66 proves the full Gospel of Jesus Christ was carefully preserved by 200 AD.</mainIdea>
+          <gloss>Papyrus P66 proves the full Gospel of Jesus Christ was carefully preserved by 200 AD.</gloss>
+          <loci>This idea lives at Papyrus Vault, with Silas.</loci>
+          <word><term>Papyrus P66</term><sense>a nearly complete papyrus codex of the Gospel of John from around 200 AD</sense></word>
+          <hint>Silas highlights a nearly complete Gospel book showing John's words preserved accurately.</hint>
+        </learn>
+        <match>
+          <sentenceCorrect>Papyrus P66 proves the full Gospel of Jesus Christ was carefully preserved by 200 AD.</sentenceCorrect>
+          <sentenceMisses>
+            <miss>Papyrus P66 shows that scribes rewrote John's Gospel to invent new miracles.</miss>
+            <miss>The Bodmer papyri were created by nineteenth-century desert wanderers.</miss>
+          </sentenceMisses>
+          <placePrompt>Those names sit at Papyrus Vault.</placePrompt>
+          <personPrompt>Silas keeps that street.</personPrompt>
+          <ideaPrompt>Silas’s dig — The Intact Gospel</ideaPrompt>
+          <ideaLabel>The Intact Gospel</ideaLabel>
+          <whyEasy>Papyrus P66 proves the full Gospel of Jesus Christ was carefully preserved by 200 AD.</whyEasy>
+        </match>
+        <hold onFail="easy">
+          <claim>Papyrus P66 proves the full Gospel of Jesus Christ was carefully preserved by 200 AD.</claim>
+          <reason>This nearly complete booklet records John's testimony without mythological changes.</reason>
+          <source>Papyrus P66 (Bodmer Papyrus II)</source>
+          <whyCorrect>This nearly complete booklet records John's testimony without mythological changes.</whyCorrect>
+          <whyMisses>
+            <miss>Papyrus P66 shows strict scribal care and matches modern Gospel texts.</miss>
+            <miss>The manuscript dates to around 200 AD, not the nineteenth century.</miss>
+            <miss>The text confirms John's authentic eyewitness account of Jesus Christ.</miss>
+          </whyMisses>
+          <claimChoices>
+            <choice>Papyrus P66 proves the full Gospel of Jesus Christ was carefully preserved by 200 AD.</choice>
+            <choice>Papyrus P66 shows that the Gospels were heavily altered through centuries of drift.</choice>
+            <choice>Papyrus P66 proves John was originally an oral legend without any early manuscripts.</choice>
+          </claimChoices>
+          <reasonChoices>
+            <choice>This nearly complete booklet records John's testimony without mythological changes.</choice>
+            <choice>The manuscript contains a totally different story of Jesus with late inventions.</choice>
+            <choice>The scribe erased John's words to replace them with Roman political speeches.</choice>
+          </reasonChoices>
+        </hold>
+      </hard>
+    </lesson>
+  </lessons>
+</areaPack>
