@@ -159,7 +159,7 @@ export function Settings({ onNavigate }: SettingsProps) {
         <p className="quiet">{TRAIL_SUBTITLE}</p>
         <p>
           The Easy trail stays free. Soft pauses sit between home and a lesson —
-          never over Match, Hold, or arcade play, and never on Journal. Never a
+          never over Match, Lock In, or arcade play, and never on Journal. Never a
           hard paywall.
         </p>
         <div className="settings-actions">
@@ -423,7 +423,7 @@ export function Settings({ onNavigate }: SettingsProps) {
         <p className="eyebrow">Between-scene pauses</p>
         <p>
           Unpaid walks may see a dismissible pause between home and a lesson.
-          They never cover Match, Hold, Journal, or arcade play. A tip is the
+          They never cover Match, Lock In, Journal, or arcade play. A tip is the
           supporter path until stores return. Remove ads comes with stores; this
           toggle is a this-device hide for playtest.
         </p>
