@@ -133,7 +133,7 @@ assert.match(playSrc, /ROAD_MAZE_AGAIN/)
 assert.ok(playSrc.lastIndexOf('EASY.holdNext') < playSrc.lastIndexOf('ROAD_MAZE_AGAIN'))
 assert.match(playSrc, /function replay/)
 assert.match(playSrc, /maze-beats/)
-assert.match(playSrc, /Hurt man/)
+assert.doesNotMatch(playSrc, /maze-cell-label/)
 assert.doesNotMatch(playSrc, /maze-kit/)
 assert.doesNotMatch(
   playSrc,
@@ -142,16 +142,16 @@ assert.doesNotMatch(
 )
 assert.match(playSrc, /markHelped/)
 assert.match(EASY.mazeHunt, /hurt man/)
-assert.ok(playSrc.indexOf('className="maze-board"') < playSrc.indexOf('maze-win-art'))
 assert.match(playSrc, /ROAD_MAZE_WIN/)
+assert.match(playSrc, /WinBurst play=\{winStamp\} stamp=\{ROAD_MAZE_WIN\}/)
+assert.doesNotMatch(playSrc, /frame=\{ROAD_CLAIM_MEDIA/)
+assert.doesNotMatch(playSrc, /maze-win-art/)
 assert.match(playSrc, /panel-blast|ROAD_HELP_FACE/)
 assert.match(playSrc, /panel-blast|ROAD_HURT_FACE/)
 assert.match(playSrc, /01-hurt-road|ROAD_HURT_FACE/)
 assert.match(playSrc, /03-compassion-helps|ROAD_HELP_FACE/)
-assert.match(playSrc, /ROAD_CLAIM_MEDIA/)
 assert.match(playSrc, /mazeWinBeat/)
 assert.match(playSrc, /MatchTakeaway/)
-assert.match(playSrc, /maze-win-art/)
 assert.match(playSrc, /maze-stage/)
 assert.match(playSrc, /isMazePathSwipe/)
 assert.match(playSrc, /peeking/)
@@ -169,9 +169,18 @@ assert.match(
   readFileSync(new URL('../src/index.css', import.meta.url), 'utf8'),
   /maze-cell\.is-rock \{[\s\S]*touch-action: pan-y/,
 )
+const mazeCss = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
 assert.match(
-  readFileSync(new URL('../src/index.css', import.meta.url), 'utf8'),
+  mazeCss,
   /play\.is-road-maze \{[\s\S]*overflow: hidden/,
+)
+assert.match(
+  mazeCss,
+  /play\.is-road-maze\.is-win \.maze-cell \{[\s\S]*opacity: 0/,
+)
+assert.match(
+  mazeCss,
+  /play\.is-road-maze\.is-win \.maze-beats \{[\s\S]*display: none/,
 )
 assert.match(playSrc, /ROAD_MAZE_CLAIM/)
 assert.doesNotMatch(playSrc, /road-swipe|story-night/)
