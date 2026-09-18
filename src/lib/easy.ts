@@ -1,1 +1,1 @@
-file:///workspace/Silver-dollar-city/src/lib/easy.ts
+PLACEHOLDER_WILL_FAIL
