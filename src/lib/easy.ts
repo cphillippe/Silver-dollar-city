@@ -1,1 +1,1 @@
-PLACEHOLDER_WILL_FAIL
+data:text/plain;base64,dGVzdA==
