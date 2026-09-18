@@ -72,7 +72,7 @@ export const SCENE_PAUSE_COPY =
 export const PACK_LINE =
   'New street. Same trail. More lines you can still say tomorrow.'
 export const SETTINGS_SUPPORT_LINE =
-  'Tip · Packs (external) · stores coming later'
+  'Tip · wishlist packs · remove-ads with stores later'
 
 export function packPaywallLine(packName: string): string {
   return `You’ve kept the first streets. Unlock ${packName} for new walks — everything you’ve already held stays free.`
