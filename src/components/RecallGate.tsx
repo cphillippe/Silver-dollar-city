@@ -183,7 +183,7 @@ export function RecallGate({
         className={`recall-gate is-encode is-easy-hold is-why-blast ${shake ? 'is-shake' : ''} ${own ? 'is-own' : ''}`}
         aria-label={STORY.takeaway}
       >
-        <p className="eyebrow">{brief.source ? brief.source : 'Hold'}</p>
+        <p className="eyebrow">{brief.source ? brief.source : 'Lock In'}</p>
         {!easyLineReady ? (
           <>
             <p className="teach-chip" role="note">
@@ -224,7 +224,7 @@ export function RecallGate({
       className={`recall-gate ${shake ? 'is-shake' : ''} phase-${phase} ${encode ? 'is-encode' : 'is-review'} ${own ? 'is-own' : ''} ${deeper ? 'is-deeper' : ''}`}
       aria-label={STORY.takeaway}
     >
-      <p className="eyebrow">{brief.source ? brief.source : 'Hold'}</p>
+      <p className="eyebrow">{brief.source ? brief.source : 'Lock In'}</p>
       <p className="next-tap">{nextTap}</p>
       {encode ? (
         <p className="learning-store">

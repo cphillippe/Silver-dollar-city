@@ -26,7 +26,7 @@ const PLAY_HEADING: Record<DebugPlayKind, string> = {
   'panel-blast': 'Gem Match / word search',
   'claim-merge': 'Claim merge',
   'source-dig': 'Source dig',
-  'why-blast': 'Hold Why Blast',
+  'why-blast': 'Lock In Why Blast',
 }
 
 const LAYER_ORDER: DebugPlayKind[] = [
@@ -70,7 +70,7 @@ export function debugMiniGames(): DebugMiniGame[] {
   plays.push({
     lineId: DEBUG_LAYER_LINES['why-blast'],
     play: 'why-blast',
-    name: 'Hold Why Blast',
+    name: 'Lock In Why Blast',
   })
   return plays
 }
