@@ -1,0 +1,169 @@
+/* Story Snap — timing lane. Peel into src/styles/storySnap.css on wire. */
+
+.play.is-story-snap {
+  display: grid;
+  gap: 0.75rem;
+  position: relative;
+}
+
+.play.is-story-snap .snap-teach {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.35;
+  opacity: 0.92;
+}
+
+.play.is-story-snap .snap-stage {
+  position: relative;
+  min-height: 11rem;
+  border-radius: 1rem;
+  overflow: hidden;
+  background: linear-gradient(180deg, #1a2433 0%, #0f1620 100%);
+  border: 2px solid rgba(255, 214, 120, 0.35);
+}
+
+.play.is-story-snap .snap-lane {
+  position: absolute;
+  inset: 28% 0 28%;
+  display: flex;
+  align-items: center;
+}
+
+.play.is-story-snap .snap-gate {
+  position: absolute;
+  left: 50%;
+  top: 8%;
+  bottom: 8%;
+  width: 0.35rem;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, #ffe08a, #f0a020);
+  box-shadow: 0 0 12px rgba(255, 200, 80, 0.7);
+  border-radius: 999px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.play.is-story-snap.is-glow .snap-gate {
+  box-shadow: 0 0 18px 4px rgba(255, 220, 120, 0.95);
+}
+
+.play.is-story-snap .snap-beat {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translate(-50%, -50%);
+  min-width: 7.5rem;
+  max-width: 42%;
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.75rem;
+  background: #243246;
+  border: 2px solid rgba(255, 214, 120, 0.55);
+  color: #fff8e8;
+  text-align: center;
+  z-index: 1;
+  will-change: left;
+}
+
+.play.is-story-snap .snap-beat-label {
+  display: block;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  font-size: 0.85rem;
+  color: #ffe08a;
+}
+
+.play.is-story-snap .snap-beat-text {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.78rem;
+  line-height: 1.25;
+}
+
+.play.is-story-snap .snap-strip {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  min-height: 2.4rem;
+}
+
+.play.is-story-snap .snap-chip {
+  flex: 1 1 30%;
+  min-width: 5rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 0.55rem;
+  background: rgba(255, 214, 120, 0.12);
+  border: 1px dashed rgba(255, 214, 120, 0.35);
+  font-size: 0.78rem;
+  text-align: center;
+  opacity: 0.45;
+}
+
+.play.is-story-snap .snap-chip.is-locked {
+  opacity: 1;
+  border-style: solid;
+  background: rgba(255, 214, 120, 0.22);
+  font-weight: 700;
+}
+
+.play.is-story-snap .snap-pad {
+  width: 100%;
+  min-height: 3.25rem;
+  border-radius: 999px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  font-size: 1.05rem;
+}
+
+.play.is-story-snap.is-shake .snap-stage {
+  animation: story-snap-shake 0.32s ease;
+}
+
+@keyframes story-snap-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-6px);
+  }
+  75% {
+    transform: translateX(6px);
+  }
+}
+
+.play.is-story-snap .win-stamp-wrap {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.play.is-story-snap .win-stamp {
+  font-size: 1.6rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: #ffe08a;
+  text-shadow: 0 2px 0 #5a3a00, 0 0 18px rgba(255, 200, 80, 0.6);
+}
+
+.play.is-story-snap .snap-claim {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.play.is-story-snap.is-win .snap-pad {
+  opacity: 0.85;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .play.is-story-snap.is-shake .snap-stage {
+    animation: none;
+  }
+  .play.is-story-snap .snap-beat {
+    will-change: auto;
+  }
+}

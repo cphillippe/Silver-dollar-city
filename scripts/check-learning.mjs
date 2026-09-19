@@ -118,7 +118,7 @@ const teachSrc = readFileSync(
   'utf8',
 )
 assert.match(teachSrc, /Acquire/)
-assert.match(teachSrc, /Hold this line to deploy/)
+assert.match(teachSrc, /Lock in this line to deploy/)
 assert.match(teachSrc, /WORDS\.claim\.teach/)
 assert.match(teachSrc, /The main idea you will keep/)
 assert.doesNotMatch(teachSrc, /A claim is the main idea we hold to be true/)

@@ -86,7 +86,9 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
                     ? EASY.mergeHome
                     : storyPlayFor(loopId) === 'source-dig'
                       ? EASY.digHome
-                      : coldMercy
+                      : storyPlayFor(loopId) === 'story-snap'
+                        ? EASY.snapHome
+                        : coldMercy
                       ? 'Find Mercy’s story at Story Creek.'
                       : 'Find the gems. The story opens as you play.'}
           </p>
@@ -105,7 +107,9 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
                   ? EASY.mergeMatch
                   : storyPlayFor(loopId) === 'source-dig'
                     ? EASY.digMatch
-                    : EASY.matchCta}
+                    : storyPlayFor(loopId) === 'story-snap'
+                      ? EASY.snapMatch
+                      : EASY.matchCta}
           </button>
           <button
             type="button"
