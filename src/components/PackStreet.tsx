@@ -48,7 +48,7 @@ export function PackStreet({ packId, onNavigate }: PackStreetProps) {
           <h1>{street.title}</h1>
           <p>
             This street is extra. The core Easy trail stays free — never a paywall on Mercy,
-            Match, or Hold.
+            Match, or Lock In.
           </p>
           <p className="quiet">{packPaywallLine(street.place)}</p>
           {pack ? (
