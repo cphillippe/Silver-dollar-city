@@ -37,7 +37,7 @@ assert.equal(allBeatsLocked(['lamp', 'hill', 'seen']), true)
 assert.equal(allBeatsLocked(['lamp']), false)
 
 const playSrc = readFileSync(
-  new URL('../src/components/challenges/StorySnapPlay.tsx', import.meta.url),
+  new URL('../src/components/challenges/StorySnapPlayView.tsx', import.meta.url),
   'utf8',
 )
 assert.match(playSrc, /is-story-snap/)
