@@ -3,6 +3,9 @@ on:
   push:
     branches: [fun/match-story-dock-1.4.97]
     paths:
+      - scripts/assemble-patch-dock.mjs
+      - scripts/_patch-dock-p1.b64
+      - scripts/_patch-dock-p2.b64
       - scripts/patch-dock-css-cl.mjs
       - .github/workflows/patch-dock-css-cl.yml
 jobs:
@@ -17,13 +20,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+      - name: Assemble patcher if needed
+        run: |
+          if [ -f scripts/assemble-patch-dock.mjs ]; then
+            node scripts/assemble-patch-dock.mjs
+          fi
       - name: Patch CSS + changelog + checks
         run: node scripts/patch-dock-css-cl.mjs
       - name: Commit if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/index.css src/content/changelog.ts scripts/check-gem-search.mjs
+          git add src/index.css src/content/changelog.ts scripts/check-gem-search.mjs scripts/patch-dock-css-cl.mjs
           if git diff --cached --quiet; then
             echo "No changes"
           else
