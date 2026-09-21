@@ -384,7 +384,18 @@ assert.match(playSrc, /Date\.now\(\)/)
 assert.match(playSrc, /setRound\(\(current\) => current \+ 1\)/)
 assert.match(playSrc, /bonus-banner/)
 assert.match(playSrc, /EASY\.bonusHint/)
-assert.match(playSrc, /is-bonus/)
+assert.match(playSrc, /bonusHint=\{EASY\.bonusHint\}/)
+assert.match(playSrc, /bonusWords=/)
+assert.match(playSrc, /useState<'hero' \| 'dock' \| 'sheet'>\('dock'\)/)
+assert.doesNotMatch(playSrc, /gem-words is-bonus/, 'no multi-row bonus grid above the board')
+assert.match(
+  readFileSync(new URL('../src/components/StoryStrip.tsx', import.meta.url), 'utf8'),
+  /story-dock-extras/,
+)
+assert.match(
+  readFileSync(new URL('../src/components/StoryStrip.tsx', import.meta.url), 'utf8'),
+  /gem-word is-bonus/,
+)
 assert.match(playSrc, /cellsNeededByOpenPlanted/)
 assert.match(playSrc, /bonusGhosted/)
 assert.match(playSrc, /is-cracked/)
@@ -416,21 +427,25 @@ assert.match(gemCss, /gem-overlay-pop/)
 assert.match(gemCss, /pointer-events: none/)
 assert.match(gemCss, /is-story-docked/)
 assert.match(gemCss, /\.story-strip\.is-dock/)
+assert.match(gemCss, /max-height: 72px/)
+assert.match(gemCss, /74dvh|76dvh/)
 assert.match(gemCss, /\.story-sheet/)
+assert.match(gemCss, /story-dock-extras/)
+assert.match(gemCss, /display: none !important/)
 assert.match(gemCss, /\.gem-cell\.is-cracked \{/)
 const crackedRule = gemCss.match(/\.gem-cell\.is-cracked \{[^}]+\}/)?.[0] ?? ''
 assert.match(crackedRule, /opacity: 0\.55/)
 assert.doesNotMatch(crackedRule, /pointer-events/, 'cracked bonus cells stay swipeable')
 assert.match(
-  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  readFileSync(new URL('../src/lib/easyUi.ts', import.meta.url), 'utf8'),
   /Not a bonus word/,
 )
 assert.match(
-  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  readFileSync(new URL('../src/lib/easyUi.ts', import.meta.url), 'utf8'),
   /Try a full straight word/,
 )
 assert.match(
-  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  readFileSync(new URL('../src/lib/easyUi.ts', import.meta.url), 'utf8'),
   /Miss −25/,
 )
 
@@ -465,7 +480,7 @@ assert.match(
 )
 assert.match(matchClearBeat('ph-road').why, /hurt man|help|mercy/i)
 assert.match(
-  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  readFileSync(new URL('../src/lib/easyUi.ts', import.meta.url), 'utf8'),
   /Yes — keep this/,
 )
 assert.match(
@@ -537,9 +552,11 @@ for (const id of EASY_LINE_ORDER) {
         ? 'road-maze'
         : id === 'wb-creed'
           ? 'claim-merge'
-          : isSourceDigLine(id)
-            ? 'source-dig'
-            : 'panel-blast'
+          : id === 'daily-lantern'
+            ? 'story-snap'
+            : isSourceDigLine(id)
+              ? 'source-dig'
+              : 'panel-blast'
   assert.equal(storyPlayFor(id), play, `${id} play`)
   assert.equal(story.play, play)
   assert.deepEqual(story.beats, panels)

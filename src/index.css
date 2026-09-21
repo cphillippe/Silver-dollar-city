@@ -7790,18 +7790,20 @@ html[data-easy='on'] .next-tap {
   z-index: 6;
   width: 100%;
   max-width: none;
+  max-height: 72px; /* ≤12% phone first paint */
   margin: 0;
-  padding: 4px 6px 6px;
-  gap: 2px;
+  padding: 3px 6px 4px;
+  gap: 0;
   border: 0;
-  border-radius: 14px;
+  border-radius: 12px;
   background: linear-gradient(180deg, rgba(26, 8, 64, 0.98), rgba(26, 8, 64, 0.9));
-  box-shadow: 0 4px 0 rgba(80, 20, 40, 0.28);
+  box-shadow: 0 3px 0 rgba(80, 20, 40, 0.28);
   color: inherit;
   font: inherit;
   text-align: left;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  overflow: hidden;
 }
 
 .play.is-gem-search.is-panel-blast.is-story-docked .story-strip.is-dock:focus-visible {
@@ -7825,23 +7827,38 @@ html[data-easy='on'] .next-tap {
 
 .story-strip.is-dock .story-thumbs {
   flex: 0 0 auto;
-  width: min(46%, 168px);
-  gap: 3px;
+  width: min(38%, 140px);
+  gap: 2px;
 }
 
 .story-strip.is-dock .story-thumb {
-  max-height: 36px;
+  max-height: 28px;
 }
 
 .story-dock-words {
   display: flex;
   flex: 1 1 auto;
-  flex-wrap: wrap;
-  gap: 4px;
+  flex-wrap: nowrap; /* one compact row of ≤4 pills */
+  gap: 3px;
   margin: 0;
   padding: 0;
   list-style: none;
   min-width: 0;
+  overflow: hidden;
+}
+
+.story-dock-extras {
+  flex: 0 0 auto;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(255, 204, 51, 0.18);
+  border: 1px solid rgba(255, 204, 51, 0.4);
+  color: #ffe7a8;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  line-height: 1.2;
 }
 
 .story-dock-word {
@@ -7952,6 +7969,120 @@ html[data-easy='on'] .next-tap {
 .play.is-gem-search.is-panel-blast.is-story-docked .gem-scroll {
   flex: 1 1 auto;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Board-first 1.4.98 — hide hunt line; crossword owns the phone */
+.play.is-gem-search.is-panel-blast.is-story-docked .sort-how {
+  display: none;
+}
+
+.play.is-gem-search.is-panel-blast.is-story-docked .gem-bonus-hint,
+.play.is-gem-search.is-panel-blast.is-story-docked .gem-bonus-hint.is-loud,
+.play.is-gem-search.is-panel-blast.is-story-docked .gem-bonus-hint.is-inline,
+.play.is-gem-search.is-panel-blast.is-story-docked .gem-words.is-bonus {
+  display: none !important; /* 0% bonus chrome above the board */
+}
+
+.play.is-gem-search.is-panel-blast.is-story-docked .gem-stage {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: min(100%, 100%);
+  max-width: none;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.play.is-gem-search.is-panel-blast.is-story-docked .gem-board {
+  /* Claim ~65–75% of usable height on phone; square cells via aspect-ratio on cells */
+  width: min(100%, 96vw, 520px);
+  max-width: 100%;
+  flex: 0 1 auto;
+  min-height: clamp(280px, 74dvh, 620px);
+  height: min(76dvh, 100%);
+  margin: 0 auto;
+  align-content: stretch;
+  gap: 2px;
+  padding: 4px;
+}
+
+.play.is-gem-search.is-panel-blast.is-story-docked .gem-cell {
+  min-height: 0;
+  aspect-ratio: 1;
+}
+
+.play.is-gem-search.is-panel-blast.is-story-docked .match-score {
+  flex: 0 0 auto;
+  margin: 2px 0 0;
+  font-size: 0.82rem;
+}
+
+.story-sheet-bonus-label {
+  margin: 6px 0 4px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #ffe7a8;
+  opacity: 0.95;
+}
+
+.story-sheet-bonus.gem-words.is-bonus {
+  margin: 0 0 8px;
+  justify-content: flex-start;
+}
+
+.story-sheet-bonus .gem-word.is-bonus {
+  min-width: 56px;
+  padding: 4px 8px 3px;
+}
+
+.gem-bonus-hint.is-inline {
+  margin: 0;
+  padding: 2px 8px;
+  text-align: center;
+  color: #ffe7a8;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+@media (max-width: 430px) {
+  .play.is-gem-search.is-panel-blast.is-story-docked .story-strip.is-dock {
+    padding: 3px 5px 4px;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .story-strip.is-dock .story-thumb {
+    max-height: 30px;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .story-dock-word {
+    font-size: 0.62rem;
+    padding: 1px 6px;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .gem-board {
+    min-height: clamp(260px, 74dvh, 560px);
+    height: min(76dvh, 100%);
+    width: min(100%, 100vw);
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .story-strip.is-dock {
+    max-height: 64px;
+    padding: 2px 4px 3px;
+  }
+}
+
+@media (max-height: 720px) {
+  .play.is-gem-search.is-panel-blast.is-story-docked .gem-board {
+    min-height: clamp(240px, 72dvh, 520px);
+    height: min(74dvh, 100%);
+  }
 }
 
 

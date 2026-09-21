@@ -73,7 +73,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   const [findPop, setFindPop] = useState(0)
   const [status, setStatus] = useState<'play' | 'ok'>('play')
   const [winStamp, setWinStamp] = useState(false)
-  const [stripMode, setStripMode] = useState<'hero' | 'dock' | 'sheet'>('hero')
+  const [stripMode, setStripMode] = useState<'hero' | 'dock' | 'sheet'>('dock')
   const [dockJuice, setDockJuice] = useState<number | null>(null)
   const drag = useRef(false)
   const moved = useRef(false)
@@ -128,7 +128,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     setWinStamp(false)
     setOpened(0)
     setFlipping(null)
-    setStripMode('hero')
+    setStripMode('dock')
     setDockJuice(null)
     dockJuiced.current = false
   }
@@ -150,6 +150,17 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     // extra try / One more Match reshuffle
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [round])
+
+  // Board-first 1.4.98: if anything leaves us in hero, auto-dock within 1.2s.
+  // First paint already starts docked — never leave full hero + chips above the board.
+  useEffect(() => {
+    if (stripMode !== 'hero') return
+    const ms = prefersReducedMotion() ? 0 : 1200
+    const t = window.setTimeout(() => {
+      setStripMode((current) => (current === 'hero' ? 'dock' : current))
+    }, ms)
+    return () => window.clearTimeout(t)
+  }, [stripMode, lineId, round])
 
   function flashToast(line: string, why = '', bonus = false, miss = false) {
     setToast(line)
@@ -452,11 +463,18 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
           label: word.label,
           found: found.includes(word.id),
         }))}
+        bonusWords={puzzle.planted.map((word) => ({
+          id: word.id,
+          label: word.label,
+          found: bonusFound.includes(word.id),
+        }))}
+        bonusHint={EASY.bonusHint}
         dockJuice={dockJuice}
         onDockTap={() => setStripMode('sheet')}
         onSheetClose={() => setStripMode('dock')}
       />
       <div className="gem-scroll">
+      {/* Board-first 1.4.98: lesson chips live in the dock; 0% bonus chrome above the board. */}
       {stripMode === 'hero' ? (
       <ul className="gem-words" aria-label="Words to find">
         {puzzle.words.map((word) => (
@@ -471,22 +489,6 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
           </li>
         ))}
       </ul>
-      ) : null}
-      {status === 'play' ? (
-        <p className="gem-bonus-hint is-loud">{EASY.bonusHint}</p>
-      ) : null}
-      {puzzle.planted.length ? (
-        <ul className="gem-words is-bonus" aria-label="Bonus words">
-          {puzzle.planted.map((word) => (
-            <li
-              key={word.id}
-              className={`gem-word is-bonus ${bonusFound.includes(word.id) ? 'is-found' : ''}`}
-            >
-              <span className="gem-word-label">{word.label}</span>
-              <span className="gem-word-kind">bonus</span>
-            </li>
-          ))}
-        </ul>
       ) : null}
       {plusFlash ? (
         <p className="bonus-plus" aria-hidden>
