@@ -19,15 +19,16 @@ jobs:
       - name: Apply dock no-overlap patches
         run: |
           set -euo pipefail
-          if grep -q 'Match story dock 1.4.99' src/index.css; then
+          if grep -q 'Match story dock 1.4.99' src/index.css && grep -q "story-dock-word-label" src/components/StoryStrip.tsx; then
             echo 'already materialized'
             exit 0
           fi
           for p in tmp/dock-1499-*.patch; do
             echo "Applying $p"
-            patch -p1 < "$p"
+            if ! patch -p1 -N < "$p"; then
+              echo "patch reported issues for $p (may be partially applied); continuing"
+            fi
           done
-          # version bump already on branch; keep lockstep if patch also touched them
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add src/index.css src/content/changelog.ts scripts/check-gem-search.mjs \

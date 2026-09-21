@@ -1,0 +1,224 @@
+diff --git a/src/index.css b/src/index.css
+index aa380b8..ddb2bb5 100644
+--- a/src/index.css
++++ b/src/index.css
+@@ -7749,9 +7749,9 @@ html[data-easy='on'] .next-tap {
+
+ .play.is-gem-search.is-panel-blast .story-strip {
+   flex-shrink: 0;
+-  position: sticky;
+-  top: 0;
+-  z-index: 5;
++  position: relative; /* 1.4.99: stay in document flow above gem-scroll */
++  top: auto;
++  z-index: 2;
+   padding-bottom: 4px;
+   background: linear-gradient(180deg, rgba(26, 8, 64, 0.96), rgba(26, 8, 64, 0.88));
+ }
+@@ -7783,16 +7783,20 @@ html[data-easy='on'] .next-tap {
+   margin: 0 auto;
+ }
+
+-/* Match story dock 1.4.97 — board owns screen */
++/* Match story dock 1.4.99 — dock in flow, no overlay; pills LTR */
++.play.is-gem-search.is-panel-blast.is-story-docked .story-strip,
+ .play.is-gem-search.is-panel-blast.is-story-docked .story-strip.is-dock {
++  flex: 0 0 auto;
+   flex-shrink: 0;
+-  position: relative;
+-  z-index: 6;
++  position: relative; /* never absolute/fixed/sticky over the board */
++  top: auto;
++  z-index: 2;
+   width: 100%;
+   max-width: none;
+-  max-height: 72px; /* ≤12% phone first paint */
++  max-height: none;
++  height: auto;
+   margin: 0;
+-  padding: 3px 6px 4px;
++  padding: 4px 6px;
+   gap: 0;
+   border: 0;
+   border-radius: 12px;
+@@ -7803,7 +7807,7 @@ html[data-easy='on'] .next-tap {
+   text-align: left;
+   cursor: pointer;
+   -webkit-tap-highlight-color: transparent;
+-  overflow: hidden;
++  overflow: visible;
+ }
+
+ .play.is-gem-search.is-panel-blast.is-story-docked .story-strip.is-dock:focus-visible {
+@@ -7820,31 +7824,39 @@ html[data-easy='on'] .next-tap {
+
+ .story-dock-row {
+   display: flex;
++  flex-direction: row;
++  flex-wrap: nowrap;
+   align-items: center;
+-  gap: 8px;
++  gap: 6px;
+   min-width: 0;
++  width: 100%;
+ }
+
+ .story-strip.is-dock .story-thumbs {
+-  flex: 0 0 auto;
+-  width: min(38%, 140px);
++  flex: 0 1 auto;
++  width: auto;
++  max-width: min(34%, 112px);
+   gap: 2px;
+ }
+
+ .story-strip.is-dock .story-thumb {
+-  max-height: 28px;
++  max-height: 26px;
+ }
+
+ .story-dock-words {
+   display: flex;
+   flex: 1 1 auto;
+-  flex-wrap: nowrap; /* one compact row of ≤4 pills */
++  flex-direction: row;
++  flex-wrap: nowrap; /* one compact horizontal row of ≤4 lesson pills */
++  align-items: center;
+   gap: 3px;
+   margin: 0;
+   padding: 0;
+   list-style: none;
+   min-width: 0;
+-  overflow: hidden;
++  overflow-x: auto;
++  overflow-y: hidden;
++  -webkit-overflow-scrolling: touch;
+ }
+
+ .story-dock-extras {
+@@ -7862,6 +7874,10 @@ html[data-easy='on'] .next-tap {
+ }
+
+ .story-dock-word {
++  flex: 0 0 auto;
++  display: inline-flex;
++  align-items: center;
++  justify-content: center;
+   padding: 2px 7px;
+   border-radius: 999px;
+   background: rgba(255, 246, 216, 0.12);
+@@ -7871,7 +7887,21 @@ html[data-easy='on'] .next-tap {
+   font-weight: 800;
+   letter-spacing: 0.04em;
+   text-transform: uppercase;
+-  line-height: 1.2;
++  line-height: 1.15;
++  white-space: nowrap; /* kill global li overflow-wrap:anywhere vertical stacks */
++  overflow-wrap: normal;
++  word-break: keep-all;
++  writing-mode: horizontal-tb;
++  text-orientation: mixed;
++}
++
++.story-dock-word-label {
++  display: inline;
++  white-space: nowrap;
++  writing-mode: horizontal-tb;
++  text-orientation: mixed;
++  overflow-wrap: normal;
++  word-break: keep-all;
+ }
+
+ .story-dock-word.is-found {
+@@ -7972,9 +8002,11 @@ html[data-easy='on'] .next-tap {
+   display: flex;
+   flex-direction: column;
+   gap: 4px;
++  position: relative; /* in normal flow under the dock — never underlap */
++  overflow: auto;
+ }
+
+-/* Board-first 1.4.98 — hide hunt line; crossword owns the phone */
++/* Board-first 1.4.99 — hide hunt line; crossword owns space UNDER the dock */
+ .play.is-gem-search.is-panel-blast.is-story-docked .sort-how {
+   display: none;
+ }
+@@ -7989,22 +8021,24 @@ html[data-easy='on'] .next-tap {
+ .play.is-gem-search.is-panel-blast.is-story-docked .gem-stage {
+   flex: 1 1 auto;
+   min-height: 0;
+-  width: min(100%, 100%);
++  width: 100%;
+   max-width: none;
+   margin: 0 auto;
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+-  justify-content: center;
++  justify-content: flex-start; /* avoid center overflow under the dock */
+ }
+
+ .play.is-gem-search.is-panel-blast.is-story-docked .gem-board {
+-  /* Claim ~65–75% of usable height on phone; square cells via aspect-ratio on cells */
++  /* Fill leftover space under the tiny dock (≥70% board); no viewport-dvh overlay */
+   width: min(100%, 96vw, 520px);
+   max-width: 100%;
+-  flex: 0 1 auto;
+-  min-height: clamp(280px, 74dvh, 620px);
+-  height: min(76dvh, 100%);
++  max-height: 100%;
++  flex: 1 1 auto;
++  min-height: 0;
++  height: auto;
++  aspect-ratio: 1;
+   margin: 0 auto;
+   align-content: stretch;
+   gap: 2px;
+@@ -8054,34 +8088,34 @@ html[data-easy='on'] .next-tap {
+
+ @media (max-width: 430px) {
+   .play.is-gem-search.is-panel-blast.is-story-docked .story-strip.is-dock {
+-    padding: 3px 5px 4px;
++    padding: 3px 4px;
+   }
+
+   .play.is-gem-search.is-panel-blast.is-story-docked .story-strip.is-dock .story-thumb {
+-    max-height: 30px;
++    max-height: 24px;
+   }
+
+   .play.is-gem-search.is-panel-blast.is-story-docked .story-dock-word {
+-    font-size: 0.62rem;
+-    padding: 1px 6px;
++    font-size: 0.58rem;
++    padding: 1px 5px;
++    white-space: nowrap;
++    writing-mode: horizontal-tb;
+   }
+
+   .play.is-gem-search.is-panel-blast.is-story-docked .gem-board {
+-    min-height: clamp(260px, 74dvh, 560px);
+-    height: min(76dvh, 100%);
+     width: min(100%, 100vw);
+-  }
+-
+-  .play.is-gem-search.is-panel-blast.is-story-docked .story-strip.is-dock {
+-    max-height: 64px;
+-    padding: 2px 4px 3px;
++    max-height: 100%;
++    min-height: 0;
++    height: auto;
++    aspect-ratio: 1;
+   }
+ }
+
+ @media (max-height: 720px) {
+   .play.is-gem-search.is-panel-blast.is-story-docked .gem-board {
+-    min-height: clamp(240px, 72dvh, 520px);
+-    height: min(74dvh, 100%);
++    max-height: 100%;
++    min-height: 0;
++    height: auto;
+   }
+ }
+
