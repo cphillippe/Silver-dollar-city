@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.105',
+    title: 'Why Gate split · Arch + Bedrock',
+    when: '2026-09-21',
+    items: [
+      'Why Gate split: Ansel keeps Swinging Arch hinges (order/reason/ought/mover/kalām/limits); Cosmo marks Bedrock Step (fg-ground + fg-contingent) — neither guide is the Rock; the living God is',
+    ],
+  },
+  {
     version: '1.4.99',
     title: 'Match dock no-overlap · Easy core trail',
     when: '2026-09-21',
