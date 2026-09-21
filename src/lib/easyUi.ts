@@ -64,7 +64,6 @@ export const EASY = {
   sayFrom: 'From',
   sayTomorrow: 'Say this tomorrow',
   lockIn: 'Save your picks.',
-  lockIn: 'Save your picks.',
   matchHow: 'Keep the right pictures. Remove wrong picks.',
   tapSentence: 'Tap a sentence',
   tapPlace: 'Tap a place',
