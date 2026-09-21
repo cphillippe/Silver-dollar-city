@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.97',
+    title: 'Match story dock · Easy core trail',
+    when: '2026-09-20',
+    items: [
+      'Match: story pictures start big, then dock to a tiny top bar so the crossword owns the screen; tap the bar to expand. Dock collapse awards +1000 arcade juice',
+    ],
+  },
+  {
     version: '1.4.92',
     title: 'Road maze win clean · Easy core trail',
     when: '2026-09-18',
