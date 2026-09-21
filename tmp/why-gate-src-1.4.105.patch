@@ -1,0 +1,1421 @@
+diff --git a/package.json b/package.json
+index 65b3e3d..be83e81 100644
+--- a/package.json
++++ b/package.json
+@@ -1,7 +1,7 @@
+ {
+   "name": "silver-city",
+   "private": true,
+-  "version": "1.4.104",
++  "version": "1.4.105",
+   "type": "module",
+   "scripts": {
+     "dev": "vite",
+diff --git a/src/assets/cast/portrait-cosmo.ts b/src/assets/cast/portrait-cosmo.ts
+new file mode 100644
+index 0000000..1ae0cae
+--- /dev/null
++++ b/src/assets/cast/portrait-cosmo.ts
+@@ -0,0 +1,3 @@
++/** Candy Cosmo portrait as data URL — text-safe for MCP ship. */
++const src = 'data:image/png;base64,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'
++export default src
+diff --git a/src/components/Avatar.tsx b/src/components/Avatar.tsx
+index 999052f..53f41b4 100644
+--- a/src/components/Avatar.tsx
++++ b/src/components/Avatar.tsx
+@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react'
+ import type { CharacterId } from '../content/story'
+ import { CAST } from '../content/story'
+ import ansel from '../assets/cast/portrait-ansel.png'
++import cosmo from '../assets/cast/portrait-cosmo.ts'
+ import hope from '../assets/cast/portrait-hope.png'
+ import juniper from '../assets/cast/portrait-juniper.png'
+ import mercy from '../assets/cast/portrait-mercy.png'
+@@ -23,6 +24,7 @@ const PORTRAITS: Record<CharacterId, string> = {
+   silas,
+   nora,
+   ansel,
++  cosmo,
+   hope,
+ }
+ 
+diff --git a/src/config/app.ts b/src/config/app.ts
+index 319db2e..3736ea2 100644
+--- a/src/config/app.ts
++++ b/src/config/app.ts
+@@ -1,5 +1,5 @@
+ /** Display + envelope version. Keep in lockstep with package.json. */
+-export const APP_VERSION = '1.4.104'
++export const APP_VERSION = '1.4.105'
+ 
+ /** Capacitor / Play id — do not change without a migration story. */
+ export const APP_ID = 'city.silver.unending'
+diff --git a/src/content/changelog.ts b/src/content/changelog.ts
+index 662c9a8..ac75ca9 100644
+--- a/src/content/changelog.ts
++++ b/src/content/changelog.ts
+@@ -7,6 +7,14 @@ export interface ChangeNote {
+ }
+ 
+ export const CHANGELOG: ChangeNote[] = [
++  {
++    version: '1.4.105',
++    title: 'Why Gate split · Arch + Bedrock',
++    when: '2026-09-21',
++    items: [
++      'Why Gate split: Ansel keeps Swinging Arch hinges (order/reason/ought/mover/kalām/limits); Cosmo marks Bedrock Step (fg-ground + fg-contingent) — neither guide is the Rock; the living God is',
++    ],
++  },
+   {
+     version: '1.4.99',
+     title: 'Match dock no-overlap · Easy core trail',
+diff --git a/src/content/links.ts b/src/content/links.ts
+index 18587da..6ed08d1 100644
+--- a/src/content/links.ts
++++ b/src/content/links.ts
+@@ -102,6 +102,12 @@ const PERSON_NODES: LinkNode[] = [
+     text: 'Ansel Gate',
+     who: 'ansel',
+   },
++  {
++    id: 'person-cosmo',
++    kind: 'person',
++    text: 'Cosmic Cosmo',
++    who: 'cosmo',
++  },
+   {
+     id: 'person-hope',
+     kind: 'person',
+@@ -360,7 +366,7 @@ const STREET_FACTS: StreetFact[] = [
+     ideaId: 'idea-ground',
+     tripleId: 'ground-gate',
+     placeId: 'place-gate',
+-    personId: 'person-ansel',
++    personId: 'person-cosmo',
+     text: 'The living God is the foundation of order, reason, and ought.',
+     caption: 'The living God is the foundation.',
+   },
+@@ -378,7 +384,7 @@ const STREET_FACTS: StreetFact[] = [
+     ideaId: 'idea-contingent',
+     tripleId: 'contingent-gate',
+     placeId: 'place-gate',
+-    personId: 'person-ansel',
++    personId: 'person-cosmo',
+     text: 'Things that might not exist still need a necessary ground.',
+     caption: 'Might-not-have-beens need a necessary ground.',
+   },
+@@ -896,59 +902,59 @@ const LINK_CLUES: Record<string, Record<LinkStep, string>> = {
+     person: 'Nora keeps that sky.',
+   },
+   'ansel-gate': {
+-    idea: 'Ansel’s why — the world exists and did not have to.',
+-    place: 'That question lives at Why Gate.',
+-    person: 'Ansel keeps that gate.',
++    idea: 'Ansel’s swinging arch — the world exists and did not have to.',
++    place: 'That question lives at Why Gate Arch.',
++    person: 'Ansel keeps the swinging arch.',
+   },
+   'order-gate': {
+-    idea: 'Ansel’s why — the world holds together in Christ.',
+-    place: 'That question lives at Why Gate.',
+-    person: 'Ansel keeps that gate.',
++    idea: 'Ansel’s hinge — the world holds together in Christ.',
++    place: 'That question lives at Why Gate Arch.',
++    person: 'Ansel keeps the swinging arch.',
+   },
+   'reason-gate': {
+-    idea: 'Ansel’s why — the mind needs a real ground.',
+-    place: 'That question lives at Why Gate.',
+-    person: 'Ansel keeps that gate.',
++    idea: 'Ansel’s hinge — the mind needs a real ground.',
++    place: 'That question lives at Why Gate Arch.',
++    person: 'Ansel keeps the swinging arch.',
+   },
+   'ought-gate': {
+-    idea: 'Ansel’s why — rocks cannot write the law.',
+-    place: 'That question lives at Why Gate.',
+-    person: 'Ansel keeps that gate.',
++    idea: 'Ansel’s hinge — rocks cannot write the law.',
++    place: 'That question lives at Why Gate Arch.',
++    person: 'Ansel keeps the swinging arch.',
+   },
+   'ground-gate': {
+-    idea: 'Ansel’s why — the living God is the foundation.',
+-    place: 'That question lives at Why Gate.',
+-    person: 'Ansel keeps that gate.',
++    idea: 'Cosmo’s bedrock marker — the living God is the foundation.',
++    place: 'That question lives at Why Gate Bedrock.',
++    person: 'Cosmo marks that bedrock — God is the ground, not Cosmo.',
+   },
+   'mover-gate': {
+-    idea: 'Ansel’s why — change needs a first actuality.',
+-    place: 'That question lives at Why Gate.',
+-    person: 'Ansel keeps that gate.',
++    idea: 'Ansel’s hinge — change needs a first actuality.',
++    place: 'That question lives at Why Gate Arch.',
++    person: 'Ansel keeps the swinging arch.',
+   },
+   'contingent-gate': {
+-    idea: 'Ansel’s why — might-not-have-beens need a necessary ground.',
+-    place: 'That question lives at Why Gate.',
+-    person: 'Ansel keeps that gate.',
++    idea: 'Cosmo’s Bedrock Step — might-not-have-beens need a necessary ground.',
++    place: 'That question lives at Why Gate Bedrock.',
++    person: 'Cosmo marks Bedrock Step — God is the Rock, not Cosmo.',
+   },
+   'kalam-gate': {
+-    idea: 'Ansel’s why — what begins has a cause.',
+-    place: 'That question lives at Why Gate.',
+-    person: 'Ansel keeps that gate.',
++    idea: 'Ansel’s hinge — what begins has a cause.',
++    place: 'That question lives at Why Gate Arch.',
++    person: 'Ansel keeps the swinging arch.',
+   },
+   'limits-gate': {
+-    idea: 'Ansel’s why — a first cause is not yet the whole gospel.',
+-    place: 'That question lives at Why Gate.',
+-    person: 'Ansel keeps that gate.',
++    idea: 'Ansel’s hinge — a first cause is not yet the whole gospel.',
++    place: 'That question lives at Why Gate Arch.',
++    person: 'Ansel keeps the swinging arch.',
+   },
+   'scroll-gate': {
+-    idea: 'Ansel’s pages — we hold a river of copies.',
+-    place: 'That question lives at Why Gate.',
+-    person: 'Ansel keeps that gate.',
++    idea: 'Ansel’s arch pages — we hold a river of copies.',
++    place: 'That question lives at Why Gate Arch.',
++    person: 'Ansel keeps the swinging arch.',
+   },
+   'isaiah-gate': {
+-    idea: 'Ansel’s scroll — Isaiah’s Servant is Jesus.',
+-    place: 'That question lives at Why Gate.',
+-    person: 'Ansel keeps that gate.',
++    idea: 'Ansel’s arch scroll — Isaiah’s Servant is Jesus.',
++    place: 'That question lives at Why Gate Arch.',
++    person: 'Ansel keeps the swinging arch.',
+   },
+   'hope-lookout': {
+     idea: 'Hope’s ridge — duty is more than a taste.',
+@@ -1113,48 +1119,48 @@ export const STREET_WHYS: Record<string, { easy: string; hard: string }> = {
+     hard: 'Nora Skye keeps Sky Watch. Life, a livable world, and minds are gifts from a Maker.',
+   },
+   'ansel-gate': {
+-    easy: 'Ansel keeps Why Gate. The world exists — and did not have to.',
+-    hard: 'Ansel Gate keeps Why Gate. That the universe exists and did not have to is the why-a-world stone.',
++    easy: 'Ansel keeps the swinging arch. The world exists — and did not have to.',
++    hard: 'Ansel keeps Why Gate Arch. That the universe exists and did not have to is a first hinge — not the bedrock.',
+   },
+   'order-gate': {
+-    easy: 'Ansel keeps Why Gate. The world holds together in Christ.',
+-    hard: 'Ansel Gate keeps Why Gate. You already trust order — and Colossians names Christ as the One who holds all things.',
++    easy: 'Ansel keeps the swinging arch. The world holds together in Christ.',
++    hard: 'Ansel keeps Why Gate Arch. You already trust order — and Colossians names Christ as the One who holds all things.',
+   },
+   'reason-gate': {
+-    easy: 'Ansel keeps Why Gate. The mind needs a real ground.',
+-    hard: 'Ansel Gate keeps Why Gate. The mind you already trust is not free-floating — John names the Light.',
++    easy: 'Ansel keeps the swinging arch. The mind needs a real ground.',
++    hard: 'Ansel keeps Why Gate Arch. The mind you already trust is not free-floating — John names the Light.',
+   },
+   'ought-gate': {
+-    easy: 'Ansel keeps Why Gate. Rocks cannot write the law.',
+-    hard: 'Ansel Gate keeps Why Gate. Rocks cannot write the law you already trust — the law is on the heart.',
++    easy: 'Ansel keeps the swinging arch. Rocks cannot write the law.',
++    hard: 'Ansel keeps Why Gate Arch. Rocks cannot write the law you already trust — the law is on the heart.',
+   },
+   'ground-gate': {
+-    easy: 'Ansel keeps Why Gate. The living God is the foundation.',
+-    hard: 'Ansel Gate keeps Why Gate. The living God is the foundation of order, reason, and ought — in him we live.',
++    easy: 'Cosmo marks Why Gate Bedrock. The living God is the foundation — not Cosmo, not Ansel.',
++    hard: 'Cosmo marks Why Gate Bedrock. The living God is the foundation of order, reason, and ought — in him we live.',
+   },
+   'mover-gate': {
+-    easy: 'Ansel keeps Why Gate. Change needs a first actuality.',
+-    hard: 'Ansel Gate keeps Why Gate. Nothing reduces itself from potential to actual; present change needs a first actuality.',
++    easy: 'Ansel keeps the swinging arch. Change needs a first actuality.',
++    hard: 'Ansel keeps Why Gate Arch. Nothing reduces itself from potential to actual; present change needs a first actuality.',
+   },
+   'contingent-gate': {
+-    easy: 'Ansel keeps Why Gate. Might-not-have-beens need a necessary ground.',
+-    hard: 'Ansel Gate keeps Why Gate. A world of might-not-have-beens still needs a necessary ground — not a shrug.',
++    easy: 'Cosmo marks Bedrock Step. Might-not-have-beens need a necessary ground — God, not Cosmo.',
++    hard: 'Cosmo marks Bedrock Step. A world of might-not-have-beens still needs a necessary ground — God, not Cosmo.',
+   },
+   'kalam-gate': {
+-    easy: 'Ansel keeps Why Gate. What begins has a cause.',
+-    hard: 'Ansel Gate keeps Why Gate. What begins has a cause — the universe began, so it has a Cause of the beginning.',
++    easy: 'Ansel keeps the swinging arch. What begins has a cause.',
++    hard: 'Ansel keeps Why Gate Arch. What begins has a cause — the universe began, so it has a Cause of the beginning.',
+   },
+   'limits-gate': {
+-    easy: 'Ansel keeps Why Gate. A first cause is not yet the whole gospel.',
+-    hard: 'Ansel Gate keeps Why Gate. A first cause is a great deal — not yet the whole gospel.',
++    easy: 'Ansel keeps the swinging arch. A first cause is not yet the whole gospel.',
++    hard: 'Ansel keeps Why Gate Arch. A first cause is a great deal — not yet the whole gospel.',
+   },
+   'scroll-gate': {
+-    easy: 'Ansel keeps Why Gate. We hold a river of copies, not the first ink.',
+-    hard: 'Ansel Gate keeps Why Gate. Scribes copy, later hands compare — we hold a river of copies, not the first ink.',
++    easy: 'Ansel keeps the swinging arch. We hold a river of copies, not the first ink.',
++    hard: 'Ansel keeps Why Gate Arch. Scribes copy, later hands compare — we hold a river of copies, not the first ink.',
+   },
+   'isaiah-gate': {
+-    easy: 'Ansel keeps Why Gate. Isaiah’s Servant is Jesus.',
+-    hard: 'Ansel Gate keeps Why Gate. Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.',
++    easy: 'Ansel keeps the swinging arch. Isaiah’s Servant is Jesus.',
++    hard: 'Ansel keeps Why Gate Arch. Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.',
+   },
+   'hope-lookout': {
+     easy: 'Hope keeps Meaning Ridge. Duty is more than a taste.',
+diff --git a/src/content/lots.ts b/src/content/lots.ts
+index 705f899..3a41263 100644
+--- a/src/content/lots.ts
++++ b/src/content/lots.ts
+@@ -35,9 +35,9 @@ export const LOT_STORY: Record<CityPlotId, LotStory> = {
+   },
+   gate: {
+     path: 'Why a world',
+-    whyEasy: 'Ansel’s stone asks why there is a world at all. That question lives at the gate you walked in by.',
++    whyEasy: 'Ansel’s swinging arch = hinges. Cosmo’s Bedrock Step = living Rock. God holds what might not have been — not the guides.',
+     whyHard:
+-      'Why Gate is the east-road arch beside the porch. After the sky, you come back to the stone: first mover, might-not-have-been, the beginning argument — then the high ridge.',
++      'Why Gate has two loci: Ansel’s Swinging Arch (order, reason, ought, mover, kalām, limits) and Cosmo’s Bedrock Step (living foundation + necessary ground). Neither guide is the Rock — the living God is.',
+   },
+   lookout: {
+     path: 'Meaning',
+@@ -70,7 +70,7 @@ export function easyPlaceSub(id: CityPlotId): string | null {
+   if (id === 'bench') return 'Witness Square · public names'
+   if (id === 'porch') return 'Juniper’s lamp'
+   if (id === 'observatory') return 'Nora’s Sky Watch'
+-  if (id === 'gate') return 'Ansel’s why-a-world gate'
++  if (id === 'gate') return 'Swinging Arch · Bedrock Step'
+   if (id === 'lookout') return 'Hope’s Meaning Ridge'
+   return null
+ }
+diff --git a/src/content/packParse.ts b/src/content/packParse.ts
+index 1b3fb9d..be001b9 100644
+--- a/src/content/packParse.ts
++++ b/src/content/packParse.ts
+@@ -149,6 +149,9 @@ function lociFromNames(place: string, person: string): Pick<PackLoci, 'plotId' |
+   if (blob.includes('nora') || blob.includes('sky watch') || blob.includes('observatory')) {
+     return { plotId: 'observatory', who: 'nora' }
+   }
++  if (blob.includes('cosmo')) {
++    return { plotId: 'gate', who: 'cosmo' }
++  }
+   if (blob.includes('ansel') || blob.includes('why gate')) {
+     return { plotId: 'gate', who: 'ansel' }
+   }
+diff --git a/src/content/packs/first-gate.xml b/src/content/packs/first-gate.xml
+index 0d94f2b..9688aa9 100644
+--- a/src/content/packs/first-gate.xml
++++ b/src/content/packs/first-gate.xml
+@@ -1,5 +1,5 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+-<areaPack id="first-gate" schemaVersion="3" appVersion="1.4.81" generated="2026-09-16T09:00:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/" title="Why Gate" place="Why Gate" person="Ansel Gate" personId="ansel" plotId="gate">
++<areaPack id="first-gate" schemaVersion="3" appVersion="1.4.105" generated="2026-09-16T09:00:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/" title="Why Gate" place="Why Gate" person="Ansel Gate" personId="ansel" plotId="gate">
+   <howToEdit>RUNTIME CONTENT: the game loads this file as the source of truth for this area. Change player-facing text in place inside each &lt;lesson&gt;. Stable id attributes (ph-father, …) are engine keys — do not rename without a migration. Three tiers per fact: &lt;easy easyOrder="N"&gt;, &lt;medium&gt;, and &lt;hard&gt; — each with &lt;learn&gt;, &lt;match&gt;, and &lt;hold&gt;. Easy Learn: shortStory/mainIdea/loci. Medium Learn: mediumTeach (clearer than Hard, richer than Easy). Hard Learn: hardTeach/fullTeach. Held claim·reason·source stay plain and identical on all three. Hold level-up: see hold @levelUpTo / @onFail and index &lt;holdRules&gt;. Empty optional elements are intentional. Escape &amp; &lt; &gt; in text.</howToEdit>
+   <meta>
+     <title>Silver City — Why Gate</title>
+@@ -21,13 +21,13 @@
+     <line id="daily-isaiah" easyOrder="33">daily-isaiah</line>
+   </easyShelf>
+   <lessons>
+-    <lesson id="fg-order" place="Why Gate" person="Ansel Gate" tripleId="order-gate" ideaId="idea-order" ideaLabel="The world holds together in Christ." challengeKind="sort" challengeTitle="We already trust order">
++    <lesson id="fg-order" place="Why Gate Arch" person="Ansel Gate" personId="ansel" plotId="gate" tripleId="order-gate" ideaId="idea-order" ideaLabel="The world holds together in Christ." challengeKind="sort" challengeTitle="We already trust order">
+       <easy points="10" easyOrder="4">
+         <learn>
+           <shortStory>You already live like the world hangs together — clocks, roads, promises. That is not a mood. Colossians names Christ: all things were made through him, and in him they hold together.</shortStory>
+           <mainIdea>You already trust that the world holds together in Christ.</mainIdea>
+           <gloss>You already trust that the world holds together in Christ.</gloss>
+-          <loci>This idea lives at Why Gate, with Ansel.</loci>
++          <loci>This idea lives at Why Gate Arch — Ansel’s swinging hinges.</loci>
+           <word>
+             <term>Order</term>
+             <sense>the world hanging together — not a lucky pile</sense>
+@@ -40,11 +40,11 @@
+             <miss>The world is a lucky pile with no holder.</miss>
+             <miss>You do not actually trust order in ordinary life.</miss>
+           </sentenceMisses>
+-          <placePrompt>That question lives at Why Gate.</placePrompt>
+-          <personPrompt>Ansel keeps that gate.</personPrompt>
+-          <ideaPrompt>Ansel’s why — the world holds together in Christ.</ideaPrompt>
++          <placePrompt>That question lives at Why Gate Arch.</placePrompt>
++          <personPrompt>Ansel keeps the swinging arch.</personPrompt>
++          <ideaPrompt>Ansel’s hinge — the world holds together in Christ.</ideaPrompt>
+           <ideaLabel>The world holds together in Christ.</ideaLabel>
+-          <whyEasy>Ansel keeps Why Gate. The world holds together in Christ.</whyEasy>
++          <whyEasy>Ansel keeps the swinging arch. The world holds together in Christ.</whyEasy>
+         </match>
+         <hold levelUpTo="medium" onFail="easy">
+           <claim>You already trust that the world holds together in Christ.</claim>
+@@ -73,7 +73,7 @@
+           <mediumTeach>You already trust order: you count on a world that hangs together. That lived trust is real. Colossians does not leave the holder unnamed — all things were made through Christ and hold together in him. The world is not a lucky pile.</mediumTeach>
+           <mainIdea>You already trust that the world holds together in Christ.</mainIdea>
+           <gloss>You already trust that the world holds together in Christ.</gloss>
+-          <loci>This idea lives at Why Gate, with Ansel.</loci>
++          <loci>This idea lives at Why Gate Arch — Ansel’s swinging hinges.</loci>
+           <word>
+             <term>Order</term>
+             <sense>the world hanging together — not a lucky pile</sense>
+@@ -86,11 +86,11 @@
+             <miss>The world is a lucky pile with no holder.</miss>
+             <miss>You do not actually trust order in ordinary life.</miss>
+           </sentenceMisses>
+-          <placePrompt>That question lives at Why Gate.</placePrompt>
+-          <personPrompt>Ansel keeps that gate.</personPrompt>
+-          <ideaPrompt>Ansel’s why — the world holds together in Christ.</ideaPrompt>
++          <placePrompt>That question lives at Why Gate Arch.</placePrompt>
++          <personPrompt>Ansel keeps the swinging arch.</personPrompt>
++          <ideaPrompt>Ansel’s hinge — the world holds together in Christ.</ideaPrompt>
+           <ideaLabel>The world holds together in Christ.</ideaLabel>
+-          <whyMedium>Ansel keeps Why Gate. The world holds together in Christ.</whyMedium>
++          <whyMedium>Ansel keeps the swinging arch. The world holds together in Christ.</whyMedium>
+         </match>
+         <hold levelUpTo="hard" onFail="easy">
+           <claim>You already trust that the world holds together in Christ.</claim>
+@@ -128,11 +128,11 @@
+             <miss>The world is a lucky pile with no holder.</miss>
+             <miss>You do not actually trust order in ordinary life.</miss>
+           </sentenceMisses>
+-          <placePrompt>That question lives at Why Gate.</placePrompt>
+-          <personPrompt>Ansel keeps that gate.</personPrompt>
+-          <ideaPrompt>Ansel’s why — the world holds together in Christ.</ideaPrompt>
++          <placePrompt>That question lives at Why Gate Arch.</placePrompt>
++          <personPrompt>Ansel keeps the swinging arch.</personPrompt>
++          <ideaPrompt>Ansel’s hinge — the world holds together in Christ.</ideaPrompt>
+           <ideaLabel>The world holds together in Christ.</ideaLabel>
+-          <whyHard>Ansel Gate keeps Why Gate. You already trust order — and Colossians names Christ as the One who holds all things.</whyHard>
++          <whyHard>Ansel keeps Why Gate Arch. You already trust order — and Colossians names Christ as the One who holds all things.</whyHard>
+         </match>
+         <hold onFail="easy">
+           <claim>You already trust that the world holds together in Christ.</claim>
+@@ -156,7 +156,7 @@
+           </reasonChoices>
+         </hold>
+       </hard>
+-      <journal id="j-fg-order" title="We already trust order" kicker="Why Gate" unlockAfter="fg-order" scoreFromHeldTier="true">
++      <journal id="j-fg-order" title="We already trust order" kicker="Why Gate Arch" unlockAfter="fg-order" scoreFromHeldTier="true">
+         <p>You already live like the world hangs together. Clocks, roads, and promises only work because order is real. That is not a slogan. It is the trust you already spend.</p>
+         <p>Colossians 1:16–17 names the holder: all things were made through Christ, and in him they hold together. Augustine and Aquinas read that given order as creation’s grain — not a lucky pile. The first foundation beat is this lived trust, with Christ named on the card.</p>
+         <sources>
+@@ -166,13 +166,13 @@
+         </sources>
+       </journal>
+     </lesson>
+-    <lesson id="fg-reason" place="Why Gate" person="Ansel Gate" tripleId="reason-gate" ideaId="idea-reason" ideaLabel="The mind needs a real ground." challengeKind="sequence" challengeTitle="Trust needs a ground">
++    <lesson id="fg-reason" place="Why Gate Arch" person="Ansel Gate" personId="ansel" plotId="gate" tripleId="reason-gate" ideaId="idea-reason" ideaLabel="The mind needs a real ground." challengeKind="sequence" challengeTitle="Trust needs a ground">
+       <easy points="10" easyOrder="5">
+         <learn>
+           <shortStory>You already trust your mind enough to argue, count, and ask why. That trust is not a trick hanging in midair. John calls the Word — Christ — the true light. Romans says what can be known of God is plain in what is made. The mind needs a real ground.</shortStory>
+           <mainIdea>The mind you already trust needs a real ground.</mainIdea>
+           <gloss>The mind you already trust needs a real ground.</gloss>
+-          <loci>This idea lives at Why Gate, with Ansel.</loci>
++          <loci>This idea lives at Why Gate Arch — Ansel’s swinging hinges.</loci>
+           <word>
+             <term>Ground</term>
+             <sense>what holds a trust up — not a shrug in midair</sense>
+@@ -185,11 +185,11 @@
+             <miss>Reason is a free-floating trick with no ground.</miss>
+             <miss>Darkness is the last word about the world.</miss>
+           </sentenceMisses>
+-          <placePrompt>That question lives at Why Gate.</placePrompt>
+-          <personPrompt>Ansel keeps that gate.</personPrompt>
+-          <ideaPrompt>Ansel’s why — the mind needs a real ground.</ideaPrompt>
++          <placePrompt>That question lives at Why Gate Arch.</placePrompt>
++          <personPrompt>Ansel keeps the swinging arch.</personPrompt>
++          <ideaPrompt>Ansel’s hinge — the mind needs a real ground.</ideaPrompt>
+           <ideaLabel>The mind needs a real ground.</ideaLabel>
+-          <whyEasy>Ansel keeps Why Gate. The mind needs a real ground.</whyEasy>
++          <whyEasy>Ansel keeps the swinging arch. The mind needs a real ground.</whyEasy>
+         </match>
+         <hold levelUpTo="medium" onFail="easy">
+           <claim>The mind you already trust needs a real ground.</claim>
+@@ -218,7 +218,7 @@
+           <mediumTeach>You already trust reason — you argue, count, and ask why. That trust is not free-floating. John 1 names the Word as the true light that gives light to everyone. Romans 1:19–20 says what can be known of God is plain in what is made. Light makes the world knowable because God made it knowable.</mediumTeach>
+           <mainIdea>The mind you already trust needs a real ground.</mainIdea>
+           <gloss>The mind you already trust needs a real ground.</gloss>
+-          <loci>This idea lives at Why Gate, with Ansel.</loci>
++          <loci>This idea lives at Why Gate Arch — Ansel’s swinging hinges.</loci>
+           <word>
+             <term>Ground</term>
+             <sense>what holds a trust up — not a shrug in midair</sense>
+@@ -231,11 +231,11 @@
+             <miss>Reason is a free-floating trick with no ground.</miss>
+             <miss>Darkness is the last word about the world.</miss>
+           </sentenceMisses>
+-          <placePrompt>That question lives at Why Gate.</placePrompt>
+-          <personPrompt>Ansel keeps that gate.</personPrompt>
+-          <ideaPrompt>Ansel’s why — the mind needs a real ground.</ideaPrompt>
++          <placePrompt>That question lives at Why Gate Arch.</placePrompt>
++          <personPrompt>Ansel keeps the swinging arch.</personPrompt>
++          <ideaPrompt>Ansel’s hinge — the mind needs a real ground.</ideaPrompt>
+           <ideaLabel>The mind needs a real ground.</ideaLabel>
+-          <whyMedium>Ansel keeps Why Gate. The mind needs a real ground.</whyMedium>
++          <whyMedium>Ansel keeps the swinging arch. The mind needs a real ground.</whyMedium>
+         </match>
+         <hold levelUpTo="hard" onFail="easy">
+           <claim>The mind you already trust needs a real ground.</claim>
+@@ -273,11 +273,11 @@
+             <miss>Reason is a free-floating trick with no ground.</miss>
+             <miss>Darkness is the last word about the world.</miss>
+           </sentenceMisses>
+-          <placePrompt>That question lives at Why Gate.</placePrompt>
+-          <personPrompt>Ansel keeps that gate.</personPrompt>
+-          <ideaPrompt>Ansel’s why — the mind needs a real ground.</ideaPrompt>
++          <placePrompt>That question lives at Why Gate Arch.</placePrompt>
++          <personPrompt>Ansel keeps the swinging arch.</personPrompt>
++          <ideaPrompt>Ansel’s hinge — the mind needs a real ground.</ideaPrompt>
+           <ideaLabel>The mind needs a real ground.</ideaLabel>
+-          <whyHard>Ansel Gate keeps Why Gate. The mind you already trust is not free-floating — John names the Light.</whyHard>
++          <whyHard>Ansel keeps Why Gate Arch. The mind you already trust is not free-floating — John names the Light.</whyHard>
+         </match>
+         <hold onFail="easy">
+           <claim>The mind you already trust needs a real ground.</claim>
+@@ -301,7 +301,7 @@
+           </reasonChoices>
+         </hold>
+       </hard>
+-      <journal id="j-fg-reason" title="Trust needs a ground" kicker="Why Gate" unlockAfter="fg-reason" scoreFromHeldTier="true">
++      <journal id="j-fg-reason" title="Trust needs a ground" kicker="Why Gate Arch" unlockAfter="fg-reason" scoreFromHeldTier="true">
+         <p>You already trust reason. You argue, count, and ask why. That trust is not a trick hanging in midair. Free-floating reason explains nothing; it still borrows the light it uses.</p>
+         <p>John 1:1–9 names the Word as the true light. Romans 1:19–20 says what can be known of God is plain in what is made. Augustine’s illumination and Aquinas on intellect as measured by being both read that Light as the ground of our seeing — not a late accident at the end of a dark story.</p>
+         <sources>
+@@ -312,13 +312,13 @@
+         </sources>
+       </journal>
+     </lesson>
+-    <lesson id="fg-ought" place="Why Gate" person="Ansel Gate" tripleId="ought-gate" ideaId="idea-ought" ideaLabel="Rocks cannot write the law." challengeKind="sort" challengeTitle="Nature alone is not enough">
++    <lesson id="fg-ought" place="Why Gate Arch" person="Ansel Gate" personId="ansel" plotId="gate" tripleId="ought-gate" ideaId="idea-ought" ideaLabel="Rocks cannot write the law." challengeKind="sort" challengeTitle="Nature alone is not enough">
+       <easy points="10" easyOrder="6">
+         <learn>
+           <shortStory>You already treat some things as really wrong, not only “I don’t like it.” Rocks and weather do not invent that pull. A limited world cannot write that law. Romans says the law is already written on the heart.</shortStory>
+           <mainIdea>Rocks cannot write the law you already trust.</mainIdea>
+           <gloss>Rocks cannot write the law you already trust.</gloss>
+-          <loci>This idea lives at Why Gate, with Ansel.</loci>
++          <loci>This idea lives at Why Gate Arch — Ansel’s swinging hinges.</loci>
+           <word>
+             <term>Ought</term>
+             <sense>real right and wrong — not only a mood</sense>
+@@ -331,11 +331,11 @@
+             <miss>Rocks and weather write the law on the heart.</miss>
+             <miss>Ought is only a mood you can drop.</miss>
+           </sentenceMisses>
+-          <placePrompt>That question lives at Why Gate.</placePrompt>
+-          <personPrompt>Ansel keeps that gate.</personPrompt>
+-          <ideaPrompt>Ansel’s why — rocks cannot write the law.</ideaPrompt>
++          <placePrompt>That question lives at Why Gate Arch.</placePrompt>
++          <personPrompt>Ansel keeps the swinging arch.</personPrompt>
++          <ideaPrompt>Ansel’s hinge — rocks cannot write the law.</ideaPrompt>
+           <ideaLabel>Rocks cannot write the law.</ideaLabel>
+-          <whyEasy>Ansel keeps Why Gate. Rocks cannot write the law.</whyEasy>
++          <whyEasy>Ansel keeps the swinging arch. Rocks cannot write the law.</whyEasy>
+         </match>
+         <hold levelUpTo="medium" onFail="easy">
+           <claim>Rocks cannot write the law you already trust.</claim>
+@@ -364,7 +364,7 @@
+           <mediumTeach>You already trust ought: some things are really wrong. Finite nature cannot be that ground. A changing, limited world does not write a law on the heart. Romans 2:14–15 says the nations already show that law at work. This is not Hope’s later ridge on duty-as-taste. This is Ansel’s step: nature alone is not enough.</mediumTeach>
+           <mainIdea>Rocks cannot write the law you already trust.</mainIdea>
+           <gloss>Rocks cannot write the law you already trust.</gloss>
+-          <loci>This idea lives at Why Gate, with Ansel.</loci>
++          <loci>This idea lives at Why Gate Arch — Ansel’s swinging hinges.</loci>
+           <word>
+             <term>Ought</term>
+             <sense>real right and wrong — not only a mood</sense>
+@@ -377,11 +377,11 @@
+             <miss>Rocks and weather write the law on the heart.</miss>
+             <miss>Ought is only a mood you can drop.</miss>
+           </sentenceMisses>
+-          <placePrompt>That question lives at Why Gate.</placePrompt>
+-          <personPrompt>Ansel keeps that gate.</personPrompt>
+-          <ideaPrompt>Ansel’s why — rocks cannot write the law.</ideaPrompt>
++          <placePrompt>That question lives at Why Gate Arch.</placePrompt>
++          <personPrompt>Ansel keeps the swinging arch.</personPrompt>
++          <ideaPrompt>Ansel’s hinge — rocks cannot write the law.</ideaPrompt>
+           <ideaLabel>Rocks cannot write the law.</ideaLabel>
+-          <whyMedium>Ansel keeps Why Gate. Rocks cannot write the law.</whyMedium>
++          <whyMedium>Ansel keeps the swinging arch. Rocks cannot write the law.</whyMedium>
+         </match>
+         <hold levelUpTo="hard" onFail="easy">
+           <claim>Rocks cannot write the law you already trust.</claim>
+@@ -419,11 +419,11 @@
+             <miss>Rocks and weather write the law on the heart.</miss>
+             <miss>Ought is only a mood you can drop.</miss>
+           </sentenceMisses>
+-          <placePrompt>That question lives at Why Gate.</placePrompt>
+-          <personPrompt>Ansel keeps that gate.</personPrompt>
+-          <ideaPrompt>Ansel’s why — rocks cannot write the law.</ideaPrompt>
++          <placePrompt>That question lives at Why Gate Arch.</placePrompt>
++          <personPrompt>Ansel keeps the swinging arch.</personPrompt>
++          <ideaPrompt>Ansel’s hinge — rocks cannot write the law.</ideaPrompt>
+           <ideaLabel>Rocks cannot write the law.</ideaLabel>
+-          <whyHard>Ansel Gate keeps Why Gate. Rocks cannot write the law you already trust — the law is on the heart.</whyHard>
++          <whyHard>Ansel keeps Why Gate Arch. Rocks cannot write the law you already trust — the law is on the heart.</whyHard>
+         </match>
+         <hold onFail="easy">
+           <claim>Rocks cannot write the law you already trust.</claim>
+@@ -447,7 +447,7 @@
+           </reasonChoices>
+         </hold>
+       </hard>
+-      <journal id="j-fg-ought" title="Nature alone is not enough" kicker="Why Gate" unlockAfter="fg-ought" scoreFromHeldTier="true">
++      <journal id="j-fg-ought" title="Nature alone is not enough" kicker="Why Gate Arch" unlockAfter="fg-ought" scoreFromHeldTier="true">
+         <p>You already trust ought. Some things are really wrong. Finite nature cannot be the ground of that pull. Rocks and weather do not write a law on the heart.</p>
+         <p>Romans 2:14–15 treats that law as already shared. Augustine locates the eternal law in God; Aquinas calls natural law our share in it. This is Ansel’s gate step — not Hope’s later ridge that duty is more than taste. Nature as a pile of facts is not enough.</p>
+         <sources>
+@@ -457,18 +457,18 @@
+         </sources>
+       </journal>
+     </lesson>
+-    <lesson id="fg-ground" place="Why Gate" person="Ansel Gate" tripleId="ground-gate" ideaId="idea-ground" ideaLabel="The living God is the foundation." challengeKind="sequence" challengeTitle="God as living foundation">
++    <lesson id="fg-ground" place="Why Gate Bedrock" person="Cosmic Cosmo" personId="cosmo" plotId="gate" tripleId="ground-gate" ideaId="idea-ground" ideaLabel="The living God is the foundation." challengeKind="sequence" challengeTitle="God as living foundation">
+       <easy points="10" easyOrder="7">
+         <learn>
+-          <shortStory>Order, reason, and ought are not free-floating, and finite nature cannot hold them up. Paul at Athens does not point to a cold first brick. He names the God who made the world and gives life and breath — the One in whom we live and move and have our being. That living God is the foundation.</shortStory>
++          <shortStory>Hey space cadet — Cosmo here. I look past the stars to see what holds everything up. Order, reason, and ought are not free-floating, and finite nature cannot hold them up. Cosmo isn’t the ground, and Ansel isn’t either — Acts 17 names the living God who gives life and breath, the One in whom we live and move and have our being. That living God is the foundation.</shortStory>
+           <mainIdea>The living God is the foundation of order, reason, and ought.</mainIdea>
+           <gloss>The living God is the foundation of order, reason, and ought.</gloss>
+-          <loci>This idea lives at Why Gate, with Ansel.</loci>
++          <loci>Cosmo’s Bedrock Marker at Why Gate. Cosmo is the memory guide — the living God is the Rock.</loci>
+           <word>
+             <term>Foundation</term>
+             <sense>the living God who holds what you already trust</sense>
+           </word>
+-          <hint>Keep the living God. Toss the dead brick.</hint>
++          <hint>Keep the living God. Toss the dead brick. Cosmo only points.</hint>
+         </learn>
+         <match>
+           <sentenceCorrect>The living God is the foundation of order, reason, and ought.</sentenceCorrect>
+@@ -476,11 +476,11 @@
+             <miss>The foundation is a dead first brick, not the living God.</miss>
+             <miss>We live by accident, not in God.</miss>
+           </sentenceMisses>
+-          <placePrompt>That question lives at Why Gate.</placePrompt>
+-          <personPrompt>Ansel keeps that gate.</personPrompt>
+-          <ideaPrompt>Ansel’s why — the living God is the foundation.</ideaPrompt>
++          <placePrompt>That question lives at Why Gate Bedrock.</placePrompt>
++          <personPrompt>Cosmo marks that bedrock — God is the ground, not Cosmo.</personPrompt>
++          <ideaPrompt>Cosmo’s bedrock marker — the living God is the foundation.</ideaPrompt>
+           <ideaLabel>The living God is the foundation.</ideaLabel>
+-          <whyEasy>Ansel keeps Why Gate. The living God is the foundation.</whyEasy>
++          <whyEasy>Cosmo marks Why Gate Bedrock. The living God is the foundation — not Cosmo, not Ansel.</whyEasy>
+         </match>
+         <hold levelUpTo="medium" onFail="easy">
+           <claim>The living God is the foundation of order, reason, and ought.</claim>
+@@ -506,15 +506,15 @@
+       </easy>
+       <medium points="12">
+         <learn>
+-          <mediumTeach>You already trust order, reason, and ought. Those trusts need a ground, and finite nature cannot be it. Acts 17:24–28 names the living God who made the world and gives life and breath. In him we live and move and have our being. That is not a dead first brick. That is God — the foundation you already leaned on.</mediumTeach>
++          <mediumTeach>You already trust order, reason, and ought. Those trusts need a ground, and finite nature cannot be it. Cosmo isn’t the ground, and Ansel isn’t either. Acts 17:24–28 names the living God who made the world and gives life and breath. In him we live and move and have our being. That is not a dead first brick. That is God — the foundation you already leaned on.</mediumTeach>
+           <mainIdea>The living God is the foundation of order, reason, and ought.</mainIdea>
+           <gloss>The living God is the foundation of order, reason, and ought.</gloss>
+-          <loci>This idea lives at Why Gate, with Ansel.</loci>
++          <loci>Cosmo’s Bedrock Marker at Why Gate. Cosmo is the memory guide — the living God is the Rock.</loci>
+           <word>
+             <term>Foundation</term>
+             <sense>the living God who holds what you already trust</sense>
+           </word>
+-          <hint>Keep the living God. Toss the dead brick.</hint>
++          <hint>Keep the living God. Toss the dead brick. Cosmo only points.</hint>
+         </learn>
+         <match>
+           <sentenceCorrect>The living God is the foundation of order, reason, and ought.</sentenceCorrect>
+@@ -522,11 +522,11 @@
+             <miss>The foundation is a dead first brick, not the living God.</miss>
+             <miss>We live by accident, not in God.</miss>
+           </sentenceMisses>
+-          <placePrompt>That question lives at Why Gate.</placePrompt>
+-          <personPrompt>Ansel keeps that gate.</personPrompt>
+-          <ideaPrompt>Ansel’s why — the living God is the foundation.</ideaPrompt>
++          <placePrompt>That question lives at Why Gate Bedrock.</placePrompt>
++          <personPrompt>Cosmo marks that bedrock — God is the ground, not Cosmo.</personPrompt>
++          <ideaPrompt>Cosmo’s bedrock marker — the living God is the foundation.</ideaPrompt>
+           <ideaLabel>The living God is the foundation.</ideaLabel>
+-          <whyMedium>Ansel keeps Why Gate. The living God is the foundation.</whyMedium>
++          <whyMedium>Cosmo marks Why Gate Bedrock. The living God is the foundation — not Cosmo, not Ansel.</whyMedium>
+         </match>
+         <hold levelUpTo="hard" onFail="easy">
+           <claim>The living God is the foundation of order, reason, and ought.</claim>
+@@ -552,10 +552,10 @@
+       </medium>
+       <hard points="15">
+         <learn>
+-          <hardTeach>Acts 17:24–28: the God who made the world and everything in it does not live in temples made by hands; he gives to all life and breath and everything; in him we live and move and have our being. Augustine: our heart is restless until it rests in God (Confessions I.1). Aquinas: God is ipsum esse subsistens — not a first brick in the pile, the living source of being (ST I, q.3; q.44). Feser (secondary) traces that same classical theism for modern readers. This is the foundation beat. It is not the later first-mover or kalām walk. It is the living God under the trusts you already spend.</hardTeach>
+-          <fullTeach>Acts 17:24–28: the God who made the world and everything in it does not live in temples made by hands; he gives to all life and breath and everything; in him we live and move and have our being. Augustine: our heart is restless until it rests in God (Confessions I.1). Aquinas: God is ipsum esse subsistens — not a first brick in the pile, the living source of being (ST I, q.3; q.44). Feser (secondary) traces that same classical theism for modern readers. This is the foundation beat. It is not the later first-mover or kalām walk. It is the living God under the trusts you already spend.</fullTeach>
++          <hardTeach>Acts 17:24–28: the God who made the world and everything in it does not live in temples made by hands; he gives to all life and breath and everything; in him we live and move and have our being. Augustine: our heart is restless until it rests in God (Confessions I.1). Aquinas: God is ipsum esse subsistens — not a first brick in the pile, the living source of being (ST I, q.3; q.44). Feser (secondary) traces that same classical theism for modern readers. Cosmo is only the loci guide at Why Gate Bedrock. This is the foundation beat. It is not the later first-mover or kalām walk. It is the living God under the trusts you already spend.</hardTeach>
++          <fullTeach>Acts 17:24–28: the God who made the world and everything in it does not live in temples made by hands; he gives to all life and breath and everything; in him we live and move and have our being. Augustine: our heart is restless until it rests in God (Confessions I.1). Aquinas: God is ipsum esse subsistens — not a first brick in the pile, the living source of being (ST I, q.3; q.44). Feser (secondary) traces that same classical theism for modern readers. Cosmo is only the loci guide at Why Gate Bedrock. This is the foundation beat. It is not the later first-mover or kalām walk. It is the living God under the trusts you already spend.</fullTeach>
+           <prompt>Order the walk to the living God: trusts, nature’s limit, then Acts 17’s foundation.</prompt>
+-          <teachOnWrong>Do not stop at a dead first brick. Paul names the living God in whom we live and move and have our being. That is the foundation of order, reason, and ought.</teachOnWrong>
++          <teachOnWrong>Do not stop at a dead first brick. Paul names the living God in whom we live and move and have our being. Cosmo isn’t the ground — God is. That is the foundation of order, reason, and ought.</teachOnWrong>
+           <challengeTiles />
+         </learn>
+         <match>
+@@ -564,11 +564,11 @@
+             <miss>The foundation is a dead first brick, not the living God.</miss>
+             <miss>We live by accident, not in God.</miss>
+           </sentenceMisses>
+-          <placePrompt>That question lives at Why Gate.</placePrompt>
+-          <personPrompt>Ansel keeps that gate.</personPrompt>
+-          <ideaPrompt>Ansel’s why — the living God is the foundation.</ideaPrompt>
++          <placePrompt>That question lives at Why Gate Bedrock.</placePrompt>
++          <personPrompt>Cosmo marks that bedrock — God is the ground, not Cosmo.</personPrompt>
++          <ideaPrompt>Cosmo’s bedrock marker — the living God is the foundation.</ideaPrompt>
+           <ideaLabel>The living God is the foundation.</ideaLabel>
+-          <whyHard>Ansel Gate keeps Why Gate. The living God is the foundation of order, reason, and ought — in him we live.</whyHard>
++          <whyHard>Cosmo marks Why Gate Bedrock. The living God is the foundation of order, reason, and ought — in him we live.</whyHard>
+         </match>
+         <hold onFail="easy">
+           <claim>The living God is the foundation of order, reason, and ought.</claim>
+@@ -592,8 +592,8 @@
+           </reasonChoices>
+         </hold>
+       </hard>
+-      <journal id="j-fg-ground" title="God as living foundation" kicker="Why Gate" unlockAfter="fg-ground" scoreFromHeldTier="true">
+-        <p>Order, reason, and ought are not free-floating. Finite nature cannot hold them up. The foundation is the living God — not a dead first brick.</p>
++      <journal id="j-fg-ground" title="God as living foundation" kicker="Why Gate Bedrock" unlockAfter="fg-ground" scoreFromHeldTier="true">
++        <p>Order, reason, and ought are not free-floating. Finite nature cannot hold them up. Cosmo isn’t the ground, and Ansel isn’t either. The foundation is the living God — not a dead first brick.</p>
+         <p>Acts 17:24–28 names the God who made the world and gives life and breath: in him we live and move and have our being. Augustine’s restless heart and Aquinas’s ipsum esse read that same living source. This beat is distinct from the later first-mover and kalām walks. It is the case-for-God foundation under the trusts you already spend.</p>
+         <sources>
+           <source>Acts 17:24–28</source>
+@@ -602,13 +602,13 @@
+         </sources>
+       </journal>
+     </lesson>
+-    <lesson id="fg-mover" place="Why Gate" person="Ansel Gate" tripleId="mover-gate" ideaId="idea-mover" ideaLabel="Change needs a first actuality." challengeKind="sequence" challengeTitle="The unmoved mover">
++    <lesson id="fg-mover" place="Why Gate Arch" person="Ansel Gate" personId="ansel" plotId="gate" tripleId="mover-gate" ideaId="idea-mover" ideaLabel="Change needs a first actuality." challengeKind="sequence" challengeTitle="The unmoved mover">
+       <easy points="10" easyOrder="28">
+         <learn>
+           <shortStory>Things go from “can be” to “is.” Nothing gives itself that step. A stack of receivers is not an answer. There is a first changer not itself changed.</shortStory>
+           <mainIdea>Change now needs a first mover that is not itself changing.</mainIdea>
+           <gloss>Change here and now still asks for a first changer.</gloss>
+-          <loci>This idea lives at Why Gate, with Ansel.</loci>
++          <loci>This idea lives at Why Gate Arch — Ansel’s swinging hinges.</loci>
+           <word>
+             <term>First mover</term>
+             <sense>the bottom of the explanation — not only the oldest date</sense>
+@@ -621,11 +621,11 @@
+             <miss>This is only a story about dominoes at the Big Bang.</miss>
+             <miss>Each changing thing explains itself.</miss>
+           </sentenceMisses>
+-          <placePrompt>That question lives at Why Gate.</placePrompt>
+-          <personPrompt>Ansel keeps that gate.</personPrompt>
+-          <ideaPrompt>Ansel’s why — change needs a first actuality.</ideaPrompt>
++          <placePrompt>That question lives at Why Gate Arch.</placePrompt>
++          <personPrompt>Ansel keeps the swinging arch.</personPrompt>
++          <ideaPrompt>Ansel’s hinge — change needs a first actuality.</ideaPrompt>
+           <ideaLabel>Change needs a first actuality.</ideaLabel>
+-          <whyEasy>Ansel keeps Why Gate. Change needs a first actuality.</whyEasy>
++          <whyEasy>Ansel keeps the swinging arch. Change needs a first actuality.</whyEasy>
+         </match>
+         <hold levelUpTo="medium" onFail="easy">
+           <claim>Change now needs a first mover that is not itself changing.</claim>
+@@ -654,7 +654,7 @@
+           <mediumTeach>Things go from “can be” to “is.” Nothing gives itself that step. A stack of receivers is not an explanation. Change here and now needs a first actuality that is not itself only a receiver of change — classical theism’s first mover.</mediumTeach>
+           <mainIdea>Change now needs a first mover that is not itself changing.</mainIdea>
+           <gloss>Change here and now still asks for a first changer.</gloss>
+-          <loci>This idea lives at Why Gate, with Ansel.</loci>
++          <loci>This idea lives at Why Gate Arch — Ansel’s swinging hinges.</loci>
+           <word>
+             <term>First mover</term>
+             <sense>the bottom of the explanation — not only the oldest date</sense>
+@@ -667,11 +667,11 @@
+             <miss>This is only a story about dominoes at the Big Bang.</miss>
+             <miss>Each changing thing explains itself.</miss>
+           </sentenceMisses>
+-          <placePrompt>That question lives at Why Gate.</placePrompt>
+-          <personPrompt>Ansel keeps that gate.</personPrompt>
+-          <ideaPrompt>Ansel’s why — change needs a first actuality.</ideaPrompt>
++          <placePrompt>That question lives at Why Gate Arch.</placePrompt>
++          <personPrompt>Ansel keeps the swinging arch.</personPrompt>
++          <ideaPrompt>Ansel’s hinge — change needs a first actuality.</ideaPrompt>
+           <ideaLabel>Change needs a first actuality.</ideaLabel>
+-          <whyMedium>Ansel keeps Why Gate. Change needs a first actuality.</whyMedium>
++          <whyMedium>Ansel keeps the swinging arch. Change needs a first actuality.</whyMedium>
+         </match>
+         <hold levelUpTo="hard" onFail="easy">
+           <claim>Change now needs a first mover that is not itself changing.</claim>
+@@ -711,11 +711,11 @@ Critics ask whether quantum events or a past-eternal cosmos break the chain. Def
+             <miss>This is only a story about dominoes at the Big Bang.</miss>
+             <miss>Each changing thing explains itself.</miss>
+           </sentenceMisses>
+-          <placePrompt>That question lives at Why Gate.</placePrompt>
+-          <personPrompt>Ansel keeps that gate.</personPrompt>
+-          <ideaPrompt>Ansel’s why — change needs a first actuality.</ideaPrompt>
++          <placePrompt>That question lives at Why Gate Arch.</placePrompt>
++          <personPrompt>Ansel keeps the swinging arch.</personPrompt>
++          <ideaPrompt>Ansel’s hinge — change needs a first actuality.</ideaPrompt>
+           <ideaLabel>Change needs a first actuality.</ideaLabel>
+-          <whyHard>Ansel Gate keeps Why Gate. Nothing reduces itself from potential to actual; present change needs a first actuality.</whyHard>
++          <whyHard>Ansel keeps Why Gate Arch. Nothing reduces itself from potential to actual; present change needs a first actuality.</whyHard>
+         </match>
+         <hold onFail="easy">
+           <claim>Change now needs a first mover that is not itself changing.</claim>
+@@ -739,7 +739,7 @@ Critics ask whether quantum events or a past-eternal cosmos break the chain. Def
+           </reasonChoices>
+         </hold>
+       </hard>
+-      <journal id="j-fg-1" title="Unmoved mover" kicker="Why Gate" unlockAfter="fg-mover" scoreFromHeldTier="true">
++      <journal id="j-fg-1" title="Unmoved mover" kicker="Why Gate Arch" unlockAfter="fg-mover" scoreFromHeldTier="true">
+         <p>Aristotle and Aquinas begin with change: the everyday passage from potential to actual. If nothing explains its own becoming, and a stack of unexplained becomings is not an explanation, then there is a first actuality that is not itself a receiver of change.</p>
+         <p>Read “first” as the bottom of the explanation, not merely the earliest date on a calendar. That is why the argument can be aimed at the present cosmos, not only at a first Tuesday.</p>
+         <sources>
+@@ -748,18 +748,18 @@ Critics ask whether quantum events or a past-eternal cosmos break the chain. Def
+         </sources>
+       </journal>
+     </lesson>
+-    <lesson id="fg-contingent" place="Why Gate" person="Ansel Gate" tripleId="contingent-gate" ideaId="idea-contingent" ideaLabel="Might-not-have-beens need a necessary ground." challengeKind="build-argument" challengeTitle="What might not have been">
++    <lesson id="fg-contingent" place="Why Gate Bedrock" person="Cosmic Cosmo" personId="cosmo" plotId="gate" tripleId="contingent-gate" ideaId="idea-contingent" ideaLabel="Might-not-have-beens need a necessary ground." challengeKind="build-argument" challengeTitle="What might not have been">
+       <easy points="10" easyOrder="29">
+         <learn>
+-          <shortStory>You exist, but you might not have. A world of only “might-not-have-beens” does not explain why anything is here. God is the necessary ground — not a shrug.</shortStory>
++          <shortStory>Cosmo again, at Bedrock Step. You exist, but you might not have. A world of only “might-not-have-beens” does not explain why anything is here. Cosmo isn’t the ground — God is the necessary Rock. Not a shrug.</shortStory>
+           <mainIdea>Things that might not exist still need a necessary ground.</mainIdea>
+           <gloss>What might not have been needs a ground.</gloss>
+-          <loci>This idea lives at Why Gate, with Ansel.</loci>
++          <loci>Cosmo’s Bedrock Step at Why Gate. Cosmo points — the living God is the necessary Rock.</loci>
+           <word>
+             <term>Might not have been</term>
+             <sense>it is real, but it could have failed to be</sense>
+           </word>
+-          <hint>Assemble the chain. Leave the joke cards.</hint>
++          <hint>Assemble the chain. Leave the joke cards. Cosmo only points.</hint>
+         </learn>
+         <match>
+           <sentenceCorrect>Things that might not exist still need a necessary ground.</sentenceCorrect>
+@@ -767,11 +767,11 @@ Critics ask whether quantum events or a past-eternal cosmos break the chain. Def
+             <miss>Contingent things contain the reason why there is anything.</miss>
+             <miss>Rivals are unintelligible and need not be named.</miss>
+           </sentenceMisses>
+-          <placePrompt>That question lives at Why Gate.</placePrompt>
+-          <personPrompt>Ansel keeps that gate.</personPrompt>
+-          <ideaPrompt>Ansel’s why — might-not-have-beens need a necessary ground.</ideaPrompt>
++          <placePrompt>That question lives at Why Gate Bedrock.</placePrompt>
++          <personPrompt>Cosmo marks Bedrock Step — God is the Rock, not Cosmo.</personPrompt>
++          <ideaPrompt>Cosmo’s Bedrock Step — might-not-have-beens need a necessary ground.</ideaPrompt>
+           <ideaLabel>Might-not-have-beens need a necessary ground.</ideaLabel>
+-          <whyEasy>Ansel keeps Why Gate. Might-not-have-beens need a necessary ground.</whyEasy>
++          <whyEasy>Cosmo marks Bedrock Step. Might-not-have-beens need a necessary ground — God, not Cosmo.</whyEasy>
+         </match>
+         <hold levelUpTo="medium" onFail="easy">
+           <claim>Things that might not exist still need a necessary ground.</claim>
+@@ -791,21 +791,21 @@ Critics ask whether quantum events or a past-eternal cosmos break the chain. Def
+           <reasonChoices>
+             <choice>Things that might not exist still need a ground.</choice>
+             <choice>Necessary being is only a weather report.</choice>
+-            <choice>Brute fact is not a metaphysical move.</choice>
++            <choice>It just is — that is enough.</choice>
+           </reasonChoices>
+         </hold>
+       </easy>
+       <medium points="12">
+         <learn>
+-          <mediumTeach>You exist, but you might not have. Contingent means: it is here, yet it could have failed to be. A world of only might-not-have-beens does not explain why anything is here. Classical theism names the necessary ground God.</mediumTeach>
++          <mediumTeach>You exist, but you might not have. Contingent things do not contain the reason why there is anything. Cosmo isn’t the ground, and Ansel isn’t either. Classical theism names the necessary ground God — Aquinas’s Third Way and Leibniz on sufficient reason. Not a shrug. Not “it just is.”</mediumTeach>
+           <mainIdea>Things that might not exist still need a necessary ground.</mainIdea>
+           <gloss>What might not have been needs a ground.</gloss>
+-          <loci>This idea lives at Why Gate, with Ansel.</loci>
++          <loci>Cosmo’s Bedrock Step at Why Gate. Cosmo points — the living God is the necessary Rock.</loci>
+           <word>
+             <term>Might not have been</term>
+             <sense>it is real, but it could have failed to be</sense>
+           </word>
+-          <hint>Assemble the chain. Leave the joke cards.</hint>
++          <hint>Assemble the chain. Leave the joke cards. Cosmo only points.</hint>
+         </learn>
+         <match>
+           <sentenceCorrect>Things that might not exist still need a necessary ground.</sentenceCorrect>
+@@ -813,11 +813,11 @@ Critics ask whether quantum events or a past-eternal cosmos break the chain. Def
+             <miss>Contingent things contain the reason why there is anything.</miss>
+             <miss>Rivals are unintelligible and need not be named.</miss>
+           </sentenceMisses>
+-          <placePrompt>That question lives at Why Gate.</placePrompt>
+-          <personPrompt>Ansel keeps that gate.</personPrompt>
+-          <ideaPrompt>Ansel’s why — might-not-have-beens need a necessary ground.</ideaPrompt>
++          <placePrompt>That question lives at Why Gate Bedrock.</placePrompt>
++          <personPrompt>Cosmo marks Bedrock Step — God is the Rock, not Cosmo.</personPrompt>
++          <ideaPrompt>Cosmo’s Bedrock Step — might-not-have-beens need a necessary ground.</ideaPrompt>
+           <ideaLabel>Might-not-have-beens need a necessary ground.</ideaLabel>
+-          <whyMedium>Ansel keeps Why Gate. Might-not-have-beens need a necessary ground.</whyMedium>
++          <whyMedium>Cosmo marks Bedrock Step. Might-not-have-beens need a necessary ground — God, not Cosmo.</whyMedium>
+         </match>
+         <hold levelUpTo="hard" onFail="easy">
+           <claim>Things that might not exist still need a necessary ground.</claim>
+@@ -837,18 +837,16 @@ Critics ask whether quantum events or a past-eternal cosmos break the chain. Def
+           <reasonChoices>
+             <choice>Things that might not exist still need a ground.</choice>
+             <choice>Necessary being is only a weather report.</choice>
+-            <choice>Brute fact is not a metaphysical move.</choice>
++            <choice>It just is — that is enough.</choice>
+           </reasonChoices>
+         </hold>
+       </medium>
+       <hard points="15">
+         <learn>
+-          <hardTeach>Related to Aquinas’s Third Way (ST I, q.2, a.3) and Leibniz’s principle of sufficient reason. Contingent means: it exists, but it could have failed to exist.
+-Atheist replies include: the universe itself is necessary; or “brute fact” is acceptable; or quantum vacua suffice. Each reply relocates necessity or else gives up explanation. That is a real debate — not a slogan fight.</hardTeach>
+-          <fullTeach>Related to Aquinas’s Third Way (ST I, q.2, a.3) and Leibniz’s principle of sufficient reason. Contingent means: it exists, but it could have failed to exist.
+-Atheist replies include: the universe itself is necessary; or “brute fact” is acceptable; or quantum vacua suffice. Each reply relocates necessity or else gives up explanation. That is a real debate — not a slogan fight.</fullTeach>
+-          <prompt>Assemble a contingency argument in a valid order.</prompt>
+-          <teachOnWrong>Leave the joke cards in the bank. The valid chain moves from contingent beings, through the failure of a purely contingent series, to a necessary ground — not to every later Christian doctrine at once.</teachOnWrong>
++          <hardTeach>Aquinas, Summa Theologiae I, q.2, a.3 (Third Way); Leibniz on sufficient reason. Contingent beings exist, but a world of only “might-not-have-beens” does not explain why anything is here. Cosmo is only the loci guide at Bedrock Step — the necessary ground is God. Rivals relocate necessity into the universe or accept a brute fact. Those are intelligible moves. They are not automatically cheaper. “It just is” is also a metaphysics.</hardTeach>
++          <fullTeach>Aquinas, Summa Theologiae I, q.2, a.3 (Third Way); Leibniz on sufficient reason. Contingent beings exist, but a world of only “might-not-have-beens” does not explain why anything is here. Cosmo is only the loci guide at Bedrock Step — the necessary ground is God. Rivals relocate necessity into the universe or accept a brute fact. Those are intelligible moves. They are not automatically cheaper. “It just is” is also a metaphysics.</fullTeach>
++          <prompt>Build the contingent → necessary chain. Do not stop at a shrug.</prompt>
++          <teachOnWrong>Contingent things do not contain the reason why there is anything. Cosmo isn’t the ground — God is the necessary Rock. Name that ground; do not shrug.</teachOnWrong>
+           <challengeTiles />
+         </learn>
+         <match>
+@@ -857,11 +855,11 @@ Atheist replies include: the universe itself is necessary; or “brute fact” i
+             <miss>Contingent things contain the reason why there is anything.</miss>
+             <miss>Rivals are unintelligible and need not be named.</miss>
+           </sentenceMisses>
+-          <placePrompt>That question lives at Why Gate.</placePrompt>
+-          <personPrompt>Ansel keeps that gate.</personPrompt>
+-          <ideaPrompt>Ansel’s why — might-not-have-beens need a necessary ground.</ideaPrompt>
++          <placePrompt>That question lives at Why Gate Bedrock.</placePrompt>
++          <personPrompt>Cosmo marks Bedrock Step — God is the Rock, not Cosmo.</personPrompt>
++          <ideaPrompt>Cosmo’s Bedrock Step — might-not-have-beens need a necessary ground.</ideaPrompt>
+           <ideaLabel>Might-not-have-beens need a necessary ground.</ideaLabel>
+-          <whyHard>Ansel Gate keeps Why Gate. A world of might-not-have-beens still needs a necessary ground — not a shrug.</whyHard>
++          <whyHard>Cosmo marks Bedrock Step. A world of might-not-have-beens still needs a necessary ground — God, not Cosmo.</whyHard>
+         </match>
+         <hold onFail="easy">
+           <claim>Things that might not exist still need a necessary ground.</claim>
+@@ -881,12 +879,12 @@ Atheist replies include: the universe itself is necessary; or “brute fact” i
+           <reasonChoices>
+             <choice>Things that might not exist still need a ground.</choice>
+             <choice>Necessary being is only a weather report.</choice>
+-            <choice>Brute fact is not a metaphysical move.</choice>
++            <choice>It just is — that is enough.</choice>
+           </reasonChoices>
+         </hold>
+       </hard>
+-      <journal id="j-fg-2" title="Necessary being" kicker="Why Gate" unlockAfter="fg-contingent" scoreFromHeldTier="true">
+-        <p>Contingent things exist. A world made only of “might-not-have-beens” does not contain the reason why there is anything. Classical theism names the necessary ground God.</p>
++      <journal id="j-fg-2" title="Necessary being" kicker="Why Gate Bedrock" unlockAfter="fg-contingent" scoreFromHeldTier="true">
++        <p>Contingent things exist. A world made only of “might-not-have-beens” does not contain the reason why there is anything. Cosmo isn’t the ground — classical theism names the necessary ground God.</p>
+         <p>Rivals relocate necessity into the universe, or they accept a brute fact. Those are intelligible moves. They are not automatically cheaper. “It just is” is also a metaphysics.</p>
+         <sources>
+           <source>Aquinas, ST I, q.2, a.3 (Third Way)</source>
+@@ -894,13 +892,13 @@ Atheist replies include: the universe itself is necessary; or “brute fact” i
+         </sources>
+       </journal>
+     </lesson>
+-    <lesson id="fg-kalam" place="Why Gate" person="Ansel Gate" tripleId="kalam-gate" ideaId="idea-kalam" ideaLabel="What begins has a cause." challengeKind="sort" challengeTitle="Whatever begins">
++    <lesson id="fg-kalam" place="Why Gate Arch" person="Ansel Gate" personId="ansel" plotId="gate" tripleId="kalam-gate" ideaId="idea-kalam" ideaLabel="What begins has a cause." challengeKind="sort" challengeTitle="Whatever begins">
+       <easy points="10" easyOrder="30">
+         <learn>
+           <shortStory>What begins has a cause. The universe began, so it has a Cause. Naming Abraham’s God takes further steps.</shortStory>
+           <mainIdea>What begins has a cause — the universe began, so it has a Cause.</mainIdea>
+           <gloss>Whatever begins still asks for a cause.</gloss>
+-          <loci>This idea lives at Why Gate, with Ansel.</loci>
++          <loci>This idea lives at Why Gate Arch — Ansel’s swinging hinges.</loci>
+           <word>
+             <term>Kalām</term>
+             <sense>the beginning argument — what starts still asks for a cause</sense>
+@@ -913,11 +911,11 @@ Atheist replies include: the universe itself is necessary; or “brute fact” i
+             <miss>A cause of the beginning is already the whole creed.</miss>
+             <miss>The form never mentions a beginning.</miss>
+           </sentenceMisses>
+-          <placePrompt>That question lives at Why Gate.</placePrompt>
+-          <personPrompt>Ansel keeps that gate.</personPrompt>
+-          <ideaPrompt>Ansel’s why — what begins has a cause.</ideaPrompt>
++          <placePrompt>That question lives at Why Gate Arch.</placePrompt>
++          <personPrompt>Ansel keeps the swinging arch.</personPrompt>
++          <ideaPrompt>Ansel’s hinge — what begins has a cause.</ideaPrompt>
+           <ideaLabel>What begins has a cause.</ideaLabel>
+-          <whyEasy>Ansel keeps Why Gate. What begins has a cause.</whyEasy>
++          <whyEasy>Ansel keeps the swinging arch. What begins has a cause.</whyEasy>
+         </match>
+         <hold levelUpTo="medium" onFail="easy">
+           <claim>What begins has a cause — the universe began, so it has a Cause.</claim>
+@@ -946,7 +944,7 @@ Atheist replies include: the universe itself is necessary; or “brute fact” i
+           <mediumTeach>Whatever begins to exist has a cause. If this universe began, it has a cause. That is already a great deal. Naming Abraham’s God takes further historical steps — not a leak in the argument, a next chapter.</mediumTeach>
+           <mainIdea>What begins has a cause — the universe began, so it has a Cause.</mainIdea>
+           <gloss>Whatever begins still asks for a cause.</gloss>
+-          <loci>This idea lives at Why Gate, with Ansel.</loci>
++          <loci>This idea lives at Why Gate Arch — Ansel’s swinging hinges.</loci>
+           <word>
+             <term>Kalām</term>
+             <sense>the beginning argument — what starts still asks for a cause</sense>
+@@ -959,11 +957,11 @@ Atheist replies include: the universe itself is necessary; or “brute fact” i
+             <miss>A cause of the beginning is already the whole creed.</miss>
+             <miss>The form never mentions a beginning.</miss>
+           </sentenceMisses>
+-          <placePrompt>That question lives at Why Gate.</placePrompt>
+-          <personPrompt>Ansel keeps that gate.</personPrompt>
+-          <ideaPrompt>Ansel’s why — what begins has a cause.</ideaPrompt>
++          <placePrompt>That question lives at Why Gate Arch.</placePrompt>
++          <personPrompt>Ansel keeps the swinging arch.</personPrompt>
++          <ideaPrompt>Ansel’s hinge — what begins has a cause.</ideaPrompt>
+           <ideaLabel>What begins has a cause.</ideaLabel>
+-          <whyMedium>Ansel keeps Why Gate. What begins has a cause.</whyMedium>
++          <whyMedium>Ansel keeps the swinging arch. What begins has a cause.</whyMedium>
+         </match>
+         <hold levelUpTo="hard" onFail="easy">
+           <claim>What begins has a cause — the universe began, so it has a Cause.</claim>
+@@ -1008,11 +1006,11 @@ Write the argument, then the best objection, then the reply. That is how these a
+             <miss>A cause of the beginning is already the whole creed.</miss>
+             <miss>The form never mentions a beginning.</miss>
+           </sentenceMisses>
+-          <placePrompt>That question lives at Why Gate.</placePrompt>
+-          <personPrompt>Ansel keeps that gate.</personPrompt>
+-          <ideaPrompt>Ansel’s why — what begins has a cause.</ideaPrompt>
++          <placePrompt>That question lives at Why Gate Arch.</placePrompt>
++          <personPrompt>Ansel keeps the swinging arch.</personPrompt>
++          <ideaPrompt>Ansel’s hinge — what begins has a cause.</ideaPrompt>
+           <ideaLabel>What begins has a cause.</ideaLabel>
+-          <whyHard>Ansel Gate keeps Why Gate. What begins has a cause — the universe began, so it has a Cause of the beginning.</whyHard>
++          <whyHard>Ansel keeps Why Gate Arch. What begins has a cause — the universe began, so it has a Cause of the beginning.</whyHard>
+         </match>
+         <hold onFail="easy">
+           <claim>What begins has a cause — the universe began, so it has a Cause.</claim>
+@@ -1036,7 +1034,7 @@ Write the argument, then the best objection, then the reply. That is how these a
+           </reasonChoices>
+         </hold>
+       </hard>
+-      <journal id="j-fg-3" title="Beginning and cause" kicker="Why Gate" unlockAfter="fg-kalam" scoreFromHeldTier="true">
++      <journal id="j-fg-3" title="Beginning and cause" kicker="Why Gate Arch" unlockAfter="fg-kalam" scoreFromHeldTier="true">
+         <p>The kalām form is clean: what begins has a cause; the universe began; therefore it has a cause. The second premise is argued from the impossibility of an infinite past and from the cosmos we actually observe.</p>
+         <p>That yields a cause of the beginning. Personhood, goodness, and the name of the God of Abraham are further questions — some of them historical.</p>
+         <sources>
+@@ -1046,13 +1044,13 @@ Write the argument, then the best objection, then the reply. That is how these a
+         </sources>
+       </journal>
+     </lesson>
+-    <lesson id="fg-limits" place="Why Gate" person="Ansel Gate" tripleId="limits-gate" ideaId="idea-limits" ideaLabel="A first cause is not yet the whole gospel." challengeKind="sort" challengeTitle="What the gate opens">
++    <lesson id="fg-limits" place="Why Gate Arch" person="Ansel Gate" personId="ansel" plotId="gate" tripleId="limits-gate" ideaId="idea-limits" ideaLabel="A first cause is not yet the whole gospel." challengeKind="sort" challengeTitle="What the gate opens">
+       <easy points="10" easyOrder="31">
+         <learn>
+           <shortStory>A working argument names a first cause. Intellect, goodness, and the gospel are further steps — not leaks.</shortStory>
+           <mainIdea>A first cause is a great deal — not yet the whole gospel.</mainIdea>
+           <gloss>A first cause is not yet the whole Christian faith.</gloss>
+-          <loci>This idea lives at Why Gate, with Ansel.</loci>
++          <loci>This idea lives at Why Gate Arch — Ansel’s swinging hinges.</loci>
+           <word>
+             <term>Creed</term>
+             <sense>the full Christian confession — more than “a first cause”</sense>
+@@ -1065,11 +1063,11 @@ Write the argument, then the best objection, then the reply. That is how these a
+             <miss>The Five Ways are already the whole gospel.</miss>
+             <miss>Pascal commands you to skip the philosophers.</miss>
+           </sentenceMisses>
+-          <placePrompt>That question lives at Why Gate.</placePrompt>
+-          <personPrompt>Ansel keeps that gate.</personPrompt>
+-          <ideaPrompt>Ansel’s why — a first cause is not yet the whole gospel.</ideaPrompt>
++          <placePrompt>That question lives at Why Gate Arch.</placePrompt>
++          <personPrompt>Ansel keeps the swinging arch.</personPrompt>
++          <ideaPrompt>Ansel’s hinge — a first cause is not yet the whole gospel.</ideaPrompt>
+           <ideaLabel>A first cause is not yet the whole gospel.</ideaLabel>
+-          <whyEasy>Ansel keeps Why Gate. A first cause is not yet the whole gospel.</whyEasy>
++          <whyEasy>Ansel keeps the swinging arch. A first cause is not yet the whole gospel.</whyEasy>
+         </match>
+         <hold levelUpTo="medium" onFail="easy">
+           <claim>A first cause is a great deal — not yet the whole gospel.</claim>
+@@ -1098,7 +1096,7 @@ Write the argument, then the best objection, then the reply. That is how these a
+           <mediumTeach>A cosmological argument, if it works, gives a first cause or necessary being — already a great deal. It is not yet the sermon on the mount. Intellect, goodness, and the gospel are further steps, not proofs that the first step failed.</mediumTeach>
+           <mainIdea>A first cause is a great deal — not yet the whole gospel.</mainIdea>
+           <gloss>A first cause is not yet the whole Christian faith.</gloss>
+-          <loci>This idea lives at Why Gate, with Ansel.</loci>
++          <loci>This idea lives at Why Gate Arch — Ansel’s swinging hinges.</loci>
+           <word>
+             <term>Creed</term>
+             <sense>the full Christian confession — more than “a first cause”</sense>
+@@ -1111,11 +1109,11 @@ Write the argument, then the best objection, then the reply. That is how these a
+             <miss>The Five Ways are already the whole gospel.</miss>
+             <miss>Pascal commands you to skip the philosophers.</miss>
+           </sentenceMisses>
+-          <placePrompt>That question lives at Why Gate.</placePrompt>
+-          <personPrompt>Ansel keeps that gate.</personPrompt>
+-          <ideaPrompt>Ansel’s why — a first cause is not yet the whole gospel.</ideaPrompt>
++          <placePrompt>That question lives at Why Gate Arch.</placePrompt>
++          <personPrompt>Ansel keeps the swinging arch.</personPrompt>
++          <ideaPrompt>Ansel’s hinge — a first cause is not yet the whole gospel.</ideaPrompt>
+           <ideaLabel>A first cause is not yet the whole gospel.</ideaLabel>
+-          <whyMedium>Ansel keeps Why Gate. A first cause is not yet the whole gospel.</whyMedium>
++          <whyMedium>Ansel keeps the swinging arch. A first cause is not yet the whole gospel.</whyMedium>
+         </match>
+         <hold levelUpTo="hard" onFail="easy">
+           <claim>A first cause is a great deal — not yet the whole gospel.</claim>
+@@ -1160,11 +1158,11 @@ Pascal’s warning about the God of the philosophers is a warning against stoppi
+             <miss>The Five Ways are already the whole gospel.</miss>
+             <miss>Pascal commands you to skip the philosophers.</miss>
+           </sentenceMisses>
+-          <placePrompt>That question lives at Why Gate.</placePrompt>
+-          <personPrompt>Ansel keeps that gate.</personPrompt>
+-          <ideaPrompt>Ansel’s why — a first cause is not yet the whole gospel.</ideaPrompt>
++          <placePrompt>That question lives at Why Gate Arch.</placePrompt>
++          <personPrompt>Ansel keeps the swinging arch.</personPrompt>
++          <ideaPrompt>Ansel’s hinge — a first cause is not yet the whole gospel.</ideaPrompt>
+           <ideaLabel>A first cause is not yet the whole gospel.</ideaLabel>
+-          <whyHard>Ansel Gate keeps Why Gate. A first cause is a great deal — not yet the whole gospel.</whyHard>
++          <whyHard>Ansel keeps Why Gate Arch. A first cause is a great deal — not yet the whole gospel.</whyHard>
+         </match>
+         <hold onFail="easy">
+           <claim>A first cause is a great deal — not yet the whole gospel.</claim>
+@@ -1188,7 +1186,7 @@ Pascal’s warning about the God of the philosophers is a warning against stoppi
+           </reasonChoices>
+         </hold>
+       </hard>
+-      <journal id="j-fg-4" title="Honest limits" kicker="Why Gate" unlockAfter="fg-limits" scoreFromHeldTier="true">
++      <journal id="j-fg-4" title="Honest limits" kicker="Why Gate Arch" unlockAfter="fg-limits" scoreFromHeldTier="true">
+         <p>A sound cosmological argument is already a great deal. It is not yet the sermon on the mount, and it does not need to be. Aquinas does not stop at the Five Ways; he argues onward. The New Testament adds public claims about a particular life, death, and raising.</p>
+         <p>Pascal’s warning about the God of the philosophers is a warning against stopping. It is not a command to skip the philosophers.</p>
+         <sources>
+@@ -1197,13 +1195,13 @@ Pascal’s warning about the God of the philosophers is a warning against stoppi
+         </sources>
+       </journal>
+     </lesson>
+-    <lesson id="daily-cosmos" place="Why Gate" person="Ansel Gate" tripleId="ansel-gate" ideaId="idea-cosmos" ideaLabel="The world did not have to exist." challengeKind="build-argument" challengeTitle="Why anything at all">
++    <lesson id="daily-cosmos" place="Why Gate Arch" person="Ansel Gate" personId="ansel" plotId="gate" tripleId="ansel-gate" ideaId="idea-cosmos" ideaLabel="The world did not have to exist." challengeKind="build-argument" challengeTitle="Why anything at all">
+       <easy points="10" easyOrder="12">
+         <learn>
+           <shortStory>The world is here, and it did not have to be. The psalms name a Giver for that gift — not a shrug that pretends the question never arises.</shortStory>
+           <mainIdea>The world is here, and it did not have to be — the psalms name a Giver.</mainIdea>
+           <gloss>The world is here, and it did not have to be — the psalms name a Giver.</gloss>
+-          <loci>This idea lives at Why Gate, with Ansel.</loci>
++          <loci>This idea lives at Why Gate Arch — Ansel’s swinging hinges.</loci>
+           <word>
+             <term>Source</term>
+             <sense>the One from whom this world comes</sense>
+@@ -1216,11 +1214,11 @@ Pascal’s warning about the God of the philosophers is a warning against stoppi
+             <miss>Questions about a source are impolite.</miss>
+             <miss>Existence plus contingency yields no question.</miss>
+           </sentenceMisses>
+-          <placePrompt>That question lives at Why Gate.</placePrompt>
+-          <personPrompt>Ansel keeps that gate.</personPrompt>
+-          <ideaPrompt>Ansel’s why — the world exists and did not have to.</ideaPrompt>
++          <placePrompt>That question lives at Why Gate Arch.</placePrompt>
++          <personPrompt>Ansel keeps the swinging arch.</personPrompt>
++          <ideaPrompt>Ansel’s hinge — the world exists and did not have to.</ideaPrompt>
+           <ideaLabel>The world did not have to exist.</ideaLabel>
+-          <whyEasy>Ansel keeps Why Gate. The world exists — and did not have to.</whyEasy>
++          <whyEasy>Ansel keeps the swinging arch. The world exists — and did not have to.</whyEasy>
+         </match>
+         <hold levelUpTo="medium" onFail="easy">
+           <claim>The world is here, and it did not have to be — the psalms name a Giver.</claim>
+@@ -1249,7 +1247,7 @@ Pascal’s warning about the God of the philosophers is a warning against stoppi
+           <mediumTeach>The universe exists and did not have to. The psalms name a Giver — not a shrug. Why there is a world at all points to a Source worth naming, not to polite silence.</mediumTeach>
+           <mainIdea>The world is here, and it did not have to be — the psalms name a Giver.</mainIdea>
+           <gloss>The world is here, and it did not have to be — the psalms name a Giver.</gloss>
+-          <loci>This idea lives at Why Gate, with Ansel.</loci>
++          <loci>This idea lives at Why Gate Arch — Ansel’s swinging hinges.</loci>
+           <word>
+             <term>Source</term>
+             <sense>the One from whom this world comes</sense>
+@@ -1262,11 +1260,11 @@ Pascal’s warning about the God of the philosophers is a warning against stoppi
+             <miss>Questions about a source are impolite.</miss>
+             <miss>Existence plus contingency yields no question.</miss>
+           </sentenceMisses>
+-          <placePrompt>That question lives at Why Gate.</placePrompt>
+-          <personPrompt>Ansel keeps that gate.</personPrompt>
+-          <ideaPrompt>Ansel’s why — the world exists and did not have to.</ideaPrompt>
++          <placePrompt>That question lives at Why Gate Arch.</placePrompt>
++          <personPrompt>Ansel keeps the swinging arch.</personPrompt>
++          <ideaPrompt>Ansel’s hinge — the world exists and did not have to.</ideaPrompt>
+           <ideaLabel>The world did not have to exist.</ideaLabel>
+-          <whyMedium>Ansel keeps Why Gate. The world exists — and did not have to.</whyMedium>
++          <whyMedium>Ansel keeps the swinging arch. The world exists — and did not have to.</whyMedium>
+         </match>
+         <hold levelUpTo="hard" onFail="easy">
+           <claim>The world is here, and it did not have to be — the psalms name a Giver.</claim>
+@@ -1306,11 +1304,11 @@ Psalm 8: when I look at your heavens… what is man that you are mindful of him?
+             <miss>Questions about a source are impolite.</miss>
+             <miss>Existence plus contingency yields no question.</miss>
+           </sentenceMisses>
+-          <placePrompt>That question lives at Why Gate.</placePrompt>
+-          <personPrompt>Ansel keeps that gate.</personPrompt>
+-          <ideaPrompt>Ansel’s why — the world exists and did not have to.</ideaPrompt>
++          <placePrompt>That question lives at Why Gate Arch.</placePrompt>
++          <personPrompt>Ansel keeps the swinging arch.</personPrompt>
++          <ideaPrompt>Ansel’s hinge — the world exists and did not have to.</ideaPrompt>
+           <ideaLabel>The world did not have to exist.</ideaLabel>
+-          <whyHard>Ansel Gate keeps Why Gate. That the universe exists and did not have to is the why-a-world stone.</whyHard>
++          <whyHard>Ansel keeps Why Gate Arch. That the universe exists and did not have to is the why-a-world stone.</whyHard>
+         </match>
+         <hold onFail="easy">
+           <claim>The world is here, and it did not have to be — the psalms name a Giver.</claim>
+@@ -1341,13 +1339,13 @@ Psalm 8: when I look at your heavens… what is man that you are mindful of him?
+         </sources>
+       </journal>
+     </lesson>
+-    <lesson id="daily-scroll" place="Why Gate" person="Ansel Gate" tripleId="scroll-gate" ideaId="idea-scroll" ideaLabel="We hold a river of copies." challengeKind="sequence" challengeTitle="A copied line">
++    <lesson id="daily-scroll" place="Why Gate Arch" person="Ansel Gate" personId="ansel" plotId="gate" tripleId="scroll-gate" ideaId="idea-scroll" ideaLabel="We hold a river of copies." challengeKind="sequence" challengeTitle="A copied line">
+       <easy points="10" easyOrder="32">
+         <learn>
+           <shortStory>Scribes copy. Later hands compare. Then a page prints a recovered text. The word still stands.</shortStory>
+           <mainIdea>We hold a river of copies, not the first ink.</mainIdea>
+           <gloss>We hold a river of copies, not the first ink.</gloss>
+-          <loci>This idea lives at Why Gate, with Ansel.</loci>
++          <loci>This idea lives at Why Gate Arch — Ansel’s swinging hinges.</loci>
+           <word>
+             <term>Copies</term>
+             <sense>later hands writing the same line — not cheating</sense>
+@@ -1360,11 +1358,11 @@ Psalm 8: when I look at your heavens… what is man that you are mindful of him?
+             <miss>We hold the first ink in a glass case.</miss>
+             <miss>Comparison of copies is cheating.</miss>
+           </sentenceMisses>
+-          <placePrompt>That question lives at Why Gate.</placePrompt>
+-          <personPrompt>Ansel keeps that gate.</personPrompt>
+-          <ideaPrompt>Ansel’s pages — we hold a river of copies.</ideaPrompt>
++          <placePrompt>That question lives at Why Gate Arch.</placePrompt>
++          <personPrompt>Ansel keeps the swinging arch.</personPrompt>
++          <ideaPrompt>Ansel’s arch pages — we hold a river of copies.</ideaPrompt>
+           <ideaLabel>We hold a river of copies.</ideaLabel>
+-          <whyEasy>Ansel keeps Why Gate. We hold a river of copies, not the first ink.</whyEasy>
++          <whyEasy>Ansel keeps the swinging arch. We hold a river of copies, not the first ink.</whyEasy>
+         </match>
+         <hold levelUpTo="medium" onFail="easy">
+           <claim>We hold a river of copies, not the first ink.</claim>
+@@ -1393,7 +1391,7 @@ Psalm 8: when I look at your heavens… what is man that you are mindful of him?
+           <mediumTeach>We do not hold the first ink. We hold a river of copies: scribes copy, later hands compare, then a page prints a recovered text. The word still stands — transmission is careful work, not a reason to throw the book away.</mediumTeach>
+           <mainIdea>We hold a river of copies, not the first ink.</mainIdea>
+           <gloss>We hold a river of copies, not the first ink.</gloss>
+-          <loci>This idea lives at Why Gate, with Ansel.</loci>
++          <loci>This idea lives at Why Gate Arch — Ansel’s swinging hinges.</loci>
+           <word>
+             <term>Copies</term>
+             <sense>later hands writing the same line — not cheating</sense>
+@@ -1406,11 +1404,11 @@ Psalm 8: when I look at your heavens… what is man that you are mindful of him?
+             <miss>We hold the first ink in a glass case.</miss>
+             <miss>Comparison of copies is cheating.</miss>
+           </sentenceMisses>
+-          <placePrompt>That question lives at Why Gate.</placePrompt>
+-          <personPrompt>Ansel keeps that gate.</personPrompt>
+-          <ideaPrompt>Ansel’s pages — we hold a river of copies.</ideaPrompt>
++          <placePrompt>That question lives at Why Gate Arch.</placePrompt>
++          <personPrompt>Ansel keeps the swinging arch.</personPrompt>
++          <ideaPrompt>Ansel’s arch pages — we hold a river of copies.</ideaPrompt>
+           <ideaLabel>We hold a river of copies.</ideaLabel>
+-          <whyMedium>Ansel keeps Why Gate. We hold a river of copies, not the first ink.</whyMedium>
++          <whyMedium>Ansel keeps the swinging arch. We hold a river of copies, not the first ink.</whyMedium>
+         </match>
+         <hold levelUpTo="hard" onFail="easy">
+           <claim>We hold a river of copies, not the first ink.</claim>
+@@ -1450,11 +1448,11 @@ Isaiah 40:8: the grass withers, the flower fades, but the word of our God will s
+             <miss>We hold the first ink in a glass case.</miss>
+             <miss>Comparison of copies is cheating.</miss>
+           </sentenceMisses>
+-          <placePrompt>That question lives at Why Gate.</placePrompt>
+-          <personPrompt>Ansel keeps that gate.</personPrompt>
+-          <ideaPrompt>Ansel’s pages — we hold a river of copies.</ideaPrompt>
++          <placePrompt>That question lives at Why Gate Arch.</placePrompt>
++          <personPrompt>Ansel keeps the swinging arch.</personPrompt>
++          <ideaPrompt>Ansel’s arch pages — we hold a river of copies.</ideaPrompt>
+           <ideaLabel>We hold a river of copies.</ideaLabel>
+-          <whyHard>Ansel Gate keeps Why Gate. Scribes copy, later hands compare — we hold a river of copies, not the first ink.</whyHard>
++          <whyHard>Ansel keeps Why Gate Arch. Scribes copy, later hands compare — we hold a river of copies, not the first ink.</whyHard>
+         </match>
+         <hold onFail="easy">
+           <claim>We hold a river of copies, not the first ink.</claim>
+@@ -1485,13 +1483,13 @@ Isaiah 40:8: the grass withers, the flower fades, but the word of our God will s
+         </sources>
+       </journal>
+     </lesson>
+-    <lesson id="daily-isaiah" place="Why Gate" person="Ansel Gate" tripleId="isaiah-gate" ideaId="idea-isaiah" ideaLabel="Isaiah’s Servant is Jesus." challengeKind="sort" challengeTitle="A hard poem">
++    <lesson id="daily-isaiah" place="Why Gate Arch" person="Ansel Gate" personId="ansel" plotId="gate" tripleId="isaiah-gate" ideaId="idea-isaiah" ideaLabel="Isaiah’s Servant is Jesus." challengeKind="sort" challengeTitle="A hard poem">
+       <easy points="10" easyOrder="33">
+         <learn>
+           <shortStory>The poem’s Servant suffers for others and does not answer with a sword. The church names that Servant as Jesus.</shortStory>
+           <mainIdea>Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.</mainIdea>
+           <gloss>Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.</gloss>
+-          <loci>This idea lives at Why Gate, with Ansel.</loci>
++          <loci>This idea lives at Why Gate Arch — Ansel’s swinging hinges.</loci>
+           <word>
+             <term>Servant</term>
+             <sense>the wounded one in Isaiah 53 — not a general on a horse</sense>
+@@ -1504,11 +1502,11 @@ Isaiah 40:8: the grass withers, the flower fades, but the word of our God will s
+             <miss>The servant conquers Rome by sword.</miss>
+             <miss>The poem is about estate planning.</miss>
+           </sentenceMisses>
+-          <placePrompt>That question lives at Why Gate.</placePrompt>
+-          <personPrompt>Ansel keeps that gate.</personPrompt>
+-          <ideaPrompt>Ansel’s scroll — Isaiah’s Servant is Jesus.</ideaPrompt>
++          <placePrompt>That question lives at Why Gate Arch.</placePrompt>
++          <personPrompt>Ansel keeps the swinging arch.</personPrompt>
++          <ideaPrompt>Ansel’s arch scroll — Isaiah’s Servant is Jesus.</ideaPrompt>
+           <ideaLabel>Isaiah’s Servant is Jesus.</ideaLabel>
+-          <whyEasy>Ansel keeps Why Gate. Isaiah’s Servant is Jesus.</whyEasy>
++          <whyEasy>Ansel keeps the swinging arch. Isaiah’s Servant is Jesus.</whyEasy>
+         </match>
+         <hold levelUpTo="medium" onFail="easy">
+           <claim>Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.</claim>
+@@ -1537,7 +1535,7 @@ Isaiah 40:8: the grass withers, the flower fades, but the word of our God will s
+           <mediumTeach>Isaiah 53’s Servant suffers for others and does not answer with a sword — wounded, silent like a lamb. The church confesses that Servant as Jesus. The poem and the gospel meet without flattening either.</mediumTeach>
+           <mainIdea>Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.</mainIdea>
+           <gloss>Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.</gloss>
+-          <loci>This idea lives at Why Gate, with Ansel.</loci>
++          <loci>This idea lives at Why Gate Arch — Ansel’s swinging hinges.</loci>
+           <word>
+             <term>Servant</term>
+             <sense>the wounded one in Isaiah 53 — not a general on a horse</sense>
+@@ -1550,11 +1548,11 @@ Isaiah 40:8: the grass withers, the flower fades, but the word of our God will s
+             <miss>The servant conquers Rome by sword.</miss>
+             <miss>The poem is about estate planning.</miss>
+           </sentenceMisses>
+-          <placePrompt>That question lives at Why Gate.</placePrompt>
+-          <personPrompt>Ansel keeps that gate.</personPrompt>
+-          <ideaPrompt>Ansel’s scroll — Isaiah’s Servant is Jesus.</ideaPrompt>
++          <placePrompt>That question lives at Why Gate Arch.</placePrompt>
++          <personPrompt>Ansel keeps the swinging arch.</personPrompt>
++          <ideaPrompt>Ansel’s arch scroll — Isaiah’s Servant is Jesus.</ideaPrompt>
+           <ideaLabel>Isaiah’s Servant is Jesus.</ideaLabel>
+-          <whyMedium>Ansel keeps Why Gate. Isaiah’s Servant is Jesus.</whyMedium>
++          <whyMedium>Ansel keeps the swinging arch. Isaiah’s Servant is Jesus.</whyMedium>
+         </match>
+         <hold levelUpTo="hard" onFail="easy">
+           <claim>Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.</claim>
+@@ -1599,11 +1597,11 @@ He was pierced for our transgressions… and with his wounds we are healed.</ful
+             <miss>The servant conquers Rome by sword.</miss>
+             <miss>The poem is about estate planning.</miss>
+           </sentenceMisses>
+-          <placePrompt>That question lives at Why Gate.</placePrompt>
+-          <personPrompt>Ansel keeps that gate.</personPrompt>
+-          <ideaPrompt>Ansel’s scroll — Isaiah’s Servant is Jesus.</ideaPrompt>
++          <placePrompt>That question lives at Why Gate Arch.</placePrompt>
++          <personPrompt>Ansel keeps the swinging arch.</personPrompt>
++          <ideaPrompt>Ansel’s arch scroll — Isaiah’s Servant is Jesus.</ideaPrompt>
+           <ideaLabel>Isaiah’s Servant is Jesus.</ideaLabel>
+-          <whyHard>Ansel Gate keeps Why Gate. Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.</whyHard>
++          <whyHard>Ansel keeps Why Gate Arch. Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.</whyHard>
+         </match>
+         <hold onFail="easy">
+           <claim>Isaiah’s Servant is Jesus — wounded for others, silent like a lamb.</claim>
+@@ -1636,12 +1634,12 @@ He was pierced for our transgressions… and with his wounds we are healed.</ful
+     </lesson>
+   </lessons>
+   <streetFacts>
+-    <fact evidenceId="fg-mover" tripleId="mover-gate" ideaId="idea-mover" place="Why Gate" person="Ansel Gate" ideaLabel="Change needs a first actuality." />
+-    <fact evidenceId="fg-contingent" tripleId="contingent-gate" ideaId="idea-contingent" place="Why Gate" person="Ansel Gate" ideaLabel="Might-not-have-beens need a necessary ground." />
+-    <fact evidenceId="fg-kalam" tripleId="kalam-gate" ideaId="idea-kalam" place="Why Gate" person="Ansel Gate" ideaLabel="What begins has a cause." />
+-    <fact evidenceId="fg-limits" tripleId="limits-gate" ideaId="idea-limits" place="Why Gate" person="Ansel Gate" ideaLabel="A first cause is not yet the whole gospel." />
+-    <fact evidenceId="daily-cosmos" tripleId="ansel-gate" ideaId="idea-cosmos" place="Why Gate" person="Ansel Gate" ideaLabel="The world did not have to exist." />
+-    <fact evidenceId="daily-scroll" tripleId="scroll-gate" ideaId="idea-scroll" place="Why Gate" person="Ansel Gate" ideaLabel="We hold a river of copies." />
+-    <fact evidenceId="daily-isaiah" tripleId="isaiah-gate" ideaId="idea-isaiah" place="Why Gate" person="Ansel Gate" ideaLabel="Isaiah’s Servant is Jesus." />
++    <fact evidenceId="fg-mover" tripleId="mover-gate" ideaId="idea-mover" place="Why Gate Arch" person="Ansel Gate" ideaLabel="Change needs a first actuality." />
++    <fact evidenceId="fg-contingent" tripleId="contingent-gate" ideaId="idea-contingent" place="Why Gate Bedrock" person="Cosmic Cosmo" ideaLabel="Might-not-have-beens need a necessary ground." />
++    <fact evidenceId="fg-kalam" tripleId="kalam-gate" ideaId="idea-kalam" place="Why Gate Arch" person="Ansel Gate" ideaLabel="What begins has a cause." />
++    <fact evidenceId="fg-limits" tripleId="limits-gate" ideaId="idea-limits" place="Why Gate Arch" person="Ansel Gate" ideaLabel="A first cause is not yet the whole gospel." />
++    <fact evidenceId="daily-cosmos" tripleId="ansel-gate" ideaId="idea-cosmos" place="Why Gate Arch" person="Ansel Gate" ideaLabel="The world did not have to exist." />
++    <fact evidenceId="daily-scroll" tripleId="scroll-gate" ideaId="idea-scroll" place="Why Gate Arch" person="Ansel Gate" ideaLabel="We hold a river of copies." />
++    <fact evidenceId="daily-isaiah" tripleId="isaiah-gate" ideaId="idea-isaiah" place="Why Gate Arch" person="Ansel Gate" ideaLabel="Isaiah’s Servant is Jesus." />
+   </streetFacts>
+ </areaPack>
+diff --git a/src/content/story.ts b/src/content/story.ts
+index 405f9bf..9c93f89 100644
+--- a/src/content/story.ts
++++ b/src/content/story.ts
+@@ -5,6 +5,7 @@ export type CharacterId =
+   | 'silas'
+   | 'nora'
+   | 'ansel'
++  | 'cosmo'
+   | 'hope'
+ 
+ export interface Character {
+@@ -60,8 +61,16 @@ export const CAST: Record<CharacterId, Character> = {
+     id: 'ansel',
+     name: 'Ansel Gate',
+     shortName: 'Ansel',
+-    role: 'Why-gate keeper',
+-    seeking: 'Why there is a world at all — and the God who answers it.',
++    role: 'Swinging-arch keeper',
++    seeking: 'Doorways and first hinges — order, reason, ought, mover, beginning — not the bedrock itself.',
++    areaId: 'first-gate',
++  },
++  cosmo: {
++    id: 'cosmo',
++    name: 'Cosmic Cosmo',
++    shortName: 'Cosmo',
++    role: 'Ground-truth tracker',
++    seeking: 'Points past the stars to the living Rock that holds the universe — not himself.',
+     areaId: 'first-gate',
+   },
+   hope: {
+@@ -130,8 +139,8 @@ export const AREA_LINES: Record<
+     after: 'If a sky line stuck, say it on the stairs.',
+   },
+   'first-gate': {
+-    hello: 'The stone only asks why there is a world. That’s as far as we walk tonight.',
+-    after: 'A first cause is a lot. It is not yet the sermon on the mount.',
++    hello: 'Ansel keeps the swinging arch — hinges that open why. Cosmo marks the bedrock below. God is the Rock.',
++    after: 'Hinges open the walk. Bedrock holds it. Neither guide is the foundation — the living God is.',
+   },
+   'high-lookout': {
+     hello: 'Wind’s honest up here. Duty, mind, meaning, beauty — sit with them.',
+@@ -190,12 +199,12 @@ export const TOWN_VOICE: Record<
+   },
+   gate: {
+     who: 'ansel',
+-    here: 'East road’s asking why.',
++    here: 'Swinging arch — hinges asking why.',
+     built: 'Arch is standing.',
+-    lit: 'Stone’s warm.',
+-    unlocked: 'Ansel unbarred the road.',
+-    afterWin: 'A gate rose.',
+-    grew: 'Stone settled.',
++    lit: 'Hinges warm.',
++    unlocked: 'Ansel unbarred the swinging arch.',
++    afterWin: 'A hinge caught.',
++    grew: 'Arch settled.',
+   },
+   lookout: {
+     who: 'hope',
+diff --git a/src/lib/city.ts b/src/lib/city.ts
+index c088ecb..5079598 100644
+--- a/src/lib/city.ts
++++ b/src/lib/city.ts
+@@ -49,7 +49,7 @@ export const CITY_PLOTS: CityPlotSpec[] = [
+   {
+     id: 'gate',
+     title: 'Why Gate',
+-    blurb: 'Ansel’s arch. The stone asks why there is a world at all.',
++    blurb: 'Ansel’s swinging arch for hinges; Cosmo’s bedrock for the living Rock.',
+     areaId: 'first-gate',
+   },
+   {
+@@ -212,7 +212,7 @@ export const CITY_AGE_LINE: Record<CityAge, string> = {
+   eden: 'You arrive at Juniper’s lamp. The creek garden — Story Creek — holds Jesus stories. Heaven waits on the ridge.',
+   village: 'Mercy’s oaks and Silas’s square. Stories first, then public names.',
+   town: 'Nora’s dome looks up. Fine-tuning lives with the sky.',
+-  gold: 'Ansel’s gate asks why there is a world. The lookout is close enough to see.',
++  gold: 'Ansel’s hinges and Cosmo’s bedrock ask why there is a world. The lookout is close enough to see.',
+   heaven: 'Hope’s ridge and the City of Heaven. You kept the trail.',
+ }
+ 
+@@ -316,7 +316,7 @@ export function nextGift(id: CityPlotId, stage: CityStage, fill: number, easy =
+       if (fill < 4) return 'The last glass will set'
+       return 'Stars will catch the glass'
+     case 'gate':
+-      if (stage === 'empty' || stage === 'scaffold') return 'Ansel’s arch will stand'
++      if (stage === 'empty' || stage === 'scaffold') return 'Ansel’s swinging arch will stand'
+       if (fill < 2) return 'Stone will settle'
+       if (fill < 3) return 'A lantern will hang'
+       if (fill < 4) return 'The last stone will set'
+diff --git a/src/lib/easy.ts b/src/lib/easy.ts
+index 8e3cef2..f048c5d 100644
+--- a/src/lib/easy.ts
++++ b/src/lib/easy.ts
+@@ -273,6 +273,8 @@ const LINE_HOME: Record<string, { whoId: CharacterId; plotId: CityPlotId }> = {
+   'daily-lantern': { whoId: 'juniper', plotId: 'porch' },
+   'daily-stars': { whoId: 'nora', plotId: 'observatory' },
+   'daily-cosmos': { whoId: 'ansel', plotId: 'gate' },
++  'fg-ground': { whoId: 'cosmo', plotId: 'gate' },
++  'fg-contingent': { whoId: 'cosmo', plotId: 'gate' },
+   'hl-moral': { whoId: 'hope', plotId: 'lookout' },
+ }
+ 
+diff --git a/src/types.ts b/src/types.ts
+index d81e42c..6235130 100644
+--- a/src/types.ts
++++ b/src/types.ts
+@@ -122,7 +122,7 @@ export interface LinkNode {
+   kind: LinkKind
+   text: string
+   /** Person chip — candy portrait. */
+-  who?: 'river' | 'juniper' | 'mercy' | 'silas' | 'nora' | 'ansel' | 'hope'
++  who?: 'river' | 'juniper' | 'mercy' | 'silas' | 'nora' | 'ansel' | 'cosmo' | 'hope'
+   /** Place chip — town plot. */
+   plotId?: string
+   /** Idea chip — existing evidence / walk id. */

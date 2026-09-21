@@ -35,9 +35,9 @@ export const LOT_STORY: Record<CityPlotId, LotStory> = {
   },
   gate: {
     path: 'Why a world',
-    whyEasy: 'Ansel’s stone asks why there is a world at all. That question lives at the gate you walked in by.',
+    whyEasy: 'Ansel’s swinging arch = hinges. Cosmo’s Bedrock Step = living Rock. God holds what might not have been — not the guides.',
     whyHard:
-      'Why Gate is the east-road arch beside the porch. After the sky, you come back to the stone: first mover, might-not-have-been, the beginning argument — then the high ridge.',
+      'Why Gate has two loci: Ansel’s Swinging Arch (order, reason, ought, mover, kalām, limits) and Cosmo’s Bedrock Step (living foundation + necessary ground). Neither guide is the Rock — the living God is.',
   },
   lookout: {
     path: 'Meaning',
@@ -70,7 +70,7 @@ export function easyPlaceSub(id: CityPlotId): string | null {
   if (id === 'bench') return 'Witness Square · public names'
   if (id === 'porch') return 'Juniper’s lamp'
   if (id === 'observatory') return 'Nora’s Sky Watch'
-  if (id === 'gate') return 'Ansel’s why-a-world gate'
+  if (id === 'gate') return 'Swinging Arch · Bedrock Step'
   if (id === 'lookout') return 'Hope’s Meaning Ridge'
   return null
 }
