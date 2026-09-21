@@ -206,7 +206,7 @@ assert.equal(
   'sc-pliny',
 )
 assert.equal(
-  easyLoopLine({ ...EASY_LINE_ORDER.slice(0, 42)] }),
+  easyLoopLine({ ...afterDoor, easyHeld: [...EASY_LINE_ORDER.slice(0, 42)] }),
   'ic-trajan',
 )
 
