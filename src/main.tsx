@@ -7,6 +7,7 @@ import { ProgressProvider } from './store/ProgressProvider'
 import './index.css'
 import './styles/gem-less-waste.css'
 import './styles/storySnap.css'
+import './styles/digReveal.css'
 
 if (!Capacitor.isNativePlatform()) {
   registerSW({ immediate: true })
