@@ -69,10 +69,14 @@ const LESSON_SCENES: Record<string, StoryScene[]> = {
   'wb-women': ['tomb', 'tell', 'keep'],
   'daily-stars': ['sky', 'tell', 'keep'],
   'daily-cosmos': ['sky', 'keep', 'tell'],
-  'fg-order': ['keep', 'tell', 'creek'],
-  'fg-reason': ['lamp', 'tell', 'keep'],
-  'fg-ought': ['keep', 'tell', 'creek'],
-  'fg-ground': ['keep', 'tell', 'sky'],
+  'fg-order': ['keep', 'tell', 'creek', 'sky'],
+  'fg-reason': ['lamp', 'tell', 'keep', 'sky'],
+  'fg-ought': ['keep', 'tell', 'creek', 'sky'],
+  'fg-ground': ['keep', 'tell', 'sky', 'creek'],
+  'fg-mover': ['keep', 'creek', 'tell', 'sky'],
+  'fg-contingent': ['keep', 'creek', 'tell', 'sky'],
+  'fg-kalam': ['keep', 'creek', 'tell', 'sky'],
+  'fg-limits': ['keep', 'creek', 'tell', 'sky'],
 }
 
 /** Split pack shortStory on sentence ends — do not rewrite the words. */
@@ -135,7 +139,7 @@ function scenesFor(lineId: string, count: number, texts: string[]): StoryScene[]
   const picked: StoryScene[] = []
   for (let i = 0; i < count; i += 1) {
     const fromList = authored?.[Math.min(i, (authored?.length ?? 1) - 1)]
-    if (lineId === 'ph-father' && fromList) {
+    if (fromList) {
       picked.push(fromList)
       continue
     }
@@ -151,7 +155,7 @@ export function storyPanelsFor(lineId: string, wordCount = gemWordsFor(lineId).l
   const story = lesson?.easy.learn ?? evidenceFor(lineId)?.reason ?? ''
   const sentences = splitStorySentences(story)
   const count =
-    lineId === 'ph-father' ? 5 : Math.max(3, Math.min(4, wordCount || 4))
+    lineId === 'ph-father' ? 5 : lineId.startsWith('fg-') ? 4 : Math.max(3, Math.min(4, wordCount || 4))
   let beats = packStoryBeats(sentences, count)
   const fromStoryCount = beats.length
   const fillers = padCopy(lineId)

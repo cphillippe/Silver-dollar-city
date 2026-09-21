@@ -77,3 +77,22 @@
   width: 100%;
   height: auto;
 }
+
+
+/* Spent Match cells stay flat: shared letters remain playable but lose gem emboss. */
+.gem-cell.is-clear {
+  background: rgba(18, 6, 46, 0.18);
+  border-color: rgba(255, 204, 51, 0.18);
+  box-shadow: none;
+  text-shadow: none;
+}
+
+.gem-cell.is-cracked {
+  background: color-mix(in srgb, var(--gem, #ffcc33) 34%, #1a0840);
+  border-color: rgba(255, 204, 51, 0.28);
+  box-shadow: none;
+}
+
+.gem-cell.is-cracked .gem-letter {
+  text-shadow: none;
+}
