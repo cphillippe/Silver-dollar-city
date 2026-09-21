@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.100',
+    title: 'Dig Reveal timed scrub · Easy core trail',
+    when: '2026-09-21',
+    items: [
+      'Dig: scrub dirt off three tablets against a clock (Easy 20s / Hard 12s). Clock starts on first scrub. Three reveals → DUG!; timeout soft Buried! then One more dig reset. No glow-order',
+    ],
+  },
+  {
     version: '1.4.99',
     title: 'Match dock no-overlap · Easy core trail',
     when: '2026-09-21',
