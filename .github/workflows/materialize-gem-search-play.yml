@@ -1,0 +1,29 @@
+name: Materialize GemSearchPlay dock
+on:
+  workflow_dispatch:
+  push:
+    branches: [fun/match-story-dock-1.4.97]
+    paths:
+      - scripts/materialize-gem-search-play.mjs
+permissions:
+  contents: write
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fun/match-story-dock-1.4.97
+      - name: Materialize GemSearchPlay.tsx
+        run: node scripts/materialize-gem-search-play.mjs
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/components/challenges/GemSearchPlay.tsx
+          if git diff --staged --quiet; then
+            echo "No change"
+          else
+            git commit -m "fix(match): restore GemSearchPlay story dock wiring +1000 juice"
+            git push
+          fi
