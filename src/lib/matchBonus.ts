@@ -3,6 +3,8 @@ import type { ProgressState } from '../types.ts'
 /** Bill: 100 points for an extra try at the match. Not a Hold tier score. */
 export const MATCH_BONUS_POINTS = 100
 export const MATCH_MISS_POINTS = 25
+/** Bill: unlock/collapse of Match story strip — arcade +1000. */
+export const MATCH_DOCK_JUICE_POINTS = 1000
 export const MATCH_BONUS_MAX = 10_000
 export const MATCH_EXTRA_MAX = 20
 
@@ -20,6 +22,20 @@ export function applyMatchBonus<T extends Pick<ProgressState, 'matchBonus' | 'ma
     matchExtra: {
       ...(progress.matchExtra ?? {}),
       [id]: Math.min(MATCH_EXTRA_MAX, extra + 1),
+    },
+  }
+}
+
+/** Story strip hero→dock collapse — +1000 arcade juice, no extra try. */
+export function applyMatchDockJuice<T extends Pick<ProgressState, 'matchBonus'>>(
+  progress: T,
+  id: string,
+): Pick<ProgressState, 'matchBonus'> {
+  const prior = progress.matchBonus?.[id] ?? 0
+  return {
+    matchBonus: {
+      ...(progress.matchBonus ?? {}),
+      [id]: Math.min(MATCH_BONUS_MAX, prior + MATCH_DOCK_JUICE_POINTS),
     },
   }
 }
