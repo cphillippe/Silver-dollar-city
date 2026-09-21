@@ -15,7 +15,7 @@ interface StoryStripProps {
   opened: number
   flipping: number | null
   complete: boolean
-  /** hero = big intro; dock = tiny top bar; sheet = expand over the board */
+  /** hero = big intro; dock = tiny in-flow top bar (not overlay); sheet = expand over the board */
   mode?: StoryStripMode
   /** Target Match words shown in the tiny dock bar */
   words?: StoryStripWord[]
@@ -78,7 +78,7 @@ export function StoryStrip({
       <ul className="story-dock-words" aria-label="Words to find">
         {words.map((word) => (
           <li key={word.id} className={`story-dock-word ${word.found ? 'is-found' : ''}`}>
-            {word.label}
+            <span className="story-dock-word-label">{word.label}</span>
           </li>
         ))}
       </ul>
