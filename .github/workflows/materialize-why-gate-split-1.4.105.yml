@@ -1,0 +1,66 @@
+name: materialize-why-gate-split-1.4.105
+on:
+  push:
+    branches: [content/why-gate-mat-1.4.105]
+    paths:
+      - 'tmp/why-gate-src-1.4.105/**'
+      - '.github/workflows/materialize-why-gate-split-1.4.105.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: content/why-gate-mat-1.4.105
+          fetch-depth: 0
+      - name: Assemble and apply source patch
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64
+          parts = sorted(Path('tmp/why-gate-src-1.4.105').glob('part-*.b64'))
+          data = b''.join(base64.b64decode(p.read_text().strip()) for p in parts)
+          Path('tmp/why-gate-src.patch').write_bytes(data)
+          print('assembled', len(data), 'from', len(parts), 'parts')
+          PY
+          git apply --whitespace=nowarn tmp/why-gate-src.patch || git apply --3way --whitespace=nowarn tmp/why-gate-src.patch
+          node scripts/embed-packs.mjs
+      - name: Rebuild docs for Pages
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run build
+          rm -rf docs/assets
+          mkdir -p docs
+          cp -a dist/. docs/
+          git checkout HEAD -- docs/assets/panel-blast 2>/dev/null || true
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          html = Path('docs/index.html').read_text()
+          js = re.search(r'assets/index-[^"]+\.js', html).group(0)
+          css = re.search(r'assets/index-[^"]+\.css', html).group(0)
+          p = Path('docs/404.html')
+          if p.exists():
+            t = p.read_text()
+            t = re.sub(r'assets/index-[^"]+\.js', js, t)
+            t = re.sub(r'assets/index-[^"]+\.css', css, t)
+            p.write_text(t)
+          print('docs synced', js, css)
+          PY
+      - name: Commit materialized files
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'nothing to commit'
+            exit 0
+          fi
+          git commit -m "materialize Why Gate split 1.4.105 (Arch + Bedrock) + docs"
+          git push
