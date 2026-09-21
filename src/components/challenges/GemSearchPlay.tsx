@@ -35,8 +35,10 @@ interface GemSearchPlayProps {
 const SHARDS = [0, 1, 2, 3, 4, 5, 6, 7]
 
 function cellFromPoint(x: number, y: number): GemCoord | null {
-  const hit = document.elementFromPoint(x, y)
-  const node = hit instanceof Element ? hit.closest('[data-gem-cell]') : null
+  // Pointer capture keeps the gesture alive, but an expanded dock/overlay can still
+  // be above the board in hit-testing. Search every painted layer for the gem cell.
+  const nodes = document.elementsFromPoint(x, y)
+  const node = nodes.find((candidate) => candidate instanceof HTMLElement && candidate.matches('[data-gem-cell]'))
   if (!(node instanceof HTMLElement)) return null
   if (node.classList.contains('is-clear')) return null
   const r = Number(node.dataset.r)
@@ -76,6 +78,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   const [stripMode, setStripMode] = useState<'hero' | 'dock' | 'sheet'>('dock')
   const [dockJuice, setDockJuice] = useState<number | null>(null)
   const drag = useRef(false)
+  const dragPointerId = useRef<number | null>(null)
   const moved = useRef(false)
   const pathRef = useRef<GemCoord[]>([])
   const rawRef = useRef<GemCoord[]>([])
@@ -386,8 +389,8 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       if (!last) rawRef.current = [cell]
       else if (!sameCell(last, cell)) rawRef.current = [...raw, cell]
       const line = snapFingerPath(rawRef.current, puzzle.size)
+      // Keep the complete gesture visible; score only once on pointerup.
       writePath(line)
-      submit(line)
       return
     }
     const current = pathRef.current
@@ -411,7 +414,10 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     if (status === 'ok') return
     event.preventDefault()
     event.stopPropagation()
+    if (drag.current) return
     drag.current = true
+    dragPointerId.current = event.pointerId
+    event.currentTarget.setPointerCapture?.(event.pointerId)
     moved.current = false
     scoredThisGesture.current = false
     setShake(false)
@@ -420,7 +426,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   }
 
   function onBoardMove(event: ReactPointerEvent<HTMLDivElement>) {
-    if (!drag.current || status === 'ok') return
+    if (!drag.current || status === 'ok' || event.pointerId !== dragPointerId.current) return
     const cell = cellFromPoint(event.clientX, event.clientY)
     if (!cell) return
     const last = pathRef.current[pathRef.current.length - 1]
@@ -429,15 +435,25 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     applyCell(cell, 'drag')
   }
 
-  function onBoardUp() {
+  function onBoardUp(event?: ReactPointerEvent<HTMLDivElement>) {
     if (!drag.current) return
+    if (event && event.pointerId !== dragPointerId.current) return
     drag.current = false
+    dragPointerId.current = null
     if (scoredThisGesture.current) return
     const nextPath = rawRef.current.length ? rawRef.current : pathRef.current
     if (!nextPath.length) return
     if (moved.current || nextPath.length >= 3) {
       missIfSwipe(nextPath)
     }
+  }
+
+  function onBoardCancel() {
+    if (!drag.current) return
+    drag.current = false
+    dragPointerId.current = null
+    rawRef.current = []
+    writePath([])
   }
 
   function replay() {
@@ -452,7 +468,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       className={`play is-gem-search is-panel-blast ${stripMode !== 'hero' ? 'is-story-docked' : ''} ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''} ${burst.length ? 'is-boom' : ''} ${plusFlash ? 'is-bonus-pop' : ''} ${findPop ? 'is-find-pop' : ''}`}
       style={{ ['--gem-size' as string]: puzzle.size }}
       onPointerUp={onBoardUp}
-      onPointerCancel={onBoardUp}
+      onPointerCancel={onBoardCancel}
     >
       <p className="sort-how">{EASY.matchHunt}</p>
       <StoryStrip
@@ -532,7 +548,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
         aria-label="Letter gems"
         onPointerMove={onBoardMove}
         onPointerUp={onBoardUp}
-        onPointerCancel={onBoardUp}
+        onPointerCancel={onBoardCancel}
       >
         <WinBurst play={winStamp} stamp={EASY.matchWin} />
         {puzzle.letters.flatMap((row, r) =>
@@ -546,7 +562,11 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
             })
             const bonusClear = !kept && bonusCleared.includes(key)
             const bonusGhost = !bonusClear && bonusGhosted.includes(key)
+            const sharedFound = kept && found.some((wordId) =>
+              (puzzle.paths[wordId] ?? []).some((cell) => cell.r === r && cell.c === c),
+            )
             const cellClear = targetClear || bonusClear
+            const cellCracked = !bonusClear && (bonusGhost || sharedFound)
             return (
               <div
                 key={key}
@@ -555,7 +575,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
                 data-r={r}
                 data-c={c}
                 onPointerDown={(event) => onCellDown(event, { r, c })}
-                className={`gem-cell hue-${gemHue(letter, r, c)} ${selected.has(key) ? 'is-sel' : ''} ${popping ? 'is-burst' : ''} ${cellClear ? 'is-clear' : ''} ${bonusGhost ? 'is-cracked' : ''} ${kept && found.length > 0 && !selected.has(key) ? 'is-live' : ''} ${hint.includes(key) ? 'is-hint' : ''} ${popping && (bonusClear || bonusGhost) ? 'is-bonus-burst' : ''}`}
+                className={`gem-cell hue-${gemHue(letter, r, c)} ${selected.has(key) ? 'is-sel' : ''} ${popping ? 'is-burst' : ''} ${cellClear ? 'is-clear' : ''} ${cellCracked ? 'is-cracked' : ''} ${kept && found.length > 0 && !selected.has(key) && !cellCracked ? 'is-live' : ''} ${hint.includes(key) ? 'is-hint' : ''} ${popping && (bonusClear || bonusGhost) ? 'is-bonus-burst' : ''}`}
               >
                 <span className="gem-letter">{letter}</span>
                 {popping
