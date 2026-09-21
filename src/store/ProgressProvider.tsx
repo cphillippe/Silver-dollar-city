@@ -1,1 +1,442 @@
-@file:/workspace/Silver-dollar-city/src/store/ProgressProvider.tsx
+import { useCallback, useMemo, useState, type ReactNode } from 'react'
+import { markEasyHeld, markEasyTaught } from '../lib/easy'
+import {
+  applyMatchBonus,
+  applyMatchDockJuice,
+  applyMatchMiss,
+  consumeMatchExtra as spendMatchExtra,
+} from '../lib/matchBonus'
+import { applyHoldFail, applyHoldSuccess, currentLessonTier } from '../lib/tiers'
+import { appendStreetLinks, STREET_TRIPLES } from '../content/links'
+import { learningFromReview, upsertLearning } from '../lib/learning'
+import { isToolHowTo } from '../lib/watchTools'
+import {
+  applyMiss,
+  applySnooze,
+  applySuccess,
+  emptyTrace,
+  masteryFromReview,
+  type ReviewEvent,
+} from '../lib/memory'
+import {
+  backupCurrentSave,
+  parseIncomingSave,
+  persistSave,
+  type SaveMeta,
+} from '../lib/save'
+import { bestStars, type StarCount } from '../lib/stars'
+import { streakAfterPlay } from '../lib/streak'
+import { citySnapshot, forgetCitySeen, writeCitySeen, type CityPlotId } from '../lib/city'
+import { applyUpgrade } from '../lib/cityBuild'
+import type { AppTheme, ProgressState } from '../types'
+import {
+  cardsUnlockedBy,
+  emptyProgress,
+  loadAppSave,
+  ProgressContext,
+  trailCardsForDays,
+  type ProgressApi,
+} from './progress'
+
+export function ProgressProvider({ children }: { children: ReactNode }) {
+  const [progress, setProgress] = useState<ProgressState>(() => loadAppSave().progress)
+  const [saveMeta, setSaveMeta] = useState<SaveMeta>(() => loadAppSave().meta)
+  const [missed, setMissed] = useState<string[]>([])
+
+  const commit = useCallback((next: ProgressState) => {
+    const meta = persistSave(next)
+    setProgress(next)
+    setSaveMeta(meta)
+  }, [])
+
+  const write = useCallback((next: ProgressState) => {
+    setSaveMeta(persistSave(next))
+    return next
+  }, [])
+
+  const start = useCallback(() => {
+    setProgress((current) => {
+      writeCitySeen(citySnapshot(current))
+      const next = {
+        ...current,
+        started: true,
+        lastAreaId: current.lastAreaId ?? 'parable-hollow',
+      }
+      return write(next)
+    })
+  }, [write])
+
+  const markMiss = useCallback((challengeId: string) => {
+    setMissed((current) =>
+      current.includes(challengeId) ? current : [...current, challengeId],
+    )
+  }, [])
+
+  const recordHeld = useCallback((evidenceId: string) => {
+    setProgress((current) => {
+      if (isToolHowTo(evidenceId)) return current
+      const held = current.held.includes(evidenceId)
+        ? current.held
+        : [...current.held, evidenceId]
+      const easyHeld = current.easyMode
+        ? markEasyHeld(current, evidenceId)
+        : (current.easyHeld ?? [])
+      if (held === current.held && easyHeld === (current.easyHeld ?? [])) return current
+      const next: ProgressState = {
+        ...current,
+        held,
+        easyHeld,
+      }
+      return write(next)
+    })
+  }, [write])
+
+  const recordReview = useCallback((event: ReviewEvent) => {
+    let kept: StarCount = 1
+    setProgress((current) => {
+      const prior = current.memory[event.id]
+      const base = prior ?? emptyTrace(event.id, event.pillar, event.today)
+      const helped = event.peeked || !event.clean
+
+      let nextTrace = base
+      if (event.kind === 'encode') {
+        nextTrace = prior
+          ? {
+              ...base,
+              pillar: event.pillar,
+              elaborated: base.elaborated || event.elaborated,
+            }
+          : {
+              ...emptyTrace(event.id, event.pillar, event.today),
+              elaborated: event.elaborated,
+            }
+      } else if (helped) {
+        nextTrace = applyMiss(base, event.today)
+      } else {
+        nextTrace = applySuccess(base, event.today)
+      }
+
+      nextTrace = {
+        ...nextTrace,
+        elaborated: nextTrace.elaborated || event.elaborated,
+      }
+
+      kept = bestStars(
+        current.stars[event.id],
+        masteryFromReview(current.stars[event.id], prior, event, nextTrace),
+      )
+      const next: ProgressState = {
+        ...current,
+        memory: { ...current.memory, [event.id]: nextTrace },
+        stars: { ...current.stars, [event.id]: kept },
+        held:
+          isToolHowTo(event.id) || current.held.includes(event.id)
+            ? current.held
+            : [...current.held, event.id],
+        easyHeld:
+          current.easyMode && !isToolHowTo(event.id)
+            ? markEasyHeld(current, event.id)
+            : (current.easyHeld ?? []),
+        lastReviewPillar: event.pillar,
+        elaborations: event.text
+          ? { ...current.elaborations, [event.id]: event.text }
+          : current.elaborations,
+      }
+      const stored = learningFromReview(event, current)
+      if (stored) {
+        next.learnings = upsertLearning(current.learnings ?? [], stored)
+      }
+      return write(next)
+    })
+    return kept
+  }, [write])
+
+  const snoozeReviews = useCallback((ids: string[], today: string) => {
+    if (ids.length === 0) return
+    setProgress((current) => {
+      let changed = false
+      const memory = { ...current.memory }
+      for (const id of ids) {
+        const prior = memory[id]
+        if (!prior) continue
+        memory[id] = applySnooze(prior, today)
+        changed = true
+      }
+      if (!changed) return current
+      return write({ ...current, memory })
+    })
+  }, [write])
+
+  const recordStars = useCallback((challengeId: string, stars: StarCount) => {
+    let kept: StarCount = stars
+    setProgress((current) => {
+      kept = bestStars(current.stars[challengeId], stars)
+      if (current.stars[challengeId] === kept) return current
+      const next: ProgressState = {
+        ...current,
+        stars: { ...current.stars, [challengeId]: kept },
+      }
+      return write(next)
+    })
+    return kept
+  }, [write])
+
+  const completeChallenge = useCallback(
+    (areaId: string, challengeId: string) => {
+      const unlocked = cardsUnlockedBy(challengeId)
+      setProgress((current) => {
+        const already = current.completed.includes(challengeId)
+        const next: ProgressState = {
+          ...current,
+          started: true,
+          completed: already
+            ? current.completed
+            : [...current.completed, challengeId],
+          journal: [...new Set([...current.journal, ...unlocked])],
+          firstTry:
+            already ||
+            missed.includes(challengeId) ||
+            current.firstTry.includes(challengeId)
+              ? current.firstTry
+              : [...current.firstTry, challengeId],
+          lastAreaId: areaId,
+          lastChallengeId: challengeId,
+        }
+        return write(next)
+      })
+      return unlocked
+    },
+    [missed, write],
+  )
+
+  const completeDaily = useCallback((dateKey: string) => {
+    let unlocked: string[] = []
+    setProgress((current) => {
+      const seenToday = current.dailyDates.includes(dateKey)
+      const dates = seenToday
+        ? current.dailyDates
+        : [...current.dailyDates, dateKey]
+      unlocked = trailCardsForDays(dates.length).filter(
+        (id) => !current.journal.includes(id),
+      )
+      const update = streakAfterPlay(
+        current.lastDailyDate,
+        dateKey,
+        current.streak,
+      )
+      const next: ProgressState = {
+        ...current,
+        started: true,
+        dailyDates: dates,
+        lastDailyDate: dateKey,
+        streak: update.streak,
+        bestStreak: Math.max(current.bestStreak, update.streak),
+        journal: [
+          ...new Set([...current.journal, ...trailCardsForDays(dates.length)]),
+        ],
+      }
+      return write(next)
+    })
+    return unlocked
+  }, [write])
+
+  const recordNight = useCallback((dateKey: string) => {
+    setProgress((current) => {
+      const seen = current.defense.nights.includes(dateKey)
+      const next = {
+        ...current,
+        defense: {
+          cleared: current.defense.cleared + 1,
+          nights: seen ? current.defense.nights : [...current.defense.nights, dateKey],
+          lastNight: dateKey,
+        },
+      }
+      return write(next)
+    })
+  }, [write])
+
+  const setTheme = useCallback((theme: AppTheme) => {
+    setProgress((current) => {
+      if (current.theme === theme) return current
+      return write({ ...current, theme })
+    })
+  }, [write])
+
+  const setEasyMode = useCallback((easyMode: boolean) => {
+    setProgress((current) => {
+      if (current.easyMode === easyMode) return current
+      return write({ ...current, easyMode })
+    })
+  }, [write])
+
+  const recordTaught = useCallback((evidenceId: string) => {
+    setProgress((current) => {
+      const taught = current.taught ?? []
+      const nextTaught = taught.includes(evidenceId) ? taught : [...taught, evidenceId]
+      const easyTaught = current.easyMode
+        ? markEasyTaught(current, evidenceId)
+        : (current.easyTaught ?? [])
+      const tierTaught = current.easyMode
+        ? { ...(current.tierTaught ?? {}), [evidenceId]: currentLessonTier(current, evidenceId) }
+        : (current.tierTaught ?? {})
+      if (
+        nextTaught === taught &&
+        easyTaught === (current.easyTaught ?? []) &&
+        tierTaught[evidenceId] === current.tierTaught?.[evidenceId]
+      ) {
+        return current
+      }
+      return write({ ...current, taught: nextTaught, easyTaught, tierTaught })
+    })
+  }, [write])
+
+  const recordLessonHold = useCallback((evidenceId: string, clean: boolean) => {
+    if (isToolHowTo(evidenceId)) return
+    setProgress((current) => {
+      const patch = clean
+        ? applyHoldSuccess(current, evidenceId)
+        : applyHoldFail(current, evidenceId)
+      return write({ ...current, ...patch })
+    })
+  }, [write])
+
+  const recordMatchBonus = useCallback((lineId: string) => {
+    if (!lineId) return
+    setProgress((current) => write({ ...current, ...applyMatchBonus(current, lineId) }))
+  }, [write])
+
+  const recordMatchDockJuice = useCallback((lineId: string) => {
+    if (!lineId) return
+    setProgress((current) => write({ ...current, ...applyMatchDockJuice(current, lineId) }))
+  }, [write])
+
+  const recordMatchMiss = useCallback((lineId: string) => {
+    if (!lineId) return
+    setProgress((current) => write({ ...current, ...applyMatchMiss(current, lineId) }))
+  }, [write])
+
+  const consumeMatchExtra = useCallback((lineId: string) => {
+    if (!lineId) return
+    setProgress((current) => {
+      if (!(current.matchExtra?.[lineId] ?? 0)) return current
+      return write({ ...current, ...spendMatchExtra(current, lineId) })
+    })
+  }, [write])
+
+  const recordStreetLinks = useCallback((tripleIds: string[]) => {
+    if (tripleIds.length === 0) return
+    setProgress((current) => {
+      const streetLinked = appendStreetLinks(current.streetLinked ?? [], tripleIds)
+      const allDone = streetLinked.length >= STREET_TRIPLES.length
+      const completed =
+        allDone && !current.completed.includes('ln-street')
+          ? [...current.completed, 'ln-street']
+          : current.completed
+      if (
+        streetLinked.length === (current.streetLinked ?? []).length &&
+        completed === current.completed
+      ) {
+        return current
+      }
+      return write({
+        ...current,
+        started: true,
+        streetLinked,
+        completed,
+        lastAreaId: 'street',
+        lastChallengeId: 'ln-street',
+      })
+    })
+  }, [write])
+
+  const upgradeBuilding = useCallback((id: CityPlotId) => {
+    setProgress((current) => {
+      const next = applyUpgrade(current, id)
+      if (next === current) return current
+      return write(next)
+    })
+  }, [write])
+
+  const reset = useCallback(() => {
+    setMissed([])
+    forgetCitySeen()
+    backupCurrentSave()
+    setProgress((current) => {
+      const next = {
+        ...emptyProgress(),
+        theme: current.theme,
+        easyMode: current.easyMode,
+      }
+      return write(next)
+    })
+  }, [write])
+
+  const importSaveText = useCallback((raw: string) => {
+    const parsed = parseIncomingSave(raw)
+    if (!parsed.ok) return parsed
+    backupCurrentSave()
+    setMissed([])
+    forgetCitySeen()
+    commit(parsed.progress)
+    return { ok: true as const }
+  }, [commit])
+
+  const api = useMemo<ProgressApi>(
+    () => ({
+      progress,
+      saveMeta,
+      missed,
+      start,
+      completeChallenge,
+      completeDaily,
+      recordStars,
+      recordHeld,
+      recordReview,
+      recordLessonHold,
+      recordMatchBonus,
+      recordMatchDockJuice,
+      recordMatchMiss,
+      consumeMatchExtra,
+      snoozeReviews,
+      markMiss,
+      recordNight,
+      setTheme,
+      setEasyMode,
+      recordTaught,
+      recordStreetLinks,
+      upgradeBuilding,
+      reset,
+      importSaveText,
+    }),
+    [
+      completeChallenge,
+      completeDaily,
+      importSaveText,
+      markMiss,
+      missed,
+      progress,
+      recordHeld,
+      recordNight,
+      recordReview,
+      recordLessonHold,
+      recordMatchBonus,
+      recordMatchDockJuice,
+      recordMatchMiss,
+      consumeMatchExtra,
+      snoozeReviews,
+      recordStars,
+      reset,
+      saveMeta,
+      recordTaught,
+      recordStreetLinks,
+      setEasyMode,
+      setTheme,
+      start,
+      upgradeBuilding,
+    ],
+  )
+
+  return (
+    <ProgressContext.Provider value={api}>{children}</ProgressContext.Provider>
+  )
+}
