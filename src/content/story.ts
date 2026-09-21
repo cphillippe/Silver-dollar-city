@@ -5,6 +5,7 @@ export type CharacterId =
   | 'silas'
   | 'nora'
   | 'ansel'
+  | 'cosmo'
   | 'hope'
 
 export interface Character {
@@ -60,8 +61,16 @@ export const CAST: Record<CharacterId, Character> = {
     id: 'ansel',
     name: 'Ansel Gate',
     shortName: 'Ansel',
-    role: 'Why-gate keeper',
-    seeking: 'Why there is a world at all — and the God who answers it.',
+    role: 'Swinging-arch keeper',
+    seeking: 'Doorways and first hinges — order, reason, ought, mover, beginning — not the bedrock itself.',
+    areaId: 'first-gate',
+  },
+  cosmo: {
+    id: 'cosmo',
+    name: 'Cosmic Cosmo',
+    shortName: 'Cosmo',
+    role: 'Ground-truth tracker',
+    seeking: 'Points past the stars to the living Rock that holds the universe — not himself.',
     areaId: 'first-gate',
   },
   hope: {
@@ -130,8 +139,8 @@ export const AREA_LINES: Record<
     after: 'If a sky line stuck, say it on the stairs.',
   },
   'first-gate': {
-    hello: 'The stone only asks why there is a world. That’s as far as we walk tonight.',
-    after: 'A first cause is a lot. It is not yet the sermon on the mount.',
+    hello: 'Ansel keeps the swinging arch — hinges that open why. Cosmo marks the bedrock below. God is the Rock.',
+    after: 'Hinges open the walk. Bedrock holds it. Neither guide is the foundation — the living God is.',
   },
   'high-lookout': {
     hello: 'Wind’s honest up here. Duty, mind, meaning, beauty — sit with them.',
@@ -190,12 +199,12 @@ export const TOWN_VOICE: Record<
   },
   gate: {
     who: 'ansel',
-    here: 'East road’s asking why.',
+    here: 'Swinging arch — hinges asking why.',
     built: 'Arch is standing.',
-    lit: 'Stone’s warm.',
-    unlocked: 'Ansel unbarred the road.',
-    afterWin: 'A gate rose.',
-    grew: 'Stone settled.',
+    lit: 'Hinges warm.',
+    unlocked: 'Ansel unbarred the swinging arch.',
+    afterWin: 'A hinge caught.',
+    grew: 'Arch settled.',
   },
   lookout: {
     who: 'hope',

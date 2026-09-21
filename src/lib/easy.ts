@@ -273,6 +273,8 @@ const LINE_HOME: Record<string, { whoId: CharacterId; plotId: CityPlotId }> = {
   'daily-lantern': { whoId: 'juniper', plotId: 'porch' },
   'daily-stars': { whoId: 'nora', plotId: 'observatory' },
   'daily-cosmos': { whoId: 'ansel', plotId: 'gate' },
+  'fg-ground': { whoId: 'cosmo', plotId: 'gate' },
+  'fg-contingent': { whoId: 'cosmo', plotId: 'gate' },
   'hl-moral': { whoId: 'hope', plotId: 'lookout' },
 }
 
