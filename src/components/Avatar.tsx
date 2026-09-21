@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react'
 import type { CharacterId } from '../content/story'
 import { CAST } from '../content/story'
 import ansel from '../assets/cast/portrait-ansel.png'
+import cosmo from '../assets/cast/portrait-cosmo.ts'
 import hope from '../assets/cast/portrait-hope.png'
 import juniper from '../assets/cast/portrait-juniper.png'
 import mercy from '../assets/cast/portrait-mercy.png'
@@ -23,6 +24,7 @@ const PORTRAITS: Record<CharacterId, string> = {
   silas,
   nora,
   ansel,
+  cosmo,
   hope,
 }
 
