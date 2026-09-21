@@ -122,7 +122,7 @@ export interface LinkNode {
   kind: LinkKind
   text: string
   /** Person chip — candy portrait. */
-  who?: 'river' | 'juniper' | 'mercy' | 'silas' | 'nora' | 'ansel' | 'hope'
+  who?: 'river' | 'juniper' | 'mercy' | 'silas' | 'nora' | 'ansel' | 'cosmo' | 'hope'
   /** Place chip — town plot. */
   plotId?: string
   /** Idea chip — existing evidence / walk id. */
