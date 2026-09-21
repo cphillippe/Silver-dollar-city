@@ -1,1 +1,147 @@
-dock-probe 1.4.97
+import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import { EASY, easyWhoWhere } from '../../lib/easy'
+import {
+  buildGemPuzzle,
+  cellKey,
+  cellsNeededByOpenPlanted,
+  cellsStillNeeded,
+  gemHue,
+  isStraightPath,
+  matchBonusWord,
+  matchGemWord,
+  sameCell,
+  shouldMissAfterSwipe,
+  snapFingerPath,
+  tryAddToPath,
+  type GemCoord,
+} from '../../lib/gemSearch'
+import { lineBonusPoints, MATCH_DOCK_JUICE_POINTS } from '../../lib/matchBonus'
+import { gemBonusBeat, gemTargetBeat, matchClearBeat } from '../../lib/successBeat'
+import { MatchTakeaway } from '../HeldTriad'
+import { storyPanelsFor, type StoryPanel } from '../../lib/storyPanels'
+import { GEM_BURST, playGemPop, prefersReducedMotion } from '../../lib/juice'
+import { useProgress } from '../../store/progress'
+import { StoryStrip } from '../StoryStrip'
+import { WinBurst } from './WinBurst'
+
+interface GemSearchPlayProps {
+  lineId: string
+  beats?: StoryPanel[]
+  onMiss: () => void
+  onClear?: () => void
+  onEasyStop?: (dest: 'hold' | 'home') => void
+}
+
+const SHARDS = [0, 1, 2, 3, 4, 5, 6, 7]
+
+function cellFromPoint(x: number, y: number): GemCoord | null {
+  const hit = document.elementFromPoint(x, y)
+  const node = hit instanceof Element ? hit.closest('[data-gem-cell]') : null
+  if (!(node instanceof HTMLElement)) return null
+  if (node.classList.contains('is-clear')) return null
+  const r = Number(node.dataset.r)
+  const c = Number(node.dataset.c)
+  if (!Number.isFinite(r) || !Number.isFinite(c)) return null
+  return { r, c }
+}
+
+export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: GemSearchPlayProps) {
+  const { progress, recordMatchBonus, recordMatchDockJuice, recordMatchMiss } = useProgress()
+  const [round, setRound] = useState(() => Date.now())
+  const puzzle = useMemo(() => buildGemPuzzle(lineId, round), [lineId, round])
+  const panels = useMemo(
+    () => beats ?? storyPanelsFor(lineId, puzzle.words.length),
+    [beats, lineId, puzzle.words.length],
+  )
+  const [found, setFound] = useState<string[]>([])
+  const [bonusFound, setBonusFound] = useState<string[]>([])
+  const [bonusCleared, setBonusCleared] = useState<string[]>([])
+  const [bonusGhosted, setBonusGhosted] = useState<string[]>([])
+  const [opened, setOpened] = useState(0)
+  const [flipping, setFlipping] = useState<number | null>(null)
+  const [path, setPath] = useState<GemCoord[]>([])
+  const [burst, setBurst] = useState<string[]>([])
+  const [hint, setHint] = useState<string[]>([])
+  const [misses, setMisses] = useState(0)
+  const [shake, setShake] = useState(false)
+  const [toast, setToast] = useState('')
+  const [toastWhy, setToastWhy] = useState('')
+  const [toastBonus, setToastBonus] = useState(false)
+  const [toastMiss, setToastMiss] = useState(false)
+  const [plusFlash, setPlusFlash] = useState(false)
+  const [comboFlash, setComboFlash] = useState(0)
+  const [findPop, setFindPop] = useState(0)
+  const [status, setStatus] = useState<'play' | 'ok'>('play')
+  const [winStamp, setWinStamp] = useState(false)
+  const [stripMode, setStripMode] = useState<'hero' | 'dock' | 'sheet'>('hero')
+  const [dockJuice, setDockJuice] = useState<number | null>(null)
+  const drag = useRef(false)
+  const moved = useRef(false)
+  const pathRef = useRef<GemCoord[]>([])
+  const rawRef = useRef<GemCoord[]>([])
+  const foundRef = useRef<string[]>([])
+  const bonusRef = useRef<string[]>([])
+  const comboRef = useRef(0)
+  const replayToast = useRef(false)
+  const cleared = useRef(false)
+  const scoredThisGesture = useRef(false)
+  const dockJuiced = useRef(false)
+  const home = easyWhoWhere(lineId)
+  const needed = cellsStillNeeded(puzzle, found)
+  const nextWord = puzzle.words.find((word) => !found.includes(word.id))
+  const left = puzzle.words.length - found.length
+  const bonusPts = lineBonusPoints(progress, lineId)
+  const clearBeat = matchClearBeat(lineId)
+
+  function writePath(next: GemCoord[] | ((current: GemCoord[]) => GemCoord[])) {
+    setPath((current) => {
+      const value = typeof next === 'function' ? next(current) : next
+      pathRef.current = value
+      return value
+    })
+  }
+
+  function resetBoard(keepTaught: boolean) {
+    foundRef.current = []
+    bonusRef.current = []
+    pathRef.current = []
+    rawRef.current = []
+    scoredThisGesture.current = false
+    if (!keepTaught) cleared.current = false
+    setFound([])
+    setBonusFound([])
+    setBonusCleared([])
+    setBonusGhosted([])
+    setPath([])
+    setBurst([])
+    setHint([])
+    setMisses(0)
+    setToast('')
+    setToastWhy('')
+    setToastBonus(false)
+    setToastMiss(false)
+    setPlusFlash(false)
+    setComboFlash(0)
+    setFindPop(0)
+    comboRef.current = 0
+    setStatus('play')
+    setWinStamp(false)
+    setOpened(0)
+    setFlipping(null)
+    setStripMode('hero')
+    setDockJuice(null)
+    dockJuiced.current = false
+  }
+
+  useEffect(() => {
+    setRound(Date.now())
+    resetBoard(false)
+    // line change only — new Match deal, not the leftover extras
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lineId])
+
+  useEffect(() => {
+    if (round === 0) return
+    resetBoard(true)
+    if (replayToast.current) {
+      replayToast.current = false
