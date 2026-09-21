@@ -1,0 +1,79 @@
+/* Match art flash + tight letter rows 1.4.101 — import after index.css */
+
+/* Dock thumbs: real StoryPanelArt, not sealed-foil-only */
+.story-strip.is-dock .story-thumbs {
+  flex: 0 1 auto;
+  width: auto;
+  max-width: min(40%, 140px);
+  gap: 3px;
+}
+
+.story-strip.is-dock .story-thumb {
+  position: relative;
+  aspect-ratio: 1;
+  max-height: 34px;
+  min-height: 28px;
+  overflow: hidden;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  background: #1a0840;
+}
+
+.story-strip.is-dock .story-thumb.is-sealed {
+  background:
+    repeating-linear-gradient(135deg, #ffcc33 0 8px, #ffb020 8px 16px);
+}
+
+.story-strip.is-dock .story-thumb-art {
+  position: absolute;
+  inset: 0;
+}
+
+.story-strip.is-dock .story-thumb-art .story-art-tile,
+.story-strip.is-dock .story-thumb-art .story-art {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.story-strip.is-dock .story-thumb .story-thumb-seal {
+  width: 18px;
+  height: 18px;
+  font-size: 0.7rem;
+}
+
+@media (max-width: 430px) {
+  .play.is-gem-search.is-panel-blast.is-story-docked .story-strip.is-dock .story-thumb {
+    max-height: 30px;
+    min-height: 26px;
+  }
+}
+
+/* Hero flash: keep painted art visible while open */
+.story-hero.is-open .story-hero-face.is-front .story-art-tile,
+.story-hero.is-open .story-hero-face.is-front .story-art {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Tighten letter-board gaps; kill stretch gutters between rows */
+.gem-board {
+  gap: 2px;
+  padding: 4px;
+}
+
+.play.is-gem-search.is-panel-blast.is-story-docked .gem-board {
+  align-content: center; /* was stretch — stretch opened white gaps between rows */
+  justify-content: center;
+  gap: 1px;
+  padding: 2px;
+}
+
+.play.is-gem-search.is-panel-blast.is-story-docked .gem-cell {
+  min-height: 0;
+  aspect-ratio: 1;
+  width: 100%;
+  height: auto;
+}
