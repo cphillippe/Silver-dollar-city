@@ -24,15 +24,48 @@ const PANEL_ART: Partial<Record<StoryScene, string>> = {
   feast: panelHug,
 }
 
+/** Lesson-specific still map for Why Gate. These local SVG stills are keyed by beatId,
+ * so foundation panels never fall back to Samaritan art or empty generic tiles. */
+type FoundationArtKind =
+  | 'world' | 'order' | 'christ' | 'gate' | 'mind' | 'light' | 'word' | 'reason'
+  | 'nature' | 'law' | 'heart' | 'ought' | 'god' | 'life' | 'breath' | 'ground'
+  | 'change' | 'actual' | 'mover' | 'source' | 'possible' | 'necessary' | 'contingent'
+  | 'beginning' | 'cause' | 'time' | 'kalam' | 'finite' | 'limits' | 'gospel' | 'whole'
+
+const FOUNDATION_BEATS: Record<string, readonly FoundationArtKind[]> = {
+  'fg-order': ['world', 'order', 'christ', 'gate'],
+  'fg-reason': ['mind', 'light', 'word', 'reason'],
+  'fg-ought': ['nature', 'law', 'heart', 'ought'],
+  'fg-ground': ['god', 'life', 'breath', 'ground'],
+  'fg-mover': ['change', 'actual', 'mover', 'source'],
+  'fg-contingent': ['possible', 'necessary', 'contingent', 'ground'],
+  'fg-kalam': ['beginning', 'time', 'cause', 'kalam'],
+  'fg-limits': ['finite', 'limits', 'gospel', 'whole'],
+}
+
+function foundationBeatFor(beatId?: string): FoundationArtKind | null {
+  if (!beatId) return null
+  const [lineId, , rawIndex] = beatId.split(':')
+  if (!lineId.startsWith('fg-')) return null
+  const index = Number(rawIndex)
+  if (!Number.isInteger(index)) return null
+  return FOUNDATION_BEATS[lineId]?.[index] ?? null
+}
+
 export function StoryPanelArt({
   scene,
   media,
+  beatId,
   size = 'hero',
 }: {
   scene: StoryScene
   media?: StoryMediaSlot
+  beatId?: string
   size?: 'hero' | 'thumb'
 }) {
+  const uid = useId().replace(/:/g, '')
+  const foundationBeat = foundationBeatFor(beatId)
+  if (foundationBeat) return <FoundationArt kind={foundationBeat} uid={uid} />
   const resolved = resolveStoryMedia(media)
   if (resolved.loop) {
     return (
@@ -53,7 +86,6 @@ export function StoryPanelArt({
   if (painted) {
     return <img className="story-art-tile" src={painted} alt="" draggable={false} />
   }
-  const uid = useId().replace(/:/g, '')
   switch (scene) {
     case 'forgive':
       return (
@@ -142,6 +174,31 @@ export function StoryPanelArt({
         </Frame>
       )
   }
+}
+
+function FoundationArt({ kind, uid }: { kind: FoundationArtKind; uid: string }) {
+  const label = kind.toUpperCase()
+  const orderArt = ['world', 'order', 'christ', 'gate'].includes(kind)
+  const from = orderArt ? '#2a0d58' : '#1a2848'
+  const to = orderArt ? '#148a48' : '#3a1480'
+  const path =
+    kind === 'world' || kind === 'nature' || kind === 'finite'
+      ? 'M14 27h36M32 9c-7 5-10 11-10 18s3 13 10 18M32 9c7 5 10 11 10 18s-3 13-10 18'
+      : kind === 'mind' || kind === 'reason' || kind === 'light'
+        ? 'M20 28c0-8 5-13 12-13s12 5 12 13c0 5-3 8-7 10H27c-4-2-7-5-7-10ZM27 43h10M28 48h8'
+        : kind === 'law' || kind === 'heart' || kind === 'ought'
+          ? 'M32 13 37 25h13L39 33l4 13-11-8-11 8 4-13-11-8h13Z'
+          : 'M32 10v34M21 22h22M16 47h32'
+  return (
+    <Frame uid={uid} from={from} to={to}>
+      <circle cx="32" cy="27" r="18" fill="#ffcc33" opacity="0.95" />
+      <path d={path} fill="none" stroke="#2a1408" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      <rect x="7" y="49" width="50" height="10" rx="5" fill="#fff6e8" opacity="0.92" />
+      <text x="32" y="56.5" textAnchor="middle" fontSize="6.2" fontWeight="800" fill="#2a1408">
+        {label}
+      </text>
+    </Frame>
+  )
 }
 
 function Person({
