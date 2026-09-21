@@ -49,7 +49,7 @@ export const CITY_PLOTS: CityPlotSpec[] = [
   {
     id: 'gate',
     title: 'Why Gate',
-    blurb: 'Ansel’s arch. The stone asks why there is a world at all.',
+    blurb: 'Ansel’s swinging arch for hinges; Cosmo’s bedrock for the living Rock.',
     areaId: 'first-gate',
   },
   {
@@ -212,7 +212,7 @@ export const CITY_AGE_LINE: Record<CityAge, string> = {
   eden: 'You arrive at Juniper’s lamp. The creek garden — Story Creek — holds Jesus stories. Heaven waits on the ridge.',
   village: 'Mercy’s oaks and Silas’s square. Stories first, then public names.',
   town: 'Nora’s dome looks up. Fine-tuning lives with the sky.',
-  gold: 'Ansel’s gate asks why there is a world. The lookout is close enough to see.',
+  gold: 'Ansel’s hinges and Cosmo’s bedrock ask why there is a world. The lookout is close enough to see.',
   heaven: 'Hope’s ridge and the City of Heaven. You kept the trail.',
 }
 
@@ -316,7 +316,7 @@ export function nextGift(id: CityPlotId, stage: CityStage, fill: number, easy = 
       if (fill < 4) return 'The last glass will set'
       return 'Stars will catch the glass'
     case 'gate':
-      if (stage === 'empty' || stage === 'scaffold') return 'Ansel’s arch will stand'
+      if (stage === 'empty' || stage === 'scaffold') return 'Ansel’s swinging arch will stand'
       if (fill < 2) return 'Stone will settle'
       if (fill < 3) return 'A lantern will hang'
       if (fill < 4) return 'The last stone will set'

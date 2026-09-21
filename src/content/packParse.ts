@@ -149,6 +149,9 @@ function lociFromNames(place: string, person: string): Pick<PackLoci, 'plotId' |
   if (blob.includes('nora') || blob.includes('sky watch') || blob.includes('observatory')) {
     return { plotId: 'observatory', who: 'nora' }
   }
+  if (blob.includes('cosmo')) {
+    return { plotId: 'gate', who: 'cosmo' }
+  }
   if (blob.includes('ansel') || blob.includes('why gate')) {
     return { plotId: 'gate', who: 'ansel' }
   }
