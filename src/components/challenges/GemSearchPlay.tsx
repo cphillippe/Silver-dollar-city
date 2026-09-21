@@ -474,7 +474,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
         onSheetClose={() => setStripMode('dock')}
       />
       <div className="gem-scroll">
-      {/* Board-first 1.4.98: lesson chips live in the dock; 0% bonus chrome above the board. */}
+      {/* Board-first 1.4.99: StoryStrip dock is a flex header above this scroll; board fills leftover — zero overlay. */}
       {stripMode === 'hero' ? (
       <ul className="gem-words" aria-label="Words to find">
         {puzzle.words.map((word) => (
