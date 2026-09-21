@@ -15,7 +15,7 @@ import {
   tryAddToPath,
   type GemCoord,
 } from '../../lib/gemSearch'
-import { lineBonusPoints } from '../../lib/matchBonus'
+import { lineBonusPoints, MATCH_DOCK_JUICE_POINTS } from '../../lib/matchBonus'
 import { gemBonusBeat, gemTargetBeat, matchClearBeat } from '../../lib/successBeat'
 import { MatchTakeaway } from '../HeldTriad'
 import { storyPanelsFor, type StoryPanel } from '../../lib/storyPanels'
@@ -46,7 +46,7 @@ function cellFromPoint(x: number, y: number): GemCoord | null {
 }
 
 export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: GemSearchPlayProps) {
-  const { progress, recordMatchBonus, recordMatchMiss } = useProgress()
+  const { progress, recordMatchBonus, recordMatchDockJuice, recordMatchMiss } = useProgress()
   const [round, setRound] = useState(() => Date.now())
   const puzzle = useMemo(() => buildGemPuzzle(lineId, round), [lineId, round])
   const panels = useMemo(
@@ -73,6 +73,8 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   const [findPop, setFindPop] = useState(0)
   const [status, setStatus] = useState<'play' | 'ok'>('play')
   const [winStamp, setWinStamp] = useState(false)
+  const [stripMode, setStripMode] = useState<'hero' | 'dock' | 'sheet'>('hero')
+  const [dockJuice, setDockJuice] = useState<number | null>(null)
   const drag = useRef(false)
   const moved = useRef(false)
   const pathRef = useRef<GemCoord[]>([])
@@ -83,6 +85,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   const replayToast = useRef(false)
   const cleared = useRef(false)
   const scoredThisGesture = useRef(false)
+  const dockJuiced = useRef(false)
   const home = easyWhoWhere(lineId)
   const needed = cellsStillNeeded(puzzle, found)
   const nextWord = puzzle.words.find((word) => !found.includes(word.id))
@@ -125,6 +128,9 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     setWinStamp(false)
     setOpened(0)
     setFlipping(null)
+    setStripMode('hero')
+    setDockJuice(null)
+    dockJuiced.current = false
   }
 
   useEffect(() => {
@@ -165,13 +171,27 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     )
   }
 
+  function collapseStoryDock() {
+    setStripMode((current) => (current === 'sheet' ? current : 'dock'))
+    if (dockJuiced.current) return
+    dockJuiced.current = true
+    recordMatchDockJuice(lineId)
+    setDockJuice(MATCH_DOCK_JUICE_POINTS)
+    playGemPop('bonus')
+    window.setTimeout(() => setDockJuice(null), prefersReducedMotion() ? 400 : 1200)
+  }
+
   function revealPanel(count: number) {
     const index = count - 1
     const delay = prefersReducedMotion() ? 0 : 180
     window.setTimeout(() => {
       setOpened(count)
       setFlipping(index)
-      window.setTimeout(() => setFlipping((current) => (current === index ? null : current)), 520)
+      window.setTimeout(() => {
+        setFlipping((current) => (current === index ? null : current))
+        // First panel unlock: big hero collapses to tiny dock + arcade +1000.
+        if (count === 1) collapseStoryDock()
+      }, prefersReducedMotion() ? 0 : 520)
     }, delay)
   }
 
@@ -414,7 +434,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
 
   return (
     <div
-      className={`play is-gem-search is-panel-blast ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''} ${burst.length ? 'is-boom' : ''} ${plusFlash ? 'is-bonus-pop' : ''} ${findPop ? 'is-find-pop' : ''}`}
+      className={`play is-gem-search is-panel-blast ${stripMode !== 'hero' ? 'is-story-docked' : ''} ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''} ${burst.length ? 'is-boom' : ''} ${plusFlash ? 'is-bonus-pop' : ''} ${findPop ? 'is-find-pop' : ''}`}
       style={{ ['--gem-size' as string]: puzzle.size }}
       onPointerUp={onBoardUp}
       onPointerCancel={onBoardUp}
@@ -426,8 +446,18 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
         opened={opened}
         flipping={flipping}
         complete={status === 'ok'}
+        mode={stripMode}
+        words={puzzle.words.map((word) => ({
+          id: word.id,
+          label: word.label,
+          found: found.includes(word.id),
+        }))}
+        dockJuice={dockJuice}
+        onDockTap={() => setStripMode('sheet')}
+        onSheetClose={() => setStripMode('dock')}
       />
       <div className="gem-scroll">
+      {stripMode === 'hero' ? (
       <ul className="gem-words" aria-label="Words to find">
         {puzzle.words.map((word) => (
           <li
@@ -441,6 +471,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
           </li>
         ))}
       </ul>
+      ) : null}
       {status === 'play' ? (
         <p className="gem-bonus-hint is-loud">{EASY.bonusHint}</p>
       ) : null}

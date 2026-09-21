@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState, type ReactNode } from 'react'
 import { markEasyHeld, markEasyTaught } from '../lib/easy'
 import {
   applyMatchBonus,
+  applyMatchDockJuice,
   applyMatchMiss,
   consumeMatchExtra as spendMatchExtra,
 } from '../lib/matchBonus'
@@ -304,6 +305,11 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     setProgress((current) => write({ ...current, ...applyMatchBonus(current, lineId) }))
   }, [write])
 
+  const recordMatchDockJuice = useCallback((lineId: string) => {
+    if (!lineId) return
+    setProgress((current) => write({ ...current, ...applyMatchDockJuice(current, lineId) }))
+  }, [write])
+
   const recordMatchMiss = useCallback((lineId: string) => {
     if (!lineId) return
     setProgress((current) => write({ ...current, ...applyMatchMiss(current, lineId) }))
@@ -388,6 +394,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       recordReview,
       recordLessonHold,
       recordMatchBonus,
+      recordMatchDockJuice,
       recordMatchMiss,
       consumeMatchExtra,
       snoozeReviews,
@@ -413,6 +420,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       recordReview,
       recordLessonHold,
       recordMatchBonus,
+      recordMatchDockJuice,
       recordMatchMiss,
       consumeMatchExtra,
       snoozeReviews,

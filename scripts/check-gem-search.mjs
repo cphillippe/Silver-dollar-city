@@ -35,6 +35,7 @@ import {
   bonusFace,
   consumeMatchExtra,
   MATCH_BONUS_POINTS,
+  MATCH_DOCK_JUICE_POINTS,
   MATCH_MISS_POINTS,
 } from '../src/lib/matchBonus.ts'
 import { gemBonusBeat, gemTargetBeat, matchClearBeat } from '../src/lib/successBeat.ts'
@@ -88,6 +89,7 @@ assert.ok(
   'bonus is not a required chip',
 )
 assert.equal(MATCH_BONUS_POINTS, 100)
+assert.equal(MATCH_DOCK_JUICE_POINTS, 1000)
 assert.equal(MATCH_MISS_POINTS, 25)
 const planted = mercy.bonus.filter((word) => (mercy.bonusPaths[word.id] ?? []).length === word.text.length)
 assert.ok(planted.length >= MIN_BONUS_PLANT, 'mercy plants bonus words')
@@ -363,6 +365,9 @@ assert.match(playSrc, /EASY\.holdNext/)
 assert.match(playSrc, /EASY\.matchHunt/)
 assert.match(playSrc, /Try this word/)
 assert.match(playSrc, /is-panel-blast/)
+assert.match(playSrc, /is-story-docked/)
+assert.match(playSrc, /recordMatchDockJuice/)
+assert.match(playSrc, /MATCH_DOCK_JUICE_POINTS/)
 assert.match(playSrc, /StoryStrip/)
 assert.match(playSrc, /onClear/)
 assert.match(playSrc, /revealPanel/)
@@ -409,6 +414,9 @@ assert.match(gemCss, /play\.is-gem-search\.is-shake \{\s*animation: none/)
 assert.match(gemCss, /gem-stage \.miss-banner/)
 assert.match(gemCss, /gem-overlay-pop/)
 assert.match(gemCss, /pointer-events: none/)
+assert.match(gemCss, /is-story-docked/)
+assert.match(gemCss, /\.story-strip\.is-dock/)
+assert.match(gemCss, /\.story-sheet/)
 assert.match(gemCss, /\.gem-cell\.is-cracked \{/)
 const crackedRule = gemCss.match(/\.gem-cell\.is-cracked \{[^}]+\}/)?.[0] ?? ''
 assert.match(crackedRule, /opacity: 0\.55/)

@@ -498,6 +498,7 @@ export interface ProgressApi {
   recordReview: (event: ReviewEvent) => StarCount
   recordLessonHold: (evidenceId: string, clean: boolean) => void
   recordMatchBonus: (lineId: string) => void
+  recordMatchDockJuice: (lineId: string) => void
   recordMatchMiss: (lineId: string) => void
   consumeMatchExtra: (lineId: string) => void
   snoozeReviews: (ids: string[], today: string) => void
