@@ -40,6 +40,23 @@ export function applyMatchDockJuice<T extends Pick<ProgressState, 'matchBonus'>>
   }
 }
 
+/** Required-word find juice — persists the on-board +N pop into matchBonus (account score). */
+export function applyMatchFind<T extends Pick<ProgressState, 'matchBonus'>>(
+  progress: T,
+  id: string,
+  points: number,
+): Pick<ProgressState, 'matchBonus'> {
+  const add = Math.max(0, Math.floor(points))
+  if (!add) return { matchBonus: { ...(progress.matchBonus ?? {}) } }
+  const prior = progress.matchBonus?.[id] ?? 0
+  return {
+    matchBonus: {
+      ...(progress.matchBonus ?? {}),
+      [id]: Math.min(MATCH_BONUS_MAX, prior + add),
+    },
+  }
+}
+
 /** Wrong swipe on extras — −25, floor 0. Does not touch extras banked or required chips. */
 export function applyMatchMiss<T extends Pick<ProgressState, 'matchBonus'>>(
   progress: T,

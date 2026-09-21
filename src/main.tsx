@@ -6,6 +6,7 @@ import App from './App'
 import { ProgressProvider } from './store/ProgressProvider'
 import './index.css'
 import './styles/gem-less-waste.css'
+import './styles/match-art-tight.css'
 import './styles/storySnap.css'
 
 if (!Capacitor.isNativePlatform()) {
