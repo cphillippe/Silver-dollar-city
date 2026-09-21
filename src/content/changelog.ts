@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.98',
+    title: 'Match board-first · Easy core trail',
+    when: '2026-09-21',
+    items: [
+      'Match: first paint is a tiny story dock + letter board (≥70% height); bonus chips move into the expand sheet — no 8-chip grid above the crossword',
+    ],
+  },
+  {
     version: '1.4.97',
     title: 'Match story dock · Easy core trail',
     when: '2026-09-20',
