@@ -15,27 +15,21 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Materialize Dig Reveal 1.4.100 product
-        run: node scripts/materialize-dig-reveal-1.4.100.mjs
+      - name: Patch changelog 1.4.100 if needed
+        run: node scripts/patch-changelog-dig-1.4.100.mjs
       - name: Commit if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add \
-            scripts/check-panel-blast.mjs \
-            scripts/check-source-dig.mjs \
-            src/components/PuzzlePlay.tsx \
-            src/components/challenges/SourceDigPlay.tsx \
-            src/content/changelog.ts \
-            src/lib/easyUi.ts \
-            src/lib/sourceDig.ts \
-            src/styles/digReveal.css
-          git rm -f --ignore-unmatch tmp/dig100p.* tmp/dig100.b64.* tmp/dig-reveal-1.4.100.tgz \
+          git add src/content/changelog.ts
+          git rm -f --ignore-unmatch \
+            tmp/dig100p.* tmp/dig100.b64.* tmp/dig-reveal-1.4.100.tgz tmp/dig-rem.b64.* \
             scripts/materialize-dig-reveal-1.4.100.mjs \
+            scripts/patch-changelog-dig-1.4.100.mjs \
             .github/workflows/materialize-dig-reveal-1.4.100.yml || true
           if git diff --cached --quiet; then
             echo "no changes"
           else
-            git commit -m "Dig Reveal timed 1.4.100 — brush dirt before the clock"
+            git commit -m "Dig Reveal timed 1.4.100 — changelog + cleanup"
             git push
           fi
