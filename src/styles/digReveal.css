@@ -1,0 +1,146 @@
+/* Dig Reveal timed scrub — peel from index.css to avoid Match dock conflicts. */
+
+.dig-board {
+  touch-action: none;
+}
+
+.dig-timer {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 6px;
+  margin: 0;
+  color: #fff6c8;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-shadow: 0 2px 0 #5a1aa0;
+}
+
+.dig-timer strong {
+  font-size: 1.35rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.dig-timer span {
+  font-size: 0.78rem;
+  opacity: 0.88;
+}
+
+.dig-timer.is-armed {
+  opacity: 0.72;
+}
+
+.dig-timer.is-pulse {
+  color: #ff5a7a;
+  animation: dig-timer-pulse 0.55s ease-in-out infinite;
+}
+
+.dig-hint {
+  margin: 0;
+  text-align: center;
+  font-size: 0.78rem;
+  opacity: 0.75;
+}
+
+/* Glow is no longer an answer cue — Dig Reveal uses dirt scrub. */
+.dig-tablet.is-glow {
+  box-shadow: none;
+  animation: none;
+}
+
+.dig-tablet.is-buried {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  color: #3a2410;
+  background:
+    radial-gradient(circle at 30% 20%, #c4a574, #8a6234 55%, #5a3a18);
+}
+
+.dig-tablet.is-buried.hue-scripture,
+.dig-tablet.is-buried.hue-ancient {
+  background:
+    radial-gradient(circle at 30% 20%, #c4a574, #8a6234 55%, #5a3a18);
+}
+
+.dig-dirt {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  touch-action: none;
+  cursor: grab;
+  overflow: hidden;
+  background:
+    repeating-linear-gradient(
+      -18deg,
+      rgba(70, 42, 16, 0.55) 0 6px,
+      rgba(110, 72, 28, 0.45) 6px 12px
+    ),
+    radial-gradient(circle at 40% 30%, #a07840, #6a4420 70%);
+  opacity: calc(1 - (var(--scrub, 0) * 0.85));
+  box-shadow: inset 0 0 0 2px rgba(40, 20, 8, 0.35);
+}
+
+.dig-dirt.is-scrubbing {
+  cursor: grabbing;
+}
+
+.dig-scrub-fill {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(var(--scrub, 0) * 100%);
+  background: linear-gradient(180deg, rgba(255, 246, 184, 0.15), rgba(255, 204, 51, 0.35));
+  pointer-events: none;
+  transition: height 0.05s linear;
+}
+
+.dig-dust {
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #d2b48c;
+  pointer-events: none;
+  animation: dig-dust-fly 0.38s ease-out infinite;
+  animation-delay: calc(var(--i) * 0.05s);
+}
+
+.dig-tablet.is-buried .dig-era,
+.dig-tablet.is-buried strong {
+  position: relative;
+  z-index: 1;
+  pointer-events: none;
+}
+
+@keyframes dig-timer-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes dig-dust-fly {
+  0% {
+    transform: translate(calc((var(--i) - 1.5) * 6px), 0) scale(1);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(calc((var(--i) - 1.5) * 18px), -22px) scale(0.2);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dig-timer.is-pulse,
+  .dig-dust {
+    animation: none !important;
+  }
+}
