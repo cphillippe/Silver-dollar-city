@@ -24,18 +24,48 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          import base64, gzip
+          import base64, gzip, hashlib
+
+          EXPECT_ALT_SHA = '41f2d0c2ce4fd04192dd25843d12ed723df933ed7e3aa0ede94fe451d3442dcb'
+          EXPECT_PATCH_SHA = 'a5c0b6ea4fd28a6f534d13dffe67c3330cf751244bb0ffac5373c1208d873d3f'
+
+          def repair_parts():
+              """Fix known MCP upload corruptions in alt.b64.07 / .09."""
+              p7 = Path('tmp/why-gate-src-1.4.105.patch.alt.b64.07')
+              t = p7.read_text().strip()
+              if len(t) == 3499 and t[2551:2553] == 'ls':
+                  t = t[:2551] + 'fix' + t[2553:]
+                  print('repaired part07: inserted fix at 2551')
+              if len(t) == 3500 and t[3031] == 'u':
+                  t = t[:3031] + 'U' + t[3032:]
+                  print('repaired part07: U at 3031')
+              p7.write_text(t)
+
+              p9 = Path('tmp/why-gate-src-1.4.105.patch.alt.b64.09')
+              t = p9.read_text().strip()
+              if len(t) == 3500 and t[20] == 'u':
+                  t = t[:20] + 'U' + t[21:]
+                  print('repaired part09: U at 20')
+              p9.write_text(t)
+
+          repair_parts()
           parts = sorted(Path('tmp').glob('why-gate-src-1.4.105.patch.alt.b64.*'))
           if not parts:
               raise SystemExit('no patch parts found')
           alt = ''.join(p.read_text().strip() for p in parts)
+          got = hashlib.sha256(alt.encode()).hexdigest()
+          if got != EXPECT_ALT_SHA:
+              raise SystemExit(f'alt sha mismatch: {got} != {EXPECT_ALT_SHA}')
           b64 = alt.replace('.', '+').replace('_', '/')
           pad = (-len(b64)) % 4
           b64 += '=' * pad
           gz = base64.b64decode(b64)
           data = gzip.decompress(gz)
+          psha = hashlib.sha256(data).hexdigest()
+          if psha != EXPECT_PATCH_SHA:
+              raise SystemExit(f'patch sha mismatch: {psha}')
           Path('tmp/why-gate-src-1.4.105.patch').write_bytes(data)
-          print('assembled', len(data), 'from', len(parts), 'alt parts')
+          print('assembled', len(data), 'from', len(parts), 'alt parts; sha ok')
           PY
           git apply --whitespace=nowarn tmp/why-gate-src-1.4.105.patch
           node scripts/embed-packs.mjs
