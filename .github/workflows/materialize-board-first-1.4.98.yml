@@ -14,7 +14,14 @@ jobs:
           ref: fun/match-board-first-1.4.98
       - name: Assemble and apply board-first patch
         run: |
-          cat tmp/board-first-1.4.98.patch.part* > tmp/board-first-1.4.98.patch
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64
+          parts = sorted(Path('tmp').glob('board-first-1.4.98.patch.b64.*'))
+          data = b''.join(base64.b64decode(p.read_text().strip()) for p in parts)
+          Path('tmp/board-first-1.4.98.patch').write_bytes(data)
+          print('assembled', len(data), 'from', [p.name for p in parts])
+          PY
           git apply --whitespace=nowarn tmp/board-first-1.4.98.patch
       - name: Commit if changed
         run: |
