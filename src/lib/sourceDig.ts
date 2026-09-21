@@ -1,4 +1,4 @@
-/** Source-dig arcade — tap glowing ancient tablets. Not a claim/reason quiz. */
+/** Source-dig arcade — scrub dirt off ancient tablets against a clock. Not a claim/reason quiz. */
 
 import { packLesson } from '../content/packCatalog.ts'
 
@@ -6,8 +6,18 @@ export const SOURCE_DIG_WIN = 'DUG!'
 
 export const SOURCE_DIG_AGAIN = 'One more dig'
 
-export const SOURCE_DIG_HINT = 'Tap the glowing tablet.'
+export const SOURCE_DIG_HINT = 'Scrub the dirt off each tablet.'
+export const SOURCE_DIG_TIMEOUT = 'Buried!'
 export const SOURCE_DIG_MISS = 'Miss −25'
+
+export const SOURCE_DIG_TIMER_EASY_MS = 20000
+export const SOURCE_DIG_TIMER_HARD_MS = 12000
+/** Full dirt stroke distance (px). Reveal fires at SOURCE_DIG_SCRUB_THRESHOLD. */
+export const SOURCE_DIG_SCRUB_PX = 200
+/** Fraction of stroke that reveals a tablet (~55%, tunable). */
+export const SOURCE_DIG_SCRUB_THRESHOLD = 0.55
+/** Finds within this window stack a combo. */
+export const SOURCE_DIG_COMBO_MS = 2000
 
 export const SOURCE_DIG_TAP_SCORE = 25
 export const SOURCE_DIG_WIN_SCORE = 100
@@ -345,7 +355,7 @@ export function mixSeed(seed: number): number {
   return ((t ^ (t >>> 14)) >>> 0) / 4294967296
 }
 
-/** Shuffle seats; ids stay in teach order so the glow still teaches. */
+/** Shuffle seats for layout variety; any buried tablet is diggable (no glow-order). */
 export function seatTablets(lineId: string, seed: number): DigTablet[] {
   const rows = digTablets(lineId).map((row) => ({ ...row }))
   const seats = [...rows]

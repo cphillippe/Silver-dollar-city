@@ -12,6 +12,11 @@ import {
   SOURCE_DIG_AGAIN,
   SOURCE_DIG_HINT,
   SOURCE_DIG_MISS,
+  SOURCE_DIG_SCRUB_PX,
+  SOURCE_DIG_SCRUB_THRESHOLD,
+  SOURCE_DIG_TIMEOUT,
+  SOURCE_DIG_TIMER_EASY_MS,
+  SOURCE_DIG_TIMER_HARD_MS,
   SOURCE_DIG_TAP_SCORE,
   SOURCE_DIG_WIN,
   SOURCE_DIG_WIN_SCORE,
@@ -58,8 +63,15 @@ assert.equal(SOURCE_DIG_AGAIN, 'One more dig')
 assert.equal(EASY.digAgain, SOURCE_DIG_AGAIN)
 assert.equal(SOURCE_DIG_TAP_SCORE, 25)
 assert.equal(SOURCE_DIG_WIN_SCORE, 100)
-assert.equal(SOURCE_DIG_HINT, 'Tap the glowing tablet.')
+assert.equal(SOURCE_DIG_HINT, 'Scrub the dirt off each tablet.')
+assert.equal(SOURCE_DIG_TIMEOUT, 'Buried!')
+assert.equal(SOURCE_DIG_TIMER_EASY_MS, 20000)
+assert.equal(SOURCE_DIG_TIMER_HARD_MS, 12000)
+assert.ok(SOURCE_DIG_SCRUB_PX >= 100 && SOURCE_DIG_SCRUB_PX <= 300)
+assert.equal(SOURCE_DIG_SCRUB_THRESHOLD, 0.55)
 assert.equal(SOURCE_DIG_MISS, 'Miss −25')
+assert.match(EASY.digHunt, /Scrub the dirt/)
+assert.doesNotMatch(EASY.digHunt, /glowing tablet/)
 
 for (const id of ['wb-women', 'wb-early', 'wb-method', ...NAMES_ARC]) {
   const tablets = digTablets(id)
@@ -216,11 +228,20 @@ assert.match(playSrc, /function replay/)
 assert.match(playSrc, /data-dig-again/)
 assert.match(playSrc, /dig-shard/)
 assert.match(playSrc, /Combo/)
+assert.match(playSrc, /dig-dirt/)
+assert.match(playSrc, /SOURCE_DIG_SCRUB_PX/)
+assert.match(playSrc, /SOURCE_DIG_SCRUB_THRESHOLD/)
+assert.match(playSrc, /SOURCE_DIG_TIMEOUT/)
+assert.match(playSrc, /SOURCE_DIG_TIMER_EASY_MS/)
+assert.match(playSrc, /setPointerCapture/)
+assert.match(playSrc, /role="timer"/)
+assert.doesNotMatch(playSrc, /nextId|is-glow|Tap the glow/)
 assert.doesNotMatch(playSrc, /tapWhy|claimChoices|reasonChoices|whyCorrect/)
 
 const puzzleSrc = readFileSync(new URL('../src/components/PuzzlePlay.tsx', import.meta.url), 'utf8')
 assert.match(puzzleSrc, /case 'source-dig'/)
 assert.match(puzzleSrc, /SourceDigPlay/)
+assert.match(puzzleSrc, /easy=\{isEasy\(progress\)\}/)
 
 const digSrc = readFileSync(new URL('../src/components/DigDeeper.tsx', import.meta.url), 'utf8')
 assert.match(digSrc, /easyDigTaps/)
