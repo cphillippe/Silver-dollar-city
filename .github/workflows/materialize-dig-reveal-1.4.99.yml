@@ -1,0 +1,47 @@
+name: materialize-dig-reveal-1.4.99
+on:
+  push:
+    branches: [fun/dig-reveal-timed-1.4.99]
+  workflow_dispatch:
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fun/dig-reveal-timed-1.4.99
+      - name: Assemble and apply Dig Reveal timed patch
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64
+          parts = sorted(Path('tmp').glob('dig-reveal-1.4.99.patch.b64.*'))
+          data = b''.join(base64.b64decode(p.read_text().strip()) for p in parts)
+          Path('tmp/dig-reveal-1.4.99.patch').write_bytes(data)
+          print('assembled', len(data), 'from', [p.name for p in parts])
+          PY
+          git apply --whitespace=nowarn tmp/dig-reveal-1.4.99.patch
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            package.json \
+            android/app/build.gradle \
+            scripts/check-panel-blast.mjs \
+            scripts/check-source-dig.mjs \
+            src/components/PuzzlePlay.tsx \
+            src/components/challenges/SourceDigPlay.tsx \
+            src/config/app.ts \
+            src/content/changelog.ts \
+            src/index.css \
+            src/lib/easyUi.ts \
+            src/lib/sourceDig.ts
+          if git diff --cached --quiet; then
+            echo "no changes"
+          else
+            git commit -m "Dig Reveal timed 1.4.99 — brush dirt before the clock"
+            git push
+          fi
