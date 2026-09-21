@@ -3,6 +3,7 @@ import { markEasyHeld, markEasyTaught } from '../lib/easy'
 import {
   applyMatchBonus,
   applyMatchDockJuice,
+  applyMatchFind,
   applyMatchMiss,
   consumeMatchExtra as spendMatchExtra,
 } from '../lib/matchBonus'
@@ -310,6 +311,11 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     setProgress((current) => write({ ...current, ...applyMatchDockJuice(current, lineId) }))
   }, [write])
 
+  const recordMatchFind = useCallback((lineId: string, points: number) => {
+    if (!lineId || !(points > 0)) return
+    setProgress((current) => write({ ...current, ...applyMatchFind(current, lineId, points) }))
+  }, [write])
+
   const recordMatchMiss = useCallback((lineId: string) => {
     if (!lineId) return
     setProgress((current) => write({ ...current, ...applyMatchMiss(current, lineId) }))
@@ -395,6 +401,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       recordLessonHold,
       recordMatchBonus,
       recordMatchDockJuice,
+      recordMatchFind,
       recordMatchMiss,
       consumeMatchExtra,
       snoozeReviews,
@@ -421,6 +428,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       recordLessonHold,
       recordMatchBonus,
       recordMatchDockJuice,
+      recordMatchFind,
       recordMatchMiss,
       consumeMatchExtra,
       snoozeReviews,
