@@ -18,8 +18,13 @@ jobs:
           curl -fsSL "$BASE/src/lib/sourceDig.ts" -o src/lib/sourceDig.ts
           curl -fsSL "$BASE/src/components/challenges/SourceDigPlay.tsx" -o src/components/challenges/SourceDigPlay.tsx
           curl -fsSL "$BASE/scripts/check-source-dig.mjs" -o scripts/check-source-dig.mjs
-      - name: Patch changelog 1.4.100 if needed
-        run: node scripts/patch-changelog-dig-1.4.100.mjs
+          # Idempotent: skip if already scrub product
+          if grep -q SOURCE_DIG_SCRUB_PX src/lib/sourceDig.ts; then
+            echo "product present"
+          else
+            echo "product missing after curl" >&2
+            exit 1
+          fi
       - name: Commit product + cleanup scaffolding
         run: |
           git config user.name "github-actions[bot]"
@@ -27,8 +32,7 @@ jobs:
           git add \
             src/lib/sourceDig.ts \
             src/components/challenges/SourceDigPlay.tsx \
-            scripts/check-source-dig.mjs \
-            src/content/changelog.ts
+            scripts/check-source-dig.mjs
           git rm -f --ignore-unmatch \
             tmp/dig100p.* tmp/dig100.b64.* tmp/dig-reveal-1.4.100.tgz tmp/dig-rem.b64.* \
             scripts/materialize-dig-reveal-1.4.100.mjs \
@@ -37,6 +41,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "no changes"
           else
-            git commit -m "Dig Reveal timed 1.4.100 — scrub play + changelog"
+            git commit -m "Dig Reveal timed 1.4.100 — scrub play product"
             git push
           fi
