@@ -53,6 +53,27 @@ export function StoryStrip({
       {panels.map((panel, index) => {
         const open = index < opened
         const now = index === opened - 1 || (complete && index === panels.length - 1)
+        // Dock: open thumbs paint real StoryPanelArt (no 3D seal trap at tiny size).
+        // Hero/sheet keep the flip card for the big unlock beat.
+        if (mode === 'dock' || mode === 'sheet') {
+          return (
+            <li
+              key={panel.id}
+              data-beat={panel.beatId}
+              className={`story-thumb ${open ? 'is-open' : 'is-sealed'} ${now ? 'is-now' : ''} ${flipping === index ? 'is-flip' : ''}`}
+            >
+              {open ? (
+                <div className="story-thumb-art">
+                  <StoryPanelArt scene={panel.scene} media={panel.media} size="thumb" />
+                </div>
+              ) : (
+                <span className="story-thumb-seal" aria-hidden>
+                  {index + 1}
+                </span>
+              )}
+            </li>
+          )
+        }
         return (
           <li
             key={panel.id}

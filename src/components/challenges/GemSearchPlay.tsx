@@ -46,7 +46,7 @@ function cellFromPoint(x: number, y: number): GemCoord | null {
 }
 
 export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: GemSearchPlayProps) {
-  const { progress, recordMatchBonus, recordMatchDockJuice, recordMatchMiss } = useProgress()
+  const { progress, recordMatchBonus, recordMatchDockJuice, recordMatchFind, recordMatchMiss } = useProgress()
   const [round, setRound] = useState(() => Date.now())
   const puzzle = useMemo(() => buildGemPuzzle(lineId, round), [lineId, round])
   const panels = useMemo(
@@ -151,8 +151,8 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [round])
 
-  // Board-first 1.4.98: if anything leaves us in hero, auto-dock within 1.2s.
-  // First paint already starts docked — never leave full hero + chips above the board.
+  // Art flash 1.4.101: first unlock may enter hero briefly; auto-dock within ≤1.2s.
+  // First paint stays docked (board-first). Hero is only the brief big→tiny intro.
   useEffect(() => {
     if (stripMode !== 'hero') return
     const ms = prefersReducedMotion() ? 0 : 1200
@@ -198,11 +198,13 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     window.setTimeout(() => {
       setOpened(count)
       setFlipping(index)
+      // First panel unlock: brief big StoryPanelArt flash, then dock (≤1.2s).
+      if (count === 1) setStripMode('hero')
       window.setTimeout(() => {
         setFlipping((current) => (current === index ? null : current))
-        // First panel unlock: big hero collapses to tiny dock + arcade +1000.
+        // After the flip beat, collapse hero → tiny dock + arcade +1000.
         if (count === 1) collapseStoryDock()
-      }, prefersReducedMotion() ? 0 : 520)
+      }, prefersReducedMotion() ? 0 : (count === 1 ? 1200 : 520))
     }, delay)
   }
 
@@ -213,6 +215,8 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     // Stronger find juice: large +N score pop (letter count as local stamp).
     const popPts = Math.max(25, cells.length * 10)
     setFindPop(popPts)
+    // Persist find juice to account matchBonus (Journal / profile total) — not toast-only.
+    recordMatchFind(lineId, popPts)
     window.setTimeout(() => setFindPop(0), done ? 1200 : 980)
     const beat = gemTargetBeat(
       puzzle.words.find((word) => word.label === wordLabel) ?? {
