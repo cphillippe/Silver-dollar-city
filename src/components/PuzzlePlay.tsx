@@ -103,6 +103,7 @@ export function PuzzlePlay({
           return (
             <SourceDigPlay
               lineId={story.lineId}
+              easy={isEasy(progress)}
               onMiss={onMiss}
               onClear={onSolved}
               onEasyStop={onEasyStop}
