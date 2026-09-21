@@ -3,7 +3,7 @@ on:
   push:
     branches: [content/why-gate-mat-1.4.105]
     paths:
-      - 'tmp/why-gate-src-1.4.105.patch.b64.*'
+      - 'tmp/why-gate-src-1.4.105.patch.alt.b64.*'
       - '.github/workflows/materialize-why-gate-split-1.4.105.yml'
   workflow_dispatch:
 permissions:
@@ -24,13 +24,18 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          import base64
-          parts = sorted(Path('tmp').glob('why-gate-src-1.4.105.patch.b64.*'))
+          import base64, gzip
+          parts = sorted(Path('tmp').glob('why-gate-src-1.4.105.patch.alt.b64.*'))
           if not parts:
               raise SystemExit('no patch parts found')
-          data = b''.join(base64.b64decode(p.read_text().strip()) for p in parts)
+          alt = ''.join(p.read_text().strip() for p in parts)
+          b64 = alt.replace('.', '+').replace('_', '/')
+          pad = (-len(b64)) % 4
+          b64 += '=' * pad
+          gz = base64.b64decode(b64)
+          data = gzip.decompress(gz)
           Path('tmp/why-gate-src-1.4.105.patch').write_bytes(data)
-          print('assembled', len(data), 'from', len(parts), 'parts')
+          print('assembled', len(data), 'from', len(parts), 'alt parts')
           PY
           git apply --whitespace=nowarn tmp/why-gate-src-1.4.105.patch
           node scripts/embed-packs.mjs
@@ -47,14 +52,14 @@ jobs:
           from pathlib import Path
           import re
           html = Path('docs/index.html').read_text()
-          js = re.search(r'assets/index-[^"]+\\.js', html).group(0)
-          css = re.search(r'assets/index-[^"]+\\.css', html).group(0)
+          js = re.search(r'assets/index-[^"]+\.js', html).group(0)
+          css = re.search(r'assets/index-[^"]+\.css', html).group(0)
           p = Path('docs/404.html')
           if p.exists():
-            t = p.read_text()
-            t = re.sub(r'assets/index-[^"]+\\.js', js, t)
-            t = re.sub(r'assets/index-[^"]+\\.css', css, t)
-            p.write_text(t)
+              t = p.read_text()
+              t = re.sub(r'assets/index-[^"]+\.js', js, t)
+              t = re.sub(r'assets/index-[^"]+\.css', css, t)
+              p.write_text(t)
           print('docs synced', js, css)
           PY
       - name: Commit materialized files
