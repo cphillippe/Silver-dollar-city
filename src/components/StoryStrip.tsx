@@ -64,7 +64,7 @@ export function StoryStrip({
             >
               {open ? (
                 <div className="story-thumb-art">
-                  <StoryPanelArt scene={panel.scene} media={panel.media} size="thumb" />
+                  <StoryPanelArt scene={panel.scene} media={panel.media} beatId={panel.beatId} size="thumb" />
                 </div>
               ) : (
                 <span className="story-thumb-seal" aria-hidden>
@@ -82,7 +82,7 @@ export function StoryStrip({
           >
             <div className="story-thumb-inner">
               <div className="story-thumb-face is-front">
-                <StoryPanelArt scene={panel.scene} media={panel.media} size="thumb" />
+                <StoryPanelArt scene={panel.scene} media={panel.media} beatId={panel.beatId} size="thumb" />
               </div>
               <div className="story-thumb-face is-back" aria-hidden>
                 <span className="story-thumb-seal">{index + 1}</span>
@@ -177,7 +177,7 @@ export function StoryStrip({
                       className={`story-sheet-panel ${open ? 'is-open' : 'is-sealed'}`}
                     >
                       {open ? (
-                        <StoryPanelArt scene={panel.scene} media={panel.media} size="hero" />
+                        <StoryPanelArt scene={panel.scene} media={panel.media} beatId={panel.beatId} size="hero" />
                       ) : (
                         <span className="story-thumb-seal">{index + 1}</span>
                       )}
@@ -217,7 +217,7 @@ export function StoryStrip({
       >
         <div className="story-hero-inner">
           <div className="story-hero-face is-front">
-            {latest ? <StoryPanelArt scene={latest.scene} media={latest.media} size="hero" /> : null}
+            {latest ? <StoryPanelArt scene={latest.scene} media={latest.media} beatId={latest.beatId} size="hero" /> : null}
           </div>
           <div className="story-hero-face is-back">
             <span className="story-hero-foil">
