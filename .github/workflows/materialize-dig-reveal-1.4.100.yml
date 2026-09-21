@@ -1,0 +1,42 @@
+name: materialize-dig-reveal-1.4.100
+on:
+  push:
+    branches: [fun/dig-reveal-timed-1.4.100]
+  workflow_dispatch:
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fun/dig-reveal-timed-1.4.100
+      - name: Fetch Dig scrub product from known tip
+        run: |
+          BASE=https://raw.githubusercontent.com/cphillippe/Silver-dollar-city/677d527dd8a3e81bfae4eaac9fa0ff72054df349
+          curl -fsSL "$BASE/src/lib/sourceDig.ts" -o src/lib/sourceDig.ts
+          curl -fsSL "$BASE/src/components/challenges/SourceDigPlay.tsx" -o src/components/challenges/SourceDigPlay.tsx
+          curl -fsSL "$BASE/scripts/check-source-dig.mjs" -o scripts/check-source-dig.mjs
+      - name: Patch changelog 1.4.100 if needed
+        run: node scripts/patch-changelog-dig-1.4.100.mjs
+      - name: Commit product + cleanup scaffolding
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            src/lib/sourceDig.ts \
+            src/components/challenges/SourceDigPlay.tsx \
+            scripts/check-source-dig.mjs \
+            src/content/changelog.ts
+          git rm -f --ignore-unmatch \
+            tmp/dig100p.* tmp/dig100.b64.* tmp/dig-reveal-1.4.100.tgz tmp/dig-rem.b64.* \
+            scripts/materialize-dig-reveal-1.4.100.mjs \
+            scripts/patch-changelog-dig-1.4.100.mjs \
+            .github/workflows/materialize-dig-reveal-1.4.100.yml || true
+          if git diff --cached --quiet; then
+            echo "no changes"
+          else
+            git commit -m "Dig Reveal timed 1.4.100 — scrub play + changelog"
+            git push
+          fi
