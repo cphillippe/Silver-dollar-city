@@ -1,0 +1,29 @@
+name: materialize-board-first-1.4.98
+on:
+  push:
+    branches: [fun/match-board-first-1.4.98]
+  workflow_dispatch:
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fun/match-board-first-1.4.98
+      - name: Assemble and apply board-first patch
+        run: |
+          cat tmp/board-first-1.4.98.patch.part* > tmp/board-first-1.4.98.patch
+          git apply --whitespace=nowarn tmp/board-first-1.4.98.patch
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/components/StoryStrip.tsx src/components/challenges/GemSearchPlay.tsx scripts/check-gem-search.mjs src/index.css src/content/changelog.ts
+          if git diff --cached --quiet; then
+            echo "no changes"
+          else
+            git commit -m "materialize Match board-first 1.4.98 product files"
+            git push
+          fi
