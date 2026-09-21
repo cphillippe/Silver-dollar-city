@@ -1,0 +1,31 @@
+name: materialize-match-art-101
+on:
+  push:
+    branches: [fun/match-art-tight-1.4.101]
+    paths:
+      - 'scripts/materialize-match-art-101.mjs'
+      - 'scripts/patch-changelog-1.4.101.mjs'
+      - '.github/workflows/materialize-match-art-101.yml'
+      - '.github/match-art-101/**'
+permissions:
+  contents: write
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Materialize product files
+        run: node scripts/materialize-match-art-101.mjs
+      - name: Ensure changelog 1.4.101 entry
+        run: node scripts/patch-changelog-1.4.101.mjs
+      - name: Commit if needed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && echo 'no changes' && exit 0
+          git commit -m "materialize Match art flash 1.4.101 product files"
+          git push
