@@ -1,1 +1,612 @@
-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
+import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import { EASY, easyWhoWhere } from '../../lib/easy'
+import {
+  buildGemPuzzle,
+  cellKey,
+  cellsNeededByOpenPlanted,
+  cellsStillNeeded,
+  gemHue,
+  isStraightPath,
+  matchBonusWord,
+  matchGemWord,
+  sameCell,
+  shouldMissAfterSwipe,
+  snapFingerPath,
+  tryAddToPath,
+  type GemCoord,
+} from '../../lib/gemSearch'
+import { lineBonusPoints, MATCH_DOCK_JUICE_POINTS } from '../../lib/matchBonus'
+import { gemBonusBeat, gemTargetBeat, matchClearBeat } from '../../lib/successBeat'
+import { MatchTakeaway } from '../HeldTriad'
+import { storyPanelsFor, type StoryPanel } from '../../lib/storyPanels'
+import { GEM_BURST, playGemPop, prefersReducedMotion } from '../../lib/juice'
+import { useProgress } from '../../store/progress'
+import { StoryStrip } from '../StoryStrip'
+import { WinBurst } from './WinBurst'
+
+interface GemSearchPlayProps {
+  lineId: string
+  beats?: StoryPanel[]
+  onMiss: () => void
+  onClear?: () => void
+  onEasyStop?: (dest: 'hold' | 'home') => void
+}
+
+const SHARDS = [0, 1, 2, 3, 4, 5, 6, 7]
+
+function cellFromPoint(x: number, y: number): GemCoord | null {
+  const hit = document.elementFromPoint(x, y)
+  const node = hit instanceof Element ? hit.closest('[data-gem-cell]') : null
+  if (!(node instanceof HTMLElement)) return null
+  if (node.classList.contains('is-clear')) return null
+  const r = Number(node.dataset.r)
+  const c = Number(node.dataset.c)
+  if (!Number.isFinite(r) || !Number.isFinite(c)) return null
+  return { r, c }
+}
+
+export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: GemSearchPlayProps) {
+  const { progress, recordMatchBonus, recordMatchDockJuice, recordMatchMiss } = useProgress()
+  const [round, setRound] = useState(() => Date.now())
+  const puzzle = useMemo(() => buildGemPuzzle(lineId, round), [lineId, round])
+  const panels = useMemo(
+    () => beats ?? storyPanelsFor(lineId, puzzle.words.length),
+    [beats, lineId, puzzle.words.length],
+  )
+  const [found, setFound] = useState<string[]>([])
+  const [bonusFound, setBonusFound] = useState<string[]>([])
+  const [bonusCleared, setBonusCleared] = useState<string[]>([])
+  const [bonusGhosted, setBonusGhosted] = useState<string[]>([])
+  const [opened, setOpened] = useState(0)
+  const [flipping, setFlipping] = useState<number | null>(null)
+  const [path, setPath] = useState<GemCoord[]>([])
+  const [burst, setBurst] = useState<string[]>([])
+  const [hint, setHint] = useState<string[]>([])
+  const [misses, setMisses] = useState(0)
+  const [shake, setShake] = useState(false)
+  const [toast, setToast] = useState('')
+  const [toastWhy, setToastWhy] = useState('')
+  const [toastBonus, setToastBonus] = useState(false)
+  const [toastMiss, setToastMiss] = useState(false)
+  const [plusFlash, setPlusFlash] = useState(false)
+  const [comboFlash, setComboFlash] = useState(0)
+  const [findPop, setFindPop] = useState(0)
+  const [status, setStatus] = useState<'play' | 'ok'>('play')
+  const [winStamp, setWinStamp] = useState(false)
+  const [stripMode, setStripMode] = useState<'hero' | 'dock' | 'sheet'>('hero')
+  const [dockJuice, setDockJuice] = useState<number | null>(null)
+  const drag = useRef(false)
+  const moved = useRef(false)
+  const pathRef = useRef<GemCoord[]>([])
+  const rawRef = useRef<GemCoord[]>([])
+  const foundRef = useRef<string[]>([])
+  const bonusRef = useRef<string[]>([])
+  const comboRef = useRef(0)
+  const replayToast = useRef(false)
+  const cleared = useRef(false)
+  const scoredThisGesture = useRef(false)
+  const dockJuiced = useRef(false)
+  const home = easyWhoWhere(lineId)
+  const needed = cellsStillNeeded(puzzle, found)
+  const nextWord = puzzle.words.find((word) => !found.includes(word.id))
+  const left = puzzle.words.length - found.length
+  const bonusPts = lineBonusPoints(progress, lineId)
+  const clearBeat = matchClearBeat(lineId)
+
+  function writePath(next: GemCoord[] | ((current: GemCoord[]) => GemCoord[])) {
+    setPath((current) => {
+      const value = typeof next === 'function' ? next(current) : next
+      pathRef.current = value
+      return value
+    })
+  }
+
+  function resetBoard(keepTaught: boolean) {
+    foundRef.current = []
+    bonusRef.current = []
+    pathRef.current = []
+    rawRef.current = []
+    scoredThisGesture.current = false
+    if (!keepTaught) cleared.current = false
+    setFound([])
+    setBonusFound([])
+    setBonusCleared([])
+    setBonusGhosted([])
+    setPath([])
+    setBurst([])
+    setHint([])
+    setMisses(0)
+    setToast('')
+    setToastWhy('')
+    setToastBonus(false)
+    setToastMiss(false)
+    setPlusFlash(false)
+    setComboFlash(0)
+    setFindPop(0)
+    comboRef.current = 0
+    setStatus('play')
+    setWinStamp(false)
+    setOpened(0)
+    setFlipping(null)
+    setStripMode('hero')
+    setDockJuice(null)
+    dockJuiced.current = false
+  }
+
+  useEffect(() => {
+    setRound(Date.now())
+    resetBoard(false)
+    // line change only — new Match deal, not the leftover extras
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lineId])
+
+  useEffect(() => {
+    if (round === 0) return
+    resetBoard(true)
+    if (replayToast.current) {
+      replayToast.current = false
+      flashToast('One more Match. Find the gems.')
+    }
+    // extra try / One more Match reshuffle
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [round])
+
+  function flashToast(line: string, why = '', bonus = false, miss = false) {
+    setToast(line)
+    setToastWhy(why)
+    setToastBonus(bonus)
+    setToastMiss(miss)
+    // Miss −25 stays tight (no long soft lines). Bonus SNAG stays punchy. Find gets a beat longer.
+    const holdMs = miss ? 1100 : bonus ? 2200 : 2000
+    window.setTimeout(
+      () =>
+        setToast((current) => {
+          if (current !== line) return current
+          setToastWhy('')
+          setToastBonus(false)
+          setToastMiss(false)
+          return ''
+        }),
+      holdMs,
+    )
+  }
+
+  function collapseStoryDock() {
+    setStripMode((current) => (current === 'sheet' ? current : 'dock'))
+    if (dockJuiced.current) return
+    dockJuiced.current = true
+    recordMatchDockJuice(lineId)
+    setDockJuice(MATCH_DOCK_JUICE_POINTS)
+    playGemPop('bonus')
+    window.setTimeout(() => setDockJuice(null), prefersReducedMotion() ? 400 : 1200)
+  }
+
+  function revealPanel(count: number) {
+    const index = count - 1
+    const delay = prefersReducedMotion() ? 0 : 180
+    window.setTimeout(() => {
+      setOpened(count)
+      setFlipping(index)
+      window.setTimeout(() => {
+        setFlipping((current) => (current === index ? null : current))
+        // First panel unlock: big hero collapses to tiny dock + arcade +1000.
+        if (count === 1) collapseStoryDock()
+      }, prefersReducedMotion() ? 0 : 520)
+    }, delay)
+  }
+
+  function explode(cells: GemCoord[], wordLabel: string, done: boolean, foundCount: number) {
+    const keys = cells.map(cellKey)
+    setBurst(keys)
+    playGemPop(done ? 'win' : 'find')
+    // Stronger find juice: large +N score pop (letter count as local stamp).
+    const popPts = Math.max(25, cells.length * 10)
+    setFindPop(popPts)
+    window.setTimeout(() => setFindPop(0), done ? 1200 : 980)
+    const beat = gemTargetBeat(
+      puzzle.words.find((word) => word.label === wordLabel) ?? {
+        id: wordLabel,
+        text: wordLabel.toUpperCase(),
+        label: wordLabel,
+        kind: 'idea',
+      },
+    )
+    flashToast(beat.title, beat.why)
+    revealPanel(foundCount)
+    if (done) {
+      window.setTimeout(() => {
+        const rest: string[] = []
+        puzzle.letters.forEach((row, r) => {
+          row.forEach((_, c) => {
+            const key = `${r}:${c}`
+            if (!keys.includes(key)) rest.push(key)
+          })
+        })
+        setBurst([...keys, ...rest])
+      }, 160)
+    }
+    // Longer burst stamp on required finds (keep explode).
+    window.setTimeout(() => setBurst([]), done ? 980 : 720)
+  }
+
+  function explodeBonus(cells: GemCoord[], label: string) {
+    // Never delete letters still needed for lesson chips OR remaining planted bonuses.
+    // Exclusive bonus cells clear; shared cells ghost/crack and stay playable.
+    const needLesson = cellsStillNeeded(puzzle, foundRef.current)
+    const needPlanted = cellsNeededByOpenPlanted(puzzle, bonusRef.current)
+    const keep = new Set<string>([...needLesson, ...needPlanted])
+    const clearKeys: string[] = []
+    const ghostKeys: string[] = []
+    for (const cell of cells) {
+      const key = cellKey(cell)
+      if (keep.has(key)) ghostKeys.push(key)
+      else clearKeys.push(key)
+    }
+    setBurst([...clearKeys, ...ghostKeys])
+    if (clearKeys.length) {
+      setBonusCleared((current) => [...current, ...clearKeys])
+    }
+    if (ghostKeys.length) {
+      setBonusGhosted((current) => [...current, ...ghostKeys.filter((k) => !current.includes(k))])
+    }
+    playGemPop('bonus')
+    setPlusFlash(true)
+    window.setTimeout(() => setPlusFlash(false), 900)
+    const beat = gemBonusBeat(label)
+    flashToast(beat.title, beat.why, true)
+    window.setTimeout(() => setBurst([]), 640)
+  }
+
+  function teachHint(count: number) {
+    if (!nextWord) return
+    const trail = puzzle.paths[nextWord.id] ?? []
+    if (count >= 4 && trail.length) {
+      setHint(trail.map(cellKey))
+      return
+    }
+    if (count >= 2) {
+      const first = trail[0]
+      setHint(first ? [cellKey(first)] : [])
+    }
+  }
+
+  function finishBoard() {
+    if (!cleared.current) {
+      cleared.current = true
+      onClear?.()
+    }
+    const stampAt = prefersReducedMotion() ? 80 : 880
+    window.setTimeout(() => {
+      setWinStamp(true)
+      setStatus('ok')
+    }, stampAt)
+  }
+
+  function submit(nextPath: GemCoord[]) {
+    const hit = matchGemWord(nextPath, puzzle, foundRef.current)
+    if (hit) {
+      const nextFound = [...foundRef.current, hit.id]
+      foundRef.current = nextFound
+      const done = nextFound.length === puzzle.words.length
+      setFound(nextFound)
+      scoredThisGesture.current = true
+      writePath([])
+      rawRef.current = []
+      setHint([])
+      setMisses(0)
+      comboRef.current += 1
+      if (comboRef.current >= 2) {
+        setComboFlash(comboRef.current)
+        window.setTimeout(() => setComboFlash(0), 1100)
+      }
+      explode(nextPath, hit.label, done, nextFound.length)
+      if (done) finishBoard()
+      return true
+    }
+    const extra = matchBonusWord(nextPath, puzzle, bonusRef.current)
+    if (extra) {
+      const nextBonus = [...bonusRef.current, extra.id]
+      bonusRef.current = nextBonus
+      setBonusFound(nextBonus)
+      scoredThisGesture.current = true
+      writePath([])
+      rawRef.current = []
+      setMisses(0)
+      comboRef.current += 1
+      if (comboRef.current >= 2) {
+        setComboFlash(comboRef.current)
+        window.setTimeout(() => setComboFlash(0), 1100)
+      }
+      recordMatchBonus(lineId)
+      explodeBonus(nextPath, extra.label)
+      return true
+    }
+    return false
+  }
+
+  function missIfSwipe(nextPath: GemCoord[]) {
+    if (scoredThisGesture.current) return
+    const line = snapFingerPath(nextPath, puzzle.size)
+    if (!shouldMissAfterSwipe(scoredThisGesture.current, line.length)) {
+      writePath([])
+      return
+    }
+    writePath(line)
+    if (submit(line)) return
+    if (!shouldMissAfterSwipe(scoredThisGesture.current, line.length)) {
+      writePath([])
+      return
+    }
+    setShake(true)
+    playGemPop('miss')
+    comboRef.current = 0
+    const count = misses + 1
+    setMisses(count)
+    onMiss()
+    const straight = isStraightPath(line)
+    // Soft/empty swipe ≥3: Miss −25 tight — no long soft toast lines.
+    const softEmpty = straight && line.length >= 3
+    const why =
+      count >= 2 && nextWord
+        ? `Try this word: ${nextWord.label}`
+        : softEmpty
+          ? ''
+          : !straight || line.length < 3
+            ? EASY.bonusMissStraight
+            : EASY.bonusMissWord
+    recordMatchMiss(lineId)
+    flashToast(EASY.missPenalty, why, false, true)
+    teachHint(count)
+    window.setTimeout(() => {
+      setShake(false)
+      writePath([])
+    }, softEmpty ? 280 : 360)
+  }
+
+  function applyCell(cell: GemCoord, mode: 'tap' | 'drag') {
+    if (status === 'ok') return
+    if (mode === 'drag') {
+      const raw = rawRef.current
+      const last = raw[raw.length - 1]
+      if (!last) rawRef.current = [cell]
+      else if (!sameCell(last, cell)) rawRef.current = [...raw, cell]
+      const line = snapFingerPath(rawRef.current, puzzle.size)
+      writePath(line)
+      submit(line)
+      return
+    }
+    const current = pathRef.current
+    let next = current
+    if (!current.length) {
+      next = [cell]
+    } else if (sameCell(current[current.length - 1]!, cell)) {
+      next = current
+    } else {
+      const trial = tryAddToPath(current, cell, puzzle.size)
+      if (trial.length > current.length) next = trial
+      else next = [cell]
+    }
+    rawRef.current = next
+    const line = snapFingerPath(next, puzzle.size)
+    writePath(line)
+    submit(line)
+  }
+
+  function onCellDown(event: ReactPointerEvent<HTMLDivElement>, cell: GemCoord) {
+    if (status === 'ok') return
+    event.preventDefault()
+    event.stopPropagation()
+    drag.current = true
+    moved.current = false
+    scoredThisGesture.current = false
+    setShake(false)
+    rawRef.current = [cell]
+    applyCell(cell, 'tap')
+  }
+
+  function onBoardMove(event: ReactPointerEvent<HTMLDivElement>) {
+    if (!drag.current || status === 'ok') return
+    const cell = cellFromPoint(event.clientX, event.clientY)
+    if (!cell) return
+    const last = pathRef.current[pathRef.current.length - 1]
+    if (last && sameCell(last, cell)) return
+    moved.current = true
+    applyCell(cell, 'drag')
+  }
+
+  function onBoardUp() {
+    if (!drag.current) return
+    drag.current = false
+    if (scoredThisGesture.current) return
+    const nextPath = rawRef.current.length ? rawRef.current : pathRef.current
+    if (!nextPath.length) return
+    if (moved.current || nextPath.length >= 3) {
+      missIfSwipe(nextPath)
+    }
+  }
+
+  function replay() {
+    replayToast.current = true
+    setRound((current) => current + 1)
+  }
+
+  const selected = new Set(path.map(cellKey))
+
+  return (
+    <div
+      className={`play is-gem-search is-panel-blast ${stripMode !== 'hero' ? 'is-story-docked' : ''} ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''} ${burst.length ? 'is-boom' : ''} ${plusFlash ? 'is-bonus-pop' : ''} ${findPop ? 'is-find-pop' : ''}`}
+      style={{ ['--gem-size' as string]: puzzle.size }}
+      onPointerUp={onBoardUp}
+      onPointerCancel={onBoardUp}
+    >
+      <p className="sort-how">{EASY.matchHunt}</p>
+      <StoryStrip
+        kicker={`${home.who} · ${home.place}`}
+        panels={panels}
+        opened={opened}
+        flipping={flipping}
+        complete={status === 'ok'}
+        mode={stripMode}
+        words={puzzle.words.map((word) => ({
+          id: word.id,
+          label: word.label,
+          found: found.includes(word.id),
+        }))}
+        dockJuice={dockJuice}
+        onDockTap={() => setStripMode('sheet')}
+        onSheetClose={() => setStripMode('dock')}
+      />
+      <div className="gem-scroll">
+      {stripMode === 'hero' ? (
+      <ul className="gem-words" aria-label="Words to find">
+        {puzzle.words.map((word) => (
+          <li
+            key={word.id}
+            className={`gem-word is-${word.kind} ${found.includes(word.id) ? 'is-found' : ''} ${nextWord?.id === word.id && misses >= 2 ? 'is-hint' : ''}`}
+          >
+            <span className="gem-word-label">{word.label}</span>
+            <span className="gem-word-kind">
+              {word.kind === 'person' ? 'person' : word.kind === 'place' ? 'place' : 'idea'}
+            </span>
+          </li>
+        ))}
+      </ul>
+      ) : null}
+      {status === 'play' ? (
+        <p className="gem-bonus-hint is-loud">{EASY.bonusHint}</p>
+      ) : null}
+      {puzzle.planted.length ? (
+        <ul className="gem-words is-bonus" aria-label="Bonus words">
+          {puzzle.planted.map((word) => (
+            <li
+              key={word.id}
+              className={`gem-word is-bonus ${bonusFound.includes(word.id) ? 'is-found' : ''}`}
+            >
+              <span className="gem-word-label">{word.label}</span>
+              <span className="gem-word-kind">bonus</span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {plusFlash ? (
+        <p className="bonus-plus" aria-hidden>
+          +100
+        </p>
+      ) : null}
+      {findPop > 0 ? (
+        <p className="gem-find-pop" aria-hidden>
+          +{findPop}
+        </p>
+      ) : null}
+      {comboFlash > 1 ? (
+        <p className="gem-combo is-loud" role="status">
+          Combo ×{comboFlash}
+        </p>
+      ) : null}
+      <div className="gem-stage">
+      {toastBonus && toast ? (
+        <p className="bonus-banner" role="status">
+          <strong>{toast}</strong>
+          {toastWhy ? <span>{toastWhy}</span> : null}
+        </p>
+      ) : toastMiss && toast ? (
+        <p className="miss-banner" role="status">
+          <strong>{toast}</strong>
+          {toastWhy ? <span>{toastWhy}</span> : null}
+        </p>
+      ) : toast ? (
+        <p className="match-toast gem-toast is-yes" role="status">
+          <strong>{toast}</strong>
+          {toastWhy ? <span className="toast-why">{toastWhy}</span> : null}
+        </p>
+      ) : null}
+      <div
+        className="gem-board"
+        role="grid"
+        aria-label="Letter gems"
+        onPointerMove={onBoardMove}
+        onPointerUp={onBoardUp}
+        onPointerCancel={onBoardUp}
+      >
+        <WinBurst play={winStamp} stamp={EASY.matchWin} />
+        {puzzle.letters.flatMap((row, r) =>
+          row.map((letter, c) => {
+            const key = `${r}:${c}`
+            const popping = burst.includes(key)
+            const kept = needed.has(key)
+            const targetClear = !kept && puzzle.words.some((word) => {
+              if (!found.includes(word.id)) return false
+              return (puzzle.paths[word.id] ?? []).some((cell) => cell.r === r && cell.c === c)
+            })
+            const bonusClear = !kept && bonusCleared.includes(key)
+            const bonusGhost = !bonusClear && bonusGhosted.includes(key)
+            const cellClear = targetClear || bonusClear
+            return (
+              <div
+                key={key}
+                role="gridcell"
+                data-gem-cell
+                data-r={r}
+                data-c={c}
+                onPointerDown={(event) => onCellDown(event, { r, c })}
+                className={`gem-cell hue-${gemHue(letter, r, c)} ${selected.has(key) ? 'is-sel' : ''} ${popping ? 'is-burst' : ''} ${cellClear ? 'is-clear' : ''} ${bonusGhost ? 'is-cracked' : ''} ${kept && found.length > 0 && !selected.has(key) ? 'is-live' : ''} ${hint.includes(key) ? 'is-hint' : ''} ${popping && (bonusClear || bonusGhost) ? 'is-bonus-burst' : ''}`}
+              >
+                <span className="gem-letter">{letter}</span>
+                {popping
+                  ? SHARDS.map((i) => (
+                      <span
+                        key={i}
+                        className="gem-shard"
+                        style={{ ['--i' as string]: i }}
+                      />
+                    ))
+                  : null}
+                {popping
+                  ? GEM_BURST.slice(0, 4).map((i) => (
+                      <span
+                        key={`p-${i}`}
+                        className="gem-pop"
+                        style={{ ['--i' as string]: i }}
+                      />
+                    ))
+                  : null}
+              </div>
+            )
+          }),
+        )}
+      </div>
+      </div>
+      <p className={`match-score ${plusFlash || findPop > 0 || comboFlash > 1 ? 'is-juice' : ''}`}>
+        {left} left · {found.length} / {puzzle.words.length} found
+        {bonusFound.length ? ` · ${bonusFound.length} bonus` : ''}
+        {bonusPts ? <span className="bonus-pts"> · +{bonusPts} bonus</span> : null}
+      </p>
+      {status === 'ok' ? (
+        <>
+          <MatchTakeaway lineId={lineId} title={clearBeat.title} />
+          <div className="cta-dock">
+            <button
+              type="button"
+              className="btn primary xl snap-bins"
+              onClick={() => onEasyStop?.('hold')}
+            >
+              {EASY.holdNext}
+            </button>
+            <button
+              type="button"
+              className="btn gold xl more-match"
+              data-match-again
+              onClick={replay}
+            >
+              {EASY.moreMatch}
+            </button>
+            <button type="button" className="btn xl" onClick={() => onEasyStop?.('home')}>
+              {EASY.home}
+            </button>
+          </div>
+        </>
+      ) : null}
+      </div>
+    </div>
+  )
+}
