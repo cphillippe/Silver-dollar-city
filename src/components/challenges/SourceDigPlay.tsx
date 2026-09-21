@@ -17,6 +17,7 @@ import {
 import { GEM_BURST, playGemPop, prefersReducedMotion } from '../../lib/juice'
 import { MatchTakeaway } from '../HeldTriad'
 import { WinBurst } from './WinBurst'
+import '../../styles/digReveal.css'
 
 interface SourceDigPlayProps {
   lineId: string
