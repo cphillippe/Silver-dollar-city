@@ -19,6 +19,10 @@ interface StoryStripProps {
   mode?: StoryStripMode
   /** Target Match words shown in the tiny dock bar */
   words?: StoryStripWord[]
+  /** Bonus extras listed only inside the expand sheet (not above the board) */
+  bonusWords?: StoryStripWord[]
+  /** Long bonus copy — sheet only; never a first-paint banner */
+  bonusHint?: string
   /** Arcade +N flash on the dock collapse */
   dockJuice?: number | null
   onDockTap?: () => void
@@ -33,6 +37,8 @@ export function StoryStrip({
   complete,
   mode = 'hero',
   words = [],
+  bonusWords = [],
+  bonusHint,
   dockJuice = null,
   onDockTap,
   onSheetClose,
@@ -78,6 +84,18 @@ export function StoryStrip({
       </ul>
     ) : null
 
+  const bonusRow =
+    bonusWords.length > 0 ? (
+      <ul className="story-sheet-bonus gem-words is-bonus" aria-label="Bonus words">
+        {bonusWords.map((word) => (
+          <li key={word.id} className={`gem-word is-bonus ${word.found ? 'is-found' : ''}`}>
+            <span className="gem-word-label">{word.label}</span>
+            <span className="gem-word-kind">bonus</span>
+          </li>
+        ))}
+      </ul>
+    ) : null
+
   if (mode === 'dock' || mode === 'sheet') {
     return (
       <>
@@ -96,10 +114,14 @@ export function StoryStrip({
           aria-expanded={mode === 'sheet'}
           aria-label="Story pictures — tap to expand"
         >
-          {kicker ? <span className="story-kicker is-dock">{kicker}</span> : null}
           <div className="story-dock-row">
             {thumbs}
             {wordRow}
+            {bonusWords.length > 0 ? (
+              <span className="story-dock-extras" aria-hidden>
+                +{bonusWords.length} extras
+              </span>
+            ) : null}
           </div>
           {dockJuice ? (
             <span className="story-dock-juice" aria-hidden>
@@ -143,6 +165,14 @@ export function StoryStrip({
                 })}
               </div>
               {wordRow}
+              {bonusRow ? (
+                <>
+                  <p className="story-sheet-bonus-label">
+                    {bonusHint ?? '+100 extras'}
+                  </p>
+                  {bonusRow}
+                </>
+              ) : null}
               <p className="story-caption" role="status">
                 {caption}
               </p>
