@@ -1,0 +1,399 @@
+.play.is-source-dig {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(100%, 390px);
+  margin: 0 auto;
+}
+
+.dig-board {
+  position: relative;
+  display: grid;
+  gap: 10px;
+  min-height: 280px;
+  padding: 12px 10px 16px;
+  border-radius: 28px;
+  touch-action: none;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(255, 246, 184, 0.4), transparent 28%),
+    linear-gradient(180deg, #5a1aa0 0%, #2a0d58 55%, #140428 100%);
+  box-shadow:
+    inset 0 0 0 4px rgba(255, 204, 51, 0.4),
+    0 10px 0 rgba(80, 20, 40, 0.35);
+}
+
+.dig-timer {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 6px;
+  margin: 0;
+  color: #fff6c8;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-shadow: 0 2px 0 #5a1aa0;
+}
+
+.dig-timer strong {
+  font-size: 1.35rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.dig-timer span {
+  font-size: 0.78rem;
+  opacity: 0.88;
+}
+
+.dig-timer.is-armed {
+  opacity: 0.72;
+}
+
+.dig-timer.is-pulse {
+  color: #ff5a7a;
+  animation: dig-timer-pulse 0.55s ease-in-out infinite;
+}
+
+.dig-hint {
+  margin: 0;
+  text-align: center;
+  font-size: 0.78rem;
+  opacity: 0.75;
+}
+
+.play.is-source-dig .dig-board .win-burst {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.play.is-source-dig .win-flash,
+.play.is-source-dig .win-ring {
+  position: absolute;
+}
+
+.play.is-source-dig.is-win .dig-board {
+  min-height: auto;
+  padding-top: 54px;
+  padding-bottom: 18px;
+}
+
+.play.is-source-dig .win-stamp-wrap {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  right: auto;
+  width: max-content;
+  max-width: 92%;
+  transform: translateX(-50%);
+  z-index: 8;
+}
+
+.play.is-source-dig.is-win .win-stamp {
+  font-size: clamp(1.05rem, 5vw, 1.45rem);
+  letter-spacing: 0.14em;
+}
+
+.play.is-source-dig.is-win .match-yes {
+  margin-top: 4px;
+}
+
+.play.is-source-dig .match-score.is-juice {
+  animation: merge-score-pop 0.42s cubic-bezier(0.12, 1.45, 0.28, 1);
+}
+
+.dig-combo {
+  position: absolute;
+  left: 50%;
+  top: 28%;
+  z-index: 5;
+  margin: 0;
+  transform: translateX(-50%);
+  color: #fff6c8;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-shadow: 0 3px 0 #e09412;
+  pointer-events: none;
+}
+
+.dig-tablet {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  gap: 4px;
+  justify-items: start;
+  min-height: 72px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 18px;
+  text-align: left;
+  color: #3a1408;
+  cursor: pointer;
+  box-shadow:
+    0 5px 0 rgba(40, 8, 24, 0.35),
+    inset 0 4px 0 rgba(255, 255, 255, 0.55);
+}
+
+.dig-tablet.hue-scripture {
+  background: radial-gradient(circle at 28% 22%, #fffce8, #ffcc33 58%, #e09412);
+}
+
+.dig-tablet.hue-ancient {
+  background: radial-gradient(circle at 28% 22%, #ffe0ea, #ff5a7a 58%, #c01840);
+}
+
+/* Glow is no longer an answer cue — Dig Reveal uses dirt scrub. */
+.dig-tablet.is-glow {
+  animation: none;
+}
+
+.dig-tablet.is-buried {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  color: #3a2410;
+  background:
+    radial-gradient(circle at 30% 20%, #c4a574, #8a6234 55%, #5a3a18);
+}
+
+.dig-tablet.is-buried.hue-scripture,
+.dig-tablet.is-buried.hue-ancient {
+  background:
+    radial-gradient(circle at 30% 20%, #c4a574, #8a6234 55%, #5a3a18);
+}
+
+.dig-dirt {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  touch-action: none;
+  cursor: grab;
+  overflow: hidden;
+  background:
+    repeating-linear-gradient(
+      -18deg,
+      rgba(70, 42, 16, 0.55) 0 6px,
+      rgba(110, 72, 28, 0.45) 6px 12px
+    ),
+    radial-gradient(circle at 40% 30%, #a07840, #6a4420 70%);
+  opacity: calc(1 - (var(--scrub, 0) * 0.85));
+  box-shadow: inset 0 0 0 2px rgba(40, 20, 8, 0.35);
+}
+
+.dig-dirt.is-scrubbing {
+  cursor: grabbing;
+}
+
+.dig-scrub-fill {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(var(--scrub, 0) * 100%);
+  background: linear-gradient(180deg, rgba(255, 246, 184, 0.15), rgba(255, 204, 51, 0.35));
+  pointer-events: none;
+  transition: height 0.05s linear;
+}
+
+.dig-dust {
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #d2b48c;
+  pointer-events: none;
+  animation: dig-dust-fly 0.38s ease-out infinite;
+  animation-delay: calc(var(--i) * 0.05s);
+}
+
+.dig-tablet.is-buried .dig-era,
+.dig-tablet.is-buried strong {
+  position: relative;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.dig-tablet.is-open {
+  cursor: default;
+  overflow: visible;
+  min-height: auto;
+  height: auto;
+  align-content: start;
+  padding-bottom: 12px;
+}
+
+.dig-tablet.is-open em {
+  display: block;
+  white-space: normal;
+  overflow: visible;
+  max-height: none;
+}
+
+.play.is-source-dig.is-win .dig-tablet {
+  min-height: auto;
+}
+
+.dig-tablet.is-pop .dig-shard,
+.dig-tablet.is-pop .dig-burst {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: #fff6c8;
+  z-index: 3;
+}
+
+.dig-tablet.is-pop .dig-shard {
+  animation: maze-shard 0.42s ease forwards;
+}
+
+.dig-tablet.is-pop .dig-burst {
+  width: 14px;
+  height: 14px;
+  background: #ff5a7a;
+  animation: maze-shard 0.48s ease forwards;
+}
+
+.dig-era {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.dig-tablet strong {
+  font-size: 0.95rem;
+}
+
+.dig-tablet em {
+  font-style: normal;
+  font-size: 0.82rem;
+  line-height: 1.25;
+  font-weight: 650;
+}
+
+.play.is-source-dig.is-shake .dig-board {
+  animation: shake 0.36s ease;
+}
+
+@keyframes dig-glow-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+}
+
+@keyframes dig-timer-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes dig-dust-fly {
+  0% {
+    transform: translate(calc((var(--i) - 1.5) * 6px), 0) scale(1);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(calc((var(--i) - 1.5) * 18px), -22px) scale(0.2);
+    opacity: 0;
+  }
+}
+
+.dig-taps {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dig-tap {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fff6b8, #ffcc33);
+  color: #3a1408;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.dig-tap.hue-ancient {
+  background: linear-gradient(180deg, #ffe0ea, #ff5a7a);
+  color: #3a1408;
+}
+
+.dig-bite {
+  margin: 4px 4px 0;
+  font-size: 0.88rem;
+}
+
+@media (max-width: 420px) {
+  .maze-board {
+    width: min(100%, calc(44dvh * 5 / 7));
+    max-height: min(44dvh, 380px);
+    gap: 3px;
+    padding: 6px;
+  }
+
+  .play.is-road-maze .story-caption {
+    min-height: 0;
+    font-size: 0.9rem;
+  }
+
+  .play.is-road-maze .run-thumb {
+    max-height: 40px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .play.is-father-run.is-running .run-actor.is-father,
+  .play.is-father-run.is-running .run-leg.is-a,
+  .play.is-father-run.is-running .run-leg.is-b,
+  .run-dust,
+  .run-thumb.is-flip,
+  .run-hearts,
+  .run-shard,
+  .run-burst,
+  .bonus-plus,
+  .gem-combo,
+  .play.is-road-maze.is-shake .maze-board,
+  .maze-drop,
+  .maze-beat.is-pop,
+  .maze-cell.is-pop .maze-shard,
+  .maze-cell.is-pop .maze-burst,
+  .play.is-claim-merge.is-shake .merge-bowl,
+  .play.is-source-dig.is-shake .dig-board,
+  .dig-timer.is-pulse,
+  .dig-dust,
+  .dig-tablet.is-glow,
+  .dig-tablet.is-pop .dig-shard,
+  .dig-tablet.is-pop .dig-burst,
+  .merge-ball.is-lock,
+  .merge-ball.is-cue,
+  .merge-ball,
+  .merge-pop i,
+  .merge-pop b,
+  .merge-score.is-juice {
+    animation: none;
+  }
+}
