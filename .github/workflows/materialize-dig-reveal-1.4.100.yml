@@ -30,7 +30,7 @@ jobs:
             src/lib/easyUi.ts \
             src/lib/sourceDig.ts \
             src/styles/digReveal.css
-          git rm -f --ignore-unmatch tmp/dig100.b64.* tmp/dig-reveal-1.4.100.tgz \
+          git rm -f --ignore-unmatch tmp/dig100p.* tmp/dig100.b64.* tmp/dig-reveal-1.4.100.tgz \
             scripts/materialize-dig-reveal-1.4.100.mjs \
             .github/workflows/materialize-dig-reveal-1.4.100.yml || true
           if git diff --cached --quiet; then
