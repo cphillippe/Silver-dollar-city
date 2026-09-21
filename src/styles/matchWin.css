@@ -1,0 +1,16 @@
+/* Match win 1.4.104 — hide solved tiles before the takeaway and actions render. */
+.play.is-gem-search.is-win {
+  overflow: auto;
+  justify-content: flex-start;
+}
+
+.play.is-gem-search.is-win .gem-scroll {
+  display: none;
+}
+
+.play.is-gem-search.is-win .match-yes,
+.play.is-gem-search.is-win .cta-dock {
+  position: relative;
+  z-index: 4;
+  flex: 0 0 auto;
+}
