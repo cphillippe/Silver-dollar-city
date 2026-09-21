@@ -1,0 +1,41 @@
+name: materialize-dock-no-overlap-1.4.99
+on:
+  push:
+    branches: [fun/match-dock-no-overlap-1.4.99]
+    paths:
+      - 'tmp/dock-1499-*.patch'
+      - '.github/workflows/materialize-dock-no-overlap-1.4.99.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fun/match-dock-no-overlap-1.4.99
+          fetch-depth: 0
+      - name: Apply dock no-overlap patches
+        run: |
+          set -euo pipefail
+          if grep -q 'Match story dock 1.4.99' src/index.css; then
+            echo 'already materialized'
+            exit 0
+          fi
+          for p in tmp/dock-1499-*.patch; do
+            echo "Applying $p"
+            patch -p1 < "$p"
+          done
+          # version bump already on branch; keep lockstep if patch also touched them
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add src/index.css src/content/changelog.ts scripts/check-gem-search.mjs \
+            src/components/StoryStrip.tsx src/components/challenges/GemSearchPlay.tsx \
+            package.json src/config/app.ts scripts/check-panel-blast.mjs || true
+          if git diff --cached --quiet; then
+            echo 'nothing to commit'
+            exit 0
+          fi
+          git commit -m "materialize Match dock no-overlap 1.4.99 product files"
+          git push

@@ -1,0 +1,19 @@
+diff --git a/src/content/changelog.ts b/src/content/changelog.ts
+index 6aa38a1..662c9a8 100644
+--- a/src/content/changelog.ts
++++ b/src/content/changelog.ts
+@@ -7,6 +7,14 @@ export interface ChangeNote {
+ }
+ 
+ export const CHANGELOG: ChangeNote[] = [
++  {
++    version: '1.4.99',
++    title: 'Match dock no-overlap · Easy core trail',
++    when: '2026-09-21',
++    items: [
++      'Match: story dock sits in normal flow above the letter board (no overlay); lesson pills stay one horizontal LTR row — no vertical mid-word splits',
++    ],
++  },
+   {
+     version: '1.4.98',
+     title: 'Match board-first · Easy core trail',
