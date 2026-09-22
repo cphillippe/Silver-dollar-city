@@ -1,0 +1,174 @@
+name: materialize direct 1.4.107
+on:
+  push:
+    branches: [fix/match-teach-contrast-1.4.107]
+    paths:
+      - 'tmp/run-targeted-1.4.107'
+      - '.github/workflows/materialize-direct-1.4.107.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/match-teach-contrast-1.4.107
+          fetch-depth: 0
+      - name: Apply direct source changes
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          root = Path('.')
+          p = root / 'package.json'
+          s = p.read_text(); s = s.replace('"version": "1.4.106"', '"version": "1.4.107"', 1); p.write_text(s)
+          p = root / 'src/config/app.ts'
+          s = p.read_text(); s = s.replace("APP_VERSION = '1.4.106'", "APP_VERSION = '1.4.107'", 1); p.write_text(s)
+          p = root / 'src/content/changelog.ts'
+          s = p.read_text()
+          if "version: '1.4.107'" not in s:
+            entry = """  {
+    version: '1.4.107',
+    title: 'Match teach dock · readable contrast',
+    when: '2026-09-22',
+    items: [
+      'Match teach: WHO/WHERE chips and the say sentence use high-contrast ink, solid borders, and readable pending/found word states',
+      'Lock In: after LOCKED!, the Yes button and citation remain reachable by scrolling on phone screens',
+    ],
+  },
+"""
+            s = s.replace('export const CHANGELOG: ChangeNote[] = [\n', 'export const CHANGELOG: ChangeNote[] = [\n' + entry, 1)
+            p.write_text(s)
+          p = root / 'src/styles/loci-stamp.css'
+          s = p.read_text()
+          old = """  border: 1px solid color-mix(in srgb, var(--ink, #2a2118) 14%, transparent);
+  background: color-mix(in srgb, var(--paper, #f6efe4) 88%, #d8c4a0);
+  opacity: 0.72;"""
+          new = """  border: 1.5px solid #3d2e1a;
+  background: #fff8ec;
+  color: #1a140e;
+  opacity: 1;
+  box-shadow: 0 1px 0 rgba(26, 20, 14, 0.12);"""
+          s = s.replace(old, new, 1)
+          s = s.replace("""  opacity: 1;
+  background: color-mix(in srgb, #c9a45c 35%, var(--paper, #f6efe4));
+  border-color: color-mix(in srgb, #c9a45c 70%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, #c9a45c 40%, transparent);""", """  background: #f0d089;
+  border-color: #8a6418;
+  box-shadow: 0 0 0 2px rgba(138, 100, 24, 0.35);""", 1)
+          s = s.replace("""  text-transform: uppercase;
+  opacity: 0.7;""", """  text-transform: uppercase;
+  color: #5c4020;
+  opacity: 1;""", 1)
+          s = s.replace('  font-size: 0.78rem;\n  font-weight: 800;\n  line-height: 1.1;\n}', '  font-size: 0.82rem;\n  font-weight: 800;\n  line-height: 1.1;\n  color: #1a140e;\n}', 1)
+          s = s.replace("""  padding: 0.35rem 0.5rem;
+  border-radius: 10px;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: color-mix(in srgb, var(--ink, #2a2118) 55%, transparent);
+  background: color-mix(in srgb, var(--paper, #f6efe4) 70%, #e8dcc8);""", """  padding: 0.4rem 0.55rem;
+  border-radius: 10px;
+  font-size: 0.84rem;
+  line-height: 1.4;
+  font-weight: 650;
+  color: #1a140e;
+  background: #fff8ec;
+  border: 1.5px solid #3d2e1a;""", 1)
+          s = s.replace("""  color: var(--ink, #2a2118);
+  background: color-mix(in srgb, #c9a45c 22%, var(--paper, #f6efe4));
+  font-weight: 650;""", """  color: #1a140e;
+  background: #f0d089;
+  border-color: #8a6418;
+  font-weight: 750;""", 1)
+          s = s.replace('  opacity: 0.45;\n}', '  opacity: 1;\n  color: #4a3a28;\n  text-decoration: underline;\n  text-decoration-style: dotted;\n  text-decoration-thickness: 1.5px;\n  text-underline-offset: 2px;\n}', 1)
+          s = s.replace("""  opacity: 1;
+  font-weight: 800;
+  color: #6b4a12;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;""", """  opacity: 1;
+  font-weight: 900;
+  color: #6b3d08;
+  text-decoration: underline;
+  text-decoration-style: solid;
+  text-decoration-thickness: 2.5px;""", 1)
+          p.write_text(s)
+          p = root / 'src/index.css'
+          s = p.read_text()
+          if 'Lock In / Easy Hold must scroll' not in s:
+            s += """
+
+/* Lock In / Easy Hold must scroll to Yes + citation on phone */
+.app.is-play .app-body:has(.journal.is-rehearse),
+.app.is-play .app-body:has(.recall-gate.is-easy-hold),
+.app.is-play .app-body:has(.challenge-page.is-rehearse),
+.app.is-play .app-body:has(.daily-page.is-rehearse),
+.app.is-play .app-body:has(.why-blast.is-win) {
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  padding-bottom: calc(48px + var(--safe-bottom));
+}
+
+/* After Match, rehearse still had is-puzzle → overflow:hidden — unlock scroll */
+.app.is-play .app-body:has(.is-puzzle.is-rehearse) {
+  overflow-y: auto;
+  display: block;
+}
+
+.journal.is-rehearse,
+.journal.is-easy-hold-practice {
+  padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px));
+}
+
+.recall-gate.is-easy-hold {
+  min-height: 0;
+  max-height: none;
+  overflow: visible;
+  padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+}
+
+.why-blast {
+  min-height: 0;
+  overflow: visible;
+}
+
+.why-blast.is-win .cta-dock {
+  position: static;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+}
+
+.why-blast.is-win .match-yes .held-from,
+.recall-gate.is-easy-hold .held-from {
+  display: block;
+  margin-top: 0.45em;
+  padding-bottom: 4px;
+}
+"""
+            p.write_text(s)
+          p = root / 'src/components/challenges/WhyBlastPlay.tsx'
+          s = p.read_text()
+          if 'ctaRef' not in s:
+            s = s.replace("import { useMemo, useState } from 'react'", "import { useEffect, useMemo, useRef, useState } from 'react'", 1)
+            s = s.replace('  const beat = holdSuccessBeat(claim, easyWhyLine(reason), source)\n', """  const beat = holdSuccessBeat(claim, easyWhyLine(reason), source)
+  const ctaRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    if (!locked) return
+    const id = window.requestAnimationFrame(() => {
+      ctaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+    })
+    return () => window.cancelAnimationFrame(id)
+  }, [locked])
+""", 1)
+            s = s.replace('          <div className="cta-dock">', '          <div className="cta-dock" ref={ctaRef}>', 1)
+            p.write_text(s)
+          PY
+          git rm -f tmp/run-targeted-1.4.107 tmp/targeted-1.4.107.patch.gz.b64.* tmp/match-teach-contrast-1.4.107.patch.gz.b64 tmp/match-teach-contrast-1.4.107.patch.gz.b64.* .github/workflows/materialize-direct-1.4.107.yml .github/workflows/materialize-targeted-1.4.107.yml .github/workflows/materialize-match-teach-contrast-1.4.107.yml
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add -A
+          git commit -m "materialize Match teach contrast and Lock In scroll 1.4.107"
+          git push
