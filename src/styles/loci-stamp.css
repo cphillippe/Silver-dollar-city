@@ -212,16 +212,17 @@ button.loci-stamp {
   min-width: 3.6rem;
   padding: 0.28rem 0.45rem;
   border-radius: 10px;
-  border: 1px solid color-mix(in srgb, var(--ink, #2a2118) 14%, transparent);
-  background: color-mix(in srgb, var(--paper, #f6efe4) 88%, #d8c4a0);
-  opacity: 0.72;
+  border: 1.5px solid #3d2e1a;
+  background: #fff8ec;
+  color: #1a140e;
+  opacity: 1;
+  box-shadow: 0 1px 0 rgba(26, 20, 14, 0.12);
 }
 
 .match-teach-chip.is-found {
-  opacity: 1;
-  background: color-mix(in srgb, #c9a45c 35%, var(--paper, #f6efe4));
-  border-color: color-mix(in srgb, #c9a45c 70%, transparent);
-  box-shadow: 0 0 0 1px color-mix(in srgb, #c9a45c 40%, transparent);
+  background: #f0d089;
+  border-color: #8a6418;
+  box-shadow: 0 0 0 2px rgba(138, 100, 24, 0.35);
 }
 
 .match-teach-kind {
@@ -229,41 +230,52 @@ button.loci-stamp {
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  opacity: 0.7;
+  color: #5c4020;
+  opacity: 1;
 }
 
 .match-teach-label {
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   font-weight: 800;
   line-height: 1.1;
+  color: #1a140e;
 }
 
 .match-teach-say {
   margin: 0;
-  padding: 0.35rem 0.5rem;
+  padding: 0.4rem 0.55rem;
   border-radius: 10px;
-  font-size: 0.78rem;
-  line-height: 1.35;
-  color: color-mix(in srgb, var(--ink, #2a2118) 55%, transparent);
-  background: color-mix(in srgb, var(--paper, #f6efe4) 70%, #e8dcc8);
+  font-size: 0.84rem;
+  line-height: 1.4;
+  font-weight: 650;
+  color: #1a140e;
+  background: #fff8ec;
+  border: 1.5px solid #3d2e1a;
 }
 
 .match-teach-say.is-lit {
-  color: var(--ink, #2a2118);
-  background: color-mix(in srgb, #c9a45c 22%, var(--paper, #f6efe4));
-  font-weight: 650;
+  color: #1a140e;
+  background: #f0d089;
+  border-color: #8a6418;
+  font-weight: 750;
 }
 
 .match-teach-say-word.is-pending {
-  opacity: 0.45;
+  opacity: 1;
+  color: #4a3a28;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 2px;
 }
 
 .match-teach-say-word.is-found {
   opacity: 1;
-  font-weight: 800;
-  color: #6b4a12;
+  font-weight: 900;
+  color: #6b3d08;
   text-decoration: underline;
-  text-decoration-thickness: 2px;
+  text-decoration-style: solid;
+  text-decoration-thickness: 2.5px;
   text-underline-offset: 2px;
 }
 
@@ -296,4 +308,52 @@ button.loci-stamp {
   .match-teach-say {
     font-size: 0.72rem;
   }
+}
+
+/* Lock In / Easy Hold must scroll to Yes + citation on phone */
+.app.is-play .app-body:has(.journal.is-rehearse),
+.app.is-play .app-body:has(.recall-gate.is-easy-hold),
+.app.is-play .app-body:has(.challenge-page.is-rehearse),
+.app.is-play .app-body:has(.daily-page.is-rehearse),
+.app.is-play .app-body:has(.why-blast.is-win) {
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  padding-bottom: calc(48px + var(--safe-bottom));
+}
+
+/* After Match, rehearse still had is-puzzle → overflow:hidden — unlock scroll */
+.app.is-play .app-body:has(.is-puzzle.is-rehearse) {
+  overflow-y: auto;
+  display: block;
+}
+
+.journal.is-rehearse,
+.journal.is-easy-hold-practice {
+  padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px));
+}
+
+.recall-gate.is-easy-hold {
+  min-height: 0;
+  max-height: none;
+  overflow: visible;
+  padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+}
+
+.why-blast {
+  min-height: 0;
+  overflow: visible;
+}
+
+.why-blast.is-win .cta-dock {
+  position: static;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+}
+
+.why-blast.is-win .match-yes .held-from,
+.recall-gate.is-easy-hold .held-from {
+  display: block;
+  margin-top: 0.45em;
+  padding-bottom: 4px;
 }
