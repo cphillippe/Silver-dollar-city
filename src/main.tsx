@@ -10,6 +10,7 @@ import './styles/match-art-tight.css'
 import './styles/storySnap.css'
 import './styles/digReveal.css'
 import './styles/matchWin.css'
+import './styles/loci-stamp.css'
 
 if (!Capacitor.isNativePlatform()) {
   registerSW({ immediate: true })
