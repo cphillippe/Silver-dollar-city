@@ -15,7 +15,8 @@ export const TIP_BLURB =
   'A small tip helps keep wholesome evidence walks growing for kids and families. Easy stays free. Journal stays open.'
 export const STORES_COMING = 'Remove ads · Coming with stores'
 export const TIP_TOAST_TITLE = 'Support the trail'
-export const TIP_TOAST = 'A tip keeps new streets coming. Easy stays free.'
+export const TIP_TOAST =
+  'A small tip grows the next free street. Easy stays free. Journal stays open.'
 export const NOT_NOW = 'Not now'
 export const MILL_PACK_CTA = 'Mill Street'
 export const HARBOR_PACK_CTA = 'Harbor Walk'
