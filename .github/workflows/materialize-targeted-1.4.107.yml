@@ -1,0 +1,35 @@
+name: materialize targeted 1.4.107
+on:
+  push:
+    branches: [fix/match-teach-contrast-1.4.107]
+    paths:
+      - 'tmp/targeted-1.4.107.patch.gz.b64.*'
+      - '.github/workflows/materialize-targeted-1.4.107.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/match-teach-contrast-1.4.107
+          fetch-depth: 0
+      - name: Apply targeted patch
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64, gzip
+          parts = sorted(Path('tmp').glob('targeted-1.4.107.patch.gz.b64.*'))
+          encoded = ''.join(p.read_text() for p in parts)
+          Path('tmp/targeted-1.4.107.patch').write_bytes(gzip.decompress(base64.b64decode(encoded)))
+          PY
+          git apply --whitespace=nowarn tmp/targeted-1.4.107.patch
+          git rm -f tmp/targeted-1.4.107.patch.gz.b64.* tmp/match-teach-contrast-1.4.107.patch.gz.b64 tmp/match-teach-contrast-1.4.107.patch.gz.b64.* .github/workflows/materialize-targeted-1.4.107.yml .github/workflows/materialize-match-teach-contrast-1.4.107.yml
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add -A
+          git commit -m "materialize Match teach contrast and Lock In scroll 1.4.107"
+          git push
