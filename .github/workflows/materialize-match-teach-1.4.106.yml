@@ -1,11 +1,10 @@
-name: materialize-match-teach-1.4.106
+name: materialize Match teach 1.4.107
 on:
   push:
-    branches: [fun/match-teach-1.4.106]
+    branches: [fix/match-teach-contrast-1.4.107]
     paths:
-      - 'tmp/match-teach-1.4.106.patch.b64.*'
+      - 'tmp/match-teach-1.4.106.patch.b64.17'
       - '.github/workflows/materialize-match-teach-1.4.106.yml'
-  workflow_dispatch:
 permissions:
   contents: write
 jobs:
@@ -14,32 +13,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: fun/match-teach-1.4.106
-          fetch-depth: 0
-      - name: Apply Match teach patch
-        run: |
-          set -euo pipefail
-          if grep -q 'MATCH_CHIPS' src/lib/gemSearch.ts && grep -q 'match-teach-dock' src/components/challenges/GemSearchPlay.tsx; then
-            echo 'already materialized'
-            exit 0
-          fi
-          python3 - <<'PY'
-          from pathlib import Path
-          import base64
-          parts = sorted(Path('tmp').glob('match-teach-1.4.106.patch.b64.*'))
-          data = b''.join(base64.b64decode(''.join(p.read_text().split())) for p in parts)
-          Path('tmp/match-teach-1.4.106.patch').write_bytes(data)
-          print('assembled', len(data), 'from', [p.name for p in parts])
-          PY
-          git apply --whitespace=nowarn tmp/match-teach-1.4.106.patch
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add src/lib/gemSearch.ts src/components/challenges/GemSearchPlay.tsx \
-            scripts/check-gem-search.mjs src/lib/storyPanels.ts src/styles/loci-stamp.css \
-            src/content/changelog.ts || true
-          if git diff --cached --quiet; then
-            echo 'nothing to commit'
-            exit 0
-          fi
-          git commit -m "materialize Match teach 1.4.106 — MATCH_CHIPS + say dock"
-          git push
+          ref: fix/match-teach-contrast-1.4.107
+      - name: Apply release changes
+        run: python3 -c "from pathlib import Path; p=Path('package.json'); p.write_text(p.read_text().replace('\\\"version\\\": \\\"1.4.106\\\"','\\\"version\\\": \\\"1.4.107\\\"',1)); p=Path('src/config/app.ts'); p.write_text(p.read_text().replace(\"APP_VERSION = '1.4.106'\",\"APP_VERSION = '1.4.107'\",1))"
