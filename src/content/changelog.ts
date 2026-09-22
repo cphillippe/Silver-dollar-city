@@ -25,3 +25,12 @@ export const CHANGELOG: ChangeNote[] = [
     ],
   },
 ]
+
+/** Resolve What’s new copy for a version (falls back to newest). */
+export function latestChange(version: string): ChangeNote {
+  const note = CHANGELOG.find((item) => item.version === version) ?? CHANGELOG[0]
+  if (!note) {
+    return { version, title: 'Easy core trail', when: '', items: [] }
+  }
+  return note
+}
