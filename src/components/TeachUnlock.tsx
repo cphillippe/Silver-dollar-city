@@ -9,7 +9,9 @@ import { WORDS, schoolWordsFor } from '../lib/words'
 import { learningBeat } from '../lib/learning'
 import { learningPicture, toolForEvidence } from '../lib/watchTools'
 import { useProgress } from '../store/progress'
+import { lociStampFor } from '../lib/lociStamp'
 import { Avatar } from './Avatar'
+import { LociStamp } from './LociStamp'
 import { GemMark } from './GemMark'
 import { HeldTriad } from './HeldTriad'
 import { WordGloss } from './WordGloss'
@@ -45,9 +47,11 @@ export function TeachUnlock({ brief, kind, onUnlock, unlock, beats }: TeachUnloc
 
   if (easy) {
     const home = easyWhoWhere(brief.id)
+    const stamp = lociStampFor(brief.id)
     return (
       <section className="recall-gate is-encode teach-gate easy-story-card" aria-label="Short story">
         <p className="eyebrow">Short story</p>
+        <LociStamp stamp={stamp} mode="hero" />
         {picture ? <GemMark gem={picture} size="sm" /> : null}
         <p className="teach-reason">{story}</p>
         <p className="eyebrow hold-kicker">The main idea you will keep</p>

@@ -16,6 +16,8 @@ export interface GemWord {
   text: string
   label: string
   kind: GemKind
+  /** Mind-map slot for authored MATCH_CHIPS (who/where/idea/keep). */
+  role?: 'who' | 'where' | 'idea' | 'keep'
 }
 
 export interface GemCoord {
@@ -160,10 +162,10 @@ const LESSON_BONUS: Record<string, string[]> = {
   'daily-stars': ['SKY', 'STARS', 'MAKER', 'SPEAK'],
   'daily-cosmos': ['WORLD', 'LIFE', 'FIT', 'GIVEN'],
   'hl-moral': ['DUTY', 'HEART', 'RIGHT', 'KNOW'],
-  'fg-order': ['ORDER', 'HOLD', 'WORLD', 'CHRIST'],
-  'fg-reason': ['LIGHT', 'MIND', 'KNOW', 'WORD'],
-  'fg-ought': ['OUGHT', 'HEART', 'LAW', 'NATURE'],
-  'fg-ground': ['GOD', 'LIVE', 'MOVE', 'GROUND'],
+  'fg-order': ['HOLD', 'WORLD', 'HINGE', 'TRUST'],
+  'fg-reason': ['MIND', 'KNOW', 'WORD', 'TRUST'],
+  'fg-ought': ['HEART', 'NATURE', 'TRUST', 'RIGHT'],
+  'fg-ground': ['LIVE', 'MOVE', 'ACTS', 'FOUND'],
 }
 
 export function lettersOnly(text: string): string {
@@ -224,8 +226,99 @@ function addWord(list: GemWord[], text: string, kind: GemKind) {
   })
 }
 
-/** Claim, person, place, and short idea words from the current Easy pack lesson. */
+
+/** Authored Easy Why Gate Match — one connected teaching unit, not claim-token scrape. */
+export interface MatchChipSet {
+  words: [string, string, string, string]
+  kinds: [GemKind, GemKind, GemKind, GemKind]
+  roles: ['who', 'where', 'idea', 'keep']
+  say: string
+}
+
+export const MATCH_CHIPS: Record<string, MatchChipSet> = {
+  'fg-order': {
+    words: ['ANSEL', 'ARCH', 'ORDER', 'CHRIST'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Ansel at the Arch saw that all order holds together in Christ.',
+  },
+  'fg-reason': {
+    words: ['ANSEL', 'ARCH', 'REASON', 'LIGHT'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: "Ansel at the Arch saw that our reason comes from God's light.",
+  },
+  'fg-ought': {
+    words: ['ANSEL', 'ARCH', 'OUGHT', 'LAW'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: "Ansel at the Arch saw that what we ought to do is God's law inside us.",
+  },
+  'fg-ground': {
+    words: ['COSMO', 'ROCK', 'GROUND', 'GOD'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Cosmo at the Rock saw that the living God is the true ground of all things.',
+  },
+  'fg-contingent': {
+    words: ['COSMO', 'ROCK', 'DEPENDS', 'MAKER'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Cosmo at the Rock saw that what might not have been depends on a Maker.',
+  },
+  'fg-mover': {
+    words: ['ANSEL', 'ARCH', 'MOTION', 'FIRST'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Ansel at the Arch saw that all motion starts with the First Mover.',
+  },
+  'fg-kalam': {
+    words: ['ANSEL', 'ARCH', 'BEGAN', 'CAUSE'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Ansel at the Arch saw that whatever began to exist must have a First Cause.',
+  },
+  'fg-limits': {
+    words: ['ANSEL', 'ARCH', 'LIMITS', 'RULES'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Ansel at the Arch saw that rules and limits in nature point beyond themselves.',
+  },
+}
+
+export function matchChipsFor(lineId: string): MatchChipSet | undefined {
+  return MATCH_CHIPS[lineId]
+}
+
+export function matchChipRoleLabel(role: GemWord['role']): string {
+  if (role === 'who') return 'who'
+  if (role === 'where') return 'where'
+  if (role === 'keep') return 'keep'
+  return 'idea'
+}
+
+/** Claim, person, place, and short idea words — authored MATCH_CHIPS win for Why Gate. */
 export function gemWordsFor(lineId: string): GemWord[] {
+  const authored = MATCH_CHIPS[lineId]
+  if (authored) {
+    const picked: GemWord[] = []
+    authored.words.forEach((text, index) => {
+      const letters = lettersOnly(text)
+      if (letters.length < MIN_LEN || letters.length > MAX_LEN) return
+      if (picked.some((word) => word.text === letters)) return
+      const kind = authored.kinds[index]
+      const role = authored.roles[index]
+      picked.push({
+        id: `${role}-${letters.toLowerCase()}`,
+        text: letters,
+        label: titleWord(letters),
+        kind,
+        role,
+      })
+    })
+    return picked.slice(0, MAX_WORDS)
+  }
+
   const lesson = packLesson(lineId)
   const home = easyWhoWhere(lineId)
   const claim = lesson?.claim || evidenceFor(lineId)?.claim || ''
