@@ -309,3 +309,51 @@ button.loci-stamp {
     font-size: 0.72rem;
   }
 }
+
+/* Lock In / Easy Hold must scroll to Yes + citation on phone */
+.app.is-play .app-body:has(.journal.is-rehearse),
+.app.is-play .app-body:has(.recall-gate.is-easy-hold),
+.app.is-play .app-body:has(.challenge-page.is-rehearse),
+.app.is-play .app-body:has(.daily-page.is-rehearse),
+.app.is-play .app-body:has(.why-blast.is-win) {
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  padding-bottom: calc(48px + var(--safe-bottom));
+}
+
+/* After Match, rehearse still had is-puzzle → overflow:hidden — unlock scroll */
+.app.is-play .app-body:has(.is-puzzle.is-rehearse) {
+  overflow-y: auto;
+  display: block;
+}
+
+.journal.is-rehearse,
+.journal.is-easy-hold-practice {
+  padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px));
+}
+
+.recall-gate.is-easy-hold {
+  min-height: 0;
+  max-height: none;
+  overflow: visible;
+  padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+}
+
+.why-blast {
+  min-height: 0;
+  overflow: visible;
+}
+
+.why-blast.is-win .cta-dock {
+  position: static;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+}
+
+.why-blast.is-win .match-yes .held-from,
+.recall-gate.is-easy-hold .held-from {
+  display: block;
+  margin-top: 0.45em;
+  padding-bottom: 4px;
+}
