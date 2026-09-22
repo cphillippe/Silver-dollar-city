@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.106',
+    title: 'Match teach · connected Why Gate chips',
+    when: '2026-09-21',
+    items: [
+      'Match teach: Why Gate boards use authored who/where/idea/keep chips + a building say sentence (e.g. Cosmo·Rock·Ground·God) — not four unconnected crossword words; LociStamp secondary; Mercy Story Creek comics stay',
+    ],
+  },
+  {
     version: '1.4.105',
     title: 'Why Gate split · Arch + Bedrock',
     when: '2026-09-21',

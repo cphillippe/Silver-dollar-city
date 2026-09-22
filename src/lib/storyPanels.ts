@@ -69,14 +69,15 @@ const LESSON_SCENES: Record<string, StoryScene[]> = {
   'wb-women': ['tomb', 'tell', 'keep'],
   'daily-stars': ['sky', 'tell', 'keep'],
   'daily-cosmos': ['sky', 'keep', 'tell'],
-  'fg-order': ['keep', 'tell', 'creek', 'sky'],
-  'fg-reason': ['lamp', 'tell', 'keep', 'sky'],
-  'fg-ought': ['keep', 'tell', 'creek', 'sky'],
-  'fg-ground': ['keep', 'tell', 'sky', 'creek'],
-  'fg-mover': ['keep', 'creek', 'tell', 'sky'],
-  'fg-contingent': ['keep', 'creek', 'tell', 'sky'],
-  'fg-kalam': ['keep', 'creek', 'tell', 'sky'],
-  'fg-limits': ['keep', 'creek', 'tell', 'sky'],
+  // Why Gate: keep/sky loci — never Story Creek comics for foundation Match
+  'fg-order': ['keep', 'sky', 'keep', 'sky'],
+  'fg-reason': ['keep', 'sky', 'lamp', 'keep'],
+  'fg-ought': ['keep', 'sky', 'keep', 'sky'],
+  'fg-ground': ['keep', 'sky', 'keep', 'sky'],
+  'fg-mover': ['keep', 'sky', 'keep', 'sky'],
+  'fg-contingent': ['keep', 'sky', 'keep', 'sky'],
+  'fg-kalam': ['keep', 'sky', 'keep', 'sky'],
+  'fg-limits': ['keep', 'sky', 'keep', 'sky'],
 }
 
 /** Split pack shortStory on sentence ends — do not rewrite the words. */
