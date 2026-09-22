@@ -3,7 +3,7 @@ on:
   push:
     branches: [fix/match-teach-contrast-1.4.107]
     paths:
-      - 'tmp/match-teach-contrast-1.4.107.patch.gz.b64'
+      - 'tmp/match-teach-contrast-1.4.107.patch.gz.b64.*'
       - '.github/workflows/materialize-match-teach-contrast-1.4.107.yml'
   workflow_dispatch:
 permissions:
@@ -22,11 +22,12 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           import base64, gzip
-          encoded = Path('tmp/match-teach-contrast-1.4.107.patch.gz.b64').read_text()
+          parts = sorted(Path('tmp').glob('match-teach-contrast-1.4.107.patch.gz.b64.*'))
+          encoded = ''.join(p.read_text() for p in parts)
           Path('tmp/match-teach-contrast-1.4.107.patch').write_bytes(gzip.decompress(base64.b64decode(encoded)))
           PY
           git apply --whitespace=nowarn tmp/match-teach-contrast-1.4.107.patch
-          git rm tmp/match-teach-contrast-1.4.107.patch.gz.b64 .github/workflows/materialize-match-teach-contrast-1.4.107.yml
+          git rm -f tmp/match-teach-contrast-1.4.107.patch.gz.b64 tmp/match-teach-contrast-1.4.107.patch.gz.b64.* .github/workflows/materialize-match-teach-contrast-1.4.107.yml
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add -A
