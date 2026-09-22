@@ -17,6 +17,7 @@ import {
   cellsNeededByOpenPlanted,
   findStraightSpelling,
   gemWordsFor,
+  matchChipsFor,
   isBonusSpelling,
   isStraightPath,
   matchBonusWord,
@@ -56,6 +57,27 @@ assert.ok(mercyWords.some((word) => word.kind === 'person'))
 assert.ok(mercyWords.some((word) => word.kind === 'place'))
 assert.ok(mercyWords.some((word) => word.kind === 'idea'))
 assert.ok(mercyWords.length >= 3 && mercyWords.length <= 4)
+
+const orderWords = gemWordsFor('fg-order')
+assert.deepEqual(
+  orderWords.map((word) => word.text),
+  ['ANSEL', 'ARCH', 'ORDER', 'CHRIST'],
+  'fg-order authored MATCH_CHIPS',
+)
+assert.deepEqual(
+  orderWords.map((word) => word.role),
+  ['who', 'where', 'idea', 'keep'],
+  'fg-order mind-map roles',
+)
+
+const groundWords = gemWordsFor('fg-ground')
+assert.deepEqual(
+  groundWords.map((word) => word.text),
+  ['COSMO', 'ROCK', 'GROUND', 'GOD'],
+  'fg-ground authored MATCH_CHIPS (connected teach unit)',
+)
+assert.equal(matchChipsFor('fg-ground')?.say.includes('living God'), true, 'fg-ground say teaches')
+
 
 const mercy = buildGemPuzzle('ph-road')
 assert.equal(mercy.size, 8)

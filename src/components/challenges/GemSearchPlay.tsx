@@ -21,6 +21,9 @@ import { MatchTakeaway } from '../HeldTriad'
 import { storyPanelsFor, type StoryPanel } from '../../lib/storyPanels'
 import { GEM_BURST, playGemPop, prefersReducedMotion } from '../../lib/juice'
 import { useProgress } from '../../store/progress'
+import { matchChipsFor, matchChipRoleLabel } from '../../lib/gemSearch'
+import { lociStampEntry } from '../../lib/lociStamp'
+import { LociStamp } from '../LociStamp'
 import { StoryStrip } from '../StoryStrip'
 import { WinBurst } from './WinBurst'
 
@@ -90,6 +93,8 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   const scoredThisGesture = useRef(false)
   const dockJuiced = useRef(false)
   const home = easyWhoWhere(lineId)
+  const matchChips = matchChipsFor(lineId)
+  const lociStamp = lociStampEntry(lineId)
   const needed = cellsStillNeeded(puzzle, found)
   const nextWord = puzzle.words.find((word) => !found.includes(word.id))
   const left = puzzle.words.length - found.length
@@ -471,6 +476,85 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       onPointerCancel={onBoardCancel}
     >
       <p className="sort-how">{EASY.matchHunt}</p>
+      {matchChips ? (
+        <>
+          <div className={`match-teach-dock ${status === 'ok' ? 'is-complete' : ''} ${stripMode === 'sheet' ? 'is-sheet-open' : ''}`}>
+            {lociStamp ? (
+              <LociStamp
+                stamp={lociStamp}
+                mode="dock"
+                dockJuice={dockJuice}
+                onTap={() => setStripMode(stripMode === 'sheet' ? 'dock' : 'sheet')}
+              />
+            ) : null}
+            <ul className="match-teach-chips" aria-label="Mind-map words to find">
+              {puzzle.words.map((word) => (
+                <li
+                  key={word.id}
+                  className={`match-teach-chip is-${word.role ?? word.kind} ${found.includes(word.id) ? 'is-found' : ''}`}
+                >
+                  <span className="match-teach-kind">{matchChipRoleLabel(word.role)}</span>
+                  <span className="match-teach-label">{word.label}</span>
+                </li>
+              ))}
+            </ul>
+            <p
+              className={`match-teach-say ${found.length === puzzle.words.length ? 'is-lit' : ''}`}
+              role="status"
+              aria-live="polite"
+            >
+              {matchChips.say.split(/(\s+)/).map((part: string, index: number) => {
+                const plain = part.replace(/[^A-Za-z]/g, '').toUpperCase()
+                const hit = puzzle.words.find((word) => word.text === plain)
+                const on = hit ? found.includes(hit.id) : false
+                if (!hit || !part.trim()) {
+                  return <span key={`s-${index}`}>{part}</span>
+                }
+                return (
+                  <span key={`s-${index}`} className={`match-teach-say-word ${on ? 'is-found' : 'is-pending'}`}>
+                    {part}
+                  </span>
+                )
+              })}
+            </p>
+          </div>
+          {stripMode === 'sheet' && lociStamp ? (
+            <div
+              className="loci-sheet"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Place, person, and idea"
+              onClick={() => setStripMode('dock')}
+            >
+              <div className="loci-sheet-card" onClick={(event) => event.stopPropagation()}>
+                <button
+                  type="button"
+                  className="loci-sheet-close"
+                  onClick={() => setStripMode('dock')}
+                  aria-label="Close loci stamp"
+                >
+                  Close
+                </button>
+                <LociStamp stamp={lociStamp} mode="hero" />
+                <p className={`match-teach-say is-sheet ${found.length === puzzle.words.length ? 'is-lit' : ''}`}>
+                  {matchChips.say}
+                </p>
+                <ul className="match-teach-chips" aria-label="Mind-map words">
+                  {puzzle.words.map((word) => (
+                    <li
+                      key={word.id}
+                      className={`match-teach-chip is-${word.role ?? word.kind} ${found.includes(word.id) ? 'is-found' : ''}`}
+                    >
+                      <span className="match-teach-kind">{matchChipRoleLabel(word.role)}</span>
+                      <span className="match-teach-label">{word.label}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          ) : null}
+        </>
+      ) : (
       <StoryStrip
         kicker={`${home.who} · ${home.place}`}
         panels={panels}
@@ -493,6 +577,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
         onDockTap={() => setStripMode('sheet')}
         onSheetClose={() => setStripMode('dock')}
       />
+      )}
       <div className="gem-scroll">
       {/* Board-first 1.4.99: StoryStrip dock is a flex header above this scroll; board fills leftover — zero overlay. */}
       {stripMode === 'hero' ? (
