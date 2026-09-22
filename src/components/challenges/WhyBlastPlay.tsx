@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { EASY, easyFacingLine, easyWhyLine } from '../../lib/easy'
 import { GEM_BURST, playGemPop } from '../../lib/juice'
 import { holdSuccessBeat } from '../../lib/successBeat'
@@ -39,6 +39,16 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
   const [shake, setShake] = useState(false)
   const [missFlash, setMissFlash] = useState(false)
   const beat = holdSuccessBeat(claim, easyWhyLine(reason), source)
+  const ctaRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    if (!locked) return
+    const id = window.requestAnimationFrame(() => {
+      ctaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+    })
+    return () => window.cancelAnimationFrame(id)
+  }, [locked])
+
 
   function miss(line: string) {
     if (locked || tossing || gone.includes(line)) return
@@ -114,7 +124,7 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
       {locked ? (
         <>
           <MatchTakeaway lineId={id} title={beat.title} />
-          <div className="cta-dock">
+          <div className="cta-dock" ref={ctaRef}>
             <button
               type="button"
               className="btn primary xl recall-done"
