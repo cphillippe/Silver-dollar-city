@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.113',
+    title: 'Welcome Easy-only',
+    when: '2026-09-23',
+    items: [
+      'Welcome hides Hard and Easy/Hard twin toggles — one Start Easy message (reasons to believe); Hard stays in Settings only',
+    ],
+  },
+  {
     version: '1.4.112',
     title: 'Start Easy · Learn → Match → Lock In',
     when: '2026-09-23',
