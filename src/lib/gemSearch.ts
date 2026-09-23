@@ -227,7 +227,7 @@ function addWord(list: GemWord[], text: string, kind: GemKind) {
 }
 
 
-/** Authored Easy Why Gate Match — one connected teaching unit, not claim-token scrape. */
+/** Authored Easy Match — one connected teaching unit per shelf id, not claim-token scrape. */
 export interface MatchChipSet {
   words: [string, string, string, string]
   kinds: [GemKind, GemKind, GemKind, GemKind]
@@ -236,6 +236,24 @@ export interface MatchChipSet {
 }
 
 export const MATCH_CHIPS: Record<string, MatchChipSet> = {
+  'ph-road': {
+    words: ['MERCY', 'CREEK', 'NEIGHBOR', 'CARE'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Mercy at the Creek teaches that a real neighbor will care.',
+  },
+  'ph-father': {
+    words: ['MERCY', 'CREEK', 'FATHER', 'GRACE'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Mercy at the Creek tells how the father runs with grace before the speech is done.',
+  },
+  'ph-debt': {
+    words: ['MERCY', 'CREEK', 'DEBT', 'FORGIVE'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Mercy at the Creek warns that forgiven debt means we must forgive too.',
+  },
   'fg-order': {
     words: ['ANSEL', 'ARCH', 'ORDER', 'CHRIST'],
     kinds: ['person', 'place', 'idea', 'idea'],
@@ -246,13 +264,13 @@ export const MATCH_CHIPS: Record<string, MatchChipSet> = {
     words: ['ANSEL', 'ARCH', 'REASON', 'LIGHT'],
     kinds: ['person', 'place', 'idea', 'idea'],
     roles: ['who', 'where', 'idea', 'keep'],
-    say: "Ansel at the Arch saw that our reason comes from God's light.",
+    say: 'Ansel at the Arch saw that our reason comes from God\'s light.',
   },
   'fg-ought': {
     words: ['ANSEL', 'ARCH', 'OUGHT', 'LAW'],
     kinds: ['person', 'place', 'idea', 'idea'],
     roles: ['who', 'where', 'idea', 'keep'],
-    say: "Ansel at the Arch saw that what we ought to do is God's law inside us.",
+    say: 'Ansel at the Arch saw that what we ought to do is God\'s law inside us.',
   },
   'fg-ground': {
     words: ['COSMO', 'ROCK', 'GROUND', 'GOD'],
@@ -260,17 +278,137 @@ export const MATCH_CHIPS: Record<string, MatchChipSet> = {
     roles: ['who', 'where', 'idea', 'keep'],
     say: 'Cosmo at the Rock saw that the living God is the true ground of all things.',
   },
-  'fg-contingent': {
-    words: ['COSMO', 'ROCK', 'DEPENDS', 'MAKER'],
+  'wb-creed': {
+    words: ['SILAS', 'SQUARE', 'CREED', 'CHRIST'],
     kinds: ['person', 'place', 'idea', 'idea'],
     roles: ['who', 'where', 'idea', 'keep'],
-    say: 'Cosmo at the Rock saw that what might not have been depends on a Maker.',
+    say: 'Silas at the Square shares an early creed: Christ died, was buried, and rose.',
+  },
+  'wb-women': {
+    words: ['SILAS', 'SQUARE', 'WOMEN', 'RISEN'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Silas at the Square remembers how the women were first to tell that Jesus is risen.',
+  },
+  'wb-early': {
+    words: ['SILAS', 'SQUARE', 'EARLY', 'CHRIST'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Silas at the Square reads early testimony showing that Christ truly rose.',
+  },
+  'wb-method': {
+    words: ['SILAS', 'SQUARE', 'REPORTS', 'TRUTH'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Silas at the Square weighs historical reports to know the truth about Jesus.',
+  },
+  'daily-names': {
+    words: ['SILAS', 'SQUARE', 'WITNESS', 'CHRIST'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Silas at the Square hears many a witness who saw the risen Christ.',
+  },
+  'daily-creed': {
+    words: ['SILAS', 'SQUARE', 'CREED', 'GOSPEL'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Silas at the Square speaks the early creed that declares the good news of the gospel.',
+  },
+  'daily-empty': {
+    words: ['SILAS', 'SQUARE', 'EMPTY', 'WONDER'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Silas at the Square stands at the empty tomb with holy wonder.',
+  },
+  'daily-lantern': {
+    words: ['JUNIPER', 'PORCH', 'LAMP', 'SEEN'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Juniper at the Porch shows a lamp that is meant to be seen.',
+  },
+  'daily-stars': {
+    words: ['NORA', 'SKY', 'MAKER', 'SPEAK'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Nora at the Sky hears the heavens speak of a Maker.',
+  },
+  'daily-cosmos': {
+    words: ['ANSEL', 'ARCH', 'WORLD', 'GIVER'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Ansel at the Arch sees a world that did not have to be — a Giver gave it.',
+  },
+  'hl-moral': {
+    words: ['HOPE', 'RIDGE', 'DUTY', 'GOD'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Hope at the Ridge knows duty is more than taste — it fits a good God.',
+  },
+  'ph-seeds': {
+    words: ['MERCY', 'CREEK', 'PARABLE', 'KINGDOM'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Mercy at the Creek listens to each parable about the kingdom of God.',
+  },
+  'daily-gems': {
+    words: ['JUNIPER', 'PORCH', 'PICTURE', 'JESUS'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Juniper at the Porch remembers every picture taught by Jesus.',
+  },
+  'daily-seed': {
+    words: ['JUNIPER', 'PORCH', 'SEED', 'WORD'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Juniper at the Porch hears how the seed stands for God\'s word.',
+  },
+  'daily-neighbor': {
+    words: ['JUNIPER', 'PORCH', 'NEIGHBOR', 'MERCY'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Juniper at the Porch shows that a true neighbor acts with mercy.',
+  },
+  'ob-tuning': {
+    words: ['NORA', 'SKY', 'TUNING', 'DESIGNER'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Nora at the Sky sees fine tuning that points to a Designer.',
+  },
+  'ob-design': {
+    words: ['NORA', 'SKY', 'MIND', 'MAKER'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Nora at the Sky watch sees that a caring Mind and Maker designed our world.',
+  },
+  'ob-leibniz': {
+    words: ['NORA', 'SKY', 'NOTHING', 'CREATOR'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Nora at the Sky watch wonders why there is something instead of nothing, pointing to the Creator.',
+  },
+  'ob-life': {
+    words: ['NORA', 'SKY', 'INFO', 'MAKER'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Nora at the Sky watch learns that living info comes from a Maker.',
+  },
+  'daily-life': {
+    words: ['NORA', 'SKY', 'GIFT', 'MAKER'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Nora at the Sky watch thanks the Maker for life as a good gift.',
   },
   'fg-mover': {
     words: ['ANSEL', 'ARCH', 'MOTION', 'FIRST'],
     kinds: ['person', 'place', 'idea', 'idea'],
     roles: ['who', 'where', 'idea', 'keep'],
     say: 'Ansel at the Arch saw that all motion starts with the First Mover.',
+  },
+  'fg-contingent': {
+    words: ['COSMO', 'ROCK', 'DEPENDS', 'MAKER'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Cosmo at the Rock saw that what might not have been depends on a Maker.',
   },
   'fg-kalam': {
     words: ['ANSEL', 'ARCH', 'BEGAN', 'CAUSE'],
@@ -283,6 +421,144 @@ export const MATCH_CHIPS: Record<string, MatchChipSet> = {
     kinds: ['person', 'place', 'idea', 'idea'],
     roles: ['who', 'where', 'idea', 'keep'],
     say: 'Ansel at the Arch saw that rules and limits in nature point beyond themselves.',
+  },
+  'daily-scroll': {
+    words: ['ANSEL', 'ARCH', 'COPIES', 'WORD'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Ansel at the Arch studies early copies to trust God\'s standing Word.',
+  },
+  'daily-isaiah': {
+    words: ['ANSEL', 'ARCH', 'SERVANT', 'JESUS'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Ansel at the Arch learns that the silent Servant who suffers for others is Jesus.',
+  },
+  'hl-mind': {
+    words: ['HOPE', 'RIDGE', 'MIND', 'GOD'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Hope at the Ridge sees that your mind finds its true home in God.',
+  },
+  'hl-meaning': {
+    words: ['HOPE', 'RIDGE', 'MEANING', 'GIFT'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Hope at the Ridge remembers that true meaning is received as a gift.',
+  },
+  'hl-beauty': {
+    words: ['HOPE', 'RIDGE', 'BEAUTY', 'HUNGER'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Hope at the Ridge knows that beauty wakes a hunger for a real home.',
+  },
+  'daily-grace': {
+    words: ['HOPE', 'RIDGE', 'GRACE', 'FAITH'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Hope at the Ridge trusts that grace is a gift received by faith.',
+  },
+  'daily-rest': {
+    words: ['HOPE', 'RIDGE', 'REST', 'JESUS'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Hope at the Ridge hears Jesus offer true rest to tired hearts.',
+  },
+  'daily-door': {
+    words: ['HOPE', 'RIDGE', 'DOOR', 'JESUS'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Hope at the Ridge finds that Jesus is the door open to anyone who comes.',
+  },
+  'sc-tacitus': {
+    words: ['SILAS', 'COURT', 'TACITUS', 'CHRISTUS'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Silas at the Court reads how Tacitus recorded the death of Christus.',
+  },
+  'sc-james': {
+    words: ['SILAS', 'COURT', 'JOSEPHUS', 'CHRIST'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Silas at the Court finds where Josephus named James the brother of Christ.',
+  },
+  'sc-pliny': {
+    words: ['SILAS', 'COURT', 'PLINY', 'CHRIST'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Silas at the Court reads Pliny showing early Christians sang praise to Christ.',
+  },
+  'ic-trajan': {
+    words: ['SILAS', 'INK', 'TRAJAN', 'CHRIST'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Silas at the Ink court reads Trajan writing about followers of Christ.',
+  },
+  'ic-suetonius': {
+    words: ['SILAS', 'INK', 'NERO', 'CHRIST'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Silas at the Ink court reads how Nero punished early believers in Christ.',
+  },
+  'ic-lucian': {
+    words: ['SILAS', 'INK', 'LUCIAN', 'WORSHIP'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Silas at the Ink Court reads how Lucian noted that Christians worship Jesus.',
+  },
+  'papr-p52': {
+    words: ['SILAS', 'VAULT', 'PAPYRUS', 'GOSPEL'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Silas at the Vault sees a papyrus fragment showing the early Gospel.',
+  },
+  'papr-p46': {
+    words: ['SILAS', 'VAULT', 'LETTERS', 'CHRIST'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Silas at the Vault studies old letters honoring Christ.',
+  },
+  'papr-p66': {
+    words: ['SILAS', 'VAULT', 'PRESERVE', 'GOSPEL'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Silas at the Vault sees how scribes helped preserve the Gospel.',
+  },
+  'aa-tacitus': {
+    words: ['SILAS', 'ALLEY', 'TACITUS', 'PILATE'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Silas at the Alley reads that Tacitus recorded Pilate executing Jesus.',
+  },
+  'aa-josephus': {
+    words: ['SILAS', 'ALLEY', 'JOSEPHUS', 'JAMES'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Silas at the Alley learns how Josephus wrote about James.',
+  },
+  'aa-suetonius': {
+    words: ['SILAS', 'ALLEY', 'ROME', 'FAITH'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Silas at the Alley learns how believers in Rome kept their faith.',
+  },
+  'psw-pilate': {
+    words: ['SILAS', 'STONE', 'PILATE', 'TRUTH'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Silas at the Stone sees Pilate named on rock, confirming Gospel truth.',
+  },
+  'psw-ossuary': {
+    words: ['SILAS', 'STONE', 'OSSUARY', 'FAMILY'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Silas at the Stone finds an ossuary naming the family of Jesus.',
+  },
+  'psw-nazareth': {
+    words: ['SILAS', 'STONE', 'NAZARETH', 'HOUSES'],
+    kinds: ['person', 'place', 'idea', 'idea'],
+    roles: ['who', 'where', 'idea', 'keep'],
+    say: 'Silas at the Stone learns about ancient houses in Nazareth where Jesus lived.',
   },
 }
 
@@ -297,7 +573,7 @@ export function matchChipRoleLabel(role: GemWord['role']): string {
   return 'idea'
 }
 
-/** Claim, person, place, and short idea words — authored MATCH_CHIPS win for Why Gate. */
+/** Claim, person, place, and short idea words — authored MATCH_CHIPS win for Easy shelf. */
 export function gemWordsFor(lineId: string): GemWord[] {
   const authored = MATCH_CHIPS[lineId]
   if (authored) {
