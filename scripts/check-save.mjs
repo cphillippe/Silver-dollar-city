@@ -245,8 +245,9 @@ const welcomeSrc = readFileSync(
 )
 assert.match(welcomeSrc, /welcome-easy/)
 assert.match(welcomeSrc, /setEasyMode/)
-assert.match(welcomeSrc, /STORY\.purpose/)
-assert.match(welcomeSrc, /STORY\.who/)
+assert.match(welcomeSrc, /EASY\.startEasy|startEasy/)
+assert.match(welcomeSrc, /EASY\.welcomeGoal|welcomeGoal/)
+assert.doesNotMatch(welcomeSrc, />\s*Hard\s*</)
 
 const capSrc = readFileSync(new URL('../capacitor.config.ts', import.meta.url), 'utf8')
 assert.match(capSrc, /allowMixedContent:\s*false/)
