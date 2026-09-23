@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.110',
+    title: 'Real Samaritan road maze',
+    when: '2026-09-23',
+    items: [
+      'Samaritan road: tap/swipe/arrows move one open-road step at a time — no far-tap auto-walk; walls matter; Hurt → Help → Inn stays the mercy walk',
+    ],
+  },
+  {
     version: '1.4.109',
     title: 'Perfect Match · Easy teach chips',
     when: '2026-09-22',
