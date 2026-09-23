@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.109',
+    title: 'Perfect Match · Easy teach chips',
+    when: '2026-09-22',
+    items: [
+      'Match teach: every Easy shelf lesson has authored who/where/idea/keep MATCH_CHIPS + a kid say sentence — Perfect Match teaching unit, not claim-token scrape; Why Gate keep/sky scenes stay (no creek filler off Story Creek)',
+    ],
+  },
+  {
     version: '1.4.108',
     title: 'Freemium chrome polish',
     when: '2026-09-22',

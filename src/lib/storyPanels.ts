@@ -2,7 +2,7 @@ import { packLesson } from '../content/packCatalog.ts'
 import { evidenceFor } from '../content/evidence.ts'
 import { panelBlastBeatMedia } from '../content/panelBlast.ts'
 import { easyChromeLine, easyWhoWhere } from './easy.ts'
-import { gemWordsFor } from './gemSearch.ts'
+import { gemWordsFor, matchChipsFor } from './gemSearch.ts'
 
 export type StoryScene =
   | 'tell'
@@ -137,15 +137,27 @@ function padCopy(lineId: string): string[] {
 
 function scenesFor(lineId: string, count: number, texts: string[]): StoryScene[] {
   const authored = LESSON_SCENES[lineId]
+  const chips = matchChipsFor(lineId)
+  // MATCH_CHIPS teach dock: never Story Creek comic filler (keep/tell/creek/sky) off hollow.
+  const hollow =
+    lineId.startsWith('ph-') ||
+    lineId === 'daily-neighbor' ||
+    lineId === 'daily-seed' ||
+    lineId === 'daily-gems'
   const picked: StoryScene[] = []
   for (let i = 0; i < count; i += 1) {
-    const fromList = authored?.[Math.min(i, (authored?.length ?? 1) - 1)]
+    let fromList = authored?.[Math.min(i, (authored?.length ?? 1) - 1)]
+    if (chips && fromList === 'creek' && !hollow) {
+      fromList = i % 2 === 0 ? 'keep' : 'sky'
+    }
     if (fromList) {
       picked.push(fromList)
       continue
     }
     const text = texts[i] ?? ''
-    picked.push(sceneFromText(text, fromList ?? 'keep'))
+    let scene = sceneFromText(text, 'keep')
+    if (chips && scene === 'creek' && !hollow) scene = 'keep'
+    picked.push(scene)
   }
   return picked
 }
