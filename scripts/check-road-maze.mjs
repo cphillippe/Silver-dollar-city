@@ -26,6 +26,7 @@ import {
   swipeStep,
   isMazeLookPan,
   isMazePathSwipe,
+  isAdjacentRoadStep,
 } from '../src/lib/roadMaze.ts'
 import { EASY } from '../src/lib/easy.ts'
 import { lessonStory, storyPlayFor } from '../src/lib/storyPlay.ts'
@@ -57,6 +58,12 @@ assert.deepEqual(
 assert.ok(shortestMazePath(MAZE_START, MAZE_HURT))
 assert.ok(shortestMazePath(MAZE_HURT, MAZE_INN))
 assert.equal(shortestMazePath(MAZE_START, { r: 0, c: 2 }), null)
+
+assert.equal(mazeSame(MAZE_HURT, MAZE_INN), false, 'hurt and inn are distinct cells')
+assert.equal(mazeSame(mazeGoal(true, false).at, mazeGoal(true, true).at), false, 'help locus ≠ inn')
+assert.equal(isAdjacentRoadStep(MAZE_START, { r: 0, c: 1 }), true)
+assert.equal(isAdjacentRoadStep(MAZE_START, MAZE_HURT), false)
+assert.equal(isAdjacentRoadStep(MAZE_START, MAZE_INN), false)
 
 assert.equal(canHelp(false, false), false)
 assert.equal(canHelp(true, false), true)
@@ -125,6 +132,12 @@ const playSrc = readFileSync(
   'utf8',
 )
 assert.match(playSrc, /is-road-maze/)
+assert.doesNotMatch(
+  playSrc,
+  /shortestMazePath\(/,
+  'play must not auto-path / teleport on tap',
+)
+assert.match(playSrc, /isAdjacentRoadStep/)
 assert.match(playSrc, /maze-board/)
 assert.match(playSrc, /onBoardKey/)
 assert.match(playSrc, /EASY\.mazeHunt/)

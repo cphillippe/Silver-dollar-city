@@ -79,6 +79,12 @@ export function mazeNeighbors(cell: MazeCoord): MazeCoord[] {
   return DIRS.map((dir) => ({ r: cell.r + dir.r, c: cell.c + dir.c })).filter(isMazeRoad)
 }
 
+/** One open-road step — tap / swipe / key. Never a far teleport. */
+export function isAdjacentRoadStep(from: MazeCoord, to: MazeCoord): boolean {
+  if (!isMazeRoad(from) || !isMazeRoad(to)) return false
+  return mazeNeighbors(from).some((n) => mazeSame(n, to))
+}
+
 export function mazeBeatAt(cell: MazeCoord): MazeBeat | null {
   if (mazeSame(cell, MAZE_HURT)) return MAZE_BEATS[0] ?? null
   if (mazeSame(cell, MAZE_INN)) return MAZE_BEATS[2] ?? null
