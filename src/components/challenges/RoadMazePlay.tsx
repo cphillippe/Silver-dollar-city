@@ -32,7 +32,7 @@ import {
   ROAD_MAZE_HINT,
   ROAD_MAZE_WIN,
   isMazePathSwipe,
-  shortestMazePath,
+  isAdjacentRoadStep,
   swipeStep,
   type MazeCoord,
 } from '../../lib/roadMaze'
@@ -284,12 +284,15 @@ export function RoadMazePlay({
       }
       return
     }
-    const path = shortestMazePath(here, target)
-    if (!path) {
-      blocked(mazeBlockedHint(target, foundRef.current, helpedRef.current))
+    if (!isMazeRoad(target) || !isAdjacentRoadStep(here, target)) {
+      blocked(
+        isMazeRoad(target)
+          ? 'One step on the open road.'
+          : mazeBlockedHint(target, foundRef.current, helpedRef.current),
+      )
       return
     }
-    walkPath(path)
+    walkPath([here, target])
   }
 
   function onCellDown(event: ReactPointerEvent<HTMLButtonElement>, cell: MazeCoord) {
