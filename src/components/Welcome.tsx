@@ -1,10 +1,7 @@
 import { useEffect } from 'react'
 import { APP_VERSION } from '../config/app'
-import { TRAIL_SUBTITLE } from '../config/commerce'
-import { STORY } from '../content/story'
 import { EASY, EASY_MATCH_LINE, easyLineHeld } from '../lib/easy'
 import { Avatar } from './Avatar'
-import { CityMap } from './CityMap'
 import { dailyDoneToday, useProgress } from '../store/progress'
 import { localDateKey } from '../lib/dates'
 import type { View } from '../types'
@@ -18,41 +15,32 @@ export function Welcome({ onNavigate }: WelcomeProps) {
   const today = localDateKey()
   const returning = progress.started && dailyDoneToday(progress, today)
 
-  // Prefer Easy on first paint so Start Easy is the loud path (Hard stays reachable).
+  // Welcome is Easy-only chrome. Hard stays in Settings — never a Welcome twin.
   useEffect(() => {
-    if (!progress.started) setEasyMode(true)
-  }, [progress.started, setEasyMode])
+    setEasyMode(true)
+  }, [setEasyMode])
 
   function begin() {
+    setEasyMode(true)
     start()
-    if (progress.easyMode) {
-      onNavigate(
-        easyLineHeld(progress, EASY_MATCH_LINE)
-          ? { name: 'hub' }
-          : { name: 'link' },
-      )
-      return
-    }
-    if (returning) {
-      onNavigate({ name: 'hub' })
-      return
-    }
-    onNavigate({ name: 'daily' })
+    onNavigate(
+      easyLineHeld(progress, EASY_MATCH_LINE)
+        ? { name: 'hub' }
+        : { name: 'link' },
+    )
   }
 
   return (
-    <main className="welcome is-onescreen is-alive">
+    <main className="welcome is-onescreen is-alive is-easy-only">
       <div className="welcome-sky" aria-hidden />
       <div className="welcome-ridge" aria-hidden />
       <div className="welcome-hero">
-        {progress.easyMode ? null : <CityMap mode="poster" onNavigate={onNavigate} />}
-        <p className="eyebrow">60 seconds</p>
+        <p className="eyebrow">{EASY.welcomeEyebrow}</p>
         <h1>
           Silver City
-          <span>Unending Evidence</span>
+          <span>{EASY.welcomeTag}</span>
         </h1>
-        <p className="welcome-goal">{progress.easyMode ? TRAIL_SUBTITLE : STORY.purpose}</p>
-        {progress.easyMode ? null : <p className="welcome-who">{STORY.who}</p>}
+        <p className="welcome-goal">{EASY.welcomeGoal}</p>
         <div className="welcome-cast">
           <figure>
             <Avatar who="river" size="lg" />
@@ -65,45 +53,16 @@ export function Welcome({ onNavigate }: WelcomeProps) {
           </figure>
         </div>
         <div className="welcome-actions">
-          <p className="eyebrow">Reading</p>
-          <div className="settings-actions">
-            <button
-              type="button"
-              className={`btn ${progress.easyMode ? 'primary' : ''}`}
-              aria-pressed={Boolean(progress.easyMode)}
-              onClick={() => setEasyMode(true)}
-            >
-              Easy
-            </button>
-            <button
-              type="button"
-              className="btn"
-              aria-pressed={!progress.easyMode}
-              onClick={() => setEasyMode(false)}
-            >
-              Hard
-            </button>
-          </div>
-          <p className="quiet welcome-easy-note">
-            {progress.easyMode
-              ? 'Easier words · bigger taps. You can change this in Settings.'
-              : 'Hard keeps the full voice. You can switch anytime in Settings → Reading. We teach hard words first — a claim is the main idea we hold to be true.'}
+          <p className="quiet welcome-easy-note welcome-easy" role="note">
+            {EASY.welcomeNote}
           </p>
-          {progress.easyMode ? (
-            <p className="teach-chip" role="note">
-              {EASY.claimTeach}
-            </p>
-          ) : null}
+          <p className="teach-chip" role="note">
+            {EASY.claimTeach}
+          </p>
           <button type="button" className="btn primary xl" onClick={begin}>
-            {progress.easyMode
-              ? returning
-                ? EASY.home
-                : EASY.startEasy
-              : returning
-                ? 'Back to town'
-                : 'Begin the trail'}
+            {returning ? EASY.home : EASY.startEasy}
           </button>
-          <p className="welcome-version">{progress.easyMode ? APP_VERSION : `V0 · ${APP_VERSION}`}</p>
+          <p className="welcome-version">{APP_VERSION}</p>
         </div>
       </div>
     </main>
