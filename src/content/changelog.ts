@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.114',
+    title: 'Match crossword perfect',
+    when: '2026-09-23',
+    items: [
+      'Easy Match: short-phone teach dock keeps the board swipe plane; loci sheet dismiss hands the next finger to the board; find / BONUS / dock +1000 each get one punch; teach chips plant before fill; after Matched! Lock In next is the loud CTA',
+    ],
+  },
+  {
     version: '1.4.113',
     title: 'Welcome Easy-only',
     when: '2026-09-23',

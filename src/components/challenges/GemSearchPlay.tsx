@@ -194,10 +194,13 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     setStripMode((current) => (current === 'sheet' ? current : 'dock'))
     if (dockJuiced.current) return
     dockJuiced.current = true
-    recordMatchDockJuice(lineId)
-    setDockJuice(MATCH_DOCK_JUICE_POINTS)
-    playGemPop('bonus')
-    window.setTimeout(() => setDockJuice(null), prefersReducedMotion() ? 400 : 1200)
+    const delay = prefersReducedMotion() ? 0 : 520 // after find-pop peak
+    window.setTimeout(() => {
+      recordMatchDockJuice(lineId)
+      setDockJuice(MATCH_DOCK_JUICE_POINTS)
+      playGemPop('bonus')
+      window.setTimeout(() => setDockJuice(null), prefersReducedMotion() ? 400 : 1200)
+    }, delay)
   }
 
   function revealPanel(count: number) {
@@ -417,6 +420,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
 
   function onCellDown(event: ReactPointerEvent<HTMLDivElement>, cell: GemCoord) {
     if (status === 'ok') return
+    if (stripMode === 'sheet') return
     event.preventDefault()
     event.stopPropagation()
     if (drag.current) return
@@ -484,7 +488,10 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
                 stamp={lociStamp}
                 mode="dock"
                 dockJuice={dockJuice}
-                onTap={() => setStripMode(stripMode === 'sheet' ? 'dock' : 'sheet')}
+                onTap={() => {
+                  if (stripMode === 'sheet') onBoardCancel()
+                  setStripMode(stripMode === 'sheet' ? 'dock' : 'sheet')
+                }}
               />
             ) : null}
             <ul className="match-teach-chips" aria-label="Mind-map words to find">
@@ -524,13 +531,19 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
               role="dialog"
               aria-modal="true"
               aria-label="Place, person, and idea"
-              onClick={() => setStripMode('dock')}
+              onClick={() => {
+                onBoardCancel()
+                setStripMode('dock')
+              }}
             >
               <div className="loci-sheet-card" onClick={(event) => event.stopPropagation()}>
                 <button
                   type="button"
                   className="loci-sheet-close"
-                  onClick={() => setStripMode('dock')}
+                  onClick={() => {
+                    onBoardCancel()
+                    setStripMode('dock')
+                  }}
                   aria-label="Close loci stamp"
                 >
                   Close
@@ -575,7 +588,10 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
         bonusHint={EASY.bonusHint}
         dockJuice={dockJuice}
         onDockTap={() => setStripMode('sheet')}
-        onSheetClose={() => setStripMode('dock')}
+        onSheetClose={() => {
+          onBoardCancel()
+          setStripMode('dock')
+        }}
       />
       )}
       <div className="gem-scroll">
@@ -705,7 +721,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
             </button>
             <button
               type="button"
-              className="btn gold xl more-match"
+              className="btn xl more-match"
               data-match-again
               onClick={replay}
             >
