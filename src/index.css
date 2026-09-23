@@ -7531,6 +7531,24 @@ html[data-easy='on'] .mind-node em {
   padding: 8px 0 20px;
 }
 
+.hub.is-easy-home .easy-home-map {
+  order: 0;
+  flex: 0 0 auto;
+}
+
+.hub.is-easy-home .easy-home-map .city-overworld {
+  margin: 0 0 4px;
+}
+
+.hub.is-easy-home .easy-home-map .city-svg {
+  width: 100%;
+  max-height: min(52vh, 420px);
+}
+
+.hub.is-easy-home .easy-core {
+  gap: 10px;
+}
+
 .easy-home-head {
   display: flex;
   flex-direction: column;

@@ -1766,6 +1766,8 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
   assert.match(easyHome, /EASY\.saved/)
   assert.match(easyHome, /EASY\.townSoon/)
   assert.match(easyHome, /matchReady/)
+  assert.match(easyHome, /easy-home-map/)
+  assert.match(easyHome, /CityMap/)
   assert.match(hubSrc, /easyMatchReady/)
   assert.ok(
     easyHome.indexOf('EASY.matchCta') < easyHome.indexOf("name: 'learn'"),
