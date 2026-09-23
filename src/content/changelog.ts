@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.111',
+    title: 'Home is a memory palace',
+    when: '2026-09-23',
+    items: [
+      'Easy Home: town map is the primary visual (person · place · idea); Match / Lock In / Learn sit under the map — Night Watch and Hard town chrome stay parked',
+    ],
+  },
+  {
     version: '1.4.110',
     title: 'Real Samaritan road maze',
     when: '2026-09-23',
