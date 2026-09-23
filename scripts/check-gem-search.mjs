@@ -50,13 +50,39 @@ import { lessonStory, storyPlayFor } from '../src/lib/storyPlay.ts'
 import { isSourceDigLine } from '../src/lib/sourceDig.ts'
 
 const mercyWords = gemWordsFor('ph-road')
-assert.ok(mercyWords.some((word) => word.text === 'MERCY'), 'Mercy the person')
-assert.ok(mercyWords.some((word) => word.text === 'CREEK'), 'Story Creek place')
-assert.ok(mercyWords.some((word) => word.text === 'NEIGHBOR'), 'claim word')
+assert.deepEqual(
+  mercyWords.map((word) => word.text),
+  ['MERCY', 'CREEK', 'NEIGHBOR', 'CARE'],
+  'ph-road authored MATCH_CHIPS',
+)
+assert.deepEqual(
+  mercyWords.map((word) => word.role),
+  ['who', 'where', 'idea', 'keep'],
+  'ph-road mind-map roles',
+)
 assert.ok(mercyWords.some((word) => word.kind === 'person'))
 assert.ok(mercyWords.some((word) => word.kind === 'place'))
 assert.ok(mercyWords.some((word) => word.kind === 'idea'))
-assert.ok(mercyWords.length >= 3 && mercyWords.length <= 4)
+assert.match(matchChipsFor('ph-road')?.say ?? '', /neighbor.*care/i)
+
+const creedWords = gemWordsFor('wb-creed')
+assert.deepEqual(creedWords.map((w) => w.text), ['SILAS', 'SQUARE', 'CREED', 'CHRIST'])
+assert.match(matchChipsFor('wb-creed')?.say ?? '', /creed.*Christ/i)
+
+const lanternWords = gemWordsFor('daily-lantern')
+assert.deepEqual(lanternWords.map((w) => w.text), ['JUNIPER', 'PORCH', 'LAMP', 'SEEN'])
+assert.match(matchChipsFor('daily-lantern')?.say ?? '', /lamp.*seen/i)
+
+const tuningWords = gemWordsFor('ob-tuning')
+assert.deepEqual(tuningWords.map((w) => w.text), ['NORA', 'SKY', 'TUNING', 'DESIGNER'])
+assert.match(matchChipsFor('ob-tuning')?.say ?? '', /tuning.*Designer/i)
+
+for (const id of EASY_LINE_ORDER) {
+  const chips = matchChipsFor(id)
+  assert.ok(chips, `${id} has MATCH_CHIPS`)
+  assert.equal(chips.words.length, 4, `${id} four chips`)
+  assert.equal(gemWordsFor(id).length, 4, `${id} gemWords from chips`)
+}
 
 const orderWords = gemWordsFor('fg-order')
 assert.deepEqual(
