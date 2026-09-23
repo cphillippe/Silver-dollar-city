@@ -65,6 +65,11 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
     setMindPlot(requested)
   }, [requested])
 
+  function setPlot(id: CityPlotId | null) {
+    setMindPlot(id)
+    if (!id && openPlot) onNavigate({ name: 'hub' })
+  }
+
   if (easy) {
     const matchReady = easyMatchReady(progress)
     const focus = easyHomeFocus(progress)
@@ -74,7 +79,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
       <main className="hub is-easy-home" aria-label="Home">
         <header className="easy-home-head">
           <p className="eyebrow">Silver City</p>
-          <h1>Play</h1>
+          <h1>Home</h1>
           <p className="quiet">
             {focus === 'hold'
               ? 'The story is open. Lock in the line.'
@@ -93,6 +98,13 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
                       : 'Find the gems. The story opens as you play.'}
           </p>
         </header>
+        <section className="easy-home-map" aria-label="Your map · person · place · idea">
+          <CityMap
+            onNavigate={onNavigate}
+            mindPlot={mindPlot}
+            onMindPlot={setPlot}
+          />
+        </section>
         <nav className="easy-core" aria-label="Play">
           <button
             type="button"
@@ -169,17 +181,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
     )
   }
 
-  function setPlot(id: CityPlotId | null) {
-    setMindPlot(id)
-    if (!id && openPlot) onNavigate({ name: 'hub' })
-  }
-
-  const nextCta =
-    goal.kind === 'daily'
-      ? easy
-        ? EASY.readStory
-        : 'Walk today’s trail'
-      : goal.kind === 'vista'
+ goal.kind === 'vista'
         ? 'Stand at the lookout'
         : goal.kind === 'challenge'
           ? 'Open this walk'
