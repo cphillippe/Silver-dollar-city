@@ -181,7 +181,12 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
     )
   }
 
- goal.kind === 'vista'
+  const nextCta =
+    goal.kind === 'daily'
+      ? easy
+        ? EASY.readStory
+        : 'Walk today’s trail'
+      : goal.kind === 'vista'
         ? 'Stand at the lookout'
         : goal.kind === 'challenge'
           ? 'Open this walk'
