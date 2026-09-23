@@ -80,6 +80,7 @@ export const EASY = {
   nightTap: 'Tap the face.',
   nightLead: 'Tap the face six times.',
   nightMiss: 'Wrong — tap the glowing face',
+  startEasy: 'Start Easy',
   home: 'Home',
   townSoon: 'Town (soon)',
   supportTrail: 'Support the trail',

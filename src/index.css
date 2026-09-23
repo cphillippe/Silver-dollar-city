@@ -7549,6 +7549,40 @@ html[data-easy='on'] .mind-node em {
   gap: 10px;
 }
 
+.easy-coach {
+  display: flex;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.easy-coach li {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.easy-coach-step {
+  width: 100%;
+  border: 1px solid rgba(255, 204, 51, 0.28);
+  background: rgba(58, 20, 128, 0.35);
+  color: inherit;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 0.92rem;
+  opacity: 0.78;
+}
+
+.easy-coach li.is-now .easy-coach-step {
+  opacity: 1;
+  border-color: rgba(255, 204, 51, 0.85);
+  background: rgba(255, 204, 51, 0.18);
+  font-weight: 700;
+}
+
 .easy-home-head {
   display: flex;
   flex-direction: column;
