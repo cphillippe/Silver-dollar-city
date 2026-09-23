@@ -372,7 +372,7 @@ for (const id of EASY_LINE_ORDER) {
   for (const word of puzzle.words) {
     assert.ok(word.text.length >= 3 && word.text.length <= 8, `${id} ${word.text} length`)
     const path = puzzle.paths[word.id]
-    assert.ok(path && path.length === word.text.length, `${id} ${word.text} placed`)
+    assert.ok(path && path.length === word.text.length, `${id} chip ${word.text} planted before fill`)
     assert.equal(pathLetters(path, puzzle.letters), word.text, `${id} ${word.text} letters`)
     assert.equal(isStraightPath(path), true, `${id} ${word.text} straight`)
   }

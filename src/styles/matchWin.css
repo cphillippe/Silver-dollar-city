@@ -14,3 +14,27 @@
   z-index: 4;
   flex: 0 0 auto;
 }
+
+.play.is-gem-search.is-win .cta-dock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  align-items: stretch;
+}
+.play.is-gem-search.is-win .cta-dock .btn.primary {
+  order: 0;
+  transform: scale(1.02);
+}
+.play.is-gem-search.is-win .cta-dock .btn.more-match {
+  order: 1;
+  /* demote loud gold — secondary */
+  box-shadow: none;
+  background: transparent;
+  border: 1.5px solid color-mix(in srgb, var(--ink, #2a2118) 22%, transparent);
+  color: inherit;
+  font-size: 0.95rem;
+}
+.play.is-gem-search.is-win .cta-dock .btn.xl:not(.primary):not(.more-match) {
+  order: 2;
+  opacity: 0.85;
+}

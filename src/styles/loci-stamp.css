@@ -143,6 +143,8 @@ button.loci-stamp {
   background: color-mix(in srgb, #1a120a 55%, transparent);
   padding: 1rem;
   box-sizing: border-box;
+  /* KEEP fixed inset + z-index 40 */
+  touch-action: manipulation;
 }
 
 .loci-sheet-card {
@@ -153,6 +155,12 @@ button.loci-stamp {
   border-radius: 16px;
   padding: 0.85rem 0.9rem 1rem;
   box-shadow: 0 12px 40px color-mix(in srgb, #000 35%, transparent);
+  touch-action: pan-y;
+}
+
+/* While sheet open, board underlay ignores hits (sheet owns the modal beat) */
+.play.is-gem-search.is-panel-blast:has(.loci-sheet) .gem-board {
+  pointer-events: none;
 }
 
 .loci-sheet-close {
@@ -356,4 +364,26 @@ button.loci-stamp {
   display: block;
   margin-top: 0.45em;
   padding-bottom: 4px;
+}
+
+/* Short phone: teach dock stays a strip; board keeps the swipe plane */
+@media (max-height: 720px) {
+  .play.is-gem-search.is-panel-blast.is-story-docked .match-teach-dock {
+    max-height: min(28vh, 150px);
+    overflow: hidden;
+    gap: 0.22rem;
+    padding-bottom: 0.2rem;
+  }
+  .play.is-gem-search.is-panel-blast.is-story-docked .match-teach-chips {
+    flex-wrap: nowrap;
+  }
+  .play.is-gem-search.is-panel-blast.is-story-docked .match-teach-say {
+    font-size: 0.68rem;
+    padding: 0.28rem 0.45rem;
+    line-height: 1.25;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
 }
