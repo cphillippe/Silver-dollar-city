@@ -2609,7 +2609,7 @@ assert.match(
 )
 assert.match(
   readFileSync(new URL('../src/components/Welcome.tsx', import.meta.url), 'utf8'),
-  /Easier words/,
+  /EASY\.welcomeGoal|welcomeGoal|Bigger taps/,
 )
 assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
@@ -2623,9 +2623,10 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   />\s*Hard\s*</,
 )
-assert.match(
+assert.doesNotMatch(
   readFileSync(new URL('../src/components/Welcome.tsx', import.meta.url), 'utf8'),
   />\s*Hard\s*</,
+  'Welcome must not show Hard — Easy-only first paint',
 )
 assert.match(
   readFileSync(new URL('../src/components/MindMap.tsx', import.meta.url), 'utf8'),
