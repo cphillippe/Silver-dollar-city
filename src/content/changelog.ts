@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.112',
+    title: 'Start Easy · Learn → Match → Lock In',
+    when: '2026-09-23',
+    items: [
+      'New-user Easy trail: Welcome primary CTA is Start Easy (Hard stays quiet); Easy Home shows a Learn → Match → Lock In coach strip under the map until Match ready and the line is held',
+    ],
+  },
+  {
     version: '1.4.111',
     title: 'Home is a memory palace',
     when: '2026-09-23',

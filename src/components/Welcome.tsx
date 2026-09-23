@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { APP_VERSION } from '../config/app'
 import { TRAIL_SUBTITLE } from '../config/commerce'
 import { STORY } from '../content/story'
@@ -16,6 +17,11 @@ export function Welcome({ onNavigate }: WelcomeProps) {
   const { progress, start, setEasyMode } = useProgress()
   const today = localDateKey()
   const returning = progress.started && dailyDoneToday(progress, today)
+
+  // Prefer Easy on first paint so Start Easy is the loud path (Hard stays reachable).
+  useEffect(() => {
+    if (!progress.started) setEasyMode(true)
+  }, [progress.started, setEasyMode])
 
   function begin() {
     start()
@@ -71,7 +77,7 @@ export function Welcome({ onNavigate }: WelcomeProps) {
             </button>
             <button
               type="button"
-              className={`btn ${progress.easyMode ? '' : 'primary'}`}
+              className="btn"
               aria-pressed={!progress.easyMode}
               onClick={() => setEasyMode(false)}
             >
@@ -92,7 +98,7 @@ export function Welcome({ onNavigate }: WelcomeProps) {
             {progress.easyMode
               ? returning
                 ? EASY.home
-                : 'Play'
+                : EASY.startEasy
               : returning
                 ? 'Back to town'
                 : 'Begin the trail'}
