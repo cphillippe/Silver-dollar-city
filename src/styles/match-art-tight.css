@@ -65,10 +65,11 @@
 }
 
 .play.is-gem-search.is-panel-blast.is-story-docked .gem-board {
-  align-content: center; /* was stretch — stretch opened white gaps between rows */
+  gap: 0;
+  padding: 1px;
+  background: #1a0840; /* seam color = board chrome, not white paper */
+  align-content: center;
   justify-content: center;
-  gap: 1px;
-  padding: 2px;
 }
 
 .play.is-gem-search.is-panel-blast.is-story-docked .gem-cell {
@@ -76,6 +77,7 @@
   aspect-ratio: 1;
   width: 100%;
   height: auto;
+  border-radius: 6px; /* KEEP readable tiles; no gap gutter */
 }
 
 

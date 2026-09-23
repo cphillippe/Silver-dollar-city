@@ -894,6 +894,19 @@ export function fillGrid(
 }
 
 export function buildGemPuzzle(lineId: string, salt = 0): GemPuzzle {
+  try {
+    return buildGemPuzzleOnce(lineId, salt)
+  } catch (err) {
+    // Production-safe: one salt+1 rebuild rather than ship empty chip paths
+    try {
+      return buildGemPuzzleOnce(lineId, salt + 1)
+    } catch {
+      throw err
+    }
+  }
+}
+
+function buildGemPuzzleOnce(lineId: string, salt: number): GemPuzzle {
   const words = gemWordsFor(lineId)
   const bonusPool = bonusWordsFor(lineId)
   const size = GRID
@@ -907,12 +920,17 @@ export function buildGemPuzzle(lineId: string, salt = 0): GemPuzzle {
     for (let c = 0; c < size; c += 1) starts.push({ r, c })
   }
 
-  words
-    .slice()
-    .sort((a, b) => b.text.length - a.text.length)
-    .forEach((word) => {
-      paths[word.id] = tryPlaceWord(grid, word.text, starts, rand) ?? placeFallback(grid, word.text) ?? []
-    })
+  // NEVER leave empty chip paths — plant before bonus + fill
+  for (const word of words.slice().sort((a, b) => b.text.length - a.text.length)) {
+    let placed = tryPlaceWord(grid, word.text, starts, rand) ?? placeFallback(grid, word.text)
+    if (!placed || placed.length !== word.text.length) {
+      placed = placeFallback(grid, word.text)
+    }
+    if (!placed || placed.length !== word.text.length) {
+      throw new Error(`Match chip ${word.text} failed to plant on ${lineId}`)
+    }
+    paths[word.id] = placed
+  }
 
   const plantedWords: GemWord[] = []
   const planted = new Set<string>()
