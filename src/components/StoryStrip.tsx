@@ -156,13 +156,29 @@ export function StoryStrip({
             role="dialog"
             aria-modal="true"
             aria-label="Story pictures"
-            onClick={onSheetClose}
+            onPointerDown={(event) => {
+              event.stopPropagation()
+            }}
+            onPointerUp={(event) => {
+              event.stopPropagation()
+            }}
+            onClick={(event) => {
+              event.stopPropagation()
+              onSheetClose?.()
+            }}
           >
-            <div className="story-sheet-card" onClick={(event) => event.stopPropagation()}>
+            <div
+              className="story-sheet-card"
+              onPointerDown={(event) => event.stopPropagation()}
+              onClick={(event) => event.stopPropagation()}
+            >
               <button
                 type="button"
                 className="story-sheet-close"
-                onClick={onSheetClose}
+                onClick={(event) => {
+                  event.stopPropagation()
+                  onSheetClose?.()
+                }}
                 aria-label="Close story"
               >
                 Close
