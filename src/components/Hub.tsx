@@ -6,15 +6,11 @@ import { LOT_STORY } from '../content/lots'
 import { localDateKey } from '../lib/dates'
 import { CITY_PLOTS, nextGift, nextPlotId, type CityPlotId } from '../lib/city'
 import { anyUpgradeReady, lotTapWhy, visualFills, visualSnapshot } from '../lib/cityBuild'
-import { extraStreetPacks } from '../content/paidStreets'
-import { PACK_LINE } from '../config/commerce'
-import { packIsUnlocked } from '../lib/commerce'
 import { EASY, EASY_MATCH_LINE, easyHomeFocus, easyHoldView, easyLineHeld, easyLoopLine, easyMatchReady, isEasy } from '../lib/easy'
 import { storyPlayFor } from '../lib/storyPlay'
 import { markLater, readLater, sessionDue } from '../lib/recall'
 import { Avatar } from './Avatar'
 import { ShareInvite } from './ShareInvite'
-import { useCommerce } from './AdSlot'
 import { CityMap } from './CityMap'
 import { AbilityMark } from './GemMark'
 import { unlockedWatchAbilities } from '../lib/defend'
@@ -50,7 +46,6 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
   const nextId = nextPlotId(progress, doneToday)
   const watchOpen = unlockedWatchAbilities(progress)
   const easy = isEasy(progress)
-  const commerce = useCommerce()
   const streetDone = streetIsComplete(progress)
   const streetLinked = progress.streetLinked ?? []
   const tonight = nextStreetWalk(streetLinked)
@@ -80,128 +75,111 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
     const buildGift = anyUpgradeReady(progress)
       ? 'A building is ready. Tap it, then Build this.'
       : nextGift(nextId, easySnap[nextId], easyFills[nextId] ?? 0, true)
+    const homeWhisper =
+      focus === 'hold'
+        ? 'The story is open. Lock in the line.'
+        : storyPlayFor(loopId) === 'father-run'
+          ? EASY.runHome
+          : storyPlayFor(loopId) === 'road-maze'
+            ? EASY.mazeHome
+            : storyPlayFor(loopId) === 'claim-merge'
+              ? EASY.mergeHome
+              : storyPlayFor(loopId) === 'source-dig'
+                ? EASY.digHome
+                : storyPlayFor(loopId) === 'story-snap'
+                  ? EASY.snapHome
+                  : coldMercy
+                    ? 'Find Mercy’s story at Story Creek.'
+                    : 'Find the gems. The story opens as you play.'
+
     return (
       <main className="hub is-easy-home" aria-label="Home">
-        <header className="easy-home-head">
-          <h1>{EASY.home}</h1>
-          <p className="quiet">
-            {focus === 'hold'
-              ? 'The story is open. Lock in the line.'
-              : storyPlayFor(loopId) === 'father-run'
-                ? EASY.runHome
-                : storyPlayFor(loopId) === 'road-maze'
-                  ? EASY.mazeHome
-                  : storyPlayFor(loopId) === 'claim-merge'
-                    ? EASY.mergeHome
-                    : storyPlayFor(loopId) === 'source-dig'
-                      ? EASY.digHome
-                      : storyPlayFor(loopId) === 'story-snap'
-                        ? EASY.snapHome
-                        : coldMercy
-                      ? 'Find Mercy’s story at Story Creek.'
-                      : 'Find the gems. The story opens as you play.'}
-          </p>
-        </header>
-        <section className="easy-home-map" aria-label="Your map · person · place · idea">
+        <section className="easy-home-map" aria-label="Your city">
           <CityMap
             onNavigate={onNavigate}
             mindPlot={mindPlot}
             onMindPlot={setPlot}
           />
         </section>
-        <section className="easy-build-it" aria-label="Build It">
-          <p className="eyebrow">Build It</p>
-          <p className="easy-build-gift">{buildGift}</p>
-          <button
-            type="button"
-            className="btn gold xl"
-            onClick={() => setPlot(nextId)}
-          >
-            Build this
-          </button>
-        </section>
-        {!matchReady || coldMercy ? (
-          <ol className="easy-coach" aria-label="Your next steps">
-            <li className={focus === 'learn' || !matchReady ? 'is-now' : ''}>
-              <button type="button" className="easy-coach-step" onClick={() => onNavigate({ name: 'learn' })}>
-                Learn
-              </button>
-            </li>
-            <li className={focus === 'match' ? 'is-now' : ''}>
-              <button type="button" className="easy-coach-step" onClick={() => onNavigate({ name: 'link' })}>
-                Match
-              </button>
-            </li>
-            <li className={focus === 'hold' ? 'is-now' : ''}>
+
+        <div className="easy-home-dock">
+          <p className="easy-home-whisper quiet">{homeWhisper}</p>
+          <section className="easy-build-it" aria-label="Build It">
+            <div className="easy-build-meta">
+              <p className="eyebrow">Build It</p>
+              <p className="easy-build-gift">{buildGift}</p>
+            </div>
+            <button
+              type="button"
+              className="btn gold easy-dock-build"
+              onClick={() => setPlot(nextId)}
+            >
+              Build this
+            </button>
+          </section>
+          {!matchReady || coldMercy ? (
+            <ol className="easy-coach" aria-label="Your next steps">
+              <li className={focus === 'learn' || !matchReady ? 'is-now' : ''}>
+                <button type="button" className="easy-coach-step" onClick={() => onNavigate({ name: 'learn' })}>
+                  Learn
+                </button>
+              </li>
+              <li className={focus === 'match' ? 'is-now' : ''}>
+                <button type="button" className="easy-coach-step" onClick={() => onNavigate({ name: 'link' })}>
+                  Match
+                </button>
+              </li>
+              <li className={focus === 'hold' ? 'is-now' : ''}>
+                <button
+                  type="button"
+                  className="easy-coach-step"
+                  onClick={() => onNavigate(easyHoldView(progress))}
+                >
+                  Lock In
+                </button>
+              </li>
+            </ol>
+          ) : (
+            <nav className="easy-dock-play" aria-label="Play">
               <button
                 type="button"
-                className="easy-coach-step"
+                className={`easy-coach-step ${focus === 'match' ? 'is-dock-now' : ''}`}
+                onClick={() => onNavigate({ name: 'link' })}
+              >
+                {storyPlayFor(loopId) === 'father-run'
+                  ? EASY.runMatch
+                  : storyPlayFor(loopId) === 'road-maze'
+                    ? EASY.mazeMatch
+                    : storyPlayFor(loopId) === 'claim-merge'
+                      ? EASY.mergeMatch
+                      : storyPlayFor(loopId) === 'source-dig'
+                        ? EASY.digMatch
+                        : storyPlayFor(loopId) === 'story-snap'
+                          ? EASY.snapMatch
+                          : EASY.matchCta}
+              </button>
+              <button
+                type="button"
+                className={`easy-coach-step ${focus === 'hold' ? 'is-dock-now' : ''}`}
                 onClick={() => onNavigate(easyHoldView(progress))}
               >
-                Lock In
+                {EASY.saved}
               </button>
-            </li>
-          </ol>
-        ) : null}
-
-        <nav className="easy-core" aria-label="Play">
-          <button
-            type="button"
-            className={`btn xl ${focus === 'match' ? 'primary' : ''}`}
-            onClick={() => onNavigate({ name: 'link' })}
-          >
-            {storyPlayFor(loopId) === 'father-run'
-              ? EASY.runMatch
-              : storyPlayFor(loopId) === 'road-maze'
-                ? EASY.mazeMatch
-                : storyPlayFor(loopId) === 'claim-merge'
-                  ? EASY.mergeMatch
-                  : storyPlayFor(loopId) === 'source-dig'
-                    ? EASY.digMatch
-                    : storyPlayFor(loopId) === 'story-snap'
-                      ? EASY.snapMatch
-                      : EASY.matchCta}
-          </button>
-          <button
-            type="button"
-            className={`btn xl ${focus === 'hold' ? 'primary' : ''}`}
-            onClick={() => onNavigate(easyHoldView(progress))}
-          >
-            {EASY.saved}
-          </button>
-          {matchReady ? null : (
-            <p className="quiet easy-match-lock">{EASY.readStoryFirst}</p>
+            </nav>
           )}
-          <button
-            type="button"
-            className="text-link"
-            onClick={() => onNavigate({ name: 'learn' })}
-          >
-            {EASY.readStory}
+        </div>
+
+        {/* Parked Extra streets / stacked core — CSS-hidden on Easy Home */}
+        <nav className="easy-core" aria-hidden="true" hidden>
+          <button type="button" tabIndex={-1} className="btn xl" onClick={() => onNavigate({ name: 'link' })}>
+            {EASY.matchCta}
           </button>
         </nav>
-        <section className="easy-extra-streets" aria-label="Extra streets">
-          <p className="eyebrow">{EASY.packs}</p>
-          <p className="quiet">{PACK_LINE}</p>
-          {extraStreetPacks().map((pack) => {
-            const open = packIsUnlocked(pack.id, commerce)
-            return (
-              <button
-                key={pack.id}
-                type="button"
-                className="btn"
-                onClick={() =>
-                  onNavigate({ name: 'pack-street', packId: pack.id })
-                }
-              >
-                {open ? pack.street : `Locked · ${pack.street} · ${pack.priceLabel}`}
-              </button>
-            )
-          })}
-        </section>
+        <section className="easy-extra-streets" aria-hidden="true" hidden />
         <SupportToast />
       </main>
     )
+
   }
 
   const nextCta =

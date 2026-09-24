@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.121',
+    title: 'Home map fills the phone',
+    when: '2026-09-24',
+    items: [
+      'Easy Home: map is the whole-screen surface under the purple/gold menu; Build It + Match/Lock In sit in a thin bottom dock overlay — no mid-page card, no stacked button columns shrinking the map; Dig/Hard/stores stay parked',
+    ],
+  },
+  {
     version: '1.4.120',
     title: 'Home Build It · big map',
     when: '2026-09-24',
