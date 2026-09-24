@@ -8101,23 +8101,27 @@ html[data-easy='on'] .next-tap {
 }
 
 .play.is-gem-search.is-panel-blast.is-story-docked .gem-board {
-  /* Fill leftover space under the tiny dock (≥70% board); no viewport-dvh overlay */
+  /* Width-first square board — flex-grow on height was breaking row/column alignment on tall phones */
   width: min(100%, 96vw, 520px);
   max-width: 100%;
-  max-height: 100%;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-height: 0;
   height: auto;
   aspect-ratio: 1;
   margin: 0 auto;
   align-content: stretch;
+  justify-items: stretch;
+  align-items: stretch;
   gap: 2px;
   padding: 4px;
 }
 
 .play.is-gem-search.is-panel-blast.is-story-docked .gem-cell {
+  min-width: 0;
   min-height: 0;
-  aspect-ratio: 1;
+  aspect-ratio: unset;
+  align-self: stretch;
+  justify-self: stretch;
 }
 
 .play.is-gem-search.is-panel-blast.is-story-docked .match-score {
@@ -8560,6 +8564,7 @@ html[data-easy='on'] .next-tap {
   position: relative;
   display: grid;
   grid-template-columns: repeat(var(--gem-size, 8), minmax(0, 1fr));
+  grid-template-rows: repeat(var(--gem-size, 8), minmax(0, 1fr));
   gap: 3px;
   width: min(100%, 390px);
   margin: 0 auto;

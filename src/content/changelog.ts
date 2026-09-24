@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.119',
+    title: 'Match flush grid',
+    when: '2026-09-24',
+    items: [
+      'Easy Match letter board: tiles stay flush in straight columns and rows on phone width — no overlap or jagged gaps between candy cells',
+    ],
+  },
+  {
     version: '1.4.118',
     title: 'Easy menu consistent',
     when: '2026-09-24',
