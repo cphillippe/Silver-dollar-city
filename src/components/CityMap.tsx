@@ -351,7 +351,7 @@ export function CityMap({
       <svg
         className="city-svg"
         viewBox={viewBoxOf(cam)}
-        preserveAspectRatio="xMidYMid meet"
+        preserveAspectRatio={easy ? 'xMidYMid slice' : 'xMidYMid meet'}
         role={mode === 'poster' ? 'img' : 'group'}
         aria-label={
           mode === 'poster'
