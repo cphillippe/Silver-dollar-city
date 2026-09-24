@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.118',
+    title: 'Easy menu consistent',
+    when: '2026-09-24',
+    items: [
+      'Easy chrome: Home · Lock In · Settings top menu everywhere after Welcome; ← Home always lands on Home; compact matching header on Home/Settings/Learn/Match/Lock In; Reset this Easy walk plainly named in Settings',
+    ],
+  },
+  {
     version: '1.4.117',
     title: 'Lock In win stays',
     when: '2026-09-24',

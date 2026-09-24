@@ -2,6 +2,8 @@ import { useRef, useState } from 'react'
 import { STREET_BEATS, STREET_PLACE_WHYS, STREET_TRIPLES, appendStreetLinks, easyStreetChallenge, hardStreetChallenge, nextStreetWalk, streetFactsLeft, streetWalkTakeaway } from '../content/links'
 import { STORY } from '../content/story'
 import { EASY, easyHoldView, easyMatchLine, isEasy } from '../lib/easy'
+import { EASY_HOME } from '../lib/easyNav'
+import { EasyBack } from './EasyBack'
 import { useJuiceHandoff } from '../lib/juice'
 import { PuzzlePlay } from './PuzzlePlay'
 import { TownReturn } from './TownReturn'
@@ -92,7 +94,7 @@ export function LinkScreen({ onNavigate, debugLine }: LinkScreenProps) {
       return
     }
     markStreet()
-    onNavigate(dest === 'hold' ? easyHoldView(progress) : { name: 'hub' })
+    onNavigate(dest === 'hold' ? easyHoldView(progress) : EASY_HOME)
   }
 
   return (
@@ -100,13 +102,13 @@ export function LinkScreen({ onNavigate, debugLine }: LinkScreenProps) {
       className={`challenge-page ${showNext ? 'is-after' : taught ? 'is-puzzle' : 'is-teach'} ${arming ? 'is-arming' : ''}`}
       aria-label={STORY.playGoal}
     >
-      <button
-        type="button"
-        className="text-link"
-        onClick={() => onNavigate({ name: debugLine ? 'settings' : 'hub' })}
-      >
-        ← {debugLine ? 'Settings' : easy ? EASY.home : 'The town'}
-      </button>
+      {easy ? (
+        <EasyBack onNavigate={onNavigate} debugToSettings={Boolean(debugLine)} />
+      ) : (
+        <button type="button" className="text-link" onClick={() => onNavigate({ name: 'hub' })}>
+          ← The town
+        </button>
+      )}
 
       {!showNext ? (
         !taught ? (
@@ -192,8 +194,8 @@ export function LinkScreen({ onNavigate, debugLine }: LinkScreenProps) {
                   ? 'Continue from Town when you want one more round.'
                   : 'Tap a place on the map — the mind map holds what you linked.'
             }
-            action={easy ? `See ${EASY.saved}` : 'See the town'}
-            onGo={() => onNavigate(easy ? { name: 'journal' } : { name: 'hub' })}
+            action={easy ? EASY.saved : 'See the town'}
+            onGo={() => onNavigate(easy ? easyHoldView(progress) : { name: 'hub' })}
           />
         </section>
       )}

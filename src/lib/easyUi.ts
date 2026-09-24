@@ -97,4 +97,5 @@ export const EASY = {
   savedSub: 'saved lines',
   connections: 'Connections',
   uses: 'Things you can use',
+  resetWalk: 'Reset this Easy walk',
 } as const
