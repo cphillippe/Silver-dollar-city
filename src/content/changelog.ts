@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.117',
+    title: 'Lock In win stays',
+    when: '2026-09-24',
+    items: [
+      'After the correct why-chip: LOCKED! and the gold chip stay visible, Keep scrolls into view, and the Hold beat continues on its own — no hunting for a vanished win',
+    ],
+  },
+  {
     version: '1.4.116',
     title: 'Hurt man works',
     when: '2026-09-24',
