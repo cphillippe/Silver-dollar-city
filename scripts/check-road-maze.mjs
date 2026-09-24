@@ -27,6 +27,7 @@ import {
   isMazeLookPan,
   isMazePathSwipe,
   isAdjacentRoadStep,
+  mazeStepToward,
 } from '../src/lib/roadMaze.ts'
 import { EASY } from '../src/lib/easy.ts'
 import { lessonStory, storyPlayFor } from '../src/lib/storyPlay.ts'
@@ -64,6 +65,9 @@ assert.equal(mazeSame(mazeGoal(true, false).at, mazeGoal(true, true).at), false,
 assert.equal(isAdjacentRoadStep(MAZE_START, { r: 0, c: 1 }), true)
 assert.equal(isAdjacentRoadStep(MAZE_START, MAZE_HURT), false)
 assert.equal(isAdjacentRoadStep(MAZE_START, MAZE_INN), false)
+
+assert.equal(mazeSame(mazeStepToward(MAZE_START, MAZE_HURT), { r: 0, c: 1 }), true)
+assert.equal(isAdjacentRoadStep(MAZE_START, mazeStepToward(MAZE_START, MAZE_HURT)), true)
 
 assert.equal(canHelp(false, false), false)
 assert.equal(canHelp(true, false), true)
@@ -137,7 +141,7 @@ assert.doesNotMatch(
   /shortestMazePath\(/,
   'play must not auto-path / teleport on tap',
 )
-assert.match(playSrc, /isAdjacentRoadStep/)
+assert.match(playSrc, /mazeStepToward/)
 assert.match(playSrc, /maze-board/)
 assert.match(playSrc, /onBoardKey/)
 assert.match(playSrc, /EASY\.mazeHunt/)
@@ -146,7 +150,9 @@ assert.match(playSrc, /ROAD_MAZE_AGAIN/)
 assert.ok(playSrc.lastIndexOf('EASY.holdNext') < playSrc.lastIndexOf('ROAD_MAZE_AGAIN'))
 assert.match(playSrc, /function replay/)
 assert.match(playSrc, /maze-beats/)
-assert.doesNotMatch(playSrc, /maze-cell-label/)
+assert.match(playSrc, /maze-cell-label/)
+assert.match(playSrc, /mazeStepToward/)
+assert.doesNotMatch(playSrc, /walkPath\(\s*shortestMazePath/)
 assert.doesNotMatch(playSrc, /maze-kit/)
 assert.doesNotMatch(
   playSrc,

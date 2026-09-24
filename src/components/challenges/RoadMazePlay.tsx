@@ -32,7 +32,7 @@ import {
   ROAD_MAZE_HINT,
   ROAD_MAZE_WIN,
   isMazePathSwipe,
-  isAdjacentRoadStep,
+  mazeStepToward,
   swipeStep,
   type MazeCoord,
 } from '../../lib/roadMaze'
@@ -284,15 +284,16 @@ export function RoadMazePlay({
       }
       return
     }
-    if (!isMazeRoad(target) || !isAdjacentRoadStep(here, target)) {
-      blocked(
-        isMazeRoad(target)
-          ? 'One step on the open road.'
-          : mazeBlockedHint(target, foundRef.current, helpedRef.current),
-      )
+    if (!isMazeRoad(target)) {
+      blocked(mazeBlockedHint(target, foundRef.current, helpedRef.current))
       return
     }
-    walkPath([here, target])
+    const step = mazeStepToward(here, target)
+    if (!step) {
+      blocked('One step on the open road.')
+      return
+    }
+    walkPath([here, step])
   }
 
   function onCellDown(event: ReactPointerEvent<HTMLButtonElement>, cell: MazeCoord) {
@@ -473,6 +474,7 @@ export function RoadMazePlay({
                     <img src={ROAD_HURT_FACE} alt="" draggable={false} />
                   </span>
                 ) : null}
+                {helpCue ? <span className="maze-cell-label">Help</span> : null}
                 {helped && here ? <span className="maze-carry" aria-hidden /> : null}
                 {inn ? <span className="maze-inn" aria-hidden /> : null}
                 {popAt === mazeKey(cell)
