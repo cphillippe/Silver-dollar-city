@@ -427,6 +427,17 @@ assert.match(playSrc, /function replay/)
 assert.match(playSrc, /data-match-again/)
 assert.match(playSrc, /Combo/)
 assert.ok(playSrc.lastIndexOf('EASY.holdNext') < playSrc.lastIndexOf('EASY.moreMatch'))
+assert.match(playSrc, /function closeSheet/)
+assert.match(playSrc, /function endDrag/)
+assert.match(playSrc, /heroFlash/)
+assert.match(
+  playSrc,
+  /match-score[\s\S]*?<\/p>\s*<\/div>\s*\{status === 'ok' \?/,
+  'Lock In stays outside the hidden board scroller',
+)
+const winCss = readFileSync(new URL('../src/styles/matchWin.css', import.meta.url), 'utf8')
+assert.match(winCss, /\.play\.is-gem-search\.is-win \.cta-dock \.btn\.primary/)
+assert.match(winCss, /font-weight:\s*800/)
 assert.doesNotMatch(playSrc, /extras > 0/)
 assert.match(playSrc, /Date\.now\(\)/)
 assert.match(playSrc, /setRound\(\(current\) => current \+ 1\)/)
