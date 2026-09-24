@@ -1,11 +1,38 @@
-/* Match win 1.4.104 — hide solved tiles before the takeaway and actions render. */
+/* Match win — hide the solved board; Matched! + Lock In stay in the play flow. */
 .play.is-gem-search.is-win {
   overflow: auto;
   justify-content: flex-start;
 }
 
-.play.is-gem-search.is-win .gem-scroll {
+.play.is-gem-search.is-win .gem-scroll,
+.play.is-gem-search.is-win .match-teach-dock,
+.play.is-gem-search.is-win .story-strip {
   display: none;
+}
+
+.play.is-gem-search.is-win .win-burst,
+.play.is-gem-search.is-win .win-burst * {
+  pointer-events: none;
+}
+
+.play.is-gem-search.is-win .win-burst {
+  position: relative;
+  inset: auto;
+  height: auto;
+  min-height: 46px;
+  margin: 2px 0 6px;
+}
+
+.play.is-gem-search.is-win .win-stamp-wrap {
+  position: relative;
+  top: auto;
+  left: auto;
+  right: auto;
+  transform: none;
+  width: 100%;
+  max-width: none;
+  display: flex;
+  justify-content: center;
 }
 
 .play.is-gem-search.is-win .match-yes,
@@ -23,7 +50,10 @@
 }
 .play.is-gem-search.is-win .cta-dock .btn.primary {
   order: 0;
-  transform: scale(1.02);
+  transform: none;
+  font-size: 1.16rem;
+  font-weight: 800;
+  min-height: 54px;
 }
 .play.is-gem-search.is-win .cta-dock .btn.more-match {
   order: 1;

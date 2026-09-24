@@ -83,6 +83,11 @@
   }
 }
 
+/* One bonus punch: the BONUS! banner. The floating +100 is the same beat. */
+.play.is-gem-search.is-bonus-pop .bonus-plus {
+  display: none;
+}
+
 /* BONUS! +100 SNAG — punchy, not soft. */
 .play.is-gem-search .gem-stage .bonus-banner {
   animation: gem-overlay-pop 0.28s cubic-bezier(0.15, 1.55, 0.3, 1) both;
