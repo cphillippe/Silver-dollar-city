@@ -146,7 +146,7 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
               className="btn primary xl recall-done"
               onClick={finish}
             >
-              {EASY.keepThis}
+              {EASY.saved}
             </button>
           </div>
         </>

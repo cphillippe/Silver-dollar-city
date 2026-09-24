@@ -183,7 +183,7 @@ export function RecallGate({
         className={`recall-gate is-encode is-easy-hold is-why-blast ${shake ? 'is-shake' : ''} ${own ? 'is-own' : ''}`}
         aria-label={STORY.takeaway}
       >
-        <p className="eyebrow">{brief.source ? brief.source : 'Lock In'}</p>
+        <p className="eyebrow">{EASY.saved}</p>
         {!easyLineReady ? (
           <>
             <p className="teach-chip" role="note">

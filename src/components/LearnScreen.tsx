@@ -1,6 +1,8 @@
 import { evidenceFor } from '../content/evidence'
 import { STORY } from '../content/story'
 import { EASY, easyLearnLine, isEasy } from '../lib/easy'
+import { EASY_HOME } from '../lib/easyNav'
+import { EasyBack } from './EasyBack'
 import { TeachUnlock } from './TeachUnlock'
 import { useProgress } from '../store/progress'
 import type { View } from '../types'
@@ -22,15 +24,19 @@ export function LearnScreen({ onNavigate }: LearnScreenProps) {
 
   return (
     <main className="challenge-page is-teach" aria-label={STORY.playGoal}>
-      <button type="button" className="text-link" onClick={() => onNavigate({ name: 'hub' })}>
-        ← {easy ? EASY.home : 'The town'}
-      </button>
+      {easy ? (
+        <EasyBack onNavigate={onNavigate} />
+      ) : (
+        <button type="button" className="text-link" onClick={() => onNavigate({ name: 'hub' })}>
+          ← The town
+        </button>
+      )}
       {brief ? (
         <TeachUnlock brief={brief} kind="link" unlock={EASY.learnCta} onUnlock={unlock} />
       ) : (
         <section className="recall-gate is-encode teach-gate">
           <p className="quiet">{EASY.readStoryFirst}</p>
-          <button type="button" className="btn primary xl" onClick={() => onNavigate({ name: 'hub' })}>
+          <button type="button" className="btn primary xl" onClick={() => onNavigate(EASY_HOME)}>
             {EASY.home}
           </button>
         </section>

@@ -7600,7 +7600,15 @@ html[data-easy='on'] .mind-node em {
 
 .easy-home-head h1 {
   margin: 0;
-  font-size: 2rem;
+  font-size: 1.35rem;
+}
+
+.app[data-easy='on'] .settings.page-head h1 {
+  font-size: 1.35rem;
+}
+
+.settings-reset-easy {
+  border-color: rgba(255, 90, 90, 0.35);
 }
 
 .easy-core {
