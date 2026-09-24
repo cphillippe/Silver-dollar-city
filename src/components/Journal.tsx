@@ -4,6 +4,8 @@ import { evidenceFor, evidenceForJournal, evidenceForTier } from '../content/evi
 import { guideForArea, STORY } from '../content/story'
 import { localDateKey } from '../lib/dates'
 import { EASY, easyFacingLine, easyJournalMeta, isEasy } from '../lib/easy'
+import { EASY_HOME } from '../lib/easyNav'
+import { EasyBack } from './EasyBack'
 import { offerSupportToast } from '../lib/supportToast'
 import { isDue, nextGapLabel } from '../lib/memory'
 import { starLegend } from '../lib/stars'
@@ -89,13 +91,13 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
     const advancing = firstHold || needsTierHold(progress, quizBrief.id)
     return (
       <main className={`journal is-rehearse ${easy ? 'is-easy-hold-practice' : ''}`}>
-        <button
-          type="button"
-          className="text-link"
-          onClick={() => onNavigate({ name: easy ? 'hub' : 'journal' })}
-        >
-          ← {easy ? EASY.home : 'Journal'}
-        </button>
+        {easy ? (
+          <EasyBack onNavigate={onNavigate} />
+        ) : (
+          <button type="button" className="text-link" onClick={() => onNavigate({ name: 'journal' })}>
+            ← Journal
+          </button>
+        )}
         <section className="rehearse-anchor">
           <p className="eyebrow">{easy ? EASY.saved : 'Takeaway'}</p>
           {easy ? null : <h1>{focusedEntry?.title ?? STORY.tapTakeaway}</h1>}
@@ -118,7 +120,7 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
                 })
                 recordLessonHold(quizBrief.id, result.clean)
                 offerSupportToast()
-                onNavigate({ name: 'hub' })
+                onNavigate(EASY_HOME)
                 return
               }
               recordReview({
@@ -160,6 +162,7 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
 
   return (
     <main className={`journal ${dueItems.length ? 'has-due' : ''} ${easy ? 'is-easy-hold' : ''}`}>
+      {easy ? <EasyBack onNavigate={onNavigate} /> : null}
       {easy ? null : dueItems.length > 0 ? (
         <section className="journal-chapter due-chapter">
           <RecallOffer
@@ -392,13 +395,11 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
 
       {easy ? null : <ShareInvite />}
 
-      <button
-        type="button"
-        className="btn ghost"
-        onClick={() => onNavigate({ name: 'hub' })}
-      >
-        {easy ? EASY.home : 'Return to the map'}
-      </button>
+      {easy ? null : (
+        <button type="button" className="btn ghost" onClick={() => onNavigate({ name: 'hub' })}>
+          Return to the map
+        </button>
+      )}
     </main>
   )
 }

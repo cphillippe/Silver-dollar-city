@@ -31,6 +31,8 @@ import {
 import { localDateKey } from '../lib/dates'
 import { debugJumpView, debugPlayGroups, debugPlayLabel } from '../lib/debugPlays'
 import { EASY, isEasy } from '../lib/easy'
+import { EASY_HOME } from '../lib/easyNav'
+import { EasyBack } from './EasyBack'
 import { useAdsPref } from './AdSlot'
 import { useProgress } from '../store/progress'
 import type { AppTheme, View } from '../types'
@@ -100,7 +102,7 @@ export function Settings({ onNavigate }: SettingsProps) {
     }
     setPaste('')
     setMessage('Imported. Stars, journal, and Daily marks are on this device.')
-    onNavigate({ name: 'hub' })
+    onNavigate(EASY_HOME)
   }
 
   function onFile(file: File | undefined) {
@@ -123,7 +125,7 @@ export function Settings({ onNavigate }: SettingsProps) {
   function confirmReset() {
     const ok = window.confirm(
       easy
-        ? 'Reset this walk? That clears saved sentences and connections on this device, then starts Easy at Mercy’s Story Creek line.'
+        ? 'Reset this Easy walk? That clears saved sentences and connections on this device and returns to Welcome.'
         : 'Reset progress? This wipes the save on this device — all held lines, journal pages, Night Watch, and mind-map links — and returns to the start. A backup of this save stays until the next import or reset.',
     )
     if (!ok) return
@@ -137,17 +139,17 @@ export function Settings({ onNavigate }: SettingsProps) {
 
   return (
     <main className="settings page">
-      <button
-        type="button"
-        className="text-link"
-        onClick={() => onNavigate({ name: 'hub' })}
-      >
-        ← {easy ? EASY.home : 'The town'}
-      </button>
+      {easy ? (
+        <EasyBack onNavigate={onNavigate} />
+      ) : (
+        <button type="button" className="text-link" onClick={() => onNavigate({ name: 'hub' })}>
+          ← The town
+        </button>
+      )}
 
       <header className="page-head">
         <p className="eyebrow">{easy ? `Settings · ${APP_VERSION}` : `Settings · V0 · ${APP_VERSION}`}</p>
-        <h1>Progress & support</h1>
+        <h1>{easy ? 'Settings' : 'Progress & support'}</h1>
         <p>{savedLabel}</p>
       </header>
 
@@ -453,18 +455,29 @@ export function Settings({ onNavigate }: SettingsProps) {
 
       </details>
 
-      <details className="settings-card settings-danger">
-        <summary>Danger zone · wipe this device</summary>
-        <p className="eyebrow">Reset progress</p>
-        <p>
-          {easy
-            ? 'Wipe this walk on this device — saved sentences and connections — and start Easy at Mercy’s Story Creek line. Export first if you want it back.'
-            : 'Wipe ALL progress on this device — held lines, journal, Night Watch, and mind-map links — and return to the start. Export first if you want the walk back. This is not on the town screen.'}
-        </p>
-        <button type="button" className="btn" onClick={confirmReset}>
-          Reset progress
-        </button>
-      </details>
+      {easy ? (
+        <section className="settings-card settings-danger settings-reset-easy" aria-label="Reset">
+          <p className="eyebrow">Start over</p>
+          <p>
+            {EASY.resetWalk} clears saved sentences and connections on this device, then
+            returns to Welcome. Export first if you want this walk back.
+          </p>
+          <button type="button" className="btn" onClick={confirmReset}>
+            {EASY.resetWalk}
+          </button>
+        </section>
+      ) : (
+        <details className="settings-card settings-danger">
+          <summary>Danger zone · wipe this device</summary>
+          <p className="eyebrow">Reset progress</p>
+          <p>
+            Wipe ALL progress on this device — held lines, journal, Night Watch, and mind-map links — and return to the start. Export first if you want the walk back. This is not on the town screen.
+          </p>
+          <button type="button" className="btn" onClick={confirmReset}>
+            Reset progress
+          </button>
+        </details>
+      )}
 
       <details className="settings-card settings-danger settings-debug">
         <summary>Developer · mini-game jumps</summary>

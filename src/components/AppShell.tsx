@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { dueCount, getNextGoal, insightScore, useProgress } from '../store/progress'
-import { EASY, easyHoldView, isEasy } from '../lib/easy'
+import { easyHoldView, isEasy } from '../lib/easy'
+import { EASY_HOME, EASY_TOP } from '../lib/easyNav'
 import { Avatar } from './Avatar'
 import type { View } from '../types'
 
@@ -16,6 +17,7 @@ export function AppShell({ view, onNavigate, children }: AppShellProps) {
   const goal = getNextGoal(progress)
   const waiting = dueCount(progress)
   const hideChrome = view.name === 'welcome'
+  const easyCompact = easy && !hideChrome
   const playView =
     view.name === 'daily' ||
     view.name === 'challenge' ||
@@ -57,7 +59,7 @@ export function AppShell({ view, onNavigate, children }: AppShellProps) {
 
   return (
     <div
-      className={`app ${hideChrome ? 'is-welcome' : ''} ${playView ? 'is-play' : ''} ${townView ? 'is-town' : ''}`}
+      className={`app ${hideChrome ? 'is-welcome' : ''} ${playView || easyCompact ? 'is-play' : ''} ${townView ? 'is-town' : ''}`}
       data-theme={progress.theme ?? 'candy'}
       data-easy={progress.easyMode ? 'on' : 'off'}
     >
@@ -67,7 +69,7 @@ export function AppShell({ view, onNavigate, children }: AppShellProps) {
           <button
             type="button"
             className="brand"
-            onClick={() => onNavigate({ name: 'hub' })}
+            onClick={() => onNavigate(EASY_HOME)}
           >
             <Avatar who="river" size="sm" />
             Silver City
@@ -76,9 +78,9 @@ export function AppShell({ view, onNavigate, children }: AppShellProps) {
             <button
               type="button"
               className={view.name === 'hub' ? 'is-active' : ''}
-              onClick={() => onNavigate({ name: 'hub' })}
+              onClick={() => onNavigate(EASY_HOME)}
             >
-              {easy ? 'Home' : 'Town'}
+              {easy ? EASY_TOP.home : 'Town'}
             </button>
             {easy ? null : (
             <button
@@ -94,14 +96,14 @@ export function AppShell({ view, onNavigate, children }: AppShellProps) {
               className={view.name === 'journal' ? 'is-active' : ''}
               onClick={() => onNavigate(easy ? easyHoldView(progress) : { name: 'journal' })}
             >
-              {easy ? EASY.saved : 'Journal'}
+              {easy ? EASY_TOP.lockIn : 'Journal'}
             </button>
             <button
               type="button"
               className={view.name === 'settings' || view.name === 'shop' ? 'is-active' : ''}
               onClick={() => onNavigate({ name: 'settings' })}
             >
-              Settings
+              {EASY_TOP.settings}
             </button>
           </nav>
         </header>
@@ -117,7 +119,7 @@ export function AppShell({ view, onNavigate, children }: AppShellProps) {
             <em>{goal.detail}</em>
           </button>
           <p className="score" title={easy ? 'Sentences you kept' : 'Held lines are claims you rebuilt from memory'}>
-            {easy ? EASY.saved : 'Held'} {progress.held.length}
+            {easy ? EASY_TOP.lockIn : 'Held'} {progress.held.length}
             {waiting ? ` · due ${waiting}` : ''}
             {easy ? null : (
               <span className="score-sub"> · insight {insightScore(progress)}</span>
