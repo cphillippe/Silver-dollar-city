@@ -78,8 +78,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
     return (
       <main className="hub is-easy-home" aria-label="Home">
         <header className="easy-home-head">
-          <p className="eyebrow">Silver City</p>
-          <h1>Home</h1>
+          <h1>{EASY.home}</h1>
           <p className="quiet">
             {focus === 'hold'
               ? 'The story is open. Lock in the line.'
@@ -184,22 +183,6 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
             )
           })}
         </section>
-        <div className="easy-soon">
-        <button
-          type="button"
-          className="text-link"
-          onClick={() => onNavigate({ name: 'settings' })}
-        >
-          {EASY.supportTrail}
-        </button>
-        <button
-          type="button"
-          className="text-link town-soon"
-          onClick={() => onNavigate({ name: 'settings' })}
-        >
-          {EASY.townSoon}
-        </button>
-        </div>
         <SupportToast />
       </main>
     )

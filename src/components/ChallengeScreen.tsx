@@ -4,6 +4,8 @@ import { evidenceFor } from '../content/evidence'
 import { STORY, townVoiceForArea } from '../content/story'
 import { localDateKey } from '../lib/dates'
 import { EASY, isEasy } from '../lib/easy'
+import { EASY_HOME } from '../lib/easyNav'
+import { EasyBack } from './EasyBack'
 import { useJuiceHandoff } from '../lib/juice'
 import { isDue } from '../lib/memory'
 import { findLearning } from '../lib/learning'
@@ -101,9 +103,9 @@ export function ChallengeScreen({
         <button
           type="button"
           className="btn primary"
-          onClick={() => onNavigate({ name: 'area', areaId })}
+          onClick={() => onNavigate(easy ? EASY_HOME : { name: 'area', areaId })}
         >
-          Back to {area.title}
+          {easy ? `← ${EASY.home}` : `Back to ${area.title}`}
         </button>
       </main>
     )
@@ -131,7 +133,7 @@ export function ChallengeScreen({
   }
 
   function goNext() {
-    onNavigate({ name: 'hub' })
+    onNavigate(EASY_HOME)
   }
 
   const canProceed = showNext && (!brief || recalled)
@@ -143,13 +145,17 @@ export function ChallengeScreen({
       className={`challenge-page ${showNext ? 'is-after' : taught ? 'is-puzzle' : 'is-teach'} ${rehearsing ? 'is-rehearse' : ''} ${arming ? 'is-arming' : ''}`}
       aria-label={STORY.playGoal}
     >
-      <button
-        type="button"
-        className="text-link"
-        onClick={() => onNavigate({ name: 'area', areaId })}
-      >
-        ← {area.title}
-      </button>
+      {easy ? (
+        <EasyBack onNavigate={onNavigate} />
+      ) : (
+        <button
+          type="button"
+          className="text-link"
+          onClick={() => onNavigate({ name: 'area', areaId })}
+        >
+          ← {area.title}
+        </button>
+      )}
 
       {!showNext ? (
         !taught && brief ? (
