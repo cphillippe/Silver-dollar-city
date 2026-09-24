@@ -1754,34 +1754,40 @@ assert.match(
 assert.doesNotMatch(hubSrc, /easyTapNext/)
 assert.doesNotMatch(hubSrc, /tap-next-dock/)
 assert.match(hubSrc, /is-easy-home/)
-assert.match(hubSrc, /EASY\.townSoon/)
+// Town soon stays parked off Easy Home (1.4.118+)
 assert.match(hubSrc, /EASY\.saved/)
 assert.match(hubSrc, /EASY\.matchCta/)
 assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
 {
   const easyHome = hubSrc.match(/className="hub is-easy-home"[\s\S]*?<\/main>/)?.[0] ?? ''
-  assert.match(easyHome, /name: 'learn'/)
-  assert.match(easyHome, /EASY\.learnCta|EASY\.readStory/)
-  assert.match(easyHome, /EASY\.matchCta/)
-  assert.match(easyHome, /EASY\.saved/)
-  assert.match(easyHome, /EASY\.townSoon/)
-  assert.match(easyHome, /matchReady/)
   assert.match(easyHome, /easy-home-map/)
+  assert.match(easyHome, /easy-home-dock/)
   assert.match(easyHome, /CityMap/)
   assert.match(easyHome, /easy-build-it/)
   assert.match(easyHome, /Build It/)
   assert.match(easyHome, /Build this/)
   assert.match(easyHome, /setPlot\(nextId\)/)
+  assert.match(easyHome, /easy-coach/)
+  assert.match(easyHome, /name: 'learn'/)
+  assert.match(easyHome, /name: 'link'/)
+  assert.match(easyHome, /EASY\.matchCta/)
+  assert.match(easyHome, /EASY\.saved/)
+  assert.match(easyHome, /matchReady/)
   assert.match(hubSrc, /nextGift/)
   assert.match(hubSrc, /anyUpgradeReady/)
   assert.match(cssSrc, /easy-build-it/)
-  assert.match(cssSrc, /max-height: min\(62vh, 520px\)/)
-  assert.match(cssSrc, /\.hub\.is-easy-home \.easy-extra-streets[\s\S]{0,80}display:\s*none/)
+  assert.match(cssSrc, /easy-home-dock/)
+  assert.match(cssSrc, /\.hub\.is-easy-home \.easy-home-map[\s\S]{0,120}position:\s*absolute/)
+  assert.match(cssSrc, /\.hub\.is-easy-home \.easy-home-map \.city-svg[\s\S]{0,200}max-height:\s*none/)
+  assert.doesNotMatch(cssSrc, /max-height: min\(62vh, 520px\)/)
+  assert.match(cssSrc, /\.hub\.is-easy-home \.easy-extra-streets[\s\S]{0,120}display:\s*none/)
+  assert.match(cssSrc, /\.hub\.is-easy-home \.easy-core[\s\S]{0,80}display:\s*none/)
   assert.match(mapSrc, /is-easy-soft/)
+  assert.match(mapSrc, /xMidYMid slice/)
   assert.match(hubSrc, /easyMatchReady/)
   assert.ok(
-    easyHome.indexOf('EASY.matchCta') < easyHome.indexOf("name: 'learn'"),
-    'Easy home order is Match before Learn re-read',
+    easyHome.indexOf('easy-build-it') < easyHome.indexOf('easy-coach'),
+    'Easy home dock: Build It before coach pills',
   )
   assert.ok(
     easyHome.indexOf('EASY.matchCta') < easyHome.indexOf('EASY.saved'),
