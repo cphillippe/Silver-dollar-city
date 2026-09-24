@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.120',
+    title: 'Home Build It · big map',
+    when: '2026-09-24',
+    items: [
+      'Easy Home: Build It is a real card (gift + Build this opens the next lot); map is the hero (~62vh); Match/Lock In/Learn stay compact; Extra streets packs stay parked off Easy Home; map overlays quieter',
+    ],
+  },
+  {
     version: '1.4.119',
     title: 'Match flush grid',
     when: '2026-09-24',

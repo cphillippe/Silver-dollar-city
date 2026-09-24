@@ -4,8 +4,8 @@ import { STREET_TRIPLES, nextStreetWalk, streetIsComplete } from '../content/lin
 import { STORY, townVoice } from '../content/story'
 import { LOT_STORY } from '../content/lots'
 import { localDateKey } from '../lib/dates'
-import { CITY_PLOTS, nextPlotId, type CityPlotId } from '../lib/city'
-import { lotTapWhy } from '../lib/cityBuild'
+import { CITY_PLOTS, nextGift, nextPlotId, type CityPlotId } from '../lib/city'
+import { anyUpgradeReady, lotTapWhy, visualFills, visualSnapshot } from '../lib/cityBuild'
 import { extraStreetPacks } from '../content/paidStreets'
 import { PACK_LINE } from '../config/commerce'
 import { packIsUnlocked } from '../lib/commerce'
@@ -75,6 +75,11 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
     const focus = easyHomeFocus(progress)
     const loopId = easyLoopLine(progress)
     const coldMercy = loopId === EASY_MATCH_LINE && !easyLineHeld(progress, EASY_MATCH_LINE)
+    const easySnap = visualSnapshot(progress)
+    const easyFills = visualFills(progress)
+    const buildGift = anyUpgradeReady(progress)
+      ? 'A building is ready. Tap it, then Build this.'
+      : nextGift(nextId, easySnap[nextId], easyFills[nextId] ?? 0, true)
     return (
       <main className="hub is-easy-home" aria-label="Home">
         <header className="easy-home-head">
@@ -103,6 +108,17 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
             mindPlot={mindPlot}
             onMindPlot={setPlot}
           />
+        </section>
+        <section className="easy-build-it" aria-label="Build It">
+          <p className="eyebrow">Build It</p>
+          <p className="easy-build-gift">{buildGift}</p>
+          <button
+            type="button"
+            className="btn gold xl"
+            onClick={() => setPlot(nextId)}
+          >
+            Build this
+          </button>
         </section>
         {!matchReady || coldMercy ? (
           <ol className="easy-coach" aria-label="Your next steps">

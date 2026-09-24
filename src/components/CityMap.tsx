@@ -537,7 +537,11 @@ export function CityMap({
 
         {mode === 'live' && !celebrating ? (
           <g className="city-next-mark" transform={`translate(${nextAt.x} ${nextAt.y})`}>
-            <circle r={easy ? 22 : 34} className="city-next-halo" />
+            {easy ? (
+              <circle r={12} className="city-next-halo is-easy-soft" />
+            ) : (
+              <circle r={34} className="city-next-halo" />
+            )}
             {easy ? null : (
               <text y="-40" textAnchor="middle">
                 {kicker}
@@ -635,7 +639,7 @@ export function CityMap({
         />
 
         {mode === 'live'
-          ? CITY_PLOTS.map((plot) => (
+          ? CITY_PLOTS.filter((plot) => (easy ? nextId === plot.id : true)).map((plot) => (
               <TownFolk
                 key={`folk-${plot.id}`}
                 id={plot.id}
@@ -654,10 +658,7 @@ export function CityMap({
 
         {mode === 'live' && easy ? (
           <g className="city-easy-tags" pointerEvents="none">
-            {EASY_NAMED_PLOTS.filter((id) => {
-              const stage = stageOf(id)
-              return stage !== 'empty' || nextId === id
-            }).map((id) => (
+            {EASY_NAMED_PLOTS.filter((id) => id === nextId).map((id) => (
               <EasyPlotChip key={`tag-${id}`} id={id} />
             ))}
           </g>
@@ -691,20 +692,17 @@ export function CityMap({
         </div>
       ) : null}
 
-      {mode === 'live' ? (
+      {mode === 'live' && (!easy || celebrating || lockNote) ? (
         <div className="city-legend">
           {celebrating ? (
             <p className="eyebrow">{beat?.beat}</p>
           ) : (
             isEasy(progress) ? (
-              <>
-                <p className="city-gift">{gift}</p>
-                {lockNote ? (
-                  <p className="city-lock-toast" role="status">
-                    {lockNote}
-                  </p>
-                ) : null}
-              </>
+              lockNote ? (
+                <p className="city-lock-toast" role="status">
+                  {lockNote}
+                </p>
+              ) : null
             ) : (
             <>
               <p className="eyebrow">Eden → City of Heaven</p>
