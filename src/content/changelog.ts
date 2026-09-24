@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.122',
+    title: 'Manage tight + whole map visible',
+    when: '2026-09-24',
+    items: [
+      'Easy Manage lot sheet: compress empty padding so PLACE·PERSON·MAIN IDEA hug content (side-by-side Place+Person); Walk CTA stays big — Dig/Match/Home layout parked',
+      'Easy Home full-viewport map: show the entire map (preserveAspectRatio meet / contain letterbox) instead of cover-slice crop that hid edges',
+      'Map zoom juice: Build this / tap lot / upgrade briefly zooms toward that place, then settles back to the full map — not a sticky crop',
+    ],
+  },
+  {
     version: '1.4.121',
     title: 'Home map fills the phone',
     when: '2026-09-24',

@@ -6397,10 +6397,125 @@ img.walker-face.easy-walker-face,
   width: min(100%, 420px);
   max-height: min(72dvh, calc(100dvh - 56px));
   min-height: 0;
+  height: auto; /* hug content — no tall empty purple sheet */
   margin: 0;
   border-radius: 20px 20px 0 0;
-  padding: 12px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+  /* Gemini vision on Bill East porch shot: compress pad, keep purple/gold */
+  padding: 8px 12px calc(6px + env(safe-area-inset-bottom, 0px));
+  gap: 4px;
 }
+
+/* 1.4.122 — Manage lot sheet denser (vision: hug PLACE·PERSON·MAIN IDEA) */
+.mind-map.is-manage .mind-map-head {
+  gap: 8px;
+  padding: 0 0 2px;
+  align-items: center;
+}
+
+.mind-map.is-manage .mind-map-head h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.15;
+}
+
+.mind-map.is-manage .mind-map-head .eyebrow {
+  margin: 0 0 2px;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+
+.mind-map.is-manage .mind-map-head .btn.tiny {
+  min-height: 44px;
+  padding: 6px 12px;
+}
+
+.mind-map.is-manage .mind-map-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 0 1 auto; /* hug content — no empty purple stretch */
+  padding: 0;
+}
+
+.mind-map.is-manage .quiet,
+.mind-map.is-manage .build-job,
+.mind-map.is-manage .build-cap,
+.mind-map.is-manage .scrap-kicker {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.2;
+}
+
+.mind-map.is-manage .place-sub {
+  margin: 2px 0 0;
+  font-size: 0.84rem;
+  line-height: 1.2;
+}
+
+/* PLACE + PERSON side-by-side; MAIN IDEA full width — kill empty purple half (Bill shot) */
+.mind-map.is-manage .mind-web {
+  margin: 2px 0 4px;
+  gap: 6px;
+  grid-template-columns: 1fr 1fr;
+}
+
+.mind-map.is-manage .mind-node {
+  min-height: 0;
+  padding: 6px 10px;
+  gap: 2px;
+  border-radius: 14px;
+}
+
+.mind-map.is-manage .mind-node .mind-kicker {
+  margin: 0;
+  font-size: 0.68rem;
+}
+
+.mind-map.is-manage .mind-node strong {
+  font-size: 0.9rem;
+  line-height: 1.2;
+}
+
+.mind-map.is-manage .mind-node em {
+  font-size: 0.78rem;
+  line-height: 1.2;
+}
+
+.mind-map.is-manage .mind-node.is-place {
+  grid-column: 1 / 2;
+}
+
+.mind-map.is-manage .mind-node.is-person {
+  grid-column: 2 / 3;
+}
+
+.mind-map.is-manage .mind-idea-wrap,
+.mind-map.is-manage .mind-node.is-idea,
+.mind-map.is-manage .mind-node.is-tool {
+  grid-column: 1 / -1;
+}
+
+.mind-map.is-manage .mind-map-dock {
+  padding: 6px 0 0;
+  gap: 4px;
+  margin-top: 0;
+}
+
+.mind-map.is-manage .build-next {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.2;
+}
+
+.mind-map.is-manage .mind-map-dock .btn.xl {
+  min-height: 52px; /* keep Walk CTA chunky for kids */
+}
+
+.mind-map.is-manage .mind-map-walk {
+  min-height: 36px;
+  margin: 0;
+}
+
 
 .hub.is-town .street-link {
   background:
@@ -7566,6 +7681,7 @@ html[data-easy='on'] .mind-node em {
 }
 
 .hub.is-easy-home .easy-home-map .city-svg {
+  /* Full stage size; preserveAspectRatio meet letterboxes — entire map visible */
   flex: 1;
   width: 100%;
   height: 100%;
@@ -7575,7 +7691,8 @@ html[data-easy='on'] .mind-node em {
   border-radius: 0;
   border: 0;
   box-shadow: none;
-  background: #3a1480;
+  background: #3a1480; /* purple chrome in letterbox / pillarbox bands */
+  object-fit: contain; /* belt-and-suspenders for any raster fallback */
 }
 
 .hub.is-easy-home .easy-home-map .city-legend {

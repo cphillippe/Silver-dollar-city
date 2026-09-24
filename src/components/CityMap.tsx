@@ -99,7 +99,11 @@ const FULL_CAM = { x: 0, y: 0, w: 640, h: 420 }
 
 function camAround(id: CityPlotId) {
   const at = ANCHOR[id]
-  return { x: at.x - 150, y: at.y - 120, w: 300, h: 230 }
+  const w = 300
+  const h = 230
+  const x = Math.max(0, Math.min(FULL_CAM.w - w, at.x - w / 2))
+  const y = Math.max(0, Math.min(FULL_CAM.h - h, at.y - h / 2))
+  return { x, y, w, h }
 }
 
 function viewBoxOf(cam: { x: number; y: number; w: number; h: number }) {
@@ -136,6 +140,7 @@ export function CityMap({
   const timers = useRef<number[]>([])
   const camNow = useRef(FULL_CAM)
   const camFrame = useRef(0)
+  const lastPulse = useRef<CityPlotId | null>(null)
 
   function stageOf(id: CityPlotId): CityStage {
     if (mode === 'poster') return id === 'porch' ? 'scaffold' : 'empty'
@@ -184,17 +189,22 @@ export function CityMap({
     }
   }, [])
 
+  // Hub "Build this" / map tap Manage — one-shot zoom toward lot, then full map
+  useEffect(() => {
+    if (mode !== 'live' || !mindPlot) {
+      lastPulse.current = null
+      return
+    }
+    if (!isEasy(progress)) return
+    if (lastPulse.current === mindPlot) return
+    lastPulse.current = mindPlot
+    pulseToward(mindPlot)
+  }, [mode, mindPlot, progress])
+
   useEffect(() => {
     if (mode !== 'live') return
     const now = visualSnapshot(progress)
     const fills = visualFills(progress)
-    if (isEasy(progress)) {
-      writeCitySeen(now)
-      writeFillsSeen(fills)
-      setShown(now)
-      setShownFill(fills)
-      return
-    }
     const prev = readCitySeen()
     const prevFill = readFillsSeen()
     if (!prev) {
@@ -221,13 +231,14 @@ export function CityMap({
       setShownFill(fills)
       writeCitySeen(now)
       writeFillsSeen(fills)
-      maybeHomecoming(now)
+      if (!isEasy(progress)) maybeHomecoming(now)
       return
     }
     if (playing.current) return
     playing.current = true
     setShown(prev)
     setShownFill(prevFill ?? fills)
+    // Easy + Hard: one-shot zoom to the lot, apply rise, settle back to full map
     playQueue(queue, now, fills)
   }, [mode, progress])
 
@@ -254,6 +265,22 @@ export function CityMap({
       if (t < 1) camFrame.current = requestAnimationFrame(tick)
     }
     camFrame.current = requestAnimationFrame(tick)
+  }
+
+  /** One-shot juice: brief zoom toward a lot, then settle back to full-map contain. Not sticky. */
+  function pulseToward(id: CityPlotId) {
+    if (mode === 'poster') return
+    if (playing.current) return
+    const reduced =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduced) {
+      camNow.current = FULL_CAM
+      setCam(FULL_CAM)
+      return
+    }
+    tweenCam(camAround(id), 180)
+    later(480, () => tweenCam(FULL_CAM, 240))
   }
 
   function playQueue(
@@ -284,8 +311,14 @@ export function CityMap({
       }
       const item = queue[index]
       setBeat(item)
-      if (!reduced) tweenCam(camAround(item.id), 200)
-      later(reduced ? 40 : 180, () => {
+      const easyPulse = isEasy(progress)
+      const zoomIn = reduced ? 0 : easyPulse ? 160 : 200
+      const applyAt = reduced ? 40 : easyPulse ? 140 : 180
+      const hold = reduced ? 700 : easyPulse ? 720 : 1100
+      const zoomOut = reduced ? 0 : easyPulse ? 200 : 220
+      const gap = reduced ? 40 : easyPulse ? 160 : 200
+      if (!reduced) tweenCam(camAround(item.id), zoomIn)
+      later(applyAt, () => {
         if (item.beat !== 'Grew!') {
           setShown((current) => ({ ...current, [item.id]: item.to }))
         }
@@ -295,11 +328,11 @@ export function CityMap({
         }))
         setRising(item.id)
       })
-      later(reduced ? 700 : 1100, () => {
+      later(hold, () => {
         setRising(null)
         setBeat(null)
-        if (!reduced) tweenCam(FULL_CAM, 220)
-        later(reduced ? 40 : 200, () => step(index + 1))
+        if (!reduced) tweenCam(FULL_CAM, zoomOut)
+        later(gap, () => step(index + 1))
       })
     }
 
@@ -351,7 +384,7 @@ export function CityMap({
       <svg
         className="city-svg"
         viewBox={viewBoxOf(cam)}
-        preserveAspectRatio={easy ? 'xMidYMid slice' : 'xMidYMid meet'}
+        preserveAspectRatio="xMidYMid meet"
         role={mode === 'poster' ? 'img' : 'group'}
         aria-label={
           mode === 'poster'
