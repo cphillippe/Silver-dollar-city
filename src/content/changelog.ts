@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.116',
+    title: 'Hurt man works',
+    when: '2026-09-24',
+    items: [
+      'Samaritan road: tap the hurt man walks one step toward him (no full teleport); after find, a Help label sits on his cell so the mercy beat completes',
+    ],
+  },
+  {
     version: '1.4.115',
     title: 'Easy Match phone polish',
     when: '2026-09-24',
