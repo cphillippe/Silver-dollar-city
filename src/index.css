@@ -6880,6 +6880,14 @@ html[data-easy='on'] .link-block.is-not {
   transform: scale(0);
 }
 
+.why-blast.is-win .why-arena {
+  min-height: 0;
+}
+
+.why-blast.is-win .why-chip {
+  animation: none;
+}
+
 .why-blast.is-win .why-chip.is-clear:not(.is-lock) {
   animation: why-toss 0.55s 0.08s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
 }
@@ -6888,6 +6896,7 @@ html[data-easy='on'] .link-block.is-not {
   animation: why-lock 0.7s cubic-bezier(0.18, 0.9, 0.22, 1) forwards;
   border-color: #ffe68c;
   box-shadow: 0 0 22px rgba(255, 204, 51, 0.7);
+  z-index: 3;
 }
 
 @keyframes why-toss {
@@ -6898,7 +6907,7 @@ html[data-easy='on'] .link-block.is-not {
 @keyframes why-lock {
   0% { transform: scale(1); }
   35% { transform: scale(1.12); }
-  100% { transform: scale(0.08); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 .why-pop {

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { EASY, easyFacingLine, easyWhyLine } from '../../lib/easy'
-import { GEM_BURST, playGemPop } from '../../lib/juice'
+import { GEM_BURST, playGemPop, prefersReducedMotion } from '../../lib/juice'
 import { holdSuccessBeat } from '../../lib/successBeat'
 import {
   applyHoldMiss,
@@ -40,15 +40,31 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
   const [missFlash, setMissFlash] = useState(false)
   const beat = holdSuccessBeat(claim, easyWhyLine(reason), source)
   const ctaRef = useRef<HTMLDivElement | null>(null)
+  const missesRef = useRef(0)
+  const doneRef = useRef(false)
+  const reduced = prefersReducedMotion()
+
+  useEffect(() => {
+    missesRef.current = misses
+  }, [misses])
 
   useEffect(() => {
     if (!locked) return
-    const id = window.requestAnimationFrame(() => {
-      ctaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+    const frame = window.requestAnimationFrame(() => {
+      ctaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
     })
-    return () => window.cancelAnimationFrame(id)
+    const auto = window.setTimeout(() => finish(), reduced ? 420 : 1200)
+    return () => {
+      window.cancelAnimationFrame(frame)
+      window.clearTimeout(auto)
+    }
   }, [locked])
 
+  function finish() {
+    if (doneRef.current) return
+    doneRef.current = true
+    onDone({ clean: missesRef.current === 0 })
+  }
 
   function miss(line: string) {
     if (locked || tossing || gone.includes(line)) return
@@ -66,7 +82,7 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
   }
 
   function hit() {
-    if (locked || tossing) return
+    if (locked || tossing || doneRef.current) return
     setMissFlash(false)
     setLocked(true)
     playGemPop('win')
@@ -84,7 +100,7 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
     >
       <WinBurst play={locked} stamp={HOLD_LOCKED_STAMP} />
       <div className="why-blast-hud">
-        <p className="next-tap">{EASY.tapWhy}</p>
+        <p className="next-tap">{locked ? EASY.keepThis : EASY.tapWhy}</p>
         <p className="why-score" aria-live="polite">
           {score}
         </p>
@@ -128,7 +144,7 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
             <button
               type="button"
               className="btn primary xl recall-done"
-              onClick={() => onDone({ clean: misses === 0 })}
+              onClick={finish}
             >
               {EASY.keepThis}
             </button>
