@@ -61,6 +61,14 @@ const blastSrc = readFileSync(
 )
 assert.match(blastSrc, /why-blast/)
 assert.match(blastSrc, /miss-banner/)
+
+assert.match(blastSrc, /missTeach/)
+assert.match(blastSrc, /why-miss-teach/)
+assert.match(blastSrc, /EASY\.tryAgain/)
+assert.match(blastSrc, /EASY\.missTeachBadge/)
+assert.match(blastSrc, /EASY\.whyTrueLabel/)
+assert.match(blastSrc, /PlainTalk/)
+assert.match(blastSrc, /retryAfterTeach|is-miss-teach/)
 assert.match(blastSrc, /miss-plus/)
 assert.match(blastSrc, /HOLD_LOCKED_STAMP/)
 assert.match(blastSrc, /applyHoldMiss/)
@@ -81,6 +89,7 @@ const recallSrc = readFileSync(
 )
 assert.match(recallSrc, /WhyBlastPlay/)
 assert.match(recallSrc, /is-why-blast/)
+assert.match(recallSrc, /EASY\.tryAgain/)
 assert.doesNotMatch(recallSrc, /pool\.find\(\(line\) => line !== correct\)/)
 
 const gemSrc = readFileSync(

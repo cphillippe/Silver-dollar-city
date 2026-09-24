@@ -6822,7 +6822,7 @@ html[data-easy='on'] .link-block.is-not {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  min-height: min(68vh, 540px);
+  min-height: min(58vh, 460px);
   padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
 }
 
@@ -6844,7 +6844,7 @@ html[data-easy='on'] .link-block.is-not {
   flex-direction: column;
   gap: 10px;
   flex: 1 1 auto;
-  min-height: min(58vh, 480px);
+  min-height: min(48vh, 400px);
 }
 
 .why-blast.is-shake,
@@ -6918,6 +6918,125 @@ html[data-easy='on'] .link-block.is-not {
   border-color: rgba(255, 140, 160, 0.9);
 }
 
+/* 1.4.123 — Lock In miss teach: claim · reason · From + Try again */
+.why-blast.is-miss-teach {
+  min-height: 0;
+  gap: 8px;
+}
+
+.why-blast.is-miss-teach .why-blast-hud {
+  margin-bottom: 0;
+}
+
+.why-miss-teach {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 12px 12px 10px;
+  border-radius: 18px;
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgba(255, 230, 140, 0.18), transparent 55%),
+    linear-gradient(180deg, rgba(72, 24, 120, 0.96), rgba(28, 8, 58, 0.98));
+  border: 2px solid rgba(255, 204, 51, 0.82);
+  box-shadow:
+    0 0 0 1px rgba(255, 248, 220, 0.18),
+    0 10px 28px rgba(20, 4, 48, 0.5),
+    0 0 22px rgba(255, 204, 51, 0.28);
+}
+
+.why-miss-badge {
+  margin: 0;
+  text-align: center;
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #ffe68c;
+}
+
+.why-miss-teach .why-claim {
+  margin: 0 !important;
+  padding: 12px 10px;
+  font-size: clamp(1.05rem, 4.2vw, 1.28rem);
+}
+
+.why-miss-reason {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255, 248, 220, 0.08);
+  border: 1px solid rgba(255, 204, 51, 0.35);
+  color: #fff6e8;
+  font-size: 0.95rem;
+  line-height: 1.35;
+  font-weight: 700;
+  text-align: center;
+}
+
+.why-miss-label {
+  display: block;
+  margin: 0 0 4px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(255, 230, 140, 0.85);
+}
+
+.why-miss-teach .held-from {
+  margin: 0;
+  text-align: center;
+  font-weight: 700;
+  color: #ffe68c;
+}
+
+.why-miss-teach .plain-talk {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 14px;
+}
+
+.why-miss-teach .cta-dock {
+  position: static;
+  margin-top: 4px;
+  padding: 8px 0 2px;
+}
+
+.why-miss-retry {
+  width: 100%;
+  box-shadow: 0 0 18px rgba(255, 204, 51, 0.45);
+}
+
+.why-blast.is-retry-juice .why-chip.is-retry-pulse:not(.is-gone) {
+  animation: why-retry-pulse 0.55s cubic-bezier(0.2, 1.2, 0.3, 1) both;
+  border-color: #ffe68c;
+  box-shadow: 0 0 16px rgba(255, 204, 51, 0.55);
+}
+
+@keyframes why-retry-pulse {
+  0% { transform: scale(0.94); }
+  55% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .why-blast.is-retry-juice .why-chip.is-retry-pulse {
+    animation: none;
+  }
+}
+
+/* Compress Easy Lock In chrome when miss-teach is open (phone ~390) */
+.recall-gate.is-easy-hold:has(.why-blast.is-miss-teach) {
+  min-height: 0;
+  gap: 8px;
+}
+
+.why-blast.is-miss-teach .why-arena {
+  display: none;
+}
+
 .why-arena {
   position: relative;
   display: grid;
@@ -6928,7 +7047,7 @@ html[data-easy='on'] .link-block.is-not {
     'c2 c3';
   gap: 8px;
   align-items: stretch;
-  min-height: 280px;
+  min-height: 240px;
 }
 
 .why-chip.slot-0 { grid-area: c0; }
