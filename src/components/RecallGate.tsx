@@ -95,7 +95,9 @@ export function RecallGate({
   const easyLineReady = !own || Boolean(chosen)
   const nextTap =
     phase === 'teach'
-      ? 'Read this, then tap Got it.'
+      ? easy
+        ? 'Read this, then try again.'
+        : 'Read this, then tap Got it.'
       : phase === 'reason'
         ? confirmReason
           ? easy
@@ -174,6 +176,16 @@ export function RecallGate({
   }
 
   function finishFromTeach() {
+    // Easy: teach-before-test — send them back for one more reason try.
+    if (easy) {
+      setMisses(0)
+      setFlash(null)
+      setShake(false)
+      setReasonLocked(false)
+      setPhase('reason')
+      playGemPop('bonus')
+      return
+    }
     settle(false)
   }
 
@@ -336,7 +348,7 @@ export function RecallGate({
 
       {phase === 'teach' ? (
         <>
-          <h2>{deeper ? 'Here’s the sharper line.' : 'Here’s the line.'}</h2>
+          <h2>{easy ? EASY.missTeachBadge : deeper ? 'Here’s the sharper line.' : 'Here’s the line.'}</h2>
           <article className="unlock-card pop-in">
             <p className="recall-line">{easy ? easyFacingLine(brief.id, heldClaim) : heldClaim}</p>
             <p>{easy ? reasonFace(heldReason) : heldReason}</p>
@@ -347,8 +359,8 @@ export function RecallGate({
             ) : null}
             <PlainTalk id={brief.id} teach />
           </article>
-          <button type="button" className="btn primary xl" onClick={finishFromTeach}>
-            Got it
+          <button type="button" className="btn gold xl" onClick={finishFromTeach}>
+            {easy ? EASY.tryAgain : 'Got it'}
           </button>
           <DigDeeper id={brief.id} />
         </>

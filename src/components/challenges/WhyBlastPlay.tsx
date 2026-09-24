@@ -11,6 +11,7 @@ import {
   whyBlastExtras,
 } from '../../lib/whyBlast'
 import { MatchTakeaway } from '../HeldTriad'
+import { PlainTalk } from '../PlainTalk'
 import { WinBurst } from './WinBurst'
 
 interface WhyBlastPlayProps {
@@ -24,7 +25,8 @@ interface WhyBlastPlayProps {
 
 /**
  * Easy Hold why-step: claim stays center, four why-chips float around it.
- * Correct → blast + LOCKED!. Wrong → shake + Miss −25 and that chip pops out.
+ * Correct → blast + LOCKED!. Wrong → shake + Miss −25, then claim·reason·From
+ * teach sheet with Try again so the kid learns before the next tap.
  */
 export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: WhyBlastPlayProps) {
   const chips = useMemo(
@@ -38,6 +40,8 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
   const [misses, setMisses] = useState(0)
   const [shake, setShake] = useState(false)
   const [missFlash, setMissFlash] = useState(false)
+  const [missTeach, setMissTeach] = useState(false)
+  const [retryJuice, setRetryJuice] = useState(false)
   const beat = holdSuccessBeat(claim, easyWhyLine(reason), source)
   const ctaRef = useRef<HTMLDivElement | null>(null)
   const missesRef = useRef(0)
@@ -67,7 +71,7 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
   }
 
   function miss(line: string) {
-    if (locked || tossing || gone.includes(line)) return
+    if (locked || tossing || missTeach || gone.includes(line)) return
     setTossing(line)
     setShake(true)
     setMissFlash(true)
@@ -78,65 +82,106 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
       setGone((current) => [...current, line])
       setTossing(null)
       setShake(false)
-    }, 420)
+      setMissTeach(true)
+    }, reduced ? 180 : 420)
+  }
+
+  function retryAfterTeach() {
+    if (locked || !missTeach) return
+    setMissTeach(false)
+    setMissFlash(false)
+    setRetryJuice(true)
+    playGemPop('bonus')
+    window.setTimeout(() => setRetryJuice(false), reduced ? 280 : 650)
   }
 
   function hit() {
-    if (locked || tossing || doneRef.current) return
+    if (locked || tossing || missTeach || doneRef.current) return
     setMissFlash(false)
+    setMissTeach(false)
     setLocked(true)
     playGemPop('win')
   }
 
   function pick(line: string) {
-    if (gone.includes(line) || tossing) return
+    if (gone.includes(line) || tossing || missTeach) return
     if (line === reason) hit()
     else miss(line)
   }
 
   return (
     <div
-      className={`why-blast ${shake ? 'is-shake' : ''} ${locked ? 'is-yes is-win' : ''} ${missFlash ? 'is-miss' : ''}`}
+      className={`why-blast ${shake ? 'is-shake' : ''} ${locked ? 'is-yes is-win' : ''} ${missFlash ? 'is-miss' : ''} ${missTeach ? 'is-miss-teach' : ''} ${retryJuice ? 'is-retry-juice' : ''}`}
     >
       <WinBurst play={locked} stamp={HOLD_LOCKED_STAMP} />
       <div className="why-blast-hud">
-        <p className="next-tap">{locked ? EASY.keepThis : EASY.tapWhy}</p>
+        <p className="next-tap">
+          {locked
+            ? EASY.keepThis
+            : missTeach
+              ? EASY.missTeachBadge
+              : retryJuice
+                ? EASY.oneMoreTry
+                : EASY.tapWhy}
+        </p>
         <p className="why-score" aria-live="polite">
           {score}
         </p>
       </div>
-      {missFlash ? (
+      {missFlash && !missTeach ? (
         <p className="miss-banner" role="status">
           <strong className="miss-plus">{HOLD_MISS_FACE}</strong>
         </p>
       ) : null}
-      <div className="why-arena">
-        {chips.map((line, index) => {
-          const tossed = tossing === line || gone.includes(line)
-          return (
-            <button
-              key={line}
-              type="button"
-              className={`why-chip match-card recall-card slot-${index} float-${index} ${tossed ? 'is-toss' : ''} ${gone.includes(line) ? 'is-gone' : ''} ${locked ? 'is-clear' : ''} ${locked && line === reason ? 'is-lock' : ''}`}
-              onClick={() => pick(line)}
-              disabled={locked || tossed}
-            >
-              {easyWhyLine(line)}
-            </button>
-          )
-        })}
-        <p className="why-claim recall-line rehearse-stem">{easyFacingLine(id, claim)}</p>
-        {locked ? null : (
-          <p className="held-from quiet">
-            {EASY.sayFrom} {source}
+      {missTeach ? (
+        <article className="why-miss-teach pop-in" role="status" aria-live="polite">
+          <p className="why-miss-badge">{EASY.missTeachBadge}</p>
+          <p className="why-claim recall-line rehearse-stem">{easyFacingLine(id, claim)}</p>
+          <p className="why-miss-reason">
+            <span className="why-miss-label">{EASY.whyTrueLabel}</span>
+            {easyWhyLine(reason)}
           </p>
-        )}
-        {locked
-          ? GEM_BURST.slice(0, 6).map((i) => (
-              <span key={i} className="why-pop" style={{ ['--i' as string]: i }} aria-hidden />
-            ))
-          : null}
-      </div>
+          {source ? (
+            <p className="held-from">
+              {EASY.sayFrom} {source}
+            </p>
+          ) : null}
+          <PlainTalk id={id} teach />
+          <div className="cta-dock" ref={ctaRef}>
+            <button type="button" className="btn gold xl why-miss-retry" onClick={retryAfterTeach}>
+              {EASY.tryAgain}
+            </button>
+          </div>
+        </article>
+      ) : (
+        <div className="why-arena">
+          {chips.map((line, index) => {
+            const tossed = tossing === line || gone.includes(line)
+            return (
+              <button
+                key={line}
+                type="button"
+                className={`why-chip match-card recall-card slot-${index} float-${index} ${tossed ? 'is-toss' : ''} ${gone.includes(line) ? 'is-gone' : ''} ${locked ? 'is-clear' : ''} ${locked && line === reason ? 'is-lock' : ''} ${retryJuice && !gone.includes(line) ? 'is-retry-pulse' : ''}`}
+                onClick={() => pick(line)}
+                disabled={locked || tossed}
+              >
+                {easyWhyLine(line)}
+              </button>
+            )
+          })}
+          <p className="why-claim recall-line rehearse-stem">{easyFacingLine(id, claim)}</p>
+          {locked ? null : (
+            <p className="held-from quiet">
+              {EASY.sayFrom} {source}
+            </p>
+          )}
+          {locked
+            ? GEM_BURST.slice(0, 6).map((i) => (
+                <span key={i} className="why-pop" style={{ ['--i' as string]: i }} aria-hidden />
+              ))
+            : null}
+        </div>
+      )}
       {locked ? (
         <>
           <MatchTakeaway lineId={id} title={beat.title} />
