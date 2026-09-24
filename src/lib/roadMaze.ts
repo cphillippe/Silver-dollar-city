@@ -85,6 +85,15 @@ export function isAdjacentRoadStep(from: MazeCoord, to: MazeCoord): boolean {
   return mazeNeighbors(from).some((n) => mazeSame(n, to))
 }
 
+/** One step toward a far road cell — never a full teleport. */
+export function mazeStepToward(from: MazeCoord, to: MazeCoord): MazeCoord | null {
+  if (!isMazeRoad(from) || !isMazeRoad(to)) return null
+  if (mazeSame(from, to)) return null
+  if (isAdjacentRoadStep(from, to)) return to
+  const path = shortestMazePath(from, to)
+  return path && path.length >= 2 ? (path[1] ?? null) : null
+}
+
 export function mazeBeatAt(cell: MazeCoord): MazeBeat | null {
   if (mazeSame(cell, MAZE_HURT)) return MAZE_BEATS[0] ?? null
   if (mazeSame(cell, MAZE_INN)) return MAZE_BEATS[2] ?? null
