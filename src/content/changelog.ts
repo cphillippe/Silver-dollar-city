@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.123',
+    title: 'Lock In miss recovery',
+    when: '2026-09-24',
+    items: [
+      'Easy Lock In miss: wrong why-chip opens a compact teach sheet (claim · why-true · From source) with Try again — chip stays gone, one-more juice on retry; Dig/Hard/NW/Town/stores/Home/Match parked',
+      'Easy RecallGate teach after two misses: Try again returns to the reason ask instead of ending the Hold cold',
+      'Phone ~390: compress empty Easy Hold / why-arena chrome so miss teach fits without sparse gaps',
+    ],
+  },
+  {
     version: '1.4.122',
     title: 'Manage tight + whole map visible',
     when: '2026-09-24',
