@@ -427,21 +427,25 @@ export function CityMap({
         <EdenGrove age={age} />
         {easy ? null : <SpinePath age={age} />}
 
-        <path
-          className={`city-street city-street-main is-${stageOf('hollow')} is-${stageOf('bench')}`}
-          d="M70 310 C 140 300, 200 280, 280 292 C 360 304, 430 286, 560 300"
-          fill="none"
-        />
-        <path
-          className={`city-street city-street-ridge is-${stageOf('bench')} is-${stageOf('gate')}`}
-          d="M300 292 C 360 250, 400 210, 448 168"
-          fill="none"
-        />
-        <path
-          className={`city-creek is-${stageOf('hollow')}`}
-          d="M18 250 C 70 270, 90 300, 60 360 C 40 400, 80 410, 120 400"
-          fill="none"
-        />
+        {easy ? null : (
+          <>
+            <path
+              className={`city-street city-street-main is-${stageOf('hollow')} is-${stageOf('bench')}`}
+              d="M70 310 C 140 300, 200 280, 280 292 C 360 304, 430 286, 560 300"
+              fill="none"
+            />
+            <path
+              className={`city-street city-street-ridge is-${stageOf('bench')} is-${stageOf('gate')}`}
+              d="M300 292 C 360 250, 400 210, 448 168"
+              fill="none"
+            />
+            <path
+              className={`city-creek is-${stageOf('hollow')}`}
+              d="M18 250 C 70 270, 90 300, 60 360 C 40 400, 80 410, 120 400"
+              fill="none"
+            />
+          </>
+        )}
         {shownFill.lamps >= 1 ? (
           <g className={`city-street-lamps is-${stageOf('lamps')}`} aria-hidden>
             <circle className="city-lamp" cx="148" cy="298" r="5" />
