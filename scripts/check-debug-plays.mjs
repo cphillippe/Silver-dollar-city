@@ -8,6 +8,7 @@ import {
   debugPlayLabel,
 } from '../src/lib/debugPlays.ts'
 import { storyPlayFor } from '../src/lib/storyPlay.ts'
+import { readAppCss } from './readAppCss.mjs'
 
 const games = debugMiniGames()
 const groups = debugPlayGroups()
@@ -123,7 +124,8 @@ const linkSrc = readFileSync(
 )
 assert.match(linkSrc, /debugLine/)
 assert.match(linkSrc, /lineId=\{easy \? lineId : undefined\}/)
-assert.match(linkSrc, /name: debugLine \? 'settings' : 'hub'/)
+assert.match(linkSrc, /debugToSettings=\{Boolean\(debugLine\)\}/)
+assert.match(linkSrc, /name: 'settings'/)
 
 const puzzleSrc = readFileSync(
   new URL('../src/components/PuzzlePlay.tsx', import.meta.url),
@@ -132,7 +134,7 @@ const puzzleSrc = readFileSync(
 assert.match(puzzleSrc, /lineId \?\? easyMatchLine\(progress\)/)
 assert.match(puzzleSrc, /isEasy\(progress\) \|\| lineId/)
 
-const cssSrc = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
+const cssSrc = readAppCss()
 assert.match(cssSrc, /\.settings-debug /)
 
 console.log('check-debug-plays: ok')

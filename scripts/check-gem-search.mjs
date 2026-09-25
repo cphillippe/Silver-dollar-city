@@ -48,6 +48,7 @@ import {
 } from '../src/lib/storyPanels.ts'
 import { lessonStory, storyPlayFor } from '../src/lib/storyPlay.ts'
 import { isSourceDigLine } from '../src/lib/sourceDig.ts'
+import { readAppCss } from './readAppCss.mjs'
 
 const mercyWords = gemWordsFor('ph-road')
 assert.deepEqual(
@@ -479,7 +480,7 @@ assert.match(
   playSrc,
   /className="gem-stage"[\s\S]*miss-banner[\s\S]*className="gem-board"/,
 )
-const gemCss = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
+const gemCss = readAppCss()
 assert.match(gemCss, /play\.is-gem-search\.is-shake \{\s*animation: none/)
 assert.match(gemCss, /gem-stage \.miss-banner/)
 assert.match(gemCss, /gem-overlay-pop/)

@@ -74,6 +74,7 @@ import { deeperLinksFor, eraLabel } from '../src/content/deeper.ts'
 import { allEvidenceIds, evidenceFor } from '../src/content/evidence.ts'
 import { plainFor } from '../src/content/plain.ts'
 import { profileInventory } from '../src/lib/profile.ts'
+import { readAppCss } from './readAppCss.mjs'
 
 const progressSrc = readFileSync(
   new URL('../src/store/progress.ts', import.meta.url),
@@ -565,7 +566,7 @@ assert.match(matchSrc, /startsWith\('ob-'\)/)
 assert.match(matchSrc, /Try again/)
 assert.match(matchSrc, /decoyFor/)
 
-const matchCss = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
+const matchCss = readAppCss()
 assert.match(matchCss, /match-toast/)
 assert.match(matchCss, /match-scene/)
 assert.match(matchCss, /grid-template-rows: subgrid/)
@@ -742,7 +743,7 @@ const shellSrc = readFileSync(
 assert.match(shellSrc, /view\.name === 'journal'/)
 assert.match(shellSrc, /view\.name === 'hub'/)
 
-const cssSrc = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
+const cssSrc = readAppCss()
 assert.match(cssSrc, /--candy-lip/)
 assert.match(cssSrc, /--candy-shine/)
 assert.match(cssSrc, /#ffcc33/)

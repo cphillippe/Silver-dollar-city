@@ -36,6 +36,7 @@ import {
 } from '../src/lib/claimMerge.ts'
 import { lessonStory, storyPlayFor } from '../src/lib/storyPlay.ts'
 import { mergeWinBeat } from '../src/lib/successBeat.ts'
+import { readAppCss } from './readAppCss.mjs'
 
 assert.equal(CLAIM_MERGE_LINE, 'wb-creed')
 assert.equal(CLAIM_MERGE_CLAIM, 'Paul hands on an early public creed: died, buried, raised, appeared.')
@@ -177,7 +178,7 @@ assert.match(playSrc, /merge-drop-chip/)
 assert.match(playSrc, /merge-ghost is-loud/)
 assert.match(playSrc, /Smash the Died pair/)
 assert.match(playSrc, /WinBurst play=\{view\.won\}/)
-const mergeCss = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
+const mergeCss = readAppCss()
 assert.match(mergeCss, /merge-drop-chip/)
 assert.match(
   mergeCss,
