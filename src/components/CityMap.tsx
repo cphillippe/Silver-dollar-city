@@ -140,7 +140,6 @@ export function CityMap({
   const timers = useRef<number[]>([])
   const camNow = useRef(FULL_CAM)
   const camFrame = useRef(0)
-  const lastPulse = useRef<CityPlotId | null>(null)
 
   function stageOf(id: CityPlotId): CityStage {
     if (mode === 'poster') return id === 'porch' ? 'scaffold' : 'empty'
@@ -189,17 +188,8 @@ export function CityMap({
     }
   }, [])
 
-  // Hub "Build this" / map tap Manage — one-shot zoom toward lot, then full map
-  useEffect(() => {
-    if (mode !== 'live' || !mindPlot) {
-      lastPulse.current = null
-      return
-    }
-    if (!isEasy(progress)) return
-    if (lastPulse.current === mindPlot) return
-    lastPulse.current = mindPlot
-    pulseToward(mindPlot)
-  }, [mode, mindPlot, progress])
+  // 1.4.124 — Easy Manage open no longer pulseToward's (Bill: map moved under opaque card).
+  // Upgrade playQueue still tweens camAround → FULL_CAM when lots rise.
 
   useEffect(() => {
     if (mode !== 'live') return
@@ -265,22 +255,6 @@ export function CityMap({
       if (t < 1) camFrame.current = requestAnimationFrame(tick)
     }
     camFrame.current = requestAnimationFrame(tick)
-  }
-
-  /** One-shot juice: brief zoom toward a lot, then settle back to full-map contain. Not sticky. */
-  function pulseToward(id: CityPlotId) {
-    if (mode === 'poster') return
-    if (playing.current) return
-    const reduced =
-      typeof window !== 'undefined' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (reduced) {
-      camNow.current = FULL_CAM
-      setCam(FULL_CAM)
-      return
-    }
-    tweenCam(camAround(id), 180)
-    later(480, () => tweenCam(FULL_CAM, 240))
   }
 
   function playQueue(

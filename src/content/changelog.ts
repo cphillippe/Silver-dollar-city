@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.124',
+    title: 'Manage sheet keeps map visible',
+    when: '2026-09-24',
+    items: [
+      'Easy Manage: bottom sheet (~half phone) so the Home candy map stays visible above — no opaque wall over the lot',
+      'Light scrim only; skip the one-shot zoom pulse while Manage is open so the map does not move under a hidden card',
+      'PLACE·PERSON·MAIN IDEA stay compact from 1.4.122; Dig/Hard/NW/Town/stores/Match/Lock In/Road maze parked',
+    ],
+  },
+  {
     version: '1.4.123',
     title: 'Lock In miss recovery',
     when: '2026-09-24',
