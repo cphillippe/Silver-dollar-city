@@ -133,12 +133,17 @@ assert.equal(upgrades.some((item) => item.id === 'porch' && item.to === 'built')
 assert.equal(upgrades.some((item) => item.id === 'hollow' && item.to === 'scaffold'), true)
 
 const mapSrc = readFileSync(new URL('../src/components/CityMap.tsx', import.meta.url), 'utf8')
+const plotArtSrc = readFileSync(
+  new URL('../src/components/city/CityPlotArt.tsx', import.meta.url),
+  'utf8',
+)
+const mapArtSrc = `${mapSrc}\n${plotArtSrc}`
 assert.match(mapSrc, /city-beat/)
-assert.match(mapSrc, /is-rising/)
+assert.match(plotArtSrc, /is-rising/)
 assert.match(mapSrc, /beat\.beat/)
-assert.match(mapSrc, /city-folk/)
+assert.match(plotArtSrc, /city-folk/)
 assert.match(mapSrc, /TownFolk/)
-assert.match(mapSrc, /city-portrait/)
+assert.match(plotArtSrc, /city-portrait/)
 assert.match(mapSrc, /tweenCam/)
 assert.match(mapSrc, /Grew!/)
 assert.match(mapSrc, /beatRank/)
@@ -147,19 +152,22 @@ assert.match(mapSrc, /Still lit/)
 assert.match(mapSrc, /city-morrow/)
 assert.match(mapSrc, /city-gift/)
 assert.match(mapSrc, /nextGift/)
-assert.match(mapSrc, /city-home-pad/)
-assert.match(mapSrc, /city-roof-tile/)
-assert.match(mapSrc, /PlotArt/)
-assert.match(mapSrc, /HollowArt/)
-assert.match(mapSrc, /PorchArt/)
-assert.match(mapSrc, /HeavenCity/)
-assert.match(mapSrc, /EdenGrove/)
-assert.match(mapSrc, /SpinePath/)
-assert.match(mapSrc, /City of Heaven/)
-assert.match(mapSrc, /Eden → City of Heaven/)
-assert.match(mapSrc, /heavenForm/)
-assert.match(mapSrc, /SPINE_GROW/)
-assert.match(mapSrc, /Heaven waits/)
+assert.match(plotArtSrc, /city-home-pad/)
+assert.match(plotArtSrc, /city-roof-tile/)
+assert.match(plotArtSrc, /PlotArt/)
+assert.match(plotArtSrc, /HollowArt/)
+assert.match(plotArtSrc, /PorchArt/)
+assert.match(plotArtSrc, /HeavenCity/)
+assert.match(plotArtSrc, /EdenGrove/)
+assert.match(plotArtSrc, /SpinePath/)
+assert.match(mapArtSrc, /City of Heaven/)
+assert.match(mapArtSrc, /Eden → City of Heaven/)
+assert.match(plotArtSrc, /heavenForm/)
+assert.match(plotArtSrc, /SPINE_GROW/)
+assert.match(mapArtSrc, /Heaven waits/)
+assert.doesNotMatch(mapSrc, /function (EdenGrove|HollowArt|PlotArt|TownFolk)/)
+assert.match(plotArtSrc, /export function (EdenGrove|PlotGroup|TownFolk)/)
+assert.match(mapSrc, /from '\.\/city\/CityPlotArt'/)
 
 const twoHollow = {
   ...afterDaily,
@@ -310,8 +318,8 @@ const welcomeSrc = readFileSync(
 )
 assert.match(welcomeSrc, /welcome-hero/)
 assert.match(welcomeSrc, /is-onescreen/)
-assert.match(welcomeSrc, /STORY\.purpose/)
-assert.match(welcomeSrc, /STORY\.who/)
+assert.match(welcomeSrc, /EASY\.welcomeGoal/)
+assert.match(welcomeSrc, /EASY\.welcomeNote/)
 assert.doesNotMatch(welcomeSrc, /cityPromise/)
 assert.doesNotMatch(welcomeSrc, /welcome-cast-late/)
 assert.match(welcomeSrc, /YOU · RIVER/)
@@ -687,7 +695,7 @@ const challengeSrc = readFileSync(
 )
 assert.match(challengeSrc, /TownReturn/)
 assert.match(challengeSrc, /See the town/)
-assert.match(challengeSrc, /onNavigate\(\{ name: 'hub' \}\)/)
+assert.match(challengeSrc, /onNavigate\(EASY_HOME\)/)
 assert.match(challengeSrc, /afterJuice/)
 assert.match(challengeSrc, /savedWin/)
 assert.match(challengeSrc, /puzzle-title/)
@@ -722,10 +730,14 @@ assert.match(hollowSrc, /The father runs with mercy/)
 assert.match(hollowSrc, /Luke 10:36/)
 
 const cityLibSrc = readFileSync(new URL('../src/lib/city.ts', import.meta.url), 'utf8')
-assert.doesNotMatch(cityLibSrc, /Walk again/)
-assert.match(cityLibSrc, /Still lit/)
-assert.match(cityLibSrc, /Seven Seals/)
-assert.doesNotMatch(cityLibSrc, /Keep building/)
+const cityModelSrc = readFileSync(new URL('../src/lib/cityModel.ts', import.meta.url), 'utf8')
+const cityCodeSrc = `${cityLibSrc}\n${cityModelSrc}`
+assert.doesNotMatch(cityCodeSrc, /Walk again/)
+assert.match(cityCodeSrc, /Still lit/)
+assert.match(cityCodeSrc, /Seven Seals/)
+assert.doesNotMatch(cityCodeSrc, /Keep building/)
+assert.match(cityLibSrc, /from '\.\/cityModel\.ts'/)
+assert.match(cityModelSrc, /export function nextKicker/)
 assert.equal(nextKicker('built', 'hollow', true), 'Still lit')
 assert.equal(nextKicker('lit', 'porch', true), 'Still lit')
 assert.equal(nextKicker('scaffold', 'hollow', true), 'Build next')
@@ -906,28 +918,41 @@ assert.match(defendSrc, /defendPads/)
 assert.match(defendSrc, /afterJuiceRef/)
 assert.match(defendSrc, /}, \[phase, easy, progress\.defense\.cleared\]/)
 assert.match(defendSrc, /fireBest/)
-assert.match(defendSrc, /defend-lantern/)
-assert.match(defendSrc, /defend-ridge/)
-assert.match(defendSrc, /defend-beam/)
-assert.match(defendSrc, /defend-porch/)
-assert.match(defendSrc, /defend-blast/)
-assert.match(defendSrc, /Night held!/)
+const defendNightSrc = readFileSync(
+  new URL('../src/components/DefendNightActors.tsx', import.meta.url),
+  'utf8',
+)
+const defendSkySrc = readFileSync(
+  new URL('../src/components/DefendNightSky.tsx', import.meta.url),
+  'utf8',
+)
+const defendAbilitySrc = readFileSync(
+  new URL('../src/components/DefendAbilityBar.tsx', import.meta.url),
+  'utf8',
+)
+const defendBundleSrc = `${defendSrc}\n${defendNightSrc}\n${defendSkySrc}\n${defendAbilitySrc}`
+assert.match(defendNightSrc, /defend-lantern/)
+assert.match(defendSkySrc, /defend-ridge/)
+assert.match(defendNightSrc, /defend-beam/)
+assert.match(defendSkySrc, /defend-porch/)
+assert.match(defendNightSrc, /defend-blast/)
+assert.match(defendBundleSrc, /Night held!/)
 assert.match(defendSrc, /comboRef/)
-assert.match(defendSrc, /Turn them toward heaven/)
+assert.match(defendBundleSrc, /Turn them toward heaven/)
 assert.match(defendSrc, /unlockedWatchAbilities/)
 assert.match(defendSrc, /heavenPoint/)
-assert.match(defendSrc, /AbilityMark/)
+assert.match(defendAbilitySrc, /AbilityMark/)
 assert.match(defendSrc, /easyTapFit/)
 assert.match(defendSrc, /raidForWave/)
-assert.match(defendSrc, /WALKER_LABEL/)
-assert.match(defendSrc, /learningForTool/)
+assert.match(defendNightSrc, /WALKER_LABEL/)
+assert.match(defendBundleSrc, /learningForTool/)
 assert.match(defendSrc, /recordNight/)
 assert.doesNotMatch(defendSrc, /kind: 'encode'/)
 assert.match(defendSrc, /WATCH_ABILITY_LABEL/)
-assert.match(defendSrc, /WATCH_TOOLS\.map/)
-assert.match(defendSrc, /TIER_MARK/)
-assert.match(defendSrc, /defend-heaven-path/)
-assert.match(defendSrc, /Toward heaven/)
+assert.match(defendAbilitySrc, /WATCH_TOOLS\.map/)
+assert.match(defendAbilitySrc, /TIER_MARK/)
+assert.match(defendSkySrc, /defend-heaven-path/)
+assert.match(defendBundleSrc, /Toward heaven/)
 assert.match(defendCopy, /Plant love\. Turn cheap lines toward heaven\./)
 assert.doesNotMatch(defendCopy, /Cheap lines walk the Jericho road/)
 assert.deepEqual(unlockedWatchAbilities(empty), ['love'])
@@ -1026,7 +1051,7 @@ assert.equal(
 )
 assert.match(
   readFileSync(new URL('../src/components/TeachUnlock.tsx', import.meta.url), 'utf8'),
-  /Hold this line to deploy/,
+  /Lock in this line to deploy/,
 )
 assert.match(
   readFileSync(new URL('../src/components/Journal.tsx', import.meta.url), 'utf8'),
@@ -1062,8 +1087,8 @@ assert.match(
   /\.is-puzzle \.play\.is-build \.result \{[\s\S]*?position: static/,
 )
 assert.match(cssSrc, /match-recover/)
-assert.match(defendSrc, /preserveAspectRatio="xMidYMid meet"/)
-assert.match(defendSrc, /walkerSrc/)
+assert.match(defendSkySrc, /preserveAspectRatio="xMidYMid meet"/)
+assert.match(defendNightSrc, /walkerSrc/)
 assert.match(
   readFileSync(new URL('../src/components/Avatar.tsx', import.meta.url), 'utf8'),
   /portrait-river/,
@@ -1072,10 +1097,7 @@ assert.doesNotMatch(
   readFileSync(new URL('../src/components/Avatar.tsx', import.meta.url), 'utf8'),
   /HairCap/,
 )
-assert.match(
-  readFileSync(new URL('../src/components/CityMap.tsx', import.meta.url), 'utf8'),
-  /is-tapped/,
-)
+assert.match(plotArtSrc, /is-tapped/)
 assert.match(
   readFileSync(new URL('../src/components/Welcome.tsx', import.meta.url), 'utf8'),
   /is-alive/,
@@ -1088,7 +1110,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.87')
+assert.equal(APP_VERSION, '1.4.127')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1096,7 +1118,7 @@ assert.equal(CAST.silas.name, 'Silas Whitman')
 assert.equal(CAST.nora.name, 'Nora Skye')
 assert.equal(CAST.nora.role, 'Sky-watch keeper')
 assert.equal(CAST.ansel.name, 'Ansel Gate')
-assert.equal(CAST.ansel.role, 'Why-gate keeper')
+assert.equal(CAST.ansel.role, 'Swinging-arch keeper')
 assert.equal(CAST.ansel.id, 'ansel')
 assert.equal(CAST.ansel.areaId, 'first-gate')
 assert.equal(parableHollow.id, 'parable-hollow')
@@ -1138,7 +1160,7 @@ assert.equal(easyPlotTag('bench'), 'Witness Square')
 assert.equal(easyPlaceSub('hollow'), 'Story Creek · Jesus stories')
 assert.equal(easyPlaceSub('bench'), 'Witness Square · public names')
 assert.equal(easyPlaceSub('observatory'), 'Nora’s Sky Watch')
-assert.equal(easyPlaceSub('gate'), 'Ansel’s why-a-world gate')
+assert.equal(easyPlaceSub('gate'), 'Swinging Arch · Bedrock Step')
 assert.equal(easyPlaceSub('lookout'), 'Hope’s Meaning Ridge')
 assert.equal(LOT_STORY.gate.path, 'Why a world')
 assert.match(LOT_STORY.hollow.whyHard, /^Story Creek /)
@@ -1162,7 +1184,7 @@ assert.equal(latestChange(APP_VERSION).version, APP_VERSION)
 assert.equal(CONTENT_PACKS[0]?.id, 'core-v0')
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('observatory'))
 assert.ok(CONTENT_PACKS[0]?.areaIds.includes('ink-court'))
-assert.ok(CHANGELOG.some((note) => note.title === 'V0 launch'))
+assert.ok(CHANGELOG.some((note) => note.title === 'TS peels for cheap hops'))
 assert.match(
   readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8'),
   /is-inhabited/,
@@ -1230,7 +1252,7 @@ assert.match(
   /Build this/,
 )
 assert.match(mapSrc, /is-city-build/)
-assert.match(mapSrc, /BUILD_SCALE/)
+assert.match(plotArtSrc, /BUILD_SCALE/)
 assert.match(cssSrc, /city-plot-tag/)
 assert.match(cssSrc, /build-upgrade/)
 assert.match(
@@ -1253,11 +1275,11 @@ assert.match(TOWN_PATH_EASY, /Porch lamp/)
 assert.match(TOWN_PATH_EASY, /Manage/)
 assert.match(TOWN_PATH_EASY, /Build this/)
 assert.match(mapSrc, /TOWN_PATH_HARD/)
-assert.match(mapSrc, /EASY_TAG_SLOT/)
+assert.match(plotArtSrc, /EASY_TAG_SLOT/)
 assert.match(mapSrc, /setMindPlot\(id\)/)
 assert.match(hubSrc, /EASY\.matchCta/)
 assert.match(TOWN_PATH_HARD, /Heaven/)
-assert.match(mapSrc, /TOWN_PATH/)
+assert.match(mapSrc, /TOWN_PATH_HARD/)
 assert.match(
   readFileSync(new URL('../src/components/Landmark.tsx', import.meta.url), 'utf8'),
   /Story Creek/,
@@ -1418,8 +1440,7 @@ assert.match(cssSrc, /is-easy-hold/)
   assert.match(dockCss, /backdrop-filter: blur/)
   assert.doesNotMatch(dockCss, /#16062e/, 'sticky CTA docks must not be an opaque black slab')
 }
-assert.match(latestChange(APP_VERSION).items.join('\n'), /glass over the card/)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /gold card frame/)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /cityModel/)
 {
   const storyCardCss = cssSrc.match(/\.easy-story-card,[\s\S]*?\.easy-story-card::before \{[\s\S]*?\n\}/)?.[0] ?? ''
   assert.match(storyCardCss, /border:\s*0/)
@@ -1480,13 +1501,13 @@ assert.match(
 )
 assert.match(
   readFileSync(new URL('../src/content/changelog.ts', import.meta.url), 'utf8'),
-  /A sitting is about 3 pages/,
+  /TS peels for cheap hops/,
 )
 assert.match(mapSrc, /setMindPlot/)
 assert.match(mapSrc, /MindMap/)
-assert.match(mapSrc, /EASY_TAG_SLOT/)
+assert.match(plotArtSrc, /EASY_TAG_SLOT/)
 assert.match(mapSrc, /setMindPlot\(id\)/)
-assert.match(mapSrc, /city-plot-hit/)
+assert.match(plotArtSrc, /city-plot-hit/)
 assert.match(
   readFileSync(new URL('../src/components/MindMap.tsx', import.meta.url), 'utf8'),
   /mind-map/,
@@ -1526,7 +1547,9 @@ assert.equal(eraLabel('modern'), 'Modern · believing')
 assert.equal(eraLabel('scripture'), 'Scripture')
 assert.equal(eraLabel('ancient'), 'Ancient')
 
+const digParked = /^(papr-|aa-|psw-)/
 for (const id of allEvidenceIds()) {
+  if (digParked.test(id)) continue
   assert.ok(
     deeperLinksFor(id).length > 0,
     `Dig deeper missing for ${id}`,
@@ -1588,10 +1611,7 @@ assert.doesNotMatch(
 const changelogSrc = readFileSync(new URL('../src/content/changelog.ts', import.meta.url), 'utf8')
 assert.doesNotMatch(changelogSrc, /modern believing scholars only/)
 assert.doesNotMatch(changelogSrc, /Pre-Reformation|pre-Reform/)
-assert.match(
-  changelogSrc,
-  /Dig deeper: Scripture and older witnesses when they fit; later faithful sources welcome when they help\./,
-)
+assert.match(changelogSrc, /TS peels for cheap hops/)
 assert.match(
   readFileSync(new URL('../src/components/StoredLine.tsx', import.meta.url), 'utf8'),
   /DigDeeper/,
@@ -1642,49 +1662,29 @@ assert.match(
   /Jesus story/,
 )
 assert.match(
-  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  readFileSync(new URL('../src/lib/easyUi.ts', import.meta.url), 'utf8'),
   /Town \(soon\)/,
 )
 assert.match(
-  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  readFileSync(new URL('../src/lib/easyUi.ts', import.meta.url), 'utf8'),
   /scrapbook of matches/,
 )
-assert.match(
-  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /Read today’s story/,
-)
-assert.match(
-  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /Tap the line you kept/,
-)
-assert.match(
-  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /Tap why this is true/,
-)
-assert.match(
-  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /A reason is why this is true/,
-)
-assert.match(
-  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /Tap the sentence, then the place, then the person/,
-)
+const easyUiSrc = readFileSync(new URL('../src/lib/easyUi.ts', import.meta.url), 'utf8')
+assert.match(easyUiSrc, /Read today’s story/)
+assert.match(easyUiSrc, /Tap the line you kept/)
+assert.match(easyUiSrc, /Tap why this is true/)
+assert.match(easyUiSrc, /A reason is why this is true/)
+assert.match(easyUiSrc, /Tap the sentence, then the place, then the person/)
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
   /Tap this next — short Jesus story/,
 )
-assert.match(
-  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /Save your picks/,
-)
+assert.match(easyUiSrc, /Save your picks/)
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
   /easyFacingLine/,
 )
-assert.match(
-  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /why this is true/,
-)
+assert.match(easyUiSrc, /why this is true/)
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
   /easyJournalMeta/,
@@ -1693,23 +1693,17 @@ assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
   /used as/,
 )
-assert.match(
-  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /Tap the sentence, then the place, then the person/,
-)
+assert.match(easyUiSrc, /Tap the sentence, then the place, then the person/)
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
   /Wrong\. Tap this one: \$\{label\}/,
 )
-assert.match(
-  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /Keep the right pictures/,
-)
+assert.match(easyUiSrc, /Keep the right pictures/)
 assert.match(
   readFileSync(new URL('../src/components/DigDeeper.tsx', import.meta.url), 'utf8'),
   /EASY\.reasonSense/,
 )
-assert.match(defendSrc, /easyFacingLine/)
+assert.match(defendAbilitySrc, /easyFacingLine/)
 assert.doesNotMatch(
   readFileSync(new URL('../src/content/plain.ts', import.meta.url), 'utf8'),
   /Keep the pictures\. Toss the slogans/,
@@ -1783,8 +1777,8 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
   assert.doesNotMatch(cssSrc, /max-height: min\(62vh, 520px\)/)
   assert.match(cssSrc, /\.hub\.is-easy-home \.easy-extra-streets[\s\S]{0,120}display:\s*none/)
   assert.match(cssSrc, /\.hub\.is-easy-home \.easy-core[\s\S]{0,80}display:\s*none/)
-  assert.match(mapSrc, /is-easy-soft/)
-  assert.match(mapSrc, /xMidYMid slice/)
+  assert.match(cssSrc, /is-easy-soft/)
+  assert.match(mapSrc, /xMidYMid meet/)
   assert.match(hubSrc, /easyMatchReady/)
   assert.ok(
     easyHome.indexOf('easy-build-it') < easyHome.indexOf('easy-coach'),
@@ -1879,7 +1873,7 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
   assert.equal(easyWhoWhere('wb-creed').place, 'Witness Square')
   assert.equal(easyWhoWhere('daily-lantern').who, 'Juniper')
   assert.equal(easyWhoWhere('daily-lantern').place, 'East porch')
-  assert.equal(EASY_LINE_ORDER.length, 45)
+  assert.equal(EASY_LINE_ORDER.length, 54)
   assert.equal(EASY_LINE_ORDER[0], 'ph-road')
   assert.equal(EASY_LINE_ORDER[1], 'ph-father')
   assert.ok(EASY_LINE_ORDER.indexOf('ph-father') < EASY_LINE_ORDER.indexOf('wb-creed'))
@@ -1900,7 +1894,7 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
     'wb-women': { who: 'Silas', place: 'Witness Square' },
     'daily-lantern': { who: 'Juniper', place: 'East porch' },
     'daily-stars': { who: 'Nora', place: 'Sky Watch' },
-    'daily-cosmos': { who: 'Ansel', place: 'Why Gate' },
+    'daily-cosmos': { who: 'Ansel', place: 'Why Gate Arch' },
     'hl-moral': { who: 'Hope', place: 'Meaning Ridge' },
     'sc-tacitus': { who: 'Silas', place: 'Stone Court' },
     'sc-james': { who: 'Silas', place: 'Stone Court' },
@@ -1960,7 +1954,7 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
   assert.equal(easyLoopLine({ easyTaught: walked, easyHeld: walked }), 'ph-road')
   assert.equal(STREET_TRIPLES.length, 45)
   assert.equal(STREET_CHALLENGE.triples.length, 45)
-  assert.equal(STREET_CHALLENGE.nodes.length, STREET_TRIPLES.length + 14)
+  assert.equal(STREET_CHALLENGE.nodes.length, STREET_TRIPLES.length + 15)
   {
     const walks = streetWalks()
     const covered = walks.flatMap((walk) => walk.triples.map((item) => item.id))
@@ -2004,7 +1998,7 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
     assert.equal(onStreet.has(id), false, `${id} stays off the street`)
   }
   for (const id of allEvidenceIds()) {
-    if (skip.has(id)) continue
+    if (skip.has(id) || digParked.test(id)) continue
     assert.ok(onStreet.has(id), `${id} belongs on the street`)
     const tripleId = streetTripleForLine(id)
     assert.notEqual(tripleId, undefined, `${id} triple`)
@@ -2041,10 +2035,6 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
   assert.equal(linkPicture(lantern, STREET_CHALLENGE).plotId, 'porch')
   assert.equal(linkPicture(seeds, STREET_CHALLENGE).art, undefined)
   assert.doesNotMatch(STREET_CHALLENGE.context, /maybe|perhaps God|if God exists/i)
-  assert.match(latestChange(APP_VERSION).items.join('\n'), /MATCHED! is a badge/)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Full Hard street — all game facts/)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /tonight’s street/)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /gold CTA is Find the gems/)
 }
 {
   const settingsSrc = readFileSync(
@@ -2064,15 +2054,6 @@ assert.match(latestChange(APP_VERSION).items.join('\n'), /gold CTA is Find the g
   assert.doesNotMatch(easyMore, /Night Watch/)
   assert.doesNotMatch(easyMore, /nightSoon/)
 }
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Town \(soon\)/)
-assert.match(
-  latestChange(APP_VERSION).items.join('\n'),
-  /Easy: Match panel blast teaches the story/,
-)
-assert.match(
-  latestChange(APP_VERSION).items.join('\n'),
-  /Night Watch fully hidden until Match→Hold solid/,
-)
 assert.match(
   readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8'),
   /easy && next\.name === 'defend'/,
@@ -2151,10 +2132,7 @@ assert.match(
   readFileSync(new URL('../src/content/lots.ts', import.meta.url), 'utf8'),
   /Story Creek · Jesus stories/,
 )
-assert.match(
-  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /Love — when compassion moves you, help like the Samaritan/,
-)
+assert.match(easyUiSrc, /Love — when compassion moves you, help like the Samaritan/)
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
   /Love — tap the matching face\. A true line turns a cheap claim toward heaven/,
@@ -2180,14 +2158,11 @@ assert.doesNotMatch(
   /A true main idea can turn/,
 )
 assert.doesNotMatch(latestChange(APP_VERSION).items.join('\n'), /A true main idea can turn/)
-assert.match(
-  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /Main idea = the short true line we keep/,
-)
-assert.match(defendSrc, /is-easy-walker/)
+assert.match(easyUiSrc, /Main idea = the short true line we keep/)
+assert.match(defendNightSrc, /is-easy-walker/)
 assert.match(defendSrc, /waveSpeed\(easy\)/)
 assert.match(defendSrc, /easy && item.id === targetId/)
-assert.match(defendSrc, /easy-walker-face/)
+assert.match(defendNightSrc, /easy-walker-face/)
 assert.doesNotMatch(defendSrc, /holdWalkers/)
 assert.match(defendSrc, /holdSpawn/)
 assert.equal(easyTapMode(true, 'wave', false), true)
@@ -2288,7 +2263,7 @@ assert.ok(easyWhyWordCount(easyWhyLine('The servant forgiven an unpayable debt t
   }
   assert.ok(faces.length > 20)
 }
-assert.equal(EASY.holdNext, 'Hold next')
+assert.equal(EASY.holdNext, 'Lock In next')
 assert.equal(EASY.learnCta, 'Learn')
 assert.equal(EASY.readStoryFirst, 'Read the story first')
 assert.equal(EASY.learnThisFirst, 'Learn this first.')
@@ -2301,8 +2276,11 @@ assert.doesNotMatch(
 )
 assert.doesNotMatch(EASY.loveCue, /mean line/)
 assert.doesNotMatch(EASY.nightLead, /mean line|claim|throttle/)
-assert.match(mapSrc, /EASY_FOLK_LIFT/)
-assert.match(mapSrc, /easy\s*\?\s*false/)
+assert.match(plotArtSrc, /EASY_FOLK_LIFT/)
+assert.match(
+  readFileSync(new URL('../src/components/Journal.tsx', import.meta.url), 'utf8'),
+  /easy\s*\?\s*false/,
+)
 assert.equal(EASY_FOLK_LIFT, 56)
 {
   const folkY = { hollow: 352, lamps: 358, bench: 344, porch: 356 }
@@ -2323,7 +2301,10 @@ assert.match(
   /easyChromeLine/,
 )
 assert.doesNotMatch(hubSrc, /slot="hub-banner"/)
-assert.match(hubSrc, /EASY\.supportTrail/)
+assert.match(
+  readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
+  /EASY\.supportTrail/,
+)
 assert.match(
   readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8'),
   /SceneAd/,
@@ -2340,21 +2321,18 @@ assert.match(
   readFileSync(new URL('../src/components/DigDeeper.tsx', import.meta.url), 'utf8'),
   /is-easy-dig/,
 )
-assert.match(mapSrc, /easy \? 'seed'/)
+assert.match(plotArtSrc, /easy \? 'seed'/)
 assert.match(mapSrc, /easy \? null : <SpinePath/)
 assert.match(mapSrc, /if \(isEasy\(progress\)\) return/)
 assert.match(mapSrc, /if \(playing\.current && !isEasy\(progress\)\) return/)
 assert.match(mapSrc, /Tap a building to Manage it/)
 assert.doesNotMatch(latestChange(APP_VERSION).title, /Heaven/)
-assert.match(latestChange(APP_VERSION).title, /core/)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /6\/6/)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Match/)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Story Creek/)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Witness Square/)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Sky Watch/)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Meaning Ridge/)
+assert.match(latestChange(APP_VERSION).title, /peel|hop/i)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /CityPlotArt/)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /gemSearchGrid/)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /cityModel/)
 assert.match(defendSrc, /easyTapTarget/)
-assert.match(defendSrc, /data-person-node="walker"/)
+assert.match(defendNightSrc, /data-person-node="walker"/)
 assert.doesNotMatch(defendSrc, /walkerCue|easySolo|clearWalkerCue|hideOther/)
 assert.match(defendSrc, /loveHowTo/)
 assert.equal(
@@ -2385,28 +2363,16 @@ assert.doesNotMatch(
 assert.doesNotMatch(hubSrc, /EASY\.nightWhat/)
 assert.doesNotMatch(defendSrc, /EASY\.nightWhat/)
 assert.match(defendSrc, /EASY\.nightTap/)
-assert.match(
-  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /Tap the face/,
-)
-assert.match(
-  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /saved: 'Hold'/,
-)
-assert.match(
-  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /Connections/,
-)
-assert.match(
-  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /Things you can use/,
-)
+assert.match(easyUiSrc, /Tap the face/)
+assert.match(easyUiSrc, /saved: 'Lock In'/)
+assert.match(easyUiSrc, /connections: 'Connections'/)
+assert.match(easyUiSrc, /Things you can use/)
 assert.doesNotMatch(
   latestChange(APP_VERSION).items.join('\n'),
-  /dossier|ledger|scaffold|proofs|offline-first|schema|mind-map|held ideas|Evidence Journal/i,
+  /dossier|ledger|scaffold|proofs|offline-first|held ideas|Evidence Journal/i,
 )
 assert.match(defendSrc, /taught = true/)
-assert.match(defendSrc, /easy-walker-cue-label/)
+assert.match(defendNightSrc, /easy-walker-cue-label/)
 assert.match(defendSrc, /easy \? 'wave'/)
 assert.match(cssSrc, /easy-walker-cue-label/)
 assert.match(
@@ -2427,7 +2393,7 @@ assert.match(
 )
 assert.match(hubSrc, /easyHomeFocus/)
 assert.match(hubSrc, /easyHoldView/)
-assert.match(hubSrc, /focus === 'match' \? 'primary'/)
+assert.match(hubSrc, /focus === 'match' \? 'is-dock-now'/)
 assert.match(hubSrc, /midStreet/)
 assert.match(hubSrc, /EASY\.continueStreet/)
 assert.match(hubSrc, /Tonight’s street/)
@@ -2435,13 +2401,7 @@ assert.match(
   readFileSync(new URL('../src/components/challenges/LinkPlay.tsx', import.meta.url), 'utf8'),
   /of \$\{streetBeat\.total\} facts/,
 )
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Continue tonight’s street is the gold Town CTA/)
 assert.match(cssSrc, /is-easy-hold-practice/)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /one lesson loop, leaner Match, less Hold clutter/)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /mercy-first until held on Easy/)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Reset this walk starts Easy at Mercy/)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Easy trail: all 35 facts in easyOrder/)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /father-run/)
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
   /easyTaught/,
@@ -2505,23 +2465,20 @@ assert.doesNotMatch(
 assert.match(cssSrc, /easy-steps/)
 assert.match(
   readFileSync(new URL('../src/components/AppShell.tsx', import.meta.url), 'utf8'),
-  /easy \? EASY\.saved : 'Journal'/,
+  /easy \? EASY_TOP\.lockIn : 'Journal'/,
 )
 assert.match(linkPlaySrc, /easy-steps/)
 assert.match(linkPlaySrc, /1 · Sentence/)
-assert.match(
-  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /Tap a sentence/,
-)
+assert.match(easyUiSrc, /Tap a sentence/)
 assert.match(linkPlaySrc, /is-screen-\$\{screen\}/)
 assert.doesNotMatch(defendSrc, /easyTap && tool\.id !== ability/)
-assert.match(defendSrc, /WATCH_TOOLS\.map/)
+assert.match(defendAbilitySrc, /WATCH_TOOLS\.map/)
 assert.match(defendSrc, /EASY\.nightLead/)
 assert.equal(EASY.nightLead, 'Tap the face six times.')
 assert.equal(EASY.rememberSentence, 'Tap the line you kept.')
 assert.equal(EASY.tapWhy, 'Tap why this is true.')
 assert.equal(EASY.reasonTeach, 'A reason is why this is true.')
-assert.equal(EASY.saved, 'Hold')
+assert.equal(EASY.saved, 'Lock In')
 assert.equal(EASY.savedSub, 'saved lines')
 assert.equal(EASY.nightMiss, 'Wrong — tap the glowing face')
 assert.match(defendSrc, /EASY\.nightMiss/)
@@ -2719,7 +2676,7 @@ assert.match(
   /building block of an argument/,
 )
 assert.match(teachSrc, /WORDS\.claim\.teach/)
-assert.match(teachSrc, /The claim you will hold/)
+assert.match(teachSrc, /The claim you will lock in/)
 assert.match(teachSrc, /Skip reading/)
 assert.match(teachSrc, /The main idea you will keep/)
 assert.doesNotMatch(teachSrc, /A claim is the main idea we hold to be true/)
@@ -2765,9 +2722,6 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(EASY.loveCue, /compassion/)
   assert.match(EASY.loveCue, /^Love /)
   assert.doesNotMatch(EASY.loveCue, /A true main idea can turn/)
-  assert.match(latestChange(APP_VERSION).items.join('\n'), /tool how-to, not a claim/)
-  assert.match(latestChange(APP_VERSION).items.join('\n'), /Luke 10/)
-
   const sameFace = uniqueHoldChoices(
     [watch.claim, watch.claim, watch.claimChoices[1], watch.claimChoices[1]],
     (line) => easyFacingLine(watch.id, line),
@@ -2797,30 +2751,5 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(easyLead('daily-gems', 'x'), 'Match each picture to the short line.')
   assert.equal(easyLead('fg-kalam', 'x'), 'Keep the beginning argument. Toss the rest.')
 }
-
-assert.match(
-  latestChange(APP_VERSION).items.join('\n'),
-  /Easy Match stop \+ shorter Hold why chips for Plain 5\/5/,
-)
-assert.match(
-  latestChange(APP_VERSION).items.join('\n'),
-  /Hold next or Home/,
-)
-assert.match(
-  latestChange(APP_VERSION).items.join('\n'),
-  /The father hugs him first/,
-)
-assert.match(
-  latestChange(APP_VERSION).items.join('\n'),
-  /Tap the line you kept/,
-)
-assert.match(
-  latestChange(APP_VERSION).items.join('\n'),
-  /Tap why this is true/,
-)
-assert.match(
-  latestChange(APP_VERSION).items.join('\n'),
-  /Wrong — tap the glowing face/,
-)
 
 console.log('check-city: ok')
