@@ -133,6 +133,10 @@ assert.equal(upgrades.some((item) => item.id === 'porch' && item.to === 'built')
 assert.equal(upgrades.some((item) => item.id === 'hollow' && item.to === 'scaffold'), true)
 
 const mapSrc = readFileSync(new URL('../src/components/CityMap.tsx', import.meta.url), 'utf8')
+// Art functions were peeled to CityMapArt.tsx in 1.4.127; check combined.
+const artSrcPath = new URL('../src/components/CityMapArt.tsx', import.meta.url)
+const artSrc = existsSync(artSrcPath) ? readFileSync(artSrcPath, 'utf8') : ''
+const mapAndArtSrc = mapSrc + '\n' + artSrc
 assert.match(mapSrc, /city-beat/)
 assert.match(mapSrc, /is-rising/)
 assert.match(mapSrc, /beat\.beat/)
@@ -148,17 +152,17 @@ assert.match(mapSrc, /city-morrow/)
 assert.match(mapSrc, /city-gift/)
 assert.match(mapSrc, /nextGift/)
 assert.match(mapSrc, /city-home-pad/)
-assert.match(mapSrc, /city-roof-tile/)
+assert.match(mapAndArtSrc, /city-roof-tile/)
 assert.match(mapSrc, /PlotArt/)
-assert.match(mapSrc, /HollowArt/)
-assert.match(mapSrc, /PorchArt/)
+assert.match(mapAndArtSrc, /HollowArt/)
+assert.match(mapAndArtSrc, /PorchArt/)
 assert.match(mapSrc, /HeavenCity/)
 assert.match(mapSrc, /EdenGrove/)
 assert.match(mapSrc, /SpinePath/)
 assert.match(mapSrc, /City of Heaven/)
 assert.match(mapSrc, /Eden → City of Heaven/)
-assert.match(mapSrc, /heavenForm/)
-assert.match(mapSrc, /SPINE_GROW/)
+assert.match(mapAndArtSrc, /heavenForm/)
+assert.match(mapAndArtSrc, /SPINE_GROW/)
 assert.match(mapSrc, /Heaven waits/)
 
 const twoHollow = {
