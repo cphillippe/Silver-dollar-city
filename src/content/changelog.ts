@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.134',
+    title: 'Flatten memory-palace map bg under plot seats',
+    when: '2026-09-25',
+    items: [
+      'Home map background replaced with flattened candy valley plate — continuous grass under hollow, gate, and porch seats (0% brown dirt cake at anchors)',
+      'Pack A plot cutouts and 1.4.133 CSS cascade fix unchanged; streets, creek, plots, and HeavenCity stay SVG overlays',
+    ],
+  },
+  {
     version: '1.4.133',
     title: 'Clean candy cascade fix: no plates, no gold rings',
     when: '2026-09-25',
