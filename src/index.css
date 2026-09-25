@@ -6395,7 +6395,8 @@ img.walker-face.easy-walker-face,
 
 .mind-map.is-manage .mind-map-card {
   width: min(100%, 420px);
-  max-height: min(72dvh, calc(100dvh - 56px));
+  /* 1.4.124 — bottom sheet: keep candy map visible in top half (Bill: map moves under wall) */
+  max-height: min(50dvh, 420px);
   min-height: 0;
   height: auto; /* hug content — no tall empty purple sheet */
   margin: 0;
@@ -6403,6 +6404,16 @@ img.walker-face.easy-walker-face,
   /* Gemini vision on Bill East porch shot: compress pad, keep purple/gold */
   padding: 8px 12px calc(6px + env(safe-area-inset-bottom, 0px));
   gap: 4px;
+}
+
+/* 1.4.124 — light scrim: top stays bright so Home map + lot stay readable above sheet */
+.mind-map.is-manage .mind-map-scrim {
+  background: linear-gradient(
+    180deg,
+    rgba(16, 6, 36, 0.05) 0%,
+    rgba(16, 6, 36, 0.16) 55%,
+    rgba(16, 6, 36, 0.28) 100%
+  );
 }
 
 /* 1.4.122 — Manage lot sheet denser (vision: hug PLACE·PERSON·MAIN IDEA) */
@@ -6433,7 +6444,9 @@ img.walker-face.easy-walker-face,
   display: flex;
   flex-direction: column;
   gap: 6px;
-  flex: 0 1 auto; /* hug content — no empty purple stretch */
+  flex: 1 1 auto; /* hug when short; scroll inside 50dvh cap when tall */
+  min-height: 0;
+  overflow: auto;
   padding: 0;
 }
 
