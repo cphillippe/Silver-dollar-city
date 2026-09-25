@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { shuffle } from '../../lib/shuffle'
-import { EASY, easyWrongTap, isEasy } from '../../lib/easy'
+import { plainFor } from '../../content/plain'
+import { EASY, easyChromeLine, easyWrongTap, isEasy } from '../../lib/easy'
 import { useProgress } from '../../store/progress'
 import type { MatchChallenge, MatchSceneId } from '../../types'
 import { MatchScene } from '../MatchScene'
@@ -117,6 +118,11 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
     : right
   const needPair = left.find((pair) => pair.id === (picked?.id ?? focusId))
   const missCard = picked?.side === 'left' ? needPair?.right : needPair?.left
+  // Easy Match chrome already prints EASY.matchHow as .sort-how — skip identical PuzzleHint.
+  const easyPlainHint = easy
+    ? easyChromeLine(plainFor(challenge.id)?.hint ?? challenge.context ?? '')
+    : ''
+  const showEasyPuzzleHint = Boolean(easyPlainHint) && easyPlainHint !== EASY.matchHow
 
   return (
     <div
@@ -125,7 +131,13 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
     >
       <WinBurst play={status === 'ok'} stamp={easy ? EASY.matchWin : 'Locked!'} />
       <PuzzleLead challenge={challenge} />
-      <PuzzleHint text={challenge.context} id={challenge.id} onPeek={onPeek} />
+      {easy ? (
+        showEasyPuzzleHint ? (
+          <PuzzleHint text={challenge.context} id={challenge.id} onPeek={onPeek} />
+        ) : null
+      ) : (
+        <PuzzleHint text={challenge.context} id={challenge.id} onPeek={onPeek} />
+      )}
       <p className="sort-how">
         {easy ? (
           EASY.matchHow
