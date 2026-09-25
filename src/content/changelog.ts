@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.128',
+    title: 'Cursor hop guardrails / peel map',
+    when: '2026-09-25',
+    items: [
+      '`.cursor/rules/cursor-hop-efficiency.mdc` — agents open peeled modules first (CityPlotArt, gemSearchGrid, cityModel, scoped CSS)',
+      'No gameplay change — Dig/Hard/NW/Town/stores/Match/Lock In parked',
+    ],
+  },
+  {
     version: '1.4.127',
     title: 'TS peels for cheap hops',
     when: '2026-09-25',
