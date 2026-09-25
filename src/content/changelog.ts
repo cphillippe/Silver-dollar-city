@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.133',
+    title: 'Clean candy cascade fix: no plates, no gold rings',
+    when: '2026-09-25',
+    items: [
+      'Home map: candy plot killers moved after is-built/is-lit/is-next stage rules so fill/stroke/filter no longer paint white plates through cutout alpha',
+      'Pack A (porch, gate, journal, hollow): hit circles and ready rings no longer inherit gold stroke; next halo softens on easy Pack A lots',
+      'PlotImageArt belt-and-suspenders fill="none" stroke="none" on candy raster images',
+    ],
+  },
+  {
     version: '1.4.132',
     title: 'Clean candy Home: Pack A cutouts + memory-palace bg',
     when: '2026-09-25',
