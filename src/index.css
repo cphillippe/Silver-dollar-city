@@ -10094,9 +10094,10 @@ html[data-easy='on'] .next-tap {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 3px;
   width: min(100%, 390px);
   margin: 0 auto;
+  padding: 6px 6px 8px;
   min-height: 0;
   height: 100%;
   max-height: 100%;
@@ -10143,26 +10144,59 @@ html[data-easy='on'] .next-tap {
 .play.is-road-maze .sort-how {
   margin: 0;
   text-align: center;
+  font-size: 0.68rem;
+  line-height: 1.2;
+}
+
+.play.is-road-maze .story-kicker {
+  margin: 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  line-height: 1.15;
+}
+
+.play.is-road-maze .run-thumbs {
+  gap: 4px;
+}
+
+.play.is-road-maze .run-thumb {
+  max-height: 34px;
+  border-radius: 10px;
+}
+
+.play.is-road-maze .story-caption {
+  min-height: 0;
+  margin: 0;
+  padding: 0 2px;
+  font-size: 0.86rem;
+  line-height: 1.2;
+}
+
+.play.is-road-maze .match-score {
+  margin: 2px 0 0;
+  font-size: 0.72rem;
 }
 
 .maze-beats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 6px;
+  gap: 5px;
   margin: 0;
   padding: 0;
   list-style: none;
+  flex: 0 0 auto;
 }
 
 .maze-beat {
   display: grid;
   justify-items: center;
-  gap: 2px;
-  padding: 5px 4px 4px;
+  align-content: center;
+  gap: 1px;
+  padding: 4px 3px 3px;
   border-radius: 12px;
   background: rgba(18, 6, 46, 0.45);
   color: #fff6e8;
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 750;
   letter-spacing: 0.03em;
   text-transform: uppercase;
@@ -10193,17 +10227,17 @@ html[data-easy='on'] .next-tap {
 }
 
 .maze-beat-face {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
   object-fit: cover;
   box-shadow: 0 2px 0 rgba(80, 20, 40, 0.28);
 }
 
 .maze-beat-inn {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px 8px 6px 6px;
+  width: 38px;
+  height: 38px;
+  border-radius: 9px 9px 7px 7px;
   background: linear-gradient(180deg, #ff8aa3, #c01840);
   clip-path: polygon(50% 0, 100% 32%, 100% 100%, 0 100%, 0 32%);
 }
@@ -10212,7 +10246,7 @@ html[data-easy='on'] .next-tap {
   position: relative;
   flex: 1 1 auto;
   min-height: 0;
-  width: min(100%, 390px);
+  width: 100%;
   margin: 0 auto;
   display: flex;
   justify-content: center;
@@ -10246,13 +10280,16 @@ html[data-easy='on'] .next-tap {
   grid-template-columns: repeat(var(--maze-cols, 5), minmax(0, 1fr));
   grid-template-rows: repeat(var(--maze-rows, 7), minmax(0, 1fr));
   gap: 4px;
-  width: min(100%, 340px, calc(48dvh * 5 / 7));
+  /* Width-first flush @ ~390 — was starved by calc(dvh * 5/7) side gutters */
+  width: min(100%, 390px);
+  max-width: 100%;
+  flex: 0 1 auto;
   height: auto;
-  max-height: min(48dvh, 420px);
+  max-height: min(58dvh, 520px);
   aspect-ratio: 5 / 7;
   margin: 0 auto;
-  padding: 8px;
-  border-radius: 18px;
+  padding: 6px;
+  border-radius: 16px;
   background:
     linear-gradient(180deg, rgba(255, 180, 90, 0.18), rgba(42, 13, 88, 0.2)),
     linear-gradient(180deg, #3a1480, #1a0840);
@@ -10313,7 +10350,7 @@ html[data-easy='on'] .next-tap {
 .maze-inn,
 .maze-carry {
   position: absolute;
-  inset: 10%;
+  inset: 6%;
   display: grid;
   place-items: center;
   pointer-events: none;
@@ -11165,19 +11202,36 @@ html[data-easy='on'] .next-tap {
 
 @media (max-width: 420px) {
   .maze-board {
-    width: min(100%, calc(44dvh * 5 / 7));
-    max-height: min(44dvh, 380px);
+    width: min(100%, 390px);
+    max-width: 100%;
+    max-height: min(56dvh, 480px);
     gap: 3px;
-    padding: 6px;
+    padding: 5px;
+  }
+
+  .play.is-road-maze {
+    gap: 2px;
+    padding: 5px 5px 6px;
   }
 
   .play.is-road-maze .story-caption {
     min-height: 0;
-    font-size: 0.9rem;
+    font-size: 0.82rem;
   }
 
   .play.is-road-maze .run-thumb {
-    max-height: 40px;
+    max-height: 30px;
+  }
+
+  .maze-beat-face,
+  .maze-beat-inn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .maze-beat {
+    font-size: 0.68rem;
+    padding: 3px 2px 2px;
   }
 }
 
