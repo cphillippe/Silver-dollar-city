@@ -350,6 +350,8 @@ function PlotImageArt({ id, href }: { id: CityPlotId; href: string }) {
       y={at.y - h / 2}
       width={w}
       height={h}
+      fill="none"
+      stroke="none"
       preserveAspectRatio="xMidYMid meet"
     />
   )

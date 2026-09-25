@@ -75,6 +75,8 @@ interface CityMapProps {
 
 const FULL_CAM = { x: 0, y: 0, w: 640, h: 420 }
 
+const PACK_A_CANDY: CityPlotId[] = ['porch', 'gate', 'journal', 'hollow']
+
 function camAround(id: CityPlotId) {
   const at = ANCHOR[id]
   return { x: at.x - 150, y: at.y - 120, w: 300, h: 230 }
@@ -495,7 +497,10 @@ export function CityMap({
 
         {mode === 'live' && !celebrating ? (
           <g className="city-next-mark" transform={`translate(${nextAt.x} ${nextAt.y})`}>
-            <circle r={easy ? 22 : 34} className="city-next-halo" />
+            <circle
+              r={easy ? 22 : 34}
+              className={`city-next-halo${easy && PACK_A_CANDY.includes(nextId) ? ' is-easy-soft' : ''}`}
+            />
             {easy ? null : (
               <text y="-40" textAnchor="middle">
                 {kicker}
