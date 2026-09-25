@@ -99,7 +99,9 @@ export function RoadMazePlay({
   const opened = mazeBeatsOpened(found, helped, won)
   const goal = mazeGoal(found, helped)
   const caption = mazeCaption(found, helped, won)
+  const helpPhase = found && !helped
   const latest = panels[Math.min(opened, panels.length) - 1]
+  const storyLine = won ? ROAD_MAZE_CLAIM : helpPhase ? caption : (latest?.text ?? caption)
 
   useEffect(() => {
     atRef.current = at
@@ -365,7 +367,7 @@ export function RoadMazePlay({
   return (
     <div
       ref={playRef}
-      className={`play is-road-maze ${shake ? 'is-shake' : ''} ${won ? 'is-win' : ''} ${helped ? 'is-helped' : ''} ${found ? 'is-found' : ''}`}
+      className={`play is-road-maze ${shake ? 'is-shake' : ''} ${won ? 'is-win' : ''} ${helpPhase ? 'is-help-phase' : ''} ${helped ? 'is-helped' : ''} ${found ? 'is-found' : ''}`}
       style={{ ['--maze-cols' as string]: MAZE_COLS, ['--maze-rows' as string]: MAZE_ROWS }}
     >
       <p className="sort-how">{EASY.mazeHunt}</p>
@@ -387,7 +389,7 @@ export function RoadMazePlay({
         })}
       </ol>
       <p className="story-caption" role="status">
-        {won ? ROAD_MAZE_CLAIM : (latest?.text ?? caption)}
+        {storyLine}
       </p>
       <ul className="maze-beats" aria-label="Mercy on the road">
         {MAZE_BEATS.map((beat) => {
@@ -464,13 +466,15 @@ export function RoadMazePlay({
                 }}
                 className={`maze-cell ${road ? 'is-road' : 'is-rock'} ${here ? 'is-here' : ''} ${hurt ? 'is-hurt' : ''} ${inn ? 'is-inn' : ''} ${helpCue ? 'is-help-cue' : ''} ${glow ? 'is-hint' : ''} ${popAt === mazeKey(cell) ? 'is-pop' : ''}`}
               >
-                {here ? (
+                {here && !helpCue ? (
                   <span className="maze-actor is-you">
                     <img src={ROAD_HELP_FACE} alt="" draggable={false} />
                   </span>
                 ) : null}
                 {hurt && !helped ? (
-                  <span className={`maze-actor is-hurt ${here ? 'is-with-you' : ''}`}>
+                  <span
+                    className={`maze-actor is-hurt ${here && !helpCue ? 'is-with-you' : ''} ${helpCue ? 'is-help-focus' : ''}`}
+                  >
                     <img src={ROAD_HURT_FACE} alt="" draggable={false} />
                   </span>
                 ) : null}

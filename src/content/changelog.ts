@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.129',
+    title: 'Samaritan HELP contain',
+    when: '2026-09-25',
+    items: [
+      'HELP phase: hurt + Help pill stay inside the cell — no gold-arena clip; one affordance (skip duplicate you face on help cue)',
+      'HELP phase chrome compress — beat row + thumbs shrink so the board fills the phone',
+      'Caption uses maze teach line (“Stop. Help the hurt man.”) during HELP, not walk-past panel text',
+    ],
+  },
+  {
     version: '1.4.128',
     title: 'Cursor hop guardrails / peel map',
     when: '2026-09-25',

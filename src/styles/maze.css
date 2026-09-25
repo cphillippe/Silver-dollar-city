@@ -330,6 +330,7 @@
   margin: 0 auto;
   padding: 6px;
   border-radius: 16px;
+  overflow: hidden;
   background:
     linear-gradient(180deg, rgba(255, 180, 90, 0.18), rgba(42, 13, 88, 0.2)),
     linear-gradient(180deg, #3a1480, #1a0840);
@@ -403,9 +404,13 @@
   border-radius: 28%;
 }
 
-.maze-cell.is-hurt,
+.maze-cell.is-hurt:not(.is-help-cue),
 .maze-cell.is-inn {
   overflow: visible;
+}
+
+.maze-cell.is-help-cue {
+  overflow: hidden;
 }
 
 .maze-cell-label {
@@ -427,8 +432,12 @@
 }
 
 .maze-cell.is-help-cue .maze-cell-label {
+  bottom: 5%;
+  max-width: calc(100% - 10%);
   background: #ffcc33;
   color: #2a0d58;
+  font-size: 0.52rem;
+  padding: 1px 4px;
   box-shadow: 0 0 10px rgba(255, 204, 51, 0.55);
 }
 
@@ -436,6 +445,66 @@
   inset: auto 4% 28% auto;
   width: 42%;
   height: 42%;
+}
+
+.maze-cell.is-help-cue .maze-actor.is-hurt.is-help-focus {
+  inset: 8% 8% 24% 8%;
+  width: auto;
+  height: auto;
+}
+
+.maze-cell.is-help-cue .maze-actor.is-hurt.is-help-focus img {
+  box-shadow: 0 0 0 2px rgba(255, 252, 232, 0.85);
+}
+
+/* HELP phase — compress chrome so the board fills the phone */
+.play.is-road-maze.is-help-phase {
+  gap: 2px;
+  padding: 4px 5px 6px;
+}
+
+.play.is-road-maze.is-help-phase .sort-how {
+  font-size: 0.62rem;
+  line-height: 1.1;
+}
+
+.play.is-road-maze.is-help-phase .story-kicker {
+  font-size: 0.62rem;
+  line-height: 1.1;
+}
+
+.play.is-road-maze.is-help-phase .run-thumbs {
+  gap: 3px;
+}
+
+.play.is-road-maze.is-help-phase .run-thumb {
+  max-height: 26px;
+  border-radius: 8px;
+}
+
+.play.is-road-maze.is-help-phase .story-caption {
+  font-size: 0.8rem;
+  line-height: 1.15;
+}
+
+.play.is-road-maze.is-help-phase .maze-beats {
+  gap: 4px;
+}
+
+.play.is-road-maze.is-help-phase .maze-beat {
+  padding: 2px 2px 1px;
+  font-size: 0.64rem;
+  border-radius: 10px;
+}
+
+.play.is-road-maze.is-help-phase .maze-beat-face,
+.play.is-road-maze.is-help-phase .maze-beat-inn {
+  width: 30px;
+  height: 30px;
+}
+
+.play.is-road-maze.is-help-phase .maze-board {
+  max-height: min(62dvh, 540px);
 }
 
 .maze-drop {
@@ -597,6 +666,20 @@
   .maze-beat {
     font-size: 0.68rem;
     padding: 3px 2px 2px;
+  }
+
+  .play.is-road-maze.is-help-phase .run-thumb {
+    max-height: 24px;
+  }
+
+  .play.is-road-maze.is-help-phase .maze-beat-face,
+  .play.is-road-maze.is-help-phase .maze-beat-inn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .play.is-road-maze.is-help-phase .maze-board {
+    max-height: min(64dvh, 520px);
   }
 }
 
