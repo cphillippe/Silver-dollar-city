@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.125',
+    title: 'Samaritan road flush on phone',
+    when: '2026-09-24',
+    items: [
+      'Easy Samaritan road / Mercy · Story Creek: maze board fills ~390px play width (kill dvh width-cap gutters); bigger tiles + actors',
+      'Bigger HURT MAN / HELP / INN beat faces; compress how/kicker/thumbs/caption chrome so the board gets the space',
+      'Gold/purple Easy chrome + walk/Help/hurt-man path from 1.4.110/116 kept — Dig/Hard/NW/Town/stores/Home Manage/Match/Lock In parked',
+    ],
+  },
+{
     version: '1.4.124',
     title: 'Manage sheet keeps map visible',
     when: '2026-09-24',
