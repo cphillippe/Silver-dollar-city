@@ -635,4 +635,10 @@ for (const id of EASY_LINE_ORDER) {
   assert.ok(panels.every((panel) => panel.media && panel.beatId), `${id} beat + media`)
 }
 
+const gemSearchSrc = readFileSync(new URL('../src/lib/gemSearch.ts', import.meta.url), 'utf8')
+const gemGridSrc = readFileSync(new URL('../src/lib/gemSearchGrid.ts', import.meta.url), 'utf8')
+assert.match(gemSearchSrc, /from '\.\/gemSearchGrid\.ts'/)
+assert.match(gemGridSrc, /export function (fillGrid|snapFingerPath|tryPlaceWord)/)
+assert.doesNotMatch(gemSearchSrc, /function emptyGrid\(/)
+
 console.log(`check-gem-search: ok (bonus dict ${COMMON_BONUS_COUNT} words, 3–6)`)
