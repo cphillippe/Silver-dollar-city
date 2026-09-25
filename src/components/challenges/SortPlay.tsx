@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { shuffle } from '../../lib/shuffle'
 import type { SortChallenge, SortTile } from '../../types'
+import { plainFor } from '../../content/plain'
 import { STORY } from '../../content/story'
 import { EASY, easyChromeLine, isEasy } from '../../lib/easy'
 import { useProgress } from '../../store/progress'
@@ -127,6 +128,12 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
   const selected = picked ? takeTile(picked) : undefined
   const ready = status !== 'ok' && filledSlots().length === 0
   const nextTile = filledSlots()[0]
+  // Easy Sort keeps PuzzleHint (.easy-hint teach) — skip redundant Keep/Toss .sort-how when hint shows.
+  // Inverse of MatchPlay 1.4.137 (which kept .sort-how and skipped duplicate PuzzleHint).
+  const easyPlainHint = easy
+    ? easyChromeLine(plainFor(challenge.id)?.hint ?? challenge.context ?? '')
+    : ''
+  const showSortHow = !easy || !easyPlainHint
 
   return (
     <div
@@ -135,17 +142,19 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
       <WinBurst play={status === 'ok'} />
       <PuzzleLead challenge={challenge} />
       <PuzzleHint text={challenge.context} id={challenge.id} onPeek={onPeek} />
-      <p className="sort-how">
-        {easy ? (
-          <>
-            <strong>Keep</strong> this, or <strong>Toss</strong> it — one line at a time
-          </>
-        ) : (
-          <>
-            <strong>Keep</strong> belongs · <strong>Toss</strong> a distractor
-          </>
-        )}
-      </p>
+      {showSortHow ? (
+        <p className="sort-how">
+          {easy ? (
+            <>
+              <strong>Keep</strong> this, or <strong>Toss</strong> it — one line at a time
+            </>
+          ) : (
+            <>
+              <strong>Keep</strong> belongs · <strong>Toss</strong> a distractor
+            </>
+          )}
+        </p>
+      ) : null}
 
       {easy ? (
         nextTile ? (
