@@ -264,9 +264,10 @@ export function PlotGroup({
   const tagX = Math.min(632 - tagW / 2, Math.max(tagW / 2 + 8, at.x))
   const tagY = at.y + 32
   const tagH = 18
+  const candyImg = plotImageHref(id, stage)
   return (
     <g
-      className={`city-plot is-${stage} ${next ? 'is-next' : ''} ${rising ? 'is-rising' : ''} ${tapped ? 'is-tapped' : ''} ${ready ? 'is-ready' : ''} ${easy ? 'is-easy-lot' : ''}`}
+      className={`city-plot is-${stage} ${next ? 'is-next' : ''} ${rising ? 'is-rising' : ''} ${tapped ? 'is-tapped' : ''} ${ready ? 'is-ready' : ''} ${easy ? 'is-easy-lot' : ''} ${candyImg ? 'has-candy-img' : ''}`}
       role={clickable ? 'button' : undefined}
       tabIndex={clickable ? 0 : undefined}
       aria-label={`${title} ${stage}${ready ? ', upgrade ready' : ''}${next ? ', next to build' : ''}${rising ? ', just rose' : ''}`}

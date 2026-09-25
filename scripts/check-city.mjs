@@ -1110,7 +1110,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.130')
+assert.equal(APP_VERSION, '1.4.131')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -2326,11 +2326,13 @@ assert.match(mapSrc, /easy \? null : <SpinePath/)
 assert.match(mapSrc, /if \(isEasy\(progress\)\) return/)
 assert.match(mapSrc, /if \(playing\.current && !isEasy\(progress\)\) return/)
 assert.match(mapSrc, /Tap a building to Manage it/)
-assert.match(latestChange(APP_VERSION).title, /candy plot/i)
+assert.match(latestChange(APP_VERSION).title, /alpha|overlay/i)
 assert.match(latestChange(APP_VERSION).items.join('\n'), /porch|gate|journal|hollow/)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /TownFolk/)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /overlay|alpha/i)
 assert.match(plotArtSrc, /PLOT_IMG/)
 assert.match(plotArtSrc, /city-plot-img/)
+assert.match(plotArtSrc, /has-candy-img/)
+assert.match(cssSrc, /\.city-plot\.has-candy-img/)
 assert.match(plotArtSrc, /preserveAspectRatio="xMidYMid meet"/)
 for (const id of ['porch', 'gate', 'journal', 'hollow']) {
   for (const stage of ['scaffold', 'built', 'lit']) {

@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.131',
+    title: 'Pack A true alpha + map overlay fix',
+    when: '2026-09-25',
+    items: [
+      'Easy-trail Pack A plot webps replaced with true RGBA alpha cutouts — no white plates behind porch, gate, journal, or hollow',
+      'Home map: grey/dark mid-map overlay blob fixed — group fill/stroke/filter no longer paints on candy raster plots',
+      'Lit/next glow scoped to the plot image instead of the SVG group bounding box',
+    ],
+  },
+  {
     version: '1.4.130',
     title: 'Home map candy plot images',
     when: '2026-09-25',
