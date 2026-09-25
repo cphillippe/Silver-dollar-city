@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.127',
+    title: 'TS peels for cheap hops',
+    when: '2026-09-25',
+    items: [
+      'Peel CityMap plot/SVG art → city/CityPlotArt.tsx; shell (camera, beats, mind-map) stays in CityMap (~726 LOC)',
+      'Peel gemSearch grid placement/fill/snap → gemSearchGrid.ts; puzzle orchestration + MATCH_CHIPS stay in gemSearch.ts',
+      'Peel city model math → cityModel.ts; city.ts keeps storage re-exports — Dig/Hard/NW/Town/stores/Match/Lock In parked',
+    ],
+  },
+  {
     version: '1.4.126',
     title: 'CSS peels + scoped tests',
     when: '2026-09-24',
