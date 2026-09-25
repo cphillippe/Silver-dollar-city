@@ -27,9 +27,8 @@
   stroke-dasharray: none;
 }
 
-.city-plot.has-candy-img.is-lit .city-plot-img,
-.city-plot.has-candy-img.is-next .city-plot-img {
-  filter: url(#city-glow);
+.city-plot.has-candy-img.is-next {
+  filter: none;
 }
 
 .city-plot.has-candy-img.is-tapped {
