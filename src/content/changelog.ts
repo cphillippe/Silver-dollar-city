@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.132',
+    title: 'Clean candy Home: Pack A cutouts + memory-palace bg',
+    when: '2026-09-25',
+    items: [
+      'Easy-trail Pack A (porch, gate, journal, hollow) plot webps replaced with clean candy cutouts — building only, no dirt cake or floating grass pads (Bill lock)',
+      'Home map background: geometric SVG hills/sky replaced with candy memory-palace valley plate; streets, creek, plots, and HeavenCity stay SVG overlays',
+      'Candy plot glow rings removed — bg owns ground, lit/next selection no longer paints cheap yellow halos on raster plots',
+    ],
+  },
+  {
     version: '1.4.131',
     title: 'Pack A true alpha + map overlay fix',
     when: '2026-09-25',

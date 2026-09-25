@@ -1110,7 +1110,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.131')
+assert.equal(APP_VERSION, '1.4.132')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -2326,9 +2326,15 @@ assert.match(mapSrc, /easy \? null : <SpinePath/)
 assert.match(mapSrc, /if \(isEasy\(progress\)\) return/)
 assert.match(mapSrc, /if \(playing\.current && !isEasy\(progress\)\) return/)
 assert.match(mapSrc, /Tap a building to Manage it/)
-assert.match(latestChange(APP_VERSION).title, /alpha|overlay/i)
+assert.match(latestChange(APP_VERSION).title, /clean candy|memory-palace/i)
 assert.match(latestChange(APP_VERSION).items.join('\n'), /porch|gate|journal|hollow/)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /overlay|alpha/i)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /cutout|background|memory-palace/i)
+assert.match(mapSrc, /cityMapBg/)
+assert.match(mapSrc, /city-map-bg\.webp/)
+assert.ok(
+  existsSync(new URL('../src/assets/city/city-map-bg.webp', import.meta.url)),
+  'missing city-map-bg.webp',
+)
 assert.match(plotArtSrc, /PLOT_IMG/)
 assert.match(plotArtSrc, /city-plot-img/)
 assert.match(plotArtSrc, /has-candy-img/)
