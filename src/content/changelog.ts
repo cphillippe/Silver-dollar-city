@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.137',
+    title: 'Match: one how line on Easy',
+    when: '2026-09-25',
+    items: [
+      'Easy Match: dedupe PuzzleHint when it repeats EASY.matchHow — keep a single .sort-how line (daily-gems, daily-lantern, daily-door, ph-seeds)',
+    ],
+  },
+  {
     version: '1.4.136',
     title: 'Home map: plant Easy folk + soften candy roads',
     when: '2026-09-25',
