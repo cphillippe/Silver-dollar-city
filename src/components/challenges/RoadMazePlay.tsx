@@ -387,7 +387,7 @@ export function RoadMazePlay({
         })}
       </ol>
       <p className="story-caption" role="status">
-        {won ? ROAD_MAZE_CLAIM : (latest?.text ?? caption)}
+        {won ? ROAD_MAZE_CLAIM : found && !helped ? caption : (latest?.text ?? caption)}
       </p>
       <ul className="maze-beats" aria-label="Mercy on the road">
         {MAZE_BEATS.map((beat) => {
