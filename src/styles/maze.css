@@ -188,6 +188,11 @@
   line-height: 1.2;
 }
 
+/* Steps 2–3: player found the hurt man — instruction banner is redundant. */
+.play.is-road-maze.is-found:not(.is-win) .sort-how {
+  display: none;
+}
+
 .play.is-road-maze .story-kicker {
   margin: 0;
   font-size: 0.68rem;
@@ -406,6 +411,11 @@
 .maze-cell.is-hurt,
 .maze-cell.is-inn {
   overflow: visible;
+}
+
+/* When the player occupies the hurt cell, clip everything to the tile. */
+.maze-cell.is-help-cue {
+  overflow: hidden;
 }
 
 .maze-cell-label {
