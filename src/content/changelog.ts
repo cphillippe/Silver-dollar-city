@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.135',
+    title: 'Home map plate fix: candy image fill + folk portraits',
+    when: '2026-09-25',
+    items: [
+      'Pack A candy plots: stylesheet fill:none !important on .city-plot-img so SVG image viewports no longer paint light plates through cutout alpha (Pages, East porch)',
+      'TownFolk and welcome folk: replaced foreignObject HTML Avatar with clipped SVG portrait images (walker pattern) — no rectangular chrome behind circular faces',
+    ],
+  },
+  {
     version: '1.4.134',
     title: 'Flatten memory-palace map bg under plot seats',
     when: '2026-09-25',

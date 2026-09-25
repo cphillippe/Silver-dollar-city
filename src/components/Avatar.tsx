@@ -82,6 +82,10 @@ export function walkerSrc(kind: WalkerKind) {
   return WALKERS[kind]
 }
 
+export function portraitSrc(who: CharacterId) {
+  return PORTRAITS[who]
+}
+
 export function Say({
   who,
   line,

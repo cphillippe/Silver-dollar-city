@@ -50,7 +50,7 @@ import {
   visualSnapshot,
 } from '../lib/cityBuild'
 import { TOWN_PATH_HARD } from '../content/lots'
-import { Avatar } from './Avatar'
+import { Avatar, portraitSrc } from './Avatar'
 import { GemMark } from './GemMark'
 import { MindMap } from './MindMap'
 import cityMapBg from '../assets/city/city-map-bg.webp'
@@ -477,21 +477,36 @@ export function CityMap({
 
         {mode === 'poster' ? (
           <g className="city-welcome-folk" aria-hidden>
-            <foreignObject x="148" y="300" width="44" height="44">
-              <div className="city-portrait">
-                <Avatar who="river" size="sm" />
-              </div>
-            </foreignObject>
-            <foreignObject x="348" y="274" width="44" height="44">
-              <div className="city-portrait">
-                <Avatar who="juniper" size="sm" />
-              </div>
-            </foreignObject>
-            <foreignObject x="236" y="318" width="40" height="40">
-              <div className="city-portrait">
-                <Avatar who="mercy" size="sm" />
-              </div>
-            </foreignObject>
+            <image
+              className="city-portrait-img"
+              href={portraitSrc('river')}
+              x="148"
+              y="300"
+              width="44"
+              height="44"
+              clipPath="url(#city-face-clip)"
+              preserveAspectRatio="xMidYMid slice"
+            />
+            <image
+              className="city-portrait-img"
+              href={portraitSrc('juniper')}
+              x="348"
+              y="274"
+              width="44"
+              height="44"
+              clipPath="url(#city-face-clip)"
+              preserveAspectRatio="xMidYMid slice"
+            />
+            <image
+              className="city-portrait-img"
+              href={portraitSrc('mercy')}
+              x="236"
+              y="318"
+              width="40"
+              height="40"
+              clipPath="url(#city-face-clip)"
+              preserveAspectRatio="xMidYMid slice"
+            />
           </g>
         ) : null}
 
