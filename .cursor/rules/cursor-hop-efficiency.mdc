@@ -1,0 +1,33 @@
+---
+description: Open peeled modules first — keep Cursor hops cheap on Silver City
+alwaysApply: true
+---
+
+Silver City is peeled for cheap hops (1.4.126 CSS + 1.4.127 TS). **Open the narrow module first**, not the shell or `index.css`.
+
+## Peel map (prefer these)
+
+| Job | Open first | Shell (only if wiring) |
+| --- | --- | --- |
+| Home map art / plot SVG / folk | `src/components/city/CityPlotArt.tsx` | `src/components/CityMap.tsx` |
+| City model / ages / plot math | `src/lib/cityModel.ts` | `src/lib/city.ts` (storage re-exports) |
+| Match grid fill / snap / placement | `src/lib/gemSearchGrid.ts` | `src/lib/gemSearch.ts` (puzzle + MATCH_CHIPS) |
+| Match board UI | `src/components/challenges/GemSearchPlay.tsx` | `src/components/challenges/MatchPlay.tsx` |
+| Samaritan road / maze CSS | `src/styles/maze.css` | `src/components/challenges/RoadMazePlay.tsx` |
+| City map CSS | `src/styles/city.css` | — |
+| Match CSS | `src/styles/match.css`, `match-art-tight.css`, `gem*.css` | — |
+| Hold / sort CSS | `src/styles/sortHold.css` | — |
+| Defend / Night Watch CSS | `src/styles/defend.css` | — |
+
+CSS peels import from `src/main.tsx`. **Never move peeled rules back into `src/index.css`** — keep shared tokens + layout there only.
+
+## Still fat (avoid opening whole unless needed)
+
+`index.css` (~5k shared), `sortHold.css`, `city.css`, `links.ts`, `defend.css`, `gemSearch.ts`, `gem.css`, `deeper.ts`, `packParse.ts`, `maze.css`, `progress.ts`, `Hub.tsx`.
+
+## Workflow
+
+- **Gemini-first content packs** in `src/content/packs/` are fine — engine stays peeled.
+- **Park unless asked:** Dig deeper, Hard trail, Night Watch, Town, stores/billing, Samaritan HELP polish.
+- **One concern per PR.** Infra/peel hops only when that is the ask.
+- **Version:** bump `package.json`, `src/config/app.ts`, `scripts/check-city.mjs`, `scripts/check-panel-blast.mjs`, add `src/content/changelog.ts` row, then `npm run build` (refreshes `docs/`).
