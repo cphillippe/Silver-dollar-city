@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.138',
+    title: 'Sort: one how line on Easy',
+    when: '2026-09-25',
+    items: [
+      'Easy Sort: keep PuzzleHint teach line; skip redundant Keep/Toss .sort-how when the easy hint shows (one how line — Clear family with Match 1.4.137)',
+    ],
+  },
+  {
     version: '1.4.137',
     title: 'Match: one how line on Easy',
     when: '2026-09-25',
