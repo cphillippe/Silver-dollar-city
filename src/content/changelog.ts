@@ -8,6 +8,17 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.127',
+    title: 'HELP cell fix + citymap-art peel',
+    when: '2026-09-25',
+    items: [
+      'Fix: HELP-phase cell clips (overflow: hidden on is-help-cue) — Help face and label no longer overflow the tile on small phones',
+      'Fix: Hide redundant instruction banner in HELP/INN phases (is-found); caption now shows game goal instead of last story panel text',
+      'Peel: ~490 lines of pure SVG art extracted from CityMap.tsx → CityMapArt.tsx (EdenGrove, SpinePath, EasyPlotChip, HeavenCity, PlotArt + 8 building art fns); CityMap.tsx 1406→905 lines',
+      'Scoped check-city asserts updated to cover CityMapArt — Dig/Hard/NW/Town/stores/Match/Lock In parked',
+    ],
+  },
+  {
     version: '1.4.126',
     title: 'CSS peels + scoped tests',
     when: '2026-09-24',
