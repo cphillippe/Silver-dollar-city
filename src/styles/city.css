@@ -11,6 +11,10 @@
   margin: 0 -6px 16px;
 }
 
+.city-plot-img {
+  pointer-events: none;
+}
+
 .city-svg {
   display: block;
   width: 100%;

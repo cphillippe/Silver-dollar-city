@@ -1,4 +1,16 @@
 import { Avatar } from '../Avatar'
+import plotGateBuilt from '../../assets/city/plots/plot-gate-built.webp'
+import plotGateLit from '../../assets/city/plots/plot-gate-lit.webp'
+import plotGateScaffold from '../../assets/city/plots/plot-gate-scaffold.webp'
+import plotHollowBuilt from '../../assets/city/plots/plot-hollow-built.webp'
+import plotHollowLit from '../../assets/city/plots/plot-hollow-lit.webp'
+import plotHollowScaffold from '../../assets/city/plots/plot-hollow-scaffold.webp'
+import plotJournalBuilt from '../../assets/city/plots/plot-journal-built.webp'
+import plotJournalLit from '../../assets/city/plots/plot-journal-lit.webp'
+import plotJournalScaffold from '../../assets/city/plots/plot-journal-scaffold.webp'
+import plotPorchBuilt from '../../assets/city/plots/plot-porch-built.webp'
+import plotPorchLit from '../../assets/city/plots/plot-porch-lit.webp'
+import plotPorchScaffold from '../../assets/city/plots/plot-porch-scaffold.webp'
 import { townAck, townVoice } from '../../content/story'
 import {
   CITY_AGES,
@@ -33,6 +45,39 @@ export const ANCHOR: Record<CityPlotId, { x: number; y: number }> = {
 }
 
 const BUILD_SCALE = 1.58
+
+/** Phone-big candy stills for Easy-trail Pack A (porch/gate/journal/hollow). */
+type PackAPlotId = 'porch' | 'gate' | 'journal' | 'hollow'
+type PlotImageStage = 'scaffold' | 'built' | 'lit'
+
+export const PLOT_IMG: Record<
+  PackAPlotId,
+  Record<PlotImageStage, string>
+> = {
+  porch: {
+    scaffold: plotPorchScaffold,
+    built: plotPorchBuilt,
+    lit: plotPorchLit,
+  },
+  gate: {
+    scaffold: plotGateScaffold,
+    built: plotGateBuilt,
+    lit: plotGateLit,
+  },
+  journal: {
+    scaffold: plotJournalScaffold,
+    built: plotJournalBuilt,
+    lit: plotJournalLit,
+  },
+  hollow: {
+    scaffold: plotHollowScaffold,
+    built: plotHollowBuilt,
+    lit: plotHollowLit,
+  },
+}
+
+/** SVG viewBox width for Pack A candy images (72–110; scaled by BUILD_SCALE on phone). */
+const PLOT_IMG_W = 96
 
 const FOLK: Record<CityPlotId, { x: number; y: number }> = {
   lookout: { x: 568, y: 118 },
@@ -286,6 +331,29 @@ export function PlotGroup({
   )
 }
 
+function plotImageHref(id: CityPlotId, stage: CityStage): string | undefined {
+  if (stage !== 'scaffold' && stage !== 'built' && stage !== 'lit') return undefined
+  const pack = PLOT_IMG[id as PackAPlotId]
+  return pack?.[stage]
+}
+
+function PlotImageArt({ id, href }: { id: CityPlotId; href: string }) {
+  const at = ANCHOR[id]
+  const w = PLOT_IMG_W
+  const h = w
+  return (
+    <image
+      className="city-plot-img"
+      href={href}
+      x={at.x - w / 2}
+      y={at.y - h / 2}
+      width={w}
+      height={h}
+      preserveAspectRatio="xMidYMid meet"
+    />
+  )
+}
+
 function PlotArt({
   id,
   stage,
@@ -297,6 +365,8 @@ function PlotArt({
   fill: number
   rising: boolean
 }) {
+  const img = plotImageHref(id, stage)
+  if (img) return <PlotImageArt id={id} href={img} />
   if (id === 'hollow') return <HollowArt stage={stage} fill={fill} rising={rising} />
   if (id === 'porch') return <PorchArt stage={stage} />
   if (id === 'bench') return <BenchArt stage={stage} fill={fill} rising={rising} />
