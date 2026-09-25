@@ -1,4 +1,4 @@
-import { Avatar } from '../Avatar'
+import { portraitSrc } from '../Avatar'
 import plotGateBuilt from '../../assets/city/plots/plot-gate-built.webp'
 import plotGateLit from '../../assets/city/plots/plot-gate-lit.webp'
 import plotGateScaffold from '../../assets/city/plots/plot-gate-scaffold.webp'
@@ -350,6 +350,8 @@ function PlotImageArt({ id, href }: { id: CityPlotId; href: string }) {
       y={at.y - h / 2}
       width={w}
       height={h}
+      fill="none"
+      stroke="none"
       preserveAspectRatio="xMidYMid meet"
     />
   )
@@ -750,11 +752,16 @@ export function TownFolk({
           <path className="city-porch-rail" d="M-16 2 H16 M-16 2 v-8 M0 2 v-8 M16 2 v-8" />
         ) : null}
         {stage === 'lit' ? <circle className="city-lamp" cx="18" cy="-4" r="3.8" /> : null}
-        <foreignObject x="-22" y="-50" width="44" height="44" overflow="hidden">
-          <div className="city-portrait">
-            <Avatar who={voice.who} size="sm" />
-          </div>
-        </foreignObject>
+        <image
+          className="city-portrait-img"
+          href={portraitSrc(voice.who)}
+          x={-22}
+          y={-50}
+          width={44}
+          height={44}
+          clipPath="url(#city-face-clip)"
+          preserveAspectRatio="xMidYMid slice"
+        />
         {speaking ? (
           <g className="city-bubble">
             <rect x="-38" y="-62" width="76" height="16" rx="8" />

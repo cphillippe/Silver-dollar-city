@@ -15,23 +15,7 @@
   pointer-events: none;
 }
 
-/* Pack A candy raster: group fill/stroke/filter paint the <g> bounding box on
-   WebKit when children are only <image> — grey/purple plate mid-map (#165). */
-.city-plot.has-candy-img {
-  fill: none;
-  stroke: none;
-  filter: none;
-}
-
-.city-plot.has-candy-img.is-scaffold {
-  stroke-dasharray: none;
-}
-
-.city-plot.has-candy-img.is-lit .city-plot-img,
-.city-plot.has-candy-img.is-next .city-plot-img {
-  filter: url(#city-glow);
-}
-
+/* Pack A candy tap — fill/stroke/filter killers live AFTER stage rules below. */
 .city-plot.has-candy-img.is-tapped {
   animation: city-candy-tap 0.34s cubic-bezier(0.2, 1.45, 0.3, 1);
 }
@@ -220,38 +204,23 @@
   stroke-linecap: round;
 }
 
-.city-portrait {
-  width: 44px;
-  height: 44px;
-  max-width: 100%;
-  max-height: 100%;
-  display: block;
-  overflow: hidden;
-  border-radius: 50%;
+.city-portrait-img {
+  pointer-events: none;
   filter: drop-shadow(0 3px 8px rgba(20, 12, 6, 0.45));
 }
 
-html[data-easy='on'] .city-portrait,
-html[data-easy='on'] .city-portrait .avatar {
-  width: 100%;
-  height: 100%;
+.city-folk.is-home .city-portrait-img {
+  filter:
+    drop-shadow(0 3px 8px rgba(20, 12, 6, 0.45))
+    drop-shadow(0 0 0 2px rgba(232, 195, 106, 0.7))
+    drop-shadow(0 0 14px rgba(232, 195, 106, 0.45));
 }
 
-.city-portrait .avatar {
-  width: 44px;
-  height: 44px;
-}
-
-.city-folk.is-home .city-portrait {
-  box-shadow:
-    0 0 0 2px rgba(232, 195, 106, 0.7),
-    0 0 14px rgba(232, 195, 106, 0.45);
-}
-
-.city-folk.is-lit .city-portrait {
-  box-shadow:
-    0 0 0 2px #ffe08a,
-    0 0 18px rgba(255, 224, 138, 0.7);
+.city-folk.is-lit .city-portrait-img {
+  filter:
+    drop-shadow(0 3px 8px rgba(20, 12, 6, 0.45))
+    drop-shadow(0 0 0 2px #ffe08a)
+    drop-shadow(0 0 18px rgba(255, 224, 138, 0.7));
 }
 
 .city-home-pad {
@@ -436,6 +405,29 @@ html[data-easy='on'] .city-portrait .avatar {
   filter: url(#city-glow);
 }
 
+/* Pack A candy raster: must follow stage rules or is-built/is-lit re-win fill/stroke/filter
+   and paint plates + gold rings through cutout alpha (#165, #168). */
+.city-plot.has-candy-img,
+.city-plot.has-candy-img.is-empty,
+.city-plot.has-candy-img.is-scaffold,
+.city-plot.has-candy-img.is-built,
+.city-plot.has-candy-img.is-lit,
+.city-plot.has-candy-img.is-next,
+.city-plot.has-candy-img.is-ready,
+.city-plot.has-candy-img.is-rising,
+.city-plot.has-candy-img.is-tapped {
+  fill: none;
+  stroke: none;
+  filter: none;
+}
+
+/* Belt: SVG <image> fill paints its viewport rect through cutout alpha
+   even when the parent <g> is fill:none (#165 leftover on Pages/porch). */
+.city-plot.has-candy-img .city-plot-img {
+  fill: none !important;
+  stroke: none !important;
+}
+
 .city-folk-head {
   fill: #f0d2b0;
   stroke: #e0b34a;
@@ -510,19 +502,19 @@ html[data-easy='on'] .city-portrait .avatar {
 }
 
 .city-overworld.is-alive .city-folk,
-.city-overworld.is-alive .city-welcome-folk .city-portrait {
+.city-overworld.is-alive .city-welcome-folk .city-portrait-img {
   animation: city-bob 2.1s ease-in-out infinite;
 }
 
-.city-overworld.is-alive .city-welcome-folk foreignObject:nth-of-type(2) .city-portrait {
+.city-overworld.is-alive .city-welcome-folk .city-portrait-img:nth-of-type(2) {
   animation-delay: 0.25s;
 }
 
-.city-overworld.is-alive .city-welcome-folk foreignObject:nth-of-type(3) .city-portrait {
+.city-overworld.is-alive .city-welcome-folk .city-portrait-img:nth-of-type(3) {
   animation-delay: 0.5s;
 }
 
-.city-overworld.is-alive .city-folk.is-lit .city-portrait {
+.city-overworld.is-alive .city-folk.is-lit .city-portrait-img {
   animation: city-cheer-glow 1.8s ease-in-out infinite;
 }
 
@@ -1371,6 +1363,16 @@ html[data-theme='dusk'] .hub.is-town .street-link {
   stroke-width: 3;
   opacity: 0.85;
   animation: city-pulse 2.4s ease-in-out infinite;
+}
+
+.city-plot.has-candy-img .city-plot-hit {
+  fill: transparent;
+  stroke: none;
+}
+
+.city-plot.has-candy-img.is-ready .city-plot-hit {
+  stroke: none;
+  animation: none;
 }
 
 .city-plot-tag-bg {

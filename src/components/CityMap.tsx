@@ -50,9 +50,10 @@ import {
   visualSnapshot,
 } from '../lib/cityBuild'
 import { TOWN_PATH_HARD } from '../content/lots'
-import { Avatar } from './Avatar'
+import { Avatar, portraitSrc } from './Avatar'
 import { GemMark } from './GemMark'
 import { MindMap } from './MindMap'
+import cityMapBg from '../assets/city/city-map-bg.webp'
 import {
   ANCHOR,
   cityAgeReached,
@@ -73,6 +74,8 @@ interface CityMapProps {
 }
 
 const FULL_CAM = { x: 0, y: 0, w: 640, h: 420 }
+
+const PACK_A_CANDY: CityPlotId[] = ['porch', 'gate', 'journal', 'hollow']
 
 function camAround(id: CityPlotId) {
   const at = ANCHOR[id]
@@ -394,32 +397,14 @@ export function CityMap({
           </clipPath>
         </defs>
 
-        <rect width="640" height="420" fill="url(#city-sky)" />
-        <ellipse cx="320" cy="198" rx="280" ry="28" fill="#ffcc33" opacity="0.28" />
-        <circle cx="548" cy="48" r="28" fill="url(#city-moon-glow)" />
-        <circle className="city-moon" cx="548" cy="48" r="9" fill="#fff6d8" />
-        <g className={`city-sky-stars is-${stageOf('lamps')}`}>
-          <circle cx="72" cy="42" r="1.6" />
-          <circle cx="118" cy="28" r="1.2" />
-          <circle cx="510" cy="36" r="1.5" />
-          <circle cx="568" cy="52" r="1.1" />
-          <circle cx="430" cy="22" r="1.3" />
-          <circle cx="300" cy="34" r="1.1" />
-          <circle cx="196" cy="50" r="1.1" />
-          <circle cx="248" cy="20" r="0.9" />
-          <circle cx="390" cy="54" r="1.2" />
-          <circle cx="88" cy="68" r="0.8" />
-        </g>
-
-        <path
-          d="M-20 210 L80 120 160 168 250 96 340 150 430 78 520 130 660 70 V230 H-20 Z"
-          fill="url(#city-ridge)"
-          opacity="0.92"
-        />
-        <path
-          d="M-20 248 L40 200 120 228 210 176 300 214 410 168 500 206 660 150 V430 H-20 Z"
-          fill="#3dcc7a"
-          opacity="0.55"
+        {/* Candy memory-palace plate (#166). Streets/creek/plots/HeavenCity stay SVG overlays. */}
+        <image
+          href={cityMapBg}
+          x={0}
+          y={0}
+          width={640}
+          height={420}
+          preserveAspectRatio="xMidYMid slice"
         />
 
         <HeavenCity
@@ -492,29 +477,45 @@ export function CityMap({
 
         {mode === 'poster' ? (
           <g className="city-welcome-folk" aria-hidden>
-            <foreignObject x="148" y="300" width="44" height="44">
-              <div className="city-portrait">
-                <Avatar who="river" size="sm" />
-              </div>
-            </foreignObject>
-            <foreignObject x="348" y="274" width="44" height="44">
-              <div className="city-portrait">
-                <Avatar who="juniper" size="sm" />
-              </div>
-            </foreignObject>
-            <foreignObject x="236" y="318" width="40" height="40">
-              <div className="city-portrait">
-                <Avatar who="mercy" size="sm" />
-              </div>
-            </foreignObject>
+            <image
+              className="city-portrait-img"
+              href={portraitSrc('river')}
+              x="148"
+              y="300"
+              width="44"
+              height="44"
+              clipPath="url(#city-face-clip)"
+              preserveAspectRatio="xMidYMid slice"
+            />
+            <image
+              className="city-portrait-img"
+              href={portraitSrc('juniper')}
+              x="348"
+              y="274"
+              width="44"
+              height="44"
+              clipPath="url(#city-face-clip)"
+              preserveAspectRatio="xMidYMid slice"
+            />
+            <image
+              className="city-portrait-img"
+              href={portraitSrc('mercy')}
+              x="236"
+              y="318"
+              width="40"
+              height="40"
+              clipPath="url(#city-face-clip)"
+              preserveAspectRatio="xMidYMid slice"
+            />
           </g>
         ) : null}
 
-        <path d="M-10 368 Q 180 340 320 358 T 660 372 V430 H-10 Z" fill="#148a48" />
-
         {mode === 'live' && !celebrating ? (
           <g className="city-next-mark" transform={`translate(${nextAt.x} ${nextAt.y})`}>
-            <circle r={easy ? 22 : 34} className="city-next-halo" />
+            <circle
+              r={easy ? 22 : 34}
+              className={`city-next-halo${easy && PACK_A_CANDY.includes(nextId) ? ' is-easy-soft' : ''}`}
+            />
             {easy ? null : (
               <text y="-40" textAnchor="middle">
                 {kicker}

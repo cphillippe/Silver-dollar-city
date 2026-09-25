@@ -8,6 +8,44 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.135',
+    title: 'Home map plate fix: candy image fill + folk portraits',
+    when: '2026-09-25',
+    items: [
+      'Pack A candy plots: stylesheet fill:none !important on .city-plot-img so SVG image viewports no longer paint light plates through cutout alpha (Pages, East porch)',
+      'TownFolk and welcome folk: replaced foreignObject HTML Avatar with clipped SVG portrait images (walker pattern) — no rectangular chrome behind circular faces',
+    ],
+  },
+  {
+    version: '1.4.134',
+    title: 'Flatten memory-palace map bg under plot seats',
+    when: '2026-09-25',
+    items: [
+      'Home map background replaced with flattened candy valley plate — continuous grass under hollow, gate, and porch seats (0% brown dirt cake at anchors)',
+      'Pack A plot cutouts and 1.4.133 CSS cascade fix unchanged; streets, creek, plots, and HeavenCity stay SVG overlays',
+    ],
+  },
+  {
+    version: '1.4.133',
+    title: 'Clean candy cascade fix: no plates, no gold rings',
+    when: '2026-09-25',
+    items: [
+      'Home map: candy plot killers moved after is-built/is-lit/is-next stage rules so fill/stroke/filter no longer paint white plates through cutout alpha',
+      'Pack A (porch, gate, journal, hollow): hit circles and ready rings no longer inherit gold stroke; next halo softens on easy Pack A lots',
+      'PlotImageArt belt-and-suspenders fill="none" stroke="none" on candy raster images',
+    ],
+  },
+  {
+    version: '1.4.132',
+    title: 'Clean candy Home: Pack A cutouts + memory-palace bg',
+    when: '2026-09-25',
+    items: [
+      'Easy-trail Pack A (porch, gate, journal, hollow) plot webps replaced with clean candy cutouts — building only, no dirt cake or floating grass pads (Bill lock)',
+      'Home map background: geometric SVG hills/sky replaced with candy memory-palace valley plate; streets, creek, plots, and HeavenCity stay SVG overlays',
+      'Candy plot glow rings removed — bg owns ground, lit/next selection no longer paints cheap yellow halos on raster plots',
+    ],
+  },
+  {
     version: '1.4.131',
     title: 'Pack A true alpha + map overlay fix',
     when: '2026-09-25',
