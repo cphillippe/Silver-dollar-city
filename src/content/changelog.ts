@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.130',
+    title: 'Home map candy plot images',
+    when: '2026-09-25',
+    items: [
+      'Easy-trail Pack A: porch, gate, journal, and hollow use slight-iso candy webp art on the Home map — phone-big landmarks',
+      'SVG side-elevation fallback kept for bench, lamps, observatory, lookout, and empty/staked lots',
+      'Hit circles, tags, sparks, and TownFolk unchanged',
+    ],
+  },
+  {
     version: '1.4.129',
     title: 'Samaritan HELP contain',
     when: '2026-09-25',
