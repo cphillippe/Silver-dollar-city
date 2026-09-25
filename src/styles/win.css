@@ -1,0 +1,425 @@
+/* Win juice / stamp / bonus banners for 1.4.126. */
+
+.daily-page.is-puzzle .play.is-win,
+.challenge-page.is-puzzle .play.is-win {
+  overflow: visible;
+}
+
+.play.is-win .chip.in-chain,
+.play.is-win .chip.in-slot,
+.play.is-win .match-card.is-locked,
+.play.is-win .chip.in-bin {
+  animation: tile-burst 0.72s cubic-bezier(0.18, 0.9, 0.22, 1) forwards;
+}
+
+.play.is-win .prompt,
+.play.is-win .hint-peek,
+.play.is-win .sort-how,
+.play.is-win .match-score {
+  opacity: 0;
+  height: 0;
+  margin: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.play.is-win {
+  animation: play-boom 0.5s cubic-bezier(0.2, 1.35, 0.4, 1);
+}
+
+.win-burst {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 7;
+  overflow: visible;
+}
+
+.win-stamp-wrap {
+  position: fixed;
+  left: 50%;
+  top: 26%;
+  z-index: 32;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.win-stamp-frame {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 168px;
+  height: 168px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Overlay label — celebration juice, not a primary CTA. */
+.win-stamp {
+  display: block;
+  position: relative;
+  z-index: 1;
+  font-family: var(--sans);
+  font-size: clamp(0.92rem, 4.1vw, 1.22rem);
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #fff6e8;
+  background: rgba(42, 10, 72, 0.72);
+  padding: 7px 16px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(255, 204, 51, 0.82);
+  box-shadow: 0 0 22px rgba(255, 204, 51, 0.42);
+  text-shadow: 0 0 14px rgba(255, 204, 51, 0.7);
+  animation:
+    win-stamp-pop 0.48s cubic-bezier(0.2, 1.45, 0.35, 1) both,
+    win-stamp-glow 0.9s 0.4s ease-in-out both;
+}
+
+@keyframes win-stamp-pop {
+  0% {
+    transform: scale(0.28) rotate(-10deg);
+    opacity: 0;
+  }
+  62% {
+    transform: scale(1.14) rotate(2deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes win-stamp-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 10px rgba(255, 224, 138, 0.45));
+  }
+  50% {
+    filter: drop-shadow(0 0 28px rgba(255, 236, 170, 0.95));
+  }
+}
+
+.win-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: radial-gradient(
+    circle at 50% 42%,
+    rgba(255, 244, 196, 0.96),
+    rgba(255, 214, 90, 0.55) 32%,
+    rgba(224, 179, 74, 0.22) 58%,
+    transparent 78%
+  );
+  animation: win-flash 0.88s ease-out both;
+}
+
+.win-ring {
+  position: fixed;
+  left: 50%;
+  top: 42%;
+  z-index: 31;
+  width: 64px;
+  height: 64px;
+  margin: -32px;
+  border-radius: 50%;
+  border: 4px solid rgba(255, 236, 170, 0.95);
+  box-shadow: 0 0 28px rgba(255, 224, 138, 0.8);
+  animation: win-ring 0.7s cubic-bezier(0.12, 0.7, 0.28, 1) both;
+}
+
+.win-spark {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: 14px;
+  height: 14px;
+  margin: -7px;
+  border-radius: 50%;
+  background: #ffe08a;
+  box-shadow: 0 0 16px rgba(255, 224, 138, 1);
+  animation: win-spark 0.86s cubic-bezier(0.12, 0.8, 0.3, 1) both;
+  animation-delay: calc(var(--i) * 16ms);
+  transform: rotate(calc(var(--i) * 20deg)) translateY(-8px);
+}
+
+.win-spark.is-shard {
+  width: 8px;
+  height: 22px;
+  margin: -11px -4px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #fff6c4, #e0b34a);
+}
+
+@keyframes win-flash {
+  0% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  8% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+  40% {
+    opacity: 0.78;
+    transform: scale(1.08);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.22);
+  }
+}
+
+@keyframes win-ring {
+  0% {
+    transform: scale(0.18);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(16);
+    opacity: 0;
+  }
+}
+
+@keyframes win-spark {
+  0% {
+    opacity: 1;
+    transform: rotate(calc(var(--i) * 20deg)) translateY(0) scale(0.55);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(calc(var(--i) * 20deg)) translateY(-210px) scale(0.15);
+  }
+}
+
+.win-gem {
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  width: 22px;
+  height: 22px;
+  margin: -11px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #fffce8, #ffcc33 42%, #ff5a7a);
+  box-shadow:
+    0 0 18px rgba(255, 204, 51, 0.95),
+    inset 0 2px 0 rgba(255, 255, 255, 0.8);
+  animation: win-gem 0.95s cubic-bezier(0.12, 0.8, 0.3, 1) both;
+  animation-delay: calc(var(--i) * 38ms);
+  transform: rotate(45deg);
+}
+
+.win-gem:nth-child(odd) {
+  background: linear-gradient(135deg, #fff6b8, #3dcc7a 50%, #148a48);
+}
+
+.win-gem:nth-child(3n) {
+  background: linear-gradient(135deg, #ffe0e8, #c86bff 48%, #5a2ab8);
+}
+
+@keyframes win-gem {
+  0% {
+    opacity: 1;
+    transform: rotate(45deg) translate(0, 0) scale(0.4);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(calc(52deg + var(--i) * 16deg))
+      translate(calc(var(--i) * 22px - 88px), -190px) scale(0.18);
+  }
+}
+
+@keyframes tile-burst {
+  0% {
+    transform: scale(1) rotate(0);
+    opacity: 1;
+  }
+  18% {
+    transform: scale(1.22) rotate(calc(var(--spin, 8deg) * 0.35));
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--dx, 0), var(--dy, -110px)) scale(0.08) rotate(var(--spin, 18deg));
+    opacity: 0;
+  }
+}
+
+@keyframes play-boom {
+  0% {
+    transform: scale(1);
+  }
+  32% {
+    transform: scale(1.055);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.play.is-father-run .run-scene .win-burst {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.play.is-father-run .win-flash,
+.play.is-father-run .win-ring {
+  position: absolute;
+}
+
+.play.is-father-run .win-stamp-wrap {
+  position: absolute;
+  top: 16%;
+  left: 50%;
+  right: auto;
+  width: max-content;
+  max-width: 92%;
+  transform: translateX(-50%);
+  z-index: 8;
+}
+
+.play.is-father-run.is-win .win-stamp {
+  font-size: clamp(1.05rem, 5vw, 1.45rem);
+  letter-spacing: 0.14em;
+}
+
+.bonus-banner {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 12px 12px 10px;
+  border-radius: 16px;
+  text-align: center;
+  color: #2a0d58;
+  background: linear-gradient(180deg, #fff6c8, #ffcc33 55%, #ff9f1a);
+  border: 2px solid #fff8dc;
+  box-shadow:
+    0 5px 0 #e09412,
+    0 0 22px rgba(255, 204, 51, 0.55);
+  animation: bonus-banner-pop 0.42s cubic-bezier(0.2, 1.4, 0.3, 1) both;
+}
+
+@keyframes bonus-banner-pop {
+  0% {
+    transform: scale(0.72);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.bonus-banner strong {
+  font-size: clamp(1.55rem, 8vw, 2.15rem);
+  letter-spacing: 0.04em;
+  line-height: 1.05;
+}
+
+.bonus-banner span {
+  font-size: 1.02rem;
+  font-weight: 800;
+}
+
+.bonus-plus {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  z-index: 4;
+  margin: 0;
+  transform: translate(-50%, -50%);
+  color: #fff6c8;
+  font-family: var(--sans);
+  font-size: clamp(2rem, 10vw, 3rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-shadow: 0 4px 0 #e09412, 0 0 18px rgba(255, 204, 51, 0.8);
+  animation: bonus-plus-pop 0.9s cubic-bezier(0.2, 1.4, 0.3, 1) both;
+  pointer-events: none;
+}
+
+@keyframes bonus-plus-pop {
+  0% {
+    transform: translate(-50%, -20%) scale(0.4);
+    opacity: 0;
+  }
+  35% {
+    transform: translate(-50%, -55%) scale(1.12);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -80%) scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes merge-score-pop {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.16); }
+  100% { transform: scale(1); }
+}
+
+.play.is-claim-merge.is-win .win-stamp {
+  font-size: clamp(1.05rem, 5vw, 1.45rem);
+  letter-spacing: 0.14em;
+  animation:
+    win-stamp-pop 0.48s cubic-bezier(0.2, 1.45, 0.35, 1) both,
+    win-stamp-glow 1.2s 0.4s ease-in-out infinite;
+}
+
+.play.is-claim-merge .merge-bowl .win-burst {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.play.is-claim-merge .win-flash,
+.play.is-claim-merge .win-ring {
+  position: absolute;
+}
+
+.play.is-claim-merge .win-stamp-wrap {
+  position: absolute;
+  top: 16%;
+  left: 50%;
+  right: auto;
+  width: max-content;
+  max-width: 92%;
+  transform: translateX(-50%);
+  z-index: 8;
+}
+
+.play.is-source-dig .dig-board .win-burst {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.play.is-source-dig .win-flash,
+.play.is-source-dig .win-ring {
+  position: absolute;
+}
+
+.play.is-source-dig .win-stamp-wrap {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  right: auto;
+  width: max-content;
+  max-width: 92%;
+  transform: translateX(-50%);
+  z-index: 8;
+}
+
+.play.is-source-dig.is-win .win-stamp {
+  font-size: clamp(1.05rem, 5vw, 1.45rem);
+  letter-spacing: 0.14em;
+}

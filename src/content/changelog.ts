@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.126',
+    title: 'CSS peels + scoped tests',
+    when: '2026-09-24',
+    items: [
+      'Peel match/city/defend/maze/gem/sortHold/welcome/win sheets from tip index.css — Keep Manage denser (1.4.122–124) + Samaritan road flush (1.4.125)',
+      'Scoped npm test / test:* via run-checks + readAppCss so peeled CSS stays visible to asserts',
+      'Infra only — Dig/Hard/NW/Town/stores/Match/Lock In parked',
+    ],
+  },
+  {
     version: '1.4.125',
     title: 'Samaritan road flush on phone',
     when: '2026-09-24',
@@ -17,7 +27,7 @@ export const CHANGELOG: ChangeNote[] = [
       'Gold/purple Easy chrome + walk/Help/hurt-man path from 1.4.110/116 kept — Dig/Hard/NW/Town/stores/Home Manage/Match/Lock In parked',
     ],
   },
-{
+  {
     version: '1.4.124',
     title: 'Manage sheet keeps map visible',
     when: '2026-09-24',

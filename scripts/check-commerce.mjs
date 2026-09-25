@@ -59,6 +59,7 @@ import { PAID_STREETS } from '../src/content/paidStreets.ts'
 import { EASY_LINE_ORDER, easyLoopLine, FOUNDATION_ARC } from '../src/lib/easy.ts'
 import { emptyProgress } from '../src/lib/save.ts'
 import { evidenceFor } from '../src/content/evidence.ts'
+import { readAppCss } from './readAppCss.mjs'
 
 assert.equal(CORE_PACK_ID, 'core-v0')
 assert.equal(PLAY_SKUS.removeAds, 'city.silver.unending.removeads')
@@ -120,7 +121,7 @@ assert.deepEqual(proto.unlockedPacks.sort(), ['harbor-walk', 'mill-street'])
 
 writeCommerce(emptyCommerce())
 
-assert.equal(EASY_LINE_ORDER.length, 45)
+assert.equal(EASY_LINE_ORDER.length, 54)
 assert.equal(EASY_LINE_ORDER[0], 'ph-road')
 assert.deepEqual(FOUNDATION_ARC, ['fg-order', 'fg-reason', 'fg-ought', 'fg-ground'])
 for (const street of PAID_STREETS) {
@@ -167,19 +168,17 @@ assert.doesNotMatch(appSrc, /hub-banner/)
 const hubSrc = readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8')
 assert.match(hubSrc, /EASY\.matchCta|EASY\.mazeMatch|EASY\.runMatch|EASY\.mergeMatch|EASY\.digMatch/)
 assert.match(hubSrc, /EASY\.saved/)
-assert.match(hubSrc, /EASY\.supportTrail/)
 assert.match(hubSrc, /SupportToast/)
 assert.match(hubSrc, /name: 'settings'/)
-assert.match(hubSrc, /extraStreetPacks/)
+// Easy Home (1.4.120+) parks Extra streets / pack-street paywall chrome off the home dock
+assert.match(hubSrc, /easy-extra-streets/)
+assert.match(hubSrc, /easy-core/)
 assert.doesNotMatch(hubSrc, /slot="hub-banner"/)
 assert.doesNotMatch(hubSrc, /slot="between-districts"/)
-assert.match(hubSrc, /Locked · /)
-assert.match(hubSrc, /pack-street/)
 assert.ok(
   hubSrc.indexOf('easy-core') < hubSrc.indexOf('easy-extra-streets'),
   'Core Easy play stays above extra streets',
 )
-
 const adSlotSrc = readFileSync(new URL('../src/components/AdSlot.tsx', import.meta.url), 'utf8')
 assert.match(adSlotSrc, /EMPTY_COMMERCE/)
 assert.doesNotMatch(adSlotSrc, /unlockedPacks: \[\] as string\[\]/)
@@ -221,6 +220,7 @@ assert.match(sceneAdSrc, /SCENE_PAUSE_COPY/)
 assert.match(sceneAdSrc, /REMOVE_ADS_PRODUCT\.title/)
 
 const settingsSrc = readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8')
+assert.match(settingsSrc, /EASY\.supportTrail/)
 assert.match(settingsSrc, /SETTINGS_SUPPORT_LINE/)
 assert.match(settingsSrc, /Street Packs/)
 assert.match(settingsSrc, /Support Silver City/)
@@ -318,7 +318,7 @@ assert.equal(supportUrls().mill, MILL_PACK_URL)
 assert.equal(supportUrls().harbor, HARBOR_PACK_URL)
 assert.match(STORES_COMING, /Coming with stores/)
 
-const toastCss = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
+const toastCss = readAppCss()
 assert.match(toastCss, /\.support-toast[\s\S]{0,400}color:\s*#2a1a0e/)
 assert.doesNotMatch(toastCss, /var\(--card/)
 

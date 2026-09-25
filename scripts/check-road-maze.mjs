@@ -32,6 +32,7 @@ import {
 import { EASY } from '../src/lib/easy.ts'
 import { lessonStory, storyPlayFor } from '../src/lib/storyPlay.ts'
 import { mazeWinBeat } from '../src/lib/successBeat.ts'
+import { readAppCss } from './readAppCss.mjs'
 
 assert.equal(ROAD_MAZE_LINE, 'ph-road')
 assert.equal(ROAD_MAZE_CLAIM, 'Neighbor is the one who shows mercy.')
@@ -185,10 +186,10 @@ assert.doesNotMatch(
   'a blocked rock only reroutes — no lives',
 )
 assert.match(
-  readFileSync(new URL('../src/index.css', import.meta.url), 'utf8'),
+  readAppCss(),
   /maze-cell\.is-rock \{[\s\S]*touch-action: pan-y/,
 )
-const mazeCss = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
+const mazeCss = readAppCss()
 assert.match(
   mazeCss,
   /play\.is-road-maze \{[\s\S]*overflow: hidden/,
