@@ -25,6 +25,7 @@ import {
 } from '../../lib/city'
 import {
   EASY_FOLK_LIFT,
+  EASY_FOLK_NUDGE,
   EASY_TAG_SLOT,
   easyTagMetrics,
   HEAVEN_TAG,
@@ -78,6 +79,10 @@ export const PLOT_IMG: Record<
 
 /** SVG viewBox width for Pack A candy images (72–110; scaled by BUILD_SCALE on phone). */
 const PLOT_IMG_W = 96
+
+/** Portrait circle anchor — bottom sits ~2px below folk seat y. */
+const FOLK_PORTRAIT_Y = -42
+const FOLK_PORTRAIT_SIZE = 44
 
 const FOLK: Record<CityPlotId, { x: number; y: number }> = {
   lookout: { x: 568, y: 118 },
@@ -737,7 +742,13 @@ export function TownFolk({
   if (stage === 'empty' && !next) return null
   const easy = isEasy(progress)
   const seat = FOLK[id]
-  const at = easy ? { x: seat.x, y: seat.y - EASY_FOLK_LIFT } : seat
+  const nudge = easy ? EASY_FOLK_NUDGE[id] : undefined
+  const at = easy
+    ? {
+        x: seat.x + (nudge?.x ?? 0),
+        y: seat.y - EASY_FOLK_LIFT + (nudge?.y ?? 0),
+      }
+    : seat
   const voice = townVoice(id)
   const line = ack ? townAck(id, ack, isEasy(progress)) : voice.here
   const short = line.length > 22 ? `${line.slice(0, 20)}…` : line
@@ -747,7 +758,12 @@ export function TownFolk({
       <g
         className={`city-folk is-${stage} ${next ? 'is-next' : ''} ${rising ? 'is-waving' : ''} ${home ? 'is-home' : ''}`}
       >
-        <ellipse className="city-home-pad" rx={home ? 20 : 13} ry={home ? 8 : 5} cy="7" />
+        <ellipse
+          className="city-home-pad"
+          rx={home ? 16 : 13}
+          ry={home ? 4 : 5}
+          cy={home ? 2 : 7}
+        />
         {home ? (
           <path className="city-porch-rail" d="M-16 2 H16 M-16 2 v-8 M0 2 v-8 M16 2 v-8" />
         ) : null}
@@ -755,10 +771,10 @@ export function TownFolk({
         <image
           className="city-portrait-img"
           href={portraitSrc(voice.who)}
-          x={-22}
-          y={-50}
-          width={44}
-          height={44}
+          x={-FOLK_PORTRAIT_SIZE / 2}
+          y={FOLK_PORTRAIT_Y}
+          width={FOLK_PORTRAIT_SIZE}
+          height={FOLK_PORTRAIT_SIZE}
           clipPath="url(#city-face-clip)"
           preserveAspectRatio="xMidYMid slice"
         />

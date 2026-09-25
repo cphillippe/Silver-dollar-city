@@ -66,6 +66,7 @@ import {
   easyTagMetrics,
   plotTag,
   EASY_FOLK_LIFT,
+  EASY_FOLK_NUDGE,
 } from '../src/lib/cityBuild.ts'
 import { emptyProgress } from '../src/lib/save.ts'
 import { EASY, EASY_LINE_ORDER, DIG_ARC, NAMES_ARC, STONE_ARC, INK_ARC, easyChromeLine, easyFacingLine, easyHomeFocus, easyHoldLine, easyHoldPractice, easyHoldView, easyLearnLine, easyLineHeld, easyLineLearned, easyLineTaught, easyLoopLine, easyMatchLine, easyMatchReady, markEasyHeld, markEasyTaught, easyWhoWhere, easyWhoWhereLine, easyWhyLine, easyWhyWordCount, easyWrongTap, uniqueHoldChoices } from '../src/lib/easy.ts'
@@ -1112,7 +1113,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.135')
+assert.equal(APP_VERSION, '1.4.136')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -2283,11 +2284,15 @@ assert.match(
   readFileSync(new URL('../src/components/Journal.tsx', import.meta.url), 'utf8'),
   /easy\s*\?\s*false/,
 )
-assert.equal(EASY_FOLK_LIFT, 56)
+assert.equal(EASY_FOLK_LIFT, 24)
+assert.ok(EASY_FOLK_NUDGE.porch?.y && EASY_FOLK_NUDGE.gate?.y)
 {
+  const folkPortraitY = -42
+  const folkPortraitH = 44
   const folkY = { hollow: 352, lamps: 358, bench: 344, porch: 356 }
   for (const [id, y] of Object.entries(folkY)) {
-    const portraitBottom = y - EASY_FOLK_LIFT - 50 + 44
+    const nudgeY = EASY_FOLK_NUDGE[id]?.y ?? 0
+    const portraitBottom = y - EASY_FOLK_LIFT + nudgeY + folkPortraitY + folkPortraitH
     const chipTop = easyTagMetrics(id).y0
     assert.ok(
       portraitBottom + 8 < chipTop,
@@ -2325,11 +2330,12 @@ assert.match(
 )
 assert.match(plotArtSrc, /easy \? 'seed'/)
 assert.match(mapSrc, /easy \? null : <SpinePath/)
+assert.match(mapSrc, /easy \? null : \(\s*\n\s*<>[\s\S]*city-street-main/)
 assert.match(mapSrc, /if \(isEasy\(progress\)\) return/)
 assert.match(mapSrc, /if \(playing\.current && !isEasy\(progress\)\) return/)
 assert.match(mapSrc, /Tap a building to Manage it/)
-assert.match(latestChange(APP_VERSION).title, /plate|portrait|folk/i)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /plate|portrait|foreignObject|city-plot-img/i)
+assert.match(latestChange(APP_VERSION).title, /folk|road|candy/i)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /folk|seat|street|candy/i)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-img[\s\S]*?fill: none !important/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img\.is-built[\s\S]*?fill: none/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-hit[\s\S]*?stroke: none/)

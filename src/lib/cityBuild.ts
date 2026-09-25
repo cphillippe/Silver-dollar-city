@@ -303,7 +303,14 @@ export function easyPlotTag(id: CityPlotId): string {
 export const EASY_NAMED_PLOTS: CityPlotId[] = ['hollow', 'lamps', 'journal', 'bench', 'porch']
 
 /** Easy portraits sit on the buildings, not on the name-chip band. */
-export const EASY_FOLK_LIFT = 56
+export const EASY_FOLK_LIFT = 24
+
+/** Per-plot Easy seat nudge after lift — positive y plants folk on candy seats. */
+export const EASY_FOLK_NUDGE: Partial<Record<CityPlotId, { x?: number; y?: number }>> = {
+  lookout: { y: 10 },
+  gate: { x: 4, y: 18 },
+  porch: { x: 8, y: 22 },
+}
 
 /**
  * Chip centers in the 640×420 viewBox. Street names sit in a bottom band
