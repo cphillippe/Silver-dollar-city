@@ -1,0 +1,772 @@
+/* Gem search + gem art primitives peeled for 1.4.126. */
+
+.play.is-gem-search.is-shake {
+  animation: none;
+}
+
+.gem {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+span.gem:not(.gem-art) {
+  transform: rotate(45deg);
+  border-radius: 5px;
+  box-shadow:
+    0 4px 0 rgba(40, 8, 70, 0.28),
+    0 0 12px rgba(255, 204, 51, 0.5),
+    inset 0 2px 0 rgba(255, 255, 255, 0.85);
+}
+
+span.gem:not(.gem-art)::after {
+  content: '';
+  position: absolute;
+  inset: 22%;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.55);
+  transform: rotate(-18deg);
+}
+
+img.gem-art {
+  display: block;
+  object-fit: contain;
+  border-radius: 9px;
+  background: transparent;
+  transform: none;
+  box-shadow: none;
+}
+
+img.gem-ability,
+img.gem-heart {
+  border-radius: 50%;
+}
+
+.gem-sm {
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+}
+
+.gem-lamp {
+  background: linear-gradient(135deg, #fff6b8, #ffcc33 45%, #ff9f1a);
+}
+
+.gem-seed {
+  background: linear-gradient(135deg, #d4ffe8, #3dcc7a 50%, #148a48);
+}
+
+.gem-heart {
+  background: linear-gradient(135deg, #ffe0e8, #ff5a7a 50%, #c81c48);
+}
+
+.gem-star {
+  background: linear-gradient(135deg, #fffce8, #ffe08a 45%, #ffcc33);
+}
+
+.gem-cup {
+  background: linear-gradient(135deg, #f0e0ff, #c86bff 50%, #7a4ad4);
+}
+
+.gem-tree {
+  background: linear-gradient(135deg, #e0ffe8, #34c46a 50%, #0e6a38);
+}
+
+.gem-door {
+  background: linear-gradient(135deg, #ffe8c4, #c4922a 50%, #8a6a22);
+}
+
+.gem-coin {
+  background: linear-gradient(135deg, #fff8dc, #ffcc33 40%, #e09412);
+}
+
+.play.is-gem-search {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+}
+
+.play.is-gem-search.is-panel-blast {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 0;
+  overflow: hidden; /* whole play no longer scrolls as one blob */
+}
+
+.play.is-gem-search.is-panel-blast .sort-how {
+  flex-shrink: 0;
+}
+
+.play.is-gem-search.is-panel-blast .story-strip {
+  flex-shrink: 0;
+  position: relative; /* 1.4.99: stay in document flow above gem-scroll */
+  top: auto;
+  z-index: 2;
+  padding-bottom: 4px;
+  background: linear-gradient(180deg, rgba(26, 8, 64, 0.96), rgba(26, 8, 64, 0.88));
+}
+
+.play.is-gem-search.is-panel-blast .gem-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Parent play already scrolls today — disable that for panel-blast Match */
+.daily-page.is-puzzle .play.is-gem-search.is-panel-blast,
+.challenge-page.is-puzzle .play.is-gem-search.is-panel-blast,
+.daily-page.is-puzzle .play.is-gem-search.is-panel-blast.is-win,
+.challenge-page.is-puzzle .play.is-gem-search.is-panel-blast.is-win {
+  overflow: hidden;
+}
+
+/* Match story dock 1.4.99 — dock in flow, no overlay; pills LTR */
+.play.is-gem-search.is-panel-blast.is-story-docked .story-strip,
+.play.is-gem-search.is-panel-blast.is-story-docked .story-strip.is-dock {
+  flex: 0 0 auto;
+  flex-shrink: 0;
+  position: relative; /* never absolute/fixed/sticky over the board */
+  top: auto;
+  z-index: 2;
+  width: 100%;
+  max-width: none;
+  max-height: none;
+  height: auto;
+  margin: 0;
+  padding: 4px 6px;
+  gap: 0;
+  border: 0;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(26, 8, 64, 0.98), rgba(26, 8, 64, 0.9));
+  box-shadow: 0 3px 0 rgba(80, 20, 40, 0.28);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  overflow: visible;
+}
+
+.play.is-gem-search.is-panel-blast.is-story-docked .story-strip.is-dock:focus-visible {
+  outline: 3px solid rgba(255, 204, 51, 0.95);
+  outline-offset: 2px;
+}
+
+.play.is-gem-search.is-panel-blast.is-story-docked .gem-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: relative; /* in normal flow under the dock — never underlap */
+  overflow: auto;
+}
+
+/* Board-first 1.4.99 — hide hunt line; crossword owns space UNDER the dock */
+.play.is-gem-search.is-panel-blast.is-story-docked .sort-how {
+  display: none;
+}
+
+.play.is-gem-search.is-panel-blast.is-story-docked .gem-bonus-hint,
+.play.is-gem-search.is-panel-blast.is-story-docked .gem-bonus-hint.is-loud,
+.play.is-gem-search.is-panel-blast.is-story-docked .gem-bonus-hint.is-inline,
+.play.is-gem-search.is-panel-blast.is-story-docked .gem-words.is-bonus {
+  display: none !important; /* 0% bonus chrome above the board */
+}
+
+.play.is-gem-search.is-panel-blast.is-story-docked .gem-stage {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  max-width: none;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; /* avoid center overflow under the dock */
+}
+
+.play.is-gem-search.is-panel-blast.is-story-docked .gem-board {
+  /* Width-first square board — flex-grow on height was breaking row/column alignment on tall phones */
+  width: min(100%, 96vw, 520px);
+  max-width: 100%;
+  flex: 0 1 auto;
+  min-height: 0;
+  height: auto;
+  aspect-ratio: 1;
+  margin: 0 auto;
+  align-content: stretch;
+  justify-items: stretch;
+  align-items: stretch;
+  gap: 2px;
+  padding: 4px;
+}
+
+.play.is-gem-search.is-panel-blast.is-story-docked .gem-cell {
+  min-width: 0;
+  min-height: 0;
+  aspect-ratio: unset;
+  align-self: stretch;
+  justify-self: stretch;
+}
+
+.play.is-gem-search.is-panel-blast.is-story-docked .match-score {
+  flex: 0 0 auto;
+  margin: 2px 0 0;
+  font-size: 0.82rem;
+}
+
+.story-sheet-bonus.gem-words.is-bonus {
+  margin: 0 0 8px;
+  justify-content: flex-start;
+}
+
+.story-sheet-bonus .gem-word.is-bonus {
+  min-width: 56px;
+  padding: 4px 8px 3px;
+}
+
+.gem-bonus-hint.is-inline {
+  margin: 0;
+  padding: 2px 8px;
+  text-align: center;
+  color: #ffe7a8;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+@media (max-width: 430px) {
+  .play.is-gem-search.is-panel-blast.is-story-docked .story-strip.is-dock {
+    padding: 3px 4px;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .story-strip.is-dock .story-thumb {
+    max-height: 24px;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .story-dock-word {
+    font-size: 0.58rem;
+    padding: 1px 5px;
+    white-space: nowrap;
+    writing-mode: horizontal-tb;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .gem-board {
+    width: min(100%, 100vw);
+    max-height: 100%;
+    min-height: 0;
+    height: auto;
+    aspect-ratio: 1;
+  }
+}
+
+@media (max-height: 720px) {
+  .play.is-gem-search.is-panel-blast.is-story-docked .gem-board {
+    max-height: 100%;
+    min-height: 0;
+    height: auto;
+  }
+}
+
+.play.is-gem-search.is-panel-blast .gem-board .win-burst {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.play.is-gem-search .win-flash,
+.play.is-gem-search .win-ring {
+  position: absolute;
+}
+
+.play.is-gem-search.is-panel-blast .win-stamp-wrap {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  right: auto;
+  width: max-content;
+  max-width: 92%;
+  transform: translateX(-50%);
+  z-index: 8;
+}
+
+.play.is-gem-search.is-win .win-stamp {
+  font-size: clamp(1.05rem, 5vw, 1.45rem);
+  letter-spacing: 0.14em;
+}
+
+.play.is-gem-search .sort-how {
+  margin: 0;
+  text-align: center;
+  font-size: 1.02rem;
+  font-weight: 750;
+}
+
+.gem-words {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gem-word {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 72px;
+  padding: 6px 10px 5px;
+  border-radius: 14px;
+  border: 1.5px solid rgba(255, 204, 51, 0.4);
+  background: rgba(26, 8, 64, 0.55);
+  box-shadow: var(--candy-shine);
+}
+
+.gem-word.is-person {
+  border-color: rgba(200, 107, 255, 0.7);
+}
+
+.gem-word.is-place {
+  border-color: rgba(61, 204, 122, 0.7);
+}
+
+.gem-word.is-idea {
+  border-color: rgba(255, 204, 51, 0.7);
+}
+
+.gem-word.is-found {
+  background: linear-gradient(180deg, rgba(255, 204, 51, 0.95), rgba(255, 159, 26, 0.88));
+  color: #2a1408;
+  border-color: #fff6b8;
+}
+
+.gem-word.is-found .gem-word-label {
+  text-decoration: none;
+}
+
+.gem-word.is-hint {
+  animation: need-pulse 0.9s ease-in-out infinite;
+}
+
+.gem-word-label {
+  font-size: 0.92rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+}
+
+.gem-word-kind {
+  font-size: 0.62rem;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.72;
+}
+
+.gem-word.is-found .gem-word-kind {
+  opacity: 0.8;
+}
+
+.gem-toast {
+  margin: 0;
+  text-align: center;
+}
+
+.gem-board {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--gem-size, 8), minmax(0, 1fr));
+  grid-template-rows: repeat(var(--gem-size, 8), minmax(0, 1fr));
+  gap: 3px;
+  width: min(100%, 390px);
+  margin: 0 auto;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  padding: 6px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(18, 6, 46, 0.9), rgba(42, 13, 88, 0.72));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 246, 232, 0.18),
+    0 10px 28px rgba(20, 4, 48, 0.45);
+}
+
+.play.is-gem-search .gem-stage {
+  position: relative;
+  width: min(100%, 390px);
+  margin: 0 auto;
+}
+
+.play.is-gem-search .gem-stage .bonus-banner,
+.play.is-gem-search .gem-stage .miss-banner,
+.play.is-gem-search .gem-stage .match-toast {
+  position: absolute;
+  left: 50%;
+  top: 12%;
+  z-index: 8;
+  width: min(92%, 240px);
+  margin: 0;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.play.is-gem-search .gem-stage .bonus-banner {
+  animation: gem-overlay-pop 0.32s cubic-bezier(0.2, 1.4, 0.3, 1) both;
+}
+
+.play.is-gem-search .gem-stage .miss-banner {
+  padding: 5px 10px 4px;
+  gap: 0;
+  border-width: 1.5px;
+  border-radius: 12px;
+  box-shadow:
+    0 2px 0 #b8284c,
+    0 0 10px rgba(255, 90, 122, 0.32);
+  animation: gem-overlay-pop 0.28s cubic-bezier(0.2, 1.2, 0.3, 1) both;
+}
+
+.play.is-gem-search .gem-stage .miss-banner strong {
+  font-size: 0.92rem;
+  letter-spacing: 0.04em;
+  line-height: 1.15;
+}
+
+.play.is-gem-search .gem-stage .miss-banner span {
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+@keyframes gem-overlay-pop {
+  0% {
+    transform: translateX(-50%) scale(0.86);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+  }
+}
+
+.play.is-gem-search .match-score.is-juice {
+  animation: merge-score-pop 0.42s cubic-bezier(0.12, 1.45, 0.28, 1);
+}
+
+.gem-combo {
+  position: absolute;
+  left: 50%;
+  top: 36%;
+  z-index: 5;
+  margin: 0;
+  transform: translateX(-50%);
+  color: #fff6c8;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-shadow: 0 3px 0 #e09412;
+  pointer-events: none;
+}
+
+.gem-cell {
+  position: relative;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 28%;
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  color: #2a1408;
+  font-family: var(--sans);
+  font-size: clamp(0.92rem, 4.4vw, 1.28rem);
+  font-weight: 800;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  cursor: pointer;
+  overflow: hidden;
+  background: linear-gradient(180deg, #fffce8 0%, var(--gem, #ffcc33) 46%, var(--gem-deep, #e09412) 100%);
+  box-shadow:
+    0 4px 0 var(--gem-deep, #e09412),
+    inset 0 3px 0 rgba(255, 255, 255, 0.88),
+    inset 0 -6px 8px rgba(42, 10, 72, 0.18);
+  transform: translateZ(0);
+}
+
+.gem-cell.hue-0 {
+  --gem: #ffcc33;
+  --gem-deep: #e09412;
+}
+
+.gem-cell.hue-1 {
+  --gem: #ff5a7a;
+  --gem-deep: #c01840;
+}
+
+.gem-cell.hue-2 {
+  --gem: #3dcc7a;
+  --gem-deep: #148a48;
+}
+
+.gem-cell.hue-3 {
+  --gem: #c86bff;
+  --gem-deep: #6a28b8;
+}
+
+.gem-cell.hue-4 {
+  --gem: #ff9f1a;
+  --gem-deep: #c46a08;
+}
+
+.gem-cell.hue-5 {
+  --gem: #5ad0ff;
+  --gem-deep: #1a6ab8;
+}
+
+.gem-letter {
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+  pointer-events: none;
+}
+
+.gem-cell.is-sel {
+  transform: scale(1.08);
+  z-index: 2;
+  border-color: #fff6b8;
+  box-shadow:
+    0 0 0 3px rgba(255, 204, 51, 0.85),
+    0 0 18px rgba(255, 90, 122, 0.55),
+    inset 0 3px 0 rgba(255, 255, 255, 0.95);
+  filter: brightness(1.12);
+}
+
+.gem-cell.is-hint {
+  box-shadow: 0 0 0 3px #ffcc33, 0 0 16px rgba(255, 204, 51, 0.8);
+  animation: need-pulse 0.9s ease-in-out infinite;
+}
+
+.gem-cell.is-live {
+  outline: 2px solid rgba(255, 246, 184, 0.55);
+}
+
+.gem-cell.is-burst {
+  z-index: 4;
+  animation: gem-explode 0.5s cubic-bezier(0.12, 0.8, 0.28, 1) both;
+}
+
+.gem-cell.is-clear {
+  background: radial-gradient(circle at 50% 40%, rgba(255, 246, 184, 0.22), rgba(18, 6, 46, 0.15));
+  border-color: rgba(255, 204, 51, 0.18);
+  box-shadow: none;
+  color: transparent;
+  pointer-events: none;
+}
+
+.gem-cell.is-clear .gem-letter {
+  opacity: 0;
+}
+
+.gem-cell.is-cracked {
+  opacity: 0.55;
+  filter: saturate(0.65);
+  box-shadow: inset 0 0 0 2px rgba(255, 204, 51, 0.35);
+}
+
+.gem-cell.is-cracked .gem-letter {
+  opacity: 0.72;
+  text-shadow: 0 0 0 transparent;
+}
+
+.gem-cell.is-cracked::after {
+  content: '';
+  position: absolute;
+  inset: 18% 12%;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(125deg, transparent 42%, rgba(255, 255, 255, 0.55) 43%, transparent 44%),
+    linear-gradient(55deg, transparent 48%, rgba(18, 6, 46, 0.35) 49%, transparent 51%);
+  opacity: 0.9;
+}
+
+.gem-shard,
+.gem-pop {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.gem-shard {
+  width: 8px;
+  height: 14px;
+  margin: -7px -4px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #fffce8, var(--gem, #ffcc33));
+  box-shadow: 0 0 8px var(--gem, #ffcc33);
+  animation: gem-shard-fly 0.48s cubic-bezier(0.12, 0.8, 0.3, 1) both;
+  animation-delay: calc(var(--i) * 12ms);
+}
+
+.gem-pop {
+  width: 10px;
+  height: 10px;
+  margin: -5px;
+  border-radius: 50%;
+  background: #fff6b8;
+  box-shadow: 0 0 10px #ffcc33;
+  animation: gem-pop-fly 0.5s cubic-bezier(0.12, 0.8, 0.3, 1) both;
+  animation-delay: calc(var(--i) * 18ms);
+}
+
+.play.is-gem-search.is-shake .gem-cell.is-sel {
+  animation: miss-shake 0.4s ease-in-out;
+}
+
+@keyframes gem-explode {
+  0% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  28% {
+    transform: scale(1.28) rotate(8deg);
+    filter: brightness(1.8);
+  }
+  100% {
+    transform: scale(0.2) rotate(28deg);
+    filter: brightness(2.2);
+    opacity: 0.15;
+  }
+}
+
+@keyframes gem-shard-fly {
+  0% {
+    opacity: 1;
+    transform: rotate(calc(var(--i) * 45deg)) translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(calc(var(--i) * 45deg)) translateY(-42px) scale(0.2);
+  }
+}
+
+@keyframes gem-pop-fly {
+  0% {
+    opacity: 1;
+    transform: rotate(calc(var(--i) * 72deg)) translate(0, 0) scale(0.6);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(calc(var(--i) * 72deg)) translate(28px, -36px) scale(0.1);
+  }
+}
+
+@keyframes gem-board-thump {
+  0% {
+    transform: scale(1);
+  }
+  36% {
+    transform: scale(1.035);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 430px) {
+  .play.is-gem-search .sort-how {
+    font-size: 0.95rem;
+  }
+
+  .gem-word {
+    min-width: 64px;
+    padding: 5px 8px 4px;
+  }
+
+  .gem-board {
+    gap: 2px;
+    padding: 5px;
+  }
+}
+
+.gem-bonus-hint {
+  margin: 0;
+  text-align: center;
+  color: #ffe7a8;
+  font-size: 0.82rem;
+  line-height: 1.3;
+}
+
+.gem-bonus-hint.is-loud {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(255, 204, 51, 0.2);
+  border: 1.5px solid rgba(255, 230, 140, 0.75);
+  color: #fff8d2;
+  font-size: 0.92rem;
+  font-weight: 750;
+  line-height: 1.3;
+}
+
+.gem-words.is-bonus {
+  margin-top: 2px;
+}
+
+.gem-word.is-bonus {
+  background: rgba(255, 204, 51, 0.16);
+  box-shadow: inset 0 0 0 1.5px rgba(255, 230, 140, 0.7);
+}
+
+.gem-toast.is-yes,
+.gem-toast.is-bonus,
+.gem-toast.is-miss {
+  display: grid;
+  gap: 2px;
+}
+
+.gem-toast.is-miss {
+  background: rgba(255, 90, 122, 0.22);
+  border-color: rgba(255, 180, 196, 0.8);
+  color: #ffe8ee;
+}
+
+.gem-toast.is-bonus {
+  background: rgba(255, 204, 51, 0.28);
+  border-color: rgba(255, 230, 120, 0.85);
+  color: #fff8d2;
+  box-shadow: 0 0 18px rgba(255, 204, 51, 0.35);
+}
+
+.toast-why {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  opacity: 0.92;
+}
+
+.play.is-gem-search {
+  position: relative;
+}
+
+.gem-cell.is-bonus-burst {
+  box-shadow:
+    0 0 16px rgba(255, 204, 51, 0.85),
+    0 4px 0 #e09412,
+    inset 0 3px 0 rgba(255, 255, 255, 0.88);
+}
