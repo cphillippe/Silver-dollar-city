@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.136',
+    title: 'Home map: plant Easy folk + soften candy roads',
+    when: '2026-09-25',
+    items: [
+      'Easy Home: folk lift/nudge onto Pack A candy seats (East porch, gate, lookout) — portraits lowered, purple seat ovals hidden on Easy',
+      'Easy Home: hide SVG street/creek overlays when candy map-bg already paints valley paths; hard trail keeps whisper-tan connectors',
+    ],
+  },
+  {
     version: '1.4.135',
     title: 'Home map plate fix: candy image fill + folk portraits',
     when: '2026-09-25',

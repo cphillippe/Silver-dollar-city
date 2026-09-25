@@ -229,6 +229,11 @@
   stroke-width: 1.2;
 }
 
+html[data-easy='on'] .city-home-pad,
+html[data-easy='on'] .city-folk .city-porch-rail {
+  display: none;
+}
+
 .city-folk.is-lit .city-home-pad {
   fill: #c86bff;
   stroke: #fff6b8;
@@ -762,21 +767,21 @@
 
 .city-street.is-scaffold,
 .city-creek.is-scaffold {
-  stroke: rgba(255, 159, 26, 0.45);
-  stroke-width: 5;
+  stroke: rgba(200, 168, 110, 0.28);
+  stroke-width: 3;
 }
 
 .city-street.is-built,
 .city-creek.is-built {
-  stroke: #ff9f1a;
-  stroke-width: 7;
+  stroke: rgba(210, 175, 120, 0.38);
+  stroke-width: 3.5;
 }
 
 .city-street.is-lit,
 .city-creek.is-lit {
-  stroke: #ffcc33;
-  stroke-width: 9;
-  filter: url(#city-glow);
+  stroke: rgba(230, 195, 130, 0.48);
+  stroke-width: 4;
+  filter: none;
 }
 
 .city-street-lamps .city-lamp {
