@@ -1,7 +1,7 @@
 MODEL=gemini-flash-latest
-Shot pack 1.4.180 Gemini vision FAIL on 05-easy-lockin-miss.png — Fixes #239.
+Shot pack 1.4.180 Gemini vision FAIL on 06-samaritan.png — Fixes #240.
 Invent API: GEMINI_API_KEY present but not AIza AI Studio shape (same as 163–168).
-Manager-steered peel (parent + issue #239 comment): Easy Lock In win-end / feedback ≤720 fill empty purple bottom (vision = win-end fallback; miss teach not reached).
-Peel: sortHold.css @media (max-height:720px) Easy is-after:has(.stored-line) — app-body flex fill + after-win flex + stored-line flex:1 align-content center; StoredLine comment.
-Do NOT pack #238 Match / #240 Samaritan. Miss teach 161 / arena 170 / Match 184 untouched.
-VERDICT: APPROVE (shot Gemini + issue #239)
+Manager-steered peel (parent + issue #240): Easy Samaritan / Sequence order ≤720 fill top-cluster purple void (content clustered at top; massive empty purple bottom half).
+Peel: sortHold.css — base play.is-sequence.is-deal flex:0→1; @media (max-height:720px) bank.is-order flex:1 + grid-auto-rows minmax(0,1fr) stretch stones; SequencePlay comment.
+Do NOT pack #238 Match / #239 Lock In. Sequence how-peel 171 / Sort 183 / Match 184 / Lock In 185 untouched.
+VERDICT: APPROVE (shot Gemini + issue #240)

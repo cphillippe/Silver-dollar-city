@@ -1,44 +1,43 @@
-# ready-easy-fun-clear-185 — 1.4.185 Easy Lock In ≤720 fill win-end purple void (Fixes #239)
+# ready-easy-fun-clear-186 — 1.4.186 Easy Samaritan ≤720 fill top-cluster purple void (Fixes #240)
 
-**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/242
-**Branch:** `ship/easy-fun-clear-185` → `main`
-**Version:** 1.4.185
-**Peel:** `ffa04c1` (`ffa04c1022be63e645f2a64de7076c715e53fd35`)
-**Tip:** `82b1c8a` (`82b1c8ab45f63aec2abf310a470433a1a5739a13`)
-**Base live:** 1.4.184 (`e638288`, PR #241 Easy Match ≤720 fill empty purple card on main)
+**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/243
+**Branch:** `ship/easy-fun-clear-186` → `main`
+**Version:** 1.4.186
+**Peel:** `ae6ab04` (`ae6ab04fc3b0968fc76ddee32bf8561c1742f992`)
+**Tip:** `f38f155` (`f38f1554950ee8e23ab8f94d17b2b303493ca9a7`)
+**Base live:** 1.4.185 (`7deb4d2`, PR #242 Easy Lock In ≤720 fill win-end purple void on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
 ## How picked
-Open Issues: **#239** Easy Lock In win-end / feedback bottom purple void (P1 phone-fail, Shot 1.4.180 `05-easy-lockin-miss.png`; issue comment: vision = win-end fallback, miss teach not reached) — this hop.
-**#240** Samaritan — deferred next climb; do not pack. **#238** Match already on main as 1.4.184.
+Open Issues: **#240** Easy Samaritan top-cluster / bottom half purple void (P1 phone-fail, Shot 1.4.180 `06-samaritan.png`) — this hop.
+**#238** Match / **#239** Lock In already on main as 1.4.184 / 1.4.185.
 **#161** Dig/Hard/NW/Town parked. **#160** cheap-hop infra.
 
 ## Chosen climb
-Single Easy Fun/Clear polish: **Easy Lock In win-end / feedback ≤720 fill empty purple bottom** — grow `challenge-page.is-after:has(.stored-line)` after-win shell + `stored-line` gold card so SAY THIS TOMORROW · Home CTA · Juniper whisper fill the portrait (Fixes #239).
+Single Easy Fun/Clear polish: **Easy Samaritan / Sequence order ≤720 fill top-cluster purple void** — grow `play.is-sequence.is-deal` shell + stretch `bank.is-order` stone tiles so instruction · progress · choice chips fill the portrait (Fixes #240).
 
 ## What fixed
-- `src/styles/sortHold.css`: `@media (max-height: 720px)` Easy `app-body:has(.is-after .stored-line)` flex fill; `.after-win` flex column; `.stored-line { flex: 1 1 auto; align-content: center }`; TownReturn pinned `flex: 0 0 auto`
-- `src/components/StoredLine.tsx`: thin 1.4.185 comment
+- `src/styles/sortHold.css`: base `.play.is-sequence.is-deal` `flex: 0 → 1` so gold card fills; `@media (max-height: 720px)` `bank.is-order { flex: 1 1 auto; grid-auto-rows: minmax(0,1fr) }` + stretch chips
+- `src/components/challenges/SequencePlay.tsx`: thin 1.4.186 comment
 - Android `versionName` left at **1.4.113**
-- Version **1.4.185** atop live **1.4.184**
+- Version **1.4.186** atop live **1.4.185**
 
 ## Deferred (do NOT climb this hop)
 - Dig Reveal / Hard / NW / Town / stores / Pack B / Home map candy
-- **#240** Samaritan top-cluster
-- Match 184 / Sort 183 / Snap 182 / Creed 181 / Manage 180 / letterbox (already on main)
-- Miss teach PlainTalk drop 1.4.161 / Lock In arena ≤720 1.4.170 (different surface)
+- Match 184 / Lock In 185 / Sort 183 / Snap 182 / Creed 181 / Manage 180 / letterbox (already on main)
+- Sequence how/lead/hint peel 1.4.171 (different surface; still applies ≤720)
 
 ## Gemini
-MODEL=gemini-flash-latest — Shot pack 1.4.180 vision FAIL on Lock In win-end (`gemini-vision.json`). Invent API key present but not AIza AI Studio shape. Manager-steered + issue #239 comment. Notes: `notes-gemini.txt` (+ `/workspace/silver-city-art/notes-gemini-185.txt`).
+MODEL=gemini-flash-latest — Shot pack 1.4.180 vision FAIL on Samaritan (`gemini-vision.json`). Invent API key present but not AIza AI Studio shape. Manager-steered + issue #240. Notes: `notes-gemini.txt` (+ `/workspace/silver-city-art/notes-gemini-186.txt`).
 
 ## Files peeled
 - `src/styles/sortHold.css`
-- `src/components/StoredLine.tsx`
+- `src/components/challenges/SequencePlay.tsx`
 - `scripts/check-city.mjs`, `scripts/check-panel-blast.mjs`
 - `src/config/app.ts`, `package.json`, `package-lock.json`
 - `src/content/changelog.ts`
 - `notes-gemini.txt`
-- `docs/` (Pages rebuild `index-S5aan8XD.js` / `index-D0FDdba9.css`)
+- `docs/` (Pages rebuild `index-DVMgvvC5.js` / `index-W91YziJI.css`)
 - `MERGE.md`
 
 ## Checks

@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.186',
+    title: 'Easy Samaritan: ≤720 fill top-cluster purple void',
+    when: '2026-09-25',
+    items: [
+      'Easy Samaritan / Sequence order on ≤720px tall: grow play shell + stretch order stones so the gold card fills — no bottom-half empty purple void (Fixes #240; Shot 1.4.180 · invent Fun/Clear; Sequence how-peel 1.4.171 untouched)',
+    ],
+  },
+  {
     version: '1.4.185',
     title: 'Easy Lock In: ≤720 fill win-end purple void',
     when: '2026-09-25',

@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.185')
+assert.equal(APP_VERSION, '1.4.186')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3285,13 +3285,39 @@ console.log('check-city: ok')
     /html\[data-easy='on'\] \.app\.is-play \.app-body:has\(\.challenge-page\.is-after \.stored-line\)/,
   )
   assert.match(stored185, /1\.4\.185: ≤720 fills empty purple bottom/)
-  assert.match(latestChange(APP_VERSION).items.join('\n'), /Fixes #239/)
+  assert.match(latestChange('1.4.185').items.join('\n'), /Fixes #239/)
   assert.doesNotMatch(
-    latestChange(APP_VERSION).items.join('\n'),
+    latestChange('1.4.185').items.join('\n'),
     /Fixes #238|Fixes #240|Samaritan|Match \(picture|empty purple card|Story Snap|eyebrow|Creed merge|Fixes #232|empty-lot|Fixes #217/i,
     '1.4.185 must not claim #238 Match / #240 Samaritan / Snap / Creed / Manage / letterbox',
   )
 }
+
+// Easy Clear 1.4.186: Easy Samaritan / Sequence ≤720 fill top-cluster purple void (Fixes #240)
+{
+  const holdCss186 = readFileSync(new URL('../src/styles/sortHold.css', import.meta.url), 'utf8')
+  const seqPlay186 = readFileSync(
+    new URL('../src/components/challenges/SequencePlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(holdCss186, /1\.4\.186: Easy Samaritan \/ Sequence order ≤720 fill top-cluster purple void/)
+  assert.match(
+    holdCss186,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-sequence\.is-deal \.bank\.is-order \{[\s\S]*?flex: 1 1 auto/,
+  )
+  assert.match(
+    holdCss186,
+    /\.play\.is-sequence\.is-deal,[\s\S]*?flex: 1 1 auto/,
+  )
+  assert.match(seqPlay186, /1\.4\.186: ≤720 fills top-cluster purple void/)
+  assert.match(latestChange(APP_VERSION).items.join('\n'), /Fixes #240/)
+  assert.doesNotMatch(
+    latestChange(APP_VERSION).items.join('\n'),
+    /Fixes #238|Fixes #239|Lock In win-end|Match \(picture|empty purple card|Story Snap|eyebrow|Creed merge|Fixes #232|empty-lot|Fixes #217/i,
+    '1.4.186 must not claim #238 Match / #239 Lock In / Snap / Creed / Manage / letterbox',
+  )
+}
+
 
 
 
