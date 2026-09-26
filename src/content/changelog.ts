@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.231',
+    title: 'Easy Lock In win-end: ≤720 close fill + triad→Home purple void on tall phone',
+    when: '2026-09-26',
+    items: [
+      'Easy Lock In win-end (StoredLine · SAY THIS TOMORROW · TownReturn Home) on ≤720 / phone portrait: extend fill + triad→Home so after-win shell / stored-line absorb free space and claim·reason·source · Home pack tight — no large purple void under the triad / before Home on tall phones (invent Fun/Clear; continuation of Lock In win-end fill 185 / triad→Home 208 ≤720 family; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.230',
     title: 'Easy Manage sheet: ≤720 close width cutout / exposed purple (Fixes #302)',
     when: '2026-09-26',

@@ -14,6 +14,7 @@ interface StoredLineProps {
 /** After a win: claim · reason · source kids can say tomorrow. */
 /* Easy Clear 1.4.185: ≤720 fills empty purple bottom on Lock In win-end (sortHold.css; Fixes #239). */
 /* Easy Clear 1.4.208: ≤720 closes triad→Home purple gap — tighten after-win/held-triad gaps (fill 185 stays). */
+/* Easy Clear 1.4.231: phone portrait extends fill 185 + triad→Home 208 so StoredLine·Home close purple void (invent Fun/Clear). */
 export function StoredLine({ learning, when }: StoredLineProps) {
   const { progress } = useProgress()
   const easy = isEasy(progress)
