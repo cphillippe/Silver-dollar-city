@@ -55,6 +55,20 @@ assert.doesNotMatch(
 )
 assert.match(playSrc, /claimShown \? \(/)
 
+// Easy Clear 1.4.163: omit Learn-lead STORY_SNAP_TEACH reprint — Fixes #209
+assert.doesNotMatch(
+  playSrc,
+  /className="snap-teach"/,
+  'Snap play peels Learn-lead snap-teach (#209)',
+)
+assert.doesNotMatch(
+  playSrc,
+  /\{STORY_SNAP_TEACH\}/,
+  'no STORY_SNAP_TEACH in Snap play JSX (#209)',
+)
+assert.match(playSrc, /easy-who-where-line/, 'quiet who·place stays')
+assert.match(playSrc, /1\.4\.163.*#209|#209.*omit STORY_SNAP_TEACH/)
+
 const snapCss = readFileSync(new URL('../src/styles/storySnap.css', import.meta.url), 'utf8')
 assert.match(snapCss, /max-height:\s*720px/)
 assert.match(snapCss, /\.snap-teach/)

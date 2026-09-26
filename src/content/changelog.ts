@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.163',
+    title: 'Story Snap: drop Learn-lead teach reprint',
+    when: '2026-09-25',
+    items: [
+      'Easy Story Snap play: omit STORY_SNAP_TEACH Learn-lead reprint on all heights — pad · strip · gate teach the mechanic; quiet who·place stays; ≤720 peel from #189 kept (Fixes #209)',
+    ],
+  },
+  {
     version: '1.4.162',
     title: 'Learn: short-story ≤720 peel',
     when: '2026-09-25',
