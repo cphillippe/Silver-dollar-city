@@ -5203,6 +5203,51 @@ html[data-easy='on'] .mind-node em {
   }
 }
 
+/* Easy Clear 1.4.220: Easy Creed ≤720 / phone portrait fill + bowl→CTA purple void —
+   After fill 192 + dock-margin 200 (both ≤720 only), real phones ~390×844 still leave
+   the merge bowl hugging the top with empty purple under the bowl / before the dock
+   because those peels never apply at Shot heights. Extend fill + dock-margin across
+   phone portrait heights (max-height: 920px) so merge-bowl absorbs free space — tight
+   score · ladder · bowl → CTA on tall phones (Easy Creed arcade chrome).
+   Fill 192 / dock 200 ≤720 stay. Do NOT pack Samaritan / Manage / Match / Lock In /
+   Learn / Father / Creek / Dig / Build / Hold / Sort / Snap / Link. Shot wake hop. */
+@media (max-height: 920px) {
+  .play.is-claim-merge,
+  .daily-page.is-puzzle .play.is-claim-merge,
+  .challenge-page.is-puzzle .play.is-claim-merge {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .play.is-claim-merge .merge-bowl {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+    max-height: none;
+    width: min(100%, 390px);
+    aspect-ratio: auto;
+    align-self: center;
+  }
+
+  .play.is-claim-merge .story-kicker,
+  .play.is-claim-merge .merge-hud,
+  .play.is-claim-merge .merge-ladder,
+  .play.is-claim-merge .merge-combo,
+  .play.is-claim-merge .miss-banner,
+  .play.is-claim-merge .bonus-banner,
+  .play.is-claim-merge .bonus-plus,
+  .play.is-claim-merge .match-toast {
+    flex: 0 0 auto;
+  }
+
+  .play.is-claim-merge .cta-dock {
+    margin-top: 0;
+  }
+}
+
 .merge-danger {
   position: absolute;
   left: 8%;
