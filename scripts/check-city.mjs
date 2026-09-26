@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.233')
+assert.equal(APP_VERSION, '1.4.234')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -4705,5 +4705,32 @@ console.log('check-city: ok')
     latestChange('1.4.233').items.join('\n'),
     /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#300|#301|#302|Father Dash|Learn cream|Samaritan|Manage|Lock In|Dig|Hold|Sort|Snap|Link|Build|Sequence|Road maze|Source dig|Story Creek|Match picture|score→CTA|triad→Home|bowl→CTA|fill 192|dock 200/i,
     '1.4.233 must not fix phone-fail issues or climb another Easy surface',
+  )
+}
+
+// Easy Clear 1.4.234: Easy Story Creek maze ≤720 / phone portrait HUD peel (invent Fun/Clear)
+{
+  const mazeCss234 = readFileSync(new URL('../src/styles/maze.css', import.meta.url), 'utf8')
+  const mazePlay234 = readFileSync(
+    new URL('../src/components/challenges/RoadMazePlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(mazeCss234, /1\.4\.234: Easy Story Creek maze ≤720 \/ phone portrait HUD peel/)
+  assert.match(
+    mazeCss234,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.play\.is-road-maze \.story-kicker,[\s\S]*?\.play\.is-road-maze \.run-thumbs,[\s\S]*?\.play\.is-road-maze \.story-caption \{[\s\S]*?display: none/,
+  )
+  assert.match(
+    mazeCss234,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.play\.is-road-maze \.match-score \{[\s\S]*?font-size: 0\.68rem/,
+  )
+  assert.match(mazePlay234, /1\.4\.234: phone portrait extends HUD peel 175/)
+  assert.match(cssSrc, /1\.4\.234: Easy Story Creek maze ≤720 \/ phone portrait HUD peel/)
+  assert.match(latestChange('1.4.234').items.join('\n'), /HUD peel|who·where|thumbs|caption|phone portrait|Story Creek|maze|invent Fun\/Clear/i)
+  assert.match(latestChange('1.4.234').title, /Easy Story Creek|≤720|maze HUD peel/i)
+  assert.doesNotMatch(
+    latestChange('1.4.234').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#300|#301|#302|Father Dash|Learn cream|Samaritan voids|Manage|Lock In|Dig|Hold|Sort|Snap|Link|Build|Sequence|Claim merge|Creed|Source dig|Match picture|score→CTA|triad→Home|bowl→CTA|fill 191|board→CTA/i,
+    '1.4.234 must not fix phone-fail issues or climb another Easy surface',
   )
 }
