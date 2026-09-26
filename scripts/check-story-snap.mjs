@@ -83,4 +83,17 @@ assert.doesNotMatch(easyUiSnap, /snapHome: 'Tap when a beat/)
 assert.match(hubSnapSrc, /EASY\.snapHome/)
 assert.match(hubSnapSrc, /1\.4\.157.*whisper|#203/)
 
+
+// Easy Clear 1.4.182: Story Snap ≤720 HUD peel — hide eyebrow + who·where (invent Fun/Clear)
+assert.match(playSrc, /1\.4\.182: ≤720 peels HUD/)
+assert.match(snapCss, /1\.4\.182: Story Snap ≤720 HUD peel/)
+assert.match(
+  snapCss,
+  /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-story-snap \.eyebrow \{[\s\S]*?display: none/,
+)
+assert.match(
+  snapCss,
+  /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-story-snap \.easy-who-where-line \{[\s\S]*?display: none/,
+)
+
 console.log('check-story-snap: ok')
