@@ -1,10 +1,12 @@
 import { useMemo, useState } from 'react'
 import { shuffle } from '../../lib/shuffle'
-import { isEasy } from '../../lib/easy'
+import { plainFor } from '../../content/plain'
+import { easyChromeLine, easyChromeNearDup, isEasy } from '../../lib/easy'
 import { useProgress } from '../../store/progress'
 import type { SequenceChallenge, SequenceItem } from '../../types'
 import { GemMark } from '../GemMark'
 import { burstStyle } from '../../lib/juice'
+import { easyLead } from '../../lib/words'
 import { PuzzleHint } from './PuzzleHint'
 import { PuzzleLead } from './PuzzleLead'
 import { ResultPanel } from './ResultPanel'
@@ -148,6 +150,14 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
       ? [challenge.items[nextIndex]?.id, decoyId].filter((id): id is string => Boolean(id))
       : order.map((item) => item.id),
   )
+  // Easy Clear 1.4.146: skip PuzzleHint when it near-dupes PuzzleLead (fg-reason / fg-ground
+  // Keep/Toss stack). Keep order-step .sort-how — that is the mechanic cue, not a Keep/Toss echo.
+  const easyLeadLine = easy ? easyLead(challenge.id, challenge.prompt) : ''
+  const easyPlainHint = easy
+    ? easyChromeLine(plainFor(challenge.id)?.hint ?? challenge.context ?? '')
+    : ''
+  const showEasyPuzzleHint =
+    Boolean(easyPlainHint) && !easyChromeNearDup(easyPlainHint, easyLeadLine)
 
   return (
     <div
@@ -155,7 +165,13 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
     >
       <WinBurst play={status === 'ok'} />
       <PuzzleLead challenge={challenge} />
-      <PuzzleHint text={challenge.context} id={challenge.id} onPeek={onPeek} />
+      {easy ? (
+        showEasyPuzzleHint ? (
+          <PuzzleHint text={challenge.context} id={challenge.id} onPeek={onPeek} />
+        ) : null
+      ) : (
+        <PuzzleHint text={challenge.context} id={challenge.id} onPeek={onPeek} />
+      )}
       <p className="sort-how is-order-how">
         {challenge.items.map((item, index) => (
           <span
