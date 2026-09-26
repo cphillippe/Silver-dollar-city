@@ -3,8 +3,8 @@
 **PR:** (pending)
 **Branch:** `ship/easy-fun-clear-193` → `main`
 **Version:** 1.4.193
-**Peel:** (pending peel commit)
-**Tip:** (pending)
+**Peel:**  ()
+**Tip:**  ()
 **Base live:** 1.4.192 (`5f1e3ce`, PR #249 Easy Creed merge ≤720 fill purple void on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
