@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.234')
+assert.equal(APP_VERSION, '1.4.235')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -4732,5 +4732,36 @@ console.log('check-city: ok')
     latestChange('1.4.234').items.join('\n'),
     /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#300|#301|#302|Father Dash|Learn cream|Samaritan voids|Manage|Lock In|Dig|Hold|Sort|Snap|Link|Build|Sequence|Claim merge|Creed|Source dig|Match picture|score→CTA|triad→Home|bowl→CTA|fill 191|board→CTA/i,
     '1.4.234 must not fix phone-fail issues or climb another Easy surface',
+  )
+}
+
+// Easy Clear 1.4.235: Easy Learn ≤720 / tall-phone bottom-half purple void (Fixes #314)
+{
+  const welcomeCss235 = readFileSync(new URL('../src/styles/welcome.css', import.meta.url), 'utf8')
+  const teachUnlock235 = readFileSync(
+    new URL('../src/components/TeachUnlock.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(welcomeCss235, /1\.4\.235: Easy Learn ≤720 \/ tall-phone bottom-half purple void/)
+  assert.match(
+    welcomeCss235,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.easy-story-card\.teach-gate \{[\s\S]*?height: 100%[\s\S]*?max-height: 100%/,
+  )
+  assert.match(
+    welcomeCss235,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.easy-story-card \.held-triad \{[\s\S]*?align-content: space-evenly/,
+  )
+  assert.match(
+    welcomeCss235,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.cta-dock\.easy-story-dock \{[\s\S]*?position: static[\s\S]*?margin-top: auto/,
+  )
+  assert.match(teachUnlock235, /1\.4\.235: tall-phone strengthens fill 224/)
+  assert.match(cssSrc, /1\.4\.235: Easy Learn ≤720 \/ tall-phone bottom-half purple void/)
+  assert.match(latestChange('1.4.235').items.join('\n'), /Fixes #314|bottom-half|purple void|Learn|tall-phone|space-evenly|position static/i)
+  assert.match(latestChange('1.4.235').title, /Easy Learn|≤720|tall-phone|bottom-half|purple void|Fixes #314/i)
+  assert.doesNotMatch(
+    latestChange('1.4.235').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#300|#301|#302|#315|#316|#317|#318|#319|Father Dash|Match grid|Samaritan|Manage|Lock In|Dig|Creed|Build|Sort|Snap|Link|Road maze|Claim merge|Source dig|Story Creek|invent Fun\/Clear/i,
+    '1.4.235 must not fix other phone-fail issues or climb another Easy surface',
   )
 }

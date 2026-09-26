@@ -833,3 +833,88 @@ html[data-theme='dusk'] .easy-story-card {
   }
 }
 
+
+
+/* Easy Clear 1.4.235: Easy Learn ≤720 / tall-phone bottom-half purple void (Fixes #314) —
+   After tighten 224 (flex 1 1 0 · dock margin-top auto · zero pad) Shot pack 1.4.230
+   02-easy-learn.png (390×844) STILL clusters Short story · cream LociStamp · reason ·
+   HeldTriad · Find-the-gems in the upper half with a massive dead purple band under the
+   stack (residual after closed #296 / 1.4.224 + #280 / 1.4.215). Cause: global sticky
+   `.cta-dock` + incomplete height pin leave free space as a flat purple plate beneath
+   the content hug (Father Dash 229 sticky lesson). Strengthen: app-body / is-teach /
+   cream-card height 100% · max-height 100%, held-triad flex 1 1 0 with align-content
+   space-evenly (intentional spacing inside the card beats empty purple), dock
+   position static + margin-top auto so Find-the-gems pins to the usable floor.
+   Compress 162 / stamp wrap 177 / fill 206 ≤720 / extend 215 / tighten 224 stay.
+   Do NOT pack #315–#319 Match / Lock In / Samaritan / Father / Dig / Creek / parked maps. */
+@media (max-height: 920px) {
+  html[data-easy='on'] .app.is-play .app-body:has(.challenge-page.is-teach .easy-story-card) {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+    padding-top: 4px;
+    padding-bottom: 0;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach:has(.easy-story-card) {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    gap: 4px;
+    overflow: hidden;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach:has(.easy-story-card) > .text-link {
+    flex: 0 0 auto;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card.teach-gate {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    gap: 6px;
+    overflow: hidden;
+    padding-top: 10px;
+    padding-bottom: 0;
+    justify-content: flex-start;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card > .eyebrow,
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .loci-stamp,
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .teach-reason {
+    flex: 0 0 auto;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .held-triad {
+    display: grid;
+    flex: 1 1 0;
+    min-height: 0;
+    align-content: space-evenly;
+    gap: 12px;
+    margin: 0;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .easy-story-dock,
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .cta-dock.easy-story-dock {
+    position: static;
+    bottom: auto;
+    margin-top: auto;
+    flex: 0 0 auto;
+    padding-top: 8px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+

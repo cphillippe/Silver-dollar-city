@@ -55,6 +55,7 @@ export function TeachUnlock({ brief, kind, onUnlock, unlock, beats }: TeachUnloc
         {/* Easy Clear 1.4.206: ≤720 fills held-clear purple void — grow is-teach + stretch HeldTriad (compress 162 stays). */}
         {/* Easy Clear 1.4.215: phone portrait extends fill 206 so CTA dock closes purple void beneath (Fixes #280). */}
         {/* Easy Clear 1.4.224: phone portrait tightens fill 215 — zero bottom pad · flex 1 1 0 · dock auto — closes bottom-half void (Fixes #296). */}
+        {/* Easy Clear 1.4.235: tall-phone strengthens fill 224 — height 100% · triad space-evenly · dock position static — closes Shot 230 bottom-half void (Fixes #314). */}
         <LociStamp stamp={stamp} mode="hero" />
         {picture ? <GemMark gem={picture} size="sm" /> : null}
         <p className="teach-reason">{story}</p>
