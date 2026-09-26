@@ -78,6 +78,15 @@ export function easyChromeLine(text: string): string {
     .replace(/\bthrottle\b/gi, 'choke')
 }
 
+/** True when two Easy chrome lines are the same Keep/Toss cue (hint ≈ lead). */
+export function easyChromeNearDup(a: string, b: string): boolean {
+  const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '')
+  const na = norm(a)
+  const nb = norm(b)
+  if (!na || !nb) return false
+  return na === nb || na.startsWith(nb) || nb.startsWith(na)
+}
+
 const WHY_WORD_CAP = 12
 
 /** Count words in an Easy why face. Em-dashes count as breaks, not words. */
