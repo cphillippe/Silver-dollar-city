@@ -1,7 +1,7 @@
 MODEL=gemini-flash-latest
-Shot pack 1.4.190 Gemini vision FAIL on 03-easy-match.png — Fixes #250.
-Invent API: GEMINI_API_KEY present but not AIza AI Studio shape (same as 163–192).
-Manager-steered peel (parent + issue #250): Easy Match (GemSearch letter grid) ≤720 fill grid→footer purple void.
-Peel: gem.css @media (max-height:720px) play.is-gem-search.is-panel-blast.is-story-docked flex:1 + stretch gem-scroll/gem-stage/gem-board (max-height:none, aspect-ratio:auto); GemSearchPlay comment.
-Do NOT pack #251 Lock In quiz / #252 Lock In feedback / #253 Father. Picture-deal 184 / Creed 192 / Story Creek 191 / Hold / Link / Build / Samaritan / Sort / Snap untouched.
-VERDICT: APPROVE (shot Gemini + issue #250)
+Shot pack 1.4.190 Gemini vision FAIL on 04-easy-lockin.png — Fixes #251.
+Invent API: GEMINI_API_KEY present but not AIza AI Studio shape (same as 163–193).
+Manager-steered peel (parent + issue #251): Easy Lock In quiz (WhyBlast mid-question) ≤720 fill bottom purple void.
+Peel: sortHold.css @media (max-height:720px) app-body:has(journal.is-rehearse why-blast live) flex fill + journal / rehearse-anchor / recall-gate flex:1; WhyBlastPlay comment. Hold arena stretch 190 still applies inside card.
+Do NOT pack #252 Lock In feedback / #253 Father / #250 Match. Win-end 185 / Hold 190 / Match 193 / Creed / Story Creek / Samaritan / Sort / Snap untouched.
+VERDICT: APPROVE (shot Gemini + issue #251)
