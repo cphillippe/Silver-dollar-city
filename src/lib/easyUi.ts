@@ -9,12 +9,12 @@ export const EASY = {
   runHunt: 'Hold to run. Let go when it glows, then press again.',
   runCta: 'Run to him',
   runMatch: 'Run',
-  runHome: 'Hold to run. Press the glow. Hug him before the speech is done. One more run.',
+  runHome: 'One more run.',  // Easy Clear 1.4.155: short Home next-step (not full runHunt; Fixes #192)
   runAgain: 'One more run',
   mazeHunt: 'Find the hurt man. Help him. Take him to the inn.',
   mazeCta: 'Help on the road',
   mazeMatch: 'Help',
-  mazeHome: 'Find the hurt man. Help him. Take him to the inn. One more road.',
+  mazeHome: 'One more road.',  // Easy Clear 1.4.155: short Home next-step (not full mazeHunt; Fixes #192)
   mazeWinWhy: 'You found him, helped him, and took him to safety.',
   mazeAgain: 'One more road',
   mergeHunt: 'Drop candy. Smash two of a kind.',
