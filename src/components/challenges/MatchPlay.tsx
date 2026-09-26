@@ -124,6 +124,7 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
   // Easy Clear 1.4.232: phone portrait extends fill 184 + score→CTA 207 so match-grid·score·CTA close purple void (invent Fun/Clear).
   // Easy Clear 1.4.236: tall-phone strengthens fill 232 (height 100% · grid flex 1 1 0 · cta-dock position static) so picture-deal closes bottom-half purple void (Fixes #315).
   // Easy Clear 1.4.246: tall-phone cream-card fill (match-grid parchment plate · denser card stretch) so leftover is cream-inside-card, not purple void (Fixes #332).
+  // Easy Clear 1.4.253: tall-phone cream shell fill (opaque cream play + solid match-grid · cream score/dock floor) so leftover is cream floor, not purple void after 246 (Fixes #345).
   const easyPlainHint = easy
     ? easyChromeLine(plainFor(challenge.id)?.hint ?? challenge.context ?? '')
     : ''
