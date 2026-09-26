@@ -27,7 +27,8 @@ interface WhyBlastPlayProps {
  * Easy Hold why-step: claim stays center, four why-chips float around it.
  * Correct → blast + LOCKED!. Wrong → shake + Miss −25, then Main idea · why-true · From
  * teach sheet with Try again so the kid learns before the next tap.
- * Easy Clear: miss badge lives on the sheet only (no HUD dup); claim gets Main idea label.
+ * Easy Clear: miss badge lives on the sheet only (no HUD dup); claim gets Main idea label
+ * on miss teach (1.4.139) and live arena (1.4.141).
  */
 export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: WhyBlastPlayProps) {
   const chips = useMemo(
@@ -170,7 +171,11 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
               </button>
             )
           })}
-          <p className="why-claim recall-line rehearse-stem">{easyFacingLine(id, claim)}</p>
+          <p className="why-claim recall-line rehearse-stem">
+            {/* Easy Clear 1.4.141: live arena names Main idea — same family as miss teach 139 + Learn 140. */}
+            <span className="why-miss-label">{EASY.mainIdea}</span>
+            {easyFacingLine(id, claim)}
+          </p>
           {locked ? null : (
             <p className="held-from quiet">
               {EASY.sayFrom} {source}
