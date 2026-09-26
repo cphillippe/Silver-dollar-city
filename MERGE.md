@@ -3,8 +3,8 @@
 **PR:** (pending)
 **Branch:** `ship/easy-fun-clear-198` → `main`
 **Version:** 1.4.198
-**Peel:** (pending)
-**Tip:** (pending)
+**Peel:** `67cf0b0` (`67cf0b07e3ebc2558e1a29dc70c2799f70002a82`)
+**Tip:** `67cf0b0` (`67cf0b07e3ebc2558e1a29dc70c2799f70002a82`)
 **Base live:** 1.4.197 (`e5a43af`, PR #258 Easy Story Snap ≤720 fill purple void on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
