@@ -2,7 +2,7 @@ import type { Challenge, SequenceItem } from '../types'
 import type { EvidenceBrief } from '../content/evidence'
 import { packLesson } from '../content/packCatalog'
 import { plainFor } from '../content/plain'
-import { EASY, easyFacingLine, easyWhoWhere, easyWhoWhereLine, isEasy } from '../lib/easy'
+import { EASY, easyWhoWhere, easyWhoWhereLine, isEasy } from '../lib/easy'
 import { storyPlayFor } from '../lib/storyPlay'
 import { currentLessonTier } from '../lib/tiers'
 import { WORDS, schoolWordsFor } from '../lib/words'
@@ -54,14 +54,12 @@ export function TeachUnlock({ brief, kind, onUnlock, unlock, beats }: TeachUnloc
         <LociStamp stamp={stamp} mode="hero" />
         {picture ? <GemMark gem={picture} size="sm" /> : null}
         <p className="teach-reason">{story}</p>
-        <p className="eyebrow hold-kicker">The main idea you will keep</p>
-        <p className="recall-line rehearse-stem">{easyFacingLine(brief.id, brief.claim)}</p>
+        {/* Easy Clear 1.4.140: one HeldTriad — Main idea · Why · From (no orphan claim above). */}
         <HeldTriad
           id={brief.id}
           claim={brief.claim}
           reason={brief.reason}
           source={brief.source}
-          omitClaim
         />
         <div className="easy-who-where" aria-label={`${home.who} · ${home.place}`}>
           <p className="easy-who-where-line">{easyWhoWhereLine(brief.id)}</p>
