@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.229',
+    title: 'Easy Father Dash: ≤720 close timing-rail→CTA purple void (Fixes #301)',
+    when: '2026-09-26',
+    items: [
+      'Fixes #301: Easy Father Dash timing-rail on ≤720 / phone portrait — strengthen fill so play overflow hidden · run-scene flex 1 1 0 absorbs free space and cta-dock is position static with margin-top 0 — no massive purple void between the timing rail and HOLD TO RUN / LET GO on tall phones (Shot 220 residual after Father Dash peel 1.4.216; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.228',
     title: 'Easy Samaritan: ≤720 close voids above/below board (Fixes #300)',
     when: '2026-09-26',
