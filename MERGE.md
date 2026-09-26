@@ -4,7 +4,7 @@
 **Branch:** `ship/manage-empty-lot-179` → `main` (alias `ship/manage-empty-lot-180`)
 **Version:** 1.4.180
 **Peel:** `deac678` (`deac678355c6690fe83a77fd3aa4404fef13ac2c`)
-**Tip:** `16d38ca` (`16d38ca9380b245e39c3393d2c567ce4fa9dd6fc`)
+**Tip:** `e5146df` (`e5146df4c49d86a76a601c4ffaf4f2bf0c88613d`) — plus MERGE tip-note commit on branch head
 **Base live:** 1.4.179 (`5f9b148`, PR #229 Easy Home map fills the phone / Fixes #217; atop 1.4.178 Witness #222)
 **Fixes:** #232
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
