@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.209')
+assert.equal(APP_VERSION, '1.4.210')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3851,6 +3851,33 @@ console.log('check-city: ok')
     latestChange('1.4.209').items.join('\n'),
     /Fixes #250|Fixes #251|Fixes #252|Fixes #253|Lock In quiz|Lock In feedback|grid→footer|gem-board|Easy Sort ≤720 fill|Father Dash ≤720 fill|Story Snap ≤720 fill|snap-stage|bank\.is-sort|sort-bins|choices→CTA|link-dock|Easy Link ≤720 fill|bowl→CTA|Easy Creed ≤720 fill|merge-bowl|board→CTA|Story Creek ≤720 fill|maze-board|chips→CTA|Easy Hold.*≤720 fill|Build Argument ≤720 fill|free-place|slider→CTA|speech→rail|Easy Father ≤720 fill|stones→result|Easy Sequence ≤720|held-clear|Easy Learn ≤720|empty purple card|score→CTA|Easy Match ≤720|triad→Home|Lock In win-end/i,
     '1.4.209 must not re-peel Shot 190 fails #250–#253 or Lock In win-end 208 / Match 207 / Learn 206 / Sequence 205 / Father 204 / Build 203 / Hold 202 / Creek 201 / Creed 200 / Link 199 / Sort 198 / Snap fill 197',
+  )
+}
+
+// Easy Clear 1.4.210: Easy Hold ≤720 close hud→arena purple gap (invent Fun/Clear; Shot wake)
+{
+  const holdCss210 = readFileSync(new URL('../src/styles/sortHold.css', import.meta.url), 'utf8')
+  const whyBlast210 = readFileSync(
+    new URL('../src/components/challenges/WhyBlastPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(holdCss210, /1\.4\.210: Easy Hold ≤720 close hud→arena purple gap/)
+  assert.match(
+    holdCss210,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.why-blast \{[\s\S]*?gap: 2px/,
+  )
+  assert.match(
+    holdCss210,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.why-blast \.why-arena \{[\s\S]*?gap: 4px/,
+  )
+  assert.match(whyBlast210, /1\.4\.210: ≤720 closes hud→arena purple gap/)
+  assert.match(cssSrc, /1\.4\.210: Easy Hold ≤720 close hud→arena purple gap/)
+  assert.match(latestChange('1.4.210').items.join('\n'), /hud→arena|why-blast|why-arena|purple band between the hud/i)
+  assert.match(latestChange('1.4.210').title, /Easy Hold|≤720|hud→arena|purple gap/i)
+  assert.doesNotMatch(
+    latestChange('1.4.210').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|Lock In quiz|Lock In feedback|grid→footer|gem-board|Easy Sort ≤720 fill|Father Dash ≤720 fill|Story Snap ≤720 fill|snap-stage|bank\.is-sort|sort-bins|choices→CTA|link-dock|Easy Link ≤720 fill|bowl→CTA|Easy Creed ≤720 fill|merge-bowl|board→CTA|Story Creek ≤720 fill|maze-board|chips→CTA|Easy Hold.*≤720 fill|Build Argument ≤720 fill|free-place|slider→CTA|speech→rail|Easy Father ≤720 fill|stones→result|Easy Sequence ≤720|held-clear|Easy Learn ≤720|empty purple card|score→CTA|Easy Match ≤720|triad→Home|Lock In win-end|pad→CTA/i,
+    '1.4.210 must not re-peel Shot 190 fails #250–#253 or Snap2 209 / StoredLine 208 / Match 207 / Learn 206 / Sequence 205 / Father 204 / Build 203 / Hold dock 202 / Creek 201 / Creed 200 / Link 199 / Sort 198 / Snap fill 197',
   )
 }
 

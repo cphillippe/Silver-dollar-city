@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.210',
+    title: 'Easy Hold: ≤720 close hud→arena purple gap',
+    when: '2026-09-25',
+    items: [
+      'Easy Hold (WhyBlast Lock In live) on ≤720px tall: tighten why-blast + why-arena + hud gaps so next-tap · claim · chips pack tight — no purple band between the hud and the arena (Snap/Match dock-margin family · invent Fun/Clear; Shot wake version; after Hold fill 1.4.190 / dock 1.4.202; Snap2 209 / StoredLine 208 / Match 207 / Learn 206 / Sequence 205 / Father 204 / Build 203 / Story Creek 201 / Creed 200 / Link 199 / Sort 198 peels untouched)',
+    ],
+  },
+  {
     version: '1.4.209',
     title: 'Easy Story Snap: ≤720 close pad→CTA purple gap',
     when: '2026-09-25',
