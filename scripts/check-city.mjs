@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.212')
+assert.equal(APP_VERSION, '1.4.213')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -4083,5 +4083,29 @@ console.log('check-city: ok')
     latestChange('1.4.212').items.join('\n'),
     /Fixes #250|Fixes #252|Fixes #253|#272|#275|#276|#277|miss teach|Father|Match|Story Creek|Creed|Build|Sort|Snap|Link|Road maze|Claim merge|Source dig/i,
     '1.4.212 must not fix other phone-fail issues or climb another Easy surface',
+  )
+}
+
+
+// Easy Clear 1.4.213: Easy Lock In feedback ≤720 close bottom purple void (Fixes #275)
+{
+  const holdCss213 = readFileSync(new URL('../src/styles/sortHold.css', import.meta.url), 'utf8')
+  const whyPlay213 = readFileSync(
+    new URL('../src/components/challenges/WhyBlastPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(holdCss213, /1\.4\.213: Easy Lock In feedback ≤720 close the bottom purple void/)
+  assert.match(
+    holdCss213,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.app\.is-play \.app-body:has\(\.journal\.is-rehearse \.why-blast\.is-miss-teach\) \{[\s\S]*?padding-bottom: 0/,
+  )
+  assert.match(whyPlay213, /1\.4\.213: ≤720 feedback packs residual bottom padding/)
+  assert.match(cssSrc, /1\.4\.213: Easy Lock In feedback ≤720 close the bottom purple void/)
+  assert.match(latestChange('1.4.213').items.join('\n'), /Fixes #275|feedback|bottom|purple band/i)
+  assert.match(latestChange('1.4.213').title, /Lock In feedback|≤720|bottom|purple void/i)
+  assert.doesNotMatch(
+    latestChange('1.4.213').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#274|#276|#277|quiz|Match|Father|Story Creek|Creed|Build|Sort|Snap|Link|Road maze|Claim merge|Source dig/i,
+    '1.4.213 must not fix other phone-fail issues or climb another Easy surface',
   )
 }
