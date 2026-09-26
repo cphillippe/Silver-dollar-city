@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.183')
+assert.equal(APP_VERSION, '1.4.184')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3232,6 +3232,37 @@ console.log('check-city: ok')
     '1.4.183 must not claim Snap 182 / Creed 181 / Manage / letterbox',
   )
 }
+
+
+// Easy Clear 1.4.184: Easy Match ≤720 fill empty purple card (Fixes #238)
+{
+  const matchCss184 = readFileSync(new URL('../src/styles/match.css', import.meta.url), 'utf8')
+  const matchPlay184 = readFileSync(
+    new URL('../src/components/challenges/MatchPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(matchCss184, /1\.4\.184: Easy Match \(picture · main idea\) ≤720 fill empty purple card/)
+  assert.match(
+    matchCss184,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.is-puzzle \.play\.is-match\.is-deal \.match-grid \{[\s\S]*?flex: 1 1 auto/,
+  )
+  assert.match(
+    matchCss184,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.is-puzzle \.play\.is-match\.is-deal \.sort-how \{[\s\S]*?display: none/,
+  )
+  assert.match(
+    matchCss184,
+    /@media \(max-height: 720px\) \{[\s\S]*?grid-template-rows: auto minmax\(0, 1\.15fr\) minmax\(0, 1fr\)/,
+  )
+  assert.match(matchPlay184, /1\.4\.184: ≤720 fills empty purple card/)
+  assert.match(latestChange(APP_VERSION).items.join('\n'), /Fixes #238/)
+  assert.doesNotMatch(
+    latestChange(APP_VERSION).items.join('\n'),
+    /Fixes #239|Fixes #240|Samaritan|Lock In miss|Story Snap|eyebrow|Creed merge|Fixes #232|empty-lot|Fixes #217/i,
+    '1.4.184 must not claim #239/#240 / Snap / Creed / Manage / letterbox',
+  )
+}
+
 
 
 // Easy Clear 1.4.181: Easy Creed merge ≤720 HUD peel (invent Fun/Clear)

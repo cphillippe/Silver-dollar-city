@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.184',
+    title: 'Easy Match: ≤720 fill empty purple card',
+    when: '2026-09-25',
+    items: [
+      'Easy Match (picture · main idea) on ≤720px tall: grow deal grid + stretch cards so the play shell fills — no half-empty purple void (Fixes #238; Shot 1.4.180 · invent Fun/Clear; gem crossword 1.4.168 untouched)',
+    ],
+  },
+  {
     version: '1.4.183',
     title: 'Easy Sort: ≤720 board-first',
     when: '2026-09-25',

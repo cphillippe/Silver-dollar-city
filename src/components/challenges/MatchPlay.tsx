@@ -119,6 +119,7 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
   const needPair = left.find((pair) => pair.id === (picked?.id ?? focusId))
   const missCard = picked?.side === 'left' ? needPair?.right : needPair?.left
   // Easy Match chrome already prints EASY.matchHow as .sort-how — skip identical PuzzleHint.
+  // Easy Clear 1.4.184: ≤720 fills empty purple card in match.css (Fixes #238).
   const easyPlainHint = easy
     ? easyChromeLine(plainFor(challenge.id)?.hint ?? challenge.context ?? '')
     : ''
