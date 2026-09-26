@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.167',
+    title: 'Easy Manage: Hub chrome compress when open',
+    when: '2026-09-25',
+    items: [
+      'Easy Manage open: hub gets is-manage-open — hide topbar + Easy Home dock so map+sheet read as one overlay (not Hub header · void · map · sheet; Fixes #220; letterbox stays #217; Witness candy Map 1.4.166)',
+    ],
+  },
+  {
     version: '1.4.165',
     title: 'Easy Manage: peek sheet + portrait dedupe',
     when: '2026-09-25',
