@@ -918,3 +918,114 @@ html[data-theme='dusk'] .easy-story-card {
   }
 }
 
+
+/* Easy Clear 1.4.245: Easy Learn ≤720 / tall-phone bottom purple void residual (Fixes #331) —
+   After strengthen 235 (height 100% · triad space-evenly · dock position static) Shot pack
+   1.4.240 02-easy-learn.png (390×844; chrome 1.4.242) STILL fails — Gemini sees a massive
+   purple dead band under Help-on-the-road / Skip reading (residual after closed #314 /
+   1.4.235). Cause: base `.easy-story-card` is `background: transparent`, so flex-grown
+   empty space inside the card is still the dusk purple plate (vision FAIL). Visually
+   different from 235: (1) paint cream `.easy-story-card.teach-gate` so leftover fill is
+   cream-inside-card (intentional card plate), not purple; (2) dark ink on cream for
+   reason · triad; (3) bump triad row padding/gaps + align-content space-between so rows
+   occupy vertical space; (4) pin Find-the-gems / story dock to the cream card floor.
+   Compress 162 / stamp wrap 177 / fill 206 ≤720 / extend 215 / tighten 224 / strengthen
+   235 stay. Do NOT pack Match / Lock In / Samaritan / Father / Dig / Creek / parked maps. */
+@media (max-height: 920px) {
+  html[data-easy='on'] .app.is-play .app-body:has(.challenge-page.is-teach .easy-story-card) {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+    padding-top: 4px;
+    padding-bottom: 0;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach:has(.easy-story-card) {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    gap: 6px;
+    overflow: hidden;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach:has(.easy-story-card) > .text-link {
+    flex: 0 0 auto;
+  }
+
+  /* Cream plate fills tall portrait — leftover band is cream-inside-card, not purple void */
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card.teach-gate {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    gap: 10px;
+    overflow: hidden;
+    padding: 12px 14px 0;
+    border-radius: 18px;
+    border: 1px solid color-mix(in srgb, var(--ink, #2a2118) 10%, transparent);
+    background: var(--parchment, #fff6e8);
+    color: var(--ink, #2a2118);
+    box-shadow: 0 2px 0 color-mix(in srgb, #000 6%, transparent);
+    justify-content: flex-start;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card > .eyebrow {
+    flex: 0 0 auto;
+    color: color-mix(in srgb, var(--gold, #c9a45c) 70%, var(--ink, #2a2118));
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .loci-stamp {
+    flex: 0 0 auto;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .teach-reason {
+    flex: 0 0 auto;
+    color: var(--ink, #2a2118);
+    opacity: 0.92;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .held-triad {
+    display: grid;
+    flex: 1 1 0;
+    min-height: 0;
+    align-content: space-between;
+    gap: 16px;
+    margin: 0;
+    padding: 8px 0;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .held-triad > div {
+    padding: 4px 0;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .held-triad dt {
+    color: color-mix(in srgb, var(--gold, #c9a45c) 55%, var(--ink, #2a2118));
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .held-triad dd,
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .held-triad .recall-line {
+    color: var(--ink, #2a2118);
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .easy-story-dock,
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .cta-dock.easy-story-dock {
+    position: static;
+    bottom: auto;
+    margin-top: auto;
+    flex: 0 0 auto;
+    padding-top: 10px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
