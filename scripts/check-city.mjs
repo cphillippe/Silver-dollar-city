@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.210')
+assert.equal(APP_VERSION, '1.4.211')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -4033,4 +4033,31 @@ console.log('check-city: ok')
   )
   assert.match(mergePlay181, /1\.4\.181: ≤720 peels HUD/)
   assert.match(cssSrc, /1\.4\.181: Creed merge ≤720 HUD peel/)
+}
+
+
+// Easy Clear 1.4.211: Easy Match ≤720 close grid→status purple void (Fixes #273)
+{
+  const matchArtTight211 = readFileSync(
+    new URL('../src/styles/match-art-tight.css', import.meta.url),
+    'utf8',
+  )
+  const gemPlay211 = readFileSync(
+    new URL('../src/components/challenges/GemSearchPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(matchArtTight211, /1\.4\.211: Easy Match ≤720 close the grid→status purple void/)
+  assert.match(
+    matchArtTight211,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-gem-search\.is-panel-blast\.is-story-docked \.gem-board \{[\s\S]*?height: 100%[\s\S]*?flex: 1 1 auto[\s\S]*?aspect-ratio: auto/,
+  )
+  assert.match(gemPlay211, /1\.4\.211: match-art-tight keeps the ≤720 board fill through the status counter/)
+  assert.match(cssSrc, /1\.4\.211: Easy Match ≤720 close the grid→status purple void/)
+  assert.match(latestChange('1.4.211').items.join('\n'), /Fixes #273|grid.*status|purple void/i)
+  assert.match(latestChange('1.4.211').title, /Easy Match|≤720|grid→status|purple void/i)
+  assert.doesNotMatch(
+    latestChange('1.4.211').items.join('\n'),
+    /Fixes #251|Fixes #252|Fixes #253|Lock In quiz|Lock In feedback|Father|Story Snap|Story Creek|Creed|Build Argument|Easy Link|Road maze|Claim merge|Source dig|Hold.*purple|pad→CTA|hud→arena/i,
+    '1.4.211 must not fix other Shot 200 issues or climb another Easy surface',
+  )
 }
