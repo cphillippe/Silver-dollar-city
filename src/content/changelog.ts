@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.155',
+    title: 'Easy Home: short next-step whisper',
+    when: '2026-09-25',
+    items: [
+      'Easy Home dock whisper: mazeHome / runHome are short next-step (“One more road/run”) — no full mazeHunt/runHunt how reprint on taller phones (play how-dedupe 1.4.143/144 stay; Fixes #192)',
+    ],
+  },
+  {
     version: '1.4.154',
     title: 'Father run: short-phone speech thin',
     when: '2026-09-25',
