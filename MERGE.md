@@ -1,10 +1,10 @@
 # ready-easy-fun-clear-186 — 1.4.186 Easy Samaritan ≤720 fill top-cluster purple void (Fixes #240)
 
-**PR:** (pending)
+**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/243
 **Branch:** `ship/easy-fun-clear-186` → `main`
 **Version:** 1.4.186
-**Peel:** (pending)
-**Tip:** (pending)
+**Peel:** `ae6ab04` (`ae6ab04fc3b0968fc76ddee32bf8561c1742f992`)
+**Tip:** `ae6ab04` (`ae6ab04fc3b0968fc76ddee32bf8561c1742f992`)
 **Base live:** 1.4.185 (`7deb4d2`, PR #242 Easy Lock In ≤720 fill win-end purple void on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
