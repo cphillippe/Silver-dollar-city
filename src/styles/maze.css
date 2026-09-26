@@ -864,6 +864,33 @@
   }
 }
 
+/* Easy Clear 1.4.234: Easy Story Creek maze ≤720 / phone portrait HUD peel —
+   After HUD peel 175 (≤720 only), real phones ~390×844 still show who·where
+   kicker · run-thumbs · story-caption that bury beats + board — those peels
+   never apply at Shot heights. Fill 191 + board→CTA 201 already extended to
+   920 by phone-fail 228, but HUD peel never invent-climbed. Extend hide
+   story-kicker · run-thumbs · story-caption + tiny match-score across phone
+   portrait heights (max-height: 920px) so maze-beats + board stay clear on
+   tall phones (Easy Story Creek / Samaritan arcade chrome; invent Fun/Clear).
+   Distinct from Father Dash HUD 173 (leave for later invent).
+   HUD 175 ≤720 stays. Do NOT pack Match / Lock In / Learn / Father / Creed /
+   Dig / Hold / Sort / Snap / Link / Build / Manage / Claim merge / gemSearch. */
+@media (max-height: 920px) {
+  .play.is-road-maze .story-kicker,
+  .play.is-road-maze .run-thumbs,
+  .play.is-road-maze .story-caption {
+    display: none;
+  }
+
+  .play.is-road-maze .match-score {
+    margin: 0;
+    font-size: 0.68rem;
+    line-height: 1.1;
+    min-height: 0;
+    padding: 1px 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .play.is-father-run.is-running .run-actor.is-father,
   .play.is-father-run.is-running .run-leg.is-a,
