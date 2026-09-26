@@ -1,6 +1,6 @@
 # ready-easy-fun-clear-200 — 1.4.200 Easy Creed ≤720 close bowl→CTA purple gap
 
-**PR:** (pending)
+**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/261
 **Branch:** `ship/easy-fun-clear-200` → `main`
 **Version:** 1.4.200
 **Peel:** `ccd47bd` (`ccd47bd598616ef141be8c2ea4043fd3589c2014`)
