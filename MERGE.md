@@ -1,58 +1,49 @@
-# ready-easy-fun-clear-182 — 1.4.182 Easy Story Snap ≤720 HUD peel
+# ready-easy-fun-clear-183 — 1.4.183 Easy Sort ≤720 board-first
 
-**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/236
-**Branch:** `ship/easy-fun-clear-182` → `main`
-**Version:** 1.4.182
-**Peel:** `89ec117` (`89ec11797b02a7041fa67eed22dea48372a288a5`)
-**Tip:** `89ec117` (`89ec11797b02a7041fa67eed22dea48372a288a5`)
-**Base live:** 1.4.181 (`2fc3e89`, PR #235 Easy Creed merge ≤720 HUD on main; atop 1.4.180 Manage #234)
+**PR:** (pending push)
+**Branch:** `ship/easy-fun-clear-183` → `main`
+**Version:** 1.4.183
+**Peel:** (pending)
+**Tip:** (pending)
+**Base live:** 1.4.182 (`2a5cce5`, PR #236 Easy Story Snap ≤720 HUD on main; atop 1.4.181 Creed #235)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
 ## How picked
-Open Issues scan: **#232** Manage → **1.4.180** on main. **#217** letterbox → **1.4.179** on main. **#231** Learn → **1.4.177**. **#161** parked. No open Easy Fun/Clear P1/P2 left.
+Open Issues scan: **#161** Dig/Hard/NW/Town parked. **#160** cheap-hop continue (infra). No open Easy Fun/Clear P1/P2 left after #236 merged mid-flight.
 
-Invent Fun/Clear — Gemini flash pick **A** Story Snap ≤720 HUD peel (hide eyebrow + who·where). Explicitly deferred in **1.4.181** MERGE notes. Creed **1.4.181** (#235) already on main — do not reopen / do not duplicate.
-
-## Rebase (urgent)
-After #235 squash-merged to main (`2fc3e89`), PR #236 went DIRTY/CONFLICTING (docs rename + version). Rebuilt `ship/easy-fun-clear-182` onto `origin/main`:
-- Kept Story Snap ≤720 HUD peel (`storySnap.css` hide eyebrow + who·where; StorySnapPlayView comment)
-- Accepted Creed merge 1.4.181 + Manage/letterbox from main
-- **APP_VERSION / package version 1.4.182** (changelog 1.4.182 atop 1.4.181)
+Invent Fun/Clear — Gemini flash pick **A** Easy Sort ≤720 board-first. Sort is the sole core Easy trail minigame without a dedicated ≤720 fold peel (Match 168 / Sequence·Build 171 / Father 173 / Maze 175 / Creed 181 / Snap 182). Do not reopen Snap eyebrow / Creed merge / Manage / letterbox.
 
 ## Chosen climb
-Single Easy Fun/Clear polish: **Easy Story Snap ≤720 HUD peel** — hide title eyebrow + who·where so stage · strip · pad stay above fold (Father 1.4.173 / maze 1.4.175 / Creed 1.4.181 hide-kicker family; complements 1.4.152 compress + 1.4.163 teach-omit).
+Single Easy Fun/Clear polish: **Easy Sort ≤720 board-first** — hide how + hint; clamp lead so Keep·Toss + bins stay above fold (Sequence/Build 1.4.171 / Match 1.4.168 ≤720 family).
 
 ## What fixed
-- `src/styles/storySnap.css`: `@media (max-height: 720px)` `display:none` on `.play.is-story-snap .eyebrow` + `.easy-who-where-line`; keep strip · stage · pad compress from #189
-- `src/components/challenges/StorySnapPlayView.tsx`: thin 1.4.182 comment
+- `src/styles/sortHold.css`: `@media (max-height: 720px)` hides `.play.is-easy-sort` `.sort-how` + `.easy-hint`/`.hint-peek`; clamps `.prompt` (`-webkit-line-clamp: 2`); gap 3px
+- `src/components/challenges/SortPlay.tsx`: thin 1.4.183 comment
 - Android `versionName` left at **1.4.113**
-- Version **1.4.182** atop live **1.4.181**
+- Version **1.4.183** atop live **1.4.182**
 
 ## Deferred (do NOT climb this hop)
-- Dig Reveal / Hard / NW / Town / stores / Pack B / Home map letterbox
-- Manage empty-lot / Creed merge HUD (already on main as 1.4.180 / 1.4.181)
-- Journal held clear chrome further peel
+- Dig Reveal / Hard / NW / Town / stores / Pack B / Home map candy
+- Story Snap / Creed merge / Manage / letterbox (already on main)
+- Journal held clear chrome further peel / Easy Link ≤720
 
 ## Gemini
-MODEL=gemini-flash-latest — invent pick A approved. Notes: `notes-gemini.txt` (+ `/workspace/silver-city-art/notes-gemini-182.txt`).
+MODEL=gemini-flash-latest — invent pick A approved. Notes: `notes-gemini.txt` (+ `/workspace/silver-city-art/notes-gemini-183.txt`).
 
 ## Files peeled
-- `src/styles/storySnap.css`
-- `src/components/challenges/StorySnapPlayView.tsx`
-- `scripts/check-city.mjs`, `scripts/check-story-snap.mjs`, `scripts/check-panel-blast.mjs`
+- `src/styles/sortHold.css`
+- `src/components/challenges/SortPlay.tsx`
+- `scripts/check-city.mjs`, `scripts/check-panel-blast.mjs`
 - `src/config/app.ts`, `package.json`, `package-lock.json`
 - `src/content/changelog.ts`
 - `notes-gemini.txt`
-- `docs/` (Pages rebuild `index-CMJS026O.js` / `index-BnOfMziR.css`)
+- `docs/` (Pages rebuild `index-D8rLdrE0.js` / `index-DWbnHx6a.css`)
 - `MERGE.md`
 
 ## Checks
 - `npm run test:city` ✓
 - `npm run test:arcade` ✓
-- `node scripts/check-story-snap.mjs` ✓
 - `npm run build` → `docs/` ✓
 
-- GitHub PR: `mergeable: true`, `mergeStateStatus: CLEAN` (confirm after push)
-
 ## Status
-**MERGEABLE CLEAN** (post-rebase onto 1.4.181) — ready for CoS merge after green. Do NOT merge from this hop.
+**MERGEABLE CLEAN** (pending push confirm) — ready for CoS merge after green. Do NOT merge from this hop.
