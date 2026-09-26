@@ -1,6 +1,6 @@
 # ready-easy-fun-clear-202 — 1.4.202 Easy Hold ≤720 close chips→CTA purple gap
 
-**PR:** (pending)
+**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/263
 **Branch:** `ship/easy-fun-clear-202` → `main`
 **Version:** 1.4.202
 **Peel:** `bc5a761` (`bc5a761d14f565de88d0133fa01eb0f220fb0cee`)
