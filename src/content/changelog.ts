@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.194',
+    title: 'Easy Lock In quiz: ≤720 fill purple void',
+    when: '2026-09-25',
+    items: [
+      'Easy Lock In quiz (WhyBlast mid-question) on ≤720px tall: grow journal rehearse shell + stretch recall-gate quiz card so claim · chips fill the portrait — no massive empty purple void across the bottom third (Fixes #251 · Shot 1.4.190 / 04-easy-lockin; after Hold arena stretch 1.4.190 / chrome 1.4.170·156; do not pack #252 / #253; win-end 1.4.185 / Match 1.4.193 / Creed / Story Creek / Samaritan / Sort / Snap / Build / Link / Dash peels untouched)',
+    ],
+  },
+  {
     version: '1.4.193',
     title: 'Easy Match: ≤720 fill grid→footer purple void',
     when: '2026-09-25',

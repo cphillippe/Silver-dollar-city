@@ -1614,3 +1614,57 @@ html[data-easy='on'] .recall-card {
     flex: 0 0 auto;
   }
 }
+
+/* Easy Clear 1.4.194: Lock In quiz ≤720 fill purple void (Fixes #251) —
+   After Hold arena stretch 190 / win-end 185 / chrome 170·156, the gold
+   recall-gate quiz card still hugs content in journal rehearse so ≤720 leaves
+   a massive empty purple bottom third (Shot 1.4.190 04-easy-lockin · Gemini
+   vision). Grow app-body · journal · rehearse-anchor · recall-gate so the quiz
+   card fills the portrait; why-blast / why-arena stretch from 190 still apply.
+   Do NOT pack #252 miss teach / #253 Father; win-end 185 / Match 193 / Hold
+   arena 190 untouched. Invent Fun/Clear. */
+@media (max-height: 720px) {
+  html[data-easy='on'] .app.is-play .app-body:has(.journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win)) {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding-top: 8px;
+    padding-bottom: calc(8px + var(--safe-bottom, 0px));
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast:not(.is-miss-teach):not(.is-win)) {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    gap: 4px;
+    overflow: hidden;
+    padding-bottom: 0;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast:not(.is-miss-teach):not(.is-win)) > .text-link {
+    flex: 0 0 auto;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast:not(.is-miss-teach):not(.is-win)) .rehearse-anchor {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast:not(.is-miss-teach):not(.is-win)) .rehearse-anchor > .eyebrow {
+    flex: 0 0 auto;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast:not(.is-miss-teach):not(.is-win)) .recall-gate.is-easy-hold {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    height: auto;
+    margin-bottom: 0;
+    overflow: hidden;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  }
+}
