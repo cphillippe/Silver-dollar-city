@@ -16,6 +16,14 @@ export const CHANGELOG: ChangeNote[] = [
     ],
   },
   {
+    version: '1.4.142',
+    title: 'Lock In: one claim-pick cue',
+    when: '2026-09-25',
+    items: [
+      'Easy Lock In claim-pick: drop stacked Main idea teach-chip above next-tap — one action cue (“Tap the main idea you kept”) after Learn triad 1.4.140 + Lock In Main idea labels 1.4.139/141',
+    ],
+  },
+  {
     version: '1.4.141',
     title: 'Lock In: live Main idea label',
     when: '2026-09-25',

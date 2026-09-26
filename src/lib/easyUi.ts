@@ -38,7 +38,7 @@ export const EASY = {
   learnThisFirst: 'Learn this first.',
   findGems: 'Find the gems',
   panelCue: 'Find a word to flip the first panel.',
-  rememberSentence: 'Tap the line you kept.',
+  rememberSentence: 'Tap the main idea you kept.',
   tapWhy: 'Tap why this is true.',
   keepThis: 'Yes — keep this',
   holdYes: 'Yes!',
