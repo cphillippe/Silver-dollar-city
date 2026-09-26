@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.230',
+    title: 'Easy Manage sheet: ≤720 close width cutout / exposed purple (Fixes #302)',
+    when: '2026-09-26',
+    items: [
+      'Fixes #302: Easy Manage lot sheet on ≤720 / phone portrait — edge-to-edge width (stretch align · 100vw · max-width none · zero side margin) so the gold sheet spans the viewport without awkward cutout / exposed purple bars beside it (Shot 220 residual after Manage peek / hub chrome peels; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.229',
     title: 'Easy Father Dash: ≤720 close timing-rail→CTA purple void (Fixes #301)',
     when: '2026-09-26',
