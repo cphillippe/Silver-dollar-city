@@ -1,46 +1,47 @@
-# ready-easy-fun-clear-192 — 1.4.192 Easy Creed merge ≤720 fill purple void
+# ready-easy-fun-clear-193 — 1.4.193 Easy Match ≤720 fill grid→footer purple void (Fixes #250)
 
-**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/249
-**Branch:** `ship/easy-fun-clear-192` → `main`
-**Version:** 1.4.192
-**Peel:** `a051bde` (`a051bdeb65e452740a539c851a9a5209ef2e9edd`)
-**Tip:** `339c45c` (`339c45c4ad7860530266830a2d07197ea91edb73`)
-**Base live:** 1.4.191 (`5d8e11e`, PR #248 Easy Story Creek ≤720 fill purple void on main)
+**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/254
+**Branch:** `ship/easy-fun-clear-193` → `main`
+**Version:** 1.4.193
+**Peel:** `79e8f41` (`79e8f416ec2589408ec61750c5d6e04b45299feb`)
+**Tip:** `a4b0fd4` (`a4b0fd40f02a750f16aa41c10cb9b658e7898076`)
+**Base live:** 1.4.192 (`5f1e3ce`, PR #249 Easy Creed merge ≤720 fill purple void on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
 ## Shot wake
-**Shot pack incoming separately — stay on invent.** Do NOT wake Shot from this hop. CoS wakes Shot on 10th ships (next 1.4.200); this hop does not ping Shot.
+**Do NOT wake Shot from this hop.** CoS wakes Shot on 10th ships (next 1.4.200); this hop does not ping Shot.
 
 ## How picked
-Open Issues: **#161** Dig/Hard/NW/Town parked. **#160** cheap-hop infra. No open Easy Fun/Clear issue.
-1.4.191 Easy Story Creek fill live on main. Invent Fun/Clear — densest remaining Easy trail different from recent Story Creek/Hold/Father/Link/Build/Samaritan/Match/LockIn: **Easy Creed merge** had HUD peel **1.4.181** / bowl-first **1.4.159** only — capped `merge-bowl` (max-height + aspect-ratio) hugs the top so the gold card leaves empty purple under the bowl (Match 184 / Story Creek 191 fill family).
+Open Issues: **#250** Easy Match ≤720 empty purple between grid and footer (P1 phone-fail, Shot 1.4.190 `03-easy-match.png`) — this hop.
+**#251** Lock In quiz / **#252** Lock In feedback / **#253** Father — deferred next climbs; do not pack.
+**#161** Dig/Hard/NW/Town parked. **#160** cheap-hop infra.
 
 ## Chosen climb
-Single Easy Fun/Clear polish: **Easy Creed merge ≤720 fill purple void** — grow `play.is-claim-merge` shell + stretch `merge-bowl` so score · ladder · bowl fill the portrait.
+Single Easy Fun/Clear polish: **Easy Match (GemSearch letter grid) ≤720 fill grid→footer purple void** — grow `play.is-gem-search.is-panel-blast.is-story-docked` shell + stretch `gem-scroll` / `gem-stage` / `gem-board` so dock · letter grid · match-score fill the portrait (Fixes #250). Picture-deal Match 1.4.184 (#238) untouched.
 
 ## What fixed
-- `src/index.css`: `@media (max-height: 720px)` — `.play.is-claim-merge` `flex: 1 1 auto`; `.merge-bowl` `flex: 1` + `height: auto` + `max-height: none` + `aspect-ratio: auto`; HUD / ladder / banners stay `flex: 0`
-- `src/components/challenges/ClaimMergePlay.tsx`: thin 1.4.192 comment
+- `src/styles/gem.css`: `@media (max-height: 720px)` — `.play.is-gem-search.is-panel-blast.is-story-docked` `flex: 1 1 auto`; stretch `.gem-scroll` / `.gem-stage`; `.gem-board` `flex: 1` + `height: 100%` + `max-height: none` + `aspect-ratio: auto`; dock / match-score / CTA stay `flex: 0`
+- `src/components/challenges/GemSearchPlay.tsx`: thin 1.4.193 comment
 - Android `versionName` left at **1.4.113**
-- Version **1.4.192** atop live **1.4.191**
+- Version **1.4.193** atop live **1.4.192**
 
 ## Deferred (do NOT climb this hop)
 - Dig Reveal / Hard / NW / Town / stores / Pack B / Home map candy
-- Match 184 / Lock In win-end 185 / Samaritan Sequence 186 / Sort 183 / Snap 182 / Story Creek 191 / Hold 190 / Build Argument 187 / Link 188 / Father Dash 189 / Manage 180 / letterbox (already on main)
-- Journal held clear chrome further peel
-- Creed HUD peel 1.4.181 / bowl-first 1.4.159 (different surface; still applies ≤720)
+- **#251** Lock In quiz empty purple / **#252** Lock In feedback bottom void / **#253** Father slider→CTA
+- Match picture-deal 184 / Creed fill 192 / Story Creek 191 / Hold 190 / Build / Link / Father Dash / Samaritan / Sort / Snap (already on main or other issues)
+- How/say peel 1.4.168 (different surface; still applies ≤720)
 
 ## Gemini
-MODEL=gemini-flash-latest — Invent Fun/Clear (no open Easy Fun/Clear issue). Invent API key present but not AIza AI Studio shape. Manager-steered invent. Notes: `notes-gemini.txt` (+ `/workspace/silver-city-art/notes-gemini-192.txt`).
+MODEL=gemini-flash-latest — Shot pack 1.4.190 vision FAIL on Match (`gemini-vision.json`). Invent API key present but not AIza AI Studio shape. Manager-steered + issue #250. Notes: `notes-gemini.txt` (+ `/workspace/silver-city-art/notes-gemini-193.txt`).
 
 ## Files peeled
-- `src/index.css`
-- `src/components/challenges/ClaimMergePlay.tsx`
+- `src/styles/gem.css`
+- `src/components/challenges/GemSearchPlay.tsx`
 - `scripts/check-city.mjs`, `scripts/check-panel-blast.mjs`
 - `src/config/app.ts`, `package.json`, `package-lock.json`
 - `src/content/changelog.ts`
 - `notes-gemini.txt`
-- `docs/` (Pages rebuild `index-Bt-xAwB3.js` / `index-8DeF8_vH.css`)
+- `docs/` (Pages rebuild `index-Dm2u0r6v.js` / `index-BLD9gSX6.css`)
 - `MERGE.md`
 
 ## Checks
