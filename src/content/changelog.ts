@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.157',
+    title: 'Easy Home: snap/merge/dig whisper short',
+    when: '2026-09-25',
+    items: [
+      'Easy Home dock whisper: snapHome / mergeHome / digHome are short next-step (“One more snap/merge/dig”) — no full snapHunt/mergeHunt/digHunt how reprint (completes maze/run #192 family; Fixes #203)',
+    ],
+  },
+  {
     version: '1.4.156',
     title: 'Lock In: short-phone arena thin',
     when: '2026-09-25',
