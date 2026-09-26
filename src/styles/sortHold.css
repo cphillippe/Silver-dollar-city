@@ -1343,3 +1343,40 @@ html[data-easy='on'] .recall-card {
     font-size: 0.82rem;
   }
 }
+
+/* Easy Clear 1.4.171: Easy Sequence / BuildArgument ≤720 board-first —
+   hide non-essential how / lead / hint chrome so stone board + primary CTA stay above fold
+   (Match 1.4.168 / Hold 1.4.170 ≤720 family). Creed merge already has 1.4.159 bowl-first.
+   Invent Fun/Clear. */
+@media (max-height: 720px) {
+  .play.is-sequence,
+  .play.is-build {
+    gap: 3px;
+  }
+
+  /* lead — clamp thin so question stays, not a dump over the board */
+  .play.is-sequence .prompt,
+  .play.is-build .prompt {
+    font-size: 0.82rem;
+    line-height: 1.15;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* hint — hide; board + slot/seat cue already teach */
+  .play.is-sequence .easy-hint,
+  .play.is-build .easy-hint,
+  .play.is-sequence .hint-peek,
+  .play.is-build .hint-peek {
+    display: none;
+  }
+
+  /* how — hide (Match 168 hid .sort-how; awaiting seat / slot.is-now cue next tap) */
+  .play.is-sequence .sort-how,
+  .play.is-build .sort-how {
+    display: none;
+  }
+}
