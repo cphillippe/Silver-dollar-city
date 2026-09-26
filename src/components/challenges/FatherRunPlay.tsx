@@ -372,6 +372,7 @@ export function FatherRunPlay({
       {/* Easy Clear 1.4.216: phone portrait extends speech→rail+pad so Dash rail→CTA closes (Fixes #283). */}
       {/* Easy Clear 1.4.229: phone portrait strengthens fill — overflow hidden · run-scene flex 1 1 0 · dock static so rail→CTA closes (Fixes #301). */}
       {/* Easy Clear 1.4.240: tall-phone strengthens fill 229 — ancestor height chain · run-scene flex 1 1 0 · dock static + clear sticky blur so rail→CTA closes (Fixes #319). */}
+      {/* Easy Clear 1.4.250: tall-phone cream plate fill — paint parchment play · warm run-scene · dark ink · dock pin — closes Shot 240 purple residual (Fixes #336). */}
       <div className={`run-speech ${phase === 'miss' ? 'is-done' : ''}`} aria-live="polite">
         <p className="run-speech-kicker">Hired-hand speech</p>
         <p className="run-speech-line">{phrase}</p>
