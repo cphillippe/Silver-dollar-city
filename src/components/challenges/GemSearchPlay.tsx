@@ -511,6 +511,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       {/* Easy Clear 1.4.262: tall residual cream floor (opaque cream play + app-body · solid gem-scroll/stage · found-counter pinned to cream floor above the 920 cap) so leftover between grid and counter is cream, not purple void after 253 (Fixes #362). */}
       {/* Easy Clear 1.4.259: phone portrait extends board-first HUD peel 168 + SNAG bonus tall-phone juice (invent Fun/Clear; panel-blast / SNAG only). */}
       {/* Easy Fun 1.4.270: tall-phone one-more win-end dock — One more Match punches gold, claim stays readable, stamp stays a label (invent Fun/Clear · Shot wake). */}
+      {/* Easy Clear 1.4.271: pack gem-stage flex-start so the letter grid sits under the objective strip on tall phones — cream floor stays (Fixes #378). */}
       <p className="sort-how">{EASY.matchHunt}</p>
       {matchChips ? (
         <>
