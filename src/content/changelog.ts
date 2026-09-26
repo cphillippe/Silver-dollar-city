@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.236',
+    title: 'Easy Match: ≤720 close tall-phone bottom-half purple void (Fixes #315)',
+    when: '2026-09-26',
+    items: [
+      'Fixes #315: Easy Match on ≤720 / tall phone portrait — strengthen fill 232 picture-deal + fill 225 gemSearch (height 100% chain, match-grid / gem-scroll·stage·board flex 1 1 0 absorb leftover, status follows grid, cta-dock position static + margin-top auto) so Match board + status fill portrait without a large dead purple band under the UI (Shot 230 residual after Match bottom-third peel 1.4.225 + invent picture-deal 1.4.232; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.235',
     title: 'Easy Learn: ≤720 close tall-phone bottom-half purple void (Fixes #314)',
     when: '2026-09-26',
