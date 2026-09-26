@@ -1,6 +1,6 @@
 # ready-easy-fun-clear-197 — 1.4.197 Easy Story Snap ≤720 fill purple void
 
-**PR:** (pending)
+**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/258
 **Branch:** `ship/easy-fun-clear-197` → `main`
 **Version:** 1.4.197
 **Peel:** `ea520d1` (`ea520d1c52dd5f2b4cfafcb51a695b62b112e147`)
