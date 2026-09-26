@@ -94,7 +94,10 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
                     : 'Find the gems. The story opens as you play.'
 
     return (
-      <main className="hub is-easy-home" aria-label="Home">
+      <main
+        className={`hub is-easy-home${mindPlot ? ' is-manage-open' : ''}`}
+        aria-label="Home"
+      >
         <section className="easy-home-map" aria-label="Your city">
           <CityMap
             onNavigate={onNavigate}
@@ -248,7 +251,10 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
   }
 
   return (
-    <main className="hub is-town is-inhabited" aria-label="The town">
+    <main
+      className={`hub is-town is-inhabited${mindPlot ? ' is-manage-open' : ''}`}
+      aria-label="The town"
+    >
       {easy ? null : midStreet ? (
       <section className="next-card do-next" aria-label="Do this next">
         <p className="eyebrow">Do this next</p>

@@ -1,6 +1,6 @@
-1.4.165 Manage sheet peek + portrait dedupe (#220)
-Gemini: unavailable — GEMINI_API_KEY present but not AIza AI Studio shape (same as 163/164).
-Prior vision pack used: /workspace/manage-sheet-gemini-review.md (models/gemini-3.8-flash on Bill Story Creek phone-fail).
+1.4.167 Manage-open Hub chrome compress (#220)
+Gemini: unavailable — GEMINI_API_KEY present but not AIza AI Studio shape (same as 163–165).
+Prior vision pack used: /workspace/manage-sheet-gemini-review.md (P1 Hub vs Map chrome strata).
 Shipped Manager-steered peel without live Gemini APPROVE.
-Peel: max-height ~42dvh; drop header Avatar (PERSON tile keeps Mercy); Easy eyebrow ${applied} · tier (no Manage); omit Easy lotWhy + PLACE path em; denser pad/gap.
-Deferred: map letterbox/full-bleed (#217 Map owns); Hub vs Map chrome strata; snap points peek/half/full JS; Dig/Hard/NW/Town/stores/Pack B/#213.
+Peel: hub is-manage-open when mindPlot set; :has hides AppShell topbar + collapses grid row; hide Easy Home dock.
+Deferred: map letterbox/full-bleed (#217 Map owns); Witness candy (Map 1.4.166); snap points peek/half/full JS; Dig/Hard/NW/Town/stores/Pack B/#213.
