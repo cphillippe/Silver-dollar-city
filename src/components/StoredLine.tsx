@@ -12,6 +12,7 @@ interface StoredLineProps {
 }
 
 /** After a win: claim · reason · source kids can say tomorrow. */
+/* Easy Clear 1.4.185: ≤720 fills empty purple bottom on Lock In win-end (sortHold.css; Fixes #239). */
 export function StoredLine({ learning, when }: StoredLineProps) {
   const { progress } = useProgress()
   const easy = isEasy(progress)
