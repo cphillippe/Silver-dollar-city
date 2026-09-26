@@ -505,6 +505,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       {/* Easy Clear 1.4.193: ≤720 fills purple void in gem.css (Fixes #250; Shot 1.4.190 / 03-easy-match). */}
       {/* Easy Clear 1.4.211: match-art-tight keeps the ≤720 board fill through the status counter (Fixes #273). */}
       {/* Easy Clear 1.4.225: phone portrait extends fill 193 + board stretch 211 so gem-board·status close bottom-third purple void (Fixes #297). */}
+      {/* Easy Clear 1.4.236: tall-phone strengthens fill 225 (height 100% · gem-scroll/stage/board flex 1 1 0 · cta-dock position static) so gemSearch closes bottom-half purple void (Fixes #315). */}
       <p className="sort-how">{EASY.matchHunt}</p>
       {matchChips ? (
         <>
