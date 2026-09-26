@@ -1234,3 +1234,89 @@ html[data-easy='on'] .recall-card {
   font-size: 1.02rem;
   font-weight: 750;
 }
+
+
+/* 1.4.156 short phone — Lock In WhyBlast arena-first (Story Snap ≤720 family). Fixes #193 */
+@media (max-height: 720px) {
+  .recall-gate.is-easy-hold {
+    gap: 6px;
+    min-height: 0;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .why-blast {
+    gap: 6px;
+    min-height: 0;
+  }
+
+  .why-blast-hud {
+    gap: 6px;
+  }
+
+  .why-blast-hud .next-tap {
+    font-size: 0.88rem;
+    line-height: 1.15;
+  }
+
+  .why-score {
+    min-width: 2.6rem;
+    padding: 3px 8px;
+    font-size: 0.9rem;
+  }
+
+  .why-arena {
+    gap: 6px;
+    min-height: 0;
+  }
+
+  .why-claim {
+    margin: 2px 0 !important;
+    padding: 8px 10px;
+    font-size: clamp(0.95rem, 3.8vw, 1.15rem);
+    line-height: 1.18;
+    border-radius: 14px;
+  }
+
+  .why-arena .why-claim .why-miss-label {
+    margin-bottom: 3px;
+  }
+
+  .why-chip {
+    min-height: 48px;
+    padding: 7px 8px;
+    font-size: 0.82rem;
+    line-height: 1.15;
+  }
+
+  .why-arena .held-from {
+    margin: 2px 0 0;
+    font-size: 0.78rem;
+    line-height: 1.15;
+  }
+
+  /* miss teach stays readable — thinner only */
+  .why-miss-teach {
+    gap: 6px;
+    padding: 8px 10px;
+  }
+
+  .why-miss-teach .why-claim {
+    padding: 8px 8px;
+    font-size: clamp(0.95rem, 3.8vw, 1.12rem);
+  }
+
+  .why-miss-reason {
+    padding: 7px 9px;
+    font-size: 0.88rem;
+  }
+
+  .why-miss-badge {
+    font-size: 0.72rem;
+  }
+
+  .recall-gate.is-easy-hold .cta-dock,
+  .why-blast .cta-dock {
+    margin-top: 4px;
+    padding: 8px 0 calc(6px + env(safe-area-inset-bottom, 0px));
+  }
+}
