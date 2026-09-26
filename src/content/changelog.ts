@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.151',
+    title: 'BuildArgument: one how line on Easy',
+    when: '2026-09-25',
+    items: [
+      'Easy BuildArgument: skip redundant premise .sort-how when PuzzleHint/lead already teach — one–two chrome lines (Clear family with Sort how 1.4.138 / lead≈hint 1.4.145; Fixes #188)',
+    ],
+  },
+  {
     version: '1.4.150',
     title: 'Easy Home: Match-first coach',
     when: '2026-09-25',
