@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.149',
+    title: 'Cold Start Easy: Home before Match',
+    when: '2026-09-25',
+    items: [
+      'Cold Start Easy: Welcome → Easy Home (palace map + Learn→Match→Lock In coach) before Match — reopen of 1.4.112 KEEP→link routing (Fixes #186)',
+    ],
+  },
+  {
     version: '1.4.148',
     title: 'Challenge: one title line on Easy',
     when: '2026-09-25',
