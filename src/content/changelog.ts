@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.171',
+    title: 'Easy Sequence: ≤720 board-first',
+    when: '2026-09-25',
+    items: [
+      'Easy Sequence / BuildArgument on ≤720px tall: hide how + hint chrome; clamp lead so stone board + primary CTA stay above fold (Match 1.4.168 / Hold 1.4.170 ≤720 family; invent Fun/Clear)',
+    ],
+  },
+  {
     version: '1.4.170',
     title: 'Easy Lock In: ≤720 arena-first',
     when: '2026-09-25',
