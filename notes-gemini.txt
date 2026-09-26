@@ -1,5 +1,6 @@
-1.4.164 Easy Build It gift wrap (#214)
-Gemini: unavailable — GEMINI_API_KEY present but not AIza AI Studio shape (same as 163).
-Shipped Manager-steered peel without Gemini APPROVE.
-Fix: .hub.is-easy-home .easy-build-gift — white-space:normal + 2-line clamp; drop nowrap/ellipsis.
-Copy kept: “A building is ready. Tap it, then Build this.”
+1.4.165 Manage sheet peek + portrait dedupe (#220)
+Gemini: unavailable — GEMINI_API_KEY present but not AIza AI Studio shape (same as 163/164).
+Prior vision pack used: /workspace/manage-sheet-gemini-review.md (models/gemini-3.8-flash on Bill Story Creek phone-fail).
+Shipped Manager-steered peel without live Gemini APPROVE.
+Peel: max-height ~42dvh; drop header Avatar (PERSON tile keeps Mercy); Easy eyebrow ${applied} · tier (no Manage); omit Easy lotWhy + PLACE path em; denser pad/gap.
+Deferred: map letterbox/full-bleed (#217 Map owns); Hub vs Map chrome strata; snap points peek/half/full JS; Dig/Hard/NW/Town/stores/Pack B/#213.
