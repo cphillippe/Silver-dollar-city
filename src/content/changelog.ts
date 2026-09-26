@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.202',
+    title: 'Easy Hold: ≤720 close chips→CTA purple gap',
+    when: '2026-09-25',
+    items: [
+      'Easy Hold (Lock In WhyBlast live arena) on ≤720px tall: zero cta-dock margin-top so why-arena flex fill absorbs the portrait — no empty purple void between the chips and the next-tap dock (Father 1.4.196 / Link 1.4.199 / Creed 1.4.200 / Story Creek 1.4.201 dock-margin family · invent Fun/Clear; after Hold fill 1.4.190 left 4px/8px margin; quiz 194 / miss 195 / Story Creek 201 / Creed 200 / Link 199 / Sort 198 / Story Snap 197 / Match 193 / Father 196 / Build / Samaritan peels untouched)',
+    ],
+  },
+  {
     version: '1.4.201',
     title: 'Easy Story Creek: ≤720 close board→CTA purple gap',
     when: '2026-09-25',
