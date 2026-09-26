@@ -249,4 +249,13 @@ assert.doesNotMatch(digSrc, /newadvent\.org/)
 
 assert.equal(easyDigTaps('wb-early')[0]?.source.includes('Christ'), true)
 
+
+// Easy Clear 1.4.157: Home whisper short next-step (not full digHunt) — Fixes #203
+const easyUiDig = readFileSync(new URL('../src/lib/easyUi.ts', import.meta.url), 'utf8')
+const hubDigSrc = readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8')
+assert.match(easyUiDig, /digHome: 'One more dig\.'/)
+assert.doesNotMatch(easyUiDig, /digHome: 'Scrub the dirt/)
+assert.match(hubDigSrc, /EASY\.digHome/)
+assert.match(hubDigSrc, /1\.4\.157.*whisper|#203/)
+
 console.log('check-source-dig: ok')

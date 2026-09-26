@@ -20,17 +20,17 @@ export const EASY = {
   mergeHunt: 'Drop candy. Smash two of a kind.',
   mergeCta: 'Merge candy',
   mergeMatch: 'Merge',
-  mergeHome: 'Drop candy. Smash two of a kind. Make the creed.',
+  mergeHome: 'One more merge.',  // Easy Clear 1.4.157: short Home next-step (not full mergeHunt; Fixes #203)
   mergeWinWhy: 'Died, buried, raised, appeared.',
   digHunt: 'Scrub the dirt off each tablet. Dig the old names.',
   digCta: 'Dig the names',
   digMatch: 'Dig',
-  digHome: 'Scrub the dirt off each tablet. Dig the old names. One more dig.',
+  digHome: 'One more dig.',  // Easy Clear 1.4.157: short Home next-step (not full digHunt; Fixes #203)
   digAgain: 'One more dig',
   snapHunt: 'Tap when a beat is under the gate. Lock three. Story opens.',
   snapCta: 'Snap the story',
   snapMatch: 'Snap',
-  snapHome: 'Tap when a beat is under the gate. Lock three. Story opens. One more snap.',
+  snapHome: 'One more snap.',  // Easy Clear 1.4.157: short Home next-step (not full snapHunt; Fixes #203)
   snapAgain: 'One more snap',
   readStory: 'Read today’s story.',
   learnCta: 'Learn',
