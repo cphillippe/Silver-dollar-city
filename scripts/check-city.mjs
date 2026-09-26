@@ -1132,7 +1132,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.173')
+assert.equal(APP_VERSION, '1.4.175')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1462,7 +1462,7 @@ assert.match(cssSrc, /is-easy-hold/)
   assert.match(dockCss, /backdrop-filter: blur/)
   assert.doesNotMatch(dockCss, /#16062e/, 'sticky CTA docks must not be an opaque black slab')
 }
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Father|Dash|≤720|HUD|kicker|thumbs|caption|pad/i)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Story Creek|Samaritan|maze|≤720|HUD|kicker|thumbs|caption|beats|board/i)
 {
   const storyCardCss = cssSrc.match(/\.easy-story-card,[\s\S]*?\.easy-story-card::before \{[\s\S]*?\n\}/)?.[0] ?? ''
   assert.match(storyCardCss, /border:\s*0/)
@@ -2369,8 +2369,8 @@ assert.match(mapSrc, /easy \? null : \(\s*\n\s*<>[\s\S]*city-street-main/)
 assert.match(mapSrc, /if \(isEasy\(progress\)\) return/)
 assert.match(mapSrc, /if \(playing\.current && !isEasy\(progress\)\) return/)
 assert.match(mapSrc, /Tap a building to Manage it/)
-assert.match(latestChange(APP_VERSION).title, /Father|Dash|HUD|≤720/i)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Father|Dash|≤720|HUD|kicker|thumbs|caption|pad/i)
+assert.match(latestChange(APP_VERSION).title, /Story Creek|maze|HUD|≤720/i)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Story Creek|Samaritan|maze|≤720|HUD|kicker|thumbs|caption|beats|board/i)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-img[\s\S]*?fill: none !important/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img\.is-built[\s\S]*?fill: none/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-hit[\s\S]*?stroke: none/)
@@ -2900,6 +2900,26 @@ assert.match(cssSrc, /1\.4\.162: Learn short-story ≤720 peel|Fixes #208/)
   )
   assert.match(fatherPlay173, /1\.4\.173: ≤720 peels HUD/)
   assert.match(cssSrc, /1\.4\.173: Father Dash ≤720 HUD peel/)
+}
+
+// Easy Clear 1.4.175: Easy Story Creek maze ≤720 HUD peel (invent Fun/Clear)
+{
+  const mazeCss175 = readFileSync(new URL('../src/styles/maze.css', import.meta.url), 'utf8')
+  const mazePlay175 = readFileSync(
+    new URL('../src/components/challenges/RoadMazePlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(mazeCss175, /1\.4\.175: Story Creek maze ≤720 HUD peel/)
+  assert.match(
+    mazeCss175,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-road-maze \.story-kicker,[\s\S]*?\.play\.is-road-maze \.run-thumbs,[\s\S]*?\.play\.is-road-maze \.story-caption \{[\s\S]*?display: none/,
+  )
+  assert.match(
+    mazeCss175,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-road-maze \.match-score \{/,
+  )
+  assert.match(mazePlay175, /1\.4\.175: ≤720 peels HUD/)
+  assert.match(cssSrc, /1\.4\.175: Story Creek maze ≤720 HUD peel/)
 }
 
 
