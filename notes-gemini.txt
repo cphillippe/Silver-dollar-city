@@ -1,8 +1,8 @@
 MODEL=gemini-flash-latest
 Invent Fun/Clear — no open Easy Fun/Clear issue beyond parked #161 / cheap-hop #160.
-1.4.187 Build Argument fill live on main (dd01944 / #244). Shot wake at 1.4.190 — invent toward that.
-Invent API: GEMINI_API_KEY present but not AIza AI Studio shape (same as 163–187).
-Manager-steered invent peel: Easy Link ≤720 fill purple void (deferred since Sort 183; sticky easy-steps + tall 220px/148px picture seats hug top — empty purple under choice column / bury seats; Match 184 / Build 187 fill family; different scene than Match/LockIn/Samaritan/Sort/Snap/Creed/Build Argument).
-Peel: index.css @media (max-height:720px) play.is-easy-link flex:1 + stretch link-col seats / thin easy-steps + clue clamp + shrink glyphs 96px; LinkPlay comment.
-Do NOT re-peel Match/LockIn/Samaritan/Sort/Snap/Creed/Build Argument. Dig/Hard/NW/Town/stores/Pack B/Home map candy parked.
-VERDICT: APPROVE (invent Fun/Clear · densest remaining Easy trail Easy Link fill — deferred since 183)
+1.4.188 Easy Link fill live on main (c82e112 / #245). Shot wake at 1.4.190 — invent toward that.
+Invent API: GEMINI_API_KEY present but not AIza AI Studio shape (same as 163–188).
+Manager-steered invent peel: Easy Father Dash ≤720 fill purple void (HUD peel 173 only; fixed 132px run-scene + speech + Hold pad hug top — empty purple under pad; Match 184 / Link 188 fill family; different scene than Match/LockIn/Samaritan/Sort/Snap/Creed/Build Argument/Link).
+Peel: index.css @media (max-height:720px) play.is-father-run flex:1 + stretch run-scene height:auto; FatherRunPlay comment.
+Do NOT re-peel Match/LockIn/Samaritan/Sort/Snap/Creed/Build Argument/Link. Dig/Hard/NW/Town/stores/Pack B/Home map candy parked.
+VERDICT: APPROVE (invent Fun/Clear · densest remaining Easy trail Father Dash fill — after HUD 173)
