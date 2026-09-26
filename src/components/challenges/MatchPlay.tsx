@@ -121,6 +121,7 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
   // Easy Match chrome already prints EASY.matchHow as .sort-how — skip identical PuzzleHint.
   // Easy Clear 1.4.184: ≤720 fills empty purple card in match.css (Fixes #238).
   // Easy Clear 1.4.207: ≤720 zeros cta-dock margin-top so score→CTA close (fill 184 stays).
+  // Easy Clear 1.4.232: phone portrait extends fill 184 + score→CTA 207 so match-grid·score·CTA close purple void (invent Fun/Clear).
   const easyPlainHint = easy
     ? easyChromeLine(plainFor(challenge.id)?.hint ?? challenge.context ?? '')
     : ''
