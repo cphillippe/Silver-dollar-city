@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.260',
+    title: 'Easy Creed Claim merge: ≤720 HUD deepen tall-phone juice (Shot wake)',
+    when: '2026-09-26',
+    items: [
+      'Easy Creed Claim merge (is-claim-merge) on ≤720 / phone portrait: deepen HUD peel 181 so score · next · mini · ladder dots · Drop chip compress thin on tall phones — bowl + Drop stay loud (invent Fun/Clear · Shot wake version; continuation of Creed HUD hide 233 + fill/dock 220; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.259',
     title: 'Easy panel-blast / SNAG: ≤720 board-first HUD + tall-phone SNAG juice',
     when: '2026-09-26',
