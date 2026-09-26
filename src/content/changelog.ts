@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.154',
+    title: 'Father run: short-phone speech thin',
+    when: '2026-09-25',
+    items: [
+      'Easy Father run on ≤720px tall: compress hired-hand speech chrome (kicker · line · bar · count) so pad + timer stay readable without scrolling (keep timer; Fixes #191)',
+    ],
+  },
+  {
     version: '1.4.153',
     title: 'Samaritan road: default board-first',
     when: '2026-09-25',
