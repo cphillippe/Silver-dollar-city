@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.261',
+    title: 'Easy Learn: ≤720 close tall residual purple void (Fixes #361)',
+    when: '2026-09-26',
+    items: [
+      'Fixes #361: Easy Learn Short Story / Story Creek teach chrome on ≤720 / phone portrait — full-bleed cream app-body + is-teach shell + solid recall-gate teach card (no purple-gold gradient · dark ink on claim / reason / source · Help-on-the-road dock pinned to the cream floor) so leftover below the lesson is intentional cream floor, including layout viewports taller than the 920 cap (Shot 260 residual after Learn cream peel 1.4.252; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.260',
     title: 'Easy Creed Claim merge: ≤720 HUD deepen tall-phone juice (Shot wake)',
     when: '2026-09-26',

@@ -1171,3 +1171,167 @@ html[data-theme='dusk'] .easy-story-card {
     -webkit-backdrop-filter: none;
   }
 }
+
+/* Easy Clear 1.4.261: Easy Learn ≤720 / tall residual purple void after cream 252 (Fixes #361) —
+   After opaque cream shell 252 (app-body + is-teach + solid teach-gate) Shot pack 1.4.260
+   02-easy-learn.png STILL fails — Gemini: Short Story / Story Creek content clustered in the
+   top half, massive empty purple void across the bottom half (residual after closed #344 /
+   1.4.252). Live DOM is `main.challenge-page.is-teach` >
+   `section.recall-gate.is-encode.teach-gate.easy-story-card` > `.teach-reason` + `.held-triad`
+   + `.cta-dock.easy-story-dock` (LearnScreen / Challenge teach). 252 selectors match that chain
+   inside `@media (max-height: 920px)` and already paint cream there. The residual is a layout
+   viewport taller than 920px: no cream rule matches, `.easy-story-card` stays transparent over
+   the `.recall-gate` / body purple-gold gradient, and the card content-hugs. ≤920 also still
+   leaves ~10px purple body gutters (`.app-body` width cap) and candy `--ink` (#2a1070) on the
+   cream plate. Strengthen — do not delete 252. This block is the 920 query joined with
+   min-height 921 so the same floor covers the tall residual: (1) opaque `#fff6e8` +
+   `background-image: none` on full-bleed app-body / is-teach / the real recall-gate teach card /
+   dock (body and .app stay dusk so the translucent play topbar keeps its purple wash); (2) explicit dark ink `#2a2118` on
+   claim / reason / source; (3) pin the primary CTA + Skip reading with margin-top: auto and a
+   cream dock wash. Easy Learn Short Story / teach chrome ONLY. */
+@media (max-height: 920px), (min-height: 921px) {
+  /* Do not paint body / .app — the play topbar is a translucent dusk wash and must stay purple. */
+  html[data-easy='on'] .app.is-play .app-body:has(.challenge-page.is-teach .easy-story-card),
+  .app.is-play[data-easy='on'] .app-body:has(.challenge-page.is-teach .easy-story-card) {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+    box-sizing: border-box;
+    padding: 4px 12px 0;
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    color: #2a2118;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach:has(.easy-story-card),
+  .app[data-easy='on'] .challenge-page.is-teach:has(.easy-story-card) {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    gap: 6px;
+    overflow: hidden;
+    padding: 8px 10px 0;
+    border-radius: 18px;
+    border: 1px solid color-mix(in srgb, #2a2118 10%, transparent);
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    color: #2a2118;
+    box-shadow: none;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach:has(.easy-story-card) > .text-link,
+  .app[data-easy='on'] .challenge-page.is-teach:has(.easy-story-card) > .text-link {
+    flex: 0 0 auto;
+    color: #8a5a12;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .recall-gate.is-encode.teach-gate.easy-story-card,
+  html[data-easy='on'] .challenge-page.is-teach .recall-gate.easy-story-card.teach-gate,
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card.teach-gate,
+  .app[data-easy='on'] .challenge-page.is-teach .recall-gate.is-encode.teach-gate.easy-story-card {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    align-self: stretch;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    gap: 10px;
+    overflow: hidden;
+    padding: 12px 14px 0;
+    border-radius: 16px;
+    border: 0;
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    color: #2a2118;
+    box-shadow: none;
+    justify-content: flex-start;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card.teach-gate::before,
+  .app[data-easy='on'] .challenge-page.is-teach .recall-gate.easy-story-card.teach-gate::before {
+    content: none;
+    display: none;
+    background: none;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card > .eyebrow {
+    flex: 0 0 auto;
+    color: #8a5a12;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .loci-stamp {
+    flex: 0 0 auto;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .teach-reason {
+    flex: 0 0 auto;
+    color: #2a2118;
+    opacity: 1;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .held-triad {
+    display: grid;
+    flex: 1 1 auto;
+    min-height: 0;
+    align-content: start;
+    gap: 14px;
+    margin: 0;
+    padding: 10px 0 16px;
+    color: #2a2118;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .held-triad > div {
+    padding: 2px 0;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .held-triad dt {
+    color: #8a5a12;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .held-triad dd,
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .held-triad .recall-line {
+    color: #2a2118;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .easy-story-dock,
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .cta-dock.easy-story-dock {
+    position: static;
+    bottom: auto;
+    margin-top: auto;
+    flex: 0 0 auto;
+    padding-top: 12px;
+    padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .easy-story-dock .btn.gold {
+    color: #2a2118;
+    background-color: #ffcc33;
+    background-image: none;
+    background: #ffcc33;
+    border-color: #e0a020;
+    box-shadow: 0 2px 0 #c4922a;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .easy-story-dock .text-link {
+    color: #8a5a12;
+  }
+}
