@@ -50,6 +50,7 @@ interface StorySnapPlayProps {
  * Easy Clear 1.4.209: ≤720 zeros cta-dock margin-top so pad→CTA close (peel 197 stays).
  * Easy Clear 1.4.223: phone portrait extends fill + pad→CTA so snap-stage·pad·CTA close purple void (invent Fun/Clear).
  * Easy Clear 1.4.241: phone portrait extends HUD peel 182 so eyebrow + who·where hide on tall phones (invent Fun/Clear).
+ * Easy Fun 1.4.269: tall-phone Story Snap residual juice — HUD compress 182 (strip · chip) climbs past 720, snap CTA + score/miss juice go loud without crowding the snap board (invent Fun/Clear).
  */
 
 export function StorySnapPlayView({
@@ -168,7 +169,7 @@ export function StorySnapPlayView({
       playGemPop('miss')
       setScore((pts) => applyMissScore(pts))
       setShake(true)
-      window.setTimeout(() => setShake(false), 340)
+      window.setTimeout(() => setShake(false), 560)
       onMiss()
       flashToast(`Miss −${SNAP_SCORE}`)
     }
