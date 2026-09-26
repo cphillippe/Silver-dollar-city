@@ -4,7 +4,7 @@
 **Branch:** `ship/easy-fun-clear-200` → `main`
 **Version:** 1.4.200
 **Peel:** `ccd47bd` (`ccd47bd598616ef141be8c2ea4043fd3589c2014`)
-**Tip:** `5b42625` (`5b42625d3636cb41d048cd4f0369c0d769a793b1`)
+**Tip:** `afb98d4` (`afb98d4bb28164381cf7822184edb5f9a6f0265a`)
 **Base live:** 1.4.199 (`709df26`, PR #260 Easy Link ≤720 close choices→CTA purple gap on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
