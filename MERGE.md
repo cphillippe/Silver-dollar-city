@@ -3,8 +3,8 @@
 **PR:** (pending)
 **Branch:** `ship/easy-fun-clear-196` → `main`
 **Version:** 1.4.196
-**Peel:** (pending)
-**Tip:** (pending)
+**Peel:**  ()
+**Tip:**  ()
 **Base live:** 1.4.195 (`ea5eba5`, PR #256 Easy Lock In feedback ≤720 fill purple void on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
