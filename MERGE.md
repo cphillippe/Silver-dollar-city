@@ -1,47 +1,48 @@
-# ready-easy-fun-clear-198 — 1.4.198 Easy Sort ≤720 fill purple void
+# ready-easy-fun-clear-199 — 1.4.199 Easy Link ≤720 close choices→CTA purple gap
 
-**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/259
-**Branch:** `ship/easy-fun-clear-198` → `main`
-**Version:** 1.4.198
-**Peel:** `67cf0b0` (`67cf0b07e3ebc2558e1a29dc70c2799f70002a82`)
-**Tip:** `c3badef` (`c3badef9d40ee70a49cd4e5ae5c943a9252c65fc`)
-**Base live:** 1.4.197 (`e5a43af`, PR #258 Easy Story Snap ≤720 fill purple void on main)
+**PR:** (pending)
+**Branch:** `ship/easy-fun-clear-199` → `main`
+**Version:** 1.4.199
+**Peel:** (pending)
+**Tip:** (pending)
+**Base live:** 1.4.198 (`ff7dcbf`, PR #259 Easy Sort ≤720 fill purple void on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
 ## Shot wake
-**Do NOT wake Shot from this hop.** CoS wakes Shot on 10th ships (next 1.4.200); this hop does not ping Shot. Keep inventing toward that.
+**Do NOT wake Shot from this hop.** CoS wakes Shot on 10th ships (next **1.4.200**); this hop is last invent before Shot cadence. Do not claim 1.4.200. Do not ping Shot.
 
 ## How picked
 Open Issues: **#161** Dig/Hard/NW/Town parked. **#160** cheap-hop infra. No open Easy Fun/Clear issue.
-1.4.197 Easy Story Snap fill live on main. Shot 190 fails #250–#253 already peeled as 193–196 — do NOT re-peel.
-Invent Fun/Clear — densest remaining Easy trail different from Story Snap 197 / Match/LockIn/Father/Hold/Creed/Story Creek/Build/Link/Samaritan: **Easy Sort** had board-first peel **1.4.183** only — fixed `bank.is-sort` (108px×2) + capped `sort-bins` (102px) hug the top so the gold card leaves empty purple under the bins (Match 184 / Story Snap 197 / Creed 192 fill family).
+1.4.198 Easy Sort fill live on main. Shot 190 fails #250–#253 already peeled as 193–196 — do NOT re-peel. Story Snap 197 / Sort 198 invent fills already on main.
+Invent Fun/Clear — densest remaining Easy trail different from Sort 198 / Story Snap 197: **Easy Link** had fill peel **1.4.188** only — global `.link-dock { margin-top: auto }` still steals free space after fill so the gold card leaves empty purple between picture choices and the bottom dock (Father 196 dock-margin family).
 
 ## Chosen climb
-Single Easy Fun/Clear polish: **Easy Sort ≤720 fill purple void** — grow `play.is-easy-sort` shell + stretch `bank.is-sort` seats / `sort-bins` so Keep·Toss fill the portrait.
+Single Easy Fun/Clear polish: **Easy Link ≤720 close choices→CTA purple gap** — zero `.play.is-easy-link .link-dock` `margin-top` so `link-col` flex:1 absorbs the portrait.
 
 ## What fixed
-- `src/styles/sortHold.css`: `@media (max-height: 720px)` — `.play.is-easy-sort` `flex: 1 1 auto`; `.bank.is-sort` stretch rows + `max-height: none`; `.sort-bins` / `.bin` grow; prompt / how / hint stay `flex: 0`; board-first 183 hide how/hint stays
-- `src/components/challenges/SortPlay.tsx`: thin 1.4.198 comment
+- `src/index.css`: `@media (max-height: 720px)` — `.play.is-easy-link .link-dock` `margin-top: 0` (global auto margin was stealing free space after fill 188)
+- `src/components/challenges/LinkPlay.tsx`: thin 1.4.199 comment
 - Android `versionName` left at **1.4.113**
-- Version **1.4.198** atop live **1.4.197**
+- Version **1.4.199** atop live **1.4.198**
 
 ## Deferred (do NOT climb this hop)
 - Dig Reveal / Hard / NW / Town / stores / Pack B / Home map candy
-- Story Snap 197 / Match 193 / Lock In quiz 194 / Lock In feedback 195 / Father 196 / Hold arena 190 / Creed 192 / Story Creek 191 / Build / Link / Samaritan / Manage / letterbox (already on main)
+- Sort 198 / Story Snap 197 / Match 193 / Lock In quiz 194 / Lock In feedback 195 / Father 196 / Hold arena 190 / Creed 192 / Story Creek 191 / Build / Samaritan / Link fill 188 / Manage / letterbox (already on main)
 - Journal held clear chrome further peel
-- Sort board-first 1.4.183 (different surface; still applies ≤720)
+- Link fill peel 1.4.188 (different surface; still applies ≤720)
+- **1.4.200** Shot wake (do not invent as 200)
 
 ## Gemini
-MODEL=gemini-flash-latest — Invent Fun/Clear (no open Easy Fun/Clear issue). Invent API key present but not AIza AI Studio shape. Manager-steered invent. Notes: `notes-gemini.txt` (+ `/workspace/silver-city-art/notes-gemini-198.txt`).
+MODEL=gemini-flash-latest — Invent Fun/Clear (no open Easy Fun/Clear issue). Invent API key present but not AIza AI Studio shape. Manager-steered invent. Notes: `notes-gemini.txt` (+ `/workspace/silver-city-art/notes-gemini-199.txt`).
 
 ## Files peeled
-- `src/styles/sortHold.css`
-- `src/components/challenges/SortPlay.tsx`
+- `src/index.css`
+- `src/components/challenges/LinkPlay.tsx`
 - `scripts/check-city.mjs`, `scripts/check-panel-blast.mjs`
 - `src/config/app.ts`, `package.json`, `package-lock.json`
 - `src/content/changelog.ts`
 - `notes-gemini.txt`
-- `docs/` (Pages rebuild `index-BgKnFwDp.js` / `index-NetVQDiO.css`)
+- `docs/` (Pages rebuild `index-BalTfmT6.js` / `index-3ZkQ0f3B.css`)
 - `MERGE.md`
 
 ## Checks
