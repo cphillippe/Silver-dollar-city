@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.179',
+    title: 'Easy Home: map fills the phone',
+    when: '2026-09-26',
+    items: [
+      'Easy Home on a tall phone: the valley fills the screen (sky above, meadow below) so the whole map stays visible without dark purple letterbox bands (Fixes #217)',
+    ],
+  },
+  {
     version: '1.4.178',
     title: 'Witness Square candy hall',
     when: '2026-09-26',

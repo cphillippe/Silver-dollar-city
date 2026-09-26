@@ -1433,7 +1433,7 @@ html[data-easy='on'] .city-easy-tags {
 }
 
 .hub.is-easy-home .easy-home-map .city-svg {
-  /* Full stage size; preserveAspectRatio meet letterboxes — entire map visible */
+  /* Valley fills the phone; sky and meadow, not empty bands. */
   flex: 1;
   width: 100%;
   height: 100%;
@@ -1443,8 +1443,8 @@ html[data-easy='on'] .city-easy-tags {
   border-radius: 0;
   border: 0;
   box-shadow: none;
-  background: #3a1480; /* purple chrome in letterbox / pillarbox bands */
-  object-fit: contain; /* belt-and-suspenders for any raster fallback */
+  background: linear-gradient(180deg, #c6a98b 0 50%, #a8d070 50% 100%);
+  object-fit: fill;
 }
 
 .hub.is-easy-home .easy-home-map .city-legend {
