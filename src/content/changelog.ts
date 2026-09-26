@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.158',
+    title: 'Easy Source Dig: one how line',
+    when: '2026-09-25',
+    items: [
+      'Easy Source Dig: omit digHunt .sort-how — Scrub tablets · timer · SOURCE_DIG_HINT already teach scrub (Clear family with Maze 1.4.143 / Father 1.4.144 / Creed merge 1.4.147; Fixes #204)',
+    ],
+  },
+  {
     version: '1.4.157',
     title: 'Easy Home: snap/merge/dig whisper short',
     when: '2026-09-25',
