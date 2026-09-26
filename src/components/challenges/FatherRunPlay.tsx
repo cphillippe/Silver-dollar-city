@@ -374,6 +374,7 @@ export function FatherRunPlay({
       {/* Easy Clear 1.4.240: tall-phone strengthens fill 229 — ancestor height chain · run-scene flex 1 1 0 · dock static + clear sticky blur so rail→CTA closes (Fixes #319). */}
       {/* Easy Clear 1.4.250: tall-phone cream plate fill — paint parchment play · warm run-scene · dark ink · dock pin — closes Shot 240 purple residual (Fixes #336). */}
       {/* Easy Clear 1.4.257: tall-phone cream shell fill — opaque cream app-body + play shell · solid cream run plate · warm run-scene · cream HOLD TO RUN dock floor — closes Shot 250 purple void after 250 (Fixes #349). */}
+      {/* Easy Clear 1.4.266: tall residual cream floor (opaque cream play + app-body · HOLD TO RUN pinned to cream floor above the 920 cap) so leftover between the timing rail and the button is cream, not a purple void after 257 (Fixes #366). */}
       <div className={`run-speech ${phase === 'miss' ? 'is-done' : ''}`} aria-live="polite">
         <p className="run-speech-kicker">Hired-hand speech</p>
         <p className="run-speech-line">{phrase}</p>

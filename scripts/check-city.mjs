@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.265')
+assert.equal(APP_VERSION, '1.4.266')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -5839,5 +5839,44 @@ console.log('check-city: ok')
     latestChange('1.4.265').items.join('\n'),
     /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#300|#301|#302|#314|#315|#316|#317|#318|#319|#331|#332|#333|#334|#335|#336|#343|#344|#345|#346|#347|#348|#349|#350|#361|#362|#363|#364|Father Dash|Learn cream|Lock In|Manage|Match grid|Dig|Creed|Build|Sort|Snap|Link|Claim merge|Source dig|invent Fun\/Clear|Sequence|Story Creek HOLD|Home dock|coach|live quiz|miss-teach/i,
     '1.4.265 must not fix other phone-fail issues or climb another Easy surface',
+  )
+}
+
+// Easy Clear 1.4.266: Easy Father Dash ≤720 / tall residual purple void after cream 257 (Fixes #366)
+{
+  const welcomeCss266 = readFileSync(new URL('../src/styles/welcome.css', import.meta.url), 'utf8')
+  const fatherPlay266 = readFileSync(
+    new URL('../src/components/challenges/FatherRunPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(welcomeCss266, /1\.4\.266: Easy Father Dash ≤720 \/ tall residual purple void after cream 257/)
+  assert.match(
+    welcomeCss266,
+    /1\.4\.266: Easy Father Dash ≤720 \/ tall residual purple void after cream 257[\s\S]*?@media \(max-height: 920px\), \(min-height: 921px\)/,
+  )
+  assert.match(
+    welcomeCss266,
+    /1\.4\.266: Easy Father Dash ≤720 \/ tall residual purple void after cream 257[\s\S]*?\.app-body:has\(\.play\.is-father-run\)[\s\S]*?background: #fff6e8/,
+  )
+  assert.match(
+    welcomeCss266,
+    /1\.4\.266: Easy Father Dash ≤720 \/ tall residual purple void after cream 257[\s\S]*?\.play\.is-father-run[\s\S]*?background-image: none[\s\S]*?background: #fff6e8/,
+  )
+  assert.match(
+    welcomeCss266,
+    /1\.4\.266: Easy Father Dash ≤720 \/ tall residual purple void after cream 257[\s\S]*?\.run-rail-track[\s\S]*?background: rgba\(42, 33, 24, 0\.35\)/,
+  )
+  assert.match(
+    welcomeCss266,
+    /1\.4\.266: Easy Father Dash ≤720 \/ tall residual purple void after cream 257[\s\S]*?\.cta-dock[\s\S]*?margin-top: auto[\s\S]*?background: #fff6e8/,
+  )
+  assert.match(fatherPlay266, /1\.4\.266: tall residual cream floor/)
+  assert.match(cssSrc, /1\.4\.266: Easy Father Dash ≤720 \/ tall residual purple void after cream 257/)
+  assert.match(latestChange('1.4.266').items.join('\n'), /Fixes #366|purple void|cream|Father Dash|phone portrait|rail/i)
+  assert.match(latestChange('1.4.266').title, /Easy Father Dash|≤720|purple void|Fixes #366/i)
+  assert.doesNotMatch(
+    latestChange('1.4.266').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#300|#301|#302|#314|#315|#316|#317|#318|#319|#331|#332|#333|#334|#335|#336|#343|#344|#345|#346|#347|#348|#349|#350|#361|#362|#363|#364|#365|Learn cream|Lock In|Samaritan|Manage|Match grid|Dig|Creed|Build|Sort|Snap|Link|Claim merge|Source dig|invent Fun\/Clear|Sequence|Story Creek HOLD|Home dock|coach|live quiz|miss-teach|maze-stage/i,
+    '1.4.266 must not fix other phone-fail issues or climb another Easy surface',
   )
 }
