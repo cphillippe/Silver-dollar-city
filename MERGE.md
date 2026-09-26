@@ -1,6 +1,6 @@
 # ready-easy-fun-clear-205 — 1.4.205 Easy Sequence ≤720 close stones→result purple gap
 
-**PR:** (pending)
+**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/266
 **Branch:** `ship/easy-fun-clear-205` → `main`
 **Version:** 1.4.205
 **Peel:** `9425077` (`9425077c99b525f7906b58573cd7910f34eddee1`)
