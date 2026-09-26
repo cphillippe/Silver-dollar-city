@@ -38,6 +38,7 @@ interface WhyBlastPlayProps {
  * Easy Clear 1.4.195: ≤720 grows journal miss-teach shell so feedback card fills purple void (Fixes #252).
  */
 
+// Easy Clear 1.4.212: ≤720 mid-question quiz packs residual lower-third padding (Fixes #274).
 export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: WhyBlastPlayProps) {
   const chips = useMemo(
     () => whyBlastChoices(reason, packMisses, whyBlastExtras(id), easyWhyLine),
