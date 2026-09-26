@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { areas } from '../content'
 import { townVoice } from '../content/story'
 import {
@@ -15,9 +15,11 @@ import {
   fillSnapshot,
   nextGift,
   nextKicker,
+  MAP_PLATE,
   nextPlotId,
   plotView,
   newestStanding,
+  stageCam,
   readCitySeen,
   readFillsSeen,
   readHomecomingDay,
@@ -71,9 +73,15 @@ interface CityMapProps {
   /** Hub can open the same place mind map from the street list. */
   mindPlot?: CityPlotId | null
   onMindPlot?: (id: CityPlotId | null) => void
+  /** Easy Home: grow the camera to the phone so the valley fills the stage. */
+  fillStage?: boolean
 }
 
-const FULL_CAM = { x: 0, y: 0, w: 640, h: 420 }
+const FULL_CAM = MAP_PLATE
+
+/** Top and bottom edge colors of city-map-bg.webp — sky, then meadow. */
+const STAGE_SKY = '#c6a98b'
+const STAGE_MEADOW = '#a8d070'
 
 const PACK_A_CANDY: CityPlotId[] = ['porch', 'gate', 'journal', 'hollow']
 
@@ -91,6 +99,7 @@ export function CityMap({
   mode = 'live',
   mindPlot: mindPlotProp,
   onMindPlot,
+  fillStage = false,
 }: CityMapProps) {
   const { progress } = useProgress()
   const today = localDateKey()
@@ -112,10 +121,12 @@ export function CityMap({
   const mindPlot = mindPlotProp !== undefined ? mindPlotProp : mindPlotLocal
   const setMindPlot = onMindPlot ?? setMindPlotLocal
   const [cam, setCam] = useState(FULL_CAM)
+  const [stageAspect, setStageAspect] = useState<number | null>(null)
   const playing = useRef(false)
   const timers = useRef<number[]>([])
   const camNow = useRef(FULL_CAM)
   const camFrame = useRef(0)
+  const svgRef = useRef<SVGSVGElement | null>(null)
 
   function stageOf(id: CityPlotId): CityStage {
     if (mode === 'poster') return id === 'porch' ? 'scaffold' : 'empty'
@@ -163,6 +174,30 @@ export function CityMap({
       if (camFrame.current) cancelAnimationFrame(camFrame.current)
     }
   }, [])
+
+  useLayoutEffect(() => {
+    if (!fillStage) return
+    const el = svgRef.current
+    if (!el || typeof ResizeObserver === 'undefined') return
+    let frame = 0
+    const read = () => {
+      const w = el.clientWidth
+      const h = el.clientHeight
+      if (w < 1 || h < 1) return
+      const next = w / h
+      setStageAspect((prev) => (prev !== null && Math.abs(prev - next) < 0.004 ? prev : next))
+    }
+    read()
+    const observer = new ResizeObserver(() => {
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(read)
+    })
+    observer.observe(el)
+    return () => {
+      cancelAnimationFrame(frame)
+      observer.disconnect()
+    }
+  }, [fillStage])
 
   useEffect(() => {
     if (mode !== 'live') return
@@ -323,14 +358,22 @@ export function CityMap({
   const celebrating = Boolean(beat) || homecoming
   const beatVoice = beat ? townVoice(beat.id) : townVoice(nextId)
   const easy = isEasy(progress)
+  const plateSettled =
+    Math.abs(cam.x - FULL_CAM.x) < 0.5 &&
+    Math.abs(cam.y - FULL_CAM.y) < 0.5 &&
+    Math.abs(cam.w - FULL_CAM.w) < 0.5 &&
+    Math.abs(cam.h - FULL_CAM.h) < 0.5
+  const view =
+    fillStage && plateSettled && stageAspect != null ? stageCam(stageAspect) : cam
 
   return (
     <section
       className={`city-overworld is-city-build is-age-${age} is-alive ${mode === 'poster' ? 'is-poster' : ''} ${celebrating ? 'is-revealing' : ''} ${homecoming ? 'is-homecoming' : ''}`}
     >
       <svg
+        ref={svgRef}
         className="city-svg"
-        viewBox={viewBoxOf(cam)}
+        viewBox={viewBoxOf(view)}
         preserveAspectRatio="xMidYMid meet"
         role={mode === 'poster' ? 'img' : 'group'}
         aria-label={
@@ -395,7 +438,56 @@ export function CityMap({
           <clipPath id="city-face-clip" clipPathUnits="objectBoundingBox">
             <circle cx="0.5" cy="0.5" r="0.48" />
           </clipPath>
+          {fillStage ? (
+            <linearGradient
+              id="city-stage-bleed"
+              gradientUnits="userSpaceOnUse"
+              x1="0"
+              y1="0"
+              x2="0"
+              y2={FULL_CAM.h}
+            >
+              <stop offset="0%" stopColor={STAGE_SKY} />
+              <stop offset="100%" stopColor={STAGE_MEADOW} />
+            </linearGradient>
+          ) : null}
         </defs>
+
+        {fillStage ? (
+          <g className="city-stage-bleed" aria-hidden>
+            <rect
+              x={view.x - 4}
+              y={view.y - 4}
+              width={view.w + 8}
+              height={view.h + 8}
+              fill="url(#city-stage-bleed)"
+            />
+            {view.x < -0.5 ? (
+              <svg
+                x={view.x}
+                y={view.y}
+                width={-view.x + 1}
+                height={view.h}
+                viewBox="0 0 36 420"
+                preserveAspectRatio="none"
+              >
+                <image href={cityMapBg} x="0" y="0" width="640" height="420" />
+              </svg>
+            ) : null}
+            {view.x + view.w > FULL_CAM.w + 0.5 ? (
+              <svg
+                x={FULL_CAM.w - 1}
+                y={view.y}
+                width={view.x + view.w - (FULL_CAM.w - 1)}
+                height={view.h}
+                viewBox="604 0 36 420"
+                preserveAspectRatio="none"
+              >
+                <image href={cityMapBg} x="0" y="0" width="640" height="420" />
+              </svg>
+            ) : null}
+          </g>
+        ) : null}
 
         {/* Candy memory-palace plate (#166). Streets/creek/plots/HeavenCity stay SVG overlays. */}
         <image

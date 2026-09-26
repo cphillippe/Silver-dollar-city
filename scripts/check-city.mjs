@@ -3,6 +3,8 @@ import { existsSync, readFileSync } from 'node:fs'
 import {
   CITY_HOLLOW_TO_WITNESS,
   CITY_PLOTS,
+  MAP_PLATE,
+  stageCam,
   cityAge,
   citySnapshot,
   cityUpgrades,
@@ -1133,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.178')
+assert.equal(APP_VERSION, '1.4.180')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1463,7 +1465,7 @@ assert.match(cssSrc, /is-easy-hold/)
   assert.match(dockCss, /backdrop-filter: blur/)
   assert.doesNotMatch(dockCss, /#16062e/, 'sticky CTA docks must not be an opaque black slab')
 }
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Witness Square|candy webp|#213/i)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Easy Home|letterbox|#217|valley|meadow/i)
 {
   const storyCardCss = cssSrc.match(/\.easy-story-card,[\s\S]*?\.easy-story-card::before \{[\s\S]*?\n\}/)?.[0] ?? ''
   assert.match(storyCardCss, /border:\s*0/)
@@ -1798,6 +1800,33 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
   assert.match(cssSrc, /\.hub\.is-easy-home \.easy-home-map[\s\S]{0,120}position:\s*absolute/)
   assert.match(cssSrc, /\.hub\.is-easy-home \.easy-home-map \.city-svg[\s\S]{0,200}max-height:\s*none/)
   assert.doesNotMatch(cssSrc, /max-height: min\(62vh, 520px\)/)
+  {
+    const easySvg =
+      cssSrc.match(/\.hub\.is-easy-home \.easy-home-map \.city-svg \{[\s\S]*?\n\}/)?.[0] ?? ''
+    assert.match(easySvg, /#c6a98b/)
+    assert.match(easySvg, /#a8d070/)
+    assert.doesNotMatch(easySvg, /#3a1480/, 'Easy Home map must not paint purple letterbox bands')
+  }
+  assert.match(easyHome, /fillStage/)
+  assert.match(mapSrc, /fillStage\?:/)
+  assert.match(mapSrc, /city-stage-bleed/)
+  assert.match(mapSrc, /stageCam\(/)
+  {
+    const phone = stageCam(390 / 780)
+    assert.ok(phone.y < 0, 'portrait stage adds sky above the plate')
+    assert.ok(phone.y + phone.h > MAP_PLATE.y + MAP_PLATE.h, 'portrait stage adds meadow below the plate')
+    assert.ok(phone.x <= MAP_PLATE.x + 0.01)
+    assert.ok(phone.x + phone.w >= MAP_PLATE.x + MAP_PLATE.w - 0.01)
+    assert.ok(phone.y <= MAP_PLATE.y + 0.01)
+    assert.ok(Math.abs(phone.w / phone.h - 390 / 780) < 0.002)
+    const wide = stageCam(2)
+    assert.ok(wide.x < 0, 'wide stage adds valley beside the plate')
+    assert.ok(wide.y <= MAP_PLATE.y + 0.01)
+    assert.ok(wide.y + wide.h >= MAP_PLATE.y + MAP_PLATE.h - 0.01)
+    const fitted = stageCam(MAP_PLATE.w / MAP_PLATE.h)
+    assert.ok(Math.abs(fitted.w - MAP_PLATE.w) < 0.01)
+    assert.ok(Math.abs(fitted.h - MAP_PLATE.h) < 0.01)
+  }
   assert.match(cssSrc, /\.hub\.is-easy-home \.easy-extra-streets[\s\S]{0,120}display:\s*none/)
   assert.match(cssSrc, /\.hub\.is-easy-home \.easy-core[\s\S]{0,80}display:\s*none/)
   assert.match(cssSrc, /is-easy-soft/)
@@ -2370,8 +2399,8 @@ assert.match(mapSrc, /easy \? null : \(\s*\n\s*<>[\s\S]*city-street-main/)
 assert.match(mapSrc, /if \(isEasy\(progress\)\) return/)
 assert.match(mapSrc, /if \(playing\.current && !isEasy\(progress\)\) return/)
 assert.match(mapSrc, /Tap a building to Manage it/)
-assert.match(latestChange(APP_VERSION).title, /Witness Square|candy hall/i)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Witness Square|candy webp|#213/i)
+assert.match(latestChange(APP_VERSION).title, /Easy Home|phone|map fills/i)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Easy Home|letterbox|#217|valley|meadow/i)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-img[\s\S]*?fill: none !important/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img\.is-built[\s\S]*?fill: none/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-hit[\s\S]*?stroke: none/)

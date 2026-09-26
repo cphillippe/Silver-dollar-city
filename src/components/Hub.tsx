@@ -103,6 +103,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
             onNavigate={onNavigate}
             mindPlot={mindPlot}
             onMindPlot={setPlot}
+            fillStage
           />
         </section>
 
