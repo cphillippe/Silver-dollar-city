@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.181')
+assert.equal(APP_VERSION, '1.4.182')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1465,7 +1465,7 @@ assert.match(cssSrc, /is-easy-hold/)
   assert.match(dockCss, /backdrop-filter: blur/)
   assert.doesNotMatch(dockCss, /#16062e/, 'sticky CTA docks must not be an opaque black slab')
 }
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Creed|merge|≤720|HUD|kicker|bowl|Drop/i)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Story Snap|≤720|HUD|eyebrow|who·where|strip|pad/i)
 {
   const storyCardCss = cssSrc.match(/\.easy-story-card,[\s\S]*?\.easy-story-card::before \{[\s\S]*?\n\}/)?.[0] ?? ''
   assert.match(storyCardCss, /border:\s*0/)
@@ -2403,8 +2403,8 @@ assert.match(mapSrc, /easy \? null : \(\s*\n\s*<>[\s\S]*city-street-main/)
 assert.match(mapSrc, /if \(isEasy\(progress\)\) return/)
 assert.match(mapSrc, /if \(playing\.current && !isEasy\(progress\)\) return/)
 assert.match(mapSrc, /Tap a building to Manage it/)
-assert.match(latestChange(APP_VERSION).title, /Creed|merge|HUD|≤720/i)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Creed|merge|≤720|HUD|kicker|bowl|Drop/i)
+assert.match(latestChange(APP_VERSION).title, /Story Snap|HUD|≤720/i)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Story Snap|≤720|HUD|eyebrow|who·where|strip|pad/i)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-img[\s\S]*?fill: none !important/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img\.is-built[\s\S]*?fill: none/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-hit[\s\S]*?stroke: none/)
@@ -3176,6 +3176,31 @@ console.log('check-city: ok')
     latestChange(APP_VERSION).items.join('\n'),
     /full-bleed map|Witness Square candy|Fixes #217|Fixes #213/i,
     '1.4.180 must not claim Map Witness or #217 letterbox fix',
+  )
+}
+
+
+// Easy Clear 1.4.182: Easy Story Snap ≤720 HUD peel (invent Fun/Clear)
+{
+  const snapCss182 = readFileSync(new URL('../src/styles/storySnap.css', import.meta.url), 'utf8')
+  const snapPlay182 = readFileSync(
+    new URL('../src/components/challenges/StorySnapPlayView.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(snapCss182, /1\.4\.182: Story Snap ≤720 HUD peel/)
+  assert.match(
+    snapCss182,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-story-snap \.eyebrow \{[\s\S]*?display: none/,
+  )
+  assert.match(
+    snapCss182,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-story-snap \.easy-who-where-line \{[\s\S]*?display: none/,
+  )
+  assert.match(snapPlay182, /1\.4\.182: ≤720 peels HUD/)
+  assert.doesNotMatch(
+    latestChange(APP_VERSION).items.join('\n'),
+    /Fixes #232|empty-lot|Fixes #217/i,
+    '1.4.182 must not claim Manage 180 or Map letterbox',
   )
 }
 
