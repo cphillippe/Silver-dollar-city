@@ -1335,3 +1335,135 @@ html[data-theme='dusk'] .easy-story-card {
     color: #8a5a12;
   }
 }
+
+/* Easy Clear 1.4.262: Easy Match gemSearch ≤720 / tall residual purple void after cream 253 (Fixes #362) —
+   After opaque cream shell 253 (app-body + play + gem-scroll/stage) Shot pack 1.4.260
+   03-easy-match.png STILL fails — Gemini: Story Creek letter grid clustered mid-card,
+   massive empty purple void between the grid and the yellow found counter (residual after
+   closed #345 / 1.4.253). Live DOM is `main.challenge-page.is-puzzle` >
+   `.play.is-gem-search.is-panel-blast.is-story-docked` > `.match-teach-dock` +
+   `.gem-scroll` > `.gem-stage` > `.gem-board` + `.match-score`. 253 selectors match that
+   chain inside `@media (max-height: 920px)` and already paint cream there. The residual is
+   a layout viewport taller than 920px: no cream rule matches, `.gem-stage` still flex-grows
+   transparent over the `.play` purple-gold gradient, and the square letter board
+   content-hugs while `.match-score` sits on the purple floor of `.gem-scroll`.
+   Strengthen — do not delete 253. This block is the 920 query joined with min-height 921
+   so the same floor covers the tall residual: (1) opaque `#fff6e8` + `background-image: none`
+   on full-bleed app-body / puzzle shell / play / gem-scroll / gem-stage (body and .app stay
+   dusk so the translucent play topbar keeps its purple wash); (2) pin `.match-score` with
+   margin-top: auto and a cream dock wash; (3) leave `.gem-cell` letter tiles on their
+   candy hues. Easy Match gem-search ONLY. */
+@media (max-height: 920px), (min-height: 921px) {
+  /* Do not paint body / .app — the play topbar is a translucent dusk wash and must stay purple. */
+  html[data-easy='on'] .app.is-play .app-body:has(.play.is-gem-search.is-panel-blast.is-story-docked),
+  .app.is-play[data-easy='on'] .app-body:has(.play.is-gem-search.is-panel-blast.is-story-docked) {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+    box-sizing: border-box;
+    padding: 4px 12px 0;
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    color: #2a2118;
+  }
+
+  html[data-easy='on'] .daily-page.is-puzzle:has(.play.is-gem-search.is-panel-blast.is-story-docked),
+  html[data-easy='on'] .challenge-page.is-puzzle:has(.play.is-gem-search.is-panel-blast.is-story-docked),
+  .app[data-easy='on'] .challenge-page.is-puzzle:has(.play.is-gem-search.is-panel-blast.is-story-docked) {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    gap: 2px;
+    overflow: hidden;
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    color: #2a2118;
+  }
+
+  html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked,
+  html[data-easy='on'] .daily-page.is-puzzle .play.is-gem-search.is-panel-blast.is-story-docked,
+  html[data-easy='on'] .challenge-page.is-puzzle .play.is-gem-search.is-panel-blast.is-story-docked {
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 4px;
+    overflow: hidden;
+    padding: 10px 10px 0;
+    border-radius: 22px;
+    border: 1px solid color-mix(in srgb, #2a2118 12%, transparent);
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    color: #2a2118;
+    box-shadow: 0 2px 0 color-mix(in srgb, #000 6%, transparent);
+  }
+
+  html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .gem-scroll {
+    flex: 1 1 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    gap: 4px;
+    padding: 6px;
+    padding-bottom: 0;
+    border-radius: 16px;
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+  }
+
+  html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .gem-stage {
+    min-height: 0;
+    width: 100%;
+    max-width: none;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    border-radius: 12px;
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    padding: 4px;
+  }
+
+  html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .match-teach-dock,
+  html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .sort-how,
+  html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .match-yes,
+  html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .miss-banner,
+  html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .match-toast {
+    flex: 0 0 auto;
+  }
+
+  /* Pin the found counter to the cream floor — cream dock wash, not purple sticky blur. */
+  html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .match-score {
+    position: static;
+    bottom: auto;
+    margin-top: auto;
+    flex: 0 0 auto;
+    padding-top: 8px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    color: #8a5a12;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
