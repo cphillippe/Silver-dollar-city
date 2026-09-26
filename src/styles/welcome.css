@@ -1467,3 +1467,203 @@ html[data-theme='dusk'] .easy-story-card {
     -webkit-backdrop-filter: none;
   }
 }
+
+/* Easy Clear 1.4.263: Easy Lock In quiz ≤720 / tall residual purple void after cream 254 (Fixes #363) —
+   After opaque cream shell 254 (app-body + journal live-quiz + solid recall-gate) Shot pack
+   1.4.260 04-easy-lockin.png STILL fails — Gemini: LOCK IN quiz card (MAIN IDEA + four
+   gold-outline options + From) clustered in the top half, massive empty purple void across
+   the bottom (residual after closed #346 / 1.4.254). Live mid-question DOM is
+   `main.journal.is-rehearse.is-easy-hold-practice` > `.rehearse-anchor` >
+   `section.recall-gate.is-encode.is-easy-hold.is-why-blast` >
+   `.why-blast:not(.is-miss-teach):not(.is-win)` > `.why-blast-hud` + `.why-arena`
+   (why-chip ×4 + why-claim + held-from). 254 selectors match that chain inside
+   `@media (max-height: 920px)` and already paint cream there. The residual is a layout
+   viewport taller than 920px: no cream rule matches, `.recall-gate` stays the translucent
+   purple-gold gradient, why-claim / why-chip keep opaque purple plates, and the card
+   content-hugs over the dusk body. Strengthen — do not delete 254. This block is the 920
+   query joined with min-height 921 so the same floor covers the tall residual: (1) opaque
+   `#fff6e8` + `background-image: none` on full-bleed app-body / journal rehearse shell /
+   rehearse-anchor / recall-gate quiz plate (body and .app stay dusk so the translucent play
+   topbar keeps its purple wash); (2) dark ink `#2a2118` on the live claim and gold-outline
+   options so they stay legible on cream; (3) content stays top-hugged so leftover under the
+   stack is cream floor, not stretched giant chips. Easy Lock In live quiz ONLY. */
+@media (max-height: 920px), (min-height: 921px) {
+  /* Do not paint body / .app — the play topbar is a translucent dusk wash and must stay purple. */
+  html[data-easy='on'] .app.is-play .app-body:has(.journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win)),
+  .app.is-play[data-easy='on'] .app-body:has(.journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win)) {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+    box-sizing: border-box;
+    padding: 4px 12px 0;
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    color: #2a2118;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast:not(.is-miss-teach):not(.is-win)) {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    gap: 6px;
+    overflow: hidden;
+    padding: 8px 10px 0;
+    border-radius: 18px;
+    border: 1px solid color-mix(in srgb, #2a2118 10%, transparent);
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    color: #2a2118;
+    box-shadow: none;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast:not(.is-miss-teach):not(.is-win)) > .text-link {
+    flex: 0 0 auto;
+    color: #8a5a12;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast:not(.is-miss-teach):not(.is-win)) .rehearse-anchor {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast:not(.is-miss-teach):not(.is-win)) .rehearse-anchor > .eyebrow {
+    flex: 0 0 auto;
+    color: #8a5a12;
+  }
+
+  /* Solid opaque cream plate — kill recall-gate translucent purple-gold gradient */
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast:not(.is-miss-teach):not(.is-win)) .recall-gate.is-easy-hold {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    align-self: stretch;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    margin-bottom: 0;
+    overflow: hidden;
+    padding: 12px 14px 0;
+    gap: 8px;
+    border-radius: 16px;
+    border: 1px solid color-mix(in srgb, #2a2118 12%, transparent);
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    color: #2a2118;
+    box-shadow: none;
+    justify-content: flex-start;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast:not(.is-miss-teach):not(.is-win)) .recall-gate.is-easy-hold::before {
+    content: none;
+    display: none;
+    background: none;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast:not(.is-miss-teach):not(.is-win)) .recall-gate.is-easy-hold > .eyebrow {
+    flex: 0 0 auto;
+    color: #8a5a12;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    gap: 8px;
+    overflow: hidden;
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    color: #2a2118;
+    justify-content: flex-start;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .why-blast-hud,
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .miss-banner {
+    flex: 0 0 auto;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .why-blast-hud .next-tap {
+    color: #2a2118;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .why-score {
+    color: #2a2118;
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    border-color: #e0a020;
+    box-shadow: none;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .why-arena {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+    max-height: none;
+    align-content: start;
+    grid-template-rows: auto auto auto;
+    gap: 10px;
+    padding: 4px 0 12px;
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .why-chip {
+    min-height: 48px;
+    height: auto;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #2a2118;
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    border-color: #e0a020;
+    box-shadow: 0 2px 0 #c4922a;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .why-claim {
+    align-self: stretch;
+    color: #2a2118;
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    border-color: #e0a020;
+    box-shadow: none;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .why-claim .why-miss-label {
+    color: #8a5a12;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .why-arena .held-from,
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .held-from {
+    color: #8a5a12;
+  }
+}
