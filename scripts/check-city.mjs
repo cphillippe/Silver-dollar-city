@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.197')
+assert.equal(APP_VERSION, '1.4.198')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3529,6 +3529,39 @@ console.log('check-city: ok')
     '1.4.197 must not re-peel Shot 190 fails #250–#253 or Match / Lock In / Father / Hold / Creed / Story Creek / Sort / Build / Link / maze / bowl',
   )
 }
+
+
+// Easy Clear 1.4.198: Easy Sort ≤720 fill purple void (invent Fun/Clear)
+{
+  const holdCss198 = readFileSync(new URL('../src/styles/sortHold.css', import.meta.url), 'utf8')
+  const sortPlay198 = readFileSync(
+    new URL('../src/components/challenges/SortPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(holdCss198, /1\.4\.198: Easy Sort ≤720 fill purple void/)
+  assert.match(
+    holdCss198,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-easy-sort \{[\s\S]*?flex: 1 1 auto/,
+  )
+  assert.match(
+    holdCss198,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-easy-sort \.bank\.is-sort \{[\s\S]*?max-height: none/,
+  )
+  assert.match(
+    holdCss198,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-easy-sort \.sort-bins \{[\s\S]*?max-height: none/,
+  )
+  assert.match(sortPlay198, /1\.4\.198: ≤720 fills purple void/)
+  assert.match(cssSrc, /1\.4\.198: Easy Sort ≤720 fill purple void/)
+  assert.match(latestChange('1.4.198').items.join('\n'), /Easy Sort.*≤720|purple void under the bins/i)
+  assert.match(latestChange('1.4.198').title, /Easy Sort|≤720|purple void/i)
+  assert.doesNotMatch(
+    latestChange('1.4.198').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|Lock In quiz|Lock In feedback|Father.*slider|grid→footer|Creed merge ≤720 fill|Story Creek ≤720 fill|Easy Hold.*≤720 fill|gem-board|Build Argument ≤720 fill|Easy Link ≤720 fill|Father Dash ≤720 fill|maze-board|merge-bowl|Story Snap ≤720 fill|snap-stage/i,
+    '1.4.198 must not re-peel Shot 190 fails #250–#253 or Story Snap 197 / Match / Lock In / Father / Hold / Creed / Story Creek / Build / Link / maze / bowl',
+  )
+}
+
 
 
 
