@@ -4,7 +4,7 @@
 **Branch:** `ship/easy-fun-clear-195` → `main`
 **Version:** 1.4.195
 **Peel:** `39976be` (`39976beb4eed82bb42afa417c9bb4a7c215e46fd`)
-**Tip:** `4a32420` (`4a324207ef8c199ccf230a9158ef6dda35e9660c`)
+**Tip:** `5bc8356` (`5bc83569c843377739b2718419180c1e681e0646`)
 **Base live:** 1.4.194 (`7ff1bf6`, PR #255 Easy Lock In quiz ≤720 fill purple void on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
