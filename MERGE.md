@@ -1,43 +1,43 @@
-# ready-easy-fun-clear-186 — 1.4.186 Easy Samaritan ≤720 fill top-cluster purple void (Fixes #240)
+# ready-easy-fun-clear-187 — 1.4.187 Easy Build Argument ≤720 fill purple void
 
-**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/243
-**Branch:** `ship/easy-fun-clear-186` → `main`
-**Version:** 1.4.186
-**Peel:** `ae6ab04` (`ae6ab04fc3b0968fc76ddee32bf8561c1742f992`)
-**Tip:** `f38f155` (`f38f1554950ee8e23ab8f94d17b2b303493ca9a7`)
-**Base live:** 1.4.185 (`7deb4d2`, PR #242 Easy Lock In ≤720 fill win-end purple void on main)
+**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/244
+**Branch:** `ship/easy-fun-clear-187` → `main`
+**Version:** 1.4.187
+**Peel:** `7079579` (`7079579ad3eedca4404f7a4f4ddd81ceffb3a583`)
+**Tip:** `4befe9c` (`4befe9c1bc8edb31392e737281a29ecef32d9611`)
+**Base live:** 1.4.186 (`06206c7`, PR #243 Easy Samaritan ≤720 fill top-cluster purple void on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
 ## How picked
-Open Issues: **#240** Easy Samaritan top-cluster / bottom half purple void (P1 phone-fail, Shot 1.4.180 `06-samaritan.png`) — this hop.
-**#238** Match / **#239** Lock In already on main as 1.4.184 / 1.4.185.
+Open Issues: **#238** Match / **#239** Lock In / **#240** Samaritan already on main as 1.4.184–1.4.186. No other open Easy Fun/Clear issue.
 **#161** Dig/Hard/NW/Town parked. **#160** cheap-hop infra.
+Invent Fun/Clear — densest remaining Easy trail different from recent Match/LockIn/Samaritan/Sort/Snap/Creed: **Easy Build Argument** still hugged content (no flex grow) so guided deal left empty purple under slots + two-choice bank (Sequence order 1.4.186 fill family).
 
 ## Chosen climb
-Single Easy Fun/Clear polish: **Easy Samaritan / Sequence order ≤720 fill top-cluster purple void** — grow `play.is-sequence.is-deal` shell + stretch `bank.is-order` stone tiles so instruction · progress · choice chips fill the portrait (Fixes #240).
+Single Easy Fun/Clear polish: **Easy Build Argument ≤720 fill purple void** — grow `play.is-build` shell + stretch `slot-list` seats / deal `bank.is-order` tiles so the gold card fills the portrait.
 
 ## What fixed
-- `src/styles/sortHold.css`: base `.play.is-sequence.is-deal` `flex: 0 → 1` so gold card fills; `@media (max-height: 720px)` `bank.is-order { flex: 1 1 auto; grid-auto-rows: minmax(0,1fr) }` + stretch chips
-- `src/components/challenges/SequencePlay.tsx`: thin 1.4.186 comment
+- `src/styles/sortHold.css`: base `.play.is-build` `flex: 1 1 auto`; `@media (max-height: 720px)` stretch `.is-build.is-deal` slot-list + bank tiles
+- `src/components/challenges/BuildArgumentPlay.tsx`: thin 1.4.187 comment
 - Android `versionName` left at **1.4.113**
-- Version **1.4.186** atop live **1.4.185**
+- Version **1.4.187** atop live **1.4.186**
 
 ## Deferred (do NOT climb this hop)
 - Dig Reveal / Hard / NW / Town / stores / Pack B / Home map candy
-- Match 184 / Lock In 185 / Sort 183 / Snap 182 / Creed 181 / Manage 180 / letterbox (already on main)
-- Sequence how/lead/hint peel 1.4.171 (different surface; still applies ≤720)
+- Match 184 / Lock In 185 / Samaritan 186 / Sort 183 / Snap 182 / Creed 181 / Manage 180 / letterbox (already on main)
+- Sequence how-peel 1.4.171 (different surface; still applies ≤720)
 
 ## Gemini
-MODEL=gemini-flash-latest — Shot pack 1.4.180 vision FAIL on Samaritan (`gemini-vision.json`). Invent API key present but not AIza AI Studio shape. Manager-steered + issue #240. Notes: `notes-gemini.txt` (+ `/workspace/silver-city-art/notes-gemini-186.txt`).
+MODEL=gemini-flash-latest — Invent Fun/Clear (no open Easy Fun/Clear issue). Invent API key present but not AIza AI Studio shape. Manager-steered invent. Notes: `notes-gemini.txt` (+ `/workspace/silver-city-art/notes-gemini-187.txt`).
 
 ## Files peeled
 - `src/styles/sortHold.css`
-- `src/components/challenges/SequencePlay.tsx`
+- `src/components/challenges/BuildArgumentPlay.tsx`
 - `scripts/check-city.mjs`, `scripts/check-panel-blast.mjs`
 - `src/config/app.ts`, `package.json`, `package-lock.json`
 - `src/content/changelog.ts`
 - `notes-gemini.txt`
-- `docs/` (Pages rebuild `index-DVMgvvC5.js` / `index-W91YziJI.css`)
+- `docs/` (Pages rebuild `index-CSlQnAhF.js` / `index-m-ngIPHJ.css`)
 - `MERGE.md`
 
 ## Checks
