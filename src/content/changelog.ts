@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.266',
+    title: 'Easy Father Dash: ≤720 close tall residual purple void (Fixes #366)',
+    when: '2026-09-26',
+    items: [
+      'Fixes #366: Easy Father Dash timing-rail chrome on ≤720 / phone portrait — opaque cream app-body + play shell + cream HOLD TO RUN dock (no purple-gold gradient · dark ink on caption and speech · rail stays readable · dock pinned to the cream floor) so leftover between the slider and HOLD TO RUN is intentional cream floor, including layout viewports taller than the 920 cap (Shot 260 residual after Father cream peel 1.4.257; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.265',
     title: 'Easy Samaritan: ≤720 close tall residual purple void (Fixes #365)',
     when: '2026-09-26',
