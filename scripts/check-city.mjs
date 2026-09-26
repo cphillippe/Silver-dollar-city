@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.205')
+assert.equal(APP_VERSION, '1.4.206')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3743,6 +3743,37 @@ console.log('check-city: ok')
     latestChange('1.4.205').items.join('\n'),
     /Fixes #250|Fixes #251|Fixes #252|Fixes #253|Lock In quiz|Lock In feedback|grid→footer|gem-board|Easy Sort ≤720 fill|Father Dash ≤720 fill|Story Snap ≤720 fill|snap-stage|bank\.is-sort|sort-bins|choices→CTA|link-dock|Easy Link ≤720 fill|bowl→CTA|Easy Creed ≤720 fill|merge-bowl|board→CTA|Story Creek ≤720 fill|maze-board|chips→CTA|Easy Hold.*≤720 fill|Build Argument ≤720 fill|free-place|slider→CTA|speech→rail|Easy Father ≤720 fill/i,
     '1.4.205 must not re-peel Shot 190 fails #250–#253 or Father 204 / Build 203 / Hold 202 / Creek 201 / Creed 200 / Link 199 / Sort 198 / Snap 197 / Match / Lock In',
+  )
+}
+
+// Easy Clear 1.4.206: Easy Learn ≤720 fill held-clear purple void (invent Fun/Clear)
+{
+  const welcomeCss206 = readFileSync(new URL('../src/styles/welcome.css', import.meta.url), 'utf8')
+  const teachUnlock206 = readFileSync(
+    new URL('../src/components/TeachUnlock.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(welcomeCss206, /1\.4\.206: Easy Learn ≤720 fill held-clear purple void/)
+  assert.match(
+    welcomeCss206,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.challenge-page\.is-teach:has\(\.easy-story-card\) \{[\s\S]*?flex: 1/,
+  )
+  assert.match(
+    welcomeCss206,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.easy-story-card \.held-triad \{[\s\S]*?flex: 1 1 auto/,
+  )
+  assert.match(
+    welcomeCss206,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.easy-story-card \.easy-story-dock \{[\s\S]*?margin-top: 0/,
+  )
+  assert.match(teachUnlock206, /1\.4\.206: ≤720 fills held-clear purple void/)
+  assert.match(cssSrc, /1\.4\.206: Easy Learn ≤720 fill held-clear purple void/)
+  assert.match(latestChange('1.4.206').items.join('\n'), /held-clear|HeldTriad|claim·reason·source|easy-story-card/i)
+  assert.match(latestChange('1.4.206').title, /Easy Learn|≤720|held-clear|purple void/i)
+  assert.doesNotMatch(
+    latestChange('1.4.206').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|Lock In quiz|Lock In feedback|grid→footer|gem-board|Easy Sort ≤720 fill|Father Dash ≤720 fill|Story Snap ≤720 fill|snap-stage|bank\.is-sort|sort-bins|choices→CTA|link-dock|Easy Link ≤720 fill|bowl→CTA|Easy Creed ≤720 fill|merge-bowl|board→CTA|Story Creek ≤720 fill|maze-board|chips→CTA|Easy Hold.*≤720 fill|Build Argument ≤720 fill|free-place|slider→CTA|speech→rail|Easy Father ≤720 fill|stones→result|Easy Sequence ≤720/i,
+    '1.4.206 must not re-peel Shot 190 fails #250–#253 or Sequence 205 / Father 204 / Build 203 / Hold 202 / Creek 201 / Creed 200 / Link 199 / Sort 198 / Snap 197 / Match / Lock In',
   )
 }
 

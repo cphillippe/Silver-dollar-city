@@ -662,3 +662,55 @@ html[data-theme='dusk'] .easy-story-card {
   }
 }
 
+/* Easy Clear 1.4.206: Easy Learn ≤720 fill held-clear purple void —
+   after compress 162 / stamp wrap 177, teach-gate still content-hugs so Short story ·
+   stamp · reason · HeldTriad (Main idea · Why · From) · Match CTA sit top with empty
+   purple under the dock (Shot-era Clear claim·reason·source; invent Fun/Clear;
+   Sequence 205 / Father 204 / Lock In win-end 185 ≤720 family). Grow is-teach +
+   easy-story-card, stretch held-triad, zero dock margin — compress 162 stays. */
+@media (max-height: 720px) {
+  html[data-easy='on'] .app.is-play .app-body:has(.challenge-page.is-teach .easy-story-card) {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach:has(.easy-story-card) {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    gap: 4px;
+    overflow: hidden;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card.teach-gate {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    gap: 2px;
+    overflow: hidden;
+    padding-bottom: 10px;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card > .eyebrow,
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .loci-stamp,
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .teach-reason {
+    flex: 0 0 auto;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .held-triad {
+    flex: 1 1 auto;
+    min-height: 0;
+    align-content: center;
+    gap: 8px;
+    margin: 0;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .easy-story-dock {
+    margin-top: 0;
+    flex: 0 0 auto;
+  }
+}
+

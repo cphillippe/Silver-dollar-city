@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.206',
+    title: 'Easy Learn: ≤720 fill held-clear purple void',
+    when: '2026-09-25',
+    items: [
+      'Easy Learn (Short story · HeldTriad Main idea · Why · From) on ≤720px tall: grow is-teach + easy-story-card, stretch held-triad, zero dock margin so claim·reason·source + Match CTA fill the portrait — no empty purple under the dock (Lock In win-end / Father dock-margin family · invent Fun/Clear; after Learn compress 1.4.162 / stamp 177; Sequence 205 / Father 204 / Build 203 / Hold 202 / Story Creek 201 / Creed 200 / Link 199 / Sort 198 / Story Snap 197 / Match 193 / Lock In 194·195 peels untouched)',
+    ],
+  },
+  {
     version: '1.4.205',
     title: 'Easy Sequence: ≤720 close stones→result purple gap',
     when: '2026-09-25',
