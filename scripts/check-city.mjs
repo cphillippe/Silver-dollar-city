@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.232')
+assert.equal(APP_VERSION, '1.4.233')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -4678,5 +4678,32 @@ console.log('check-city: ok')
     latestChange('1.4.232').items.join('\n'),
     /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#300|#301|#302|Father Dash|Learn cream|Samaritan|Manage|Lock In|Dig|Creed|Hold|Sort|Snap|Link|Build|Sequence|Road maze|Claim merge|Source dig|Story Creek HOLD|slider→HOLD|timing-rail→CTA|hud→arena|Keep·Toss|choices→CTA|bowl→CTA|stones→result|triad→Home/i,
     '1.4.232 must not fix phone-fail issues or climb another Easy surface',
+  )
+}
+
+// Easy Clear 1.4.233: Easy Creed Claim merge ≤720 / phone portrait HUD peel (invent Fun/Clear)
+{
+  const mergeCss233 = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
+  const mergePlay233 = readFileSync(
+    new URL('../src/components/challenges/ClaimMergePlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(mergeCss233, /1\.4\.233: Easy Creed Claim merge ≤720 \/ phone portrait HUD peel/)
+  assert.match(
+    mergeCss233,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.play\.is-claim-merge \.story-kicker \{[\s\S]*?display: none/,
+  )
+  assert.match(
+    mergeCss233,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.play\.is-claim-merge \.merge-rung-name \{[\s\S]*?display: none/,
+  )
+  assert.match(mergePlay233, /1\.4\.233: phone portrait extends HUD peel 181/)
+  assert.match(cssSrc, /1\.4\.233: Easy Creed Claim merge ≤720 \/ phone portrait HUD peel/)
+  assert.match(latestChange('1.4.233').items.join('\n'), /HUD peel|who·where|rung names|phone portrait|Claim merge|Creed|invent Fun\/Clear/i)
+  assert.match(latestChange('1.4.233').title, /Easy Creed|≤720|Claim merge|HUD peel/i)
+  assert.doesNotMatch(
+    latestChange('1.4.233').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#300|#301|#302|Father Dash|Learn cream|Samaritan|Manage|Lock In|Dig|Hold|Sort|Snap|Link|Build|Sequence|Road maze|Source dig|Story Creek|Match picture|score→CTA|triad→Home|bowl→CTA|fill 192|dock 200/i,
+    '1.4.233 must not fix phone-fail issues or climb another Easy surface',
   )
 }
