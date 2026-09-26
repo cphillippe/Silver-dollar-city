@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.272',
+    title: 'Easy Lock In hub: ≤720 close empty purple void (Fixes #384)',
+    when: '2026-09-26',
+    items: [
+      'Fixes #384: Easy Lock In hub on ≤720 / phone portrait — stored-lines list opens by default and the journal body fills with an opaque cream floor so claim, why, and from sit under the head instead of a collapsed row over a purple void, including layout viewports taller than the 920 cap (hub list only; the quiz path is unchanged; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.271',
     title: 'Easy Match: ≤720 close tall residual cream gap (Fixes #378)',
     when: '2026-09-26',
