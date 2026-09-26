@@ -4,7 +4,7 @@
 **Branch:** `ship/easy-fun-clear-188` → `main`
 **Version:** 1.4.188
 **Peel:** `9fbc9a9` (`9fbc9a9b96d1bc0f38096739fbe697073533e03f`)
-**Tip:** (post-MERGE commit)
+**Tip:** `4f32c02` (`4f32c028000c0b0b844ef5ac168a78413c5a1bbc`)
 **Base live:** 1.4.187 (`dd01944`, PR #244 Easy Build Argument ≤720 fill purple void on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
