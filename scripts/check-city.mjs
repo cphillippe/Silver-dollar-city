@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.186')
+assert.equal(APP_VERSION, '1.4.187')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3310,13 +3310,44 @@ console.log('check-city: ok')
     /\.play\.is-sequence\.is-deal,[\s\S]*?flex: 1 1 auto/,
   )
   assert.match(seqPlay186, /1\.4\.186: ≤720 fills top-cluster purple void/)
-  assert.match(latestChange(APP_VERSION).items.join('\n'), /Fixes #240/)
+  assert.match(latestChange('1.4.186').items.join('\n'), /Fixes #240/)
   assert.doesNotMatch(
-    latestChange(APP_VERSION).items.join('\n'),
+    latestChange('1.4.186').items.join('\n'),
     /Fixes #238|Fixes #239|Lock In win-end|Match \(picture|empty purple card|Story Snap|eyebrow|Creed merge|Fixes #232|empty-lot|Fixes #217/i,
     '1.4.186 must not claim #238 Match / #239 Lock In / Snap / Creed / Manage / letterbox',
   )
 }
+
+// Easy Clear 1.4.187: Easy Build Argument ≤720 fill purple void (invent Fun/Clear)
+{
+  const holdCss187 = readFileSync(new URL('../src/styles/sortHold.css', import.meta.url), 'utf8')
+  const buildPlay187 = readFileSync(
+    new URL('../src/components/challenges/BuildArgumentPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(holdCss187, /1\.4\.187: Easy Build Argument ≤720 fill purple void/)
+  assert.match(
+    holdCss187,
+    /\.play\.is-build,[\s\S]*?flex: 1 1 auto/,
+  )
+  assert.match(
+    holdCss187,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-build\.is-deal \.bank\.is-order \{[\s\S]*?flex: 1 1 auto/,
+  )
+  assert.match(
+    holdCss187,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-build\.is-deal \.slot-list \{[\s\S]*?flex: 1 1 auto/,
+  )
+  assert.match(buildPlay187, /1\.4\.187: ≤720 fills purple void/)
+  assert.match(latestChange(APP_VERSION).items.join('\n'), /Build Argument.*≤720|purple void under the deal/i)
+  assert.doesNotMatch(
+    latestChange(APP_VERSION).items.join('\n'),
+    /Fixes #238|Fixes #239|Fixes #240|Lock In win-end|Match \(picture|empty purple card|Story Snap|eyebrow|Creed merge|Fixes #232|empty-lot|Fixes #217/i,
+    '1.4.187 must not re-claim Match / Lock In / Samaritan issues / Snap / Creed / Manage / letterbox',
+  )
+}
+
+
 
 
 
