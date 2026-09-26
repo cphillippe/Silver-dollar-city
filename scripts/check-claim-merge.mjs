@@ -36,12 +36,15 @@ import {
 } from '../src/lib/claimMerge.ts'
 import { lessonStory, storyPlayFor } from '../src/lib/storyPlay.ts'
 import { mergeWinBeat } from '../src/lib/successBeat.ts'
+import { EASY } from '../src/lib/easy.ts'
 import { readAppCss } from './readAppCss.mjs'
 
 assert.equal(CLAIM_MERGE_LINE, 'wb-creed')
 assert.equal(CLAIM_MERGE_CLAIM, 'Paul hands on an early public creed: died, buried, raised, appeared.')
 assert.equal(CLAIM_MERGE_WIN, 'MERGED!')
 assert.equal(CLAIM_MERGE_HINT, 'Drop candy. Smash two of a kind.')
+assert.match(EASY.mergeHunt, /Drop candy/)
+assert.match(EASY.mergeHome, /Make the creed/)
 assert.equal(storyPlayFor('wb-creed'), 'claim-merge')
 assert.equal(storyPlayFor('ph-road'), 'road-maze')
 assert.equal(storyPlayFor('ph-father'), 'father-run')
@@ -177,6 +180,11 @@ assert.match(playSrc, /merge-drop-guide/)
 assert.match(playSrc, /merge-drop-chip/)
 assert.match(playSrc, /merge-ghost is-loud/)
 assert.match(playSrc, /Smash the Died pair/)
+assert.doesNotMatch(
+  playSrc,
+  /EASY\.mergeHunt/,
+  'Easy Clear 1.4.147: omit mergeHunt .sort-how — Drop · smash · ladder teach the bowl',
+)
 assert.match(playSrc, /WinBurst play=\{view\.won\}/)
 const mergeCss = readAppCss()
 assert.match(mergeCss, /merge-drop-chip/)
