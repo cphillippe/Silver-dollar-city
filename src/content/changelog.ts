@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.212',
+    title: 'Easy Lock In quiz: ≤720 close lower-third purple void',
+    when: '2026-09-25',
+    items: [
+      'Easy Lock In mid-question quiz on ≤720px tall: pack the residual phone-safe bottom padding so the quiz card and choices reach the lower portrait edge without a dead purple band (Fixes #274; continuation of the earlier quiz shell peel; do not touch other Shot 200 issues)',
+    ],
+  },
+  {
     version: '1.4.211',
     title: 'Easy Match: ≤720 close grid→status purple void',
     when: '2026-09-25',
