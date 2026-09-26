@@ -488,3 +488,94 @@ html[data-easy='on'] .next-tap {
     margin-top: 0;
   }
 }
+
+
+/* Easy Clear 1.4.236: Easy Match ≤720 / tall-phone bottom-half purple void (Fixes #315) —
+   After invent fill 232 (extend 184+207 to ≤920) + gem leftover 225, Shot pack 1.4.230
+   03-easy-match.png (390×844) STILL cramps picture-deal PICTURE / MAIN IDEA + status at
+   the top with a massive dead purple band across the bottom half (residual after closed
+   #297 / 1.4.225; capture at Chrome 1.4.230 before invent 232). Cause: challenge-page
+   `.play { overflow: auto }` + incomplete height pin + global sticky `.cta-dock` leave
+   free space as a flat purple plate under the score (Father Dash 229 / Learn 235 sticky
+   lesson). Strengthen: play height 100% · overflow hidden · match-grid flex 1 1 0
+   absorbs leftover · chrome flex 0 · score follows grid · cta-dock position static +
+   margin-top auto so status/footer pin to the usable floor when Next appears.
+   Fill 184 / score→CTA 207 ≤720 / invent 232 stay. Do NOT pack #314 Learn / #316–#319
+   Lock In / Samaritan / Father / Dig / Creek / parked Dig/Hard/NW/Town/stores/Pack B. */
+@media (max-height: 920px) {
+  .is-puzzle .play.is-match.is-deal,
+  .daily-page.is-puzzle .play.is-match.is-deal,
+  .challenge-page.is-puzzle .play.is-match.is-deal {
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    overflow: hidden;
+  }
+
+  .is-puzzle .play.is-match.is-deal .prompt,
+  .is-puzzle .play.is-match.is-deal .easy-hint,
+  .is-puzzle .play.is-match.is-deal .hint-peek,
+  .is-puzzle .play.is-match.is-deal .sort-how,
+  .is-puzzle .play.is-match.is-deal .match-toast,
+  .is-puzzle .play.is-match.is-deal .match-recover,
+  .is-puzzle .play.is-match.is-deal .match-score,
+  .is-puzzle .play.is-match.is-deal .cta-dock,
+  .is-puzzle .play.is-match.is-deal .match-yes {
+    flex: 0 0 auto;
+  }
+
+  .is-puzzle .play.is-match.is-deal .sort-how {
+    display: none;
+  }
+
+  .is-puzzle .play.is-match.is-deal .match-grid {
+    flex: 1 1 0;
+    min-height: 0;
+    height: auto;
+    max-height: none;
+    grid-template-rows: auto minmax(0, 1.35fr) minmax(0, 1fr);
+    gap: 10px 10px;
+    align-content: stretch;
+  }
+
+  .is-puzzle .play.is-match.is-deal .match-card {
+    min-height: 0;
+    height: 100%;
+    align-self: stretch;
+  }
+
+  .is-puzzle .play.is-match.is-deal .match-card.is-picture {
+    min-height: 0;
+    justify-content: stretch;
+  }
+
+  .is-puzzle .play.is-match.is-deal .match-scene {
+    flex: 1 1 0;
+    min-height: 0;
+    max-height: none;
+    height: auto;
+    aspect-ratio: auto;
+    object-fit: contain;
+  }
+
+  .is-puzzle .play.is-match.is-deal .match-score {
+    margin: 0;
+    font-size: 0.7rem;
+  }
+
+  .is-puzzle .play.is-match.is-deal .cta-dock {
+    position: static;
+    bottom: auto;
+    margin-top: auto;
+    flex: 0 0 auto;
+    padding-top: 6px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
