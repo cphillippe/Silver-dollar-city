@@ -4,7 +4,7 @@
 **Branch:** `ship/easy-fun-clear-187` → `main`
 **Version:** 1.4.187
 **Peel:** `7079579` (`7079579ad3eedca4404f7a4f4ddd81ceffb3a583`)
-**Tip:** `7079579` (`7079579ad3eedca4404f7a4f4ddd81ceffb3a583`)
+**Tip:** `e2e0ac0` (`e2e0ac053d2fc14f9364a385511b732b35268492`)
 **Base live:** 1.4.186 (`06206c7`, PR #243 Easy Samaritan ≤720 fill top-cluster purple void on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
