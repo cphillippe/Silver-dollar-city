@@ -5289,6 +5289,161 @@ html[data-easy='on'] .mind-node em {
 }
 
 
+/* Easy Clear 1.4.257: Easy Father Dash ≤720 / tall-phone rail→CTA purple void residual after cream 250 (Fixes #349) —
+   After cream parchment Father plate 250 (warm run-scene · dark ink · dock pin) Shot pack 1.4.250
+   07-father.png (390×844) STILL fails — Gemini: massive empty purple void wastes vertical space
+   between the timing rail and the bottom action button (residual after closed #336 / 1.4.250). Cause:
+   cream on `.play.is-father-run` via `var(--parchment)` still content-hugs / transparent flex-grow /
+   purple-gold gradient bleed under Father (base `.play` dusk gradient · app-body dusk leftover
+   outside the card · transparent cta-dock), so leftover rail→CTA still reads as a purple dead band.
+   Strengthen further — NOT another 240/250 height/flex/cream-on-play-only copy (Learn 252 / Match
+   253 / Lock In 254–255 / Samaritan 256 lesson): (1) paint opaque cream on `.app-body` +
+   `.play.is-father-run` shell so tall leftover rail→CTA is cream floor through the full portrait
+   (kill purple-gold gradient bleed under Father); (2) solid `#fff6e8` + `background-image: none`
+   on `.play.is-father-run` beating any translucent wash / var(--parchment) miss; (3) warm run-scene
+   sunset art stays; (4) pin HOLD TO RUN / cta-dock to the cream floor with cream dock wash (not
+   transparent sticky purple blur). Confirmed Father Dash timing-rail ONLY (`.play.is-father-run` /
+   FatherRunPlay) — NOT Story Creek HOLD (#272). Fill 189 / dock 196 / speech→rail 204 ≤720 /
+   Creek HOLD 214 / Dash 216 / strengthen 229 / tall 240 / cream plate 250 stay. Do NOT pack #272
+   Creek HOLD / Learn / Match / Lock In / Samaritan / Manage / Dig / parked Dig/Hard/NW/Town/
+   stores/Pack B / Home map candy. */
+@media (max-height: 920px) {
+  /* Cream app-body floor — leftover around a content-hug play is cream, not dusk purple void */
+  html[data-easy='on'] .app.is-play .app-body:has(.play.is-father-run) {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+    padding-top: 4px;
+    padding-bottom: 0;
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    color: var(--ink, #2a2118);
+  }
+
+  .daily-page.is-puzzle:has(.play.is-father-run),
+  .challenge-page.is-puzzle:has(.play.is-father-run) {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    gap: 2px;
+    overflow: hidden;
+  }
+
+  /* Opaque cream play shell — kill purple-gold gradient bleed under Father */
+  .play.is-father-run,
+  .daily-page.is-puzzle .play.is-father-run,
+  .challenge-page.is-puzzle .play.is-father-run {
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 4px;
+    overflow: hidden;
+    padding: 10px 10px 0;
+    border-radius: 22px;
+    border: 1px solid color-mix(in srgb, var(--ink, #2a2118) 12%, transparent);
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    color: var(--ink, #2a2118);
+    box-shadow: 0 2px 0 color-mix(in srgb, #000 6%, transparent);
+  }
+
+  /* Warm run-scene art plate — sunset gradient stays; absorb some leftover above the rail */
+  .play.is-father-run .run-scene {
+    flex: 1 1 0;
+    min-height: 0;
+    height: auto;
+    max-height: none;
+    align-self: stretch;
+  }
+
+  .play.is-father-run .story-kicker,
+  .play.is-father-run .run-thumbs,
+  .play.is-father-run .story-caption,
+  .play.is-father-run .match-score,
+  .play.is-father-run .run-speech,
+  .play.is-father-run .run-rail,
+  .play.is-father-run .cta-dock,
+  .play.is-father-run .run-miss,
+  .play.is-father-run .match-toast {
+    flex: 0 0 auto;
+  }
+
+  .play.is-father-run .story-kicker {
+    color: color-mix(in srgb, var(--gold, #c9a45c) 70%, var(--ink, #2a2118));
+  }
+
+  .play.is-father-run .story-caption,
+  .play.is-father-run .match-score {
+    color: var(--ink, #2a2118);
+  }
+
+  .play.is-father-run .run-speech {
+    margin: 0;
+    padding: 3px 8px 4px;
+    background: color-mix(in srgb, #fff6e8 55%, var(--gold, #c9a45c));
+    border-color: color-mix(in srgb, var(--ink, #2a2118) 14%, transparent);
+    box-shadow: 0 1px 0 color-mix(in srgb, #000 5%, transparent);
+  }
+
+  .play.is-father-run .run-speech-kicker,
+  .play.is-father-run .run-speech-count {
+    color: color-mix(in srgb, var(--gold, #c9a45c) 55%, var(--ink, #2a2118));
+  }
+
+  .play.is-father-run .run-speech-line {
+    margin: 1px 0 2px;
+    color: var(--ink, #2a2118);
+  }
+
+  .play.is-father-run .run-speech-count {
+    margin-top: 1px;
+  }
+
+  .play.is-father-run .run-rail {
+    margin: 0;
+    height: 14px;
+  }
+
+  .play.is-father-run .run-pad {
+    min-height: 58px;
+    font-size: 1rem;
+    border-radius: 18px;
+  }
+
+  /* Pin HOLD TO RUN to the cream floor — cream dock wash, not transparent purple sticky blur */
+  .play.is-father-run .cta-dock,
+  .play.is-father-run .cta-dock.run-dock {
+    position: static;
+    bottom: auto;
+    margin-top: auto;
+    flex: 0 0 auto;
+    padding-top: 6px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+
 
 .miss-banner {
   display: grid;
