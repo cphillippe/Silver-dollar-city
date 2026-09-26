@@ -1,45 +1,47 @@
-# ready-easy-fun-clear-196 — 1.4.196 Easy Father ≤720 close slider→CTA purple gap (Fixes #253)
+# ready-easy-fun-clear-197 — 1.4.197 Easy Story Snap ≤720 fill purple void
 
-**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/257
-**Branch:** `ship/easy-fun-clear-196` → `main`
-**Version:** 1.4.196
-**Peel:** `e307e2c` (`e307e2c6aa7429abbf69778856a9882ab9138d96`)
-**Tip:** `7637108` (`7637108499713fb872fac72a2f061d8cb1032ec5`)
-**Base live:** 1.4.195 (`ea5eba5`, PR #256 Easy Lock In feedback ≤720 fill purple void on main)
+**PR:** (pending)
+**Branch:** `ship/easy-fun-clear-197` → `main`
+**Version:** 1.4.197
+**Peel:** (pending)
+**Tip:** (pending)
+**Base live:** 1.4.196 (`ceb0d31`, PR #257 Easy Father ≤720 close slider→CTA purple gap on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
 ## Shot wake
-**Do NOT wake Shot from this hop.** CoS wakes Shot on 10th ships (next 1.4.200); this hop does not ping Shot.
+**Do NOT wake Shot from this hop.** CoS wakes Shot on 10th ships (next 1.4.200); this hop does not ping Shot. Keep inventing toward that.
 
 ## How picked
-Open Issues: **#253** Easy Father ≤720 purple gap slider to CTA (P1 phone-fail, Shot 1.4.190 `07-father.png`) — this hop.
-**#250** Match / **#251** Lock In quiz / **#252** Lock In feedback already on main as 1.4.193 / 1.4.194 / 1.4.195.
-**#161** Dig/Hard/NW/Town parked. **#160** cheap-hop infra.
+Open Issues: **#161** Dig/Hard/NW/Town parked. **#160** cheap-hop infra. No open Easy Fun/Clear issue.
+1.4.196 Easy Father slider→CTA live on main. Shot 190 fails #250–#253 already peeled as 193–196 — do NOT re-peel.
+Invent Fun/Clear — densest remaining Easy trail different from recent Match/LockIn/Father/Hold/Creed/Story Creek/Sort/Build/Link/Samaritan: **Easy Story Snap** had HUD peel **1.4.182** / compress **1.4.152** / teach-omit **1.4.163** only — capped `snap-stage` (min-height 8.5rem) hugs the top so the gold card leaves empty purple under the Hold pad (Match 184 / Creed 192 / Story Creek 191 fill family).
 
 ## Chosen climb
-Single Easy Fun/Clear polish: **Easy Father timing ≤720 close slider→CTA purple gap** — zero `.cta-dock` / `.cta-dock.run-dock` `margin-top` so `run-scene` flex:1 (from 1.4.189) absorbs the portrait instead of a dead purple band between the timing slider and the Hold pad (Fixes #253). Match 193 / Lock In 194·195 / Hold arena 190 untouched — different peel target.
+Single Easy Fun/Clear polish: **Easy Story Snap ≤720 fill purple void** — grow `play.is-story-snap` shell + stretch `snap-stage` so strip · stage · pad fill the portrait.
 
 ## What fixed
-- `src/index.css`: `@media (max-height: 720px)` — Easy Father: `.play.is-father-run .cta-dock` / `.cta-dock.run-dock` `margin-top: 0` (global auto margin was stealing free space after fill 189)
-- `src/components/challenges/FatherRunPlay.tsx`: thin 1.4.196 comment
+- `src/styles/storySnap.css`: `@media (max-height: 720px)` — `.play.is-story-snap` `flex: 1 1 auto`; `.snap-stage` `flex: 1` + `min-height: 0` (overrides capped 8.5rem); strip / score / pad / CTA stay `flex: 0`; HUD 182 hide eyebrow/who·where stays
+- `src/components/challenges/StorySnapPlayView.tsx`: thin 1.4.197 comment
 - Android `versionName` left at **1.4.113**
-- Version **1.4.196** atop live **1.4.195**
+- Version **1.4.197** atop live **1.4.196**
 
 ## Deferred (do NOT climb this hop)
 - Dig Reveal / Hard / NW / Town / stores / Pack B / Home map candy
-- Match 193 / Lock In quiz 194 / Lock In feedback 195 / Hold arena 190 / win-end StoredLine 185 / Creed 192 / Story Creek 191 / Build / Link / Father fill 189 / Samaritan / Sort / Snap (already on main or other issues)
+- Match 193 / Lock In quiz 194 / Lock In feedback 195 / Father 196 / Hold arena 190 / Creed 192 / Story Creek 191 / Sort 183 / Build / Link / Samaritan / Manage / letterbox (already on main)
+- Journal held clear chrome further peel
+- Story Snap HUD peel 1.4.182 / compress 1.4.152 / teach-omit 1.4.163 (different surface; still applies ≤720)
 
 ## Gemini
-MODEL=gemini-flash-latest — Shot pack 1.4.190 vision FAIL on Father (`gemini-vision.json` / `07-father.png`). Invent API key present but not AIza AI Studio shape. Manager-steered + issue #253. Notes: `notes-gemini.txt` (+ `/workspace/silver-city-art/notes-gemini-196.txt`).
+MODEL=gemini-flash-latest — Invent Fun/Clear (no open Easy Fun/Clear issue). Invent API key present but not AIza AI Studio shape. Manager-steered invent. Notes: `notes-gemini.txt` (+ `/workspace/silver-city-art/notes-gemini-197.txt`).
 
 ## Files peeled
-- `src/index.css`
-- `src/components/challenges/FatherRunPlay.tsx`
+- `src/styles/storySnap.css`
+- `src/components/challenges/StorySnapPlayView.tsx`
 - `scripts/check-city.mjs`, `scripts/check-panel-blast.mjs`
 - `src/config/app.ts`, `package.json`, `package-lock.json`
 - `src/content/changelog.ts`
 - `notes-gemini.txt`
-- `docs/` (Pages rebuild `index-C2CKVLEC.js` / `index-hl3RlArr.css`)
+- `docs/` (Pages rebuild `index-CIZYq87t.js` / `index-Cl_8kURm.css`)
 - `MERGE.md`
 
 ## Checks
