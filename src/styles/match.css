@@ -579,3 +579,51 @@ html[data-easy='on'] .next-tap {
     -webkit-backdrop-filter: none;
   }
 }
+
+
+/* Easy Clear 1.4.245: Easy Match panel-blast ≤720 / phone portrait board-first HUD peel —
+   After board-first HUD peel 168 (≤720 only), real phones ~390×844 still show how / say
+   chrome that bury letter board + Lock In CTA — those peels never apply at Shot heights.
+   Fill 193 + leftover 211 + invent 225 + strengthen 236 already extended to 920, but
+   board-first HUD peel never invent-climbed. Extend hide .sort-how + .match-teach-say +
+   compress teach dock / LociStamp / chips / score across phone portrait heights
+   (max-height: 920px) so letter board · Lock In stay clear on tall phones (Easy Match
+   gemSearch / panel-blast arcade chrome; invent Fun/Clear). Continuation of Creed HUD
+   233 / Creek maze HUD 234 / Snap HUD 241 / Hold HUD 242 / Sequence/Build HUD 243 /
+   Sort HUD 244 hide-kicker family. HUD 168 ≤720 stays. Do NOT pack Lock In / Learn /
+   Father / Creek / Dig / Hold / Sort / Sequence / Build / Manage / Claim merge /
+   Story Snap / Link / picture-deal Match. */
+@media (max-height: 920px) {
+  .play.is-gem-search.is-panel-blast {
+    gap: 3px;
+  }
+
+  .play.is-gem-search.is-panel-blast .sort-how {
+    display: none;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .match-teach-say {
+    display: none;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .match-teach-dock {
+    max-height: 72px;
+    gap: 0.08rem;
+    padding: 0;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .loci-stamp.is-dock {
+    min-height: 28px;
+    max-height: 32px;
+    padding: 0.06rem 0.35rem;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .match-teach-chips {
+    gap: 0.18rem;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .match-score {
+    margin: 0;
+    font-size: 0.7rem;
+  }
+}

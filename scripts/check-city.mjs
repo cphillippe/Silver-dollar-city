@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.244')
+assert.equal(APP_VERSION, '1.4.245')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -5067,5 +5067,37 @@ console.log('check-city: ok')
     latestChange('1.4.244').items.join('\n'),
     /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#300|#301|#302|#314|#315|#316|#317|#318|#319|Father Dash|Learn cream|Samaritan|Manage|Lock In|Dig|Sequence|Build|Hold|Claim merge|Creed|Source dig|Story Creek|Story Snap|Match picture|score→CTA|triad→Home|bowl→CTA|fill 198|fill 218|stones→result/i,
     '1.4.244 must not fix phone-fail issues or climb another Easy surface',
+  )
+}
+
+
+// Easy Clear 1.4.245: Easy Match panel-blast ≤720 / phone portrait board-first HUD peel (invent Fun/Clear)
+{
+  const matchCss245 = readFileSync(new URL('../src/styles/match.css', import.meta.url), 'utf8')
+  const gemPlay245 = readFileSync(
+    new URL('../src/components/challenges/GemSearchPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(matchCss245, /1\.4\.245: Easy Match panel-blast ≤720 \/ phone portrait board-first HUD peel/)
+  assert.match(
+    matchCss245,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.play\.is-gem-search\.is-panel-blast \{[\s\S]*?gap: 3px/,
+  )
+  assert.match(
+    matchCss245,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.play\.is-gem-search\.is-panel-blast \.sort-how \{[\s\S]*?display: none/,
+  )
+  assert.match(
+    matchCss245,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.play\.is-gem-search\.is-panel-blast\.is-story-docked \.match-teach-say \{[\s\S]*?display: none/,
+  )
+  assert.match(gemPlay245, /1\.4\.245: phone portrait extends board-first HUD peel 168/)
+  assert.match(cssSrc, /1\.4\.245: Easy Match panel-blast ≤720 \/ phone portrait board-first HUD peel/)
+  assert.match(latestChange('1.4.245').items.join('\n'), /board-first|HUD peel|how|say|phone portrait|panel-blast|Match|invent Fun\/Clear/i)
+  assert.match(latestChange('1.4.245').title, /Easy Match|panel-blast|≤720|board-first|HUD/i)
+  assert.doesNotMatch(
+    latestChange('1.4.245').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#300|#301|#302|#314|#315|#316|#317|#318|#319|Father Dash|Learn cream|Samaritan|Manage|Lock In|Dig|Sequence|Build|Hold|Claim merge|Creed|Source dig|Story Creek|Story Snap|Sort|picture-deal|score→CTA|triad→Home|bowl→CTA|fill 193|fill 225|bottom-half|bottom-third/i,
+    '1.4.245 must not fix phone-fail issues or climb another Easy surface',
   )
 }
