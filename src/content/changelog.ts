@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.251',
+    title: 'Easy Home: Learn / Lock In dock button contrast (Fixes #343)',
+    when: '2026-09-26',
+    items: [
+      'Fixes #343: Easy Home dock Match · Learn · Lock In coach pills — force cream parchment labels + full opacity + clearer gold lip on dusk purple fill so Learn / Lock In are readable (Shot 250 Home fail: dark text on dark dock; Match is-now gold highlight stays; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.250',
     title: 'Easy Father Dash: ≤720 close tall-phone rail→CTA purple void residual (Fixes #336)',
     when: '2026-09-26',
