@@ -375,6 +375,7 @@ export function RoadMazePlay({
       {/* Easy Clear 1.4.175: ≤720 peels HUD (kicker · thumbs · caption) in maze.css — beats + board stay above fold. */}
       {/* Easy Clear 1.4.191: ≤720 fills purple void in maze.css (invent Fun/Clear). */}
       {/* Easy Clear 1.4.201: ≤720 zeros cta-dock margin-top so board→CTA close (fill 191 stays). */}
+      {/* Easy Clear 1.4.228: phone portrait extends fill 191 + board→CTA 201 so maze-board closes voids above/below (Fixes #300). */}
       <p className="story-kicker">
         {home.who} · {home.place}
       </p>
