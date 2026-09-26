@@ -1,9 +1,9 @@
 # ready-manage-empty-lot-180 — 1.4.180 Manage empty-lot header + compact sheet
 
 **PR:** https://github.com/cphillippe/Silver-dollar-city/pull/234
-**Branch:** `ship/manage-empty-lot-180` → `main`
+**Branch:** `ship/manage-empty-lot-179` → `main` (alias `ship/manage-empty-lot-180`)
 **Version:** 1.4.180
-**Commit:** `e7d1397` (`e7d13971ecc4d68ba0f88c89212db526393215fa`; peel tip)
+**Commit:** `ee29064` (`ee29064e83f2e55f8373337d53e85d02af9b0a3f` tip; peel `e7d1397`)
 **Base live:** 1.4.178 (`60150e2`, PR #222 Witness Square candy hall on main; atop 1.4.177 #233)
 **Fixes:** #232
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
