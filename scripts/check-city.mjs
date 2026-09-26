@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.226')
+assert.equal(APP_VERSION, '1.4.227')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -4502,5 +4502,36 @@ console.log('check-city: ok')
     latestChange('1.4.226').items.join('\n'),
     /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#299|#300|#301|#302|Father Dash|Learn cream|Match grid|Samaritan|Manage|miss teach|Dig|Creed|Build|Sort|Snap|Link|Road maze|Claim merge|Source dig|Story Creek HOLD|slider→HOLD|invent Fun\/Clear/i,
     '1.4.226 must not fix other phone-fail issues or climb another Easy surface',
+  )
+}
+
+// Easy Clear 1.4.227: Easy Lock In feedback ≤720 / phone portrait bottom-half purple void (Fixes #299)
+{
+  const holdCss227 = readFileSync(new URL('../src/styles/sortHold.css', import.meta.url), 'utf8')
+  const whyPlay227 = readFileSync(
+    new URL('../src/components/challenges/WhyBlastPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(holdCss227, /1\.4\.227: Easy Lock In feedback ≤720 \/ phone portrait bottom-half purple void/)
+  assert.match(
+    holdCss227,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.app\.is-play \.app-body:has\(\.journal\.is-rehearse \.why-blast\.is-miss-teach\) \{[\s\S]*?padding-bottom: 0/,
+  )
+  assert.match(
+    holdCss227,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.why-blast\.is-miss-teach \.why-miss-teach \{[\s\S]*?flex: 1 1 auto/,
+  )
+  assert.match(
+    holdCss227,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.why-blast\.is-miss-teach \.why-miss-teach \.cta-dock \{[\s\S]*?margin-top: auto/,
+  )
+  assert.match(whyPlay227, /1\.4\.227: phone portrait extends fill 195 \+ pad-zero 213/)
+  assert.match(cssSrc, /1\.4\.227: Easy Lock In feedback ≤720 \/ phone portrait bottom-half purple void/)
+  assert.match(latestChange('1.4.227').items.join('\n'), /Fixes #299|bottom-half|purple void|Lock In feedback/i)
+  assert.match(latestChange('1.4.227').title, /Lock In feedback|≤720|bottom-half|purple void/i)
+  assert.doesNotMatch(
+    latestChange('1.4.227').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#300|#301|#302|Father Dash|Learn cream|Match grid|Samaritan|Manage|Lock In quiz|Dig|Creed|Build|Sort|Snap|Link|Road maze|Claim merge|Source dig|Story Creek HOLD|slider→HOLD|invent Fun\/Clear/i,
+    '1.4.227 must not fix other phone-fail issues or climb another Easy surface',
   )
 }
