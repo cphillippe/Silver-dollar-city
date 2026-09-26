@@ -3380,6 +3380,22 @@ html[data-easy='on'] .mind-node em {
   display: none !important;
 }
 
+/* 1.4.167 — Manage-open Hub chrome compress (Fixes #220 strata: Hub header · void · map · sheet) */
+/* Prefer class on hub; :has drives AppShell topbar so map+sheet read as one overlay */
+.hub.is-manage-open .easy-home-dock {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.app:has(.hub.is-manage-open) {
+  grid-template-rows: 1fr;
+}
+
+.app:has(.hub.is-manage-open) .topbar {
+  display: none;
+}
+
+
 /* Easy Home under dual is-play+is-town: full-bleed body, purple menu topbar */
 .app.is-town[data-easy='on'] .app-body {
   width: 100%;
