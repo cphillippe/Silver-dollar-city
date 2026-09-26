@@ -372,6 +372,7 @@ export function RoadMazePlay({
     >
       {/* Easy Clear 1.4.143: omit mazeHunt .sort-how — maze-beats + story-caption + score already teach the three steps. */}
       {/* Easy Clear 1.4.153: default chrome compress (maze.css) — board-first after how-dedupe; not only .is-help-phase (#190). */}
+      {/* Easy Clear 1.4.175: ≤720 peels HUD (kicker · thumbs · caption) in maze.css — beats + board stay above fold. */}
       <p className="story-kicker">
         {home.who} · {home.place}
       </p>

@@ -250,4 +250,17 @@ assert.match(
 )
 assert.match(playSrc, /1\.4\.153.*board-first|#190/)
 
+
+// Easy Clear 1.4.175: Story Creek maze ≤720 HUD peel — hide kicker/thumbs/caption; keep beats (invent Fun/Clear)
+assert.match(mazeCss, /1\.4\.175: Story Creek maze ≤720 HUD peel/)
+assert.match(
+  mazeCss,
+  /@media \(max-height: 720px\) \{[\s\S]*?play\.is-road-maze \.story-kicker,[\s\S]*?play\.is-road-maze \.run-thumbs,[\s\S]*?play\.is-road-maze \.story-caption \{[\s\S]*?display: none/,
+)
+assert.match(
+  mazeCss,
+  /@media \(max-height: 720px\) \{[\s\S]*?play\.is-road-maze \.match-score \{/,
+)
+assert.match(playSrc, /1\.4\.175: ≤720 peels HUD/)
+
 console.log('check-road-maze: ok')
