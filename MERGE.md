@@ -4,7 +4,7 @@
 **Branch:** `ship/easy-fun-clear-205` → `main`
 **Version:** 1.4.205
 **Peel:** `9425077` (`9425077c99b525f7906b58573cd7910f34eddee1`)
-**Tip:** `9425077` (`9425077c99b525f7906b58573cd7910f34eddee1`)
+**Tip:** `66a81b3` (`66a81b3d7d080b283adc089336ce962db3a55c88`)
 **Base live:** 1.4.204 (`22bfb1b`, PR #265 Easy Father ≤720 close speech→rail purple gap on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
