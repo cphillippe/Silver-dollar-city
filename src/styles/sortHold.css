@@ -1380,3 +1380,34 @@ html[data-easy='on'] .recall-card {
     display: none;
   }
 }
+
+/* Easy Clear 1.4.183: Easy Sort ≤720 board-first —
+   hide non-essential how / lead / hint chrome so Keep·Toss + bins stay above fold
+   (Sequence/Build 1.4.171 / Match 1.4.168 ≤720 family). Invent Fun/Clear. */
+@media (max-height: 720px) {
+  .play.is-easy-sort {
+    gap: 3px;
+  }
+
+  /* lead — clamp thin so question stays, not a dump over Keep·Toss */
+  .play.is-easy-sort .prompt {
+    font-size: 0.82rem;
+    line-height: 1.15;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* hint — hide; Keep·Toss buttons + bins already teach */
+  .play.is-easy-sort .easy-hint,
+  .play.is-easy-sort .hint-peek {
+    display: none;
+  }
+
+  /* how — hide (Sequence 171 hid .sort-how; Keep/Toss CTA cues next tap) */
+  .play.is-easy-sort .sort-how {
+    display: none;
+  }
+}
