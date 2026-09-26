@@ -4628,6 +4628,82 @@ html[data-easy='on'] .mind-node em {
     var(--candy-shine);
 }
 
+/* Easy Clear 1.4.159: Creed merge short-phone bowl-first — thin kicker · HUD · ladder; Drop chip stays readable (Story Snap / maze ≤720 family). Fixes #205 */
+@media (max-height: 720px) {
+  .play.is-claim-merge {
+    gap: 3px;
+  }
+
+  .play.is-claim-merge .story-kicker {
+    font-size: 0.62rem;
+    line-height: 1.1;
+    letter-spacing: 0.06em;
+  }
+
+  .play.is-claim-merge .merge-hud {
+    gap: 4px;
+  }
+
+  .play.is-claim-merge .merge-score {
+    min-width: 52px;
+    padding: 3px 8px;
+    font-size: 1.05rem;
+    box-shadow:
+      0 2px 0 #c4922a,
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  }
+
+  .play.is-claim-merge .merge-next {
+    gap: 4px;
+  }
+
+  .play.is-claim-merge .merge-next-label {
+    font-size: 0.58rem;
+    letter-spacing: 0.06em;
+  }
+
+  .play.is-claim-merge .merge-mini {
+    width: 28px;
+    height: 28px;
+    font-size: 0.42rem;
+  }
+
+  .play.is-claim-merge .merge-mini.is-preview {
+    width: 20px;
+    height: 20px;
+    font-size: 0.36rem;
+  }
+
+  .play.is-claim-merge .merge-ladder {
+    gap: 2px;
+  }
+
+  .play.is-claim-merge .merge-rung {
+    gap: 0;
+  }
+
+  .play.is-claim-merge .merge-rung-dot {
+    width: 10px;
+    height: 10px;
+  }
+
+  .play.is-claim-merge .merge-rung-name {
+    font-size: 0.42rem;
+    line-height: 1;
+    letter-spacing: 0.02em;
+  }
+
+  .play.is-claim-merge .merge-bowl {
+    max-height: min(72vh, 520px);
+  }
+
+  /* Drop teach stays readable — only slight thin */
+  .play.is-claim-merge .merge-drop-chip {
+    font-size: 0.58rem;
+    padding: 2px 8px;
+  }
+}
+
 .merge-danger {
   position: absolute;
   left: 8%;
