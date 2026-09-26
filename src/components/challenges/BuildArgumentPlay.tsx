@@ -234,6 +234,7 @@ export function BuildArgumentPlay({
       {/* Easy Clear 1.4.187: ≤720 fills purple void in sortHold.css (invent Fun/Clear). */}
       {/* Easy Clear 1.4.203: ≤720 fills free-place purple void (non-deal slots·bank; deal fill 187 stays). */}
       {/* Easy Clear 1.4.221: phone portrait extends deal+free-place fill so slots·bank·lock close purple void (invent Fun/Clear). */}
+      {/* Easy Clear 1.4.243: phone portrait extends board-first HUD peel 171 so how + hint hide and lead clamps on tall phones (invent Fun/Clear). */}
       <PuzzleLead challenge={challenge} />
       {easy ? (
         showEasyPuzzleHint ? (

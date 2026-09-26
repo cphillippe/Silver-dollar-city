@@ -2125,6 +2125,50 @@ html[data-easy='on'] .recall-card {
   }
 }
 
+/* Easy Clear 1.4.243: Easy Sequence / Build ≤720 / phone portrait board-first HUD peel —
+   After board-first HUD peel 171 (≤720 only), real phones ~390×844 still show how /
+   lead / hint chrome that bury stone board · slots · bank · CTA — those peels never
+   apply at Shot heights. Fill 221 (Build) + fill 222 (Sequence) already extended to
+   920, but board-first HUD peel never invent-climbed. Extend hide how + hint + clamp
+   prompt across phone portrait heights (max-height: 920px) so board · slots · bank ·
+   CTA stay clear on tall phones (Sequence / Build Argument arcade chrome; invent
+   Fun/Clear). Continuation of Creed HUD 233 / Creek maze HUD 234 / Snap HUD 241 /
+   Hold HUD 242 hide-kicker family. HUD 171 ≤720 stays. Do NOT pack Match / Lock In /
+   Learn / Father / Creek / Dig / Sort / Link / Hold / Manage / Claim merge /
+   Story Snap / gemSearch. */
+@media (max-height: 920px) {
+  .play.is-sequence,
+  .play.is-build {
+    gap: 3px;
+  }
+
+  /* lead — clamp thin so question stays, not a dump over the board */
+  .play.is-sequence .prompt,
+  .play.is-build .prompt {
+    font-size: 0.82rem;
+    line-height: 1.15;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* hint — hide; board + slot/seat cue already teach */
+  .play.is-sequence .easy-hint,
+  .play.is-build .easy-hint,
+  .play.is-sequence .hint-peek,
+  .play.is-build .hint-peek {
+    display: none;
+  }
+
+  /* how — hide (Match 168 hid .sort-how; awaiting seat / slot.is-now cue next tap) */
+  .play.is-sequence .sort-how,
+  .play.is-build .sort-how {
+    display: none;
+  }
+}
+
 
 /* Easy Clear 1.4.194: Lock In quiz ≤720 fill purple void (Fixes #251) —
    After Hold arena stretch 190 / win-end 185 / chrome 170·156, the gold
