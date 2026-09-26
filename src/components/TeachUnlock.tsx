@@ -2,7 +2,7 @@ import type { Challenge, SequenceItem } from '../types'
 import type { EvidenceBrief } from '../content/evidence'
 import { packLesson } from '../content/packCatalog'
 import { plainFor } from '../content/plain'
-import { EASY, easyWhoWhere, easyWhoWhereLine, isEasy } from '../lib/easy'
+import { EASY, isEasy } from '../lib/easy'
 import { storyPlayFor } from '../lib/storyPlay'
 import { currentLessonTier } from '../lib/tiers'
 import { WORDS, schoolWordsFor } from '../lib/words'
@@ -10,7 +10,6 @@ import { learningBeat } from '../lib/learning'
 import { learningPicture, toolForEvidence } from '../lib/watchTools'
 import { useProgress } from '../store/progress'
 import { lociStampFor } from '../lib/lociStamp'
-import { Avatar } from './Avatar'
 import { LociStamp } from './LociStamp'
 import { GemMark } from './GemMark'
 import { HeldTriad } from './HeldTriad'
@@ -46,11 +45,11 @@ export function TeachUnlock({ brief, kind, onUnlock, unlock, beats }: TeachUnloc
   const school = schoolWordsFor(brief.id, easy)
 
   if (easy) {
-    const home = easyWhoWhere(brief.id)
     const stamp = lociStampFor(brief.id)
     return (
       <section className="recall-gate is-encode teach-gate easy-story-card" aria-label="Short story">
         <p className="eyebrow">Short story</p>
+        {/* Easy Clear 1.4.160: LociStamp hero is the one who·where surface — drop duplicate who/where row (Fixes #206). */}
         <LociStamp stamp={stamp} mode="hero" />
         {picture ? <GemMark gem={picture} size="sm" /> : null}
         <p className="teach-reason">{story}</p>
@@ -61,16 +60,6 @@ export function TeachUnlock({ brief, kind, onUnlock, unlock, beats }: TeachUnloc
           reason={brief.reason}
           source={brief.source}
         />
-        <div className="easy-who-where" aria-label={`${home.who} · ${home.place}`}>
-          <p className="easy-who-where-line">{easyWhoWhereLine(brief.id)}</p>
-          <div className="easy-who-where-row">
-            <figure className="easy-who-chip">
-              <Avatar who={home.whoId} size="sm" />
-              <figcaption>{home.who}</figcaption>
-            </figure>
-            <p className="easy-place-chip">{home.place}</p>
-          </div>
-        </div>
         <div className="cta-dock easy-story-dock">
           <button type="button" className="btn gold xl" onClick={onUnlock}>
             {storyPlayFor(brief.id) === 'father-run'
