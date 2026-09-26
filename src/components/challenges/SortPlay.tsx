@@ -3,10 +3,11 @@ import { shuffle } from '../../lib/shuffle'
 import type { SortChallenge, SortTile } from '../../types'
 import { plainFor } from '../../content/plain'
 import { STORY } from '../../content/story'
-import { EASY, easyChromeLine, isEasy } from '../../lib/easy'
+import { EASY, easyChromeLine, easyChromeNearDup, isEasy } from '../../lib/easy'
 import { useProgress } from '../../store/progress'
 import { GemMark } from '../GemMark'
 import { burstStyle } from '../../lib/juice'
+import { easyLead } from '../../lib/words'
 import { PuzzleHint } from './PuzzleHint'
 import { PuzzleLead } from './PuzzleLead'
 import { ResultPanel } from './ResultPanel'
@@ -130,9 +131,13 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
   const nextTile = filledSlots()[0]
   // Easy Sort keeps PuzzleHint (.easy-hint teach) — skip redundant Keep/Toss .sort-how when hint shows.
   // Inverse of MatchPlay 1.4.137 (which kept .sort-how and skipped duplicate PuzzleHint).
+  // 1.4.145: also skip PuzzleHint when it near-dupes PuzzleLead (fg-order / fg-ought Keep/Toss stack).
+  const easyLeadLine = easy ? easyLead(challenge.id, challenge.prompt) : ''
   const easyPlainHint = easy
     ? easyChromeLine(plainFor(challenge.id)?.hint ?? challenge.context ?? '')
     : ''
+  const showEasyPuzzleHint =
+    Boolean(easyPlainHint) && !easyChromeNearDup(easyPlainHint, easyLeadLine)
   const showSortHow = !easy || !easyPlainHint
 
   return (
@@ -141,7 +146,13 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
     >
       <WinBurst play={status === 'ok'} />
       <PuzzleLead challenge={challenge} />
-      <PuzzleHint text={challenge.context} id={challenge.id} onPeek={onPeek} />
+      {easy ? (
+        showEasyPuzzleHint ? (
+          <PuzzleHint text={challenge.context} id={challenge.id} onPeek={onPeek} />
+        ) : null
+      ) : (
+        <PuzzleHint text={challenge.context} id={challenge.id} onPeek={onPeek} />
+      )}
       {showSortHow ? (
         <p className="sort-how">
           {easy ? (
