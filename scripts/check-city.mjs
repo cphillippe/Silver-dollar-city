@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.187')
+assert.equal(APP_VERSION, '1.4.188')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3339,9 +3339,9 @@ console.log('check-city: ok')
     /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-build\.is-deal \.slot-list \{[\s\S]*?flex: 1 1 auto/,
   )
   assert.match(buildPlay187, /1\.4\.187: ≤720 fills purple void/)
-  assert.match(latestChange(APP_VERSION).items.join('\n'), /Build Argument.*≤720|purple void under the deal/i)
+  assert.match(latestChange('1.4.187').items.join('\n'), /Build Argument.*≤720|purple void under the deal/i)
   assert.doesNotMatch(
-    latestChange(APP_VERSION).items.join('\n'),
+    latestChange('1.4.187').items.join('\n'),
     /Fixes #238|Fixes #239|Fixes #240|Lock In win-end|Match \(picture|empty purple card|Story Snap|eyebrow|Creed merge|Fixes #232|empty-lot|Fixes #217/i,
     '1.4.187 must not re-claim Match / Lock In / Samaritan issues / Snap / Creed / Manage / letterbox',
   )
@@ -3351,6 +3351,37 @@ console.log('check-city: ok')
 
 
 
+
+
+// Easy Clear 1.4.188: Easy Link ≤720 fill purple void (invent Fun/Clear)
+{
+  const indexCss188 = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
+  const linkPlay188 = readFileSync(
+    new URL('../src/components/challenges/LinkPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(indexCss188, /1\.4\.188: Easy Link ≤720 fill purple void/)
+  assert.match(
+    indexCss188,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-easy-link,[\s\S]*?flex: 1 1 auto/,
+  )
+  assert.match(
+    indexCss188,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-easy-link \.link-col \{[\s\S]*?grid-auto-rows: minmax\(0, 1fr\)/,
+  )
+  assert.match(
+    indexCss188,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-easy-link \.link-block\.is-picture \{[\s\S]*?min-height: 0/,
+  )
+  assert.match(linkPlay188, /1\.4\.188: ≤720 fills purple void/)
+  assert.match(cssSrc, /1\.4\.188: Easy Link ≤720 fill purple void/)
+  assert.match(latestChange(APP_VERSION).items.join('\n'), /Easy Link.*≤720|purple void under the deal/i)
+  assert.doesNotMatch(
+    latestChange(APP_VERSION).items.join('\n'),
+    /Fixes #238|Fixes #239|Fixes #240|Lock In win-end|Match \(picture|empty purple card|Story Snap|eyebrow|Creed merge|Fixes #232|empty-lot|Fixes #217|Build Argument ≤720 fill/i,
+    '1.4.188 must not re-claim Match / Lock In / Samaritan / Snap / Creed / Manage / letterbox / Build 187',
+  )
+}
 
 // Easy Clear 1.4.181: Easy Creed merge ≤720 HUD peel (invent Fun/Clear)
 {

@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.188',
+    title: 'Easy Link: ≤720 fill purple void',
+    when: '2026-09-25',
+    items: [
+      'Easy Link (Connections) on ≤720px tall: grow play shell + stretch wizard picture seats so clue · choices fill the gold card — no empty purple void under the deal (Match 1.4.184 / Build Argument 1.4.187 fill family · invent Fun/Clear; Match / Lock In / Samaritan / Sort / Snap / Creed / Build Argument peels untouched)',
+    ],
+  },
+  {
     version: '1.4.187',
     title: 'Easy Build Argument: ≤720 fill purple void',
     when: '2026-09-25',

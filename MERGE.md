@@ -1,43 +1,43 @@
-# ready-easy-fun-clear-187 — 1.4.187 Easy Build Argument ≤720 fill purple void
+# ready-easy-fun-clear-188 — 1.4.188 Easy Link ≤720 fill purple void
 
-**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/244
-**Branch:** `ship/easy-fun-clear-187` → `main`
-**Version:** 1.4.187
-**Peel:** `7079579` (`7079579ad3eedca4404f7a4f4ddd81ceffb3a583`)
-**Tip:** `4befe9c` (`4befe9c1bc8edb31392e737281a29ecef32d9611`)
-**Base live:** 1.4.186 (`06206c7`, PR #243 Easy Samaritan ≤720 fill top-cluster purple void on main)
+**PR:** (pending)
+**Branch:** `ship/easy-fun-clear-188` → `main`
+**Version:** 1.4.188
+**Peel:** (pending commit)
+**Tip:** (pending)
+**Base live:** 1.4.187 (`dd01944`, PR #244 Easy Build Argument ≤720 fill purple void on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
 ## How picked
-Open Issues: **#238** Match / **#239** Lock In / **#240** Samaritan already on main as 1.4.184–1.4.186. No other open Easy Fun/Clear issue.
-**#161** Dig/Hard/NW/Town parked. **#160** cheap-hop infra.
-Invent Fun/Clear — densest remaining Easy trail different from recent Match/LockIn/Samaritan/Sort/Snap/Creed: **Easy Build Argument** still hugged content (no flex grow) so guided deal left empty purple under slots + two-choice bank (Sequence order 1.4.186 fill family).
+Open Issues: **#161** Dig/Hard/NW/Town parked. **#160** cheap-hop infra. No open Easy Fun/Clear issue.
+1.4.187 Build Argument fill live on main. Shot wake at 1.4.190 — invent toward that.
+Invent Fun/Clear — densest remaining Easy trail different from recent Match/LockIn/Samaritan/Sort/Snap/Creed/Build Argument: **Easy Link** (Connections) had no ≤720 peel (deferred since Sort 183) — sticky easy-steps + tall 220px/148px picture seats hug the top so the gold card leaves empty purple under the choice column (Match 184 / Build 187 fill family).
 
 ## Chosen climb
-Single Easy Fun/Clear polish: **Easy Build Argument ≤720 fill purple void** — grow `play.is-build` shell + stretch `slot-list` seats / deal `bank.is-order` tiles so the gold card fills the portrait.
+Single Easy Fun/Clear polish: **Easy Link ≤720 fill purple void** — grow `play.is-easy-link` shell + stretch wizard `link-col` picture seats; thin teach + shrink glyph floors so clue · choices fill the portrait.
 
 ## What fixed
-- `src/styles/sortHold.css`: base `.play.is-build` `flex: 1 1 auto`; `@media (max-height: 720px)` stretch `.is-build.is-deal` slot-list + bank tiles
-- `src/components/challenges/BuildArgumentPlay.tsx`: thin 1.4.187 comment
+- `src/index.css`: `@media (max-height: 720px)` — `.play.is-easy-link` `flex: 1 1 auto`; stretch `.link-col` `grid-auto-rows: minmax(0,1fr)`; thin `.easy-steps` / clamp `.link-clue`; picture seats `min-height: 0` + glyphs 96px
+- `src/components/challenges/LinkPlay.tsx`: thin 1.4.188 comment
 - Android `versionName` left at **1.4.113**
-- Version **1.4.187** atop live **1.4.186**
+- Version **1.4.188** atop live **1.4.187**
 
 ## Deferred (do NOT climb this hop)
 - Dig Reveal / Hard / NW / Town / stores / Pack B / Home map candy
-- Match 184 / Lock In 185 / Samaritan 186 / Sort 183 / Snap 182 / Creed 181 / Manage 180 / letterbox (already on main)
-- Sequence how-peel 1.4.171 (different surface; still applies ≤720)
+- Match 184 / Lock In 185 / Samaritan 186 / Sort 183 / Snap 182 / Creed 181 / Build Argument 187 / Manage 180 / letterbox (already on main)
+- Journal held clear chrome further peel
 
 ## Gemini
-MODEL=gemini-flash-latest — Invent Fun/Clear (no open Easy Fun/Clear issue). Invent API key present but not AIza AI Studio shape. Manager-steered invent. Notes: `notes-gemini.txt` (+ `/workspace/silver-city-art/notes-gemini-187.txt`).
+MODEL=gemini-flash-latest — Invent Fun/Clear (no open Easy Fun/Clear issue). Invent API key present but not AIza AI Studio shape. Manager-steered invent. Notes: `notes-gemini.txt` (+ `/workspace/silver-city-art/notes-gemini-188.txt`).
 
 ## Files peeled
-- `src/styles/sortHold.css`
-- `src/components/challenges/BuildArgumentPlay.tsx`
+- `src/index.css`
+- `src/components/challenges/LinkPlay.tsx`
 - `scripts/check-city.mjs`, `scripts/check-panel-blast.mjs`
 - `src/config/app.ts`, `package.json`, `package-lock.json`
 - `src/content/changelog.ts`
 - `notes-gemini.txt`
-- `docs/` (Pages rebuild `index-CSlQnAhF.js` / `index-m-ngIPHJ.css`)
+- `docs/` (Pages rebuild)
 - `MERGE.md`
 
 ## Checks
