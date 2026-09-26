@@ -1,6 +1,5 @@
-1.4.167 Manage-open Hub chrome compress (#220)
-Gemini: unavailable — GEMINI_API_KEY present but not AIza AI Studio shape (same as 163–165).
-Prior vision pack used: /workspace/manage-sheet-gemini-review.md (P1 Hub vs Map chrome strata).
-Shipped Manager-steered peel without live Gemini APPROVE.
-Peel: hub is-manage-open when mindPlot set; :has hides AppShell topbar + collapses grid row; hide Easy Home dock.
-Deferred: map letterbox/full-bleed (#217 Map owns); Witness candy (Map 1.4.166); snap points peek/half/full JS; Dig/Hard/NW/Town/stores/Pack B/#213.
+1.4.168 Easy Match ≤720 board-first (invent Fun/Clear)
+Gemini: unavailable — GEMINI_API_KEY present but not AIza AI Studio shape (same as 163–167).
+Shipped Manager-steered invent peel without live Gemini APPROVE.
+Peel: match.css @media (max-height:720px) hides .sort-how + .match-teach-say; tiny LociStamp/chips/score so gem letter board + Lock In CTA stay above fold.
+Comment in GemSearchPlay.tsx. Do not reopen #220. Do not claim 1.4.166. Dig/Hard/NW/Town/stores/Pack B/Home map candy parked.
