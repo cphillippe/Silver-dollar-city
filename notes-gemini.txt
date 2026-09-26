@@ -1,5 +1,5 @@
-1.4.168 Easy Match ≤720 board-first (invent Fun/Clear)
-Gemini: unavailable — GEMINI_API_KEY present but not AIza AI Studio shape (same as 163–167).
+1.4.170 Easy Lock In ≤720 arena-first (invent Fun/Clear)
+Gemini: unavailable — GEMINI_API_KEY present but not AIza AI Studio shape (same as 163–168).
 Shipped Manager-steered invent peel without live Gemini APPROVE.
-Peel: match.css @media (max-height:720px) hides .sort-how + .match-teach-say; tiny LociStamp/chips/score so gem letter board + Lock In CTA stay above fold.
-Comment in GemSearchPlay.tsx. Do not reopen #220. Do not claim 1.4.166. Dig/Hard/NW/Town/stores/Pack B/Home map candy parked.
+Peel: sortHold.css @media (max-height:720px) hides Journal + RecallGate Saved eyebrow when .why-blast is up; hides .why-arena .held-from.quiet; tiny HUD next-tap. Complements 1.4.156 thin + 1.4.161 miss PlainTalk drop.
+Comment in WhyBlastPlay.tsx. Do not reopen #207. Do not claim 1.4.166/1.4.169. Dig/Hard/NW/Town/stores/Pack B/Home map candy parked.
