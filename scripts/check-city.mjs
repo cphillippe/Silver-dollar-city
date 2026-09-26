@@ -1133,7 +1133,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.177')
+assert.equal(APP_VERSION, '1.4.178')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1463,7 +1463,7 @@ assert.match(cssSrc, /is-easy-hold/)
   assert.match(dockCss, /backdrop-filter: blur/)
   assert.doesNotMatch(dockCss, /#16062e/, 'sticky CTA docks must not be an opaque black slab')
 }
-assert.match(latestChange(APP_VERSION).items.join('\n'), /LociStamp|claim pill|contrast|cream|dark ink|wrap|mercy|#231/i)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Witness Square|candy webp|#213/i)
 {
   const storyCardCss = cssSrc.match(/\.easy-story-card,[\s\S]*?\.easy-story-card::before \{[\s\S]*?\n\}/)?.[0] ?? ''
   assert.match(storyCardCss, /border:\s*0/)
@@ -2370,8 +2370,8 @@ assert.match(mapSrc, /easy \? null : \(\s*\n\s*<>[\s\S]*city-street-main/)
 assert.match(mapSrc, /if \(isEasy\(progress\)\) return/)
 assert.match(mapSrc, /if \(playing\.current && !isEasy\(progress\)\) return/)
 assert.match(mapSrc, /Tap a building to Manage it/)
-assert.match(latestChange(APP_VERSION).title, /Learn|claim pill|contrast/i)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /LociStamp|claim pill|contrast|cream|dark ink|wrap|mercy|#231/i)
+assert.match(latestChange(APP_VERSION).title, /Witness Square|candy hall/i)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Witness Square|candy webp|#213/i)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-img[\s\S]*?fill: none !important/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img\.is-built[\s\S]*?fill: none/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-hit[\s\S]*?stroke: none/)
@@ -2388,7 +2388,11 @@ assert.match(plotArtSrc, /city-plot-img/)
 assert.match(plotArtSrc, /has-candy-img/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img/)
 assert.match(plotArtSrc, /preserveAspectRatio="xMidYMid meet"/)
-for (const id of ['porch', 'gate', 'journal', 'hollow']) {
+assert.match(plotArtSrc, /type PackAPlotId = 'porch' \| 'gate' \| 'journal' \| 'hollow' \| 'bench'/)
+assert.match(plotArtSrc, /bench:\s*\{[\s\S]*scaffold: plotBenchScaffold/)
+assert.match(plotArtSrc, /if \(img\) return <PlotImageArt/)
+assert.match(plotArtSrc, /id === 'bench'\) return <BenchArt/)
+for (const id of ['porch', 'gate', 'journal', 'hollow', 'bench']) {
   for (const stage of ['scaffold', 'built', 'lit']) {
     assert.ok(
       existsSync(
@@ -2398,6 +2402,21 @@ for (const id of ['porch', 'gate', 'journal', 'hollow']) {
     )
   }
 }
+const qaSeed = readFileSync(new URL('../public/qa-seed.html', import.meta.url), 'utf8')
+const qaSeedDocs = readFileSync(new URL('../docs/qa-seed.html', import.meta.url), 'utf8')
+assert.equal(qaSeedDocs, qaSeed, 'docs/qa-seed.html must match public/qa-seed.html')
+assert.match(qaSeed, /silver-city-progress-v1/)
+assert.match(qaSeed, /silver-city-seen-city-v1/)
+assert.match(qaSeed, /silver-city-seen-fill-v1/)
+assert.match(qaSeed, /ph-road/)
+assert.match(qaSeed, /ph-father/)
+assert.match(qaSeed, /plot-bench-scaffold\.webp/)
+assert.match(qaSeed, /plot-bench-built\.webp/)
+assert.match(qaSeed, /plot-bench-lit\.webp/)
+assert.match(
+  readFileSync(new URL('../vite.config.ts', import.meta.url), 'utf8'),
+  /navigateFallbackDenylist:\s*\[\/\\\/qa-seed\\\.html\/\]/,
+)
 assert.match(defendSrc, /easyTapTarget/)
 assert.match(defendNightSrc, /data-person-node="walker"/)
 assert.doesNotMatch(defendSrc, /walkerCue|easySolo|clearWalkerCue|hideOther/)
