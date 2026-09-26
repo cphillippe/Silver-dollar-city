@@ -1069,6 +1069,179 @@
   }
 }
 
+/* Easy Clear 1.4.256: Easy Samaritan / road maze ≤720 / tall-phone purple voids + top clip residual after cream 249 (Fixes #348) —
+   After cream parchment maze-stage 249 (warm board · denser stretch · dock pin) Shot pack 1.4.250
+   06-samaritan.png (390×844) STILL fails — Gemini: massive empty purple voids above and below the board
+   waste vertical space while top content is clipped (residual after closed #335 / 1.4.249). Cause: cream
+   on `.maze-stage` still content-hugs / transparent flex-grow over the purple play shell (base `.play`
+   purple-gold gradient · app-body dusk leftover outside the card), and tight overflow/padding clips the
+   maze-beats HUD at the top of the gold frame. Strengthen further — NOT another 239/249 height/flex/
+   cream-on-stage-only copy (Learn 252 / Match 253 / Lock In 254–255 lesson): (1) paint opaque cream on
+   `.app-body` + `.play.is-road-maze` shell so tall leftover above/below the board is cream floor through
+   the full portrait (kill purple-gold gradient bleed under Samaritan); (2) solid `#fff6e8` +
+   `background-image: none` on `.maze-stage` beating any translucent wash; (3) warm board plate behind
+   `.maze-board` (not #3a1480 purple seam chrome); (4) pin match-score / cta-dock to the cream floor with
+   cream dock wash; (5) pad top + keep maze-beats flex 0 so HUD stays in viewport (no top clip).
+   Confirmed `.play.is-road-maze` Samaritan — NOT Sequence / Story Creek HOLD. Fill 191 / board→CTA 201
+   ≤720 / extend 228 / HUD 234 / strengthen 239 / cream stage 249 stay. Do NOT pack Match / Lock In /
+   Learn / Father / Manage / Dig / Sequence / parked maps. */
+@media (max-height: 920px) {
+  /* Cream app-body floor — leftover around a content-hug play is cream, not dusk purple void */
+  html[data-easy='on'] .app.is-play .app-body:has(.play.is-road-maze) {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+    padding-top: 4px;
+    padding-bottom: 0;
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    color: var(--ink, #2a2118);
+  }
+
+  .daily-page.is-puzzle:has(.play.is-road-maze),
+  .challenge-page.is-puzzle:has(.play.is-road-maze) {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    gap: 2px;
+    overflow: hidden;
+  }
+
+  /* Opaque cream play shell — kill purple-gold gradient bleed under Samaritan; pad top so HUD unclips */
+  .play.is-road-maze,
+  .daily-page.is-puzzle .play.is-road-maze,
+  .challenge-page.is-puzzle .play.is-road-maze {
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 4px;
+    overflow: hidden;
+    padding: 10px 10px 0;
+    border-radius: 22px;
+    border: 1px solid color-mix(in srgb, var(--ink, #2a2118) 12%, transparent);
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    color: var(--ink, #2a2118);
+    box-shadow: 0 2px 0 color-mix(in srgb, #000 6%, transparent);
+  }
+
+  /* Solid opaque cream parchment — leftover under/above board is intentional cream board stage */
+  .play.is-road-maze .maze-stage {
+    flex: 1 1 0;
+    min-height: 0;
+    height: auto;
+    max-height: none;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    overflow: hidden;
+    gap: 4px;
+    padding: 6px;
+    border-radius: 16px;
+    border: 1px solid color-mix(in srgb, var(--ink, #2a2118) 10%, transparent);
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    box-shadow: 0 2px 0 color-mix(in srgb, #000 6%, transparent);
+  }
+
+  .play.is-road-maze .maze-board {
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: none;
+    width: min(100%, 390px);
+    max-width: 100%;
+    aspect-ratio: auto;
+    align-self: stretch;
+    align-content: stretch;
+    justify-content: stretch;
+    justify-items: stretch;
+    align-items: stretch;
+    margin: 0 auto;
+    gap: 4px;
+    padding: 6px;
+    border-radius: 12px;
+    overflow: hidden;
+    /* Warm board plate seams — not #3a1480 / #1a0840 purple dead chrome */
+    background: color-mix(in srgb, #fff6e8 55%, var(--gold, #c9a45c));
+    box-shadow:
+      inset 0 1px 0 rgba(255, 246, 232, 0.35),
+      0 4px 14px rgba(42, 33, 24, 0.18);
+  }
+
+  .play.is-road-maze .maze-cell {
+    min-width: 0;
+    min-height: 0;
+    aspect-ratio: unset;
+    width: auto;
+    height: auto;
+    align-self: stretch;
+    justify-self: stretch;
+  }
+
+  /* HUD stays in viewport — no top clip of maze-beats */
+  .play.is-road-maze .maze-beats,
+  .play.is-road-maze .story-kicker,
+  .play.is-road-maze .run-thumbs,
+  .play.is-road-maze .story-caption,
+  .play.is-road-maze .match-score,
+  .play.is-road-maze .cta-dock,
+  .play.is-road-maze .match-yes,
+  .play.is-road-maze .miss-banner,
+  .play.is-road-maze .match-toast {
+    flex: 0 0 auto;
+  }
+
+  .play.is-road-maze .maze-beats {
+    margin: 0;
+    padding-top: 2px;
+  }
+
+  .play.is-road-maze .match-score {
+    margin: 0;
+    margin-top: 2px;
+    color: color-mix(in srgb, var(--gold, #c9a45c) 70%, var(--ink, #2a2118));
+  }
+
+  /* Pin match-score / CTA to the cream floor — cream dock wash, not purple sticky blur */
+  .play.is-road-maze .match-score,
+  .play.is-road-maze .cta-dock {
+    position: static;
+    bottom: auto;
+    margin-top: auto;
+    flex: 0 0 auto;
+    padding-top: 8px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .play.is-road-maze .cta-dock {
+    margin-top: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .play.is-father-run.is-running .run-actor.is-father,
   .play.is-father-run.is-running .run-leg.is-a,
