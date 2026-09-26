@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.222',
+    title: 'Easy Sequence: ≤720 close fill + stones→result purple void on tall phone',
+    when: '2026-09-25',
+    items: [
+      'Easy Sequence order on ≤720 / phone portrait: extend fill + stones→result so order bank / stone tiles absorb free space and pack tight to ResultPanel — no large purple void under the stones on tall phones (invent Fun/Clear; continuation of Sequence fill 186 / stones→result 205 ≤720 family; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.221',
     title: 'Easy Build: ≤720 close fill purple void on tall phone',
     when: '2026-09-25',

@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.221')
+assert.equal(APP_VERSION, '1.4.222')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -4352,5 +4352,36 @@ console.log('check-city: ok')
     latestChange('1.4.221').items.join('\n'),
     /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|Father Dash|Learn cream|Match grid|Samaritan|Manage|Lock In quiz|Dig|Creed|Hold|Sort|Snap|Link|Sequence|Road maze|Claim merge|Source dig|Story Creek HOLD|slider→HOLD|timing-rail→CTA|hud→arena|Keep·Toss|choices→CTA|bowl→CTA/i,
     '1.4.221 must not fix phone-fail issues or climb another Easy surface',
+  )
+}
+
+// Easy Clear 1.4.222: Easy Sequence ≤720 / phone portrait fill + stones→result purple void (invent Fun/Clear)
+{
+  const seqCss222 = readFileSync(new URL('../src/styles/sortHold.css', import.meta.url), 'utf8')
+  const seqPlay222 = readFileSync(
+    new URL('../src/components/challenges/SequencePlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(seqCss222, /1\.4\.222: Easy Sequence ≤720 \/ phone portrait fill \+ stones→result purple void/)
+  assert.match(
+    seqCss222,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.play\.is-sequence\.is-deal \{[\s\S]*?gap: 2px/,
+  )
+  assert.match(
+    seqCss222,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.play\.is-sequence\.is-deal \.bank\.is-order \{[\s\S]*?max-height: none/,
+  )
+  assert.match(
+    seqCss222,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.play\.is-sequence\.is-deal \.result[\s\S]*?margin: 0/,
+  )
+  assert.match(seqPlay222, /1\.4\.222: phone portrait extends fill \+ stones→result so order bank·result close purple void/)
+  assert.match(cssSrc, /1\.4\.222: Easy Sequence ≤720 \/ phone portrait fill \+ stones→result purple void/)
+  assert.match(latestChange('1.4.222').items.join('\n'), /fill|stones→result|phone portrait|purple void|Sequence|order bank|invent Fun\/Clear/i)
+  assert.match(latestChange('1.4.222').title, /Easy Sequence|≤720|fill|stones→result|purple void/i)
+  assert.doesNotMatch(
+    latestChange('1.4.222').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|Father Dash|Learn cream|Match grid|Manage|Lock In quiz|Dig|Creed|Hold|Sort|Snap|Link|Build|Road maze|Claim merge|Source dig|Story Creek HOLD|slider→HOLD|timing-rail→CTA|hud→arena|Keep·Toss|choices→CTA|bowl→CTA/i,
+    '1.4.222 must not fix phone-fail issues or climb another Easy surface',
   )
 }
