@@ -2884,3 +2884,144 @@ html[data-easy='on'] .recall-card {
     -webkit-backdrop-filter: none;
   }
 }
+
+
+/* Easy Clear 1.4.247: Easy Lock In quiz ≤720 / tall-phone bottom-half purple void residual (Fixes #333) —
+   After strengthen 237 (height 100% · flex 1 1 0 · arena absorb · dock static) Shot pack
+   1.4.240 04-easy-lockin.png (390×844; chrome 1.4.242) STILL fails — Gemini sees a massive
+   purple dead band under the quiz card with chips clustered at the top (residual after
+   closed #316 / 1.4.237). Cause: base `.recall-gate` plate is a SEMI-TRANSPARENT gold/purple
+   gradient (`rgba(…, 0.18)` / `rgba(…, 0.22)`), so flex-grown empty space inside the card
+   is still the dusk purple play plate (vision FAIL — same lesson as Learn 235→245 cream
+   teach-gate / Match 236→246 cream board). Visually different from 237: (1) paint opaque
+   cream parchment `.recall-gate.is-easy-hold` (live why-blast only) so leftover fill is
+   intentional cream card plate, not purple void; (2) dark ink on next-tap · held-from for
+   cream; (3) denser why-arena stretch (align-content stretch · chip rows); (4) pin cta-dock
+   to the cream floor. Live mid-question quiz ONLY (`why-blast:not(.is-miss-teach):not(.is-win)`).
+   Fill 194 / pad-zero 212 ≤720 / extend 226 / strengthen 237 stay. Do NOT pack #334 miss-teach
+   / win-end / Match / Learn / Samaritan / Father / Manage / Dig / Creek / parked maps. */
+@media (max-height: 920px) {
+  html[data-easy='on'] .app.is-play .app-body:has(.journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win)) {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+    padding-top: 4px;
+    padding-bottom: 0;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast:not(.is-miss-teach):not(.is-win)) {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    gap: 4px;
+    overflow: hidden;
+    padding-bottom: 0;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast:not(.is-miss-teach):not(.is-win)) > .text-link {
+    flex: 0 0 auto;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast:not(.is-miss-teach):not(.is-win)) .rehearse-anchor {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast:not(.is-miss-teach):not(.is-win)) .rehearse-anchor > .eyebrow {
+    flex: 0 0 auto;
+  }
+
+  /* Cream plate fills tall portrait — leftover band is cream-inside-card, not purple void */
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast:not(.is-miss-teach):not(.is-win)) .recall-gate.is-easy-hold {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    margin-bottom: 0;
+    overflow: hidden;
+    padding: 12px 14px 0;
+    gap: 8px;
+    border-radius: 18px;
+    border: 1px solid color-mix(in srgb, var(--ink, #2a2118) 10%, transparent);
+    background: var(--parchment, #fff6e8);
+    color: var(--ink, #2a2118);
+    box-shadow: 0 2px 0 color-mix(in srgb, #000 6%, transparent);
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    gap: 8px;
+    overflow: hidden;
+    background: transparent;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .why-blast-hud,
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .miss-banner {
+    flex: 0 0 auto;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .why-blast-hud .next-tap {
+    color: var(--ink, #2a2118);
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .why-arena {
+    flex: 1 1 0;
+    min-height: 0;
+    height: auto;
+    max-height: none;
+    align-content: stretch;
+    grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 10px;
+    padding: 4px 0;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .why-chip {
+    min-height: 0;
+    height: 100%;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .why-claim {
+    align-self: stretch;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .why-arena .held-from,
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .held-from {
+    color: color-mix(in srgb, var(--ink, #2a2118) 78%, var(--gold, #c9a45c));
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .cta-dock,
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast:not(.is-miss-teach):not(.is-win)) .recall-gate.is-easy-hold .cta-dock {
+    position: static;
+    bottom: auto;
+    margin-top: auto;
+    flex: 0 0 auto;
+    padding-top: 10px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
