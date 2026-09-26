@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.243',
+    title: 'Easy Sequence / Build: ≤720 close board-first HUD on tall phone',
+    when: '2026-09-26',
+    items: [
+      'Easy Sequence / Build on ≤720 / phone portrait: extend board-first HUD peel so how + hint hide and lead clamps thin — board · slots · bank · CTA stay clear on tall phones (invent Fun/Clear; continuation of Sequence/Build board-first HUD peel 171 ≤720 family; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.242',
     title: 'Easy Hold: ≤720 close HUD peel on tall phone',
     when: '2026-09-26',
