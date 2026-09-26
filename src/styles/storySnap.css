@@ -322,6 +322,221 @@
   }
 }
 
+/* Easy Fun 1.4.269: Easy Story Snap residual juice on tall phone —
+   HUD compress 182 (teach · strip · chip) still caps at max-height: 720px, so
+   Story Snap on ~390×844 keeps a quiet SNAP pad and a soft score while the
+   chips stay full-size beside the board. Extend that Snap HUD compress across
+   phone portrait and taller layout viewports, and punch the snap CTA plus
+   score · miss juice arcade-loud without crowding the snap board.
+   Live Story Snap chrome only — Hold, Father Dash, Match, Lock In, Samaritan,
+   and Manage stay on their peels. HUD 182 ≤720 stays. Fill 223 / HUD hide 241 stay.
+   Invent Fun/Clear. Do not wake Shot. */
+@media (max-height: 920px), (min-height: 921px) {
+  /* Fill 223 stops at 920, so a taller layout viewport was still a stretching
+     grid — the punch would inflate the pad and leave a purple gap. Keep the
+     stage on the free space and pack pad · score · dock under it. */
+  .play.is-story-snap,
+  .daily-page.is-puzzle .play.is-story-snap,
+  .challenge-page.is-puzzle .play.is-story-snap {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.12rem;
+  }
+
+  .play.is-story-snap .snap-stage {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+  }
+
+  .play.is-story-snap .eyebrow,
+  .play.is-story-snap .easy-who-where-line {
+    display: none;
+  }
+
+  .play.is-story-snap .snap-strip,
+  .play.is-story-snap .snap-claim,
+  .play.is-story-snap .match-score,
+  .play.is-story-snap .snap-pad,
+  .play.is-story-snap .cta-dock {
+    flex: 0 0 auto;
+  }
+
+  .play.is-story-snap .cta-dock {
+    margin-top: 0;
+  }
+
+  .play.is-story-snap .snap-teach {
+    font-size: 0.72rem;
+    line-height: 1.15;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .play.is-story-snap .snap-strip {
+    min-height: 0;
+    gap: 0.28rem;
+  }
+
+  .play.is-story-snap .snap-chip {
+    min-width: 4rem;
+    padding: 0.22rem 0.35rem;
+    font-size: 0.68rem;
+  }
+
+  /* SNAP pad — gold lip and window glow, still short of the board */
+  .play.is-story-snap .snap-pad {
+    min-height: 3.5rem;
+    font-size: 1.2rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    color: #2a2118;
+    background-color: #ffcc33;
+    background-image: linear-gradient(180deg, #fffce8, #ffcc33 46%, #ff9f1a);
+    background: linear-gradient(180deg, #fffce8, #ffcc33 46%, #ff9f1a);
+    border: 2.5px solid #fff8dc;
+    box-shadow:
+      0 5px 0 #c46a08,
+      0 0 18px rgba(255, 204, 51, 0.55);
+  }
+
+  .play.is-story-snap.is-glow .snap-pad {
+    box-shadow:
+      0 5px 0 #c46a08,
+      0 0 24px rgba(255, 220, 120, 0.95);
+  }
+
+  .play.is-story-snap.is-glow .snap-gate {
+    box-shadow: 0 0 22px 6px rgba(255, 220, 120, 0.98);
+  }
+
+  /* Score — gold pill under the board, not a whisper line */
+  .play.is-story-snap .match-score {
+    align-self: center;
+    min-width: 3.2rem;
+    margin: 0;
+    padding: 4px 14px;
+    font-size: 1.2rem;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    text-transform: none;
+    line-height: 1.1;
+    color: #2a2118;
+    background-color: #ffcc33;
+    background-image: linear-gradient(180deg, #fffce8, #ffcc33 55%, #ff9f1a);
+    background: linear-gradient(180deg, #fffce8, #ffcc33 55%, #ff9f1a);
+    border: 2.5px solid #fff8dc;
+    border-radius: 999px;
+    box-shadow:
+      0 3px 0 #c46a08,
+      0 0 16px rgba(255, 204, 51, 0.7);
+  }
+
+  .play.is-story-snap.is-shake .match-score {
+    color: #fff6e8;
+    background-color: #ff5a7a;
+    background-image: linear-gradient(180deg, #ff8aa0, #ff5a7a 55%, #c63d5c);
+    background: linear-gradient(180deg, #ff8aa0, #ff5a7a 55%, #c63d5c);
+    border-color: #fff8dc;
+    box-shadow:
+      0 3px 0 #a32d48,
+      0 0 16px rgba(255, 90, 122, 0.65);
+  }
+
+  /* Miss / snap toast overlays the stage — does not push the beat lane */
+  .play.is-story-snap .snap-stage .match-toast {
+    position: absolute;
+    left: 50%;
+    bottom: 0.35rem;
+    z-index: 4;
+    transform: translateX(-50%);
+    max-width: calc(100% - 1.2rem);
+    margin: 0;
+    padding: 5px 12px;
+    font-size: 0.88rem;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    line-height: 1.15;
+    text-align: center;
+    color: #2a2118;
+    background-color: #ffcc33;
+    background-image: linear-gradient(180deg, #fffce8, #ffcc33 55%, #ff9f1a);
+    background: linear-gradient(180deg, #fffce8, #ffcc33 55%, #ff9f1a);
+    border: 2.5px solid #fff8dc;
+    border-radius: 999px;
+    box-shadow:
+      0 3px 0 #c46a08,
+      0 0 14px rgba(255, 204, 51, 0.65);
+  }
+
+  .play.is-story-snap.is-shake .snap-stage .match-toast {
+    color: #fff6e8;
+    background-color: #ff5a7a;
+    background-image: linear-gradient(180deg, #ff8aa0, #ff5a7a 55%, #c63d5c);
+    background: linear-gradient(180deg, #ff8aa0, #ff5a7a 55%, #c63d5c);
+    border-color: #fff8dc;
+    box-shadow:
+      0 4px 0 #a32d48,
+      0 0 18px rgba(255, 90, 122, 0.75);
+  }
+
+  .play.is-story-snap.is-shake .snap-stage {
+    animation: story-snap-shake-loud 0.42s ease;
+    border-color: #ff8aa0;
+    box-shadow: 0 0 18px rgba(255, 90, 122, 0.55);
+  }
+
+  .play.is-story-snap .win-stamp {
+    font-size: clamp(1.35rem, 6.2vw, 1.85rem);
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    color: #2a2118;
+    background-color: #ffcc33;
+    background-image: linear-gradient(180deg, #fffce8, #ffcc33 55%, #ff9f1a);
+    background: linear-gradient(180deg, #fffce8, #ffcc33 55%, #ff9f1a);
+    border: 2.5px solid #fff8dc;
+    box-shadow:
+      0 4px 0 #c46a08,
+      0 0 22px rgba(255, 204, 51, 0.75);
+    text-shadow: none;
+  }
+
+  .play.is-story-snap.is-win .cta-dock .btn {
+    min-height: 56px;
+    font-size: 1.12rem;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    color: #2a2118;
+    border: 2.5px solid #fff8dc;
+    box-shadow:
+      0 5px 0 #c46a08,
+      0 0 18px rgba(255, 204, 51, 0.55);
+  }
+}
+
+@keyframes story-snap-shake-loud {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-8px);
+  }
+  40% {
+    transform: translateX(7px);
+  }
+  60% {
+    transform: translateX(-5px);
+  }
+  80% {
+    transform: translateX(4px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .play.is-story-snap.is-shake .snap-stage {
     animation: none;

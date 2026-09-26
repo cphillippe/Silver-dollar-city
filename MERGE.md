@@ -1,17 +1,17 @@
-# 1.4.268 Easy Hold dock arcade punch invent
+# 1.4.269 Easy Story Snap residual juice invent
 
-**Branch:** `fix/268-easy-fun-clear-invent` → `main`
+**Branch:** `fix/269-easy-fun-clear-invent` → `main`
 **Status:** Not merged. Do not wake Shot (wake at 1.4.270).
 
 ## What changed
-Story Creek HOLD on tall phones (~390×844) still used the 1.4.156 HUD compress only at `max-height: 720px`, so the dock CTA and timing juice stayed quiet after the cream quiz plate. 1.4.268 adds `@media (max-height: 920px), (min-height: 921px)` in `src/styles/welcome.css` for Easy Hold dock chrome only (`html[data-easy='on']` live `.why-blast`, not miss-teach):
+Story Snap on tall phones (~390×844) still used the 1.4.182 HUD compress (strip · chip) only at `max-height: 720px`, so the SNAP pad and score stayed quiet while full-size chips sat beside the board. 1.4.269 adds `@media (max-height: 920px), (min-height: 921px)` in `src/styles/storySnap.css` for Easy Story Snap chrome only:
 
-- HUD gaps and next-tap compress climb past the 720 cap
-- score, miss, and LOCKED juice punch gold (or miss pink) on the cream plate
-- win dock CTA is a 64px gold button with dark ink
-- claim stays dark-ink readable
+- strip · chip compress climbs past the 720 cap
+- SNAP pad and win dock CTA punch gold
+- score is a gold pill; a miss turns score, toast, and stage border pink and shakes louder
+- miss / snap toast overlays the stage so it does not push the beat lane
 
-Father Dash timing rail, Match, Samaritan, Manage, and miss-teach feedback stay on their peels. Android `versionName` stays `1.4.113`. `docs/` is synced from `dist/` and `qa-seed.html` is preserved.
+Hold, Father Dash, Match, Lock In, Samaritan, and Manage stay on their peels. Android `versionName` stays `1.4.113`. `docs/` is synced from `dist/` and `qa-seed.html` is preserved.
 
 ## Checks
 - `npm run test:city`
