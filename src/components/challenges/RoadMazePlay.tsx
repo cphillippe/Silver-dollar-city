@@ -381,6 +381,7 @@ export function RoadMazePlay({
       {/* Easy Clear 1.4.249: tall-phone cream board-plate fill — paint parchment maze-stage · warm maze-board · denser stretch · dock pin — closes Shot 240 purple residual (Fixes #335). */}
       {/* Easy Clear 1.4.256: tall-phone cream shell fill — opaque cream app-body + play shell · solid maze-stage · warm board · cream score/dock floor · top pad so HUD unclips — closes Shot 250 purple voids + top clip after 249 (Fixes #348). */}
       {/* Easy Clear 1.4.265: tall residual cream floor (opaque cream play + app-body · solid maze-stage · score pinned to cream floor above the 920 cap) so leftover between HUD, board, and footer is cream, not purple void after 256 (Fixes #365). */}
+      {/* Easy Clear 1.4.271: pack maze-stage flex-start so the board sits under the objective chips on tall phones — cream floor stays, pills unchanged (Fixes #378). */}
       <p className="story-kicker">
         {home.who} · {home.place}
       </p>
