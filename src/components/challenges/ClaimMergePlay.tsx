@@ -248,7 +248,8 @@ export function ClaimMergePlay({
       className={`play is-claim-merge ${shake ? 'is-shake' : ''} ${view.won ? 'is-win' : ''} ${view.overflow ? 'is-full' : ''} ${comboFlash > 1 ? 'is-combo' : ''}`}
     >
       {/* Easy Clear 1.4.147: omit mergeHunt .sort-how — Drop chip · smash hint · ladder already teach the bowl (Fixes #184; Clear family with Maze 1.4.143 / Father 1.4.144). */}
-      {/* Easy Clear 1.4.159: ≤720 bowl-first — thin kicker · HUD · ladder; Drop chip stays (Fixes #205; Story Snap / maze ≤720 family). */}
+      {/* Easy Clear 1.4.159: ≤720 bowl-first — thin HUD · ladder; Drop chip stays (Fixes #205; Story Snap / maze ≤720 family). */}
+      {/* Easy Clear 1.4.181: ≤720 peels HUD — hide who·where kicker + rung names so bowl · Drop stay above fold (Father 173 / maze 175 family). */}
       <p className="story-kicker">
         {home.who} · {home.place}
       </p>
