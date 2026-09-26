@@ -370,7 +370,7 @@ export function RoadMazePlay({
       className={`play is-road-maze ${shake ? 'is-shake' : ''} ${won ? 'is-win' : ''} ${helpPhase ? 'is-help-phase' : ''} ${helped ? 'is-helped' : ''} ${found ? 'is-found' : ''}`}
       style={{ ['--maze-cols' as string]: MAZE_COLS, ['--maze-rows' as string]: MAZE_ROWS }}
     >
-      <p className="sort-how">{EASY.mazeHunt}</p>
+      {/* Easy Clear 1.4.143: omit mazeHunt .sort-how — maze-beats + story-caption + score already teach the three steps. */}
       <p className="story-kicker">
         {home.who} · {home.place}
       </p>
