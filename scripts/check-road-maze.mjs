@@ -145,11 +145,17 @@ assert.doesNotMatch(
 assert.match(playSrc, /mazeStepToward/)
 assert.match(playSrc, /maze-board/)
 assert.match(playSrc, /onBoardKey/)
-assert.match(playSrc, /EASY\.mazeHunt/)
+assert.doesNotMatch(
+  playSrc,
+  /EASY\.mazeHunt/,
+  'Easy Clear 1.4.143: omit mazeHunt .sort-how — beats + caption + score teach the road',
+)
 assert.match(playSrc, /EASY\.holdNext/)
 assert.match(playSrc, /ROAD_MAZE_AGAIN/)
 assert.ok(playSrc.lastIndexOf('EASY.holdNext') < playSrc.lastIndexOf('ROAD_MAZE_AGAIN'))
 assert.match(playSrc, /function replay/)
+assert.match(playSrc, /mazeCaption/)
+assert.match(playSrc, /story-caption/)
 assert.match(playSrc, /maze-beats/)
 assert.match(playSrc, /maze-cell-label/)
 assert.match(playSrc, /mazeStepToward/)
