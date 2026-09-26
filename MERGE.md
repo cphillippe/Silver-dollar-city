@@ -1,6 +1,6 @@
 # ready-easy-fun-clear-195 — 1.4.195 Easy Lock In feedback ≤720 fill purple void (Fixes #252)
 
-**PR:** (pending open)
+**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/256
 **Branch:** `ship/easy-fun-clear-195` → `main`
 **Version:** 1.4.195
 **Peel:** `39976be` (`39976beb4eed82bb42afa417c9bb4a7c215e46fd`)
