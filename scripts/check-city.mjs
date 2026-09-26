@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.262')
+assert.equal(APP_VERSION, '1.4.263')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -5714,5 +5714,40 @@ console.log('check-city: ok')
     latestChange('1.4.262').items.join('\n'),
     /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#300|#301|#302|#314|#315|#316|#317|#318|#319|#331|#332|#333|#334|#335|#336|#343|#344|#346|#347|#348|#349|#350|#361|Father Dash|Learn cream|Samaritan|Manage|Lock In|Dig|Creed|Build|Sort|Snap|Link|Claim merge|Source dig|invent Fun\/Clear|Sequence|Story Creek HOLD|Home dock|coach/i,
     '1.4.262 must not fix other phone-fail issues or climb another Easy surface',
+  )
+}
+
+// Easy Clear 1.4.263: Easy Lock In quiz ≤720 / tall residual purple void after cream 254 (Fixes #363)
+{
+  const welcomeCss263 = readFileSync(new URL('../src/styles/welcome.css', import.meta.url), 'utf8')
+  const whyBlast263 = readFileSync(
+    new URL('../src/components/challenges/WhyBlastPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(welcomeCss263, /1\.4\.263: Easy Lock In quiz ≤720 \/ tall residual purple void after cream 254/)
+  assert.match(
+    welcomeCss263,
+    /1\.4\.263: Easy Lock In quiz ≤720 \/ tall residual purple void after cream 254[\s\S]*?@media \(max-height: 920px\), \(min-height: 921px\)/,
+  )
+  assert.match(
+    welcomeCss263,
+    /1\.4\.263: Easy Lock In quiz ≤720 \/ tall residual purple void after cream 254[\s\S]*?\.app-body:has\(\.journal\.is-rehearse \.why-blast:not\(\.is-miss-teach\):not\(\.is-win\)\)[\s\S]*?background: #fff6e8/,
+  )
+  assert.match(
+    welcomeCss263,
+    /1\.4\.263: Easy Lock In quiz ≤720 \/ tall residual purple void after cream 254[\s\S]*?\.recall-gate\.is-easy-hold[\s\S]*?background-image: none[\s\S]*?background: #fff6e8/,
+  )
+  assert.match(
+    welcomeCss263,
+    /1\.4\.263: Easy Lock In quiz ≤720 \/ tall residual purple void after cream 254[\s\S]*?\.why-chip[\s\S]*?color: #2a2118/,
+  )
+  assert.match(whyBlast263, /1\.4\.263: tall residual cream floor/)
+  assert.match(cssSrc, /1\.4\.263: Easy Lock In quiz ≤720 \/ tall residual purple void after cream 254/)
+  assert.match(latestChange('1.4.263').items.join('\n'), /Fixes #363|purple void|cream|Lock In|phone portrait|recall-gate/i)
+  assert.match(latestChange('1.4.263').title, /Easy Lock In|≤720|purple void|Fixes #363/i)
+  assert.doesNotMatch(
+    latestChange('1.4.263').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#300|#301|#302|#314|#315|#316|#317|#318|#319|#331|#332|#333|#334|#335|#336|#343|#344|#345|#346|#347|#348|#349|#350|#361|#362|#364|Father Dash|Learn cream|Samaritan|Manage|Match grid|Dig|Creed|Build|Sort|Snap|Link|Claim merge|Source dig|invent Fun\/Clear|Sequence|Story Creek HOLD|Home dock|coach|miss-teach/i,
+    '1.4.263 must not fix other phone-fail issues or climb another Easy surface',
   )
 }
