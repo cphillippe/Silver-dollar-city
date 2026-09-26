@@ -3,7 +3,8 @@
 **PR:** https://github.com/cphillippe/Silver-dollar-city/pull/235
 **Branch:** `ship/easy-fun-clear-181` → `main`
 **Version:** 1.4.181
-**Tip:** `50518a6` (`50518a6bc8a7b76595ac7a8e238f8c611078fa01`)
+**Peel:** `b0013a3` (`b0013a35ed53129d924096e476f4983d3de568dc`)
+**Tip:** `330d674` (`330d674f298be54dc65fd6abebb812ca11bc376b`)
 **Base live:** 1.4.180 (`ea09832`, PR #234 Manage empty-lot header + compact sheet; atop 1.4.179 Easy Home letterbox #229)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
@@ -40,7 +41,7 @@ MODEL=gemini-flash-latest — invent pick A approved. Notes: `notes-gemini.txt`.
 - `src/config/app.ts`, `package.json`, `package-lock.json`
 - `src/content/changelog.ts` (1.4.181 atop live 1.4.180)
 - `notes-gemini.txt`
-- `docs/` (Pages rebuild)
+- `docs/` (Pages rebuild `index-CdsS9o_R.js` / `index-MktsPBFF.css`)
 - `MERGE.md`
 
 ## Checks
