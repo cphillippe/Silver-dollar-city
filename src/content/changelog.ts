@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.269',
+    title: 'Easy Story Snap: ≤720 residual juice tall-phone punch',
+    when: '2026-09-26',
+    items: [
+      'Easy Story Snap on ≤720 / phone portrait: extend HUD peel 182 strip · chip compress across max-height 920px and taller layout viewports, and punch the snap CTA plus score · miss juice arcade-loud without crowding the snap board (invent Fun/Clear; continuation of Story Snap HUD 241; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.268',
     title: 'Easy Hold dock: ≤720 arcade punch tall-phone juice',
     when: '2026-09-26',
