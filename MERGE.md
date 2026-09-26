@@ -1,6 +1,6 @@
 # ready-easy-fun-clear-198 — 1.4.198 Easy Sort ≤720 fill purple void
 
-**PR:** (pending)
+**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/259
 **Branch:** `ship/easy-fun-clear-198` → `main`
 **Version:** 1.4.198
 **Peel:** `67cf0b0` (`67cf0b07e3ebc2558e1a29dc70c2799f70002a82`)
