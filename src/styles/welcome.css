@@ -2552,3 +2552,97 @@ html[data-theme='dusk'] .easy-story-card {
     margin-top: 0;
   }
 }
+
+/* Easy Clear 1.4.272: Easy Lock In hub empty purple void (Fixes #384) —
+   Bill phone Lock In hub shows one collapsed row “Lock In · 8” then a huge purple void.
+   Kept claims stay hidden because Easy stored-lines SavedTree mounts collapsed.
+   This block is the hub list only — NOT mid-quiz (`.journal.is-rehearse` / why-blast
+   stays on 254/263/364). Media is the 920 query joined with min-height 921 so tall
+   phones get the floor, not only ≤720. (1) opaque cream `#fff6e8` on full-bleed
+   app-body and `.journal.is-easy-hold` so portrait leftover is cream, not dusk purple;
+   (2) dark ink `#2a2118` on the head and claim · reason · from so the open list stays
+   readable; (3) `justify-content: flex-start` packs the list under the head. */
+@media (max-height: 920px), (min-height: 921px) {
+  /* Do not paint body / .app — the play topbar is a translucent dusk wash and must stay purple. */
+  html[data-easy='on'] .app.is-play .app-body:has(> .journal.is-easy-hold),
+  .app.is-play[data-easy='on'] .app-body:has(> .journal.is-easy-hold) {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+    box-sizing: border-box;
+    padding: 4px 12px calc(12px + env(safe-area-inset-bottom, 0px));
+    overflow-x: hidden;
+    overflow-y: auto;
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    color: #2a2118;
+  }
+
+  html[data-easy='on'] .journal.is-easy-hold {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-content: flex-start;
+    flex: 1 0 auto;
+    min-height: 100%;
+    width: 100%;
+    gap: 0;
+    padding: 8px 10px 12px;
+    border-radius: 18px;
+    border: 1px solid color-mix(in srgb, #2a2118 10%, transparent);
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    color: #2a2118;
+    box-shadow: none;
+  }
+
+  html[data-easy='on'] .journal.is-easy-hold > .text-link {
+    flex: 0 0 auto;
+    color: #8a5a12;
+  }
+
+  html[data-easy='on'] .journal.is-easy-hold .journal-head {
+    flex: 0 0 auto;
+    margin-bottom: 8px;
+  }
+
+  html[data-easy='on'] .journal.is-easy-hold .journal-head h1,
+  html[data-easy='on'] .journal.is-easy-hold .journal-head > p,
+  html[data-easy='on'] .journal.is-easy-hold .saved-tree-copy,
+  html[data-easy='on'] .journal.is-easy-hold .saved-tree-count,
+  html[data-easy='on'] .journal.is-easy-hold .saved-tree-lead,
+  html[data-easy='on'] .journal.is-easy-hold .dossier.is-stored h3,
+  html[data-easy='on'] .journal.is-easy-hold .held-triad dd,
+  html[data-easy='on'] .journal.is-easy-hold .learning-store,
+  html[data-easy='on'] .journal.is-easy-hold .dossier.is-stored .quiet {
+    color: #2a2118;
+  }
+
+  html[data-easy='on'] .journal.is-easy-hold .journal-head .eyebrow,
+  html[data-easy='on'] .journal.is-easy-hold .dossier.is-stored .eyebrow,
+  html[data-easy='on'] .journal.is-easy-hold .held-triad dt {
+    color: #8a5a12;
+  }
+
+  html[data-easy='on'] .journal.is-easy-hold .stored-chapter {
+    flex: 0 1 auto;
+    margin-bottom: 0;
+  }
+
+  html[data-easy='on'] .journal.is-easy-hold .dossier.is-stored {
+    background-color: #fffdf8;
+    background-image: none;
+    background: #fffdf8;
+    color: #2a2118;
+    border-color: color-mix(in srgb, #2a2118 16%, transparent);
+    box-shadow: none;
+  }
+}

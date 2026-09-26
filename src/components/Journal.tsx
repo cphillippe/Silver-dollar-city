@@ -237,9 +237,10 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
       </header>
 
       {progress.learnings.length > 0 ? (
+        /* Easy Clear 1.4.272: hub list opens stored lines (Fixes #384). Rehearse/quiz stays on the early return. */
         <SavedTree
           className="journal-chapter stored-chapter"
-          startOpen={easy ? false : !focusedEntry || Boolean(focusId?.startsWith('learn-'))}
+          startOpen={easy ? true : !focusedEntry || Boolean(focusId?.startsWith('learn-'))}
         >
           <SavedTreeSummary
             who="juniper"
