@@ -938,6 +938,11 @@
   margin-bottom: 6px;
 }
 
+/* Easy Clear 1.4.141: live arena Main idea label — same micro label as miss teach. */
+.why-arena .why-claim .why-miss-label {
+  margin-bottom: 6px;
+}
+
 .why-miss-reason {
   margin: 0;
   padding: 10px 12px;
