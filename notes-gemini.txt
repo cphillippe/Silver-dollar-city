@@ -1,8 +1,2 @@
-MODEL=gemini-flash-latest
-Invent Fun/Clear — no open Easy Fun/Clear issue beyond parked #161 / cheap-hop #160.
-1.4.204 Easy Father speech→rail live on main (22bfb1b / #265). Shot pack 200 still in flight — Manager handles vision; do NOT wake Shot; do NOT run Gemini vision.
-Invent API: GEMINI_API_KEY present but not AIza AI Studio shape (same as 163–204).
-Manager-steered invent peel: Easy Sequence ≤720 close stones→result purple gap (after fill 186, gap:6px + ResultPanel padding leave purple between stone bank and miss teach; Father/Hold dock-margin family; different scene than Father 204 / Build 203 / Hold 202 / Creek 201 / Creed 200 / Link 199 / Sort 198 / Snap 197 / Match / Lock In).
-Peel: sortHold.css @media (max-height:720px) play.is-sequence.is-deal gap:2px + .result margin:0 compact padding; SequencePlay comment. Fill 186 / how-peel 171 stay.
-Do NOT re-peel Shot 190 fails #250–#253 or Father 204 / Build 203 / Hold 202 / Creek 201 / Creed 200 / Link 199 / Sort 198 / Snap 197. Dig/Hard/NW/Town/stores/Pack B/Home map candy parked.
-VERDICT: APPROVE (invent Fun/Clear · Sequence stones→result close — after fill 186)
+{"pick":"A","slug":"easy-learn-held-clear-fill-720","title":"Easy Learn ≤720 fill held-clear purple void","why":"197–205 covered Snap/Sort/Link/Creed/Creek/Hold/Build/Father/Sequence. Learn compress 162 / stamp 177 still leave teach-gate content-hugging with empty purple under Match CTA. Clear climb claim·reason·source (HeldTriad) — densest remaining Fun/Clear invent; Journal held clear chrome was deferred across hops.","approach":"welcome.css ≤720: grow app-body:has(is-teach easy-story-card) + challenge-page.is-teach + easy-story-card flex; stretch held-triad align-content center; zero easy-story-dock margin-top. TeachUnlock thin 1.4.206 comment. Compress 162 / stamp 177 stay.","risks":"Near-zero; EasyBack + stamp + reason + dock still teach; not Dig/Hard/NW/Town/stores/Pack B/Map; not #250–#253; not Sequence 205–Snap 197."}
+VERDICT: UNAVAILABLE — shipped Manager-steered invent (Easy Learn ≤720 fill held-clear) without Gemini APPROVE. Shot pack 1.4.200 mid-capture — Manager handles vision. Do NOT wake Shot.
