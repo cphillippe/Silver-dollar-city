@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.268')
+assert.equal(APP_VERSION, '1.4.269')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -5966,5 +5966,51 @@ console.log('check-city: ok')
     latestChange('1.4.268').items.join('\n'),
     /Fixes #|Father Dash|Learn cream|Samaritan|Manage|Lock In|Dig|Creed|Build|Sort|Snap|Link|Claim merge|Source dig|Sequence|Match grid|Home dock|coach|miss-teach|maze-stage/i,
     '1.4.268 must not fix phone-fail issues or climb another Easy surface',
+  )
+}
+
+// Easy Fun 1.4.269: Easy Story Snap residual juice on tall phone (invent Fun/Clear)
+{
+  const snapCss269 = readFileSync(new URL('../src/styles/storySnap.css', import.meta.url), 'utf8')
+  const snapPlay269 = readFileSync(
+    new URL('../src/components/challenges/StorySnapPlayView.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(snapCss269, /1\.4\.269: Easy Story Snap residual juice/)
+  assert.match(
+    snapCss269,
+    /1\.4\.269: Easy Story Snap residual juice[\s\S]*?@media \(max-height: 920px\), \(min-height: 921px\)/,
+  )
+  assert.match(
+    snapCss269,
+    /1\.4\.269: Easy Story Snap residual juice[\s\S]*?\.snap-chip \{[\s\S]*?font-size: 0\.68rem/,
+  )
+  assert.match(
+    snapCss269,
+    /1\.4\.269: Easy Story Snap residual juice[\s\S]*?\.snap-pad \{[\s\S]*?#ffcc33/,
+  )
+  assert.match(
+    snapCss269,
+    /1\.4\.269: Easy Story Snap residual juice[\s\S]*?\.match-score \{[\s\S]*?#ffcc33/,
+  )
+  assert.match(
+    snapCss269,
+    /1\.4\.269: Easy Story Snap residual juice[\s\S]*?\.is-shake \.match-score \{[\s\S]*?#ff5a7a/,
+  )
+  assert.match(
+    snapCss269,
+    /1\.4\.269: Easy Story Snap residual juice[\s\S]*?\.match-toast \{[\s\S]*?position: absolute/,
+  )
+  assert.match(snapPlay269, /1\.4\.269: tall-phone Story Snap residual juice/)
+  assert.match(cssSrc, /1\.4\.269: Easy Story Snap residual juice/)
+  assert.match(
+    latestChange('1.4.269').items.join('\n'),
+    /HUD peel|phone portrait|snap CTA|score|miss|invent Fun\/Clear|snap board/i,
+  )
+  assert.match(latestChange('1.4.269').title, /Easy Story Snap|≤720|residual juice|HUD/i)
+  assert.doesNotMatch(
+    latestChange('1.4.269').items.join('\n'),
+    /Fixes #|Father Dash|Learn cream|Samaritan|Manage|Lock In|Dig|Creed|Build|Sort|Link|Claim merge|Source dig|Sequence|Match grid|Home dock|coach|miss-teach|maze-stage|Hold dock/i,
+    '1.4.269 must not fix phone-fail issues or climb another Easy surface',
   )
 }
