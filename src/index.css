@@ -3286,6 +3286,89 @@ html[data-easy='on'] .link-block.is-picture .link-art {
   }
 }
 
+/* Easy Clear 1.4.219: Easy Link ≤720 / phone portrait fill + choices→CTA purple void —
+   After fill 188 + dock-margin 199 (both ≤720 only), real phones ~390×844 still leave
+   picture choices hugging the top with empty purple under the column / before the dock
+   because those peels never apply at Shot heights. Extend fill + dock-margin across
+   phone portrait heights (max-height: 920px) so link-col absorbs free space — tight
+   clue · picture choices → CTA on tall phones (Easy Link arcade chrome).
+   Fill 188 / dock 199 ≤720 stay. Do NOT pack Samaritan / Manage / Match / Lock In /
+   Learn / Father / Creek / Dig / Creed / Build / Hold / Sort / Snap. */
+@media (max-height: 920px) {
+  .play.is-easy-link,
+  .daily-page.is-puzzle .play.is-easy-link,
+  .challenge-page.is-puzzle .play.is-easy-link {
+    flex: 1 1 auto;
+    min-height: 0;
+    gap: 4px;
+  }
+
+  .play.is-easy-link .easy-teach {
+    flex: 0 0 auto;
+    margin: 0 0 4px;
+  }
+
+  .play.is-easy-link .easy-steps {
+    padding: 4px 6px;
+    font-size: 0.72rem;
+    gap: 2px;
+  }
+
+  .play.is-easy-link .link-grid.is-wizard {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .play.is-easy-link .link-col {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: grid;
+    grid-auto-rows: minmax(0, 1fr);
+    align-content: stretch;
+    gap: 8px;
+  }
+
+  .play.is-easy-link .link-clue {
+    flex: 0 0 auto;
+    margin: 0 0 4px;
+    padding: 6px 8px;
+    font-size: 0.88rem;
+    line-height: 1.2;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .play.is-easy-link .link-block.is-picture {
+    min-height: 0;
+    height: auto;
+    max-height: none;
+    align-self: stretch;
+    gap: 4px;
+    padding: 8px;
+  }
+
+  .play.is-easy-link .link-block.is-picture .place-glyph,
+  .play.is-easy-link .link-block.is-picture .avatar,
+  .play.is-easy-link .link-block.is-picture .gem,
+  .play.is-easy-link .link-block.is-picture .link-art {
+    width: 96px;
+    height: 96px;
+  }
+
+  .play.is-easy-link .link-block.is-picture .link-label {
+    font-size: 0.88rem;
+    max-height: 2.4em;
+  }
+
+  .play.is-easy-link .link-dock {
+    margin-top: 0;
+  }
+}
+
 html[data-easy='on'] .btn.tiny {
   min-height: 52px;
 }
