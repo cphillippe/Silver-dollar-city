@@ -812,3 +812,50 @@ html[data-easy='on'] .next-tap {
     margin-top: 0;
   }
 }
+
+/* Easy Clear 1.4.259: Easy panel-blast / SNAG bonus ≤720 / phone portrait HUD peel —
+   After board-first HUD peel 168 (≤720 only), real phones ~390×844 still show how /
+   teach-say / fat teach-dock chrome that bury letter board · SNAG BONUS! · Lock In CTA —
+   those peels never apply at Shot heights. Fill 193 + invent 225/236/246/253 already
+   extended cream fill to 920, but board-first HUD peel never invent-climbed. Extend
+   hide how + teach-say + compress teach-dock / LociStamp / chips / score across phone
+   portrait heights (max-height: 920px) so dock · board · SNAG juice · score · CTA stay
+   clear on tall phones (Easy panel-blast arcade chrome; invent Fun/Clear).
+   Continuation of Creed HUD 233 / Creek maze HUD 234 / Snap HUD 241 / Hold HUD 242 /
+   Sequence/Build HUD 243 / Sort HUD 244 hide-kicker family. HUD 168 ≤720 stays.
+   Do NOT re-peel Match cream 245–253 / Learn / Lock In / Samaritan / Father / Manage /
+   Dig / Creed / Hold / Sort / Snap / Link / Build / Creek. */
+@media (max-height: 920px) {
+  .play.is-gem-search.is-panel-blast {
+    gap: 3px;
+  }
+
+  .play.is-gem-search.is-panel-blast .sort-how {
+    display: none;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .match-teach-say {
+    display: none;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .match-teach-dock {
+    max-height: 72px;
+    gap: 0.08rem;
+    padding: 0;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .loci-stamp.is-dock {
+    min-height: 28px;
+    max-height: 32px;
+    padding: 0.06rem 0.35rem;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .match-teach-chips {
+    gap: 0.18rem;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .match-score {
+    margin: 0;
+    font-size: 0.7rem;
+  }
+}

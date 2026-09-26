@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.259',
+    title: 'Easy panel-blast / SNAG: ≤720 board-first HUD + tall-phone SNAG juice',
+    when: '2026-09-26',
+    items: [
+      'Easy panel-blast / SNAG bonus (GemSearch is-panel-blast) on ≤720 / phone portrait: extend board-first HUD peel so how + teach-say hide and teach-dock / LociStamp / chips / score compress thin, plus punch BONUS! +100 SNAG overlay arcade-loud on the cream board with gold bonus-pts — dock · board · SNAG · CTA stay clear on tall phones (invent Fun/Clear; continuation of panel-blast board-first HUD peel 168 ≤720 family; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.258',
     title: 'Easy Manage sheet: ≤720 close tall-phone black void / bottom cutout (Fixes #350)',
     when: '2026-09-26',
