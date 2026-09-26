@@ -5983,6 +5983,14 @@ console.log('check-city: ok')
   )
   assert.match(
     snapCss269,
+    /1\.4\.269: Easy Story Snap residual juice[\s\S]*?display: flex/,
+  )
+  assert.match(
+    snapCss269,
+    /1\.4\.269: Easy Story Snap residual juice[\s\S]*?\.eyebrow,[\s\S]*?display: none/,
+  )
+  assert.match(
+    snapCss269,
     /1\.4\.269: Easy Story Snap residual juice[\s\S]*?\.snap-chip \{[\s\S]*?font-size: 0\.68rem/,
   )
   assert.match(
