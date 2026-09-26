@@ -2091,6 +2091,40 @@ html[data-easy='on'] .recall-card {
   }
 }
 
+/* Easy Clear 1.4.242: Easy Hold ≤720 / phone portrait HUD peel —
+   After HUD peel 170 (≤720 only), real phones ~390×844 still show outer eyebrow +
+   quiet From that bury next-tap · claim · chips — those peels never apply at Shot
+   heights. Fill 190 + dock 202 + hud→arena 210 already extended to 920 by invent
+   217, but HUD peel never invent-climbed. Extend hide eyebrow + quiet held-from
+   across phone portrait heights (max-height: 920px) so arena · next-tap · chips
+   stay clear on tall phones (Hold WhyBlast live arena chrome; invent Fun/Clear).
+   Continuation of Creed HUD 233 / Creek maze HUD 234 / Snap HUD 241 hide-kicker family.
+   HUD 170 ≤720 stays. Do NOT pack Match / Lock In / Learn / Father / Creek /
+   Dig / Sort / Link / Build / Sequence / Manage / Claim merge / Story Snap / gemSearch. */
+@media (max-height: 920px) {
+  /* Journal rehearse + RecallGate both print EASY.saved — hide when blast arena is up */
+  .journal.is-rehearse.is-easy-hold-practice:has(.why-blast) .rehearse-anchor > .eyebrow {
+    display: none;
+  }
+
+  .recall-gate.is-easy-hold.is-why-blast:has(.why-blast) > .eyebrow {
+    display: none;
+  }
+
+  /* From under live claim is secondary — miss teach / locked takeaway still show From */
+  .why-arena .held-from.quiet {
+    display: none;
+  }
+
+  .why-blast-hud {
+    gap: 4px;
+  }
+
+  .why-blast-hud .next-tap {
+    font-size: 0.82rem;
+  }
+}
+
 
 /* Easy Clear 1.4.194: Lock In quiz ≤720 fill purple void (Fixes #251) —
    After Hold arena stretch 190 / win-end 185 / chrome 170·156, the gold

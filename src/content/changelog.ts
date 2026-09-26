@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.242',
+    title: 'Easy Hold: ≤720 close HUD peel on tall phone',
+    when: '2026-09-26',
+    items: [
+      'Easy Hold on ≤720 / phone portrait: extend HUD peel so outer eyebrow + quiet From hide and arena · next-tap · chips stay clear — no buried claim on tall phones (invent Fun/Clear; continuation of Hold arena-first HUD peel 170 ≤720 family; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.241',
     title: 'Easy Story Snap: ≤720 close HUD peel on tall phone',
     when: '2026-09-26',
