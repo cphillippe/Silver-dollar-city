@@ -2311,3 +2311,59 @@ html[data-theme='dusk'] .easy-story-card {
     -webkit-backdrop-filter: none;
   }
 }
+
+/* Easy Clear 1.4.267: Easy Manage lot sheet purple bar / misalign after black-void 258 (Fixes #367) —
+   Shot pack 1.4.260 08-manage-or-snap.png STILL fails — Gemini: East porch Manage sheet is
+   misaligned with a dark purple bar extending at the bottom-right (new shape vs closed #350
+   black void). Live DOM is body > .mind-map.is-manage (portal) > .mind-map-card. The card is
+   width: min(100%, 420px). place-items: unset on the overlay wins over align-items: center, so
+   the 420px plate sits on the left. 1.4.230 / 1.4.258 force 100vw only at max-width 430px or
+   max-height 920px. Above both caps the right gap falls over the visibility:hidden Easy Home
+   dock, and the dusk body shows through as a bottom-right purple bar. 258's ::after belt
+   (#241050) is the same strip when the 920 query matches and the plate does not cover it.
+   Strengthen — do not delete 258. This block joins the 920 query with min-height 921 and scopes
+   Easy only (html[data-easy='on'], sheet is portaled to body): (1) stretch the overlay with
+   width: auto + left/right 0 so 100vw cannot shift it; (2) full-bleed the card (width 100% ·
+   max-width none · margin 0 · square bottom) with an opaque #241050 plate; (3) safe-area
+   padding inside the plate; (4) content: none on the ::after belt. Map peek above the sheet
+   stays. Home map when Manage is closed is untouched. */
+@media (max-height: 920px), (min-height: 921px) {
+  html[data-easy='on'] .mind-map.is-manage {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    max-width: none;
+    margin: 0;
+    box-sizing: border-box;
+    align-items: stretch;
+    justify-content: flex-end;
+  }
+
+  /* Kill the 258 bottom belt — the plate itself is the floor, not a darker strip beside it */
+  html[data-easy='on'] .mind-map.is-manage::after {
+    content: none;
+    display: none;
+    background: none;
+    background-color: transparent;
+    background-image: none;
+  }
+
+  html[data-easy='on'] .mind-map.is-manage .mind-map-card {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    margin: 0;
+    align-self: stretch;
+    box-sizing: border-box;
+    border-radius: 20px 20px 0 0;
+    background-color: #241050;
+  }
+
+  /* Safe-area lives inside the plate. Empty-lot keeps its own compact padding. */
+  html[data-easy='on'] .mind-map.is-manage:not(.is-empty-lot) .mind-map-card {
+    padding-left: max(12px, env(safe-area-inset-left, 0px));
+    padding-right: max(12px, env(safe-area-inset-right, 0px));
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  }
+}
