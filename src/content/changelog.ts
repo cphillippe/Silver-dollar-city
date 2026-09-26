@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.246',
+    title: 'Easy Match: ≤720 close tall-phone grid→footer purple void residual (Fixes #332)',
+    when: '2026-09-26',
+    items: [
+      'Fixes #332: Easy Match gemSearch / picture-deal on ≤720 / tall phone portrait — paint cream parchment gem-scroll·stage · warm board plate · denser grid stretch (and match-grid cream plate on picture-deal) so leftover fill is intentional cream board stage, not a dead purple band between grid and footer (Shot 240 residual after Match tall-void peel 1.4.236; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.245',
     title: 'Easy Learn: ≤720 close tall-phone bottom purple void residual (Fixes #331)',
     when: '2026-09-26',
