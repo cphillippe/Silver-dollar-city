@@ -20,7 +20,7 @@ import { resolveStoryMedia, storyPanelsFor } from '../src/lib/storyPanels.ts'
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 
 assert.equal(PANEL_BLAST_VERSION, '1.4.85')
-assert.equal(APP_VERSION, '1.4.203')
+assert.equal(APP_VERSION, '1.4.204')
 
 const files = [
   ...ROAD_BLAST_IDS.flatMap((id) => [
