@@ -1,8 +1,8 @@
 MODEL=gemini-flash-latest
 Invent Fun/Clear — no open Easy Fun/Clear issue beyond parked #161 / cheap-hop #160.
-1.4.188 Easy Link fill live on main (c82e112 / #245). Shot wake at 1.4.190 — invent toward that.
-Invent API: GEMINI_API_KEY present but not AIza AI Studio shape (same as 163–188).
-Manager-steered invent peel: Easy Father Dash ≤720 fill purple void (HUD peel 173 only; fixed 132px run-scene + speech + Hold pad hug top — empty purple under pad; Match 184 / Link 188 fill family; different scene than Match/LockIn/Samaritan/Sort/Snap/Creed/Build Argument/Link).
-Peel: index.css @media (max-height:720px) play.is-father-run flex:1 + stretch run-scene height:auto; FatherRunPlay comment.
-Do NOT re-peel Match/LockIn/Samaritan/Sort/Snap/Creed/Build Argument/Link. Dig/Hard/NW/Town/stores/Pack B/Home map candy parked.
-VERDICT: APPROVE (invent Fun/Clear · densest remaining Easy trail Father Dash fill — after HUD 173)
+1.4.189 Easy Father Dash fill live on main (639a840 / #246). Shot wake after this 1.4.190 merges — CoS wakes Shot; do NOT wake Shot from this hop.
+Invent API: GEMINI_API_KEY present but not AIza AI Studio shape (same as 163–189).
+Manager-steered invent peel: Easy Hold (WhyBlast live arena) ≤720 fill purple void (arena-first 170 / short-phone 156 only for Hold chrome; chips hug content — empty purple under CTA; Match 184 / Father 189 fill family; different scene than Match/LockIn-win-end/Samaritan/Sort/Snap/Creed/Build Argument/Link/Father Dash).
+Peel: sortHold.css @media (max-height:720px) why-blast flex:1 + why-arena grid-template-rows stretch chips; WhyBlastPlay comment.
+Do NOT re-peel Match/LockIn-win-end/Samaritan/Sort/Snap/Creed/Build Argument/Link/Father Dash. Dig/Hard/NW/Town/stores/Pack B/Home map candy parked.
+VERDICT: APPROVE (invent Fun/Clear · densest remaining Easy trail Hold arena fill — after chrome 170 / win-end 185)

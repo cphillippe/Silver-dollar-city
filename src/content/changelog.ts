@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.190',
+    title: 'Easy Hold: ≤720 fill purple void',
+    when: '2026-09-25',
+    items: [
+      'Easy Hold (Lock In WhyBlast) on ≤720px tall: grow why-blast shell + stretch arena chip rows so claim · chips fill the gold card — no empty purple void under the CTA (Match 1.4.184 / Father Dash 1.4.189 fill family · invent Fun/Clear; arena-first 1.4.170 / win-end 1.4.185 untouched; Match / Samaritan / Sort / Snap / Creed / Build Argument / Link / Father Dash peels untouched)',
+    ],
+  },
+  {
     version: '1.4.189',
     title: 'Easy Father Dash: ≤720 fill purple void',
     when: '2026-09-25',
