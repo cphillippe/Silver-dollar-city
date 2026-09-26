@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.223')
+assert.equal(APP_VERSION, '1.4.224')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -4414,5 +4414,35 @@ console.log('check-city: ok')
     latestChange('1.4.223').items.join('\n'),
     /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|Father Dash|Learn cream|Match grid|Manage|Lock In quiz|Dig|Creed|Hold|Sort|Link|Build|Sequence|Road maze|Claim merge|Source dig|Story Creek HOLD|slider→HOLD|timing-rail→CTA|hud→arena|Keep·Toss|choices→CTA|bowl→CTA|stones→result/i,
     '1.4.223 must not fix phone-fail issues or climb another Easy surface',
+  )
+}
+// Easy Clear 1.4.224: Easy Match ≤720 / phone portrait fill + score→CTA purple void (invent Fun/Clear)
+{
+  const matchCss224 = readFileSync(new URL('../src/styles/match.css', import.meta.url), 'utf8')
+  const matchPlay224 = readFileSync(
+    new URL('../src/components/challenges/MatchPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(matchCss224, /1\.4\.224: Easy Match ≤720 \/ phone portrait fill \+ score→CTA purple void/)
+  assert.match(
+    matchCss224,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.play\.is-match\.is-deal \{[\s\S]*?gap: 4px/,
+  )
+  assert.match(
+    matchCss224,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.play\.is-match\.is-deal \.match-grid \{[\s\S]*?min-height: 0/,
+  )
+  assert.match(
+    matchCss224,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.play\.is-match\.is-deal \.cta-dock \{[\s\S]*?margin-top: 0/,
+  )
+  assert.match(matchPlay224, /1\.4\.224: phone portrait extends fill \+ score→CTA so match-grid·score·CTA close purple void/)
+  assert.match(cssSrc, /1\.4\.224: Easy Match ≤720 \/ phone portrait fill \+ score→CTA purple void/)
+  assert.match(latestChange('1.4.224').items.join('\n'), /fill|score→CTA|phone portrait|purple void|Match|match-grid|invent Fun\/Clear/i)
+  assert.match(latestChange('1.4.224').title, /Easy Match|≤720|fill|score→CTA|purple void/i)
+  assert.doesNotMatch(
+    latestChange('1.4.224').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|Father Dash|Learn cream|Manage|Lock In quiz|Dig|Creed|Hold|Sort|Link|Build|Sequence|Road maze|Claim merge|Source dig|Story Creek|Story Snap|slider→HOLD|timing-rail→CTA|hud→arena|Keep·Toss|choices→CTA|bowl→CTA|stones→result|pad→CTA|snap-stage/i,
+    '1.4.224 must not fix phone-fail issues or climb another Easy surface',
   )
 }
