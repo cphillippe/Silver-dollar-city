@@ -1,10 +1,10 @@
 # ready-easy-fun-clear-184 — 1.4.184 Easy Match ≤720 fill empty purple card (Fixes #238)
 
-**PR:** (fill after open)
+**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/241
 **Branch:** `ship/easy-fun-clear-184` → `main`
 **Version:** 1.4.184
-**Peel:** (fill after commit)
-**Tip:** (fill after commit)
+**Peel:**  ()
+**Tip:**  ()
 **Base live:** 1.4.183 (`29f015a`, PR #237 Easy Sort ≤720 board-first on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
