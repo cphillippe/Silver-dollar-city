@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.152',
+    title: 'Story Snap: short-phone teach thin',
+    when: '2026-09-25',
+    items: [
+      'Easy Story Snap on ≤720px tall: pad owns how (quiet Tap-when hint off); snap-teach stays a thin strip so the lane keeps the phone (maze help-phase family; Fixes #189)',
+    ],
+  },
+  {
     version: '1.4.151',
     title: 'BuildArgument: one how line on Easy',
     when: '2026-09-25',

@@ -298,9 +298,7 @@ export function StorySnapPlayView({
         <p className="snap-claim" role="status">
           {STORY_SNAP_CLAIM}
         </p>
-      ) : (
-        <p className="quiet">{STORY_SNAP_HINT}</p>
-      )}
+      ) : null}
 
       <p className="match-score is-juice" aria-label={`Score ${score}`}>
         {score}
