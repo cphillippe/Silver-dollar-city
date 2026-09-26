@@ -1,6 +1,6 @@
 # ready-easy-fun-clear-189 — 1.4.189 Easy Father Dash ≤720 fill purple void
 
-**PR:** (pending open)
+**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/246
 **Branch:** `ship/easy-fun-clear-189` → `main`
 **Version:** 1.4.189
 **Peel:** `4151c77` (`4151c77f415210ea156996179f633fa60611a1ce`)
