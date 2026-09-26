@@ -225,4 +225,23 @@ assert.match(hubSrc, /EASY\.mazeMatch/)
 assert.match(hubSrc, /EASY\.mazeMatch/)
 assert.match(hubSrc, /EASY\.matchCta/)
 
+// Easy Clear 1.4.153: default board-first chrome compress (not only .is-help-phase) — Fixes #190
+assert.match(
+  mazeCss,
+  /1\.4\.153 default board-first|peel help-phase chrome compress/,
+)
+assert.match(
+  mazeCss,
+  /play\.is-road-maze \.run-thumb \{[\s\S]*max-height: 26px/,
+)
+assert.match(
+  mazeCss,
+  /@media \(max-height: 720px\) \{[\s\S]*play\.is-road-maze/,
+)
+assert.match(
+  mazeCss,
+  /max-height: min\(62dvh, 540px\)/,
+)
+assert.match(playSrc, /1\.4\.153.*board-first|#190/)
+
 console.log('check-road-maze: ok')
