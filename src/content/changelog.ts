@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.156',
+    title: 'Lock In: short-phone arena thin',
+    when: '2026-09-25',
+    items: [
+      'Easy Lock In (WhyBlast) on ≤720px tall: thin HUD · chips · claim so the arena keeps the phone — miss teach stays readable (Story Snap ≤720 family; Fixes #193)',
+    ],
+  },
+  {
     version: '1.4.155',
     title: 'Easy Home: short next-step whisper',
     when: '2026-09-25',
