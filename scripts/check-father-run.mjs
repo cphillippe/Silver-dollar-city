@@ -196,4 +196,13 @@ assert.match(
 assert.match(fatherCss, /\.run-speech-bar \{[\s\S]*?height: 3px/)
 assert.match(fatherCss, /-webkit-line-clamp:\s*2/)
 
+
+// Easy Clear 1.4.155: Home whisper short next-step (not full runHunt) — Fixes #192
+const easyUiRun = readFileSync(new URL('../src/lib/easyUi.ts', import.meta.url), 'utf8')
+const hubRunSrc = readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8')
+assert.match(easyUiRun, /runHome: 'One more run\.'/)
+assert.doesNotMatch(easyUiRun, /runHome: 'Hold to run\. Press the glow/)
+assert.match(hubRunSrc, /EASY\.runHome/)
+assert.match(hubRunSrc, /1\.4\.155.*whisper|#192/)
+
 console.log('check-father-run: ok')
