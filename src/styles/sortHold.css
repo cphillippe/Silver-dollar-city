@@ -2535,3 +2535,125 @@ html[data-easy='on'] .recall-card {
     flex: 0 0 auto;
   }
 }
+
+/* Easy Clear 1.4.237: Easy Lock In quiz ≤720 / tall-phone bottom-half purple void (Fixes #316) —
+   After extend fill 226 (194 + pad-zero 212 to ≤920), Shot pack 1.4.230 04-easy-lockin.png
+   (390×844) STILL clusters the gold recall-gate quiz card at the top with a massive dead
+   purple band across the bottom half (residual after closed #298 / 1.4.226; capture at
+   Chrome 1.4.230). Cause: incomplete height pin + flex 1 1 auto basis + global sticky
+   `.cta-dock` leave free space as a flat purple plate beneath the card hug (Father Dash
+   229 / Learn 235 / Match 236 sticky lesson). Strengthen LIVE mid-question quiz only
+   (`why-blast:not(.is-miss-teach):not(.is-win)`): app-body · journal · rehearse-anchor ·
+   recall-gate · why-blast height 100% · max-height 100% · flex 1 1 0 · overflow hidden,
+   why-arena flex 1 1 0 absorbs leftover (grid rows stretch chips · claim), cta-dock
+   position static + margin-top auto so any dock pins to the usable floor.
+   Fill 194 / pad-zero 212 ≤720 / extend 226 stay. Do NOT pack #317 miss-teach / win-end
+   231 / Match / Learn / Samaritan / Father / Manage / Dig / Creek / parked maps. */
+@media (max-height: 920px) {
+  html[data-easy='on'] .app.is-play .app-body:has(.journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win)) {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+    padding-top: 4px;
+    padding-bottom: 0;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast:not(.is-miss-teach):not(.is-win)) {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    gap: 4px;
+    overflow: hidden;
+    padding-bottom: 0;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast:not(.is-miss-teach):not(.is-win)) > .text-link {
+    flex: 0 0 auto;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast:not(.is-miss-teach):not(.is-win)) .rehearse-anchor {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast:not(.is-miss-teach):not(.is-win)) .rehearse-anchor > .eyebrow {
+    flex: 0 0 auto;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast:not(.is-miss-teach):not(.is-win)) .recall-gate.is-easy-hold {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    margin-bottom: 0;
+    overflow: hidden;
+    padding-bottom: 0;
+    gap: 4px;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    gap: 4px;
+    overflow: hidden;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .why-blast-hud,
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .miss-banner {
+    flex: 0 0 auto;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .why-arena {
+    flex: 1 1 0;
+    min-height: 0;
+    height: auto;
+    max-height: none;
+    align-content: stretch;
+    grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .why-chip {
+    min-height: 0;
+    height: 100%;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .why-claim {
+    align-self: stretch;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .cta-dock,
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast:not(.is-miss-teach):not(.is-win)) .recall-gate.is-easy-hold .cta-dock {
+    position: static;
+    bottom: auto;
+    margin-top: auto;
+    flex: 0 0 auto;
+    padding-top: 6px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
