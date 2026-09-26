@@ -934,6 +934,10 @@
   font-size: clamp(1.05rem, 4.2vw, 1.28rem);
 }
 
+.why-miss-teach .why-claim .why-miss-label {
+  margin-bottom: 6px;
+}
+
 .why-miss-reason {
   margin: 0;
   padding: 10px 12px;

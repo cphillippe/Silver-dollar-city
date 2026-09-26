@@ -25,8 +25,9 @@ interface WhyBlastPlayProps {
 
 /**
  * Easy Hold why-step: claim stays center, four why-chips float around it.
- * Correct → blast + LOCKED!. Wrong → shake + Miss −25, then claim·reason·From
+ * Correct → blast + LOCKED!. Wrong → shake + Miss −25, then Main idea · why-true · From
  * teach sheet with Try again so the kid learns before the next tap.
+ * Easy Clear: miss badge lives on the sheet only (no HUD dup); claim gets Main idea label.
  */
 export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: WhyBlastPlayProps) {
   const chips = useMemo(
@@ -115,15 +116,12 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
     >
       <WinBurst play={locked} stamp={HOLD_LOCKED_STAMP} />
       <div className="why-blast-hud">
-        <p className="next-tap">
-          {locked
-            ? EASY.keepThis
-            : missTeach
-              ? EASY.missTeachBadge
-              : retryJuice
-                ? EASY.oneMoreTry
-                : EASY.tapWhy}
-        </p>
+        {/* Easy Clear 1.4.139: miss teach sheet already prints .why-miss-badge — skip HUD dup. */}
+        {missTeach ? null : (
+          <p className="next-tap">
+            {locked ? EASY.keepThis : retryJuice ? EASY.oneMoreTry : EASY.tapWhy}
+          </p>
+        )}
         <p className="why-score" aria-live="polite">
           {score}
         </p>
@@ -136,7 +134,10 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
       {missTeach ? (
         <article className="why-miss-teach pop-in" role="status" aria-live="polite">
           <p className="why-miss-badge">{EASY.missTeachBadge}</p>
-          <p className="why-claim recall-line rehearse-stem">{easyFacingLine(id, claim)}</p>
+          <p className="why-claim recall-line rehearse-stem">
+            <span className="why-miss-label">{EASY.mainIdea}</span>
+            {easyFacingLine(id, claim)}
+          </p>
           <p className="why-miss-reason">
             <span className="why-miss-label">{EASY.whyTrueLabel}</span>
             {easyWhyLine(reason)}
