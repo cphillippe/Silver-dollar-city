@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.164',
+    title: 'Easy Home: Build It gift wrap',
+    when: '2026-09-25',
+    items: [
+      'Easy Home Build It gift: allow 2-line wrap — drop nowrap + ellipsis so ready gift shows “Tap it, then Build this.” beside the gold button (Fixes #214)',
+    ],
+  },
+  {
     version: '1.4.163',
     title: 'Story Snap: drop Learn-lead teach reprint',
     when: '2026-09-25',

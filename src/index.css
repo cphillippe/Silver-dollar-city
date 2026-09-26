@@ -3323,15 +3323,18 @@ html[data-easy='on'] .mind-node em {
   opacity: 0.95;
 }
 
+/* 1.4.164 Easy Build It gift wrap — Fixes #214: allow 2-line wrap (no nowrap ellipsis) so “Build this” stays visible */
 .hub.is-easy-home .easy-build-gift {
   margin: 0;
   font-family: var(--serif);
   font-size: 0.98rem;
   line-height: 1.25;
   color: var(--parchment);
-  white-space: nowrap;
+  white-space: normal;
   overflow: hidden;
-  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .hub.is-easy-home .easy-dock-build {
