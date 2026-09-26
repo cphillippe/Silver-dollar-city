@@ -230,6 +230,7 @@ export function BuildArgumentPlay({
       className={`play is-build is-onescreen ${guided ? 'is-deal' : ''} ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}
     >
       <WinBurst play={status === 'ok'} />
+      {/* Easy Clear 1.4.171: ≤720 peels how/lead/hint chrome in sortHold.css so slots + bank stay above fold. */}
       <PuzzleLead challenge={challenge} />
       {easy ? (
         showEasyPuzzleHint ? (
