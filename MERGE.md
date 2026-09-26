@@ -1,6 +1,6 @@
 # ready-easy-fun-clear-192 — 1.4.192 Easy Creed merge ≤720 fill purple void
 
-**PR:** (pending)
+**PR:** (pending create)
 **Branch:** `ship/easy-fun-clear-192` → `main`
 **Version:** 1.4.192
 **Peel:**  ()
