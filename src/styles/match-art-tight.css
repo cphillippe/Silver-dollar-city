@@ -108,7 +108,10 @@
   box-shadow: none;
 }
 
-/* Size the square from leftover height so a short phone does not scroll the grid away. */
+/* Easy Clear 1.4.211: Easy Match ≤720 close the grid→status purple void (Fixes #273).
+   The earlier square-width override landed after gem.css and undid 1.4.193's
+   leftover-height fill. Keep the board as the swipe plane, but let its rows
+   stretch through the stage so the status counter follows the grid. */
 @media (max-height: 720px) {
   .play.is-gem-search.is-panel-blast.is-story-docked .gem-scroll {
     overflow: hidden;
@@ -123,11 +126,14 @@
     justify-content: center;
   }
   .play.is-gem-search.is-panel-blast.is-story-docked .gem-board {
-    width: min(100%, calc(100svh - 308px));
+    width: min(100%, 96vw, 520px);
     max-width: 100%;
-    height: auto;
-    flex: 0 1 auto;
-    aspect-ratio: 1;
+    min-height: 0;
+    height: 100%;
+    max-height: none;
+    flex: 1 1 auto;
+    aspect-ratio: auto;
+    align-self: center;
   }
 }
 
