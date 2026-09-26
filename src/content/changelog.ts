@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.203',
+    title: 'Easy Build: ≤720 fill free-place purple void',
+    when: '2026-09-25',
+    items: [
+      'Easy Build Argument free-place (non-deal) on ≤720px tall: grow play shell + stretch slot-list / bank tiles + zero build-lock margin so slots · bank · Check lock fill the gold card — no empty purple void under the lock (Match 1.4.184 / Sort 1.4.198 / Sequence 1.4.186 fill family · invent Fun/Clear; deal fill 1.4.187 untouched; Hold 202 / Story Creek 201 / Creed 200 / Link 199 / Sort 198 / Story Snap 197 / Match 193 / Lock In 194·195 / Father 196 / Samaritan peels untouched)',
+    ],
+  },
+  {
     version: '1.4.202',
     title: 'Easy Hold: ≤720 close chips→CTA purple gap',
     when: '2026-09-25',
