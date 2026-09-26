@@ -3,7 +3,7 @@
 **PR:** https://github.com/cphillippe/Silver-dollar-city/pull/368
 **Branch:** `fix/361-easy-learn-tall-residual` → `main`
 **Implementation:** `11ec53e56a75665c8e56d63d27a7bc6af258ee29`
-**Tip:** `87eb73279d362f09e7594a32abe47b8042ebbe81`
+**Tip:** `8cf19aede7dc6cb13c0f4b14668cdc0b40b56776`
 **Status:** MERGEABLE (`mergeStateStatus` CLEAN). Not merged.
 
 ## What changed
