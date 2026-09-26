@@ -1,5 +1,5 @@
-1.4.173 Easy Father Dash ≤720 HUD peel (invent Fun/Clear)
-Gemini: unavailable — GEMINI_API_KEY present but not AIza AI Studio shape (same as 163–171; 1.4.171 Sequence now on main).
+1.4.175 Easy Story Creek maze ≤720 HUD peel (invent Fun/Clear)
+Gemini: unavailable — GEMINI_API_KEY present but not AIza AI Studio shape (same as 163–173).
 Shipped Manager-steered invent peel without live Gemini APPROVE.
-Peel: index.css @media (max-height:720px) hides Father run .story-kicker + .run-thumbs + .story-caption; tinies .match-score + .run-pad so scene + speech + rail + Hold pad stay above fold. Complements 1.4.154 speech thin. Creed merge 1.4.159 / Dig how 1.4.158 untouched.
-Comment in FatherRunPlay.tsx. 1.4.171 Sequence merged (#227). Do not claim 1.4.172 (Map Witness). Dig/Hard/NW/Town/stores/Pack B/Home map candy parked.
+Peel: maze.css @media (max-height:720px) hides .play.is-road-maze .story-kicker + .run-thumbs + .story-caption; keeps maze-beats; tinies .match-score; board max-height min(68dvh,540px) so beats + board stay above fold. Complements 1.4.153 compress + 1.4.143 how-dedupe. Father 1.4.173 / Creed 1.4.159 / Dig how 1.4.158 untouched.
+Comment in RoadMazePlay.tsx. 1.4.173 Father Dash merged (#228). Do not claim 1.4.172 / 1.4.174 (Map Witness owns 1.4.174). Dig/Hard/NW/Town/stores/Pack B/Home map candy parked.

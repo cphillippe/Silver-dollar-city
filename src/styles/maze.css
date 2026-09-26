@@ -705,20 +705,24 @@
 
 
 /* 1.4.153 short phone — default Find/walk board-first (Story Snap ≤720 family) */
+/* Easy Clear 1.4.175: Story Creek maze ≤720 HUD peel — hide kicker · thumbs · caption that bury
+   the board; keep maze-beats (Hurt/Help/Inn teach after 1.4.143 how-dedupe); tiny score so
+   beats + board stay above fold (Father 1.4.173 / Match/Hold/Sequence ≤720 family; invent Fun/Clear). */
 @media (max-height: 720px) {
   .play.is-road-maze {
     gap: 2px;
     padding: 3px 4px 5px;
   }
 
+  .play.is-road-maze .story-kicker,
+  .play.is-road-maze .run-thumbs,
+  .play.is-road-maze .story-caption {
+    display: none;
+  }
+
   .play.is-road-maze .run-thumb {
     max-height: 22px;
     border-radius: 7px;
-  }
-
-  .play.is-road-maze .story-caption {
-    font-size: 0.74rem;
-    line-height: 1.1;
   }
 
   .play.is-road-maze .maze-beat {
@@ -732,8 +736,16 @@
     height: 26px;
   }
 
+  .play.is-road-maze .match-score {
+    margin: 0;
+    font-size: 0.68rem;
+    line-height: 1.1;
+    min-height: 0;
+    padding: 1px 0;
+  }
+
   .play.is-road-maze .maze-board {
-    max-height: min(64dvh, 520px);
+    max-height: min(68dvh, 540px);
   }
 }
 
