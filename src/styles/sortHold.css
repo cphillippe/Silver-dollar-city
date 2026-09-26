@@ -3025,3 +3025,161 @@ html[data-easy='on'] .recall-card {
     -webkit-backdrop-filter: none;
   }
 }
+
+
+/* Easy Clear 1.4.248: Easy Lock In feedback ≤720 / tall-phone bottom-half purple void residual (Fixes #334) —
+   After strengthen 238 (height 100% · flex 1 1 0 · why-miss-teach absorb · dock static) Shot pack
+   1.4.240 05-easy-lockin-miss.png (390×844; chrome 1.4.242) STILL fails — Gemini sees a massive
+   purple dead band under Main idea · Why this is true · From · Try again (residual after
+   closed #317 / 1.4.238). Cause: base `.recall-gate` plate is a SEMI-TRANSPARENT gold/purple
+   gradient (`rgba(…, 0.18)` / `rgba(…, 0.22)`), so flex-grown empty space inside the card
+   is still the dusk purple play plate (vision FAIL — same lesson as Learn 235→245 cream
+   teach-gate / Match 236→246 cream board / Lock In quiz 237→247 cream recall-gate). Visually
+   different from 238: (1) paint opaque cream parchment `.recall-gate.is-easy-hold` (miss-teach
+   only) so leftover fill is intentional cream card plate, not purple void; (2) transparent
+   why-miss-teach shell + dark ink on badge · labels · claim · reason · held-from for cream;
+   (3) denser why-miss-teach stretch (flex 1 1 0 · space-between content); (4) pin Try-again
+   cta-dock to the cream floor. Miss-teach feedback ONLY (`.why-blast.is-miss-teach` /
+   why-miss-teach). Fill 195 / pad-zero 213 ≤720 / extend 227 / strengthen 238 stay. Do NOT
+   pack #333 live quiz / win-end / Match / Learn / Samaritan / Father / Manage / Dig / Creek /
+   parked maps. */
+@media (max-height: 920px) {
+  html[data-easy='on'] .app.is-play .app-body:has(.journal.is-rehearse .why-blast.is-miss-teach) {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+    padding-top: 4px;
+    padding-bottom: 0;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    gap: 4px;
+    overflow: hidden;
+    padding-bottom: 0;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) > .text-link {
+    flex: 0 0 auto;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) .rehearse-anchor {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) .rehearse-anchor > .eyebrow {
+    flex: 0 0 auto;
+  }
+
+  /* Cream plate fills tall portrait — leftover band is cream-inside-card, not purple void */
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) .recall-gate.is-easy-hold {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    margin-bottom: 0;
+    overflow: hidden;
+    padding: 12px 14px 0;
+    gap: 8px;
+    border-radius: 18px;
+    border: 1px solid color-mix(in srgb, var(--ink, #2a2118) 10%, transparent);
+    background: var(--parchment, #fff6e8);
+    color: var(--ink, #2a2118);
+    box-shadow: 0 2px 0 color-mix(in srgb, #000 6%, transparent);
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-miss-teach {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    gap: 8px;
+    overflow: hidden;
+    background: transparent;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-miss-teach .why-blast-hud {
+    flex: 0 0 auto;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-miss-teach .why-blast-hud .next-tap {
+    color: var(--ink, #2a2118);
+  }
+
+  /* Strip purple-gold miss shell — cream plate carries fill; dark ink for cream contrast */
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-miss-teach .why-miss-teach {
+    flex: 1 1 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    max-height: none;
+    gap: 12px;
+    padding: 4px 0 0;
+    overflow: hidden;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    color: var(--ink, #2a2118);
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-miss-teach .why-miss-teach .why-miss-badge {
+    flex: 0 0 auto;
+    color: color-mix(in srgb, var(--gold, #c9a45c) 55%, var(--ink, #2a2118));
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-miss-teach .why-miss-teach .why-claim {
+    flex: 0 0 auto;
+    background: color-mix(in srgb, var(--parchment, #fff6e8) 70%, #fff);
+    border: 1px solid color-mix(in srgb, var(--ink, #2a2118) 12%, transparent);
+    color: var(--ink, #2a2118);
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-miss-teach .why-miss-teach .why-miss-reason {
+    flex: 0 0 auto;
+    background: color-mix(in srgb, var(--parchment, #fff6e8) 55%, #fff);
+    border: 1px solid color-mix(in srgb, var(--ink, #2a2118) 12%, transparent);
+    color: var(--ink, #2a2118);
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-miss-teach .why-miss-teach .why-miss-label {
+    color: color-mix(in srgb, var(--gold, #c9a45c) 55%, var(--ink, #2a2118));
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-miss-teach .why-miss-teach .held-from {
+    flex: 0 0 auto;
+    color: color-mix(in srgb, var(--ink, #2a2118) 78%, var(--gold, #c9a45c));
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-miss-teach .why-miss-teach .cta-dock,
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) .recall-gate.is-easy-hold .cta-dock {
+    position: static;
+    bottom: auto;
+    margin-top: auto;
+    flex: 0 0 auto;
+    padding-top: 10px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
