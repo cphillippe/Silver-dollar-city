@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.182',
+    title: 'Easy Story Snap: ≤720 HUD peel',
+    when: '2026-09-25',
+    items: [
+      'Easy Story Snap on ≤720px tall: hide title eyebrow + who·where so stage · strip · pad stay above fold (complements 1.4.152 compress + 1.4.163 teach-omit; Father 1.4.173 / maze 1.4.175 / Creed 1.4.181 hide-kicker family; invent Fun/Clear)',
+    ],
+  },
+  {
     version: '1.4.181',
     title: 'Easy Creed merge: ≤720 HUD peel',
     when: '2026-09-25',
