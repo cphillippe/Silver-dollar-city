@@ -60,6 +60,11 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'icon-192.png', 'icon-512.png'],
+      workbox: {
+        // Box QA opens docs/qa-seed.html after the app SW is installed.
+        // Without this, navigation fallback serves index.html and the seed never runs.
+        navigateFallbackDenylist: [/\/qa-seed\.html/],
+      },
       manifest: {
         name: 'Silver City: Unending Evidence',
         short_name: 'Silver City',
