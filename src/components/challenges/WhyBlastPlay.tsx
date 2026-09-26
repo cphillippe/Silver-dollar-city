@@ -29,6 +29,7 @@ interface WhyBlastPlayProps {
  * teach sheet with Try again so the kid learns before the next tap.
  * Easy Clear: miss badge lives on the sheet only (no HUD dup); claim gets Main idea label
  * on miss teach (1.4.139) and live arena (1.4.141).
+ * Easy Clear 1.4.156: ≤720px arena-first chrome thin so chips + claim keep the phone (#193).
  */
 export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: WhyBlastPlayProps) {
   const chips = useMemo(
