@@ -202,6 +202,44 @@
   }
 }
 
+/* Easy Clear 1.4.197: Easy Story Snap ≤720 fill purple void —
+   After HUD peel 182 / compress 152 / teach-omit 163, capped snap-stage
+   (min-height 8.5rem) hugs the top so the gold card leaves empty purple under
+   the Hold pad (Match 184 / Creed 192 / Story Creek 191 fill family; invent
+   Fun/Clear). Grow play shell + stretch snap-stage so strip · stage · pad fill
+   the portrait. Match 193 / Lock In 194·195 / Father 196 / Hold / Creed /
+   Story Creek / Sort / Build / Link / Samaritan peels untouched. */
+@media (max-height: 720px) {
+  .play.is-story-snap,
+  .daily-page.is-puzzle .play.is-story-snap,
+  .challenge-page.is-puzzle .play.is-story-snap {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.28rem;
+  }
+
+  .play.is-story-snap .snap-stage {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+  }
+
+  .play.is-story-snap .eyebrow,
+  .play.is-story-snap .easy-who-where-line,
+  .play.is-story-snap .snap-teach,
+  .play.is-story-snap .snap-strip,
+  .play.is-story-snap .snap-claim,
+  .play.is-story-snap .match-score,
+  .play.is-story-snap .snap-pad,
+  .play.is-story-snap .cta-dock,
+  .play.is-story-snap .match-toast,
+  .play.is-story-snap .bonus-plus {
+    flex: 0 0 auto;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .play.is-story-snap.is-shake .snap-stage {
     animation: none;

@@ -1,7 +1,8 @@
 MODEL=gemini-flash-latest
-Shot pack 1.4.190 Gemini vision FAIL on 07-father.png — Fixes #253.
-Invent API: GEMINI_API_KEY present but not AIza AI Studio shape (same as 163–195).
-Manager-steered peel (parent + issue #253): Easy Father ≤720 close slider→CTA purple gap (after fill 189 left .cta-dock margin-top:auto stealing free space).
-Peel: index.css @media (max-height:720px) .play.is-father-run .cta-dock margin-top:0 so run-scene flex:1 absorbs; FatherRunPlay comment. Fill 189 / HUD 173 / speech 154 stay.
-Do NOT pack #250 Match / #251 Lock In quiz / #252 Lock In feedback. Match 193 / Lock In 194·195 / Hold 190 / Creed / Story Creek / Samaritan / Sort / Snap untouched.
-VERDICT: APPROVE (shot Gemini + issue #253)
+Invent Fun/Clear — no open Easy Fun/Clear issue beyond parked #161 / cheap-hop #160.
+1.4.196 Easy Father slider→CTA live on main (ceb0d31 / #257). Shot wake next at 1.4.200 — keep inventing toward that; do NOT wake Shot.
+Invent API: GEMINI_API_KEY present but not AIza AI Studio shape (same as 163–196).
+Manager-steered invent peel: Easy Story Snap ≤720 fill purple void (HUD peel 182 / compress 152 / teach-omit 163 only; capped snap-stage min-height 8.5rem hugs top — empty purple under Hold pad; Match 184 / Creed 192 / Story Creek 191 fill family; different scene than Match/LockIn/Father/Hold/Creed/Story Creek/Sort/Build/Link/Samaritan).
+Peel: storySnap.css @media (max-height:720px) play.is-story-snap flex:1 + stretch snap-stage; StorySnapPlayView comment. HUD 182 hide eyebrow/who·where stays.
+Do NOT re-peel Shot 190 fails #250–#253 (Match 193 / Lock In 194·195 / Father 196). Dig/Hard/NW/Town/stores/Pack B/Home map candy parked.
+VERDICT: APPROVE (invent Fun/Clear · densest remaining Easy trail Story Snap fill — after HUD 182)

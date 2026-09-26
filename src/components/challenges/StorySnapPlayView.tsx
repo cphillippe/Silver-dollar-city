@@ -46,7 +46,9 @@ interface StorySnapPlayProps {
  * Story Snap — three beats fly under a gate; tap on time to lock the strip.
  * After three SNAP!s → STORY OPEN! → claim → Lock In. One more snap loops.
  * Easy Clear 1.4.182: ≤720 peels HUD eyebrow + who·where in storySnap.css (stage·strip·pad first).
+ * Easy Clear 1.4.197: ≤720 fills purple void — grow play + stretch snap-stage (HUD 182 stays).
  */
+
 export function StorySnapPlayView({
   lineId,
   beats: _beats,
