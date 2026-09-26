@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.267',
+    title: 'Easy Manage sheet: ≤720 close purple bar / misalign (Fixes #367)',
+    when: '2026-09-26',
+    items: [
+      'Fixes #367: Easy Manage lot sheet on ≤720 / phone portrait — full-width sheet bottom (stretch · width 100% · square bottom edge · opaque plate · safe-area padding inside) and the leftover purple belt is removed so the bottom-right is the sheet, not a darker bar or cutout, including layout viewports taller than the 920 cap (Shot 260 residual after Manage black-void peel 1.4.258; map peek above stays; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.266',
     title: 'Easy Father Dash: ≤720 close tall residual purple void (Fixes #366)',
     when: '2026-09-26',
