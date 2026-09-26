@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.258',
+    title: 'Easy Manage sheet: ≤720 close tall-phone black void / bottom cutout (Fixes #350)',
+    when: '2026-09-26',
+    items: [
+      'Fixes #350: Easy Manage lot sheet on ≤720 / tall phone portrait — opaque body:has floor + visual-viewport pin (100dvh · min-height 100svh) + bottom-only opaque ::after belt + opaque gold sheet plate (safe-area · slightly taller max-height) so the bottom of the portrait is intentional purple sheet chrome, not a dead black void / cutout under the sheet (Shot 250 residual after Manage width peel 1.4.230; map peek above stays; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.257',
     title: 'Easy Father Dash: ≤720 close tall-phone rail→CTA purple void residual (Fixes #349)',
     when: '2026-09-26',
