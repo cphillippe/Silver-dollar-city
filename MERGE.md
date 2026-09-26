@@ -4,7 +4,7 @@
 **Branch:** `ship/easy-fun-clear-202` → `main`
 **Version:** 1.4.202
 **Peel:** `bc5a761` (`bc5a761d14f565de88d0133fa01eb0f220fb0cee`)
-**Tip:** `b1cde0a` (`b1cde0a61d21c9e9a40c65fb27bfbd94dd848f25`)
+**Tip:** `b0b406f` (`b0b406f1c4f6dfb091df6b558fb623e6c8e958ed`)
 **Base live:** 1.4.201 (`71ec6da`, PR #262 Easy Story Creek ≤720 close board→CTA purple gap on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
