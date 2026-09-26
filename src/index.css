@@ -3621,6 +3621,34 @@ html[data-easy='on'] .mind-node em {
 }
 
 
+/* Easy Clear 1.4.230: Easy Manage sheet phone width cutout / exposed purple (Fixes #302) —
+   After peek 165 / hub chrome 167 / empty-lot 180, Shot pack 1.4.220 08-manage-or-snap.png
+   (390×844) still leaves the gold mind-map-card short of the viewport edges with map/purple
+   cutout bars beside the sheet (new fail shape vs closed #277 scrollbar; Shot 210 PASS;
+   capture may show in-app 1.4.219 PWA lag). Card used width:min(100%,420px) + align-items
+   center; on phone portrait force edge-to-edge: stretch align · width 100vw · max-width none
+   · zero side margin so the Manage lot sheet spans cleanly without exposed cutout bars.
+   Peek height / empty-lot compact / hub chrome stay. Do NOT pack #296–#301 Father / Samaritan
+   / Match / Lock In / Learn / Dig / map candy (letterbox stays Map-owned #217). */
+@media (max-width: 430px) {
+  .mind-map.is-manage {
+    align-items: stretch;
+    width: 100%;
+    left: 0;
+    right: 0;
+  }
+
+  .mind-map.is-manage .mind-map-card {
+    width: 100vw;
+    max-width: none;
+    margin: 0;
+    border-radius: 20px 20px 0 0;
+    align-self: stretch;
+    box-sizing: border-box;
+  }
+}
+
+
 /* Easy Home under dual is-play+is-town: full-bleed body, purple menu topbar */
 .app.is-town[data-easy='on'] .app-body {
   width: 100%;
