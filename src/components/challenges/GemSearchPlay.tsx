@@ -504,6 +504,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       {/* Easy Clear 1.4.168: ≤720 peels how/say chrome in match.css — letter board + Lock In stay above fold (Hub/Snap/Father/Learn family). */}
       {/* Easy Clear 1.4.193: ≤720 fills purple void in gem.css (Fixes #250; Shot 1.4.190 / 03-easy-match). */}
       {/* Easy Clear 1.4.211: match-art-tight keeps the ≤720 board fill through the status counter (Fixes #273). */}
+      {/* Easy Clear 1.4.225: phone portrait extends fill 193 + board stretch 211 so gem-board·status close bottom-third purple void (Fixes #297). */}
       <p className="sort-how">{EASY.matchHunt}</p>
       {matchChips ? (
         <>
