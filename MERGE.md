@@ -3,8 +3,8 @@
 **PR:** (pending)
 **Branch:** `ship/easy-fun-clear-204` → `main`
 **Version:** 1.4.204
-**Peel:** (pending)
-**Tip:** (pending)
+**Peel:** `0268634` (`0268634f0d9b8a2b5ea355a9d70c3c180fa5215d`)
+**Tip:** `0268634` (`0268634f0d9b8a2b5ea355a9d70c3c180fa5215d`)
 **Base live:** 1.4.203 (`b2cf654`, PR #264 Easy Build ≤720 fill free-place purple void on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
