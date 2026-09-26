@@ -159,15 +159,18 @@
   opacity: 0.85;
 }
 
-/* Short phone — pad owns how; story teach stays thin (maze help-phase family). Fixes #189 */
+/* Short phone — pad owns how; story teach stays thin (maze help-phase family). Fixes #189
+   Easy Clear 1.4.182: Story Snap ≤720 HUD peel — hide eyebrow + who·where so stage·strip·pad
+   stay above fold (Father 173 / maze 175 / Creed 181 hide-kicker family; invent Fun/Clear).
+   Complements 1.4.152 compress + 1.4.163 teach-omit; Learn already owns who·where. */
 @media (max-height: 720px) {
   .play.is-story-snap {
     gap: 0.35rem;
   }
 
+  /* 1.4.182: Creed/Father/maze hide-kicker family — title + who·place defer to Learn */
   .play.is-story-snap .eyebrow {
-    font-size: 0.7rem;
-    line-height: 1.1;
+    display: none;
   }
 
   .play.is-story-snap .snap-teach {
@@ -180,8 +183,7 @@
   }
 
   .play.is-story-snap .easy-who-where-line {
-    font-size: 0.68rem;
-    line-height: 1.1;
+    display: none;
   }
 
   .play.is-story-snap .snap-strip {
