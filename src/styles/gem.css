@@ -279,6 +279,62 @@ img.gem-heart {
   }
 }
 
+/* Easy Clear 1.4.193: Easy Match ≤720 fill purple void —
+   After how/say peel 168 + board-first 99, square width-capped gem-board hugs
+   the top so the play shell leaves empty purple between letter grid and
+   match-score footer (Shot 1.4.190 / 03-easy-match · Fixes #250; still fail
+   after picture-deal #238 / 1.4.184). Grow play + stretch gem-scroll / stage /
+   board so dock · grid · score fill the portrait. Do NOT pack #251 Lock In /
+   #252 Lock In miss / #253 Father. Match deal 184 / Creed 192 / Story Creek
+   191 / Hold / Link / Build / Samaritan / Sort / Snap peels untouched. */
+@media (max-height: 720px) {
+  .play.is-gem-search.is-panel-blast.is-story-docked,
+  .daily-page.is-puzzle .play.is-gem-search.is-panel-blast.is-story-docked,
+  .challenge-page.is-puzzle .play.is-gem-search.is-panel-blast.is-story-docked {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .gem-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .gem-stage {
+    flex: 1 1 auto;
+    min-height: 0;
+    align-items: stretch;
+    justify-content: center;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .gem-board {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+    max-height: none;
+    width: min(100%, 96vw, 520px);
+    aspect-ratio: auto;
+    align-self: center;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .story-strip,
+  .play.is-gem-search.is-panel-blast.is-story-docked .story-strip.is-dock,
+  .play.is-gem-search.is-panel-blast.is-story-docked .match-teach-dock,
+  .play.is-gem-search.is-panel-blast.is-story-docked .match-score,
+  .play.is-gem-search.is-panel-blast.is-story-docked .cta-dock,
+  .play.is-gem-search.is-panel-blast.is-story-docked .match-yes,
+  .play.is-gem-search.is-panel-blast.is-story-docked .miss-banner,
+  .play.is-gem-search.is-panel-blast.is-story-docked .match-toast {
+    flex: 0 0 auto;
+  }
+}
+
 .play.is-gem-search.is-panel-blast .gem-board .win-burst {
   position: absolute;
   inset: 0;
