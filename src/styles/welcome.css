@@ -1029,3 +1029,145 @@ html[data-theme='dusk'] .easy-story-card {
     -webkit-backdrop-filter: none;
   }
 }
+
+
+/* Easy Clear 1.4.252: Easy Learn ≤720 / tall-phone purple void residual after cream 245 (Fixes #344) —
+   After cream teach-gate 245 (parchment card · dark ink · triad space-between · dock pin) Shot pack
+   1.4.250 02-easy-learn.png (390×844) STILL fails — Gemini: content clustered upper, massive empty
+   purple void at the bottom (residual after closed #331 / 1.4.245). Cause: cream on
+   `.easy-story-card.teach-gate` still content-hugs / transparent flex-grow over the purple shell
+   (`.recall-gate` dusk/gold gradient · `.teach-gate` translucent wash · app-body dusk leftover
+   outside the card), so leftover below the lesson still reads as a purple dead band. Strengthen
+   further — NOT another 235/245 height/flex/space-between copy: (1) paint opaque cream on
+   `.app-body` + `.challenge-page.is-teach` shell so tall leftover below the lesson is cream floor
+   through the full portrait (not purple outside the card); (2) solid `#fff6e8` + `background-image:
+   none` on `.recall-gate.easy-story-card.teach-gate` beating recall-gate / teach-gate gradients;
+   (3) pin Find-the-gems / Skip-reading dock to the cream floor with cream dock wash (not
+   transparent sticky purple blur); (4) keep dark ink on cream. Meaning Ridge cream-pill Learn
+   ONLY — do NOT pack Match / Lock In / Samaritan / Father / Manage / Dig / Creek / parked maps. */
+@media (max-height: 920px) {
+  /* Cream app-body floor — leftover below a content-hug card is cream, not dusk purple void */
+  html[data-easy='on'] .app.is-play .app-body:has(.challenge-page.is-teach .easy-story-card) {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+    padding-top: 4px;
+    padding-bottom: 0;
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    color: var(--ink, #2a2118);
+  }
+
+  /* Cream teach shell fills tall portrait — leftover under the lesson is cream page plate */
+  html[data-easy='on'] .challenge-page.is-teach:has(.easy-story-card) {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    gap: 6px;
+    overflow: hidden;
+    padding: 8px 10px 0;
+    border-radius: 18px;
+    border: 1px solid color-mix(in srgb, var(--ink, #2a2118) 10%, transparent);
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    color: var(--ink, #2a2118);
+    box-shadow: 0 2px 0 color-mix(in srgb, #000 6%, transparent);
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach:has(.easy-story-card) > .text-link {
+    flex: 0 0 auto;
+    color: color-mix(in srgb, var(--gold, #c9a45c) 55%, var(--ink, #2a2118));
+  }
+
+  /* Solid opaque cream plate — kill recall-gate / teach-gate translucent purple-gold gradients */
+  html[data-easy='on'] .challenge-page.is-teach .recall-gate.easy-story-card.teach-gate,
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card.teach-gate {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    align-self: stretch;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    gap: 10px;
+    overflow: hidden;
+    padding: 12px 14px 0;
+    border-radius: 16px;
+    border: 1px solid color-mix(in srgb, var(--ink, #2a2118) 12%, transparent);
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    color: var(--ink, #2a2118);
+    box-shadow: none;
+    justify-content: flex-start;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card.teach-gate::before {
+    content: none;
+    display: none;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card > .eyebrow {
+    flex: 0 0 auto;
+    color: color-mix(in srgb, var(--gold, #c9a45c) 70%, var(--ink, #2a2118));
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .loci-stamp {
+    flex: 0 0 auto;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .teach-reason {
+    flex: 0 0 auto;
+    color: var(--ink, #2a2118);
+    opacity: 0.92;
+  }
+
+  /* Held triad absorbs leftover inside the cream plate; rows stay readable on cream */
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .held-triad {
+    display: grid;
+    flex: 1 1 auto;
+    min-height: 0;
+    align-content: start;
+    gap: 14px;
+    margin: 0;
+    padding: 10px 0 16px;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .held-triad > div {
+    padding: 2px 0;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .held-triad dt {
+    color: color-mix(in srgb, var(--gold, #c9a45c) 55%, var(--ink, #2a2118));
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .held-triad dd,
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .held-triad .recall-line {
+    color: var(--ink, #2a2118);
+  }
+
+  /* Pin Find-the-gems / Skip reading to the cream floor — cream dock wash, not purple sticky blur */
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .easy-story-dock,
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .cta-dock.easy-story-dock {
+    position: static;
+    bottom: auto;
+    margin-top: auto;
+    flex: 0 0 auto;
+    padding-top: 12px;
+    padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
