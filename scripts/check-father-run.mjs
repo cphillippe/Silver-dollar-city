@@ -181,4 +181,19 @@ assert.match(
   /<shortStory>Jesus tells about a son who takes his share early and wastes it far from home\. Hungry and ashamed, he starts a hired-hand speech to ask for work\. But his father sees him while he is still a long way off and runs — mercy before the speech is done\. He hugs the son\. Honor is spent so the lost one can be welcomed; the feast is the father’s idea\.<\/shortStory>/,
 )
 
+
+// Easy Clear 1.4.154: short-height speech chrome compress — pad + timer stay on-screen (Fixes #191)
+assert.match(playSrc, /run-speech/)
+assert.match(playSrc, /run-speech-bar/)
+assert.match(playSrc, /run-speech-count/)
+assert.match(playSrc, /1\.4\.154.*speech|#191/)
+const fatherCss = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
+assert.match(fatherCss, /1\.4\.154: speech chrome thin|Fixes #191/)
+assert.match(
+  fatherCss,
+  /@media \(max-height: 720px\) \{[\s\S]*?1\.4\.154: speech chrome thin[\s\S]*?\.run-speech \{[\s\S]*?padding: 4px 8px 5px/,
+)
+assert.match(fatherCss, /\.run-speech-bar \{[\s\S]*?height: 3px/)
+assert.match(fatherCss, /-webkit-line-clamp:\s*2/)
+
 console.log('check-father-run: ok')
