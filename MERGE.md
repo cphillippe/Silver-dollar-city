@@ -1,10 +1,10 @@
 # ready-easy-fun-clear-195 — 1.4.195 Easy Lock In feedback ≤720 fill purple void (Fixes #252)
 
-**PR:** (pending)
+**PR:** (pending open)
 **Branch:** `ship/easy-fun-clear-195` → `main`
 **Version:** 1.4.195
-**Peel:** (pending)
-**Tip:** (pending)
+**Peel:** `39976be` (`39976beb4eed82bb42afa417c9bb4a7c215e46fd`)
+**Tip:** `39976be` (`39976beb4eed82bb42afa417c9bb4a7c215e46fd`)
 **Base live:** 1.4.194 (`7ff1bf6`, PR #255 Easy Lock In quiz ≤720 fill purple void on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
