@@ -4982,6 +4982,21 @@ html[data-easy='on'] .mind-node em {
   }
 }
 
+/* Easy Clear 1.4.200: Easy Creed ≤720 close bowl→CTA purple gap —
+   After fill 192 grew play + stretch merge-bowl, global .cta-dock { margin-top: auto }
+   still steals free space on win/overflow before flex-grow, leaving empty purple
+   between the bowl · ladder and the Hold / One more dock (Father 196 / Link 199
+   dock-margin family; invent Fun/Clear · Shot wake version). Zero the auto margin
+   so merge-bowl flex:1 absorbs the portrait — tight bowl→CTA spacing.
+   Fill 192 / HUD 181 / bowl-first 159 stay; Sort 198 / Story Snap 197 / Link 199 /
+   Match 193 / Lock In 194·195 / Father 196 / Hold / Story Creek / Build /
+   Samaritan peels untouched. */
+@media (max-height: 720px) {
+  .play.is-claim-merge .cta-dock {
+    margin-top: 0;
+  }
+}
+
 .merge-danger {
   position: absolute;
   left: 8%;

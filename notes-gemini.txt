@@ -1,8 +1,8 @@
 MODEL=gemini-flash-latest
 Invent Fun/Clear — no open Easy Fun/Clear issue beyond parked #161 / cheap-hop #160.
-1.4.198 Easy Sort fill live on main (ff7dcbf / #259). Shot wake next at 1.4.200 — this hop is last invent 1.4.199; do NOT wake Shot / do NOT ship as 1.4.200.
-Invent API: GEMINI_API_KEY present but not AIza AI Studio shape (same as 163–198).
-Manager-steered invent peel: Easy Link ≤720 close choices→CTA purple gap (after fill 188 left .link-dock margin-top:auto stealing free space before link-col flex-grow; Father 196 dock-margin family; different scene than Sort 198 / Story Snap 197 / Match/LockIn/Father/Hold/Creed/Story Creek/Build/Samaritan).
-Peel: index.css @media (max-height:720px) .play.is-easy-link .link-dock margin-top:0; LinkPlay comment. Fill 188 stays.
-Do NOT re-peel Shot 190 fails #250–#253 or Sort 198 / Story Snap 197. Dig/Hard/NW/Town/stores/Pack B/Home map candy parked.
-VERDICT: APPROVE (invent Fun/Clear · Link choices→CTA close — after fill 188; Father 196 dock-margin family)
+1.4.199 Easy Link choices→CTA live on main (709df26 / #260). This hop IS 1.4.200 Shot wake version — ship invent peel only; do NOT wake Shot; do NOT run Gemini vision; CoS wakes Shot after merge.
+Invent API: GEMINI_API_KEY present but not AIza AI Studio shape (same as 163–199).
+Manager-steered invent peel: Easy Creed ≤720 close bowl→CTA purple gap (after fill 192 left .cta-dock margin-top:auto stealing free space on win/overflow before merge-bowl flex-grow; Father 196 / Link 199 dock-margin family; different scene than Link 199 / Sort 198 / Story Snap 197 / Match/LockIn/Father/Hold/Story Creek/Build/Samaritan).
+Peel: index.css @media (max-height:720px) .play.is-claim-merge .cta-dock margin-top:0; ClaimMergePlay comment. Fill 192 / HUD 181 / bowl-first 159 stay.
+Do NOT re-peel Shot 190 fails #250–#253 or Link 199 / Sort 198 / Story Snap 197. Dig/Hard/NW/Town/stores/Pack B/Home map candy parked.
+VERDICT: APPROVE (invent Fun/Clear · Creed bowl→CTA close — after fill 192; Shot wake version 1.4.200)
