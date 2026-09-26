@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.140',
+    title: 'Learn: one Main idea · why · From triad',
+    when: '2026-09-25',
+    items: [
+      'Easy Learn: drop orphan “The main idea you will keep” claim above HeldTriad — one full triad Main idea · Why this is true · From (Clear family with Lock In miss 1.4.139)',
+    ],
+  },
+  {
     version: '1.4.139',
     title: 'Lock In: miss teach Main idea · why · From',
     when: '2026-09-25',
