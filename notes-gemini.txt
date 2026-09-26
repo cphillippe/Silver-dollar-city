@@ -1,5 +1,5 @@
-1.4.171 Easy Sequence ≤720 board-first (invent Fun/Clear)
-Gemini: unavailable — GEMINI_API_KEY present but not AIza AI Studio shape (same as 163–170).
+1.4.173 Easy Father Dash ≤720 HUD peel (invent Fun/Clear)
+Gemini: unavailable — GEMINI_API_KEY present but not AIza AI Studio shape (same as 163–171; 1.4.171 Sequence now on main).
 Shipped Manager-steered invent peel without live Gemini APPROVE.
-Peel: sortHold.css @media (max-height:720px) hides Sequence/Build .sort-how + .easy-hint/.hint-peek; clamps .prompt to 2 lines so stone board + primary CTA stay above fold. Creed merge already 1.4.159 bowl-first — untouched.
-Comments in SequencePlay.tsx + BuildArgumentPlay.tsx. Do not claim 1.4.166/169/172 (Map Witness). Do not reopen closed how-dedupe. Dig/Hard/NW/Town/stores/Pack B/Home map candy parked.
+Peel: index.css @media (max-height:720px) hides Father run .story-kicker + .run-thumbs + .story-caption; tinies .match-score + .run-pad so scene + speech + rail + Hold pad stay above fold. Complements 1.4.154 speech thin. Creed merge 1.4.159 / Dig how 1.4.158 untouched.
+Comment in FatherRunPlay.tsx. 1.4.171 Sequence merged (#227). Do not claim 1.4.172 (Map Witness). Dig/Hard/NW/Town/stores/Pack B/Home map candy parked.
