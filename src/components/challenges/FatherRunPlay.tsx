@@ -363,6 +363,7 @@ export function FatherRunPlay({
       <p className="story-caption" role="status">
         {caption}
       </p>
+      {/* Easy Clear 1.4.154: keep speech + timer; short-height CSS compresses chrome — Fixes #191 */}
       <div className={`run-speech ${phase === 'miss' ? 'is-done' : ''}`} aria-live="polite">
         <p className="run-speech-kicker">Hired-hand speech</p>
         <p className="run-speech-line">{phrase}</p>
