@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.247',
+    title: 'Easy Lock In quiz: ≤720 close tall-phone bottom-half purple void residual (Fixes #333)',
+    when: '2026-09-26',
+    items: [
+      'Fixes #333: Easy Lock In live mid-question quiz on ≤720 / tall phone portrait — paint parchment cream recall-gate plate (dark ink · denser why-arena stretch · CTA dock pinned to cream floor) so leftover fill is cream-inside-card, not a dead purple band under the quiz (Shot 240 residual after Lock In quiz tall-void peel 1.4.237; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.246',
     title: 'Easy Match: ≤720 close tall-phone grid→footer purple void residual (Fixes #332)',
     when: '2026-09-26',
