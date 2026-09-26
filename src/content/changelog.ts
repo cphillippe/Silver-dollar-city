@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.211',
+    title: 'Easy Match: ≤720 close grid→status purple void',
+    when: '2026-09-25',
+    items: [
+      'Easy Match letter grid on ≤720px tall: restore the board fill after the later art-tight square override so the grid and bottom status counter pack tight — no large purple void (Fixes #273; continuation of Match grid→footer #250 / 1.4.193; do not touch other Shot 200 issues)',
+    ],
+  },
+  {
     version: '1.4.210',
     title: 'Easy Hold: ≤720 close hud→arena purple gap',
     when: '2026-09-25',
