@@ -75,6 +75,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
     const buildGift = anyUpgradeReady(progress)
       ? 'A building is ready. Tap it, then Build this.'
       : nextGift(nextId, easySnap[nextId], easyFills[nextId] ?? 0, true)
+    // Easy Clear 1.4.155: Home whisper = short next-step (mazeHome/runHome), not full hunt how — Fixes #192
     const homeWhisper =
       focus === 'hold'
         ? 'The story is open. Lock in the line.'

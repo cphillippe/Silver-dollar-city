@@ -225,6 +225,12 @@ assert.match(hubSrc, /EASY\.mazeMatch/)
 assert.match(hubSrc, /EASY\.mazeMatch/)
 assert.match(hubSrc, /EASY\.matchCta/)
 
+// Easy Clear 1.4.155: Home whisper short next-step (not full mazeHunt) — Fixes #192
+const easyUiMaze = readFileSync(new URL('../src/lib/easyUi.ts', import.meta.url), 'utf8')
+assert.match(easyUiMaze, /mazeHome: 'One more road\.'/)
+assert.doesNotMatch(easyUiMaze, /mazeHome: 'Find the hurt man/)
+assert.match(hubSrc, /1\.4\.155.*whisper|#192/)
+
 // Easy Clear 1.4.153: default board-first chrome compress (not only .is-help-phase) — Fixes #190
 assert.match(
   mazeCss,
