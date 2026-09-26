@@ -3,26 +3,33 @@
 **PR:** https://github.com/cphillippe/Silver-dollar-city/pull/234
 **Branch:** `ship/manage-empty-lot-179` → `main` (alias `ship/manage-empty-lot-180`)
 **Version:** 1.4.180
-**Commit:** `79a1e43` (`79a1e43052a3ff60608d61aab958b85a7f18709d` tip; peel `e7d1397`)
-**Base live:** 1.4.178 (`60150e2`, PR #222 Witness Square candy hall on main; atop 1.4.177 #233)
+**Peel:** `deac678` (`deac678355c6690fe83a77fd3aa4404fef13ac2c`)
+**Tip:** `16d38ca` (`16d38ca9380b245e39c3393d2c567ce4fa9dd6fc`)
+**Base live:** 1.4.179 (`5f9b148`, PR #229 Easy Home map fills the phone / Fixes #217; atop 1.4.178 Witness #222)
 **Fixes:** #232
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
 ## How picked
-Shot-pack climb from 1.4.170 `08-manage-or-snap.png` → issue **#232** (Manage empty lot — header gone / letterbox / dense sheet). Letterbox framing remains Map **#217** / **1.4.179** — not climbed. Map owns 1.4.178 Witness (+ letterbox 1.4.179) — not claimed. Retargeted Manage empty-lot **1.4.179→1.4.180**.
+Shot-pack climb from 1.4.170 `08-manage-or-snap.png` → issue **#232** (Manage empty lot — header gone / letterbox / dense sheet). Letterbox framing landed as Map **#229** / **1.4.179** on main — kept intact on rebase. Map owns 1.4.178 Witness (+ letterbox 1.4.179) — not claimed. Retargeted Manage empty-lot **1.4.179→1.4.180**.
+
+## Rebase (urgent)
+After #229 squash-merged to main (`5f9b148`), GitHub update-branch 422 / PR dirty. Rebased `ship/manage-empty-lot-179` onto `origin/main`:
+- Kept Manage empty-lot peel (Hub `is-empty-lot` topbar restore; MindMap compact empty-lot sheet)
+- Kept Map letterbox / Home (`fillStage`, CityMap, cityModel, city.css) from main
+- **APP_VERSION / package version stayed 1.4.180** (changelog 1.4.180 atop 1.4.179)
 
 ## Chosen climb
 Single Easy Clear polish per **#232**: **Manage empty-lot header restore + compact Place·Person·Tool sheet**.
 
 ## What fixed
-- `src/components/Hub.tsx`: `is-empty-lot` when `appliedTier(mindPlot)===0` (Easy Home + Town)
-- `src/index.css`: empty-lot keeps AppShell topbar (undo 1.4.167 over-hide for this branch only); sheet `max-height: min(30dvh, 280px)`; Place·Person·Tool 3-col row; hug scroll (no stretch into purple)
+- `src/components/Hub.tsx`: `is-empty-lot` when `appliedTier(mindPlot)===0` (Easy Home + Town); `fillStage` from 1.4.179 kept
+- `src/index.css`: empty-lot restores AppShell topbar; sheet `max-height: min(30dvh, 280px)`; Place·Person·Tool 3-col row; hug scroll
 - `src/components/MindMap.tsx`: `is-empty-lot` class; omit Easy place-sub on empty lot
-- Android `versionName` left alone
+- Android `versionName` left alone (`1.4.113`)
 
 ## Deferred (do NOT climb this hop)
 - Dig Reveal / Hard / NW / Town / stores / Pack B
-- Map Witness → **1.4.178** / letterbox → **#217** / **1.4.179** (do not claim)
+- Map Witness / letterbox (already on main as 1.4.178 / 1.4.179)
 - Full-bleed map / snap points peek/half/full JS
 
 ## Gemini
@@ -34,16 +41,16 @@ Single Easy Clear polish per **#232**: **Manage empty-lot header restore + compa
 - `src/index.css`
 - `scripts/check-city.mjs`, `scripts/check-panel-blast.mjs`
 - `src/config/app.ts`, `package.json`, `package-lock.json`
-- `src/content/changelog.ts` (1.4.180 atop live 1.4.178 Witness)
+- `src/content/changelog.ts` (1.4.180 atop live 1.4.179 letterbox)
 - `notes-gemini.txt`
-- `docs/` (Pages rebuild `index-D7FDBwP7.js` / `index-DoSC5yZC.css`)
+- `docs/` (Pages rebuild `index-qIrOlqlM.js` / `index-jgc3aF0b.css`)
 - `MERGE.md`
 
 ## Checks
 - `npm run test:city` ✓
 - `npm run test:arcade` ✓
 - `npm run build` → `docs/` ✓
-- GitHub PR: `mergeable: true`, `mergeStateStatus: CLEAN` (no required checks configured on branch)
+- GitHub PR: `mergeable: true`, `mergeStateStatus: CLEAN` (confirm after push)
 
 ## Status
-**MERGEABLE CLEAN** — ready for CoS merge after green. Do NOT merge from this hop.
+**MERGEABLE CLEAN** (post-rebase onto 1.4.179) — ready for CoS merge after green. Do NOT merge from this hop.
