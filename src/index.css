@@ -4768,6 +4768,54 @@ html[data-easy='on'] .mind-node em {
   }
 }
 
+/* Easy Clear 1.4.216: Easy Father Dash ≤720 / phone portrait timing-rail→CTA purple void (Fixes #283) —
+   After Creek HOLD fill+dock 214 (≤920), Shot pack 1.4.210 07-father.png (390×844) still
+   shows Father Dash LET GO chrome with speech→rail 204 / pad compress stuck at ≤720 only —
+   thumbs/caption stay (HUD peel 173 is ≤720) and residual speech/rail/pad spacing plus any
+   leftover dock band reads as a large purple void between the timing rail and the bottom
+   action. Extend speech→rail 204 + pad compress across phone portrait heights and keep
+   dock margin-top: 0 so rail→CTA packs tight on Dash (Father Dash timing-rail chrome).
+   HUD 173 / speech thin 154 / fill 189 / dock 196 / speech→rail 204 ≤720 / Creek HOLD 214
+   stay. Do NOT pack #272 Creek HOLD / #276 Samaritan / #277 Manage / #280 Learn / #281
+   Match / #282 Lock In / Dig. */
+@media (max-height: 920px) {
+  .play.is-father-run,
+  .daily-page.is-puzzle .play.is-father-run,
+  .challenge-page.is-puzzle .play.is-father-run {
+    gap: 2px;
+  }
+
+  .play.is-father-run .run-speech {
+    margin: 0;
+    padding: 3px 8px 4px;
+  }
+
+  .play.is-father-run .run-speech-line {
+    margin: 1px 0 2px;
+  }
+
+  .play.is-father-run .run-speech-count {
+    margin-top: 1px;
+  }
+
+  .play.is-father-run .run-rail {
+    margin: 0;
+    height: 14px;
+  }
+
+  .play.is-father-run .run-pad {
+    min-height: 58px;
+    font-size: 1rem;
+    border-radius: 18px;
+  }
+
+  .play.is-father-run .cta-dock,
+  .play.is-father-run .cta-dock.run-dock {
+    margin-top: 0;
+    padding-top: 4px;
+  }
+}
+
 .miss-banner {
   display: grid;
   gap: 2px;
