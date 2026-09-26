@@ -768,3 +768,68 @@ html[data-theme='dusk'] .easy-story-card {
   }
 }
 
+
+/* Easy Clear 1.4.224: Easy Learn ≤720 / phone portrait bottom-half purple void (Fixes #296) —
+   After fill 215 (max-height 920) grew is-teach + held-triad, Shot pack 1.4.220
+   02-easy-learn.png (390×844) still clusters Short story · cream LociStamp · reason ·
+   HeldTriad · CTAs in the upper half with a massive dead purple band under the dock
+   (residual after closed #280 / 1.4.215; capture may show in-app 1.4.219 PWA lag).
+   Tighten further: zero phone-safe app-body / teach-gate bottom padding, flex: 1 1 0
+   on page · card · triad, pin EasyBack, dock margin-top auto — no purple void under
+   the cream-pill stack. Compress 162 / stamp wrap 177 / fill 206 ≤720 / extend 215 stay.
+   Do NOT pack #297–#302 Match / Lock In / Samaritan / Father / Manage / Dig / Creek /
+   parked maps. */
+@media (max-height: 920px) {
+  html[data-easy='on'] .app.is-play .app-body:has(.challenge-page.is-teach .easy-story-card) {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 0;
+    min-height: 0;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach:has(.easy-story-card) {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    gap: 4px;
+    overflow: hidden;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach:has(.easy-story-card) > .text-link {
+    flex: 0 0 auto;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card.teach-gate {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    gap: 2px;
+    overflow: hidden;
+    padding-bottom: 0;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card > .eyebrow,
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .loci-stamp,
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .teach-reason {
+    flex: 0 0 auto;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .held-triad {
+    flex: 1 1 0;
+    min-height: 0;
+    align-content: center;
+    gap: 8px;
+    margin: 0;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .easy-story-dock {
+    margin-top: auto;
+    flex: 0 0 auto;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
