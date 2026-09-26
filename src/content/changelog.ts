@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.228',
+    title: 'Easy Samaritan: ≤720 close voids above/below board (Fixes #300)',
+    when: '2026-09-26',
+    items: [
+      'Fixes #300: Easy Samaritan (Story Creek road maze) on ≤720 / phone portrait — extend fill 191 + board→CTA 201 across max-height 920px so maze-stage · maze-board absorb free space and cta-dock does not steal it — no large purple voids above/below the board on tall phones (Shot 220 residual after Story Creek fill 1.4.191; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.227',
     title: 'Easy Lock In feedback: ≤720 close bottom-half purple void (Fixes #299)',
     when: '2026-09-26',

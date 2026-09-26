@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.227')
+assert.equal(APP_VERSION, '1.4.228')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -4533,5 +4533,36 @@ console.log('check-city: ok')
     latestChange('1.4.227').items.join('\n'),
     /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#300|#301|#302|Father Dash|Learn cream|Match grid|Samaritan|Manage|Lock In quiz|Dig|Creed|Build|Sort|Snap|Link|Road maze|Claim merge|Source dig|Story Creek HOLD|slider→HOLD|invent Fun\/Clear/i,
     '1.4.227 must not fix other phone-fail issues or climb another Easy surface',
+  )
+}
+
+// Easy Clear 1.4.228: Easy Samaritan ≤720 / phone portrait voids above/below board (Fixes #300)
+{
+  const mazeCss228 = readFileSync(new URL('../src/styles/maze.css', import.meta.url), 'utf8')
+  const mazePlay228 = readFileSync(
+    new URL('../src/components/challenges/RoadMazePlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(mazeCss228, /1\.4\.228: Easy Samaritan ≤720 \/ phone portrait voids above\/below board/)
+  assert.match(
+    mazeCss228,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.play\.is-road-maze \{[\s\S]*?flex: 1 1 auto/,
+  )
+  assert.match(
+    mazeCss228,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.play\.is-road-maze \.maze-board \{[\s\S]*?max-height: none[\s\S]*?aspect-ratio: auto/,
+  )
+  assert.match(
+    mazeCss228,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.play\.is-road-maze \.cta-dock \{[\s\S]*?margin-top: 0/,
+  )
+  assert.match(mazePlay228, /1\.4\.228: phone portrait extends fill 191 \+ board→CTA 201/)
+  assert.match(cssSrc, /1\.4\.228: Easy Samaritan ≤720 \/ phone portrait voids above\/below board/)
+  assert.match(latestChange('1.4.228').items.join('\n'), /Fixes #300|voids above|below the board|Samaritan|maze/i)
+  assert.match(latestChange('1.4.228').title, /Samaritan|≤720|voids above|below board/i)
+  assert.doesNotMatch(
+    latestChange('1.4.228').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#301|#302|Father Dash|Learn cream|Match grid|Lock In|Manage|Sequence order|order bank|stones→result|Dig|Creed|Build|Sort|Snap|Link|Claim merge|Source dig|Story Creek HOLD|slider→HOLD|invent Fun\/Clear/i,
+    '1.4.228 must not fix other phone-fail issues or climb another Easy surface',
   )
 }
