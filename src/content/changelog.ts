@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.225',
+    title: 'Easy Match: ≤720 close bottom-third purple void (Fixes #297)',
+    when: '2026-09-26',
+    items: [
+      'Fixes #297: Easy Match gemSearchGrid on ≤720 / phone portrait — extend leftover-height fill 211 + grid→footer fill 193 across max-height 920px so gem-scroll · stage · board absorb free space and status follows the grid — no massive purple void across the bottom third of the card on tall phones (Shot 220 residual after Match leftover-height peel 1.4.211; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.224',
     title: 'Easy Learn: ≤720 close bottom-half purple void (Fixes #296)',
     when: '2026-09-26',

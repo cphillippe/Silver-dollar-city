@@ -155,3 +155,65 @@
 .gem-cell.is-cracked .gem-letter {
   text-shadow: none;
 }
+
+/* Easy Clear 1.4.225: Easy Match ≤720 / phone portrait bottom-third purple void (Fixes #297) —
+   After leftover-height fill 211 (≤720 only) + grid→footer fill 193 (≤720 only), real phones
+   ~390×844 still leave a square width-capped gem-board hugging the top with a massive empty
+   purple band across the bottom third of the card before the status counter (Shot pack 1.4.220
+   03-easy-match.png; residual after closed #273/#281 / 1.4.211; capture may show in-app 1.4.219
+   PWA lag). Extend fill 193 + board stretch 211 across phone portrait heights (max-height: 920px)
+   so gem-scroll · stage · board absorb free space and status follows the grid — no purple void
+   under the board on tall phones. Fill 193 / board stretch 211 / how-peel 168 ≤720 stay.
+   Do NOT pack #296 Learn / #298–#302 Lock In / Samaritan / Father / Manage / Dig / Creek /
+   parked Dig/Hard/NW/Town/stores/Pack B/Home map candy. */
+@media (max-height: 920px) {
+  .play.is-gem-search.is-panel-blast.is-story-docked,
+  .daily-page.is-puzzle .play.is-gem-search.is-panel-blast.is-story-docked,
+  .challenge-page.is-puzzle .play.is-gem-search.is-panel-blast.is-story-docked {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .gem-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    gap: 2px;
+    padding-bottom: 2px;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .gem-stage {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .gem-board {
+    width: min(100%, 96vw, 520px);
+    max-width: 100%;
+    min-height: 0;
+    height: 100%;
+    max-height: none;
+    flex: 1 1 auto;
+    aspect-ratio: auto;
+    align-self: center;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .story-strip,
+  .play.is-gem-search.is-panel-blast.is-story-docked .story-strip.is-dock,
+  .play.is-gem-search.is-panel-blast.is-story-docked .match-teach-dock,
+  .play.is-gem-search.is-panel-blast.is-story-docked .match-score,
+  .play.is-gem-search.is-panel-blast.is-story-docked .cta-dock,
+  .play.is-gem-search.is-panel-blast.is-story-docked .match-yes,
+  .play.is-gem-search.is-panel-blast.is-story-docked .miss-banner,
+  .play.is-gem-search.is-panel-blast.is-story-docked .match-toast {
+    flex: 0 0 auto;
+  }
+}
