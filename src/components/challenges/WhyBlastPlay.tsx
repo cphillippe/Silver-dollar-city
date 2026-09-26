@@ -11,7 +11,6 @@ import {
   whyBlastExtras,
 } from '../../lib/whyBlast'
 import { MatchTakeaway } from '../HeldTriad'
-import { PlainTalk } from '../PlainTalk'
 import { WinBurst } from './WinBurst'
 
 interface WhyBlastPlayProps {
@@ -30,6 +29,7 @@ interface WhyBlastPlayProps {
  * Easy Clear: miss badge lives on the sheet only (no HUD dup); claim gets Main idea label
  * on miss teach (1.4.139) and live arena (1.4.141).
  * Easy Clear 1.4.156: ≤720px arena-first chrome thin so chips + claim keep the phone (#193).
+ * Easy Clear 1.4.161: miss teach omits PlainTalk stack — triad + Try again only (#207).
  */
 export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: WhyBlastPlayProps) {
   const chips = useMemo(
@@ -149,7 +149,7 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
               {EASY.sayFrom} {source}
             </p>
           ) : null}
-          <PlainTalk id={id} teach />
+          {/* Easy Clear 1.4.161: miss sheet = triad + Try again — PlainTalk teach stays on Learn / first claim (#207). */}
           <div className="cta-dock" ref={ctaRef}>
             <button type="button" className="btn gold xl why-miss-retry" onClick={retryAfterTeach}>
               {EASY.tryAgain}

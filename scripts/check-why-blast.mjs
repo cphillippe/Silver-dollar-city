@@ -80,7 +80,10 @@ assert.doesNotMatch(
   blastSrc,
   /missTeach\s*\n\s*\?\s*EASY\.missTeachBadge/,
 )
-assert.match(blastSrc, /PlainTalk/)
+// Easy Clear 1.4.161: miss teach omits PlainTalk mount — triad + Try again only (Fixes #207).
+assert.doesNotMatch(blastSrc, /import \{ PlainTalk \}/)
+assert.doesNotMatch(blastSrc, /<PlainTalk[\s/>]/)
+assert.match(blastSrc, /1\.4\.161.*PlainTalk|#207/)
 assert.match(blastSrc, /retryAfterTeach|is-miss-teach/)
 assert.match(blastSrc, /miss-plus/)
 assert.match(blastSrc, /HOLD_LOCKED_STAMP/)
@@ -148,5 +151,9 @@ assert.match(
   holdCss,
   /@media \(max-height: 720px\) \{[\s\S]*?\.why-claim \{[\s\S]*?padding: 8px 10px/,
 )
+
+// Easy Clear 1.4.161: no miss-teach PlainTalk chrome (Fixes #207)
+assert.match(holdCss, /1\.4\.161.*PlainTalk|Fixes #207/)
+assert.doesNotMatch(holdCss, /\.why-miss-teach \.plain-talk/)
 
 console.log('check-why-blast: ok')
