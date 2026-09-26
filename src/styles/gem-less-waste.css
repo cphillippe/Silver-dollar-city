@@ -119,3 +119,41 @@
     animation: none;
   }
 }
+
+/* Easy Fun 1.4.259: Easy panel-blast SNAG bonus tall-phone HUD juice —
+   After cream fill 253 + HUD peel 168→920, punch BONUS! +100 SNAG overlay on tall
+   phones so the SNAG beat reads arcade-loud over the denser cream board (not a soft
+   mid-board whisper). Pin score bonus-pts gold so SNAG tally stays readable on cream
+   floor. Invent Fun/Clear — panel-blast SNAG only; Match cream / Learn / Lock In /
+   Samaritan / Father / Manage / Dig / Creed peels untouched. */
+@media (max-height: 920px) {
+  .play.is-gem-search.is-panel-blast .gem-stage .bonus-banner {
+    top: 10%;
+    width: min(94%, 280px);
+    padding: 14px 14px 12px;
+    border-radius: 18px;
+    border: 2.5px solid #fff8dc;
+    background: linear-gradient(180deg, #fffce8, #ffcc33 52%, #ff9f1a);
+    box-shadow:
+      0 5px 0 #c46a08,
+      0 0 28px rgba(255, 204, 51, 0.7),
+      0 0 0 3px rgba(255, 246, 232, 0.55);
+    animation: gem-overlay-pop 0.32s cubic-bezier(0.12, 1.55, 0.28, 1) both;
+  }
+
+  .play.is-gem-search.is-panel-blast .gem-stage .bonus-banner strong {
+    font-size: clamp(1.15rem, 5.2vw, 1.45rem);
+    letter-spacing: 0.08em;
+    line-height: 1.05;
+  }
+
+  .play.is-gem-search.is-panel-blast .gem-stage .bonus-banner span {
+    font-size: 0.88rem;
+    font-weight: 800;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .match-score .bonus-pts {
+    color: #c46a08;
+    font-weight: 900;
+  }
+}
