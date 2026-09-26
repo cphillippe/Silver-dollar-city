@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.244',
+    title: 'Easy Sort: ≤720 close board-first HUD on tall phone',
+    when: '2026-09-26',
+    items: [
+      'Easy Sort on ≤720 / phone portrait: extend board-first HUD peel so how + hint hide and lead clamps thin — Keep·Toss · bank · bins stay clear on tall phones (invent Fun/Clear; continuation of Sort board-first HUD peel 183 ≤720 family; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.243',
     title: 'Easy Sequence / Build: ≤720 close board-first HUD on tall phone',
     when: '2026-09-26',
