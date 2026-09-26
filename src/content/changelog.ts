@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.241',
+    title: 'Easy Story Snap: ≤720 close HUD peel on tall phone',
+    when: '2026-09-26',
+    items: [
+      'Easy Story Snap on ≤720 / phone portrait: extend HUD peel so eyebrow + who·where hide and stage · strip · pad stay clear — no buried pad on tall phones (invent Fun/Clear; continuation of Story Snap HUD peel 182 ≤720 family; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.240',
     title: 'Easy Father Dash: ≤720 close tall-phone rail→CTA purple void (Fixes #319)',
     when: '2026-09-26',
