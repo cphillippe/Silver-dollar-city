@@ -1,6 +1,6 @@
 # ready-easy-fun-clear-201 — 1.4.201 Easy Story Creek ≤720 close board→CTA purple gap
 
-**PR:** (pending)
+**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/262
 **Branch:** `ship/easy-fun-clear-201` → `main`
 **Version:** 1.4.201
 **Peel:** `772ed4a` (`772ed4a541b94d1869654c1e3937a574228c6041`)
