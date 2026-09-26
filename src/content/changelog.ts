@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.213',
+    title: 'Easy Lock In feedback: ≤720 close bottom purple void',
+    when: '2026-09-25',
+    items: [
+      'Easy Lock In feedback / miss teach on ≤720px tall: pack the residual phone-safe bottom padding so Main idea · Why this is true · From · Try again reach the lower portrait edge without a dead purple band (Fixes #275; continuation of the earlier feedback shell peel; do not touch other Shot 200 issues)',
+    ],
+  },
+  {
     version: '1.4.212',
     title: 'Easy Lock In quiz: ≤720 close lower-third purple void',
     when: '2026-09-25',

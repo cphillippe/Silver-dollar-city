@@ -1997,3 +1997,23 @@ html[data-easy='on'] .recall-card {
     padding-bottom: 0;
   }
 }
+
+
+/* Easy Clear 1.4.213: Easy Lock In feedback ≤720 close the bottom purple void
+   (Fixes #275). The 1.4.195 miss-teach shell fills the feedback card, but
+   later phone-safe app-body · journal · recall-gate padding leaves a dead band
+   below Main idea · Why this is true · From · Try again. Pack only feedback;
+   quiz #274, win-end #272, and other Shot 200 surfaces stay untouched. */
+@media (max-height: 720px) {
+  html[data-easy='on'] .app.is-play .app-body:has(.journal.is-rehearse .why-blast.is-miss-teach) {
+    padding-bottom: 0;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) {
+    padding-bottom: 0;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) .recall-gate.is-easy-hold {
+    padding-bottom: 0;
+  }
+}
