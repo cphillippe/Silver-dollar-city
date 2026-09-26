@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.197',
+    title: 'Easy Story Snap: ≤720 fill purple void',
+    when: '2026-09-25',
+    items: [
+      'Easy Story Snap on ≤720px tall: grow play shell + stretch snap-stage so strip · stage · pad fill the gold card — no empty purple void under the Hold pad (Match 1.4.184 / Creed 1.4.192 / Story Creek 1.4.191 fill family · invent Fun/Clear; HUD peel 1.4.182 / compress 1.4.152 / teach-omit 1.4.163 untouched; Match 193 / Lock In 194·195 / Father 196 / Hold / Creed / Story Creek / Sort / Build / Link / Samaritan peels untouched)',
+    ],
+  },
+  {
     version: '1.4.196',
     title: 'Easy Father: ≤720 close slider→CTA purple gap',
     when: '2026-09-25',
