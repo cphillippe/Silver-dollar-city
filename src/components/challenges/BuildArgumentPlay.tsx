@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react'
 import { shuffle } from '../../lib/shuffle'
-import { isEasy } from '../../lib/easy'
+import { plainFor } from '../../content/plain'
+import { easyChromeLine, easyChromeNearDup, isEasy } from '../../lib/easy'
 import { useProgress } from '../../store/progress'
 import type { ArgumentCard, BuildArgumentChallenge } from '../../types'
 import { burstStyle } from '../../lib/juice'
+import { easyLead } from '../../lib/words'
 import { PuzzleHint } from './PuzzleHint'
 import { PuzzleLead } from './PuzzleLead'
 import { WinBurst } from './WinBurst'
@@ -212,29 +214,48 @@ export function BuildArgumentPlay({
     bounce()
   }
 
+  const easy = isEasy(progress)
+  // Easy Clear 1.4.151: skip premise .sort-how when PuzzleHint shows (lead/hint already teach).
+  // Same family as Sort 1.4.138 showSortHow; also skip PuzzleHint when it near-dupes PuzzleLead (145/146).
+  const easyLeadLine = easy ? easyLead(challenge.id, challenge.prompt) : ''
+  const easyPlainHint = easy
+    ? easyChromeLine(plainFor(challenge.id)?.hint ?? challenge.context ?? '')
+    : ''
+  const showEasyPuzzleHint =
+    Boolean(easyPlainHint) && !easyChromeNearDup(easyPlainHint, easyLeadLine)
+  const showSortHow = !easy || !easyPlainHint
+
   return (
     <div
       className={`play is-build is-onescreen ${guided ? 'is-deal' : ''} ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}
     >
       <WinBurst play={status === 'ok'} />
       <PuzzleLead challenge={challenge} />
-      <PuzzleHint text={challenge.context} id={challenge.id} onPeek={onPeek} />
-      <p className="sort-how">
-        {isEasy(progress) ? (
-          <>
-            <strong>A premise is a building block of an argument.</strong> Tap the next stone
-            {guided ? ' · two choices' : ''}
-          </>
-        ) : guided ? (
-          <>
-            <strong>Tap the next stone</strong> · two choices
-          </>
-        ) : (
-          <>
-            <strong>Tap a stone</strong> · then a slot
-          </>
-        )}
-      </p>
+      {easy ? (
+        showEasyPuzzleHint ? (
+          <PuzzleHint text={challenge.context} id={challenge.id} onPeek={onPeek} />
+        ) : null
+      ) : (
+        <PuzzleHint text={challenge.context} id={challenge.id} onPeek={onPeek} />
+      )}
+      {showSortHow ? (
+        <p className="sort-how">
+          {easy ? (
+            <>
+              <strong>A premise is a building block of an argument.</strong> Tap the next stone
+              {guided ? ' · two choices' : ''}
+            </>
+          ) : guided ? (
+            <>
+              <strong>Tap the next stone</strong> · two choices
+            </>
+          ) : (
+            <>
+              <strong>Tap a stone</strong> · then a slot
+            </>
+          )}
+        </p>
+      ) : null}
 
       {misses > 0 && status !== 'ok' ? (
         <p className="match-toast" role="status">
