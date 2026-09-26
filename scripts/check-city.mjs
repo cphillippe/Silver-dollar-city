@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.257')
+assert.equal(APP_VERSION, '1.4.258')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1465,7 +1465,7 @@ assert.match(cssSrc, /is-easy-hold/)
   assert.match(dockCss, /backdrop-filter: blur/)
   assert.doesNotMatch(dockCss, /#16062e/, 'sticky CTA docks must not be an opaque black slab')
 }
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Fixes #349|purple void|cream|parchment|Father Dash|tall-phone|rail→CTA|shell/i)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Fixes #350|black void|bottom cutout|Manage|opaque|tall-phone/i)
 {
   const storyCardCss = cssSrc.match(/\.easy-story-card,[\s\S]*?\.easy-story-card::before \{[\s\S]*?\n\}/)?.[0] ?? ''
   assert.match(storyCardCss, /border:\s*0/)
@@ -2403,8 +2403,8 @@ assert.match(mapSrc, /easy \? null : \(\s*\n\s*<>[\s\S]*city-street-main/)
 assert.match(mapSrc, /if \(isEasy\(progress\)\) return/)
 assert.match(mapSrc, /if \(playing\.current && !isEasy\(progress\)\) return/)
 assert.match(mapSrc, /Tap a building to Manage it/)
-assert.match(latestChange(APP_VERSION).title, /Easy Father Dash|≤720|tall-phone|rail→CTA|purple void|Fixes #349/i)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Fixes #349|purple void|cream|parchment|Father Dash|tall-phone|rail→CTA|shell/i)
+assert.match(latestChange(APP_VERSION).title, /Easy Manage|black void|bottom cutout|Fixes #350/i)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Fixes #350|black void|bottom cutout|Manage|opaque|tall-phone/i)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-img[\s\S]*?fill: none !important/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img\.is-built[\s\S]*?fill: none/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-hit[\s\S]*?stroke: none/)
@@ -5540,5 +5540,38 @@ console.log('check-city: ok')
     latestChange('1.4.257').items.join('\n'),
     /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#300|#301|#302|#314|#315|#316|#317|#318|#319|#331|#332|#333|#334|#335|#336|#343|#344|#345|#346|#347|#348|Learn cream|teach-gate|Match grid|gem-scroll|Manage|Samaritan|Lock In|Dig|Creed|Build|Sort|Snap|Link|Claim merge|Source dig|invent Fun\/Clear|Sequence|Story Creek HOLD|Home dock|coach/i,
     '1.4.257 must not fix other phone-fail issues or climb another Easy surface',
+  )
+}
+
+
+// Easy Clear 1.4.258: Easy Manage lot sheet tall-phone black void / bottom cutout (Fixes #350)
+{
+  const indexCss258 = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
+  const mindMap258 = readFileSync(new URL('../src/components/MindMap.tsx', import.meta.url), 'utf8')
+  assert.match(indexCss258, /1\.4\.258: Easy Manage lot sheet tall-phone black void \/ bottom cutout/)
+  assert.match(
+    indexCss258,
+    /1\.4\.258: Easy Manage lot sheet tall-phone black void \/ bottom cutout[\s\S]*?body:has\(\.mind-map\.is-manage\) \{[\s\S]*?background: #12062e/,
+  )
+  assert.match(
+    indexCss258,
+    /1\.4\.258: Easy Manage lot sheet tall-phone black void \/ bottom cutout[\s\S]*?\.mind-map\.is-manage \{[\s\S]*?height: 100dvh[\s\S]*?min-height: 100svh/,
+  )
+  assert.match(
+    indexCss258,
+    /1\.4\.258: Easy Manage lot sheet tall-phone black void \/ bottom cutout[\s\S]*?\.mind-map\.is-manage::after \{[\s\S]*?background: #241050/,
+  )
+  assert.match(
+    indexCss258,
+    /1\.4\.258: Easy Manage lot sheet tall-phone black void \/ bottom cutout[\s\S]*?\.mind-map\.is-manage \.mind-map-card \{[\s\S]*?max-height: min\(52dvh, 460px\)/,
+  )
+  assert.match(mindMap258, /1\.4\.258: tall-phone opaque bottom belt \+ viewport pin/)
+  assert.match(cssSrc, /1\.4\.258: Easy Manage lot sheet tall-phone black void \/ bottom cutout/)
+  assert.match(latestChange('1.4.258').items.join('\n'), /Fixes #350|black void|bottom cutout|Manage|opaque|tall-phone/i)
+  assert.match(latestChange('1.4.258').title, /Easy Manage|black void|bottom cutout|Fixes #350/i)
+  assert.doesNotMatch(
+    latestChange('1.4.258').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#300|#301|#302|#314|#315|#316|#317|#318|#319|#331|#332|#333|#334|#335|#336|#343|#344|#345|#346|#347|#348|#349|Learn cream|teach-gate|Match grid|gem-scroll|Samaritan|Father Dash|Lock In|Dig|Creed|Build|Sort|Snap|Link|Claim merge|Source dig|invent Fun\/Clear|Sequence|Story Creek HOLD|Home dock|coach|width cutout/i,
+    '1.4.258 must not fix other phone-fail issues or climb another Easy surface',
   )
 }

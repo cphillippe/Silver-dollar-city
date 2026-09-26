@@ -3677,6 +3677,104 @@ html[data-easy='on'] .mind-node em {
 }
 
 
+/* Easy Clear 1.4.258: Easy Manage lot sheet tall-phone black void / bottom cutout (Fixes #350) —
+   After peek 165 / hub chrome 167 / empty-lot 180 / width 230, Shot pack 1.4.250
+   08-manage-or-snap.png still fails — Gemini: massive black void cuts off the viewport and
+   wastes the entire bottom third (new fail shape vs closed #302 width cutout / Shot 240 PASS;
+   vertical, not side bars). Cause: manage overlay + hug peek card (max-height 42dvh · height
+   auto · transparent floor under the gold plate) left the bottom of the tall portrait reading
+   as a dead black cutout under the sheet rather than opaque sheet chrome pinned to the visual
+   viewport. Strengthen — NOT another 230 width-only copy + NOT an opaque full-overlay (map
+   peek above the sheet must stay readable): (1) body:has(.mind-map.is-manage) opaque dusk floor
+   so any leftover under the portal is intentional purple, not WebView black; (2) pin overlay to
+   the visual viewport (inset 0 · 100vw · 100dvh · min-height 100svh) with a bottom-only opaque
+   ::after belt (not a transparent hole over black); (3) bottom-pin the gold card — opaque sheet
+   plate · zero bottom margin · safe-area padding · slightly taller tall-phone max-height so
+   sheet claims the usable bottom without eating map peek. Width 230 / peek 165 / empty-lot 180 /
+   hub 167 stay. Do NOT pack Learn / Match / Lock In / Samaritan / Father / Dig / parked
+   Dig/Hard/NW/Town/stores/Pack B / map candy (letterbox stays Map-owned #217). */
+@media (max-height: 920px) {
+  /* Opaque body floor while Manage portal is open — kill black void under sheet */
+  body:has(.mind-map.is-manage) {
+    background-color: #12062e;
+    background-image: none;
+    background: #12062e;
+  }
+
+  .mind-map.is-manage {
+    position: fixed;
+    inset: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    max-width: 100vw;
+    height: 100dvh;
+    min-height: 100svh;
+    max-height: none;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: stretch;
+    /* keep overlay itself transparent so Home map stays readable above the peek sheet */
+    background: transparent;
+  }
+
+  /* Bottom-only opaque belt — kills transparent hole / black cutout under the gold card */
+  .mind-map.is-manage::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: max(28px, calc(12px + env(safe-area-inset-bottom, 0px)));
+    background-color: #241050;
+    background: #241050;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .mind-map.is-manage .mind-map-scrim {
+    z-index: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(16, 6, 36, 0.06) 0%,
+      rgba(16, 6, 36, 0.18) 55%,
+      rgba(18, 6, 46, 0.42) 100%
+    );
+  }
+
+  .mind-map.is-manage .mind-map-card {
+    position: relative;
+    z-index: 1;
+    width: 100vw;
+    max-width: none;
+    margin: 0;
+    margin-bottom: 0;
+    border-radius: 20px 20px 0 0;
+    align-self: stretch;
+    box-sizing: border-box;
+    /* Tall-phone: claim usable bottom — map peek stays above (~half) */
+    max-height: min(52dvh, 460px);
+    min-height: 0;
+    height: auto;
+    padding: 8px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+    /* Opaque sheet plate — not a translucent wash over black */
+    background-color: #241050;
+    background-image:
+      radial-gradient(160px 80px at 90% 0%, rgba(255, 90, 122, 0.28), transparent 70%),
+      linear-gradient(180deg, #48188c 0%, #240c50 100%);
+  }
+
+  .mind-map.is-manage .mind-map-dock {
+    margin-top: auto;
+    padding-bottom: 0;
+  }
+}
+
+
 /* Easy Home under dual is-play+is-town: full-bleed body, purple menu topbar */
 .app.is-town[data-easy='on'] .app-body {
   width: 100%;
