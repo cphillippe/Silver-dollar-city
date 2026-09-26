@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.144',
+    title: 'Father run: one how line',
+    when: '2026-09-25',
+    items: [
+      'Easy Father run: omit redundant Hold/glow .sort-how — run-pad, miss toast, and story-caption already teach the dash (Clear family with Samaritan maze 1.4.143 / Match·Sort how dedupe)',
+    ],
+  },
+  {
     version: '1.4.143',
     title: 'Samaritan road: one how line',
     when: '2026-09-25',
