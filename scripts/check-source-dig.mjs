@@ -234,6 +234,11 @@ assert.match(playSrc, /setPointerCapture/)
 assert.match(playSrc, /role="timer"/)
 assert.doesNotMatch(playSrc, /nextId|is-glow|Tap the glow/)
 assert.doesNotMatch(playSrc, /tapWhy|claimChoices|reasonChoices|whyCorrect/)
+assert.doesNotMatch(
+  playSrc,
+  /EASY\.digHunt/,
+  'Easy Clear 1.4.158: omit digHunt .sort-how — Scrub tablets · timer · SOURCE_DIG_HINT teach scrub',
+)
 
 const puzzleSrc = readFileSync(new URL('../src/components/PuzzlePlay.tsx', import.meta.url), 'utf8')
 assert.match(puzzleSrc, /case 'source-dig'/)
