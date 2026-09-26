@@ -76,7 +76,7 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
 
   const sheet = (
     <div
-      className="mind-map is-manage"
+      className={`mind-map is-manage${applied === 0 ? ' is-empty-lot' : ''}`}
       role="dialog"
       aria-label={`Manage ${graph.placeTitle}`}
     >
@@ -91,7 +91,8 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
                 : `Manage · Level ${applied} · ${tierTitle(applied, easy)}`}
             </p>
             <h2>{graph.placeTitle}</h2>
-            {easy && easyPlaceSub(plotId) ? (
+            {/* 1.4.180 — empty-lot omits place-sub (compact; Fixes #232) */}
+            {easy && applied > 0 && easyPlaceSub(plotId) ? (
               <p className="quiet place-sub">{easyPlaceSub(plotId)}</p>
             ) : null}
           </div>
