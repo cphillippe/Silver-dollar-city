@@ -3,8 +3,8 @@
 **PR:** (pending)
 **Branch:** `ship/easy-fun-clear-199` → `main`
 **Version:** 1.4.199
-**Peel:** (pending)
-**Tip:** (pending)
+**Peel:** `95314a2` (`95314a2773b6ace3686a30448003aff5e2db920a`)
+**Tip:** `95314a2` (`95314a2773b6ace3686a30448003aff5e2db920a`)
 **Base live:** 1.4.198 (`ff7dcbf`, PR #259 Easy Sort ≤720 fill purple void on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
