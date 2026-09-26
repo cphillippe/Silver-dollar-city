@@ -279,7 +279,7 @@
 .challenge-page.is-puzzle .play.is-sequence.is-deal {
   display: flex;
   flex-direction: column;
-  flex: 0 0 auto;
+  flex: 1 1 auto;
   min-height: 0;
   overflow: hidden;
   gap: 10px;
@@ -1459,5 +1459,51 @@ html[data-easy='on'] .recall-card {
     flex: 0 0 auto;
     margin-top: 0;
     padding-bottom: calc(4px + var(--safe-bottom, 0px));
+  }
+}
+
+/* Easy Clear 1.4.186: Easy Samaritan / Sequence order ≤720 fill top-cluster purple void —
+   play.is-sequence.is-deal was flex:0 so the gold card hugged content at the top with a
+   massive empty purple bottom half (Shot 1.4.180 06-samaritan · Fixes #240). Grow play
+   shell (base flex:1) + stretch order bank / stone tiles so chips fill the portrait —
+   Match 184 / Lock In 185 ≤720 family. Invent Fun/Clear. */
+@media (max-height: 720px) {
+  .is-puzzle .play.is-sequence.is-deal,
+  .daily-page.is-puzzle .play.is-sequence.is-deal,
+  .challenge-page.is-puzzle .play.is-sequence.is-deal {
+    gap: 6px;
+  }
+
+  .is-puzzle .play.is-sequence.is-deal .bank.is-order {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-auto-rows: minmax(0, 1fr);
+    align-content: stretch;
+    gap: 10px;
+    height: auto;
+    max-height: none;
+  }
+
+  .is-puzzle .play.is-sequence.is-deal .sort-tile {
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    align-self: stretch;
+  }
+
+  .is-puzzle .play.is-sequence.is-deal .sort-tile .chip {
+    height: 100%;
+    min-height: 72px;
+    -webkit-line-clamp: 6;
+  }
+
+  .is-puzzle .play.is-sequence.is-deal .prompt {
+    flex: 0 0 auto;
+  }
+
+  .is-puzzle .play.is-sequence.is-deal .sort-how.is-order-how {
+    flex: 0 0 auto;
   }
 }
