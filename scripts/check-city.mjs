@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.223')
+assert.equal(APP_VERSION, '1.4.224')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -4414,5 +4414,36 @@ console.log('check-city: ok')
     latestChange('1.4.223').items.join('\n'),
     /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|Father Dash|Learn cream|Match grid|Manage|Lock In quiz|Dig|Creed|Hold|Sort|Link|Build|Sequence|Road maze|Claim merge|Source dig|Story Creek HOLD|slider→HOLD|timing-rail→CTA|hud→arena|Keep·Toss|choices→CTA|bowl→CTA|stones→result/i,
     '1.4.223 must not fix phone-fail issues or climb another Easy surface',
+  )
+}
+
+// Easy Clear 1.4.224: Easy Learn ≤720 / phone portrait bottom-half purple void (Fixes #296)
+{
+  const welcomeCss224 = readFileSync(new URL('../src/styles/welcome.css', import.meta.url), 'utf8')
+  const teachUnlock224 = readFileSync(
+    new URL('../src/components/TeachUnlock.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(welcomeCss224, /1\.4\.224: Easy Learn ≤720 \/ phone portrait bottom-half purple void/)
+  assert.match(
+    welcomeCss224,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.app-body:has\(\.challenge-page\.is-teach \.easy-story-card\) \{[\s\S]*?padding-bottom: 0/,
+  )
+  assert.match(
+    welcomeCss224,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.challenge-page\.is-teach:has\(\.easy-story-card\) \{[\s\S]*?flex: 1 1 0/,
+  )
+  assert.match(
+    welcomeCss224,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.easy-story-card \.easy-story-dock \{[\s\S]*?margin-top: auto/,
+  )
+  assert.match(teachUnlock224, /1\.4\.224: phone portrait tightens fill 215/)
+  assert.match(cssSrc, /1\.4\.224: Easy Learn ≤720 \/ phone portrait bottom-half purple void/)
+  assert.match(latestChange('1.4.224').items.join('\n'), /Fixes #296|bottom-half|purple void|Learn|cream/i)
+  assert.match(latestChange('1.4.224').title, /Easy Learn|≤720|bottom-half|purple void/i)
+  assert.doesNotMatch(
+    latestChange('1.4.224').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#297|#298|#299|#300|#301|#302|Father Dash|Match grid|Samaritan|Manage|Lock In|Dig|Creed|Build|Sort|Snap|Link|Road maze|Claim merge|Source dig|Story Creek HOLD|slider→HOLD|invent Fun\/Clear/i,
+    '1.4.224 must not fix other phone-fail issues or climb another Easy surface',
   )
 }
