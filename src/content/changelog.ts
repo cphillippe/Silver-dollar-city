@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.195',
+    title: 'Easy Lock In feedback: ≤720 fill purple void',
+    when: '2026-09-25',
+    items: [
+      'Easy Lock In feedback / miss teach on ≤720px tall: grow journal rehearse shell + stretch why-miss-teach so Main idea · why-true · From · Try again fill the portrait — no massive empty purple void across the bottom third (Fixes #252 · Shot 1.4.190 / 05-easy-lockin-miss; still fail after win-end StoredLine #239 / 1.4.185; do not pack #250 / #251 / #253; quiz 1.4.194 / Hold arena 1.4.190 / Match 1.4.193 / Creed / Story Creek / Samaritan / Sort / Snap / Build / Link / Dash peels untouched)',
+    ],
+  },
+  {
     version: '1.4.194',
     title: 'Easy Lock In quiz: ≤720 fill purple void',
     when: '2026-09-25',

@@ -1668,3 +1668,75 @@ html[data-easy='on'] .recall-card {
     padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
   }
 }
+
+/* Easy Clear 1.4.195: Lock In feedback / miss teach ≤720 fill purple void (Fixes #252) —
+   After quiz shell 194 / win-end StoredLine 185 / Hold arena 190, miss-teach still
+   hugs content so ≤720 leaves a massive empty purple bottom third (Shot 1.4.190
+   05-easy-lockin-miss · Gemini vision; still fail after #239). Grow app-body ·
+   journal · rehearse-anchor · recall-gate + stretch why-miss-teach so Main idea ·
+   why-true · From · Try again fill the portrait. Do NOT pack #250/#251/#253;
+   quiz 194 / win-end 185 / Hold arena 190 / Match 193 untouched. Invent Fun/Clear. */
+@media (max-height: 720px) {
+  html[data-easy='on'] .app.is-play .app-body:has(.journal.is-rehearse .why-blast.is-miss-teach) {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding-top: 8px;
+    padding-bottom: calc(8px + var(--safe-bottom, 0px));
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    gap: 4px;
+    overflow: hidden;
+    padding-bottom: 0;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) > .text-link {
+    flex: 0 0 auto;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) .rehearse-anchor {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) .rehearse-anchor > .eyebrow {
+    flex: 0 0 auto;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) .recall-gate.is-easy-hold {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    height: auto;
+    margin-bottom: 0;
+    overflow: hidden;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  }
+
+  html[data-easy='on'] .why-blast.is-miss-teach {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  html[data-easy='on'] .why-blast.is-miss-teach .why-blast-hud {
+    flex: 0 0 auto;
+  }
+
+  html[data-easy='on'] .why-blast.is-miss-teach .why-miss-teach {
+    flex: 1 1 auto;
+    min-height: 0;
+    justify-content: center;
+    gap: 10px;
+  }
+}
