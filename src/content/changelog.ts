@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.192',
+    title: 'Easy Creed merge: ≤720 fill purple void',
+    when: '2026-09-25',
+    items: [
+      'Easy Creed merge on ≤720px tall: grow play shell + stretch merge-bowl so score · ladder · bowl fill the gold card — no empty purple void under the bowl (Match 1.4.184 / Story Creek 1.4.191 fill family · invent Fun/Clear; HUD peel 1.4.181 / bowl-first 1.4.159 untouched; Match / Lock In / Samaritan / Sort / Snap / Story Creek / Hold / Build Argument / Link / Father Dash peels untouched)',
+    ],
+  },
+  {
     version: '1.4.191',
     title: 'Easy Story Creek: ≤720 fill purple void',
     when: '2026-09-25',
