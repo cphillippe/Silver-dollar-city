@@ -1,0 +1,5 @@
+1.4.164 Easy Build It gift wrap (#214)
+Gemini: unavailable — GEMINI_API_KEY present but not AIza AI Studio shape (same as 163).
+Shipped Manager-steered peel without Gemini APPROVE.
+Fix: .hub.is-easy-home .easy-build-gift — white-space:normal + 2-line clamp; drop nowrap/ellipsis.
+Copy kept: “A building is ready. Tap it, then Build this.”
