@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.208')
+assert.equal(APP_VERSION, '1.4.209')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3824,6 +3824,33 @@ console.log('check-city: ok')
     latestChange('1.4.208').items.join('\n'),
     /Fixes #250|Fixes #251|Fixes #252|Fixes #253|Lock In quiz|Lock In feedback|grid→footer|gem-board|Easy Sort ≤720 fill|Father Dash ≤720 fill|Story Snap ≤720 fill|snap-stage|bank\.is-sort|sort-bins|choices→CTA|link-dock|Easy Link ≤720 fill|bowl→CTA|Easy Creed ≤720 fill|merge-bowl|board→CTA|Story Creek ≤720 fill|maze-board|chips→CTA|Easy Hold.*≤720 fill|Build Argument ≤720 fill|free-place|slider→CTA|speech→rail|Easy Father ≤720 fill|stones→result|Easy Sequence ≤720|held-clear|Easy Learn ≤720|empty purple card|score→CTA|Easy Match ≤720/i,
     '1.4.208 must not re-peel Shot 190 fails #250–#253 or Match 207 / Learn 206 / Sequence 205 / Father 204 / Build 203 / Hold 202 / Creek 201 / Creed 200 / Link 199 / Sort 198 / Snap 197 / Lock In quiz·miss',
+  )
+}
+
+// Easy Clear 1.4.209: Easy Story Snap ≤720 close pad→CTA purple gap (invent Fun/Clear)
+{
+  const snapCss209 = readFileSync(new URL('../src/styles/storySnap.css', import.meta.url), 'utf8')
+  const snapPlay209 = readFileSync(
+    new URL('../src/components/challenges/StorySnapPlayView.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(snapCss209, /1\.4\.209: Easy Story Snap ≤720 close pad→CTA purple gap/)
+  assert.match(
+    snapCss209,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-story-snap \.cta-dock \{[\s\S]*?margin-top: 0/,
+  )
+  assert.match(
+    snapCss209,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-story-snap[\s\S]*?gap: 0\.12rem/,
+  )
+  assert.match(snapPlay209, /1\.4\.209: ≤720 zeros cta-dock margin-top so pad→CTA close/)
+  assert.match(cssSrc, /1\.4\.209: Easy Story Snap ≤720 close pad→CTA purple gap/)
+  assert.match(latestChange('1.4.209').items.join('\n'), /pad→CTA|cta-dock|Hold pad|purple band between the pad/i)
+  assert.match(latestChange('1.4.209').title, /Story Snap|≤720|pad→CTA|purple gap/i)
+  assert.doesNotMatch(
+    latestChange('1.4.209').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|Lock In quiz|Lock In feedback|grid→footer|gem-board|Easy Sort ≤720 fill|Father Dash ≤720 fill|Story Snap ≤720 fill|snap-stage|bank\.is-sort|sort-bins|choices→CTA|link-dock|Easy Link ≤720 fill|bowl→CTA|Easy Creed ≤720 fill|merge-bowl|board→CTA|Story Creek ≤720 fill|maze-board|chips→CTA|Easy Hold.*≤720 fill|Build Argument ≤720 fill|free-place|slider→CTA|speech→rail|Easy Father ≤720 fill|stones→result|Easy Sequence ≤720|held-clear|Easy Learn ≤720|empty purple card|score→CTA|Easy Match ≤720|triad→Home|Lock In win-end/i,
+    '1.4.209 must not re-peel Shot 190 fails #250–#253 or Lock In win-end 208 / Match 207 / Learn 206 / Sequence 205 / Father 204 / Build 203 / Hold 202 / Creek 201 / Creed 200 / Link 199 / Sort 198 / Snap fill 197',
   )
 }
 

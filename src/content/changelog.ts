@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.209',
+    title: 'Easy Story Snap: ≤720 close pad→CTA purple gap',
+    when: '2026-09-25',
+    items: [
+      'Easy Story Snap on ≤720px tall: zero cta-dock margin-top + tighten play gap so Hold pad · score · next-tap dock pack tight — no purple band between the pad and the dock (Link/Creed/Creek/Hold/Match dock-margin family · invent Fun/Clear; after grow-play peel 1.4.197; StoredLine 208 / Match 207 / Learn 206 / Sequence 205 / Father 204 / Build 203 / Hold 202 / Story Creek 201 / Creed 200 / Link 199 / Sort 198 peels untouched)',
+    ],
+  },
+  {
     version: '1.4.208',
     title: 'Easy Lock In win-end: ≤720 close triad→Home purple gap',
     when: '2026-09-25',
