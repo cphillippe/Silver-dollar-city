@@ -1,8 +1,7 @@
 MODEL=gemini-flash-latest
-Invent Fun/Clear — no open Easy Fun/Clear issue beyond parked #161 / cheap-hop #160.
-1.4.191 Easy Story Creek fill live on main (5d8e11e / #248). Shot pack incoming separately — stay on invent; do NOT wake Shot.
-Invent API: GEMINI_API_KEY present but not AIza AI Studio shape (same as 163–191).
-Manager-steered invent peel: Easy Creed merge ≤720 fill purple void (HUD peel 181 / bowl-first 159 only; capped merge-bowl + aspect-ratio hug top — empty purple under bowl; Match 184 / Story Creek 191 fill family; different scene than Match/LockIn/Samaritan-Sequence/Sort/Snap/Story Creek/Build/Link/Father/Hold).
-Peel: index.css @media (max-height:720px) play.is-claim-merge flex:1 + stretch merge-bowl (max-height:none, aspect-ratio:auto); ClaimMergePlay comment.
-Do NOT re-peel Match/LockIn/Samaritan/Sort/Snap/Story Creek/Hold/Build/Link/Father. Dig/Hard/NW/Town/stores/Pack B/Home map candy parked.
-VERDICT: APPROVE (invent Fun/Clear · densest remaining Easy trail Creed merge fill — after HUD 181)
+Shot pack 1.4.190 Gemini vision FAIL on 03-easy-match.png — Fixes #250.
+Invent API: GEMINI_API_KEY present but not AIza AI Studio shape (same as 163–192).
+Manager-steered peel (parent + issue #250): Easy Match (GemSearch letter grid) ≤720 fill grid→footer purple void.
+Peel: gem.css @media (max-height:720px) play.is-gem-search.is-panel-blast.is-story-docked flex:1 + stretch gem-scroll/gem-stage/gem-board (max-height:none, aspect-ratio:auto); GemSearchPlay comment.
+Do NOT pack #251 Lock In quiz / #252 Lock In feedback / #253 Father. Picture-deal 184 / Creed 192 / Story Creek 191 / Hold / Link / Build / Samaritan / Sort / Snap untouched.
+VERDICT: APPROVE (shot Gemini + issue #250)

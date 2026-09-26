@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.193',
+    title: 'Easy Match: ≤720 fill grid→footer purple void',
+    when: '2026-09-25',
+    items: [
+      'Easy Match (letter grid) on ≤720px tall: grow play shell + stretch gem-scroll / gem-stage / gem-board so dock · grid · score fill the portrait — no empty purple void between letter grid and footer (Fixes #250 · Shot 1.4.190 / 03-easy-match; still fail after picture-deal #238 / 1.4.184; how/say peel 1.4.168 untouched; do not pack #251 Lock In / #252 Lock In miss / #253 Father; Creed 192 / Story Creek 191 / Hold / Link / Build / Samaritan / Sort / Snap peels untouched)',
+    ],
+  },
+  {
     version: '1.4.192',
     title: 'Easy Creed merge: ≤720 fill purple void',
     when: '2026-09-25',
