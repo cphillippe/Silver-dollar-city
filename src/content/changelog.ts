@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.268',
+    title: 'Easy Hold dock: ≤720 arcade punch tall-phone juice',
+    when: '2026-09-26',
+    items: [
+      'Easy Hold (Story Creek HOLD) on ≤720 / phone portrait: extend HUD peel 156 dock compress across max-height 920px and taller layout viewports, and punch the Hold dock CTA plus timing juice (score · miss · LOCKED) arcade-loud on the cream plate — claim stays readable (invent Fun/Clear; continuation of Hold HUD 242; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.267',
     title: 'Easy Manage sheet: ≤720 close purple bar / misalign (Fixes #367)',
     when: '2026-09-26',
