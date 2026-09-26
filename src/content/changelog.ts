@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.168',
+    title: 'Easy Match: ≤720 board-first',
+    when: '2026-09-25',
+    items: [
+      'Easy Match gem/crossword on ≤720px tall: hide how + teach-say chrome; tiny LociStamp/chips so letter board + Lock In CTA stay above fold (Hub/Snap/Father/Learn ≤720 family; invent Fun/Clear)',
+    ],
+  },
+  {
     version: '1.4.167',
     title: 'Easy Manage: Hub chrome compress when open',
     when: '2026-09-25',

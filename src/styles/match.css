@@ -336,3 +336,41 @@ html[data-easy='on'] .next-tap {
 .play.is-source-dig .match-score.is-juice {
   animation: merge-score-pop 0.42s cubic-bezier(0.12, 1.45, 0.28, 1);
 }
+
+/* Easy Clear 1.4.168: Easy Match (gem / crossword) ≤720 board-first —
+   hide non-essential how/say chrome so letter board + Lock In CTA stay above fold
+   (Hub / Snap / Father / Learn ≤720 family). Teach chips + LociStamp stay. */
+@media (max-height: 720px) {
+  .play.is-gem-search.is-panel-blast {
+    gap: 3px;
+  }
+
+  .play.is-gem-search.is-panel-blast .sort-how {
+    display: none;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .match-teach-say {
+    display: none;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .match-teach-dock {
+    max-height: 72px;
+    gap: 0.08rem;
+    padding: 0;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .loci-stamp.is-dock {
+    min-height: 28px;
+    max-height: 32px;
+    padding: 0.06rem 0.35rem;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .match-teach-chips {
+    gap: 0.18rem;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .match-score {
+    margin: 0;
+    font-size: 0.7rem;
+  }
+}
