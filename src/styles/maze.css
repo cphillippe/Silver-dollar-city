@@ -794,6 +794,21 @@
   }
 }
 
+/* Easy Clear 1.4.201: Easy Story Creek ≤720 close board→CTA purple gap —
+   After fill 191 grew play + stretch maze-board, global .cta-dock { margin-top: auto }
+   still steals free space on win before flex-grow, leaving empty purple between
+   the board · score and the Hold / Again dock (Father 196 / Link 199 / Creed 200
+   dock-margin family; invent Fun/Clear). Zero the auto margin so maze-board
+   flex:1 absorbs the portrait — tight board→CTA spacing.
+   Fill 191 / HUD 175 / compress 153 stay; Creed 200 / Link 199 / Sort 198 /
+   Story Snap 197 / Match 193 / Lock In 194·195 / Father 196 / Hold / Build /
+   Samaritan peels untouched. */
+@media (max-height: 720px) {
+  .play.is-road-maze .cta-dock {
+    margin-top: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .play.is-father-run.is-running .run-actor.is-father,
   .play.is-father-run.is-running .run-leg.is-a,

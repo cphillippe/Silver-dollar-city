@@ -374,6 +374,7 @@ export function RoadMazePlay({
       {/* Easy Clear 1.4.153: default chrome compress (maze.css) — board-first after how-dedupe; not only .is-help-phase (#190). */}
       {/* Easy Clear 1.4.175: ≤720 peels HUD (kicker · thumbs · caption) in maze.css — beats + board stay above fold. */}
       {/* Easy Clear 1.4.191: ≤720 fills purple void in maze.css (invent Fun/Clear). */}
+      {/* Easy Clear 1.4.201: ≤720 zeros cta-dock margin-top so board→CTA close (fill 191 stays). */}
       <p className="story-kicker">
         {home.who} · {home.place}
       </p>
