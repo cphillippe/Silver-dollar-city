@@ -1,19 +1,19 @@
-# 1.4.264 Easy Lock In feedback tall residual cream (Fixes #364)
+# 1.4.265 Easy Samaritan tall residual cream (Fixes #365)
 
-**Branch:** `fix/364-easy-lockin-feedback-tall-residual` → `main`
+**Branch:** `fix/365-easy-samaritan-tall-residual` → `main`
 **Status:** Not merged. Do not wake Shot (wake at 1.4.270).
 
 ## What changed
-Easy Lock In miss feedback left a purple void under NOT QUITE on tall portrait viewports after the 1.4.255 cream peel. The live DOM is `main.journal.is-rehearse` > `.rehearse-anchor` > `section.recall-gate.is-easy-hold` > `.why-blast.is-miss-teach` > `article.why-miss-teach`. Those 255 selectors already paint cream at `max-height: 920px`. Above that cap the feedback plate keeps its purple-gold gradient and the stack hugs the top.
+Easy Samaritan / Story Creek mercy maze left purple voids between the HUD, the road board, and the find-line footer on tall portrait viewports after the 1.4.256 cream peel. The live DOM is `main.challenge-page.is-puzzle` > `.play.is-road-maze` > `.maze-beats` + `.maze-stage` > `.maze-board` + `.match-score`. Those 256 selectors already paint cream at `max-height: 920px`. Above that cap the play keeps its purple-gold gradient and the aspect-capped board sits in a transparent stage.
 
-1.4.264 keeps the 255 rules and adds `@media (max-height: 920px), (min-height: 921px)` in `src/styles/welcome.css` for miss/feedback only:
+1.4.265 keeps the 256 rules and adds `@media (max-height: 920px), (min-height: 921px)` in `src/styles/welcome.css` for Easy Samaritan / road-maze only:
 
-- opaque `#fff6e8` (`background-image: none`) on the full-bleed app-body, miss-teach shell, recall-gate, and why-miss-teach plate
-- dark ink `#2a2118` on claim and reason
-- Try again pinned with `margin-top: auto` on a cream dock, solid gold so it stays readable
-- horizontal overflow pin so the #347 left clip does not return
+- opaque `#fff6e8` (`background-image: none`) on the full-bleed app-body, puzzle shell, play, maze-stage, and maze-board plate
+- dark ink on the kicker, caption, and score so HUD and footer stay readable
+- find-line / win dock pinned with `margin-top: auto` on a cream floor
+- road tiles and target chips keep their own faces
 
-Live quiz stays on the 1.4.263 peel. The play topbar stays the purple dusk wash. Android `versionName` stays `1.4.113`. `docs/` is synced from `dist/` and `qa-seed.html` is preserved.
+The play topbar stays the purple dusk wash. Android `versionName` stays `1.4.113`. `docs/` is synced from `dist/` and `qa-seed.html` is preserved.
 
 ## Checks
 - `npm run test:city`
