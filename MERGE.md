@@ -1,10 +1,10 @@
 # ready-easy-fun-clear-192 — 1.4.192 Easy Creed merge ≤720 fill purple void
 
-**PR:** (pending create)
+**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/249
 **Branch:** `ship/easy-fun-clear-192` → `main`
 **Version:** 1.4.192
-**Peel:**  ()
-**Tip:**  ()
+**Peel:** `a051bde` (`a051bdeb65e452740a539c851a9a5209ef2e9edd`)
+**Tip:** `b398aaa` (`b398aaa1278f74776f17ef7a7ebcf9d35b60604e`)
 **Base live:** 1.4.191 (`5d8e11e`, PR #248 Easy Story Creek ≤720 fill purple void on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
