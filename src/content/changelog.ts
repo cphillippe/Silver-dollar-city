@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.227',
+    title: 'Easy Lock In feedback: ≤720 close bottom-half purple void (Fixes #299)',
+    when: '2026-09-26',
+    items: [
+      'Fixes #299: Easy Lock In feedback on ≤720 / phone portrait — extend miss-teach shell fill 195 + pad-zero 213 across max-height 920px so app-body · journal · rehearse-anchor · recall-gate · why-miss-teach absorb free space, zero residual phone-safe padding, and pin Try again — no massive purple void across the bottom half of the card on tall phones (Shot 220 residual after Lock In feedback peel 1.4.213; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.226',
     title: 'Easy Lock In quiz: ≤720 close bottom-half purple void (Fixes #298)',
     when: '2026-09-26',
