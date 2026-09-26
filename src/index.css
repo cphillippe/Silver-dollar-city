@@ -5006,6 +5006,120 @@ html[data-easy='on'] .mind-node em {
   }
 }
 
+/* Easy Clear 1.4.240: Easy Father Dash ≤720 / tall-phone rail→CTA purple void (Fixes #319) —
+   After strengthen 229 (overflow hidden · run-scene flex 1 1 0 · dock static), Shot pack
+   1.4.230 07-father.png (390×844) STILL parks HOLD TO RUN at the card floor with a massive
+   purple band under the timing rail (residual after closed #301 / 1.4.229; capture at
+   Chrome 1.4.230). Cause: incomplete ancestor height pin — play height 100% alone cannot
+   absorb when app-body / challenge-page leave free space, and sticky `.cta-dock` chrome
+   (blur plate) still reads as purple under the rail (Learn 235 / Match 236 / Lock In
+   237–238 / Samaritan 239 sticky lesson). Strengthen Father Dash timing-rail ONLY
+   (`.play.is-father-run` / FatherRunPlay — NOT Story Creek HOLD): app-body · puzzle page
+   height 100% chain · overflow hidden · flex 1 1 0, play height 100% · overflow hidden,
+   run-scene flex 1 1 0 · min-height 0 absorbs leftover (clear fixed 188px), speech→rail
+   compress, chrome flex 0, cta-dock position static + margin-top 0 (auto would recreate
+   the rail→CTA void per Shot PNG) + clear sticky blur plate so HOLD packs tight to rail.
+   Fill 189 / dock 196 / speech→rail 204 ≤720 / Creek HOLD 214 / Dash 216 / strengthen 229
+   stay. Do NOT pack #272 Creek HOLD / #314–#318 Learn / Match / Lock In / Samaritan /
+   Manage / Dig / parked Dig/Hard/NW/Town/stores/Pack B/Home map candy. */
+@media (max-height: 920px) {
+  html[data-easy='on'] .app.is-play .app-body:has(.play.is-father-run) {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+    padding-top: 4px;
+    padding-bottom: 0;
+  }
+
+  .daily-page.is-puzzle:has(.play.is-father-run),
+  .challenge-page.is-puzzle:has(.play.is-father-run) {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    gap: 2px;
+    overflow: hidden;
+  }
+
+  .play.is-father-run,
+  .daily-page.is-puzzle .play.is-father-run,
+  .challenge-page.is-puzzle .play.is-father-run {
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 2px;
+    overflow: hidden;
+  }
+
+  .play.is-father-run .run-scene {
+    flex: 1 1 0;
+    min-height: 0;
+    height: auto;
+    max-height: none;
+    align-self: stretch;
+  }
+
+  .play.is-father-run .story-kicker,
+  .play.is-father-run .run-thumbs,
+  .play.is-father-run .story-caption,
+  .play.is-father-run .match-score,
+  .play.is-father-run .run-speech,
+  .play.is-father-run .run-rail,
+  .play.is-father-run .cta-dock,
+  .play.is-father-run .run-miss,
+  .play.is-father-run .match-toast {
+    flex: 0 0 auto;
+  }
+
+  .play.is-father-run .run-speech {
+    margin: 0;
+    padding: 3px 8px 4px;
+  }
+
+  .play.is-father-run .run-speech-line {
+    margin: 1px 0 2px;
+  }
+
+  .play.is-father-run .run-speech-count {
+    margin-top: 1px;
+  }
+
+  .play.is-father-run .run-rail {
+    margin: 0;
+    height: 14px;
+  }
+
+  .play.is-father-run .run-pad {
+    min-height: 58px;
+    font-size: 1rem;
+    border-radius: 18px;
+  }
+
+  .play.is-father-run .cta-dock,
+  .play.is-father-run .cta-dock.run-dock {
+    position: static;
+    bottom: auto;
+    margin-top: 0;
+    flex: 0 0 auto;
+    padding-top: 2px;
+    padding-bottom: calc(4px + env(safe-area-inset-bottom, 0px));
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+
 
 .miss-banner {
   display: grid;
