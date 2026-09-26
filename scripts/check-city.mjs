@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.182')
+assert.equal(APP_VERSION, '1.4.183')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3203,6 +3203,36 @@ console.log('check-city: ok')
     '1.4.182 must not claim Manage 180 or Map letterbox',
   )
 }
+
+
+// Easy Clear 1.4.183: Easy Sort ≤720 board-first how/lead/hint peel (invent Fun/Clear)
+{
+  const holdCss183 = readFileSync(new URL('../src/styles/sortHold.css', import.meta.url), 'utf8')
+  const sortPlay183 = readFileSync(
+    new URL('../src/components/challenges/SortPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(holdCss183, /1\.4\.183: Easy Sort ≤720 board-first/)
+  assert.match(
+    holdCss183,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-easy-sort \.sort-how \{[\s\S]*?display: none/,
+  )
+  assert.match(
+    holdCss183,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-easy-sort \.easy-hint,[\s\S]*?display: none/,
+  )
+  assert.match(
+    holdCss183,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-easy-sort \.prompt \{[\s\S]*?-webkit-line-clamp: 2/,
+  )
+  assert.match(sortPlay183, /1\.4\.183: ≤720 peels how\/lead\/hint chrome in sortHold\.css/)
+  assert.doesNotMatch(
+    latestChange(APP_VERSION).items.join('\n'),
+    /Story Snap|eyebrow|who·where|Creed merge|Fixes #232|empty-lot|Fixes #217/i,
+    '1.4.183 must not claim Snap 182 / Creed 181 / Manage / letterbox',
+  )
+}
+
 
 // Easy Clear 1.4.181: Easy Creed merge ≤720 HUD peel (invent Fun/Clear)
 {

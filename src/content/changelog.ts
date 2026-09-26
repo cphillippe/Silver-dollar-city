@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.183',
+    title: 'Easy Sort: ≤720 board-first',
+    when: '2026-09-25',
+    items: [
+      'Easy Sort on ≤720px tall: hide how + hint chrome; clamp lead so Keep·Toss + bins stay above fold (Sequence/Build 1.4.171 / Match 1.4.168 ≤720 family; invent Fun/Clear)',
+    ],
+  },
+  {
     version: '1.4.182',
     title: 'Easy Story Snap: ≤720 HUD peel',
     when: '2026-09-25',
