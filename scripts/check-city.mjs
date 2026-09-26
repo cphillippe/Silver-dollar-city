@@ -1122,7 +1122,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.146')
+assert.equal(APP_VERSION, '1.4.147')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1452,7 +1452,7 @@ assert.match(cssSrc, /is-easy-hold/)
   assert.match(dockCss, /backdrop-filter: blur/)
   assert.doesNotMatch(dockCss, /#16062e/, 'sticky CTA docks must not be an opaque black slab')
 }
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Sequence|PuzzleHint|PuzzleLead|near-dup|fg-reason|fg-ground|1\.4\.145/i)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /creed merge|mergeHunt|Drop chip|smash hint|ladder|1\.4\.143|1\.4\.144|#184/i)
 {
   const storyCardCss = cssSrc.match(/\.easy-story-card,[\s\S]*?\.easy-story-card::before \{[\s\S]*?\n\}/)?.[0] ?? ''
   assert.match(storyCardCss, /border:\s*0/)
@@ -2349,8 +2349,8 @@ assert.match(mapSrc, /easy \? null : \(\s*\n\s*<>[\s\S]*city-street-main/)
 assert.match(mapSrc, /if \(isEasy\(progress\)\) return/)
 assert.match(mapSrc, /if \(playing\.current && !isEasy\(progress\)\) return/)
 assert.match(mapSrc, /Tap a building to Manage it/)
-assert.match(latestChange(APP_VERSION).title, /Sequence|lead|how/i)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Sequence|PuzzleHint|PuzzleLead|near-dup|fg-reason|fg-ground|1\.4\.145/i)
+assert.match(latestChange(APP_VERSION).title, /Creed merge|how/i)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /creed merge|mergeHunt|Drop chip|smash hint|ladder|1\.4\.143|1\.4\.144|#184/i)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-img[\s\S]*?fill: none !important/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img\.is-built[\s\S]*?fill: none/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-hit[\s\S]*?stroke: none/)
