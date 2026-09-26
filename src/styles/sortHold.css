@@ -1615,6 +1615,22 @@ html[data-easy='on'] .recall-card {
   }
 }
 
+/* Easy Clear 1.4.202: Easy Hold ≤720 close chips→CTA purple gap —
+   After fill 190 grew why-blast + stretch why-arena, short-phone still leaves
+   .why-blast .cta-dock { margin-top: 4px } (and base 8px) so free space sits as
+   a thin purple band between chips and the next-tap dock (Father 196 / Link 199 /
+   Creed 200 / Story Creek 201 dock-margin family; invent Fun/Clear). Zero the
+   margin so arena flex:1 absorbs the portrait — tight chips→CTA spacing.
+   Fill 190 / arena-first 170 / short-phone 156 stay; quiz 194 / miss 195 /
+   Story Creek 201 / Creed 200 / Link 199 / Sort 198 / Story Snap 197 / Match 193 /
+   Father 196 / Build / Samaritan peels untouched. */
+@media (max-height: 720px) {
+  .recall-gate.is-easy-hold .cta-dock,
+  .why-blast .cta-dock {
+    margin-top: 0;
+  }
+}
+
 /* Easy Clear 1.4.194: Lock In quiz ≤720 fill purple void (Fixes #251) —
    After Hold arena stretch 190 / win-end 185 / chrome 170·156, the gold
    recall-gate quiz card still hugs content in journal rehearse so ≤720 leaves

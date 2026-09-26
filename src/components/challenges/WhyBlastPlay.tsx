@@ -32,6 +32,7 @@ interface WhyBlastPlayProps {
  * Easy Clear 1.4.161: miss teach omits PlainTalk stack — triad + Try again only (#207).
  * Easy Clear 1.4.170: ≤720 peels outer eyebrow + quiet From in sortHold.css so arena stays above fold.
  * Easy Clear 1.4.190: ≤720 fills purple void in sortHold.css (invent Fun/Clear).
+ * Easy Clear 1.4.202: ≤720 zeros cta-dock margin-top so chips→CTA close (fill 190 stays).
  * Easy Clear 1.4.194: ≤720 grows journal quiz shell so Lock In card fills purple void (Fixes #251).
  * Easy Clear 1.4.195: ≤720 grows journal miss-teach shell so feedback card fills purple void (Fixes #252).
  */
