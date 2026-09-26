@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.148',
+    title: 'Challenge: one title line on Easy',
+    when: '2026-09-25',
+    items: [
+      'Easy ChallengeScreen (area Sort·Sequence): hide puzzle-title — match LinkScreen Easy null title so only PuzzleLead shows on short phones (Clear family with Link Easy title; Fixes #185)',
+    ],
+  },
+  {
     version: '1.4.147',
     title: 'Creed merge: one how line',
     when: '2026-09-25',

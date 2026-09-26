@@ -187,7 +187,7 @@ export function ChallengeScreen({
           />
         ) : (
           <>
-            <h1 className="puzzle-title">{challenge.title}</h1>
+            {easy ? null : <h1 className="puzzle-title">{challenge.title}</h1>}
             <PuzzlePlay
               challenge={challenge}
               onMiss={() => {
