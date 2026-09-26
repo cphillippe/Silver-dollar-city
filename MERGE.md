@@ -3,8 +3,8 @@
 **PR:** https://github.com/cphillippe/Silver-dollar-city/pull/236
 **Branch:** `ship/easy-fun-clear-182` → `main`
 **Version:** 1.4.182
-**Peel:** (pending commit)
-**Tip:** (pending)
+**Peel:** `89ec117` (`89ec11797b02a7041fa67eed22dea48372a288a5`)
+**Tip:** `89ec117` (`89ec11797b02a7041fa67eed22dea48372a288a5`)
 **Base live:** 1.4.181 (`2fc3e89`, PR #235 Easy Creed merge ≤720 HUD on main; atop 1.4.180 Manage #234)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
@@ -43,7 +43,7 @@ MODEL=gemini-flash-latest — invent pick A approved. Notes: `notes-gemini.txt` 
 - `src/config/app.ts`, `package.json`, `package-lock.json`
 - `src/content/changelog.ts`
 - `notes-gemini.txt`
-- `docs/` (Pages rebuild)
+- `docs/` (Pages rebuild `index-CMJS026O.js` / `index-BnOfMziR.css`)
 - `MERGE.md`
 
 ## Checks
@@ -51,6 +51,8 @@ MODEL=gemini-flash-latest — invent pick A approved. Notes: `notes-gemini.txt` 
 - `npm run test:arcade` ✓
 - `node scripts/check-story-snap.mjs` ✓
 - `npm run build` → `docs/` ✓
+
+- GitHub PR: `mergeable: true`, `mergeStateStatus: CLEAN` (confirm after push)
 
 ## Status
 **MERGEABLE CLEAN** (post-rebase onto 1.4.181) — ready for CoS merge after green. Do NOT merge from this hop.
