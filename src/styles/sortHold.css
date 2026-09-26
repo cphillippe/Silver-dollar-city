@@ -973,11 +973,7 @@
   color: #ffe68c;
 }
 
-.why-miss-teach .plain-talk {
-  margin: 0;
-  padding: 8px 10px;
-  border-radius: 14px;
-}
+/* Easy Clear 1.4.161: miss teach drops PlainTalk stack — no miss-teach PlainTalk chrome (Fixes #207). */
 
 .why-miss-teach .cta-dock {
   position: static;
