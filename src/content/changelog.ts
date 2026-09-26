@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.215',
+    title: 'Easy Learn: ≤720 close CTA purple void beneath cream-pill',
+    when: '2026-09-25',
+    items: [
+      'Easy Learn cream-pill (Short story · LociStamp · HeldTriad · CTAs) on ≤720 / phone portrait: extend fill so is-teach + easy-story-card grow and held-triad absorbs free space — no large purple void beneath the CTAs (Fixes #280; continuation of Learn held-clear fill 206; do not touch other Shot 210 issues)',
+    ],
+  },
+  {
     version: '1.4.214',
     title: 'Easy Story Creek speech: ≤720 close slider→HOLD purple void',
     when: '2026-09-25',

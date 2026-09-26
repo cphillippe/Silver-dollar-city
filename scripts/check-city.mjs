@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.214')
+assert.equal(APP_VERSION, '1.4.215')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -4135,5 +4135,36 @@ console.log('check-city: ok')
     latestChange('1.4.214').items.join('\n'),
     /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#273|#274|#275|#276|#277|#280|#283|Lock In|Match grid|Samaritan|Manage|Learn cream|Father Dash invent|Dig|Creed|Build|Sort|Snap|Link|Road maze|Claim merge|Source dig/i,
     '1.4.214 must not fix other phone-fail issues or climb another Easy surface',
+  )
+}
+
+// Easy Clear 1.4.215: Easy Learn ≤720 / phone portrait CTA purple void (Fixes #280)
+{
+  const welcomeCss215 = readFileSync(new URL('../src/styles/welcome.css', import.meta.url), 'utf8')
+  const teachUnlock215 = readFileSync(
+    new URL('../src/components/TeachUnlock.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(welcomeCss215, /1\.4\.215: Easy Learn ≤720 \/ phone portrait CTA purple void/)
+  assert.match(
+    welcomeCss215,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.challenge-page\.is-teach:has\(\.easy-story-card\) \{[\s\S]*?flex: 1/,
+  )
+  assert.match(
+    welcomeCss215,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.easy-story-card \.held-triad \{[\s\S]*?flex: 1 1 auto/,
+  )
+  assert.match(
+    welcomeCss215,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.easy-story-card \.easy-story-dock \{[\s\S]*?margin-top: 0/,
+  )
+  assert.match(teachUnlock215, /1\.4\.215: phone portrait extends fill 206 so CTA dock closes/)
+  assert.match(cssSrc, /1\.4\.215: Easy Learn ≤720 \/ phone portrait CTA purple void/)
+  assert.match(latestChange('1.4.215').items.join('\n'), /Fixes #280|CTA|purple void|Learn|cream/i)
+  assert.match(latestChange('1.4.215').title, /Easy Learn|≤720|CTA|purple void/i)
+  assert.doesNotMatch(
+    latestChange('1.4.215').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#281|#282|#283|Father Dash|Match grid|Samaritan|Manage|Lock In|Dig|Creed|Build|Sort|Snap|Link|Road maze|Claim merge|Source dig|Story Creek HOLD|slider→HOLD/i,
+    '1.4.215 must not fix other phone-fail issues or climb another Easy surface',
   )
 }
