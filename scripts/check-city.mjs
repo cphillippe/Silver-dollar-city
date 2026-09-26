@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.213')
+assert.equal(APP_VERSION, '1.4.214')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -4107,5 +4107,33 @@ console.log('check-city: ok')
     latestChange('1.4.213').items.join('\n'),
     /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#274|#276|#277|quiz|Match|Father|Story Creek|Creed|Build|Sort|Snap|Link|Road maze|Claim merge|Source dig/i,
     '1.4.213 must not fix other phone-fail issues or climb another Easy surface',
+  )
+}
+
+
+// Easy Clear 1.4.214: Easy Story Creek speech ≤720 slider→HOLD purple void (Fixes #272)
+{
+  const indexCss214 = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
+  const fatherPlay214 = readFileSync(
+    new URL('../src/components/challenges/FatherRunPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(indexCss214, /1\.4\.214: Easy Story Creek speech ≤720 slider→HOLD purple void/)
+  assert.match(
+    indexCss214,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.play\.is-father-run \.cta-dock,[\s\S]*?margin-top: 0/,
+  )
+  assert.match(
+    indexCss214,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.play\.is-father-run \.run-scene \{[\s\S]*?flex: 1 1 auto/,
+  )
+  assert.match(fatherPlay214, /1\.4\.214: phone portrait extends fill\+dock so slider→HOLD closes/)
+  assert.match(cssSrc, /1\.4\.214: Easy Story Creek speech ≤720 slider→HOLD purple void/)
+  assert.match(latestChange('1.4.214').items.join('\n'), /Fixes #272|slider→HOLD|purple void/i)
+  assert.match(latestChange('1.4.214').title, /Story Creek|≤720|slider→HOLD|purple void/i)
+  assert.doesNotMatch(
+    latestChange('1.4.214').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#273|#274|#275|#276|#277|#280|#283|Lock In|Match grid|Samaritan|Manage|Learn cream|Father Dash invent|Dig|Creed|Build|Sort|Snap|Link|Road maze|Claim merge|Source dig/i,
+    '1.4.214 must not fix other phone-fail issues or climb another Easy surface',
   )
 }
