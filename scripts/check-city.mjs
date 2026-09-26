@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.248')
+assert.equal(APP_VERSION, '1.4.249')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -5210,5 +5210,36 @@ console.log('check-city: ok')
     latestChange('1.4.248').items.join('\n'),
     /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#300|#301|#302|#314|#315|#316|#317|#318|#319|#331|#332|#333|Father Dash|Learn cream|Match grid|Samaritan|Manage|live quiz|Dig|Creed|Build|Sort|Snap|Link|Road maze|Claim merge|Source dig|Story Creek|invent Fun\/Clear/i,
     '1.4.248 must not fix other phone-fail issues or climb another Easy surface',
+  )
+}
+
+// Easy Clear 1.4.249: Easy Samaritan / Story Creek road maze ≤720 / tall-phone voids above/below board residual (Fixes #335)
+{
+  const mazeCss249 = readFileSync(new URL('../src/styles/maze.css', import.meta.url), 'utf8')
+  const roadPlay249 = readFileSync(
+    new URL('../src/components/challenges/RoadMazePlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(mazeCss249, /1\.4\.249: Easy Samaritan \/ Story Creek road maze ≤720 \/ tall-phone voids above\/below board residual/)
+  assert.match(
+    mazeCss249,
+    /\.play\.is-road-maze \.maze-stage \{[\s\S]*?background: var\(--parchment/,
+  )
+  assert.match(
+    mazeCss249,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.play\.is-road-maze \.maze-board \{[\s\S]*?aspect-ratio: auto[\s\S]*?background: color-mix\(in srgb, var\(--parchment/,
+  )
+  assert.match(
+    mazeCss249,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.play\.is-road-maze \.cta-dock \{[\s\S]*?position: static[\s\S]*?margin-top: auto/,
+  )
+  assert.match(roadPlay249, /1\.4\.249: tall-phone cream board-plate fill/)
+  assert.match(cssSrc, /1\.4\.249: Easy Samaritan \/ Story Creek road maze ≤720 \/ tall-phone voids above\/below board residual/)
+  assert.match(latestChange('1.4.249').items.join('\n'), /Fixes #335|purple void|cream|parchment|Samaritan|tall-phone|board/i)
+  assert.match(latestChange('1.4.249').title, /Easy Samaritan|≤720|tall-phone|voids above\/below|Fixes #335/i)
+  assert.doesNotMatch(
+    latestChange('1.4.249').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#300|#301|#302|#314|#315|#316|#317|#318|#319|#331|#332|#333|#334|Father Dash|Learn cream|Match grid|Manage|Lock In|Dig|Creed|Build|Sort|Snap|Link|Claim merge|Source dig|invent Fun\/Clear|Sequence/i,
+    '1.4.249 must not fix other phone-fail issues or climb another Easy surface',
   )
 }
