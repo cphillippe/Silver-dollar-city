@@ -579,3 +579,99 @@ html[data-easy='on'] .next-tap {
     -webkit-backdrop-filter: none;
   }
 }
+
+
+/* Easy Clear 1.4.246: Easy Match ≤720 / tall-phone grid→footer purple void residual (Fixes #332) —
+   After strengthen 236 (height 100% · match-grid flex 1 1 0 · dock static) Shot pack
+   1.4.240 03-easy-match.png still fails on gemSearch (see match-art-tight) — and the
+   picture-deal path has the same transparent leftover risk. Cause: flex-grown empty
+   space inside `.play.is-match.is-deal` / `.match-grid` is still the dusk purple plate
+   (vision FAIL, same lesson as Learn 235→245 cream teach-gate). Visually different from
+   236: (1) paint cream parchment `.match-grid` plate so leftover fill is intentional
+   card/board surface, not purple void; (2) denser picture / choice card stretch; (3)
+   score / cta-dock pin to the cream floor. Invent fill 232 / strengthen 236 stay.
+   Do NOT pack Learn / Lock In / Samaritan / Father / Dig / Creek / parked maps. */
+@media (max-height: 920px) {
+  .is-puzzle .play.is-match.is-deal,
+  .daily-page.is-puzzle .play.is-match.is-deal,
+  .challenge-page.is-puzzle .play.is-match.is-deal {
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    overflow: hidden;
+  }
+
+  .is-puzzle .play.is-match.is-deal .prompt,
+  .is-puzzle .play.is-match.is-deal .easy-hint,
+  .is-puzzle .play.is-match.is-deal .hint-peek,
+  .is-puzzle .play.is-match.is-deal .sort-how,
+  .is-puzzle .play.is-match.is-deal .match-toast,
+  .is-puzzle .play.is-match.is-deal .match-recover,
+  .is-puzzle .play.is-match.is-deal .match-score,
+  .is-puzzle .play.is-match.is-deal .cta-dock,
+  .is-puzzle .play.is-match.is-deal .match-yes {
+    flex: 0 0 auto;
+  }
+
+  .is-puzzle .play.is-match.is-deal .sort-how {
+    display: none;
+  }
+
+  /* Cream plate fills tall portrait — leftover band is cream-inside-card, not purple void */
+  .is-puzzle .play.is-match.is-deal .match-grid {
+    flex: 1 1 0;
+    min-height: 0;
+    height: auto;
+    max-height: none;
+    grid-template-rows: auto minmax(0, 1.35fr) minmax(0, 1fr);
+    gap: 10px 10px;
+    align-content: stretch;
+    padding: 8px;
+    border-radius: 16px;
+    border: 1px solid color-mix(in srgb, var(--ink, #2a2118) 10%, transparent);
+    background: var(--parchment, #fff6e8);
+    box-shadow: 0 2px 0 color-mix(in srgb, #000 6%, transparent);
+  }
+
+  .is-puzzle .play.is-match.is-deal .match-card {
+    min-height: 0;
+    height: 100%;
+    align-self: stretch;
+  }
+
+  .is-puzzle .play.is-match.is-deal .match-card.is-picture {
+    min-height: 0;
+    justify-content: stretch;
+  }
+
+  .is-puzzle .play.is-match.is-deal .match-scene {
+    flex: 1 1 0;
+    min-height: 0;
+    max-height: none;
+    height: auto;
+    aspect-ratio: auto;
+    object-fit: contain;
+  }
+
+  .is-puzzle .play.is-match.is-deal .match-score {
+    margin: 0;
+    font-size: 0.7rem;
+    color: color-mix(in srgb, var(--gold, #c9a45c) 70%, var(--ink, #2a2118));
+  }
+
+  .is-puzzle .play.is-match.is-deal .cta-dock {
+    position: static;
+    bottom: auto;
+    margin-top: auto;
+    flex: 0 0 auto;
+    padding-top: 6px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
