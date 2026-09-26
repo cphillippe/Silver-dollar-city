@@ -4,7 +4,7 @@
 **Branch:** `ship/easy-fun-clear-190` → `main`
 **Version:** 1.4.190
 **Peel:** `d01e4c2` (`d01e4c2f61660d76907233df3901a13ee9844577`)
-**Tip:** `dea357d` (`dea357d037aad5be2c1cd7899221557a48c27ddb`)
+**Tip:** `7507af7` (`7507af7aaf9219d05146358b94636fe3b59ef72f`)
 **Base live:** 1.4.189 (`639a840`, PR #246 Easy Father Dash ≤720 fill purple void on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
