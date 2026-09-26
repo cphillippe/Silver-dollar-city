@@ -3355,3 +3355,245 @@ html[data-easy='on'] .recall-card {
     -webkit-backdrop-filter: none;
   }
 }
+
+/* Easy Clear 1.4.255: Easy Lock In feedback ≤720 / tall-phone purple void + left clip residual after cream 248 (Fixes #347) —
+   After cream recall-gate 248 (parchment card · transparent why-miss-teach · dark ink · dock pin) Shot pack
+   1.4.250 05-easy-lockin-miss.png (390×844) STILL fails — Gemini: content shifted off-screen on the left
+   margin with a massive empty purple void across the lower half (residual after closed #334 / 1.4.248).
+   Cause: cream on `.recall-gate.is-easy-hold` still content-hugs / transparent flex-grow over the purple
+   shell (base `.recall-gate` purple-gold gradient · app-body dusk leftover outside the card), and nested
+   padding / box-shadow / overflow lets the feedback chrome slide left of the viewport. Strengthen further
+   — NOT another 238/248 height/flex/cream-on-gate-only copy (quiz 254 lesson): (1) paint opaque cream on
+   `.app-body` + `.journal.is-rehearse` miss-teach shell so tall leftover below feedback is cream floor
+   through the full portrait (not purple outside the card); (2) solid `#fff6e8` + `background-image: none`
+   on `.recall-gate.is-easy-hold` beating recall-gate purple-gold gradient; (3) pin Try-again cta-dock to
+   the cream floor with cream dock wash; (4) pin horizontal — overflow-x hidden · max-width 100% ·
+   min-width 0 · width 100% · box-sizing border-box · margin-inline 0 · align-self stretch so content stays
+   in viewport (no left-edge clip). Miss-teach feedback ONLY (`.why-blast.is-miss-teach` / why-miss-teach).
+   Do NOT pack #346 live quiz / win-end / Match / Learn / Samaritan / Father / Manage / Dig / Creek /
+   parked maps. */
+@media (max-height: 920px) {
+  /* Cream app-body floor — leftover below a content-hug feedback card is cream, not dusk purple void */
+  html[data-easy='on'] .app.is-play .app-body:has(.journal.is-rehearse .why-blast.is-miss-teach) {
+    overflow: hidden;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    margin-inline: 0;
+    padding-top: 4px;
+    padding-bottom: 0;
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    color: var(--ink, #2a2118);
+  }
+
+  /* Cream miss-teach shell fills tall portrait — leftover under feedback is cream page plate */
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    align-self: stretch;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    margin-inline: 0;
+    gap: 4px;
+    overflow: hidden;
+    overflow-x: hidden;
+    padding: 8px 10px 0;
+    border-radius: 18px;
+    border: 1px solid color-mix(in srgb, var(--ink, #2a2118) 10%, transparent);
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    color: var(--ink, #2a2118);
+    box-shadow: 0 2px 0 color-mix(in srgb, #000 6%, transparent);
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) > .text-link {
+    flex: 0 0 auto;
+    color: color-mix(in srgb, var(--gold, #c9a45c) 55%, var(--ink, #2a2118));
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) .rehearse-anchor {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    align-self: stretch;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    margin-inline: 0;
+    overflow: hidden;
+    overflow-x: hidden;
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) .rehearse-anchor > .eyebrow {
+    flex: 0 0 auto;
+    color: color-mix(in srgb, var(--gold, #c9a45c) 70%, var(--ink, #2a2118));
+  }
+
+  /* Solid opaque cream plate — kill recall-gate translucent purple-gold gradient; pin in viewport */
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) .recall-gate.is-easy-hold {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    align-self: stretch;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    margin-inline: 0;
+    margin-bottom: 0;
+    overflow: hidden;
+    overflow-x: hidden;
+    padding: 12px 14px 0;
+    gap: 8px;
+    border-radius: 16px;
+    border: 1px solid color-mix(in srgb, var(--ink, #2a2118) 12%, transparent);
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    color: var(--ink, #2a2118);
+    box-shadow: none;
+    justify-content: flex-start;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) .recall-gate.is-easy-hold::before {
+    content: none;
+    display: none;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-miss-teach {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    align-self: stretch;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    margin-inline: 0;
+    gap: 8px;
+    overflow: hidden;
+    overflow-x: hidden;
+    background: transparent;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-miss-teach .why-blast-hud {
+    flex: 0 0 auto;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-miss-teach .why-blast-hud .next-tap {
+    color: var(--ink, #2a2118);
+  }
+
+  /* Strip purple-gold miss shell — cream plate carries fill; dark ink for cream contrast; stay in viewport */
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-miss-teach .why-miss-teach {
+    flex: 1 1 0;
+    align-self: stretch;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    max-height: none;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    margin-inline: 0;
+    gap: 12px;
+    padding: 4px 0 0;
+    overflow: hidden;
+    overflow-x: hidden;
+    background-color: transparent;
+    background-image: none;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    color: var(--ink, #2a2118);
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-miss-teach .why-miss-teach .why-miss-badge {
+    flex: 0 0 auto;
+    color: color-mix(in srgb, var(--gold, #c9a45c) 55%, var(--ink, #2a2118));
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-miss-teach .why-miss-teach .why-claim {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    background: color-mix(in srgb, var(--parchment, #fff6e8) 70%, #fff);
+    border: 1px solid color-mix(in srgb, var(--ink, #2a2118) 12%, transparent);
+    color: var(--ink, #2a2118);
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-miss-teach .why-miss-teach .why-miss-reason {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    background: color-mix(in srgb, var(--parchment, #fff6e8) 55%, #fff);
+    border: 1px solid color-mix(in srgb, var(--ink, #2a2118) 12%, transparent);
+    color: var(--ink, #2a2118);
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-miss-teach .why-miss-teach .why-miss-label {
+    color: color-mix(in srgb, var(--gold, #c9a45c) 55%, var(--ink, #2a2118));
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-miss-teach .why-miss-teach .held-from {
+    flex: 0 0 auto;
+    color: color-mix(in srgb, var(--ink, #2a2118) 78%, var(--gold, #c9a45c));
+  }
+
+  /* Pin CTA to the cream floor — cream dock wash, not purple sticky blur */
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-miss-teach .why-miss-teach .cta-dock,
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) .recall-gate.is-easy-hold .cta-dock {
+    position: static;
+    bottom: auto;
+    margin-top: auto;
+    margin-inline: 0;
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding-top: 10px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
