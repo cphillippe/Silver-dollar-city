@@ -4,7 +4,7 @@ import { evidenceFor } from '../content/evidence'
 import { areas, journalForChallenge } from '../content'
 import { plainFor } from '../content/plain'
 import { LOT_STORY, easyPlaceSub, lotWhy } from '../content/lots'
-import { EASY, isEasy, scrapbookLabel } from '../lib/easy'
+import { isEasy, scrapbookLabel } from '../lib/easy'
 import { mindGraph } from '../lib/mindMap'
 import {
   appliedTier,
@@ -83,11 +83,11 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
       <button type="button" className="mind-map-scrim" aria-label="Close building" onClick={onClose} />
       <div className="mind-map-card">
         <header className="mind-map-head">
-          <Avatar who={graph.person.id} size="md" />
+          {/* 1.4.165 — one portrait: PERSON tile keeps Avatar; header dropped (Fixes #220) */}
           <div>
             <p className="eyebrow">
               {easy
-                ? `${EASY.manage} · ${applied} · ${tierTitle(applied, easy)}`
+                ? `${applied} · ${tierTitle(applied, easy)}`
                 : `Manage · Level ${applied} · ${tierTitle(applied, easy)}`}
             </p>
             <h2>{graph.placeTitle}</h2>
@@ -100,7 +100,8 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
           </button>
         </header>
         <div className="mind-map-scroll">
-        <p className="quiet">{lotWhy(graph.plotId, easy)}</p>
+        {/* Easy: omit lotWhy wall — cards + Walk CTA carry intent (#220 density) */}
+        {easy ? null : <p className="quiet">{lotWhy(graph.plotId, easy)}</p>}
 
         {easy ? null : <WordGloss words={[WORDS.upgrade]} />}
 
@@ -115,7 +116,7 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
           <div className="mind-node is-place is-lit">
             <span className="mind-kicker">Place</span>
             <strong>{graph.placeTitle}</strong>
-            <em className="mind-why">{LOT_STORY[graph.plotId].path}</em>
+            {easy ? null : <em className="mind-why">{LOT_STORY[graph.plotId].path}</em>}
           </div>
           <div className="mind-node is-person is-lit">
             <span className="mind-kicker">Person</span>

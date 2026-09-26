@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.165',
+    title: 'Easy Manage: peek sheet + portrait dedupe',
+    when: '2026-09-25',
+    items: [
+      'Easy Manage bottom sheet: ~42dvh peek so map stays readable; one Mercy portrait (PERSON tile); drop Manage-vs-Walk eyebrow clash + density wall (Fixes #220)',
+    ],
+  },
+  {
     version: '1.4.164',
     title: 'Easy Home: Build It gift wrap',
     when: '2026-09-25',

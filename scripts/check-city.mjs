@@ -1132,7 +1132,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.164')
+assert.equal(APP_VERSION, '1.4.165')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1462,7 +1462,7 @@ assert.match(cssSrc, /is-easy-hold/)
   assert.match(dockCss, /backdrop-filter: blur/)
   assert.doesNotMatch(dockCss, /#16062e/, 'sticky CTA docks must not be an opaque black slab')
 }
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Build It|gift wrap|#214|nowrap|ellipsis|2-line/i)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Manage|peek|#220|42dvh|portrait|PERSON/i)
 {
   const storyCardCss = cssSrc.match(/\.easy-story-card,[\s\S]*?\.easy-story-card::before \{[\s\S]*?\n\}/)?.[0] ?? ''
   assert.match(storyCardCss, /border:\s*0/)
@@ -2369,8 +2369,8 @@ assert.match(mapSrc, /easy \? null : \(\s*\n\s*<>[\s\S]*city-street-main/)
 assert.match(mapSrc, /if \(isEasy\(progress\)\) return/)
 assert.match(mapSrc, /if \(playing\.current && !isEasy\(progress\)\) return/)
 assert.match(mapSrc, /Tap a building to Manage it/)
-assert.match(latestChange(APP_VERSION).title, /Build It|gift wrap/i)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Build It|gift wrap|#214|nowrap|ellipsis|2-line/i)
+assert.match(latestChange(APP_VERSION).title, /Manage|peek|portrait/i)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Manage|peek|#220|42dvh|portrait|PERSON/i)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-img[\s\S]*?fill: none !important/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img\.is-built[\s\S]*?fill: none/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-hit[\s\S]*?stroke: none/)
@@ -2798,6 +2798,25 @@ assert.match(cssSrc, /1\.4\.162: Learn short-story ≤720 peel|Fixes #208/)
   assert.doesNotMatch(giftRule, /white-space:\s*nowrap/, '1.4.164 no nowrap clip (#214)')
   assert.doesNotMatch(giftRule, /text-overflow:\s*ellipsis/, '1.4.164 no ellipsis clip (#214)')
   assert.match(hubSrc, /A building is ready\. Tap it, then Build this\./)
+}
+
+// Easy Clear 1.4.165: Manage sheet peek + portrait dedupe — Fixes #220
+{
+  const manageCard = cssSrc.match(/\.mind-map\.is-manage \.mind-map-card \{([\s\S]*?)\n\}/)?.[1] ?? ''
+  assert.match(cssSrc, /1\.4\.165.*#220|Fixes #220/)
+  assert.match(manageCard, /max-height:\s*min\(42dvh/, '1.4.165 peek ~42dvh (#220)')
+  assert.doesNotMatch(manageCard, /max-height:\s*min\(50dvh/, '1.4.165 no 50dvh wall (#220)')
+  const manageHead = cssSrc.match(/\.mind-map\.is-manage \.mind-map-head \{([\s\S]*?)\n\}/)?.[1] ?? ''
+  assert.match(manageHead, /grid-template-columns:\s*minmax\(0,\s*1fr\)\s+auto/, '1.4.165 head no avatar col (#220)')
+  const mindMapSrc = readFileSync(new URL('../src/components/MindMap.tsx', import.meta.url), 'utf8')
+  assert.match(mindMapSrc, /1\.4\.165/)
+  // Header Avatar dropped; PERSON tile Avatar remains
+  const headChunk = mindMapSrc.split('mind-map-head')[1]?.split('mind-map-scroll')[0] ?? ''
+  assert.doesNotMatch(headChunk, /<Avatar\b/, '1.4.165 no header Avatar (#220)')
+  assert.match(mindMapSrc, /mind-node is-person[\s\S]*?<Avatar\b/, '1.4.165 PERSON Avatar kept (#220)')
+  // Easy eyebrow drops Manage admin chrome (Walk CTA aligns with place title)
+  assert.doesNotMatch(mindMapSrc, /EASY\.manage/, '1.4.165 Easy eyebrow omits Manage (#220)')
+  assert.match(mindMapSrc, /\$\{applied\} · \$\{tierTitle\(applied, easy\)\}/, '1.4.165 Easy level eyebrow (#220)')
 }
 
 

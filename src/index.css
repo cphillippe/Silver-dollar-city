@@ -2362,15 +2362,15 @@ button.btn:disabled {
 
 .mind-map.is-manage .mind-map-card {
   width: min(100%, 420px);
-  /* 1.4.124 — bottom sheet: keep candy map visible in top half (Bill: map moves under wall) */
-  max-height: min(50dvh, 420px);
+  /* 1.4.165 — peek/half sheet (~42dvh) so map context stays readable (#220; letterbox stays #217) */
+  max-height: min(42dvh, 380px);
   min-height: 0;
   height: auto; /* hug content — no tall empty purple sheet */
   margin: 0;
   border-radius: 20px 20px 0 0;
-  /* Gemini vision on Bill East porch shot: compress pad, keep purple/gold */
-  padding: 8px 12px calc(6px + env(safe-area-inset-bottom, 0px));
-  gap: 4px;
+  /* Gemini vision on Bill East porch / Story Creek: compress pad, keep purple/gold */
+  padding: 6px 12px calc(6px + env(safe-area-inset-bottom, 0px));
+  gap: 2px;
 }
 
 /* 1.4.124 — light scrim: top stays bright so Home map + lot stay readable above sheet */
@@ -2384,7 +2384,9 @@ button.btn:disabled {
 }
 
 /* 1.4.122 — Manage lot sheet denser (vision: hug PLACE·PERSON·MAIN IDEA) */
+/* 1.4.165 — no header Avatar (PERSON tile only); title · Close two-col (#220) */
 .mind-map.is-manage .mind-map-head {
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 8px;
   padding: 0 0 2px;
   align-items: center;
@@ -2411,7 +2413,7 @@ button.btn:disabled {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  flex: 1 1 auto; /* hug when short; scroll inside 50dvh cap when tall */
+  flex: 1 1 auto; /* hug when short; scroll inside 42dvh cap when tall */
   min-height: 0;
   overflow: auto;
   padding: 0;
@@ -2434,16 +2436,16 @@ button.btn:disabled {
 
 /* PLACE + PERSON side-by-side; MAIN IDEA full width — kill empty purple half (Bill shot) */
 .mind-map.is-manage .mind-web {
-  margin: 2px 0 4px;
-  gap: 6px;
+  margin: 0 0 2px;
+  gap: 4px;
   grid-template-columns: 1fr 1fr;
 }
 
 .mind-map.is-manage .mind-node {
   min-height: 0;
-  padding: 6px 10px;
-  gap: 2px;
-  border-radius: 14px;
+  padding: 4px 8px;
+  gap: 1px;
+  border-radius: 12px;
 }
 
 .mind-map.is-manage .mind-node .mind-kicker {
@@ -2476,8 +2478,8 @@ button.btn:disabled {
 }
 
 .mind-map.is-manage .mind-map-dock {
-  padding: 6px 0 0;
-  gap: 4px;
+  padding: 4px 0 0;
+  gap: 2px;
   margin-top: 0;
 }
 
@@ -2495,6 +2497,8 @@ button.btn:disabled {
   min-height: 36px;
   margin: 0;
 }
+
+/* 1.4.165 Fixes #220 — Easy Manage rational peek: map readable above sheet */
 
 .play.is-link {
   display: flex;
