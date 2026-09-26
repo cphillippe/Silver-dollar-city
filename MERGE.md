@@ -1,10 +1,10 @@
 # ready-easy-fun-clear-191 — 1.4.191 Easy Story Creek ≤720 fill purple void
 
-**PR:** (pending push)
+**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/248
 **Branch:** `ship/easy-fun-clear-191` → `main`
 **Version:** 1.4.191
-**Peel:** (pending commit)
-**Tip:** (pending)
+**Peel:**  ()
+**Tip:** (post-MERGE commit)
 **Base live:** 1.4.190 (`a89b482`, PR #247 Easy Hold ≤720 fill purple void on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
