@@ -1,8 +1,8 @@
 MODEL=gemini-flash-latest
 Invent Fun/Clear — no open Easy Fun/Clear issue beyond parked #161 / cheap-hop #160.
-1.4.203 Easy Build free-place fill live on main (b2cf654 / #264). Shot pack 200 still in flight — Manager handles vision; do NOT wake Shot; do NOT run Gemini vision.
-Invent API: GEMINI_API_KEY present but not AIza AI Studio shape (same as 163–203).
-Manager-steered invent peel: Easy Father ≤720 close speech→rail purple gap (after fill 189 / dock 196, speech padding/margins + play gap leave thin purple between speech card and timing rail; Father dock-margin family; different scene than Build 203 / Hold 202 / Creek 201 / Creed 200 / Link 199 / Sort 198 / Snap 197).
-Peel: index.css @media (max-height:720px) play.is-father-run gap:2px + run-speech/run-rail margin:0 + thinner speech padding; FatherRunPlay comment. Fill 189 / HUD 173 / speech 154 / dock 196 stay.
-Do NOT re-peel Shot 190 fails #250–#253 or Build 203 / Hold 202 / Creek 201 / Creed 200 / Link 199 / Sort 198 / Snap 197. Dig/Hard/NW/Town/stores/Pack B/Home map candy parked.
-VERDICT: APPROVE (invent Fun/Clear · Father speech→rail close — after fill 189 / dock 196)
+1.4.204 Easy Father speech→rail live on main (22bfb1b / #265). Shot pack 200 still in flight — Manager handles vision; do NOT wake Shot; do NOT run Gemini vision.
+Invent API: GEMINI_API_KEY present but not AIza AI Studio shape (same as 163–204).
+Manager-steered invent peel: Easy Sequence ≤720 close stones→result purple gap (after fill 186, gap:6px + ResultPanel padding leave purple between stone bank and miss teach; Father/Hold dock-margin family; different scene than Father 204 / Build 203 / Hold 202 / Creek 201 / Creed 200 / Link 199 / Sort 198 / Snap 197 / Match / Lock In).
+Peel: sortHold.css @media (max-height:720px) play.is-sequence.is-deal gap:2px + .result margin:0 compact padding; SequencePlay comment. Fill 186 / how-peel 171 stay.
+Do NOT re-peel Shot 190 fails #250–#253 or Father 204 / Build 203 / Hold 202 / Creek 201 / Creed 200 / Link 199 / Sort 198 / Snap 197. Dig/Hard/NW/Town/stores/Pack B/Home map candy parked.
+VERDICT: APPROVE (invent Fun/Clear · Sequence stones→result close — after fill 186)
