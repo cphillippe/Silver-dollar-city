@@ -119,14 +119,14 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
           </section>
           {!matchReady || coldMercy ? (
             <ol className="easy-coach" aria-label="Your next steps">
-              <li className={focus === 'learn' || !matchReady ? 'is-now' : ''}>
-                <button type="button" className="easy-coach-step" onClick={() => onNavigate({ name: 'learn' })}>
-                  Learn
-                </button>
-              </li>
-              <li className={focus === 'match' ? 'is-now' : ''}>
+              <li className={focus === 'match' || !matchReady ? 'is-now' : ''}>
                 <button type="button" className="easy-coach-step" onClick={() => onNavigate({ name: 'link' })}>
                   Match
+                </button>
+              </li>
+              <li className={focus === 'learn' ? 'is-now' : ''}>
+                <button type="button" className="easy-coach-step" onClick={() => onNavigate({ name: 'learn' })}>
+                  Learn
                 </button>
               </li>
               <li className={focus === 'hold' ? 'is-now' : ''}>
