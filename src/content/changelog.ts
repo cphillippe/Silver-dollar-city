@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.256',
+    title: 'Easy Samaritan: ≤720 close tall-phone purple voids + top clip residual (Fixes #348)',
+    when: '2026-09-26',
+    items: [
+      'Fixes #348: Easy Samaritan / road maze chrome on ≤720 / tall phone portrait — paint opaque cream app-body + .play.is-road-maze shell + solid cream maze-stage / warm maze-board (no purple-gold gradient bleed · cream match-score / CTA dock pinned to cream floor · top pad so HUD stays in viewport) so leftover above/below the board is intentional cream floor, not dead purple voids or top clip (Shot 250 residual after Samaritan cream peel 1.4.249; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.255',
     title: 'Easy Lock In feedback: ≤720 close tall-phone purple void + left clip residual (Fixes #347)',
     when: '2026-09-26',
