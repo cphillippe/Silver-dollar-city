@@ -3272,6 +3272,20 @@ html[data-easy='on'] .link-block.is-picture .link-art {
   }
 }
 
+/* Easy Clear 1.4.199: Easy Link ≤720 close choices→CTA purple gap —
+   After fill 188 grew play + stretch link-col picture seats, global
+   .link-dock { margin-top: auto } still steals free space before flex-grow,
+   leaving empty purple between the choice column and the bottom dock
+   (Father 196 slider→CTA family; invent Fun/Clear). Zero the auto margin so
+   link-col flex:1 absorbs the portrait — tight choices→CTA spacing.
+   Fill 188 stays; Sort 198 / Story Snap 197 / Match 193 / Lock In 194·195 /
+   Father 196 / Hold / Creed / Story Creek / Build / Samaritan untouched. */
+@media (max-height: 720px) {
+  .play.is-easy-link .link-dock {
+    margin-top: 0;
+  }
+}
+
 html[data-easy='on'] .btn.tiny {
   min-height: 52px;
 }
