@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.262',
+    title: 'Easy Match: ≤720 close tall residual purple void (Fixes #362)',
+    when: '2026-09-26',
+    items: [
+      'Fixes #362: Easy Match gem-search / Story Creek letter grid on ≤720 / phone portrait — opaque cream app-body + play shell + solid gem-scroll/stage (no purple-gold gradient · found-counter pinned to the cream floor) so leftover between the grid and the counter is intentional cream floor, including layout viewports taller than the 920 cap (Shot 260 residual after Match cream peel 1.4.253; letter tiles stay readable; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.261',
     title: 'Easy Learn: ≤720 close tall residual purple void (Fixes #361)',
     when: '2026-09-26',
