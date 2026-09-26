@@ -1115,7 +1115,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.139')
+assert.equal(APP_VERSION, '1.4.140')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1445,7 +1445,7 @@ assert.match(cssSrc, /is-easy-hold/)
   assert.match(dockCss, /backdrop-filter: blur/)
   assert.doesNotMatch(dockCss, /#16062e/, 'sticky CTA docks must not be an opaque black slab')
 }
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Lock In|miss teach|Main idea|why-miss|dedupe/i)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Learn|HeldTriad|Main idea|triad|orphan/i)
 {
   const storyCardCss = cssSrc.match(/\.easy-story-card,[\s\S]*?\.easy-story-card::before \{[\s\S]*?\n\}/)?.[0] ?? ''
   assert.match(storyCardCss, /border:\s*0/)
@@ -2339,8 +2339,8 @@ assert.match(mapSrc, /easy \? null : \(\s*\n\s*<>[\s\S]*city-street-main/)
 assert.match(mapSrc, /if \(isEasy\(progress\)\) return/)
 assert.match(mapSrc, /if \(playing\.current && !isEasy\(progress\)\) return/)
 assert.match(mapSrc, /Tap a building to Manage it/)
-assert.match(latestChange(APP_VERSION).title, /Lock In|miss teach|Main idea/i)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /miss teach|Main idea|HUD|dedupe|why-miss/i)
+assert.match(latestChange(APP_VERSION).title, /Learn|Main idea|triad|HeldTriad/i)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Learn|HeldTriad|Main idea|triad|orphan/i)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-img[\s\S]*?fill: none !important/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img\.is-built[\s\S]*?fill: none/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-hit[\s\S]*?stroke: none/)
@@ -2714,7 +2714,9 @@ assert.match(
 assert.match(teachSrc, /WORDS\.claim\.teach/)
 assert.match(teachSrc, /The claim you will lock in/)
 assert.match(teachSrc, /Skip reading/)
-assert.match(teachSrc, /The main idea you will keep/)
+assert.doesNotMatch(teachSrc, /The main idea you will keep/)
+assert.doesNotMatch(teachSrc, /omitClaim/)
+assert.match(teachSrc, /HeldTriad/)
 assert.doesNotMatch(teachSrc, /A claim is the main idea we hold to be true/)
 assert.ok(
   teachSrc.indexOf('teach-reason') < teachSrc.indexOf('brief.claim'),
@@ -2728,11 +2730,13 @@ assert.match(teachSrc, /easy-place-chip/)
     teachSrc.indexOf('easy-story-card'),
     teachSrc.indexOf('easy-story-dock'),
   )
-  assert.ok(card.includes('easyFacingLine'), 'Easy Learn names the idea')
+  assert.ok(card.includes('HeldTriad'), 'Easy Learn shows the claim·why·from triad')
+  assert.ok(!card.includes('omitClaim'), 'Easy Learn full triad includes Main idea')
+  assert.ok(!card.includes('The main idea you will keep'), 'no orphan Main idea kicker above triad')
   assert.ok(card.includes('easyWhoWhereLine'), 'Easy Learn binds place and person')
   assert.ok(
-    card.indexOf('easyFacingLine') < card.indexOf('easyWhoWhereLine'),
-    'Easy Learn encodes the idea first, then this idea lives at this place, with this person',
+    card.indexOf('HeldTriad') < card.indexOf('easyWhoWhereLine'),
+    'Easy Learn encodes the triad first, then this idea lives at this place, with this person',
   )
 }
 assert.match(matchSrc, /match-col-label/)
