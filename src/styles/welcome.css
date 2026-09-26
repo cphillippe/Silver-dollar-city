@@ -2367,3 +2367,147 @@ html[data-theme='dusk'] .easy-story-card {
     padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
   }
 }
+
+/* Easy Fun 1.4.268: Easy Hold dock arcade punch on tall phone —
+   HUD compress 156 (gaps · next-tap · dock pad) still caps at max-height: 720px, so
+   Story Creek HOLD on ~390×844 keeps a quiet dock / soft score while cream quiz 263
+   washes the timing juice flat. Extend that Hold HUD compress across phone portrait
+   and taller layout viewports, and punch the Hold dock CTA + timing juice
+   (score · Miss · LOCKED) arcade-loud on the cream plate. Claim stays dark-ink
+   readable. Live Hold dock only — miss-teach feedback, Father Dash timing rail,
+   Match, Samaritan, and Manage stay on their peels. HUD 156 ≤720 stays.
+   Invent Fun/Clear. Do not wake Shot. */
+@media (max-height: 920px), (min-height: 921px) {
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach) {
+    gap: 6px;
+    min-height: 0;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach) .why-blast-hud {
+    gap: 6px;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach) .why-blast-hud .next-tap {
+    font-size: 0.88rem;
+    line-height: 1.15;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .why-arena {
+    gap: 6px;
+    min-height: 0;
+  }
+
+  /* Claim stays readable on the cream plate — do not whisper it under the punch */
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .why-claim {
+    padding: 10px 12px;
+    font-size: clamp(1.05rem, 4.2vw, 1.28rem);
+    line-height: 1.22;
+    font-weight: 750;
+    color: #2a2118;
+  }
+
+  /* HOLD tap CTA — cream chip, thicker gold lip, taller hit */
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .why-chip {
+    min-height: 56px;
+    padding: 10px 12px;
+    font-size: 0.98rem;
+    font-weight: 800;
+    line-height: 1.2;
+    color: #2a2118;
+    border-width: 2.5px;
+    border-color: #c46a08;
+    box-shadow: 0 4px 0 #c46a08;
+  }
+
+  /* Timing juice — gold score on cream, not a flat cream disc */
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .why-score {
+    min-width: 3.2rem;
+    padding: 6px 12px;
+    font-size: 1.2rem;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    color: #2a2118;
+    background-color: #ffcc33;
+    background-image: linear-gradient(180deg, #fffce8, #ffcc33 55%, #ff9f1a);
+    background: linear-gradient(180deg, #fffce8, #ffcc33 55%, #ff9f1a);
+    border: 2.5px solid #fff8dc;
+    box-shadow:
+      0 3px 0 #c46a08,
+      0 0 16px rgba(255, 204, 51, 0.7);
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-miss:not(.is-miss-teach) .why-score {
+    color: #fff6e8;
+    background-color: #ff5a7a;
+    background-image: linear-gradient(180deg, #ff8aa0, #ff5a7a 55%, #c63d5c);
+    background: linear-gradient(180deg, #ff8aa0, #ff5a7a 55%, #c63d5c);
+    border-color: #fff8dc;
+    box-shadow:
+      0 3px 0 #a32d48,
+      0 0 16px rgba(255, 90, 122, 0.65);
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach) .miss-banner {
+    padding: 12px 14px 10px;
+    border-width: 2.5px;
+    box-shadow:
+      0 5px 0 #a32d48,
+      0 0 24px rgba(255, 90, 122, 0.7);
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach) .miss-plus {
+    font-size: clamp(1.45rem, 7vw, 2rem);
+    font-weight: 900;
+    letter-spacing: 0.08em;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast .win-stamp {
+    font-size: clamp(1.05rem, 4.8vw, 1.4rem);
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    color: #2a2118;
+    background-color: #ffcc33;
+    background-image: linear-gradient(180deg, #fffce8, #ffcc33 55%, #ff9f1a);
+    background: linear-gradient(180deg, #fffce8, #ffcc33 55%, #ff9f1a);
+    border: 2.5px solid #fff8dc;
+    box-shadow:
+      0 4px 0 #c46a08,
+      0 0 22px rgba(255, 204, 51, 0.75);
+  }
+
+  /* Hold dock — cream plate, arcade gold CTA */
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-win .cta-dock,
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-win) .recall-gate.is-easy-hold .cta-dock {
+    position: static;
+    bottom: auto;
+    margin-top: auto;
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 12px 0 calc(14px + env(safe-area-inset-bottom, 0px));
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-win .cta-dock .btn,
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-win) .recall-gate.is-easy-hold .cta-dock .btn {
+    min-height: 64px;
+    width: 100%;
+    font-size: 1.22rem;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    color: #2a2118;
+    background-color: #ffcc33;
+    background-image: linear-gradient(180deg, #fffce8, #ffcc33 46%, #ff9f1a);
+    background: linear-gradient(180deg, #fffce8, #ffcc33 46%, #ff9f1a);
+    border: 2.5px solid #fff8dc;
+    box-shadow:
+      0 5px 0 #c46a08,
+      0 0 18px rgba(255, 204, 51, 0.55);
+  }
+}
