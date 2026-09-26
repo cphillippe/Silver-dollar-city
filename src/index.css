@@ -4693,6 +4693,40 @@ html[data-easy='on'] .mind-node em {
   }
 }
 
+/* Easy Clear 1.4.204: Easy Father ≤720 close speech→rail purple gap —
+   After fill 189 + dock-margin 196, run-speech padding/margins + play gap still
+   leave a thin purple band between the speech card and the timing rail before
+   the Hold pad (Father dock-margin family · invent Fun/Clear). Zero speech/rail
+   margins + tighten gap/padding so scene · speech · rail · pad pack tight.
+   Fill 189 / HUD 173 / speech thin 154 / dock 196 stay; Build 203 / Hold 202 /
+   Creek 201 / Creed 200 / Link 199 / Sort 198 / Snap 197 / Match 193 /
+   Lock In 194·195 / Samaritan peels untouched. */
+@media (max-height: 720px) {
+  .play.is-father-run,
+  .daily-page.is-puzzle .play.is-father-run,
+  .challenge-page.is-puzzle .play.is-father-run {
+    gap: 2px;
+  }
+
+  .play.is-father-run .run-speech {
+    margin: 0;
+    padding: 3px 8px 4px;
+  }
+
+  .play.is-father-run .run-speech-line {
+    margin: 1px 0 2px;
+  }
+
+  .play.is-father-run .run-speech-count {
+    margin-top: 1px;
+  }
+
+  .play.is-father-run .run-rail {
+    margin: 0;
+    height: 14px;
+  }
+}
+
 .miss-banner {
   display: grid;
   gap: 2px;
