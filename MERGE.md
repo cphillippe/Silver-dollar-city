@@ -3,7 +3,7 @@
 **PR:** https://github.com/cphillippe/Silver-dollar-city/pull/234
 **Branch:** `ship/manage-empty-lot-179` → `main` (alias `ship/manage-empty-lot-180`)
 **Version:** 1.4.180
-**Commit:** `f7303e7` (`f7303e7ca895c48a5c9d7618204e60fe7794a941` tip; peel `e7d1397`)
+**Commit:** `79a1e43` (`79a1e43052a3ff60608d61aab958b85a7f18709d` tip; peel `e7d1397`)
 **Base live:** 1.4.178 (`60150e2`, PR #222 Witness Square candy hall on main; atop 1.4.177 #233)
 **Fixes:** #232
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
