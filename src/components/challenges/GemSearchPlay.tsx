@@ -507,6 +507,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       {/* Easy Clear 1.4.225: phone portrait extends fill 193 + board stretch 211 so gem-board·status close bottom-third purple void (Fixes #297). */}
       {/* Easy Clear 1.4.236: tall-phone strengthens fill 225 (height 100% · gem-scroll/stage/board flex 1 1 0 · cta-dock position static) so gemSearch closes bottom-half purple void (Fixes #315). */}
       {/* Easy Clear 1.4.246: tall-phone cream board-plate fill (gem-scroll·stage parchment · warm board · denser stretch) so leftover is cream stage, not purple void (Fixes #332). */}
+      {/* Easy Clear 1.4.253: tall-phone cream shell fill (opaque cream play + app-body · solid gem-scroll/stage · warm board · cream score/dock floor) so leftover is cream floor, not purple void after 246 (Fixes #345). */}
       <p className="sort-how">{EASY.matchHunt}</p>
       {matchChips ? (
         <>
