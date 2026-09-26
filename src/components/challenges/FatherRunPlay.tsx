@@ -367,6 +367,7 @@ export function FatherRunPlay({
       {/* Easy Clear 1.4.173: ≤720 peels HUD (kicker · thumbs · caption) in index.css — pad/scene stay above fold. */}
       {/* Easy Clear 1.4.189: ≤720 fills purple void in index.css (invent Fun/Clear). */}
       {/* Easy Clear 1.4.196: ≤720 zeros cta-dock margin-top so slider→CTA gap closes (Fixes #253). */}
+      {/* Easy Clear 1.4.204: ≤720 closes speech→rail purple gap (fill 189 / dock 196 stay). */}
       <div className={`run-speech ${phase === 'miss' ? 'is-done' : ''}`} aria-live="polite">
         <p className="run-speech-kicker">Hired-hand speech</p>
         <p className="run-speech-line">{phrase}</p>
