@@ -1,10 +1,10 @@
 # ready-easy-fun-clear-208 — 1.4.208 Easy Lock In win-end ≤720 close triad→Home purple gap
 
-**PR:** (pending)
+**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/269
 **Branch:** `ship/easy-fun-clear-208` → `main`
 **Version:** 1.4.208
-**Peel:** (pending)
-**Tip:** (pending)
+**Peel:** `a2eb6de` (`a2eb6de3680ab528973e267da7fdf02e12d9f9bd`)
+**Tip:** `a0718d4` (`a0718d496b9919707d95d9e73a100b475915bf2f`)
 **Base live:** 1.4.207 (`3bbfa30`, PR #268 Easy Match ≤720 close score→CTA purple gap on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
@@ -45,4 +45,4 @@ MODEL=gemini-flash-latest — Invent Fun/Clear (no open Easy Fun/Clear issue). I
 - Android versionName **1.4.113** unchanged
 
 ## Mergeability
-(pending)
+MERGEABLE CLEAN
