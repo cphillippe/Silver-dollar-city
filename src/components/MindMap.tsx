@@ -83,6 +83,7 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
       <button type="button" className="mind-map-scrim" aria-label="Close building" onClick={onClose} />
       {/* Easy Clear 1.4.230: phone portrait edge-to-edge sheet — width 100vw · stretch · zero side margin (Fixes #302). */}
       {/* Easy Clear 1.4.258: tall-phone opaque bottom belt + viewport pin — kill black void / bottom cutout (Fixes #350). */}
+      {/* Easy Clear 1.4.267: full-bleed Easy sheet — width 100% · square bottom · safe-area inside · no purple bar (Fixes #367). */}
       <div className="mind-map-card">
         <header className="mind-map-head">
           {/* 1.4.165 — one portrait: PERSON tile keeps Avatar; header dropped (Fixes #220) */}

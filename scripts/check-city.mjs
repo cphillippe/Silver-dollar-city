@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.266')
+assert.equal(APP_VERSION, '1.4.267')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -5878,5 +5878,47 @@ console.log('check-city: ok')
     latestChange('1.4.266').items.join('\n'),
     /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#300|#301|#302|#314|#315|#316|#317|#318|#319|#331|#332|#333|#334|#335|#336|#343|#344|#345|#346|#347|#348|#349|#350|#361|#362|#363|#364|#365|Learn cream|Lock In|Samaritan|Manage|Match grid|Dig|Creed|Build|Sort|Snap|Link|Claim merge|Source dig|invent Fun\/Clear|Sequence|Story Creek HOLD|Home dock|coach|live quiz|miss-teach|maze-stage/i,
     '1.4.266 must not fix other phone-fail issues or climb another Easy surface',
+  )
+}
+
+// Easy Clear 1.4.267: Easy Manage lot sheet purple bar / misalign after black-void 258 (Fixes #367)
+{
+  const welcomeCss267 = readFileSync(new URL('../src/styles/welcome.css', import.meta.url), 'utf8')
+  const mindMap267 = readFileSync(new URL('../src/components/MindMap.tsx', import.meta.url), 'utf8')
+  assert.match(
+    welcomeCss267,
+    /1\.4\.267: Easy Manage lot sheet purple bar \/ misalign after black-void 258/,
+  )
+  assert.match(
+    welcomeCss267,
+    /1\.4\.267: Easy Manage lot sheet purple bar \/ misalign after black-void 258[\s\S]*?@media \(max-height: 920px\), \(min-height: 921px\)/,
+  )
+  assert.match(
+    welcomeCss267,
+    /1\.4\.267: Easy Manage lot sheet purple bar \/ misalign after black-void 258[\s\S]*?html\[data-easy='on'\] \.mind-map\.is-manage \{[\s\S]*?width: auto[\s\S]*?align-items: stretch/,
+  )
+  assert.match(
+    welcomeCss267,
+    /1\.4\.267: Easy Manage lot sheet purple bar \/ misalign after black-void 258[\s\S]*?html\[data-easy='on'\] \.mind-map\.is-manage::after \{[\s\S]*?content: none/,
+  )
+  assert.match(
+    welcomeCss267,
+    /1\.4\.267: Easy Manage lot sheet purple bar \/ misalign after black-void 258[\s\S]*?html\[data-easy='on'\] \.mind-map\.is-manage \.mind-map-card \{[\s\S]*?width: 100%[\s\S]*?background-color: #241050/,
+  )
+  assert.match(
+    welcomeCss267,
+    /1\.4\.267: Easy Manage lot sheet purple bar \/ misalign after black-void 258[\s\S]*?:not\(\.is-empty-lot\) \.mind-map-card \{[\s\S]*?env\(safe-area-inset-bottom, 0px\)/,
+  )
+  assert.match(mindMap267, /1\.4\.267: full-bleed Easy sheet/)
+  assert.match(cssSrc, /1\.4\.267: Easy Manage lot sheet purple bar \/ misalign after black-void 258/)
+  assert.match(
+    latestChange('1.4.267').items.join('\n'),
+    /Fixes #367|purple bar|Manage|phone portrait|safe-area|920/i,
+  )
+  assert.match(latestChange('1.4.267').title, /Easy Manage|≤720|purple bar|Fixes #367/i)
+  assert.doesNotMatch(
+    latestChange('1.4.267').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#300|#301|#302|#314|#315|#316|#317|#318|#319|#331|#332|#333|#334|#335|#336|#343|#344|#345|#346|#347|#348|#349|#361|#362|#363|#364|#365|#366|Learn cream|Lock In|Samaritan|Father Dash|Match grid|Dig|Creed|Build|Sort|Snap|Link|Claim merge|Source dig|invent Fun\/Clear|Sequence|Story Creek HOLD|Home dock|coach|live quiz|miss-teach|maze-stage/i,
+    '1.4.267 must not fix other phone-fail issues or climb another Easy surface',
   )
 }
