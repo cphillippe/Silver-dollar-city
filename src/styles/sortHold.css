@@ -1465,6 +1465,28 @@ html[data-easy='on'] .recall-card {
   }
 }
 
+/* Easy Clear 1.4.208: Easy Lock In win-end ≤720 close triad→Home purple gap —
+   After fill 185 grew after-win + stored-line into the portrait, gap:10px /
+   held-triad gap:12px still leave purple between HeldTriad (Main idea · Why ·
+   From) and TownReturn Home CTA (Father/Hold dock-margin · Sequence result
+   family; invent Fun/Clear). Tighten after-win + stored-line + held-triad gaps
+   so claim·reason·source · Home pack tight. Fill 185 stays; quiz 194 / miss
+   teach 195 / Match 207 / Learn 206 peels untouched. */
+@media (max-height: 720px) {
+  html[data-easy='on'] .challenge-page.is-after:has(.stored-line) .after-win {
+    gap: 2px;
+  }
+
+  html[data-easy='on'] .challenge-page.is-after:has(.stored-line) .stored-line {
+    gap: 4px;
+    margin-bottom: 0;
+  }
+
+  html[data-easy='on'] .challenge-page.is-after:has(.stored-line) .stored-line .held-triad {
+    gap: 6px;
+  }
+}
+
 /* Easy Clear 1.4.186: Easy Samaritan / Sequence order ≤720 fill top-cluster purple void —
    play.is-sequence.is-deal was flex:0 so the gold card hugged content at the top with a
    massive empty purple bottom half (Shot 1.4.180 06-samaritan · Fixes #240). Grow play

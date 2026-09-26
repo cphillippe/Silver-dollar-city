@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.208',
+    title: 'Easy Lock In win-end: ≤720 close triad→Home purple gap',
+    when: '2026-09-25',
+    items: [
+      'Easy Lock In win-end (StoredLine · TownReturn) on ≤720px tall: tighten after-win + held-triad gaps so Main idea · Why · From · Home CTA pack tight — no purple band between the triad and Home (Father/Hold dock-margin family · invent Fun/Clear; after win-end fill 1.4.185; Match 207 / Learn 206 / Sequence 205 / Father 204 / Build 203 / Hold 202 / Story Creek 201 / Creed 200 / Link 199 / Sort 198 / Story Snap 197 / letter-grid 193 peels untouched)',
+    ],
+  },
+  {
     version: '1.4.207',
     title: 'Easy Match: ≤720 close score→CTA purple gap',
     when: '2026-09-25',
