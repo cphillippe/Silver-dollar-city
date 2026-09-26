@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.185',
+    title: 'Easy Lock In: ≤720 fill win-end purple void',
+    when: '2026-09-25',
+    items: [
+      'Easy Lock In win-end / feedback on ≤720px tall: grow SAY THIS TOMORROW card + after-win shell so Home CTA fills the portrait — no bottom-third empty purple void (Fixes #239; Shot 1.4.180 · invent Fun/Clear; miss teach 1.4.161 / arena 1.4.170 untouched)',
+    ],
+  },
+  {
     version: '1.4.184',
     title: 'Easy Match: ≤720 fill empty purple card',
     when: '2026-09-25',

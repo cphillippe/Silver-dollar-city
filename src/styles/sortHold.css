@@ -1411,3 +1411,53 @@ html[data-easy='on'] .recall-card {
     display: none;
   }
 }
+
+/* Easy Clear 1.4.185: Lock In win-end / feedback ≤720 fill empty purple bottom —
+   StoredLine (SAY THIS TOMORROW) + TownReturn Home CTA sit mid-screen with a
+   large dead purple band under (Shot 1.4.180 05-easy-lockin-miss · Fixes #239;
+   vision = win-end fallback, miss teach not reached). Grow after-win shell +
+   stored-line card into the portrait so the gold teach card fills — Match 184
+   / Sort 183 ≤720 family. Invent Fun/Clear. */
+@media (max-height: 720px) {
+  html[data-easy='on'] .app.is-play .app-body:has(.challenge-page.is-after .stored-line) {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding-top: 8px;
+  }
+
+  html[data-easy='on'] .challenge-page.is-after:has(.stored-line) {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    gap: 4px;
+    overflow: hidden;
+  }
+
+  html[data-easy='on'] .challenge-page.is-after:has(.stored-line) .after-win {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    gap: 10px;
+    margin-top: 0;
+  }
+
+  html[data-easy='on'] .challenge-page.is-after:has(.stored-line) .stored-line {
+    flex: 1 1 auto;
+    min-height: 0;
+    align-content: center;
+    gap: 10px;
+  }
+
+  html[data-easy='on'] .challenge-page.is-after:has(.stored-line) .stored-line .held-triad {
+    gap: 12px;
+  }
+
+  html[data-easy='on'] .challenge-page.is-after:has(.stored-line) .town-return {
+    flex: 0 0 auto;
+    margin-top: 0;
+    padding-bottom: calc(4px + var(--safe-bottom, 0px));
+  }
+}
