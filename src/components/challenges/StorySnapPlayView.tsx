@@ -51,6 +51,7 @@ interface StorySnapPlayProps {
  * Easy Clear 1.4.223: phone portrait extends fill + pad→CTA so snap-stage·pad·CTA close purple void (invent Fun/Clear).
  * Easy Clear 1.4.241: phone portrait extends HUD peel 182 so eyebrow + who·where hide on tall phones (invent Fun/Clear).
  * Easy Fun 1.4.269: tall-phone Story Snap residual juice — HUD compress 182 (strip · chip) climbs past 720, snap CTA + score/miss juice go loud without crowding the snap board (invent Fun/Clear).
+ * Easy Fun 1.4.270: tall-phone one-more win-end dock — One more snap punches gold, claim stays readable, snap board stays (invent Fun/Clear · Shot wake).
  */
 
 export function StorySnapPlayView({
