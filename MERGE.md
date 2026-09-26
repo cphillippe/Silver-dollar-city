@@ -1,10 +1,10 @@
 # ready-easy-fun-clear-206 — 1.4.206 Easy Learn ≤720 fill held-clear purple void
 
-**PR:** (pending)
+**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/267
 **Branch:** `ship/easy-fun-clear-206` → `main`
 **Version:** 1.4.206
-**Peel:** (pending)
-**Tip:** (pending)
+**Peel:** `d81531a` (`d81531a8a167c494b3f77701246d3bb95c61cc39`)
+**Tip:** ``4cd7bfc` (`4cd7bfca5bfb1f07b0321167292681025f952869`)`
 **Base live:** 1.4.205 (`af330b4`, PR #266 Easy Sequence ≤720 close stones→result purple gap on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
@@ -44,3 +44,6 @@ MODEL=gemini-flash-latest — Invent Fun/Clear (no open Easy Fun/Clear issue). I
 - `npm run test:arcade` OK
 - `npm run build` → `docs/` synced (qa-seed.html preserved)
 - Android versionName **1.4.113** unchanged
+
+## Mergeability
+MERGEABLE CLEAN (GitHub compute after push)
