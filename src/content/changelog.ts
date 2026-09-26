@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.161',
+    title: 'Lock In: miss teach drop PlainTalk stack',
+    when: '2026-09-25',
+    items: [
+      'Easy Lock In miss teach: badge + Main idea · Why · From + Try again only — omit PlainTalk teach stack so short phones are not a scroll wall (Clear density; Fixes #207)',
+    ],
+  },
+  {
     version: '1.4.160',
     title: 'Easy Learn: one who·where surface',
     when: '2026-09-25',
