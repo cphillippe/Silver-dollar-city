@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.199')
+assert.equal(APP_VERSION, '1.4.200')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3585,6 +3585,31 @@ console.log('check-city: ok')
     '1.4.199 must not re-peel Shot 190 fails #250–#253 or Sort 198 / Story Snap 197 / Match / Lock In / Father / Hold / Creed / Story Creek / Build / maze / bowl',
   )
 }
+
+
+// Easy Clear 1.4.200: Easy Creed ≤720 close bowl→CTA purple gap (invent Fun/Clear · Shot wake)
+{
+  const indexCss200 = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
+  const mergePlay200 = readFileSync(
+    new URL('../src/components/challenges/ClaimMergePlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(indexCss200, /1\.4\.200: Easy Creed ≤720 close bowl→CTA purple gap/)
+  assert.match(
+    indexCss200,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-claim-merge \.cta-dock \{[\s\S]*?margin-top: 0/,
+  )
+  assert.match(mergePlay200, /1\.4\.200: ≤720 zeros cta-dock margin-top/)
+  assert.match(cssSrc, /1\.4\.200: Easy Creed ≤720 close bowl→CTA purple gap/)
+  assert.match(latestChange('1.4.200').items.join('\n'), /bowl→CTA|cta-dock|purple void between the bowl/i)
+  assert.match(latestChange('1.4.200').title, /Easy Creed|≤720|bowl→CTA|purple gap/i)
+  assert.doesNotMatch(
+    latestChange('1.4.200').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|Lock In quiz|Lock In feedback|Father.*slider|grid→footer|Story Creek ≤720 fill|Easy Hold.*≤720 fill|gem-board|Build Argument ≤720 fill|Easy Sort ≤720 fill|Father Dash ≤720 fill|maze-board|Story Snap ≤720 fill|snap-stage|bank\.is-sort|sort-bins|choices→CTA|link-dock|Easy Link ≤720 fill/i,
+    '1.4.200 must not re-peel Shot 190 fails #250–#253 or Link 199 / Sort 198 / Story Snap 197 / Match / Lock In / Father / Hold / Story Creek / Build / maze',
+  )
+}
+
 
 
 
