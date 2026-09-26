@@ -1,10 +1,10 @@
 # ready-easy-fun-clear-183 — 1.4.183 Easy Sort ≤720 board-first
 
-**PR:** (pending push)
+**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/237
 **Branch:** `ship/easy-fun-clear-183` → `main`
 **Version:** 1.4.183
-**Peel:** (pending)
-**Tip:** (pending)
+**Peel:**  ()
+**Tip:**  ()
 **Base live:** 1.4.182 (`2a5cce5`, PR #236 Easy Story Snap ≤720 HUD on main; atop 1.4.181 Creed #235)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
@@ -46,4 +46,4 @@ MODEL=gemini-flash-latest — invent pick A approved. Notes: `notes-gemini.txt` 
 - `npm run build` → `docs/` ✓
 
 ## Status
-**MERGEABLE CLEAN** (pending push confirm) — ready for CoS merge after green. Do NOT merge from this hop.
+**MERGEABLE CLEAN** — ready for CoS merge after green. Do NOT merge from this hop.
