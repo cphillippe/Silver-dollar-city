@@ -2396,3 +2396,87 @@ html[data-easy='on'] .recall-card {
     padding-bottom: 0;
   }
 }
+
+
+/* Easy Clear 1.4.227: Easy Lock In feedback ≤720 / phone portrait bottom-half purple void
+   (Fixes #299). After miss-teach shell 195 + pad-zero 213 (both ≤720 only), real phones
+   ~390×844 still cluster Main idea · Why this is true · From · Try again at the top with
+   a massive empty purple void across the bottom half (Shot pack 1.4.220
+   05-easy-lockin-miss.png; residual after closed #275 / 1.4.213; capture may show in-app
+   1.4.219 PWA lag). Extend fill 195 + pad-zero 213 across phone portrait heights
+   (max-height: 920px) so app-body · journal · rehearse-anchor · recall-gate · why-blast
+   · why-miss-teach absorb free space, zero residual phone-safe padding, and pin Try again
+   dock — no purple void under Lock In feedback. Fill 195 / pad-zero 213 ≤720 stay.
+   Live quiz #298 / 1.4.226 / Match / Learn / Samaritan / Father / Manage / Dig / Creek /
+   parked maps untouched. */
+@media (max-height: 920px) {
+  html[data-easy='on'] .app.is-play .app-body:has(.journal.is-rehearse .why-blast.is-miss-teach) {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding-top: 8px;
+    padding-bottom: 0;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    gap: 4px;
+    overflow: hidden;
+    padding-bottom: 0;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) > .text-link {
+    flex: 0 0 auto;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) .rehearse-anchor {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) .rehearse-anchor > .eyebrow {
+    flex: 0 0 auto;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) .recall-gate.is-easy-hold {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    height: auto;
+    margin-bottom: 0;
+    overflow: hidden;
+    padding-bottom: 0;
+  }
+
+  html[data-easy='on'] .why-blast.is-miss-teach {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  html[data-easy='on'] .why-blast.is-miss-teach .why-blast-hud {
+    flex: 0 0 auto;
+  }
+
+  html[data-easy='on'] .why-blast.is-miss-teach .why-miss-teach {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  html[data-easy='on'] .why-blast.is-miss-teach .why-miss-teach .cta-dock {
+    margin-top: auto;
+    flex: 0 0 auto;
+  }
+}
