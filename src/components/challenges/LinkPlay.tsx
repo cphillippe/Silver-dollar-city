@@ -342,6 +342,7 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek, onEasyStop, stre
     >
       {/* Easy Clear 1.4.188: ≤720 fills purple void in index.css (invent Fun/Clear). */}
       {/* Easy Clear 1.4.199: ≤720 zeros link-dock margin-top so choices→CTA close (fill 188 stays). */}
+      {/* Easy Clear 1.4.219: phone portrait extends fill+dock so choices→CTA close purple void (invent Fun/Clear). */}
       {easy || step === 'linked' ? null : <PuzzleLead challenge={challenge} />}
       {easy || step === 'linked' ? null : (
         <PuzzleHint text={challenge.context} id={challenge.id} onPeek={onPeek} />
