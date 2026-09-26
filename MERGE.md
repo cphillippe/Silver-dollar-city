@@ -1,10 +1,10 @@
 # ready-easy-fun-clear-188 — 1.4.188 Easy Link ≤720 fill purple void
 
-**PR:** (pending)
+**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/245
 **Branch:** `ship/easy-fun-clear-188` → `main`
 **Version:** 1.4.188
-**Peel:** (pending commit)
-**Tip:** (pending)
+**Peel:** `9fbc9a9` (`9fbc9a9b96d1bc0f38096739fbe697073533e03f`)
+**Tip:** (post-MERGE commit)
 **Base live:** 1.4.187 (`dd01944`, PR #244 Easy Build Argument ≤720 fill purple void on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
@@ -37,7 +37,7 @@ MODEL=gemini-flash-latest — Invent Fun/Clear (no open Easy Fun/Clear issue). I
 - `src/config/app.ts`, `package.json`, `package-lock.json`
 - `src/content/changelog.ts`
 - `notes-gemini.txt`
-- `docs/` (Pages rebuild)
+- `docs/` (Pages rebuild `index-BKTj-vRq.js` / `index-CQtnI-4b.css`)
 - `MERGE.md`
 
 ## Checks
