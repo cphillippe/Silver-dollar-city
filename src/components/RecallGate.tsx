@@ -198,9 +198,7 @@ export function RecallGate({
         <p className="eyebrow">{EASY.saved}</p>
         {!easyLineReady ? (
           <>
-            <p className="teach-chip" role="note">
-              {EASY.mainIdeaTeach}
-            </p>
+            {/* Easy Clear 1.4.142: one next-tap action cue — Main idea already taught on Learn (140) + labeled on Lock In live/miss (141/139). */}
             <p className="next-tap">{EASY.rememberSentence}</p>
             <div className="recall-choices">
               {claimOptions.map((line) => (
