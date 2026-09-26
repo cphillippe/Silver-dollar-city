@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.251')
+assert.equal(APP_VERSION, '1.4.252')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1465,7 +1465,7 @@ assert.match(cssSrc, /is-easy-hold/)
   assert.match(dockCss, /backdrop-filter: blur/)
   assert.doesNotMatch(dockCss, /#16062e/, 'sticky CTA docks must not be an opaque black slab')
 }
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Fixes #343|contrast|parchment|Learn|Lock In|coach|dock/i)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Fixes #344|purple void|cream|parchment|Learn|tall-phone|teach-gate|shell/i)
 {
   const storyCardCss = cssSrc.match(/\.easy-story-card,[\s\S]*?\.easy-story-card::before \{[\s\S]*?\n\}/)?.[0] ?? ''
   assert.match(storyCardCss, /border:\s*0/)
@@ -2403,8 +2403,8 @@ assert.match(mapSrc, /easy \? null : \(\s*\n\s*<>[\s\S]*city-street-main/)
 assert.match(mapSrc, /if \(isEasy\(progress\)\) return/)
 assert.match(mapSrc, /if \(playing\.current && !isEasy\(progress\)\) return/)
 assert.match(mapSrc, /Tap a building to Manage it/)
-assert.match(latestChange(APP_VERSION).title, /Easy Home|Learn|Lock In|contrast|Fixes #343/i)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Fixes #343|contrast|parchment|Learn|Lock In|coach|dock/i)
+assert.match(latestChange(APP_VERSION).title, /Easy Learn|≤720|tall-phone|purple void|Fixes #344/i)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Fixes #344|purple void|cream|parchment|Learn|tall-phone|teach-gate|shell/i)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-img[\s\S]*?fill: none !important/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img\.is-built[\s\S]*?fill: none/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-hit[\s\S]*?stroke: none/)
@@ -5300,5 +5300,40 @@ console.log('check-city: ok')
     latestChange('1.4.251').items.join('\n'),
     /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#300|#301|#302|#314|#315|#316|#317|#318|#319|#331|#332|#333|#334|#335|#336|Learn cream|Match grid|Samaritan|Manage|Father Dash|Dig|Creed|Build|Sort|Snap|Link|Claim merge|Source dig|invent Fun\/Clear|Sequence|Story Creek HOLD|purple void residual/i,
     '1.4.251 must not fix other phone-fail issues or climb another Easy surface',
+  )
+}
+
+// Easy Clear 1.4.252: Easy Learn ≤720 / tall-phone purple void residual after cream 245 (Fixes #344)
+{
+  const welcomeCss252 = readFileSync(new URL('../src/styles/welcome.css', import.meta.url), 'utf8')
+  const teachUnlock252 = readFileSync(
+    new URL('../src/components/TeachUnlock.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(welcomeCss252, /1\.4\.252: Easy Learn ≤720 \/ tall-phone purple void residual after cream 245/)
+  assert.match(
+    welcomeCss252,
+    /1\.4\.252: Easy Learn ≤720 \/ tall-phone purple void residual after cream 245[\s\S]*?\.app-body:has\(\.challenge-page\.is-teach \.easy-story-card\) \{[\s\S]*?background: #fff6e8/,
+  )
+  assert.match(
+    welcomeCss252,
+    /1\.4\.252: Easy Learn ≤720 \/ tall-phone purple void residual after cream 245[\s\S]*?\.challenge-page\.is-teach:has\(\.easy-story-card\) \{[\s\S]*?background: #fff6e8/,
+  )
+  assert.match(
+    welcomeCss252,
+    /1\.4\.252: Easy Learn ≤720 \/ tall-phone purple void residual after cream 245[\s\S]*?\.recall-gate\.easy-story-card\.teach-gate[\s\S]*?background-image: none[\s\S]*?background: #fff6e8/,
+  )
+  assert.match(
+    welcomeCss252,
+    /1\.4\.252: Easy Learn ≤720 \/ tall-phone purple void residual after cream 245[\s\S]*?\.cta-dock\.easy-story-dock \{[\s\S]*?position: static[\s\S]*?margin-top: auto[\s\S]*?background: #fff6e8/,
+  )
+  assert.match(teachUnlock252, /1\.4\.252: tall-phone cream shell fill/)
+  assert.match(cssSrc, /1\.4\.252: Easy Learn ≤720 \/ tall-phone purple void residual after cream 245/)
+  assert.match(latestChange('1.4.252').items.join('\n'), /Fixes #344|purple void|cream|parchment|Learn|tall-phone|teach-gate|shell/i)
+  assert.match(latestChange('1.4.252').title, /Easy Learn|≤720|tall-phone|purple void|Fixes #344/i)
+  assert.doesNotMatch(
+    latestChange('1.4.252').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#300|#301|#302|#314|#315|#316|#317|#318|#319|#331|#332|#333|#334|#335|#336|#343|Match grid|Samaritan|Manage|Father Dash|Lock In|Dig|Creed|Build|Sort|Snap|Link|Claim merge|Source dig|invent Fun\/Clear|Sequence|Story Creek HOLD|Home dock|coach/i,
+    '1.4.252 must not fix other phone-fail issues or climb another Easy surface',
   )
 }
