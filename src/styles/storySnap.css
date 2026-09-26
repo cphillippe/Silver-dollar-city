@@ -258,6 +258,50 @@
   }
 }
 
+/* Easy Clear 1.4.223: Easy Story Snap ≤720 / phone portrait fill + pad→CTA purple void —
+   After fill 197 + pad→CTA 209 (both ≤720 only), real phones ~390×844 still leave
+   strip · stage · pad hugging the top with empty purple under the Hold pad / before
+   the dock because those peels never apply at Shot heights. Extend both fills across
+   phone portrait heights (max-height: 920px) so snap-stage absorbs free space and
+   pad · CTA pack tight — tight Story Snap fill on tall phones.
+   Fill 197 / pad→CTA 209 / HUD 182 ≤720 stay. Do NOT pack Manage / Match / Lock In /
+   Learn / Father / Creek / Dig / Creed / Hold / Sort / Link / Build / Sequence /
+   Road maze / Why Blast / panel-blast. */
+@media (max-height: 920px) {
+  .play.is-story-snap,
+  .daily-page.is-puzzle .play.is-story-snap,
+  .challenge-page.is-puzzle .play.is-story-snap {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.12rem;
+  }
+
+  .play.is-story-snap .snap-stage {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+  }
+
+  .play.is-story-snap .eyebrow,
+  .play.is-story-snap .easy-who-where-line,
+  .play.is-story-snap .snap-teach,
+  .play.is-story-snap .snap-strip,
+  .play.is-story-snap .snap-claim,
+  .play.is-story-snap .match-score,
+  .play.is-story-snap .snap-pad,
+  .play.is-story-snap .cta-dock,
+  .play.is-story-snap .match-toast,
+  .play.is-story-snap .bonus-plus {
+    flex: 0 0 auto;
+  }
+
+  .play.is-story-snap .cta-dock {
+    margin-top: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .play.is-story-snap.is-shake .snap-stage {
     animation: none;
