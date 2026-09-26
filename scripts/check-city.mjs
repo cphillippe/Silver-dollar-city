@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.204')
+assert.equal(APP_VERSION, '1.4.205')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3717,6 +3717,35 @@ console.log('check-city: ok')
     '1.4.204 must not re-peel Shot 190 fails #250–#253 or Build 203 / Hold 202 / Creek 201 / Creed 200 / Link 199 / Sort 198 / Snap 197 / Match / Lock In / Father fill·dock',
   )
 }
+
+
+// Easy Clear 1.4.205: Easy Sequence ≤720 close stones→result purple gap (invent Fun/Clear)
+{
+  const holdCss205 = readFileSync(new URL('../src/styles/sortHold.css', import.meta.url), 'utf8')
+  const seqPlay205 = readFileSync(
+    new URL('../src/components/challenges/SequencePlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(holdCss205, /1\.4\.205: Easy Sequence ≤720 close stones→result purple gap/)
+  assert.match(
+    holdCss205,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-sequence\.is-deal \{[\s\S]*?gap: 2px/,
+  )
+  assert.match(
+    holdCss205,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-sequence\.is-deal \.result[\s\S]*?margin: 0/,
+  )
+  assert.match(seqPlay205, /1\.4\.205: ≤720 closes stones→result purple gap/)
+  assert.match(cssSrc, /1\.4\.205: Easy Sequence ≤720 close stones→result purple gap/)
+  assert.match(latestChange('1.4.205').items.join('\n'), /stones→result|ResultPanel|purple band between the stones/i)
+  assert.match(latestChange('1.4.205').title, /Easy Sequence|≤720|stones→result|purple gap/i)
+  assert.doesNotMatch(
+    latestChange('1.4.205').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|Lock In quiz|Lock In feedback|grid→footer|gem-board|Easy Sort ≤720 fill|Father Dash ≤720 fill|Story Snap ≤720 fill|snap-stage|bank\.is-sort|sort-bins|choices→CTA|link-dock|Easy Link ≤720 fill|bowl→CTA|Easy Creed ≤720 fill|merge-bowl|board→CTA|Story Creek ≤720 fill|maze-board|chips→CTA|Easy Hold.*≤720 fill|Build Argument ≤720 fill|free-place|slider→CTA|speech→rail|Easy Father ≤720 fill/i,
+    '1.4.205 must not re-peel Shot 190 fails #250–#253 or Father 204 / Build 203 / Hold 202 / Creek 201 / Creed 200 / Link 199 / Sort 198 / Snap 197 / Match / Lock In',
+  )
+}
+
 
 
 

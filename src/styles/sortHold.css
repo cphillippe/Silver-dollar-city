@@ -1511,6 +1511,43 @@ html[data-easy='on'] .recall-card {
   }
 }
 
+/* Easy Clear 1.4.205: Easy Sequence ≤720 close stones→result purple gap —
+   After fill 186 stretched order bank / stone tiles, play gap:6px + .result
+   padding still leave a purple band between the stone bank and the teach
+   ResultPanel on miss (Father/Hold dock-margin family · invent Fun/Clear).
+   Tighten gap + zero result margin + compact teach padding so stones · result
+   pack tight. Fill 186 / how-peel 171 stay; Father 204 / Build 203 / Hold 202 /
+   Creek 201 / Creed 200 / Link 199 / Sort 198 / Snap 197 / Match 193 /
+   Lock In 194·195 peels untouched. */
+@media (max-height: 720px) {
+  .is-puzzle .play.is-sequence.is-deal,
+  .daily-page.is-puzzle .play.is-sequence.is-deal,
+  .challenge-page.is-puzzle .play.is-sequence.is-deal {
+    gap: 2px;
+  }
+
+  .is-puzzle .play.is-sequence.is-deal .result,
+  .play.is-sequence .result {
+    flex: 0 0 auto;
+    margin: 0;
+    padding: 8px 10px;
+  }
+
+  .is-puzzle .play.is-sequence.is-deal .result h3,
+  .play.is-sequence .result h3 {
+    margin: 2px 0;
+    font-size: 0.95rem;
+    line-height: 1.2;
+  }
+
+  .is-puzzle .play.is-sequence.is-deal .result p,
+  .play.is-sequence .result p {
+    margin: 2px 0;
+    font-size: 0.82rem;
+    line-height: 1.2;
+  }
+}
+
 /* Easy Clear 1.4.187: Easy Build Argument ≤720 fill purple void —
    play.is-build hugged content (no flex grow) so Easy guided deal left empty purple
    under slots + two-choice bank (Samaritan Sequence 1.4.186 / Match 184 fill family;
