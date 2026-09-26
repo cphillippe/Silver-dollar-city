@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.217',
+    title: 'Easy Hold: ≤720 close hud→arena purple void',
+    when: '2026-09-25',
+    items: [
+      'Easy Hold (WhyBlast Lock In live) on ≤720 / phone portrait: extend fill + dock-margin + hud→arena gap tighten so next-tap · claim · chips · CTA pack tight — no large purple void between hud and arena on tall phones (invent Fun/Clear; continuation of Hold fill 190 / dock 202 / hud 210 ≤720 family; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.216',
     title: 'Easy Father Dash: ≤720 close timing-rail→CTA purple void',
     when: '2026-09-25',
