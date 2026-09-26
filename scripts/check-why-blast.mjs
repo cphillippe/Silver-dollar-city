@@ -156,4 +156,21 @@ assert.match(
 assert.match(holdCss, /1\.4\.161.*PlainTalk|Fixes #207/)
 assert.doesNotMatch(holdCss, /\.why-miss-teach \.plain-talk/)
 
+
+// Easy Clear 1.4.170: ≤720 hide outer eyebrow + quiet From — arena-first invent Fun/Clear
+assert.match(blastSrc, /1\.4\.170.*≤720|1\.4\.170.*eyebrow|sortHold\.css/)
+assert.match(holdCss, /1\.4\.170: Lock In WhyBlast ≤720 arena-first/)
+assert.match(
+  holdCss,
+  /@media \(max-height: 720px\) \{[\s\S]*?\.recall-gate\.is-easy-hold\.is-why-blast:has\(\.why-blast\) > \.eyebrow \{[\s\S]*?display: none/,
+)
+assert.match(
+  holdCss,
+  /@media \(max-height: 720px\) \{[\s\S]*?\.why-arena \.held-from\.quiet \{[\s\S]*?display: none/,
+)
+assert.match(
+  holdCss,
+  /@media \(max-height: 720px\) \{[\s\S]*?\.journal\.is-rehearse\.is-easy-hold-practice:has\(\.why-blast\) \.rehearse-anchor > \.eyebrow \{[\s\S]*?display: none/,
+)
+
 console.log('check-why-blast: ok')

@@ -1316,3 +1316,30 @@ html[data-easy='on'] .recall-card {
     padding: 8px 0 calc(6px + env(safe-area-inset-bottom, 0px));
   }
 }
+
+/* Easy Clear 1.4.170: Lock In WhyBlast ≤720 arena-first — hide non-essential eyebrow /
+   quiet From chrome so arena + next-tap stay above fold (complements 1.4.156 thin +
+   1.4.161 miss PlainTalk drop; Match/Hub/Snap ≤720 family). Invent Fun/Clear. */
+@media (max-height: 720px) {
+  /* Journal rehearse + RecallGate both print EASY.saved — hide when blast arena is up */
+  .journal.is-rehearse.is-easy-hold-practice:has(.why-blast) .rehearse-anchor > .eyebrow {
+    display: none;
+  }
+
+  .recall-gate.is-easy-hold.is-why-blast:has(.why-blast) > .eyebrow {
+    display: none;
+  }
+
+  /* From under live claim is secondary — miss teach / locked takeaway still show From */
+  .why-arena .held-from.quiet {
+    display: none;
+  }
+
+  .why-blast-hud {
+    gap: 4px;
+  }
+
+  .why-blast-hud .next-tap {
+    font-size: 0.82rem;
+  }
+}

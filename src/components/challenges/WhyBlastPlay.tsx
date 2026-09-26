@@ -30,6 +30,7 @@ interface WhyBlastPlayProps {
  * on miss teach (1.4.139) and live arena (1.4.141).
  * Easy Clear 1.4.156: ≤720px arena-first chrome thin so chips + claim keep the phone (#193).
  * Easy Clear 1.4.161: miss teach omits PlainTalk stack — triad + Try again only (#207).
+ * Easy Clear 1.4.170: ≤720 peels outer eyebrow + quiet From in sortHold.css so arena stays above fold.
  */
 export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: WhyBlastPlayProps) {
   const chips = useMemo(
