@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.201',
+    title: 'Easy Story Creek: ≤720 close board→CTA purple gap',
+    when: '2026-09-25',
+    items: [
+      'Easy Story Creek (Samaritan road maze) on ≤720px tall: zero cta-dock margin-top so maze-board flex fill absorbs the portrait — no empty purple void between the board · score and the Hold / Again dock (Father 1.4.196 / Link 1.4.199 / Creed 1.4.200 dock-margin family · invent Fun/Clear; after Story Creek fill 1.4.191 left auto margin stealing free space; Creed 200 / Link 199 / Sort 198 / Story Snap 197 / Match 193 / Lock In 194·195 / Hold / Build / Samaritan peels untouched)',
+    ],
+  },
+  {
     version: '1.4.200',
     title: 'Easy Creed: ≤720 close bowl→CTA purple gap',
     when: '2026-09-25',
