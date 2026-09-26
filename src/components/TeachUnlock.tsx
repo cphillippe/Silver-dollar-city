@@ -50,6 +50,7 @@ export function TeachUnlock({ brief, kind, onUnlock, unlock, beats }: TeachUnloc
       <section className="recall-gate is-encode teach-gate easy-story-card" aria-label="Short story">
         <p className="eyebrow">Short story</p>
         {/* Easy Clear 1.4.160: LociStamp hero is the one who·where surface — drop duplicate who/where row (Fixes #206). */}
+        {/* Easy Clear 1.4.162: ≤720 peel in welcome.css — tiny stamp · hide GemMark · clamp reason so gold CTA stays above fold (Fixes #208). */}
         <LociStamp stamp={stamp} mode="hero" />
         {picture ? <GemMark gem={picture} size="sm" /> : null}
         <p className="teach-reason">{story}</p>

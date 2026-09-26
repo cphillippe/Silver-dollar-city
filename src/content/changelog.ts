@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.162',
+    title: 'Learn: short-story ≤720 peel',
+    when: '2026-09-25',
+    items: [
+      'Easy Learn short-story on ≤720px tall: tiny LociStamp · hide GemMark · clamp teach-reason · thin HeldTriad so gold Match CTA stays above fold (Hub/Snap/Father ≤720 family; 1.4.160 already omitted who/where; Fixes #208)',
+    ],
+  },
+  {
     version: '1.4.161',
     title: 'Lock In: miss teach drop PlainTalk stack',
     when: '2026-09-25',
