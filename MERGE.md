@@ -3,8 +3,8 @@
 **PR:** (pending)
 **Branch:** `ship/easy-fun-clear-192` → `main`
 **Version:** 1.4.192
-**Peel:** (pending commit)
-**Tip:** (pending)
+**Peel:**  ()
+**Tip:**  ()
 **Base live:** 1.4.191 (`5d8e11e`, PR #248 Easy Story Creek ≤720 fill purple void on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
