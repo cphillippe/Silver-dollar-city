@@ -13,7 +13,7 @@ export const STORY_SNAP_SNAP = 'SNAP!'
 
 export const STORY_SNAP_AGAIN = 'One more snap'
 
-/** 1–2 line teach lead (already shown on Learn; echo only — do not replace shortStory). */
+/** Learn shortStory lead — play peels reprint (1.4.163 / #209). Kept for reference; do not wire into Snap play. */
 export const STORY_SNAP_TEACH =
   'Jesus talks about an ordinary lamp and a city on a hill. Light is meant to be seen.'
 

@@ -24,7 +24,6 @@ import {
   STORY_SNAP_CLAIM,
   STORY_SNAP_HINT,
   STORY_SNAP_SNAP,
-  STORY_SNAP_TEACH,
   STORY_SNAP_WIN,
   STORY_OPEN_SCORE,
   SNAP_SCORE,
@@ -256,7 +255,7 @@ export function StorySnapPlayView({
       className={`play is-story-snap ${inWindow && phase === 'fly' ? 'is-glow' : ''} ${phase === 'open' ? 'is-win' : ''} ${shake ? 'is-shake' : ''}`}
     >
       <p className="eyebrow">Story Snap</p>
-      <p className="snap-teach">{STORY_SNAP_TEACH}</p>
+      {/* 1.4.163 / #209: Learn already showed short story — omit STORY_SNAP_TEACH reprint; pad·strip·gate teach mechanic */}
       <p className="quiet easy-who-where-line">
         {home.who} · {home.place}
       </p>
