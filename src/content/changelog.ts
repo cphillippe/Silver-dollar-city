@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.147',
+    title: 'Creed merge: one how line',
+    when: '2026-09-25',
+    items: [
+      'Easy creed merge: omit redundant Drop/Smash .sort-how — Drop chip · smash hint · ladder already teach the bowl (Clear family with Samaritan maze 1.4.143 / Father run 1.4.144; Fixes #184)',
+    ],
+  },
+  {
     version: '1.4.146',
     title: 'Sequence: one lead line on Easy',
     when: '2026-09-25',

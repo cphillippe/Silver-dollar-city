@@ -247,7 +247,7 @@ export function ClaimMergePlay({
     <div
       className={`play is-claim-merge ${shake ? 'is-shake' : ''} ${view.won ? 'is-win' : ''} ${view.overflow ? 'is-full' : ''} ${comboFlash > 1 ? 'is-combo' : ''}`}
     >
-      {view.won ? null : <p className="sort-how">{EASY.mergeHunt}</p>}
+      {/* Easy Clear 1.4.147: omit mergeHunt .sort-how — Drop chip · smash hint · ladder already teach the bowl (Fixes #184; Clear family with Maze 1.4.143 / Father 1.4.144). */}
       <p className="story-kicker">
         {home.who} · {home.place}
       </p>
