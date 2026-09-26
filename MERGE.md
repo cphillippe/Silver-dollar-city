@@ -4,7 +4,7 @@
 **Branch:** `ship/easy-fun-clear-204` → `main`
 **Version:** 1.4.204
 **Peel:** `0268634` (`0268634f0d9b8a2b5ea355a9d70c3c180fa5215d`)
-**Tip:** `53f422d` (`53f422d1f2f942ecf5cd75b07d7b4a2082106207`)
+**Tip:** `88cf602` (`88cf6020ebab9c71775eaa950d5ecc4359d88bb2`)
 **Base live:** 1.4.203 (`b2cf654`, PR #264 Easy Build ≤720 fill free-place purple void on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
