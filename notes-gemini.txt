@@ -1,7 +1,7 @@
 MODEL=gemini-flash-latest
-Shot pack 1.4.190 Gemini vision FAIL on 05-easy-lockin-miss.png — Fixes #252.
-Invent API: GEMINI_API_KEY present but not AIza AI Studio shape (same as 163–194).
-Manager-steered peel (parent + issue #252): Easy Lock In feedback / miss teach ≤720 fill bottom purple void (still fail after win-end StoredLine #239 / 1.4.185).
-Peel: sortHold.css @media (max-height:720px) app-body:has(journal.is-rehearse why-blast.is-miss-teach) flex fill + journal / rehearse-anchor / recall-gate flex:1 + why-miss-teach stretch; WhyBlastPlay comment. Quiz shell 194 / Hold arena 190 untouched.
-Do NOT pack #250 Match / #251 Lock In quiz / #253 Father. Win-end 185 / quiz 194 / Hold 190 / Match 193 / Creed / Story Creek / Samaritan / Sort / Snap untouched.
-VERDICT: APPROVE (shot Gemini + issue #252)
+Shot pack 1.4.190 Gemini vision FAIL on 07-father.png — Fixes #253.
+Invent API: GEMINI_API_KEY present but not AIza AI Studio shape (same as 163–195).
+Manager-steered peel (parent + issue #253): Easy Father ≤720 close slider→CTA purple gap (after fill 189 left .cta-dock margin-top:auto stealing free space).
+Peel: index.css @media (max-height:720px) .play.is-father-run .cta-dock margin-top:0 so run-scene flex:1 absorbs; FatherRunPlay comment. Fill 189 / HUD 173 / speech 154 stay.
+Do NOT pack #250 Match / #251 Lock In quiz / #252 Lock In feedback. Match 193 / Lock In 194·195 / Hold 190 / Creed / Story Creek / Samaritan / Sort / Snap untouched.
+VERDICT: APPROVE (shot Gemini + issue #253)
