@@ -253,6 +253,7 @@ export function ClaimMergePlay({
       {/* Easy Clear 1.4.192: ≤720 fills purple void — grow play + stretch merge-bowl (Match 184 / Story Creek 191 fill family). */}
       {/* Easy Clear 1.4.200: ≤720 zeros cta-dock margin-top so bowl→CTA close (fill 192 stays; Shot wake version). */}
       {/* Easy Clear 1.4.220: phone portrait extends fill+dock so bowl→CTA close purple void (invent Fun/Clear · Shot wake). */}
+      {/* Easy Clear 1.4.233: phone portrait extends HUD peel 181 — hide who·where kicker + rung names on tall phones (invent Fun/Clear). */}
       <p className="story-kicker">
         {home.who} · {home.place}
       </p>

@@ -5356,6 +5356,25 @@ html[data-easy='on'] .mind-node em {
   }
 }
 
+/* Easy Clear 1.4.233: Easy Creed Claim merge ≤720 / phone portrait HUD peel —
+   After HUD peel 181 (≤720 only), real phones ~390×844 still show who·where
+   kicker + ladder rung names that bury the bowl — those peels never apply at
+   Shot heights. Fill 192 + dock 200 already extended to 920 by invent 220, but
+   HUD peel never invent-climbed. Extend hide story-kicker + merge-rung-name
+   across phone portrait heights (max-height: 920px) so bowl + Drop stay clear
+   on tall phones (Easy Creed arcade chrome; invent Fun/Clear).
+   HUD 181 ≤720 stays. Do NOT pack Match / Lock In / Learn / Father / Creek /
+   Dig / Hold / Sort / Snap / Link / Build / Manage / Samaritan / gemSearch. */
+@media (max-height: 920px) {
+  .play.is-claim-merge .story-kicker {
+    display: none;
+  }
+
+  .play.is-claim-merge .merge-rung-name {
+    display: none;
+  }
+}
+
 .merge-danger {
   position: absolute;
   left: 8%;
