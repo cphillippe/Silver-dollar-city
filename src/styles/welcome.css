@@ -2497,6 +2497,8 @@ html[data-theme='dusk'] .easy-story-card {
   html[data-easy='on'] .journal.is-rehearse .why-blast.is-win .cta-dock .btn,
   html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-win) .recall-gate.is-easy-hold .cta-dock .btn {
     min-height: 64px;
+    height: 64px;
+    flex-shrink: 0;
     width: 100%;
     font-size: 1.22rem;
     font-weight: 900;
