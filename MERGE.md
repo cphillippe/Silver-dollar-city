@@ -1,37 +1,37 @@
-# ready-easy-fun-clear-194 — 1.4.194 Easy Lock In quiz ≤720 fill purple void (Fixes #251)
+# ready-easy-fun-clear-195 — 1.4.195 Easy Lock In feedback ≤720 fill purple void (Fixes #252)
 
-**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/255
-**Branch:** `ship/easy-fun-clear-194` → `main`
-**Version:** 1.4.194
-**Peel:** `f1e0129` (`f1e0129f97579477858cb20a9ee9b3b0914be69d`)
-**Tip:** `199ef5a` (`199ef5a26a20e65319eb02c9830216df23693e0f`)
-**Base live:** 1.4.193 (`9e8bef5`, PR #254 Easy Match ≤720 fill grid→footer purple void on main)
+**PR:** (pending)
+**Branch:** `ship/easy-fun-clear-195` → `main`
+**Version:** 1.4.195
+**Peel:** (pending)
+**Tip:** (pending)
+**Base live:** 1.4.194 (`7ff1bf6`, PR #255 Easy Lock In quiz ≤720 fill purple void on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
 ## Shot wake
 **Do NOT wake Shot from this hop.** CoS wakes Shot on 10th ships (next 1.4.200); this hop does not ping Shot.
 
 ## How picked
-Open Issues: **#251** Easy Lock In quiz ≤720 bottom third purple void (P1 phone-fail, Shot 1.4.190 `04-easy-lockin.png`) — this hop.
-**#252** Lock In feedback / **#253** Father — deferred next climbs; do not pack.
+Open Issues: **#252** Easy Lock In feedback / miss teach ≤720 bottom purple void still (P1 phone-fail, Shot 1.4.190 `05-easy-lockin-miss.png`) — this hop.
+**#253** Father — deferred next climb; do not pack. **#250** Match / **#251** Lock In quiz already on main as 1.4.193 / 1.4.194.
 **#161** Dig/Hard/NW/Town parked. **#160** cheap-hop infra.
 
 ## Chosen climb
-Single Easy Fun/Clear polish: **Easy Lock In quiz (WhyBlast mid-question) ≤720 fill purple void** — grow `app-body` · `journal.is-rehearse` · `rehearse-anchor` · `recall-gate` so the gold quiz card fills the portrait (Fixes #251). Hold arena stretch 1.4.190 stays inside the card; miss teach (#252) / win-end 185 untouched.
+Single Easy Fun/Clear polish: **Easy Lock In feedback / miss teach ≤720 fill purple void** — grow `app-body` · `journal.is-rehearse` · `rehearse-anchor` · `recall-gate` + stretch `why-miss-teach` so Main idea · why-true · From · Try again fill the portrait (Fixes #252). Win-end StoredLine 1.4.185 / quiz shell 1.4.194 / Hold arena 1.4.190 untouched — different peel target.
 
 ## What fixed
-- `src/styles/sortHold.css`: `@media (max-height: 720px)` — Easy Lock In live quiz: `app-body:has(.journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win))` flex fill; `journal` / `rehearse-anchor` / `recall-gate.is-easy-hold` `flex: 1 1 auto`
-- `src/components/challenges/WhyBlastPlay.tsx`: thin 1.4.194 comment
+- `src/styles/sortHold.css`: `@media (max-height: 720px)` — Easy Lock In miss teach: `app-body:has(.journal.is-rehearse .why-blast.is-miss-teach)` flex fill; `journal` / `rehearse-anchor` / `recall-gate.is-easy-hold` `flex: 1 1 auto`; `.why-blast.is-miss-teach .why-miss-teach` stretch + `justify-content: center`
+- `src/components/challenges/WhyBlastPlay.tsx`: thin 1.4.195 comment
 - Android `versionName` left at **1.4.113**
-- Version **1.4.194** atop live **1.4.193**
+- Version **1.4.195** atop live **1.4.194**
 
 ## Deferred (do NOT climb this hop)
 - Dig Reveal / Hard / NW / Town / stores / Pack B / Home map candy
-- **#252** Lock In feedback bottom void / **#253** Father slider→CTA
-- Match 193 / Hold arena 190 / Creed 192 / Story Creek 191 / Hold win-end 185 / Build / Link / Father Dash / Samaritan / Sort / Snap (already on main or other issues)
+- **#253** Father slider→CTA
+- Match 193 / Lock In quiz 194 / Hold arena 190 / win-end StoredLine 185 / Creed 192 / Story Creek 191 / Build / Link / Father Dash / Samaritan / Sort / Snap (already on main or other issues)
 
 ## Gemini
-MODEL=gemini-flash-latest — Shot pack 1.4.190 vision FAIL on Lock In quiz (`gemini-vision.json` / `04-easy-lockin.png`). Invent API key present but not AIza AI Studio shape. Manager-steered + issue #251. Notes: `notes-gemini.txt` (+ `/workspace/silver-city-art/notes-gemini-194.txt`).
+MODEL=gemini-flash-latest — Shot pack 1.4.190 vision FAIL on Lock In feedback (`gemini-vision.json` / `05-easy-lockin-miss.png`). Invent API key present but not AIza AI Studio shape. Manager-steered + issue #252. Notes: `notes-gemini.txt` (+ `/workspace/silver-city-art/notes-gemini-195.txt`).
 
 ## Files peeled
 - `src/styles/sortHold.css`
@@ -40,7 +40,7 @@ MODEL=gemini-flash-latest — Shot pack 1.4.190 vision FAIL on Lock In quiz (`ge
 - `src/config/app.ts`, `package.json`, `package-lock.json`
 - `src/content/changelog.ts`
 - `notes-gemini.txt`
-- `docs/` (Pages rebuild `index-DEzZq_YF.js` / `index-CPWkDwwh.css`)
+- `docs/` (Pages rebuild `index-CpukNI8a.js` / `index-Qsev-pH5.css`)
 - `MERGE.md`
 
 ## Checks

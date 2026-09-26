@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.194')
+assert.equal(APP_VERSION, '1.4.195')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3442,6 +3442,42 @@ console.log('check-city: ok')
   )
 }
 
+
+
+// Easy Clear 1.4.195: Lock In feedback / miss teach ≤720 fill purple void (Fixes #252)
+{
+  const holdCss195 = readFileSync(new URL('../src/styles/sortHold.css', import.meta.url), 'utf8')
+  const whyPlay195 = readFileSync(
+    new URL('../src/components/challenges/WhyBlastPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(holdCss195, /1\.4\.195: Lock In feedback \/ miss teach ≤720 fill purple void/)
+  assert.match(
+    holdCss195,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.journal\.is-rehearse:has\(\.why-blast\.is-miss-teach\) \{[\s\S]*?flex: 1 1 auto/,
+  )
+  assert.match(
+    holdCss195,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.journal\.is-rehearse:has\(\.why-blast\.is-miss-teach\) \.recall-gate\.is-easy-hold \{[\s\S]*?flex: 1 1 auto/,
+  )
+  assert.match(
+    holdCss195,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.app\.is-play \.app-body:has\(\.journal\.is-rehearse \.why-blast\.is-miss-teach\) \{[\s\S]*?display: flex/,
+  )
+  assert.match(
+    holdCss195,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.why-blast\.is-miss-teach \.why-miss-teach \{[\s\S]*?flex: 1 1 auto/,
+  )
+  assert.match(whyPlay195, /1\.4\.195: ≤720 grows journal miss-teach shell/)
+  assert.match(cssSrc, /1\.4\.195: Lock In feedback \/ miss teach ≤720 fill purple void/)
+  assert.match(latestChange('1.4.195').items.join('\n'), /Fixes #252|bottom third|purple void/i)
+  assert.match(latestChange('1.4.195').title, /Lock In feedback|≤720|purple void/i)
+  assert.doesNotMatch(
+    latestChange('1.4.195').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #253|Lock In quiz|Father.*slider|grid→footer|Creed merge ≤720 fill|Story Creek ≤720 fill|Easy Hold.*≤720 fill|gem-board|Build Argument ≤720 fill|Easy Link ≤720 fill|Father Dash ≤720 fill|maze-board|merge-bowl|stored-line|Fixes #239/i,
+    '1.4.195 must not pack #250/#251/#253 or re-claim quiz / Match / Hold arena / win-end / Creed / Story Creek / Link / Build / Father / maze / bowl',
+  )
+}
 
 // Easy Clear 1.4.194: Lock In quiz ≤720 fill purple void (Fixes #251)
 {
