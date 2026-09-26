@@ -4724,16 +4724,16 @@ html[data-easy='on'] .mind-node em {
     var(--candy-shine);
 }
 
-/* Easy Clear 1.4.159: Creed merge short-phone bowl-first — thin kicker · HUD · ladder; Drop chip stays readable (Story Snap / maze ≤720 family). Fixes #205 */
+/* Easy Clear 1.4.159: Creed merge short-phone bowl-first — thin HUD · ladder; Drop chip stays readable (Story Snap / maze ≤720 family). Fixes #205 */
+/* Easy Clear 1.4.181: Creed merge ≤720 HUD peel — hide who·where kicker + ladder rung names so bowl + Drop stay above fold
+   (complements 1.4.159 bowl-first; Father 1.4.173 / maze 1.4.175 hide-kicker family; invent Fun/Clear). */
 @media (max-height: 720px) {
   .play.is-claim-merge {
     gap: 3px;
   }
 
   .play.is-claim-merge .story-kicker {
-    font-size: 0.62rem;
-    line-height: 1.1;
-    letter-spacing: 0.06em;
+    display: none;
   }
 
   .play.is-claim-merge .merge-hud {
@@ -4741,9 +4741,9 @@ html[data-easy='on'] .mind-node em {
   }
 
   .play.is-claim-merge .merge-score {
-    min-width: 52px;
-    padding: 3px 8px;
-    font-size: 1.05rem;
+    min-width: 48px;
+    padding: 2px 8px;
+    font-size: 0.95rem;
     box-shadow:
       0 2px 0 #c4922a,
       inset 0 1px 0 rgba(255, 255, 255, 0.8);
@@ -4783,7 +4783,9 @@ html[data-easy='on'] .mind-node em {
     height: 10px;
   }
 
+  /* rung names bury the bowl on short phones — lit dots still cue candy sizes */
   .play.is-claim-merge .merge-rung-name {
+    display: none;
     font-size: 0.42rem;
     line-height: 1;
     letter-spacing: 0.02em;

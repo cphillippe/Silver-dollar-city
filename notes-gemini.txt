@@ -1,2 +1,3 @@
-Enormous blank purple letterboxing wastes nearly half the screen, crushing the game viewport while the bottom sheet is cramped and scroll-locked.
-FAIL
+MODEL=gemini-flash-latest
+{"pick":"A","slug":"creed-merge-short-hud-peel","title":"Creed Merge ≤720 HUD Peel: Hide Kicker & Compress Ladder","why":"Follows Father Dash (1.4.173) and Maze (1.4.175) by hiding the decorative story kicker and ladder rung names on ≤720 so the merge bowl and Drop chip stay above fold; complements 1.4.159 bowl-first; explicitly deferred in recent MERGE notes.","approach":"In index.css ≤720 claim-merge block: display:none on .story-kicker and .merge-rung-name; tiny .merge-score; keep Drop chip + lit dots. ClaimMergePlay.tsx thin 1.4.181 comment.","risks":"Near-zero; Drop chip · smash hint · lit ladder dots still teach; who·where already on Learn."}
+VERDICT: APPROVE
