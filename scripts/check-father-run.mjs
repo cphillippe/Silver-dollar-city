@@ -139,6 +139,11 @@ const playSrc = readFileSync(
   'utf8',
 )
 assert.match(playSrc, /is-father-run/)
+assert.doesNotMatch(
+  playSrc,
+  /EASY\.runHunt/,
+  'Easy Clear 1.4.144: omit runHunt .sort-how — pad + toast + caption teach the run',
+)
 assert.match(playSrc, /Hold to run/)
 assert.match(playSrc, /Let go — press now/)
 assert.match(playSrc, /stumbleIfHeldThrough/)
