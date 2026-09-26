@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.159',
+    title: 'Creed merge: short-phone bowl-first',
+    when: '2026-09-25',
+    items: [
+      'Easy Creed merge on ≤720px tall: thin story-kicker · merge-hud · merge-ladder so the candy bowl owns the phone — Drop chip stays readable (Story Snap / maze ≤720 family; Fixes #205)',
+    ],
+  },
+  {
     version: '1.4.158',
     title: 'Easy Source Dig: one how line',
     when: '2026-09-25',
