@@ -159,6 +159,47 @@
   opacity: 0.85;
 }
 
+/* Short phone — pad owns how; story teach stays thin (maze help-phase family). Fixes #189 */
+@media (max-height: 720px) {
+  .play.is-story-snap {
+    gap: 0.35rem;
+  }
+
+  .play.is-story-snap .eyebrow {
+    font-size: 0.7rem;
+    line-height: 1.1;
+  }
+
+  .play.is-story-snap .snap-teach {
+    font-size: 0.72rem;
+    line-height: 1.15;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .play.is-story-snap .easy-who-where-line {
+    font-size: 0.68rem;
+    line-height: 1.1;
+  }
+
+  .play.is-story-snap .snap-strip {
+    min-height: 0;
+    gap: 0.28rem;
+  }
+
+  .play.is-story-snap .snap-chip {
+    min-width: 4rem;
+    padding: 0.22rem 0.35rem;
+    font-size: 0.68rem;
+  }
+
+  .play.is-story-snap .snap-stage {
+    min-height: 8.5rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .play.is-story-snap.is-shake .snap-stage {
     animation: none;
