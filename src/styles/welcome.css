@@ -714,3 +714,57 @@ html[data-theme='dusk'] .easy-story-card {
   }
 }
 
+/* Easy Clear 1.4.215: Easy Learn ≤720 / phone portrait CTA purple void (Fixes #280) —
+   After fill 206 (≤720 only), Shot pack 1.4.210 02-easy-learn.png (390×844) still
+   content-hugs: Short story · cream LociStamp · reason · HeldTriad · CTAs sit high with
+   a large dead purple band under the dock. Extend fill 206 across phone portrait
+   heights so is-teach + easy-story-card grow, held-triad absorbs free space, and
+   easy-story-dock stays bottom — no purple void beneath CTAs (Learn cream-pill chrome).
+   Compress 162 / stamp wrap 177 / fill 206 ≤720 stay. Do NOT pack #276 Samaritan /
+   #277 Manage / #281 Match / #282 Lock In / #283 Father Dash / Dig / Creek hold. */
+@media (max-height: 920px) {
+  html[data-easy='on'] .app.is-play .app-body:has(.challenge-page.is-teach .easy-story-card) {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach:has(.easy-story-card) {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    gap: 4px;
+    overflow: hidden;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card.teach-gate {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    gap: 2px;
+    overflow: hidden;
+    padding-bottom: 10px;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card > .eyebrow,
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .loci-stamp,
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .teach-reason {
+    flex: 0 0 auto;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .held-triad {
+    flex: 1 1 auto;
+    min-height: 0;
+    align-content: center;
+    gap: 8px;
+    margin: 0;
+  }
+
+  html[data-easy='on'] .challenge-page.is-teach .easy-story-card .easy-story-dock {
+    margin-top: 0;
+    flex: 0 0 auto;
+  }
+}
+
