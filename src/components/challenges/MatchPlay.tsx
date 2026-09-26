@@ -120,6 +120,7 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
   const missCard = picked?.side === 'left' ? needPair?.right : needPair?.left
   // Easy Match chrome already prints EASY.matchHow as .sort-how — skip identical PuzzleHint.
   // Easy Clear 1.4.184: ≤720 fills empty purple card in match.css (Fixes #238).
+  // Easy Clear 1.4.207: ≤720 zeros cta-dock margin-top so score→CTA close (fill 184 stays).
   const easyPlainHint = easy
     ? easyChromeLine(plainFor(challenge.id)?.hint ?? challenge.context ?? '')
     : ''
