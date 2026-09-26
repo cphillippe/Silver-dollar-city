@@ -3,8 +3,8 @@
 **PR:** https://github.com/cphillippe/Silver-dollar-city/pull/248
 **Branch:** `ship/easy-fun-clear-191` → `main`
 **Version:** 1.4.191
-**Peel:**  ()
-**Tip:**  ()
+**Peel:** `b64948d` (`b64948d076e1a6061a62e4ed232612ca0bc448d8`)
+**Tip:** `e084bf6` (`e084bf6044733532bcb0602af7a9f0cec7272fe1`)
 **Base live:** 1.4.190 (`a89b482`, PR #247 Easy Hold ≤720 fill purple void on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
