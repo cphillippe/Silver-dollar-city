@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.216')
+assert.equal(APP_VERSION, '1.4.217')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -4193,5 +4193,36 @@ console.log('check-city: ok')
     latestChange('1.4.216').items.join('\n'),
     /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|Learn cream|Match grid|Samaritan|Manage|Lock In|Dig|Creed|Build|Sort|Snap|Link|Road maze|Claim merge|Source dig|Story Creek HOLD|slider→HOLD/i,
     '1.4.216 must not fix other phone-fail issues or climb another Easy surface',
+  )
+}
+
+// Easy Clear 1.4.217: Easy Hold ≤720 / phone portrait hud→arena purple void (invent Fun/Clear)
+{
+  const holdCss217 = readFileSync(new URL('../src/styles/sortHold.css', import.meta.url), 'utf8')
+  const whyBlast217 = readFileSync(
+    new URL('../src/components/challenges/WhyBlastPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(holdCss217, /1\.4\.217: Easy Hold ≤720 \/ phone portrait hud→arena purple void/)
+  assert.match(
+    holdCss217,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.why-blast \{[\s\S]*?gap: 2px/,
+  )
+  assert.match(
+    holdCss217,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.why-blast \.why-arena \{[\s\S]*?gap: 4px/,
+  )
+  assert.match(
+    holdCss217,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.why-blast \.cta-dock \{[\s\S]*?margin-top: 0/,
+  )
+  assert.match(whyBlast217, /1\.4\.217: phone portrait extends fill\+dock\+hud so Hold hud→arena closes/)
+  assert.match(cssSrc, /1\.4\.217: Easy Hold ≤720 \/ phone portrait hud→arena purple void/)
+  assert.match(latestChange('1.4.217').items.join('\n'), /hud→arena|phone portrait|purple void|Hold|WhyBlast|invent Fun\/Clear/i)
+  assert.match(latestChange('1.4.217').title, /Easy Hold|≤720|hud→arena|purple void/i)
+  assert.doesNotMatch(
+    latestChange('1.4.217').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|Father Dash|Learn cream|Match grid|Samaritan|Manage|Lock In quiz|Dig|Creed|Build|Sort|Snap|Link|Road maze|Claim merge|Source dig|Story Creek HOLD|slider→HOLD|timing-rail→CTA/i,
+    '1.4.217 must not fix phone-fail issues or climb another Easy surface',
   )
 }

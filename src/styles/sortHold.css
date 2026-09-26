@@ -1783,6 +1783,62 @@ html[data-easy='on'] .recall-card {
   }
 }
 
+/* Easy Clear 1.4.217: Easy Hold ≤720 / phone portrait hud→arena purple void —
+   After fill 190 / dock 202 / hud→arena 210 (all ≤720 only), real phones ~390×844
+   still leave purple between next-tap hud and claim·chips (and residual dock band)
+   because those peels never apply at Shot heights. Extend fill + dock-margin + gap
+   tighten across phone portrait heights (max-height: 920px) so why-arena absorbs
+   free space — tight hud→claim·chips→CTA (Hold WhyBlast live arena chrome).
+   Fill 190 / dock 202 / hud 210 ≤720 stay. Do NOT pack Samaritan / Manage / Match /
+   Lock In quiz·feedback / Learn / Father / Creek / Dig / Creed / Build / Sort / Snap / Link. */
+@media (max-height: 920px) {
+  .recall-gate.is-easy-hold:has(.why-blast),
+  .why-blast {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .why-blast .why-arena {
+    flex: 1 1 auto;
+    min-height: 0;
+    align-content: stretch;
+    grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 4px;
+  }
+
+  .why-blast .why-chip {
+    min-height: 0;
+    height: 100%;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .why-blast .why-claim {
+    align-self: stretch;
+  }
+
+  .why-blast-hud {
+    flex: 0 0 auto;
+    gap: 2px;
+  }
+
+  .why-blast .cta-dock,
+  .why-blast .miss-banner,
+  .why-blast .why-miss-teach {
+    flex: 0 0 auto;
+  }
+
+  .recall-gate.is-easy-hold .cta-dock,
+  .why-blast .cta-dock {
+    margin-top: 0;
+  }
+}
+
 
 /* Easy Clear 1.4.194: Lock In quiz ≤720 fill purple void (Fixes #251) —
    After Hold arena stretch 190 / win-end 185 / chrome 170·156, the gold
