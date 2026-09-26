@@ -67,6 +67,14 @@ assert.match(blastSrc, /why-miss-teach/)
 assert.match(blastSrc, /EASY\.tryAgain/)
 assert.match(blastSrc, /EASY\.missTeachBadge/)
 assert.match(blastSrc, /EASY\.whyTrueLabel/)
+assert.match(blastSrc, /EASY\.mainIdea/)
+assert.match(blastSrc, /why-miss-label[\s\S]*?EASY\.mainIdea/)
+// Easy Clear 1.4.139: missTeachBadge on sheet only — HUD next-tap skips the dup when missTeach.
+assert.match(blastSrc, /missTeach \? null/)
+assert.doesNotMatch(
+  blastSrc,
+  /missTeach\s*\n\s*\?\s*EASY\.missTeachBadge/,
+)
 assert.match(blastSrc, /PlainTalk/)
 assert.match(blastSrc, /retryAfterTeach|is-miss-teach/)
 assert.match(blastSrc, /miss-plus/)
