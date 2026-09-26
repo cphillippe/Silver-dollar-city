@@ -1,8 +1,8 @@
 MODEL=gemini-flash-latest
 Invent Fun/Clear — no open Easy Fun/Clear issue beyond parked #161 / cheap-hop #160.
-1.4.190 Easy Hold fill live on main (a89b482 / #247). Shot pack incoming separately — stay on invent; do NOT wake Shot.
-Invent API: GEMINI_API_KEY present but not AIza AI Studio shape (same as 163–190).
-Manager-steered invent peel: Easy Story Creek (Samaritan road maze) ≤720 fill purple void (HUD peel 175 / compress 153 only; capped 5/7 board + centered stage hug top — empty purple under board; Match 184 / Hold 190 fill family; different scene than Match/LockIn/Samaritan-Sequence/Sort/Snap/Creed/Build/Link/Father/Hold).
-Peel: maze.css @media (max-height:720px) play.is-road-maze flex:1 + stretch maze-stage/maze-board (max-height:none, aspect-ratio:auto); RoadMazePlay comment.
-Do NOT re-peel Match/LockIn/Samaritan/Sort/Snap/Creed/Hold/Build/Link/Father. Dig/Hard/NW/Town/stores/Pack B/Home map candy parked.
-VERDICT: APPROVE (invent Fun/Clear · densest remaining Easy trail Story Creek fill — after HUD 175)
+1.4.191 Easy Story Creek fill live on main (5d8e11e / #248). Shot pack incoming separately — stay on invent; do NOT wake Shot.
+Invent API: GEMINI_API_KEY present but not AIza AI Studio shape (same as 163–191).
+Manager-steered invent peel: Easy Creed merge ≤720 fill purple void (HUD peel 181 / bowl-first 159 only; capped merge-bowl + aspect-ratio hug top — empty purple under bowl; Match 184 / Story Creek 191 fill family; different scene than Match/LockIn/Samaritan-Sequence/Sort/Snap/Story Creek/Build/Link/Father/Hold).
+Peel: index.css @media (max-height:720px) play.is-claim-merge flex:1 + stretch merge-bowl (max-height:none, aspect-ratio:auto); ClaimMergePlay comment.
+Do NOT re-peel Match/LockIn/Samaritan/Sort/Snap/Story Creek/Hold/Build/Link/Father. Dig/Hard/NW/Town/stores/Pack B/Home map candy parked.
+VERDICT: APPROVE (invent Fun/Clear · densest remaining Easy trail Creed merge fill — after HUD 181)

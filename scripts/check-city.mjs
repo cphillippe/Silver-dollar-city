@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.191')
+assert.equal(APP_VERSION, '1.4.192')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3227,7 +3227,7 @@ console.log('check-city: ok')
   )
   assert.match(sortPlay183, /1\.4\.183: ≤720 peels how\/lead\/hint chrome in sortHold\.css/)
   assert.doesNotMatch(
-    latestChange(APP_VERSION).items.join('\n'),
+    latestChange('1.4.183').items.join('\n'),
     /Story Snap|eyebrow|who·where|Creed merge|Fixes #232|empty-lot|Fixes #217/i,
     '1.4.183 must not claim Snap 182 / Creed 181 / Manage / letterbox',
   )
@@ -3441,6 +3441,37 @@ console.log('check-city: ok')
     '1.4.190 must not re-claim Match / Lock In win-end / Samaritan / Snap / Creed / Manage / letterbox / Build / Link / Father Dash',
   )
 }
+
+// Easy Clear 1.4.192: Easy Creed merge ≤720 fill purple void (invent Fun/Clear)
+{
+  const mergeCss192 = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
+  const mergePlay192 = readFileSync(
+    new URL('../src/components/challenges/ClaimMergePlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(mergeCss192, /1\.4\.192: Easy Creed merge ≤720 fill purple void/)
+  assert.match(
+    mergeCss192,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-claim-merge \{[\s\S]*?flex: 1 1 auto/,
+  )
+  assert.match(
+    mergeCss192,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-claim-merge \.merge-bowl \{[\s\S]*?max-height: none/,
+  )
+  assert.match(
+    mergeCss192,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-claim-merge \.merge-bowl \{[\s\S]*?aspect-ratio: auto/,
+  )
+  assert.match(mergePlay192, /1\.4\.192: ≤720 fills purple void/)
+  assert.match(cssSrc, /1\.4\.192: Easy Creed merge ≤720 fill purple void/)
+  assert.match(latestChange('1.4.192').items.join('\n'), /Creed merge.*≤720|purple void under the bowl/i)
+  assert.doesNotMatch(
+    latestChange('1.4.192').items.join('\n'),
+    /Fixes #238|Fixes #239|Fixes #240|Lock In win-end|Match \(picture|empty purple card|Story Snap|eyebrow|Fixes #232|empty-lot|Fixes #217|Build Argument ≤720 fill|Easy Link ≤720 fill|Father Dash ≤720 fill|Easy Hold.*≤720 fill|why-blast|Story Creek ≤720 fill|maze-board/i,
+    '1.4.192 must not re-claim Match / Lock In / Samaritan / Snap / Story Creek / Manage / letterbox / Build / Link / Father / Hold',
+  )
+}
+
 // Easy Clear 1.4.191: Easy Story Creek ≤720 fill purple void (invent Fun/Clear)
 {
   const mazeCss191 = readFileSync(new URL('../src/styles/maze.css', import.meta.url), 'utf8')
