@@ -3,7 +3,7 @@
 **PR:** https://github.com/cphillippe/Silver-dollar-city/pull/368
 **Branch:** `fix/361-easy-learn-tall-residual` → `main`
 **Implementation:** `11ec53e56a75665c8e56d63d27a7bc6af258ee29`
-**Tip:** branch HEAD of `fix/361-easy-learn-tall-residual` (this MERGE.md commit; parent is the implementation SHA above)
+**Tip:** `78f454473efdb3de16bcecf337f0514c8b911ad6`
 **Status:** MERGEABLE (`mergeStateStatus` CLEAN). Not merged.
 
 ## What changed
