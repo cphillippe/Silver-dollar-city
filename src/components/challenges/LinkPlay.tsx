@@ -340,6 +340,7 @@ export function LinkPlay({ challenge, onMiss, onSolved, onPeek, onEasyStop, stre
     <div
       className={`play is-link is-wizard ${easy ? `is-easy-link is-screen-${screen}` : ''} ${shake ? 'is-shake' : ''}`}
     >
+      {/* Easy Clear 1.4.188: ≤720 fills purple void in index.css (invent Fun/Clear). */}
       {easy || step === 'linked' ? null : <PuzzleLead challenge={challenge} />}
       {easy || step === 'linked' ? null : (
         <PuzzleHint text={challenge.context} id={challenge.id} onPeek={onPeek} />
