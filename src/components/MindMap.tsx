@@ -81,6 +81,7 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
       aria-label={`Manage ${graph.placeTitle}`}
     >
       <button type="button" className="mind-map-scrim" aria-label="Close building" onClick={onClose} />
+      {/* Easy Clear 1.4.230: phone portrait edge-to-edge sheet — width 100vw · stretch · zero side margin (Fixes #302). */}
       <div className="mind-map-card">
         <header className="mind-map-head">
           {/* 1.4.165 — one portrait: PERSON tile keeps Avatar; header dropped (Fixes #220) */}

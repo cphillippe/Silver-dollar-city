@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.229')
+assert.equal(APP_VERSION, '1.4.230')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -4595,5 +4595,29 @@ console.log('check-city: ok')
     latestChange('1.4.229').items.join('\n'),
     /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#300|#302|Learn cream|Match grid|Samaritan|Manage|Lock In|Dig|Creed|Build|Sort|Snap|Link|Road maze|Claim merge|Source dig|Story Creek HOLD|slider→HOLD|invent Fun\/Clear/i,
     '1.4.229 must not fix other phone-fail issues or climb another Easy surface',
+  )
+}
+
+// Easy Clear 1.4.230: Easy Manage sheet phone width cutout / exposed purple (Fixes #302)
+{
+  const indexCss230 = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
+  const mindMap230 = readFileSync(new URL('../src/components/MindMap.tsx', import.meta.url), 'utf8')
+  assert.match(indexCss230, /1\.4\.230: Easy Manage sheet phone width cutout/)
+  assert.match(
+    indexCss230,
+    /@media \(max-width: 430px\) \{[\s\S]*?\.mind-map\.is-manage \{[\s\S]*?align-items: stretch/,
+  )
+  assert.match(
+    indexCss230,
+    /@media \(max-width: 430px\) \{[\s\S]*?\.mind-map\.is-manage \.mind-map-card \{[\s\S]*?width: 100vw[\s\S]*?max-width: none/,
+  )
+  assert.match(mindMap230, /1\.4\.230: phone portrait edge-to-edge sheet/)
+  assert.match(cssSrc, /1\.4\.230: Easy Manage sheet phone width cutout/)
+  assert.match(latestChange('1.4.230').items.join('\n'), /Fixes #302|width cutout|exposed purple|Manage/i)
+  assert.match(latestChange('1.4.230').title, /Manage sheet|width cutout|exposed purple/i)
+  assert.doesNotMatch(
+    latestChange('1.4.230').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#300|#301|Father Dash|Learn cream|Match grid|Samaritan|Lock In|Dig|Creed|Build|Sort|Snap|Link|Road maze|Claim merge|Source dig|Story Creek HOLD|slider→HOLD|timing-rail→CTA|invent Fun\/Clear|letterbox|#217/i,
+    '1.4.230 must not fix other phone-fail issues or climb another Easy surface',
   )
 }
