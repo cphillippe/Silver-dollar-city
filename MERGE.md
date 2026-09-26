@@ -1,46 +1,45 @@
-# ready-easy-fun-clear-195 — 1.4.195 Easy Lock In feedback ≤720 fill purple void (Fixes #252)
+# ready-easy-fun-clear-196 — 1.4.196 Easy Father ≤720 close slider→CTA purple gap (Fixes #253)
 
-**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/256
-**Branch:** `ship/easy-fun-clear-195` → `main`
-**Version:** 1.4.195
-**Peel:** `39976be` (`39976beb4eed82bb42afa417c9bb4a7c215e46fd`)
-**Tip:** `ca07b7e` (`ca07b7e18fb52b4aed39f5f8bc9562cb022800a1`)
-**Base live:** 1.4.194 (`7ff1bf6`, PR #255 Easy Lock In quiz ≤720 fill purple void on main)
+**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/257
+**Branch:** `ship/easy-fun-clear-196` → `main`
+**Version:** 1.4.196
+**Peel:** `e307e2c` (`e307e2c6aa7429abbf69778856a9882ab9138d96`)
+**Tip:** `7637108` (`7637108499713fb872fac72a2f061d8cb1032ec5`)
+**Base live:** 1.4.195 (`ea5eba5`, PR #256 Easy Lock In feedback ≤720 fill purple void on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
 ## Shot wake
 **Do NOT wake Shot from this hop.** CoS wakes Shot on 10th ships (next 1.4.200); this hop does not ping Shot.
 
 ## How picked
-Open Issues: **#252** Easy Lock In feedback / miss teach ≤720 bottom purple void still (P1 phone-fail, Shot 1.4.190 `05-easy-lockin-miss.png`) — this hop.
-**#253** Father — deferred next climb; do not pack. **#250** Match / **#251** Lock In quiz already on main as 1.4.193 / 1.4.194.
+Open Issues: **#253** Easy Father ≤720 purple gap slider to CTA (P1 phone-fail, Shot 1.4.190 `07-father.png`) — this hop.
+**#250** Match / **#251** Lock In quiz / **#252** Lock In feedback already on main as 1.4.193 / 1.4.194 / 1.4.195.
 **#161** Dig/Hard/NW/Town parked. **#160** cheap-hop infra.
 
 ## Chosen climb
-Single Easy Fun/Clear polish: **Easy Lock In feedback / miss teach ≤720 fill purple void** — grow `app-body` · `journal.is-rehearse` · `rehearse-anchor` · `recall-gate` + stretch `why-miss-teach` so Main idea · why-true · From · Try again fill the portrait (Fixes #252). Win-end StoredLine 1.4.185 / quiz shell 1.4.194 / Hold arena 1.4.190 untouched — different peel target.
+Single Easy Fun/Clear polish: **Easy Father timing ≤720 close slider→CTA purple gap** — zero `.cta-dock` / `.cta-dock.run-dock` `margin-top` so `run-scene` flex:1 (from 1.4.189) absorbs the portrait instead of a dead purple band between the timing slider and the Hold pad (Fixes #253). Match 193 / Lock In 194·195 / Hold arena 190 untouched — different peel target.
 
 ## What fixed
-- `src/styles/sortHold.css`: `@media (max-height: 720px)` — Easy Lock In miss teach: `app-body:has(.journal.is-rehearse .why-blast.is-miss-teach)` flex fill; `journal` / `rehearse-anchor` / `recall-gate.is-easy-hold` `flex: 1 1 auto`; `.why-blast.is-miss-teach .why-miss-teach` stretch + `justify-content: center`
-- `src/components/challenges/WhyBlastPlay.tsx`: thin 1.4.195 comment
+- `src/index.css`: `@media (max-height: 720px)` — Easy Father: `.play.is-father-run .cta-dock` / `.cta-dock.run-dock` `margin-top: 0` (global auto margin was stealing free space after fill 189)
+- `src/components/challenges/FatherRunPlay.tsx`: thin 1.4.196 comment
 - Android `versionName` left at **1.4.113**
-- Version **1.4.195** atop live **1.4.194**
+- Version **1.4.196** atop live **1.4.195**
 
 ## Deferred (do NOT climb this hop)
 - Dig Reveal / Hard / NW / Town / stores / Pack B / Home map candy
-- **#253** Father slider→CTA
-- Match 193 / Lock In quiz 194 / Hold arena 190 / win-end StoredLine 185 / Creed 192 / Story Creek 191 / Build / Link / Father Dash / Samaritan / Sort / Snap (already on main or other issues)
+- Match 193 / Lock In quiz 194 / Lock In feedback 195 / Hold arena 190 / win-end StoredLine 185 / Creed 192 / Story Creek 191 / Build / Link / Father fill 189 / Samaritan / Sort / Snap (already on main or other issues)
 
 ## Gemini
-MODEL=gemini-flash-latest — Shot pack 1.4.190 vision FAIL on Lock In feedback (`gemini-vision.json` / `05-easy-lockin-miss.png`). Invent API key present but not AIza AI Studio shape. Manager-steered + issue #252. Notes: `notes-gemini.txt` (+ `/workspace/silver-city-art/notes-gemini-195.txt`).
+MODEL=gemini-flash-latest — Shot pack 1.4.190 vision FAIL on Father (`gemini-vision.json` / `07-father.png`). Invent API key present but not AIza AI Studio shape. Manager-steered + issue #253. Notes: `notes-gemini.txt` (+ `/workspace/silver-city-art/notes-gemini-196.txt`).
 
 ## Files peeled
-- `src/styles/sortHold.css`
-- `src/components/challenges/WhyBlastPlay.tsx`
+- `src/index.css`
+- `src/components/challenges/FatherRunPlay.tsx`
 - `scripts/check-city.mjs`, `scripts/check-panel-blast.mjs`
 - `src/config/app.ts`, `package.json`, `package-lock.json`
 - `src/content/changelog.ts`
 - `notes-gemini.txt`
-- `docs/` (Pages rebuild `index-CpukNI8a.js` / `index-Qsev-pH5.css`)
+- `docs/` (Pages rebuild `index-C2CKVLEC.js` / `index-hl3RlArr.css`)
 - `MERGE.md`
 
 ## Checks
