@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { APP_VERSION } from '../config/app'
-import { EASY, EASY_MATCH_LINE, easyLineHeld } from '../lib/easy'
+import { EASY } from '../lib/easy'
 import { Avatar } from './Avatar'
 import { dailyDoneToday, useProgress } from '../store/progress'
 import { localDateKey } from '../lib/dates'
@@ -23,11 +23,9 @@ export function Welcome({ onNavigate }: WelcomeProps) {
   function begin() {
     setEasyMode(true)
     start()
-    onNavigate(
-      easyLineHeld(progress, EASY_MATCH_LINE)
-        ? { name: 'hub' }
-        : { name: 'link' },
-    )
+    // Cold Start Easy lands Home map + coach before Match (Fixes #186).
+    // Product reopen of 1.4.112 KEEP→link routing: Home-first wanted now.
+    onNavigate({ name: 'hub' })
   }
 
   return (
