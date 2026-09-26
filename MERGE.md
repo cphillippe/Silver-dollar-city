@@ -1,6 +1,6 @@
 # ready-easy-fun-clear-199 — 1.4.199 Easy Link ≤720 close choices→CTA purple gap
 
-**PR:** (pending)
+**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/260
 **Branch:** `ship/easy-fun-clear-199` → `main`
 **Version:** 1.4.199
 **Peel:** `95314a2` (`95314a2773b6ace3686a30448003aff5e2db920a`)
