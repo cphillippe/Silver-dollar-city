@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.190')
+assert.equal(APP_VERSION, '1.4.191')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3439,6 +3439,35 @@ console.log('check-city: ok')
     latestChange('1.4.190').items.join('\n'),
     /Fixes #238|Fixes #239|Fixes #240|Lock In win-end|Match \(picture|empty purple card|Story Snap|eyebrow|Creed merge|Fixes #232|empty-lot|Fixes #217|Build Argument ≤720 fill|Easy Link ≤720 fill|Father Dash ≤720 fill/i,
     '1.4.190 must not re-claim Match / Lock In win-end / Samaritan / Snap / Creed / Manage / letterbox / Build / Link / Father Dash',
+  )
+}
+// Easy Clear 1.4.191: Easy Story Creek ≤720 fill purple void (invent Fun/Clear)
+{
+  const mazeCss191 = readFileSync(new URL('../src/styles/maze.css', import.meta.url), 'utf8')
+  const mazePlay191 = readFileSync(
+    new URL('../src/components/challenges/RoadMazePlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(mazeCss191, /1\.4\.191: Easy Story Creek ≤720 fill purple void/)
+  assert.match(
+    mazeCss191,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-road-maze \{[\s\S]*?flex: 1 1 auto/,
+  )
+  assert.match(
+    mazeCss191,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-road-maze \.maze-board \{[\s\S]*?max-height: none/,
+  )
+  assert.match(
+    mazeCss191,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-road-maze \.maze-board \{[\s\S]*?aspect-ratio: auto/,
+  )
+  assert.match(mazePlay191, /1\.4\.191: ≤720 fills purple void/)
+  assert.match(cssSrc, /1\.4\.191: Easy Story Creek ≤720 fill purple void/)
+  assert.match(latestChange('1.4.191').items.join('\n'), /Story Creek.*≤720|purple void under the board/i)
+  assert.doesNotMatch(
+    latestChange('1.4.191').items.join('\n'),
+    /Fixes #238|Fixes #239|Fixes #240|Lock In win-end|Match \(picture|empty purple card|Story Snap|eyebrow|Creed merge|Fixes #232|empty-lot|Fixes #217|Build Argument ≤720 fill|Easy Link ≤720 fill|Father Dash ≤720 fill|Easy Hold.*≤720 fill|why-blast/i,
+    '1.4.191 must not re-claim Match / Lock In / Samaritan / Snap / Creed / Manage / letterbox / Build / Link / Father / Hold',
   )
 }
 
