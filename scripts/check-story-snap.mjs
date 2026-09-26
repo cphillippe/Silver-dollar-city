@@ -60,4 +60,13 @@ assert.match(snapCss, /max-height:\s*720px/)
 assert.match(snapCss, /\.snap-teach/)
 assert.match(snapCss, /-webkit-line-clamp:\s*2/)
 
+
+// Easy Clear 1.4.157: Home whisper short next-step (not full snapHunt) — Fixes #203
+const easyUiSnap = readFileSync(new URL('../src/lib/easyUi.ts', import.meta.url), 'utf8')
+const hubSnapSrc = readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8')
+assert.match(easyUiSnap, /snapHome: 'One more snap\.'/)
+assert.doesNotMatch(easyUiSnap, /snapHome: 'Tap when a beat/)
+assert.match(hubSnapSrc, /EASY\.snapHome/)
+assert.match(hubSnapSrc, /1\.4\.157.*whisper|#203/)
+
 console.log('check-story-snap: ok')

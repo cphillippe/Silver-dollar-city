@@ -44,7 +44,8 @@ assert.equal(CLAIM_MERGE_CLAIM, 'Paul hands on an early public creed: died, buri
 assert.equal(CLAIM_MERGE_WIN, 'MERGED!')
 assert.equal(CLAIM_MERGE_HINT, 'Drop candy. Smash two of a kind.')
 assert.match(EASY.mergeHunt, /Drop candy/)
-assert.match(EASY.mergeHome, /Make the creed/)
+assert.equal(EASY.mergeHome, 'One more merge.')
+assert.doesNotMatch(EASY.mergeHome, /Drop candy|Make the creed/)
 assert.equal(storyPlayFor('wb-creed'), 'claim-merge')
 assert.equal(storyPlayFor('ph-road'), 'road-maze')
 assert.equal(storyPlayFor('ph-father'), 'father-run')
@@ -224,6 +225,12 @@ assert.doesNotMatch(puzzleSrc, /timing-dash|road-swipe|story-night/)
 
 const hubSrc = readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8')
 assert.match(hubSrc, /EASY\.mergeHome/)
+
+// Easy Clear 1.4.157: Home whisper short next-step (not full mergeHunt) — Fixes #203
+const easyUiMerge = readFileSync(new URL('../src/lib/easyUi.ts', import.meta.url), 'utf8')
+assert.match(easyUiMerge, /mergeHome: 'One more merge\.'/)
+assert.doesNotMatch(easyUiMerge, /mergeHome: 'Drop candy/)
+assert.match(hubSrc, /1\.4\.157.*whisper|#203/)
 assert.match(hubSrc, /EASY\.mergeMatch/)
 
 const teachSrc = readFileSync(new URL('../src/components/TeachUnlock.tsx', import.meta.url), 'utf8')
