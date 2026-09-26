@@ -2657,3 +2657,112 @@ html[data-easy='on'] .recall-card {
     -webkit-backdrop-filter: none;
   }
 }
+
+/* Easy Clear 1.4.238: Easy Lock In feedback ≤720 / tall-phone bottom-half purple void (Fixes #317) —
+   After extend fill 227 (195 + pad-zero 213 to ≤920), Shot pack 1.4.230 05-easy-lockin-miss.png
+   (390×844) STILL clusters Main idea · Why this is true · From · Try again at the top with a
+   massive dead purple band across the bottom half (residual after closed #299 / 1.4.227; capture
+   at Chrome 1.4.230). Cause: incomplete height pin + flex 1 1 auto basis + global sticky
+   `.cta-dock` leave free space as a flat purple plate beneath the feedback card hug (Father Dash
+   229 / Learn 235 / Match 236 / Lock In quiz 237 sticky lesson). Strengthen miss-teach feedback
+   only (`.why-blast.is-miss-teach` / why-miss-teach family): app-body · journal · rehearse-anchor ·
+   recall-gate · why-blast height 100% · max-height 100% · flex 1 1 0 · overflow hidden,
+   why-miss-teach flex 1 1 0 absorbs leftover, cta-dock position static + margin-top auto so
+   Try again pins to the usable floor.
+   Fill 195 / pad-zero 213 ≤720 / extend 227 stay. Do NOT pack #316 live quiz / win-end 231 /
+   Match / Learn / Samaritan / Father / Manage / Dig / Creek / parked maps. */
+@media (max-height: 920px) {
+  html[data-easy='on'] .app.is-play .app-body:has(.journal.is-rehearse .why-blast.is-miss-teach) {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+    padding-top: 4px;
+    padding-bottom: 0;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    gap: 4px;
+    overflow: hidden;
+    padding-bottom: 0;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) > .text-link {
+    flex: 0 0 auto;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) .rehearse-anchor {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) .rehearse-anchor > .eyebrow {
+    flex: 0 0 auto;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) .recall-gate.is-easy-hold {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    margin-bottom: 0;
+    overflow: hidden;
+    padding-bottom: 0;
+    gap: 4px;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-miss-teach {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    gap: 4px;
+    overflow: hidden;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-miss-teach .why-blast-hud {
+    flex: 0 0 auto;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-miss-teach .why-miss-teach {
+    flex: 1 1 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    max-height: none;
+    gap: 10px;
+    overflow: hidden;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-miss-teach .why-miss-teach .cta-dock,
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) .recall-gate.is-easy-hold .cta-dock {
+    position: static;
+    bottom: auto;
+    margin-top: auto;
+    flex: 0 0 auto;
+    padding-top: 6px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
