@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.232',
+    title: 'Easy Match: ≤720 close fill + score→CTA purple void on tall phone',
+    when: '2026-09-26',
+    items: [
+      'Easy Match (picture · main idea deal) on ≤720 / phone portrait: extend fill + score→CTA so match-grid absorbs free space and score · Next CTA pack tight — no large purple void under the score / before the dock on tall phones (invent Fun/Clear; continuation of Match fill 184 / score→CTA 207 ≤720 family; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.231',
     title: 'Easy Lock In win-end: ≤720 close fill + triad→Home purple void on tall phone',
     when: '2026-09-26',
