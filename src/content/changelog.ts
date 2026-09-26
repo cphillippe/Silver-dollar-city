@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.248',
+    title: 'Easy Lock In feedback: ≤720 close tall-phone bottom-half purple void residual (Fixes #334)',
+    when: '2026-09-26',
+    items: [
+      'Fixes #334: Easy Lock In miss-teach feedback on ≤720 / tall phone portrait — paint parchment cream recall-gate plate (transparent why-miss-teach · dark ink · denser stretch · Try-again dock pinned to cream floor) so leftover fill is cream-inside-card, not a dead purple band under the stack (Shot 240 residual after Lock In feedback tall-void peel 1.4.238; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.247',
     title: 'Easy Lock In quiz: ≤720 close tall-phone bottom-half purple void residual (Fixes #333)',
     when: '2026-09-26',
