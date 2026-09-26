@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.178',
+    title: 'Witness Square candy hall',
+    when: '2026-09-26',
+    items: [
+      'Easy Home: Witness Square uses Pack A candy webp art for the construction frame, finished hall, and evening glow — geometric SVG hall stays only when the image is missing (Fixes #213)',
+    ],
+  },
+  {
     version: '1.4.177',
     title: 'Easy Learn: claim pill contrast',
     when: '2026-09-25',

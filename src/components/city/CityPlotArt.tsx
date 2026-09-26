@@ -1,4 +1,7 @@
 import { portraitSrc } from '../Avatar'
+import plotBenchBuilt from '../../assets/city/plots/plot-bench-built.webp'
+import plotBenchLit from '../../assets/city/plots/plot-bench-lit.webp'
+import plotBenchScaffold from '../../assets/city/plots/plot-bench-scaffold.webp'
 import plotGateBuilt from '../../assets/city/plots/plot-gate-built.webp'
 import plotGateLit from '../../assets/city/plots/plot-gate-lit.webp'
 import plotGateScaffold from '../../assets/city/plots/plot-gate-scaffold.webp'
@@ -47,8 +50,8 @@ export const ANCHOR: Record<CityPlotId, { x: number; y: number }> = {
 
 const BUILD_SCALE = 1.58
 
-/** Phone-big candy stills for Easy-trail Pack A (porch/gate/journal/hollow). */
-type PackAPlotId = 'porch' | 'gate' | 'journal' | 'hollow'
+/** Phone-big candy stills for Easy-trail Pack A (porch/gate/journal/hollow/bench). */
+type PackAPlotId = 'porch' | 'gate' | 'journal' | 'hollow' | 'bench'
 type PlotImageStage = 'scaffold' | 'built' | 'lit'
 
 export const PLOT_IMG: Record<
@@ -74,6 +77,11 @@ export const PLOT_IMG: Record<
     scaffold: plotHollowScaffold,
     built: plotHollowBuilt,
     lit: plotHollowLit,
+  },
+  bench: {
+    scaffold: plotBenchScaffold,
+    built: plotBenchBuilt,
+    lit: plotBenchLit,
   },
 }
 
