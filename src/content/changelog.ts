@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.252',
+    title: 'Easy Learn: ≤720 close tall-phone purple void residual (Fixes #344)',
+    when: '2026-09-26',
+    items: [
+      'Fixes #344: Easy Learn Meaning Ridge cream-pill / teach-gate chrome on ≤720 / tall phone portrait — paint opaque cream app-body + is-teach shell + solid teach-gate plate (no recall-gate purple-gold gradient · cream Find-the-gems dock pinned to cream floor) so leftover below the lesson is intentional cream floor, not a dead purple band under the stack (Shot 250 residual after Learn cream peel 1.4.245; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.251',
     title: 'Easy Home: Learn / Lock In dock button contrast (Fixes #343)',
     when: '2026-09-26',
