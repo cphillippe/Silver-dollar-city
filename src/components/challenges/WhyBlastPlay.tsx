@@ -33,7 +33,9 @@ interface WhyBlastPlayProps {
  * Easy Clear 1.4.170: ≤720 peels outer eyebrow + quiet From in sortHold.css so arena stays above fold.
  * Easy Clear 1.4.190: ≤720 fills purple void in sortHold.css (invent Fun/Clear).
  * Easy Clear 1.4.194: ≤720 grows journal quiz shell so Lock In card fills purple void (Fixes #251).
+ * Easy Clear 1.4.195: ≤720 grows journal miss-teach shell so feedback card fills purple void (Fixes #252).
  */
+
 export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: WhyBlastPlayProps) {
   const chips = useMemo(
     () => whyBlastChoices(reason, packMisses, whyBlastExtras(id), easyWhyLine),
@@ -161,7 +163,7 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
         </article>
       ) : (
         <div className="why-arena">
-          {/* Easy Clear 1.4.190/194: ≤720 fills purple void in sortHold.css (invent Fun/Clear · Fixes #251). */}
+          {/* Easy Clear 1.4.190/194/195: ≤720 fills purple void in sortHold.css (invent Fun/Clear · Fixes #251/#252). */}
           {chips.map((line, index) => {
             const tossed = tossing === line || gone.includes(line)
             return (
