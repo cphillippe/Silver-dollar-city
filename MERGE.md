@@ -3,8 +3,8 @@
 **PR:** (pending open)
 **Branch:** `ship/easy-fun-clear-189` → `main`
 **Version:** 1.4.189
-**Peel:** (pending commit)
-**Tip:** (pending)
+**Peel:**  ()
+**Tip:**  ()
 **Base live:** 1.4.188 (`c82e112`, PR #245 Easy Link ≤720 fill purple void on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
