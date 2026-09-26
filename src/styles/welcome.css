@@ -2646,3 +2646,19 @@ html[data-theme='dusk'] .easy-story-card {
     box-shadow: none;
   }
 }
+
+/* Easy Clear 1.4.273: Easy Manage sheet head→job gap —
+   Star lamps (and other Easy lots with a place subtitle) sit a line taller
+   under the title. Drop the head’s bottom pad and the card gap above the job
+   so the sheet does not grow. No map candy. */
+html[data-easy='on'] .mind-map.is-manage .mind-map-head {
+  padding-bottom: 0;
+}
+
+html[data-easy='on'] .mind-map.is-manage .mind-map-card {
+  gap: 0;
+}
+
+html[data-easy='on'] .mind-map.is-manage .place-sub {
+  margin-top: 0;
+}

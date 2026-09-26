@@ -42,7 +42,7 @@ export const TIER_JOB: Record<number, { hard: string; easy: string }> = {
   },
   3: {
     hard: 'Rooms for more ideas. Dig deeper opens on lines you have kept.',
-    easy: 'More rooms. You can Read more on lines you kept.',
+    easy: 'More room here for ideas you kept.',
   },
   4: {
     hard: 'Lamps hold. Tap a lit idea to say the line again.',
@@ -244,7 +244,9 @@ function needForTier(id: CityPlotId, want: number, easy: boolean): string {
     if (want <= 1) return easy ? 'Earn one star.' : 'One star caught on a walk raises the first lamp.'
     if (want === 2) return easy ? 'Earn four stars.' : 'Four stars raise a row of lamps.'
     if (want === 3) return easy ? 'Eight stars, or hold a night.' : 'Eight stars or a Night Watch furnishes the street.'
-    return easy ? 'Twelve stars or nights.' : 'Twelve stars and nights remembered light the street.'
+    return easy
+      ? 'Catch twelve stars, or keep a night.'
+      : 'Twelve stars and nights remembered light the street.'
   }
   if (want <= 1) {
     return easy
