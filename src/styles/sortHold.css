@@ -1569,3 +1569,48 @@ html[data-easy='on'] .recall-card {
     flex: 0 0 auto;
   }
 }
+
+/* Easy Clear 1.4.190: Easy Hold ≤720 fill purple void —
+   After arena-first 170 / short-phone 156, why-arena chips hug content so the
+   gold Lock In card leaves empty purple under the CTA (Match 184 / Father 189
+   fill family; invent Fun/Clear). Grow why-blast + stretch why-arena chip rows
+   so claim · chips fill the portrait. Lock In win-end 185 / Match / Samaritan /
+   Sort / Snap / Creed / Build / Link / Father Dash peels untouched. */
+@media (max-height: 720px) {
+  .recall-gate.is-easy-hold:has(.why-blast),
+  .why-blast {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .why-blast .why-arena {
+    flex: 1 1 auto;
+    min-height: 0;
+    align-content: stretch;
+    grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .why-blast .why-chip {
+    min-height: 0;
+    height: 100%;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .why-blast .why-claim {
+    align-self: stretch;
+  }
+
+  .why-blast-hud,
+  .why-blast .cta-dock,
+  .why-blast .miss-banner,
+  .why-blast .why-miss-teach {
+    flex: 0 0 auto;
+  }
+}
