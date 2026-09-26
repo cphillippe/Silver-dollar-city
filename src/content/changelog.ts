@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.233',
+    title: 'Easy Creed: ≤720 close Claim merge HUD peel on tall phone',
+    when: '2026-09-26',
+    items: [
+      'Easy Creed Claim merge on ≤720 / phone portrait: extend HUD peel so who·where kicker + ladder rung names hide and bowl · Drop stay clear — no buried bowl on tall phones (invent Fun/Clear; continuation of Creed merge HUD peel 181 ≤720 family; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.232',
     title: 'Easy Match: ≤720 close fill + score→CTA purple void on tall phone',
     when: '2026-09-26',
