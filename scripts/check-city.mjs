@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.271')
+assert.equal(APP_VERSION, '1.4.272')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -2343,9 +2343,10 @@ assert.doesNotMatch(
 assert.doesNotMatch(EASY.loveCue, /mean line/)
 assert.doesNotMatch(EASY.nightLead, /mean line|claim|throttle/)
 assert.match(plotArtSrc, /EASY_FOLK_LIFT/)
+// Easy Clear 1.4.272: Easy Lock In hub opens stored lines (Fixes #384) — was collapsed (`easy ? false`).
 assert.match(
   readFileSync(new URL('../src/components/Journal.tsx', import.meta.url), 'utf8'),
-  /easy\s*\?\s*false/,
+  /startOpen=\{easy \? true :/,
 )
 assert.equal(EASY_FOLK_LIFT, 24)
 assert.ok(EASY_FOLK_NUDGE.porch?.y && EASY_FOLK_NUDGE.gate?.y)
@@ -6129,5 +6130,37 @@ console.log('check-city: ok')
     latestChange('1.4.271').items.join('\n'),
     /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#300|#301|#302|#314|#315|#316|#317|#318|#319|#331|#332|#333|#334|#335|#336|#343|#344|#345|#346|#347|#348|#349|#350|#361|#362|#363|#364|#365|#366|#367|#381|Father Dash|Learn cream|Samaritan pill|Manage|Lock In|Dig|Creed|Build|Sort|Snap|Link|Claim merge|Source dig|invent Fun\/Clear|Sequence|Story Creek HOLD|Home dock|coach|Night Watch|Home map/i,
     '1.4.271 must not fix other phone-fail issues or climb another Easy surface',
+  )
+}
+
+// Easy Clear 1.4.272: Easy Lock In hub empty purple void — stored list opens on cream (Fixes #384)
+{
+  const welcomeCss272 = readFileSync(new URL('../src/styles/welcome.css', import.meta.url), 'utf8')
+  const journalSrc272 = readFileSync(new URL('../src/components/Journal.tsx', import.meta.url), 'utf8')
+  assert.match(welcomeCss272, /1\.4\.272: Easy Lock In hub empty purple void/)
+  assert.match(
+    welcomeCss272,
+    /1\.4\.272: Easy Lock In hub empty purple void[\s\S]*?@media \(max-height: 920px\), \(min-height: 921px\)/,
+  )
+  assert.match(
+    welcomeCss272,
+    /1\.4\.272: Easy Lock In hub empty purple void[\s\S]*?\.journal\.is-easy-hold \{[\s\S]*?justify-content: flex-start[\s\S]*?background: #fff6e8[\s\S]*?color: #2a2118/,
+  )
+  assert.match(
+    welcomeCss272,
+    /1\.4\.272: Easy Lock In hub empty purple void[\s\S]*?\.held-triad dd[\s\S]*?color: #2a2118/,
+  )
+  assert.match(journalSrc272, /1\.4\.272: hub list opens stored lines/)
+  assert.match(journalSrc272, /startOpen=\{easy \? true :/)
+  assert.match(cssSrc, /1\.4\.272: Easy Lock In hub empty purple void/)
+  assert.match(
+    latestChange('1.4.272').items.join('\n'),
+    /Fixes #384|cream|Lock In|phone portrait|hub/i,
+  )
+  assert.match(latestChange('1.4.272').title, /Lock In|≤720|purple void|Fixes #384/i)
+  assert.doesNotMatch(
+    latestChange('1.4.272').items.join('\n'),
+    /Fixes #379|Fixes #378|Fixes #380|Fixes #381|Fixes #382|mid-quiz|Match candy|Dig deeper|Night Watch|Town|Star lamps/i,
+    '1.4.272 must stay on the Easy Lock In hub and must not claim Fixes #379',
   )
 }
