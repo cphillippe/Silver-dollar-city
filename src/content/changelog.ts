@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.249',
+    title: 'Easy Samaritan: ≤720 close tall-phone voids above/below board residual (Fixes #335)',
+    when: '2026-09-26',
+    items: [
+      'Fixes #335: Easy Samaritan / Story Creek road maze on ≤720 / tall phone portrait — paint cream parchment maze-stage plate + warm maze-board plate (denser stretch · match-score / cta-dock pinned to cream floor) so leftover fill is intentional cream board stage, not purple voids above/below the board (Shot 240 residual after Samaritan tall-void peel 1.4.239; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.248',
     title: 'Easy Lock In feedback: ≤720 close tall-phone bottom-half purple void residual (Fixes #334)',
     when: '2026-09-26',
