@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.180',
+    title: 'Easy Manage: empty-lot header + compact sheet',
+    when: '2026-09-25',
+    items: [
+      'Easy Manage empty lot: keep AppShell header (1.4.167 is-manage-open over-hid); compact Place·Person·Tool row + Build this sheet so map stays readable (Fixes #232; map framing remains Map-owned)',
+    ],
+  },
+  {
     version: '1.4.179',
     title: 'Easy Home: map fills the phone',
     when: '2026-09-26',

@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.179')
+assert.equal(APP_VERSION, '1.4.180')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1465,7 +1465,7 @@ assert.match(cssSrc, /is-easy-hold/)
   assert.match(dockCss, /backdrop-filter: blur/)
   assert.doesNotMatch(dockCss, /#16062e/, 'sticky CTA docks must not be an opaque black slab')
 }
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Easy Home|letterbox|#217|valley|meadow/i)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /empty.?lot|header|compact|Place|Person|Tool|#232/i)
 {
   const storyCardCss = cssSrc.match(/\.easy-story-card,[\s\S]*?\.easy-story-card::before \{[\s\S]*?\n\}/)?.[0] ?? ''
   assert.match(storyCardCss, /border:\s*0/)
@@ -2403,8 +2403,8 @@ assert.match(mapSrc, /easy \? null : \(\s*\n\s*<>[\s\S]*city-street-main/)
 assert.match(mapSrc, /if \(isEasy\(progress\)\) return/)
 assert.match(mapSrc, /if \(playing\.current && !isEasy\(progress\)\) return/)
 assert.match(mapSrc, /Tap a building to Manage it/)
-assert.match(latestChange(APP_VERSION).title, /Easy Home|phone|map fills/i)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Easy Home|letterbox|#217|valley|meadow/i)
+assert.match(latestChange(APP_VERSION).title, /Manage|empty-lot|empty lot|compact/i)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /empty.?lot|header|compact|Place|Person|Tool|#232/i)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-img[\s\S]*?fill: none !important/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img\.is-built[\s\S]*?fill: none/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-hit[\s\S]*?stroke: none/)
@@ -3143,3 +3143,39 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
 }
 
 console.log('check-city: ok')
+
+// Easy Clear 1.4.180: Manage empty-lot header + compact sheet (Fixes #232)
+{
+  const hubSrc180 = readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8')
+  const mindSrc180 = readFileSync(new URL('../src/components/MindMap.tsx', import.meta.url), 'utf8')
+  assert.match(hubSrc180, /appliedTier/, '1.4.180 Hub imports appliedTier (#232)')
+  assert.match(hubSrc180, /is-empty-lot/, '1.4.180 Hub is-empty-lot (#232)')
+  assert.match(
+    mindSrc180,
+    /mind-map is-manage\$\{applied === 0 \? ' is-empty-lot' : ''\}/,
+    '1.4.180 MindMap empty-lot class (#232)',
+  )
+  assert.match(mindSrc180, /1\.4\.180 — empty-lot omits place-sub/, '1.4.180 place-sub omit (#232)')
+  assert.match(cssSrc, /1\.4\.180 — empty-lot keeps AppShell header/, '1.4.180 CSS header restore (#232)')
+  assert.match(
+    cssSrc,
+    /\.app:has\(\.hub\.is-manage-open\.is-empty-lot\) \.topbar[\s\S]*?display:\s*flex/,
+    '1.4.180 empty-lot shows topbar (#232)',
+  )
+  assert.match(
+    cssSrc,
+    /\.mind-map\.is-manage\.is-empty-lot \.mind-map-card[\s\S]*?max-height:\s*min\(30dvh/,
+    '1.4.180 empty-lot sheet max-height (#232)',
+  )
+  assert.match(
+    cssSrc,
+    /\.mind-map\.is-manage\.is-empty-lot \.mind-web[\s\S]*?grid-template-columns:\s*1fr 1fr 1fr/,
+    '1.4.180 empty-lot Place·Person·Tool row (#232)',
+  )
+  assert.doesNotMatch(
+    latestChange(APP_VERSION).items.join('\n'),
+    /full-bleed map|Witness Square candy|Fixes #217|Fixes #213/i,
+    '1.4.180 must not claim Map Witness or #217 letterbox fix',
+  )
+}
+
