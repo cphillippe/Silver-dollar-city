@@ -1,8 +1,8 @@
 MODEL=gemini-flash-latest
 Invent Fun/Clear — no open Easy Fun/Clear issue beyond parked #161 / cheap-hop #160.
-1.4.200 Easy Creed bowl→CTA live on main (3fba16e / #261). Shot woken for pack — Manager handles vision; do NOT wake Shot; do NOT run Gemini vision.
-Invent API: GEMINI_API_KEY present but not AIza AI Studio shape (same as 163–200).
-Manager-steered invent peel: Easy Story Creek ≤720 close board→CTA purple gap (after fill 191 left .cta-dock margin-top:auto stealing free space on win before maze-board flex-grow; Father 196 / Link 199 / Creed 200 dock-margin family; different scene than Creed 200 / Link 199 / Sort 198 / Story Snap 197 / Match/LockIn/Father/Hold/Build/Samaritan).
-Peel: maze.css @media (max-height:720px) .play.is-road-maze .cta-dock margin-top:0; RoadMazePlay comment. Fill 191 / HUD 175 / compress 153 stay.
-Do NOT re-peel Shot 190 fails #250–#253 or Creed 200 / Link 199 / Sort 198 / Story Snap 197. Dig/Hard/NW/Town/stores/Pack B/Home map candy parked.
-VERDICT: APPROVE (invent Fun/Clear · Story Creek board→CTA close — after fill 191)
+1.4.201 Easy Story Creek board→CTA live on main (71ec6da / #262). Shot pack 200 still in flight — Manager handles vision; do NOT wake Shot; do NOT run Gemini vision.
+Invent API: GEMINI_API_KEY present but not AIza AI Studio shape (same as 163–201).
+Manager-steered invent peel: Easy Hold ≤720 close chips→CTA purple gap (after fill 190 left .cta-dock margin-top 4px/8px; Father 196 / Link 199 / Creed 200 / Story Creek 201 dock-margin family; different scene than Creek 201 / Creed 200 / Link 199 / Sort 198 / Snap 197; live arena only — not quiz 194 / miss 195).
+Peel: sortHold.css @media (max-height:720px) .why-blast/.recall-gate.is-easy-hold .cta-dock margin-top:0; WhyBlastPlay comment. Fill 190 / arena-first 170 / short-phone 156 stay.
+Do NOT re-peel Shot 190 fails #250–#253 or Creek 201 / Creed 200 / Link 199 / Sort 198 / Snap 197. Dig/Hard/NW/Town/stores/Pack B/Home map candy parked.
+VERDICT: APPROVE (invent Fun/Clear · Hold chips→CTA close — after fill 190)

@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.201')
+assert.equal(APP_VERSION, '1.4.202')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3633,6 +3633,31 @@ console.log('check-city: ok')
     '1.4.201 must not re-peel Shot 190 fails #250–#253 or Creed 200 / Link 199 / Sort 198 / Story Snap 197 / Match / Lock In / Father / Hold / Build',
   )
 }
+
+
+// Easy Clear 1.4.202: Easy Hold ≤720 close chips→CTA purple gap (invent Fun/Clear)
+{
+  const holdCss202 = readFileSync(new URL('../src/styles/sortHold.css', import.meta.url), 'utf8')
+  const whyPlay202 = readFileSync(
+    new URL('../src/components/challenges/WhyBlastPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(holdCss202, /1\.4\.202: Easy Hold ≤720 close chips→CTA purple gap/)
+  assert.match(
+    holdCss202,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.why-blast \.cta-dock \{[\s\S]*?margin-top: 0/,
+  )
+  assert.match(whyPlay202, /1\.4\.202: ≤720 zeros cta-dock margin-top/)
+  assert.match(cssSrc, /1\.4\.202: Easy Hold ≤720 close chips→CTA purple gap/)
+  assert.match(latestChange('1.4.202').items.join('\n'), /chips→CTA|cta-dock|purple void between the chips/i)
+  assert.match(latestChange('1.4.202').title, /Easy Hold|≤720|chips→CTA|purple gap/i)
+  assert.doesNotMatch(
+    latestChange('1.4.202').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|Lock In quiz|Lock In feedback|Father.*slider|grid→footer|gem-board|Build Argument ≤720 fill|Easy Sort ≤720 fill|Father Dash ≤720 fill|Story Snap ≤720 fill|snap-stage|bank\.is-sort|sort-bins|choices→CTA|link-dock|Easy Link ≤720 fill|bowl→CTA|Easy Creed ≤720 fill|merge-bowl|board→CTA|Story Creek ≤720 fill|maze-board|Easy Hold.*≤720 fill/i,
+    '1.4.202 must not re-peel Shot 190 fails #250–#253 or Story Creek 201 / Creed 200 / Link 199 / Sort 198 / Story Snap 197 / Match / Lock In quiz·miss / Father / Build / Hold fill',
+  )
+}
+
 
 
 
