@@ -57,6 +57,7 @@ export function TeachUnlock({ brief, kind, onUnlock, unlock, beats }: TeachUnloc
         {/* Easy Clear 1.4.224: phone portrait tightens fill 215 — zero bottom pad · flex 1 1 0 · dock auto — closes bottom-half void (Fixes #296). */}
         {/* Easy Clear 1.4.235: tall-phone strengthens fill 224 — height 100% · triad space-evenly · dock position static — closes Shot 230 bottom-half void (Fixes #314). */}
         {/* Easy Clear 1.4.245: tall-phone cream-card fill — paint parchment teach-gate · dark ink · triad space-between + row pad · dock pin — closes Shot 240 purple residual (Fixes #331). */}
+        {/* Easy Clear 1.4.252: tall-phone cream shell fill — opaque app-body + is-teach cream plate · solid teach-gate (no recall-gate gradient) · cream dock floor pin — closes Shot 250 purple residual after 245 (Fixes #344). */}
         <LociStamp stamp={stamp} mode="hero" />
         {picture ? <GemMark gem={picture} size="sm" /> : null}
         <p className="teach-reason">{story}</p>
