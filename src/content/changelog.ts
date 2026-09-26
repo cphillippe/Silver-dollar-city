@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.250',
+    title: 'Easy Father Dash: ≤720 close tall-phone rail→CTA purple void residual (Fixes #336)',
+    when: '2026-09-26',
+    items: [
+      'Fixes #336: Easy Father Dash timing-rail chrome on ≤720 / tall phone portrait — paint opaque cream parchment play plate + warm run-scene (dark ink · warm speech card · HOLD TO RUN dock pinned to cream floor) so leftover rail→CTA fill is intentional cream surface, not a dead purple band under the timing rail (Shot 240 residual after Father Dash tall-void peel 1.4.240; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.249',
     title: 'Easy Samaritan: ≤720 close tall-phone voids above/below board residual (Fixes #335)',
     when: '2026-09-26',
