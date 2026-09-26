@@ -4727,6 +4727,47 @@ html[data-easy='on'] .mind-node em {
   }
 }
 
+/* Easy Clear 1.4.214: Easy Story Creek speech ≤720 slider→HOLD purple void (Fixes #272) —
+   After dock-margin 196 (≤720 only), Shot pack 1.4.200 02+07 (390×844) still leave
+   global .cta-dock { margin-top: auto } as a large purple band between run-rail and
+   HOLD TO RUN. Extend fill 189 + dock-margin 196 across phone portrait heights so
+   run-scene absorbs free space — tight slider→HOLD (Story Creek speech/hold chrome).
+   HUD 173 / speech thin 154 / fill 189 / dock 196 / speech→rail 204 stay. Do NOT pack
+   #276 Samaritan / #277 Manage / #280 Learn cream-pill / #283 Father Dash / Match /
+   Lock In / Dig. */
+@media (max-height: 920px) {
+  .play.is-father-run,
+  .daily-page.is-puzzle .play.is-father-run,
+  .challenge-page.is-puzzle .play.is-father-run {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .play.is-father-run .run-scene {
+    flex: 1 1 auto;
+    min-height: 120px;
+    height: auto;
+    max-height: none;
+  }
+
+  .play.is-father-run .match-score,
+  .play.is-father-run .run-speech,
+  .play.is-father-run .run-rail,
+  .play.is-father-run .cta-dock,
+  .play.is-father-run .run-miss,
+  .play.is-father-run .match-toast {
+    flex: 0 0 auto;
+  }
+
+  .play.is-father-run .cta-dock,
+  .play.is-father-run .cta-dock.run-dock {
+    margin-top: 0;
+  }
+}
+
 .miss-banner {
   display: grid;
   gap: 2px;
