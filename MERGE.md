@@ -4,7 +4,7 @@
 **Branch:** `ship/easy-fun-clear-183` → `main`
 **Version:** 1.4.183
 **Peel:** `be1334a` (`be1334a31b573a5c6eadbdf8309058ee67dc9fe9`)
-**Tip:** `f380d78` (`f380d7847e1e195ea96d601da96f44c5e3d3946a`)
+**Tip:**  ()
 **Base live:** 1.4.182 (`2a5cce5`, PR #236 Easy Story Snap ≤720 HUD on main; atop 1.4.181 Creed #235)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
