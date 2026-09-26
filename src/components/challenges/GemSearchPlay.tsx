@@ -502,6 +502,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       onPointerCancel={onBoardCancel}
     >
       {/* Easy Clear 1.4.168: ≤720 peels how/say chrome in match.css — letter board + Lock In stay above fold (Hub/Snap/Father/Learn family). */}
+      {/* Easy Clear 1.4.193: ≤720 fills purple void in gem.css (Fixes #250; Shot 1.4.190 / 03-easy-match). */}
       <p className="sort-how">{EASY.matchHunt}</p>
       {matchChips ? (
         <>

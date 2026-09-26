@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.192')
+assert.equal(APP_VERSION, '1.4.193')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3439,6 +3439,37 @@ console.log('check-city: ok')
     latestChange('1.4.190').items.join('\n'),
     /Fixes #238|Fixes #239|Fixes #240|Lock In win-end|Match \(picture|empty purple card|Story Snap|eyebrow|Creed merge|Fixes #232|empty-lot|Fixes #217|Build Argument ≤720 fill|Easy Link ≤720 fill|Father Dash ≤720 fill/i,
     '1.4.190 must not re-claim Match / Lock In win-end / Samaritan / Snap / Creed / Manage / letterbox / Build / Link / Father Dash',
+  )
+}
+
+// Easy Clear 1.4.193: Easy Match ≤720 fill purple void (Fixes #250)
+{
+  const gemCss193 = readFileSync(new URL('../src/styles/gem.css', import.meta.url), 'utf8')
+  const gemPlay193 = readFileSync(
+    new URL('../src/components/challenges/GemSearchPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(gemCss193, /1\.4\.193: Easy Match ≤720 fill purple void/)
+  assert.match(
+    gemCss193,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-gem-search\.is-panel-blast\.is-story-docked \{[\s\S]*?flex: 1 1 auto/,
+  )
+  assert.match(
+    gemCss193,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-gem-search\.is-panel-blast\.is-story-docked \.gem-board \{[\s\S]*?max-height: none/,
+  )
+  assert.match(
+    gemCss193,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-gem-search\.is-panel-blast\.is-story-docked \.gem-board \{[\s\S]*?aspect-ratio: auto/,
+  )
+  assert.match(gemPlay193, /1\.4\.193: ≤720 fills purple void/)
+  assert.match(cssSrc, /1\.4\.193: Easy Match ≤720 fill purple void/)
+  assert.match(latestChange('1.4.193').items.join('\n'), /Fixes #250|grid.*footer|purple void between/i)
+  assert.match(latestChange('1.4.193').title, /Easy Match|≤720|purple void/i)
+  assert.doesNotMatch(
+    latestChange('1.4.193').items.join('\n'),
+    /Fixes #251|Fixes #252|Fixes #253|Lock In quiz|Lock In feedback|Father.*slider|Creed merge ≤720 fill|Story Creek ≤720 fill|Easy Hold.*≤720 fill|why-blast|Build Argument ≤720 fill|Easy Link ≤720 fill|Father Dash ≤720 fill|maze-board|merge-bowl/i,
+    '1.4.193 must not pack #251/#252/#253 or re-claim Creed / Story Creek / Hold / Link / Build / Father / maze / bowl',
   )
 }
 
