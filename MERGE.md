@@ -4,7 +4,7 @@
 **Branch:** `ship/easy-fun-clear-194` → `main`
 **Version:** 1.4.194
 **Peel:** `f1e0129` (`f1e0129f97579477858cb20a9ee9b3b0914be69d`)
-**Tip:** `f1e0129` (`f1e0129f97579477858cb20a9ee9b3b0914be69d`)
+**Tip:** `7e1637f` (`7e1637f3a5fe92c3f096ece24b7988a2798d8ff8`)
 **Base live:** 1.4.193 (`9e8bef5`, PR #254 Easy Match ≤720 fill grid→footer purple void on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
