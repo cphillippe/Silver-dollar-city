@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.189')
+assert.equal(APP_VERSION, '1.4.190')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3405,13 +3405,44 @@ console.log('check-city: ok')
   )
   assert.match(fatherPlay189, /1\.4\.189: ≤720 fills purple void/)
   assert.match(cssSrc, /1\.4\.189: Easy Father Dash ≤720 fill purple void/)
-  assert.match(latestChange(APP_VERSION).items.join('\n'), /Father Dash.*≤720|purple void under the pad/i)
+  assert.match(latestChange('1.4.189').items.join('\n'), /Father Dash.*≤720|purple void under the pad/i)
   assert.doesNotMatch(
-    latestChange(APP_VERSION).items.join('\n'),
+    latestChange('1.4.189').items.join('\n'),
     /Fixes #238|Fixes #239|Fixes #240|Lock In win-end|Match \(picture|empty purple card|Story Snap|eyebrow|Creed merge|Fixes #232|empty-lot|Fixes #217|Build Argument ≤720 fill|Easy Link ≤720 fill/i,
     '1.4.189 must not re-claim Match / Lock In / Samaritan / Snap / Creed / Manage / letterbox / Build / Link',
   )
 }
+// Easy Clear 1.4.190: Easy Hold ≤720 fill purple void (invent Fun/Clear)
+{
+  const holdCss190 = readFileSync(new URL('../src/styles/sortHold.css', import.meta.url), 'utf8')
+  const whyPlay190 = readFileSync(
+    new URL('../src/components/challenges/WhyBlastPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(holdCss190, /1\.4\.190: Easy Hold ≤720 fill purple void/)
+  assert.match(
+    holdCss190,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.why-blast \{[\s\S]*?flex: 1 1 auto/,
+  )
+  assert.match(
+    holdCss190,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.why-blast \.why-arena \{[\s\S]*?grid-template-rows: minmax\(0, 1fr\) auto minmax\(0, 1fr\)/,
+  )
+  assert.match(
+    holdCss190,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.why-blast \.why-chip \{[\s\S]*?height: 100%/,
+  )
+  assert.match(whyPlay190, /1\.4\.190: ≤720 fills purple void/)
+  assert.match(cssSrc, /1\.4\.190: Easy Hold ≤720 fill purple void/)
+  assert.match(latestChange('1.4.190').items.join('\n'), /Easy Hold.*≤720|purple void under the CTA/i)
+  assert.doesNotMatch(
+    latestChange('1.4.190').items.join('\n'),
+    /Fixes #238|Fixes #239|Fixes #240|Lock In win-end|Match \(picture|empty purple card|Story Snap|eyebrow|Creed merge|Fixes #232|empty-lot|Fixes #217|Build Argument ≤720 fill|Easy Link ≤720 fill|Father Dash ≤720 fill/i,
+    '1.4.190 must not re-claim Match / Lock In win-end / Samaritan / Snap / Creed / Manage / letterbox / Build / Link / Father Dash',
+  )
+}
+
+
 
 // Easy Clear 1.4.181: Easy Creed merge ≤720 HUD peel (invent Fun/Clear)
 {
