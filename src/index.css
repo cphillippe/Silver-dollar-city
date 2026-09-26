@@ -4665,6 +4665,20 @@ html[data-easy='on'] .mind-node em {
   }
 }
 
+/* Easy Clear 1.4.196: Easy Father ≤720 slider→CTA purple gap (Fixes #253) —
+   After fill 189 grew play + stretch run-scene, global .cta-dock { margin-top: auto }
+   still steals free space before flex-grow, leaving a large empty purple void between
+   the timing slider (run-rail) and the Hold pad (Shot 1.4.190 / 07-father). Zero the
+   auto margin so run-scene flex:1 absorbs the portrait — tight slider→CTA spacing.
+   HUD peel 173 / speech thin 154 / fill 189 stay; Match / Lock In / Creed / Story Creek
+   / Hold / Link / Build / Samaritan / Sort / Snap untouched. Do NOT pack #250/#251/#252. */
+@media (max-height: 720px) {
+  .play.is-father-run .cta-dock,
+  .play.is-father-run .cta-dock.run-dock {
+    margin-top: 0;
+  }
+}
+
 .miss-banner {
   display: grid;
   gap: 2px;

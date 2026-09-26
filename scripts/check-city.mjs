@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.195')
+assert.equal(APP_VERSION, '1.4.196')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3478,6 +3478,30 @@ console.log('check-city: ok')
     '1.4.195 must not pack #250/#251/#253 or re-claim quiz / Match / Hold arena / win-end / Creed / Story Creek / Link / Build / Father / maze / bowl',
   )
 }
+
+// Easy Clear 1.4.196: Father ≤720 slider→CTA purple gap (Fixes #253)
+{
+  const indexCss196 = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
+  const fatherPlay196 = readFileSync(
+    new URL('../src/components/challenges/FatherRunPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(indexCss196, /1\.4\.196: Easy Father ≤720 slider→CTA purple gap/)
+  assert.match(
+    indexCss196,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-father-run \.cta-dock,[\s\S]*?margin-top: 0/,
+  )
+  assert.match(fatherPlay196, /1\.4\.196: ≤720 zeros cta-dock margin-top/)
+  assert.match(cssSrc, /1\.4\.196: Easy Father ≤720 slider→CTA purple gap/)
+  assert.match(latestChange('1.4.196').items.join('\n'), /Fixes #253|slider→CTA|purple void/i)
+  assert.match(latestChange('1.4.196').title, /Father|≤720|slider→CTA|purple gap/i)
+  assert.doesNotMatch(
+    latestChange('1.4.196').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Lock In quiz|Lock In feedback|grid→footer|Creed merge ≤720 fill|Story Creek ≤720 fill|Easy Hold.*≤720 fill|gem-board|Build Argument ≤720 fill|Easy Link ≤720 fill|maze-board|merge-bowl|stored-line|Fixes #239|why-miss-teach/i,
+    '1.4.196 must not pack #250/#251/#252 or re-claim Match / Lock In / Hold / Creed / Story Creek / Link / Build / maze / bowl',
+  )
+}
+
 
 // Easy Clear 1.4.194: Lock In quiz ≤720 fill purple void (Fixes #251)
 {
