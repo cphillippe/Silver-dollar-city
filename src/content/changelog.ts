@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.181',
+    title: 'Easy Creed merge: ≤720 HUD peel',
+    when: '2026-09-25',
+    items: [
+      'Easy Creed merge on ≤720px tall: hide who·where kicker + ladder rung names; tiny score so candy bowl + Drop chip stay above fold (complements 1.4.159 bowl-first; Father 1.4.173 / maze 1.4.175 hide-kicker family; invent Fun/Clear)',
+    ],
+  },
+  {
     version: '1.4.180',
     title: 'Easy Manage: empty-lot header + compact sheet',
     when: '2026-09-25',
