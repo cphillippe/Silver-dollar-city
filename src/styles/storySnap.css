@@ -302,6 +302,26 @@
   }
 }
 
+/* Easy Clear 1.4.241: Easy Story Snap ≤720 / phone portrait HUD peel —
+   After HUD peel 182 (≤720 only), real phones ~390×844 still show eyebrow +
+   who·where that bury stage · strip · pad — those peels never apply at Shot
+   heights. Fill 197 + pad→CTA 209 already extended to 920 by invent 223, but
+   HUD peel never invent-climbed. Extend hide eyebrow + easy-who-where-line
+   across phone portrait heights (max-height: 920px) so stage · strip · pad
+   stay clear on tall phones (Easy Story Snap arcade chrome; invent Fun/Clear).
+   Continuation of Creed HUD 233 / Creek maze HUD 234 hide-kicker family.
+   HUD 182 ≤720 stays. Do NOT pack Match / Lock In / Learn / Father / Creek /
+   Dig / Hold / Sort / Link / Build / Sequence / Manage / Claim merge / gemSearch. */
+@media (max-height: 920px) {
+  .play.is-story-snap .eyebrow {
+    display: none;
+  }
+
+  .play.is-story-snap .easy-who-where-line {
+    display: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .play.is-story-snap.is-shake .snap-stage {
     animation: none;
