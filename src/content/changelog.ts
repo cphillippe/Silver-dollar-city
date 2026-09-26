@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.150',
+    title: 'Easy Home: Match-first coach',
+    when: '2026-09-25',
+    items: [
+      'Easy Home cold coach: Match → Learn → Lock In — “now” highlights Match (real next play); Learn stays a re-read, not a false first step (Fixes #187)',
+    ],
+  },
+  {
     version: '1.4.149',
     title: 'Cold Start Easy: Home before Match',
     when: '2026-09-25',
