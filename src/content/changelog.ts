@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.196',
+    title: 'Easy Father: ≤720 close slider→CTA purple gap',
+    when: '2026-09-25',
+    items: [
+      'Easy Father timing on ≤720px tall: zero cta-dock margin-top so run-scene flex fill absorbs the portrait — no large empty purple void between the timing slider and the Hold pad (Fixes #253 · Shot 1.4.190 / 07-father; after Father fill 1.4.189 left auto margin stealing free space; do not pack #250 / #251 / #252; HUD peel 173 / speech thin 154 / Match 193 / Lock In 194·195 / Creed / Story Creek / Hold / Link / Build / Samaritan / Sort / Snap peels untouched)',
+    ],
+  },
+  {
     version: '1.4.195',
     title: 'Easy Lock In feedback: ≤720 fill purple void',
     when: '2026-09-25',
