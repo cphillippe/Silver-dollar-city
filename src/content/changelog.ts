@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.234',
+    title: 'Easy Story Creek: ≤720 close maze HUD peel on tall phone',
+    when: '2026-09-26',
+    items: [
+      'Easy Story Creek road maze on ≤720 / phone portrait: extend HUD peel so who·where kicker · thumbs · caption hide and maze-beats + board stay clear — no buried board on tall phones (invent Fun/Clear; continuation of Story Creek maze HUD peel 175 ≤720 family; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.233',
     title: 'Easy Creed: ≤720 close Claim merge HUD peel on tall phone',
     when: '2026-09-26',
