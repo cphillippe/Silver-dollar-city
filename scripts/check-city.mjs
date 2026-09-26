@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.269')
+assert.equal(APP_VERSION, '1.4.270')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -6020,5 +6020,71 @@ console.log('check-city: ok')
     latestChange('1.4.269').items.join('\n'),
     /Fixes #|Father Dash|Learn cream|Samaritan|Manage|Lock In|Dig|Creed|Build|Sort|Link|Claim merge|Source dig|Sequence|Match grid|Home dock|coach|miss-teach|maze-stage|Hold dock/i,
     '1.4.269 must not fix phone-fail issues or climb another Easy surface',
+  )
+}
+
+// Easy Fun 1.4.270: Easy one-more win-end dock on tall phone (invent Fun/Clear · Shot wake)
+{
+  const winCss270 = readFileSync(new URL('../src/styles/matchWin.css', import.meta.url), 'utf8')
+  const gem270 = readFileSync(
+    new URL('../src/components/challenges/GemSearchPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  const snap270 = readFileSync(
+    new URL('../src/components/challenges/StorySnapPlayView.tsx', import.meta.url),
+    'utf8',
+  )
+  const stored270 = readFileSync(new URL('../src/components/StoredLine.tsx', import.meta.url), 'utf8')
+  const match270 = readFileSync(
+    new URL('../src/components/challenges/MatchPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(winCss270, /1\.4\.270: Easy one-more win-end dock/)
+  assert.match(
+    winCss270,
+    /1\.4\.270: Easy one-more win-end dock[\s\S]*?@media \(max-height: 920px\), \(min-height: 921px\)/,
+  )
+  assert.match(
+    winCss270,
+    /1\.4\.270: Easy one-more win-end dock[\s\S]*?\.held-triad dd \{[\s\S]*?#fff6e8/,
+  )
+  assert.match(
+    winCss270,
+    /1\.4\.270: Easy one-more win-end dock[\s\S]*?\.town-return \.btn \{[\s\S]*?min-height: 64px/,
+  )
+  assert.match(
+    winCss270,
+    /1\.4\.270: Easy one-more win-end dock[\s\S]*?\.play\.is-match\.is-win \.cta-dock \.btn \{[\s\S]*?min-height: 64px/,
+  )
+  assert.match(
+    winCss270,
+    /1\.4\.270: Easy one-more win-end dock[\s\S]*?\.match-yes strong \{[\s\S]*?color: #2a2118/,
+  )
+  assert.match(
+    winCss270,
+    /1\.4\.270: Easy one-more win-end dock[\s\S]*?\.btn\.more-match \{[\s\S]*?min-height: 64px[\s\S]*?#ffcc33/,
+  )
+  assert.match(
+    winCss270,
+    /1\.4\.270: Easy one-more win-end dock[\s\S]*?\.snap-claim \{[\s\S]*?color: #2a2118/,
+  )
+  assert.match(
+    winCss270,
+    /1\.4\.270: Easy one-more win-end dock[\s\S]*?\.text-link \{[\s\S]*?min-height: 60px/,
+  )
+  assert.match(gem270, /1\.4\.270: tall-phone one-more win-end dock/)
+  assert.match(snap270, /1\.4\.270: tall-phone one-more win-end dock/)
+  assert.match(stored270, /1\.4\.270: tall-phone one-more win-end dock/)
+  assert.match(match270, /1\.4\.270: tall-phone one-more win-end dock/)
+  assert.match(cssSrc, /1\.4\.270: Easy one-more win-end dock/)
+  assert.match(
+    latestChange('1.4.270').items.join('\n'),
+    /win-end|one-more|phone portrait|invent Fun\/Clear|Shot wake|claim/i,
+  )
+  assert.match(latestChange('1.4.270').title, /one-more|win-end|≤720|Shot wake/i)
+  assert.doesNotMatch(
+    latestChange('1.4.270').items.join('\n'),
+    /Fixes #|Father Dash|Learn cream|Samaritan|Manage|Dig|Creed|Night Watch|Home map|Hold dock|panel-blast|SNAG|miss-teach|maze-stage/i,
+    '1.4.270 must not fix phone-fail issues or climb another Easy surface',
   )
 }
