@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.170',
+    title: 'Easy Lock In: ≤720 arena-first',
+    when: '2026-09-25',
+    items: [
+      'Easy Lock In (WhyBlast) on ≤720px tall: hide outer Saved eyebrow + quiet From under claim so chips · Main idea · next-tap stay above fold (complements 1.4.156 thin + 1.4.161 miss PlainTalk; invent Fun/Clear)',
+    ],
+  },
+  {
     version: '1.4.168',
     title: 'Easy Match: ≤720 board-first',
     when: '2026-09-25',
