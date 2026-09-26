@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Silver City — Witness Square QA seed</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 28px 20px 48px;
+        font-family: "Outfit", system-ui, sans-serif;
+        background: #2a0d58;
+        color: #f6efe2;
+        line-height: 1.45;
+      }
+      main {
+        max-width: 38rem;
+      }
+      a {
+        color: #ffcc33;
+      }
+      code {
+        color: #ffe08a;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Witness Square QA seed</h1>
+      <p>
+        Easy Home draws nothing on an empty Witness Square lot. This page writes a
+        local save so the candy hall is already up, then opens Home.
+      </p>
+      <ul>
+        <li>
+          <a href="?stage=scaffold">scaffold</a> — two Story Creek walks
+          (<code>ph-road</code>, <code>ph-father</code>). Candy file
+          <code>plot-bench-scaffold.webp</code>.
+        </li>
+        <li>
+          <a href="?stage=built">built</a> — those walks plus
+          <code>wb-creed</code>. Candy file <code>plot-bench-built.webp</code>.
+        </li>
+        <li>
+          <a href="?stage=lit">lit</a> — those walks plus
+          <code>wb-creed</code>, <code>wb-early</code>, <code>wb-method</code>,
+          <code>wb-women</code>. Candy file <code>plot-bench-lit.webp</code>.
+        </li>
+      </ul>
+      <p>
+        Porch is built (one daily). Hollow is built. Gate, journal, and lookout
+        stay empty. Add <code>stay=1</code> to keep this note on screen.
+      </p>
+      <p id="status">Seeding…</p>
+    </main>
+    <script>
+      const params = new URLSearchParams(location.search)
+      const asked = params.get('stage')
+      const stage = asked === 'built' || asked === 'lit' ? asked : 'scaffold'
+      const hollow = ['ph-road', 'ph-father']
+      const benchByStage = {
+        scaffold: [],
+        built: ['wb-creed'],
+        lit: ['wb-creed', 'wb-early', 'wb-method', 'wb-women'],
+      }
+      const benchTier = { scaffold: 1, built: 2, lit: 4 }
+      const completed = hollow.concat(benchByStage[stage])
+      const snap = {
+        lookout: 'empty',
+        observatory: 'empty',
+        hollow: 'built',
+        journal: 'empty',
+        bench: stage,
+        lamps: 'empty',
+        gate: 'empty',
+        porch: 'built',
+      }
+      const fills = {
+        lookout: 0,
+        observatory: 0,
+        hollow: 2,
+        journal: 0,
+        bench: benchByStage[stage].length,
+        lamps: 0,
+        gate: 0,
+        porch: 1,
+      }
+      const envelope = {
+        kind: 'silver-city-save',
+        schemaVersion: 1,
+        appVersion: '1.4.178',
+        savedAt: new Date().toISOString(),
+        progress: {
+          started: true,
+          easyMode: true,
+          completed: completed,
+          journal: [],
+          firstTry: [],
+          stars: {},
+          dailyDates: ['2026-09-25'],
+          lastDailyDate: '2026-09-25',
+          streak: 1,
+          bestStreak: 1,
+          held: [],
+          memory: {},
+          elaborations: {},
+          theme: 'candy',
+          cityBuilt: {
+            porch: 2,
+            hollow: 2,
+            bench: benchTier[stage],
+            observatory: 0,
+            gate: 0,
+            lookout: 0,
+            journal: 0,
+            lamps: 0,
+          },
+        },
+      }
+      localStorage.setItem('silver-city-progress-v1', JSON.stringify(envelope))
+      localStorage.setItem('silver-city-seen-city-v1', JSON.stringify(snap))
+      localStorage.setItem('silver-city-seen-fill-v1', JSON.stringify(fills))
+      const status = document.getElementById('status')
+      status.textContent =
+        'Witness Square ' + stage + ' is saved. Candy cutout should be on Home.'
+      if (params.get('stay') !== '1') location.replace('./index.html')
+    </script>
+  </body>
+</html>
