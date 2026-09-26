@@ -1,10 +1,10 @@
 # ready-easy-fun-clear-207 — 1.4.207 Easy Match ≤720 close score→CTA purple gap
 
-**PR:** (pending)
+**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/268
 **Branch:** `ship/easy-fun-clear-207` → `main`
 **Version:** 1.4.207
-**Peel:** (pending)
-**Tip:** (pending)
+**Peel:** `5a07cf7` (`5a07cf7543b0a300a4af8db1dd46014e66ea4b77`)
+**Tip:** `b322548` (`b322548aa056e0e7cd45eeb68d1747658b8deb7b`)
 **Base live:** 1.4.206 (`d897909`, PR #267 Easy Learn ≤720 fill held-clear purple void on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
@@ -45,4 +45,4 @@ MODEL=gemini-flash-latest — Invent Fun/Clear (no open Easy Fun/Clear issue). I
 - Android versionName **1.4.113** unchanged
 
 ## Mergeability
-(pending)
+MERGEABLE CLEAN
