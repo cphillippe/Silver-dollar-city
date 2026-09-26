@@ -327,6 +327,9 @@ assert.doesNotMatch(welcomeSrc, /cityPromise/)
 assert.doesNotMatch(welcomeSrc, /welcome-cast-late/)
 assert.match(welcomeSrc, /YOU · RIVER/)
 assert.match(welcomeSrc, /GUIDE · JUNIPER/)
+assert.match(welcomeSrc, /name: 'hub'/)
+assert.doesNotMatch(welcomeSrc, /name: 'link'/, 'Cold Start Easy must land hub (map+coach), not link/Match')
+assert.doesNotMatch(welcomeSrc, /easyLineHeld/, '1.4.149 Home-first: no Mercy-held ternary on Welcome.begin')
 
 const storySrc = readFileSync(
   new URL('../src/content/story.ts', import.meta.url),
@@ -1123,7 +1126,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.148')
+assert.equal(APP_VERSION, '1.4.149')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1453,7 +1456,7 @@ assert.match(cssSrc, /is-easy-hold/)
   assert.match(dockCss, /backdrop-filter: blur/)
   assert.doesNotMatch(dockCss, /#16062e/, 'sticky CTA docks must not be an opaque black slab')
 }
-assert.match(latestChange(APP_VERSION).items.join('\n'), /ChallengeScreen|puzzle-title|LinkScreen|PuzzleLead|#185/i)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Cold Start|Welcome|Home|coach|hub|#186/i)
 {
   const storyCardCss = cssSrc.match(/\.easy-story-card,[\s\S]*?\.easy-story-card::before \{[\s\S]*?\n\}/)?.[0] ?? ''
   assert.match(storyCardCss, /border:\s*0/)
@@ -2350,8 +2353,8 @@ assert.match(mapSrc, /easy \? null : \(\s*\n\s*<>[\s\S]*city-street-main/)
 assert.match(mapSrc, /if \(isEasy\(progress\)\) return/)
 assert.match(mapSrc, /if \(playing\.current && !isEasy\(progress\)\) return/)
 assert.match(mapSrc, /Tap a building to Manage it/)
-assert.match(latestChange(APP_VERSION).title, /Challenge|title|Easy/i)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /ChallengeScreen|puzzle-title|LinkScreen|PuzzleLead|#185/i)
+assert.match(latestChange(APP_VERSION).title, /Cold Start|Home|Match|Easy/i)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Cold Start|Welcome|Home|coach|hub|#186/i)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-img[\s\S]*?fill: none !important/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img\.is-built[\s\S]*?fill: none/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-hit[\s\S]*?stroke: none/)
@@ -2459,7 +2462,11 @@ assert.match(
 )
 assert.match(
   readFileSync(new URL('../src/components/Welcome.tsx', import.meta.url), 'utf8'),
-  /easyLineHeld/,
+  /name: 'hub'/,
+)
+assert.doesNotMatch(
+  readFileSync(new URL('../src/components/Welcome.tsx', import.meta.url), 'utf8'),
+  /name: 'link'/,
 )
 assert.match(
   readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8'),
