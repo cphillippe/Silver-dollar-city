@@ -2402,6 +2402,21 @@ for (const id of ['porch', 'gate', 'journal', 'hollow', 'bench']) {
     )
   }
 }
+const qaSeed = readFileSync(new URL('../public/qa-seed.html', import.meta.url), 'utf8')
+const qaSeedDocs = readFileSync(new URL('../docs/qa-seed.html', import.meta.url), 'utf8')
+assert.equal(qaSeedDocs, qaSeed, 'docs/qa-seed.html must match public/qa-seed.html')
+assert.match(qaSeed, /silver-city-progress-v1/)
+assert.match(qaSeed, /silver-city-seen-city-v1/)
+assert.match(qaSeed, /silver-city-seen-fill-v1/)
+assert.match(qaSeed, /ph-road/)
+assert.match(qaSeed, /ph-father/)
+assert.match(qaSeed, /plot-bench-scaffold\.webp/)
+assert.match(qaSeed, /plot-bench-built\.webp/)
+assert.match(qaSeed, /plot-bench-lit\.webp/)
+assert.match(
+  readFileSync(new URL('../vite.config.ts', import.meta.url), 'utf8'),
+  /navigateFallbackDenylist:\s*\[\/\\\/qa-seed\\\.html\/\]/,
+)
 assert.match(defendSrc, /easyTapTarget/)
 assert.match(defendNightSrc, /data-person-node="walker"/)
 assert.doesNotMatch(defendSrc, /walkerCue|easySolo|clearWalkerCue|hideOther/)
