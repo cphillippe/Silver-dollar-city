@@ -1,5 +1,2 @@
-1.4.175 Easy Story Creek maze ≤720 HUD peel (invent Fun/Clear)
-Gemini: unavailable — GEMINI_API_KEY present but not AIza AI Studio shape (same as 163–173).
-Shipped Manager-steered invent peel without live Gemini APPROVE.
-Peel: maze.css @media (max-height:720px) hides .play.is-road-maze .story-kicker + .run-thumbs + .story-caption; keeps maze-beats; tinies .match-score; board max-height min(68dvh,540px) so beats + board stay above fold. Complements 1.4.153 compress + 1.4.143 how-dedupe. Father 1.4.173 / Creed 1.4.159 / Dig how 1.4.158 untouched.
-Comment in RoadMazePlay.tsx. 1.4.173 Father Dash merged (#228). Do not claim 1.4.172 / 1.4.174 (Map Witness owns 1.4.174). Dig/Hard/NW/Town/stores/Pack B/Home map candy parked.
+MODEL=gemini-flash-latest
+The white title and white pill text have extremely poor contrast against the cream card, and the claim text is clearly truncated ("Neighbor is the one who shows"), resulting in a **readability fail**.
