@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.214',
+    title: 'Easy Story Creek speech: ≤720 close slider→HOLD purple void',
+    when: '2026-09-25',
+    items: [
+      'Easy Story Creek speech / hold on ≤720 phone portrait: extend fill + dock-margin so the timing slider and HOLD TO RUN pack tight — no large purple void between them (Fixes #272; continuation of the earlier speech-hold dock peel; do not touch other Shot 200 issues)',
+    ],
+  },
+  {
     version: '1.4.213',
     title: 'Easy Lock In feedback: ≤720 close bottom purple void',
     when: '2026-09-25',
