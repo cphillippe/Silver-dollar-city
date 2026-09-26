@@ -414,3 +414,181 @@
     -webkit-backdrop-filter: none;
   }
 }
+
+
+/* Easy Clear 1.4.253: Easy Match gemSearch ≤720 / tall-phone purple void residual after cream 246 (Fixes #345) —
+   After cream parchment gem-scroll·stage 246 (warm board · denser stretch · dock pin) Shot pack
+   1.4.250 03-easy-match.png (390×844) STILL fails — Gemini: content clustered at the top, massive
+   empty purple void in the lower half (residual after closed #332 / 1.4.246). Cause: cream on
+   `.gem-scroll` / `.gem-stage` still content-hugs / transparent flex-grow over the purple play
+   shell (`.play` purple-gold gradient · app-body dusk leftover outside the card), so leftover
+   below the grid still reads as a purple dead band. Strengthen further — NOT another 236/246
+   height/flex/cream-on-scroll-only copy: (1) paint opaque cream on `.app-body` + `.play.is-gem-search`
+   shell so tall leftover below the grid is cream floor through the full portrait (kill purple-gold
+   gradient bleed under Match); (2) solid `#fff6e8` + `background-image: none` on `.gem-scroll` /
+   `.gem-stage` beating any translucent wash; (3) warm board plate behind `.gem-board` (not #1a0840
+   purple seam chrome); (4) pin match-score / cta-dock to the cream floor with cream dock wash (not
+   transparent sticky purple blur). Match gem board ONLY — do NOT pack Learn / Lock In / Samaritan /
+   Father / Manage / Dig / Creek / parked maps. */
+@media (max-height: 920px) {
+  /* Cream app-body floor — leftover below a content-hug play is cream, not dusk purple void */
+  html[data-easy='on'] .app.is-play .app-body:has(.play.is-gem-search.is-panel-blast.is-story-docked) {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+    padding-top: 4px;
+    padding-bottom: 0;
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    color: var(--ink, #2a2118);
+  }
+
+  .daily-page.is-puzzle:has(.play.is-gem-search.is-panel-blast.is-story-docked),
+  .challenge-page.is-puzzle:has(.play.is-gem-search.is-panel-blast.is-story-docked) {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    gap: 2px;
+    overflow: hidden;
+  }
+
+  /* Opaque cream play shell — kill purple-gold gradient bleed under Match */
+  .play.is-gem-search.is-panel-blast.is-story-docked,
+  .daily-page.is-puzzle .play.is-gem-search.is-panel-blast.is-story-docked,
+  .challenge-page.is-puzzle .play.is-gem-search.is-panel-blast.is-story-docked {
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 4px;
+    overflow: hidden;
+    padding: 10px 10px 0;
+    border-radius: 22px;
+    border: 1px solid color-mix(in srgb, var(--ink, #2a2118) 12%, transparent);
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    color: var(--ink, #2a2118);
+    box-shadow: 0 2px 0 color-mix(in srgb, #000 6%, transparent);
+  }
+
+  /* Solid opaque cream parchment — leftover under grid is intentional cream board stage */
+  .play.is-gem-search.is-panel-blast.is-story-docked .gem-scroll {
+    flex: 1 1 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    gap: 4px;
+    padding: 6px;
+    padding-bottom: 6px;
+    border-radius: 16px;
+    border: 1px solid color-mix(in srgb, var(--ink, #2a2118) 10%, transparent);
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    box-shadow: 0 2px 0 color-mix(in srgb, #000 6%, transparent);
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .gem-stage {
+    flex: 1 1 0;
+    min-height: 0;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    border-radius: 12px;
+    background-color: #f5e6c8;
+    background-image: none;
+    background: color-mix(in srgb, #fff6e8 88%, #e8d4a8);
+    padding: 4px;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .gem-board {
+    width: min(100%, 96vw, 520px);
+    max-width: 100%;
+    min-height: 0;
+    height: 100%;
+    max-height: none;
+    flex: 1 1 0;
+    aspect-ratio: auto;
+    align-self: stretch;
+    align-content: stretch;
+    justify-content: stretch;
+    justify-items: stretch;
+    align-items: stretch;
+    gap: 0;
+    padding: 0;
+    /* Warm board plate seams — not #1a0840 purple dead chrome */
+    background: color-mix(in srgb, #fff6e8 55%, var(--gold, #c9a45c));
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .gem-cell {
+    min-width: 0;
+    min-height: 0;
+    aspect-ratio: unset;
+    width: auto;
+    height: auto;
+    align-self: stretch;
+    justify-self: stretch;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .story-strip,
+  .play.is-gem-search.is-panel-blast.is-story-docked .story-strip.is-dock,
+  .play.is-gem-search.is-panel-blast.is-story-docked .match-teach-dock,
+  .play.is-gem-search.is-panel-blast.is-story-docked .sort-how,
+  .play.is-gem-search.is-panel-blast.is-story-docked .match-score,
+  .play.is-gem-search.is-panel-blast.is-story-docked .cta-dock,
+  .play.is-gem-search.is-panel-blast.is-story-docked .match-yes,
+  .play.is-gem-search.is-panel-blast.is-story-docked .miss-banner,
+  .play.is-gem-search.is-panel-blast.is-story-docked .match-toast {
+    flex: 0 0 auto;
+  }
+
+  /* Teach dock reads on cream — kill dusk purple strip wash */
+  .play.is-gem-search.is-panel-blast.is-story-docked .match-teach-dock,
+  .play.is-gem-search.is-panel-blast.is-story-docked .story-strip,
+  .play.is-gem-search.is-panel-blast.is-story-docked .story-strip.is-dock {
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .match-score {
+    margin: 0;
+    margin-top: 2px;
+    color: color-mix(in srgb, var(--gold, #c9a45c) 70%, var(--ink, #2a2118));
+  }
+
+  /* Pin match-score / CTA to the cream floor — cream dock wash, not purple sticky blur */
+  .play.is-gem-search.is-panel-blast.is-story-docked .match-score,
+  .play.is-gem-search.is-panel-blast.is-story-docked .cta-dock {
+    position: static;
+    bottom: auto;
+    margin-top: auto;
+    flex: 0 0 auto;
+    padding-top: 8px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .cta-dock {
+    margin-top: 0;
+  }
+}
