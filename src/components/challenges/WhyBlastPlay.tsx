@@ -44,6 +44,7 @@ interface WhyBlastPlayProps {
 // Easy Clear 1.4.237: tall-phone strengthens fill 226 (height 100% · flex 1 1 0 · arena absorb · cta-dock static) so Lock In quiz closes bottom-half void (Fixes #316).
 // Easy Clear 1.4.213: ≤720 feedback packs residual bottom padding (Fixes #275).
 // Easy Clear 1.4.227: phone portrait extends fill 195 + pad-zero 213 so Lock In feedback closes bottom-half void (Fixes #299).
+// Easy Clear 1.4.238: tall-phone strengthens fill 227 (height 100% · flex 1 1 0 · why-miss-teach absorb · cta-dock static) so Lock In feedback closes bottom-half void (Fixes #317).
 export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: WhyBlastPlayProps) {
   const chips = useMemo(
     () => whyBlastChoices(reason, packMisses, whyBlastExtras(id), easyWhyLine),
