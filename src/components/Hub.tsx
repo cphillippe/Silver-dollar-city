@@ -122,6 +122,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
               Build this
             </button>
           </section>
+          {/* Easy Clear 1.4.251: parchment coach labels — Learn/Lock In contrast (Fixes #343). */}
           {!matchReady || coldMercy ? (
             <ol className="easy-coach" aria-label="Your next steps">
               <li className={focus === 'match' || !matchReady ? 'is-now' : ''}>

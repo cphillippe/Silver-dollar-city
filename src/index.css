@@ -3549,6 +3549,34 @@ html[data-easy='on'] .mind-node em {
   font-weight: 700;
 }
 
+/* Easy Clear 1.4.251: Easy Home dock Learn / Lock In contrast (Fixes #343) —
+   Shot pack 1.4.250 01-home.png — Gemini: "Learn" and "Lock In" buttons suffer
+   from severe low contrast with dark text. Cause: `.easy-coach-step` used
+   `color: inherit` so UA ButtonText / dark ink landed on the dusk purple dock
+   fill; Match `is-now` gold plate still read light. Force cream parchment labels
+   + full opacity + clearer gold lip on Easy Home coach pills so dark text is
+   gone; `is-now` gold highlight stays. Easy Home dock / CTAs ONLY — do not touch
+   Match play / Lock In quiz·feedback / Learn teach / Samaritan / Father / Manage /
+   Dig / parked Dig/Hard/NW/Town/stores/Pack B / Home map candy. */
+.hub.is-easy-home .easy-coach-step,
+.hub.is-easy-home .easy-dock-play .easy-coach-step {
+  color: var(--parchment, #fff6e8);
+  -webkit-text-fill-color: var(--parchment, #fff6e8);
+  opacity: 1;
+  border-color: rgba(255, 204, 51, 0.55);
+  background: rgba(58, 20, 128, 0.55);
+}
+
+.hub.is-easy-home .easy-dock-play .easy-coach-step.is-dock-now,
+.hub.is-easy-home .easy-coach li.is-now .easy-coach-step {
+  color: var(--parchment, #fff6e8);
+  -webkit-text-fill-color: var(--parchment, #fff6e8);
+  opacity: 1;
+  border-color: rgba(255, 204, 51, 0.85);
+  background: rgba(255, 204, 51, 0.22);
+  font-weight: 700;
+}
+
 .hub.is-easy-home .easy-core,
 .hub.is-easy-home .easy-extra-streets,
 .hub.is-easy-home .easy-home-head {
