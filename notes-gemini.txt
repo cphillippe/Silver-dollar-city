@@ -1,2 +1,2 @@
-MODEL=gemini-flash-latest
-The white title and white pill text have extremely poor contrast against the cream card, and the claim text is clearly truncated ("Neighbor is the one who shows"), resulting in a **readability fail**.
+Enormous blank purple letterboxing wastes nearly half the screen, crushing the game viewport while the bottom sheet is cramped and scroll-locked.
+FAIL

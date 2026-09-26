@@ -5,7 +5,7 @@ import { STORY, townVoice } from '../content/story'
 import { LOT_STORY } from '../content/lots'
 import { localDateKey } from '../lib/dates'
 import { CITY_PLOTS, nextGift, nextPlotId, type CityPlotId } from '../lib/city'
-import { anyUpgradeReady, lotTapWhy, visualFills, visualSnapshot } from '../lib/cityBuild'
+import { anyUpgradeReady, appliedTier, lotTapWhy, visualFills, visualSnapshot } from '../lib/cityBuild'
 import { EASY, EASY_MATCH_LINE, easyHomeFocus, easyHoldView, easyLineHeld, easyLoopLine, easyMatchReady, isEasy } from '../lib/easy'
 import { storyPlayFor } from '../lib/storyPlay'
 import { markLater, readLater, sessionDue } from '../lib/recall'
@@ -95,7 +95,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
 
     return (
       <main
-        className={`hub is-easy-home${mindPlot ? ' is-manage-open' : ''}`}
+        className={`hub is-easy-home${mindPlot ? ' is-manage-open' : ''}${mindPlot && appliedTier(mindPlot, progress) === 0 ? ' is-empty-lot' : ''}`}
         aria-label="Home"
       >
         <section className="easy-home-map" aria-label="Your city">
@@ -253,7 +253,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
 
   return (
     <main
-      className={`hub is-town is-inhabited${mindPlot ? ' is-manage-open' : ''}`}
+      className={`hub is-town is-inhabited${mindPlot ? ' is-manage-open' : ''}${mindPlot && appliedTier(mindPlot, progress) === 0 ? ' is-empty-lot' : ''}`}
       aria-label="The town"
     >
       {easy ? null : midStreet ? (

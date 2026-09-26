@@ -3395,6 +3395,56 @@ html[data-easy='on'] .mind-node em {
   display: none;
 }
 
+/* 1.4.180 — empty-lot keeps AppShell header (1.4.167 over-hid; Fixes #232). Letterbox stays #217. */
+.app:has(.hub.is-manage-open.is-empty-lot) {
+  grid-template-rows: auto 1fr;
+}
+
+.app:has(.hub.is-manage-open.is-empty-lot) .topbar {
+  display: flex;
+}
+
+/* 1.4.180 — empty-lot Manage sheet compact: Place·Person·Tool row + Build this (Fixes #232) */
+.mind-map.is-manage.is-empty-lot .mind-map-card {
+  max-height: min(30dvh, 280px);
+  padding: 4px 10px calc(4px + env(safe-area-inset-bottom, 0px));
+  gap: 2px;
+}
+
+.mind-map.is-manage.is-empty-lot .mind-map-scroll {
+  flex: 0 1 auto; /* hug — no stretch into 42dvh purple */
+  gap: 4px;
+}
+
+.mind-map.is-manage.is-empty-lot .mind-web {
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 3px;
+}
+
+.mind-map.is-manage.is-empty-lot .mind-node.is-place,
+.mind-map.is-manage.is-empty-lot .mind-node.is-person,
+.mind-map.is-manage.is-empty-lot .mind-node.is-tool {
+  grid-column: auto;
+}
+
+.mind-map.is-manage.is-empty-lot .mind-node {
+  padding: 3px 6px;
+}
+
+.mind-map.is-manage.is-empty-lot .mind-node .avatar,
+.mind-map.is-manage.is-empty-lot .mind-node .gem {
+  width: 28px;
+  height: 28px;
+}
+
+.mind-map.is-manage.is-empty-lot .mind-map-dock .btn.xl {
+  min-height: 48px;
+}
+
+.mind-map.is-manage.is-empty-lot .build-job {
+  font-size: 0.82rem;
+}
+
 
 /* Easy Home under dual is-play+is-town: full-bleed body, purple menu topbar */
 .app.is-town[data-easy='on'] .app-body {
