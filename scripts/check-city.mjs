@@ -1132,7 +1132,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.167')
+assert.equal(APP_VERSION, '1.4.168')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1462,7 +1462,7 @@ assert.match(cssSrc, /is-easy-hold/)
   assert.match(dockCss, /backdrop-filter: blur/)
   assert.doesNotMatch(dockCss, /#16062e/, 'sticky CTA docks must not be an opaque black slab')
 }
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Manage|#220|is-manage-open|topbar|dock|chrome/i)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Match|≤720|board-first|how\/say|gem|crossword|Lock In/i)
 {
   const storyCardCss = cssSrc.match(/\.easy-story-card,[\s\S]*?\.easy-story-card::before \{[\s\S]*?\n\}/)?.[0] ?? ''
   assert.match(storyCardCss, /border:\s*0/)
@@ -2369,8 +2369,8 @@ assert.match(mapSrc, /easy \? null : \(\s*\n\s*<>[\s\S]*city-street-main/)
 assert.match(mapSrc, /if \(isEasy\(progress\)\) return/)
 assert.match(mapSrc, /if \(playing\.current && !isEasy\(progress\)\) return/)
 assert.match(mapSrc, /Tap a building to Manage it/)
-assert.match(latestChange(APP_VERSION).title, /Manage|Hub chrome|compress/i)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Manage|#220|is-manage-open|topbar|dock|chrome/i)
+assert.match(latestChange(APP_VERSION).title, /Match|board-first|≤720/i)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Match|≤720|board-first|how\/say|gem|crossword|Lock In/i)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-img[\s\S]*?fill: none !important/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img\.is-built[\s\S]*?fill: none/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-hit[\s\S]*?stroke: none/)
@@ -2840,6 +2840,26 @@ assert.match(cssSrc, /1\.4\.162: Learn short-story ≤720 peel|Fixes #208/)
     /\.app:has\(\.hub\.is-manage-open\)[\s\S]*?grid-template-rows:\s*1fr/,
     '1.4.167 collapse topbar row (#220)',
   )
+}
+
+// Easy Clear 1.4.168: Easy Match ≤720 board-first how/say peel (invent Fun/Clear)
+{
+  const matchCss168 = readFileSync(new URL('../src/styles/match.css', import.meta.url), 'utf8')
+  const gemPlay168 = readFileSync(
+    new URL('../src/components/challenges/GemSearchPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(matchCss168, /1\.4\.168: Easy Match \(gem \/ crossword\) ≤720 board-first/)
+  assert.match(
+    matchCss168,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-gem-search\.is-panel-blast \.sort-how \{[\s\S]*?display: none/,
+  )
+  assert.match(
+    matchCss168,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.match-teach-say \{[\s\S]*?display: none/,
+  )
+  assert.match(gemPlay168, /1\.4\.168: ≤720 peels how\/say chrome in match\.css/)
+  assert.match(cssSrc, /1\.4\.168: Easy Match \(gem \/ crossword\) ≤720 board-first/)
 }
 
 
