@@ -3,8 +3,8 @@
 **PR:** (pending)
 **Branch:** `ship/easy-fun-clear-200` → `main`
 **Version:** 1.4.200
-**Peel:** (pending)
-**Tip:** (pending)
+**Peel:** `ccd47bd` (`ccd47bd598616ef141be8c2ea4043fd3589c2014`)
+**Tip:** `ccd47bd` (`ccd47bd598616ef141be8c2ea4043fd3589c2014`)
 **Base live:** 1.4.199 (`709df26`, PR #260 Easy Link ≤720 close choices→CTA purple gap on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
