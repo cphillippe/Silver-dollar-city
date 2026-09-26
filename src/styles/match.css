@@ -374,3 +374,49 @@ html[data-easy='on'] .next-tap {
     font-size: 0.7rem;
   }
 }
+
+/* Easy Clear 1.4.184: Easy Match (picture · main idea) ≤720 fill empty purple card —
+   MatchPlay is-deal grid was flex:0 + auto rows so play shell stretched while board
+   stayed content-sized (Shot 1.4.180 / 03-easy-match · Fixes #238). Grow grid +
+   stretch card rows; hide .sort-how (prompt lead already teaches). Gem 168 untouched. */
+@media (max-height: 720px) {
+  .is-puzzle .play.is-match.is-deal {
+    gap: 4px;
+  }
+
+  .is-puzzle .play.is-match.is-deal .sort-how {
+    display: none;
+  }
+
+  .is-puzzle .play.is-match.is-deal .match-grid {
+    flex: 1 1 auto;
+    min-height: 0;
+    grid-template-rows: auto minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: 10px 10px;
+  }
+
+  .is-puzzle .play.is-match.is-deal .match-card {
+    min-height: 0;
+    height: 100%;
+    align-self: stretch;
+  }
+
+  .is-puzzle .play.is-match.is-deal .match-card.is-picture {
+    min-height: 0;
+    justify-content: stretch;
+  }
+
+  .is-puzzle .play.is-match.is-deal .match-scene {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    height: auto;
+    aspect-ratio: auto;
+    object-fit: contain;
+  }
+
+  .is-puzzle .play.is-match.is-deal .match-score {
+    margin: 0;
+    font-size: 0.7rem;
+  }
+}
