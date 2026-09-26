@@ -49,6 +49,7 @@ interface WhyBlastPlayProps {
 // Easy Clear 1.4.227: phone portrait extends fill 195 + pad-zero 213 so Lock In feedback closes bottom-half void (Fixes #299).
 // Easy Clear 1.4.238: tall-phone strengthens fill 227 (height 100% · flex 1 1 0 · why-miss-teach absorb · cta-dock static) so Lock In feedback closes bottom-half void (Fixes #317).
 // Easy Clear 1.4.248: tall-phone cream-card fill — paint parchment recall-gate · transparent why-miss-teach · dark ink · dock pin — closes Shot 240 purple residual (Fixes #334).
+// Easy Clear 1.4.255: tall-phone cream shell fill — opaque app-body + journal miss-teach cream plate · solid recall-gate (no purple-gold gradient) · cream dock floor pin · horizontal overflow pin (no left clip) — closes Shot 250 purple residual after 248 (Fixes #347).
 export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: WhyBlastPlayProps) {
   const chips = useMemo(
     () => whyBlastChoices(reason, packMisses, whyBlastExtras(id), easyWhyLine),
