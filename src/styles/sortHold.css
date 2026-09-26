@@ -1761,6 +1761,29 @@ html[data-easy='on'] .recall-card {
   }
 }
 
+/* Easy Clear 1.4.210: Easy Hold ≤720 close hud→arena purple gap —
+   After fill 190 grew why-blast + stretch why-arena and dock-margin 202 zeroed
+   CTA margin, gap:6px / arena gap:8px still leave purple between the next-tap
+   hud and claim·chips (Snap/Match dock-margin family · invent Fun/Clear; Shot
+   wake version — CoS wakes Shot after merge). Tighten why-blast + why-arena +
+   hud gaps — fill 190 / dock 202 stay; quiz 194 / miss 195 / Snap 209 peels
+   untouched. */
+@media (max-height: 720px) {
+  .recall-gate.is-easy-hold:has(.why-blast),
+  .why-blast {
+    gap: 2px;
+  }
+
+  .why-blast .why-arena {
+    gap: 4px;
+  }
+
+  .why-blast-hud {
+    gap: 2px;
+  }
+}
+
+
 /* Easy Clear 1.4.194: Lock In quiz ≤720 fill purple void (Fixes #251) —
    After Hold arena stretch 190 / win-end 185 / chrome 170·156, the gold
    recall-gate quiz card still hugs content in journal rehearse so ≤720 leaves
