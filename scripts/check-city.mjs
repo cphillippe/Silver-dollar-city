@@ -68,6 +68,8 @@ import {
   easyPlotTag,
   easyTagMetrics,
   plotTag,
+  tierJob,
+  nextUpgradeNeed,
   EASY_FOLK_LIFT,
   EASY_FOLK_NUDGE,
 } from '../src/lib/cityBuild.ts'
@@ -1135,7 +1137,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.272')
+assert.equal(APP_VERSION, '1.4.273')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -6162,5 +6164,54 @@ console.log('check-city: ok')
     latestChange('1.4.272').items.join('\n'),
     /Fixes #379|Fixes #378|Fixes #380|Fixes #381|Fixes #382|mid-quiz|Match candy|Dig deeper|Night Watch|Town|Star lamps/i,
     '1.4.272 must stay on the Easy Lock In hub and must not claim Fixes #379',
+  )
+}
+
+// Easy Clear 1.4.273: Easy Star lamps Manage sheet kid-clear copy + light head→job compress
+{
+  const welcomeCss273 = readFileSync(new URL('../src/styles/welcome.css', import.meta.url), 'utf8')
+  const mindMap273 = readFileSync(new URL('../src/components/MindMap.tsx', import.meta.url), 'utf8')
+  const lampsRooms = {
+    ...emptyProgress(),
+    stars: { walk: 8 },
+    cityBuilt: { ...emptyCityBuilt(), lamps: 3 },
+  }
+  assert.equal(tierJob(3, true), 'More room here for ideas you kept.')
+  assert.equal(
+    tierJob(3, false),
+    'Rooms for more ideas. Dig deeper opens on lines you have kept.',
+  )
+  assert.equal(
+    nextUpgradeNeed('lamps', lampsRooms, true).line,
+    'Catch twelve stars, or keep a night.',
+  )
+  assert.equal(
+    nextUpgradeNeed('lamps', lampsRooms, false).line,
+    'Twelve stars and nights remembered light the street.',
+  )
+  assert.equal(easyPlaceSub('lamps'), 'Juniper’s street light')
+  assert.equal(LOT_STORY.lamps.path, 'Remember')
+  assert.match(mindMap273, /function easyPlaceTile/)
+  assert.match(mindMap273, /1\.4\.273 — Easy PLACE uses the path role/)
+  assert.match(mindMap273, /easy \? easyPlaceTile\(plotId, graph\.placeTitle\)/)
+  assert.match(welcomeCss273, /1\.4\.273: Easy Manage sheet head→job gap/)
+  assert.match(
+    welcomeCss273,
+    /1\.4\.273: Easy Manage sheet head→job gap[\s\S]*?html\[data-easy='on'\] \.mind-map\.is-manage \.mind-map-head \{[\s\S]*?padding-bottom:\s*0/,
+  )
+  assert.match(
+    welcomeCss273,
+    /1\.4\.273: Easy Manage sheet head→job gap[\s\S]*?html\[data-easy='on'\] \.mind-map\.is-manage \.mind-map-card \{[\s\S]*?gap:\s*0/,
+  )
+  assert.match(cssSrc, /1\.4\.273: Easy Manage sheet head→job gap/)
+  assert.match(latestChange('1.4.273').title, /Star lamps|≤720|kid-clear/)
+  assert.match(
+    latestChange('1.4.273').items.join('\n'),
+    /phone portrait|Remember|ideas you kept|street light/i,
+  )
+  assert.doesNotMatch(
+    latestChange('1.4.273').items.join('\n'),
+    /Fixes #379|Fixes #380|Fixes #381|Fixes #382|Match candy|Night Watch|Dig deeper/i,
+    '1.4.273 must stay on Easy Star lamps Manage copy',
   )
 }

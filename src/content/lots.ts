@@ -72,6 +72,7 @@ export function easyPlaceSub(id: CityPlotId): string | null {
   if (id === 'observatory') return 'Nora’s Sky Watch'
   if (id === 'gate') return 'Swinging Arch · Bedrock Step'
   if (id === 'lookout') return 'Hope’s Meaning Ridge'
+  if (id === 'lamps') return 'Juniper’s street light'
   return null
 }
 
