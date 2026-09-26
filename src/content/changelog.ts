@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.245',
+    title: 'Easy Learn: ≤720 close tall-phone bottom purple void residual (Fixes #331)',
+    when: '2026-09-26',
+    items: [
+      'Fixes #331: Easy Learn cream-pill on ≤720 / tall phone portrait — paint parchment teach-gate cream plate (dark ink · triad space-between + row pad · Find-the-gems dock pinned to cream floor) so leftover fill is cream-inside-card, not a dead purple band under the CTAs (Shot 240 residual after Learn tall-void peel 1.4.235; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.244',
     title: 'Easy Sort: ≤720 close board-first HUD on tall phone',
     when: '2026-09-26',
