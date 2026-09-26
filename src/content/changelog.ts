@@ -8,7 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.191',
+    title: 'Easy Story Creek: ≤720 fill purple void',
+    when: '2026-09-25',
+    items: [
+      'Easy Story Creek (Samaritan road maze) on ≤720px tall: grow play shell + stretch maze-stage / maze-board so beats · board fill the gold card — no empty purple void under the board (Match 1.4.184 / Hold 1.4.190 fill family · invent Fun/Clear; HUD peel 1.4.175 untouched; Match / Lock In / Samaritan Sequence / Sort / Snap / Creed / Hold / Build Argument / Link / Father Dash peels untouched)',
+    ],
+  },
+  {
     version: '1.4.190',
+
     title: 'Easy Hold: ≤720 fill purple void',
     when: '2026-09-25',
     items: [

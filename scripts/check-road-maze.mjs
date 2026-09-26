@@ -263,4 +263,19 @@ assert.match(
 )
 assert.match(playSrc, /1\.4\.175: ≤720 peels HUD/)
 
+
+// Easy Clear 1.4.191: Story Creek ≤720 fill purple void — stretch maze-board (invent Fun/Clear)
+{
+  assert.match(mazeCss, /1\.4\.191: Easy Story Creek ≤720 fill purple void/)
+  assert.match(
+    mazeCss,
+    /@media \(max-height: 720px\) \{[\s\S]*?play\.is-road-maze \.maze-board \{[\s\S]*?max-height: none/,
+  )
+  assert.match(
+    mazeCss,
+    /@media \(max-height: 720px\) \{[\s\S]*?play\.is-road-maze \.maze-board \{[\s\S]*?aspect-ratio: auto/,
+  )
+  assert.match(playSrc, /1\.4\.191: ≤720 fills purple void/)
+}
+
 console.log('check-road-maze: ok')

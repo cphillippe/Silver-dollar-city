@@ -1,47 +1,46 @@
-# ready-easy-fun-clear-190 — 1.4.190 Easy Hold ≤720 fill purple void
+# ready-easy-fun-clear-191 — 1.4.191 Easy Story Creek ≤720 fill purple void
 
-**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/247
-**Branch:** `ship/easy-fun-clear-190` → `main`
-**Version:** 1.4.190
-**Peel:** `d01e4c2` (`d01e4c2f61660d76907233df3901a13ee9844577`)
-**Tip:** `9a76154` (`9a7615420f7b7685d515f3d22cd2c821995eb366`)
-**Base live:** 1.4.189 (`639a840`, PR #246 Easy Father Dash ≤720 fill purple void on main)
+**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/248
+**Branch:** `ship/easy-fun-clear-191` → `main`
+**Version:** 1.4.191
+**Peel:** `b64948d` (`b64948d076e1a6061a62e4ed232612ca0bc448d8`)
+**Tip:** `10503bd` (`10503bdbf5858ebd767b642968ddb5d068faedbf`)
+**Base live:** 1.4.190 (`a89b482`, PR #247 Easy Hold ≤720 fill purple void on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
 ## Shot wake
-**Shot wakes after CoS merges this 1.4.190.** Do NOT wake Shot from this hop — CoS wakes Shot post-merge.
+**Shot pack incoming separately — stay on invent.** Do NOT wake Shot from this hop. CoS wakes Shot after 190 (already live); this hop does not ping Shot.
 
 ## How picked
 Open Issues: **#161** Dig/Hard/NW/Town parked. **#160** cheap-hop infra. No open Easy Fun/Clear issue.
-1.4.189 Easy Father Dash fill live on main. Shot wake at 1.4.190 — invent toward that.
-Invent Fun/Clear — densest remaining Easy trail different from recent Match/LockIn/Samaritan/Sort/Snap/Creed/Build Argument/Link/Father Dash: **Easy Hold (WhyBlast live arena)** had chrome peels **1.4.156 / 1.4.170** only — chips hug content so the gold card leaves empty purple under the CTA (Match 184 / Father 189 fill family). Lock In win-end **1.4.185** was after-win stored-line — different surface.
+1.4.190 Easy Hold fill live on main. Invent Fun/Clear — densest remaining Easy trail different from recent Hold/Father/Link/Build/Samaritan/Match/LockIn/Sort/Snap/Creed: **Easy Story Creek (Samaritan road maze)** had HUD peel **1.4.175** / compress **1.4.153** only — capped 5/7 `maze-board` + centered stage hug the top so the gold card leaves empty purple under the board (Match 184 / Hold 190 fill family).
 
 ## Chosen climb
-Single Easy Fun/Clear polish: **Easy Hold ≤720 fill purple void** — grow `why-blast` shell + stretch `why-arena` chip rows so claim · chips fill the portrait.
+Single Easy Fun/Clear polish: **Easy Story Creek ≤720 fill purple void** — grow `play.is-road-maze` shell + stretch `maze-stage` / `maze-board` so beats · board fill the portrait.
 
 ## What fixed
-- `src/styles/sortHold.css`: `@media (max-height: 720px)` — `.recall-gate.is-easy-hold:has(.why-blast)` / `.why-blast` `flex: 1 1 auto`; `.why-arena` `flex: 1` + `grid-template-rows: minmax(0,1fr) auto minmax(0,1fr)`; chips `height: 100%`; HUD / CTA / miss teach stay `flex: 0`
-- `src/components/challenges/WhyBlastPlay.tsx`: thin 1.4.190 comment
+- `src/styles/maze.css`: `@media (max-height: 720px)` — `.play.is-road-maze` `flex: 1 1 auto`; `.maze-stage` `flex: 1` + `align-items: stretch`; `.maze-board` `flex: 1` + `height: 100%` + `max-height: none` + `aspect-ratio: auto`; beats / score / CTA stay `flex: 0`
+- `src/components/challenges/RoadMazePlay.tsx`: thin 1.4.191 comment
 - Android `versionName` left at **1.4.113**
-- Version **1.4.190** atop live **1.4.189**
+- Version **1.4.191** atop live **1.4.190**
 
 ## Deferred (do NOT climb this hop)
 - Dig Reveal / Hard / NW / Town / stores / Pack B / Home map candy
-- Match 184 / Lock In win-end 185 / Samaritan 186 / Sort 183 / Snap 182 / Creed 181 / Build Argument 187 / Link 188 / Father Dash 189 / Manage 180 / letterbox (already on main)
+- Match 184 / Lock In win-end 185 / Samaritan Sequence 186 / Sort 183 / Snap 182 / Creed 181 / Build Argument 187 / Link 188 / Father Dash 189 / Hold 190 / Manage 180 / letterbox (already on main)
 - Journal held clear chrome further peel
-- Hold arena-first 1.4.170 / short-phone 1.4.156 (different surface; still applies ≤720)
+- Story Creek HUD peel 1.4.175 / compress 1.4.153 (different surface; still applies ≤720)
 
 ## Gemini
-MODEL=gemini-flash-latest — Invent Fun/Clear (no open Easy Fun/Clear issue). Invent API key present but not AIza AI Studio shape. Manager-steered invent. Notes: `notes-gemini.txt` (+ `/workspace/silver-city-art/notes-gemini-190.txt`).
+MODEL=gemini-flash-latest — Invent Fun/Clear (no open Easy Fun/Clear issue). Invent API key present but not AIza AI Studio shape. Manager-steered invent. Notes: `notes-gemini.txt` (+ `/workspace/silver-city-art/notes-gemini-191.txt`).
 
 ## Files peeled
-- `src/styles/sortHold.css`
-- `src/components/challenges/WhyBlastPlay.tsx`
-- `scripts/check-city.mjs`, `scripts/check-panel-blast.mjs`
+- `src/styles/maze.css`
+- `src/components/challenges/RoadMazePlay.tsx`
+- `scripts/check-city.mjs`, `scripts/check-road-maze.mjs`, `scripts/check-panel-blast.mjs`
 - `src/config/app.ts`, `package.json`, `package-lock.json`
 - `src/content/changelog.ts`
 - `notes-gemini.txt`
-- `docs/` (Pages rebuild `index-DDeyzpVI.js` / `index-2llEk2Nu.css`)
+- `docs/` (Pages rebuild `index-DHWgUIcG.js` / `index-D6C8cq2K.css`)
 - `MERGE.md`
 
 ## Checks
@@ -50,4 +49,4 @@ MODEL=gemini-flash-latest — Invent Fun/Clear (no open Easy Fun/Clear issue). I
 - `npm run build` → `docs/` ✓
 
 ## Status
-**MERGEABLE CLEAN** — ready for CoS merge after green. Do NOT merge from this hop. **Shot wakes after this merges (CoS).**
+**MERGEABLE CLEAN** — ready for CoS merge after green. Do NOT merge from this hop. Do NOT wake Shot.
