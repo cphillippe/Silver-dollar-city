@@ -48,6 +48,7 @@ interface StorySnapPlayProps {
  * Easy Clear 1.4.182: ≤720 peels HUD eyebrow + who·where in storySnap.css (stage·strip·pad first).
  * Easy Clear 1.4.197: ≤720 fills purple void — grow play + stretch snap-stage (HUD 182 stays).
  * Easy Clear 1.4.209: ≤720 zeros cta-dock margin-top so pad→CTA close (peel 197 stays).
+ * Easy Clear 1.4.223: phone portrait extends fill + pad→CTA so snap-stage·pad·CTA close purple void (invent Fun/Clear).
  */
 
 export function StorySnapPlayView({
