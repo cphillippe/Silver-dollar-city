@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.205',
+    title: 'Easy Sequence: ≤720 close stones→result purple gap',
+    when: '2026-09-25',
+    items: [
+      'Easy Sequence (Samaritan order) on ≤720px tall: tighten play gap + zero ResultPanel margin/compact teach padding so stone bank · miss teach pack tight — no purple band between the stones and the result card (Father/Hold dock-margin family · invent Fun/Clear; after Sequence fill 1.4.186; Father 204 / Build 203 / Hold 202 / Story Creek 201 / Creed 200 / Link 199 / Sort 198 / Story Snap 197 / Match 193 / Lock In 194·195 peels untouched)',
+    ],
+  },
+  {
     version: '1.4.204',
     title: 'Easy Father: ≤720 close speech→rail purple gap',
     when: '2026-09-25',

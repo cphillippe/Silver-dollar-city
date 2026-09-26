@@ -174,6 +174,7 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
       )}
       {/* Easy Clear 1.4.171: ≤720 peels how/lead/hint chrome in sortHold.css so board stays above fold. */}
       {/* Easy Clear 1.4.186: ≤720 fills top-cluster purple void in sortHold.css (Fixes #240). */}
+      {/* Easy Clear 1.4.205: ≤720 closes stones→result purple gap (fill 186 stays). */}
       <p className="sort-how is-order-how">
         {challenge.items.map((item, index) => (
           <span
