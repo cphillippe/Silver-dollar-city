@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.145',
+    title: 'Sort: one lead line on Easy',
+    when: '2026-09-25',
+    items: [
+      'Easy Sort: skip PuzzleHint when it near-dupes PuzzleLead Keep/Toss (fg-order / fg-ought) — one task line; .sort-how still off when hint text exists (Clear family with Match/Sort how dedupe 1.4.137/138)',
+    ],
+  },
+  {
     version: '1.4.144',
     title: 'Father run: one how line',
     when: '2026-09-25',
