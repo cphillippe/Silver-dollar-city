@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.146',
+    title: 'Sequence: one lead line on Easy',
+    when: '2026-09-25',
+    items: [
+      'Easy Sequence: skip PuzzleHint when it near-dupes PuzzleLead Keep/Toss (fg-reason / fg-ground) — one task line above tap-the-next-stone steps (Clear family with Sort lead≈hint 1.4.145)',
+    ],
+  },
+  {
     version: '1.4.145',
     title: 'Sort: one lead line on Easy',
     when: '2026-09-25',
