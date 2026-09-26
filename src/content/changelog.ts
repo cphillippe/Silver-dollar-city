@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.216',
+    title: 'Easy Father Dash: ≤720 close timing-rail→CTA purple void',
+    when: '2026-09-25',
+    items: [
+      'Easy Father Dash timing-rail on ≤720 / phone portrait: extend speech→rail + pad compress so the timing rail and LET GO CTA pack tight — no large purple void between them (Fixes #283; continuation of Father Dash fill/dock / Creek HOLD 214 phone-portrait family; do not touch other Shot 210 issues)',
+    ],
+  },
+  {
     version: '1.4.215',
     title: 'Easy Learn: ≤720 close CTA purple void beneath cream-pill',
     when: '2026-09-25',
