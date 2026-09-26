@@ -5911,6 +5911,75 @@ html[data-easy='on'] .mind-node em {
   }
 }
 
+/* Easy Clear 1.4.260: Easy Creed Claim merge ≤720 / phone portrait HUD deepen —
+   After invent 233 extended hide story-kicker + merge-rung-name to 920, tall phones
+   ~390×844 still keep the fat ≤720-only HUD chrome from peel 181 (score · next ·
+   mini · ladder dots · Drop chip) that crowds the bowl. Deepen: extend 181's
+   compress rules across phone portrait heights (max-height: 920px) so score /
+   next / mini / ladder / Drop thin — bowl + Drop stay loud on tall phones
+   (Easy Creed arcade chrome; invent Fun/Clear · Shot wake version).
+   Hide 233 + fill 220 + HUD 181 ≤720 stay. Do NOT pack Match / Lock In / Learn /
+   Father / Creek / Dig / Hold / Sort / Snap / Link / Build / Manage / Samaritan /
+   gemSearch / panel-blast / one-more win-end / Home. Shot wake — Manager/CoS wake Shot. */
+@media (max-height: 920px) {
+  .play.is-claim-merge {
+    gap: 3px;
+  }
+
+  .play.is-claim-merge .merge-hud {
+    gap: 4px;
+  }
+
+  .play.is-claim-merge .merge-score {
+    min-width: 48px;
+    padding: 2px 8px;
+    font-size: 0.95rem;
+    box-shadow:
+      0 2px 0 #c4922a,
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  }
+
+  .play.is-claim-merge .merge-next {
+    gap: 4px;
+  }
+
+  .play.is-claim-merge .merge-next-label {
+    font-size: 0.58rem;
+    letter-spacing: 0.06em;
+  }
+
+  .play.is-claim-merge .merge-mini {
+    width: 28px;
+    height: 28px;
+    font-size: 0.42rem;
+  }
+
+  .play.is-claim-merge .merge-mini.is-preview {
+    width: 20px;
+    height: 20px;
+    font-size: 0.36rem;
+  }
+
+  .play.is-claim-merge .merge-ladder {
+    gap: 2px;
+  }
+
+  .play.is-claim-merge .merge-rung {
+    gap: 0;
+  }
+
+  .play.is-claim-merge .merge-rung-dot {
+    width: 10px;
+    height: 10px;
+  }
+
+  /* Drop teach stays readable — only slight thin */
+  .play.is-claim-merge .merge-drop-chip {
+    font-size: 0.58rem;
+    padding: 2px 8px;
+  }
+}
+
 .merge-danger {
   position: absolute;
   left: 8%;
