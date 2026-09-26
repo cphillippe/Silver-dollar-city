@@ -1,48 +1,48 @@
-# ready-easy-fun-clear-200 — 1.4.200 Easy Creed ≤720 close bowl→CTA purple gap
+# ready-easy-fun-clear-201 — 1.4.201 Easy Story Creek ≤720 close board→CTA purple gap
 
-**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/261
-**Branch:** `ship/easy-fun-clear-200` → `main`
-**Version:** 1.4.200
-**Peel:** `ccd47bd` (`ccd47bd598616ef141be8c2ea4043fd3589c2014`)
-**Tip:** `afb98d4` (`afb98d4bb28164381cf7822184edb5f9a6f0265a`)
-**Base live:** 1.4.199 (`709df26`, PR #260 Easy Link ≤720 close choices→CTA purple gap on main)
+**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/262
+**Branch:** `ship/easy-fun-clear-201` → `main`
+**Version:** 1.4.201
+**Peel:** `772ed4a` (`772ed4a541b94d1869654c1e3937a574228c6041`)
+**Tip:** `fa7d6ef` (`fa7d6ef608c11df3f57b02f13a8a23bb25d55eb9`)
+**Base live:** 1.4.200 (`3fba16e`, PR #261 Easy Creed ≤720 close bowl→CTA purple gap on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
 ## Shot wake
-**This hop IS the every-10 Shot wake version (1.4.200).** Ship invent peel only. **Do NOT wake Shot from this hop.** Do NOT run Gemini vision. CoS wakes Shot after this merge (same pattern as 1.4.190).
+Shot woken for pack after 1.4.200 — Manager handles vision when PNGs arrive. **Do NOT wake Shot from this hop.** Do NOT run Gemini vision. Keep inventing Fun/Clear.
 
 ## How picked
 Open Issues: **#161** Dig/Hard/NW/Town parked. **#160** cheap-hop infra. No open Easy Fun/Clear issue.
-1.4.199 Easy Link choices→CTA live on main. Shot 190 fails #250–#253 already peeled as 193–196 — do NOT re-peel. Story Snap 197 / Sort 198 / Link 199 invents already on main.
-Invent Fun/Clear — densest remaining Easy trail different from Link 199 / Sort 198 / Story Snap 197: **Easy Creed merge** had fill peel **1.4.192** / HUD **181** / bowl-first **159** — global `.cta-dock { margin-top: auto }` still steals free space on win/overflow so the gold card leaves empty purple between bowl · ladder and the Hold / One more dock (Father 196 / Link 199 dock-margin family).
+1.4.200 Easy Creed bowl→CTA live on main. Shot 190 fails #250–#253 already peeled as 193–196 — do NOT re-peel. Story Snap 197 / Sort 198 / Link 199 / Creed 200 invents already on main.
+Invent Fun/Clear — densest remaining Easy trail different from Creed 200 / Link 199 / Sort 198 / Story Snap 197: **Easy Story Creek (Samaritan road maze)** had fill peel **1.4.191** / HUD **175** / compress **153** — global `.cta-dock { margin-top: auto }` still steals free space on win so the gold card leaves empty purple between board · score and the Hold / Again dock (Father 196 / Link 199 / Creed 200 dock-margin family).
 
 ## Chosen climb
-Single Easy Fun/Clear polish: **Easy Creed ≤720 close bowl→CTA purple gap** — zero `.play.is-claim-merge .cta-dock` `margin-top` so `merge-bowl` flex:1 absorbs the portrait.
+Single Easy Fun/Clear polish: **Easy Story Creek ≤720 close board→CTA purple gap** — zero `.play.is-road-maze .cta-dock` `margin-top` so `maze-board` flex:1 absorbs the portrait.
 
 ## What fixed
-- `src/index.css`: `@media (max-height: 720px)` — `.play.is-claim-merge .cta-dock` `margin-top: 0` (global auto margin was stealing free space after fill 192)
-- `src/components/challenges/ClaimMergePlay.tsx`: thin 1.4.200 comment
+- `src/styles/maze.css`: `@media (max-height: 720px)` — `.play.is-road-maze .cta-dock` `margin-top: 0` (global auto margin was stealing free space after fill 191)
+- `src/components/challenges/RoadMazePlay.tsx`: thin 1.4.201 comment
 - Android `versionName` left at **1.4.113**
-- Version **1.4.200** atop live **1.4.199** (Shot wake version)
+- Version **1.4.201** atop live **1.4.200**
 
 ## Deferred (do NOT climb this hop)
 - Dig Reveal / Hard / NW / Town / stores / Pack B / Home map candy
-- Link 199 / Sort 198 / Story Snap 197 / Match 193 / Lock In quiz 194 / Lock In feedback 195 / Father 196 / Hold arena 190 / Creed fill 192 / Story Creek 191 / Build / Samaritan / Manage / letterbox (already on main)
+- Creed 200 / Link 199 / Sort 198 / Story Snap 197 / Match 193 / Lock In quiz 194 / Lock In feedback 195 / Father 196 / Hold arena 190 / Story Creek fill 191 / Build / Samaritan / Manage / letterbox (already on main)
 - Journal held clear chrome further peel
-- Creed fill 192 / HUD 181 / bowl-first 159 (different surface; still applies ≤720)
-- Waking Shot / Gemini vision (CoS after merge)
+- Story Creek fill 191 / HUD 175 / compress 153 (different surface; still applies ≤720)
+- Shot vision / waking Shot (Manager)
 
 ## Gemini
-MODEL=gemini-flash-latest — Invent Fun/Clear (no open Easy Fun/Clear issue). Invent API key present but not AIza AI Studio shape. Manager-steered invent. Notes: `notes-gemini.txt` (+ `/workspace/silver-city-art/notes-gemini-200.txt`). Do NOT run Shot vision this hop.
+MODEL=gemini-flash-latest — Invent Fun/Clear (no open Easy Fun/Clear issue). Invent API key present but not AIza AI Studio shape. Manager-steered invent. Notes: `notes-gemini.txt` (+ `/workspace/silver-city-art/notes-gemini-201.txt`). Do NOT run Shot vision this hop.
 
 ## Files peeled
-- `src/index.css`
-- `src/components/challenges/ClaimMergePlay.tsx`
+- `src/styles/maze.css`
+- `src/components/challenges/RoadMazePlay.tsx`
 - `scripts/check-city.mjs`, `scripts/check-panel-blast.mjs`
 - `src/config/app.ts`, `package.json`, `package-lock.json`
 - `src/content/changelog.ts`
 - `notes-gemini.txt`
-- `docs/` (Pages rebuild `index-BuOSbVAG.js` / `index-W8Owv5qi.css`)
+- `docs/` (Pages rebuild `index-DNov9PFC.js` / `index-BvoOdNRG.css`)
 - `MERGE.md`
 
 ## Checks
@@ -51,4 +51,4 @@ MODEL=gemini-flash-latest — Invent Fun/Clear (no open Easy Fun/Clear issue). I
 - `npm run build` → `docs/` ✓
 
 ## Status
-**MERGEABLE CLEAN** — ready for CoS merge after green. Do NOT merge from this hop. Do NOT wake Shot (CoS after merge).
+**MERGEABLE CLEAN** — ready for CoS merge after green. Do NOT merge from this hop. Do NOT wake Shot.

@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.200')
+assert.equal(APP_VERSION, '1.4.201')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3609,6 +3609,31 @@ console.log('check-city: ok')
     '1.4.200 must not re-peel Shot 190 fails #250–#253 or Link 199 / Sort 198 / Story Snap 197 / Match / Lock In / Father / Hold / Story Creek / Build / maze',
   )
 }
+
+
+// Easy Clear 1.4.201: Easy Story Creek ≤720 close board→CTA purple gap (invent Fun/Clear)
+{
+  const mazeCss201 = readFileSync(new URL('../src/styles/maze.css', import.meta.url), 'utf8')
+  const mazePlay201 = readFileSync(
+    new URL('../src/components/challenges/RoadMazePlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(mazeCss201, /1\.4\.201: Easy Story Creek ≤720 close board→CTA purple gap/)
+  assert.match(
+    mazeCss201,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-road-maze \.cta-dock \{[\s\S]*?margin-top: 0/,
+  )
+  assert.match(mazePlay201, /1\.4\.201: ≤720 zeros cta-dock margin-top/)
+  assert.match(cssSrc, /1\.4\.201: Easy Story Creek ≤720 close board→CTA purple gap/)
+  assert.match(latestChange('1.4.201').items.join('\n'), /board→CTA|cta-dock|purple void between the board/i)
+  assert.match(latestChange('1.4.201').title, /Story Creek|≤720|board→CTA|purple gap/i)
+  assert.doesNotMatch(
+    latestChange('1.4.201').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|Lock In quiz|Lock In feedback|Father.*slider|grid→footer|Easy Hold.*≤720 fill|gem-board|Build Argument ≤720 fill|Easy Sort ≤720 fill|Father Dash ≤720 fill|Story Snap ≤720 fill|snap-stage|bank\.is-sort|sort-bins|choices→CTA|link-dock|Easy Link ≤720 fill|bowl→CTA|Easy Creed ≤720 fill|merge-bowl/i,
+    '1.4.201 must not re-peel Shot 190 fails #250–#253 or Creed 200 / Link 199 / Sort 198 / Story Snap 197 / Match / Lock In / Father / Hold / Build',
+  )
+}
+
 
 
 
