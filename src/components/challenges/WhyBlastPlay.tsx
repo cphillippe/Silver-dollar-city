@@ -39,6 +39,7 @@ interface WhyBlastPlayProps {
  */
 
 // Easy Clear 1.4.212: ≤720 mid-question quiz packs residual lower-third padding (Fixes #274).
+// Easy Clear 1.4.213: ≤720 feedback packs residual bottom padding (Fixes #275).
 export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: WhyBlastPlayProps) {
   const chips = useMemo(
     () => whyBlastChoices(reason, packMisses, whyBlastExtras(id), easyWhyLine),
