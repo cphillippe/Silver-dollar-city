@@ -369,6 +369,7 @@ export function FatherRunPlay({
       {/* Easy Clear 1.4.196: ≤720 zeros cta-dock margin-top so slider→CTA gap closes (Fixes #253). */}
       {/* Easy Clear 1.4.204: ≤720 closes speech→rail purple gap (fill 189 / dock 196 stay). */}
       {/* Easy Clear 1.4.214: phone portrait extends fill+dock so slider→HOLD closes (Fixes #272). */}
+      {/* Easy Clear 1.4.216: phone portrait extends speech→rail+pad so Dash rail→CTA closes (Fixes #283). */}
       <div className={`run-speech ${phase === 'miss' ? 'is-done' : ''}`} aria-live="polite">
         <p className="run-speech-kicker">Hired-hand speech</p>
         <p className="run-speech-line">{phrase}</p>
