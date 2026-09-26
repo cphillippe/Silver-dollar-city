@@ -4,7 +4,7 @@
 **Branch:** `ship/easy-fun-clear-193` → `main`
 **Version:** 1.4.193
 **Peel:** `79e8f41` (`79e8f416ec2589408ec61750c5d6e04b45299feb`)
-**Tip:** `0275274` (`0275274358a1f57195c818284b06de464d0da6f8`)
+**Tip:** `c0c559e` (`c0c559e6991bbcc850f005efe8529ca0b0b35f53`)
 **Base live:** 1.4.192 (`5f1e3ce`, PR #249 Easy Creed merge ≤720 fill purple void on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
