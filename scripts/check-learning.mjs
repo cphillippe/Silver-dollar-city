@@ -183,4 +183,22 @@ assert.equal(
   true,
 )
 
+
+// Easy Clear 1.4.162: ≤720 peel lives in welcome.css (Fixes #208) — keep TS stamp+triad; CSS peels chrome.
+{
+  const welcomeCss = readFileSync(
+    new URL('../src/styles/welcome.css', import.meta.url),
+    'utf8',
+  )
+  assert.match(welcomeCss, /1\.4\.162: Learn short-story ≤720 peel|Fixes #208/)
+  assert.match(
+    welcomeCss,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.easy-story-card\.teach-gate/,
+  )
+  assert.match(
+    welcomeCss,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.easy-story-card \.loci-stamp\.is-hero/,
+  )
+}
+
 console.log('check-learning: ok')

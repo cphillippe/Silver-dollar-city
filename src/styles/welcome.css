@@ -553,3 +553,106 @@ html[data-theme='dusk'] .easy-story-card {
   background: var(--mist);
   font-weight: 650;
 }
+
+/* Easy Clear 1.4.162: Learn short-story ≤720 peel — tiny stamp · tighter gaps · collapse GemMark/eyebrow/reason density so gold Match CTA stays above fold (Hub/Snap/Father ≤720 family; Fixes #208). 1.4.160 already omitted .easy-who-where. */
+@media (max-height: 720px) {
+  .easy-story-card.teach-gate {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px 10px 10px;
+  }
+
+  .easy-story-card > .eyebrow {
+    font-size: 0.62rem;
+    line-height: 1.1;
+    letter-spacing: 0.06em;
+    margin: 0;
+  }
+
+  .easy-story-card .loci-stamp.is-hero {
+    min-height: 34px;
+    max-height: 40px;
+    padding: 0.18rem 0.5rem;
+    margin: 0;
+    gap: 0.35rem;
+    border-radius: 10px;
+  }
+
+  .easy-story-card .loci-stamp.is-hero .avatar.size-md {
+    width: 28px;
+    height: 28px;
+  }
+
+  .easy-story-card .loci-stamp.is-hero .loci-stamp-place {
+    font-size: 0.72rem;
+    line-height: 1.1;
+  }
+
+  .easy-story-card .loci-stamp.is-hero .loci-stamp-idea {
+    font-size: 0.62rem;
+    line-height: 1.1;
+    padding: 0.06rem 0.35rem;
+  }
+
+  .easy-story-card .loci-stamp.is-hero .loci-stamp-pin {
+    font-size: 0.72rem;
+  }
+
+  /* Optional GemMark chrome — hide on short phones so triad + CTA fit */
+  .easy-story-card > .gem,
+  .easy-story-card > .gem-art {
+    display: none;
+  }
+
+  .easy-story-card .teach-reason {
+    margin: 0;
+    font-size: 0.88rem;
+    line-height: 1.2;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .easy-story-card .held-triad {
+    gap: 3px;
+    margin: 0;
+  }
+
+  .easy-story-card .held-triad dt {
+    font-size: 0.58rem;
+    letter-spacing: 0.04em;
+  }
+
+  .easy-story-card .held-triad dd {
+    margin: 1px 0 0;
+    font-size: 0.82rem;
+    line-height: 1.15;
+  }
+
+  .easy-story-card .held-triad .recall-line {
+    font-size: 0.9rem;
+    line-height: 1.15;
+  }
+
+  .easy-story-card .easy-story-dock {
+    margin-top: 4px;
+  }
+
+  .easy-story-card .easy-story-dock .btn.xl {
+    padding-top: 0.7rem;
+    padding-bottom: 0.7rem;
+  }
+
+  .easy-story-card .easy-story-dock .text-link {
+    font-size: 0.78rem;
+    margin-top: 2px;
+  }
+
+  /* Defensive if who/where remounted — 1.4.160 already omitted in TS */
+  .easy-story-card .easy-who-where {
+    display: none;
+  }
+}
+
