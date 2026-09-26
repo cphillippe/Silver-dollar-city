@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.173',
+    title: 'Easy Father Dash: ≤720 HUD peel',
+    when: '2026-09-25',
+    items: [
+      'Easy Father Dash on ≤720px tall: hide kicker · story-beat thumbs · caption HUD; tiny score so scene + speech + Hold pad stay above fold (complements 1.4.154 speech thin; Match/Hold/Sequence ≤720 family; invent Fun/Clear)',
+    ],
+  },
+  {
     version: '1.4.171',
     title: 'Easy Sequence: ≤720 board-first',
     when: '2026-09-25',

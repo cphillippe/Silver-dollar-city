@@ -197,6 +197,17 @@ assert.match(fatherCss, /\.run-speech-bar \{[\s\S]*?height: 3px/)
 assert.match(fatherCss, /-webkit-line-clamp:\s*2/)
 
 
+// Easy Clear 1.4.173: Father Dash ≤720 HUD peel — hide kicker/thumbs/caption so pad stays above fold (invent Fun/Clear)
+assert.match(playSrc, /1\.4\.173: ≤720 peels HUD/)
+assert.match(fatherCss, /1\.4\.173: Father Dash ≤720 HUD peel/)
+assert.match(
+  fatherCss,
+  /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-father-run \.story-kicker,[\s\S]*?\.play\.is-father-run \.run-thumbs,[\s\S]*?display: none/,
+)
+assert.match(fatherCss, /\.play\.is-father-run \.match-score \{/)
+
+
+
 // Easy Clear 1.4.155: Home whisper short next-step (not full runHunt) — Fixes #192
 const easyUiRun = readFileSync(new URL('../src/lib/easyUi.ts', import.meta.url), 'utf8')
 const hubRunSrc = readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8')

@@ -4478,6 +4478,29 @@ html[data-easy='on'] .mind-node em {
   .run-rail {
     height: 16px;
   }
+
+  /* Easy Clear 1.4.173: Father Dash ≤720 HUD peel — hide kicker · thumbs · caption that bury
+     the Hold pad; tiny score so scene + speech + rail + pad stay above fold
+     (complements 1.4.154 speech thin; Match/Hold/Sequence ≤720 family; invent Fun/Clear). */
+  .play.is-father-run .story-kicker,
+  .play.is-father-run .run-thumbs,
+  .play.is-father-run .story-caption {
+    display: none;
+  }
+
+  .play.is-father-run .match-score {
+    margin: 0;
+    font-size: 0.82rem;
+    line-height: 1.1;
+    min-height: 0;
+    padding: 1px 0;
+  }
+
+  .play.is-father-run .run-pad {
+    min-height: 58px;
+    font-size: 1rem;
+    border-radius: 18px;
+  }
 }
 
 .miss-banner {

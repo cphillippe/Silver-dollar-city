@@ -364,6 +364,7 @@ export function FatherRunPlay({
         {caption}
       </p>
       {/* Easy Clear 1.4.154: keep speech + timer; short-height CSS compresses chrome — Fixes #191 */}
+      {/* Easy Clear 1.4.173: ≤720 peels HUD (kicker · thumbs · caption) in index.css — pad/scene stay above fold. */}
       <div className={`run-speech ${phase === 'miss' ? 'is-done' : ''}`} aria-live="polite">
         <p className="run-speech-kicker">Hired-hand speech</p>
         <p className="run-speech-line">{phrase}</p>
