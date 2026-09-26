@@ -1,6 +1,6 @@
 # ready-easy-fun-clear-187 — 1.4.187 Easy Build Argument ≤720 fill purple void
 
-**PR:** (pending)
+**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/244
 **Branch:** `ship/easy-fun-clear-187` → `main`
 **Version:** 1.4.187
 **Peel:** `7079579` (`7079579ad3eedca4404f7a4f4ddd81ceffb3a583`)
