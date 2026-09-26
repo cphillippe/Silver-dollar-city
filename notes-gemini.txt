@@ -1,7 +1,8 @@
 MODEL=gemini-flash-latest
-Shot pack 1.4.180 Gemini vision FAIL on 06-samaritan.png — Fixes #240.
-Invent API: GEMINI_API_KEY present but not AIza AI Studio shape (same as 163–168).
-Manager-steered peel (parent + issue #240): Easy Samaritan / Sequence order ≤720 fill top-cluster purple void (content clustered at top; massive empty purple bottom half).
-Peel: sortHold.css — base play.is-sequence.is-deal flex:0→1; @media (max-height:720px) bank.is-order flex:1 + grid-auto-rows minmax(0,1fr) stretch stones; SequencePlay comment.
-Do NOT pack #238 Match / #239 Lock In. Sequence how-peel 171 / Sort 183 / Match 184 / Lock In 185 untouched.
-VERDICT: APPROVE (shot Gemini + issue #240)
+Invent Fun/Clear — no open Easy Fun/Clear issue beyond parked #161 / cheap-hop #160.
+Shot pack 1.4.180 fails (#238–#240) already shipped as 1.4.184–1.4.186.
+Invent API: GEMINI_API_KEY present but not AIza AI Studio shape (same as 163–186).
+Manager-steered invent peel: Easy Build Argument ≤720 fill purple void (play.is-build hugged content; empty purple under slots + two-choice bank — Samaritan Sequence 186 fill family; different scene than Match/LockIn/Samaritan/Sort/Snap/Creed).
+Peel: sortHold.css — base play.is-build flex:1; @media (max-height:720px) slot-list + bank.is-order flex:1 + stretch seats/tiles; BuildArgumentPlay comment.
+Do NOT re-peel #238 Match / #239 Lock In / #240 Samaritan. Sequence how-peel 171 / Samaritan 186 / Sort 183 untouched.
+VERDICT: APPROVE (invent Fun/Clear · densest remaining Easy trail Build Argument fill)

@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.187',
+    title: 'Easy Build Argument: ≤720 fill purple void',
+    when: '2026-09-25',
+    items: [
+      'Easy Build Argument on ≤720px tall: grow play shell + stretch slot seats / two-choice bank so the gold card fills — no empty purple void under the deal (Sequence order 1.4.186 fill family · invent Fun/Clear; Sequence how-peel 1.4.171 untouched)',
+    ],
+  },
+  {
     version: '1.4.186',
     title: 'Easy Samaritan: ≤720 fill top-cluster purple void',
     when: '2026-09-25',

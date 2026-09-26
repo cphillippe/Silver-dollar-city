@@ -335,9 +335,12 @@
   font-size: 0.72rem;
 }
 
-.is-puzzle .play.is-build {
+.is-puzzle .play.is-build,
+.daily-page.is-puzzle .play.is-build,
+.challenge-page.is-puzzle .play.is-build {
   display: flex;
   flex-direction: column;
+  flex: 1 1 auto;
   min-height: 0;
   overflow: hidden;
   gap: 4px;
@@ -1504,6 +1507,65 @@ html[data-easy='on'] .recall-card {
   }
 
   .is-puzzle .play.is-sequence.is-deal .sort-how.is-order-how {
+    flex: 0 0 auto;
+  }
+}
+
+/* Easy Clear 1.4.187: Easy Build Argument ≤720 fill purple void —
+   play.is-build hugged content (no flex grow) so Easy guided deal left empty purple
+   under slots + two-choice bank (Samaritan Sequence 1.4.186 / Match 184 fill family;
+   invent Fun/Clear). Grow play shell + stretch slot seats / deal bank tiles so the
+   gold card fills. Sequence how-peel 171 / Samaritan 186 / Sort 183 untouched. */
+@media (max-height: 720px) {
+  .is-puzzle .play.is-build.is-deal,
+  .daily-page.is-puzzle .play.is-build.is-deal,
+  .challenge-page.is-puzzle .play.is-build.is-deal {
+    gap: 6px;
+  }
+
+  .is-puzzle .play.is-build.is-deal .slot-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: grid;
+    grid-auto-rows: minmax(0, 1fr);
+    align-content: stretch;
+    gap: 8px;
+  }
+
+  .is-puzzle .play.is-build.is-deal .slot {
+    --slot-seat: auto;
+    height: auto;
+    min-height: 52px;
+    max-height: none;
+    align-self: stretch;
+  }
+
+  .is-puzzle .play.is-build.is-deal .bank.is-order {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-auto-rows: minmax(0, 1fr);
+    align-content: stretch;
+    gap: 10px;
+    height: auto;
+  }
+
+  .is-puzzle .play.is-build.is-deal .sort-tile {
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    align-self: stretch;
+  }
+
+  .is-puzzle .play.is-build.is-deal .sort-tile .chip {
+    height: 100%;
+    min-height: 72px;
+    -webkit-line-clamp: 6;
+  }
+
+  .is-puzzle .play.is-build.is-deal .prompt {
     flex: 0 0 auto;
   }
 }
