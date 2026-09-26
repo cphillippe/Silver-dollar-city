@@ -217,3 +217,85 @@
     flex: 0 0 auto;
   }
 }
+
+
+/* Easy Clear 1.4.236: Easy Match gemSearch ≤720 / tall-phone bottom-half purple void (Fixes #315) —
+   After leftover-height fill 225 (extend 193+211 to ≤920) Shot pack 1.4.230 still reports a
+   massive empty purple band under Match UI on tall phones. Same-recipe media extend alone
+   was not enough: challenge-page `.play { overflow: auto }` + incomplete height pin leave
+   free space as a flat purple plate (Father Dash 229 / Learn 235 sticky lesson). Strengthen:
+   play height 100% · overflow hidden · gem-scroll/stage/board flex 1 1 0 absorb leftover ·
+   status/CTA chrome flex 0 · cta-dock position static + margin-top auto so status/footer
+   pin to the usable floor. Fill 193 / board stretch 211 ≤720 / extend 225 stay. Picture-deal
+   invent 232 + strengthen 236 in match.css cover the Easy Match deal path — do not regress.
+   Do NOT pack #314 Learn / #316–#319 Lock In / Samaritan / Father / Dig / Creek / parked maps. */
+@media (max-height: 920px) {
+  .play.is-gem-search.is-panel-blast.is-story-docked,
+  .daily-page.is-puzzle .play.is-gem-search.is-panel-blast.is-story-docked,
+  .challenge-page.is-puzzle .play.is-gem-search.is-panel-blast.is-story-docked {
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    overflow: hidden;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .gem-scroll {
+    flex: 1 1 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    gap: 2px;
+    padding-bottom: 2px;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .gem-stage {
+    flex: 1 1 0;
+    min-height: 0;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .gem-board {
+    width: min(100%, 96vw, 520px);
+    max-width: 100%;
+    min-height: 0;
+    height: 100%;
+    max-height: none;
+    flex: 1 1 0;
+    aspect-ratio: auto;
+    align-self: stretch;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .story-strip,
+  .play.is-gem-search.is-panel-blast.is-story-docked .story-strip.is-dock,
+  .play.is-gem-search.is-panel-blast.is-story-docked .match-teach-dock,
+  .play.is-gem-search.is-panel-blast.is-story-docked .match-score,
+  .play.is-gem-search.is-panel-blast.is-story-docked .cta-dock,
+  .play.is-gem-search.is-panel-blast.is-story-docked .match-yes,
+  .play.is-gem-search.is-panel-blast.is-story-docked .miss-banner,
+  .play.is-gem-search.is-panel-blast.is-story-docked .match-toast {
+    flex: 0 0 auto;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .match-score {
+    margin: 0;
+  }
+
+  .play.is-gem-search.is-panel-blast.is-story-docked .cta-dock {
+    position: static;
+    bottom: auto;
+    margin-top: auto;
+    flex: 0 0 auto;
+    padding-top: 6px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}

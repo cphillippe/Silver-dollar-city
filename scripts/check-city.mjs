@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.235')
+assert.equal(APP_VERSION, '1.4.236')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -4763,5 +4763,54 @@ console.log('check-city: ok')
     latestChange('1.4.235').items.join('\n'),
     /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#300|#301|#302|#315|#316|#317|#318|#319|Father Dash|Match grid|Samaritan|Manage|Lock In|Dig|Creed|Build|Sort|Snap|Link|Road maze|Claim merge|Source dig|Story Creek|invent Fun\/Clear/i,
     '1.4.235 must not fix other phone-fail issues or climb another Easy surface',
+  )
+}
+
+// Easy Clear 1.4.236: Easy Match ≤720 / tall-phone bottom-half purple void (Fixes #315)
+{
+  const matchCss236 = readFileSync(new URL('../src/styles/match.css', import.meta.url), 'utf8')
+  const matchArtTight236 = readFileSync(
+    new URL('../src/styles/match-art-tight.css', import.meta.url),
+    'utf8',
+  )
+  const matchPlay236 = readFileSync(
+    new URL('../src/components/challenges/MatchPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  const gemPlay236 = readFileSync(
+    new URL('../src/components/challenges/GemSearchPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(matchCss236, /1\.4\.236: Easy Match ≤720 \/ tall-phone bottom-half purple void/)
+  assert.match(
+    matchCss236,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.play\.is-match\.is-deal \{[\s\S]*?height: 100%[\s\S]*?max-height: 100%[\s\S]*?overflow: hidden/,
+  )
+  assert.match(
+    matchCss236,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.play\.is-match\.is-deal \.match-grid \{[\s\S]*?flex: 1 1 0/,
+  )
+  assert.match(
+    matchCss236,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.play\.is-match\.is-deal \.cta-dock \{[\s\S]*?position: static[\s\S]*?margin-top: auto/,
+  )
+  assert.match(matchArtTight236, /1\.4\.236: Easy Match gemSearch ≤720 \/ tall-phone bottom-half purple void/)
+  assert.match(
+    matchArtTight236,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.play\.is-gem-search\.is-panel-blast\.is-story-docked \.gem-board \{[\s\S]*?flex: 1 1 0/,
+  )
+  assert.match(
+    matchArtTight236,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.play\.is-gem-search\.is-panel-blast\.is-story-docked \.cta-dock \{[\s\S]*?position: static[\s\S]*?margin-top: auto/,
+  )
+  assert.match(matchPlay236, /1\.4\.236: tall-phone strengthens fill 232/)
+  assert.match(gemPlay236, /1\.4\.236: tall-phone strengthens fill 225/)
+  assert.match(cssSrc, /1\.4\.236: Easy Match ≤720 \/ tall-phone bottom-half purple void/)
+  assert.match(latestChange('1.4.236').items.join('\n'), /Fixes #315|bottom-half|purple void|Match|tall-phone|position static|flex 1 1 0/i)
+  assert.match(latestChange('1.4.236').title, /Easy Match|≤720|tall-phone|bottom-half|purple void|Fixes #315/i)
+  assert.doesNotMatch(
+    latestChange('1.4.236').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#300|#301|#302|#314|#316|#317|#318|#319|Father Dash|Learn cream|Samaritan|Manage|Lock In|Dig|Creed|Build|Sort|Snap|Link|Road maze|Claim merge|Source dig|Story Creek|invent Fun\/Clear/i,
+    '1.4.236 must not fix other phone-fail issues or climb another Easy surface',
   )
 }
