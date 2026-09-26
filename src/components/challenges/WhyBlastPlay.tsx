@@ -44,6 +44,7 @@ interface WhyBlastPlayProps {
 // Easy Clear 1.4.226: phone portrait extends fill 194 + pad-zero 212 so Lock In quiz closes bottom-half void (Fixes #298).
 // Easy Clear 1.4.237: tall-phone strengthens fill 226 (height 100% · flex 1 1 0 · arena absorb · cta-dock static) so Lock In quiz closes bottom-half void (Fixes #316).
 // Easy Clear 1.4.247: tall-phone cream-card fill — paint parchment recall-gate · dark ink · denser arena · dock pin — closes Shot 240 purple residual (Fixes #333).
+// Easy Clear 1.4.254: tall-phone cream shell fill — opaque app-body + journal live-quiz cream plate · solid recall-gate (no purple-gold gradient) · cream dock floor pin — closes Shot 250 purple residual after 247 (Fixes #346).
 // Easy Clear 1.4.213: ≤720 feedback packs residual bottom padding (Fixes #275).
 // Easy Clear 1.4.227: phone portrait extends fill 195 + pad-zero 213 so Lock In feedback closes bottom-half void (Fixes #299).
 // Easy Clear 1.4.238: tall-phone strengthens fill 227 (height 100% · flex 1 1 0 · why-miss-teach absorb · cta-dock static) so Lock In feedback closes bottom-half void (Fixes #317).
