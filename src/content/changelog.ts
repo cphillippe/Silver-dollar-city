@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.218',
+    title: 'Easy Sort: ≤720 close fill purple void on tall phone',
+    when: '2026-09-25',
+    items: [
+      'Easy Sort Keep·Toss on ≤720 / phone portrait: extend fill so play + bank seats / bins absorb free space — no large purple void under the bins on tall phones (invent Fun/Clear; continuation of Sort fill 198 ≤720 family; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.217',
     title: 'Easy Hold: ≤720 close hud→arena purple void',
     when: '2026-09-25',

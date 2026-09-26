@@ -2033,6 +2033,76 @@ html[data-easy='on'] .recall-card {
     flex: 0 0 auto;
   }
 }
+/* Easy Clear 1.4.218: Easy Sort ≤720 / phone portrait fill purple void —
+   After fill 198 (≤720 only), real phones ~390×844 still leave Keep·Toss bank +
+   bins hugging the top with empty purple under the bins because that peel never
+   applies at Shot heights. Extend fill 198 across phone portrait heights
+   (max-height: 920px) so play + bank seats / bins absorb free space — tight
+   Keep·Toss fill on tall phones (Easy Sort arcade board chrome).
+   Board-first 183 / fill 198 ≤720 stay. Do NOT pack Samaritan / Manage / Match /
+   Lock In / Learn / Father / Creek / Dig / Creed / Build / Hold / Snap / Link. */
+@media (max-height: 920px) {
+  .play.is-easy-sort,
+  .daily-page.is-puzzle .play.is-easy-sort,
+  .challenge-page.is-puzzle .play.is-easy-sort {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    overflow: hidden;
+  }
+
+  .play.is-easy-sort .bank.is-sort {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+    max-height: none;
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+    align-content: stretch;
+  }
+
+  .play.is-easy-sort .sort-tile {
+    --sort-seat: auto;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    align-self: stretch;
+  }
+
+  .play.is-easy-sort .sort-tile .chip {
+    height: 100%;
+    min-height: 0;
+    -webkit-line-clamp: 5;
+  }
+
+  .play.is-easy-sort .sort-bins {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+    max-height: none;
+    align-content: stretch;
+  }
+
+  .play.is-easy-sort .bin {
+    height: auto;
+    min-height: 72px;
+    max-height: none;
+    align-self: stretch;
+  }
+
+  .play.is-easy-sort .prompt,
+  .play.is-easy-sort .sort-how,
+  .play.is-easy-sort .easy-hint,
+  .play.is-easy-sort .hint-peek,
+  .play.is-easy-sort .sort-one,
+  .play.is-easy-sort .sort-lock,
+  .play.is-easy-sort .match-recover {
+    flex: 0 0 auto;
+  }
+}
+
+
 
 
 /* Easy Clear 1.4.212: Easy Lock In quiz ≤720 close the lower-third purple void

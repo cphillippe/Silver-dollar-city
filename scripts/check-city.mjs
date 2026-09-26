@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.217')
+assert.equal(APP_VERSION, '1.4.218')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -4224,5 +4224,36 @@ console.log('check-city: ok')
     latestChange('1.4.217').items.join('\n'),
     /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|Father Dash|Learn cream|Match grid|Samaritan|Manage|Lock In quiz|Dig|Creed|Build|Sort|Snap|Link|Road maze|Claim merge|Source dig|Story Creek HOLD|slider→HOLD|timing-rail→CTA/i,
     '1.4.217 must not fix phone-fail issues or climb another Easy surface',
+  )
+}
+
+// Easy Clear 1.4.218: Easy Sort ≤720 / phone portrait fill purple void (invent Fun/Clear)
+{
+  const sortCss218 = readFileSync(new URL('../src/styles/sortHold.css', import.meta.url), 'utf8')
+  const sortPlay218 = readFileSync(
+    new URL('../src/components/challenges/SortPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(sortCss218, /1\.4\.218: Easy Sort ≤720 \/ phone portrait fill purple void/)
+  assert.match(
+    sortCss218,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.play\.is-easy-sort \{[\s\S]*?gap: 3px/,
+  )
+  assert.match(
+    sortCss218,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.play\.is-easy-sort \.bank\.is-sort \{[\s\S]*?grid-template-rows: minmax\(0, 1fr\) minmax\(0, 1fr\)/,
+  )
+  assert.match(
+    sortCss218,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.play\.is-easy-sort \.sort-bins \{[\s\S]*?max-height: none/,
+  )
+  assert.match(sortPlay218, /1\.4\.218: phone portrait extends fill so Keep·Toss bank\/bins close purple void/)
+  assert.match(cssSrc, /1\.4\.218: Easy Sort ≤720 \/ phone portrait fill purple void/)
+  assert.match(latestChange('1.4.218').items.join('\n'), /fill|phone portrait|purple void|Sort|Keep·Toss|invent Fun\/Clear/i)
+  assert.match(latestChange('1.4.218').title, /Easy Sort|≤720|fill|purple void/i)
+  assert.doesNotMatch(
+    latestChange('1.4.218').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|Father Dash|Learn cream|Match grid|Samaritan|Manage|Lock In quiz|Dig|Creed|Build|Hold|Snap|Link|Road maze|Claim merge|Source dig|Story Creek HOLD|slider→HOLD|timing-rail→CTA|hud→arena/i,
+    '1.4.218 must not fix phone-fail issues or climb another Easy surface',
   )
 }
