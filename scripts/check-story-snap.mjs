@@ -47,4 +47,17 @@ const wire = readFileSync(new URL('../src/lib/storyPlay.ts', import.meta.url), '
 assert.match(wire, /STORY_SNAP_LINE/)
 assert.match(wire, /story-snap/)
 
+assert.match(playSrc, /STORY_SNAP_HINT/)
+assert.doesNotMatch(
+  playSrc,
+  /className="quiet">\{STORY_SNAP_HINT\}/,
+  'pad owns how — no quiet STORY_SNAP_HINT chrome (#189)',
+)
+assert.match(playSrc, /claimShown \? \(/)
+
+const snapCss = readFileSync(new URL('../src/styles/storySnap.css', import.meta.url), 'utf8')
+assert.match(snapCss, /max-height:\s*720px/)
+assert.match(snapCss, /\.snap-teach/)
+assert.match(snapCss, /-webkit-line-clamp:\s*2/)
+
 console.log('check-story-snap: ok')
