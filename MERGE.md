@@ -1,10 +1,10 @@
 # ready-easy-fun-clear-196 — 1.4.196 Easy Father ≤720 close slider→CTA purple gap (Fixes #253)
 
-**PR:** (pending)
+**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/257
 **Branch:** `ship/easy-fun-clear-196` → `main`
 **Version:** 1.4.196
 **Peel:** `e307e2c` (`e307e2c6aa7429abbf69778856a9882ab9138d96`)
-**Tip:** `e307e2c` (`e307e2c6aa7429abbf69778856a9882ab9138d96`)
+**Tip:** `7d26de9` (`7d26de90bb0729fead33a14351dc4a322643b136`)
 **Base live:** 1.4.195 (`ea5eba5`, PR #256 Easy Lock In feedback ≤720 fill purple void on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
