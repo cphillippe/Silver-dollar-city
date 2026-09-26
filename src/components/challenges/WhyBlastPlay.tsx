@@ -37,6 +37,7 @@ interface WhyBlastPlayProps {
  * Easy Clear 1.4.217: phone portrait extends fill+dock+hud so Hold hud→arena closes (invent Fun/Clear).
  * Easy Clear 1.4.242: phone portrait extends HUD peel 170 so eyebrow + quiet From hide on tall phones (invent Fun/Clear).
  * Easy Fun 1.4.268: tall-phone Hold dock arcade punch — HUD compress 156 climbs past 720, dock CTA + score/miss/LOCKED juice go loud on cream, claim stays readable (invent Fun/Clear).
+ * Easy Fun 1.4.270: tall-phone one-more win-end dock — win claim stays readable; continue button stays the 268 punch (invent Fun/Clear · Shot wake).
  * Easy Clear 1.4.194: ≤720 grows journal quiz shell so Lock In card fills purple void (Fixes #251).
  * Easy Clear 1.4.195: ≤720 grows journal miss-teach shell so feedback card fills purple void (Fixes #252).
  */

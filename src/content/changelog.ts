@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.270',
+    title: 'Easy one-more win-end dock: ≤720 arcade punch tall-phone juice (Shot wake)',
+    when: '2026-09-26',
+    items: [
+      'Easy Match / Snap / Lock In win-end on ≤720 / phone portrait: extend win-end dock compress still at max-height 720px across max-height 920px and taller layout viewports, and punch the one-more / continue button arcade-loud — claim stays readable and the win stamp is not crowded (invent Fun/Clear · Shot wake version; Hold win continue stays on the 268 punch; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.269',
     title: 'Easy Story Snap: ≤720 residual juice tall-phone punch',
     when: '2026-09-26',
