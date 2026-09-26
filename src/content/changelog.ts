@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.224',
+    title: 'Easy Match: ≤720 close fill + score→CTA purple void on tall phone',
+    when: '2026-09-25',
+    items: [
+      'Easy Match (picture · main idea) on ≤720 / phone portrait: extend fill + score→CTA so match-grid / cards absorb free space and pack tight to the Next CTA — no large purple void under the score on tall phones (invent Fun/Clear; continuation of Match fill 184 / score→CTA 207 ≤720 family; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.223',
     title: 'Easy Story Snap: ≤720 close fill + pad→CTA purple void on tall phone',
     when: '2026-09-25',
