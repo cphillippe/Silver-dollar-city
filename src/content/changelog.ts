@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.221',
+    title: 'Easy Build: ≤720 close fill purple void on tall phone',
+    when: '2026-09-25',
+    items: [
+      'Easy Build Argument on ≤720 / phone portrait: extend deal + free-place fill so slots · bank · Check lock absorb free space — no large purple void under the lock / bank on tall phones (invent Fun/Clear; continuation of Build deal fill 187 / free-place 203 ≤720 family; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.220',
     title: 'Easy Creed: ≤720 close fill + bowl→CTA purple void on tall phone (Shot wake)',
     when: '2026-09-25',
