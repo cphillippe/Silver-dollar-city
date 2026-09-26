@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.247')
+assert.equal(APP_VERSION, '1.4.248')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -5179,5 +5179,36 @@ console.log('check-city: ok')
     latestChange('1.4.247').items.join('\n'),
     /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#300|#301|#302|#314|#315|#316|#317|#318|#319|#331|#332|Father Dash|Learn cream|Match grid|Samaritan|Manage|miss teach|Dig|Creed|Build|Sort|Snap|Link|Road maze|Claim merge|Source dig|Story Creek|invent Fun\/Clear/i,
     '1.4.247 must not fix other phone-fail issues or climb another Easy surface',
+  )
+}
+
+// Easy Clear 1.4.248: Easy Lock In feedback ≤720 / tall-phone bottom-half purple void residual (Fixes #334)
+{
+  const holdCss248 = readFileSync(new URL('../src/styles/sortHold.css', import.meta.url), 'utf8')
+  const whyPlay248 = readFileSync(
+    new URL('../src/components/challenges/WhyBlastPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(holdCss248, /1\.4\.248: Easy Lock In feedback ≤720 \/ tall-phone bottom-half purple void residual/)
+  assert.match(
+    holdCss248,
+    /\.journal\.is-rehearse:has\(\.why-blast\.is-miss-teach\) \.recall-gate\.is-easy-hold \{[\s\S]*?background: var\(--parchment/,
+  )
+  assert.match(
+    holdCss248,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.why-blast\.is-miss-teach \.why-miss-teach \{[\s\S]*?background: transparent/,
+  )
+  assert.match(
+    holdCss248,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.why-blast\.is-miss-teach \.why-miss-teach \.cta-dock[\s\S]*?position: static[\s\S]*?margin-top: auto/,
+  )
+  assert.match(whyPlay248, /1\.4\.248: tall-phone cream-card fill/)
+  assert.match(cssSrc, /1\.4\.248: Easy Lock In feedback ≤720 \/ tall-phone bottom-half purple void residual/)
+  assert.match(latestChange('1.4.248').items.join('\n'), /Fixes #334|purple void|cream|parchment|Lock In feedback|miss-teach|tall-phone/i)
+  assert.match(latestChange('1.4.248').title, /Easy Lock In feedback|≤720|tall-phone|purple void|Fixes #334/i)
+  assert.doesNotMatch(
+    latestChange('1.4.248').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#300|#301|#302|#314|#315|#316|#317|#318|#319|#331|#332|#333|Father Dash|Learn cream|Match grid|Samaritan|Manage|live quiz|Dig|Creed|Build|Sort|Snap|Link|Road maze|Claim merge|Source dig|Story Creek|invent Fun\/Clear/i,
+    '1.4.248 must not fix other phone-fail issues or climb another Easy surface',
   )
 }
