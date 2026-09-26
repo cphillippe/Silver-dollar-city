@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.188')
+assert.equal(APP_VERSION, '1.4.189')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3375,11 +3375,41 @@ console.log('check-city: ok')
   )
   assert.match(linkPlay188, /1\.4\.188: ≤720 fills purple void/)
   assert.match(cssSrc, /1\.4\.188: Easy Link ≤720 fill purple void/)
-  assert.match(latestChange(APP_VERSION).items.join('\n'), /Easy Link.*≤720|purple void under the deal/i)
+  assert.match(latestChange('1.4.188').items.join('\n'), /Easy Link.*≤720|purple void under the deal/i)
   assert.doesNotMatch(
-    latestChange(APP_VERSION).items.join('\n'),
+    latestChange('1.4.188').items.join('\n'),
     /Fixes #238|Fixes #239|Fixes #240|Lock In win-end|Match \(picture|empty purple card|Story Snap|eyebrow|Creed merge|Fixes #232|empty-lot|Fixes #217|Build Argument ≤720 fill/i,
     '1.4.188 must not re-claim Match / Lock In / Samaritan / Snap / Creed / Manage / letterbox / Build 187',
+  )
+}
+
+// Easy Clear 1.4.189: Easy Father Dash ≤720 fill purple void (invent Fun/Clear)
+{
+  const indexCss189 = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
+  const fatherPlay189 = readFileSync(
+    new URL('../src/components/challenges/FatherRunPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(indexCss189, /1\.4\.189: Easy Father Dash ≤720 fill purple void/)
+  assert.match(
+    indexCss189,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-father-run,[\s\S]*?flex: 1 1 auto/,
+  )
+  assert.match(
+    indexCss189,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-father-run \.run-scene \{[\s\S]*?flex: 1 1 auto/,
+  )
+  assert.match(
+    indexCss189,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-father-run \.run-scene \{[\s\S]*?height: auto/,
+  )
+  assert.match(fatherPlay189, /1\.4\.189: ≤720 fills purple void/)
+  assert.match(cssSrc, /1\.4\.189: Easy Father Dash ≤720 fill purple void/)
+  assert.match(latestChange(APP_VERSION).items.join('\n'), /Father Dash.*≤720|purple void under the pad/i)
+  assert.doesNotMatch(
+    latestChange(APP_VERSION).items.join('\n'),
+    /Fixes #238|Fixes #239|Fixes #240|Lock In win-end|Match \(picture|empty purple card|Story Snap|eyebrow|Creed merge|Fixes #232|empty-lot|Fixes #217|Build Argument ≤720 fill|Easy Link ≤720 fill/i,
+    '1.4.189 must not re-claim Match / Lock In / Samaritan / Snap / Creed / Manage / letterbox / Build / Link',
   )
 }
 

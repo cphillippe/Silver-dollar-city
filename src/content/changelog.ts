@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.189',
+    title: 'Easy Father Dash: ≤720 fill purple void',
+    when: '2026-09-25',
+    items: [
+      'Easy Father Dash on ≤720px tall: grow play shell + stretch run-scene so scene · speech · Hold pad fill the gold card — no empty purple void under the pad (Match 1.4.184 / Link 1.4.188 fill family · invent Fun/Clear; HUD peel 1.4.173 untouched; Match / Lock In / Samaritan / Sort / Snap / Creed / Build Argument / Link peels untouched)',
+    ],
+  },
+  {
     version: '1.4.188',
     title: 'Easy Link: ≤720 fill purple void',
     when: '2026-09-25',
