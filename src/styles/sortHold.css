@@ -1570,6 +1570,77 @@ html[data-easy='on'] .recall-card {
   }
 }
 
+/* Easy Clear 1.4.203: Easy Build ≤720 fill free-place purple void —
+   Fill 187 only stretched .is-build.is-deal; free-place (non-deal) still keeps
+   fixed slot seats (48px) + capped bank (max-height 3×seat) so the gold card
+   leaves empty purple under the Check chain lock (Match 184 / Sort 198 /
+   Sequence 186 fill family; invent Fun/Clear). Grow play + stretch slot-list /
+   bank tiles + zero build-lock margin so slots · bank · lock fill the portrait.
+   Deal fill 187 / how-peel 171 stay; Hold 202 / Creek 201 / Creed 200 / Link 199 /
+   Sort 198 / Snap 197 / Match 193 / Lock In 194·195 / Father 196 / Samaritan
+   peels untouched. */
+@media (max-height: 720px) {
+  .is-puzzle .play.is-build:not(.is-deal),
+  .daily-page.is-puzzle .play.is-build:not(.is-deal),
+  .challenge-page.is-puzzle .play.is-build:not(.is-deal) {
+    gap: 4px;
+  }
+
+  .is-puzzle .play.is-build:not(.is-deal) .slot-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: grid;
+    grid-auto-rows: minmax(0, 1fr);
+    align-content: stretch;
+    gap: 6px;
+  }
+
+  .is-puzzle .play.is-build:not(.is-deal) .slot {
+    --slot-seat: auto;
+    height: auto;
+    min-height: 44px;
+    max-height: none;
+    align-self: stretch;
+  }
+
+  .is-puzzle .play.is-build:not(.is-deal) .bank.is-order {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-auto-rows: minmax(0, 1fr);
+    align-content: stretch;
+    gap: 8px;
+    height: auto;
+  }
+
+  .is-puzzle .play.is-build:not(.is-deal) .sort-tile {
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    align-self: stretch;
+  }
+
+  .is-puzzle .play.is-build:not(.is-deal) .sort-tile .chip {
+    height: 100%;
+    min-height: 56px;
+    -webkit-line-clamp: 5;
+  }
+
+  .is-puzzle .play.is-build:not(.is-deal) .prompt,
+  .is-puzzle .play.is-build:not(.is-deal) .result {
+    flex: 0 0 auto;
+  }
+
+  .is-puzzle .play.is-build:not(.is-deal) .build-lock,
+  .play.is-build:not(.is-deal) .build-lock {
+    flex: 0 0 auto;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+}
+
 /* Easy Clear 1.4.190: Easy Hold ≤720 fill purple void —
    After arena-first 170 / short-phone 156, why-arena chips hug content so the
    gold Lock In card leaves empty purple under the CTA (Match 184 / Father 189

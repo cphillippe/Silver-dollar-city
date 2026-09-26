@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.202')
+assert.equal(APP_VERSION, '1.4.203')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3657,6 +3657,39 @@ console.log('check-city: ok')
     '1.4.202 must not re-peel Shot 190 fails #250–#253 or Story Creek 201 / Creed 200 / Link 199 / Sort 198 / Story Snap 197 / Match / Lock In quiz·miss / Father / Build / Hold fill',
   )
 }
+
+
+// Easy Clear 1.4.203: Easy Build ≤720 fill free-place purple void (invent Fun/Clear)
+{
+  const holdCss203 = readFileSync(new URL('../src/styles/sortHold.css', import.meta.url), 'utf8')
+  const buildPlay203 = readFileSync(
+    new URL('../src/components/challenges/BuildArgumentPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(holdCss203, /1\.4\.203: Easy Build ≤720 fill free-place purple void/)
+  assert.match(
+    holdCss203,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-build:not\(\.is-deal\) \.slot-list \{[\s\S]*?flex: 1 1 auto/,
+  )
+  assert.match(
+    holdCss203,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-build:not\(\.is-deal\) \.bank\.is-order \{[\s\S]*?max-height: none/,
+  )
+  assert.match(
+    holdCss203,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-build:not\(\.is-deal\) \.build-lock[\s\S]*?margin-top: 0/,
+  )
+  assert.match(buildPlay203, /1\.4\.203: ≤720 fills free-place purple void/)
+  assert.match(cssSrc, /1\.4\.203: Easy Build ≤720 fill free-place purple void/)
+  assert.match(latestChange('1.4.203').items.join('\n'), /free-place|non-deal|purple void under the lock/i)
+  assert.match(latestChange('1.4.203').title, /Easy Build|≤720|free-place|purple void/i)
+  assert.doesNotMatch(
+    latestChange('1.4.203').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|Lock In quiz|Lock In feedback|Father.*slider|grid→footer|gem-board|Easy Sort ≤720 fill|Father Dash ≤720 fill|Story Snap ≤720 fill|snap-stage|bank\.is-sort|sort-bins|choices→CTA|link-dock|Easy Link ≤720 fill|bowl→CTA|Easy Creed ≤720 fill|merge-bowl|board→CTA|Story Creek ≤720 fill|maze-board|chips→CTA|Easy Hold.*≤720 fill|Build Argument ≤720 fill/i,
+    '1.4.203 must not re-peel Shot 190 fails #250–#253 or Hold 202 / Creek 201 / Creed 200 / Link 199 / Sort 198 / Snap 197 / Match / Lock In / Father / Hold / deal Build fill 187',
+  )
+}
+
 
 
 

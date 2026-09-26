@@ -232,6 +232,7 @@ export function BuildArgumentPlay({
       <WinBurst play={status === 'ok'} />
       {/* Easy Clear 1.4.171: ≤720 peels how/lead/hint chrome in sortHold.css so slots + bank stay above fold. */}
       {/* Easy Clear 1.4.187: ≤720 fills purple void in sortHold.css (invent Fun/Clear). */}
+      {/* Easy Clear 1.4.203: ≤720 fills free-place purple void (non-deal slots·bank; deal fill 187 stays). */}
       <PuzzleLead challenge={challenge} />
       {easy ? (
         showEasyPuzzleHint ? (
