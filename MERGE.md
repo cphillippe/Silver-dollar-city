@@ -4,7 +4,7 @@
 **Branch:** `ship/easy-fun-clear-203` → `main`
 **Version:** 1.4.203
 **Peel:** `5625ff6` (`5625ff6269687cb2ba319c1ba04684e6a91a3fc0`)
-**Tip:** `924bd10` (`924bd1090ab4b38eac78ab9df66ff3d3786e86c9`)
+**Tip:** `48ccc87` (`48ccc87cff2000b5a1dfcadd87f4b3c74e024b79`)
 **Base live:** 1.4.202 (`62fe9c9`, PR #263 Easy Hold ≤720 close chips→CTA purple gap on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
