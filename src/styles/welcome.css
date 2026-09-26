@@ -570,9 +570,10 @@ html[data-theme='dusk'] .easy-story-card {
     margin: 0;
   }
 
+  /* 1.4.177: lift max-height so 2-line claim pill wraps (was 40px clip) — Fixes #231 */
   .easy-story-card .loci-stamp.is-hero {
     min-height: 34px;
-    max-height: 40px;
+    max-height: 56px;
     padding: 0.18rem 0.5rem;
     margin: 0;
     gap: 0.35rem;
@@ -591,8 +592,13 @@ html[data-theme='dusk'] .easy-story-card {
 
   .easy-story-card .loci-stamp.is-hero .loci-stamp-idea {
     font-size: 0.62rem;
-    line-height: 1.1;
+    line-height: 1.15;
     padding: 0.06rem 0.35rem;
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   .easy-story-card .loci-stamp.is-hero .loci-stamp-pin {

@@ -73,7 +73,8 @@ export function lociStampEntry(lessonId: string): LociStampSpec | undefined {
   return LOCI_STAMP[lessonId]
 }
 
-function shortenIdea(text: string, maxWords = 6): string {
+/* 1.4.177: 8 words keeps “Neighbor is the one who shows mercy” intact (Fixes #231) */
+function shortenIdea(text: string, maxWords = 8): string {
   const words = text
     .replace(/[—–]/g, ' ')
     .replace(/[.!?].*$/, '')
