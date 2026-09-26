@@ -3,8 +3,8 @@
 **PR:** https://github.com/cphillippe/Silver-dollar-city/pull/241
 **Branch:** `ship/easy-fun-clear-184` → `main`
 **Version:** 1.4.184
-**Peel:**  ()
-**Tip:**  ()
+**Peel:** `4d708ff` (`4d708ff1a863f0887ee69b602231a1e5b088fa08`)
+**Tip:** `aff0b3c` (`aff0b3ca9c81289d927ab77097ad27b85a0441a0`)
 **Base live:** 1.4.183 (`29f015a`, PR #237 Easy Sort ≤720 board-first on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
@@ -47,4 +47,4 @@ MODEL=gemini-flash-latest — Shot pack 1.4.180 vision FAIL on Match (`gemini-vi
 - `npm run build` → `docs/` ✓
 
 ## Status
-**MERGEABLE CLEAN** (confirm after push) — ready for CoS merge after green. Do NOT merge from this hop.
+**MERGEABLE CLEAN** — ready for CoS merge after green. Do NOT merge from this hop.
