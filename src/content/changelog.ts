@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.199',
+    title: 'Easy Link: ≤720 close choices→CTA purple gap',
+    when: '2026-09-25',
+    items: [
+      'Easy Link on ≤720px tall: zero link-dock margin-top so link-col flex fill absorbs the portrait — no empty purple void between the picture choices and the bottom dock (Father 1.4.196 dock-margin family · invent Fun/Clear; after Link fill 1.4.188 left auto margin stealing free space; Sort 198 / Story Snap 197 / Match 193 / Lock In 194·195 / Hold / Creed / Story Creek / Build / Samaritan peels untouched)',
+    ],
+  },
+  {
     version: '1.4.198',
     title: 'Easy Sort: ≤720 fill purple void',
     when: '2026-09-25',
