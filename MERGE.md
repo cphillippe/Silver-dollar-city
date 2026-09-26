@@ -1,17 +1,17 @@
-# 1.4.265 Easy Samaritan tall residual cream (Fixes #365)
+# 1.4.266 Easy Father Dash tall residual cream (Fixes #366)
 
-**Branch:** `fix/365-easy-samaritan-tall-residual` → `main`
+**Branch:** `fix/366-easy-father-dash-tall-residual` → `main`
 **Status:** Not merged. Do not wake Shot (wake at 1.4.270).
 
 ## What changed
-Easy Samaritan / Story Creek mercy maze left purple voids between the HUD, the road board, and the find-line footer on tall portrait viewports after the 1.4.256 cream peel. The live DOM is `main.challenge-page.is-puzzle` > `.play.is-road-maze` > `.maze-beats` + `.maze-stage` > `.maze-board` + `.match-score`. Those 256 selectors already paint cream at `max-height: 920px`. Above that cap the play keeps its purple-gold gradient and the aspect-capped board sits in a transparent stage.
+Easy Father Dash left a purple void between the timing slider and HOLD TO RUN on tall portrait viewports after the 1.4.257 cream peel. The live DOM is `main.challenge-page.is-puzzle` > `.play.is-father-run` > `.run-speech` + `.run-rail` + `.cta-dock.run-dock`. Those 257 selectors already paint cream at `max-height: 920px`. Above that cap the play keeps its purple-gold gradient and the dock’s auto margin parks the button on that plate.
 
-1.4.265 keeps the 256 rules and adds `@media (max-height: 920px), (min-height: 921px)` in `src/styles/welcome.css` for Easy Samaritan / road-maze only:
+1.4.266 keeps the 257 rules and adds `@media (max-height: 920px), (min-height: 921px)` in `src/styles/welcome.css` for Easy Father Dash only:
 
-- opaque `#fff6e8` (`background-image: none`) on the full-bleed app-body, puzzle shell, play, maze-stage, and maze-board plate
-- dark ink on the kicker, caption, and score so HUD and footer stay readable
-- find-line / win dock pinned with `margin-top: auto` on a cream floor
-- road tiles and target chips keep their own faces
+- opaque `#fff6e8` (`background-image: none`) on the full-bleed app-body, puzzle shell, and dash plate
+- sunset run-scene stays a fixed art strip
+- dark ink on the kicker, caption, score, and speech; timing rail stays visible
+- HOLD TO RUN pinned with `margin-top: auto` on a cream floor
 
 The play topbar stays the purple dusk wash. Android `versionName` stays `1.4.113`. `docs/` is synced from `dist/` and `qa-seed.html` is preserved.
 
