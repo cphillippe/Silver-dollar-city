@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.224',
+    title: 'Easy Learn: ≤720 close bottom-half purple void (Fixes #296)',
+    when: '2026-09-26',
+    items: [
+      'Fixes #296: Easy Learn cream-pill on ≤720 / phone portrait — tighten fill 215 (zero app-body / teach-gate bottom pad, flex 1 1 0 on page · card · held-triad, EasyBack pin, dock margin-top auto) so Learn content + CTAs fill portrait without a large dead purple band under the stack (Shot 220 residual after Learn CTA void peel 1.4.215; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.223',
     title: 'Easy Story Snap: ≤720 close fill + pad→CTA purple void on tall phone',
     when: '2026-09-25',
