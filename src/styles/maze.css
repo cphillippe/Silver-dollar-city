@@ -134,10 +134,11 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  /* 1.4.153 default board-first — peel help-phase chrome compress (#190) */
+  gap: 2px;
   width: min(100%, 390px);
   margin: 0 auto;
-  padding: 6px 6px 8px;
+  padding: 4px 5px 6px;
   min-height: 0;
   height: 100%;
   max-height: 100%;
@@ -200,17 +201,35 @@
 }
 
 .play.is-road-maze .run-thumb {
-  max-height: 34px;
-  border-radius: 10px;
+  max-height: 26px;
+  border-radius: 8px;
 }
 
 .play.is-road-maze .story-caption {
   min-height: 0;
   margin: 0;
   padding: 0 2px;
-  font-size: 0.86rem;
-  line-height: 1.2;
+  font-size: 0.8rem;
+  line-height: 1.15;
 }
+
+/* 1.4.153 default Find/walk — beat row vertical cost (NOTES 127); board-first */
+.play.is-road-maze .maze-beats {
+  gap: 4px;
+}
+
+.play.is-road-maze .maze-beat {
+  padding: 2px 2px 1px;
+  font-size: 0.64rem;
+  border-radius: 10px;
+}
+
+.play.is-road-maze .maze-beat-face,
+.play.is-road-maze .maze-beat-inn {
+  width: 30px;
+  height: 30px;
+}
+
 
 .play.is-road-maze .match-score {
   margin: 2px 0 0;
@@ -325,7 +344,7 @@
   max-width: 100%;
   flex: 0 1 auto;
   height: auto;
-  max-height: min(58dvh, 520px);
+  max-height: min(62dvh, 540px);
   aspect-ratio: 5 / 7;
   margin: 0 auto;
   padding: 6px;
@@ -638,47 +657,82 @@
   .maze-board {
     width: min(100%, 390px);
     max-width: 100%;
-    max-height: min(56dvh, 480px);
+    max-height: min(62dvh, 520px);
     gap: 3px;
     padding: 5px;
   }
 
   .play.is-road-maze {
     gap: 2px;
-    padding: 5px 5px 6px;
+    padding: 4px 5px 6px;
   }
 
   .play.is-road-maze .story-caption {
     min-height: 0;
-    font-size: 0.82rem;
+    font-size: 0.78rem;
   }
 
   .play.is-road-maze .run-thumb {
-    max-height: 30px;
-  }
-
-  .maze-beat-face,
-  .maze-beat-inn {
-    width: 36px;
-    height: 36px;
-  }
-
-  .maze-beat {
-    font-size: 0.68rem;
-    padding: 3px 2px 2px;
-  }
-
-  .play.is-road-maze.is-help-phase .run-thumb {
     max-height: 24px;
   }
 
-  .play.is-road-maze.is-help-phase .maze-beat-face,
-  .play.is-road-maze.is-help-phase .maze-beat-inn {
+  .play.is-road-maze .maze-beat-face,
+  .play.is-road-maze .maze-beat-inn {
     width: 28px;
     height: 28px;
   }
 
+  .play.is-road-maze .maze-beat {
+    font-size: 0.62rem;
+    padding: 2px 2px 1px;
+  }
+
+  /* HELP phase — keep slightly tighter than default board-first */
+  .play.is-road-maze.is-help-phase .run-thumb {
+    max-height: 22px;
+  }
+
+  .play.is-road-maze.is-help-phase .maze-beat-face,
+  .play.is-road-maze.is-help-phase .maze-beat-inn {
+    width: 26px;
+    height: 26px;
+  }
+
   .play.is-road-maze.is-help-phase .maze-board {
+    max-height: min(64dvh, 520px);
+  }
+}
+
+
+/* 1.4.153 short phone — default Find/walk board-first (Story Snap ≤720 family) */
+@media (max-height: 720px) {
+  .play.is-road-maze {
+    gap: 2px;
+    padding: 3px 4px 5px;
+  }
+
+  .play.is-road-maze .run-thumb {
+    max-height: 22px;
+    border-radius: 7px;
+  }
+
+  .play.is-road-maze .story-caption {
+    font-size: 0.74rem;
+    line-height: 1.1;
+  }
+
+  .play.is-road-maze .maze-beat {
+    padding: 1px 2px 1px;
+    font-size: 0.6rem;
+  }
+
+  .play.is-road-maze .maze-beat-face,
+  .play.is-road-maze .maze-beat-inn {
+    width: 26px;
+    height: 26px;
+  }
+
+  .play.is-road-maze .maze-board {
     max-height: min(64dvh, 520px);
   }
 }

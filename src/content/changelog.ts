@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.153',
+    title: 'Samaritan road: default board-first',
+    when: '2026-09-25',
+    items: [
+      'Easy Samaritan road default Find/walk: peel help-phase chrome compress onto default play — thumbs · caption · beats thin so the board keeps the phone (board-first after how-dedupe 1.4.143; Fixes #190)',
+    ],
+  },
+  {
     version: '1.4.152',
     title: 'Story Snap: short-phone teach thin',
     when: '2026-09-25',
