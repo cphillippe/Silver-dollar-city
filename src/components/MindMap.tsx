@@ -38,6 +38,12 @@ interface MindMapProps {
   onNavigate: (view: View) => void
 }
 
+/** Easy PLACE repeats the sheet title — show the one-word path role instead. */
+function easyPlaceTile(plotId: CityPlotId, placeTitle: string): string {
+  const path = LOT_STORY[plotId].path
+  return path === placeTitle ? placeTitle : path
+}
+
 export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) {
   const { progress, upgradeBuilding } = useProgress()
   const easy = isEasy(progress)
@@ -119,7 +125,8 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
         <div className="mind-web" aria-label="Linked nodes">
           <div className="mind-node is-place is-lit">
             <span className="mind-kicker">Place</span>
-            <strong>{graph.placeTitle}</strong>
+            {/* 1.4.273 — Easy PLACE uses the path role when the tile would repeat the sheet title */}
+            <strong>{easy ? easyPlaceTile(plotId, graph.placeTitle) : graph.placeTitle}</strong>
             {easy ? null : <em className="mind-why">{LOT_STORY[graph.plotId].path}</em>}
           </div>
           <div className="mind-node is-person is-lit">

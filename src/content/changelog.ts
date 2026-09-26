@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.273',
+    title: 'Easy Star lamps Manage sheet: ≤720 kid-clear copy',
+    when: '2026-09-26',
+    items: [
+      'Easy Star lamps Manage sheet on phone portrait: the job says more room here for ideas you kept, the next line says catch twelve stars or keep a night, PLACE shows Remember instead of repeating the title, and the subtitle is Juniper’s street light. The head-to-job gap tightens slightly (other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.272',
     title: 'Easy Lock In hub: ≤720 close empty purple void (Fixes #384)',
     when: '2026-09-26',
