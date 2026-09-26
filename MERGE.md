@@ -1,10 +1,10 @@
 # ready-easy-fun-clear-210 — 1.4.210 Easy Hold ≤720 close hud→arena purple gap
 
-**PR:** (pending)
+**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/271
 **Branch:** `ship/easy-fun-clear-210` → `main`
 **Version:** 1.4.210
-**Peel:** (pending)
-**Tip:** (pending)
+**Peel:** `c03c0c7` (`c03c0c7594c29e34e6c4902ea51c22f280d7c091`)
+**Tip:** `24733e9` (`24733e9aba1af260c8a124cb8ff517e161ea1754`)
 **Base live:** 1.4.209 (`0ca08c4`, PR #270 Easy Story Snap ≤720 close pad→CTA purple gap on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
@@ -45,4 +45,4 @@ MODEL=gemini-flash-latest — Invent Fun/Clear (no open Easy Fun/Clear issue). I
 - Android versionName **1.4.113** unchanged
 
 ## Mergeability
-(pending)
+MERGEABLE CLEAN
