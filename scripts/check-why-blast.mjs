@@ -131,4 +131,22 @@ assert.match(bonusDict, /isKidFriendlyBonusWord/)
 assert.match(bonusDict, /isPreferredPlantWord/)
 assert.doesNotMatch(bonusDict, /PLANTED_EXTRAS/)
 
+
+// Easy Clear 1.4.156: short-phone WhyBlast arena-first chrome compress — Fixes #193
+assert.match(blastSrc, /1\.4\.156.*arena|#193/)
+const holdCss = readFileSync(new URL('../src/styles/sortHold.css', import.meta.url), 'utf8')
+assert.match(holdCss, /1\.4\.156 short phone — Lock In WhyBlast arena-first|Fixes #193/)
+assert.match(
+  holdCss,
+  /@media \(max-height: 720px\) \{[\s\S]*?\.why-blast \{[\s\S]*?gap: 6px/,
+)
+assert.match(
+  holdCss,
+  /@media \(max-height: 720px\) \{[\s\S]*?\.why-chip \{[\s\S]*?min-height: 48px/,
+)
+assert.match(
+  holdCss,
+  /@media \(max-height: 720px\) \{[\s\S]*?\.why-claim \{[\s\S]*?padding: 8px 10px/,
+)
+
 console.log('check-why-blast: ok')
