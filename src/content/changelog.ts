@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.198',
+    title: 'Easy Sort: ≤720 fill purple void',
+    when: '2026-09-25',
+    items: [
+      'Easy Sort on ≤720px tall: grow play shell + stretch bank seats / bins so Keep·Toss fill the gold card — no empty purple void under the bins (Match 1.4.184 / Story Snap 1.4.197 / Creed 1.4.192 fill family · invent Fun/Clear; board-first 1.4.183 untouched; Story Snap 197 / Match 193 / Lock In 194·195 / Father 196 / Hold / Creed / Story Creek / Build / Link / Samaritan peels untouched)',
+    ],
+  },
+  {
     version: '1.4.197',
     title: 'Easy Story Snap: ≤720 fill purple void',
     when: '2026-09-25',

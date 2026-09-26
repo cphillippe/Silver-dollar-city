@@ -1740,3 +1740,71 @@ html[data-easy='on'] .recall-card {
     gap: 10px;
   }
 }
+
+/* Easy Clear 1.4.198: Easy Sort ≤720 fill purple void —
+   After board-first 183 (hide how/hint), fixed-height bank.is-sort (108px×2) +
+   capped sort-bins (102px) hug the top so the gold card leaves empty purple
+   under the bins (Match 184 / Story Snap 197 / Creed 192 fill family; invent
+   Fun/Clear). Grow play shell + stretch bank seats / bins so Keep·Toss fill
+   the portrait. Story Snap 197 / Match 193 / Lock In 194·195 / Father 196 /
+   Hold / Creed / Story Creek / Build / Link / Samaritan peels untouched. */
+@media (max-height: 720px) {
+  .play.is-easy-sort,
+  .daily-page.is-puzzle .play.is-easy-sort,
+  .challenge-page.is-puzzle .play.is-easy-sort {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    overflow: hidden;
+  }
+
+  .play.is-easy-sort .bank.is-sort {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+    max-height: none;
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+    align-content: stretch;
+  }
+
+  .play.is-easy-sort .sort-tile {
+    --sort-seat: auto;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    align-self: stretch;
+  }
+
+  .play.is-easy-sort .sort-tile .chip {
+    height: 100%;
+    min-height: 0;
+    -webkit-line-clamp: 5;
+  }
+
+  .play.is-easy-sort .sort-bins {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+    max-height: none;
+    align-content: stretch;
+  }
+
+  .play.is-easy-sort .bin {
+    height: auto;
+    min-height: 72px;
+    max-height: none;
+    align-self: stretch;
+  }
+
+  .play.is-easy-sort .prompt,
+  .play.is-easy-sort .sort-how,
+  .play.is-easy-sort .easy-hint,
+  .play.is-easy-sort .hint-peek,
+  .play.is-easy-sort .sort-one,
+  .play.is-easy-sort .sort-lock,
+  .play.is-easy-sort .match-recover {
+    flex: 0 0 auto;
+  }
+}

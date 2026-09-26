@@ -133,6 +133,7 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
   // Inverse of MatchPlay 1.4.137 (which kept .sort-how and skipped duplicate PuzzleHint).
   // 1.4.145: also skip PuzzleHint when it near-dupes PuzzleLead (fg-order / fg-ought Keep/Toss stack).
   // Easy Clear 1.4.183: ≤720 peels how/lead/hint chrome in sortHold.css so Keep·Toss stays above fold.
+  // Easy Clear 1.4.198: ≤720 fills purple void — grow play + stretch bank/bins (board-first 183 stays).
   const easyLeadLine = easy ? easyLead(challenge.id, challenge.prompt) : ''
   const easyPlainHint = easy
     ? easyChromeLine(plainFor(challenge.id)?.hint ?? challenge.context ?? '')
