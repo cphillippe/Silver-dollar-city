@@ -420,3 +420,14 @@ html[data-easy='on'] .next-tap {
     font-size: 0.7rem;
   }
 }
+
+/* Easy Clear 1.4.207: Easy Match ≤720 close score→CTA purple gap —
+   after fill 184 grew deal grid + stretch cards, global .cta-dock { margin-top: auto }
+   still parks a purple band between match-score and the gold Next CTA when ready
+   (Link 199 / Creed 200 / Creek 201 / Hold 202 dock-margin family; invent Fun/Clear;
+   gem-board #250 / 193 untouched). Zero cta-dock margin-top — fill 184 stays. */
+@media (max-height: 720px) {
+  .is-puzzle .play.is-match.is-deal .cta-dock {
+    margin-top: 0;
+  }
+}
