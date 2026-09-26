@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.207')
+assert.equal(APP_VERSION, '1.4.208')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3797,6 +3797,33 @@ console.log('check-city: ok')
     latestChange('1.4.207').items.join('\n'),
     /Fixes #250|Fixes #251|Fixes #252|Fixes #253|Lock In quiz|Lock In feedback|grid→footer|gem-board|Easy Sort ≤720 fill|Father Dash ≤720 fill|Story Snap ≤720 fill|snap-stage|bank\.is-sort|sort-bins|choices→CTA|link-dock|Easy Link ≤720 fill|bowl→CTA|Easy Creed ≤720 fill|merge-bowl|board→CTA|Story Creek ≤720 fill|maze-board|chips→CTA|Easy Hold.*≤720 fill|Build Argument ≤720 fill|free-place|slider→CTA|speech→rail|Easy Father ≤720 fill|stones→result|Easy Sequence ≤720|held-clear|Easy Learn ≤720|empty purple card/i,
     '1.4.207 must not re-peel Shot 190 fails #250–#253 or Learn 206 / Sequence 205 / Father 204 / Build 203 / Hold 202 / Creek 201 / Creed 200 / Link 199 / Sort 198 / Snap 197 / Match fill 184 / Lock In',
+  )
+}
+
+// Easy Clear 1.4.208: Easy Lock In win-end ≤720 close triad→Home purple gap (invent Fun/Clear)
+{
+  const holdCss208 = readFileSync(new URL('../src/styles/sortHold.css', import.meta.url), 'utf8')
+  const storedLine208 = readFileSync(
+    new URL('../src/components/StoredLine.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(holdCss208, /1\.4\.208: Easy Lock In win-end ≤720 close triad→Home purple gap/)
+  assert.match(
+    holdCss208,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.challenge-page\.is-after:has\(\.stored-line\) \.after-win \{[\s\S]*?gap: 2px/,
+  )
+  assert.match(
+    holdCss208,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.stored-line \.held-triad \{[\s\S]*?gap: 6px/,
+  )
+  assert.match(storedLine208, /1\.4\.208: ≤720 closes triad→Home purple gap/)
+  assert.match(cssSrc, /1\.4\.208: Easy Lock In win-end ≤720 close triad→Home purple gap/)
+  assert.match(latestChange('1.4.208').items.join('\n'), /triad→Home|held-triad|TownReturn|StoredLine|purple band between the triad/i)
+  assert.match(latestChange('1.4.208').title, /Lock In win-end|≤720|triad→Home|purple gap/i)
+  assert.doesNotMatch(
+    latestChange('1.4.208').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|Lock In quiz|Lock In feedback|grid→footer|gem-board|Easy Sort ≤720 fill|Father Dash ≤720 fill|Story Snap ≤720 fill|snap-stage|bank\.is-sort|sort-bins|choices→CTA|link-dock|Easy Link ≤720 fill|bowl→CTA|Easy Creed ≤720 fill|merge-bowl|board→CTA|Story Creek ≤720 fill|maze-board|chips→CTA|Easy Hold.*≤720 fill|Build Argument ≤720 fill|free-place|slider→CTA|speech→rail|Easy Father ≤720 fill|stones→result|Easy Sequence ≤720|held-clear|Easy Learn ≤720|empty purple card|score→CTA|Easy Match ≤720/i,
+    '1.4.208 must not re-peel Shot 190 fails #250–#253 or Match 207 / Learn 206 / Sequence 205 / Father 204 / Build 203 / Hold 202 / Creek 201 / Creed 200 / Link 199 / Sort 198 / Snap 197 / Lock In quiz·miss',
   )
 }
 
