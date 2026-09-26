@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.259')
+assert.equal(APP_VERSION, '1.4.260')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -5610,5 +5610,35 @@ console.log('check-city: ok')
     latestChange('1.4.259').items.join('\n'),
     /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#300|#301|#302|#314|#315|#316|#317|#318|#319|#331|#332|#333|#334|#335|#336|#343|#344|#345|#346|#347|#348|#349|#350|Father Dash|Learn cream|Samaritan|Manage|Lock In|Dig|Sequence|Build|Hold|Claim merge|Creed|Source dig|Story Creek|Story Snap|Sort|Link|Match picture|score→CTA|triad→Home|bowl→CTA|Home dock|coach|cream shell fill 253/i,
     '1.4.259 must not fix phone-fail issues or climb another Easy surface',
+  )
+}
+// Easy Clear 1.4.260: Easy Creed Claim merge ≤720 / phone portrait HUD deepen (invent Fun/Clear · Shot wake)
+{
+  const mergeCss260 = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
+  const mergePlay260 = readFileSync(
+    new URL('../src/components/challenges/ClaimMergePlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(mergeCss260, /1\.4\.260: Easy Creed Claim merge ≤720 \/ phone portrait HUD deepen/)
+  assert.match(
+    mergeCss260,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.play\.is-claim-merge \.merge-score \{[\s\S]*?font-size: 0\.95rem/,
+  )
+  assert.match(
+    mergeCss260,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.play\.is-claim-merge \.merge-mini \{[\s\S]*?width: 28px/,
+  )
+  assert.match(
+    mergeCss260,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.play\.is-claim-merge \.merge-drop-chip \{[\s\S]*?font-size: 0\.58rem/,
+  )
+  assert.match(mergePlay260, /1\.4\.260: phone portrait deepens HUD peel 181/)
+  assert.match(cssSrc, /1\.4\.260: Easy Creed Claim merge ≤720 \/ phone portrait HUD deepen/)
+  assert.match(latestChange('1.4.260').items.join('\n'), /HUD deepen|score|mini|Drop|phone portrait|Claim merge|Creed|invent Fun\/Clear|Shot wake/i)
+  assert.match(latestChange('1.4.260').title, /Easy Creed|Claim merge|HUD deepen|Shot wake/i)
+  assert.doesNotMatch(
+    latestChange('1.4.260').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#300|#301|#302|#314|#315|#316|#317|#318|#319|#331|#332|#333|#334|#335|#336|#343|#344|#345|#346|#347|#348|#349|#350|Father Dash|Learn cream|Samaritan|Manage|Lock In|Dig|Hold|Sort|Snap|Link|Build|Sequence|Story Creek|Match picture|panel-blast|SNAG|one-more win-end|Home dock|coach|cream shell/i,
+    '1.4.260 must not fix phone-fail issues or climb another Easy surface',
   )
 }
