@@ -1487,6 +1487,61 @@ html[data-easy='on'] .recall-card {
   }
 }
 
+/* Easy Clear 1.4.231: Easy Lock In win-end ≤720 / phone portrait fill + triad→Home purple void —
+   After fill 185 + triad→Home 208 (both ≤720 only), real phones ~390×844 still leave
+   StoredLine (SAY THIS TOMORROW) · HeldTriad · TownReturn Home CTA hugging the top with
+   empty purple under / before the dock because those peels never apply at Shot heights.
+   Extend both fills across phone portrait heights (max-height: 920px) so after-win shell ·
+   stored-line absorb free space and claim·reason·source · Home pack tight — tight Lock In
+   win-end fill on tall phones (Easy Lock In StoredLine arcade chrome).
+   Fill 185 / triad→Home 208 ≤720 stay. Do NOT pack Manage / Match / Samaritan / Learn /
+   Father / Creek / Dig / Creed / Hold / Sort / Snap / Link / Build / Road maze / quiz 226 /
+   feedback 227 / panel-blast. Invent Fun/Clear. */
+@media (max-height: 920px) {
+  html[data-easy='on'] .app.is-play .app-body:has(.challenge-page.is-after .stored-line) {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding-top: 8px;
+  }
+
+  html[data-easy='on'] .challenge-page.is-after:has(.stored-line) {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    gap: 4px;
+    overflow: hidden;
+  }
+
+  html[data-easy='on'] .challenge-page.is-after:has(.stored-line) .after-win {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    gap: 2px;
+    margin-top: 0;
+  }
+
+  html[data-easy='on'] .challenge-page.is-after:has(.stored-line) .stored-line {
+    flex: 1 1 auto;
+    min-height: 0;
+    align-content: center;
+    gap: 4px;
+    margin-bottom: 0;
+  }
+
+  html[data-easy='on'] .challenge-page.is-after:has(.stored-line) .stored-line .held-triad {
+    gap: 6px;
+  }
+
+  html[data-easy='on'] .challenge-page.is-after:has(.stored-line) .town-return {
+    flex: 0 0 auto;
+    margin-top: 0;
+    padding-bottom: calc(4px + var(--safe-bottom, 0px));
+  }
+}
+
 /* Easy Clear 1.4.186: Easy Samaritan / Sequence order ≤720 fill top-cluster purple void —
    play.is-sequence.is-deal was flex:0 so the gold card hugged content at the top with a
    massive empty purple bottom half (Shot 1.4.180 06-samaritan · Fixes #240). Grow play
