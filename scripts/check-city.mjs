@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.256')
+assert.equal(APP_VERSION, '1.4.257')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1465,7 +1465,7 @@ assert.match(cssSrc, /is-easy-hold/)
   assert.match(dockCss, /backdrop-filter: blur/)
   assert.doesNotMatch(dockCss, /#16062e/, 'sticky CTA docks must not be an opaque black slab')
 }
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Fixes #348|purple void|cream|parchment|Samaritan|road maze|tall-phone|maze-stage|shell|top/i)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Fixes #349|purple void|cream|parchment|Father Dash|tall-phone|rail→CTA|shell/i)
 {
   const storyCardCss = cssSrc.match(/\.easy-story-card,[\s\S]*?\.easy-story-card::before \{[\s\S]*?\n\}/)?.[0] ?? ''
   assert.match(storyCardCss, /border:\s*0/)
@@ -2403,8 +2403,8 @@ assert.match(mapSrc, /easy \? null : \(\s*\n\s*<>[\s\S]*city-street-main/)
 assert.match(mapSrc, /if \(isEasy\(progress\)\) return/)
 assert.match(mapSrc, /if \(playing\.current && !isEasy\(progress\)\) return/)
 assert.match(mapSrc, /Tap a building to Manage it/)
-assert.match(latestChange(APP_VERSION).title, /Easy Samaritan|≤720|tall-phone|purple void|Fixes #348/i)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Fixes #348|purple void|cream|parchment|Samaritan|road maze|tall-phone|maze-stage|shell|top/i)
+assert.match(latestChange(APP_VERSION).title, /Easy Father Dash|≤720|tall-phone|rail→CTA|purple void|Fixes #349/i)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Fixes #349|purple void|cream|parchment|Father Dash|tall-phone|rail→CTA|shell/i)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-img[\s\S]*?fill: none !important/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img\.is-built[\s\S]*?fill: none/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-hit[\s\S]*?stroke: none/)
@@ -5505,5 +5505,40 @@ console.log('check-city: ok')
     latestChange('1.4.256').items.join('\n'),
     /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#300|#301|#302|#314|#315|#316|#317|#318|#319|#331|#332|#333|#334|#335|#336|#343|#344|#345|#346|#347|Learn cream|teach-gate|Match grid|gem-scroll|Manage|Father Dash|Lock In|Dig|Creed|Build|Sort|Snap|Link|Claim merge|Source dig|invent Fun\/Clear|Sequence|Story Creek HOLD|Home dock|coach/i,
     '1.4.256 must not fix other phone-fail issues or climb another Easy surface',
+  )
+}
+
+// Easy Clear 1.4.257: Easy Father Dash ≤720 / tall-phone rail→CTA purple void residual after cream 250 (Fixes #349)
+{
+  const indexCss257 = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
+  const fatherPlay257 = readFileSync(
+    new URL('../src/components/challenges/FatherRunPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(indexCss257, /1\.4\.257: Easy Father Dash ≤720 \/ tall-phone rail→CTA purple void residual after cream 250/)
+  assert.match(
+    indexCss257,
+    /1\.4\.257: Easy Father Dash ≤720 \/ tall-phone rail→CTA purple void residual after cream 250[\s\S]*?\.app-body:has\(\.play\.is-father-run\) \{[\s\S]*?background: #fff6e8/,
+  )
+  assert.match(
+    indexCss257,
+    /1\.4\.257: Easy Father Dash ≤720 \/ tall-phone rail→CTA purple void residual after cream 250[\s\S]*?\.play\.is-father-run,[\s\S]*?background-image: none[\s\S]*?background: #fff6e8/,
+  )
+  assert.match(
+    indexCss257,
+    /1\.4\.257: Easy Father Dash ≤720 \/ tall-phone rail→CTA purple void residual after cream 250[\s\S]*?\.play\.is-father-run \.run-scene \{[\s\S]*?flex: 1 1 0/,
+  )
+  assert.match(
+    indexCss257,
+    /1\.4\.257: Easy Father Dash ≤720 \/ tall-phone rail→CTA purple void residual after cream 250[\s\S]*?\.play\.is-father-run \.cta-dock,\s*\n\s*\.play\.is-father-run \.cta-dock\.run-dock \{[\s\S]*?position: static[\s\S]*?margin-top: auto[\s\S]*?background: #fff6e8/,
+  )
+  assert.match(fatherPlay257, /1\.4\.257: tall-phone cream shell fill/)
+  assert.match(cssSrc, /1\.4\.257: Easy Father Dash ≤720 \/ tall-phone rail→CTA purple void residual after cream 250/)
+  assert.match(latestChange('1.4.257').items.join('\n'), /Fixes #349|purple void|cream|parchment|Father Dash|tall-phone|rail→CTA|shell/i)
+  assert.match(latestChange('1.4.257').title, /Easy Father Dash|≤720|tall-phone|rail→CTA|purple void|Fixes #349/i)
+  assert.doesNotMatch(
+    latestChange('1.4.257').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#300|#301|#302|#314|#315|#316|#317|#318|#319|#331|#332|#333|#334|#335|#336|#343|#344|#345|#346|#347|#348|Learn cream|teach-gate|Match grid|gem-scroll|Manage|Samaritan|Lock In|Dig|Creed|Build|Sort|Snap|Link|Claim merge|Source dig|invent Fun\/Clear|Sequence|Story Creek HOLD|Home dock|coach/i,
+    '1.4.257 must not fix other phone-fail issues or climb another Easy surface',
   )
 }
