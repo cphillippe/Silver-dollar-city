@@ -4,7 +4,7 @@
 **Branch:** `ship/easy-fun-clear-181` → `main`
 **Version:** 1.4.181
 **Peel:** `b0013a3` (`b0013a35ed53129d924096e476f4983d3de568dc`)
-**Tip:** `330d674` (`330d674f298be54dc65fd6abebb812ca11bc376b`)
+**Tip:** `68d56d2` (`68d56d2dbcfa63c277fc82244135d808c4bda2c0`)
 **Base live:** 1.4.180 (`ea09832`, PR #234 Manage empty-lot header + compact sheet; atop 1.4.179 Easy Home letterbox #229)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
