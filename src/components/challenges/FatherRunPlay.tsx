@@ -296,7 +296,7 @@ export function FatherRunPlay({
     <div
       className={`play is-father-run ${holding ? 'is-running' : ''} ${dash.inWindow && phase === 'run' ? 'is-glow' : ''} ${dashFlash ? 'is-dash' : ''} ${phase === 'hug' ? 'is-win is-hug' : ''} ${phase === 'miss' ? 'is-miss' : ''}`}
     >
-      <p className="sort-how">{EASY.runHunt}</p>
+      {/* Easy Clear 1.4.144: omit runHunt .sort-how — run-pad + toast + story-caption already teach Hold / glow. */}
       <p className="story-kicker">
         {home.who} · {home.place}
       </p>
