@@ -1,42 +1,42 @@
-# ready-easy-fun-clear-209 — 1.4.209 Easy Story Snap ≤720 close pad→CTA purple gap
+# ready-easy-fun-clear-210 — 1.4.210 Easy Hold ≤720 close hud→arena purple gap
 
-**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/270
-**Branch:** `ship/easy-fun-clear-209` → `main`
-**Version:** 1.4.209
-**Peel:** `18c092f` (`18c092f72e415d458a3c8804b5218b00fe81b91a`)
-**Tip:** `2b17695` (`2b1769547c687eeac7ff6125ed62ef9d252176fd`)
-**Base live:** 1.4.208 (`32e0390`, PR #269 Easy Lock In win-end ≤720 close triad→Home purple gap on main)
+**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/271
+**Branch:** `ship/easy-fun-clear-210` → `main`
+**Version:** 1.4.210
+**Peel:** `c03c0c7` (`c03c0c7594c29e34e6c4902ea51c22f280d7c091`)
+**Tip:** `24733e9` (`24733e9aba1af260c8a124cb8ff517e161ea1754`)
+**Base live:** 1.4.209 (`0ca08c4`, PR #270 Easy Story Snap ≤720 close pad→CTA purple gap on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
 ## Shot wake
-Next Shot wake at **1.4.210** after this hop merges. Shot pack 1.4.200 still 7/8 Match pending — Manager handles vision when complete. **Do NOT wake Shot from this hop.** Do NOT run Gemini vision. Keep inventing Fun/Clear.
+**This hop IS the every-10 Shot wake version (1.4.210)** — same pattern as 1.4.200 / 1.4.190. Ship normal invent; **do NOT wake Shot from this hop**; **do NOT run Gemini vision**. CoS wakes Shot after merge. Pack 200 still 7/8 Match pending — Manager handles vision when complete.
 
 ## How picked
 Open Issues: **#161** Dig/Hard/NW/Town parked. **#160** cheap-hop infra. No open Easy Fun/Clear issue.
-1.4.208 Easy Lock In win-end triad→Home live on main. Shot 190 fails #250–#253 already peeled as 193–196 — do NOT re-peel. Story Snap grow 197 / Sort 198 / Link 199 / Creed 200 / Story Creek 201 / Hold 202 / Build 203 / Father 204 / Sequence 205 / Learn 206 / Match 207 / Lock In win-end 208 invents already on main.
-Invent Fun/Clear — densest remaining Easy trail different from 197–208: **Easy Story Snap second-pass** — after grow-play peel **1.4.197**, global `.cta-dock { margin-top: auto }` still parks purple between Hold pad and next-tap dock (dock-margin family).
+1.4.209 Easy Story Snap pad→CTA live on main. Shot 190 fails #250–#253 already peeled as 193–196 — do NOT re-peel. Story Snap grow 197 / Sort 198 / Link 199 / Creed 200 / Story Creek 201 / Hold dock 202 / Build 203 / Father 204 / Sequence 205 / Learn 206 / Match 207 / StoredLine 208 / Snap2 209 invents already on main.
+Invent Fun/Clear — densest remaining Easy trail different from 197–209: **Easy Hold (WhyBlast live)** — after fill **1.4.190** / dock **1.4.202**, gap:6px / arena gap:8px still leave purple between next-tap hud and claim·chips.
 
 ## Chosen climb
-Single Easy Fun/Clear polish: **Easy Story Snap ≤720 close pad→CTA purple gap** — zero cta-dock margin-top + tighten play gap so pad · score · dock pack tight.
+Single Easy Fun/Clear polish: **Easy Hold ≤720 close hud→arena purple gap** — tighten why-blast + why-arena + hud gaps so next-tap · claim · chips pack tight.
 
 ## What fixed
-- `src/styles/storySnap.css`: `@media (max-height: 720px)` — `.play.is-story-snap` `gap: 0.12rem`; `.cta-dock { margin-top: 0 }`; peel 197 stays
-- `src/components/challenges/StorySnapPlayView.tsx`: thin 1.4.209 comment
+- `src/styles/sortHold.css`: `@media (max-height: 720px)` — `.why-blast` `gap: 2px`; `.why-arena` `gap: 4px`; `.why-blast-hud` `gap: 2px`; fill 190 / dock 202 stay
+- `src/components/challenges/WhyBlastPlay.tsx`: thin 1.4.210 comment (Shot wake)
 - Android `versionName` left at **1.4.113**
-- Version **1.4.209** atop live **1.4.208**
+- Version **1.4.210** atop live **1.4.209** (Shot wake version)
 
 ## Deferred (do NOT climb this hop)
 - Dig Reveal / Hard / NW / Town / stores / Pack B / Home map candy
-- StoredLine 208 / Match 207 / Learn 206 / Sequence 205 / Father 204 / Build 203 / Hold 202 / Story Creek 201 / Creed 200 / Link 199 / Sort 198 / Snap grow 197 / letter-grid 193 / Lock In quiz 194 / Lock In feedback 195 / Manage / letterbox (already on main)
-- Story Snap grow-play 197 / HUD 182 (different surface; still applies ≤720)
-- Shot vision / waking Shot (Manager; next wake 1.4.210)
+- Snap2 209 / StoredLine 208 / Match 207 / Learn 206 / Sequence 205 / Father 204 / Build 203 / Hold dock 202 / Story Creek 201 / Creed 200 / Link 199 / Sort 198 / Snap grow 197 / letter-grid 193 / Lock In quiz 194 / Lock In feedback 195 / Manage / letterbox (already on main)
+- Hold fill 190 / arena-first 170 (different surface; still applies ≤720)
+- Shot vision / waking Shot (CoS after merge; Manager)
 
 ## Gemini
-MODEL=gemini-flash-latest — Invent Fun/Clear (no open Easy Fun/Clear issue). Invent API key present but not AIza AI Studio shape. Manager-steered invent. Notes: `notes-gemini.txt` (+ `/workspace/silver-city-art/notes-gemini-209.txt`). Do NOT run Shot vision this hop.
+MODEL=gemini-flash-latest — Invent Fun/Clear (no open Easy Fun/Clear issue). Invent API key present but not AIza AI Studio shape. Manager-steered invent. Notes: `notes-gemini.txt` (+ `/workspace/silver-city-art/notes-gemini-210.txt`). Do NOT run Shot vision this hop — CoS wakes Shot after merge.
 
 ## Files peeled
-- `src/styles/storySnap.css`
-- `src/components/challenges/StorySnapPlayView.tsx`
+- `src/styles/sortHold.css`
+- `src/components/challenges/WhyBlastPlay.tsx`
 
 ## Checks
 - `npm run test:city` OK
