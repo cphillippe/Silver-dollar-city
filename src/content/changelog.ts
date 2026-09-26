@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.175',
+    title: 'Easy Story Creek maze: ≤720 HUD peel',
+    when: '2026-09-25',
+    items: [
+      'Easy Story Creek (Samaritan road) on ≤720px tall: hide kicker · story-beat thumbs · caption HUD; keep Hurt/Help/Inn beats; tiny score so board stays above fold (complements 1.4.153 compress + 1.4.143 how-dedupe; Father 1.4.173 / Match/Hold/Sequence ≤720 family; invent Fun/Clear)',
+    ],
+  },
+  {
     version: '1.4.173',
     title: 'Easy Father Dash: ≤720 HUD peel',
     when: '2026-09-25',
