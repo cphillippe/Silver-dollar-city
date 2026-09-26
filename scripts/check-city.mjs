@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.225')
+assert.equal(APP_VERSION, '1.4.226')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -4475,5 +4475,32 @@ console.log('check-city: ok')
     latestChange('1.4.225').items.join('\n'),
     /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#298|#299|#300|#301|#302|Father Dash|Learn cream|Samaritan|Manage|Lock In|Dig|Creed|Build|Sort|Snap|Link|Road maze|Claim merge|Source dig|Story Creek HOLD|slider→HOLD|invent Fun\/Clear/i,
     '1.4.225 must not fix other phone-fail issues or climb another Easy surface',
+  )
+}
+
+// Easy Clear 1.4.226: Easy Lock In quiz ≤720 / phone portrait bottom-half purple void (Fixes #298)
+{
+  const holdCss226 = readFileSync(new URL('../src/styles/sortHold.css', import.meta.url), 'utf8')
+  const whyPlay226 = readFileSync(
+    new URL('../src/components/challenges/WhyBlastPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(holdCss226, /1\.4\.226: Easy Lock In quiz ≤720 \/ phone portrait bottom-half purple void/)
+  assert.match(
+    holdCss226,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.app\.is-play \.app-body:has\(\.journal\.is-rehearse \.why-blast:not\(\.is-miss-teach\):not\(\.is-win\)\) \{[\s\S]*?padding-bottom: 0/,
+  )
+  assert.match(
+    holdCss226,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.journal\.is-rehearse:has\(\.why-blast:not\(\.is-miss-teach\):not\(\.is-win\)\) \.recall-gate\.is-easy-hold \{[\s\S]*?flex: 1 1 auto/,
+  )
+  assert.match(whyPlay226, /1\.4\.226: phone portrait extends fill 194 \+ pad-zero 212/)
+  assert.match(cssSrc, /1\.4\.226: Easy Lock In quiz ≤720 \/ phone portrait bottom-half purple void/)
+  assert.match(latestChange('1.4.226').items.join('\n'), /Fixes #298|bottom-half|purple void|Lock In quiz/i)
+  assert.match(latestChange('1.4.226').title, /Lock In quiz|≤720|bottom-half|purple void/i)
+  assert.doesNotMatch(
+    latestChange('1.4.226').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#299|#300|#301|#302|Father Dash|Learn cream|Match grid|Samaritan|Manage|miss teach|Dig|Creed|Build|Sort|Snap|Link|Road maze|Claim merge|Source dig|Story Creek HOLD|slider→HOLD|invent Fun\/Clear/i,
+    '1.4.226 must not fix other phone-fail issues or climb another Easy surface',
   )
 }

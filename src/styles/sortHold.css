@@ -2322,6 +2322,62 @@ html[data-easy='on'] .recall-card {
 }
 
 
+/* Easy Clear 1.4.226: Easy Lock In quiz ≤720 / phone portrait bottom-half purple void
+   (Fixes #298). After quiz shell 194 + pad-zero 212 (both ≤720 only), real phones
+   ~390×844 still cluster the gold recall-gate quiz card at the top with a massive
+   empty purple void across the bottom half (Shot pack 1.4.220 04-easy-lockin.png;
+   residual after closed #274/#282 / 1.4.212; capture may show in-app 1.4.219 PWA lag).
+   Extend fill 194 + pad-zero 212 across phone portrait heights (max-height: 920px)
+   so app-body · journal · rehearse-anchor · recall-gate absorb free space and zero
+   residual phone-safe padding — no purple void under the live mid-question quiz.
+   Fill 194 / pad-zero 212 ≤720 stay. Miss-teach feedback #299 / 1.4.213 / win-end /
+   Match / Learn / Samaritan / Father / Manage / Dig / Creek / parked maps untouched. */
+@media (max-height: 920px) {
+  html[data-easy='on'] .app.is-play .app-body:has(.journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win)) {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding-top: 8px;
+    padding-bottom: 0;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast:not(.is-miss-teach):not(.is-win)) {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    gap: 4px;
+    overflow: hidden;
+    padding-bottom: 0;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast:not(.is-miss-teach):not(.is-win)) > .text-link {
+    flex: 0 0 auto;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast:not(.is-miss-teach):not(.is-win)) .rehearse-anchor {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast:not(.is-miss-teach):not(.is-win)) .rehearse-anchor > .eyebrow {
+    flex: 0 0 auto;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast:not(.is-miss-teach):not(.is-win)) .recall-gate.is-easy-hold {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    height: auto;
+    margin-bottom: 0;
+    overflow: hidden;
+    padding-bottom: 0;
+  }
+}
+
 /* Easy Clear 1.4.213: Easy Lock In feedback ≤720 close the bottom purple void
    (Fixes #275). The 1.4.195 miss-teach shell fills the feedback card, but
    later phone-safe app-body · journal · recall-gate padding leaves a dead band
