@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.249')
+assert.equal(APP_VERSION, '1.4.250')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -5241,5 +5241,36 @@ console.log('check-city: ok')
     latestChange('1.4.249').items.join('\n'),
     /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#300|#301|#302|#314|#315|#316|#317|#318|#319|#331|#332|#333|#334|Father Dash|Learn cream|Match grid|Manage|Lock In|Dig|Creed|Build|Sort|Snap|Link|Claim merge|Source dig|invent Fun\/Clear|Sequence/i,
     '1.4.249 must not fix other phone-fail issues or climb another Easy surface',
+  )
+}
+
+// Easy Clear 1.4.250: Easy Father Dash ≤720 / tall-phone rail→CTA purple void residual (Fixes #336)
+{
+  const indexCss250 = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
+  const fatherPlay250 = readFileSync(
+    new URL('../src/components/challenges/FatherRunPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(indexCss250, /1\.4\.250: Easy Father Dash ≤720 \/ tall-phone rail→CTA purple void residual/)
+  assert.match(
+    indexCss250,
+    /1\.4\.250: Easy Father Dash ≤720 \/ tall-phone rail→CTA purple void residual[\s\S]*?\.play\.is-father-run,[\s\S]*?background: var\(--parchment/,
+  )
+  assert.match(
+    indexCss250,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.play\.is-father-run \.run-scene \{[\s\S]*?flex: 1 1 0/,
+  )
+  assert.match(
+    indexCss250,
+    /@media \(max-height: 920px\) \{[\s\S]*?\.play\.is-father-run \.cta-dock,\s*\n\s*\.play\.is-father-run \.cta-dock\.run-dock \{[\s\S]*?position: static[\s\S]*?margin-top: auto/,
+  )
+  assert.match(fatherPlay250, /1\.4\.250: tall-phone cream plate fill/)
+  assert.match(cssSrc, /1\.4\.250: Easy Father Dash ≤720 \/ tall-phone rail→CTA purple void residual/)
+  assert.match(latestChange('1.4.250').items.join('\n'), /Fixes #336|purple void|cream|parchment|Father Dash|tall-phone|rail→CTA/i)
+  assert.match(latestChange('1.4.250').title, /Easy Father Dash|≤720|tall-phone|rail→CTA|purple void|Fixes #336/i)
+  assert.doesNotMatch(
+    latestChange('1.4.250').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#300|#301|#302|#314|#315|#316|#317|#318|#319|#331|#332|#333|#334|#335|Learn cream|Match grid|Samaritan|Manage|Lock In|Dig|Creed|Build|Sort|Snap|Link|Claim merge|Source dig|invent Fun\/Clear|Sequence|Story Creek HOLD/i,
+    '1.4.250 must not fix other phone-fail issues or climb another Easy surface',
   )
 }
