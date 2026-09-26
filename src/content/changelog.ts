@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.235',
+    title: 'Easy Learn: ≤720 close tall-phone bottom-half purple void (Fixes #314)',
+    when: '2026-09-26',
+    items: [
+      'Fixes #314: Easy Learn cream-pill on ≤720 / tall phone portrait — strengthen fill 224 (height 100% chain, held-triad space-evenly intentional spacing, Find-the-gems dock position static + margin-top auto) so Learn content + CTAs fill portrait without a large dead purple band under the stack (Shot 230 residual after Learn bottom-half peel 1.4.224; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.234',
     title: 'Easy Story Creek: ≤720 close maze HUD peel on tall phone',
     when: '2026-09-26',
