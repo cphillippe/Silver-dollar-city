@@ -4,7 +4,7 @@
 **Branch:** `ship/easy-fun-clear-185` → `main`
 **Version:** 1.4.185
 **Peel:** `ffa04c1` (`ffa04c1022be63e645f2a64de7076c715e53fd35`)
-**Tip:** `ffa04c1` (`ffa04c1022be63e645f2a64de7076c715e53fd35`)
+**Tip:** `b0c496c` (`b0c496cce8a5ac518e8cd59982762f4f8c907a04`)
 **Base live:** 1.4.184 (`e638288`, PR #241 Easy Match ≤720 fill empty purple card on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
