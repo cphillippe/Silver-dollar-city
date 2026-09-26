@@ -1946,3 +1946,177 @@ html[data-theme='dusk'] .easy-story-card {
     box-shadow: 0 2px 0 #c4922a;
   }
 }
+
+/* Easy Clear 1.4.265: Easy Samaritan / road maze ≤720 / tall residual purple void after cream 256 (Fixes #365) —
+   After opaque cream shell 256 (app-body + play + solid maze-stage · warm board · cream dock)
+   Shot pack 1.4.260 06-samaritan.png STILL fails — Gemini: MERCY · STORY CREEK mid-play
+   (target chips Hurt man / Help / Inn, maze board, footer FIND THE HURT MAN) leaves massive
+   empty purple voids between the HUD, the grid, and the footer (residual after closed #348 /
+   1.4.256). Live DOM is `main.challenge-page.is-puzzle` > `.play.is-road-maze` >
+   `.story-kicker` + `.story-caption` + `ul.maze-beats` + `.maze-stage` > `.maze-board` +
+   `.match-score`. 256 selectors match that chain inside `@media (max-height: 920px)` and
+   already paint cream there. The residual is a layout viewport taller than 920px: no cream
+   rule matches, `.play` keeps its purple-gold gradient, `.maze-stage` flex-grows transparent
+   and centers the aspect-capped board, and `.maze-board` stays the #3a1480 plate. Strengthen
+   — do not delete 256. This block is the 920 query joined with min-height 921 so the same
+   floor covers the tall residual: (1) opaque `#fff6e8` + `background-image: none` on
+   full-bleed app-body / puzzle shell / play / maze-stage / maze-board plate (body and .app
+   stay dusk so the translucent play topbar keeps its purple wash); (2) dark ink on the
+   kicker, caption, and score so HUD and footer stay readable on cream; (3) pin `.match-score`
+   / `.cta-dock` with margin-top: auto and a cream dock wash. Road tiles and target chips keep
+   their own faces. Easy Samaritan / road-maze ONLY. */
+@media (max-height: 920px), (min-height: 921px) {
+  /* Do not paint body / .app — the play topbar is a translucent dusk wash and must stay purple. */
+  html[data-easy='on'] .app.is-play .app-body:has(.play.is-road-maze),
+  .app.is-play[data-easy='on'] .app-body:has(.play.is-road-maze) {
+    overflow: hidden;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    margin: 0;
+    margin-inline: 0;
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+    box-sizing: border-box;
+    padding: 4px 12px 0;
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    color: #2a2118;
+  }
+
+  html[data-easy='on'] .daily-page.is-puzzle:has(.play.is-road-maze),
+  html[data-easy='on'] .challenge-page.is-puzzle:has(.play.is-road-maze),
+  .app[data-easy='on'] .challenge-page.is-puzzle:has(.play.is-road-maze) {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    align-self: stretch;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    margin-inline: 0;
+    gap: 2px;
+    overflow: hidden;
+    overflow-x: hidden;
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    color: #2a2118;
+  }
+
+  /* Opaque cream play shell — kill purple-gold gradient bleed under Samaritan */
+  html[data-easy='on'] .play.is-road-maze,
+  html[data-easy='on'] .daily-page.is-puzzle .play.is-road-maze,
+  html[data-easy='on'] .challenge-page.is-puzzle .play.is-road-maze {
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    margin-inline: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 4px;
+    overflow: hidden;
+    overflow-x: hidden;
+    padding: 10px 10px 0;
+    border-radius: 22px;
+    border: 1px solid color-mix(in srgb, #2a2118 12%, transparent);
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    color: #2a2118;
+    box-shadow: 0 2px 0 color-mix(in srgb, #000 6%, transparent);
+  }
+
+  html[data-easy='on'] .play.is-road-maze.is-win {
+    overflow: auto;
+  }
+
+  html[data-easy='on'] .play.is-road-maze .story-kicker,
+  html[data-easy='on'] .play.is-road-maze .run-thumbs,
+  html[data-easy='on'] .play.is-road-maze .story-caption,
+  html[data-easy='on'] .play.is-road-maze .maze-beats,
+  html[data-easy='on'] .play.is-road-maze .match-yes,
+  html[data-easy='on'] .play.is-road-maze .miss-banner,
+  html[data-easy='on'] .play.is-road-maze .match-toast {
+    flex: 0 0 auto;
+  }
+
+  html[data-easy='on'] .play.is-road-maze .story-kicker {
+    color: #8a5a12;
+  }
+
+  html[data-easy='on'] .play.is-road-maze .story-caption {
+    color: #2a2118;
+  }
+
+  /* Solid opaque cream stage — leftover between HUD and footer is cream floor, not a purple void */
+  html[data-easy='on'] .play.is-road-maze .maze-stage {
+    flex: 1 1 auto;
+    align-self: stretch;
+    min-height: 0;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    margin-inline: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    gap: 4px;
+    padding: 6px;
+    border-radius: 16px;
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+  }
+
+  /* Opaque cream board plate — kill #3a1480 purple seam chrome; tiles keep their own faces */
+  html[data-easy='on'] .play.is-road-maze .maze-board {
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 246, 232, 0.35),
+      0 4px 14px rgba(42, 33, 24, 0.12);
+  }
+
+  /* Pin the find-line / win dock to the cream floor — cream dock wash, not purple sticky blur */
+  html[data-easy='on'] .play.is-road-maze .match-score,
+  html[data-easy='on'] .play.is-road-maze .cta-dock {
+    position: static;
+    bottom: auto;
+    margin-top: auto;
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    margin-inline: 0;
+    padding-top: 8px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    color: #8a5a12;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
