@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.220',
+    title: 'Easy Creed: ≤720 close fill + bowl→CTA purple void on tall phone (Shot wake)',
+    when: '2026-09-25',
+    items: [
+      'Easy Creed merge on ≤720 / phone portrait: extend fill + dock-margin so score · ladder · bowl absorb free space and pack tight to the CTA — no large purple void under the bowl on tall phones (invent Fun/Clear · Shot wake hop — CoS wakes Shot after merge; continuation of Creed fill 192 / dock 200 ≤720 family; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.219',
     title: 'Easy Link: ≤720 close fill + choices→CTA purple void on tall phone',
     when: '2026-09-25',
