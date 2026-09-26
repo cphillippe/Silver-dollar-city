@@ -4,7 +4,7 @@
 **Branch:** `ship/easy-fun-clear-206` → `main`
 **Version:** 1.4.206
 **Peel:** `d81531a` (`d81531a8a167c494b3f77701246d3bb95c61cc39`)
-**Tip:** ``4cd7bfc` (`4cd7bfca5bfb1f07b0321167292681025f952869`)`
+**Tip:** `493cbb4` (`493cbb45570fcf736aed7dbd61bb3ee94bdbb979`)
 **Base live:** 1.4.205 (`af330b4`, PR #266 Easy Sequence ≤720 close stones→result purple gap on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
