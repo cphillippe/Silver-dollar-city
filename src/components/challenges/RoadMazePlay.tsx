@@ -377,6 +377,7 @@ export function RoadMazePlay({
       {/* Easy Clear 1.4.201: ≤720 zeros cta-dock margin-top so board→CTA close (fill 191 stays). */}
       {/* Easy Clear 1.4.228: phone portrait extends fill 191 + board→CTA 201 so maze-board closes voids above/below (Fixes #300). */}
       {/* Easy Clear 1.4.234: phone portrait extends HUD peel 175 — hide kicker · thumbs · caption on tall phones (invent Fun/Clear). */}
+      {/* Easy Clear 1.4.239: tall-phone strengthens fill 228 — height 100% · maze-stage/board flex 1 1 0 · drop aspect-ratio/max-height · cta-dock position static (Fixes #318). */}
       <p className="story-kicker">
         {home.who} · {home.place}
       </p>
