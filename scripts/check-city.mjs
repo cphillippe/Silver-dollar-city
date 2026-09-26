@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.255')
+assert.equal(APP_VERSION, '1.4.256')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1465,7 +1465,7 @@ assert.match(cssSrc, /is-easy-hold/)
   assert.match(dockCss, /backdrop-filter: blur/)
   assert.doesNotMatch(dockCss, /#16062e/, 'sticky CTA docks must not be an opaque black slab')
 }
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Fixes #347|purple void|cream|parchment|Lock In feedback|miss-teach|tall-phone|recall-gate|shell|left/i)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Fixes #348|purple void|cream|parchment|Samaritan|road maze|tall-phone|maze-stage|shell|top/i)
 {
   const storyCardCss = cssSrc.match(/\.easy-story-card,[\s\S]*?\.easy-story-card::before \{[\s\S]*?\n\}/)?.[0] ?? ''
   assert.match(storyCardCss, /border:\s*0/)
@@ -2403,8 +2403,8 @@ assert.match(mapSrc, /easy \? null : \(\s*\n\s*<>[\s\S]*city-street-main/)
 assert.match(mapSrc, /if \(isEasy\(progress\)\) return/)
 assert.match(mapSrc, /if \(playing\.current && !isEasy\(progress\)\) return/)
 assert.match(mapSrc, /Tap a building to Manage it/)
-assert.match(latestChange(APP_VERSION).title, /Easy Lock In feedback|≤720|tall-phone|purple void|Fixes #347/i)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Fixes #347|purple void|cream|parchment|Lock In feedback|miss-teach|tall-phone|recall-gate|shell|left/i)
+assert.match(latestChange(APP_VERSION).title, /Easy Samaritan|≤720|tall-phone|purple void|Fixes #348/i)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Fixes #348|purple void|cream|parchment|Samaritan|road maze|tall-phone|maze-stage|shell|top/i)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-img[\s\S]*?fill: none !important/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img\.is-built[\s\S]*?fill: none/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-hit[\s\S]*?stroke: none/)
@@ -5466,5 +5466,44 @@ console.log('check-city: ok')
     latestChange('1.4.255').items.join('\n'),
     /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#300|#301|#302|#314|#315|#316|#317|#318|#319|#331|#332|#333|#334|#335|#336|#343|#344|#345|#346|Learn cream|teach-gate|Match grid|gem-scroll|Samaritan|Manage|Father Dash|live quiz|Dig|Creed|Build|Sort|Snap|Link|Claim merge|Source dig|invent Fun\/Clear|Sequence|Story Creek HOLD|Home dock|coach/i,
     '1.4.255 must not fix other phone-fail issues or climb another Easy surface',
+  )
+}
+
+// Easy Clear 1.4.256: Easy Samaritan / road maze ≤720 / tall-phone purple voids + top clip residual after cream 249 (Fixes #348)
+{
+  const mazeCss256 = readFileSync(new URL('../src/styles/maze.css', import.meta.url), 'utf8')
+  const roadPlay256 = readFileSync(
+    new URL('../src/components/challenges/RoadMazePlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(mazeCss256, /1\.4\.256: Easy Samaritan \/ road maze ≤720 \/ tall-phone purple voids \+ top clip residual after cream 249/)
+  assert.match(
+    mazeCss256,
+    /1\.4\.256: Easy Samaritan \/ road maze ≤720 \/ tall-phone purple voids \+ top clip residual after cream 249[\s\S]*?\.app-body:has\(\.play\.is-road-maze\) \{[\s\S]*?background: #fff6e8/,
+  )
+  assert.match(
+    mazeCss256,
+    /1\.4\.256: Easy Samaritan \/ road maze ≤720 \/ tall-phone purple voids \+ top clip residual after cream 249[\s\S]*?\.play\.is-road-maze,[\s\S]*?background: #fff6e8/,
+  )
+  assert.match(
+    mazeCss256,
+    /1\.4\.256: Easy Samaritan \/ road maze ≤720 \/ tall-phone purple voids \+ top clip residual after cream 249[\s\S]*?\.maze-stage \{[\s\S]*?background-image: none[\s\S]*?background: #fff6e8/,
+  )
+  assert.match(
+    mazeCss256,
+    /1\.4\.256: Easy Samaritan \/ road maze ≤720 \/ tall-phone purple voids \+ top clip residual after cream 249[\s\S]*?\.match-score,[\s\S]*?\.cta-dock \{[\s\S]*?position: static[\s\S]*?margin-top: auto[\s\S]*?background: #fff6e8/,
+  )
+  assert.match(
+    mazeCss256,
+    /1\.4\.256: Easy Samaritan \/ road maze ≤720 \/ tall-phone purple voids \+ top clip residual after cream 249[\s\S]*?\.maze-beats \{[\s\S]*?padding-top: 2px/,
+  )
+  assert.match(roadPlay256, /1\.4\.256: tall-phone cream shell fill/)
+  assert.match(cssSrc, /1\.4\.256: Easy Samaritan \/ road maze ≤720 \/ tall-phone purple voids \+ top clip residual after cream 249/)
+  assert.match(latestChange('1.4.256').items.join('\n'), /Fixes #348|purple void|cream|parchment|Samaritan|tall-phone|maze-stage|shell|top/i)
+  assert.match(latestChange('1.4.256').title, /Easy Samaritan|≤720|tall-phone|purple void|Fixes #348/i)
+  assert.doesNotMatch(
+    latestChange('1.4.256').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#300|#301|#302|#314|#315|#316|#317|#318|#319|#331|#332|#333|#334|#335|#336|#343|#344|#345|#346|#347|Learn cream|teach-gate|Match grid|gem-scroll|Manage|Father Dash|Lock In|Dig|Creed|Build|Sort|Snap|Link|Claim merge|Source dig|invent Fun\/Clear|Sequence|Story Creek HOLD|Home dock|coach/i,
+    '1.4.256 must not fix other phone-fail issues or climb another Easy surface',
   )
 }
