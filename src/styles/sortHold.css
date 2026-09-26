@@ -3183,3 +3183,175 @@ html[data-easy='on'] .recall-card {
     -webkit-backdrop-filter: none;
   }
 }
+
+
+/* Easy Clear 1.4.254: Easy Lock In quiz ≤720 / tall-phone purple void residual after cream 247 (Fixes #346) —
+   After cream recall-gate 247 (parchment card · dark ink · denser arena · dock pin) Shot pack
+   1.4.250 04-easy-lockin.png (390×844) STILL fails — Gemini: quiz card clustered at the top,
+   massive empty purple void across the bottom half (residual after closed #333 / 1.4.247). Cause:
+   cream on `.recall-gate.is-easy-hold` still content-hugs / transparent flex-grow over the purple
+   shell (base `.recall-gate` purple-gold gradient · app-body dusk leftover outside the card), so
+   leftover below the quiz still reads as a purple dead band. Strengthen further — NOT another
+   237/247 height/flex/cream-on-gate-only copy: (1) paint opaque cream on `.app-body` +
+   `.journal.is-rehearse` live-quiz shell so tall leftover below the quiz is cream floor through
+   the full portrait (not purple outside the card); (2) solid `#fff6e8` + `background-image: none`
+   on `.recall-gate.is-easy-hold` beating recall-gate purple-gold gradient; (3) pin cta-dock to
+   the cream floor with cream dock wash (not transparent sticky purple blur); (4) keep dark ink
+   on cream · denser why-arena stretch. Live mid-question quiz ONLY
+   (`why-blast:not(.is-miss-teach):not(.is-win)`). Do NOT pack #347 miss-teach feedback / win-end
+   / Match / Learn / Samaritan / Father / Manage / Dig / Creek / parked maps. */
+@media (max-height: 920px) {
+  /* Cream app-body floor — leftover below a content-hug quiz card is cream, not dusk purple void */
+  html[data-easy='on'] .app.is-play .app-body:has(.journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win)) {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+    padding-top: 4px;
+    padding-bottom: 0;
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    color: var(--ink, #2a2118);
+  }
+
+  /* Cream live-quiz shell fills tall portrait — leftover under the quiz is cream page plate */
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast:not(.is-miss-teach):not(.is-win)) {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    gap: 4px;
+    overflow: hidden;
+    padding: 8px 10px 0;
+    border-radius: 18px;
+    border: 1px solid color-mix(in srgb, var(--ink, #2a2118) 10%, transparent);
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    color: var(--ink, #2a2118);
+    box-shadow: 0 2px 0 color-mix(in srgb, #000 6%, transparent);
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast:not(.is-miss-teach):not(.is-win)) > .text-link {
+    flex: 0 0 auto;
+    color: color-mix(in srgb, var(--gold, #c9a45c) 55%, var(--ink, #2a2118));
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast:not(.is-miss-teach):not(.is-win)) .rehearse-anchor {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast:not(.is-miss-teach):not(.is-win)) .rehearse-anchor > .eyebrow {
+    flex: 0 0 auto;
+    color: color-mix(in srgb, var(--gold, #c9a45c) 70%, var(--ink, #2a2118));
+  }
+
+  /* Solid opaque cream plate — kill recall-gate translucent purple-gold gradient */
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast:not(.is-miss-teach):not(.is-win)) .recall-gate.is-easy-hold {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    align-self: stretch;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    margin-bottom: 0;
+    overflow: hidden;
+    padding: 12px 14px 0;
+    gap: 8px;
+    border-radius: 16px;
+    border: 1px solid color-mix(in srgb, var(--ink, #2a2118) 12%, transparent);
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    color: var(--ink, #2a2118);
+    box-shadow: none;
+    justify-content: flex-start;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast:not(.is-miss-teach):not(.is-win)) .recall-gate.is-easy-hold::before {
+    content: none;
+    display: none;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    gap: 8px;
+    overflow: hidden;
+    background: transparent;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .why-blast-hud,
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .miss-banner {
+    flex: 0 0 auto;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .why-blast-hud .next-tap {
+    color: var(--ink, #2a2118);
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .why-arena {
+    flex: 1 1 0;
+    min-height: 0;
+    height: auto;
+    max-height: none;
+    align-content: stretch;
+    grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 10px;
+    padding: 4px 0;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .why-chip {
+    min-height: 0;
+    height: 100%;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .why-claim {
+    align-self: stretch;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .why-arena .held-from,
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .held-from {
+    color: color-mix(in srgb, var(--ink, #2a2118) 78%, var(--gold, #c9a45c));
+  }
+
+  /* Pin CTA to the cream floor — cream dock wash, not purple sticky blur */
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .cta-dock,
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast:not(.is-miss-teach):not(.is-win)) .recall-gate.is-easy-hold .cta-dock {
+    position: static;
+    bottom: auto;
+    margin-top: auto;
+    flex: 0 0 auto;
+    padding-top: 10px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
