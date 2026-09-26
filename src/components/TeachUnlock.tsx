@@ -52,6 +52,7 @@ export function TeachUnlock({ brief, kind, onUnlock, unlock, beats }: TeachUnloc
         {/* Easy Clear 1.4.160: LociStamp hero is the one who·where surface — drop duplicate who/where row (Fixes #206). */}
         {/* Easy Clear 1.4.162: ≤720 peel in welcome.css — tiny stamp · hide GemMark · clamp reason so gold CTA stays above fold (Fixes #208). */}
         {/* Easy Clear 1.4.177: cream stamp dark ink + claim pill wrap (loci-stamp.css / welcome ≤720) — Fixes #231. */}
+        {/* Easy Clear 1.4.206: ≤720 fills held-clear purple void — grow is-teach + stretch HeldTriad (compress 162 stays). */}
         <LociStamp stamp={stamp} mode="hero" />
         {picture ? <GemMark gem={picture} size="sm" /> : null}
         <p className="teach-reason">{story}</p>
