@@ -121,7 +121,7 @@ export function CityMap({
   const mindPlot = mindPlotProp !== undefined ? mindPlotProp : mindPlotLocal
   const setMindPlot = onMindPlot ?? setMindPlotLocal
   const [cam, setCam] = useState(FULL_CAM)
-  const [stageAspect, setStageAspect] = useState<number | null>(null)
+  const [stageFrame, setStageFrame] = useState<{ aspect: number; focus: number } | null>(null)
   const playing = useRef(false)
   const timers = useRef<number[]>([])
   const camNow = useRef(FULL_CAM)
@@ -184,8 +184,21 @@ export function CityMap({
       const w = el.clientWidth
       const h = el.clientHeight
       if (w < 1 || h < 1) return
-      const next = w / h
-      setStageAspect((prev) => (prev !== null && Math.abs(prev - next) < 0.004 ? prev : next))
+      const dock = document.querySelector('.easy-home-dock')
+      let focus = 0.5
+      if (dock) {
+        const svgRect = el.getBoundingClientRect()
+        const dockTop = dock.getBoundingClientRect().top
+        const overlap = Math.min(h, Math.max(0, svgRect.bottom - dockTop))
+        const visible = h - overlap
+        if (visible > 48) focus = visible / 2 / h
+      }
+      const aspect = w / h
+      setStageFrame((prev) =>
+        prev && Math.abs(prev.aspect - aspect) < 0.004 && Math.abs(prev.focus - focus) < 0.012
+          ? prev
+          : { aspect, focus },
+      )
     }
     read()
     const observer = new ResizeObserver(() => {
@@ -193,6 +206,8 @@ export function CityMap({
       frame = requestAnimationFrame(read)
     })
     observer.observe(el)
+    const dock = document.querySelector('.easy-home-dock')
+    if (dock) observer.observe(dock)
     return () => {
       cancelAnimationFrame(frame)
       observer.disconnect()
@@ -364,7 +379,9 @@ export function CityMap({
     Math.abs(cam.w - FULL_CAM.w) < 0.5 &&
     Math.abs(cam.h - FULL_CAM.h) < 0.5
   const view =
-    fillStage && plateSettled && stageAspect != null ? stageCam(stageAspect) : cam
+    fillStage && plateSettled && stageFrame != null
+      ? stageCam(stageFrame.aspect, FULL_CAM, stageFrame.focus)
+      : cam
 
   return (
     <section
@@ -484,6 +501,34 @@ export function CityMap({
                 preserveAspectRatio="none"
               >
                 <image href={cityMapBg} x="0" y="0" width="640" height="420" />
+              </svg>
+            ) : null}
+            {view.y < -0.5 ? (
+              <svg
+                x={view.x}
+                y={view.y}
+                width={view.w}
+                height={-view.y + 1}
+                viewBox="0 0 640 72"
+                preserveAspectRatio="none"
+              >
+                <g transform="translate(0 72) scale(1 -1)">
+                  <image href={cityMapBg} x="0" y="0" width="640" height="420" />
+                </g>
+              </svg>
+            ) : null}
+            {view.y + view.h > FULL_CAM.h + 0.5 ? (
+              <svg
+                x={view.x}
+                y={FULL_CAM.h - 1}
+                width={view.w}
+                height={view.y + view.h - (FULL_CAM.h - 1)}
+                viewBox="0 384 640 36"
+                preserveAspectRatio="none"
+              >
+                <g transform="translate(0 804) scale(1 -1)">
+                  <image href={cityMapBg} x="0" y="0" width="640" height="420" />
+                </g>
               </svg>
             ) : null}
           </g>
