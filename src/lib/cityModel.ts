@@ -443,3 +443,37 @@ export function fillGrows(
   }
   return list
 }
+
+/** Candy map plate. Easy Home may show more sky and meadow around it. */
+export const MAP_PLATE = { x: 0, y: 0, w: 640, h: 420 }
+
+export interface MapCam {
+  x: number
+  y: number
+  w: number
+  h: number
+}
+
+/**
+ * Camera that keeps the whole plate visible and matches a stage aspect
+ * (width / height). A tall phone grows sky above and meadow below.
+ * `focus` is where the plate center sits from the top of the stage (0–1).
+ * Easy Home uses it so the town sits in the gap above the dock, not under it.
+ */
+export function stageCam(stageAspect: number, plate: MapCam = MAP_PLATE, focus = 0.5): MapCam {
+  const aspect =
+    Number.isFinite(stageAspect) && stageAspect > 0.05 && stageAspect < 20
+      ? stageAspect
+      : plate.w / plate.h
+  const plateAspect = plate.w / plate.h
+  let w = plate.w
+  let h = plate.h
+  if (aspect > plateAspect) w = h * aspect
+  else h = w / aspect
+  const anchor = Number.isFinite(focus) ? Math.min(0.92, Math.max(0.08, focus)) : 0.5
+  let x = plate.x + plate.w / 2 - w / 2
+  let y = plate.y + plate.h / 2 - anchor * h
+  x = Math.min(plate.x, Math.max(plate.x + plate.w - w, x))
+  y = Math.min(plate.y, Math.max(plate.y + plate.h - h, y))
+  return { x, y, w, h }
+}
