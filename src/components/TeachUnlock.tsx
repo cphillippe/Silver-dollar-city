@@ -58,6 +58,7 @@ export function TeachUnlock({ brief, kind, onUnlock, unlock, beats }: TeachUnloc
         {/* Easy Clear 1.4.235: tall-phone strengthens fill 224 — height 100% · triad space-evenly · dock position static — closes Shot 230 bottom-half void (Fixes #314). */}
         {/* Easy Clear 1.4.245: tall-phone cream-card fill — paint parchment teach-gate · dark ink · triad space-between + row pad · dock pin — closes Shot 240 purple residual (Fixes #331). */}
         {/* Easy Clear 1.4.252: tall-phone cream shell fill — opaque app-body + is-teach cream plate · solid teach-gate (no recall-gate gradient) · cream dock floor pin — closes Shot 250 purple residual after 245 (Fixes #344). */}
+        {/* Easy Clear 1.4.261: tall residual cream floor — body + full-bleed app-body + is-teach + recall-gate teach card, dark ink, dock pin; covers layout viewports above the 920 cap (Fixes #361). */}
         <LociStamp stamp={stamp} mode="hero" />
         {picture ? <GemMark gem={picture} size="sm" /> : null}
         <p className="teach-reason">{story}</p>
