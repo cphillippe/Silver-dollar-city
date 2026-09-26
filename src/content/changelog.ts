@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.143',
+    title: 'Samaritan road: one how line',
+    when: '2026-09-25',
+    items: [
+      'Easy Samaritan road: omit redundant mazeHunt .sort-how — maze-beats · story-caption · score already teach Find · Help · Inn (Clear family with Match/Sort how dedupe 1.4.137/138)',
+    ],
+  },
+  {
     version: '1.4.141',
     title: 'Lock In: live Main idea label',
     when: '2026-09-25',
