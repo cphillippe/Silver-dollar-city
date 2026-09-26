@@ -371,6 +371,7 @@ export function RoadMazePlay({
       style={{ ['--maze-cols' as string]: MAZE_COLS, ['--maze-rows' as string]: MAZE_ROWS }}
     >
       {/* Easy Clear 1.4.143: omit mazeHunt .sort-how — maze-beats + story-caption + score already teach the three steps. */}
+      {/* Easy Clear 1.4.153: default chrome compress (maze.css) — board-first after how-dedupe; not only .is-help-phase (#190). */}
       <p className="story-kicker">
         {home.who} · {home.place}
       </p>
