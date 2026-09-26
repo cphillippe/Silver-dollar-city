@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.200',
+    title: 'Easy Creed: ≤720 close bowl→CTA purple gap',
+    when: '2026-09-25',
+    items: [
+      'Easy Creed merge on ≤720px tall: zero cta-dock margin-top so merge-bowl flex fill absorbs the portrait — no empty purple void between the bowl · ladder and the Hold / One more dock (Father 1.4.196 / Link 1.4.199 dock-margin family · invent Fun/Clear · Shot wake version; after Creed fill 1.4.192 left auto margin stealing free space; Sort 198 / Story Snap 197 / Link 199 / Match 193 / Lock In 194·195 / Hold / Story Creek / Build / Samaritan peels untouched)',
+    ],
+  },
+  {
     version: '1.4.199',
     title: 'Easy Link: ≤720 close choices→CTA purple gap',
     when: '2026-09-25',
