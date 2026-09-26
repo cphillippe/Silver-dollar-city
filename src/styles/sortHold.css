@@ -1570,6 +1570,79 @@ html[data-easy='on'] .recall-card {
   }
 }
 
+/* Easy Clear 1.4.222: Easy Sequence ≤720 / phone portrait fill + stones→result purple void —
+   After fill 186 + stones→result 205 (both ≤720 only), real phones ~390×844 still leave
+   order stones hugging the top with empty purple under the bank / before ResultPanel
+   because those peels never apply at Shot heights. Extend both fills across phone
+   portrait heights (max-height: 920px) so order bank / stone tiles absorb free space
+   and stones · result pack tight — tight Sequence order fill on tall phones (Easy
+   Sequence / Samaritan arcade chrome).
+   Fill 186 / stones→result 205 / how-peel 171 ≤720 stay. Do NOT pack Manage / Match /
+   Lock In / Learn / Father / Creek / Dig / Creed / Hold / Sort / Snap / Link / Build /
+   Road maze / Why Blast / panel-blast. */
+@media (max-height: 920px) {
+  .is-puzzle .play.is-sequence.is-deal,
+  .daily-page.is-puzzle .play.is-sequence.is-deal,
+  .challenge-page.is-puzzle .play.is-sequence.is-deal {
+    gap: 2px;
+  }
+
+  .is-puzzle .play.is-sequence.is-deal .bank.is-order {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-auto-rows: minmax(0, 1fr);
+    align-content: stretch;
+    gap: 10px;
+    height: auto;
+    max-height: none;
+  }
+
+  .is-puzzle .play.is-sequence.is-deal .sort-tile {
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    align-self: stretch;
+  }
+
+  .is-puzzle .play.is-sequence.is-deal .sort-tile .chip {
+    height: 100%;
+    min-height: 72px;
+    -webkit-line-clamp: 6;
+  }
+
+  .is-puzzle .play.is-sequence.is-deal .prompt {
+    flex: 0 0 auto;
+  }
+
+  .is-puzzle .play.is-sequence.is-deal .sort-how.is-order-how {
+    flex: 0 0 auto;
+  }
+
+  .is-puzzle .play.is-sequence.is-deal .result,
+  .play.is-sequence .result {
+    flex: 0 0 auto;
+    margin: 0;
+    padding: 8px 10px;
+  }
+
+  .is-puzzle .play.is-sequence.is-deal .result h3,
+  .play.is-sequence .result h3 {
+    margin: 2px 0;
+    font-size: 0.95rem;
+    line-height: 1.2;
+  }
+
+  .is-puzzle .play.is-sequence.is-deal .result p,
+  .play.is-sequence .result p {
+    margin: 2px 0;
+    font-size: 0.82rem;
+    line-height: 1.2;
+  }
+}
+
+
 /* Easy Clear 1.4.187: Easy Build Argument ≤720 fill purple void —
    play.is-build hugged content (no flex grow) so Easy guided deal left empty purple
    under slots + two-choice bank (Samaritan Sequence 1.4.186 / Match 184 fill family;
