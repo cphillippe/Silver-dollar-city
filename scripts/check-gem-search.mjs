@@ -488,6 +488,19 @@ assert.match(gemCss, /pointer-events: none/)
 assert.match(gemCss, /is-story-docked/)
 assert.match(gemCss, /grid-template-rows:\s*repeat\(var\(--gem-size/)
 assert.match(gemCss, /is-story-docked[\s\S]{0,900}flex:\s*0\s+1\s+auto/)
+// Easy Clear 1.4.168: Match ≤720 board-first how/say peel (match.css)
+const matchCss168 = readFileSync(new URL('../src/styles/match.css', import.meta.url), 'utf8')
+assert.match(matchCss168, /1\.4\.168: Easy Match \(gem \/ crossword\) ≤720 board-first/)
+assert.match(
+  matchCss168,
+  /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-gem-search\.is-panel-blast \.sort-how \{[\s\S]*?display: none/,
+)
+assert.match(
+  matchCss168,
+  /@media \(max-height: 720px\) \{[\s\S]*?\.match-teach-say \{[\s\S]*?display: none/,
+)
+assert.match(playSrc, /1\.4\.168: ≤720 peels how\/say chrome in match\.css/)
+
 const tightCss = readFileSync(new URL('../src/styles/match-art-tight.css', import.meta.url), 'utf8')
 assert.match(tightCss, /is-story-docked[\s\S]{0,500}aspect-ratio:\s*unset/)
 assert.match(tightCss, /is-story-docked[\s\S]{0,500}gap:\s*0/)
