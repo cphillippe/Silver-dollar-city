@@ -1,19 +1,17 @@
-# 1.4.267 Easy Manage sheet purple bar (Fixes #367)
+# 1.4.268 Easy Hold dock arcade punch invent
 
-**Branch:** `fix/367-easy-manage-purple-bar` → `main`
+**Branch:** `fix/268-easy-fun-clear-invent` → `main`
 **Status:** Not merged. Do not wake Shot (wake at 1.4.270).
 
 ## What changed
-Easy Manage lot sheet left a dark purple bar at the bottom-right after the 1.4.258 black-void peel. The live DOM is the body portal `.mind-map.is-manage` > `.mind-map-card`. The card stays `min(100%, 420px)`, and `place-items: unset` drops `align-items: center`, so the plate sits on the left. Width rules from 1.4.230 / 1.4.258 only force `100vw` at `max-width: 430px` or `max-height: 920px`. Above both caps the right gap sits over the hidden Easy Home dock and the dusk body shows through. The 258 `::after` belt is that same strip when the 920 query matches and the plate does not cover it.
+Story Creek HOLD on tall phones (~390×844) still used the 1.4.156 HUD compress only at `max-height: 720px`, so the dock CTA and timing juice stayed quiet after the cream quiz plate. 1.4.268 adds `@media (max-height: 920px), (min-height: 921px)` in `src/styles/welcome.css` for Easy Hold dock chrome only (`html[data-easy='on']` live `.why-blast`, not miss-teach):
 
-1.4.267 keeps the 258 rules and adds `@media (max-height: 920px), (min-height: 921px)` in `src/styles/welcome.css` for the Easy Manage sheet only (`html[data-easy='on']`):
+- HUD gaps and next-tap compress climb past the 720 cap
+- score, miss, and LOCKED juice punch gold (or miss pink) on the cream plate
+- win dock CTA is a 64px gold button with dark ink
+- claim stays dark-ink readable
 
-- overlay stretches with `width: auto` and left/right 0 (no `100vw` shift)
-- card is full-bleed (`width: 100%`, square bottom, opaque `#241050`)
-- safe-area padding sits inside the plate (empty-lot keeps its compact padding)
-- the `::after` purple belt is `content: none`
-
-Map peek above the sheet stays. Home map when Manage is closed is unchanged. Android `versionName` stays `1.4.113`. `docs/` is synced from `dist/` and `qa-seed.html` is preserved.
+Father Dash timing rail, Match, Samaritan, Manage, and miss-teach feedback stay on their peels. Android `versionName` stays `1.4.113`. `docs/` is synced from `dist/` and `qa-seed.html` is preserved.
 
 ## Checks
 - `npm run test:city`
