@@ -1,43 +1,44 @@
-# ready-easy-fun-clear-183 — 1.4.183 Easy Sort ≤720 board-first
+# ready-easy-fun-clear-184 — 1.4.184 Easy Match ≤720 fill empty purple card (Fixes #238)
 
-**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/237
-**Branch:** `ship/easy-fun-clear-183` → `main`
-**Version:** 1.4.183
-**Peel:** `be1334a` (`be1334a31b573a5c6eadbdf8309058ee67dc9fe9`)
-**Tip:** `478844d` (`478844dfb074d0c4339d9795800aeb79ba0f4f53`)
-**Base live:** 1.4.182 (`2a5cce5`, PR #236 Easy Story Snap ≤720 HUD on main; atop 1.4.181 Creed #235)
+**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/241
+**Branch:** `ship/easy-fun-clear-184` → `main`
+**Version:** 1.4.184
+**Peel:** `4d708ff` (`4d708ff1a863f0887ee69b602231a1e5b088fa08`)
+**Tip:** `aff0b3c` (`aff0b3ca9c81289d927ab77097ad27b85a0441a0`)
+**Base live:** 1.4.183 (`29f015a`, PR #237 Easy Sort ≤720 board-first on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
 ## How picked
-Open Issues scan: **#161** Dig/Hard/NW/Town parked. **#160** cheap-hop continue (infra). No open Easy Fun/Clear P1/P2 left after #236 merged mid-flight.
-
-Invent Fun/Clear — Gemini flash pick **A** Easy Sort ≤720 board-first. Sort is the sole core Easy trail minigame without a dedicated ≤720 fold peel (Match 168 / Sequence·Build 171 / Father 173 / Maze 175 / Creed 181 / Snap 182). Do not reopen Snap eyebrow / Creed merge / Manage / letterbox.
+Open Issues: **#238** Easy Match empty purple card (P1 phone-fail, Shot 1.4.180 `03-easy-match.png`) — this hop.
+**#239** Lock In miss / **#240** Samaritan — deferred next climbs; do not pack.
+**#161** Dig/Hard/NW/Town parked. **#160** cheap-hop infra.
 
 ## Chosen climb
-Single Easy Fun/Clear polish: **Easy Sort ≤720 board-first** — hide how + hint; clamp lead so Keep·Toss + bins stay above fold (Sequence/Build 1.4.171 / Match 1.4.168 ≤720 family).
+Single Easy Fun/Clear polish: **Easy Match (picture · main idea) ≤720 fill empty purple card** — grow `is-deal` match-grid into the play shell + stretch card rows so picture · MAIN IDEA fill the gold-bordered card (Fixes #238). Gem crossword 1.4.168 how/say peel untouched.
 
 ## What fixed
-- `src/styles/sortHold.css`: `@media (max-height: 720px)` hides `.play.is-easy-sort` `.sort-how` + `.easy-hint`/`.hint-peek`; clamps `.prompt` (`-webkit-line-clamp: 2`); gap 3px
-- `src/components/challenges/SortPlay.tsx`: thin 1.4.183 comment
+- `src/styles/match.css`: `@media (max-height: 720px)` on `.is-puzzle .play.is-match.is-deal` — `match-grid { flex: 1 1 auto; grid-template-rows: auto minmax(0,1.15fr) minmax(0,1fr) }`; stretch cards + scene; hide `.sort-how` (prompt lead already teaches)
+- `src/components/challenges/MatchPlay.tsx`: thin 1.4.184 comment
 - Android `versionName` left at **1.4.113**
-- Version **1.4.183** atop live **1.4.182**
+- Version **1.4.184** atop live **1.4.183**
 
 ## Deferred (do NOT climb this hop)
 - Dig Reveal / Hard / NW / Town / stores / Pack B / Home map candy
-- Story Snap / Creed merge / Manage / letterbox (already on main)
-- Journal held clear chrome further peel / Easy Link ≤720
+- **#239** Lock In miss empty purple / **#240** Samaritan top-cluster
+- Sort 183 / Snap 182 / Creed 181 / Manage 180 / letterbox (already on main)
+- Gem Match 168 how/say (different surface)
 
 ## Gemini
-MODEL=gemini-flash-latest — invent pick A approved. Notes: `notes-gemini.txt` (+ `/workspace/silver-city-art/notes-gemini-183.txt`).
+MODEL=gemini-flash-latest — Shot pack 1.4.180 vision FAIL on Match (`gemini-vision.json`). Invent API key present but not AIza AI Studio shape. Manager-steered + issue #238. Notes: `notes-gemini.txt` (+ `/workspace/silver-city-art/notes-gemini-184.txt`).
 
 ## Files peeled
-- `src/styles/sortHold.css`
-- `src/components/challenges/SortPlay.tsx`
+- `src/styles/match.css`
+- `src/components/challenges/MatchPlay.tsx`
 - `scripts/check-city.mjs`, `scripts/check-panel-blast.mjs`
 - `src/config/app.ts`, `package.json`, `package-lock.json`
 - `src/content/changelog.ts`
 - `notes-gemini.txt`
-- `docs/` (Pages rebuild `index-D8rLdrE0.js` / `index-DWbnHx6a.css`)
+- `docs/` (Pages rebuild `index-Dh_Wcyhp.js` / `index-C-nrAQvE.css`)
 - `MERGE.md`
 
 ## Checks

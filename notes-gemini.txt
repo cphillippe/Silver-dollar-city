@@ -1,3 +1,7 @@
 MODEL=gemini-flash-latest
-{"pick":"A","slug":"easy-sort-720-board-first","title":"Easy Sort ≤720 board-first HUD peel","why":"Sort is the sole core Easy trail minigame lacking a dedicated ≤720 fold peel (Sequence had 171, Match had 168, Maze had 175). On compact mobile viewports, verbose .sort-how rules and hint peeks push the active sorting card and Keep/Toss bins below the fold, breaking fluid drag/tap interactions.","approach":"Under ≤720px media queries, display:none .sort-how and non-critical .easy-hint/.hint-peek chrome; clamp .prompt to 2 lines; tighten gap so Keep·Toss + bins stay above fold.","risks":"First-time players miss written bin explanations; mitigated by explicit Keep/Toss buttons, clear prompt text, and inline visual feedback upon placement."}
-VERDICT: APPROVE
+Shot pack 1.4.180 Gemini vision FAIL on 03-easy-match.png — Fixes #238.
+Invent API: GEMINI_API_KEY present but not AIza AI Studio shape (same as 163–168).
+Manager-steered peel (parent + issue #238): Easy MatchPlay is-deal ≤720 fill empty purple card.
+Peel: match.css @media (max-height:720px) flex:1 match-grid + fr card rows + hide .sort-how; MatchPlay comment.
+Do NOT pack #239 Lock In miss / #240 Samaritan. Gem 168 / Sort 183 / Snap 182 untouched.
+VERDICT: APPROVE (shot Gemini + issue #238)
