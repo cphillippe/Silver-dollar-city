@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.207',
+    title: 'Easy Match: ≤720 close score→CTA purple gap',
+    when: '2026-09-25',
+    items: [
+      'Easy Match (picture · main idea deal) on ≤720px tall: zero cta-dock margin-top so match-score · Next CTA pack tight — no purple band between the score and the gold dock (Link/Creed/Creek/Hold dock-margin family · invent Fun/Clear; after Match fill 1.4.184; Learn 206 / Sequence 205 / Father 204 / Build 203 / Hold 202 / Story Creek 201 / Creed 200 / Link 199 / Sort 198 / Story Snap 197 / Match letter-grid 193 / Lock In 194·195 peels untouched)',
+    ],
+  },
+  {
     version: '1.4.206',
     title: 'Easy Learn: ≤720 fill held-clear purple void',
     when: '2026-09-25',
