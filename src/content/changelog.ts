@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.264',
+    title: 'Easy Lock In feedback: ≤720 close tall residual purple void (Fixes #364)',
+    when: '2026-09-26',
+    items: [
+      'Fixes #364: Easy Lock In miss-teach feedback chrome on ≤720 / phone portrait — opaque cream app-body + journal miss-teach shell + solid recall-gate feedback plate (no purple-gold gradient · dark ink on claim and reason · Try again pinned to the cream floor · horizontal overflow pin so content stays in viewport) so leftover below feedback is intentional cream floor, including layout viewports taller than the 920 cap (Shot 260 residual after Lock In feedback cream peel 1.4.255; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.263',
     title: 'Easy Lock In quiz: ≤720 close tall residual purple void (Fixes #363)',
     when: '2026-09-26',

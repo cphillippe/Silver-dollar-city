@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.263')
+assert.equal(APP_VERSION, '1.4.264')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -5749,5 +5749,52 @@ console.log('check-city: ok')
     latestChange('1.4.263').items.join('\n'),
     /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#300|#301|#302|#314|#315|#316|#317|#318|#319|#331|#332|#333|#334|#335|#336|#343|#344|#345|#346|#347|#348|#349|#350|#361|#362|#364|Father Dash|Learn cream|Samaritan|Manage|Match grid|Dig|Creed|Build|Sort|Snap|Link|Claim merge|Source dig|invent Fun\/Clear|Sequence|Story Creek HOLD|Home dock|coach|miss-teach/i,
     '1.4.263 must not fix other phone-fail issues or climb another Easy surface',
+  )
+}
+
+// Easy Clear 1.4.264: Easy Lock In feedback ≤720 / tall residual purple void after cream 255 (Fixes #364)
+{
+  const welcomeCss264 = readFileSync(new URL('../src/styles/welcome.css', import.meta.url), 'utf8')
+  const whyBlast264 = readFileSync(
+    new URL('../src/components/challenges/WhyBlastPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(welcomeCss264, /1\.4\.264: Easy Lock In feedback ≤720 \/ tall residual purple void after cream 255/)
+  assert.match(
+    welcomeCss264,
+    /1\.4\.264: Easy Lock In feedback ≤720 \/ tall residual purple void after cream 255[\s\S]*?@media \(max-height: 920px\), \(min-height: 921px\)/,
+  )
+  assert.match(
+    welcomeCss264,
+    /1\.4\.264: Easy Lock In feedback ≤720 \/ tall residual purple void after cream 255[\s\S]*?\.app-body:has\(\.journal\.is-rehearse \.why-blast\.is-miss-teach\)[\s\S]*?background: #fff6e8/,
+  )
+  assert.match(
+    welcomeCss264,
+    /1\.4\.264: Easy Lock In feedback ≤720 \/ tall residual purple void after cream 255[\s\S]*?\.recall-gate\.is-easy-hold[\s\S]*?background-image: none[\s\S]*?background: #fff6e8/,
+  )
+  assert.match(
+    welcomeCss264,
+    /1\.4\.264: Easy Lock In feedback ≤720 \/ tall residual purple void after cream 255[\s\S]*?\.why-miss-teach[\s\S]*?background-image: none[\s\S]*?background: #fff6e8/,
+  )
+  assert.match(
+    welcomeCss264,
+    /1\.4\.264: Easy Lock In feedback ≤720 \/ tall residual purple void after cream 255[\s\S]*?\.why-claim[\s\S]*?color: #2a2118/,
+  )
+  assert.match(
+    welcomeCss264,
+    /1\.4\.264: Easy Lock In feedback ≤720 \/ tall residual purple void after cream 255[\s\S]*?\.cta-dock[\s\S]*?margin-top: auto[\s\S]*?background: #fff6e8/,
+  )
+  assert.match(
+    welcomeCss264,
+    /1\.4\.264: Easy Lock In feedback ≤720 \/ tall residual purple void after cream 255[\s\S]*?overflow-x: hidden/,
+  )
+  assert.match(whyBlast264, /1\.4\.264: tall residual cream floor/)
+  assert.match(cssSrc, /1\.4\.264: Easy Lock In feedback ≤720 \/ tall residual purple void after cream 255/)
+  assert.match(latestChange('1.4.264').items.join('\n'), /Fixes #364|purple void|cream|Lock In|phone portrait|recall-gate|miss-teach/i)
+  assert.match(latestChange('1.4.264').title, /Easy Lock In feedback|≤720|purple void|Fixes #364/i)
+  assert.doesNotMatch(
+    latestChange('1.4.264').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#280|#281|#282|#283|#296|#297|#298|#299|#300|#301|#302|#314|#315|#316|#317|#318|#319|#331|#332|#333|#334|#335|#336|#343|#344|#345|#346|#347|#348|#349|#350|#361|#362|#363|Father Dash|Learn cream|Samaritan|Manage|Match grid|Dig|Creed|Build|Sort|Snap|Link|Claim merge|Source dig|invent Fun\/Clear|Sequence|Story Creek HOLD|Home dock|coach|live quiz/i,
+    '1.4.264 must not fix other phone-fail issues or climb another Easy surface',
   )
 }

@@ -1,26 +1,24 @@
-# 1.4.261 Easy Learn tall residual cream (Fixes #361)
+# 1.4.264 Easy Lock In feedback tall residual cream (Fixes #364)
 
-**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/368
-**Branch:** `fix/361-easy-learn-tall-residual` → `main`
-**Implementation:** `11ec53e56a75665c8e56d63d27a7bc6af258ee29`
-**Tip:** `8cf19aede7dc6cb13c0f4b14668cdc0b40b56776`
-**Status:** MERGEABLE (`mergeStateStatus` CLEAN). Not merged.
+**Branch:** `fix/364-easy-lockin-feedback-tall-residual` → `main`
+**Status:** Not merged. Do not wake Shot (wake at 1.4.270).
 
 ## What changed
-Easy Learn Short Story (Story Creek) left a purple void under the lesson on tall portrait viewports after the 1.4.252 cream peel. The live DOM is `main.challenge-page.is-teach` > `section.recall-gate.is-encode.teach-gate.easy-story-card`. Those 252 selectors already paint cream at `max-height: 920px`. Above that cap the card stays transparent over the dusk gradient and the lesson hugs the top.
+Easy Lock In miss feedback left a purple void under NOT QUITE on tall portrait viewports after the 1.4.255 cream peel. The live DOM is `main.journal.is-rehearse` > `.rehearse-anchor` > `section.recall-gate.is-easy-hold` > `.why-blast.is-miss-teach` > `article.why-miss-teach`. Those 255 selectors already paint cream at `max-height: 920px`. Above that cap the feedback plate keeps its purple-gold gradient and the stack hugs the top.
 
-1.4.261 keeps the 252 rules and adds `@media (max-height: 920px), (min-height: 921px)` in `src/styles/welcome.css` for this teach chrome only:
+1.4.264 keeps the 255 rules and adds `@media (max-height: 920px), (min-height: 921px)` in `src/styles/welcome.css` for miss/feedback only:
 
-- opaque `#fff6e8` (`background-image: none`) on the full-bleed app-body, teach shell, story card, and dock
-- dark ink `#2a2118` on claim / reason / source
-- Help on the road and Skip reading pinned with `margin-top: auto` on a cream dock wash
+- opaque `#fff6e8` (`background-image: none`) on the full-bleed app-body, miss-teach shell, recall-gate, and why-miss-teach plate
+- dark ink `#2a2118` on claim and reason
+- Try again pinned with `margin-top: auto` on a cream dock, solid gold so it stays readable
+- horizontal overflow pin so the #347 left clip does not return
 
-The play topbar stays the purple dusk wash. Android `versionName` stays `1.4.113`. `docs/` is synced from `dist/` and `qa-seed.html` is preserved.
+Live quiz stays on the 1.4.263 peel. The play topbar stays the purple dusk wash. Android `versionName` stays `1.4.113`. `docs/` is synced from `dist/` and `qa-seed.html` is preserved.
 
 ## Checks
 - `npm run test:city`
 - `npm run test:css`
 - `npm run test:core`
-- `node --experimental-strip-types scripts/check-panel-blast.mjs`
+- `node scripts/check-panel-blast.mjs`
 - `npm run build`
 - `git diff --check`
