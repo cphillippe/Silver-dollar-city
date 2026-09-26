@@ -236,4 +236,25 @@ assert.match(hubSrc, /EASY\.mergeMatch/)
 const teachSrc = readFileSync(new URL('../src/components/TeachUnlock.tsx', import.meta.url), 'utf8')
 assert.match(teachSrc, /EASY\.mergeCta/)
 
+
+// Easy Clear 1.4.159: short-phone Creed merge bowl-first chrome compress — Fixes #205
+assert.match(playSrc, /1\.4\.159.*bowl-first|#205/)
+assert.match(mergeCss, /1\.4\.159: Creed merge short-phone bowl-first|Fixes #205/)
+assert.match(
+  mergeCss,
+  /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-claim-merge \{[\s\S]*?gap: 3px/,
+)
+assert.match(
+  mergeCss,
+  /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-claim-merge \.merge-bowl \{[\s\S]*?max-height: min\(72vh, 520px\)/,
+)
+assert.match(
+  mergeCss,
+  /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-claim-merge \.merge-rung-name \{[\s\S]*?font-size: 0\.42rem/,
+)
+assert.match(
+  mergeCss,
+  /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-claim-merge \.merge-drop-chip \{/,
+)
+
 console.log('check-claim-merge: ok')
