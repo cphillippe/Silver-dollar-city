@@ -275,7 +275,7 @@ export function SourceDigPlay({
 
   return (
     <div className={`play is-source-dig ${shake ? 'is-shake' : ''} ${won ? 'is-win' : ''}`}>
-      <p className="sort-how">{EASY.digHunt}</p>
+      {/* Easy Clear 1.4.158: omit digHunt .sort-how — Scrub tablets · timer · SOURCE_DIG_HINT already teach scrub (Fixes #204; Clear family with Maze 1.4.143 / Father 1.4.144 / Creed merge 1.4.147). */}
       <p className="story-kicker">
         {home.who} · {home.place}
       </p>
