@@ -1132,7 +1132,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.165')
+assert.equal(APP_VERSION, '1.4.167')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1462,7 +1462,7 @@ assert.match(cssSrc, /is-easy-hold/)
   assert.match(dockCss, /backdrop-filter: blur/)
   assert.doesNotMatch(dockCss, /#16062e/, 'sticky CTA docks must not be an opaque black slab')
 }
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Manage|peek|#220|42dvh|portrait|PERSON/i)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Manage|#220|is-manage-open|topbar|dock|chrome/i)
 {
   const storyCardCss = cssSrc.match(/\.easy-story-card,[\s\S]*?\.easy-story-card::before \{[\s\S]*?\n\}/)?.[0] ?? ''
   assert.match(storyCardCss, /border:\s*0/)
@@ -1776,7 +1776,7 @@ assert.match(hubSrc, /EASY\.saved/)
 assert.match(hubSrc, /EASY\.matchCta/)
 assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
 {
-  const easyHome = hubSrc.match(/className="hub is-easy-home"[\s\S]*?<\/main>/)?.[0] ?? ''
+  const easyHome = hubSrc.match(/is-easy-home[\s\S]*?<\/main>/)?.[0] ?? ''
   assert.match(easyHome, /easy-home-map/)
   assert.match(easyHome, /easy-home-dock/)
   assert.match(easyHome, /CityMap/)
@@ -2369,8 +2369,8 @@ assert.match(mapSrc, /easy \? null : \(\s*\n\s*<>[\s\S]*city-street-main/)
 assert.match(mapSrc, /if \(isEasy\(progress\)\) return/)
 assert.match(mapSrc, /if \(playing\.current && !isEasy\(progress\)\) return/)
 assert.match(mapSrc, /Tap a building to Manage it/)
-assert.match(latestChange(APP_VERSION).title, /Manage|peek|portrait/i)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Manage|peek|#220|42dvh|portrait|PERSON/i)
+assert.match(latestChange(APP_VERSION).title, /Manage|Hub chrome|compress/i)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /Manage|#220|is-manage-open|topbar|dock|chrome/i)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-img[\s\S]*?fill: none !important/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img\.is-built[\s\S]*?fill: none/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-hit[\s\S]*?stroke: none/)
@@ -2818,6 +2818,30 @@ assert.match(cssSrc, /1\.4\.162: Learn short-story ≤720 peel|Fixes #208/)
   assert.doesNotMatch(mindMapSrc, /EASY\.manage/, '1.4.165 Easy eyebrow omits Manage (#220)')
   assert.match(mindMapSrc, /\$\{applied\} · \$\{tierTitle\(applied, easy\)\}/, '1.4.165 Easy level eyebrow (#220)')
 }
+
+// Easy Clear 1.4.167: Manage-open Hub chrome compress — Fixes #220 strata
+{
+  const hubSrc167 = readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8')
+  assert.match(hubSrc167, /is-manage-open/, '1.4.167 hub manage-open class (#220)')
+  assert.match(
+    hubSrc167,
+    /hub is-easy-home\$\{mindPlot \? ' is-manage-open' : ''\}/,
+    '1.4.167 Easy Home class toggles manage-open (#220)',
+  )
+  assert.match(cssSrc, /1\.4\.167.*#220|Manage-open Hub chrome/, '1.4.167 CSS comment (#220)')
+  assert.match(cssSrc, /\.hub\.is-manage-open \.easy-home-dock/, '1.4.167 hide Easy dock when manage (#220)')
+  assert.match(
+    cssSrc,
+    /\.app:has\(\.hub\.is-manage-open\) \.topbar[\s\S]*?display:\s*none/,
+    '1.4.167 hide topbar when manage open (#220)',
+  )
+  assert.match(
+    cssSrc,
+    /\.app:has\(\.hub\.is-manage-open\)[\s\S]*?grid-template-rows:\s*1fr/,
+    '1.4.167 collapse topbar row (#220)',
+  )
+}
+
 
 
 assert.match(
