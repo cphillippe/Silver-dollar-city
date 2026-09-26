@@ -2513,3 +2513,42 @@ html[data-theme='dusk'] .easy-story-card {
       0 0 18px rgba(255, 204, 51, 0.55);
   }
 }
+
+/* Easy Clear 1.4.271: Easy Match tall residual cream gap between objective tabs and the tile grid (Fixes #378) —
+   Shot pack 1.4.270 03-easy-match.png (Mercy · Story Creek mid-play, footer “Find the hurt man”)
+   still shows a massive empty cream band between the objective chips and the tile grid.
+   Residual after closed #362 / cream-floor 1.4.262 — new shape is vertical packing, not a
+   purple void under the grid. Live Mercy Match is `.play.is-road-maze` (kicker + caption +
+   maze-beats + maze-board). Gem-search letter grids share the same stage-centering trap.
+   Cause: cream floor 262/265 paints `#fff6e8` at every height, but the board stretch and the
+   ≤720 HUD compress stop at max-height 920. Above that cap the stage still flex-grows and
+   `justify-content: center` floats a content-sized board in the middle of the cream, so the
+   dead band sits between the tabs and the grid. Pack — do not delete 262/265, do not recolor
+   beat pills (#381). This block is the 920 query joined with min-height 921 so tall shot
+   phones get it: (1) `justify-content: flex-start` on `.maze-stage` and `.gem-stage` so the
+   grid sits under the objective strip; (2) cream floor `#fff6e8` stays under the grid down
+   to the found counter; (3) no purple plate. Easy Match road board + gem-search ONLY. */
+@media (max-height: 920px), (min-height: 921px) {
+  html[data-easy='on'] .play.is-road-maze .maze-stage {
+    justify-content: flex-start;
+    align-content: flex-start;
+  }
+
+  html[data-easy='on'] .play.is-road-maze .maze-board {
+    margin-top: 0;
+  }
+
+  html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .gem-scroll {
+    justify-content: flex-start;
+  }
+
+  html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .gem-stage {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-content: flex-start;
+  }
+
+  html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .gem-board {
+    margin-top: 0;
+  }
+}

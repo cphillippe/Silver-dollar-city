@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.271',
+    title: 'Easy Match: ≤720 close tall residual cream gap (Fixes #378)',
+    when: '2026-09-26',
+    items: [
+      'Fixes #378: Easy Match gem-search letter grid and Mercy road board on ≤720 / phone portrait — pack the objective strip toward the tile grid (stage flex-start, no vertical centering of the content-sized board) so the dead cream band between the tabs and the grid shrinks, including layout viewports taller than the 920 cap (Shot 270 residual after Match cream-floor peel 1.4.262; cream floor stays under the grid; found counter stays readable; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.270',
     title: 'Easy one-more win-end dock: ≤720 arcade punch tall-phone juice (Shot wake)',
     when: '2026-09-26',
