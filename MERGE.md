@@ -1,10 +1,10 @@
 # ready-easy-fun-clear-193 — 1.4.193 Easy Match ≤720 fill grid→footer purple void (Fixes #250)
 
-**PR:** (pending)
+**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/254
 **Branch:** `ship/easy-fun-clear-193` → `main`
 **Version:** 1.4.193
 **Peel:** `79e8f41` (`79e8f416ec2589408ec61750c5d6e04b45299feb`)
-**Tip:** `f849288` (`f849288b6fe115799e48594e3c6e23dfa5aadcf2`)
+**Tip:** `b3937db` (`b3937db9a4e6742dc5c63b969a3263fdda35f8e6`)
 **Base live:** 1.4.192 (`5f1e3ce`, PR #249 Easy Creed merge ≤720 fill purple void on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
