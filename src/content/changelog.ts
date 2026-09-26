@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.139',
+    title: 'Lock In: miss teach Main idea · why · From',
+    when: '2026-09-25',
+    items: [
+      'Easy Lock In miss teach: one miss badge (sheet only — no HUD dup); claim line labeled Main idea so teach reads Main idea · Why this is true · From (Clear family with Match/Sort how dedupe)',
+    ],
+  },
+  {
     version: '1.4.138',
     title: 'Sort: one how line on Easy',
     when: '2026-09-25',
