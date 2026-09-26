@@ -240,6 +240,24 @@
   }
 }
 
+/* Easy Clear 1.4.209: Easy Story Snap ≤720 close pad→CTA purple gap —
+   After grow-play peel 197 stretched the stage, global .cta-dock { margin-top: auto }
+   still parks a purple band between the Hold pad / score and the next-tap dock
+   (Link 199 / Creed 200 / Creek 201 / Hold 202 / Match 207 dock-margin family;
+   invent Fun/Clear). Zero cta-dock margin-top + tighten play gap — peel 197 stays.
+   Lock In win-end 208 / Match 207 / Learn 206 peels untouched. */
+@media (max-height: 720px) {
+  .play.is-story-snap,
+  .daily-page.is-puzzle .play.is-story-snap,
+  .challenge-page.is-puzzle .play.is-story-snap {
+    gap: 0.12rem;
+  }
+
+  .play.is-story-snap .cta-dock {
+    margin-top: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .play.is-story-snap.is-shake .snap-stage {
     animation: none;
