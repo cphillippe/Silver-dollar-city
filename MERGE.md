@@ -4,7 +4,7 @@
 **Branch:** `ship/easy-fun-clear-197` → `main`
 **Version:** 1.4.197
 **Peel:** `ea520d1` (`ea520d1c52dd5f2b4cfafcb51a695b62b112e147`)
-**Tip:** `ea520d1` (`ea520d1c52dd5f2b4cfafcb51a695b62b112e147`)
+**Tip:** `853dd5f` (`853dd5f2f56f7663fb101f8dc991a7822943b4c1`)
 **Base live:** 1.4.196 (`ceb0d31`, PR #257 Easy Father ≤720 close slider→CTA purple gap on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
