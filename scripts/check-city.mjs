@@ -1132,7 +1132,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.159')
+assert.equal(APP_VERSION, '1.4.160')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1462,7 +1462,7 @@ assert.match(cssSrc, /is-easy-hold/)
   assert.match(dockCss, /backdrop-filter: blur/)
   assert.doesNotMatch(dockCss, /#16062e/, 'sticky CTA docks must not be an opaque black slab')
 }
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Creed merge|bowl-first|merge-hud|merge-ladder|#205|≤720|720px|Story Snap|maze/i)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /LociStamp|who·where|easy-who-where|#206|Easy Learn|HeldTriad/i)
 {
   const storyCardCss = cssSrc.match(/\.easy-story-card,[\s\S]*?\.easy-story-card::before \{[\s\S]*?\n\}/)?.[0] ?? ''
   assert.match(storyCardCss, /border:\s*0/)
@@ -2369,8 +2369,8 @@ assert.match(mapSrc, /easy \? null : \(\s*\n\s*<>[\s\S]*city-street-main/)
 assert.match(mapSrc, /if \(isEasy\(progress\)\) return/)
 assert.match(mapSrc, /if \(playing\.current && !isEasy\(progress\)\) return/)
 assert.match(mapSrc, /Tap a building to Manage it/)
-assert.match(latestChange(APP_VERSION).title, /Creed merge|bowl-first|short-phone/i)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /Creed merge|bowl-first|merge-hud|merge-ladder|#205|≤720|720px|Story Snap|maze/i)
+assert.match(latestChange(APP_VERSION).title, /Easy Learn|who·where|LociStamp/i)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /LociStamp|who·where|easy-who-where|#206|Easy Learn|HeldTriad/i)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-img[\s\S]*?fill: none !important/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img\.is-built[\s\S]*?fill: none/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-hit[\s\S]*?stroke: none/)
@@ -2756,9 +2756,10 @@ assert.ok(
   teachSrc.indexOf('teach-reason') < teachSrc.indexOf('brief.claim'),
   'teach story before the claim line',
 )
-assert.match(teachSrc, /easyWhoWhere/)
-assert.match(teachSrc, /easy-who-where/)
-assert.match(teachSrc, /easy-place-chip/)
+assert.match(teachSrc, /LociStamp/)
+assert.match(teachSrc, /lociStampFor/)
+assert.doesNotMatch(teachSrc, /easy-who-where/)
+assert.doesNotMatch(teachSrc, /easyWhoWhereLine/)
 {
   const card = teachSrc.slice(
     teachSrc.indexOf('easy-story-card'),
@@ -2767,10 +2768,12 @@ assert.match(teachSrc, /easy-place-chip/)
   assert.ok(card.includes('HeldTriad'), 'Easy Learn shows the claim·why·from triad')
   assert.ok(!card.includes('omitClaim'), 'Easy Learn full triad includes Main idea')
   assert.ok(!card.includes('The main idea you will keep'), 'no orphan Main idea kicker above triad')
-  assert.ok(card.includes('easyWhoWhereLine'), 'Easy Learn binds place and person')
+  assert.ok(card.includes('LociStamp'), 'Easy Learn LociStamp hero is the who·where surface')
+  assert.ok(card.includes('mode="hero"'), 'Easy Learn stamp is hero mode')
+  assert.ok(!card.includes('easy-who-where'), 'Easy Learn omits who-where row when stamp present (1.4.160 #206)')
   assert.ok(
-    card.indexOf('HeldTriad') < card.indexOf('easyWhoWhereLine'),
-    'Easy Learn encodes the triad first, then this idea lives at this place, with this person',
+    card.indexOf('LociStamp') < card.indexOf('HeldTriad'),
+    'Easy Learn stamp then story triad — one who·where surface',
   )
 }
 assert.match(matchSrc, /match-col-label/)

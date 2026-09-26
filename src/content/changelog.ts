@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.160',
+    title: 'Easy Learn: one who·where surface',
+    when: '2026-09-25',
+    items: [
+      'Easy Learn: LociStamp hero alone carries place · person · idea — omit .easy-who-where row so Clear teach does not echo who/where twice before HeldTriad (Fixes #206)',
+    ],
+  },
+  {
     version: '1.4.159',
     title: 'Creed merge: short-phone bowl-first',
     when: '2026-09-25',
