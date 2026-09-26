@@ -3,8 +3,8 @@
 **PR:** (pending)
 **Branch:** `ship/easy-fun-clear-201` → `main`
 **Version:** 1.4.201
-**Peel:** (pending)
-**Tip:** (pending)
+**Peel:** `772ed4a` (`772ed4a541b94d1869654c1e3937a574228c6041`)
+**Tip:** `772ed4a` (`772ed4a541b94d1869654c1e3937a574228c6041`)
 **Base live:** 1.4.200 (`3fba16e`, PR #261 Easy Creed ≤720 close bowl→CTA purple gap on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
