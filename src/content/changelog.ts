@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.177',
+    title: 'Easy Learn: claim pill contrast',
+    when: '2026-09-25',
+    items: [
+      'Easy Learn LociStamp / claim pill: dark ink on cream stamp + wrap full main-idea (no white-on-cream truncate mid-sentence; Samaritan “shows mercy” intact; Fixes #231)',
+    ],
+  },
+  {
     version: '1.4.175',
     title: 'Easy Story Creek maze: ≤720 HUD peel',
     when: '2026-09-25',

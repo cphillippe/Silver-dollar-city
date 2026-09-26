@@ -9,7 +9,8 @@
   text-align: left;
   border: 1px solid color-mix(in srgb, var(--ink, #2a2118) 12%, transparent);
   background: color-mix(in srgb, var(--paper, #f6efe4) 92%, #c9a45c);
-  color: inherit;
+  /* 1.4.177: force dark ink on cream stamp — Learn inherits light text from dusk shell (Fixes #231) */
+  color: var(--ink, #2a2118);
   font: inherit;
   box-shadow: 0 1px 0 color-mix(in srgb, #000 6%, transparent);
 }
@@ -53,6 +54,7 @@ button.loci-stamp {
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.01em;
+  color: var(--ink, #2a2118);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -68,7 +70,8 @@ button.loci-stamp {
   max-width: 100%;
   padding: 0.12rem 0.45rem;
   border-radius: 999px;
-  background: color-mix(in srgb, #c9a45c 28%, transparent);
+  background: color-mix(in srgb, #c9a45c 22%, #fff8ec);
+  color: var(--ink, #1a140e);
   font-size: 0.72rem;
   font-weight: 600;
   line-height: 1.25;
@@ -77,16 +80,25 @@ button.loci-stamp {
   text-overflow: ellipsis;
 }
 
+/* Hero Learn stamp: wrap claim pill (no mid-sentence nowrap truncate) — 1.4.177 #231 */
 .loci-stamp.is-hero .loci-stamp-idea {
   font-size: 0.82rem;
   padding: 0.18rem 0.55rem;
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
 }
 
 .loci-stamp-pin {
   flex: 0 0 auto;
-  opacity: 0.45;
+  opacity: 0.55;
   font-size: 0.95rem;
   line-height: 1;
+  color: var(--ink, #2a2118);
 }
 
 .loci-stamp.is-dock .loci-stamp-pin {
