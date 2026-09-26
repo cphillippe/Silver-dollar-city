@@ -3194,6 +3194,84 @@ html[data-easy='on'] .link-block.is-picture .link-art {
   height: 148px;
 }
 
+/* Easy Clear 1.4.188: Easy Link ≤720 fill purple void —
+   Easy Link had no ≤720 peel (deferred since Sort 183). Sticky easy-steps + tall
+   picture seats (220px / 148px glyphs) hug the top so the gold card leaves empty
+   purple under the choice column — or bury 2–3 seats below fold (Match 184 /
+   Build Argument 187 fill family; invent Fun/Clear). Grow play + stretch wizard
+   seats; thin teach + shrink glyph floors so clue · picture choices fill the
+   portrait. Match / Lock In / Samaritan / Sort / Snap / Creed / Build untouched. */
+@media (max-height: 720px) {
+  .play.is-easy-link,
+  .daily-page.is-puzzle .play.is-easy-link,
+  .challenge-page.is-puzzle .play.is-easy-link {
+    flex: 1 1 auto;
+    min-height: 0;
+    gap: 4px;
+  }
+
+  .play.is-easy-link .easy-teach {
+    flex: 0 0 auto;
+    margin: 0 0 4px;
+  }
+
+  .play.is-easy-link .easy-steps {
+    padding: 4px 6px;
+    font-size: 0.72rem;
+    gap: 2px;
+  }
+
+  .play.is-easy-link .link-grid.is-wizard {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .play.is-easy-link .link-col {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: grid;
+    grid-auto-rows: minmax(0, 1fr);
+    align-content: stretch;
+    gap: 8px;
+  }
+
+  .play.is-easy-link .link-clue {
+    flex: 0 0 auto;
+    margin: 0 0 4px;
+    padding: 6px 8px;
+    font-size: 0.88rem;
+    line-height: 1.2;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .play.is-easy-link .link-block.is-picture {
+    min-height: 0;
+    height: auto;
+    max-height: none;
+    align-self: stretch;
+    gap: 4px;
+    padding: 8px;
+  }
+
+  .play.is-easy-link .link-block.is-picture .place-glyph,
+  .play.is-easy-link .link-block.is-picture .avatar,
+  .play.is-easy-link .link-block.is-picture .gem,
+  .play.is-easy-link .link-block.is-picture .link-art {
+    width: 96px;
+    height: 96px;
+  }
+
+  .play.is-easy-link .link-block.is-picture .link-label {
+    font-size: 0.88rem;
+    max-height: 2.4em;
+  }
+}
+
 html[data-easy='on'] .btn.tiny {
   min-height: 52px;
 }
