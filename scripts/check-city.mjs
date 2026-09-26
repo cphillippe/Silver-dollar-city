@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.211')
+assert.equal(APP_VERSION, '1.4.212')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -4059,5 +4059,29 @@ console.log('check-city: ok')
     latestChange('1.4.211').items.join('\n'),
     /Fixes #251|Fixes #252|Fixes #253|Lock In quiz|Lock In feedback|Father|Story Snap|Story Creek|Creed|Build Argument|Easy Link|Road maze|Claim merge|Source dig|Hold.*purple|pad→CTA|hud→arena/i,
     '1.4.211 must not fix other Shot 200 issues or climb another Easy surface',
+  )
+}
+
+
+// Easy Clear 1.4.212: Easy Lock In quiz ≤720 close lower-third purple void (Fixes #274)
+{
+  const holdCss212 = readFileSync(new URL('../src/styles/sortHold.css', import.meta.url), 'utf8')
+  const whyPlay212 = readFileSync(
+    new URL('../src/components/challenges/WhyBlastPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(holdCss212, /1\.4\.212: Easy Lock In quiz ≤720 close the lower-third purple void/)
+  assert.match(
+    holdCss212,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.app\.is-play \.app-body:has\(\.journal\.is-rehearse \.why-blast:not\(\.is-miss-teach\):not\(\.is-win\)\) \{[\s\S]*?padding-bottom: 0/,
+  )
+  assert.match(whyPlay212, /1\.4\.212: ≤720 mid-question quiz packs residual lower-third padding/)
+  assert.match(cssSrc, /1\.4\.212: Easy Lock In quiz ≤720 close the lower-third purple void/)
+  assert.match(latestChange('1.4.212').items.join('\n'), /Fixes #274|lower-third|purple band/i)
+  assert.match(latestChange('1.4.212').title, /Lock In quiz|≤720|lower-third|purple void/i)
+  assert.doesNotMatch(
+    latestChange('1.4.212').items.join('\n'),
+    /Fixes #250|Fixes #252|Fixes #253|#272|#275|#276|#277|miss teach|Father|Match|Story Creek|Creed|Build|Sort|Snap|Link|Road maze|Claim merge|Source dig/i,
+    '1.4.212 must not fix other phone-fail issues or climb another Easy surface',
   )
 }
