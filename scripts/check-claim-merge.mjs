@@ -257,4 +257,18 @@ assert.match(
   /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-claim-merge \.merge-drop-chip \{/,
 )
 
+
+
+// Easy Clear 1.4.181: Creed merge ≤720 HUD peel — hide kicker + rung names (invent Fun/Clear)
+assert.match(playSrc, /1\.4\.181: ≤720 peels HUD/)
+assert.match(mergeCss, /1\.4\.181: Creed merge ≤720 HUD peel/)
+assert.match(
+  mergeCss,
+  /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-claim-merge \.story-kicker \{[\s\S]*?display: none/,
+)
+assert.match(
+  mergeCss,
+  /@media \(max-height: 720px\) \{[\s\S]*?\.play\.is-claim-merge \.merge-rung-name \{[\s\S]*?display: none/,
+)
+
 console.log('check-claim-merge: ok')

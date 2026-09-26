@@ -1,49 +1,47 @@
-# ready-manage-empty-lot-180 — 1.4.180 Manage empty-lot header + compact sheet
+# ready-easy-fun-clear-181 — 1.4.181 Easy Creed merge ≤720 HUD peel
 
-**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/234
-**Branch:** `ship/manage-empty-lot-179` → `main` (alias `ship/manage-empty-lot-180`)
-**Version:** 1.4.180
-**Peel:** `deac678` (`deac678355c6690fe83a77fd3aa4404fef13ac2c`)
-**Tip:** `285371b` (`285371b20c3389f421e5fbec4e7e14153a799852`)
-**Base live:** 1.4.179 (`5f9b148`, PR #229 Easy Home map fills the phone / Fixes #217; atop 1.4.178 Witness #222)
-**Fixes:** #232
+**PR:** https://github.com/cphillippe/Silver-dollar-city/pull/235
+**Branch:** `ship/easy-fun-clear-181` → `main`
+**Version:** 1.4.181
+**Peel:** `b0013a3` (`b0013a35ed53129d924096e476f4983d3de568dc`)
+**Tip:** `68d56d2` (`68d56d2dbcfa63c277fc82244135d808c4bda2c0`)
+**Base live:** 1.4.180 (`ea09832`, PR #234 Manage empty-lot header + compact sheet; atop 1.4.179 Easy Home letterbox #229)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
 ## How picked
-Shot-pack climb from 1.4.170 `08-manage-or-snap.png` → issue **#232** (Manage empty lot — header gone / letterbox / dense sheet). Letterbox framing landed as Map **#229** / **1.4.179** on main — kept intact on rebase. Map owns 1.4.178 Witness (+ letterbox 1.4.179) — not claimed. Retargeted Manage empty-lot **1.4.179→1.4.180**.
+Invent Fun/Clear — Gemini flash pick **A** Creed merge ≤720 HUD peel (hide kicker + compress ladder). After Father **1.4.173** / maze **1.4.175** hide-kicker peels, Creed still only tinied kicker (**1.4.159** bowl-first); densest remaining Easy trail Clear chrome.
 
 ## Rebase (urgent)
-After #229 squash-merged to main (`5f9b148`), GitHub update-branch 422 / PR dirty. Rebased `ship/manage-empty-lot-179` onto `origin/main`:
-- Kept Manage empty-lot peel (Hub `is-empty-lot` topbar restore; MindMap compact empty-lot sheet)
-- Kept Map letterbox / Home (`fillStage`, CityMap, cityModel, city.css) from main
-- **APP_VERSION / package version stayed 1.4.180** (changelog 1.4.180 atop 1.4.179)
+After #234 squash-merged to main (`ea09832`), PR #235 was based on letterbox **1.4.179** and went DIRTY/CONFLICTING. Rebuilt `ship/easy-fun-clear-181` onto `origin/main`:
+- Kept Creed merge ≤720 peel (`index.css` hide kicker + rung names; tiny score; ClaimMergePlay comment)
+- Accepted Manage empty-lot + letterbox from main (Hub/MindMap/CityMap / 1.4.180 CSS)
+- **APP_VERSION / package version stayed 1.4.181** (changelog 1.4.181 atop 1.4.180)
 
 ## Chosen climb
-Single Easy Clear polish per **#232**: **Manage empty-lot header restore + compact Place·Person·Tool sheet**.
+Single Easy Fun/Clear polish: **Easy Creed merge ≤720 HUD peel** — hide who·where kicker + ladder rung names; tiny score so candy bowl + Drop chip stay above fold (complements 1.4.159 bowl-first; Father 1.4.173 / maze 1.4.175 hide-kicker family).
 
 ## What fixed
-- `src/components/Hub.tsx`: `is-empty-lot` when `appliedTier(mindPlot)===0` (Easy Home + Town); `fillStage` from 1.4.179 kept
-- `src/index.css`: empty-lot restores AppShell topbar; sheet `max-height: min(30dvh, 280px)`; Place·Person·Tool 3-col row; hug scroll
-- `src/components/MindMap.tsx`: `is-empty-lot` class; omit Easy place-sub on empty lot
-- Android `versionName` left alone (`1.4.113`)
+- `src/index.css`: `@media (max-height: 720px)` hides `.play.is-claim-merge .story-kicker` + `.merge-rung-name`; tinies `.merge-score`; keeps Drop chip + lit rung dots; bowl `max-height` from 1.4.159 retained; **1.4.180 empty-lot CSS kept from main**
+- `src/components/challenges/ClaimMergePlay.tsx`: thin 1.4.181 comment
+- Android `versionName` left at **1.4.113**
+- Dig / Hard / map candy untouched
 
 ## Deferred (do NOT climb this hop)
 - Dig Reveal / Hard / NW / Town / stores / Pack B
-- Map Witness / letterbox (already on main as 1.4.178 / 1.4.179)
-- Full-bleed map / snap points peek/half/full JS
+- Manage empty-lot / Home letterbox (already on main as 1.4.180 / 1.4.179)
+- Story Snap ≤720 eyebrow/who-where further peel / Journal held clear chrome
 
 ## Gemini
-`gemini-flash-latest` on `/workspace/silver-city-shots/1.4.170/08-manage-or-snap.png` (AQ. key OK): enormous blank purple letterboxing + cramped scroll-locked bottom sheet — **FAIL** (pre-fix). Notes: `notes-gemini.txt` (+ `/workspace/silver-city-art/notes-gemini-180.txt`).
+MODEL=gemini-flash-latest — invent pick A approved. Notes: `notes-gemini.txt`.
 
 ## Files peeled
-- `src/components/Hub.tsx`
-- `src/components/MindMap.tsx`
 - `src/index.css`
-- `scripts/check-city.mjs`, `scripts/check-panel-blast.mjs`
+- `src/components/challenges/ClaimMergePlay.tsx`
+- `scripts/check-city.mjs`, `scripts/check-claim-merge.mjs`, `scripts/check-panel-blast.mjs`
 - `src/config/app.ts`, `package.json`, `package-lock.json`
-- `src/content/changelog.ts` (1.4.180 atop live 1.4.179 letterbox)
+- `src/content/changelog.ts` (1.4.181 atop live 1.4.180)
 - `notes-gemini.txt`
-- `docs/` (Pages rebuild `index-qIrOlqlM.js` / `index-jgc3aF0b.css`)
+- `docs/` (Pages rebuild `index-CdsS9o_R.js` / `index-MktsPBFF.css`)
 - `MERGE.md`
 
 ## Checks
@@ -53,4 +51,4 @@ Single Easy Clear polish per **#232**: **Manage empty-lot header restore + compa
 - GitHub PR: `mergeable: true`, `mergeStateStatus: CLEAN` (confirm after push)
 
 ## Status
-**MERGEABLE CLEAN** (post-rebase onto 1.4.179) — ready for CoS merge after green. Do NOT merge from this hop.
+**MERGEABLE CLEAN** (post-rebase onto 1.4.180) — ready for CoS merge after green. Do NOT merge from this hop.
