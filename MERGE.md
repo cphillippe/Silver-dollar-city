@@ -3,8 +3,8 @@
 **PR:** (pending)
 **Branch:** `ship/easy-fun-clear-187` → `main`
 **Version:** 1.4.187
-**Peel:** (pending commit)
-**Tip:** (pending)
+**Peel:** `7079579` (`7079579ad3eedca4404f7a4f4ddd81ceffb3a583`)
+**Tip:** `7079579` (`7079579ad3eedca4404f7a4f4ddd81ceffb3a583`)
 **Base live:** 1.4.186 (`06206c7`, PR #243 Easy Samaritan ≤720 fill top-cluster purple void on main)
 **CoS merges — do NOT merge from this hop.** Manager pings CoS only when mergeable.
 
