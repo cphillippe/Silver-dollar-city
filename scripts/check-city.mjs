@@ -1135,7 +1135,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.184')
+assert.equal(APP_VERSION, '1.4.185')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3255,11 +3255,41 @@ console.log('check-city: ok')
     /@media \(max-height: 720px\) \{[\s\S]*?grid-template-rows: auto minmax\(0, 1\.15fr\) minmax\(0, 1fr\)/,
   )
   assert.match(matchPlay184, /1\.4\.184: ≤720 fills empty purple card/)
-  assert.match(latestChange(APP_VERSION).items.join('\n'), /Fixes #238/)
+  assert.match(latestChange('1.4.184').items.join('\n'), /Fixes #238/)
   assert.doesNotMatch(
-    latestChange(APP_VERSION).items.join('\n'),
+    latestChange('1.4.184').items.join('\n'),
     /Fixes #239|Fixes #240|Samaritan|Lock In miss|Story Snap|eyebrow|Creed merge|Fixes #232|empty-lot|Fixes #217/i,
     '1.4.184 must not claim #239/#240 / Snap / Creed / Manage / letterbox',
+  )
+}
+
+
+// Easy Clear 1.4.185: Easy Lock In ≤720 fill win-end purple void (Fixes #239)
+{
+  const holdCss185 = readFileSync(new URL('../src/styles/sortHold.css', import.meta.url), 'utf8')
+  const stored185 = readFileSync(
+    new URL('../src/components/StoredLine.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(holdCss185, /1\.4\.185: Lock In win-end \/ feedback ≤720 fill empty purple bottom/)
+  assert.match(
+    holdCss185,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.challenge-page\.is-after:has\(\.stored-line\) \.stored-line \{[\s\S]*?flex: 1 1 auto/,
+  )
+  assert.match(
+    holdCss185,
+    /@media \(max-height: 720px\) \{[\s\S]*?\.challenge-page\.is-after:has\(\.stored-line\) \.after-win \{[\s\S]*?flex: 1 1 auto/,
+  )
+  assert.match(
+    holdCss185,
+    /html\[data-easy='on'\] \.app\.is-play \.app-body:has\(\.challenge-page\.is-after \.stored-line\)/,
+  )
+  assert.match(stored185, /1\.4\.185: ≤720 fills empty purple bottom/)
+  assert.match(latestChange(APP_VERSION).items.join('\n'), /Fixes #239/)
+  assert.doesNotMatch(
+    latestChange(APP_VERSION).items.join('\n'),
+    /Fixes #238|Fixes #240|Samaritan|Match \(picture|empty purple card|Story Snap|eyebrow|Creed merge|Fixes #232|empty-lot|Fixes #217/i,
+    '1.4.185 must not claim #238 Match / #240 Samaritan / Snap / Creed / Manage / letterbox',
   )
 }
 
