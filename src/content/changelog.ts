@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.204',
+    title: 'Easy Father: ≤720 close speech→rail purple gap',
+    when: '2026-09-25',
+    items: [
+      'Easy Father Dash on ≤720px tall: zero run-speech / run-rail margins + tighten gap/padding so scene · speech · rail · pad pack tight — no thin purple band between the speech card and the timing rail (Father dock-margin family · invent Fun/Clear; after fill 1.4.189 / dock 1.4.196; Build 203 / Hold 202 / Story Creek 201 / Creed 200 / Link 199 / Sort 198 / Story Snap 197 / Match 193 / Lock In 194·195 / Samaritan peels untouched)',
+    ],
+  },
+  {
     version: '1.4.203',
     title: 'Easy Build: ≤720 fill free-place purple void',
     when: '2026-09-25',
