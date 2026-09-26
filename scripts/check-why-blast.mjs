@@ -69,6 +69,11 @@ assert.match(blastSrc, /EASY\.missTeachBadge/)
 assert.match(blastSrc, /EASY\.whyTrueLabel/)
 assert.match(blastSrc, /EASY\.mainIdea/)
 assert.match(blastSrc, /why-miss-label[\s\S]*?EASY\.mainIdea/)
+// Easy Clear 1.4.141: live arena claim also labeled Main idea (not only miss teach).
+assert.match(
+  blastSrc,
+  /why-arena[\s\S]*?why-claim[\s\S]*?why-miss-label[\s\S]*?EASY\.mainIdea/,
+)
 // Easy Clear 1.4.139: missTeachBadge on sheet only — HUD next-tap skips the dup when missTeach.
 assert.match(blastSrc, /missTeach \? null/)
 assert.doesNotMatch(

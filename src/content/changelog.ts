@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.141',
+    title: 'Lock In: live Main idea label',
+    when: '2026-09-25',
+    items: [
+      'Easy Lock In why-blast: label the live arena claim Main idea (same Clear family as miss teach 1.4.139 + Learn HeldTriad 1.4.140) so play reads Main idea · tap why — not a bare claim card until you miss',
+    ],
+  },
+  {
     version: '1.4.140',
     title: 'Learn: one Main idea · why · From triad',
     when: '2026-09-25',
