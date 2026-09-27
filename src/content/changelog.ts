@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.282',
+    title: 'Easy Father Hold-to-Run arcade spring invent',
+    when: '2026-09-27',
+    items: [
+      'Easy Father Dash: HOLD TO RUN pad presses deeper while held (scale 0.96, translateY 6px) with a soft brightness bump; glow window adds pink drop-shadow — invent Fun/Clear climb toward Shot wake',
+    ],
+  },
+  {
     version: '1.4.281',
     title: 'Easy Match gem tactile press invent',
     when: '2026-09-27',
