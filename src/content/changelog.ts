@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.275',
+    title: 'Easy Manage sheet: ≤720 header scroll mask',
+    when: '2026-09-27',
+    items: [
+      'Easy Manage sheet on phone portrait: scrolling cards fade behind a solid header plate so the title stays readable, and the hidden scrollbar plus last TOOL padding stay (other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.274',
     title: 'Easy Manage sheet: ≤720 hide scrollbar + fix clip',
     when: '2026-09-27',

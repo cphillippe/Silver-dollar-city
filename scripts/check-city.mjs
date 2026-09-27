@@ -1137,7 +1137,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.274')
+assert.equal(APP_VERSION, '1.4.275')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -6243,5 +6243,35 @@ console.log('check-city: ok')
     latestChange('1.4.274').items.join('\n'),
     /Fixes #380|map glitch|Night Watch|Dig deeper|typography/i,
     '1.4.274 must stay on Easy Manage scroll chrome',
+  )
+}
+
+// Easy Clear 1.4.275: Easy Manage header scroll mask — opaque plate + top fade
+{
+  const indexCss275 = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
+  const gradle275 = readFileSync(new URL('../android/app/build.gradle', import.meta.url), 'utf8')
+  assert.match(indexCss275, /1\.4\.275: Manage head stays above scroll/)
+  assert.match(
+    indexCss275,
+    /1\.4\.275: Manage head stays above scroll[\s\S]*?html\[data-easy='on'\] \.mind-map\.is-manage \.mind-map-card > \.mind-map-head \{[\s\S]*?position:\s*relative[\s\S]*?z-index:\s*3[\s\S]*?background-color:\s*#48188c[\s\S]*?background-image:\s*none[\s\S]*?padding-bottom:\s*6px/,
+  )
+  assert.match(
+    indexCss275,
+    /html\[data-easy='on'\] \.mind-map\.is-manage \.mind-map-scroll \{[\s\S]*?padding-top:\s*14px[\s\S]*?mask-image:\s*linear-gradient\(to bottom, transparent 0, #000 14px/,
+  )
+  assert.match(
+    indexCss275,
+    /1\.4\.274: Easy Manage hide web scrollbar[\s\S]*?padding-bottom:\s*12px[\s\S]*?scroll-padding-bottom:\s*12px/,
+  )
+  assert.match(gradle275, /versionName "1\.4\.113"/)
+  assert.match(latestChange('1.4.275').title, /Manage|≤720|header|mask/)
+  assert.match(
+    latestChange('1.4.275').items.join('\n'),
+    /phone portrait|header|scroll|TOOL/i,
+  )
+  assert.doesNotMatch(
+    latestChange('1.4.275').items.join('\n'),
+    /Fixes #380|map glitch|Night Watch|Dig deeper|typography|Shot 270/i,
+    '1.4.275 must stay on Easy Manage header scroll mask',
   )
 }
