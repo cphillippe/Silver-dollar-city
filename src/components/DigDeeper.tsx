@@ -29,7 +29,24 @@ function EasyTapList({ taps }: { taps: DeeperLink[] }) {
               <strong>{link.label}</strong>
               <span className="quiet">{eraLabel(link.era)}</span>
             </button>
-            {shown ? <p className="dig-bite">{link.source}</p> : null}
+            {shown ? (
+              link.quote ? (
+                <div className="dig-bite is-verse">
+                  <p>{link.quote}</p>
+                  <p className="dig-bite-attrib quiet">RSV</p>
+                  <a
+                    className="dig-bite-open quiet"
+                    href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Open full
+                  </a>
+                </div>
+              ) : (
+                <p className="dig-bite">{link.source}</p>
+              )
+            ) : null}
           </li>
         )
       })}
@@ -93,6 +110,7 @@ export function DigDeeper({
           <span className="quiet">
             {eraLabel(link.era)} · {link.source}
           </span>
+          {link.quote ? <p className="dig-bite is-verse">{link.quote}</p> : null}
         </li>
       ))}
     </ul>

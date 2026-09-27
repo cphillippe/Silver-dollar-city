@@ -2855,3 +2855,33 @@ html[data-easy='on'] .mind-map.is-manage .place-sub {
     padding-bottom: max(8px, env(safe-area-inset-bottom, 0px));
   }
 }
+
+/* Easy Dig 1.4.297: in-app RSV verse reveal (Fixes #416) — thin parchment dig-bite */
+.dig-bite.is-verse {
+  margin: 6px 4px 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #fff9eb, #f5e6c8);
+  border: 1px solid rgba(120, 86, 40, 0.22);
+  font-size: 1rem;
+  line-height: 1.45;
+  color: #3a1408;
+}
+
+.dig-bite.is-verse p {
+  margin: 0;
+}
+
+.dig-bite.is-verse .dig-bite-attrib {
+  margin: 8px 0 0;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+
+.dig-bite.is-verse .dig-bite-open {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 0.82rem;
+}

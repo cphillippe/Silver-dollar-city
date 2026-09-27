@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.297',
+    title: 'Easy Dig tap verse ref reveals RSV text',
+    when: '2026-09-27',
+    items: [
+      'Easy Dig: tap a Bible reference to read the RSV words in-app on parchment, with a quiet RSV line and optional Open full to BibleGateway (Fixes #416)',
+    ],
+  },
+  {
     version: '1.4.296',
     title: 'Easy Samaritan less-is-more + smash + route variety',
     when: '2026-09-27',
