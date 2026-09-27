@@ -987,3 +987,54 @@ img.walker-face.easy-walker-face,
   .easy-tap-plus,
   .easy-tap-combo { animation: none; }
 }
+
+/* Phase 2 hop 2 — watch tower feel (1.4.302 / #418) */
+.defend-lantern-window {
+  fill: rgba(255, 246, 200, 0.35);
+  stroke: rgba(232, 195, 106, 0.55);
+  stroke-width: 0.6;
+}
+
+.defend-pad.is-planted .defend-hot-halo {
+  stroke: rgba(255, 246, 216, 0.55);
+  stroke-width: 2.2;
+  stroke-dasharray: 4 3;
+  opacity: 0.55;
+}
+
+.defend-pad.is-hot .defend-hot-halo {
+  opacity: 1;
+  stroke: #fff8d4;
+  stroke-dasharray: none;
+  animation: defend-hot 0.7s ease-in-out infinite;
+}
+
+.defend-pad.is-flash .defend-lamp {
+  fill: #fffef0;
+  filter: url(#defend-glow);
+}
+
+.defend-pad.is-flash .defend-hot-halo {
+  opacity: 1;
+  stroke: #ffe08a;
+  stroke-width: 3.2;
+  animation: defend-tower-fire 0.28s ease-out both;
+}
+
+.defend-pad.is-flash .defend-pool {
+  opacity: 1;
+}
+
+.defend-page.is-easy-tap .defend-pad.is-decor {
+  pointer-events: none;
+  opacity: 0.92;
+}
+
+@keyframes defend-tower-fire {
+  0% { transform: scale(0.7); opacity: 1; }
+  100% { transform: scale(1.35); opacity: 0.35; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .defend-pad.is-flash .defend-hot-halo { animation: none; }
+}

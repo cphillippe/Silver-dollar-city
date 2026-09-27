@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.302',
+    title: 'Night Watch Phase 2 hop 2 — watch-tower feel',
+    when: '2026-09-27',
+    items: [
+      'Night Watch: planted lamps read as watch towers with range ring and fire flash; Easy TAP shows display-only towers mid-wave (Fixes #418)',
+    ],
+  },
+  {
     version: '1.4.301',
     title: 'Night Watch Phase 2 hop 1 — Easy TAP juice',
     when: '2026-09-27',

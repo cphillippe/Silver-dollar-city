@@ -1138,7 +1138,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.301')
+assert.equal(APP_VERSION, '1.4.302')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -6988,5 +6988,27 @@ console.log('check-city: ok')
     latestChange('1.4.301').items.join('\n'),
     /Phase 1 taunt|unpark|tower/i,
     '1.4.301 must stay on Easy Night Watch Phase 2 hop 1 TAP juice Fixes #418',
+  )
+}
+
+// Night Watch 1.4.302: Phase 2 hop 2 watch-tower feel (Fixes #418)
+{
+  const defendCss302 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  assert.doesNotMatch(defendNightSrc, /easyTap\s*\?\s*null\s*:\s*pads\.map/)
+  assert.match(defendNightSrc, /is-decor/)
+  assert.match(defendNightSrc, /defend-hot-halo/)
+  assert.match(defendNightSrc, /easyTap && !on/)
+  assert.match(defendCss302, /Phase 2 hop 2 — watch tower feel/)
+  assert.match(defendCss302, /defend-tower-fire/)
+  assert.match(defendCss302, /\.defend-page\.is-easy-tap \.defend-pad\.is-decor/)
+  assert.match(latestChange('1.4.302').title, /Night Watch|Phase 2|watch.?tower|Fixes #418/i)
+  assert.match(
+    latestChange('1.4.302').items.join('\n'),
+    /Fixes #418|watch tower|range ring|Easy TAP/i,
+  )
+  assert.doesNotMatch(
+    latestChange('1.4.302').items.join('\n'),
+    /TAP juice|squash|heaven-lift/i,
+    '1.4.302 must stay on Night Watch Phase 2 hop 2 watch-tower feel Fixes #418',
   )
 }

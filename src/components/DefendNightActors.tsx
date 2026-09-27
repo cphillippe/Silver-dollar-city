@@ -86,11 +86,10 @@ export function DefendNightActorsSvg({
 }: Omit<DefendNightActorsProps, 'tapTarget' | 'tapPos' | 'fireBest'>) {
   return (
     <>
-              {easyTap
-                ? null
-                : pads.map((id) => {
+              {pads.map((id) => {
                 const at = DEFEND_ANCHOR[id]
                 const on = planted.includes(id)
+                if (easyTap && !on) return null
                 const stage = padStage(id, progress)
                 const plot = CITY_PLOTS.find((item) => item.id === id)
                 const hot =
@@ -102,42 +101,69 @@ export function DefendNightActorsSvg({
                       dist(at, raiderAt(raider)) <=
                         abilityRange(unlocked.includes(ability) ? ability : 'love', stage, progress),
                   )
+                const isFlash = flash === id
+                const haloR = hot || isFlash ? 30 : 24
+                const decor = easyTap
                 return (
                   <g
                     key={id}
                     data-person-node="pad"
-                    className={`defend-pad is-${stage} ${on ? 'is-planted' : ''} ${hot ? 'is-hot' : ''} ${flash === id ? 'is-flash' : ''}`}
+                    className={`defend-pad is-${stage} ${on ? 'is-planted' : ''} ${hot ? 'is-hot' : ''} ${isFlash ? 'is-flash' : ''} ${decor ? 'is-decor' : ''}`}
                     transform={`translate(${at.x} ${at.y})`}
-                    role="button"
-                    tabIndex={0}
+                    role={decor ? undefined : 'button'}
+                    tabIndex={decor ? undefined : 0}
+                    aria-hidden={decor ? true : undefined}
                     aria-label={
-                      phase === 'plant'
-                        ? `${on ? 'Pull' : 'Plant'} lamp at ${plot?.title ?? id}`
-                        : `Fire ${plot?.title ?? id}`
+                      decor
+                        ? undefined
+                        : phase === 'plant'
+                          ? `${on ? 'Pull' : 'Plant'} lamp at ${plot?.title ?? id}`
+                          : `Fire ${plot?.title ?? id}`
                     }
-                    onClick={(event) => {
-                      event.stopPropagation()
-                      if (phase === 'plant') togglePad(id)
-                      else fire(id)
-                    }}
-                    onKeyDown={(event) => {
-                      if (event.key === 'Enter' || event.key === ' ') {
-                        event.preventDefault()
-                        if (phase === 'plant') togglePad(id)
-                        else fire(id)
-                      }
-                    }}
+                    onClick={
+                      decor
+                        ? undefined
+                        : (event) => {
+                            event.stopPropagation()
+                            if (phase === 'plant') togglePad(id)
+                            else fire(id)
+                          }
+                    }
+                    onKeyDown={
+                      decor
+                        ? undefined
+                        : (event) => {
+                            if (event.key === 'Enter' || event.key === ' ') {
+                              event.preventDefault()
+                              if (phase === 'plant') togglePad(id)
+                              else fire(id)
+                            }
+                          }
+                    }
                   >
                     <circle className="defend-hit" r="38" />
                     <ellipse className="defend-earth" cx="0" cy="10" rx="15" ry="6" />
                     {on ? (
                       <>
-                        <ellipse className="defend-pool" cx="0" cy="12" rx={hot ? 30 : 20} ry={hot ? 11 : 7} />
-                        <path className="defend-post" d="M-2.4 10 V-18 H2.4 V10 Z" fill="url(#defend-wood)" />
-                        <path className="defend-lantern-roof" d="M-8 -18 l8 -7 8 7 Z" fill="url(#defend-gold-roof)" />
-                        <rect className="defend-lantern" x="-6.5" y="-18" width="13" height="11" rx="2" />
-                        <circle className="defend-lamp" cx="0" cy="-13" r="4.6" />
-                        {hot ? <circle className="defend-hot-halo" r="27" /> : null}
+                        <ellipse
+                          className="defend-pool"
+                          cx="0"
+                          cy="12"
+                          rx={hot || isFlash ? 30 : 22}
+                          ry={hot || isFlash ? 11 : 8}
+                        />
+                        <path className="defend-post" d="M-3 10 V-28 H3 V10 Z" fill="url(#defend-wood)" />
+                        <path className="defend-lantern-roof" d="M-10 -28 l10 -8 10 8 Z" fill="url(#defend-gold-roof)" />
+                        <rect className="defend-lantern" x="-8" y="-28" width="16" height="14" rx="2" />
+                        <rect className="defend-lantern-window" x="-5" y="-24" width="4" height="5" rx="0.6" />
+                        <rect className="defend-lantern-window" x="1" y="-24" width="4" height="5" rx="0.6" />
+                        <path
+                          className="defend-crenel"
+                          d="M-7 -36 h3 v3 h-3 z M-1 -36 h3 v3 h-3 z M5 -36 h3 v3 h-3 z"
+                          fill="url(#defend-gold-roof)"
+                        />
+                        <circle className="defend-lamp" cx="0" cy="-21" r="5.2" />
+                        <circle className="defend-hot-halo" r={haloR} />
                       </>
                     ) : (
                       <>
