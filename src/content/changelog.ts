@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.287',
+    title: 'Easy Learn story-dock arcade punch invent',
+    when: '2026-09-27',
+    items: [
+      'Easy Learn Short story: unlock CTA squish on press (scale 0.94, translateY 3px, inset shadow, brightness bump) — invent Fun/Clear climb toward Shot wake',
+    ],
+  },
+  {
     version: '1.4.286',
     title: 'Easy Sort bin gulp press invent',
     when: '2026-09-27',
