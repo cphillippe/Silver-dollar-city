@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.299',
+    title: 'Easy Night Watch unpark',
+    when: '2026-09-27',
+    items: [
+      'Easy: Night Watch opens from Home again so Phase 1 prove can run on Easy (Fixes #418 residual)',
+    ],
+  },
+  {
     version: '1.4.298',
     title: 'Night Watch Phase 1 fantasy reskin',
     when: '2026-09-27',
