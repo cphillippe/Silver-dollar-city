@@ -1138,7 +1138,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.300')
+assert.equal(APP_VERSION, '1.4.301')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -6961,5 +6961,32 @@ console.log('check-city: ok')
     latestChange('1.4.300').items.join('\n'),
     /unpark|prayer watch|dark fantasy reskin/i,
     '1.4.300 must stay on Easy Night Watch TAP Phase 1 taunt Fixes #418 residual',
+  )
+}
+
+// Night Watch 1.4.301: Phase 2 hop 1 Easy TAP juice (Fixes #418)
+{
+  const defendCss301 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const defendScreen301 = readFileSync(
+    new URL('../src/components/DefendScreen.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(defendScreen301, /tapJuice/)
+  assert.match(defendScreen301, /setTapJuice/)
+  assert.match(defendNightSrc, /easy-tap-plus/)
+  assert.match(defendNightSrc, /easy-tap-combo/)
+  assert.match(defendNightSrc, /tapJuice/)
+  assert.match(defendCss301, /Phase 2 hop 1 — Easy TAP juice/)
+  assert.match(defendCss301, /\.easy-tap-plus/)
+  assert.match(defendCss301, /easy-tap-heaven/)
+  assert.match(latestChange('1.4.301').title, /Night Watch|Phase 2|TAP|juice|Fixes #418/i)
+  assert.match(
+    latestChange('1.4.301').items.join('\n'),
+    /Fixes #418|squash|heaven|Combo|\+ flash/i,
+  )
+  assert.doesNotMatch(
+    latestChange('1.4.301').items.join('\n'),
+    /Phase 1 taunt|unpark|tower/i,
+    '1.4.301 must stay on Easy Night Watch Phase 2 hop 1 TAP juice Fixes #418',
   )
 }

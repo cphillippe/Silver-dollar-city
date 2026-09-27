@@ -928,3 +928,62 @@ img.walker-face.easy-walker-face,
   top: auto;
   bottom: -4px;
 }
+
+/* Phase 2 hop 1 — Easy TAP juice (1.4.301 / #418) */
+.easy-walkers-juice {
+  pointer-events: none;
+}
+.easy-walker.is-juice {
+  pointer-events: none;
+}
+.easy-walker.is-squash .easy-walker-face {
+  animation: easy-tap-squash 0.28s cubic-bezier(0.12, 1.2, 0.28, 1) both;
+}
+.easy-walker.is-heaven .easy-walker-face {
+  animation: easy-tap-heaven 0.55s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+}
+.easy-tap-plus {
+  position: absolute;
+  left: 50%;
+  top: 18%;
+  transform: translateX(-50%);
+  z-index: 8;
+  color: #ffcc33;
+  font-weight: 900;
+  font-size: 42px;
+  text-shadow: 0 2px 0 #5a3a00, 0 0 12px rgba(255, 204, 51, 0.7);
+  animation: easy-tap-plus 0.7s cubic-bezier(0.2, 1.45, 0.3, 1) both;
+  pointer-events: none;
+}
+.easy-tap-combo {
+  position: absolute;
+  left: 50%;
+  top: 6%;
+  transform: translateX(-50%);
+  z-index: 9;
+  color: #fff8d4;
+  font-weight: 900;
+  font-size: 22px;
+  animation: defend-combo 0.55s ease-out both;
+  pointer-events: none;
+}
+@keyframes easy-tap-squash {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.12, 0.82); }
+  100% { transform: scale(1); }
+}
+@keyframes easy-tap-heaven {
+  0% { transform: translateY(0) scale(1); opacity: 1; filter: brightness(1); }
+  100% { transform: translateY(-48px) scale(0.85); opacity: 0; filter: brightness(1.35); }
+}
+@keyframes easy-tap-plus {
+  0% { opacity: 0; transform: translateX(-50%) scale(0.5) translateY(10px); }
+  30% { opacity: 1; transform: translateX(-50%) scale(1.15) translateY(-6px); }
+  100% { opacity: 0; transform: translateX(-50%) scale(1) translateY(-36px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .easy-walker.is-squash .easy-walker-face,
+  .easy-walker.is-heaven .easy-walker-face,
+  .easy-tap-plus,
+  .easy-tap-combo { animation: none; }
+}
