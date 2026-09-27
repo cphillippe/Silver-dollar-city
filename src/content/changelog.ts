@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.291',
+    title: 'Easy Match teach-dock unclamp',
+    when: '2026-09-27',
+    items: [
+      'Easy Match: drop the 72px teach-dock clamp on phone portrait so LociStamp claim + WHO/WHERE/IDEA/KEEP chips stack with a readable gap instead of overlapping the prompt (Fixes #404)',
+    ],
+  },
+  {
     version: '1.4.290',
     title: 'Easy Story Snap pad arcade squish invent',
     when: '2026-09-27',
