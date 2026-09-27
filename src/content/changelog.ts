@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.300',
+    title: 'Easy Night Watch TAP Phase 1 taunt',
+    when: '2026-09-27',
+    items: [
+      'Easy Night Watch: mid-wave TAP face shows walker kind label and short taunt on the cue bubble, with tap teach kept below (Fixes #418 residual)',
+    ],
+  },
+  {
     version: '1.4.299',
     title: 'Easy Night Watch unpark',
     when: '2026-09-27',
