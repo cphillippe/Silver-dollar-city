@@ -1137,7 +1137,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.275')
+assert.equal(APP_VERSION, '1.4.276')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -6257,10 +6257,6 @@ console.log('check-city: ok')
   )
   assert.match(
     indexCss275,
-    /html\[data-easy='on'\] \.mind-map\.is-manage \.mind-map-scroll \{[\s\S]*?padding-top:\s*14px[\s\S]*?mask-image:\s*linear-gradient\(to bottom, transparent 0, #000 14px/,
-  )
-  assert.match(
-    indexCss275,
     /1\.4\.274: Easy Manage hide web scrollbar[\s\S]*?padding-bottom:\s*12px[\s\S]*?scroll-padding-bottom:\s*12px/,
   )
   assert.match(gradle275, /versionName "1\.4\.113"/)
@@ -6273,5 +6269,31 @@ console.log('check-city: ok')
     latestChange('1.4.275').items.join('\n'),
     /Fixes #380|map glitch|Night Watch|Dig deeper|typography|Shot 270/i,
     '1.4.275 must stay on Easy Manage header scroll mask',
+  )
+}
+
+// Easy Clear 1.4.276: Easy Manage smooth header fade — 56px multi-stop mask
+{
+  const indexCss276 = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
+  const gradle276 = readFileSync(new URL('../android/app/build.gradle', import.meta.url), 'utf8')
+  assert.match(indexCss276, /1\.4\.276: Smooth Header Fade/)
+  assert.match(
+    indexCss276,
+    /1\.4\.276: Smooth Header Fade[\s\S]*?html\[data-easy='on'\] \.mind-map\.is-manage \.mind-map-scroll \{[\s\S]*?padding-top:\s*56px[\s\S]*?scroll-padding-top:\s*56px[\s\S]*?rgba\(0, 0, 0, 0\.1\) 18px[\s\S]*?rgba\(0, 0, 0, 0\.6\) 40px[\s\S]*?#000 56px/,
+  )
+  assert.match(
+    indexCss276,
+    /1\.4\.275: Manage head stays above scroll[\s\S]*?background-color:\s*#48188c/,
+  )
+  assert.match(gradle276, /versionName "1\.4\.113"/)
+  assert.match(latestChange('1.4.276').title, /Manage|≤720|smooth|fade|header/i)
+  assert.match(
+    latestChange('1.4.276').items.join('\n'),
+    /phone portrait|fade|header|scroll|TOOL/i,
+  )
+  assert.doesNotMatch(
+    latestChange('1.4.276').items.join('\n'),
+    /Fixes #380|map glitch|Night Watch|Dig deeper|typography|Shot 270/i,
+    '1.4.276 must stay on Easy Manage smooth header fade',
   )
 }

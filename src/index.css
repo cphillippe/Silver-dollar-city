@@ -2446,8 +2446,8 @@ html[data-easy='on'] .mind-map.is-manage .mind-map-scroll::-webkit-scrollbar {
    The child combinator beats 1.4.273 padding-bottom: 0 in welcome.css.
    Plate matches the phone sheet top (1.4.258 gradient starts #48188c on the
    267 floor #241050) — a flat #241050 bar would read as a darker stripe.
-   Scroll padding-top keeps that 14px fade empty at rest so the first cards
-   stay crisp. 274 scrollbar hide + padding-bottom 12px stay. */
+   1.4.276 extends the scroll top fade to 56px multi-stop (see block below).
+   274 scrollbar hide + padding-bottom 12px stay. */
 html[data-easy='on'] .mind-map.is-manage .mind-map-card {
   isolation: isolate;
 }
@@ -2462,13 +2462,33 @@ html[data-easy='on'] .mind-map.is-manage .mind-map-card > .mind-map-head {
   margin-bottom: 0;
 }
 
+/* Easy Clear 1.4.276: Smooth Header Fade — 56px multi-stop so cards dissolve
+   before the opaque #48188c head (Gemini Pro FAIL on 275: 14px cliff bisects
+   Love/TOOL mid-scroll). Keep 274 scrollbar hide + padding-bottom 12px and
+   the 275 opaque head plate. */
 html[data-easy='on'] .mind-map.is-manage .mind-map-scroll {
   position: relative;
   z-index: 1;
-  padding-top: 14px; /* fade gutter — empty at rest, cards dissolve here while scrolling */
-  scroll-padding-top: 14px;
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 14px, #000 calc(100% - 8px), #000 100%);
-  mask-image: linear-gradient(to bottom, transparent 0, #000 14px, #000 calc(100% - 8px), #000 100%);
+  padding-top: 56px; /* fade gutter — empty at rest, cards dissolve here while scrolling */
+  scroll-padding-top: 56px;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0px,
+    rgba(0, 0, 0, 0.1) 18px,
+    rgba(0, 0, 0, 0.6) 40px,
+    #000 56px,
+    #000 calc(100% - 8px),
+    #000 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0px,
+    rgba(0, 0, 0, 0.1) 18px,
+    rgba(0, 0, 0, 0.6) 40px,
+    #000 56px,
+    #000 calc(100% - 8px),
+    #000 100%
+  );
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-size: 100% 100%;
