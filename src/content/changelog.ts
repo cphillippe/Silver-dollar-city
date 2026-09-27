@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.296',
+    title: 'Easy Samaritan less-is-more + smash + route variety',
+    when: '2026-09-27',
+    items: [
+      'Easy Samaritan: earthen road tiles, square cells, and contain faces so the hurt man is not crushed; traveler token until you help (Fixes #414, Fixes #412)',
+      'Easy Samaritan: rotate three authored road layouts so the first step is not always right (Fixes #413)',
+    ],
+  },
+  {
     version: '1.4.295',
     title: 'Father Dash HOLD TO RUN cream void fill',
     when: '2026-09-27',

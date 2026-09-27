@@ -42,19 +42,80 @@ export const MAZE_COLS = 5
 export const MAZE_ROWS = 7
 
 export const MAZE_START: MazeCoord = { r: 0, c: 0 }
-export const MAZE_HURT: MazeCoord = { r: 4, c: 4 }
-export const MAZE_INN: MazeCoord = { r: 6, c: 0 }
 
-/** 1 = open road. Authored Jericho-road bend — not a random junk maze. */
-export const MAZE_ROADS: readonly (readonly number[])[] = [
-  [1, 1, 0, 1, 1],
-  [0, 1, 1, 1, 0],
-  [1, 1, 0, 1, 1],
-  [1, 0, 0, 1, 0],
-  [1, 1, 1, 1, 1],
-  [0, 1, 0, 1, 0],
-  [1, 1, 1, 1, 0],
-]
+export interface MazePreset {
+  id: string
+  roads: readonly (readonly number[])[]
+  hurt: MazeCoord
+  inn: MazeCoord
+}
+
+/** Authored 5×7 Jericho bends — rotate so the first step is not always right. */
+export const MAZE_PRESETS: readonly MazePreset[] = [
+  {
+    id: 'A_fork',
+    hurt: { r: 4, c: 4 },
+    inn: { r: 6, c: 0 },
+    roads: [
+      [1, 1, 0, 0, 1],
+      [1, 0, 0, 1, 1],
+      [1, 1, 1, 1, 0],
+      [0, 0, 1, 0, 0],
+      [1, 1, 1, 1, 1],
+      [1, 0, 0, 1, 0],
+      [1, 1, 1, 1, 0],
+    ],
+  },
+  {
+    id: 'B_left_canyon',
+    hurt: { r: 3, c: 4 },
+    inn: { r: 6, c: 0 },
+    roads: [
+      [1, 0, 0, 1, 1],
+      [1, 1, 0, 1, 0],
+      [0, 1, 1, 1, 1],
+      [0, 0, 1, 0, 1],
+      [1, 1, 1, 1, 1],
+      [1, 0, 0, 1, 0],
+      [1, 1, 1, 1, 0],
+    ],
+  },
+  {
+    id: 'C_weave',
+    hurt: { r: 4, c: 2 },
+    inn: { r: 6, c: 0 },
+    roads: [
+      [1, 0, 1, 1, 0],
+      [1, 1, 1, 0, 0],
+      [0, 1, 0, 0, 1],
+      [1, 1, 1, 1, 1],
+      [1, 0, 1, 0, 1],
+      [1, 0, 1, 1, 1],
+      [1, 1, 1, 0, 0],
+    ],
+  },
+] as const
+
+export function mazePresetIndex(attempt: number): number {
+  const n = MAZE_PRESETS.length
+  if (n === 0) return 0
+  return ((attempt % n) + n) % n
+}
+
+function applyPreset(preset: MazePreset): void {
+  MAZE_ROADS = preset.roads
+  MAZE_HURT = preset.hurt
+  MAZE_INN = preset.inn
+}
+
+/** Active layout — live bindings for play + checks (default preset A). */
+export let MAZE_ROADS: readonly (readonly number[])[] = MAZE_PRESETS[0]!.roads
+export let MAZE_HURT: MazeCoord = { ...MAZE_PRESETS[0]!.hurt }
+export let MAZE_INN: MazeCoord = { ...MAZE_PRESETS[0]!.inn }
+
+export function setMazePreset(attempt: number): void {
+  applyPreset(MAZE_PRESETS[mazePresetIndex(attempt)]!)
+}
 
 const DIRS: MazeCoord[] = [
   { r: -1, c: 0 },
