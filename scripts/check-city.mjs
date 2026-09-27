@@ -1137,7 +1137,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.284')
+assert.equal(APP_VERSION, '1.4.285')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -6531,5 +6531,30 @@ console.log('check-city: ok')
     latestChange('1.4.284').items.join('\n'),
     /Fixes #|Dig deeper|Match candy|HUD peel|peels closed|Learn cream|Manage|Night Watch|Town|Dig|Creed|Build|Sort|Snap|Link|Claim merge|Source dig|Sequence|Home dock|coach|maze-stage|gem tactile|Hold-to-Run|run-pad|road tile|Samaritan maze/i,
     '1.4.284 must stay on Easy Lock In why-chip tactile press invent',
+  )
+}
+
+// Easy Fun 1.4.285: Sort tile arcade squish invent (invent Fun/Clear · Shot wake)
+{
+  const holdCss285 = readFileSync(new URL('../src/styles/sortHold.css', import.meta.url), 'utf8')
+  assert.match(holdCss285, /1\.4\.285: Sort tile arcade squish invent/)
+  assert.match(
+    holdCss285,
+    /1\.4\.285: Sort tile arcade squish invent[\s\S]*?html\[data-easy='on'\] \.play\.is-easy-sort \.sort-tile:not\(\.is-gone\)/,
+  )
+  assert.match(
+    holdCss285,
+    /html\[data-easy='on'\] \.play\.is-easy-sort \.sort-tile:active:not\(\.is-gone\)[\s\S]*?transform: scale\(0\.92\) translateY\(2px\)/,
+  )
+  assert.match(cssSrc, /1\.4\.285: Sort tile arcade squish invent/)
+  assert.match(
+    latestChange('1.4.285').items.join('\n'),
+    /sort tile|squish|arcade|invent Fun\/Clear|Shot wake|finger|press|gone/i,
+  )
+  assert.match(latestChange('1.4.285').title, /Easy Sort|tile|arcade squish|invent/i)
+  assert.doesNotMatch(
+    latestChange('1.4.285').items.join('\n'),
+    /Fixes #|Dig deeper|Match candy|HUD peel|peels closed|Learn cream|Manage|Night Watch|Town|Dig|Creed|Build|Snap|Link|Claim merge|Source dig|Sequence|Home dock|coach|miss-teach|maze-stage|gem tactile|Hold-to-Run|run-pad|road tile|Samaritan maze|Lock In|why-chip/i,
+    '1.4.285 must stay on Easy Sort tile arcade squish invent',
   )
 }

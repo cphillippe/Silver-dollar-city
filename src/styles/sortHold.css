@@ -170,6 +170,18 @@
   border-color: var(--gold);
 }
 
+/* Easy Fun/Clear 1.4.285: Sort tile arcade squish invent —
+   Finger-down press on Easy Sort tiles. Skip gone. Dig/Hard parked. */
+html[data-easy='on'] .play.is-easy-sort .sort-tile:not(.is-gone) {
+  transition: transform 0.08s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.08s ease, filter 0.08s ease;
+}
+
+html[data-easy='on'] .play.is-easy-sort .sort-tile:active:not(.is-gone) {
+  transform: scale(0.92) translateY(2px);
+  box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.18);
+  filter: brightness(0.96);
+}
+
 .sort-tile-actions {
   display: flex;
   flex-wrap: wrap;
