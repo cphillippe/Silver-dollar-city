@@ -826,3 +826,11 @@ img.gem-heart {
     0 4px 0 #e09412,
     inset 0 3px 0 rgba(255, 255, 255, 0.88);
 }
+
+/* Easy Fun/Clear 1.4.281: Match gem tactile press invent —
+   Finger-down arcade squish on Easy gem cells. Skip is-sel / is-burst so
+   existing select pop and match burst keep the lead. Match candy parked. */
+html[data-easy='on'] .play.is-gem-search .gem-cell:active:not(.is-sel):not(.is-burst) {
+  transform: scale(0.92) translateZ(0);
+  transition: transform 0.05s ease-out;
+}
