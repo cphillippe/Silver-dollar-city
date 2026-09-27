@@ -987,3 +987,47 @@ img.walker-face.easy-walker-face,
   .easy-tap-plus,
   .easy-tap-combo { animation: none; }
 }
+
+/* Easy little wave on path (1.4.302 / #418) */
+.defend-page.is-easy-tap .defend-raider.is-easy-tap-target {
+  cursor: pointer;
+  outline: none;
+}
+
+.defend-page.is-easy-tap .defend-raider.is-easy-cue .defend-raider-face {
+  filter: url(#defend-glow) drop-shadow(0 0 6px rgba(255, 204, 51, 0.65));
+}
+
+.defend-raider-call text.defend-raider-taunt {
+  font-size: 9px;
+}
+
+.easy-walkers-path-cue {
+  pointer-events: none;
+}
+
+.easy-walker-arrow.is-path-cue,
+.easy-walker-cue-label.is-path-cue {
+  position: absolute;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.easy-walker-arrow.is-path-cue {
+  font-size: 22px;
+  color: #ffcc33;
+  text-shadow: 0 1px 0 #3a2200;
+  animation: easy-walker-pulse 1s ease-in-out infinite;
+}
+
+.easy-walker-cue-label.is-path-cue {
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff6b8;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .easy-walker-arrow.is-path-cue { animation: none; }
+}
