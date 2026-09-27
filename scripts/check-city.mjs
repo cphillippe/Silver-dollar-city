@@ -1137,7 +1137,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.279')
+assert.equal(APP_VERSION, '1.4.280')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -6394,5 +6394,34 @@ console.log('check-city: ok')
     latestChange('1.4.279').items.join('\n'),
     /Fixes #382|Match candy|Night Watch|Dig deeper|Manage|Lock In/i,
     '1.4.279 must stay on Easy Samaritan beat pill contrast',
+  )
+}
+
+// Easy Clear 1.4.280: Easy Father Dash tall residual cream gap between timing rail and HOLD TO RUN (Fixes #382)
+{
+  const welcomeCss280 = readFileSync(new URL('../src/styles/welcome.css', import.meta.url), 'utf8')
+  assert.match(welcomeCss280, /1\.4\.280: Father Dash tall residual cream gap \(Fixes #382\)/)
+  assert.match(
+    welcomeCss280,
+    /1\.4\.280: Father Dash tall residual cream gap \(Fixes #382\)[\s\S]*?@media \(max-height: 920px\), \(min-height: 921px\)/,
+  )
+  assert.match(
+    welcomeCss280,
+    /1\.4\.280: Father Dash tall residual cream gap \(Fixes #382\)[\s\S]*?\.play\.is-father-run \.cta-dock[\s\S]*?margin-top: 16px[\s\S]*?margin-bottom: auto/,
+  )
+  assert.match(
+    welcomeCss280,
+    /1\.4\.280: Father Dash tall residual cream gap \(Fixes #382\)[\s\S]*?not speech-hold dock/,
+  )
+  assert.match(cssSrc, /1\.4\.280: Father Dash tall residual cream gap \(Fixes #382\)/)
+  assert.match(
+    latestChange('1.4.280').items.join('\n'),
+    /Fixes #382|cream|Father Dash|phone portrait|rail|HOLD TO RUN/i,
+  )
+  assert.match(latestChange('1.4.280').title, /Easy Father Dash|≤720|cream gap|Fixes #382/i)
+  assert.doesNotMatch(
+    latestChange('1.4.280').items.join('\n'),
+    /Fixes #250|Fixes #251|Fixes #252|Fixes #253|#272|#273|#274|#275|#276|#277|#281|#283|#296|#297|#298|#299|#300|#301|#302|#314|#315|#316|#317|#318|#319|#331|#332|#333|#334|#335|#336|#343|#344|#345|#346|#347|#348|#349|#350|#361|#362|#363|#364|#365|#366|#367|#381|Learn cream|Lock In|Samaritan|Manage|Match grid|Dig|Creed|Build|Sort|Snap|Link|Claim merge|Source dig|invent Fun\/Clear|Sequence|Story Creek HOLD|Home dock|coach|live quiz|miss-teach|maze-stage|Night Watch|Town/i,
+    '1.4.280 must not fix other phone-fail issues or climb another Easy surface',
   )
 }
