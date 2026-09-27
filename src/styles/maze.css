@@ -391,6 +391,20 @@
   touch-action: none;
 }
 
+/* Easy Fun/Clear 1.4.283: Samaritan maze road-tile arcade press invent —
+   Chunky finger squish on walkable road cells only (not rocks). Dig/Hard parked. */
+html[data-easy='on'] .play.is-road-maze .maze-cell.is-road {
+  transition: transform 0.08s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.08s ease, filter 0.08s ease;
+}
+
+html[data-easy='on'] .play.is-road-maze .maze-cell.is-road:active {
+  transform: scale(0.92) translateZ(0);
+  box-shadow:
+    inset 0 4px 8px rgba(42, 20, 8, 0.28),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.25);
+  filter: brightness(1.08);
+}
+
 .maze-cell.is-hint {
   box-shadow:
     0 0 0 2px #fff6c8,
