@@ -226,6 +226,7 @@ export function DefendNightWalkerCue({
                   type="button"
                   data-person-node="walker"
                   className="easy-walker is-easy-walker is-cue"
+                  aria-label={`${WALKER_LABEL[tapTarget.kind]}: ${tapTarget.text}. ${EASY.nightTap}`}
                   style={{
                     left: tapPos.left,
                     top: tapPos.top,
@@ -237,6 +238,10 @@ export function DefendNightWalkerCue({
                     fireBest()
                   }}
                 >
+                  <span className="easy-walker-call" aria-hidden>
+                    <span className="easy-walker-kind">{WALKER_LABEL[tapTarget.kind]}</span>
+                    <span className="easy-walker-taunt">{tapTarget.text}</span>
+                  </span>
                   <span className="easy-walker-arrow" aria-hidden>
                     ▼
                   </span>

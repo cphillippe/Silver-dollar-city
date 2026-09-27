@@ -1138,7 +1138,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.299')
+assert.equal(APP_VERSION, '1.4.300')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -6937,5 +6937,29 @@ console.log('check-city: ok')
     latestChange('1.4.299').items.join('\n'),
     /prayer watch|dark fantasy|Phase 1 fantasy reskin/i,
     '1.4.299 must stay on Easy Night Watch unpark Fixes #418 residual',
+  )
+}
+
+// Night Watch 1.4.300: Easy TAP Phase 1 taunt (Fixes #418 residual)
+{
+  const defendCss300 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  assert.match(defendNightSrc, /easy-walker-call/)
+  assert.match(defendNightSrc, /easy-walker-kind/)
+  assert.match(defendNightSrc, /easy-walker-taunt/)
+  assert.match(defendNightSrc, /WALKER_LABEL\[tapTarget\.kind\]/)
+  assert.match(defendNightSrc, /tapTarget\.text/)
+  assert.match(defendCss300, /Easy TAP Phase 1 taunt bubble/)
+  assert.match(defendCss300, /\.easy-walker-call/)
+  assert.match(defendCss300, /\.easy-walker-kind/)
+  assert.match(defendCss300, /\.easy-walker-taunt/)
+  assert.match(latestChange('1.4.300').title, /Night Watch|TAP|Phase 1|taunt|Fixes #418/i)
+  assert.match(
+    latestChange('1.4.300').items.join('\n'),
+    /Fixes #418|Easy|Night Watch|TAP|taunt|kind/i,
+  )
+  assert.doesNotMatch(
+    latestChange('1.4.300').items.join('\n'),
+    /unpark|prayer watch|dark fantasy reskin/i,
+    '1.4.300 must stay on Easy Night Watch TAP Phase 1 taunt Fixes #418 residual',
   )
 }
