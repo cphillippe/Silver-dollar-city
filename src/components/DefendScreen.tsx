@@ -44,6 +44,7 @@ import { TownReturn } from './TownReturn'
 import { WinBurst } from './challenges/WinBurst'
 import { DefendAbilityBar } from './DefendAbilityBar'
 import { DefendNightBoard } from './DefendNightBoard'
+import type { EasyTapJuice } from './DefendNightActors'
 
 interface DefendScreenProps {
   onNavigate: (view: View) => void
@@ -94,6 +95,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const [flash, setFlash] = useState<CityPlotId | null>(null)
   const [shots, setShots] = useState<Shot[]>([])
   const [blasts, setBlasts] = useState<Blast[]>([])
+  const [tapJuice, setTapJuice] = useState<EasyTapJuice | null>(null)
   const [combo, setCombo] = useState(0)
   const [shake, setShake] = useState(false)
   const [leakFlash, setLeakFlash] = useState(false)
@@ -290,7 +292,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       y: to.y,
       line: easy
         ? fit === 'match'
-          ? 'Yes'
+          ? '+'
           : 'Try Love'
         : fit === 'match'
           ? (heldLine
@@ -308,6 +310,19 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       setBlasts((current) => current.filter((item) => item.key !== now))
     }, 620)
     if (fit === 'match') {
+      if (easy) {
+        const juiceAt = boardPoint(to.x, to.y)
+        setTapJuice({
+          key: now,
+          combo: nextCombo,
+          left: juiceAt.left,
+          top: juiceAt.top,
+          kind: best.kind,
+        })
+        window.setTimeout(() => {
+          setTapJuice((current) => (current?.key === now ? null : current))
+        }, 620)
+      }
       live.current.raiders = live.current.raiders.map((item) =>
         item.id === best.id
           ? { ...item, turned: using, from: to, heavenT: 0, text: 'Toward heaven' }
@@ -360,6 +375,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     setCombo(0)
     setShots([])
     setBlasts([])
+    setTapJuice(null)
     saved.current = false
   }
 
@@ -426,10 +442,12 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                   </span>
                 ))}
               </span>
-              <span className={`defend-count ${!easy && combo > 1 ? 'is-combo' : ''}`}>
+              <span className={`defend-count ${combo > 1 ? 'is-combo' : ''}`}>
                 {phase === 'wave'
                   ? easy
-                    ? `TAP ${downed}/${DEFEND_WAVE_SIZE}`
+                    ? combo > 1
+                      ? `×${combo}  ${downed}/${DEFEND_WAVE_SIZE}`
+                      : `TAP ${downed}/${DEFEND_WAVE_SIZE}`
                     : combo > 1
                       ? `×${combo}  ${downed}/${DEFEND_WAVE_SIZE}`
                       : `${downed}/${DEFEND_WAVE_SIZE} · TAP`
@@ -461,6 +479,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
               blasts={blasts}
               tapTarget={tapTarget}
               tapPos={tapPos}
+              tapJuice={tapJuice}
             />
           </div>
           {phase === 'plant' ? (

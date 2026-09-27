@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.301',
+    title: 'Night Watch Phase 2 hop 1 — Easy TAP juice',
+    when: '2026-09-27',
+    items: [
+      'Easy Night Watch: successful TAP pops squash, heaven-lift spark, gold + flash, and Combo ×2 from the second hit (Fixes #418)',
+    ],
+  },
+  {
     version: '1.4.300',
     title: 'Easy Night Watch TAP Phase 1 taunt',
     when: '2026-09-27',

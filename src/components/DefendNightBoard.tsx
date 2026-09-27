@@ -13,7 +13,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
   const {
     boardRef, shake, won, phase, fireBest, easyTap,
     pads, planted, progress, raiders, raiderAt, ability, unlocked,
-    flash, togglePad, fire, shots, easy, blasts, tapTarget, tapPos,
+    flash, togglePad, fire, shots, easy, blasts, tapTarget, tapPos, tapJuice,
   } = props
   return (
     <>
@@ -48,6 +48,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
         tapTarget={tapTarget}
         tapPos={tapPos}
         fireBest={fireBest}
+        tapJuice={tapJuice}
       />
     </>
   )
