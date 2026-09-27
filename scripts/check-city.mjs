@@ -1137,7 +1137,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.273')
+assert.equal(APP_VERSION, '1.4.274')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -6213,5 +6213,35 @@ console.log('check-city: ok')
     latestChange('1.4.273').items.join('\n'),
     /Fixes #379|Fixes #380|Fixes #381|Fixes #382|Match candy|Night Watch|Dig deeper/i,
     '1.4.273 must stay on Easy Star lamps Manage copy',
+  )
+}
+
+// Easy Clear 1.4.274: Easy Manage sheet hide web scrollbar + last TOOL card clip
+{
+  const indexCss274 = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
+  const gradle274 = readFileSync(new URL('../android/app/build.gradle', import.meta.url), 'utf8')
+  assert.match(indexCss274, /1\.4\.274: Easy Manage hide web scrollbar/)
+  assert.match(
+    indexCss274,
+    /1\.4\.274: Easy Manage hide web scrollbar[\s\S]*?html\[data-easy='on'\] \.mind-map\.is-manage \.mind-map-scroll \{[\s\S]*?scrollbar-width:\s*none[\s\S]*?-ms-overflow-style:\s*none[\s\S]*?padding-bottom:\s*12px[\s\S]*?scroll-padding-bottom:\s*12px/,
+  )
+  assert.match(
+    indexCss274,
+    /html\[data-easy='on'\] \.mind-map\.is-manage \.mind-map-scroll::-webkit-scrollbar \{[\s\S]*?display:\s*none[\s\S]*?width:\s*0[\s\S]*?height:\s*0/,
+  )
+  assert.match(
+    indexCss274,
+    /\.mind-map\.is-manage \.mind-map-scroll \{[\s\S]*?overflow:\s*auto/,
+  )
+  assert.match(gradle274, /versionName "1\.4\.113"/)
+  assert.match(latestChange('1.4.274').title, /Manage|≤720|scrollbar|clip/)
+  assert.match(
+    latestChange('1.4.274').items.join('\n'),
+    /phone portrait|scrollbar|TOOL|scroll/i,
+  )
+  assert.doesNotMatch(
+    latestChange('1.4.274').items.join('\n'),
+    /Fixes #380|map glitch|Night Watch|Dig deeper|typography/i,
+    '1.4.274 must stay on Easy Manage scroll chrome',
   )
 }

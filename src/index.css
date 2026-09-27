@@ -2419,6 +2419,26 @@ button.btn:disabled {
   padding: 0;
 }
 
+/* Easy Clear 1.4.274: Easy Manage hide web scrollbar + last TOOL card clip —
+   Gemini Pro FAIL on Star lamps Manage: default desktop scrollbar on the card
+   list, and the last TOOL card is sliced by the scroll edge. Hide the thumb
+   and track; keep overflow so swipe still scrolls. Bottom padding lets the
+   last card clear the clip. Easy only (html[data-easy='on']; sheet is portaled
+   to body). Map glitch, type, copy, and other peels stay. */
+html[data-easy='on'] .mind-map.is-manage .mind-map-scroll {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* legacy Edge */
+  padding-bottom: 12px; /* last card fully clears clip */
+  scroll-padding-bottom: 12px;
+}
+
+html[data-easy='on'] .mind-map.is-manage .mind-map-scroll::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+  background: transparent;
+}
+
 .mind-map.is-manage .quiet,
 .mind-map.is-manage .build-job,
 .mind-map.is-manage .build-cap,

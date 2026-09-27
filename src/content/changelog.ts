@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.274',
+    title: 'Easy Manage sheet: ≤720 hide scrollbar + fix clip',
+    when: '2026-09-27',
+    items: [
+      'Easy Manage sheet on phone portrait: the card list hides the default web scrollbar and still swipes, and the last TOOL card can scroll fully into view (other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.273',
     title: 'Easy Star lamps Manage sheet: ≤720 kid-clear copy',
     when: '2026-09-26',
