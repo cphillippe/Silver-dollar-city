@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.283',
+    title: 'Easy Samaritan maze road-tile arcade press invent',
+    when: '2026-09-27',
+    items: [
+      'Easy Samaritan road maze: finger-down arcade squish on walkable road tiles only (scale 0.92, inset press shadow); rock cells unchanged — invent Fun/Clear climb toward Shot wake',
+    ],
+  },
+  {
     version: '1.4.282',
     title: 'Easy Father Hold-to-Run arcade spring invent',
     when: '2026-09-27',
