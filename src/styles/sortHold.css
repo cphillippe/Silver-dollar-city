@@ -1108,6 +1108,16 @@ html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) .recall-
   transform: scale(0);
 }
 
+/* Easy Fun/Clear 1.4.284: Lock In why-chip tactile press invent —
+   Pause float + arcade squish on finger-down. Skip gone/toss. Dig/Hard parked. */
+html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-win):not(.is-miss-teach) .why-chip:active:not(.is-gone):not(.is-toss) {
+  animation: none;
+  transform: scale(0.92) translateY(2px);
+  box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.28), 0 1px 0 rgba(160, 90, 12, 0.35);
+  filter: brightness(1.08);
+  transition: transform 0.05s ease-out, box-shadow 0.05s ease-out, filter 0.05s ease-out;
+}
+
 .why-blast.is-win .why-arena {
   min-height: 0;
 }
