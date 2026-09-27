@@ -1137,7 +1137,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.286')
+assert.equal(APP_VERSION, '1.4.287')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -6581,5 +6581,30 @@ console.log('check-city: ok')
     latestChange('1.4.286').items.join('\n'),
     /Fixes #|Dig deeper|Match candy|HUD peel|peels closed|Learn cream|Manage|Night Watch|Town|Dig|Creed|Build|Snap|Link|Claim merge|Source dig|Sequence|Home dock|coach|miss-teach|maze-stage|gem tactile|Hold-to-Run|run-pad|road tile|Samaritan maze|Lock In|why-chip|sort tile|gone tile/i,
     '1.4.286 must stay on Easy Sort bin gulp press invent',
+  )
+}
+
+// Easy Fun 1.4.287: Learn story-dock arcade punch invent (invent Fun/Clear · Shot wake)
+{
+  const welcomeCss287 = readFileSync(new URL('../src/styles/welcome.css', import.meta.url), 'utf8')
+  assert.match(welcomeCss287, /1\.4\.287: Learn story-dock arcade punch invent/)
+  assert.match(
+    welcomeCss287,
+    /1\.4\.287: Learn story-dock arcade punch invent[\s\S]*?html\[data-easy='on'\] \.challenge-page\.is-teach \.easy-story-card \.cta-dock\.easy-story-dock \.btn \{/,
+  )
+  assert.match(
+    welcomeCss287,
+    /html\[data-easy='on'\] \.challenge-page\.is-teach \.easy-story-card \.cta-dock\.easy-story-dock \.btn:active[\s\S]*?transform: scale\(0\.94\) translateY\(3px\)/,
+  )
+  assert.match(cssSrc, /1\.4\.287: Learn story-dock arcade punch invent/)
+  assert.match(
+    latestChange('1.4.287').items.join('\n'),
+    /story-dock|unlock|squish|invent Fun\/Clear|Shot wake|press/i,
+  )
+  assert.match(latestChange('1.4.287').title, /Easy Learn|story-dock|arcade punch|invent/i)
+  assert.doesNotMatch(
+    latestChange('1.4.287').items.join('\n'),
+    /Fixes #|Dig deeper|Match candy|HUD peel|peels closed|Learn cream|Manage|Night Watch|Town|Dig|Creed|Build|Snap|Link|Claim merge|Source dig|Sequence|Home dock|coach|miss-teach|maze-stage|gem tactile|Hold-to-Run|run-pad|road tile|Samaritan maze|Lock In|why-chip|sort tile|gone tile|bin gulp|Keep\/Toss/i,
+    '1.4.287 must stay on Easy Learn story-dock arcade punch invent',
   )
 }
