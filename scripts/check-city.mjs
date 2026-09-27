@@ -1137,7 +1137,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.292')
+assert.equal(APP_VERSION, '1.4.293')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1469,7 +1469,7 @@ assert.match(cssSrc, /is-easy-hold/)
 }
 assert.match(
   latestChange(APP_VERSION).items.join('\n'),
-  /Fixes #379|Lock In|quiz|why-blast|why-arena|cream void|claim|chips|portrait/i,
+  /Fixes #405|Lock In|miss-teach|why-blast|why-miss-teach|cream void|Main idea|Try again|portrait/i,
 )
 {
   const storyCardCss = cssSrc.match(/\.easy-story-card,[\s\S]*?\.easy-story-card::before \{[\s\S]*?\n\}/)?.[0] ?? ''
@@ -2409,10 +2409,10 @@ assert.match(mapSrc, /easy \? null : \(\s*\n\s*<>[\s\S]*city-street-main/)
 assert.match(mapSrc, /if \(isEasy\(progress\)\) return/)
 assert.match(mapSrc, /if \(playing\.current && !isEasy\(progress\)\) return/)
 assert.match(mapSrc, /Tap a building to Manage it/)
-assert.match(latestChange(APP_VERSION).title, /Easy Lock In|quiz|cream void|Fixes #379/i)
+assert.match(latestChange(APP_VERSION).title, /Easy Lock In|miss-teach|cream void|Fixes #405/i)
 assert.match(
   latestChange(APP_VERSION).items.join('\n'),
-  /Fixes #379|Lock In|quiz|why-blast|why-arena|cream void|claim|chips|portrait/i,
+  /Fixes #405|Lock In|miss-teach|why-blast|why-miss-teach|cream void|Main idea|Try again|portrait/i,
 )
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-img[\s\S]*?fill: none !important/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img\.is-built[\s\S]*?fill: none/)
@@ -6737,5 +6737,30 @@ console.log('check-city: ok')
     latestChange('1.4.292').items.join('\n'),
     /Fixes #404|Fixes #405|Fixes #406|Dig deeper|Night Watch|Town|Manage|Father Dash|Match|invent Fun\/Clear|Shot wake|Story Snap|gem tactile|Samaritan|Sort tile|Hold-to-Run|road tile|why-chip|streets button|LociStamp|miss-teach/i,
     '1.4.292 must stay on Easy Lock In live quiz cream void fill Fixes #379',
+  )
+}
+
+// Easy Clear 1.4.293: Easy Lock In miss-teach cream void fill (Fixes #405)
+{
+  const holdCss293 = readFileSync(new URL('../src/styles/sortHold.css', import.meta.url), 'utf8')
+  assert.match(holdCss293, /1\.4\.293: Easy Lock In miss-teach cream void fill \(Fixes #405\)/)
+  assert.match(
+    holdCss293,
+    /1\.4\.293: Easy Lock In miss-teach cream void fill \(Fixes #405\)[\s\S]*?html\[data-easy='on'\] \.journal\.is-rehearse \.recall-gate\.is-easy-hold \.why-blast\.is-miss-teach[\s\S]*?flex: 1 1 auto[\s\S]*?flex-direction: column/,
+  )
+  assert.match(
+    holdCss293,
+    /html\[data-easy='on'\] \.journal\.is-rehearse \.recall-gate\.is-easy-hold \.why-blast\.is-miss-teach \.why-miss-teach[\s\S]*?flex: 1 1 auto[\s\S]*?justify-content: center/,
+  )
+  assert.match(cssSrc, /1\.4\.293: Easy Lock In miss-teach cream void fill \(Fixes #405\)/)
+  assert.match(
+    latestChange('1.4.293').items.join('\n'),
+    /Fixes #405|Lock In|miss-teach|why-blast|why-miss-teach|cream void|Main idea|Try again|portrait/i,
+  )
+  assert.match(latestChange('1.4.293').title, /Easy Lock In|miss-teach|cream void|Fixes #405/i)
+  assert.doesNotMatch(
+    latestChange('1.4.293').items.join('\n'),
+    /Fixes #379|Fixes #404|Fixes #406|Dig deeper|Night Watch|Town|Manage|Father Dash|Match|invent Fun\/Clear|Shot wake|Story Snap|gem tactile|Samaritan|Sort tile|Hold-to-Run|road tile|why-chip|streets button|LociStamp|live quiz|why-arena|claim · chips/i,
+    '1.4.293 must stay on Easy Lock In miss-teach cream void fill Fixes #405',
   )
 }

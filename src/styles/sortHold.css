@@ -3740,3 +3740,34 @@ html[data-easy='on'] .recall-gate.is-easy-hold .why-blast:not(.is-miss-teach):no
   justify-content: center;
   align-content: center;
 }
+
+/* Easy Clear 1.4.293: Easy Lock In miss-teach cream void fill (Fixes #405) —
+   Shot pack 1.4.290 / 05-easy-lockin-miss.png: miss-teach card hugs content with
+   massive cream void under Try again. Prior fill 1.4.195 was gated @media
+   (max-height: 720px) so tall phones (~844) never got it. Mirror 1.4.292 quiz
+   peel: grow why-blast.is-miss-teach + stretch why-miss-teach with NO height
+   media gate so Main idea · why-true · From · Try again fill the portrait.
+   Live quiz / win untouched (#379 done; Father #406 next). Dig/Hard parked. */
+html[data-easy='on'] .journal.is-rehearse .recall-gate.is-easy-hold .why-blast.is-miss-teach,
+html[data-easy='on'] .recall-gate.is-easy-hold .why-blast.is-miss-teach {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+html[data-easy='on'] .journal.is-rehearse .recall-gate.is-easy-hold .why-blast.is-miss-teach .why-blast-hud,
+html[data-easy='on'] .recall-gate.is-easy-hold .why-blast.is-miss-teach .why-blast-hud {
+  flex: 0 0 auto;
+}
+
+html[data-easy='on'] .journal.is-rehearse .recall-gate.is-easy-hold .why-blast.is-miss-teach .why-miss-teach,
+html[data-easy='on'] .recall-gate.is-easy-hold .why-blast.is-miss-teach .why-miss-teach {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+}
