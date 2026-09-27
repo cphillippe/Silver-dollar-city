@@ -54,6 +54,7 @@ interface WhyBlastPlayProps {
 // Easy Clear 1.4.248: tall-phone cream-card fill — paint parchment recall-gate · transparent why-miss-teach · dark ink · dock pin — closes Shot 240 purple residual (Fixes #334).
 // Easy Clear 1.4.255: tall-phone cream shell fill — opaque app-body + journal miss-teach cream plate · solid recall-gate (no purple-gold gradient) · cream dock floor pin · horizontal overflow pin (no left clip) — closes Shot 250 purple residual after 248 (Fixes #347).
 // Easy Clear 1.4.264: tall residual cream floor — opaque cream app-body + journal miss-teach shell + solid recall-gate feedback plate (no purple-gold gradient) · dark ink on claim and reason · Try again pinned · horizontal overflow pin — covers layout viewports above the 920 cap so leftover under miss feedback is cream after 255 (Fixes #364).
+// Easy Clear 1.4.277: miss-teach nested framing — collapse duplicate LOCK IN + inner borders + stretch void in sortHold.css / welcome.css (Fixes #380).
 export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: WhyBlastPlayProps) {
   const chips = useMemo(
     () => whyBlastChoices(reason, packMisses, whyBlastExtras(id), easyWhyLine),

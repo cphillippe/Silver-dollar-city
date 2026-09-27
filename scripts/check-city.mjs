@@ -1137,7 +1137,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.276')
+assert.equal(APP_VERSION, '1.4.277')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -6295,5 +6295,54 @@ console.log('check-city: ok')
     latestChange('1.4.276').items.join('\n'),
     /Fixes #380|map glitch|Night Watch|Dig deeper|typography|Shot 270/i,
     '1.4.276 must stay on Easy Manage smooth header fade',
+  )
+}
+
+// Easy Clear 1.4.277: Easy Lock In miss-teach nested framing collapse (Fixes #380)
+{
+  const welcomeCss277 = readFileSync(new URL('../src/styles/welcome.css', import.meta.url), 'utf8')
+  const whyBlast277 = readFileSync(
+    new URL('../src/components/challenges/WhyBlastPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(welcomeCss277, /1\.4\.277: Easy Lock In miss-teach nested framing \+ stretch void \(Fixes #380\)/)
+  assert.match(
+    welcomeCss277,
+    /1\.4\.277: Easy Lock In miss-teach nested framing \+ stretch void \(Fixes #380\)[\s\S]*?@media \(max-height: 920px\), \(min-height: 921px\)/,
+  )
+  assert.match(
+    welcomeCss277,
+    /1\.4\.277: Easy Lock In miss-teach nested framing \+ stretch void \(Fixes #380\)[\s\S]*?\.why-miss-teach \{[\s\S]*?flex: 0 1 auto[\s\S]*?border: none/,
+  )
+  assert.match(
+    welcomeCss277,
+    /1\.4\.277: Easy Lock In miss-teach nested framing \+ stretch void \(Fixes #380\)[\s\S]*?\.cta-dock[\s\S]*?margin-top: 1\.5rem/,
+  )
+  assert.match(
+    cssSrc,
+    /1\.4\.277: Easy Lock In miss-teach kill tall-phone stretch void \(Fixes #380\)/,
+  )
+  assert.match(
+    cssSrc,
+    /1\.4\.277: Easy Lock In miss-teach kill tall-phone stretch void \(Fixes #380\)[\s\S]*?@media \(max-height: 720px\)[\s\S]*?\.why-blast\.is-miss-teach \{[\s\S]*?flex: 0 1 auto[\s\S]*?justify-content: flex-start/,
+  )
+  assert.match(
+    cssSrc,
+    /1\.4\.277: Easy Lock In miss-teach kill tall-phone stretch void \(Fixes #380\)[\s\S]*?@media \(max-height: 920px\)[\s\S]*?\.why-miss-teach \.cta-dock[\s\S]*?margin-top: 1\.5rem/,
+  )
+  assert.match(
+    cssSrc,
+    /1\.4\.277: miss-teach collapses duplicate LOCK IN chrome \(Fixes #380\)[\s\S]*?\.recall-gate\.is-easy-hold > \.eyebrow \{[\s\S]*?display: none/,
+  )
+  assert.match(whyBlast277, /1\.4\.277: miss-teach nested framing/)
+  assert.match(latestChange('1.4.277').title, /Easy Lock In miss-teach|nested framing|Fixes #380/i)
+  assert.match(
+    latestChange('1.4.277').items.join('\n'),
+    /Fixes #380|nested|LOCK IN|Try again|cream/i,
+  )
+  assert.doesNotMatch(
+    latestChange('1.4.277').items.join('\n'),
+    /Fixes #381|Fixes #382|Match candy|Night Watch|Dig deeper|Manage|Shot 270/i,
+    '1.4.277 must stay on Easy Lock In miss-teach nested framing',
   )
 }
