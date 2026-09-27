@@ -160,6 +160,17 @@
   align-content: start;
 }
 
+/* Easy Fun/Clear 1.4.286: Sort bin gulp press invent —
+   Soft arcade squish when tapping Keep/Toss bins on Easy Sort. Dig/Hard parked. */
+html[data-easy='on'] .play.is-easy-sort .sort-bins .bin {
+  transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), filter 0.1s ease;
+}
+
+html[data-easy='on'] .play.is-easy-sort .sort-bins .bin:active {
+  transform: scale(0.94) translateY(3px);
+  filter: brightness(0.94);
+}
+
 .sort-tile {
   display: grid;
   gap: 8px;

@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.286',
+    title: 'Easy Sort bin gulp press invent',
+    when: '2026-09-27',
+    items: [
+      'Easy Sort: Keep/Toss bins squish on press (scale 0.94, translateY 3px, brightness dip) — invent Fun/Clear climb toward Shot wake',
+    ],
+  },
+  {
     version: '1.4.285',
     title: 'Easy Sort tile arcade squish invent',
     when: '2026-09-27',
