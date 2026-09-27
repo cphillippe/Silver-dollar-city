@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.289',
+    title: 'Easy LociStamp arcade squish invent',
+    when: '2026-09-27',
+    items: [
+      'Easy pressable loci stamps: finger-down squish (scale 0.92, rotate -3deg) + soft gold glow on press — invent Fun/Clear climb toward Shot wake',
+    ],
+  },
+  {
     version: '1.4.288',
     title: 'Easy City streets button arcade press invent',
     when: '2026-09-27',
