@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import {
   DEFEND_ANCHOR,
   abilityRange,
@@ -35,6 +36,14 @@ interface Blast {
   combo: number
 }
 
+export interface EasyTapJuice {
+  key: number
+  combo: number
+  left: number
+  top: number
+  kind: WalkerKind
+}
+
 export interface DefendNightActorsProps {
   easyTap: boolean
   pads: CityPlotId[]
@@ -54,6 +63,7 @@ export interface DefendNightActorsProps {
   phase: 'plant' | 'wave' | 'lost'
   tapTarget: Raider | undefined
   tapPos: { left: number; top: number } | null
+  tapJuice?: EasyTapJuice | null
 }
 
 /** SVG children: pads, shots, raiders, blasts (must render inside DefendNightSky). */
@@ -197,7 +207,7 @@ export function DefendNightActorsSvg({
                   <path className="defend-shard is-2" d="M4 2 L28 8 L8 8 Z" />
                   <path className="defend-shard is-3" d="M-4 4 L-26 16 L-8 8 Z" />
                   <path className="defend-shard is-4" d="M2 6 L10 26 L-2 10 Z" />
-                  {!easy && blast.combo > 1 ? (
+                  {blast.combo > 1 ? (
                     <text className="defend-combo-pop" y="-34" textAnchor="middle">
                       ×{blast.combo}
                     </text>
@@ -217,9 +227,47 @@ export function DefendNightWalkerCue({
   tapTarget,
   tapPos,
   fireBest,
-}: Pick<DefendNightActorsProps, 'easyTap' | 'tapTarget' | 'tapPos' | 'fireBest'>) {
+  tapJuice,
+}: Pick<DefendNightActorsProps, 'easyTap' | 'tapTarget' | 'tapPos' | 'fireBest' | 'tapJuice'>) {
+  const [juiceHeaven, setJuiceHeaven] = useState(false)
+  useEffect(() => {
+    if (!tapJuice) {
+      setJuiceHeaven(false)
+      return
+    }
+    setJuiceHeaven(false)
+    const heavenAt = window.setTimeout(() => setJuiceHeaven(true), 280)
+    return () => window.clearTimeout(heavenAt)
+  }, [tapJuice?.key])
+
   return (
     <>
+            {tapJuice ? (
+              <div className="easy-walkers easy-walkers-juice" aria-hidden>
+                <div
+                  className={`easy-walker is-easy-walker is-juice${juiceHeaven ? ' is-heaven' : ' is-squash'}`}
+                  style={{
+                    left: tapJuice.left,
+                    top: tapJuice.top,
+                    width: EASY_WALKER_HIT_PX,
+                    height: EASY_WALKER_HIT_PX,
+                  }}
+                >
+                  <span className="easy-tap-plus">+</span>
+                  {tapJuice.combo > 1 ? (
+                    <span className="easy-tap-combo">×{tapJuice.combo}</span>
+                  ) : null}
+                  <WalkerFace
+                    kind={tapJuice.kind}
+                    className="easy-walker-face"
+                    style={{
+                      width: EASY_WALKER_FACE_PX,
+                      height: EASY_WALKER_FACE_PX,
+                    }}
+                  />
+                </div>
+              </div>
+            ) : null}
             {easyTap && tapTarget && tapPos ? (
               <div className="easy-walkers" aria-label="Tap the walking person">
                 <button
