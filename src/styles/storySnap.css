@@ -114,6 +114,19 @@
   font-size: 1.05rem;
 }
 
+/* Easy Fun/Clear 1.4.290: Story Snap pad arcade squish invent (Shot wake) —
+   Finger-down squish + soft glow on the SNAP pad. Dig/Hard parked.
+   Shot wake — Manager/CoS wakes Shot. Do not wake Shot. */
+html[data-easy='on'] .play.is-story-snap button.snap-pad {
+  transition: transform 0.12s cubic-bezier(0.34, 1.4, 0.64, 1), filter 0.12s ease;
+}
+
+html[data-easy='on'] .play.is-story-snap button.snap-pad:active {
+  transform: scale(0.94) translateY(3px);
+  filter: brightness(1.12) drop-shadow(0 0 10px rgba(255, 204, 51, 0.55));
+  transition: transform 0.05s ease-out, filter 0.05s ease-out;
+}
+
 .play.is-story-snap.is-shake .snap-stage {
   animation: story-snap-shake 0.32s ease;
 }
