@@ -2826,3 +2826,32 @@ html[data-easy='on'] .mind-map.is-manage .place-sub {
     margin-bottom: 0;
   }
 }
+
+/* Easy Clear 1.4.295: Father Dash HOLD TO RUN cream void fill (Fixes #406) —
+   Shot pack 1.4.290 / 07-father.png: after #382 (1.4.280) parked leftover cream
+   BELOW the dock via `margin-bottom: auto`, tall phones show ~⅓ empty cream under
+   HOLD TO RUN. Keep rail→CTA packed (margin-top: 16px — no #382 slider→CTA canyon).
+   Override margin-bottom to 0 + grow .run-speech so mid content absorbs leftover
+   height inside the cream plate. Append AFTER 382 in welcome.css. Easy
+   `.play.is-father-run` ONLY — not Story Creek speech-hold. Dig/Hard parked. */
+@media (max-height: 920px), (min-height: 921px) {
+  html[data-easy='on'] .play.is-father-run .run-speech,
+  html[data-easy='on'] .daily-page.is-puzzle .play.is-father-run .run-speech,
+  html[data-easy='on'] .challenge-page.is-puzzle .play.is-father-run .run-speech {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  html[data-easy='on'] .play.is-father-run .cta-dock,
+  html[data-easy='on'] .play.is-father-run .cta-dock.run-dock,
+  html[data-easy='on'] .daily-page.is-puzzle .play.is-father-run .cta-dock,
+  html[data-easy='on'] .challenge-page.is-puzzle .play.is-father-run .cta-dock,
+  .app[data-easy='on'] .challenge-page.is-puzzle .play.is-father-run .cta-dock {
+    margin-top: 16px;
+    margin-bottom: 0;
+    padding-bottom: max(8px, env(safe-area-inset-bottom, 0px));
+  }
+}
