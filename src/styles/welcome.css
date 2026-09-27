@@ -2760,3 +2760,69 @@ html[data-easy='on'] .mind-map.is-manage .mind-map-card {
 html[data-easy='on'] .mind-map.is-manage .place-sub {
   margin-top: 0;
 }
+
+/* Easy Clear 1.4.294: Easy Lock In miss-teach cream void residual (Fixes #405) —
+   Pages prove after 1.4.293 still FAIL on 390×844: miss-teach card hugs content with
+   ~32% cream under Try again (lockin-miss-prove-293.png). Cause: 1.4.277 (#380) sets
+   journal · rehearse-anchor · recall-gate · why-blast.is-miss-teach · why-miss-teach to
+   `flex: 0 1 auto; height: auto` (collapse nested framing), so the 293 sortHold grow
+   never receives leftover height. Strengthen AFTER 277: restore flex fill on that
+   parent chain + center why-miss-teach content; keep 277 border:none chrome collapse.
+   Live quiz / win untouched. Dig/Hard parked. */
+@media (max-height: 920px), (min-height: 921px) {
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) {
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) .rehearse-anchor {
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) .recall-gate.is-easy-hold {
+    flex: 1 1 0;
+    min-height: 0;
+    height: auto;
+    max-height: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: stretch;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-miss-teach {
+    flex: 1 1 0;
+    min-height: 0;
+    height: auto;
+    max-height: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-miss-teach .why-blast-hud {
+    flex: 0 0 auto;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-miss-teach .why-miss-teach {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+    max-height: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-miss-teach .why-miss-teach .cta-dock,
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) .recall-gate.is-easy-hold .cta-dock {
+    margin-top: 12px;
+    margin-bottom: 0;
+  }
+}
