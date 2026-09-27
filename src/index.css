@@ -2439,6 +2439,42 @@ html[data-easy='on'] .mind-map.is-manage .mind-map-scroll::-webkit-scrollbar {
   background: transparent;
 }
 
+/* Easy Clear 1.4.275: Manage head stays above scroll — opaque plate + top fade.
+   Gemini Pro FAIL after 274 on Star lamps: scrolling cards bleed into the
+   title, subtitle, and eyebrow. Opaque head + z-index so a card cannot paint
+   through the title, and a top mask so cards fade before the head edge.
+   The child combinator beats 1.4.273 padding-bottom: 0 in welcome.css.
+   Plate matches the phone sheet top (1.4.258 gradient starts #48188c on the
+   267 floor #241050) — a flat #241050 bar would read as a darker stripe.
+   Scroll padding-top keeps that 14px fade empty at rest so the first cards
+   stay crisp. 274 scrollbar hide + padding-bottom 12px stay. */
+html[data-easy='on'] .mind-map.is-manage .mind-map-card {
+  isolation: isolate;
+}
+
+html[data-easy='on'] .mind-map.is-manage .mind-map-card > .mind-map-head {
+  position: relative;
+  z-index: 3;
+  flex: 0 0 auto;
+  background-color: #48188c;
+  background-image: none;
+  padding-bottom: 6px;
+  margin-bottom: 0;
+}
+
+html[data-easy='on'] .mind-map.is-manage .mind-map-scroll {
+  position: relative;
+  z-index: 1;
+  padding-top: 14px; /* fade gutter — empty at rest, cards dissolve here while scrolling */
+  scroll-padding-top: 14px;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 14px, #000 calc(100% - 8px), #000 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 14px, #000 calc(100% - 8px), #000 100%);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+}
+
 .mind-map.is-manage .quiet,
 .mind-map.is-manage .build-job,
 .mind-map.is-manage .build-cap,
