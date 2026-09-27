@@ -1124,6 +1124,17 @@ html[data-theme='dusk'] .hub.is-town .street-link {
   white-space: normal;
 }
 
+/* Easy Fun/Clear 1.4.288: City streets button arcade press invent —
+   Finger-down squish on Home street-list buttons. Dig/Hard parked. */
+html[data-easy='on'] .city-streets button {
+  transition: transform 0.08s cubic-bezier(0.4, 0, 0.2, 1), filter 0.08s ease;
+}
+
+html[data-easy='on'] .city-streets button:active {
+  transform: scale(0.94) translateY(2px);
+  filter: brightness(0.95);
+}
+
 .city-streets button.street-rehearse {
   flex: 1 1 12rem;
   text-align: left;
