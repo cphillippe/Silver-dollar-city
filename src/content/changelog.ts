@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.293',
+    title: 'Easy Lock In miss-teach cream void fill',
+    when: '2026-09-27',
+    items: [
+      'Easy Lock In: grow why-blast.is-miss-teach + center why-miss-teach so Main idea · why-true · From · Try again fill the portrait instead of leaving a cream void below (Fixes #405)',
+    ],
+  },
+  {
     version: '1.4.292',
     title: 'Easy Lock In quiz cream void fill',
     when: '2026-09-27',
