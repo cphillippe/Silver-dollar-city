@@ -1137,7 +1137,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.293')
+assert.equal(APP_VERSION, '1.4.294')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -6762,5 +6762,30 @@ console.log('check-city: ok')
     latestChange('1.4.293').items.join('\n'),
     /Fixes #379|Fixes #404|Fixes #406|Dig deeper|Night Watch|Town|Manage|Father Dash|Match|invent Fun\/Clear|Shot wake|Story Snap|gem tactile|Samaritan|Sort tile|Hold-to-Run|road tile|why-chip|streets button|LociStamp|live quiz|why-arena|claim · chips/i,
     '1.4.293 must stay on Easy Lock In miss-teach cream void fill Fixes #405',
+  )
+}
+
+// Easy Clear 1.4.294: Easy Lock In miss-teach cream void residual (Fixes #405)
+{
+  const welcomeCss294 = readFileSync(new URL('../src/styles/welcome.css', import.meta.url), 'utf8')
+  assert.match(welcomeCss294, /1\.4\.294: Easy Lock In miss-teach cream void residual \(Fixes #405\)/)
+  assert.match(
+    welcomeCss294,
+    /1\.4\.294: Easy Lock In miss-teach cream void residual \(Fixes #405\)[\s\S]*?\.journal\.is-rehearse:has\(\.why-blast\.is-miss-teach\) \{[\s\S]*?flex: 1 1 0/,
+  )
+  assert.match(
+    welcomeCss294,
+    /1\.4\.294: Easy Lock In miss-teach cream void residual \(Fixes #405\)[\s\S]*?\.why-miss-teach \{[\s\S]*?justify-content: center/,
+  )
+  assert.match(cssSrc, /1\.4\.294: Easy Lock In miss-teach cream void residual \(Fixes #405\)/)
+  assert.match(
+    latestChange('1.4.294').items.join('\n'),
+    /Fixes #405|Lock In|miss-teach|journal|recall-gate|#380|Main idea|Try again|portrait|cream void/i,
+  )
+  assert.match(latestChange('1.4.294').title, /Easy Lock In|miss-teach|cream void|residual/i)
+  assert.doesNotMatch(
+    latestChange('1.4.294').items.join('\n'),
+    /Fixes #379|Fixes #404|Fixes #406|Dig deeper|Night Watch|Town|Manage|Father Dash|Match|invent Fun\/Clear|Shot wake|Story Snap|gem tactile|Samaritan|Sort tile|Hold-to-Run|road tile|why-chip|streets button|LociStamp|live quiz|why-arena|claim · chips|Father/i,
+    '1.4.294 must stay on Easy Lock In miss-teach cream void residual Fixes #405',
   )
 }
