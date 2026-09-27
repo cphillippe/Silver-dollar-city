@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.290',
+    title: 'Easy Story Snap pad arcade squish invent',
+    when: '2026-09-27',
+    items: [
+      'Easy Story Snap: finger-down squish + soft gold glow on the live SNAP pad (scale 0.94, translateY 3px) — invent Fun/Clear · Shot wake',
+    ],
+  },
+  {
     version: '1.4.289',
     title: 'Easy LociStamp arcade squish invent',
     when: '2026-09-27',
