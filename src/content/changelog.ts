@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.292',
+    title: 'Easy Lock In quiz cream void fill',
+    when: '2026-09-27',
+    items: [
+      'Easy Lock In: grow live quiz why-blast + center why-arena so claim · chips fill the portrait instead of leaving a cream void below (Fixes #379)',
+    ],
+  },
+  {
     version: '1.4.291',
     title: 'Easy Match teach-dock unclamp',
     when: '2026-09-27',

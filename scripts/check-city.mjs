@@ -1137,7 +1137,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.291')
+assert.equal(APP_VERSION, '1.4.292')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1467,7 +1467,10 @@ assert.match(cssSrc, /is-easy-hold/)
   assert.match(dockCss, /backdrop-filter: blur/)
   assert.doesNotMatch(dockCss, /#16062e/, 'sticky CTA docks must not be an opaque black slab')
 }
-assert.match(latestChange(APP_VERSION).items.join('\n'), /tactile|gem|press|squish|invent Fun\/Clear|touch|finger|Match/i)
+assert.match(
+  latestChange(APP_VERSION).items.join('\n'),
+  /Fixes #379|Lock In|quiz|why-blast|why-arena|cream void|claim|chips|portrait/i,
+)
 {
   const storyCardCss = cssSrc.match(/\.easy-story-card,[\s\S]*?\.easy-story-card::before \{[\s\S]*?\n\}/)?.[0] ?? ''
   assert.match(storyCardCss, /border:\s*0/)
@@ -2406,8 +2409,11 @@ assert.match(mapSrc, /easy \? null : \(\s*\n\s*<>[\s\S]*city-street-main/)
 assert.match(mapSrc, /if \(isEasy\(progress\)\) return/)
 assert.match(mapSrc, /if \(playing\.current && !isEasy\(progress\)\) return/)
 assert.match(mapSrc, /Tap a building to Manage it/)
-assert.match(latestChange(APP_VERSION).title, /Easy Match|gem|tactile|invent/i)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /tactile|gem|press|squish|invent Fun\/Clear|touch|finger|Match/i)
+assert.match(latestChange(APP_VERSION).title, /Easy Lock In|quiz|cream void|Fixes #379/i)
+assert.match(
+  latestChange(APP_VERSION).items.join('\n'),
+  /Fixes #379|Lock In|quiz|why-blast|why-arena|cream void|claim|chips|portrait/i,
+)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-img[\s\S]*?fill: none !important/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img\.is-built[\s\S]*?fill: none/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-hit[\s\S]*?stroke: none/)
@@ -6706,5 +6712,30 @@ console.log('check-city: ok')
     latestChange('1.4.291').items.join('\n'),
     /Fixes #379|Fixes #405|Fixes #406|Dig deeper|Night Watch|Town|Manage|Father Dash|Lock In quiz|invent Fun\/Clear|Shot wake|Story Snap|gem tactile|Samaritan|Sort tile|Hold-to-Run|road tile|why-chip|streets button|LociStamp squish/i,
     '1.4.291 must stay on Easy Match teach-dock unclamp Fixes #404',
+  )
+}
+
+// Easy Clear 1.4.292: Easy Lock In quiz cream void fill (Fixes #379)
+{
+  const holdCss292 = readFileSync(new URL('../src/styles/sortHold.css', import.meta.url), 'utf8')
+  assert.match(holdCss292, /1\.4\.292: Easy Lock In quiz cream void fill \(Fixes #379\)/)
+  assert.match(
+    holdCss292,
+    /1\.4\.292: Easy Lock In quiz cream void fill \(Fixes #379\)[\s\S]*?html\[data-easy='on'\] \.journal\.is-rehearse \.recall-gate\.is-easy-hold \.why-blast:not\(\.is-miss-teach\):not\(\.is-win\)[\s\S]*?flex: 1 1 auto[\s\S]*?flex-direction: column/,
+  )
+  assert.match(
+    holdCss292,
+    /html\[data-easy='on'\] \.journal\.is-rehearse \.recall-gate\.is-easy-hold \.why-blast:not\(\.is-miss-teach\):not\(\.is-win\) \.why-arena[\s\S]*?flex: 1 1 auto[\s\S]*?justify-content: center[\s\S]*?align-content: center/,
+  )
+  assert.match(cssSrc, /1\.4\.292: Easy Lock In quiz cream void fill \(Fixes #379\)/)
+  assert.match(
+    latestChange('1.4.292').items.join('\n'),
+    /Fixes #379|Lock In|quiz|why-blast|why-arena|cream void|claim|chips|portrait/i,
+  )
+  assert.match(latestChange('1.4.292').title, /Easy Lock In|quiz|cream void|Fixes #379/i)
+  assert.doesNotMatch(
+    latestChange('1.4.292').items.join('\n'),
+    /Fixes #404|Fixes #405|Fixes #406|Dig deeper|Night Watch|Town|Manage|Father Dash|Match|invent Fun\/Clear|Shot wake|Story Snap|gem tactile|Samaritan|Sort tile|Hold-to-Run|road tile|why-chip|streets button|LociStamp|miss-teach/i,
+    '1.4.292 must stay on Easy Lock In live quiz cream void fill Fixes #379',
   )
 }

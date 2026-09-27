@@ -3717,3 +3717,26 @@ html[data-easy='on'] .recall-card {
     display: block;
   }
 }
+
+/* Easy Clear 1.4.292: Easy Lock In quiz cream void fill (Fixes #379) —
+   Shot pack 1.4.290 / 04-easy-lockin.png (also 1.4.270 residual): live quiz
+   cramped at top with massive cream void lower half. Grow why-blast + stretch
+   why-arena on Easy so claim · chips fill the portrait. Miss-teach / win
+   untouched (#405 next). Dig/Hard parked. */
+html[data-easy='on'] .journal.is-rehearse .recall-gate.is-easy-hold .why-blast:not(.is-miss-teach):not(.is-win),
+html[data-easy='on'] .recall-gate.is-easy-hold .why-blast:not(.is-miss-teach):not(.is-win) {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+html[data-easy='on'] .journal.is-rehearse .recall-gate.is-easy-hold .why-blast:not(.is-miss-teach):not(.is-win) .why-arena,
+html[data-easy='on'] .recall-gate.is-easy-hold .why-blast:not(.is-miss-teach):not(.is-win) .why-arena {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-content: center;
+}
