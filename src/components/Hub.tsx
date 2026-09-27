@@ -173,6 +173,17 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
               </button>
             </nav>
           )}
+          <section className="night-watch easy-night-watch" aria-label="Night Watch">
+            <p className="eyebrow">Night Watch</p>
+            <p className="quiet">{EASY.nightLead}</p>
+            <button
+              type="button"
+              className="btn gold xl"
+              onClick={() => onNavigate({ name: 'defend' })}
+            >
+              {EASY.nightDo}
+            </button>
+          </section>
         </div>
 
         {/* Parked Extra streets / stacked core — CSS-hidden on Easy Home */}
