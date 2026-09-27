@@ -17,17 +17,10 @@ import { Vista } from './components/Vista'
 import { Welcome } from './components/Welcome'
 import { adsAreVisible, isBetweenSceneTransition, scenePauseMountsOn } from './config/ads'
 import { liveInterstitialReady, showBetweenSceneInterstitial } from './lib/adAdapter'
-import { isEasy } from './lib/easy'
 import { useProgress } from './store/progress'
 import type { View } from './types'
 
 const AD_COOLDOWN_MS = 20_000
-
-function easyNightWatchHit(): boolean {
-  if (typeof window === 'undefined') return false
-  const blob = `${window.location.hash} ${window.location.search} ${window.location.pathname}`
-  return /defend|night-?watch/i.test(blob)
-}
 
 function isLessonEnterView(view: View): boolean {
   return (
@@ -45,7 +38,6 @@ function isSceneLeaveView(view: View): boolean {
 
 export default function App() {
   const { progress } = useProgress()
-  const easy = isEasy(progress)
   const [view, setView] = useState<View>(() => {
     const walked =
       progress.completed.length > 0 || Boolean(progress.lastDailyDate)
@@ -57,13 +49,6 @@ export default function App() {
   const lastAdAt = useRef(0)
 
   function go(next: View, skipAd = false) {
-    if (easy && next.name === 'defend') {
-      setSceneAd(false)
-      setPending(null)
-      setView({ name: 'hub' })
-      return
-    }
-
     const adsOn = !skipAd && adsAreVisible()
     const cooled = Date.now() - lastAdAt.current >= AD_COOLDOWN_MS
     const between = isBetweenSceneTransition(view.name, next.name)
@@ -124,13 +109,6 @@ export default function App() {
   }
 
   useEffect(() => {
-    if (!easy) return
-    if (view.name === 'defend' || easyNightWatchHit()) {
-      if (view.name !== 'hub') setView({ name: 'hub' })
-    }
-  }, [easy, view.name])
-
-  useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [view])
 
@@ -178,7 +156,7 @@ export default function App() {
       {view.name === 'pack-street' ? (
         <PackStreet packId={view.packId} onNavigate={go} />
       ) : null}
-      {view.name === 'defend' && !easy ? <DefendScreen onNavigate={go} /> : null}
+      {view.name === 'defend' ? <DefendScreen onNavigate={go} /> : null}
       {view.name === 'link' ? (
         <LinkScreen
           key={view.debugLine ?? 'loop'}

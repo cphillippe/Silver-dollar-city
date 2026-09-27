@@ -1138,7 +1138,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.298')
+assert.equal(APP_VERSION, '1.4.299')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1860,10 +1860,11 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
     assert.ok(iMatch >= 0 && iLearn >= 0 && iLock >= 0, 'cold coach has Match · Learn · Lock In')
     assert.ok(iMatch < iLearn && iLearn < iLock, 'cold coach order is Match → Learn → Lock In (#187)')
   }
-  assert.doesNotMatch(easyHome, /Night Watch/)
+  assert.match(easyHome, /Night Watch/)
   assert.doesNotMatch(easyHome, /EASY\.nightSoon/)
-  assert.doesNotMatch(easyHome, /EASY\.nightDo/)
-  assert.doesNotMatch(easyHome, /name: 'defend'/)
+  assert.match(easyHome, /EASY\.nightDo/)
+  assert.match(easyHome, /EASY\.nightLead/)
+  assert.match(easyHome, /name: 'defend'/)
   assert.doesNotMatch(easyHome, /debugLine/)
   assert.doesNotMatch(easyHome, /mini-game jumps/)
   assert.doesNotMatch(easyHome, /debugPlayGroups/)
@@ -2126,11 +2127,15 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
   assert.doesNotMatch(easyMore, /Night Watch/)
   assert.doesNotMatch(easyMore, /nightSoon/)
 }
-assert.match(
+assert.doesNotMatch(
   readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8'),
   /easy && next\.name === 'defend'/,
 )
 assert.match(
+  readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8'),
+  /view\.name === 'defend' \? <DefendScreen/,
+)
+assert.doesNotMatch(
   readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8'),
   /view\.name === 'defend' && !easy/,
 )
@@ -2410,10 +2415,10 @@ assert.match(mapSrc, /easy \? null : \(\s*\n\s*<>[\s\S]*city-street-main/)
 assert.match(mapSrc, /if \(isEasy\(progress\)\) return/)
 assert.match(mapSrc, /if \(playing\.current && !isEasy\(progress\)\) return/)
 assert.match(mapSrc, /Tap a building to Manage it/)
-assert.match(latestChange(APP_VERSION).title, /Night Watch|Phase 1|fantasy|Fixes #418/i)
+assert.match(latestChange(APP_VERSION).title, /Night Watch|Easy|unpark|Fixes #418/i)
 assert.match(
   latestChange(APP_VERSION).items.join('\n'),
-  /Fixes #418|prayer watch|dark|taunt|Guardian|Messenger|walker/i,
+  /Fixes #418|Easy|Night Watch|Phase 1|unpark|prove/i,
 )
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-img[\s\S]*?fill: none !important/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img\.is-built[\s\S]*?fill: none/)
@@ -6909,5 +6914,28 @@ console.log('check-city: ok')
     latestChange('1.4.298').items.join('\n'),
     /Fixes #416|RSV|Dig verse|Father Dash|Samaritan smash/i,
     '1.4.298 must stay on Night Watch Phase 1 fantasy reskin Fixes #418',
+  )
+}
+
+// Night Watch 1.4.299: Easy unpark (Fixes #418 residual)
+{
+  const app299 = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8')
+  const hub299 = readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8')
+  assert.doesNotMatch(app299, /easy && next\.name === 'defend'/)
+  assert.doesNotMatch(app299, /view\.name === 'defend' && !easy/)
+  assert.match(app299, /view\.name === 'defend' \? <DefendScreen/)
+  assert.match(hub299, /easy-night-watch/)
+  assert.match(hub299, /EASY\.nightDo/)
+  assert.match(hub299, /EASY\.nightLead/)
+  assert.match(hub299, /name: 'defend'/)
+  assert.match(latestChange('1.4.299').title, /Night Watch|Easy|unpark|Fixes #418/i)
+  assert.match(
+    latestChange('1.4.299').items.join('\n'),
+    /Fixes #418|Easy|Night Watch|unpark|prove/i,
+  )
+  assert.doesNotMatch(
+    latestChange('1.4.299').items.join('\n'),
+    /prayer watch|dark fantasy|Phase 1 fantasy reskin/i,
+    '1.4.299 must stay on Easy Night Watch unpark Fixes #418 residual',
   )
 }
