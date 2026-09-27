@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.276',
+    title: 'Easy Manage sheet: ≤720 smooth header fade',
+    when: '2026-09-27',
+    items: [
+      'Easy Manage sheet on phone portrait: scrolling cards fade smoothly under the solid header instead of getting cut in half, with the hidden scrollbar and last TOOL padding kept (other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.275',
     title: 'Easy Manage sheet: ≤720 header scroll mask',
     when: '2026-09-27',
