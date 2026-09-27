@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.295',
+    title: 'Father Dash HOLD TO RUN cream void fill',
+    when: '2026-09-27',
+    items: [
+      'Easy Father Dash: end #382 bottom auto-margin on the HOLD dock and grow run-speech so HOLD TO RUN sits without a cream void below (Fixes #406)',
+    ],
+  },
+  {
     version: '1.4.294',
     title: 'Easy Lock In miss-teach cream void residual',
     when: '2026-09-27',

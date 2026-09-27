@@ -1137,7 +1137,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.294')
+assert.equal(APP_VERSION, '1.4.295')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -2409,10 +2409,10 @@ assert.match(mapSrc, /easy \? null : \(\s*\n\s*<>[\s\S]*city-street-main/)
 assert.match(mapSrc, /if \(isEasy\(progress\)\) return/)
 assert.match(mapSrc, /if \(playing\.current && !isEasy\(progress\)\) return/)
 assert.match(mapSrc, /Tap a building to Manage it/)
-assert.match(latestChange(APP_VERSION).title, /Easy Lock In|miss-teach|cream void|Fixes #405/i)
+assert.match(latestChange(APP_VERSION).title, /Father Dash|HOLD TO RUN|cream void|Fixes #406/i)
 assert.match(
   latestChange(APP_VERSION).items.join('\n'),
-  /Fixes #405|Lock In|miss-teach|why-blast|why-miss-teach|cream void|Main idea|Try again|portrait/i,
+  /Fixes #406|Father Dash|#382|run-speech|HOLD TO RUN|cream void/i,
 )
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-img[\s\S]*?fill: none !important/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img\.is-built[\s\S]*?fill: none/)
@@ -6787,5 +6787,33 @@ console.log('check-city: ok')
     latestChange('1.4.294').items.join('\n'),
     /Fixes #379|Fixes #404|Fixes #406|Dig deeper|Night Watch|Town|Manage|Father Dash|Match|invent Fun\/Clear|Shot wake|Story Snap|gem tactile|Samaritan|Sort tile|Hold-to-Run|road tile|why-chip|streets button|LociStamp|live quiz|why-arena|claim · chips|Father/i,
     '1.4.294 must stay on Easy Lock In miss-teach cream void residual Fixes #405',
+  )
+}
+
+// Easy Clear 1.4.295: Father Dash HOLD TO RUN cream void fill (Fixes #406)
+{
+  const welcomeCss295 = readFileSync(new URL('../src/styles/welcome.css', import.meta.url), 'utf8')
+  assert.match(
+    welcomeCss295,
+    /1\.4\.295: Father Dash HOLD TO RUN cream void fill \(Fixes #406\)/,
+  )
+  assert.match(
+    welcomeCss295,
+    /1\.4\.295: Father Dash HOLD TO RUN cream void fill \(Fixes #406\)[\s\S]*?\.play\.is-father-run \.run-speech[\s\S]*?flex: 1 1 auto/,
+  )
+  assert.match(
+    welcomeCss295,
+    /1\.4\.295: Father Dash HOLD TO RUN cream void fill \(Fixes #406\)[\s\S]*?\.play\.is-father-run \.cta-dock[\s\S]*?margin-bottom: 0/,
+  )
+  assert.match(cssSrc, /1\.4\.295: Father Dash HOLD TO RUN cream void fill \(Fixes #406\)/)
+  assert.match(
+    latestChange('1.4.295').items.join('\n'),
+    /Fixes #406|Father Dash|#382|run-speech|HOLD TO RUN|cream void/i,
+  )
+  assert.match(latestChange('1.4.295').title, /Father Dash|HOLD TO RUN|cream void|Fixes #406/i)
+  assert.doesNotMatch(
+    latestChange('1.4.295').items.join('\n'),
+    /Fixes #405|Fixes #379|Fixes #404|Dig deeper|Night Watch|Town|Manage|Match|invent Fun\/Clear|Shot wake|Story Snap|gem tactile|Samaritan|Sort tile|Lock In|miss-teach|why-arena|claim · chips/i,
+    '1.4.295 must stay on Father Dash HOLD TO RUN cream void fill Fixes #406',
   )
 }
