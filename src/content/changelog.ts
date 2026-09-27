@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.280',
+    title: 'Easy Father Dash: ≤720 close tall residual cream gap (Fixes #382)',
+    when: '2026-09-27',
+    items: [
+      'Fixes #382: Easy Father Dash on ≤720 / phone portrait — pack the timing rail and HOLD TO RUN with a modest gap so the massive empty cream band between slider and CTA is gone, including layout viewports taller than the 920 cap (Shot 270 residual after cream floors 257/266; opaque cream floors stay; leftover cream may sit below the dock; other Easy / Shot peels untouched)',
+    ],
+  },
+  {
     version: '1.4.279',
     title: 'Easy Samaritan HURT MAN/HELP pill contrast',
     when: '2026-09-27',

@@ -2380,6 +2380,24 @@ html[data-easy='on'] .play.is-road-maze .maze-beat.is-now {
   }
 }
 
+/* Easy Clear 1.4.280: Father Dash tall residual cream gap (Fixes #382) —
+   After cream floors 257/266, Shot pack 1.4.270 07-father.png still fails —
+   massive empty cream between timing slider (.run-rail) and HOLD TO RUN.
+   Cause: 266 pinned `.cta-dock` with `margin-top: auto`, stretching the void
+   on tall phones. Keep opaque cream floors; override only the auto margin so
+   rail + CTA pack with a modest gap and leftover cream sits BELOW the dock.
+   Easy Father Dash (`.play.is-father-run`) ONLY — not speech-hold dock. */
+@media (max-height: 920px), (min-height: 921px) {
+  html[data-easy='on'] .play.is-father-run .cta-dock,
+  html[data-easy='on'] .play.is-father-run .cta-dock.run-dock,
+  html[data-easy='on'] .daily-page.is-puzzle .play.is-father-run .cta-dock,
+  html[data-easy='on'] .challenge-page.is-puzzle .play.is-father-run .cta-dock,
+  .app[data-easy='on'] .challenge-page.is-puzzle .play.is-father-run .cta-dock {
+    margin-top: 16px;
+    margin-bottom: auto;
+  }
+}
+
 /* Easy Clear 1.4.267: Easy Manage lot sheet purple bar / misalign after black-void 258 (Fixes #367) —
    Shot pack 1.4.260 08-manage-or-snap.png STILL fails — Gemini: East porch Manage sheet is
    misaligned with a dark purple bar extending at the bottom-right (new shape vs closed #350
