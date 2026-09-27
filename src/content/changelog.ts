@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.285',
+    title: 'Easy Sort tile arcade squish invent',
+    when: '2026-09-27',
+    items: [
+      'Easy Sort: live sort tiles squish on finger-down (scale 0.92, inset press shadow); gone tiles unchanged — invent Fun/Clear climb toward Shot wake',
+    ],
+  },
+  {
     version: '1.4.284',
     title: 'Easy Lock In why-chip tactile press invent',
     when: '2026-09-27',
