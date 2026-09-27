@@ -859,3 +859,28 @@ html[data-easy='on'] .next-tap {
     font-size: 0.7rem;
   }
 }
+
+/* Easy Clear 1.4.291: Easy Match teach-dock unclamp (Fixes #404) —
+   Shot pack 1.4.290 / 03-easy-match.png: 1.4.259 max-height:72px crushed
+   LociStamp claim + WHO/WHERE/IDEA/KEEP chips into one band so pills overlap
+   the prompt claim. Drop the clamp on Easy so stamp + chips stack with a
+   readable gap. Keep teach-say hide + board-first from 259. Dig/Hard parked. */
+@media (max-height: 920px) {
+  html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .match-teach-dock {
+    max-height: none;
+    gap: 0.28rem;
+    padding: 0.1rem 0.1rem 0.25rem;
+    overflow: visible;
+  }
+
+  html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .match-teach-chips {
+    flex-shrink: 0;
+    gap: 0.28rem;
+  }
+
+  html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked .loci-stamp.is-dock {
+    flex-shrink: 0;
+    min-height: 32px;
+    max-height: 44px;
+  }
+}
