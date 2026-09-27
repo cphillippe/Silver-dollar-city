@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.278',
+    title: 'Easy Lock In miss-teach: HUD peel restores one LOCK IN label',
+    when: '2026-09-27',
+    items: [
+      'Easy Lock In miss-teach on phone portrait: WhyBlast HUD peel had hidden both LOCK IN eyebrows — outer section label shows again (exactly one; inner duplicate stays hidden per 1.4.277) (Fixes #380; follow-up prove A)',
+    ],
+  },
+  {
     version: '1.4.277',
     title: 'Easy Lock In miss-teach: ≤720 nested framing collapse',
     when: '2026-09-27',

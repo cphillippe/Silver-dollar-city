@@ -1137,7 +1137,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.277')
+assert.equal(APP_VERSION, '1.4.278')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -6344,5 +6344,35 @@ console.log('check-city: ok')
     latestChange('1.4.277').items.join('\n'),
     /Fixes #381|Fixes #382|Match candy|Night Watch|Dig deeper|Manage|Shot 270/i,
     '1.4.277 must stay on Easy Lock In miss-teach nested framing',
+  )
+}
+
+// Easy Clear 1.4.278: Easy Lock In miss-teach one LOCK IN section label (#380 prove A)
+{
+  assert.match(
+    cssSrc,
+    /1\.4\.278: miss-teach keep ONE LOCK IN section label \(#380 prove A\)/,
+  )
+  assert.match(
+    cssSrc,
+    /1\.4\.278: miss-teach keep ONE LOCK IN section label \(#380 prove A\)[\s\S]*?@media \(max-height: 920px\)[\s\S]*?\.rehearse-anchor > \.eyebrow \{[\s\S]*?display: block/,
+  )
+  assert.match(
+    cssSrc,
+    /1\.4\.278: miss-teach keep ONE LOCK IN section label \(#380 prove A\)[\s\S]*?@media \(max-height: 720px\)[\s\S]*?\.rehearse-anchor > \.eyebrow \{[\s\S]*?display: block/,
+  )
+  assert.match(
+    cssSrc,
+    /1\.4\.278: miss-teach keep ONE LOCK IN section label \(#380 prove A\)[\s\S]*?\.why-blast\.is-miss-teach\)[\s\S]*?\.rehearse-anchor > \.eyebrow/,
+  )
+  assert.match(latestChange('1.4.278').title, /Easy Lock In miss-teach|LOCK IN|Fixes #380/i)
+  assert.match(
+    latestChange('1.4.278').items.join('\n'),
+    /Fixes #380|LOCK IN|outer|HUD|277|prove A/i,
+  )
+  assert.doesNotMatch(
+    latestChange('1.4.278').items.join('\n'),
+    /Fixes #381|Fixes #382|Match candy|Night Watch|Dig deeper|Manage|Shot 270/i,
+    '1.4.278 must stay on Easy Lock In miss-teach one LOCK IN label',
   )
 }

@@ -3667,3 +3667,20 @@ html[data-easy='on'] .recall-card {
     justify-content: flex-start;
   }
 }
+
+/* Easy Clear 1.4.278: miss-teach keep ONE LOCK IN section label (#380 prove A) —
+   ≤920 HUD hide blanks rehearse-anchor eyebrow for any .why-blast; 277 already
+   hides the inner recall-gate eyebrow. Show the outer LOCK IN only on miss-teach. */
+@media (max-height: 920px) {
+  html[data-easy='on'] .journal.is-rehearse.is-easy-hold-practice:has(.why-blast.is-miss-teach) .rehearse-anchor > .eyebrow,
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) .rehearse-anchor > .eyebrow {
+    display: block; /* override HUD display:none; welcome cream color rules still apply */
+  }
+}
+
+@media (max-height: 720px) {
+  html[data-easy='on'] .journal.is-rehearse.is-easy-hold-practice:has(.why-blast.is-miss-teach) .rehearse-anchor > .eyebrow,
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) .rehearse-anchor > .eyebrow {
+    display: block;
+  }
+}
