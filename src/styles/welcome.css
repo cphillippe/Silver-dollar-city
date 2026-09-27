@@ -1947,6 +1947,66 @@ html[data-theme='dusk'] .easy-story-card {
   }
 }
 
+/* Easy Clear 1.4.277: Easy Lock In miss-teach nested framing + stretch void (Fixes #380) —
+   After cream floors 255 / 264 (Shot 270), tall Easy miss-teach still stacks duplicate LOCK IN
+   eyebrows, triple nested card borders, and flex stretch + margin-top: auto pins Try again across
+   a giant cream void under From. Collapse inner chrome and pack content — keep opaque #fff6e8
+   floors; do not peel #381–#382. Overrides 264 stretch only for `.why-blast.is-miss-teach`. */
+@media (max-height: 920px), (min-height: 921px) {
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) {
+    flex: 0 1 auto;
+    height: auto;
+    max-height: none;
+    border: none;
+    box-shadow: none;
+    padding-bottom: 0;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) .rehearse-anchor {
+    flex: 0 1 auto;
+    height: auto;
+    max-height: none;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) .recall-gate.is-easy-hold {
+    flex: 0 1 auto;
+    height: auto;
+    max-height: none;
+    justify-content: flex-start;
+    gap: 1rem;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-miss-teach {
+    flex: 0 1 auto;
+    min-height: auto;
+    height: auto;
+    max-height: none;
+    justify-content: flex-start;
+    gap: 1.25rem;
+    border: none;
+    box-shadow: none;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-miss-teach .why-miss-teach {
+    flex: 0 1 auto;
+    min-height: auto;
+    height: auto;
+    max-height: none;
+    justify-content: flex-start;
+    gap: 1rem;
+    padding: 0;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-miss-teach .why-miss-teach .cta-dock,
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) .recall-gate.is-easy-hold .cta-dock {
+    margin-top: 1.5rem;
+  }
+}
+
 /* Easy Clear 1.4.265: Easy Samaritan / road maze ≤720 / tall residual purple void after cream 256 (Fixes #365) —
    After opaque cream shell 256 (app-body + play + solid maze-stage · warm board · cream dock)
    Shot pack 1.4.260 06-samaritan.png STILL fails — Gemini: MERCY · STORY CREEK mid-play

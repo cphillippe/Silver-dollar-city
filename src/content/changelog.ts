@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.277',
+    title: 'Easy Lock In miss-teach: ≤720 nested framing collapse',
+    when: '2026-09-27',
+    items: [
+      'Easy Lock In miss-teach on phone portrait: one LOCK IN label, a single cream card without triple nested borders, and Try again sits right under the From line instead of across a giant empty gap (Fixes #380; cream floors from earlier peels stay)',
+    ],
+  },
+  {
     version: '1.4.276',
     title: 'Easy Manage sheet: ≤720 smooth header fade',
     when: '2026-09-27',
