@@ -36,6 +36,9 @@ import {
   EASY_CUE_HOLD_MS,
   EASY_WALKER_FACE_PX,
   EASY_WALKER_HIT_PX,
+  EASY_WAVE_LIVE,
+  easyHoldSpawn,
+  easySpawnT,
   easyTapFit,
   easyTapMode,
   easyTapPersonCount,
@@ -2238,7 +2241,8 @@ assert.doesNotMatch(latestChange(APP_VERSION).items.join('\n'), /A true main ide
 assert.match(easyUiSrc, /Main idea = the short true line we keep/)
 assert.match(defendNightSrc, /is-easy-walker/)
 assert.match(defendSrc, /waveSpeed\(easy\)/)
-assert.match(defendSrc, /easy && item.id === targetId/)
+assert.match(defendSrc, /easyHoldSpawn/)
+assert.match(defendSrc, /easySpawnT/)
 assert.match(defendNightSrc, /easy-walker-face/)
 assert.doesNotMatch(defendSrc, /holdWalkers/)
 assert.match(defendSrc, /holdSpawn/)
@@ -2252,12 +2256,17 @@ assert.equal(easyTapMode(false, 'wave', false), false)
     { id: 0, turned: 'love' },
     { id: 1, turned: 'love' },
     { id: 2, turned: 'love' },
-    { id: 3 },
-    { id: 4 },
+    { id: 3, t: 0.55 },
+    { id: 4, t: 0.2 },
   ]
   assert.equal(easyTapPersonCount(midWave1), 1)
   assert.equal(easyTapPersonCount(midWave3), 1)
   assert.equal(easyTapTarget(midWave3)?.id, 3)
+  assert.equal(EASY_WAVE_LIVE, 3)
+  assert.equal(easyHoldSpawn(2), false)
+  assert.equal(easyHoldSpawn(3), true)
+  assert.equal(easySpawnT(0), 0.08)
+  assert.equal(easySpawnT(1), 0.18)
   assert.equal(easyTapPersonCount([{ id: 0, turned: 'love' }]), 0)
 }
 assert.equal(easyTapFit(true, 'love', 'physical'), 'match')
@@ -2466,7 +2475,7 @@ assert.match(
   /navigateFallbackDenylist:\s*\[\/\\\/qa-seed\\\.html\/\]/,
 )
 assert.match(defendSrc, /easyTapTarget/)
-assert.match(defendNightSrc, /data-person-node="walker"/)
+assert.match(defendNightSrc, /data-person-node=\{isTap \? 'walker'/)
 assert.doesNotMatch(defendSrc, /walkerCue|easySolo|clearWalkerCue|hideOther/)
 assert.match(defendSrc, /loveHowTo/)
 assert.equal(
@@ -2622,7 +2631,7 @@ assert.equal(EASY.nightMiss, 'Wrong — tap the glowing face')
 assert.match(defendSrc, /EASY\.nightMiss/)
 assert.match(defendSrc, /TAP \$\{downed\}/)
 assert.match(defendSrc, /You missed\. Tap the face/)
-assert.match(defendSrc, /walking\.some\(\(item\) => !item\.turned\)/)
+assert.match(defendSrc, /easyHoldSpawn\(unturnedLive\)/)
 assert.doesNotMatch(defendSrc, /matching sentence/)
 assert.doesNotMatch(
   readFileSync(new URL('../src/components/challenges/LinkPlay.tsx', import.meta.url), 'utf8'),
@@ -6943,11 +6952,11 @@ console.log('check-city: ok')
 // Night Watch 1.4.300: Easy TAP Phase 1 taunt (Fixes #418 residual)
 {
   const defendCss300 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
-  assert.match(defendNightSrc, /easy-walker-call/)
-  assert.match(defendNightSrc, /easy-walker-kind/)
-  assert.match(defendNightSrc, /easy-walker-taunt/)
-  assert.match(defendNightSrc, /WALKER_LABEL\[tapTarget\.kind\]/)
-  assert.match(defendNightSrc, /tapTarget\.text/)
+  assert.match(defendNightSrc, /defend-raider-call/)
+  assert.match(defendNightSrc, /defend-raider-kind/)
+  assert.match(defendNightSrc, /defend-raider-taunt/)
+  assert.match(defendNightSrc, /WALKER_LABEL\[raider\.kind\]/)
+  assert.match(defendNightSrc, /raider\.text/)
   assert.match(defendCss300, /Easy TAP Phase 1 taunt bubble/)
   assert.match(defendCss300, /\.easy-walker-call/)
   assert.match(defendCss300, /\.easy-walker-kind/)
@@ -6991,24 +7000,30 @@ console.log('check-city: ok')
   )
 }
 
-// Night Watch 1.4.302: Phase 2 hop 2 watch-tower feel (Fixes #418)
+// Night Watch 1.4.302: Easy little wave on path (Fixes #418 / Bill redirect)
 {
   const defendCss302 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
-  assert.doesNotMatch(defendNightSrc, /easyTap\s*\?\s*null\s*:\s*pads\.map/)
-  assert.match(defendNightSrc, /is-decor/)
-  assert.match(defendNightSrc, /defend-hot-halo/)
-  assert.match(defendNightSrc, /easyTap && !on/)
-  assert.match(defendCss302, /Phase 2 hop 2 — watch tower feel/)
-  assert.match(defendCss302, /defend-tower-fire/)
-  assert.match(defendCss302, /\.defend-page\.is-easy-tap \.defend-pad\.is-decor/)
-  assert.match(latestChange('1.4.302').title, /Night Watch|Phase 2|watch.?tower|Fixes #418/i)
+  const defendScreen302 = readFileSync(
+    new URL('../src/components/DefendScreen.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.doesNotMatch(defendNightSrc, /easy\s*\?\s*null\s*:\s*raiders\.map/)
+  assert.match(defendNightSrc, /fireAtRaider/)
+  assert.match(defendNightSrc, /is-easy-tap-target/)
+  assert.match(defendNightSrc, /easy-walkers-path-cue/)
+  assert.match(defendScreen302, /easyHoldSpawn/)
+  assert.match(defendScreen302, /easySpawnT/)
+  assert.match(defendScreen302, /fireAtRaider/)
+  assert.doesNotMatch(defendScreen302, /freezeTarget/)
+  assert.match(defendCss302, /Easy little wave on path/)
+  assert.match(latestChange('1.4.302').title, /Easy|Night Watch|little wave|path|Fixes #418/i)
   assert.match(
     latestChange('1.4.302').items.join('\n'),
-    /Fixes #418|watch tower|range ring|Easy TAP/i,
+    /Fixes #418|walker|path|wave|Bill redirect/i,
   )
   assert.doesNotMatch(
     latestChange('1.4.302').items.join('\n'),
-    /TAP juice|squash|heaven-lift/i,
-    '1.4.302 must stay on Night Watch Phase 2 hop 2 watch-tower feel Fixes #418',
+    /watch tower|range ring|tower feel/i,
+    '1.4.302 must stay on Easy Night Watch little wave on path Fixes #418',
   )
 }

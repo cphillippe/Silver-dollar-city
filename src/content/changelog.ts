@@ -9,10 +9,10 @@ export interface ChangeNote {
 export const CHANGELOG: ChangeNote[] = [
   {
     version: '1.4.302',
-    title: 'Night Watch Phase 2 hop 2 — watch-tower feel',
+    title: 'Easy Night Watch little wave on path',
     when: '2026-09-27',
     items: [
-      'Night Watch: planted lamps read as watch towers with range ring and fire flash; Easy TAP shows display-only towers mid-wave (Fixes #418)',
+      'Easy Night Watch: 2–3 dark walkers on the soft TD path with faces and taunts; tap walkers on the road (TAP juice kept). Bill redirect / Fixes #418',
     ],
   },
   {
