@@ -1137,7 +1137,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.295')
+assert.equal(APP_VERSION, '1.4.296')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1469,7 +1469,7 @@ assert.match(cssSrc, /is-easy-hold/)
 }
 assert.match(
   latestChange(APP_VERSION).items.join('\n'),
-  /Fixes #405|Lock In|miss-teach|why-blast|why-miss-teach|cream void|Main idea|Try again|portrait/i,
+  /Fixes #414|Fixes #412|Fixes #413|Samaritan|route variety|hurt man|always right/i,
 )
 {
   const storyCardCss = cssSrc.match(/\.easy-story-card,[\s\S]*?\.easy-story-card::before \{[\s\S]*?\n\}/)?.[0] ?? ''
@@ -2409,10 +2409,10 @@ assert.match(mapSrc, /easy \? null : \(\s*\n\s*<>[\s\S]*city-street-main/)
 assert.match(mapSrc, /if \(isEasy\(progress\)\) return/)
 assert.match(mapSrc, /if \(playing\.current && !isEasy\(progress\)\) return/)
 assert.match(mapSrc, /Tap a building to Manage it/)
-assert.match(latestChange(APP_VERSION).title, /Father Dash|HOLD TO RUN|cream void|Fixes #406/i)
+assert.match(latestChange(APP_VERSION).title, /Samaritan|less-is-more|route variety|Fixes #414/i)
 assert.match(
   latestChange(APP_VERSION).items.join('\n'),
-  /Fixes #406|Father Dash|#382|run-speech|HOLD TO RUN|cream void/i,
+  /Fixes #414|Fixes #412|Fixes #413|Samaritan|route variety|hurt man|always right/i,
 )
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-img[\s\S]*?fill: none !important/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img\.is-built[\s\S]*?fill: none/)
@@ -6815,5 +6815,29 @@ console.log('check-city: ok')
     latestChange('1.4.295').items.join('\n'),
     /Fixes #405|Fixes #379|Fixes #404|Dig deeper|Night Watch|Town|Manage|Match|invent Fun\/Clear|Shot wake|Story Snap|gem tactile|Samaritan|Sort tile|Lock In|miss-teach|why-arena|claim · chips/i,
     '1.4.295 must stay on Father Dash HOLD TO RUN cream void fill Fixes #406',
+  )
+}
+
+// Easy Clear 1.4.296: Easy Samaritan less-is-more + smash + route variety (Fixes #414 #412 #413)
+{
+  assert.match(
+    latestChange('1.4.296').items.join('\n'),
+    /Fixes #414|Fixes #412|Fixes #413|Samaritan|route variety|hurt man|always right/i,
+  )
+  assert.match(latestChange('1.4.296').title, /Samaritan|less-is-more|route variety|Fixes #414/i)
+  assert.doesNotMatch(
+    latestChange('1.4.296').items.join('\n'),
+    /Fixes #406|Fixes #405|Fixes #404|Father Dash|Lock In|Match teach|Story Snap|Dig deeper|Night Watch|Town|Manage/i,
+    '1.4.296 must stay on Easy Samaritan less-is-more smash route variety Fixes #414 #412 #413',
+  )
+  assert.match(cssSrc, /1\.4\.296: Samaritan less-is-more \+ smash fix/)
+  assert.match(cssSrc, /#d8b888/)
+  assert.match(
+    readFileSync(new URL('../src/lib/roadMaze.ts', import.meta.url), 'utf8'),
+    /MAZE_PRESETS/,
+  )
+  assert.match(
+    readFileSync(new URL('../src/components/challenges/RoadMazePlay.tsx', import.meta.url), 'utf8'),
+    /setMazePreset/,
   )
 }

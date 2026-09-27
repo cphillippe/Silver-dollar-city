@@ -6,7 +6,10 @@ import {
   MAZE_BEATS,
   MAZE_HURT,
   MAZE_INN,
+  MAZE_PRESETS,
   MAZE_START,
+  mazePresetIndex,
+  setMazePreset,
   mazeBeatDone,
   mazeBeatsOpened,
   mazeBlockedHint,
@@ -27,6 +30,7 @@ import {
   isMazeLookPan,
   isMazePathSwipe,
   isAdjacentRoadStep,
+  isMazeRoad,
   mazeStepToward,
 } from '../src/lib/roadMaze.ts'
 import { EASY } from '../src/lib/easy.ts'
@@ -57,18 +61,40 @@ assert.deepEqual(
   MAZE_BEATS.map((beat) => beat.label),
   ['Hurt man', 'Help', 'Inn'],
 )
-assert.ok(shortestMazePath(MAZE_START, MAZE_HURT))
-assert.ok(shortestMazePath(MAZE_HURT, MAZE_INN))
+assert.equal(MAZE_PRESETS.length, 3)
+assert.equal(mazePresetIndex(0), 0)
+assert.equal(mazePresetIndex(3), 0)
+assert.equal(mazePresetIndex(-1), 2)
+
+for (let i = 0; i < MAZE_PRESETS.length; i += 1) {
+  setMazePreset(i)
+  assert.ok(shortestMazePath(MAZE_START, MAZE_HURT), `preset ${i}: start→hurt`)
+  assert.ok(shortestMazePath(MAZE_HURT, MAZE_INN), `preset ${i}: hurt→inn`)
+  assert.equal(isMazeRoad(MAZE_START), true, `preset ${i}: start is road`)
+}
+setMazePreset(0)
 assert.equal(shortestMazePath(MAZE_START, { r: 0, c: 2 }), null)
 
 assert.equal(mazeSame(MAZE_HURT, MAZE_INN), false, 'hurt and inn are distinct cells')
 assert.equal(mazeSame(mazeGoal(true, false).at, mazeGoal(true, true).at), false, 'help locus ≠ inn')
-assert.equal(isAdjacentRoadStep(MAZE_START, { r: 0, c: 1 }), true)
+
+setMazePreset(0)
+assert.ok(swipeStep(MAZE_START, 1, 0), 'preset A: first move may go down')
+assert.ok(swipeStep(MAZE_START, 0, 1), 'preset A: first move may go right')
 assert.equal(isAdjacentRoadStep(MAZE_START, MAZE_HURT), false)
 assert.equal(isAdjacentRoadStep(MAZE_START, MAZE_INN), false)
+const stepA = mazeStepToward(MAZE_START, MAZE_HURT)
+assert.ok(stepA && isAdjacentRoadStep(MAZE_START, stepA))
 
-assert.equal(mazeSame(mazeStepToward(MAZE_START, MAZE_HURT), { r: 0, c: 1 }), true)
-assert.equal(isAdjacentRoadStep(MAZE_START, mazeStepToward(MAZE_START, MAZE_HURT)), true)
+setMazePreset(1)
+assert.ok(swipeStep(MAZE_START, 1, 0), 'preset B: first move down')
+assert.equal(swipeStep(MAZE_START, 0, 1), null, 'preset B: not right-only')
+
+setMazePreset(2)
+assert.ok(swipeStep(MAZE_START, 1, 0), 'preset C: first move down')
+assert.equal(swipeStep(MAZE_START, 0, 1), null, 'preset C: not right-only')
+
+setMazePreset(0)
 
 assert.equal(canHelp(false, false), false)
 assert.equal(canHelp(true, false), true)
@@ -159,6 +185,8 @@ assert.match(playSrc, /story-caption/)
 assert.match(playSrc, /maze-beats/)
 assert.match(playSrc, /maze-cell-label/)
 assert.match(playSrc, /mazeStepToward/)
+assert.match(playSrc, /setMazePreset/)
+assert.match(playSrc, /maze-you-token/)
 assert.doesNotMatch(playSrc, /walkPath\(\s*shortestMazePath/)
 assert.doesNotMatch(playSrc, /maze-kit/)
 assert.doesNotMatch(
@@ -249,6 +277,16 @@ assert.match(
   /max-height: min\(62dvh, 540px\)/,
 )
 assert.match(playSrc, /1\.4\.153.*board-first|#190/)
+
+// Easy Clear 1.4.296: Samaritan less-is-more + smash + route variety (Fixes #414 #412 #413)
+assert.match(mazeCss, /1\.4\.296: Samaritan less-is-more \+ smash fix/)
+assert.match(mazeCss, /#d8b888/)
+assert.match(mazeCss, /aspect-ratio: 1 \/ 1/)
+assert.match(
+  mazeCss,
+  /\.play\.is-road-maze \.maze-actor img,[\s\S]*?object-fit: contain/,
+)
+assert.match(mazeCss, /maze-you-token/)
 
 
 // Easy Clear 1.4.175: Story Creek maze ≤720 HUD peel — hide kicker/thumbs/caption; keep beats (invent Fun/Clear)
