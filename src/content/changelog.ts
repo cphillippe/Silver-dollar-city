@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.281',
+    title: 'Easy Match gem tactile press invent',
+    when: '2026-09-27',
+    items: [
+      'Easy Match: finger-down arcade squish on gem cells (scale 0.92); selected (.is-sel) and match-burst (.is-burst) cells keep their existing pop and burst — invent Fun/Clear climb toward Shot wake',
+    ],
+  },
+  {
     version: '1.4.280',
     title: 'Easy Father Dash: ≤720 close tall residual cream gap (Fixes #382)',
     when: '2026-09-27',
