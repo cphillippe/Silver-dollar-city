@@ -41,6 +41,7 @@ import {
   easyTapPersonCount,
   easyTapTarget,
   heavenPoint,
+  RAID_CAST,
   raidForWave,
   unlockedWatchAbilities,
   waveIsClear,
@@ -6876,8 +6877,29 @@ console.log('check-city: ok')
   assert.match(defend298, /Prayer watch/)
   assert.match(defend298, /Plant lamps\. Push the dark back\./)
   assert.match(defend298, /Guardian near · Messenger help/)
+  assert.match(defendCss298, /Night Watch Phase 1/)
   assert.match(defendCss298, /\.defend-angel-help/)
   assert.match(defendSrc, /defend-angel-help/)
+  assert.equal(WALKER_LABEL['image-bearer'], 'Cold Heart')
+  assert.equal(WALKER_LABEL.skeptic, 'Accuser')
+  assert.equal(WALKER_LABEL.pagan, 'Tempter')
+  assert.equal(WALKER_LABEL.physical, 'Despair')
+  assert.equal(WALKER_LABEL.metaphysical, 'Whisper')
+  assert.equal(WALKER_LABEL.spiritual, 'Mockery')
+  assert.equal(RAID_CAST.length, 8)
+  assert.deepEqual(
+    RAID_CAST.map((item) => item.text),
+    [
+      'Mercy is optional',
+      'Only your own',
+      'Keep walking',
+      "You're wrong",
+      'Trade your lamp',
+      'Only atoms speak',
+      'Many tired gods',
+      'Mind is weather',
+    ],
+  )
   assert.match(
     latestChange('1.4.298').items.join('\n'),
     /Fixes #418|prayer watch|dark|taunt|Guardian|Messenger|walker/i,
