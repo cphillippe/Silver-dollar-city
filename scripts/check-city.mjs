@@ -1137,7 +1137,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.296')
+assert.equal(APP_VERSION, '1.4.297')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1469,7 +1469,7 @@ assert.match(cssSrc, /is-easy-hold/)
 }
 assert.match(
   latestChange(APP_VERSION).items.join('\n'),
-  /Fixes #414|Fixes #412|Fixes #413|Samaritan|route variety|hurt man|always right/i,
+  /Fixes #416|RSV|Dig|verse|BibleGateway|parchment/i,
 )
 {
   const storyCardCss = cssSrc.match(/\.easy-story-card,[\s\S]*?\.easy-story-card::before \{[\s\S]*?\n\}/)?.[0] ?? ''
@@ -2409,10 +2409,10 @@ assert.match(mapSrc, /easy \? null : \(\s*\n\s*<>[\s\S]*city-street-main/)
 assert.match(mapSrc, /if \(isEasy\(progress\)\) return/)
 assert.match(mapSrc, /if \(playing\.current && !isEasy\(progress\)\) return/)
 assert.match(mapSrc, /Tap a building to Manage it/)
-assert.match(latestChange(APP_VERSION).title, /Samaritan|less-is-more|route variety|Fixes #414/i)
+assert.match(latestChange(APP_VERSION).title, /Dig|RSV|verse|Fixes #416/i)
 assert.match(
   latestChange(APP_VERSION).items.join('\n'),
-  /Fixes #414|Fixes #412|Fixes #413|Samaritan|route variety|hurt man|always right/i,
+  /Fixes #416|RSV|Dig|verse|BibleGateway|parchment/i,
 )
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-img[\s\S]*?fill: none !important/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img\.is-built[\s\S]*?fill: none/)
@@ -6840,4 +6840,31 @@ console.log('check-city: ok')
     readFileSync(new URL('../src/components/challenges/RoadMazePlay.tsx', import.meta.url), 'utf8'),
     /setMazePreset/,
   )
+}
+
+// Easy Dig 1.4.297: tap verse ref → RSV in-app (Fixes #416)
+{
+  const deeperSrc = readFileSync(new URL('../src/content/deeper.ts', import.meta.url), 'utf8')
+  const digSrc = readFileSync(new URL('../src/components/DigDeeper.tsx', import.meta.url), 'utf8')
+  const rsvSrc = readFileSync(new URL('../src/content/rsvBites.ts', import.meta.url), 'utf8')
+  const welcomeCss297 = readFileSync(new URL('../src/styles/welcome.css', import.meta.url), 'utf8')
+  assert.match(deeperSrc, /rsvBite/)
+  assert.match(deeperSrc, /quote\?: string/)
+  assert.match(rsvSrc, /export function rsvBite/)
+  assert.match(digSrc, /dig-bite is-verse/)
+  assert.match(digSrc, /Open full/)
+  assert.match(welcomeCss297, /1\.4\.297: in-app RSV verse reveal/)
+  assert.match(welcomeCss297, /\.dig-bite\.is-verse/)
+  assert.match(
+    latestChange('1.4.297').items.join('\n'),
+    /Fixes #416|RSV|Dig|verse|BibleGateway|parchment/i,
+  )
+  assert.match(latestChange('1.4.297').title, /Dig|RSV|verse|Fixes #416/i)
+  assert.doesNotMatch(
+    latestChange('1.4.297').items.join('\n'),
+    /Fixes #414|Fixes #412|Fixes #413|Samaritan|Father Dash|Lock In|Match teach|Night Watch|Town|Manage/i,
+    '1.4.297 must stay on Easy Dig RSV verse reveal Fixes #416',
+  )
+  const genesis = deeperLinksFor('daily-cosmos').find((l) => l.label === 'Genesis 1:1')
+  assert.ok(genesis?.quote, 'Genesis 1:1 must ship in-app RSV quote')
 }

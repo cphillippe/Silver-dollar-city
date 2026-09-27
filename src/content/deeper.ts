@@ -6,6 +6,7 @@
  */
 
 import { digTablets, isSourceDigLine } from '../lib/sourceDig.ts'
+import { rsvBite } from './rsvBites.ts'
 
 export type DeeperEra = 'scripture' | 'ancient' | 'classic' | 'modern'
 export type DeeperSurface = 'hold' | 'journal' | 'map' | 'profile'
@@ -15,16 +16,20 @@ export interface DeeperLink {
   href: string
   era: DeeperEra
   source: string
+  /** In-app RSV excerpt when shipped in rsvBites (Easy Dig verse reveal). */
+  quote?: string
   /** Outside attestation (Tacitus / Josephus) — Journal only. */
   journalOnly?: boolean
 }
 
 function rsv(ref: string): DeeperLink {
+  const quote = rsvBite(ref)
   return {
     label: ref,
     href: `https://www.biblegateway.com/passage/?search=${encodeURIComponent(ref)}&version=RSV`,
     era: 'scripture',
     source: 'Holy Scripture · RSV',
+    ...(quote ? { quote } : {}),
   }
 }
 
