@@ -80,12 +80,12 @@ export const WALKER_KINDS: WalkerKind[] = [
 ]
 
 export const WALKER_LABEL: Record<WalkerKind, string> = {
-  'image-bearer': 'Image-bearer',
-  skeptic: 'Skeptic',
-  pagan: 'Pagan',
-  physical: 'Physical',
-  metaphysical: 'Metaphysical',
-  spiritual: 'Spiritual',
+  'image-bearer': 'Cold Heart',
+  skeptic: 'Accuser',
+  pagan: 'Tempter',
+  physical: 'Despair',
+  metaphysical: 'Whisper',
+  spiritual: 'Mockery',
 }
 
 export const TIER_MARK = ['', 'I', 'II', 'III'] as const

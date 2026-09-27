@@ -42,7 +42,7 @@ export function easyWrongTap(card: string): string {
 
 /** Hard Night Watch Love chrome — mechanic how-to, not a claim to hold. */
 export const LOVE_HOW_HARD =
-  'Love — tap the matching face. A true line turns a cheap claim toward heaven.'
+  'Love — tap the matching face. A true line turns a lie toward heaven.'
 
 const EASY_LINES: Record<string, string> = {
   'td-watch': EASY.loveCue,

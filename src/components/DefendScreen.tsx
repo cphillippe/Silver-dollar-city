@@ -1,6 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { evidenceFor } from '../content/evidence'
-import { WATCH_KICKER, WATCH_LEAD, WATCH_TITLE } from '../content/defend'
+import {
+  ANGEL_STICKER,
+  HARD_PLANT_TIP,
+  HARD_WAVE_TIP,
+  WATCH_KICKER,
+  WATCH_LEAD,
+  WATCH_TITLE,
+} from '../content/defend'
 import { EASY, isEasy, loveHowTo } from '../lib/easy'
 import { localDateKey } from '../lib/dates'
 import {
@@ -384,8 +391,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     >
       {after ? (
         <>
-          <article className="stored-line" aria-label={easy ? 'How to use Love' : 'Love tip'}>
-            <p className="eyebrow">{easy ? 'How to use Love' : 'Love tip'}</p>
+          <article className="stored-line" aria-label={easy ? 'How to pray Love' : 'Love tip'}>
+            <p className="eyebrow">{easy ? 'How to pray Love' : 'Love tip'}</p>
             <p className="stored-claim">{loveHowTo(easy)}</p>
             {easy ? <p className="quiet">{EASY.nightTap}</p> : null}
           </article>
@@ -428,6 +435,9 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                       : `${downed}/${DEFEND_WAVE_SIZE} · TAP`
                   : `${planted.length} lamp${planted.length === 1 ? '' : 's'}`}
               </span>
+            </p>
+            <p className="defend-angel-help" aria-hidden="true">
+              {ANGEL_STICKER}
             </p>
             <DefendNightBoard
               boardRef={boardRef}
@@ -493,13 +503,9 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           {easy ? (
             phase === 'lost' ? null : <p className="defend-tip">{EASY.nightTap}</p>
           ) : phase === 'wave' ? (
-            <p className="defend-tip">
-              Match the walker. Deploy the held argument — the wrong tool only nudges.
-            </p>
+            <p className="defend-tip">{HARD_WAVE_TIP}</p>
           ) : (
-            <p className="defend-tip">
-              Learn · hold · deploy. Love is ready. Logic, reason, and science unlock as you keep lines.
-            </p>
+            <p className="defend-tip">{HARD_PLANT_TIP}</p>
           )}
         </>
       )}

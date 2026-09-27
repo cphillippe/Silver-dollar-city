@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.298',
+    title: 'Night Watch Phase 1 fantasy reskin',
+    when: '2026-09-27',
+    items: [
+      'Night Watch: prayer-watch chrome, dark fantasy walker faces and short taunts, quiet Guardian · Messenger sticker (Fixes #418)',
+    ],
+  },
+  {
     version: '1.4.297',
     title: 'Easy Dig tap verse ref reveals RSV text',
     when: '2026-09-27',

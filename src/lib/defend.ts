@@ -31,13 +31,13 @@ export const DEFEND_ANCHOR: Record<CityPlotId, { x: number; y: number }> = {
 
 export const RAID_CAST: { text: string; kind: WalkerKind }[] = [
   { text: 'Mercy is optional', kind: 'skeptic' },
-  { text: 'Neighbor means your own', kind: 'image-bearer' },
+  { text: 'Only your own', kind: 'image-bearer' },
   { text: 'Keep walking', kind: 'spiritual' },
-  { text: 'Classify and leave', kind: 'skeptic' },
-  { text: 'The priest did enough', kind: 'image-bearer' },
+  { text: "You're wrong", kind: 'skeptic' },
+  { text: 'Trade your lamp', kind: 'pagan' },
   { text: 'Only atoms speak', kind: 'physical' },
-  { text: 'The gods are many and tired', kind: 'pagan' },
-  { text: 'Mind is only weather', kind: 'metaphysical' },
+  { text: 'Many tired gods', kind: 'pagan' },
+  { text: 'Mind is weather', kind: 'metaphysical' },
 ]
 
 export const RAID_LINES = RAID_CAST.map((item) => item.text)

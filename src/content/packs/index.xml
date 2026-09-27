@@ -83,13 +83,13 @@
   </scoring>
   <tools>
     <tool id="td-watch" kind="love-how-to">
-      <easy>Love — when compassion moves you, help like the Samaritan. Tap the glowing face.</easy>
-      <hard>Love — tap the matching face. A true line turns a cheap claim toward heaven.</hard>
+      <easy>Love — tap the dark face. Prayer turns a lie toward heaven.</easy>
+      <hard>Love — tap the matching face. A true line turns a lie toward heaven.</hard>
       <note>Mechanic how-to, not a held claim lesson.</note>
-      <claimFacingHard>Love — tap the matching face. A true line turns a cheap claim toward heaven.</claimFacingHard>
+      <claimFacingHard>Love — tap the matching face. A true line turns a lie toward heaven.</claimFacingHard>
       <reason>Love, logic, reason, and science you have kept can divert a false step up the ridge.</reason>
       <source>Luke 10:25–37 · the night road</source>
-      <plainTeach>Tap the glowing face. When compassion moves you, help like the Samaritan.</plainTeach>
+      <plainTeach>Tap the dark face. Prayer turns a lie toward heaven.</plainTeach>
     </tool>
   </tools>
   <trailNotes>

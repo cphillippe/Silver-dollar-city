@@ -41,6 +41,7 @@ import {
   easyTapPersonCount,
   easyTapTarget,
   heavenPoint,
+  RAID_CAST,
   raidForWave,
   unlockedWatchAbilities,
   waveIsClear,
@@ -936,7 +937,7 @@ const defendSrc = readFileSync(
 )
 assert.match(defendSrc, /The road is coming/)
 assert.match(defendSrc, /EASY.nightDo/)
-assert.match(defendSrc, /How to use Love/)
+assert.match(defendSrc, /How to pray Love/)
 assert.match(defendSrc, /Love tip/)
 assert.match(defendSrc, /loveHowTo/)
 assert.doesNotMatch(defendSrc, /TeachUnlock/)
@@ -980,7 +981,7 @@ assert.match(defendAbilitySrc, /WATCH_TOOLS\.map/)
 assert.match(defendAbilitySrc, /TIER_MARK/)
 assert.match(defendSkySrc, /defend-heaven-path/)
 assert.match(defendBundleSrc, /Toward heaven/)
-assert.match(defendCopy, /Plant love\. Turn cheap lines toward heaven\./)
+assert.match(defendCopy, /Plant lamps\. Push the dark back\./)
 assert.doesNotMatch(defendCopy, /Cheap lines walk the Jericho road/)
 assert.deepEqual(unlockedWatchAbilities(empty), ['love'])
 assert.equal(
@@ -1087,8 +1088,8 @@ assert.match(
 assert.match(cssSrc, /learning-store/)
 assert.equal(toolForEvidence('ph-road')?.id, 'love')
 assert.equal(toolForEvidence('wb-creed')?.id, 'logic')
-assert.equal(WALKER_LABEL.skeptic, 'Skeptic')
-assert.equal(WALKER_LABEL.physical, 'Physical')
+assert.equal(WALKER_LABEL.skeptic, 'Accuser')
+assert.equal(WALKER_LABEL.physical, 'Despair')
 assert.match(
   cssSrc,
   /\.defend-abilities \{[\s\S]*?grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/,
@@ -1137,7 +1138,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.297')
+assert.equal(APP_VERSION, '1.4.298')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1469,7 +1470,7 @@ assert.match(cssSrc, /is-easy-hold/)
 }
 assert.match(
   latestChange(APP_VERSION).items.join('\n'),
-  /Fixes #416|RSV|Dig|verse|BibleGateway|parchment/i,
+  /Fixes #418|prayer watch|dark|taunt|Guardian|Messenger|walker/i,
 )
 {
   const storyCardCss = cssSrc.match(/\.easy-story-card,[\s\S]*?\.easy-story-card::before \{[\s\S]*?\n\}/)?.[0] ?? ''
@@ -2203,10 +2204,10 @@ assert.match(
   readFileSync(new URL('../src/content/lots.ts', import.meta.url), 'utf8'),
   /Story Creek · Jesus stories/,
 )
-assert.match(easyUiSrc, /Love — when compassion moves you, help like the Samaritan/)
+assert.match(easyUiSrc, /Love — tap the dark face\. Prayer turns a lie toward heaven/)
 assert.match(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
-  /Love — tap the matching face\. A true line turns a cheap claim toward heaven/,
+  /Love — tap the matching face\. A true line turns a lie toward heaven/,
 )
 assert.doesNotMatch(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
@@ -2409,10 +2410,10 @@ assert.match(mapSrc, /easy \? null : \(\s*\n\s*<>[\s\S]*city-street-main/)
 assert.match(mapSrc, /if \(isEasy\(progress\)\) return/)
 assert.match(mapSrc, /if \(playing\.current && !isEasy\(progress\)\) return/)
 assert.match(mapSrc, /Tap a building to Manage it/)
-assert.match(latestChange(APP_VERSION).title, /Dig|RSV|verse|Fixes #416/i)
+assert.match(latestChange(APP_VERSION).title, /Night Watch|Phase 1|fantasy|Fixes #418/i)
 assert.match(
   latestChange(APP_VERSION).items.join('\n'),
-  /Fixes #416|RSV|Dig|verse|BibleGateway|parchment/i,
+  /Fixes #418|prayer watch|dark|taunt|Guardian|Messenger|walker/i,
 )
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-img[\s\S]*?fill: none !important/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img\.is-built[\s\S]*?fill: none/)
@@ -2465,7 +2466,7 @@ assert.doesNotMatch(defendSrc, /walkerCue|easySolo|clearWalkerCue|hideOther/)
 assert.match(defendSrc, /loveHowTo/)
 assert.equal(
   EASY.loveCue,
-  'Love — when compassion moves you, help like the Samaritan. Tap the glowing face.',
+  'Love — tap the dark face. Prayer turns a lie toward heaven.',
 )
 assert.doesNotMatch(defendSrc, /is-dim/)
 assert.match(linkPlaySrc, /is-need/)
@@ -2606,7 +2607,7 @@ assert.match(linkPlaySrc, /is-screen-\$\{screen\}/)
 assert.doesNotMatch(defendSrc, /easyTap && tool\.id !== ability/)
 assert.match(defendAbilitySrc, /WATCH_TOOLS\.map/)
 assert.match(defendSrc, /EASY\.nightLead/)
-assert.equal(EASY.nightLead, 'Tap the face six times.')
+assert.equal(EASY.nightLead, 'Tap the dark face.')
 assert.equal(EASY.rememberSentence, 'Tap the main idea you kept.')
 assert.equal(EASY.tapWhy, 'Tap why this is true.')
 assert.equal(EASY.reasonTeach, 'A reason is why this is true.')
@@ -3073,7 +3074,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
 {
   const watch = evidenceFor('td-watch')
   assert.ok(watch)
-  assert.equal(watch.claim, 'Love — tap the matching face. A true line turns a cheap claim toward heaven.')
+  assert.equal(watch.claim, 'Love — tap the matching face. A true line turns a lie toward heaven.')
   const claim = easyFacingLine(watch.id, watch.claim)
   const decoy = easyFacingLine(watch.id, watch.claimChoices[1])
   assert.equal(claim, EASY.loveCue)
@@ -3081,7 +3082,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.notEqual(decoy, claim)
   assert.equal(new Set(watch.claimChoices.map((line) => easyFacingLine(watch.id, line))).size, 3)
   assert.equal(evidenceFor('ph-road')?.claim, 'Neighbor is the one who shows mercy.')
-  assert.match(EASY.loveCue, /compassion/)
+  assert.match(EASY.loveCue, /dark face/)
   assert.match(EASY.loveCue, /^Love /)
   assert.doesNotMatch(EASY.loveCue, /A true main idea can turn/)
   const sameFace = uniqueHoldChoices(
@@ -6867,4 +6868,46 @@ console.log('check-city: ok')
   )
   const genesis = deeperLinksFor('daily-cosmos').find((l) => l.label === 'Genesis 1:1')
   assert.ok(genesis?.quote, 'Genesis 1:1 must ship in-app RSV quote')
+}
+
+// Night Watch 1.4.298: Phase 1 fantasy reskin (Fixes #418)
+{
+  const defend298 = readFileSync(new URL('../src/content/defend.ts', import.meta.url), 'utf8')
+  const defendCss298 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  assert.match(defend298, /Prayer watch/)
+  assert.match(defend298, /Plant lamps\. Push the dark back\./)
+  assert.match(defend298, /Guardian near · Messenger help/)
+  assert.match(defendCss298, /Night Watch Phase 1/)
+  assert.match(defendCss298, /\.defend-angel-help/)
+  assert.match(defendSrc, /defend-angel-help/)
+  assert.equal(WALKER_LABEL['image-bearer'], 'Cold Heart')
+  assert.equal(WALKER_LABEL.skeptic, 'Accuser')
+  assert.equal(WALKER_LABEL.pagan, 'Tempter')
+  assert.equal(WALKER_LABEL.physical, 'Despair')
+  assert.equal(WALKER_LABEL.metaphysical, 'Whisper')
+  assert.equal(WALKER_LABEL.spiritual, 'Mockery')
+  assert.equal(RAID_CAST.length, 8)
+  assert.deepEqual(
+    RAID_CAST.map((item) => item.text),
+    [
+      'Mercy is optional',
+      'Only your own',
+      'Keep walking',
+      "You're wrong",
+      'Trade your lamp',
+      'Only atoms speak',
+      'Many tired gods',
+      'Mind is weather',
+    ],
+  )
+  assert.match(
+    latestChange('1.4.298').items.join('\n'),
+    /Fixes #418|prayer watch|dark|taunt|Guardian|Messenger|walker/i,
+  )
+  assert.match(latestChange('1.4.298').title, /Night Watch|Phase 1|fantasy|Fixes #418/i)
+  assert.doesNotMatch(
+    latestChange('1.4.298').items.join('\n'),
+    /Fixes #416|RSV|Dig verse|Father Dash|Samaritan smash/i,
+    '1.4.298 must stay on Night Watch Phase 1 fantasy reskin Fixes #418',
+  )
 }

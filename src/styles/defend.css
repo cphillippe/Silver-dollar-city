@@ -862,3 +862,32 @@ img.walker-face.easy-walker-face,
 .app.is-play:has(.defend-page .recall-gate) .app-body {
   overflow: auto;
 }
+
+/* Night Watch Phase 1 — fantasy reskin polish (Fixes #418). Append to end of defend.css. */
+
+.defend-angel-help {
+  margin: 0.35rem auto 0;
+  padding: 0.2rem 0.55rem;
+  width: fit-content;
+  max-width: 92%;
+  border-radius: 999px;
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  background: rgba(30, 24, 48, 0.55);
+  color: #f3e6c0;
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  text-align: center;
+  pointer-events: none;
+}
+
+.defend-page.is-easy-watch .defend-frame {
+  box-shadow: inset 0 0 0 1px rgba(120, 140, 220, 0.18);
+}
+
+.defend-page .easy-walker-cue-label,
+.defend-page .walker-cue-label {
+  background: rgba(28, 22, 40, 0.88);
+  color: #fff4df;
+  border: 1px solid rgba(212, 175, 55, 0.35);
+}
