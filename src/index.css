@@ -4775,6 +4775,26 @@ html[data-easy='on'] .mind-node em {
     var(--candy-lip);
 }
 
+/* Easy Fun/Clear 1.4.282: Father Hold-to-Run arcade spring invent —
+   Deeper chunky pad press + soft rev glow while held on Easy Father Dash.
+   Overrides base .run-pad.is-held (3px) with Easy-only spring. Dig/Hard parked. */
+html[data-easy='on'] .play.is-father-run .cta-dock.run-dock .run-pad {
+  transition: transform 0.08s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.08s ease, filter 0.08s ease;
+}
+
+html[data-easy='on'] .play.is-father-run .cta-dock.run-dock .run-pad.is-held {
+  transform: scale(0.96) translateY(6px);
+  box-shadow:
+    0 0 0 #e09412,
+    inset 0 4px 10px rgba(42, 20, 8, 0.28),
+    var(--candy-shine);
+  filter: brightness(1.12) saturate(1.15);
+}
+
+html[data-easy='on'] .play.is-father-run .cta-dock.run-dock .run-pad.is-held.is-glow {
+  filter: brightness(1.2) saturate(1.25) drop-shadow(0 0 10px rgba(255, 90, 122, 0.55));
+}
+
 .run-miss {
   display: grid;
   gap: 8px;

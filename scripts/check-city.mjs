@@ -1137,7 +1137,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.281')
+assert.equal(APP_VERSION, '1.4.282')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -6452,5 +6452,34 @@ console.log('check-city: ok')
     latestChange('1.4.281').items.join('\n'),
     /Fixes #|Dig deeper|Match candy|HUD peel|peels closed|Father Dash|Learn cream|Samaritan|Manage|Lock In|Night Watch|Town|Dig|Creed|Build|Sort|Snap|Link|Claim merge|Source dig|Sequence|Home dock|coach|miss-teach|maze-stage/i,
     '1.4.281 must stay on Easy Match gem tactile invent',
+  )
+}
+
+// Easy Fun 1.4.282: Father Hold-to-Run arcade spring invent (invent Fun/Clear · Shot wake)
+{
+  const indexCss282 = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
+  assert.match(indexCss282, /1\.4\.282: Father Hold-to-Run arcade spring invent/)
+  assert.match(
+    indexCss282,
+    /1\.4\.282: Father Hold-to-Run arcade spring invent[\s\S]*?html\[data-easy='on'\] \.play\.is-father-run \.cta-dock\.run-dock \.run-pad\.is-held/,
+  )
+  assert.match(
+    indexCss282,
+    /1\.4\.282: Father Hold-to-Run arcade spring invent[\s\S]*?transform: scale\(0\.96\) translateY\(6px\)/,
+  )
+  assert.match(
+    indexCss282,
+    /1\.4\.282: Father Hold-to-Run arcade spring invent[\s\S]*?html\[data-easy='on'\] \.play\.is-father-run \.cta-dock\.run-dock \.run-pad\.is-held\.is-glow/,
+  )
+  assert.match(cssSrc, /1\.4\.282: Father Hold-to-Run arcade spring invent/)
+  assert.match(
+    latestChange('1.4.282').items.join('\n'),
+    /HOLD TO RUN|run-pad|arcade|spring|invent Fun\/Clear|Shot wake|held|glow/i,
+  )
+  assert.match(latestChange('1.4.282').title, /Easy Father|Hold-to-Run|arcade spring|invent/i)
+  assert.doesNotMatch(
+    latestChange('1.4.282').items.join('\n'),
+    /Fixes #|Dig deeper|Match candy|HUD peel|peels closed|Learn cream|Samaritan|Manage|Lock In|Night Watch|Town|Dig|Creed|Build|Sort|Snap|Link|Claim merge|Source dig|Sequence|Home dock|coach|miss-teach|maze-stage|gem tactile|squish/i,
+    '1.4.282 must stay on Easy Father Hold-to-Run arcade spring invent',
   )
 }
