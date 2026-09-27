@@ -891,3 +891,40 @@ img.walker-face.easy-walker-face,
   color: #fff4df;
   border: 1px solid rgba(212, 175, 55, 0.35);
 }
+
+/* Easy TAP Phase 1 taunt bubble (1.4.300 / #418 residual) */
+.easy-walker-call {
+  position: absolute;
+  top: -58px;
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 132px;
+  max-width: 180px;
+  padding: 6px 10px 5px;
+  border-radius: 10px;
+  background: rgba(12, 8, 20, 0.88);
+  box-shadow: 0 0 0 2px rgba(255, 204, 51, 0.55);
+  text-align: center;
+  pointer-events: none;
+  z-index: 7;
+}
+.easy-walker-kind {
+  display: block;
+  color: #ffcc33;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  line-height: 1.15;
+}
+.easy-walker-taunt {
+  display: block;
+  color: #fff6b8;
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 1.2;
+  margin-top: 2px;
+}
+.easy-walker.is-cue .easy-walker-cue-label {
+  top: auto;
+  bottom: -4px;
+}
