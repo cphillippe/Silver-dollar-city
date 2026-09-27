@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.284',
+    title: 'Easy Lock In why-chip tactile press invent',
+    when: '2026-09-27',
+    items: [
+      'Easy Lock In mid-quiz: why-chips squish on finger-down (scale 0.92, inset press shadow) with float animation paused while held; gone, toss, win, and miss-teach unchanged — invent Fun/Clear climb toward Shot wake',
+    ],
+  },
+  {
     version: '1.4.283',
     title: 'Easy Samaritan maze road-tile arcade press invent',
     when: '2026-09-27',
