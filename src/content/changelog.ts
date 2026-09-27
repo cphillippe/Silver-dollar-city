@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.288',
+    title: 'Easy City streets button arcade press invent',
+    when: '2026-09-27',
+    items: [
+      'Easy Home street list: street buttons squish on press (scale 0.94, translateY 2px, brightness dip) — invent Fun/Clear climb toward Shot wake',
+    ],
+  },
+  {
     version: '1.4.287',
     title: 'Easy Learn story-dock arcade punch invent',
     when: '2026-09-27',
