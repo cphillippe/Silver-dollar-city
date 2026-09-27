@@ -33,6 +33,7 @@ import {
   ROAD_MAZE_WIN,
   isMazePathSwipe,
   mazeStepToward,
+  setMazePreset,
   swipeStep,
   type MazeCoord,
 } from '../../lib/roadMaze'
@@ -78,6 +79,7 @@ export function RoadMazePlay({
   const [plusFlash, setPlusFlash] = useState('')
   const [walking, setWalking] = useState(false)
   const [score, setScore] = useState(0)
+  const [attempt, setAttempt] = useState(0)
   const [popAt, setPopAt] = useState('')
   const [beatPop, setBeatPop] = useState('')
   const [comboFlash, setComboFlash] = useState(0)
@@ -95,6 +97,8 @@ export function RoadMazePlay({
   const comboRef = useRef(0)
   const openedRef = useRef(1)
   const cleared = useRef(false)
+
+  setMazePreset(attempt)
 
   const opened = mazeBeatsOpened(found, helped, won)
   const goal = mazeGoal(found, helped)
@@ -193,6 +197,7 @@ export function RoadMazePlay({
     setPopAt('')
     setBeatPop('')
     setComboFlash(0)
+    setAttempt((n) => n + 1)
   }
 
   function blocked(message: string) {
@@ -479,7 +484,11 @@ export function RoadMazePlay({
               >
                 {here && !helpCue ? (
                   <span className="maze-actor is-you">
-                    <img src={ROAD_HELP_FACE} alt="" draggable={false} />
+                    {found || helped ? (
+                      <img src={ROAD_HELP_FACE} alt="" draggable={false} />
+                    ) : (
+                      <span className="maze-you-token" aria-hidden />
+                    )}
                   </span>
                 ) : null}
                 {hurt && !helped ? (

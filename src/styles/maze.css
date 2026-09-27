@@ -1286,3 +1286,67 @@ html[data-easy='on'] .play.is-road-maze .maze-cell.is-road:active {
     animation: none;
   }
 }
+
+/* Easy Clear 1.4.296: Samaritan less-is-more + smash fix (Fixes #414 #412) —
+   Append to END of src/styles/maze.css. Earthen continuous road; square cells;
+   object-fit contain so Hurt Man isn’t crushed. No Match candy invent. */
+
+.play.is-road-maze .maze-board {
+  gap: 2px;
+  padding: 6px;
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(216, 184, 136, 0.22), rgba(43, 34, 27, 0.35)),
+    linear-gradient(180deg, #4a3b2c, #2b221b);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 246, 232, 0.12),
+    0 8px 22px rgba(20, 10, 4, 0.4);
+  border: 2px solid #4a3b2c;
+}
+
+.play.is-road-maze .maze-cell {
+  aspect-ratio: 1 / 1;
+  height: auto;
+  border-radius: 6px;
+}
+
+.play.is-road-maze .maze-cell.is-road {
+  background: #d8b888;
+  border-bottom: 2px solid #b89767;
+  box-shadow: none;
+}
+
+.play.is-road-maze .maze-cell.is-rock {
+  background: #3d3126;
+  opacity: 0.95;
+  box-shadow: none;
+}
+
+.play.is-road-maze .maze-actor img,
+.play.is-road-maze .maze-beat-face {
+  object-fit: contain;
+}
+
+.play.is-road-maze .maze-cell.is-hint,
+.play.is-road-maze .maze-cell.is-here {
+  box-shadow:
+    0 0 0 2px #fff6c8,
+    0 0 10px rgba(255, 204, 51, 0.55);
+}
+
+html[data-easy='on'] .play.is-road-maze .maze-cell.is-road:active {
+  box-shadow:
+    inset 0 4px 8px rgba(42, 20, 8, 0.28),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.2);
+  filter: brightness(1.06);
+}
+
+.play.is-road-maze .maze-you-token {
+  width: 52%;
+  height: 52%;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #6eb5ff, #2a5aa8);
+  box-shadow:
+    0 0 0 2px #fff6e8,
+    0 2px 0 rgba(20, 10, 4, 0.35);
+}
