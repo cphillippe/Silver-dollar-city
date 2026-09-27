@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.279',
+    title: 'Easy Samaritan HURT MAN/HELP pill contrast',
+    when: '2026-09-27',
+    items: [
+      'Easy Samaritan mid-play: HURT MAN and HELP beat pills use dark ink on light yellow got/now chips so labels stay readable (Fixes #381)',
+    ],
+  },
+  {
     version: '1.4.278',
     title: 'Easy Lock In miss-teach: HUD peel restores one LOCK IN label',
     when: '2026-09-27',

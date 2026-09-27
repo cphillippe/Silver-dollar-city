@@ -1137,7 +1137,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.278')
+assert.equal(APP_VERSION, '1.4.279')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1467,7 +1467,7 @@ assert.match(cssSrc, /is-easy-hold/)
   assert.match(dockCss, /backdrop-filter: blur/)
   assert.doesNotMatch(dockCss, /#16062e/, 'sticky CTA docks must not be an opaque black slab')
 }
-assert.match(latestChange(APP_VERSION).items.join('\n'), /board-first|HUD peel|SNAG|panel-blast|phone portrait|BONUS|invent Fun\/Clear/i)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /board-first|HUD peel|SNAG|panel-blast|phone portrait|BONUS|invent Fun\/Clear|Samaritan|beat pill|HURT MAN/i)
 {
   const storyCardCss = cssSrc.match(/\.easy-story-card,[\s\S]*?\.easy-story-card::before \{[\s\S]*?\n\}/)?.[0] ?? ''
   assert.match(storyCardCss, /border:\s*0/)
@@ -2406,8 +2406,8 @@ assert.match(mapSrc, /easy \? null : \(\s*\n\s*<>[\s\S]*city-street-main/)
 assert.match(mapSrc, /if \(isEasy\(progress\)\) return/)
 assert.match(mapSrc, /if \(playing\.current && !isEasy\(progress\)\) return/)
 assert.match(mapSrc, /Tap a building to Manage it/)
-assert.match(latestChange(APP_VERSION).title, /panel-blast|SNAG|≤720|HUD/i)
-assert.match(latestChange(APP_VERSION).items.join('\n'), /board-first|HUD peel|SNAG|panel-blast|phone portrait|BONUS|invent Fun\/Clear/i)
+assert.match(latestChange(APP_VERSION).title, /panel-blast|SNAG|≤720|HUD|Samaritan|pill contrast/i)
+assert.match(latestChange(APP_VERSION).items.join('\n'), /board-first|HUD peel|SNAG|panel-blast|phone portrait|BONUS|invent Fun\/Clear|Samaritan|beat pill|HURT MAN/i)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-img[\s\S]*?fill: none !important/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img\.is-built[\s\S]*?fill: none/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-hit[\s\S]*?stroke: none/)
@@ -6374,5 +6374,25 @@ console.log('check-city: ok')
     latestChange('1.4.278').items.join('\n'),
     /Fixes #381|Fixes #382|Match candy|Night Watch|Dig deeper|Manage|Shot 270/i,
     '1.4.278 must stay on Easy Lock In miss-teach one LOCK IN label',
+  )
+}
+
+// Easy Clear 1.4.279: Easy Samaritan beat pill contrast (Fixes #381)
+{
+  const welcomeCss279 = readFileSync(new URL('../src/styles/welcome.css', import.meta.url), 'utf8')
+  assert.match(welcomeCss279, /1\.4\.279: Samaritan beat pill contrast \(Fixes #381\)/)
+  assert.match(
+    welcomeCss279,
+    /1\.4\.279: Samaritan beat pill contrast \(Fixes #381\)[\s\S]*?html\[data-easy='on'\] \.play\.is-road-maze \.maze-beat\.is-got,[\s\S]*?html\[data-easy='on'\] \.play\.is-road-maze \.maze-beat\.is-now \{[\s\S]*?color: #3a2618/,
+  )
+  assert.match(latestChange('1.4.279').title, /Easy Samaritan|pill contrast|Fixes #381/i)
+  assert.match(
+    latestChange('1.4.279').items.join('\n'),
+    /Fixes #381|HURT MAN|HELP|beat pill|Samaritan/i,
+  )
+  assert.doesNotMatch(
+    latestChange('1.4.279').items.join('\n'),
+    /Fixes #382|Match candy|Night Watch|Dig deeper|Manage|Lock In/i,
+    '1.4.279 must stay on Easy Samaritan beat pill contrast',
   )
 }

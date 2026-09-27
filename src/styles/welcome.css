@@ -2007,6 +2007,14 @@ html[data-theme='dusk'] .easy-story-card {
   }
 }
 
+/* Easy Clear 1.4.279: Samaritan beat pill contrast (Fixes #381) —
+   is-got light yellow + cream #fff6e8 text = unreadable HURT MAN / HELP.
+   Dark ink on got/now; leave default dim dark pills cream-on-dusk. */
+html[data-easy='on'] .play.is-road-maze .maze-beat.is-got,
+html[data-easy='on'] .play.is-road-maze .maze-beat.is-now {
+  color: #3a2618;
+}
+
 /* Easy Clear 1.4.265: Easy Samaritan / road maze ≤720 / tall residual purple void after cream 256 (Fixes #365) —
    After opaque cream shell 256 (app-body + play + solid maze-stage · warm board · cream dock)
    Shot pack 1.4.260 06-samaritan.png STILL fails — Gemini: MERCY · STORY CREEK mid-play
