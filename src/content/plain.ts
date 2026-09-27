@@ -278,9 +278,9 @@ const PLAIN: Record<string, PlainLine> = {
     },
   ),
   'td-watch': line(
-    'Love — when compassion moves you, help like the Samaritan. Tap the glowing face.',
-    'Tap the glowing face. When compassion moves you, help like the Samaritan.',
-    { term: 'Love', sense: 'the Night Watch tool — how to use it, not a new main idea', hint: 'Tap the face six times. Example: tap the glowing person.' },
+    'Love — tap the dark face. Prayer turns a lie toward heaven.',
+    'Tap the dark face. Prayer turns a lie toward heaven.',
+    { term: 'Love', sense: 'the Night Watch tool — how to use it, not a new main idea', hint: 'Tap the dark face. Example: tap the glowing person.' },
   ),
   'ln-street': line(
     'An idea lives at a place, with a person.',
