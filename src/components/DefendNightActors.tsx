@@ -56,6 +56,7 @@ export interface DefendNightActorsProps {
   flash: CityPlotId | null
   togglePad: (id: CityPlotId) => void
   fire: (id: CityPlotId) => void
+  fireAtRaider: (id: number) => void
   fireBest: () => void
   shots: Shot[]
   easy: boolean
@@ -79,11 +80,12 @@ export function DefendNightActorsSvg({
   flash,
   togglePad,
   fire,
+  fireAtRaider,
+  tapTarget,
   shots,
-  easy,
   blasts,
   phase,
-}: Omit<DefendNightActorsProps, 'tapTarget' | 'tapPos' | 'fireBest'>) {
+}: Omit<DefendNightActorsProps, 'tapPos' | 'fireBest' | 'tapJuice' | 'easy'> & { easy: boolean }) {
   return (
     <>
               {easyTap
@@ -160,16 +162,43 @@ export function DefendNightActorsSvg({
                   <circle className="defend-impact" cx={shot.to.x} cy={shot.to.y} r="22" />
                 </g>
               ))}
-              {easy
-                ? null
-                : raiders.map((raider) => {
+              {raiders.map((raider) => {
                 const at = raiderAt(raider)
+                const isTap = easyTap && !raider.turned
+                const isCue = isTap && tapTarget?.id === raider.id
                 return (
                   <g
                     key={raider.id}
-                    className={`defend-raider ${raider.turned ? 'is-turned' : ''}`}
+                    data-person-node={isTap ? 'walker' : undefined}
+                    className={`defend-raider ${raider.turned ? 'is-turned' : ''} ${isTap ? 'is-easy-tap-target' : ''} ${isCue ? 'is-easy-cue' : ''}`}
                     transform={`translate(${at.x} ${at.y})`}
+                    role={isTap ? 'button' : undefined}
+                    tabIndex={isTap ? 0 : undefined}
+                    aria-label={
+                      isTap
+                        ? `${WALKER_LABEL[raider.kind]}: ${raider.text}. ${EASY.nightTap}`
+                        : undefined
+                    }
+                    onClick={
+                      isTap
+                        ? (event) => {
+                            event.stopPropagation()
+                            fireAtRaider(raider.id)
+                          }
+                        : undefined
+                    }
+                    onKeyDown={
+                      isTap
+                        ? (event) => {
+                            if (event.key === 'Enter' || event.key === ' ') {
+                              event.preventDefault()
+                              fireAtRaider(raider.id)
+                            }
+                          }
+                        : undefined
+                    }
                   >
+                    <circle className="defend-raider-hit" r="22" fill="transparent" />
                     <ellipse className="defend-raider-shadow" cy={12} rx={13} ry={4.6} />
                     <image
                       className="defend-raider-face"
@@ -187,15 +216,17 @@ export function DefendNightActorsSvg({
                         <circle className="defend-cheer-spark is-3" cx="2" cy="-26" r="1.4" />
                       </g>
                     ) : null}
-                    <g className="defend-raider-call">
-                      <rect x={-40} y={-42} width={80} height={28} rx="8" />
-                      <text className="defend-raider-kind" y={-32} textAnchor="middle">
-                        {WALKER_LABEL[raider.kind]}
-                      </text>
-                      <text y={-20} textAnchor="middle">
-                        {raider.text}
-                      </text>
-                    </g>
+                    {!raider.turned ? (
+                      <g className="defend-raider-call">
+                        <rect x={-40} y={-42} width={80} height={28} rx="8" />
+                        <text className="defend-raider-kind" y={-32} textAnchor="middle">
+                          {WALKER_LABEL[raider.kind]}
+                        </text>
+                        <text className="defend-raider-taunt" y={-20} textAnchor="middle">
+                          {raider.text}
+                        </text>
+                      </g>
+                    ) : null}
                   </g>
                 )
               })}
@@ -226,9 +257,8 @@ export function DefendNightWalkerCue({
   easyTap,
   tapTarget,
   tapPos,
-  fireBest,
   tapJuice,
-}: Pick<DefendNightActorsProps, 'easyTap' | 'tapTarget' | 'tapPos' | 'fireBest' | 'tapJuice'>) {
+}: Pick<DefendNightActorsProps, 'easyTap' | 'tapTarget' | 'tapPos' | 'tapJuice'>) {
   const [juiceHeaven, setJuiceHeaven] = useState(false)
   useEffect(() => {
     if (!tapJuice) {
@@ -269,40 +299,25 @@ export function DefendNightWalkerCue({
               </div>
             ) : null}
             {easyTap && tapTarget && tapPos ? (
-              <div className="easy-walkers" aria-label="Tap the walking person">
-                <button
-                  type="button"
-                  data-person-node="walker"
-                  className="easy-walker is-easy-walker is-cue"
-                  aria-label={`${WALKER_LABEL[tapTarget.kind]}: ${tapTarget.text}. ${EASY.nightTap}`}
+              <div className="easy-walkers easy-walkers-path-cue" aria-hidden>
+                <span
+                  className="easy-walker-arrow is-path-cue"
                   style={{
                     left: tapPos.left,
-                    top: tapPos.top,
-                    width: EASY_WALKER_HIT_PX,
-                    height: EASY_WALKER_HIT_PX,
-                  }}
-                  onClick={(event) => {
-                    event.stopPropagation()
-                    fireBest()
+                    top: tapPos.top - 28,
                   }}
                 >
-                  <span className="easy-walker-call" aria-hidden>
-                    <span className="easy-walker-kind">{WALKER_LABEL[tapTarget.kind]}</span>
-                    <span className="easy-walker-taunt">{tapTarget.text}</span>
-                  </span>
-                  <span className="easy-walker-arrow" aria-hidden>
-                    ▼
-                  </span>
-                  <span className="easy-walker-cue-label">{EASY.nightTap}</span>
-                  <WalkerFace
-                    kind={tapTarget.kind}
-                    className="easy-walker-face"
-                    style={{
-                      width: EASY_WALKER_FACE_PX,
-                      height: EASY_WALKER_FACE_PX,
-                    }}
-                  />
-                </button>
+                  ▼
+                </span>
+                <span
+                  className="easy-walker-cue-label is-path-cue"
+                  style={{
+                    left: tapPos.left,
+                    top: tapPos.top + 36,
+                  }}
+                >
+                  {EASY.nightTap}
+                </span>
               </div>
             ) : null}
     </>

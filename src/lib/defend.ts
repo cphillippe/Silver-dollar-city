@@ -6,6 +6,10 @@ import { deployFit, toolTier, unlockedWatchTools, watchTool, WATCH_TOOLS } from 
 export const DEFEND_BRIEF_ID = 'td-watch'
 export const DEFEND_HEARTS = 3
 export const DEFEND_WAVE_SIZE = 6
+/** Easy soft TD: cap live unturned walkers before spawning the next. */
+export const EASY_WAVE_LIVE = 3
+
+const EASY_SPAWN_T = [0.08, 0.18, 0.28] as const
 
 /** Main street — same curve the overworld draws. Raiders walk toward the porch. */
 export const DEFEND_PATH: { x: number; y: number }[] = [
@@ -95,9 +99,27 @@ export function easyTapMode(easy: boolean, phase: string, won: boolean): boolean
   return easy && phase === 'wave' && !won
 }
 
-/** The one person Easy TAP shows. Mid-wave count stays 1. */
-export function easyTapTarget<T extends { turned?: string }>(raiders: T[]): T | undefined {
-  return raiders.find((item) => !item.turned)
+/** Front-most unturned walker — teach cue only (not the only live walker). */
+export function easyTapTarget<T extends { turned?: string; t?: number }>(raiders: T[]): T | undefined {
+  let pick: T | undefined
+  let bestT = -1
+  for (const item of raiders) {
+    if (item.turned) continue
+    const t = item.t ?? 0
+    if (t >= bestT) {
+      bestT = t
+      pick = item
+    }
+  }
+  return pick
+}
+
+export function easyHoldSpawn(walkingUnturned: number): boolean {
+  return walkingUnturned >= EASY_WAVE_LIVE
+}
+
+export function easySpawnT(spawnIndex: number): number {
+  return EASY_SPAWN_T[spawnIndex % EASY_SPAWN_T.length]
 }
 
 export function easyTapPersonCount(raiders: { turned?: string }[]): number {

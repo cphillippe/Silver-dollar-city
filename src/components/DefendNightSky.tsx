@@ -17,7 +17,7 @@ export function DefendNightSky({
   won,
   phase,
   fireBest,
-  easyTap,
+  easyTap: _easyTap,
   children,
 }: DefendNightSkyProps) {
   return (
@@ -133,12 +133,10 @@ export function DefendNightSky({
                 <rect x="-16" y="-4" width="32" height="26" rx="2" />
                 <rect className="defend-porch-window" x="-5" y="4" width="10" height="9" rx="1" />
               </g>
-              {easyTap ? null : (
               <g className="defend-gate" transform={`translate(${DEFEND_PATH[0].x} ${DEFEND_PATH[0].y})`}>
                 <path d="M-10 6 V-16 M10 6 V-16" />
                 <path d="M-12 -16 H12" />
               </g>
-              )}
 {children}
             </svg>
   )

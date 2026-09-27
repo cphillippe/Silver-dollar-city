@@ -28,6 +28,8 @@ import {
   unlockedWatchAbilities,
   waveSpawnEvery,
   waveSpeed,
+  easyHoldSpawn,
+  easySpawnT,
   easyTapFit,
   easyTapMode,
   easyTapTarget,
@@ -151,15 +153,12 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       const dt = Math.min(0.05, (now - last) / 1000)
       last = now
       spawnAt += dt
-      const targetId = live.current.raiders.find((item) => !item.turned)?.id
       const next = live.current.raiders.map((item) => {
         if (item.turned) {
           const tool = item.turned ? watchTool(item.turned) : undefined
           const tier = tool ? toolTier(tool, progress) : 1
           return { ...item, heavenT: (item.heavenT ?? 0) + heavenSpeed(tier, easy) * dt }
         }
-        const freezeTarget = easy && item.id === targetId
-        if (freezeTarget) return { ...item }
         return { ...item, t: item.t + waveSpeed(easy) * dt }
       })
       let leaked = 0
@@ -182,7 +181,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         window.setTimeout(() => setLeakFlash(false), 220)
         markMissRef.current(DEFEND_BRIEF_ID)
       }
-      const holdSpawn = easy && walking.some((item) => !item.turned)
+      const unturnedLive = walking.filter((item) => !item.turned).length
+      const holdSpawn = easy && easyHoldSpawn(unturnedLive)
       if (
         live.current.spawned < DEFEND_WAVE_SIZE &&
         !holdSpawn &&
@@ -196,7 +196,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         const cast = raidForWave(progress.defense.cleared, id)
         walking.push({
           id,
-          t: easy ? 0.42 : 0,
+          t: easy ? easySpawnT(id) : 0,
           text: cast.text,
           kind: cast.kind,
         })
@@ -253,7 +253,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     return pathPoint(raider.t)
   }
 
-  function fire(id: CityPlotId) {
+  function fire(id: CityPlotId, forceRaiderId?: number) {
     if (phase !== 'wave' || won) return
     const now = performance.now()
     const stage = padStage(id, progress)
@@ -263,13 +263,18 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     const using = unlocked.includes(ability) ? ability : 'love'
     const range = abilityRange(using, stage, progress)
     let best: Raider | null = null
-    let bestD = range
-    for (const raider of live.current.raiders) {
-      if (raider.turned) continue
-      const d = dist(at, raiderAt(raider))
-      if (d <= bestD) {
-        best = raider
-        bestD = d
+    if (forceRaiderId !== undefined) {
+      const forced = live.current.raiders.find((item) => item.id === forceRaiderId && !item.turned)
+      if (forced && dist(at, raiderAt(forced)) <= range) best = forced
+    } else {
+      let bestD = range
+      for (const raider of live.current.raiders) {
+        if (raider.turned) continue
+        const d = dist(at, raiderAt(raider))
+        if (d <= bestD) {
+          best = raider
+          bestD = d
+        }
       }
     }
     live.current.cool[id] = now
@@ -339,6 +344,29 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     }
     setRaiders(live.current.raiders)
     setDowned(live.current.downed)
+  }
+
+  function fireAtRaider(raiderId: number) {
+    if (phase !== 'wave' || won) return
+    let pick: CityPlotId | null = null
+    let bestD = Infinity
+    const raider = live.current.raiders.find((item) => item.id === raiderId && !item.turned)
+    if (!raider) return
+    for (const id of live.current.planted) {
+      const at = DEFEND_ANCHOR[id]
+      const range = abilityRange(
+        unlocked.includes(ability) ? ability : 'love',
+        padStage(id, progress),
+        progress,
+      )
+      const d = dist(at, raiderAt(raider))
+      if (d <= range && d < bestD) {
+        bestD = d
+        pick = id
+      }
+    }
+    if (pick) fire(pick, raiderId)
+    else if (easy) setToolLock(EASY.nightMiss)
   }
 
   function fireBest() {
@@ -463,6 +491,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
               won={won}
               phase={phase}
               fireBest={fireBest}
+              fireAtRaider={fireAtRaider}
               easyTap={easyTap}
               pads={pads}
               planted={planted}
