@@ -11,15 +11,16 @@ export interface UiShellProps {
   balloon?: ReactNode
   /** Playfield (the board). */
   children: ReactNode
-  /** Right rail beside the frame: the C&C ability dock. */
+  /** Right-edge cutaway floating over the full-width frame: the C&C ability dock. */
   rail?: ReactNode
   /** Overlaid on the playfield's bottom-left corner: lost card, toast, plant CTA, tip, helper sticker. */
   docks?: ReactNode
 }
 
 /**
- * Purple night chrome (A2 plate): top HUD bar, map-first playfield, right C&C rail,
- * left money balloon. Docks float on the stage so no footer steals map height.
+ * Purple night chrome (A2 plate): top HUD bar, full-width map playfield, right C&C
+ * cutaway over the map, left money balloon. Docks float on the stage so no footer
+ * steals map height and no rail column steals map width.
  * Hosts slots only; owns no combat state.
  */
 export function UiShell({ shake, won, hud, coin, balloon, children, rail, docks }: UiShellProps) {
