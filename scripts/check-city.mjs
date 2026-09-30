@@ -32,6 +32,8 @@ import { parableHollow } from '../src/content/parableHollow.ts'
 import { witnessBench } from '../src/content/witnessBench.ts'
 import {
   abilityRange,
+  DEFEND_PATH,
+  DEFEND_WAVE_SIZE,
   defendPads,
   EASY_CUE_HOLD_MS,
   EASY_WALKER_FACE_PX,
@@ -44,11 +46,17 @@ import {
   easyTapPersonCount,
   easyTapTarget,
   heavenPoint,
+  padStage,
+  pathPoint,
   RAID_CAST,
   raidForWave,
   unlockedWatchAbilities,
   waveIsClear,
 } from '../src/lib/defend.ts'
+import { nightEnemies as nightEnemiesMod } from '../src/nightWatch/enemies/index.ts'
+import { nightParts as nightPartsMod } from '../src/nightWatch/parts/index.ts'
+import { nightPath as nightPathMod } from '../src/nightWatch/path/index.ts'
+import { nightTowers as nightTowersMod } from '../src/nightWatch/towers/index.ts'
 import {
   deployFit,
   toolForEvidence,
@@ -1159,7 +1167,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.302')
+assert.equal(APP_VERSION, '1.4.303')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -7040,5 +7048,53 @@ console.log('check-city: ok')
     latestChange('1.4.302').items.join('\n'),
     /watch tower|range ring|tower feel/i,
     '1.4.302 must stay on Easy Night Watch little wave on path Fixes #418',
+  )
+}
+
+// Night Watch 1.4.303: FRAME — UiShell + module seams (src/nightWatch)
+{
+  const nw = (file) => readFileSync(new URL(`../src/nightWatch/${file}`, import.meta.url), 'utf8')
+  const shell303 = nw('ui/UiShell.tsx')
+  const surface303 = nw('map/surface.ts')
+  const path303 = nw('path/index.ts')
+  const towers303 = nw('towers/index.ts')
+  const enemies303 = nw('enemies/index.ts')
+  const parts303 = nw('parts/index.ts')
+  assert.match(shell303, /defend-frame/)
+  assert.match(shell303, /docks/)
+  assert.match(surface303, /plate: null/, '1.4.303 Frame must not drop the A2 plate')
+  assert.match(surface303, /viewBox: '0 0 640 420'/)
+  assert.match(path303, /points: DEFEND_PATH/)
+  assert.match(path303, /DEFEND_ANCHOR\[id\]/)
+  assert.match(towers303, /defendPads/)
+  assert.match(towers303, /abilityRange/)
+  assert.match(towers303, /dist\(/)
+  assert.match(enemies303, /raidForWave/)
+  assert.match(enemies303, /heavenPoint/)
+  assert.match(parts303, /NIGHT_PARTS[^=]*= \{\}/, '1.4.303 parts registry ships empty')
+  for (const src of [path303, towers303, enemies303, parts303, surface303]) {
+    assert.doesNotMatch(src, /from 'react'|components\//, 'Night Watch data seams stay React-free')
+  }
+  assert.match(defendScreenOnlySrc, /<UiShell/)
+  assert.doesNotMatch(defendScreenOnlySrc, /className=\{`defend-frame/)
+  assert.doesNotMatch(defendScreenOnlySrc, /DEFEND_ANCHOR|pathPoint\(|interface Raider/)
+  assert.match(defendScreenOnlySrc, /useState<NightPhase>/)
+  assert.match(defendSkySrc, /<MapPlate \/>/)
+  assert.match(defendSkySrc, /nightPath\.roadD/)
+  assert.match(defendNightSrc, /nightTowers\.inRange/)
+  assert.match(defendNightSrc, /nightParts\.src\('face'/)
+  assert.deepEqual(nightPathMod.points, DEFEND_PATH)
+  assert.deepEqual(nightPathMod.pointAt(0), DEFEND_PATH[0])
+  assert.deepEqual(nightPathMod.pointAt(1), DEFEND_PATH[DEFEND_PATH.length - 1])
+  assert.deepEqual(nightEnemiesMod.at({ id: 0, t: 0.5, text: '', kind: 'skeptic' }), pathPoint(0.5))
+  assert.equal(nightEnemiesMod.waveSize, DEFEND_WAVE_SIZE)
+  assert.equal(nightTowersMod.range('porch', 'love', empty), abilityRange('love', padStage('porch', empty), empty))
+  assert.equal(nightPartsMod.src('face', 'skeptic'), null)
+  assert.match(latestChange('1.4.303').title, /Night Watch|frame/i)
+  assert.match(latestChange('1.4.303').items.join('\n'), /Night Watch|module|#418/i)
+  assert.doesNotMatch(
+    latestChange('1.4.303').items.join('\n'),
+    /plate|candy cottage|yellow road|tower plant|auto-fire|spawn table/i,
+    '1.4.303 must stay Frame only (no A2 map fill claims)',
   )
 }
