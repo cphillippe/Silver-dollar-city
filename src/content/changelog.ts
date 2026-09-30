@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.314',
+    title: 'Night Watch C&C float over map',
+    when: '2026-09-30',
+    items: [
+      'Night Watch hands the map the full width: the right Love / Logic / Reason / Science dock now floats as a see-through cutaway over the map’s right edge instead of reserving its own column, so the purple strip beside the map is gone. The four buttons stay tappable, the money balloon, coin read, corner docks, and whole-map fit stay as they were. Fixes #418',
+    ],
+  },
+  {
     version: '1.4.313',
     title: 'Night Watch compact chrome — map gets the space',
     when: '2026-09-30',

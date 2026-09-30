@@ -1168,7 +1168,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.313')
+assert.equal(APP_VERSION, '1.4.314')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -7305,7 +7305,7 @@ console.log('check-city: ok')
   assert.match(defendAbilitySrc, /WATCH_TOOLS\.map/)
   assert.doesNotMatch(css310, /grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/, '1.4.310 no 2×2 dock grid')
   assert.match(css310, /1\.4\.310 UiShell chrome/)
-  assert.match(css310, /\.nw-stage \{[\s\S]*?grid-template-columns: minmax\(0, 1fr\) auto/)
+  assert.match(css310, /\.nw-stage \{[\s\S]*?grid-template-columns: minmax\(0, 1fr\)/)
   assert.match(css310, /\.defend-ability-claim \{[\s\S]*?clip: rect\(0 0 0 0\)/)
   assert.match(latestChange('1.4.310').title, /UiShell/)
   assert.match(latestChange('1.4.310').items.join('\n'), /right rail|C&C|Love \/ Logic/i)
@@ -7383,5 +7383,35 @@ console.log('check-city: ok')
     latestChange('1.4.313').items.join('\n'),
     /tower plant|auto-fire|spawn table|pathfind|new tool|HP/,
     '1.4.313 must stay chrome layout only',
+  )
+}
+
+// Night Watch 1.4.314: C&C cutaway floats over the full-width map (no reserved rail column)
+{
+  const shell314 = readFileSync(new URL('../src/nightWatch/ui/UiShell.tsx', import.meta.url), 'utf8')
+  const css314 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const stage314 = css314.match(/\n\.nw-stage \{[\s\S]*?\n\}/)?.[0] ?? ''
+  const rail314 = css314.match(/\n\.nw-rail \{[\s\S]*?\n\}/)?.[0] ?? ''
+  assert.match(stage314, /grid-template-columns: minmax\(0, 1fr\);/, '1.4.314 stage is one full-width column')
+  assert.doesNotMatch(stage314, /minmax\(0, 1fr\) auto|gap:/, '1.4.314 no reserved rail column beside the frame')
+  assert.match(stage314, /position: relative/, '1.4.314 stage anchors the floating rail')
+  assert.match(rail314, /position: absolute/, '1.4.314 C&C floats over the map')
+  assert.match(rail314, /right: /, '1.4.314 C&C sits on the right edge')
+  assert.doesNotMatch(rail314, /bottom: /, '1.4.314 C&C does not move to the bottom')
+  assert.match(rail314, /pointer-events: none/, '1.4.314 map stays tappable around the dock')
+  assert.match(css314, /\.nw-rail \.defend-ability \{[\s\S]*?pointer-events: auto/, '1.4.314 C&C buttons stay tappable')
+  assert.match(shell314, /className="nw-stage"[\s\S]*defend-frame[\s\S]*nw-rail/, '1.4.314 rail still hosted by UiShell')
+  assert.match(defendScreenOnlySrc, /rail=\{rail\}/)
+  assert.match(defendAbilitySrc, /WATCH_TOOLS\.map/, '1.4.314 keeps Love / Logic / Reason / Science')
+  assert.match(defendScreenOnlySrc, /balloon=\{<MoneyBalloon/, '1.4.314 keeps the money balloon')
+  assert.match(defendScreenOnlySrc, /coin=\{<CoinRead/, '1.4.314 keeps the coin HUD')
+  assert.match(css314, /\.nw-docks \{[\s\S]*?position: absolute/, '1.4.314 keeps the 1.4.313 overlay docks')
+  assert.match(defendSkySrc, /preserveAspectRatio="xMidYMid meet"/, '1.4.314 keeps the 1.4.312 contain plate')
+  assert.doesNotMatch(defendSkySrc, /slice/, '1.4.314 no cover crop')
+  assert.match(latestChange('1.4.314').title, /C&C float over map/)
+  assert.doesNotMatch(
+    latestChange('1.4.314').items.join('\n'),
+    /tower plant|auto-fire|spawn table|pathfind|new tool|HP/,
+    '1.4.314 must stay chrome layout only',
   )
 }
