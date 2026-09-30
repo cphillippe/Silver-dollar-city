@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.311',
+    title: 'Night Watch playfield full-bleed under chrome',
+    when: '2026-09-30',
+    items: [
+      'Night Watch playfield fills the phone: the board takes every px under the chrome HUD beside the right C&C rail (no more short letterbox and empty purple below), the candy map cover-crops edge-to-edge around the yellow road, and walkers, lamps, and tap cues ride the same crop so they stay on the road. Fixes #418',
+    ],
+  },
+  {
     version: '1.4.310',
     title: 'Night Watch UiShell — right C&C + chrome HUD',
     when: '2026-09-30',

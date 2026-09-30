@@ -28,6 +28,7 @@ import {
   MoneyBalloon,
   UiShell,
   boardPoint as mapBoardPoint,
+  boardViewBox,
   nightEnemies,
   nightTowers,
   type NightBlast as Blast,
@@ -492,6 +493,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           >
             <DefendNightBoard
               boardRef={boardRef}
+              viewBox={boardViewBox(boardBox)}
               shake={shake}
               won={won}
               phase={phase}

@@ -1136,7 +1136,7 @@ assert.match(
   cssSrc,
   /\.defend-abilities \{[\s\S]*?z-index: 3/,
 )
-assert.match(cssSrc, /--nw-frame-h: min\(/)
+assert.doesNotMatch(cssSrc, /--nw-frame-h/)
 assert.match(cssSrc, /defend-ability-pop/)
 assert.match(cssSrc, /city-tap/)
 assert.match(cssSrc, /lantern-breathe/)
@@ -1145,7 +1145,7 @@ assert.match(
   /\.is-puzzle \.play\.is-build \.result \{[\s\S]*?position: static/,
 )
 assert.match(cssSrc, /match-recover/)
-assert.match(defendSkySrc, /preserveAspectRatio="xMidYMid meet"/)
+assert.match(defendSkySrc, /preserveAspectRatio="xMidYMid slice"/)
 assert.match(defendNightSrc, /nightEnemies\.faceSrc|walkerSrc/)
 assert.match(
   readFileSync(new URL('../src/components/Avatar.tsx', import.meta.url), 'utf8'),
@@ -1168,7 +1168,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.310')
+assert.equal(APP_VERSION, '1.4.311')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -7313,5 +7313,33 @@ console.log('check-city: ok')
     latestChange('1.4.310').items.join('\n'),
     /tower plant|auto-fire|spawn table|pathfind|new tool/i,
     '1.4.310 must stay UiShell / docks / HUD only',
+  )
+}
+
+// Night Watch 1.4.311: playfield full-bleed under chrome — stage fills, board cover-crops, overlays share the crop
+{
+  const nw311 = (file) => readFileSync(new URL(`../src/nightWatch/${file}`, import.meta.url), 'utf8')
+  const surface311 = nw311('map/surface.ts')
+  const css311 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  assert.doesNotMatch(css311, /--nw-frame-h|58dvh/, '1.4.311 no aspect / dvh cap on the stage')
+  assert.match(css311, /\.nw-shell \{[\s\S]*?flex: 1 1 auto/, '1.4.311 shell takes the rest of the page')
+  assert.match(css311, /\.nw-stage \{[\s\S]*?flex: 1 1 0/, '1.4.311 stage takes the rest of the shell')
+  assert.match(css311, /\.nw-stage \{[\s\S]*?grid-template-rows: minmax\(0, 1fr\)/)
+  assert.match(defendSkySrc, /viewBox=\{viewBox\}/, '1.4.311 board uses the cover-crop viewBox')
+  assert.match(defendScreenOnlySrc, /viewBox=\{boardViewBox\(boardBox\)\}/)
+  assert.match(defendScreenOnlySrc, /mapBoardPoint\(boardBox,/, '1.4.311 overlays share the measured box')
+  assert.match(surface311, /Math\.max\(box\.w \/ map\.width, box\.h \/ map\.height\)/, '1.4.311 cover scale')
+  assert.match(surface311, /const view = boardView\(box, map\)/, '1.4.311 boardPoint uses the same crop as the viewBox')
+  assert.match(surface311, /keep: ROAD_KEEP/, '1.4.311 crop holds the painted road')
+  assert.match(surface311, /pathRect\(DEFEND_PATH, WALKER_PAD\)/)
+  const xs = DEFEND_PATH.map((p) => p.x)
+  const span = Math.max(...xs) - Math.min(...xs)
+  const phoneCropW = 300 * (420 / 600)
+  assert.ok(span < phoneCropW, `1.4.311 road (${span}) fits a 300×600 phone stage crop (${phoneCropW})`)
+  assert.match(latestChange('1.4.311').title, /full-bleed/i)
+  assert.doesNotMatch(
+    latestChange('1.4.311').items.join('\n'),
+    /tower plant|auto-fire|spawn table|pathfind|new tool|HP/,
+    '1.4.311 must stay layout + projection only',
   )
 }
