@@ -11,27 +11,7 @@ export const EASY_WAVE_LIVE = 3
 
 const EASY_SPAWN_T = [0.08, 0.18, 0.28] as const
 
-/** Main street — same curve the overworld draws. Raiders walk toward the porch. */
-export const DEFEND_PATH: { x: number; y: number }[] = [
-  { x: 70, y: 310 },
-  { x: 148, y: 298 },
-  { x: 220, y: 286 },
-  { x: 300, y: 294 },
-  { x: 400, y: 290 },
-  { x: 498, y: 296 },
-  { x: 560, y: 300 },
-]
-
-export const DEFEND_ANCHOR: Record<CityPlotId, { x: number; y: number }> = {
-  lookout: { x: 520, y: 72 },
-  observatory: { x: 464, y: 118 },
-  hollow: { x: 108, y: 286 },
-  journal: { x: 288, y: 248 },
-  bench: { x: 350, y: 278 },
-  lamps: { x: 258, y: 300 },
-  gate: { x: 498, y: 268 },
-  porch: { x: 564, y: 292 },
-}
+export { DEFEND_ANCHOR, DEFEND_PATH, pathPoint } from '../nightWatch/path/data.ts'
 
 export const RAID_CAST: { text: string; kind: WalkerKind }[] = [
   { text: 'Mercy is optional', kind: 'skeptic' },
@@ -151,16 +131,6 @@ export function waveSpeed(easy = false): number {
 export function waveSpawnEvery(easy = false): number {
   if (easy) return prefersReducedMotion() ? 4.2 : 3.8
   return prefersReducedMotion() ? 2.05 : 1.08
-}
-
-export function pathPoint(t: number): { x: number; y: number } {
-  const clamped = Math.min(1, Math.max(0, t))
-  const scaled = clamped * (DEFEND_PATH.length - 1)
-  const i = Math.min(DEFEND_PATH.length - 2, Math.floor(scaled))
-  const local = scaled - i
-  const a = DEFEND_PATH[i]
-  const b = DEFEND_PATH[i + 1]
-  return { x: a.x + (b.x - a.x) * local, y: a.y + (b.y - a.y) * local }
 }
 
 /** Catalog ids. Later tools are more WATCH_TOOLS rows — do not hard-code a 4-id board. */
