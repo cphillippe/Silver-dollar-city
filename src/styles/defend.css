@@ -1064,12 +1064,10 @@ img.walker-face.easy-walker-face,
 .nw-shell {
   --nw-rail-w: 76px;
   --nw-gap: 8px;
-  --nw-frame-h: min(calc((100cqw - var(--nw-rail-w) - var(--nw-gap)) * 0.65625), 58dvh, 540px);
-  container-type: inline-size;
   display: flex;
   flex-direction: column;
   gap: 6px;
-  flex: 0 1 auto;
+  flex: 1 1 auto;
   min-height: 0;
   width: 100%;
   max-width: 780px;
@@ -1107,11 +1105,13 @@ img.walker-face.easy-walker-face,
   height: 20px;
 }
 
-/* Prefers the aspect-fit map height, shrinks on short screens, never below the rail. */
+/* Takes every px left under the chrome; the board cover-crops the plate to fill it (1.4.311). */
 .nw-stage {
-  flex: 0 1 var(--nw-frame-h);
+  flex: 1 1 0;
+  min-height: 220px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: minmax(0, 1fr);
   gap: var(--nw-gap);
   align-items: stretch;
 }

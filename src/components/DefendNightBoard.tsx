@@ -11,7 +11,7 @@ export type DefendNightBoardProps = Omit<DefendNightSkyProps, 'children'> &
 
 export function DefendNightBoard(props: DefendNightBoardProps) {
   const {
-    boardRef, shake, won, phase, fireBest, easyTap,
+    boardRef, viewBox, shake, won, phase, fireBest, easyTap,
     pads, planted, progress, raiders, raiderAt, ability, unlocked,
     flash, togglePad, fire, fireAtRaider, shots, easy, blasts, tapTarget, tapPos, tapJuice,
   } = props
@@ -19,6 +19,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
     <>
       <DefendNightSky
         boardRef={boardRef}
+        viewBox={viewBox}
         shake={shake}
         won={won}
         phase={phase}
