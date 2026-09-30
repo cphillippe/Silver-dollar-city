@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.303',
+    title: 'Night Watch frame',
+    when: '2026-09-30',
+    items: [
+      'Night Watch plays the same on Easy: the board now runs through its own frame, map, road, parts, lamp, and walker modules so new art and walkers can land one at a time (#418)',
+    ],
+  },
+  {
     version: '1.4.302',
     title: 'Easy Night Watch little wave on path',
     when: '2026-09-27',

@@ -11,37 +11,30 @@ import {
 import { EASY, isEasy, loveHowTo } from '../lib/easy'
 import { localDateKey } from '../lib/dates'
 import {
-  DEFEND_ANCHOR,
   DEFEND_BRIEF_ID,
   DEFEND_HEARTS,
-  DEFEND_WAVE_SIZE,
-  raidForWave,
   WATCH_ABILITY_LABEL,
-  abilityRange,
-  defendPads,
   dist,
-  heavenPoint,
-  heavenSpeed,
-  padStage,
-  pathPoint,
-  towerCooldown,
   unlockedWatchAbilities,
-  waveSpawnEvery,
-  waveSpeed,
-  easyHoldSpawn,
-  easySpawnT,
-  easyTapFit,
   easyTapMode,
-  easyTapTarget,
-  waveIsClear,
   type WatchAbility,
 } from '../lib/defend'
 import { learningForTool } from '../lib/learning'
 import { toolTier, watchTool } from '../lib/watchTools'
 import { useJuiceHandoff } from '../lib/juice'
 import type { CityPlotId } from '../lib/city'
+import {
+  UiShell,
+  boardPoint as mapBoardPoint,
+  nightEnemies,
+  nightTowers,
+  type NightBlast as Blast,
+  type NightPhase,
+  type NightRaider as Raider,
+  type NightShot as Shot,
+} from '../nightWatch'
 import { useProgress } from '../store/progress'
-import type { View, WalkerKind } from '../types'
+import type { View } from '../types'
 import { TownReturn } from './TownReturn'
 import { WinBurst } from './challenges/WinBurst'
 import { DefendAbilityBar } from './DefendAbilityBar'
@@ -52,36 +45,14 @@ interface DefendScreenProps {
   onNavigate: (view: View) => void
 }
 
-interface Raider {
-  id: number
-  t: number
-  text: string
-  kind: WalkerKind
-  turned?: string
-  from?: { x: number; y: number }
-  heavenT?: number
-}
-
-interface Shot {
-  key: number
-  from: { x: number; y: number }
-  to: { x: number; y: number }
-}
-
-interface Blast {
-  key: number
-  x: number
-  y: number
-  line: string
-  combo: number
-}
+const DEFEND_WAVE_SIZE = nightEnemies.waveSize
 
 export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const { progress, recordNight, markMiss } = useProgress()
   const easy = isEasy(progress)
   const today = localDateKey()
   const brief = evidenceFor(DEFEND_BRIEF_ID)
-  const pads = defendPads(progress)
+  const pads = nightTowers.pads(progress)
   const unlocked = unlockedWatchAbilities(progress)
   const [ability, setAbility] = useState<WatchAbility>(() => unlocked[0] ?? 'love')
   const taught = true
@@ -89,7 +60,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const [boardBox, setBoardBox] = useState({ w: 640, h: 420 })
   const [toolLock, setToolLock] = useState<string | null>(null)
   const arming = false
-  const [phase, setPhase] = useState<'plant' | 'wave' | 'lost'>(easy ? 'wave' : 'plant')
+  const [phase, setPhase] = useState<NightPhase>(easy ? 'wave' : 'plant')
   const [planted, setPlanted] = useState<CityPlotId[]>(() => [...pads])
   const [hearts, setHearts] = useState(DEFEND_HEARTS)
   const [raiders, setRaiders] = useState<Raider[]>([])
@@ -157,9 +128,9 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         if (item.turned) {
           const tool = item.turned ? watchTool(item.turned) : undefined
           const tier = tool ? toolTier(tool, progress) : 1
-          return { ...item, heavenT: (item.heavenT ?? 0) + heavenSpeed(tier, easy) * dt }
+          return { ...item, heavenT: (item.heavenT ?? 0) + nightEnemies.heavenSpeed(tier, easy) * dt }
         }
-        return { ...item, t: item.t + waveSpeed(easy) * dt }
+        return { ...item, t: item.t + nightEnemies.speed(easy) * dt }
       })
       let leaked = 0
       const walking = next.filter((item) => {
@@ -182,21 +153,21 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         markMissRef.current(DEFEND_BRIEF_ID)
       }
       const unturnedLive = walking.filter((item) => !item.turned).length
-      const holdSpawn = easy && easyHoldSpawn(unturnedLive)
+      const holdSpawn = easy && nightEnemies.holdSpawn(unturnedLive)
       if (
         live.current.spawned < DEFEND_WAVE_SIZE &&
         !holdSpawn &&
         (live.current.spawnNow ||
-          spawnAt >= waveSpawnEvery(easy) ||
+          spawnAt >= nightEnemies.spawnEvery(easy) ||
           (easy && live.current.spawned === 0))
       ) {
         live.current.spawnNow = false
         spawnAt = 0
         const id = live.current.spawned
-        const cast = raidForWave(progress.defense.cleared, id)
+        const cast = nightEnemies.cast(progress.defense.cleared, id)
         walking.push({
           id,
-          t: easy ? easySpawnT(id) : 0,
+          t: easy ? nightEnemies.spawnT(id) : 0,
           text: cast.text,
           kind: cast.kind,
         })
@@ -209,7 +180,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         setPhase('lost')
         return
       }
-      if (waveIsClear(easy, live.current.downed, live.current.spawned, walking.length)) {
+      if (nightEnemies.isClear(easy, live.current.downed, live.current.spawned, walking.length)) {
         live.current.playing = false
         setWon(true)
         afterJuiceRef.current()
@@ -249,19 +220,17 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   }
 
   function raiderAt(raider: Raider) {
-    if (raider.turned && raider.from) return heavenPoint(raider.from, raider.heavenT ?? 0)
-    return pathPoint(raider.t)
+    return nightEnemies.at(raider)
   }
 
   function fire(id: CityPlotId, forceRaiderId?: number) {
     if (phase !== 'wave' || won) return
     const now = performance.now()
-    const stage = padStage(id, progress)
-    const wait = towerCooldown(stage)
+    const wait = nightTowers.cooldown(id, progress)
     if ((live.current.cool[id] ?? 0) + wait > now) return
-    const at = DEFEND_ANCHOR[id]
+    const at = nightTowers.anchor(id)
     const using = unlocked.includes(ability) ? ability : 'love'
-    const range = abilityRange(using, stage, progress)
+    const range = nightTowers.range(id, using, progress)
     let best: Raider | null = null
     if (forceRaiderId !== undefined) {
       const forced = live.current.raiders.find((item) => item.id === forceRaiderId && !item.turned)
@@ -284,7 +253,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     window.setTimeout(() => setFiring(false), 220)
     if (!best) return
     const to = raiderAt(best)
-    const fit = easyTapFit(easy, using, best.kind)
+    const fit = nightEnemies.fit(easy, using, best.kind)
     const heldLine = learningForTool(progress, using)
     comboRef.current += 1
     const nextCombo = comboRef.current
@@ -306,7 +275,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           : `${WATCH_ABILITY_LABEL[using]} is weak here`,
       combo: nextCombo,
     }
-    setShots((current) => [...current.slice(-3), { key: now, from: { x: at.x, y: at.y - 16 }, to }])
+    setShots((current) => [...current.slice(-3), { key: now, from: nightTowers.muzzle(id), to }])
     setBlasts((current) => [...current.slice(-3), blast])
     window.setTimeout(() => {
       setShots((current) => current.filter((item) => item.key !== now))
@@ -353,12 +322,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     const raider = live.current.raiders.find((item) => item.id === raiderId && !item.turned)
     if (!raider) return
     for (const id of live.current.planted) {
-      const at = DEFEND_ANCHOR[id]
-      const range = abilityRange(
-        unlocked.includes(ability) ? ability : 'love',
-        padStage(id, progress),
-        progress,
-      )
+      const at = nightTowers.anchor(id)
+      const range = nightTowers.range(id, unlocked.includes(ability) ? ability : 'love', progress)
       const d = dist(at, raiderAt(raider))
       if (d <= range && d < bestD) {
         bestD = d
@@ -374,12 +339,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     let pick: CityPlotId | null = null
     let bestD = Infinity
     for (const id of live.current.planted) {
-      const at = DEFEND_ANCHOR[id]
-      const range = abilityRange(
-        unlocked.includes(ability) ? ability : 'love',
-        padStage(id, progress),
-        progress,
-      )
+      const at = nightTowers.anchor(id)
+      const range = nightTowers.range(id, unlocked.includes(ability) ? ability : 'love', progress)
       for (const raider of live.current.raiders) {
         if (raider.turned) continue
         const d = dist(at, raiderAt(raider))
@@ -416,17 +377,71 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   }
 
   function boardPoint(x: number, y: number) {
-    const scale = Math.min(boardBox.w / 640, boardBox.h / 420)
-    return {
-      left: (boardBox.w - 640 * scale) / 2 + x * scale,
-      top: (boardBox.h - 420 * scale) / 2 + y * scale,
-    }
+    return mapBoardPoint(boardBox, { x, y })
   }
 
   const after = juiceDone && won
   const easyTap = easyTapMode(easy, phase, won)
-  const tapTarget = easyTap ? easyTapTarget(raiders) : undefined
+  const tapTarget = easyTap ? nightEnemies.cueTarget(raiders) : undefined
   const tapPos = tapTarget ? boardPoint(raiderAt(tapTarget).x, raiderAt(tapTarget).y) : null
+
+  const hud = (
+    <>
+      <p className="defend-hud" aria-live="polite">
+        <span className="defend-hearts">
+          {Array.from({ length: DEFEND_HEARTS }, (_, index) => (
+            <span key={index} className={index < hearts ? 'is-on' : ''}>
+              ♥
+            </span>
+          ))}
+        </span>
+        <span className={`defend-count ${combo > 1 ? 'is-combo' : ''}`}>
+          {phase === 'wave'
+            ? easy
+              ? combo > 1
+                ? `×${combo}  ${downed}/${DEFEND_WAVE_SIZE}`
+                : `TAP ${downed}/${DEFEND_WAVE_SIZE}`
+              : combo > 1
+                ? `×${combo}  ${downed}/${DEFEND_WAVE_SIZE}`
+                : `${downed}/${DEFEND_WAVE_SIZE} · TAP`
+            : `${planted.length} lamp${planted.length === 1 ? '' : 's'}`}
+        </span>
+      </p>
+      <p className="defend-angel-help" aria-hidden="true">
+        {ANGEL_STICKER}
+      </p>
+    </>
+  )
+
+  const docks = (
+    <>
+      {phase === 'plant' ? (
+        <button
+          type="button"
+          className="btn primary xl defend-go"
+          onClick={() => setPhase('wave')}
+          disabled={planted.length < 1 || arming}
+        >
+          {easy ? EASY.nightDo : 'The road is coming'}
+        </button>
+      ) : null}
+      {toolLock ? (
+        <p className="match-toast" role="status">
+          {toolLock}
+        </p>
+      ) : null}
+      <DefendAbilityBar
+        progress={progress}
+        easy={easy}
+        easyTap={easyTap}
+        ability={ability}
+        setAbility={setAbility}
+        setToolLock={setToolLock}
+        firing={firing}
+        unlocked={unlocked}
+      />
+    </>
+  )
 
   return (
     <main
@@ -461,30 +476,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                 ? 'Turn them toward heaven.'
                 : WATCH_LEAD}
           </h1>
-          <div className={`defend-frame ${shake ? 'is-shake' : ''} ${won ? 'is-clear' : ''}`}>
-            <p className="defend-hud" aria-live="polite">
-              <span className="defend-hearts">
-                {Array.from({ length: DEFEND_HEARTS }, (_, index) => (
-                  <span key={index} className={index < hearts ? 'is-on' : ''}>
-                    ♥
-                  </span>
-                ))}
-              </span>
-              <span className={`defend-count ${combo > 1 ? 'is-combo' : ''}`}>
-                {phase === 'wave'
-                  ? easy
-                    ? combo > 1
-                      ? `×${combo}  ${downed}/${DEFEND_WAVE_SIZE}`
-                      : `TAP ${downed}/${DEFEND_WAVE_SIZE}`
-                    : combo > 1
-                      ? `×${combo}  ${downed}/${DEFEND_WAVE_SIZE}`
-                      : `${downed}/${DEFEND_WAVE_SIZE} · TAP`
-                  : `${planted.length} lamp${planted.length === 1 ? '' : 's'}`}
-              </span>
-            </p>
-            <p className="defend-angel-help" aria-hidden="true">
-              {ANGEL_STICKER}
-            </p>
+          <UiShell shake={shake} won={won} hud={hud} docks={docks}>
             <DefendNightBoard
               boardRef={boardRef}
               shake={shake}
@@ -510,32 +502,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
               tapPos={tapPos}
               tapJuice={tapJuice}
             />
-          </div>
-          {phase === 'plant' ? (
-            <button
-              type="button"
-              className="btn primary xl defend-go"
-              onClick={() => setPhase('wave')}
-              disabled={planted.length < 1 || arming}
-            >
-              {easy ? EASY.nightDo : 'The road is coming'}
-            </button>
-          ) : null}
-          {toolLock ? (
-            <p className="match-toast" role="status">
-              {toolLock}
-            </p>
-          ) : null}
-          <DefendAbilityBar
-            progress={progress}
-            easy={easy}
-            easyTap={easyTap}
-            ability={ability}
-            setAbility={setAbility}
-            setToolLock={setToolLock}
-            firing={firing}
-            unlocked={unlocked}
-          />
+          </UiShell>
           {phase === 'lost' ? (
             <div className="defend-lost">
               <p>

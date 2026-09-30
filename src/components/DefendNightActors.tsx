@@ -1,9 +1,5 @@
 import { useEffect, useState } from 'react'
 import {
-  DEFEND_ANCHOR,
-  abilityRange,
-  dist,
-  padStage,
   EASY_WALKER_FACE_PX,
   EASY_WALKER_HIT_PX,
   type WatchAbility,
@@ -11,30 +7,17 @@ import {
 import { WALKER_LABEL } from '../lib/watchTools'
 import { CITY_PLOTS, type CityPlotId } from '../lib/city'
 import { EASY } from '../lib/easy'
+import {
+  nightParts,
+  nightTowers,
+  type NightBlast as Blast,
+  type NightPhase,
+  type NightPoint,
+  type NightRaider as Raider,
+  type NightShot as Shot,
+} from '../nightWatch'
 import type { ProgressState, WalkerKind } from '../types'
 import { walkerSrc, WalkerFace } from './Avatar'
-
-interface Raider {
-  id: number
-  t: number
-  text: string
-  kind: WalkerKind
-  turned?: string
-  from?: { x: number; y: number }
-  heavenT?: number
-}
-interface Shot {
-  key: number
-  from: { x: number; y: number }
-  to: { x: number; y: number }
-}
-interface Blast {
-  key: number
-  x: number
-  y: number
-  line: string
-  combo: number
-}
 
 export interface EasyTapJuice {
   key: number
@@ -50,7 +33,7 @@ export interface DefendNightActorsProps {
   planted: CityPlotId[]
   progress: ProgressState
   raiders: Raider[]
-  raiderAt: (raider: Raider) => { x: number; y: number }
+  raiderAt: (raider: Raider) => NightPoint
   ability: WatchAbility
   unlocked: WatchAbility[]
   flash: CityPlotId | null
@@ -61,7 +44,7 @@ export interface DefendNightActorsProps {
   shots: Shot[]
   easy: boolean
   blasts: Blast[]
-  phase: 'plant' | 'wave' | 'lost'
+  phase: NightPhase
   tapTarget: Raider | undefined
   tapPos: { left: number; top: number } | null
   tapJuice?: EasyTapJuice | null
@@ -91,18 +74,18 @@ export function DefendNightActorsSvg({
               {easyTap
                 ? null
                 : pads.map((id) => {
-                const at = DEFEND_ANCHOR[id]
+                const at = nightTowers.anchor(id)
                 const on = planted.includes(id)
-                const stage = padStage(id, progress)
+                const stage = nightTowers.stage(id, progress)
                 const plot = CITY_PLOTS.find((item) => item.id === id)
+                const using = unlocked.includes(ability) ? ability : 'love'
                 const hot =
                   phase === 'wave' &&
                   on &&
                   raiders.some(
                     (raider) =>
                       !raider.turned &&
-                      dist(at, raiderAt(raider)) <=
-                        abilityRange(unlocked.includes(ability) ? ability : 'love', stage, progress),
+                      nightTowers.inRange(id, using, progress, raiderAt(raider)),
                   )
                 return (
                   <g
@@ -202,7 +185,7 @@ export function DefendNightActorsSvg({
                     <ellipse className="defend-raider-shadow" cy={12} rx={13} ry={4.6} />
                     <image
                       className="defend-raider-face"
-                      href={walkerSrc(raider.kind)}
+                      href={nightParts.src('face', raider.kind) ?? walkerSrc(raider.kind)}
                       x={-18}
                       y={-24}
                       width={36}
