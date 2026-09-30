@@ -129,6 +129,7 @@
 .defend-board.has-map-plate > .defend-windows,
 .defend-board.has-map-plate > .defend-canopy,
 .defend-board.has-map-plate > .defend-porch,
+.defend-board.has-map-plate > .defend-gate,
 .defend-board.has-map-plate > circle,
 .defend-board.has-map-plate > path:not([class]) {
   display: none;

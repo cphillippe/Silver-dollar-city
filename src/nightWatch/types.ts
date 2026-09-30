@@ -1,6 +1,6 @@
 import type { WalkerKind } from '../types.ts'
 
-/** Board coordinates in map viewBox units (640×420). */
+/** Board coordinates in map viewBox units (798×1134 A2 plate). */
 export interface NightPoint {
   x: number
   y: number
