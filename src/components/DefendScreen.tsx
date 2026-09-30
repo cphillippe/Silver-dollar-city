@@ -413,11 +413,22 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     </p>
   )
 
+  const tip = easy ? null : phase === 'wave' ? HARD_WAVE_TIP : phase === 'plant' ? HARD_PLANT_TIP : null
+
   const docks = (
     <>
-      <p className="defend-angel-help" aria-hidden="true">
-        {ANGEL_STICKER}
-      </p>
+      {phase === 'lost' ? (
+        <div className="defend-lost">
+          <p>
+            {easy
+              ? 'You missed. Tap the face.'
+              : 'Porch flickered. Turn them again.'}
+          </p>
+          <button type="button" className="btn primary" onClick={retry}>
+            Try the night again
+          </button>
+        </div>
+      ) : null}
       {phase === 'plant' ? (
         <button
           type="button"
@@ -433,6 +444,10 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           {toolLock}
         </p>
       ) : null}
+      {tip ? <p className="defend-tip">{tip}</p> : null}
+      <p className="defend-angel-help" aria-hidden="true">
+        {ANGEL_STICKER}
+      </p>
     </>
   )
 
@@ -474,14 +489,16 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         </>
       ) : (
         <>
-          <p className="eyebrow">{easy ? 'Night Watch' : WATCH_KICKER}</p>
-          <h1 className="defend-title">
-            {easy
-              ? EASY.nightLead
-              : phase === 'wave'
-                ? 'Turn them toward heaven.'
-                : WATCH_LEAD}
-          </h1>
+          {easy ? (
+            <h1 className="nw-sr-only">{EASY.nightLead}</h1>
+          ) : (
+            <>
+              <p className="eyebrow">{WATCH_KICKER}</p>
+              <h1 className="defend-title">
+                {phase === 'wave' ? 'Turn them toward heaven.' : WATCH_LEAD}
+              </h1>
+            </>
+          )}
           <UiShell
             shake={shake}
             won={won}
@@ -518,25 +535,6 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
               tapJuice={tapJuice}
             />
           </UiShell>
-          {phase === 'lost' ? (
-            <div className="defend-lost">
-              <p>
-                {easy
-                  ? 'You missed. Tap the face.'
-                  : 'Porch flickered. Turn them again.'}
-              </p>
-              <button type="button" className="btn primary" onClick={retry}>
-                Try the night again
-              </button>
-            </div>
-          ) : null}
-          {easy ? (
-            phase === 'lost' ? null : <p className="defend-tip">{EASY.nightTap}</p>
-          ) : phase === 'wave' ? (
-            <p className="defend-tip">{HARD_WAVE_TIP}</p>
-          ) : (
-            <p className="defend-tip">{HARD_PLANT_TIP}</p>
-          )}
         </>
       )}
       <WinBurst play={won && !juiceDone} stamp="Night held!" />
