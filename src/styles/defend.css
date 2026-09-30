@@ -671,6 +671,11 @@ img.walker-face.easy-walker-face,
   transform-origin: center;
 }
 
+/* ENEMIES 1.4.308 — dark-face chip on path walkers */
+.defend-raider-face.is-dark-face {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.55));
+}
+
 .defend-raider.is-turned .defend-raider-face {
   filter: brightness(1.2) drop-shadow(0 0 8px #ffcc33);
 }
