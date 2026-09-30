@@ -71,9 +71,7 @@ export function DefendNightActorsSvg({
 }: Omit<DefendNightActorsProps, 'tapPos' | 'fireBest' | 'tapJuice' | 'easy'> & { easy: boolean }) {
   return (
     <>
-              {easyTap
-                ? null
-                : pads.map((id) => {
+              {(easyTap ? planted : pads).map((id) => {
                 const at = nightTowers.anchor(id)
                 const on = planted.includes(id)
                 const stage = nightTowers.stage(id, progress)
@@ -87,44 +85,62 @@ export function DefendNightActorsSvg({
                       !raider.turned &&
                       nightTowers.inRange(id, using, progress, raiderAt(raider)),
                   )
+                const pose = nightTowers.lampPose(hot || flash === id)
+                const lampBox = nightTowers.lampImageBox()
+                const scenery = easyTap
                 return (
                   <g
                     key={id}
-                    data-person-node="pad"
-                    className={`defend-pad is-${stage} ${on ? 'is-planted' : ''} ${hot ? 'is-hot' : ''} ${flash === id ? 'is-flash' : ''}`}
+                    data-person-node={scenery ? undefined : 'pad'}
+                    className={`defend-pad is-${stage} ${on ? 'is-planted' : ''} ${hot ? 'is-hot' : ''} ${flash === id ? 'is-flash' : ''} ${scenery ? 'is-tower-scenery' : ''}`}
                     transform={`translate(${at.x} ${at.y})`}
-                    role="button"
-                    tabIndex={0}
+                    role={scenery ? undefined : 'button'}
+                    tabIndex={scenery ? undefined : 0}
+                    aria-hidden={scenery ? true : undefined}
                     aria-label={
-                      phase === 'plant'
-                        ? `${on ? 'Pull' : 'Plant'} lamp at ${plot?.title ?? id}`
-                        : `Fire ${plot?.title ?? id}`
+                      scenery
+                        ? undefined
+                        : phase === 'plant'
+                          ? `${on ? 'Pull' : 'Plant'} lamp at ${plot?.title ?? id}`
+                          : `Fire ${plot?.title ?? id}`
                     }
-                    onClick={(event) => {
-                      event.stopPropagation()
-                      if (phase === 'plant') togglePad(id)
-                      else fire(id)
-                    }}
-                    onKeyDown={(event) => {
-                      if (event.key === 'Enter' || event.key === ' ') {
-                        event.preventDefault()
-                        if (phase === 'plant') togglePad(id)
-                        else fire(id)
-                      }
-                    }}
+                    onClick={
+                      scenery
+                        ? undefined
+                        : (event) => {
+                            event.stopPropagation()
+                            if (phase === 'plant') togglePad(id)
+                            else fire(id)
+                          }
+                    }
+                    onKeyDown={
+                      scenery
+                        ? undefined
+                        : (event) => {
+                            if (event.key === 'Enter' || event.key === ' ') {
+                              event.preventDefault()
+                              if (phase === 'plant') togglePad(id)
+                              else fire(id)
+                            }
+                          }
+                    }
                   >
-                    <circle className="defend-hit" r="38" />
+                    {scenery ? null : <circle className="defend-hit" r="38" />}
                     <ellipse className="defend-earth" cx="0" cy="10" rx="15" ry="6" />
                     {on ? (
                       <>
                         <ellipse className="defend-pool" cx="0" cy="12" rx={hot ? 30 : 20} ry={hot ? 11 : 7} />
-                        <path className="defend-post" d="M-2.4 10 V-18 H2.4 V10 Z" fill="url(#defend-wood)" />
-                        <path className="defend-lantern-roof" d="M-8 -18 l8 -7 8 7 Z" fill="url(#defend-gold-roof)" />
-                        <rect className="defend-lantern" x="-6.5" y="-18" width="13" height="11" rx="2" />
-                        <circle className="defend-lamp" cx="0" cy="-13" r="4.6" />
+                        <image
+                          className={`defend-tower-lamp is-${pose}`}
+                          href={nightTowers.lampSrc(pose)}
+                          x={lampBox.x}
+                          y={lampBox.y}
+                          width={lampBox.w}
+                          height={lampBox.h}
+                        />
                         {hot ? <circle className="defend-hot-halo" r="27" /> : null}
                       </>
-                    ) : (
+                    ) : scenery ? null : (
                       <>
                         <circle className="defend-ring" r="16" />
                         <path className="defend-post is-empty" d="M-1.6 8 V-8 H1.6 V8 Z" />

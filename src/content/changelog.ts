@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.307',
+    title: 'Night Watch tower lamps on pads',
+    when: '2026-09-30',
+    items: [
+      'Night Watch planted lots show idle and firing lamp tower sprites on their pads — soft TD plant toys only. Fixes #418',
+    ],
+  },
+  {
     version: '1.4.306',
     title: 'Night Watch PARTS — sprite registry',
     when: '2026-09-30',
