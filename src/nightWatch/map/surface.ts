@@ -1,5 +1,5 @@
 import type { NightPoint } from '../types.ts'
-import nwMapPlate from '../../assets/defend/nw-map-plate.png'
+import nwMapPlate from '../../assets/defend/nw-map-plate.webp'
 
 export interface NightMapSurface {
   readonly width: number
@@ -9,10 +9,14 @@ export interface NightMapSurface {
   readonly plate: string | null
 }
 
+/**
+ * Whole locked A2 playfield, portrait: frame + baked HUD bar trimmed and the baked
+ * C&C rail painted out, so the live chrome is the only chrome.
+ */
 export const NIGHT_MAP: NightMapSurface = {
-  width: 640,
-  height: 420,
-  viewBox: '0 0 640 420',
+  width: 798,
+  height: 1134,
+  viewBox: '0 0 798 1134',
   plate: nwMapPlate,
 }
 
