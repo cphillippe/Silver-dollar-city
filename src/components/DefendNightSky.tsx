@@ -1,11 +1,12 @@
-import { DEFEND_PATH, HEAVEN_POINT } from '../lib/defend'
+import { HEAVEN_POINT } from '../lib/defend'
 import type { RefObject, ReactNode } from 'react'
+import { MapPlate, NIGHT_MAP, nightPath, type NightPhase } from '../nightWatch'
 
 export interface DefendNightSkyProps {
   boardRef: RefObject<SVGSVGElement | null>
   shake: boolean
   won: boolean
-  phase: 'plant' | 'wave' | 'lost'
+  phase: NightPhase
   fireBest: () => void
   easyTap: boolean
   children?: ReactNode
@@ -24,7 +25,7 @@ export function DefendNightSky({
             <svg
               ref={boardRef}
               className={`defend-board ${shake ? 'is-shake' : ''} ${won ? 'is-clear' : ''}`}
-              viewBox="0 0 640 420"
+              viewBox={NIGHT_MAP.viewBox}
               preserveAspectRatio="xMidYMid meet"
               role="img"
               aria-label="Night road through Silver City"
@@ -103,18 +104,9 @@ export function DefendNightSky({
               <ellipse className="defend-canopy" cx="214" cy="252" rx="22" ry="13" />
               <ellipse className="defend-canopy" cx="402" cy="246" rx="24" ry="14" />
               <ellipse className="defend-canopy" cx="528" cy="258" rx="20" ry="12" />
-              <path
-                className="defend-road-bed"
-                d="M70 310 C 140 300, 200 280, 280 292 C 360 304, 430 286, 560 300"
-              />
-              <path
-                className="defend-road"
-                d="M70 310 C 140 300, 200 280, 280 292 C 360 304, 430 286, 560 300"
-              />
-              <path
-                className="defend-road-shine"
-                d="M70 310 C 140 300, 200 280, 280 292 C 360 304, 430 286, 560 300"
-              />
+              <path className="defend-road-bed" d={nightPath.roadD} />
+              <path className="defend-road" d={nightPath.roadD} />
+              <path className="defend-road-shine" d={nightPath.roadD} />
               <path
                 className="defend-heaven-path"
                 d="M280 292 C 400 210, 500 90, 572 36"
@@ -133,10 +125,11 @@ export function DefendNightSky({
                 <rect x="-16" y="-4" width="32" height="26" rx="2" />
                 <rect className="defend-porch-window" x="-5" y="4" width="10" height="9" rx="1" />
               </g>
-              <g className="defend-gate" transform={`translate(${DEFEND_PATH[0].x} ${DEFEND_PATH[0].y})`}>
+              <g className="defend-gate" transform={`translate(${nightPath.start.x} ${nightPath.start.y})`}>
                 <path d="M-10 6 V-16 M10 6 V-16" />
                 <path d="M-12 -16 H12" />
               </g>
+              <MapPlate />
 {children}
             </svg>
   )
