@@ -6,5 +6,6 @@ export {
   type NightBoardBox,
   type NightBoardView,
   type NightMapSurface,
+  type NightRect,
 } from './surface.ts'
 export { MapPlate } from './MapPlate'
