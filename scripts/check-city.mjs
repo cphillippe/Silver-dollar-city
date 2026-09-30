@@ -32,6 +32,7 @@ import { parableHollow } from '../src/content/parableHollow.ts'
 import { witnessBench } from '../src/content/witnessBench.ts'
 import {
   abilityRange,
+  DEFEND_ANCHOR,
   DEFEND_PATH,
   DEFEND_WAVE_SIZE,
   defendPads,
@@ -1167,7 +1168,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.308')
+assert.equal(APP_VERSION, '1.4.309')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -7127,15 +7128,6 @@ console.log('check-city: ok')
   const path305 = readFileSync(new URL('../src/nightWatch/path/data.ts', import.meta.url), 'utf8')
   assert.match(path305, /A2 candy plate/)
   assert.match(path305, /polyline only/)
-  assert.ok(DEFEND_PATH[0].x > 520 && DEFEND_PATH[0].y > 360, '1.4.305 gate sits bottom-right on A2')
-  const end = DEFEND_PATH[DEFEND_PATH.length - 1]
-  assert.ok(end.x < 72, '1.4.305 UL terminus clears the bush')
-  assert.ok(end.y < 160)
-  assert.ok(
-    DEFEND_PATH[0].y === DEFEND_PATH[1].y && DEFEND_PATH[1].x < DEFEND_PATH[0].x,
-    '1.4.305 gate keeps a ~90° turn onto the road',
-  )
-  assert.match(nightPathMod.roadD, /^M[\d.]+ [\d.]+(?: L[\d.]+ [\d.]+)+$/)
   assert.doesNotMatch(nightPathMod.roadD, /C /)
   assert.match(latestChange('1.4.305').title, /path|Night Watch|A2|yellow/i)
   assert.match(latestChange('1.4.305').items.join('\n'), /yellow road|path|#418/i)
@@ -7242,5 +7234,48 @@ console.log('check-city: ok')
     latestChange('1.4.308').items.join('\n'),
     /plate|candy cottage|tower plant|auto-fire|spawn table/i,
     '1.4.308 must stay ENEMIES fill only',
+  )
+}
+
+// Night Watch 1.4.309: MAP+PATH — walkers on the A2 plate's painted yellow road
+{
+  const nw309 = (file) => readFileSync(new URL(`../src/nightWatch/${file}`, import.meta.url), 'utf8')
+  assert.match(nw309('map/MapPlate.tsx'), /preserveAspectRatio="xMidYMid meet"/)
+  assert.doesNotMatch(nw309('map/MapPlate.tsx'), /slice/)
+  assert.equal(nightPathMod.roadD, '', '1.4.309 plate paints the road; neon overlay stays empty')
+  const start = DEFEND_PATH[0]
+  const end = DEFEND_PATH[DEFEND_PATH.length - 1]
+  assert.equal(start.y, 420, '1.4.309 walkers enter off the plate bottom edge')
+  assert.ok(start.x > 320 && start.x < 380, '1.4.309 entry matches the painted road at the bottom edge')
+  assert.equal(end.y, 0, '1.4.309 walkers exit through the plate top edge')
+  assert.ok(end.x > 290 && end.x < 330, '1.4.309 exit matches the painted road at the top edge')
+  assert.ok(DEFEND_PATH.length >= 30, '1.4.309 enough points to hug the S-curve')
+  const segs = DEFEND_PATH.slice(1).map((p, i) => Math.hypot(p.x - DEFEND_PATH[i].x, p.y - DEFEND_PATH[i].y))
+  assert.ok(Math.max(...segs) < 1.5 * Math.min(...segs), '1.4.309 even spacing keeps pathPoint speed steady')
+  for (const p of DEFEND_PATH) {
+    assert.ok(p.x >= 0 && p.x <= 640 && p.y >= 0 && p.y <= 420)
+  }
+  const farthest = Math.max(...DEFEND_PATH.map((p) => p.x))
+  assert.ok(farthest > 470 && farthest < 500, '1.4.309 upper bend reaches the painted curve')
+  const toRoad = (q) =>
+    Math.min(
+      ...DEFEND_PATH.slice(1).map((b, i) => {
+        const a = DEFEND_PATH[i]
+        const dx = b.x - a.x
+        const dy = b.y - a.y
+        const t = Math.max(0, Math.min(1, ((q.x - a.x) * dx + (q.y - a.y) * dy) / (dx * dx + dy * dy)))
+        return Math.hypot(q.x - (a.x + dx * t), q.y - (a.y + dy * t))
+      }),
+    )
+  for (const [id, seat] of Object.entries(DEFEND_ANCHOR)) {
+    const d = toRoad(seat)
+    assert.ok(d > 30 && d < 96, `1.4.309 ${id} seat sits beside the road (d=${d.toFixed(0)})`)
+  }
+  assert.match(latestChange('1.4.309').title, /Night Watch|Map|Path|yellow road/i)
+  assert.match(latestChange('1.4.309').items.join('\n'), /yellow road|centerline|#418/i)
+  assert.doesNotMatch(
+    latestChange('1.4.309').items.join('\n'),
+    /tower plant|auto-fire|spawn table|HP|pathfind/i,
+    '1.4.309 must stay Map+Path only',
   )
 }
