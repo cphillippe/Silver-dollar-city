@@ -1167,7 +1167,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.303')
+assert.equal(APP_VERSION, '1.4.304')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -7062,7 +7062,7 @@ console.log('check-city: ok')
   const parts303 = nw('parts/index.ts')
   assert.match(shell303, /defend-frame/)
   assert.match(shell303, /docks/)
-  assert.match(surface303, /plate: null/, '1.4.303 Frame must not drop the A2 plate')
+  assert.match(surface303, /readonly plate:/, '1.4.303 Frame must not drop the A2 plate slot')
   assert.match(surface303, /viewBox: '0 0 640 420'/)
   assert.match(path303, /points: DEFEND_PATH/)
   assert.match(path303, /DEFEND_ANCHOR\[id\]/)
@@ -7096,5 +7096,30 @@ console.log('check-city: ok')
     latestChange('1.4.303').items.join('\n'),
     /plate|candy cottage|yellow road|tower plant|auto-fire|spawn table/i,
     '1.4.303 must stay Frame only (no A2 map fill claims)',
+  )
+}
+
+// Night Watch 1.4.304: MAP — A2 playfield plate under the board
+{
+  const nw = (file) => readFileSync(new URL(`../src/nightWatch/${file}`, import.meta.url), 'utf8')
+  const surface304 = nw('map/surface.ts')
+  const mapPlate304 = nw('map/MapPlate.tsx')
+  const plateAsset = new URL('../src/assets/defend/nw-map-plate.png', import.meta.url)
+  assert.ok(existsSync(plateAsset), '1.4.304 ships nw-map-plate asset')
+  assert.match(surface304, /nw-map-plate/, '1.4.304 wires NIGHT_MAP.plate import')
+  assert.doesNotMatch(surface304, /plate: null/, '1.4.304 must fill the A2 plate')
+  assert.match(mapPlate304, /defend-map-plate/)
+  assert.match(defendSkySrc, /<MapPlate \/>/)
+  assert.match(defendSkySrc, /has-map-plate/)
+  const defendCss304 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  assert.match(defendCss304, /has-map-plate|defend-map-plate/, 'defend.css must style A2 plate under board')
+  assert.match(defendCss304, /\.defend-board\.has-map-plate/)
+  assert.match(defendCss304, /\.defend-map-plate/)
+  assert.match(latestChange('1.4.304').title, /Night Watch|map|plate|A2/i)
+  assert.match(latestChange('1.4.304').items.join('\n'), /plate|map|#418/i)
+  assert.doesNotMatch(
+    latestChange('1.4.304').items.join('\n'),
+    /tower plant|auto-fire|spawn table|HUD/i,
+    '1.4.304 must stay MAP plate only',
   )
 }
