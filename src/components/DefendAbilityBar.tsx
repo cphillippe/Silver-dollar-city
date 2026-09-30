@@ -32,12 +32,26 @@ export function DefendAbilityBar({
               const open = unlocked.includes(tool.id)
               const heldLine = learningForTool(progress, tool.id)
               const tier = toolTier(tool, progress)
+              const claim = open
+                ? tool.id === 'love'
+                  ? loveHowTo(easy)
+                  : heldLine
+                    ? easy
+                      ? easyFacingLine(heldLine.id, heldLine.claim)
+                      : heldLine.claim
+                    : easy
+                      ? 'Keep a main idea to name this tool.'
+                      : 'Lock in a line to name this tool.'
+                : easy
+                  ? 'Locked — tap the glowing face'
+                  : 'Lock in a matching line'
               return (
                 <button
                   key={tool.id}
                   type="button"
                   className={`defend-ability ${ability === tool.id ? 'is-on' : ''} ${open ? '' : 'is-locked'} ${firing && ability === tool.id ? 'is-firing' : ''}`}
                   aria-pressed={ability === tool.id}
+                  title={claim}
                   onClick={() => {
                     if (open) {
                       setToolLock(null)
@@ -52,27 +66,13 @@ export function DefendAbilityBar({
                   }}
                 >
                   <AbilityMark ability={tool.id} size="md" />
-                  {tool.label}
+                  <span className="defend-ability-label">{tool.label}</span>
                   {easyTap ? null : (
                     <span className="defend-ability-tier" aria-hidden>
                       {TIER_MARK[tier]}
                     </span>
                   )}
-                  <span className="defend-ability-claim">
-                    {open
-                      ? tool.id === 'love'
-                        ? loveHowTo(easy)
-                        : heldLine
-                          ? easy
-                            ? easyFacingLine(heldLine.id, heldLine.claim)
-                            : heldLine.claim
-                          : easy
-                            ? 'Keep a main idea to name this tool.'
-                            : 'Lock in a line to name this tool.'
-                      : easy
-                        ? 'Locked — tap the glowing face'
-                        : 'Lock in a matching line'}
-                  </span>
+                  <span className="defend-ability-claim">{claim}</span>
                 </button>
               )
             })}
