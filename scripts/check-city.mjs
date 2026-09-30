@@ -1168,7 +1168,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.312')
+assert.equal(APP_VERSION, '1.4.313')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -7355,5 +7355,33 @@ console.log('check-city: ok')
     latestChange('1.4.312').items.join('\n'),
     /tower plant|auto-fire|spawn table|pathfind|new tool|HP/,
     '1.4.312 must stay layout + projection only',
+  )
+}
+
+// Night Watch 1.4.313: compact chrome — docks overlay the stage, Easy drops the title stack
+{
+  const shell313 = readFileSync(new URL('../src/nightWatch/ui/UiShell.tsx', import.meta.url), 'utf8')
+  const css313 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const frame313 = shell313.match(/<div className=\{`defend-frame[\s\S]*?\n {8}<\/div>/)?.[0] ?? ''
+  assert.match(frame313, /nw-docks/, '1.4.313 docks render inside the frame, not under the stage')
+  assert.doesNotMatch(shell313, /<\/div>\s*\{docks\}\s*<\/div>/, '1.4.313 no stacked footer docks')
+  assert.match(css313, /\.nw-docks \{[\s\S]*?position: absolute/, '1.4.313 docks overlay the stage')
+  const docksBlock313 = defendScreenOnlySrc.match(/const docks = \([\s\S]*?\n {2}\)\n/)?.[0] ?? ''
+  for (const part of ['defend-lost', 'defend-go', 'match-toast', 'defend-tip', 'defend-angel-help']) {
+    assert.match(docksBlock313, new RegExp(part), `1.4.313 ${part} lives in the overlay docks`)
+  }
+  assert.doesNotMatch(docksBlock313, /DefendAbilityBar/, '1.4.313 right C&C rail stays out of the docks')
+  const shellTail313 = defendScreenOnlySrc.slice(defendScreenOnlySrc.indexOf('</UiShell>'))
+  assert.doesNotMatch(shellTail313, /defend-tip|defend-lost/, '1.4.313 nothing stacks under the shell')
+  assert.doesNotMatch(defendScreenOnlySrc, /defend-tip">\{EASY\.nightTap\}/, '1.4.313 Easy tip does not duplicate the on-map cue')
+  assert.match(defendScreenOnlySrc, /nw-sr-only">\{EASY\.nightLead\}/, '1.4.313 Easy title stays for screen readers only')
+  assert.match(css313, /\.nw-sr-only \{[\s\S]*?clip: rect\(0 0 0 0\)/)
+  assert.match(css313, /\.nw-stage \{[\s\S]*?flex: 1 1 0/, '1.4.313 stage takes the reclaimed height')
+  assert.match(defendSkySrc, /preserveAspectRatio="xMidYMid meet"/, '1.4.313 keeps the 1.4.312 contain plate')
+  assert.match(latestChange('1.4.313').title, /compact chrome/i)
+  assert.doesNotMatch(
+    latestChange('1.4.313').items.join('\n'),
+    /tower plant|auto-fire|spawn table|pathfind|new tool|HP/,
+    '1.4.313 must stay chrome layout only',
   )
 }

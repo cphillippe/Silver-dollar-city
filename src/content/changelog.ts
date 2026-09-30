@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.313',
+    title: 'Night Watch compact chrome — map gets the space',
+    when: '2026-09-30',
+    items: [
+      'Night Watch gives the map the room: the helper sticker, miss toast, plant button, tips, and the try-again card now float small on the stage’s bottom-left corner instead of stacking under it, Easy drops the “Night Watch / Tap the dark face.” title (the HUD and the on-map “Tap the face.” cue already teach it) and the duplicate tip line, so the stage takes that height. Whole-map fit and the right Love / Logic / Reason / Science rail stay as they were. Fixes #418',
+    ],
+  },
+  {
     version: '1.4.312',
     title: 'Night Watch whole plate visible — undo zoom crop',
     when: '2026-09-30',
