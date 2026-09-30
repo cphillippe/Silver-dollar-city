@@ -934,10 +934,28 @@ const defendCopy = readFileSync(
   'utf8',
 )
 assert.doesNotMatch(defendCopy, /standing lot/i)
-const defendSrc = readFileSync(
+const NIGHT_WATCH_FILES = [
+  'index.ts',
+  'types.ts',
+  'ui/index.ts',
+  'ui/UiShell.tsx',
+  'map/index.ts',
+  'map/surface.ts',
+  'map/MapPlate.tsx',
+  'path/index.ts',
+  'parts/index.ts',
+  'towers/index.ts',
+  'enemies/index.ts',
+]
+const nightWatchSrc = NIGHT_WATCH_FILES.map((file) =>
+  readFileSync(new URL(`../src/nightWatch/${file}`, import.meta.url), 'utf8'),
+).join('\n')
+/** DefendScreen composes src/nightWatch seams — scan both as one Night Watch screen bundle. */
+const defendScreenOnlySrc = readFileSync(
   new URL('../src/components/DefendScreen.tsx', import.meta.url),
   'utf8',
 )
+const defendSrc = `${defendScreenOnlySrc}\n${nightWatchSrc}`
 assert.match(defendSrc, /The road is coming/)
 assert.match(defendSrc, /EASY.nightDo/)
 assert.match(defendSrc, /How to pray Love/)
@@ -2240,7 +2258,7 @@ assert.doesNotMatch(
 assert.doesNotMatch(latestChange(APP_VERSION).items.join('\n'), /A true main idea can turn/)
 assert.match(easyUiSrc, /Main idea = the short true line we keep/)
 assert.match(defendNightSrc, /is-easy-walker/)
-assert.match(defendSrc, /waveSpeed\(easy\)/)
+assert.match(defendSrc, /(waveSpeed|nightEnemies\.speed)\(easy\)/)
 assert.match(defendSrc, /easyHoldSpawn/)
 assert.match(defendSrc, /easySpawnT/)
 assert.match(defendNightSrc, /easy-walker-face/)
@@ -2631,7 +2649,7 @@ assert.equal(EASY.nightMiss, 'Wrong — tap the glowing face')
 assert.match(defendSrc, /EASY\.nightMiss/)
 assert.match(defendSrc, /TAP \$\{downed\}/)
 assert.match(defendSrc, /You missed\. Tap the face/)
-assert.match(defendSrc, /easyHoldSpawn\(unturnedLive\)/)
+assert.match(defendSrc, /(easyHoldSpawn|nightEnemies\.holdSpawn)\(unturnedLive\)/)
 assert.doesNotMatch(defendSrc, /matching sentence/)
 assert.doesNotMatch(
   readFileSync(new URL('../src/components/challenges/LinkPlay.tsx', import.meta.url), 'utf8'),
@@ -7003,10 +7021,7 @@ console.log('check-city: ok')
 // Night Watch 1.4.302: Easy little wave on path (Fixes #418 / Bill redirect)
 {
   const defendCss302 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
-  const defendScreen302 = readFileSync(
-    new URL('../src/components/DefendScreen.tsx', import.meta.url),
-    'utf8',
-  )
+  const defendScreen302 = defendSrc
   assert.doesNotMatch(defendNightSrc, /easy\s*\?\s*null\s*:\s*raiders\.map/)
   assert.match(defendNightSrc, /fireAtRaider/)
   assert.match(defendNightSrc, /is-easy-tap-target/)
