@@ -722,7 +722,7 @@ img.walker-face.easy-walker-face,
   fill: #2a1c08;
 }
 
-/* C&C right rail (1.4.310): vertical Love / Logic / Reason / Science beside the frame. */
+/* C&C right rail (1.4.310): vertical Love / Logic / Reason / Science; floats over the map (1.4.314). */
 .defend-abilities {
   display: flex;
   flex-direction: column;
@@ -1105,20 +1105,37 @@ img.walker-face.easy-walker-face,
   height: 20px;
 }
 
-/* Takes every px left under the chrome; the board contains the whole plate inside it (1.4.312). */
+/* Takes every px left under the chrome; the board contains the whole plate inside it (1.4.312).
+   One column (1.4.314): the frame gets the full stage width and the C&C floats over it. */
 .nw-stage {
+  position: relative;
   flex: 1 1 0;
   min-height: 220px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
-  gap: var(--nw-gap);
   align-items: stretch;
 }
 
+/* C&C cutaway (1.4.314): floats over the map's right edge; only the buttons take taps. */
 .nw-rail {
+  position: absolute;
+  z-index: 6;
+  top: var(--nw-gap);
+  right: var(--nw-gap);
   display: flex;
   align-items: flex-start;
+  pointer-events: none;
+}
+
+.nw-rail .defend-abilities {
+  background: linear-gradient(180deg, rgba(58, 20, 128, 0.62), rgba(26, 8, 64, 0.7));
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+.nw-rail .defend-ability {
+  pointer-events: auto;
 }
 
 .nw-balloon-slot {
@@ -1261,7 +1278,7 @@ img.walker-face.easy-walker-face,
   .nw-docks {
     left: 6px;
     bottom: 6px;
-    max-width: min(78%, 260px);
+    max-width: min(78%, 260px, calc(100% - var(--nw-rail-w) - 18px));
   }
 
   .nw-docks .defend-angel-help {
