@@ -112,6 +112,27 @@
   outline: none;
 }
 
+/* A2 map plate: candy cottages + yellow road paint under the soft-TD vector road. */
+.defend-board.has-map-plate {
+  background: #2a0f5c;
+}
+
+.defend-board.has-map-plate > rect:first-of-type,
+.defend-board.has-map-plate > ellipse:not(.defend-canopy),
+.defend-board.has-map-plate > .defend-stars,
+.defend-board.has-map-plate > .defend-ridge,
+.defend-board.has-map-plate > .defend-windows,
+.defend-board.has-map-plate > .defend-canopy,
+.defend-board.has-map-plate > .defend-porch,
+.defend-board.has-map-plate > circle,
+.defend-board.has-map-plate > path:not([class]) {
+  display: none;
+}
+
+.defend-map-plate {
+  pointer-events: none;
+}
+
 .defend-page.is-easy-watch .defend-frame {
   height: min(52vh, 380px);
   min-height: 300px;
