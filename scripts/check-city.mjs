@@ -988,7 +988,7 @@ const defendAbilitySrc = readFileSync(
   'utf8',
 )
 const defendBundleSrc = `${defendSrc}\n${defendNightSrc}\n${defendSkySrc}\n${defendAbilitySrc}`
-assert.match(defendNightSrc, /defend-lantern/)
+assert.match(defendNightSrc, /defend-tower-lamp/)
 assert.match(defendSkySrc, /defend-ridge/)
 assert.match(defendNightSrc, /defend-beam/)
 assert.match(defendSkySrc, /defend-porch/)
@@ -1167,7 +1167,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.306')
+assert.equal(APP_VERSION, '1.4.307')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -7174,5 +7174,40 @@ console.log('check-city: ok')
     latestChange('1.4.306').items.join('\n'),
     /plate|candy cottage|yellow road|wave table|plant UX|auto-fire/i,
     '1.4.306 must stay PARTS registry only',
+  )
+}
+
+// Night Watch 1.4.307: TOWERS — plant toys via TowersModule (lamp sprites on pads)
+{
+  const nw307 = (file) => readFileSync(new URL(`../src/nightWatch/${file}`, import.meta.url), 'utf8')
+  const towers307 = nw307('towers/index.ts')
+  const defendCss307 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  assert.match(towers307, /lampSrc/)
+  assert.match(towers307, /nw-tower-lamp-idle-cut\.png/)
+  assert.match(towers307, /nw-tower-lamp-firing-cut\.png/)
+  assert.match(towers307, /nightParts\.src\('lamp'/)
+  assert.doesNotMatch(towers307, /from 'react'|components\//, '1.4.307 towers seam stays React-free')
+  assert.match(defendNightSrc, /defend-tower-lamp/)
+  assert.match(defendNightSrc, /nightTowers\.lampSrc/)
+  assert.match(defendNightSrc, /is-tower-scenery/)
+  assert.match(defendCss307, /1\.4\.307: tower lamp sprites/)
+  assert.ok(
+    existsSync(new URL('../src/assets/night-watch/nw-tower-lamp-idle-cut.png', import.meta.url)),
+    'idle lamp sprite must ship in src/assets',
+  )
+  assert.ok(
+    existsSync(new URL('../src/assets/night-watch/nw-tower-lamp-firing-cut.png', import.meta.url)),
+    'firing lamp sprite must ship in src/assets',
+  )
+  assert.equal(nightTowersMod.lampSrc('idle'), nightPartsMod.src('lamp', 'idle'))
+  assert.equal(nightTowersMod.lampSrc('firing'), nightPartsMod.src('lamp', 'firing'))
+  assert.equal(nightTowersMod.lampPose(true), 'firing')
+  assert.equal(nightTowersMod.lampPose(false), 'idle')
+  assert.match(latestChange('1.4.307').title, /Night Watch|tower|lamp/i)
+  assert.match(latestChange('1.4.307').items.join('\n'), /Night Watch|lamp|tower|#418/i)
+  assert.doesNotMatch(
+    latestChange('1.4.307').items.join('\n'),
+    /HP|turret|pathfind|map plate|yellow road|candy cottage/i,
+    '1.4.307 must stay Towers plant toys only',
   )
 }

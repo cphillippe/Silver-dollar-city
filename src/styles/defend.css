@@ -301,6 +301,19 @@ img.walker-face.easy-walker-face,
   stroke-linecap: round;
 }
 
+/* Night Watch 1.4.307: tower lamp sprites on planted pads (TowersModule) */
+.defend-tower-lamp {
+  pointer-events: none;
+}
+
+.defend-pad.is-tower-scenery {
+  pointer-events: none;
+}
+
+.defend-tower-lamp.is-firing {
+  filter: url(#defend-glow);
+}
+
 .defend-pad {
   cursor: pointer;
   outline: none;
