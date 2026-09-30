@@ -24,6 +24,8 @@ import { toolTier, watchTool } from '../lib/watchTools'
 import { useJuiceHandoff } from '../lib/juice'
 import type { CityPlotId } from '../lib/city'
 import {
+  CoinRead,
+  MoneyBalloon,
   UiShell,
   boardPoint as mapBoardPoint,
   nightEnemies,
@@ -33,7 +35,7 @@ import {
   type NightRaider as Raider,
   type NightShot as Shot,
 } from '../nightWatch'
-import { useProgress } from '../store/progress'
+import { insightScore, useProgress } from '../store/progress'
 import type { View } from '../types'
 import { TownReturn } from './TownReturn'
 import { WinBurst } from './challenges/WinBurst'
@@ -385,36 +387,36 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const tapTarget = easyTap ? nightEnemies.cueTarget(raiders) : undefined
   const tapPos = tapTarget ? boardPoint(raiderAt(tapTarget).x, raiderAt(tapTarget).y) : null
 
+  const starCount = Object.values(progress.stars).reduce<number>((sum, n) => sum + n, 0)
+
   const hud = (
-    <>
-      <p className="defend-hud" aria-live="polite">
-        <span className="defend-hearts">
-          {Array.from({ length: DEFEND_HEARTS }, (_, index) => (
-            <span key={index} className={index < hearts ? 'is-on' : ''}>
-              ♥
-            </span>
-          ))}
-        </span>
-        <span className={`defend-count ${combo > 1 ? 'is-combo' : ''}`}>
-          {phase === 'wave'
-            ? easy
-              ? combo > 1
-                ? `×${combo}  ${downed}/${DEFEND_WAVE_SIZE}`
-                : `TAP ${downed}/${DEFEND_WAVE_SIZE}`
-              : combo > 1
-                ? `×${combo}  ${downed}/${DEFEND_WAVE_SIZE}`
-                : `${downed}/${DEFEND_WAVE_SIZE} · TAP`
-            : `${planted.length} lamp${planted.length === 1 ? '' : 's'}`}
-        </span>
-      </p>
-      <p className="defend-angel-help" aria-hidden="true">
-        {ANGEL_STICKER}
-      </p>
-    </>
+    <p className="defend-hud" aria-live="polite">
+      <span className="defend-hearts">
+        {Array.from({ length: DEFEND_HEARTS }, (_, index) => (
+          <span key={index} className={index < hearts ? 'is-on' : ''}>
+            ♥
+          </span>
+        ))}
+      </span>
+      <span className={`defend-count ${combo > 1 ? 'is-combo' : ''}`}>
+        {phase === 'wave'
+          ? easy
+            ? combo > 1
+              ? `×${combo}  ${downed}/${DEFEND_WAVE_SIZE}`
+              : `TAP ${downed}/${DEFEND_WAVE_SIZE}`
+            : combo > 1
+              ? `×${combo}  ${downed}/${DEFEND_WAVE_SIZE}`
+              : `${downed}/${DEFEND_WAVE_SIZE} · TAP`
+          : `${planted.length} lamp${planted.length === 1 ? '' : 's'}`}
+      </span>
+    </p>
   )
 
   const docks = (
     <>
+      <p className="defend-angel-help" aria-hidden="true">
+        {ANGEL_STICKER}
+      </p>
       {phase === 'plant' ? (
         <button
           type="button"
@@ -430,17 +432,20 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           {toolLock}
         </p>
       ) : null}
-      <DefendAbilityBar
-        progress={progress}
-        easy={easy}
-        easyTap={easyTap}
-        ability={ability}
-        setAbility={setAbility}
-        setToolLock={setToolLock}
-        firing={firing}
-        unlocked={unlocked}
-      />
     </>
+  )
+
+  const rail = (
+    <DefendAbilityBar
+      progress={progress}
+      easy={easy}
+      easyTap={easyTap}
+      ability={ability}
+      setAbility={setAbility}
+      setToolLock={setToolLock}
+      firing={firing}
+      unlocked={unlocked}
+    />
   )
 
   return (
@@ -476,7 +481,15 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                 ? 'Turn them toward heaven.'
                 : WATCH_LEAD}
           </h1>
-          <UiShell shake={shake} won={won} hud={hud} docks={docks}>
+          <UiShell
+            shake={shake}
+            won={won}
+            hud={hud}
+            coin={<CoinRead count={insightScore(progress)} label="Insight" />}
+            balloon={<MoneyBalloon count={starCount} label="Stars" />}
+            rail={rail}
+            docks={docks}
+          >
             <DefendNightBoard
               boardRef={boardRef}
               shake={shake}

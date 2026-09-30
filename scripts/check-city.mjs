@@ -1122,7 +1122,7 @@ assert.equal(WALKER_LABEL.skeptic, 'Accuser')
 assert.equal(WALKER_LABEL.physical, 'Despair')
 assert.match(
   cssSrc,
-  /\.defend-abilities \{[\s\S]*?grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/,
+  /\.defend-abilities \{\s*display: flex;\s*flex-direction: column;/,
 )
 assert.match(
   cssSrc,
@@ -1136,7 +1136,7 @@ assert.match(
   cssSrc,
   /\.defend-abilities \{[\s\S]*?z-index: 3/,
 )
-assert.match(cssSrc, /height: min\(34vh, 220px\)/)
+assert.match(cssSrc, /--nw-frame-h: min\(/)
 assert.match(cssSrc, /defend-ability-pop/)
 assert.match(cssSrc, /city-tap/)
 assert.match(cssSrc, /lantern-breathe/)
@@ -1168,7 +1168,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.309')
+assert.equal(APP_VERSION, '1.4.310')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -7277,5 +7277,41 @@ console.log('check-city: ok')
     latestChange('1.4.309').items.join('\n'),
     /tower plant|auto-fire|spawn table|HP|pathfind/i,
     '1.4.309 must stay Map+Path only',
+  )
+}
+
+// Night Watch 1.4.310: UiShell — right C&C rail + chrome HUD + money balloon (A2 plate)
+{
+  const nw310 = (file) => readFileSync(new URL(`../src/nightWatch/${file}`, import.meta.url), 'utf8')
+  const shell310 = nw310('ui/UiShell.tsx')
+  const chrome310 = nw310('ui/Chrome.tsx')
+  const css310 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  for (const slot of ['hud', 'coin', 'balloon', 'rail', 'docks']) {
+    assert.match(shell310, new RegExp(`\\b${slot}\\?: ReactNode`), `1.4.310 UiShell exposes a ${slot} slot`)
+  }
+  assert.match(shell310, /className="nw-stage"[\s\S]*defend-frame[\s\S]*nw-rail/, '1.4.310 rail sits beside the frame')
+  assert.doesNotMatch(shell310, /useState|useEffect|useRef/, '1.4.310 UiShell owns no combat state')
+  assert.match(chrome310, /MoneyBalloon/)
+  assert.match(chrome310, /CoinRead/)
+  assert.match(chrome310, /gem="coin"/)
+  assert.match(defendScreenOnlySrc, /rail=\{rail\}/)
+  assert.match(defendScreenOnlySrc, /balloon=\{<MoneyBalloon count=\{starCount\}/)
+  assert.match(defendScreenOnlySrc, /coin=\{<CoinRead count=\{insightScore\(progress\)\}/)
+  assert.match(defendScreenOnlySrc, /progress\.stars/, '1.4.310 balloon reads existing stars')
+  assert.doesNotMatch(defendScreenOnlySrc, /spend|wallet|setCoins|coins:/i, '1.4.310 no new economy')
+  const docksBlock = defendScreenOnlySrc.match(/const docks = \([\s\S]*?\n {2}\)\n/)?.[0] ?? ''
+  assert.ok(docksBlock, '1.4.310 docks block present')
+  assert.doesNotMatch(docksBlock, /DefendAbilityBar/, '1.4.310 ability dock is not a bottom dock')
+  assert.match(defendAbilitySrc, /WATCH_TOOLS\.map/)
+  assert.doesNotMatch(css310, /grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/, '1.4.310 no 2×2 dock grid')
+  assert.match(css310, /1\.4\.310 UiShell chrome/)
+  assert.match(css310, /\.nw-stage \{[\s\S]*?grid-template-columns: minmax\(0, 1fr\) auto/)
+  assert.match(css310, /\.defend-ability-claim \{[\s\S]*?clip: rect\(0 0 0 0\)/)
+  assert.match(latestChange('1.4.310').title, /UiShell/)
+  assert.match(latestChange('1.4.310').items.join('\n'), /right rail|C&C|Love \/ Logic/i)
+  assert.doesNotMatch(
+    latestChange('1.4.310').items.join('\n'),
+    /tower plant|auto-fire|spawn table|pathfind|new tool/i,
+    '1.4.310 must stay UiShell / docks / HUD only',
   )
 }

@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.310',
+    title: 'Night Watch UiShell — right C&C + chrome HUD',
+    when: '2026-09-30',
+    items: [
+      'Night Watch UiShell: Love / Logic / Reason / Science dock now stands as a compact right rail beside the board (no bottom 2×2), purple chrome HUD bar carries hearts, TAP count, and an insight coin, and a left star balloon reads your existing stars — map-first, no new economy. Fixes #418',
+    ],
+  },
+  {
     version: '1.4.309',
     title: 'Night Watch Map+Path — walkers on the A2 yellow road',
     when: '2026-09-30',
