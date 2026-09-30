@@ -1168,7 +1168,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.314')
+assert.equal(APP_VERSION, '1.4.315')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -7064,7 +7064,7 @@ console.log('check-city: ok')
   assert.match(shell303, /defend-frame/)
   assert.match(shell303, /docks/)
   assert.match(surface303, /readonly plate:/, '1.4.303 Frame must not drop the A2 plate slot')
-  assert.match(surface303, /viewBox: '0 0 640 420'/)
+  assert.match(surface303, /viewBox: '0 0 \d+ \d+'/)
   assert.match(path303, /points: DEFEND_PATH/)
   assert.match(path303, /DEFEND_ANCHOR\[id\]/)
   assert.match(towers303, /defendPads/)
@@ -7103,7 +7103,7 @@ console.log('check-city: ok')
   const nw = (file) => readFileSync(new URL(`../src/nightWatch/${file}`, import.meta.url), 'utf8')
   const surface304 = nw('map/surface.ts')
   const mapPlate304 = nw('map/MapPlate.tsx')
-  const plateAsset = new URL('../src/assets/defend/nw-map-plate.png', import.meta.url)
+  const plateAsset = new URL('../src/assets/defend/nw-map-plate.webp', import.meta.url)
   assert.ok(existsSync(plateAsset), '1.4.304 ships nw-map-plate asset')
   assert.match(surface304, /nw-map-plate/, '1.4.304 wires NIGHT_MAP.plate import')
   assert.doesNotMatch(surface304, /plate: null/, '1.4.304 must fill the A2 plate')
@@ -7237,40 +7237,15 @@ console.log('check-city: ok')
   )
 }
 
-// Night Watch 1.4.309: MAP+PATH — walkers on the A2 plate's painted yellow road
+// Night Watch 1.4.309: MAP+PATH — walkers on the A2 plate's painted yellow road (geometry superseded by 1.4.315 whole plate)
 {
   const nw309 = (file) => readFileSync(new URL(`../src/nightWatch/${file}`, import.meta.url), 'utf8')
   assert.match(nw309('map/MapPlate.tsx'), /preserveAspectRatio="xMidYMid meet"/)
   assert.doesNotMatch(nw309('map/MapPlate.tsx'), /slice/)
   assert.equal(nightPathMod.roadD, '', '1.4.309 plate paints the road; neon overlay stays empty')
-  const start = DEFEND_PATH[0]
-  const end = DEFEND_PATH[DEFEND_PATH.length - 1]
-  assert.equal(start.y, 420, '1.4.309 walkers enter off the plate bottom edge')
-  assert.ok(start.x > 320 && start.x < 380, '1.4.309 entry matches the painted road at the bottom edge')
-  assert.equal(end.y, 0, '1.4.309 walkers exit through the plate top edge')
-  assert.ok(end.x > 290 && end.x < 330, '1.4.309 exit matches the painted road at the top edge')
   assert.ok(DEFEND_PATH.length >= 30, '1.4.309 enough points to hug the S-curve')
   const segs = DEFEND_PATH.slice(1).map((p, i) => Math.hypot(p.x - DEFEND_PATH[i].x, p.y - DEFEND_PATH[i].y))
   assert.ok(Math.max(...segs) < 1.5 * Math.min(...segs), '1.4.309 even spacing keeps pathPoint speed steady')
-  for (const p of DEFEND_PATH) {
-    assert.ok(p.x >= 0 && p.x <= 640 && p.y >= 0 && p.y <= 420)
-  }
-  const farthest = Math.max(...DEFEND_PATH.map((p) => p.x))
-  assert.ok(farthest > 470 && farthest < 500, '1.4.309 upper bend reaches the painted curve')
-  const toRoad = (q) =>
-    Math.min(
-      ...DEFEND_PATH.slice(1).map((b, i) => {
-        const a = DEFEND_PATH[i]
-        const dx = b.x - a.x
-        const dy = b.y - a.y
-        const t = Math.max(0, Math.min(1, ((q.x - a.x) * dx + (q.y - a.y) * dy) / (dx * dx + dy * dy)))
-        return Math.hypot(q.x - (a.x + dx * t), q.y - (a.y + dy * t))
-      }),
-    )
-  for (const [id, seat] of Object.entries(DEFEND_ANCHOR)) {
-    const d = toRoad(seat)
-    assert.ok(d > 30 && d < 96, `1.4.309 ${id} seat sits beside the road (d=${d.toFixed(0)})`)
-  }
   assert.match(latestChange('1.4.309').title, /Night Watch|Map|Path|yellow road/i)
   assert.match(latestChange('1.4.309').items.join('\n'), /yellow road|centerline|#418/i)
   assert.doesNotMatch(
@@ -7332,7 +7307,7 @@ console.log('check-city: ok')
   )
 }
 
-// Night Watch 1.4.312: whole plate visible — full-bleed stage, contain camera on the fixed 640×420 plate
+// Night Watch 1.4.312: whole plate visible — full-bleed stage, contain camera on the plate (plate size per 1.4.315)
 {
   const surface312 = readFileSync(new URL('../src/nightWatch/map/surface.ts', import.meta.url), 'utf8')
   const css312 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
@@ -7344,12 +7319,14 @@ console.log('check-city: ok')
   assert.doesNotMatch(surface312, /Math\.max\(box\.w|ROAD_KEEP|cropStart/, '1.4.312 no cover crop')
   assert.match(surface312, /x: 0,\s*y: 0,\s*w: map\.width,\s*h: map\.height/, '1.4.312 viewBox is always the whole plate')
   assert.match(surface312, /const view = boardView\(box, map\)[\s\S]*?view\.left \+ \(point\.x - view\.x\) \* view\.scale/, '1.4.312 boardPoint shares the viewBox camera')
+  const [, plateW312, plateH312] = (surface312.match(/viewBox: '0 0 (\d+) (\d+)'/) ?? []).map(Number)
+  assert.ok(plateW312 > 0 && plateH312 > 0, '1.4.312 NIGHT_MAP declares its plate size')
   for (const p of DEFEND_PATH) {
-    assert.ok(p.x >= 0 && p.x <= 640 && p.y >= 0 && p.y <= 420, `1.4.312 walker road point ${p.x},${p.y} on the plate`)
+    assert.ok(p.x >= 0 && p.x <= plateW312 && p.y >= 0 && p.y <= plateH312, `1.4.312 walker road point ${p.x},${p.y} on the plate`)
   }
   const phone = { w: 300, h: 560 }
-  const scale = Math.min(phone.w / 640, phone.h / 420)
-  assert.ok(640 * scale <= phone.w && 420 * scale <= phone.h, '1.4.312 phone stage holds the whole plate')
+  const scale = Math.min(phone.w / plateW312, phone.h / plateH312)
+  assert.ok(plateW312 * scale <= phone.w && plateH312 * scale <= phone.h, '1.4.312 phone stage holds the whole plate')
   assert.match(latestChange('1.4.312').title, /whole plate/i)
   assert.doesNotMatch(
     latestChange('1.4.312').items.join('\n'),
@@ -7413,5 +7390,79 @@ console.log('check-city: ok')
     latestChange('1.4.314').items.join('\n'),
     /tower plant|auto-fire|spawn table|pathfind|new tool|HP/,
     '1.4.314 must stay chrome layout only',
+  )
+}
+
+// Night Watch 1.4.315: whole locked A2 plate (portrait), path retraced gate → top cottage
+{
+  const nw315 = (file) => readFileSync(new URL(`../src/nightWatch/${file}`, import.meta.url), 'utf8')
+  const surface315 = nw315('map/surface.ts')
+  const plateUrl315 = new URL('../src/assets/defend/nw-map-plate.webp', import.meta.url)
+  assert.ok(!existsSync(new URL('../src/assets/defend/nw-map-plate.png', import.meta.url)), '1.4.315 landscape crop plate is gone')
+  assert.match(surface315, /assets\/defend\/nw-map-plate\.webp/)
+  assert.match(surface315, /width: 798,\s*height: 1134,\s*viewBox: '0 0 798 1134'/, '1.4.315 NIGHT_MAP is the whole A2 plate')
+  const webp = readFileSync(plateUrl315)
+  assert.equal(webp.toString('ascii', 0, 4), 'RIFF')
+  assert.equal(webp.toString('ascii', 8, 16), 'WEBPVP8 ', '1.4.315 plate is lossy WebP')
+  assert.equal(webp.readUInt16LE(26) & 0x3fff, 798, '1.4.315 plate pixels match NIGHT_MAP width')
+  assert.equal(webp.readUInt16LE(28) & 0x3fff, 1134, '1.4.315 plate pixels match NIGHT_MAP height')
+  assert.match(surface315, /Math\.min\(box\.w \/ map\.width, box\.h \/ map\.height\)/, '1.4.315 keeps contain')
+  assert.doesNotMatch(surface315, /Math\.max\(box\.w/, '1.4.315 no cover-zoom')
+  assert.match(nw315('map/MapPlate.tsx'), /preserveAspectRatio="xMidYMid meet"/)
+  assert.equal(nightPathMod.roadD, '', '1.4.315 plate paints the road')
+
+  const start = DEFEND_PATH[0]
+  const end = DEFEND_PATH[DEFEND_PATH.length - 1]
+  assert.equal(start.x, 798, '1.4.315 walkers enter off the right edge over the gate slabs')
+  assert.ok(start.y > 1080 && start.y < 1110, '1.4.315 entry sits on the painted stone slabs')
+  assert.ok(
+    DEFEND_PATH.some((p) => p.x > 690 && p.x < 730 && p.y > 1050 && p.y < 1075),
+    '1.4.315 walkers pass through the painted gate opening',
+  )
+  assert.ok(end.x > 370 && end.x < 410 && end.y > 60 && end.y < 90, '1.4.315 road ends under the top cottage roof')
+  assert.ok(DEFEND_PATH.length >= 60, '1.4.315 enough points to hug the long portrait S-road')
+  assert.ok(Math.max(...DEFEND_PATH.map((p) => p.x)) > 570, '1.4.315 upper bend reaches the painted top curve')
+  assert.ok(
+    DEFEND_PATH.some((p) => p.x < 300 && p.y > 690 && p.y < 760),
+    '1.4.315 lower S-bend swings left past the bottom cottage',
+  )
+  assert.ok(
+    !DEFEND_PATH.some((p) => p.x < 400 && p.y > 960),
+    '1.4.315 walkers skip the fork arm to the bottom cottage',
+  )
+  const toRoad315 = (q) =>
+    Math.min(
+      ...DEFEND_PATH.slice(1).map((b, i) => {
+        const a = DEFEND_PATH[i]
+        const dx = b.x - a.x
+        const dy = b.y - a.y
+        const t = Math.max(0, Math.min(1, ((q.x - a.x) * dx + (q.y - a.y) * dy) / (dx * dx + dy * dy)))
+        return Math.hypot(q.x - (a.x + dx * t), q.y - (a.y + dy * t))
+      }),
+    )
+  const seats315 = Object.entries(DEFEND_ANCHOR)
+  for (const [id, seat] of seats315) {
+    const d = toRoad315(seat)
+    assert.ok(d > 36 && d < 110, `1.4.315 ${id} seat sits beside the road (d=${d.toFixed(0)})`)
+    assert.ok(seat.y - 64 >= 0 && seat.x >= 38 && seat.x <= 798 - 38, `1.4.315 ${id} lamp fits on the plate`)
+    assert.ok(!(seat.x > 640 && seat.y < 480), `1.4.315 ${id} seat stays clear of the right C&C float`)
+  }
+  for (const [i, [a, p]] of seats315.entries()) {
+    for (const [b, q] of seats315.slice(i + 1)) {
+      assert.ok(Math.hypot(p.x - q.x, p.y - q.y) >= 90, `1.4.315 ${a} / ${b} lamps don't overlap`)
+    }
+  }
+
+  const css315 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const rail315 = css315.match(/\n\.nw-rail \{[\s\S]*?\n\}/)?.[0] ?? ''
+  assert.match(rail315, /position: absolute/, '1.4.315 keeps the 1.4.314 C&C float')
+  assert.match(defendAbilitySrc, /WATCH_TOOLS\.map/, '1.4.315 keeps Love / Logic / Reason / Science')
+  assert.match(defendScreenOnlySrc, /balloon=\{<MoneyBalloon/, '1.4.315 keeps the money balloon')
+  assert.match(defendScreenOnlySrc, /coin=\{<CoinRead/, '1.4.315 keeps the coin HUD')
+  assert.match(latestChange('1.4.315').title, /whole locked A2 plate/)
+  assert.doesNotMatch(
+    latestChange('1.4.315').items.join('\n'),
+    /tower plant|auto-fire|spawn table|pathfind|new tool|HP|bezel|letterbox/,
+    '1.4.315 must stay art plate + path only',
   )
 }

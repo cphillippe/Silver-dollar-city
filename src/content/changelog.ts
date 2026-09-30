@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.315',
+    title: 'Night Watch whole locked A2 plate',
+    when: '2026-09-30',
+    items: [
+      'Night Watch now shows the whole painted A2 map instead of a landscape slice of it: all five candy cottages, the full winding yellow road, the golden gate, and the money-balloon corner. Walkers come in through the painted gate and follow the yellow road up to the top cottage, and the lamp lots sit on open ground beside the road. The Love / Logic / Reason / Science dock still floats on the right. Fixes #418',
+    ],
+  },
+  {
     version: '1.4.314',
     title: 'Night Watch C&C float over map',
     when: '2026-09-30',
