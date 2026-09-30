@@ -11,7 +11,7 @@ export function MapPlate({ map = NIGHT_MAP }: { map?: NightMapSurface }) {
       y={0}
       width={map.width}
       height={map.height}
-      preserveAspectRatio="xMidYMid slice"
+      preserveAspectRatio="xMidYMid meet"
     />
   )
 }

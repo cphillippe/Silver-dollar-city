@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.309',
+    title: 'Night Watch Map+Path — walkers on the A2 yellow road',
+    when: '2026-09-30',
+    items: [
+      'Night Watch: walkers follow the painted yellow road centerline on the A2 map plate (bottom-edge entry, S-curve, top-edge exit); the jagged neon road overlay is gone and lot seats sit beside the painted road (#418)',
+    ],
+  },
+  {
     version: '1.4.308',
     title: 'Night Watch ENEMIES — dark path walkers',
     when: '2026-09-30',
