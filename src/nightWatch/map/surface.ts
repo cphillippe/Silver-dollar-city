@@ -1,4 +1,5 @@
 import type { NightPoint } from '../types.ts'
+import nwMapPlate from '../../assets/defend/nw-map-plate.png'
 
 export interface NightMapSurface {
   readonly width: number
@@ -12,7 +13,7 @@ export const NIGHT_MAP: NightMapSurface = {
   width: 640,
   height: 420,
   viewBox: '0 0 640 420',
-  plate: null,
+  plate: nwMapPlate,
 }
 
 export interface NightBoardBox {

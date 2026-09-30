@@ -24,7 +24,7 @@ export function DefendNightSky({
   return (
             <svg
               ref={boardRef}
-              className={`defend-board ${shake ? 'is-shake' : ''} ${won ? 'is-clear' : ''}`}
+              className={`defend-board ${NIGHT_MAP.plate ? 'has-map-plate' : ''} ${shake ? 'is-shake' : ''} ${won ? 'is-clear' : ''}`}
               viewBox={NIGHT_MAP.viewBox}
               preserveAspectRatio="xMidYMid meet"
               role="img"
@@ -72,6 +72,7 @@ export function DefendNightSky({
                   </feMerge>
                 </filter>
               </defs>
+              <MapPlate />
               <rect width="640" height="420" fill="url(#defend-dusk)" />
               <ellipse cx="320" cy="198" rx="280" ry="28" fill="#ffcc33" opacity="0.28" />
               <circle cx="548" cy="48" r="32" fill="url(#defend-moon-glow)" />
@@ -129,7 +130,6 @@ export function DefendNightSky({
                 <path d="M-10 6 V-16 M10 6 V-16" />
                 <path d="M-12 -16 H12" />
               </g>
-              <MapPlate />
 {children}
             </svg>
   )

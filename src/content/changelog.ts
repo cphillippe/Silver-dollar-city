@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.304',
+    title: 'Night Watch A2 map plate',
+    when: '2026-09-30',
+    items: [
+      'Fixes #418: Night Watch Easy board — A2 candy playfield plate paints under the soft-TD road and towers (MAP hop)',
+    ],
+  },
+  {
     version: '1.4.303',
     title: 'Night Watch frame',
     when: '2026-09-30',
