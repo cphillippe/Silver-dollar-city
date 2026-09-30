@@ -1105,7 +1105,7 @@ img.walker-face.easy-walker-face,
   height: 20px;
 }
 
-/* Takes every px left under the chrome; the board cover-crops the plate to fill it (1.4.311). */
+/* Takes every px left under the chrome; the board contains the whole plate inside it (1.4.312). */
 .nw-stage {
   flex: 1 1 0;
   min-height: 220px;

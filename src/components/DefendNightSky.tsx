@@ -4,7 +4,7 @@ import { MapPlate, NIGHT_MAP, nightPath, type NightPhase } from '../nightWatch'
 
 export interface DefendNightSkyProps {
   boardRef: RefObject<SVGSVGElement | null>
-  /** Cover crop from `boardViewBox`; overlays use the same crop via `boardPoint`. */
+  /** Whole plate from `boardViewBox`; overlays use the same contain camera via `boardPoint`. */
   viewBox?: string
   shake: boolean
   won: boolean
@@ -29,7 +29,7 @@ export function DefendNightSky({
               ref={boardRef}
               className={`defend-board ${NIGHT_MAP.plate ? 'has-map-plate' : ''} ${shake ? 'is-shake' : ''} ${won ? 'is-clear' : ''}`}
               viewBox={viewBox}
-              preserveAspectRatio="xMidYMid slice"
+              preserveAspectRatio="xMidYMid meet"
               role="img"
               aria-label="Night road through Silver City"
               onClick={() => {
