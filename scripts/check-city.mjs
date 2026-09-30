@@ -7454,6 +7454,7 @@ console.log('check-city: ok')
   }
 
   const css315 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  assert.match(css315, /\.defend-board\.has-map-plate > \.defend-gate,/, '1.4.315 plate paints the gate; vector gate glyph hides')
   const rail315 = css315.match(/\n\.nw-rail \{[\s\S]*?\n\}/)?.[0] ?? ''
   assert.match(rail315, /position: absolute/, '1.4.315 keeps the 1.4.314 C&C float')
   assert.match(defendAbilitySrc, /WATCH_TOOLS\.map/, '1.4.315 keeps Love / Logic / Reason / Science')
