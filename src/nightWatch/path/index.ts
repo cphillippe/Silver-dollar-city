@@ -5,10 +5,11 @@ import type { NightPoint } from '../types.ts'
 export { DEFEND_ANCHOR, DEFEND_PATH, NIGHT_ROAD_D, pathPoint } from './data.ts'
 
 export interface NightPathModule {
-  /** Walker polyline, gate → porch. */
+  /** Walker polyline on the plate's yellow road, bottom-edge entry → top-edge exit. */
   readonly points: readonly NightPoint[]
   /** Where walkers enter (gate). */
   readonly start: NightPoint
+  /** SVG road overlay; empty while the map plate paints the road. */
   readonly roadD: string
   /** Position along the polyline, t in [0, 1]. */
   pointAt(t: number): NightPoint
