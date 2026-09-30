@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.306',
+    title: 'Night Watch PARTS — sprite registry',
+    when: '2026-09-30',
+    items: [
+      'Night Watch PartsModule: lot, lamp (idle/firing), and dark walker face cutouts live in src/assets/defend/ with registry fallbacks — soft TD play unchanged (#418)',
+    ],
+  },
+  {
     version: '1.4.305',
     title: 'Night Watch A2 yellow road path',
     when: '2026-09-30',

@@ -1167,7 +1167,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.305')
+assert.equal(APP_VERSION, '1.4.306')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -2450,10 +2450,10 @@ assert.match(mapSrc, /easy \? null : \(\s*\n\s*<>[\s\S]*city-street-main/)
 assert.match(mapSrc, /if \(isEasy\(progress\)\) return/)
 assert.match(mapSrc, /if \(playing\.current && !isEasy\(progress\)\) return/)
 assert.match(mapSrc, /Tap a building to Manage it/)
-assert.match(latestChange(APP_VERSION).title, /Night Watch|Easy|unpark|Fixes #418/i)
+assert.match(latestChange(APP_VERSION).title, /Night Watch|PARTS|parts|sprite|registry/i)
 assert.match(
   latestChange(APP_VERSION).items.join('\n'),
-  /Fixes #418|Easy|Night Watch|Phase 1|unpark|prove/i,
+  /PartsModule|lot|lamp|face|defend|#418/i,
 )
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-img[\s\S]*?fill: none !important/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img\.is-built[\s\S]*?fill: none/)
@@ -7071,7 +7071,7 @@ console.log('check-city: ok')
   assert.match(towers303, /dist\(/)
   assert.match(enemies303, /raidForWave/)
   assert.match(enemies303, /heavenPoint/)
-  assert.match(parts303, /NIGHT_PARTS[^=]*= \{\}/, '1.4.303 parts registry ships empty')
+  assert.match(parts303, /NightPartId = 'lot' \| 'lamp' \| 'face'/, '1.4.303 parts seam ids')
   for (const src of [path303, towers303, enemies303, parts303, surface303]) {
     assert.doesNotMatch(src, /from 'react'|components\//, 'Night Watch data seams stay React-free')
   }
@@ -7089,7 +7089,6 @@ console.log('check-city: ok')
   assert.deepEqual(nightEnemiesMod.at({ id: 0, t: 0.5, text: '', kind: 'skeptic' }), pathPoint(0.5))
   assert.equal(nightEnemiesMod.waveSize, DEFEND_WAVE_SIZE)
   assert.equal(nightTowersMod.range('porch', 'love', empty), abilityRange('love', padStage('porch', empty), empty))
-  assert.equal(nightPartsMod.src('face', 'skeptic'), null)
   assert.match(latestChange('1.4.303').title, /Night Watch|frame/i)
   assert.match(latestChange('1.4.303').items.join('\n'), /Night Watch|module|#418/i)
   assert.doesNotMatch(
@@ -7145,5 +7144,35 @@ console.log('check-city: ok')
     latestChange('1.4.305').items.join('\n'),
     /plate drop|tower plant|spawn table|auto-fire/i,
     '1.4.305 must stay PATH only',
+  )
+}
+
+// Night Watch 1.4.306: PARTS — PartsModule sprite registry (lot / lamp / face cutouts)
+{
+  const parts306 = readFileSync(new URL('../src/nightWatch/parts/index.ts', import.meta.url), 'utf8')
+  const defendAsset = (name) =>
+    existsSync(new URL(`../src/assets/defend/${name}`, import.meta.url))
+  assert.ok(defendAsset('nw-lot-empty.png'), 'missing nw-lot-empty.png')
+  assert.ok(defendAsset('nw-tower-lamp-idle.png'), 'missing nw-tower-lamp-idle.png')
+  assert.ok(defendAsset('nw-tower-lamp-firing.png'), 'missing nw-tower-lamp-firing.png')
+  assert.ok(defendAsset('nw-dark-face.png'), 'missing nw-dark-face.png')
+  assert.match(parts306, /assets\/defend\/nw-lot-empty\.png/)
+  assert.match(parts306, /assets\/defend\/nw-tower-lamp-idle\.png/)
+  assert.match(parts306, /assets\/defend\/nw-tower-lamp-firing\.png/)
+  assert.match(parts306, /assets\/defend\/nw-dark-face\.png/)
+  assert.match(parts306, /lot:[\s\S]*empty: lotEmpty/)
+  assert.match(parts306, /lamp:[\s\S]*firing: lampFiring/)
+  assert.equal(nightPartsMod.src('lot', 'empty'), nightPartsMod.src('lot', 'default'))
+  assert.ok(nightPartsMod.src('lamp', 'idle'))
+  assert.ok(nightPartsMod.src('lamp', 'firing'))
+  assert.ok(nightPartsMod.src('face', 'skeptic'))
+  assert.ok(nightPartsMod.src('face', 'image-bearer'))
+  assert.doesNotMatch(parts306, /from 'react'|components\//, 'Parts registry stays React-free')
+  assert.match(latestChange('1.4.306').title, /Night Watch|PARTS|parts|sprite/i)
+  assert.match(latestChange('1.4.306').items.join('\n'), /PartsModule|lot|lamp|face|#418/i)
+  assert.doesNotMatch(
+    latestChange('1.4.306').items.join('\n'),
+    /plate|candy cottage|yellow road|wave table|plant UX|auto-fire/i,
+    '1.4.306 must stay PARTS registry only',
   )
 }
