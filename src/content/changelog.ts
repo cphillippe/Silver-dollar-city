@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.308',
+    title: 'Night Watch ENEMIES — dark path walkers',
+    when: '2026-09-30',
+    items: [
+      'Easy Night Watch: dark-face walkers on the soft TD path via the enemies module (Parts face when registered), with RAID_CAST taunts on each walker; the tap cue stays on path walkers, not a lone HTML face-circle (#418)',
+    ],
+  },
+  {
     version: '1.4.307',
     title: 'Night Watch tower lamps on pads',
     when: '2026-09-30',

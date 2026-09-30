@@ -1145,7 +1145,7 @@ assert.match(
 )
 assert.match(cssSrc, /match-recover/)
 assert.match(defendSkySrc, /preserveAspectRatio="xMidYMid meet"/)
-assert.match(defendNightSrc, /walkerSrc/)
+assert.match(defendNightSrc, /nightEnemies\.faceSrc|walkerSrc/)
 assert.match(
   readFileSync(new URL('../src/components/Avatar.tsx', import.meta.url), 'utf8'),
   /portrait-river/,
@@ -1167,7 +1167,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.307')
+assert.equal(APP_VERSION, '1.4.308')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -7082,7 +7082,6 @@ console.log('check-city: ok')
   assert.match(defendSkySrc, /<MapPlate \/>/)
   assert.match(defendSkySrc, /nightPath\.roadD/)
   assert.match(defendNightSrc, /nightTowers\.inRange/)
-  assert.match(defendNightSrc, /nightParts\.src\('face'/)
   assert.deepEqual(nightPathMod.points, DEFEND_PATH)
   assert.deepEqual(nightPathMod.pointAt(0), DEFEND_PATH[0])
   assert.deepEqual(nightPathMod.pointAt(1), DEFEND_PATH[DEFEND_PATH.length - 1])
@@ -7209,5 +7208,39 @@ console.log('check-city: ok')
     latestChange('1.4.307').items.join('\n'),
     /HP|turret|pathfind|map plate|yellow road|candy cottage/i,
     '1.4.307 must stay Towers plant toys only',
+  )
+}
+
+// Night Watch 1.4.308: ENEMIES — dark-face walkers on path (Fixes #418)
+{
+  const nw308 = (file) => readFileSync(new URL(`../src/nightWatch/${file}`, import.meta.url), 'utf8')
+  const enemies308 = nw308('enemies/index.ts')
+  assert.match(enemies308, /NIGHT_DARK_FACE/)
+  assert.match(enemies308, /RAID_CAST/)
+  assert.match(enemies308, /faceSrc/)
+  assert.match(enemies308, /nightParts\.src\('face'/)
+  assert.match(enemies308, /nw-dark-face-cut/)
+  assert.equal(nightEnemiesMod.taunts.length, RAID_CAST.length)
+  assert.equal(nightEnemiesMod.faceSrc('skeptic', true), nightPartsMod.src('face', 'skeptic'))
+  assert.equal(nightEnemiesMod.faceSrc('pagan', true), nightPartsMod.src('face', 'pagan'))
+  assert.match(defendNightSrc, /nightEnemies\.faceSrc/)
+  assert.doesNotMatch(defendNightSrc, /nightParts\.src\('face'/)
+  assert.doesNotMatch(defendNightSrc, /easy-walker is-easy-walker is-cue/)
+  assert.match(defendNightSrc, /defend-raider-call/)
+  assert.match(defendNightSrc, /defend-raider-taunt/)
+  assert.match(defendNightSrc, /is-dark-face/)
+  assert.ok(
+    existsSync(new URL('../src/assets/night-watch/nw-dark-face-cut.png', import.meta.url)),
+    'missing nw-dark-face-cut.png',
+  )
+  assert.match(latestChange('1.4.308').title, /Night Watch|ENEMIES|dark|walker/i)
+  assert.match(
+    latestChange('1.4.308').items.join('\n'),
+    /dark-face|RAID_CAST|path|face-circle|#418/i,
+  )
+  assert.doesNotMatch(
+    latestChange('1.4.308').items.join('\n'),
+    /plate|candy cottage|tower plant|auto-fire|spawn table/i,
+    '1.4.308 must stay ENEMIES fill only',
   )
 }
