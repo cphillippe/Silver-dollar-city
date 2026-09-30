@@ -8,7 +8,7 @@ import { WALKER_LABEL } from '../lib/watchTools'
 import { CITY_PLOTS, type CityPlotId } from '../lib/city'
 import { EASY } from '../lib/easy'
 import {
-  nightParts,
+  nightEnemies,
   nightTowers,
   type NightBlast as Blast,
   type NightPhase,
@@ -17,7 +17,6 @@ import {
   type NightShot as Shot,
 } from '../nightWatch'
 import type { ProgressState, WalkerKind } from '../types'
-import { walkerSrc, WalkerFace } from './Avatar'
 
 export interface EasyTapJuice {
   key: number
@@ -68,6 +67,7 @@ export function DefendNightActorsSvg({
   shots,
   blasts,
   phase,
+  easy,
 }: Omit<DefendNightActorsProps, 'tapPos' | 'fireBest' | 'tapJuice' | 'easy'> & { easy: boolean }) {
   return (
     <>
@@ -200,8 +200,8 @@ export function DefendNightActorsSvg({
                     <circle className="defend-raider-hit" r="22" fill="transparent" />
                     <ellipse className="defend-raider-shadow" cy={12} rx={13} ry={4.6} />
                     <image
-                      className="defend-raider-face"
-                      href={nightParts.src('face', raider.kind) ?? walkerSrc(raider.kind)}
+                      className={`defend-raider-face${easy && !raider.turned ? ' is-dark-face' : ''}`}
+                      href={nightEnemies.faceSrc(raider.kind, easy)}
                       x={-18}
                       y={-24}
                       width={36}
@@ -286,9 +286,12 @@ export function DefendNightWalkerCue({
                   {tapJuice.combo > 1 ? (
                     <span className="easy-tap-combo">×{tapJuice.combo}</span>
                   ) : null}
-                  <WalkerFace
-                    kind={tapJuice.kind}
-                    className="easy-walker-face"
+                  <img
+                    className="walker-face easy-walker-face"
+                    src={nightEnemies.faceSrc(tapJuice.kind, true)}
+                    alt=""
+                    draggable={false}
+                    aria-hidden
                     style={{
                       width: EASY_WALKER_FACE_PX,
                       height: EASY_WALKER_FACE_PX,
