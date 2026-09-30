@@ -1167,7 +1167,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.304')
+assert.equal(APP_VERSION, '1.4.305')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -7121,5 +7121,29 @@ console.log('check-city: ok')
     latestChange('1.4.304').items.join('\n'),
     /tower plant|auto-fire|spawn table|HUD/i,
     '1.4.304 must stay MAP plate only',
+  )
+}
+
+// Night Watch 1.4.305: PATH — A2 yellow road polyline (src/nightWatch/path)
+{
+  const path305 = readFileSync(new URL('../src/nightWatch/path/data.ts', import.meta.url), 'utf8')
+  assert.match(path305, /A2 candy plate/)
+  assert.match(path305, /polyline only/)
+  assert.ok(DEFEND_PATH[0].x > 520 && DEFEND_PATH[0].y > 360, '1.4.305 gate sits bottom-right on A2')
+  const end = DEFEND_PATH[DEFEND_PATH.length - 1]
+  assert.ok(end.x < 72, '1.4.305 UL terminus clears the bush')
+  assert.ok(end.y < 160)
+  assert.ok(
+    DEFEND_PATH[0].y === DEFEND_PATH[1].y && DEFEND_PATH[1].x < DEFEND_PATH[0].x,
+    '1.4.305 gate keeps a ~90° turn onto the road',
+  )
+  assert.match(nightPathMod.roadD, /^M[\d.]+ [\d.]+(?: L[\d.]+ [\d.]+)+$/)
+  assert.doesNotMatch(nightPathMod.roadD, /C /)
+  assert.match(latestChange('1.4.305').title, /path|Night Watch|A2|yellow/i)
+  assert.match(latestChange('1.4.305').items.join('\n'), /yellow road|path|#418/i)
+  assert.doesNotMatch(
+    latestChange('1.4.305').items.join('\n'),
+    /plate drop|tower plant|spawn table|auto-fire/i,
+    '1.4.305 must stay PATH only',
   )
 }

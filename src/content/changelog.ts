@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.305',
+    title: 'Night Watch A2 yellow road path',
+    when: '2026-09-30',
+    items: [
+      'Night Watch: walker polyline and lot seats follow the A2 candy plate road — sharp gate turn, upper-left finish clear of the bush (#418)',
+    ],
+  },
+  {
     version: '1.4.304',
     title: 'Night Watch A2 map plate',
     when: '2026-09-30',

@@ -1,9 +1,8 @@
 import type { CityPlotId } from '../../lib/city.ts'
-import { DEFEND_ANCHOR, DEFEND_PATH, pathPoint } from '../../lib/defend.ts'
+import { DEFEND_ANCHOR, DEFEND_PATH, NIGHT_ROAD_D, pathPoint } from './data.ts'
 import type { NightPoint } from '../types.ts'
 
-/** Drawn road curve. Walkers follow `points`, not this — keep both in step when the road moves. */
-export const NIGHT_ROAD_D = 'M70 310 C 140 300, 200 280, 280 292 C 360 304, 430 286, 560 300'
+export { DEFEND_ANCHOR, DEFEND_PATH, NIGHT_ROAD_D, pathPoint } from './data.ts'
 
 export interface NightPathModule {
   /** Walker polyline, gate → porch. */
