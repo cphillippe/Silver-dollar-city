@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.312',
+    title: 'Night Watch whole plate visible — undo zoom crop',
+    when: '2026-09-30',
+    items: [
+      'Night Watch shows the whole candy map again: the board keeps the full stage under the chrome HUD beside the right C&C rail, but the map now fits inside it (cottages, the full yellow road, and the gate all at once) instead of zooming in on one cottage. Purple edges fill any leftover stage; walkers, lamps, and tap cues use the same fit so they stay on the road. Fixes #418',
+    ],
+  },
+  {
     version: '1.4.311',
     title: 'Night Watch playfield full-bleed under chrome',
     when: '2026-09-30',

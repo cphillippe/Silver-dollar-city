@@ -1145,7 +1145,7 @@ assert.match(
   /\.is-puzzle \.play\.is-build \.result \{[\s\S]*?position: static/,
 )
 assert.match(cssSrc, /match-recover/)
-assert.match(defendSkySrc, /preserveAspectRatio="xMidYMid slice"/)
+assert.match(defendSkySrc, /preserveAspectRatio="xMidYMid meet"/)
 assert.match(defendNightSrc, /nightEnemies\.faceSrc|walkerSrc/)
 assert.match(
   readFileSync(new URL('../src/components/Avatar.tsx', import.meta.url), 'utf8'),
@@ -1168,7 +1168,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.311')
+assert.equal(APP_VERSION, '1.4.312')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -7316,30 +7316,44 @@ console.log('check-city: ok')
   )
 }
 
-// Night Watch 1.4.311: playfield full-bleed under chrome — stage fills, board cover-crops, overlays share the crop
+// Night Watch 1.4.311: playfield full-bleed under chrome — stage fills (projection superseded by 1.4.312 contain)
 {
-  const nw311 = (file) => readFileSync(new URL(`../src/nightWatch/${file}`, import.meta.url), 'utf8')
-  const surface311 = nw311('map/surface.ts')
   const css311 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
   assert.doesNotMatch(css311, /--nw-frame-h|58dvh/, '1.4.311 no aspect / dvh cap on the stage')
   assert.match(css311, /\.nw-shell \{[\s\S]*?flex: 1 1 auto/, '1.4.311 shell takes the rest of the page')
   assert.match(css311, /\.nw-stage \{[\s\S]*?flex: 1 1 0/, '1.4.311 stage takes the rest of the shell')
   assert.match(css311, /\.nw-stage \{[\s\S]*?grid-template-rows: minmax\(0, 1fr\)/)
-  assert.match(defendSkySrc, /viewBox=\{viewBox\}/, '1.4.311 board uses the cover-crop viewBox')
-  assert.match(defendScreenOnlySrc, /viewBox=\{boardViewBox\(boardBox\)\}/)
   assert.match(defendScreenOnlySrc, /mapBoardPoint\(boardBox,/, '1.4.311 overlays share the measured box')
-  assert.match(surface311, /Math\.max\(box\.w \/ map\.width, box\.h \/ map\.height\)/, '1.4.311 cover scale')
-  assert.match(surface311, /const view = boardView\(box, map\)/, '1.4.311 boardPoint uses the same crop as the viewBox')
-  assert.match(surface311, /keep: ROAD_KEEP/, '1.4.311 crop holds the painted road')
-  assert.match(surface311, /pathRect\(DEFEND_PATH, WALKER_PAD\)/)
-  const xs = DEFEND_PATH.map((p) => p.x)
-  const span = Math.max(...xs) - Math.min(...xs)
-  const phoneCropW = 300 * (420 / 600)
-  assert.ok(span < phoneCropW, `1.4.311 road (${span}) fits a 300×600 phone stage crop (${phoneCropW})`)
   assert.match(latestChange('1.4.311').title, /full-bleed/i)
   assert.doesNotMatch(
     latestChange('1.4.311').items.join('\n'),
     /tower plant|auto-fire|spawn table|pathfind|new tool|HP/,
     '1.4.311 must stay layout + projection only',
+  )
+}
+
+// Night Watch 1.4.312: whole plate visible — full-bleed stage, contain camera on the fixed 640×420 plate
+{
+  const surface312 = readFileSync(new URL('../src/nightWatch/map/surface.ts', import.meta.url), 'utf8')
+  const css312 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  assert.match(css312, /\.nw-stage \{[\s\S]*?flex: 1 1 0/, '1.4.312 keeps the 1.4.311 full-bleed stage')
+  assert.match(defendSkySrc, /preserveAspectRatio="xMidYMid meet"/, '1.4.312 board contains, never slices')
+  assert.doesNotMatch(defendSkySrc, /slice/)
+  assert.match(defendScreenOnlySrc, /viewBox=\{boardViewBox\(boardBox\)\}/)
+  assert.match(surface312, /Math\.min\(box\.w \/ map\.width, box\.h \/ map\.height\)/, '1.4.312 contain scale')
+  assert.doesNotMatch(surface312, /Math\.max\(box\.w|ROAD_KEEP|cropStart/, '1.4.312 no cover crop')
+  assert.match(surface312, /x: 0,\s*y: 0,\s*w: map\.width,\s*h: map\.height/, '1.4.312 viewBox is always the whole plate')
+  assert.match(surface312, /const view = boardView\(box, map\)[\s\S]*?view\.left \+ \(point\.x - view\.x\) \* view\.scale/, '1.4.312 boardPoint shares the viewBox camera')
+  for (const p of DEFEND_PATH) {
+    assert.ok(p.x >= 0 && p.x <= 640 && p.y >= 0 && p.y <= 420, `1.4.312 walker road point ${p.x},${p.y} on the plate`)
+  }
+  const phone = { w: 300, h: 560 }
+  const scale = Math.min(phone.w / 640, phone.h / 420)
+  assert.ok(640 * scale <= phone.w && 420 * scale <= phone.h, '1.4.312 phone stage holds the whole plate')
+  assert.match(latestChange('1.4.312').title, /whole plate/i)
+  assert.doesNotMatch(
+    latestChange('1.4.312').items.join('\n'),
+    /tower plant|auto-fire|spawn table|pathfind|new tool|HP/,
+    '1.4.312 must stay layout + projection only',
   )
 }
