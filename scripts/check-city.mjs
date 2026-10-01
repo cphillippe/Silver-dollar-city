@@ -21,6 +21,11 @@ import {
   SPINE_GROW,
 } from '../src/lib/city.ts'
 import { APP_VERSION } from '../src/config/app.ts'
+import { easyLoopLine as easyLoopFromLib, easyTrailView as easyTrailViewFromLib } from '../src/lib/easy.ts'
+import {
+  easyLoopLine as easyLoopFromShelf,
+  easyTrailView as easyTrailViewFromShelf,
+} from '../src/easyTrail/trail/index.ts'
 import { normalizeProgress } from '../src/lib/save.ts'
 import {
   PH_ROAD_SHOW_IT,
@@ -1196,7 +1201,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.331')
+assert.equal(APP_VERSION, '1.4.332')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -8158,6 +8163,90 @@ console.log('check-city: ok')
     latestChange('1.4.331').items.join('\n'),
     /#470|#471|Dig deeper|Hard trail|Town|bezel|dark face|portrait/i,
     '1.4.331 stays the thin HP bar',
+  )
+}
+
+// Easy Trail 1.4.332: FRAME — empty shelves (src/easyTrail). Fixes #476.
+{
+  const et = (file) => readFileSync(new URL(`../src/easyTrail/${file}`, import.meta.url), 'utf8')
+  const barrel332 = et('index.ts')
+  const types332 = et('types.ts')
+  const trail332 = et('trail/index.ts')
+  const match332 = et('match/index.ts')
+  const father332 = et('father/index.ts')
+  const lockIn332 = et('lockIn/index.ts')
+  const gradle332 = readFileSync(new URL('../android/app/build.gradle', import.meta.url), 'utf8')
+  for (const file of [
+    'index.ts',
+    'types.ts',
+    'trail/index.ts',
+    'match/index.ts',
+    'father/index.ts',
+    'lockIn/index.ts',
+  ]) {
+    assert.ok(existsSync(new URL(`../src/easyTrail/${file}`, import.meta.url)), `1.4.332 shelf ${file}`)
+  }
+  assert.match(barrel332, /do not fork/, '1.4.332 barrel wraps and does not fork')
+  assert.match(barrel332, /from '\.\/trail\/index\.ts'/)
+  assert.match(barrel332, /from '\.\/match\/index\.ts'/)
+  assert.match(barrel332, /from '\.\/father\/index\.ts'/)
+  assert.match(barrel332, /from '\.\/lockIn\/index\.ts'/)
+  assert.match(barrel332, /A1 Match registry/)
+  assert.match(barrel332, /A2 Father home/)
+  assert.match(barrel332, /A3 Lock In peel/)
+  assert.match(barrel332, /A4 trail peel/)
+  assert.match(types332, /EasyHomeFocus as EasyTrailFocus/)
+  assert.match(trail332, /from '\.\.\/\.\.\/lib\/easy\.ts'/)
+  assert.match(trail332, /easyLoopLine/)
+  assert.match(trail332, /easyTrailView/)
+  assert.doesNotMatch(trail332, /PuzzlePlay|FatherRunPlay|RecallGate/)
+  assert.match(match332, /export \{ PuzzlePlay \} from '\.\.\/\.\.\/components\/PuzzlePlay'/)
+  assert.match(match332, /from '\.\.\/\.\.\/lib\/storyPlay\.ts'/)
+  assert.match(match332, /storyPlayFor/)
+  assert.match(match332, /A1 Match registry is later/)
+  assert.doesNotMatch(match332, /MATCH_CHIPS|gemSearchGrid/, '1.4.332 Match shelf is not a registry')
+  assert.match(father332, /export \{ FatherRunPlay \} from '\.\.\/\.\.\/components\/challenges\/FatherRunPlay'/)
+  assert.match(father332, /from '\.\.\/\.\.\/lib\/fatherRun\.ts'/)
+  assert.match(father332, /FATHER_RUN_LINE/)
+  assert.match(father332, /A2 home move is later/)
+  assert.match(lockIn332, /export \{ RecallGate \} from '\.\.\/\.\.\/components\/RecallGate'/)
+  assert.match(lockIn332, /easyHoldPractice/)
+  assert.match(lockIn332, /from '\.\.\/\.\.\/lib\/easy\.ts'/)
+  assert.match(lockIn332, /A3 Lock In peel is later/)
+  assert.doesNotMatch(lockIn332, /from ['"][^'"]*Journal/, '1.4.332 Lock In shelf does not peel Journal')
+  assert.equal(easyLoopFromShelf, easyLoopFromLib, '1.4.332 trail shelf re-exports lib/easy loop')
+  assert.equal(easyTrailViewFromShelf, easyTrailViewFromLib, '1.4.332 trail view stays the lib/easy helper')
+  for (const rel of [
+    '../src/App.tsx',
+    '../src/components/PuzzlePlay.tsx',
+    '../src/components/Journal.tsx',
+    '../src/components/ChallengeScreen.tsx',
+    '../src/components/LinkScreen.tsx',
+    '../src/components/DailyTrail.tsx',
+    '../src/components/PackStreet.tsx',
+    '../src/components/challenges/FatherRunPlay.tsx',
+    '../src/components/RecallGate.tsx',
+  ]) {
+    const src = readFileSync(new URL(rel, import.meta.url), 'utf8')
+    assert.doesNotMatch(src, /easyTrail/, `${rel} keeps its current imports`)
+  }
+  assert.match(
+    readFileSync(new URL('../src/components/PuzzlePlay.tsx', import.meta.url), 'utf8'),
+    /from '\.\/challenges\/FatherRunPlay'/,
+  )
+  assert.match(
+    readFileSync(new URL('../src/components/Journal.tsx', import.meta.url), 'utf8'),
+    /from '\.\/RecallGate'/,
+  )
+  assert.match(gradle332, /versionName "1\.4\.113"/, '1.4.332 Android versionName stays 1.4.113')
+  assert.match(latestChange('1.4.332').title, /Easy Trail|frame/i)
+  assert.match(latestChange('1.4.332').items.join('\n'), /Fixes #476/)
+  assert.match(latestChange('1.4.332').items.join('\n'), /shelves/)
+  assert.match(latestChange('1.4.332').items.join('\n'), /later/)
+  assert.doesNotMatch(
+    latestChange('1.4.332').items.join('\n'),
+    /registry|peel|SceneAd|#475|Pack B|Dig deeper/i,
+    '1.4.332 must stay FRAME / shelves only (no Match registry or Lock In peel claims)',
   )
 }
 
