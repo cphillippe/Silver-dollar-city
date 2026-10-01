@@ -113,8 +113,24 @@ html[data-easy='on'] .challenge-page.is-teach:has(.show-it-teach) > .text-link {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 42%;
+  object-position: center 40%;
   pointer-events: none;
+}
+
+@media (min-width: 840px) {
+  .show-it-teach.is-pick {
+    align-items: center;
+  }
+
+  .show-it-prompt {
+    width: min(100%, 920px);
+  }
+
+  .show-it-choices {
+    width: min(100%, 920px);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: minmax(0, 1fr);
+  }
 }
 
 .show-it-choice:focus-visible {
