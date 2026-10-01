@@ -52,11 +52,11 @@ export interface DefendNightActorsProps {
 }
 
 /**
- * Readable HP bar in A2 viewBox units. Phone contain is ~390/798 ≈ 0.49px per unit,
- * so a 32-unit track is ~16px tall — a bar, not the old ~5px pips (Fixes #451).
+ * Readable HP bar in A2 viewBox units. On a 390px phone the contain camera
+ * is under half a pixel per unit, so the track is 44 units tall (Fixes #451).
  */
-const HP_TRACK = { w: 88, h: 32, y: 18, rx: 10 }
-const HP_FILL = { inset: 4, h: 24, rx: 6 }
+const HP_TRACK = { w: 88, h: 44, y: 18, rx: 12 }
+const HP_FILL = { inset: 4, h: 36, rx: 8 }
 
 /** SVG children: pads, shots, raiders, blasts (must render inside DefendNightSky). */
 export function DefendNightActorsSvg({

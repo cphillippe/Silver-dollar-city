@@ -7714,9 +7714,10 @@ console.log('check-city: ok')
 // Night Watch 1.4.323: readable enemy HP bar (Fixes #451). 1.4.316 hit/spawn stay.
 {
   const defendCss323 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
-  assert.match(defendNightSrc, /const HP_TRACK = \{ w: 88, h: 32, y: 18, rx: 10 \}/, '1.4.323 track is a readable bar')
-  assert.match(defendNightSrc, /const HP_FILL = \{ inset: 4, h: 24, rx: 6 \}/, '1.4.323 fill sits inside the track')
-  assert.ok((32 * 390) / 798 >= 14, '1.4.323 track is at least ~14px tall on a 390px phone')
+  assert.match(defendNightSrc, /const HP_TRACK = \{ w: 88, h: 44, y: 18, rx: 12 \}/, '1.4.323 track is a readable bar')
+  assert.match(defendNightSrc, /const HP_FILL = \{ inset: 4, h: 36, rx: 8 \}/, '1.4.323 fill sits inside the track')
+  assert.ok((44 * 390) / 798 >= 14, '1.4.323 track is at least ~14px tall on a 390px phone')
+  assert.ok((36 * 390) / 798 >= 14, '1.4.323 gold fill is at least ~14px tall on a 390px phone')
   assert.ok((88 * 390) / 798 >= 36, '1.4.323 track is wide enough to read HP steps')
   assert.match(defendNightSrc, /className="defend-hp-bar"/, '1.4.323 HP bar group')
   assert.match(defendNightSrc, /className="defend-hp-track"/, '1.4.323 HP track under the face')
