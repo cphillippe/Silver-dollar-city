@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.330',
+    title: 'Night Watch tap stays small',
+    when: '2026-10-01',
+    items: [
+      'Tapping a Night Watch face plays a short pop and a turn toward heaven. The face on the road stays small. Fixes #469.',
+    ],
+  },
+  {
     version: '1.4.329',
     title: 'Night Watch Still and Mend',
     when: '2026-10-01',
