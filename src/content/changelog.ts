@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.324',
+    title: 'Night Watch enemies remaining',
+    when: '2026-10-01',
+    items: [
+      'Night Watch shows how many enemies are still left in the wave. The count starts at the wave total and drops each time a walker turns toward heaven, down to none left. Easy reads TAP N left. Hard reads N left · TAP. Fixes #453',
+    ],
+  },
+  {
     version: '1.4.323',
     title: 'Night Watch HP bar',
     when: '2026-10-01',

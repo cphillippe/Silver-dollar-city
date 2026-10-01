@@ -1176,7 +1176,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.323')
+assert.equal(APP_VERSION, '1.4.324')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -2738,7 +2738,7 @@ assert.equal(EASY.saved, 'Lock In')
 assert.equal(EASY.savedSub, 'saved lines')
 assert.equal(EASY.nightMiss, 'Wrong — tap the glowing face')
 assert.match(defendSrc, /EASY\.nightMiss/)
-assert.match(defendSrc, /TAP \$\{downed\}/)
+assert.match(defendSrc, /TAP \$\{remaining\} left/)
 assert.match(defendSrc, /You missed\. Tap the face/)
 assert.match(defendSrc, /(easyHoldSpawn|nightEnemies\.holdSpawn)\(unturnedLive\)/)
 assert.doesNotMatch(defendSrc, /matching sentence/)
@@ -7739,5 +7739,31 @@ console.log('check-city: ok')
     latestChange('1.4.323').items.join('\n'),
     /#450|#452|#453|varieties|enemies remaining|Dig deeper|Hard trail|Town|tower HP|pathfind/i,
     '1.4.323 stays the HP bar',
+  )
+}
+
+// Night Watch 1.4.324: HUD shows enemies remaining (Fixes #453).
+{
+  assert.match(
+    defendSrc,
+    /const remaining = DEFEND_WAVE_SIZE - downed/,
+    '1.4.324 remaining is wave size minus downed',
+  )
+  assert.match(defendSrc, /TAP \$\{remaining\} left/, '1.4.324 Easy TAP names how many are left')
+  assert.match(defendSrc, /\$\{remaining\} left · TAP/, '1.4.324 Hard names how many are left')
+  assert.match(defendSrc, /×\$\{combo\}  \$\{remaining\} left/, '1.4.324 combo keeps the remaining total')
+  assert.doesNotMatch(defendSrc, /TAP \$\{downed\}/, '1.4.324 HUD is not cleared/total')
+  assert.doesNotMatch(
+    defendSrc,
+    /\$\{downed\}\/\$\{DEFEND_WAVE_SIZE\}/,
+    '1.4.324 no cleared/total fraction',
+  )
+  assert.match(latestChange('1.4.324').title, /Night Watch enemies remaining/)
+  assert.match(latestChange('1.4.324').items.join('\n'), /Fixes #453/)
+  assert.match(latestChange('1.4.324').items.join('\n'), /left/)
+  assert.doesNotMatch(
+    latestChange('1.4.324').items.join('\n'),
+    /#450|#451|#452|HP bar|varieties|Dig deeper|Hard trail|Town|tower HP|pathfind/i,
+    '1.4.324 stays enemies remaining',
   )
 }

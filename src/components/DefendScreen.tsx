@@ -398,6 +398,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const tapPos = tapTarget ? boardPoint(raiderAt(tapTarget).x, raiderAt(tapTarget).y) : null
 
   const starCount = Object.values(progress.stars).reduce<number>((sum, n) => sum + n, 0)
+  const remaining = DEFEND_WAVE_SIZE - downed
 
   const hud = (
     <p className="defend-hud" aria-live="polite">
@@ -412,11 +413,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         {phase === 'wave'
           ? easy
             ? combo > 1
-              ? `×${combo}  ${downed}/${DEFEND_WAVE_SIZE}`
-              : `TAP ${downed}/${DEFEND_WAVE_SIZE}`
+              ? `×${combo}  ${remaining} left`
+              : `TAP ${remaining} left`
             : combo > 1
-              ? `×${combo}  ${downed}/${DEFEND_WAVE_SIZE}`
-              : `${downed}/${DEFEND_WAVE_SIZE} · TAP`
+              ? `×${combo}  ${remaining} left`
+              : `${remaining} left · TAP`
           : `${planted.length} lamp${planted.length === 1 ? '' : 's'}`}
       </span>
     </p>
