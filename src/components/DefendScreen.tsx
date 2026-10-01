@@ -159,6 +159,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     live.current.cool = {}
     live.current.spawnNow = false
     live.current.freezeUntil = 0
+    setToolLock(null)
     setRaiders([])
     setDowned(0)
     setHearts(DEFEND_HEARTS)
@@ -255,6 +256,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         )
       ) {
         live.current.playing = false
+        setToolLock(null)
         setPhase('boost')
         return
       }
