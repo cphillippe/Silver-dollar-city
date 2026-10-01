@@ -42,7 +42,7 @@ import { TownReturn } from './TownReturn'
 import { WinBurst } from './challenges/WinBurst'
 import { DefendAbilityBar } from './DefendAbilityBar'
 import { DefendNightBoard } from './DefendNightBoard'
-import type { EasyTapJuice } from './DefendNightActors'
+import type { EasyTapJuice, EasyWalkerCall } from './DefendNightActors'
 
 interface DefendScreenProps {
   onNavigate: (view: View) => void
@@ -396,6 +396,15 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const easyTap = easyTapMode(easy, phase, won)
   const tapTarget = easyTap ? nightEnemies.cueTarget(raiders) : undefined
   const tapPos = tapTarget ? boardPoint(raiderAt(tapTarget).x, raiderAt(tapTarget).y) : null
+  const walkerCalls: EasyWalkerCall[] = easyTap
+    ? raiders
+        .filter((raider) => !raider.turned)
+        .map((raider) => {
+          const at = raiderAt(raider)
+          const pos = boardPoint(at.x, at.y)
+          return { id: raider.id, left: pos.left, top: pos.top, kind: raider.kind, text: raider.text }
+        })
+    : []
 
   const starCount = Object.values(progress.stars).reduce<number>((sum, n) => sum + n, 0)
   const remaining = DEFEND_WAVE_SIZE - downed
@@ -543,6 +552,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
               tapTarget={tapTarget}
               tapPos={tapPos}
               tapJuice={tapJuice}
+              walkerCalls={walkerCalls}
             />
           </UiShell>
         </>

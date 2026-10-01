@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.325',
+    title: 'Night Watch enemy varieties',
+    when: '2026-10-01',
+    items: [
+      'Night Watch walks all six kinds in one wave: Accuser, Cold Heart, Mockery, Tempter, Despair, and Whisper. The kind name by each face is big enough to read on a phone. Fixes #452',
+    ],
+  },
+  {
     version: '1.4.324',
     title: 'Night Watch enemies remaining',
     when: '2026-10-01',

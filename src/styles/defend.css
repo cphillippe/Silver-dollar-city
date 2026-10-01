@@ -625,11 +625,13 @@ img.walker-face.easy-walker-face,
   font-weight: 650;
 }
 
+/* 1.4.325: kind name readable on a 390px phone — 32 user-px ≈ 15 CSS px (Fixes #452). */
 .defend-raider-call text.defend-raider-kind {
   fill: #ffcc33;
-  font-size: 5.4px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-family: var(--sans);
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
 }
 
 .defend-go {
@@ -1044,7 +1046,27 @@ img.walker-face.easy-walker-face,
 }
 
 .defend-raider-call text.defend-raider-taunt {
-  font-size: 9px;
+  font-size: 16px;
+}
+
+/* 1.4.325: Easy kind names in CSS px so the A2 camera does not crush them (Fixes #452). */
+.easy-walker-call.is-on-map {
+  transform: translate(-50%, calc(-100% - 36px));
+  min-width: 88px;
+  max-width: 168px;
+  width: max-content;
+  padding: 5px 10px 4px;
+  z-index: 8;
+}
+
+.easy-walker-call.is-on-map .easy-walker-kind {
+  font-size: 15px;
+  white-space: nowrap;
+}
+
+.easy-walker-call.is-on-map .easy-walker-taunt {
+  font-size: 11px;
+  font-weight: 650;
 }
 
 .easy-walkers-path-cue {

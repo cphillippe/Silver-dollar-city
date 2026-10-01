@@ -1078,7 +1078,6 @@ assert.equal(WATCH_TOOLS[0].id, 'love')
 assert.equal(deployFit('love', 'skeptic'), 'match')
 assert.equal(deployFit('love', 'physical'), 'weak')
 assert.equal(deployFit('science', 'physical'), 'match')
-assert.equal(raidForWave(0, 0).kind !== 'physical', true)
 assert.equal(raidForWave(2, 5).kind.length > 0, true)
 assert.equal(toolTier(watchTool('love'), empty), 1)
 assert.equal(abilityRange('love', 'built', empty), 640)
@@ -1176,7 +1175,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.324')
+assert.equal(APP_VERSION, '1.4.325')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -7016,11 +7015,11 @@ console.log('check-city: ok')
       'Mercy is optional',
       'Only your own',
       'Keep walking',
-      "You're wrong",
       'Trade your lamp',
       'Only atoms speak',
-      'Many tired gods',
       'Mind is weather',
+      "You're wrong",
+      'Many tired gods',
     ],
   )
   assert.match(
@@ -7765,5 +7764,43 @@ console.log('check-city: ok')
     latestChange('1.4.324').items.join('\n'),
     /#450|#451|#452|HP bar|varieties|Dig deeper|Hard trail|Town|tower HP|pathfind/i,
     '1.4.324 stays enemies remaining',
+  )
+}
+
+// Night Watch 1.4.325: Easy night 0 sees all six walker kinds, names readable (Fixes #452).
+{
+  const wave325 = Array.from({ length: DEFEND_WAVE_SIZE }, (_, index) => raidForWave(0, index))
+  const kinds325 = wave325.map((cast) => cast.kind)
+  assert.ok(new Set(kinds325).size >= 5, '1.4.325 night-0 wave covers at least five kinds')
+  assert.equal(new Set(kinds325).size, 6, '1.4.325 night-0 wave covers six unique kinds')
+  assert.ok(kinds325.includes('physical'), '1.4.325 night-0 includes Despair')
+  assert.ok(kinds325.includes('metaphysical'), '1.4.325 night-0 includes Whisper')
+  assert.deepEqual(
+    RAID_CAST.slice(0, 6).map((item) => item.kind),
+    ['skeptic', 'image-bearer', 'spiritual', 'pagan', 'physical', 'metaphysical'],
+    '1.4.325 first six cast slots are Accuser through Whisper',
+  )
+  for (let index = 0; index < DEFEND_WAVE_SIZE; index += 1) {
+    assert.equal(raidForWave(0, index).kind, raidForWave(2, index).kind, '1.4.325 cleared does not filter the cast')
+  }
+  assert.doesNotMatch(
+    readFileSync(new URL('../src/lib/defend.ts', import.meta.url), 'utf8'),
+    /loveKinds/,
+    '1.4.325 drops the night-0 loveKinds filter',
+  )
+  assert.match(defendNightSrc, /easy-walker-call is-on-map/, '1.4.325 Easy kind name uses the HTML call')
+  assert.match(defendNightSrc, /WALKER_LABEL\[call\.kind\]/, '1.4.325 Easy call keeps WALKER_LABEL')
+  assert.match(defendNightSrc, /const KIND_CALL = \{ w: 260, h: 84, y: -118, rx: 12, kindY: -78, tauntY: -46 \}/)
+  const defendCss325 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  assert.match(defendCss325, /\.defend-raider-call text\.defend-raider-kind \{[\s\S]*?font-size:\s*32px/)
+  assert.ok((32 * 390) / 798 >= 14, '1.4.325 Hard kind name is at least ~14px on a 390px phone')
+  assert.match(defendCss325, /\.easy-walker-call\.is-on-map \.easy-walker-kind \{[\s\S]*?font-size:\s*15px/)
+  assert.match(latestChange('1.4.325').title, /Night Watch enemy varieties/)
+  assert.match(latestChange('1.4.325').items.join('\n'), /Fixes #452/)
+  assert.match(latestChange('1.4.325').items.join('\n'), /Whisper/)
+  assert.doesNotMatch(
+    latestChange('1.4.325').items.join('\n'),
+    /Dig deeper|Hard trail|Town|#450|#451|#453|new portrait|HP bar/i,
+    '1.4.325 stays enemy varieties',
   )
 }

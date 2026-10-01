@@ -49,6 +49,8 @@ export interface DefendNightActorsProps {
   tapTarget: Raider | undefined
   tapPos: { left: number; top: number } | null
   tapJuice?: EasyTapJuice | null
+  /** Easy living walkers: CSS-px kind names (the SVG chip is Hard). */
+  walkerCalls?: EasyWalkerCall[]
 }
 
 /**
@@ -57,6 +59,12 @@ export interface DefendNightActorsProps {
  */
 const HP_TRACK = { w: 88, h: 44, y: 18, rx: 12 }
 const HP_FILL = { inset: 4, h: 36, rx: 8 }
+
+/**
+ * Kind-name chip in A2 viewBox units. 32 user-px is about 15 CSS px on a
+ * 390px-wide phone (Fixes #452). Easy draws the same label in HTML instead.
+ */
+const KIND_CALL = { w: 260, h: 84, y: -118, rx: 12, kindY: -78, tauntY: -46 }
 
 /** SVG children: pads, shots, raiders, blasts (must render inside DefendNightSky). */
 export function DefendNightActorsSvg({
@@ -244,13 +252,19 @@ export function DefendNightActorsSvg({
                         <circle className="defend-cheer-spark is-3" cx="2" cy="-26" r="1.4" />
                       </g>
                     ) : null}
-                    {!raider.turned ? (
+                    {!raider.turned && !easy ? (
                       <g className="defend-raider-call">
-                        <rect x={-40} y={-42} width={80} height={28} rx="8" />
-                        <text className="defend-raider-kind" y={-32} textAnchor="middle">
+                        <rect
+                          x={-KIND_CALL.w / 2}
+                          y={KIND_CALL.y}
+                          width={KIND_CALL.w}
+                          height={KIND_CALL.h}
+                          rx={KIND_CALL.rx}
+                        />
+                        <text className="defend-raider-kind" y={KIND_CALL.kindY} textAnchor="middle">
                           {WALKER_LABEL[raider.kind]}
                         </text>
-                        <text className="defend-raider-taunt" y={-20} textAnchor="middle">
+                        <text className="defend-raider-taunt" y={KIND_CALL.tauntY} textAnchor="middle">
                           {raider.text}
                         </text>
                       </g>
@@ -281,12 +295,23 @@ export function DefendNightActorsSvg({
   )
 }
 
+export interface EasyWalkerCall {
+  id: number
+  left: number
+  top: number
+  kind: WalkerKind
+  text: string
+}
+
 export function DefendNightWalkerCue({
   easyTap,
   tapTarget,
   tapPos,
   tapJuice,
-}: Pick<DefendNightActorsProps, 'easyTap' | 'tapTarget' | 'tapPos' | 'tapJuice'>) {
+  walkerCalls = [],
+}: Pick<DefendNightActorsProps, 'easyTap' | 'tapTarget' | 'tapPos' | 'tapJuice'> & {
+  walkerCalls?: EasyWalkerCall[]
+}) {
   const [juiceHeaven, setJuiceHeaven] = useState(false)
   useEffect(() => {
     if (!tapJuice) {
@@ -301,6 +326,20 @@ export function DefendNightWalkerCue({
 
   return (
     <>
+            {walkerCalls.length > 0 ? (
+              <div className="easy-walkers easy-walkers-kind-calls" aria-hidden>
+                {walkerCalls.map((call) => (
+                  <span
+                    key={call.id}
+                    className="easy-walker-call is-on-map"
+                    style={{ left: call.left, top: call.top }}
+                  >
+                    <span className="easy-walker-kind">{WALKER_LABEL[call.kind]}</span>
+                    <span className="easy-walker-taunt">{call.text}</span>
+                  </span>
+                ))}
+              </div>
+            ) : null}
             {tapJuice ? (
               <div className="easy-walkers easy-walkers-juice" aria-hidden>
                 <div
