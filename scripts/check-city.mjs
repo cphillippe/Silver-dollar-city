@@ -8391,6 +8391,33 @@ console.log('check-city: ok')
   assert.match(home334, /^export function FatherRunPlay\(\{$/m, '1.4.334 FatherRunPlay is defined in the home')
   assert.match(timing334, /^export function runOutcome\($/m, '1.4.334 Father timing is defined in the home')
   assert.doesNotMatch(timing334, /^import /m, '1.4.334 Father timing stays a leaf module')
+  assert.deepEqual(
+    Object.fromEntries(Object.entries(fatherRunHome).filter(([, value]) => typeof value === 'number' || Array.isArray(value))),
+    {
+      DASH_BOOST: 0.22,
+      DASH_PERIOD_MS: 2100,
+      DASH_WINDOW_MS: 500,
+      FATHER_RUN_DASH_SCORE: 25,
+      FATHER_RUN_HUG_SCORE: 100,
+      HIRED_HAND_SPEECH: [
+        'Father, I have sinned against heaven',
+        'and before you.',
+        'I am no longer worthy to be called your son.',
+        'Make me like one of your hired servants.',
+      ],
+      HOLD_CAP: 0.58,
+      HOLD_SPEED: 0.05,
+      HOLD_SPEED_REDUCED: 0.062,
+      MIN_DASHES_TO_HUG: 2,
+      MIN_START_GAP: 0.5,
+      RETRY_CLOSER: 0.1,
+      SPEECH_PHRASE_MS: 2600,
+      STALL_AFTER_MS: 900,
+      STALL_FACTOR: 0.38,
+      STUMBLE: 0.05,
+    },
+    '1.4.334 hold / dash / speech clock tuning is unchanged by the move',
+  )
   const fatherDir334 = new URL('easyTrail/father/', srcRoot334)
   const homeDeps334 = [...home334.matchAll(/ from '([^']+)'/g)].map(([, spec]) =>
     spec.startsWith('.') ? new URL(spec, fatherDir334).href.slice(srcRoot334.href.length) : spec,
