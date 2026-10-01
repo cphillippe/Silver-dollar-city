@@ -66,7 +66,11 @@ import { nightParts as nightPartsMod } from '../src/nightWatch/parts/index.ts'
 import { nightPath as nightPathMod } from '../src/nightWatch/path/index.ts'
 import { nightTowers as nightTowersMod } from '../src/nightWatch/towers/index.ts'
 import {
+  applyBoost,
+  boostCost,
+  combatTier,
   deployFit,
+  freshRunTier,
   toolForEvidence,
   toolTier,
   WALKER_LABEL,
@@ -1175,7 +1179,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.326')
+assert.equal(APP_VERSION, '1.4.327')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -7354,10 +7358,14 @@ console.log('check-city: ok')
   assert.match(chrome310, /CoinRead/)
   assert.match(chrome310, /gem="coin"/)
   assert.match(defendScreenOnlySrc, /rail=\{rail\}/)
-  assert.match(defendScreenOnlySrc, /balloon=\{<MoneyBalloon count=\{starCount\}/)
+  assert.match(defendScreenOnlySrc, /balloon=\{<MoneyBalloon count=\{runSparks\} label="Sparks"/)
   assert.match(defendScreenOnlySrc, /coin=\{<CoinRead count=\{insightScore\(progress\)\}/)
-  assert.match(defendScreenOnlySrc, /progress\.stars/, '1.4.310 balloon reads existing stars')
-  assert.doesNotMatch(defendScreenOnlySrc, /spend|wallet|setCoins|coins:/i, '1.4.310 no new economy')
+  assert.doesNotMatch(
+    defendScreenOnlySrc,
+    /progress\.stars/,
+    '1.4.327 sparks are not journal stars',
+  )
+  assert.doesNotMatch(defendScreenOnlySrc, /wallet|setCoins|coins:/i, '1.4.310 no shop economy')
   const docksBlock = defendScreenOnlySrc.match(/const docks = \([\s\S]*?\n {2}\)\n/)?.[0] ?? ''
   assert.ok(docksBlock, '1.4.310 docks block present')
   assert.doesNotMatch(docksBlock, /DefendAbilityBar/, '1.4.310 ability dock is not a bottom dock')
@@ -7578,7 +7586,11 @@ console.log('check-city: ok')
   assert.equal(nightEnemiesMod.hit(second316.raider).raider.hp, 0, '1.4.316 HP floors at 0')
 
   assert.match(defendScreenOnlySrc, /nightEnemies\.maxHp\(cast\.kind, easy\)/, '1.4.316 spawn seeds HP from enemies')
-  assert.match(defendScreenOnlySrc, /const struck = nightEnemies\.hit\(best\)/, '1.4.316 match hit goes through enemies.hit')
+  assert.match(
+    defendScreenOnlySrc,
+    /const struck = nightEnemies\.hit\(best(?:, tier)?\)/,
+    '1.4.316 match hit goes through enemies.hit',
+  )
   assert.match(defendScreenOnlySrc, /struck\.down\s*\?\s*\{ \.\.\.struck\.raider, turned: using, from: to, heavenT: 0/, '1.4.316 keeps soft-turn verb at HP 0')
   assert.match(defendScreenOnlySrc, /if \(struck\.down\) \{\s*live\.current\.downed \+= 1/, '1.4.316 downed counts only turned walkers')
   assert.match(defendScreenOnlySrc, /t: Math\.max\(0, item\.t - 0\.22\)/, '1.4.316 weak stays pushback')
@@ -7835,5 +7847,74 @@ console.log('check-city: ok')
     latestChange('1.4.326').items.join('\n'),
     /#461|#462|#463|#464|Dig deeper|Hard trail|Town|bezel|tower upgrade/i,
     '1.4.326 stays the side roster',
+  )
+}
+
+// Night Watch 1.4.327: run sparks boost Love / Logic / Reason / Science (Fixes #461).
+{
+  const types327 = readFileSync(new URL('../src/nightWatch/types.ts', import.meta.url), 'utf8')
+  const watch327 = readFileSync(new URL('../src/lib/watchTools.ts', import.meta.url), 'utf8')
+  const hp327 = readFileSync(new URL('../src/nightWatch/enemies/hp.ts', import.meta.url), 'utf8')
+  assert.match(types327, /'plant' \| 'wave' \| 'boost' \| 'lost'/, '1.4.327 boost phase')
+  assert.match(watch327, /export function combatTier/)
+  assert.match(watch327, /export function applyBoost/)
+  assert.match(defendScreenOnlySrc, /runTier/)
+  assert.match(defendScreenOnlySrc, /runSparks/)
+  assert.match(defendScreenOnlySrc, /setRunSparks\(\(count\) => count \+ 1\)/, '1.4.327 a down earns a spark')
+  assert.match(defendScreenOnlySrc, /setPhase\('boost'\)/, '1.4.327 wave clear opens boost')
+  assert.match(defendScreenOnlySrc, /continueFromBoost/, '1.4.327 boost can continue')
+  assert.match(defendScreenOnlySrc, /nightEnemies\.hit\(best, tier\)/, '1.4.327 hit damage is the tier')
+  assert.match(defendScreenOnlySrc, /combatTier\(/)
+  assert.match(defendScreenOnlySrc, /label="Sparks"/)
+  assert.doesNotMatch(defendScreenOnlySrc, /progress\.stars/, '1.4.327 does not drain journal stars')
+  assert.doesNotMatch(defendScreenOnlySrc, /name: 'shop'/, '1.4.327 no store')
+  assert.match(defendAbilitySrc, /defend-ability-tier/)
+  assert.match(defendAbilitySrc, /TIER_MARK\[tier\]/)
+  assert.match(defendAbilitySrc, /if \(boosting\)/)
+  assert.match(defendAbilitySrc, /onBoost\(tool\.id\)/)
+  assert.match(defendAbilitySrc, /setAbility\(tool\.id\)/)
+  assert.doesNotMatch(defendAbilitySrc, /easyTap \? null/, '1.4.327 Easy rail shows the tier mark')
+  assert.equal(easyTapMode(true, 'boost', false), false, '1.4.327 boost is not mid-wave TAP')
+  assert.equal(boostCost(1), 1)
+  assert.equal(boostCost(2), 1)
+  assert.equal(boostCost(3), 0)
+  assert.deepEqual(freshRunTier(), { love: 1, logic: 1, reason: 1, science: 1 })
+  assert.equal(combatTier('love', {}), 1)
+  assert.equal(combatTier('love', { love: 2 }), 2)
+  assert.equal(combatTier('love', { love: 9 }), 3)
+  assert.equal(abilityRange('love', 'built', empty, { love: 1 }), 640)
+  assert.equal(abilityRange('love', 'built', empty, { love: 2 }), 658)
+  assert.equal(abilityRange('love', 'built', empty, { love: 3 }), 676)
+  assert.equal(
+    abilityRange('logic', 'built', { ...empty, held: ['wb-creed', 'wb-early'] }, { logic: 1 }),
+    118,
+    '1.4.327 run tier ignores trail mastery',
+  )
+  const spent = applyBoost('love', { love: 1, logic: 1, reason: 1, science: 1 }, 1)
+  assert.equal(spent.ok, true)
+  assert.equal(spent.sparks, 0)
+  assert.equal(spent.runTier.love, 2)
+  assert.equal(spent.note, 'Love II')
+  const broke = applyBoost('love', { love: 1 }, 0)
+  assert.equal(broke.ok, false)
+  assert.equal(broke.note, 'Need a spark')
+  assert.equal(broke.runTier.love, 1)
+  const maxed = applyBoost('love', { love: 3 }, 4)
+  assert.equal(maxed.ok, false)
+  assert.equal(maxed.note, 'Love is III')
+  assert.equal(maxed.sparks, 4)
+  const tank = { id: 0, t: 0, text: '', kind: 'physical', hp: 3, maxHp: 3 }
+  assert.equal(nightEnemiesMod.hit(tank, 1).raider.hp, 2)
+  assert.equal(nightEnemiesMod.hit(tank, 1).down, false)
+  assert.equal(nightEnemiesMod.hit(tank, 2).raider.hp, 1)
+  assert.equal(nightEnemiesMod.hit(tank, 3).down, true, '1.4.327 III one-shots an Easy tank')
+  assert.match(hp327, /damage = 1/)
+  assert.match(latestChange('1.4.327').title, /Night Watch/)
+  assert.match(latestChange('1.4.327').items.join('\n'), /Fixes #461/)
+  assert.match(latestChange('1.4.327').items.join('\n'), /spark/)
+  assert.doesNotMatch(
+    latestChange('1.4.327').items.join('\n'),
+    /#460|#462|#463|#464|Dig deeper|Hard trail|Town|bezel/i,
+    '1.4.327 stays the tower upgrade path',
   )
 }

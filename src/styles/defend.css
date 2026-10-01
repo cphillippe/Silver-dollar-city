@@ -834,12 +834,14 @@ img.walker-face.easy-walker-face,
   z-index: 3;
 }
 
-.defend-lost {
+.defend-lost,
+.defend-boost {
   flex: 0 0 auto;
   z-index: 3;
 }
 
-.defend-lost p {
+.defend-lost p,
+.defend-boost p {
   margin: 0 0 8px;
 }
 
@@ -1187,6 +1189,13 @@ img.walker-face.easy-walker-face,
   font-weight: 800;
 }
 
+.nw-balloon-label {
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #ffe9b0;
+}
+
 @media (max-width: 480px) {
   .nw-shell {
     --nw-rail-w: 60px;
@@ -1243,7 +1252,8 @@ img.walker-face.easy-walker-face,
 }
 
 .nw-docks .btn,
-.nw-docks .defend-lost {
+.nw-docks .defend-lost,
+.nw-docks .defend-boost {
   pointer-events: auto;
 }
 
@@ -1276,7 +1286,8 @@ img.walker-face.easy-walker-face,
   max-width: 100%;
 }
 
-.nw-docks .defend-lost {
+.nw-docks .defend-lost,
+.nw-docks .defend-boost {
   padding: 10px 12px;
   border-radius: 14px;
   border: 1px solid rgba(255, 204, 51, 0.45);

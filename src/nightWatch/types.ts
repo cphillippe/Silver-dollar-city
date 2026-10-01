@@ -6,7 +6,7 @@ export interface NightPoint {
   y: number
 }
 
-export type NightPhase = 'plant' | 'wave' | 'lost'
+export type NightPhase = 'plant' | 'wave' | 'boost' | 'lost'
 
 export interface NightRaider {
   id: number
