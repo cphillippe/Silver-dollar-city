@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.322',
+    title: 'Night Watch walker portraits',
+    when: '2026-10-01',
+    items: [
+      'Night Watch bad guys wear their own faces again. Cold Heart, Accuser, Tempter, Despair, Whisper, and Mockery each show a different portrait, so Easy is not one shared dark blob. Tap the face still marks who to tap. Fixes #450',
+    ],
+  },
+  {
     version: '1.4.321',
     title: 'Match board stays planted',
     when: '2026-10-01',
