@@ -10,6 +10,7 @@ import {
 import { applyHoldFail, applyHoldSuccess } from '../lib/tiers'
 import { appendStreetLinks, STREET_TRIPLES } from '../content/links'
 import { learningFromReview, upsertLearning } from '../lib/learning'
+import { isNightCastId } from '../lib/defend.ts'
 import { isToolHowTo } from '../lib/watchTools'
 import {
   applyMiss,
@@ -247,12 +248,25 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       const next = {
         ...current,
         defense: {
+          ...current.defense,
           cleared: current.defense.cleared + 1,
           nights: seen ? current.defense.nights : [...current.defense.nights, dateKey],
           lastNight: dateKey,
         },
       }
       return write(next)
+    })
+  }, [write])
+
+  const markMet = useCallback((castId: string) => {
+    if (!isNightCastId(castId)) return
+    setProgress((current) => {
+      const met = current.defense.met ?? []
+      if (met.includes(castId)) return current
+      return write({
+        ...current,
+        defense: { ...current.defense, met: [...met, castId] },
+      })
     })
   }, [write])
 
@@ -399,6 +413,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       snoozeReviews,
       markMiss,
       recordNight,
+      markMet,
       setTheme,
       setEasyMode,
       recordTaught,
@@ -411,6 +426,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       completeChallenge,
       completeDaily,
       importSaveText,
+      markMet,
       markMiss,
       missed,
       progress,

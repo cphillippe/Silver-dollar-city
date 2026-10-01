@@ -196,6 +196,8 @@ export interface DefenseState {
   cleared: number
   nights: string[]
   lastNight?: string
+  /** Cast ids whose first-meet story has already been shown. */
+  met?: string[]
 }
 
 export type AppTheme = 'candy' | 'dusk' | 'parchment'
