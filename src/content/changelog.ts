@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.329',
+    title: 'Night Watch Still and Mend',
+    when: '2026-10-01',
+    items: [
+      'After a Night Watch wave, spend a spark on Still or Mend. During the next wave, Still freezes the walkers for a moment and Mend gives one heart back, up to three. The last wave still needs a stronger tool. Fixes #463.',
+    ],
+  },
+  {
     version: '1.4.328',
     title: 'Night Watch five waves',
     when: '2026-10-01',
