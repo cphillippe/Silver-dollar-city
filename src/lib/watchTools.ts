@@ -137,6 +137,53 @@ export function toolTier(tool: WatchTool, progress: ProgressState): number {
   return Math.min(TOOL_TIER_MAX, tool.tier + extra)
 }
 
+/** Each night starts tools at I. Trail mastery stays on toolTier. */
+export function freshRunTier(): Record<string, number> {
+  return Object.fromEntries(WATCH_TOOLS.map((tool) => [tool.id, 1]))
+}
+
+/** Tier Night Watch combat reads this run. */
+export function combatTier(toolId: string, runTier: Record<string, number>): number {
+  const live = runTier[toolId] ?? 1
+  return Math.min(TOOL_TIER_MAX, Math.max(1, Math.floor(live)))
+}
+
+/** Sparks to raise one step. Flat 1. Maxed tools cost nothing. */
+export function boostCost(tier: number): number {
+  return tier >= TOOL_TIER_MAX ? 0 : 1
+}
+
+export interface BoostSpend {
+  ok: boolean
+  runTier: Record<string, number>
+  sparks: number
+  note: string
+}
+
+/** Spend run sparks to bump I→II→III. Does not touch journal stars. */
+export function applyBoost(
+  toolId: string,
+  runTier: Record<string, number>,
+  sparks: number,
+): BoostSpend {
+  const label = watchTool(toolId)?.label ?? 'Tool'
+  const tier = combatTier(toolId, runTier)
+  if (tier >= TOOL_TIER_MAX) {
+    return { ok: false, runTier, sparks, note: `${label} is ${TIER_MARK[TOOL_TIER_MAX]}` }
+  }
+  const cost = boostCost(tier)
+  if (sparks < cost) {
+    return { ok: false, runTier, sparks, note: 'Need a spark' }
+  }
+  const next = tier + 1
+  return {
+    ok: true,
+    runTier: { ...runTier, [toolId]: next },
+    sparks: sparks - cost,
+    note: `${label} ${TIER_MARK[next]}`,
+  }
+}
+
 export function unlockedWatchTools(progress: ProgressState): WatchTool[] {
   return WATCH_TOOLS.filter((tool) => toolUnlocked(tool, progress))
 }

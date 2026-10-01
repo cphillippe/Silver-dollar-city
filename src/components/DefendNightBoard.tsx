@@ -13,8 +13,8 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
   const {
     boardRef, viewBox, shake, won, phase, fireBest, easyTap,
     pads, planted, progress, raiders, raiderAt, ability, unlocked,
-    flash, togglePad, fire, fireAtRaider, shots, easy, blasts, tapTarget, tapPos, tapJuice,
-    walkerCalls,
+    flash, togglePad,     fire, fireAtRaider, shots, easy, blasts, tapTarget, tapPos, tapJuice,
+    walkerCalls, runTier,
   } = props
   return (
     <>
@@ -45,6 +45,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
           easy={easy}
           blasts={blasts}
           phase={phase}
+          runTier={runTier}
         />
       </DefendNightSky>
       <DefendNightWalkerCue

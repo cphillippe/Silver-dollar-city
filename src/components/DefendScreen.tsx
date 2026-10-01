@@ -20,7 +20,7 @@ import {
   type WatchAbility,
 } from '../lib/defend'
 import { learningForTool } from '../lib/learning'
-import { toolTier, watchTool } from '../lib/watchTools'
+import { applyBoost, combatTier, freshRunTier } from '../lib/watchTools'
 import { useJuiceHandoff } from '../lib/juice'
 import type { CityPlotId } from '../lib/city'
 import {
@@ -64,6 +64,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const [toolLock, setToolLock] = useState<string | null>(null)
   const arming = false
   const [phase, setPhase] = useState<NightPhase>(easy ? 'wave' : 'plant')
+  const [runTier, setRunTier] = useState<Record<string, number>>(freshRunTier)
+  const [runSparks, setRunSparks] = useState(0)
+  const [boostNote, setBoostNote] = useState<string | null>(null)
+  const runTierRef = useRef(runTier)
+  runTierRef.current = runTier
   const [planted, setPlanted] = useState<CityPlotId[]>(() => [...pads])
   const [hearts, setHearts] = useState(DEFEND_HEARTS)
   const [raiders, setRaiders] = useState<Raider[]>([])
@@ -129,8 +134,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       spawnAt += dt
       const next = live.current.raiders.map((item) => {
         if (item.turned) {
-          const tool = item.turned ? watchTool(item.turned) : undefined
-          const tier = tool ? toolTier(tool, progress) : 1
+          const tier = combatTier(item.turned, runTierRef.current)
           return { ...item, heavenT: (item.heavenT ?? 0) + nightEnemies.heavenSpeed(tier, easy) * dt }
         }
         return { ...item, t: item.t + nightEnemies.speed(easy) * dt }
@@ -188,8 +192,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       }
       if (nightEnemies.isClear(easy, live.current.downed, live.current.spawned, walking.length)) {
         live.current.playing = false
-        setWon(true)
-        afterJuiceRef.current()
+        setPhase('boost')
         return
       }
       frame = requestAnimationFrame(tick)
@@ -236,7 +239,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     if ((live.current.cool[id] ?? 0) + wait > now) return
     const at = nightTowers.anchor(id)
     const using = unlocked.includes(ability) ? ability : 'love'
-    const range = nightTowers.range(id, using, progress)
+    const tier = combatTier(using, runTier)
+    const range = nightTowers.range(id, using, progress, runTier)
     let best: Raider | null = null
     if (forceRaiderId !== undefined) {
       const forced = live.current.raiders.find((item) => item.id === forceRaiderId && !item.turned)
@@ -290,7 +294,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       setBlasts((current) => current.filter((item) => item.key !== now))
     }, 620)
     if (fit === 'match') {
-      const struck = nightEnemies.hit(best)
+      const struck = nightEnemies.hit(best, tier)
       if (easy) {
         const juiceAt = boardPoint(to.x, to.y)
         setTapJuice({
@@ -314,6 +318,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       )
       if (struck.down) {
         live.current.downed += 1
+        setRunSparks((count) => count + 1)
         if (easy) live.current.spawnNow = true
       }
     } else {
@@ -335,7 +340,12 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     if (!raider) return
     for (const id of live.current.planted) {
       const at = nightTowers.anchor(id)
-      const range = nightTowers.range(id, unlocked.includes(ability) ? ability : 'love', progress)
+      const range = nightTowers.range(
+        id,
+        unlocked.includes(ability) ? ability : 'love',
+        progress,
+        runTier,
+      )
       const d = dist(at, raiderAt(raider))
       if (d <= range && d < bestD) {
         bestD = d
@@ -352,7 +362,12 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     let bestD = Infinity
     for (const id of live.current.planted) {
       const at = nightTowers.anchor(id)
-      const range = nightTowers.range(id, unlocked.includes(ability) ? ability : 'love', progress)
+      const range = nightTowers.range(
+        id,
+        unlocked.includes(ability) ? ability : 'love',
+        progress,
+        runTier,
+      )
       for (const raider of live.current.raiders) {
         if (raider.turned) continue
         const d = dist(at, raiderAt(raider))
@@ -377,7 +392,25 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     setShots([])
     setBlasts([])
     setTapJuice(null)
+    setRunTier(freshRunTier())
+    setRunSparks(0)
+    setBoostNote(null)
     saved.current = false
+  }
+
+  function boostTool(id: WatchAbility) {
+    const next = applyBoost(id, runTier, runSparks)
+    setBoostNote(next.note)
+    if (!next.ok) return
+    setRunTier(next.runTier)
+    setRunSparks(next.sparks)
+    setToolLock(null)
+  }
+
+  function continueFromBoost() {
+    if (won) return
+    setWon(true)
+    afterJuice()
   }
 
   if (!brief) {
@@ -403,8 +436,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         .map((raider) => ({ id: raider.id, kind: raider.kind, text: raider.text }))
     : []
 
-  const starCount = Object.values(progress.stars).reduce<number>((sum, n) => sum + n, 0)
   const remaining = DEFEND_WAVE_SIZE - downed
+  const boosting = phase === 'boost' && !won
 
   const hud = (
     <p className="defend-hud" aria-live="polite">
@@ -416,15 +449,17 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         ))}
       </span>
       <span className={`defend-count ${combo > 1 ? 'is-combo' : ''}`}>
-        {phase === 'wave'
-          ? easy
-            ? combo > 1
-              ? `×${combo}  ${remaining} left`
-              : `TAP ${remaining} left`
-            : combo > 1
-              ? `×${combo}  ${remaining} left`
-              : `${remaining} left · TAP`
-          : `${planted.length} lamp${planted.length === 1 ? '' : 's'}`}
+        {phase === 'boost'
+          ? 'Level up'
+          : phase === 'wave'
+            ? easy
+              ? combo > 1
+                ? `×${combo}  ${remaining} left`
+                : `TAP ${remaining} left`
+              : combo > 1
+                ? `×${combo}  ${remaining} left`
+                : `${remaining} left · TAP`
+            : `${planted.length} lamp${planted.length === 1 ? '' : 's'}`}
       </span>
     </p>
   )
@@ -442,6 +477,14 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           </p>
           <button type="button" className="btn primary" onClick={retry}>
             Try the night again
+          </button>
+        </div>
+      ) : null}
+      {phase === 'boost' && !won ? (
+        <div className="defend-boost">
+          <p role="status">{boostNote ?? 'Spend sparks · tap a tool to level up'}</p>
+          <button type="button" className="btn primary" onClick={continueFromBoost}>
+            Continue
           </button>
         </div>
       ) : null}
@@ -471,12 +514,14 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     <DefendAbilityBar
       progress={progress}
       easy={easy}
-      easyTap={easyTap}
       ability={ability}
       setAbility={setAbility}
       setToolLock={setToolLock}
       firing={firing}
       unlocked={unlocked}
+      runTier={runTier}
+      boosting={boosting}
+      onBoost={boostTool}
     />
   )
 
@@ -511,7 +556,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
             <>
               <p className="eyebrow">{WATCH_KICKER}</p>
               <h1 className="defend-title">
-                {phase === 'wave' ? 'Turn them toward heaven.' : WATCH_LEAD}
+                {phase === 'wave'
+                  ? 'Turn them toward heaven.'
+                  : phase === 'boost'
+                    ? 'Spend sparks. Tap a tool.'
+                    : WATCH_LEAD}
               </h1>
             </>
           )}
@@ -520,7 +569,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
             won={won}
             hud={hud}
             coin={<CoinRead count={insightScore(progress)} label="Insight" />}
-            balloon={<MoneyBalloon count={starCount} label="Stars" />}
+            balloon={<MoneyBalloon count={runSparks} label="Sparks" />}
             rail={rail}
             docks={docks}
           >
@@ -550,6 +599,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
               tapPos={tapPos}
               tapJuice={tapJuice}
               walkerCalls={walkerCalls}
+              runTier={runTier}
             />
           </UiShell>
         </>

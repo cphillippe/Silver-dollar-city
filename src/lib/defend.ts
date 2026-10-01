@@ -1,7 +1,7 @@
 import type { ProgressState, WalkerKind } from '../types.ts'
 import { CITY_PLOTS, plotStage, type CityPlotId, type CityStage } from './city.ts'
 import { prefersReducedMotion } from './juice.ts'
-import { deployFit, toolTier, unlockedWatchTools, watchTool, WATCH_TOOLS } from './watchTools.ts'
+import { combatTier, deployFit, toolTier, unlockedWatchTools, watchTool, WATCH_TOOLS } from './watchTools.ts'
 
 export const DEFEND_BRIEF_ID = 'td-watch'
 export const DEFEND_HEARTS = 3
@@ -162,9 +162,10 @@ export function abilityRange(
   ability: string,
   stage: CityStage,
   progress: ProgressState,
+  runTier?: Record<string, number>,
 ): number {
   const tool = watchTool(ability)
-  const tier = tool ? toolTier(tool, progress) : 1
+  const tier = runTier ? combatTier(ability, runTier) : tool ? toolTier(tool, progress) : 1
   const reach = (tier - 1) * 18
   if (ability === 'love') return 640 + reach
   return towerRange(stage) + reach

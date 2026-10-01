@@ -51,6 +51,8 @@ export interface DefendNightActorsProps {
   tapJuice?: EasyTapJuice | null
   /** Living walkers: kind name + taunt in the left slide-out, not on the path. */
   walkerCalls?: EasyWalkerCall[]
+  /** Run tier for lamp range. Combat reads this, not trail mastery. */
+  runTier: Record<string, number>
 }
 
 /**
@@ -79,6 +81,7 @@ export function DefendNightActorsSvg({
   blasts,
   phase,
   easy,
+  runTier,
 }: Omit<DefendNightActorsProps, 'tapPos' | 'fireBest' | 'tapJuice' | 'easy'> & { easy: boolean }) {
   return (
     <>
@@ -94,7 +97,7 @@ export function DefendNightActorsSvg({
                   raiders.some(
                     (raider) =>
                       !raider.turned &&
-                      nightTowers.inRange(id, using, progress, raiderAt(raider)),
+                      nightTowers.inRange(id, using, progress, raiderAt(raider), runTier),
                   )
                 const pose = nightTowers.lampPose(hot || flash === id)
                 const lampBox = nightTowers.lampImageBox()
@@ -121,7 +124,7 @@ export function DefendNightActorsSvg({
                         : (event) => {
                             event.stopPropagation()
                             if (phase === 'plant') togglePad(id)
-                            else fire(id)
+                            else if (phase === 'wave') fire(id)
                           }
                     }
                     onKeyDown={
@@ -131,7 +134,7 @@ export function DefendNightActorsSvg({
                             if (event.key === 'Enter' || event.key === ' ') {
                               event.preventDefault()
                               if (phase === 'plant') togglePad(id)
-                              else fire(id)
+                              else if (phase === 'wave') fire(id)
                             }
                           }
                     }

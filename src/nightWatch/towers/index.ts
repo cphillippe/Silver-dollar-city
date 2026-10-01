@@ -27,9 +27,20 @@ export interface NightTowersModule {
   /** Where a shot leaves the lamp. */
   muzzle(id: CityPlotId): NightPoint
   stage(id: CityPlotId, progress: ProgressState): CityStage
-  range(id: CityPlotId, ability: string, progress: ProgressState): number
+  range(
+    id: CityPlotId,
+    ability: string,
+    progress: ProgressState,
+    runTier?: Record<string, number>,
+  ): number
   cooldown(id: CityPlotId, progress: ProgressState): number
-  inRange(id: CityPlotId, ability: string, progress: ProgressState, target: NightPoint): boolean
+  inRange(
+    id: CityPlotId,
+    ability: string,
+    progress: ProgressState,
+    target: NightPoint,
+    runTier?: Record<string, number>,
+  ): boolean
   /** Idle vs firing lamp art — Parts registry wins when filled. */
   lampSrc(pose: NightLampPose): string
   lampPose(hot: boolean): NightLampPose
@@ -46,10 +57,11 @@ export const nightTowers: NightTowersModule = {
     return { x: at.x, y: at.y - (h - footY) + 10 }
   },
   stage: padStage,
-  range: (id, ability, progress) => abilityRange(ability, padStage(id, progress), progress),
+  range: (id, ability, progress, runTier) =>
+    abilityRange(ability, padStage(id, progress), progress, runTier),
   cooldown: (id, progress) => towerCooldown(padStage(id, progress)),
-  inRange: (id, ability, progress, target) =>
-    dist(nightPath.anchor(id), target) <= nightTowers.range(id, ability, progress),
+  inRange: (id, ability, progress, target, runTier) =>
+    dist(nightPath.anchor(id), target) <= nightTowers.range(id, ability, progress, runTier),
   lampSrc: (pose) => nightParts.src('lamp', pose) ?? LOCAL_LAMP[pose],
   lampPose: (hot) => (hot ? 'firing' : 'idle'),
   lampImageBox: () => {

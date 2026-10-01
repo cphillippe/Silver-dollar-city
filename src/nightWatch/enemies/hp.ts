@@ -23,7 +23,7 @@ export function enemyMaxHp(kind: WalkerKind, easy: boolean): number {
   return NIGHT_ENEMY_HP[easy ? 'easy' : 'hard'][NIGHT_ENEMY_ROLE[kind]]
 }
 
-/** One matching hit. `down` means HP is gone and the caller soft-turns the walker. */
+/** Matching hit. Damage is the combat tier (I=1, II=2, III=3). `down` means HP is gone. */
 export function enemyHit<T extends NightRaider>(raider: T, damage = 1): { raider: T; down: boolean } {
   const hp = Math.max(0, raider.hp - damage)
   return { raider: { ...raider, hp }, down: hp <= 0 }

@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.327',
+    title: 'Night Watch towers upgrade',
+    when: '2026-10-01',
+    items: [
+      'Night Watch Love, Logic, Reason, and Science show I, II, or III on the rail. Turning a walker earns a spark. After the wave, tap an unlocked tool to spend a spark and raise it. II and III reach farther and hit harder. Sparks are for this night only. Fixes #461',
+    ],
+  },
+  {
     version: '1.4.326',
     title: 'Night Watch side roster',
     when: '2026-10-01',

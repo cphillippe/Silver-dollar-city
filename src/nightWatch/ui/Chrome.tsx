@@ -10,6 +10,9 @@ export function MoneyBalloon({ count, label }: { count: number; label: string })
       <span className="nw-balloon-count" aria-hidden>
         {count}
       </span>
+      <span className="nw-balloon-label" aria-hidden>
+        {label}
+      </span>
     </span>
   )
 }
