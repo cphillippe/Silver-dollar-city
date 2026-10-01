@@ -59,6 +59,24 @@ export interface ParseFail {
 
 export type ParseResult = ParseOk | ParseFail
 
+/** Settings Start over — fresh walk, same theme and Easy flag. Taught flags cannot survive. */
+export function progressAfterReset(
+  current: Pick<ProgressState, 'theme' | 'easyMode'>,
+): ProgressState {
+  return {
+    ...emptyProgress(),
+    theme: current.theme,
+    easyMode: current.easyMode,
+    taught: [],
+    held: [],
+    easyTaught: [],
+    easyHeld: [],
+    tierTaught: {},
+    lessonTier: {},
+    lessonScore: {},
+  }
+}
+
 export function emptyProgress(): ProgressState {
   return {
     started: false,

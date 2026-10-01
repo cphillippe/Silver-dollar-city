@@ -3,7 +3,7 @@ import { areas, journalEntries, pillarFor } from '../content'
 import { evidenceFor, evidenceForJournal, evidenceForTier } from '../content/evidence'
 import { guideForArea, STORY } from '../content/story'
 import { localDateKey } from '../lib/dates'
-import { EASY, easyFacingLine, easyJournalMeta, isEasy } from '../lib/easy'
+import { EASY, easyFacingLine, easyJournalMeta, easyLineTaught, easyLoopLine, isEasy } from '../lib/easy'
 import { EASY_HOME } from '../lib/easyNav'
 import { EasyBack } from './EasyBack'
 import { offerSupportToast } from '../lib/supportToast'
@@ -82,8 +82,13 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
     ? evidenceForTier(holdId, currentLessonTier(progress, holdId)) ?? evidenceFor(holdId)
     : undefined
 
+  const openLine = easyLoopLine(progress)
+  const quizReplacesMatch =
+    easy &&
+    (holdId === openLine || focusId === openLine) &&
+    !easyLineTaught(progress, openLine)
   const holdPractice =
-    Boolean(autoQuiz && quizBrief && (easy || !focusedEntry || focusedOpen))
+    Boolean(autoQuiz && quizBrief && !quizReplacesMatch && (easy || !focusedEntry || focusedOpen))
 
   if (holdPractice && quizBrief) {
     const pillar = focusedEntry?.areaId ?? pillarFor(quizBrief.id)
