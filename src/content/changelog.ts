@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.319',
+    title: 'Easy show-it — Who helped?',
+    when: '2026-10-01',
+    items: [
+      'Easy Learn for the mercy road (ph-road) plays a short show-it clip, then asks who helped with three pictures: the hurt man, someone walking past, and the helper. The helper opens Match. A wrong picture shakes so you can try again. Other Easy lessons keep the short story card. Fixes #439',
+    ],
+  },
+  {
     version: '1.4.318',
     title: 'Easy Match person and place variety',
     when: '2026-10-01',

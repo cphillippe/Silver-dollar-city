@@ -21,6 +21,13 @@ import {
   SPINE_GROW,
 } from '../src/lib/city.ts'
 import { APP_VERSION } from '../src/config/app.ts'
+import {
+  PH_ROAD_SHOW_IT,
+  SHOW_IT_LINE,
+  SHOW_IT_PROMPT,
+  SHOW_IT_WORD_CAP,
+  showItWordCount,
+} from '../src/content/showIt.ts'
 import { lociStampFor } from '../src/lib/lociStamp.ts'
 import { CAST } from '../src/content/story.ts'
 import { CHANGELOG, latestChange } from '../src/content/changelog.ts'
@@ -1168,7 +1175,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.318')
+assert.equal(APP_VERSION, '1.4.319')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -7517,5 +7524,61 @@ console.log('check-city: ok')
     latestChange('1.4.318').items.join('\n'),
     /Night Watch|enemy HP|board juice/i,
     '1.4.318 stays Easy Match person and place variety',
+  )
+}
+
+// Easy show-it 1.4.319: ph-road Learn plays the clip, then a picture tap (Fixes #439)
+{
+  assert.equal(SHOW_IT_LINE, 'ph-road')
+  assert.equal(SHOW_IT_PROMPT, 'Who helped?')
+  assert.ok(showItWordCount(SHOW_IT_PROMPT) <= SHOW_IT_WORD_CAP, '1.4.319 prompt stays within 6 words')
+  assert.equal(showItWordCount(SHOW_IT_PROMPT), 2)
+  assert.equal(PH_ROAD_SHOW_IT.correctId, '03-compassion-helps')
+  assert.deepEqual(
+    PH_ROAD_SHOW_IT.choices.map((choice) => choice.id),
+    ['01-hurt-road', '02-walk-past', '03-compassion-helps'],
+  )
+  assert.match(PH_ROAD_SHOW_IT.clip, /assets\/show-it\/ph-road-showit\.webm$/)
+  assert.match(PH_ROAD_SHOW_IT.poster, /assets\/show-it\/ph-road-showit-poster\.jpg$/)
+  for (const choice of PH_ROAD_SHOW_IT.choices) {
+    assert.match(choice.src, new RegExp(`assets/panel-blast/ph-road/${choice.id}@1024\\.webp$`))
+  }
+  for (const rel of [
+    'public/assets/show-it/ph-road-showit.webm',
+    'public/assets/show-it/ph-road-showit-poster.jpg',
+    'docs/assets/show-it/ph-road-showit.webm',
+    'docs/assets/show-it/ph-road-showit-poster.jpg',
+  ]) {
+    assert.ok(existsSync(new URL(`../${rel}`, import.meta.url)), `1.4.319 missing ${rel}`)
+  }
+
+  const showSrc319 = readFileSync(new URL('../src/components/ShowItTeach.tsx', import.meta.url), 'utf8')
+  const teachSrc319 = readFileSync(new URL('../src/components/TeachUnlock.tsx', import.meta.url), 'utf8')
+  assert.match(teachSrc319, /brief\.id === SHOW_IT_LINE/)
+  assert.match(teachSrc319, /<ShowItTeach onUnlock=\{onUnlock\} \/>/)
+  assert.ok(
+    teachSrc319.indexOf('SHOW_IT_LINE') < teachSrc319.indexOf('easy-story-card'),
+    '1.4.319 show-it replaces the ph-road card; other Easy lessons keep easy-story-card',
+  )
+  assert.match(teachSrc319, /Skip reading/)
+  assert.match(teachSrc319, /LociStamp/)
+  assert.match(teachSrc319, /HeldTriad/)
+  assert.match(showSrc319, /onEnded=\{\(\) => setPhase\('pick'\)\}/)
+  assert.match(showSrc319, /onUnlock\(\)/)
+  assert.match(showSrc319, /is-shake/)
+  assert.match(showSrc319, /\{PH_ROAD_SHOW_IT\.prompt\}/)
+  assert.doesNotMatch(showSrc319, /Skip reading|Short story|HeldTriad|teach-reason|Unlock the/)
+  assert.match(
+    readFileSync(new URL('../src/main.tsx', import.meta.url), 'utf8'),
+    /showIt\.css/,
+  )
+  assert.match(cssSrc, /\.show-it-choice\.is-shake/)
+  assert.match(latestChange('1.4.319').title, /Who helped/)
+  assert.match(latestChange('1.4.319').items.join('\n'), /Fixes #439/)
+  assert.match(latestChange('1.4.319').items.join('\n'), /ph-road/)
+  assert.doesNotMatch(
+    latestChange('1.4.319').items.join('\n'),
+    /Night Watch|Dig Scripture|board plant|#443|#444/i,
+    '1.4.319 stays the ph-road show-it pilot',
   )
 }

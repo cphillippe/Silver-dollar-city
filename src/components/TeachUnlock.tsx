@@ -10,9 +10,11 @@ import { learningBeat } from '../lib/learning'
 import { learningPicture, toolForEvidence } from '../lib/watchTools'
 import { useProgress } from '../store/progress'
 import { lociStampFor } from '../lib/lociStamp'
+import { SHOW_IT_LINE } from '../content/showIt'
 import { LociStamp } from './LociStamp'
 import { GemMark } from './GemMark'
 import { HeldTriad } from './HeldTriad'
+import { ShowItTeach } from './ShowItTeach'
 import { WordGloss } from './WordGloss'
 
 interface TeachUnlockProps {
@@ -45,6 +47,10 @@ export function TeachUnlock({ brief, kind, onUnlock, unlock, beats }: TeachUnloc
   const school = schoolWordsFor(brief.id, easy)
 
   if (easy) {
+    if (brief.id === SHOW_IT_LINE) {
+      // Easy show-it 1.4.319: ph-road only — clip, then tap the helper (Fixes #439).
+      return <ShowItTeach onUnlock={onUnlock} />
+    }
     const stamp = lociStampFor(brief.id)
     return (
       <section className="recall-gate is-encode teach-gate easy-story-card" aria-label="Short story">
