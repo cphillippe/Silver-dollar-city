@@ -680,46 +680,20 @@ img.walker-face.easy-walker-face,
   filter: brightness(1.2) drop-shadow(0 0 8px #ffcc33);
 }
 
-/* ENEMIES 1.4.316 — tiny HP pips under the face; a lost pip flashes as it empties */
-.defend-hp-pips {
+/* ENEMIES 1.4.323 — readable HP bar under the face (Fixes #451). Dark track, gold fill. */
+.defend-hp-bar {
   pointer-events: none;
 }
 
-.defend-hp-chip {
+.defend-hp-track {
   fill: rgba(42, 13, 88, 0.92);
-  stroke: rgba(255, 246, 184, 0.55);
-  stroke-width: 0.8;
+  stroke: #fff6b8;
+  stroke-width: 2;
 }
 
-.defend-hp-pip {
-  stroke: none;
-}
-
-.defend-hp-pip.is-full {
+.defend-hp-fill {
   fill: #ffcc33;
-}
-
-.defend-hp-pip.is-empty {
-  fill: #fff6b8;
-  opacity: 0.35;
-  animation: defend-hp-drop 0.32s ease-out;
-}
-
-@keyframes defend-hp-drop {
-  0% {
-    fill: #ffffff;
-    opacity: 1;
-  }
-  100% {
-    fill: #fff6b8;
-    opacity: 0.35;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .defend-hp-pip.is-empty {
-    animation: none;
-  }
+  stroke: none;
 }
 
 .defend-cheer-spark {
