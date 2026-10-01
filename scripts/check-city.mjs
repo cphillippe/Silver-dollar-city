@@ -93,8 +93,9 @@ import {
   EASY_FOLK_LIFT,
   EASY_FOLK_NUDGE,
 } from '../src/lib/cityBuild.ts'
-import { emptyProgress } from '../src/lib/save.ts'
-import { EASY, EASY_LINE_ORDER, DIG_ARC, NAMES_ARC, STONE_ARC, INK_ARC, easyChromeLine, easyChromeNearDup, easyFacingLine, easyHomeFocus, easyHoldLine, easyHoldPractice, easyHoldView, easyLearnLine, easyLineHeld, easyLineLearned, easyLineTaught, easyLoopLine, easyMatchLine, easyMatchReady, markEasyHeld, markEasyTaught, easyWhoWhere, easyWhoWhereLine, easyWhyLine, easyWhyWordCount, easyWrongTap, uniqueHoldChoices } from '../src/lib/easy.ts'
+import { emptyProgress, progressAfterReset } from '../src/lib/save.ts'
+import { EASY, EASY_LINE_ORDER, DIG_ARC, FOUNDATION_ARC, NAMES_ARC, STONE_ARC, INK_ARC, easyChromeLine, easyChromeNearDup, easyFacingLine, easyHomeFocus, easyHoldFields, easyHoldLine, easyHoldPractice, easyHoldView, easyLearnLine, easyLineHeld, easyLineLearned, easyLineTaught, easyLoopLine, easyMatchLine, easyMatchReady, easyTeachFields, easyTrailView, markEasyHeld, markEasyTaught, progressAfterMatchTaught, easyWhoWhere, easyWhoWhereLine, easyWhyLine, easyWhyWordCount, easyWrongTap, uniqueHoldChoices } from '../src/lib/easy.ts'
+import { storyPlayFor } from '../src/lib/storyPlay.ts'
 import { WORDS, easyLead } from '../src/lib/words.ts'
 import { deeperLinksFor, eraLabel } from '../src/content/deeper.ts'
 import { allEvidenceIds, evidenceFor } from '../src/content/evidence.ts'
@@ -1175,7 +1176,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.319')
+assert.equal(APP_VERSION, '1.4.320')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1956,6 +1957,80 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
   assert.equal(easyHomeFocus(fresh), 'match')
   assert.equal(easyHomeFocus(taughtMercy), 'hold')
   assert.equal(easyHomeFocus(heldMercy), 'match')
+  // Fixes #448 — fresh Easy offers Match, not Lock In auto-quiz.
+  assert.deepEqual(easyTrailView(fresh), { name: 'link' })
+  assert.equal(easyHoldView(fresh).autoQuiz, undefined)
+  assert.deepEqual(easyTrailView(progressAfterMatchTaught(fresh, 'ph-road')), {
+    name: 'journal',
+    focusId: 'ph-road',
+    autoQuiz: true,
+  })
+  const quizWalk = {
+    ...fresh,
+    taught: ['ph-road', 'wb-women'],
+    held: ['ph-road', 'wb-women'],
+    completed: ['ph-road', 'wb-women'],
+  }
+  assert.deepEqual(easyTeachFields(quizWalk, 'ph-road', false).easyTaught, [])
+  assert.deepEqual(easyTeachFields(quizWalk, 'wb-women', false).tierTaught, {})
+  assert.deepEqual(easyHoldFields(quizWalk, 'ph-road'), [])
+  assert.equal(easyHomeFocus(quizWalk), 'match')
+  assert.deepEqual(easyTrailView(quizWalk), { name: 'link' })
+  const matchedWomen = {
+    ...quizWalk,
+    ...easyTeachFields(quizWalk, 'wb-women', true),
+  }
+  assert.deepEqual(matchedWomen.easyTaught, ['wb-women'])
+  assert.equal(matchedWomen.tierTaught['wb-women'], 'easy')
+  assert.deepEqual(easyHoldFields(matchedWomen, 'wb-women'), ['wb-women'])
+  const atDig = {
+    ...fresh,
+    easyHeld: ['ph-road', 'ph-father', 'ph-debt', ...FOUNDATION_ARC, 'wb-creed'],
+  }
+  assert.equal(easyLoopLine(atDig), 'wb-women')
+  assert.equal(storyPlayFor('wb-women'), 'source-dig')
+  assert.equal(easyHomeFocus(atDig), 'match')
+  assert.deepEqual(easyTrailView(atDig), { name: 'link' })
+  assert.notEqual(easyHoldView(atDig).autoQuiz, true)
+  const dirtyWalk = {
+    ...fresh,
+    theme: 'dusk',
+    easyMode: true,
+    taught: ['ph-road', 'wb-women'],
+    held: ['ph-road'],
+    easyTaught: ['ph-road', 'wb-women'],
+    easyHeld: ['ph-road'],
+    tierTaught: { 'ph-road': 'easy', 'wb-women': 'medium' },
+    lessonTier: { 'ph-road': 'medium' },
+    lessonScore: { 'ph-road': 12 },
+  }
+  const wiped = progressAfterReset(dirtyWalk)
+  assert.deepEqual(wiped.easyTaught, [])
+  assert.deepEqual(wiped.easyHeld, [])
+  assert.deepEqual(wiped.tierTaught, {})
+  assert.deepEqual(wiped.taught, [])
+  assert.deepEqual(wiped.held, [])
+  assert.equal(wiped.easyMode, true)
+  assert.equal(wiped.theme, 'dusk')
+  assert.equal(easyHomeFocus(wiped), 'match')
+  assert.deepEqual(easyTrailView(wiped), { name: 'link' })
+  const puzzleSrc448 = readFileSync(
+    new URL('../src/components/PuzzlePlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(puzzleSrc448, /case 'source-dig':[\s\S]*?<SourceDigPlay/)
+  assert.match(
+    readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
+    /recordTaught\(lineId, true\)/,
+  )
+  assert.match(
+    readFileSync(new URL('../src/store/ProgressProvider.tsx', import.meta.url), 'utf8'),
+    /easyTeachFields\(current, evidenceId, fromMatch\)/,
+  )
+  assert.match(
+    readFileSync(new URL('../src/components/CityMap.tsx', import.meta.url), 'utf8'),
+    /easyTrailView\(progress\)/,
+  )
   const taughtFather = {
     ...fresh,
     easyTaught: ['ph-road', 'ph-father'],
@@ -2609,11 +2684,11 @@ assert.match(
 )
 assert.match(
   readFileSync(new URL('../src/store/ProgressProvider.tsx', import.meta.url), 'utf8'),
-  /markEasyHeld/,
+  /easyHoldFields/,
 )
 assert.match(
   readFileSync(new URL('../src/store/ProgressProvider.tsx', import.meta.url), 'utf8'),
-  /markEasyTaught/,
+  /easyTeachFields/,
 )
 assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),

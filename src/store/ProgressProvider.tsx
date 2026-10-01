@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState, type ReactNode } from 'react'
-import { markEasyHeld, markEasyTaught } from '../lib/easy'
+import { easyHoldFields, easyTeachFields } from '../lib/easy'
 import {
   applyMatchBonus,
   applyMatchDockJuice,
@@ -7,7 +7,7 @@ import {
   applyMatchMiss,
   consumeMatchExtra as spendMatchExtra,
 } from '../lib/matchBonus'
-import { applyHoldFail, applyHoldSuccess, currentLessonTier } from '../lib/tiers'
+import { applyHoldFail, applyHoldSuccess } from '../lib/tiers'
 import { appendStreetLinks, STREET_TRIPLES } from '../content/links'
 import { learningFromReview, upsertLearning } from '../lib/learning'
 import { isToolHowTo } from '../lib/watchTools'
@@ -23,6 +23,7 @@ import {
   backupCurrentSave,
   parseIncomingSave,
   persistSave,
+  progressAfterReset,
   type SaveMeta,
 } from '../lib/save'
 import { bestStars, type StarCount } from '../lib/stars'
@@ -32,7 +33,6 @@ import { applyUpgrade } from '../lib/cityBuild'
 import type { AppTheme, ProgressState } from '../types'
 import {
   cardsUnlockedBy,
-  emptyProgress,
   loadAppSave,
   ProgressContext,
   trailCardsForDays,
@@ -79,8 +79,8 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       const held = current.held.includes(evidenceId)
         ? current.held
         : [...current.held, evidenceId]
-      const easyHeld = current.easyMode
-        ? markEasyHeld(current, evidenceId)
+      const easyHeld = current.easyMode && !isToolHowTo(evidenceId)
+        ? easyHoldFields(current, evidenceId)
         : (current.easyHeld ?? [])
       if (held === current.held && easyHeld === (current.easyHeld ?? [])) return current
       const next: ProgressState = {
@@ -136,7 +136,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
             : [...current.held, event.id],
         easyHeld:
           current.easyMode && !isToolHowTo(event.id)
-            ? markEasyHeld(current, event.id)
+            ? easyHoldFields(current, event.id)
             : (current.easyHeld ?? []),
         lastReviewPillar: event.pillar,
         elaborations: event.text
@@ -270,16 +270,15 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     })
   }, [write])
 
-  const recordTaught = useCallback((evidenceId: string) => {
+  const recordTaught = useCallback((evidenceId: string, fromMatch = false) => {
     setProgress((current) => {
       const taught = current.taught ?? []
       const nextTaught = taught.includes(evidenceId) ? taught : [...taught, evidenceId]
-      const easyTaught = current.easyMode
-        ? markEasyTaught(current, evidenceId)
-        : (current.easyTaught ?? [])
-      const tierTaught = current.easyMode
-        ? { ...(current.tierTaught ?? {}), [evidenceId]: currentLessonTier(current, evidenceId) }
-        : (current.tierTaught ?? {})
+      const taughtFields = current.easyMode
+        ? easyTeachFields(current, evidenceId, fromMatch)
+        : { easyTaught: current.easyTaught ?? [], tierTaught: current.tierTaught ?? {} }
+      const easyTaught = taughtFields.easyTaught
+      const tierTaught = taughtFields.tierTaught
       if (
         nextTaught === taught &&
         easyTaught === (current.easyTaught ?? []) &&
@@ -367,14 +366,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     setMissed([])
     forgetCitySeen()
     backupCurrentSave()
-    setProgress((current) => {
-      const next = {
-        ...emptyProgress(),
-        theme: current.theme,
-        easyMode: current.easyMode,
-      }
-      return write(next)
-    })
+    setProgress((current) => write(progressAfterReset(current)))
   }, [write])
 
   const importSaveText = useCallback((raw: string) => {

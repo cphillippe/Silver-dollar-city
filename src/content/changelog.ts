@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.320',
+    title: 'Easy restart keeps Match and Dig',
+    when: '2026-10-01',
+    items: [
+      'After Start over, Home offers the open line’s Match game first. Gem Match is the arcade, and when the trail reaches a dig line that same Match opens Source Dig. Lock In quizzes wait until that game is finished, and a fresh walk does not reuse lines already marked taught. Fixes #448',
+    ],
+  },
+  {
     version: '1.4.319',
     title: 'Easy show-it — Who helped?',
     when: '2026-10-01',

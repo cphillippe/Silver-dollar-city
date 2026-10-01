@@ -139,7 +139,11 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
                 <button
                   type="button"
                   className="easy-coach-step"
-                  onClick={() => onNavigate(easyHoldView(progress))}
+                  onClick={() =>
+                    onNavigate(
+                      easyHomeFocus(progress) === 'hold' ? easyHoldView(progress) : { name: 'link' },
+                    )
+                  }
                 >
                   Lock In
                 </button>
@@ -167,7 +171,11 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
               <button
                 type="button"
                 className={`easy-coach-step ${focus === 'hold' ? 'is-dock-now' : ''}`}
-                onClick={() => onNavigate(easyHoldView(progress))}
+                onClick={() =>
+                  onNavigate(
+                    easyHomeFocus(progress) === 'hold' ? easyHoldView(progress) : { name: 'link' },
+                  )
+                }
               >
                 {EASY.saved}
               </button>

@@ -40,7 +40,7 @@ import {
   useProgress,
 } from '../store/progress'
 import { localDateKey } from '../lib/dates'
-import { isEasy } from '../lib/easy'
+import { easyTrailView, isEasy } from '../lib/easy'
 import type { View } from '../types'
 import riverWalk from '../assets/cast/portrait-river.png'
 import juniperWalk from '../assets/cast/portrait-juniper.png'
@@ -135,6 +135,11 @@ export function CityMap({
 
   function enter(id: CityPlotId) {
     if (mode === 'poster' || playing.current) return
+    if (isEasy(progress)) {
+      setMindPlot(null)
+      onNavigate(easyTrailView(progress))
+      return
+    }
     const spec = CITY_PLOTS.find((plot) => plot.id === id)
     const areaId = spec?.areaId
     const unlocked = areaId ? isAreaUnlocked(areaId, progress.completed) : true

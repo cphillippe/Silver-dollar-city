@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { STREET_BEATS, STREET_PLACE_WHYS, STREET_TRIPLES, appendStreetLinks, easyStreetChallenge, hardStreetChallenge, nextStreetWalk, streetFactsLeft, streetWalkTakeaway } from '../content/links'
 import { STORY } from '../content/story'
-import { EASY, easyHoldView, easyMatchLine, isEasy } from '../lib/easy'
+import { EASY, easyHoldView, easyMatchLine, isEasy, progressAfterMatchTaught } from '../lib/easy'
 import { EASY_HOME } from '../lib/easyNav'
 import { EasyBack } from './EasyBack'
 import { useJuiceHandoff } from '../lib/juice'
@@ -42,6 +42,8 @@ export function LinkScreen({ onNavigate, debugLine }: LinkScreenProps) {
   const { juiceDone: showNext, afterJuice } = useJuiceHandoff()
   const savedWin = useRef(false)
   const finishedWalk = useRef<ReturnType<typeof nextStreetWalk>>(undefined)
+  // Teach-gate only. Easy opens the Match arcade immediately — this is not easyTaught.
+  // An untaught line must not skip into Lock In (Fixes #448).
   const [taught, setTaught] = useState(() => isEasy(progress) || Boolean(debugLine))
   const [arming, setArming] = useState(false)
   const easy = isEasy(progress) || Boolean(debugLine)
@@ -71,7 +73,7 @@ export function LinkScreen({ onNavigate, debugLine }: LinkScreenProps) {
   function solved() {
     if (easy) {
       if (!debugLine) {
-        recordTaught(lineId)
+        recordTaught(lineId, true)
         markStreet()
       }
       return
@@ -94,7 +96,8 @@ export function LinkScreen({ onNavigate, debugLine }: LinkScreenProps) {
       return
     }
     markStreet()
-    onNavigate(dest === 'hold' ? easyHoldView(progress) : EASY_HOME)
+    const taughtNow = progressAfterMatchTaught(progress, lineId)
+    onNavigate(dest === 'hold' ? easyHoldView(taughtNow) : EASY_HOME)
   }
 
   return (
