@@ -444,6 +444,62 @@ export function easyHoldView(progress: EasyLoopProgress): {
   return { name: 'journal' }
 }
 
+/**
+ * Open triad after Welcome / Home / a lot tap.
+ * Untaught → Match arcade (gem, Source Dig, or the line’s other play).
+ * Taught → Lock In. A quiz must not stand in for an untaught Match (Fixes #448).
+ */
+export function easyTrailView(
+  progress: EasyLoopProgress,
+): { name: 'link' } | ReturnType<typeof easyHoldView> {
+  if (easyHomeFocus(progress) === 'hold') return easyHoldView(progress)
+  return { name: 'link' }
+}
+
+/** Match clear — Lock In can open before the save flush lands. */
+export function progressAfterMatchTaught<T extends EasyLoopProgress>(
+  progress: T,
+  id: string,
+): T {
+  return {
+    ...progress,
+    easyTaught: markEasyTaught(progress, id),
+    tierTaught: {
+      ...(progress.tierTaught ?? {}),
+      [id]: currentLessonTier(progress, id),
+    },
+  }
+}
+
+/**
+ * Easy-loop teach. Only Match writes easyTaught / tierTaught.
+ * Area walks and Daily may record the general taught list; they must not
+ * skip gem Match or Source Dig (Fixes #448).
+ */
+export function easyTeachFields(
+  progress: EasyLoopProgress,
+  id: string,
+  fromMatch: boolean,
+): { easyTaught: string[]; tierTaught: NonNullable<EasyLoopProgress['tierTaught']> } {
+  if (!fromMatch) {
+    return {
+      easyTaught: progress.easyTaught ?? [],
+      tierTaught: progress.tierTaught ?? {},
+    }
+  }
+  const next = progressAfterMatchTaught(progress, id)
+  return {
+    easyTaught: next.easyTaught ?? [],
+    tierTaught: next.tierTaught ?? {},
+  }
+}
+
+/** A quiz or area encode cannot hold a line Match has not taught. */
+export function easyHoldFields(progress: EasyLoopProgress, id: string): string[] {
+  if (!easyLineTaught(progress, id)) return progress.easyHeld ?? []
+  return markEasyHeld(progress, id)
+}
+
 function appendUnique(list: string[] | undefined, id: string): string[] {
   const next = list ?? []
   return next.includes(id) ? next : [...next, id]

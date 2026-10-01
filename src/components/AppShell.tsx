@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { dueCount, getNextGoal, insightScore, useProgress } from '../store/progress'
-import { easyHoldView, isEasy } from '../lib/easy'
+import { easyTrailView, isEasy } from '../lib/easy'
 import { EASY_HOME, EASY_TOP } from '../lib/easyNav'
 import { Avatar } from './Avatar'
 import type { View } from '../types'
@@ -94,7 +94,7 @@ export function AppShell({ view, onNavigate, children }: AppShellProps) {
             <button
               type="button"
               className={view.name === 'journal' ? 'is-active' : ''}
-              onClick={() => onNavigate(easy ? easyHoldView(progress) : { name: 'journal' })}
+              onClick={() => onNavigate(easy ? easyTrailView(progress) : { name: 'journal' })}
             >
               {easy ? EASY_TOP.lockIn : 'Journal'}
             </button>

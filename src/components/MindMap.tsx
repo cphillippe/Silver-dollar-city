@@ -4,7 +4,7 @@ import { evidenceFor } from '../content/evidence'
 import { areas, journalForChallenge } from '../content'
 import { plainFor } from '../content/plain'
 import { LOT_STORY, easyPlaceSub, lotWhy } from '../content/lots'
-import { isEasy, scrapbookLabel } from '../lib/easy'
+import { easyLineTaught, easyLoopLine, easyTrailView, isEasy, scrapbookLabel } from '../lib/easy'
 import { mindGraph } from '../lib/mindMap'
 import {
   appliedTier,
@@ -68,6 +68,10 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
     graph.tools.filter((item) => item.lit).length
 
   function openIdea(id: string) {
+    if (easy && id === easyLoopLine(progress) && !easyLineTaught(progress, id)) {
+      onNavigate({ name: 'link' })
+      return
+    }
     const page = journalForChallenge(id)
     if (page && progress.journal.includes(page.id)) {
       onNavigate({ name: 'journal', focusId: page.id, autoQuiz: true })
@@ -188,7 +192,11 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
             <button
               type="button"
               className="btn gold xl"
-              onClick={() => onNavigate(nextWalkView(gateArea, progress.completed))}
+              onClick={() =>
+                onNavigate(
+                  easy ? easyTrailView(progress) : nextWalkView(gateArea, progress.completed),
+                )
+              }
             >
               {easy ? `Walk ${gateTitle} next` : `Walk ${gateTitle}`}
             </button>
