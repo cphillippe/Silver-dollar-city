@@ -1176,7 +1176,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.321')
+assert.equal(APP_VERSION, '1.4.322')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -7232,7 +7232,8 @@ console.log('check-city: ok')
   assert.match(parts306, /assets\/defend\/nw-lot-empty\.png/)
   assert.match(parts306, /assets\/defend\/nw-tower-lamp-idle\.png/)
   assert.match(parts306, /assets\/defend\/nw-tower-lamp-firing\.png/)
-  assert.match(parts306, /assets\/defend\/nw-dark-face\.png/)
+  assert.match(parts306, /assets\/walkers\/walker-skeptic\.png/)
+  assert.doesNotMatch(parts306, /nw-dark-face\.png/, '1.4.322 faces are per-kind portraits')
   assert.match(parts306, /lot:[\s\S]*empty: lotEmpty/)
   assert.match(parts306, /lamp:[\s\S]*firing: lampFiring/)
   assert.equal(nightPartsMod.src('lot', 'empty'), nightPartsMod.src('lot', 'default'))
@@ -7685,4 +7686,29 @@ console.log('check-city: ok')
   )
   assert.match(juice321, /\.play\.is-gem-search \.match-teach-chip\.is-found \{[\s\S]*?box-shadow:\s*0 1px 0/)
   assert.match(juice321, /\.gem-cell\.is-burst/)
+}
+
+// Night Watch 1.4.322: per-kind walker portraits (Fixes #450)
+{
+  const parts322 = readFileSync(new URL('../src/nightWatch/parts/index.ts', import.meta.url), 'utf8')
+  const kinds = ['image-bearer', 'skeptic', 'pagan', 'physical', 'metaphysical', 'spiritual']
+  const faces = kinds.map((kind) => nightPartsMod.src('face', kind))
+  assert.equal(new Set(faces).size, kinds.length, '1.4.322 each walker kind has its own face')
+  for (const kind of kinds) {
+    const file = `walker-${kind}.png`
+    assert.match(parts322, new RegExp(`assets/walkers/${file.replace('.', '\\.')}`))
+    assert.match(String(nightPartsMod.src('face', kind)), new RegExp(file.replace('.', '\\.')))
+    assert.equal(nightEnemiesMod.faceSrc(kind, true), nightPartsMod.src('face', kind))
+    assert.equal(nightEnemiesMod.faceSrc(kind, false), nightPartsMod.src('face', kind))
+    assert.doesNotMatch(String(nightPartsMod.src('face', kind)), /nw-dark-face/)
+  }
+  assert.doesNotMatch(parts322, /nw-dark-face\.png/)
+  assert.match(latestChange('1.4.322').title, /Night Watch walker portraits/)
+  assert.match(latestChange('1.4.322').items.join('\n'), /Fixes #450/)
+  assert.match(latestChange('1.4.322').items.join('\n'), /Tap the face/)
+  assert.doesNotMatch(
+    latestChange('1.4.322').items.join('\n'),
+    /HP bar|enemies remaining|#451|#452|#453|Dig deeper|Hard trail|Town/i,
+    '1.4.322 stays walker portraits',
+  )
 }
