@@ -13,26 +13,23 @@ const EASY_SPAWN_T = [0.08, 0.18, 0.28] as const
 
 export { DEFEND_ANCHOR, DEFEND_PATH, pathPoint } from '../nightWatch/path/data.ts'
 
+/** First six slots are one of each WalkerKind; later rows are extra taunts only. */
 export const RAID_CAST: { text: string; kind: WalkerKind }[] = [
   { text: 'Mercy is optional', kind: 'skeptic' },
   { text: 'Only your own', kind: 'image-bearer' },
   { text: 'Keep walking', kind: 'spiritual' },
-  { text: "You're wrong", kind: 'skeptic' },
   { text: 'Trade your lamp', kind: 'pagan' },
   { text: 'Only atoms speak', kind: 'physical' },
-  { text: 'Many tired gods', kind: 'pagan' },
   { text: 'Mind is weather', kind: 'metaphysical' },
+  { text: "You're wrong", kind: 'skeptic' },
+  { text: 'Many tired gods', kind: 'pagan' },
 ]
 
 export const RAID_LINES = RAID_CAST.map((item) => item.text)
 
-export function raidForWave(cleared: number, index: number): { text: string; kind: WalkerKind } {
-  const loveKinds: WalkerKind[] = ['image-bearer', 'spiritual', 'skeptic']
-  const pool =
-    cleared < 1
-      ? RAID_CAST.filter((item) => loveKinds.includes(item.kind))
-      : RAID_CAST
-  return pool[index % pool.length]
+/** Full six-kind cast. `cleared` does not narrow the pool (Fixes #452). */
+export function raidForWave(_cleared: number, index: number): { text: string; kind: WalkerKind } {
+  return RAID_CAST[index % RAID_CAST.length]
 }
 
 export function emptyDefense() {
