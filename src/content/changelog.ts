@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.328',
+    title: 'Night Watch five waves',
+    when: '2026-10-01',
+    items: [
+      'One night is five waves. Clear a wave, spend sparks, then tap Continue for the next. Wave 5 is faster and tougher, so Love I leaks until a tool is raised. Each new walker tells a short story once in the side list. Fixes #462. Fixes #464.',
+    ],
+  },
+  {
     version: '1.4.327',
     title: 'Night Watch towers upgrade',
     when: '2026-10-01',

@@ -51,6 +51,8 @@ export interface DefendNightActorsProps {
   tapJuice?: EasyTapJuice | null
   /** Living walkers: kind name + taunt in the left slide-out, not on the path. */
   walkerCalls?: EasyWalkerCall[]
+  /** First-meet story, shown once above the side list. */
+  loreLine?: string | null
   /** Run tier for lamp range. Combat reads this, not trail mastery. */
   runTier: Record<string, number>
 }
@@ -189,7 +191,7 @@ export function DefendNightActorsSvg({
                     tabIndex={isTap ? 0 : undefined}
                     aria-label={
                       isTap
-                        ? `${WALKER_LABEL[raider.kind]}: ${raider.text}. ${EASY.nightTap}`
+                        ? `${raider.label ?? WALKER_LABEL[raider.kind]}: ${raider.text}. ${EASY.nightTap}`
                         : undefined
                     }
                     onClick={
@@ -279,6 +281,10 @@ export interface EasyWalkerCall {
   id: number
   kind: WalkerKind
   text: string
+  /** Climb name when it differs from the shared face. */
+  label?: string
+  /** First meeting this night — highlight the row. The story sits above the list. */
+  fresh?: boolean
 }
 
 export function DefendNightWalkerCue({
@@ -287,8 +293,11 @@ export function DefendNightWalkerCue({
   tapPos,
   tapJuice,
   walkerCalls = [],
+  loreLine = null,
 }: Pick<DefendNightActorsProps, 'easyTap' | 'tapTarget' | 'tapPos' | 'tapJuice'> & {
   walkerCalls?: EasyWalkerCall[]
+  /** First-meet story. One line above the side list, not on the road. */
+  loreLine?: string | null
 }) {
   const [juiceHeaven, setJuiceHeaven] = useState(false)
   useEffect(() => {
@@ -304,14 +313,15 @@ export function DefendNightWalkerCue({
 
   return (
     <>
-            {walkerCalls.length > 0 ? (
+            {walkerCalls.length > 0 || loreLine ? (
               <aside className="nw-walker-slide easy-walker-roster" aria-label="Walkers on the road">
+                {loreLine ? <span className="easy-walker-lore is-new">{loreLine}</span> : null}
                 {walkerCalls.map((call) => (
                   <span
                     key={call.id}
-                    className={`easy-walker-call${tapTarget?.id === call.id ? ' is-cue' : ''}`}
+                    className={`easy-walker-call${tapTarget?.id === call.id ? ' is-cue' : ''}${call.fresh ? ' is-new' : ''}`}
                   >
-                    <span className="easy-walker-kind">{WALKER_LABEL[call.kind]}</span>
+                    <span className="easy-walker-kind">{call.label ?? WALKER_LABEL[call.kind]}</span>
                     <span className="easy-walker-taunt">{call.text}</span>
                   </span>
                 ))}

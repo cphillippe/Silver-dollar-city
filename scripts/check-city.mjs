@@ -21,6 +21,7 @@ import {
   SPINE_GROW,
 } from '../src/lib/city.ts'
 import { APP_VERSION } from '../src/config/app.ts'
+import { normalizeProgress } from '../src/lib/save.ts'
 import {
   PH_ROAD_SHOW_IT,
   SHOW_IT_LINE,
@@ -41,6 +42,7 @@ import {
   abilityRange,
   DEFEND_ANCHOR,
   DEFEND_PATH,
+  DEFEND_NIGHT_WAVES,
   DEFEND_WAVE_SIZE,
   defendPads,
   EASY_CUE_HOLD_MS,
@@ -56,10 +58,14 @@ import {
   heavenPoint,
   padStage,
   pathPoint,
+  NIGHT_CAST,
+  normalizeMet,
   RAID_CAST,
   raidForWave,
   unlockedWatchAbilities,
+  waveCombat,
   waveIsClear,
+  wavePackSize,
 } from '../src/lib/defend.ts'
 import { nightEnemies as nightEnemiesMod } from '../src/nightWatch/enemies/index.ts'
 import { nightParts as nightPartsMod } from '../src/nightWatch/parts/index.ts'
@@ -1179,7 +1185,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.327')
+assert.equal(APP_VERSION, '1.4.328')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -7759,8 +7765,8 @@ console.log('check-city: ok')
 {
   assert.match(
     defendSrc,
-    /const remaining = DEFEND_WAVE_SIZE - downed/,
-    '1.4.324 remaining is wave size minus downed',
+    /const remaining = waveSize - downed/,
+    '1.4.324 remaining is the live wave pack minus downed',
   )
   assert.match(defendSrc, /TAP \$\{remaining\} left/, '1.4.324 Easy TAP names how many are left')
   assert.match(defendSrc, /\$\{remaining\} left · TAP/, '1.4.324 Hard names how many are left')
@@ -7783,20 +7789,11 @@ console.log('check-city: ok')
 
 // Night Watch 1.4.325: Easy night 0 sees all six walker kinds, names readable (Fixes #452).
 {
-  const wave325 = Array.from({ length: DEFEND_WAVE_SIZE }, (_, index) => raidForWave(0, index))
-  const kinds325 = wave325.map((cast) => cast.kind)
-  assert.ok(new Set(kinds325).size >= 5, '1.4.325 night-0 wave covers at least five kinds')
-  assert.equal(new Set(kinds325).size, 6, '1.4.325 night-0 wave covers six unique kinds')
-  assert.ok(kinds325.includes('physical'), '1.4.325 night-0 includes Despair')
-  assert.ok(kinds325.includes('metaphysical'), '1.4.325 night-0 includes Whisper')
   assert.deepEqual(
     RAID_CAST.slice(0, 6).map((item) => item.kind),
     ['skeptic', 'image-bearer', 'spiritual', 'pagan', 'physical', 'metaphysical'],
     '1.4.325 first six cast slots are Accuser through Whisper',
   )
-  for (let index = 0; index < DEFEND_WAVE_SIZE; index += 1) {
-    assert.equal(raidForWave(0, index).kind, raidForWave(2, index).kind, '1.4.325 cleared does not filter the cast')
-  }
   assert.doesNotMatch(
     readFileSync(new URL('../src/lib/defend.ts', import.meta.url), 'utf8'),
     /loveKinds/,
@@ -7922,4 +7919,155 @@ console.log('check-city: ok')
     /#460|#462|#463|#464|Dig deeper|Hard trail|Town|bezel/i,
     '1.4.327 stays the tower upgrade path',
   )
+}
+
+// Night Watch 1.4.328: five-wave night + climb cast and first-meet lore (Fixes #462, #464).
+{
+  assert.equal(DEFEND_NIGHT_WAVES, 5)
+  assert.equal(NIGHT_CAST.length, 13)
+  assert.deepEqual(
+    [...DEFEND_WAVE_PACK_CHECK()],
+    [4, 4, 5, 5, 8],
+  )
+  assert.ok(wavePackSize(0) < 6 && wavePackSize(1) < 6 && wavePackSize(2) < 6 && wavePackSize(3) < 6)
+  assert.ok(wavePackSize(4) > DEFEND_WAVE_SIZE, '1.4.328 wave 5 is denser than the old six')
+  assert.equal(waveCombat(0, true).hpBonus, 0)
+  assert.equal(waveCombat(3, true).speedScale, 1)
+  assert.ok(waveCombat(4, true).hpBonus >= 4, '1.4.328 wave 5 Easy is tankier')
+  assert.ok(waveCombat(4, true).speedScale > 1, '1.4.328 wave 5 Easy is faster')
+  assert.ok(waveCombat(4, true).spawnScale < 1, '1.4.328 wave 5 Easy spawns sooner')
+  assert.equal(waveCombat(4, false).hpBonus, 0, '1.4.328 Hard keeps its own HP; Easy is the gate')
+
+  for (let index = 0; index < 8; index += 1) {
+    const guy = raidForWave(0, index, index === 7 ? 4 : 0)
+    assert.equal(guy.id, NIGHT_CAST[0].id, '1.4.328 night 0 only spawns guy 1')
+    assert.equal(guy.kind, 'skeptic')
+  }
+  const level2 = new Set(Array.from({ length: 6 }, (_, index) => raidForWave(1, index).id))
+  assert.deepEqual([...level2].sort(), ['accuser', 'cold-heart'])
+  const reached = new Set(Array.from({ length: 13 }, (_, index) => raidForWave(12, index).id))
+  assert.equal(reached.size, 13, '1.4.328 a cleared-12 night can reach all 13 guys')
+  assert.equal(raidForWave(12, 12).id, 'doubt')
+  assert.equal(raidForWave(12, 0, 4).kind, 'physical', '1.4.328 wave 5 biases tanks inside the unlocked pool')
+  assert.equal(raidForWave(0, 0, 4).id, 'accuser', '1.4.328 wave 5 does not invent a locked tank')
+
+  assert.deepEqual(normalizeMet(['nope', 'accuser', 'accuser', 'doubt']), ['accuser', 'doubt'])
+  assert.deepEqual(normalizeMet(undefined), [])
+  const metSave = normalizeProgress({
+    defense: { cleared: 3, nights: ['2026-10-01'], met: ['nope', 'accuser', 'accuser', 'doubt'] },
+  })
+  assert.deepEqual(metSave.defense.met, ['accuser', 'doubt'])
+  assert.equal(metSave.defense.cleared, 3)
+  assert.deepEqual(normalizeProgress({ defense: { cleared: 1, nights: [] } }).defense.met, [])
+
+  const boostFn = defendScreenOnlySrc.slice(
+    defendScreenOnlySrc.indexOf('function continueFromBoost'),
+    defendScreenOnlySrc.indexOf('function continueFromBoost') + 420,
+  )
+  assert.match(boostFn, /waveIndex \+ 1 < DEFEND_NIGHT_WAVES/)
+  assert.match(boostFn, /setWaveIndex\(\(i\) => i \+ 1\)/, '1.4.328 Continue advances the wave')
+  assert.match(boostFn, /setPhase\('wave'\)/)
+  assert.match(boostFn, /setWon\(true\)/)
+  assert.doesNotMatch(boostFn, /freshRunTier|setRunSparks\(0\)|recordNight/, '1.4.328 sparks and tier persist between waves')
+  assert.match(defendScreenOnlySrc, /setRunSparks\(\(count\) => count \+ 1\)/)
+  assert.match(defendScreenOnlySrc, /applyBoost/)
+  assert.match(defendScreenOnlySrc, /setWaveIndex\(0\)/, '1.4.328 a lost night resets the wave')
+  assert.match(defendScreenOnlySrc, /setRunTier\(freshRunTier\(\)\)/)
+  assert.match(defendScreenOnlySrc, /Wave \{waveIndex \+ 1\}\/\{DEFEND_NIGHT_WAVES\}/)
+  assert.match(defendScreenOnlySrc, /Wave \$\{waveIndex \+ 1\} clear · spend sparks/)
+  assert.match(defendScreenOnlySrc, /markMetRef\.current\(cast\.id\)/)
+  assert.match(
+    readFileSync(new URL('../src/store/ProgressProvider.tsx', import.meta.url), 'utf8'),
+    /\.\.\.current\.defense,\s*cleared: current\.defense\.cleared \+ 1/,
+    '1.4.328 a full night keeps met when cleared increments',
+  )
+  assert.match(defendNightSrc, /easy-walker-lore/)
+  assert.match(defendNightSrc, /is-new/)
+  assert.match(defendNightSrc, /call\.label \?\? WALKER_LABEL\[call\.kind\]/)
+  assert.doesNotMatch(defendNightSrc, /is-on-map/)
+  assert.match(
+    readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8'),
+    /\.easy-walker-lore/,
+  )
+  assert.doesNotMatch(
+    readFileSync(new URL('../src/nightWatch/enemies/cast.ts', import.meta.url), 'utf8'),
+    /\.png/,
+    '1.4.328 reuses the six portraits',
+  )
+
+  assert.equal(easyGateResult(0, 1, 0.7), 'clear', '1.4.328 waves 1–4 hold on Love I')
+  assert.equal(easyGateResult(3, 1, 0.7), 'clear', '1.4.328 wave 4 holds on Love I')
+  assert.equal(easyGateResult(4, 1, 0.7), 'lost', '1.4.328 wave 5 leaks on Love I')
+  assert.equal(easyGateResult(4, 2, 0.7), 'clear', '1.4.328 wave 5 holds after Love II')
+  assert.equal(easyGateResult(4, 2, 0.7, 3), 'clear', '1.4.328 a tank wave 5 still holds on Love II')
+
+  assert.match(latestChange('1.4.328').title, /Night Watch/)
+  assert.match(latestChange('1.4.328').items.join('\n'), /Fixes #462/)
+  assert.match(latestChange('1.4.328').items.join('\n'), /Fixes #464/)
+  assert.match(latestChange('1.4.328').items.join('\n'), /five waves|5/)
+  assert.doesNotMatch(
+    latestChange('1.4.328').items.join('\n'),
+    /#463|bezel|Dig deeper|Hard trail|Town|consumable|new portrait/i,
+    '1.4.328 stays multi-wave and the climb cast',
+  )
+}
+
+function DEFEND_WAVE_PACK_CHECK() {
+  return [0, 1, 2, 3, 4].map((index) => wavePackSize(index))
+}
+
+/** Starter-porch taps: one shot per cooldown, focused on the front walker. */
+function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
+  const tune = waveCombat(waveIndex, true)
+  const speed = 0.01 * tune.speedScale
+  const spawnEvery = 3.8 * tune.spawnScale
+  const hp0 = baseHp + tune.hpBonus
+  const spawnT = [0.08, 0.18, 0.28]
+  let spawned = 0
+  let downed = 0
+  let hearts = 3
+  let spawnAt = 0
+  let spawnNow = false
+  let coolUntil = 0
+  const raiders = []
+  let time = 0
+  const dt = 1 / 60
+  while (time < 180) {
+    spawnAt += dt
+    let leaked = 0
+    for (const raider of raiders) {
+      if (raider.dead) continue
+      raider.t += speed * dt
+      if (raider.t >= 1) {
+        raider.dead = true
+        leaked += 1
+      }
+    }
+    hearts -= leaked
+    if (hearts <= 0) return 'lost'
+    const live = raiders.filter((raider) => !raider.dead).length
+    const hold = live >= 3
+    if (spawned < tune.size && !hold && (spawnNow || spawnAt >= spawnEvery || spawned === 0)) {
+      spawnNow = false
+      spawnAt = 0
+      raiders.push({ t: spawnT[spawned % 3], hp: hp0, dead: false })
+      spawned += 1
+    }
+    if (time >= coolUntil) {
+      const target = raiders.filter((raider) => !raider.dead).sort((a, b) => b.t - a.t)[0]
+      if (target) {
+        target.hp -= damage
+        coolUntil = time + cooldown
+        if (target.hp <= 0) {
+          target.dead = true
+          downed += 1
+          spawnNow = true
+        }
+      }
+    }
+    if (downed >= tune.size) return 'clear'
+    if (spawned >= tune.size && raiders.every((raider) => raider.dead) && downed < tune.size) return 'lost'
+    time += dt
+  }
+  return 'timeout'
 }

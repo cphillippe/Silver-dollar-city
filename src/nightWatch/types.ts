@@ -13,6 +13,9 @@ export interface NightRaider {
   t: number
   text: string
   kind: WalkerKind
+  /** Climb roster id — labels can differ from the shared face. */
+  castId?: string
+  label?: string
   hp: number
   maxHp?: number
   turned?: string

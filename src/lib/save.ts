@@ -2,7 +2,7 @@ import { APP_VERSION, SAVE_SCHEMA_VERSION, STORAGE_BACKUP_KEY, STORAGE_KEY } fro
 import { localDateKey } from './dates.ts'
 import { emptyCityBuilt, snapshotCityBuilt } from './cityBuild.ts'
 import { MATCH_BONUS_MAX, MATCH_EXTRA_MAX } from './matchBonus.ts'
-import { emptyDefense } from './defend.ts'
+import { emptyDefense, normalizeMet } from './defend.ts'
 import { emptyTrace } from './memory.ts'
 import type {
   AppTheme,
@@ -321,6 +321,7 @@ function asDefense(value: unknown): DefenseState {
     cleared: finiteInt(value.cleared, 0, SAVE_MAX_COUNT, 0),
     nights,
     lastNight: isDateKey(value.lastNight) ? value.lastNight : undefined,
+    met: normalizeMet(value.met),
   }
 }
 

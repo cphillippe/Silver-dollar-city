@@ -13,10 +13,13 @@ import { localDateKey } from '../lib/dates'
 import {
   DEFEND_BRIEF_ID,
   DEFEND_HEARTS,
+  DEFEND_NIGHT_WAVES,
   WATCH_ABILITY_LABEL,
   dist,
   unlockedWatchAbilities,
   easyTapMode,
+  waveCombat,
+  wavePackSize,
   type WatchAbility,
 } from '../lib/defend'
 import { learningForTool } from '../lib/learning'
@@ -48,10 +51,8 @@ interface DefendScreenProps {
   onNavigate: (view: View) => void
 }
 
-const DEFEND_WAVE_SIZE = nightEnemies.waveSize
-
 export function DefendScreen({ onNavigate }: DefendScreenProps) {
-  const { progress, recordNight, markMiss } = useProgress()
+  const { progress, recordNight, markMet, markMiss } = useProgress()
   const easy = isEasy(progress)
   const today = localDateKey()
   const brief = evidenceFor(DEFEND_BRIEF_ID)
@@ -64,11 +65,18 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const [toolLock, setToolLock] = useState<string | null>(null)
   const arming = false
   const [phase, setPhase] = useState<NightPhase>(easy ? 'wave' : 'plant')
+  const [waveIndex, setWaveIndex] = useState(0)
   const [runTier, setRunTier] = useState<Record<string, number>>(freshRunTier)
   const [runSparks, setRunSparks] = useState(0)
   const [boostNote, setBoostNote] = useState<string | null>(null)
+  const [loreMeet, setLoreMeet] = useState<{ id: string; line: string } | null>(null)
   const runTierRef = useRef(runTier)
   runTierRef.current = runTier
+  const waveIndexRef = useRef(waveIndex)
+  waveIndexRef.current = waveIndex
+  const metRef = useRef<string[]>([...(progress.defense.met ?? [])])
+  const markMetRef = useRef(markMet)
+  markMetRef.current = markMet
   const [planted, setPlanted] = useState<CityPlotId[]>(() => [...pads])
   const [hearts, setHearts] = useState(DEFEND_HEARTS)
   const [raiders, setRaiders] = useState<Raider[]>([])
@@ -112,7 +120,17 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   }, [juiceDone, brief, recordNight, today])
 
   useEffect(() => {
+    const saved = progress.defense.met ?? []
+    for (const id of saved) {
+      if (!metRef.current.includes(id)) metRef.current = [...metRef.current, id]
+    }
+  }, [progress.defense.met])
+
+  useEffect(() => {
     if (phase !== 'wave') return
+    const wave = waveIndexRef.current
+    const tune = waveCombat(wave, easy)
+    const cleared = progress.defense.cleared
     live.current.playing = true
     live.current.raiders = []
     live.current.spawned = 0
@@ -137,7 +155,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           const tier = combatTier(item.turned, runTierRef.current)
           return { ...item, heavenT: (item.heavenT ?? 0) + nightEnemies.heavenSpeed(tier, easy) * dt }
         }
-        return { ...item, t: item.t + nightEnemies.speed(easy) * dt }
+        return { ...item, t: item.t + nightEnemies.speed(easy) * tune.speedScale * dt }
       })
       let leaked = 0
       const walking = next.filter((item) => {
@@ -162,22 +180,33 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       const unturnedLive = walking.filter((item) => !item.turned).length
       const holdSpawn = easy && nightEnemies.holdSpawn(unturnedLive)
       if (
-        live.current.spawned < DEFEND_WAVE_SIZE &&
+        live.current.spawned < tune.size &&
         !holdSpawn &&
         (live.current.spawnNow ||
-          spawnAt >= nightEnemies.spawnEvery(easy) ||
+          spawnAt >= nightEnemies.spawnEvery(easy) * tune.spawnScale ||
           (easy && live.current.spawned === 0))
       ) {
         live.current.spawnNow = false
         spawnAt = 0
         const id = live.current.spawned
-        const cast = nightEnemies.cast(progress.defense.cleared, id)
-        const hp = nightEnemies.maxHp(cast.kind, easy)
+        const cast = nightEnemies.cast(cleared, id, wave)
+        const hp = nightEnemies.maxHp(cast.kind, easy) + tune.hpBonus
+        if (!metRef.current.includes(cast.id)) {
+          metRef.current = [...metRef.current, cast.id]
+          markMetRef.current(cast.id)
+          const line = `${cast.label}: ${cast.lore}`
+          setLoreMeet({ id: cast.id, line })
+          window.setTimeout(() => {
+            setLoreMeet((current) => (current?.id === cast.id ? null : current))
+          }, 2200)
+        }
         walking.push({
           id,
           t: easy ? nightEnemies.spawnT(id) : 0,
           text: cast.text,
           kind: cast.kind,
+          label: cast.label,
+          castId: cast.id,
           hp,
           maxHp: hp,
         })
@@ -190,9 +219,27 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         setPhase('lost')
         return
       }
-      if (nightEnemies.isClear(easy, live.current.downed, live.current.spawned, walking.length)) {
+      if (
+        nightEnemies.isClear(
+          easy,
+          live.current.downed,
+          live.current.spawned,
+          walking.length,
+          tune.size,
+        )
+      ) {
         live.current.playing = false
         setPhase('boost')
+        return
+      }
+      if (
+        easy &&
+        live.current.spawned >= tune.size &&
+        walking.length === 0 &&
+        live.current.downed < tune.size
+      ) {
+        live.current.playing = false
+        setPhase('lost')
         return
       }
       frame = requestAnimationFrame(tick)
@@ -395,6 +442,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     setRunTier(freshRunTier())
     setRunSparks(0)
     setBoostNote(null)
+    setWaveIndex(0)
+    setLoreMeet(null)
     saved.current = false
   }
 
@@ -408,7 +457,14 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   }
 
   function continueFromBoost() {
-    if (won) return
+    if (won || phase !== 'boost') return
+    setBoostNote(null)
+    setLoreMeet(null)
+    if (waveIndex + 1 < DEFEND_NIGHT_WAVES) {
+      setWaveIndex((i) => i + 1)
+      setPhase('wave')
+      return
+    }
     setWon(true)
     afterJuice()
   }
@@ -433,14 +489,26 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const walkerCalls: EasyWalkerCall[] = midWave
     ? raiders
         .filter((raider) => !raider.turned)
-        .map((raider) => ({ id: raider.id, kind: raider.kind, text: raider.text }))
+        .map((raider) => ({
+          id: raider.id,
+          kind: raider.kind,
+          text: raider.text,
+          label: raider.label,
+          fresh: raider.castId !== undefined && raider.castId === loreMeet?.id,
+        }))
     : []
 
-  const remaining = DEFEND_WAVE_SIZE - downed
+  const waveSize = wavePackSize(waveIndex)
+  const remaining = waveSize - downed
   const boosting = phase === 'boost' && !won
 
   const hud = (
     <p className="defend-hud" aria-live="polite">
+      {phase === 'wave' ? (
+        <span className="defend-wave">
+          Wave {waveIndex + 1}/{DEFEND_NIGHT_WAVES}
+        </span>
+      ) : null}
       <span className="defend-hearts">
         {Array.from({ length: DEFEND_HEARTS }, (_, index) => (
           <span key={index} className={index < hearts ? 'is-on' : ''}>
@@ -482,7 +550,10 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       ) : null}
       {phase === 'boost' && !won ? (
         <div className="defend-boost">
-          <p role="status">{boostNote ?? 'Spend sparks · tap a tool to level up'}</p>
+          <p role="status">
+            {`Wave ${waveIndex + 1} clear · spend sparks`}
+            {boostNote ? ` · ${boostNote}` : ''}
+          </p>
           <button type="button" className="btn primary" onClick={continueFromBoost}>
             Continue
           </button>
@@ -541,7 +612,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
             who="juniper"
             line={
               easy
-                ? 'Night held. Six taps.'
+                ? 'Night held. Five waves.'
                 : 'Night held. The road turned toward heaven.'
             }
             action={easy ? EASY.home : 'See the town'}
@@ -599,6 +670,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
               tapPos={tapPos}
               tapJuice={tapJuice}
               walkerCalls={walkerCalls}
+              loreLine={loreMeet?.line ?? null}
               runTier={runTier}
             />
           </UiShell>

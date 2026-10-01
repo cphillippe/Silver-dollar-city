@@ -40,8 +40,12 @@ export interface NightEnemiesModule {
   readonly taunts: typeof RAID_CAST
   /** Parts face when registered; else dark face on Easy, kind portrait on Hard. */
   faceSrc(kind: WalkerKind, easy: boolean): string
-  /** Who walks next in this wave. */
-  cast(cleared: number, index: number): { text: string; kind: WalkerKind }
+  /** Who walks next in this wave. Climb pool, with a wave-5 tank bias. */
+  cast(
+    cleared: number,
+    index: number,
+    waveIndex?: number,
+  ): { text: string; kind: WalkerKind; id: string; label: string; lore: string }
   /** Easy: where on the road a new walker appears. */
   spawnT(index: number): number
   /** Easy: hold the next spawn while this many unturned walkers are live. */
@@ -58,7 +62,7 @@ export interface NightEnemiesModule {
   maxHp(kind: WalkerKind, easy: boolean): number
   /** Matching hit only (weak stays pushback). `down` → caller soft-turns heavenward. */
   hit<T extends NightRaider>(raider: T, damage?: number): { raider: T; down: boolean }
-  isClear(easy: boolean, downed: number, spawned: number, walking: number): boolean
+  isClear(easy: boolean, downed: number, spawned: number, walking: number, size?: number): boolean
 }
 
 export const nightEnemies: NightEnemiesModule = {
@@ -80,5 +84,6 @@ export const nightEnemies: NightEnemiesModule = {
   fit: easyTapFit,
   maxHp: enemyMaxHp,
   hit: enemyHit,
-  isClear: waveIsClear,
+  isClear: (easy, downed, spawned, walking, size) =>
+    waveIsClear(easy, downed, spawned, walking, size),
 }
