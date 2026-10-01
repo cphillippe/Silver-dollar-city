@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.318',
+    title: 'Easy Match person and place variety',
+    when: '2026-10-01',
+    items: [
+      'Easy Match boards rotate keepers and places so the person and the spot change from board to board. Lark Banner, Ruth Quill, Leah Lamp, and the other keepers each hold the line where that story lives — Quiet Stoop, Creed Bench, Lamp Lane, Seed Field, and the rest — while the lesson words stay true. Fixes #444',
+    ],
+  },
+  {
     version: '1.4.316',
     title: 'Night Watch enemy HP',
     when: '2026-10-01',
