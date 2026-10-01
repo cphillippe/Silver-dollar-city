@@ -1168,7 +1168,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.315')
+assert.equal(APP_VERSION, '1.4.316')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -7465,5 +7465,46 @@ console.log('check-city: ok')
     latestChange('1.4.315').items.join('\n'),
     /tower plant|auto-fire|spawn table|pathfind|new tool|HP|bezel|letterbox/,
     '1.4.315 must stay art plate + path only',
+  )
+}
+
+// Night Watch 1.4.316: enemy HP — enemies module owns the table + hit; match damages, weak pushes back
+{
+  const hpSrc316 = readFileSync(new URL('../src/nightWatch/enemies/hp.ts', import.meta.url), 'utf8')
+  assert.doesNotMatch(hpSrc316, /from 'react'|components\//, '1.4.316 HP seam stays React-free')
+  const kinds316 = ['image-bearer', 'skeptic', 'pagan', 'physical', 'metaphysical', 'spiritual']
+  const hard316 = kinds316.map((kind) => nightEnemiesMod.maxHp(kind, false))
+  const easy316 = kinds316.map((kind) => nightEnemiesMod.maxHp(kind, true))
+  assert.deepEqual([...new Set(hard316)].sort(), [2, 3, 4], '1.4.316 Hard swarm 2 / mid 3 / tank 4')
+  assert.ok(easy316.every((hp) => hp >= 2 && hp <= 3), '1.4.316 Easy walkers take 2–3 hits')
+  assert.equal(easy316.filter((hp) => hp === 3).length, 1, '1.4.316 one Easy tank kind at 3')
+  for (const cast of RAID_CAST) {
+    assert.ok(nightEnemiesMod.maxHp(cast.kind, true) > 1, `1.4.316 Easy ${cast.kind} needs more than one tap`)
+  }
+
+  let walker316 = { id: 0, t: 0.4, text: '', kind: 'skeptic', hp: 2, maxHp: 2 }
+  const first316 = nightEnemiesMod.hit(walker316)
+  assert.equal(first316.raider.hp, 1)
+  assert.equal(first316.down, false, '1.4.316 first hit does not turn a 2-HP walker')
+  assert.equal(walker316.hp, 2, '1.4.316 hit returns a copy')
+  walker316 = first316.raider
+  const second316 = nightEnemiesMod.hit(walker316)
+  assert.equal(second316.raider.hp, 0)
+  assert.equal(second316.down, true, '1.4.316 HP 0 → soft-turn')
+  assert.equal(nightEnemiesMod.hit(second316.raider).raider.hp, 0, '1.4.316 HP floors at 0')
+
+  assert.match(defendScreenOnlySrc, /nightEnemies\.maxHp\(cast\.kind, easy\)/, '1.4.316 spawn seeds HP from enemies')
+  assert.match(defendScreenOnlySrc, /const struck = nightEnemies\.hit\(best\)/, '1.4.316 match hit goes through enemies.hit')
+  assert.match(defendScreenOnlySrc, /struck\.down\s*\?\s*\{ \.\.\.struck\.raider, turned: using, from: to, heavenT: 0/, '1.4.316 keeps soft-turn verb at HP 0')
+  assert.match(defendScreenOnlySrc, /if \(struck\.down\) \{\s*live\.current\.downed \+= 1/, '1.4.316 downed counts only turned walkers')
+  assert.match(defendScreenOnlySrc, /t: Math\.max\(0, item\.t - 0\.22\)/, '1.4.316 weak stays pushback')
+  assert.match(defendNightSrc, /defend-hp-pip/, '1.4.316 tiny HP pips by the face')
+  assert.doesNotMatch(defendNightSrc, /hp-bar|defend-hp-track/, '1.4.316 no fat HP bar')
+  assert.match(defendNightSrc, /tapJuice\.down === false/, '1.4.316 Easy juice lifts heavenward only on the last hit')
+  assert.match(latestChange('1.4.316').title, /Night Watch enemy HP/)
+  assert.doesNotMatch(
+    latestChange('1.4.316').items.join('\n'),
+    /pathfind|tower HP|projectile|bezel|letterbox|new walker/i,
+    '1.4.316 stays enemy HP only',
   )
 }

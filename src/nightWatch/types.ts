@@ -13,6 +13,8 @@ export interface NightRaider {
   t: number
   text: string
   kind: WalkerKind
+  hp: number
+  maxHp?: number
   turned?: string
   from?: NightPoint
   heavenT?: number

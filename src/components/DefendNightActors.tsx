@@ -24,6 +24,8 @@ export interface EasyTapJuice {
   left: number
   top: number
   kind: WalkerKind
+  /** Last HP pip gone — juice lifts heavenward; otherwise squash only. */
+  down?: boolean
 }
 
 export interface DefendNightActorsProps {
@@ -208,6 +210,27 @@ export function DefendNightActorsSvg({
                       height={36}
                       clipPath="url(#defend-face-clip)"
                     />
+                    {!raider.turned && (raider.maxHp ?? 0) > 1 ? (
+                      <g className="defend-hp-pips" aria-hidden>
+                        <rect
+                          className="defend-hp-chip"
+                          x={-((raider.maxHp ?? 0) * 13 + 5) / 2}
+                          y={15}
+                          width={(raider.maxHp ?? 0) * 13 + 5}
+                          height={15}
+                          rx={7.5}
+                        />
+                        {Array.from({ length: raider.maxHp ?? 0 }, (_, i) => (
+                          <circle
+                            key={i}
+                            className={`defend-hp-pip ${i < raider.hp ? 'is-full' : 'is-empty'}`}
+                            cx={(i - ((raider.maxHp ?? 0) - 1) / 2) * 13}
+                            cy={22.5}
+                            r={5}
+                          />
+                        ))}
+                      </g>
+                    ) : null}
                     {raider.turned ? (
                       <g className="defend-heaven-cheer" aria-hidden>
                         <circle className="defend-cheer-spark" cx="-10" cy="-18" r="2.2" />
@@ -265,6 +288,7 @@ export function DefendNightWalkerCue({
       return
     }
     setJuiceHeaven(false)
+    if (tapJuice.down === false) return
     const heavenAt = window.setTimeout(() => setJuiceHeaven(true), 280)
     return () => window.clearTimeout(heavenAt)
   }, [tapJuice?.key])
