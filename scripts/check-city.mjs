@@ -124,6 +124,8 @@ import { EASY, EASY_LINE_ORDER, DIG_ARC, FOUNDATION_ARC, NAMES_ARC, STONE_ARC, I
 import { storyPlayFor } from '../src/lib/storyPlay.ts'
 import { DEBUG_LAYER_LINES, debugJumpView } from '../src/lib/debugPlays.ts'
 import { FATHER_RUN_LINE } from '../src/lib/fatherRun.ts'
+import * as fatherRunHome from '../src/easyTrail/father/fatherRun.ts'
+import * as fatherRunShim from '../src/lib/fatherRun.ts'
 import { WORDS, easyLead } from '../src/lib/words.ts'
 import { deeperLinksFor, eraLabel } from '../src/content/deeper.ts'
 import { allEvidenceIds, evidenceFor } from '../src/content/evidence.ts'
@@ -1203,7 +1205,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.333')
+assert.equal(APP_VERSION, '1.4.334')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -8361,7 +8363,7 @@ console.log('check-city: ok')
     /versionName "1\.4\.113"/,
     '1.4.333 Android versionName stays 1.4.113',
   )
-  assert.equal(CHANGELOG[0].version, '1.4.333')
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.333'), '1.4.333 row stays (no longer CHANGELOG[0] after 1.4.334)')
   const items333 = latestChange('1.4.333').items.join('\n')
   assert.match(latestChange('1.4.333').title, /Match/)
   assert.match(items333, /Fixes #476/)
@@ -8371,6 +8373,127 @@ console.log('check-city: ok')
     items333,
     /registry|StoryPlayKind|PuzzlePlay|Lock In|#475|Pack B|Dig deeper|new screen/i,
     '1.4.333 stays kid-plain and A1 only',
+  )
+}
+
+// Easy Trail 1.4.334: A2 — Father home (src/easyTrail/father). Old paths are re-export shims. Fixes #476.
+{
+  const src334 = (rel) => readFileSync(new URL(`../src/${rel}`, import.meta.url), 'utf8')
+  const srcRoot334 = new URL('../src/', import.meta.url)
+  const home334 = src334('easyTrail/father/FatherRunPlay.tsx')
+  const timing334 = src334('easyTrail/father/fatherRun.ts')
+  const shelf334 = src334('easyTrail/father/index.ts')
+  const registry334 = src334('easyTrail/match/registry.tsx')
+
+  for (const rel of ['easyTrail/father/index.ts', 'easyTrail/father/FatherRunPlay.tsx', 'easyTrail/father/fatherRun.ts']) {
+    assert.ok(existsSync(new URL(rel, srcRoot334)), `1.4.334 Father home has ${rel}`)
+  }
+  assert.match(home334, /^export function FatherRunPlay\(\{$/m, '1.4.334 FatherRunPlay is defined in the home')
+  assert.match(timing334, /^export function runOutcome\($/m, '1.4.334 Father timing is defined in the home')
+  assert.doesNotMatch(timing334, /^import /m, '1.4.334 Father timing stays a leaf module')
+  const fatherDir334 = new URL('easyTrail/father/', srcRoot334)
+  const homeDeps334 = [...home334.matchAll(/ from '([^']+)'/g)].map(([, spec]) =>
+    spec.startsWith('.') ? new URL(spec, fatherDir334).href.slice(srcRoot334.href.length) : spec,
+  )
+  assert.deepEqual(
+    homeDeps334,
+    [
+      'react',
+      'lib/easy',
+      'lib/successBeat',
+      'components/HeldTriad',
+      'easyTrail/father/fatherRun',
+      'lib/juice',
+      'lib/storyPanels',
+      'components/StoryPanelArt',
+      'content/panelBlast',
+      'components/challenges/WinBurst',
+    ],
+    '1.4.334 moved play reads the same modules (timing from its home, not the shim)',
+  )
+
+  const code334 = (src) =>
+    src
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line && !/^(\/\*\*|\*|\/\/)/.test(line))
+  assert.deepEqual(
+    code334(src334('components/challenges/FatherRunPlay.tsx')),
+    ["export { FatherRunPlay } from '../../easyTrail/father/FatherRunPlay'"],
+    '1.4.334 components/challenges/FatherRunPlay.tsx is a re-export shim',
+  )
+  assert.deepEqual(
+    code334(src334('lib/fatherRun.ts')),
+    ["export * from '../easyTrail/father/fatherRun.ts'"],
+    '1.4.334 lib/fatherRun.ts is a re-export shim',
+  )
+  assert.deepEqual(Object.keys(fatherRunShim).sort(), Object.keys(fatherRunHome).sort(), '1.4.334 shim keeps every timing export')
+  for (const [name, value] of Object.entries(fatherRunHome)) {
+    assert.equal(fatherRunShim[name], value, `1.4.334 lib/fatherRun ${name} is the home binding`)
+  }
+
+  assert.match(shelf334, /^export \{ FatherRunPlay \} from '\.\/FatherRunPlay'$/m)
+  const shelfTiming334 = (shelf334.match(/^export \{\n([\s\S]*?)\n\} from '\.\/fatherRun\.ts'$/m)?.[1] ?? '')
+    .split(',')
+    .map((name) => name.trim())
+    .filter(Boolean)
+  assert.deepEqual(
+    shelfTiming334,
+    ['FATHER_RUN_AGAIN', 'FATHER_RUN_CLAIM', 'FATHER_RUN_HINT', 'FATHER_RUN_LINE', 'FATHER_RUN_WIN', 'fatherReached', 'hugBeforeSpeech', 'runOutcome'],
+    '1.4.334 Father shelf exports the same timing symbols as 1.4.332',
+  )
+  for (const name of shelfTiming334) assert.ok(name in fatherRunHome, `1.4.334 shelf ${name} comes from the home`)
+  assert.match(shelf334, /^export type \{ FatherRunPhase \} from '\.\/fatherRun\.ts'$/m)
+  assert.doesNotMatch(code334(shelf334).join('\n'), /components\/challenges|lib\/fatherRun/, '1.4.334 shelf exports the home, not the shims')
+
+  assert.match(registry334, /^import \{ FatherRunPlay \} from '\.\.\/father\/FatherRunPlay'$/m, '1.4.334 Match registry imports Father from the home')
+  assert.doesNotMatch(registry334, /from '[^']*components\/challenges\/FatherRunPlay'/, '1.4.334 registry skips the shim')
+  assert.match(
+    registry334,
+    /'father-run': \(story, wire\) => \(\n {4}<FatherRunPlay\n {6}lineId=\{story\.lineId\}\n {6}beats=\{story\.beats\}\n {6}onMiss=\{wire\.onMiss\}\n {6}onClear=\{wire\.onClear\}\n {6}onEasyStop=\{wire\.onEasyStop\}\n {4}\/>\n {2}\),/,
+    '1.4.334 father-run keeps the same props',
+  )
+
+  const srcFiles334 = readdirSync(srcRoot334, { recursive: true })
+    .map((rel) => String(rel).replaceAll('\\', '/'))
+    .filter((rel) => /\.tsx?$/.test(rel))
+  const filesWith334 = (pattern) =>
+    srcFiles334.filter((rel) => pattern.test(readFileSync(new URL(rel, srcRoot334), 'utf8'))).sort()
+  assert.deepEqual(filesWith334(/export function FatherRunPlay\b/), ['easyTrail/father/FatherRunPlay.tsx'], '1.4.334 one FatherRunPlay')
+  assert.deepEqual(filesWith334(/export function runOutcome\b/), ['easyTrail/father/fatherRun.ts'], '1.4.334 one Father timing')
+  assert.deepEqual(filesWith334(/<FatherRunPlay\b/), ['easyTrail/match/registry.tsx'], '1.4.334 FatherRunPlay mounts only from Match')
+  assert.deepEqual(
+    filesWith334(/(?:import|export) \{[^}]*\bFatherRunPlay\b[^}]*\} from/),
+    ['components/challenges/FatherRunPlay.tsx', 'easyTrail/father/index.ts', 'easyTrail/match/registry.tsx'],
+    '1.4.334 FatherRunPlay is wired only by the shim, the Father shelf, and the Match registry',
+  )
+
+  assert.doesNotMatch(src334('App.tsx'), /FatherRunPlay|easyTrail\/father|name === 'father/, '1.4.334 App has no Father route')
+  const viewUnion334 = src334('types.ts').match(/export type View =([\s\S]*?)(?:\n\n|\n?$)/)?.[1] ?? ''
+  assert.match(viewUnion334, /name: 'link'; debugLine\?: string/)
+  assert.doesNotMatch(viewUnion334, /father|run/i, '1.4.334 no Father-only App view')
+  assert.equal(storyPlayFor(FATHER_RUN_LINE), 'father-run', '1.4.334 Father line is still the father-run Match kind')
+  assert.deepEqual(
+    debugJumpView({ lineId: FATHER_RUN_LINE, play: 'father-run', name: '' }),
+    { name: 'link', debugLine: FATHER_RUN_LINE },
+    '1.4.334 Developer Father jump still opens Match (LinkScreen)',
+  )
+
+  assert.match(
+    readFileSync(new URL('../android/app/build.gradle', import.meta.url), 'utf8'),
+    /versionName "1\.4\.113"/,
+    '1.4.334 Android versionName stays 1.4.113',
+  )
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.334'), '1.4.334 changelog row')
+  const items334 = latestChange('1.4.334').items.join('\n')
+  assert.match(latestChange('1.4.334').title, /Father/)
+  assert.match(items334, /Fixes #476/)
+  assert.match(items334, /plays the same/)
+  assert.match(items334, /Father run is still a Match game/)
+  assert.doesNotMatch(
+    items334,
+    /registry|shim|StoryPlayKind|PuzzlePlay|FatherRunPlay|fatherRun|easyTrail|Lock In|#475|Pack B|Dig deeper|new screen/i,
+    '1.4.334 stays kid-plain and A2 only',
   )
 }
 
