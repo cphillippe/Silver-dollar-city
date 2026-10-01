@@ -1175,7 +1175,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.325')
+assert.equal(APP_VERSION, '1.4.326')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -7060,9 +7060,10 @@ console.log('check-city: ok')
 // Night Watch 1.4.300: Easy TAP Phase 1 taunt (Fixes #418 residual)
 {
   const defendCss300 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
-  assert.match(defendNightSrc, /defend-raider-call/)
-  assert.match(defendNightSrc, /defend-raider-kind/)
-  assert.match(defendNightSrc, /defend-raider-taunt/)
+  // 1.4.326 moved the on-path chip into the left roster (Fixes #460).
+  assert.match(defendNightSrc, /nw-walker-slide/)
+  assert.match(defendNightSrc, /easy-walker-kind/)
+  assert.match(defendNightSrc, /easy-walker-taunt/)
   assert.match(defendNightSrc, /WALKER_LABEL\[raider\.kind\]/)
   assert.match(defendNightSrc, /raider\.text/)
   assert.match(defendCss300, /Easy TAP Phase 1 taunt bubble/)
@@ -7300,8 +7301,9 @@ console.log('check-city: ok')
   assert.match(defendNightSrc, /nightEnemies\.faceSrc/)
   assert.doesNotMatch(defendNightSrc, /nightParts\.src\('face'/)
   assert.doesNotMatch(defendNightSrc, /easy-walker is-easy-walker is-cue/)
-  assert.match(defendNightSrc, /defend-raider-call/)
-  assert.match(defendNightSrc, /defend-raider-taunt/)
+  // 1.4.326 moved the on-path taunt chip into the left roster (Fixes #460).
+  assert.match(defendNightSrc, /nw-walker-slide/)
+  assert.match(defendNightSrc, /easy-walker-taunt/)
   assert.match(defendNightSrc, /is-dark-face/)
   assert.ok(
     existsSync(new URL('../src/assets/night-watch/nw-dark-face-cut.png', import.meta.url)),
@@ -7788,13 +7790,8 @@ console.log('check-city: ok')
     /loveKinds/,
     '1.4.325 drops the night-0 loveKinds filter',
   )
-  assert.match(defendNightSrc, /easy-walker-call is-on-map/, '1.4.325 Easy kind name uses the HTML call')
   assert.match(defendNightSrc, /WALKER_LABEL\[call\.kind\]/, '1.4.325 Easy call keeps WALKER_LABEL')
-  assert.match(defendNightSrc, /const KIND_CALL = \{ w: 260, h: 84, y: -118, rx: 12, kindY: -78, tauntY: -46 \}/)
-  const defendCss325 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
-  assert.match(defendCss325, /\.defend-raider-call text\.defend-raider-kind \{[\s\S]*?font-size:\s*32px/)
-  assert.ok((32 * 390) / 798 >= 14, '1.4.325 Hard kind name is at least ~14px on a 390px phone')
-  assert.match(defendCss325, /\.easy-walker-call\.is-on-map \.easy-walker-kind \{[\s\S]*?font-size:\s*15px/)
+  assert.match(defendNightSrc, /easy-walker-kind/, '1.4.325 kind name stays in the HTML call')
   assert.match(latestChange('1.4.325').title, /Night Watch enemy varieties/)
   assert.match(latestChange('1.4.325').items.join('\n'), /Fixes #452/)
   assert.match(latestChange('1.4.325').items.join('\n'), /Whisper/)
@@ -7802,5 +7799,41 @@ console.log('check-city: ok')
     latestChange('1.4.325').items.join('\n'),
     /Dig deeper|Hard trail|Town|#450|#451|#453|new portrait|HP bar/i,
     '1.4.325 stays enemy varieties',
+  )
+}
+
+// Night Watch 1.4.326: descriptors off the path, left slide-out (Fixes #460).
+{
+  const defendCss326 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  assert.match(defendNightSrc, /nw-walker-slide/, '1.4.326 left slide-out')
+  assert.match(defendNightSrc, /easy-walker-roster/, '1.4.326 roster lists living walkers')
+  assert.match(defendNightSrc, /WALKER_LABEL\[call\.kind\]/, '1.4.326 roster uses kind labels')
+  assert.match(defendNightSrc, /\{call\.text\}/, '1.4.326 roster keeps the taunt')
+  assert.match(defendSrc, /filter\(\(raider\) => !raider\.turned\)/, '1.4.326 roster is living walkers')
+  assert.doesNotMatch(defendNightSrc, /is-on-map/, '1.4.326 no on-path call anchor')
+  assert.doesNotMatch(defendNightSrc, /KIND_CALL/, '1.4.326 no Hard on-path kind chip')
+  assert.doesNotMatch(defendNightSrc, /defend-raider-call/, '1.4.326 SVG kind chip is gone')
+  assert.match(defendNightSrc, /width=\{36\}/, '1.4.326 face stays 36 user units wide')
+  assert.match(defendNightSrc, /height=\{36\}/, '1.4.326 face stays 36 user units tall')
+  assert.equal(EASY_WALKER_FACE_PX, 128, '1.4.326 does not shrink the Easy face')
+  assert.match(defendNightSrc, /easy-walker-arrow is-path-cue/, '1.4.326 TAP arrow stays on the cue face')
+  assert.match(defendNightSrc, /easy-walker-cue-label is-path-cue/, '1.4.326 tap teach stays on the cue face')
+  assert.match(defendSrc, /phase === 'wave' && !won/, '1.4.326 roster is mid-wave for Easy and Hard')
+  assert.doesNotMatch(
+    defendSrc,
+    /walkerCalls: EasyWalkerCall\[\] = easyTap/,
+    '1.4.326 Hard shares the off-path roster',
+  )
+  assert.match(defendCss326, /\.nw-walker-slide\.easy-walker-roster \{[\s\S]*?left:\s*0/, '1.4.326 roster hugs the left edge')
+  assert.match(defendCss326, /\.easy-walker-roster/)
+  assert.doesNotMatch(defendCss326, /\.easy-walker-call\.is-on-map/, '1.4.326 on-map call CSS is gone')
+  assert.doesNotMatch(defendCss326, /font-size:\s*32px/, '1.4.326 giant on-path kind size is gone')
+  assert.match(latestChange('1.4.326').title, /Night Watch/)
+  assert.match(latestChange('1.4.326').items.join('\n'), /Fixes #460/)
+  assert.match(latestChange('1.4.326').items.join('\n'), /left/)
+  assert.doesNotMatch(
+    latestChange('1.4.326').items.join('\n'),
+    /#461|#462|#463|#464|Dig deeper|Hard trail|Town|bezel|tower upgrade/i,
+    '1.4.326 stays the side roster',
   )
 }
