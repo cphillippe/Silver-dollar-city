@@ -123,9 +123,13 @@ export function towerCooldown(stage: CityStage): number {
   return 700
 }
 
-/** Easy walker face is HTML CSS px — not SVG viewBox units (those get crushed). */
-export const EASY_WALKER_FACE_PX = 128
-export const EASY_WALKER_HIT_PX = 160
+/**
+ * Tap-juice face in CSS px. Path faces stay SVG 36×36.
+ * This overlay is brief squash → heaven only — keep it near that face, not a giant portrait.
+ */
+export const EASY_WALKER_FACE_PX = 44
+/** Juice wrapper only. Path taps still use the SVG defend-raider-hit target. */
+export const EASY_WALKER_HIT_PX = 72
 export const EASY_CUE_HOLD_MS = 1800
 export const EASY_MISS_HOLD_MS = 1400
 
