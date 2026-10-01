@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.316',
+    title: 'Night Watch enemy HP',
+    when: '2026-10-01',
+    items: [
+      'Night Watch walkers now take more than one matching hit before they turn toward heaven. Tiny gold pips under each face show how many hits are left. On Easy most walkers need 2 taps (Despair needs 3), and every tap still counts. On Hard, quick walkers need 2, middle ones 3, and Despair 4; a weak tool still only pushes a walker back. Map, road, and the Love / Logic / Reason / Science dock are unchanged.',
+    ],
+  },
+  {
     version: '1.4.315',
     title: 'Night Watch whole locked A2 plate',
     when: '2026-09-30',
