@@ -1,15 +1,15 @@
 /**
  * Match kinds home (A1). Every StoryPlayKind maps to the play Match mounts for it.
- * father-run stays a Match kind (LinkScreen → PuzzlePlay → FatherRunPlay) until A2.
+ * father-run stays a Match kind (LinkScreen → PuzzlePlay → FatherRunPlay); its play lives in the A2 Father home.
  */
 import type { ReactElement } from 'react'
 import { ClaimMergePlay } from '../../components/challenges/ClaimMergePlay'
-import { FatherRunPlay } from '../../components/challenges/FatherRunPlay'
 import { GemSearchPlay } from '../../components/challenges/GemSearchPlay'
 import { RoadMazePlay } from '../../components/challenges/RoadMazePlay'
 import { SourceDigPlay } from '../../components/challenges/SourceDigPlay'
 import { StorySnapPlay } from '../../components/challenges/StorySnapPlay'
 import type { LessonStory, StoryPlayKind } from '../../lib/storyPlay.ts'
+import { FatherRunPlay } from '../father/FatherRunPlay'
 
 /** What PuzzlePlay hands the Easy/link play. */
 export interface StoryPlayWiring {

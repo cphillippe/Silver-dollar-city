@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.334',
+    title: 'Father run gets its own home',
+    when: '2026-10-01',
+    items: [
+      'Father run now lives in its own home. It plays the same as before: hold to run, press the glow, hug before the speech is done. Father run is still a Match game. Fixes #476.',
+    ],
+  },
+  {
     version: '1.4.333',
     title: 'Match games get one home',
     when: '2026-10-01',

@@ -20,7 +20,7 @@ import { resolveStoryMedia, storyPanelsFor } from '../src/lib/storyPanels.ts'
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 
 assert.equal(PANEL_BLAST_VERSION, '1.4.85')
-assert.equal(APP_VERSION, '1.4.333')
+assert.equal(APP_VERSION, '1.4.334')
 
 const files = [
   ...ROAD_BLAST_IDS.flatMap((id) => [
@@ -72,7 +72,7 @@ assert.match(mazeSrc, /ROAD_HELP_FACE/)
 assert.doesNotMatch(mazeSrc, /ROAD_CLAIM_MEDIA/)
 assert.match(mazeSrc, /panelBlast/)
 
-const runSrc = readFileSync(new URL('../src/components/challenges/FatherRunPlay.tsx', import.meta.url), 'utf8')
+const runSrc = readFileSync(new URL('../src/easyTrail/father/FatherRunPlay.tsx', import.meta.url), 'utf8')
 assert.match(runSrc, /FATHER_RUN_FACE/)
 assert.match(runSrc, /FATHER_SON_FACE/)
 assert.match(runSrc, /FATHER_HUG_MEDIA/)

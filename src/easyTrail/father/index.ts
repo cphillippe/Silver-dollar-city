@@ -1,8 +1,9 @@
 /**
- * Father shelf. FatherRunPlay stays mounted from its component file.
- * Timing symbols wrap lib/fatherRun.ts and do not fork it. A2 home move is later.
+ * Father home (A2). FatherRunPlay and its timing live here.
+ * Father stays a Match kind: only the Match registry mounts FatherRunPlay; App has no Father route.
+ * components/challenges/FatherRunPlay.tsx and lib/fatherRun.ts are re-export shims.
  */
-export { FatherRunPlay } from '../../components/challenges/FatherRunPlay'
+export { FatherRunPlay } from './FatherRunPlay'
 export {
   FATHER_RUN_AGAIN,
   FATHER_RUN_CLAIM,
@@ -12,5 +13,5 @@ export {
   fatherReached,
   hugBeforeSpeech,
   runOutcome,
-} from '../../lib/fatherRun.ts'
-export type { FatherRunPhase } from '../../lib/fatherRun.ts'
+} from './fatherRun.ts'
+export type { FatherRunPhase } from './fatherRun.ts'
