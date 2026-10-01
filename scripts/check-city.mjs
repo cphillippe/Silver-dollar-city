@@ -1196,7 +1196,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.329')
+assert.equal(APP_VERSION, '1.4.330')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -2614,8 +2614,8 @@ assert.equal(
 assert.doesNotMatch(defendSrc, /is-dim/)
 assert.match(linkPlaySrc, /is-need/)
 assert.match(cssSrc, /easy-walker-face/)
-assert.equal(EASY_WALKER_FACE_PX, 128)
-assert.equal(EASY_WALKER_HIT_PX, 160)
+assert.equal(EASY_WALKER_FACE_PX, 44)
+assert.equal(EASY_WALKER_HIT_PX, 72)
 assert.equal(EASY_CUE_HOLD_MS, 1800)
 assert.doesNotMatch(
   readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
@@ -7835,7 +7835,7 @@ console.log('check-city: ok')
   assert.doesNotMatch(defendNightSrc, /defend-raider-call/, '1.4.326 SVG kind chip is gone')
   assert.match(defendNightSrc, /width=\{36\}/, '1.4.326 face stays 36 user units wide')
   assert.match(defendNightSrc, /height=\{36\}/, '1.4.326 face stays 36 user units tall')
-  assert.equal(EASY_WALKER_FACE_PX, 128, '1.4.326 does not shrink the Easy face')
+  assert.equal(EASY_WALKER_FACE_PX, 44, '1.4.330 juice face stays small; path face stays 36')
   assert.match(defendNightSrc, /easy-walker-arrow is-path-cue/, '1.4.326 TAP arrow stays on the cue face')
   assert.match(defendNightSrc, /easy-walker-cue-label is-path-cue/, '1.4.326 tap teach stays on the cue face')
   assert.match(defendSrc, /phase === 'wave' && !won/, '1.4.326 roster is mid-wave for Easy and Hard')
@@ -8086,6 +8086,42 @@ console.log('check-city: ok')
     latestChange('1.4.329').items.join('\n'),
     /Burst|bezel|Dig deeper|Hard trail|Town|fifth/i,
     '1.4.329 stays Still and Mend',
+  )
+}
+
+// Night Watch 1.4.330: Easy tap juice stays near the path face (Fixes #469).
+{
+  const defendCss330 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const juiceFaceRule = defendCss330.match(
+    /img\.walker-face\.easy-walker-face,[\s\S]*?\.easy-walker-face \{[\s\S]*?\n\}/,
+  )
+  const juiceWrapRule = defendCss330.match(/\.easy-walker \{[\s\S]*?\n\}/)
+  assert.ok(juiceFaceRule, '1.4.330 juice face rule')
+  assert.ok(juiceWrapRule, '1.4.330 juice wrapper rule')
+  assert.equal(EASY_WALKER_FACE_PX, 44)
+  assert.ok(EASY_WALKER_FACE_PX <= 48, '1.4.330 juice face stays near the path face')
+  assert.equal(EASY_WALKER_HIT_PX, 72)
+  assert.match(juiceFaceRule[0], /width:\s*44px/)
+  assert.match(juiceFaceRule[0], /height:\s*44px/)
+  assert.doesNotMatch(juiceFaceRule[0], /128px|!important/)
+  assert.match(juiceWrapRule[0], /width:\s*72px/)
+  assert.match(juiceWrapRule[0], /height:\s*72px/)
+  assert.doesNotMatch(juiceWrapRule[0], /160px/)
+  assert.match(defendNightSrc, /width=\{36\}/, '1.4.330 path face stays 36 user units wide')
+  assert.match(defendNightSrc, /height=\{36\}/, '1.4.330 path face stays 36 user units tall')
+  assert.match(defendNightSrc, /is-squash/, '1.4.330 squash juice stays')
+  assert.match(defendNightSrc, /is-heaven/, '1.4.330 heaven juice stays')
+  assert.match(defendNightSrc, /easy-tap-plus/, '1.4.330 plus stays')
+  assert.match(defendNightSrc, /easy-walkers-path-cue/, '1.4.330 TAP cue stays')
+  assert.match(defendCss330, /easy-tap-squash/)
+  assert.match(defendCss330, /easy-tap-heaven/)
+  assert.match(latestChange('1.4.330').title, /Night Watch/)
+  assert.match(latestChange('1.4.330').items.join('\n'), /Fixes #469/)
+  assert.match(latestChange('1.4.330').items.join('\n'), /small/)
+  assert.doesNotMatch(
+    latestChange('1.4.330').items.join('\n'),
+    /#472|#470|#471|Dig deeper|Hard trail|Town|bezel|portrait/i,
+    '1.4.330 stays the tap-juice face',
   )
 }
 
