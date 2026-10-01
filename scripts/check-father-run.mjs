@@ -33,7 +33,7 @@ import {
   speechPhraseAt,
   STALL_AFTER_MS,
   stumbleIfHeldThrough,
-} from '../src/lib/fatherRun.ts'
+} from '../src/easyTrail/father/fatherRun.ts'
 import { lessonStory, storyPlayFor } from '../src/lib/storyPlay.ts'
 import { gemWordsFor } from '../src/lib/gemSearch.ts'
 import { storyFromPanels, storyPanelsFor } from '../src/lib/storyPanels.ts'
@@ -135,7 +135,7 @@ assert.ok(
 )
 
 const playSrc = readFileSync(
-  new URL('../src/components/challenges/FatherRunPlay.tsx', import.meta.url),
+  new URL('../src/easyTrail/father/FatherRunPlay.tsx', import.meta.url),
   'utf8',
 )
 assert.match(playSrc, /is-father-run/)

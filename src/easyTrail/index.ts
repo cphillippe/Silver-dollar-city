@@ -1,8 +1,9 @@
 /**
  * Easy Trail module seams. Each folder fills on its own.
- * Father, Lock In, and the loop stay in their current files —
+ * Lock In and the loop stay in their current files —
  * shelves wrap, they do not fork. A1 Match registry lives in match/registry.tsx.
- * Later hops: A2 Father home, A3 Lock In peel, A4 trail peel.
+ * A2 Father home lives in father/ (old Father paths are re-export shims).
+ * Later hops: A3 Lock In peel, A4 trail peel.
  */
 export type { EasyTrailFocus } from './types.ts'
 export * from './trail/index.ts'
