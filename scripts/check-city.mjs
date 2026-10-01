@@ -1168,7 +1168,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.316')
+assert.equal(APP_VERSION, '1.4.318')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1499,7 +1499,7 @@ assert.match(cssSrc, /is-easy-hold/)
   assert.doesNotMatch(dockCss, /#16062e/, 'sticky CTA docks must not be an opaque black slab')
 }
 assert.match(
-  latestChange(APP_VERSION).items.join('\n'),
+  latestChange('1.4.316').items.join('\n'),
   /Fixes #418|prayer watch|dark|taunt|Guardian|Messenger|walker/i,
 )
 {
@@ -2451,9 +2451,9 @@ assert.match(mapSrc, /easy \? null : \(\s*\n\s*<>[\s\S]*city-street-main/)
 assert.match(mapSrc, /if \(isEasy\(progress\)\) return/)
 assert.match(mapSrc, /if \(playing\.current && !isEasy\(progress\)\) return/)
 assert.match(mapSrc, /Tap a building to Manage it/)
-assert.match(latestChange(APP_VERSION).title, /Night Watch|PARTS|parts|sprite|registry/i)
+assert.match(latestChange('1.4.316').title, /Night Watch|PARTS|parts|sprite|registry/i)
 assert.match(
-  latestChange(APP_VERSION).items.join('\n'),
+  latestChange('1.4.316').items.join('\n'),
   /PartsModule|lot|lamp|face|defend|#418/i,
 )
 assert.match(cssSrc, /\.city-plot\.has-candy-img \.city-plot-img[\s\S]*?fill: none !important/)
@@ -7506,5 +7506,16 @@ console.log('check-city: ok')
     latestChange('1.4.316').items.join('\n'),
     /pathfind|tower HP|projectile|bezel|letterbox|new walker/i,
     '1.4.316 stays enemy HP only',
+  )
+}
+
+// Easy Match 1.4.318: person/place variety on MATCH_CHIPS (#444)
+{
+  assert.match(latestChange('1.4.318').title, /Easy Match person and place/)
+  assert.match(latestChange('1.4.318').items.join('\n'), /Fixes #444/)
+  assert.doesNotMatch(
+    latestChange('1.4.318').items.join('\n'),
+    /Night Watch|enemy HP|board juice/i,
+    '1.4.318 stays Easy Match person and place variety',
   )
 }

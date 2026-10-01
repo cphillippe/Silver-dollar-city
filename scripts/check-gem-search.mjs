@@ -17,6 +17,7 @@ import {
   cellsNeededByOpenPlanted,
   findStraightSpelling,
   gemWordsFor,
+  MATCH_CHIPS,
   matchChipsFor,
   isBonusSpelling,
   isStraightPath,
@@ -53,7 +54,7 @@ import { readAppCss } from './readAppCss.mjs'
 const mercyWords = gemWordsFor('ph-road')
 assert.deepEqual(
   mercyWords.map((word) => word.text),
-  ['MERCY', 'CREEK', 'NEIGHBOR', 'CARE'],
+  ['HANNAH', 'STOOP', 'NEIGHBOR', 'CARE'],
   'ph-road authored MATCH_CHIPS',
 )
 assert.deepEqual(
@@ -67,15 +68,15 @@ assert.ok(mercyWords.some((word) => word.kind === 'idea'))
 assert.match(matchChipsFor('ph-road')?.say ?? '', /neighbor.*care/i)
 
 const creedWords = gemWordsFor('wb-creed')
-assert.deepEqual(creedWords.map((w) => w.text), ['SILAS', 'SQUARE', 'CREED', 'CHRIST'])
+assert.deepEqual(creedWords.map((w) => w.text), ['RUTH', 'BENCH', 'CREED', 'CHRIST'])
 assert.match(matchChipsFor('wb-creed')?.say ?? '', /creed.*Christ/i)
 
 const lanternWords = gemWordsFor('daily-lantern')
-assert.deepEqual(lanternWords.map((w) => w.text), ['JUNIPER', 'PORCH', 'LAMP', 'SEEN'])
+assert.deepEqual(lanternWords.map((w) => w.text), ['LEAH', 'LANE', 'LAMP', 'SEEN'])
 assert.match(matchChipsFor('daily-lantern')?.say ?? '', /lamp.*seen/i)
 
 const tuningWords = gemWordsFor('ob-tuning')
-assert.deepEqual(tuningWords.map((w) => w.text), ['NORA', 'SKY', 'TUNING', 'DESIGNER'])
+assert.deepEqual(tuningWords.map((w) => w.text), ['LARK', 'STEPS', 'TUNING', 'DESIGNER'])
 assert.match(matchChipsFor('ob-tuning')?.say ?? '', /tuning.*Designer/i)
 
 for (const id of EASY_LINE_ORDER) {
@@ -85,10 +86,34 @@ for (const id of EASY_LINE_ORDER) {
   assert.equal(gemWordsFor(id).length, 4, `${id} gemWords from chips`)
 }
 
+const MATCH_PEOPLE = new Set([
+  'LARK', 'RUTH', 'CALEB', 'ESTHER', 'LEAH', 'MICAH', 'HANNAH',
+  'JUDE', 'TITUS', 'NAOMI', 'SETH', 'CLARA', 'BOAZ',
+])
+const MATCH_PLACES = new Set([
+  'LANE', 'BENCH', 'BRIDGE', 'FIELD', 'RAIL', 'DOME', 'YARD', 'STOOP',
+  'TABLE', 'EMMAUS', 'HALL', 'GATE', 'STEPS', 'PEAK', 'RIDGE',
+])
+const TOWN7 = new Set(['JUNIPER', 'SILAS', 'MERCY', 'NORA', 'HOPE', 'ANSEL', 'COSMO'])
+const whoWherePairs = new Set()
+for (const [id, chips] of Object.entries(MATCH_CHIPS)) {
+  const [who, where] = chips.words
+  assert.ok(MATCH_PEOPLE.has(who), `${id} who rotates through the Easy pool`)
+  assert.ok(MATCH_PLACES.has(where), `${id} where rotates through the Easy pool`)
+  assert.equal(TOWN7.has(who), false, `${id} who is not a town-7 keeper`)
+  assert.match(chips.say, /\b(keeps|holds|marks) the line at\b/, `${id} say keeps the line at a place`)
+  const pair = `${who}|${where}`
+  assert.equal(whoWherePairs.has(pair), false, `${id} repeats ${pair}`)
+  whoWherePairs.add(pair)
+}
+assert.equal(whoWherePairs.size, Object.keys(MATCH_CHIPS).length, 'every board has its own person/place pair')
+assert.equal(new Set([...whoWherePairs].map((pair) => pair.split('|')[0])).size, MATCH_PEOPLE.size)
+assert.equal(new Set([...whoWherePairs].map((pair) => pair.split('|')[1])).size, MATCH_PLACES.size)
+
 const orderWords = gemWordsFor('fg-order')
 assert.deepEqual(
   orderWords.map((word) => word.text),
-  ['ANSEL', 'ARCH', 'ORDER', 'CHRIST'],
+  ['LARK', 'GATE', 'ORDER', 'CHRIST'],
   'fg-order authored MATCH_CHIPS',
 )
 assert.deepEqual(
@@ -100,7 +125,7 @@ assert.deepEqual(
 const groundWords = gemWordsFor('fg-ground')
 assert.deepEqual(
   groundWords.map((word) => word.text),
-  ['COSMO', 'ROCK', 'GROUND', 'GOD'],
+  ['CALEB', 'RIDGE', 'GROUND', 'GOD'],
   'fg-ground authored MATCH_CHIPS (connected teach unit)',
 )
 assert.equal(matchChipsFor('fg-ground')?.say.includes('living God'), true, 'fg-ground say teaches')
@@ -308,11 +333,10 @@ assert.equal(pathLetters(fatherSamplePath, fatherBoard.letters), fatherSample.te
 assert.equal(matchBonusWord(fatherSamplePath, fatherBoard, [])?.text, fatherSample.text)
 assert.equal(matchGemWord(fatherSamplePath, fatherBoard, []), null)
 assert.equal(matchBonusWord([...fatherSamplePath].reverse(), fatherBoard, [])?.text, fatherSample.text)
-const mercyChip = fatherBoard.words.find((word) => word.text === 'MERCY')
-if (mercyChip) {
-  assert.equal(matchGemWord(fatherBoard.paths[mercyChip.id], fatherBoard, [])?.text, 'MERCY')
-  assert.equal(matchBonusWord(fatherBoard.paths[mercyChip.id], fatherBoard, []), null)
-}
+const fatherWho = fatherBoard.words.find((word) => word.role === 'who')
+assert.ok(fatherWho, 'father board has a who chip')
+assert.equal(matchGemWord(fatherBoard.paths[fatherWho.id], fatherBoard, [])?.text, fatherWho.text)
+assert.equal(matchBonusWord(fatherBoard.paths[fatherWho.id], fatherBoard, []), null)
 const reverseHelp = [...(mercy.bonusPaths[mercy.planted[0].id] ?? [])].reverse()
 assert.equal(matchBonusWord(reverseHelp, mercy, [])?.text, mercy.planted[0].text)
 for (const word of planted) {
