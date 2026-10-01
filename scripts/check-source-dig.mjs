@@ -241,9 +241,10 @@ assert.doesNotMatch(
 )
 
 const puzzleSrc = readFileSync(new URL('../src/components/PuzzlePlay.tsx', import.meta.url), 'utf8')
-assert.match(puzzleSrc, /case 'source-dig'/)
-assert.match(puzzleSrc, /SourceDigPlay/)
-assert.match(puzzleSrc, /easy=\{isEasy\(progress\)\}/)
+const registrySrc = readFileSync(new URL('../src/easyTrail/match/registry.tsx', import.meta.url), 'utf8')
+assert.match(registrySrc, /'source-dig': \(story, wire\) => \(\s*<SourceDigPlay/)
+assert.match(registrySrc, /easy=\{wire\.easy\}/)
+assert.match(puzzleSrc, /easy: isEasy\(progress\)/)
 
 const digSrc = readFileSync(new URL('../src/components/DigDeeper.tsx', import.meta.url), 'utf8')
 assert.match(digSrc, /easyDigTaps/)

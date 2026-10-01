@@ -169,11 +169,12 @@ assert.match(playSrc, /onClear/)
 assert.doesNotMatch(playSrc, /road-swipe|story-night/)
 
 const puzzleSrc = readFileSync(new URL('../src/components/PuzzlePlay.tsx', import.meta.url), 'utf8')
-assert.match(puzzleSrc, /FatherRunPlay/)
-assert.match(puzzleSrc, /case 'father-run'/)
-assert.match(puzzleSrc, /case 'panel-blast'/)
-assert.match(puzzleSrc, /case 'claim-merge'/)
-assert.doesNotMatch(puzzleSrc, /timing-dash|road-swipe|story-night/)
+const registrySrc = readFileSync(new URL('../src/easyTrail/match/registry.tsx', import.meta.url), 'utf8')
+assert.match(puzzleSrc, /renderStoryPlay/)
+assert.match(registrySrc, /'father-run': \(story, wire\) => \(\s*<FatherRunPlay/)
+assert.match(registrySrc, /'panel-blast': \(story, wire\) =>/)
+assert.match(registrySrc, /'claim-merge': \(story, wire\) =>/)
+assert.doesNotMatch(`${puzzleSrc}\n${registrySrc}`, /timing-dash|road-swipe|story-night/)
 
 const xml = readFileSync(new URL('../src/content/packs/parable-hollow.xml', import.meta.url), 'utf8')
 assert.match(

@@ -1565,12 +1565,17 @@ const puzzleSrc = readFileSync(
   new URL('../src/components/PuzzlePlay.tsx', import.meta.url),
   'utf8',
 )
+const matchRegistrySrc = readFileSync(
+  new URL('../src/easyTrail/match/registry.tsx', import.meta.url),
+  'utf8',
+)
 assert.match(puzzleSrc, /kind === 'link'/)
 assert.match(puzzleSrc, /LinkPlay/)
-assert.match(puzzleSrc, /GemSearchPlay/)
+assert.match(puzzleSrc, /renderStoryPlay/, '1.4.333 Easy link Match mounts through the registry')
+assert.match(matchRegistrySrc, /GemSearchPlay/)
 assert.match(puzzleSrc, /isEasy\(progress\)/)
-assert.match(puzzleSrc, /SourceDigPlay/)
-assert.match(puzzleSrc, /source-dig/)
+assert.match(matchRegistrySrc, /SourceDigPlay/)
+assert.match(matchRegistrySrc, /source-dig/)
 assert.match(cssSrc, /gem-board/)
 assert.match(cssSrc, /gem-cell\.is-burst/)
 assert.match(cssSrc, /gem-shard/)
@@ -2039,11 +2044,11 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
   assert.equal(wiped.theme, 'dusk')
   assert.equal(easyHomeFocus(wiped), 'match')
   assert.deepEqual(easyTrailView(wiped), { name: 'link' })
-  const puzzleSrc448 = readFileSync(
-    new URL('../src/components/PuzzlePlay.tsx', import.meta.url),
+  const registrySrc448 = readFileSync(
+    new URL('../src/easyTrail/match/registry.tsx', import.meta.url),
     'utf8',
   )
-  assert.match(puzzleSrc448, /case 'source-dig':[\s\S]*?<SourceDigPlay/)
+  assert.match(registrySrc448, /'source-dig': \(story, wire\) => \(\s*<SourceDigPlay/, '1.4.333 source-dig entry moved to the registry')
   assert.match(
     readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
     /recordTaught\(lineId, true\)/,
@@ -8166,7 +8171,7 @@ console.log('check-city: ok')
   )
 }
 
-// Easy Trail 1.4.332: FRAME — empty shelves (src/easyTrail). Fixes #476.
+// Easy Trail 1.4.332: FRAME — empty shelves (src/easyTrail). Fixes #476. (Match shelf + PuzzlePlay import superseded by 1.4.333 A1 registry)
 {
   const et = (file) => readFileSync(new URL(`../src/easyTrail/${file}`, import.meta.url), 'utf8')
   const barrel332 = et('index.ts')
@@ -8203,8 +8208,8 @@ console.log('check-city: ok')
   assert.match(match332, /export \{ PuzzlePlay \} from '\.\.\/\.\.\/components\/PuzzlePlay'/)
   assert.match(match332, /from '\.\.\/\.\.\/lib\/storyPlay\.ts'/)
   assert.match(match332, /storyPlayFor/)
-  assert.match(match332, /A1 Match registry is later/)
-  assert.doesNotMatch(match332, /MATCH_CHIPS|gemSearchGrid/, '1.4.332 Match shelf is not a registry')
+  assert.match(match332, /A1 Match registry \(registry\.tsx\)/, '1.4.333 Match shelf names the A1 registry')
+  assert.doesNotMatch(match332, /MATCH_CHIPS|gemSearchGrid/, '1.4.333 Match shelf does not reach into the gem grid')
   assert.match(father332, /export \{ FatherRunPlay \} from '\.\.\/\.\.\/components\/challenges\/FatherRunPlay'/)
   assert.match(father332, /from '\.\.\/\.\.\/lib\/fatherRun\.ts'/)
   assert.match(father332, /FATHER_RUN_LINE/)
@@ -8218,7 +8223,6 @@ console.log('check-city: ok')
   assert.equal(easyTrailViewFromShelf, easyTrailViewFromLib, '1.4.332 trail view stays the lib/easy helper')
   for (const rel of [
     '../src/App.tsx',
-    '../src/components/PuzzlePlay.tsx',
     '../src/components/Journal.tsx',
     '../src/components/ChallengeScreen.tsx',
     '../src/components/LinkScreen.tsx',
@@ -8231,8 +8235,9 @@ console.log('check-city: ok')
     assert.doesNotMatch(src, /easyTrail/, `${rel} keeps its current imports`)
   }
   assert.match(
-    readFileSync(new URL('../src/components/PuzzlePlay.tsx', import.meta.url), 'utf8'),
-    /from '\.\/challenges\/FatherRunPlay'/,
+    et('match/registry.tsx'),
+    /from '\.\.\/\.\.\/components\/challenges\/FatherRunPlay'/,
+    '1.4.333 FatherRunPlay still mounts from its component file, via the Match registry',
   )
   assert.match(
     readFileSync(new URL('../src/components/Journal.tsx', import.meta.url), 'utf8'),
