@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import {
   CITY_HOLLOW_TO_WITNESS,
   CITY_PLOTS,
@@ -122,6 +122,8 @@ import {
 import { emptyProgress, progressAfterReset } from '../src/lib/save.ts'
 import { EASY, EASY_LINE_ORDER, DIG_ARC, FOUNDATION_ARC, NAMES_ARC, STONE_ARC, INK_ARC, easyChromeLine, easyChromeNearDup, easyFacingLine, easyHomeFocus, easyHoldFields, easyHoldLine, easyHoldPractice, easyHoldView, easyLearnLine, easyLineHeld, easyLineLearned, easyLineTaught, easyLoopLine, easyMatchLine, easyMatchReady, easyTeachFields, easyTrailView, markEasyHeld, markEasyTaught, progressAfterMatchTaught, easyWhoWhere, easyWhoWhereLine, easyWhyLine, easyWhyWordCount, easyWrongTap, uniqueHoldChoices } from '../src/lib/easy.ts'
 import { storyPlayFor } from '../src/lib/storyPlay.ts'
+import { DEBUG_LAYER_LINES, debugJumpView } from '../src/lib/debugPlays.ts'
+import { FATHER_RUN_LINE } from '../src/lib/fatherRun.ts'
 import { WORDS, easyLead } from '../src/lib/words.ts'
 import { deeperLinksFor, eraLabel } from '../src/content/deeper.ts'
 import { allEvidenceIds, evidenceFor } from '../src/content/evidence.ts'
@@ -1201,7 +1203,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.332')
+assert.equal(APP_VERSION, '1.4.333')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -8252,6 +8254,124 @@ console.log('check-city: ok')
     latestChange('1.4.332').items.join('\n'),
     /registry|peel|SceneAd|#475|Pack B|Dig deeper/i,
     '1.4.332 must stay FRAME / shelves only (no Match registry or Lock In peel claims)',
+  )
+}
+
+// Easy Trail 1.4.333: A1 — Match StoryPlayKind registry (src/easyTrail/match/registry.tsx). Fixes #476.
+{
+  const src333 = (rel) => readFileSync(new URL(`../src/${rel}`, import.meta.url), 'utf8')
+  const registry333 = src333('easyTrail/match/registry.tsx')
+  const match333 = src333('easyTrail/match/index.ts')
+  const puzzle333 = src333('components/PuzzlePlay.tsx')
+  const kinds333 = [
+    ...(src333('lib/storyPlay.ts').match(/export type StoryPlayKind = ([^\n]+)/)?.[1] ?? '').matchAll(/'([a-z-]+)'/g),
+  ].map((m) => m[1])
+  const mounts333 = {
+    'panel-blast': 'GemSearchPlay',
+    'father-run': 'FatherRunPlay',
+    'road-maze': 'RoadMazePlay',
+    'claim-merge': 'ClaimMergePlay',
+    'source-dig': 'SourceDigPlay',
+    'story-snap': 'StorySnapPlay',
+  }
+  assert.deepEqual(kinds333, Object.keys(mounts333), '1.4.333 StoryPlayKind is the six Match kinds')
+
+  assert.match(
+    registry333,
+    /export const STORY_PLAY_REGISTRY: Record<StoryPlayKind, StoryPlayMount> = \{/,
+    '1.4.333 Record<StoryPlayKind> — tsc rejects a missing kind',
+  )
+  const body333 = registry333.match(/export const STORY_PLAY_REGISTRY[^=]*= \{\n([\s\S]*?)\n\}\n/)?.[1] ?? ''
+  const entries333 = [
+    ...body333.matchAll(/^ {2}'([a-z-]+)': \(story, wire\) => \(\n\s*<(\w+)\n([\s\S]*?)\/>\n {2}\),$/gm),
+  ]
+  assert.deepEqual(
+    entries333.map((m) => m[1]),
+    kinds333,
+    '1.4.333 registry lists every StoryPlayKind explicitly (panel-blast too)',
+  )
+  const attr333 = /(\w+)=\{([^}]+)\}/g
+  for (const [, kind, mount, propsSrc] of entries333) {
+    assert.equal(mount, mounts333[kind], `1.4.333 ${kind} mounts ${mounts333[kind]}`)
+    assert.equal(propsSrc.replace(attr333, '').trim(), '', `1.4.333 ${kind} has only braced props`)
+    assert.deepEqual(
+      Object.fromEntries([...propsSrc.matchAll(attr333)].map((m) => [m[1], m[2]])),
+      {
+        lineId: 'story.lineId',
+        ...(kind === 'source-dig' ? { easy: 'wire.easy' } : { beats: 'story.beats' }),
+        onMiss: 'wire.onMiss',
+        onClear: 'wire.onClear',
+        onEasyStop: 'wire.onEasyStop',
+      },
+      `1.4.333 ${kind} keeps the pre-registry props`,
+    )
+  }
+  assert.match(
+    registry333,
+    /STORY_PLAY_REGISTRY\[story\.play\] \?\? STORY_PLAY_REGISTRY\['panel-blast'\]/,
+    '1.4.333 panel-blast stays the fallback',
+  )
+  assert.doesNotMatch(registry333, /\buse[A-Z]\w*\(/, '1.4.333 mounts run inside PuzzlePlay render — no hooks')
+  assert.doesNotMatch(
+    registry333,
+    /from '[^']*PuzzlePlay'|from '\.\/index/,
+    '1.4.333 registry does not import PuzzlePlay or the shelf (no cycle)',
+  )
+
+  assert.match(puzzle333, /import \{ renderStoryPlay \} from '\.\.\/easyTrail\/match\/registry'/)
+  assert.match(
+    puzzle333,
+    /if \(isEasy\(progress\) \|\| lineId\) \{\s*const story = lessonStory\(lineId \?\? easyMatchLine\(progress\)\)\s*return renderStoryPlay\(story, \{\s*easy: isEasy\(progress\),\s*onMiss,\s*onClear: onSolved,\s*onEasyStop,\s*\}\)/,
+    '1.4.333 PuzzlePlay Easy/link branch calls the registry with the same wiring',
+  )
+  assert.doesNotMatch(puzzle333, /switch \(story\.play\)|case '/, '1.4.333 no kind switch left in PuzzlePlay')
+  for (const mount of Object.values(mounts333)) {
+    assert.doesNotMatch(puzzle333, new RegExp(`\\b${mount}\\b`), `1.4.333 PuzzlePlay no longer imports ${mount}`)
+  }
+  for (const kept of ['SortPlay', 'SequencePlay', 'BuildArgumentPlay', 'LinkPlay', 'MatchPlay']) {
+    assert.match(puzzle333, new RegExp(`<${kept}\\b`), `1.4.333 PuzzlePlay still owns ${kept}`)
+  }
+  assert.match(puzzle333, /<LinkPlay[\s\S]*?onPeek=\{onPeek\}[\s\S]*?streetBeat=\{streetBeat\}/, '1.4.333 Hard link unchanged')
+
+  assert.match(match333, /export \{ STORY_PLAY_REGISTRY, renderStoryPlay \} from '\.\/registry'/)
+  assert.match(match333, /export type \{ StoryPlayWiring \} from '\.\/registry'/)
+  assert.match(match333, /export \{ PuzzlePlay \} from '\.\.\/\.\.\/components\/PuzzlePlay'/)
+  assert.match(match333, /export \{ lessonStory, storyPlayFor \} from '\.\.\/\.\.\/lib\/storyPlay\.ts'/)
+
+  for (const kind of kinds333) {
+    assert.equal(storyPlayFor(DEBUG_LAYER_LINES[kind]), kind, `1.4.333 ${kind} is reachable from a real line`)
+  }
+  assert.equal(storyPlayFor(FATHER_RUN_LINE), 'father-run')
+  assert.deepEqual(
+    debugJumpView({ lineId: FATHER_RUN_LINE, play: 'father-run', name: '' }),
+    { name: 'link', debugLine: FATHER_RUN_LINE },
+    '1.4.333 Developer Father jump still opens Match (LinkScreen)',
+  )
+  const viewUnion333 = src333('types.ts').match(/export type View =([\s\S]*?)(?:\n\n|\n?$)/)?.[1] ?? ''
+  assert.match(viewUnion333, /name: 'link'; debugLine\?: string/)
+  assert.doesNotMatch(viewUnion333, /father|run/i, '1.4.333 no Father-only App view')
+  assert.doesNotMatch(src333('App.tsx'), /FatherRunPlay|name === 'father/, '1.4.333 App has no Father route')
+  const srcRoot333 = new URL('../src/', import.meta.url)
+  const fatherMounts333 = readdirSync(srcRoot333, { recursive: true })
+    .map((rel) => String(rel).replaceAll('\\', '/'))
+    .filter((rel) => rel.endsWith('.tsx') && /<FatherRunPlay\b/.test(readFileSync(new URL(rel, srcRoot333), 'utf8')))
+  assert.deepEqual(fatherMounts333, ['easyTrail/match/registry.tsx'], '1.4.333 FatherRunPlay mounts only from Match')
+
+  assert.match(
+    readFileSync(new URL('../android/app/build.gradle', import.meta.url), 'utf8'),
+    /versionName "1\.4\.113"/,
+    '1.4.333 Android versionName stays 1.4.113',
+  )
+  assert.equal(CHANGELOG[0].version, '1.4.333')
+  const items333 = latestChange('1.4.333').items.join('\n')
+  assert.match(latestChange('1.4.333').title, /Match/)
+  assert.match(items333, /Fixes #476/)
+  assert.match(items333, /plays the same/)
+  assert.match(items333, /Father run is still a Match game/)
+  assert.doesNotMatch(
+    items333,
+    /registry|StoryPlayKind|PuzzlePlay|Lock In|#475|Pack B|Dig deeper|new screen/i,
+    '1.4.333 stays kid-plain and A1 only',
   )
 }
 
