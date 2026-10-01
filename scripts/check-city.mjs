@@ -1176,7 +1176,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.322')
+assert.equal(APP_VERSION, '1.4.323')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -7581,8 +7581,6 @@ console.log('check-city: ok')
   assert.match(defendScreenOnlySrc, /struck\.down\s*\?\s*\{ \.\.\.struck\.raider, turned: using, from: to, heavenT: 0/, '1.4.316 keeps soft-turn verb at HP 0')
   assert.match(defendScreenOnlySrc, /if \(struck\.down\) \{\s*live\.current\.downed \+= 1/, '1.4.316 downed counts only turned walkers')
   assert.match(defendScreenOnlySrc, /t: Math\.max\(0, item\.t - 0\.22\)/, '1.4.316 weak stays pushback')
-  assert.match(defendNightSrc, /defend-hp-pip/, '1.4.316 tiny HP pips by the face')
-  assert.doesNotMatch(defendNightSrc, /hp-bar|defend-hp-track/, '1.4.316 no fat HP bar')
   assert.match(defendNightSrc, /tapJuice\.down === false/, '1.4.316 Easy juice lifts heavenward only on the last hit')
   assert.match(latestChange('1.4.316').title, /Night Watch enemy HP/)
   assert.doesNotMatch(
@@ -7710,5 +7708,36 @@ console.log('check-city: ok')
     latestChange('1.4.322').items.join('\n'),
     /HP bar|enemies remaining|#451|#452|#453|Dig deeper|Hard trail|Town/i,
     '1.4.322 stays walker portraits',
+  )
+}
+
+// Night Watch 1.4.323: readable enemy HP bar (Fixes #451). 1.4.316 hit/spawn stay.
+{
+  const defendCss323 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  assert.match(defendNightSrc, /const HP_TRACK = \{ w: 88, h: 44, y: 18, rx: 12 \}/, '1.4.323 track is a readable bar')
+  assert.match(defendNightSrc, /const HP_FILL = \{ inset: 4, h: 36, rx: 8 \}/, '1.4.323 fill sits inside the track')
+  assert.ok((44 * 390) / 798 >= 14, '1.4.323 track is at least ~14px tall on a 390px phone')
+  assert.ok((36 * 390) / 798 >= 14, '1.4.323 gold fill is at least ~14px tall on a 390px phone')
+  assert.ok((88 * 390) / 798 >= 36, '1.4.323 track is wide enough to read HP steps')
+  assert.match(defendNightSrc, /className="defend-hp-bar"/, '1.4.323 HP bar group')
+  assert.match(defendNightSrc, /className="defend-hp-track"/, '1.4.323 HP track under the face')
+  assert.match(defendNightSrc, /className="defend-hp-fill"/, '1.4.323 HP fill')
+  assert.match(
+    defendNightSrc,
+    /\(\(HP_TRACK\.w - HP_FILL\.inset \* 2\) \* raider\.hp\) \/ \(raider\.maxHp \?\? 1\)/,
+    '1.4.323 fill width is hp/maxHp',
+  )
+  assert.match(defendNightSrc, /!raider\.turned && \(raider\.maxHp \?\? 0\) > 1/, '1.4.323 bar is on living walkers')
+  assert.doesNotMatch(defendNightSrc, /defend-hp-pip/, '1.4.323 replaces the ~5px pips')
+  assert.match(defendCss323, /\.defend-hp-track \{[\s\S]*?fill: rgba\(42, 13, 88, 0\.92\)/, '1.4.323 dark track')
+  assert.match(defendCss323, /\.defend-hp-fill \{[\s\S]*?fill: #ffcc33/, '1.4.323 gold fill')
+  assert.doesNotMatch(defendCss323, /\.defend-hp-pip/, '1.4.323 pip CSS is gone')
+  assert.match(latestChange('1.4.323').title, /Night Watch HP bar/)
+  assert.match(latestChange('1.4.323').items.join('\n'), /Fixes #451/)
+  assert.match(latestChange('1.4.323').items.join('\n'), /Easy and Hard/)
+  assert.doesNotMatch(
+    latestChange('1.4.323').items.join('\n'),
+    /#450|#452|#453|varieties|enemies remaining|Dig deeper|Hard trail|Town|tower HP|pathfind/i,
+    '1.4.323 stays the HP bar',
   )
 }
