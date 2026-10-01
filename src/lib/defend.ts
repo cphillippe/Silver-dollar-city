@@ -1,11 +1,29 @@
+import {
+  unlockedNightCast,
+  type NightCastGuy,
+} from '../nightWatch/enemies/cast.ts'
+import { NIGHT_ENEMY_ROLE } from '../nightWatch/enemies/hp.ts'
 import type { ProgressState, WalkerKind } from '../types.ts'
 import { CITY_PLOTS, plotStage, type CityPlotId, type CityStage } from './city.ts'
 import { prefersReducedMotion } from './juice.ts'
 import { combatTier, deployFit, toolTier, unlockedWatchTools, watchTool, WATCH_TOOLS } from './watchTools.ts'
 
+export {
+  isNightCastId,
+  NIGHT_CAST,
+  nightCastById,
+  normalizeMet,
+  unlockedNightCast,
+} from '../nightWatch/enemies/cast.ts'
+export type { NightCastGuy } from '../nightWatch/enemies/cast.ts'
+
 export const DEFEND_BRIEF_ID = 'td-watch'
 export const DEFEND_HEARTS = 3
 export const DEFEND_WAVE_SIZE = 6
+/** One night is five waves. Boost sits between them; the win is after wave 5. */
+export const DEFEND_NIGHT_WAVES = 5
+/** Waves 1–4 stay under the old six. Wave 5 is the denser upgrade gate. */
+export const DEFEND_WAVE_PACK = [4, 4, 5, 5, 8] as const
 /** Easy soft TD: cap live unturned walkers before spawning the next. */
 export const EASY_WAVE_LIVE = 3
 
@@ -27,13 +45,53 @@ export const RAID_CAST: { text: string; kind: WalkerKind }[] = [
 
 export const RAID_LINES = RAID_CAST.map((item) => item.text)
 
-/** Full six-kind cast. `cleared` does not narrow the pool (Fixes #452). */
-export function raidForWave(_cleared: number, index: number): { text: string; kind: WalkerKind } {
-  return RAID_CAST[index % RAID_CAST.length]
+export function wavePackSize(waveIndex: number): number {
+  const index = Math.min(
+    DEFEND_WAVE_PACK.length - 1,
+    Math.max(0, Math.floor(waveIndex) || 0),
+  )
+  return DEFEND_WAVE_PACK[index]
+}
+
+export interface WaveCombat {
+  size: number
+  /** Multiplier on the Easy/Hard walk speed. */
+  speedScale: number
+  /** Multiplier on the spawn gap. Below 1 spawns sooner. */
+  spawnScale: number
+  /** Added to the kind's base HP. Wave 5 Easy is the gate. */
+  hpBonus: number
+}
+
+/**
+ * Easy wave 5 walks faster and soaks more hits, so Love I on the starter
+ * porch leaks. Love II holds. Waves 1–4 keep the soft pace.
+ */
+export function waveCombat(waveIndex: number, easy: boolean): WaveCombat {
+  const size = wavePackSize(waveIndex)
+  const gate = easy && waveIndex >= DEFEND_NIGHT_WAVES - 1
+  if (!gate) return { size, speedScale: 1, spawnScale: 1, hpBonus: 0 }
+  return { size, speedScale: 5.5, spawnScale: 0.5, hpBonus: 5 }
+}
+
+/**
+ * Climb pool is guys 1..level, level = cleared + 1.
+ * Wave 5 biases toward tanks already in that pool — it never opens a locked guy.
+ */
+export function raidForWave(cleared: number, index: number, waveIndex = 0): NightCastGuy {
+  const pool = unlockedNightCast(cleared)
+  const gate = waveIndex >= DEFEND_NIGHT_WAVES - 1
+  if (gate) {
+    const tanks = pool.filter((guy) => NIGHT_ENEMY_ROLE[guy.kind] === 'tank')
+    if (tanks.length > 0 && index % 2 === 0) {
+      return tanks[Math.floor(index / 2) % tanks.length]
+    }
+  }
+  return pool[index % pool.length]
 }
 
 export function emptyDefense() {
-  return { cleared: 0, nights: [] as string[] }
+  return { cleared: 0, nights: [] as string[], met: [] as string[] }
 }
 
 export function nightsCleared(progress: ProgressState): number {
@@ -115,9 +173,10 @@ export function waveIsClear(
   downed: number,
   spawned: number,
   walking: number,
+  size = DEFEND_WAVE_SIZE,
 ): boolean {
-  if (easy) return downed >= DEFEND_WAVE_SIZE
-  return spawned >= DEFEND_WAVE_SIZE && walking === 0
+  if (easy) return downed >= size
+  return spawned >= size && walking === 0
 }
 
 export function waveSpeed(easy = false): number {
