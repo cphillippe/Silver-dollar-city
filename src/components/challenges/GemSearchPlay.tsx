@@ -234,13 +234,15 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       setOpened(count)
       setFlipping(index)
       // Teach-chip Match stays docked so the board keeps the swipe plane.
-      // Hero flash is only the non-chip story strip (brief, then dock).
+      // Fixes #443: that dock rule covers every Match line. First find never
+      // swaps the strip to hero — hero was an in-flow reflow that moved the grid.
+      // Juice stays on the found trail, the score, and the dock.
       const heroFlash = count === 1 && !matchChips
-      if (heroFlash) setStripMode('hero')
+      if (heroFlash) setStripMode('dock')
       window.setTimeout(() => {
         setFlipping((current) => (current === index ? null : current))
         if (count === 1) collapseStoryDock()
-      }, prefersReducedMotion() ? 0 : heroFlash ? 1200 : 40)
+      }, prefersReducedMotion() ? 0 : 40)
     }, delay)
   }
 
@@ -496,7 +498,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
 
   return (
     <div
-      className={`play is-gem-search is-panel-blast ${stripMode !== 'hero' ? 'is-story-docked' : ''} ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''} ${burst.length ? 'is-boom' : ''} ${plusFlash ? 'is-bonus-pop' : ''} ${findPop ? 'is-find-pop' : ''}`}
+      className={`play is-gem-search is-panel-blast is-story-docked ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''} ${burst.length ? 'is-boom' : ''} ${plusFlash ? 'is-bonus-pop' : ''} ${findPop ? 'is-find-pop' : ''}`}
       style={{ ['--gem-size' as string]: puzzle.size }}
       onPointerUp={onBoardUp}
       onPointerCancel={onBoardCancel}
@@ -715,7 +717,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
                 data-r={r}
                 data-c={c}
                 onPointerDown={(event) => onCellDown(event, { r, c })}
-                className={`gem-cell hue-${gemHue(letter, r, c)} ${selected.has(key) ? 'is-sel' : ''} ${popping ? 'is-burst' : ''} ${cellClear ? 'is-clear' : ''} ${cellCracked ? 'is-cracked' : ''} ${kept && found.length > 0 && !selected.has(key) && !cellCracked ? 'is-live' : ''} ${hint.includes(key) ? 'is-hint' : ''} ${popping && (bonusClear || bonusGhost) ? 'is-bonus-burst' : ''}`}
+                className={`gem-cell hue-${gemHue(letter, r, c)} ${selected.has(key) ? 'is-sel' : ''} ${popping ? 'is-burst' : ''} ${cellClear ? 'is-clear' : ''} ${cellCracked ? 'is-cracked' : ''} ${hint.includes(key) ? 'is-hint' : ''} ${popping && (bonusClear || bonusGhost) ? 'is-bonus-burst' : ''}`}
               >
                 <span className="gem-letter">{letter}</span>
                 {popping

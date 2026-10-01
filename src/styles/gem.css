@@ -172,6 +172,25 @@ img.gem-heart {
   overflow: auto;
 }
 
+/* Fixes #443 — reserve the dock slot. A hero strip overlays; it must not push the grid.
+   Story dock and teach dock stay flex 0 0 auto so first-find paint cannot reflow the board. */
+.play.is-gem-search.is-panel-blast .story-strip:not(.is-dock) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 6;
+  margin: 0;
+  pointer-events: none;
+}
+
+.play.is-gem-search.is-panel-blast.is-story-docked .story-strip.is-dock,
+.play.is-gem-search.is-panel-blast.is-story-docked .match-teach-dock {
+  flex: 0 0 auto;
+  flex-shrink: 0;
+}
+
 /* Board-first 1.4.99 — hide hunt line; crossword owns space UNDER the dock */
 .play.is-gem-search.is-panel-blast.is-story-docked .sort-how {
   display: none;
@@ -614,9 +633,8 @@ img.gem-heart {
   animation: need-pulse 0.9s ease-in-out infinite;
 }
 
-.gem-cell.is-live {
-  outline: 2px solid rgba(255, 246, 184, 0.55);
-}
+/* Fixes #443: no board-wide .gem-cell.is-live after the first find.
+   Idle letters keep this base paint. Glow is is-sel, is-hint, and is-burst only. */
 
 .gem-cell.is-burst {
   z-index: 4;
@@ -728,18 +746,6 @@ img.gem-heart {
   100% {
     opacity: 0;
     transform: rotate(calc(var(--i) * 72deg)) translate(28px, -36px) scale(0.1);
-  }
-}
-
-@keyframes gem-board-thump {
-  0% {
-    transform: scale(1);
-  }
-  36% {
-    transform: scale(1.035);
-  }
-  100% {
-    transform: scale(1);
   }
 }
 
