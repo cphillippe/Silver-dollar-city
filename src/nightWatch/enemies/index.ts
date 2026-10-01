@@ -16,6 +16,9 @@ import type { WalkerKind } from '../../types.ts'
 import { nightParts } from '../parts/index.ts'
 import { nightPath } from '../path/index.ts'
 import type { NightPoint, NightRaider } from '../types.ts'
+import { enemyHit, enemyMaxHp } from './hp.ts'
+
+export * from './hp.ts'
 
 const asset = (path: string) => new URL(path, import.meta.url).href
 
@@ -51,6 +54,10 @@ export interface NightEnemiesModule {
   /** Front-most unturned walker (Easy cue on path, not a lone HTML face). */
   cueTarget<T extends NightRaider>(raiders: T[]): T | undefined
   fit(easy: boolean, toolId: string, kind: WalkerKind): 'match' | 'weak'
+  /** Spawn HP: swarm / mid / tank role per kind, lower on Easy. */
+  maxHp(kind: WalkerKind, easy: boolean): number
+  /** Matching hit only (weak stays pushback). `down` → caller soft-turns heavenward. */
+  hit<T extends NightRaider>(raider: T, damage?: number): { raider: T; down: boolean }
   isClear(easy: boolean, downed: number, spawned: number, walking: number): boolean
 }
 
@@ -71,5 +78,7 @@ export const nightEnemies: NightEnemiesModule = {
       : nightPath.pointAt(raider.t),
   cueTarget: easyTapTarget,
   fit: easyTapFit,
+  maxHp: enemyMaxHp,
+  hit: enemyHit,
   isClear: waveIsClear,
 }

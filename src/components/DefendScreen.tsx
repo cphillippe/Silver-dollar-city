@@ -168,11 +168,14 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         spawnAt = 0
         const id = live.current.spawned
         const cast = nightEnemies.cast(progress.defense.cleared, id)
+        const hp = nightEnemies.maxHp(cast.kind, easy)
         walking.push({
           id,
           t: easy ? nightEnemies.spawnT(id) : 0,
           text: cast.text,
           kind: cast.kind,
+          hp,
+          maxHp: hp,
         })
         live.current.spawned += 1
       }
@@ -287,6 +290,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       setBlasts((current) => current.filter((item) => item.key !== now))
     }, 620)
     if (fit === 'match') {
+      const struck = nightEnemies.hit(best)
       if (easy) {
         const juiceAt = boardPoint(to.x, to.y)
         setTapJuice({
@@ -295,18 +299,23 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           left: juiceAt.left,
           top: juiceAt.top,
           kind: best.kind,
+          down: struck.down,
         })
         window.setTimeout(() => {
           setTapJuice((current) => (current?.key === now ? null : current))
         }, 620)
       }
       live.current.raiders = live.current.raiders.map((item) =>
-        item.id === best.id
-          ? { ...item, turned: using, from: to, heavenT: 0, text: 'Toward heaven' }
-          : item,
+        item.id !== best.id
+          ? item
+          : struck.down
+            ? { ...struck.raider, turned: using, from: to, heavenT: 0, text: 'Toward heaven' }
+            : struck.raider,
       )
-      live.current.downed += 1
-      if (easy) live.current.spawnNow = true
+      if (struck.down) {
+        live.current.downed += 1
+        if (easy) live.current.spawnNow = true
+      }
     } else {
       live.current.raiders = live.current.raiders.map((item) =>
         item.id === best.id
