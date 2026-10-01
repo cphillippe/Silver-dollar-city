@@ -212,13 +212,21 @@ export function DefendNightActorsSvg({
                     />
                     {!raider.turned && (raider.maxHp ?? 0) > 1 ? (
                       <g className="defend-hp-pips" aria-hidden>
+                        <rect
+                          className="defend-hp-chip"
+                          x={-((raider.maxHp ?? 0) * 13 + 5) / 2}
+                          y={15}
+                          width={(raider.maxHp ?? 0) * 13 + 5}
+                          height={15}
+                          rx={7.5}
+                        />
                         {Array.from({ length: raider.maxHp ?? 0 }, (_, i) => (
                           <circle
                             key={i}
                             className={`defend-hp-pip ${i < raider.hp ? 'is-full' : 'is-empty'}`}
-                            cx={(i - ((raider.maxHp ?? 0) - 1) / 2) * 10}
-                            cy={20}
-                            r={4}
+                            cx={(i - ((raider.maxHp ?? 0) - 1) / 2) * 13}
+                            cy={22.5}
+                            r={5}
                           />
                         ))}
                       </g>

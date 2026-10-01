@@ -685,9 +685,14 @@ img.walker-face.easy-walker-face,
   pointer-events: none;
 }
 
+.defend-hp-chip {
+  fill: rgba(42, 13, 88, 0.92);
+  stroke: rgba(255, 246, 184, 0.55);
+  stroke-width: 0.8;
+}
+
 .defend-hp-pip {
-  stroke: #2a0d58;
-  stroke-width: 1.4;
+  stroke: none;
 }
 
 .defend-hp-pip.is-full {
