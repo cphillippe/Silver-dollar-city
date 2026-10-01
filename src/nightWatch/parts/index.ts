@@ -5,22 +5,18 @@ export type NightPartId = 'lot' | 'lamp' | 'face'
 const lotEmpty = new URL('../../assets/defend/nw-lot-empty.png', import.meta.url).href
 const lampIdle = new URL('../../assets/defend/nw-tower-lamp-idle.png', import.meta.url).href
 const lampFiring = new URL('../../assets/defend/nw-tower-lamp-firing.png', import.meta.url).href
-const faceDark = new URL('../../assets/defend/nw-dark-face.png', import.meta.url).href
 
-const WALKER_FACE_KINDS: WalkerKind[] = [
-  'image-bearer',
-  'skeptic',
-  'pagan',
-  'physical',
-  'metaphysical',
-  'spiritual',
-]
+/** Per-kind portraits. One shared dark face hid every walker (Fixes #450). */
+const FACE_PORTRAITS: Record<WalkerKind, string> = {
+  'image-bearer': new URL('../../assets/walkers/walker-image-bearer.png', import.meta.url).href,
+  skeptic: new URL('../../assets/walkers/walker-skeptic.png', import.meta.url).href,
+  pagan: new URL('../../assets/walkers/walker-pagan.png', import.meta.url).href,
+  physical: new URL('../../assets/walkers/walker-physical.png', import.meta.url).href,
+  metaphysical: new URL('../../assets/walkers/walker-metaphysical.png', import.meta.url).href,
+  spiritual: new URL('../../assets/walkers/walker-spiritual.png', import.meta.url).href,
+}
 
-const faceSprites = Object.fromEntries(
-  WALKER_FACE_KINDS.map((kind) => [kind, faceDark]),
-) as Record<string, string>
-
-/** Sprite URLs by part, then variant (e.g. walker kind for faces). Empty = built-in SVG / portrait art. */
+/** Sprite URLs by part, then variant (walker kind for faces). */
 const NIGHT_PARTS: Partial<Record<NightPartId, Record<string, string>>> = {
   lot: {
     default: lotEmpty,
@@ -31,7 +27,7 @@ const NIGHT_PARTS: Partial<Record<NightPartId, Record<string, string>>> = {
     idle: lampIdle,
     firing: lampFiring,
   },
-  face: faceSprites,
+  face: FACE_PORTRAITS,
 }
 
 export interface NightPartsModule {
