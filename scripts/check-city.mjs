@@ -1196,7 +1196,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.330')
+assert.equal(APP_VERSION, '1.4.331')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -7741,14 +7741,14 @@ console.log('check-city: ok')
   )
 }
 
-// Night Watch 1.4.323: readable enemy HP bar (Fixes #451). 1.4.316 hit/spawn stay.
+// Night Watch 1.4.323: enemy HP bar (Fixes #451). 1.4.331 thins the capsule (Fixes #472).
 {
   const defendCss323 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
-  assert.match(defendNightSrc, /const HP_TRACK = \{ w: 88, h: 44, y: 18, rx: 12 \}/, '1.4.323 track is a readable bar')
-  assert.match(defendNightSrc, /const HP_FILL = \{ inset: 4, h: 36, rx: 8 \}/, '1.4.323 fill sits inside the track')
-  assert.ok((44 * 390) / 798 >= 14, '1.4.323 track is at least ~14px tall on a 390px phone')
-  assert.ok((36 * 390) / 798 >= 14, '1.4.323 gold fill is at least ~14px tall on a 390px phone')
-  assert.ok((88 * 390) / 798 >= 36, '1.4.323 track is wide enough to read HP steps')
+  assert.match(defendNightSrc, /const HP_TRACK = \{ w: 36, h: 10, y: 14, rx: 5 \}/, '1.4.331 track is face-scale')
+  assert.match(defendNightSrc, /const HP_FILL = \{ inset: 2, h: 6, rx: 3 \}/, '1.4.331 fill sits inside the thin track')
+  assert.ok((10 * 390) / 798 <= 10, '1.4.331 track is at most ~10px tall on a 390px phone')
+  assert.ok((6 * 390) / 798 <= 10, '1.4.331 gold fill stays a thin line on a 390px phone')
+  assert.ok(36 <= 36, '1.4.331 track width stays within the 36-wide face')
   assert.match(defendNightSrc, /className="defend-hp-bar"/, '1.4.323 HP bar group')
   assert.match(defendNightSrc, /className="defend-hp-track"/, '1.4.323 HP track under the face')
   assert.match(defendNightSrc, /className="defend-hp-fill"/, '1.4.323 HP fill')
@@ -8122,6 +8122,42 @@ console.log('check-city: ok')
     latestChange('1.4.330').items.join('\n'),
     /#472|#470|#471|Dig deeper|Hard trail|Town|bezel|portrait/i,
     '1.4.330 stays the tap-juice face',
+  )
+}
+
+// Night Watch 1.4.331: thin HP bar so it does not ride the walker (Fixes #472).
+{
+  const defendCss331 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const enemies331 = readFileSync(new URL('../src/nightWatch/enemies/index.ts', import.meta.url), 'utf8')
+  const gradle331 = readFileSync(new URL('../android/app/build.gradle', import.meta.url), 'utf8')
+  assert.match(defendNightSrc, /const HP_TRACK = \{ w: 36, h: 10, y: 14, rx: 5 \}/, '1.4.331 thin track')
+  assert.match(defendNightSrc, /const HP_FILL = \{ inset: 2, h: 6, rx: 3 \}/, '1.4.331 thin fill')
+  assert.ok((10 * 390) / 798 <= 10, '1.4.331 track ≤ ~10px tall on a 390px phone')
+  assert.ok(36 <= 36, '1.4.331 track is no wider than the 36-wide face')
+  assert.match(
+    defendNightSrc,
+    /\(\(HP_TRACK\.w - HP_FILL\.inset \* 2\) \* raider\.hp\) \/ \(raider\.maxHp \?\? 1\)/,
+    '1.4.331 fill width stays proportional to hp/maxHp',
+  )
+  assert.match(defendCss331, /\.defend-hp-track \{[\s\S]*?stroke-width:\s*0\.75/, '1.4.331 stroke is a hairline')
+  assert.doesNotMatch(
+    defendCss331,
+    /\.defend-hp-track \{[^}]*stroke-width:\s*2\b/,
+    '1.4.331 track stroke is not the old halo',
+  )
+  assert.match(
+    enemies331,
+    /faceSrc: \(kind, easy\) =>\s*nightParts\.src\('face', kind\)/,
+    '1.4.331 keeps kind portraits on the road',
+  )
+  assert.match(gradle331, /versionName "1\.4\.113"/, '1.4.331 Android versionName stays 1.4.113')
+  assert.match(latestChange('1.4.331').title, /Night Watch/)
+  assert.match(latestChange('1.4.331').items.join('\n'), /Fixes #472/)
+  assert.match(latestChange('1.4.331').items.join('\n'), /thin/)
+  assert.doesNotMatch(
+    latestChange('1.4.331').items.join('\n'),
+    /#470|#471|Dig deeper|Hard trail|Town|bezel|dark face|portrait/i,
+    '1.4.331 stays the thin HP bar',
   )
 }
 
