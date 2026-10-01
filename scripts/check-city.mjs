@@ -7870,6 +7870,11 @@ console.log('check-city: ok')
   assert.doesNotMatch(defendScreenOnlySrc, /name: 'shop'/, '1.4.327 no store')
   assert.match(defendAbilitySrc, /defend-ability-tier/)
   assert.match(defendAbilitySrc, /TIER_MARK\[tier\]/)
+  assert.match(
+    readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8'),
+    /\.defend-ability-tier \{[\s\S]*?background: rgba\(18, 6, 46/,
+    '1.4.327 tier mark is a readable pill on the Easy rail',
+  )
   assert.match(defendAbilitySrc, /if \(boosting\)/)
   assert.match(defendAbilitySrc, /onBoost\(tool\.id\)/)
   assert.match(defendAbilitySrc, /setAbility\(tool\.id\)/)
