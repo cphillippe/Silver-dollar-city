@@ -24,7 +24,7 @@ export interface EasyTapJuice {
   left: number
   top: number
   kind: WalkerKind
-  /** Last HP pip gone — juice lifts heavenward; otherwise squash only. */
+  /** Last hit — juice lifts heavenward; otherwise squash only. */
   down?: boolean
 }
 
@@ -50,6 +50,13 @@ export interface DefendNightActorsProps {
   tapPos: { left: number; top: number } | null
   tapJuice?: EasyTapJuice | null
 }
+
+/**
+ * Readable HP bar in A2 viewBox units. Phone contain is ~390/798 ≈ 0.49px per unit,
+ * so a 32-unit track is ~16px tall — a bar, not the old ~5px pips (Fixes #451).
+ */
+const HP_TRACK = { w: 88, h: 32, y: 18, rx: 10 }
+const HP_FILL = { inset: 4, h: 24, rx: 6 }
 
 /** SVG children: pads, shots, raiders, blasts (must render inside DefendNightSky). */
 export function DefendNightActorsSvg({
@@ -211,24 +218,23 @@ export function DefendNightActorsSvg({
                       clipPath="url(#defend-face-clip)"
                     />
                     {!raider.turned && (raider.maxHp ?? 0) > 1 ? (
-                      <g className="defend-hp-pips" aria-hidden>
+                      <g className="defend-hp-bar" aria-hidden>
                         <rect
-                          className="defend-hp-chip"
-                          x={-((raider.maxHp ?? 0) * 13 + 5) / 2}
-                          y={15}
-                          width={(raider.maxHp ?? 0) * 13 + 5}
-                          height={15}
-                          rx={7.5}
+                          className="defend-hp-track"
+                          x={-HP_TRACK.w / 2}
+                          y={HP_TRACK.y}
+                          width={HP_TRACK.w}
+                          height={HP_TRACK.h}
+                          rx={HP_TRACK.rx}
                         />
-                        {Array.from({ length: raider.maxHp ?? 0 }, (_, i) => (
-                          <circle
-                            key={i}
-                            className={`defend-hp-pip ${i < raider.hp ? 'is-full' : 'is-empty'}`}
-                            cx={(i - ((raider.maxHp ?? 0) - 1) / 2) * 13}
-                            cy={22.5}
-                            r={5}
-                          />
-                        ))}
+                        <rect
+                          className="defend-hp-fill"
+                          x={-HP_TRACK.w / 2 + HP_FILL.inset}
+                          y={HP_TRACK.y + HP_FILL.inset}
+                          width={((HP_TRACK.w - HP_FILL.inset * 2) * raider.hp) / (raider.maxHp ?? 1)}
+                          height={HP_FILL.h}
+                          rx={HP_FILL.rx}
+                        />
                       </g>
                     ) : null}
                     {raider.turned ? (

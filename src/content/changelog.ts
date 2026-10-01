@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.323',
+    title: 'Night Watch HP bar',
+    when: '2026-10-01',
+    items: [
+      'Each Night Watch walker has a gold HP bar under the face. The bar shrinks on a matching hit and empties when the walker turns toward heaven. Easy and Hard both show it. Fixes #451',
+    ],
+  },
+  {
     version: '1.4.322',
     title: 'Night Watch walker portraits',
     when: '2026-10-01',
