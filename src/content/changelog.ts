@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.331',
+    title: 'Night Watch health bar stays thin',
+    when: '2026-10-01',
+    items: [
+      'The health line under each Night Watch walker is a thin bar, so it does not ride along as a big sticker while they move. Fixes #472.',
+    ],
+  },
+  {
     version: '1.4.330',
     title: 'Night Watch tap stays small',
     when: '2026-10-01',
