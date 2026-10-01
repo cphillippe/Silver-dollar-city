@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.333',
+    title: 'Match games get one home',
+    when: '2026-10-01',
+    items: [
+      'Every Easy Match game now sits on one list: gem Match, Father run, road maze, Creed merge, source dig, and story snap. Each one plays the same as before, and Father run is still a Match game. Fixes #476.',
+    ],
+  },
+  {
     version: '1.4.332',
     title: 'Easy Trail frame',
     when: '2026-10-01',
