@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.332',
+    title: 'Easy Trail frame',
+    when: '2026-10-01',
+    items: [
+      'Easy Trail has a frame of empty shelves for Match, Father, and Lock In. The games play the same. Those homes come later. Fixes #476.',
+    ],
+  },
+  {
     version: '1.4.331',
     title: 'Night Watch health bar stays thin',
     when: '2026-10-01',
