@@ -1176,7 +1176,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.320')
+assert.equal(APP_VERSION, '1.4.321')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -7656,4 +7656,33 @@ console.log('check-city: ok')
     /Night Watch|Dig Scripture|board plant|#443|#444/i,
     '1.4.319 stays the ph-road show-it pilot',
   )
+}
+
+// Match 1.4.321: board stays planted after the first find (Fixes #443)
+{
+  const play321 = readFileSync(
+    new URL('../src/components/challenges/GemSearchPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  const gemCss321 = readFileSync(new URL('../src/styles/gem.css', import.meta.url), 'utf8')
+  const juice321 = readFileSync(new URL('../src/styles/gem-less-waste.css', import.meta.url), 'utf8')
+  assert.match(latestChange('1.4.321').title, /Match board stays planted/)
+  assert.match(latestChange('1.4.321').items.join('\n'), /Fixes #443/)
+  assert.doesNotMatch(
+    latestChange('1.4.321').items.join('\n'),
+    /Night Watch|Dig deeper|Hard trail|Town/i,
+    '1.4.321 stays Match board plant',
+  )
+  assert.doesNotMatch(play321, /setStripMode\('hero'\)/, '1.4.321 no hero layout push')
+  assert.doesNotMatch(play321, /is-live/, '1.4.321 no board-wide is-live')
+  assert.match(play321, /className=\{`play is-gem-search is-panel-blast is-story-docked/)
+  assert.doesNotMatch(gemCss321, /\.gem-cell\.is-live\s*\{/)
+  assert.doesNotMatch(gemCss321, /@keyframes gem-board-thump/)
+  assert.doesNotMatch(juice321, /animation:\s*gem-board-thump/)
+  assert.match(
+    juice321,
+    /\.play\.is-gem-search\.is-find-pop \.gem-board,\s*\n\.play\.is-gem-search\.is-boom \.gem-board \{\s*\n\s*animation:\s*none/,
+  )
+  assert.match(juice321, /\.play\.is-gem-search \.match-teach-chip\.is-found \{[\s\S]*?box-shadow:\s*0 1px 0/)
+  assert.match(juice321, /\.gem-cell\.is-burst/)
 }

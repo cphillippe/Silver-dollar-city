@@ -455,6 +455,9 @@ assert.ok(playSrc.lastIndexOf('EASY.holdNext') < playSrc.lastIndexOf('EASY.moreM
 assert.match(playSrc, /function closeSheet/)
 assert.match(playSrc, /function endDrag/)
 assert.match(playSrc, /heroFlash/)
+assert.doesNotMatch(playSrc, /setStripMode\('hero'\)/, '1.4.321 first find must not hero-reflow the board')
+assert.doesNotMatch(playSrc, /is-live/, '1.4.321 idle letters must not take a board-wide is-live glow')
+assert.match(playSrc, /is-story-docked/)
 assert.match(
   playSrc,
   /match-score[\s\S]*?<\/p>\s*<\/div>\s*\{status === 'ok' \?/,

@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.321',
+    title: 'Match board stays planted',
+    when: '2026-10-01',
+    items: [
+      'After you find the first word on Match, the letter grid stays in the same place and the same size. Letters you have not found look the same as they did before. Only the trail you just found pops. The word dock keeps its height, so the board does not jump. Fixes #443',
+    ],
+  },
+  {
     version: '1.4.320',
     title: 'Easy restart keeps Match and Dig',
     when: '2026-10-01',

@@ -56,10 +56,12 @@
   }
 }
 
-/* Required find board thump when burst is live. */
+/* Fixes #443 — do not thump the whole board. That scale moved the grid.
+   Juice stays on the burst cells, the score (.match-score.is-juice), and the dock. */
 .play.is-gem-search.is-find-pop .gem-board,
 .play.is-gem-search.is-boom .gem-board {
-  animation: gem-board-thump 0.42s cubic-bezier(0.12, 1.2, 0.28, 1);
+  animation: none;
+  transform: none;
 }
 
 /* Longer / punchier explode on required finds. */
@@ -113,11 +115,35 @@
 @media (prefers-reduced-motion: reduce) {
   .gem-find-pop,
   .gem-combo.is-loud,
-  .play.is-gem-search.is-find-pop .gem-board,
-  .play.is-gem-search.is-boom .gem-board,
   .play.is-gem-search.is-find-pop .gem-cell.is-burst {
     animation: none;
   }
+}
+
+/* Fixes #443 — teach-chip is-found is paint only. Same border box as the idle chip
+   so the dock slot does not grow and the letter grid stays planted.
+   Chip Match dock rule (reserved flex slot, no hero push) covers every Match line. */
+.play.is-gem-search .match-teach-chip.is-found {
+  background: #f0d089;
+  border-color: #8a6418;
+  border-width: 1.5px;
+  box-shadow: 0 1px 0 rgba(26, 20, 14, 0.12);
+  outline: none;
+  transform: none;
+  font-weight: inherit;
+  line-height: inherit;
+}
+
+.play.is-gem-search .match-teach-say-word.is-found {
+  font-weight: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 2px;
+}
+
+.play.is-gem-search.is-panel-blast.is-story-docked .match-teach-chips {
+  flex: 0 0 auto;
 }
 
 /* Easy Fun 1.4.259: Easy panel-blast SNAG bonus tall-phone HUD juice —
