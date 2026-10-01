@@ -396,14 +396,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const easyTap = easyTapMode(easy, phase, won)
   const tapTarget = easyTap ? nightEnemies.cueTarget(raiders) : undefined
   const tapPos = tapTarget ? boardPoint(raiderAt(tapTarget).x, raiderAt(tapTarget).y) : null
-  const walkerCalls: EasyWalkerCall[] = easyTap
+  const midWave = phase === 'wave' && !won
+  const walkerCalls: EasyWalkerCall[] = midWave
     ? raiders
         .filter((raider) => !raider.turned)
-        .map((raider) => {
-          const at = raiderAt(raider)
-          const pos = boardPoint(at.x, at.y)
-          return { id: raider.id, left: pos.left, top: pos.top, kind: raider.kind, text: raider.text }
-        })
+        .map((raider) => ({ id: raider.id, kind: raider.kind, text: raider.text }))
     : []
 
   const starCount = Object.values(progress.stars).reduce<number>((sum, n) => sum + n, 0)

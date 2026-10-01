@@ -625,15 +625,6 @@ img.walker-face.easy-walker-face,
   font-weight: 650;
 }
 
-/* 1.4.325: kind name readable on a 390px phone — 32 user-px ≈ 15 CSS px (Fixes #452). */
-.defend-raider-call text.defend-raider-kind {
-  fill: #ffcc33;
-  font-family: var(--sans);
-  font-size: 32px;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-}
-
 .defend-go {
   animation: defend-go 1.2s ease-in-out infinite;
   box-shadow: 0 0 22px rgba(224, 179, 74, 0.45);
@@ -1049,26 +1040,6 @@ img.walker-face.easy-walker-face,
   font-size: 16px;
 }
 
-/* 1.4.325: Easy kind names in CSS px so the A2 camera does not crush them (Fixes #452). */
-.easy-walker-call.is-on-map {
-  transform: translate(-50%, calc(-100% - 36px));
-  min-width: 88px;
-  max-width: 168px;
-  width: max-content;
-  padding: 5px 10px 4px;
-  z-index: 8;
-}
-
-.easy-walker-call.is-on-map .easy-walker-kind {
-  font-size: 15px;
-  white-space: nowrap;
-}
-
-.easy-walker-call.is-on-map .easy-walker-taunt {
-  font-size: 11px;
-  font-weight: 650;
-}
-
 .easy-walkers-path-cue {
   pointer-events: none;
 }
@@ -1331,4 +1302,79 @@ img.walker-face.easy-walker-face,
   .nw-docks .match-toast {
     font-size: 0.72rem;
   }
+}
+
+/* 1.4.326: kind name + taunt slide out on the left. The road keeps the face (Fixes #460). */
+.nw-walker-slide.easy-walker-roster {
+  position: absolute;
+  z-index: 4;
+  top: 72px;
+  left: 0;
+  width: 128px;
+  max-height: calc(100% - 150px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: 0;
+  padding: 6px 8px;
+  pointer-events: none;
+  border-radius: 0 14px 14px 0;
+  background: linear-gradient(180deg, rgba(42, 13, 88, 0.9), rgba(18, 6, 46, 0.84));
+  border: 1px solid rgba(255, 204, 51, 0.45);
+  border-left: 0;
+  box-shadow: 6px 8px 18px rgba(18, 6, 46, 0.4);
+  animation: nw-walker-slide-in 0.32s ease-out both;
+}
+
+.nw-walker-slide .easy-walker-call {
+  position: static;
+  top: auto;
+  left: auto;
+  transform: none;
+  min-width: 0;
+  max-width: none;
+  width: auto;
+  padding: 3px 4px;
+  border-radius: 8px;
+  background: transparent;
+  box-shadow: none;
+  text-align: left;
+}
+
+.nw-walker-slide .easy-walker-call.is-cue {
+  background: rgba(255, 204, 51, 0.16);
+  box-shadow: inset 2px 0 0 #ffcc33;
+}
+
+.nw-walker-slide .easy-walker-kind {
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nw-walker-slide .easy-walker-taunt {
+  font-size: 11px;
+  font-weight: 650;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@keyframes nw-walker-slide-in {
+  from { transform: translateX(-110%); }
+  to { transform: none; }
+}
+
+@media (max-width: 480px) {
+  .nw-walker-slide.easy-walker-roster {
+    top: 58px;
+    width: 120px;
+    max-height: calc(100% - 128px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nw-walker-slide.easy-walker-roster { animation: none; }
 }

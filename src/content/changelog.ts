@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.326',
+    title: 'Night Watch side roster',
+    when: '2026-10-01',
+    items: [
+      'Night Watch kind names and taunts sit in a list on the left, so the road stays clear and the faces stay easy to see. Tap the face still marks who to tap. Fixes #460',
+    ],
+  },
+  {
     version: '1.4.325',
     title: 'Night Watch enemy varieties',
     when: '2026-10-01',
