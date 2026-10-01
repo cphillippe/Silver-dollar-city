@@ -47,6 +47,7 @@ import {
   defendPads,
   EASY_CUE_HOLD_MS,
   EASY_WALKER_FACE_PX,
+  DEFEND_HEARTS,
   EASY_WALKER_HIT_PX,
   EASY_WAVE_LIVE,
   easyHoldSpawn,
@@ -83,6 +84,16 @@ import {
   watchTool,
   WATCH_TOOLS,
 } from '../src/lib/watchTools.ts'
+import {
+  applyKitBuy,
+  freshRunKits,
+  KIT_IDS,
+  kitSparkCost,
+  STILL_MS,
+  unturnedStep,
+  useMend,
+  useStill,
+} from '../src/lib/nightKits.ts'
 import { ideaUnlocked, mindGraph, mindMapHasLit } from '../src/lib/mindMap.ts'
 import { appendStreetLinks, easyStreetChallenge, hardStreetChallenge, linkCaption, linkClue, linkMiss, linkPicture, nextStreetWalk, STREET_CHALLENGE, STREET_FACT_IDS, STREET_LIGHTS, STREET_SKIP_IDS, STREET_TRIPLES, streetDecoyNodes, streetFactsLeft, streetIsComplete, streetTripleForLine, streetWalks, STREET_WHYS } from '../src/content/links.ts'
 import { firstGate } from '../src/content/firstGate.ts'
@@ -1185,7 +1196,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.328')
+assert.equal(APP_VERSION, '1.4.329')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -8009,6 +8020,72 @@ console.log('check-city: ok')
     latestChange('1.4.328').items.join('\n'),
     /#463|bezel|Dig deeper|Hard trail|Town|consumable|new portrait/i,
     '1.4.328 stays multi-wave and the climb cast',
+  )
+}
+
+// Night Watch 1.4.329: Still + Mend session kits (Fixes #463). Wave-5 gate stays on tier.
+{
+  assert.deepEqual([...KIT_IDS], ['still', 'mend'])
+  assert.equal(kitSparkCost, 1)
+  assert.ok(STILL_MS >= 1600 && STILL_MS <= 2000, '1.4.329 Still is a short freeze')
+  assert.equal(useStill(1_000), 1_000 + STILL_MS)
+  assert.deepEqual(freshRunKits(), { still: 0, mend: 0 })
+  const broke = applyKitBuy('still', freshRunKits(), 0)
+  assert.equal(broke.ok, false)
+  assert.equal(broke.note, 'Need a spark')
+  assert.equal(broke.sparks, 0)
+  assert.equal(broke.kits.still, 0)
+  const bought = applyKitBuy('mend', freshRunKits(), 2)
+  assert.equal(bought.ok, true)
+  assert.equal(bought.sparks, 1)
+  assert.equal(bought.kits.mend, 1)
+  assert.equal(bought.kits.still, 0)
+  assert.equal(bought.note, 'Mend ready')
+  const again = applyKitBuy('still', bought.kits, bought.sparks)
+  assert.equal(again.ok, true)
+  assert.equal(again.sparks, 0)
+  assert.equal(again.kits.still, 1)
+  assert.equal(again.kits.mend, 1)
+  const mend = useMend(2)
+  assert.equal(mend.healed, true)
+  assert.equal(mend.hearts, 3)
+  assert.equal(mend.note, 'Mend')
+  const full = useMend(DEFEND_HEARTS)
+  assert.equal(full.healed, false)
+  assert.equal(full.hearts, DEFEND_HEARTS)
+  assert.equal(full.note, 'Hearts full')
+  assert.equal(unturnedStep(0.42, 0.08, true), 0.42, '1.4.329 freeze holds an unturned walker')
+  assert.equal(unturnedStep(0.42, 0.08, false), 0.5)
+  assert.equal(WATCH_TOOLS.length, 4, '1.4.329 does not add a fifth rail tool')
+  assert.match(defendScreenOnlySrc, /applyKitBuy/)
+  assert.match(defendScreenOnlySrc, /useStill\(performance\.now\(\)\)/)
+  assert.match(defendScreenOnlySrc, /useMend\(live\.current\.hearts\)/)
+  assert.match(defendScreenOnlySrc, /unturnedStep\(/)
+  assert.match(defendScreenOnlySrc, /freezeUntil/)
+  assert.match(defendScreenOnlySrc, /const frozen = now < live\.current\.freezeUntil/)
+  assert.match(defendScreenOnlySrc, /if \(!frozen\) spawnAt \+= dt/)
+  assert.match(defendScreenOnlySrc, /if \(item\.turned\)/, '1.4.329 heaven flyaway still advances')
+  assert.match(defendScreenOnlySrc, /className="defend-kits"/)
+  assert.match(defendScreenOnlySrc, /className="defend-kit-buys"/)
+  assert.match(defendScreenOnlySrc, /Still · \$\{kitSparkCost\} spark|\$\{KIT_LABEL\.still\} · \$\{kitSparkCost\} spark/)
+  assert.match(defendScreenOnlySrc, /\$\{KIT_LABEL\.mend\} · \$\{kitSparkCost\} spark/)
+  assert.match(defendScreenOnlySrc, /setRunKits\(kits\)/)
+  assert.match(defendScreenOnlySrc, /freshRunKits\(\)/)
+  assert.doesNotMatch(defendAbilitySrc, /applyKitBuy|defend-kit|useMend|useStill/, '1.4.329 kits stay off the rail')
+  assert.match(
+    readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8'),
+    /\.defend-kits/,
+  )
+  assert.equal(easyGateResult(4, 1, 0.7), 'lost', '1.4.329 Love I still leaks wave 5')
+  assert.equal(easyGateResult(4, 2, 0.7), 'clear', '1.4.329 Love II still holds wave 5')
+  assert.match(latestChange('1.4.329').title, /Still/)
+  assert.match(latestChange('1.4.329').items.join('\n'), /Fixes #463/)
+  assert.match(latestChange('1.4.329').items.join('\n'), /Still/)
+  assert.match(latestChange('1.4.329').items.join('\n'), /Mend/)
+  assert.doesNotMatch(
+    latestChange('1.4.329').items.join('\n'),
+    /Burst|bezel|Dig deeper|Hard trail|Town|fifth/i,
+    '1.4.329 stays Still and Mend',
   )
 }
 

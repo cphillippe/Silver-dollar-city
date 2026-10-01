@@ -864,6 +864,62 @@ img.walker-face.easy-walker-face,
   margin: 0 0 8px;
 }
 
+/* 1.4.329 session kits — Still / Mend beside the boost spend (Fixes #463). */
+.defend-kits,
+.defend-kit-buys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  pointer-events: auto;
+}
+
+.defend-kit-buys {
+  margin: 0 0 8px;
+}
+
+.nw-docks .defend-kits,
+.nw-docks .defend-kit,
+.defend-boost .defend-kit {
+  pointer-events: auto;
+}
+
+.defend-kit {
+  min-height: 36px;
+  padding: 6px 10px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  gap: 6px;
+}
+
+.defend-kit-badge {
+  min-width: 1.2em;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: rgba(255, 204, 51, 0.28);
+  color: #fff4d2;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.defend-kit:disabled {
+  opacity: 0.45;
+}
+
+.defend-page.is-still .defend-board {
+  box-shadow:
+    0 0 0 2px rgba(186, 220, 255, 0.75),
+    0 0 28px rgba(140, 190, 255, 0.35);
+}
+
+@media (max-width: 480px) {
+  .defend-kit {
+    min-height: 40px;
+    padding: 7px 10px;
+    font-size: 0.74rem;
+  }
+}
+
 .app.is-play:has(.defend-page) .app-body {
   overflow: hidden;
   display: flex;
