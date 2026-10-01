@@ -72,7 +72,7 @@ assert.match(mazeSrc, /ROAD_HELP_FACE/)
 assert.doesNotMatch(mazeSrc, /ROAD_CLAIM_MEDIA/)
 assert.match(mazeSrc, /panelBlast/)
 
-const runSrc = readFileSync(new URL('../src/components/challenges/FatherRunPlay.tsx', import.meta.url), 'utf8')
+const runSrc = readFileSync(new URL('../src/easyTrail/father/FatherRunPlay.tsx', import.meta.url), 'utf8')
 assert.match(runSrc, /FATHER_RUN_FACE/)
 assert.match(runSrc, /FATHER_SON_FACE/)
 assert.match(runSrc, /FATHER_HUG_MEDIA/)

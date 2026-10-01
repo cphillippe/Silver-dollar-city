@@ -3104,7 +3104,7 @@ assert.match(cssSrc, /1\.4\.162: Learn short-story ≤720 peel|Fixes #208/)
 {
   const fatherCss173 = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
   const fatherPlay173 = readFileSync(
-    new URL('../src/components/challenges/FatherRunPlay.tsx', import.meta.url),
+    new URL('../src/easyTrail/father/FatherRunPlay.tsx', import.meta.url),
     'utf8',
   )
   assert.match(fatherCss173, /1\.4\.173: Father Dash ≤720 HUD peel/)
@@ -3552,7 +3552,7 @@ console.log('check-city: ok')
 {
   const indexCss189 = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
   const fatherPlay189 = readFileSync(
-    new URL('../src/components/challenges/FatherRunPlay.tsx', import.meta.url),
+    new URL('../src/easyTrail/father/FatherRunPlay.tsx', import.meta.url),
     'utf8',
   )
   assert.match(indexCss189, /1\.4\.189: Easy Father Dash ≤720 fill purple void/)
@@ -3648,7 +3648,7 @@ console.log('check-city: ok')
 {
   const indexCss196 = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
   const fatherPlay196 = readFileSync(
-    new URL('../src/components/challenges/FatherRunPlay.tsx', import.meta.url),
+    new URL('../src/easyTrail/father/FatherRunPlay.tsx', import.meta.url),
     'utf8',
   )
   assert.match(indexCss196, /1\.4\.196: Easy Father ≤720 slider→CTA purple gap/)
@@ -3860,7 +3860,7 @@ console.log('check-city: ok')
 {
   const indexCss204 = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
   const fatherPlay204 = readFileSync(
-    new URL('../src/components/challenges/FatherRunPlay.tsx', import.meta.url),
+    new URL('../src/easyTrail/father/FatherRunPlay.tsx', import.meta.url),
     'utf8',
   )
   assert.match(indexCss204, /1\.4\.204: Easy Father ≤720 close speech→rail purple gap/)
@@ -4280,7 +4280,7 @@ console.log('check-city: ok')
 {
   const indexCss214 = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
   const fatherPlay214 = readFileSync(
-    new URL('../src/components/challenges/FatherRunPlay.tsx', import.meta.url),
+    new URL('../src/easyTrail/father/FatherRunPlay.tsx', import.meta.url),
     'utf8',
   )
   assert.match(indexCss214, /1\.4\.214: Easy Story Creek speech ≤720 slider→HOLD purple void/)
@@ -4338,7 +4338,7 @@ console.log('check-city: ok')
 {
   const indexCss216 = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
   const fatherPlay216 = readFileSync(
-    new URL('../src/components/challenges/FatherRunPlay.tsx', import.meta.url),
+    new URL('../src/easyTrail/father/FatherRunPlay.tsx', import.meta.url),
     'utf8',
   )
   assert.match(indexCss216, /1\.4\.216: Easy Father Dash ≤720 \/ phone portrait timing-rail→CTA purple void/)
@@ -4736,7 +4736,7 @@ console.log('check-city: ok')
 {
   const indexCss229 = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
   const fatherPlay229 = readFileSync(
-    new URL('../src/components/challenges/FatherRunPlay.tsx', import.meta.url),
+    new URL('../src/easyTrail/father/FatherRunPlay.tsx', import.meta.url),
     'utf8',
   )
   assert.match(indexCss229, /1\.4\.229: Easy Father Dash ≤720 \/ phone portrait timing-rail→CTA purple void/)
@@ -5081,7 +5081,7 @@ console.log('check-city: ok')
 {
   const indexCss240 = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
   const fatherPlay240 = readFileSync(
-    new URL('../src/components/challenges/FatherRunPlay.tsx', import.meta.url),
+    new URL('../src/easyTrail/father/FatherRunPlay.tsx', import.meta.url),
     'utf8',
   )
   assert.match(indexCss240, /1\.4\.240: Easy Father Dash ≤720 \/ tall-phone rail→CTA purple void/)
@@ -5413,7 +5413,7 @@ console.log('check-city: ok')
 {
   const indexCss250 = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
   const fatherPlay250 = readFileSync(
-    new URL('../src/components/challenges/FatherRunPlay.tsx', import.meta.url),
+    new URL('../src/easyTrail/father/FatherRunPlay.tsx', import.meta.url),
     'utf8',
   )
   assert.match(indexCss250, /1\.4\.250: Easy Father Dash ≤720 \/ tall-phone rail→CTA purple void residual/)
@@ -5677,7 +5677,7 @@ console.log('check-city: ok')
 {
   const indexCss257 = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
   const fatherPlay257 = readFileSync(
-    new URL('../src/components/challenges/FatherRunPlay.tsx', import.meta.url),
+    new URL('../src/easyTrail/father/FatherRunPlay.tsx', import.meta.url),
     'utf8',
   )
   assert.match(indexCss257, /1\.4\.257: Easy Father Dash ≤720 \/ tall-phone rail→CTA purple void residual after cream 250/)
@@ -6011,7 +6011,7 @@ console.log('check-city: ok')
 {
   const welcomeCss266 = readFileSync(new URL('../src/styles/welcome.css', import.meta.url), 'utf8')
   const fatherPlay266 = readFileSync(
-    new URL('../src/components/challenges/FatherRunPlay.tsx', import.meta.url),
+    new URL('../src/easyTrail/father/FatherRunPlay.tsx', import.meta.url),
     'utf8',
   )
   assert.match(welcomeCss266, /1\.4\.266: Easy Father Dash ≤720 \/ tall residual purple void after cream 257/)
@@ -8173,7 +8173,7 @@ console.log('check-city: ok')
   )
 }
 
-// Easy Trail 1.4.332: FRAME — empty shelves (src/easyTrail). Fixes #476. (Match shelf + PuzzlePlay import superseded by 1.4.333 A1 registry)
+// Easy Trail 1.4.332: FRAME — empty shelves (src/easyTrail). Fixes #476. (Match shelf + PuzzlePlay import superseded by 1.4.333 A1 registry; Father shelf paths superseded by 1.4.334 A2 home)
 {
   const et = (file) => readFileSync(new URL(`../src/easyTrail/${file}`, import.meta.url), 'utf8')
   const barrel332 = et('index.ts')
@@ -8212,10 +8212,10 @@ console.log('check-city: ok')
   assert.match(match332, /storyPlayFor/)
   assert.match(match332, /A1 Match registry \(registry\.tsx\)/, '1.4.333 Match shelf names the A1 registry')
   assert.doesNotMatch(match332, /MATCH_CHIPS|gemSearchGrid/, '1.4.333 Match shelf does not reach into the gem grid')
-  assert.match(father332, /export \{ FatherRunPlay \} from '\.\.\/\.\.\/components\/challenges\/FatherRunPlay'/)
-  assert.match(father332, /from '\.\.\/\.\.\/lib\/fatherRun\.ts'/)
+  assert.match(father332, /export \{ FatherRunPlay \} from '\.\/FatherRunPlay'/, '1.4.334 Father shelf exports its own play')
+  assert.match(father332, /from '\.\/fatherRun\.ts'/, '1.4.334 Father shelf exports its own timing')
   assert.match(father332, /FATHER_RUN_LINE/)
-  assert.match(father332, /A2 home move is later/)
+  assert.match(father332, /Father home \(A2\)/, '1.4.334 Father shelf is the A2 home')
   assert.match(lockIn332, /export \{ RecallGate \} from '\.\.\/\.\.\/components\/RecallGate'/)
   assert.match(lockIn332, /easyHoldPractice/)
   assert.match(lockIn332, /from '\.\.\/\.\.\/lib\/easy\.ts'/)
@@ -8230,7 +8230,6 @@ console.log('check-city: ok')
     '../src/components/LinkScreen.tsx',
     '../src/components/DailyTrail.tsx',
     '../src/components/PackStreet.tsx',
-    '../src/components/challenges/FatherRunPlay.tsx',
     '../src/components/RecallGate.tsx',
   ]) {
     const src = readFileSync(new URL(rel, import.meta.url), 'utf8')
@@ -8238,8 +8237,8 @@ console.log('check-city: ok')
   }
   assert.match(
     et('match/registry.tsx'),
-    /from '\.\.\/\.\.\/components\/challenges\/FatherRunPlay'/,
-    '1.4.333 FatherRunPlay still mounts from its component file, via the Match registry',
+    /from '\.\.\/father\/FatherRunPlay'/,
+    '1.4.334 Match registry mounts FatherRunPlay from the Father home',
   )
   assert.match(
     readFileSync(new URL('../src/components/Journal.tsx', import.meta.url), 'utf8'),
