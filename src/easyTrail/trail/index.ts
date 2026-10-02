@@ -1,6 +1,6 @@
 /**
- * Trail shelf. Loop helpers still live in lib/easy.ts — this hop does not move them.
- * A4 trail peel is later.
+ * Trail home (A4). The Easy loop lives in trail/loop.ts.
+ * lib/easy.ts re-exports the same bindings, so callers keep importing lib/easy.
  */
 export {
   EASY_LINE_ORDER,
@@ -15,4 +15,4 @@ export {
   easyMatchLine,
   easyMatchReady,
   easyTrailView,
-} from '../../lib/easy.ts'
+} from './loop.ts'
