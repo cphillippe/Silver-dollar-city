@@ -2692,12 +2692,14 @@ assert.match(
 )
 assert.match(cssSrc, /is-easy-hold-practice/)
 assert.match(
-  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  readFileSync(new URL('../src/easyTrail/trail/loop.ts', import.meta.url), 'utf8'),
   /easyTaught/,
+  '1.4.336 Easy loop source lives in the trail home',
 )
 assert.match(
-  readFileSync(new URL('../src/lib/easy.ts', import.meta.url), 'utf8'),
+  readFileSync(new URL('../src/easyTrail/trail/loop.ts', import.meta.url), 'utf8'),
   /prefer the first line not yet held on Easy/i,
+  '1.4.336 Easy loop source lives in the trail home',
 )
 assert.match(
   readFileSync(new URL('../src/components/Welcome.tsx', import.meta.url), 'utf8'),
@@ -8178,7 +8180,7 @@ console.log('check-city: ok')
   )
 }
 
-// Easy Trail 1.4.332: FRAME — empty shelves (src/easyTrail). Fixes #476. (Match shelf + PuzzlePlay import superseded by 1.4.333 A1 registry; Father shelf paths superseded by 1.4.334 A2 home; Lock In shelf + Journal import superseded by 1.4.335 A3 peel)
+// Easy Trail 1.4.332: FRAME — empty shelves (src/easyTrail). Fixes #476. (Match shelf + PuzzlePlay import superseded by 1.4.333 A1 registry; Father shelf paths superseded by 1.4.334 A2 home; Lock In shelf + Journal import superseded by 1.4.335 A3 peel; trail shelf + Lock In hold-helper source superseded by 1.4.336 A4 trail peel)
 {
   const et = (file) => readFileSync(new URL(`../src/easyTrail/${file}`, import.meta.url), 'utf8')
   const barrel332 = et('index.ts')
@@ -8208,7 +8210,8 @@ console.log('check-city: ok')
   assert.match(barrel332, /A3 Lock In peel: hold practice lives in lockIn\/HoldPractice\.tsx/, '1.4.335 barrel names the A3 Lock In home')
   assert.match(barrel332, /A4 trail peel/)
   assert.match(types332, /EasyHomeFocus as EasyTrailFocus/)
-  assert.match(trail332, /from '\.\.\/\.\.\/lib\/easy\.ts'/)
+  assert.match(trail332, /from '\.\/loop\.ts'/, '1.4.336 trail shelf exports its own home')
+  assert.doesNotMatch(trail332, /A4 trail peel is later/, '1.4.336 supersedes the 1.4.332 "A4 later" pin')
   assert.match(trail332, /easyLoopLine/)
   assert.match(trail332, /easyTrailView/)
   assert.doesNotMatch(trail332, /PuzzlePlay|FatherRunPlay|RecallGate/)
@@ -8223,13 +8226,13 @@ console.log('check-city: ok')
   assert.match(father332, /Father home \(A2\)/, '1.4.334 Father shelf is the A2 home')
   assert.match(lockIn332, /export \{ RecallGate \} from '\.\.\/\.\.\/components\/RecallGate'/)
   assert.match(lockIn332, /easyHoldPractice/)
-  assert.match(lockIn332, /from '\.\.\/\.\.\/lib\/easy\.ts'/)
+  assert.match(lockIn332, /from '\.\.\/trail\/loop\.ts'/, '1.4.336 Lock In shelf exports the hold helpers from the trail home')
   assert.match(lockIn332, /Lock In home \(A3\)/, '1.4.335 Lock In shelf is the A3 home')
   assert.match(lockIn332, /^export \{ HoldPractice \} from '\.\/HoldPractice'$/m, '1.4.335 Lock In shelf exports its own hold practice')
   assert.doesNotMatch(lockIn332, /A3 Lock In peel is later/, '1.4.335 supersedes the 1.4.332 "A3 later" pin')
   assert.doesNotMatch(lockIn332, /from ['"][^'"]*Journal/, '1.4.332 Lock In shelf does not import Journal')
-  assert.equal(easyLoopFromShelf, easyLoopFromLib, '1.4.332 trail shelf re-exports lib/easy loop')
-  assert.equal(easyTrailViewFromShelf, easyTrailViewFromLib, '1.4.332 trail view stays the lib/easy helper')
+  assert.equal(easyLoopFromShelf, easyLoopFromLib, '1.4.336 trail shelf and lib/easy share one easyLoopLine (the trail home)')
+  assert.equal(easyTrailViewFromShelf, easyTrailViewFromLib, '1.4.336 trail shelf and lib/easy share one easyTrailView (the trail home)')
   for (const rel of [
     '../src/App.tsx',
     '../src/components/ChallengeScreen.tsx',
@@ -8528,7 +8531,7 @@ console.log('check-city: ok')
   )
 }
 
-// Easy Trail 1.4.335: A3 — Lock In peel. Journal's hold practice lives in src/easyTrail/lockIn/HoldPractice.tsx. Fixes #476.
+// Easy Trail 1.4.335: A3 — Lock In peel. Journal's hold practice lives in src/easyTrail/lockIn/HoldPractice.tsx. Fixes #476. (lib/easy hold-helper source superseded by 1.4.336 A4 trail peel)
 {
   const src335 = (rel) => readFileSync(new URL(`../src/${rel}`, import.meta.url), 'utf8')
   const srcRoot335 = new URL('../src/', import.meta.url)
@@ -8686,8 +8689,8 @@ console.log('check-city: ok')
   assert.match(shelf335, /^export \{ RecallGate \} from '\.\.\/\.\.\/components\/RecallGate'$/m)
   assert.match(
     shelf335,
-    /^export \{ easyHoldFields, easyHoldPractice, easyHoldView \} from '\.\.\/\.\.\/lib\/easy\.ts'$/m,
-    '1.4.335 lib/easy hold helpers stay in lib/easy (A4)',
+    /^export \{ easyHoldFields, easyHoldPractice, easyHoldView \} from '\.\.\/trail\/loop\.ts'$/m,
+    '1.4.336 hold helpers moved from lib/easy to the trail home (A4)',
   )
   assert.doesNotMatch(src335('easyTrail/index.ts'), /Later hops?: A3/, '1.4.335 barrel no longer lists A3 as later')
   assert.doesNotMatch(src335('easyTrail/types.ts'), /later hop/, '1.4.335 types no longer say Lock In is later')
