@@ -155,6 +155,18 @@ export function anyUpgradeReady(progress: ProgressState): boolean {
   return CITY_PLOTS.some((plot) => canUpgrade(plot.id, progress))
 }
 
+/** First plot that can raise a look — prefer the narrative next lot when it is ready. */
+export function readyUpgradeId(
+  progress: ProgressState,
+  prefer?: CityPlotId,
+): CityPlotId | null {
+  if (prefer && canUpgrade(prefer, progress)) return prefer
+  for (const plot of CITY_PLOTS) {
+    if (canUpgrade(plot.id, progress)) return plot.id
+  }
+  return null
+}
+
 export function tierTitle(tier: number, easy: boolean): string {
   const row = TIER_NAME[Math.max(0, Math.min(TIER_MAX, tier))]
   return easy ? row.easy : row.hard

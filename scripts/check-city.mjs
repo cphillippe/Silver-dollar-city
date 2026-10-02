@@ -119,6 +119,7 @@ import {
   plotTag,
   tierJob,
   nextUpgradeNeed,
+  readyUpgradeId,
   EASY_FOLK_LIFT,
   EASY_FOLK_NUDGE,
 } from '../src/lib/cityBuild.ts'
@@ -1211,7 +1212,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.336')
+assert.equal(APP_VERSION, '1.4.337')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1340,6 +1341,15 @@ assert.equal(earnedTier('journal', grown), 4)
   const managed = { ...afterDaily, cityBuilt: emptyCityBuilt() }
   assert.equal(appliedTier('porch', managed), 1)
   assert.equal(canUpgrade('porch', managed), true)
+  assert.equal(nextPlotId(managed, true), 'hollow', 'Bill #438: next lot is hollow while porch can still raise')
+  const billPorchReady = { ...managed, cityBuilt: { ...emptyCityBuilt(), porch: 1, hollow: 1 } }
+  assert.equal(canUpgrade('hollow', billPorchReady), false)
+  assert.equal(canUpgrade('porch', billPorchReady), true)
+  assert.equal(
+    readyUpgradeId(billPorchReady, 'hollow'),
+    'porch',
+    'Easy Build this must raise porch, not open hollow Walk',
+  )
   const raised = applyUpgrade(managed, 'porch')
   assert.equal(appliedTier('porch', raised), 2)
   assert.equal(canUpgrade('porch', raised), false)
@@ -1870,7 +1880,10 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
   assert.match(easyHome, /easy-build-it/)
   assert.match(easyHome, /Build It/)
   assert.match(easyHome, /Build this/)
-  assert.match(easyHome, /setPlot\(nextId\)/)
+  assert.match(easyHome, /onClick=\{easyBuildThis\}/)
+  assert.match(hubSrc, /function easyBuildThis\(\)[\s\S]*upgradeBuilding\(readyId\)/)
+  assert.match(hubSrc, /upgradeReadyId/)
+  assert.doesNotMatch(easyHome, /onClick=\{\(\) => setPlot\(nextId\)\}/)
   assert.match(easyHome, /easy-coach/)
   assert.match(easyHome, /name: 'learn'/)
   assert.match(easyHome, /name: 'link'/)
@@ -1878,7 +1891,7 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
   assert.match(easyHome, /EASY\.saved/)
   assert.match(easyHome, /matchReady/)
   assert.match(hubSrc, /nextGift/)
-  assert.match(hubSrc, /anyUpgradeReady/)
+  assert.match(hubSrc, /readyUpgradeId/)
   assert.match(cssSrc, /easy-build-it/)
   assert.match(cssSrc, /easy-home-dock/)
   assert.match(cssSrc, /\.hub\.is-easy-home \.easy-home-map[\s\S]{0,120}position:\s*absolute/)
@@ -8938,6 +8951,19 @@ console.log('check-city: ok')
     /loop\.ts|lib\/easy|easyTrail|re-export|binding|shim|peel|registry|gate|#475|#480|#438|Pack B|Dig deeper|new screen/i,
     '1.4.336 stays kid-plain and A4 only',
   )
+}
+
+// Easy Build It 1.4.337: Home Build this raises when ready — Fixes #438
+{
+  const hub337 = readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8')
+  assert.match(hub337, /function easyBuildThis\(\)/, '1.4.337 Easy dock Build handler (#438)')
+  assert.match(hub337, /upgradeBuilding\(readyId\)/, '1.4.337 calls upgradeBuilding when ready (#438)')
+  assert.match(hub337, /upgradeReadyId/, '1.4.337 gift tied to ready upgrade (#438)')
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.337'), '1.4.337 changelog row')
+  const items337 = latestChange('1.4.337').items.join('\n')
+  assert.match(items337, /Fixes #438/)
+  assert.match(items337, /Build this/i)
+  assert.match(latestChange('1.4.337').title, /build/i)
 }
 
 function DEFEND_WAVE_PACK_CHECK() {

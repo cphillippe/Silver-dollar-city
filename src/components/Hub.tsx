@@ -5,7 +5,13 @@ import { STORY, townVoice } from '../content/story'
 import { LOT_STORY } from '../content/lots'
 import { localDateKey } from '../lib/dates'
 import { CITY_PLOTS, nextGift, nextPlotId, type CityPlotId } from '../lib/city'
-import { anyUpgradeReady, appliedTier, lotTapWhy, visualFills, visualSnapshot } from '../lib/cityBuild'
+import {
+  appliedTier,
+  lotTapWhy,
+  readyUpgradeId,
+  visualFills,
+  visualSnapshot,
+} from '../lib/cityBuild'
 import { EASY, EASY_MATCH_LINE, easyHomeFocus, easyHoldView, easyLineHeld, easyLoopLine, easyMatchReady, isEasy } from '../lib/easy'
 import { storyPlayFor } from '../lib/storyPlay'
 import { markLater, readLater, sessionDue } from '../lib/recall'
@@ -36,7 +42,7 @@ interface HubProps {
 }
 
 export function Hub({ onNavigate, openPlot }: HubProps) {
-  const { progress, snoozeReviews } = useProgress()
+  const { progress, snoozeReviews, upgradeBuilding } = useProgress()
   const today = localDateKey()
   const doneToday = dailyDoneToday(progress, today)
   const waiting = dueCount(progress, today)
@@ -72,9 +78,19 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
     const coldMercy = loopId === EASY_MATCH_LINE && !easyLineHeld(progress, EASY_MATCH_LINE)
     const easySnap = visualSnapshot(progress)
     const easyFills = visualFills(progress)
-    const buildGift = anyUpgradeReady(progress)
+    const upgradeReadyId = readyUpgradeId(progress, nextId)
+    const buildGift = upgradeReadyId
       ? 'A building is ready. Tap it, then Build this.'
       : nextGift(nextId, easySnap[nextId], easyFills[nextId] ?? 0, true)
+
+    function easyBuildThis() {
+      const readyId = readyUpgradeId(progress, nextId)
+      if (readyId) {
+        upgradeBuilding(readyId)
+        return
+      }
+      setPlot(nextId)
+    }
     // Easy Clear 1.4.157: Home whisper = short next-step (maze/run/merge/dig/snap Home), not full hunt how — Fixes #203 (completes #192 family)
     const homeWhisper =
       focus === 'hold'
@@ -117,7 +133,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
             <button
               type="button"
               className="btn gold easy-dock-build"
-              onClick={() => setPlot(nextId)}
+              onClick={easyBuildThis}
             >
               Build this
             </button>
