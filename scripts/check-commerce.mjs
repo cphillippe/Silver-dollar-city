@@ -234,10 +234,13 @@ assert.doesNotMatch(settingsSrc, /Subscribe/)
 assert.doesNotMatch(settingsSrc, /VITE_PLAY_BILLING\s*=\s*1/)
 
 const journalSrc = readFileSync(new URL('../src/components/Journal.tsx', import.meta.url), 'utf8')
-assert.doesNotMatch(journalSrc, /SceneAd/)
-assert.doesNotMatch(journalSrc, /AdSlot/)
-assert.match(journalSrc, /offerSupportToast/)
-assert.doesNotMatch(journalSrc, /data-support-toast/)
+const holdPracticeSrc = readFileSync(new URL('../src/easyTrail/lockIn/HoldPractice.tsx', import.meta.url), 'utf8')
+for (const src of [journalSrc, holdPracticeSrc]) {
+  assert.doesNotMatch(src, /SceneAd/)
+  assert.doesNotMatch(src, /AdSlot/)
+  assert.doesNotMatch(src, /data-support-toast/)
+}
+assert.match(holdPracticeSrc, /offerSupportToast/)
 
 const matchSrc = readFileSync(new URL('../src/components/challenges/MatchPlay.tsx', import.meta.url), 'utf8')
 const holdSrc = readFileSync(new URL('../src/components/challenges/WhyBlastPlay.tsx', import.meta.url), 'utf8')
