@@ -3602,6 +3602,20 @@ html[data-easy='on'] .mind-node em {
   font-weight: 800;
 }
 
+.hub.is-easy-home .easy-dock-walk {
+  flex-shrink: 0;
+  width: auto;
+  min-height: 44px;
+  margin: 0;
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-weight: 800;
+  border: 2px solid rgba(255, 246, 232, 0.55);
+  background: rgba(42, 13, 88, 0.72);
+  color: var(--parchment);
+  box-shadow: none;
+}
+
 .hub.is-easy-home .easy-coach {
   gap: 6px;
   margin: 0;
