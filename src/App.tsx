@@ -17,6 +17,7 @@ import { Vista } from './components/Vista'
 import { Welcome } from './components/Welcome'
 import { adsAreVisible, isBetweenSceneTransition, scenePauseMountsOn } from './config/ads'
 import { liveInterstitialReady, showBetweenSceneInterstitial } from './lib/adAdapter'
+import { offerStoresComingNotice } from './lib/supportToast'
 import { useProgress } from './store/progress'
 import type { View } from './types'
 
@@ -103,9 +104,11 @@ export default function App() {
   }
 
   function supportFromAd() {
+    const dest = pending ?? { name: 'hub' as const }
     setSceneAd(false)
     setPending(null)
-    setView({ name: 'settings' })
+    setView(dest)
+    offerStoresComingNotice()
   }
 
   useEffect(() => {
