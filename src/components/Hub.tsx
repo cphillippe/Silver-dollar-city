@@ -33,6 +33,7 @@ import {
 } from '../store/progress'
 import type { View } from '../types'
 import { RecallOffer } from './RecallOffer'
+import { StoresComingNotice } from './StoresComingNotice'
 import { SupportToast } from './SupportToast'
 
 interface HubProps {
@@ -223,6 +224,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
           </button>
         </nav>
         <section className="easy-extra-streets" aria-hidden="true" hidden />
+        <StoresComingNotice />
         <SupportToast />
       </main>
     )
@@ -558,6 +560,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
         </button>
       )}
 
+      <StoresComingNotice />
       <SupportToast />
     </main>
   )
