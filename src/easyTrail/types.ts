@@ -1,5 +1,5 @@
 /**
  * Easy Trail focus. Same three homes as EasyHomeFocus — learn, match, hold.
- * Father home lives in father/; the Lock In home lands on a later hop.
+ * Father home lives in father/; Lock In hold practice lives in lockIn/.
  */
 export type { EasyHomeFocus as EasyTrailFocus } from '../lib/easy.ts'

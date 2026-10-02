@@ -1,17 +1,16 @@
 import { useState } from 'react'
-import { areas, journalEntries, pillarFor } from '../content'
+import { areas, journalEntries } from '../content'
 import { evidenceFor, evidenceForJournal, evidenceForTier } from '../content/evidence'
 import { guideForArea, STORY } from '../content/story'
 import { localDateKey } from '../lib/dates'
 import { EASY, easyFacingLine, easyJournalMeta, easyLineTaught, easyLoopLine, isEasy } from '../lib/easy'
-import { EASY_HOME } from '../lib/easyNav'
+import { HoldPractice } from '../easyTrail/lockIn/HoldPractice'
 import { EasyBack } from './EasyBack'
-import { offerSupportToast } from '../lib/supportToast'
 import { isDue, nextGapLabel } from '../lib/memory'
 import { starLegend } from '../lib/stars'
 import { deployLabel, findLearning, storedLearnings, withLearningBeat } from '../lib/learning'
 import { bonusFace, journalBonusPoints, lineBonusPoints } from '../lib/matchBonus'
-import { journalPoints, journalTierCounts, needsTierHold, currentLessonTier, scoreFace } from '../lib/tiers'
+import { journalPoints, journalTierCounts, currentLessonTier, scoreFace } from '../lib/tiers'
 import { watchTool } from '../lib/watchTools'
 import { DigDeeper } from './DigDeeper'
 import { HeldTriad } from './HeldTriad'
@@ -39,7 +38,7 @@ interface JournalProps {
 }
 
 export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
-  const { progress, recordHeld, recordReview, recordLessonHold, snoozeReviews } = useProgress()
+  const { progress, snoozeReviews } = useProgress()
   const easy = isEasy(progress)
   const today = localDateKey()
   const { open, total, percent } = journalCompletion(progress)
@@ -91,77 +90,14 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
     Boolean(autoQuiz && quizBrief && !quizReplacesMatch && (easy || !focusedEntry || focusedOpen))
 
   if (holdPractice && quizBrief) {
-    const pillar = focusedEntry?.areaId ?? pillarFor(quizBrief.id)
-    const firstHold = !progress.held.includes(quizBrief.id)
-    const advancing = firstHold || needsTierHold(progress, quizBrief.id)
     return (
-      <main className={`journal is-rehearse ${easy ? 'is-easy-hold-practice' : ''}`}>
-        {easy ? (
-          <EasyBack onNavigate={onNavigate} />
-        ) : (
-          <button type="button" className="text-link" onClick={() => onNavigate({ name: 'journal' })}>
-            ← Journal
-          </button>
-        )}
-        <section className="rehearse-anchor">
-          <p className="eyebrow">{easy ? EASY.saved : 'Takeaway'}</p>
-          {easy ? null : <h1>{focusedEntry?.title ?? STORY.tapTakeaway}</h1>}
-          <RecallGate
-            brief={quizBrief}
-            mode={easy && advancing ? 'encode' : 'review'}
-            visits={progress.memory[quizBrief.id]?.reviews ?? 0}
-            kicker={STORY.tapTakeaway}
-            onHeld={(result) => {
-              if (easy && advancing) {
-                recordHeld(quizBrief.id)
-                recordReview({
-                  id: quizBrief.id,
-                  pillar,
-                  kind: 'encode',
-                  today,
-                  clean: result.clean,
-                  peeked: false,
-                  elaborated: false,
-                })
-                recordLessonHold(quizBrief.id, result.clean)
-                offerSupportToast()
-                onNavigate(EASY_HOME)
-                return
-              }
-              recordReview({
-                id: quizBrief.id,
-                pillar,
-                kind: 'recall',
-                today,
-                clean: result.clean,
-                peeked: false,
-                elaborated: false,
-              })
-              if (!result.clean) recordLessonHold(quizBrief.id, false)
-              onNavigate(
-                easy
-                  ? { name: 'hub' }
-                  : focusedEntry
-                    ? { name: 'journal', focusId: focusedEntry.id }
-                    : { name: 'journal' },
-              )
-            }}
-            onSkip={
-              easy
-                ? undefined
-                : (how) => {
-                    if (how === 'not-today') snoozeReviews([quizBrief.id], today)
-                    setLater(markLater(today, [quizBrief.id], true))
-                    onNavigate(
-                      focusedEntry
-                        ? { name: 'journal', focusId: focusedEntry.id }
-                        : { name: 'journal' },
-                    )
-                  }
-            }
-          />
-        </section>
-      </main>
+      <HoldPractice
+        quizBrief={quizBrief}
+        focusedEntry={focusedEntry}
+        today={today}
+        setLater={setLater}
+        onNavigate={onNavigate}
+      />
     )
   }
 

@@ -615,10 +615,12 @@ assert.doesNotMatch(
   readFileSync(new URL('../src/components/RecallGate.tsx', import.meta.url), 'utf8'),
   /easy\s*\?\s*\n\s*EASY\.tapWhy/,
 )
-assert.doesNotMatch(
-  readFileSync(new URL('../src/components/Journal.tsx', import.meta.url), 'utf8'),
-  /<h1>\{focusedEntry\?\.title \?\? \(easy \? EASY\.rememberSentence/,
-)
+for (const rel of ['../src/components/Journal.tsx', '../src/easyTrail/lockIn/HoldPractice.tsx']) {
+  assert.doesNotMatch(
+    readFileSync(new URL(rel, import.meta.url), 'utf8'),
+    /<h1>\{focusedEntry\?\.title \?\? \(easy \? EASY\.rememberSentence/,
+  )
+}
 assert.match(recallSrc, /uniqueHoldChoices/)
 assert.doesNotMatch(recallSrc, /Tap the sentence you still remember/)
 assert.match(recallSrc, /reasonLocked/)
@@ -2674,7 +2676,7 @@ assert.match(
   /EASY\.saved/,
 )
 assert.match(
-  readFileSync(new URL('../src/components/Journal.tsx', import.meta.url), 'utf8'),
+  readFileSync(new URL('../src/easyTrail/lockIn/HoldPractice.tsx', import.meta.url), 'utf8'),
   /is-easy-hold-practice/,
 )
 assert.match(hubSrc, /easyHomeFocus/)
@@ -8175,7 +8177,7 @@ console.log('check-city: ok')
   )
 }
 
-// Easy Trail 1.4.332: FRAME — empty shelves (src/easyTrail). Fixes #476. (Match shelf + PuzzlePlay import superseded by 1.4.333 A1 registry; Father shelf paths superseded by 1.4.334 A2 home)
+// Easy Trail 1.4.332: FRAME — empty shelves (src/easyTrail). Fixes #476. (Match shelf + PuzzlePlay import superseded by 1.4.333 A1 registry; Father shelf paths superseded by 1.4.334 A2 home; Lock In shelf + Journal import superseded by 1.4.335 A3 peel)
 {
   const et = (file) => readFileSync(new URL(`../src/easyTrail/${file}`, import.meta.url), 'utf8')
   const barrel332 = et('index.ts')
@@ -8202,7 +8204,7 @@ console.log('check-city: ok')
   assert.match(barrel332, /from '\.\/lockIn\/index\.ts'/)
   assert.match(barrel332, /A1 Match registry/)
   assert.match(barrel332, /A2 Father home/)
-  assert.match(barrel332, /A3 Lock In peel/)
+  assert.match(barrel332, /A3 Lock In peel: hold practice lives in lockIn\/HoldPractice\.tsx/, '1.4.335 barrel names the A3 Lock In home')
   assert.match(barrel332, /A4 trail peel/)
   assert.match(types332, /EasyHomeFocus as EasyTrailFocus/)
   assert.match(trail332, /from '\.\.\/\.\.\/lib\/easy\.ts'/)
@@ -8221,13 +8223,14 @@ console.log('check-city: ok')
   assert.match(lockIn332, /export \{ RecallGate \} from '\.\.\/\.\.\/components\/RecallGate'/)
   assert.match(lockIn332, /easyHoldPractice/)
   assert.match(lockIn332, /from '\.\.\/\.\.\/lib\/easy\.ts'/)
-  assert.match(lockIn332, /A3 Lock In peel is later/)
-  assert.doesNotMatch(lockIn332, /from ['"][^'"]*Journal/, '1.4.332 Lock In shelf does not peel Journal')
+  assert.match(lockIn332, /Lock In home \(A3\)/, '1.4.335 Lock In shelf is the A3 home')
+  assert.match(lockIn332, /^export \{ HoldPractice \} from '\.\/HoldPractice'$/m, '1.4.335 Lock In shelf exports its own hold practice')
+  assert.doesNotMatch(lockIn332, /A3 Lock In peel is later/, '1.4.335 supersedes the 1.4.332 "A3 later" pin')
+  assert.doesNotMatch(lockIn332, /from ['"][^'"]*Journal/, '1.4.332 Lock In shelf does not import Journal')
   assert.equal(easyLoopFromShelf, easyLoopFromLib, '1.4.332 trail shelf re-exports lib/easy loop')
   assert.equal(easyTrailViewFromShelf, easyTrailViewFromLib, '1.4.332 trail view stays the lib/easy helper')
   for (const rel of [
     '../src/App.tsx',
-    '../src/components/Journal.tsx',
     '../src/components/ChallengeScreen.tsx',
     '../src/components/LinkScreen.tsx',
     '../src/components/DailyTrail.tsx',
