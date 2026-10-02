@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.341',
+    title: 'More candy on the Home map',
+    when: '2026-10-02',
+    items: [
+      'Easy Home: Star lamps, Sky Watch, and Meaning Ridge get candy map pictures as they grow, like the other lots on the map.',
+    ],
+  },
+  {
     version: '1.4.340',
     title: 'Win verse you can read',
     when: '2026-10-02',
