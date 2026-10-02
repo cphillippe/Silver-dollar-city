@@ -1212,7 +1212,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.338')
+assert.equal(APP_VERSION, '1.4.339')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -8997,6 +8997,33 @@ console.log('check-city: ok')
   assert.match(items338, /Fixes #438/)
   assert.match(items338, /story|walk/i)
   assert.match(latestChange('1.4.338').title, /walk|build/i)
+}
+
+// SceneAd 1.4.339: Remove ads stays on Home — Fixes #475
+{
+  const app339 = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8')
+  assert.doesNotMatch(app339, /supportFromAd[\s\S]*?name: 'settings'/, '1.4.339 supportFromAd must not open Settings (#475)')
+  assert.match(
+    app339,
+    /function supportFromAd\(\) \{[\s\S]*?const dest = pending \?\? \{ name: 'hub' as const \}[\s\S]*?setSceneAd\(false\)[\s\S]*?setPending\(null\)[\s\S]*?setView\(dest\)/,
+    '1.4.339 supportFromAd dismisses SceneAd and honors pending like continueFromAd (#475)',
+  )
+  assert.match(app339, /offerStoresComingNotice\(\)/, '1.4.339 Remove ads offers stores-coming notice (#475)')
+  assert.match(
+    app339,
+    /function continueFromAd\(\) \{[\s\S]*?const dest = pending \?\? \{ name: 'hub' as const \}/,
+    '1.4.339 continueFromAd still honors pending (#475)',
+  )
+  const hub339 = readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8')
+  assert.match(hub339, /StoresComingNotice/, '1.4.339 hub shows stores-coming notice (#475)')
+  assert.match(app339, /scenePauseMountsOn\(view\.name\)/, '1.4.339 SceneAd still mounts only on hub (#475)')
+  const notice339 = readFileSync(new URL('../src/components/StoresComingNotice.tsx', import.meta.url), 'utf8')
+  assert.match(notice339, /STORES_COMING/, '1.4.339 notice reuses STORES_COMING (#475)')
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.339'), '1.4.339 changelog row')
+  const items339 = latestChange('1.4.339').items.join('\n')
+  assert.match(items339, /Fixes #475/)
+  assert.match(items339, /Settings|Home/i)
+  assert.match(latestChange('1.4.339').title, /Remove ads|Home/i)
 }
 
 function DEFEND_WAVE_PACK_CHECK() {

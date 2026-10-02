@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.339',
+    title: 'Remove ads stays on Home',
+    when: '2026-10-02',
+    items: [
+      'After Lock In or Match, the quiet pause’s Remove ads button no longer drops you on Settings. It closes the pause, keeps you on Home, and says Remove ads · Coming with stores. Continue the trail still works. Fixes #475.',
+    ],
+  },
+  {
     version: '1.4.338',
     title: 'Walk before Build It',
     when: '2026-10-02',
