@@ -126,6 +126,7 @@ import { DEBUG_LAYER_LINES, debugJumpView } from '../src/lib/debugPlays.ts'
 import { FATHER_RUN_LINE } from '../src/lib/fatherRun.ts'
 import * as fatherRunHome from '../src/easyTrail/father/fatherRun.ts'
 import * as fatherRunShim from '../src/lib/fatherRun.ts'
+import { EASY_HOME } from '../src/lib/easyNav.ts'
 import { WORDS, easyLead } from '../src/lib/words.ts'
 import { deeperLinksFor, eraLabel } from '../src/content/deeper.ts'
 import { allEvidenceIds, evidenceFor } from '../src/content/evidence.ts'
@@ -1207,7 +1208,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.334')
+assert.equal(APP_VERSION, '1.4.335')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -8524,6 +8525,199 @@ console.log('check-city: ok')
     items334,
     /registry|shim|StoryPlayKind|PuzzlePlay|FatherRunPlay|fatherRun|easyTrail|Lock In|#475|Pack B|Dig deeper|new screen/i,
     '1.4.334 stays kid-plain and A2 only',
+  )
+}
+
+// Easy Trail 1.4.335: A3 — Lock In peel. Journal's hold practice lives in src/easyTrail/lockIn/HoldPractice.tsx. Fixes #476.
+{
+  const src335 = (rel) => readFileSync(new URL(`../src/${rel}`, import.meta.url), 'utf8')
+  const srcRoot335 = new URL('../src/', import.meta.url)
+  const home335 = src335('easyTrail/lockIn/HoldPractice.tsx')
+  const shelf335 = src335('easyTrail/lockIn/index.ts')
+  const journal335 = src335('components/Journal.tsx')
+  const [journalMain335, journalCard335 = ''] = journal335.split('\nfunction JournalCard(')
+
+  assert.deepEqual(
+    readdirSync(new URL('easyTrail/lockIn/', srcRoot335)).sort(),
+    ['HoldPractice.tsx', 'index.ts'],
+    '1.4.335 Lock In home is HoldPractice + shelf only (no new stylesheet)',
+  )
+  assert.match(
+    home335,
+    /^export function HoldPractice\(\{ quizBrief, focusedEntry, today, setLater, onNavigate \}: HoldPracticeProps\) \{$/m,
+    '1.4.335 HoldPractice is defined in the home with the Journal hand-off props',
+  )
+  assert.deepEqual(
+    [...(home335.match(/interface HoldPracticeProps \{\n([\s\S]*?)\n\}/)?.[1] ?? '').matchAll(/^ {2}(\w+)\??:/gm)].map((m) => m[1]),
+    ['quizBrief', 'focusedEntry', 'today', 'setLater', 'onNavigate'],
+    '1.4.335 HoldPractice takes only what the Journal branch closed over',
+  )
+  assert.deepEqual(
+    [...home335.matchAll(/\buse[A-Z]\w*\(/g)].map((m) => m[0]),
+    ['useProgress('],
+    '1.4.335 HoldPractice adds no state or effects',
+  )
+  const lockInDir335 = new URL('easyTrail/lockIn/', srcRoot335)
+  assert.deepEqual(
+    [...home335.matchAll(/ from '([^']+)'/g)].map(([, spec]) =>
+      spec.startsWith('.') ? new URL(spec, lockInDir335).href.slice(srcRoot335.href.length) : spec,
+    ),
+    [
+      'react',
+      'content',
+      'content/evidence',
+      'content/story',
+      'lib/easy',
+      'lib/easyNav',
+      'lib/recall',
+      'lib/supportToast',
+      'lib/tiers',
+      'components/EasyBack',
+      'components/RecallGate',
+      'store/progress',
+      'types',
+    ],
+    '1.4.335 moved hold practice reads the same modules Journal did',
+  )
+
+  // #448 teach-gate stays in Journal, unchanged; HoldPractice never re-gates.
+  assert.ok(
+    journalMain335.includes(
+      [
+        '  const quizBrief = holdId',
+        '    ? evidenceForTier(holdId, currentLessonTier(progress, holdId)) ?? evidenceFor(holdId)',
+        '    : undefined',
+        '',
+        '  const openLine = easyLoopLine(progress)',
+        '  const quizReplacesMatch =',
+        '    easy &&',
+        '    (holdId === openLine || focusId === openLine) &&',
+        '    !easyLineTaught(progress, openLine)',
+        '  const holdPractice =',
+        '    Boolean(autoQuiz && quizBrief && !quizReplacesMatch && (easy || !focusedEntry || focusedOpen))',
+        '',
+        '  if (holdPractice && quizBrief) {',
+        '    return (',
+        '      <HoldPractice',
+        '        quizBrief={quizBrief}',
+        '        focusedEntry={focusedEntry}',
+        '        today={today}',
+        '        setLater={setLater}',
+        '        onNavigate={onNavigate}',
+        '      />',
+        '    )',
+        '  }',
+      ].join('\n'),
+    ),
+    '1.4.335 Journal keeps the same quizBrief / #448 quizReplacesMatch / holdPractice gate, then renders HoldPractice',
+  )
+  assert.doesNotMatch(home335, /quizReplacesMatch|easyLineTaught|easyLoopLine|autoQuiz/, '1.4.335 HoldPractice does not re-gate')
+  {
+    const fresh = { ...emptyProgress(), easyMode: true }
+    const openLine = easyLoopLine(fresh)
+    assert.equal(openLine, 'ph-road')
+    assert.equal(easyLineTaught(fresh, openLine), false, '1.4.335 fresh open line is untaught (quizReplacesMatch → Match first)')
+    assert.deepEqual(easyTrailView(fresh), { name: 'link' }, '1.4.335 fresh Easy still goes to Match')
+    const taught = progressAfterMatchTaught(fresh, openLine)
+    assert.equal(easyLineTaught(taught, openLine), true, '1.4.335 taught open line lets Lock In through')
+    assert.deepEqual(
+      easyTrailView(taught),
+      { name: 'journal', focusId: 'ph-road', autoQuiz: true },
+      '1.4.335 taught Easy still opens Lock In practice',
+    )
+  }
+
+  // Easy advancing encode: save in the same order, then Home.
+  assert.match(
+    home335,
+    /const advancing = firstHold \|\| needsTierHold\(progress, quizBrief\.id\)[\s\S]*?mode=\{easy && advancing \? 'encode' : 'review'\}/,
+  )
+  assert.match(
+    home335,
+    /if \(easy && advancing\) \{\n\s*recordHeld\(quizBrief\.id\)\n\s*recordReview\(\{\n\s*id: quizBrief\.id,\n\s*pillar,\n\s*kind: 'encode',\n\s*today,\n\s*clean: result\.clean,\n\s*peeked: false,\n\s*elaborated: false,\n\s*\}\)\n\s*recordLessonHold\(quizBrief\.id, result\.clean\)\n\s*offerSupportToast\(\)\n\s*onNavigate\(EASY_HOME\)\n\s*return\n\s*\}/,
+    '1.4.335 Easy encode records held / review / lesson hold / support toast, then EASY_HOME',
+  )
+  assert.match(home335, /^import \{ EASY_HOME \} from '\.\.\/\.\.\/lib\/easyNav'$/m)
+  assert.deepEqual(EASY_HOME, { name: 'hub' }, '1.4.335 EASY_HOME is still Easy Home')
+  assert.match(home335, /onNavigate\(\n\s*easy\n\s*\? \{ name: 'hub' \}/, '1.4.335 Easy review still lands Home')
+
+  // Move-only layout: same main, no wrapper, no new classes or inline styles.
+  assert.match(
+    home335,
+    /\) \{\n(?: {2}const [^\n]+\n)+ {2}return \(\n {4}<main className=\{`journal is-rehearse \$\{easy \? 'is-easy-hold-practice' : ''\}`\}>\n/,
+    '1.4.335 HoldPractice returns the rehearse main directly',
+  )
+  assert.match(home335, /\n {4}<\/main>\n {2}\)\n\}\n$/, '1.4.335 nothing wraps or follows the rehearse main')
+  assert.deepEqual(
+    [...home335.matchAll(/className=(?:"([^"]+)"|\{`([^`]+)`\})/g)].map((m) => m[1] ?? m[2]),
+    ["journal is-rehearse ${easy ? 'is-easy-hold-practice' : ''}", 'text-link', 'rehearse-anchor', 'eyebrow'],
+    '1.4.335 HoldPractice keeps the same practice classes',
+  )
+  assert.doesNotMatch(home335, /style=|\.css'/, '1.4.335 no inline style or stylesheet on the moved practice')
+  assert.match(home335, /<section className="rehearse-anchor">\n\s*<p className="eyebrow">\{easy \? EASY\.saved : 'Takeaway'\}<\/p>\n\s*\{easy \? null : <h1>\{focusedEntry\?\.title \?\? STORY\.tapTakeaway\}<\/h1>\}\n\s*<RecallGate\n/)
+
+  // Journal no longer inlines the rehearse / RecallGate encode tree.
+  assert.doesNotMatch(
+    journalMain335,
+    /<RecallGate|is-rehearse|rehearse-anchor|is-easy-hold-practice|EASY_HOME|offerSupportToast|needsTierHold|kind: 'encode'/,
+    '1.4.335 Journal thin-gates only',
+  )
+  assert.equal(journalCard335.match(/<RecallGate\b/g)?.length, 1, '1.4.335 Journal keeps only the page-card recall')
+  assert.deepEqual(
+    [...journal335.matchAll(/ from '(\.\.\/easyTrail[^']*)'/g)].map((m) => m[1]),
+    ['../easyTrail/lockIn/HoldPractice'],
+    '1.4.335 Journal imports only HoldPractice from Easy Trail',
+  )
+
+  const srcFiles335 = readdirSync(srcRoot335, { recursive: true })
+    .map((rel) => String(rel).replaceAll('\\', '/'))
+    .filter((rel) => /\.tsx?$/.test(rel))
+  const filesWith335 = (pattern) =>
+    srcFiles335.filter((rel) => pattern.test(readFileSync(new URL(rel, srcRoot335), 'utf8'))).sort()
+  assert.deepEqual(filesWith335(/export function HoldPractice\b/), ['easyTrail/lockIn/HoldPractice.tsx'], '1.4.335 one HoldPractice')
+  assert.deepEqual(filesWith335(/<HoldPractice\b/), ['components/Journal.tsx'], '1.4.335 only Journal mounts HoldPractice')
+  assert.deepEqual(
+    filesWith335(/(?:import|export) \{[^}]*\bHoldPractice\b[^}]*\} from/),
+    ['components/Journal.tsx', 'easyTrail/lockIn/index.ts'],
+    '1.4.335 HoldPractice is wired only by Journal and the Lock In shelf',
+  )
+  assert.deepEqual(filesWith335(/export function RecallGate\b/), ['components/RecallGate.tsx'], '1.4.335 one RecallGate')
+  assert.match(home335, /^import \{ RecallGate \} from '\.\.\/\.\.\/components\/RecallGate'$/m)
+  assert.match(shelf335, /^export \{ RecallGate \} from '\.\.\/\.\.\/components\/RecallGate'$/m)
+  assert.match(
+    shelf335,
+    /^export \{ easyHoldFields, easyHoldPractice, easyHoldView \} from '\.\.\/\.\.\/lib\/easy\.ts'$/m,
+    '1.4.335 lib/easy hold helpers stay in lib/easy (A4)',
+  )
+  assert.doesNotMatch(src335('easyTrail/index.ts'), /Later hops?: A3/, '1.4.335 barrel no longer lists A3 as later')
+  assert.doesNotMatch(src335('easyTrail/types.ts'), /later hop/, '1.4.335 types no longer say Lock In is later')
+
+  // No App rewrite: Journal is still the only Lock In route.
+  assert.doesNotMatch(src335('App.tsx'), /HoldPractice|easyTrail/, '1.4.335 App has no Lock In route')
+  assert.match(
+    src335('App.tsx'),
+    /\{view\.name === 'journal' \? \(\n\s*<Journal\n\s*focusId=\{view\.focusId\}\n\s*autoQuiz=\{view\.autoQuiz\}\n\s*onNavigate=\{go\}\n\s*\/>\n\s*\) : null\}/,
+    '1.4.335 App still mounts Journal the same way',
+  )
+  assert.match(src335('types.ts'), /\| \{ name: 'journal'; focusId\?: string; autoQuiz\?: boolean \}/)
+  const viewUnion335 = src335('types.ts').match(/export type View =([\s\S]*?)(?:\n\n|\n?$)/)?.[1] ?? ''
+  assert.doesNotMatch(viewUnion335, /lock|hold|practice/i, '1.4.335 no Lock In-only App view')
+
+  assert.match(
+    readFileSync(new URL('../android/app/build.gradle', import.meta.url), 'utf8'),
+    /versionName "1\.4\.113"/,
+    '1.4.335 Android versionName stays 1.4.113',
+  )
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.335'), '1.4.335 changelog row')
+  const items335 = latestChange('1.4.335').items.join('\n')
+  assert.match(latestChange('1.4.335').title, /Lock In/)
+  assert.match(items335, /Fixes #476/)
+  assert.match(items335, /works the same/)
+  assert.match(items335, /starts with Match/)
+  assert.doesNotMatch(
+    items335,
+    /HoldPractice|RecallGate|Journal|easyTrail|registry|shim|peel|gate|#475|Pack B|Dig deeper|new screen/i,
+    '1.4.335 stays kid-plain and A3 only',
   )
 }
 
