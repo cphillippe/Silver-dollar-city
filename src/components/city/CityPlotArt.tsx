@@ -11,6 +11,15 @@ import plotHollowScaffold from '../../assets/city/plots/plot-hollow-scaffold.web
 import plotJournalBuilt from '../../assets/city/plots/plot-journal-built.webp'
 import plotJournalLit from '../../assets/city/plots/plot-journal-lit.webp'
 import plotJournalScaffold from '../../assets/city/plots/plot-journal-scaffold.webp'
+import plotLampsBuilt from '../../assets/city/plots/plot-lamps-built.webp'
+import plotLampsLit from '../../assets/city/plots/plot-lamps-lit.webp'
+import plotLampsScaffold from '../../assets/city/plots/plot-lamps-scaffold.webp'
+import plotLookoutBuilt from '../../assets/city/plots/plot-lookout-built.webp'
+import plotLookoutLit from '../../assets/city/plots/plot-lookout-lit.webp'
+import plotLookoutScaffold from '../../assets/city/plots/plot-lookout-scaffold.webp'
+import plotObservatoryBuilt from '../../assets/city/plots/plot-observatory-built.webp'
+import plotObservatoryLit from '../../assets/city/plots/plot-observatory-lit.webp'
+import plotObservatoryScaffold from '../../assets/city/plots/plot-observatory-scaffold.webp'
 import plotPorchBuilt from '../../assets/city/plots/plot-porch-built.webp'
 import plotPorchLit from '../../assets/city/plots/plot-porch-lit.webp'
 import plotPorchScaffold from '../../assets/city/plots/plot-porch-scaffold.webp'
@@ -50,12 +59,20 @@ export const ANCHOR: Record<CityPlotId, { x: number; y: number }> = {
 
 const BUILD_SCALE = 1.58
 
-/** Phone-big candy stills for Easy-trail Pack A (porch/gate/journal/hollow/bench). */
-type PackAPlotId = 'porch' | 'gate' | 'journal' | 'hollow' | 'bench'
+/** Phone-big candy stills for Easy-trail Pack A + B home map lots. */
+type CandyPlotId =
+  | 'porch'
+  | 'gate'
+  | 'journal'
+  | 'hollow'
+  | 'bench'
+  | 'lamps'
+  | 'observatory'
+  | 'lookout'
 type PlotImageStage = 'scaffold' | 'built' | 'lit'
 
 export const PLOT_IMG: Record<
-  PackAPlotId,
+  CandyPlotId,
   Record<PlotImageStage, string>
 > = {
   porch: {
@@ -82,6 +99,21 @@ export const PLOT_IMG: Record<
     scaffold: plotBenchScaffold,
     built: plotBenchBuilt,
     lit: plotBenchLit,
+  },
+  lamps: {
+    scaffold: plotLampsScaffold,
+    built: plotLampsBuilt,
+    lit: plotLampsLit,
+  },
+  observatory: {
+    scaffold: plotObservatoryScaffold,
+    built: plotObservatoryBuilt,
+    lit: plotObservatoryLit,
+  },
+  lookout: {
+    scaffold: plotLookoutScaffold,
+    built: plotLookoutBuilt,
+    lit: plotLookoutLit,
   },
 }
 
@@ -347,7 +379,7 @@ export function PlotGroup({
 
 function plotImageHref(id: CityPlotId, stage: CityStage): string | undefined {
   if (stage !== 'scaffold' && stage !== 'built' && stage !== 'lit') return undefined
-  const pack = PLOT_IMG[id as PackAPlotId]
+  const pack = PLOT_IMG[id as CandyPlotId]
   return pack?.[stage]
 }
 

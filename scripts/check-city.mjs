@@ -1212,7 +1212,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.340')
+assert.equal(APP_VERSION, '1.4.341')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -2616,11 +2616,28 @@ assert.match(plotArtSrc, /city-plot-img/)
 assert.match(plotArtSrc, /has-candy-img/)
 assert.match(cssSrc, /\.city-plot\.has-candy-img/)
 assert.match(plotArtSrc, /preserveAspectRatio="xMidYMid meet"/)
-assert.match(plotArtSrc, /type PackAPlotId = 'porch' \| 'gate' \| 'journal' \| 'hollow' \| 'bench'/)
+assert.match(
+  plotArtSrc,
+  /type CandyPlotId =[\s\S]*'porch'[\s\S]*'bench'[\s\S]*'lamps'[\s\S]*'observatory'[\s\S]*'lookout'/,
+)
 assert.match(plotArtSrc, /bench:\s*\{[\s\S]*scaffold: plotBenchScaffold/)
+assert.match(plotArtSrc, /lamps:\s*\{[\s\S]*scaffold: plotLampsScaffold/)
+assert.match(plotArtSrc, /observatory:\s*\{[\s\S]*scaffold: plotObservatoryScaffold/)
+assert.match(plotArtSrc, /lookout:\s*\{[\s\S]*scaffold: plotLookoutScaffold/)
 assert.match(plotArtSrc, /if \(img\) return <PlotImageArt/)
 assert.match(plotArtSrc, /id === 'bench'\) return <BenchArt/)
-for (const id of ['porch', 'gate', 'journal', 'hollow', 'bench']) {
+assert.match(plotArtSrc, /id === 'observatory'\) return <ObservatoryArt/)
+assert.match(plotArtSrc, /id === 'lookout'\) return <LookoutArt/)
+for (const id of [
+  'porch',
+  'gate',
+  'journal',
+  'hollow',
+  'bench',
+  'lamps',
+  'observatory',
+  'lookout',
+]) {
   for (const stage of ['scaffold', 'built', 'lit']) {
     assert.ok(
       existsSync(
