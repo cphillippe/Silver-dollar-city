@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.337',
+    title: 'Build It actually builds',
+    when: '2026-10-02',
+    items: [
+      'On Easy Home, Build this now raises the building you earned — the map shows the next look instead of sending you to Walk. Fixes #438.',
+    ],
+  },
+  {
     version: '1.4.336',
     title: 'Easy trail gets its own home',
     when: '2026-10-02',
