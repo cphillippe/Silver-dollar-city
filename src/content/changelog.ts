@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.335',
+    title: 'Lock In gets its own home',
+    when: '2026-10-02',
+    items: [
+      'Lock In now lives in its own home. It works the same as before: after Match teaches a line, Lock In helps you keep it, then you go back Home. A new line still starts with Match. Fixes #476.',
+    ],
+  },
+  {
     version: '1.4.334',
     title: 'Father run gets its own home',
     when: '2026-10-01',

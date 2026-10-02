@@ -39,8 +39,13 @@ const journalSrc = readFileSync(
   new URL('../src/components/Journal.tsx', import.meta.url),
   'utf8',
 )
+const holdPracticeSrc = readFileSync(
+  new URL('../src/easyTrail/lockIn/HoldPractice.tsx', import.meta.url),
+  'utf8',
+)
 assert.match(journalSrc, /autoQuiz && quizBrief/)
-assert.match(journalSrc, /kicker=\{STORY\.tapTakeaway\}/)
+assert.match(holdPracticeSrc, /kicker=\{STORY\.tapTakeaway\}/)
 assert.doesNotMatch(journalSrc, /Quiz me again/)
+assert.doesNotMatch(holdPracticeSrc, /Quiz me again/)
 
 console.log('check-progress: ok')
