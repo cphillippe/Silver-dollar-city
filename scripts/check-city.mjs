@@ -1212,7 +1212,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.339')
+assert.equal(APP_VERSION, '1.4.340')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -9024,6 +9024,26 @@ console.log('check-city: ok')
   assert.match(items339, /Fixes #475/)
   assert.match(items339, /Settings|Home/i)
   assert.match(latestChange('1.4.339').title, /Remove ads|Home/i)
+}
+
+// Easy win verse contrast 1.4.340: Father HUGGED + Road HELPED post-play takeaway (Fixes #480)
+{
+  const winCss340 = readFileSync(new URL('../src/styles/matchWin.css', import.meta.url), 'utf8')
+  assert.match(winCss340, /1\.4\.340: Easy Father HUGGED \+ Road HELPED win verse contrast \(Fixes #480\)/)
+  assert.match(
+    winCss340,
+    /1\.4\.340: Easy Father HUGGED \+ Road HELPED win verse contrast \(Fixes #480\)[\s\S]*?html\[data-easy='on'\] \.play\.is-father-run\.is-win \.match-yes,[\s\S]*?html\[data-easy='on'\] \.play\.is-road-maze\.is-win \.match-yes \{[\s\S]*?color: var\(--ink, #2a2118\)/,
+  )
+  assert.match(
+    winCss340,
+    /1\.4\.340: Easy Father HUGGED \+ Road HELPED win verse contrast \(Fixes #480\)[\s\S]*?\.play\.is-father-run\.is-win \.match-yes strong,[\s\S]*?\.play\.is-road-maze\.is-win \.match-yes strong \{[\s\S]*?#2a2118/,
+  )
+  assert.match(cssSrc, /1\.4\.340: Easy Father HUGGED \+ Road HELPED win verse contrast/)
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.340'), '1.4.340 changelog row')
+  const items340 = latestChange('1.4.340').items.join('\n')
+  assert.match(items340, /Fixes #480/)
+  assert.match(items340, /Father|HUGGED|HELPED|read/i)
+  assert.match(latestChange('1.4.340').title, /read|verse|win/i)
 }
 
 function DEFEND_WAVE_PACK_CHECK() {

@@ -312,4 +312,35 @@
     color: #3a2418;
     opacity: 1;
   }
+
+  /* 1.4.340: Easy Father HUGGED + Road HELPED win verse contrast (Fixes #480) —
+     mirror gem / why-blast readable ink on cream; base .match-yes cream-on-orange
+     fails on phone after Hired-hand speech / HELPED! */
+  html[data-easy='on'] .play.is-father-run.is-win .match-yes,
+  html[data-easy='on'] .play.is-road-maze.is-win .match-yes {
+    color: var(--ink, #2a2118);
+    background-color: #fff6e8;
+    background-image: none;
+    background: #fff6e8;
+    border: 2px solid #e0a020;
+  }
+
+  html[data-easy='on'] .play.is-father-run.is-win .match-yes strong,
+  html[data-easy='on'] .play.is-road-maze.is-win .match-yes strong {
+    color: #2a2118;
+    font-size: 1.12rem;
+    line-height: 1.25;
+  }
+
+  html[data-easy='on'] .play.is-father-run.is-win .match-yes span,
+  html[data-easy='on'] .play.is-road-maze.is-win .match-yes span {
+    color: #3a2418;
+    opacity: 1;
+  }
+
+  html[data-easy='on'] .play.is-father-run.is-win .match-yes .held-from,
+  html[data-easy='on'] .play.is-road-maze.is-win .match-yes .held-from {
+    color: #3a2418;
+    opacity: 1;
+  }
 }

@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.340',
+    title: 'Win verse you can read',
+    when: '2026-10-02',
+    items: [
+      'After Father hugs you or the road says HELPED!, the Yes line and Bible bit are dark ink on cream so you can read them on your phone. Fixes #480.',
+    ],
+  },
+  {
     version: '1.4.339',
     title: 'Remove ads stays on Home',
     when: '2026-10-02',
