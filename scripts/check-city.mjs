@@ -26,6 +26,9 @@ import {
   easyLoopLine as easyLoopFromShelf,
   easyTrailView as easyTrailViewFromShelf,
 } from '../src/easyTrail/trail/index.ts'
+import * as easyLib from '../src/lib/easy.ts'
+import * as trailLoopHome from '../src/easyTrail/trail/loop.ts'
+import * as trailShelf from '../src/easyTrail/trail/index.ts'
 import { normalizeProgress } from '../src/lib/save.ts'
 import {
   PH_ROAD_SHOW_IT,
@@ -1208,7 +1211,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.335')
+assert.equal(APP_VERSION, '1.4.336')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -8721,6 +8724,219 @@ console.log('check-city: ok')
     items335,
     /HoldPractice|RecallGate|Journal|easyTrail|registry|shim|peel|gate|#475|Pack B|Dig deeper|new screen/i,
     '1.4.335 stays kid-plain and A3 only',
+  )
+}
+
+// Easy Trail 1.4.336: A4 — trail peel. The Easy loop lives in src/easyTrail/trail/loop.ts; lib/easy.ts re-exports the same bindings. Fixes #476.
+{
+  const src336 = (rel) => readFileSync(new URL(`../src/${rel}`, import.meta.url), 'utf8')
+  const srcRoot336 = new URL('../src/', import.meta.url)
+  const loop336 = src336('easyTrail/trail/loop.ts')
+  const shelf336 = src336('easyTrail/trail/index.ts')
+  const easy336 = src336('lib/easy.ts')
+  const TRAIL336 = [
+    'EASY_LINE_ORDER',
+    'EASY_MATCH_LINE',
+    'FOUNDATION_ARC',
+    'digReady',
+    'easyHoldFields',
+    'easyHoldLine',
+    'easyHoldPractice',
+    'easyHoldView',
+    'easyHomeFocus',
+    'easyLearnLine',
+    'easyLineHeld',
+    'easyLineLearned',
+    'easyLineTaught',
+    'easyLoopLine',
+    'easyMatchLine',
+    'easyMatchReady',
+    'easyTeachFields',
+    'easyTrailView',
+    'foundationPrior',
+    'foundationReady',
+    'inkReady',
+    'markEasyHeld',
+    'markEasyTaught',
+    'namesReady',
+    'progressAfterMatchTaught',
+    'stoneReady',
+  ]
+
+  // Trail home: loop.ts + shelf, every trail name defined there.
+  assert.deepEqual(
+    readdirSync(new URL('easyTrail/trail/', srcRoot336)).sort(),
+    ['index.ts', 'loop.ts'],
+    '1.4.336 trail home is loop + shelf only',
+  )
+  assert.deepEqual(Object.keys(trailLoopHome).sort(), TRAIL336, '1.4.336 trail home exports exactly the loop API')
+  for (const name of TRAIL336) {
+    assert.match(loop336, new RegExp(`^export (?:function|const) ${name}\\b`, 'm'), `1.4.336 ${name} is defined in the trail home`)
+  }
+  assert.match(loop336, /^export type EasyHomeFocus = 'learn' \| 'match' \| 'hold'$/m, '1.4.336 EasyHomeFocus moves with easyHomeFocus')
+  assert.match(loop336, /^type EasyLoopProgress = Pick<$/m, '1.4.336 EasyLoopProgress stays private to the loop')
+  const trailDir336 = new URL('easyTrail/trail/', srcRoot336)
+  assert.deepEqual(
+    [...loop336.matchAll(/ from '([^']+)'/g)].map(([, spec]) => new URL(spec, trailDir336).href.slice(srcRoot336.href.length)),
+    ['types.ts', 'content/packCatalog.ts', 'lib/tiers.ts', 'lib/sourceDig.ts'],
+    '1.4.336 trail home reads only types / pack order / tiers / Source Dig priors — never lib/easy (no cycle)',
+  )
+
+  // lib/easy is the compatibility shim: same bindings, no second definition, no loop logic left.
+  const shim336 = easy336.match(/^export \{\n([^}]*)\n\} from '\.\.\/easyTrail\/trail\/loop\.ts'$/m)?.[1] ?? ''
+  assert.deepEqual(
+    shim336.split(',').map((name) => name.trim()).filter(Boolean),
+    TRAIL336,
+    '1.4.336 lib/easy re-exports every trail name from the home',
+  )
+  assert.match(easy336, /^export type \{ EasyHomeFocus \} from '\.\.\/easyTrail\/trail\/loop\.ts'$/m)
+  for (const name of TRAIL336) {
+    assert.equal(easyLib[name], trailLoopHome[name], `1.4.336 lib/easy ${name} is the trail home binding`)
+    assert.doesNotMatch(easy336, new RegExp(`^(?:export )?(?:function|const) ${name}\\b`, 'm'), `1.4.336 lib/easy does not redefine ${name}`)
+  }
+  assert.doesNotMatch(
+    easy336,
+    /currentLessonTier|needsTierHold|packEasyOrder|EasyLoopProgress|easyTaught|easyHeld/,
+    '1.4.336 no loop logic left in lib/easy',
+  )
+  for (const name of [
+    'isEasy',
+    'easyLinkStep',
+    'easyWrongTap',
+    'loveHowTo',
+    'easyMainIdea',
+    'easyChromeLine',
+    'easyWhyLine',
+    'easyJournalMeta',
+    'easyFacingLine',
+    'uniqueHoldChoices',
+    'easyTapNext',
+    'easyStoryCard',
+    'easyWhoWhere',
+    'easyWhoWhereLine',
+    'scrapbookLabel',
+  ]) {
+    assert.match(easy336, new RegExp(`^export function ${name}\\(`, 'm'), `1.4.336 ${name} stays defined in lib/easy`)
+  }
+  assert.match(easy336, /^export \{\n {2}DIG_ARC,[\s\S]*?\n\} from '\.\/sourceDig\.ts'$/m, '1.4.336 Source Dig arcs still re-export from sourceDig')
+
+  const srcFiles336 = readdirSync(srcRoot336, { recursive: true })
+    .map((rel) => String(rel).replaceAll('\\', '/'))
+    .filter((rel) => /\.tsx?$/.test(rel))
+  const filesWith336 = (pattern) =>
+    srcFiles336.filter((rel) => pattern.test(readFileSync(new URL(rel, srcRoot336), 'utf8'))).sort()
+  for (const name of TRAIL336) {
+    assert.deepEqual(filesWith336(new RegExp(`(?:function|const|let|var) ${name}\\b`)), ['easyTrail/trail/loop.ts'], `1.4.336 one ${name}`)
+  }
+
+  // Shelves export the home with the same names as before.
+  assert.deepEqual(
+    Object.keys(trailShelf).sort(),
+    [
+      'EASY_LINE_ORDER',
+      'EASY_MATCH_LINE',
+      'easyHoldLine',
+      'easyHomeFocus',
+      'easyLearnLine',
+      'easyLineHeld',
+      'easyLineLearned',
+      'easyLineTaught',
+      'easyLoopLine',
+      'easyMatchLine',
+      'easyMatchReady',
+      'easyTrailView',
+    ],
+    '1.4.336 trail shelf exports the same names as 1.4.332',
+  )
+  for (const [name, value] of Object.entries(trailShelf)) {
+    assert.equal(value, trailLoopHome[name], `1.4.336 trail shelf ${name} is the home binding`)
+  }
+  assert.match(shelf336, /Trail home \(A4\)/)
+  assert.doesNotMatch(shelf336, /lib\/easy\.ts'/, '1.4.336 trail shelf exports the home, not the shim')
+  assert.match(
+    src336('easyTrail/lockIn/index.ts'),
+    /^export \{ easyHoldFields, easyHoldPractice, easyHoldView \} from '\.\.\/trail\/loop\.ts'$/m,
+    '1.4.336 Lock In shelf hold helpers come from the trail home',
+  )
+  assert.doesNotMatch(src336('easyTrail/lockIn/index.ts'), /lib\/easy/, '1.4.336 Lock In shelf no longer points at lib/easy')
+  assert.match(src336('easyTrail/types.ts'), /^export type \{ EasyHomeFocus as EasyTrailFocus \} from '\.\/trail\/loop\.ts'$/m)
+  assert.match(
+    src336('easyTrail/index.ts'),
+    /A4 trail peel: the Easy loop lives in trail\/loop\.ts; lib\/easy\.ts re-exports the same bindings\./,
+  )
+  for (const rel of ['easyTrail/index.ts', 'easyTrail/types.ts', 'easyTrail/trail/index.ts', 'easyTrail/lockIn/index.ts']) {
+    assert.doesNotMatch(src336(rel), /Later hop|later/i, `1.4.336 ${rel} no longer lists a later hop`)
+  }
+
+  // No caller fan-out: lib/easy is the only file outside Easy Trail that reaches the home.
+  assert.deepEqual(filesWith336(/from '[^']*easyTrail\/trail\b/), ['lib/easy.ts'], '1.4.336 only lib/easy imports the trail home')
+  for (const [rel, names] of [
+    ['components/Hub.tsx', ['easyHomeFocus', 'easyHoldView', 'easyLoopLine']],
+    ['components/CityMap.tsx', ['easyTrailView']],
+    ['components/LinkScreen.tsx', ['easyHoldView', 'progressAfterMatchTaught']],
+    ['components/Journal.tsx', ['easyLineTaught', 'easyLoopLine']],
+    ['store/ProgressProvider.tsx', ['easyHoldFields', 'easyTeachFields']],
+  ]) {
+    const src = src336(rel)
+    const fromEasy = src.match(/^import \{([^}]*)\} from '\.\.\/lib\/easy'$/m)?.[1] ?? ''
+    for (const name of names) {
+      assert.match(fromEasy, new RegExp(`\\b${name}\\b`), `1.4.336 ${rel} still imports ${name} from lib/easy`)
+    }
+    assert.doesNotMatch(src, /easyTrail\/trail/, `1.4.336 ${rel} is not rewritten onto the trail home`)
+  }
+
+  // Same trail: Match teaches, Lock In holds, Home opens the next line — every line, in teach order (#448).
+  {
+    const order = trailLoopHome.EASY_LINE_ORDER
+    assert.equal(trailLoopHome.EASY_MATCH_LINE, order[0])
+    assert.equal(trailLoopHome.EASY_MATCH_LINE, 'ph-road', '1.4.336 the Easy trail still starts at the mercy road')
+    assert.deepEqual(EASY_HOME, { name: 'hub' }, '1.4.336 Lock In still lands on Easy Home')
+    let walk = { ...emptyProgress(), easyMode: true }
+    const walked = []
+    for (let step = 0; step < order.length; step += 1) {
+      const id = trailLoopHome.easyLoopLine(walk)
+      assert.equal(trailLoopHome.easyHomeFocus(walk), 'match', `1.4.336 ${id} Home focus is Match`)
+      assert.deepEqual(trailLoopHome.easyTrailView(walk), { name: 'link' }, `1.4.336 ${id} opens Match first`)
+      assert.deepEqual(trailLoopHome.easyHoldFields(walk, id), walk.easyHeld ?? [], `1.4.336 ${id} cannot be held before Match`)
+      assert.deepEqual(
+        trailLoopHome.easyTeachFields(walk, id, false),
+        { easyTaught: walk.easyTaught ?? [], tierTaught: walk.tierTaught ?? {} },
+        `1.4.336 only Match teaches ${id}`,
+      )
+      assert.deepEqual(
+        trailLoopHome.easyHoldView(trailLoopHome.progressAfterMatchTaught(walk, id)),
+        { name: 'journal', focusId: id, autoQuiz: true },
+        `1.4.336 ${id} Match clear hands off to Lock In`,
+      )
+      walk = { ...walk, ...trailLoopHome.easyTeachFields(walk, id, true) }
+      assert.deepEqual(
+        trailLoopHome.easyTrailView(walk),
+        { name: 'journal', focusId: id, autoQuiz: true },
+        `1.4.336 ${id} taught → Lock In`,
+      )
+      walk = { ...walk, easyHeld: trailLoopHome.easyHoldFields(walk, id) }
+      walked.push(id)
+    }
+    assert.deepEqual(walked, [...order], '1.4.336 Match → Lock In → Home walks every line in teach order')
+    assert.equal(trailLoopHome.easyLoopLine(walk), order[0], '1.4.336 a finished Easy trail loops back to the first line')
+  }
+
+  assert.match(
+    readFileSync(new URL('../android/app/build.gradle', import.meta.url), 'utf8'),
+    /versionName "1\.4\.113"/,
+    '1.4.336 Android versionName stays 1.4.113',
+  )
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.336'), '1.4.336 changelog row')
+  const items336 = latestChange('1.4.336').items.join('\n')
+  assert.match(latestChange('1.4.336').title, /trail/i)
+  assert.match(items336, /Fixes #476/)
+  assert.match(items336, /works the same/)
+  assert.match(items336, /starts with Match/)
+  assert.match(items336, /back Home/)
+  assert.doesNotMatch(
+    items336,
+    /loop\.ts|lib\/easy|easyTrail|re-export|binding|shim|peel|registry|gate|#475|#480|#438|Pack B|Dig deeper|new screen/i,
+    '1.4.336 stays kid-plain and A4 only',
   )
 }
 
