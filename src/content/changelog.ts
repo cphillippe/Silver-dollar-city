@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.338',
+    title: 'Walk before Build It',
+    when: '2026-10-02',
+    items: [
+      'On Easy Home, gold Build this only shows when a raise is really ready. If you still need today’s story, the dock sends you to Read today’s story — you do not pay to build; you finish the walk first. Fixes #438.',
+    ],
+  },
+  {
     version: '1.4.337',
     title: 'Build It actually builds',
     when: '2026-10-02',
