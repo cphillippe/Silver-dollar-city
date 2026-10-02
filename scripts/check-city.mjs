@@ -1212,7 +1212,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.337')
+assert.equal(APP_VERSION, '1.4.338')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1882,7 +1882,15 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
   assert.match(easyHome, /Build this/)
   assert.match(easyHome, /onClick=\{easyBuildThis\}/)
   assert.match(hubSrc, /function easyBuildThis\(\)[\s\S]*upgradeBuilding\(readyId\)/)
+  {
+    const easyBuildFn = hubSrc.match(/function easyBuildThis\(\) \{[\s\S]*?\n    \}/)?.[0] ?? ''
+    assert.ok(easyBuildFn.length > 0, 'easyBuildThis handler present')
+    assert.doesNotMatch(easyBuildFn, /setPlot\(nextId\)/)
+  }
   assert.match(hubSrc, /upgradeReadyId/)
+  assert.match(easyHome, /upgradeReadyId \?/)
+  assert.match(easyHome, /easy-dock-walk/)
+  assert.match(easyHome, /name: 'daily'/)
   assert.doesNotMatch(easyHome, /onClick=\{\(\) => setPlot\(nextId\)\}/)
   assert.match(easyHome, /easy-coach/)
   assert.match(easyHome, /name: 'learn'/)
@@ -1890,9 +1898,10 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
   assert.match(easyHome, /EASY\.matchCta/)
   assert.match(easyHome, /EASY\.saved/)
   assert.match(easyHome, /matchReady/)
-  assert.match(hubSrc, /nextGift/)
+  assert.match(hubSrc, /nextUpgradeNeed/)
   assert.match(hubSrc, /readyUpgradeId/)
   assert.match(cssSrc, /easy-build-it/)
+  assert.match(cssSrc, /easy-dock-walk/)
   assert.match(cssSrc, /easy-home-dock/)
   assert.match(cssSrc, /\.hub\.is-easy-home \.easy-home-map[\s\S]{0,120}position:\s*absolute/)
   assert.match(cssSrc, /\.hub\.is-easy-home \.easy-home-map \.city-svg[\s\S]{0,200}max-height:\s*none/)
@@ -8964,6 +8973,30 @@ console.log('check-city: ok')
   assert.match(items337, /Fixes #438/)
   assert.match(items337, /Build this/i)
   assert.match(latestChange('1.4.337').title, /build/i)
+}
+
+// Easy Build It 1.4.338: honest walk-before-build on Easy Home — Fixes #438
+{
+  const hub338 = readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8')
+  assert.match(hub338, /upgradeReadyId \?/, '1.4.338 gates gold Build this on ready (#438)')
+  assert.match(hub338, /easy-dock-walk/, '1.4.338 walk CTA when story not done (#438)')
+  assert.match(hub338, /name: 'daily'/, '1.4.338 sends to DailyTrail when not ready (#438)')
+  {
+    const easyBuildFn338 =
+      hub338.match(/function easyBuildThis\(\) \{[\s\S]*?\n    \}/)?.[0] ?? ''
+    assert.ok(easyBuildFn338.length > 0, '1.4.338 easyBuildThis handler present (#438)')
+    assert.doesNotMatch(
+      easyBuildFn338,
+      /setPlot\(nextId\)/,
+      '1.4.338 must not gold-CTA into Walk Manage when not ready (#438)',
+    )
+  }
+  assert.match(hub338, /upgradeBuilding\(readyId\)/, '1.4.338 ready path still raises (#438)')
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.338'), '1.4.338 changelog row')
+  const items338 = latestChange('1.4.338').items.join('\n')
+  assert.match(items338, /Fixes #438/)
+  assert.match(items338, /story|walk/i)
+  assert.match(latestChange('1.4.338').title, /walk|build/i)
 }
 
 function DEFEND_WAVE_PACK_CHECK() {

@@ -4,13 +4,12 @@ import { STREET_TRIPLES, nextStreetWalk, streetIsComplete } from '../content/lin
 import { STORY, townVoice } from '../content/story'
 import { LOT_STORY } from '../content/lots'
 import { localDateKey } from '../lib/dates'
-import { CITY_PLOTS, nextGift, nextPlotId, type CityPlotId } from '../lib/city'
+import { CITY_PLOTS, nextPlotId, type CityPlotId } from '../lib/city'
 import {
   appliedTier,
   lotTapWhy,
+  nextUpgradeNeed,
   readyUpgradeId,
-  visualFills,
-  visualSnapshot,
 } from '../lib/cityBuild'
 import { EASY, EASY_MATCH_LINE, easyHomeFocus, easyHoldView, easyLineHeld, easyLoopLine, easyMatchReady, isEasy } from '../lib/easy'
 import { storyPlayFor } from '../lib/storyPlay'
@@ -76,20 +75,17 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
     const focus = easyHomeFocus(progress)
     const loopId = easyLoopLine(progress)
     const coldMercy = loopId === EASY_MATCH_LINE && !easyLineHeld(progress, EASY_MATCH_LINE)
-    const easySnap = visualSnapshot(progress)
-    const easyFills = visualFills(progress)
     const upgradeReadyId = readyUpgradeId(progress, nextId)
+    const buildNeed = nextUpgradeNeed(nextId, progress, true)
     const buildGift = upgradeReadyId
       ? 'A building is ready. Tap it, then Build this.'
-      : nextGift(nextId, easySnap[nextId], easyFills[nextId] ?? 0, true)
+      : !doneToday
+        ? 'Finish today’s story once. Then you can raise the building — no pay.'
+        : buildNeed.line
 
     function easyBuildThis() {
       const readyId = readyUpgradeId(progress, nextId)
-      if (readyId) {
-        upgradeBuilding(readyId)
-        return
-      }
-      setPlot(nextId)
+      if (readyId) upgradeBuilding(readyId)
     }
     // Easy Clear 1.4.157: Home whisper = short next-step (maze/run/merge/dig/snap Home), not full hunt how — Fixes #203 (completes #192 family)
     const homeWhisper =
@@ -130,13 +126,23 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
               <p className="eyebrow">Build It</p>
               <p className="easy-build-gift">{buildGift}</p>
             </div>
-            <button
-              type="button"
-              className="btn gold easy-dock-build"
-              onClick={easyBuildThis}
-            >
-              Build this
-            </button>
+            {upgradeReadyId ? (
+              <button
+                type="button"
+                className="btn gold easy-dock-build"
+                onClick={easyBuildThis}
+              >
+                Build this
+              </button>
+            ) : !doneToday ? (
+              <button
+                type="button"
+                className="btn easy-dock-walk"
+                onClick={() => onNavigate({ name: 'daily' })}
+              >
+                {EASY.readStory}
+              </button>
+            ) : null}
           </section>
           {/* Easy Clear 1.4.251: parchment coach labels — Learn/Lock In contrast (Fixes #343). */}
           {!matchReady || coldMercy ? (
