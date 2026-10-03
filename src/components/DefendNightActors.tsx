@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import {
   EASY_WALKER_FACE_PX,
   EASY_WALKER_HIT_PX,
+  WATCH_ABILITY_LABEL,
   type WatchAbility,
 } from '../lib/defend'
 import { WALKER_LABEL } from '../lib/watchTools'
@@ -55,6 +56,9 @@ export interface DefendNightActorsProps {
   loreLine?: string | null
   /** Run tier for lamp range. Combat reads this, not trail mastery. */
   runTier: Record<string, number>
+  /** Between waves: tap a planted lamp to spend sparks on the selected tool. */
+  boosting?: boolean
+  onBoostTower?: () => void
 }
 
 /**
@@ -86,6 +90,8 @@ export function DefendNightActorsSvg({
   phase,
   easy,
   runTier,
+  boosting = false,
+  onBoostTower,
 }: Omit<DefendNightActorsProps, 'tapPos' | 'fireBest' | 'tapJuice' | 'easy'> & { easy: boolean }) {
   return (
     <>
@@ -105,12 +111,13 @@ export function DefendNightActorsSvg({
                   )
                 const pose = nightTowers.lampPose(hot || flash === id)
                 const lampBox = nightTowers.lampImageBox()
-                const scenery = easyTap
+                const boostPad = boosting && on
+                const scenery = easyTap && !boostPad
                 return (
                   <g
                     key={id}
                     data-person-node={scenery ? undefined : 'pad'}
-                    className={`defend-pad is-${stage} ${on ? 'is-planted' : ''} ${hot ? 'is-hot' : ''} ${flash === id ? 'is-flash' : ''} ${scenery ? 'is-tower-scenery' : ''}`}
+                    className={`defend-pad is-${stage} ${on ? 'is-planted' : ''} ${hot ? 'is-hot' : ''} ${flash === id ? 'is-flash' : ''} ${scenery ? 'is-tower-scenery' : ''} ${boostPad ? 'is-boost-pick' : ''}`}
                     transform={`translate(${at.x} ${at.y})`}
                     role={scenery ? undefined : 'button'}
                     tabIndex={scenery ? undefined : 0}
@@ -120,7 +127,9 @@ export function DefendNightActorsSvg({
                         ? undefined
                         : phase === 'plant'
                           ? `${on ? 'Pull' : 'Plant'} lamp at ${plot?.title ?? id}`
-                          : `Fire ${plot?.title ?? id}`
+                          : boostPad
+                            ? `Spend a spark on ${WATCH_ABILITY_LABEL[using] ?? using} at ${plot?.title ?? id}`
+                            : `Fire ${plot?.title ?? id}`
                     }
                     onClick={
                       scenery
@@ -128,6 +137,7 @@ export function DefendNightActorsSvg({
                         : (event) => {
                             event.stopPropagation()
                             if (phase === 'plant') togglePad(id)
+                            else if (phase === 'boost' && on) onBoostTower?.()
                             else if (phase === 'wave') fire(id)
                           }
                     }
@@ -138,6 +148,7 @@ export function DefendNightActorsSvg({
                             if (event.key === 'Enter' || event.key === ' ') {
                               event.preventDefault()
                               if (phase === 'plant') togglePad(id)
+                              else if (phase === 'boost' && on) onBoostTower?.()
                               else if (phase === 'wave') fire(id)
                             }
                           }

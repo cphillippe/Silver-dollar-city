@@ -1212,7 +1212,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.342')
+assert.equal(APP_VERSION, '1.4.343')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -9082,6 +9082,37 @@ console.log('check-city: ok')
     latestChange('1.4.342').items.join('\n'),
     /#491|#493|upgrade|skill choice|Dig deeper|Hard trail|Town|Pack B/i,
     '1.4.342 stays the Easy plant peel',
+  )
+}
+
+// Night Watch 1.4.343: planted lamps + rail spend sparks on Easy phone (Fixes #491).
+{
+  const easyUi343 = readFileSync(new URL('../src/lib/easyUi.ts', import.meta.url), 'utf8')
+  const defendNight343 = readFileSync(
+    new URL('../src/components/DefendNightActors.tsx', import.meta.url),
+    'utf8',
+  )
+  const defendAbility343 = readFileSync(
+    new URL('../src/components/DefendAbilityBar.tsx', import.meta.url),
+    'utf8',
+  )
+  const defendCss343 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  assert.match(defendScreenOnlySrc, /EASY\.nightBoost/, '1.4.343 Easy boost tip')
+  assert.match(defendScreenOnlySrc, /onBoostTower=\{boostSelectedTool\}/, '1.4.343 map boost wired')
+  assert.match(defendScreenOnlySrc, /is-boost/, '1.4.343 boost phase chrome')
+  assert.match(defendNight343, /phase === 'boost' && on\)/, '1.4.343 planted lamp tap spends sparks')
+  assert.match(defendNight343, /is-boost-pick/, '1.4.343 boost pick styling hook')
+  assert.match(defendAbility343, /defend-ability-boost/, '1.4.343 rail shows spark spend cue')
+  assert.match(easyUi343, /nightBoost:/)
+  assert.match(defendCss343, /1\.4\.343: planted lamps spend sparks/)
+  assert.equal(easyTapMode(true, 'boost', false), false, '1.4.343 boost lamps are not scenery')
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.343'), '1.4.343 changelog row')
+  assert.match(latestChange('1.4.343').items.join('\n'), /Fixes #491/)
+  assert.match(latestChange('1.4.343').title, /Night Watch|tower|level/i)
+  assert.doesNotMatch(
+    latestChange('1.4.343').items.join('\n'),
+    /#492|#493|Dig deeper|Hard trail|Town|Pack B/i,
+    '1.4.343 stays the tower upgrade peel',
   )
 }
 

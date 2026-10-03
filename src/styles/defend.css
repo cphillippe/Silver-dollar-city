@@ -321,6 +321,46 @@ img.walker-face.easy-walker-face,
   pointer-events: none;
 }
 
+/* 1.4.343: planted lamps spend sparks between waves (Fixes #491). */
+.defend-pad.is-boost-pick .defend-pool {
+  stroke: rgba(255, 204, 51, 0.85);
+  stroke-width: 2;
+  animation: defend-boost-pulse 1.1s ease-in-out infinite;
+}
+
+.defend-pad.is-boost-pick .defend-tower-lamp {
+  filter: drop-shadow(0 0 6px rgba(255, 204, 51, 0.75));
+}
+
+@keyframes defend-boost-pulse {
+  0%,
+  100% {
+    opacity: 0.75;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.defend-page.is-boost .nw-rail .defend-abilities {
+  border-color: rgba(255, 204, 51, 0.72);
+  box-shadow:
+    0 10px 24px rgba(18, 6, 46, 0.55),
+    0 0 0 1px rgba(255, 204, 51, 0.35);
+}
+
+.defend-ability-boost {
+  font-size: 0.52rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: #ffe9b0;
+  line-height: 1;
+}
+
+.defend-ability.is-on .defend-ability-boost {
+  color: #4a2800;
+}
+
 .defend-tower-lamp.is-firing {
   filter: url(#defend-glow);
 }

@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.343',
+    title: 'Night Watch towers can level up',
+    when: '2026-10-03',
+    items: [
+      'After a wave, tap a planted lamp or Love on the right rail. Each spark raises it to II or III. Fixes #491.',
+    ],
+  },
+  {
     version: '1.4.342',
     title: 'Night Watch lets you plant lamps',
     when: '2026-10-03',

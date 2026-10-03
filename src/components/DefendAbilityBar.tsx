@@ -79,6 +79,11 @@ export function DefendAbilityBar({
                   <span className="defend-ability-tier" aria-hidden>
                     {TIER_MARK[tier]}
                   </span>
+                  {boosting && open ? (
+                    <span className="defend-ability-boost" aria-hidden>
+                      {tier >= 3 ? 'Max' : '↑ spark'}
+                    </span>
+                  ) : null}
                   <span className="defend-ability-claim">{claim}</span>
                 </button>
               )
