@@ -652,20 +652,20 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         <div className="defend-kits" role="group" aria-label="One-off tools">
           <button
             type="button"
-            className="btn defend-kit"
+            className="btn defend-kit defend-kit-choice"
             onClick={spendStill}
             disabled={runKits.still < 1}
           >
-            Still
+            <span className="defend-kit-name">{KIT_LABEL.still}</span>
             <span className="defend-kit-badge">{runKits.still}</span>
           </button>
           <button
             type="button"
-            className="btn defend-kit"
+            className="btn defend-kit defend-kit-choice"
             onClick={spendMend}
             disabled={runKits.mend < 1}
           >
-            Mend
+            <span className="defend-kit-name">{KIT_LABEL.mend}</span>
             <span className="defend-kit-badge">{runKits.mend}</span>
           </button>
         </div>
@@ -684,29 +684,36 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       ) : null}
       {phase === 'boost' && !won ? (
         <div className="defend-boost">
-          <p role="status">
+          <p className="defend-boost-status" role="status">
             {`Wave ${waveIndex + 1} clear · spend sparks`}
             {boostNote ? ` · ${boostNote}` : ''}
           </p>
-          <div className="defend-kit-buys">
-            <button
-              type="button"
-              className="btn defend-kit"
-              onClick={() => buyKit('still')}
-              disabled={runSparks < kitSparkCost}
-            >
-              {`${KIT_LABEL.still} · ${kitSparkCost} spark`}
-              <span className="defend-kit-badge">{runKits.still}</span>
-            </button>
-            <button
-              type="button"
-              className="btn defend-kit"
-              onClick={() => buyKit('mend')}
-              disabled={runSparks < kitSparkCost}
-            >
-              {`${KIT_LABEL.mend} · ${kitSparkCost} spark`}
-              <span className="defend-kit-badge">{runKits.mend}</span>
-            </button>
+          <div className="defend-spark-choices" role="group" aria-labelledby="defend-spark-pick">
+            <p id="defend-spark-pick" className="defend-spark-choices-label">
+              {easy ? EASY.nightBoostPick : 'Pick one skill'}
+            </p>
+            <div className="defend-kit-buys">
+              <button
+                type="button"
+                className="btn defend-kit defend-kit-choice"
+                onClick={() => buyKit('still')}
+                disabled={runSparks < kitSparkCost}
+              >
+                <span className="defend-kit-name">{KIT_LABEL.still}</span>
+                <span className="defend-kit-cost">{`${kitSparkCost} spark`}</span>
+                <span className="defend-kit-badge">{runKits.still}</span>
+              </button>
+              <button
+                type="button"
+                className="btn defend-kit defend-kit-choice"
+                onClick={() => buyKit('mend')}
+                disabled={runSparks < kitSparkCost}
+              >
+                <span className="defend-kit-name">{KIT_LABEL.mend}</span>
+                <span className="defend-kit-cost">{`${kitSparkCost} spark`}</span>
+                <span className="defend-kit-badge">{runKits.mend}</span>
+              </button>
+            </div>
           </div>
           <button type="button" className="btn primary" onClick={continueFromBoost}>
             Continue

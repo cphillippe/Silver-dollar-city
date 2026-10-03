@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.344',
+    title: 'Night Watch skills look like choices',
+    when: '2026-10-03',
+    items: [
+      'After a wave, Still and Mend show as two big skill buttons you can tap. Love on the right glows Tap when it can take a spark. Fixes #493.',
+    ],
+  },
+  {
     version: '1.4.343',
     title: 'Night Watch towers can level up',
     when: '2026-10-03',
