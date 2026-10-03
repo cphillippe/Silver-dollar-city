@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.348',
+    title: 'Night Watch porch lamp reaches the road',
+    when: '2026-10-03',
+    items: [
+      'Easy Night Watch counts lamp range from the East porch seat out to the yellow road, so a walker in front of that lamp can take Love taps again. Walkers still down at the gate stay out of reach — no map-wide Love shot.',
+    ],
+  },
+  {
     version: '1.4.347',
     title: 'Night Watch lamps respect range',
     when: '2026-10-03',
