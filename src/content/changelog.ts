@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.346',
+    title: 'Night Watch faces lose the chevron',
+    when: '2026-10-03',
+    items: [
+      'Easy Night Watch no longer puts a yellow triangle on the walker you should tap. The left list and the small tap pop still show who to hit. Fixes #489.',
+    ],
+  },
+  {
     version: '1.4.345',
     title: 'Night Watch walkers stay one size',
     when: '2026-10-03',

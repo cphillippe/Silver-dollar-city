@@ -1214,7 +1214,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.345')
+assert.equal(APP_VERSION, '1.4.346')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -7900,7 +7900,7 @@ console.log('check-city: ok')
   assert.match(defendNightSrc, /width=\{PATH_WALKER_FACE_U\}/, '1.4.326 face uses path viewBox units')
   assert.match(defendNightSrc, /height=\{PATH_WALKER_FACE_U\}/, '1.4.326 face uses path viewBox units')
   assert.equal(EASY_WALKER_FACE_PX, 44, '1.4.330 juice face stays small; path face stays separate')
-  assert.match(defendNightSrc, /easy-walker-arrow is-path-cue/, '1.4.326 TAP arrow stays on the cue face')
+  assert.doesNotMatch(defendNightSrc, /easy-walker-arrow is-path-cue/, '1.4.346 no TAP chevron on the cue face')
   assert.match(defendNightSrc, /easy-walker-cue-label is-path-cue/, '1.4.326 tap teach stays on the cue face')
   assert.match(defendSrc, /phase === 'wave' && !won/, '1.4.326 roster is mid-wave for Easy and Hard')
   assert.doesNotMatch(
@@ -9175,6 +9175,25 @@ console.log('check-city: ok')
     latestChange('1.4.345').items.join('\n'),
     /#469|#470|#491|#492|#493|Dig deeper|Hard trail|Town|Pack B|triangle|range/i,
     '1.4.345 stays path walker scale only',
+  )
+}
+
+// Night Watch 1.4.346: drop the TAP chevron on path faces (Fixes #489).
+{
+  assert.doesNotMatch(defendNightSrc, /▼/, '1.4.346 no down-arrow chevron on the path cue')
+  assert.doesNotMatch(defendNightSrc, /easy-walker-arrow is-path-cue/, '1.4.346 chevron marker is gone')
+  assert.match(defendNightSrc, /easy-walker-cue-label is-path-cue/, '1.4.346 tap teach label can stay below the face')
+  assert.match(defendNightSrc, /easy-walkers-path-cue/, '1.4.346 path cue shell stays')
+  assert.match(defendNightSrc, /tapTarget\?\.id === call\.id \? ' is-cue'/, '1.4.346 left roster still marks the cue walker')
+  assert.equal(EASY_WALKER_FACE_PX, 44, '1.4.346 tap juice face stays small')
+  assert.equal(PATH_WALKER_FACE_U, 72, '1.4.346 path face scale stays from 1.4.345')
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.346'), '1.4.346 changelog row')
+  assert.match(latestChange('1.4.346').items.join('\n'), /Fixes #489/)
+  assert.match(latestChange('1.4.346').title, /Night Watch|chevron|triangle/i)
+  assert.doesNotMatch(
+    latestChange('1.4.346').items.join('\n'),
+    /#488|#490|#470|Dig deeper|Hard trail|Town|Pack B|range|scale pop/i,
+    '1.4.346 stays the path chevron peel',
   )
 }
 
