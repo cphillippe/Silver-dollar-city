@@ -502,6 +502,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     setToolLock(null)
   }
 
+  function boostSelectedTool() {
+    const using = unlocked.includes(ability) ? ability : 'love'
+    boostTool(using)
+  }
+
   function flashKit(note: string) {
     setToolLock(note)
     window.setTimeout(() => {
@@ -609,7 +614,9 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       </span>
       <span className={`defend-count ${combo > 1 ? 'is-combo' : ''}`}>
         {phase === 'boost'
-          ? 'Level up'
+          ? runSparks > 0
+            ? `Level up · ${runSparks} spark${runSparks === 1 ? '' : 's'}`
+            : 'Level up'
           : phase === 'wave'
             ? easy
               ? combo > 1
@@ -632,7 +639,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         ? easy
           ? EASY.nightPlant
           : HARD_PLANT_TIP
-        : null
+        : phase === 'boost' && !won
+          ? easy
+            ? EASY.nightBoost
+            : 'Tap a planted lamp or a tool on the right to spend sparks.'
+          : null
 
   const kitCharges = runKits.still + runKits.mend
   const docks = (
@@ -741,7 +752,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
 
   return (
     <main
-      className={`defend-page ${taught ? 'is-puzzle' : 'is-teach'} ${arming ? 'is-arming' : ''} ${won ? 'is-win' : ''} ${shake ? 'is-shake' : ''} ${leakFlash ? 'is-leak' : ''} ${firing ? 'is-firing' : ''} ${stillOn ? 'is-still' : ''} ${easy ? 'is-easy-watch' : ''} ${easyTap ? 'is-easy-tap' : ''}`}
+      className={`defend-page ${taught ? 'is-puzzle' : 'is-teach'} ${arming ? 'is-arming' : ''} ${won ? 'is-win' : ''} ${shake ? 'is-shake' : ''} ${leakFlash ? 'is-leak' : ''} ${firing ? 'is-firing' : ''} ${stillOn ? 'is-still' : ''} ${easy ? 'is-easy-watch' : ''} ${easyTap ? 'is-easy-tap' : ''} ${boosting ? 'is-boost' : ''}`}
       aria-label={WATCH_TITLE}
     >
       {after ? (
@@ -815,6 +826,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
               walkerCalls={walkerCalls}
               loreLine={loreMeet?.line ?? null}
               runTier={runTier}
+              boosting={boosting}
+              onBoostTower={boostSelectedTool}
             />
           </UiShell>
         </>
