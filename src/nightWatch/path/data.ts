@@ -127,3 +127,22 @@ export function pathPoint(t: number): NightPoint {
   const b = DEFEND_PATH[i + 1]
   return { x: a.x + (b.x - a.x) * local, y: a.y + (b.y - a.y) * local }
 }
+
+function segDist(p: NightPoint, a: NightPoint, b: NightPoint): number {
+  const dx = b.x - a.x
+  const dy = b.y - a.y
+  const len2 = dx * dx + dy * dy
+  if (len2 === 0) return Math.hypot(p.x - a.x, p.y - a.y)
+  let t = ((p.x - a.x) * dx + (p.y - a.y) * dy) / len2
+  t = Math.max(0, Math.min(1, t))
+  return Math.hypot(p.x - (a.x + t * dx), p.y - (a.y + t * dy))
+}
+
+/** Shortest distance from a lot seat to the walker road polyline. */
+export function pathClearance(from: NightPoint): number {
+  let min = Infinity
+  for (let i = 0; i < DEFEND_PATH.length - 1; i++) {
+    min = Math.min(min, segDist(from, DEFEND_PATH[i], DEFEND_PATH[i + 1]))
+  }
+  return min
+}
