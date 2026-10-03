@@ -1212,7 +1212,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.341')
+assert.equal(APP_VERSION, '1.4.342')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -2704,7 +2704,8 @@ assert.doesNotMatch(
 )
 assert.match(defendSrc, /taught = true/)
 assert.match(defendNightSrc, /easy-walker-cue-label/)
-assert.match(defendSrc, /easy \? 'wave'/)
+assert.match(defendSrc, /useState<NightPhase>\('plant'\)/)
+assert.match(defendSrc, /EASY\.nightPlant/)
 assert.match(cssSrc, /easy-walker-cue-label/)
 assert.match(
   readFileSync(new URL('../src/components/Journal.tsx', import.meta.url), 'utf8'),
@@ -9061,6 +9062,27 @@ console.log('check-city: ok')
   assert.match(items340, /Fixes #480/)
   assert.match(items340, /Father|HUGGED|HELPED|read/i)
   assert.match(latestChange('1.4.340').title, /read|verse|win/i)
+}
+
+// Night Watch 1.4.342: Easy plant step before wave (Fixes #492).
+{
+  const easyUi342 = readFileSync(new URL('../src/lib/easyUi.ts', import.meta.url), 'utf8')
+  assert.doesNotMatch(defendScreenOnlySrc, /easy \? 'wave' : 'plant'/, '1.4.342 Easy opens plant like Hard')
+  assert.match(defendScreenOnlySrc, /useState<NightPhase>\('plant'\)/, '1.4.342 run starts in plant')
+  assert.match(defendScreenOnlySrc, /setPhase\('plant'\)/, '1.4.342 retry returns to plant')
+  assert.match(defendScreenOnlySrc, /EASY\.nightPlant/, '1.4.342 Easy plant tip')
+  assert.match(defendScreenOnlySrc, /EASY\.nightKeepLamp/, '1.4.342 last-lamp toast')
+  assert.match(easyUi342, /nightPlant:/)
+  assert.match(easyUi342, /nightKeepLamp:/)
+  assert.equal(easyTapMode(true, 'plant', false), false, '1.4.342 plant pads are tappable on Easy')
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.342'), '1.4.342 changelog row')
+  assert.match(latestChange('1.4.342').items.join('\n'), /Fixes #492/)
+  assert.match(latestChange('1.4.342').title, /Night Watch|plant|lamp/i)
+  assert.doesNotMatch(
+    latestChange('1.4.342').items.join('\n'),
+    /#491|#493|upgrade|skill choice|Dig deeper|Hard trail|Town|Pack B/i,
+    '1.4.342 stays the Easy plant peel',
+  )
 }
 
 function DEFEND_WAVE_PACK_CHECK() {
