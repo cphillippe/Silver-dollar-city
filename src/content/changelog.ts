@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.345',
+    title: 'Night Watch walkers stay one size',
+    when: '2026-10-03',
+    items: [
+      'Night Watch faces on the road stay the same size while they walk. They do not start tiny and pop big on a tall phone. Fixes #488.',
+    ],
+  },
+  {
     version: '1.4.344',
     title: 'Night Watch skills look like choices',
     when: '2026-10-03',
