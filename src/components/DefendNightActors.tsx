@@ -384,15 +384,6 @@ export function DefendNightWalkerCue({
             {easyTap && tapTarget && tapPos ? (
               <div className="easy-walkers easy-walkers-path-cue" aria-hidden>
                 <span
-                  className="easy-walker-arrow is-path-cue"
-                  style={{
-                    left: tapPos.left,
-                    top: tapPos.top - 28,
-                  }}
-                >
-                  ▼
-                </span>
-                <span
                   className="easy-walker-cue-label is-path-cue"
                   style={{
                     left: tapPos.left,
