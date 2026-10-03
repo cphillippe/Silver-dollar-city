@@ -1212,7 +1212,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.343')
+assert.equal(APP_VERSION, '1.4.344')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -9113,6 +9113,30 @@ console.log('check-city: ok')
     latestChange('1.4.343').items.join('\n'),
     /#492|#493|Dig deeper|Hard trail|Town|Pack B/i,
     '1.4.343 stays the tower upgrade peel',
+  )
+}
+
+// Night Watch 1.4.344: boost skills read as pick-one choices (Fixes #493).
+{
+  const easyUi344 = readFileSync(new URL('../src/lib/easyUi.ts', import.meta.url), 'utf8')
+  const defendCss344 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  assert.match(defendScreenOnlySrc, /defend-spark-choices/, '1.4.344 boost skill choice group')
+  assert.match(defendScreenOnlySrc, /defend-kit-choice/, '1.4.344 kit choice tiles')
+  assert.match(defendScreenOnlySrc, /EASY\.nightBoostPick/, '1.4.344 Easy pick label')
+  assert.match(defendScreenOnlySrc, /defend-kit-name/, '1.4.344 kit name row')
+  assert.match(defendScreenOnlySrc, /defend-kit-cost/, '1.4.344 kit spark cost row')
+  assert.match(defendAbilitySrc, /easy \? 'Tap' : '↑ spark'/, '1.4.344 Easy rail tap cue')
+  assert.match(easyUi344, /nightBoostPick:/)
+  assert.match(defendCss344, /1\.4\.344: Still \/ Mend \+ rail spend read as pick-one skills \(Fixes #493\)/)
+  assert.match(defendCss344, /\.defend-kit-choice/)
+  assert.match(defendCss344, /defend-boost-choice-pulse/)
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.344'), '1.4.344 changelog row')
+  assert.match(latestChange('1.4.344').items.join('\n'), /Fixes #493/)
+  assert.match(latestChange('1.4.344').title, /Night Watch|skill|choice/i)
+  assert.doesNotMatch(
+    latestChange('1.4.344').items.join('\n'),
+    /#491|#492|Dig deeper|Hard trail|Town|Pack B/i,
+    '1.4.344 stays the skill choice peel',
   )
 }
 
