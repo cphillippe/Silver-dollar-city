@@ -29,7 +29,7 @@ export const EASY_WAVE_LIVE = 3
 
 const EASY_SPAWN_T = [0.08, 0.18, 0.28] as const
 
-export { DEFEND_ANCHOR, DEFEND_PATH, pathPoint } from '../nightWatch/path/data.ts'
+export { DEFEND_ANCHOR, DEFEND_PATH, pathClearance, pathPoint } from '../nightWatch/path/data.ts'
 
 /** First six slots are one of each WalkerKind; later rows are extra taunts only. */
 export const RAID_CAST: { text: string; kind: WalkerKind }[] = [

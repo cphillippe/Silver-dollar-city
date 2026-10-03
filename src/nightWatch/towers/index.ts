@@ -1,5 +1,6 @@
 import type { CityPlotId, CityStage } from '../../lib/city.ts'
 import { abilityRange, defendPads, dist, padStage, towerCooldown } from '../../lib/defend.ts'
+import { pathClearance } from '../path/data.ts'
 import type { ProgressState } from '../../types.ts'
 import { nightParts } from '../parts/index.ts'
 import { nightPath } from '../path/index.ts'
@@ -58,7 +59,8 @@ export const nightTowers: NightTowersModule = {
   },
   stage: padStage,
   range: (id, ability, progress, runTier) =>
-    abilityRange(ability, padStage(id, progress), progress, runTier),
+    abilityRange(ability, padStage(id, progress), progress, runTier) +
+    pathClearance(nightPath.anchor(id)),
   cooldown: (id, progress) => towerCooldown(padStage(id, progress)),
   inRange: (id, ability, progress, target, runTier) =>
     dist(nightPath.anchor(id), target) <= nightTowers.range(id, ability, progress, runTier),

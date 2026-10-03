@@ -68,6 +68,7 @@ import {
   easyTapTarget,
   heavenPoint,
   padStage,
+  pathClearance,
   pathPoint,
   NIGHT_CAST,
   normalizeMet,
@@ -1214,7 +1215,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.347')
+assert.equal(APP_VERSION, '1.4.348')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3388,6 +3389,31 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(defendNightSrc, /nightTowers\.inRange/)
   assert.match(defendSrc, /dist\(at, raiderAt/)
   assert.match(defendSrc, /d <= range/)
+}
+
+// Night Watch 1.4.348: porch lamp reach covers the road in front of it (#490).
+{
+  const porchStage = padStage('porch', empty)
+  const porchReach =
+    abilityRange('love', porchStage, empty, { love: 1 }) + pathClearance(DEFEND_ANCHOR.porch)
+  const gateWalker = pathPoint(0)
+  const porch = DEFEND_ANCHOR.porch
+  const gateDist = Math.hypot(porch.x - gateWalker.x, porch.y - gateWalker.y)
+  assert.ok(gateDist > porchReach, '1.4.348 porch Love I still misses the gate walker')
+  const frontRoad = pathPoint(0.72)
+  const frontDist = Math.hypot(porch.x - frontRoad.x, porch.y - frontRoad.y)
+  assert.ok(
+    frontDist <= porchReach,
+    '1.4.348 porch Love I reaches a walker on the upper road in front of the lamp',
+  )
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.348'), '1.4.348 changelog row')
+  assert.match(latestChange('1.4.348').title, /Night Watch|porch|road|range/i)
+  assert.doesNotMatch(
+    latestChange('1.4.348').items.join('\n'),
+    /Fixes #490|Closes #490|Resolves #490/i,
+    '1.4.348 changelog avoids GitHub close keywords',
+  )
+  assert.match(readFileSync(new URL('../src/nightWatch/towers/index.ts', import.meta.url), 'utf8'), /pathClearance/)
 }
 
 console.log('check-city: ok')
@@ -7286,7 +7312,10 @@ console.log('check-city: ok')
   assert.deepEqual(nightPathMod.pointAt(1), DEFEND_PATH[DEFEND_PATH.length - 1])
   assert.deepEqual(nightEnemiesMod.at({ id: 0, t: 0.5, text: '', kind: 'skeptic' }), pathPoint(0.5))
   assert.equal(nightEnemiesMod.waveSize, DEFEND_WAVE_SIZE)
-  assert.equal(nightTowersMod.range('porch', 'love', empty), abilityRange('love', padStage('porch', empty), empty))
+  assert.equal(
+    nightTowersMod.range('porch', 'love', empty),
+    abilityRange('love', padStage('porch', empty), empty) + pathClearance(DEFEND_ANCHOR.porch),
+  )
   assert.match(latestChange('1.4.303').title, /Night Watch|frame/i)
   assert.match(latestChange('1.4.303').items.join('\n'), /Night Watch|module|#418/i)
   assert.doesNotMatch(
