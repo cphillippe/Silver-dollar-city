@@ -76,7 +76,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const [boardBox, setBoardBox] = useState({ w: 640, h: 420 })
   const [toolLock, setToolLock] = useState<string | null>(null)
   const arming = false
-  const [phase, setPhase] = useState<NightPhase>(easy ? 'wave' : 'plant')
+  const [phase, setPhase] = useState<NightPhase>('plant')
   const [waveIndex, setWaveIndex] = useState(0)
   const [runTier, setRunTier] = useState<Record<string, number>>(freshRunTier)
   const [runSparks, setRunSparks] = useState(0)
@@ -302,7 +302,10 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     if (phase !== 'plant') return
     setPlanted((current) => {
       if (current.includes(id)) {
-        if (current.length <= 1) return current
+        if (current.length <= 1) {
+          flashKit(easy ? EASY.nightKeepLamp : 'Keep at least one lamp.')
+          return current
+        }
         return current.filter((item) => item !== id)
       }
       return [...current, id]
@@ -463,7 +466,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   }
 
   function retry() {
-    setPhase(easy ? 'wave' : 'plant')
+    setPhase('plant')
     setWon(false)
     setRaiders([])
     setDowned(0)
@@ -620,7 +623,16 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     </p>
   )
 
-  const tip = easy ? null : phase === 'wave' ? HARD_WAVE_TIP : phase === 'plant' ? HARD_PLANT_TIP : null
+  const tip =
+    phase === 'wave'
+      ? easy
+        ? null
+        : HARD_WAVE_TIP
+      : phase === 'plant'
+        ? easy
+          ? EASY.nightPlant
+          : HARD_PLANT_TIP
+        : null
 
   const kitCharges = runKits.still + runKits.mend
   const docks = (

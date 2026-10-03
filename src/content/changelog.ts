@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.342',
+    title: 'Night Watch lets you plant lamps',
+    when: '2026-10-03',
+    items: [
+      'Easy Night Watch opens with a plant step: tap gold rings on the map to add lamps, then tap Begin the watch. Fixes #492.',
+    ],
+  },
+  {
     version: '1.4.341',
     title: 'More candy on the Home map',
     when: '2026-10-02',

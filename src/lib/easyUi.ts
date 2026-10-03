@@ -83,6 +83,8 @@ export const EASY = {
   nightSoon: 'Night Watch (soon)',
   nightTap: 'Tap the face.',
   nightLead: 'Tap the dark face.',
+  nightPlant: 'Tap a gold ring to plant a lamp. Tap a lamp to pull it.',
+  nightKeepLamp: 'Keep one lamp — tap a ring to plant more.',
   nightMiss: 'Wrong — tap the glowing face',
   startEasy: 'Start Easy',
   welcomeEyebrow: 'A short trail',
