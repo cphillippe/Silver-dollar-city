@@ -84,6 +84,8 @@ export const EASY = {
   nightTap: 'Tap the face.',
   nightLead: 'Tap the dark face.',
   nightPlant: 'Tap a gold ring to plant a lamp. Tap a lamp to pull it.',
+  nightBoost:
+    'Wave clear. Tap a planted lamp or Love on the right — each spark raises it to II or III.',
   nightKeepLamp: 'Keep one lamp — tap a ring to plant more.',
   nightMiss: 'Wrong — tap the glowing face',
   startEasy: 'Start Easy',
