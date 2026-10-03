@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import {
   EASY_WALKER_FACE_PX,
   EASY_WALKER_HIT_PX,
+  PATH_WALKER_FACE_U,
+  PATH_WALKER_HIT_R,
   WATCH_ABILITY_LABEL,
   type WatchAbility,
 } from '../lib/defend'
@@ -62,13 +64,18 @@ export interface DefendNightActorsProps {
 }
 
 /**
- * Thin HP bar in A2 viewBox units. Width matches the 36-wide face so the
- * bar does not stick out past the sprite. On a 390px phone the contain
- * camera is under half a pixel per unit, so h: 10 is about 5px — a line,
- * not a capsule riding the walker (Fixes #472).
+ * Thin HP bar in A2 viewBox units. Width matches the path face so the
+ * bar does not stick out past the sprite (Fixes #472).
  */
-const HP_TRACK = { w: 36, h: 10, y: 14, rx: 5 }
+const HP_TRACK = {
+  w: PATH_WALKER_FACE_U,
+  h: 10,
+  y: Math.round(PATH_WALKER_FACE_U * (14 / 36)),
+  rx: 5,
+}
 const HP_FILL = { inset: 2, h: 6, rx: 3 }
+const FACE_HALF = PATH_WALKER_FACE_U / 2
+const FACE_TOP = -PATH_WALKER_FACE_U * (24 / 36)
 
 /** SVG children: pads, shots, raiders, blasts (must render inside DefendNightSky). */
 export function DefendNightActorsSvg({
@@ -226,15 +233,20 @@ export function DefendNightActorsSvg({
                         : undefined
                     }
                   >
-                    <circle className="defend-raider-hit" r="22" fill="transparent" />
-                    <ellipse className="defend-raider-shadow" cy={12} rx={13} ry={4.6} />
+                    <circle className="defend-raider-hit" r={PATH_WALKER_HIT_R} fill="transparent" />
+                    <ellipse
+                      className="defend-raider-shadow"
+                      cy={12 * (PATH_WALKER_FACE_U / 36)}
+                      rx={13 * (PATH_WALKER_FACE_U / 36)}
+                      ry={4.6 * (PATH_WALKER_FACE_U / 36)}
+                    />
                     <image
                       className={`defend-raider-face${easy && !raider.turned ? ' is-dark-face' : ''}`}
                       href={nightEnemies.faceSrc(raider.kind, easy)}
-                      x={-18}
-                      y={-24}
-                      width={36}
-                      height={36}
+                      x={-FACE_HALF}
+                      y={FACE_TOP}
+                      width={PATH_WALKER_FACE_U}
+                      height={PATH_WALKER_FACE_U}
                       clipPath="url(#defend-face-clip)"
                     />
                     {!raider.turned && (raider.maxHp ?? 0) > 1 ? (
@@ -384,7 +396,7 @@ export function DefendNightWalkerCue({
                   className="easy-walker-cue-label is-path-cue"
                   style={{
                     left: tapPos.left,
-                    top: tapPos.top + 36,
+                    top: tapPos.top + EASY_WALKER_FACE_PX,
                   }}
                 >
                   {EASY.nightTap}

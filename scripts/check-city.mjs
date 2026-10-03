@@ -57,6 +57,8 @@ import {
   EASY_WALKER_FACE_PX,
   DEFEND_HEARTS,
   EASY_WALKER_HIT_PX,
+  PATH_WALKER_FACE_U,
+  PATH_WALKER_HIT_R,
   EASY_WAVE_LIVE,
   easyHoldSpawn,
   easySpawnT,
@@ -1212,7 +1214,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.344')
+assert.equal(APP_VERSION, '1.4.345')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -7806,11 +7808,11 @@ console.log('check-city: ok')
 // Night Watch 1.4.323: enemy HP bar (Fixes #451). 1.4.331 thins the capsule (Fixes #472).
 {
   const defendCss323 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
-  assert.match(defendNightSrc, /const HP_TRACK = \{ w: 36, h: 10, y: 14, rx: 5 \}/, '1.4.331 track is face-scale')
+  assert.match(defendNightSrc, /const HP_TRACK = \{[\s\S]*?w: PATH_WALKER_FACE_U/, '1.4.331 track is face-scale')
   assert.match(defendNightSrc, /const HP_FILL = \{ inset: 2, h: 6, rx: 3 \}/, '1.4.331 fill sits inside the thin track')
   assert.ok((10 * 390) / 798 <= 10, '1.4.331 track is at most ~10px tall on a 390px phone')
   assert.ok((6 * 390) / 798 <= 10, '1.4.331 gold fill stays a thin line on a 390px phone')
-  assert.ok(36 <= 36, '1.4.331 track width stays within the 36-wide face')
+  assert.ok(PATH_WALKER_FACE_U >= 36, '1.4.345 path face stays readable on the portrait plate')
   assert.match(defendNightSrc, /className="defend-hp-bar"/, '1.4.323 HP bar group')
   assert.match(defendNightSrc, /className="defend-hp-track"/, '1.4.323 HP track under the face')
   assert.match(defendNightSrc, /className="defend-hp-fill"/, '1.4.323 HP fill')
@@ -7895,9 +7897,9 @@ console.log('check-city: ok')
   assert.doesNotMatch(defendNightSrc, /is-on-map/, '1.4.326 no on-path call anchor')
   assert.doesNotMatch(defendNightSrc, /KIND_CALL/, '1.4.326 no Hard on-path kind chip')
   assert.doesNotMatch(defendNightSrc, /defend-raider-call/, '1.4.326 SVG kind chip is gone')
-  assert.match(defendNightSrc, /width=\{36\}/, '1.4.326 face stays 36 user units wide')
-  assert.match(defendNightSrc, /height=\{36\}/, '1.4.326 face stays 36 user units tall')
-  assert.equal(EASY_WALKER_FACE_PX, 44, '1.4.330 juice face stays small; path face stays 36')
+  assert.match(defendNightSrc, /width=\{PATH_WALKER_FACE_U\}/, '1.4.326 face uses path viewBox units')
+  assert.match(defendNightSrc, /height=\{PATH_WALKER_FACE_U\}/, '1.4.326 face uses path viewBox units')
+  assert.equal(EASY_WALKER_FACE_PX, 44, '1.4.330 juice face stays small; path face stays separate')
   assert.match(defendNightSrc, /easy-walker-arrow is-path-cue/, '1.4.326 TAP arrow stays on the cue face')
   assert.match(defendNightSrc, /easy-walker-cue-label is-path-cue/, '1.4.326 tap teach stays on the cue face')
   assert.match(defendSrc, /phase === 'wave' && !won/, '1.4.326 roster is mid-wave for Easy and Hard')
@@ -8169,8 +8171,8 @@ console.log('check-city: ok')
   assert.match(juiceWrapRule[0], /width:\s*72px/)
   assert.match(juiceWrapRule[0], /height:\s*72px/)
   assert.doesNotMatch(juiceWrapRule[0], /160px/)
-  assert.match(defendNightSrc, /width=\{36\}/, '1.4.330 path face stays 36 user units wide')
-  assert.match(defendNightSrc, /height=\{36\}/, '1.4.330 path face stays 36 user units tall')
+  assert.match(defendNightSrc, /width=\{PATH_WALKER_FACE_U\}/, '1.4.330 path face stays in viewBox units')
+  assert.match(defendNightSrc, /height=\{PATH_WALKER_FACE_U\}/, '1.4.330 path face stays in viewBox units')
   assert.match(defendNightSrc, /is-squash/, '1.4.330 squash juice stays')
   assert.match(defendNightSrc, /is-heaven/, '1.4.330 heaven juice stays')
   assert.match(defendNightSrc, /easy-tap-plus/, '1.4.330 plus stays')
@@ -8192,10 +8194,10 @@ console.log('check-city: ok')
   const defendCss331 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
   const enemies331 = readFileSync(new URL('../src/nightWatch/enemies/index.ts', import.meta.url), 'utf8')
   const gradle331 = readFileSync(new URL('../android/app/build.gradle', import.meta.url), 'utf8')
-  assert.match(defendNightSrc, /const HP_TRACK = \{ w: 36, h: 10, y: 14, rx: 5 \}/, '1.4.331 thin track')
+  assert.match(defendNightSrc, /const HP_TRACK = \{[\s\S]*?w: PATH_WALKER_FACE_U/, '1.4.331 thin track')
   assert.match(defendNightSrc, /const HP_FILL = \{ inset: 2, h: 6, rx: 3 \}/, '1.4.331 thin fill')
   assert.ok((10 * 390) / 798 <= 10, '1.4.331 track ≤ ~10px tall on a 390px phone')
-  assert.ok(36 <= 36, '1.4.331 track is no wider than the 36-wide face')
+  assert.ok(PATH_WALKER_FACE_U >= 36, '1.4.345 path face is at least the old 36-wide chip')
   assert.match(
     defendNightSrc,
     /\(\(HP_TRACK\.w - HP_FILL\.inset \* 2\) \* raider\.hp\) \/ \(raider\.maxHp \?\? 1\)/,
@@ -9137,6 +9139,42 @@ console.log('check-city: ok')
     latestChange('1.4.344').items.join('\n'),
     /#491|#492|Dig deeper|Hard trail|Town|Pack B/i,
     '1.4.344 stays the skill choice peel',
+  )
+}
+
+// Night Watch 1.4.345: stable path walker scale on tall phones (Fixes #488).
+{
+  const defendCss345 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const defendTs345 = readFileSync(new URL('../src/lib/defend.ts', import.meta.url), 'utf8')
+  assert.equal(PATH_WALKER_FACE_U, 72, '1.4.345 portrait plate path face')
+  assert.equal(PATH_WALKER_HIT_R, (PATH_WALKER_FACE_U * 22) / 36, '1.4.345 hit tracks the face')
+  assert.match(defendTs345, /export const PATH_WALKER_FACE_U/)
+  assert.match(defendNightSrc, /PATH_WALKER_FACE_U/)
+  assert.match(defendNightSrc, /PATH_WALKER_HIT_R/)
+  assert.match(defendCss345, /1\.4\.345: whole portrait plate — width-led contain/)
+  assert.match(defendCss345, /container-type: inline-size/)
+  assert.match(defendCss345, /min-height: calc\(100cqi \* 1134 \/ 798\)/)
+  assert.match(defendCss345, /aspect-ratio: 798 \/ 1134/)
+  assert.match(defendScreenOnlySrc, /useLayoutEffect/)
+  assert.match(defendScreenOnlySrc, /rect\.width < 1 \|\| rect\.height < 1/)
+  assert.doesNotMatch(defendScreenOnlySrc, /useState\(\{ w: 640, h: 420 \}/)
+  const phoneW = 390
+  const shortH = 220
+  const tallH = 580
+  const shortScale = Math.min(phoneW / 798, shortH / 1134)
+  const tallScale = Math.min(phoneW / 798, tallH / 1134)
+  assert.ok(tallScale > shortScale * 1.4, '1.4.345 tall stage is not stuck on height-limited meet')
+  const tallFacePx = PATH_WALKER_FACE_U * tallScale
+  assert.ok(tallFacePx >= 34, '1.4.345 walkers stay readable at width-led contain')
+  assert.equal(EASY_WALKER_FACE_PX, 44, '1.4.345 tap juice stays small (Fixes #469 regression)')
+  assert.ok(EASY_WALKER_FACE_PX <= 48, '1.4.345 no giant tap portrait')
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.345'), '1.4.345 changelog row')
+  assert.match(latestChange('1.4.345').items.join('\n'), /Fixes #488/)
+  assert.match(latestChange('1.4.345').title, /Night Watch|walker|size/i)
+  assert.doesNotMatch(
+    latestChange('1.4.345').items.join('\n'),
+    /#469|#470|#491|#492|#493|Dig deeper|Hard trail|Town|Pack B|triangle|range/i,
+    '1.4.345 stays path walker scale only',
   )
 }
 
