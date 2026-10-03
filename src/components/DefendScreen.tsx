@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { evidenceFor } from '../content/evidence'
 import {
   ANGEL_STICKER,
@@ -73,7 +73,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const [ability, setAbility] = useState<WatchAbility>(() => unlocked[0] ?? 'love')
   const taught = true
   const boardRef = useRef<SVGSVGElement>(null)
-  const [boardBox, setBoardBox] = useState({ w: 640, h: 420 })
+  const [boardBox, setBoardBox] = useState({ w: 0, h: 0 })
   const [toolLock, setToolLock] = useState<string | null>(null)
   const arming = false
   const [phase, setPhase] = useState<NightPhase>('plant')
@@ -285,11 +285,12 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     setStillOn(false)
   }, [phase])
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const node = boardRef.current
     if (!node) return
     const sync = () => {
       const rect = node.getBoundingClientRect()
+      if (rect.width < 1 || rect.height < 1) return
       setBoardBox({ w: rect.width, h: rect.height })
     }
     sync()
@@ -580,7 +581,10 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const after = juiceDone && won
   const easyTap = easyTapMode(easy, phase, won)
   const tapTarget = easyTap ? nightEnemies.cueTarget(raiders) : undefined
-  const tapPos = tapTarget ? boardPoint(raiderAt(tapTarget).x, raiderAt(tapTarget).y) : null
+  const tapPos =
+    tapTarget && boardBox.w > 0
+      ? boardPoint(raiderAt(tapTarget).x, raiderAt(tapTarget).y)
+      : null
   const midWave = phase === 'wave' && !won
   const walkerCalls: EasyWalkerCall[] = midWave
     ? raiders

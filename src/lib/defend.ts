@@ -124,8 +124,16 @@ export function towerCooldown(stage: CityStage): number {
 }
 
 /**
- * Tap-juice face in CSS px. Path faces stay SVG 36×36.
- * This overlay is brief squash → heaven only — keep it near that face, not a giant portrait.
+ * A2 path walker face in viewBox units. Sized for width-led contain on a tall phone
+ * (whole 798×1134 plate); keeps ~40 CSS px once the stage is not height-shrunk.
+ */
+export const PATH_WALKER_FACE_U = 72
+/** Tap hit radius on the path (same proportion as the original 36-wide / r22). */
+export const PATH_WALKER_HIT_R = (PATH_WALKER_FACE_U * 22) / 36
+
+/**
+ * Tap-juice face in CSS px. Brief squash → heaven only — keep it near the path face,
+ * not a giant portrait (Fixes #469).
  */
 export const EASY_WALKER_FACE_PX = 44
 /** Juice wrapper only. Path taps still use the SVG defend-raider-hit target. */
