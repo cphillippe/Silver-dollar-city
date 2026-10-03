@@ -238,7 +238,6 @@ export function abilityRange(
   const tool = watchTool(ability)
   const tier = runTier ? combatTier(ability, runTier) : tool ? toolTier(tool, progress) : 1
   const reach = (tier - 1) * 18
-  if (ability === 'love') return 640 + reach
   return towerRange(stage) + reach
 }
 

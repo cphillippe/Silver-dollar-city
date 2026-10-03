@@ -1119,7 +1119,7 @@ assert.equal(deployFit('love', 'physical'), 'weak')
 assert.equal(deployFit('science', 'physical'), 'match')
 assert.equal(raidForWave(2, 5).kind.length > 0, true)
 assert.equal(toolTier(watchTool('love'), empty), 1)
-assert.equal(abilityRange('love', 'built', empty), 640)
+assert.equal(abilityRange('love', 'built', empty), 118)
 assert.equal(
   toolTier(watchTool('love'), {
     ...empty,
@@ -1214,7 +1214,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.346')
+assert.equal(APP_VERSION, '1.4.347')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3357,6 +3357,37 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   )
   assert.equal(easyLead('fg-reason', 'x'), 'Keep the ground. Toss the floating trick.')
   assert.equal(easyLead('fg-ground', 'x'), 'Keep the living God. Toss the dead brick.')
+}
+
+// Night Watch 1.4.347: lamp and power shots respect range (#490).
+{
+  const defendLib347 = readFileSync(new URL('../src/lib/defend.ts', import.meta.url), 'utf8')
+  const porchStage = padStage('porch', empty)
+  const porchRange = abilityRange('love', porchStage, empty, { love: 1 })
+  const farWalker = pathPoint(0)
+  const porch = DEFEND_ANCHOR.porch
+  const farDist = Math.hypot(porch.x - farWalker.x, porch.y - farWalker.y)
+  assert.ok(farDist > porchRange, '1.4.347 porch Love I should not reach the gate spawn')
+  assert.equal(
+    abilityRange('love', 'built', empty, { love: 1 }),
+    abilityRange('logic', 'built', empty, { logic: 1 }),
+    '1.4.347 Love range follows the lamp like other tools',
+  )
+  assert.doesNotMatch(
+    defendLib347,
+    /if \(ability === 'love'\) return 640/,
+    '1.4.347 drops the whole-map Love reach',
+  )
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.347'), '1.4.347 changelog row')
+  assert.match(latestChange('1.4.347').title, /Night Watch|range/i)
+  assert.doesNotMatch(
+    latestChange('1.4.347').items.join('\n'),
+    /Fixes #490|Closes #490|Resolves #490/i,
+    '1.4.347 changelog avoids GitHub close keywords',
+  )
+  assert.match(defendNightSrc, /nightTowers\.inRange/)
+  assert.match(defendSrc, /dist\(at, raiderAt/)
+  assert.match(defendSrc, /d <= range/)
 }
 
 console.log('check-city: ok')
@@ -7959,9 +7990,9 @@ console.log('check-city: ok')
   assert.equal(combatTier('love', {}), 1)
   assert.equal(combatTier('love', { love: 2 }), 2)
   assert.equal(combatTier('love', { love: 9 }), 3)
-  assert.equal(abilityRange('love', 'built', empty, { love: 1 }), 640)
-  assert.equal(abilityRange('love', 'built', empty, { love: 2 }), 658)
-  assert.equal(abilityRange('love', 'built', empty, { love: 3 }), 676)
+  assert.equal(abilityRange('love', 'built', empty, { love: 1 }), 118)
+  assert.equal(abilityRange('love', 'built', empty, { love: 2 }), 136)
+  assert.equal(abilityRange('love', 'built', empty, { love: 3 }), 154)
   assert.equal(
     abilityRange('logic', 'built', { ...empty, held: ['wb-creed', 'wb-early'] }, { logic: 1 }),
     118,

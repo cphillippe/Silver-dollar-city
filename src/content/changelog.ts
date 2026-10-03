@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.347',
+    title: 'Night Watch lamps respect range',
+    when: '2026-10-03',
+    items: [
+      'Easy Night Watch only damages walkers that are close enough to the lamp or power you use. A far walker on the road is out of reach until it walks into range. Bill: “They can be attacked from anywhere.” That is fixed here.',
+    ],
+  },
+  {
     version: '1.4.346',
     title: 'Night Watch faces lose the chevron',
     when: '2026-10-03',
