@@ -1215,7 +1215,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.349')
+assert.equal(APP_VERSION, '1.4.350')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3414,6 +3414,40 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     '1.4.348 changelog avoids GitHub close keywords',
   )
   assert.match(readFileSync(new URL('../src/nightWatch/towers/index.ts', import.meta.url), 'utf8'), /pathClearance/)
+}
+
+// Easy Match 1.4.350: road maze closes on HELPED! (#514 — no mid-Match hurt-man respawn).
+{
+  const mazePlaySrc = readFileSync(
+    new URL('../src/components/challenges/RoadMazePlay.tsx', import.meta.url),
+    'utf8',
+  )
+  const mazeCss350 = readFileSync(new URL('../src/styles/maze.css', import.meta.url), 'utf8')
+  const registry350 = readFileSync(
+    new URL('../src/easyTrail/match/registry.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(
+    mazePlaySrc,
+    /1\.4\.350: HELPED! closes the maze grid; teach clear runs after the stamp \(#514\)/,
+  )
+  assert.match(mazePlaySrc, /useEffect\(\(\) => \{\s*setMazePreset\(attempt\)/)
+  assert.doesNotMatch(mazePlaySrc, /\n  setMazePreset\(attempt\)\n/)
+  assert.match(mazePlaySrc, /stampTimer/)
+  assert.match(
+    mazePlaySrc,
+    /setWinStamp\(true\)[\s\S]*?if \(!cleared\.current\) \{[\s\S]*?onClear\?\.\(\)/,
+  )
+  assert.match(mazePlaySrc, /maze-win-end/)
+  assert.match(mazeCss350, /1\.4\.350: Easy road Match ends on HELPED!/)
+  assert.match(registry350, /'road-maze': \(story, wire\) => \([\s\S]*?<RoadMazePlay[\s\S]*?key=\{story\.lineId\}/)
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.350'), '1.4.350 changelog row')
+  assert.match(latestChange('1.4.350').title, /HELPED|Match ends/i)
+  assert.doesNotMatch(
+    latestChange('1.4.350').items.join('\n'),
+    /Fixes #514|Closes #514|Resolves #514|Fixes #470|Closes #470|Resolves #470/i,
+    '1.4.350 changelog avoids GitHub close keywords',
+  )
 }
 
 // Night Watch 1.4.349: debug freeze harness for playtests (Bill — read cue without racing walkers).
