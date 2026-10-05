@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.351',
+    title: 'Easy Lock In matches the story hold',
+    when: '2026-10-05',
+    items: [
+      'After a sort walk (seed and soil): Lock In main-idea choices and why-blast now rehearse the same claim and reason you learned on the story — not the shorter sort tile lines.',
+    ],
+  },
+  {
     version: '1.4.350',
     title: 'Easy Match ends after HELPED!',
     when: '2026-10-05',

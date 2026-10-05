@@ -50,13 +50,21 @@ export function RecallGate({
   const picture = learningPicture(brief.id, tool)
   const beat = learningBeat(brief.id)
   const lines = useMemo(() => takeawayLines(brief, keeps), [brief, keeps])
-  const own = encode && lines.length > 1
-  const [chosen, setChosen] = useState<(typeof lines)[0] | null>(own ? null : lines[0] ?? null)
+  /** Sort “keep” tiles can carry sub-lines; Easy Lock In rehearses the story hold, not those tiles. */
+  const sortKeepsEncode = encode && lines.length > 1
+  const own = sortKeepsEncode && !easy
+  const easySortClaimPick = easy && sortKeepsEncode
+  const [chosen, setChosen] = useState<(typeof lines)[0] | null>(
+    own || easySortClaimPick ? null : lines[0] ?? null,
+  )
   const claimFace = (line: string) => (easy ? easyFacingLine(brief.id, line) : line)
   const reasonFace = (line: string) => (easy ? easyWhyLine(line) : line)
   const claimOptions = useMemo(() => {
     if (encode) {
-      const raw = own ? lines.map((item) => item.claim) : [brief.claim]
+      if (easySortClaimPick) {
+        return uniqueHoldChoices([...brief.claimChoices], claimFace, brief.claim)
+      }
+      const raw = sortKeepsEncode ? lines.map((item) => item.claim) : [brief.claim]
       return uniqueHoldChoices(raw, claimFace, raw[0] ?? brief.claim)
     }
     const pool = shuffle([...brief.claimChoices])
@@ -68,7 +76,7 @@ export function RecallGate({
         )
       : pool
     return uniqueHoldChoices(raw, claimFace, brief.claim)
-  }, [brief.id, brief.claim, brief.claimChoices, encode, own, lines, easy])
+  }, [brief.id, brief.claim, brief.claimChoices, encode, sortKeepsEncode, easySortClaimPick, lines, easy])
   const reasonOptions = useMemo(() => {
     const correct = chosen?.reason ?? brief.reason
     if (encode && !easy) return uniqueHoldChoices([correct], reasonFace, correct)
@@ -92,7 +100,7 @@ export function RecallGate({
   const showDeeperBeat = deeper && (sealed || reasonLocked || phase === 'teach')
 
   const easyEncode = easy && encode
-  const easyLineReady = !own || Boolean(chosen)
+  const easyLineReady = !(own || easySortClaimPick) || Boolean(chosen)
   const nextTap =
     phase === 'teach'
       ? easy
@@ -151,6 +159,15 @@ export function RecallGate({
   }
 
   function pickClaim(line: string) {
+    if (easySortClaimPick) {
+      if (line === brief.claim) {
+        setChosen({ claim: brief.claim, reason: brief.reason })
+        setHeldNote(true)
+        return
+      }
+      pick(line, brief.claim, 'reason')
+      return
+    }
     if (encode && own) {
       const hit = lines.find((item) => item.claim === line)
       if (hit) {
@@ -192,7 +209,7 @@ export function RecallGate({
   if (easyEncode) {
     return (
       <section
-        className={`recall-gate is-encode is-easy-hold is-why-blast ${shake ? 'is-shake' : ''} ${own ? 'is-own' : ''}`}
+        className={`recall-gate is-encode is-easy-hold is-why-blast ${shake ? 'is-shake' : ''} ${own || easySortClaimPick ? 'is-own' : ''}`}
         aria-label={STORY.takeaway}
       >
         <p className="eyebrow">{EASY.saved}</p>
