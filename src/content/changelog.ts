@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.354',
+    title: 'Easy Keep/Toss names an unfinished line',
+    when: '2026-10-05',
+    items: [
+      'Easy Keep/Toss: when Toss is empty and a line is still on the card, the note says that line is not sorted yet. “Those bins still mix” shows only when a line is sitting in the wrong bin.',
+    ],
+  },
+  {
     version: '1.4.353',
     title: 'Easy Lock In why choices stay still',
     when: '2026-10-05',
