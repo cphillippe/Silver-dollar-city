@@ -40,6 +40,7 @@ import {
 import { lociStampFor } from '../src/lib/lociStamp.ts'
 import { CAST } from '../src/content/story.ts'
 import { CHANGELOG, latestChange } from '../src/content/changelog.ts'
+import { sortMissCopy } from '../src/lib/sortFeedback.ts'
 import { CONTENT_PACKS } from '../src/content/packs.ts'
 import { DAILY_POOL, dailyForDate } from '../src/content/daily.ts'
 import { highLookout } from '../src/content/highLookout.ts'
@@ -1215,7 +1216,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.353')
+assert.equal(APP_VERSION, '1.4.354')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3488,6 +3489,60 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.352').items.join('\n'),
     /Fixes #515|Closes #515|Resolves #515|Fixes #470|Closes #470|Resolves #470/i,
     '1.4.352 changelog avoids GitHub close keywords',
+  )
+}
+
+// Easy Keep/Toss 1.4.354: empty Toss + a pending line is unfinished, not mixed bins (#503).
+{
+  const sortPlay354 = readFileSync(
+    new URL('../src/components/challenges/SortPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(sortPlay354, /sortMissCopy/)
+  assert.match(sortPlay354, /1\.4\.354: empty Toss/)
+  const kept = [{ bin: 'keep' }, { bin: 'keep' }, { bin: 'keep' }]
+  const unfinished = sortMissCopy({
+    status: 'wrong',
+    misses: 2,
+    pending: 1,
+    keep: kept,
+    discard: [],
+    easy: true,
+    teachOnWrong: 'Jesus names loss and hearing in the same breath.',
+  })
+  assert.equal(unfinished.kicker, 'Still sorting')
+  assert.equal(unfinished.title, 'This line is not sorted yet.')
+  assert.doesNotMatch(unfinished.title, /mix/i)
+  assert.match(unfinished.body ?? '', /Keep what belongs/)
+  const mixed = sortMissCopy({
+    status: 'wrong',
+    misses: 2,
+    pending: 0,
+    keep: [{ bin: 'discard' }],
+    discard: [{ bin: 'keep' }],
+    easy: true,
+    teachOnWrong: 'teach',
+  })
+  assert.equal(mixed.kicker, 'One more look')
+  assert.equal(mixed.title, 'Those bins still mix.')
+  assert.match(mixed.body ?? '', /Keep what belongs/)
+  const mixedWhilePending = sortMissCopy({
+    status: 'wrong',
+    misses: 2,
+    pending: 1,
+    keep: kept,
+    discard: [{ bin: 'keep' }],
+    easy: false,
+    teachOnWrong: 'A keep line is sitting in Toss.',
+  })
+  assert.equal(mixedWhilePending.title, 'Those bins still mix.')
+  assert.equal(mixedWhilePending.body, 'A keep line is sitting in Toss.')
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.354'), '1.4.354 changelog row')
+  assert.match(latestChange('1.4.354').title, /Keep\/Toss|unfinished/i)
+  assert.doesNotMatch(
+    latestChange('1.4.354').items.join('\n'),
+    /Fixes #503|Closes #503|Resolves #503|Fixes #520|Closes #520|Fixes #508|Closes #508/i,
+    '1.4.354 changelog avoids GitHub close keywords',
   )
 }
 
