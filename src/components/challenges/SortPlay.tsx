@@ -7,6 +7,7 @@ import { EASY, easyChromeLine, easyChromeNearDup, isEasy } from '../../lib/easy'
 import { useProgress } from '../../store/progress'
 import { GemMark } from '../GemMark'
 import { burstStyle } from '../../lib/juice'
+import { sortMissCopy } from '../../lib/sortFeedback'
 import { easyLead } from '../../lib/words'
 import { PuzzleHint } from './PuzzleHint'
 import { PuzzleLead } from './PuzzleLead'
@@ -127,8 +128,19 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
   }
 
   const selected = picked ? takeTile(picked) : undefined
-  const ready = status !== 'ok' && filledSlots().length === 0
+  const pendingCount = filledSlots().length
+  const ready = status !== 'ok' && pendingCount === 0
   const nextTile = filledSlots()[0]
+  // 1.4.354: empty Toss + a line still on the card is unfinished, not mixed bins.
+  const missCopy = sortMissCopy({
+    status,
+    misses,
+    pending: pendingCount,
+    keep,
+    discard,
+    easy,
+    teachOnWrong: challenge.teachOnWrong,
+  })
   // Easy Sort keeps PuzzleHint (.easy-hint teach) — skip redundant Keep/Toss .sort-how when hint shows.
   // Inverse of MatchPlay 1.4.137 (which kept .sort-how and skipped duplicate PuzzleHint).
   // 1.4.145: also skip PuzzleHint when it near-dupes PuzzleLead (fg-order / fg-ought Keep/Toss stack).
@@ -395,29 +407,9 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
 
       <ResultPanel
         tone={status === 'idle' ? 'idle' : status === 'ok' ? 'ok' : 'teach'}
-        kicker={
-          status === 'ok'
-            ? 'Snapped'
-            : misses >= 2
-              ? 'One more look'
-              : 'A line is in the wrong bin'
-        }
-        title={
-          status === 'ok'
-            ? 'Keep and toss lock in.'
-            : misses >= 2
-              ? 'Those bins still mix.'
-              : 'Keep vs toss — shake and sort again.'
-        }
-        body={
-          status === 'wrong'
-            ? misses >= 2
-              ? easy
-                ? 'Keep what belongs with the main idea. Toss the rest.'
-                : challenge.teachOnWrong
-              : 'Keep the lines that belong. Toss (set aside) the rest.'
-            : undefined
-        }
+        kicker={missCopy.kicker}
+        title={missCopy.title}
+        body={missCopy.body}
         deeper={challenge.deeper}
       />
     </div>
