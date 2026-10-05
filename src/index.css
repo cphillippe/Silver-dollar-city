@@ -4497,6 +4497,10 @@ html[data-easy='on'] .mind-node em {
   width: min(100%, 390px);
   margin: 0 auto;
   min-height: 0;
+  /* 1.4.352: phone long-press on this play surface must not select text or raise a callout. */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .run-scene {
@@ -4769,7 +4773,18 @@ html[data-easy='on'] .mind-node em {
   box-shadow:
     var(--candy-lip),
     var(--candy-shine);
+  /* 1.4.352: HOLD TO RUN long-press starts the run — no browser callout, no text selection. */
   touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+.play.is-father-run .btn,
+.play.is-father-run .run-pad {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
   user-select: none;
 }
 
