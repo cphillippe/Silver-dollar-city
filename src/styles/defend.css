@@ -1269,8 +1269,16 @@ img.walker-face.easy-walker-face,
   outline: none;
 }
 
-.defend-page.is-easy-tap .defend-raider.is-easy-cue .defend-raider-face {
-  filter: url(#defend-glow) drop-shadow(0 0 6px rgba(255, 204, 51, 0.65));
+.defend-page.is-easy-tap .defend-raider.is-easy-cue .defend-raider-face.is-dark-face {
+  filter: url(#defend-glow) drop-shadow(0 0 10px rgba(255, 204, 51, 0.85))
+    drop-shadow(0 0 18px rgba(255, 204, 51, 0.45));
+  animation: easy-walker-pulse 1s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .defend-page.is-easy-tap .defend-raider.is-easy-cue .defend-raider-face.is-dark-face {
+    animation: none;
+  }
 }
 
 .defend-raider-call text.defend-raider-taunt {
