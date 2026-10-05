@@ -1215,7 +1215,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.352')
+assert.equal(APP_VERSION, '1.4.353')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3488,6 +3488,29 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.352').items.join('\n'),
     /Fixes #515|Closes #515|Resolves #515|Fixes #470|Closes #470|Resolves #470/i,
     '1.4.352 changelog avoids GitHub close keywords',
+  )
+}
+
+// Easy Lock In 1.4.353: phone why chips stay still so a thumb hits a fixed target (#502).
+{
+  const hold353 = readFileSync(new URL('../src/styles/sortHold.css', import.meta.url), 'utf8')
+  const blast353 = readFileSync(
+    new URL('../src/components/challenges/WhyBlastPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(hold353, /1\.4\.353: phone why chips stay still/)
+  assert.match(hold353, /animation: why-float 2\.4s ease-in-out infinite/)
+  assert.match(
+    hold353,
+    /@media \(max-width: 900px\), \(pointer: coarse\) \{\s*\.why-chip \{\s*animation: none;/,
+  )
+  assert.match(blast353, /1\.4\.353: phone why chips stay still/)
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.353'), '1.4.353 changelog row')
+  assert.match(latestChange('1.4.353').title, /why choices stay still|Lock In/i)
+  assert.doesNotMatch(
+    latestChange('1.4.353').items.join('\n'),
+    /Fixes #502|Closes #502|Resolves #502|Fixes #470|Closes #470|Resolves #470/i,
+    '1.4.353 changelog avoids GitHub close keywords',
   )
 }
 
