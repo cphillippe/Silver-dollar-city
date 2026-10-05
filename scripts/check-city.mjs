@@ -1215,7 +1215,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.350')
+assert.equal(APP_VERSION, '1.4.351')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3447,6 +3447,24 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.350').items.join('\n'),
     /Fixes #514|Closes #514|Resolves #514|Fixes #470|Closes #470|Resolves #470/i,
     '1.4.350 changelog avoids GitHub close keywords',
+  )
+}
+
+// Easy Lock In 1.4.351: sort encode rehearses pack hold, not sort tile sub-lines (#501).
+{
+  const recall351 = readFileSync(
+    new URL('../src/components/RecallGate.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(recall351, /easySortClaimPick/)
+  assert.match(recall351, /easySortClaimPick[\s\S]*brief\.claimChoices/)
+  assert.match(recall351, /setChosen\(\{ claim: brief\.claim, reason: brief\.reason \}\)/)
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.351'), '1.4.351 changelog row')
+  assert.match(latestChange('1.4.351').title, /Lock In|story hold/i)
+  assert.doesNotMatch(
+    latestChange('1.4.351').items.join('\n'),
+    /Fixes #501|Closes #501|Resolves #501|Fixes #470|Closes #470|Resolves #470/i,
+    '1.4.351 changelog avoids GitHub close keywords',
   )
 }
 
