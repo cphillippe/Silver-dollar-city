@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.352',
+    title: 'Hold to run ignores the phone menu',
+    when: '2026-10-05',
+    items: [
+      'Easy Father Dash: holding Hold to run starts the run. A long press no longer opens the browser menu or selects the words on the button.',
+    ],
+  },
+  {
     version: '1.4.351',
     title: 'Easy Lock In matches the story hold',
     when: '2026-10-05',
