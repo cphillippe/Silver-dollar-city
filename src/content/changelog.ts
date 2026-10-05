@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.349',
+    title: 'Night Watch debug freeze for playtests',
+    when: '2026-10-05',
+    items: [
+      'Settings → Developer: Night Watch debug freeze (playtests). When on, Easy Night Watch starts each wave paused so walkers hold still while you read the side cue and tap the glowing face. Resume walkers / Pause walkers on the board. Default off — kids never see it unless a playtester turns it on.',
+    ],
+  },
+  {
     version: '1.4.348',
     title: 'Night Watch porch lamp reaches the road',
     when: '2026-10-03',
