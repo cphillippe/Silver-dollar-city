@@ -35,6 +35,10 @@ import {
   type KitId,
   type RunKits,
 } from '../lib/nightKits'
+import {
+  nightWatchDebugFrozen,
+  readNightWatchDebug,
+} from '../lib/nightWatchDebug'
 import { applyBoost, combatTier, freshRunTier } from '../lib/watchTools'
 import { useJuiceHandoff } from '../lib/juice'
 import type { CityPlotId } from '../lib/city'
@@ -82,6 +86,12 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const [runSparks, setRunSparks] = useState(0)
   const [runKits, setRunKits] = useState<RunKits>(freshRunKits)
   const [stillOn, setStillOn] = useState(false)
+  const [nwDebug, setNwDebug] = useState(() => readNightWatchDebug())
+  const [debugPaused, setDebugPaused] = useState(false)
+  const nwDebugRef = useRef(nwDebug)
+  const debugPausedRef = useRef(debugPaused)
+  nwDebugRef.current = nwDebug
+  debugPausedRef.current = debugPaused
   const [boostNote, setBoostNote] = useState<string | null>(null)
   const [loreMeet, setLoreMeet] = useState<{ id: string; line: string } | null>(null)
   const runTierRef = useRef(runTier)
@@ -134,6 +144,16 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   }, [planted])
 
   useEffect(() => {
+    const sync = () => setNwDebug(readNightWatchDebug())
+    window.addEventListener('silver-city-nw-debug', sync)
+    return () => window.removeEventListener('silver-city-nw-debug', sync)
+  }, [])
+
+  useEffect(() => {
+    if (phase === 'wave' && nwDebug && easy) setDebugPaused(true)
+  }, [phase, waveIndex, nwDebug, easy])
+
+  useEffect(() => {
     if (!juiceDone || saved.current || !brief) return
     saved.current = true
     recordNight(today)
@@ -171,7 +191,13 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       if (!live.current.playing) return
       const dt = Math.min(0.05, (now - last) / 1000)
       last = now
-      const frozen = now < live.current.freezeUntil
+      const frozen = nightWatchDebugFrozen(
+        easy,
+        nwDebugRef.current,
+        debugPausedRef.current,
+        now,
+        live.current.freezeUntil,
+      )
       if (!frozen) spawnAt += dt
       const next = live.current.raiders.map((item) => {
         if (item.turned) {
@@ -484,6 +510,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     kitsRef.current = kits
     setRunKits(kits)
     setStillOn(false)
+    setDebugPaused(false)
     live.current.freezeUntil = 0
     live.current.hearts = DEFEND_HEARTS
     setBoostNote(null)
@@ -586,6 +613,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       ? boardPoint(raiderAt(tapTarget).x, raiderAt(tapTarget).y)
       : null
   const midWave = phase === 'wave' && !won
+  const debugHarness = easy && nwDebug && midWave
+  const debugFrozen = debugHarness && debugPaused
   const walkerCalls: EasyWalkerCall[] = midWave
     ? raiders
         .filter((raider) => !raider.turned)
@@ -652,6 +681,21 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const kitCharges = runKits.still + runKits.mend
   const docks = (
     <>
+      {debugHarness ? (
+        <div className="defend-nw-debug" role="group" aria-label="Night Watch debug playtest">
+          <p className="defend-nw-debug-label">Debug · test only</p>
+          <button
+            type="button"
+            className={`btn defend-nw-debug-toggle${debugPaused ? ' is-paused' : ''}`}
+            onClick={() => setDebugPaused((on) => !on)}
+          >
+            {debugPaused ? 'Resume walkers' : 'Pause walkers'}
+          </button>
+          {debugPaused ? (
+            <p className="defend-nw-debug-hint">Walkers frozen — read the cue, tap the glowing face.</p>
+          ) : null}
+        </div>
+      ) : null}
       {phase === 'wave' && !won && kitCharges > 0 ? (
         <div className="defend-kits" role="group" aria-label="One-off tools">
           <button
@@ -763,7 +807,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
 
   return (
     <main
-      className={`defend-page ${taught ? 'is-puzzle' : 'is-teach'} ${arming ? 'is-arming' : ''} ${won ? 'is-win' : ''} ${shake ? 'is-shake' : ''} ${leakFlash ? 'is-leak' : ''} ${firing ? 'is-firing' : ''} ${stillOn ? 'is-still' : ''} ${easy ? 'is-easy-watch' : ''} ${easyTap ? 'is-easy-tap' : ''} ${boosting ? 'is-boost' : ''}`}
+      className={`defend-page ${taught ? 'is-puzzle' : 'is-teach'} ${arming ? 'is-arming' : ''} ${won ? 'is-win' : ''} ${shake ? 'is-shake' : ''} ${leakFlash ? 'is-leak' : ''} ${firing ? 'is-firing' : ''} ${stillOn ? 'is-still' : ''} ${debugFrozen ? 'is-nw-debug-freeze' : ''} ${easy ? 'is-easy-watch' : ''} ${easyTap ? 'is-easy-tap' : ''} ${boosting ? 'is-boost' : ''}`}
       aria-label={WATCH_TITLE}
     >
       {after ? (

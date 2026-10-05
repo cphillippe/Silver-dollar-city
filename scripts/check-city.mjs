@@ -1215,7 +1215,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.348')
+assert.equal(APP_VERSION, '1.4.349')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3414,6 +3414,26 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     '1.4.348 changelog avoids GitHub close keywords',
   )
   assert.match(readFileSync(new URL('../src/nightWatch/towers/index.ts', import.meta.url), 'utf8'), /pathClearance/)
+}
+
+// Night Watch 1.4.349: debug freeze harness for playtests (Bill — read cue without racing walkers).
+{
+  const nwDebugSrc = readFileSync(new URL('../src/lib/nightWatchDebug.ts', import.meta.url), 'utf8')
+  const defendScreenSrc = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const settingsSrc = readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8')
+  assert.match(nwDebugSrc, /readNightWatchDebug/)
+  assert.match(nwDebugSrc, /nightWatchDebugFrozen/)
+  assert.match(defendScreenSrc, /nightWatchDebugFrozen/)
+  assert.match(defendScreenSrc, /is-nw-debug-freeze/)
+  assert.match(settingsSrc, /writeNightWatchDebug/)
+  assert.match(settingsSrc, /debugNightWatchJump/)
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.349'), '1.4.349 changelog row')
+  assert.match(latestChange('1.4.349').title, /Night Watch|debug|freeze|playtest/i)
+  assert.doesNotMatch(
+    latestChange('1.4.349').items.join('\n'),
+    /Fixes #508|Closes #508|Resolves #508|Fixes #470|Closes #470|Resolves #470/i,
+    '1.4.349 changelog avoids GitHub close keywords',
+  )
 }
 
 console.log('check-city: ok')
@@ -8186,7 +8206,7 @@ console.log('check-city: ok')
   assert.match(defendScreenOnlySrc, /useMend\(live\.current\.hearts\)/)
   assert.match(defendScreenOnlySrc, /unturnedStep\(/)
   assert.match(defendScreenOnlySrc, /freezeUntil/)
-  assert.match(defendScreenOnlySrc, /const frozen = now < live\.current\.freezeUntil/)
+  assert.match(defendScreenOnlySrc, /nightWatchDebugFrozen\(/)
   assert.match(defendScreenOnlySrc, /if \(!frozen\) spawnAt \+= dt/)
   assert.match(defendScreenOnlySrc, /if \(item\.turned\)/, '1.4.329 heaven flyaway still advances')
   assert.match(defendScreenOnlySrc, /className="defend-kits"/)
