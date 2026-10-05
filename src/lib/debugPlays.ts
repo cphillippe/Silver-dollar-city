@@ -96,3 +96,8 @@ export function debugJumpView(item: DebugMiniGame):
   }
   return { name: 'link', debugLine: item.lineId }
 }
+
+/** Cold jump to Night Watch — pair with Settings debug freeze for playtests. */
+export function debugNightWatchJump(): { name: 'defend' } {
+  return { name: 'defend' }
+}

@@ -29,7 +29,8 @@ import {
   wrapSave,
 } from '../lib/save'
 import { localDateKey } from '../lib/dates'
-import { debugJumpView, debugPlayGroups, debugPlayLabel } from '../lib/debugPlays'
+import { debugJumpView, debugNightWatchJump, debugPlayGroups, debugPlayLabel } from '../lib/debugPlays'
+import { readNightWatchDebug, writeNightWatchDebug } from '../lib/nightWatchDebug'
 import { EASY, isEasy } from '../lib/easy'
 import { EASY_HOME } from '../lib/easyNav'
 import { EasyBack } from './EasyBack'
@@ -49,6 +50,7 @@ export function Settings({ onNavigate }: SettingsProps) {
   const [paste, setPaste] = useState('')
   const [message, setMessage] = useState('')
   const [shareCode, setShareCode] = useState('')
+  const [nwDebug, setNwDebug] = useState(() => readNightWatchDebug())
 
   const held = progress.held.length
   const open = progress.journal.length
@@ -486,6 +488,36 @@ export function Settings({ onNavigate }: SettingsProps) {
           One-tap every Easy play. Labels are lesson id + short name. This is
           not on Home.
         </p>
+        <section className="settings-debug-group" aria-label="Night Watch playtest">
+          <p className="eyebrow">Night Watch · debug freeze</p>
+          <p>
+            Playtest only. Easy Night Watch pauses walkers each wave so you can read
+            the cue and tap the glowing face without racing. Off by default.
+          </p>
+          <div className="settings-actions">
+            <button
+              type="button"
+              className={`btn${nwDebug ? ' primary' : ''}`}
+              onClick={() => {
+                const next = !nwDebug
+                writeNightWatchDebug(next)
+                setNwDebug(next)
+              }}
+            >
+              {nwDebug ? 'Debug freeze · ON' : 'Debug freeze · OFF'}
+            </button>
+            <button
+              type="button"
+              className="btn"
+              onClick={() => {
+                setEasyMode(true)
+                onNavigate(debugNightWatchJump())
+              }}
+            >
+              Jump · Night Watch
+            </button>
+          </div>
+        </section>
         {debugPlayGroups().map((group) => (
           <section key={group.play} className="settings-debug-group" aria-label={group.heading}>
             <p className="eyebrow">{group.heading}</p>
