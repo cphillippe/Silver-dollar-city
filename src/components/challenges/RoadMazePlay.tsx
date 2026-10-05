@@ -97,8 +97,17 @@ export function RoadMazePlay({
   const comboRef = useRef(0)
   const openedRef = useRef(1)
   const cleared = useRef(false)
+  const stampTimer = useRef(0)
 
-  setMazePreset(attempt)
+  useEffect(() => {
+    setMazePreset(attempt)
+  }, [attempt])
+
+  useEffect(() => {
+    return () => {
+      window.clearTimeout(stampTimer.current)
+    }
+  }, [])
 
   const opened = mazeBeatsOpened(found, helped, won)
   const goal = mazeGoal(found, helped)
@@ -174,6 +183,7 @@ export function RoadMazePlay({
 
   function replay() {
     window.clearTimeout(walkRef.current)
+    window.clearTimeout(stampTimer.current)
     atRef.current = MAZE_START
     foundRef.current = false
     helpedRef.current = false
@@ -235,11 +245,15 @@ export function RoadMazePlay({
     setToastWhy('')
     setScore((pts) => pts + MAZE_INN_SCORE)
     playGemPop('win')
-    if (!cleared.current) {
-      cleared.current = true
-      onClear?.()
-    }
-    window.setTimeout(() => setWinStamp(true), reduced ? 40 : 280)
+    window.clearTimeout(stampTimer.current)
+    const stampAt = reduced ? 40 : 280
+    stampTimer.current = window.setTimeout(() => {
+      setWinStamp(true)
+      if (!cleared.current) {
+        cleared.current = true
+        onClear?.()
+      }
+    }, stampAt)
   }
 
   function landOn(cell: MazeCoord) {
@@ -387,6 +401,7 @@ export function RoadMazePlay({
       {/* Easy Clear 1.4.256: tall-phone cream shell fill — opaque cream app-body + play shell · solid maze-stage · warm board · cream score/dock floor · top pad so HUD unclips — closes Shot 250 purple voids + top clip after 249 (Fixes #348). */}
       {/* Easy Clear 1.4.265: tall residual cream floor (opaque cream play + app-body · solid maze-stage · score pinned to cream floor above the 920 cap) so leftover between HUD, board, and footer is cream, not purple void after 256 (Fixes #365). */}
       {/* Easy Clear 1.4.271: pack maze-stage flex-start so the board sits under the objective chips on tall phones — cream floor stays, pills unchanged (Fixes #378). */}
+      {/* Easy Match 1.4.350: HELPED! closes the maze grid; teach clear runs after the stamp (#514). */}
       <p className="story-kicker">
         {home.who} · {home.place}
       </p>
@@ -429,6 +444,12 @@ export function RoadMazePlay({
         })}
       </ul>
       <div className="maze-stage">
+      {won ? (
+        <div className="maze-win-end" aria-live="polite">
+          <WinBurst play={winStamp} stamp={ROAD_MAZE_WIN} />
+        </div>
+      ) : (
+        <>
       {toast ? (
         <p className={`match-toast gem-toast is-yes`} role="status">
           <strong>{toast}</strong>
@@ -457,7 +478,6 @@ export function RoadMazePlay({
         }}
         onKeyDown={onBoardKey}
       >
-        <WinBurst play={winStamp} stamp={ROAD_MAZE_WIN} />
         {Array.from({ length: MAZE_ROWS }, (_, r) =>
           Array.from({ length: MAZE_COLS }, (__, c) => {
             const cell = { r, c }
@@ -516,6 +536,8 @@ export function RoadMazePlay({
           }),
         )}
       </div>
+        </>
+      )}
       </div>
       <p className={`match-score ${plusFlash ? 'is-juice' : ''}`}>
         {score}

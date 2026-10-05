@@ -45,6 +45,7 @@ export const STORY_PLAY_REGISTRY: Record<StoryPlayKind, StoryPlayMount> = {
   ),
   'road-maze': (story, wire) => (
     <RoadMazePlay
+      key={story.lineId}
       lineId={story.lineId}
       beats={story.beats}
       onMiss={wire.onMiss}
