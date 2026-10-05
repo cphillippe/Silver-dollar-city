@@ -128,7 +128,7 @@ import {
   EASY_FOLK_NUDGE,
 } from '../src/lib/cityBuild.ts'
 import { emptyProgress, progressAfterReset } from '../src/lib/save.ts'
-import { EASY, EASY_LINE_ORDER, DIG_ARC, FOUNDATION_ARC, NAMES_ARC, STONE_ARC, INK_ARC, easyChromeLine, easyChromeNearDup, easyFacingLine, easyHomeFocus, easyHoldFields, easyHoldLine, easyHoldPractice, easyHoldView, easyLearnLine, easyLineHeld, easyLineLearned, easyLineTaught, easyLoopLine, easyMatchLine, easyMatchReady, easyTeachFields, easyTrailView, markEasyHeld, markEasyTaught, progressAfterMatchTaught, easyWhoWhere, easyWhoWhereLine, easyWhyLine, easyWhyWordCount, easyWrongTap, uniqueHoldChoices } from '../src/lib/easy.ts'
+import { EASY, EASY_LINE_ORDER, DIG_ARC, FOUNDATION_ARC, NAMES_ARC, STONE_ARC, INK_ARC, easyChromeLine, easyChromeNearDup, easyFacingLine, easyHomeFocus, easyHoldFields, easyHoldLine, easyHoldPractice, easyHoldView, easyLockInExit, easyLearnLine, easyLineHeld, easyLineLearned, easyLineTaught, easyLoopLine, easyMatchLine, easyMatchReady, easyTeachFields, easyTrailView, markEasyHeld, markEasyTaught, progressAfterMatchTaught, easyWhoWhere, easyWhoWhereLine, easyWhyLine, easyWhyWordCount, easyWrongTap, uniqueHoldChoices } from '../src/lib/easy.ts'
 import { storyPlayFor } from '../src/lib/storyPlay.ts'
 import { DEBUG_LAYER_LINES, debugJumpView } from '../src/lib/debugPlays.ts'
 import { FATHER_RUN_LINE } from '../src/lib/fatherRun.ts'
@@ -1216,7 +1216,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.354')
+assert.equal(APP_VERSION, '1.4.355')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3489,6 +3489,55 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.352').items.join('\n'),
     /Fixes #515|Closes #515|Resolves #515|Fixes #470|Closes #470|Resolves #470/i,
     '1.4.352 changelog avoids GitHub close keywords',
+  )
+}
+
+// Easy Lock In 1.4.355: Lock In exit recites the proof just kept. The Hurt Man maze stays on Match.
+{
+  const fresh355 = { ...emptyProgress(), easyMode: true }
+  assert.deepEqual(easyLockInExit(fresh355), { name: 'journal' }, '1.4.355 fresh Lock In is a recap, not the maze')
+  assert.notEqual(easyLockInExit(fresh355).name, 'link')
+  const taughtMercy355 = progressAfterMatchTaught(fresh355, 'ph-road')
+  assert.deepEqual(easyLockInExit(taughtMercy355), {
+    name: 'journal',
+    focusId: 'ph-road',
+    autoQuiz: true,
+  })
+  const seeded355 = {
+    ...fresh355,
+    held: ['daily-seed'],
+    learnings: [{ id: 'daily-seed' }],
+  }
+  assert.deepEqual(easyLockInExit(seeded355), {
+    name: 'journal',
+    focusId: 'learn-daily-seed',
+  })
+  const afterMercy355 = {
+    ...fresh355,
+    easyTaught: ['ph-road'],
+    easyHeld: ['ph-road'],
+    held: ['ph-road'],
+    learnings: [{ id: 'ph-road' }],
+  }
+  assert.equal(easyLoopLine(afterMercy355), 'ph-father')
+  assert.deepEqual(easyLockInExit(afterMercy355), { name: 'link' }, '1.4.355 a later beat still opens from Lock In')
+  const hub355 = readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8')
+  const shell355 = readFileSync(new URL('../src/components/AppShell.tsx', import.meta.url), 'utf8')
+  assert.match(hub355, /easyLockInExit\(progress\)/)
+  assert.doesNotMatch(hub355, /easyHoldView\(progress\) : \{ name: 'link' \}/)
+  assert.match(shell355, /easyLockInExit\(progress\)/)
+  assert.doesNotMatch(shell355, /easyTrailView/)
+  assert.match(
+    readFileSync(new URL('../src/components/CityMap.tsx', import.meta.url), 'utf8'),
+    /easyTrailView\(progress\)/,
+    '1.4.355 map enter still opens Match',
+  )
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.355'), '1.4.355 changelog row')
+  assert.match(latestChange('1.4.355').title, /Lock In/i)
+  assert.doesNotMatch(
+    latestChange('1.4.355').items.join('\n'),
+    /Fixes #504|Closes #504|Resolves #504|Fixes #520|Closes #520|Fixes #508|Closes #508/i,
+    '1.4.355 changelog avoids GitHub close keywords',
   )
 }
 
