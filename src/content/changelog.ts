@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.349',
+    title: 'Night Watch glowing face matches lamp range',
+    when: '2026-10-05',
+    items: [
+      'Easy Night Watch only glows the front walker your planted lamp can hit right now. Tapping that face lands Love; tapping a different face still says Wrong. No glow and no Wrong spam while walkers are still out of reach.',
+    ],
+  },
+  {
     version: '1.4.348',
     title: 'Night Watch porch lamp reaches the road',
     when: '2026-10-03',
