@@ -37,8 +37,8 @@ export function sortBinsMixed(
 }
 
 /**
- * 1.4.354: an empty Toss and a line still on the card are an unfinished sort,
- * not mixed bins. “Those bins still mix” stays for a line sitting in the wrong bin.
+ * An empty Toss and a line still on the card are an unfinished sort, including
+ * the first miss. Wrong-bin copy only when a placed line is in the wrong bin.
  */
 export function sortMissCopy(input: SortMissInput): SortMissCopy {
   if (input.status === 'ok') {
@@ -58,7 +58,7 @@ export function sortMissCopy(input: SortMissInput): SortMissCopy {
     }
   }
 
-  if (!mixed && input.misses >= 2 && input.pending > 0) {
+  if (!mixed && input.pending > 0 && input.misses >= 1) {
     return {
       kicker: 'Still sorting',
       title: 'This line is not sorted yet.',
@@ -66,7 +66,7 @@ export function sortMissCopy(input: SortMissInput): SortMissCopy {
     }
   }
 
-  if (!mixed && input.misses >= 2) {
+  if (!mixed) {
     return {
       kicker: 'Still sorting',
       title: 'Keep and toss are not locked yet.',
