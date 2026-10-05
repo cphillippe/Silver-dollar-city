@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.355',
+    title: 'Easy Lock In stays with the proof',
+    when: '2026-10-05',
+    items: [
+      'Easy Lock In no longer opens the Hurt Man maze. Lock In shows the line you just kept — main idea, why, and from — or the next beat when that beat is not the mercy road. Match still starts the road when that story is the one to play.',
+    ],
+  },
+  {
     version: '1.4.354',
     title: 'Easy Keep/Toss names an unfinished line',
     when: '2026-10-05',

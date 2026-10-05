@@ -32,6 +32,7 @@ export {
   easyHoldPractice,
   easyHoldView,
   easyHomeFocus,
+  easyLockInExit,
   easyLearnLine,
   easyLineHeld,
   easyLineLearned,

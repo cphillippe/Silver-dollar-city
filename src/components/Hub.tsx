@@ -11,7 +11,7 @@ import {
   nextUpgradeNeed,
   readyUpgradeId,
 } from '../lib/cityBuild'
-import { EASY, EASY_MATCH_LINE, easyHomeFocus, easyHoldView, easyLineHeld, easyLoopLine, easyMatchReady, isEasy } from '../lib/easy'
+import { EASY, EASY_MATCH_LINE, easyHomeFocus, easyHoldView, easyLineHeld, easyLockInExit, easyLoopLine, easyMatchReady, isEasy } from '../lib/easy'
 import { storyPlayFor } from '../lib/storyPlay'
 import { markLater, readLater, sessionDue } from '../lib/recall'
 import { Avatar } from './Avatar'
@@ -164,7 +164,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
                   className="easy-coach-step"
                   onClick={() =>
                     onNavigate(
-                      easyHomeFocus(progress) === 'hold' ? easyHoldView(progress) : { name: 'link' },
+                      easyHomeFocus(progress) === 'hold' ? easyHoldView(progress) : easyLockInExit(progress),
                     )
                   }
                 >
@@ -196,7 +196,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
                 className={`easy-coach-step ${focus === 'hold' ? 'is-dock-now' : ''}`}
                 onClick={() =>
                   onNavigate(
-                    easyHomeFocus(progress) === 'hold' ? easyHoldView(progress) : { name: 'link' },
+                    easyHomeFocus(progress) === 'hold' ? easyHoldView(progress) : easyLockInExit(progress),
                   )
                 }
               >
