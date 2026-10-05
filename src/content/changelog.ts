@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.356',
+    title: 'Easy Keep/Toss first miss stays honest',
+    when: '2026-10-05',
+    items: [
+      'Easy Keep/Toss: the first miss, with Toss empty and a line still on the card, says that line is not sorted yet. “A line is in the wrong bin” shows only when a line is sitting in the wrong bin.',
+    ],
+  },
+  {
     version: '1.4.355',
     title: 'Easy Lock In stays with the proof',
     when: '2026-10-05',

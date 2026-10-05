@@ -1216,7 +1216,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.355')
+assert.equal(APP_VERSION, '1.4.356')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3538,6 +3538,53 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.355').items.join('\n'),
     /Fixes #504|Closes #504|Resolves #504|Fixes #520|Closes #520|Fixes #508|Closes #508/i,
     '1.4.355 changelog avoids GitHub close keywords',
+  )
+}
+
+// Easy Keep/Toss 1.4.356: first miss with empty Toss + a pending line is unfinished (#527).
+{
+  const kept356 = [{ bin: 'keep' }, { bin: 'keep' }, { bin: 'keep' }]
+  const firstMiss = sortMissCopy({
+    status: 'wrong',
+    misses: 1,
+    pending: 1,
+    keep: kept356,
+    discard: [],
+    easy: true,
+    teachOnWrong: 'Jesus names loss and hearing in the same breath.',
+  })
+  assert.equal(firstMiss.kicker, 'Still sorting')
+  assert.equal(firstMiss.title, 'This line is not sorted yet.')
+  assert.doesNotMatch(`${firstMiss.kicker} ${firstMiss.title}`, /wrong bin|mix/i)
+  assert.match(firstMiss.body ?? '', /Keep what belongs/)
+  const firstMissMixed = sortMissCopy({
+    status: 'wrong',
+    misses: 1,
+    pending: 1,
+    keep: kept356,
+    discard: [{ bin: 'keep' }],
+    easy: true,
+    teachOnWrong: 'teach',
+  })
+  assert.equal(firstMissMixed.kicker, 'A line is in the wrong bin')
+  assert.match(firstMissMixed.title, /Keep vs toss/)
+  const firstMissClear = sortMissCopy({
+    status: 'wrong',
+    misses: 1,
+    pending: 0,
+    keep: kept356,
+    discard: [],
+    easy: true,
+    teachOnWrong: 'teach',
+  })
+  assert.equal(firstMissClear.kicker, 'Still sorting')
+  assert.equal(firstMissClear.title, 'Keep and toss are not locked yet.')
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.356'), '1.4.356 changelog row')
+  assert.match(latestChange('1.4.356').title, /Keep\/Toss|first miss/i)
+  assert.doesNotMatch(
+    latestChange('1.4.356').items.join('\n'),
+    /Fixes #527|Closes #527|Resolves #527|Fixes #503|Closes #503|Fixes #520|Closes #520|Fixes #508|Closes #508/i,
+    '1.4.356 changelog avoids GitHub close keywords',
   )
 }
 
