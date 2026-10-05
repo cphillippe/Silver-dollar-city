@@ -1115,6 +1115,16 @@ html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-miss-teach) .recall-
   50% { transform: translateY(-5px); }
 }
 
+/* Easy Lock In 1.4.353: phone why chips stay still.
+   Idle why-float bobbed the hit target while a thumb aimed. Narrow viewports
+   and coarse pointers keep chips put. Desktop mouse keeps the bob.
+   Toss, lock, retry, and press stay — those rules outrank .why-chip. */
+@media (max-width: 900px), (pointer: coarse) {
+  .why-chip {
+    animation: none;
+  }
+}
+
 .why-chip.is-toss {
   animation: why-toss 0.42s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
   pointer-events: none;
