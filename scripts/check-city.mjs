@@ -1215,7 +1215,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.351')
+assert.equal(APP_VERSION, '1.4.352')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3465,6 +3465,29 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.351').items.join('\n'),
     /Fixes #501|Closes #501|Resolves #501|Fixes #470|Closes #470|Resolves #470/i,
     '1.4.351 changelog avoids GitHub close keywords',
+  )
+}
+
+// Easy Father Dash 1.4.352: HOLD TO RUN long-press must not open the browser menu or select text (#515).
+{
+  const father352 = readFileSync(
+    new URL('../src/easyTrail/father/FatherRunPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  const css352 = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
+  assert.match(father352, /function blockHoldMenu/)
+  assert.match(father352, /onContextMenu=\{blockHoldMenu\}/)
+  assert.match(father352, /selectstart/)
+  assert.match(css352, /\.run-pad \{[\s\S]*?-webkit-touch-callout:\s*none/)
+  assert.match(css352, /\.run-pad \{[\s\S]*?-webkit-user-select:\s*none/)
+  assert.match(css352, /\.play\.is-father-run \{[\s\S]*?-webkit-user-select:\s*none/)
+  assert.match(css352, /\.play\.is-father-run \.btn/)
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.352'), '1.4.352 changelog row')
+  assert.match(latestChange('1.4.352').title, /Hold to run|phone menu/i)
+  assert.doesNotMatch(
+    latestChange('1.4.352').items.join('\n'),
+    /Fixes #515|Closes #515|Resolves #515|Fixes #470|Closes #470|Resolves #470/i,
+    '1.4.352 changelog avoids GitHub close keywords',
   )
 }
 

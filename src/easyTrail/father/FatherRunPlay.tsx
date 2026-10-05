@@ -82,6 +82,7 @@ export function FatherRunPlay({
   const cleared = useRef(false)
   const openedRef = useRef(1)
   const frame = useRef(0)
+  const playRef = useRef<HTMLDivElement>(null)
 
   const opened = beatsOpened(progress, panels.length)
   const phrase = clockOn.current || elapsed > 0 ? speechPhraseAt(elapsed) : HIRED_HAND_SPEECH[0]
@@ -271,6 +272,19 @@ export function FatherRunPlay({
     beginHold(event.currentTarget, event.pointerId)
   }
 
+  // Phone long-press must start the run. Block the browser menu and text selection.
+  function blockHoldMenu(event: { preventDefault: () => void }) {
+    event.preventDefault()
+  }
+
+  useEffect(() => {
+    const node = playRef.current
+    if (!node) return
+    const blockSelect = (event: Event) => event.preventDefault()
+    node.addEventListener('selectstart', blockSelect)
+    return () => node.removeEventListener('selectstart', blockSelect)
+  }, [])
+
   function onPadUp() {
     holdingRef.current = false
     setHolding(false)
@@ -294,7 +308,9 @@ export function FatherRunPlay({
 
   return (
     <div
+      ref={playRef}
       className={`play is-father-run ${holding ? 'is-running' : ''} ${dash.inWindow && phase === 'run' ? 'is-glow' : ''} ${dashFlash ? 'is-dash' : ''} ${phase === 'hug' ? 'is-win is-hug' : ''} ${phase === 'miss' ? 'is-miss' : ''}`}
+      onContextMenu={blockHoldMenu}
     >
       {/* Easy Clear 1.4.144: omit runHunt .sort-how — run-pad + toast + story-caption already teach Hold / glow. */}
       <p className="story-kicker">
@@ -433,6 +449,7 @@ export function FatherRunPlay({
             onPointerDown={onPadDown}
             onPointerUp={onPadUp}
             onPointerCancel={onPadUp}
+            onContextMenu={blockHoldMenu}
             onKeyDown={onPadKeyDown}
             onKeyUp={onPadKeyUp}
           >
