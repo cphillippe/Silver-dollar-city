@@ -3,8 +3,9 @@
  * the Match → Lock In view, and the Match-only teach / hold fields (#448).
  * lib/easy.ts re-exports these same bindings. Never import lib/easy here — that would be a cycle.
  */
-import type { ProgressState } from '../../types.ts'
+import type { ProgressState, View } from '../../types.ts'
 import { packEasyOrder } from '../../content/packCatalog.ts'
+import { ROAD_MAZE_LINE } from '../../lib/roadMaze.ts'
 import { currentLessonTier, needsTierHold, tierRank } from '../../lib/tiers.ts'
 import { digPrior, inkPrior, namesPrior, stonePrior } from '../../lib/sourceDig.ts'
 
@@ -190,6 +191,34 @@ export function easyTrailView(
 ): { name: 'link' } | ReturnType<typeof easyHoldView> {
   if (easyHomeFocus(progress) === 'hold') return easyHoldView(progress)
   return { name: 'link' }
+}
+
+type LockExitProgress = EasyLoopProgress & {
+  learnings?: readonly { id: string }[]
+  held?: readonly string[]
+}
+
+/** Newest stored proof — the line Lock In should recite, not the open Match. */
+function newestLockedId(progress: LockExitProgress): string | undefined {
+  const learned = progress.learnings ?? []
+  const fromLearning = learned.length ? learned[learned.length - 1]?.id : undefined
+  if (fromLearning) return fromLearning
+  const held = progress.held ?? []
+  return held.length ? held[held.length - 1] : undefined
+}
+
+/**
+ * Lock In button / success exit.
+ * Taught open line → that line’s hold.
+ * A later beat → that beat.
+ * The mercy maze → same-proof recap. Never a fresh Hurt Man board.
+ */
+export function easyLockInExit(progress: LockExitProgress): View {
+  if (easyHomeFocus(progress) === 'hold') return easyHoldView(progress)
+  if (easyLoopLine(progress) !== ROAD_MAZE_LINE) return { name: 'link' }
+  const id = newestLockedId(progress)
+  if (!id) return { name: 'journal' }
+  return { name: 'journal', focusId: `learn-${id}` }
 }
 
 /** Match clear — Lock In can open before the save flush lands. */
