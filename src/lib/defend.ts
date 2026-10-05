@@ -161,6 +161,25 @@ export function easyTapTarget<T extends { turned?: string; t?: number }>(raiders
   return pick
 }
 
+/** Easy TAP cue: front-most walker a planted lamp can hit right now (1.4.349 / #508). */
+export function easyCueTarget<T extends { turned?: string; t?: number }>(
+  raiders: T[],
+  canHit?: (raider: T) => boolean,
+): T | undefined {
+  let pick: T | undefined
+  let bestT = -1
+  for (const item of raiders) {
+    if (item.turned) continue
+    if (canHit && !canHit(item)) continue
+    const t = item.t ?? 0
+    if (t >= bestT) {
+      bestT = t
+      pick = item
+    }
+  }
+  return pick
+}
+
 export function easyHoldSpawn(walkingUnturned: number): boolean {
   return walkingUnturned >= EASY_WAVE_LIVE
 }

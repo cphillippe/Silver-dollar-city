@@ -65,6 +65,7 @@ import {
   easyTapFit,
   easyTapMode,
   easyTapPersonCount,
+  easyCueTarget,
   easyTapTarget,
   heavenPoint,
   padStage,
@@ -1215,7 +1216,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.348')
+assert.equal(APP_VERSION, '1.4.349')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3414,6 +3415,61 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     '1.4.348 changelog avoids GitHub close keywords',
   )
   assert.match(readFileSync(new URL('../src/nightWatch/towers/index.ts', import.meta.url), 'utf8'), /pathClearance/)
+}
+
+// Night Watch 1.4.349: Easy cue glow matches a lamp-reachable walker (#508).
+{
+  const porchReach =
+    abilityRange('love', padStage('porch', empty), empty, { love: 1 }) + pathClearance(DEFEND_ANCHOR.porch)
+  const gateSpawn = pathPoint(0.08)
+  const porch = DEFEND_ANCHOR.porch
+  const gateDist = Math.hypot(porch.x - gateSpawn.x, porch.y - gateSpawn.y)
+  assert.ok(gateDist > porchReach, '1.4.349 porch still misses fresh gate spawns')
+  const roadReady = pathPoint(0.72)
+  assert.ok(
+    Math.hypot(porch.x - roadReady.x, porch.y - roadReady.y) <= porchReach,
+    '1.4.349 porch still reaches upper-road walkers',
+  )
+  const earlyPack = [
+    { id: 1, t: 0.08 },
+    { id: 2, t: 0.18 },
+    { id: 3, t: 0.28 },
+  ]
+  assert.equal(easyTapTarget(earlyPack)?.id, 3, 'front walker unchanged for teach count')
+  assert.equal(
+    easyCueTarget(earlyPack, (raider) => {
+      const at = pathPoint(raider.t)
+      return Math.hypot(porch.x - at.x, porch.y - at.y) <= porchReach
+    }),
+    undefined,
+    '1.4.349 no glowing cue until a walker is in lamp range',
+  )
+  const inRangePack = [
+    { id: 1, t: 0.65 },
+    { id: 2, t: 0.72 },
+    { id: 3, t: 0.68 },
+  ]
+  assert.equal(
+    easyCueTarget(inRangePack, (raider) => {
+      const at = pathPoint(raider.t)
+      return Math.hypot(porch.x - at.x, porch.y - at.y) <= porchReach
+    })?.id,
+    2,
+    '1.4.349 cue is the front-most walker that Love can reach',
+  )
+  assert.match(defendSrc, /easyCueTarget/)
+  assert.match(defendSrc, /raiderReachable/)
+  assert.match(
+    readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8'),
+    /is-easy-cue .defend-raider-face\.is-dark-face/,
+  )
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.349'), '1.4.349 changelog row')
+  assert.match(latestChange('1.4.349').title, /Night Watch|glow|face|cue/i)
+  assert.doesNotMatch(
+    latestChange('1.4.349').items.join('\n'),
+    /Fixes #508|Closes #508|Resolves #508|Fixes #470|Closes #470|Resolves #470/i,
+    '1.4.349 changelog avoids GitHub close keywords',
+  )
 }
 
 console.log('check-city: ok')

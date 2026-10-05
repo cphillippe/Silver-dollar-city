@@ -17,6 +17,7 @@ import {
   WATCH_ABILITY_LABEL,
   dist,
   unlockedWatchAbilities,
+  easyCueTarget,
   easyTapMode,
   waveCombat,
   wavePackSize,
@@ -317,6 +318,19 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     return nightEnemies.at(raider)
   }
 
+  function raiderReachable(raider: Raider): boolean {
+    const using = unlocked.includes(ability) ? ability : 'love'
+    const at = raiderAt(raider)
+    for (const id of live.current.planted) {
+      if (nightTowers.inRange(id, using, progress, at, runTierRef.current)) return true
+    }
+    return false
+  }
+
+  function easyCueWalker(): Raider | undefined {
+    return easyCueTarget(live.current.raiders, raiderReachable)
+  }
+
   function fire(id: CityPlotId, forceRaiderId?: number) {
     if (phase !== 'wave' || won) return
     const now = performance.now()
@@ -423,6 +437,14 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     let bestD = Infinity
     const raider = live.current.raiders.find((item) => item.id === raiderId && !item.turned)
     if (!raider) return
+    if (easy) {
+      const cue = easyCueWalker()
+      if (!cue) return
+      if (raiderId !== cue.id) {
+        setToolLock(EASY.nightMiss)
+        return
+      }
+    }
     for (const id of live.current.planted) {
       const at = nightTowers.anchor(id)
       const range = nightTowers.range(
@@ -580,7 +602,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
 
   const after = juiceDone && won
   const easyTap = easyTapMode(easy, phase, won)
-  const tapTarget = easyTap ? nightEnemies.cueTarget(raiders) : undefined
+  const tapTarget = easyTap ? easyCueTarget(raiders, (raider) => raiderReachable(raider)) : undefined
   const tapPos =
     tapTarget && boardBox.w > 0
       ? boardPoint(raiderAt(tapTarget).x, raiderAt(tapTarget).y)
