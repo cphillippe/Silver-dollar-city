@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.353',
+    title: 'Easy Lock In why choices stay still',
+    when: '2026-10-05',
+    items: [
+      'Easy Lock In “Tap why this is true”: on a phone the why choices stay put so a thumb can hit them. Toss, lock, and press still play.',
+    ],
+  },
+  {
     version: '1.4.352',
     title: 'Hold to run ignores the phone menu',
     when: '2026-10-05',

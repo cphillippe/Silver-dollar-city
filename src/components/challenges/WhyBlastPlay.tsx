@@ -23,7 +23,8 @@ interface WhyBlastPlayProps {
 }
 
 /**
- * Easy Hold why-step: claim stays center, four why-chips float around it.
+ * Easy Hold why-step: claim stays center, four why-chips sit with it.
+ * Easy Lock In 1.4.353: phone why chips stay still — idle float is off so a thumb hits a fixed target.
  * Correct → blast + LOCKED!. Wrong → shake + Miss −25, then Main idea · why-true · From
  * teach sheet with Try again so the kid learns before the next tap.
  * Easy Clear: miss badge lives on the sheet only (no HUD dup); claim gets Main idea label
