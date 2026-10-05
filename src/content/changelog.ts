@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.350',
+    title: 'Easy Match ends after HELPED!',
+    when: '2026-10-05',
+    items: [
+      'Story Creek road Match: when you reach the inn and see HELPED!, the maze grid closes and the win takeaway and Lock In button show — no fresh “Find the hurt man” board under the stamp.',
+    ],
+  },
+  {
     version: '1.4.349',
     title: 'Night Watch debug freeze for playtests',
     when: '2026-10-05',

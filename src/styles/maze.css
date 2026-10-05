@@ -667,6 +667,16 @@ html[data-easy='on'] .play.is-road-maze .maze-cell.is-road:active {
   margin-top: 8px;
 }
 
+/* 1.4.350: Easy road Match ends on HELPED! — win stamp without a live maze grid (#514). */
+.play.is-road-maze .maze-win-end {
+  position: relative;
+  flex: 1 1 auto;
+  display: grid;
+  place-items: center;
+  min-height: min(40dvh, 300px);
+  width: 100%;
+}
+
 @media (max-width: 420px) {
   .maze-board {
     width: min(100%, 390px);
