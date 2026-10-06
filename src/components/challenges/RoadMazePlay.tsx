@@ -79,7 +79,6 @@ export function RoadMazePlay({
   /** Replay / Lock In / Home stay out of the winning touch. A phone tap lifts them under the finger. */
   const [dockLive, setDockLive] = useState(false)
   const [plusFlash, setPlusFlash] = useState('')
-  const [walking, setWalking] = useState(false)
   const [score, setScore] = useState(0)
   const [attempt, setAttempt] = useState(0)
   const [popAt, setPopAt] = useState('')
@@ -91,6 +90,11 @@ export function RoadMazePlay({
   const wonRef = useRef(won)
   const walkRef = useRef(0)
   const playRef = useRef<HTMLDivElement>(null)
+  const boardRef = useRef<HTMLDivElement>(null)
+  /** In-flight multi-step only. A single tap must not latch this or the next thumb is dropped. */
+  const walkingRef = useRef(false)
+  /** Finger is down on the board. A bounce from that touch is not a look. */
+  const roadPointer = useRef(false)
   const swipe = useRef<{ x: number; y: number; scroll: number; onRoad: boolean } | null>(null)
   const usedTap = useRef(false)
   const peeking = useRef(false)
@@ -132,6 +136,8 @@ export function RoadMazePlay({
   useEffect(() => {
     const node = playRef.current
     const markPeek = () => {
+      // 1.4.359: the tap that bounced the page must not arm a look and drop the next step (#509).
+      if (roadPointer.current) return
       peeking.current = true
       swipe.current = null
       window.clearTimeout(peekTimer.current)
@@ -147,6 +153,21 @@ export function RoadMazePlay({
       window.clearTimeout(peekTimer.current)
     }
   }, [])
+
+  useEffect(() => {
+    const node = boardRef.current
+    if (!node) return
+    // Non-passive: pointerdown preventDefault does not stop a phone pan. touchstart does (#509).
+    const stopScroll = (event: TouchEvent) => {
+      if (event.cancelable) event.preventDefault()
+    }
+    node.addEventListener('touchstart', stopScroll, { passive: false })
+    node.addEventListener('touchmove', stopScroll, { passive: false })
+    return () => {
+      node.removeEventListener('touchstart', stopScroll)
+      node.removeEventListener('touchmove', stopScroll)
+    }
+  }, [won])
 
   useEffect(() => {
     if (opened === openedRef.current) return
@@ -206,6 +227,8 @@ export function RoadMazePlay({
   function replay() {
     window.clearTimeout(walkRef.current)
     window.clearTimeout(stampTimer.current)
+    walkingRef.current = false
+    roadPointer.current = false
     clearDockRelease()
     atRef.current = MAZE_START
     foundRef.current = false
@@ -225,7 +248,6 @@ export function RoadMazePlay({
     setToastWhy('')
     setPlusFlash('')
     setHintCell('')
-    setWalking(false)
     setFlipping(null)
     setScore(0)
     setPopAt('')
@@ -307,24 +329,24 @@ export function RoadMazePlay({
   }
 
   function walkPath(path: MazeCoord[]) {
-    if (walking || wonRef.current) return
+    if (walkingRef.current || wonRef.current) return
     const steps = path.slice(1)
     if (!steps.length) return
     window.clearTimeout(walkRef.current)
-    setWalking(true)
     let i = 0
     const tick = () => {
       const next = steps[i]
       if (!next) {
-        setWalking(false)
+        walkingRef.current = false
         return
       }
       landOn(next)
       i += 1
       if (i >= steps.length) {
-        setWalking(false)
+        walkingRef.current = false
         return
       }
+      walkingRef.current = true
       walkRef.current = window.setTimeout(tick, reduced ? 30 : STEP_MS)
     }
     tick()
@@ -335,7 +357,8 @@ export function RoadMazePlay({
   }
 
   function tryGo(target: MazeCoord) {
-    if (wonRef.current || walking || peeking.current) return
+    // A road tap is a step. Look-peek must not swallow the next fast thumb (#509).
+    if (wonRef.current || walkingRef.current) return
     if (!isFiniteCell(target)) return
     const here = atRef.current
     if (mazeSame(here, target)) {
@@ -356,15 +379,36 @@ export function RoadMazePlay({
     walkPath([here, step])
   }
 
+  function holdPointer(event: ReactPointerEvent<HTMLElement>) {
+    roadPointer.current = true
+    const host = playRef.current
+    if (!host) return
+    try {
+      host.setPointerCapture(event.pointerId)
+    } catch {
+      /* pointer already released */
+    }
+  }
+
+  function onPlayPointerEnd() {
+    roadPointer.current = false
+    // Tap already stepped on pointerdown. Drop the latch if capture retargeted pointerup here.
+    usedTap.current = false
+  }
+
   function onCellDown(event: ReactPointerEvent<HTMLButtonElement>, cell: MazeCoord) {
-    event.preventDefault()
+    if (event.cancelable) event.preventDefault()
     event.stopPropagation()
     usedTap.current = true
     winGesture.current = 'down'
+    // Capture on the play shell, which stays mounted when the inn unmounts the grid (#531).
+    holdPointer(event)
     tryGo(cell)
   }
 
   function onBoardDown(event: ReactPointerEvent<HTMLDivElement>) {
+    if (event.cancelable) event.preventDefault()
+    holdPointer(event)
     const hit = event.target
     const cell = hit instanceof Element ? hit.closest('[data-maze-cell]') : null
     const onRoad = cell instanceof HTMLElement && cell.classList.contains('is-road')
@@ -383,7 +427,7 @@ export function RoadMazePlay({
       usedTap.current = false
       return
     }
-    if (!start || walking || wonRef.current || peeking.current) return
+    if (!start || walkingRef.current || wonRef.current || peeking.current) return
     const dx = event.clientX - start.x
     const dy = event.clientY - start.y
     if (
@@ -409,7 +453,7 @@ export function RoadMazePlay({
   }
 
   function onBoardKey(event: ReactKeyboardEvent<HTMLDivElement>) {
-    if (wonRef.current || walking) return
+    if (wonRef.current || walkingRef.current) return
     const map: Record<string, MazeCoord | undefined> = {
       ArrowUp: swipeStep(atRef.current, -1, 0) ?? undefined,
       ArrowDown: swipeStep(atRef.current, 1, 0) ?? undefined,
@@ -429,6 +473,8 @@ export function RoadMazePlay({
     <div
       ref={playRef}
       className={`play is-road-maze ${shake ? 'is-shake' : ''} ${won ? 'is-win' : ''} ${helpPhase ? 'is-help-phase' : ''} ${helped ? 'is-helped' : ''} ${found ? 'is-found' : ''}`}
+      onPointerUp={onPlayPointerEnd}
+      onPointerCancel={onPlayPointerEnd}
       style={{ ['--maze-cols' as string]: MAZE_COLS, ['--maze-rows' as string]: MAZE_ROWS }}
     >
       {/* Easy Clear 1.4.143: omit mazeHunt .sort-how — maze-beats + story-caption + score already teach the three steps. */}
@@ -445,6 +491,7 @@ export function RoadMazePlay({
       {/* Easy Clear 1.4.271: pack maze-stage flex-start so the board sits under the objective chips on tall phones — cream floor stays, pills unchanged (Fixes #378). */}
       {/* Easy Match 1.4.350: HELPED! closes the maze grid; teach clear runs after the stamp (#514). */}
       {/* Easy Match 1.4.358: inn arrival keeps HELPED!. The dock waits out the winning touch so One more road cannot restart the round (#531). */}
+      {/* Easy Match 1.4.359: fast taps stay on the road. The board does not scroll or jump (#509). */}
       <p className="story-kicker">
         {home.who} · {home.place}
       </p>
@@ -510,14 +557,19 @@ export function RoadMazePlay({
         </p>
       ) : null}
       <div
+        ref={boardRef}
         className="maze-board"
         role="grid"
         aria-label="Jericho road"
         tabIndex={0}
         onPointerDown={onBoardDown}
+        onMouseDown={(event) => {
+          if (event.cancelable) event.preventDefault()
+        }}
         onPointerUp={onBoardUp}
         onPointerCancel={() => {
           swipe.current = null
+          roadPointer.current = false
         }}
         onKeyDown={onBoardKey}
       >

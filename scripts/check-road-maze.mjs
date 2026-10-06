@@ -314,6 +314,21 @@ assert.match(
 )
 assert.match(playSrc, /1\.4\.175: ≤720 peels HUD/)
 
+// Easy Match 1.4.359: fast taps stay on the path; board does not pan (#509).
+assert.match(playSrc, /1\.4\.359: fast taps stay on the road/)
+assert.match(playSrc, /setPointerCapture/)
+assert.match(playSrc, /passive: false/)
+assert.doesNotMatch(
+  playSrc,
+  /if \(wonRef\.current \|\| walking \|\| peeking\.current\) return/,
+  'a look-peek must not drop the next road tap',
+)
+assert.match(playSrc, /winStamp && dockLive/)
+assert.match(
+  mazeCss,
+  /\.play\.is-road-maze \.maze-board \{[\s\S]*?touch-action: none/,
+)
+
 
 // Easy Clear 1.4.191: Story Creek ≤720 fill purple void — stretch maze-board (invent Fun/Clear)
 {

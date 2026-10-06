@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.359',
+    title: 'Easy maze stays under a fast thumb',
+    when: '2026-10-06',
+    items: [
+      'Easy Match road: quick taps keep the blue walker on the path. The board stays still instead of jumping or sticking.',
+    ],
+  },
+  {
     version: '1.4.358',
     title: 'Easy Match stays at the inn',
     when: '2026-10-06',
