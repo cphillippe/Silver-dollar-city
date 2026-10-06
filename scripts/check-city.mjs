@@ -1216,7 +1216,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.357')
+assert.equal(APP_VERSION, '1.4.358')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3612,6 +3612,40 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.357').items.join('\n'),
     /Fixes #505|Closes #505|Resolves #505|Fixes #527|Closes #527|Fixes #520|Closes #520|Fixes #508|Closes #508/i,
     '1.4.357 changelog avoids GitHub close keywords',
+  )
+}
+
+// Easy Match 1.4.358: inn arrival stamps HELPED! and does not restart the round (#531).
+{
+  const maze358 = readFileSync(
+    new URL('../src/components/challenges/RoadMazePlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(maze358, /1\.4\.358: inn arrival keeps HELPED!/)
+  assert.match(maze358, /winStamp && dockLive/)
+  const gateAt = maze358.indexOf('winStamp && dockLive')
+  const dockAt = maze358.indexOf('data-maze-dock')
+  const againAt = maze358.indexOf('data-maze-again')
+  assert.ok(gateAt !== -1 && gateAt < dockAt && dockAt < againAt, 'One more road waits for HELPED! and a finished touch')
+  assert.match(
+    maze358,
+    /setWinStamp\(true\)[\s\S]*?if \(!cleared\.current\) \{[\s\S]*?onClear\?\.\(\)/,
+    'teach clear still runs after the HELPED! stamp',
+  )
+  assert.doesNotMatch(
+    maze358.slice(maze358.indexOf('function finishIfWon')),
+    /function finishIfWon[\s\S]*?function landOn[\s\S]*?\breplay\(/,
+    'inn arrival does not restart the round',
+  )
+  assert.match(maze358, /Find the hurt man/)
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.358'), '1.4.358 changelog row')
+  assert.match(latestChange('1.4.358').title, /inn|Match|Helped/i)
+  assert.match(latestChange('1.4.358').items.join('\n'), /Helped!/)
+  assert.match(latestChange('1.4.358').items.join('\n'), /Find the hurt man/)
+  assert.doesNotMatch(
+    latestChange('1.4.358').items.join('\n'),
+    /Fixes #531|Closes #531|Resolves #531|Fixes #505|Closes #505|Resolves #505/i,
+    '1.4.358 changelog avoids GitHub close keywords',
   )
 }
 
