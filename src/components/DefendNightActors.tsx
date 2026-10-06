@@ -306,14 +306,14 @@ export function DefendNightActorsSvg({
                   </text>
                   {blast.pop ? (
                     <g className="defend-puff" aria-hidden>
-                      <circle cx="-16" cy="-6" r="7" />
-                      <circle cx="14" cy="-10" r="9" />
-                      <circle cx="6" cy="8" r="5" />
-                      <circle cx="-8" cy="6" r="4" />
+                      <circle cx="-36" cy="-8" r="28" />
+                      <circle cx="34" cy="-18" r="34" />
+                      <circle cx="12" cy="22" r="22" />
+                      <circle cx="-18" cy="18" r="18" />
                     </g>
                   ) : null}
                   {blast.spark ? (
-                    <text className="defend-spark-pop" y="-50" textAnchor="middle">
+                    <text className="defend-spark-pop" y="-72" textAnchor="middle">
                       +spark
                     </text>
                   ) : null}
