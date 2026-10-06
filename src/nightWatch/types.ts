@@ -21,6 +21,8 @@ export interface NightRaider {
   turned?: string
   from?: NightPoint
   heavenT?: number
+  /** Last lamp hit, for the path-face flash. */
+  struckAt?: number
 }
 
 export interface NightShot {
@@ -35,4 +37,8 @@ export interface NightBlast {
   y: number
   line: string
   combo: number
+  /** Walker fell — puff on the road. */
+  pop?: boolean
+  /** Sparks this hit paid. */
+  spark?: number
 }

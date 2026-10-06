@@ -71,3 +71,22 @@ export const nightTowers: NightTowersModule = {
     return { x: -w / 2, y: -(h - footY), w, h }
   },
 }
+
+/**
+ * A planted lamp shoots on its own once its cooldown has elapsed.
+ * `frozen` is the debug pause only — Still holds walkers and lamps keep shooting.
+ */
+export function lampReadyToFire(
+  lastFiredAt: number,
+  now: number,
+  cooldownMs: number,
+  frozen: boolean,
+): boolean {
+  if (frozen) return false
+  return now >= lastFiredAt + cooldownMs
+}
+
+/** One spark when the hit turns the walker. A graze pays nothing. */
+export function sparkAwardForHit(down: boolean): number {
+  return down ? 1 : 0
+}
