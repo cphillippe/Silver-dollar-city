@@ -1216,7 +1216,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.358')
+assert.equal(APP_VERSION, '1.4.359')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3646,6 +3646,30 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.358').items.join('\n'),
     /Fixes #531|Closes #531|Resolves #531|Fixes #505|Closes #505|Resolves #505/i,
     '1.4.358 changelog avoids GitHub close keywords',
+  )
+}
+
+// Easy Match 1.4.359: fast maze taps keep the walker on the path (#509). Leave the issue open.
+{
+  const maze359 = readFileSync(
+    new URL('../src/components/challenges/RoadMazePlay.tsx', import.meta.url),
+    'utf8',
+  )
+  const mazeCss359 = readFileSync(new URL('../src/styles/maze.css', import.meta.url), 'utf8')
+  assert.match(maze359, /1\.4\.359: fast taps stay on the road/)
+  assert.match(maze359, /passive: false/)
+  assert.match(maze359, /setPointerCapture/)
+  assert.match(maze359, /winStamp && dockLive/)
+  assert.match(mazeCss359, /1\.4\.359: fast road taps/)
+  assert.match(mazeCss359, /\.play\.is-road-maze \.maze-board \{[\s\S]*?touch-action: none/)
+  assert.match(mazeCss359, /transform: none/)
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.359'), '1.4.359 changelog row')
+  assert.match(latestChange('1.4.359').title, /maze|thumb/i)
+  assert.match(latestChange('1.4.359').items.join('\n'), /walker/)
+  assert.doesNotMatch(
+    latestChange('1.4.359').items.join('\n'),
+    /Fixes #509|Closes #509|Resolves #509|Fixes #531|Closes #531|Resolves #531/i,
+    '1.4.359 changelog avoids GitHub close keywords',
   )
 }
 
@@ -7095,7 +7119,8 @@ console.log('check-city: ok')
   )
   assert.match(
     mazeCss283,
-    /html\[data-easy='on'\] \.play\.is-road-maze \.maze-cell\.is-road:active[\s\S]*?transform: scale\(0\.92\) translateZ\(0\)/,
+    /html\[data-easy='on'\] \.play\.is-road-maze \.maze-cell\.is-road:active[\s\S]*?transform: none/,
+    '1.4.359: road press must not scale the tile — that stuck the walker',
   )
   assert.match(cssSrc, /1\.4\.283: Samaritan maze road-tile arcade press invent/)
   assert.match(
