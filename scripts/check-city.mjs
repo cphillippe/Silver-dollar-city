@@ -1219,7 +1219,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.368')
+assert.equal(APP_VERSION, '1.4.369')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3899,6 +3899,34 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.368').items.join('\n'),
     /Fixes #|Closes #|Resolves #/i,
     '1.4.368 changelog avoids GitHub close keywords',
+  )
+}
+
+// Easy Keep/Toss 1.4.369: sorted cards wrap on spaces (#518). Leave the issue open.
+{
+  const hold369 = readFileSync(new URL('../src/styles/sortHold.css', import.meta.url), 'utf8')
+  assert.match(hold369, /1\.4\.369: Easy Keep\/Toss sorted cards wrap on spaces/)
+  assert.match(
+    hold369,
+    /1\.4\.369: Easy Keep\/Toss sorted cards wrap on spaces[\s\S]*?html\[data-easy='on'\] \.play\.is-easy-sort \.chip\.in-bin \{[\s\S]*?overflow-wrap:\s*normal[\s\S]*?word-break:\s*normal[\s\S]*?hyphens:\s*none/,
+  )
+  assert.doesNotMatch(
+    hold369,
+    /html\[data-easy='on'\] \.play\.is-easy-sort \.chip\.in-bin \{[^}]*overflow-wrap:\s*anywhere/,
+  )
+  assert.doesNotMatch(
+    hold369,
+    /html\[data-easy='on'\] \.play\.is-easy-sort \.chip\.in-bin \{[^}]*word-break:\s*break-all/,
+  )
+  assert.doesNotMatch(hold369, /1\.4\.369[\s\S]{0,400}Fixes #|1\.4\.369[\s\S]{0,400}Closes #|1\.4\.369[\s\S]{0,400}Resolves #/i)
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.369'), '1.4.369 changelog row')
+  assert.match(latestChange('1.4.369').title, /Easy Keep\/Toss keeps long words whole/)
+  assert.match(latestChange('1.4.369').items.join('\n'), /wrap on spaces/)
+  assert.match(latestChange('1.4.369').items.join('\n'), /guaranteed/)
+  assert.doesNotMatch(
+    latestChange('1.4.369').items.join('\n'),
+    /Fixes #|Closes #|Resolves #/i,
+    '1.4.369 changelog avoids GitHub close keywords',
   )
 }
 

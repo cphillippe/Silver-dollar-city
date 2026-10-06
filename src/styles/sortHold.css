@@ -3863,3 +3863,16 @@ html[data-easy='on'] .recall-gate.is-easy-hold .why-blast.is-miss-teach .why-mis
     margin-top: 12px;
   }
 }
+
+/* 1.4.369: Easy Keep/Toss sorted cards wrap on spaces.
+   Shared .chip uses overflow-wrap:anywhere and word-break:break-word.
+   In a narrow bin that splits a long word (guaranteed → guarant / eed).
+   Wrap at spaces. Do not hyphenate or break inside a word. */
+html[data-easy='on'] .play.is-easy-sort .chip.in-bin {
+  flex-wrap: wrap;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+  -webkit-hyphens: none;
+  white-space: normal;
+}

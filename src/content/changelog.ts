@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.369',
+    title: 'Easy Keep/Toss keeps long words whole',
+    when: '2026-10-06',
+    items: [
+      'Easy Keep/Toss sorted cards wrap on spaces. A long word like guaranteed stays in one piece.',
+    ],
+  },
+  {
     version: '1.4.368',
     title: 'Easy story lines stay whole on a phone',
     when: '2026-10-06',
