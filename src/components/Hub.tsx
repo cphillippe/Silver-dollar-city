@@ -83,14 +83,20 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
       : !doneToday
         ? 'Finish today’s story once. Then you can raise the building — no pay.'
         : buildNeed.line
+    // 1.4.357: Home order is Read → Match → Lock In. One gold step. Trail focus stays.
+    const readNow = !doneToday && focus !== 'hold'
+    const playNow = matchReady && !readNow && focus !== 'hold'
+    const lockNow = focus === 'hold'
+    const playLater = !playNow && !lockNow
 
     function easyBuildThis() {
       const readyId = readyUpgradeId(progress, nextId)
       if (readyId) upgradeBuilding(readyId)
     }
     // Easy Clear 1.4.157: Home whisper = short next-step (maze/run/merge/dig/snap Home), not full hunt how — Fixes #203 (completes #192 family)
-    const homeWhisper =
-      focus === 'hold'
+    const homeWhisper = readNow
+      ? 'First, read today’s story.'
+      : focus === 'hold'
         ? 'The story is open. Lock in the line.'
         : storyPlayFor(loopId) === 'father-run'
           ? EASY.runHome
@@ -135,50 +141,30 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
               >
                 Build this
               </button>
-            ) : !doneToday ? (
-              <button
-                type="button"
-                className="btn easy-dock-walk"
-                onClick={() => onNavigate({ name: 'daily' })}
-              >
-                {EASY.readStory}
-              </button>
             ) : null}
           </section>
           {/* Easy Clear 1.4.251: parchment coach labels — Learn/Lock In contrast (Fixes #343). */}
-          {!matchReady || coldMercy ? (
-            <ol className="easy-coach" aria-label="Your next steps">
-              <li className={focus === 'match' || !matchReady ? 'is-now' : ''}>
-                <button type="button" className="easy-coach-step" onClick={() => onNavigate({ name: 'link' })}>
-                  Match
-                </button>
-              </li>
-              <li className={focus === 'learn' ? 'is-now' : ''}>
-                <button type="button" className="easy-coach-step" onClick={() => onNavigate({ name: 'learn' })}>
-                  Learn
-                </button>
-              </li>
-              <li className={focus === 'hold' ? 'is-now' : ''}>
-                <button
-                  type="button"
-                  className="easy-coach-step"
-                  onClick={() =>
-                    onNavigate(
-                      easyHomeFocus(progress) === 'hold' ? easyHoldView(progress) : easyLockInExit(progress),
-                    )
-                  }
-                >
-                  Lock In
-                </button>
-              </li>
-            </ol>
-          ) : (
-            <nav className="easy-dock-play" aria-label="Play">
+          {/* 1.4.357: numbered Read → Match/Learn → Lock In. One gold step. */}
+          <ol className="easy-coach easy-home-steps" aria-label="Next step: Read, then Match, then Lock In">
+            <li className={readNow ? 'is-now' : 'is-quiet'}>
+              <button
+                type="button"
+                className="easy-coach-step easy-dock-walk"
+                onClick={() => onNavigate({ name: 'daily' })}
+              >
+                <span className="easy-step-num">1</span>
+                Read
+              </button>
+            </li>
+            <li className={playNow ? 'is-now' : playLater ? 'is-later' : 'is-quiet'}>
               <button
                 type="button"
                 className={`easy-coach-step ${focus === 'match' ? 'is-dock-now' : ''}`}
+                disabled={playLater || (!matchReady && !lockNow)}
+                title={playLater ? EASY.readStoryFirst : undefined}
                 onClick={() => onNavigate({ name: 'link' })}
               >
+                <span className="easy-step-num">2</span>
                 {storyPlayFor(loopId) === 'father-run'
                   ? EASY.runMatch
                   : storyPlayFor(loopId) === 'road-maze'
@@ -193,17 +179,30 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
               </button>
               <button
                 type="button"
-                className={`easy-coach-step ${focus === 'hold' ? 'is-dock-now' : ''}`}
+                className="easy-learn-aside"
+                hidden={!playNow}
+                onClick={() => onNavigate({ name: 'learn' })}
+              >
+                Learn
+              </button>
+            </li>
+            <li className={lockNow ? 'is-now' : 'is-later'}>
+              <button
+                type="button"
+                className="easy-coach-step"
+                disabled={!lockNow}
+                title={!lockNow ? (readNow ? EASY.readStoryFirst : 'Match first.') : undefined}
                 onClick={() =>
                   onNavigate(
                     easyHomeFocus(progress) === 'hold' ? easyHoldView(progress) : easyLockInExit(progress),
                   )
                 }
               >
+                <span className="easy-step-num">3</span>
                 {EASY.saved}
               </button>
-            </nav>
-          )}
+            </li>
+          </ol>
           <section className="night-watch easy-night-watch" aria-label="Night Watch">
             <p className="eyebrow">Night Watch</p>
             <p className="quiet">{EASY.nightLead}</p>
