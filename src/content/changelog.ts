@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.368',
+    title: 'Easy story lines stay whole on a phone',
+    when: '2026-10-06',
+    items: [
+      'Easy story lines stay whole on a phone. The short story wraps so you can read every line.',
+    ],
+  },
+  {
     version: '1.4.367',
     title: 'Home top bar stays readable on a phone',
     when: '2026-10-06',
