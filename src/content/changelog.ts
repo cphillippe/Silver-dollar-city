@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.372',
+    title: 'Night Watch shows the walker to tap',
+    when: '2026-10-06',
+    items: [
+      'The walker to tap glows with a gold ring and a bouncing arrow. Other walkers stay quieter. Lamps still shoot with a beam, a flash, and a spark.',
+    ],
+  },
+  {
     version: '1.4.371',
     title: 'Night Watch shots you can see',
     when: '2026-10-06',
