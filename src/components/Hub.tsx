@@ -7,6 +7,7 @@ import { localDateKey } from '../lib/dates'
 import { CITY_PLOTS, nextPlotId, type CityPlotId } from '../lib/city'
 import {
   appliedTier,
+  lampsBuildGift,
   lotTapWhy,
   nextUpgradeNeed,
   readyUpgradeId,
@@ -78,11 +79,9 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
     const coldMercy = loopId === EASY_MATCH_LINE && !easyLineHeld(progress, EASY_MATCH_LINE)
     const upgradeReadyId = readyUpgradeId(progress, nextId)
     const buildNeed = nextUpgradeNeed(nextId, progress, true)
-    const buildGift = upgradeReadyId
-      ? 'A building is ready. Tap it, then Build this.'
-      : !doneToday
-        ? 'Finish today’s story once. Then you can raise the building — no pay.'
-        : buildNeed.line
+    const lampsGift = lampsBuildGift(progress, doneToday, upgradeReadyId)
+    const readyLine = upgradeReadyId ? 'A building is ready. Tap it, then Build this.' : !doneToday ? 'Finish today’s story once. Then you can raise the building — no pay.' : buildNeed.line
+    const buildGift = lampsGift ?? readyLine
     // 1.4.357: Home order is Read → Match → Lock In. One gold step. Trail focus stays.
     const readNow = !doneToday && focus !== 'hold'
     const playNow = matchReady && !readNow && focus !== 'hold'

@@ -116,6 +116,9 @@ import {
   canUpgrade,
   earnedTier,
   emptyCityBuilt,
+  lampsBuildGift,
+  visualSnapshot,
+  visualStage,
   lotTapWhy,
   easyTagsFit,
   easyPlotTag,
@@ -1216,7 +1219,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.364')
+assert.equal(APP_VERSION, '1.4.365')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3800,6 +3803,79 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.364').items.join('\n'),
     /Fixes #|Closes #|Resolves #/i,
     '1.4.364 changelog avoids GitHub close keywords',
+  )
+}
+
+// Easy Build It 1.4.365: Star lamps change picture and the prompt moves (#512). Leave the issue open.
+{
+  const eight = {
+    ...emptyProgress(),
+    easyMode: true,
+    stars: { a: 3, b: 3, c: 2 },
+    cityBuilt: { ...emptyCityBuilt(), lamps: 2 },
+  }
+  assert.equal(earnedTier('lamps', eight), 3, '1.4.365 eight stars earn the lamp tier that used to redraw built')
+  assert.equal(visualStage('lamps', 2), 'built')
+  assert.equal(visualSnapshot(eight).lamps, 'built')
+  assert.equal(lampsBuildGift(eight, false, 'lamps'), 'Star lamps are up. Build this lights them.')
+  const lit = applyUpgrade(eight, 'lamps')
+  assert.equal(appliedTier('lamps', lit), 3)
+  assert.equal(visualSnapshot(lit).lamps, 'lit', '1.4.365 Star lamps light on that beat')
+  assert.equal(canUpgrade('lamps', lit), false)
+  const afterEight = lampsBuildGift(lit, false, null)
+  assert.equal(afterEight, 'Catch twelve stars, or keep a night.')
+  assert.doesNotMatch(afterEight ?? '', /raise the building/)
+
+  const twelve = {
+    ...emptyProgress(),
+    easyMode: true,
+    stars: { a: 3, b: 3, c: 3, d: 3 },
+    cityBuilt: { ...emptyCityBuilt(), lamps: 2 },
+  }
+  assert.equal(earnedTier('lamps', twelve), 4)
+  const jumped = applyUpgrade(twelve, 'lamps')
+  assert.equal(appliedTier('lamps', jumped), 4, '1.4.365 one beat reaches the lit picture')
+  assert.equal(visualSnapshot(jumped).lamps, 'lit')
+  assert.match(lampsBuildGift(jumped, false, null) ?? '', /lamps stay on/)
+
+  const first = {
+    ...emptyProgress(),
+    easyMode: true,
+    stars: { a: 1 },
+    cityBuilt: {
+      ...emptyCityBuilt(),
+      porch: 4,
+      hollow: 4,
+      bench: 4,
+      observatory: 4,
+      gate: 4,
+      lookout: 4,
+      journal: 4,
+      lamps: 0,
+    },
+  }
+  assert.equal(readyUpgradeId(first, 'porch'), 'lamps')
+  assert.equal(visualSnapshot(first).lamps, 'empty')
+  assert.equal(lampsBuildGift(first, false, 'lamps'), null)
+  const scaffold = applyUpgrade(first, 'lamps')
+  assert.equal(visualSnapshot(scaffold).lamps, 'scaffold')
+  assert.equal(lampsBuildGift(scaffold, false, null), 'Earn four stars.')
+
+  const porch = {
+    ...emptyProgress(),
+    dailyDates: ['2020-01-01'],
+    cityBuilt: emptyCityBuilt(),
+  }
+  assert.equal(appliedTier('porch', applyUpgrade(porch, 'porch')), 2, '1.4.365 porch still raises one look')
+  assert.equal(lampsBuildGift({ ...emptyProgress(), easyMode: true }, false, null), null)
+
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.365'), '1.4.365 changelog row')
+  assert.match(latestChange('1.4.365').title, /Star lamps/)
+  assert.match(latestChange('1.4.365').items.join('\n'), /Star lamps show up after you build/)
+  assert.doesNotMatch(
+    latestChange('1.4.365').items.join('\n'),
+    /Fixes #|Closes #|Resolves #/i,
+    '1.4.365 changelog avoids GitHub close keywords',
   )
 }
 
