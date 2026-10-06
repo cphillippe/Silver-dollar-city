@@ -1219,7 +1219,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.371')
+assert.equal(APP_VERSION, '1.4.372')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3927,6 +3927,48 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.369').items.join('\n'),
     /Fixes #|Closes #|Resolves #/i,
     '1.4.369 changelog avoids GitHub close keywords',
+  )
+}
+
+// Night Watch 1.4.372: the lead walker glows so a kid knows which face to tap.
+{
+  const defendCss372 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  assert.match(defendCss372, /1\.4\.372: the lead walker glows/)
+  assert.match(defendCss372, /1\.4\.372: idle walkers stay quieter/)
+  assert.match(defendNightSrc, /walker-target-cue/)
+  assert.match(defendNightSrc, /data-cue="target"/)
+  assert.match(defendNightSrc, /walker-cue-pulse/)
+  assert.match(defendNightSrc, /walker-cue-arrow/)
+  assert.match(defendNightSrc, /walker-cue-ring/)
+  const ringRule = defendCss372.match(/\.walker-cue-ring \{[\s\S]*?\}/)
+  assert.ok(ringRule, '1.4.372 cue ring')
+  assert.match(ringRule[0], /stroke:\s*#ffcc33/)
+  assert.match(ringRule[0], /stroke-width:\s*8/)
+  assert.match(ringRule[0], /vector-effect:\s*non-scaling-stroke/)
+  assert.match(defendCss372, /\.walker-cue-pulse[\s\S]*?animation:\s*walker-cue-pulse/)
+  assert.match(defendCss372, /\.walker-cue-arrow[\s\S]*?animation:\s*walker-cue-bob/)
+  assert.match(
+    defendCss372,
+    /\.defend-page\.is-easy-tap \.defend-raider\.is-easy-cue \.defend-raider-face \{[\s\S]*?drop-shadow\(0 0 16px #ff9f1a\)/,
+  )
+  assert.match(
+    defendCss372,
+    /\.defend-page\.is-easy-tap \.defend-raider\.is-easy-tap-target:not\(\.is-easy-cue\):not\(\.is-lamp-hit\) \{[\s\S]*?opacity:\s*0\.72/,
+  )
+  assert.match(
+    defendCss372,
+    /\.defend-page\.is-easy-tap \.defend-raider\.is-easy-cue\.is-lamp-hit \.defend-raider-face[\s\S]*?brightness\(2\.8\)/,
+    '1.4.372 keeps the white hit flash on the lead walker',
+  )
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.372'), '1.4.372 changelog row')
+  assert.match(latestChange('1.4.372').title, /walker to tap/)
+  assert.match(latestChange('1.4.372').items.join('\n'), /gold ring/)
+  assert.match(latestChange('1.4.372').items.join('\n'), /arrow/)
+  assert.match(latestChange('1.4.372').items.join('\n'), /beam/)
+  assert.doesNotMatch(
+    latestChange('1.4.372').items.join('\n'),
+    /Fixes #|Closes #|Resolves #|monkey|balloon/i,
+    '1.4.372 changelog avoids GitHub close keywords',
   )
 }
 
