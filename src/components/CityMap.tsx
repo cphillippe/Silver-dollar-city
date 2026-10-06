@@ -48,6 +48,8 @@ import {
   anyUpgradeReady,
   canUpgrade,
   EASY_NAMED_PLOTS,
+  lampsBuildGift,
+  readyUpgradeId,
   visualFills,
   visualSnapshot,
 } from '../lib/cityBuild'
@@ -372,9 +374,13 @@ export function CityMap({
     : nextKicker(nextStage, nextId, doneToday)
   const gift = anyUpgradeReady(progress)
     ? isEasy(progress)
-      ? 'A building is ready. Tap it, then Build this.'
+      ? (lampsBuildGift(progress, doneToday, readyUpgradeId(progress, nextId)) ??
+        'A building is ready. Tap it, then Build this.')
       : 'A building is ready. Tap it, then Build this — learning raises the house.'
-    : nextGift(nextId, nextStage, shownFill[nextId] ?? 0, isEasy(progress))
+    : isEasy(progress)
+      ? (lampsBuildGift(progress, doneToday, null) ??
+        nextGift(nextId, nextStage, shownFill[nextId] ?? 0, true))
+      : nextGift(nextId, nextStage, shownFill[nextId] ?? 0, isEasy(progress))
   const celebrating = Boolean(beat) || homecoming
   const beatVoice = beat ? townVoice(beat.id) : townVoice(nextId)
   const easy = isEasy(progress)
