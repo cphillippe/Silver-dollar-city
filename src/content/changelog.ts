@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.370',
+    title: 'Night Watch lamps fight on their own',
+    when: '2026-10-06',
+    items: [
+      'Planted lamps shoot walkers in range. A hit flashes, a pop shows when a walker falls, and a spark lands.',
+    ],
+  },
+  {
     version: '1.4.369',
     title: 'Easy Keep/Toss keeps long words whole',
     when: '2026-10-06',

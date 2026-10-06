@@ -50,6 +50,8 @@ import {
   boardViewBox,
   nightEnemies,
   nightTowers,
+  lampReadyToFire,
+  sparkAwardForHit,
   type NightBlast as Blast,
   type NightPhase,
   type NightRaider as Raider,
@@ -102,6 +104,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   kitsRef.current = runKits
   const sparksRef = useRef(runSparks)
   sparksRef.current = runSparks
+  const prevSparks = useRef(runSparks)
+  const [sparkPop, setSparkPop] = useState(false)
   const stillTimer = useRef(0)
   const metRef = useRef<string[]>([...(progress.defense.met ?? [])])
   const markMetRef = useRef(markMet)
@@ -138,10 +142,21 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     spawnNow: false,
     freezeUntil: 0,
   })
+  const autoFireRef = useRef<(now: number, frozen: boolean) => void>(() => {})
 
   useEffect(() => {
     live.current.planted = planted
   }, [planted])
+
+  useEffect(() => {
+    if (runSparks > prevSparks.current) {
+      setSparkPop(true)
+      const timer = window.setTimeout(() => setSparkPop(false), 700)
+      prevSparks.current = runSparks
+      return () => window.clearTimeout(timer)
+    }
+    prevSparks.current = runSparks
+  }, [runSparks])
 
   useEffect(() => {
     const sync = () => setNwDebug(readNightWatchDebug())
@@ -266,7 +281,10 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         live.current.spawned += 1
       }
       live.current.raiders = walking
-      setRaiders(walking)
+      const debugHold = easy && nwDebugRef.current && debugPausedRef.current
+      autoFireRef.current(now, debugHold)
+      const alive = live.current.raiders
+      setRaiders(alive)
       if (live.current.hearts <= 0) {
         live.current.playing = false
         setPhase('lost')
@@ -277,7 +295,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           easy,
           live.current.downed,
           live.current.spawned,
-          walking.length,
+          alive.length,
           tune.size,
         )
       ) {
@@ -289,7 +307,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       if (
         easy &&
         live.current.spawned >= tune.size &&
-        walking.length === 0 &&
+        alive.filter((item) => !item.turned).length === 0 &&
         live.current.downed < tune.size
       ) {
         live.current.playing = false
@@ -396,16 +414,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           : `${WATCH_ABILITY_LABEL[using]} is weak here`,
       combo: nextCombo,
     }
-    setShots((current) => [...current.slice(-3), { key: now, from: nightTowers.muzzle(id), to }])
-    setBlasts((current) => [...current.slice(-3), blast])
-    window.setTimeout(() => {
-      setShots((current) => current.filter((item) => item.key !== now))
-    }, 280)
-    window.setTimeout(() => {
-      setBlasts((current) => current.filter((item) => item.key !== now))
-    }, 620)
     if (fit === 'match') {
       const struck = nightEnemies.hit(best, tier)
+      const sparks = sparkAwardForHit(struck.down)
+      blast.pop = struck.down
+      blast.spark = sparks
       if (easy) {
         const juiceAt = boardPoint(to.x, to.y)
         setTapJuice({
@@ -424,8 +437,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         item.id !== best.id
           ? item
           : struck.down
-            ? { ...struck.raider, turned: using, from: to, heavenT: 0, text: 'Toward heaven' }
-            : struck.raider,
+            ? { ...struck.raider, turned: using, from: to, heavenT: 0, struckAt: now, text: 'Toward heaven' }
+            : { ...struck.raider, struckAt: now },
       )
       if (struck.down) {
         live.current.downed += 1
@@ -435,12 +448,34 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     } else {
       live.current.raiders = live.current.raiders.map((item) =>
         item.id === best.id
-          ? { ...item, t: Math.max(0, item.t - 0.22), text: `${WATCH_ABILITY_LABEL[using]} is weak` }
+          ? { ...item, struckAt: now, t: Math.max(0, item.t - 0.22), text: `${WATCH_ABILITY_LABEL[using]} is weak` }
           : item,
       )
     }
+    setShots((current) => [...current.slice(-3), { key: now, from: nightTowers.muzzle(id), to }])
+    setBlasts((current) => [...current.slice(-3), blast])
+    window.setTimeout(() => {
+      setShots((current) => current.filter((item) => item.key !== now))
+    }, 280)
+    window.setTimeout(() => {
+      setBlasts((current) => current.filter((item) => item.key !== now))
+    }, 620)
     setRaiders(live.current.raiders)
     setDowned(live.current.downed)
+  }
+
+  autoFireRef.current = (now: number, frozen: boolean) => {
+    const using = unlocked.includes(ability) ? ability : 'love'
+    for (const id of live.current.planted) {
+      const wait = nightTowers.cooldown(id, progress)
+      if (!lampReadyToFire(live.current.cool[id] ?? 0, now, wait, frozen)) continue
+      const at = nightTowers.anchor(id)
+      const range = nightTowers.range(id, using, progress, runTier)
+      const aimed = live.current.raiders.some(
+        (raider) => !raider.turned && dist(at, raiderAt(raider)) <= range,
+      )
+      if (aimed) fire(id)
+    }
   }
 
   function fireAtRaider(raiderId: number) {
@@ -849,7 +884,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
             won={won}
             hud={hud}
             coin={<CoinRead count={insightScore(progress)} label="Insight" />}
-            balloon={<MoneyBalloon count={runSparks} label="Sparks" />}
+            balloon={<MoneyBalloon count={runSparks} label="Sparks" gain={sparkPop} />}
             rail={rail}
             docks={docks}
           >
