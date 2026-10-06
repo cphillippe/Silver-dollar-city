@@ -14,6 +14,7 @@ import { journalPoints, journalTierCounts, currentLessonTier, scoreFace } from '
 import { watchTool } from '../lib/watchTools'
 import { DigDeeper } from './DigDeeper'
 import { HeldTriad } from './HeldTriad'
+import { StoredLine } from './StoredLine'
 import { SavedTree, SavedTreeSummary } from './SavedTree'
 import { GemMark } from './GemMark'
 import { Landmark } from './Landmark'
@@ -198,6 +199,16 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
               const learning = withLearningBeat(raw)
               const tool = deployLabel(learning)
               const trace = progress.memory[learning.id]
+              if (easy && focusId === `learn-${learning.id}`) {
+                return (
+                  <div key={learning.id} id={`learn-${learning.id}`}>
+                    <StoredLine
+                      learning={learning}
+                      when={trace ? nextGapLabel(trace, today, true) : undefined}
+                    />
+                  </div>
+                )
+              }
               return (
                 <article key={learning.id} id={`learn-${learning.id}`} className="dossier is-open is-stored">
                   <p className="eyebrow">Stored · {learning.source}</p>

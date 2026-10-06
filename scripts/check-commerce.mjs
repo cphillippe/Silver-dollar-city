@@ -4,6 +4,7 @@ import { CORE_PACK_ID, PLAY_SKUS, SHOP_PACKS, paidPacks } from '../src/config/co
 import {
   adsEnabledDefault,
   isBetweenSceneTransition,
+  lockInQuizBlocksPause,
   scenePauseMountsOn,
   softAdsVisible,
 } from '../src/config/ads.ts'
@@ -148,6 +149,10 @@ assert.equal(isBetweenSceneTransition('link', 'learn'), false)
 assert.equal(isBetweenSceneTransition('link', 'journal'), false)
 assert.equal(isBetweenSceneTransition('link', 'hub'), true)
 assert.equal(isBetweenSceneTransition('journal', 'hub'), true)
+assert.equal(lockInQuizBlocksPause('journal', true), true)
+assert.equal(lockInQuizBlocksPause('journal', false), false)
+assert.equal(lockInQuizBlocksPause('hub', true), false)
+assert.equal(lockInQuizBlocksPause('daily', false), false)
 assert.equal(isBetweenSceneTransition('pack-street', 'hub'), true)
 assert.equal(scenePauseMountsOn('hub'), true)
 assert.equal(scenePauseMountsOn('link'), false)
@@ -161,6 +166,7 @@ assert.match(appSrc, /pack-street/)
 assert.match(appSrc, /name === 'journal'/)
 assert.match(appSrc, /scenePauseMountsOn/)
 assert.match(appSrc, /isSceneLeaveView/)
+assert.match(appSrc, /lockInQuizBlocksPause/)
 assert.match(appSrc, /liveInterstitialReady/)
 assert.match(appSrc, /showBetweenSceneInterstitial/)
 assert.doesNotMatch(appSrc, /hub-banner/)
