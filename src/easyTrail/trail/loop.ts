@@ -198,6 +198,11 @@ type LockExitProgress = EasyLoopProgress & {
   held?: readonly string[]
 }
 
+/** Same-proof recap after a correct Lock In why. Not Home, and not the next maze. */
+export function sameProofRecap(id: string): View {
+  return { name: 'journal', focusId: `learn-${id}` }
+}
+
 /** Newest stored proof — the line Lock In should recite, not the open Match. */
 function newestLockedId(progress: LockExitProgress): string | undefined {
   const learned = progress.learnings ?? []

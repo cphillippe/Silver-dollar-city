@@ -33,6 +33,7 @@ export {
   easyHoldView,
   easyHomeFocus,
   easyLockInExit,
+  sameProofRecap,
   easyLearnLine,
   easyLineHeld,
   easyLineLearned,

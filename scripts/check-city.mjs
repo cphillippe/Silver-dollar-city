@@ -128,7 +128,7 @@ import {
   EASY_FOLK_NUDGE,
 } from '../src/lib/cityBuild.ts'
 import { emptyProgress, progressAfterReset } from '../src/lib/save.ts'
-import { EASY, EASY_LINE_ORDER, DIG_ARC, FOUNDATION_ARC, NAMES_ARC, STONE_ARC, INK_ARC, easyChromeLine, easyChromeNearDup, easyFacingLine, easyHomeFocus, easyHoldFields, easyHoldLine, easyHoldPractice, easyHoldView, easyLockInExit, easyLearnLine, easyLineHeld, easyLineLearned, easyLineTaught, easyLoopLine, easyMatchLine, easyMatchReady, easyTeachFields, easyTrailView, markEasyHeld, markEasyTaught, progressAfterMatchTaught, easyWhoWhere, easyWhoWhereLine, easyWhyLine, easyWhyWordCount, easyWrongTap, uniqueHoldChoices } from '../src/lib/easy.ts'
+import { EASY, EASY_LINE_ORDER, DIG_ARC, FOUNDATION_ARC, NAMES_ARC, STONE_ARC, INK_ARC, easyChromeLine, easyChromeNearDup, easyFacingLine, easyHomeFocus, easyHoldFields, easyHoldLine, easyHoldPractice, easyHoldView, easyLockInExit, easyLearnLine, easyLineHeld, easyLineLearned, easyLineTaught, easyLoopLine, easyMatchLine, easyMatchReady, easyTeachFields, easyTrailView, markEasyHeld, markEasyTaught, progressAfterMatchTaught, sameProofRecap, easyWhoWhere, easyWhoWhereLine, easyWhyLine, easyWhyWordCount, easyWrongTap, uniqueHoldChoices } from '../src/lib/easy.ts'
 import { storyPlayFor } from '../src/lib/storyPlay.ts'
 import { DEBUG_LAYER_LINES, debugJumpView } from '../src/lib/debugPlays.ts'
 import { FATHER_RUN_LINE } from '../src/lib/fatherRun.ts'
@@ -1216,7 +1216,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.361')
+assert.equal(APP_VERSION, '1.4.362')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3695,6 +3695,44 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.361').items.join('\n'),
     /Fixes #511|Closes #511|Resolves #511|Fixes #510|Closes #510|Resolves #510|Fixes #509|Closes #509|Resolves #509|Fixes #531|Closes #531|Resolves #531/i,
     '1.4.361 changelog avoids GitHub close keywords',
+  )
+}
+
+// Easy Lock In 1.4.362: correct why → LOCKED! → same-proof recap. Quiet pause waits until after that recap. Leave #511 open.
+{
+  assert.deepEqual(sameProofRecap('ph-road'), {
+    name: 'journal',
+    focusId: 'learn-ph-road',
+  })
+  assert.notEqual(sameProofRecap('ph-road').name, 'hub')
+  assert.notEqual(sameProofRecap('ph-road').name, 'link')
+  const hold362 = readFileSync(
+    new URL('../src/easyTrail/lockIn/HoldPractice.tsx', import.meta.url),
+    'utf8',
+  )
+  const app362 = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8')
+  const journal362 = readFileSync(new URL('../src/components/Journal.tsx', import.meta.url), 'utf8')
+  const ads362 = readFileSync(new URL('../src/config/ads.ts', import.meta.url), 'utf8')
+  assert.match(hold362, /onNavigate\(sameProofRecap\(quizBrief\.id\)\)/)
+  assert.doesNotMatch(hold362, /onNavigate\(EASY_HOME\)/)
+  assert.match(app362, /lockInQuizBlocksPause\(/)
+  assert.match(ads362, /export function lockInQuizBlocksPause/)
+  assert.match(journal362, /focusId === `learn-\$\{learning\.id\}`/)
+  assert.match(journal362, /<StoredLine/)
+  assert.doesNotMatch(
+    readFileSync(new URL('../src/styles/sortHold.css', import.meta.url), 'utf8'),
+    /1\.4\.362/,
+    '1.4.362 does not touch the LOCKED! phone stack',
+  )
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.362'), '1.4.362 changelog row')
+  assert.match(latestChange('1.4.362').title, /Lock In/i)
+  assert.match(latestChange('1.4.362').items.join('\n'), /LOCKED!/)
+  assert.match(latestChange('1.4.362').items.join('\n'), /Say this tomorrow/)
+  assert.match(latestChange('1.4.362').items.join('\n'), /quiet pause/i)
+  assert.doesNotMatch(
+    latestChange('1.4.362').items.join('\n'),
+    /Fixes #511|Closes #511|Resolves #511|Fixes #504|Closes #504|Resolves #504|Fixes #441|Closes #441|Resolves #441|Fixes #510|Closes #510|Resolves #510|Fixes #509|Closes #509|Resolves #509|Fixes #531|Closes #531|Resolves #531/i,
+    '1.4.362 changelog avoids GitHub close keywords',
   )
 }
 
@@ -9082,7 +9120,6 @@ console.log('check-city: ok')
       'content/evidence',
       'content/story',
       'lib/easy',
-      'lib/easyNav',
       'lib/recall',
       'lib/supportToast',
       'lib/tiers',
@@ -9148,10 +9185,9 @@ console.log('check-city: ok')
   )
   assert.match(
     home335,
-    /if \(easy && advancing\) \{\n\s*recordHeld\(quizBrief\.id\)\n\s*recordReview\(\{\n\s*id: quizBrief\.id,\n\s*pillar,\n\s*kind: 'encode',\n\s*today,\n\s*clean: result\.clean,\n\s*peeked: false,\n\s*elaborated: false,\n\s*\}\)\n\s*recordLessonHold\(quizBrief\.id, result\.clean\)\n\s*offerSupportToast\(\)\n\s*onNavigate\(EASY_HOME\)\n\s*return\n\s*\}/,
-    '1.4.335 Easy encode records held / review / lesson hold / support toast, then EASY_HOME',
+    /if \(easy && advancing\) \{\n\s*recordHeld\(quizBrief\.id\)\n\s*recordReview\(\{\n\s*id: quizBrief\.id,\n\s*pillar,\n\s*kind: 'encode',\n\s*today,\n\s*clean: result\.clean,\n\s*peeked: false,\n\s*elaborated: false,\n\s*\}\)\n\s*recordLessonHold\(quizBrief\.id, result\.clean\)\n\s*offerSupportToast\(\)\n\s*onNavigate\(sameProofRecap\(quizBrief\.id\)\)\n\s*return\n\s*\}/,
+    '1.4.362 Easy encode records held / review / lesson hold / support toast, then the same-proof recap',
   )
-  assert.match(home335, /^import \{ EASY_HOME \} from '\.\.\/\.\.\/lib\/easyNav'$/m)
   assert.deepEqual(EASY_HOME, { name: 'hub' }, '1.4.335 EASY_HOME is still Easy Home')
   assert.match(home335, /onNavigate\(\n\s*easy\n\s*\? \{ name: 'hub' \}/, '1.4.335 Easy review still lands Home')
 

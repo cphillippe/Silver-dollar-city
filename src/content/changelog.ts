@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.362',
+    title: 'Easy Lock In keeps the line you locked',
+    when: '2026-10-06',
+    items: [
+      'Easy Lock In: the right why shows LOCKED!, then Say this tomorrow for that line. A quiet pause waits until after that line.',
+    ],
+  },
+  {
     version: '1.4.361',
     title: 'Easy Lock In stacks the locked cards',
     when: '2026-10-06',
