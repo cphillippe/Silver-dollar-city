@@ -32,6 +32,7 @@ import {
   isAdjacentRoadStep,
   isMazeRoad,
   mazeStepToward,
+  roadCtaLabel,
 } from '../src/lib/roadMaze.ts'
 import { EASY } from '../src/lib/easy.ts'
 import { lessonStory, storyPlayFor } from '../src/lib/storyPlay.ts'
@@ -327,6 +328,31 @@ assert.match(playSrc, /winStamp && dockLive/)
 assert.match(
   mazeCss,
   /\.play\.is-road-maze \.maze-board \{[\s\S]*?touch-action: none/,
+)
+
+// Easy Match 1.4.360: win plate shows the kept line; dock labels cannot render blank (#510).
+assert.equal(roadCtaLabel('  Lock In next  ', 'Home'), 'Lock In next')
+assert.equal(roadCtaLabel('   ', 'Lock In next'), 'Lock In next')
+assert.equal(roadCtaLabel('', ''), 'Next')
+assert.match(playSrc, /roadCtaLabel\(EASY\.holdNext, 'Lock In next'\)/)
+assert.match(playSrc, /maze-win-cta/)
+assert.match(playSrc, /1\.4\.360: the win plate shows the kept line/)
+assert.ok(
+  playSrc.indexOf('maze-win-end') < playSrc.indexOf('<MatchTakeaway'),
+  'the result card sits on the win plate',
+)
+assert.ok(
+  playSrc.indexOf('<MatchTakeaway') < playSrc.indexOf('data-maze-dock'),
+  'the result card is not the dock',
+)
+assert.match(playSrc, /winStamp && dockLive/)
+assert.match(playSrc, /setPointerCapture/)
+assert.match(mazeCss, /1\.4\.360: Easy road win plate holds the kept line/)
+const matchWinCss = readFileSync(new URL('../src/styles/matchWin.css', import.meta.url), 'utf8')
+assert.match(matchWinCss, /1\.4\.360: Easy road win/)
+assert.match(
+  matchWinCss,
+  /play\.is-road-maze\.is-win \.cta-dock \.maze-win-cta \{[\s\S]*?-webkit-text-fill-color: #2a2118/,
 )
 
 
