@@ -78,6 +78,10 @@ const HP_TRACK = {
 const HP_FILL = { inset: 2, h: 6, rx: 3 }
 const FACE_HALF = PATH_WALKER_FACE_U / 2
 const FACE_TOP = -PATH_WALKER_FACE_U * (24 / 36)
+/** Ring sits on the clipped face (clip radius is 0.36 of the chip). */
+const CUE_RING_R = PATH_WALKER_FACE_U * 0.5
+/** Downward chevron above the lead face. */
+const CUE_ARROW = `M0 ${FACE_TOP - 30} L-28 ${FACE_TOP - 68} L-14 ${FACE_TOP - 62} L0 ${FACE_TOP - 46} L14 ${FACE_TOP - 62} L28 ${FACE_TOP - 68} Z`
 
 /** SVG children: pads, shots, raiders, blasts (must render inside DefendNightSky). */
 export function DefendNightActorsSvg({
@@ -314,6 +318,20 @@ export function DefendNightActorsSvg({
                   />
                 </g>
               ))}
+              {easyTap && tapTarget && !tapTarget.turned ? (
+                <g
+                  className="walker-target-cue"
+                  data-cue="target"
+                  transform={`translate(${raiderAt(tapTarget).x} ${raiderAt(tapTarget).y})`}
+                  aria-hidden
+                  pointerEvents="none"
+                >
+                  <circle className="walker-cue-under" cy={PATH_WALKER_FACE_DY} r={CUE_RING_R} />
+                  <circle className="walker-cue-ring" cy={PATH_WALKER_FACE_DY} r={CUE_RING_R} />
+                  <circle className="walker-cue-pulse" cy={PATH_WALKER_FACE_DY} r={CUE_RING_R + FACE_HALF * 0.22} />
+                  <path className="walker-cue-arrow" d={CUE_ARROW} />
+                </g>
+              ) : null}
               {blasts.map((blast) => (
                 <g key={blast.key} className="defend-blast" transform={`translate(${blast.x} ${blast.y})`}>
                   <circle className="defend-blast-ring" r="26" />
