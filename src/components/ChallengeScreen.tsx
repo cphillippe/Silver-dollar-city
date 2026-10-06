@@ -133,7 +133,7 @@ export function ChallengeScreen({
   }
 
   function goNext() {
-    onNavigate(EASY_HOME)
+    onNavigate({ name: 'hub', afterScene: true })
   }
 
   const canProceed = showNext && (!brief || recalled)
