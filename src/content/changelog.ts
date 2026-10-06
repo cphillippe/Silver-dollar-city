@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.366',
+    title: 'Run fail hint is easier to read',
+    when: '2026-10-06',
+    items: [
+      'Run fail hint is easier to read.',
+    ],
+  },
+  {
     version: '1.4.365',
     title: 'Star lamps show up after you build',
     when: '2026-10-06',

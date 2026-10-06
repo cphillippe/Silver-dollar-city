@@ -20,6 +20,7 @@ import './styles/digReveal.css'
 import './styles/matchWin.css'
 import './styles/loci-stamp.css'
 import './styles/showIt.css'
+import './styles/fatherRunHint.css'
 
 if (!Capacitor.isNativePlatform()) {
   registerSW({ immediate: true })
