@@ -433,6 +433,8 @@ img.walker-face.easy-walker-face,
 
 /* 1.4.370: lamp range — faint while the tower waits, solid while it shoots.
    Stroke stays in screen pixels so the circle still reads on a phone plate. */
+/* 1.4.371: phone shot juice. stroke-dasharray none was ignored, so the ring stayed
+   dashed, and the cream beam faded on the yellow road before a glance. */
 .defend-range {
   fill: rgba(255, 236, 170, 0.08);
   stroke: rgba(255, 244, 190, 0.72);
@@ -443,14 +445,29 @@ img.walker-face.easy-walker-face,
 }
 
 .defend-range.is-firing {
-  fill: rgba(255, 214, 80, 0.2);
-  stroke: #fff8d6;
-  stroke-width: 5;
-  stroke-dasharray: none;
+  fill: rgba(255, 186, 40, 0.46);
+  stroke: #fff6a8;
+  stroke-width: 8;
+  stroke-dasharray: 100000;
+  filter: drop-shadow(0 0 8px #ffcc33);
+}
+
+.defend-shot {
+  pointer-events: none;
 }
 
 .defend-raider.is-lamp-hit .defend-raider-face {
   filter: brightness(2.4) drop-shadow(0 0 10px #fff6d0);
+}
+
+.defend-face-flash {
+  fill: #fffef6;
+  stroke: #ffcc33;
+  stroke-width: 8;
+  vector-effect: non-scaling-stroke;
+  opacity: 1;
+  pointer-events: none;
+  animation: none;
 }
 
 .defend-spark-pop {
@@ -496,12 +513,24 @@ img.walker-face.easy-walker-face,
   animation: defend-hot 0.7s ease-in-out infinite;
 }
 
-.defend-beam {
-  stroke: #fff8d4;
-  stroke-width: 7;
+.defend-beam-halo {
+  stroke: #2a0d58;
+  stroke-width: 14;
   stroke-linecap: round;
-  filter: url(#defend-glow) drop-shadow(0 0 10px #ffcc33);
-  animation: defend-beam 0.34s ease-out both;
+  vector-effect: non-scaling-stroke;
+  opacity: 1;
+  stroke-opacity: 1;
+  animation: none;
+}
+
+.defend-beam {
+  stroke: #fffef6;
+  stroke-width: 6;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  opacity: 1;
+  stroke-opacity: 1;
+  animation: none;
 }
 
 .defend-impact {
@@ -565,13 +594,20 @@ img.walker-face.easy-walker-face,
 }
 
 @keyframes defend-beam {
-  0% {
-    stroke-opacity: 1;
-    stroke-width: 8;
-  }
+  0%,
   100% {
-    stroke-opacity: 0;
-    stroke-width: 1.4;
+    stroke-opacity: 1;
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .defend-beam,
+  .defend-beam-halo,
+  .defend-face-flash {
+    animation: none !important;
+    opacity: 1 !important;
+    stroke-opacity: 1 !important;
   }
 }
 
@@ -1302,6 +1338,21 @@ img.walker-face.easy-walker-face,
 .easy-walker.is-juice {
   pointer-events: none;
 }
+/* 1.4.371: the juice face sits above the board, so the hit flash has to live here too. */
+.easy-hit-flash {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 7;
+  width: 40px;
+  height: 40px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: #fffef6;
+  box-shadow: 0 0 0 4px #ffcc33, 0 0 16px 6px #fff;
+  pointer-events: none;
+  animation: none;
+}
 .easy-walker.is-squash .easy-walker-face {
   animation: easy-tap-squash 0.28s cubic-bezier(0.12, 1.2, 0.28, 1) both;
 }
@@ -1364,6 +1415,14 @@ img.walker-face.easy-walker-face,
 
 .defend-page.is-easy-tap .defend-raider.is-easy-cue .defend-raider-face {
   filter: url(#defend-glow) drop-shadow(0 0 6px rgba(255, 204, 51, 0.65));
+}
+
+/* Easy cue glow is more specific than the hit flash. The shot has to win. */
+.defend-page.is-easy-tap .defend-raider.is-lamp-hit .defend-raider-face,
+.defend-page.is-easy-tap .defend-raider.is-easy-cue.is-lamp-hit .defend-raider-face,
+.defend-page.is-nw-debug-freeze.is-easy-tap .defend-raider.is-lamp-hit .defend-raider-face,
+.defend-page.is-nw-debug-freeze.is-easy-tap .defend-raider.is-easy-cue.is-lamp-hit .defend-raider-face {
+  filter: brightness(2.8) saturate(0.35) drop-shadow(0 0 12px #fff) drop-shadow(0 0 4px #ffcc33);
 }
 
 .defend-raider-call text.defend-raider-taunt {

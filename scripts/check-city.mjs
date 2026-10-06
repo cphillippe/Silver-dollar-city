@@ -83,7 +83,7 @@ import {
 import { nightEnemies as nightEnemiesMod } from '../src/nightWatch/enemies/index.ts'
 import { nightParts as nightPartsMod } from '../src/nightWatch/parts/index.ts'
 import { nightPath as nightPathMod } from '../src/nightWatch/path/index.ts'
-import { nightTowers as nightTowersMod, lampReadyToFire, sparkAwardForHit } from '../src/nightWatch/towers/index.ts'
+import { nightTowers as nightTowersMod, lampReadyToFire, SHOT_JUICE_MS, sparkAwardForHit } from '../src/nightWatch/towers/index.ts'
 import {
   applyBoost,
   boostCost,
@@ -1219,7 +1219,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.370')
+assert.equal(APP_VERSION, '1.4.371')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3927,6 +3927,41 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.369').items.join('\n'),
     /Fixes #|Closes #|Resolves #/i,
     '1.4.369 changelog avoids GitHub close keywords',
+  )
+}
+
+// Night Watch 1.4.371: auto-fire juice stays readable on a phone.
+{
+  const defendCss371 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const firingRule = defendCss371.match(/\.defend-range\.is-firing \{[\s\S]*?\}/)
+  const beamRule = defendCss371.match(/\.defend-beam \{[\s\S]*?\}/)
+  assert.ok(firingRule, '1.4.371 firing range rule')
+  assert.ok(beamRule, '1.4.371 beam rule')
+  assert.match(defendCss371, /1\.4\.371: phone shot juice/)
+  assert.match(firingRule[0], /stroke-dasharray:\s*100000/)
+  assert.doesNotMatch(firingRule[0], /stroke-dasharray:\s*none/)
+  assert.match(beamRule[0], /vector-effect:\s*non-scaling-stroke/)
+  assert.match(beamRule[0], /animation:\s*none/)
+  assert.match(defendCss371, /\.defend-beam-halo/)
+  assert.match(defendCss371, /\.defend-face-flash/)
+  assert.match(defendNightSrc, /defend-face-flash/)
+  assert.match(defendNightSrc, /easy-hit-flash/)
+  assert.match(defendCss371, /\.easy-hit-flash/)
+  assert.match(defendNightSrc, /defend-beam-halo/)
+  assert.match(defendNightSrc, /strokeDasharray: '100000'/)
+  assert.match(defendScreenOnlySrc, /SHOT_JUICE_MS/)
+  assert.match(defendScreenOnlySrc, /lightPad/)
+  assert.ok(SHOT_JUICE_MS >= 400, '1.4.371 shot juice lasts long enough to see')
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.371'), '1.4.371 changelog row')
+  assert.match(latestChange('1.4.371').title, /shots you can see/)
+  assert.match(latestChange('1.4.371').items.join('\n'), /solid/)
+  assert.match(latestChange('1.4.371').items.join('\n'), /beam/)
+  assert.match(latestChange('1.4.371').items.join('\n'), /flash/)
+  assert.match(latestChange('1.4.371').items.join('\n'), /spark/)
+  assert.doesNotMatch(
+    latestChange('1.4.371').items.join('\n'),
+    /Fixes #|Closes #|Resolves #|monkey|balloon/i,
+    '1.4.371 changelog avoids GitHub close keywords',
   )
 }
 

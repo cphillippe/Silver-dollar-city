@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.371',
+    title: 'Night Watch shots you can see',
+    when: '2026-10-06',
+    items: [
+      'When a lamp shoots, its range circle turns solid, a bright beam reaches the walker, and the face flashes. The pop and spark stay.',
+    ],
+  },
+  {
     version: '1.4.370',
     title: 'Night Watch lamps fight on their own',
     when: '2026-10-06',

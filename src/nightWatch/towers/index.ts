@@ -73,6 +73,12 @@ export const nightTowers: NightTowersModule = {
 }
 
 /**
+ * How long one auto-shot stays readable on a phone.
+ * Basic lamps wait 700ms, so the range ring can return to a dashed idle.
+ */
+export const SHOT_JUICE_MS = 500
+
+/**
  * A planted lamp shoots on its own once its cooldown has elapsed.
  * `frozen` is the debug pause only — Still holds walkers and lamps keep shooting.
  */

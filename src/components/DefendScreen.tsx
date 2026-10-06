@@ -18,6 +18,7 @@ import {
   dist,
   unlockedWatchAbilities,
   easyTapMode,
+  PATH_WALKER_FACE_DY,
   waveCombat,
   wavePackSize,
   type WatchAbility,
@@ -51,6 +52,7 @@ import {
   nightEnemies,
   nightTowers,
   lampReadyToFire,
+  SHOT_JUICE_MS,
   sparkAwardForHit,
   type NightBlast as Blast,
   type NightPhase,
@@ -114,7 +116,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const [hearts, setHearts] = useState(DEFEND_HEARTS)
   const [raiders, setRaiders] = useState<Raider[]>([])
   const [downed, setDowned] = useState(0)
-  const [flash, setFlash] = useState<CityPlotId | null>(null)
+  const [flash, setFlash] = useState<CityPlotId[]>([])
   const [shots, setShots] = useState<Shot[]>([])
   const [blasts, setBlasts] = useState<Blast[]>([])
   const [tapJuice, setTapJuice] = useState<EasyTapJuice | null>(null)
@@ -143,6 +145,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     freezeUntil: 0,
   })
   const autoFireRef = useRef<(now: number, frozen: boolean) => void>(() => {})
+  const flashGen = useRef<Record<string, number>>({})
+  const shotSeq = useRef(0)
 
   useEffect(() => {
     live.current.planted = planted
@@ -386,12 +390,12 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       }
     }
     live.current.cool[id] = now
-    setFlash(id)
+    lightPad(id)
     setFiring(true)
-    window.setTimeout(() => setFlash(null), 280)
-    window.setTimeout(() => setFiring(false), 220)
+    window.setTimeout(() => setFiring(false), SHOT_JUICE_MS)
     if (!best) return
     const to = raiderAt(best)
+    const aim = { x: to.x, y: to.y + PATH_WALKER_FACE_DY }
     const fit = nightEnemies.fit(easy, using, best.kind)
     const heldLine = learningForTool(progress, using)
     comboRef.current += 1
@@ -452,16 +456,28 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           : item,
       )
     }
-    setShots((current) => [...current.slice(-3), { key: now, from: nightTowers.muzzle(id), to }])
+    shotSeq.current += 1
+    const shotKey = shotSeq.current
+    setShots((current) => [...current.slice(-3), { key: shotKey, from: nightTowers.muzzle(id), to: aim }])
     setBlasts((current) => [...current.slice(-3), blast])
     window.setTimeout(() => {
-      setShots((current) => current.filter((item) => item.key !== now))
-    }, 280)
+      setShots((current) => current.filter((item) => item.key !== shotKey))
+    }, SHOT_JUICE_MS)
     window.setTimeout(() => {
       setBlasts((current) => current.filter((item) => item.key !== now))
     }, 620)
     setRaiders(live.current.raiders)
     setDowned(live.current.downed)
+  }
+
+  function lightPad(id: CityPlotId) {
+    const gen = (flashGen.current[id] ?? 0) + 1
+    flashGen.current[id] = gen
+    setFlash((current) => (current.includes(id) ? current : [...current, id]))
+    window.setTimeout(() => {
+      if (flashGen.current[id] !== gen) return
+      setFlash((current) => current.filter((item) => item !== id))
+    }, SHOT_JUICE_MS)
   }
 
   autoFireRef.current = (now: number, frozen: boolean) => {
@@ -537,6 +553,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     setCombo(0)
     setShots([])
     setBlasts([])
+    setFlash([])
     setTapJuice(null)
     setRunTier(freshRunTier())
     setRunSparks(0)

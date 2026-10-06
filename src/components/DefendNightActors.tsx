@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import {
   EASY_WALKER_FACE_PX,
   EASY_WALKER_HIT_PX,
+  PATH_WALKER_FACE_DY,
   PATH_WALKER_FACE_U,
   PATH_WALKER_HIT_R,
   WATCH_ABILITY_LABEL,
@@ -13,6 +14,7 @@ import { EASY } from '../lib/easy'
 import {
   nightEnemies,
   nightTowers,
+  SHOT_JUICE_MS,
   type NightBlast as Blast,
   type NightPhase,
   type NightPoint,
@@ -40,7 +42,7 @@ export interface DefendNightActorsProps {
   raiderAt: (raider: Raider) => NightPoint
   ability: WatchAbility
   unlocked: WatchAbility[]
-  flash: CityPlotId | null
+  flash: readonly CityPlotId[]
   togglePad: (id: CityPlotId) => void
   fire: (id: CityPlotId) => void
   fireAtRaider: (id: number) => void
@@ -116,7 +118,8 @@ export function DefendNightActorsSvg({
                       !raider.turned &&
                       nightTowers.inRange(id, using, progress, raiderAt(raider), runTier),
                   )
-                const pose = nightTowers.lampPose(hot || flash === id)
+                const firing = flash.includes(id)
+                const pose = nightTowers.lampPose(hot || firing)
                 const lampBox = nightTowers.lampImageBox()
                 const boostPad = boosting && on
                 const scenery = easyTap && !boostPad
@@ -124,7 +127,7 @@ export function DefendNightActorsSvg({
                   <g
                     key={id}
                     data-person-node={scenery ? undefined : 'pad'}
-                    className={`defend-pad is-${stage} ${on ? 'is-planted' : ''} ${hot ? 'is-hot' : ''} ${flash === id ? 'is-flash' : ''} ${scenery ? 'is-tower-scenery' : ''} ${boostPad ? 'is-boost-pick' : ''}`}
+                    className={`defend-pad is-${stage} ${on ? 'is-planted' : ''} ${hot ? 'is-hot' : ''} ${firing ? 'is-flash' : ''} ${scenery ? 'is-tower-scenery' : ''} ${boostPad ? 'is-boost-pick' : ''}`}
                     transform={`translate(${at.x} ${at.y})`}
                     role={scenery ? undefined : 'button'}
                     tabIndex={scenery ? undefined : 0}
@@ -165,13 +168,6 @@ export function DefendNightActorsSvg({
                     <ellipse className="defend-earth" cx="0" cy="10" rx="15" ry="6" />
                     {on ? (
                       <>
-                        {phase === 'wave' ? (
-                          <circle
-                            className={`defend-range${flash === id ? ' is-firing' : ''}`}
-                            r={nightTowers.range(id, using, progress, runTier)}
-                            pointerEvents="none"
-                          />
-                        ) : null}
                         <ellipse className="defend-pool" cx="0" cy="12" rx={hot ? 30 : 20} ry={hot ? 11 : 7} />
                         <image
                           className={`defend-tower-lamp is-${pose}`}
@@ -182,6 +178,23 @@ export function DefendNightActorsSvg({
                           height={lampBox.h}
                         />
                         {hot ? <circle className="defend-hot-halo" r="27" /> : null}
+                        {phase === 'wave' ? (
+                          <circle
+                            className={`defend-range${firing ? ' is-firing' : ''}`}
+                            r={nightTowers.range(id, using, progress, runTier)}
+                            pointerEvents="none"
+                            style={
+                              firing
+                                ? {
+                                    strokeDasharray: '100000',
+                                    stroke: '#fff6a8',
+                                    strokeWidth: 8,
+                                    fill: 'rgba(255, 186, 40, 0.46)',
+                                  }
+                                : undefined
+                            }
+                          />
+                        ) : null}
                       </>
                     ) : scenery ? null : (
                       <>
@@ -192,24 +205,12 @@ export function DefendNightActorsSvg({
                   </g>
                 )
               })}
-              {shots.map((shot) => (
-                <g className="defend-shot" key={shot.key}>
-                  <line
-                    className="defend-beam"
-                    x1={shot.from.x}
-                    y1={shot.from.y}
-                    x2={shot.to.x}
-                    y2={shot.to.y}
-                  />
-                  <circle className="defend-impact" cx={shot.to.x} cy={shot.to.y} r="22" />
-                </g>
-              ))}
               {raiders.map((raider) => {
                 const at = raiderAt(raider)
                 const isTap = easyTap && !raider.turned
                 const isCue = isTap && tapTarget?.id === raider.id
                 const lampHit =
-                  raider.struckAt != null && performance.now() - raider.struckAt < 340
+                  raider.struckAt != null && performance.now() - raider.struckAt < SHOT_JUICE_MS
                 return (
                   <g
                     key={raider.id}
@@ -258,6 +259,13 @@ export function DefendNightActorsSvg({
                       height={PATH_WALKER_FACE_U}
                       clipPath="url(#defend-face-clip)"
                     />
+                    {lampHit ? (
+                      <circle
+                        className="defend-face-flash"
+                        cy={PATH_WALKER_FACE_DY}
+                        r={FACE_HALF * 0.82}
+                      />
+                    ) : null}
                     {!raider.turned && (raider.maxHp ?? 0) > 1 ? (
                       <g className="defend-hp-bar" aria-hidden>
                         <rect
@@ -288,6 +296,24 @@ export function DefendNightActorsSvg({
                   </g>
                 )
               })}
+              {shots.map((shot) => (
+                <g className="defend-shot" key={shot.key}>
+                  <line
+                    className="defend-beam-halo"
+                    x1={shot.from.x}
+                    y1={shot.from.y}
+                    x2={shot.to.x}
+                    y2={shot.to.y}
+                  />
+                  <line
+                    className="defend-beam"
+                    x1={shot.from.x}
+                    y1={shot.from.y}
+                    x2={shot.to.x}
+                    y2={shot.to.y}
+                  />
+                </g>
+              ))}
               {blasts.map((blast) => (
                 <g key={blast.key} className="defend-blast" transform={`translate(${blast.x} ${blast.y})`}>
                   <circle className="defend-blast-ring" r="26" />
@@ -319,6 +345,17 @@ export function DefendNightActorsSvg({
                   ) : null}
                 </g>
               ))}
+              <g className="defend-shot-flashes" pointerEvents="none">
+                {shots.map((shot) => (
+                  <circle
+                    key={`flash-${shot.key}`}
+                    className="defend-face-flash"
+                    cx={shot.to.x}
+                    cy={shot.to.y}
+                    r={PATH_WALKER_FACE_U * 0.42}
+                  />
+                ))}
+              </g>
 
     </>
   )
@@ -385,6 +422,7 @@ export function DefendNightWalkerCue({
                     height: EASY_WALKER_HIT_PX,
                   }}
                 >
+                  <span className="easy-hit-flash" />
                   <span className="easy-tap-plus">+</span>
                   {tapJuice.combo > 1 ? (
                     <span className="easy-tap-combo">×{tapJuice.combo}</span>
