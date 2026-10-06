@@ -1219,7 +1219,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.367')
+assert.equal(APP_VERSION, '1.4.368')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3265,7 +3265,7 @@ assert.match(
 )
 assert.match(
   cssSrc,
-  /@media \(max-height: 720px\) \{[\s\S]*?\.easy-story-card \.teach-reason \{[\s\S]*?-webkit-line-clamp: 3/,
+  /@media \(max-height: 720px\) \{[\s\S]*?\.easy-story-card \.teach-reason \{[\s\S]*?-webkit-line-clamp:\s*unset/,
 )
 assert.match(
   cssSrc,
@@ -3876,6 +3876,29 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.365').items.join('\n'),
     /Fixes #|Closes #|Resolves #/i,
     '1.4.365 changelog avoids GitHub close keywords',
+  )
+}
+
+// Easy story 1.4.368: short-story body wraps on a phone (#517). Leave the issue open.
+{
+  const welcome368 = readFileSync(new URL('../src/styles/welcome.css', import.meta.url), 'utf8')
+  assert.match(welcome368, /1\.4\.368: read the whole short story/)
+  assert.match(
+    welcome368,
+    /1\.4\.368: read the whole short story[\s\S]*?\.easy-story-card \.teach-reason \{[\s\S]*?-webkit-line-clamp:\s*unset[\s\S]*?overflow:\s*visible[\s\S]*?white-space:\s*normal/,
+  )
+  assert.doesNotMatch(
+    welcome368,
+    /\.easy-story-card \.teach-reason \{[^}]*-webkit-line-clamp:\s*3/,
+  )
+  assert.doesNotMatch(welcome368, /1\.4\.368[\s\S]{0,240}Fixes #|1\.4\.368[\s\S]{0,240}Closes #|1\.4\.368[\s\S]{0,240}Resolves #/i)
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.368'), '1.4.368 changelog row')
+  assert.match(latestChange('1.4.368').title, /Easy story lines stay whole/)
+  assert.match(latestChange('1.4.368').items.join('\n'), /short story wraps/)
+  assert.doesNotMatch(
+    latestChange('1.4.368').items.join('\n'),
+    /Fixes #|Closes #|Resolves #/i,
+    '1.4.368 changelog avoids GitHub close keywords',
   )
 }
 
