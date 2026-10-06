@@ -1216,7 +1216,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.359')
+assert.equal(APP_VERSION, '1.4.360')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3670,6 +3670,32 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.359').items.join('\n'),
     /Fixes #509|Closes #509|Resolves #509|Fixes #531|Closes #531|Resolves #531/i,
     '1.4.359 changelog avoids GitHub close keywords',
+  )
+}
+
+// Easy Match 1.4.360: win plate shows the kept line and a readable Lock In next (#510). Leave the issue open.
+{
+  const maze360 = readFileSync(
+    new URL('../src/components/challenges/RoadMazePlay.tsx', import.meta.url),
+    'utf8',
+  )
+  const mazeCss360 = readFileSync(new URL('../src/styles/maze.css', import.meta.url), 'utf8')
+  const matchWin360 = readFileSync(new URL('../src/styles/matchWin.css', import.meta.url), 'utf8')
+  assert.match(maze360, /1\.4\.360: the win plate shows the kept line/)
+  assert.match(maze360, /roadCtaLabel/)
+  assert.match(maze360, /maze-win-cta/)
+  assert.match(maze360, /winStamp && dockLive/)
+  assert.match(maze360, /setPointerCapture/)
+  assert.match(mazeCss360, /1\.4\.360: Easy road win plate holds the kept line/)
+  assert.match(matchWin360, /maze-win-cta/)
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.360'), '1.4.360 changelog row')
+  assert.match(latestChange('1.4.360').title, /win screen|next step/i)
+  assert.match(latestChange('1.4.360').items.join('\n'), /Helped!/)
+  assert.match(latestChange('1.4.360').items.join('\n'), /Lock In next/)
+  assert.doesNotMatch(
+    latestChange('1.4.360').items.join('\n'),
+    /Fixes #510|Closes #510|Resolves #510|Fixes #509|Closes #509|Resolves #509|Fixes #531|Closes #531|Resolves #531/i,
+    '1.4.360 changelog avoids GitHub close keywords',
   )
 }
 

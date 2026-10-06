@@ -11,6 +11,14 @@ export const ROAD_MAZE_HINT = 'Stay on the open road.'
 
 export const ROAD_MAZE_AGAIN = 'One more road'
 
+/** Win dock face. A blank or whitespace label must not mount as an empty button. */
+export function roadCtaLabel(label: string, fallback: string): string {
+  const text = label.replace(/\s+/g, ' ').trim()
+  if (text.length > 0) return text
+  const spare = fallback.replace(/\s+/g, ' ').trim()
+  return spare.length > 0 ? spare : 'Next'
+}
+
 /** Tiny Luke 10 flavor after Help — never a collectible headline. */
 export const MAZE_CARE_WHY = 'You bind his wounds.'
 
