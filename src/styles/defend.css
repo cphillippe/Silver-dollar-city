@@ -431,18 +431,20 @@ img.walker-face.easy-walker-face,
   opacity: 0.7;
 }
 
-/* 1.4.370: lamp range — faint while the tower waits, solid while it shoots. */
+/* 1.4.370: lamp range — faint while the tower waits, solid while it shoots.
+   Stroke stays in screen pixels so the circle still reads on a phone plate. */
 .defend-range {
-  fill: rgba(255, 236, 170, 0.05);
-  stroke: rgba(255, 236, 170, 0.32);
+  fill: rgba(255, 236, 170, 0.08);
+  stroke: rgba(255, 244, 190, 0.72);
   stroke-width: 3;
-  stroke-dasharray: 12 16;
+  stroke-dasharray: 8 7;
+  vector-effect: non-scaling-stroke;
   pointer-events: none;
 }
 
 .defend-range.is-firing {
-  fill: rgba(255, 214, 80, 0.16);
-  stroke: rgba(255, 248, 214, 0.95);
+  fill: rgba(255, 214, 80, 0.2);
+  stroke: #fff8d6;
   stroke-width: 5;
   stroke-dasharray: none;
 }
@@ -453,8 +455,11 @@ img.walker-face.easy-walker-face,
 
 .defend-spark-pop {
   fill: #ffe08a;
-  font-size: 20px;
+  font-size: 42px;
   font-weight: 800;
+  stroke: #5a3a00;
+  stroke-width: 1.2;
+  paint-order: stroke fill;
   animation: defend-puff 0.7s ease-out both;
 }
 
