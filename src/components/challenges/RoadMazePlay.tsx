@@ -76,6 +76,8 @@ export function RoadMazePlay({
   const [hintCell, setHintCell] = useState<string>('')
   const [flipping, setFlipping] = useState<number | null>(null)
   const [winStamp, setWinStamp] = useState(false)
+  /** Replay / Lock In / Home stay out of the winning touch. A phone tap lifts them under the finger. */
+  const [dockLive, setDockLive] = useState(false)
   const [plusFlash, setPlusFlash] = useState('')
   const [walking, setWalking] = useState(false)
   const [score, setScore] = useState(0)
@@ -98,6 +100,9 @@ export function RoadMazePlay({
   const openedRef = useRef(1)
   const cleared = useRef(false)
   const stampTimer = useRef(0)
+  /** How the winning step started. A pointer-down must not release the dock until that finger is up. */
+  const winGesture = useRef<'down' | 'up' | 'key'>('key')
+  const dockRelease = useRef<(() => void) | null>(null)
 
   useEffect(() => {
     setMazePreset(attempt)
@@ -106,6 +111,10 @@ export function RoadMazePlay({
   useEffect(() => {
     return () => {
       window.clearTimeout(stampTimer.current)
+      const up = dockRelease.current
+      if (!up) return
+      window.removeEventListener('pointerup', up, true)
+      window.removeEventListener('pointercancel', up, true)
     }
   }, [])
 
@@ -181,9 +190,23 @@ export function RoadMazePlay({
     window.setTimeout(() => setPlusFlash(''), 800)
   }
 
+  function clearDockRelease() {
+    const up = dockRelease.current
+    if (!up) return
+    window.removeEventListener('pointerup', up, true)
+    window.removeEventListener('pointercancel', up, true)
+    dockRelease.current = null
+  }
+
+  /** Let the winning touch's click land before One more road can receive it. */
+  function armDockAfterPointer() {
+    window.setTimeout(() => setDockLive(true), 350)
+  }
+
   function replay() {
     window.clearTimeout(walkRef.current)
     window.clearTimeout(stampTimer.current)
+    clearDockRelease()
     atRef.current = MAZE_START
     foundRef.current = false
     helpedRef.current = false
@@ -197,6 +220,7 @@ export function RoadMazePlay({
     setHelped(false)
     setWon(false)
     setWinStamp(false)
+    setDockLive(false)
     setToast('')
     setToastWhy('')
     setPlusFlash('')
@@ -239,6 +263,7 @@ export function RoadMazePlay({
 
   function finishIfWon(cell: MazeCoord, nextHelped: boolean) {
     if (!canWin(nextHelped, cell) || wonRef.current) return
+    const gesture = winGesture.current
     wonRef.current = true
     setWon(true)
     setToast('')
@@ -246,9 +271,23 @@ export function RoadMazePlay({
     setScore((pts) => pts + MAZE_INN_SCORE)
     playGemPop('win')
     window.clearTimeout(stampTimer.current)
+    // 1.4.358: the inn tap unmounts the grid. One more road must not sit under that finger (#531).
+    if (gesture === 'down') {
+      clearDockRelease()
+      const up = () => {
+        clearDockRelease()
+        armDockAfterPointer()
+      }
+      dockRelease.current = up
+      window.addEventListener('pointerup', up, true)
+      window.addEventListener('pointercancel', up, true)
+    } else if (gesture === 'up') {
+      armDockAfterPointer()
+    }
     const stampAt = reduced ? 40 : 280
     stampTimer.current = window.setTimeout(() => {
       setWinStamp(true)
+      if (gesture === 'key') setDockLive(true)
       if (!cleared.current) {
         cleared.current = true
         onClear?.()
@@ -321,6 +360,7 @@ export function RoadMazePlay({
     event.preventDefault()
     event.stopPropagation()
     usedTap.current = true
+    winGesture.current = 'down'
     tryGo(cell)
   }
 
@@ -364,6 +404,7 @@ export function RoadMazePlay({
       blocked(ROAD_MAZE_HINT)
       return
     }
+    winGesture.current = 'up'
     walkPath([atRef.current, step])
   }
 
@@ -378,6 +419,7 @@ export function RoadMazePlay({
     const step = map[event.key]
     if (!step) return
     event.preventDefault()
+    winGesture.current = 'key'
     walkPath([atRef.current, step])
   }
 
@@ -402,6 +444,7 @@ export function RoadMazePlay({
       {/* Easy Clear 1.4.265: tall residual cream floor (opaque cream play + app-body · solid maze-stage · score pinned to cream floor above the 920 cap) so leftover between HUD, board, and footer is cream, not purple void after 256 (Fixes #365). */}
       {/* Easy Clear 1.4.271: pack maze-stage flex-start so the board sits under the objective chips on tall phones — cream floor stays, pills unchanged (Fixes #378). */}
       {/* Easy Match 1.4.350: HELPED! closes the maze grid; teach clear runs after the stamp (#514). */}
+      {/* Easy Match 1.4.358: inn arrival keeps HELPED!. The dock waits out the winning touch so One more road cannot restart the round (#531). */}
       <p className="story-kicker">
         {home.who} · {home.place}
       </p>
@@ -547,21 +590,23 @@ export function RoadMazePlay({
       {won ? (
         <>
           <MatchTakeaway lineId={lineId} title={win.title} />
-          <div className="cta-dock">
-            <button
-              type="button"
-              className="btn primary xl snap-bins"
-              onClick={() => onEasyStop?.('hold')}
-            >
-              {EASY.holdNext}
-            </button>
-            <button type="button" className="btn gold xl" data-maze-again onClick={replay}>
-              {ROAD_MAZE_AGAIN}
-            </button>
-            <button type="button" className="btn xl" onClick={() => onEasyStop?.('home')}>
-              {EASY.home}
-            </button>
-          </div>
+          {winStamp && dockLive ? (
+            <div className="cta-dock" data-maze-dock>
+              <button
+                type="button"
+                className="btn primary xl snap-bins"
+                onClick={() => onEasyStop?.('hold')}
+              >
+                {EASY.holdNext}
+              </button>
+              <button type="button" className="btn gold xl" data-maze-again onClick={replay}>
+                {ROAD_MAZE_AGAIN}
+              </button>
+              <button type="button" className="btn xl" onClick={() => onEasyStop?.('home')}>
+                {EASY.home}
+              </button>
+            </div>
+          ) : null}
         </>
       ) : null}
     </div>

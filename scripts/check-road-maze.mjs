@@ -205,6 +205,11 @@ assert.match(playSrc, /markHelped/)
 assert.match(EASY.mazeHunt, /hurt man/)
 assert.match(playSrc, /ROAD_MAZE_WIN/)
 assert.match(playSrc, /WinBurst play=\{winStamp\} stamp=\{ROAD_MAZE_WIN\}/)
+assert.match(playSrc, /winStamp && dockLive/)
+assert.ok(
+  playSrc.indexOf('winStamp && dockLive') < playSrc.indexOf('data-maze-again'),
+  'inn arrival does not mount One more road before HELPED!',
+)
 assert.doesNotMatch(playSrc, /frame=\{ROAD_CLAIM_MEDIA/)
 assert.doesNotMatch(playSrc, /maze-win-art/)
 assert.match(playSrc, /panel-blast|ROAD_HELP_FACE/)
