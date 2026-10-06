@@ -98,3 +98,12 @@ export function isBetweenSceneTransition(fromName: ViewName, toName: ViewName): 
 export function scenePauseMountsOn(viewName: ViewName): boolean {
   return viewName === 'hub'
 }
+
+/**
+ * Easy Lock In quiz is not a between-scene break.
+ * A correct why must show LOCKED!, then the same-proof recap.
+ * The quiet pause waits until the player leaves that recap.
+ */
+export function lockInQuizBlocksPause(viewName: ViewName, autoQuiz = false): boolean {
+  return viewName === 'journal' && autoQuiz
+}

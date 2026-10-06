@@ -2,8 +2,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import { pillarFor } from '../../content'
 import type { EvidenceBrief } from '../../content/evidence'
 import { STORY } from '../../content/story'
-import { EASY, isEasy } from '../../lib/easy'
-import { EASY_HOME } from '../../lib/easyNav'
+import { EASY, isEasy, sameProofRecap } from '../../lib/easy'
 import { markLater, type RecallLaterState } from '../../lib/recall'
 import { offerSupportToast } from '../../lib/supportToast'
 import { needsTierHold } from '../../lib/tiers'
@@ -62,7 +61,7 @@ export function HoldPractice({ quizBrief, focusedEntry, today, setLater, onNavig
               })
               recordLessonHold(quizBrief.id, result.clean)
               offerSupportToast()
-              onNavigate(EASY_HOME)
+              onNavigate(sameProofRecap(quizBrief.id))
               return
             }
             recordReview({

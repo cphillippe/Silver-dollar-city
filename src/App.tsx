@@ -15,7 +15,12 @@ import { Profile } from './components/Profile'
 import { SceneAd } from './components/SceneAd'
 import { Vista } from './components/Vista'
 import { Welcome } from './components/Welcome'
-import { adsAreVisible, isBetweenSceneTransition, scenePauseMountsOn } from './config/ads'
+import {
+  adsAreVisible,
+  isBetweenSceneTransition,
+  lockInQuizBlocksPause,
+  scenePauseMountsOn,
+} from './config/ads'
 import { liveInterstitialReady, showBetweenSceneInterstitial } from './lib/adAdapter'
 import { offerStoresComingNotice } from './lib/supportToast'
 import { useProgress } from './store/progress'
@@ -50,6 +55,17 @@ export default function App() {
   const lastAdAt = useRef(0)
 
   function go(next: View, skipAd = false) {
+    const onLockInQuiz = lockInQuizBlocksPause(
+      view.name,
+      view.name === 'journal' && view.autoQuiz === true,
+    )
+    if (onLockInQuiz) {
+      setSceneAd(false)
+      setPending(null)
+      setView(next)
+      return
+    }
+
     const adsOn = !skipAd && adsAreVisible()
     const cooled = Date.now() - lastAdAt.current >= AD_COOLDOWN_MS
     const between = isBetweenSceneTransition(view.name, next.name)
