@@ -1,0 +1,55 @@
+/* Easy Home 1.4.367 — phone top bar stays one line (#516).
+   At ≤640 the nav took flex-basis 100% and the title shrank under it,
+   so “Silver City” wrapped and the Home pill dropped to the next line.
+   One row through 720 / SE 375. Home, Lock In, and Settings stay whole.
+   The title may ellipsis when the row is still tight. */
+
+@media (max-width: 720px) {
+  .app[data-easy='on'] .topbar {
+    flex-wrap: nowrap;
+    align-items: center;
+    column-gap: 6px;
+    row-gap: 0;
+    min-width: 0;
+    max-width: 100%;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .app[data-easy='on'] .topbar .brand {
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: 6px;
+    font-size: 0.98rem;
+    line-height: 1.1;
+  }
+
+  .app[data-easy='on'] .topbar .brand .avatar {
+    width: 32px;
+    height: 32px;
+  }
+
+  .app[data-easy='on'] .topbar .brand-name {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .app[data-easy='on'] .topbar nav {
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    gap: 2px;
+    min-width: max-content;
+  }
+
+  .app[data-easy='on'] .topbar nav button {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    padding: 6px 9px;
+    font-size: 0.86rem;
+    line-height: 1.2;
+  }
+}

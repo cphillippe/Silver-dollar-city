@@ -1219,7 +1219,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.366')
+assert.equal(APP_VERSION, '1.4.367')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3876,6 +3876,33 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.365').items.join('\n'),
     /Fixes #|Closes #|Resolves #/i,
     '1.4.365 changelog avoids GitHub close keywords',
+  )
+}
+
+// Easy Home 1.4.367: phone top bar stays one line (#516). Leave the issue open.
+{
+  const topCss367 = readFileSync(new URL('../src/styles/easyTopbar.css', import.meta.url), 'utf8')
+  const main367 = readFileSync(new URL('../src/main.tsx', import.meta.url), 'utf8')
+  const shell367 = readFileSync(new URL('../src/components/AppShell.tsx', import.meta.url), 'utf8')
+  assert.match(main367, /easyTopbar\.css/, '1.4.367 peel is imported')
+  assert.match(topCss367, /1\.4\.367/)
+  assert.match(topCss367, /max-width:\s*720px/)
+  assert.match(topCss367, /data-easy='on'/)
+  assert.match(topCss367, /\.topbar \{[\s\S]*?flex-wrap:\s*nowrap/)
+  assert.match(topCss367, /\.topbar \{[\s\S]*?min-width:\s*0/)
+  assert.match(topCss367, /\.topbar nav \{[\s\S]*?flex-wrap:\s*nowrap/)
+  assert.match(topCss367, /text-overflow:\s*ellipsis/)
+  assert.match(topCss367, /white-space:\s*nowrap/)
+  assert.match(shell367, /brand-name/)
+  assert.match(shell367, /Silver City/)
+  assert.doesNotMatch(topCss367, /Fixes #|Closes #|Resolves #/i)
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.367'), '1.4.367 changelog row')
+  assert.match(latestChange('1.4.367').title, /Home top bar stays readable/)
+  assert.match(latestChange('1.4.367').items.join('\n'), /Home top bar stays readable on a phone/)
+  assert.doesNotMatch(
+    latestChange('1.4.367').items.join('\n'),
+    /Fixes #|Closes #|Resolves #/i,
+    '1.4.367 changelog avoids GitHub close keywords',
   )
 }
 

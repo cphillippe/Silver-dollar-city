@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.367',
+    title: 'Home top bar stays readable on a phone',
+    when: '2026-10-06',
+    items: [
+      'Home top bar stays readable on a phone.',
+    ],
+  },
+  {
     version: '1.4.366',
     title: 'Run fail hint is easier to read',
     when: '2026-10-06',

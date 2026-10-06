@@ -72,7 +72,7 @@ export function AppShell({ view, onNavigate, children }: AppShellProps) {
             onClick={() => onNavigate(EASY_HOME)}
           >
             <Avatar who="river" size="sm" />
-            Silver City
+            <span className="brand-name">Silver City</span>
           </button>
           <nav>
             <button
