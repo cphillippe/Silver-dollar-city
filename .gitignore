@@ -6,6 +6,9 @@ dist-ssr
 dev-dist
 .vite
 tsconfig.tsbuildinfo
+/test-results/
+/playwright-report/
+/blob-report/
 node_modules/.tmp
 android/local.properties
 android/.gradle

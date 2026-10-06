@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.364',
+    title: 'Phone checks the Easy walk',
+    when: '2026-10-06',
+    items: [
+      'Phone checks keep the Easy walk honest.',
+    ],
+  },
+  {
     version: '1.4.363',
     title: 'Quiet pause waits until Home',
     when: '2026-10-06',

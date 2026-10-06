@@ -3,6 +3,7 @@
  * Scoped check runner — thin hops use a subset; `npm test` still runs all.
  * Usage: node scripts/run-checks.mjs <scope>
  * Scopes: all | core | dig | arcade | city | commerce | css | juice
+ * Phone Easy play-through is `npm run test:e2e` (not a scope here).
  */
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
