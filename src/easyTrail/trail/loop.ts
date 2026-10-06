@@ -148,10 +148,10 @@ export function easyMatchReady(progress: EasyLoopProgress): boolean {
 }
 
 /**
- * Gold home tap for the open triad. Match teaches through the lesson play.
+ * Gold home focus for the open triad. Match teaches through the lesson play.
  * After the board is cleared (taught), Hold is next. After Hold, the next
- * line’s Match. Learn stays a re-read, not the gate — cold coach lists
- * Match first so “now” matches the real next action (Fixes #187).
+ * line’s Match. Learn stays a re-read, not the gate — focus stays match
+ * until the line is taught (#187). Home chrome numbers Read, then Match, then Lock In.
  */
 export type EasyHomeFocus = 'learn' | 'match' | 'hold'
 

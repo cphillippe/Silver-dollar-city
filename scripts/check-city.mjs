@@ -1216,7 +1216,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.356')
+assert.equal(APP_VERSION, '1.4.357')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -1946,7 +1946,7 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
   assert.match(cssSrc, /is-easy-soft/)
   assert.match(mapSrc, /xMidYMid meet/)
   assert.match(hubSrc, /easyMatchReady/)
-  assert.match(easyHome, /focus === 'match' \|\| !matchReady \? 'is-now'/)
+  assert.match(easyHome, /readNow \? 'is-now'/)
   assert.doesNotMatch(easyHome, /focus === 'learn' \|\| !matchReady/)
   assert.ok(
     easyHome.indexOf('easy-build-it') < easyHome.indexOf('easy-coach'),
@@ -1957,12 +1957,13 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
     'Easy home order is Match before Hold',
   )
   {
-    const coach = easyHome.slice(easyHome.indexOf('easy-coach'), easyHome.indexOf('easy-dock-play'))
-    const iMatch = coach.indexOf('>Match<') >= 0 ? coach.indexOf('>Match<') : coach.search(/>\s*Match\s*</)
-    const iLearn = coach.indexOf('>Learn<') >= 0 ? coach.indexOf('>Learn<') : coach.search(/>\s*Learn\s*</)
-    const iLock = coach.search(/>\s*Lock In\s*</)
-    assert.ok(iMatch >= 0 && iLearn >= 0 && iLock >= 0, 'cold coach has Match · Learn · Lock In')
-    assert.ok(iMatch < iLearn && iLearn < iLock, 'cold coach order is Match → Learn → Lock In (#187)')
+    const coach = easyHome.slice(easyHome.indexOf('easy-home-steps'), easyHome.indexOf('Night Watch'))
+    const iRead = coach.search(/>\s*Read\s*</)
+    const iMatch = coach.indexOf('EASY.matchCta')
+    const iLearn = coach.search(/>\s*Learn\s*</)
+    const iLock = coach.indexOf('EASY.saved')
+    assert.ok(iRead >= 0 && iMatch >= 0 && iLearn >= 0 && iLock >= 0, 'home steps have Read · Match · Learn · Lock In')
+    assert.ok(iRead < iMatch && iMatch < iLearn && iLearn < iLock, 'home order is Read → Match/Learn → Lock In')
   }
   assert.match(easyHome, /Night Watch/)
   assert.doesNotMatch(easyHome, /EASY\.nightSoon/)
@@ -3585,6 +3586,32 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.356').items.join('\n'),
     /Fixes #527|Closes #527|Resolves #527|Fixes #503|Closes #503|Fixes #520|Closes #520|Fixes #508|Closes #508/i,
     '1.4.356 changelog avoids GitHub close keywords',
+  )
+}
+
+// Easy Home 1.4.357: numbered Read → Match → Lock In, one gold step (#505).
+{
+  const hub357 = readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8')
+  const css357 = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
+  assert.match(hub357, /easy-home-steps/)
+  assert.match(hub357, /const readNow = !doneToday && focus !== 'hold'/)
+  assert.match(hub357, /disabled=\{playLater \|\| \(!matchReady && !lockNow\)\}/)
+  assert.match(hub357, /disabled=\{!lockNow\}/)
+  assert.match(hub357, /easyLockInExit\(progress\)/)
+  assert.match(hub357, /name: 'daily'/)
+  assert.match(hub357, /name: 'learn'/)
+  assert.match(hub357, /name: 'link'/)
+  assert.match(css357, /1\.4\.357: Easy Home next step/)
+  assert.match(css357, /\.easy-home-steps li\.is-now \.easy-coach-step/)
+  assert.match(css357, /\.easy-home-steps li\.is-later \.easy-coach-step:disabled/)
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.357'), '1.4.357 changelog row')
+  assert.match(latestChange('1.4.357').title, /Home|next/i)
+  assert.match(latestChange('1.4.357').items.join('\n'), /Read/)
+  assert.match(latestChange('1.4.357').items.join('\n'), /Lock In/)
+  assert.doesNotMatch(
+    latestChange('1.4.357').items.join('\n'),
+    /Fixes #505|Closes #505|Resolves #505|Fixes #527|Closes #527|Fixes #520|Closes #520|Fixes #508|Closes #508/i,
+    '1.4.357 changelog avoids GitHub close keywords',
   )
 }
 

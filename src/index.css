@@ -3667,6 +3667,89 @@ html[data-easy='on'] .mind-node em {
   font-weight: 700;
 }
 
+/* 1.4.357: Easy Home next step — Read, then Match, then Lock In.
+   One gold candy step. Later steps wait. Quiet steps stay tappable. */
+.hub.is-easy-home .easy-home-steps {
+  flex-wrap: nowrap;
+  gap: 6px;
+  margin: 0;
+}
+
+.hub.is-easy-home .easy-home-steps > li {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+}
+
+.hub.is-easy-home .easy-home-steps .easy-coach-step {
+  min-height: 48px;
+  padding: 10px 6px;
+  font-size: 0.92rem;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.hub.is-easy-home .easy-step-num {
+  font-weight: 800;
+  margin-right: 0.22em;
+}
+
+.hub.is-easy-home .easy-home-steps li.is-now .easy-coach-step {
+  opacity: 1;
+  background: linear-gradient(180deg, #fff6b8 0%, #ffcc33 46%, #ff9f1a);
+  color: #2a1c08;
+  -webkit-text-fill-color: #2a1c08;
+  border-color: #fff3c4;
+  font-weight: 800;
+  box-shadow:
+    var(--candy-lip),
+    0 12px 22px rgba(255, 120, 40, 0.38),
+    var(--candy-shine);
+}
+
+.hub.is-easy-home .easy-home-steps li.is-quiet .easy-coach-step {
+  opacity: 0.72;
+  font-weight: 650;
+  background: rgba(42, 13, 88, 0.45);
+  border-color: rgba(255, 246, 232, 0.28);
+  color: var(--parchment, #fff6e8);
+  -webkit-text-fill-color: var(--parchment, #fff6e8);
+  box-shadow: none;
+}
+
+.hub.is-easy-home .easy-home-steps li.is-later .easy-coach-step:disabled {
+  opacity: 0.38;
+  font-weight: 650;
+  background: rgba(42, 13, 88, 0.28);
+  border-color: rgba(255, 246, 232, 0.16);
+  color: rgba(255, 246, 232, 0.72);
+  -webkit-text-fill-color: rgba(255, 246, 232, 0.72);
+  box-shadow: none;
+}
+
+.hub.is-easy-home .easy-learn-aside {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--parchment, #fff6e8);
+  -webkit-text-fill-color: var(--parchment, #fff6e8);
+  opacity: 0.8;
+  font: inherit;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  padding: 2px 0 0;
+  min-height: 28px;
+}
+
+.hub.is-easy-home .easy-learn-aside[hidden] {
+  display: none !important;
+}
+
 .hub.is-easy-home .easy-core,
 .hub.is-easy-home .easy-extra-streets,
 .hub.is-easy-home .easy-home-head {

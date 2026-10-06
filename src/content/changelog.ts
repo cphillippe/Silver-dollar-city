@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.357',
+    title: 'Easy Home shows what to do next',
+    when: '2026-10-05',
+    items: [
+      'Easy Home numbers the trail: 1 Read, then 2 Match, then 3 Lock In. The gold button is the one to tap. Read comes first when today’s story is still open. Lock In waits until Match is done.',
+    ],
+  },
+  {
     version: '1.4.356',
     title: 'Easy Keep/Toss first miss stays honest',
     when: '2026-10-05',
