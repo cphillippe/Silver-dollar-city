@@ -83,7 +83,7 @@ import {
 import { nightEnemies as nightEnemiesMod } from '../src/nightWatch/enemies/index.ts'
 import { nightParts as nightPartsMod } from '../src/nightWatch/parts/index.ts'
 import { nightPath as nightPathMod } from '../src/nightWatch/path/index.ts'
-import { nightTowers as nightTowersMod } from '../src/nightWatch/towers/index.ts'
+import { nightTowers as nightTowersMod, lampReadyToFire, sparkAwardForHit } from '../src/nightWatch/towers/index.ts'
 import {
   applyBoost,
   boostCost,
@@ -1219,7 +1219,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.369')
+assert.equal(APP_VERSION, '1.4.370')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3927,6 +3927,38 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.369').items.join('\n'),
     /Fixes #|Closes #|Resolves #/i,
     '1.4.369 changelog avoids GitHub close keywords',
+  )
+}
+
+// Night Watch 1.4.370: planted lamps auto-fire at walkers in range.
+{
+  const defendCss370 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  assert.match(defendCss370, /1\.4\.370: lamp range/)
+  assert.match(defendCss370, /\.defend-range\.is-firing/)
+  assert.match(defendCss370, /\.defend-raider\.is-lamp-hit/)
+  assert.match(defendCss370, /\.defend-spark-pop/)
+  assert.match(defendCss370, /\.nw-spark-float/)
+  assert.match(defendScreenOnlySrc, /lampReadyToFire/)
+  assert.match(defendScreenOnlySrc, /sparkAwardForHit/)
+  assert.match(defendScreenOnlySrc, /autoFireRef\.current\(now, debugHold\)/)
+  assert.match(defendNightSrc, /defend-range/)
+  assert.match(defendNightSrc, /is-lamp-hit/)
+  assert.match(defendNightSrc, /defend-puff/)
+  assert.match(defendNightSrc, /defend-spark-pop/)
+  assert.match(defendNightSrc, /\+spark/)
+  assert.equal(lampReadyToFire(0, 699, 700, false), false)
+  assert.equal(lampReadyToFire(0, 700, 700, false), true)
+  assert.equal(lampReadyToFire(0, 5000, 700, true), false, 'debug pause holds the shot')
+  assert.equal(sparkAwardForHit(false), 0)
+  assert.equal(sparkAwardForHit(true), 1)
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.370'), '1.4.370 changelog row')
+  assert.match(latestChange('1.4.370').title, /lamps fight/)
+  assert.match(latestChange('1.4.370').items.join('\n'), /shoot walkers in range/)
+  assert.match(latestChange('1.4.370').items.join('\n'), /spark/)
+  assert.doesNotMatch(
+    latestChange('1.4.370').items.join('\n'),
+    /Fixes #|Closes #|Resolves #|monkey|money balloon/i,
+    '1.4.370 changelog avoids GitHub close keywords',
   )
 }
 

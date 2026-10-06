@@ -1,9 +1,19 @@
 import { GemMark } from '../../components/GemMark'
 
 /** Left chrome orb. Decorative read of an existing count — no spend loop. */
-export function MoneyBalloon({ count, label }: { count: number; label: string }) {
+export function MoneyBalloon({
+  count,
+  label,
+  gain = false,
+}: {
+  count: number
+  label: string
+  /** Brief +spark when a lamp pays out. */
+  gain?: boolean
+}) {
   return (
-    <span className="nw-balloon" role="img" aria-label={`${label}: ${count}`}>
+    <span className={`nw-balloon${gain ? ' is-spark-gain' : ''}`} role="img" aria-label={`${label}: ${count}`}>
+      {gain ? <span className="nw-spark-float">+spark</span> : null}
       <span className="nw-balloon-orb" aria-hidden>
         ★
       </span>

@@ -431,6 +431,38 @@ img.walker-face.easy-walker-face,
   opacity: 0.7;
 }
 
+/* 1.4.370: lamp range — faint while the tower waits, solid while it shoots.
+   Stroke stays in screen pixels so the circle still reads on a phone plate. */
+.defend-range {
+  fill: rgba(255, 236, 170, 0.08);
+  stroke: rgba(255, 244, 190, 0.72);
+  stroke-width: 3;
+  stroke-dasharray: 8 7;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
+.defend-range.is-firing {
+  fill: rgba(255, 214, 80, 0.2);
+  stroke: #fff8d6;
+  stroke-width: 5;
+  stroke-dasharray: none;
+}
+
+.defend-raider.is-lamp-hit .defend-raider-face {
+  filter: brightness(2.4) drop-shadow(0 0 10px #fff6d0);
+}
+
+.defend-spark-pop {
+  fill: #ffe08a;
+  font-size: 42px;
+  font-weight: 800;
+  stroke: #5a3a00;
+  stroke-width: 1.2;
+  paint-order: stroke fill;
+  animation: defend-puff 0.7s ease-out both;
+}
+
 .defend-ring {
   fill: rgba(224, 179, 74, 0.1);
   stroke: rgba(224, 179, 74, 0.4);
@@ -1459,10 +1491,30 @@ img.walker-face.easy-walker-face,
 }
 
 .nw-balloon {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2px;
+}
+
+.nw-spark-float {
+  position: absolute;
+  left: 50%;
+  top: -4px;
+  z-index: 2;
+  color: #ffe08a;
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1;
+  text-shadow: 0 1px 0 #5a3a00, 0 0 8px rgba(255, 204, 51, 0.8);
+  animation: defend-puff 0.7s ease-out both;
+  pointer-events: none;
+}
+
+.nw-balloon.is-spark-gain .nw-balloon-count {
+  background: #ffcc33;
+  color: #3a2200;
 }
 
 .nw-balloon-orb {
