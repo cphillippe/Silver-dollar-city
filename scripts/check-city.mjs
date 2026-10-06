@@ -1216,7 +1216,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.360')
+assert.equal(APP_VERSION, '1.4.361')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3670,6 +3670,31 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.359').items.join('\n'),
     /Fixes #509|Closes #509|Resolves #509|Fixes #531|Closes #531|Resolves #531/i,
     '1.4.359 changelog avoids GitHub close keywords',
+  )
+}
+
+// Easy Lock In 1.4.361: phone LOCKED! sits above the card stack (#511). Leave the issue open.
+{
+  const hold361 = readFileSync(new URL('../src/styles/sortHold.css', import.meta.url), 'utf8')
+  const blast361 = readFileSync(
+    new URL('../src/components/challenges/WhyBlastPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(hold361, /1\.4\.361: phone LOCKED! sits above the card stack/)
+  assert.match(hold361, /@media \(max-width: 720px\)/)
+  assert.match(hold361, /\.why-blast\.is-win > \.win-burst \{/)
+  assert.match(hold361, /\.why-blast\.is-win > \.win-burst \.win-stamp-wrap \{/)
+  assert.match(hold361, /\.why-blast\.is-win \.why-chip\.is-clear:not\(\.is-lock\)/)
+  assert.match(hold361, /\.why-blast\.is-win \.why-claim \{/)
+  assert.match(blast361, /1\.4\.361: phone LOCKED! sits above the card stack/)
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.361'), '1.4.361 changelog row')
+  assert.match(latestChange('1.4.361').title, /Lock In|locked cards/i)
+  assert.match(latestChange('1.4.361').items.join('\n'), /LOCKED!/)
+  assert.match(latestChange('1.4.361').items.join('\n'), /main idea/i)
+  assert.doesNotMatch(
+    latestChange('1.4.361').items.join('\n'),
+    /Fixes #511|Closes #511|Resolves #511|Fixes #510|Closes #510|Resolves #510|Fixes #509|Closes #509|Resolves #509|Fixes #531|Closes #531|Resolves #531/i,
+    '1.4.361 changelog avoids GitHub close keywords',
   )
 }
 
