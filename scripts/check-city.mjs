@@ -1219,7 +1219,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.365')
+assert.equal(APP_VERSION, '1.4.366')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3876,6 +3876,39 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.365').items.join('\n'),
     /Fixes #|Closes #|Resolves #/i,
     '1.4.365 changelog avoids GitHub close keywords',
+  )
+}
+
+// Easy Father Run 1.4.366: fail-reset press-the-glow toast is readable on a phone (#513). Leave the issue open.
+{
+  const hintCss366 = readFileSync(new URL('../src/styles/fatherRunHint.css', import.meta.url), 'utf8')
+  const main366 = readFileSync(new URL('../src/main.tsx', import.meta.url), 'utf8')
+  const play366 = readFileSync(
+    new URL('../src/easyTrail/father/FatherRunPlay.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.match(main366, /fatherRunHint\.css/, '1.4.366 peel is imported')
+  assert.match(hintCss366, /1\.4\.366/)
+  assert.match(hintCss366, /max-width:\s*720px/)
+  assert.match(hintCss366, /max-height:\s*720px/)
+  assert.match(
+    hintCss366,
+    /html\[data-easy='on'\] \.play\.is-father-run \.match-toast \{[\s\S]*?background:\s*#2a1408/,
+  )
+  assert.match(
+    hintCss366,
+    /html\[data-easy='on'\] \.play\.is-father-run \.match-toast \{[\s\S]*?color:\s*#fff6e8/,
+  )
+  assert.match(hintCss366, /font-size:\s*1\.32rem/)
+  assert.match(play366, /Hold — then press the glow/)
+  assert.doesNotMatch(hintCss366, /Fixes #|Closes #|Resolves #/i)
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.366'), '1.4.366 changelog row')
+  assert.match(latestChange('1.4.366').title, /Run fail hint is easier to read/)
+  assert.match(latestChange('1.4.366').items.join('\n'), /Run fail hint is easier to read/)
+  assert.doesNotMatch(
+    latestChange('1.4.366').items.join('\n'),
+    /Fixes #|Closes #|Resolves #/i,
+    '1.4.366 changelog avoids GitHub close keywords',
   )
 }
 
