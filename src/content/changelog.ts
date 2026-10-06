@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.365',
+    title: 'Star lamps show up after you build',
+    when: '2026-10-06',
+    items: [
+      'Star lamps show up after you build. The map lights the next lamps, and Build It says what changed.',
+    ],
+  },
+  {
     version: '1.4.364',
     title: 'Phone checks the Easy walk',
     when: '2026-10-06',

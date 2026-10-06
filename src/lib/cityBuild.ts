@@ -70,6 +70,27 @@ export function stageFromTier(tier: number): CityStage {
   return 'built'
 }
 
+/**
+ * Picture the map actually draws. Star lamps light up at the eight-star tier
+ * so that beat is not a second copy of the built picture.
+ */
+export function visualStage(id: CityPlotId, tier: number): CityStage {
+  if (id === 'lamps' && tier >= 3) return 'lit'
+  return stageFromTier(tier)
+}
+
+/** Next saved tier. Star lamps skip a step that would draw the same picture. */
+export function nextBuildTier(id: CityPlotId, applied: number, earned: number): number {
+  if (earned <= applied) return applied
+  if (id !== 'lamps') return applied + 1
+  const now = visualStage(id, applied)
+  let next = applied + 1
+  while (next < earned && visualStage(id, next) === now) next += 1
+  const look = visualStage(id, next)
+  while (next < earned && visualStage(id, next + 1) === look) next += 1
+  return next
+}
+
 function heldOnLot(id: CityPlotId, progress: ProgressState): boolean {
   const known = PLOT_IDEAS[id] ?? []
   const held = progress.held ?? []
@@ -120,18 +141,41 @@ export function canUpgrade(id: CityPlotId, progress: ProgressState): boolean {
 export function applyUpgrade(progress: ProgressState, id: CityPlotId): ProgressState {
   const earned = earnedTier(id, progress)
   const applied = appliedTier(id, progress)
-  if (earned <= applied) return progress
+  const nextTier = nextBuildTier(id, applied, earned)
+  if (nextTier <= applied) return progress
   const cityBuilt = { ...(progress.cityBuilt ?? snapshotCityBuilt(progress)) }
-  cityBuilt[id] = applied + 1
+  cityBuilt[id] = nextTier
   return { ...progress, cityBuilt }
 }
 
 export function visualSnapshot(progress: ProgressState): CitySnapshot {
   const snap = {} as CitySnapshot
   for (const plot of CITY_PLOTS) {
-    snap[plot.id] = stageFromTier(appliedTier(plot.id, progress))
+    snap[plot.id] = visualStage(plot.id, appliedTier(plot.id, progress))
   }
   return snap
+}
+
+/**
+ * Easy Build It line for Star lamps. Null keeps Hub’s porch / generic line.
+ * A raised lamp lot must not repeat the same “raise the building” sentence.
+ */
+export function lampsBuildGift(
+  progress: ProgressState,
+  doneToday: boolean,
+  readyId: CityPlotId | null,
+): string | null {
+  if (readyId === 'lamps') {
+    const look = visualStage('lamps', appliedTier('lamps', progress))
+    if (look === 'scaffold') return 'The first star lamp is up. Build this adds more.'
+    if (look === 'built') return 'Star lamps are up. Build this lights them.'
+    if (look === 'lit') return 'Star lamps are lit. Build this keeps them shining.'
+    return null
+  }
+  if (!readyId && !doneToday && appliedTier('lamps', progress) > 0) {
+    return nextUpgradeNeed('lamps', progress, true).line
+  }
+  return null
 }
 
 export function visualFills(progress: ProgressState): CityFills {
