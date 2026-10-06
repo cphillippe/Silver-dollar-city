@@ -165,6 +165,13 @@ export function DefendNightActorsSvg({
                     <ellipse className="defend-earth" cx="0" cy="10" rx="15" ry="6" />
                     {on ? (
                       <>
+                        {phase === 'wave' ? (
+                          <circle
+                            className={`defend-range${flash === id ? ' is-firing' : ''}`}
+                            r={nightTowers.range(id, using, progress, runTier)}
+                            pointerEvents="none"
+                          />
+                        ) : null}
                         <ellipse className="defend-pool" cx="0" cy="12" rx={hot ? 30 : 20} ry={hot ? 11 : 7} />
                         <image
                           className={`defend-tower-lamp is-${pose}`}
@@ -201,11 +208,13 @@ export function DefendNightActorsSvg({
                 const at = raiderAt(raider)
                 const isTap = easyTap && !raider.turned
                 const isCue = isTap && tapTarget?.id === raider.id
+                const lampHit =
+                  raider.struckAt != null && performance.now() - raider.struckAt < 340
                 return (
                   <g
                     key={raider.id}
                     data-person-node={isTap ? 'walker' : undefined}
-                    className={`defend-raider ${raider.turned ? 'is-turned' : ''} ${isTap ? 'is-easy-tap-target' : ''} ${isCue ? 'is-easy-cue' : ''}`}
+                    className={`defend-raider ${raider.turned ? 'is-turned' : ''} ${isTap ? 'is-easy-tap-target' : ''} ${isCue ? 'is-easy-cue' : ''} ${lampHit ? 'is-lamp-hit' : ''}`}
                     transform={`translate(${at.x} ${at.y})`}
                     role={isTap ? 'button' : undefined}
                     tabIndex={isTap ? 0 : undefined}
@@ -295,6 +304,19 @@ export function DefendNightActorsSvg({
                   <text className="defend-blast-line" y="28" textAnchor="middle">
                     {blast.line}
                   </text>
+                  {blast.pop ? (
+                    <g className="defend-puff" aria-hidden>
+                      <circle cx="-16" cy="-6" r="7" />
+                      <circle cx="14" cy="-10" r="9" />
+                      <circle cx="6" cy="8" r="5" />
+                      <circle cx="-8" cy="6" r="4" />
+                    </g>
+                  ) : null}
+                  {blast.spark ? (
+                    <text className="defend-spark-pop" y="-50" textAnchor="middle">
+                      +spark
+                    </text>
+                  ) : null}
                 </g>
               ))}
 
