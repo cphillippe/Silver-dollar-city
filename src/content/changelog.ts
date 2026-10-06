@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.358',
+    title: 'Easy Match stays at the inn',
+    when: '2026-10-06',
+    items: [
+      'Easy Match: stepping onto the inn shows Helped! and ends the road. The round does not jump back to Find the hurt man.',
+    ],
+  },
+  {
     version: '1.4.357',
     title: 'Easy Home shows what to do next',
     when: '2026-10-05',
