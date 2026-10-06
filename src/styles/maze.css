@@ -1380,3 +1380,52 @@ html[data-easy='on'] .play.is-road-maze .maze-cell.is-road:active {
     0 0 0 2px #fff6e8,
     0 2px 0 rgba(20, 10, 4, 0.35);
 }
+
+/* 1.4.360: Easy road win plate holds the kept line. Helped! sits above the card
+   instead of floating on an empty cream box. Dock timing stays on the play file. */
+.play.is-road-maze.is-win .maze-stage {
+  flex: 1 1 auto;
+}
+
+.play.is-road-maze.is-win .maze-win-end {
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 8.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 8px 8px;
+  box-sizing: border-box;
+}
+
+.play.is-road-maze.is-win .maze-win-end .win-burst {
+  position: relative;
+  inset: auto;
+  z-index: 2;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.play.is-road-maze.is-win .maze-win-end .win-stamp-wrap {
+  position: relative;
+  top: auto;
+  left: auto;
+  right: auto;
+  width: 100%;
+  max-width: none;
+  transform: none;
+  display: flex;
+  justify-content: center;
+}
+
+.play.is-road-maze.is-win .maze-win-end .match-yes {
+  flex: 1 1 auto;
+  align-content: center;
+  margin: 0;
+  min-height: 4.5rem;
+}

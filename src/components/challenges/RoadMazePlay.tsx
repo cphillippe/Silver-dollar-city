@@ -31,6 +31,7 @@ import {
   ROAD_MAZE_CLAIM,
   ROAD_MAZE_HINT,
   ROAD_MAZE_WIN,
+  roadCtaLabel,
   isMazePathSwipe,
   mazeStepToward,
   setMazePreset,
@@ -492,6 +493,7 @@ export function RoadMazePlay({
       {/* Easy Match 1.4.350: HELPED! closes the maze grid; teach clear runs after the stamp (#514). */}
       {/* Easy Match 1.4.358: inn arrival keeps HELPED!. The dock waits out the winning touch so One more road cannot restart the round (#531). */}
       {/* Easy Match 1.4.359: fast taps stay on the road. The board does not scroll or jump (#509). */}
+      {/* Easy Match 1.4.360: the win plate shows the kept line, and Lock In next stays a readable label. The dock still waits out the winning touch (#531). */}
       <p className="story-kicker">
         {home.who} · {home.place}
       </p>
@@ -537,6 +539,7 @@ export function RoadMazePlay({
       {won ? (
         <div className="maze-win-end" aria-live="polite">
           <WinBurst play={winStamp} stamp={ROAD_MAZE_WIN} />
+          <MatchTakeaway lineId={lineId} title={win.title.trim() || ROAD_MAZE_CLAIM} />
         </div>
       ) : (
         <>
@@ -639,27 +642,35 @@ export function RoadMazePlay({
         {' · '}
         {won ? 'Safe at the inn' : helped ? 'He is with you' : found ? 'Help him' : 'Find the hurt man'}
       </p>
-      {won ? (
-        <>
-          <MatchTakeaway lineId={lineId} title={win.title} />
-          {winStamp && dockLive ? (
-            <div className="cta-dock" data-maze-dock>
-              <button
-                type="button"
-                className="btn primary xl snap-bins"
-                onClick={() => onEasyStop?.('hold')}
-              >
-                {EASY.holdNext}
-              </button>
-              <button type="button" className="btn gold xl" data-maze-again onClick={replay}>
-                {ROAD_MAZE_AGAIN}
-              </button>
-              <button type="button" className="btn xl" onClick={() => onEasyStop?.('home')}>
-                {EASY.home}
-              </button>
-            </div>
-          ) : null}
-        </>
+      {won && winStamp && dockLive ? (
+        <div className="cta-dock" data-maze-dock>
+          <button
+            type="button"
+            className="btn primary xl snap-bins"
+            data-maze-next
+            aria-label={roadCtaLabel(EASY.holdNext, 'Lock In next')}
+            onClick={() => onEasyStop?.('hold')}
+          >
+            <span className="maze-win-cta">{roadCtaLabel(EASY.holdNext, 'Lock In next')}</span>
+          </button>
+          <button
+            type="button"
+            className="btn gold xl"
+            data-maze-again
+            aria-label={roadCtaLabel(ROAD_MAZE_AGAIN, 'One more road')}
+            onClick={replay}
+          >
+            <span className="maze-win-cta">{roadCtaLabel(ROAD_MAZE_AGAIN, 'One more road')}</span>
+          </button>
+          <button
+            type="button"
+            className="btn xl"
+            aria-label={roadCtaLabel(EASY.home, 'Home')}
+            onClick={() => onEasyStop?.('home')}
+          >
+            <span className="maze-win-cta">{roadCtaLabel(EASY.home, 'Home')}</span>
+          </button>
+        </div>
       ) : null}
     </div>
   )

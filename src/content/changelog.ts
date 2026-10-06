@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.360',
+    title: 'Easy win screen shows the next step',
+    when: '2026-10-06',
+    items: [
+      'Easy Match road: after Helped!, the win card shows the line you kept, and Lock In next is a label you can read.',
+    ],
+  },
+  {
     version: '1.4.359',
     title: 'Easy maze stays under a fast thumb',
     when: '2026-10-06',
