@@ -2189,8 +2189,12 @@ button.btn:disabled {
     box-shadow: 0 0 0 3px rgba(224, 179, 74, 0.36) !important;
   }
 
-  .defend-beam {
-    animation: defend-beam 0.28s ease-out both !important;
+  .defend-beam,
+  .defend-beam-halo,
+  .defend-face-flash {
+    animation: none !important;
+    opacity: 1 !important;
+    stroke-opacity: 1 !important;
   }
 
   .defend-impact,

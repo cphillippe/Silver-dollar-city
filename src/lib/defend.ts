@@ -130,6 +130,8 @@ export function towerCooldown(stage: CityStage): number {
 export const PATH_WALKER_FACE_U = 72
 /** Tap hit radius on the path (same proportion as the original 36-wide / r22). */
 export const PATH_WALKER_HIT_R = (PATH_WALKER_FACE_U * 22) / 36
+/** Face center above the path anchor. The beam and the hit flash share it. */
+export const PATH_WALKER_FACE_DY = -PATH_WALKER_FACE_U / 6
 
 /**
  * Tap-juice face in CSS px. Brief squash → heaven only — keep it near the path face,
