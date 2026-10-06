@@ -21,6 +21,7 @@ import './styles/matchWin.css'
 import './styles/loci-stamp.css'
 import './styles/showIt.css'
 import './styles/fatherRunHint.css'
+import './styles/easyTopbar.css'
 
 if (!Capacitor.isNativePlatform()) {
   registerSW({ immediate: true })
