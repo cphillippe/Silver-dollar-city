@@ -3781,3 +3781,85 @@ html[data-easy='on'] .recall-gate.is-easy-hold .why-blast.is-miss-teach .why-mis
   justify-content: center;
   gap: 10px;
 }
+
+/* Easy Lock In 1.4.361: phone LOCKED! sits above the card stack.
+   The stamp was absolute over the arena, and the win grid kept tossed chips
+   in place so LOCKED!, the why, and Main idea covered each other. On a phone
+   the badge, the locked why, and Main idea stack with a gap. Quiz, miss-teach,
+   and wider screens stay on their peels. */
+@media (max-width: 720px) {
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-win > .win-burst {
+    position: relative;
+    inset: auto;
+    z-index: 1;
+    height: auto;
+    min-height: 0;
+    margin: 0 0 10px;
+    overflow: visible;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-win > .win-burst .win-stamp-wrap {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    z-index: auto;
+    width: auto;
+    max-width: 100%;
+    margin: 0;
+    transform: none;
+    display: flex;
+    justify-content: center;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-win > .win-burst .win-spark,
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-win > .win-burst .win-gem,
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-win .why-pop {
+    display: none;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-win .why-arena {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 12px;
+    min-height: 0;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-win .why-chip.is-clear:not(.is-lock) {
+    display: none;
+    animation: none;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-win .why-chip.is-lock {
+    position: relative;
+    z-index: 1;
+    grid-area: auto;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    animation: none;
+    transform: none;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-win .why-claim {
+    position: relative;
+    z-index: 1;
+    grid-area: auto;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 !important;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-win .match-yes {
+    position: relative;
+    z-index: 1;
+    margin-top: 12px;
+  }
+}
