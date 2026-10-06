@@ -198,9 +198,13 @@ type LockExitProgress = EasyLoopProgress & {
   held?: readonly string[]
 }
 
-/** Same-proof recap after a correct Lock In why. Not Home, and not the next maze. */
+/**
+ * Same-proof recap after a correct Lock In why. Not Home, and not the next maze.
+ * `sceneRecap` marks this close so a quiet pause can wait until Home.
+ * Opening a stored line does not set it.
+ */
 export function sameProofRecap(id: string): View {
-  return { name: 'journal', focusId: `learn-${id}` }
+  return { name: 'journal', focusId: `learn-${id}`, sceneRecap: true }
 }
 
 /** Newest stored proof — the line Lock In should recite, not the open Match. */

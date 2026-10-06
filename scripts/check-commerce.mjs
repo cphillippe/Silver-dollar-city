@@ -2,9 +2,12 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { CORE_PACK_ID, PLAY_SKUS, SHOP_PACKS, paidPacks } from '../src/config/commerce.ts'
 import {
+  QUIET_PAUSE_BLOCKED_VIEWS,
+  QUIET_PAUSE_LINK_PLAYS,
+  QUIET_PAUSE_SCENE_RETURNS,
   adsEnabledDefault,
-  isBetweenSceneTransition,
   lockInQuizBlocksPause,
+  quietPauseAllowed,
   scenePauseMountsOn,
   softAdsVisible,
 } from '../src/config/ads.ts'
@@ -143,33 +146,95 @@ assert.equal(
   'ph-father',
 )
 
-assert.equal(isBetweenSceneTransition('hub', 'link'), true)
-assert.equal(isBetweenSceneTransition('hub', 'journal'), false)
-assert.equal(isBetweenSceneTransition('link', 'learn'), false)
-assert.equal(isBetweenSceneTransition('link', 'journal'), false)
-assert.equal(isBetweenSceneTransition('link', 'hub'), true)
-assert.equal(isBetweenSceneTransition('journal', 'hub'), true)
+// Quiet pause allow-list: blocked views never, including the way Home.
+for (const name of QUIET_PAUSE_BLOCKED_VIEWS) {
+  assert.equal(quietPauseAllowed({ name }, { name: 'hub' }), false, `${name} → hub`)
+  assert.equal(quietPauseAllowed({ name }, { name: 'hub', afterScene: true }), false, `${name} exit`)
+  assert.equal(quietPauseAllowed({ name: 'hub' }, { name }), false, `hub → ${name}`)
+}
+assert.ok(QUIET_PAUSE_BLOCKED_VIEWS.includes('link'), 'Match / arcade / source-dig view')
+assert.ok(QUIET_PAUSE_BLOCKED_VIEWS.includes('learn'), 'teach')
+assert.ok(QUIET_PAUSE_BLOCKED_VIEWS.includes('journal'), 'Lock In / Journal / recap')
+assert.ok(QUIET_PAUSE_BLOCKED_VIEWS.includes('defend'), 'Night Watch')
+assert.ok(QUIET_PAUSE_BLOCKED_VIEWS.includes('settings'))
+assert.ok(QUIET_PAUSE_BLOCKED_VIEWS.includes('welcome'), 'first run')
+for (const play of ['match', 'panel-blast', 'father-run', 'road-maze', 'claim-merge', 'story-snap', 'source-dig']) {
+  assert.ok(QUIET_PAUSE_LINK_PLAYS.includes(play), play)
+}
+assert.equal(quietPauseAllowed({ name: 'link' }, { name: 'hub' }), false, 'Match exit')
+assert.equal(quietPauseAllowed({ name: 'link' }, { name: 'journal', autoQuiz: true }), false, 'Match → Lock In')
 assert.equal(lockInQuizBlocksPause('journal', true), true)
 assert.equal(lockInQuizBlocksPause('journal', false), false)
 assert.equal(lockInQuizBlocksPause('hub', true), false)
 assert.equal(lockInQuizBlocksPause('daily', false), false)
-assert.equal(isBetweenSceneTransition('pack-street', 'hub'), true)
+assert.equal(
+  quietPauseAllowed({ name: 'journal', autoQuiz: true }, { name: 'journal', focusId: 'learn-ph-road', sceneRecap: true }),
+  false,
+  'Lock In quiz → Say this tomorrow',
+)
+assert.equal(quietPauseAllowed({ name: 'journal', autoQuiz: true }, { name: 'hub' }), false, 'Lock In quiz → Home')
+assert.equal(quietPauseAllowed({ name: 'journal' }, { name: 'hub' }), false, 'Journal list → Home')
+assert.equal(
+  quietPauseAllowed({ name: 'journal', focusId: 'learn-ph-road' }, { name: 'hub' }),
+  false,
+  'stored line is not the Lock In close',
+)
+assert.equal(quietPauseAllowed({ name: 'hub' }, { name: 'link' }), false, 'no enter pause')
+assert.equal(quietPauseAllowed({ name: 'hub' }, { name: 'learn' }), false)
+assert.equal(quietPauseAllowed({ name: 'hub' }, { name: 'daily' }), false)
+assert.equal(quietPauseAllowed({ name: 'learn' }, { name: 'link' }), false)
+assert.equal(quietPauseAllowed({ name: 'daily' }, { name: 'hub' }), false, 'back during Daily is not finished')
+assert.equal(quietPauseAllowed({ name: 'challenge' }, { name: 'hub' }), false, 'back during a scene is not finished')
+assert.equal(quietPauseAllowed({ name: 'defend' }, { name: 'hub' }), false, 'Night Watch')
+assert.equal(quietPauseAllowed({ name: 'settings' }, { name: 'hub' }), false)
+assert.equal(quietPauseAllowed({ name: 'welcome' }, { name: 'hub' }), false, 'first run')
+assert.equal(quietPauseAllowed({ name: 'pack-street' }, { name: 'hub' }), false)
+// Clean Home return after a finished scene may pause. Cooldown stays in App.go.
+assert.deepEqual(QUIET_PAUSE_SCENE_RETURNS, ['daily', 'challenge'])
+assert.equal(quietPauseAllowed({ name: 'daily' }, { name: 'hub', afterScene: true }), true)
+assert.equal(quietPauseAllowed({ name: 'challenge' }, { name: 'hub', afterScene: true }), true)
+assert.equal(
+  quietPauseAllowed({ name: 'journal', focusId: 'learn-ph-road', sceneRecap: true }, { name: 'hub' }),
+  true,
+  'Say this tomorrow closed, then Home',
+)
 assert.equal(scenePauseMountsOn('hub'), true)
 assert.equal(scenePauseMountsOn('link'), false)
 assert.equal(scenePauseMountsOn('journal'), false)
+assert.equal(scenePauseMountsOn('learn'), false)
+assert.equal(scenePauseMountsOn('defend'), false)
 
 const appSrc = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8')
+const adsSrc = readFileSync(new URL('../src/config/ads.ts', import.meta.url), 'utf8')
 assert.match(appSrc, /SceneAd/)
-assert.match(appSrc, /isBetweenSceneTransition/)
+assert.match(appSrc, /quietPauseAllowed/)
 assert.match(appSrc, /view\.name === 'shop'/)
 assert.match(appSrc, /pack-street/)
 assert.match(appSrc, /name === 'journal'/)
 assert.match(appSrc, /scenePauseMountsOn/)
-assert.match(appSrc, /isSceneLeaveView/)
-assert.match(appSrc, /lockInQuizBlocksPause/)
+assert.doesNotMatch(appSrc, /isSceneLeaveView/)
+assert.doesNotMatch(appSrc, /isLessonEnterView/)
+assert.doesNotMatch(appSrc, /lockInQuizBlocksPause/)
+assert.doesNotMatch(appSrc, /isBetweenSceneTransition/)
 assert.match(appSrc, /liveInterstitialReady/)
 assert.match(appSrc, /showBetweenSceneInterstitial/)
 assert.doesNotMatch(appSrc, /hub-banner/)
+assert.match(adsSrc, /Dig deeper has no route/)
+assert.match(adsSrc, /Night Watch/)
+assert.match(adsSrc, /source-dig/)
+assert.match(adsSrc, /first run/)
+const dailySrc = readFileSync(new URL('../src/components/DailyTrail.tsx', import.meta.url), 'utf8')
+const challengeSrc = readFileSync(new URL('../src/components/ChallengeScreen.tsx', import.meta.url), 'utf8')
+const loopSrc = readFileSync(new URL('../src/easyTrail/trail/loop.ts', import.meta.url), 'utf8')
+const backSrc = readFileSync(new URL('../src/components/EasyBack.tsx', import.meta.url), 'utf8')
+assert.match(dailySrc, /afterScene: true/)
+assert.match(challengeSrc, /afterScene: true/)
+assert.match(loopSrc, /sceneRecap: true/)
+assert.doesNotMatch(backSrc, /afterScene/)
+assert.doesNotMatch(
+  readFileSync(new URL('../src/components/LinkScreen.tsx', import.meta.url), 'utf8'),
+  /afterScene/,
+)
 
 const hubSrc = readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8')
 assert.match(hubSrc, /EASY\.matchCta|EASY\.mazeMatch|EASY\.runMatch|EASY\.mergeMatch|EASY\.digMatch/)

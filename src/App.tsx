@@ -15,32 +15,13 @@ import { Profile } from './components/Profile'
 import { SceneAd } from './components/SceneAd'
 import { Vista } from './components/Vista'
 import { Welcome } from './components/Welcome'
-import {
-  adsAreVisible,
-  isBetweenSceneTransition,
-  lockInQuizBlocksPause,
-  scenePauseMountsOn,
-} from './config/ads'
+import { adsAreVisible, quietPauseAllowed, scenePauseMountsOn } from './config/ads'
 import { liveInterstitialReady, showBetweenSceneInterstitial } from './lib/adAdapter'
 import { offerStoresComingNotice } from './lib/supportToast'
 import { useProgress } from './store/progress'
 import type { View } from './types'
 
 const AD_COOLDOWN_MS = 20_000
-
-function isLessonEnterView(view: View): boolean {
-  return (
-    view.name === 'learn' ||
-    view.name === 'link' ||
-    view.name === 'daily' ||
-    view.name === 'challenge' ||
-    view.name === 'pack-street'
-  )
-}
-
-function isSceneLeaveView(view: View): boolean {
-  return isLessonEnterView(view) || view.name === 'journal'
-}
 
 export default function App() {
   const { progress } = useProgress()
@@ -55,46 +36,15 @@ export default function App() {
   const lastAdAt = useRef(0)
 
   function go(next: View, skipAd = false) {
-    const onLockInQuiz = lockInQuizBlocksPause(
-      view.name,
-      view.name === 'journal' && view.autoQuiz === true,
-    )
-    if (onLockInQuiz) {
-      setSceneAd(false)
-      setPending(null)
-      setView(next)
-      return
-    }
-
     const adsOn = !skipAd && adsAreVisible()
     const cooled = Date.now() - lastAdAt.current >= AD_COOLDOWN_MS
-    const between = isBetweenSceneTransition(view.name, next.name)
-
-    if (adsOn && cooled && between && view.name === 'hub' && isLessonEnterView(next)) {
-      lastAdAt.current = Date.now()
-      setPending(next)
-      if (liveInterstitialReady() && scenePauseMountsOn(view.name)) {
-        void showBetweenSceneInterstitial(view.name).then((result) => {
-          if (result === 'live') {
-            setSceneAd(false)
-            setPending(null)
-            setView(next)
-            return
-          }
-          setSceneAd(true)
-        })
-        return
-      }
-      setSceneAd(true)
-      return
-    }
-
-    if (adsOn && cooled && between && isSceneLeaveView(view) && next.name === 'hub') {
+    // Allow-list only: clean Home after a finished scene. Cooldown stays here.
+    if (adsOn && cooled && quietPauseAllowed(view, next) && scenePauseMountsOn(next.name)) {
       lastAdAt.current = Date.now()
       setPending(null)
-      setView({ name: 'hub' })
-      if (liveInterstitialReady() && scenePauseMountsOn('hub')) {
-        void showBetweenSceneInterstitial('hub').then((result) => {
+      setView(next)
+      if (liveInterstitialReady()) {
+        void showBetweenSceneInterstitial(next.name).then((result) => {
           if (result === 'live') {
             setSceneAd(false)
             return
