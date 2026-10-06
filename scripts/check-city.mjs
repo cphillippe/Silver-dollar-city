@@ -1216,7 +1216,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.363')
+assert.equal(APP_VERSION, '1.4.364')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3763,6 +3763,43 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.363').items.join('\n'),
     /Fixes #|Closes #|Resolves #/i,
     '1.4.363 changelog avoids GitHub close keywords',
+  )
+}
+
+// Phone Easy play-through 1.4.364: thin Playwright spec. Core checks stay browser-free.
+{
+  const pkg364 = JSON.parse(
+    readFileSync(new URL('../package.json', import.meta.url), 'utf8'),
+  )
+  assert.equal(typeof pkg364.scripts['test:e2e'], 'string')
+  assert.match(pkg364.devDependencies['@playwright/test'], /.+/)
+  assert.doesNotMatch(
+    readFileSync(new URL('./run-checks.mjs', import.meta.url), 'utf8'),
+    /easy-phone/,
+    '1.4.364 keeps the phone play-through out of npm test',
+  )
+  const spec364 = readFileSync(new URL('../e2e/easy-phone.spec.ts', import.meta.url), 'utf8')
+  assert.match(spec364, /375/)
+  assert.match(spec364, /667/)
+  assert.match(spec364, /A quiet pause/)
+  assert.match(spec364, /One more road/)
+  assert.match(spec364, /Lock In next/)
+  assert.match(spec364, /Say this tomorrow/)
+  assert.match(spec364, /Find the hurt man/)
+  assert.match(spec364, /Helped!/)
+  assert.ok(existsSync(new URL('../playwright.config.ts', import.meta.url)))
+  assert.ok(existsSync(new URL('./test-e2e.mjs', import.meta.url)))
+  assert.doesNotMatch(
+    readFileSync(new URL('../src/styles/sortHold.css', import.meta.url), 'utf8'),
+    /1\.4\.364/,
+    '1.4.364 does not touch the LOCKED! phone stack',
+  )
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.364'), '1.4.364 changelog row')
+  assert.match(latestChange('1.4.364').items.join('\n'), /Phone checks keep the Easy walk honest/)
+  assert.doesNotMatch(
+    latestChange('1.4.364').items.join('\n'),
+    /Fixes #|Closes #|Resolves #/i,
+    '1.4.364 changelog avoids GitHub close keywords',
   )
 }
 

@@ -1,7 +1,7 @@
 {
   "name": "silver-city",
   "private": true,
-  "version": "1.4.363",
+  "version": "1.4.364",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -20,7 +20,8 @@
     "test:city": "node scripts/run-checks.mjs city",
     "test:commerce": "node scripts/run-checks.mjs commerce",
     "test:css": "node scripts/run-checks.mjs css",
-    "test:juice": "node scripts/run-checks.mjs juice"
+    "test:juice": "node scripts/run-checks.mjs juice",
+    "test:e2e": "node scripts/test-e2e.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.1",
@@ -31,6 +32,7 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^8.5.1",
+    "@playwright/test": "^1.63.0",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.2",
