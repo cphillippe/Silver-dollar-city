@@ -325,11 +325,11 @@ export interface ProgressState {
 
 export type View =
   | { name: 'welcome' }
-  | { name: 'hub'; mindPlot?: string }
+  | { name: 'hub'; mindPlot?: string; afterScene?: boolean }
   | { name: 'daily' }
   | { name: 'area'; areaId: string }
   | { name: 'challenge'; areaId: string; challengeId: string }
-  | { name: 'journal'; focusId?: string; autoQuiz?: boolean }
+  | { name: 'journal'; focusId?: string; autoQuiz?: boolean; sceneRecap?: boolean }
   | { name: 'vista' }
   | { name: 'settings' }
   | { name: 'defend' }
