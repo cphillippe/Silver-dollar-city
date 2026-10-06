@@ -164,7 +164,7 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
               who={townVoice('porch').who}
               line={townVoice('porch').afterWin}
               action={easy ? EASY.home : 'See the town'}
-              onGo={() => onNavigate({ name: 'hub' })}
+              onGo={() => onNavigate({ name: 'hub', afterScene: true })}
             />
           ) : null}
         </section>

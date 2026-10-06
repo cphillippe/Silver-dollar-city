@@ -30,12 +30,14 @@ assert.ok(ADS_NEVER_COVER.some((line) => /Journal/i.test(line)))
 assert.ok(ADS_NEVER_COVER.some((line) => /claim-merge/i.test(line)))
 assert.ok(ADS_NEVER_COVER.some((line) => /father-run/i.test(line)))
 assert.ok(ADS_NEVER_COVER.some((line) => /source-dig/i.test(line)))
-assert.ok(isBetweenSceneTransition('hub', 'link'))
-assert.ok(isBetweenSceneTransition('link', 'hub'))
-assert.ok(isBetweenSceneTransition('hub', 'learn'))
+assert.equal(isBetweenSceneTransition('hub', 'link'), false)
+assert.equal(isBetweenSceneTransition('link', 'hub'), false)
+assert.equal(isBetweenSceneTransition('hub', 'learn'), false)
 assert.equal(isBetweenSceneTransition('hub', 'journal'), false)
 assert.equal(isBetweenSceneTransition('learn', 'link'), false)
 assert.equal(isBetweenSceneTransition('hub', 'settings'), false)
+assert.equal(isBetweenSceneTransition('journal', 'hub'), false)
+assert.equal(isBetweenSceneTransition('daily', 'hub'), false)
 
 const legacy = {
   started: true,

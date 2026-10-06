@@ -783,7 +783,7 @@ const challengeSrc = readFileSync(
 )
 assert.match(challengeSrc, /TownReturn/)
 assert.match(challengeSrc, /See the town/)
-assert.match(challengeSrc, /onNavigate\(EASY_HOME\)/)
+assert.match(challengeSrc, /onNavigate\(\{ name: 'hub', afterScene: true \}\)/)
 assert.match(challengeSrc, /afterJuice/)
 assert.match(challengeSrc, /savedWin/)
 assert.match(challengeSrc, /puzzle-title/)
@@ -1216,7 +1216,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.362')
+assert.equal(APP_VERSION, '1.4.363')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3703,6 +3703,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.deepEqual(sameProofRecap('ph-road'), {
     name: 'journal',
     focusId: 'learn-ph-road',
+    sceneRecap: true,
   })
   assert.notEqual(sameProofRecap('ph-road').name, 'hub')
   assert.notEqual(sameProofRecap('ph-road').name, 'link')
@@ -3715,8 +3716,8 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   const ads362 = readFileSync(new URL('../src/config/ads.ts', import.meta.url), 'utf8')
   assert.match(hold362, /onNavigate\(sameProofRecap\(quizBrief\.id\)\)/)
   assert.doesNotMatch(hold362, /onNavigate\(EASY_HOME\)/)
-  assert.match(app362, /lockInQuizBlocksPause\(/)
   assert.match(ads362, /export function lockInQuizBlocksPause/)
+  assert.match(app362, /quietPauseAllowed\(/)
   assert.match(journal362, /focusId === `learn-\$\{learning\.id\}`/)
   assert.match(journal362, /<StoredLine/)
   assert.doesNotMatch(
@@ -3733,6 +3734,35 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.362').items.join('\n'),
     /Fixes #511|Closes #511|Resolves #511|Fixes #504|Closes #504|Resolves #504|Fixes #441|Closes #441|Resolves #441|Fixes #510|Closes #510|Resolves #510|Fixes #509|Closes #509|Resolves #509|Fixes #531|Closes #531|Resolves #531/i,
     '1.4.362 changelog avoids GitHub close keywords',
+  )
+}
+
+// Quiet pause 1.4.363: allow-list is clean Home after a finished scene. Leave play screens alone.
+{
+  const app363 = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8')
+  const ads363 = readFileSync(new URL('../src/config/ads.ts', import.meta.url), 'utf8')
+  assert.match(ads363, /export function quietPauseAllowed/)
+  assert.match(ads363, /QUIET_PAUSE_BLOCKED_VIEWS/)
+  assert.match(ads363, /QUIET_PAUSE_SCENE_RETURNS/)
+  assert.match(app363, /quietPauseAllowed\(view, next\)/)
+  assert.doesNotMatch(app363, /isLessonEnterView/)
+  assert.doesNotMatch(app363, /lockInQuizBlocksPause\(/)
+  assert.match(
+    readFileSync(new URL('../src/easyTrail/trail/loop.ts', import.meta.url), 'utf8'),
+    /sceneRecap: true/,
+  )
+  assert.doesNotMatch(
+    readFileSync(new URL('../src/styles/sortHold.css', import.meta.url), 'utf8'),
+    /1\.4\.363/,
+    '1.4.363 does not touch the LOCKED! phone stack',
+  )
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.363'), '1.4.363 changelog row')
+  assert.match(latestChange('1.4.363').items.join('\n'), /quiet pause/i)
+  assert.match(latestChange('1.4.363').items.join('\n'), /Home/)
+  assert.doesNotMatch(
+    latestChange('1.4.363').items.join('\n'),
+    /Fixes #|Closes #|Resolves #/i,
+    '1.4.363 changelog avoids GitHub close keywords',
   )
 }
 

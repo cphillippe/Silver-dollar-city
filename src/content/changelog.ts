@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.363',
+    title: 'Quiet pause waits until Home',
+    when: '2026-10-06',
+    items: [
+      'A quiet pause shows only after you finish and get Home.',
+    ],
+  },
+  {
     version: '1.4.362',
     title: 'Easy Lock In keeps the line you locked',
     when: '2026-10-06',
