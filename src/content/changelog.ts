@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.380',
+    title: 'Night Watch skills recharge',
+    when: '2026-10-07',
+    items: [
+      'Easy Night Watch skills open one at a time. Still freezes the walkers. Mend fills your hearts and holds the gate. Tap a skill when it says TAP. It recharges after you use it. The first time a skill opens, a short card tells you what it does.',
+    ],
+  },
+  {
     version: '1.4.379',
     title: 'Night Watch phone map uses the screen',
     when: '2026-10-07',

@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { evidenceFor } from '../content/evidence'
 import {
   ANGEL_STICKER,
@@ -24,18 +25,15 @@ import {
   type WatchAbility,
 } from '../lib/defend'
 import { learningForTool } from '../lib/learning'
+import { KIT_LABEL, STILL_MS, useStill, unturnedStep, type KitId } from '../lib/nightKits'
 import {
-  applyKitBuy,
-  freshRunKits,
-  KIT_LABEL,
-  kitSparkCost,
-  STILL_MS,
-  useMend,
-  useStill,
-  unturnedStep,
-  type KitId,
-  type RunKits,
-} from '../lib/nightKits'
+  MEND_SHIELD_MS,
+  SKILL_COOLDOWN_MS,
+  SKILL_UNLOCK_WAVE,
+  mendPower,
+  skillUnlockOnWave,
+  skillUnlocked,
+} from '../lib/nightSkills'
 import {
   nightWatchDebugFrozen,
   readNightWatchDebug,
@@ -74,6 +72,8 @@ import { TownReturn } from './TownReturn'
 import { WinBurst } from './challenges/WinBurst'
 import { DefendAbilityBar } from './DefendAbilityBar'
 import { DefendNightBoard } from './DefendNightBoard'
+import { NightSkillSplash } from './NightSkillSplash'
+import { NightSkillTray } from './NightSkillTray'
 import type { EasyTapJuice, EasyWalkerCall } from './DefendNightActors'
 
 interface DefendScreenProps {
@@ -120,8 +120,14 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const [waveIndex, setWaveIndex] = useState(0)
   const [runTier, setRunTier] = useState<Record<string, number>>(freshRunTier)
   const [runSparks, setRunSparks] = useState(0)
-  const [runKits, setRunKits] = useState<RunKits>(freshRunKits)
+  const [skillReady, setSkillReady] = useState<Record<KitId, number>>({ still: 0, mend: 0 })
+  const [skillNow, setSkillNow] = useState(0)
+  const [skillSplash, setSkillSplash] = useState<KitId | null>(null)
+  const [pulseId, setPulseId] = useState<KitId | null>(null)
   const [stillOn, setStillOn] = useState(false)
+  const [mendOn, setMendOn] = useState(false)
+  const [mendShield, setMendShield] = useState(false)
+  const [powerBanner, setPowerBanner] = useState<string | null>(null)
   const [nwDebug, setNwDebug] = useState(() => readNightWatchDebug())
   const [debugPaused, setDebugPaused] = useState(false)
   const nwDebugRef = useRef(nwDebug)
@@ -138,14 +144,22 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   runTierRef.current = runTier
   const waveIndexRef = useRef(waveIndex)
   waveIndexRef.current = waveIndex
-  const kitsRef = useRef(runKits)
-  kitsRef.current = runKits
+  const skillReadyRef = useRef(skillReady)
+  skillReadyRef.current = skillReady
+  const skillHoldRef = useRef(false)
+  const pendingIntroRef = useRef<KitId | null>(null)
+  const seenSkill = useRef<Record<KitId, boolean>>({ still: false, mend: false })
+  const mendShieldUntilRef = useRef(0)
   const sparksRef = useRef(runSparks)
   sparksRef.current = runSparks
   const prevSparks = useRef(runSparks)
   const [sparkPop, setSparkPop] = useState(false)
   const burstTimer = useRef(0)
   const stillTimer = useRef(0)
+  const mendTimer = useRef(0)
+  const shieldTimer = useRef(0)
+  const bannerTimer = useRef(0)
+  const pulseTimer = useRef(0)
   const metRef = useRef<string[]>([...(progress.defense.met ?? [])])
   const markMetRef = useRef(markMet)
   markMetRef.current = markMet
@@ -230,6 +244,13 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   }, [phase, waveIndex, nwDebug, easy])
 
   useEffect(() => {
+    if (phase !== 'wave' && phase !== 'boost') return
+    setSkillNow(performance.now())
+    const timer = window.setInterval(() => setSkillNow(performance.now()), 200)
+    return () => window.clearInterval(timer)
+  }, [phase])
+
+  useEffect(() => {
     if (!juiceDone || saved.current || !brief) return
     saved.current = true
     recordNight(today)
@@ -243,8 +264,22 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   }, [progress.defense.met])
 
   useEffect(() => {
-    if (phase !== 'wave') return
+    if (phase !== 'wave') {
+      skillHoldRef.current = false
+      pendingIntroRef.current = null
+      setSkillSplash(null)
+      return
+    }
     const wave = waveIndexRef.current
+    const intro = skillUnlockOnWave(wave)
+    if (intro && !seenSkill.current[intro]) {
+      seenSkill.current[intro] = true
+      pendingIntroRef.current = intro
+      skillHoldRef.current = true
+      setSkillSplash(intro)
+    } else if (intro && pendingIntroRef.current === intro) {
+      skillHoldRef.current = true
+    }
     const tune = waveCombat(wave, easy)
     const cleared = progress.defense.cleared
     live.current.playing = true
@@ -255,6 +290,9 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     live.current.cool = {}
     live.current.spawnNow = false
     live.current.freezeUntil = 0
+    mendShieldUntilRef.current = 0
+    window.clearTimeout(shieldTimer.current)
+    setMendShield(false)
     setToolLock(null)
     setRaiders([])
     setDowned(0)
@@ -265,6 +303,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
 
     const tick = (now: number) => {
       if (!live.current.playing) return
+      if (skillHoldRef.current) {
+        last = now
+        frame = requestAnimationFrame(tick)
+        return
+      }
       const dt = Math.min(0.05, (now - last) / 1000)
       last = now
       const frozen = nightWatchDebugFrozen(
@@ -296,6 +339,12 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         leaked += 1
         return false
       })
+      if (leaked && now < mendShieldUntilRef.current) {
+        leaked = 0
+        setPowerBanner('Held')
+        window.clearTimeout(bannerTimer.current)
+        bannerTimer.current = window.setTimeout(() => setPowerBanner(null), 2800)
+      }
       if (leaked) {
         live.current.hearts = Math.max(0, live.current.hearts - leaked)
         setHearts(live.current.hearts)
@@ -627,9 +676,18 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     setPlants(easy ? {} : starterPlants(pads, unlocked))
     setRunSparks(0)
     sparksRef.current = 0
-    const kits = freshRunKits()
-    kitsRef.current = kits
-    setRunKits(kits)
+    const ready = { still: 0, mend: 0 }
+    skillReadyRef.current = ready
+    setSkillReady(ready)
+    seenSkill.current = { still: false, mend: false }
+    pendingIntroRef.current = null
+    skillHoldRef.current = false
+    setSkillSplash(null)
+    setPulseId(null)
+    mendShieldUntilRef.current = 0
+    setMendShield(false)
+    setMendOn(false)
+    setPowerBanner(null)
     setStillOn(false)
     setDebugPaused(false)
     live.current.freezeUntil = 0
@@ -690,42 +748,77 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     }, 900)
   }
 
-  function buyKit(id: KitId) {
-    if (phase !== 'boost' || won) return
-    const next = applyKitBuy(id, kitsRef.current, sparksRef.current)
-    setBoostNote(next.note)
-    if (!next.ok) return
-    kitsRef.current = next.kits
-    sparksRef.current = next.sparks
-    setRunKits(next.kits)
-    setRunSparks(next.sparks)
+  function showPower(note: string) {
+    setPowerBanner(note)
+    window.clearTimeout(bannerTimer.current)
+    bannerTimer.current = window.setTimeout(() => setPowerBanner(null), 2800)
+  }
+
+  function armSkill(id: KitId, now: number) {
+    const next = { ...skillReadyRef.current, [id]: now + SKILL_COOLDOWN_MS[id] }
+    skillReadyRef.current = next
+    setSkillReady(next)
+    setSkillNow(now)
   }
 
   function spendStill() {
-    if (phase !== 'wave' || won || kitsRef.current.still < 1) return
-    const kits = { ...kitsRef.current, still: kitsRef.current.still - 1 }
-    kitsRef.current = kits
-    setRunKits(kits)
     live.current.freezeUntil = useStill(performance.now())
     window.clearTimeout(stillTimer.current)
     setStillOn(true)
-    stillTimer.current = window.setTimeout(() => setStillOn(false), STILL_MS)
-    flashKit('Still')
+    stillTimer.current = window.setTimeout(() => setStillOn(false), Math.max(STILL_MS, 2800))
+    showPower('Still')
   }
 
   function spendMend() {
-    if (phase !== 'wave' || won || kitsRef.current.mend < 1) return
-    const next = useMend(live.current.hearts)
-    if (!next.healed) {
-      flashKit(next.note)
+    const now = performance.now()
+    const powered = mendPower(live.current.hearts)
+    live.current.hearts = powered.hearts
+    setHearts(powered.hearts)
+    mendShieldUntilRef.current = now + MEND_SHIELD_MS
+    setMendShield(true)
+    setMendOn(true)
+    window.clearTimeout(shieldTimer.current)
+    shieldTimer.current = window.setTimeout(() => {
+      mendShieldUntilRef.current = 0
+      setMendShield(false)
+    }, MEND_SHIELD_MS)
+    window.clearTimeout(mendTimer.current)
+    mendTimer.current = window.setTimeout(() => setMendOn(false), 980)
+    showPower(powered.note)
+  }
+
+  function dismissSkillSplash() {
+    const opened = pendingIntroRef.current
+    pendingIntroRef.current = null
+    skillHoldRef.current = false
+    setSkillSplash(null)
+    if (!opened) return
+    setPulseId(opened)
+    window.clearTimeout(pulseTimer.current)
+    pulseTimer.current = window.setTimeout(() => {
+      setPulseId((current) => (current === opened ? null : current))
+    }, 2600)
+  }
+
+  function castSkill(id: KitId) {
+    const label = KIT_LABEL[id]
+    if (won || skillSplash) return
+    if (!skillUnlocked(id, waveIndex)) {
+      flashKit(`${label} unlocks on wave ${SKILL_UNLOCK_WAVE[id] + 1}`)
       return
     }
-    const kits = { ...kitsRef.current, mend: kitsRef.current.mend - 1 }
-    kitsRef.current = kits
-    setRunKits(kits)
-    live.current.hearts = next.hearts
-    setHearts(next.hearts)
-    flashKit(next.note)
+    if (phase !== 'wave') {
+      flashKit(`Tap ${label} during the wave`)
+      return
+    }
+    const now = performance.now()
+    if (now < skillReadyRef.current[id]) {
+      flashKit(`${label} is recharging`)
+      return
+    }
+    if (id === 'still') spendStill()
+    else spendMend()
+    armSkill(id, performance.now())
   }
 
   function continueFromBoost() {
@@ -791,12 +884,14 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           Wave {waveIndex + 1}/{DEFEND_NIGHT_WAVES}
         </span>
       ) : null}
-      <span className="defend-hearts">
+      <span className={`defend-hearts${mendShield ? ' is-mend-shield' : ''}${mendOn ? ' is-mend-pop' : ''}`}>
         {Array.from({ length: DEFEND_HEARTS }, (_, index) => (
           <span key={index} className={index < hearts ? 'is-on' : ''}>
             ♥
           </span>
         ))}
+        {mendShield ? <span className="nw-mend-hold">Gate</span> : null}
+        {powerBanner ? <span className="nw-power-chip">{powerBanner}</span> : null}
       </span>
       <span className={`defend-count ${combo > 1 ? 'is-combo' : ''}`}>
         {phase === 'boost'
@@ -831,7 +926,16 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
             : 'Tap a planted lamp or a tool on the right to spend sparks.'
           : null
 
-  const kitCharges = runKits.still + runKits.mend
+  const skillTray = (
+    <NightSkillTray
+      waveIndex={waveIndex}
+      now={skillNow}
+      readyAt={skillReady}
+      pulseId={pulseId}
+      onCast={castSkill}
+    />
+  )
+
   const docks = (
     <>
       {debugHarness ? (
@@ -849,26 +953,9 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           ) : null}
         </div>
       ) : null}
-      {phase === 'wave' && !won && kitCharges > 0 ? (
-        <div className="defend-kits" role="group" aria-label="One-off tools">
-          <button
-            type="button"
-            className="btn defend-kit defend-kit-choice"
-            onClick={spendStill}
-            disabled={runKits.still < 1}
-          >
-            <span className="defend-kit-name">{KIT_LABEL.still}</span>
-            <span className="defend-kit-badge">{runKits.still}</span>
-          </button>
-          <button
-            type="button"
-            className="btn defend-kit defend-kit-choice"
-            onClick={spendMend}
-            disabled={runKits.mend < 1}
-          >
-            <span className="defend-kit-name">{KIT_LABEL.mend}</span>
-            <span className="defend-kit-badge">{runKits.mend}</span>
-          </button>
+      {phase === 'wave' && !won && !skillSplash ? (
+        <div className="defend-kits nw-skill-tray" role="group" aria-label="Skills">
+          {skillTray}
         </div>
       ) : null}
       {phase === 'lost' ? (
@@ -891,30 +978,9 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           </p>
           <div className="defend-spark-choices" role="group" aria-labelledby="defend-spark-pick">
             <p id="defend-spark-pick" className="defend-spark-choices-label">
-              {easy ? EASY.nightBoostPick : 'Pick one skill'}
+              {easy ? EASY.nightBoostPick : 'Skills'}
             </p>
-            <div className="defend-kit-buys">
-              <button
-                type="button"
-                className="btn defend-kit defend-kit-choice"
-                onClick={() => buyKit('still')}
-                disabled={runSparks < kitSparkCost}
-              >
-                <span className="defend-kit-name">{KIT_LABEL.still}</span>
-                <span className="defend-kit-cost">{`${kitSparkCost} spark`}</span>
-                <span className="defend-kit-badge">{runKits.still}</span>
-              </button>
-              <button
-                type="button"
-                className="btn defend-kit defend-kit-choice"
-                onClick={() => buyKit('mend')}
-                disabled={runSparks < kitSparkCost}
-              >
-                <span className="defend-kit-name">{KIT_LABEL.mend}</span>
-                <span className="defend-kit-cost">{`${kitSparkCost} spark`}</span>
-                <span className="defend-kit-badge">{runKits.mend}</span>
-              </button>
-            </div>
+            {skillTray}
           </div>
           <button type="button" className="btn primary" onClick={continueFromBoost}>
             Continue
@@ -962,7 +1028,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
 
   return (
     <main
-      className={`defend-page ${taught ? 'is-puzzle' : 'is-teach'} ${arming ? 'is-arming' : ''} ${won ? 'is-win' : ''} ${shake ? 'is-shake' : ''} ${leakFlash ? 'is-leak' : ''} ${firing ? 'is-firing' : ''} ${stillOn ? 'is-still' : ''} ${debugFrozen ? 'is-nw-debug-freeze' : ''} ${easy ? 'is-easy-watch' : ''} ${easyTap ? 'is-easy-tap' : ''} ${boosting ? 'is-boost' : ''}`}
+      className={`defend-page ${taught ? 'is-puzzle' : 'is-teach'} ${arming ? 'is-arming' : ''} ${won ? 'is-win' : ''} ${shake ? 'is-shake' : ''} ${leakFlash ? 'is-leak' : ''} ${firing ? 'is-firing' : ''} ${stillOn ? 'is-still' : ''} ${mendOn ? 'is-mend' : ''} ${mendShield ? 'is-mend-shield' : ''} ${debugFrozen ? 'is-nw-debug-freeze' : ''} ${easy ? 'is-easy-watch' : ''} ${easyTap ? 'is-easy-tap' : ''} ${boosting ? 'is-boost' : ''}`}
       aria-label={WATCH_TITLE}
     >
       {after ? (
@@ -1064,6 +1130,22 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                 </span>
               </div>
             ) : null}
+            {skillSplash ? <NightSkillSplash id={skillSplash} onDismiss={dismissSkillSplash} /> : null}
+            {createPortal(
+              <>
+                {stillOn ? <div className="nw-still-veil" aria-hidden="true" /> : null}
+                {mendShield ? <div className="nw-mend-shield" aria-hidden="true" /> : null}
+                {powerBanner ? (
+                  <p
+                    className={`nw-power-banner${powerBanner.startsWith('Mend') || powerBanner === 'Held' ? ' is-mend' : ' is-still'}`}
+                    role="status"
+                  >
+                    {powerBanner}
+                  </p>
+                ) : null}
+              </>,
+              document.body,
+            )}
           </UiShell>
         </>
       )}
