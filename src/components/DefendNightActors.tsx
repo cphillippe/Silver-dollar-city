@@ -8,7 +8,7 @@ import {
   WATCH_ABILITY_LABEL,
   type WatchAbility,
 } from '../lib/defend'
-import { WALKER_LABEL } from '../lib/watchTools'
+import { combatTier, TIER_MARK, WALKER_LABEL } from '../lib/watchTools'
 import { CITY_PLOTS, type CityPlotId } from '../lib/city'
 import { EASY } from '../lib/easy'
 import {
@@ -82,6 +82,16 @@ const HP_TRACK = {
   rx: 5,
 }
 const HP_FILL = { inset: 2, h: 6, rx: 3 }
+
+/** Short sparkle offsets from the lamp center, in CSS pixels. */
+const LEVEL_SPARKS = [
+  { dx: -28, dy: -40, r: 16, delay: '0s' },
+  { dx: 4, dy: -56, r: 18, delay: '0.04s' },
+  { dx: 32, dy: -36, r: 15, delay: '0.08s' },
+  { dx: -40, dy: -8, r: 13, delay: '0.02s' },
+  { dx: 40, dy: -4, r: 14, delay: '0.1s' },
+  { dx: 10, dy: -20, r: 12, delay: '0.12s' },
+] as const
 const FACE_HALF = PATH_WALKER_FACE_U / 2
 const FACE_TOP = -PATH_WALKER_FACE_U * (24 / 36)
 /** Ring sits on the clipped face (clip radius is 0.36 of the chip). */
@@ -139,6 +149,7 @@ export function DefendNightActorsSvg({
                 const scenery = easyTap && !boostPad
                 const upgrading = on && upgradeAt === id
                 const justUp = on && upFlashId === id
+                const tierMark = TIER_MARK[combatTier(using, runTier)]
                 const activatePad = () => {
                   if (phase === 'plant') {
                     if (on) onOpenUpgrade?.(id)
@@ -156,6 +167,7 @@ export function DefendNightActorsSvg({
                     key={id}
                     data-person-node={scenery ? undefined : 'pad'}
                     className={`defend-pad is-${stage} ${on ? 'is-planted' : ''} ${hot ? 'is-hot' : ''} ${firing ? 'is-flash' : ''} ${scenery ? 'is-tower-scenery' : ''} ${boostPad ? 'is-boost-pick' : ''} ${upgrading ? 'is-upgrade-open' : ''} ${justUp ? 'is-up' : ''}`}
+                    data-level={on ? tierMark : undefined}
                     transform={`translate(${at.x} ${at.y})`}
                     role={scenery ? undefined : 'button'}
                     tabIndex={scenery ? undefined : 0}
@@ -194,16 +206,49 @@ export function DefendNightActorsSvg({
                     {on ? (
                       <>
                         <ellipse className="defend-pool" cx="0" cy="12" rx={hot ? 30 : 20} ry={hot ? 11 : 7} />
-                        <image
-                          className={`defend-tower-lamp is-${pose}`}
-                          href={nightTowers.lampSrc(pose)}
-                          x={lampBox.x}
-                          y={lampBox.y}
-                          width={lampBox.w}
-                          height={lampBox.h}
-                        />
+                        <g className="defend-lamp-sprite">
+                          <image
+                            className={`defend-tower-lamp is-${pose}`}
+                            href={nightTowers.lampSrc(pose)}
+                            x={lampBox.x}
+                            y={lampBox.y}
+                            width={lampBox.w}
+                            height={lampBox.h}
+                          />
+                        </g>
                         {hot ? <circle className="defend-hot-halo" r="27" /> : null}
                         {upgrading || justUp ? <circle className="defend-upgrade-ring" r="36" /> : null}
+                        {phase !== 'wave' ? (
+                          <text
+                            className={`defend-level-pip${justUp ? ' is-bump' : ''}`}
+                            y="-74"
+                            textAnchor="middle"
+                            data-level={tierMark}
+                            aria-hidden="true"
+                          >
+                            {tierMark}
+                          </text>
+                        ) : null}
+                        {justUp ? (
+                          <g className="defend-level-burst" pointerEvents="none" aria-hidden="true">
+                            <circle className="defend-level-flash" cx="0" cy="-28" r="40" />
+                            <circle className="defend-burst-ring" cx="0" cy="-28" r="34" />
+                            {LEVEL_SPARKS.map((spark) => (
+                              <circle
+                                key={`${spark.dx}-${spark.dy}`}
+                                className="defend-burst-spark"
+                                cx="0"
+                                cy="-28"
+                                r={spark.r}
+                                style={{
+                                  ['--dx' as string]: `${spark.dx}px`,
+                                  ['--dy' as string]: `${spark.dy}px`,
+                                  animationDelay: spark.delay,
+                                }}
+                              />
+                            ))}
+                          </g>
+                        ) : null}
                         {phase === 'wave' ? (
                           <circle
                             className={`defend-range${firing ? ' is-firing' : ''}`}
