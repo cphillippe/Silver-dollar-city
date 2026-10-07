@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Mend">
+  <defs>
+    <linearGradient id="mend-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffe1ef"/>
+      <stop offset="1" stop-color="#c43b78"/>
+    </linearGradient>
+  </defs>
+  <circle cx="64" cy="64" r="62" fill="url(#mend-sky)"/>
+  <circle cx="64" cy="64" r="54" fill="none" stroke="#ffe7a8" stroke-width="3"/>
+  <path fill="#fff4f8" d="M64 102C40 84 24 68 24 50a16 16 0 0 1 28-10 16 16 0 0 1 28 10c0 18-16 34-16 52z"/>
+  <path fill="none" stroke="#e07a3a" stroke-width="4" stroke-linecap="round" d="M64 48v28M50 62h28"/>
+  <circle cx="40" cy="36" r="5" fill="#ffe7a8"/>
+  <circle cx="92" cy="40" r="4" fill="#ffe7a8"/>
+  <circle cx="96" cy="86" r="3.5" fill="#ffe7a8"/>
+</svg>
