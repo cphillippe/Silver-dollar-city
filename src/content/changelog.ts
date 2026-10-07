@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.382',
+    title: 'Night Watch porch paths are candy',
+    when: '2026-10-07',
+    items: [
+      'Easy Night Watch shows thick candy paths from the cottage porches to the yellow road. Pink, lilac, and mint sweets sit on white icing so the paths are easy to see on a phone.',
+    ],
+  },
+  {
     version: '1.4.381',
     title: 'Night Watch can run at 3×',
     when: '2026-10-07',
