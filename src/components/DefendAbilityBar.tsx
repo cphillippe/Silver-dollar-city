@@ -1,4 +1,4 @@
-import { EASY, easyFacingLine, loveHowTo } from '../lib/easy'
+import { easyFacingLine, loveHowTo } from '../lib/easy'
 import { learningForTool } from '../lib/learning'
 import { combatTier, TIER_MARK, WATCH_TOOLS } from '../lib/watchTools'
 import { AbilityMark } from './GemMark'
@@ -40,7 +40,8 @@ export function DefendAbilityBar({
   return (
           <div className="defend-abilities" role="group" aria-label="Night abilities">
             {WATCH_TOOLS.map((tool) => {
-              const open = unlocked.includes(tool.id)
+              // Easy plants every type from Wave 1. Face-tap miss stays on walkers.
+              const open = easy || unlocked.includes(tool.id)
               const placed = plantedTypes.includes(tool.id)
               const heldLine = learningForTool(progress, tool.id)
               const tier = combatTier(tool.id, runTier)
@@ -54,9 +55,7 @@ export function DefendAbilityBar({
                     : easy
                       ? 'Keep a main idea to name this tool.'
                       : 'Lock in a line to name this tool.'
-                : easy
-                  ? 'Locked — tap the glowing face'
-                  : 'Lock in a matching line'
+                : 'Lock in a matching line'
               return (
                 <button
                   key={tool.id}
@@ -69,9 +68,7 @@ export function DefendAbilityBar({
                   onClick={() => {
                     if (!open) {
                       setToolLock(
-                        easy
-                          ? EASY.nightMiss
-                          : `${tool.label} is locked. Lock in a matching line to deploy this tool.`,
+                        `${tool.label} is locked. Lock in a matching line to deploy this tool.`,
                       )
                       return
                     }
@@ -88,8 +85,8 @@ export function DefendAbilityBar({
                   <span className="defend-ability-tier" aria-hidden>
                     {TIER_MARK[tier]}
                   </span>
-                  {open && !placed && !boosting ? (
-                    <span className="defend-ability-stock" aria-hidden>
+                  {open && !placed ? (
+                    <span className="defend-ability-stock" data-slot-badge="1">
                       1
                     </span>
                   ) : null}

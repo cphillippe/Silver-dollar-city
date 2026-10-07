@@ -106,7 +106,15 @@ import {
   useMend,
   useStill,
 } from '../src/lib/nightKits.ts'
-import { isTowerType, plantType, pullPlant, slotLeft, starterPlants } from '../src/lib/nightPlants.ts'
+import {
+  EASY_PLANT_PADS,
+  isTowerType,
+  nightPlantTypes,
+  plantType,
+  pullPlant,
+  slotLeft,
+  starterPlants,
+} from '../src/lib/nightPlants.ts'
 import { ideaUnlocked, mindGraph, mindMapHasLit } from '../src/lib/mindMap.ts'
 import { appendStreetLinks, easyStreetChallenge, hardStreetChallenge, linkCaption, linkClue, linkMiss, linkPicture, nextStreetWalk, STREET_CHALLENGE, STREET_FACT_IDS, STREET_LIGHTS, STREET_SKIP_IDS, STREET_TRIPLES, streetDecoyNodes, streetFactsLeft, streetIsComplete, streetTripleForLine, streetWalks, STREET_WHYS } from '../src/content/links.ts'
 import { firstGate } from '../src/content/firstGate.ts'
@@ -1220,7 +1228,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.377')
+assert.equal(APP_VERSION, '1.4.378')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3930,6 +3938,68 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.369').items.join('\n'),
     /Fixes #|Closes #|Resolves #/i,
     '1.4.369 changelog avoids GitHub close keywords',
+  )
+}
+
+// Night Watch 1.4.378: Easy plants all four from Wave 1. Face-tap does not gate the rail.
+{
+  const actors378 = readFileSync(
+    new URL('../src/components/DefendNightActors.tsx', import.meta.url),
+    'utf8',
+  )
+  const ability378 = readFileSync(
+    new URL('../src/components/DefendAbilityBar.tsx', import.meta.url),
+    'utf8',
+  )
+  const css378 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  assert.equal(EASY_PLANT_PADS.length, 4, '1.4.378 one ring per type')
+  assert.deepEqual(nightPlantTypes(true, ['love']), ['love', 'logic', 'reason', 'science'])
+  assert.deepEqual(nightPlantTypes(false, ['love']), ['love'], '1.4.378 hard still waits on Lock In')
+  const hand = {}
+  for (const id of ['love', 'logic', 'reason', 'science']) {
+    assert.equal(slotLeft(hand, id), 1, '1.4.378 each type starts with 1')
+  }
+  let board = hand
+  EASY_PLANT_PADS.forEach((pad, index) => {
+    const type = ['love', 'logic', 'reason', 'science'][index]
+    board = plantType(board, pad, type)
+  })
+  assert.equal(slotLeft(board, 'love'), 0, '1.4.378 planting spends the 1')
+  assert.equal(slotLeft(board, 'science'), 0)
+  assert.equal(board.porch, 'love')
+  assert.equal(board.hollow, 'logic')
+  assert.equal(board.journal, 'reason')
+  assert.equal(board.bench, 'science')
+  const freed = pullPlant(board, 'porch', EASY_PLANT_PADS)
+  assert.equal(freed.porch, undefined)
+  assert.equal(slotLeft(freed, 'love'), 1, '1.4.378 Pull returns that type’s 1')
+  assert.equal(freed.hollow, 'logic')
+  const onlyLove = { porch: 'love' }
+  const pulledLast = pullPlant(onlyLove, 'porch', EASY_PLANT_PADS)
+  assert.deepEqual(pulledLast, {}, '1.4.378 Pull frees the last lamp when another ring is open')
+  assert.equal(slotLeft(pulledLast, 'love'), 1)
+  assert.equal(
+    pullPlant({ porch: 'love' }, 'porch', ['porch']),
+    null,
+    '1.4.378 the last lamp stays only when no empty ring remains',
+  )
+  assert.match(defendScreenOnlySrc, /nightPlantTypes/)
+  assert.match(defendScreenOnlySrc, /EASY_PLANT_PADS/)
+  assert.match(defendScreenOnlySrc, /pullPlant\(plants, id, pads\)/)
+  assert.match(defendScreenOnlySrc, /easy \? \{\} : starterPlants/)
+  assert.doesNotMatch(ability378, /nightMiss/, '1.4.378 rail tap is not the face-tap miss')
+  assert.match(ability378, /easy \|\| unlocked\.includes/)
+  assert.match(ability378, /data-slot-badge="1"/)
+  assert.match(actors378, /data-plant-ring="gold"/)
+  assert.match(css378, /1\.4\.378: Easy plant rings/)
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.378'), '1.4.378 changelog row')
+  assert.match(latestChange('1.4.378').title, /all four/)
+  assert.match(latestChange('1.4.378').items.join('\n'), /gold ring/)
+  assert.match(latestChange('1.4.378').items.join('\n'), /Pull/)
+  assert.doesNotMatch(
+    latestChange('1.4.378').items.join('\n'),
+    /Fixes #|Closes #|Resolves #|monkey|balloon/i,
+    '1.4.378 changelog avoids GitHub close keywords',
   )
 }
 
