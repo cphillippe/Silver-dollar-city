@@ -4030,7 +4030,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(defendCss383, /1\.4\.383: Sparks stay clear of Accuser/)
   assert.match(
     defendCss383,
-    /\.defend-page\.is-easy-watch \.nw-walker-slide\.easy-walker-roster \{[^}]*top:\s*108px/,
+    /\.defend-page\.is-easy-watch \.nw-walker-slide\.easy-walker-roster \{[^}]*top:\s*152px/,
   )
   assert.match(defendCss383, /1\.4\.379: Easy phone SE chrome/, '1.4.383 keeps the phone chrome rules')
   assert.match(
