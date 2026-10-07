@@ -83,9 +83,9 @@ export const EASY = {
   nightSoon: 'Night Watch (soon)',
   nightTap: 'Tap the face.',
   nightLead: 'Tap the dark face.',
-  nightPlant: 'Tap a gold ring to plant a lamp. Tap a lamp to pull it.',
+  nightPlant: 'Tap a gold ring to plant a lamp. Tap a lamp to make it stronger.',
   nightBoost:
-    'Wave clear. Tap a planted lamp or Love on the right — each spark raises it to II or III.',
+    'Wave clear. Tap a planted lamp. Gold Upgrade spends a spark and raises it to II or III.',
   nightBoostPick: 'Pick one skill',
   nightKeepLamp: 'Keep one lamp — tap a ring to plant more.',
   nightMiss: 'Wrong — tap the glowing face',

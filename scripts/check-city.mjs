@@ -1219,7 +1219,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.372')
+assert.equal(APP_VERSION, '1.4.373')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3927,6 +3927,48 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.369').items.join('\n'),
     /Fixes #|Closes #|Resolves #/i,
     '1.4.369 changelog avoids GitHub close keywords',
+  )
+}
+
+// Night Watch 1.4.373: tap a planted lamp for an upgrade card. Pull is a small trash control.
+{
+  const defendCss373 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const towerCard373 = readFileSync(
+    new URL('../src/components/DefendTowerCard.tsx', import.meta.url),
+    'utf8',
+  )
+  const easyUi373 = readFileSync(new URL('../src/lib/easyUi.ts', import.meta.url), 'utf8')
+  assert.match(defendCss373, /1\.4\.373: tap a planted lamp/)
+  assert.match(defendCss373, /\.defend-tower-card/)
+  assert.match(defendCss373, /\.defend-tower-upgrade/)
+  assert.match(defendCss373, /\.defend-tower-pull/)
+  assert.match(towerCard373, /data-upgrade-card/)
+  assert.match(towerCard373, /defend-tower-upgrade/)
+  assert.match(towerCard373, /defend-tower-pull/)
+  assert.match(towerCard373, /Pull lamp at/)
+  assert.match(towerCard373, /Range ↑  ·  Damage ↑/)
+  assert.match(towerCard373, /boostCost/)
+  assert.match(towerCard373, /TIER_MARK\[next\]/)
+  assert.match(towerCard373, /Upgrade/)
+  assert.match(defendNightSrc, /onOpenUpgrade\?\.\(id\)/)
+  assert.match(defendNightSrc, /phase === 'boost' && on\)/)
+  assert.match(defendNightSrc, /'Upgrade' : 'Plant'\} lamp at/)
+  assert.doesNotMatch(defendNightSrc, /'Pull'/)
+  assert.match(defendScreenOnlySrc, /onBoostTower=\{boostSelectedTool\}/)
+  assert.match(defendScreenOnlySrc, /openUpgrade/)
+  assert.match(defendScreenOnlySrc, /pullUpgradeLamp/)
+  assert.match(defendScreenOnlySrc, /applyBoost/)
+  assert.match(easyUi373, /make it stronger/)
+  assert.doesNotMatch(easyUi373, /Tap a lamp to pull it/)
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.373'), '1.4.373 changelog row')
+  assert.match(latestChange('1.4.373').title, /upgrade card/)
+  assert.match(latestChange('1.4.373').items.join('\n'), /gold Upgrade/)
+  assert.match(latestChange('1.4.373').items.join('\n'), /trash/)
+  assert.match(latestChange('1.4.373').items.join('\n'), /spark/)
+  assert.doesNotMatch(
+    latestChange('1.4.373').items.join('\n'),
+    /Fixes #|Closes #|Resolves #|monkey|balloon/i,
+    '1.4.373 changelog avoids GitHub close keywords',
   )
 }
 

@@ -97,6 +97,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   nwDebugRef.current = nwDebug
   debugPausedRef.current = debugPaused
   const [boostNote, setBoostNote] = useState<string | null>(null)
+  const [upgradeAt, setUpgradeAt] = useState<CityPlotId | null>(null)
+  const [upFlash, setUpFlash] = useState<CityPlotId | null>(null)
   const [loreMeet, setLoreMeet] = useState<{ id: string; line: string } | null>(null)
   const runTierRef = useRef(runTier)
   runTierRef.current = runTier
@@ -151,6 +153,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   useEffect(() => {
     live.current.planted = planted
   }, [planted])
+
+  useEffect(() => {
+    setUpgradeAt(null)
+    setUpFlash(null)
+  }, [phase])
 
   useEffect(() => {
     if (runSparks > prevSparks.current) {
@@ -359,6 +366,25 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       }
       return [...current, id]
     })
+  }
+
+  function openUpgrade(id: CityPlotId) {
+    setUpgradeAt((current) => (current === id ? null : id))
+  }
+
+  function closeUpgrade() {
+    setUpgradeAt(null)
+  }
+
+  function pullUpgradeLamp() {
+    if (!upgradeAt || phase !== 'plant') return
+    const id = upgradeAt
+    if (planted.length <= 1) {
+      togglePad(id)
+      return
+    }
+    togglePad(id)
+    setUpgradeAt(null)
   }
 
   function raiderAt(raider: Raider) {
@@ -580,6 +606,13 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     setRunTier(next.runTier)
     setRunSparks(next.sparks)
     setToolLock(null)
+    if (upgradeAt) {
+      const lamp = upgradeAt
+      setUpFlash(lamp)
+      window.setTimeout(() => {
+        setUpFlash((current) => (current === lamp ? null : current))
+      }, 650)
+    }
   }
 
   function boostSelectedTool() {
@@ -663,6 +696,10 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const tapPos =
     tapTarget && boardBox.w > 0
       ? boardPoint(raiderAt(tapTarget).x, raiderAt(tapTarget).y)
+      : null
+  const upgradePoint =
+    upgradeAt && boardBox.w > 0
+      ? boardPoint(nightTowers.anchor(upgradeAt).x, nightTowers.anchor(upgradeAt).y)
       : null
   const midWave = phase === 'wave' && !won
   const debugHarness = easy && nwDebug && midWave
@@ -935,6 +972,15 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
               runTier={runTier}
               boosting={boosting}
               onBoostTower={boostSelectedTool}
+              upgradeAt={upgradeAt}
+              onOpenUpgrade={openUpgrade}
+              upFlashId={upFlash}
+              upgradePoint={upgradePoint}
+              boardBox={boardBox}
+              runSparks={runSparks}
+              onPullLamp={phase === 'plant' ? pullUpgradeLamp : undefined}
+              onCloseUpgrade={closeUpgrade}
+              onBoardTap={closeUpgrade}
             />
           </UiShell>
         </>
