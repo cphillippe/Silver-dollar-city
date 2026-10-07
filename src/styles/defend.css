@@ -458,6 +458,11 @@ img.walker-face.easy-walker-face,
   pointer-events: none;
 }
 
+/* 1.4.385: shot juice sits on the walker. It must not steal the face tap. */
+.defend-blast {
+  pointer-events: none;
+}
+
 .defend-raider.is-lamp-hit .defend-raider-face {
   filter: brightness(2.4) drop-shadow(0 0 10px #fff6d0);
 }
@@ -719,7 +724,14 @@ img.walker-face.easy-walker-face,
 
 /* 1.4.372: the lead walker glows so a kid knows which face to tap.
    Gold ring + pulse + bounce arrow. The white hit flash stays a separate flash. */
+/* 1.4.385: gold pad fills the ring so the glowing face is the tap. */
 .walker-target-cue {
+  pointer-events: none;
+}
+
+.walker-cue-pad {
+  fill: rgba(255, 214, 70, 0.5);
+  stroke: none;
   pointer-events: none;
 }
 
@@ -1442,9 +1454,19 @@ img.walker-face.easy-walker-face,
 }
 
 /* Easy little wave on path (1.4.302 / #418) */
+/* 1.4.385: the fat face disc is the only tap. The sprite must not eat it. */
 .defend-page.is-easy-tap .defend-raider.is-easy-tap-target {
   cursor: pointer;
   outline: none;
+}
+
+.defend-page.is-easy-tap .defend-raider-hit {
+  pointer-events: all;
+}
+
+.defend-page.is-easy-tap .defend-raider.is-easy-tap-target .defend-raider-face,
+.defend-page.is-easy-tap .defend-raider.is-easy-tap-target .defend-raider-shadow {
+  pointer-events: none;
 }
 
 /* 1.4.372: idle walkers stay quieter so the glowing lead pops. A hit still flashes full. */

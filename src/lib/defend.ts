@@ -158,11 +158,24 @@ export const PATH_WALKER_HIT_R = (PATH_WALKER_FACE_U * 22) / 36
 export const PATH_WALKER_FACE_DY = -PATH_WALKER_FACE_U / 6
 
 /**
+ * Easy face tap in viewBox units, centered on the face.
+ * At the 375-wide phone cover scale (~0.47) the disc is about 75 CSS px,
+ * so a thumb lands on the gold ring and not the feet.
+ */
+export const EASY_FACE_HIT_R = 80
+
+/** CSS px across the easy face disc at `scale` (board px per viewBox unit). */
+export function easyFaceHitPx(scale: number): number {
+  if (!(scale > 0)) return 0
+  return EASY_FACE_HIT_R * 2 * scale
+}
+
+/**
  * Tap-juice face in CSS px. Brief squash → heaven only — keep it near the path face,
  * not a giant portrait (Fixes #469).
  */
 export const EASY_WALKER_FACE_PX = 44
-/** Juice wrapper only. Path taps still use the SVG defend-raider-hit target. */
+/** Juice wrapper only. Easy path taps use the face disc (`EASY_FACE_HIT_R`). */
 export const EASY_WALKER_HIT_PX = 72
 export const EASY_CUE_HOLD_MS = 1800
 export const EASY_MISS_HOLD_MS = 1400
@@ -204,6 +217,18 @@ export function easyTapPersonCount(raiders: { turned?: string }[]): number {
 export function easyTapFit(easy: boolean, toolId: string, kind: WalkerKind): 'match' | 'weak' {
   if (easy) return 'match'
   return deployFit(toolId, kind)
+}
+
+/**
+ * A tap on a living walker face.
+ * Easy always hits, even when no lamp reaches that walker.
+ * Hard hits only when a lamp is in range.
+ * A tap that misses the face is a miss for both.
+ */
+export function faceTapStrike(easy: boolean, onFace: boolean, lampInRange: boolean): 'hit' | 'miss' {
+  if (!onFace) return 'miss'
+  if (easy) return 'hit'
+  return lampInRange ? 'hit' : 'miss'
 }
 
 /** Easy wins on 6 downs even if a flyer is still on the board. Hard waits for an empty road. */
