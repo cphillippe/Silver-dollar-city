@@ -83,7 +83,8 @@ export const EASY = {
   nightSoon: 'Night Watch (soon)',
   nightTap: 'Tap the face.',
   nightLead: 'Tap the dark face.',
-  nightPlant: 'Tap a gold ring to plant a lamp. Tap a lamp to make it stronger.',
+  nightPlant:
+    'Pick Love, Logic, Reason, or Science. Tap a gold ring to plant that one. Tap it to make it stronger.',
   nightBoost:
     'Wave clear. Tap a planted lamp. Gold Upgrade spends a spark and raises it to II or III.',
   nightBoostPick: 'Pick one skill',
