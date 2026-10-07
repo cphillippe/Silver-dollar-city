@@ -1268,7 +1268,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.386')
+assert.equal(APP_VERSION, '1.4.387')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -4355,6 +4355,42 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.386').items.join('\n'),
     /Fixes #|Closes #|Resolves #|monkey|balloon/i,
     '1.4.386 changelog avoids GitHub close keywords',
+  )
+}
+
+// Night Watch 1.4.387: Easy hides the stuck Insight diamond. Rail 1s stay the plant slots.
+{
+  const defendSrc387 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const css387 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  assert.match(
+    defendSrc387,
+    /1\.4\.387: Easy hides Insight[\s\S]*?easy \? null : <CoinRead count=\{insightScore\(progress\)\} label="Insight" \/>/,
+    '1.4.387 Easy omits the diamond; other watches still read journal insight',
+  )
+  assert.doesNotMatch(defendSrc387, /setCoins|wallet|coins:/i, '1.4.387 does not invent a gold wallet')
+  assert.match(defendSrc387, /balloon=\{<MoneyBalloon count=\{runSparks\} label="Sparks"/, '1.4.387 sparks stay on the star')
+  assert.match(defendAbilitySrc, /data-slot-badge="1"/, '1.4.387 rail gold 1 stays the plant slot')
+  assert.match(defendSrc387, /pullPlant\(plants, id, pads\)/, '1.4.387 Pull still returns a slot')
+  assert.match(defendSrc387, /lampUpgradeTool\(plotId, plantsRef\.current\)/, '1.4.387 upgrade still spends on the open lamp')
+  assert.match(css387, /1\.4\.385: gold pad fills the ring/, '1.4.387 keeps face taps')
+  assert.match(css387, /1\.4\.383: Begin stays readable until the first plant/, '1.4.387 keeps Begin')
+  assert.equal(WATCH_TOOLS.length, 4, '1.4.387 does not add a rail tool')
+  assert.equal(
+    applyGateLeaks(DEFEND_HEARTS, 1, false).hearts,
+    DEFEND_HEARTS - 1,
+    '1.4.387 a leak still drops a heart',
+  )
+  assert.equal(slotLeft({}, 'love'), 1, '1.4.387 an unplanted lamp still shows 1')
+  assert.equal(slotLeft({ porch: 'love' }, 'love'), 0, '1.4.387 planting still spends that 1')
+  const returned = pullPlant({ porch: 'love', hollow: 'logic' }, 'porch', EASY_PLANT_PADS)
+  assert.equal(slotLeft(returned, 'love'), 1, '1.4.387 Pull still puts the 1 back')
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.387'), '1.4.387 changelog row')
+  assert.match(latestChange('1.4.387').title, /diamond/)
+  assert.match(latestChange('1.4.387').items.join('\n'), /gold 1/)
+  assert.doesNotMatch(
+    latestChange('1.4.387').items.join('\n'),
+    /Fixes #|Closes #|Resolves #|monkey|balloon/i,
+    '1.4.387 changelog avoids GitHub close keywords',
   )
 }
 
@@ -9221,7 +9257,11 @@ console.log('check-city: ok')
   assert.match(chrome310, /gem="coin"/)
   assert.match(defendScreenOnlySrc, /rail=\{rail\}/)
   assert.match(defendScreenOnlySrc, /balloon=\{<MoneyBalloon count=\{runSparks\} label="Sparks"/)
-  assert.match(defendScreenOnlySrc, /coin=\{<CoinRead count=\{insightScore\(progress\)\}/)
+  assert.match(
+    defendScreenOnlySrc,
+    /coin=\{[\s\S]*?<CoinRead count=\{insightScore\(progress\)\}/,
+    '1.4.310 coin still reads journal insight',
+  )
   assert.doesNotMatch(
     defendScreenOnlySrc,
     /progress\.stars/,
@@ -9339,7 +9379,7 @@ console.log('check-city: ok')
   assert.match(defendScreenOnlySrc, /rail=\{rail\}/)
   assert.match(defendAbilitySrc, /WATCH_TOOLS\.map/, '1.4.314 keeps Love / Logic / Reason / Science')
   assert.match(defendScreenOnlySrc, /balloon=\{<MoneyBalloon/, '1.4.314 keeps the money balloon')
-  assert.match(defendScreenOnlySrc, /coin=\{<CoinRead/, '1.4.314 keeps the coin HUD')
+  assert.match(defendScreenOnlySrc, /coin=\{[\s\S]*?<CoinRead/, '1.4.314 keeps the coin HUD')
   assert.match(css314, /\.nw-docks \{[\s\S]*?position: absolute/, '1.4.314 keeps the 1.4.313 overlay docks')
   assert.match(defendSkySrc, /preserveAspectRatio="xMidYMid meet"/, '1.4.314 keeps the 1.4.312 contain plate')
   assert.doesNotMatch(defendSkySrc, /slice/, '1.4.314 no cover crop')
@@ -9417,7 +9457,7 @@ console.log('check-city: ok')
   assert.match(rail315, /position: absolute/, '1.4.315 keeps the 1.4.314 C&C float')
   assert.match(defendAbilitySrc, /WATCH_TOOLS\.map/, '1.4.315 keeps Love / Logic / Reason / Science')
   assert.match(defendScreenOnlySrc, /balloon=\{<MoneyBalloon/, '1.4.315 keeps the money balloon')
-  assert.match(defendScreenOnlySrc, /coin=\{<CoinRead/, '1.4.315 keeps the coin HUD')
+  assert.match(defendScreenOnlySrc, /coin=\{[\s\S]*?<CoinRead/, '1.4.315 keeps the coin HUD')
   assert.match(latestChange('1.4.315').title, /whole locked A2 plate/)
   assert.doesNotMatch(
     latestChange('1.4.315').items.join('\n'),
