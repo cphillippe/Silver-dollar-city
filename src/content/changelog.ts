@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.378',
+    title: 'Night Watch plants all four from the first wave',
+    when: '2026-10-07',
+    items: [
+      'Easy Night Watch lets you plant Love, Logic, Reason, and Science from the first wave. Each type shows 1 until you set it on its own gold ring. Pull puts that 1 back when another ring is open. The glowing face is only for walkers.',
+    ],
+  },
+  {
     version: '1.4.377',
     title: 'Night Watch towers are Love, Logic, Reason, and Science',
     when: '2026-10-07',
