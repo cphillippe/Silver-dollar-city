@@ -1862,6 +1862,7 @@ img.walker-face.easy-walker-face,
 }
 
 /* 1.4.373: tap a planted lamp for an upgrade card at the tower. Pull is the small trash. */
+/* 1.4.374: that trash stays on the card after a wave clears, not only while planting. */
 .defend-upgrade-ring {
   fill: none;
   stroke: #ffcc33;

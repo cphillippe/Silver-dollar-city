@@ -377,13 +377,14 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   }
 
   function pullUpgradeLamp() {
-    if (!upgradeAt || phase !== 'plant') return
+    if (!upgradeAt) return
+    if (phase !== 'plant' && phase !== 'boost') return
     const id = upgradeAt
     if (planted.length <= 1) {
-      togglePad(id)
+      flashKit(easy ? EASY.nightKeepLamp : 'Keep at least one lamp.')
       return
     }
-    togglePad(id)
+    setPlanted((current) => current.filter((item) => item !== id))
     setUpgradeAt(null)
   }
 
@@ -978,7 +979,9 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
               upgradePoint={upgradePoint}
               boardBox={boardBox}
               runSparks={runSparks}
-              onPullLamp={phase === 'plant' ? pullUpgradeLamp : undefined}
+              onPullLamp={
+                phase === 'plant' || phase === 'boost' ? pullUpgradeLamp : undefined
+              }
               onCloseUpgrade={closeUpgrade}
               onBoardTap={closeUpgrade}
             />

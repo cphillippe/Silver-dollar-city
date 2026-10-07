@@ -1219,7 +1219,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.373')
+assert.equal(APP_VERSION, '1.4.374')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3927,6 +3927,28 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.369').items.join('\n'),
     /Fixes #|Closes #|Resolves #/i,
     '1.4.369 changelog avoids GitHub close keywords',
+  )
+}
+
+// Night Watch 1.4.374: the upgrade card's small trash pulls a lamp after a wave clears too.
+{
+  const defendCss374 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  assert.match(defendCss374, /1\.4\.374: that trash stays on the card after a wave clears/)
+  assert.match(defendCss374, /\.defend-tower-pull/)
+  assert.match(defendScreenOnlySrc, /phase === 'plant' \|\| phase === 'boost'/)
+  assert.match(defendScreenOnlySrc, /if \(phase !== 'plant' && phase !== 'boost'\) return/)
+  assert.match(defendScreenOnlySrc, /pullUpgradeLamp/)
+  assert.match(defendScreenOnlySrc, /planted\.length <= 1/)
+  assert.match(defendScreenOnlySrc, /EASY\.nightKeepLamp/)
+  assert.match(defendScreenOnlySrc, /Keep at least one lamp/)
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.374'), '1.4.374 changelog row')
+  assert.match(latestChange('1.4.374').title, /lamp card can pull/)
+  assert.match(latestChange('1.4.374').items.join('\n'), /trash/)
+  assert.match(latestChange('1.4.374').items.join('\n'), /last lamp/i)
+  assert.doesNotMatch(
+    latestChange('1.4.374').items.join('\n'),
+    /Fixes #|Closes #|Resolves #|monkey|balloon/i,
+    '1.4.374 changelog avoids GitHub close keywords',
   )
 }
 

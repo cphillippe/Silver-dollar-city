@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.374',
+    title: 'Night Watch lamp card can pull',
+    when: '2026-10-07',
+    items: [
+      'The lamp upgrade card has a small trash control. Pull takes that lamp off the road. The last lamp stays.',
+    ],
+  },
+  {
     version: '1.4.373',
     title: 'Night Watch lamp upgrade card',
     when: '2026-10-06',
