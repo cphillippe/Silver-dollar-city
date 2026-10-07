@@ -98,3 +98,55 @@ export function slotLeft(map: Record<string, string>, ability: string): number {
   if (!isTowerType(ability)) return 0
   return Object.values(map).includes(ability) ? 0 : PLANT_SLOT
 }
+
+/**
+ * A second open event this soon is the same tap (click + key, or a bubbled repeat).
+ * It must not toggle the card shut or bounce back to the previous lamp.
+ */
+export const UPGRADE_TAP_ECHO_MS = 400
+
+/**
+ * An Upgrade click this soon after the lamp opened is the open-tap landing on the
+ * button, not a choice to spend. The button arms after this.
+ */
+export const UPGRADE_GHOST_MS = 48
+
+/**
+ * Lamp the upgrade card should show.
+ * A repeat of the tap that just opened this lamp stays on it.
+ * A later tap on the open lamp closes. Any other lamp switches.
+ */
+export function selectUpgradeLamp(
+  current: string | null,
+  tapped: string,
+  echoed: boolean,
+): string | null {
+  if (echoed) return tapped
+  if (current === tapped) return null
+  return tapped
+}
+
+/**
+ * Tool planted on the lamp whose card is open.
+ * Empty plots and unknown ids spend nothing — never the rail pick, never Love.
+ */
+export function lampUpgradeTool(
+  plotId: string | null | undefined,
+  plants: Record<string, string>,
+): string | null {
+  if (!plotId) return null
+  const type = plants[plotId]
+  return type && isTowerType(type) ? type : null
+}
+
+/** Upgrade spends only when this card is still the lamp the player opened. */
+export function upgradeSpendAllowed(
+  openPlotId: string | null,
+  cardPlotId: string,
+  openedAt: number,
+  now: number,
+): boolean {
+  if (!cardPlotId || openPlotId !== cardPlotId) return false
+  if (!(now >= openedAt) || now - openedAt < UPGRADE_GHOST_MS) return false
+  return true
+}

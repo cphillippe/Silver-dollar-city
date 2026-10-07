@@ -50,10 +50,15 @@ import {
 } from '../lib/nightWatchDebug'
 import {
   EASY_PLANT_PADS,
+  lampUpgradeTool,
   nightPlantTypes,
   plantType,
   pullPlant,
+  selectUpgradeLamp,
   starterPlants,
+  UPGRADE_GHOST_MS,
+  UPGRADE_TAP_ECHO_MS,
+  upgradeSpendAllowed,
 } from '../lib/nightPlants'
 import { applyBoost, combatTier, freshRunTier } from '../lib/watchTools'
 import { useJuiceHandoff } from '../lib/juice'
@@ -148,6 +153,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   debugPausedRef.current = debugPaused
   const [boostNote, setBoostNote] = useState<string | null>(null)
   const [upgradeAt, setUpgradeAt] = useState<CityPlotId | null>(null)
+  const upgradeAtRef = useRef<CityPlotId | null>(null)
+  const upgradeTapRef = useRef<{ id: CityPlotId; at: number }>({ id: 'porch', at: -1e9 })
   const [upFlash, setUpFlash] = useState<CityPlotId | null>(null)
   const [levelBurst, setLevelBurst] = useState<{ plotId: CityPlotId; from: number; to: number } | null>(null)
   const [sparkSpend, setSparkSpend] = useState(false)
@@ -181,6 +188,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const [plants, setPlants] = useState<Record<string, string>>(() =>
     easy ? {} : starterPlants(pads, unlocked),
   )
+  const plantsRef = useRef(plants)
+  plantsRef.current = plants
   const planted = useMemo(() => Object.keys(plants) as CityPlotId[], [plants])
   const [hearts, setHearts] = useState(DEFEND_HEARTS)
   const [raiders, setRaiders] = useState<Raider[]>([])
@@ -231,6 +240,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   }
 
   useEffect(() => {
+    upgradeAtRef.current = null
+    upgradeTapRef.current = { id: 'porch', at: -1e9 }
     setUpgradeAt(null)
     setUpFlash(null)
     setLevelBurst(null)
@@ -479,14 +490,23 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     if (plants[id]) return
     const using = unlocked.includes(ability) ? ability : 'love'
     setPlants((current) => plantType(current, id, using))
-    setUpgradeAt(null)
+    closeUpgrade(true)
   }
 
   function openUpgrade(id: CityPlotId) {
-    setUpgradeAt((current) => (current === id ? null : id))
+    const now = performance.now()
+    const prev = upgradeTapRef.current
+    const echoed = prev.id === id && now - prev.at < UPGRADE_TAP_ECHO_MS
+    upgradeTapRef.current = { id, at: echoed ? prev.at : now }
+    const next = selectUpgradeLamp(upgradeAtRef.current, id, echoed) as CityPlotId | null
+    upgradeAtRef.current = next
+    setUpgradeAt(next)
   }
 
-  function closeUpgrade() {
+  function closeUpgrade(force = false) {
+    if (!force && performance.now() - upgradeTapRef.current.at < UPGRADE_GHOST_MS) return
+    upgradeAtRef.current = null
+    upgradeTapRef.current = { id: 'porch', at: -1e9 }
     setUpgradeAt(null)
   }
 
@@ -502,7 +522,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       return
     }
     setPlants(next)
-    setUpgradeAt(null)
+    closeUpgrade(true)
   }
 
   function raiderAt(raider: Raider) {
@@ -754,7 +774,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     saved.current = false
   }
 
-  function boostTool(id: WatchAbility) {
+  function boostTool(id: WatchAbility, lampId?: CityPlotId | null) {
     const before = combatTier(id, runTierRef.current)
     const next = applyBoost(id, runTierRef.current, sparksRef.current)
     setBoostNote(next.note)
@@ -765,17 +785,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     setRunTier(next.runTier)
     setRunSparks(next.sparks)
     setToolLock(null)
-    const lamp = upgradeAt
-    const plantedType = lamp ? plants[lamp] : undefined
-    const shown =
-      plantedType && unlocked.includes(plantedType)
-        ? plantedType
-        : unlocked.includes(ability)
-          ? ability
-          : 'love'
+    const lamp = lampId !== undefined ? lampId : upgradeAtRef.current
+    const plantedType = lamp ? plantsRef.current[lamp] : undefined
     window.clearTimeout(burstTimer.current)
     setSparkSpend(true)
-    if (lamp && id === shown) {
+    if (lamp && plantedType === id) {
       setLevelBurst({ plotId: lamp, from: before, to: after })
       setUpFlash(lamp)
     }
@@ -786,15 +800,21 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     }, LEVEL_BURST_MS)
   }
 
-  function boostSelectedTool() {
-    const plantedType = upgradeAt ? plants[upgradeAt] : undefined
-    const using =
-      plantedType && unlocked.includes(plantedType)
-        ? plantedType
-        : unlocked.includes(ability)
-          ? ability
-          : 'love'
-    boostTool(using)
+  function boostSelectedTool(plotId: CityPlotId) {
+    const now = performance.now()
+    if (
+      !upgradeSpendAllowed(
+        upgradeAtRef.current,
+        plotId,
+        upgradeTapRef.current.at,
+        now,
+      )
+    ) {
+      return
+    }
+    const tool = lampUpgradeTool(plotId, plantsRef.current)
+    if (!tool || !unlocked.includes(tool as WatchAbility)) return
+    boostTool(tool as WatchAbility, plotId)
   }
 
   function flashKit(note: string) {
