@@ -80,6 +80,7 @@ import {
   waveIsClear,
   wavePackSize,
 } from '../src/lib/defend.ts'
+import { boardFill } from '../src/nightWatch/map/phoneFill.ts'
 import { nightEnemies as nightEnemiesMod } from '../src/nightWatch/enemies/index.ts'
 import { nightParts as nightPartsMod } from '../src/nightWatch/parts/index.ts'
 import { nightPath as nightPathMod } from '../src/nightWatch/path/index.ts'
@@ -1228,7 +1229,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.378')
+assert.equal(APP_VERSION, '1.4.379')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3938,6 +3939,60 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.369').items.join('\n'),
     /Fixes #|Closes #|Resolves #/i,
     '1.4.369 changelog avoids GitHub close keywords',
+  )
+}
+
+// Night Watch 1.4.379: Easy phone SE chrome — bezel reclaimed, roster tiny, icons, wave on the map.
+{
+  const css379 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const fill379 = readFileSync(new URL('../src/nightWatch/map/phoneFill.ts', import.meta.url), 'utf8')
+  assert.match(css379, /1\.4\.379: Easy phone SE chrome/)
+  assert.match(
+    css379,
+    /\.app\.is-play:has\(\.defend-page\.is-easy-watch\) \.app-body \{[^}]*width:\s*100%/,
+    '1.4.379 Easy phone playfield has no side inset',
+  )
+  assert.match(
+    css379,
+    /\.defend-page\.is-easy-watch \.defend-board \{[^}]*border-radius:\s*0/,
+    '1.4.379 Easy phone board drops the rounded frame',
+  )
+  assert.match(
+    css379,
+    /\.defend-page\.is-easy-watch \.defend-frame \{[^}]*width:\s*100%;[^}]*height:\s*100%;[^}]*aspect-ratio:\s*auto/,
+    '1.4.379 Easy phone frame fills the stage',
+  )
+  assert.match(
+    css379,
+    /\.defend-page\.is-easy-watch \.nw-walker-slide\.easy-walker-roster \{[^}]*max-height:\s*26px/,
+    '1.4.379 walker names stay one small line',
+  )
+  assert.match(
+    css379,
+    /\.defend-page\.is-easy-watch \.defend-ability-label \{[^}]*clip:\s*rect\(0 0 0 0\)/,
+    '1.4.379 rail labels are off the icons',
+  )
+  assert.match(css379, /\.defend-page\.is-easy-watch \.nw-hud \.defend-wave \{[^}]*display:\s*none/)
+  assert.match(css379, /\.defend-page\.is-easy-watch \.nw-wave-overlay \{[^}]*position:\s*absolute/)
+  assert.match(defendScreenOnlySrc, /nw-wave-overlay/)
+  assert.match(defendScreenOnlySrc, /plateFill \? boardFillBox\(boardBox\) : boardViewBox\(boardBox\)/)
+  assert.match(defendScreenOnlySrc, /if \(!plateFill\) return mapBoardPoint\(boardBox,/)
+  assert.match(fill379, /const scale = byW > byH \? byW : byH/)
+  assert.doesNotMatch(fill379, /Math\.max\(box\.w/)
+  const se379 = boardFill({ w: 375, h: 580 })
+  assert.ok(se379.x > 0 && Math.abs(se379.y) < 0.05, '1.4.379 SE crops the dark side edges, not the road ends')
+  assert.ok(se379.w < 798 && Math.abs(se379.h - 1134) < 0.05)
+  assert.ok(632 > se379.x && 632 < se379.x + se379.w, '1.4.379 gate seat stays on the filled map')
+  assert.ok(388 > se379.x && 72 > se379.y && 72 < se379.y + se379.h, '1.4.379 road end stays on the filled map')
+  assert.match(css379, /1\.4\.378: Easy plant rings/, '1.4.379 keeps the gold plant rings')
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.379'), '1.4.379 changelog row')
+  assert.match(latestChange('1.4.379').title, /phone map uses the screen/)
+  assert.match(latestChange('1.4.379').items.join('\n'), /icons/)
+  assert.match(latestChange('1.4.379').items.join('\n'), /wave count sits on the map/)
+  assert.doesNotMatch(
+    latestChange('1.4.379').items.join('\n'),
+    /Fixes #|Closes #|Resolves #|monkey|balloon/i,
+    '1.4.379 changelog avoids GitHub close keywords',
   )
 }
 
@@ -8633,7 +8688,11 @@ console.log('check-city: ok')
   assert.match(css312, /\.nw-stage \{[\s\S]*?flex: 1 1 0/, '1.4.312 keeps the 1.4.311 full-bleed stage')
   assert.match(defendSkySrc, /preserveAspectRatio="xMidYMid meet"/, '1.4.312 board contains, never slices')
   assert.doesNotMatch(defendSkySrc, /slice/)
-  assert.match(defendScreenOnlySrc, /viewBox=\{boardViewBox\(boardBox\)\}/)
+  assert.match(
+    defendScreenOnlySrc,
+    /viewBox=\{plateFill \? boardFillBox\(boardBox\) : boardViewBox\(boardBox\)\}/,
+    '1.4.312 contain camera stays; 1.4.379 Easy phone fills the stage',
+  )
   assert.match(surface312, /Math\.min\(box\.w \/ map\.width, box\.h \/ map\.height\)/, '1.4.312 contain scale')
   assert.doesNotMatch(surface312, /Math\.max\(box\.w|ROAD_KEEP|cropStart/, '1.4.312 no cover crop')
   assert.match(surface312, /x: 0,\s*y: 0,\s*w: map\.width,\s*h: map\.height/, '1.4.312 viewBox is always the whole plate')

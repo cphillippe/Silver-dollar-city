@@ -54,6 +54,8 @@ import {
   CoinRead,
   MoneyBalloon,
   UiShell,
+  boardFillBox,
+  boardFillPoint,
   boardPoint as mapBoardPoint,
   boardViewBox,
   nightEnemies,
@@ -81,9 +83,28 @@ interface DefendScreenProps {
 /** 1.4.375: how long the lamp level-up burst, roman bump, and −1✦ stay readable. */
 const LEVEL_BURST_MS = 1100
 
+/** Easy SE chrome (1.4.379). Same cutoff as the phone rules in defend.css. */
+const PHONE_SE = '(max-width: 480px)'
+
+function usePhoneSe() {
+  const [phone, setPhone] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia(PHONE_SE).matches,
+  )
+  useEffect(() => {
+    const media = window.matchMedia(PHONE_SE)
+    const sync = () => setPhone(media.matches)
+    sync()
+    media.addEventListener('change', sync)
+    return () => media.removeEventListener('change', sync)
+  }, [])
+  return phone
+}
+
 export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const { progress, recordNight, markMet, markMiss } = useProgress()
   const easy = isEasy(progress)
+  const phoneSe = usePhoneSe()
+  const plateFill = easy && phoneSe
   const today = localDateKey()
   const brief = evidenceFor(DEFEND_BRIEF_ID)
   const trailOpen = unlockedWatchAbilities(progress)
@@ -729,7 +750,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   }
 
   function boardPoint(x: number, y: number) {
-    return mapBoardPoint(boardBox, { x, y })
+    if (!plateFill) return mapBoardPoint(boardBox, { x, y })
+    return boardFillPoint(boardBox, { x, y })
   }
 
   const after = juiceDone && won
@@ -988,7 +1010,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           >
             <DefendNightBoard
               boardRef={boardRef}
-              viewBox={boardViewBox(boardBox)}
+              viewBox={plateFill ? boardFillBox(boardBox) : boardViewBox(boardBox)}
               shake={shake}
               won={won}
               phase={phase}
@@ -1033,7 +1055,15 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
               }
               onCloseUpgrade={closeUpgrade}
               onBoardTap={closeUpgrade}
+              plateFill={plateFill}
             />
+            {phase === 'wave' ? (
+              <div className="nw-wave-overlay">
+                <span className="defend-wave">
+                  Wave {waveIndex + 1}/{DEFEND_NIGHT_WAVES}
+                </span>
+              </div>
+            ) : null}
           </UiShell>
         </>
       )}

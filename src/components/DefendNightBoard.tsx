@@ -1,6 +1,6 @@
 import type { CityPlotId } from '../lib/city'
 import { WATCH_ABILITY_LABEL } from '../lib/defend'
-import { boardPoint as mapBoardPoint, nightTowers } from '../nightWatch'
+import { boardFillPoint, boardPoint as mapBoardPoint, nightTowers } from '../nightWatch'
 import type { DefendNightSkyProps } from './DefendNightSky'
 import { DefendNightSky } from './DefendNightSky'
 import { DefendTowerCard, type TowerCardPoint } from './DefendTowerCard'
@@ -19,6 +19,8 @@ export type DefendNightBoardProps = Omit<DefendNightSkyProps, 'children'> &
     levelBurst?: { from: number; to: number } | null
     onPullLamp?: () => void
     onCloseUpgrade?: () => void
+    /** Easy phone: overlays share the fill camera with the board. */
+    plateFill?: boolean
   }
 
 export function DefendNightBoard(props: DefendNightBoardProps) {
@@ -28,7 +30,9 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
     flash, togglePad, fire, fireAtRaider, shots, easy, blasts, tapTarget, tapPos, tapJuice,
     walkerCalls, loreLine, runTier, boosting, onBoostTower, upgradeAt, onOpenUpgrade, upFlashId,
     upgradePoint, boardBox, runSparks = 0, levelBurst = null, onPullLamp, onCloseUpgrade,
+    plateFill = false,
   } = props
+  const place = plateFill ? boardFillPoint : mapBoardPoint
   const showCard = Boolean(upgradeAt && upgradePoint && boardBox && boardBox.w > 0 && onCloseUpgrade)
   const cardAbility =
     (upgradeAt && towerType[upgradeAt] && unlocked.includes(towerType[upgradeAt])
@@ -39,7 +43,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
       ? planted.map((id) => {
           const type = towerType[id]
           if (!type) return null
-          const at = mapBoardPoint(boardBox, nightTowers.anchor(id))
+          const at = place(boardBox, nightTowers.anchor(id))
           return (
             <span
               key={id}
