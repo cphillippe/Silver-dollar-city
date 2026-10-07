@@ -1254,7 +1254,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.381')
+assert.equal(APP_VERSION, '1.4.382')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3964,6 +3964,52 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.369').items.join('\n'),
     /Fixes #|Closes #|Resolves #/i,
     '1.4.369 changelog avoids GitHub close keywords',
+  )
+}
+
+// Night Watch 1.4.382: porch→road candy art. Thick icing and gumdrops, not thin dashes.
+{
+  const defendCss382 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const plate382 = readFileSync(new URL('../src/nightWatch/map/MapPlate.tsx', import.meta.url), 'utf8')
+  const candyUrl = new URL('../src/assets/defend/nw-porch-candy.svg', import.meta.url)
+  const candy382 = readFileSync(candyUrl, 'utf8')
+  assert.ok(existsSync(candyUrl), '1.4.382 ships the porch candy asset')
+  assert.match(plate382, /nw-porch-candy\.svg/, '1.4.382 paints candy on the night plate')
+  assert.match(plate382, /defend-porch-candy/)
+  assert.match(candy382, /Cottage porches|cottage porches/i)
+  assert.equal((candy382.match(/<path /g) ?? []).length, 12, '1.4.382 four porch paths, three candy layers')
+  assert.match(candy382, /gum-pink/)
+  assert.match(candy382, /gum-lilac/)
+  assert.match(candy382, /gum-mint/)
+  assert.doesNotMatch(candy382, /stroke-dasharray/)
+  assert.match(defendCss382, /1\.4\.382: porch→road connectors are the candy image/)
+  assert.match(defendCss382, /\.defend-porch-candy/)
+  assert.match(defendCss382, /\.defend-heaven-path \{[^}]*stroke:\s*none/s)
+  assert.doesNotMatch(
+    defendCss382.slice(defendCss382.indexOf('.defend-heaven-path'), defendCss382.indexOf('.defend-heaven-glow')),
+    /stroke-dasharray:\s*7\s+8/,
+    '1.4.382 heaven hook is not the thin dash',
+  )
+  assert.match(defendSkySrc, /defend-heaven-path/, '1.4.382 keeps the heaven path hook')
+  assert.match(defendCss382, /1\.4\.381: unlockable 3× speed/, '1.4.382 keeps 3× speed')
+  assert.match(defendCss382, /1\.4\.380: skills pack/, '1.4.382 keeps the skill pack')
+  assert.match(defendCss382, /1\.4\.379: Easy phone SE chrome/, '1.4.382 keeps the phone chrome rules')
+  assert.match(defendCss382, /1\.4\.378: Easy plant rings/, '1.4.382 keeps the gold plant rings')
+  assert.equal(WATCH_TOOLS.length, 4, '1.4.382 does not add a rail tool')
+  assert.equal(PACE_UNLOCK_WAVE, 2, '1.4.382 3× still opens on wave 3')
+  assert.deepEqual(
+    [0, 1, 2].map((wave) => skillUnlockOnWave(wave)),
+    ['still', 'mend', null],
+    '1.4.382 skills still open one per wave',
+  )
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.382'), '1.4.382 changelog row')
+  assert.match(latestChange('1.4.382').title, /candy/)
+  assert.match(latestChange('1.4.382').items.join('\n'), /porch/)
+  assert.match(latestChange('1.4.382').items.join('\n'), /yellow road/)
+  assert.doesNotMatch(
+    latestChange('1.4.382').items.join('\n'),
+    /Fixes #|Closes #|Resolves #|monkey|balloon/i,
+    '1.4.382 changelog avoids GitHub close keywords',
   )
 }
 
