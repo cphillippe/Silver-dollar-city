@@ -1,6 +1,6 @@
 import type { CityPlotId } from '../lib/city'
 import { WATCH_ABILITY_LABEL } from '../lib/defend'
-import { boardFillPoint, boardPoint as mapBoardPoint, nightTowers } from '../nightWatch'
+import { boardFill, boardFillPoint, boardPoint as mapBoardPoint, boardView, nightTowers } from '../nightWatch'
 import type { DefendNightSkyProps } from './DefendNightSky'
 import { DefendNightSky } from './DefendNightSky'
 import { DefendTowerCard, type TowerCardPoint } from './DefendTowerCard'
@@ -33,11 +33,18 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
     plateFill = false,
   } = props
   const place = plateFill ? boardFillPoint : mapBoardPoint
-  const showCard = Boolean(upgradeAt && upgradePoint && boardBox && boardBox.w > 0 && onCloseUpgrade)
-  const cardAbility =
-    (upgradeAt && towerType[upgradeAt] && unlocked.includes(towerType[upgradeAt])
-      ? towerType[upgradeAt]
-      : ability) ?? ability
+  const cardAbility = upgradeAt ? towerType[upgradeAt] : undefined
+  const showCard = Boolean(
+    upgradeAt && cardAbility && upgradePoint && boardBox && boardBox.w > 0 && onCloseUpgrade,
+  )
+  const clearOf =
+    showCard && boardBox
+      ? planted
+          .filter((id) => id !== upgradeAt)
+          .map((id) => place(boardBox, nightTowers.anchor(id)))
+      : []
+  const cameraScale =
+    boardBox && boardBox.w > 0 ? (plateFill ? boardFill(boardBox) : boardView(boardBox)).scale : 0.55
   const typeChips =
     boardBox && boardBox.w > 0
       ? planted.map((id) => {
@@ -96,12 +103,14 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
       {showCard ? (
         <DefendTowerCard
           plotId={upgradeAt as CityPlotId}
-          ability={cardAbility}
+          ability={cardAbility ?? ''}
           runTier={runTier}
           sparks={runSparks}
           point={upgradePoint as TowerCardPoint}
           board={boardBox as { w: number; h: number }}
-          onUpgrade={() => onBoostTower?.()}
+          onUpgrade={() => onBoostTower?.(upgradeAt as CityPlotId)}
+          clearOf={clearOf}
+          cameraScale={cameraScale}
           onPull={onPullLamp}
           onClose={onCloseUpgrade as () => void}
           levelBurst={levelBurst}

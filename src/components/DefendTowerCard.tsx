@@ -1,6 +1,11 @@
 import { useEffect, useRef } from 'react'
 import { CITY_PLOTS, type CityPlotId } from '../lib/city'
 import { WATCH_ABILITY_LABEL } from '../lib/defend'
+import {
+  placeTowerCard,
+  TOWER_CARD_W,
+  type TowerCardPoint,
+} from '../lib/towerCardPlace'
 import { boostCost, combatTier, TIER_MARK, TOOL_TIER_MAX } from '../lib/watchTools'
 
 export interface LevelBurst {
@@ -8,35 +13,7 @@ export interface LevelBurst {
   to: number
 }
 
-export interface TowerCardPoint {
-  left: number
-  top: number
-}
-
-const CARD_W = 176
-const CARD_H = 168
-const RAIL = 72
-const MARGIN = 8
-const GAP = 28
-
-/** Keep the upgrade card on the phone plate, beside the lamp, clear of the right rail. */
-export function placeTowerCard(
-  point: TowerCardPoint,
-  board: { w: number; h: number },
-): { left: number; top: number; side: 'above' | 'below' } {
-  let top = point.top - CARD_H - GAP
-  let side: 'above' | 'below' = 'above'
-  if (top < MARGIN) {
-    top = point.top + GAP
-    side = 'below'
-  }
-  if (top + CARD_H > board.h - MARGIN) {
-    top = Math.max(MARGIN, board.h - CARD_H - MARGIN)
-    side = top + GAP < point.top ? 'above' : side
-  }
-  const left = Math.max(MARGIN, Math.min(point.left - CARD_W / 2, board.w - CARD_W - RAIL))
-  return { left, top, side }
-}
+export type { TowerCardPoint }
 
 export function DefendTowerCard({
   plotId,
@@ -49,6 +26,8 @@ export function DefendTowerCard({
   onPull,
   onClose,
   levelBurst = null,
+  clearOf = [],
+  cameraScale = 0.55,
 }: {
   plotId: CityPlotId
   ability: string
@@ -62,9 +41,12 @@ export function DefendTowerCard({
   onClose: () => void
   /** I→II / II→III while the level-up burst plays. */
   levelBurst?: LevelBurst | null
+  /** Other planted lamps. The card moves so a tap can still reach them. */
+  clearOf?: readonly TowerCardPoint[]
+  /** Board camera scale. Lamp hits are viewBox units times this. */
+  cameraScale?: number
 }) {
   const cardRef = useRef<HTMLDivElement>(null)
-  const upgradeRef = useRef<HTMLButtonElement>(null)
   const tier = combatTier(ability, runTier)
   const maxed = tier >= TOOL_TIER_MAX
   const cost = boostCost(tier)
@@ -72,16 +54,16 @@ export function DefendTowerCard({
   const canSpend = !maxed && sparks >= cost
   const label = WATCH_ABILITY_LABEL[ability] ?? 'Love'
   const plotTitle = CITY_PLOTS.find((plot) => plot.id === plotId)?.title ?? plotId
-  const placed = placeTowerCard(point, board)
+  const placed = placeTowerCard(point, board, clearOf, cameraScale)
   const levelLine = maxed ? TIER_MARK[tier] : `${TIER_MARK[next]} · ${cost}✦`
   const bursting = Boolean(levelBurst && levelBurst.to > levelBurst.from)
   const fromMark = bursting ? TIER_MARK[levelBurst!.from] : ''
   const toMark = bursting ? TIER_MARK[levelBurst!.to] : ''
 
   useEffect(() => {
-    const node = canSpend ? upgradeRef.current : cardRef.current
-    node?.focus({ preventScroll: true })
-  }, [plotId, canSpend])
+    // Focus the card, not Upgrade. A focused spend button can take the next lamp tap.
+    cardRef.current?.focus({ preventScroll: true })
+  }, [plotId])
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -96,6 +78,7 @@ export function DefendTowerCard({
       ref={cardRef}
       className={`defend-tower-card is-${placed.side}${bursting ? ' is-level-up' : ''}`}
       data-upgrade-card
+      data-upgrade-plot={plotId}
       data-tier={tier}
       data-level-bump={bursting ? `${fromMark}-${toMark}` : undefined}
       data-next={maxed ? TIER_MARK[tier] : TIER_MARK[next]}
@@ -107,7 +90,7 @@ export function DefendTowerCard({
       style={{
         left: placed.left,
         top: placed.top,
-        width: CARD_W,
+        width: TOWER_CARD_W,
         ['--stem' as string]: `${Math.round(point.left - placed.left)}px`,
       }}
     >
@@ -154,11 +137,13 @@ export function DefendTowerCard({
       <p className="defend-tower-gain">{maxed ? 'As strong as it gets' : 'Range ↑  ·  Damage ↑'}</p>
       {maxed ? null : (
         <button
-          ref={upgradeRef}
           type="button"
           className="btn primary defend-tower-upgrade"
           disabled={!canSpend}
-          onClick={onUpgrade}
+          onClick={(event) => {
+            event.stopPropagation()
+            onUpgrade()
+          }}
         >
           Upgrade
         </button>
