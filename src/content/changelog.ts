@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.376',
+    title: 'Night Watch walkers spawn spaced',
+    when: '2026-10-07',
+    items: [
+      'Easy Night Watch walkers enter spaced along the road. The first face stays ahead. Later faces come in behind it, so you can read each one.',
+    ],
+  },
+  {
     version: '1.4.375',
     title: 'Night Watch lamp levels up',
     when: '2026-10-07',

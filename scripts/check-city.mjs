@@ -1219,7 +1219,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.375')
+assert.equal(APP_VERSION, '1.4.376')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -2444,8 +2444,10 @@ assert.equal(easyTapMode(false, 'wave', false), false)
   assert.equal(EASY_WAVE_LIVE, 3)
   assert.equal(easyHoldSpawn(2), false)
   assert.equal(easyHoldSpawn(3), true)
-  assert.equal(easySpawnT(0), 0.08)
-  assert.equal(easySpawnT(1), 0.18)
+  assert.equal(easySpawnT(0), 0.28)
+  assert.equal(easySpawnT(1), 0.16)
+  assert.equal(easySpawnT(2), 0.04)
+  assert.equal(easySpawnT(3), 0.28)
   assert.equal(easyTapPersonCount([{ id: 0, turned: 'love' }]), 0)
 }
 assert.equal(easyTapFit(true, 'love', 'physical'), 'match')
@@ -3927,6 +3929,31 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.369').items.join('\n'),
     /Fixes #|Closes #|Resolves #/i,
     '1.4.369 changelog avoids GitHub close keywords',
+  )
+}
+
+// Night Watch 1.4.376: Easy walkers spawn spaced, lead in front, later ones at the gate.
+{
+  const step = 0.01 * 3.8
+  const at = [0, 1, 2].map((index) => easySpawnT(index) + step * (2 - index))
+  const gap = (a, b) => {
+    const p = pathPoint(a)
+    const q = pathPoint(b)
+    return Math.hypot(p.x - q.x, p.y - q.y)
+  }
+  const face = PATH_WALKER_FACE_U * 0.72
+  assert.ok(at[0] > at[1] && at[1] > at[2], '1.4.376 the first walker stays ahead of the third')
+  assert.ok(gap(at[0], at[1]) >= face * 3, '1.4.376 lead and second face stay apart at the third spawn')
+  assert.ok(gap(at[1], at[2]) >= face * 3, '1.4.376 second and third face stay apart at the third spawn')
+  assert.equal(easySpawnT(0), 0.28)
+  assert.equal(easySpawnT(2), 0.04)
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.376'), '1.4.376 changelog row')
+  assert.match(latestChange('1.4.376').title, /spawn/)
+  assert.match(latestChange('1.4.376').items.join('\n'), /face/)
+  assert.doesNotMatch(
+    latestChange('1.4.376').items.join('\n'),
+    /Fixes #|Closes #|Resolves #|monkey|balloon/i,
+    '1.4.376 changelog avoids GitHub close keywords',
   )
 }
 
@@ -10185,7 +10212,7 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   const speed = 0.01 * tune.speedScale
   const spawnEvery = 3.8 * tune.spawnScale
   const hp0 = baseHp + tune.hpBonus
-  const spawnT = [0.08, 0.18, 0.28]
+  const spawnT = (index) => easySpawnT(index)
   let spawned = 0
   let downed = 0
   let hearts = 3
@@ -10213,7 +10240,7 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
     if (spawned < tune.size && !hold && (spawnNow || spawnAt >= spawnEvery || spawned === 0)) {
       spawnNow = false
       spawnAt = 0
-      raiders.push({ t: spawnT[spawned % 3], hp: hp0, dead: false })
+      raiders.push({ t: spawnT(spawned), hp: hp0, dead: false })
       spawned += 1
     }
     if (time >= coolUntil) {
