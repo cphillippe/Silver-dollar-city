@@ -87,7 +87,7 @@ export const EASY = {
     'Pick Love, Logic, Reason, or Science. Tap a gold ring to plant that one. Tap it to make it stronger.',
   nightBoost:
     'Wave clear. Tap a planted lamp. Gold Upgrade spends a spark and raises it to II or III.',
-  nightBoostPick: 'Pick one skill',
+  nightBoostPick: 'Skills',
   nightKeepLamp: 'Keep one lamp — tap a ring to plant more.',
   nightMiss: 'Wrong — tap the glowing face',
   startEasy: 'Start Easy',
