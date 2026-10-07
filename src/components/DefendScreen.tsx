@@ -35,6 +35,13 @@ import {
   skillUnlocked,
 } from '../lib/nightSkills'
 import {
+  PACE_UNLOCK_WAVE,
+  paceScale,
+  paceUnlocked,
+  pacedCooldown,
+  pacedDt,
+} from '../lib/nightPace'
+import {
   nightWatchDebugFrozen,
   readNightWatchDebug,
 } from '../lib/nightWatchDebug'
@@ -72,6 +79,7 @@ import { TownReturn } from './TownReturn'
 import { WinBurst } from './challenges/WinBurst'
 import { DefendAbilityBar } from './DefendAbilityBar'
 import { DefendNightBoard } from './DefendNightBoard'
+import { NightPaceControl } from './NightPaceControl'
 import { NightSkillSplash } from './NightSkillSplash'
 import { NightSkillTray } from './NightSkillTray'
 import type { EasyTapJuice, EasyWalkerCall } from './DefendNightActors'
@@ -123,6 +131,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const [skillReady, setSkillReady] = useState<Record<KitId, number>>({ still: 0, mend: 0 })
   const [skillNow, setSkillNow] = useState(0)
   const [skillSplash, setSkillSplash] = useState<KitId | null>(null)
+  const [fastOn, setFastOn] = useState(false)
   const [pulseId, setPulseId] = useState<KitId | null>(null)
   const [stillOn, setStillOn] = useState(false)
   const [mendOn, setMendOn] = useState(false)
@@ -147,6 +156,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const skillReadyRef = useRef(skillReady)
   skillReadyRef.current = skillReady
   const skillHoldRef = useRef(false)
+  const fastOnRef = useRef(false)
+  fastOnRef.current = fastOn
   const pendingIntroRef = useRef<KitId | null>(null)
   const seenSkill = useRef<Record<KitId, boolean>>({ still: false, mend: false })
   const mendShieldUntilRef = useRef(0)
@@ -308,7 +319,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         frame = requestAnimationFrame(tick)
         return
       }
-      const dt = Math.min(0.05, (now - last) / 1000)
+      const wallDt = Math.max(0, (now - last) / 1000)
+      const pace = easy
+        ? paceScale(paceUnlocked(waveIndexRef.current), fastOnRef.current)
+        : 1
+      const dt = pacedDt(wallDt, pace)
       last = now
       const frozen = nightWatchDebugFrozen(
         easy,
@@ -491,7 +506,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   function fire(id: CityPlotId, forceRaiderId?: number) {
     if (phase !== 'wave' || won) return
     const now = performance.now()
-    const wait = nightTowers.cooldown(id, progress)
+    const wait = pacedCooldown(nightTowers.cooldown(id, progress), combatPace())
     if ((live.current.cool[id] ?? 0) + wait > now) return
     const at = nightTowers.anchor(id)
     const using = towerAbility(id)
@@ -610,7 +625,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   autoFireRef.current = (now: number, frozen: boolean) => {
     for (const id of live.current.planted) {
       const using = towerAbility(id)
-      const wait = nightTowers.cooldown(id, progress)
+      const wait = pacedCooldown(nightTowers.cooldown(id, progress), combatPace())
       if (!lampReadyToFire(live.current.cool[id] ?? 0, now, wait, frozen)) continue
       const at = nightTowers.anchor(id)
       const range = nightTowers.range(id, using, progress, runTier)
@@ -690,6 +705,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     setPowerBanner(null)
     setStillOn(false)
     setDebugPaused(false)
+    fastOnRef.current = false
+    setFastOn(false)
     live.current.freezeUntil = 0
     live.current.hearts = DEFEND_HEARTS
     setBoostNote(null)
@@ -800,6 +817,22 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     }, 2600)
   }
 
+  function combatPace(): number {
+    if (!easy) return 1
+    return paceScale(paceUnlocked(waveIndexRef.current), fastOnRef.current)
+  }
+
+  function togglePace() {
+    if (!easy || won) return
+    if (!paceUnlocked(waveIndexRef.current)) {
+      flashKit(`3× unlocks on wave ${PACE_UNLOCK_WAVE + 1}`)
+      return
+    }
+    const next = !fastOnRef.current
+    fastOnRef.current = next
+    setFastOn(next)
+  }
+
   function castSkill(id: KitId) {
     const label = KIT_LABEL[id]
     if (won || skillSplash) return
@@ -876,6 +909,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const waveSize = wavePackSize(waveIndex)
   const remaining = waveSize - downed
   const boosting = phase === 'boost' && !won
+
+  const showPace = easy && (phase === 'wave' || phase === 'boost') && !won
 
   const hud = (
     <p className="defend-hud" aria-live="polite">
@@ -1129,6 +1164,9 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                   Wave {waveIndex + 1}/{DEFEND_NIGHT_WAVES}
                 </span>
               </div>
+            ) : null}
+            {showPace ? (
+              <NightPaceControl waveIndex={waveIndex} fastOn={fastOn} onToggle={togglePace} />
             ) : null}
             {skillSplash ? <NightSkillSplash id={skillSplash} onDismiss={dismissSkillSplash} /> : null}
             {createPortal(
