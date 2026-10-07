@@ -115,6 +115,7 @@ export function DefendNightSky({
               <path className="defend-road-bed" d={nightPath.roadD} />
               <path className="defend-road" d={nightPath.roadD} />
               <path className="defend-road-shine" d={nightPath.roadD} />
+              {/* 1.4.382: no thin dashes. Candy porch paths live on the plate image. */}
               <path
                 className="defend-heaven-path"
                 d="M280 292 C 400 210, 500 90, 572 36"

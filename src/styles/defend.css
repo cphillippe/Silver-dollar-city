@@ -274,14 +274,16 @@ img.walker-face.easy-walker-face,
   filter: url(#defend-glow);
 }
 
+/* 1.4.382: porch→road connectors are the candy image, not this thin gold dash.
+   The path node stays so the heaven mark still has a hook. It draws nothing. */
 .defend-heaven-path {
   fill: none;
-  stroke: #ffcc33;
-  stroke-width: 4;
-  stroke-linecap: round;
-  stroke-dasharray: 7 8;
-  opacity: 0.85;
-  filter: url(#defend-glow);
+  stroke: none;
+  stroke-width: 0;
+}
+
+.defend-porch-candy {
+  pointer-events: none;
 }
 
 .defend-heaven-glow {

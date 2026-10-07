@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 798 1134" width="798" height="1134">
+  <title>Candy paths from cottage porches to the yellow road</title>
+  <defs>
+    <symbol id="gum-pink" overflow="visible">
+      <ellipse cx="1.5" cy="3" rx="17" ry="15" fill="#8e1644" />
+      <ellipse cx="0" cy="0" rx="17" ry="15" fill="#ff4d88" />
+      <ellipse cx="0" cy="1" rx="12" ry="10" fill="#ff87b0" />
+      <ellipse cx="-5" cy="-5" rx="6" ry="4.2" fill="#fffaf6" />
+    </symbol>
+    <symbol id="gum-lilac" overflow="visible">
+      <ellipse cx="1.5" cy="3" rx="17" ry="15" fill="#6a2494" />
+      <ellipse cx="0" cy="0" rx="17" ry="15" fill="#d07bff" />
+      <ellipse cx="0" cy="1" rx="12" ry="10" fill="#e4b0ff" />
+      <ellipse cx="-5" cy="-5" rx="6" ry="4.2" fill="#fffaf6" />
+    </symbol>
+    <symbol id="gum-mint" overflow="visible">
+      <ellipse cx="1.5" cy="3" rx="17" ry="15" fill="#0c7a68" />
+      <ellipse cx="0" cy="0" rx="17" ry="15" fill="#3ee0c4" />
+      <ellipse cx="0" cy="1" rx="12" ry="10" fill="#8ff5e4" />
+      <ellipse cx="-5" cy="-5" rx="6" ry="4.2" fill="#fffaf6" />
+    </symbol>
+  </defs>
+  <!-- Frosting ropes: gold lip, then thick white icing. Round caps weld porch to road. -->
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <g stroke="#c47a08" stroke-width="44">
+      <path d="M238 492 Q325 525 306 448" />
+      <path d="M262 808 Q288 802 304 774" />
+      <path d="M552 302 Q560 276 528 260" />
+      <path d="M498 662 Q488 646 460 622" />
+    </g>
+    <g stroke="#fffaf2" stroke-width="30">
+      <path d="M238 492 Q325 525 306 448" />
+      <path d="M262 808 Q288 802 304 774" />
+      <path d="M552 302 Q560 276 528 260" />
+      <path d="M498 662 Q488 646 460 622" />
+    </g>
+    <g stroke="#ffe08a" stroke-width="10">
+      <path d="M238 492 Q325 525 306 448" />
+      <path d="M262 808 Q288 802 304 774" />
+      <path d="M552 302 Q560 276 528 260" />
+      <path d="M498 662 Q488 646 460 622" />
+    </g>
+  </g>
+  <g>
+    <use href="#gum-pink" x="271.1" y="501.2" />
+    <use href="#gum-pink" x="298.5" y="497.5" />
+    <use href="#gum-pink" x="309.2" y="476.6" />
+    <use href="#gum-pink" x="273" y="804.3" />
+    <use href="#gum-pink" x="285.5" y="796.5" />
+    <use href="#gum-pink" x="296.5" y="785.3" />
+    <use href="#gum-lilac" x="553.6" y="291" />
+    <use href="#gum-lilac" x="550" y="278.5" />
+    <use href="#gum-lilac" x="540.1" y="267.5" />
+    <use href="#gum-mint" x="492.7" y="654.6" />
+    <use href="#gum-mint" x="483.5" y="644" />
+    <use href="#gum-mint" x="471.4" y="632.2" />
+  </g>
+</svg>
