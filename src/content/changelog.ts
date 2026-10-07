@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.379',
+    title: 'Night Watch phone map uses the screen',
+    when: '2026-10-07',
+    items: [
+      'Easy Night Watch on a phone drops the purple frame so the map fills the screen. Walker names shrink to one small line. Love, Logic, Reason, and Science show as icons. The wave count sits on the map.',
+    ],
+  },
+  {
     version: '1.4.378',
     title: 'Night Watch plants all four from the first wave',
     when: '2026-10-07',

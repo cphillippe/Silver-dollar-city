@@ -8,3 +8,4 @@ export {
   type NightMapSurface,
 } from './surface.ts'
 export { MapPlate } from './MapPlate'
+export { boardFill, boardFillBox, boardFillPoint } from './phoneFill.ts'

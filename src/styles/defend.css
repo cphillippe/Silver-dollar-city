@@ -2402,3 +2402,118 @@ img.walker-face.easy-walker-face,
 .defend-ability.is-placed:not(.is-on)[data-type='science'] {
   box-shadow: inset 0 -3px 0 #3dcc7a;
 }
+
+/* 1.4.379: Easy phone SE chrome.
+   Bill 2026-10-06: the purple frame around the playfield is gone.
+   The map fills the phone. Walker names stay one small line.
+   The rail is icons. Wave sits on the map, not in the bar above it. */
+.nw-wave-overlay {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  .app.is-play:has(.defend-page.is-easy-watch) .app-body {
+    width: 100%;
+    padding: 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .defend-page.is-easy-watch {
+    gap: 0;
+  }
+
+  .defend-page.is-easy-watch .nw-shell {
+    gap: 4px;
+    max-width: none;
+  }
+
+  .defend-page.is-easy-watch .nw-stage {
+    min-height: 0;
+  }
+
+  .defend-page.is-easy-watch .defend-frame {
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    aspect-ratio: auto;
+    align-self: stretch;
+    justify-self: stretch;
+  }
+
+  .defend-page.is-easy-watch .defend-board {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .defend-page.is-easy-watch .nw-hud .defend-wave {
+    display: none;
+  }
+
+  .defend-page.is-easy-watch .nw-wave-overlay {
+    display: flex;
+    position: absolute;
+    z-index: 6;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+
+  .defend-page.is-easy-watch .nw-walker-slide.easy-walker-roster {
+    top: 48px;
+    width: max-content;
+    max-width: 112px;
+    max-height: 26px;
+    padding: 2px 8px;
+    gap: 0;
+    overflow: hidden;
+    border-radius: 0 10px 10px 0;
+  }
+
+  .defend-page.is-easy-watch .nw-walker-slide.easy-walker-roster:not(:has(.is-cue)) {
+    width: 1px;
+    height: 1px;
+    max-height: 1px;
+    padding: 0;
+    border: 0;
+    clip: rect(0 0 0 0);
+  }
+
+  .defend-page.is-easy-watch .nw-walker-slide .easy-walker-call:not(.is-cue),
+  .defend-page.is-easy-watch .nw-walker-slide .easy-walker-taunt,
+  .defend-page.is-easy-watch .nw-walker-slide .easy-walker-lore {
+    display: none;
+  }
+
+  .defend-page.is-easy-watch .nw-walker-slide .easy-walker-kind {
+    font-size: 11px;
+    line-height: 1.15;
+  }
+
+  .defend-page.is-easy-watch .nw-walker-slide .easy-walker-call {
+    padding: 0;
+  }
+
+  .defend-page.is-easy-watch .defend-ability-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .defend-page.is-easy-watch .nw-rail .defend-ability {
+    padding: 4px 2px;
+    gap: 0;
+  }
+
+  .defend-page.is-easy-watch .defend-ability .gem-ability {
+    width: 36px;
+    height: 36px;
+  }
+}
