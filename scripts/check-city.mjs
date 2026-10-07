@@ -57,6 +57,7 @@ import {
   EASY_CUE_HOLD_MS,
   EASY_WALKER_FACE_PX,
   DEFEND_HEARTS,
+  applyGateLeaks,
   EASY_WALKER_HIT_PX,
   PATH_WALKER_FACE_U,
   PATH_WALKER_HIT_R,
@@ -84,7 +85,7 @@ import { boardFill } from '../src/nightWatch/map/phoneFill.ts'
 import { nightEnemies as nightEnemiesMod } from '../src/nightWatch/enemies/index.ts'
 import { nightParts as nightPartsMod } from '../src/nightWatch/parts/index.ts'
 import { nightPath as nightPathMod } from '../src/nightWatch/path/index.ts'
-import { nightTowers as nightTowersMod, lampReadyToFire, SHOT_JUICE_MS, sparkAwardForHit } from '../src/nightWatch/towers/index.ts'
+import { nightTowers as nightTowersMod, lampReach, lampReadyToFire, LAMP_ROAD_OVERLAP, SHOT_JUICE_MS, sparkAwardForHit } from '../src/nightWatch/towers/index.ts'
 import {
   applyBoost,
   boostCost,
@@ -1254,7 +1255,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.383')
+assert.equal(APP_VERSION, '1.4.384')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -4050,6 +4051,128 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.383').items.join('\n'),
     /Fixes #|Closes #|Resolves #|monkey|balloon/i,
     '1.4.383 changelog avoids GitHub close keywords',
+  )
+}
+
+// Night Watch 1.4.384: a far lamp cannot skip the exit leak. Hearts fall, then the night fails.
+{
+  const defendSrc384 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const defendCss384 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const benchGap = pathClearance(DEFEND_ANCHOR.bench)
+  const benchRange = nightTowersMod.range('bench', 'logic', empty, { logic: 1 })
+  assert.ok(benchGap > 70, '1.4.384 Witness Square still sits off the road')
+  assert.ok(benchRange < benchGap, '1.4.384 Witness Square Logic stays short of the road')
+  assert.equal(
+    lampReach('bench', 96, benchGap),
+    Math.min(96, benchGap - 1),
+    '1.4.384 a thin nick does not cover the road',
+  )
+  assert.equal(LAMP_ROAD_OVERLAP, 24, '1.4.384 overlap floor stays a small nick')
+  const porchBase = abilityRange('love', padStage('porch', empty), empty, { love: 1 })
+  const porchGap = pathClearance(DEFEND_ANCHOR.porch)
+  assert.equal(
+    nightTowersMod.range('porch', 'love', empty, { love: 1 }),
+    porchBase + porchGap,
+    '1.4.384 porch keeps the seat-to-road bridge',
+  )
+  const porch = DEFEND_ANCHOR.porch
+  const porchReach = porchBase + porchGap
+  const gateDist = Math.hypot(porch.x - pathPoint(0).x, porch.y - pathPoint(0).y)
+  const frontDist = Math.hypot(porch.x - pathPoint(0.72).x, porch.y - pathPoint(0.72).y)
+  assert.ok(gateDist > porchReach, '1.4.384 porch still misses the gate spawn')
+  assert.ok(frontDist <= porchReach, '1.4.384 porch still reaches the upper road')
+  const hollowGap = pathClearance(DEFEND_ANCHOR.hollow)
+  const hollowRange = nightTowersMod.range('hollow', 'love', empty, { love: 1 })
+  assert.ok(hollowRange >= hollowGap, '1.4.384 Story Creek still reaches its bend')
+  const one = applyGateLeaks(DEFEND_HEARTS, 1, false)
+  assert.equal(one.hearts, DEFEND_HEARTS - 1, '1.4.384 one leak drops one heart')
+  assert.equal(one.failed, false, '1.4.384 one leak does not end a full night')
+  const emptyNight = applyGateLeaks(1, 1, false)
+  assert.equal(emptyNight.hearts, 0, '1.4.384 the last heart can reach zero')
+  assert.equal(emptyNight.failed, true, '1.4.384 zero hearts fails the night')
+  const held = applyGateLeaks(DEFEND_HEARTS, 1, true)
+  assert.equal(held.hearts, DEFEND_HEARTS, '1.4.384 Mend shield still forgives a leak')
+  assert.equal(held.failed, false, '1.4.384 a forgiven leak is not a fail')
+  assert.match(defendSrc384, /applyGateLeaks\(live\.current\.hearts, leaked, shielded\)/)
+  assert.match(defendSrc384, /gate\.failed \|\| live\.current\.hearts <= 0/)
+  assert.match(defendSrc384, /setPhase\('lost'\)/)
+  assert.match(defendSrc384, /You missed/)
+  assert.match(defendCss384, /1\.4\.383: Begin stays readable until the first plant/, '1.4.384 keeps Begin')
+  assert.match(defendCss384, /1\.4\.381: unlockable 3× speed/, '1.4.384 keeps 3× speed')
+  assert.match(defendCss384, /1\.4\.380: skills pack/, '1.4.384 keeps the skill pack')
+  assert.equal(WATCH_TOOLS.length, 4, '1.4.384 does not add a rail tool')
+
+  // Fresh Easy, one Logic lamp on Witness Square, no taps: walkers finish the road.
+  const tune = waveCombat(0, true)
+  const at = DEFEND_ANCHOR.bench
+  let spawned = 0
+  let downed = 0
+  let hearts = DEFEND_HEARTS
+  let failed = false
+  let spawnAt = 0
+  let spawnNow = false
+  let cool = -999
+  const raiders = []
+  let time = 0
+  const dt = 1 / 60
+  while (time < 180 && !failed) {
+    spawnAt += dt
+    for (const raider of raiders) {
+      if (!raider.dead) raider.t += 0.01 * dt
+    }
+    let leaked = 0
+    for (const raider of raiders) {
+      if (raider.dead) continue
+      if (raider.t >= 1) {
+        raider.dead = true
+        leaked += 1
+      }
+    }
+    const gate = applyGateLeaks(hearts, leaked, false)
+    hearts = gate.hearts
+    if (gate.failed) failed = true
+    const live = raiders.filter((raider) => !raider.dead)
+    if (spawned < tune.size && live.length < 3 && (spawnNow || spawnAt >= 3.8 || spawned === 0)) {
+      spawnNow = false
+      spawnAt = 0
+      raiders.push({ t: easySpawnT(spawned), hp: 2, dead: false })
+      spawned += 1
+    }
+    if (!failed && time >= cool) {
+      let best = null
+      let bestD = benchRange
+      for (const raider of live) {
+        const point = pathPoint(Math.min(1, raider.t))
+        const dist = Math.hypot(at.x - point.x, at.y - point.y)
+        if (dist <= bestD) {
+          best = raider
+          bestD = dist
+        }
+      }
+      if (best) {
+        cool = time + 0.7
+        best.hp -= 1
+        if (best.hp <= 0) {
+          best.dead = true
+          downed += 1
+          spawnNow = true
+        }
+      }
+    }
+    if (downed >= tune.size) break
+    time += dt
+  }
+  assert.equal(failed, true, '1.4.384 a far Logic lamp loses the night')
+  assert.equal(hearts, 0, '1.4.384 the far lamp drains the hearts')
+  assert.ok(downed < tune.size, '1.4.384 the far lamp does not clear the wave')
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.384'), '1.4.384 changelog row')
+  assert.match(latestChange('1.4.384').title, /heart/)
+  assert.match(latestChange('1.4.384').items.join('\n'), /heart/)
+  assert.match(latestChange('1.4.384').items.join('\n'), /Witness Square/)
+  assert.doesNotMatch(
+    latestChange('1.4.384').items.join('\n'),
+    /Fixes #|Closes #|Resolves #|monkey|balloon/i,
+    '1.4.384 changelog avoids GitHub close keywords',
   )
 }
 

@@ -59,8 +59,11 @@ export const nightTowers: NightTowersModule = {
   },
   stage: padStage,
   range: (id, ability, progress, runTier) =>
-    abilityRange(ability, padStage(id, progress), progress, runTier) +
-    pathClearance(nightPath.anchor(id)),
+    lampReach(
+      id,
+      abilityRange(ability, padStage(id, progress), progress, runTier),
+      pathClearance(nightPath.anchor(id)),
+    ),
   cooldown: (id, progress) => towerCooldown(padStage(id, progress)),
   inRange: (id, ability, progress, target, runTier) =>
     dist(nightPath.anchor(id), target) <= nightTowers.range(id, ability, progress, runTier),
@@ -76,6 +79,26 @@ export const nightTowers: NightTowersModule = {
  * How long one auto-shot stays readable on a phone.
  * Basic lamps wait 700ms, so the range ring can return to a dashed idle.
  */
+/**
+ * Thinnest road overlap that still counts as covering the path (1.4.384).
+ * Witness Square sits about 76 units off the bend. A 96 reach nicks it by ~20
+ * and pops the whole wave, so the exit leak never runs. A thinner nick misses.
+ */
+export const LAMP_ROAD_OVERLAP = 24
+
+/**
+ * How far this lamp can hit.
+ * The East porch keeps the seat-to-road bridge from 1.4.348.
+ * Other seats use their own reach, and a circle that would only nick the road
+ * stops one unit short of it.
+ */
+export function lampReach(plotId: string, base: number, roadGap: number): number {
+  if (plotId === 'porch') return base + roadGap
+  if (!(base > 0)) return 0
+  if (base < roadGap + LAMP_ROAD_OVERLAP) return Math.min(base, Math.max(0, roadGap - 1))
+  return base
+}
+
 export const SHOT_JUICE_MS = 500
 
 /**
