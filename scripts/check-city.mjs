@@ -106,6 +106,7 @@ import {
   useMend,
   useStill,
 } from '../src/lib/nightKits.ts'
+import { isTowerType, plantType, pullPlant, slotLeft, starterPlants } from '../src/lib/nightPlants.ts'
 import { ideaUnlocked, mindGraph, mindMapHasLit } from '../src/lib/mindMap.ts'
 import { appendStreetLinks, easyStreetChallenge, hardStreetChallenge, linkCaption, linkClue, linkMiss, linkPicture, nextStreetWalk, STREET_CHALLENGE, STREET_FACT_IDS, STREET_LIGHTS, STREET_SKIP_IDS, STREET_TRIPLES, streetDecoyNodes, streetFactsLeft, streetIsComplete, streetTripleForLine, streetWalks, STREET_WHYS } from '../src/content/links.ts'
 import { firstGate } from '../src/content/firstGate.ts'
@@ -1219,7 +1220,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.376')
+assert.equal(APP_VERSION, '1.4.377')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3929,6 +3930,74 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.369').items.join('\n'),
     /Fixes #|Closes #|Resolves #/i,
     '1.4.369 changelog avoids GitHub close keywords',
+  )
+}
+
+// Night Watch 1.4.377: plantable towers are Love, Logic, Reason, Science.
+{
+  const actors377 = readFileSync(
+    new URL('../src/components/DefendNightActors.tsx', import.meta.url),
+    'utf8',
+  )
+  const ability377 = readFileSync(
+    new URL('../src/components/DefendAbilityBar.tsx', import.meta.url),
+    'utf8',
+  )
+  const css377 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const pads = ['porch', 'hollow', 'bench', 'observatory', 'gate']
+  const open = ['love', 'logic', 'reason', 'science']
+  const started = starterPlants(pads, open)
+  assert.deepEqual(started, {
+    porch: 'love',
+    hollow: 'logic',
+    bench: 'reason',
+    observatory: 'science',
+  })
+  assert.equal(started.gate, undefined, '1.4.377 does not invent a fifth tower')
+  assert.equal(slotLeft(started, 'love'), 0)
+  assert.equal(slotLeft(started, 'logic'), 0)
+  const moved = plantType(started, 'gate', 'love')
+  assert.equal(moved.gate, 'love')
+  assert.equal(moved.porch, undefined, '1.4.377 planting spends the one Love slot')
+  assert.equal(moved.hollow, 'logic')
+  assert.equal(slotLeft(moved, 'love'), 0)
+  assert.equal(slotLeft({ porch: 'love' }, 'science'), 1)
+  assert.equal(isTowerType('love'), true)
+  assert.equal(isTowerType('still'), false)
+  assert.deepEqual(plantType({ porch: 'love' }, 'bench', 'still'), { porch: 'love' })
+  const pulled = pullPlant(moved, 'gate')
+  assert.equal(pulled.gate, undefined)
+  assert.equal(slotLeft(pulled, 'love'), 1, '1.4.377 pull puts the slot back')
+  assert.equal(pullPlant({ porch: 'love' }, 'porch'), null, '1.4.377 the last tower stays')
+  assert.match(defendScreenOnlySrc, /starterPlants/)
+  assert.match(defendScreenOnlySrc, /plantType/)
+  assert.match(defendScreenOnlySrc, /pullPlant/)
+  assert.match(defendScreenOnlySrc, /towerAbility/)
+  assert.match(defendScreenOnlySrc, /planted\.length <= 1/)
+  assert.match(defendScreenOnlySrc, /Keep at least one lamp/)
+  assert.match(defendScreenOnlySrc, /onBoostTower=\{boostSelectedTool\}/)
+  assert.match(actors377, /data-tower-type/)
+  assert.match(actors377, /defend-type-mark/)
+  assert.match(actors377, /defend-tower-lamp/)
+  assert.match(actors377, /'Upgrade' : 'Plant'\} lamp at/)
+  assert.match(ability377, /defend-ability-tier/)
+  assert.match(ability377, /TIER_MARK\[tier\]/)
+  assert.match(ability377, /defend-ability-stock/)
+  assert.match(ability377, /data-slot/)
+  assert.match(css377, /1\.4\.377: planted towers are Love, Logic, Reason, Science/)
+  assert.match(css377, /\.defend-pad\.is-love/)
+  assert.match(css377, /\.defend-pad\.is-logic/)
+  assert.match(css377, /\.defend-pad\.is-reason/)
+  assert.match(css377, /\.defend-pad\.is-science/)
+  assert.match(css377, /\.defend-type-chip\.is-love/)
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.377'), '1.4.377 changelog row')
+  assert.match(latestChange('1.4.377').title, /Love, Logic, Reason, and Science/)
+  assert.match(latestChange('1.4.377').items.join('\n'), /slot/)
+  assert.match(latestChange('1.4.377').items.join('\n'), /I to II/)
+  assert.doesNotMatch(
+    latestChange('1.4.377').items.join('\n'),
+    /Fixes #|Closes #|Resolves #|monkey|balloon/i,
+    '1.4.377 changelog avoids GitHub close keywords',
   )
 }
 

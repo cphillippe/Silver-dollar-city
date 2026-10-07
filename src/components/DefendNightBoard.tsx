@@ -1,4 +1,6 @@
 import type { CityPlotId } from '../lib/city'
+import { WATCH_ABILITY_LABEL } from '../lib/defend'
+import { boardPoint as mapBoardPoint, nightTowers } from '../nightWatch'
 import type { DefendNightSkyProps } from './DefendNightSky'
 import { DefendNightSky } from './DefendNightSky'
 import { DefendTowerCard, type TowerCardPoint } from './DefendTowerCard'
@@ -22,12 +24,33 @@ export type DefendNightBoardProps = Omit<DefendNightSkyProps, 'children'> &
 export function DefendNightBoard(props: DefendNightBoardProps) {
   const {
     boardRef, viewBox, shake, won, phase, fireBest, easyTap, onBoardTap,
-    pads, planted, progress, raiders, raiderAt, ability, unlocked,
+    pads, planted, progress, raiders, raiderAt, ability, towerType, unlocked,
     flash, togglePad, fire, fireAtRaider, shots, easy, blasts, tapTarget, tapPos, tapJuice,
     walkerCalls, loreLine, runTier, boosting, onBoostTower, upgradeAt, onOpenUpgrade, upFlashId,
     upgradePoint, boardBox, runSparks = 0, levelBurst = null, onPullLamp, onCloseUpgrade,
   } = props
   const showCard = Boolean(upgradeAt && upgradePoint && boardBox && boardBox.w > 0 && onCloseUpgrade)
+  const cardAbility =
+    (upgradeAt && towerType[upgradeAt] && unlocked.includes(towerType[upgradeAt])
+      ? towerType[upgradeAt]
+      : ability) ?? ability
+  const typeChips =
+    boardBox && boardBox.w > 0
+      ? planted.map((id) => {
+          const type = towerType[id]
+          if (!type) return null
+          const at = mapBoardPoint(boardBox, nightTowers.anchor(id))
+          return (
+            <span
+              key={id}
+              className={`defend-type-chip is-${type}`}
+              style={{ left: at.left, top: at.top }}
+            >
+              {WATCH_ABILITY_LABEL[type] ?? type}
+            </span>
+          )
+        })
+      : null
   return (
     <>
       <DefendNightSky
@@ -48,6 +71,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
           raiders={raiders}
           raiderAt={raiderAt}
           ability={ability}
+          towerType={towerType}
           unlocked={unlocked}
           flash={flash}
           togglePad={togglePad}
@@ -68,7 +92,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
       {showCard ? (
         <DefendTowerCard
           plotId={upgradeAt as CityPlotId}
-          ability={ability}
+          ability={cardAbility}
           runTier={runTier}
           sparks={runSparks}
           point={upgradePoint as TowerCardPoint}
@@ -79,6 +103,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
           levelBurst={levelBurst}
         />
       ) : null}
+      {typeChips}
       <DefendNightWalkerCue
         easyTap={easyTap}
         tapTarget={tapTarget}

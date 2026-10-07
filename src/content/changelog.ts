@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.377',
+    title: 'Night Watch towers are Love, Logic, Reason, and Science',
+    when: '2026-10-07',
+    items: [
+      'Easy Night Watch plants the four sidebar types: Love, Logic, Reason, and Science. Each one has its own color and icon. Planting uses that type’s one slot. Pull puts the slot back. Sparks still raise it from I to II or III.',
+    ],
+  },
+  {
     version: '1.4.376',
     title: 'Night Watch walkers spawn spaced',
     when: '2026-10-07',

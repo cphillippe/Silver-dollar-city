@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { evidenceFor } from '../content/evidence'
 import {
   ANGEL_STICKER,
@@ -40,6 +40,7 @@ import {
   nightWatchDebugFrozen,
   readNightWatchDebug,
 } from '../lib/nightWatchDebug'
+import { plantType, pullPlant, starterPlants } from '../lib/nightPlants'
 import { applyBoost, combatTier, freshRunTier } from '../lib/watchTools'
 import { useJuiceHandoff } from '../lib/juice'
 import type { CityPlotId } from '../lib/city'
@@ -120,7 +121,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const metRef = useRef<string[]>([...(progress.defense.met ?? [])])
   const markMetRef = useRef(markMet)
   markMetRef.current = markMet
-  const [planted, setPlanted] = useState<CityPlotId[]>(() => [...pads])
+  const [plants, setPlants] = useState<Record<string, string>>(() => starterPlants(pads, unlocked))
+  const planted = useMemo(() => Object.keys(plants) as CityPlotId[], [plants])
   const [hearts, setHearts] = useState(DEFEND_HEARTS)
   const [raiders, setRaiders] = useState<Raider[]>([])
   const [downed, setDowned] = useState(0)
@@ -133,6 +135,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const [leakFlash, setLeakFlash] = useState(false)
   const [won, setWon] = useState(false)
   const [firing, setFiring] = useState(false)
+  const [firingId, setFiringId] = useState<string | null>(null)
   const comboRef = useRef(0)
   const { juiceDone, afterJuice } = useJuiceHandoff()
   const saved = useRef(false)
@@ -147,6 +150,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     downed: 0,
     hearts: DEFEND_HEARTS,
     planted,
+    plants,
     cool: {} as Record<string, number>,
     playing: false,
     spawnNow: false,
@@ -158,7 +162,14 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
 
   useEffect(() => {
     live.current.planted = planted
-  }, [planted])
+    live.current.plants = plants
+  }, [planted, plants])
+
+  function towerAbility(id: CityPlotId): WatchAbility {
+    const plantedType = plants[id]
+    if (plantedType && unlocked.includes(plantedType)) return plantedType
+    return unlocked.includes(ability) ? ability : 'love'
+  }
 
   useEffect(() => {
     setUpgradeAt(null)
@@ -365,16 +376,10 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
 
   function togglePad(id: CityPlotId) {
     if (phase !== 'plant') return
-    setPlanted((current) => {
-      if (current.includes(id)) {
-        if (current.length <= 1) {
-          flashKit(easy ? EASY.nightKeepLamp : 'Keep at least one lamp.')
-          return current
-        }
-        return current.filter((item) => item !== id)
-      }
-      return [...current, id]
-    })
+    if (plants[id]) return
+    const using = unlocked.includes(ability) ? ability : 'love'
+    setPlants((current) => plantType(current, id, using))
+    setUpgradeAt(null)
   }
 
   function openUpgrade(id: CityPlotId) {
@@ -393,7 +398,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       flashKit(easy ? EASY.nightKeepLamp : 'Keep at least one lamp.')
       return
     }
-    setPlanted((current) => current.filter((item) => item !== id))
+    setPlants((current) => pullPlant(current, id) ?? current)
     setUpgradeAt(null)
   }
 
@@ -407,7 +412,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     const wait = nightTowers.cooldown(id, progress)
     if ((live.current.cool[id] ?? 0) + wait > now) return
     const at = nightTowers.anchor(id)
-    const using = unlocked.includes(ability) ? ability : 'love'
+    const using = towerAbility(id)
     const tier = combatTier(using, runTier)
     const range = nightTowers.range(id, using, progress, runTier)
     let best: Raider | null = null
@@ -428,7 +433,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     live.current.cool[id] = now
     lightPad(id)
     setFiring(true)
-    window.setTimeout(() => setFiring(false), SHOT_JUICE_MS)
+    setFiringId(using)
+    window.setTimeout(() => {
+      setFiring(false)
+      setFiringId(null)
+    }, SHOT_JUICE_MS)
     if (!best) return
     const to = raiderAt(best)
     const aim = { x: to.x, y: to.y + PATH_WALKER_FACE_DY }
@@ -517,8 +526,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   }
 
   autoFireRef.current = (now: number, frozen: boolean) => {
-    const using = unlocked.includes(ability) ? ability : 'love'
     for (const id of live.current.planted) {
+      const using = towerAbility(id)
       const wait = nightTowers.cooldown(id, progress)
       if (!lampReadyToFire(live.current.cool[id] ?? 0, now, wait, frozen)) continue
       const at = nightTowers.anchor(id)
@@ -538,12 +547,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     if (!raider) return
     for (const id of live.current.planted) {
       const at = nightTowers.anchor(id)
-      const range = nightTowers.range(
-        id,
-        unlocked.includes(ability) ? ability : 'love',
-        progress,
-        runTier,
-      )
+      const range = nightTowers.range(id, towerAbility(id), progress, runTier)
       const d = dist(at, raiderAt(raider))
       if (d <= range && d < bestD) {
         bestD = d
@@ -560,12 +564,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     let bestD = Infinity
     for (const id of live.current.planted) {
       const at = nightTowers.anchor(id)
-      const range = nightTowers.range(
-        id,
-        unlocked.includes(ability) ? ability : 'love',
-        progress,
-        runTier,
-      )
+      const range = nightTowers.range(id, towerAbility(id), progress, runTier)
       for (const raider of live.current.raiders) {
         if (raider.turned) continue
         const d = dist(at, raiderAt(raider))
@@ -592,6 +591,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     setFlash([])
     setTapJuice(null)
     setRunTier(freshRunTier())
+    setPlants(starterPlants(pads, unlocked))
     setRunSparks(0)
     sparksRef.current = 0
     const kits = freshRunKits()
@@ -619,7 +619,13 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     setRunSparks(next.sparks)
     setToolLock(null)
     const lamp = upgradeAt
-    const shown = unlocked.includes(ability) ? ability : 'love'
+    const plantedType = lamp ? plants[lamp] : undefined
+    const shown =
+      plantedType && unlocked.includes(plantedType)
+        ? plantedType
+        : unlocked.includes(ability)
+          ? ability
+          : 'love'
     window.clearTimeout(burstTimer.current)
     setSparkSpend(true)
     if (lamp && id === shown) {
@@ -634,7 +640,13 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   }
 
   function boostSelectedTool() {
-    const using = unlocked.includes(ability) ? ability : 'love'
+    const plantedType = upgradeAt ? plants[upgradeAt] : undefined
+    const using =
+      plantedType && unlocked.includes(plantedType)
+        ? plantedType
+        : unlocked.includes(ability)
+          ? ability
+          : 'love'
     boostTool(using)
   }
 
@@ -765,7 +777,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
               : combo > 1
                 ? `×${combo}  ${remaining} left`
                 : `${remaining} left · TAP`
-            : `${planted.length} lamp${planted.length === 1 ? '' : 's'}`}
+            : `${planted.length} planted`}
       </span>
     </p>
   )
@@ -905,6 +917,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       setAbility={setAbility}
       setToolLock={setToolLock}
       firing={firing}
+      firingId={firingId}
+      plantedTypes={Object.values(plants)}
       unlocked={unlocked}
       runTier={runTier}
       boosting={boosting}
@@ -975,6 +989,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
               raiders={raiders}
               raiderAt={raiderAt}
               ability={ability}
+              towerType={plants}
               unlocked={unlocked}
               flash={flash}
               togglePad={togglePad}
