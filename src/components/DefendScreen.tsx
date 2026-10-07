@@ -15,6 +15,7 @@ import {
   DEFEND_BRIEF_ID,
   DEFEND_HEARTS,
   DEFEND_NIGHT_WAVES,
+  applyGateLeaks,
   WATCH_ABILITY_LABEL,
   dist,
   unlockedWatchAbilities,
@@ -354,15 +355,17 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         leaked += 1
         return false
       })
+      let shielded = false
       if (leaked && now < mendShieldUntilRef.current) {
-        leaked = 0
+        shielded = true
         setPowerBanner('Held')
         window.clearTimeout(bannerTimer.current)
         bannerTimer.current = window.setTimeout(() => setPowerBanner(null), 2800)
       }
-      if (leaked) {
-        live.current.hearts = Math.max(0, live.current.hearts - leaked)
-        setHearts(live.current.hearts)
+      const gate = applyGateLeaks(live.current.hearts, leaked, shielded)
+      if (gate.lostHearts > 0) {
+        live.current.hearts = gate.hearts
+        setHearts(gate.hearts)
         comboRef.current = 0
         setCombo(0)
         setLeakFlash(true)
@@ -410,7 +413,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       autoFireRef.current(now, debugHold)
       const alive = live.current.raiders
       setRaiders(alive)
-      if (live.current.hearts <= 0) {
+      if (gate.failed || live.current.hearts <= 0) {
         live.current.playing = false
         setPhase('lost')
         return
