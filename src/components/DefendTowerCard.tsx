@@ -51,7 +51,7 @@ export function DefendTowerCard({
   point: TowerCardPoint
   board: { w: number; h: number }
   onUpgrade: () => void
-  /** Plant step only. Hidden once the road is moving. */
+  /** Plant and between waves. Hidden while walkers are on the road. */
   onPull?: () => void
   onClose: () => void
 }) {
