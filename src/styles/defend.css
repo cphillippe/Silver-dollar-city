@@ -480,10 +480,12 @@ img.walker-face.easy-walker-face,
   animation: defend-puff 0.7s ease-out both;
 }
 
+/* 1.4.378: Easy plant rings — gold, large enough to see and tap on a phone. */
 .defend-ring {
-  fill: rgba(224, 179, 74, 0.1);
-  stroke: rgba(224, 179, 74, 0.4);
-  stroke-width: 2;
+  fill: rgba(255, 204, 51, 0.42);
+  stroke: #ffcc33;
+  stroke-width: 7;
+  filter: drop-shadow(0 0 8px #ffcc33);
 }
 
 .defend-pad.is-planted .defend-lamp {
@@ -2365,16 +2367,24 @@ img.walker-face.easy-walker-face,
   position: absolute;
   top: 1px;
   left: 1px;
-  z-index: 1;
-  min-width: 14px;
-  padding: 1px 3px;
-  border-radius: 6px;
-  background: #ffcc33;
+  z-index: 2;
+  min-width: 1.15rem;
+  padding: 1px 4px;
+  border-radius: 999px;
+  border: 2px solid #2a1c08;
+  background: #fff6d0;
   color: #2a1c08;
-  font-size: 0.62rem;
+  font-size: 0.85rem;
   font-weight: 800;
-  line-height: 1.1;
+  line-height: 1.05;
   text-align: center;
+  box-shadow: 0 1px 0 #5a3a00;
+}
+
+.defend-ability.is-on .defend-ability-stock {
+  background: #2a1c08;
+  color: #ffcc33;
+  border-color: #ffcc33;
 }
 
 .defend-ability.is-placed:not(.is-on)[data-type='love'] {
