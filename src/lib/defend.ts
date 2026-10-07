@@ -27,7 +27,12 @@ export const DEFEND_WAVE_PACK = [4, 4, 5, 5, 8] as const
 /** Easy soft TD: cap live unturned walkers before spawning the next. */
 export const EASY_WAVE_LIVE = 3
 
-const EASY_SPAWN_T = [0.08, 0.18, 0.28] as const
+/**
+ * Easy spawn slots, lead first. The first walker is already up the road.
+ * The next two enter further back, toward the gate, so the third is behind
+ * the first with a readable gap. The pattern repeats for later spawns.
+ */
+const EASY_SPAWN_T = [0.28, 0.16, 0.04] as const
 
 export { DEFEND_ANCHOR, DEFEND_PATH, pathClearance, pathPoint } from '../nightWatch/path/data.ts'
 
@@ -168,7 +173,8 @@ export function easyHoldSpawn(walkingUnturned: number): boolean {
 }
 
 export function easySpawnT(spawnIndex: number): number {
-  return EASY_SPAWN_T[spawnIndex % EASY_SPAWN_T.length]
+  const index = Math.max(0, Math.floor(spawnIndex) || 0)
+  return EASY_SPAWN_T[index % EASY_SPAWN_T.length]
 }
 
 export function easyTapPersonCount(raiders: { turned?: string }[]): number {
