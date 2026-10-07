@@ -13,6 +13,8 @@ export type DefendNightBoardProps = Omit<DefendNightSkyProps, 'children'> &
     upgradePoint?: TowerCardPoint | null
     boardBox?: { w: number; h: number }
     runSparks?: number
+    /** Set while Upgrade just raised this lamp. */
+    levelBurst?: { from: number; to: number } | null
     onPullLamp?: () => void
     onCloseUpgrade?: () => void
   }
@@ -23,7 +25,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
     pads, planted, progress, raiders, raiderAt, ability, unlocked,
     flash, togglePad, fire, fireAtRaider, shots, easy, blasts, tapTarget, tapPos, tapJuice,
     walkerCalls, loreLine, runTier, boosting, onBoostTower, upgradeAt, onOpenUpgrade, upFlashId,
-    upgradePoint, boardBox, runSparks = 0, onPullLamp, onCloseUpgrade,
+    upgradePoint, boardBox, runSparks = 0, levelBurst = null, onPullLamp, onCloseUpgrade,
   } = props
   const showCard = Boolean(upgradeAt && upgradePoint && boardBox && boardBox.w > 0 && onCloseUpgrade)
   return (
@@ -74,6 +76,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
           onUpgrade={() => onBoostTower?.()}
           onPull={onPullLamp}
           onClose={onCloseUpgrade as () => void}
+          levelBurst={levelBurst}
         />
       ) : null}
       <DefendNightWalkerCue

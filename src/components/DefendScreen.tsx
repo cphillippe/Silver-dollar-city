@@ -71,6 +71,9 @@ interface DefendScreenProps {
   onNavigate: (view: View) => void
 }
 
+/** 1.4.375: how long the lamp level-up burst, roman bump, and −1✦ stay readable. */
+const LEVEL_BURST_MS = 1100
+
 export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const { progress, recordNight, markMet, markMiss } = useProgress()
   const easy = isEasy(progress)
@@ -99,6 +102,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const [boostNote, setBoostNote] = useState<string | null>(null)
   const [upgradeAt, setUpgradeAt] = useState<CityPlotId | null>(null)
   const [upFlash, setUpFlash] = useState<CityPlotId | null>(null)
+  const [levelBurst, setLevelBurst] = useState<{ plotId: CityPlotId; from: number; to: number } | null>(null)
+  const [sparkSpend, setSparkSpend] = useState(false)
   const [loreMeet, setLoreMeet] = useState<{ id: string; line: string } | null>(null)
   const runTierRef = useRef(runTier)
   runTierRef.current = runTier
@@ -110,6 +115,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   sparksRef.current = runSparks
   const prevSparks = useRef(runSparks)
   const [sparkPop, setSparkPop] = useState(false)
+  const burstTimer = useRef(0)
   const stillTimer = useRef(0)
   const metRef = useRef<string[]>([...(progress.defense.met ?? [])])
   const markMetRef = useRef(markMet)
@@ -157,6 +163,9 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   useEffect(() => {
     setUpgradeAt(null)
     setUpFlash(null)
+    setLevelBurst(null)
+    setSparkSpend(false)
+    window.clearTimeout(burstTimer.current)
   }, [phase])
 
   useEffect(() => {
@@ -599,21 +608,29 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   }
 
   function boostTool(id: WatchAbility) {
+    const before = combatTier(id, runTierRef.current)
     const next = applyBoost(id, runTierRef.current, sparksRef.current)
     setBoostNote(next.note)
     if (!next.ok) return
+    const after = combatTier(id, next.runTier)
     runTierRef.current = next.runTier
     sparksRef.current = next.sparks
     setRunTier(next.runTier)
     setRunSparks(next.sparks)
     setToolLock(null)
-    if (upgradeAt) {
-      const lamp = upgradeAt
+    const lamp = upgradeAt
+    const shown = unlocked.includes(ability) ? ability : 'love'
+    window.clearTimeout(burstTimer.current)
+    setSparkSpend(true)
+    if (lamp && id === shown) {
+      setLevelBurst({ plotId: lamp, from: before, to: after })
       setUpFlash(lamp)
-      window.setTimeout(() => {
-        setUpFlash((current) => (current === lamp ? null : current))
-      }, 650)
     }
+    burstTimer.current = window.setTimeout(() => {
+      setSparkSpend(false)
+      setUpFlash((current) => (current === lamp ? null : current))
+      setLevelBurst((current) => (current?.plotId === lamp ? null : current))
+    }, LEVEL_BURST_MS)
   }
 
   function boostSelectedTool() {
@@ -939,7 +956,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
             won={won}
             hud={hud}
             coin={<CoinRead count={insightScore(progress)} label="Insight" />}
-            balloon={<MoneyBalloon count={runSparks} label="Sparks" gain={sparkPop} />}
+            balloon={<MoneyBalloon count={runSparks} label="Sparks" gain={sparkPop} spend={sparkSpend} />}
             rail={rail}
             docks={docks}
           >
@@ -976,6 +993,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
               upgradeAt={upgradeAt}
               onOpenUpgrade={openUpgrade}
               upFlashId={upFlash}
+              levelBurst={
+                levelBurst && upgradeAt === levelBurst.plotId
+                  ? { from: levelBurst.from, to: levelBurst.to }
+                  : null
+              }
               upgradePoint={upgradePoint}
               boardBox={boardBox}
               runSparks={runSparks}
