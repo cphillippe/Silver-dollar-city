@@ -1,6 +1,6 @@
 import { easyFacingLine, loveHowTo } from '../lib/easy'
 import { learningForTool } from '../lib/learning'
-import { combatTier, TIER_MARK, WATCH_TOOLS } from '../lib/watchTools'
+import { boostCost, combatTier, TIER_MARK, TOOL_TIER_MAX, WATCH_TOOLS } from '../lib/watchTools'
 import { AbilityMark } from './GemMark'
 import type { ProgressState } from '../types'
 import type { WatchAbility } from '../lib/defend'
@@ -18,6 +18,8 @@ export interface DefendAbilityBarProps {
   plantedTypes?: string[]
   unlocked: WatchAbility[]
   runTier: Record<string, number>
+  /** Sparks this night. At 0, between-wave column spend is not a live Tap. */
+  sparks: number
   /** Between waves, a tap spends sparks. Mid-wave a tap only selects. */
   boosting: boolean
   onBoost: (id: WatchAbility) => void
@@ -34,6 +36,7 @@ export function DefendAbilityBar({
   plantedTypes = [],
   unlocked,
   runTier,
+  sparks,
   boosting,
   onBoost,
 }: DefendAbilityBarProps) {
@@ -45,6 +48,7 @@ export function DefendAbilityBar({
               const placed = plantedTypes.includes(tool.id)
               const heldLine = learningForTool(progress, tool.id)
               const tier = combatTier(tool.id, runTier)
+              const spendDry = boosting && open && tier < TOOL_TIER_MAX && sparks < boostCost(tier)
               const claim = open
                 ? tool.id === 'love'
                   ? loveHowTo(easy)
@@ -60,11 +64,13 @@ export function DefendAbilityBar({
                 <button
                   key={tool.id}
                   type="button"
-                  className={`defend-ability ${ability === tool.id ? 'is-on' : ''} ${open ? '' : 'is-locked'} ${placed ? 'is-placed' : ''} ${firing && firingId === tool.id ? 'is-firing' : ''}`}
+                  className={`defend-ability ${ability === tool.id ? 'is-on' : ''} ${open ? '' : 'is-locked'} ${placed ? 'is-placed' : ''} ${firing && firingId === tool.id ? 'is-firing' : ''} ${spendDry ? 'is-spark-dry' : ''}`}
                   data-type={tool.id}
                   data-slot={open ? (placed ? 0 : 1) : undefined}
+                  data-spark-dry={spendDry ? 'yes' : undefined}
                   aria-pressed={ability === tool.id}
-                  title={claim}
+                  title={spendDry ? `${claim} Need a spark.` : claim}
+                  disabled={spendDry}
                   onClick={() => {
                     if (!open) {
                       setToolLock(
@@ -92,12 +98,13 @@ export function DefendAbilityBar({
                   ) : null}
                   {boosting && open ? (
                     <span className="defend-ability-boost" aria-hidden>
-                      {tier >= 3 ? 'Max' : easy ? 'Tap' : '↑ spark'}
+                      {tier >= TOOL_TIER_MAX ? 'Max' : sparks < boostCost(tier) ? 'Need a spark' : easy ? 'Tap' : '↑ spark'}
                     </span>
                   ) : null}
                   <span className="defend-ability-claim">
                     {claim}
                     {open ? (placed ? ' Planted.' : ' 1 to plant.') : ''}
+                    {spendDry ? ' Need a spark.' : ''}
                   </span>
                 </button>
               )
