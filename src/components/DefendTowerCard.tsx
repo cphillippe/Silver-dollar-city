@@ -140,6 +140,7 @@ export function DefendTowerCard({
           type="button"
           className="btn primary defend-tower-upgrade"
           disabled={!canSpend}
+          aria-describedby={canSpend ? undefined : 'defend-tower-need'}
           onClick={(event) => {
             event.stopPropagation()
             onUpgrade()
@@ -148,7 +149,11 @@ export function DefendTowerCard({
           Upgrade
         </button>
       )}
-      {!maxed && !canSpend ? <p className="defend-tower-need">Need a spark</p> : null}
+      {!maxed && !canSpend ? (
+        <p id="defend-tower-need" className="defend-tower-need">
+          Need a spark
+        </p>
+      ) : null}
     </div>
   )
 }

@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.388',
+    title: 'Night Watch Upgrade waits for a spark',
+    when: '2026-10-07',
+    items: [
+      'When you have no sparks, Upgrade is grey and says Need a spark. Love, Logic, Reason, and Science do not say Tap until you have a spark to spend.',
+    ],
+  },
+  {
     version: '1.4.387',
     title: 'Night Watch hides the stuck diamond',
     when: '2026-10-07',
