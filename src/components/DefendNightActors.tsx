@@ -214,7 +214,11 @@ export function DefendNightActorsSvg({
                           }
                     }
                   >
-                    {scenery ? null : <circle className="defend-hit" r="38" />}
+                    {scenery ? null : on ? (
+                      <rect className="defend-hit" x="-42" y="-96" width="84" height="128" />
+                    ) : (
+                      <circle className="defend-hit" r="52" />
+                    )}
                     <ellipse className="defend-earth" cx="0" cy="10" rx="15" ry="6" />
                     {on ? (
                       <>
@@ -296,7 +300,7 @@ export function DefendNightActorsSvg({
                       </>
                     ) : scenery ? null : (
                       <>
-                        <circle className="defend-ring" r="16" />
+                        <circle className="defend-ring" data-plant-ring="gold" r="42" />
                         <path className="defend-post is-empty" d="M-1.6 8 V-8 H1.6 V8 Z" />
                       </>
                     )}

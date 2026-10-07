@@ -40,7 +40,13 @@ import {
   nightWatchDebugFrozen,
   readNightWatchDebug,
 } from '../lib/nightWatchDebug'
-import { plantType, pullPlant, starterPlants } from '../lib/nightPlants'
+import {
+  EASY_PLANT_PADS,
+  nightPlantTypes,
+  plantType,
+  pullPlant,
+  starterPlants,
+} from '../lib/nightPlants'
 import { applyBoost, combatTier, freshRunTier } from '../lib/watchTools'
 import { useJuiceHandoff } from '../lib/juice'
 import type { CityPlotId } from '../lib/city'
@@ -80,8 +86,9 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const easy = isEasy(progress)
   const today = localDateKey()
   const brief = evidenceFor(DEFEND_BRIEF_ID)
-  const pads = nightTowers.pads(progress)
-  const unlocked = unlockedWatchAbilities(progress)
+  const trailOpen = unlockedWatchAbilities(progress)
+  const unlocked = nightPlantTypes(easy, trailOpen)
+  const pads: CityPlotId[] = easy ? [...EASY_PLANT_PADS] : nightTowers.pads(progress)
   const [ability, setAbility] = useState<WatchAbility>(() => unlocked[0] ?? 'love')
   const taught = true
   const boardRef = useRef<SVGSVGElement>(null)
@@ -121,7 +128,9 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const metRef = useRef<string[]>([...(progress.defense.met ?? [])])
   const markMetRef = useRef(markMet)
   markMetRef.current = markMet
-  const [plants, setPlants] = useState<Record<string, string>>(() => starterPlants(pads, unlocked))
+  const [plants, setPlants] = useState<Record<string, string>>(() =>
+    easy ? {} : starterPlants(pads, unlocked),
+  )
   const planted = useMemo(() => Object.keys(plants) as CityPlotId[], [plants])
   const [hearts, setHearts] = useState(DEFEND_HEARTS)
   const [raiders, setRaiders] = useState<Raider[]>([])
@@ -394,11 +403,14 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     if (!upgradeAt) return
     if (phase !== 'plant' && phase !== 'boost') return
     const id = upgradeAt
-    if (planted.length <= 1) {
-      flashKit(easy ? EASY.nightKeepLamp : 'Keep at least one lamp.')
+    const next = pullPlant(plants, id, pads)
+    if (!next) {
+      if (planted.length <= 1) {
+        flashKit(easy ? EASY.nightKeepLamp : 'Keep at least one lamp.')
+      }
       return
     }
-    setPlants((current) => pullPlant(current, id) ?? current)
+    setPlants(next)
     setUpgradeAt(null)
   }
 
@@ -591,7 +603,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     setFlash([])
     setTapJuice(null)
     setRunTier(freshRunTier())
-    setPlants(starterPlants(pads, unlocked))
+    setPlants(easy ? {} : starterPlants(pads, unlocked))
     setRunSparks(0)
     sparksRef.current = 0
     const kits = freshRunKits()
