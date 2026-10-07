@@ -20,6 +20,8 @@ import {
   dist,
   unlockedWatchAbilities,
   easyTapMode,
+  EASY_MISS_HOLD_MS,
+  faceTapStrike,
   PATH_WALKER_FACE_DY,
   waveCombat,
   wavePackSize,
@@ -171,6 +173,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const mendTimer = useRef(0)
   const shieldTimer = useRef(0)
   const bannerTimer = useRef(0)
+  const missTimer = useRef(0)
   const pulseTimer = useRef(0)
   const metRef = useRef<string[]>([...(progress.defense.met ?? [])])
   const markMetRef = useRef(markMet)
@@ -506,11 +509,12 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     return nightEnemies.at(raider)
   }
 
-  function fire(id: CityPlotId, forceRaiderId?: number) {
-    if (phase !== 'wave' || won) return
+  function fire(id: CityPlotId, forceRaiderId?: number, manual = false) {
+    if (phase !== 'wave' || won) return false
     const now = performance.now()
     const wait = pacedCooldown(nightTowers.cooldown(id, progress), combatPace())
-    if ((live.current.cool[id] ?? 0) + wait > now) return
+    // A face tap is its own hit. Lamp cooldown only gates autofire.
+    if (!manual && (live.current.cool[id] ?? 0) + wait > now) return false
     const at = nightTowers.anchor(id)
     const using = towerAbility(id)
     const tier = combatTier(using, runTier)
@@ -518,7 +522,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     let best: Raider | null = null
     if (forceRaiderId !== undefined) {
       const forced = live.current.raiders.find((item) => item.id === forceRaiderId && !item.turned)
-      if (forced && dist(at, raiderAt(forced)) <= range) best = forced
+      // Easy face taps land even when the lamp cannot reach the road.
+      if (forced && (manual || dist(at, raiderAt(forced)) <= range)) best = forced
     } else {
       let bestD = range
       for (const raider of live.current.raiders) {
@@ -530,7 +535,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         }
       }
     }
-    live.current.cool[id] = now
+    if (!manual) live.current.cool[id] = now
     lightPad(id)
     setFiring(true)
     setFiringId(using)
@@ -538,7 +543,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       setFiring(false)
       setFiringId(null)
     }, SHOT_JUICE_MS)
-    if (!best) return
+    if (!best) return false
     const to = raiderAt(best)
     const aim = { x: to.x, y: to.y + PATH_WALKER_FACE_DY }
     const fit = nightEnemies.fit(easy, using, best.kind)
@@ -569,7 +574,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       blast.pop = struck.down
       blast.spark = sparks
       if (easy) {
-        const juiceAt = boardPoint(to.x, to.y)
+        const juiceAt = boardPoint(aim.x, aim.y)
         setTapJuice({
           key: now,
           combo: nextCombo,
@@ -613,6 +618,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     }, 620)
     setRaiders(live.current.raiders)
     setDowned(live.current.downed)
+    return true
   }
 
   function lightPad(id: CityPlotId) {
@@ -639,27 +645,58 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     }
   }
 
+  function showMiss() {
+    const note = EASY.nightMiss
+    setToolLock(note)
+    window.clearTimeout(missTimer.current)
+    missTimer.current = window.setTimeout(() => {
+      setToolLock((current) => (current === note ? null : current))
+    }, EASY_MISS_HOLD_MS)
+  }
+
+  function dismissMiss() {
+    window.clearTimeout(missTimer.current)
+    setToolLock((current) => (current === EASY.nightMiss ? null : current))
+  }
+
   function fireAtRaider(raiderId: number) {
     if (phase !== 'wave' || won) return
-    let pick: CityPlotId | null = null
-    let bestD = Infinity
     const raider = live.current.raiders.find((item) => item.id === raiderId && !item.turned)
     if (!raider) return
+    const point = raiderAt(raider)
+    let nearest: CityPlotId | null = null
+    let nearestD = Infinity
+    let inRange: CityPlotId | null = null
+    let inRangeD = Infinity
     for (const id of live.current.planted) {
       const at = nightTowers.anchor(id)
       const range = nightTowers.range(id, towerAbility(id), progress, runTier)
-      const d = dist(at, raiderAt(raider))
-      if (d <= range && d < bestD) {
-        bestD = d
-        pick = id
+      const d = dist(at, point)
+      if (d < nearestD) {
+        nearestD = d
+        nearest = id
+      }
+      if (d <= range && d < inRangeD) {
+        inRangeD = d
+        inRange = id
       }
     }
-    if (pick) fire(pick, raiderId)
-    else if (easy) setToolLock(EASY.nightMiss)
+    if (faceTapStrike(easy, true, inRange !== null) === 'hit') {
+      const lamp = easy ? nearest : inRange
+      if (lamp && fire(lamp, raiderId, easy)) {
+        if (easy) dismissMiss()
+      }
+      return
+    }
+    if (easy) showMiss()
   }
 
   function fireBest() {
     if (phase !== 'wave' || won) return
+    if (faceTapStrike(easy, false, false) === 'miss' && easy) {
+      showMiss()
+      return
+    }
     let pick: CityPlotId | null = null
     let bestD = Infinity
     for (const id of live.current.planted) {
@@ -675,7 +712,6 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       }
     }
     if (pick) fire(pick)
-    else if (easy) setToolLock(EASY.nightMiss)
   }
 
   function retry() {

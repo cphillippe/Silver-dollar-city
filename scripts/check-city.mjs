@@ -55,9 +55,13 @@ import {
   DEFEND_WAVE_SIZE,
   defendPads,
   EASY_CUE_HOLD_MS,
+  EASY_FACE_HIT_R,
+  EASY_MISS_HOLD_MS,
   EASY_WALKER_FACE_PX,
   DEFEND_HEARTS,
   applyGateLeaks,
+  easyFaceHitPx,
+  faceTapStrike,
   EASY_WALKER_HIT_PX,
   PATH_WALKER_FACE_U,
   PATH_WALKER_HIT_R,
@@ -1255,7 +1259,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.384')
+assert.equal(APP_VERSION, '1.4.385')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -4173,6 +4177,76 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.384').items.join('\n'),
     /Fixes #|Closes #|Resolves #|monkey|balloon/i,
     '1.4.384 changelog avoids GitHub close keywords',
+  )
+}
+
+// Night Watch 1.4.385: glowing-face tap is a hit. Wrong only when the tap misses.
+{
+  const defendSrc385 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const defendNight385 = readFileSync(
+    new URL('../src/components/DefendNightActors.tsx', import.meta.url),
+    'utf8',
+  )
+  const defendCss385 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  assert.equal(faceTapStrike(true, true, false), 'hit', '1.4.385 Easy face tap hits outside lamp range')
+  assert.equal(faceTapStrike(true, true, true), 'hit', '1.4.385 Easy face tap hits inside lamp range')
+  assert.equal(faceTapStrike(true, false, true), 'miss', '1.4.385 an off-face tap is a miss')
+  assert.equal(faceTapStrike(false, true, false), 'miss', '1.4.385 Hard still needs a lamp in range')
+  assert.equal(faceTapStrike(false, true, true), 'hit')
+  assert.equal(EASY_FACE_HIT_R, 80)
+  assert.ok(EASY_FACE_HIT_R > PATH_WALKER_HIT_R, '1.4.385 face disc is fatter than the old feet hit')
+  assert.ok(EASY_FACE_HIT_R > PATH_WALKER_FACE_U * 0.5, '1.4.385 disc covers the gold ring')
+  const phone = boardFill({ w: 375, h: 520 })
+  assert.ok(easyFaceHitPx(phone.scale) >= 64, '1.4.385 face hit is a thumb on a 375-wide phone')
+  assert.equal(easyFaceHitPx(0), 0)
+  assert.equal(EASY_MISS_HOLD_MS, 1400, '1.4.385 Wrong fades')
+  assert.match(defendSrc385, /faceTapStrike\(easy, true, inRange !== null\)/)
+  assert.match(defendSrc385, /fire\(lamp, raiderId, easy\)/)
+  assert.match(defendSrc385, /if \(!manual && \(live\.current\.cool\[id\]/)
+  assert.match(defendSrc385, /if \(forced && \(manual \|\| dist/)
+  assert.match(defendSrc385, /if \(!manual\) live\.current\.cool\[id\] = now/)
+  assert.match(defendSrc385, /dismissMiss\(\)/)
+  assert.match(defendSrc385, /showMiss\(\)/)
+  assert.match(defendSrc385, /EASY_MISS_HOLD_MS/)
+  assert.match(defendSrc385, /faceTapStrike\(easy, false, false\)/)
+  assert.doesNotMatch(
+    defendSrc385,
+    /setToolLock\(EASY\.nightMiss\)/,
+    '1.4.385 Wrong is timed, not sticky',
+  )
+  assert.match(defendNight385, /cy=\{isTap \? PATH_WALKER_FACE_DY : 0\}/)
+  assert.match(defendNight385, /r=\{isTap \? EASY_FACE_HIT_R : PATH_WALKER_HIT_R\}/)
+  assert.match(defendNight385, /walker-cue-pad/)
+  assert.match(defendNight385, /data-face-hit=\{isTap \? 'easy' : undefined\}/)
+  assert.match(defendCss385, /1\.4\.385: gold pad fills the ring/)
+  assert.match(defendCss385, /\.defend-blast \{[^}]*pointer-events:\s*none/)
+  assert.match(defendCss385, /1\.4\.385: the fat face disc is the only tap/)
+  assert.match(
+    defendCss385,
+    /1\.4\.383: Begin stays readable until the first plant/,
+    '1.4.385 keeps Begin',
+  )
+  assert.match(defendCss385, /1\.4\.381: unlockable 3× speed/, '1.4.385 keeps 3× speed')
+  assert.match(defendCss385, /1\.4\.380: skills pack/, '1.4.385 keeps the skill pack')
+  assert.match(defendCss385, /1\.4\.379: Easy phone SE chrome/, '1.4.385 keeps the phone chrome')
+  assert.ok(
+    nightTowersMod.range('bench', 'logic', empty, { logic: 1 }) < pathClearance(DEFEND_ANCHOR.bench),
+    '1.4.385 Witness Square still misses the road',
+  )
+  assert.equal(
+    applyGateLeaks(DEFEND_HEARTS, 1, false).hearts,
+    DEFEND_HEARTS - 1,
+    '1.4.385 a leak still drops a heart',
+  )
+  assert.equal(WATCH_TOOLS.length, 4, '1.4.385 does not add a rail tool')
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.385'), '1.4.385 changelog row')
+  assert.match(latestChange('1.4.385').title, /face/)
+  assert.match(latestChange('1.4.385').items.join('\n'), /glowing face/)
+  assert.match(latestChange('1.4.385').items.join('\n'), /Wrong/)
+  assert.doesNotMatch(
+    latestChange('1.4.385').items.join('\n'),
+    /Fixes #|Closes #|Resolves #|monkey|balloon/i,
+    '1.4.385 changelog avoids GitHub close keywords',
   )
 }
 
