@@ -2885,3 +2885,69 @@ img.walker-face.easy-walker-face,
     animation: none;
   }
 }
+
+/* 1.4.381: unlockable 3× speed. The night starts at 1×. Locked until wave 3, then Available or Active. */
+.nw-pace {
+  position: absolute;
+  z-index: 7;
+  top: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: auto;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  margin: 0;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 204, 51, 0.45);
+  background: rgba(18, 6, 46, 0.88);
+  color: #fff6df;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.nw-pace-rate {
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+}
+
+.nw-pace-note {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  opacity: 0.92;
+  white-space: nowrap;
+}
+
+.nw-pace.is-locked,
+.nw-pace[data-state='locked'] {
+  opacity: 0.78;
+  border-color: rgba(186, 150, 255, 0.4);
+  color: rgba(255, 246, 223, 0.82);
+}
+
+.nw-pace.is-open,
+.nw-pace[data-state='open'] {
+  border-color: rgba(255, 204, 51, 0.9);
+  color: #ffe7a3;
+}
+
+.nw-pace.is-fast,
+.nw-pace[data-state='fast'] {
+  background: #ffcc33;
+  color: #3a2200;
+  border-color: #ffe08a;
+  box-shadow: 0 0 12px rgba(255, 204, 51, 0.55);
+}
+
+@media (max-width: 480px) {
+  .defend-page.is-easy-watch .nw-pace {
+    top: 56px;
+    padding: 5px 10px;
+  }
+}

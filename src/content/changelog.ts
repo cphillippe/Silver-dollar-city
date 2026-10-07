@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.381',
+    title: 'Night Watch can run at 3×',
+    when: '2026-10-07',
+    items: [
+      'Easy Night Watch adds a speed control. The night starts at normal speed. It shows Locked until wave 3. Then it shows 1× and Available. Tap it and it shows 3× Active. Tap again to go back to 1×.',
+    ],
+  },
+  {
     version: '1.4.380',
     title: 'Night Watch skills recharge',
     when: '2026-10-07',
