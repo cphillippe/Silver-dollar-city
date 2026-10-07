@@ -1614,6 +1614,49 @@ img.walker-face.easy-walker-face,
   color: #3a2200;
 }
 
+/* 1.4.375: spark counter shows the spend beside the count. */
+.nw-spark-spend {
+  position: absolute;
+  left: 44px;
+  top: 10px;
+  z-index: 2;
+  color: #ffcc33;
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+  text-shadow:
+    0 1px 0 #3a2200,
+    0 0 8px rgba(255, 204, 51, 0.9);
+  pointer-events: none;
+  animation: defend-spend-pop 1.05s ease-out both;
+}
+
+.nw-balloon.is-spark-spend .nw-balloon-count {
+  background: #5a3208;
+  color: #ffe08a;
+  animation: defend-level-bump 1.05s ease-out both;
+}
+
+@keyframes defend-spend-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.72);
+  }
+  18% {
+    opacity: 1;
+    transform: scale(1.16);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.96) translateY(-8px);
+  }
+}
+
 .nw-balloon-orb {
   display: grid;
   place-items: center;
@@ -1874,6 +1917,127 @@ img.walker-face.easy-walker-face,
 .defend-pad.is-up .defend-upgrade-ring {
   stroke: #fff6b8;
   stroke-width: 5;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: defend-burst-ring 0.85s ease-out both;
+}
+
+/* 1.4.375: level-up burst when Upgrade spends a spark on a planted lamp. */
+.defend-pad.is-up .defend-lamp-sprite {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  animation: defend-level-grow 1.05s ease-out both;
+}
+
+.defend-level-pip {
+  fill: #ffcc33;
+  stroke: #3a2200;
+  stroke-width: 3;
+  paint-order: stroke fill;
+  font-size: 34px;
+  font-weight: 800;
+  font-family: var(--sans, system-ui, sans-serif);
+  pointer-events: none;
+}
+
+.defend-level-pip.is-bump {
+  fill: #fffef6;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: defend-level-pip-bump 1.05s ease-out both;
+}
+
+.defend-level-burst {
+  pointer-events: none;
+}
+
+.defend-level-flash {
+  fill: #fff6b8;
+  pointer-events: none;
+  animation: defend-level-flash 1.05s ease-out both;
+}
+
+.defend-burst-ring {
+  fill: none;
+  stroke: #fff6b8;
+  stroke-width: 4;
+  vector-effect: non-scaling-stroke;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: defend-burst-ring 0.85s ease-out both;
+}
+
+.defend-burst-spark {
+  fill: #fff6b8;
+  stroke: #ffcc33;
+  stroke-width: 1;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: defend-burst-spark 0.8s ease-out both;
+}
+
+@keyframes defend-level-grow {
+  0% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  32% {
+    transform: scale(1.28);
+    filter: brightness(1.85) drop-shadow(0 0 14px #fff6b8);
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1.15) drop-shadow(0 0 6px #ffcc33);
+  }
+}
+
+@keyframes defend-level-pip-bump {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.35;
+  }
+  28% {
+    transform: scale(1.55);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes defend-level-flash {
+  0% {
+    opacity: 0;
+  }
+  22% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes defend-burst-ring {
+  0% {
+    transform: scale(0.4);
+    opacity: 0.95;
+  }
+  100% {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+
+@keyframes defend-burst-spark {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(0.35);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--dx), var(--dy)) scale(1.15);
+  }
 }
 
 .defend-tower-card {
@@ -1955,6 +2119,51 @@ img.walker-face.easy-walker-face,
   animation: defend-tower-next-in 0.35s ease-out;
 }
 
+.defend-tower-card.is-level-up {
+  animation: defend-card-level 1.05s ease-out both;
+}
+
+.defend-tower-next.is-bump {
+  display: flex;
+  align-items: baseline;
+  gap: 0.28rem;
+  flex-wrap: nowrap;
+  animation: none;
+}
+
+.defend-level-from {
+  opacity: 0.62;
+  font-size: 0.82em;
+}
+
+.defend-level-arrow {
+  font-size: 0.7em;
+  opacity: 0.85;
+}
+
+.defend-level-to {
+  display: inline-block;
+  transform-origin: center bottom;
+  animation: defend-level-bump 1.05s ease-out both;
+}
+
+.defend-tower-card .defend-spark-spend {
+  position: absolute;
+  left: 50%;
+  bottom: 62px;
+  z-index: 2;
+  color: #ffcc33;
+  font-size: 1.45rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-shadow:
+    0 1px 0 #3a2200,
+    0 0 10px rgba(255, 246, 184, 0.95);
+  pointer-events: none;
+  animation: defend-spend-rise-card 1.05s ease-out both;
+}
+
 .defend-tower-gain,
 .defend-tower-need {
   margin: 4px 0 0;
@@ -1992,8 +2201,72 @@ img.walker-face.easy-walker-face,
   }
 }
 
+@keyframes defend-level-bump {
+  0% {
+    transform: scale(0.62);
+    opacity: 0.3;
+  }
+  28% {
+    transform: scale(1.34);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes defend-card-level {
+  0% {
+    box-shadow:
+      0 12px 28px rgba(18, 6, 46, 0.7),
+      0 0 0 1px rgba(255, 246, 184, 0.28);
+  }
+  30% {
+    box-shadow:
+      0 12px 28px rgba(18, 6, 46, 0.7),
+      0 0 0 3px #fff6b8,
+      0 0 22px rgba(255, 204, 51, 0.9);
+  }
+  100% {
+    box-shadow:
+      0 12px 28px rgba(18, 6, 46, 0.7),
+      0 0 0 1px rgba(255, 246, 184, 0.28);
+  }
+}
+
+@keyframes defend-spend-rise-card {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px) scale(0.8);
+  }
+  16% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1.18);
+  }
+  68% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-4px) scale(1.05);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-16px) scale(1);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .defend-tower-next {
+  .defend-tower-next,
+  .defend-level-to,
+  .defend-tower-card.is-level-up,
+  .defend-tower-card .defend-spark-spend,
+  .defend-pad.is-up .defend-lamp-sprite,
+  .defend-level-pip.is-bump,
+  .defend-level-flash,
+  .defend-burst-ring,
+  .defend-burst-spark,
+  .defend-pad.is-up .defend-upgrade-ring,
+  .nw-spark-spend,
+  .nw-balloon.is-spark-spend .nw-balloon-count {
     animation: none;
   }
 }

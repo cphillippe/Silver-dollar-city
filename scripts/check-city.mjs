@@ -1219,7 +1219,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.374')
+assert.equal(APP_VERSION, '1.4.375')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3927,6 +3927,55 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.369').items.join('\n'),
     /Fixes #|Closes #|Resolves #/i,
     '1.4.369 changelog avoids GitHub close keywords',
+  )
+}
+
+// Night Watch 1.4.375: Upgrade on a planted lamp plays a level-up burst.
+{
+  const defendCss375 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const towerCard375 = readFileSync(
+    new URL('../src/components/DefendTowerCard.tsx', import.meta.url),
+    'utf8',
+  )
+  const actors375 = readFileSync(
+    new URL('../src/components/DefendNightActors.tsx', import.meta.url),
+    'utf8',
+  )
+  const chrome375 = readFileSync(new URL('../src/nightWatch/ui/Chrome.tsx', import.meta.url), 'utf8')
+  assert.match(defendCss375, /1\.4\.375: level-up burst when Upgrade spends a spark/)
+  assert.match(defendCss375, /@keyframes defend-level-grow/)
+  assert.match(defendCss375, /@keyframes defend-burst-spark/)
+  assert.match(defendCss375, /@keyframes defend-level-bump/)
+  assert.match(defendCss375, /\.defend-level-pip\.is-bump/)
+  assert.match(defendCss375, /\.defend-spark-spend/)
+  assert.match(defendCss375, /\.nw-spark-spend/)
+  assert.match(towerCard375, /data-level-bump/)
+  assert.match(towerCard375, /defend-level-to/)
+  assert.match(towerCard375, /−1✦/)
+  assert.match(towerCard375, /TIER_MARK\[next\]/)
+  assert.match(towerCard375, /defend-tower-upgrade/)
+  assert.match(towerCard375, /defend-tower-pull/)
+  assert.match(actors375, /defend-level-burst/)
+  assert.match(actors375, /defend-level-pip/)
+  assert.match(actors375, /defend-burst-spark/)
+  assert.match(actors375, /defend-lamp-sprite/)
+  assert.match(defendCss375, /\.defend-pad\.is-up \.defend-lamp-sprite/)
+  assert.match(actors375, /className=\{`defend-tower-lamp/)
+  assert.match(defendScreenOnlySrc, /LEVEL_BURST_MS/)
+  assert.match(defendScreenOnlySrc, /setLevelBurst/)
+  assert.match(defendScreenOnlySrc, /setSparkSpend\(true\)/)
+  assert.match(defendScreenOnlySrc, /applyBoost/)
+  assert.match(chrome375, /nw-spark-spend/)
+  assert.match(chrome375, /−1✦/)
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.375'), '1.4.375 changelog row')
+  assert.match(latestChange('1.4.375').title, /lamp levels up/)
+  assert.match(latestChange('1.4.375').items.join('\n'), /burst/)
+  assert.match(latestChange('1.4.375').items.join('\n'), /I to II/)
+  assert.match(latestChange('1.4.375').items.join('\n'), /−1✦/)
+  assert.doesNotMatch(
+    latestChange('1.4.375').items.join('\n'),
+    /Fixes #|Closes #|Resolves #|monkey|balloon/i,
+    '1.4.375 changelog avoids GitHub close keywords',
   )
 }
 

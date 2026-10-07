@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.375',
+    title: 'Night Watch lamp levels up',
+    when: '2026-10-07',
+    items: [
+      'Upgrade on a planted lamp plays a short burst. The lamp grows brighter, the level steps from I to II or II to III, and the spark spend shows −1✦.',
+    ],
+  },
+  {
     version: '1.4.374',
     title: 'Night Watch lamp card can pull',
     when: '2026-10-07',
