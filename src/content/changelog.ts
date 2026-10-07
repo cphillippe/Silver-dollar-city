@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.385',
+    title: 'Night Watch face taps hit',
+    when: '2026-10-07',
+    items: [
+      'Easy Night Watch counts a tap on the glowing face. That walker takes the hit and can pop. Wrong shows only when the tap misses the face, and it fades.',
+    ],
+  },
+  {
     version: '1.4.384',
     title: 'Night Watch can lose a heart',
     when: '2026-10-07',
