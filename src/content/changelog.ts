@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.384',
+    title: 'Night Watch can lose a heart',
+    when: '2026-10-07',
+    items: [
+      'Easy Night Watch drops a heart when a walker finishes the road. When the hearts are gone, the night ends and you can try again. A lamp far from the yellow road, such as Witness Square, no longer pops the whole wave by itself.',
+    ],
+  },
+  {
     version: '1.4.383',
     title: 'Night Watch Begin stays clear',
     when: '2026-10-07',

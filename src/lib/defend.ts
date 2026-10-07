@@ -19,6 +19,25 @@ export type { NightCastGuy } from '../nightWatch/enemies/cast.ts'
 
 export const DEFEND_BRIEF_ID = 'td-watch'
 export const DEFEND_HEARTS = 3
+
+export interface GateLeak {
+  hearts: number
+  /** Hearts removed this step. A gate shield reports 0. */
+  lostHearts: number
+  /** True when this leak emptied the night. */
+  failed: boolean
+}
+
+/**
+ * A walker that finishes the road leaks. Each leak costs one heart.
+ * Empty hearts fail the night. A shield can forgive the cost.
+ */
+export function applyGateLeaks(hearts: number, leaked: number, shielded = false): GateLeak {
+  const count = Number.isFinite(leaked) ? Math.max(0, Math.floor(leaked)) : 0
+  const lostHearts = shielded || count === 0 ? 0 : count
+  const next = Math.max(0, hearts - lostHearts)
+  return { hearts: next, lostHearts, failed: lostHearts > 0 && next <= 0 }
+}
 export const DEFEND_WAVE_SIZE = 6
 /** One night is five waves. Boost sits between them; the win is after wave 5. */
 export const DEFEND_NIGHT_WAVES = 5
