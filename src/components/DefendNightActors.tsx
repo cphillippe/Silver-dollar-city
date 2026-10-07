@@ -10,6 +10,7 @@ import {
 } from '../lib/defend'
 import { combatTier, TIER_MARK, WALKER_LABEL } from '../lib/watchTools'
 import { CITY_PLOTS, type CityPlotId } from '../lib/city'
+import { TOWER_TYPE_SRC } from '../lib/towerTypeArt'
 import { EASY } from '../lib/easy'
 import {
   nightEnemies,
@@ -41,6 +42,8 @@ export interface DefendNightActorsProps {
   raiders: Raider[]
   raiderAt: (raider: Raider) => NightPoint
   ability: WatchAbility
+  /** Ability planted on each pad. Empty pads use the selected rail type. */
+  towerType: Record<string, string>
   unlocked: WatchAbility[]
   flash: readonly CityPlotId[]
   togglePad: (id: CityPlotId) => void
@@ -108,6 +111,7 @@ export function DefendNightActorsSvg({
   raiders,
   raiderAt,
   ability,
+  towerType,
   unlocked,
   flash,
   togglePad,
@@ -133,7 +137,15 @@ export function DefendNightActorsSvg({
                 const on = planted.includes(id)
                 const stage = nightTowers.stage(id, progress)
                 const plot = CITY_PLOTS.find((item) => item.id === id)
-                const using = unlocked.includes(ability) ? ability : 'love'
+                const plantedType = towerType[id]
+                const using =
+                  on && plantedType && unlocked.includes(plantedType)
+                    ? plantedType
+                    : unlocked.includes(ability)
+                      ? ability
+                      : 'love'
+                const typeName = WATCH_ABILITY_LABEL[using] ?? 'Love'
+                const typeSrc = TOWER_TYPE_SRC[using]
                 const hot =
                   phase === 'wave' &&
                   on &&
@@ -166,7 +178,8 @@ export function DefendNightActorsSvg({
                   <g
                     key={id}
                     data-person-node={scenery ? undefined : 'pad'}
-                    className={`defend-pad is-${stage} ${on ? 'is-planted' : ''} ${hot ? 'is-hot' : ''} ${firing ? 'is-flash' : ''} ${scenery ? 'is-tower-scenery' : ''} ${boostPad ? 'is-boost-pick' : ''} ${upgrading ? 'is-upgrade-open' : ''} ${justUp ? 'is-up' : ''}`}
+                    className={`defend-pad is-${stage} ${on ? `is-planted is-${using}` : ''} ${hot ? 'is-hot' : ''} ${firing ? 'is-flash' : ''} ${scenery ? 'is-tower-scenery' : ''} ${boostPad ? 'is-boost-pick' : ''} ${upgrading ? 'is-upgrade-open' : ''} ${justUp ? 'is-up' : ''}`}
+                    data-tower-type={on ? using : undefined}
                     data-level={on ? tierMark : undefined}
                     transform={`translate(${at.x} ${at.y})`}
                     role={scenery ? undefined : 'button'}
@@ -206,6 +219,7 @@ export function DefendNightActorsSvg({
                     {on ? (
                       <>
                         <ellipse className="defend-pool" cx="0" cy="12" rx={hot ? 30 : 20} ry={hot ? 11 : 7} />
+                        <circle className="defend-type-ring" r="34" />
                         <g className="defend-lamp-sprite">
                           <image
                             className={`defend-tower-lamp is-${pose}`}
@@ -216,12 +230,25 @@ export function DefendNightActorsSvg({
                             height={lampBox.h}
                           />
                         </g>
+                        {typeSrc ? (
+                          <image
+                            className="defend-type-mark"
+                            href={typeSrc}
+                            x={-22}
+                            y={-78}
+                            width={44}
+                            height={44}
+                          />
+                        ) : null}
+                        <text className="defend-type-label" y="30" textAnchor="middle">
+                          {typeName}
+                        </text>
                         {hot ? <circle className="defend-hot-halo" r="27" /> : null}
                         {upgrading || justUp ? <circle className="defend-upgrade-ring" r="36" /> : null}
                         {phase !== 'wave' ? (
                           <text
                             className={`defend-level-pip${justUp ? ' is-bump' : ''}`}
-                            y="-74"
+                            y="-98"
                             textAnchor="middle"
                             data-level={tierMark}
                             aria-hidden="true"

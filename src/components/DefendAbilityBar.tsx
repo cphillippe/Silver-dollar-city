@@ -12,6 +12,10 @@ export interface DefendAbilityBarProps {
   setAbility: (a: WatchAbility) => void
   setToolLock: (s: string | null) => void
   firing: boolean
+  /** Type that just shot. The rail flash follows the tower, not the plant pick. */
+  firingId?: string | null
+  /** Types currently standing on the road. A missing type still has its 1 slot. */
+  plantedTypes?: string[]
   unlocked: WatchAbility[]
   runTier: Record<string, number>
   /** Between waves, a tap spends sparks. Mid-wave a tap only selects. */
@@ -26,6 +30,8 @@ export function DefendAbilityBar({
   setAbility,
   setToolLock,
   firing,
+  firingId = null,
+  plantedTypes = [],
   unlocked,
   runTier,
   boosting,
@@ -35,6 +41,7 @@ export function DefendAbilityBar({
           <div className="defend-abilities" role="group" aria-label="Night abilities">
             {WATCH_TOOLS.map((tool) => {
               const open = unlocked.includes(tool.id)
+              const placed = plantedTypes.includes(tool.id)
               const heldLine = learningForTool(progress, tool.id)
               const tier = combatTier(tool.id, runTier)
               const claim = open
@@ -54,7 +61,9 @@ export function DefendAbilityBar({
                 <button
                   key={tool.id}
                   type="button"
-                  className={`defend-ability ${ability === tool.id ? 'is-on' : ''} ${open ? '' : 'is-locked'} ${firing && ability === tool.id ? 'is-firing' : ''}`}
+                  className={`defend-ability ${ability === tool.id ? 'is-on' : ''} ${open ? '' : 'is-locked'} ${placed ? 'is-placed' : ''} ${firing && firingId === tool.id ? 'is-firing' : ''}`}
+                  data-type={tool.id}
+                  data-slot={open ? (placed ? 0 : 1) : undefined}
                   aria-pressed={ability === tool.id}
                   title={claim}
                   onClick={() => {
@@ -79,12 +88,20 @@ export function DefendAbilityBar({
                   <span className="defend-ability-tier" aria-hidden>
                     {TIER_MARK[tier]}
                   </span>
+                  {open && !placed && !boosting ? (
+                    <span className="defend-ability-stock" aria-hidden>
+                      1
+                    </span>
+                  ) : null}
                   {boosting && open ? (
                     <span className="defend-ability-boost" aria-hidden>
                       {tier >= 3 ? 'Max' : easy ? 'Tap' : '↑ spark'}
                     </span>
                   ) : null}
-                  <span className="defend-ability-claim">{claim}</span>
+                  <span className="defend-ability-claim">
+                    {claim}
+                    {open ? (placed ? ' Planted.' : ' 1 to plant.') : ''}
+                  </span>
                 </button>
               )
             })}
