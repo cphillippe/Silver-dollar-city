@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.387',
+    title: 'Night Watch hides the stuck diamond',
+    when: '2026-10-07',
+    items: [
+      'Easy Night Watch no longer shows a diamond that stays at 0. Each lamp still shows its gold 1, and sparks still show on the star.',
+    ],
+  },
+  {
     version: '1.4.386',
     title: 'Night Watch upgrades the lamp you opened',
     when: '2026-10-07',

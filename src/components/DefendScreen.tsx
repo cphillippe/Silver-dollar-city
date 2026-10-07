@@ -1169,7 +1169,10 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
             shake={shake}
             won={won}
             hud={hud}
-            coin={<CoinRead count={insightScore(progress)} label="Insight" />}
+            coin={
+              // 1.4.387: Easy hides Insight. Plant, Pull, and waves never change that journal tally, so a fresh diamond stays 0. Rail 1s are the plant slots. Sparks stay on the star.
+              easy ? null : <CoinRead count={insightScore(progress)} label="Insight" />
+            }
             balloon={<MoneyBalloon count={runSparks} label="Sparks" gain={sparkPop} spend={sparkSpend} />}
             rail={rail}
             docks={docks}
