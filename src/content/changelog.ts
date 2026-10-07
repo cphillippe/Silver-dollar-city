@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.386',
+    title: 'Night Watch upgrades the lamp you opened',
+    when: '2026-10-07',
+    items: [
+      'Between waves, Upgrade spends a spark on the lamp you just opened. After Love levels, opening Logic and tapping Upgrade levels Logic.',
+    ],
+  },
+  {
     version: '1.4.385',
     title: 'Night Watch face taps hit',
     when: '2026-10-07',

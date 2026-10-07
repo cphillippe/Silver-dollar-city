@@ -66,7 +66,7 @@ export interface DefendNightActorsProps {
   runTier: Record<string, number>
   /** Between waves: a planted lamp can open the upgrade card. */
   boosting?: boolean
-  onBoostTower?: () => void
+  onBoostTower?: (plotId: CityPlotId) => void
   /** Planted lamp whose upgrade card is open. */
   upgradeAt?: CityPlotId | null
   /** Tap a planted lamp to open or close its upgrade card. */

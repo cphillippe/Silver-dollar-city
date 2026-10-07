@@ -2066,6 +2066,7 @@ img.walker-face.easy-walker-face,
   }
 }
 
+/* 1.4.386: the card body does not eat a lamp underneath. Upgrade and Pull still take the tap. */
 .defend-tower-card {
   position: absolute;
   z-index: 8;
@@ -2078,6 +2079,11 @@ img.walker-face.easy-walker-face,
     0 12px 28px rgba(18, 6, 46, 0.7),
     0 0 0 1px rgba(255, 246, 184, 0.28);
   color: #fff6e8;
+  pointer-events: none;
+}
+
+.defend-tower-card .defend-tower-upgrade,
+.defend-tower-card .defend-tower-pull {
   pointer-events: auto;
 }
 

@@ -85,7 +85,7 @@ import {
   waveIsClear,
   wavePackSize,
 } from '../src/lib/defend.ts'
-import { boardFill } from '../src/nightWatch/map/phoneFill.ts'
+import { boardFill, boardFillPoint } from '../src/nightWatch/map/phoneFill.ts'
 import { nightEnemies as nightEnemiesMod } from '../src/nightWatch/enemies/index.ts'
 import { nightParts as nightPartsMod } from '../src/nightWatch/parts/index.ts'
 import { nightPath as nightPathMod } from '../src/nightWatch/path/index.ts'
@@ -140,12 +140,21 @@ import {
 import {
   EASY_PLANT_PADS,
   isTowerType,
+  lampUpgradeTool,
   nightPlantTypes,
   plantType,
   pullPlant,
+  selectUpgradeLamp,
   slotLeft,
   starterPlants,
+  UPGRADE_GHOST_MS,
+  UPGRADE_TAP_ECHO_MS,
+  upgradeSpendAllowed,
 } from '../src/lib/nightPlants.ts'
+import {
+  placeTowerCard,
+  upgradeControlsHitLamp,
+} from '../src/lib/towerCardPlace.ts'
 import { ideaUnlocked, mindGraph, mindMapHasLit } from '../src/lib/mindMap.ts'
 import { appendStreetLinks, easyStreetChallenge, hardStreetChallenge, linkCaption, linkClue, linkMiss, linkPicture, nextStreetWalk, STREET_CHALLENGE, STREET_FACT_IDS, STREET_LIGHTS, STREET_SKIP_IDS, STREET_TRIPLES, streetDecoyNodes, streetFactsLeft, streetIsComplete, streetTripleForLine, streetWalks, STREET_WHYS } from '../src/content/links.ts'
 import { firstGate } from '../src/content/firstGate.ts'
@@ -1259,7 +1268,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.385')
+assert.equal(APP_VERSION, '1.4.386')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -4247,6 +4256,105 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.385').items.join('\n'),
     /Fixes #|Closes #|Resolves #|monkey|balloon/i,
     '1.4.385 changelog avoids GitHub close keywords',
+  )
+}
+
+// Night Watch 1.4.386: Upgrade spends on the lamp just opened, not the previous one.
+{
+  const defendSrc386 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const board386 = readFileSync(new URL('../src/components/DefendNightBoard.tsx', import.meta.url), 'utf8')
+  const card386 = readFileSync(new URL('../src/components/DefendTowerCard.tsx', import.meta.url), 'utf8')
+  const css386 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const plants = { porch: 'love', hollow: 'logic', journal: 'reason', bench: 'science' }
+  assert.equal(lampUpgradeTool('hollow', plants), 'logic', '1.4.386 Logic lamp spends on Logic')
+  assert.equal(lampUpgradeTool('porch', plants), 'love')
+  assert.equal(lampUpgradeTool('lookout', plants), null, '1.4.386 an empty plot does not fall back to Love')
+  assert.equal(lampUpgradeTool(null, plants), null)
+  assert.equal(selectUpgradeLamp('porch', 'hollow', false), 'hollow', '1.4.386 opening Logic leaves Love')
+  assert.equal(selectUpgradeLamp('hollow', 'hollow', true), 'hollow', '1.4.386 a repeated open stays on Logic')
+  assert.equal(selectUpgradeLamp('hollow', 'hollow', false), null, '1.4.386 a later tap on the open lamp closes')
+  assert.equal(selectUpgradeLamp(null, 'porch', false), 'porch')
+  assert.equal(UPGRADE_TAP_ECHO_MS, 400)
+  assert.equal(UPGRADE_GHOST_MS, 48)
+  assert.equal(upgradeSpendAllowed('hollow', 'porch', 1_000, 2_000), false, '1.4.386 Love’s button cannot spend after Logic is open')
+  assert.equal(upgradeSpendAllowed('hollow', 'hollow', 1_000, 1_020), false, '1.4.386 the open tap does not also spend')
+  assert.equal(upgradeSpendAllowed('hollow', 'hollow', 1_000, 1_000 + UPGRADE_GHOST_MS), true)
+  assert.equal(upgradeSpendAllowed(null, 'hollow', 0, 1_000), false)
+  let open = selectUpgradeLamp(null, 'porch', false)
+  let tier = { love: 1, logic: 1, reason: 1, science: 1 }
+  let sparks = 4
+  let spent = applyBoost(lampUpgradeTool(open, plants), tier, sparks)
+  assert.equal(spent.ok, true)
+  tier = spent.runTier
+  sparks = spent.sparks
+  assert.equal(tier.love, 2)
+  assert.equal(tier.logic, 1)
+  open = selectUpgradeLamp(open, 'hollow', false)
+  open = selectUpgradeLamp(open, 'hollow', true)
+  assert.equal(upgradeSpendAllowed('porch', 'porch', 5_000, 5_010), false)
+  assert.equal(upgradeSpendAllowed(open, 'porch', 5_000, 5_200), false, '1.4.386 sticky Love card cannot spend')
+  assert.equal(upgradeSpendAllowed(open, open, 5_000, 5_200), true)
+  spent = applyBoost(lampUpgradeTool(open, plants), tier, sparks)
+  assert.equal(spent.runTier.logic, 2, '1.4.386 Logic I→II')
+  assert.equal(spent.runTier.love, 2, '1.4.386 Love stays II')
+  for (const phone of [
+    { w: 375, h: 520 },
+    { w: 375, h: 620 },
+  ]) {
+    const scale = boardFill(phone).scale
+    const seats = Object.fromEntries(
+      EASY_PLANT_PADS.map((id) => [id, boardFillPoint(phone, DEFEND_ANCHOR[id])]),
+    )
+    for (const id of EASY_PLANT_PADS) {
+      const others = EASY_PLANT_PADS.filter((other) => other !== id)
+      const placed = placeTowerCard(
+        seats[id],
+        phone,
+        others.map((other) => seats[other]),
+        scale,
+      )
+      for (const other of others) {
+        assert.equal(
+          upgradeControlsHitLamp(placed, seats[other], scale),
+          false,
+          `1.4.386 ${id} Upgrade stays off ${other} at ${phone.w}×${phone.h}`,
+        )
+      }
+    }
+  }
+  assert.match(defendSrc386, /upgradeAtRef/)
+  assert.match(defendSrc386, /selectUpgradeLamp\(upgradeAtRef\.current, id, echoed\)/)
+  assert.match(defendSrc386, /lampUpgradeTool\(plotId, plantsRef\.current\)/)
+  assert.match(defendSrc386, /upgradeSpendAllowed\(/)
+  assert.doesNotMatch(
+    defendSrc386.slice(defendSrc386.indexOf('function boostSelectedTool')),
+    /unlocked\.includes\(ability\)[\s\S]{0,80}: 'love'/,
+    '1.4.386 the card spend does not fall back to Love',
+  )
+  assert.match(board386, /onBoostTower\?\.\(upgradeAt as CityPlotId\)/)
+  assert.match(board386, /clearOf/)
+  assert.match(board386, /towerType\[upgradeAt\]/)
+  assert.doesNotMatch(board386, /: ability\) \?\? ability/)
+  assert.match(card386, /data-upgrade-plot=\{plotId\}/)
+  assert.match(card386, /placeTowerCard\(point, board, clearOf, cameraScale\)/)
+  assert.match(css386, /1\.4\.386: the card body does not eat a lamp underneath/)
+  assert.match(css386, /\.defend-tower-card \{[^}]*pointer-events:\s*none/)
+  assert.match(css386, /\.defend-tower-card \.defend-tower-upgrade,\s*\.defend-tower-card \.defend-tower-pull \{[^}]*pointer-events:\s*auto/)
+  assert.match(css386, /1\.4\.385: gold pad fills the ring/, '1.4.386 keeps face taps')
+  assert.match(css386, /1\.4\.383: Begin stays readable until the first plant/, '1.4.386 keeps Begin')
+  assert.equal(WATCH_TOOLS.length, 4, '1.4.386 does not add a rail tool')
+  assert.equal(
+    applyGateLeaks(DEFEND_HEARTS, 1, false).hearts,
+    DEFEND_HEARTS - 1,
+    '1.4.386 a leak still drops a heart',
+  )
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.386'), '1.4.386 changelog row')
+  assert.match(latestChange('1.4.386').title, /lamp you opened/)
+  assert.match(latestChange('1.4.386').items.join('\n'), /Logic/)
+  assert.doesNotMatch(
+    latestChange('1.4.386').items.join('\n'),
+    /Fixes #|Closes #|Resolves #|monkey|balloon/i,
+    '1.4.386 changelog avoids GitHub close keywords',
   )
 }
 
