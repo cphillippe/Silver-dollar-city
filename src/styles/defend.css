@@ -1860,3 +1860,139 @@ img.walker-face.easy-walker-face,
 @media (prefers-reduced-motion: reduce) {
   .nw-walker-slide.easy-walker-roster { animation: none; }
 }
+
+/* 1.4.373: tap a planted lamp for an upgrade card at the tower. Pull is the small trash. */
+.defend-upgrade-ring {
+  fill: none;
+  stroke: #ffcc33;
+  stroke-width: 3;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
+.defend-pad.is-up .defend-upgrade-ring {
+  stroke: #fff6b8;
+  stroke-width: 5;
+}
+
+.defend-tower-card {
+  position: absolute;
+  z-index: 8;
+  box-sizing: border-box;
+  padding: 10px 10px 12px;
+  border-radius: 16px;
+  border: 2px solid #ffcc33;
+  background: rgba(26, 8, 64, 0.96);
+  box-shadow:
+    0 12px 28px rgba(18, 6, 46, 0.7),
+    0 0 0 1px rgba(255, 246, 184, 0.28);
+  color: #fff6e8;
+  pointer-events: auto;
+}
+
+.defend-tower-card:focus {
+  outline: none;
+}
+
+.defend-tower-card::after {
+  content: '';
+  position: absolute;
+  left: var(--stem, 50%);
+  transform: translateX(-50%);
+  border: 8px solid transparent;
+}
+
+.defend-tower-card.is-above::after {
+  bottom: -8px;
+  border-top-color: #ffcc33;
+  border-bottom: 0;
+}
+
+.defend-tower-card.is-below::after {
+  top: -8px;
+  border-bottom-color: #ffcc33;
+  border-top: 0;
+}
+
+.defend-tower-pull {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 186, 170, 0.55);
+  background: rgba(90, 28, 44, 0.72);
+  color: #ffd2c8;
+  cursor: pointer;
+}
+
+.defend-tower-trash {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+.defend-tower-tool {
+  margin: 0 28px 2px 0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #ffe9b0;
+}
+
+.defend-tower-next {
+  margin: 0;
+  font-size: 1.45rem;
+  font-weight: 800;
+  line-height: 1.05;
+  color: #ffcc33;
+  animation: defend-tower-next-in 0.35s ease-out;
+}
+
+.defend-tower-gain,
+.defend-tower-need {
+  margin: 4px 0 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #fff6e8;
+}
+
+.defend-tower-need {
+  margin-top: 6px;
+  color: #ffe9b0;
+}
+
+.defend-tower-upgrade {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 8px;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.defend-tower-card .btn.defend-tower-upgrade:disabled {
+  opacity: 0.72;
+}
+
+@keyframes defend-tower-next-in {
+  from {
+    transform: translateY(4px);
+    opacity: 0.4;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .defend-tower-next {
+    animation: none;
+  }
+}

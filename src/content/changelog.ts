@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.373',
+    title: 'Night Watch lamp upgrade card',
+    when: '2026-10-06',
+    items: [
+      'Tap a planted lamp to open its upgrade card. The next level and spark cost sit above a gold Upgrade button. Range and damage go up. Pull is a small trash control.',
+    ],
+  },
+  {
     version: '1.4.372',
     title: 'Night Watch shows the walker to tap',
     when: '2026-10-06',

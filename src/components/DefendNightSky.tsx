@@ -11,6 +11,8 @@ export interface DefendNightSkyProps {
   phase: NightPhase
   fireBest: () => void
   easyTap: boolean
+  /** Plant / boost: a tap on open ground closes the lamp upgrade card. */
+  onBoardTap?: () => void
   children?: ReactNode
 }
 
@@ -22,6 +24,7 @@ export function DefendNightSky({
   phase,
   fireBest,
   easyTap: _easyTap,
+  onBoardTap,
   children,
 }: DefendNightSkyProps) {
   return (
@@ -34,6 +37,7 @@ export function DefendNightSky({
               aria-label="Night road through Silver City"
               onClick={() => {
                 if (phase === 'wave') fireBest()
+                else onBoardTap?.()
               }}
             >
               <defs>

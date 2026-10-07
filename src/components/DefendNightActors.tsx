@@ -60,9 +60,15 @@ export interface DefendNightActorsProps {
   loreLine?: string | null
   /** Run tier for lamp range. Combat reads this, not trail mastery. */
   runTier: Record<string, number>
-  /** Between waves: tap a planted lamp to spend sparks on the selected tool. */
+  /** Between waves: a planted lamp can open the upgrade card. */
   boosting?: boolean
   onBoostTower?: () => void
+  /** Planted lamp whose upgrade card is open. */
+  upgradeAt?: CityPlotId | null
+  /** Tap a planted lamp to open or close its upgrade card. */
+  onOpenUpgrade?: (id: CityPlotId) => void
+  /** Lamp that just spent a spark. Brief ring only — peel 4 owns the burst. */
+  upFlashId?: CityPlotId | null
 }
 
 /**
@@ -104,8 +110,12 @@ export function DefendNightActorsSvg({
   easy,
   runTier,
   boosting = false,
-  onBoostTower,
-}: Omit<DefendNightActorsProps, 'tapPos' | 'fireBest' | 'tapJuice' | 'easy'> & { easy: boolean }) {
+  upgradeAt = null,
+  onOpenUpgrade,
+  upFlashId = null,
+}: Omit<DefendNightActorsProps, 'tapPos' | 'fireBest' | 'tapJuice' | 'easy' | 'onBoostTower'> & {
+  easy: boolean
+}) {
   return (
     <>
               {(easyTap ? planted : pads).map((id) => {
@@ -127,22 +137,37 @@ export function DefendNightActorsSvg({
                 const lampBox = nightTowers.lampImageBox()
                 const boostPad = boosting && on
                 const scenery = easyTap && !boostPad
+                const upgrading = on && upgradeAt === id
+                const justUp = on && upFlashId === id
+                const activatePad = () => {
+                  if (phase === 'plant') {
+                    if (on) onOpenUpgrade?.(id)
+                    else togglePad(id)
+                    return
+                  }
+                  if (phase === 'boost' && on) {
+                    onOpenUpgrade?.(id)
+                    return
+                  }
+                  if (phase === 'wave') fire(id)
+                }
                 return (
                   <g
                     key={id}
                     data-person-node={scenery ? undefined : 'pad'}
-                    className={`defend-pad is-${stage} ${on ? 'is-planted' : ''} ${hot ? 'is-hot' : ''} ${firing ? 'is-flash' : ''} ${scenery ? 'is-tower-scenery' : ''} ${boostPad ? 'is-boost-pick' : ''}`}
+                    className={`defend-pad is-${stage} ${on ? 'is-planted' : ''} ${hot ? 'is-hot' : ''} ${firing ? 'is-flash' : ''} ${scenery ? 'is-tower-scenery' : ''} ${boostPad ? 'is-boost-pick' : ''} ${upgrading ? 'is-upgrade-open' : ''} ${justUp ? 'is-up' : ''}`}
                     transform={`translate(${at.x} ${at.y})`}
                     role={scenery ? undefined : 'button'}
                     tabIndex={scenery ? undefined : 0}
                     aria-hidden={scenery ? true : undefined}
+                    aria-expanded={on && !scenery ? upgrading : undefined}
                     aria-label={
                       scenery
                         ? undefined
                         : phase === 'plant'
-                          ? `${on ? 'Pull' : 'Plant'} lamp at ${plot?.title ?? id}`
+                          ? `${on ? 'Upgrade' : 'Plant'} lamp at ${plot?.title ?? id}`
                           : boostPad
-                            ? `Spend a spark on ${WATCH_ABILITY_LABEL[using] ?? using} at ${plot?.title ?? id}`
+                            ? `Upgrade ${WATCH_ABILITY_LABEL[using] ?? using} at ${plot?.title ?? id}`
                             : `Fire ${plot?.title ?? id}`
                     }
                     onClick={
@@ -150,9 +175,7 @@ export function DefendNightActorsSvg({
                         ? undefined
                         : (event) => {
                             event.stopPropagation()
-                            if (phase === 'plant') togglePad(id)
-                            else if (phase === 'boost' && on) onBoostTower?.()
-                            else if (phase === 'wave') fire(id)
+                            activatePad()
                           }
                     }
                     onKeyDown={
@@ -161,9 +184,7 @@ export function DefendNightActorsSvg({
                         : (event) => {
                             if (event.key === 'Enter' || event.key === ' ') {
                               event.preventDefault()
-                              if (phase === 'plant') togglePad(id)
-                              else if (phase === 'boost' && on) onBoostTower?.()
-                              else if (phase === 'wave') fire(id)
+                              activatePad()
                             }
                           }
                     }
@@ -182,6 +203,7 @@ export function DefendNightActorsSvg({
                           height={lampBox.h}
                         />
                         {hot ? <circle className="defend-hot-halo" r="27" /> : null}
+                        {upgrading || justUp ? <circle className="defend-upgrade-ring" r="36" /> : null}
                         {phase === 'wave' ? (
                           <circle
                             className={`defend-range${firing ? ' is-firing' : ''}`}
