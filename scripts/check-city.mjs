@@ -1254,7 +1254,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.382')
+assert.equal(APP_VERSION, '1.4.383')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -4010,6 +4010,46 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.382').items.join('\n'),
     /Fixes #|Closes #|Resolves #|monkey|balloon/i,
     '1.4.382 changelog avoids GitHub close keywords',
+  )
+}
+
+// Night Watch 1.4.383: Begin stays readable until the first plant. Accuser stays off Sparks.
+{
+  const defendCss383 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const defendSrc383 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  assert.match(defendCss383, /1\.4\.383: Begin stays readable until the first plant/)
+  assert.match(defendCss383, /Wave start alone does not fade it/)
+  assert.match(
+    defendCss383,
+    /\.defend-go\.is-awaiting-plant:disabled \{[^}]*opacity:\s*1/,
+  )
+  assert.match(
+    defendCss383,
+    /\.defend-go\.is-after-plant \{[^}]*opacity:\s*0\.42/,
+  )
+  assert.match(defendCss383, /1\.4\.383: Sparks stay clear of Accuser/)
+  assert.match(
+    defendCss383,
+    /\.defend-page\.is-easy-watch \.nw-walker-slide\.easy-walker-roster \{[^}]*top:\s*152px/,
+  )
+  assert.match(defendCss383, /1\.4\.379: Easy phone SE chrome/, '1.4.383 keeps the phone chrome rules')
+  assert.match(
+    defendCss383,
+    /\.defend-page\.is-easy-watch \.nw-walker-slide\.easy-walker-roster \{[^}]*max-height:\s*26px/,
+    '1.4.383 keeps the one-line name rule',
+  )
+  assert.match(defendSrc383, /is-awaiting-plant/)
+  assert.match(defendSrc383, /is-after-plant/)
+  assert.match(defendSrc383, /phase === 'plant' \|\| planted\.length < 1/)
+  assert.equal(WATCH_TOOLS.length, 4, '1.4.383 does not add a rail tool')
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.383'), '1.4.383 changelog row')
+  assert.match(latestChange('1.4.383').title, /Begin/)
+  assert.match(latestChange('1.4.383').items.join('\n'), /first lamp/)
+  assert.match(latestChange('1.4.383').items.join('\n'), /Sparks/)
+  assert.doesNotMatch(
+    latestChange('1.4.383').items.join('\n'),
+    /Fixes #|Closes #|Resolves #|monkey|balloon/i,
+    '1.4.383 changelog avoids GitHub close keywords',
   )
 }
 
