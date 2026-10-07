@@ -120,6 +120,19 @@ import {
   skillUnlocked,
 } from '../src/lib/nightSkills.ts'
 import {
+  NIGHT_PACE_FAST,
+  NIGHT_PACE_NORMAL,
+  PACE_UNLOCK_WAVE,
+  paceAria,
+  paceFace,
+  paceNote,
+  paceRateLabel,
+  paceScale,
+  paceUnlocked,
+  pacedCooldown,
+  pacedDt,
+} from '../src/lib/nightPace.ts'
+import {
   EASY_PLANT_PADS,
   isTowerType,
   nightPlantTypes,
@@ -1241,7 +1254,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.380')
+assert.equal(APP_VERSION, '1.4.381')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3951,6 +3964,82 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.369').items.join('\n'),
     /Fixes #|Closes #|Resolves #/i,
     '1.4.369 changelog avoids GitHub close keywords',
+  )
+}
+
+// Night Watch 1.4.381: unlockable 3× speed. Starts at 1×. Locked until wave 3. Player taps it on.
+{
+  const defendCss381 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const paceUi = readFileSync(
+    new URL('../src/components/NightPaceControl.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.equal(PACE_UNLOCK_WAVE, 2, '1.4.381 3× opens on wave 3, after Still and Mend')
+  assert.equal(paceUnlocked(0), false, '1.4.381 wave 1 stays locked')
+  assert.equal(paceUnlocked(1), false, '1.4.381 wave 2 stays locked')
+  assert.equal(paceUnlocked(2), true)
+  assert.equal(paceFace(false, true), 'locked', '1.4.381 a locked wave cannot start fast')
+  assert.equal(paceFace(true, false), 'open')
+  assert.equal(paceFace(true, true), 'fast')
+  assert.equal(paceScale(false, true), NIGHT_PACE_NORMAL)
+  assert.equal(paceScale(true, false), NIGHT_PACE_NORMAL, '1.4.381 unlock does not force 3×')
+  assert.equal(paceScale(true, true), NIGHT_PACE_FAST)
+  assert.equal(NIGHT_PACE_FAST, 3)
+  assert.equal(paceRateLabel('locked'), '3×')
+  assert.equal(paceRateLabel('open'), '1×')
+  assert.equal(paceRateLabel('fast'), '3×')
+  assert.equal(paceNote('locked'), 'Locked')
+  assert.equal(paceNote('open'), 'Available')
+  assert.equal(paceNote('fast'), 'Active')
+  assert.match(paceAria('locked'), /Locked until wave 3/)
+  assert.match(paceAria('open'), /1×/)
+  assert.match(paceAria('fast'), /3× active/)
+  assert.ok(Math.abs(pacedDt(0.016, 1) - 0.016) < 1e-9)
+  assert.equal(pacedDt(0.1, 1), 0.05, '1.4.381 1× keeps the old step cap')
+  assert.ok(Math.abs(pacedDt(0.016, 3) - 0.048) < 1e-9)
+  assert.ok(Math.abs(pacedDt(0.1, 3) - 0.15) < 1e-9, '1.4.381 3× stretches the capped step')
+  assert.equal(pacedDt(-1, 3), 0)
+  assert.equal(pacedCooldown(700, 1), 700)
+  assert.ok(Math.abs(pacedCooldown(700, 3) - 700 / 3) < 0.001)
+  assert.equal(pacedCooldown(700, 9), 700, '1.4.381 unknown scales stay at 1×')
+  assert.match(defendScreenOnlySrc, /const \[fastOn, setFastOn\] = useState\(false\)/)
+  assert.match(defendScreenOnlySrc, /paceScale\(paceUnlocked\(waveIndexRef\.current\), fastOnRef\.current\)/)
+  assert.match(defendScreenOnlySrc, /pacedDt\(wallDt, pace\)/)
+  assert.match(defendScreenOnlySrc, /pacedCooldown\(nightTowers\.cooldown/)
+  assert.match(defendScreenOnlySrc, /showPace = easy && \(phase === 'wave' \|\| phase === 'boost'\) && !won/)
+  assert.match(defendScreenOnlySrc, /NightPaceControl/)
+  assert.match(defendScreenOnlySrc, /fastOnRef\.current = false/)
+  assert.match(paceUi, /data-state=\{face\}/)
+  assert.match(paceUi, /paceUnlocked/)
+  assert.match(defendCss381, /1\.4\.381: unlockable 3× speed/)
+  assert.match(defendCss381, /\.nw-pace\.is-locked/)
+  assert.match(defendCss381, /\.nw-pace\.is-open/)
+  assert.match(defendCss381, /\.nw-pace\.is-fast/)
+  assert.match(defendCss381, /1\.4\.380: skills pack/, '1.4.381 keeps the skill pack')
+  assert.match(defendCss381, /1\.4\.379: Easy phone SE chrome/, '1.4.381 keeps the phone chrome rules')
+  assert.match(defendCss381, /1\.4\.378: Easy plant rings/, '1.4.381 keeps the gold plant rings')
+  assert.doesNotMatch(
+    defendAbilitySrc,
+    /NightPace|paceScale|fastOn/,
+    '1.4.381 speed stays off the tower rail',
+  )
+  assert.equal(WATCH_TOOLS.length, 4, '1.4.381 does not add a rail tool')
+  assert.deepEqual(
+    [0, 1, 2, 3, 4].map((wave) => skillUnlockOnWave(wave)),
+    ['still', 'mend', null, null, null],
+    '1.4.381 skills still open one per wave',
+  )
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.381'), '1.4.381 changelog row')
+  assert.match(latestChange('1.4.381').title, /3×/)
+  assert.match(latestChange('1.4.381').items.join('\n'), /normal speed/)
+  assert.match(latestChange('1.4.381').items.join('\n'), /wave 3/)
+  assert.match(latestChange('1.4.381').items.join('\n'), /Locked/)
+  assert.match(latestChange('1.4.381').items.join('\n'), /Available/)
+  assert.match(latestChange('1.4.381').items.join('\n'), /Active/)
+  assert.doesNotMatch(
+    latestChange('1.4.381').items.join('\n'),
+    /Fixes #|Closes #|Resolves #|monkey|balloon/i,
+    '1.4.381 changelog avoids GitHub close keywords',
   )
 }
 
