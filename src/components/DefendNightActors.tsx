@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import {
+  EASY_FACE_HIT_R,
   EASY_WALKER_FACE_PX,
   EASY_WALKER_HIT_PX,
   PATH_WALKER_FACE_DY,
@@ -345,7 +346,6 @@ export function DefendNightActorsSvg({
                         : undefined
                     }
                   >
-                    <circle className="defend-raider-hit" r={PATH_WALKER_HIT_R} fill="transparent" />
                     <ellipse
                       className="defend-raider-shadow"
                       cy={12 * (PATH_WALKER_FACE_U / 36)}
@@ -395,6 +395,14 @@ export function DefendNightActorsSvg({
                         <circle className="defend-cheer-spark is-3" cx="2" cy="-26" r="1.4" />
                       </g>
                     ) : null}
+                    <circle
+                      className="defend-raider-hit"
+                      data-face-hit={isTap ? 'easy' : undefined}
+                      cy={isTap ? PATH_WALKER_FACE_DY : 0}
+                      r={isTap ? EASY_FACE_HIT_R : PATH_WALKER_HIT_R}
+                      fill="transparent"
+                      pointerEvents="all"
+                    />
                   </g>
                 )
               })}
@@ -424,6 +432,7 @@ export function DefendNightActorsSvg({
                   aria-hidden
                   pointerEvents="none"
                 >
+                  <circle className="walker-cue-pad" cy={PATH_WALKER_FACE_DY} r={CUE_RING_R} />
                   <circle className="walker-cue-under" cy={PATH_WALKER_FACE_DY} r={CUE_RING_R} />
                   <circle className="walker-cue-ring" cy={PATH_WALKER_FACE_DY} r={CUE_RING_R} />
                   <circle className="walker-cue-pulse" cy={PATH_WALKER_FACE_DY} r={CUE_RING_R + FACE_HALF * 0.22} />
