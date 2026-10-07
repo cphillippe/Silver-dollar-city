@@ -2953,3 +2953,46 @@ img.walker-face.easy-walker-face,
     padding: 5px 10px;
   }
 }
+
+/* 1.4.383: Begin stays readable until the first plant.
+   The disabled banner used to fade while the count was still 0.
+   It fades only after a plant lands. Wave start alone does not fade it.
+   The bob is off on the phone so the banner does not miss taps. */
+@media (max-width: 480px) {
+  .defend-page.is-easy-watch .nw-docks .defend-go.is-awaiting-plant,
+  .defend-page.is-easy-watch .nw-docks .defend-go.is-awaiting-plant:disabled {
+    animation: none;
+    opacity: 1;
+    color: #2a1c08;
+    -webkit-text-fill-color: #2a1c08;
+    background: linear-gradient(180deg, #fff6b8 0%, #ffcc33 46%, #ff9f1a);
+    border-color: #fff3c4;
+  }
+
+  .defend-page.is-easy-watch .nw-docks .defend-go.is-after-plant {
+    animation: none;
+    opacity: 0.42;
+    transition: opacity 0.4s ease;
+  }
+
+  /* 1.4.383: Sparks stay clear of Accuser. The name chip sits below the star. */
+  .defend-page.is-easy-watch .nw-balloon-slot {
+    z-index: 8;
+  }
+
+  .defend-page.is-easy-watch .nw-walker-slide.easy-walker-roster {
+    top: 108px;
+    left: 8px;
+    z-index: 4;
+    width: max-content;
+    max-width: 96px;
+    max-height: 20px;
+    padding: 1px 6px;
+    border-radius: 8px;
+    pointer-events: none;
+  }
+
+  .defend-page.is-easy-watch .nw-walker-slide .easy-walker-kind {
+    font-size: 10px;
+  }
+}
