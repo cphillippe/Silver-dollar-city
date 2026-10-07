@@ -1268,7 +1268,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.387')
+assert.equal(APP_VERSION, '1.4.388')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -4391,6 +4391,63 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.387').items.join('\n'),
     /Fixes #|Closes #|Resolves #|monkey|balloon/i,
     '1.4.387 changelog avoids GitHub close keywords',
+  )
+}
+
+// Night Watch 1.4.388: 0 sparks greys Upgrade and the column Tap (Fixes #566).
+{
+  const defendSrc388 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const card388 = readFileSync(new URL('../src/components/DefendTowerCard.tsx', import.meta.url), 'utf8')
+  const css388 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  assert.match(card388, /disabled=\{!canSpend\}/, '1.4.388 Upgrade stays disabled without a spark')
+  assert.match(card388, /Need a spark/, '1.4.388 the card still says Need a spark')
+  assert.match(card388, /aria-describedby=\{canSpend \? undefined : 'defend-tower-need'\}/)
+  assert.match(
+    css388,
+    /1\.4\.388: 0 sparks — Upgrade is a flat grey control[\s\S]*?\.defend-tower-card \.btn\.primary\.defend-tower-upgrade:disabled \{[\s\S]*?opacity:\s*1[\s\S]*?background:\s*linear-gradient\(180deg, #e4deea/,
+    '1.4.388 disabled Upgrade is grey, not a faded gold pill',
+  )
+  assert.doesNotMatch(
+    css388,
+    /\.defend-tower-upgrade:disabled \{\s*opacity:\s*0\.72/,
+    '1.4.388 drops the faded-gold disabled Upgrade',
+  )
+  assert.match(defendAbilitySrc, /is-spark-dry/, '1.4.388 dry columns drop the live rail')
+  assert.match(defendAbilitySrc, /disabled=\{spendDry\}/, '1.4.388 a dry column is not tappable')
+  assert.match(
+    defendAbilitySrc,
+    /sparks < boostCost\(tier\) \? 'Need a spark' : easy \? 'Tap' : '↑ spark'/,
+    '1.4.388 Tap returns once a spark can be spent',
+  )
+  assert.match(defendSrc388, /sparks=\{runSparks\}/, '1.4.388 the rail reads this night’s sparks')
+  assert.match(defendSrc388, /is-spark-broke/, '1.4.388 the rail frame rests at 0 sparks')
+  assert.match(css388, /\.defend-ability\.is-spark-dry/, '1.4.388 dry columns are styled')
+  assert.match(css388, /1\.4\.388: 0 sparks — the rail is not a live spend tray/)
+  assert.match(defendSrc388, /lampUpgradeTool\(plotId, plantsRef\.current\)/, '1.4.388 upgrade still spends on the open lamp')
+  assert.match(css388, /1\.4\.385: gold pad fills the ring/, '1.4.388 keeps face taps')
+  assert.match(css388, /1\.4\.383: Begin stays readable until the first plant/, '1.4.388 keeps Begin')
+  assert.match(defendSrc388, /balloon=\{<MoneyBalloon count=\{runSparks\} label="Sparks"/, '1.4.388 sparks stay on the star')
+  assert.match(defendAbilitySrc, /data-slot-badge="1"/, '1.4.388 rail gold 1 stays the plant slot')
+  assert.equal(WATCH_TOOLS.length, 4, '1.4.388 does not add a rail tool')
+  assert.equal(boostCost(1), 1, '1.4.388 one spark still buys the next level')
+  assert.equal(applyBoost('logic', { logic: 1 }, 0).note, 'Need a spark', '1.4.388 a dry spend still refuses')
+  assert.equal(applyBoost('logic', { logic: 1 }, 1).ok, true, '1.4.388 a spark still spends')
+  assert.equal(
+    applyGateLeaks(DEFEND_HEARTS, 1, false).hearts,
+    DEFEND_HEARTS - 1,
+    '1.4.388 a leak still drops a heart',
+  )
+  assert.equal(slotLeft({}, 'love'), 1, '1.4.388 an unplanted lamp still shows 1')
+  const returned388 = pullPlant({ porch: 'love' }, 'porch', EASY_PLANT_PADS)
+  assert.equal(slotLeft(returned388, 'love'), 1, '1.4.388 Pull still puts the 1 back')
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.388'), '1.4.388 changelog row')
+  assert.match(latestChange('1.4.388').title, /spark/)
+  assert.match(latestChange('1.4.388').items.join('\n'), /Need a spark/)
+  assert.match(latestChange('1.4.388').items.join('\n'), /Tap/)
+  assert.doesNotMatch(
+    latestChange('1.4.388').items.join('\n'),
+    /Fixes #|Closes #|Resolves #|monkey|balloon/i,
+    '1.4.388 changelog avoids GitHub close keywords',
   )
 }
 
