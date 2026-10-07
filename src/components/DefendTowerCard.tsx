@@ -3,6 +3,11 @@ import { CITY_PLOTS, type CityPlotId } from '../lib/city'
 import { WATCH_ABILITY_LABEL } from '../lib/defend'
 import { boostCost, combatTier, TIER_MARK, TOOL_TIER_MAX } from '../lib/watchTools'
 
+export interface LevelBurst {
+  from: number
+  to: number
+}
+
 export interface TowerCardPoint {
   left: number
   top: number
@@ -43,6 +48,7 @@ export function DefendTowerCard({
   onUpgrade,
   onPull,
   onClose,
+  levelBurst = null,
 }: {
   plotId: CityPlotId
   ability: string
@@ -54,6 +60,8 @@ export function DefendTowerCard({
   /** Plant and between waves. Hidden while walkers are on the road. */
   onPull?: () => void
   onClose: () => void
+  /** I→II / II→III while the level-up burst plays. */
+  levelBurst?: LevelBurst | null
 }) {
   const cardRef = useRef<HTMLDivElement>(null)
   const upgradeRef = useRef<HTMLButtonElement>(null)
@@ -66,6 +74,9 @@ export function DefendTowerCard({
   const plotTitle = CITY_PLOTS.find((plot) => plot.id === plotId)?.title ?? plotId
   const placed = placeTowerCard(point, board)
   const levelLine = maxed ? TIER_MARK[tier] : `${TIER_MARK[next]} · ${cost}✦`
+  const bursting = Boolean(levelBurst && levelBurst.to > levelBurst.from)
+  const fromMark = bursting ? TIER_MARK[levelBurst!.from] : ''
+  const toMark = bursting ? TIER_MARK[levelBurst!.to] : ''
 
   useEffect(() => {
     const node = canSpend ? upgradeRef.current : cardRef.current
@@ -83,9 +94,10 @@ export function DefendTowerCard({
   return (
     <div
       ref={cardRef}
-      className={`defend-tower-card is-${placed.side}`}
+      className={`defend-tower-card is-${placed.side}${bursting ? ' is-level-up' : ''}`}
       data-upgrade-card
       data-tier={tier}
+      data-level-bump={bursting ? `${fromMark}-${toMark}` : undefined}
       data-next={maxed ? TIER_MARK[tier] : TIER_MARK[next]}
       data-cost={maxed ? 0 : cost}
       data-can-spend={canSpend ? 'yes' : 'no'}
@@ -115,9 +127,30 @@ export function DefendTowerCard({
         </button>
       ) : null}
       <p className="defend-tower-tool">{label}</p>
-      <p className="defend-tower-next" key={levelLine}>
-        {levelLine}
+      <p
+        className={`defend-tower-next${bursting ? ' is-bump' : ''}`}
+        key={bursting ? `bump-${fromMark}-${toMark}` : levelLine}
+        aria-live="polite"
+      >
+        {bursting ? (
+          <>
+            <span className="defend-level-from">{fromMark}</span>
+            <span className="defend-level-arrow" aria-hidden="true">
+              →
+            </span>
+            <span className="defend-level-to" data-level={toMark}>
+              {toMark}
+            </span>
+          </>
+        ) : (
+          levelLine
+        )}
       </p>
+      {bursting ? (
+        <span className="defend-spark-spend" aria-hidden="true">
+          −1✦
+        </span>
+      ) : null}
       <p className="defend-tower-gain">{maxed ? 'As strong as it gets' : 'Range ↑  ·  Damage ↑'}</p>
       {maxed ? null : (
         <button

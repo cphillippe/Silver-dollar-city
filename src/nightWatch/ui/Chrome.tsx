@@ -5,15 +5,22 @@ export function MoneyBalloon({
   count,
   label,
   gain = false,
+  spend = false,
 }: {
   count: number
   label: string
   /** Brief +spark when a lamp pays out. */
   gain?: boolean
+  /** Brief −1✦ when Upgrade spends a spark. */
+  spend?: boolean
 }) {
   return (
-    <span className={`nw-balloon${gain ? ' is-spark-gain' : ''}`} role="img" aria-label={`${label}: ${count}`}>
-      {gain ? <span className="nw-spark-float">+spark</span> : null}
+    <span
+      className={`nw-balloon${gain && !spend ? ' is-spark-gain' : ''}${spend ? ' is-spark-spend' : ''}`}
+      role="img"
+      aria-label={`${label}: ${count}`}
+    >
+      {spend ? <span className="nw-spark-spend">−1✦</span> : gain ? <span className="nw-spark-float">+spark</span> : null}
       <span className="nw-balloon-orb" aria-hidden>
         ★
       </span>
