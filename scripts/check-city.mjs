@@ -108,6 +108,18 @@ import {
   useStill,
 } from '../src/lib/nightKits.ts'
 import {
+  MEND_SHIELD_MS,
+  SKILL_COOLDOWN_MS,
+  SKILL_UNLOCK_WAVE,
+  cooldownFill,
+  mendPower,
+  secondsLeft,
+  skillFace,
+  skillStatusLabel,
+  skillUnlockOnWave,
+  skillUnlocked,
+} from '../src/lib/nightSkills.ts'
+import {
   EASY_PLANT_PADS,
   isTowerType,
   nightPlantTypes,
@@ -1229,7 +1241,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.379')
+assert.equal(APP_VERSION, '1.4.380')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -3939,6 +3951,94 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.369').items.join('\n'),
     /Fixes #|Closes #|Resolves #/i,
     '1.4.369 changelog avoids GitHub close keywords',
+  )
+}
+
+// Night Watch 1.4.380: skills pack — recharge taps, Mend power, unlock one at a time, first-unlock splash.
+{
+  const defendCss380 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const splash380 = readFileSync(
+    new URL('../src/components/NightSkillSplash.tsx', import.meta.url),
+    'utf8',
+  )
+  const tray380 = readFileSync(
+    new URL('../src/components/NightSkillTray.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.deepEqual(
+    [0, 1, 2, 3, 4].map((wave) => skillUnlockOnWave(wave)),
+    ['still', 'mend', null, null, null],
+    '1.4.380 skills open one per wave',
+  )
+  assert.equal(skillUnlocked('still', 0), true)
+  assert.equal(skillUnlocked('mend', 0), false, '1.4.380 Mend stays locked on wave 1')
+  assert.equal(skillUnlocked('mend', 1), true)
+  assert.equal(SKILL_UNLOCK_WAVE.still, 0)
+  assert.equal(SKILL_UNLOCK_WAVE.mend, 1)
+  assert.ok(SKILL_COOLDOWN_MS.still >= 8_000 && SKILL_COOLDOWN_MS.still <= 20_000)
+  assert.ok(SKILL_COOLDOWN_MS.mend >= 8_000 && SKILL_COOLDOWN_MS.mend <= 20_000)
+  assert.ok(MEND_SHIELD_MS >= 3_000 && MEND_SHIELD_MS <= 5_000, '1.4.380 Mend holds the gate')
+  const now = 5_000
+  assert.equal(skillFace(false, 0, now), 'locked')
+  assert.equal(skillFace(true, 0, now), 'ready')
+  assert.equal(skillFace(true, now + SKILL_COOLDOWN_MS.still, now), 'cooling')
+  assert.ok(cooldownFill(now + 12_000, now, 12_000) > 0.99)
+  assert.equal(cooldownFill(now, now, 12_000), 0)
+  assert.equal(secondsLeft(now + 2_500, now), 3)
+  assert.equal(skillStatusLabel('locked', 0, now, 1), 'Wave 2')
+  assert.equal(skillStatusLabel('ready', 0, now, 0), 'TAP')
+  assert.equal(skillStatusLabel('cooling', now + 2_500, now, 0), '3s')
+  const empty = mendPower(0)
+  assert.equal(empty.hearts, DEFEND_HEARTS)
+  assert.equal(empty.gained, DEFEND_HEARTS)
+  assert.equal(empty.shield, true)
+  assert.equal(empty.note, 'Mend +3')
+  const one = mendPower(2)
+  assert.equal(one.hearts, 3)
+  assert.equal(one.gained, 1)
+  assert.equal(one.note, 'Mend +1')
+  const full = mendPower(DEFEND_HEARTS)
+  assert.equal(full.gained, 0)
+  assert.equal(full.hearts, DEFEND_HEARTS)
+  assert.equal(full.shield, true, '1.4.380 a full bar still mends')
+  assert.equal(full.note, 'Mend')
+  assert.equal(WATCH_TOOLS.length, 4, '1.4.380 does not add a rail tool')
+  assert.match(defendScreenOnlySrc, /skillHoldRef/)
+  assert.match(defendScreenOnlySrc, /skillUnlockOnWave/)
+  assert.match(defendScreenOnlySrc, /mendShieldUntilRef/)
+  assert.match(defendScreenOnlySrc, /if \(leaked && now < mendShieldUntilRef\.current\)/)
+  assert.match(defendScreenOnlySrc, /setPowerBanner\('Held'\)/)
+  assert.match(defendScreenOnlySrc, /NightSkillSplash/)
+  assert.match(defendScreenOnlySrc, /NightSkillTray/)
+  assert.match(splash380, /role="dialog"/)
+  assert.match(splash380, /New skill/)
+  assert.match(splash380, /SKILL_BLURB/)
+  assert.match(tray380, /data-state=\{face\}/)
+  assert.match(tray380, /nw-skill-ring-fill/)
+  assert.match(defendCss380, /1\.4\.380: skills pack/)
+  assert.match(defendCss380, /\.nw-skill\.is-ready/)
+  assert.match(defendCss380, /\.defend-page\.is-mend \.defend-board/)
+  assert.match(defendCss380, /\.nw-still-veil/)
+  assert.match(defendCss380, /\.nw-mend-shield/)
+  assert.match(defendScreenOnlySrc, /nw-still-veil/)
+  assert.match(defendScreenOnlySrc, /nw-mend-shield/)
+  assert.match(defendScreenOnlySrc, /nw-mend-hold/)
+  assert.match(tray380, /nw-skill-count/)
+  assert.match(defendCss380, /\.defend-page\.is-easy-watch \.nw-docks \.defend-kits\.nw-skill-tray/)
+  assert.match(defendCss380, /1\.4\.379: Easy phone SE chrome/, '1.4.380 keeps the phone chrome rules')
+  assert.match(defendCss380, /1\.4\.378: Easy plant rings/, '1.4.380 keeps the gold plant rings')
+  assert.doesNotMatch(defendAbilitySrc, /NightSkill|mendPower|skillHoldRef/, '1.4.380 skills stay off the tower rail')
+  assert.equal(easyGateResult(4, 1, 0.7), 'lost', '1.4.380 Love I still leaks wave 5')
+  assert.equal(easyGateResult(4, 2, 0.7), 'clear', '1.4.380 Love II still holds wave 5')
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.380'), '1.4.380 changelog row')
+  assert.match(latestChange('1.4.380').title, /skills recharge/)
+  assert.match(latestChange('1.4.380').items.join('\n'), /Still/)
+  assert.match(latestChange('1.4.380').items.join('\n'), /Mend/)
+  assert.match(latestChange('1.4.380').items.join('\n'), /recharges/)
+  assert.doesNotMatch(
+    latestChange('1.4.380').items.join('\n'),
+    /Fixes #|Closes #|Resolves #|monkey|balloon/i,
+    '1.4.380 changelog avoids GitHub close keywords',
   )
 }
 
@@ -9326,20 +9426,19 @@ console.log('check-city: ok')
   assert.equal(unturnedStep(0.42, 0.08, true), 0.42, '1.4.329 freeze holds an unturned walker')
   assert.equal(unturnedStep(0.42, 0.08, false), 0.5)
   assert.equal(WATCH_TOOLS.length, 4, '1.4.329 does not add a fifth rail tool')
-  assert.match(defendScreenOnlySrc, /applyKitBuy/)
   assert.match(defendScreenOnlySrc, /useStill\(performance\.now\(\)\)/)
-  assert.match(defendScreenOnlySrc, /useMend\(live\.current\.hearts\)/)
+  assert.match(defendScreenOnlySrc, /mendPower\(live\.current\.hearts\)/)
   assert.match(defendScreenOnlySrc, /unturnedStep\(/)
   assert.match(defendScreenOnlySrc, /freezeUntil/)
   assert.match(defendScreenOnlySrc, /nightWatchDebugFrozen\(/)
   assert.match(defendScreenOnlySrc, /if \(!frozen\) spawnAt \+= dt/)
   assert.match(defendScreenOnlySrc, /if \(item\.turned\)/, '1.4.329 heaven flyaway still advances')
-  assert.match(defendScreenOnlySrc, /className="defend-kits"/)
-  assert.match(defendScreenOnlySrc, /className="defend-kit-buys"/)
-  assert.match(defendScreenOnlySrc, /Still · \$\{kitSparkCost\} spark|\$\{KIT_LABEL\.still\} · \$\{kitSparkCost\} spark/)
-  assert.match(defendScreenOnlySrc, /\$\{KIT_LABEL\.mend\} · \$\{kitSparkCost\} spark/)
-  assert.match(defendScreenOnlySrc, /setRunKits\(kits\)/)
-  assert.match(defendScreenOnlySrc, /freshRunKits\(\)/)
+  assert.match(defendScreenOnlySrc, /className="defend-kits/)
+  assert.match(
+    readFileSync(new URL('../src/components/NightSkillTray.tsx', import.meta.url), 'utf8'),
+    /className="defend-kit-buys"/,
+    '1.4.380 skill manager keeps the kit row',
+  )
   assert.doesNotMatch(defendAbilitySrc, /applyKitBuy|defend-kit|useMend|useStill/, '1.4.329 kits stay off the rail')
   assert.match(
     readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8'),
@@ -10322,14 +10421,20 @@ console.log('check-city: ok')
 }
 
 // Night Watch 1.4.344: boost skills read as pick-one choices (Fixes #493).
+// 1.4.380 moved the tiles into the skill tray; the boost group and labels stay.
 {
   const easyUi344 = readFileSync(new URL('../src/lib/easyUi.ts', import.meta.url), 'utf8')
   const defendCss344 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const skillTray344 = readFileSync(
+    new URL('../src/components/NightSkillTray.tsx', import.meta.url),
+    'utf8',
+  )
+  const skillUi344 = `${defendScreenOnlySrc}\n${skillTray344}`
   assert.match(defendScreenOnlySrc, /defend-spark-choices/, '1.4.344 boost skill choice group')
-  assert.match(defendScreenOnlySrc, /defend-kit-choice/, '1.4.344 kit choice tiles')
+  assert.match(skillUi344, /defend-kit-choice/, '1.4.344 kit choice tiles')
   assert.match(defendScreenOnlySrc, /EASY\.nightBoostPick/, '1.4.344 Easy pick label')
-  assert.match(defendScreenOnlySrc, /defend-kit-name/, '1.4.344 kit name row')
-  assert.match(defendScreenOnlySrc, /defend-kit-cost/, '1.4.344 kit spark cost row')
+  assert.match(skillUi344, /defend-kit-name/, '1.4.344 kit name row')
+  assert.match(skillUi344, /defend-kit-cost/, '1.4.344 kit spark cost row')
   assert.match(defendAbilitySrc, /easy \? 'Tap' : '↑ spark'/, '1.4.344 Easy rail tap cue')
   assert.match(easyUi344, /nightBoostPick:/)
   assert.match(defendCss344, /1\.4\.344: Still \/ Mend \+ rail spend read as pick-one skills \(Fixes #493\)/)
