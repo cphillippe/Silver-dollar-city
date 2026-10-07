@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.383',
+    title: 'Night Watch Begin stays clear',
+    when: '2026-10-07',
+    items: [
+      'Easy Night Watch keeps Begin the watch easy to read until the first lamp is planted. It fades after that plant. The Sparks count stays clear of the walker name.',
+    ],
+  },
+  {
     version: '1.4.382',
     title: 'Night Watch porch paths are candy',
     when: '2026-10-07',

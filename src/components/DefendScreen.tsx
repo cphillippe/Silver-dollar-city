@@ -1022,12 +1022,18 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           </button>
         </div>
       ) : null}
-      {phase === 'plant' ? (
+      {(phase === 'plant' || planted.length < 1) &&
+      phase !== 'lost' &&
+      phase !== 'boost' &&
+      !won ? (
         <button
           type="button"
-          className="btn primary xl defend-go"
-          onClick={() => setPhase('wave')}
-          disabled={planted.length < 1 || arming}
+          className={`btn primary xl defend-go${planted.length < 1 ? ' is-awaiting-plant' : ' is-after-plant'}`}
+          onClick={() => {
+            if (planted.length < 1 || phase !== 'plant') return
+            setPhase('wave')
+          }}
+          disabled={planted.length < 1 || arming || phase !== 'plant'}
         >
           {easy ? EASY.nightDo : 'The road is coming'}
         </button>
