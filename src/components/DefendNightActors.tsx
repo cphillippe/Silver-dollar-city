@@ -73,6 +73,8 @@ export interface DefendNightActorsProps {
   onOpenUpgrade?: (id: CityPlotId) => void
   /** Lamp that just spent a spark. Brief ring only — peel 4 owns the burst. */
   upFlashId?: CityPlotId | null
+  /** Tap-select preview. The ring radius is the combat hit radius. */
+  ghost?: { at: { x: number; y: number }; range: number; blocked: boolean } | null
 }
 
 /**
@@ -128,16 +130,19 @@ export function DefendNightActorsSvg({
   upgradeAt = null,
   onOpenUpgrade,
   upFlashId = null,
+  ghost = null,
 }: Omit<DefendNightActorsProps, 'tapPos' | 'fireBest' | 'tapJuice' | 'easy' | 'onBoostTower'> & {
   easy: boolean
 }) {
+  const ghostBox = nightTowers.lampImageBox()
   return (
     <>
-              {(easyTap ? planted : pads).map((id) => {
+              {(easy || easyTap ? planted : pads).map((id) => {
                 const at = nightTowers.anchor(id)
                 const on = planted.includes(id)
                 const stage = nightTowers.stage(id, progress)
                 const plot = CITY_PLOTS.find((item) => item.id === id)
+                const placeName = plot?.title ?? 'open ground'
                 const plantedType = towerType[id]
                 const using =
                   on && plantedType && unlocked.includes(plantedType)
@@ -191,10 +196,24 @@ export function DefendNightActorsSvg({
                       scenery
                         ? undefined
                         : phase === 'plant'
-                          ? `${on ? 'Upgrade' : 'Plant'} lamp at ${plot?.title ?? id}`
+                          ? `${on ? 'Upgrade' : 'Plant'} lamp at ${placeName}`
                           : boostPad
-                            ? `Upgrade ${WATCH_ABILITY_LABEL[using] ?? using} at ${plot?.title ?? id}`
-                            : `Fire ${plot?.title ?? id}`
+                            ? `Upgrade ${WATCH_ABILITY_LABEL[using] ?? using} at ${placeName}`
+                            : `Fire ${placeName}`
+                    }
+                    onPointerDown={
+                      on
+                        ? (event) => {
+                            event.stopPropagation()
+                          }
+                        : undefined
+                    }
+                    onPointerUp={
+                      on
+                        ? (event) => {
+                            event.stopPropagation()
+                          }
+                        : undefined
                     }
                     onClick={
                       scenery
@@ -308,6 +327,25 @@ export function DefendNightActorsSvg({
                   </g>
                 )
               })}
+              {ghost ? (
+                <g
+                  className={`defend-ghost${ghost.blocked ? ' is-nogo' : ''}`}
+                  data-lamp-ghost={ghost.blocked ? 'nogo' : 'open'}
+                  data-hit-range={ghost.range}
+                  transform={`translate(${ghost.at.x} ${ghost.at.y})`}
+                  pointerEvents="none"
+                >
+                  <circle className="defend-ghost-ring" r={ghost.range} />
+                  <image
+                    className="defend-ghost-lamp"
+                    href={nightTowers.lampSrc('idle')}
+                    x={ghostBox.x}
+                    y={ghostBox.y}
+                    width={ghostBox.w}
+                    height={ghostBox.h}
+                  />
+                </g>
+              ) : null}
               {raiders.map((raider) => {
                 const at = raiderAt(raider)
                 const isTap = easyTap && !raider.turned

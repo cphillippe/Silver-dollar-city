@@ -146,3 +146,25 @@ export function pathClearance(from: NightPoint): number {
   }
   return min
 }
+
+/** Free lamp seat. `at:360:812` is that point in plate units, not a city lot. */
+const FREE_SPOT = /^at:(-?\d+):(-?\d+)$/
+
+export function isFreeSpot(id: string): boolean {
+  return FREE_SPOT.test(id)
+}
+
+export function freeSpotId(point: NightPoint): string {
+  return `at:${Math.round(point.x)}:${Math.round(point.y)}`
+}
+
+export function freeSpotPoint(id: string): NightPoint | null {
+  const match = FREE_SPOT.exec(id)
+  if (!match) return null
+  return { x: Number(match[1]), y: Number(match[2]) }
+}
+
+/** Fixed lot seat, or the point baked into a free seat id. */
+export function lampAnchor(id: string): NightPoint {
+  return freeSpotPoint(id) ?? DEFEND_ANCHOR[id as CityPlotId]
+}

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { CITY_PLOTS, type CityPlotId } from '../lib/city'
+import { isFreeSpot } from '../lib/lampPlace'
 import { WATCH_ABILITY_LABEL } from '../lib/defend'
 import {
   placeTowerCard,
@@ -53,7 +54,9 @@ export function DefendTowerCard({
   const next = Math.min(TOOL_TIER_MAX, tier + 1)
   const canSpend = !maxed && sparks >= cost
   const label = WATCH_ABILITY_LABEL[ability] ?? 'Love'
-  const plotTitle = CITY_PLOTS.find((plot) => plot.id === plotId)?.title ?? plotId
+  const plotTitle =
+    CITY_PLOTS.find((plot) => plot.id === plotId)?.title ??
+    (isFreeSpot(plotId) ? 'open ground' : plotId)
   const placed = placeTowerCard(point, board, clearOf, cameraScale)
   const levelLine = maxed ? TIER_MARK[tier] : `${TIER_MARK[next]} · ${cost}✦`
   const bursting = Boolean(levelBurst && levelBurst.to > levelBurst.from)

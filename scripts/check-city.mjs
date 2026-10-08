@@ -86,6 +86,7 @@ import {
   wavePackSize,
 } from '../src/lib/defend.ts'
 import { boardFill, boardFillPoint } from '../src/nightWatch/map/phoneFill.ts'
+import { commitLamp, lampSpotBlocked } from '../src/lib/lampPlace.ts'
 import { nightEnemies as nightEnemiesMod } from '../src/nightWatch/enemies/index.ts'
 import { nightParts as nightPartsMod } from '../src/nightWatch/parts/index.ts'
 import { nightPath as nightPathMod } from '../src/nightWatch/path/index.ts'
@@ -1268,7 +1269,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.389')
+assert.equal(APP_VERSION, '1.4.390')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -4496,6 +4497,79 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.389').items.join('\n'),
     /Fixes #|Closes #|Resolves #|monkey|balloon/i,
     '1.4.389 changelog avoids GitHub close keywords',
+  )
+}
+
+// Night Watch 1.4.390: Easy lamps plant on open ground. The drawn ring is the hit ring.
+{
+  const placeSrc = readFileSync(new URL('../src/lib/lampPlace.ts', import.meta.url), 'utf8')
+  const actors390 = readFileSync(new URL('../src/components/DefendNightActors.tsx', import.meta.url), 'utf8')
+  const defendSrc390 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const css390 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const ability390 = readFileSync(new URL('../src/components/DefendAbilityBar.tsx', import.meta.url), 'utf8')
+  const tier = freshRunTier()
+  const road = pathPoint(0.45)
+  assert.equal(lampSpotBlocked(road), true, '1.4.390 the road refuses a lamp')
+  assert.equal(lampSpotBlocked({ x: 192, y: 537 }), true, '1.4.390 a house refuses a lamp')
+  const refused = commitLamp({}, road, 'love', emptyProgress(), tier)
+  assert.equal(refused.ok, false, '1.4.390 a blocked tap places nothing')
+  assert.deepEqual(refused.plants, {})
+  let open = null
+  for (let y = 360; y <= 860 && !open; y += 6) {
+    for (let x = 240; x <= 520 && !open; x += 6) {
+      const point = { x, y }
+      if (lampSpotBlocked(point)) continue
+      const gap = pathClearance(point)
+      if (gap >= 50 && gap <= 68) open = point
+    }
+  }
+  assert.ok(open, '1.4.390 open ground sits beside the road')
+  const placed = commitLamp({}, open, 'love', emptyProgress(), tier)
+  assert.equal(placed.ok, true, '1.4.390 an open tap plants')
+  assert.equal(placed.plants[placed.preview.spot], 'love')
+  const seat = placed.preview.at
+  const range = nightTowersMod.range(placed.preview.spot, 'love', emptyProgress(), tier)
+  assert.equal(placed.preview.range, range, '1.4.390 the ghost ring is the combat range')
+  assert.ok(pathClearance(seat) <= range, '1.4.390 a roadside lamp reaches the road')
+  assert.equal(
+    nightTowersMod.inRange(placed.preview.spot, 'love', emptyProgress(), {
+      x: seat.x + range - 1,
+      y: seat.y,
+    }, tier),
+    true,
+    '1.4.390 a walker inside the ring is hit',
+  )
+  assert.equal(
+    nightTowersMod.inRange(placed.preview.spot, 'love', emptyProgress(), {
+      x: seat.x + range + 2,
+      y: seat.y,
+    }, tier),
+    false,
+    '1.4.390 a walker outside the ring is not hit',
+  )
+  assert.match(actors390, /easy \|\| easyTap \? planted : pads/)
+  assert.match(actors390, /data-lamp-ghost/)
+  assert.match(actors390, /data-plant-ring="gold"/, '1.4.390 hard still has the ring markup')
+  assert.match(defendSrc390, /previewLamp\(/)
+  assert.match(defendSrc390, /commitLamp\(/)
+  assert.match(defendSrc390, /const awaitingLamp = planted\.length < 1/)
+  assert.match(ability390, /data-lamp-selected/)
+  assert.doesNotMatch(ability390, /draggable|onDragStart/, '1.4.390 does not drag from the card')
+  assert.match(css390, /1\.4\.390: tap a card, then the map/)
+  assert.match(css390, /\.defend-ghost\.is-nogo \.defend-ghost-ring \{[^}]*rgba\(226, 48, 64/)
+  assert.match(css390, /1\.4\.389: Begin follows the planted count/, '1.4.390 keeps Begin on the planted count')
+  assert.match(placeSrc, /export function commitLamp/)
+  assert.match(placeSrc, /export function previewLamp/)
+  assert.doesNotMatch(placeSrc, /onDrag|pointer drag from the card/)
+  assert.equal(WATCH_TOOLS.length, 4, '1.4.390 does not add a rail tool')
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.390'), '1.4.390 changelog row')
+  assert.match(latestChange('1.4.390').title, /open ground/)
+  assert.match(latestChange('1.4.390').items.join('\n'), /red lamp/)
+  assert.match(latestChange('1.4.390').items.join('\n'), /solid gold/)
+  assert.doesNotMatch(
+    latestChange('1.4.390').items.join('\n'),
+    /Fixes #|Closes #|Resolves #|monkey|balloon/i,
+    '1.4.390 changelog avoids GitHub close keywords',
   )
 }
 
