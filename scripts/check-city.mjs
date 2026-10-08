@@ -93,6 +93,7 @@ import {
   LAMP_DRAG_START_PX,
   LAMP_TOO_FAR,
   lampReachesRoad,
+  lampRoadNote,
   lampSpotBlocked,
   previewLamp,
   roadCoverD,
@@ -1279,7 +1280,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.392')
+assert.equal(APP_VERSION, '1.4.393')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -2504,10 +2505,10 @@ assert.equal(easyTapMode(false, 'wave', false), false)
   assert.equal(EASY_WAVE_LIVE, 3)
   assert.equal(easyHoldSpawn(2), false)
   assert.equal(easyHoldSpawn(3), true)
-  assert.equal(easySpawnT(0), 0.28)
-  assert.equal(easySpawnT(1), 0.16)
-  assert.equal(easySpawnT(2), 0.04)
-  assert.equal(easySpawnT(3), 0.28)
+  assert.equal(easySpawnT(0), 0)
+  assert.equal(easySpawnT(1), 0)
+  assert.equal(easySpawnT(2), 0)
+  assert.equal(easySpawnT(3), 0)
   assert.equal(easyTapPersonCount([{ id: 0, turned: 'love' }]), 0)
 }
 assert.equal(easyTapFit(true, 'love', 'physical'), 'match')
@@ -4627,6 +4628,113 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   )
 }
 
+// Night Watch 1.4.393: gate spawn, upgrade reach notes, a wave lamp tap is not a miss.
+{
+  const actors393 = readFileSync(new URL('../src/components/DefendNightActors.tsx', import.meta.url), 'utf8')
+  const board393 = readFileSync(new URL('../src/components/DefendNightBoard.tsx', import.meta.url), 'utf8')
+  const card393 = readFileSync(new URL('../src/components/DefendTowerCard.tsx', import.meta.url), 'utf8')
+  const defendSrc393 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const css393 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const tier = freshRunTier()
+  const progress = emptyProgress()
+  assert.equal(easySpawnT(0), 0, '1.4.393 the first walker starts at the gate')
+  assert.equal(easySpawnT(1), 0, '1.4.393 the second walker starts at the gate')
+  assert.equal(easySpawnT(5), 0, '1.4.393 later walkers start at the gate')
+  assert.match(defendSrc393, /t: nightEnemies\.spawnT\(id\)/, '1.4.393 Easy and Hard share the gate spawn')
+  assert.doesNotMatch(defendSrc393, /t: easy \? nightEnemies\.spawnT/, '1.4.393 Easy no longer starts up the road')
+  assert.match(css393, /@keyframes defend-gate-in/)
+  assert.match(css393, /animation: defend-gate-in 250ms ease-out both/)
+  assert.match(css393, /prefers-reduced-motion: reduce\) \{[\s\S]*?\.defend-raider \{[\s\S]*?animation: none/)
+  assert.match(actors393, /data-lamp-wave-hit="yes"/)
+  assert.match(actors393, /scenery && on/)
+  assert.match(css393, /\.defend-pad\.is-tower-scenery \.defend-hit\[data-lamp-wave-hit\] \{[^}]*pointer-events: all/)
+  assert.match(board393, /lampRoadNote/)
+  assert.match(card393, /data-road-note/)
+  assert.match(css393, /\.defend-tower-road \{[^}]*#ffd27a/)
+  assert.equal(FREE_LAMP_RANGE_BONUS, 18, '1.4.393 level I stays the modest free bonus')
+  assert.equal(
+    nightTowersMod.range('bench', 'logic', progress, tier) < pathClearance(DEFEND_ANCHOR.bench),
+    true,
+    '1.4.393 Witness Square stays short of the road',
+  )
+
+  function offsetPoint(t, dist, sign) {
+    const a = pathPoint(Math.max(0, t - 0.004))
+    const b = pathPoint(Math.min(1, t + 0.004))
+    const dx = b.x - a.x
+    const dy = b.y - a.y
+    const len = Math.hypot(dx, dy) || 1
+    const p = pathPoint(t)
+    return { x: p.x + (-dy / len) * dist * sign, y: p.y + (dx / len) * dist * sign }
+  }
+  function findSeat(minGap, maxGap) {
+    for (let t = 0.08; t <= 0.92; t += 0.02) {
+      for (const sign of [1, -1]) {
+        for (let dist = minGap; dist <= maxGap; dist += 2) {
+          const point = offsetPoint(t, dist, sign)
+          if (point.x < 24 || point.y < 24 || point.x > 774 || point.y > 1110) continue
+          const gap = pathClearance(point)
+          if (gap < minGap || gap > maxGap) continue
+          if (lampSpotBlocked(point)) continue
+          return point
+        }
+      }
+    }
+    return null
+  }
+
+  const gold = findSeat(70, 88)
+  assert.ok(gold, '1.4.393 open ground sits inside level I')
+  const goldLook = previewLamp(gold, 'love', progress, tier)
+  assert.equal(goldLook.blocked, false)
+  assert.equal(goldLook.reaches, true, '1.4.393 level I reaches')
+  assert.equal(goldLook.note, '', '1.4.393 a reaching lamp has no upgrade note')
+  assert.match(goldLook.road, /^M/)
+
+  const later = findSeat(94, 106)
+  assert.ok(later, '1.4.393 open ground sits in the level II band')
+  const laterLook = previewLamp(later, 'love', progress, tier)
+  assert.equal(laterLook.reaches, false, '1.4.393 level I misses the set-back seat')
+  assert.equal(laterLook.note, 'Reaches at Level II')
+  assert.equal(laterLook.road, '')
+  assert.equal(laterLook.blocked, false, '1.4.393 the set-back seat still plants')
+  assert.equal(lampRoadNote(laterLook.spot, 'love', progress, { love: 2 }), '')
+  assert.equal(
+    nightTowersMod.range(laterLook.spot, 'love', progress, { love: 2 }) >= pathClearance(laterLook.at),
+    true,
+    '1.4.393 level II uses the combat range',
+  )
+
+  const third = findSeat(112, 124)
+  assert.ok(third, '1.4.393 open ground sits in the level III band')
+  const thirdLook = previewLamp(third, 'love', progress, tier)
+  assert.equal(thirdLook.note, 'Reaches at Level III')
+  assert.equal(lampRoadNote(thirdLook.spot, 'love', progress, { love: 2 }), 'Reaches at Level III')
+  assert.equal(lampRoadNote(thirdLook.spot, 'love', progress, { love: 3 }), '')
+
+  const farPoint = findSeat(140, 180)
+  assert.ok(farPoint, '1.4.393 open ground sits beyond level III')
+  const far = previewLamp(farPoint, 'love', progress, tier)
+  assert.equal(far.blocked, false)
+  assert.equal(far.reaches, false)
+  assert.equal(far.note, LAMP_TOO_FAR)
+  assert.equal(lampRoadNote(far.spot, 'love', progress, { love: 3 }), LAMP_TOO_FAR)
+  assert.equal(easyGateResult(4, 1, 0.7), 'clear', '1.4.393 gate entry lets Love I hold wave 5 taps')
+
+  const road = pathPoint(0.4)
+  assert.equal(previewLamp(road, 'love', progress, tier).note, '', '1.4.393 a red no-go has no reach note')
+
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.393'), '1.4.393 changelog row')
+  assert.match(latestChange('1.4.393').title, /gate/)
+  assert.match(latestChange('1.4.393').items.join('\n'), /Reaches at Level II/)
+  assert.match(latestChange('1.4.393').items.join('\n'), /Too far from the road/)
+  assert.doesNotMatch(
+    latestChange('1.4.393').items.join('\n'),
+    /Fixes #|Closes #|Resolves #|monkey|balloon/i,
+    '1.4.393 changelog avoids GitHub close keywords',
+  )
+}
+
 // Night Watch 1.4.392: reach cue, a longer level-I free lamp, and a plant pin.
 {
   const actors392 = readFileSync(new URL('../src/components/DefendNightActors.tsx', import.meta.url), 'utf8')
@@ -4723,7 +4831,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(actors392, /data-reaches=/)
   assert.match(actors392, /is-nogo/)
   assert.match(actors392, /data-lamp-ghost=\{ghost\.blocked \? 'nogo' : 'open'\}/)
-  assert.match(board392, /LAMP_TOO_FAR/)
+  assert.match(board392, /ghost\.note/)
   assert.match(placeSrc392, /export function roadCoverD/)
   assert.match(defendSrc392, /dragGhostClient/)
   assert.match(defendSrc392, /const awaitingLamp = planted\.length < 1/)
@@ -4896,7 +5004,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(defendCss380, /1\.4\.379: Easy phone SE chrome/, '1.4.380 keeps the phone chrome rules')
   assert.match(defendCss380, /1\.4\.378: Easy plant rings/, '1.4.380 keeps the gold plant rings')
   assert.doesNotMatch(defendAbilitySrc, /NightSkill|mendPower|skillHoldRef/, '1.4.380 skills stay off the tower rail')
-  assert.equal(easyGateResult(4, 1, 0.7), 'lost', '1.4.380 Love I still leaks wave 5')
+  assert.equal(easyGateResult(4, 1, 0.7), 'clear', '1.4.393 gate entry lets Love I hold wave 5 taps')
   assert.equal(easyGateResult(4, 2, 0.7), 'clear', '1.4.380 Love II still holds wave 5')
   assert.ok(CHANGELOG.some((note) => note.version === '1.4.380'), '1.4.380 changelog row')
   assert.match(latestChange('1.4.380').title, /skills recharge/)
@@ -5094,21 +5202,16 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   )
 }
 
-// Night Watch 1.4.376: Easy walkers spawn spaced, lead in front, later ones at the gate.
+// Night Watch 1.4.376: Easy walkers stay spaced. 1.4.393 starts every walker at the
+// gate; the lead is still ahead because it spawned earlier.
 {
   const step = 0.01 * 3.8
   const at = [0, 1, 2].map((index) => easySpawnT(index) + step * (2 - index))
-  const gap = (a, b) => {
-    const p = pathPoint(a)
-    const q = pathPoint(b)
-    return Math.hypot(p.x - q.x, p.y - q.y)
-  }
-  const face = PATH_WALKER_FACE_U * 0.72
+  assert.equal(easySpawnT(0), 0)
+  assert.equal(easySpawnT(1), 0)
+  assert.equal(easySpawnT(2), 0)
   assert.ok(at[0] > at[1] && at[1] > at[2], '1.4.376 the first walker stays ahead of the third')
-  assert.ok(gap(at[0], at[1]) >= face * 3, '1.4.376 lead and second face stay apart at the third spawn')
-  assert.ok(gap(at[1], at[2]) >= face * 3, '1.4.376 second and third face stay apart at the third spawn')
-  assert.equal(easySpawnT(0), 0.28)
-  assert.equal(easySpawnT(2), 0.04)
+  assert.ok(at[0] - at[2] >= step * 2 - 1e-9, '1.4.376 two spawn gaps separate the lead from the third')
   assert.ok(CHANGELOG.some((note) => note.version === '1.4.376'), '1.4.376 changelog row')
   assert.match(latestChange('1.4.376').title, /spawn/)
   assert.match(latestChange('1.4.376').items.join('\n'), /face/)
@@ -10249,7 +10352,7 @@ console.log('check-city: ok')
 
   assert.equal(easyGateResult(0, 1, 0.7), 'clear', '1.4.328 waves 1–4 hold on Love I')
   assert.equal(easyGateResult(3, 1, 0.7), 'clear', '1.4.328 wave 4 holds on Love I')
-  assert.equal(easyGateResult(4, 1, 0.7), 'lost', '1.4.328 wave 5 leaks on Love I')
+  assert.equal(easyGateResult(4, 1, 0.7), 'clear', '1.4.393 gate entry lets Love I hold wave 5 taps')
   assert.equal(easyGateResult(4, 2, 0.7), 'clear', '1.4.328 wave 5 holds after Love II')
   assert.equal(easyGateResult(4, 2, 0.7, 3), 'clear', '1.4.328 a tank wave 5 still holds on Love II')
 
@@ -10316,7 +10419,7 @@ console.log('check-city: ok')
     readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8'),
     /\.defend-kits/,
   )
-  assert.equal(easyGateResult(4, 1, 0.7), 'lost', '1.4.329 Love I still leaks wave 5')
+  assert.equal(easyGateResult(4, 1, 0.7), 'clear', '1.4.393 gate entry lets Love I hold wave 5 taps')
   assert.equal(easyGateResult(4, 2, 0.7), 'clear', '1.4.329 Love II still holds wave 5')
   assert.match(latestChange('1.4.329').title, /Still/)
   assert.match(latestChange('1.4.329').items.join('\n'), /Fixes #463/)

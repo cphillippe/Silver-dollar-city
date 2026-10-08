@@ -3,6 +3,7 @@ import { nightTowers } from '../nightWatch/towers/index.ts'
 import { DEFEND_PATH, freeSpotId, isFreeSpot, lampAnchor, pathClearance } from '../nightWatch/path/data.ts'
 import type { NightPoint } from '../nightWatch/types.ts'
 import { isTowerType, plantType } from './nightPlants.ts'
+import { combatTier, TIER_MARK, TOOL_TIER_MAX } from './watchTools.ts'
 
 /**
  * Easy lamp placement (1.4.390).
@@ -13,7 +14,7 @@ import { isTowerType, plantType } from './nightPlants.ts'
 export type { NightPoint }
 export { freeSpotId, isFreeSpot, lampAnchor }
 
-/** Shown while the ring does not meet the walker path. The spot can still be planted. */
+/** Shown when even level III cannot meet the walker path. The spot can still be planted. */
 export const LAMP_TOO_FAR = 'Too far from the road'
 
 export interface LampPreview {
@@ -21,10 +22,15 @@ export interface LampPreview {
   at: NightPoint
   range: number
   blocked: boolean
-  /** Combat range meets the walker path. A red no-go is never a reach. */
+  /** Combat range meets the walker path at the current level. A red no-go is never a reach. */
   reaches: boolean
-  /** Road stretch inside the combat ring. Empty when the lamp does not reach. */
+  /** Road stretch inside the combat ring. Empty when the current level does not reach. */
   road: string
+  /**
+   * Empty when the current level reaches. Otherwise the soonest upgrade that
+   * would, or `LAMP_TOO_FAR` when level III still misses. Empty on a red no-go.
+   */
+  note: string
 }
 
 /** Painted yellow road, plus a small margin so a lamp does not sit on the lip. */
@@ -225,6 +231,29 @@ export function lampReachesRoad(at: NightPoint, range: number): boolean {
 }
 
 /**
+ * Same reach function combat uses, at the current tier and at each upgrade.
+ * Gold (empty note) when this level already meets the road. The soonest
+ * higher tier that would meet it is named. Level III still short is too far.
+ */
+export function lampRoadNote(
+  spot: string,
+  ability: string,
+  progress: ProgressState,
+  runTier: Record<string, number> | undefined,
+): string {
+  const tierMap = runTier ?? {}
+  const at = lampAnchor(spot)
+  const now = nightTowers.range(spot, ability, progress, tierMap)
+  if (lampReachesRoad(at, now)) return ''
+  const current = combatTier(ability, tierMap)
+  for (let tier = current + 1; tier <= TOOL_TIER_MAX; tier++) {
+    const bumped = nightTowers.range(spot, ability, progress, { ...tierMap, [ability]: tier })
+    if (lampReachesRoad(at, bumped)) return `Reaches at Level ${TIER_MARK[tier]}`
+  }
+  return LAMP_TOO_FAR
+}
+
+/**
  * SVG path of the walker road inside the combat ring.
  * One subpath per covered stretch, in plate units.
  */
@@ -325,7 +354,16 @@ export function previewLamp(
     !isTowerType(ability) ||
     lampSpotBlocked(at, plants, ability)
   const reaches = !blocked && lampReachesRoad(at, range)
-  return { spot, at, range, blocked, reaches, road: reaches ? roadCoverD(at, range) : '' }
+  const note = blocked ? '' : lampRoadNote(spot, ability, progress, runTier)
+  return {
+    spot,
+    at,
+    range,
+    blocked,
+    reaches,
+    road: reaches ? roadCoverD(at, range) : '',
+    note,
+  }
 }
 
 /** Place when the spot is open. A blocked spot returns the same map. */
