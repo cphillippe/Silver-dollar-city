@@ -1,22 +1,30 @@
 import type { ProgressState } from '../types.ts'
 import { nightTowers } from '../nightWatch/towers/index.ts'
-import { DEFEND_PATH, freeSpotId, isFreeSpot, lampAnchor } from '../nightWatch/path/data.ts'
+import { DEFEND_PATH, freeSpotId, isFreeSpot, lampAnchor, pathClearance } from '../nightWatch/path/data.ts'
 import type { NightPoint } from '../nightWatch/types.ts'
 import { isTowerType, plantType } from './nightPlants.ts'
 
 /**
  * Easy lamp placement (1.4.390).
  * Tap a tower card, then tap open ground. A card press that slides uses the
- * same preview and commit. This file does not listen for the press.
+ * same preview and commit. The reach cue (1.4.392) uses the combat range
+ * and still lets a far lamp plant.
  */
 export type { NightPoint }
 export { freeSpotId, isFreeSpot, lampAnchor }
+
+/** Shown while the ring does not meet the walker path. The spot can still be planted. */
+export const LAMP_TOO_FAR = 'Too far from the road'
 
 export interface LampPreview {
   spot: string
   at: NightPoint
   range: number
   blocked: boolean
+  /** Combat range meets the walker path. A red no-go is never a reach. */
+  reaches: boolean
+  /** Road stretch inside the combat ring. Empty when the lamp does not reach. */
+  road: string
 }
 
 /** Painted yellow road, plus a small margin so a lamp does not sit on the lip. */
@@ -211,6 +219,92 @@ export function clientToMap(
   return { x: local.x, y: local.y }
 }
 
+/** True when this combat radius meets the walker path. */
+export function lampReachesRoad(at: NightPoint, range: number): boolean {
+  return range > 0 && pathClearance(at) <= range
+}
+
+/**
+ * SVG path of the walker road inside the combat ring.
+ * One subpath per covered stretch, in plate units.
+ */
+export function roadCoverD(at: NightPoint, range: number): string {
+  if (!(range > 0)) return ''
+  const parts: string[] = []
+  let open = false
+  let last: NightPoint | null = null
+  for (let i = 0; i < DEFEND_PATH.length - 1; i++) {
+    const hit = coverSegment(at, range, DEFEND_PATH[i], DEFEND_PATH[i + 1])
+    if (!hit) {
+      open = false
+      last = null
+      continue
+    }
+    const [start, end] = hit
+    const joins = open && last != null && Math.hypot(last.x - start.x, last.y - start.y) < 0.6
+    if (joins) parts.push(`L${end.x.toFixed(1)} ${end.y.toFixed(1)}`)
+    else parts.push(`M${start.x.toFixed(1)} ${start.y.toFixed(1)} L${end.x.toFixed(1)} ${end.y.toFixed(1)}`)
+    open = true
+    last = end
+  }
+  return parts.join(' ')
+}
+
+/** Portion of one road segment that sits inside the ring, or null. */
+function coverSegment(
+  at: NightPoint,
+  range: number,
+  a: NightPoint,
+  b: NightPoint,
+): [NightPoint, NightPoint] | null {
+  const r2 = range * range
+  const gap2 = (p: NightPoint) => {
+    const dx = p.x - at.x
+    const dy = p.y - at.y
+    return dx * dx + dy * dy
+  }
+  const inside = (p: NightPoint) => gap2(p) <= r2 + 1e-4
+  const dx = b.x - a.x
+  const dy = b.y - a.y
+  const fx = a.x - at.x
+  const fy = a.y - at.y
+  const qa = dx * dx + dy * dy
+  const qb = 2 * (fx * dx + fy * dy)
+  const qc = fx * fx + fy * fy - r2
+  const ts: number[] = []
+  if (qa > 1e-8) {
+    const disc = qb * qb - 4 * qa * qc
+    if (disc >= 0) {
+      const root = Math.sqrt(disc)
+      for (const t of [(-qb - root) / (2 * qa), (-qb + root) / (2 * qa)]) {
+        if (t >= -1e-4 && t <= 1 + 1e-4) ts.push(Math.min(1, Math.max(0, t)))
+      }
+    }
+  }
+  ts.sort((p, q) => p - q)
+  const atT = (t: number): NightPoint => ({ x: a.x + dx * t, y: a.y + dy * t })
+  const aIn = inside(a)
+  const bIn = inside(b)
+  let start: NightPoint | null = null
+  let end: NightPoint | null = null
+  if (aIn && bIn) {
+    start = a
+    end = b
+  } else if (aIn && ts.length) {
+    start = a
+    end = atT(ts[ts.length - 1])
+  } else if (bIn && ts.length) {
+    start = atT(ts[0])
+    end = b
+  } else if (ts.length >= 2) {
+    start = atT(ts[0])
+    end = atT(ts[ts.length - 1])
+  }
+  if (!start || !end) return null
+  if (Math.hypot(end.x - start.x, end.y - start.y) < 0.4) return null
+  return [start, end]
+}
+
 /**
  * Ghost at this touch. `range` is `nightTowers.range` for the seat that
  * would be planted, which is the radius combat uses.
@@ -230,7 +324,8 @@ export function previewLamp(
     hudBlocked ||
     !isTowerType(ability) ||
     lampSpotBlocked(at, plants, ability)
-  return { spot, at, range, blocked }
+  const reaches = !blocked && lampReachesRoad(at, range)
+  return { spot, at, range, blocked, reaches, road: reaches ? roadCoverD(at, range) : '' }
 }
 
 /** Place when the spot is open. A blocked spot returns the same map. */
