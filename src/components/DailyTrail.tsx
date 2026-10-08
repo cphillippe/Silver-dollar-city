@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { pillarFor } from '../content'
-import { dailyForDate } from '../content/daily'
+import { DAILY_POOL, dailyForDate } from '../content/daily'
 import { evidenceFor } from '../content/evidence'
 import { STORY, townVoice } from '../content/story'
 import { EASY, isEasy } from '../lib/easy'
@@ -18,9 +18,11 @@ import type { View } from '../types'
 
 interface DailyTrailProps {
   onNavigate: (view: View) => void
+  /** Playtest opener (?sequence=daily-rest) so a dated pool can be opened directly. */
+  forceId?: string
 }
 
-export function DailyTrail({ onNavigate }: DailyTrailProps) {
+export function DailyTrail({ onNavigate, forceId }: DailyTrailProps) {
   const { completeDaily, recordReview, recordTaught, progress } = useProgress()
   const easy = isEasy(progress)
   const now = new Date()
@@ -28,8 +30,11 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
   const morningsBefore = progress.dailyDates.filter((d) => d !== today).length
 
   const [session] = useState(() => {
-    const already = dailyDoneToday(progress, today)
-    const fresh = dailyForDate(today, morningsBefore)
+    const already = forceId ? false : dailyDoneToday(progress, today)
+    const forced = forceId
+      ? DAILY_POOL.find((item) => item.challenge.id === forceId)
+      : undefined
+    const fresh = forced ?? dailyForDate(today, morningsBefore)
     const brief = evidenceFor(fresh.challenge.id)
     const pillar = pillarFor(fresh.challenge.id)
     return {
@@ -95,8 +100,7 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
         ← {easy ? EASY.home : 'The town'}
       </button>
 
-      {!solved ? (
-        !taught && brief ? (
+      {(!solved || challenge.kind === 'sequence') && !taught && brief && !solved ? (
           <TeachUnlock
             brief={brief}
             kind={challenge.kind}
@@ -108,9 +112,10 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
               window.setTimeout(() => setArming(false), 360)
             }}
           />
-        ) : (
+        ) : null}
+      {(!solved || challenge.kind === 'sequence') && (taught || !brief || solved) ? (
           <>
-            <h1 className="puzzle-title">{challenge.title}</h1>
+            {solved ? null : <h1 className="puzzle-title">{challenge.title}</h1>}
             <PuzzlePlay
               challenge={challenge}
               onMiss={() => setMissed(true)}
@@ -118,8 +123,8 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
               onSolved={finishPuzzle}
             />
           </>
-        )
-      ) : (
+        ) : null}
+      {solved ? (
         <section className="after-win daily-done">
           {brief && !held ? (
             <div className="rehearse-anchor">
@@ -168,7 +173,7 @@ export function DailyTrail({ onNavigate }: DailyTrailProps) {
             />
           ) : null}
         </section>
-      )}
+      ) : null}
     </main>
   )
 }

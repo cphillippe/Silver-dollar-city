@@ -157,8 +157,7 @@ export function ChallengeScreen({
         </button>
       )}
 
-      {!showNext ? (
-        !taught && brief ? (
+      {(!showNext || challenge.kind === 'sequence') && !taught && brief && !showNext ? (
           <TeachUnlock
             brief={brief}
             kind={challenge.kind}
@@ -185,7 +184,8 @@ export function ChallengeScreen({
               window.setTimeout(() => setArming(false), 360)
             }}
           />
-        ) : (
+        ) : null}
+      {(!showNext || challenge.kind === 'sequence') && (taught || !brief || showNext) ? (
           <>
             {easy ? null : <h1 className="puzzle-title">{challenge.title}</h1>}
             <PuzzlePlay
@@ -198,8 +198,8 @@ export function ChallengeScreen({
               onSolved={solved}
             />
           </>
-        )
-      ) : (
+        ) : null}
+      {showNext ? (
         <section className="after-win">
           {brief && !recalled ? (
             <div className="rehearse-anchor">
@@ -248,7 +248,7 @@ export function ChallengeScreen({
             />
           ) : null}
         </section>
-      )}
+      ) : null}
     </main>
   )
 }

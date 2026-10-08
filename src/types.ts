@@ -55,6 +55,8 @@ export interface SequenceItem {
   id: string
   text: string
   gem?: GemId
+  /** Key in SEQUENCE_ART. Optional — the strip falls back to story art, foundation art, then a GemMark. */
+  art?: string
 }
 
 export interface SequenceChallenge {
@@ -326,7 +328,7 @@ export interface ProgressState {
 export type View =
   | { name: 'welcome' }
   | { name: 'hub'; mindPlot?: string; afterScene?: boolean }
-  | { name: 'daily' }
+  | { name: 'daily'; forceId?: string }
   | { name: 'area'; areaId: string }
   | { name: 'challenge'; areaId: string; challengeId: string }
   | { name: 'journal'; focusId?: string; autoQuiz?: boolean; sceneRecap?: boolean }
