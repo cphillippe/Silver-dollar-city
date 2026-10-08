@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.389',
+    title: 'Night Watch Begin waits for a lamp',
+    when: '2026-10-08',
+    items: [
+      'With no lamps planted, Begin the watch is pale and says Plant a lamp first. The lamp cards give a small nudge. After a lamp is planted, Begin is solid gold and starts the watch.',
+    ],
+  },
+  {
     version: '1.4.388',
     title: 'Night Watch Upgrade waits for a spark',
     when: '2026-10-07',

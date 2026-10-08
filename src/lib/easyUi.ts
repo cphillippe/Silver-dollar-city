@@ -80,6 +80,7 @@ export const EASY = {
   holdNext: 'Lock In next',
   continueStreet: 'Continue tonight’s street',
   nightDo: 'Begin the watch',
+  nightPlantFirst: 'Plant a lamp first',
   nightSoon: 'Night Watch (soon)',
   nightTap: 'Tap the face.',
   nightLead: 'Tap the dark face.',

@@ -1268,7 +1268,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.388')
+assert.equal(APP_VERSION, '1.4.389')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -4448,6 +4448,54 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.388').items.join('\n'),
     /Fixes #|Closes #|Resolves #|monkey|balloon/i,
     '1.4.388 changelog avoids GitHub close keywords',
+  )
+}
+
+// Night Watch 1.4.389: Begin is pale at 0 planted and solid gold once a lamp stands.
+{
+  const defendSrc389 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const css389 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const easy389 = readFileSync(new URL('../src/lib/easyUi.ts', import.meta.url), 'utf8')
+  assert.match(css389, /1\.4\.389: Begin follows the planted count/)
+  assert.match(css389, /Ring slots do not drive this/)
+  assert.match(
+    css389,
+    /1\.4\.389: Begin follows the planted count[\s\S]*?\.defend-go\.is-awaiting-plant:disabled \{[\s\S]*?opacity:\s*1[\s\S]*?background:\s*linear-gradient\(180deg, #e4deea/,
+    '1.4.389 a waiting Begin is pale grey, not bright gold',
+  )
+  assert.match(
+    css389,
+    /1\.4\.389: Begin follows the planted count[\s\S]*?\.defend-go\.is-after-plant \{[\s\S]*?opacity:\s*1[\s\S]*?#ffcc33/,
+    '1.4.389 a planted Begin is solid gold',
+  )
+  assert.match(css389, /@keyframes nw-lamp-nudge/)
+  assert.match(css389, /\.is-need-lamp \.nw-rail \.defend-abilities \{[\s\S]*?nw-lamp-nudge/)
+  assert.match(
+    css389,
+    /@media \(prefers-reduced-motion: reduce\) \{[\s\S]*?\.is-need-lamp \.nw-rail \.defend-abilities \{[\s\S]*?animation:\s*none/,
+    '1.4.389 the lamp-card nudge rests when motion is reduced',
+  )
+  assert.match(easy389, /nightPlantFirst: 'Plant a lamp first'/)
+  assert.match(defendSrc389, /const awaitingLamp = planted\.length < 1/)
+  assert.match(
+    defendSrc389,
+    /awaitingLamp \? ' is-awaiting-plant' : ' is-after-plant'/,
+    '1.4.389 Begin state follows the planted count',
+  )
+  assert.match(defendSrc389, /EASY\.nightPlantFirst/)
+  assert.match(defendSrc389, /easy && phase === 'plant' && awaitingLamp \? 'is-need-lamp'/)
+  assert.match(css389, /1\.4\.383: Begin stays readable until the first plant/, '1.4.389 keeps the earlier Begin marker')
+  assert.match(css389, /1\.4\.388: 0 sparks — Upgrade is a flat grey control/, '1.4.389 leaves Upgrade grey')
+  assert.match(defendSrc389, /lampUpgradeTool\(plotId, plantsRef\.current\)/, '1.4.389 upgrade still spends on the open lamp')
+  assert.equal(WATCH_TOOLS.length, 4, '1.4.389 does not add a rail tool')
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.389'), '1.4.389 changelog row')
+  assert.match(latestChange('1.4.389').title, /Begin/)
+  assert.match(latestChange('1.4.389').items.join('\n'), /Plant a lamp first/)
+  assert.match(latestChange('1.4.389').items.join('\n'), /solid gold/)
+  assert.doesNotMatch(
+    latestChange('1.4.389').items.join('\n'),
+    /Fixes #|Closes #|Resolves #|monkey|balloon/i,
+    '1.4.389 changelog avoids GitHub close keywords',
   )
 }
 
