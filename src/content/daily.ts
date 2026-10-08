@@ -50,9 +50,9 @@ export const DAILY_POOL: DailyPuzzle[] = [
       prompt: 'A neighbor leaves a lamp on the porch. Put the picture in order.',
       context: 'Matthew 5:14–16. Jesus used ordinary light to talk about a life that is seen.',
       items: [
-        { id: 'a', gem: 'star', text: 'Evening comes. The street grows dim.' },
-        { id: 'b', gem: 'lamp', text: 'Someone sets a lamp where it can be seen.' },
-        { id: 'c', gem: 'heart', text: 'A walker finds the stoop.' },
+        { id: 'a', gem: 'star', text: 'Night comes. The street is dark.' },
+        { id: 'b', gem: 'lamp', text: 'Someone sets a lamp out.' },
+        { id: 'c', gem: 'heart', text: 'A walker finds the way.' },
       ],
       teachOnWrong:
         'The claim is not that we become the sun — only that we do not hide what we have received. Try the order again.',
@@ -134,12 +134,12 @@ export const DAILY_POOL: DailyPuzzle[] = [
       id: 'daily-creed',
       title: 'Older than the letter',
       idea: 'the churches already named Christ died, buried, raised before Paul’s letter',
-      prompt: 'Order the steps the churches already named: died, buried, raised.',
+      prompt: 'How did the creed reach Paul\'s letter?',
       context: '1 Corinthians 15:3–4. Paul received this line — he did not invent it.',
       items: [
-        { id: 'a', text: 'Jesus is executed and buried.' },
-        { id: 'b', text: 'The first believers pass a short creed.' },
-        { id: 'c', text: 'Paul quotes that creed in a letter to Corinth.' },
+        { id: 'a', text: 'Jesus dies, is buried, and is raised.' },
+        { id: 'b', text: 'Believers pass the news on.' },
+        { id: 'c', text: 'Paul writes it in a letter.' },
       ],
       teachOnWrong:
         'Paul is handing on something he received. The churches already named Christ died, buried, raised. Try the chain again.',
@@ -219,13 +219,13 @@ export const DAILY_POOL: DailyPuzzle[] = [
       prompt: 'How does a line travel from an ancient hand to yours?',
       context: 'We do not hold the first ink. We hold a river of copies.',
       items: [
-        { id: 'a', text: 'A scribe copies a scroll by hand.' },
-        { id: 'b', text: 'Later copies are compared when they differ.' },
-        { id: 'c', text: 'A modern page prints a recovered text.' },
+        { id: 'a', text: 'A scribe copies by hand.' },
+        { id: 'b', text: 'Experts compare the old copies.' },
+        { id: 'c', text: 'Your Bible is printed today.' },
       ],
       teachOnWrong:
         'Transmission is a river, not a single page falling from the sky. Order the hands, then the comparison, then the print.',
-      deeper: 'Isaiah 40:8: the grass withers, the flower fades, but the word of our God will stand forever.',
+      deeper: 'The grass withers, the flower fades; but the word of our God will stand for ever.',
     },
   },
   {
@@ -302,9 +302,9 @@ export const DAILY_POOL: DailyPuzzle[] = [
       prompt: 'Jesus’ invitation has an order. Set the stones.',
       context: 'Matthew 11:28. Tired people are named first. The invitation is to a person, not a performance.',
       items: [
-        { id: 'a', gem: 'heart', text: 'You are tired and carrying too much.' },
-        { id: 'b', gem: 'door', text: 'Jesus says, “Come to me.”' },
-        { id: 'c', gem: 'star', text: 'He promises rest — not a steeper hill.' },
+        { id: 'a', gem: 'heart', art: 'beat1-tired', text: 'You carry a heavy load.' },
+        { id: 'b', gem: 'door', art: 'beat2-come', text: 'Jesus says, “Come to me.”' },
+        { id: 'c', gem: 'star', art: 'beat3-rest', text: 'He gives you rest.' },
       ],
       teachOnWrong: 'The weary are addressed before the command. Rest is the gift, not a prize for climbing harder.',
       deeper: 'Come to me, all who labor and are heavy laden, and I will give you rest.',
@@ -334,7 +334,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
       ],
       teachOnWrong:
         'Jesus asks which man *proved* to be a neighbor. Mercy, not pedigree, is the measure. Leave the decoy in the bank.',
-      deeper: 'He said, “The one who showed him mercy.” And Jesus said, “You go, and do likewise.”',
+      deeper: 'He said, “The one who showed mercy on him.” And Jesus said to him, “Go and do likewise.”',
     },
   },
   {

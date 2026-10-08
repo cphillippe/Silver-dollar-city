@@ -121,10 +121,10 @@ Samaritans and Judeans were divided by worship and memory (see John 4:9). Jesus 
           <prompt>Place the Good Samaritan in the order Luke tells it.</prompt>
           <teachOnWrong>Luke’s force depends on order: religious insiders fail first; the unexpected outsider becomes the measure of neighbor-love. Try again.</teachOnWrong>
           <challengeTiles>
-            <sequenceItem>A lawyer asks Jesus, “And who is my neighbor?”</sequenceItem>
-            <sequenceItem>A man is beaten and left half-dead on the road.</sequenceItem>
-            <sequenceItem>A priest and then a Levite see him and pass by.</sequenceItem>
-            <sequenceItem>Moved with compassion, a Samaritan binds the wounds, takes him to an inn, and pays.</sequenceItem>
+            <sequenceItem art="road1-lawyer">A lawyer asks, “Who is my neighbor?”</sequenceItem>
+            <sequenceItem>Robbers leave a man half dead.</sequenceItem>
+            <sequenceItem>Two temple men pass by.</sequenceItem>
+            <sequenceItem>A Samaritan has compassion and helps.</sequenceItem>
             <sequenceItem>Jesus: “Go and do likewise.”</sequenceItem>
           </challengeTiles>
         </learn>
@@ -739,9 +739,9 @@ Mercy is not softness. It is the grain of God’s world — and then a question:
           <prompt>A neighbor leaves a lamp on the porch. Put the picture in order.</prompt>
           <teachOnWrong>The claim is not that we become the sun — only that we do not hide what we have received. Try the order again.</teachOnWrong>
           <challengeTiles>
-            <sequenceItem>Evening comes. The street grows dim.</sequenceItem>
-            <sequenceItem>Someone sets a lamp where it can be seen.</sequenceItem>
-            <sequenceItem>A walker finds the stoop.</sequenceItem>
+            <sequenceItem>Night comes. The street is dark.</sequenceItem>
+            <sequenceItem>Someone sets a lamp out.</sequenceItem>
+            <sequenceItem>A walker finds the way.</sequenceItem>
           </challengeTiles>
         </learn>
         <match>
@@ -1140,7 +1140,7 @@ Jesus taught with lamps, seed, and a cup. The cup of the new covenant is poured 
       </easy>
       <medium points="12">
         <learn>
-          <mediumTeach>Luke 10:36–37. Jesus turns “who is my neighbor?” around. Mercy makes a neighbor; pedigree does not. “The one who showed him mercy… Go and do likewise.” Compassion is the measure.</mediumTeach>
+          <mediumTeach>Luke 10:36–37. Jesus turns “who is my neighbor?” around. Mercy makes a neighbor; pedigree does not. “The one who showed mercy on him.” And Jesus said to him, “Go and do likewise.” Compassion is the measure.</mediumTeach>
           <mainIdea>Mercy makes a neighbor; pedigree does not.</mainIdea>
           <gloss>Mercy makes a neighbor. Pedigree does not.</gloss>
           <loci>This idea lives at East porch, with Juniper.</loci>
@@ -1187,9 +1187,9 @@ Jesus taught with lamps, seed, and a cup. The cup of the new covenant is poured 
       <hard points="15">
         <learn>
           <hardTeach>Luke 10:36–37. The question “who is my neighbor?” is turned around. Mercy makes a neighbor.
-He said, “The one who showed him mercy.” And Jesus said, “You go, and do likewise.”</hardTeach>
+He said, “The one who showed mercy on him.” And Jesus said to him, “Go and do likewise.”</hardTeach>
           <fullTeach>Luke 10:36–37. The question “who is my neighbor?” is turned around. Mercy makes a neighbor.
-He said, “The one who showed him mercy.” And Jesus said, “You go, and do likewise.”</fullTeach>
+He said, “The one who showed mercy on him.” And Jesus said to him, “Go and do likewise.”</fullTeach>
           <prompt>Build the Samaritan’s answer from the stones provided.</prompt>
           <teachOnWrong>Jesus asks which man *proved* to be a neighbor. Mercy, not pedigree, is the measure. Leave the decoy in the bank.</teachOnWrong>
           <challengeTiles />
