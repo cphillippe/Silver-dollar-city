@@ -46,13 +46,6 @@ export const DEFEND_WAVE_PACK = [4, 4, 5, 5, 8] as const
 /** Easy soft TD: cap live unturned walkers before spawning the next. */
 export const EASY_WAVE_LIVE = 3
 
-/**
- * Easy spawn slots, lead first. The first walker is already up the road.
- * The next two enter further back, toward the gate, so the third is behind
- * the first with a readable gap. The pattern repeats for later spawns.
- */
-const EASY_SPAWN_T = [0.28, 0.16, 0.04] as const
-
 export { DEFEND_ANCHOR, DEFEND_PATH, pathClearance, pathPoint } from '../nightWatch/path/data.ts'
 
 /** First six slots are one of each WalkerKind; later rows are extra taunts only. */
@@ -88,8 +81,8 @@ export interface WaveCombat {
 }
 
 /**
- * Easy wave 5 walks faster and soaks more hits, so Love I on the starter
- * porch leaks. Love II holds. Waves 1–4 keep the soft pace.
+ * Easy wave 5 walks faster and soaks more hits. Waves 1–4 keep the soft pace.
+ * Walkers enter at the gate, so the crossing includes the whole road.
  */
 export function waveCombat(waveIndex: number, easy: boolean): WaveCombat {
   const size = wavePackSize(waveIndex)
@@ -204,9 +197,12 @@ export function easyHoldSpawn(walkingUnturned: number): boolean {
   return walkingUnturned >= EASY_WAVE_LIVE
 }
 
-export function easySpawnT(spawnIndex: number): number {
-  const index = Math.max(0, Math.floor(spawnIndex) || 0)
-  return EASY_SPAWN_T[index % EASY_SPAWN_T.length]
+/**
+ * Every walker enters at the gate. Spacing comes from spawn timing
+ * (`spawnEvery` / `holdSpawn`), not from starting partway up the road.
+ */
+export function easySpawnT(_spawnIndex: number): number {
+  return 0
 }
 
 export function easyTapPersonCount(raiders: { turned?: string }[]): number {

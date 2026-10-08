@@ -96,13 +96,11 @@ export const nightTowers: NightTowersModule = {
 export const LAMP_ROAD_OVERLAP = 24
 
 /**
- * Extra reach for a lamp planted on open ground (1.4.392).
- * City seats stay on `towerRange`. Free seats were level I at 96, which
- * covered the path only out to 72 units (96 minus the overlap floor).
- * On the SE board (about 0.51 CSS px per unit) that is ~36px, so a lamp
- * 35–45px off the path never fired. +18 makes level I 114 and covers a
- * gap of 90 units, about 45 CSS px at that scale. Levels II and III keep
- * the +18 step, so they move 114 → 132 and 132 → 150.
+ * Extra reach for a lamp planted on open ground (1.4.392, kept in 1.4.393).
+ * City seats stay on `towerRange`. Free level I is 114 and covers a gap of
+ * 90 units once the overlap floor is applied. A lamp set farther back does
+ * not get a bigger level I — levels II and III each add 18 (132, then 150),
+ * which is how a set-back lamp reaches the road.
  */
 export const FREE_LAMP_RANGE_BONUS = 18
 

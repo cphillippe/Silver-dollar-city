@@ -424,7 +424,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         }
         walking.push({
           id,
-          t: easy ? nightEnemies.spawnT(id) : 0,
+          t: nightEnemies.spawnT(id),
           text: cast.text,
           kind: cast.kind,
           label: cast.label,

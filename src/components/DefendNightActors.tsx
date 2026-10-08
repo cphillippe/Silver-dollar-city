@@ -80,6 +80,7 @@ export interface DefendNightActorsProps {
     blocked: boolean
     reaches: boolean
     road: string
+    note?: string
   } | null
 }
 
@@ -222,12 +223,16 @@ export function DefendNightActorsSvg({
                         : undefined
                     }
                     onClick={
-                      scenery
-                        ? undefined
-                        : (event) => {
+                      scenery && on
+                        ? (event) => {
                             event.stopPropagation()
-                            activatePad()
                           }
+                        : scenery
+                          ? undefined
+                          : (event) => {
+                              event.stopPropagation()
+                              activatePad()
+                            }
                     }
                     onKeyDown={
                       scenery
@@ -240,7 +245,16 @@ export function DefendNightActorsSvg({
                           }
                     }
                   >
-                    {scenery ? null : on ? (
+                    {scenery && on ? (
+                      <rect
+                        className="defend-hit"
+                        data-lamp-wave-hit="yes"
+                        x="-42"
+                        y="-96"
+                        width="84"
+                        height="128"
+                      />
+                    ) : scenery ? null : on ? (
                       <rect className="defend-hit" x="-42" y="-96" width="84" height="128" />
                     ) : (
                       <circle className="defend-hit" r="52" />
@@ -341,6 +355,7 @@ export function DefendNightActorsSvg({
                   className={`defend-ghost${ghost.blocked ? ' is-nogo' : ghost.reaches ? ' is-reaches' : ' is-short'}`}
                   data-lamp-ghost={ghost.blocked ? 'nogo' : 'open'}
                   data-reaches={ghost.reaches ? 'yes' : 'no'}
+                  data-reach-note={ghost.note ?? ''}
                   data-hit-range={ghost.range}
                   transform={`translate(${ghost.at.x} ${ghost.at.y})`}
                   pointerEvents="none"
