@@ -51,7 +51,9 @@ import {
 import {
   clientToMap,
   commitLamp,
+  dragGhostClient,
   hudCoversPoint,
+  overTowerCards,
   previewLamp,
   type LampPreview,
 } from '../lib/lampPlace'
@@ -92,7 +94,7 @@ import { insightScore, useProgress } from '../store/progress'
 import type { View } from '../types'
 import { TownReturn } from './TownReturn'
 import { WinBurst } from './challenges/WinBurst'
-import { DefendAbilityBar } from './DefendAbilityBar'
+import { DefendAbilityBar, type LampDragPhase } from './DefendAbilityBar'
 import { DefendNightBoard } from './DefendNightBoard'
 import { NightPaceControl } from './NightPaceControl'
 import { NightSkillSplash } from './NightSkillSplash'
@@ -196,6 +198,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     easy ? {} : starterPlants(pads, unlocked),
   )
   const [ghost, setGhost] = useState<LampPreview | null>(null)
+  const lampDragLive = useRef(false)
   const plantsRef = useRef(plants)
   plantsRef.current = plants
   const planted = useMemo(() => Object.keys(plants) as CityPlotId[], [plants])
@@ -503,6 +506,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   }
 
   function onPlacePointer(event: { type: string; clientX: number; clientY: number; pointerId: number; currentTarget: EventTarget }) {
+    if (lampDragLive.current) return
     if (!(easy && phase === 'plant')) return
     const svg = boardRef.current
     if (!svg) return
@@ -534,6 +538,43 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       return
     }
     setGhost(look)
+  }
+
+  function onCardPress(down: boolean) {
+    lampDragLive.current = down
+  }
+
+  function onLampDrag(kind: LampDragPhase, using: WatchAbility, clientX: number, clientY: number) {
+    if (kind === 'cancel' || !(easy && phase === 'plant')) {
+      setGhost(null)
+      return
+    }
+    const svg = boardRef.current
+    const doc = svg?.ownerDocument
+    if (!svg || !doc) {
+      setGhost(null)
+      return
+    }
+    if (kind === 'drop' && overTowerCards(clientX, clientY, doc)) {
+      setGhost(null)
+      return
+    }
+    const lifted = dragGhostClient(clientX, clientY)
+    const point = clientToMap(svg, lifted.x, lifted.y)
+    if (!point) {
+      setGhost(null)
+      return
+    }
+    const hud = overTowerCards(clientX, clientY, doc) || hudCoversPoint(lifted.x, lifted.y, doc)
+    if (kind === 'move') {
+      setGhost(previewLamp(point, using, progress, runTier, plantsRef.current, hud))
+      return
+    }
+    const next = commitLamp(plantsRef.current, point, using, progress, runTier, hud)
+    setGhost(null)
+    if (!next.ok) return
+    setPlants(next.plants)
+    closeUpgrade(true)
   }
 
   function openUpgrade(id: CityPlotId) {
@@ -1178,6 +1219,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       sparks={runSparks}
       boosting={boosting}
       placing={easy && phase === 'plant'}
+      onLampDrag={onLampDrag}
+      onCardPress={onCardPress}
       onBoost={boostTool}
     />
   )

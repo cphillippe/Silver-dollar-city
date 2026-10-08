@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.391',
+    title: 'Night Watch lamps drag onto the map',
+    when: '2026-10-08',
+    items: [
+      'Easy Night Watch lets you drag Love, Logic, Reason, or Science onto open ground. The lamp and its ring follow your finger and turn red over the road, a house, or the cards. Letting go on red puts the lamp back and spends nothing. A short tap still picks a card, then a tap on open ground plants it. Begin stays pale until a lamp is planted, then turns solid gold.',
+    ],
+  },
+  {
     version: '1.4.390',
     title: 'Night Watch lamps plant on open ground',
     when: '2026-10-08',

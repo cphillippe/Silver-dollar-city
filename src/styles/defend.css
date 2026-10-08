@@ -3159,6 +3159,17 @@ img.walker-face.easy-walker-face,
   touch-action: none;
 }
 
+/* 1.4.391: the drag starts on a tower card. none blocks scroll and pinch
+   for that gesture on the card and, once the finger reaches it, the map. */
+.defend-page.is-placing .nw-rail .defend-abilities,
+.defend-page.is-placing .nw-rail .defend-ability {
+  touch-action: none;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
 .defend-page.is-easy-watch.is-placing .nw-rail .defend-ability.is-on {
   box-shadow:
     0 0 0 3px rgba(255, 204, 51, 0.95),
