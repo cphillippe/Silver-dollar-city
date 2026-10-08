@@ -1005,6 +1005,9 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     </p>
   )
 
+  // Pale Begin and the plant line follow how many lamps are standing, not ring slots.
+  const awaitingLamp = planted.length < 1
+
   const tip =
     phase === 'wave'
       ? easy
@@ -1085,17 +1088,25 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       phase !== 'lost' &&
       phase !== 'boost' &&
       !won ? (
-        <button
-          type="button"
-          className={`btn primary xl defend-go${planted.length < 1 ? ' is-awaiting-plant' : ' is-after-plant'}`}
-          onClick={() => {
-            if (planted.length < 1 || phase !== 'plant') return
-            setPhase('wave')
-          }}
-          disabled={planted.length < 1 || arming || phase !== 'plant'}
-        >
-          {easy ? EASY.nightDo : 'The road is coming'}
-        </button>
+        <>
+          <button
+            type="button"
+            className={`btn primary xl defend-go${awaitingLamp ? ' is-awaiting-plant' : ' is-after-plant'}`}
+            onClick={() => {
+              if (awaitingLamp || phase !== 'plant') return
+              setPhase('wave')
+            }}
+            disabled={awaitingLamp || arming || phase !== 'plant'}
+            aria-describedby={easy && awaitingLamp ? 'defend-plant-first' : undefined}
+          >
+            {easy ? EASY.nightDo : 'The road is coming'}
+          </button>
+          {easy && awaitingLamp ? (
+            <p className="defend-plant-first" id="defend-plant-first">
+              {EASY.nightPlantFirst}
+            </p>
+          ) : null}
+        </>
       ) : null}
       {toolLock ? (
         <p className="match-toast" role="status">
@@ -1129,7 +1140,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
 
   return (
     <main
-      className={`defend-page ${taught ? 'is-puzzle' : 'is-teach'} ${arming ? 'is-arming' : ''} ${won ? 'is-win' : ''} ${shake ? 'is-shake' : ''} ${leakFlash ? 'is-leak' : ''} ${firing ? 'is-firing' : ''} ${stillOn ? 'is-still' : ''} ${mendOn ? 'is-mend' : ''} ${mendShield ? 'is-mend-shield' : ''} ${debugFrozen ? 'is-nw-debug-freeze' : ''} ${easy ? 'is-easy-watch' : ''} ${easyTap ? 'is-easy-tap' : ''} ${boosting ? 'is-boost' : ''} ${boosting && runSparks < 1 ? 'is-spark-broke' : ''}`}
+      className={`defend-page ${taught ? 'is-puzzle' : 'is-teach'} ${arming ? 'is-arming' : ''} ${won ? 'is-win' : ''} ${shake ? 'is-shake' : ''} ${leakFlash ? 'is-leak' : ''} ${firing ? 'is-firing' : ''} ${stillOn ? 'is-still' : ''} ${mendOn ? 'is-mend' : ''} ${mendShield ? 'is-mend-shield' : ''} ${debugFrozen ? 'is-nw-debug-freeze' : ''} ${easy ? 'is-easy-watch' : ''} ${easyTap ? 'is-easy-tap' : ''} ${boosting ? 'is-boost' : ''} ${boosting && runSparks < 1 ? 'is-spark-broke' : ''} ${easy && phase === 'plant' && awaitingLamp ? 'is-need-lamp' : ''}`}
       aria-label={WATCH_TITLE}
     >
       {after ? (
