@@ -85,7 +85,7 @@ export const EASY = {
   nightTap: 'Tap the face.',
   nightLead: 'Tap the dark face.',
   nightPlant:
-    'Pick Love, Logic, Reason, or Science. Tap that card, then tap open ground. Tap a lamp to make it stronger.',
+    'Pick Love, Logic, Reason, or Science. Drag the card onto open ground, or tap it and then tap the ground. Tap a lamp to make it stronger.',
   nightBoost:
     'Wave clear. Tap a planted lamp. Gold Upgrade spends a spark and raises it to II or III.',
   nightBoostPick: 'Skills',
