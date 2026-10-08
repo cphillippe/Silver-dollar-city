@@ -1,5 +1,5 @@
 import type { CityPlotId } from '../lib/city'
-import { LAMP_TOO_FAR } from '../lib/lampPlace'
+import { lampRoadNote } from '../lib/lampPlace'
 import { WATCH_ABILITY_LABEL } from '../lib/defend'
 import { boardFill, boardFillPoint, boardPoint as mapBoardPoint, boardView, nightTowers } from '../nightWatch'
 import type { DefendNightSkyProps } from './DefendNightSky'
@@ -35,6 +35,8 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
   } = props
   const place = plateFill ? boardFillPoint : mapBoardPoint
   const cardAbility = upgradeAt ? towerType[upgradeAt] : undefined
+  const roadNote =
+    upgradeAt && cardAbility ? lampRoadNote(upgradeAt, cardAbility, progress, runTier) : ''
   const showCard = Boolean(
     upgradeAt && cardAbility && upgradePoint && boardBox && boardBox.w > 0 && onCloseUpgrade,
   )
@@ -117,18 +119,19 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
           onPull={onPullLamp}
           onClose={onCloseUpgrade as () => void}
           levelBurst={levelBurst}
+          roadNote={roadNote}
         />
       ) : null}
-      {ghost && !ghost.blocked && !ghost.reaches && boardBox && boardBox.w > 0 ? (
+      {ghost && !ghost.blocked && ghost.note && boardBox && boardBox.w > 0 ? (
         <span
           className="defend-ghost-hint"
-          data-too-far={LAMP_TOO_FAR}
+          data-road-note={ghost.note}
           style={{
             left: place(boardBox, ghost.at).left,
             top: place(boardBox, { x: ghost.at.x, y: ghost.at.y - ghost.range }).top,
           }}
         >
-          {LAMP_TOO_FAR}
+          {ghost.note}
         </span>
       ) : null}
       {typeChips}
