@@ -347,7 +347,7 @@ export function DefendNightActorsSvg({
                 >
                   <circle className="defend-ghost-ring" r={ghost.range} />
                   {ghost.blocked ? null : (
-                    <ellipse className="defend-plant-shadow" cx="0" cy="8" rx="18" ry="6" />
+                    <ellipse className="defend-plant-shadow" cx="0" cy="18" rx="20" ry="7" />
                   )}
                   <image
                     className="defend-ghost-lamp"
@@ -358,7 +358,7 @@ export function DefendNightActorsSvg({
                     height={ghostBox.h}
                   />
                   {ghost.blocked ? null : (
-                    <circle className="defend-plant-dot" data-plant-pin="yes" r="6" />
+                    <circle className="defend-plant-dot" data-plant-pin="yes" r="11" />
                   )}
                 </g>
               ) : null}
