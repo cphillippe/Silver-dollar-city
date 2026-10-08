@@ -54,7 +54,7 @@ export function StoryPiece({
   }, [])
 
   const edges = pieceEdges(card.orderIndex, count, hard)
-  const captionHeight = showCaption ? Math.min(40, Math.round(box.h * 0.24)) : 0
+  const captionHeight = showCaption ? 52 : 0
   const path = piecePath(box.w, box.h, edges.left, edges.right, captionHeight)
   const { backdrop } = card.visual
   const face = (
