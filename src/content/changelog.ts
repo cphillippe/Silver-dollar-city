@@ -8,7 +8,7 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.393',
+    version: '1.4.394',
     title: 'Order puzzles become picture panels',
     when: '2026-10-08',
     items: [

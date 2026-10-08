@@ -67,6 +67,7 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
   const [marks, setMarks] = useState<Mark[]>(() => challenge.items.map(() => null))
   const [peeked, setPeeked] = useState(false)
   const [busy, setBusy] = useState(false)
+  const [verseOn, setVerseOn] = useState(false)
 
   const nextIndex = chain.findIndex((slot) => slot === null)
   const placed = new Set(chain.filter((slot): slot is StripCard => slot !== null).map((slot) => slot.id))
@@ -90,6 +91,8 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
     setMarks(challenge.items.map(() => 'yes'))
     playGemPop('win')
     onSolved()
+    const wait = prefersReducedMotion() ? 0 : 980
+    window.setTimeout(() => setVerseOn(true), wait)
   }
 
   function place(card: StripCard, dest: number) {
@@ -169,7 +172,6 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
       data-n={count}
       data-testid="story-strip"
     >
-      <WinBurst play={status === 'ok'} stamp="STORY SET!" />
       <h2 className="strip-lead">{status === 'ok' ? 'Great job!' : lead}</h2>
       {verse ? (
         <p className="strip-kicker">
@@ -183,6 +185,7 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
         role="list"
         aria-label="Story strip"
       >
+        <WinBurst play={status === 'ok'} stamp="STORY SET!" />
         {challenge.items.map((item, index) => {
           const filled = chain[index]
           const awaiting = index === nextIndex && status !== 'ok'
@@ -235,7 +238,7 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
           <p className="strip-stars" aria-hidden>
             ★ ★ ★
           </p>
-          {verse ? (
+          {verse && verseOn ? (
             <figure className="strip-verse">
               <figcaption>{verse.kicker}</figcaption>
               <blockquote>“{verse.text}”</blockquote>

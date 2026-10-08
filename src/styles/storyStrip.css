@@ -84,6 +84,14 @@
     0 0 22px rgba(255, 215, 112, 0.85);
 }
 
+.strip-board.is-win[data-n='3'] {
+  height: 168px;
+}
+
+.strip-board.is-win[data-n='4'] {
+  height: 156px;
+}
+
 .strip-board.is-win[data-n='5'] {
   height: auto;
   flex-wrap: wrap;
@@ -92,7 +100,7 @@
 
 .strip-board.is-win[data-n='5'] .strip-slot {
   flex: 1 1 30%;
-  height: 108px;
+  height: 120px;
   max-width: 34%;
 }
 
@@ -136,13 +144,22 @@
   pointer-events: none;
 }
 
-.strip-art img,
-.strip-art .story-art-tile,
-.strip-art .story-art {
+.strip-art img {
   width: 92%;
   height: 92%;
   object-fit: contain;
   object-position: center bottom;
+}
+
+/* Old story stills carry a white comic margin. Cover and scale past it. */
+.strip-art .story-art-tile,
+.strip-art .story-art {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  object-position: center center;
+  transform: scale(1.16);
 }
 
 .strip-gem {
@@ -166,12 +183,14 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 1px 4px;
+  padding: 2px 5px;
   background: #fff3d6;
   color: #3b1546;
   font-size: 12.5px;
-  line-height: 1.05;
+  line-height: 1.15;
   font-weight: 650;
+  white-space: normal;
+  overflow: hidden;
   pointer-events: none;
 }
 
@@ -367,12 +386,41 @@
 }
 
 .strip-verse {
+  position: relative;
+  z-index: 8;
   margin: 0;
   padding: 8px 10px;
   border-radius: 14px;
   background: #fff3d6;
   color: #3b1546;
   text-align: center;
+}
+
+/* Burst stays on the strip. Fixed flash, ring, and stamp must not cover the verse. */
+.play.is-story-strip .strip-board .win-burst {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  overflow: hidden;
+  animation: strip-burst-fade 0.28s 0.72s forwards;
+}
+
+.play.is-story-strip .win-flash,
+.play.is-story-strip .win-ring,
+.play.is-story-strip .win-stamp-wrap {
+  position: absolute;
+}
+
+.play.is-story-strip .win-stamp-wrap {
+  top: 46%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes strip-burst-fade {
+  to {
+    opacity: 0;
+  }
 }
 
 .strip-verse figcaption {
