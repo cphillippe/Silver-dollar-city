@@ -91,12 +91,16 @@ import {
   dragGhostClient,
   LAMP_DRAG_LIFT_PX,
   LAMP_DRAG_START_PX,
+  LAMP_TOO_FAR,
+  lampReachesRoad,
   lampSpotBlocked,
+  previewLamp,
+  roadCoverD,
 } from '../src/lib/lampPlace.ts'
 import { nightEnemies as nightEnemiesMod } from '../src/nightWatch/enemies/index.ts'
 import { nightParts as nightPartsMod } from '../src/nightWatch/parts/index.ts'
 import { nightPath as nightPathMod } from '../src/nightWatch/path/index.ts'
-import { nightTowers as nightTowersMod, lampReach, lampReadyToFire, LAMP_ROAD_OVERLAP, SHOT_JUICE_MS, sparkAwardForHit } from '../src/nightWatch/towers/index.ts'
+import { nightTowers as nightTowersMod, lampReach, lampReadyToFire, FREE_LAMP_RANGE_BONUS, LAMP_ROAD_OVERLAP, SHOT_JUICE_MS, sparkAwardForHit } from '../src/nightWatch/towers/index.ts'
 import {
   applyBoost,
   boostCost,
@@ -1275,7 +1279,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.391')
+assert.equal(APP_VERSION, '1.4.392')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -4620,6 +4624,125 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.391').items.join('\n'),
     /Fixes #|Closes #|Resolves #|monkey|balloon/i,
     '1.4.391 changelog avoids GitHub close keywords',
+  )
+}
+
+// Night Watch 1.4.392: reach cue, a longer level-I free lamp, and a plant pin.
+{
+  const actors392 = readFileSync(new URL('../src/components/DefendNightActors.tsx', import.meta.url), 'utf8')
+  const board392 = readFileSync(new URL('../src/components/DefendNightBoard.tsx', import.meta.url), 'utf8')
+  const defendSrc392 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const css392 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const placeSrc392 = readFileSync(new URL('../src/lib/lampPlace.ts', import.meta.url), 'utf8')
+  const tier = freshRunTier()
+  const progress = emptyProgress()
+  assert.equal(FREE_LAMP_RANGE_BONUS, 36, '1.4.392 free lamps add 36 to every tier')
+  assert.equal(abilityRange('love', 'empty', progress, tier), 96, '1.4.392 city seats stay at 96')
+  assert.equal(96 + FREE_LAMP_RANGE_BONUS - LAMP_ROAD_OVERLAP, 108, '1.4.392 level I covers a 108 gap')
+  assert.equal(LAMP_DRAG_LIFT_PX, 36, '1.4.392 the drag lift stays')
+  assert.equal(LAMP_TOO_FAR, 'Too far from the road')
+
+  function offsetPoint(t, dist, sign) {
+    const a = pathPoint(Math.max(0, t - 0.004))
+    const b = pathPoint(Math.min(1, t + 0.004))
+    const dx = b.x - a.x
+    const dy = b.y - a.y
+    const len = Math.hypot(dx, dy) || 1
+    const p = pathPoint(t)
+    return { x: p.x + (-dy / len) * dist * sign, y: p.y + (dx / len) * dist * sign }
+  }
+  function findSeat(minGap, maxGap) {
+    for (let t = 0.08; t <= 0.92; t += 0.02) {
+      for (const sign of [1, -1]) {
+        for (let dist = minGap; dist <= maxGap; dist += 4) {
+          const point = offsetPoint(t, dist, sign)
+          if (point.x < 24 || point.y < 24 || point.x > 774 || point.y > 1110) continue
+          const gap = pathClearance(point)
+          if (gap < minGap || gap > maxGap) continue
+          if (lampSpotBlocked(point)) continue
+          return point
+        }
+      }
+    }
+    return null
+  }
+
+  const beside = findSeat(52, 70)
+  assert.ok(beside, '1.4.392 open ground sits beside the road')
+  const near = previewLamp(beside, 'love', progress, tier)
+  assert.equal(near.blocked, false)
+  assert.equal(near.reaches, true, '1.4.392 a lamp beside the road reaches')
+  assert.equal(near.range, 96 + FREE_LAMP_RANGE_BONUS, '1.4.392 level I free range is 132')
+  assert.equal(
+    nightTowersMod.range(near.spot, 'love', progress, { love: 2 }),
+    114 + FREE_LAMP_RANGE_BONUS,
+    '1.4.392 level II stays 18 above level I',
+  )
+  assert.equal(
+    nightTowersMod.range(near.spot, 'love', progress, { love: 3 }),
+    132 + FREE_LAMP_RANGE_BONUS,
+    '1.4.392 level III stays 18 above level II',
+  )
+  assert.equal(roadCoverD(near.at, near.range), near.road)
+  assert.match(near.road, /^M/, '1.4.392 the reached stretch is a road path')
+  const cover = near.road.match(/-?\d+\.?\d*/g).map(Number)
+  assert.ok(
+    Math.hypot(cover[0] - near.at.x, cover[1] - near.at.y) <= near.range + 0.2,
+    '1.4.392 the highlighted road sits inside the combat ring',
+  )
+  assert.equal(lampReachesRoad(near.at, near.range), true)
+
+  const band = findSeat(96, 105)
+  assert.ok(band, '1.4.392 open ground sits about 40px off the path')
+  const mid = previewLamp(band, 'love', progress, tier)
+  assert.equal(mid.blocked, false)
+  assert.equal(mid.reaches, true, '1.4.392 a lamp up to ~45 CSS px still reaches')
+  assert.ok(pathClearance(mid.at) <= 108)
+
+  const farPoint = findSeat(130, 170)
+  assert.ok(farPoint, '1.4.392 open ground sits far from the road')
+  const far = previewLamp(farPoint, 'love', progress, tier)
+  assert.equal(far.blocked, false, '1.4.392 a far lamp is still allowed')
+  assert.equal(far.reaches, false, '1.4.392 a far lamp does not reach')
+  assert.equal(far.road, '')
+  const plantedFar = commitLamp({}, farPoint, 'love', progress, tier)
+  assert.equal(plantedFar.ok, true, '1.4.392 too far still plants')
+
+  const road = pathPoint(0.45)
+  const refused = previewLamp(road, 'love', progress, tier)
+  assert.equal(refused.blocked, true, '1.4.392 the road is still a red no-go')
+  assert.equal(refused.reaches, false)
+  assert.equal(commitLamp({}, road, 'love', progress, tier).ok, false)
+
+  assert.ok(
+    nightTowersMod.range('bench', 'logic', progress, tier) < pathClearance(DEFEND_ANCHOR.bench),
+    '1.4.392 Witness Square stays short of the road',
+  )
+  assert.match(actors392, /data-plant-pin="yes"/)
+  assert.match(actors392, /data-road-cover="yes"/)
+  assert.match(actors392, /data-reaches=/)
+  assert.match(actors392, /is-nogo/)
+  assert.match(actors392, /data-lamp-ghost=\{ghost\.blocked \? 'nogo' : 'open'\}/)
+  assert.match(board392, /LAMP_TOO_FAR/)
+  assert.match(placeSrc392, /export function roadCoverD/)
+  assert.match(defendSrc392, /dragGhostClient/)
+  assert.match(defendSrc392, /const awaitingLamp = planted\.length < 1/)
+  assert.match(defendSrc392, /EASY\.nightPlantFirst/)
+  assert.match(css392, /1\.4\.392: gold ring when the combat range meets the road/)
+  assert.match(css392, /\.defend-ghost\.is-short \.defend-ghost-ring \{[^}]*rgba\(232, 140, 36/)
+  assert.match(css392, /\.defend-ghost\.is-nogo \.defend-ghost-ring \{[^}]*rgba\(226, 48, 64/)
+  assert.match(css392, /1\.4\.389: Begin follows the planted count/, '1.4.392 keeps Begin on the planted count')
+  assert.match(css392, /\.defend-plant-shadow \{[^}]*rgba\(36, 12, 64/)
+  assert.doesNotMatch(css392.slice(css392.indexOf('1.4.392:')), /#fff|background:\s*#fff|background:\s*white/)
+  assert.equal(WATCH_TOOLS.length, 4, '1.4.392 does not add a rail tool')
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.392'), '1.4.392 changelog row')
+  assert.match(latestChange('1.4.392').title, /road/)
+  assert.match(latestChange('1.4.392').items.join('\n'), /Too far from the road/)
+  assert.match(latestChange('1.4.392').items.join('\n'), /gold dot/)
+  assert.doesNotMatch(
+    latestChange('1.4.392').items.join('\n'),
+    /Fixes #|Closes #|Resolves #|monkey|balloon/i,
+    '1.4.392 changelog avoids GitHub close keywords',
   )
 }
 
