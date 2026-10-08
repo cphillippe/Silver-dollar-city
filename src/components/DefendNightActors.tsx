@@ -73,8 +73,14 @@ export interface DefendNightActorsProps {
   onOpenUpgrade?: (id: CityPlotId) => void
   /** Lamp that just spent a spark. Brief ring only — peel 4 owns the burst. */
   upFlashId?: CityPlotId | null
-  /** Tap-select preview. The ring radius is the combat hit radius. */
-  ghost?: { at: { x: number; y: number }; range: number; blocked: boolean } | null
+  /** Tap or drag preview. The ring radius is the combat hit radius. */
+  ghost?: {
+    at: { x: number; y: number }
+    range: number
+    blocked: boolean
+    reaches: boolean
+    road: string
+  } | null
 }
 
 /**
@@ -327,15 +333,22 @@ export function DefendNightActorsSvg({
                   </g>
                 )
               })}
+              {ghost?.road ? (
+                <path className="defend-road-cover" data-road-cover="yes" d={ghost.road} pointerEvents="none" />
+              ) : null}
               {ghost ? (
                 <g
-                  className={`defend-ghost${ghost.blocked ? ' is-nogo' : ''}`}
+                  className={`defend-ghost${ghost.blocked ? ' is-nogo' : ghost.reaches ? ' is-reaches' : ' is-short'}`}
                   data-lamp-ghost={ghost.blocked ? 'nogo' : 'open'}
+                  data-reaches={ghost.reaches ? 'yes' : 'no'}
                   data-hit-range={ghost.range}
                   transform={`translate(${ghost.at.x} ${ghost.at.y})`}
                   pointerEvents="none"
                 >
                   <circle className="defend-ghost-ring" r={ghost.range} />
+                  {ghost.blocked ? null : (
+                    <ellipse className="defend-plant-shadow" cx="0" cy="18" rx="20" ry="7" />
+                  )}
                   <image
                     className="defend-ghost-lamp"
                     href={nightTowers.lampSrc('idle')}
@@ -344,6 +357,9 @@ export function DefendNightActorsSvg({
                     width={ghostBox.w}
                     height={ghostBox.h}
                   />
+                  {ghost.blocked ? null : (
+                    <circle className="defend-plant-dot" data-plant-pin="yes" r="11" />
+                  )}
                 </g>
               ) : null}
               {raiders.map((raider) => {

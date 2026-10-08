@@ -1,4 +1,5 @@
 import type { CityPlotId } from '../lib/city'
+import { LAMP_TOO_FAR } from '../lib/lampPlace'
 import { WATCH_ABILITY_LABEL } from '../lib/defend'
 import { boardFill, boardFillPoint, boardPoint as mapBoardPoint, boardView, nightTowers } from '../nightWatch'
 import type { DefendNightSkyProps } from './DefendNightSky'
@@ -117,6 +118,18 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
           onClose={onCloseUpgrade as () => void}
           levelBurst={levelBurst}
         />
+      ) : null}
+      {ghost && !ghost.blocked && !ghost.reaches && boardBox && boardBox.w > 0 ? (
+        <span
+          className="defend-ghost-hint"
+          data-too-far={LAMP_TOO_FAR}
+          style={{
+            left: place(boardBox, ghost.at).left,
+            top: place(boardBox, { x: ghost.at.x, y: ghost.at.y - ghost.range }).top,
+          }}
+        >
+          {LAMP_TOO_FAR}
+        </span>
       ) : null}
       {typeChips}
       <DefendNightWalkerCue
