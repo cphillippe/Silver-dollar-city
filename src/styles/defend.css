@@ -3151,3 +3151,39 @@ img.walker-face.easy-walker-face,
     animation: none;
   }
 }
+
+/* 1.4.390: tap a card, then the map. The ghost ring is the hit ring.
+   Open ground stays gold. Road, houses, and chrome turn the ghost red.
+   Real alpha only — no white plate behind the lamp. */
+.defend-page.is-placing .defend-board {
+  touch-action: none;
+}
+
+.defend-page.is-easy-watch.is-placing .nw-rail .defend-ability.is-on {
+  box-shadow:
+    0 0 0 3px rgba(255, 204, 51, 0.95),
+    0 0 14px rgba(255, 176, 40, 0.8);
+}
+
+.defend-ghost-ring {
+  fill: rgba(255, 204, 51, 0.16);
+  stroke: rgba(255, 214, 80, 0.92);
+  stroke-width: 4;
+  stroke-dasharray: 8 7;
+  vector-effect: non-scaling-stroke;
+}
+
+.defend-ghost-lamp {
+  opacity: 0.62;
+  pointer-events: none;
+}
+
+.defend-ghost.is-nogo .defend-ghost-ring {
+  fill: rgba(226, 48, 64, 0.24);
+  stroke: rgba(255, 64, 72, 0.95);
+}
+
+.defend-ghost.is-nogo .defend-ghost-lamp {
+  opacity: 0.78;
+  filter: brightness(0.72) sepia(1) hue-rotate(-28deg) saturate(7);
+}

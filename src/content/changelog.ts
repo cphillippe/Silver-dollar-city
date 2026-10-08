@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.390',
+    title: 'Night Watch lamps plant on open ground',
+    when: '2026-10-08',
+    items: [
+      'Easy Night Watch lets you tap Love, Logic, Reason, or Science, then tap open ground to plant that lamp. The road, houses, trees, water, and the buttons stay blocked. A blocked tap shows a red lamp and does not plant. The ring you see is the ring that hits. Begin still stays pale until a lamp is planted, then turns solid gold.',
+    ],
+  },
+  {
     version: '1.4.389',
     title: 'Night Watch Begin waits for a lamp',
     when: '2026-10-08',

@@ -1,9 +1,8 @@
 import type { CityPlotId, CityStage } from '../../lib/city.ts'
 import { abilityRange, defendPads, dist, padStage, towerCooldown } from '../../lib/defend.ts'
-import { pathClearance } from '../path/data.ts'
+import { isFreeSpot, lampAnchor, pathClearance } from '../path/data.ts'
 import type { ProgressState } from '../../types.ts'
 import { nightParts } from '../parts/index.ts'
-import { nightPath } from '../path/index.ts'
 import type { NightPoint } from '../types.ts'
 
 export type NightLampPose = 'idle' | 'firing'
@@ -24,19 +23,19 @@ const LOCAL_LAMP: Record<NightLampPose, string> = {
 export interface NightTowersModule {
   /** Lots that can hold a lamp right now. */
   pads(progress: ProgressState): CityPlotId[]
-  anchor(id: CityPlotId): NightPoint
+  anchor(id: string): NightPoint
   /** Where a shot leaves the lamp. */
-  muzzle(id: CityPlotId): NightPoint
-  stage(id: CityPlotId, progress: ProgressState): CityStage
+  muzzle(id: string): NightPoint
+  stage(id: string, progress: ProgressState): CityStage
   range(
-    id: CityPlotId,
+    id: string,
     ability: string,
     progress: ProgressState,
     runTier?: Record<string, number>,
   ): number
-  cooldown(id: CityPlotId, progress: ProgressState): number
+  cooldown(id: string, progress: ProgressState): number
   inRange(
-    id: CityPlotId,
+    id: string,
     ability: string,
     progress: ProgressState,
     target: NightPoint,
@@ -49,24 +48,33 @@ export interface NightTowersModule {
   lampImageBox(): { x: number; y: number; w: number; h: number }
 }
 
+function seatStage(id: string, progress: ProgressState) {
+  // A free seat is a basic lamp. It does not borrow a cottage's city stage.
+  return isFreeSpot(id) ? 'empty' : padStage(id as CityPlotId, progress)
+}
+
 export const nightTowers: NightTowersModule = {
   pads: defendPads,
-  anchor: (id) => nightPath.anchor(id),
+  anchor: (id) => lampAnchor(id),
   muzzle: (id) => {
-    const at = nightPath.anchor(id)
+    const at = lampAnchor(id)
     const { h, footY } = TOWER_LAMP_SPRITE
     return { x: at.x, y: at.y - (h - footY) + 10 }
   },
-  stage: padStage,
+  stage: (id, progress) => seatStage(id, progress),
+  /**
+   * Hit radius. The plant ghost draws this same value for the same seat,
+   * so the ring on screen is the ring that hits.
+   */
   range: (id, ability, progress, runTier) =>
     lampReach(
       id,
-      abilityRange(ability, padStage(id, progress), progress, runTier),
-      pathClearance(nightPath.anchor(id)),
+      abilityRange(ability, seatStage(id, progress), progress, runTier),
+      pathClearance(lampAnchor(id)),
     ),
-  cooldown: (id, progress) => towerCooldown(padStage(id, progress)),
+  cooldown: (id, progress) => towerCooldown(seatStage(id, progress)),
   inRange: (id, ability, progress, target, runTier) =>
-    dist(nightPath.anchor(id), target) <= nightTowers.range(id, ability, progress, runTier),
+    dist(lampAnchor(id), target) <= nightTowers.range(id, ability, progress, runTier),
   lampSrc: (pose) => nightParts.src('lamp', pose) ?? LOCAL_LAMP[pose],
   lampPose: (hot) => (hot ? 'firing' : 'idle'),
   lampImageBox: () => {

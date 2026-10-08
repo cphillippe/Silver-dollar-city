@@ -28,9 +28,9 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
     boardRef, viewBox, shake, won, phase, fireBest, easyTap, onBoardTap,
     pads, planted, progress, raiders, raiderAt, ability, towerType, unlocked,
     flash, togglePad, fire, fireAtRaider, shots, easy, blasts, tapTarget, tapPos, tapJuice,
-    walkerCalls, loreLine, runTier, boosting, onBoostTower, upgradeAt, onOpenUpgrade, upFlashId,
+    walkerCalls, loreLine, runTier, boosting, onBoostTower,     upgradeAt, onOpenUpgrade, upFlashId, ghost = null,
     upgradePoint, boardBox, runSparks = 0, levelBurst = null, onPullLamp, onCloseUpgrade,
-    plateFill = false,
+    plateFill = false, onPlacePointer,
   } = props
   const place = plateFill ? boardFillPoint : mapBoardPoint
   const cardAbility = upgradeAt ? towerType[upgradeAt] : undefined
@@ -73,6 +73,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
         fireBest={fireBest}
         easyTap={easyTap}
         onBoardTap={onBoardTap}
+        onPlacePointer={onPlacePointer}
       >
         <DefendNightActorsSvg
           easyTap={easyTap}
@@ -98,6 +99,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
           upgradeAt={upgradeAt}
           onOpenUpgrade={onOpenUpgrade}
           upFlashId={upFlashId}
+          ghost={ghost}
         />
       </DefendNightSky>
       {showCard ? (
