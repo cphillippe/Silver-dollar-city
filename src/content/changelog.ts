@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.392',
+    title: 'Night Watch lamps show when they reach the road',
+    when: '2026-10-08',
+    items: [
+      'Easy Night Watch paints the ring gold when a lamp can reach the yellow road, and lights that stretch of road. A lamp too far away turns the ring amber and says Too far from the road. You can still plant it. A level I lamp reaches a little farther, so one near the road can pop a walker. A gold dot marks the spot the lamp will land.',
+    ],
+  },
+  {
     version: '1.4.391',
     title: 'Night Watch lamps drag onto the map',
     when: '2026-10-08',

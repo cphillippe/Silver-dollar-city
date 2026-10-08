@@ -65,11 +65,12 @@ export const nightTowers: NightTowersModule = {
   /**
    * Hit radius. The plant ghost draws this same value for the same seat,
    * so the ring on screen is the ring that hits.
+   * A free seat adds `FREE_LAMP_RANGE_BONUS` on every tier (1.4.392).
    */
   range: (id, ability, progress, runTier) =>
     lampReach(
       id,
-      abilityRange(ability, seatStage(id, progress), progress, runTier),
+      freeLampBase(id, abilityRange(ability, seatStage(id, progress), progress, runTier)),
       pathClearance(lampAnchor(id)),
     ),
   cooldown: (id, progress) => towerCooldown(seatStage(id, progress)),
@@ -93,6 +94,21 @@ export const nightTowers: NightTowersModule = {
  * and pops the whole wave, so the exit leak never runs. A thinner nick misses.
  */
 export const LAMP_ROAD_OVERLAP = 24
+
+/**
+ * Extra reach for a lamp planted on open ground (1.4.392).
+ * City seats stay on `towerRange`. Free seats were level I at 96, which
+ * covered the path only out to 72 units (96 minus the overlap floor).
+ * On the SE board (about 0.51 CSS px per unit) that is ~36px, so a lamp
+ * 35–45px off the path never fired. +18 makes level I 114 and covers a
+ * gap of 90 units, about 45 CSS px at that scale. Levels II and III keep
+ * the +18 step, so they move 114 → 132 and 132 → 150.
+ */
+export const FREE_LAMP_RANGE_BONUS = 18
+
+function freeLampBase(id: string, base: number): number {
+  return isFreeSpot(id) ? base + FREE_LAMP_RANGE_BONUS : base
+}
 
 /**
  * How far this lamp can hit.

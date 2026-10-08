@@ -3198,3 +3198,50 @@ img.walker-face.easy-walker-face,
   opacity: 0.78;
   filter: brightness(0.72) sepia(1) hue-rotate(-28deg) saturate(7);
 }
+
+/* 1.4.392: gold ring when the combat range meets the road, amber when it does not.
+   The amber spot can still be planted. The pin sits on the plant point under the lamp. */
+.defend-ghost.is-short .defend-ghost-ring {
+  fill: rgba(255, 150, 40, 0.1);
+  stroke: rgba(232, 140, 36, 0.55);
+}
+
+.defend-ghost.is-reaches .defend-ghost-ring {
+  fill: rgba(255, 204, 51, 0.2);
+  stroke: rgba(255, 214, 80, 0.98);
+}
+
+.defend-road-cover {
+  fill: none;
+  stroke: rgba(120, 230, 140, 0.9);
+  stroke-width: 22;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.defend-plant-shadow {
+  fill: rgba(36, 12, 64, 0.5);
+}
+
+.defend-plant-dot {
+  fill: rgba(255, 214, 80, 0.96);
+  stroke: rgba(90, 42, 8, 0.85);
+  stroke-width: 2;
+}
+
+.defend-ghost-hint {
+  position: absolute;
+  z-index: 5;
+  transform: translate(-50%, -115%);
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(72, 36, 8, 0.86);
+  color: #ffd27a;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  pointer-events: none;
+}
