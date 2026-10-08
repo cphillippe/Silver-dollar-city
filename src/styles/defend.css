@@ -327,6 +327,11 @@ img.walker-face.easy-walker-face,
   pointer-events: none;
 }
 
+/* 1.4.393: the wave tap on a planted lamp is caught here, so it is not a miss. */
+.defend-pad.is-tower-scenery .defend-hit[data-lamp-wave-hit] {
+  pointer-events: all;
+}
+
 /* 1.4.343: planted lamps spend sparks between waves (Fixes #491). */
 .defend-pad.is-boost-pick .defend-pool {
   stroke: rgba(255, 204, 51, 0.85);
