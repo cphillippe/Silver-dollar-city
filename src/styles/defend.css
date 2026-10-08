@@ -3064,3 +3064,90 @@ img.walker-face.easy-walker-face,
     font-size: 10px;
   }
 }
+
+/* 1.4.389: Begin follows the planted count.
+   Tip 1.4.383 kept the waiting banner solid gold and faded it after a plant.
+   On a phone that reads backwards: 0 lamps looked tappable, and a planted lamp looked dead.
+   0 lamps: pale and not a gold call. 1 or more: solid gold.
+   Ring slots do not drive this. A later free-placement pass can keep the same count. */
+@media (max-width: 480px) {
+  .defend-page.is-easy-watch .nw-docks .defend-go.is-awaiting-plant,
+  .defend-page.is-easy-watch .nw-docks .defend-go.is-awaiting-plant:disabled {
+    animation: none;
+    opacity: 1;
+    cursor: not-allowed;
+    color: #5c5468;
+    -webkit-text-fill-color: #5c5468;
+    background: linear-gradient(180deg, #e4deea 0%, #c8c0d2 52%, #b0a8ba);
+    border-color: #d5cedf;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    filter: none;
+    transform: none;
+  }
+
+  .defend-page.is-easy-watch .nw-docks .defend-go.is-after-plant {
+    animation: none;
+    opacity: 1;
+    cursor: pointer;
+    color: #2a1c08;
+    -webkit-text-fill-color: #2a1c08;
+    background: linear-gradient(180deg, #fff6b8 0%, #ffcc33 46%, #ff9f1a);
+    border-color: #fff3c4;
+    box-shadow:
+      var(--candy-lip),
+      0 12px 22px rgba(255, 120, 40, 0.38),
+      var(--candy-shine);
+    filter: none;
+    transition: none;
+  }
+}
+
+.defend-plant-first {
+  margin: 0;
+  padding: 3px 8px;
+  border-radius: 8px;
+  background: rgba(18, 6, 46, 0.88);
+  color: #fff6df;
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.2;
+  pointer-events: none;
+}
+
+/* Nudge the right-hand lamp cards while Begin is waiting on a plant. */
+@keyframes nw-lamp-nudge {
+  0%,
+  100% {
+    transform: translateX(0);
+    box-shadow: 0 0 0 0 rgba(255, 204, 51, 0);
+  }
+  50% {
+    transform: translateX(-3px);
+    box-shadow: 0 0 0 3px rgba(255, 204, 51, 0.55);
+  }
+}
+
+.defend-page.is-easy-watch.is-need-lamp .nw-rail::before {
+  content: '';
+  position: absolute;
+  z-index: 7;
+  left: -14px;
+  top: 34px;
+  width: 0;
+  height: 0;
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  border-left: 9px solid #ffe08a;
+  filter: drop-shadow(0 0 3px rgba(255, 204, 51, 0.7));
+  pointer-events: none;
+}
+
+.defend-page.is-easy-watch.is-need-lamp .nw-rail .defend-abilities {
+  animation: nw-lamp-nudge 1.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .defend-page.is-easy-watch.is-need-lamp .nw-rail .defend-abilities {
+    animation: none;
+  }
+}
