@@ -1,9 +1,14 @@
+import { useEffect, useRef, useState } from 'react'
+import type { PointerEvent as ReactPointerEvent } from 'react'
 import { easyFacingLine, loveHowTo } from '../lib/easy'
 import { learningForTool } from '../lib/learning'
+import { LAMP_DRAG_START_PX } from '../lib/lampPlace'
 import { boostCost, combatTier, TIER_MARK, TOOL_TIER_MAX, WATCH_TOOLS } from '../lib/watchTools'
 import { AbilityMark } from './GemMark'
 import type { ProgressState } from '../types'
 import type { WatchAbility } from '../lib/defend'
+
+export type LampDragPhase = 'move' | 'drop' | 'cancel'
 
 export interface DefendAbilityBarProps {
   progress: ProgressState
@@ -24,6 +29,10 @@ export interface DefendAbilityBarProps {
   boosting: boolean
   /** Easy plant: the picked card is the one a map tap will place. */
   placing?: boolean
+  /** Easy plant: slide off the card to move a ghost. A short tap still selects. */
+  onLampDrag?: (phase: LampDragPhase, ability: WatchAbility, clientX: number, clientY: number) => void
+  /** True from press to release so a map tap does not place during the slide. */
+  onCardPress?: (down: boolean) => void
   onBoost: (id: WatchAbility) => void
 }
 
@@ -41,8 +50,77 @@ export function DefendAbilityBar({
   sparks,
   boosting,
   placing = false,
+  onLampDrag,
+  onCardPress,
   onBoost,
 }: DefendAbilityBarProps) {
+  const swallowClick = useRef(false)
+  const stopListen = useRef<(() => void) | null>(null)
+  const [dragFrom, setDragFrom] = useState<WatchAbility | null>(null)
+  const onLampDragRef = useRef(onLampDrag)
+  const onCardPressRef = useRef(onCardPress)
+  onLampDragRef.current = onLampDrag
+  onCardPressRef.current = onCardPress
+
+  useEffect(() => () => stopListen.current?.(), [])
+
+  function trackCard(event: ReactPointerEvent<HTMLButtonElement>, ability: WatchAbility, open: boolean) {
+    if (!placing || !open || boosting) return
+    if (event.pointerType === 'mouse' && event.button !== 0) return
+    stopListen.current?.()
+    const start = {
+      pointerId: event.pointerId,
+      ability,
+      x: event.clientX,
+      y: event.clientY,
+      moved: false,
+    }
+    let done = false
+    swallowClick.current = false
+    onCardPressRef.current?.(true)
+    const finish = (ev: PointerEvent, drop: boolean) => {
+      if (done || ev.pointerId !== start.pointerId) return
+      done = true
+      stopListen.current?.()
+      stopListen.current = null
+      setDragFrom((current) => (current === ability ? null : current))
+      onCardPressRef.current?.(false)
+      if (!start.moved) {
+        // A touch tap may not emit click. Selecting here keeps the short tap.
+        setToolLock(null)
+        setAbility(start.ability)
+        return
+      }
+      swallowClick.current = true
+      if (ev.cancelable) ev.preventDefault()
+      ev.stopPropagation()
+      onLampDragRef.current?.(drop ? 'drop' : 'cancel', start.ability, ev.clientX, ev.clientY)
+    }
+    const move = (ev: PointerEvent) => {
+      if (done || ev.pointerId !== start.pointerId) return
+      const dx = ev.clientX - start.x
+      const dy = ev.clientY - start.y
+      if (!start.moved && dx * dx + dy * dy < LAMP_DRAG_START_PX * LAMP_DRAG_START_PX) return
+      if (!start.moved) {
+        start.moved = true
+        setDragFrom(ability)
+      }
+      if (ev.cancelable) ev.preventDefault()
+      onLampDragRef.current?.('move', start.ability, ev.clientX, ev.clientY)
+    }
+    const up = (ev: PointerEvent) => finish(ev, true)
+    const cancel = (ev: PointerEvent) => finish(ev, false)
+    const opts: AddEventListenerOptions = { capture: true, passive: false }
+    window.addEventListener('pointermove', move, opts)
+    window.addEventListener('pointerup', up, opts)
+    window.addEventListener('pointercancel', cancel, opts)
+    stopListen.current = () => {
+      window.removeEventListener('pointermove', move, opts)
+      window.removeEventListener('pointerup', up, opts)
+      window.removeEventListener('pointercancel', cancel, opts)
+    }
+  }
+
   return (
           <div className="defend-abilities" role="group" aria-label="Night abilities">
             {WATCH_TOOLS.map((tool) => {
@@ -70,12 +148,19 @@ export function DefendAbilityBar({
                   className={`defend-ability ${ability === tool.id ? 'is-on' : ''} ${open ? '' : 'is-locked'} ${placed ? 'is-placed' : ''} ${firing && firingId === tool.id ? 'is-firing' : ''} ${spendDry ? 'is-spark-dry' : ''}`}
                   data-type={tool.id}
                   data-lamp-selected={placing && ability === tool.id ? 'yes' : undefined}
+                  data-dragging={dragFrom === tool.id ? 'yes' : undefined}
                   data-slot={open ? (placed ? 0 : 1) : undefined}
                   data-spark-dry={spendDry ? 'yes' : undefined}
                   aria-pressed={ability === tool.id}
                   title={spendDry ? `${claim} Need a spark.` : claim}
                   disabled={spendDry}
+                  style={placing && open ? { touchAction: 'none' } : undefined}
+                  onPointerDown={(event) => trackCard(event, tool.id, open)}
                   onClick={() => {
+                    if (swallowClick.current) {
+                      swallowClick.current = false
+                      return
+                    }
                     if (!open) {
                       setToolLock(
                         `${tool.label} is locked. Lock in a matching line to deploy this tool.`,

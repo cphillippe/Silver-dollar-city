@@ -86,7 +86,13 @@ import {
   wavePackSize,
 } from '../src/lib/defend.ts'
 import { boardFill, boardFillPoint } from '../src/nightWatch/map/phoneFill.ts'
-import { commitLamp, lampSpotBlocked } from '../src/lib/lampPlace.ts'
+import {
+  commitLamp,
+  dragGhostClient,
+  LAMP_DRAG_LIFT_PX,
+  LAMP_DRAG_START_PX,
+  lampSpotBlocked,
+} from '../src/lib/lampPlace.ts'
 import { nightEnemies as nightEnemiesMod } from '../src/nightWatch/enemies/index.ts'
 import { nightParts as nightPartsMod } from '../src/nightWatch/parts/index.ts'
 import { nightPath as nightPathMod } from '../src/nightWatch/path/index.ts'
@@ -1269,7 +1275,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.390')
+assert.equal(APP_VERSION, '1.4.391')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -4570,6 +4576,50 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.390').items.join('\n'),
     /Fixes #|Closes #|Resolves #|monkey|balloon/i,
     '1.4.390 changelog avoids GitHub close keywords',
+  )
+}
+
+// Night Watch 1.4.391: drag a lamp from its card. A short tap still selects.
+{
+  const ability391 = readFileSync(new URL('../src/components/DefendAbilityBar.tsx', import.meta.url), 'utf8')
+  const defendSrc391 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const css391 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const placeSrc391 = readFileSync(new URL('../src/lib/lampPlace.ts', import.meta.url), 'utf8')
+  assert.equal(LAMP_DRAG_START_PX, 10, '1.4.391 a short card press stays a tap')
+  assert.ok(LAMP_DRAG_LIFT_PX >= 24 && LAMP_DRAG_LIFT_PX <= 48, '1.4.391 the ghost sits above the finger')
+  assert.deepEqual(dragGhostClient(80, 240), { x: 80, y: 240 - LAMP_DRAG_LIFT_PX })
+  assert.match(ability391, /onPointerDown/)
+  assert.match(ability391, /LAMP_DRAG_START_PX/)
+  assert.match(ability391, /touchAction: 'none'/)
+  assert.match(ability391, /setAbility\(tool\.id\)/, '1.4.391 a short tap still selects the card')
+  assert.doesNotMatch(ability391, /draggable|onDragStart/, '1.4.391 uses pointer events, not a native drag image')
+  assert.match(defendSrc391, /function onLampDrag/)
+  assert.match(defendSrc391, /previewLamp\(/)
+  assert.match(defendSrc391, /commitLamp\(/)
+  assert.match(defendSrc391, /overTowerCards/)
+  assert.match(defendSrc391, /lampDragLive/)
+  assert.match(defendSrc391, /if \(!next\.ok\) return/)
+  assert.match(placeSrc391, /export function dragGhostClient/)
+  assert.match(placeSrc391, /export function overTowerCards/)
+  assert.match(css391, /1\.4\.391: the drag starts on a tower card/)
+  assert.match(
+    css391,
+    /\.defend-page\.is-placing \.nw-rail \.defend-ability \{[^}]*touch-action: none/,
+  )
+  assert.match(css391, /1\.4\.389: Begin follows the planted count/, '1.4.391 keeps Begin on the planted count')
+  assert.match(css391, /\.defend-ghost\.is-nogo \.defend-ghost-ring \{[^}]*rgba\(226, 48, 64/)
+  assert.match(defendSrc391, /const awaitingLamp = planted\.length < 1/)
+  assert.match(defendSrc391, /EASY\.nightPlantFirst/)
+  assert.equal(WATCH_TOOLS.length, 4, '1.4.391 does not add a rail tool')
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.391'), '1.4.391 changelog row')
+  assert.match(latestChange('1.4.391').title, /drag/)
+  assert.match(latestChange('1.4.391').items.join('\n'), /red/)
+  assert.match(latestChange('1.4.391').items.join('\n'), /short tap/)
+  assert.match(latestChange('1.4.391').items.join('\n'), /solid gold/)
+  assert.doesNotMatch(
+    latestChange('1.4.391').items.join('\n'),
+    /Fixes #|Closes #|Resolves #|monkey|balloon/i,
+    '1.4.391 changelog avoids GitHub close keywords',
   )
 }
 
