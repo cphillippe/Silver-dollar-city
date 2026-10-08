@@ -29,6 +29,7 @@ export function DefendTowerCard({
   levelBurst = null,
   clearOf = [],
   cameraScale = 0.55,
+  roadNote = '',
 }: {
   plotId: CityPlotId
   ability: string
@@ -46,6 +47,8 @@ export function DefendTowerCard({
   clearOf?: readonly TowerCardPoint[]
   /** Board camera scale. Lamp hits are viewBox units times this. */
   cameraScale?: number
+  /** Same reach note the plant ghost shows. Empty when this level already reaches. */
+  roadNote?: string
 }) {
   const cardRef = useRef<HTMLDivElement>(null)
   const tier = combatTier(ability, runTier)
@@ -138,6 +141,11 @@ export function DefendTowerCard({
         </span>
       ) : null}
       <p className="defend-tower-gain">{maxed ? 'As strong as it gets' : 'Range ↑  ·  Damage ↑'}</p>
+      {roadNote ? (
+        <p className="defend-tower-road" data-road-note={roadNote}>
+          {roadNote}
+        </p>
+      ) : null}
       {maxed ? null : (
         <button
           type="button"

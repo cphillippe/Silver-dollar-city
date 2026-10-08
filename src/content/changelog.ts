@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.393',
+    title: 'Night Watch walkers enter at the gate',
+    when: '2026-10-08',
+    items: [
+      'Walkers step in at the gate. A level I lamp near the road can still pop a walker. A lamp set back says Reaches at Level II or Reaches at Level III when a stronger lamp would reach the road. Too far from the road shows only when even level III cannot reach. The lamp card says the same thing. Tapping a planted lamp while walkers are out does not count as a miss.',
+    ],
+  },
+  {
     version: '1.4.392',
     title: 'Night Watch lamps show when they reach the road',
     when: '2026-10-08',

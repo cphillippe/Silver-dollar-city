@@ -327,6 +327,11 @@ img.walker-face.easy-walker-face,
   pointer-events: none;
 }
 
+/* 1.4.393: the wave tap on a planted lamp is caught here, so it is not a miss. */
+.defend-pad.is-tower-scenery .defend-hit[data-lamp-wave-hit] {
+  pointer-events: all;
+}
+
 /* 1.4.343: planted lamps spend sparks between waves (Fixes #491). */
 .defend-pad.is-boost-pick .defend-pool {
   stroke: rgba(255, 204, 51, 0.85);
@@ -872,6 +877,26 @@ img.walker-face.easy-walker-face,
   }
   100% {
     transform: scale(1);
+  }
+}
+
+/* 1.4.393: a walker fades in as it steps through the gate. */
+@keyframes defend-gate-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.defend-raider {
+  animation: defend-gate-in 250ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .defend-raider {
+    animation: none;
   }
 }
 
@@ -2239,6 +2264,16 @@ img.walker-face.easy-walker-face,
   margin-top: 6px;
   color: #ffe9b0;
   text-align: center;
+}
+
+/* 1.4.393: the planted card repeats the ghost reach note. */
+.defend-tower-road {
+  margin: 6px 0 0;
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.25;
+  text-align: center;
+  color: #ffd27a;
 }
 
 .defend-tower-upgrade {
