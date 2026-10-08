@@ -6,8 +6,8 @@ import { isTowerType, plantType } from './nightPlants.ts'
 
 /**
  * Easy lamp placement (1.4.390).
- * Tap a tower card, then tap open ground. The same two calls place a lamp
- * bought mid-night, and a later drag-from-card drop. This file does not drag.
+ * Tap a tower card, then tap open ground. A card press that slides uses the
+ * same preview and commit. This file does not listen for the press.
  */
 export type { NightPoint }
 export { freeSpotId, isFreeSpot, lampAnchor }
@@ -161,6 +161,30 @@ export function lampSpotBlocked(
  */
 export function hudCoversPoint(clientX: number, clientY: number, doc: Document): boolean {
   const nodes = doc.querySelectorAll('.nw-rail, .nw-docks, .nw-balloon-slot, .nw-wave-overlay')
+  for (const node of nodes) {
+    const box = node.getBoundingClientRect()
+    if (box.width < 1 || box.height < 1) continue
+    if (clientX >= box.left && clientX <= box.right && clientY >= box.top && clientY <= box.bottom) {
+      return true
+    }
+  }
+  return false
+}
+
+/** A card press shorter than this stays a tap. Past it, the lamp follows the finger. */
+export const LAMP_DRAG_START_PX = 10
+
+/** CSS pixels the ghost sits above the fingertip so the lamp is not covered. */
+export const LAMP_DRAG_LIFT_PX = 36
+
+/** Client point the ghost uses. The fingertip stays below the lamp. */
+export function dragGhostClient(clientX: number, clientY: number): { x: number; y: number } {
+  return { x: clientX, y: clientY - LAMP_DRAG_LIFT_PX }
+}
+
+/** True when the fingertip is back on the tower cards. That drop cancels. */
+export function overTowerCards(clientX: number, clientY: number, doc: Document): boolean {
+  const nodes = doc.querySelectorAll('.nw-rail .defend-abilities')
   for (const node of nodes) {
     const box = node.getBoundingClientRect()
     if (box.width < 1 || box.height < 1) continue
