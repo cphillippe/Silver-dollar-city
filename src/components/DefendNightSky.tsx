@@ -1,5 +1,5 @@
 import { HEAVEN_POINT } from '../lib/defend'
-import type { RefObject, ReactNode } from 'react'
+import type { PointerEvent, RefObject, ReactNode } from 'react'
 import { MapPlate, NIGHT_MAP, nightPath, type NightPhase } from '../nightWatch'
 
 export interface DefendNightSkyProps {
@@ -13,6 +13,8 @@ export interface DefendNightSkyProps {
   easyTap: boolean
   /** Plant / boost: a tap on open ground closes the lamp upgrade card. */
   onBoardTap?: () => void
+  /** Easy plant: finger on the plate moves the ghost and may place a lamp. */
+  onPlacePointer?: (event: PointerEvent<SVGSVGElement>) => void
   children?: ReactNode
 }
 
@@ -25,6 +27,7 @@ export function DefendNightSky({
   fireBest,
   easyTap: _easyTap,
   onBoardTap,
+  onPlacePointer,
   children,
 }: DefendNightSkyProps) {
   return (
@@ -35,6 +38,9 @@ export function DefendNightSky({
               preserveAspectRatio="xMidYMid meet"
               role="img"
               aria-label="Night road through Silver City"
+              onPointerDown={onPlacePointer}
+              onPointerMove={onPlacePointer}
+              onPointerUp={onPlacePointer}
               onClick={() => {
                 if (phase === 'wave') fireBest()
                 else onBoardTap?.()

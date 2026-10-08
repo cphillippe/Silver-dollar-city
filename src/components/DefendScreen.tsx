@@ -49,6 +49,13 @@ import {
   readNightWatchDebug,
 } from '../lib/nightWatchDebug'
 import {
+  clientToMap,
+  commitLamp,
+  hudCoversPoint,
+  previewLamp,
+  type LampPreview,
+} from '../lib/lampPlace'
+import {
   EASY_PLANT_PADS,
   lampUpgradeTool,
   nightPlantTypes,
@@ -188,6 +195,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const [plants, setPlants] = useState<Record<string, string>>(() =>
     easy ? {} : starterPlants(pads, unlocked),
   )
+  const [ghost, setGhost] = useState<LampPreview | null>(null)
   const plantsRef = useRef(plants)
   plantsRef.current = plants
   const planted = useMemo(() => Object.keys(plants) as CityPlotId[], [plants])
@@ -246,6 +254,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     setUpFlash(null)
     setLevelBurst(null)
     setSparkSpend(false)
+    setGhost(null)
     window.clearTimeout(burstTimer.current)
   }, [phase])
 
@@ -491,6 +500,40 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     const using = unlocked.includes(ability) ? ability : 'love'
     setPlants((current) => plantType(current, id, using))
     closeUpgrade(true)
+  }
+
+  function onPlacePointer(event: { type: string; clientX: number; clientY: number; pointerId: number; currentTarget: EventTarget }) {
+    if (!(easy && phase === 'plant')) return
+    const svg = boardRef.current
+    if (!svg) return
+    const point = clientToMap(svg, event.clientX, event.clientY)
+    if (!point) return
+    if (event.type === 'pointerdown') {
+      try {
+        svg.setPointerCapture(event.pointerId)
+      } catch {
+        /* A tap that cannot capture still places on pointerup. */
+      }
+    }
+    const using = unlocked.includes(ability) ? ability : 'love'
+    const hud = hudCoversPoint(event.clientX, event.clientY, svg.ownerDocument)
+    const look = previewLamp(point, using, progress, runTier, plantsRef.current, hud)
+    if (event.type === 'pointercancel') {
+      setGhost(null)
+      return
+    }
+    if (event.type === 'pointerup') {
+      const next = commitLamp(plantsRef.current, point, using, progress, runTier, hud)
+      if (!next.ok) {
+        setGhost(next.preview)
+        return
+      }
+      setPlants(next.plants)
+      setGhost(null)
+      closeUpgrade(true)
+      return
+    }
+    setGhost(look)
   }
 
   function openUpgrade(id: CityPlotId) {
@@ -1134,13 +1177,14 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       runTier={runTier}
       sparks={runSparks}
       boosting={boosting}
+      placing={easy && phase === 'plant'}
       onBoost={boostTool}
     />
   )
 
   return (
     <main
-      className={`defend-page ${taught ? 'is-puzzle' : 'is-teach'} ${arming ? 'is-arming' : ''} ${won ? 'is-win' : ''} ${shake ? 'is-shake' : ''} ${leakFlash ? 'is-leak' : ''} ${firing ? 'is-firing' : ''} ${stillOn ? 'is-still' : ''} ${mendOn ? 'is-mend' : ''} ${mendShield ? 'is-mend-shield' : ''} ${debugFrozen ? 'is-nw-debug-freeze' : ''} ${easy ? 'is-easy-watch' : ''} ${easyTap ? 'is-easy-tap' : ''} ${boosting ? 'is-boost' : ''} ${boosting && runSparks < 1 ? 'is-spark-broke' : ''} ${easy && phase === 'plant' && awaitingLamp ? 'is-need-lamp' : ''}`}
+      className={`defend-page ${taught ? 'is-puzzle' : 'is-teach'} ${arming ? 'is-arming' : ''} ${won ? 'is-win' : ''} ${shake ? 'is-shake' : ''} ${leakFlash ? 'is-leak' : ''} ${firing ? 'is-firing' : ''} ${stillOn ? 'is-still' : ''} ${mendOn ? 'is-mend' : ''} ${mendShield ? 'is-mend-shield' : ''} ${debugFrozen ? 'is-nw-debug-freeze' : ''} ${easy ? 'is-easy-watch' : ''} ${easyTap ? 'is-easy-tap' : ''} ${boosting ? 'is-boost' : ''} ${boosting && runSparks < 1 ? 'is-spark-broke' : ''} ${easy && phase === 'plant' && awaitingLamp ? 'is-need-lamp' : ''} ${easy && phase === 'plant' ? 'is-placing' : ''}`}
       aria-label={WATCH_TITLE}
     >
       {after ? (
@@ -1236,6 +1280,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
               }
               onCloseUpgrade={closeUpgrade}
               onBoardTap={closeUpgrade}
+              onPlacePointer={onPlacePointer}
+              ghost={ghost}
               plateFill={plateFill}
             />
             {phase === 'wave' ? (

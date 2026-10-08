@@ -22,6 +22,8 @@ export interface DefendAbilityBarProps {
   sparks: number
   /** Between waves, a tap spends sparks. Mid-wave a tap only selects. */
   boosting: boolean
+  /** Easy plant: the picked card is the one a map tap will place. */
+  placing?: boolean
   onBoost: (id: WatchAbility) => void
 }
 
@@ -38,6 +40,7 @@ export function DefendAbilityBar({
   runTier,
   sparks,
   boosting,
+  placing = false,
   onBoost,
 }: DefendAbilityBarProps) {
   return (
@@ -66,6 +69,7 @@ export function DefendAbilityBar({
                   type="button"
                   className={`defend-ability ${ability === tool.id ? 'is-on' : ''} ${open ? '' : 'is-locked'} ${placed ? 'is-placed' : ''} ${firing && firingId === tool.id ? 'is-firing' : ''} ${spendDry ? 'is-spark-dry' : ''}`}
                   data-type={tool.id}
+                  data-lamp-selected={placing && ability === tool.id ? 'yes' : undefined}
                   data-slot={open ? (placed ? 0 : 1) : undefined}
                   data-spark-dry={spendDry ? 'yes' : undefined}
                   aria-pressed={ability === tool.id}
