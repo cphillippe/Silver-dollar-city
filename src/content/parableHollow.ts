@@ -27,28 +27,13 @@ export const parableHollow: Area = {
         {
           id: 'a',
           gem: 'cup',
-          text: 'A lawyer asks Jesus, “And who is my neighbor?”',
+          art: 'road1-lawyer',
+          text: 'A lawyer asks, “Who is my neighbor?”',
         },
-        {
-          id: 'b',
-          gem: 'heart',
-          text: 'A man is beaten and left half-dead on the road.',
-        },
-        {
-          id: 'c',
-          gem: 'door',
-          text: 'A priest and then a Levite see him and pass by.',
-        },
-        {
-          id: 'd',
-          gem: 'lamp',
-          text: 'Moved with compassion, a Samaritan binds the wounds, takes him to an inn, and pays.',
-        },
-        {
-          id: 'e',
-          gem: 'star',
-          text: 'Jesus: “Go and do likewise.”',
-        },
+        { id: 'b', gem: 'heart', text: 'Robbers leave a man half dead.' },
+        { id: 'c', gem: 'door', text: 'Two temple men pass by.' },
+        { id: 'd', gem: 'lamp', text: 'A Samaritan has compassion and helps.' },
+        { id: 'e', gem: 'star', text: 'Jesus: “Go and do likewise.”' },
       ],
       teachOnWrong:
         'Luke’s force depends on order: religious insiders fail first; the unexpected outsider becomes the measure of neighbor-love. Try again.',

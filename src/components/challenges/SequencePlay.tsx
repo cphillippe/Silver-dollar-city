@@ -1,16 +1,19 @@
-import { useMemo, useState } from 'react'
-import { shuffle } from '../../lib/shuffle'
-import { plainFor } from '../../content/plain'
-import { easyChromeLine, easyChromeNearDup, isEasy } from '../../lib/easy'
-import { useProgress } from '../../store/progress'
+import { useMemo, useRef, useState } from 'react'
+// Story Strip replaces the deal bank. Older phone peels stay in sortHold.css:
+// 1.4.171: ≤720 peels how/lead/hint chrome in sortHold.css
+// 1.4.186: ≤720 fills top-cluster purple void
+// 1.4.205: ≤720 closes stones→result purple gap
+// 1.4.222: phone portrait extends fill + stones→result so order bank·result close purple void
+// 1.4.243: phone portrait extends board-first HUD peel 171
 import type { SequenceChallenge, SequenceItem } from '../../types'
-import { GemMark } from '../GemMark'
-import { burstStyle } from '../../lib/juice'
-import { easyLead } from '../../lib/words'
-import { PuzzleHint } from './PuzzleHint'
-import { PuzzleLead } from './PuzzleLead'
-import { ResultPanel } from './ResultPanel'
+import { shuffle } from '../../lib/shuffle'
+import { playGemPop, prefersReducedMotion } from '../../lib/juice'
+import { isEasy } from '../../lib/easy'
+import { resolveSequenceVisual } from '../../lib/sequenceArt'
+import { SEQUENCE_DECOY, sequenceVerse } from '../../lib/sequenceVerse'
+import { useProgress } from '../../store/progress'
 import { WinBurst } from './WinBurst'
+import { GhostSlot, StoryPiece, type StripCard } from './StoryPiece'
 
 interface SequencePlayProps {
   challenge: SequenceChallenge
@@ -19,266 +22,276 @@ interface SequencePlayProps {
   onPeek?: () => void
 }
 
-function decoyFor(
-  items: SequenceItem[],
-  nextIndex: number,
-  placed: Set<string>,
-) {
-  const need = items[nextIndex]
-  if (!need) return null
-  const decoys = items.filter((item) => item.id !== need.id && !placed.has(item.id))
-  return shuffle(decoys)[0]?.id ?? null
-}
+type Mark = 'yes' | 'no' | null
 
-function keepDecoy(
-  items: SequenceItem[],
-  nextIndex: number,
-  placed: Set<string>,
-  current: string | null,
-) {
-  const need = items[nextIndex]
-  if (current && need && current !== need.id && !placed.has(current)) return current
-  return decoyFor(items, nextIndex, placed)
+function toCard(item: SequenceItem, index: number, challengeId: string, decoy = false): StripCard {
+  return {
+    id: item.id,
+    text: item.text,
+    orderIndex: decoy ? -1 : index,
+    decoy,
+    visual: decoy
+      ? resolveSequenceVisual(challengeId, { id: item.id, text: item.text, gem: 'coin' }, -1)
+      : resolveSequenceVisual(challengeId, item, index),
+  }
 }
 
 export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePlayProps) {
   const { progress } = useProgress()
   const easy = isEasy(progress)
-  const seed = useMemo(() => shuffle(challenge.items), [challenge.items])
-  const progressive = easy || challenge.items.length >= 4
-  const [order, setOrder] = useState(seed)
-  const [seats, setSeats] = useState<(SequenceItem | null)[]>(seed)
-  const [chain, setChain] = useState<(SequenceItem | null)[]>(() =>
-    challenge.items.map(() => null),
-  )
-  const [decoyId, setDecoyId] = useState(() =>
-    progressive ? decoyFor(challenge.items, 0, new Set()) : null,
-  )
-  const [status, setStatus] = useState<'idle' | 'wrong' | 'ok'>('idle')
-  const [shake, setShake] = useState(false)
+  const count = challenge.items.length
+  const verse = sequenceVerse(challenge.id)
+  const solved = useRef(false)
+  const deck = useMemo(() => {
+    const cards = challenge.items.map((item, index) => toCard(item, index, challenge.id))
+    const decoyText = SEQUENCE_DECOY[challenge.id]
+    const extra =
+      !easy && decoyText
+        ? [
+            toCard(
+              { id: `${challenge.id}-decoy`, text: decoyText, gem: 'coin' },
+              -1,
+              challenge.id,
+              true,
+            ),
+          ]
+        : []
+    return shuffle([...cards, ...extra])
+  }, [challenge, easy])
+  const [order, setOrder] = useState(deck)
+  const [chain, setChain] = useState<(StripCard | null)[]>(() => challenge.items.map(() => null))
+  const [status, setStatus] = useState<'idle' | 'ok'>('idle')
   const [misses, setMisses] = useState(0)
-  const [breakHint, setBreakHint] = useState('')
-
-  function takeItem(id: string) {
-    return order.find((entry) => entry.id === id)
-  }
-
-  function placedIds(nextChain = chain) {
-    return new Set(
-      nextChain.filter((item): item is SequenceItem => item !== null).map((item) => item.id),
-    )
-  }
-
-  function resetBoard() {
-    const next = shuffle(challenge.items)
-    setOrder(next)
-    setSeats(next)
-    setChain(challenge.items.map(() => null))
-    setDecoyId(progressive ? decoyFor(challenge.items, 0, new Set()) : null)
-  }
-
-  function add(id: string) {
-    if (status === 'ok' || shake) return
-    const item = takeItem(id)
-    if (!item) return
-    const dest = chain.findIndex((slot) => slot === null)
-    if (dest < 0) return
-    const need = challenge.items[dest]
-    if (!need) return
-    if (item.id !== need.id) {
-      const nextMisses = misses + 1
-      setStatus('wrong')
-      setShake(true)
-      setMisses(nextMisses)
-      setBreakHint(
-        dest <= 0
-          ? easy
-            ? 'The first stone is already off. The main idea starts somewhere else.'
-            : 'The first stone is already off. The claim starts somewhere else.'
-          : `The first ${dest} sat right. The chain broke at step ${dest + 1} — try that stone again.`,
-      )
-      onMiss()
-      window.setTimeout(() => {
-        setShake(false)
-        if (nextMisses >= 2) resetBoard()
-        setStatus('idle')
-      }, 880)
-      return
-    }
-    const nextSeats = seats.map((slot) => (slot?.id === id ? null : slot))
-    const nextChain = chain.map((slot, index) => (index === dest ? item : slot))
-    setSeats(nextSeats)
-    setChain(nextChain)
-    const nextDest = nextChain.findIndex((slot) => slot === null)
-    setDecoyId(
-      progressive && nextDest >= 0
-        ? keepDecoy(challenge.items, nextDest, placedIds(nextChain), decoyId)
-        : null,
-    )
-    setStatus('idle')
-    if (nextChain.every(Boolean)) {
-      setStatus('ok')
-      onSolved()
-    }
-  }
-
-  function remove(id: string) {
-    if (status === 'ok' || shake) return
-    const item = takeItem(id)
-    if (!item) return
-    const home = order.findIndex((entry) => entry.id === id)
-    const nextChain = chain.map((slot) => (slot?.id === id ? null : slot))
-    setChain(nextChain)
-    setSeats((current) => {
-      if (current.some((slot) => slot?.id === id)) return current
-      const next = [...current]
-      if (home >= 0) next[home] = item
-      return next
-    })
-    const nextDest = nextChain.findIndex((slot) => slot === null)
-    setDecoyId(
-      progressive && nextDest >= 0
-        ? keepDecoy(challenge.items, nextDest, placedIds(nextChain), decoyId)
-        : null,
-    )
-    setStatus('idle')
-  }
+  const [wiggleId, setWiggleId] = useState<string | null>(null)
+  const [snapIndex, setSnapIndex] = useState<number | null>(null)
+  const [marks, setMarks] = useState<Mark[]>(() => challenge.items.map(() => null))
+  const [peeked, setPeeked] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [verseOn, setVerseOn] = useState(false)
 
   const nextIndex = chain.findIndex((slot) => slot === null)
-  const liveIds = new Set(
-    progressive
-      ? [challenge.items[nextIndex]?.id, decoyId].filter((id): id is string => Boolean(id))
-      : order.map((item) => item.id),
-  )
-  // Easy Clear 1.4.146: skip PuzzleHint when it near-dupes PuzzleLead (fg-reason / fg-ground
-  // Keep/Toss stack). Keep order-step .sort-how — that is the mechanic cue, not a Keep/Toss echo.
-  const easyLeadLine = easy ? easyLead(challenge.id, challenge.prompt) : ''
-  const easyPlainHint = easy
-    ? easyChromeLine(plainFor(challenge.id)?.hint ?? challenge.context ?? '')
-    : ''
-  const showEasyPuzzleHint =
-    Boolean(easyPlainHint) && !easyChromeNearDup(easyPlainHint, easyLeadLine)
+  const placed = new Set(chain.filter((slot): slot is StripCard => slot !== null).map((slot) => slot.id))
+  const tray = order.filter((card) => !placed.has(card.id))
+  const full = nextIndex < 0
+  const glowId =
+    misses >= 2 || peeked
+      ? challenge.items[nextIndex >= 0 ? nextIndex : firstWrong(chain, challenge.items)]?.id
+      : undefined
+  const lead = easy
+    ? challenge.id.startsWith('fg-')
+      ? 'Put the steps in order!'
+      : 'Put the story in order!'
+    : challenge.prompt
+  const showSlotCaption = count < 5 || status === 'ok'
+
+  function win() {
+    if (solved.current) return
+    solved.current = true
+    setStatus('ok')
+    setMarks(challenge.items.map(() => 'yes'))
+    playGemPop('win')
+    onSolved()
+    const wait = prefersReducedMotion() ? 0 : 980
+    window.setTimeout(() => setVerseOn(true), wait)
+  }
+
+  function place(card: StripCard, dest: number) {
+    const next = chain.map((slot, index) => (index === dest ? card : slot))
+    setChain(next)
+    setMarks(challenge.items.map(() => null))
+    setSnapIndex(dest)
+    window.setTimeout(() => setSnapIndex((current) => (current === dest ? null : current)), 420)
+    if (easy && next.every(Boolean)) win()
+  }
+
+  function tapCard(card: StripCard) {
+    if (status === 'ok' || busy) return
+    const dest = chain.findIndex((slot) => slot === null)
+    if (dest < 0) return
+    if (easy) {
+      const need = challenge.items[dest]
+      if (!need || card.id !== need.id) {
+        const wait = prefersReducedMotion() ? 0 : 420
+        setBusy(true)
+        setWiggleId(card.id)
+        setMisses((value) => value + 1)
+        onMiss()
+        playGemPop('miss')
+        window.setTimeout(() => {
+          setWiggleId(null)
+          setBusy(false)
+        }, wait)
+        return
+      }
+      playGemPop('find')
+      place(card, dest)
+      return
+    }
+    place(card, dest)
+  }
+
+  function undo(index: number) {
+    if (status === 'ok' || busy || easy) return
+    if (!chain[index]) return
+    setChain((current) => current.map((slot, slotIndex) => (slotIndex === index ? null : slot)))
+    setMarks(challenge.items.map(() => null))
+  }
+
+  function checkOrder() {
+    if (easy || status === 'ok' || busy || !full) return
+    const nextMarks: Mark[] = chain.map((slot, index) =>
+      slot && slot.id === challenge.items[index]?.id ? 'yes' : 'no',
+    )
+    setMarks(nextMarks)
+    if (nextMarks.every((mark) => mark === 'yes')) {
+      win()
+      return
+    }
+    const wait = prefersReducedMotion() ? 0 : 520
+    setBusy(true)
+    setMisses((value) => value + 1)
+    onMiss()
+    playGemPop('miss')
+    window.setTimeout(() => {
+      setChain((current) => current.map((slot, index) => (nextMarks[index] === 'yes' ? slot : null)))
+      setMarks(challenge.items.map(() => null))
+      setBusy(false)
+    }, wait)
+  }
+
+  function reshuffle() {
+    if (status === 'ok') return
+    const loose = shuffle(order.filter((card) => !placed.has(card.id)))
+    const kept = order.filter((card) => placed.has(card.id))
+    setOrder([...kept, ...loose])
+  }
 
   return (
     <div
-      className={`play is-sequence ${progressive ? 'is-deal' : ''} ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''}`}
+      className={`play is-sequence is-story-strip ${status === 'ok' ? 'is-win' : ''}`}
+      data-n={count}
+      data-testid="story-strip"
     >
-      <WinBurst play={status === 'ok'} />
-      <PuzzleLead challenge={challenge} />
-      {easy ? (
-        showEasyPuzzleHint ? (
-          <PuzzleHint text={challenge.context} id={challenge.id} onPeek={onPeek} />
-        ) : null
-      ) : (
-        <PuzzleHint text={challenge.context} id={challenge.id} onPeek={onPeek} />
-      )}
-      {/* Easy Clear 1.4.171: ≤720 peels how/lead/hint chrome in sortHold.css so board stays above fold. */}
-      {/* Easy Clear 1.4.186: ≤720 fills top-cluster purple void in sortHold.css (Fixes #240). */}
-      {/* Easy Clear 1.4.205: ≤720 closes stones→result purple gap (fill 186 stays). */}
-      {/* Easy Clear 1.4.222: phone portrait extends fill + stones→result so order bank·result close purple void (invent Fun/Clear). */}
-      {/* Easy Clear 1.4.243: phone portrait extends board-first HUD peel 171 so how + hint hide and lead clamps on tall phones (invent Fun/Clear). */}
-      <p className="sort-how is-order-how">
-        {challenge.items.map((item, index) => (
-          <span
-            key={item.id}
-            className={`order-step ${index === nextIndex ? 'is-now' : ''} ${chain[index] ? 'is-done' : ''}`}
-          >
-            {index === nextIndex ? index + 1 : ''}
-          </span>
-        ))}
-        tap the next stone
-      </p>
+      <h2 className="strip-lead">{status === 'ok' ? 'Great job!' : lead}</h2>
+      {verse ? (
+        <p className="strip-kicker">
+          {challenge.title} · {verse.ref}
+        </p>
+      ) : null}
 
-      <div className="bank is-order">
-        {order.map((home, index) => {
-          const live = seats[index]?.id === home.id
-          const placedAt = chain.findIndex((slot) => slot?.id === home.id)
-          const faceDown = progressive && live && !liveIds.has(home.id)
-          if (progressive && !live) return null
-          if (faceDown) return null
+      <div
+        className={`strip-board ${status === 'ok' ? 'is-win' : ''}`}
+        data-n={count}
+        role="list"
+        aria-label="Story strip"
+      >
+        <WinBurst play={status === 'ok'} stamp="STORY SET!" />
+        {challenge.items.map((item, index) => {
+          const filled = chain[index]
+          const awaiting = index === nextIndex && status !== 'ok'
+          const mark = marks[index]
           return (
             <div
-              key={home.id}
-              className={`sort-tile sort-seat ${live ? 'is-live' : 'is-gone'} ${faceDown ? 'is-facedown' : ''} ${placedAt >= 0 ? 'was-placed' : ''}`}
+              key={item.id}
+              className={`strip-slot ${awaiting ? 'is-next' : ''} ${snapIndex === index ? 'is-snap' : ''}`}
+              style={{ zIndex: index + 1 }}
+              role="listitem"
             >
-              {faceDown ? (
-                <span className="stone-back" aria-hidden />
+              <span className={`strip-num ${awaiting ? 'is-now' : ''}`}>{index + 1}</span>
+              {filled ? (
+                <StoryPiece
+                  card={filled}
+                  count={count}
+                  hard={!easy}
+                  showCaption={showSlotCaption}
+                  snap={snapIndex === index}
+                  locked={easy || status === 'ok'}
+                  onPress={easy || status === 'ok' ? undefined : () => undo(index)}
+                />
               ) : (
-                <button
-                  type="button"
-                  className="chip"
-                  tabIndex={0}
-                  aria-label={live ? home.text : `Return ${home.text} to its seat`}
-                  onClick={() => (live ? add(home.id) : remove(home.id))}
-                >
-                  {home.gem ? <GemMark gem={home.gem} size="sm" /> : null}
-                  {home.text}
-                </button>
+                <GhostSlot index={index} count={count} hard={!easy} awaiting={awaiting} />
               )}
+              {filled && (easy || mark === 'yes' || status === 'ok') ? (
+                <span className="strip-mark" aria-hidden>
+                  ✓
+                </span>
+              ) : null}
+              {mark === 'no' ? (
+                <span className="strip-mark is-no" aria-hidden>
+                  ✗
+                </span>
+              ) : null}
+              {snapIndex === index && status !== 'ok' ? <span className="strip-snap">SNAP!</span> : null}
             </div>
           )
         })}
       </div>
 
-      {progressive ? null : (
-        <ol className="chain">
-          {challenge.items.map((item, index) => {
-            const placed = chain[index]
-            const awaiting = index === nextIndex && status !== 'ok'
-            return (
-              <li
-                key={item.id}
-                className={`sort-seat ${placed ? 'filled' : 'empty'} ${awaiting ? 'awaiting' : ''}`}
-              >
-                <span className="chain-index">{index + 1}</span>
-                {placed ? (
-                  <button
-                    type="button"
-                    className="chip in-chain"
-                    style={status === 'ok' ? burstStyle(index, 'mid') : undefined}
-                    onClick={() => remove(placed.id)}
-                    >
-                    {placed.gem ? <GemMark gem={placed.gem} size="sm" /> : null}
-                    {placed.text}
-                  </button>
-                ) : (
-                  <span className="placeholder" aria-hidden>
-                    {awaiting ? '↓' : ''}
-                  </span>
-                )}
-              </li>
-            )
-          })}
-        </ol>
+      {status !== 'ok' ? (
+        <p className="strip-how">
+          <span aria-hidden>👆 </span>
+          Tap what comes next
+        </p>
+      ) : (
+        <>
+          <p className="strip-stamp">STORY SET!</p>
+          <p className="strip-stars" aria-hidden>
+            ★ ★ ★
+          </p>
+          {verse && verseOn ? (
+            <figure className="strip-verse">
+              <figcaption>{verse.kicker}</figcaption>
+              <blockquote>“{verse.text}”</blockquote>
+              <cite>{verse.ref}</cite>
+            </figure>
+          ) : null}
+        </>
       )}
 
-      <ResultPanel
-        tone={status === 'idle' ? 'idle' : status === 'ok' ? 'ok' : 'teach'}
-        kicker={
-          status === 'ok'
-            ? 'Well reasoned'
-            : misses >= 2
-              ? 'One more look'
-              : 'The chain bounced'
-        }
-        title={
-          status === 'ok'
-            ? 'The path locks in.'
-            : misses >= 2
-              ? 'Not that order — tiles bounce back.'
-              : breakHint || 'Shake and try the chain again.'
-        }
-        body={
-          status === 'wrong'
-            ? misses >= 2
-              ? isEasy(progress)
-                ? 'Tap the stone that comes next.'
-                : challenge.teachOnWrong
-              : 'No lecture — just find the stone that jumped the line.'
-            : undefined
-        }
-        deeper={challenge.deeper}
-      />
+      {status !== 'ok' ? (
+        <div className="strip-tray" data-count={tray.length}>
+          {tray.map((card) => (
+            <StoryPiece
+              key={card.id}
+              card={card}
+              count={count}
+              hard={!easy}
+              showCaption
+              wiggle={wiggleId === card.id}
+              glow={glowId === card.id}
+              onPress={() => tapCard(card)}
+            />
+          ))}
+        </div>
+      ) : null}
+
+      {status !== 'ok' ? (
+        <div className="strip-foot">
+          <button
+            type="button"
+            className="strip-foot-btn"
+            onClick={() => {
+              onPeek?.()
+              setPeeked(true)
+            }}
+          >
+            Peek
+          </button>
+          {!easy ? (
+            <button type="button" className="strip-check" disabled={!full || busy} onClick={checkOrder}>
+              Check order
+            </button>
+          ) : null}
+          <button type="button" className="strip-foot-btn" onClick={reshuffle}>
+            Shuffle
+          </button>
+        </div>
+      ) : null}
     </div>
   )
+}
+
+function firstWrong(chain: (StripCard | null)[], items: SequenceItem[]): number {
+  const index = chain.findIndex((slot, slotIndex) => slot?.id !== items[slotIndex]?.id)
+  return index >= 0 ? index : 0
 }

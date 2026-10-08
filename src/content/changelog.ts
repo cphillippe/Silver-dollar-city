@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.394',
+    title: 'Order puzzles become picture panels',
+    when: '2026-10-08',
+    items: [
+      'Easy order puzzles are a story strip. Numbered jigsaw slots sit on top. Every remaining picture waits in the tray, face up, with its caption. Tap the panel that comes next. A right panel snaps in. A wrong one wiggles back. After two misses the right card glows. On a win the strip stays, then a short RSV verse card. Hard adds one extra card and a Check order button.',
+    ],
+  },
+  {
     version: '1.4.393',
     title: 'Night Watch walkers enter at the gate',
     when: '2026-10-08',

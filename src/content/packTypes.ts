@@ -40,6 +40,11 @@ export interface PackWord {
   sense: string
 }
 
+export interface PackSequenceItem {
+  text: string
+  art?: string
+}
+
 export interface PackTier {
   id: LessonTierId
   points: number
@@ -50,6 +55,7 @@ export interface PackTier {
   hint?: string
   match: PackMatch
   hold: PackHold
+  sequence?: PackSequenceItem[]
 }
 
 export interface PackJournal {

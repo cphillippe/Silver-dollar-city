@@ -118,7 +118,12 @@ Verses 6–8 widen the circle: more than five hundred, James, “all the apostle
 Verses 6–8 widen the circle: more than five hundred, James, “all the apostles,” and last of all Paul. A creed is not a video. It is a public, early summary of what the churches were already saying.</fullTeach>
           <prompt>Order the core of the tradition Paul says he “delivered” and “received.”</prompt>
           <teachOnWrong>Paul’s wording is tightly patterned: death, burial, raising, appearances (1 Cor 15:3–5). Burial underlines that death was real; appearances underlines that “raised” is not only a metaphor.</teachOnWrong>
-          <challengeTiles />
+          <challengeTiles>
+            <sequenceItem art="creed1-died">Jesus died for our sins.</sequenceItem>
+            <sequenceItem art="creed2-buried">He was buried.</sequenceItem>
+            <sequenceItem art="creed3-raised">He was raised on day three.</sequenceItem>
+            <sequenceItem art="creed4-appeared">Peter, then the Twelve, saw him.</sequenceItem>
+          </challengeTiles>
         </learn>
         <match>
           <sentenceCorrect>Paul hands on an early public creed: died, buried, raised, appeared.</sentenceCorrect>
@@ -885,9 +890,13 @@ He appeared to Cephas, then to the twelve. Then he appeared to more than five hu
 Christ died… he was buried… he was raised on the third day. Burial and raising are both named.</hardTeach>
           <fullTeach>1 Corinthians 15:3–4. Paul hands on what he received. The churches already named Christ died, buried, raised — then he wrote the letter.
 Christ died… he was buried… he was raised on the third day. Burial and raising are both named.</fullTeach>
-          <prompt>Order the steps the churches already named: died, buried, raised.</prompt>
+          <prompt>How did the creed reach Paul's letter?</prompt>
           <teachOnWrong>Paul is handing on something he received. The churches already named Christ died, buried, raised. Try the chain again.</teachOnWrong>
-          <challengeTiles />
+          <challengeTiles>
+            <sequenceItem>Jesus dies, is buried, and is raised.</sequenceItem>
+            <sequenceItem>Believers pass the news on.</sequenceItem>
+            <sequenceItem>Paul writes it in a letter.</sequenceItem>
+          </challengeTiles>
         </learn>
         <match>
           <sentenceCorrect>The churches named Christ died, buried, and raised before Paul wrote.</sentenceCorrect>

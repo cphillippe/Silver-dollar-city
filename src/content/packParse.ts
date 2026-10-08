@@ -10,6 +10,7 @@ import {
   type PackLesson,
   type PackLoci,
   type PackMatch,
+  type PackSequenceItem,
   type PackTier,
   type PackWord,
 } from './packTypes.ts'
@@ -290,6 +291,20 @@ function parseHint(tierInner: string): string {
   return textOf(learn?.inner ?? tierInner, 'hint')
 }
 
+function parseSequence(tierInner: string): PackSequenceItem[] {
+  const learn = child(tierInner, 'learn')
+  const inner = learn?.inner ?? tierInner
+  const tiles = child(inner, 'challengeTiles')
+  if (!tiles?.inner) return []
+  return children(tiles.inner, 'sequenceItem')
+    .map((item) => {
+      const text = strip(item.inner)
+      const art = item.attrs.art
+      return art ? { text, art } : { text }
+    })
+    .filter((item) => item.text)
+}
+
 function parseGloss(tierInner: string, fallback: string): string {
   const learn = child(tierInner, 'learn')
   return textOf(learn?.inner ?? tierInner, 'gloss') || textOf(learn?.inner ?? tierInner, 'mainIdea') || fallback
@@ -323,6 +338,7 @@ function parseTier(
   const word = parseWord(hit.inner)
   const hint = parseHint(hit.inner)
   const gloss = parseGloss(hit.inner, learnFallback)
+  const sequence = parseSequence(hit.inner)
   return {
     id: name,
     points,
@@ -333,6 +349,7 @@ function parseTier(
     hint: hint || undefined,
     match,
     hold,
+    sequence: sequence.length ? sequence : undefined,
   }
 }
 
