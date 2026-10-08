@@ -265,7 +265,12 @@
           <fullTeach>John 1:1–9: the Word was with God and was God; he is the true light. Romans 1:19–20: what can be known of God is plain in the things that have been made. Augustine’s illumination (De Magistro; Confessions VII) treats our seeing of truth as participation in that Light. Aquinas: the intellect is measured by being, and being is from God (ST I, q.16; q.84). Reason is not a late accident. It already leans on a ground.</fullTeach>
           <prompt>Order the walk: lived trust in reason, then the need for a ground, then the Light Scripture names.</prompt>
           <teachOnWrong>Do not leave reason hanging in midair. John names the Word as true light. Romans says the made world makes God knowable. That is a ground, not a shrug.</teachOnWrong>
-          <challengeTiles />
+          <challengeTiles>
+            <sequenceItem>You think, count, and ask why.</sequenceItem>
+            <sequenceItem>Your mind needs solid ground.</sequenceItem>
+            <sequenceItem>Jesus, the Word, is true light.</sequenceItem>
+            <sequenceItem>So your thinking stands on God.</sequenceItem>
+          </challengeTiles>
         </learn>
         <match>
           <sentenceCorrect>The mind you already trust needs a real ground.</sentenceCorrect>
@@ -556,7 +561,12 @@
           <fullTeach>Acts 17:24–28: the God who made the world and everything in it does not live in temples made by hands; he gives to all life and breath and everything; in him we live and move and have our being. Augustine: our heart is restless until it rests in God (Confessions I.1). Aquinas: God is ipsum esse subsistens — not a first brick in the pile, the living source of being (ST I, q.3; q.44). Feser (secondary) traces that same classical theism for modern readers. Cosmo is only the loci guide at Why Gate Bedrock. This is the foundation beat. It is not the later first-mover or kalām walk. It is the living God under the trusts you already spend.</fullTeach>
           <prompt>Order the walk to the living God: trusts, nature’s limit, then Acts 17’s foundation.</prompt>
           <teachOnWrong>Do not stop at a dead first brick. Paul names the living God in whom we live and move and have our being. Cosmo isn’t the ground — God is. That is the foundation of order, reason, and ought.</teachOnWrong>
-          <challengeTiles />
+          <challengeTiles>
+            <sequenceItem>Order, reason, right: who holds them?</sequenceItem>
+            <sequenceItem>Stars and rocks can't hold them.</sequenceItem>
+            <sequenceItem>Paul: God made the world.</sequenceItem>
+            <sequenceItem>In God we live and move.</sequenceItem>
+          </challengeTiles>
         </learn>
         <match>
           <sentenceCorrect>The living God is the foundation of order, reason, and ought.</sentenceCorrect>
@@ -698,12 +708,17 @@
       <hard points="15">
         <learn>
           <hardTeach>Thomas Aquinas, Summa Theologiae I, q.2, a.3, drawing on Aristotle’s account of change (Physics VIII; Metaphysics XII). “First” here is explanatory. It is not automatically “a moment long ago.”
-Critics ask whether quantum events or a past-eternal cosmos break the chain. Defenders reply that contingent, changing states still need a cause of their actuality. The argument’s nerve is explanation, not a stopwatch.</hardTeach>
+Critics ask whether quantum events or a past-eternal cosmos break the chain. Defenders reply that contingent, changing states still need a cause of their actuality. The argument’s nerve is explanation, not a stopwatch. Companion verse, not the First Way itself: “For I the LORD do not change…” (Malachi 3:6).</hardTeach>
           <fullTeach>Thomas Aquinas, Summa Theologiae I, q.2, a.3, drawing on Aristotle’s account of change (Physics VIII; Metaphysics XII). “First” here is explanatory. It is not automatically “a moment long ago.”
-Critics ask whether quantum events or a past-eternal cosmos break the chain. Defenders reply that contingent, changing states still need a cause of their actuality. The argument’s nerve is explanation, not a stopwatch.</fullTeach>
+Critics ask whether quantum events or a past-eternal cosmos break the chain. Defenders reply that contingent, changing states still need a cause of their actuality. The argument’s nerve is explanation, not a stopwatch. Companion verse, not the First Way itself: “For I the LORD do not change…” (Malachi 3:6).</fullTeach>
           <prompt>Order Aquinas’s First Way as a chain of explanation — not as a timeline of yesterday’s events.</prompt>
           <teachOnWrong>Do not turn this into “dominoes starting at the Big Bang.” Aquinas is asking what accounts for change in the present. Infinite backlog is not an explanation if every member is still a receiver of change.</teachOnWrong>
-          <challengeTiles />
+          <challengeTiles>
+            <sequenceItem>Things change all around us.</sequenceItem>
+            <sequenceItem>Something else makes each change.</sequenceItem>
+            <sequenceItem>Each one only passes it on.</sequenceItem>
+            <sequenceItem>A first Changer who never changes.</sequenceItem>
+          </challengeTiles>
         </learn>
         <match>
           <sentenceCorrect>Change now needs a first mover that is not itself changing.</sentenceCorrect>
@@ -745,6 +760,7 @@ Critics ask whether quantum events or a past-eternal cosmos break the chain. Def
         <sources>
           <source>Aristotle, Physics VIII; Metaphysics XII</source>
           <source>Aquinas, Summa Theologiae I, q.2, a.3 (First Way)</source>
+          <source>Malachi 3:6</source>
         </sources>
       </journal>
     </lesson>
@@ -1435,12 +1451,16 @@ Psalm 8: when I look at your heavens… what is man that you are mindful of him?
       <hard points="15">
         <learn>
           <hardTeach>We do not hold the first ink. We hold a river of copies.
-Isaiah 40:8: the grass withers, the flower fades, but the word of our God will stand forever.</hardTeach>
+The grass withers, the flower fades; but the word of our God will stand for ever.</hardTeach>
           <fullTeach>We do not hold the first ink. We hold a river of copies.
-Isaiah 40:8: the grass withers, the flower fades, but the word of our God will stand forever.</fullTeach>
+The grass withers, the flower fades; but the word of our God will stand for ever.</fullTeach>
           <prompt>How does a line travel from an ancient hand to yours?</prompt>
           <teachOnWrong>Transmission is a river, not a single page falling from the sky. Order the hands, then the comparison, then the print.</teachOnWrong>
-          <challengeTiles />
+          <challengeTiles>
+            <sequenceItem>A scribe copies by hand.</sequenceItem>
+            <sequenceItem>Experts compare the old copies.</sequenceItem>
+            <sequenceItem>Your Bible is printed today.</sequenceItem>
+          </challengeTiles>
         </learn>
         <match>
           <sentenceCorrect>We hold a river of copies, not the first ink.</sentenceCorrect>

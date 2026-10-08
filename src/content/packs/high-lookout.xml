@@ -888,9 +888,9 @@ Come to me, all who labor and are heavy laden, and I will give you rest.</fullTe
           <prompt>Jesus’ invitation has an order. Set the stones.</prompt>
           <teachOnWrong>The weary are addressed before the command. Rest is the gift, not a prize for climbing harder.</teachOnWrong>
           <challengeTiles>
-            <sequenceItem>You are tired and carrying too much.</sequenceItem>
-            <sequenceItem>Jesus says, “Come to me.”</sequenceItem>
-            <sequenceItem>He promises rest — not a steeper hill.</sequenceItem>
+            <sequenceItem art="beat1-tired">You carry a heavy load.</sequenceItem>
+            <sequenceItem art="beat2-come">Jesus says, “Come to me.”</sequenceItem>
+            <sequenceItem art="beat3-rest">He gives you rest.</sequenceItem>
           </challengeTiles>
         </learn>
         <match>

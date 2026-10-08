@@ -517,31 +517,19 @@ const sequenceSrc = readFileSync(
   'utf8',
 )
 assert.match(sequenceSrc, /is-sequence/)
-assert.match(sequenceSrc, /bank is-order/)
-assert.match(sequenceSrc, /is-gone/)
-assert.match(sequenceSrc, /sort-seat/)
-assert.match(sequenceSrc, /tap the next stone/)
+assert.match(sequenceSrc, /is-story-strip/)
+assert.match(sequenceSrc, /Tap what comes next/)
 assert.match(sequenceSrc, /is-now/)
-assert.match(sequenceSrc, /is-facedown/)
-assert.match(sequenceSrc, /is-deal/)
-assert.match(sequenceSrc, /decoyFor/)
-assert.match(sequenceSrc, /keepDecoy/)
-assert.match(sequenceSrc, /shake\) return/)
+assert.match(sequenceSrc, /Check order/)
+assert.match(sequenceSrc, /playGemPop/)
 assert.match(sequenceSrc, /need\.id/)
-assert.match(sequenceSrc, /Return \$\{home\.text\} to its seat/)
-assert.match(sequenceSrc, /progressive && !live/)
-assert.match(sequenceSrc, /if \(faceDown\) return null/)
-assert.doesNotMatch(sequenceSrc, /Next step/)
-assert.doesNotMatch(sequenceSrc, /bank\.filter/)
-assert.match(sequenceSrc, /showEasyPuzzleHint/)
-assert.match(sequenceSrc, /easyChromeNearDup/)
-assert.match(sequenceSrc, /easyLeadLine/)
-assert.match(sequenceSrc, /easyPlainHint/)
+assert.match(sequenceSrc, /misses >= 2/)
 assert.match(
-  sequenceSrc,
-  /progressive \? null/,
-  'Jericho two-pick must not render the empty 1–5 chain',
+  readFileSync(new URL('../src/styles/storyStrip.css', import.meta.url), 'utf8'),
+  /touch-action:\s*manipulation/,
 )
+assert.doesNotMatch(sequenceSrc, /Next step/)
+assert.doesNotMatch(sequenceSrc, /is-deal/)
 
 const buildSrc = readFileSync(
   new URL('../src/components/challenges/BuildArgumentPlay.tsx', import.meta.url),
@@ -1167,7 +1155,8 @@ assert.match(cssSrc, /defend-shake/)
 assert.match(cssSrc, /defend-board/)
 assert.match(cssSrc, /defend-lantern/)
 assert.match(cssSrc, /night-watch-glow/)
-assert.match(sequenceSrc, /progressive && !live/)
+assert.match(sequenceSrc, /strip-tray/)
+assert.doesNotMatch(sequenceSrc, /progressive && !live/)
 
 const gemSrc = readFileSync(new URL('../src/components/GemMark.tsx', import.meta.url), 'utf8')
 assert.match(gemSrc, /gem-art/)

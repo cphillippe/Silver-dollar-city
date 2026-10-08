@@ -63,22 +63,10 @@ export const firstGate: Area = {
       context:
         'John 1:1–9 names the Word as the true light. Romans 1:19–20 says what can be known of God is plain in what is made. Reason is not a trick hanging in midair.',
       items: [
-        {
-          id: 'a',
-          text: 'You already trust your mind enough to argue, count, and ask why.',
-        },
-        {
-          id: 'b',
-          text: 'That trust is not a trick hanging in midair — it needs a ground.',
-        },
-        {
-          id: 'c',
-          text: 'John names the Word as the true light; Romans says the made world makes God knowable.',
-        },
-        {
-          id: 'd',
-          text: 'So reason already leans on a real ground — not a shrug.',
-        },
+        { id: 'a', text: 'You think, count, and ask why.' },
+        { id: 'b', text: 'Your mind needs solid ground.' },
+        { id: 'c', text: 'Jesus, the Word, is true light.' },
+        { id: 'd', text: 'So your thinking stands on God.' },
       ],
       teachOnWrong:
         'Do not leave reason hanging in midair. John names the Word as true light. Romans says the made world makes God knowable. That is a ground, not a shrug.',
@@ -131,22 +119,10 @@ export const firstGate: Area = {
       context:
         'Acts 17:24–28: the God who made the world gives life and breath; in him we live and move and have our being. This is not a dead first brick, and it is not the later first-mover or kalām walk.',
       items: [
-        {
-          id: 'a',
-          text: 'Order, reason, and ought are not free-floating.',
-        },
-        {
-          id: 'b',
-          text: 'Finite nature cannot be their ground.',
-        },
-        {
-          id: 'c',
-          text: 'Paul at Athens names the God who made the world and gives life.',
-        },
-        {
-          id: 'd',
-          text: 'In him we live and move and have our being — the living foundation.',
-        },
+        { id: 'a', text: 'Order, reason, right: who holds them?' },
+        { id: 'b', text: 'Stars and rocks can\'t hold them.' },
+        { id: 'c', text: 'Paul: God made the world.' },
+        { id: 'd', text: 'In God we live and move.' },
       ],
       teachOnWrong:
         'Do not stop at a dead first brick. Paul names the living God in whom we live and move and have our being. That is the foundation of order, reason, and ought.',
@@ -163,27 +139,15 @@ export const firstGate: Area = {
       context:
         'Thomas Aquinas, Summa Theologiae I, q.2, a.3, drawing on Aristotle’s account of change (Physics VIII; Metaphysics XII). “First” here is explanatory. It is not automatically “a moment long ago.”',
       items: [
-        {
-          id: 'a',
-          text: 'We observe things actually changing — moving from potential to actual.',
-        },
-        {
-          id: 'b',
-          text: 'Nothing reduces itself from potential to actual; it is changed by another.',
-        },
-        {
-          id: 'c',
-          text: 'A regress of changers cannot, by itself, explain change here and now.',
-        },
-        {
-          id: 'd',
-          text: 'There is a first changer not itself changed — the unmoved mover.',
-        },
+        { id: 'a', text: 'Things change all around us.' },
+        { id: 'b', text: 'Something else makes each change.' },
+        { id: 'c', text: 'Each one only passes it on.' },
+        { id: 'd', text: 'A first Changer who never changes.' },
       ],
       teachOnWrong:
         'Do not turn this into “dominoes starting at the Big Bang.” Aquinas is asking what accounts for change in the present. Infinite backlog is not an explanation if every member is still a receiver of change.',
       deeper:
-        'Critics ask whether quantum events or a past-eternal cosmos break the chain. Defenders reply that contingent, changing states still need a cause of their actuality. The argument’s nerve is explanation, not a stopwatch.',
+        'Critics ask whether quantum events or a past-eternal cosmos break the chain. Defenders reply that contingent, changing states still need a cause of their actuality. The argument’s nerve is explanation, not a stopwatch. Companion verse, not the First Way itself: “For I the LORD do not change…” (Malachi 3:6).',
     },
     {
       kind: 'build-argument',

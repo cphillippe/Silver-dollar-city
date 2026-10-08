@@ -15,6 +15,7 @@ import { Profile } from './components/Profile'
 import { SceneAd } from './components/SceneAd'
 import { Vista } from './components/Vista'
 import { Welcome } from './components/Welcome'
+import { findPlayable } from './content'
 import { adsAreVisible, quietPauseAllowed, scenePauseMountsOn } from './config/ads'
 import { liveInterstitialReady, showBetweenSceneInterstitial } from './lib/adAdapter'
 import { offerStoresComingNotice } from './lib/supportToast'
@@ -23,9 +24,21 @@ import type { View } from './types'
 
 const AD_COOLDOWN_MS = 20_000
 
+function sequenceBoot(): View | null {
+  if (typeof window === 'undefined') return null
+  const id = new URLSearchParams(window.location.search).get('sequence')
+  if (!id) return null
+  const found = findPlayable(id)
+  if (!found || found.challenge.kind !== 'sequence') return null
+  if (id.startsWith('daily-')) return { name: 'daily', forceId: id }
+  return { name: 'challenge', areaId: found.areaId, challengeId: id }
+}
+
 export default function App() {
   const { progress } = useProgress()
   const [view, setView] = useState<View>(() => {
+    const forced = sequenceBoot()
+    if (forced) return forced
     const walked =
       progress.completed.length > 0 || Boolean(progress.lastDailyDate)
     if (progress.started && walked) return { name: 'hub' }
@@ -100,7 +113,7 @@ export default function App() {
       {view.name === 'hub' ? (
         <Hub onNavigate={go} openPlot={view.mindPlot} />
       ) : null}
-      {view.name === 'daily' ? <DailyTrail onNavigate={go} /> : null}
+      {view.name === 'daily' ? <DailyTrail onNavigate={go} forceId={view.forceId} /> : null}
       {view.name === 'area' ? (
         <AreaView areaId={view.areaId} onNavigate={go} />
       ) : null}
