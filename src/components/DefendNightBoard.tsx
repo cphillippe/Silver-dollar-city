@@ -20,6 +20,8 @@ export type DefendNightBoardProps = Omit<DefendNightSkyProps, 'children'> &
     /** Set while Upgrade just raised this lamp. */
     levelBurst?: { from: number; to: number } | null
     onPullLamp?: () => void
+    /** Sparks a pull would return. Free lamps are 0. */
+    pullSparks?: number
     onCloseUpgrade?: () => void
     onUpgradePath?: (plotId: CityPlotId, path: TreePath, fromPip?: boolean) => void
     onArmPathBuy?: (path: TreePath) => void
@@ -34,7 +36,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
     pads, planted, progress, raiders, raiderAt, ability, towerType, unlocked,
     flash, togglePad, fire, fireAtRaider, shots, easy, blasts, tapTarget, tapPos, tapJuice,
     walkerCalls, loreLine, runTier, boosting, onBoostTower,     upgradeAt, onOpenUpgrade, upFlashId, ghost = null,
-    upgradePoint, boardBox, runSparks = 0, levelBurst = null, onPullLamp, onCloseUpgrade,
+    upgradePoint, boardBox, runSparks = 0, levelBurst = null, onPullLamp, pullSparks = 0, onCloseUpgrade,
     onUpgradePath, onArmPathBuy, runPaths,
     plateFill = false, onPlacePointer,
   } = props
@@ -126,6 +128,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
           clearOf={clearOf}
           cameraScale={cameraScale}
           onPull={onPullLamp}
+          pullSparks={pullSparks}
           onClose={onCloseUpgrade as () => void}
           levelBurst={levelBurst}
           roadNote={roadNote}

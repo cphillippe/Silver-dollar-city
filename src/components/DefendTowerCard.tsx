@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { CITY_PLOTS, type CityPlotId } from '../lib/city'
 import { isFreeSpot } from '../lib/lampPlace'
 import { WATCH_ABILITY_LABEL } from '../lib/defend'
@@ -39,6 +39,7 @@ export function DefendTowerCard({
   onArmPathBuy,
   paths,
   onPull,
+  pullSparks = 0,
   onClose,
   levelBurst = null,
   clearOf = [],
@@ -61,6 +62,8 @@ export function DefendTowerCard({
   paths?: LampPaths
   /** Plant and between waves. Hidden while walkers are on the road. */
   onPull?: () => void
+  /** Sparks this pull returns. A free lamp is 0. */
+  pullSparks?: number
   onClose: () => void
   /** I→II / II→III while the level-up burst plays. */
   levelBurst?: LevelBurst | null
@@ -73,6 +76,7 @@ export function DefendTowerCard({
   easy?: boolean
 }) {
   const cardRef = useRef<HTMLDivElement>(null)
+  const [pullAsk, setPullAsk] = useState(false)
   const tier = combatTier(ability, runTier)
   const maxed = tier >= TOOL_TIER_MAX
   const cost = boostCost(tier)
@@ -90,6 +94,7 @@ export function DefendTowerCard({
   const toMark = bursting ? TIER_MARK[levelBurst!.to] : ''
 
   useEffect(() => {
+    setPullAsk(false)
     // Focus the card, not Upgrade. A focused spend button can take the next lamp tap.
     cardRef.current?.focus({ preventScroll: true })
   }, [plotId])
@@ -125,7 +130,10 @@ export function DefendTowerCard({
             type="button"
             className="defend-tower-pull"
             aria-label={`Pull lamp at ${plotTitle}`}
-            onClick={onPull}
+            onClick={(event) => {
+              event.stopPropagation()
+              setPullAsk(true)
+            }}
           >
             <svg className="defend-tower-trash" viewBox="0 0 24 24" aria-hidden="true">
               <path
@@ -134,6 +142,34 @@ export function DefendTowerCard({
               />
             </svg>
           </button>
+        ) : null}
+        {pullAsk && onPull ? (
+          <div className="defend-pull-confirm" role="alertdialog" aria-label="Pull this lamp?">
+            <p className="defend-pull-copy">{`Pull this lamp? You get ${pullSparks} sparks back`}</p>
+            <div className="defend-pull-actions">
+              <button
+                type="button"
+                className="defend-pull-keep"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  setPullAsk(false)
+                }}
+              >
+                Keep
+              </button>
+              <button
+                type="button"
+                className="defend-pull-do"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  setPullAsk(false)
+                  onPull()
+                }}
+              >
+                Pull
+              </button>
+            </div>
+          </div>
         ) : null}
         <p className="defend-tower-tool">{label}</p>
         {TREE_PATHS.map((path) => {
@@ -264,7 +300,10 @@ export function DefendTowerCard({
           type="button"
           className="defend-tower-pull"
           aria-label={`Pull lamp at ${plotTitle}`}
-          onClick={onPull}
+          onClick={(event) => {
+            event.stopPropagation()
+            setPullAsk(true)
+          }}
         >
           <svg className="defend-tower-trash" viewBox="0 0 24 24" aria-hidden="true">
             <path
@@ -273,6 +312,34 @@ export function DefendTowerCard({
             />
           </svg>
         </button>
+      ) : null}
+      {pullAsk && onPull ? (
+        <div className="defend-pull-confirm" role="alertdialog" aria-label="Pull this lamp?">
+          <p className="defend-pull-copy">{`Pull this lamp? You get ${pullSparks} sparks back`}</p>
+          <div className="defend-pull-actions">
+            <button
+              type="button"
+              className="defend-pull-keep"
+              onClick={(event) => {
+                event.stopPropagation()
+                setPullAsk(false)
+              }}
+            >
+              Keep
+            </button>
+            <button
+              type="button"
+              className="defend-pull-do"
+              onClick={(event) => {
+                event.stopPropagation()
+                setPullAsk(false)
+                onPull()
+              }}
+            >
+              Pull
+            </button>
+          </div>
+        </div>
       ) : null}
       <p className="defend-tower-tool">{label}</p>
       <p

@@ -44,14 +44,19 @@ export function paceAria(face: PaceFace, unlockWave = PACE_UNLOCK_WAVE): string 
   return 'Speed 1× available. Tap to run at 3×.'
 }
 
-/** Cap a wall-clock step, then stretch it. 1× keeps the old 50ms cap. */
+/**
+ * Cap a wall-clock step, then stretch it. 1× keeps the old 50ms cap.
+ * Easy lamps read this same step as their clock (1.4.412). Dividing the
+ * cooldown by 3 and comparing it to the wall clock let a slow frame fire
+ * the lamps at full 3× while the walkers were still capped.
+ */
 export function pacedDt(wallDtSec: number, scale: number): number {
   const capped = Math.min(0.05, Math.max(0, wallDtSec))
   const pace = scale === NIGHT_PACE_FAST ? NIGHT_PACE_FAST : NIGHT_PACE_NORMAL
   return capped * pace
 }
 
-/** Lamp shots share the road pace so 3× is faster play, not a harder road. */
+/** Wall-clock cooldown. Hard still uses this. Easy lamps use `pacedDt` instead. */
 export function pacedCooldown(cooldownMs: number, scale: number): number {
   const pace = scale === NIGHT_PACE_FAST ? NIGHT_PACE_FAST : NIGHT_PACE_NORMAL
   return cooldownMs / pace
