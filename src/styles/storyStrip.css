@@ -1183,9 +1183,51 @@ html[data-easy='on'] .play.is-story-strip[data-n='3'] .strip-art img {
     zoom: 1;
   }
 
+  /* The win strip was shrinking and clipping the badge and the quote
+     under Home. Keep stamp, stars, and the Scripture box in the flow. */
+  html[data-easy='on'] .play.is-story-strip.is-win:not([data-n='3']) {
+    flex: 0 0 auto;
+    overflow: visible;
+    min-height: min-content;
+  }
+
+  html[data-easy='on'] .is-after:has(.play.is-story-strip.is-win:not([data-n='3'])) > .text-link {
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+
   html[data-easy='on'] .play.is-story-strip.is-win:not([data-n='3']) .strip-board {
     flex: 0 0 auto;
-    height: 120px;
+    height: 100px;
+  }
+
+  html[data-easy='on'] .play.is-story-strip.is-win:not([data-n='3']) .strip-stamp {
+    position: relative;
+    z-index: 6;
+    margin: 1px 0 0;
+    padding: 1px 10px;
+    font-size: 15px;
+    line-height: 1.1;
+  }
+
+  html[data-easy='on'] .play.is-story-strip.is-win:not([data-n='3']) .strip-stars {
+    display: none;
+  }
+
+  html[data-easy='on'] .play.is-story-strip.is-win:not([data-n='3']) .strip-verse {
+    padding: 2px 6px 3px;
+  }
+
+  html[data-easy='on'] .play.is-story-strip.is-win:not([data-n='3']) .strip-verse figcaption,
+  html[data-easy='on'] .play.is-story-strip.is-win:not([data-n='3']) .strip-verse-lead,
+  html[data-easy='on'] .play.is-story-strip.is-win:not([data-n='3']) .strip-verse blockquote,
+  html[data-easy='on'] .play.is-story-strip.is-win:not([data-n='3']) .strip-verse cite {
+    font-size: 11.5px;
+    line-height: 1.08;
+  }
+
+  html[data-easy='on'] .play.is-story-strip.is-win:not([data-n='3']) .strip-verse blockquote {
+    margin: 1px 0;
   }
 
   html[data-easy='on'] .is-after:has(.play.is-story-strip.is-win:not([data-n='3'])) .recall-gate.is-easy-hold {
@@ -1193,20 +1235,14 @@ html[data-easy='on'] .play.is-story-strip[data-n='3'] .strip-art img {
     padding-bottom: 0;
   }
 
-  html[data-easy='on'] .play.is-story-strip.is-win:not([data-n='3']) .strip-verse {
-    padding: 2px 6px 3px;
-  }
-
-  html[data-easy='on'] .play.is-story-strip.is-win:not([data-n='3']) .strip-verse blockquote {
-    margin: 1px 0;
-    font-size: 13px;
-    line-height: 1.15;
+  html[data-easy='on'] .is-after:has(.play.is-story-strip.is-win:not([data-n='3'])) .after-win {
+    gap: 2px;
   }
 
   html[data-easy='on'] .is-after:has(.play.is-story-strip.is-win:not([data-n='3'])) .town-return .btn {
-    min-height: 44px;
-    padding-top: 6px;
-    padding-bottom: 6px;
+    min-height: 40px;
+    padding-top: 4px;
+    padding-bottom: 4px;
   }
 
   html[data-easy='on'] .is-after:has(.play.is-story-strip.is-win:not([data-n='3'])) .recall-gate.is-easy-hold .why-blast:not(.is-miss-teach):not(.is-win),
@@ -1231,15 +1267,18 @@ html[data-easy='on'] .play.is-story-strip[data-n='3'] .strip-art img {
 
   html[data-easy='on'] .is-after:has(.play.is-story-strip.is-win:not([data-n='3'])) .why-chip {
     height: auto;
-    min-height: 44px;
+    min-height: 36px;
+    padding: 3px 6px;
+    font-size: 0.78rem;
+    line-height: 1.1;
     align-self: stretch;
   }
 
   html[data-easy='on'] .is-after:has(.play.is-story-strip.is-win:not([data-n='3'])) .why-claim {
     margin: 0 !important;
-    padding: 6px 8px;
-    font-size: 0.95rem;
-    line-height: 1.15;
+    padding: 4px 6px;
+    font-size: 0.88rem;
+    line-height: 1.1;
   }
 }
 
