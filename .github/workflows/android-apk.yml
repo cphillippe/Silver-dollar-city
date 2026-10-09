@@ -51,53 +51,56 @@ jobs:
         run: node scripts/write-android-local-properties.mjs
 
       - name: Choose signing
+        id: sign
         env:
-          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           set -euo pipefail
-          if [ -n "${ANDROID_KEYSTORE_BASE64}" ] && [ -n "${ANDROID_KEYSTORE_PASSWORD}" ] && [ -n "${ANDROID_KEY_ALIAS}" ] && [ -n "${ANDROID_KEY_PASSWORD}" ]; then
-            printf '%s' "${ANDROID_KEYSTORE_BASE64}" | base64 -d > "${RUNNER_TEMP}/release.keystore"
-            echo "SIGNING=release" >> "${GITHUB_ENV}"
+          if [ -n "${ANDROID_KEYSTORE_B64}" ] && [ -n "${ANDROID_KEYSTORE_PASSWORD}" ] && [ -n "${ANDROID_KEY_ALIAS}" ] && [ -n "${ANDROID_KEY_PASSWORD}" ]; then
+            printf '%s' "${ANDROID_KEYSTORE_B64}" | base64 -d > "${RUNNER_TEMP}/release.keystore"
             echo "ANDROID_KEYSTORE_PATH=${RUNNER_TEMP}/release.keystore" >> "${GITHUB_ENV}"
-            echo "Release keystore secrets are present. Building a release-signed APK."
+            {
+              echo "ANDROID_KEYSTORE_PASSWORD<<EOF"
+              echo "${ANDROID_KEYSTORE_PASSWORD}"
+              echo "EOF"
+              echo "ANDROID_KEY_ALIAS<<EOF"
+              echo "${ANDROID_KEY_ALIAS}"
+              echo "EOF"
+              echo "ANDROID_KEY_PASSWORD<<EOF"
+              echo "${ANDROID_KEY_PASSWORD}"
+              echo "EOF"
+            } >> "${GITHUB_ENV}"
+            echo "mode=release" >> "${GITHUB_OUTPUT}"
+            echo "Release keystore secrets are present."
           else
-            echo "SIGNING=debug" >> "${GITHUB_ENV}"
-            echo "Release keystore secrets are absent. Building a debug-signed APK with the committed stable debug key."
+            # Fresh key for this job's CI artifact. It is never uploaded to the latest release.
+            keytool -genkeypair -v \
+              -keystore "${RUNNER_TEMP}/ci-throwaway.keystore" \
+              -storepass ci-throwaway \
+              -alias ci-throwaway \
+              -keypass ci-throwaway \
+              -keyalg RSA -keysize 2048 -validity 1 \
+              -dname "CN=CI throwaway, OU=Silver City, O=CI, L=CI, ST=CI, C=US"
+            echo "ANDROID_KEYSTORE_PATH=${RUNNER_TEMP}/ci-throwaway.keystore" >> "${GITHUB_ENV}"
+            echo "ANDROID_KEYSTORE_PASSWORD=ci-throwaway" >> "${GITHUB_ENV}"
+            echo "ANDROID_KEY_ALIAS=ci-throwaway" >> "${GITHUB_ENV}"
+            echo "ANDROID_KEY_PASSWORD=ci-throwaway" >> "${GITHUB_ENV}"
+            echo "mode=ci" >> "${GITHUB_OUTPUT}"
+            echo "Release secrets are absent. This APK is signed with a throwaway key and must not be published."
           fi
 
-      - name: Assemble APK
+      - name: Assemble release APK
         working-directory: android
         run: |
           set -euo pipefail
           chmod +x ./gradlew
-          if [ "${SIGNING}" = "release" ]; then
-            ./gradlew assembleRelease --no-daemon
-            cp app/build/outputs/apk/release/app-release.apk "${GITHUB_WORKSPACE}/silver-city.apk"
-          else
-            ./gradlew assembleDebug --no-daemon
-            cp app/build/outputs/apk/debug/app-debug.apk "${GITHUB_WORKSPACE}/silver-city.apk"
-          fi
-
-      - name: Write release notes
-        run: |
-          set -euo pipefail
-          code=$(node -e "process.stdout.write(String(JSON.parse(require('fs').readFileSync('public/shell.json','utf8')).versionCode))")
-          {
-            if [ "${SIGNING}" = "release" ]; then
-              echo "Signing: release (repo secrets)."
-            else
-              echo "Signing: debug. The APK is debug-signed with the committed stable debug key so it installs over the previous debug build. Add ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, and ANDROID_KEY_PASSWORD to publish a release signature. The first release-signed APK will not install over this debug build."
-            fi
-            echo
-            echo "Shell versionCode: ${code}"
-            echo
-            echo "Web content follows GitHub Pages. Reinstall when the app shows Update available."
-            echo
-            echo "Download: https://github.com/cphillippe/Silver-dollar-city/releases/download/latest/silver-city.apk"
-          } > release-notes.md
+          ./gradlew assembleRelease --no-daemon
+          src="app/build/outputs/apk/release/app-release.apk"
+          test -f "${src}"
+          cp "${src}" "${GITHUB_WORKSPACE}/silver-city.apk"
 
       - uses: actions/upload-artifact@v4
         with:
@@ -105,8 +108,35 @@ jobs:
           path: silver-city.apk
           if-no-files-found: error
 
-      - name: Publish rolling latest release
+      - name: Confirm release secrets before publish
+        id: publish_gate
         if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        env:
+          SIGN_MODE: ${{ steps.sign.outputs.mode }}
+          ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [ "${SIGN_MODE}" != "release" ] || [ -z "${ANDROID_KEYSTORE_B64}" ] || [ -z "${ANDROID_KEYSTORE_PASSWORD}" ] || [ -z "${ANDROID_KEY_ALIAS}" ] || [ -z "${ANDROID_KEY_PASSWORD}" ]; then
+            echo "Refusing to publish. The latest release accepts only an APK signed with the four repo secrets. No fallback key is uploaded."
+            exit 1
+          fi
+          code=$(node -e "process.stdout.write(String(JSON.parse(require('fs').readFileSync('public/shell.json','utf8')).versionCode))")
+          {
+            echo "Signing: release (Actions secrets)."
+            echo
+            echo "Shell versionCode: ${code}"
+            echo
+            echo "Web content follows GitHub Pages. Reinstall when the app shows Update available."
+            echo
+            echo "Download: https://github.com/cphillippe/Silver-dollar-city/releases/download/latest/silver-city.apk"
+          } > release-notes.md
+          echo "ok=true" >> "${GITHUB_OUTPUT}"
+
+      - name: Publish rolling latest release
+        if: steps.publish_gate.outputs.ok == 'true'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
