@@ -20,9 +20,11 @@ interface DailyTrailProps {
   onNavigate: (view: View) => void
   /** Playtest opener (?sequence=daily-rest) so a dated pool can be opened directly. */
   forceId?: string
+  /** Settings Story Strip jump — open the strip and skip the teach card. */
+  debugStrip?: boolean
 }
 
-export function DailyTrail({ onNavigate, forceId }: DailyTrailProps) {
+export function DailyTrail({ onNavigate, forceId, debugStrip = false }: DailyTrailProps) {
   const { completeDaily, recordReview, recordTaught, progress } = useProgress()
   const easy = isEasy(progress)
   const now = new Date()
@@ -53,7 +55,7 @@ export function DailyTrail({ onNavigate, forceId }: DailyTrailProps) {
   const [held, setHeld] = useState(
     () => !brief || Boolean(progress.held.includes(brief.id)),
   )
-  const [taught, setTaught] = useState(() => !brief)
+  const [taught, setTaught] = useState(() => debugStrip || !brief)
   const [arming, setArming] = useState(false)
 
   const showNext = solved && held
@@ -64,6 +66,7 @@ export function DailyTrail({ onNavigate, forceId }: DailyTrailProps) {
     body?.scrollTo({ top: 0, behavior: 'smooth' })
     if (session.already || savedWin.current) return
     savedWin.current = true
+    if (debugStrip) return
     completeDaily(today)
     if (brief) {
       recordReview({
@@ -95,9 +98,9 @@ export function DailyTrail({ onNavigate, forceId }: DailyTrailProps) {
       <button
         type="button"
         className="text-link"
-        onClick={() => onNavigate({ name: 'hub' })}
+        onClick={() => onNavigate(debugStrip ? { name: 'settings' } : { name: 'hub' })}
       >
-        ← {easy ? EASY.home : 'The town'}
+        ← {debugStrip ? 'Settings' : easy ? EASY.home : 'The town'}
       </button>
 
       {(!solved || challenge.kind === 'sequence') && !taught && brief && !solved ? (

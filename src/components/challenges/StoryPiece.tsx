@@ -15,6 +15,8 @@ export interface StripCard {
   decoy?: boolean
   /** Easy crop + name so Jesus and the priest stay apart when the card is small. */
   figure?: SequenceFigure
+  /** Short-strip portrait crop. Puts the key figure in the window. */
+  crop?: { x: string; y: string }
   visual: SequenceVisual
 }
 
@@ -111,6 +113,12 @@ export function StoryPiece({
                 ['--focus-ox' as string]: figure.ox,
                 ['--focus-oy' as string]: figure.oy,
                 ['--focus-scale' as string]: String(figure.scale),
+              }
+            : null),
+          ...(card.crop
+            ? {
+                ['--crop-x' as string]: card.crop.x,
+                ['--crop-y' as string]: card.crop.y,
               }
             : null),
         }}

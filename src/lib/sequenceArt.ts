@@ -70,6 +70,16 @@ export interface SequenceFigure {
   scale: number
 }
 
+/**
+ * Easy short-strip crop. A 3-frame row is a tall portrait, so the picture
+ * covers the card and this point stays in the window. Heads stay whole.
+ */
+export const SEQUENCE_CROP: Record<string, { x: string; y: string }> = {
+  'beat1-tired': { x: '48%', y: '0%' },
+  'beat2-come': { x: '68%', y: '0%' },
+  'beat3-rest': { x: '46%', y: '0%' },
+}
+
 export const SEQUENCE_FIGURE: Record<string, SequenceFigure> = {
   'road1-lawyer': { cue: 'Jesus', x: '75%', y: '2%', ox: '96%', oy: '0%', scale: 2.2 },
   'road3-temple': { cue: 'Priest', x: '58%', y: '8%', ox: '62%', oy: '0%', scale: 2.7 },

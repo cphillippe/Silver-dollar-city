@@ -29,7 +29,15 @@ import {
   wrapSave,
 } from '../lib/save'
 import { localDateKey } from '../lib/dates'
-import { debugJumpView, debugNightWatchJump, debugPlayGroups, debugPlayLabel } from '../lib/debugPlays'
+import {
+  debugJumpView,
+  debugNightWatchJump,
+  debugPlayGroups,
+  debugPlayLabel,
+  debugStoryStripJump,
+  debugStoryStripLabel,
+  storyStripLines,
+} from '../lib/debugPlays'
 import { readNightWatchDebug, writeNightWatchDebug } from '../lib/nightWatchDebug'
 import { EASY, isEasy } from '../lib/easy'
 import { EASY_HOME } from '../lib/easyNav'
@@ -516,6 +524,24 @@ export function Settings({ onNavigate }: SettingsProps) {
             >
               Jump · Night Watch
             </button>
+          </div>
+        </section>
+        <section className="settings-debug-group" aria-label="Story Strip">
+          <p className="eyebrow">Story Strip</p>
+          <div className="settings-actions">
+            {storyStripLines().map((item) => (
+              <button
+                key={item.lineId}
+                type="button"
+                className="btn"
+                onClick={() => {
+                  setEasyMode(true)
+                  onNavigate(debugStoryStripJump(item))
+                }}
+              >
+                {debugStoryStripLabel(item)}
+              </button>
+            ))}
           </div>
         </section>
         {debugPlayGroups().map((group) => (
