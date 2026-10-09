@@ -121,6 +121,7 @@ import {
 } from '../src/nightWatch/upgradeTree.ts'
 import { boardFill, boardFillPoint } from '../src/nightWatch/map/phoneFill.ts'
 import {
+  clearPanelFolded,
   commitLamp,
   dragGhostClient,
   clampGhostHintLeft,
@@ -132,6 +133,8 @@ import {
   lampSpotBlocked,
   previewLamp,
   roadCoverD,
+  roundStartKind,
+  startsNextRound,
 } from '../src/lib/lampPlace.ts'
 import { nightEnemies as nightEnemiesMod } from '../src/nightWatch/enemies/index.ts'
 import { nightParts as nightPartsMod } from '../src/nightWatch/parts/index.ts'
@@ -1343,7 +1346,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.414')
+assert.equal(APP_VERSION, '1.4.415')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -5595,6 +5598,55 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.ok(CHANGELOG.some((note) => note.version === '1.4.413'), '1.4.413 changelog row')
   assert.match(latestChange('1.4.413').title, /flat taps/i)
   assert.doesNotMatch(latestChange('1.4.413').items.join('\n'), /Fixes #|Closes #|Resolves #/)
+}
+
+// Night Watch 1.4.415: New lamp is a button. Tap-then-ground and drag-to-ground plant. A card tap does not start the next round.
+{
+  const screen415 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const ability415 = readFileSync(new URL('../src/components/DefendAbilityBar.tsx', import.meta.url), 'utf8')
+  const css415 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  assert.equal(clearPanelFolded(true, 'love'), true, '1.4.415 an armed lamp folds the clear panel')
+  assert.equal(clearPanelFolded(true, null), false, '1.4.415 the clear panel stays until a lamp is picked')
+  assert.equal(clearPanelFolded(false, 'love'), false, '1.4.415 a wave does not fold')
+  assert.equal(roundStartKind('btn primary defend-continue'), 'continue')
+  assert.equal(roundStartKind('btn primary xl defend-go is-after-plant'), 'begin')
+  assert.equal(roundStartKind('defend-ability is-on'), 'card')
+  assert.equal(roundStartKind('defend-tower-card is-tree'), 'card')
+  assert.equal(roundStartKind('btn defend-new-lamp'), null)
+  assert.equal(startsNextRound('continue'), true)
+  assert.equal(startsNextRound('begin'), true)
+  assert.equal(startsNextRound('card'), false, '1.4.415 a lamp card does not start the next round')
+  assert.equal(startsNextRound(null), false)
+  assert.match(screen415, /clearPanelFolded\(boosting, placeArm\)/)
+  assert.match(screen415, /className="btn primary defend-continue"/)
+  assert.match(screen415, /<button[\s\S]{0,280}data-new-lamp="yes"/)
+  assert.doesNotMatch(screen415, /<p className="defend-lamp-price"/)
+  assert.match(screen415, /function trackNewLamp/)
+  assert.match(screen415, /onPointerDown=\{trackNewLamp\}/)
+  assert.match(screen415, /onLampDrag\(drop \? 'drop' : 'cancel', pick/)
+  assert.match(screen415, /armUnplantedLamp/)
+  assert.match(screen415, /if \(performance\.now\(\) - clearCardAt\.current < 450\) return/)
+  assert.match(screen415, /if \(next === live\.current\.hearts\) \{\s*setHeartPop\(false\)/)
+  assert.match(screen415, /data-heart-slot=\{full \? 'full' : 'empty'\}/)
+  assert.match(screen415, /\{full \? '♥' : '♡'\}/)
+  assert.match(css415, /\.defend-page\.is-clear-fold \.nw-docks \.defend-boost \{[^}]*max-width:\s*200px/)
+  assert.match(css415, /button\.defend-new-lamp \{[^}]*min-height:\s*44px/)
+  assert.doesNotMatch(
+    css415.slice(css415.indexOf('1.4.415'), css415.indexOf('1.4.415') + 700),
+    /defend-new-lamp/,
+    '1.4.415 the New lamp button stays on the folded panel',
+  )
+  assert.match(css415, /\.defend-heart-slot \{[^}]*font-variant-emoji:\s*text/)
+  const finish = screen415.slice(screen415.indexOf('function finishPlace'), screen415.indexOf('function togglePad'))
+  assert.doesNotMatch(finish, /setPhase\(/, '1.4.415 planting does not start the round')
+  assert.match(finish, /buyExtraLamp\(sparksRef\.current\)/, '1.4.415 a planted lamp still spends sparks')
+  assert.doesNotMatch(ability415, /continueFromBoost|setPhase\(/, '1.4.415 a card tap does not advance')
+  assert.match(ability415, /event\.stopPropagation\(\)/)
+  assert.match(ability415, /onUpgradePath\(path, true\)|onOpenTree/, '1.4.415 a planted card still opens the tree')
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.415'), '1.4.415 changelog row')
+  assert.match(latestChange('1.4.415').title, /clear/i)
+  assert.doesNotMatch(latestChange('1.4.415').items.join('\n'), /Fixes #|Closes #|Resolves #/)
+  assert.match(latestChange('1.4.414').title, /Story strip/i)
 }
 
 // Night Watch 1.4.392: reach cue, a longer level-I free lamp, and a plant pin.
@@ -11187,7 +11239,7 @@ console.log('check-city: ok')
 
   const boostFn = defendScreenOnlySrc.slice(
     defendScreenOnlySrc.indexOf('function continueFromBoost'),
-    defendScreenOnlySrc.indexOf('function continueFromBoost') + 420,
+    defendScreenOnlySrc.indexOf('function continueFromBoost') + 520,
   )
   assert.match(boostFn, /waveIndex \+ 1 < nightLength\(easy\)/)
   assert.match(boostFn, /setWaveIndex\(\(i\) => i \+ 1\)/, '1.4.328 Continue advances the wave')

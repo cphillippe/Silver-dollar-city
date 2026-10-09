@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
+import { createPortal, flushSync } from 'react-dom'
 import { evidenceFor } from '../content/evidence'
 import {
   ANGEL_STICKER,
@@ -58,12 +58,16 @@ import {
 } from '../lib/nightWatchDebug'
 import { FarHillsUnlock } from './FarHillsUnlock'
 import {
+  clearPanelFolded,
   clientToMap,
   commitLamp,
   dragGhostClient,
   hudCoversPoint,
+  LAMP_DRAG_START_PX,
   overTowerCards,
   previewLamp,
+  roundStartKind,
+  startsNextRound,
   type LampPreview,
 } from '../lib/lampPlace'
 import {
@@ -79,7 +83,7 @@ import {
   UPGRADE_TAP_ECHO_MS,
   upgradeSpendAllowed,
 } from '../lib/nightPlants'
-import { applyBoost, buyExtraLamp, combatTier, EASY_LAMP_COST, freshRunTier } from '../lib/watchTools'
+import { applyBoost, buyExtraLamp, combatTier, EASY_LAMP_COST, freshRunTier, WATCH_TOOLS } from '../lib/watchTools'
 import {
   applyPathStep,
   freshRunPaths,
@@ -194,6 +198,10 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const [placeArm, setPlaceArm] = useState<WatchAbility | null>(null)
   const placeArmRef = useRef<WatchAbility | null>(null)
   placeArmRef.current = placeArm
+  /** A card press at a clear must not also hit Continue. */
+  const clearCardAt = useRef(0)
+  const newLampStop = useRef<(() => void) | null>(null)
+  const swallowNewLampClick = useRef(false)
   const swallowWaveTap = useRef(false)
   const [loreMeet, setLoreMeet] = useState<{ id: string; line: string } | null>(null)
   const runTierRef = useRef(runTier)
@@ -555,7 +563,10 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       }
       const grantClearHeart = () => {
         const next = easyClearHeart(live.current.hearts)
-        if (next === live.current.hearts) return
+        if (next === live.current.hearts) {
+          setHeartPop(false)
+          return
+        }
         live.current.hearts = next
         setHearts(next)
         setHeartPop(true)
@@ -604,6 +615,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     setStillOn(false)
   }, [phase])
 
+  useEffect(() => () => newLampStop.current?.(), [])
+
   useLayoutEffect(() => {
     const node = boardRef.current
     if (!node) return
@@ -638,9 +651,111 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       clearPlaceArm()
       return
     }
+    if (phase === 'boost') clearCardAt.current = performance.now()
     placeArmRef.current = id
     setPlaceArm(id)
     setAbility(id)
+    closeUpgrade(true)
+  }
+
+  function unplantedLampId(): WatchAbility | null {
+    const standing = Object.values(plantsRef.current)
+    const open = WATCH_TOOLS.map((tool) => tool.id).filter((id) => !standing.includes(id))
+    if (open.length < 1) return null
+    return (open.includes(ability) ? ability : open[0]) as WatchAbility
+  }
+
+  function armUnplantedLamp() {
+    if (!easy || won || phase !== 'boost') return
+    clearCardAt.current = performance.now()
+    const pick = unplantedLampId()
+    if (!pick) {
+      flashKit('Every lamp is planted')
+      return
+    }
+    if (sparksRef.current < EASY_LAMP_COST) {
+      flashKit(`Need ${EASY_LAMP_COST} sparks`)
+      return
+    }
+    armPlace(pick)
+  }
+
+  /** Tap arms a ground plant. A slide drops the lamp where the finger lifts. */
+  function trackNewLamp(event: {
+    pointerId: number
+    pointerType: string
+    button: number
+    clientX: number
+    clientY: number
+    stopPropagation: () => void
+  }) {
+    if (!easy || won || phase !== 'boost') return
+    event.stopPropagation()
+    clearCardAt.current = performance.now()
+    if (event.pointerType === 'mouse' && event.button !== 0) return
+    const pick = unplantedLampId()
+    if (!pick) {
+      flashKit('Every lamp is planted')
+      return
+    }
+    if (sparksRef.current < EASY_LAMP_COST) {
+      flashKit(`Need ${EASY_LAMP_COST} sparks`)
+      return
+    }
+    newLampStop.current?.()
+    const start = {
+      pointerId: event.pointerId,
+      x: event.clientX,
+      y: event.clientY,
+      moved: false,
+    }
+    let last = { x: event.clientX, y: event.clientY }
+    let done = false
+    onCardPress(true)
+    const finish = (ev: PointerEvent, drop: boolean) => {
+      if (done || ev.pointerId !== start.pointerId) return
+      done = true
+      newLampStop.current?.()
+      newLampStop.current = null
+      onCardPress(false)
+      clearCardAt.current = performance.now()
+      if (!start.moved) {
+        flushSync(() => armPlace(pick))
+        return
+      }
+      swallowNewLampClick.current = true
+      if (ev.cancelable) ev.preventDefault()
+      ev.stopPropagation()
+      const point = drop ? last : { x: ev.clientX, y: ev.clientY }
+      onLampDrag(drop ? 'drop' : 'cancel', pick, point.x, point.y)
+    }
+    const move = (ev: PointerEvent) => {
+      if (done || ev.pointerId !== start.pointerId) return
+      const dx = ev.clientX - start.x
+      const dy = ev.clientY - start.y
+      if (!start.moved && dx * dx + dy * dy < LAMP_DRAG_START_PX * LAMP_DRAG_START_PX) return
+      if (!start.moved) {
+        start.moved = true
+        flushSync(() => armPlace(pick))
+      }
+      last = { x: ev.clientX, y: ev.clientY }
+      if (ev.cancelable) ev.preventDefault()
+      onLampDrag('move', pick, ev.clientX, ev.clientY)
+    }
+    const up = (ev: PointerEvent) => {
+      last = { x: ev.clientX, y: ev.clientY }
+      finish(ev, true)
+    }
+    const cancel = (ev: PointerEvent) => finish(ev, start.moved)
+    const opts: AddEventListenerOptions = { capture: true, passive: false }
+    window.addEventListener('pointermove', move, opts)
+    window.addEventListener('pointerup', up, opts)
+    window.addEventListener('pointercancel', cancel, opts)
+    newLampStop.current = () => {
+      window.removeEventListener('pointermove', move, opts)
+      window.removeEventListener('pointerup', up, opts)
+      window.removeEventListener('pointercancel', cancel, opts)
+    }
   }
 
   function placeHitsActor(target: EventTarget | null): boolean {
@@ -1361,9 +1476,10 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     armSkill(id, performance.now())
   }
 
-  function continueFromBoost() {
-    if (won || phase !== 'boost') return
-    if (roundChangeBlocked()) return
+  function continueFromBoost(event: { currentTarget: HTMLButtonElement }) {
+    if (!startsNextRound(roundStartKind(event.currentTarget.className))) return
+    if (performance.now() - clearCardAt.current < 450) return
+    if (won || phase !== 'boost' || roundChangeBlocked()) return
     clearPlaceArm()
     setBoostNote(null)
     setLoreMeet(null)
@@ -1433,10 +1549,15 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         data-hearts={hearts}
       >
         {Array.from({ length: DEFEND_HEARTS }, (_, index) => {
+          const full = index < hearts
           const dropped = heartDrop && index >= heartDrop.at && index < heartDrop.at + heartDrop.count
           return (
-            <span key={index} className={`${index < hearts ? 'is-on' : ''}${dropped ? ' is-drop' : ''}`}>
-              ♥
+            <span
+              key={index}
+              className={`defend-heart-slot${full ? ' is-on' : ' is-empty'}${dropped ? ' is-drop' : ''}`}
+              data-heart-slot={full ? 'full' : 'empty'}
+            >
+              {full ? '♥' : '♡'}
             </span>
           )
         })}
@@ -1542,9 +1663,24 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
             {boostNote ? ` · ${boostNote}` : ''}
           </p>
           {easy ? (
-            <p className="defend-lamp-price" data-lamp-cost={EASY_LAMP_COST}>
+            <button
+              type="button"
+              className="btn defend-new-lamp"
+              data-lamp-cost={EASY_LAMP_COST}
+              data-new-lamp="yes"
+              aria-label={`New lamp, ${EASY_LAMP_COST} sparks`}
+              aria-pressed={placeArm ? true : undefined}
+              onPointerDown={trackNewLamp}
+              onClick={() => {
+                if (swallowNewLampClick.current) {
+                  swallowNewLampClick.current = false
+                  return
+                }
+                armUnplantedLamp()
+              }}
+            >
               {`New lamp ${EASY_LAMP_COST}✦`}
-            </p>
+            </button>
           ) : null}
           <div className="defend-spark-choices" role="group" aria-labelledby="defend-spark-pick">
             <p id="defend-spark-pick" className="defend-spark-choices-label">
@@ -1552,7 +1688,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
             </p>
             {skillTray}
           </div>
-          <button type="button" className="btn primary" onClick={continueFromBoost}>
+          <button type="button" className="btn primary defend-continue" onClick={continueFromBoost}>
             Continue
           </button>
         </div>
@@ -1565,7 +1701,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           <button
             type="button"
             className={`btn primary xl defend-go${awaitingLamp ? ' is-awaiting-plant' : ' is-after-plant'}`}
-            onClick={() => {
+            onClick={(event) => {
+              if (!startsNextRound(roundStartKind(event.currentTarget.className))) return
               if (awaitingLamp || phase !== 'plant') return
               if (roundChangeBlocked()) return
               setGhost(null)
@@ -1616,6 +1753,9 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       onArmPlace={armPlace}
       onLampDrag={onLampDrag}
       onCardPress={onCardPress}
+      onBoostCardPointer={() => {
+        if (easy && phase === 'boost') clearCardAt.current = performance.now()
+      }}
       onBoost={boostTool}
       onOpenTree={openPlantedTree}
     />
@@ -1623,7 +1763,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
 
   return (
     <main
-      className={`defend-page ${taught ? 'is-puzzle' : 'is-teach'} ${arming ? 'is-arming' : ''} ${won ? 'is-win' : ''} ${shake ? 'is-shake' : ''} ${leakFlash ? 'is-leak' : ''} ${firing ? 'is-firing' : ''} ${stillOn ? 'is-still' : ''} ${mendOn ? 'is-mend' : ''} ${mendShield ? 'is-mend-shield' : ''} ${debugFrozen ? 'is-nw-debug-freeze' : ''} ${easy ? 'is-easy-watch' : ''} ${easyTap ? 'is-easy-tap' : ''} ${boosting ? 'is-boost' : ''} ${boosting && runSparks < 1 ? 'is-spark-broke' : ''} ${easy && phase === 'plant' && awaitingLamp ? 'is-need-lamp' : ''} ${easy && (phase === 'plant' || placeArm) ? 'is-placing' : ''} ${easy && !won && (phase === 'wave' || phase === 'boost') ? 'is-shop' : ''}`}
+      className={`defend-page ${taught ? 'is-puzzle' : 'is-teach'} ${arming ? 'is-arming' : ''} ${won ? 'is-win' : ''} ${shake ? 'is-shake' : ''} ${leakFlash ? 'is-leak' : ''} ${firing ? 'is-firing' : ''} ${stillOn ? 'is-still' : ''} ${mendOn ? 'is-mend' : ''} ${mendShield ? 'is-mend-shield' : ''} ${debugFrozen ? 'is-nw-debug-freeze' : ''} ${easy ? 'is-easy-watch' : ''} ${easyTap ? 'is-easy-tap' : ''} ${boosting ? 'is-boost' : ''} ${clearPanelFolded(boosting, placeArm) ? 'is-clear-fold' : ''} ${phase === 'lost' ? 'is-lost' : ''} ${boosting && runSparks < 1 ? 'is-spark-broke' : ''} ${easy && phase === 'plant' && awaitingLamp ? 'is-need-lamp' : ''} ${easy && (phase === 'plant' || placeArm) ? 'is-placing' : ''} ${easy && !won && (phase === 'wave' || phase === 'boost') ? 'is-shop' : ''}`}
       aria-label={WATCH_TITLE}
     >
       {after ? (
