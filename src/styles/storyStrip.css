@@ -135,9 +135,9 @@
 
 .strip-art {
   position: absolute;
-  left: 8%;
-  right: 8%;
-  top: 2px;
+  left: 2%;
+  right: 2%;
+  top: 1px;
   overflow: hidden;
   pointer-events: none;
 }
@@ -154,6 +154,17 @@
   object-fit: contain;
   object-position: center center;
   transform: none;
+}
+
+/* Story stills carry a ~5% white comic margin. Zoom just past it so they match the cutouts. */
+.strip-art.is-story .story-art-tile,
+.strip-art.is-story .story-art {
+  object-fit: cover;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: scale(1.14);
+  transform-origin: center center;
 }
 
 .strip-gem {
@@ -177,23 +188,30 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 2px 5px;
+  padding: 2px 4px;
   background: #fff3d6;
   color: #3b1546;
   font-size: 12.5px;
   line-height: 1.15;
   font-weight: 650;
-  white-space: normal;
-  overflow: hidden;
   pointer-events: none;
 }
 
-.strip-cap.is-line {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  padding: 1px 3px;
+.strip-cap-text {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+
+.strip-cap strong {
+  font-weight: 800;
+}
+
+.strip-cap.is-slot {
+  padding: 1px 2px;
+  line-height: 1.1;
 }
 
 .strip-num {
@@ -284,6 +302,12 @@
   overflow: visible;
 }
 
+.strip-tray[data-count='1'],
+.strip-tray[data-count='2'],
+.strip-tray[data-count='3'] {
+  align-items: center;
+}
+
 .strip-tray .strip-face {
   position: relative;
   inset: auto;
@@ -292,6 +316,16 @@
   min-height: 140px;
   height: 100%;
   max-width: 132px;
+}
+
+.strip-tray[data-count='1'] .strip-face,
+.strip-tray[data-count='2'] .strip-face,
+.strip-tray[data-count='3'] .strip-face {
+  height: auto;
+  min-height: 0;
+  max-height: 100%;
+  aspect-ratio: 2 / 3;
+  align-self: center;
 }
 
 .strip-tray[data-count='4'] {

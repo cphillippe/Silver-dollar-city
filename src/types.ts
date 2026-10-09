@@ -57,6 +57,10 @@ export interface SequenceItem {
   gem?: GemId
   /** Key in SEQUENCE_ART. Optional — the strip falls back to story art, foundation art, then a GemMark. */
   art?: string
+  /** Short slot line while the strip is in play. Tray and win keep `text`. */
+  shortCaption?: string
+  /** Word already inside `text` to set in bold, so similar pictures stay distinct. */
+  role?: string
 }
 
 export interface SequenceChallenge {

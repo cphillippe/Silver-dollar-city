@@ -26,10 +26,20 @@ export const witnessBench: Area = {
       context:
         '1 Corinthians 15:3–5. Paul is writing to a church he founded, likely in the mid-50s AD. He presents this not as a new idea but as a received formula “of first importance.”',
       items: [
-        { id: 'a', art: 'creed1-died', text: 'Jesus died for our sins.' },
-        { id: 'b', art: 'creed2-buried', text: 'He was buried.' },
-        { id: 'c', art: 'creed3-raised', text: 'He was raised on day three.' },
-        { id: 'd', art: 'creed4-appeared', text: 'Peter, then the Twelve, saw him.' },
+        { id: 'a', art: 'creed1-died', text: 'Jesus died for our sins.', shortCaption: 'Jesus died' },
+        { id: 'b', art: 'creed2-buried', text: 'He was buried.', shortCaption: 'Was buried' },
+        {
+          id: 'c',
+          art: 'creed3-raised',
+          text: 'He was raised on day three.',
+          shortCaption: 'Raised on\nday three',
+        },
+        {
+          id: 'd',
+          art: 'creed4-appeared',
+          text: 'Peter, then the Twelve, saw him.',
+          shortCaption: 'Peter\nsaw him',
+        },
       ],
       teachOnWrong:
         'Paul’s wording is tightly patterned: death, burial, raising, appearances (1 Cor 15:3–5). Burial underlines that death was real; appearances underlines that “raised” is not only a metaphor.',

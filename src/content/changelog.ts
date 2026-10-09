@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.397',
+    title: 'Story strip hints wait for a miss',
+    when: '2026-10-09',
+    items: [
+      'Easy order puzzles glow the next card only after two misses on that step, then the glow clears when you place it. Five-frame slots use a short line you can read. Tray cards stay picture-sized when only a few are left. Samaritan pictures fill the card the same way, with the role in bold.',
+    ],
+  },
+  {
     version: '1.4.395',
     title: 'Story strip Easy is easier to see',
     when: '2026-10-09',
