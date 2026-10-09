@@ -13,6 +13,7 @@ import {
   waveSpeed,
 } from '../../lib/defend.ts'
 import type { WalkerKind } from '../../types.ts'
+import { walkerFaceSrc } from './faces.ts'
 import { nightParts } from '../parts/index.ts'
 import { nightPath } from '../path/index.ts'
 import type { NightPoint, NightRaider } from '../types.ts'
@@ -38,8 +39,8 @@ export interface NightEnemiesModule {
   readonly waveSize: number
   /** RAID_CAST taunts — cast() picks the line per wave index. */
   readonly taunts: typeof RAID_CAST
-  /** Parts face when registered; else dark face on Easy, kind portrait on Hard. */
-  faceSrc(kind: WalkerKind, easy: boolean): string
+  /** Portrait pool first, then the Parts face, then the dark cutout or kind portrait. */
+  faceSrc(id: string, easy: boolean): string
   /** Who walks next in this wave. Climb pool, with a wave-5 tank bias. */
   cast(
     cleared: number,
@@ -69,8 +70,10 @@ export interface NightEnemiesModule {
 export const nightEnemies: NightEnemiesModule = {
   waveSize: DEFEND_WAVE_SIZE,
   taunts: RAID_CAST,
-  faceSrc: (kind, easy) =>
-    nightParts.src('face', kind) ?? (easy ? NIGHT_DARK_FACE : KIND_FACES[kind]),
+  faceSrc: (id, easy) =>
+    walkerFaceSrc(id) ??
+    nightParts.src('face', id) ??
+    (easy ? NIGHT_DARK_FACE : (KIND_FACES[id as WalkerKind] ?? NIGHT_DARK_FACE)),
   cast: raidForWave,
   spawnT: easySpawnT,
   holdSpawn: easyHoldSpawn,
