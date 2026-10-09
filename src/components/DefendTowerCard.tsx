@@ -36,6 +36,7 @@ export function DefendTowerCard({
   board,
   onUpgrade,
   onUpgradePath,
+  onArmPathBuy,
   paths,
   onPull,
   onClose,
@@ -54,7 +55,9 @@ export function DefendTowerCard({
   board: { w: number; h: number }
   onUpgrade: () => void
   /** Easy tree. Hard keeps the single Upgrade button. */
-  onUpgradePath?: (path: TreePath) => void
+  onUpgradePath?: (path: TreePath, fromPip?: boolean) => void
+  /** Pointer went down on a pip. The round must not advance until that buy lands. */
+  onArmPathBuy?: (path: TreePath) => void
   paths?: LampPaths
   /** Plant and between waves. Hidden while walkers are on the road. */
   onPull?: () => void
@@ -143,15 +146,45 @@ export function DefendTowerCard({
                 {PATH_LABEL[path]}
                 <span className="defend-path-line">{PATH_LINE[path]}</span>
               </p>
-              <div className="defend-path-pips" aria-hidden="true">
+              <div className="defend-path-pips">
                 {TREE_STEP_COST.map((stepCost, index) => {
                   const step = index + 1
                   const filled = rank >= step
                   const locked = stepLocked(paths, path, step)
+                  const next = buy.ok && step === rank + 1
+                  const className = `defend-path-pip${filled ? ' is-on' : ''}${locked ? ' is-locked' : ''}${next ? ' is-buy' : ''}`
+                  if (next) {
+                    return (
+                      <button
+                        key={stepCost}
+                        type="button"
+                        className={className}
+                        disabled={broke}
+                        data-step={step}
+                        data-cost={stepCost}
+                        data-path-pip={path}
+                        aria-label={`${PATH_LABEL[path]} step ${step}, ${buy.cost} sparks`}
+                        onPointerDown={(event) => {
+                          event.stopPropagation()
+                          if (!broke) onArmPathBuy?.(path)
+                        }}
+                        onPointerUp={(event) => {
+                          event.stopPropagation()
+                          if (!broke) onUpgradePath(path, true)
+                        }}
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          if (!broke) onUpgradePath(path, true)
+                        }}
+                      >
+                        {stepCost}
+                      </button>
+                    )
+                  }
                   return (
                     <span
                       key={stepCost}
-                      className={`defend-path-pip${filled ? ' is-on' : ''}${locked ? ' is-locked' : ''}`}
+                      className={className}
                       data-step={step}
                       data-cost={stepCost}
                       data-locked={locked ? 'yes' : undefined}
@@ -168,9 +201,17 @@ export function DefendTowerCard({
                   disabled={broke}
                   data-path-buy={path}
                   data-cost={buy.cost}
+                  onPointerDown={(event) => {
+                    event.stopPropagation()
+                    if (!broke) onArmPathBuy?.(path)
+                  }}
+                  onPointerUp={(event) => {
+                    event.stopPropagation()
+                    if (!broke) onUpgradePath(path, true)
+                  }}
                   onClick={(event) => {
                     event.stopPropagation()
-                    onUpgradePath(path)
+                    if (!broke) onUpgradePath(path, true)
                   }}
                 >
                   {broke ? `Need ${buy.cost}` : `${buy.cost}✦`}

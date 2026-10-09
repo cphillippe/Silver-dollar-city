@@ -8,6 +8,7 @@
  * count and HP. `hp` is added to the kind's HP.
  * `spawn` multiplies the gap before the next walker. Below 1 comes sooner.
  * Rounds 8, 12, 16, 20, and 24 are breathers: a little easier than the round before.
+ * 1.4.408 softens rounds 7–12 so a lamp-heavy spender can hold them. R1–R6 stay put.
  */
 export interface EasyRound {
   count: number
@@ -26,12 +27,12 @@ export const EASY_ROUNDS: readonly EasyRound[] = [
   { count: 5, speed: 2.6, hp: 2, spawn: 0.85 },
   { count: 6, speed: 5.5, hp: 3, spawn: 0.75 },
   { count: 6, speed: 6.4, hp: 7, spawn: 0.72 },
-  { count: 6, speed: 6.2, hp: 12, spawn: 0.74 },
-  { count: 5, speed: 5.8, hp: 10, spawn: 0.82 },
-  { count: 6, speed: 6.3, hp: 16, spawn: 0.72 },
-  { count: 6, speed: 6.4, hp: 20, spawn: 0.7 },
-  { count: 6, speed: 6.5, hp: 24, spawn: 0.7 },
-  { count: 5, speed: 6.0, hp: 20, spawn: 0.8 },
+  { count: 6, speed: 6.2, hp: 8, spawn: 0.74 },
+  { count: 5, speed: 5.8, hp: 7, spawn: 0.82 },
+  { count: 6, speed: 6.3, hp: 11, spawn: 0.72 },
+  { count: 6, speed: 6.4, hp: 14, spawn: 0.7 },
+  { count: 6, speed: 6.5, hp: 17, spawn: 0.7 },
+  { count: 5, speed: 6.0, hp: 14, spawn: 0.8 },
   { count: 7, speed: 6.5, hp: 28, spawn: 0.68 },
   { count: 7, speed: 6.6, hp: 34, spawn: 0.68 },
   { count: 8, speed: 6.6, hp: 42, spawn: 0.66 },

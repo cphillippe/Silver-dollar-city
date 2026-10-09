@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.408',
+    title: 'Night Watch lamps hold the middle rounds',
+    when: '2026-10-09',
+    items: [
+      'Tapping a lamp step buys it on the first tap. Continue waits if that tap is still landing.',
+      'On Easy, a walker who finishes the road costs one heart. The night ends when the hearts are gone. You see One got through! and the heart drop, and the loss line shows the hearts left.',
+      'Rounds 7 to 12 are a little softer, so the lamps do more of the killing and a spender can keep going through them.',
+    ],
+  },
+  {
     version: '1.4.407',
     title: 'Night Watch round jump needs a playtest flag',
     when: '2026-10-09',

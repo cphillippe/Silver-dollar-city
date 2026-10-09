@@ -7,7 +7,8 @@ import { lampStrike, type LampPaths } from './upgradeTree.ts'
  * The first two (gap about 68) are the 1.4.402 pair: Level I reach (114) covers the road.
  * Seats 3 and 4 sit further along the road, same kind of gap, so four planted lamps
  * cover more of the walk than two. A face tap once a second is `tapEvery`.
- * 0 means autofire only. One leaked walker fails the round, matching Easy.
+ * 0 means autofire only. One leaked walker fails the scored round.
+ * Live Easy spends a heart on that leak and ends the night only at 0 hearts.
  */
 const ROAD_SEATS = [
   { x: 475, y: 766 },
@@ -247,4 +248,165 @@ export function scoreEasyTree(
     time += dt
   }
   return 'timeout'
+}
+
+export interface PaceRound {
+  result: 'clear' | 'lost' | 'timeout'
+  lampKills: number
+  tapKills: number
+  /** Taps that landed. Misses are attempts that did not. */
+  taps: number
+  attempts: number
+  hearts: number
+}
+
+/**
+ * One Easy round with a slow tap. A try lands every `tapEvery` seconds
+ * (default 3) and misses when the roll is above `hitChance` (default 0.7).
+ * A leak costs one heart. The round is lost only at 0 hearts. If the road
+ * empties with hearts left, the round is clear even when someone got through.
+ * `seed` keeps the misses the same from run to run.
+ */
+export function paceEasyTree(
+  roundIndex: number,
+  paths: readonly Pick<LampPaths, 'far' | 'strong'>[],
+  heartsIn = 3,
+  tapEvery = 3,
+  hitChance = 0.7,
+  seed = 1,
+): PaceRound {
+  const round = easyRound(roundIndex)
+  const lamps = paths.slice(0, ROAD_SEATS.length).map((rank, index) => {
+    const strike = lampStrike({ far: rank.far, strong: rank.strong })
+    const base = 114 + strike.rangeBonus
+    const gap = SEAT_GAP[index]
+    return {
+      x: ROAD_SEATS[index].x,
+      y: ROAD_SEATS[index].y,
+      range: base < gap + 24 ? Math.min(base, Math.max(0, gap - 1)) : base,
+      strike,
+      cool: 0,
+    }
+  })
+  const raiders: { t: number; hp: number; dead: boolean }[] = []
+  let spawned = 0
+  let downed = 0
+  let hearts = Math.max(0, heartsIn)
+  let spawnAt = 0
+  let spawnNow = false
+  let tapAt = 0
+  let time = 0
+  let lampKills = 0
+  let tapKills = 0
+  let taps = 0
+  let attempts = 0
+  const dt = 1 / 60
+  const walk = 0.01 * round.speed
+  const spawnEvery = 3.8 * round.spawn
+  let rng = seed >>> 0 || 1
+  const roll = () => {
+    rng = (Math.imul(1664525, rng) + 1013904223) >>> 0
+    return rng / 4294967296
+  }
+  const live = () => raiders.filter((raider) => !raider.dead)
+  const finish = (result: PaceRound['result']): PaceRound => ({
+    result,
+    lampKills,
+    tapKills,
+    taps,
+    attempts,
+    hearts,
+  })
+  const wound = (raider: (typeof raiders)[number], amount: number, byTap: boolean) => {
+    if (raider.dead || amount <= 0) return
+    raider.hp -= amount
+    if (raider.hp <= 0) {
+      raider.dead = true
+      downed += 1
+      spawnNow = true
+      if (byTap) tapKills += 1
+      else lampKills += 1
+    }
+  }
+  if (hearts <= 0) return finish('lost')
+  while (time < 180) {
+    spawnAt += dt
+    tapAt += dt
+    let leaked = 0
+    for (const raider of raiders) {
+      if (raider.dead) continue
+      raider.t += walk * dt
+      if (raider.t >= 1) {
+        raider.dead = true
+        leaked += 1
+      }
+    }
+    hearts -= leaked
+    if (hearts <= 0) return finish('lost')
+    if (spawned < round.count && live().length < 3 && (spawnNow || spawnAt >= spawnEvery || spawned === 0)) {
+      spawnNow = false
+      spawnAt = 0
+      raiders.push({ t: 0, hp: 2 + round.hp, dead: false })
+      spawned += 1
+    }
+    for (const lamp of lamps) {
+      lamp.cool -= dt
+      if (lamp.cool > 0) continue
+      let best: (typeof raiders)[number] | null = null
+      let bestD = lamp.range
+      for (const raider of live()) {
+        const point = pathPoint(raider.t)
+        const distance = Math.hypot(lamp.x - point.x, lamp.y - point.y)
+        if (distance <= bestD) {
+          best = raider
+          bestD = distance
+        }
+      }
+      if (!best) continue
+      lamp.cool = lamp.strike.cooldownMs / 1000
+      wound(best, lamp.strike.damage, false)
+      const nick = (maxDist: number, minDist: number, amount: number) => {
+        if (amount <= 0) return
+        let pick: (typeof raiders)[number] | null = null
+        let pickD = maxDist
+        for (const raider of live()) {
+          if (raider === best || raider.dead) continue
+          const point = pathPoint(raider.t)
+          const distance = Math.hypot(lamp.x - point.x, lamp.y - point.y)
+          if (distance > minDist && distance <= pickD) {
+            pick = raider
+            pickD = distance
+          }
+        }
+        if (pick) wound(pick, amount, false)
+      }
+      nick(lamp.range * lamp.strike.splashFrac, -1, lamp.strike.splash)
+      nick(lamp.range * (1 + lamp.strike.outerFrac), lamp.range, lamp.strike.outer)
+    }
+    if (tapEvery > 0 && tapAt >= tapEvery && live().length > 0) {
+      tapAt = 0
+      attempts += 1
+      if (roll() <= hitChance) {
+        taps += 1
+        const front = live().sort((a, b) => b.t - a.t)[0]
+        if (front) {
+          const point = pathPoint(front.t)
+          let damage = lamps[0]?.strike.damage ?? 1
+          let bestD = Infinity
+          for (const lamp of lamps) {
+            const distance = Math.hypot(lamp.x - point.x, lamp.y - point.y)
+            if (distance < bestD) {
+              bestD = distance
+              damage = lamp.strike.damage
+            }
+          }
+          wound(front, damage, true)
+        }
+      }
+    }
+    if (downed >= round.count) return finish('clear')
+    if (spawned >= round.count && live().length === 0) return finish(hearts > 0 ? 'clear' : 'lost')
+    time += dt
+  }
+  return finish('timeout')
 }
