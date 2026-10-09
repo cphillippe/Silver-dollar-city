@@ -8,6 +8,17 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.421',
+    title: 'Night Watch Easy round 5 boss and clear-panel taps',
+    when: '2026-10-09',
+    items: [
+      'Round 5’s boss is a thinner teaching bar. Lamps alone still lose that round. A few glowing taps and one Strong step hold it. Steady taps with no upgrades clear it. Later bosses stay as thick as they were.',
+      'Far is blue with a reach mark. Strong is orange with a hit mark. The two buys sit farther apart, and one tap still buys.',
+      'Empty space on the round-clear panel lets a tap through to a planted lamp. Continue is still the only control that starts the next round.',
+      'A new skill shows when the round starts, before the walkers step out, and it stays off the clear panel. Got it does not start the round.',
+    ],
+  },
+  {
     version: '1.4.420',
     title: 'Come and rest fills the phone',
     when: '2026-10-09',
