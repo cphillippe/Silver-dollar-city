@@ -5,6 +5,7 @@ import {
 import { NIGHT_ENEMY_ROLE } from '../nightWatch/enemies/hp.ts'
 import type { ProgressState, WalkerKind } from '../types.ts'
 import { CITY_PLOTS, plotStage, type CityPlotId, type CityStage } from './city.ts'
+import { EASY_ROUNDS, easyRound } from '../nightWatch/rounds.ts'
 import { prefersReducedMotion } from './juice.ts'
 import { combatTier, deployFit, toolTier, unlockedWatchTools, watchTool, WATCH_TOOLS } from './watchTools.ts'
 
@@ -39,8 +40,13 @@ export function applyGateLeaks(hearts: number, leaked: number, shielded = false)
   return { hearts: next, lostHearts, failed: lostHearts > 0 && next <= 0 }
 }
 export const DEFEND_WAVE_SIZE = 6
-/** One night is five waves. Boost sits between them; the win is after wave 5. */
+/** Hard night length. Easy reads `EASY_ROUNDS` instead. */
 export const DEFEND_NIGHT_WAVES = 5
+
+/** Easy is the round table. Hard stays five waves. */
+export function nightLength(easy: boolean): number {
+  return easy ? EASY_ROUNDS.length : DEFEND_NIGHT_WAVES
+}
 /** Waves 1–4 stay under the old six. Wave 5 is the denser upgrade gate. */
 export const DEFEND_WAVE_PACK = [4, 4, 5, 5, 8] as const
 /** Easy soft TD: cap live unturned walkers before spawning the next. */
@@ -81,23 +87,34 @@ export interface WaveCombat {
 }
 
 /**
- * Easy wave 5 walks faster and soaks more hits. Waves 1–4 keep the soft pace.
+ * Easy reads one row of the round table. Hard keeps a flat pace.
  * Walkers enter at the gate, so the crossing includes the whole road.
  */
 export function waveCombat(waveIndex: number, easy: boolean): WaveCombat {
-  const size = wavePackSize(waveIndex)
-  const gate = easy && waveIndex >= DEFEND_NIGHT_WAVES - 1
-  if (!gate) return { size, speedScale: 1, spawnScale: 1, hpBonus: 0 }
-  return { size, speedScale: 5.5, spawnScale: 0.5, hpBonus: 5 }
+  if (easy) {
+    const round = easyRound(waveIndex)
+    return {
+      size: round.count,
+      speedScale: round.speed,
+      spawnScale: round.spawn,
+      hpBonus: round.hp,
+    }
+  }
+  return { size: wavePackSize(waveIndex), speedScale: 1, spawnScale: 1, hpBonus: 0 }
 }
 
 /**
  * Climb pool is guys 1..level, level = cleared + 1.
  * Wave 5 biases toward tanks already in that pool — it never opens a locked guy.
  */
-export function raidForWave(cleared: number, index: number, waveIndex = 0): NightCastGuy {
+export function raidForWave(
+  cleared: number,
+  index: number,
+  waveIndex = 0,
+  easy = false,
+): NightCastGuy {
   const pool = unlockedNightCast(cleared)
-  const gate = waveIndex >= DEFEND_NIGHT_WAVES - 1
+  const gate = !easy && waveIndex >= DEFEND_NIGHT_WAVES - 1
   if (gate) {
     const tanks = pool.filter((guy) => NIGHT_ENEMY_ROLE[guy.kind] === 'tank')
     if (tanks.length > 0 && index % 2 === 0) {

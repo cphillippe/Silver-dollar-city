@@ -10,11 +10,12 @@ import {
   WATCH_TITLE,
 } from '../content/defend'
 import { EASY, isEasy, loveHowTo } from '../lib/easy'
+import { roundMark } from '../nightWatch/rounds'
 import { localDateKey } from '../lib/dates'
 import {
   DEFEND_BRIEF_ID,
   DEFEND_HEARTS,
-  DEFEND_NIGHT_WAVES,
+  nightLength,
   applyGateLeaks,
   WATCH_ABILITY_LABEL,
   dist,
@@ -24,7 +25,6 @@ import {
   faceTapStrike,
   PATH_WALKER_FACE_DY,
   waveCombat,
-  wavePackSize,
   type WatchAbility,
 } from '../lib/defend'
 import { learningForTool } from '../lib/learning'
@@ -416,7 +416,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         live.current.spawnNow = false
         spawnAt = 0
         const id = live.current.spawned
-        const cast = nightEnemies.cast(cleared, id, wave)
+        const cast = nightEnemies.cast(cleared, id, wave, easy)
         const hp = nightEnemies.maxHp(cast.kind, easy) + tune.hpBonus
         if (!metRef.current.includes(cast.id)) {
           metRef.current = [...metRef.current, cast.id]
@@ -1089,7 +1089,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     clearPlaceArm()
     setBoostNote(null)
     setLoreMeet(null)
-    if (waveIndex + 1 < DEFEND_NIGHT_WAVES) {
+    if (waveIndex + 1 < nightLength(easy)) {
       setWaveIndex((i) => i + 1)
       setPhase('wave')
       return
@@ -1137,7 +1137,9 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         }))
     : []
 
-  const waveSize = wavePackSize(waveIndex)
+  const rounds = nightLength(easy)
+  const waveSize = waveCombat(waveIndex, easy).size
+  const roundLabel = roundMark(waveIndex, rounds, easy)
   const remaining = waveSize - downed
   const boosting = phase === 'boost' && !won
 
@@ -1146,9 +1148,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const hud = (
     <p className="defend-hud" aria-live="polite">
       {phase === 'wave' ? (
-        <span className="defend-wave">
-          Wave {waveIndex + 1}/{DEFEND_NIGHT_WAVES}
-        </span>
+        <span className="defend-wave">{roundLabel}</span>
       ) : null}
       <span className={`defend-hearts${mendShield ? ' is-mend-shield' : ''}${mendOn ? ' is-mend-pop' : ''}`}>
         {Array.from({ length: DEFEND_HEARTS }, (_, index) => (
@@ -1242,7 +1242,9 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       {phase === 'boost' && !won ? (
         <div className="defend-boost">
           <p className="defend-boost-status" role="status">
-            {`Wave ${waveIndex + 1} clear · spend sparks`}
+            {easy
+              ? `Round ${waveIndex + 1} clear · spend sparks`
+              : `Wave ${waveIndex + 1} clear · spend sparks`}
             {boostNote ? ` · ${boostNote}` : ''}
           </p>
           {easy ? (
@@ -1338,7 +1340,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
             who="juniper"
             line={
               easy
-                ? 'Night held. Five waves.'
+                ? `The night held after round ${rounds}.`
                 : 'Night held. The road turned toward heaven.'
             }
             action={easy ? EASY.home : 'See the town'}
@@ -1426,9 +1428,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
             />
             {phase === 'wave' ? (
               <div className="nw-wave-overlay">
-                <span className="defend-wave">
-                  Wave {waveIndex + 1}/{DEFEND_NIGHT_WAVES}
-                </span>
+                <span className="defend-wave">{roundLabel}</span>
               </div>
             ) : null}
             {showPace ? (
