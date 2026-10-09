@@ -50,9 +50,10 @@ export function StoryPiece({
     const el = ref.current
     if (!el) return
     const apply = () => {
-      const rect = el.getBoundingClientRect()
-      const w = Math.max(48, Math.round(rect.width))
-      const h = Math.max(48, Math.round(rect.height))
+      // offset size ignores the snap scale. getBoundingClientRect during that
+      // scale stuck the last win piece a few pixels small and clipped the caption.
+      const w = Math.max(48, Math.round(el.offsetWidth))
+      const h = Math.max(48, Math.round(el.offsetHeight))
       setBox((prev) => (prev.w === w && prev.h === h ? prev : { w, h }))
     }
     apply()
@@ -188,9 +189,8 @@ export function GhostSlot({
     const el = ref.current
     if (!el) return
     const apply = () => {
-      const rect = el.getBoundingClientRect()
-      const w = Math.max(36, Math.round(rect.width))
-      const h = Math.max(36, Math.round(rect.height))
+      const w = Math.max(36, Math.round(el.offsetWidth))
+      const h = Math.max(36, Math.round(el.offsetHeight))
       setBox((prev) => (prev.w === w && prev.h === h ? prev : { w, h }))
     }
     apply()
