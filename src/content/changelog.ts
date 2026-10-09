@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.424',
+    title: 'Night Watch glowing taps land',
+    when: '2026-10-09',
+    items: [
+      'A tap on the glowing walker counts. Walkers behind it no longer cover that tap. A nick still pays no sparks. Sparks still come from a walker you turn.',
+      'Round 5’s boss stays the shorter bar. A playtest link shows hits, misses, tap damage, and that boss bar. Kids do not see the line.',
+    ],
+  },
+  {
     version: '1.4.423',
     title: 'Story Strip wins fit the phone',
     when: '2026-10-09',
