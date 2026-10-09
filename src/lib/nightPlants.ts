@@ -93,6 +93,17 @@ export function pullPlant(
   return next
 }
 
+/**
+ * Sparks returned when a planted lamp is pulled.
+ * A lamp placed before Begin was free, so it returns 0.
+ * A lamp bought after Begin returns what it cost.
+ */
+export function lampPullRefund(paid: boolean, cost: number): number {
+  if (!paid) return 0
+  const sparks = Math.floor(cost)
+  return sparks > 0 ? sparks : 0
+}
+
 /** 1 while that type is still in hand. 0 once it is on the road. */
 export function slotLeft(map: Record<string, string>, ability: string): number {
   if (!isTowerType(ability)) return 0

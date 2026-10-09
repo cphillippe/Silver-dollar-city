@@ -816,7 +816,7 @@ img.walker-face.easy-walker-face,
 }
 
 .walker-cue-pad {
-  fill: rgba(255, 214, 70, 0.5);
+  fill: rgba(255, 214, 70, 0.18);
   stroke: none;
   pointer-events: none;
 }
@@ -824,7 +824,7 @@ img.walker-face.easy-walker-face,
 .walker-cue-under {
   fill: none;
   stroke: #2a0d58;
-  stroke-width: 14;
+  stroke-width: 4;
   vector-effect: non-scaling-stroke;
   pointer-events: none;
 }
@@ -832,16 +832,54 @@ img.walker-face.easy-walker-face,
 .walker-cue-ring {
   fill: none;
   stroke: #ffcc33;
-  stroke-width: 8;
+  stroke-width: 3;
   vector-effect: non-scaling-stroke;
-  filter: drop-shadow(0 0 4px #ff9f1a) drop-shadow(0 0 10px #ffcc33);
+  filter: drop-shadow(0 0 3px #ff9f1a);
+  pointer-events: none;
+}
+
+/* 1.4.412: a thin tinted ring so Fast and Tough still read while they glow. */
+.walker-target-cue[data-cue-gait='fast'] .walker-cue-pad {
+  fill: rgba(126, 200, 255, 0.16);
+}
+
+.walker-target-cue[data-cue-gait='fast'] .walker-cue-ring {
+  stroke: #7ecbff;
+  filter: drop-shadow(0 0 3px #3aa0ff);
+}
+
+.walker-target-cue[data-cue-gait='tough'] .walker-cue-pad {
+  fill: rgba(216, 90, 58, 0.16);
+}
+
+.walker-target-cue[data-cue-gait='tough'] .walker-cue-ring {
+  stroke: #ff8a4a;
+  filter: drop-shadow(0 0 3px #d85a3a);
+}
+
+.walker-cue-streaks {
+  pointer-events: none;
+}
+
+.walker-cue-streaks path {
+  fill: none;
+  stroke: #7ec8ff;
+  stroke-width: 4;
+  stroke-linecap: round;
+  opacity: 0.95;
+}
+
+.walker-cue-shoulders {
+  fill: #241433;
+  stroke: #ff8a4a;
+  stroke-width: 3;
   pointer-events: none;
 }
 
 .walker-cue-pulse {
   fill: none;
   stroke: #ffe14a;
-  stroke-width: 6;
+  stroke-width: 2;
   vector-effect: non-scaling-stroke;
   opacity: 1;
   pointer-events: none;
@@ -870,12 +908,12 @@ img.walker-face.easy-walker-face,
 @keyframes walker-cue-pulse {
   0%,
   100% {
-    opacity: 1;
-    stroke-width: 6;
+    opacity: 0.85;
+    stroke-width: 2;
   }
   50% {
-    opacity: 0.35;
-    stroke-width: 16;
+    opacity: 0.3;
+    stroke-width: 4;
   }
 }
 
@@ -950,6 +988,28 @@ img.walker-face.easy-walker-face,
   transform: rotate(-16deg) scale(0.8, 1.08);
   transform-origin: 50% 80%;
   transform-box: fill-box;
+}
+
+/* 1.4.412: a still blue rim and speed ticks. The streaks can fade; these do not. */
+.defend-fast-rim {
+  fill: none;
+  stroke: #7ec8ff;
+  stroke-width: 4px;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
+.defend-fast-badge {
+  pointer-events: none;
+}
+
+.defend-fast-badge path {
+  fill: none;
+  stroke: #7ec8ff;
+  stroke-width: 4px;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  opacity: 1;
 }
 
 .defend-fast-streaks {
@@ -2417,6 +2477,56 @@ button.defend-path-pip {
   display: block;
 }
 
+/* 1.4.412: Pull sits on the buy pips. The first tap asks; Keep is the safe one. */
+.defend-pull-confirm {
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 14px;
+  background: rgba(26, 8, 64, 0.97);
+  pointer-events: auto;
+}
+
+.defend-pull-copy {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.25;
+  color: #ffe9b0;
+}
+
+.defend-pull-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.defend-pull-keep,
+.defend-pull-do {
+  flex: 1;
+  min-height: 40px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.defend-pull-keep {
+  border: 2px solid #ffcc33;
+  background: #ffcc33;
+  color: #2a1248;
+}
+
+.defend-pull-do {
+  border: 2px solid #d85a3a;
+  background: rgba(90, 28, 44, 0.9);
+  color: #ffd2c8;
+}
+
 .defend-tower-tool {
   margin: 0 28px 2px 0;
   font-size: 0.72rem;
@@ -3572,49 +3682,54 @@ button.defend-path-pip {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  gap: 8px;
-  padding: 4px 2px 8px;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 8px 16px;
   overflow: hidden;
 }
 
 .nw-far-hills-title {
   margin: 0;
   font-family: var(--serif);
-  font-size: 1.45rem;
+  font-size: clamp(1.7rem, 3.6vw, 2.5rem);
   line-height: 1.15;
   color: #ffe9b0;
+  text-align: center;
 }
 
 .nw-far-hills-held {
   margin: 0;
-  font-size: 1rem;
+  font-size: clamp(1rem, 2.2vw, 1.25rem);
   font-weight: 800;
   line-height: 1.25;
   color: #f4ead2;
+  text-align: center;
 }
 
 .nw-far-hills-card {
   display: grid;
-  grid-template-columns: 112px minmax(0, 1fr);
-  gap: 10px;
+  grid-template-columns: minmax(140px, 220px) minmax(0, 1fr);
+  gap: 16px;
   align-items: center;
-  padding: 8px;
-  border-radius: 16px;
+  width: min(100%, 560px);
+  padding: 16px 18px;
+  border-radius: 18px;
   border: 2px dashed rgba(255, 204, 51, 0.55);
   background: rgba(26, 8, 64, 0.72);
 }
 
 .nw-far-hills-art {
   display: block;
-  width: 112px;
-  height: 64px;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 160 / 72;
   border-radius: 12px;
 }
 
 .nw-far-hills-name {
-  margin: 0 0 6px;
-  font-size: 1.05rem;
+  margin: 0 0 8px;
+  font-size: clamp(1.2rem, 2.6vw, 1.7rem);
   font-weight: 800;
   line-height: 1.2;
   color: #f4ead2;
@@ -3645,6 +3760,56 @@ button.defend-path-pip {
 
 .nw-far-hills-home {
   flex: 0 0 auto;
-  min-height: 52px;
+  width: min(100%, 420px);
+  min-height: 56px;
   margin-top: 4px;
+}
+
+/* 1.4.412: tablets were width-led, so the plate grew past the viewport and the
+   round label and Continue scrolled off. Phones keep the 480px fill. */
+@media (min-width: 481px) {
+  .app.is-play:has(.defend-page.is-easy-watch) .app-body {
+    overflow: hidden;
+  }
+
+  .defend-page.is-easy-watch .nw-shell {
+    max-height: 100%;
+    min-height: 0;
+  }
+
+  .defend-page.is-easy-watch .nw-stage {
+    min-height: 0;
+    max-height: 100%;
+    overflow: hidden;
+  }
+
+  .defend-page.is-easy-watch .defend-frame {
+    width: auto;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    aspect-ratio: 798 / 1134;
+    justify-self: center;
+    align-self: center;
+  }
+
+  .defend-page.is-easy-watch .nw-hud .defend-wave {
+    display: none;
+  }
+
+  .defend-page.is-easy-watch .nw-wave-overlay {
+    display: flex;
+    position: absolute;
+    z-index: 6;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+
+  .defend-page.is-easy-watch .nw-wave-overlay .defend-wave {
+    font-size: 16px;
+    line-height: 1.2;
+    padding: 4px 12px;
+  }
 }
