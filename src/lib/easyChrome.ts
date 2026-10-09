@@ -121,4 +121,21 @@ export const EASY_CHROME: Record<string, string> = {
     'You may refuse — no one locks you in a pew.',
   'Love, logic, reason, and science you have kept can divert a false step up the ridge.':
     'Love, logic, reason, and science turn a false step.',
+  'Nothing was handed on; it was only felt.':
+    'Nothing was passed on; it was only felt.',
+}
+
+/**
+ * Easy Story Strip faces. Hard keeps the key. Claim and false answers only —
+ * why lines stay in EASY_CHROME so the short why chip still applies.
+ */
+export const EASY_STRIP_FACE: Record<string, string> = {
+  'Paul hands on an early public creed: died, buried, raised, appeared.':
+    'Paul passes on a short list of what Christians believe: died, buried, raised, appeared.',
+  'The creed is Paul’s private dream from decades later.':
+    'This was only Paul’s private dream from decades later.',
+  'Paul invented the formula on the spot in Corinth.':
+    'Paul made up the words on the spot.',
+  'Paul invents the creed as he writes.':
+    'Paul makes up the list as he writes.',
 }

@@ -59,10 +59,16 @@ export interface SequenceItem {
   art?: string
   /** Short slot line while the strip is in play. Tray and Hard win keep `text`. */
   shortCaption?: string
+  /** Easy tray line. Hard keeps `text`. */
+  easyText?: string
+  /** Easy slot line. Hard keeps `shortCaption`. */
+  easyShortCaption?: string
   /** Easy win line. Shorter than `text` so the picture stays taller than the caption. */
   winCaption?: string
   /** Word already inside `text` to set in bold, so similar pictures stay distinct. */
   role?: string
+  /** Bold word inside `easyText`. Hard keeps `role`. */
+  easyRole?: string
 }
 
 export interface SequenceChallenge {

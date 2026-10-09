@@ -617,6 +617,50 @@ assert.match(sequenceVerse, /ref: 'Luke 10:36–37'/)
 assert.match(sequenceSrc, /verse\.easyText/)
 assert.match(sequenceSrc, /verse\.easyLead/)
 assert.match(sequenceSrc, /verse\.easyHeader/)
+assert.match(sequenceSrc, /item\.easyText/)
+assert.match(hollowSeqSrc, /text: 'A lawyer asks/)
+assert.match(hollowSeqSrc, /easyText: 'A law teacher asks/)
+assert.match(hollowSeqSrc, /text: 'Robbers leave a man half dead\.'/)
+assert.match(hollowSeqSrc, /easyText: 'Robbers leave a man badly hurt\.'/)
+assert.match(hollowSeqSrc, /winCaption: 'Badly\\nhurt\.'/)
+assert.match(hollowSeqSrc, /text: 'Two temple men pass by\.'/)
+assert.match(hollowSeqSrc, /easyText: 'A priest and a helper walk past\.'/)
+assert.match(hollowSeqSrc, /easyShortCaption: 'Priest and\\nhelper'/)
+assert.match(hollowSeqSrc, /text: 'A Samaritan has compassion and helps\.'/)
+assert.match(hollowSeqSrc, /easyText: 'A Samaritan felt sorry and helped\.'/)
+assert.match(sequenceVerse, /in accordance with the scriptures/)
+assert.match(sequenceVerse, /appeared to Cephas, then to the twelve/)
+assert.match(sequenceVerse, /ref: '1 Corinthians 15:3–5'/)
+assert.match(
+  sequenceVerse,
+  /easyLead:\s*\n\s*'Cephas is Peter\. “The scriptures” means God’s Word said long ago this would happen\.'/,
+)
+const dailySeqSrc = readFileSync(new URL('../src/content/daily.ts', import.meta.url), 'utf8')
+assert.match(dailySeqSrc, /text: 'Jesus dies, is buried, and is raised\.'/)
+assert.match(dailySeqSrc, /easyText: 'Jesus died, was buried, rose\.'/)
+assert.equal(
+  easyFacingLine(
+    'wb-creed',
+    'Paul hands on an early public creed: died, buried, raised, appeared.',
+  ),
+  'Paul passes on a short list of what Christians believe: died, buried, raised, appeared.',
+)
+assert.equal(
+  evidenceFor('wb-creed')?.claim,
+  'Paul hands on an early public creed: died, buried, raised, appeared.',
+)
+assert.equal(
+  easyWhyLine('Nothing was handed on; it was only felt.'),
+  'Nothing was passed on; it was only felt.',
+)
+assert.equal(
+  easyFacingLine('ph-road', 'Neighbor is the one who shows mercy.'),
+  'Neighbor is the one who shows mercy.',
+)
+assert.equal(
+  easyFacingLine('daily-creed', 'The churches named Christ died, buried, and raised before Paul wrote.'),
+  'The churches named Christ died, buried, and raised before Paul wrote.',
+)
 assert.match(sequenceArtSrc, /'road1-lawyer': \{ cue: 'Jesus', x: '75%'/)
 assert.match(sequenceArtSrc, /'creed4-appeared': \{ cue: 'Jesus', x: '23%'/)
 assert.match(
@@ -1362,7 +1406,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.421')
+assert.equal(APP_VERSION, '1.4.422')
 
 // Night Watch 1.4.419: on-screen walkers do not share a head. Kind and boss stats stay put.
 {

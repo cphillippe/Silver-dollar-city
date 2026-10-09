@@ -35,10 +35,14 @@ function toCard(
   const crop = !decoy && easy && item.art ? SEQUENCE_CROP[item.art] : undefined
   return {
     id: item.id,
-    text: item.text,
-    shortText: decoy ? undefined : item.shortCaption,
+    text: !decoy && easy && item.easyText ? item.easyText : item.text,
+    shortText: decoy
+      ? undefined
+      : easy && item.easyShortCaption
+        ? item.easyShortCaption
+        : item.shortCaption,
     winText: !decoy && easy ? item.winCaption : undefined,
-    role: decoy ? undefined : item.role,
+    role: decoy ? undefined : easy && item.easyRole ? item.easyRole : item.role,
     orderIndex: decoy ? -1 : index,
     decoy,
     figure,

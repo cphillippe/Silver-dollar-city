@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.422',
+    title: 'Story Strip uses plain words',
+    when: '2026-10-09',
+    items: [
+      'Easy story cards say a law teacher, badly hurt, a priest and a helper, and felt sorry and helped.',
+      'Easy lines about what Paul passed on say a short list of what Christians believe. The Bible quote stays the same, and a line above it says Peter and the old holy writings.',
+    ],
+  },
+  {
     version: '1.4.421',
     title: 'Night Watch Easy round 5 boss and clear-panel taps',
     when: '2026-10-09',
