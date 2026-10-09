@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.395',
+    title: 'Story strip Easy is easier to see',
+    when: '2026-10-09',
+    items: [
+      'Easy order puzzles glow the right card after two misses, with a gold ring and a lift. A wrong tap wiggles farther and flashes red. Picture faces stay whole in the tray and on the strip, and five-frame slots keep a short caption. The start button says Order the story. A playtest link can open one puzzle without unlocking the street.',
+    ],
+  },
+  {
     version: '1.4.394',
     title: 'Order puzzles become picture panels',
     when: '2026-10-08',
