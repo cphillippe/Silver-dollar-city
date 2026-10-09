@@ -1507,6 +1507,19 @@ img.walker-face.easy-walker-face,
   box-shadow: 0 0 0 2px rgba(255, 204, 51, 0.65);
 }
 
+.nw-tap-readout {
+  margin: 0 0 6px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: rgba(12, 8, 24, 0.82);
+  color: #fff6d0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1.3;
+  text-align: center;
+  pointer-events: none;
+}
+
 .defend-page.is-nw-debug-freeze .defend-board {
   box-shadow:
     0 0 0 2px rgba(255, 204, 51, 0.85),
@@ -1762,12 +1775,23 @@ img.walker-face.easy-walker-face,
 
 /* Easy little wave on path (1.4.302 / #418) */
 /* 1.4.385: the fat face disc is the only tap. The sprite must not eat it. */
+/* 1.4.424: only the glowing walker keeps a hit disc. A later walker is painted
+   on top, and its disc was swallowing taps meant for the glow. */
 .defend-page.is-easy-tap .defend-raider.is-easy-tap-target {
   cursor: pointer;
   outline: none;
+  pointer-events: none;
+}
+
+.defend-page.is-easy-tap .defend-raider.is-easy-cue {
+  pointer-events: auto;
 }
 
 .defend-page.is-easy-tap .defend-raider-hit {
+  pointer-events: none;
+}
+
+.defend-page.is-easy-tap .defend-raider.is-easy-cue .defend-raider-hit {
   pointer-events: all;
 }
 
