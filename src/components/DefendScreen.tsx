@@ -10,7 +10,8 @@ import {
   WATCH_TITLE,
 } from '../content/defend'
 import { EASY, isEasy, loveHowTo } from '../lib/easy'
-import { roundMark } from '../nightWatch/rounds'
+import { roundMark, easyRound } from '../nightWatch/rounds'
+import { gaitForSlot, walkerHp, walkerPace, walkerSpark } from '../nightWatch/walkers'
 import { localDateKey } from '../lib/dates'
 import {
   DEFEND_BRIEF_ID,
@@ -429,7 +430,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         }
         return {
           ...item,
-          t: unturnedStep(item.t, nightEnemies.speed(easy) * tune.speedScale * dt, frozen),
+          t: unturnedStep(
+            item.t,
+            nightEnemies.speed(easy) * tune.speedScale * walkerPace(easy ? item.gait : undefined) * dt,
+            frozen,
+          ),
         }
       })
       let leaked = 0
@@ -498,7 +503,10 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         spawnAt = 0
         const id = live.current.spawned
         const cast = nightEnemies.cast(cleared, id, wave, easy)
-        const hp = nightEnemies.maxHp(cast.kind, easy) + tune.hpBonus
+        const gait = easy ? gaitForSlot(easyRound(wave), id) : undefined
+        const hp = easy
+          ? walkerHp(nightEnemies.maxHp(cast.kind, easy), tune.hpBonus, gait)
+          : nightEnemies.maxHp(cast.kind, easy) + tune.hpBonus
         if (!metRef.current.includes(cast.id)) {
           metRef.current = [...metRef.current, cast.id]
           markMetRef.current(cast.id)
@@ -517,6 +525,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           castId: cast.id,
           hp,
           maxHp: hp,
+          gait,
+          spark: walkerSpark(gait),
         })
         live.current.spawned += 1
       }
@@ -866,7 +876,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     }
     if (fit === 'match') {
       const struck = nightEnemies.hit(best, easy && manual ? easyGlowTapDamage(tier, best.hp) : tier)
-      const sparks = sparkAwardForHit(struck.down)
+      const sparks = sparkAwardForHit(struck.down, best.spark ?? 1)
       blast.pop = struck.down
       blast.spark = sparks
       if (easy) {
@@ -892,7 +902,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       )
       if (struck.down) {
         live.current.downed += 1
-        setRunSparks((count) => count + 1)
+        setRunSparks((count) => count + sparks)
         // Lamp kills keep the spawn cadence. A face tap must not pull the next walker in early.
         if (easy && !manual) live.current.spawnNow = true
       }
@@ -924,7 +934,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           )
           if (nick.down) {
             live.current.downed += 1
-            setRunSparks((count) => count + 1)
+            setRunSparks((count) => count + walkerSpark(pick.gait))
             live.current.spawnNow = true
           }
         }
