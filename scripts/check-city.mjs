@@ -5252,6 +5252,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   const screen410 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
   assert.match(screen410, /easyGlowTapDamage\(tier, best\.hp\)/)
   assert.match(screen410, /easyClearHeart\(live\.current\.hearts\)/)
+  assert.match(screen410, /easyRoundHeartCap\(waveIndexRef\.current\)/)
   assert.match(screen410, /\+1 ♥/)
   assert.match(
     readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8'),

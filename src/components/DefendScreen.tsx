@@ -21,6 +21,7 @@ import {
   cueTapStrike,
   easyClearHeart,
   easyGlowTapDamage,
+  easyRoundHeartCap,
   WATCH_ABILITY_LABEL,
   dist,
   unlockedWatchAbilities,
@@ -458,6 +459,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           live.current.leakGraceUntil,
           live.current.heartsLostRound,
           shielded,
+          easyRoundHeartCap(waveIndexRef.current),
         )
         live.current.leakGraceUntil = paced.graceUntil
         live.current.heartsLostRound = paced.lostThisRound
