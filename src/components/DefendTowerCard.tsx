@@ -7,7 +7,7 @@ import {
   TOWER_CARD_W,
   type TowerCardPoint,
 } from '../lib/towerCardPlace'
-import { boostCost, combatTier, TIER_MARK, TOOL_TIER_MAX } from '../lib/watchTools'
+import { boostCost, combatTier, easyTierCost, TIER_MARK, TOOL_TIER_MAX } from '../lib/watchTools'
 
 export interface LevelBurst {
   from: number
@@ -30,6 +30,8 @@ export function DefendTowerCard({
   clearOf = [],
   cameraScale = 0.55,
   roadNote = '',
+  /** Easy uses the scaled tier prices. Hard stays at one spark. */
+  easy = false,
 }: {
   plotId: CityPlotId
   ability: string
@@ -49,11 +51,13 @@ export function DefendTowerCard({
   cameraScale?: number
   /** Same reach note the plant ghost shows. Empty when this level already reaches. */
   roadNote?: string
+  easy?: boolean
 }) {
   const cardRef = useRef<HTMLDivElement>(null)
   const tier = combatTier(ability, runTier)
   const maxed = tier >= TOOL_TIER_MAX
-  const cost = boostCost(tier)
+  const cost = easy ? easyTierCost(tier) : boostCost(tier)
+  const burstCost = levelBurst ? (easy ? easyTierCost(levelBurst.from) : 1) : 1
   const next = Math.min(TOOL_TIER_MAX, tier + 1)
   const canSpend = !maxed && sparks >= cost
   const label = WATCH_ABILITY_LABEL[ability] ?? 'Love'
@@ -137,7 +141,7 @@ export function DefendTowerCard({
       </p>
       {bursting ? (
         <span className="defend-spark-spend" aria-hidden="true">
-          −1✦
+          {burstCost === 1 ? '−1✦' : `−${burstCost}✦`}
         </span>
       ) : null}
       <p className="defend-tower-gain">{maxed ? 'As strong as it gets' : 'Range ↑  ·  Damage ↑'}</p>
@@ -162,7 +166,7 @@ export function DefendTowerCard({
       )}
       {!maxed && !canSpend ? (
         <p id="defend-tower-need" className="defend-tower-need">
-          Need a spark
+          {cost > 1 ? `Need ${cost} sparks` : 'Need a spark'}
         </p>
       ) : null}
     </div>

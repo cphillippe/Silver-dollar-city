@@ -69,7 +69,7 @@ import {
   UPGRADE_TAP_ECHO_MS,
   upgradeSpendAllowed,
 } from '../lib/nightPlants'
-import { applyBoost, combatTier, freshRunTier } from '../lib/watchTools'
+import { applyBoost, buyExtraLamp, combatTier, EASY_LAMP_COST, freshRunTier } from '../lib/watchTools'
 import { useJuiceHandoff } from '../lib/juice'
 import type { CityPlotId } from '../lib/city'
 import {
@@ -167,6 +167,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const [upFlash, setUpFlash] = useState<CityPlotId | null>(null)
   const [levelBurst, setLevelBurst] = useState<{ plotId: CityPlotId; from: number; to: number } | null>(null)
   const [sparkSpend, setSparkSpend] = useState(false)
+  const [sparkSpent, setSparkSpent] = useState(1)
+  const [placeArm, setPlaceArm] = useState<WatchAbility | null>(null)
+  const placeArmRef = useRef<WatchAbility | null>(null)
+  placeArmRef.current = placeArm
+  const swallowWaveTap = useRef(false)
   const [loreMeet, setLoreMeet] = useState<{ id: string; line: string } | null>(null)
   const runTierRef = useRef(runTier)
   runTierRef.current = runTier
@@ -497,6 +502,69 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     return () => observer.disconnect()
   }, [phase, taught, easy])
 
+  function noteSpend(cost: number) {
+    setSparkSpent(cost)
+    setSparkSpend(true)
+    window.clearTimeout(burstTimer.current)
+    burstTimer.current = window.setTimeout(() => setSparkSpend(false), LEVEL_BURST_MS)
+  }
+
+  function clearPlaceArm() {
+    placeArmRef.current = null
+    setPlaceArm(null)
+    setGhost(null)
+  }
+
+  function armPlace(id: WatchAbility) {
+    if (!easy || won) return
+    if (phase !== 'wave' && phase !== 'boost') return
+    if (Object.values(plantsRef.current).includes(id)) {
+      clearPlaceArm()
+      return
+    }
+    placeArmRef.current = id
+    setPlaceArm(id)
+    setAbility(id)
+  }
+
+  function placeHitsActor(target: EventTarget | null): boolean {
+    const node = target as Element | null
+    return Boolean(node?.closest?.('.defend-raider, .defend-pad, .defend-tower-card'))
+  }
+
+  /** Free before Begin. After Begin, a new type spends EASY_LAMP_COST. */
+  function finishPlace(
+    plantsNow: Record<string, string>,
+    point: { x: number; y: number },
+    using: string,
+    hud: boolean,
+    paid: boolean,
+  ): boolean {
+    if (paid && Object.values(plantsNow).includes(using)) return false
+    const next = commitLamp(plantsNow, point, using, progress, runTier, hud)
+    if (!next.ok) {
+      setGhost(next.preview)
+      return false
+    }
+    if (paid) {
+      const bought = buyExtraLamp(sparksRef.current)
+      if (!bought.ok) {
+        setGhost(null)
+        flashKit(`Need ${bought.cost} sparks`)
+        return false
+      }
+      sparksRef.current = bought.sparks
+      setRunSparks(bought.sparks)
+      noteSpend(bought.cost)
+      placeArmRef.current = null
+      setPlaceArm(null)
+    }
+    setPlants(next.plants)
+    setGhost(null)
+    closeUpgrade(true)
+    return true
+  }
+
   function togglePad(id: CityPlotId) {
     if (phase !== 'plant') return
     if (plants[id]) return
@@ -505,9 +573,23 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     closeUpgrade(true)
   }
 
-  function onPlacePointer(event: { type: string; clientX: number; clientY: number; pointerId: number; currentTarget: EventTarget }) {
+  function onPlacePointer(event: {
+    type: string
+    clientX: number
+    clientY: number
+    pointerId: number
+    currentTarget: EventTarget
+    target: EventTarget | null
+  }) {
     if (lampDragLive.current) return
-    if (!(easy && phase === 'plant')) return
+    if (placeHitsActor(event.target)) {
+      if (event.type === 'pointerdown') setGhost(null)
+      return
+    }
+    const opening = easy && phase === 'plant'
+    const paidId = !opening && easy && (phase === 'wave' || phase === 'boost') ? placeArmRef.current : null
+    const paid = Boolean(paidId && !Object.values(plantsRef.current).includes(paidId))
+    if (!opening && !paid) return
     const svg = boardRef.current
     if (!svg) return
     const point = clientToMap(svg, event.clientX, event.clientY)
@@ -519,7 +601,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         /* A tap that cannot capture still places on pointerup. */
       }
     }
-    const using = unlocked.includes(ability) ? ability : 'love'
+    const using = paid ? (paidId as WatchAbility) : unlocked.includes(ability) ? ability : 'love'
     const hud = hudCoversPoint(event.clientX, event.clientY, svg.ownerDocument)
     const look = previewLamp(point, using, progress, runTier, plantsRef.current, hud)
     if (event.type === 'pointercancel') {
@@ -527,14 +609,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       return
     }
     if (event.type === 'pointerup') {
-      const next = commitLamp(plantsRef.current, point, using, progress, runTier, hud)
-      if (!next.ok) {
-        setGhost(next.preview)
-        return
-      }
-      setPlants(next.plants)
-      setGhost(null)
-      closeUpgrade(true)
+      if (phase === 'wave') swallowWaveTap.current = true
+      finishPlace(plantsRef.current, point, using, hud, paid)
       return
     }
     setGhost(look)
@@ -545,7 +621,9 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   }
 
   function onLampDrag(kind: LampDragPhase, using: WatchAbility, clientX: number, clientY: number) {
-    if (kind === 'cancel' || !(easy && phase === 'plant')) {
+    const opening = easy && phase === 'plant'
+    const paid = easy && (phase === 'wave' || phase === 'boost') && !Object.values(plantsRef.current).includes(using)
+    if (kind === 'cancel' || (!opening && !paid)) {
       setGhost(null)
       return
     }
@@ -570,14 +648,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       setGhost(previewLamp(point, using, progress, runTier, plantsRef.current, hud))
       return
     }
-    const next = commitLamp(plantsRef.current, point, using, progress, runTier, hud)
-    setGhost(null)
-    if (!next.ok) return
-    setPlants(next.plants)
-    closeUpgrade(true)
+    finishPlace(plantsRef.current, point, using, hud, paid)
   }
 
   function openUpgrade(id: CityPlotId) {
+    if (placeArmRef.current) clearPlaceArm()
     const now = performance.now()
     const prev = upgradeTapRef.current
     const echoed = prev.id === id && now - prev.at < UPGRADE_TAP_ECHO_MS
@@ -796,6 +871,10 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   }
 
   function fireBest() {
+    if (swallowWaveTap.current) {
+      swallowWaveTap.current = false
+      return
+    }
     if (phase !== 'wave' || won) return
     if (faceTapStrike(easy, false, false) === 'miss' && easy) {
       showMiss()
@@ -832,6 +911,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     setTapJuice(null)
     setRunTier(freshRunTier())
     setPlants(easy ? {} : starterPlants(pads, unlocked))
+    clearPlaceArm()
     setRunSparks(0)
     sparksRef.current = 0
     const ready = { still: 0, mend: 0 }
@@ -859,8 +939,14 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   }
 
   function boostTool(id: WatchAbility, lampId?: CityPlotId | null) {
+    if (placeArmRef.current) {
+      placeArmRef.current = null
+      setPlaceArm(null)
+      setGhost(null)
+    }
     const before = combatTier(id, runTierRef.current)
-    const next = applyBoost(id, runTierRef.current, sparksRef.current)
+    const beforeSparks = sparksRef.current
+    const next = applyBoost(id, runTierRef.current, sparksRef.current, easy)
     setBoostNote(next.note)
     if (!next.ok) return
     const after = combatTier(id, next.runTier)
@@ -868,6 +954,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     sparksRef.current = next.sparks
     setRunTier(next.runTier)
     setRunSparks(next.sparks)
+    setSparkSpent(Math.max(1, beforeSparks - next.sparks))
     setToolLock(null)
     const lamp = lampId !== undefined ? lampId : upgradeAtRef.current
     const plantedType = lamp ? plantsRef.current[lamp] : undefined
@@ -999,6 +1086,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
 
   function continueFromBoost() {
     if (won || phase !== 'boost') return
+    clearPlaceArm()
     setBoostNote(null)
     setLoreMeet(null)
     if (waveIndex + 1 < DEFEND_NIGHT_WAVES) {
@@ -1157,6 +1245,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
             {`Wave ${waveIndex + 1} clear · spend sparks`}
             {boostNote ? ` · ${boostNote}` : ''}
           </p>
+          {easy ? (
+            <p className="defend-lamp-price" data-lamp-cost={EASY_LAMP_COST}>
+              {`New lamp ${EASY_LAMP_COST}✦`}
+            </p>
+          ) : null}
           <div className="defend-spark-choices" role="group" aria-labelledby="defend-spark-pick">
             <p id="defend-spark-pick" className="defend-spark-choices-label">
               {easy ? EASY.nightBoostPick : 'Skills'}
@@ -1178,6 +1271,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
             className={`btn primary xl defend-go${awaitingLamp ? ' is-awaiting-plant' : ' is-after-plant'}`}
             onClick={() => {
               if (awaitingLamp || phase !== 'plant') return
+              setGhost(null)
               setPhase('wave')
             }}
             disabled={awaitingLamp || arming || phase !== 'plant'}
@@ -1218,7 +1312,10 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       runTier={runTier}
       sparks={runSparks}
       boosting={boosting}
-      placing={easy && phase === 'plant'}
+      placing={easy && !won && phase !== 'lost'}
+      paidPlace={easy && !won && (phase === 'wave' || phase === 'boost')}
+      lampArmed={placeArm}
+      onArmPlace={armPlace}
       onLampDrag={onLampDrag}
       onCardPress={onCardPress}
       onBoost={boostTool}
@@ -1227,7 +1324,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
 
   return (
     <main
-      className={`defend-page ${taught ? 'is-puzzle' : 'is-teach'} ${arming ? 'is-arming' : ''} ${won ? 'is-win' : ''} ${shake ? 'is-shake' : ''} ${leakFlash ? 'is-leak' : ''} ${firing ? 'is-firing' : ''} ${stillOn ? 'is-still' : ''} ${mendOn ? 'is-mend' : ''} ${mendShield ? 'is-mend-shield' : ''} ${debugFrozen ? 'is-nw-debug-freeze' : ''} ${easy ? 'is-easy-watch' : ''} ${easyTap ? 'is-easy-tap' : ''} ${boosting ? 'is-boost' : ''} ${boosting && runSparks < 1 ? 'is-spark-broke' : ''} ${easy && phase === 'plant' && awaitingLamp ? 'is-need-lamp' : ''} ${easy && phase === 'plant' ? 'is-placing' : ''}`}
+      className={`defend-page ${taught ? 'is-puzzle' : 'is-teach'} ${arming ? 'is-arming' : ''} ${won ? 'is-win' : ''} ${shake ? 'is-shake' : ''} ${leakFlash ? 'is-leak' : ''} ${firing ? 'is-firing' : ''} ${stillOn ? 'is-still' : ''} ${mendOn ? 'is-mend' : ''} ${mendShield ? 'is-mend-shield' : ''} ${debugFrozen ? 'is-nw-debug-freeze' : ''} ${easy ? 'is-easy-watch' : ''} ${easyTap ? 'is-easy-tap' : ''} ${boosting ? 'is-boost' : ''} ${boosting && runSparks < 1 ? 'is-spark-broke' : ''} ${easy && phase === 'plant' && awaitingLamp ? 'is-need-lamp' : ''} ${easy && (phase === 'plant' || placeArm) ? 'is-placing' : ''} ${easy && !won && (phase === 'wave' || phase === 'boost') ? 'is-shop' : ''}`}
       aria-label={WATCH_TITLE}
     >
       {after ? (
@@ -1272,7 +1369,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
               // 1.4.387: Easy hides Insight. Plant, Pull, and waves never change that journal tally, so a fresh diamond stays 0. Rail 1s are the plant slots. Sparks stay on the star.
               easy ? null : <CoinRead count={insightScore(progress)} label="Insight" />
             }
-            balloon={<MoneyBalloon count={runSparks} label="Sparks" gain={sparkPop} spend={sparkSpend} />}
+            balloon={<MoneyBalloon count={runSparks} label="Sparks" gain={sparkPop} spend={sparkSpend} spent={sparkSpent} />}
             rail={rail}
             docks={docks}
           >

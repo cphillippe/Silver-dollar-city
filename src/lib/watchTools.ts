@@ -148,9 +148,41 @@ export function combatTier(toolId: string, runTier: Record<string, number>): num
   return Math.min(TOOL_TIER_MAX, Math.max(1, Math.floor(live)))
 }
 
-/** Sparks to raise one step. Flat 1. Maxed tools cost nothing. */
+/** Hard sparks to raise one step. Flat 1. Maxed tools cost nothing. */
 export function boostCost(tier: number): number {
   return tier >= TOOL_TIER_MAX ? 0 : 1
+}
+
+/**
+ * Easy spark price of each tier. Path-agnostic: index is the tier you buy.
+ * 2 is II, 3 is III, 4 is the next step. Tier I is free.
+ * Every path pays this same row, so a later 2-path tree can hang these
+ * numbers on its branches without a new economy.
+ */
+export const EASY_TIER_COST: readonly number[] = [0, 0, 3, 6, 10]
+
+/** Sparks to plant one more lamp after Begin. Lamps planted before Begin are free. */
+export const EASY_LAMP_COST = 5
+
+/** Sparks for the next Easy step. A maxed lamp costs nothing. The tier-4 price waits in `EASY_TIER_COST`. */
+export function easyTierCost(tier: number): number {
+  if (tier >= TOOL_TIER_MAX) return 0
+  const buying = Math.floor(tier) + 1
+  const listed = EASY_TIER_COST[buying]
+  return listed ?? EASY_TIER_COST[EASY_TIER_COST.length - 1] ?? 0
+}
+
+export interface LampBuy {
+  ok: boolean
+  sparks: number
+  cost: number
+  note: string
+}
+
+/** Spend sparks for one extra lamp. Does not raise a tier. */
+export function buyExtraLamp(sparks: number, cost = EASY_LAMP_COST): LampBuy {
+  if (sparks < cost) return { ok: false, sparks, cost, note: 'Need a spark' }
+  return { ok: true, sparks: sparks - cost, cost, note: 'Lamp planted' }
 }
 
 export interface BoostSpend {
@@ -160,18 +192,22 @@ export interface BoostSpend {
   note: string
 }
 
-/** Spend run sparks to bump I→II→III. Does not touch journal stars. */
+/**
+ * Spend run sparks to bump I→II→III. Does not touch journal stars.
+ * Hard pays `boostCost` (1). Easy pays `easyTierCost` (3, then 6).
+ */
 export function applyBoost(
   toolId: string,
   runTier: Record<string, number>,
   sparks: number,
+  easy = false,
 ): BoostSpend {
   const label = watchTool(toolId)?.label ?? 'Tool'
   const tier = combatTier(toolId, runTier)
   if (tier >= TOOL_TIER_MAX) {
     return { ok: false, runTier, sparks, note: `${label} is ${TIER_MARK[TOOL_TIER_MAX]}` }
   }
-  const cost = boostCost(tier)
+  const cost = easy ? easyTierCost(tier) : boostCost(tier)
   if (sparks < cost) {
     return { ok: false, runTier, sparks, note: 'Need a spark' }
   }
