@@ -88,7 +88,7 @@ import {
   wavePackSize,
 } from '../src/lib/defend.ts'
 import { EASY_ROUND_SPEED_CAP, EASY_ROUNDS, roundMark } from '../src/nightWatch/rounds.ts'
-import { scoreEasyRoad, scoreEasyTree } from '../src/nightWatch/roundScore.ts'
+import { paceEasyTree, scoreEasyRoad, scoreEasyTree } from '../src/nightWatch/roundScore.ts'
 import {
   applyPathStep,
   canTake,
@@ -1288,7 +1288,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.407')
+assert.equal(APP_VERSION, '1.4.408')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -4921,7 +4921,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     assert.ok(rest.count < prev.count || rest.speed < prev.speed || rest.hp < prev.hp || rest.spawn > prev.spawn)
   }
   assert.equal(scoreEasyRoad(6, [3, 3, 2], 1), 'clear', '1.4.404 round 7 holds for the build that just left round 6')
-  assert.equal(scoreEasyRoad(9, [2, 2], 1), 'lost', '1.4.404 round 10 leaks on two Level II lamps')
+  assert.equal(scoreEasyRoad(9, [2, 2], 1), 'clear', '1.4.408 round 10 holds on two Level II lamps')
   assert.equal(scoreEasyRoad(9, [3, 3], 1), 'clear', '1.4.404 round 10 holds on two Level III lamps')
   assert.equal(scoreEasyRoad(9, [2, 2, 2, 2], 1), 'clear', '1.4.404 round 10 holds on four Level II lamps')
   assert.equal(scoreEasyRoad(9, [1, 1, 1, 1], 1), 'lost', '1.4.404 round 10 leaks on four Level I lamps')
@@ -5021,7 +5021,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(scoreEasyTree(5, [strong(2), zero], 1), 'clear', '1.4.405 one Strong step 2 holds round 6')
   assert.equal(scoreEasyTree(5, [far(2), zero], 0), 'lost', '1.4.405 Far step 2 still needs taps')
   assert.equal(scoreEasyTree(5, [far(2), zero], 1), 'clear', '1.4.405 one Far step 2 holds round 6')
-  assert.equal(scoreEasyTree(9, [strong(2), strong(2)], 1), 'lost', '1.4.405 round 10 leaks on two Strong step 2 lamps')
+  assert.equal(scoreEasyTree(9, [strong(2), strong(2)], 1), 'clear', '1.4.408 round 10 holds on two Strong step 2 lamps')
   assert.equal(scoreEasyTree(9, [strong(2), strong(2), strong(2)], 1), 'clear', '1.4.405 round 10 holds on three Strong step 2 lamps')
   assert.equal(scoreEasyTree(14, [strong(2), strong(2), strong(2), strong(2)], 1), 'lost', '1.4.405 round 15 leaks if every lamp stopped at step 2')
   assert.equal(scoreEasyTree(14, [strong(3), strong(3), strong(3)], 1), 'clear', '1.4.405 round 15 holds on three Strong step 3 lamps')
@@ -5136,6 +5136,50 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(gateSrc, /get\('playtest'\) === '1'/)
   assert.ok(CHANGELOG.some((note) => note.version === '1.4.407'), '1.4.407 changelog row')
   assert.doesNotMatch(latestChange('1.4.407').items.join('\n'), /Fixes #|Closes #|Resolves #/)
+}
+
+// Night Watch 1.4.408: pip buy, Easy hearts, softer rounds 7–12.
+{
+  assert.deepEqual(
+    EASY_ROUNDS.slice(6, 12).map((round) => round.hp),
+    [8, 7, 11, 14, 17, 14],
+    '1.4.408 rounds 7–12 step down in health',
+  )
+  assert.deepEqual(
+    EASY_ROUNDS.slice(0, 6).map((round) => round.hp),
+    [0, 0, 1, 2, 3, 7],
+    '1.4.408 rounds 1–6 keep their health',
+  )
+  const screen408 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const card408 = readFileSync(new URL('../src/components/DefendTowerCard.tsx', import.meta.url), 'utf8')
+  assert.match(screen408, /One got through!/)
+  assert.match(screen408, /Hearts left:/)
+  assert.match(screen408, /roundChangeBlocked\(\)/)
+  assert.doesNotMatch(screen408, /downed < tune\.size[\s\S]{0,120}setPhase\('lost'\)/)
+  assert.match(card408, /onPointerUp/)
+  assert.match(card408, /data-path-pip/)
+  assert.match(
+    readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8'),
+    /\.defend-tower-card \.defend-path-pips \{[^}]*pointer-events:\s*auto/,
+  )
+  const zero = { far: 0, strong: 0 }
+  const spent408 = spendTreeNight(EASY_ROUNDS.map((round) => round.count), EASY_LAMP_COST)
+  let hearts = 3
+  let lampKills = 0
+  let tapKills = 0
+  for (let index = 0; index < 12; index += 1) {
+    const paths = index === 0 ? [zero, zero] : spent408.rows[index - 1].lamps
+    const round = paceEasyTree(index, paths, hearts, 3, 0.7, 1 + index * 17)
+    assert.equal(round.result, 'clear', `1.4.408 a slow-tap spender holds round ${index + 1}`)
+    lampKills += round.lampKills
+    tapKills += round.tapKills
+    hearts = round.hearts
+  }
+  const share = lampKills / (lampKills + tapKills)
+  assert.ok(share > 0.55, '1.4.408 lamps take more than half the kills')
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.408'), '1.4.408 changelog row')
+  assert.match(latestChange('1.4.408').title, /lamp/i)
+  assert.doesNotMatch(latestChange('1.4.408').items.join('\n'), /Fixes #|Closes #|Resolves #/)
 }
 
 // Night Watch 1.4.392: reach cue, a longer level-I free lamp, and a plant pin.
