@@ -945,9 +945,89 @@ img.walker-face.easy-walker-face,
   animation: defend-gate-in 250ms ease-out both;
 }
 
+/* 1.4.411: Fast leans and streaks. Tough is darker and bulkier. No type label. */
+.defend-raider.is-fast .defend-raider-body {
+  transform: rotate(-16deg) scale(0.8, 1.08);
+  transform-origin: 50% 80%;
+  transform-box: fill-box;
+}
+
+.defend-fast-streaks {
+  pointer-events: none;
+}
+
+.defend-fast-streaks path {
+  fill: none;
+  stroke: #7ec8ff;
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  opacity: 0.9;
+  animation: defend-fast-streak 0.45s ease-out infinite;
+}
+
+.defend-fast-streaks path:nth-child(2) {
+  animation-delay: 0.12s;
+  stroke: #b7e4ff;
+}
+
+.defend-fast-streaks path:nth-child(3) {
+  animation-delay: 0.22s;
+}
+
+@keyframes defend-fast-streak {
+  from {
+    opacity: 0.15;
+    stroke-dashoffset: 8;
+  }
+  to {
+    opacity: 0.95;
+    stroke-dashoffset: 0;
+  }
+}
+
+.defend-tough-bulk {
+  fill: #241433;
+  stroke: #4a2a68;
+  stroke-width: 3;
+  pointer-events: none;
+}
+
+.defend-raider.is-tough .defend-raider-body {
+  transform-origin: 50% 90%;
+  transform-box: fill-box;
+  animation: defend-tough-step 0.72s ease-in-out infinite;
+}
+
+.defend-raider.is-tough .defend-raider-face {
+  filter: brightness(0.62) saturate(0.75);
+}
+
+.defend-raider.is-tough .defend-hp-fill {
+  fill: #d85a3a;
+}
+
+@keyframes defend-tough-step {
+  0%,
+  100% {
+    transform: scale(1.28) translateY(0);
+  }
+  50% {
+    transform: scale(1.28) translateY(5px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .defend-raider {
     animation: none;
+  }
+
+  .defend-raider.is-fast .defend-fast-streaks path,
+  .defend-raider.is-tough .defend-raider-body {
+    animation: none;
+  }
+
+  .defend-raider.is-tough .defend-raider-body {
+    transform: scale(1.28);
   }
 }
 

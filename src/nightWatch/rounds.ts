@@ -2,7 +2,7 @@
  * Easy Night Watch rounds (1.4.404, slice 2 of #602).
  * R1–R6 are the 1.4.402 table. Append rows to climb; this slice stops at R25.
  * Hard does not read this table.
- * `count` is the walkers (and the spark pay, one spark each).
+ * `count` is the walkers. Plain and fast pay one spark. Tough pays two.
  * `speed` multiplies the Easy walk rate. It stays at or under 6.8 so a walker
  * on a 375×667 phone is still readable and tappable. Late rounds lean on
  * count and HP. `hp` is added to the kind's HP.
@@ -11,43 +11,50 @@
  * 1.4.408 softens rounds 7–12 so a lamp-heavy spender can hold them.
  * 1.4.410 raises round 5 to the round-6 walk pace and brings the next walker
  * a little sooner. HP and the walker count stay put. R1–R4 stay put.
+ * 1.4.411 mixes Fast (from round 4) and Tough (from round 7) into `count`.
+ * `fast` and `tough` are how many of that count use those gaits. The rest are plain.
+ * A third gait is not in this table.
  */
 export interface EasyRound {
   count: number
   speed: number
   hp: number
   spawn: number
+  /** Walkers in `count` that use the fast gait. */
+  fast: number
+  /** Walkers in `count` that use the tough gait. */
+  tough: number
 }
 
 /** Walkers stay near the round-6 pace. Later slices should not blow past this. */
 export const EASY_ROUND_SPEED_CAP = 6.8
 
 export const EASY_ROUNDS: readonly EasyRound[] = [
-  { count: 4, speed: 1, hp: 0, spawn: 1 },
-  { count: 4, speed: 1.35, hp: 0, spawn: 0.95 },
-  { count: 5, speed: 1.8, hp: 1, spawn: 0.9 },
-  { count: 5, speed: 2.6, hp: 2, spawn: 0.85 },
-  { count: 6, speed: 6.4, hp: 3, spawn: 0.66 },
-  { count: 6, speed: 6.4, hp: 7, spawn: 0.72 },
-  { count: 6, speed: 6.2, hp: 8, spawn: 0.74 },
-  { count: 5, speed: 5.8, hp: 7, spawn: 0.82 },
-  { count: 6, speed: 6.3, hp: 11, spawn: 0.72 },
-  { count: 6, speed: 6.4, hp: 14, spawn: 0.7 },
-  { count: 6, speed: 6.5, hp: 17, spawn: 0.7 },
-  { count: 5, speed: 6.0, hp: 14, spawn: 0.8 },
-  { count: 7, speed: 6.5, hp: 28, spawn: 0.68 },
-  { count: 7, speed: 6.6, hp: 34, spawn: 0.68 },
-  { count: 8, speed: 6.6, hp: 42, spawn: 0.66 },
-  { count: 6, speed: 6.2, hp: 36, spawn: 0.78 },
-  { count: 8, speed: 6.6, hp: 42, spawn: 0.66 },
-  { count: 8, speed: 6.7, hp: 44, spawn: 0.66 },
-  { count: 9, speed: 6.7, hp: 44, spawn: 0.66 },
-  { count: 7, speed: 6.3, hp: 40, spawn: 0.76 },
-  { count: 8, speed: 6.7, hp: 44, spawn: 0.66 },
-  { count: 9, speed: 6.8, hp: 46, spawn: 0.66 },
-  { count: 9, speed: 6.8, hp: 46, spawn: 0.66 },
-  { count: 8, speed: 6.4, hp: 42, spawn: 0.74 },
-  { count: 9, speed: 6.8, hp: 46, spawn: 0.66 },
+  { count: 4, speed: 1, hp: 0, spawn: 1, fast: 0, tough: 0 },
+  { count: 4, speed: 1.35, hp: 0, spawn: 0.95, fast: 0, tough: 0 },
+  { count: 5, speed: 1.8, hp: 1, spawn: 0.9, fast: 0, tough: 0 },
+  { count: 5, speed: 2.6, hp: 2, spawn: 0.85, fast: 1, tough: 0 },
+  { count: 6, speed: 6.4, hp: 3, spawn: 0.66, fast: 1, tough: 0 },
+  { count: 6, speed: 6.4, hp: 7, spawn: 0.72, fast: 2, tough: 0 },
+  { count: 6, speed: 6.2, hp: 8, spawn: 0.74, fast: 0, tough: 4 },
+  { count: 5, speed: 5.8, hp: 7, spawn: 0.82, fast: 0, tough: 4 },
+  { count: 6, speed: 6.3, hp: 11, spawn: 0.72, fast: 1, tough: 1 },
+  { count: 6, speed: 6.4, hp: 14, spawn: 0.7, fast: 1, tough: 1 },
+  { count: 6, speed: 6.5, hp: 17, spawn: 0.7, fast: 1, tough: 1 },
+  { count: 5, speed: 6.0, hp: 14, spawn: 0.8, fast: 1, tough: 1 },
+  { count: 7, speed: 6.5, hp: 28, spawn: 0.68, fast: 2, tough: 3 },
+  { count: 7, speed: 6.6, hp: 34, spawn: 0.68, fast: 2, tough: 3 },
+  { count: 8, speed: 6.6, hp: 42, spawn: 0.66, fast: 2, tough: 3 },
+  { count: 6, speed: 6.2, hp: 36, spawn: 0.78, fast: 1, tough: 2 },
+  { count: 8, speed: 6.6, hp: 42, spawn: 0.66, fast: 2, tough: 3 },
+  { count: 8, speed: 6.7, hp: 44, spawn: 0.66, fast: 2, tough: 3 },
+  { count: 9, speed: 6.7, hp: 44, spawn: 0.66, fast: 2, tough: 4 },
+  { count: 7, speed: 6.3, hp: 40, spawn: 0.76, fast: 1, tough: 2 },
+  { count: 8, speed: 6.7, hp: 44, spawn: 0.66, fast: 2, tough: 3 },
+  { count: 9, speed: 6.8, hp: 46, spawn: 0.66, fast: 2, tough: 4 },
+  { count: 9, speed: 6.8, hp: 46, spawn: 0.66, fast: 2, tough: 4 },
+  { count: 8, speed: 6.4, hp: 42, spawn: 0.74, fast: 1, tough: 2 },
+  { count: 9, speed: 6.8, hp: 46, spawn: 0.66, fast: 2, tough: 4 },
 ]
 
 export function easyRound(index: number): EasyRound {

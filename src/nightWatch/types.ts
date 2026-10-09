@@ -1,4 +1,5 @@
 import type { WalkerKind } from '../types.ts'
+import type { WalkerGait } from './walkers.ts'
 
 /** Board coordinates in map viewBox units (798×1134 A2 plate). */
 export interface NightPoint {
@@ -18,6 +19,10 @@ export interface NightRaider {
   label?: string
   hp: number
   maxHp?: number
+  /** Easy gait. Hard leaves this unset and walks at the round pace. */
+  gait?: WalkerGait
+  /** Sparks this walker pays when turned. Tough pays more than one. */
+  spark?: number
   turned?: string
   from?: NightPoint
   heavenT?: number
