@@ -25,14 +25,33 @@ function freeRange(gap: number, tier: number): number {
   return base
 }
 
-const SEAT_GAP = ROAD_SEATS.map((lamp) => {
-  let best = Infinity
-  for (let t = 0; t <= 1; t += 0.002) {
-    const point = pathPoint(t)
-    best = Math.min(best, Math.hypot(lamp.x - point.x, lamp.y - point.y))
-  }
-  return best
-})
+function seatGap(seats: readonly { x: number; y: number }[]): number[] {
+  return seats.map((lamp) => {
+    let best = Infinity
+    for (let t = 0; t <= 1; t += 0.002) {
+      const point = pathPoint(t)
+      best = Math.min(best, Math.hypot(lamp.x - point.x, lamp.y - point.y))
+    }
+    return best
+  })
+}
+
+const SEAT_GAP = seatGap(ROAD_SEATS)
+
+/**
+ * Seats a kid can plant (1.4.412). Each one sits just off the road on a bend,
+ * so a level I ring covers a long stretch of the walk. The straight roadside
+ * seats above cover about 8% of the path, and that made this sim lose round 5
+ * with no taps while the phone cleared it. Score functions keep those seats.
+ */
+const LIVE_SEATS = [
+  { x: 472, y: 192 },
+  { x: 400, y: 736 },
+  { x: 368, y: 552 },
+  { x: 416, y: 384 },
+] as const
+
+const LIVE_GAP = seatGap(LIVE_SEATS)
 
 export function scoreEasyRoad(
   roundIndex: number,
@@ -282,13 +301,13 @@ export function paceEasyTree(
   offCue = 0.2,
 ): PaceRound {
   const round = easyRound(roundIndex)
-  const lamps = paths.slice(0, ROAD_SEATS.length).map((rank, index) => {
+  const lamps = paths.slice(0, LIVE_SEATS.length).map((rank, index) => {
     const strike = lampStrike({ far: rank.far, strong: rank.strong })
     const base = 114 + strike.rangeBonus
-    const gap = SEAT_GAP[index]
+    const gap = LIVE_GAP[index]
     return {
-      x: ROAD_SEATS[index].x,
-      y: ROAD_SEATS[index].y,
+      x: LIVE_SEATS[index].x,
+      y: LIVE_SEATS[index].y,
       range: base < gap + 24 ? Math.min(base, Math.max(0, gap - 1)) : base,
       strike,
       cool: 0,

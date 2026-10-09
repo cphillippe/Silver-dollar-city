@@ -70,6 +70,7 @@ import {
   lampUpgradeTool,
   nightPlantTypes,
   plantType,
+  lampPullRefund,
   pullPlant,
   selectUpgradeLamp,
   starterPlants,
@@ -210,6 +211,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const mendShieldUntilRef = useRef(0)
   const sparksRef = useRef(runSparks)
   sparksRef.current = runSparks
+  const paidTypes = useRef<Set<string>>(new Set())
   const prevSparks = useRef(runSparks)
   const [sparkPop, setSparkPop] = useState(false)
   const burstTimer = useRef(0)
@@ -261,6 +263,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     planted,
     plants,
     cool: {} as Record<string, number>,
+    /** Easy lamp clock, in ms. It advances with `pacedDt`, same as the walkers. */
+    clock: 0,
     playing: false,
     spawnNow: false,
     leakGraceUntil: 0,
@@ -388,6 +392,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       setHeartDrop(null)
     }
     live.current.cool = {}
+    live.current.clock = 0
     live.current.spawnNow = false
     live.current.leakGraceUntil = 0
     live.current.heartsLostRound = 0
@@ -422,7 +427,10 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         now,
         live.current.freezeUntil,
       )
-      if (!frozen) spawnAt += dt
+      if (!frozen) {
+        spawnAt += dt
+        if (easy) live.current.clock += dt * 1000
+      }
       const next = live.current.raiders.map((item) => {
         if (item.turned) {
           const tier = combatTier(item.turned, runTierRef.current)
@@ -662,6 +670,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       setPlaceArm(null)
     }
     setPlants(next.plants)
+    if (paid) paidTypes.current.add(using)
     setGhost(null)
     closeUpgrade(true)
     return true
@@ -772,16 +781,28 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     setUpgradeAt(null)
   }
 
+  function pullSparksFor(id: string): number {
+    const type = plants[id]
+    return lampPullRefund(Boolean(type && paidTypes.current.has(type)), EASY_LAMP_COST)
+  }
+
   function pullUpgradeLamp() {
     if (!upgradeAt) return
     if (phase !== 'plant' && phase !== 'boost') return
     const id = upgradeAt
+    const type = plants[id]
+    const refund = pullSparksFor(id)
     const next = pullPlant(plants, id, pads)
     if (!next) {
       if (planted.length <= 1) {
         flashKit(easy ? EASY.nightKeepLamp : 'Keep at least one lamp.')
       }
       return
+    }
+    if (type) paidTypes.current.delete(type)
+    if (refund > 0) {
+      sparksRef.current += refund
+      setRunSparks(sparksRef.current)
     }
     setPlants(next)
     closeUpgrade(true)
@@ -818,11 +839,15 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     const at = nightTowers.anchor(id)
     const using = towerAbility(id)
     const combat = lampCombat(using)
-    const wait = combat.strike
-      ? pacedCooldown(combat.strike.cooldownMs, combatPace())
-      : pacedCooldown(nightTowers.cooldown(id, progress), combatPace())
-    // A face tap is its own hit. Lamp cooldown only gates autofire.
-    if (!manual && (live.current.cool[id] ?? 0) + wait > now) return false
+    const rawCd = combat.strike ? combat.strike.cooldownMs : nightTowers.cooldown(id, progress)
+    // Easy: the clock already runs at 1× or 3×, so the cooldown stays in game ms.
+    // Hard keeps the wall clock. A face tap is its own hit and does not wait.
+    const wait = easy ? rawCd : pacedCooldown(nightTowers.cooldown(id, progress), combatPace())
+    const shotAt = easy ? live.current.clock : now
+    if (!manual) {
+      const last = easy ? live.current.cool[id] : (live.current.cool[id] ?? 0)
+      if (last != null && last + wait > shotAt) return false
+    }
     const tier = combat.damage
     const range = hitRange(id, using)
     let best: Raider | null = null
@@ -841,7 +866,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         }
       }
     }
-    if (!manual) live.current.cool[id] = now
+    if (!manual) live.current.cool[id] = shotAt
     lightPad(id)
     setFiring(true)
     setFiringId(using)
@@ -976,11 +1001,13 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   autoFireRef.current = (now: number, frozen: boolean) => {
     for (const id of live.current.planted) {
       const using = towerAbility(id)
-      const wait = pacedCooldown(
-        easy ? lampCombat(using).strike!.cooldownMs : nightTowers.cooldown(id, progress),
-        combatPace(),
-      )
-      if (!lampReadyToFire(live.current.cool[id] ?? 0, now, wait, frozen)) continue
+      const rawCd = easy
+        ? lampCombat(using).strike!.cooldownMs
+        : nightTowers.cooldown(id, progress)
+      const wait = easy ? rawCd : pacedCooldown(nightTowers.cooldown(id, progress), combatPace())
+      const shotAt = easy ? live.current.clock : now
+      const last = easy ? (live.current.cool[id] ?? shotAt - wait) : (live.current.cool[id] ?? 0)
+      if (!lampReadyToFire(last, shotAt, wait, frozen)) continue
       const at = nightTowers.anchor(id)
       const range = hitRange(id, using)
       const aimed = live.current.raiders.some(
@@ -1084,6 +1111,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     setRunTier(freshRunTier())
     setRunPaths(freshRunPaths())
     runPathsRef.current = freshRunPaths()
+    paidTypes.current = new Set()
     setPlants(easy ? {} : starterPlants(pads, unlocked))
     clearPlaceArm()
     setRunSparks(0)
@@ -1689,6 +1717,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
               onPullLamp={
                 phase === 'plant' || phase === 'boost' ? pullUpgradeLamp : undefined
               }
+              pullSparks={upgradeAt ? pullSparksFor(upgradeAt) : 0}
               onCloseUpgrade={closeUpgrade}
               onBoardTap={closeUpgrade}
               onPlacePointer={onPlacePointer}
