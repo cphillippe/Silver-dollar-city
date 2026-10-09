@@ -3,7 +3,15 @@ import type { PointerEvent as ReactPointerEvent } from 'react'
 import { easyFacingLine, loveHowTo } from '../lib/easy'
 import { learningForTool } from '../lib/learning'
 import { LAMP_DRAG_START_PX } from '../lib/lampPlace'
-import { boostCost, combatTier, TIER_MARK, TOOL_TIER_MAX, WATCH_TOOLS } from '../lib/watchTools'
+import {
+  boostCost,
+  combatTier,
+  EASY_LAMP_COST,
+  easyTierCost,
+  TIER_MARK,
+  TOOL_TIER_MAX,
+  WATCH_TOOLS,
+} from '../lib/watchTools'
 import { AbilityMark } from './GemMark'
 import type { ProgressState } from '../types'
 import type { WatchAbility } from '../lib/defend'
@@ -33,6 +41,11 @@ export interface DefendAbilityBarProps {
   onLampDrag?: (phase: LampDragPhase, ability: WatchAbility, clientX: number, clientY: number) => void
   /** True from press to release so a map tap does not place during the slide. */
   onCardPress?: (down: boolean) => void
+  /** After Begin, an unplanted card arms a paid plant instead of an upgrade. */
+  paidPlace?: boolean
+  /** Type armed for a paid plant. Empty during the free opening plant. */
+  lampArmed?: string | null
+  onArmPlace?: (id: WatchAbility) => void
   onBoost: (id: WatchAbility) => void
 }
 
@@ -52,6 +65,9 @@ export function DefendAbilityBar({
   placing = false,
   onLampDrag,
   onCardPress,
+  paidPlace = false,
+  lampArmed = null,
+  onArmPlace,
   onBoost,
 }: DefendAbilityBarProps) {
   const swallowClick = useRef(false)
@@ -59,13 +75,24 @@ export function DefendAbilityBar({
   const [dragFrom, setDragFrom] = useState<WatchAbility | null>(null)
   const onLampDragRef = useRef(onLampDrag)
   const onCardPressRef = useRef(onCardPress)
+  const onArmPlaceRef = useRef(onArmPlace)
   onLampDragRef.current = onLampDrag
   onCardPressRef.current = onCardPress
+  onArmPlaceRef.current = onArmPlace
 
   useEffect(() => () => stopListen.current?.(), [])
 
-  function trackCard(event: ReactPointerEvent<HTMLButtonElement>, ability: WatchAbility, open: boolean) {
-    if (!placing || !open || boosting) return
+  function trackCard(
+    event: ReactPointerEvent<HTMLButtonElement>,
+    ability: WatchAbility,
+    open: boolean,
+    placed: boolean,
+  ) {
+    if (!placing || !open) return
+    // A planted card between waves still upgrades. An unplanted card can be dragged into a paid plant.
+    if (paidPlace && placed) return
+    if (boosting && !paidPlace) return
+    if (paidPlace) onArmPlaceRef.current?.(ability)
     if (event.pointerType === 'mouse' && event.button !== 0) return
     stopListen.current?.()
     const start = {
@@ -129,7 +156,11 @@ export function DefendAbilityBar({
               const placed = plantedTypes.includes(tool.id)
               const heldLine = learningForTool(progress, tool.id)
               const tier = combatTier(tool.id, runTier)
-              const spendDry = boosting && open && tier < TOOL_TIER_MAX && sparks < boostCost(tier)
+              const stepCost = easy ? easyTierCost(tier) : boostCost(tier)
+              const brokeWord = stepCost > 1 ? `Need ${stepCost} sparks` : 'Need a spark'
+              const shopNew = paidPlace && !placed
+              const spendDry =
+                boosting && open && tier < TOOL_TIER_MAX && sparks < stepCost && (!easy || placed)
               const claim = open
                 ? tool.id === 'love'
                   ? loveHowTo(easy)
@@ -147,7 +178,9 @@ export function DefendAbilityBar({
                   type="button"
                   className={`defend-ability ${ability === tool.id ? 'is-on' : ''} ${open ? '' : 'is-locked'} ${placed ? 'is-placed' : ''} ${firing && firingId === tool.id ? 'is-firing' : ''} ${spendDry ? 'is-spark-dry' : ''}`}
                   data-type={tool.id}
-                  data-lamp-selected={placing && ability === tool.id ? 'yes' : undefined}
+                  data-lamp-selected={
+                    lampArmed === tool.id || (!paidPlace && placing && ability === tool.id) ? 'yes' : undefined
+                  }
                   data-dragging={dragFrom === tool.id ? 'yes' : undefined}
                   data-slot={open ? (placed ? 0 : 1) : undefined}
                   data-spark-dry={spendDry ? 'yes' : undefined}
@@ -155,7 +188,7 @@ export function DefendAbilityBar({
                   title={spendDry ? `${claim} Need a spark.` : claim}
                   disabled={spendDry}
                   style={placing && open ? { touchAction: 'none' } : undefined}
-                  onPointerDown={(event) => trackCard(event, tool.id, open)}
+                  onPointerDown={(event) => trackCard(event, tool.id, open, placed)}
                   onClick={() => {
                     if (swallowClick.current) {
                       swallowClick.current = false
@@ -168,11 +201,18 @@ export function DefendAbilityBar({
                       return
                     }
                     if (boosting) {
+                      if (easy && !placed) {
+                        setToolLock(null)
+                        setAbility(tool.id)
+                        onArmPlace?.(tool.id)
+                        return
+                      }
                       onBoost(tool.id)
                       return
                     }
                     setToolLock(null)
                     setAbility(tool.id)
+                    if (paidPlace) onArmPlace?.(tool.id)
                   }}
                 >
                   <AbilityMark ability={tool.id} size="md" />
@@ -181,18 +221,26 @@ export function DefendAbilityBar({
                     {TIER_MARK[tier]}
                   </span>
                   {open && !placed ? (
-                    <span className="defend-ability-stock" data-slot-badge="1">
-                      1
+                    <span className={`defend-ability-stock${shopNew ? ' is-price' : ''}`} data-slot-badge="1">
+                      {shopNew ? `${EASY_LAMP_COST}✦` : '1'}
                     </span>
                   ) : null}
                   {boosting && open ? (
                     <span className="defend-ability-boost" aria-hidden>
-                      {tier >= TOOL_TIER_MAX ? 'Max' : sparks < boostCost(tier) ? 'Need a spark' : easy ? 'Tap' : '↑ spark'}
+                      {shopNew
+                        ? `${EASY_LAMP_COST}✦`
+                        : tier >= TOOL_TIER_MAX
+                          ? 'Max'
+                          : sparks < stepCost
+                            ? brokeWord
+                            : easy
+                              ? 'Tap'
+                              : '↑ spark'}
                     </span>
                   ) : null}
                   <span className="defend-ability-claim">
                     {claim}
-                    {open ? (placed ? ' Planted.' : ' 1 to plant.') : ''}
+                    {open ? (placed ? ' Planted.' : shopNew ? ` ${EASY_LAMP_COST} sparks to plant.` : ' 1 to plant.') : ''}
                     {spendDry ? ' Need a spark.' : ''}
                   </span>
                 </button>

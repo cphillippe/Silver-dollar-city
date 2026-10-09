@@ -188,8 +188,26 @@ export function hudCoversPoint(clientX: number, clientY: number, doc: Document):
 /** A card press shorter than this stays a tap. Past it, the lamp follows the finger. */
 export const LAMP_DRAG_START_PX = 10
 
-/** CSS pixels the ghost sits above the fingertip so the lamp is not covered. */
-export const LAMP_DRAG_LIFT_PX = 36
+/**
+ * CSS pixels the ghost sits above the fingertip.
+ * 0 lands the lamp under the finger. A lift planted it above the release point.
+ */
+export const LAMP_DRAG_LIFT_PX = 0
+
+/** Half the widest reach note ("Too far from the road"), in CSS pixels. */
+const GHOST_HINT_HALF = 96
+
+/**
+ * Keep a centered reach note on the phone. The right inset clears the lamp cards.
+ */
+export function clampGhostHintLeft(left: number, boardW: number): number {
+  const edge = 8
+  const rail = 52
+  if (!(boardW > 0)) return left
+  const min = Math.min(GHOST_HINT_HALF + edge, boardW / 2)
+  const max = Math.max(min, boardW - rail - GHOST_HINT_HALF)
+  return Math.min(max, Math.max(min, left))
+}
 
 /** Client point the ghost uses. The fingertip stays below the lamp. */
 export function dragGhostClient(clientX: number, clientY: number): { x: number; y: number } {

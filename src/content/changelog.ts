@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.400',
+    title: 'Night Watch Easy sparks buy more',
+    when: '2026-10-09',
+    items: [
+      'On Easy, a lamp costs 3 sparks to reach II and 6 to reach III. Every lamp pays the same price for the same step. Wave 1 cannot raise both free lamps to the top.',
+      'After Begin, drag or tap another lamp onto open ground. That lamp costs 5 sparks. The ghost turns red on the road and houses, and the ring is the real reach. Lamps planted before Begin stay free.',
+      'A dragged lamp lands under the finger. Too far from the road stays on the screen.',
+    ],
+  },
+  {
     version: '1.4.399',
     title: 'Story strip words stay whole',
     when: '2026-10-09',
