@@ -32,19 +32,20 @@ export function nightWatchRoundJump(search: string, nightLen: number, allowed: b
   return round - 1
 }
 
-/** Dev build, Night Watch debug freeze, or `?playtest=1`. */
-export function nightWatchJumpAllowed(search: string, dev: boolean, debugOn: boolean): boolean {
-  if (dev || debugOn) return true
-  const flag = new URLSearchParams(search).get('playtest')
-  return flag === '1' || flag === 'true'
+/**
+ * Current search string has `playtest=1`, or Night Watch debug freeze is explicitly on.
+ * A dev build is not a pass. An old URL is not remembered.
+ */
+export function nightWatchJumpAllowed(search: string, debugOn: boolean): boolean {
+  if (debugOn === true) return true
+  return new URLSearchParams(search).get('playtest') === '1'
 }
 
 /** Easy playtest jump. Null on Hard and on a normal visit. */
 export function readNightWatchRoundJump(nightLen: number): number | null {
   if (typeof window === 'undefined') return null
   const search = window.location.search
-  const dev = Boolean(import.meta.env?.DEV)
-  return nightWatchRoundJump(search, nightLen, nightWatchJumpAllowed(search, dev, readNightWatchDebug()))
+  return nightWatchRoundJump(search, nightLen, nightWatchJumpAllowed(search, readNightWatchDebug()))
 }
 
 /** Wave tick: walkers frozen while debug pause is on (spawn timer too). */

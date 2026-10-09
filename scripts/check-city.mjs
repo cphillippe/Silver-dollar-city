@@ -30,7 +30,7 @@ import * as easyLib from '../src/lib/easy.ts'
 import * as trailLoopHome from '../src/easyTrail/trail/loop.ts'
 import * as trailShelf from '../src/easyTrail/trail/index.ts'
 import { normalizeProgress } from '../src/lib/save.ts'
-import { nightWatchRoundJump } from '../src/lib/nightWatchDebug.ts'
+import { nightWatchJumpAllowed, nightWatchRoundJump } from '../src/lib/nightWatchDebug.ts'
 import {
   PH_ROAD_SHOW_IT,
   SHOW_IT_LINE,
@@ -1288,7 +1288,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.406')
+assert.equal(APP_VERSION, '1.4.407')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -5101,6 +5101,41 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.406').items.join('\n'),
     /Fixes #|Closes #|Resolves #/,
   )
+}
+
+// Night Watch 1.4.407: nwRound only with playtest=1 on this URL, or debug freeze explicitly on.
+{
+  const proveUrl = '?cb=burn406e&nwRound=25'
+  assert.equal(nightWatchJumpAllowed(proveUrl, false), false, '1.4.407 the prove URL is not a pass')
+  assert.equal(
+    nightWatchRoundJump(proveUrl, 25, nightWatchJumpAllowed(proveUrl, false)),
+    null,
+    '1.4.407 nwRound without playtest=1 stays at round 1',
+  )
+  assert.equal(nightWatchJumpAllowed('?playtest=1&nwRound=25', false), true, '1.4.407 playtest=1 allows the jump')
+  assert.equal(
+    nightWatchRoundJump('?playtest=1&nwRound=25', 25, nightWatchJumpAllowed('?playtest=1&nwRound=25', false)),
+    24,
+    '1.4.407 playtest=1 opens round 25',
+  )
+  assert.equal(nightWatchJumpAllowed('?nwRound=25', true), true, '1.4.407 debug freeze on allows the jump')
+  assert.equal(
+    nightWatchRoundJump('?nwRound=25', 25, nightWatchJumpAllowed('?nwRound=25', true)),
+    24,
+    '1.4.407 debug freeze on opens round 25',
+  )
+  assert.equal(nightWatchJumpAllowed('?nwRound=25', false), false, '1.4.407 neither flag ignores nwRound')
+  assert.equal(nightWatchJumpAllowed('?playtest=true&nwRound=25', false), false, '1.4.407 playtest=true is not a pass')
+  assert.equal(
+    nightWatchRoundJump('?nwRound=25', 25, nightWatchJumpAllowed('?nwRound=25', false)),
+    null,
+    '1.4.407 a later URL does not keep an old playtest flag',
+  )
+  const gateSrc = readFileSync(new URL('../src/lib/nightWatchDebug.ts', import.meta.url), 'utf8')
+  assert.doesNotMatch(gateSrc, /import\.meta\.env/, '1.4.407 the jump does not read the dev flag')
+  assert.match(gateSrc, /get\('playtest'\) === '1'/)
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.407'), '1.4.407 changelog row')
+  assert.doesNotMatch(latestChange('1.4.407').items.join('\n'), /Fixes #|Closes #|Resolves #/)
 }
 
 // Night Watch 1.4.392: reach cue, a longer level-I free lamp, and a plant pin.
