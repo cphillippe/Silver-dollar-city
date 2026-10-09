@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.407',
+    title: 'Night Watch round jump needs a playtest flag',
+    when: '2026-10-09',
+    items: [
+      'A link opens Easy round 25 only when that same link says playtest=1, or when Night Watch debug freeze is on in Settings. Any other link starts at round 1.',
+    ],
+  },
+  {
     version: '1.4.406',
     title: 'Night Watch opens the Far Hills',
     when: '2026-10-09',
