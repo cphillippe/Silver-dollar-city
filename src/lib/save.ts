@@ -317,12 +317,14 @@ function asTheme(value: unknown): AppTheme {
 function asDefense(value: unknown): DefenseState {
   if (!isPlainObject(value)) return emptyDefense()
   const nights = asStringArray(value.nights).filter(isDateKey)
-  return {
+  const defense: DefenseState = {
     cleared: finiteInt(value.cleared, 0, SAVE_MAX_COUNT, 0),
     nights,
     lastNight: isDateKey(value.lastNight) ? value.lastNight : undefined,
     met: normalizeMet(value.met),
   }
+  if (value.farHills === true) defense.farHills = true
+  return defense
 }
 
 function asLearningArray(value: unknown): Learning[] {

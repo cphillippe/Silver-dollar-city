@@ -242,7 +242,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     return unlocked
   }, [write])
 
-  const recordNight = useCallback((dateKey: string) => {
+  const recordNight = useCallback((dateKey: string, farHills = false) => {
     setProgress((current) => {
       const seen = current.defense.nights.includes(dateKey)
       const next = {
@@ -252,6 +252,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
           cleared: current.defense.cleared + 1,
           nights: seen ? current.defense.nights : [...current.defense.nights, dateKey],
           lastNight: dateKey,
+          ...(farHills ? { farHills: true } : {}),
         },
       }
       return write(next)
