@@ -394,7 +394,8 @@ export function DefendNightActorsSvg({
                     key={raider.id}
                     data-person-node={isTap ? 'walker' : undefined}
                     data-gait={raider.gait && raider.gait !== 'plain' ? raider.gait : undefined}
-                    className={`defend-raider ${raider.gait === 'fast' ? 'is-fast' : ''} ${raider.gait === 'tough' ? 'is-tough' : ''} ${raider.turned ? 'is-turned' : ''} ${isTap ? 'is-easy-tap-target' : ''} ${isCue ? 'is-easy-cue' : ''} ${lampHit ? 'is-lamp-hit' : ''}`}
+                    className={`defend-raider ${raider.gait === 'fast' ? 'is-fast' : ''} ${raider.gait === 'tough' ? 'is-tough' : ''} ${raider.boss ? 'is-boss' : ''} ${raider.turned ? 'is-turned' : ''} ${isTap ? 'is-easy-tap-target' : ''} ${isCue ? 'is-easy-cue' : ''} ${lampHit ? 'is-lamp-hit' : ''}`}
+                    data-boss={raider.boss ? 'yes' : undefined}
                     transform={`translate(${at.x} ${at.y})`}
                     role={isTap ? 'button' : undefined}
                     tabIndex={isTap ? 0 : undefined}
@@ -440,6 +441,18 @@ export function DefendNightActorsSvg({
                         ry={FACE_HALF * 0.78}
                       />
                     ) : null}
+                    {raider.boss && !raider.turned ? (
+                      <g className="defend-boss-shape" aria-hidden>
+                        <path
+                          className="defend-boss-mantle"
+                          d={`M0 ${PATH_WALKER_FACE_DY + 28} l${-FACE_HALF * 1.35} ${FACE_HALF * 0.15} l${FACE_HALF * 0.35} ${-FACE_HALF * 1.15} l${FACE_HALF * 1.0} ${FACE_HALF * 0.55} l${FACE_HALF * 1.0} ${-FACE_HALF * 0.55} l${FACE_HALF * 0.35} ${FACE_HALF * 1.15} Z`}
+                        />
+                        <path
+                          className="defend-boss-crown"
+                          d={`M${-FACE_HALF * 0.72} ${PATH_WALKER_FACE_DY - FACE_HALF * 0.72} l${FACE_HALF * 0.22} ${-FACE_HALF * 0.42} l${FACE_HALF * 0.18} ${FACE_HALF * 0.28} l${FACE_HALF * 0.32} ${-FACE_HALF * 0.5} l${FACE_HALF * 0.32} ${FACE_HALF * 0.5} l${FACE_HALF * 0.18} ${-FACE_HALF * 0.28} l${FACE_HALF * 0.22} ${FACE_HALF * 0.42} Z`}
+                        />
+                      </g>
+                    ) : null}
                     <ellipse
                       className="defend-raider-shadow"
                       cy={12 * (PATH_WALKER_FACE_U / 36)}
@@ -466,18 +479,21 @@ export function DefendNightActorsSvg({
                       <g className="defend-hp-bar" aria-hidden>
                         <rect
                           className="defend-hp-track"
-                          x={-HP_TRACK.w / 2}
-                          y={HP_TRACK.y}
-                          width={HP_TRACK.w}
-                          height={HP_TRACK.h}
+                          x={-(raider.boss ? HP_TRACK.w * 1.45 : HP_TRACK.w) / 2}
+                          y={raider.boss ? HP_TRACK.y - 8 : HP_TRACK.y}
+                          width={raider.boss ? HP_TRACK.w * 1.45 : HP_TRACK.w}
+                          height={raider.boss ? HP_TRACK.h + 4 : HP_TRACK.h}
                           rx={HP_TRACK.rx}
                         />
                         <rect
                           className="defend-hp-fill"
-                          x={-HP_TRACK.w / 2 + HP_FILL.inset}
-                          y={HP_TRACK.y + HP_FILL.inset}
-                          width={((HP_TRACK.w - HP_FILL.inset * 2) * raider.hp) / (raider.maxHp ?? 1)}
-                          height={HP_FILL.h}
+                          x={-(raider.boss ? HP_TRACK.w * 1.45 : HP_TRACK.w) / 2 + HP_FILL.inset}
+                          y={(raider.boss ? HP_TRACK.y - 8 : HP_TRACK.y) + HP_FILL.inset}
+                          width={
+                            (((raider.boss ? HP_TRACK.w * 1.45 : HP_TRACK.w) - HP_FILL.inset * 2) * raider.hp) /
+                            (raider.maxHp ?? 1)
+                          }
+                          height={raider.boss ? HP_FILL.h + 2 : HP_FILL.h}
                           rx={HP_FILL.rx}
                         />
                       </g>
@@ -537,7 +553,7 @@ export function DefendNightActorsSvg({
                 <g
                   className="walker-target-cue"
                   data-cue="target"
-                  data-cue-gait={tapTarget.gait && tapTarget.gait !== 'plain' ? tapTarget.gait : 'plain'}
+                  data-cue-gait={tapTarget.boss ? 'boss' : tapTarget.gait && tapTarget.gait !== 'plain' ? tapTarget.gait : 'plain'}
                   transform={`translate(${raiderAt(tapTarget).x} ${raiderAt(tapTarget).y})`}
                   aria-hidden
                   pointerEvents="none"

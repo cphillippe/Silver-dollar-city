@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.417',
+    title: 'Night Watch Easy boss rounds',
+    when: '2026-10-09',
+    items: [
+      'Every fifth round, one big walker steps in. A gold banner says Boss! once. The walker is a wide crimson shape with a gold crown and a long red health bar, so a phone can tell it apart without a word on the walker.',
+      'Round 5’s boss is the teaching one. Lamps alone still lose that round. A few glowing taps and one harder lamp hold it.',
+      'From round 13, the walkers and the later bosses push back. Buying lamps and steps still reaches round 20, and a heart drops on the way. A glowing tap stays one flat hit. 3× is the same night, faster.',
+    ],
+  },
+  {
     version: '1.4.416',
     title: 'Easy press, same idea, taller strip',
     when: '2026-10-09',
