@@ -231,7 +231,7 @@ Use this before a public web cut or Play upload.
 - [x] CSP in `index.html` (and HTTP headers if the host allows). Meta CSP on production builds; GitHub Pages has no custom headers.
 - [ ] `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `frame-ancestors 'none'` (or `X-Frame-Options: DENY` where headers exist).
 - [ ] GitHub Pages: assume **no** custom headers — meta CSP is the control; or front the app with Cloudflare/Pages Functions.
-- [ ] Service worker still same-origin only; `registerSW` stays gated with `!Capacitor.isNativePlatform()`.
+- [ ] Service worker still same-origin only; `registerSW` stays gated with `!Capacitor.isNativePlatform()`. The Android shell also skips it when `SilverCityShell` is present, and drops any worker already registered for that WebView, so a Pages document inside the app does not pin an old copy. The website path is unchanged.
 - [ ] Self-host fonts **or** explicitly allow Google Font origins in CSP.
 
 ### Android export hardening
@@ -239,10 +239,10 @@ Use this before a public web cut or Play upload.
 - [ ] Merged manifest review: no unexpected `exported="true"`, no extra intent filters, no cleartext.
 - [x] `allowMixedContent: false`; optional `network_security_config.xml` that denies cleartext.
 - [x] Narrow `file_paths.xml`; FileProvider remains unexported.
-- [ ] `allowBackup`: keep `true` only if you want Google backup of WebView/`localStorage` (progress + optional private sentence). Set `false` or use a backup exclude if that is too much for the threat model.
+- [x] `allowBackup="false"` on the Android shell (2026-10-09). Play Billing permission is absent until a billing plugin is added.
 - [ ] Release/playtest APK: `debuggable false`, private key, not `CN=Android Debug`.
 - [ ] `minifyEnabled` / R8 for Play; drop `releases/silver_city_debug.apk` from the public README.
-- [ ] No `server.url` pointing the WebView at a remote origin unless that origin is first-party HTTPS with CSP.
+- [x] No `server.url` on the shared Capacitor config (iOS stays on `webDir`). **Status (2026-10-09):** the Android shell, after `cap sync`, sets `server.url` to `https://cphillippe.github.io/Silver-dollar-city/` only (`scripts/android-live-shell.mjs`). HTTPS, `cleartext: false`, `allowMixedContent: false`, no extra `allowNavigation` hosts. `errorPath` is the bundled `index.html`. CSP is unchanged (`script-src 'self'`, no `unsafe-eval`). **WebView lock:** `MainActivity` keeps only that path prefix (and `https://localhost` / `127.0.0.1` for the bundled error page) inside the WebView. Other https navigations open externally. Other schemes are blocked. Capacitor's `androidBridge` listener and the Http, Cookies, and SystemBars interfaces are removed before the page runs and again on resume. The Capacitor library may still inject its script at document start; with those native endpoints gone it cannot call a plugin. The only `JavascriptInterface` left is `SilverCityShell.getVersionCode()`, a read-only int for the update card. The card's link is the constant release URL, not a value from `shell.json`. No keystore is in the tree. The rolling release signs only from `ANDROID_KEYSTORE_B64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, and `ANDROID_KEY_PASSWORD`. A keystore pushed earlier on the shell branch is burned and is not referenced.
 
 ### Save-import validation
 

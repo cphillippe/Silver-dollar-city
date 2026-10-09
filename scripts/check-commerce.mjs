@@ -573,7 +573,7 @@ assert.match(capSrc, /ios:/)
 assert.match(capSrc, /allowMixedContent:\s*false/)
 
 const manifestSrc = readFileSync(new URL('../android/app/src/main/AndroidManifest.xml', import.meta.url), 'utf8')
-assert.match(manifestSrc, /com\.android\.vending\.BILLING/)
+assert.doesNotMatch(manifestSrc, /com\.android\.vending\.BILLING/)
 
 const iosPlist = readFileSync(new URL('../ios/App/App/Info.plist', import.meta.url), 'utf8')
 assert.match(iosPlist, /Silver City/)
