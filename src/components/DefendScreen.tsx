@@ -386,7 +386,6 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     if (jump == null) return
     roundJumpOnce.current = true
     setWaveIndex(jump)
-    if (jump + 1 >= nightLength(true)) setPhase('boost')
   }, [easy])
 
   useEffect(() => {
