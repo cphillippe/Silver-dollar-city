@@ -77,22 +77,23 @@ That file is the rolling `latest` GitHub Release, rebuilt on every merge to `mai
 
 - **Town and puzzles.** The app loads https://cphillippe.github.io/Silver-dollar-city/ over HTTPS. After a merge reaches `main` and Pages finishes, close the app and open it again. The new town is there. You do not reinstall.
 - **No signal.** The app opens the copy packed in the APK. That copy keeps its own save on the phone. The live town comes back when the signal does.
-- **The app itself.** A native shell change bumps `versionCode` (kept in `public/shell.json` and `android/app/build.gradle`). The app shows a small **Update available** note. Tap **Get the update**, then install. Android will not install a sideloaded app on its own. Ordinary town updates do not show this note.
+- **The app itself.** A native shell change bumps `versionCode` (kept in `public/shell.json` and `android/app/build.gradle`). The app shows a small **Update available** note. Tap **Get the update**, then install. That button opens this repo's release file in the browser. Android will not install a sideloaded app on its own. Ordinary town updates do not show this note.
+- **Other links.** The app stays on the Silver City Pages site. A link to any other site opens in the phone's browser.
 
 Web-only ships leave `versionCode` alone.
 
 **Release signing**
 
-The workflow signs with a private key when these Actions secrets all exist:
+The `latest` release is signed only when all four Actions secrets exist. No keystore belongs in the repo. A keystore that was pushed on this branch is burned. Do not reuse it.
 
 | Secret | Value |
 | --- | --- |
-| `ANDROID_KEYSTORE_BASE64` | Base64 of the `.keystore` file |
+| `ANDROID_KEYSTORE_B64` | Base64 of the `.keystore` file |
 | `ANDROID_KEYSTORE_PASSWORD` | Store password |
 | `ANDROID_KEY_ALIAS` | Key alias |
 | `ANDROID_KEY_PASSWORD` | Key password |
 
-Generate the keystore once on your machine. Keep the file private. Pick the passwords and store them only in the secrets.
+Generate a new keystore once on your machine. Keep the file private. Pick the passwords and store them only in the secrets.
 
 ```bash
 keytool -genkeypair -v \
@@ -102,9 +103,9 @@ keytool -genkeypair -v \
 base64 -w 0 silver-city-release.keystore
 ```
 
-Paste the base64 output into `ANDROID_KEYSTORE_BASE64`.
+Paste the base64 output into `ANDROID_KEYSTORE_B64`.
 
-Until those four secrets exist, the workflow publishes a **debug-signed** APK. The debug key is committed at `android/silver-city-debug.keystore` so each debug build installs over the last one. The release notes say which signing was used. The first APK signed with the private key will not install over the debug build. Uninstall the debug app, install the release APK once, and later release builds install over that one.
+Pull requests still build an APK so CI can show the file was produced. That copy is signed with a key created inside the job and discarded. It is an Actions artifact only. If any of the four secrets is missing on `main`, the publish step fails and nothing is uploaded to the `latest` release.
 
 ## Android debug APK
 
