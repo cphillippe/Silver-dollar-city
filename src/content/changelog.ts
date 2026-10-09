@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.401',
+    title: 'Story strip pictures fill the card',
+    when: '2026-10-09',
+    items: [
+      'Easy order pictures sit larger on the card, and every win caption keeps its period. The last win card is the same height as the others. The Samaritan road’s last picture is new, so the asking and the helping are easy to tell apart.',
+    ],
+  },
+  {
     version: '1.4.400',
     title: 'Night Watch Easy sparks buy more',
     when: '2026-10-09',
