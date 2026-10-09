@@ -44,6 +44,7 @@ import {
   skillUnlocked,
 } from '../lib/nightSkills'
 import {
+  NIGHT_PACE_FAST,
   PACE_UNLOCK_WAVE,
   paceScale,
   paceUnlocked,
@@ -418,7 +419,10 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       const pace = easy
         ? paceScale(paceUnlocked(waveIndexRef.current), fastOnRef.current)
         : 1
-      const dt = pacedDt(wallDt, pace)
+      // 3× is three steps of the 1× clock, so a clump of leaks is not one cheaper heart.
+      const gameDt = pacedDt(wallDt, pace)
+      const slices = pace === NIGHT_PACE_FAST ? NIGHT_PACE_FAST : 1
+      const dt = gameDt / slices
       last = now
       const frozen = nightWatchDebugFrozen(
         easy,
@@ -427,6 +431,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         now,
         live.current.freezeUntil,
       )
+      for (let slice = 0; slice < slices; slice += 1) {
       if (!frozen) {
         spawnAt += dt
         if (easy) live.current.clock += dt * 1000
@@ -468,7 +473,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         const paced = applyEasyPaceLeaks(
           live.current.hearts,
           leaked,
-          now,
+          live.current.clock,
           live.current.leakGraceUntil,
           live.current.heartsLostRound,
           shielded,
@@ -582,6 +587,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         setToolLock(null)
         setPhase('boost')
         return
+      }
       }
       frame = requestAnimationFrame(tick)
     }
@@ -900,7 +906,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       combo: nextCombo,
     }
     if (fit === 'match') {
-      const struck = nightEnemies.hit(best, easy && manual ? easyGlowTapDamage(tier, best.hp) : tier)
+      const struck = nightEnemies.hit(best, easy && manual ? easyGlowTapDamage(best.hp) : tier)
       const sparks = sparkAwardForHit(struck.down, best.spark ?? 1)
       blast.pop = struck.down
       blast.spark = sparks

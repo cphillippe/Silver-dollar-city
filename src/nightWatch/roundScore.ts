@@ -1,4 +1,5 @@
 import { applyEasyPaceLeaks, easyGlowTapDamage, easyRoundHeartCap } from '../lib/defend.ts'
+import { NIGHT_PACE_FAST, pacedDt } from '../lib/nightPace.ts'
 import { pathPoint } from './path/data.ts'
 import { easyRound } from './rounds.ts'
 import { lampStrike, type LampPaths } from './upgradeTree.ts'
@@ -286,10 +287,11 @@ export interface PaceRound {
  * (default 3). While two walkers are out, about `offCue` of those tries
  * (default 0.2) hit a face that is not glowing and do nothing. The rest
  * hit the glowing face when the roll is within `hitChance` (default 0.7).
- * A glowing tap deals twice the nearest lamp's damage. A tap kill does not
+ * A glowing tap deals a flat hit, not the lamp's damage. A tap kill does not
  * pull the next walker forward. A paid leak costs one
- * heart, then grace and the per-round cap apply. The round is lost only at
- * 0 hearts. `seed` keeps the misses the same from run to run.
+ * heart, then grace and the per-round cap apply, on the game clock.
+ * `pace` 3 runs three 1× steps per wall frame, so the round matches 1×.
+ * The round is lost only at 0 hearts. `seed` keeps the misses the same from run to run.
  */
 export function paceEasyTree(
   roundIndex: number,
@@ -299,6 +301,7 @@ export function paceEasyTree(
   hitChance = 0.7,
   seed = 1,
   offCue = 0.2,
+  pace = 1,
 ): PaceRound {
   const round = easyRound(roundIndex)
   const lamps = paths.slice(0, LIVE_SEATS.length).map((rank, index) => {
@@ -327,7 +330,6 @@ export function paceEasyTree(
   let attempts = 0
   let graceUntil = 0
   let lostRound = 0
-  const dt = 1 / 60
   const walk = 0.01 * round.speed
   const spawnEvery = 3.8 * round.spawn
   let rng = seed >>> 0 || 1
@@ -356,6 +358,9 @@ export function paceEasyTree(
     }
   }
   if (hearts <= 0) return finish('lost')
+  const paceScale = pace === NIGHT_PACE_FAST ? NIGHT_PACE_FAST : 1
+  const slices = paceScale
+  const dt = pacedDt(1 / 60, paceScale) / slices
   while (time < 180) {
     spawnAt += dt
     tapAt += dt
@@ -438,19 +443,7 @@ export function paceEasyTree(
       if (!offFace && hit) {
         taps += 1
         const front = walking[0]
-        if (front) {
-          const point = pathPoint(front.t)
-          let damage = lamps[0]?.strike.damage ?? 1
-          let bestD = Infinity
-          for (const lamp of lamps) {
-            const distance = Math.hypot(lamp.x - point.x, lamp.y - point.y)
-            if (distance < bestD) {
-              bestD = distance
-              damage = lamp.strike.damage
-            }
-          }
-          wound(front, easyGlowTapDamage(damage, front.hp), true)
-        }
+        if (front) wound(front, easyGlowTapDamage(front.hp), true)
       }
     }
     if (downed >= round.count) return finish('clear')

@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.413',
+    title: 'Night Watch Easy flat taps',
+    when: '2026-10-09',
+    items: [
+      'A tap on the glowing face is one flat hit. It does not grow when the lamp gets stronger. Fast and plain walkers still drop in a tap or two. Tough walkers soak those taps and need the lamps.',
+      'Lamps alone still lose round 5. A light tapper with one harder-hitting lamp holds that round. Steady tapping without buying stops in the middle rounds. Buying each break reaches the later rounds.',
+      '3× runs the same night faster. Lamps, walkers, spawns, and the leak grace share one clock.',
+    ],
+  },
+  {
     version: '1.4.412',
     title: 'Night Watch Easy live prove',
     when: '2026-10-09',
