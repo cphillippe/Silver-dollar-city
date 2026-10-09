@@ -8,11 +8,21 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.399',
-    title: 'Story strip words stay whole',
+    version: '1.4.401',
+    title: 'Story strip pictures fill the card',
     when: '2026-10-09',
     items: [
-      'Easy order captions keep each word whole, in the slots and on the win. The Samaritan road uses cut-out pictures like the other stories, so faces stay whole. The win strip is shorter so the Home button stays on the phone.',
+      'Easy order pictures sit larger on the card, and every win caption keeps its period. The last win card is the same height as the others. The Samaritan road’s last picture is new, so the asking and the helping are easy to tell apart.',
+    ],
+  },
+  {
+    version: '1.4.400',
+    title: 'Night Watch Easy sparks buy more',
+    when: '2026-10-09',
+    items: [
+      'On Easy, a lamp costs 3 sparks to reach II and 6 to reach III. Every lamp pays the same price for the same step. Wave 1 cannot raise both free lamps to the top.',
+      'After Begin, drag or tap another lamp onto open ground. That lamp costs 5 sparks. The ghost turns red on the road and houses, and the ring is the real reach. Lamps planted before Begin stay free.',
+      'A dragged lamp lands under the finger. Too far from the road stays on the screen.',
     ],
   },
   {

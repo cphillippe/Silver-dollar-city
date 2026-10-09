@@ -2468,6 +2468,20 @@ img.walker-face.easy-walker-face,
   color: #062814;
 }
 
+.defend-lamp-price {
+  margin: 0;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #ffe9b0;
+}
+
+.defend-ability-stock.is-price {
+  font-size: 0.62rem;
+  letter-spacing: -0.03em;
+  padding: 1px 3px;
+}
+
 .defend-ability-stock {
   position: absolute;
   top: 1px;
@@ -3190,12 +3204,16 @@ img.walker-face.easy-walker-face,
 /* 1.4.390: tap a card, then the map. The ghost ring is the hit ring.
    Open ground stays gold. Road, houses, and chrome turn the ghost red.
    Real alpha only — no white plate behind the lamp. */
-.defend-page.is-placing .defend-board {
+.defend-page.is-placing .defend-board,
+.defend-page.is-shop .defend-board {
   touch-action: none;
 }
 
 /* 1.4.391: the drag starts on a tower card. none blocks scroll and pinch
-   for that gesture on the card and, once the finger reaches it, the map. */
+   for that gesture on the card and, once the finger reaches it, the map.
+   1.4.398: the same gesture buys a lamp after Begin (is-shop). */
+.defend-page.is-shop .nw-rail .defend-abilities,
+.defend-page.is-shop .nw-rail .defend-ability,
 .defend-page.is-placing .nw-rail .defend-abilities,
 .defend-page.is-placing .nw-rail .defend-ability {
   touch-action: none;
