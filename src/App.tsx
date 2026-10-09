@@ -113,7 +113,9 @@ export default function App() {
       {view.name === 'hub' ? (
         <Hub onNavigate={go} openPlot={view.mindPlot} />
       ) : null}
-      {view.name === 'daily' ? <DailyTrail onNavigate={go} forceId={view.forceId} /> : null}
+      {view.name === 'daily' ? (
+        <DailyTrail onNavigate={go} forceId={view.forceId} debugStrip={view.debugStrip} />
+      ) : null}
       {view.name === 'area' ? (
         <AreaView areaId={view.areaId} onNavigate={go} />
       ) : null}
@@ -122,6 +124,7 @@ export default function App() {
           key={`${view.areaId}-${view.challengeId}`}
           areaId={view.areaId}
           challengeId={view.challengeId}
+          debugStrip={view.debugStrip}
           onNavigate={go}
         />
       ) : null}

@@ -34,12 +34,15 @@ function playtestSkipsGate(challengeId: string): boolean {
 interface ChallengeScreenProps {
   areaId: string
   challengeId: string
+  /** Settings Story Strip jump — open the strip, skip the street lock and the teach card. */
+  debugStrip?: boolean
   onNavigate: (view: View) => void
 }
 
 export function ChallengeScreen({
   areaId,
   challengeId,
+  debugStrip = false,
   onNavigate,
 }: ChallengeScreenProps) {
   const { completeChallenge, recordReview, recordTaught, markMiss, progress } = useProgress()
@@ -63,7 +66,7 @@ export function ChallengeScreen({
   const teachFirst =
     Boolean(brief) &&
     (isEasy(progress) || areaId === 'observatory' || challenge?.kind === 'sequence')
-  const [taught, setTaught] = useState(() => !teachFirst || reviewing)
+  const [taught, setTaught] = useState(() => debugStrip || !teachFirst || reviewing)
   const [arming, setArming] = useState(false)
 
   useEffect(() => {
@@ -72,6 +75,7 @@ export function ChallengeScreen({
     body?.scrollTo({ top: 0, behavior: 'smooth' })
     if (savedWin.current) return
     savedWin.current = true
+    if (debugStrip) return
     completeChallenge(areaId, challengeId)
     if (!brief || reviewing) return
     recordReview({
@@ -99,7 +103,7 @@ export function ChallengeScreen({
     .slice(0, index)
     .every((item) => progress.completed.includes(item.id))
 
-  if ((!unlocked || !priorDone) && !playtestSkipsGate(challenge.id)) {
+  if ((!unlocked || !priorDone) && !debugStrip && !playtestSkipsGate(challenge.id)) {
     return (
       <main className="page">
         <p>
@@ -155,7 +159,7 @@ export function ChallengeScreen({
       aria-label={STORY.playGoal}
     >
       {easy ? (
-        <EasyBack onNavigate={onNavigate} />
+        <EasyBack onNavigate={onNavigate} debugToSettings={debugStrip} />
       ) : (
         <button
           type="button"
