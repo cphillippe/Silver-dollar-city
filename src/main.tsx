@@ -3,6 +3,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { registerSW } from 'virtual:pwa-register'
 import App from './App'
+import { inAndroidShell } from './config/shell'
 import { ProgressProvider } from './store/ProgressProvider'
 import './index.css'
 import './styles/match.css'
@@ -24,7 +25,15 @@ import './styles/showIt.css'
 import './styles/fatherRunHint.css'
 import './styles/easyTopbar.css'
 
-if (!Capacitor.isNativePlatform()) {
+if (inAndroidShell()) {
+  // The shell loads Pages in the WebView. A worker from an older visit would
+  // pin that copy and block the next open from seeing a new deploy.
+  if ('serviceWorker' in navigator) {
+    void navigator.serviceWorker.getRegistrations().then((regs) => {
+      for (const reg of regs) void reg.unregister()
+    })
+  }
+} else if (!Capacitor.isNativePlatform()) {
   registerSW({ immediate: true })
 }
 

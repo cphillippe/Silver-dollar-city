@@ -13,6 +13,7 @@ import { LearnScreen } from './components/LearnScreen'
 import { LinkScreen } from './components/LinkScreen'
 import { Profile } from './components/Profile'
 import { SceneAd } from './components/SceneAd'
+import { ShellUpdateNotice } from './components/ShellUpdateNotice'
 import { Vista } from './components/Vista'
 import { Welcome } from './components/Welcome'
 import { findPlayable } from './content'
@@ -154,6 +155,7 @@ export default function App() {
       {sceneAd && scenePauseMountsOn(view.name) ? (
         <SceneAd onContinue={continueFromAd} onSupport={supportFromAd} />
       ) : null}
+      <ShellUpdateNotice />
     </AppShell>
   )
 }

@@ -52,9 +52,11 @@ captures/
 # Comment next line if keeping position of elements in Navigation Editor is relevant for you
 .idea/navEditor.xml
 
-# Keystore files — never commit Play/upload keys
+# Keystore files — never commit Play/upload keys.
+# The debug key is an exception so CI debug APKs keep one signature.
 *.jks
 *.keystore
+!silver-city-debug.keystore
 *.p12
 *.pem
 

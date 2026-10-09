@@ -231,7 +231,7 @@ Use this before a public web cut or Play upload.
 - [x] CSP in `index.html` (and HTTP headers if the host allows). Meta CSP on production builds; GitHub Pages has no custom headers.
 - [ ] `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `frame-ancestors 'none'` (or `X-Frame-Options: DENY` where headers exist).
 - [ ] GitHub Pages: assume **no** custom headers — meta CSP is the control; or front the app with Cloudflare/Pages Functions.
-- [ ] Service worker still same-origin only; `registerSW` stays gated with `!Capacitor.isNativePlatform()`.
+- [ ] Service worker still same-origin only; `registerSW` stays gated with `!Capacitor.isNativePlatform()`. The Android shell also skips it when `SilverCityShell` is present, and drops any worker already registered for that WebView, so a Pages document inside the app does not pin an old copy. The website path is unchanged.
 - [ ] Self-host fonts **or** explicitly allow Google Font origins in CSP.
 
 ### Android export hardening
@@ -242,7 +242,7 @@ Use this before a public web cut or Play upload.
 - [ ] `allowBackup`: keep `true` only if you want Google backup of WebView/`localStorage` (progress + optional private sentence). Set `false` or use a backup exclude if that is too much for the threat model.
 - [ ] Release/playtest APK: `debuggable false`, private key, not `CN=Android Debug`.
 - [ ] `minifyEnabled` / R8 for Play; drop `releases/silver_city_debug.apk` from the public README.
-- [ ] No `server.url` pointing the WebView at a remote origin unless that origin is first-party HTTPS with CSP.
+- [x] No `server.url` on the shared Capacitor config (iOS stays on `webDir`). **Status (2026-10-09):** the Android shell, after `cap sync`, sets `server.url` to `https://cphillippe.github.io/Silver-dollar-city/` only (`scripts/android-live-shell.mjs`). HTTPS, `cleartext: false`, `allowMixedContent: false`, no extra `allowNavigation` hosts. `errorPath` is the bundled `index.html`. CSP is unchanged (`script-src 'self'`, no `unsafe-eval`).
 
 ### Save-import validation
 

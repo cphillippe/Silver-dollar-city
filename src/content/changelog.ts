@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.425',
+    title: 'The phone app opens the live town',
+    when: '2026-10-09',
+    items: [
+      'On the Android app, a new story shows the next time you open it.',
+      'When the phone app itself is newer, a small note says Update available. Tap it, then install.',
+    ],
+  },
+  {
     version: '1.4.424',
     title: 'Night Watch glowing taps land',
     when: '2026-10-09',

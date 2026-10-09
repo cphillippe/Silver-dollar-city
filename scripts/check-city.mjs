@@ -1406,7 +1406,15 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.424')
+assert.equal(APP_VERSION, '1.4.425')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.425'), '1.4.425 changelog row')
+assert.match(latestChange('1.4.425').title, /phone/)
+assert.match(latestChange('1.4.425').items.join('\n'), /Update available/)
+assert.doesNotMatch(
+  latestChange('1.4.425').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.425 changelog avoids GitHub close keywords',
+)
 
 // Night Watch 1.4.419: on-screen walkers do not share a head. Kind and boss stats stay put.
 {

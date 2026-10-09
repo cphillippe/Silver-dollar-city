@@ -33,6 +33,7 @@ const SCOPES = {
       'check-story-snap.mjs',
       'check-debug-plays.mjs',
       'check-panel-blast.mjs',
+      'check-android-shell.mjs',
       'check-city.mjs',
       'check-commerce.mjs',
     ],

@@ -58,6 +58,54 @@ Progress is stored **offline-first on this device** (versioned save, same localS
 
 Installable as a PWA (Add to Home Screen) after a production build, or as an Android debug APK (below).
 
+## Android phone app
+
+One download link. The town updates by itself. Install again only when the app shows **Update available**.
+
+**Download:**  
+https://github.com/cphillippe/Silver-dollar-city/releases/download/latest/silver-city.apk
+
+That file is the rolling `latest` GitHub Release, rebuilt on every merge to `main`.
+
+**Install in Brave**
+
+1. Open the link in Brave on the phone.
+2. Allow **Install unknown apps** for Brave when Android asks.
+3. Open the downloaded file and tap Install.
+
+**How updates arrive**
+
+- **Town and puzzles.** The app loads https://cphillippe.github.io/Silver-dollar-city/ over HTTPS. After a merge reaches `main` and Pages finishes, close the app and open it again. The new town is there. You do not reinstall.
+- **No signal.** The app opens the copy packed in the APK. That copy keeps its own save on the phone. The live town comes back when the signal does.
+- **The app itself.** A native shell change bumps `versionCode` (kept in `public/shell.json` and `android/app/build.gradle`). The app shows a small **Update available** note. Tap **Get the update**, then install. Android will not install a sideloaded app on its own. Ordinary town updates do not show this note.
+
+Web-only ships leave `versionCode` alone.
+
+**Release signing**
+
+The workflow signs with a private key when these Actions secrets all exist:
+
+| Secret | Value |
+| --- | --- |
+| `ANDROID_KEYSTORE_BASE64` | Base64 of the `.keystore` file |
+| `ANDROID_KEYSTORE_PASSWORD` | Store password |
+| `ANDROID_KEY_ALIAS` | Key alias |
+| `ANDROID_KEY_PASSWORD` | Key password |
+
+Generate the keystore once on your machine. Keep the file private. Pick the passwords and store them only in the secrets.
+
+```bash
+keytool -genkeypair -v \
+  -keystore silver-city-release.keystore \
+  -alias silver-city \
+  -keyalg RSA -keysize 2048 -validity 10000
+base64 -w 0 silver-city-release.keystore
+```
+
+Paste the base64 output into `ANDROID_KEYSTORE_BASE64`.
+
+Until those four secrets exist, the workflow publishes a **debug-signed** APK. The debug key is committed at `android/silver-city-debug.keystore` so each debug build installs over the last one. The release notes say which signing was used. The first APK signed with the private key will not install over the debug build. Uninstall the debug app, install the release APK once, and later release builds install over that one.
+
 ## Android debug APK
 
 **Direct download (debug, sideload):**  

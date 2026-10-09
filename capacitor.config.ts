@@ -4,6 +4,8 @@ const config: CapacitorConfig = {
   appId: 'city.silver.unending',
   appName: 'Silver City',
   webDir: 'dist',
+  // No server.url here. Android points at Pages after sync
+  // (scripts/android-live-shell.mjs). iOS keeps this bundled webDir.
   android: {
     allowMixedContent: false,
   },
