@@ -638,7 +638,7 @@ assert.match(sequenceVerse, /appeared to Cephas, then to the twelve/)
 assert.match(sequenceVerse, /ref: '1 Corinthians 15:3–5'/)
 assert.match(
   sequenceVerse,
-  /easyLead:\s*\n\s*'Cephas is Peter\. The Twelve are Jesus’ twelve closest friends\. “The scriptures” means God’s Word said long ago this would happen\.'/,
+  /easyLead:\s*\n\s*'Cephas is Peter\. The Twelve is a name for Jesus’ closest friends\. “The scriptures” means God’s Word said long ago this would happen\.'/,
 )
 const dailySeqSrc = readFileSync(new URL('../src/content/daily.ts', import.meta.url), 'utf8')
 assert.match(dailySeqSrc, /text: 'Jesus dies, is buried, and is raised\.'/)
@@ -921,7 +921,7 @@ assert.match(benchSrc, /early public testimony, not a lab rerun/)
 assert.doesNotMatch(benchSrc, /appearances list widened/)
 assert.match(benchSrc, /1 Cor 15:3–5/)
 assert.match(benchSrc, /text: 'Peter, then the Twelve, saw him\.'/)
-assert.match(benchSrc, /easyText: 'Peter and twelve friends saw him\.'/)
+assert.match(benchSrc, /easyText: 'Peter and his friends saw him\.'/)
 
 const evidenceSrc = readFileSync(
   new URL('../src/content/evidence.ts', import.meta.url),

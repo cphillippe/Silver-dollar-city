@@ -38,7 +38,7 @@ export const witnessBench: Area = {
           id: 'd',
           art: 'creed4-appeared',
           text: 'Peter, then the Twelve, saw him.',
-          easyText: 'Peter and twelve friends saw him.',
+          easyText: 'Peter and his friends saw him.',
           shortCaption: 'Peter\nsaw him',
         },
       ],
