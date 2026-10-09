@@ -39,6 +39,55 @@ export function applyGateLeaks(hearts: number, leaked: number, shielded = false)
   const next = Math.max(0, hearts - lostHearts)
   return { hearts: next, lostHearts, failed: lostHearts > 0 && next <= 0 }
 }
+
+/** Easy only. After a paid leak, further leaks in this window cost nothing. */
+export const EASY_LEAK_GRACE_MS = 1800
+/** Easy only. One round cannot spend the whole bar. */
+export const EASY_ROUND_HEART_CAP = 2
+
+export interface EasyPaceLeak extends GateLeak {
+  graceUntil: number
+  lostThisRound: number
+}
+
+/**
+ * Easy heart pacing. The first leak in a quiet moment costs one heart and
+ * opens a short grace. Leaks during that grace, and any leak after this
+ * round has already spent `EASY_ROUND_HEART_CAP` hearts, leave the bar alone.
+ * Hard keeps `applyGateLeaks` (one heart each, no grace, no cap).
+ */
+export function applyEasyPaceLeaks(
+  hearts: number,
+  leaked: number,
+  now: number,
+  graceUntil: number,
+  lostThisRound: number,
+  shielded = false,
+): EasyPaceLeak {
+  const count = Number.isFinite(leaked) ? Math.max(0, Math.floor(leaked)) : 0
+  const spent = Number.isFinite(lostThisRound) ? Math.max(0, Math.floor(lostThisRound)) : 0
+  const quiet = Number.isFinite(graceUntil) ? graceUntil : 0
+  if (shielded || count === 0 || now < quiet || spent >= EASY_ROUND_HEART_CAP) {
+    return { hearts, lostHearts: 0, failed: false, graceUntil: quiet, lostThisRound: spent }
+  }
+  const next = Math.max(0, hearts - 1)
+  return {
+    hearts: next,
+    lostHearts: 1,
+    failed: next <= 0,
+    graceUntil: now + EASY_LEAK_GRACE_MS,
+    lostThisRound: spent + 1,
+  }
+}
+
+/**
+ * Easy only the glowing face is a tap. Any other face is a miss.
+ * Hard does not use the glow, so this stays a hit and range still decides.
+ */
+export function cueTapStrike(easy: boolean, glowingFace: boolean): 'hit' | 'miss' {
+  if (easy && !glowingFace) return 'miss'
+  return 'hit'
+}
 export const DEFEND_WAVE_SIZE = 6
 /** Hard night length. Easy reads `EASY_ROUNDS` instead. */
 export const DEFEND_NIGHT_WAVES = 5

@@ -1,3 +1,4 @@
+import { applyEasyPaceLeaks } from '../lib/defend.ts'
 import { pathPoint } from './path/data.ts'
 import { easyRound } from './rounds.ts'
 import { lampStrike, type LampPaths } from './upgradeTree.ts'
@@ -261,11 +262,13 @@ export interface PaceRound {
 }
 
 /**
- * One Easy round with a slow tap. A try lands every `tapEvery` seconds
- * (default 3) and misses when the roll is above `hitChance` (default 0.7).
- * A leak costs one heart. The round is lost only at 0 hearts. If the road
- * empties with hearts left, the round is clear even when someone got through.
- * `seed` keeps the misses the same from run to run.
+ * One Easy round with a clumsy tap. A try lands every `tapEvery` seconds
+ * (default 3). While two walkers are out, about `offCue` of those tries
+ * (default 0.2) hit a face that is not glowing and do nothing. The rest
+ * hit the glowing face when the roll is within `hitChance` (default 0.7).
+ * A tap kill does not pull the next walker forward. A paid leak costs one
+ * heart, then grace and the per-round cap apply. The round is lost only at
+ * 0 hearts. `seed` keeps the misses the same from run to run.
  */
 export function paceEasyTree(
   roundIndex: number,
@@ -274,6 +277,7 @@ export function paceEasyTree(
   tapEvery = 3,
   hitChance = 0.7,
   seed = 1,
+  offCue = 0.2,
 ): PaceRound {
   const round = easyRound(roundIndex)
   const lamps = paths.slice(0, ROAD_SEATS.length).map((rank, index) => {
@@ -300,6 +304,8 @@ export function paceEasyTree(
   let tapKills = 0
   let taps = 0
   let attempts = 0
+  let graceUntil = 0
+  let lostRound = 0
   const dt = 1 / 60
   const walk = 0.01 * round.speed
   const spawnEvery = 3.8 * round.spawn
@@ -323,7 +329,7 @@ export function paceEasyTree(
     if (raider.hp <= 0) {
       raider.dead = true
       downed += 1
-      spawnNow = true
+      if (!byTap) spawnNow = true
       if (byTap) tapKills += 1
       else lampKills += 1
     }
@@ -341,8 +347,13 @@ export function paceEasyTree(
         leaked += 1
       }
     }
-    hearts -= leaked
-    if (hearts <= 0) return finish('lost')
+    if (leaked > 0) {
+      const paced = applyEasyPaceLeaks(hearts, leaked, time * 1000, graceUntil, lostRound, false)
+      hearts = paced.hearts
+      graceUntil = paced.graceUntil
+      lostRound = paced.lostThisRound
+      if (paced.failed || hearts <= 0) return finish('lost')
+    }
     if (spawned < round.count && live().length < 3 && (spawnNow || spawnAt >= spawnEvery || spawned === 0)) {
       spawnNow = false
       spawnAt = 0
@@ -386,9 +397,12 @@ export function paceEasyTree(
     if (tapEvery > 0 && tapAt >= tapEvery && live().length > 0) {
       tapAt = 0
       attempts += 1
-      if (roll() <= hitChance) {
+      const walking = live().sort((a, b) => b.t - a.t)
+      const offFace = walking.length > 1 && roll() < offCue
+      const hit = roll() <= hitChance
+      if (!offFace && hit) {
         taps += 1
-        const front = live().sort((a, b) => b.t - a.t)[0]
+        const front = walking[0]
         if (front) {
           const point = pathPoint(front.t)
           let damage = lamps[0]?.strike.damage ?? 1

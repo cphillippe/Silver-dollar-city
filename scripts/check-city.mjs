@@ -60,7 +60,11 @@ import {
   EASY_MISS_HOLD_MS,
   EASY_WALKER_FACE_PX,
   DEFEND_HEARTS,
+  EASY_LEAK_GRACE_MS,
+  EASY_ROUND_HEART_CAP,
+  applyEasyPaceLeaks,
   applyGateLeaks,
+  cueTapStrike,
   easyFaceHitPx,
   faceTapStrike,
   EASY_WALKER_HIT_PX,
@@ -1288,7 +1292,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.408')
+assert.equal(APP_VERSION, '1.4.409')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -2897,7 +2901,7 @@ assert.equal(EASY.tapWhy, 'Tap why this is true.')
 assert.equal(EASY.reasonTeach, 'A reason is why this is true.')
 assert.equal(EASY.saved, 'Lock In')
 assert.equal(EASY.savedSub, 'saved lines')
-assert.equal(EASY.nightMiss, 'Wrong — tap the glowing face')
+assert.equal(EASY.nightMiss, 'Tap the glowing face')
 assert.match(defendSrc, /EASY\.nightMiss/)
 assert.match(defendSrc, /TAP \$\{remaining\} left/)
 assert.match(defendSrc, /You missed\. Tap the face/)
@@ -5180,6 +5184,86 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.ok(CHANGELOG.some((note) => note.version === '1.4.408'), '1.4.408 changelog row')
   assert.match(latestChange('1.4.408').title, /lamp/i)
   assert.doesNotMatch(latestChange('1.4.408').items.join('\n'), /Fixes #|Closes #|Resolves #/)
+}
+
+// Night Watch 1.4.409: Easy taps only help, and one moment cannot empty the hearts.
+{
+  assert.equal(EASY_LEAK_GRACE_MS, 1800, '1.4.409 grace is 1.8s')
+  assert.equal(EASY_ROUND_HEART_CAP, 2, '1.4.409 a round spends at most two hearts')
+  assert.equal(cueTapStrike(true, false), 'miss', '1.4.409 an Easy tap off the glow is a miss')
+  assert.equal(cueTapStrike(true, true), 'hit', '1.4.409 the glowing face still hits')
+  assert.equal(cueTapStrike(false, false), 'hit', '1.4.409 Hard does not use the glow')
+  const clump = applyEasyPaceLeaks(3, 3, 1000, 0, 0, false)
+  assert.equal(clump.lostHearts, 1, '1.4.409 a clump of leaks costs one heart')
+  assert.equal(clump.hearts, 2)
+  assert.equal(clump.failed, false)
+  const during = applyEasyPaceLeaks(clump.hearts, 1, 2000, clump.graceUntil, clump.lostThisRound, false)
+  assert.equal(during.lostHearts, 0, '1.4.409 grace leaks are free')
+  assert.equal(during.hearts, 2)
+  const again = applyEasyPaceLeaks(during.hearts, 1, clump.graceUntil + 1, during.graceUntil, during.lostThisRound, false)
+  assert.equal(again.lostHearts, 1)
+  assert.equal(again.hearts, 1)
+  const capped = applyEasyPaceLeaks(again.hearts, 1, again.graceUntil + 1, again.graceUntil, again.lostThisRound, false)
+  assert.equal(capped.lostHearts, 0, '1.4.409 the third paid leak in a round is free')
+  assert.equal(capped.hearts, 1)
+  assert.equal(applyEasyPaceLeaks(3, 1, 0, 0, 0, true).lostHearts, 0, '1.4.409 a shield still forgives')
+  const screen409 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  assert.match(screen409, /cueTapStrike\(easy, glowing\)/)
+  assert.match(screen409, /if \(easy && !manual\) live\.current\.spawnNow = true/)
+  assert.match(screen409, /applyEasyPaceLeaks\(/)
+  assert.match(screen409, /applyGateLeaks\(live\.current\.hearts, leaked, shielded\)/)
+  const zero409 = { far: 0, strong: 0 }
+  const step1 = { far: 0, strong: 1 }
+  const step2 = { far: 0, strong: 2 }
+  const spent409 = spendTreeNight(EASY_ROUNDS.map((round) => round.count), EASY_LAMP_COST)
+  function carry409(pathsFor, tapEvery) {
+    let hearts = 3
+    const rows = []
+    for (let index = 0; index < 12; index += 1) {
+      const round = paceEasyTree(index, pathsFor(index), hearts, tapEvery, 0.7, 1 + index * 17, 0.2)
+      rows.push(round)
+      hearts = round.hearts
+      if (round.result !== 'clear') break
+    }
+    return rows
+  }
+  const quiet = carry409(() => [zero409, zero409], 0)
+  assert.deepEqual(
+    quiet.map((round) => round.hearts),
+    [3, 3, 3, 3, 2, 0],
+    '1.4.409 Level I with no taps leaks on round 5 and is out on round 6',
+  )
+  assert.equal(quiet[4].result, 'clear')
+  assert.equal(quiet[5].result, 'lost')
+  const clumsy = carry409(() => [zero409, zero409], 3)
+  assert.deepEqual(
+    clumsy.map((round) => round.hearts),
+    [3, 3, 3, 3, 2, 0],
+    '1.4.409 clumsy taps hold round 5 and do not die early',
+  )
+  assert.equal(clumsy[4].result, 'clear')
+  const stepped = carry409(() => [step1, step1], 3)
+  assert.equal(stepped.at(-1).result, 'lost')
+  assert.ok(stepped.length <= 7, '1.4.409 all step-1 lamps are lost by round 7')
+  assert.ok(stepped.at(-1).hearts <= 1)
+  const gate6 = paceEasyTree(5, [step1, step1], 3, 3, 0.7, 1 + 5 * 17, 0.2)
+  assert.equal(gate6.result, 'clear', '1.4.409 round 6 on a full bar ends with hearts left')
+  assert.ok(gate6.hearts <= 1, '1.4.409 round 6 step-1 ends at one heart or fewer')
+  const gate7 = paceEasyTree(6, [step1, step1], gate6.hearts, 3, 0.7, 1 + 6 * 17, 0.2)
+  assert.equal(gate7.result, 'lost', '1.4.409 round 7 finishes a step-1 bar')
+  const held = paceEasyTree(5, [step2, zero409], 3, 3, 0.7, 1 + 5 * 17, 0.2)
+  assert.equal(held.result, 'clear', '1.4.409 one step-2 holds round 6')
+  assert.equal(held.hearts, 3)
+  const spender = carry409(
+    (index) => (index === 0 ? [zero409, zero409] : spent409.rows[index - 1].lamps),
+    3,
+  )
+  assert.equal(spender.length, 12, '1.4.409 a spender plays through round 12')
+  assert.ok(spender.every((round) => round.result === 'clear'))
+  assert.equal(spender[8].hearts, 3, '1.4.409 round 9 does not wipe the spender')
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.409'), '1.4.409 changelog row')
+  assert.match(latestChange('1.4.409').title, /tap fairness/i)
+  assert.doesNotMatch(latestChange('1.4.409').items.join('\n'), /Fixes #|Closes #|Resolves #/)
 }
 
 // Night Watch 1.4.392: reach cue, a longer level-I free lamp, and a plant pin.

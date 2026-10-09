@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.409',
+    title: 'Night Watch Easy tap fairness + heart pacing',
+    when: '2026-10-09',
+    items: [
+      'On Easy, only the glowing face takes a tap. Any other tap says Tap the glowing face. It does not spend a heart, let a walker through, or slow the lamps.',
+      'A leak still costs one heart. The next short moment is free, and one round can spend at most two hearts, so one bad moment cannot empty the bar.',
+    ],
+  },
+  {
     version: '1.4.408',
     title: 'Night Watch lamps hold the middle rounds',
     when: '2026-10-09',
