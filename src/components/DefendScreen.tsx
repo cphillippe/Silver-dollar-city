@@ -14,6 +14,7 @@ import { roundMark, easyRound } from '../nightWatch/rounds'
 import { pickWalkerFace } from '../nightWatch/enemies/faces'
 import {
   BOSS_PACE,
+  easyBossClearSparks,
   easyBossHp,
   easyBossRound,
   easyLatePush,
@@ -199,6 +200,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   nwDebugRef.current = nwDebug
   debugPausedRef.current = debugPaused
   const [boostNote, setBoostNote] = useState<string | null>(null)
+  const [bossBonus, setBossBonus] = useState(0)
   const [upgradeAt, setUpgradeAt] = useState<CityPlotId | null>(null)
   const upgradeAtRef = useRef<CityPlotId | null>(null)
   const upgradeTapRef = useRef<{ id: CityPlotId; at: number }>({ id: 'porch', at: -1e9 })
@@ -619,6 +621,17 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         setHeartPop(true)
         window.setTimeout(() => setHeartPop(false), 1200)
       }
+      const grantBossSparks = () => {
+        if (!easy) {
+          setBossBonus(0)
+          return
+        }
+        const bonus = easyBossClearSparks(wave)
+        setBossBonus(bonus)
+        if (bonus <= 0) return
+        sparksRef.current += bonus
+        setRunSparks((count) => count + bonus)
+      }
       if (
         nightEnemies.isClear(
           easy,
@@ -629,6 +642,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         )
       ) {
         if (easy) grantClearHeart()
+        grantBossSparks()
         live.current.playing = false
         setToolLock(null)
         setPhase('boost')
@@ -641,6 +655,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         live.current.hearts > 0
       ) {
         grantClearHeart()
+        grantBossSparks()
         live.current.playing = false
         setToolLock(null)
         setPhase('boost')
@@ -1335,6 +1350,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     clearPlaceArm()
     setRunSparks(0)
     sparksRef.current = 0
+    setBossBonus(0)
     const ready = { still: 0, mend: 0 }
     skillReadyRef.current = ready
     setSkillReady(ready)
@@ -1581,6 +1597,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     if (won || phase !== 'boost' || roundChangeBlocked()) return
     clearPlaceArm()
     setBoostNote(null)
+    setBossBonus(0)
     setLoreMeet(null)
     if (waveIndex + 1 < nightLength(easy)) {
       setWaveIndex((i) => i + 1)
@@ -1776,9 +1793,13 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       {phase === 'boost' && !won ? (
         <div className="defend-boost">
           <p className="defend-boost-status" role="status">
-            {easy
-              ? `Round ${waveIndex + 1} clear · spend sparks`
-              : `Wave ${waveIndex + 1} clear · spend sparks`}
+            {easy ? `Round ${waveIndex + 1} clear` : `Wave ${waveIndex + 1} clear`}
+            {easy && bossBonus > 0 ? (
+              <span className="defend-boss-bonus" data-boss-bonus={bossBonus}>
+                {` · Boss down +${bossBonus} sparks`}
+              </span>
+            ) : null}
+            {` · spend sparks`}
             {boostNote ? ` · ${boostNote}` : ''}
           </p>
           {easy ? (

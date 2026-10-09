@@ -171,10 +171,11 @@ assert.match(readme, /ANDROID_KEYSTORE_B64/)
 assert.match(readme, /environment named `release`/)
 assert.doesNotMatch(readme, /ANDROID_KEYSTORE_BASE64|silver-city-debug\.keystore/)
 
-assert.equal(APP_VERSION, '1.4.426')
+assert.equal(APP_VERSION, '1.4.427')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.426'))
 assert.match(latestChange('1.4.426').items.join('\n'), /download/)
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.425'))
 assert.match(latestChange('1.4.425').items.join('\n'), /Update available/)
-assert.doesNotMatch(latestChange('1.4.426').items.join('\n'), /Fixes #|Closes #|Resolves #/)
+assert.doesNotMatch(latestChange('1.4.427').items.join('\n'), /Fixes #|Closes #|Resolves #/)
 
 console.log('check-android-shell: ok')
