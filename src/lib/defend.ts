@@ -64,13 +64,16 @@ export function easyClearHeart(hearts: number): number {
   return hearts + 1
 }
 
-/** A glowing-face tap on Easy hits twice as hard as the lamp's own shot. */
-export const EASY_GLOW_TAP_MULT = 2
+/**
+ * A glowing-face tap on Easy deals this much, and no more.
+ * It does not grow with the lamp's tier. Tough walkers soak it.
+ * Fast and plain walkers still drop in a tap or two. Hard does not read this.
+ */
+export const EASY_GLOW_TAP_DAMAGE = 1
 
-export function easyGlowTapDamage(lampDamage: number, hp: number): number {
-  const lamp = Math.max(1, Math.floor(lampDamage) || 1)
-  const left = Math.max(0, hp)
-  return Math.min(left, lamp * EASY_GLOW_TAP_MULT)
+export function easyGlowTapDamage(hp: number): number {
+  const left = Math.max(0, Math.floor(hp) || 0)
+  return Math.min(left, EASY_GLOW_TAP_DAMAGE)
 }
 
 /**
