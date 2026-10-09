@@ -1,3 +1,4 @@
+import type { WalkerFaceId } from './enemies/faces.ts'
 import type { WalkerKind } from '../types.ts'
 import type { WalkerGait } from './walkers.ts'
 
@@ -18,7 +19,7 @@ export interface NightRaider {
    * Portrait key. Easy picks this so two walkers on the road do not share a head.
    * Kind still decides the hit. Unset means “use kind”.
    */
-  face?: WalkerKind
+  face?: WalkerFaceId
   /** Climb roster id — labels can differ from the shared face. */
   castId?: string
   label?: string

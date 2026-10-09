@@ -244,7 +244,11 @@ img.walker-face.easy-walker-face,
   box-shadow: 0 0 0 2px #ffcc33, 0 2px 6px rgba(10, 8, 6, 0.4);
 }
 
-/* Tap flash uses the same head window as the road circle. */
+/* Whole portrait in the circle. The fill shows through the cutout faces. */
+.defend-face-back {
+  fill: #e4d8c4;
+}
+
 .easy-juice-head {
   position: relative;
   width: 44px;
@@ -252,6 +256,7 @@ img.walker-face.easy-walker-face,
   margin: 14px auto 0;
   border-radius: 50%;
   overflow: hidden;
+  background: #e4d8c4;
   box-shadow: 0 0 0 2px #ffcc33, 0 2px 6px rgba(10, 8, 6, 0.4);
 }
 
