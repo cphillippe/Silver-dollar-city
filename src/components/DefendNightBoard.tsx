@@ -21,7 +21,8 @@ export type DefendNightBoardProps = Omit<DefendNightSkyProps, 'children'> &
     levelBurst?: { from: number; to: number } | null
     onPullLamp?: () => void
     onCloseUpgrade?: () => void
-    onUpgradePath?: (plotId: CityPlotId, path: TreePath) => void
+    onUpgradePath?: (plotId: CityPlotId, path: TreePath, fromPip?: boolean) => void
+    onArmPathBuy?: (path: TreePath) => void
     runPaths?: Record<string, LampPaths>
     /** Easy phone: overlays share the fill camera with the board. */
     plateFill?: boolean
@@ -34,7 +35,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
     flash, togglePad, fire, fireAtRaider, shots, easy, blasts, tapTarget, tapPos, tapJuice,
     walkerCalls, loreLine, runTier, boosting, onBoostTower,     upgradeAt, onOpenUpgrade, upFlashId, ghost = null,
     upgradePoint, boardBox, runSparks = 0, levelBurst = null, onPullLamp, onCloseUpgrade,
-    onUpgradePath, runPaths,
+    onUpgradePath, onArmPathBuy, runPaths,
     plateFill = false, onPlacePointer,
   } = props
   const place = plateFill ? boardFillPoint : mapBoardPoint
@@ -119,7 +120,8 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
           point={upgradePoint as TowerCardPoint}
           board={boardBox as { w: number; h: number }}
           onUpgrade={() => onBoostTower?.(upgradeAt as CityPlotId)}
-          onUpgradePath={(path) => onUpgradePath?.(upgradeAt as CityPlotId, path)}
+          onUpgradePath={(path, fromPip) => onUpgradePath?.(upgradeAt as CityPlotId, path, fromPip)}
+          onArmPathBuy={onArmPathBuy}
           paths={easy && cardAbility ? pathsOf(runPaths, cardAbility) : undefined}
           clearOf={clearOf}
           cameraScale={cameraScale}
