@@ -22,6 +22,15 @@ import {
 } from '../store/progress'
 import type { View } from '../types'
 
+/** Opens the linked puzzle for a playtest. Does not write street or lesson unlocks. */
+function playtestSkipsGate(challengeId: string): boolean {
+  if (typeof window === 'undefined') return false
+  const params = new URLSearchParams(window.location.search)
+  const flag = params.get('playtest')
+  if (flag !== '1' && flag !== 'true') return false
+  return params.get('sequence') === challengeId
+}
+
 interface ChallengeScreenProps {
   areaId: string
   challengeId: string
@@ -90,7 +99,7 @@ export function ChallengeScreen({
     .slice(0, index)
     .every((item) => progress.completed.includes(item.id))
 
-  if (!unlocked || !priorDone) {
+  if ((!unlocked || !priorDone) && !playtestSkipsGate(challenge.id)) {
     return (
       <main className="page">
         <p>

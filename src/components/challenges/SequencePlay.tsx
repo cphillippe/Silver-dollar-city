@@ -82,7 +82,8 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
       ? 'Put the steps in order!'
       : 'Put the story in order!'
     : challenge.prompt
-  const showSlotCaption = count < 5 || status === 'ok'
+  const showSlotCaption = true
+  const slotCaption = count >= 5 && status !== 'ok' ? 'line' : 'full'
 
   function win() {
     if (solved.current) return
@@ -111,7 +112,7 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
     if (easy) {
       const need = challenge.items[dest]
       if (!need || card.id !== need.id) {
-        const wait = prefersReducedMotion() ? 0 : 420
+        const wait = prefersReducedMotion() ? 0 : 600
         setBusy(true)
         setWiggleId(card.id)
         setMisses((value) => value + 1)
@@ -204,6 +205,7 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
                   count={count}
                   hard={!easy}
                   showCaption={showSlotCaption}
+                  caption={slotCaption}
                   snap={snapIndex === index}
                   locked={easy || status === 'ok'}
                   onPress={easy || status === 'ok' ? undefined : () => undo(index)}
