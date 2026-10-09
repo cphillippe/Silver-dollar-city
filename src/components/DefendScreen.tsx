@@ -16,7 +16,9 @@ import {
   DEFEND_BRIEF_ID,
   DEFEND_HEARTS,
   nightLength,
+  applyEasyPaceLeaks,
   applyGateLeaks,
+  cueTapStrike,
   WATCH_ABILITY_LABEL,
   dist,
   unlockedWatchAbilities,
@@ -256,6 +258,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     cool: {} as Record<string, number>,
     playing: false,
     spawnNow: false,
+    leakGraceUntil: 0,
+    heartsLostRound: 0,
     freezeUntil: 0,
   })
   const autoFireRef = useRef<(now: number, frozen: boolean) => void>(() => {})
@@ -380,6 +384,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     }
     live.current.cool = {}
     live.current.spawnNow = false
+    live.current.leakGraceUntil = 0
+    live.current.heartsLostRound = 0
     live.current.freezeUntil = 0
     mendShieldUntilRef.current = 0
     window.clearTimeout(shieldTimer.current)
@@ -440,7 +446,22 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         window.clearTimeout(bannerTimer.current)
         bannerTimer.current = window.setTimeout(() => setPowerBanner(null), 2800)
       }
-      const gate = applyGateLeaks(live.current.hearts, leaked, shielded)
+      let gate
+      if (easy) {
+        const paced = applyEasyPaceLeaks(
+          live.current.hearts,
+          leaked,
+          now,
+          live.current.leakGraceUntil,
+          live.current.heartsLostRound,
+          shielded,
+        )
+        live.current.leakGraceUntil = paced.graceUntil
+        live.current.heartsLostRound = paced.lostThisRound
+        gate = paced
+      } else {
+        gate = applyGateLeaks(live.current.hearts, leaked, shielded)
+      }
       if (gate.lostHearts > 0) {
         live.current.hearts = gate.hearts
         setHearts(gate.hearts)
@@ -857,7 +878,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       if (struck.down) {
         live.current.downed += 1
         setRunSparks((count) => count + 1)
-        if (easy) live.current.spawnNow = true
+        // Lamp kills keep the spawn cadence. A face tap must not pull the next walker in early.
+        if (easy && !manual) live.current.spawnNow = true
       }
       // Easy autofire only. A face tap stays one walker. Strong nicks inside the ring.
       // Far step 1 nicks just past it. Neither changes the main shot, so round 6 still
@@ -961,6 +983,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     if (phase !== 'wave' || won) return
     const raider = live.current.raiders.find((item) => item.id === raiderId && !item.turned)
     if (!raider) return
+    const glowing = nightEnemies.cueTarget(live.current.raiders)?.id === raider.id
+    if (cueTapStrike(easy, glowing) === 'miss') {
+      showMiss()
+      return
+    }
     const point = raiderAt(raider)
     let nearest: CityPlotId | null = null
     let nearestD = Infinity
