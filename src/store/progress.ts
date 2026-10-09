@@ -504,7 +504,7 @@ export interface ProgressApi {
   consumeMatchExtra: (lineId: string) => void
   snoozeReviews: (ids: string[], today: string) => void
   markMiss: (challengeId: string) => void
-  recordNight: (dateKey: string) => void
+  recordNight: (dateKey: string, farHills?: boolean) => void
   /** First time a climb guy walks, remember them so the story does not repeat. */
   markMet: (castId: string) => void
   setTheme: (theme: AppTheme) => void

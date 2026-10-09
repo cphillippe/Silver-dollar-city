@@ -30,6 +30,7 @@ import * as easyLib from '../src/lib/easy.ts'
 import * as trailLoopHome from '../src/easyTrail/trail/loop.ts'
 import * as trailShelf from '../src/easyTrail/trail/index.ts'
 import { normalizeProgress } from '../src/lib/save.ts'
+import { nightWatchRoundJump } from '../src/lib/nightWatchDebug.ts'
 import {
   PH_ROAD_SHOW_IT,
   SHOW_IT_LINE,
@@ -1086,7 +1087,7 @@ const defendScreenOnlySrc = readFileSync(
 const defendSrc = `${defendScreenOnlySrc}\n${nightWatchSrc}`
 assert.match(defendSrc, /The road is coming/)
 assert.match(defendSrc, /EASY.nightDo/)
-assert.match(defendSrc, /How to pray Love/)
+assert.match(defendSrc, /FarHillsUnlock/)
 assert.match(defendSrc, /Love tip/)
 assert.match(defendSrc, /loveHowTo/)
 assert.doesNotMatch(defendSrc, /TeachUnlock/)
@@ -1287,7 +1288,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.405')
+assert.equal(APP_VERSION, '1.4.406')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -2771,7 +2772,7 @@ assert.doesNotMatch(
 )
 assert.doesNotMatch(hubSrc, /EASY\.nightWhat/)
 assert.doesNotMatch(defendSrc, /EASY\.nightWhat/)
-assert.match(defendSrc, /EASY\.nightTap/)
+assert.match(defendNightSrc, /EASY\.nightTap/)
 assert.match(easyUiSrc, /Tap the face/)
 assert.match(easyUiSrc, /saved: 'Lock In'/)
 assert.match(easyUiSrc, /connections: 'Connections'/)
@@ -5063,6 +5064,42 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.405').items.join('\n'),
     /Fixes #|Closes #|Resolves #/,
     '1.4.405 changelog avoids GitHub close keywords',
+  )
+}
+
+// Night Watch 1.4.406: Easy round 25 unlocks the Far Hills teaser. Hard stays on the old win.
+{
+  assert.equal(nightWatchRoundJump('?playtest=1&nwRound=25', 25, true), 24, '1.4.406 round 25 is wave index 24')
+  assert.equal(nightWatchRoundJump('?nwRound=25', 25, false), null, '1.4.406 a normal visit ignores nwRound')
+  assert.equal(nightWatchRoundJump('?nwRound=26', 25, true), null, '1.4.406 nwRound stays inside the night')
+  assert.equal(nightWatchRoundJump('?nwRound=0', 25, true), null, '1.4.406 round 0 is not a jump')
+  const opened = normalizeProgress({ defense: { cleared: 1, nights: [], farHills: true } })
+  assert.equal(opened.defense.farHills, true, '1.4.406 the Far Hills flag loads')
+  const plain = normalizeProgress({ defense: { cleared: 1, nights: [] } })
+  assert.notEqual(plain.defense.farHills, true, '1.4.406 an old save is not unlocked')
+  const junk = normalizeProgress({ defense: { cleared: 1, nights: [], farHills: 'yes' } })
+  assert.notEqual(junk.defense.farHills, true, '1.4.406 only a real true flag unlocks')
+  const screen406 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  assert.match(screen406, /The night held after round/)
+  assert.match(screen406, /readNightWatchRoundJump\(nightLength\(true\)\)/)
+  assert.match(screen406, /recordNight\(today, easy\)/)
+  const hills406 = readFileSync(new URL('../src/nightWatch/farHills.ts', import.meta.url), 'utf8')
+  assert.match(hills406, /New place unlocked!/)
+  assert.match(hills406, /The Far Hills/)
+  assert.match(hills406, /Coming soon/)
+  assert.match(
+    readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8'),
+    /nw-area-badge/,
+  )
+  assert.match(
+    readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8'),
+    /\.nw-far-hills-home/,
+  )
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.406'), '1.4.406 changelog row')
+  assert.match(latestChange('1.4.406').title, /Far Hills/)
+  assert.doesNotMatch(
+    latestChange('1.4.406').items.join('\n'),
+    /Fixes #|Closes #|Resolves #/,
   )
 }
 
