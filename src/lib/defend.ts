@@ -42,7 +42,7 @@ export function applyGateLeaks(hearts: number, leaked: number, shielded = false)
 
 /** Easy only. After a paid leak, further leaks in this window cost nothing. */
 export const EASY_LEAK_GRACE_MS = 1800
-/** Easy only. One round cannot spend the whole bar. */
+/** Easy only. One round stops at two hearts, except the round-5 tap gate. */
 export const EASY_ROUND_HEART_CAP = 2
 
 export interface EasyPaceLeak extends GateLeak {
@@ -51,9 +51,32 @@ export interface EasyPaceLeak extends GateLeak {
 }
 
 /**
+ * Round 5 is the tap gate, so spaced leaks there can spend the last heart.
+ * Every other Easy round still stops at two. Hard does not read this.
+ */
+export function easyRoundHeartCap(roundIndex: number): number {
+  return roundIndex === 4 ? DEFEND_HEARTS : EASY_ROUND_HEART_CAP
+}
+
+/** A cleared Easy round gives one heart back, and the bar never passes three. */
+export function easyClearHeart(hearts: number): number {
+  if (hearts <= 0 || hearts >= DEFEND_HEARTS) return hearts
+  return hearts + 1
+}
+
+/** A glowing-face tap on Easy hits twice as hard as the lamp's own shot. */
+export const EASY_GLOW_TAP_MULT = 2
+
+export function easyGlowTapDamage(lampDamage: number, hp: number): number {
+  const lamp = Math.max(1, Math.floor(lampDamage) || 1)
+  const left = Math.max(0, hp)
+  return Math.min(left, lamp * EASY_GLOW_TAP_MULT)
+}
+
+/**
  * Easy heart pacing. The first leak in a quiet moment costs one heart and
  * opens a short grace. Leaks during that grace, and any leak after this
- * round has already spent `EASY_ROUND_HEART_CAP` hearts, leave the bar alone.
+ * round has already spent its cap, leave the bar alone.
  * Hard keeps `applyGateLeaks` (one heart each, no grace, no cap).
  */
 export function applyEasyPaceLeaks(
@@ -63,11 +86,13 @@ export function applyEasyPaceLeaks(
   graceUntil: number,
   lostThisRound: number,
   shielded = false,
+  cap = EASY_ROUND_HEART_CAP,
 ): EasyPaceLeak {
   const count = Number.isFinite(leaked) ? Math.max(0, Math.floor(leaked)) : 0
   const spent = Number.isFinite(lostThisRound) ? Math.max(0, Math.floor(lostThisRound)) : 0
   const quiet = Number.isFinite(graceUntil) ? graceUntil : 0
-  if (shielded || count === 0 || now < quiet || spent >= EASY_ROUND_HEART_CAP) {
+  const room = Number.isFinite(cap) ? Math.max(1, Math.floor(cap)) : EASY_ROUND_HEART_CAP
+  if (shielded || count === 0 || now < quiet || spent >= room) {
     return { hearts, lostHearts: 0, failed: false, graceUntil: quiet, lostThisRound: spent }
   }
   const next = Math.max(0, hearts - 1)

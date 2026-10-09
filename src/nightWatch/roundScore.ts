@@ -1,4 +1,4 @@
-import { applyEasyPaceLeaks } from '../lib/defend.ts'
+import { applyEasyPaceLeaks, easyGlowTapDamage, easyRoundHeartCap } from '../lib/defend.ts'
 import { pathPoint } from './path/data.ts'
 import { easyRound } from './rounds.ts'
 import { lampStrike, type LampPaths } from './upgradeTree.ts'
@@ -266,7 +266,8 @@ export interface PaceRound {
  * (default 3). While two walkers are out, about `offCue` of those tries
  * (default 0.2) hit a face that is not glowing and do nothing. The rest
  * hit the glowing face when the roll is within `hitChance` (default 0.7).
- * A tap kill does not pull the next walker forward. A paid leak costs one
+ * A glowing tap deals twice the nearest lamp's damage. A tap kill does not
+ * pull the next walker forward. A paid leak costs one
  * heart, then grace and the per-round cap apply. The round is lost only at
  * 0 hearts. `seed` keeps the misses the same from run to run.
  */
@@ -348,7 +349,15 @@ export function paceEasyTree(
       }
     }
     if (leaked > 0) {
-      const paced = applyEasyPaceLeaks(hearts, leaked, time * 1000, graceUntil, lostRound, false)
+      const paced = applyEasyPaceLeaks(
+        hearts,
+        leaked,
+        time * 1000,
+        graceUntil,
+        lostRound,
+        false,
+        easyRoundHeartCap(roundIndex),
+      )
       hearts = paced.hearts
       graceUntil = paced.graceUntil
       lostRound = paced.lostThisRound
@@ -414,7 +423,7 @@ export function paceEasyTree(
               damage = lamp.strike.damage
             }
           }
-          wound(front, damage, true)
+          wound(front, easyGlowTapDamage(damage, front.hp), true)
         }
       }
     }
