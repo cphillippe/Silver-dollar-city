@@ -253,7 +253,7 @@ import {
 import { emptyProgress, progressAfterReset } from '../src/lib/save.ts'
 import { EASY, EASY_LINE_ORDER, DIG_ARC, FOUNDATION_ARC, NAMES_ARC, STONE_ARC, INK_ARC, easyChromeLine, easyChromeNearDup, easyFacingLine, easyHomeFocus, easyHoldFields, easyHoldLine, easyHoldPractice, easyHoldView, easyLockInExit, easyLearnLine, easyLineHeld, easyLineLearned, easyLineTaught, easyLoopLine, easyMatchLine, easyMatchReady, easyTeachFields, easyTrailView, markEasyHeld, markEasyTaught, progressAfterMatchTaught, sameProofRecap, easyWhoWhere, easyWhoWhereLine, easyWhyLine, easyWhyWordCount, easyWrongTap, uniqueHoldChoices } from '../src/lib/easy.ts'
 import { storyPlayFor } from '../src/lib/storyPlay.ts'
-import { DEBUG_LAYER_LINES, debugJumpView } from '../src/lib/debugPlays.ts'
+import { DEBUG_LAYER_LINES, debugJumpView, debugStoryStripJump, storyStripLines } from '../src/lib/debugPlays.ts'
 import { FATHER_RUN_LINE } from '../src/lib/fatherRun.ts'
 import * as fatherRunHome from '../src/easyTrail/father/fatherRun.ts'
 import * as fatherRunShim from '../src/lib/fatherRun.ts'
@@ -1438,6 +1438,44 @@ assert.equal(APP_VERSION, '1.4.420')
   )
 }
 
+{
+  const stripIds = storyStripLines().map((item) => item.lineId)
+  const indexSrc = readFileSync(new URL('../src/content/index.ts', import.meta.url), 'utf8')
+  assert.match(
+    indexSrc,
+    /export const areas: Area\[\] = \[\s*parableHollow,\s*witnessBench,\s*observatory,\s*firstGate,\s*highLookout,\s*\]/,
+    '1.4.420 Story Strip scan matches the street list',
+  )
+  const expected = [
+    ...[parableHollow, witnessBench, observatory, firstGate, highLookout].flatMap((area) =>
+      area.challenges.filter((challenge) => challenge.kind === 'sequence').map((challenge) => challenge.id),
+    ),
+    ...DAILY_POOL.filter((item) => item.challenge.kind === 'sequence').map((item) => item.challenge.id),
+  ]
+  assert.deepEqual(stripIds, expected, '1.4.420 Story Strip group lists every story-strip line')
+  for (const id of ['ph-road', 'wb-creed', 'daily-rest']) {
+    assert.ok(stripIds.includes(id), `1.4.420 Story Strip group includes ${id}`)
+  }
+  const rest = storyStripLines().find((item) => item.lineId === 'daily-rest')
+  const road = storyStripLines().find((item) => item.lineId === 'ph-road')
+  assert.ok(rest && road)
+  assert.deepEqual(debugStoryStripJump(rest), {
+    name: 'daily',
+    forceId: 'daily-rest',
+    debugStrip: true,
+  })
+  assert.deepEqual(debugStoryStripJump(road), {
+    name: 'challenge',
+    areaId: 'parable-hollow',
+    challengeId: 'ph-road',
+    debugStrip: true,
+  })
+  const settingsSrc = readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8')
+  const nightAt = settingsSrc.indexOf('aria-label="Night Watch playtest"')
+  const stripAt = settingsSrc.indexOf('aria-label="Story Strip"')
+  const groupsAt = settingsSrc.indexOf('debugPlayGroups()')
+  assert.ok(nightAt >= 0 && stripAt > nightAt && groupsAt > stripAt, '1.4.420 Story Strip sits after Night Watch')
+}
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')

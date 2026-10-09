@@ -1,3 +1,9 @@
+import { DAILY_POOL } from '../content/daily.ts'
+import { firstGate } from '../content/firstGate.ts'
+import { highLookout } from '../content/highLookout.ts'
+import { observatory } from '../content/observatory.ts'
+import { parableHollow } from '../content/parableHollow.ts'
+import { witnessBench } from '../content/witnessBench.ts'
 import { packLesson } from '../content/packCatalog.ts'
 import { CLAIM_MERGE_LINE } from './claimMerge.ts'
 import { EASY_LINE_ORDER } from './easy.ts'
@@ -100,4 +106,52 @@ export function debugJumpView(item: DebugMiniGame):
 /** Cold jump to Night Watch — pair with Settings debug freeze for playtests. */
 export function debugNightWatchJump(): { name: 'defend' } {
   return { name: 'defend' }
+}
+
+export interface StoryStripLine {
+  lineId: string
+  name: string
+  areaId: string
+}
+
+/** Same streets as `areas` in content/index.ts. A new street belongs in both. */
+const STORY_STRIP_AREAS = [parableHollow, witnessBench, observatory, firstGate, highLookout]
+
+/** Every sequence puzzle. Easy plays these as Story Strip. */
+export function storyStripLines(): StoryStripLine[] {
+  const lines: StoryStripLine[] = []
+  for (const area of STORY_STRIP_AREAS) {
+    for (const challenge of area.challenges) {
+      if (challenge.kind !== 'sequence') continue
+      lines.push({ lineId: challenge.id, name: challenge.title, areaId: area.id })
+    }
+  }
+  for (const daily of DAILY_POOL) {
+    if (daily.challenge.kind !== 'sequence') continue
+    lines.push({
+      lineId: daily.challenge.id,
+      name: daily.challenge.title,
+      areaId: 'daily-trail',
+    })
+  }
+  return lines
+}
+
+export function debugStoryStripLabel(item: StoryStripLine): string {
+  return `${item.lineId} · ${item.name}`
+}
+
+/** One tap into the strip. Daily lines open the morning trail; the rest open the street puzzle. */
+export function debugStoryStripJump(item: StoryStripLine):
+  | { name: 'daily'; forceId: string; debugStrip: true }
+  | { name: 'challenge'; areaId: string; challengeId: string; debugStrip: true } {
+  if (item.lineId.startsWith('daily-')) {
+    return { name: 'daily', forceId: item.lineId, debugStrip: true }
+  }
+  return {
+    name: 'challenge',
+    areaId: item.areaId,
+    challengeId: item.lineId,
+    debugStrip: true,
+  }
 }
