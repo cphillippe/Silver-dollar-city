@@ -35,6 +35,7 @@ export const parableHollow: Area = {
         {
           id: 'b',
           gem: 'heart',
+          art: 'road2-robbers',
           text: 'Robbers leave a man half dead.',
           shortCaption: 'Robbers\nhurt him',
           role: 'Robbers',
@@ -42,6 +43,7 @@ export const parableHollow: Area = {
         {
           id: 'c',
           gem: 'door',
+          art: 'road3-temple',
           text: 'Two temple men pass by.',
           shortCaption: 'Temple\nmen pass',
           role: 'temple',
@@ -49,6 +51,7 @@ export const parableHollow: Area = {
         {
           id: 'd',
           gem: 'lamp',
+          art: 'road4-samaritan',
           text: 'A Samaritan has compassion and helps.',
           shortCaption: 'Samaritan\nhelps',
           role: 'Samaritan',
@@ -56,6 +59,7 @@ export const parableHollow: Area = {
         {
           id: 'e',
           gem: 'star',
+          art: 'road5-likewise',
           text: 'Jesus: “Go and do likewise.”',
           shortCaption: 'Go and do\nlikewise',
           role: 'Go',
