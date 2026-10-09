@@ -89,6 +89,7 @@ import { boardFill, boardFillPoint } from '../src/nightWatch/map/phoneFill.ts'
 import {
   commitLamp,
   dragGhostClient,
+  clampGhostHintLeft,
   LAMP_DRAG_LIFT_PX,
   LAMP_DRAG_START_PX,
   LAMP_TOO_FAR,
@@ -105,6 +106,10 @@ import { nightTowers as nightTowersMod, lampReach, lampReadyToFire, FREE_LAMP_RA
 import {
   applyBoost,
   boostCost,
+  buyExtraLamp,
+  EASY_LAMP_COST,
+  EASY_TIER_COST,
+  easyTierCost,
   combatTier,
   deployFit,
   freshRunTier,
@@ -1269,7 +1274,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.399')
+assert.equal(APP_VERSION, '1.4.401')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -4415,9 +4420,10 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   )
   assert.match(defendAbilitySrc, /is-spark-dry/, '1.4.388 dry columns drop the live rail')
   assert.match(defendAbilitySrc, /disabled=\{spendDry\}/, '1.4.388 a dry column is not tappable')
+  assert.match(defendAbilitySrc, /'Need a spark'/, '1.4.388 the column still says Need a spark')
   assert.match(
     defendAbilitySrc,
-    /sparks < boostCost\(tier\) \? 'Need a spark' : easy \? 'Tap' : '↑ spark'/,
+    /easy\s*\?\s*'Tap'\s*:\s*'↑ spark'/,
     '1.4.388 Tap returns once a spark can be spent',
   )
   assert.match(defendSrc388, /sparks=\{runSparks\}/, '1.4.388 the rail reads this night’s sparks')
@@ -4580,7 +4586,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   const css391 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
   const placeSrc391 = readFileSync(new URL('../src/lib/lampPlace.ts', import.meta.url), 'utf8')
   assert.equal(LAMP_DRAG_START_PX, 10, '1.4.391 a short card press stays a tap')
-  assert.ok(LAMP_DRAG_LIFT_PX >= 24 && LAMP_DRAG_LIFT_PX <= 48, '1.4.391 the ghost sits above the finger')
+  assert.equal(LAMP_DRAG_LIFT_PX, 0, '1.4.400 a dragged lamp lands under the finger')
   assert.deepEqual(dragGhostClient(80, 240), { x: 80, y: 240 - LAMP_DRAG_LIFT_PX })
   assert.match(ability391, /onPointerDown/)
   assert.match(ability391, /LAMP_DRAG_START_PX/)
@@ -4724,6 +4730,87 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   )
 }
 
+// Night Watch 1.4.400: Easy upgrade prices and a paid lamp after Begin.
+{
+  const defendSrc396 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const card396 = readFileSync(new URL('../src/components/DefendTowerCard.tsx', import.meta.url), 'utf8')
+  const ability396 = readFileSync(new URL('../src/components/DefendAbilityBar.tsx', import.meta.url), 'utf8')
+  const board396 = readFileSync(new URL('../src/components/DefendNightBoard.tsx', import.meta.url), 'utf8')
+  assert.deepEqual(EASY_TIER_COST.slice(2), [3, 6, 10], '1.4.400 tier prices stay path-agnostic')
+  assert.equal(easyTierCost(1), 3, '1.4.400 I→II costs 3')
+  assert.equal(easyTierCost(2), 6, '1.4.400 II→III costs 6')
+  assert.equal(easyTierCost(3), 0, '1.4.400 a maxed lamp has nothing to buy yet')
+  assert.equal(EASY_TIER_COST[4], 10, '1.4.400 the next tier step is priced for the tree')
+  assert.equal(boostCost(1), 1, '1.4.400 Hard still spends one spark')
+  assert.equal(boostCost(2), 1, '1.4.400 Hard II still spends one spark')
+  assert.equal(EASY_LAMP_COST, 5, '1.4.400 an extra lamp costs 5')
+  const w1 = wavePackSize(0)
+  assert.equal(w1, 4, '1.4.400 wave 1 still pays 4 sparks')
+  const first = applyBoost('science', freshRunTier(), w1, true)
+  assert.equal(first.ok, true, '1.4.400 wave 1 can raise one lamp')
+  assert.equal(first.runTier.science, 2)
+  assert.equal(first.sparks, 1)
+  const second = applyBoost('reason', first.runTier, first.sparks, true)
+  assert.equal(second.ok, false, '1.4.400 wave 1 cannot raise both lamps')
+  const topped = applyBoost('science', first.runTier, first.sparks, true)
+  assert.equal(topped.ok, false, '1.4.400 wave 1 cannot buy III')
+  assert.equal(applyBoost('logic', { logic: 1 }, 1).ok, true, '1.4.400 Hard still buys II for one spark')
+  assert.equal(buyExtraLamp(4).ok, false)
+  assert.equal(buyExtraLamp(5).sparks, 0)
+  const income = [0, 1, 2, 3, 4].map((wave) => wavePackSize(wave))
+  assert.deepEqual(income, [4, 4, 5, 5, 8])
+  const bothMax = easyTierCost(1) * 2 + easyTierCost(2) * 2
+  assert.equal(bothMax, 18)
+  assert.ok(income[0] < bothMax, '1.4.400 two free lamps cannot both reach Max off wave 1')
+  const bank = income.reduce((sum, pay) => sum + pay, 0) - bothMax - EASY_LAMP_COST - easyTierCost(1)
+  assert.ok(bank < 20, '1.4.400 a normal spend does not bank 20 sparks')
+  assert.equal(bank, 0, '1.4.400 maxing two lamps, buying one, and raising it spends the night')
+  let sparks = 0
+  const tiers = [1, 1]
+  income.forEach((pay) => {
+    sparks += pay
+    let spent = false
+    const cheap = tiers
+      .map((tier, index) => ({ index, cost: easyTierCost(tier) }))
+      .filter((step) => step.cost > 0 && step.cost <= sparks)
+      .sort((a, b) => a.cost - b.cost)[0]
+    if (cheap) {
+      sparks -= cheap.cost
+      tiers[cheap.index] += 1
+      spent = true
+    } else if (tiers.length < 4 && sparks >= EASY_LAMP_COST) {
+      sparks -= EASY_LAMP_COST
+      tiers.push(1)
+      spent = true
+    }
+    assert.equal(spent, true, '1.4.400 every wave clear can spend')
+  })
+  assert.ok(sparks < 20, '1.4.400 the greedy night stays under 20 sparks')
+  assert.match(defendSrc396, /buyExtraLamp\(sparksRef\.current\)/, '1.4.400 a new lamp spends sparks')
+  assert.match(
+    defendSrc396,
+    /applyBoost\(id, runTierRef\.current, sparksRef\.current, easy\)/,
+    '1.4.400 Easy upgrades use the scaled price',
+  )
+  assert.match(defendSrc396, /placeArmRef/, '1.4.400 a paid plant is armed, not the old rings')
+  assert.match(ability396, /paidPlace && !placed/, '1.4.400 an unplanted card places instead of upgrading')
+  assert.match(ability396, /onBoost\(tool\.id\)/, '1.4.400 a planted card can still upgrade')
+  assert.match(card396, /easy \? easyTierCost\(tier\) : boostCost\(tier\)/, '1.4.400 the card shows the Easy price')
+  assert.match(board396, /clampGhostHintLeft/, '1.4.400 the reach note stays on screen')
+  assert.ok(clampGhostHintLeft(360, 375) + 96 <= 375 - 8, '1.4.400 Too far from the road clears the right edge')
+  assert.equal(clampGhostHintLeft(180, 375), 180, '1.4.400 a centered note stays put')
+  assert.match(defendSrc396, /finishPlace\(/, '1.4.400 drag and tap share one plant')
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.400'), '1.4.400 changelog row')
+  assert.match(latestChange('1.4.400').title, /spark/)
+  assert.match(latestChange('1.4.400').items.join('\n'), /3 sparks/)
+  assert.match(latestChange('1.4.400').items.join('\n'), /5 sparks/)
+  assert.doesNotMatch(
+    latestChange('1.4.400').items.join('\n'),
+    /Fixes #|Closes #|Resolves #|monkey|balloon/i,
+    '1.4.400 changelog avoids GitHub close keywords',
+  )
+}
+
 // Night Watch 1.4.392: reach cue, a longer level-I free lamp, and a plant pin.
 {
   const actors392 = readFileSync(new URL('../src/components/DefendNightActors.tsx', import.meta.url), 'utf8')
@@ -4736,7 +4823,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(FREE_LAMP_RANGE_BONUS, 18, '1.4.392 free lamps add 18 to every tier')
   assert.equal(abilityRange('love', 'empty', progress, tier), 96, '1.4.392 city seats stay at 96')
   assert.equal(96 + FREE_LAMP_RANGE_BONUS - LAMP_ROAD_OVERLAP, 90, '1.4.392 level I covers a 90 gap')
-  assert.equal(LAMP_DRAG_LIFT_PX, 36, '1.4.392 the drag lift stays')
+  assert.equal(LAMP_DRAG_LIFT_PX, 0, '1.4.400 the drag no longer lifts the lamp off the finger')
   assert.equal(LAMP_TOO_FAR, 'Too far from the road')
 
   function offsetPoint(t, dist, sign) {

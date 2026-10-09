@@ -11,12 +11,12 @@ const allowedHosts = ['localhost', '127.0.0.1', '.trycloudflare.com']
  * Dev server skips this so Vite HMR can run. No unsafe-eval.
  * style-src unsafe-inline covers React `style={{}}` attributes.
  * Google Fonts stay allowlisted until fonts are self-hosted.
+ * frame-ancestors is header-only. A meta tag ignores it and logs a console error.
  */
 export const APP_CSP = [
   "default-src 'self'",
   "base-uri 'self'",
   "object-src 'none'",
-  "frame-ancestors 'none'",
   "form-action 'self'",
   "script-src 'self'",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",

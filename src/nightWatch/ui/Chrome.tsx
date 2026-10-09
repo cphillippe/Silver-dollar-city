@@ -6,6 +6,7 @@ export function MoneyBalloon({
   label,
   gain = false,
   spend = false,
+  spent,
 }: {
   count: number
   label: string
@@ -13,6 +14,8 @@ export function MoneyBalloon({
   gain?: boolean
   /** Brief −1✦ when Upgrade spends a spark. */
   spend?: boolean
+  /** Sparks just spent. Omitted spends show −1✦. */
+  spent?: number
 }) {
   return (
     <span
@@ -20,7 +23,11 @@ export function MoneyBalloon({
       role="img"
       aria-label={`${label}: ${count}`}
     >
-      {spend ? <span className="nw-spark-spend">−1✦</span> : gain ? <span className="nw-spark-float">+spark</span> : null}
+      {spend ? (
+        <span className="nw-spark-spend">{spent != null && spent !== 1 ? `−${spent}✦` : '−1✦'}</span>
+      ) : gain ? (
+        <span className="nw-spark-float">+spark</span>
+      ) : null}
       <span className="nw-balloon-orb" aria-hidden>
         ★
       </span>
