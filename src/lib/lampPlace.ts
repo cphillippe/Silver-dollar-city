@@ -214,6 +214,31 @@ export function dragGhostClient(clientX: number, clientY: number): { x: number; 
   return { x: clientX, y: clientY - LAMP_DRAG_LIFT_PX }
 }
 
+/**
+ * Between rounds, picking a new lamp folds the clear panel.
+ * The map can take the plant, and the ring still shows.
+ */
+export function clearPanelFolded(boosting: boolean, armed: string | null | undefined): boolean {
+  return boosting && Boolean(armed)
+}
+
+/**
+ * Continue and Begin start the next round. A lamp card does not.
+ * `className` is the control that received the tap.
+ */
+export function roundStartKind(className: string): 'continue' | 'begin' | 'card' | null {
+  const names = className.split(/\s+/).filter(Boolean)
+  if (names.includes('defend-ability') || names.includes('defend-tower-card')) return 'card'
+  if (names.includes('defend-continue')) return 'continue'
+  if (names.includes('defend-go')) return 'begin'
+  return null
+}
+
+/** A card tap, a path pip, and a map tap leave the clear where it is. */
+export function startsNextRound(kind: ReturnType<typeof roundStartKind>): boolean {
+  return kind === 'continue' || kind === 'begin'
+}
+
 /** True when the fingertip is back on the tower cards. That drop cancels. */
 export function overTowerCards(clientX: number, clientY: number, doc: Document): boolean {
   const nodes = doc.querySelectorAll('.nw-rail .defend-abilities')
