@@ -174,6 +174,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const [upgradeAt, setUpgradeAt] = useState<CityPlotId | null>(null)
   const upgradeAtRef = useRef<CityPlotId | null>(null)
   const upgradeTapRef = useRef<{ id: CityPlotId; at: number }>({ id: 'porch', at: -1e9 })
+  /** Pointer is down on a path pip. Begin and Continue must not take that gesture. */
+  const armedPathBuy = useRef<{ plotId: CityPlotId; path: TreePath } | null>(null)
+  const pathBuyAt = useRef(0)
+  const pathBuyStamp = useRef(0)
+  const boostPathRef = useRef<(plotId: CityPlotId, path: TreePath, fromPip: boolean) => void>(() => {})
   const [upFlash, setUpFlash] = useState<CityPlotId | null>(null)
   const [levelBurst, setLevelBurst] = useState<{ plotId: CityPlotId; from: number; to: number } | null>(null)
   const [sparkSpend, setSparkSpend] = useState(false)
@@ -220,6 +225,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   plantsRef.current = plants
   const planted = useMemo(() => Object.keys(plants) as CityPlotId[], [plants])
   const [hearts, setHearts] = useState(DEFEND_HEARTS)
+  const [heartDrop, setHeartDrop] = useState<{ at: number; count: number } | null>(null)
   const [raiders, setRaiders] = useState<Raider[]>([])
   const [downed, setDowned] = useState(0)
   const [flash, setFlash] = useState<CityPlotId[]>([])
@@ -266,6 +272,21 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     if (plantedType && unlocked.includes(plantedType)) return plantedType
     return unlocked.includes(ability) ? ability : 'love'
   }
+
+  useEffect(() => {
+    const finish = () => {
+      const armed = armedPathBuy.current
+      if (!armed) return
+      armedPathBuy.current = null
+      boostPathRef.current(armed.plotId, armed.path, true)
+    }
+    window.addEventListener('pointerup', finish)
+    window.addEventListener('pointercancel', finish)
+    return () => {
+      window.removeEventListener('pointerup', finish)
+      window.removeEventListener('pointercancel', finish)
+    }
+  }, [])
 
   useEffect(() => {
     upgradeAtRef.current = null
@@ -351,7 +372,12 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     live.current.raiders = []
     live.current.spawned = 0
     live.current.downed = 0
-    live.current.hearts = DEFEND_HEARTS
+    // Easy keeps hearts across rounds. A new night (round 1) fills them again.
+    if (!easy || waveIndexRef.current === 0) {
+      live.current.hearts = DEFEND_HEARTS
+      setHearts(DEFEND_HEARTS)
+      setHeartDrop(null)
+    }
     live.current.cool = {}
     live.current.spawnNow = false
     live.current.freezeUntil = 0
@@ -361,7 +387,6 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     setToolLock(null)
     setRaiders([])
     setDowned(0)
-    setHearts(DEFEND_HEARTS)
     let last = performance.now()
     let spawnAt = 0
     let frame = 0
@@ -419,10 +444,18 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       if (gate.lostHearts > 0) {
         live.current.hearts = gate.hearts
         setHearts(gate.hearts)
+        setHeartDrop({ at: gate.hearts, count: gate.lostHearts })
         comboRef.current = 0
         setCombo(0)
         setLeakFlash(true)
-        window.setTimeout(() => setLeakFlash(false), 220)
+        window.setTimeout(() => setLeakFlash(false), 900)
+        const through = gate.lostHearts === 1 ? 'One got through!' : `${gate.lostHearts} got through!`
+        setPowerBanner(through)
+        window.clearTimeout(bannerTimer.current)
+        bannerTimer.current = window.setTimeout(() => setPowerBanner(null), 1600)
+        window.setTimeout(() => {
+          setHeartDrop((current) => (current && current.at === gate.hearts ? null : current))
+        }, 900)
         markMissRef.current(DEFEND_BRIEF_ID)
       }
       const unturnedLive = walking.filter((item) => !item.turned).length
@@ -489,10 +522,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         easy &&
         live.current.spawned >= tune.size &&
         alive.filter((item) => !item.turned).length === 0 &&
-        live.current.downed < tune.size
+        live.current.hearts > 0
       ) {
         live.current.playing = false
-        setPhase('lost')
+        setToolLock(null)
+        setPhase('boost')
         return
       }
       frame = requestAnimationFrame(tick)
@@ -685,6 +719,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   }
 
   function closeUpgrade(force = false) {
+    if (!force && armedPathBuy.current) return
     if (!force && performance.now() - upgradeTapRef.current.at < UPGRADE_GHOST_MS) return
     upgradeAtRef.current = null
     upgradeTapRef.current = { id: 'porch', at: -1e9 }
@@ -987,6 +1022,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     setRaiders([])
     setDowned(0)
     setHearts(DEFEND_HEARTS)
+    setHeartDrop(null)
     comboRef.current = 0
     setCombo(0)
     setShots([])
@@ -1108,9 +1144,26 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     boostTool(tool as WatchAbility, plotId)
   }
 
-  function boostSelectedPath(plotId: CityPlotId, path: TreePath) {
+  function armPathBuy(path: TreePath) {
+    const plotId = upgradeAtRef.current
+    if (!plotId) return
+    armedPathBuy.current = { plotId, path }
+    pathBuyAt.current = performance.now()
+  }
+
+  function roundChangeBlocked() {
+    if (armedPathBuy.current) return true
+    return performance.now() - pathBuyAt.current < 450
+  }
+
+  function boostSelectedPath(plotId: CityPlotId, path: TreePath, fromPip = false) {
     const now = performance.now()
-    if (
+    if (fromPip) {
+      if (now - pathBuyStamp.current < 350) return
+      pathBuyStamp.current = now
+      pathBuyAt.current = now
+      armedPathBuy.current = null
+    } else if (
       !upgradeSpendAllowed(
         upgradeAtRef.current,
         plotId,
@@ -1124,6 +1177,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     if (!tool || !unlocked.includes(tool as WatchAbility)) return
     boostPath(tool as WatchAbility, path, plotId)
   }
+  boostPathRef.current = boostSelectedPath
 
   function flashKit(note: string) {
     setToolLock(note)
@@ -1223,6 +1277,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
 
   function continueFromBoost() {
     if (won || phase !== 'boost') return
+    if (roundChangeBlocked()) return
     clearPlaceArm()
     setBoostNote(null)
     setLoreMeet(null)
@@ -1287,12 +1342,18 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       {phase === 'wave' ? (
         <span className="defend-wave">{roundLabel}</span>
       ) : null}
-      <span className={`defend-hearts${mendShield ? ' is-mend-shield' : ''}${mendOn ? ' is-mend-pop' : ''}`}>
-        {Array.from({ length: DEFEND_HEARTS }, (_, index) => (
-          <span key={index} className={index < hearts ? 'is-on' : ''}>
-            ♥
-          </span>
-        ))}
+      <span
+        className={`defend-hearts${mendShield ? ' is-mend-shield' : ''}${mendOn ? ' is-mend-pop' : ''}`}
+        data-hearts={hearts}
+      >
+        {Array.from({ length: DEFEND_HEARTS }, (_, index) => {
+          const dropped = heartDrop && index >= heartDrop.at && index < heartDrop.at + heartDrop.count
+          return (
+            <span key={index} className={`${index < hearts ? 'is-on' : ''}${dropped ? ' is-drop' : ''}`}>
+              ♥
+            </span>
+          )
+        })}
         {mendShield ? <span className="nw-mend-hold">Gate</span> : null}
         {powerBanner ? <span className="nw-power-chip">{powerBanner}</span> : null}
       </span>
@@ -1371,6 +1432,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
               ? `Reached round ${waveIndex + 1}. You missed. Tap the face.`
               : 'Porch flickered. Turn them again.'}
           </p>
+          {easy ? (
+            <p className="defend-hearts-left" data-hearts-left={hearts}>
+              {`Hearts left: ${hearts}`}
+            </p>
+          ) : null}
           <button type="button" className="btn primary" onClick={retry}>
             Try the night again
           </button>
@@ -1410,6 +1476,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
             className={`btn primary xl defend-go${awaitingLamp ? ' is-awaiting-plant' : ' is-after-plant'}`}
             onClick={() => {
               if (awaitingLamp || phase !== 'plant') return
+              if (roundChangeBlocked()) return
               setGhost(null)
               setPhase('wave')
             }}
@@ -1550,6 +1617,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
               boosting={boosting}
               onBoostTower={boostSelectedTool}
               onUpgradePath={boostSelectedPath}
+              onArmPathBuy={armPathBuy}
               upgradeAt={upgradeAt}
               onOpenUpgrade={openUpgrade}
               upFlashId={upFlash}
