@@ -59,10 +59,10 @@ export const parableHollow: Area = {
         {
           id: 'e',
           gem: 'star',
-          art: 'road5-likewise',
-          text: 'Jesus: “Go and do likewise.”',
-          shortCaption: 'Go and do\nlikewise',
-          role: 'Go',
+          art: 'road5-inn',
+          text: 'Care at the inn.',
+          shortCaption: 'Care at\nthe inn',
+          role: 'inn',
         },
       ],
       teachOnWrong:

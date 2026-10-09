@@ -11,7 +11,7 @@ import road1Lawyer from '../assets/story-strip/road1-lawyer.webp'
 import road2Robbers from '../assets/story-strip/road2-robbers.webp'
 import road3Temple from '../assets/story-strip/road3-temple.webp'
 import road4Samaritan from '../assets/story-strip/road4-samaritan.webp'
-import road5Likewise from '../assets/story-strip/road5-likewise.webp'
+import road5Inn from '../assets/story-strip/road5-inn.webp'
 
 /** RGBA cutout keys. A later art swap replaces the file and keeps the key. */
 export const SEQUENCE_ART: Record<string, string> = {
@@ -26,7 +26,7 @@ export const SEQUENCE_ART: Record<string, string> = {
   'road2-robbers': road2Robbers,
   'road3-temple': road3Temple,
   'road4-samaritan': road4Samaritan,
-  'road5-likewise': road5Likewise,
+  'road5-inn': road5Inn,
 }
 
 export interface SequenceBackdrop {
@@ -53,7 +53,7 @@ const CUTOUT_BACKDROP: Record<string, SequenceBackdrop> = {
   'road2-robbers': { sky: '#f6e2b8', horizon: '#fff6dd', ground: '#c4a06a' },
   'road3-temple': { sky: '#f6e2b8', horizon: '#fff6dd', ground: '#c4a06a' },
   'road4-samaritan': { sky: '#f6e2b8', horizon: '#fff6dd', ground: '#c4a06a' },
-  'road5-likewise': { sky: '#f6e2b8', horizon: '#fff6dd', ground: '#c4a06a' },
+  'road5-inn': { sky: '#f6e2b8', horizon: '#fff6dd', ground: '#c4a06a' },
 }
 
 /** Fallback only. ph-road items carry their own cutout keys. */
