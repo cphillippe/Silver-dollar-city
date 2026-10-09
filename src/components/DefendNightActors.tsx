@@ -24,12 +24,7 @@ import {
   type NightRaider as Raider,
   type NightShot as Shot,
 } from '../nightWatch'
-import {
-  WALKER_HEAD_SIZE,
-  WALKER_HEAD_VIEW,
-  WALKER_HEAD_X,
-  WALKER_PORTRAIT_PX,
-} from '../nightWatch/enemies/faces'
+import type { WalkerFaceId } from '../nightWatch/enemies/faces'
 import type { ProgressState, WalkerKind } from '../types'
 
 export interface EasyTapJuice {
@@ -39,7 +34,7 @@ export interface EasyTapJuice {
   top: number
   kind: WalkerKind
   /** Portrait on the walker that was tapped. Falls back to kind. */
-  face?: WalkerKind
+  face?: WalkerFaceId
   /** Last hit — juice lifts heavenward; otherwise squash only. */
   down?: boolean
 }
@@ -469,21 +464,22 @@ export function DefendNightActorsSvg({
                       ry={(raider.gait === 'tough' ? 6.2 : 4.6) * (PATH_WALKER_FACE_U / 36)}
                     />
                     {easy && !raider.turned ? (
-                      <svg
-                        className="defend-raider-face is-dark-face"
-                        x={-FACE_HALF}
-                        y={FACE_TOP}
-                        width={PATH_WALKER_FACE_U}
-                        height={PATH_WALKER_FACE_U}
-                        viewBox={WALKER_HEAD_VIEW}
-                        clipPath="url(#defend-face-clip)"
-                      >
+                      <g className="defend-raider-face is-dark-face">
+                        <circle
+                          className="defend-face-back"
+                          cx={0}
+                          cy={PATH_WALKER_FACE_DY}
+                          r={PATH_WALKER_FACE_U * 0.36}
+                        />
                         <image
                           href={nightEnemies.faceSrc(raider.face ?? raider.kind, true)}
-                          width={WALKER_PORTRAIT_PX}
-                          height={WALKER_PORTRAIT_PX}
+                          x={-FACE_HALF}
+                          y={FACE_TOP}
+                          width={PATH_WALKER_FACE_U}
+                          height={PATH_WALKER_FACE_U}
+                          clipPath="url(#defend-face-clip)"
                         />
-                      </svg>
+                      </g>
                     ) : (
                       <image
                         className="defend-raider-face"
@@ -738,16 +734,11 @@ export function DefendNightWalkerCue({
                       draggable={false}
                       aria-hidden
                       style={{
-                        position: 'absolute',
-                        width: (EASY_WALKER_FACE_PX * WALKER_PORTRAIT_PX) / WALKER_HEAD_SIZE,
-                        height: (EASY_WALKER_FACE_PX * WALKER_PORTRAIT_PX) / WALKER_HEAD_SIZE,
-                        left: (-WALKER_HEAD_X * EASY_WALKER_FACE_PX) / WALKER_HEAD_SIZE,
-                        top: 0,
+                        width: EASY_WALKER_FACE_PX,
+                        height: EASY_WALKER_FACE_PX,
                         margin: 0,
-                        minWidth: 0,
-                        minHeight: 0,
-                        borderRadius: 0,
                         boxShadow: 'none',
+                        background: 'transparent',
                       }}
                     />
                   </span>

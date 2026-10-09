@@ -113,7 +113,12 @@ import {
   walkerSpark,
 } from '../src/nightWatch/walkers.ts'
 import { paceEasyTree, scoreEasyRoad, scoreEasyTree } from '../src/nightWatch/roundScore.ts'
-import { pickWalkerFace, WALKER_FACE_POOL } from '../src/nightWatch/enemies/faces.ts'
+import {
+  pickWalkerFace,
+  WALKER_FACE_POOL,
+  WALKER_HEAD_VIEW,
+  WALKER_PORTRAIT_PX,
+} from '../src/nightWatch/enemies/faces.ts'
 import {
   applyPathStep,
   canTake,
@@ -1361,19 +1366,49 @@ assert.equal(APP_VERSION, '1.4.419')
 
 // Night Watch 1.4.419: on-screen walkers do not share a head. Kind and boss stats stay put.
 {
-  assert.equal(WALKER_FACE_POOL.length, 6, '1.4.419 six portraits already in the repo')
+  assert.deepEqual(
+    [...WALKER_FACE_POOL],
+    [
+      'skeptic',
+      'image-bearer',
+      'spiritual',
+      'pagan',
+      'physical',
+      'metaphysical',
+      'grandma-scarf',
+      'curly-youth',
+      'bald-merchant',
+      'braids-girl',
+      'fisher-cap',
+      'scholar-beard',
+    ],
+    '1.4.419 twelve walker portraits in pool order',
+  )
   assert.equal(new Set(WALKER_FACE_POOL).size, WALKER_FACE_POOL.length)
+  for (const id of WALKER_FACE_POOL) {
+    assert.ok(
+      existsSync(new URL(`../src/assets/walkers/walker-${id}.png`, import.meta.url)),
+      `1.4.419 portrait file walker-${id}.png`,
+    )
+  }
+  assert.equal(WALKER_HEAD_VIEW, `0 0 ${WALKER_PORTRAIT_PX} ${WALKER_PORTRAIT_PX}`)
+  assert.equal(WALKER_PORTRAIT_PX, 384)
   const first = pickWalkerFace(0, 0, [])
   assert.equal(first, 'skeptic')
   assert.equal(pickWalkerFace(0, 0, []), first, '1.4.419 the same spawn picks the same face')
   const live = []
-  for (let spawn = 0; spawn < 3; spawn++) {
+  for (let spawn = 0; spawn < 8; spawn++) {
     const face = pickWalkerFace(4, spawn, live)
     assert.equal(live.includes(face), false, '1.4.419 a live walker does not share a head')
     live.push(face)
   }
-  assert.equal(live.length, 3)
+  assert.equal(live.length, 8)
   assert.equal(pickWalkerFace(4, 1, [live[0]]), live[1], '1.4.419 3× sees the same head as 1×')
+  const again = []
+  for (let spawn = 0; spawn < 8; spawn++) {
+    again.push(pickWalkerFace(4, spawn, again))
+  }
+  assert.deepEqual(again, live, '1.4.419 1× and 3× walk the same heads')
   const cast = raidForWave(0, 0, 4, true)
   assert.equal(cast.kind, 'skeptic', '1.4.419 the climb kind stays the accuser')
   assert.equal(cast.id, 'accuser')
@@ -1386,9 +1421,16 @@ assert.equal(APP_VERSION, '1.4.419')
   assert.match(actors419, /defend-boss-crown/)
   assert.match(actors419, /defend-fast-rim/)
   assert.match(actors419, /defend-tough-bulk/)
-  assert.match(actors419, /viewBox=\{WALKER_HEAD_VIEW\}/)
+  assert.match(actors419, /defend-face-back/)
+  assert.doesNotMatch(actors419, /112 0 160 160/)
+  assert.doesNotMatch(actors419, /viewBox=\{WALKER_HEAD_VIEW\}/)
+  assert.match(
+    readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8'),
+    /\.defend-face-back/,
+  )
   assert.ok(CHANGELOG.some((note) => note.version === '1.4.419'), '1.4.419 changelog row')
   assert.match(latestChange('1.4.419').items.join('\n'), /blue rim/)
+  assert.match(latestChange('1.4.419').items.join('\n'), /twelve/)
   assert.doesNotMatch(
     latestChange('1.4.419').items.join('\n'),
     /Fixes #|Closes #|Resolves #/,
@@ -11750,7 +11792,7 @@ console.log('check-city: ok')
   )
   assert.match(
     enemies331,
-    /faceSrc: \(kind, easy\) =>\s*nightParts\.src\('face', kind\)/,
+    /faceSrc: \(id, easy\) =>\s*walkerFaceSrc\(id\) \?\?\s*nightParts\.src\('face', id\)/,
     '1.4.331 keeps kind portraits on the road',
   )
   assert.match(gradle331, /versionName "1\.4\.113"/, '1.4.331 Android versionName stays 1.4.113')
