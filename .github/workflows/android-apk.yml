@@ -8,12 +8,12 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
-  actions: write
+  contents: read
 
 concurrency:
   group: android-apk-${{ github.ref }}
-  cancel-in-progress: true
+  # A main publish must run to the end. Other refs can cancel.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   apk:
@@ -50,52 +50,22 @@ jobs:
       - name: Write Android SDK path
         run: node scripts/write-android-local-properties.mjs
 
-      - name: Choose signing
-        id: sign
-        env:
-          ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: |
-          set -euo pipefail
-          if [ -n "${ANDROID_KEYSTORE_B64}" ] && [ -n "${ANDROID_KEYSTORE_PASSWORD}" ] && [ -n "${ANDROID_KEY_ALIAS}" ] && [ -n "${ANDROID_KEY_PASSWORD}" ]; then
-            printf '%s' "${ANDROID_KEYSTORE_B64}" | base64 -d > "${RUNNER_TEMP}/release.keystore"
-            echo "ANDROID_KEYSTORE_PATH=${RUNNER_TEMP}/release.keystore" >> "${GITHUB_ENV}"
-            {
-              echo "ANDROID_KEYSTORE_PASSWORD<<EOF"
-              echo "${ANDROID_KEYSTORE_PASSWORD}"
-              echo "EOF"
-              echo "ANDROID_KEY_ALIAS<<EOF"
-              echo "${ANDROID_KEY_ALIAS}"
-              echo "EOF"
-              echo "ANDROID_KEY_PASSWORD<<EOF"
-              echo "${ANDROID_KEY_PASSWORD}"
-              echo "EOF"
-            } >> "${GITHUB_ENV}"
-            echo "mode=release" >> "${GITHUB_OUTPUT}"
-            echo "Release keystore secrets are present."
-          else
-            # Fresh key for this job's CI artifact. It is never uploaded to the latest release.
-            keytool -genkeypair -v \
-              -keystore "${RUNNER_TEMP}/ci-throwaway.keystore" \
-              -storepass ci-throwaway \
-              -alias ci-throwaway \
-              -keypass ci-throwaway \
-              -keyalg RSA -keysize 2048 -validity 1 \
-              -dname "CN=CI throwaway, OU=Silver City, O=CI, L=CI, ST=CI, C=US"
-            echo "ANDROID_KEYSTORE_PATH=${RUNNER_TEMP}/ci-throwaway.keystore" >> "${GITHUB_ENV}"
-            echo "ANDROID_KEYSTORE_PASSWORD=ci-throwaway" >> "${GITHUB_ENV}"
-            echo "ANDROID_KEY_ALIAS=ci-throwaway" >> "${GITHUB_ENV}"
-            echo "ANDROID_KEY_PASSWORD=ci-throwaway" >> "${GITHUB_ENV}"
-            echo "mode=ci" >> "${GITHUB_OUTPUT}"
-            echo "Release secrets are absent. This APK is signed with a throwaway key and must not be published."
-          fi
-
-      - name: Assemble release APK
+      - name: Assemble a CI APK
         working-directory: android
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/ci-throwaway.keystore
+          ANDROID_KEYSTORE_PASSWORD: ci-throwaway
+          ANDROID_KEY_ALIAS: ci-throwaway
+          ANDROID_KEY_PASSWORD: ci-throwaway
         run: |
           set -euo pipefail
+          keytool -genkeypair -v \
+            -keystore "${ANDROID_KEYSTORE_PATH}" \
+            -storepass "${ANDROID_KEYSTORE_PASSWORD}" \
+            -alias "${ANDROID_KEY_ALIAS}" \
+            -keypass "${ANDROID_KEY_PASSWORD}" \
+            -keyalg RSA -keysize 2048 -validity 1 \
+            -dname "CN=CI throwaway, OU=Silver City, O=CI, L=CI, ST=CI, C=US"
           chmod +x ./gradlew
           ./gradlew assembleRelease --no-daemon
           src="app/build/outputs/apk/release/app-release.apk"
@@ -108,36 +78,89 @@ jobs:
           path: silver-city.apk
           if-no-files-found: error
 
-      - name: Confirm release secrets before publish
-        id: publish_gate
-        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+  publish:
+    needs: apk
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Install Android SDK packages
+        run: |
+          set -euo pipefail
+          echo "ANDROID_HOME=/usr/local/lib/android/sdk" >> "${GITHUB_ENV}"
+          echo "ANDROID_SDK_ROOT=/usr/local/lib/android/sdk" >> "${GITHUB_ENV}"
+          export ANDROID_HOME=/usr/local/lib/android/sdk
+          sdkmanager="$(find "${ANDROID_HOME}/cmdline-tools" -type f -name sdkmanager -print -quit)"
+          test -n "${sdkmanager}"
+          yes | "${sdkmanager}" --licenses >/tmp/sdk-licenses.txt || true
+          "${sdkmanager}" --install "platforms;android-36" "build-tools;35.0.0"
+
+      - run: npm ci
+
+      - name: Build web bundle and sync Android
+        run: npm run android:sync
+
+      - name: Write Android SDK path
+        run: node scripts/write-android-local-properties.mjs
+
+      - name: Assemble the release APK
+        working-directory: android
         env:
-          SIGN_MODE: ${{ steps.sign.outputs.mode }}
           ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/release.keystore
         run: |
           set -euo pipefail
-          if [ "${SIGN_MODE}" != "release" ] || [ -z "${ANDROID_KEYSTORE_B64}" ] || [ -z "${ANDROID_KEYSTORE_PASSWORD}" ] || [ -z "${ANDROID_KEY_ALIAS}" ] || [ -z "${ANDROID_KEY_PASSWORD}" ]; then
-            echo "Refusing to publish. The latest release accepts only an APK signed with the four repo secrets. No fallback key is uploaded."
+          if [ -z "${ANDROID_KEYSTORE_B64}" ] || [ -z "${ANDROID_KEYSTORE_PASSWORD}" ] || [ -z "${ANDROID_KEY_ALIAS}" ] || [ -z "${ANDROID_KEY_PASSWORD}" ]; then
+            echo "Refusing to publish. The latest release accepts only an APK signed with the four release-environment secrets."
             exit 1
           fi
-          code=$(node -e "process.stdout.write(String(JSON.parse(require('fs').readFileSync('public/shell.json','utf8')).versionCode))")
+          printf '%s' "${ANDROID_KEYSTORE_B64}" | base64 -d > "${ANDROID_KEYSTORE_PATH}"
+          test -s "${ANDROID_KEYSTORE_PATH}"
+          chmod +x ./gradlew
+          ./gradlew assembleRelease --no-daemon
+          src="app/build/outputs/apk/release/app-release.apk"
+          test -f "${src}"
+          cp "${src}" "${GITHUB_WORKSPACE}/silver-city.apk"
+          code=$(node -e "process.stdout.write(String(JSON.parse(require('fs').readFileSync('${GITHUB_WORKSPACE}/public/shell.json','utf8')).versionCode))")
           {
-            echo "Signing: release (Actions secrets)."
+            echo "Signing: release."
             echo
             echo "Shell versionCode: ${code}"
             echo
             echo "Web content follows GitHub Pages. Reinstall when the app shows Update available."
             echo
             echo "Download: https://github.com/cphillippe/Silver-dollar-city/releases/download/latest/silver-city.apk"
-          } > release-notes.md
-          echo "ok=true" >> "${GITHUB_OUTPUT}"
+          } > "${GITHUB_WORKSPACE}/release-notes.md"
+
+      - name: Point the latest tag at this commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release delete latest --yes --cleanup-tag || true
+          git push origin :refs/tags/latest || true
+          git tag latest "${GITHUB_SHA}"
+          git push origin refs/tags/latest
 
       - name: Publish rolling latest release
-        if: steps.publish_gate.outputs.ok == 'true'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
         with:
           tag_name: latest
           target_commitish: ${{ github.sha }}

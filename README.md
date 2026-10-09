@@ -84,7 +84,7 @@ Web-only ships leave `versionCode` alone.
 
 **Release signing**
 
-The `latest` release is signed only when all four Actions secrets exist. No keystore belongs in the repo. A keystore that was pushed on this branch is burned. Do not reuse it.
+The `latest` release is signed only from the protected Actions environment named `release`. Limit that environment to the `main` branch. Put these four secrets on that environment, not on the repository:
 
 | Secret | Value |
 | --- | --- |
@@ -93,7 +93,7 @@ The `latest` release is signed only when all four Actions secrets exist. No keys
 | `ANDROID_KEY_ALIAS` | Key alias |
 | `ANDROID_KEY_PASSWORD` | Key password |
 
-Generate a new keystore once on your machine. Keep the file private. Pick the passwords and store them only in the secrets.
+No keystore belongs in the repo. A keystore that was pushed on this branch is burned. Do not reuse it. Generate a new one on your machine, keep the file private, and store the passwords only in the `release` environment.
 
 ```bash
 keytool -genkeypair -v \
@@ -105,7 +105,7 @@ base64 -w 0 silver-city-release.keystore
 
 Paste the base64 output into `ANDROID_KEYSTORE_B64`.
 
-Pull requests still build an APK so CI can show the file was produced. That copy is signed with a key created inside the job and discarded. It is an Actions artifact only. If any of the four secrets is missing on `main`, the publish step fails and nothing is uploaded to the `latest` release.
+Every pull request, and every run that is not a push or dispatch on `main`, builds an APK with a key created inside that job and discarded. That file is the Actions artifact. The release-signed APK is uploaded only to the `latest` GitHub Release. If any of the four secrets is missing, the publish job fails and the release is left as it was.
 
 ## Android debug APK
 

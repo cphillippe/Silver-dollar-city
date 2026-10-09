@@ -47,7 +47,7 @@ public class MainActivity extends BridgeActivity {
         WebView webView = bridge.getWebView();
         stripCapacitorBridges(webView);
         webView.addJavascriptInterface(new ShellBridge(readVersionCode()), "SilverCityShell");
-        webView.setWebViewClient(new PagesOnlyClient(bridge));
+        bridge.setWebViewClient(new PagesOnlyClient(bridge));
     }
 
     /**
