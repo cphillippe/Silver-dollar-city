@@ -30,6 +30,7 @@ export const parableHollow: Area = {
           art: 'road1-lawyer',
           text: 'A lawyer asks, “Who is my neighbor?”',
           shortCaption: 'Lawyer\nasks',
+          winCaption: 'Who is my\nneighbor?',
           role: 'lawyer',
         },
         {
@@ -38,6 +39,7 @@ export const parableHollow: Area = {
           art: 'road2-robbers',
           text: 'Robbers leave a man half dead.',
           shortCaption: 'Robbers\nhurt him',
+          winCaption: 'Left half\ndead.',
           role: 'Robbers',
         },
         {
@@ -46,6 +48,7 @@ export const parableHollow: Area = {
           art: 'road3-temple',
           text: 'Two temple men pass by.',
           shortCaption: 'Temple\nmen pass',
+          winCaption: 'Priest\npasses by.',
           role: 'temple',
         },
         {
@@ -54,6 +57,7 @@ export const parableHollow: Area = {
           art: 'road4-samaritan',
           text: 'A Samaritan has compassion and helps.',
           shortCaption: 'Samaritan\nhelps',
+          winCaption: 'Shows\nmercy.',
           role: 'Samaritan',
         },
         {
@@ -62,6 +66,7 @@ export const parableHollow: Area = {
           art: 'road5-inn',
           text: 'Care at the inn.',
           shortCaption: 'Care at\nthe inn',
+          winCaption: 'Care at\nthe inn.',
           role: 'inn',
         },
       ],
