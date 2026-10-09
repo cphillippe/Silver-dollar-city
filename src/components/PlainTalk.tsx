@@ -1,5 +1,5 @@
 import { plainFor } from '../content/plain'
-import { easyFacingLine, easyMainIdea, isEasy } from '../lib/easy'
+import { easyFacingLine, easyMainIdea, easyPlainWord, isEasy } from '../lib/easy'
 import { useProgress } from '../store/progress'
 
 export function PlainTalk({
@@ -13,13 +13,14 @@ export function PlainTalk({
   if (!isEasy(progress)) return null
   const plain = plainFor(id)
   if (!plain) return null
+  const word = plain.word ? easyPlainWord(id, plain.word.term, plain.word.sense) : undefined
   return (
     <aside className="plain-talk" aria-label="In plain words">
       <p className="eyebrow">In plain words</p>
       <p className="plain-gloss">{easyFacingLine(id, plain.gloss)}</p>
-      {plain.word ? (
+      {word ? (
         <p className="plain-word">
-          <strong>{plain.word.term}</strong> — {easyMainIdea(plain.word.sense)}
+          <strong>{word.term}</strong> — {easyMainIdea(word.sense)}
         </p>
       ) : null}
       {teach ? <p className="teach-reason">{plain.teach}</p> : null}
