@@ -188,7 +188,7 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
       <h2 className="strip-lead">{status === 'ok' ? 'Great job!' : lead}</h2>
       {verse ? (
         <p className="strip-kicker">
-          {challenge.title} · {verse.ref}
+          {challenge.title} · {easy && verse.easyHeader ? verse.easyHeader : verse.ref}
         </p>
       ) : null}
 
@@ -256,8 +256,9 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
           {verse && verseOn ? (
             <figure className="strip-verse">
               <figcaption>{verse.kicker}</figcaption>
+              {easy && verse.easyLead ? <p className="strip-verse-lead">{verse.easyLead}</p> : null}
               <blockquote>“{easy && verse.easyText ? verse.easyText : verse.text}”</blockquote>
-              <cite>{verse.ref}</cite>
+              <cite>{easy && verse.easyRef ? verse.easyRef : verse.ref}</cite>
             </figure>
           ) : null}
         </>

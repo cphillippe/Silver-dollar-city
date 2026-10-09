@@ -522,6 +522,13 @@ html[data-easy='on'] .play.is-story-strip.is-win[data-line='ph-road'] .strip-ver
   line-height: 1.1;
 }
 
+html[data-easy='on'] .play.is-story-strip.is-win[data-line='ph-road'] .strip-verse-lead {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.1;
+}
+
 html[data-easy='on'] .play.is-story-strip.is-win[data-line='ph-road'] .strip-verse blockquote {
   margin: 1px 0;
   font-size: 13px;

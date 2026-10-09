@@ -12,8 +12,8 @@ export const CHANGELOG: ChangeNote[] = [
     title: 'Story strip faces stay apart',
     when: '2026-10-09',
     items: [
-      'On Easy, the small Samaritan and creed pictures name Jesus and the priest. The crop sits on Jesus’s hair and on the priest’s headpiece, so the two robes do not read as the same man.',
-      'The Good Samaritan win lines sit in a shorter band, and the Luke line under the pictures is shorter too. The meaning stays: the one who shows mercy is the neighbor.',
+      'On Easy, the small Samaritan and creed pictures name Jesus and the priest. The crop and the name sit on that person: Jesus’ hair, or the priest’s headpiece.',
+      'The Good Samaritan win lines sit in a shorter band. Under the pictures, the neighbor line is plain, and Jesus’ words are only “Go and do likewise.”',
     ],
   },
   {
