@@ -735,6 +735,157 @@ html[data-easy='on'] .play.is-story-strip.is-win[data-line='ph-road'] .strip-ver
   }
 }
 
+/* Tall Easy plays only. 375×667 keeps the fixed strip above — that size already fills.
+   Slots and tray cards grow with the screen but stay portrait (2:3 art). Extra
+   space is centered, not a hole between the tray and Peek/Shuffle. */
+@media (min-height: 800px) {
+  html[data-easy='on'] .play.is-story-strip:not(.is-win) {
+    justify-content: center;
+    container-type: size;
+  }
+
+  html[data-easy='on'] .play.is-story-strip:not(.is-win) .strip-board {
+    flex: 0 0 auto;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    margin-inline: auto;
+  }
+
+  /* One row of portrait slots: board is n × (2:3). */
+  html[data-easy='on'] .play.is-story-strip:not(.is-win) .strip-board[data-n='3'] {
+    aspect-ratio: 2 / 1;
+    width: min(100%, calc(100cqh - 160px));
+  }
+
+  html[data-easy='on'] .play.is-story-strip:not(.is-win) .strip-board[data-n='4'] {
+    aspect-ratio: 8 / 3;
+  }
+
+  html[data-easy='on'] .play.is-story-strip:not(.is-win) .strip-board[data-n='5'] {
+    aspect-ratio: 10 / 3;
+  }
+
+  html[data-easy='on'] .play.is-story-strip:not(.is-win) .strip-tray[data-count='1'],
+  html[data-easy='on'] .play.is-story-strip:not(.is-win) .strip-tray[data-count='2'],
+  html[data-easy='on'] .play.is-story-strip:not(.is-win) .strip-tray[data-count='3'] {
+    flex: 0 0 auto;
+    align-items: flex-start;
+    justify-content: center;
+    width: min(100%, calc(100cqh - 160px));
+    height: auto;
+    margin-inline: auto;
+  }
+
+  html[data-easy='on'] .play.is-story-strip:not(.is-win) .strip-tray[data-count='1'] .strip-face,
+  html[data-easy='on'] .play.is-story-strip:not(.is-win) .strip-tray[data-count='2'] .strip-face,
+  html[data-easy='on'] .play.is-story-strip:not(.is-win) .strip-tray[data-count='3'] .strip-face {
+    max-width: none;
+    min-width: 0;
+    width: calc((100% - 16px) / var(--tray-n, 3));
+    height: auto;
+    aspect-ratio: 2 / 3;
+    align-self: flex-start;
+  }
+
+  html[data-easy='on'] .play.is-story-strip:not(.is-win) .strip-tray[data-count='1'] {
+    --tray-n: 1;
+  }
+
+  html[data-easy='on'] .play.is-story-strip:not(.is-win) .strip-tray[data-count='2'] {
+    --tray-n: 2;
+  }
+
+  html[data-easy='on'] .play.is-story-strip:not(.is-win) .strip-tray[data-count='3'] {
+    --tray-n: 3;
+  }
+
+  /* 4- and 5-up trays already fill the width. Let them take the leftover height
+     so Peek/Shuffle stay on the cards, while the slots keep the portrait cap. */
+  html[data-easy='on'] .play.is-story-strip:not(.is-win) .strip-tray[data-count='4'],
+  html[data-easy='on'] .play.is-story-strip:not(.is-win) .strip-tray[data-count='5'],
+  html[data-easy='on'] .play.is-story-strip:not(.is-win) .strip-tray[data-count='6'] {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  /* Win: portrait strip, then the follow-up. The block is centered in the
+     viewport so leftover space is split instead of a band under the chips.
+     Lock In's flex fill must not stack or stretch that quiz on this page. */
+  html[data-easy='on'] .app.is-play .app-body:has(.play.is-story-strip.is-win) {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  html[data-easy='on'] .daily-page.is-after:has(.play.is-story-strip),
+  html[data-easy='on'] .challenge-page.is-after:has(.play.is-story-strip) {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    overflow: hidden;
+    justify-content: center;
+  }
+
+  html[data-easy='on'] .daily-page.is-after:has(.play.is-story-strip) .play.is-story-strip.is-win,
+  html[data-easy='on'] .challenge-page.is-after:has(.play.is-story-strip) .play.is-story-strip.is-win {
+    flex: 0 0 auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  html[data-easy='on'] .is-after:has(.play.is-story-strip) .after-win,
+  html[data-easy='on'] .is-after:has(.play.is-story-strip) .rehearse-anchor,
+  html[data-easy='on'] .is-after:has(.play.is-story-strip) .recall-gate.is-easy-hold,
+  html[data-easy='on'] .is-after:has(.play.is-story-strip) .recall-gate.is-easy-hold:has(.why-blast),
+  html[data-easy='on'] .is-after:has(.play.is-story-strip) .recall-gate.is-easy-hold .why-blast,
+  html[data-easy='on'] .is-after:has(.play.is-story-strip) .recall-gate.is-easy-hold .why-blast:not(.is-miss-teach):not(.is-win) {
+    flex: 0 0 auto;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+  }
+
+  html[data-easy='on'] .is-after:has(.play.is-story-strip) .recall-gate.is-easy-hold .why-blast:not(.is-miss-teach):not(.is-win) .why-arena,
+  html[data-easy='on'] .is-after:has(.play.is-story-strip) .why-blast .why-arena {
+    display: grid;
+    flex: 0 0 auto;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    grid-template-rows: auto auto auto;
+    align-content: start;
+    justify-content: stretch;
+  }
+
+  html[data-easy='on'] .play.is-story-strip.is-win .strip-board {
+    flex: 0 0 auto;
+    width: 100%;
+    height: auto;
+    margin-inline: auto;
+  }
+
+  html[data-easy='on'] .play.is-story-strip.is-win .strip-board[data-n='3'] {
+    aspect-ratio: 2 / 1;
+    min-height: 164px;
+    max-height: calc(100dvh - 620px);
+  }
+
+  html[data-easy='on'] .play.is-story-strip.is-win .strip-board[data-n='4'] {
+    aspect-ratio: 8 / 3;
+    min-height: 158px;
+    max-height: calc(100dvh - 640px);
+  }
+
+  html[data-easy='on'] .play.is-story-strip.is-win .strip-board[data-n='5'] {
+    aspect-ratio: 10 / 3;
+    min-height: 176px;
+    max-height: calc(100dvh - 640px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .strip-face.is-glow,
   .strip-face.is-glow::before,
