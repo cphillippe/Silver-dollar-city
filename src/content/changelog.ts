@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.420',
+    title: 'Come and rest fills the phone',
+    when: '2026-10-09',
+    items: [
+      'Come and rest, the three-picture story, uses a tall portrait. The pictures grow into the height of the phone, Peek and Shuffle stay under the cards, and Home stays on the screen when the story is set.',
+      'The four-picture and five-picture stories stay the same size.',
+    ],
+  },
+  {
     version: '1.4.419',
     title: 'Night Watch walkers keep their own faces',
     when: '2026-10-09',
