@@ -1,5 +1,5 @@
 import type { CityPlotId } from '../lib/city'
-import { lampRoadNote } from '../lib/lampPlace'
+import { clampGhostHintLeft, lampRoadNote } from '../lib/lampPlace'
 import { WATCH_ABILITY_LABEL } from '../lib/defend'
 import { boardFill, boardFillPoint, boardPoint as mapBoardPoint, boardView, nightTowers } from '../nightWatch'
 import type { DefendNightSkyProps } from './DefendNightSky'
@@ -120,6 +120,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
           onClose={onCloseUpgrade as () => void}
           levelBurst={levelBurst}
           roadNote={roadNote}
+          easy={easy}
         />
       ) : null}
       {ghost && !ghost.blocked && ghost.note && boardBox && boardBox.w > 0 ? (
@@ -127,7 +128,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
           className="defend-ghost-hint"
           data-road-note={ghost.note}
           style={{
-            left: place(boardBox, ghost.at).left,
+            left: clampGhostHintLeft(place(boardBox, ghost.at).left, boardBox.w),
             top: place(boardBox, { x: ghost.at.x, y: ghost.at.y - ghost.range }).top,
           }}
         >
