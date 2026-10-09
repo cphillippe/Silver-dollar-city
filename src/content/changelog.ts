@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.406',
+    title: 'Night Watch opens the Far Hills',
+    when: '2026-10-09',
+    items: [
+      'When Easy Night Watch holds through round 25, a new place is unlocked. The Far Hills show as a coming-soon card, and Home takes you back. Hard nights are unchanged.',
+      'After that night, Home marks Night Watch with a small Far Hills badge.',
+    ],
+  },
+  {
     version: '1.4.405',
     title: 'Night Watch lamps grow on two paths',
     when: '2026-10-09',

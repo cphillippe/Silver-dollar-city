@@ -203,7 +203,10 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
             </li>
           </ol>
           <section className="night-watch easy-night-watch" aria-label="Night Watch">
-            <p className="eyebrow">Night Watch</p>
+            <p className="eyebrow">
+              Night Watch
+              {progress.defense.farHills ? <span className="nw-area-badge">Far Hills</span> : null}
+            </p>
             <p className="quiet">{EASY.nightLead}</p>
             <button
               type="button"
