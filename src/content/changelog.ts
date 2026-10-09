@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.418',
+    title: 'Night Watch lamp lands on the finger',
+    when: '2026-10-09',
+    items: [
+      'A dragged lamp lands on the fingertip. The ghost and the planted lamp sit in the same place.',
+      'Too far from the road uses the same reach as a shot. A later step is named only when that step is the first one that hits the road. The note stays on the screen at phone and tablet width.',
+      'Between waves, tapping a planted lamp card opens its paths. The buy button spends the sparks, and one tap on it still buys.',
+    ],
+  },
+  {
     version: '1.4.417',
     title: 'Night Watch Easy boss rounds',
     when: '2026-10-09',
