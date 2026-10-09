@@ -6,6 +6,7 @@ import { NIGHT_ENEMY_ROLE } from '../nightWatch/enemies/hp.ts'
 import type { ProgressState, WalkerKind } from '../types.ts'
 import { CITY_PLOTS, plotStage, type CityPlotId, type CityStage } from './city.ts'
 import { EASY_ROUNDS, easyRound } from '../nightWatch/rounds.ts'
+import { easyBossRound } from '../nightWatch/walkers.ts'
 import { prefersReducedMotion } from './juice.ts'
 import { combatTier, deployFit, toolTier, unlockedWatchTools, watchTool, WATCH_TOOLS } from './watchTools.ts'
 
@@ -171,7 +172,7 @@ export function waveCombat(waveIndex: number, easy: boolean): WaveCombat {
   if (easy) {
     const round = easyRound(waveIndex)
     return {
-      size: round.count,
+      size: round.count + (easyBossRound(waveIndex) ? 1 : 0),
       speedScale: round.speed,
       spawnScale: round.spawn,
       hpBonus: round.hp,

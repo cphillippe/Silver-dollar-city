@@ -102,6 +102,10 @@ import {
   TOUGH_HP_BONUS,
   TOUGH_PACE,
   TOUGH_SPARK,
+  BOSS_PACE,
+  easyBossHp,
+  easyBossRound,
+  easyLatePush,
   gaitPlan,
   roundSparkPay,
   walkerHp,
@@ -1346,7 +1350,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.416')
+assert.equal(APP_VERSION, '1.4.417')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -4897,7 +4901,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
       [1.35, 0, 0.95],
       [1.8, 1, 0.9],
       [2.6, 2, 0.85],
-      [6.4, 6, 0.66],
+      [6.4, 6, 0.68],
       [6.4, 8, 0.72],
     ],
     '1.4.412 round 5 walks at the round 6 pace with a thicker bar',
@@ -5235,7 +5239,8 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     hearts = round.hearts
   }
   const fifth408 = paceEasyTree(4, spent408.rows[3].lamps, hearts, 3, 0.7, 1 + 4 * 17)
-  assert.equal(fifth408.result, 'lost', '1.4.413 flat taps: this two-lamp clumsy spender loses round 5')
+  assert.equal(fifth408.result, 'clear', '1.4.417 the wider round 5 gap lets this two-lamp spender through')
+  assert.equal(fifth408.hearts, 1, '1.4.417 that spender still spends a heart on round 5')
   assert.ok(CHANGELOG.some((note) => note.version === '1.4.408'), '1.4.408 changelog row')
   assert.match(latestChange('1.4.408').title, /lamp/i)
   assert.doesNotMatch(latestChange('1.4.408').items.join('\n'), /Fixes #|Closes #|Resolves #/)
@@ -5286,7 +5291,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(easyClearHeart(0), 0)
   assert.deepEqual(
     EASY_ROUNDS[4],
-    { count: 7, speed: 6.4, hp: 6, spawn: 0.66, fast: 2, tough: 3 },
+    { count: 7, speed: 6.4, hp: 6, spawn: 0.68, fast: 2, tough: 3 },
     '1.4.412 round 5 is thicker so bend lamps still lose it with no taps',
   )
   assert.deepEqual(
@@ -5357,8 +5362,8 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   )
   assert.equal(
     spender.filter((run) => run.furthest >= 12).length,
-    4,
-    '1.4.413 a clumsy two-lamp spender reaches round 12 on four seeds',
+    6,
+    '1.4.417 a clumsy two-lamp spender reaches round 12 on six seeds',
   )
   assert.ok(CHANGELOG.some((note) => note.version === '1.4.410'), '1.4.410 changelog row')
   assert.match(latestChange('1.4.410').title, /R5 tap value/i)
@@ -5409,7 +5414,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(css411, /#7ec8ff/)
   const screen411 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
   assert.match(screen411, /walkerHp\(/)
-  assert.match(screen411, /easy \? gaitForSlot\(easyRound\(wave\), id\) : undefined/)
+  assert.match(screen411, /const gait = easy && !boss \? gaitForSlot\(round, id\) : undefined/)
   const zero411 = { far: 0, strong: 0 }
   const spent411 = spendTreeNight(EASY_ROUNDS.map((round) => roundSparkPay(round)), EASY_LAMP_COST)
   function night411(pathsFor, tapEvery, hit, off, base) {
@@ -5647,6 +5652,149 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(latestChange('1.4.415').title, /clear/i)
   assert.doesNotMatch(latestChange('1.4.415').items.join('\n'), /Fixes #|Closes #|Resolves #/)
   assert.match(latestChange('1.4.414').title, /Story strip/i)
+}
+
+// Night Watch 1.4.417: a boss on every fifth Easy round. Hard does not spawn one.
+{
+  const screen417 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const actors417 = readFileSync(new URL('../src/components/DefendNightActors.tsx', import.meta.url), 'utf8')
+  const css417 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const walkers417 = readFileSync(new URL('../src/nightWatch/walkers.ts', import.meta.url), 'utf8')
+  assert.equal(BOSS_PACE, 0.7, '1.4.417 the boss walks slower than a plain walker')
+  assert.equal(EASY_GLOW_TAP_DAMAGE, 1, '1.4.417 a glowing tap is still one flat hit')
+  assert.deepEqual(TREE_STEP_COST, [3, 6, 12], '1.4.417 the lamp tree does not grow a new tier')
+  for (const index of [4, 9, 14, 19, 24]) {
+    assert.equal(easyBossRound(index), true, `1.4.417 round ${index + 1} is a boss round`)
+    assert.equal(waveCombat(index, true).size, EASY_ROUNDS[index].count + 1)
+  }
+  for (const index of [0, 3, 5, 12, 13, 25]) {
+    assert.equal(easyBossRound(index), false)
+    if (index < EASY_ROUNDS.length) assert.equal(waveCombat(index, true).size, EASY_ROUNDS[index].count)
+  }
+  assert.equal(easyBossHp(4), 20, '1.4.417 round 5 boss stays soft')
+  assert.equal(easyBossHp(9), 44)
+  assert.equal(easyBossHp(14), 200, '1.4.417 round 15 boss is thick')
+  assert.equal(easyBossHp(19), 260, '1.4.417 round 20 boss is thick')
+  assert.equal(easyBossHp(24), 320)
+  assert.equal(easyLatePush(11), 0, '1.4.417 the push starts at round 13')
+  assert.equal(easyLatePush(12), 12)
+  assert.equal(easyLatePush(13), 12)
+  assert.equal(easyLatePush(14), 18)
+  assert.equal(easyLatePush(15), 10)
+  assert.equal(easyLatePush(18), 18)
+  assert.equal(easyLatePush(19), 12)
+  assert.equal(easyLatePush(20), 20)
+  assert.equal(waveCombat(4, false).size, wavePackSize(4), '1.4.417 Hard wave size stays flat')
+  assert.equal(waveCombat(4, false).hpBonus, 0)
+  assert.match(walkers417, /export type WalkerGait = 'plain' \| 'fast' \| 'tough'/)
+  assert.doesNotMatch(walkers417, /shielded/i)
+  assert.match(screen417, /const boss = easy && easyBossRound\(wave\) && id === round\.count/)
+  assert.match(screen417, /setPowerBanner\('Boss!'\)/)
+  assert.match(screen417, /setTimeout\(\(\) => setPowerBanner\(null\), 1800\)/)
+  assert.match(screen417, /item\.boss \? BOSS_PACE : walkerPace/)
+  assert.match(screen417, /powerBanner === 'Boss!' \? ' is-boss'/)
+  assert.match(actors417, /data-boss=\{raider\.boss \? 'yes' : undefined\}/)
+  assert.match(actors417, /className="defend-boss-mantle"/)
+  assert.match(actors417, /className="defend-boss-crown"/)
+  assert.doesNotMatch(actors417, /Boss!|BOSS/, '1.4.417 the walker itself has no boss label')
+  assert.match(actors417, /data-cue-gait=\{tapTarget\.boss \? 'boss'/)
+  assert.match(css417, /\.defend-boss-mantle \{[^}]*fill:\s*#9a1838/)
+  assert.match(css417, /\.defend-boss-crown \{[^}]*fill:\s*#ffcc33/)
+  assert.match(css417, /\.defend-raider\.is-boss \.defend-raider-body \{[^}]*transform:\s*scale\(1\.72\)/)
+  assert.match(css417, /\.defend-raider\.is-boss \.defend-hp-fill \{[^}]*fill:\s*#ff5a7a/)
+  assert.match(css417, /\.nw-power-banner\.is-boss \{[^}]*font-size:\s*2\.6rem/)
+  assert.match(css417, /\.walker-cue-ring \{[^}]*stroke:\s*#ffcc33/)
+  const zero417 = { far: 0, strong: 0 }
+  const fourI = [zero417, zero417, zero417, zero417]
+  const oneII = [{ far: 0, strong: 2 }, zero417, zero417, zero417]
+  const spent417 = spendTreeNight(EASY_ROUNDS.map((round) => roundSparkPay(round)), EASY_LAMP_COST)
+  const seeds417 = Array.from({ length: 8 }, (_, seed) => 1 + seed * 97)
+  function night417(pathsFor, tapEvery, through, pace = 1, base = 1) {
+    let hearts = 3
+    const rows = []
+    for (let index = 0; index < through; index += 1) {
+      const heartsIn = hearts
+      const round = paceEasyTree(index, pathsFor(index), hearts, tapEvery, 1, base + index * 17, 0, pace)
+      rows.push({ ...round, heartsIn })
+      if (round.result !== 'clear') return { rows, dead: index + 1 }
+      hearts = easyClearHeart(round.hearts)
+    }
+    return { rows, dead: null }
+  }
+  const quiet417 = seeds417.map((base) => night417(() => fourI, 0, 8, 1, base))
+  const light417 = seeds417.map((base) => night417(() => oneII, 4, 12, 1, base))
+  const active417 = seeds417.map((base) => night417(() => fourI, 3, 12, 1, base))
+  const heavy417 = seeds417.map((base) => night417(() => fourI, 0.7, 16, 1, base))
+  const spend417 = seeds417.map((base) =>
+    night417((index) => (index === 0 ? fourI : spent417.rows[index - 1].lamps), 3, 25, 1, base),
+  )
+  assert.ok(
+    quiet417.every((run) => run.dead === 5 && run.rows[4].heartsIn === 3 && run.rows[4].hearts === 0 && run.rows[4].taps === 0),
+    '1.4.417 zero taps on four Level I lamps lose round 5',
+  )
+  assert.ok(
+    light417.every(
+      (run) => run.dead === 9 && run.rows[4].taps >= 5 && run.rows[4].taps <= 10 && run.rows[4].hearts === 3,
+    ),
+    '1.4.417 light taps plus one Strong step 2 hold round 5',
+  )
+  assert.ok(
+    active417.every((run) => run.dead === 8 && run.rows[4].taps >= 10 && run.rows[4].taps <= 20),
+    '1.4.417 active taps with no upgrades wall on round 8',
+  )
+  assert.ok(
+    heavy417.every((run) => run.dead === 10 && run.rows[4].taps >= 30),
+    '1.4.417 heavy taps with no upgrades wall by round 15',
+  )
+  const spendHearts = [
+    [12, 3, 3],
+    [13, 3, 3],
+    [14, 3, 3],
+    [15, 3, 2],
+    [16, 3, 3],
+    [17, 3, 3],
+    [18, 3, 3],
+    [19, 3, 2],
+    [20, 3, 2],
+    [21, 3, 3],
+    [22, 3, 2],
+    [23, 3, 2],
+    [24, 3, 2],
+    [25, 3, 1],
+  ]
+  assert.ok(
+    spend417.every((run) => run.dead == null && run.rows[4].taps >= 10 && run.rows[4].taps <= 20),
+    '1.4.417 a spender reaches round 25',
+  )
+  for (const run of spend417) {
+    for (const [round, heartsIn, hearts] of spendHearts) {
+      const row = run.rows[round - 1]
+      assert.equal(row.heartsIn, heartsIn, `1.4.417 spender round ${round} starts at ${heartsIn}`)
+      assert.equal(row.hearts, hearts, `1.4.417 spender round ${round} ends at ${hearts}`)
+      assert.equal(row.result, 'clear')
+    }
+    assert.ok(
+      run.rows.slice(12, 20).some((row) => row.hearts < row.heartsIn),
+      '1.4.417 the spender loses a heart between rounds 13 and 20',
+    )
+  }
+  for (const every of [0, 3, 0.7]) {
+    for (const base of seeds417) {
+      for (const index of [0, 4, 9, 14, 19]) {
+        const slow = paceEasyTree(index, fourI, 3, every, 1, base + index * 17, 0, 1)
+        const fast = paceEasyTree(index, fourI, 3, every, 1, base + index * 17, 0, 3)
+        assert.equal(fast.result, slow.result, '1.4.417 pace 3 matches pace 1')
+        assert.equal(fast.hearts, slow.hearts)
+        assert.equal(fast.lampKills, slow.lampKills)
+        assert.equal(fast.tapKills, slow.tapKills)
+        assert.equal(fast.taps, slow.taps)
+      }
+    }
+  }
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.417'), '1.4.417 changelog row')
+  assert.match(latestChange('1.4.417').title, /boss/i)
+  assert.doesNotMatch(latestChange('1.4.417').items.join('\n'), /Fixes #|Closes #|Resolves #/)
+  assert.match(latestChange('1.4.416').title, /taller strip/i)
 }
 
 // Night Watch 1.4.392: reach cue, a longer level-I free lamp, and a plant pin.
@@ -11012,8 +11160,8 @@ console.log('check-city: ok')
   assert.match(defendNightSrc, /className="defend-hp-fill"/, '1.4.323 HP fill')
   assert.match(
     defendNightSrc,
-    /\(\(HP_TRACK\.w - HP_FILL\.inset \* 2\) \* raider\.hp\) \/ \(raider\.maxHp \?\? 1\)/,
-    '1.4.323 fill width is hp/maxHp',
+    /\(\(raider\.boss \? HP_TRACK\.w \* 1\.45 : HP_TRACK\.w\) - HP_FILL\.inset \* 2\) \* raider\.hp\) \/\s*\(raider\.maxHp \?\? 1\)/,
+    '1.4.417 fill width is still hp/maxHp, wider on a boss',
   )
   assert.match(defendNightSrc, /!raider\.turned && \(raider\.maxHp \?\? 0\) > 1/, '1.4.323 bar is on living walkers')
   assert.doesNotMatch(defendNightSrc, /defend-hp-pip/, '1.4.323 replaces the ~5px pips')
@@ -11406,8 +11554,8 @@ console.log('check-city: ok')
   assert.ok(PATH_WALKER_FACE_U >= 36, '1.4.345 path face is at least the old 36-wide chip')
   assert.match(
     defendNightSrc,
-    /\(\(HP_TRACK\.w - HP_FILL\.inset \* 2\) \* raider\.hp\) \/ \(raider\.maxHp \?\? 1\)/,
-    '1.4.331 fill width stays proportional to hp/maxHp',
+    /\(\(raider\.boss \? HP_TRACK\.w \* 1\.45 : HP_TRACK\.w\) - HP_FILL\.inset \* 2\) \* raider\.hp\) \/\s*\(raider\.maxHp \?\? 1\)/,
+    '1.4.417 fill width stays proportional to hp/maxHp, wider on a boss',
   )
   assert.match(defendCss331, /\.defend-hp-track \{[\s\S]*?stroke-width:\s*0\.75/, '1.4.331 stroke is a hairline')
   assert.doesNotMatch(

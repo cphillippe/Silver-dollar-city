@@ -84,3 +84,40 @@ export function gaitForSlot(
   const index = Math.max(0, Math.floor(slot) || 0)
   return plan[index] ?? 'plain'
 }
+
+/** Boss step. Slower than a plain walker so the big shape stays readable. */
+export const BOSS_PACE = 0.7
+
+/** Easy rounds 5, 10, 15, 20, and 25. Hard does not read this. */
+export function easyBossRound(index: number): boolean {
+  const round = Math.floor(index) + 1
+  return round > 0 && round % 5 === 0 && round <= 25
+}
+
+/**
+ * Boss health. Round 5 stays soft so lamps plus a few taps can finish it.
+ * Later bosses are thick: a glowing tap still nicks them, and the lamps have to finish the bar.
+ */
+export function easyBossHp(index: number): number {
+  const round = Math.floor(index) + 1
+  if (round <= 5) return 20
+  if (round <= 10) return 44
+  if (round <= 15) return 200
+  if (round <= 20) return 260
+  return 320
+}
+
+/**
+ * Extra health from round 13 on, added to the table bonus.
+ * Breather rounds take a smaller bump. The boss bar is separate.
+ */
+export function easyLatePush(index: number): number {
+  const round = Math.floor(index) + 1
+  if (round < 13) return 0
+  if (round <= 14) return 12
+  if (round === 15) return 18
+  if (round === 16) return 10
+  if (round <= 19) return 18
+  if (round === 20) return 12
+  return 20
+}
