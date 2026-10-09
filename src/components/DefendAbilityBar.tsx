@@ -44,6 +44,8 @@ export interface DefendAbilityBarProps {
   onLampDrag?: (phase: LampDragPhase, ability: WatchAbility, clientX: number, clientY: number) => void
   /** True from press to release so a map tap does not place during the slide. */
   onCardPress?: (down: boolean) => void
+  /** A press at a clear. The next round must not start from this tap. */
+  onBoostCardPointer?: () => void
   /** After Begin, an unplanted card arms a paid plant instead of an upgrade. */
   paidPlace?: boolean
   /** Type armed for a paid plant. Empty during the free opening plant. */
@@ -71,6 +73,7 @@ export function DefendAbilityBar({
   placing = false,
   onLampDrag,
   onCardPress,
+  onBoostCardPointer,
   paidPlace = false,
   lampArmed = null,
   onArmPlace,
@@ -82,9 +85,11 @@ export function DefendAbilityBar({
   const [dragFrom, setDragFrom] = useState<WatchAbility | null>(null)
   const onLampDragRef = useRef(onLampDrag)
   const onCardPressRef = useRef(onCardPress)
+  const onBoostCardPointerRef = useRef(onBoostCardPointer)
   const onArmPlaceRef = useRef(onArmPlace)
   onLampDragRef.current = onLampDrag
   onCardPressRef.current = onCardPress
+  onBoostCardPointerRef.current = onBoostCardPointer
   onArmPlaceRef.current = onArmPlace
 
   useEffect(() => () => stopListen.current?.(), [])
@@ -201,8 +206,13 @@ export function DefendAbilityBar({
                   title={spendDry ? `${claim} Need a spark.` : claim}
                   disabled={spendDry}
                   style={placing && open ? { touchAction: 'none' } : undefined}
-                  onPointerDown={(event) => trackCard(event, tool.id, open, placed)}
-                  onClick={() => {
+                  onPointerDown={(event) => {
+                    event.stopPropagation()
+                    onBoostCardPointerRef.current?.()
+                    trackCard(event, tool.id, open, placed)
+                  }}
+                  onClick={(event) => {
+                    event.stopPropagation()
                     if (swallowClick.current) {
                       swallowClick.current = false
                       return

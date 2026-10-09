@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.415',
+    title: 'Night Watch Easy plant at a clear',
+    when: '2026-10-09',
+    items: [
+      'At a round clear, New lamp is a button. Tap it and then tap the road, or drag it onto the road. The panel shrinks, the ring and the red spots show, and planting spends 5 sparks. The clear panel comes back. The next round starts when you tap Continue.',
+      'On a loss, empty hearts stay empty. A full bar does not flash +1 heart.',
+    ],
+  },
+  {
     version: '1.4.414',
     title: 'Story strip faces stay apart',
     when: '2026-10-09',
