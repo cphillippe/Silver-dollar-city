@@ -83,6 +83,8 @@ export function FatherRunPlay({
   const openedRef = useRef(1)
   const frame = useRef(0)
   const playRef = useRef<HTMLDivElement>(null)
+  const padRef = useRef<HTMLButtonElement>(null)
+  const padPointer = useRef<number | null>(null)
 
   const opened = beatsOpened(progress, panels.length)
   const phrase = clockOn.current || elapsed > 0 ? speechPhraseAt(elapsed) : HIRED_HAND_SPEECH[0]
@@ -128,6 +130,7 @@ export function FatherRunPlay({
     heldMsRef.current = 0
     inWindowRef.current = false
     dashedWindowRef.current = false
+    padPointer.current = null
     flashToast(nextAttempt > 0 ? 'Closer this time. Hold — then press the glow.' : '')
   }
 
@@ -229,7 +232,21 @@ export function FatherRunPlay({
 
   function beginHold(fromPad?: HTMLButtonElement, pointerId?: number) {
     if (phaseRef.current === 'hug' || phaseRef.current === 'miss') return
-    if (fromPad && pointerId !== undefined) fromPad.setPointerCapture(pointerId)
+    // Capture already held means this down is the same finger, not a new press.
+    const stillCaptured = Boolean(
+      fromPad &&
+        pointerId !== undefined &&
+        fromPad.hasPointerCapture(pointerId) &&
+        holdingRef.current,
+    )
+    if (fromPad && pointerId !== undefined) {
+      try {
+        fromPad.setPointerCapture(pointerId)
+      } catch {
+        /* pointer already released */
+      }
+      padPointer.current = pointerId
+    }
     const wasHolding = holdingRef.current
     if (!clockOn.current) {
       clockOn.current = true
@@ -240,7 +257,8 @@ export function FatherRunPlay({
       setElapsed(0)
     }
     const windowOpen = dashPhase(elapsedRef.current).inWindow
-    if (windowOpen && !wasHolding) {
+    // One dash per glow. A new down still counts if a cancelled hold left the latch stuck.
+    if (windowOpen && !dashedWindowRef.current && !stillCaptured && (!wasHolding || pointerId !== undefined)) {
       const next = applyDash(progressRef.current)
       writeProgress(next)
       dashedWindowRef.current = true
@@ -285,9 +303,25 @@ export function FatherRunPlay({
     return () => node.removeEventListener('selectstart', blockSelect)
   }, [])
 
-  function onPadUp() {
+  function onPadUp(event?: ReactPointerEvent<HTMLButtonElement>) {
+    const node = event?.currentTarget ?? padRef.current
+    const pointerId = event?.pointerId
+    if (node && pointerId !== undefined && node.hasPointerCapture(pointerId)) {
+      try {
+        node.releasePointerCapture(pointerId)
+      } catch {
+        /* pointer already released */
+      }
+    }
+    padPointer.current = null
     holdingRef.current = false
     setHolding(false)
+  }
+
+  function onPadCancel(event: ReactPointerEvent<HTMLButtonElement>) {
+    // The glow retint must not drop a finger that still owns the pad.
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) return
+    onPadUp(event)
   }
 
   function onPadKeyDown(event: ReactKeyboardEvent<HTMLButtonElement>) {
@@ -443,17 +477,25 @@ export function FatherRunPlay({
       ) : (
         <div className="cta-dock run-dock">
           <button
+            key="father-run-pad"
+            ref={padRef}
             type="button"
-            className={`run-pad ${holding ? 'is-held' : ''} ${dash.inWindow ? 'is-glow' : ''}`}
+            className={`run-pad ${holding ? 'is-held' : ''} ${dash.inWindow && phase === 'run' ? 'is-glow' : ''}`}
             aria-pressed={holding}
+            aria-label={dash.inWindow && phase === 'run' ? 'Let go — press now!' : 'Hold to run'}
             onPointerDown={onPadDown}
             onPointerUp={onPadUp}
-            onPointerCancel={onPadUp}
+            onPointerCancel={onPadCancel}
             onContextMenu={blockHoldMenu}
             onKeyDown={onPadKeyDown}
             onKeyUp={onPadKeyUp}
           >
-            {dash.inWindow && phase === 'run' ? 'Let go — press now!' : 'Hold to run'}
+            <span className={`run-pad-face ${dash.inWindow && phase === 'run' ? 'is-quiet' : ''}`} aria-hidden>
+              Hold to run
+            </span>
+            <span className={`run-pad-face ${dash.inWindow && phase === 'run' ? '' : 'is-quiet'}`} aria-hidden>
+              Let go — press now!
+            </span>
           </button>
         </div>
       )}

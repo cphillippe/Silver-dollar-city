@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.416',
+    title: 'Easy press, same idea, taller strip',
+    when: '2026-10-09',
+    items: [
+      'Father’s run keeps one Hold button for the whole glow. Let go — press now stays on that same button, and the tap area is a little larger so a phone press lands.',
+      'On Easy, Reason and Ought say the same idea in the header and in the main idea: the mind you already trust needs a real ground, and rocks cannot write the law you already trust.',
+      'On a tall phone, Easy story-strip cards and slots grow with the screen and Peek and Shuffle sit under the cards. A name chip hides when the caption already says that name.',
+    ],
+  },
+  {
     version: '1.4.415',
     title: 'Night Watch Easy plant at a clear',
     when: '2026-10-09',
