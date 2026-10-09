@@ -208,6 +208,7 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
                   hard={!easy}
                   showCaption={showSlotCaption}
                   caption={slotCaption}
+                  compact={status === 'ok'}
                   snap={snapIndex === index}
                   locked={easy || status === 'ok'}
                   onPress={easy || status === 'ok' ? undefined : () => undo(index)}

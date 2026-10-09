@@ -21,6 +21,8 @@ interface StoryPieceProps {
   showCaption: boolean
   /** `slot` uses the short line while the strip is still in play. */
   caption?: 'full' | 'slot'
+  /** Win strip: shorter caption band so the verse and Home button stay on screen. */
+  compact?: boolean
   wiggle?: boolean
   glow?: boolean
   snap?: boolean
@@ -34,6 +36,7 @@ export function StoryPiece({
   hard,
   showCaption,
   caption = 'full',
+  compact = false,
   wiggle,
   glow,
   snap,
@@ -60,7 +63,7 @@ export function StoryPiece({
 
   const edges = pieceEdges(card.orderIndex, count, hard)
   const slotText = caption === 'slot' && card.shortText ? card.shortText : null
-  const captionHeight = showCaption ? (slotText ? 40 : 52) : 0
+  const captionHeight = showCaption ? (slotText ? 40 : compact ? (count >= 5 ? 50 : 46) : 52) : 0
   const path = piecePath(box.w, box.h, edges.left, edges.right, captionHeight)
   const { backdrop } = card.visual
   const face = (
