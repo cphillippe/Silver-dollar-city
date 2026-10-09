@@ -37,7 +37,8 @@ export const SEQUENCE_VERSES: Record<string, SequenceVerse> = {
   'wb-creed': {
     kicker: 'Paul wrote',
     text: '…that Christ died for our sins in accordance with the scriptures, that he was buried, that he was raised on the third day in accordance with the scriptures, and that he appeared to Cephas, then to the twelve.',
-    easyLead: 'Peter is named first. It matches the old holy writings.',
+    easyLead:
+      'Cephas is Peter. “The scriptures” means God’s Word said long ago this would happen.',
     ref: '1 Corinthians 15:3–5',
   },
   'fg-reason': {

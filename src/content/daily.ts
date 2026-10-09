@@ -137,7 +137,7 @@ export const DAILY_POOL: DailyPuzzle[] = [
       prompt: 'How did the creed reach Paul\'s letter?',
       context: '1 Corinthians 15:3–4. Paul received this line — he did not invent it.',
       items: [
-        { id: 'a', text: 'Jesus dies, is buried, and is raised.' },
+        { id: 'a', text: 'Jesus dies, is buried, and is raised.', easyText: 'Jesus died, was buried, rose.' },
         { id: 'b', text: 'Believers pass the news on.' },
         { id: 'c', text: 'Paul writes it in a letter.' },
       ],
