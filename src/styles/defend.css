@@ -2077,9 +2077,13 @@ img.walker-face.easy-walker-face,
 }
 
 .nw-docks .btn,
-.nw-docks .defend-lost,
-.nw-docks .defend-boost {
+.nw-docks .defend-lost {
   pointer-events: auto;
+}
+
+/* 1.4.421: empty clear-panel space lets a planted lamp take the tap. */
+.nw-docks .defend-boost {
+  pointer-events: none;
 }
 
 .nw-docks .defend-angel-help {
@@ -2422,10 +2426,14 @@ img.walker-face.easy-walker-face,
 
 .defend-path {
   display: grid;
-  grid-template-columns: 46px 1fr auto;
-  gap: 4px;
+  grid-template-columns: 72px 1fr auto;
+  gap: 8px;
   align-items: center;
-  margin-top: 6px;
+  margin-top: 10px;
+}
+
+.defend-path + .defend-path {
+  margin-top: 14px;
 }
 
 .defend-path-name {
@@ -2434,6 +2442,41 @@ img.walker-face.easy-walker-face,
   font-weight: 800;
   line-height: 1.05;
   color: #fff6e8;
+}
+
+.defend-path-title {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.defend-path-mark {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  display: block;
+}
+
+.defend-path[data-path='far'] .defend-path-title {
+  color: #9fd4ff;
+}
+
+.defend-path[data-path='strong'] .defend-path-title {
+  color: #ffb088;
+}
+
+.defend-path[data-path='far'] button.defend-path-pip.is-buy,
+.defend-tower-card .defend-path[data-path='far'] .defend-path-buy {
+  background: #1d4e89;
+  border-color: #7ecbff;
+  color: #e8f6ff;
+}
+
+.defend-path[data-path='strong'] button.defend-path-pip.is-buy,
+.defend-tower-card .defend-path[data-path='strong'] .defend-path-buy {
+  background: #8a3412;
+  border-color: #ff8a4a;
+  color: #fff1e6;
 }
 
 .defend-path-line {
@@ -2720,6 +2763,25 @@ button.defend-path-pip {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
   filter: none;
   transform: none;
+}
+
+/* 1.4.421: a short spark bank must not paint both path buys the same grey. */
+.defend-tower-card .defend-path[data-path='far'] .btn.primary.defend-path-buy:disabled {
+  color: #e8f6ff;
+  -webkit-text-fill-color: #e8f6ff;
+  background-image: none;
+  background-color: #1d4e89;
+  border-color: #7ecbff;
+  box-shadow: none;
+}
+
+.defend-tower-card .defend-path[data-path='strong'] .btn.primary.defend-path-buy:disabled {
+  color: #fff1e6;
+  -webkit-text-fill-color: #fff1e6;
+  background-image: none;
+  background-color: #8a3412;
+  border-color: #ff8a4a;
+  box-shadow: none;
 }
 
 @keyframes defend-tower-next-in {
@@ -3230,14 +3292,17 @@ button.defend-new-lamp[aria-pressed='true'] {
 
 .nw-skill-splash {
   position: fixed;
-  inset: 0;
   z-index: 40;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 176px;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
   padding: 16px;
-  background: rgba(12, 4, 32, 0.62);
-  pointer-events: auto;
+  background: linear-gradient(180deg, rgba(12, 4, 32, 0.28), rgba(12, 4, 32, 0));
+  pointer-events: none;
 }
 
 .nw-skill-card {
@@ -3249,6 +3314,7 @@ button.defend-new-lamp[aria-pressed='true'] {
   box-shadow: 0 12px 32px rgba(8, 2, 24, 0.55);
   text-align: center;
   color: #f4ead2;
+  pointer-events: auto;
 }
 
 .nw-skill-splash-art {

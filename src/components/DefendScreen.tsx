@@ -1948,7 +1948,9 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
             {showPace ? (
               <NightPaceControl waveIndex={waveIndex} fastOn={fastOn} onToggle={togglePace} />
             ) : null}
-            {skillSplash ? <NightSkillSplash id={skillSplash} onDismiss={dismissSkillSplash} /> : null}
+            {phase === 'wave' && skillSplash ? (
+              <NightSkillSplash id={skillSplash} onDismiss={dismissSkillSplash} />
+            ) : null}
             {createPortal(
               <>
                 {stillOn ? <div className="nw-still-veil" aria-hidden="true" /> : null}

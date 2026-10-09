@@ -20,6 +20,26 @@ import {
   type TreePath,
 } from '../nightWatch/upgradeTree'
 
+function PathMark({ path }: { path: TreePath }) {
+  if (path === 'far') {
+    return (
+      <svg className="defend-path-mark" viewBox="0 0 16 16" aria-hidden="true">
+        <circle cx="8" cy="8" r="2" fill="currentColor" />
+        <path d="M8 1.6a6.4 6.4 0 0 1 0 12.8" fill="none" stroke="currentColor" strokeWidth="1.6" />
+        <path d="M8 4.2a3.8 3.8 0 0 1 0 7.6" fill="none" stroke="currentColor" strokeWidth="1.6" />
+      </svg>
+    )
+  }
+  return (
+    <svg className="defend-path-mark" viewBox="0 0 16 16" aria-hidden="true">
+      <path
+        d="M8 1.2 9.5 5.8 14.2 6.1 10.6 9.1 11.8 13.8 8 11.2 4.2 13.8 5.4 9.1 1.8 6.1 6.5 5.8Z"
+        fill="currentColor"
+      />
+    </svg>
+  )
+}
+
 export interface LevelBurst {
   from: number
   to: number
@@ -179,7 +199,10 @@ export function DefendTowerCard({
           return (
             <div key={path} className="defend-path" data-path={path} data-rank={rank}>
               <p className="defend-path-name">
-                {PATH_LABEL[path]}
+                <span className="defend-path-title">
+                  <PathMark path={path} />
+                  {PATH_LABEL[path]}
+                </span>
                 <span className="defend-path-line">{PATH_LINE[path]}</span>
               </p>
               <div className="defend-path-pips">

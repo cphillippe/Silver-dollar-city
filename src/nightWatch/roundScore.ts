@@ -283,6 +283,14 @@ export interface PaceRound {
 }
 
 /**
+ * A kid's tap (1.4.421). They aim at the walker who is glowing, then the
+ * finger lands after a short wait. About 30% of tries miss the face.
+ * A try that lands after that walker has stopped glowing does nothing.
+ */
+export const KID_TAP_WASTE = 0.3
+export const KID_TAP_REACT_S = 0.45
+
+/**
  * One Easy round with a clumsy tap. A try lands every `tapEvery` seconds
  * (default 3). While two walkers are out, about `offCue` of those tries
  * (default 0.2) hit a face that is not glowing and do nothing. The rest
@@ -292,6 +300,8 @@ export interface PaceRound {
  * heart, then grace and the per-round cap apply, on the game clock.
  * `pace` 3 runs three 1× steps per wall frame, so the round matches 1×.
  * The round is lost only at 0 hearts. `seed` keeps the misses the same from run to run.
+ * `kid` uses the glowing-face wait above. The older hitChance / offCue rolls stay
+ * when `kid` is false, so earlier nights keep their misses.
  */
 export function paceEasyTree(
   roundIndex: number,
@@ -302,6 +312,7 @@ export function paceEasyTree(
   seed = 1,
   offCue = 0.2,
   pace = 1,
+  kid = false,
 ): PaceRound {
   const round = easyRound(roundIndex)
   const bossRound = easyBossRound(roundIndex)
@@ -319,7 +330,8 @@ export function paceEasyTree(
       cool: 0,
     }
   })
-  const raiders: { t: number; hp: number; dead: boolean; pace: number }[] = []
+  const raiders: { id: number; t: number; hp: number; dead: boolean; pace: number }[] = []
+  const pending: { at: number; id: number }[] = []
   let spawned = 0
   let downed = 0
   let hearts = Math.max(0, heartsIn)
@@ -397,6 +409,7 @@ export function paceEasyTree(
       const boss = bossRound && spawned === round.count
       const gait = boss ? undefined : gaitForSlot(round, spawned)
       raiders.push({
+        id: spawned + 1,
         t: 0,
         hp: boss ? easyBossHp(roundIndex) : walkerHp(2, bonus, gait),
         dead: false,
@@ -438,16 +451,32 @@ export function paceEasyTree(
       nick(lamp.range * lamp.strike.splashFrac, -1, lamp.strike.splash)
       nick(lamp.range * (1 + lamp.strike.outerFrac), lamp.range, lamp.strike.outer)
     }
+    if (kid) {
+      for (const shot of pending) {
+        if (shot.at > time) continue
+        shot.at = Infinity
+        const aim = raiders.find((raider) => raider.id === shot.id)
+        const front = live().sort((a, b) => b.t - a.t)[0]
+        if (roll() < KID_TAP_WASTE || !aim || aim.dead || !front || front.id !== aim.id) continue
+        taps += 1
+        wound(aim, easyGlowTapDamage(aim.hp), true)
+      }
+    }
     if (tapEvery > 0 && tapAt >= tapEvery && live().length > 0) {
       tapAt = 0
       attempts += 1
       const walking = live().sort((a, b) => b.t - a.t)
-      const offFace = walking.length > 1 && roll() < offCue
-      const hit = roll() <= hitChance
-      if (!offFace && hit) {
-        taps += 1
+      if (kid) {
         const front = walking[0]
-        if (front) wound(front, easyGlowTapDamage(front.hp), true)
+        if (front) pending.push({ at: time + KID_TAP_REACT_S, id: front.id })
+      } else {
+        const offFace = walking.length > 1 && roll() < offCue
+        const hit = roll() <= hitChance
+        if (!offFace && hit) {
+          taps += 1
+          const front = walking[0]
+          if (front) wound(front, easyGlowTapDamage(front.hp), true)
+        }
       }
     }
     if (downed >= total) return finish('clear')
