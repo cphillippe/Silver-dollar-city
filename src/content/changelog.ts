@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.405',
+    title: 'Night Watch lamps grow on two paths',
+    when: '2026-10-09',
+    items: [
+      'Easy lamps have two paths, Far and Strong, with three steps each. Far reaches farther. Strong hits harder. One path can go to three. The other stops at one. Steps cost 3, then 6, then 12 sparks, so a lamp is not finished in the early rounds.',
+      'Round 6 needs a second step on either path. Tap a planted lamp between rounds to buy a step. Hard still upgrades one step at a time.',
+    ],
+  },
+  {
     version: '1.4.404',
     title: 'Night Watch Easy runs 25 rounds',
     when: '2026-10-09',
