@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.410',
+    title: 'Night Watch Easy R5 tap value + R6–R7 curve',
+    when: '2026-10-09',
+    items: [
+      'On Easy, a tap on the glowing face hits twice as hard. Round 5 walks faster, so lamps alone lose that round and taps can hold it.',
+      'Each round you clear gives one heart back, up to three, with a small +1 ♥. One bad round does not empty the next.',
+    ],
+  },
+  {
     version: '1.4.409',
     title: 'Night Watch Easy tap fairness + heart pacing',
     when: '2026-10-09',

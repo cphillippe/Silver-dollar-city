@@ -60,11 +60,15 @@ import {
   EASY_MISS_HOLD_MS,
   EASY_WALKER_FACE_PX,
   DEFEND_HEARTS,
+  EASY_GLOW_TAP_MULT,
   EASY_LEAK_GRACE_MS,
   EASY_ROUND_HEART_CAP,
   applyEasyPaceLeaks,
   applyGateLeaks,
   cueTapStrike,
+  easyClearHeart,
+  easyGlowTapDamage,
+  easyRoundHeartCap,
   easyFaceHitPx,
   faceTapStrike,
   EASY_WALKER_HIT_PX,
@@ -1292,7 +1296,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.409')
+assert.equal(APP_VERSION, '1.4.410')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -4843,16 +4847,17 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
       [1.35, 0, 0.95],
       [1.8, 1, 0.9],
       [2.6, 2, 0.85],
-      [5.5, 3, 0.75],
+      [6.4, 3, 0.66],
       [6.4, 7, 0.72],
     ],
-    '1.4.402 the first six rounds stay put',
+    '1.4.410 round 5 walks at the round 6 pace',
   )
   assert.equal(nightLength(false), DEFEND_NIGHT_WAVES, '1.4.402 Hard stays five waves')
   for (let index = 1; index < 6; index += 1) {
     assert.ok(EASY_ROUNDS[index].speed >= EASY_ROUNDS[index - 1].speed)
     assert.ok(EASY_ROUNDS[index].hp >= EASY_ROUNDS[index - 1].hp)
-    assert.ok(EASY_ROUNDS[index].spawn <= EASY_ROUNDS[index - 1].spawn)
+    // 1.4.410 round 5's gap is tighter than round 6. The gap still tightens through round 5.
+    if (index < 5) assert.ok(EASY_ROUNDS[index].spawn <= EASY_ROUNDS[index - 1].spawn)
   }
   assert.equal(waveCombat(0, true).size, 4)
   assert.equal(waveCombat(0, true).hpBonus, 0)
@@ -5212,58 +5217,100 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(screen409, /if \(easy && !manual\) live\.current\.spawnNow = true/)
   assert.match(screen409, /applyEasyPaceLeaks\(/)
   assert.match(screen409, /applyGateLeaks\(live\.current\.hearts, leaked, shielded\)/)
-  const zero409 = { far: 0, strong: 0 }
-  const step1 = { far: 0, strong: 1 }
-  const step2 = { far: 0, strong: 2 }
-  const spent409 = spendTreeNight(EASY_ROUNDS.map((round) => round.count), EASY_LAMP_COST)
-  function carry409(pathsFor, tapEvery) {
-    let hearts = 3
-    const rows = []
-    for (let index = 0; index < 12; index += 1) {
-      const round = paceEasyTree(index, pathsFor(index), hearts, tapEvery, 0.7, 1 + index * 17, 0.2)
-      rows.push(round)
-      hearts = round.hearts
-      if (round.result !== 'clear') break
-    }
-    return rows
-  }
-  const quiet = carry409(() => [zero409, zero409], 0)
-  assert.deepEqual(
-    quiet.map((round) => round.hearts),
-    [3, 3, 3, 3, 2, 0],
-    '1.4.409 Level I with no taps leaks on round 5 and is out on round 6',
-  )
-  assert.equal(quiet[4].result, 'clear')
-  assert.equal(quiet[5].result, 'lost')
-  const clumsy = carry409(() => [zero409, zero409], 3)
-  assert.deepEqual(
-    clumsy.map((round) => round.hearts),
-    [3, 3, 3, 3, 2, 0],
-    '1.4.409 clumsy taps hold round 5 and do not die early',
-  )
-  assert.equal(clumsy[4].result, 'clear')
-  const stepped = carry409(() => [step1, step1], 3)
-  assert.equal(stepped.at(-1).result, 'lost')
-  assert.ok(stepped.length <= 7, '1.4.409 all step-1 lamps are lost by round 7')
-  assert.ok(stepped.at(-1).hearts <= 1)
-  const gate6 = paceEasyTree(5, [step1, step1], 3, 3, 0.7, 1 + 5 * 17, 0.2)
-  assert.equal(gate6.result, 'clear', '1.4.409 round 6 on a full bar ends with hearts left')
-  assert.ok(gate6.hearts <= 1, '1.4.409 round 6 step-1 ends at one heart or fewer')
-  const gate7 = paceEasyTree(6, [step1, step1], gate6.hearts, 3, 0.7, 1 + 6 * 17, 0.2)
-  assert.equal(gate7.result, 'lost', '1.4.409 round 7 finishes a step-1 bar')
-  const held = paceEasyTree(5, [step2, zero409], 3, 3, 0.7, 1 + 5 * 17, 0.2)
-  assert.equal(held.result, 'clear', '1.4.409 one step-2 holds round 6')
-  assert.equal(held.hearts, 3)
-  const spender = carry409(
-    (index) => (index === 0 ? [zero409, zero409] : spent409.rows[index - 1].lamps),
-    3,
-  )
-  assert.equal(spender.length, 12, '1.4.409 a spender plays through round 12')
-  assert.ok(spender.every((round) => round.result === 'clear'))
-  assert.equal(spender[8].hearts, 3, '1.4.409 round 9 does not wipe the spender')
+  assert.equal(easyRoundHeartCap(4), DEFEND_HEARTS, '1.4.410 round 5 can spend the last heart')
+  assert.equal(easyRoundHeartCap(5), EASY_ROUND_HEART_CAP, '1.4.410 later rounds still stop at two')
   assert.ok(CHANGELOG.some((note) => note.version === '1.4.409'), '1.4.409 changelog row')
   assert.match(latestChange('1.4.409').title, /tap fairness/i)
   assert.doesNotMatch(latestChange('1.4.409').items.join('\n'), /Fixes #|Closes #|Resolves #/)
+}
+
+// Night Watch 1.4.410: round 5 is a tap gate, and a clear gives a heart back.
+{
+  assert.equal(EASY_GLOW_TAP_MULT, 2)
+  assert.equal(easyGlowTapDamage(1, 5), 2, '1.4.410 a glow tap is twice a Level I shot')
+  assert.equal(easyGlowTapDamage(1, 2), 2, '1.4.410 a glow tap finishes a two-hit walker')
+  assert.equal(easyGlowTapDamage(2, 9), 4, '1.4.410 a step-2 glow tap is twice that lamp')
+  assert.equal(easyClearHeart(1), 2)
+  assert.equal(easyClearHeart(2), 3)
+  assert.equal(easyClearHeart(3), 3, '1.4.410 a full bar does not grow')
+  assert.equal(easyClearHeart(0), 0)
+  assert.deepEqual(
+    EASY_ROUNDS[4],
+    { count: 6, speed: 6.4, hp: 3, spawn: 0.66 },
+    '1.4.410 round 5 keeps its health and walks at the round 6 pace',
+  )
+  assert.deepEqual(
+    EASY_ROUNDS.slice(0, 4).map((round) => [round.count, round.speed, round.hp, round.spawn]),
+    [
+      [4, 1, 0, 1],
+      [4, 1.35, 0, 0.95],
+      [5, 1.8, 1, 0.9],
+      [5, 2.6, 2, 0.85],
+    ],
+    '1.4.410 rounds 1–4 stay put',
+  )
+  const screen410 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  assert.match(screen410, /easyGlowTapDamage\(tier, best\.hp\)/)
+  assert.match(screen410, /easyClearHeart\(live\.current\.hearts\)/)
+  assert.match(screen410, /\+1 ♥/)
+  assert.match(
+    readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8'),
+    /\.defend-heart-gain/,
+  )
+  const zero410 = { far: 0, strong: 0 }
+  const step1 = { far: 0, strong: 1 }
+  const step2 = { far: 0, strong: 2 }
+  const spent410 = spendTreeNight(EASY_ROUNDS.map((round) => round.count), EASY_LAMP_COST)
+  function night410(pathsFor, tapEvery, base) {
+    let hearts = 3
+    const rows = []
+    for (let index = 0; index < 14; index += 1) {
+      const round = paceEasyTree(index, pathsFor(index), hearts, tapEvery, 0.7, base + index * 17, 0.2)
+      rows.push(round)
+      if (round.result !== 'clear') return { rows, furthest: index + 1, dead: true }
+      hearts = easyClearHeart(round.hearts)
+    }
+    return { rows, furthest: rows.length, dead: false }
+  }
+  const seeds = Array.from({ length: 8 }, (_, seed) => 1 + seed * 97)
+  const quiet = seeds.map((base) => night410(() => [zero410, zero410], 0, base))
+  const clumsy = seeds.map((base) => night410(() => [zero410, zero410], 3, base))
+  const stepped = seeds.map((base) => night410(() => [step1, step1], 3, base))
+  const held = seeds.map((base) => night410(() => [step2, zero410], 3, base))
+  const spender = seeds.map((base) =>
+    night410((index) => (index === 0 ? [zero410, zero410] : spent410.rows[index - 1].lamps), 3, base),
+  )
+  assert.ok(
+    quiet.every((run) => run.rows.slice(0, 4).every((round) => round.result === 'clear' && round.hearts === 3)),
+    '1.4.410 rounds 1–4 stay full with no taps',
+  )
+  assert.ok(
+    clumsy.every((run) => run.rows.slice(0, 4).every((round) => round.result === 'clear' && round.hearts === 3)),
+    '1.4.410 rounds 1–4 stay full with clumsy taps',
+  )
+  assert.ok(
+    quiet.filter((run) => run.dead && run.furthest === 5).length >= 5,
+    '1.4.410 Level I with no taps loses on round 5 in most seeds',
+  )
+  assert.ok(
+    clumsy.filter((run) => run.furthest > 5).length >= 5,
+    '1.4.410 Level I clumsy taps hold round 5 in most seeds',
+  )
+  assert.ok(
+    stepped.filter((run) => run.dead && run.furthest <= 7).length >= 5,
+    '1.4.410 step-1 lamps lose by round 7 in most seeds',
+  )
+  assert.ok(
+    held.filter((run) => run.furthest > 7).length >= 5,
+    '1.4.410 one step-2 holds rounds 6 and 7 in most seeds',
+  )
+  assert.ok(
+    spender.filter((run) => run.furthest >= 12).length >= 5,
+    '1.4.410 a spender reaches round 12 in most seeds',
+  )
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.410'), '1.4.410 changelog row')
+  assert.match(latestChange('1.4.410').title, /R5 tap value/i)
+  assert.doesNotMatch(latestChange('1.4.410').items.join('\n'), /Fixes #|Closes #|Resolves #/)
 }
 
 // Night Watch 1.4.392: reach cue, a longer level-I free lamp, and a plant pin.
@@ -10480,7 +10527,7 @@ console.log('check-city: ok')
   assert.match(defendScreenOnlySrc, /nightEnemies\.maxHp\(cast\.kind, easy\)/, '1.4.316 spawn seeds HP from enemies')
   assert.match(
     defendScreenOnlySrc,
-    /const struck = nightEnemies\.hit\(best(?:, tier)?\)/,
+    /const struck = nightEnemies\.hit\(best,/,
     '1.4.316 match hit goes through enemies.hit',
   )
   assert.match(defendScreenOnlySrc, /struck\.down\s*\?\s*\{ \.\.\.struck\.raider, turned: using, from: to, heavenT: 0/, '1.4.316 keeps soft-turn verb at HP 0')
@@ -10746,7 +10793,11 @@ console.log('check-city: ok')
   assert.match(defendScreenOnlySrc, /setRunSparks\(\(count\) => count \+ 1\)/, '1.4.327 a down earns a spark')
   assert.match(defendScreenOnlySrc, /setPhase\('boost'\)/, '1.4.327 wave clear opens boost')
   assert.match(defendScreenOnlySrc, /continueFromBoost/, '1.4.327 boost can continue')
-  assert.match(defendScreenOnlySrc, /nightEnemies\.hit\(best, tier\)/, '1.4.327 hit damage is the tier')
+  assert.match(
+    defendScreenOnlySrc,
+    /nightEnemies\.hit\(best, easy && manual \? easyGlowTapDamage\(tier, best\.hp\) : tier\)/,
+    '1.4.410 an Easy glow tap hits twice and the lamp shot stays the tier',
+  )
   assert.match(defendScreenOnlySrc, /combatTier\(/)
   assert.match(defendScreenOnlySrc, /label="Sparks"/)
   assert.doesNotMatch(defendScreenOnlySrc, /progress\.stars/, '1.4.327 does not drain journal stars')
