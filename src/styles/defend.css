@@ -2765,6 +2765,25 @@ button.defend-path-pip {
   transform: none;
 }
 
+/* 1.4.421: a short spark bank must not paint both path buys the same grey. */
+.defend-tower-card .defend-path[data-path='far'] .btn.primary.defend-path-buy:disabled {
+  color: #e8f6ff;
+  -webkit-text-fill-color: #e8f6ff;
+  background-image: none;
+  background-color: #1d4e89;
+  border-color: #7ecbff;
+  box-shadow: none;
+}
+
+.defend-tower-card .defend-path[data-path='strong'] .btn.primary.defend-path-buy:disabled {
+  color: #fff1e6;
+  -webkit-text-fill-color: #fff1e6;
+  background-image: none;
+  background-color: #8a3412;
+  border-color: #ff8a4a;
+  box-shadow: none;
+}
+
 @keyframes defend-tower-next-in {
   from {
     transform: translateY(4px);
