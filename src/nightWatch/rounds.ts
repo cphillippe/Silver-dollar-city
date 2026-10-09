@@ -13,6 +13,8 @@
  * a little sooner. HP and the walker count stay put. R1–R4 stay put.
  * 1.4.411 mixes Fast (from round 4) and Tough (from round 7) into `count`.
  * `fast` and `tough` are how many of that count use those gaits. The rest are plain.
+ * 1.4.412 raises health and count from round 5, and mixes in more Fast and Tough,
+ * so a lamp planted on a bend no longer clears round 5 by itself.
  * A third gait is not in this table.
  */
 export interface EasyRound {
@@ -34,14 +36,14 @@ export const EASY_ROUNDS: readonly EasyRound[] = [
   { count: 4, speed: 1.35, hp: 0, spawn: 0.95, fast: 0, tough: 0 },
   { count: 5, speed: 1.8, hp: 1, spawn: 0.9, fast: 0, tough: 0 },
   { count: 5, speed: 2.6, hp: 2, spawn: 0.85, fast: 1, tough: 0 },
-  { count: 6, speed: 6.4, hp: 3, spawn: 0.66, fast: 1, tough: 0 },
-  { count: 6, speed: 6.4, hp: 7, spawn: 0.72, fast: 2, tough: 0 },
-  { count: 6, speed: 6.2, hp: 8, spawn: 0.74, fast: 0, tough: 4 },
-  { count: 5, speed: 5.8, hp: 7, spawn: 0.82, fast: 0, tough: 4 },
-  { count: 6, speed: 6.3, hp: 11, spawn: 0.72, fast: 1, tough: 1 },
-  { count: 6, speed: 6.4, hp: 14, spawn: 0.7, fast: 1, tough: 1 },
-  { count: 6, speed: 6.5, hp: 17, spawn: 0.7, fast: 1, tough: 1 },
-  { count: 5, speed: 6.0, hp: 14, spawn: 0.8, fast: 1, tough: 1 },
+  { count: 7, speed: 6.4, hp: 6, spawn: 0.66, fast: 2, tough: 3 },
+  { count: 7, speed: 6.4, hp: 8, spawn: 0.72, fast: 2, tough: 1 },
+  { count: 9, speed: 6.2, hp: 24, spawn: 0.74, fast: 2, tough: 4 },
+  { count: 6, speed: 5.8, hp: 16, spawn: 0.82, fast: 1, tough: 2 },
+  { count: 9, speed: 6.3, hp: 28, spawn: 0.7, fast: 2, tough: 4 },
+  { count: 9, speed: 6.4, hp: 32, spawn: 0.68, fast: 2, tough: 4 },
+  { count: 9, speed: 6.5, hp: 36, spawn: 0.68, fast: 2, tough: 4 },
+  { count: 5, speed: 6.0, hp: 18, spawn: 0.8, fast: 1, tough: 1 },
   { count: 7, speed: 6.5, hp: 28, spawn: 0.68, fast: 2, tough: 3 },
   { count: 7, speed: 6.6, hp: 34, spawn: 0.68, fast: 2, tough: 3 },
   { count: 8, speed: 6.6, hp: 42, spawn: 0.66, fast: 2, tough: 3 },

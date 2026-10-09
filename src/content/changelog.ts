@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.412',
+    title: 'Night Watch Easy live prove',
+    when: '2026-10-09',
+    items: [
+      'Rounds from 5 on send more walkers with thicker health, including tough ones. Lamps alone lose round 5. Tapping without upgrades walls around round 8. Buying lamps and steps reaches the later rounds.',
+      'A glowing Fast walker keeps a blue rim and speed ticks, and a glowing Tough walker keeps an orange ring, so the type still reads. Pulling a lamp asks first and says how many sparks come back. On a tablet the map stays on the screen, and the Far Hills card sits in the middle.',
+    ],
+  },
+  {
     version: '1.4.411',
     title: 'Night Watch Easy fast and tough walkers',
     when: '2026-10-09',
