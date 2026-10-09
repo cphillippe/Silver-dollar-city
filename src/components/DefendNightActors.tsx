@@ -393,7 +393,8 @@ export function DefendNightActorsSvg({
                   <g
                     key={raider.id}
                     data-person-node={isTap ? 'walker' : undefined}
-                    className={`defend-raider ${raider.turned ? 'is-turned' : ''} ${isTap ? 'is-easy-tap-target' : ''} ${isCue ? 'is-easy-cue' : ''} ${lampHit ? 'is-lamp-hit' : ''}`}
+                    data-gait={raider.gait && raider.gait !== 'plain' ? raider.gait : undefined}
+                    className={`defend-raider ${raider.gait === 'fast' ? 'is-fast' : ''} ${raider.gait === 'tough' ? 'is-tough' : ''} ${raider.turned ? 'is-turned' : ''} ${isTap ? 'is-easy-tap-target' : ''} ${isCue ? 'is-easy-cue' : ''} ${lampHit ? 'is-lamp-hit' : ''}`}
                     transform={`translate(${at.x} ${at.y})`}
                     role={isTap ? 'button' : undefined}
                     tabIndex={isTap ? 0 : undefined}
@@ -421,11 +422,27 @@ export function DefendNightActorsSvg({
                         : undefined
                     }
                   >
+                    <g className="defend-raider-body">
+                    {raider.gait === 'fast' && !raider.turned ? (
+                      <g className="defend-fast-streaks" aria-hidden>
+                        <path d={`M${FACE_HALF * 0.2} ${FACE_TOP + 18} l22 10`} />
+                        <path d={`M${FACE_HALF * 0.05} ${FACE_TOP + 34} l26 8`} />
+                        <path d={`M${FACE_HALF * 0.35} ${FACE_TOP + 50} l18 12`} />
+                      </g>
+                    ) : null}
+                    {raider.gait === 'tough' && !raider.turned ? (
+                      <ellipse
+                        className="defend-tough-bulk"
+                        cy={PATH_WALKER_FACE_DY + 4}
+                        rx={FACE_HALF * 0.92}
+                        ry={FACE_HALF * 0.78}
+                      />
+                    ) : null}
                     <ellipse
                       className="defend-raider-shadow"
                       cy={12 * (PATH_WALKER_FACE_U / 36)}
-                      rx={13 * (PATH_WALKER_FACE_U / 36)}
-                      ry={4.6 * (PATH_WALKER_FACE_U / 36)}
+                      rx={(raider.gait === 'tough' ? 18 : 13) * (PATH_WALKER_FACE_U / 36)}
+                      ry={(raider.gait === 'tough' ? 6.2 : 4.6) * (PATH_WALKER_FACE_U / 36)}
                     />
                     <image
                       className={`defend-raider-face${easy && !raider.turned ? ' is-dark-face' : ''}`}
@@ -470,6 +487,7 @@ export function DefendNightActorsSvg({
                         <circle className="defend-cheer-spark is-3" cx="2" cy="-26" r="1.4" />
                       </g>
                     ) : null}
+                    </g>
                     <circle
                       className="defend-raider-hit"
                       data-face-hit={isTap ? 'easy' : undefined}

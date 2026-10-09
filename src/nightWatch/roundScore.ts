@@ -2,6 +2,7 @@ import { applyEasyPaceLeaks, easyGlowTapDamage, easyRoundHeartCap } from '../lib
 import { pathPoint } from './path/data.ts'
 import { easyRound } from './rounds.ts'
 import { lampStrike, type LampPaths } from './upgradeTree.ts'
+import { gaitForSlot, walkerHp, walkerPace } from './walkers.ts'
 
 /**
  * Ordinary road seats used to tune slices 1 and 2.
@@ -293,7 +294,7 @@ export function paceEasyTree(
       cool: 0,
     }
   })
-  const raiders: { t: number; hp: number; dead: boolean }[] = []
+  const raiders: { t: number; hp: number; dead: boolean; pace: number }[] = []
   let spawned = 0
   let downed = 0
   let hearts = Math.max(0, heartsIn)
@@ -342,7 +343,7 @@ export function paceEasyTree(
     let leaked = 0
     for (const raider of raiders) {
       if (raider.dead) continue
-      raider.t += walk * dt
+      raider.t += walk * raider.pace * dt
       if (raider.t >= 1) {
         raider.dead = true
         leaked += 1
@@ -366,7 +367,13 @@ export function paceEasyTree(
     if (spawned < round.count && live().length < 3 && (spawnNow || spawnAt >= spawnEvery || spawned === 0)) {
       spawnNow = false
       spawnAt = 0
-      raiders.push({ t: 0, hp: 2 + round.hp, dead: false })
+      const gait = gaitForSlot(round, spawned)
+      raiders.push({
+        t: 0,
+        hp: walkerHp(2, round.hp, gait),
+        dead: false,
+        pace: walkerPace(gait),
+      })
       spawned += 1
     }
     for (const lamp of lamps) {
