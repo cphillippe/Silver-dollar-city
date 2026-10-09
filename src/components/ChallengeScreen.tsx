@@ -210,6 +210,14 @@ export function ChallengeScreen({
         ) : null}
       {showNext ? (
         <section className="after-win">
+          {easy && challenge.kind === 'sequence' ? (
+            <TownReturn
+              who={voice.who}
+              line={voice.afterWin}
+              action={EASY.home}
+              onGo={goNext}
+            />
+          ) : null}
           {brief && !recalled ? (
             <div className="rehearse-anchor">
               <RecallGate
@@ -248,7 +256,7 @@ export function ChallengeScreen({
             />
           ) : null}
 
-          {canProceed ? (
+          {canProceed && !(easy && challenge.kind === 'sequence') ? (
             <TownReturn
               who={voice.who}
               line={voice.afterWin}

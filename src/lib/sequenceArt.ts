@@ -8,6 +8,10 @@ import creed2Buried from '../assets/story-strip/creed2-buried.webp'
 import creed3Raised from '../assets/story-strip/creed3-raised.webp'
 import creed4Appeared from '../assets/story-strip/creed4-appeared.webp'
 import road1Lawyer from '../assets/story-strip/road1-lawyer.webp'
+import road2Robbers from '../assets/story-strip/road2-robbers.webp'
+import road3Temple from '../assets/story-strip/road3-temple.webp'
+import road4Samaritan from '../assets/story-strip/road4-samaritan.webp'
+import road5Likewise from '../assets/story-strip/road5-likewise.webp'
 
 /** RGBA cutout keys. A later art swap replaces the file and keeps the key. */
 export const SEQUENCE_ART: Record<string, string> = {
@@ -19,6 +23,10 @@ export const SEQUENCE_ART: Record<string, string> = {
   'creed3-raised': creed3Raised,
   'creed4-appeared': creed4Appeared,
   'road1-lawyer': road1Lawyer,
+  'road2-robbers': road2Robbers,
+  'road3-temple': road3Temple,
+  'road4-samaritan': road4Samaritan,
+  'road5-likewise': road5Likewise,
 }
 
 export interface SequenceBackdrop {
@@ -42,9 +50,13 @@ const CUTOUT_BACKDROP: Record<string, SequenceBackdrop> = {
   'creed3-raised': { sky: '#ffd59a', horizon: '#fff6e0', ground: '#8fbf6a' },
   'creed4-appeared': { sky: '#f3d7a1', horizon: '#fff0c8', ground: '#7fba68' },
   'road1-lawyer': { sky: '#f6e2b8', horizon: '#fff6dd', ground: '#c4a06a' },
+  'road2-robbers': { sky: '#f6e2b8', horizon: '#fff6dd', ground: '#c4a06a' },
+  'road3-temple': { sky: '#f6e2b8', horizon: '#fff6dd', ground: '#c4a06a' },
+  'road4-samaritan': { sky: '#f6e2b8', horizon: '#fff6dd', ground: '#c4a06a' },
+  'road5-likewise': { sky: '#f6e2b8', horizon: '#fff6dd', ground: '#c4a06a' },
 }
 
-/** ph-road steps 2–5 reuse the Samaritan story panels. Step 1 is road1-lawyer. */
+/** Fallback only. ph-road items carry their own cutout keys. */
 const ROAD_SCENES: StoryScene[] = ['hurt', 'walk-past', 'help', 'neighbor']
 
 const FOUNDATION_IDS = new Set(['fg-reason', 'fg-ground', 'fg-mover'])
@@ -56,7 +68,7 @@ export type SequenceVisual =
   | { kind: 'gem'; gem: GemId; backdrop: SequenceBackdrop }
 
 /**
- * Explicit art, then StoryPanelArt scenes for ph-road, then FoundationArt for fg-*,
+ * Explicit cutout art, then a ph-road story-panel fallback, then FoundationArt for fg-*,
  * then a centered GemMark. Never an empty stretched chip.
  */
 export function resolveSequenceVisual(

@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.399',
+    title: 'Story strip words stay whole',
+    when: '2026-10-09',
+    items: [
+      'Easy order captions keep each word whole, in the slots and on the win. The Samaritan road uses cut-out pictures like the other stories, so faces stay whole. The win strip is shorter so the Home button stays on the phone.',
+    ],
+  },
+  {
     version: '1.4.397',
     title: 'Story strip hints wait for a miss',
     when: '2026-10-09',
