@@ -1,5 +1,5 @@
 import type { ProgressState } from '../types.ts'
-import { nightTowers } from '../nightWatch/towers/index.ts'
+import { nightTowers, TOWER_LAMP_SPRITE } from '../nightWatch/towers/index.ts'
 import { DEFEND_PATH, freeSpotId, isFreeSpot, lampAnchor, pathClearance } from '../nightWatch/path/data.ts'
 import type { NightPoint } from '../nightWatch/types.ts'
 import { isTowerType, plantType } from './nightPlants.ts'
@@ -190,28 +190,73 @@ export const LAMP_DRAG_START_PX = 10
 
 /**
  * CSS pixels the ghost sits above the fingertip.
- * 0 lands the lamp under the finger. A lift planted it above the release point.
+ * 0 keeps the client point. The picture itself sits above the lot anchor,
+ * so the plant point is shifted in map units (`lampUnderFinger`).
  */
 export const LAMP_DRAG_LIFT_PX = 0
 
-/** Half the widest reach note ("Too far from the road"), in CSS pixels. */
-const GHOST_HINT_HALF = 96
+/**
+ * Half of the widest reach note ("Too far from the road" / "Reaches on Far step 3")
+ * at the hint's 12px weight, plus a little room for a larger phone font.
+ */
+export const GHOST_HINT_HALF = 108
+
+/** Padding between the hint and the screen edge. */
+export const GHOST_HINT_EDGE = 8
+
+/**
+ * Width the lamp cards take on the right.
+ * Phone cards are a gem. Tablet cards add the type name.
+ */
+export function ghostHintRail(boardW: number): number {
+  if (boardW >= 700) return 128
+  if (boardW >= 400) return 96
+  return 80
+}
 
 /**
  * Keep a centered reach note on the phone. The right inset clears the lamp cards.
  */
 export function clampGhostHintLeft(left: number, boardW: number): number {
-  const edge = 8
-  const rail = 52
+  const edge = GHOST_HINT_EDGE
+  const rail = ghostHintRail(boardW)
   if (!(boardW > 0)) return left
   const min = Math.min(GHOST_HINT_HALF + edge, boardW / 2)
   const max = Math.max(min, boardW - rail - GHOST_HINT_HALF)
   return Math.min(max, Math.max(min, left))
 }
 
-/** Client point the ghost uses. The fingertip stays below the lamp. */
+/** Client point the ghost uses. The picture shift happens in map units. */
 export function dragGhostClient(clientX: number, clientY: number): { x: number; y: number } {
   return { x: clientX, y: clientY - LAMP_DRAG_LIFT_PX }
+}
+
+/**
+ * ViewBox units from the lot anchor up to the lamp picture's center.
+ * The sprite hangs above its feet, so a plant at the fingertip draws the
+ * lamp that far above the finger.
+ */
+export function lampArtAboveAnchor(): number {
+  const { h, footY } = TOWER_LAMP_SPRITE
+  return h / 2 - footY
+}
+
+/**
+ * Map point that puts the lamp picture's center on this finger.
+ * Ghost and commit both use it, so the picture that follows the finger
+ * is the picture that plants.
+ */
+export function lampUnderFinger(point: NightPoint): NightPoint {
+  return { x: point.x, y: point.y + lampArtAboveAnchor() }
+}
+
+/**
+ * True when this control is allowed to spend a path step.
+ * A rail card opens the tree. The buy button and its step pip spend.
+ */
+export function pathSpendControl(className: string): boolean {
+  const names = className.split(/\s+/).filter(Boolean)
+  return names.includes('defend-path-buy') || names.includes('defend-path-pip')
 }
 
 /**
@@ -285,16 +330,26 @@ export function lampRoadNote(
   runTier: Record<string, number> | undefined,
   /** Easy tree: the ring grows on Far step 2, then Far step 3. Hard keeps Level II / III. */
   easyTree = false,
+  /**
+   * Reach this lamp already has in combat (Easy Far steps).
+   * The note names a later step only when the current shot still misses.
+   */
+  extra = 0,
 ): string {
   const tierMap = runTier ?? {}
   const at = lampAnchor(spot)
-  const now = nightTowers.range(spot, ability, progress, tierMap)
+  const held = Math.max(0, extra)
+  const now = nightTowers.range(spot, ability, progress, tierMap, held)
   if (lampReachesRoad(at, now)) return ''
   if (easyTree) {
-    const far2 = nightTowers.range(spot, ability, progress, tierMap, 24)
-    if (lampReachesRoad(at, far2)) return 'Reaches on Far step 2'
-    const far3 = nightTowers.range(spot, ability, progress, tierMap, 40)
-    if (lampReachesRoad(at, far3)) return 'Reaches on Far step 3'
+    if (held < 24) {
+      const far2 = nightTowers.range(spot, ability, progress, tierMap, 24)
+      if (lampReachesRoad(at, far2)) return 'Reaches on Far step 2'
+    }
+    if (held < 40) {
+      const far3 = nightTowers.range(spot, ability, progress, tierMap, 40)
+      if (lampReachesRoad(at, far3)) return 'Reaches on Far step 3'
+    }
     return LAMP_TOO_FAR
   }
   const current = combatTier(ability, tierMap)
@@ -398,16 +453,18 @@ export function previewLamp(
   plants: Record<string, string> = {},
   hudBlocked = false,
   easyTree = false,
+  /** Same Far bonus combat adds before the road-overlap rule. */
+  extra = 0,
 ): LampPreview {
   const spot = freeSpotId(point)
   const at = lampAnchor(spot)
-  const range = nightTowers.range(spot, ability, progress, runTier)
+  const range = nightTowers.range(spot, ability, progress, runTier, Math.max(0, extra))
   const blocked =
     hudBlocked ||
     !isTowerType(ability) ||
     lampSpotBlocked(at, plants, ability)
   const reaches = !blocked && lampReachesRoad(at, range)
-  const note = blocked ? '' : lampRoadNote(spot, ability, progress, runTier, easyTree)
+  const note = blocked ? '' : lampRoadNote(spot, ability, progress, runTier, easyTree, extra)
   return {
     spot,
     at,
@@ -427,8 +484,10 @@ export function commitLamp(
   progress: ProgressState,
   runTier: Record<string, number> | undefined,
   hudBlocked = false,
+  easyTree = false,
+  extra = 0,
 ): { ok: boolean; plants: Record<string, string>; preview: LampPreview } {
-  const preview = previewLamp(point, ability, progress, runTier, plants, hudBlocked)
+  const preview = previewLamp(point, ability, progress, runTier, plants, hudBlocked, easyTree, extra)
   if (preview.blocked) return { ok: false, plants, preview }
   return { ok: true, plants: plantType(plants, preview.spot, ability), preview }
 }

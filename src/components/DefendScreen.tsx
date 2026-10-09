@@ -73,7 +73,9 @@ import {
   dragGhostClient,
   hudCoversPoint,
   LAMP_DRAG_START_PX,
+  lampUnderFinger,
   overTowerCards,
+  pathSpendControl,
   previewLamp,
   roundStartKind,
   startsNextRound,
@@ -305,9 +307,16 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   }
 
   useEffect(() => {
-    const finish = () => {
+    const finish = (ev: PointerEvent) => {
       const armed = armedPathBuy.current
       if (!armed) return
+      const node = ev.target as Element | null
+      const hit = node?.closest?.('.defend-ability, .defend-path-buy, .defend-path-pip')
+      // A planted card opens its tree. Releasing on it must not spend the armed step.
+      if (hit && !pathSpendControl(hit.className)) {
+        armedPathBuy.current = null
+        return
+      }
       armedPathBuy.current = null
       boostPathRef.current(armed.plotId, armed.path, true)
     }
@@ -794,7 +803,16 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     paid: boolean,
   ): boolean {
     if (paid && Object.values(plantsNow).includes(using)) return false
-    const next = commitLamp(plantsNow, point, using, progress, runTier, hud)
+    const next = commitLamp(
+      plantsNow,
+      point,
+      using,
+      progress,
+      runTier,
+      hud,
+      easy,
+      placeBonus(using),
+    )
     if (!next.ok) {
       setGhost(next.preview)
       return false
@@ -857,14 +875,24 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     }
     const using = paid ? (paidId as WatchAbility) : unlocked.includes(ability) ? ability : 'love'
     const hud = hudCoversPoint(event.clientX, event.clientY, svg.ownerDocument)
-    const look = previewLamp(point, using, progress, runTier, plantsRef.current, hud, easy)
+    const seat = lampUnderFinger(point)
+    const look = previewLamp(
+      seat,
+      using,
+      progress,
+      runTier,
+      plantsRef.current,
+      hud,
+      easy,
+      placeBonus(using),
+    )
     if (event.type === 'pointercancel') {
       setGhost(null)
       return
     }
     if (event.type === 'pointerup') {
       if (phase === 'wave') swallowWaveTap.current = true
-      finishPlace(plantsRef.current, point, using, hud, paid)
+      finishPlace(plantsRef.current, seat, using, hud, paid)
       return
     }
     setGhost(look)
@@ -892,17 +920,26 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       return
     }
     const lifted = dragGhostClient(clientX, clientY)
-    const point = clientToMap(svg, lifted.x, lifted.y)
-    if (!point) {
+    const raw = clientToMap(svg, lifted.x, lifted.y)
+    if (!raw) {
       setGhost(null)
       return
     }
+    const point = lampUnderFinger(raw)
     const hud = overTowerCards(clientX, clientY, doc) || hudCoversPoint(lifted.x, lifted.y, doc)
     if (kind === 'move') {
-      setGhost(previewLamp(point, using, progress, runTier, plantsRef.current, hud, easy))
+      setGhost(
+        previewLamp(point, using, progress, runTier, plantsRef.current, hud, easy, placeBonus(using)),
+      )
       return
     }
     finishPlace(plantsRef.current, point, using, hud, paid)
+  }
+
+  /** Far steps this type already owns. The ghost ring uses the same bonus as a shot. */
+  function placeBonus(using: string): number {
+    if (!easy) return 0
+    return lampStrike(pathsOf(runPathsRef.current, using)).rangeBonus
   }
 
   function openUpgrade(id: CityPlotId) {
@@ -1346,6 +1383,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   }
 
   function openPlantedTree(id: WatchAbility) {
+    armedPathBuy.current = null
     const plot = Object.entries(plantsRef.current).find(([, type]) => type === id)?.[0]
     if (plot) openUpgrade(plot as CityPlotId)
   }

@@ -5,7 +5,7 @@ import { boardFill, boardFillPoint, boardPoint as mapBoardPoint, boardView, nigh
 import type { DefendNightSkyProps } from './DefendNightSky'
 import { DefendNightSky } from './DefendNightSky'
 import { DefendTowerCard, type TowerCardPoint } from './DefendTowerCard'
-import { pathsOf, type LampPaths, type TreePath } from '../nightWatch/upgradeTree'
+import { lampStrike, pathsOf, type LampPaths, type TreePath } from '../nightWatch/upgradeTree'
 import {
   DefendNightActorsSvg,
   DefendNightWalkerCue,
@@ -42,8 +42,12 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
   } = props
   const place = plateFill ? boardFillPoint : mapBoardPoint
   const cardAbility = upgradeAt ? towerType[upgradeAt] : undefined
+  const reachBonus =
+    easy && cardAbility ? lampStrike(pathsOf(runPaths, cardAbility)).rangeBonus : 0
   const roadNote =
-    upgradeAt && cardAbility ? lampRoadNote(upgradeAt, cardAbility, progress, runTier, easy) : ''
+    upgradeAt && cardAbility
+      ? lampRoadNote(upgradeAt, cardAbility, progress, runTier, easy, reachBonus)
+      : ''
   const showCard = Boolean(
     upgradeAt && cardAbility && upgradePoint && boardBox && boardBox.w > 0 && onCloseUpgrade,
   )

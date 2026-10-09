@@ -101,7 +101,7 @@ export function DefendAbilityBar({
     placed: boolean,
   ) {
     if (!placing || !open) return
-    // A planted card between waves still upgrades. An unplanted card can be dragged into a paid plant.
+    // A planted card opens its tree on click. It is not a drag and it does not buy.
     if (paidPlace && placed) return
     if (boosting && !paidPlace) return
     if (paidPlace) onArmPlaceRef.current?.(ability)
@@ -210,6 +210,13 @@ export function DefendAbilityBar({
                     event.stopPropagation()
                     onBoostCardPointerRef.current?.()
                     trackCard(event, tool.id, open, placed)
+                  }}
+                  onPointerUp={(event) => {
+                    if (!(easy && boosting && placed && open)) return
+                    event.stopPropagation()
+                    swallowClick.current = true
+                    setToolLock(null)
+                    onOpenTree?.(tool.id)
                   }}
                   onClick={(event) => {
                     event.stopPropagation()
