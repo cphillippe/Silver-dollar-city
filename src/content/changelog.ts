@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.411',
+    title: 'Night Watch Easy fast and tough walkers',
+    when: '2026-10-09',
+    items: [
+      'From round 4, some walkers are fast: slim, leaning, with blue motion streaks, and a short health bar. A lamp that reaches farther catches them.',
+      'From round 7, bulky dark walkers step a little slower and take many more hits. A stronger lamp brings them down, and turning one pays an extra spark.',
+    ],
+  },
+  {
     version: '1.4.410',
     title: 'Night Watch Easy R5 tap value + R6–R7 curve',
     when: '2026-10-09',

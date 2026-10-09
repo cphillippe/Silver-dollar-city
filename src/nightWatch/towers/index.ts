@@ -141,7 +141,9 @@ export function lampReadyToFire(
   return now >= lastFiredAt + cooldownMs
 }
 
-/** One spark when the hit turns the walker. A graze pays nothing. */
-export function sparkAwardForHit(down: boolean): number {
-  return down ? 1 : 0
+/** Sparks when the hit turns the walker. A graze pays nothing. Tough pays more than one. */
+export function sparkAwardForHit(down: boolean, pay = 1): number {
+  if (!down) return 0
+  const sparks = Math.floor(pay)
+  return sparks > 0 ? sparks : 1
 }

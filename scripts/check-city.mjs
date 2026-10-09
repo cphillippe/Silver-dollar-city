@@ -96,6 +96,18 @@ import {
   wavePackSize,
 } from '../src/lib/defend.ts'
 import { EASY_ROUND_SPEED_CAP, EASY_ROUNDS, roundMark } from '../src/nightWatch/rounds.ts'
+import {
+  FAST_HP,
+  FAST_PACE,
+  TOUGH_HP_BONUS,
+  TOUGH_PACE,
+  TOUGH_SPARK,
+  gaitPlan,
+  roundSparkPay,
+  walkerHp,
+  walkerPace,
+  walkerSpark,
+} from '../src/nightWatch/walkers.ts'
 import { paceEasyTree, scoreEasyRoad, scoreEasyTree } from '../src/nightWatch/roundScore.ts'
 import {
   applyPathStep,
@@ -1296,7 +1308,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.410')
+assert.equal(APP_VERSION, '1.4.411')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -5236,7 +5248,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(easyClearHeart(0), 0)
   assert.deepEqual(
     EASY_ROUNDS[4],
-    { count: 6, speed: 6.4, hp: 3, spawn: 0.66 },
+    { count: 6, speed: 6.4, hp: 3, spawn: 0.66, fast: 1, tough: 0 },
     '1.4.410 round 5 keeps its health and walks at the round 6 pace',
   )
   assert.deepEqual(
@@ -5312,6 +5324,111 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.ok(CHANGELOG.some((note) => note.version === '1.4.410'), '1.4.410 changelog row')
   assert.match(latestChange('1.4.410').title, /R5 tap value/i)
   assert.doesNotMatch(latestChange('1.4.410').items.join('\n'), /Fixes #|Closes #|Resolves #/)
+}
+
+// Night Watch 1.4.411: Fast from round 4, Tough from round 7. Shielded stays out.
+{
+  assert.equal(FAST_HP, 2)
+  assert.equal(FAST_PACE, 1.75)
+  assert.ok(TOUGH_PACE < 1 && TOUGH_PACE > 0.5, '1.4.411 tough still walks, slower than a plain walker')
+  assert.equal(TOUGH_HP_BONUS, 16)
+  assert.equal(TOUGH_SPARK, 2)
+  assert.equal(walkerHp(2, 8, 'fast'), FAST_HP, '1.4.411 a fast walker keeps the short bar')
+  assert.equal(walkerHp(2, 8, 'plain'), 10)
+  assert.equal(walkerHp(2, 8, 'tough'), 26, '1.4.411 tough adds a thick bonus on top of the round')
+  assert.equal(walkerPace('fast'), FAST_PACE)
+  assert.equal(walkerPace('tough'), TOUGH_PACE)
+  assert.equal(walkerPace('plain'), 1)
+  assert.equal(walkerSpark('tough'), 2)
+  assert.equal(walkerSpark('fast'), 1)
+  assert.equal(walkerSpark(undefined), 1, '1.4.411 Hard still pays one spark')
+  for (let index = 0; index < 3; index += 1) {
+    assert.equal(EASY_ROUNDS[index].fast, 0, `1.4.411 round ${index + 1} has no fast walkers`)
+    assert.equal(EASY_ROUNDS[index].tough, 0, `1.4.411 round ${index + 1} has no tough walkers`)
+  }
+  for (let index = 3; index < 6; index += 1) {
+    assert.ok(EASY_ROUNDS[index].fast >= 1 && EASY_ROUNDS[index].fast <= 2)
+    assert.equal(EASY_ROUNDS[index].tough, 0, `1.4.411 round ${index + 1} is not tough yet`)
+  }
+  assert.equal(EASY_ROUNDS[6].tough, 4, '1.4.411 round 7 is mostly tough')
+  assert.equal(EASY_ROUNDS[7].tough, 4, '1.4.411 round 8 stays mostly tough')
+  assert.ok(EASY_ROUNDS.slice(6).every((round) => round.tough >= 1))
+  assert.equal(roundSparkPay(EASY_ROUNDS[6]), EASY_ROUNDS[6].count + 4)
+  assert.equal(gaitPlan(EASY_ROUNDS[3]).filter((gait) => gait === 'fast').length, 1)
+  assert.equal(gaitPlan(EASY_ROUNDS[0]).every((gait) => gait === 'plain'), true)
+  const walkers411 = readFileSync(new URL('../src/nightWatch/walkers.ts', import.meta.url), 'utf8')
+  assert.doesNotMatch(walkers411, /shielded/i)
+  const actors411 = readFileSync(new URL('../src/components/DefendNightActors.tsx', import.meta.url), 'utf8')
+  assert.match(actors411, /data-gait/)
+  assert.match(actors411, /defend-fast-streaks/)
+  assert.match(actors411, /defend-tough-bulk/)
+  const css411 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  assert.match(css411, /\.defend-raider\.is-fast/)
+  assert.match(css411, /\.defend-raider\.is-tough/)
+  assert.match(css411, /#7ec8ff/)
+  const screen411 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  assert.match(screen411, /walkerHp\(/)
+  assert.match(screen411, /easy \? gaitForSlot\(easyRound\(wave\), id\) : undefined/)
+  const zero411 = { far: 0, strong: 0 }
+  const spent411 = spendTreeNight(EASY_ROUNDS.map((round) => roundSparkPay(round)), EASY_LAMP_COST)
+  function night411(pathsFor, tapEvery, hit, off, base) {
+    let hearts = 3
+    let lamp = 0
+    let tap = 0
+    const rows = []
+    for (let index = 0; index < 14; index += 1) {
+      const round = paceEasyTree(index, pathsFor(index), hearts, tapEvery, hit, base + index * 17, off)
+      rows.push(round)
+      lamp += round.lampKills
+      tap += round.tapKills
+      if (round.result !== 'clear') return { rows, furthest: index + 1, dead: true, lamp, tap }
+      hearts = easyClearHeart(round.hearts)
+    }
+    return { rows, furthest: rows.length, dead: false, lamp, tap }
+  }
+  const seeds411 = Array.from({ length: 8 }, (_, seed) => 1 + seed * 97)
+  const active411 = seeds411.map((base) => night411(() => [zero411, zero411], 1, 0.9, 0, base))
+  const quiet411 = seeds411.map((base) => night411(() => [zero411, zero411], 0, 0.9, 0, base))
+  const spendActive = seeds411.map((base) =>
+    night411((index) => (index === 0 ? [zero411, zero411] : spent411.rows[index - 1].lamps), 1, 0.9, 0, base),
+  )
+  const spendModest = seeds411.map((base) =>
+    night411((index) => (index === 0 ? [zero411, zero411] : spent411.rows[index - 1].lamps), 3, 0.9, 0, base),
+  )
+  const share = (run) => (run.lamp + run.tap === 0 ? 0 : run.lamp / (run.lamp + run.tap))
+  assert.ok(
+    quiet411.every((run) => run.rows.slice(0, 4).every((round) => round.result === 'clear' && round.hearts === 3)),
+    '1.4.411 rounds 1–4 stay full with no taps',
+  )
+  assert.ok(
+    active411.every((run) => run.rows.slice(0, 4).every((round) => round.result === 'clear' && round.hearts === 3)),
+    '1.4.411 rounds 1–4 stay full with active taps',
+  )
+  assert.ok(
+    quiet411.filter((run) => run.dead && run.furthest === 5).length >= 5,
+    '1.4.411 Level I with no taps still loses on round 5',
+  )
+  assert.ok(
+    active411.filter((run) => run.furthest > 5).length >= 5,
+    '1.4.411 active taps still hold round 5',
+  )
+  assert.ok(
+    active411.filter((run) => run.dead && run.furthest >= 7 && run.furthest <= 8).length >= 5,
+    '1.4.411 an active tapper with no upgrades loses on round 7 or 8',
+  )
+  assert.ok(
+    spendActive.filter((run) => run.furthest >= 12).length >= 5,
+    '1.4.411 a spender with active taps reaches round 12',
+  )
+  assert.ok(
+    spendModest.filter((run) => run.furthest >= 10).length >= 5,
+    '1.4.411 a spender with modest taps reaches round 10',
+  )
+  const modestShare = share(spendModest[0])
+  assert.ok(modestShare > 0.5, '1.4.411 modest taps leave most kills to the lamps')
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.411'), '1.4.411 changelog row')
+  assert.match(latestChange('1.4.411').title, /fast and tough/i)
+  assert.doesNotMatch(latestChange('1.4.411').items.join('\n'), /Fixes #|Closes #|Resolves #/)
 }
 
 // Night Watch 1.4.392: reach cue, a longer level-I free lamp, and a plant pin.
@@ -10791,7 +10908,12 @@ console.log('check-city: ok')
   assert.match(watch327, /export function applyBoost/)
   assert.match(defendScreenOnlySrc, /runTier/)
   assert.match(defendScreenOnlySrc, /runSparks/)
-  assert.match(defendScreenOnlySrc, /setRunSparks\(\(count\) => count \+ 1\)/, '1.4.327 a down earns a spark')
+  assert.match(
+    defendScreenOnlySrc,
+    /setRunSparks\(\(count\) => count \+ sparks\)/,
+    '1.4.411 a down earns that walker\'s sparks',
+  )
+  assert.match(defendScreenOnlySrc, /setRunSparks\(\(count\) => count \+ walkerSpark\(pick\.gait\)\)/)
   assert.match(defendScreenOnlySrc, /setPhase\('boost'\)/, '1.4.327 wave clear opens boost')
   assert.match(defendScreenOnlySrc, /continueFromBoost/, '1.4.327 boost can continue')
   assert.match(
@@ -10906,7 +11028,7 @@ console.log('check-city: ok')
   assert.match(boostFn, /setPhase\('wave'\)/)
   assert.match(boostFn, /setWon\(true\)/)
   assert.doesNotMatch(boostFn, /freshRunTier|setRunSparks\(0\)|recordNight/, '1.4.328 sparks and tier persist between waves')
-  assert.match(defendScreenOnlySrc, /setRunSparks\(\(count\) => count \+ 1\)/)
+  assert.match(defendScreenOnlySrc, /setRunSparks\(\(count\) => count \+ sparks\)/)
   assert.match(defendScreenOnlySrc, /applyBoost/)
   assert.match(defendScreenOnlySrc, /setWaveIndex\(0\)/, '1.4.328 a lost night resets the wave')
   assert.match(defendScreenOnlySrc, /setRunTier\(freshRunTier\(\)\)/)
