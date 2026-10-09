@@ -7,7 +7,7 @@ import { CITY_PLOTS, type CityPlotId } from './city.ts'
 
 import { EASY } from './easyUi.ts'
 export { EASY }
-import { EASY_CHROME } from './easyChrome.ts'
+import { EASY_CHROME, EASY_STRIP_FACE } from './easyChrome.ts'
 
 export {
   DIG_ARC,
@@ -100,7 +100,7 @@ export function easyMainIdea(text: string): string {
 
 /** Easy buttons, tiles, and hints — plain words plus a short example. Hard copy stays. */
 export function easyChromeLine(text: string): string {
-  const direct = EASY_CHROME[text]
+  const direct = EASY_CHROME[text] ?? EASY_STRIP_FACE[text]
   if (direct) return direct
   return easyMainIdea(text)
     .replace(/first-century banking/gi, 'old money rules')
@@ -177,7 +177,24 @@ export function easyFacingLine(id: string | undefined, text: string): string {
     const easy = EASY_LINES[id]
     if (text === easy || text === evidenceFor(id)?.claim) return easy
   }
+  const strip = EASY_STRIP_FACE[text]
+  if (strip) return strip
   return easyMainIdea(text)
+}
+
+/** Easy plain-words chip. Hard WordGloss keeps the pack term. */
+export function easyPlainWord(
+  id: string,
+  term: string,
+  sense: string,
+): { term: string; sense: string } {
+  if ((id === 'wb-creed' || id === 'daily-creed') && term === 'Creed') {
+    return {
+      term: 'A short list of what Christians believe',
+      sense,
+    }
+  }
+  return { term, sense }
 }
 
 /** Hold review chips: one button per shown line. Keep the true answer; drop identical faces. */

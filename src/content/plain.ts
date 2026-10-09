@@ -29,7 +29,7 @@ function line(
 const PLAIN: Record<string, PlainLine> = {
   'ph-road': line(
     'A neighbor is the person who shows mercy — not the person who looks like you.',
-    'Jesus tells a story. A hurt man lies on the road. Religious men walk past. A Samaritan is moved with compassion and helps. Then Jesus asks who *proved* to be a neighbor.',
+    'Jesus tells a story. A hurt man lies on the road. Religious men walk past. A Samaritan felt sorry and helped. Then Jesus asks who *proved* to be a neighbor.',
     {
       term: 'Samaritan',
       sense: 'someone the listener did not expect to be the hero',
@@ -52,7 +52,7 @@ const PLAIN: Record<string, PlainLine> = {
     { term: 'Debt', sense: 'what you owe and cannot pay', hint: 'Keep the mercy. Toss the choke. Example: a huge bill wiped, then a tiny one demanded.' },
   ),
   'wb-creed': line(
-    'Paul hands on an old shared belief: died, buried, raised, appeared.',
+    'Paul passes on a short list of what Christians believe: died, buried, raised, appeared.',
     'This is not Paul’s private dream. He says the churches were already saying it: Christ died, was buried, was raised, and was seen.',
     {
       term: 'Creed',
