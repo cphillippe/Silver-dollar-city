@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.419',
+    title: 'Night Watch walkers keep their own faces',
+    when: '2026-10-09',
+    items: [
+      'Walkers on the road together wear different heads, picked from the six portraits already in the game. A later wave uses the same pick, so 3× shows the same heads as 1×.',
+      'Fast keeps the blue rim, Tough keeps the orange bulk, and the boss keeps the crimson mantle and gold crown. Hits and health stay the same.',
+    ],
+  },
+  {
     version: '1.4.418',
     title: 'Night Watch lamp lands on the finger',
     when: '2026-10-09',

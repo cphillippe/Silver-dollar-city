@@ -24,6 +24,12 @@ import {
   type NightRaider as Raider,
   type NightShot as Shot,
 } from '../nightWatch'
+import {
+  WALKER_HEAD_SIZE,
+  WALKER_HEAD_VIEW,
+  WALKER_HEAD_X,
+  WALKER_PORTRAIT_PX,
+} from '../nightWatch/enemies/faces'
 import type { ProgressState, WalkerKind } from '../types'
 
 export interface EasyTapJuice {
@@ -32,6 +38,8 @@ export interface EasyTapJuice {
   left: number
   top: number
   kind: WalkerKind
+  /** Portrait on the walker that was tapped. Falls back to kind. */
+  face?: WalkerKind
   /** Last hit — juice lifts heavenward; otherwise squash only. */
   down?: boolean
 }
@@ -394,6 +402,7 @@ export function DefendNightActorsSvg({
                     key={raider.id}
                     data-person-node={isTap ? 'walker' : undefined}
                     data-gait={raider.gait && raider.gait !== 'plain' ? raider.gait : undefined}
+                    data-face={raider.face ?? raider.kind}
                     className={`defend-raider ${raider.gait === 'fast' ? 'is-fast' : ''} ${raider.gait === 'tough' ? 'is-tough' : ''} ${raider.boss ? 'is-boss' : ''} ${raider.turned ? 'is-turned' : ''} ${isTap ? 'is-easy-tap-target' : ''} ${isCue ? 'is-easy-cue' : ''} ${lampHit ? 'is-lamp-hit' : ''}`}
                     data-boss={raider.boss ? 'yes' : undefined}
                     transform={`translate(${at.x} ${at.y})`}
@@ -459,15 +468,33 @@ export function DefendNightActorsSvg({
                       rx={(raider.gait === 'tough' ? 18 : 13) * (PATH_WALKER_FACE_U / 36)}
                       ry={(raider.gait === 'tough' ? 6.2 : 4.6) * (PATH_WALKER_FACE_U / 36)}
                     />
-                    <image
-                      className={`defend-raider-face${easy && !raider.turned ? ' is-dark-face' : ''}`}
-                      href={nightEnemies.faceSrc(raider.kind, easy)}
-                      x={-FACE_HALF}
-                      y={FACE_TOP}
-                      width={PATH_WALKER_FACE_U}
-                      height={PATH_WALKER_FACE_U}
-                      clipPath="url(#defend-face-clip)"
-                    />
+                    {easy && !raider.turned ? (
+                      <svg
+                        className="defend-raider-face is-dark-face"
+                        x={-FACE_HALF}
+                        y={FACE_TOP}
+                        width={PATH_WALKER_FACE_U}
+                        height={PATH_WALKER_FACE_U}
+                        viewBox={WALKER_HEAD_VIEW}
+                        clipPath="url(#defend-face-clip)"
+                      >
+                        <image
+                          href={nightEnemies.faceSrc(raider.face ?? raider.kind, true)}
+                          width={WALKER_PORTRAIT_PX}
+                          height={WALKER_PORTRAIT_PX}
+                        />
+                      </svg>
+                    ) : (
+                      <image
+                        className="defend-raider-face"
+                        href={nightEnemies.faceSrc(raider.kind, easy)}
+                        x={-FACE_HALF}
+                        y={FACE_TOP}
+                        width={PATH_WALKER_FACE_U}
+                        height={PATH_WALKER_FACE_U}
+                        clipPath="url(#defend-face-clip)"
+                      />
+                    )}
                     {lampHit ? (
                       <circle
                         className="defend-face-flash"
@@ -703,17 +730,27 @@ export function DefendNightWalkerCue({
                   {tapJuice.combo > 1 ? (
                     <span className="easy-tap-combo">×{tapJuice.combo}</span>
                   ) : null}
-                  <img
-                    className="walker-face easy-walker-face"
-                    src={nightEnemies.faceSrc(tapJuice.kind, true)}
-                    alt=""
-                    draggable={false}
-                    aria-hidden
-                    style={{
-                      width: EASY_WALKER_FACE_PX,
-                      height: EASY_WALKER_FACE_PX,
-                    }}
-                  />
+                  <span className="easy-juice-head">
+                    <img
+                      className="walker-face easy-walker-face"
+                      src={nightEnemies.faceSrc(tapJuice.face ?? tapJuice.kind, true)}
+                      alt=""
+                      draggable={false}
+                      aria-hidden
+                      style={{
+                        position: 'absolute',
+                        width: (EASY_WALKER_FACE_PX * WALKER_PORTRAIT_PX) / WALKER_HEAD_SIZE,
+                        height: (EASY_WALKER_FACE_PX * WALKER_PORTRAIT_PX) / WALKER_HEAD_SIZE,
+                        left: (-WALKER_HEAD_X * EASY_WALKER_FACE_PX) / WALKER_HEAD_SIZE,
+                        top: 0,
+                        margin: 0,
+                        minWidth: 0,
+                        minHeight: 0,
+                        borderRadius: 0,
+                        boxShadow: 'none',
+                      }}
+                    />
+                  </span>
                 </div>
               </div>
             ) : null}

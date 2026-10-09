@@ -113,6 +113,7 @@ import {
   walkerSpark,
 } from '../src/nightWatch/walkers.ts'
 import { paceEasyTree, scoreEasyRoad, scoreEasyTree } from '../src/nightWatch/roundScore.ts'
+import { pickWalkerFace, WALKER_FACE_POOL } from '../src/nightWatch/enemies/faces.ts'
 import {
   applyPathStep,
   canTake,
@@ -1356,7 +1357,45 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.418')
+assert.equal(APP_VERSION, '1.4.419')
+
+// Night Watch 1.4.419: on-screen walkers do not share a head. Kind and boss stats stay put.
+{
+  assert.equal(WALKER_FACE_POOL.length, 6, '1.4.419 six portraits already in the repo')
+  assert.equal(new Set(WALKER_FACE_POOL).size, WALKER_FACE_POOL.length)
+  const first = pickWalkerFace(0, 0, [])
+  assert.equal(first, 'skeptic')
+  assert.equal(pickWalkerFace(0, 0, []), first, '1.4.419 the same spawn picks the same face')
+  const live = []
+  for (let spawn = 0; spawn < 3; spawn++) {
+    const face = pickWalkerFace(4, spawn, live)
+    assert.equal(live.includes(face), false, '1.4.419 a live walker does not share a head')
+    live.push(face)
+  }
+  assert.equal(live.length, 3)
+  assert.equal(pickWalkerFace(4, 1, [live[0]]), live[1], '1.4.419 3× sees the same head as 1×')
+  const cast = raidForWave(0, 0, 4, true)
+  assert.equal(cast.kind, 'skeptic', '1.4.419 the climb kind stays the accuser')
+  assert.equal(cast.id, 'accuser')
+  const screen419 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  assert.match(screen419, /pickWalkerFace\(/)
+  assert.match(screen419, /kind: cast\.kind/)
+  assert.doesNotMatch(screen419, /kind: face/)
+  const actors419 = readFileSync(new URL('../src/components/DefendNightActors.tsx', import.meta.url), 'utf8')
+  assert.match(actors419, /data-face=\{raider\.face \?\? raider\.kind\}/)
+  assert.match(actors419, /defend-boss-crown/)
+  assert.match(actors419, /defend-fast-rim/)
+  assert.match(actors419, /defend-tough-bulk/)
+  assert.match(actors419, /viewBox=\{WALKER_HEAD_VIEW\}/)
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.419'), '1.4.419 changelog row')
+  assert.match(latestChange('1.4.419').items.join('\n'), /blue rim/)
+  assert.doesNotMatch(
+    latestChange('1.4.419').items.join('\n'),
+    /Fixes #|Closes #|Resolves #/,
+    '1.4.419 changelog avoids GitHub close keywords',
+  )
+}
+
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
