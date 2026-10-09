@@ -56,6 +56,28 @@ const CUTOUT_BACKDROP: Record<string, SequenceBackdrop> = {
   'road5-inn': { sky: '#f6e2b8', horizon: '#fff6dd', ground: '#c4a06a' },
 }
 
+/**
+ * Easy thumbnail focus. The priest’s white headpiece and Jesus’s bare hair
+ * are in the art; a small card was showing two pale robes. Crop toward the
+ * identifying head and name it. Hard keeps the uncropped picture.
+ */
+export interface SequenceFigure {
+  cue: 'Jesus' | 'Priest'
+  x: string
+  y: string
+  ox: string
+  oy: string
+  scale: number
+}
+
+export const SEQUENCE_FIGURE: Record<string, SequenceFigure> = {
+  'road1-lawyer': { cue: 'Jesus', x: '28%', y: '8%', ox: '28%', oy: '14%', scale: 1.55 },
+  'road3-temple': { cue: 'Priest', x: '76%', y: '4%', ox: '76%', oy: '8%', scale: 1.7 },
+  'creed1-died': { cue: 'Jesus', x: '50%', y: '20%', ox: '50%', oy: '28%', scale: 1.25 },
+  'creed3-raised': { cue: 'Jesus', x: '40%', y: '14%', ox: '40%', oy: '18%', scale: 1.48 },
+  'creed4-appeared': { cue: 'Jesus', x: '74%', y: '14%', ox: '74%', oy: '18%', scale: 1.62 },
+}
+
 /** Fallback only. ph-road items carry their own cutout keys. */
 const ROAD_SCENES: StoryScene[] = ['hurt', 'walk-past', 'help', 'neighbor']
 

@@ -9,7 +9,7 @@ import type { SequenceChallenge, SequenceItem } from '../../types'
 import { shuffle } from '../../lib/shuffle'
 import { playGemPop, prefersReducedMotion } from '../../lib/juice'
 import { isEasy } from '../../lib/easy'
-import { resolveSequenceVisual } from '../../lib/sequenceArt'
+import { resolveSequenceVisual, SEQUENCE_FIGURE } from '../../lib/sequenceArt'
 import { SEQUENCE_DECOY, sequenceVerse } from '../../lib/sequenceVerse'
 import { useProgress } from '../../store/progress'
 import { WinBurst } from './WinBurst'
@@ -24,14 +24,23 @@ interface SequencePlayProps {
 
 type Mark = 'yes' | 'no' | null
 
-function toCard(item: SequenceItem, index: number, challengeId: string, decoy = false): StripCard {
+function toCard(
+  item: SequenceItem,
+  index: number,
+  challengeId: string,
+  decoy = false,
+  easy = false,
+): StripCard {
+  const figure = !decoy && easy && item.art ? SEQUENCE_FIGURE[item.art] : undefined
   return {
     id: item.id,
     text: item.text,
     shortText: decoy ? undefined : item.shortCaption,
+    winText: !decoy && easy ? item.winCaption : undefined,
     role: decoy ? undefined : item.role,
     orderIndex: decoy ? -1 : index,
     decoy,
+    figure,
     visual: decoy
       ? resolveSequenceVisual(challengeId, { id: item.id, text: item.text, gem: 'coin' }, -1)
       : resolveSequenceVisual(challengeId, item, index),
@@ -45,7 +54,7 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
   const verse = sequenceVerse(challenge.id)
   const solved = useRef(false)
   const deck = useMemo(() => {
-    const cards = challenge.items.map((item, index) => toCard(item, index, challenge.id))
+    const cards = challenge.items.map((item, index) => toCard(item, index, challenge.id, false, easy))
     const decoyText = SEQUENCE_DECOY[challenge.id]
     const extra =
       !easy && decoyText
@@ -172,6 +181,7 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
   return (
     <div
       className={`play is-sequence is-story-strip ${status === 'ok' ? 'is-win' : ''}`}
+      data-line={challenge.id}
       data-n={count}
       data-testid="story-strip"
     >
@@ -246,7 +256,7 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
           {verse && verseOn ? (
             <figure className="strip-verse">
               <figcaption>{verse.kicker}</figcaption>
-              <blockquote>“{verse.text}”</blockquote>
+              <blockquote>“{easy && verse.easyText ? verse.easyText : verse.text}”</blockquote>
               <cite>{verse.ref}</cite>
             </figure>
           ) : null}

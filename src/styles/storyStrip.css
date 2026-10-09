@@ -161,6 +161,32 @@
   transform-origin: center 32%;
 }
 
+/* Easy: pull the identifying head forward. Jesus’s hair, the priest’s headpiece. */
+html[data-easy='on'] .strip-art.is-focus img {
+  object-position: var(--focus-x, center) var(--focus-y, center);
+  transform: scale(var(--focus-scale, 1.2));
+  transform-origin: var(--focus-ox, center) var(--focus-oy, 32%);
+}
+
+html[data-easy='on'] .strip-cue {
+  position: absolute;
+  z-index: 4;
+  left: 50%;
+  bottom: 1px;
+  transform: translateX(-50%);
+  max-width: calc(100% - 4px);
+  padding: 0 3px;
+  border-radius: 6px;
+  background: #fff3d6;
+  color: #3b1546;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
 /* Story stills use the same contain framing as cutouts so heads are not cropped. */
 .strip-art.is-story .story-art-tile,
 .strip-art.is-story .story-art {
@@ -454,6 +480,14 @@
   padding: 1px 1px 0;
 }
 
+/* Easy Samaritan win: two short lines, so the picture stays the tall part of the card. */
+html[data-easy='on'] .strip-board.is-win[data-n='5'] .strip-cap.is-slot {
+  font-size: 11px;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  padding: 0 1px;
+}
+
 .strip-board.is-win[data-n='3'] .strip-cap {
   font-size: 13px;
   line-height: 1.1;
@@ -476,6 +510,27 @@
 .play.is-story-strip.is-win .strip-verse blockquote {
   font-size: 13px;
   line-height: 1.18;
+}
+
+/* Easy Samaritan win: the Luke line stays under the pictures, shorter than the art. */
+html[data-easy='on'] .play.is-story-strip.is-win[data-line='ph-road'] .strip-verse {
+  padding: 2px 8px 3px;
+}
+
+html[data-easy='on'] .play.is-story-strip.is-win[data-line='ph-road'] .strip-verse figcaption {
+  font-size: 10px;
+  line-height: 1.1;
+}
+
+html[data-easy='on'] .play.is-story-strip.is-win[data-line='ph-road'] .strip-verse blockquote {
+  margin: 1px 0;
+  font-size: 13px;
+  line-height: 1.1;
+}
+
+html[data-easy='on'] .play.is-story-strip.is-win[data-line='ph-road'] .strip-verse cite {
+  font-size: 11px;
+  line-height: 1.1;
 }
 
 .strip-stamp {

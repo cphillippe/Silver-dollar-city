@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.414',
+    title: 'Story strip faces stay apart',
+    when: '2026-10-09',
+    items: [
+      'On Easy, the small Samaritan and creed pictures name Jesus and the priest. The crop sits on Jesus’s hair and on the priest’s headpiece, so the two robes do not read as the same man.',
+      'The Good Samaritan win lines sit in a shorter band, and the Luke line under the pictures is shorter too. The meaning stays: the one who shows mercy is the neighbor.',
+    ],
+  },
+  {
     version: '1.4.413',
     title: 'Night Watch Easy flat taps',
     when: '2026-10-09',
