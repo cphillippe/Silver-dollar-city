@@ -112,7 +112,7 @@ import {
   walkerPace,
   walkerSpark,
 } from '../src/nightWatch/walkers.ts'
-import { paceEasyTree, scoreEasyRoad, scoreEasyTree } from '../src/nightWatch/roundScore.ts'
+import { paceEasyTree, scoreEasyRoad, scoreEasyTree, KID_TAP_REACT_S, KID_TAP_WASTE } from '../src/nightWatch/roundScore.ts'
 import {
   pickWalkerFace,
   WALKER_FACE_POOL,
@@ -1362,7 +1362,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.420')
+assert.equal(APP_VERSION, '1.4.421')
 
 // Night Watch 1.4.419: on-screen walkers do not share a head. Kind and boss stats stay put.
 {
@@ -5152,6 +5152,115 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   )
 }
 
+// Night Watch 1.4.421: a thinner round-5 boss, kid taps, path colors, clear-panel taps.
+{
+  const screen421 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const css421 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const card421 = readFileSync(new URL('../src/components/DefendTowerCard.tsx', import.meta.url), 'utf8')
+  const splash421 = readFileSync(new URL('../src/components/NightSkillSplash.tsx', import.meta.url), 'utf8')
+  assert.equal(KID_TAP_WASTE, 0.3, '1.4.421 about 30% of a kid tap misses')
+  assert.equal(KID_TAP_REACT_S, 0.45, '1.4.421 a kid tap lands after a short wait')
+  assert.equal(easyBossHp(4), 12, '1.4.421 round 5 boss is thinner')
+  assert.equal(easyBossHp(9), 44, '1.4.421 round 10 boss stays thick')
+  assert.equal(easyBossHp(14), 200, '1.4.421 round 15 boss stays thick')
+  assert.equal(easyBossHp(19), 260, '1.4.421 round 20 boss stays thick')
+  assert.equal(easyBossHp(24), 320, '1.4.421 round 25 boss stays thick')
+  assert.equal(easyLatePush(11), 0, '1.4.421 the late push still starts at round 13')
+  assert.equal(easyLatePush(14), 18, '1.4.421 round 15 push stays')
+  assert.equal(BOSS_PACE, 0.7, '1.4.421 later bosses keep the same step')
+  const dismiss421 = screen421.slice(
+    screen421.indexOf('function dismissSkillSplash'),
+    screen421.indexOf('function combatPace'),
+  )
+  assert.doesNotMatch(dismiss421, /setPhase\(/, '1.4.421 Got it does not start the round')
+  assert.match(screen421, /phase === 'wave' && skillSplash/, '1.4.421 the skill card waits for the wave')
+  assert.match(screen421, /skillHoldRef/)
+  assert.match(splash421, /Got it/)
+  assert.match(splash421, /stopPropagation\(\)/)
+  assert.doesNotMatch(splash421, /aria-modal/)
+  assert.match(css421, /\.nw-skill-splash \{[^}]*bottom:\s*176px/)
+  assert.match(css421, /\.nw-skill-splash \{[^}]*pointer-events:\s*none/)
+  assert.match(css421, /\.nw-skill-card \{[^}]*pointer-events:\s*auto/)
+  assert.match(css421, /\.nw-docks \.defend-boost \{[^}]*pointer-events:\s*none/)
+  assert.match(css421, /\.defend-path\[data-path='far'\] button\.defend-path-pip\.is-buy[\s\S]*?#7ecbff/)
+  assert.match(css421, /\.defend-path\[data-path='strong'\] button\.defend-path-pip\.is-buy[\s\S]*?#ff8a4a/)
+  const greyBuy421 = css421.indexOf('.defend-tower-card .btn.primary.defend-path-buy:disabled')
+  const farBuy421 = css421.indexOf(
+    ".defend-tower-card .defend-path[data-path='far'] .btn.primary.defend-path-buy:disabled",
+  )
+  const strongBuy421 = css421.indexOf(
+    ".defend-tower-card .defend-path[data-path='strong'] .btn.primary.defend-path-buy:disabled",
+  )
+  assert.ok(greyBuy421 > 0 && farBuy421 > greyBuy421 && strongBuy421 > farBuy421)
+  assert.match(
+    css421.slice(farBuy421, strongBuy421),
+    /background-color:\s*#1d4e89/,
+    '1.4.421 a Far buy stays blue when it says Need',
+  )
+  assert.match(
+    css421.slice(strongBuy421, strongBuy421 + 400),
+    /background-color:\s*#8a3412/,
+    '1.4.421 a Strong buy stays orange when it says Need',
+  )
+  assert.match(card421, /className="defend-path-mark"/)
+  assert.match(card421, /onUpgradePath\(path, true\)/)
+  assert.match(
+    css421,
+    /\.defend-tower-card \.defend-path-pips \{[^}]*pointer-events:\s*auto/,
+    '1.4.421 path pips stay their own pointer rule',
+  )
+  const zero421 = { far: 0, strong: 0 }
+  const fourI421 = [zero421, zero421, zero421, zero421]
+  const oneII421 = [{ far: 0, strong: 2 }, zero421, zero421, zero421]
+  const seeds421 = Array.from({ length: 8 }, (_, seed) => 1 + seed * 97)
+  function night421(pathsFor, tapEvery, through, base) {
+    let hearts = 3
+    const rows = []
+    for (let index = 0; index < through; index += 1) {
+      const heartsIn = hearts
+      const round = paceEasyTree(index, pathsFor(index), hearts, tapEvery, 1, base + index * 17, 0, 1, true)
+      rows.push({ ...round, heartsIn })
+      if (round.result !== 'clear') return { rows, dead: index + 1 }
+      hearts = easyClearHeart(round.hearts)
+    }
+    return { rows, dead: null }
+  }
+  const quiet421 = seeds421.map((base) => night421(() => fourI421, 0, 8, base))
+  const light421 = seeds421.map((base) => night421(() => oneII421, 4, 12, base))
+  const active421 = seeds421.map((base) => night421(() => fourI421, 3, 12, base))
+  assert.ok(
+    quiet421.every((run) => run.dead === 5 && run.rows[4].hearts === 0 && run.rows[4].taps === 0),
+    '1.4.421 zero taps on four Level I lamps lose round 5',
+  )
+  assert.ok(
+    light421.every((run) => run.dead === 9 && run.rows[4].hearts === 3 && run.rows[4].result === 'clear'),
+    '1.4.421 light taps plus one Strong step 2 hold round 5',
+  )
+  assert.ok(
+    active421.every(
+      (run) =>
+        (run.dead === 7 || run.dead === 8) &&
+        run.rows[4].result === 'clear' &&
+        run.rows[4].hearts > 0,
+    ),
+    '1.4.421 active taps clear round 5 and wall on round 7 or 8',
+  )
+  for (const every of [0, 3]) {
+    for (const base of seeds421) {
+      const slow = paceEasyTree(4, fourI421, 3, every, 1, base, 0, 1, true)
+      const fast = paceEasyTree(4, fourI421, 3, every, 1, base, 0, 3, true)
+      assert.equal(fast.result, slow.result, '1.4.421 kid pace 3 matches pace 1')
+      assert.equal(fast.hearts, slow.hearts)
+      assert.equal(fast.taps, slow.taps)
+    }
+  }
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.421'), '1.4.421 changelog row')
+  assert.match(latestChange('1.4.421').title, /round 5 boss/i)
+  assert.doesNotMatch(latestChange('1.4.421').items.join('\n'), /Fixes #|Closes #|Resolves #/)
+  assert.match(latestChange('1.4.416').title, /taller strip/i)
+  assert.match(latestChange('1.4.414').title, /Story strip/i)
+}
+
 // Night Watch 1.4.402: the first six Easy rounds. Later slices append; they do not retune these.
 {
   assert.deepEqual(
@@ -5936,7 +6045,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     assert.equal(easyBossRound(index), false)
     if (index < EASY_ROUNDS.length) assert.equal(waveCombat(index, true).size, EASY_ROUNDS[index].count)
   }
-  assert.equal(easyBossHp(4), 20, '1.4.417 round 5 boss stays soft')
+  assert.equal(easyBossHp(4), 12, '1.4.421 round 5 boss is the thinner teaching bar')
   assert.equal(easyBossHp(9), 44)
   assert.equal(easyBossHp(14), 200, '1.4.417 round 15 boss is thick')
   assert.equal(easyBossHp(19), 260, '1.4.417 round 20 boss is thick')
