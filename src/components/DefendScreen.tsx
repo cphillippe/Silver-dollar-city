@@ -19,6 +19,8 @@ import {
   applyEasyPaceLeaks,
   applyGateLeaks,
   cueTapStrike,
+  easyClearHeart,
+  easyGlowTapDamage,
   WATCH_ABILITY_LABEL,
   dist,
   unlockedWatchAbilities,
@@ -228,6 +230,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const planted = useMemo(() => Object.keys(plants) as CityPlotId[], [plants])
   const [hearts, setHearts] = useState(DEFEND_HEARTS)
   const [heartDrop, setHeartDrop] = useState<{ at: number; count: number } | null>(null)
+  const [heartPop, setHeartPop] = useState(false)
   const [raiders, setRaiders] = useState<Raider[]>([])
   const [downed, setDowned] = useState(0)
   const [flash, setFlash] = useState<CityPlotId[]>([])
@@ -525,6 +528,14 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         setPhase('lost')
         return
       }
+      const grantClearHeart = () => {
+        const next = easyClearHeart(live.current.hearts)
+        if (next === live.current.hearts) return
+        live.current.hearts = next
+        setHearts(next)
+        setHeartPop(true)
+        window.setTimeout(() => setHeartPop(false), 1200)
+      }
       if (
         nightEnemies.isClear(
           easy,
@@ -534,6 +545,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           tune.size,
         )
       ) {
+        if (easy) grantClearHeart()
         live.current.playing = false
         setToolLock(null)
         setPhase('boost')
@@ -545,6 +557,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         alive.filter((item) => !item.turned).length === 0 &&
         live.current.hearts > 0
       ) {
+        grantClearHeart()
         live.current.playing = false
         setToolLock(null)
         setPhase('boost')
@@ -850,7 +863,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       combo: nextCombo,
     }
     if (fit === 'match') {
-      const struck = nightEnemies.hit(best, tier)
+      const struck = nightEnemies.hit(best, easy && manual ? easyGlowTapDamage(tier, best.hp) : tier)
       const sparks = sparkAwardForHit(struck.down)
       blast.pop = struck.down
       blast.spark = sparks
@@ -1382,6 +1395,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           )
         })}
         {mendShield ? <span className="nw-mend-hold">Gate</span> : null}
+        {heartPop ? (
+          <span className="defend-heart-gain" data-heart-gain="+1">
+            +1 ♥
+          </span>
+        ) : null}
         {powerBanner ? <span className="nw-power-chip">{powerBanner}</span> : null}
       </span>
       <span className={`defend-count ${combo > 1 ? 'is-combo' : ''}`}>
