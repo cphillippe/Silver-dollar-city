@@ -64,7 +64,21 @@ export function StoryPiece({
 
   const edges = pieceEdges(card.orderIndex, count, hard)
   const slotText = caption === 'slot' && card.shortText ? card.shortText : null
-  const captionHeight = showCaption ? (slotText ? 40 : compact ? (count >= 5 ? 50 : 46) : 52) : 0
+  const captionHeight = showCaption
+    ? caption === 'slot'
+      ? count >= 5
+        ? 28
+        : 30
+      : compact
+        ? count >= 5
+          ? 76
+          : count >= 4
+            ? 46
+            : 34
+        : count >= 5
+          ? 48
+          : 38
+    : 0
   const path = piecePath(box.w, box.h, edges.left, edges.right, captionHeight)
   const { backdrop } = card.visual
   const face = (

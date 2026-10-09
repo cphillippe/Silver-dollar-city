@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.403',
+    title: 'Story strip pictures grow',
+    when: '2026-10-09',
+    items: [
+      'Easy order pictures take more of each card, in the slots, the tray, and the win. On the Samaritan road, the win words are easier to read, and the last picture is the inn, where the helper pays for the man’s care.',
+    ],
+  },
+  {
     version: '1.4.402',
     title: 'Night Watch Easy runs six rounds',
     when: '2026-10-09',
