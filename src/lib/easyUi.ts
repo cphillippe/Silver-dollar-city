@@ -90,7 +90,7 @@ export const EASY = {
     'Round clear. Tap a planted lamp. Far reaches farther. Strong hits harder. Steps cost 3, then 6, then 12 sparks. One path goes to three. The other stops at one. A new lamp costs 5 — drag its card, or tap it and then the ground.',
   nightBoostPick: 'Skills',
   nightKeepLamp: 'Keep one lamp — tap a ring to plant more.',
-  nightMiss: 'Wrong — tap the glowing face',
+  nightMiss: 'Tap the glowing face',
   startEasy: 'Start Easy',
   welcomeEyebrow: 'A short trail',
   welcomeTag: 'Reasons to believe',
