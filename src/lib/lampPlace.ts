@@ -258,11 +258,20 @@ export function lampRoadNote(
   ability: string,
   progress: ProgressState,
   runTier: Record<string, number> | undefined,
+  /** Easy tree: the ring grows on Far step 2, then Far step 3. Hard keeps Level II / III. */
+  easyTree = false,
 ): string {
   const tierMap = runTier ?? {}
   const at = lampAnchor(spot)
   const now = nightTowers.range(spot, ability, progress, tierMap)
   if (lampReachesRoad(at, now)) return ''
+  if (easyTree) {
+    const far2 = nightTowers.range(spot, ability, progress, tierMap, 24)
+    if (lampReachesRoad(at, far2)) return 'Reaches on Far step 2'
+    const far3 = nightTowers.range(spot, ability, progress, tierMap, 40)
+    if (lampReachesRoad(at, far3)) return 'Reaches on Far step 3'
+    return LAMP_TOO_FAR
+  }
   const current = combatTier(ability, tierMap)
   for (let tier = current + 1; tier <= TOOL_TIER_MAX; tier++) {
     const bumped = nightTowers.range(spot, ability, progress, { ...tierMap, [ability]: tier })
@@ -363,6 +372,7 @@ export function previewLamp(
   runTier: Record<string, number> | undefined,
   plants: Record<string, string> = {},
   hudBlocked = false,
+  easyTree = false,
 ): LampPreview {
   const spot = freeSpotId(point)
   const at = lampAnchor(spot)
@@ -372,7 +382,7 @@ export function previewLamp(
     !isTowerType(ability) ||
     lampSpotBlocked(at, plants, ability)
   const reaches = !blocked && lampReachesRoad(at, range)
-  const note = blocked ? '' : lampRoadNote(spot, ability, progress, runTier)
+  const note = blocked ? '' : lampRoadNote(spot, ability, progress, runTier, easyTree)
   return {
     spot,
     at,

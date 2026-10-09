@@ -10,6 +10,7 @@ import {
   type WatchAbility,
 } from '../lib/defend'
 import { combatTier, TIER_MARK, WALKER_LABEL } from '../lib/watchTools'
+import { lampStrike, pathBadge, pathsOf, type LampPaths } from '../nightWatch/upgradeTree'
 import { CITY_PLOTS, type CityPlotId } from '../lib/city'
 import { TOWER_TYPE_SRC } from '../lib/towerTypeArt'
 import { EASY } from '../lib/easy'
@@ -64,6 +65,8 @@ export interface DefendNightActorsProps {
   loreLine?: string | null
   /** Run tier for lamp range. Combat reads this, not trail mastery. */
   runTier: Record<string, number>
+  /** Easy upgrade tree. Hard leaves this empty and keeps Level I–III. */
+  runPaths?: Record<string, LampPaths>
   /** Between waves: a planted lamp can open the upgrade card. */
   boosting?: boolean
   onBoostTower?: (plotId: CityPlotId) => void
@@ -133,6 +136,7 @@ export function DefendNightActorsSvg({
   phase,
   easy,
   runTier,
+  runPaths,
   boosting = false,
   upgradeAt = null,
   onOpenUpgrade,
@@ -159,13 +163,16 @@ export function DefendNightActorsSvg({
                       : 'love'
                 const typeName = WATCH_ABILITY_LABEL[using] ?? 'Love'
                 const typeSrc = TOWER_TYPE_SRC[using]
+                const tree = easy ? pathsOf(runPaths, using) : null
+                const reachBonus = tree ? lampStrike(tree).rangeBonus : 0
+                const tierMark = tree ? pathBadge(tree) : TIER_MARK[combatTier(using, runTier)]
                 const hot =
                   phase === 'wave' &&
                   on &&
                   raiders.some(
                     (raider) =>
                       !raider.turned &&
-                      nightTowers.inRange(id, using, progress, raiderAt(raider), runTier),
+                      nightTowers.inRange(id, using, progress, raiderAt(raider), runTier, reachBonus),
                   )
                 const firing = flash.includes(id)
                 const pose = nightTowers.lampPose(hot || firing)
@@ -174,7 +181,6 @@ export function DefendNightActorsSvg({
                 const scenery = easyTap && !boostPad
                 const upgrading = on && upgradeAt === id
                 const justUp = on && upFlashId === id
-                const tierMark = TIER_MARK[combatTier(using, runTier)]
                 const activatePad = () => {
                   if (phase === 'plant') {
                     if (on) onOpenUpgrade?.(id)
@@ -323,7 +329,7 @@ export function DefendNightActorsSvg({
                         {phase === 'wave' ? (
                           <circle
                             className={`defend-range${firing ? ' is-firing' : ''}`}
-                            r={nightTowers.range(id, using, progress, runTier)}
+                            r={nightTowers.range(id, using, progress, runTier, reachBonus)}
                             pointerEvents="none"
                             style={
                               firing
