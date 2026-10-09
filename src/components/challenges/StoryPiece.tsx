@@ -17,6 +17,8 @@ interface StoryPieceProps {
   count: number
   hard: boolean
   showCaption: boolean
+  /** `line` is a short slot caption so a 5-frame strip can keep a readable face. */
+  caption?: 'full' | 'line'
   wiggle?: boolean
   glow?: boolean
   snap?: boolean
@@ -29,6 +31,7 @@ export function StoryPiece({
   count,
   hard,
   showCaption,
+  caption = 'full',
   wiggle,
   glow,
   snap,
@@ -54,7 +57,7 @@ export function StoryPiece({
   }, [])
 
   const edges = pieceEdges(card.orderIndex, count, hard)
-  const captionHeight = showCaption ? 52 : 0
+  const captionHeight = showCaption ? (caption === 'line' ? 34 : 52) : 0
   const path = piecePath(box.w, box.h, edges.left, edges.right, captionHeight)
   const { backdrop } = card.visual
   const face = (
@@ -66,7 +69,10 @@ export function StoryPiece({
         <PieceArt visual={card.visual} />
       </span>
       {showCaption ? (
-        <span className="strip-cap" style={{ height: captionHeight }}>
+        <span
+          className={`strip-cap ${caption === 'line' ? 'is-line' : ''}`}
+          style={{ height: captionHeight }}
+        >
           {card.text}
         </span>
       ) : null}

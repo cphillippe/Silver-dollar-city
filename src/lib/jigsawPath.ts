@@ -17,13 +17,16 @@ function scaleFor(width: number): number {
   return Math.min(1, Math.max(0.42, width / 112))
 }
 
-/** Tab reach in px, about 26px on a 112px slot. */
+/** Modest side nub. A full-circle knob read as a hole on tall tray cards. */
+function nubFor(scale: number): { radius: number; neck: number; stem: number } {
+  return { radius: 11 * scale, neck: 8 * scale, stem: 2 * scale }
+}
+
+/** How far a nub sticks out, in px. */
 export function pieceReach(width: number): number {
-  const scale = scaleFor(width)
-  const radius = 13 * scale
-  const neck = 8 * scale
-  const stem = 3 * scale
-  return stem + Math.sqrt(Math.max(0, radius * radius - neck * neck)) + radius
+  const { radius, neck, stem } = nubFor(scaleFor(width))
+  const sagitta = radius - Math.sqrt(Math.max(0, radius * radius - neck * neck))
+  return stem + sagitta
 }
 
 export function piecePath(
@@ -35,10 +38,7 @@ export function piecePath(
 ): string {
   const w = Math.max(24, width)
   const h = Math.max(24, height)
-  const scale = scaleFor(w)
-  const radius = 13 * scale
-  const neck = 8 * scale
-  const stem = 3 * scale
+  const { radius, neck, stem } = nubFor(scaleFor(w))
   const artHeight = Math.max(neck * 2 + 4, h - captionHeight)
   const cy = artHeight * 0.5
 
@@ -47,14 +47,14 @@ export function piecePath(
     const sign = kind === 'tab' ? 1 : -1
     const sweep = sign === 1 ? 1 : 0
     const x2 = w + sign * stem
-    return `L${w},${cy - neck} L${x2},${cy - neck} A${radius},${radius} 0 1 ${sweep} ${x2},${cy + neck} L${w},${cy + neck} `
+    return `L${w},${cy - neck} L${x2},${cy - neck} A${radius},${radius} 0 0 ${sweep} ${x2},${cy + neck} L${w},${cy + neck} `
   }
   const edgeLeft = (kind: EdgeKind) => {
     if (kind === 'flat') return ''
     const sign = kind === 'tab' ? -1 : 1
     const sweep = sign === 1 ? 0 : 1
     const x2 = sign * stem
-    return `L0,${cy + neck} L${x2},${cy + neck} A${radius},${radius} 0 1 ${sweep} ${x2},${cy - neck} L0,${cy - neck} `
+    return `L0,${cy + neck} L${x2},${cy + neck} A${radius},${radius} 0 0 ${sweep} ${x2},${cy - neck} L0,${cy - neck} `
   }
 
   return `M0,0 L${w},0 ${edgeRight(right)}L${w},${h} L0,${h} ${edgeLeft(left)}Z`
