@@ -1406,7 +1406,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.422')
+assert.equal(APP_VERSION, '1.4.423')
 
 // Night Watch 1.4.419: on-screen walkers do not share a head. Kind and boss stats stay put.
 {

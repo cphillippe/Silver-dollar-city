@@ -660,6 +660,13 @@ html[data-easy='on'] .play.is-story-strip.is-win[data-line='ph-road'] .strip-ver
   display: none;
 }
 
+/* After the follow-up, Say this tomorrow is the card under Home.
+   While the quiz is up it stays off so it does not reserve a blank band. */
+.daily-page.is-after:has(.is-story-strip):not(:has(.rehearse-anchor)) .stored-line,
+.challenge-page.is-after:has(.is-story-strip):not(:has(.rehearse-anchor)) .stored-line {
+  display: grid;
+}
+
 .daily-page.is-after:has(.is-story-strip) .town-return,
 .challenge-page.is-after:has(.is-story-strip) .town-return {
   margin: 0;
@@ -1135,6 +1142,145 @@ html[data-easy='on'] .play.is-story-strip[data-n='3'] .strip-art img {
   object-fit: cover;
   object-position: var(--crop-x, 50%) var(--crop-y, 0%);
   transform: none;
+}
+
+/* Easy story-strip win, short phone. 4- and 5-frame quizzes were one tall
+   column under a full strip, so the choices sat past the screen. A shorter
+   strip and quote, with the choices back in two columns, keeps the follow-up
+   on the page. 3-frame wins already use that quiz; give it its own height so
+   the last line is not clipped, and let the strip take what is left. */
+@media (max-height: 740px) {
+  html[data-easy='on'] .app.is-play .app-body:has(.play.is-story-strip.is-win:not([data-n='3'])) {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  html[data-easy='on'] .daily-page.is-after:has(.play.is-story-strip.is-win:not([data-n='3'])),
+  html[data-easy='on'] .challenge-page.is-after:has(.play.is-story-strip.is-win:not([data-n='3'])) {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  html[data-easy='on'] .daily-page.is-after:has(.play.is-story-strip[data-n='3']),
+  html[data-easy='on'] .challenge-page.is-after:has(.play.is-story-strip[data-n='3']) {
+    grid-template-rows: auto minmax(0, 1fr) auto;
+  }
+
+  html[data-easy='on'] .daily-page.is-after:has(.play.is-story-strip[data-n='3']) .rehearse-anchor,
+  html[data-easy='on'] .challenge-page.is-after:has(.play.is-story-strip[data-n='3']) .rehearse-anchor,
+  html[data-easy='on'] .daily-page.is-after:has(.play.is-story-strip[data-n='3']) .why-blast,
+  html[data-easy='on'] .challenge-page.is-after:has(.play.is-story-strip[data-n='3']) .why-blast,
+  html[data-easy='on'] .daily-page.is-after:has(.play.is-story-strip[data-n='3']) .why-arena,
+  html[data-easy='on'] .challenge-page.is-after:has(.play.is-story-strip[data-n='3']) .why-arena {
+    flex: 0 0 auto;
+    overflow: visible;
+    zoom: 1;
+  }
+
+  html[data-easy='on'] .play.is-story-strip.is-win:not([data-n='3']) .strip-board {
+    flex: 0 0 auto;
+    height: 120px;
+  }
+
+  html[data-easy='on'] .is-after:has(.play.is-story-strip.is-win:not([data-n='3'])) .recall-gate.is-easy-hold {
+    gap: 4px;
+    padding-bottom: 0;
+  }
+
+  html[data-easy='on'] .play.is-story-strip.is-win:not([data-n='3']) .strip-verse {
+    padding: 2px 6px 3px;
+  }
+
+  html[data-easy='on'] .play.is-story-strip.is-win:not([data-n='3']) .strip-verse blockquote {
+    margin: 1px 0;
+    font-size: 13px;
+    line-height: 1.15;
+  }
+
+  html[data-easy='on'] .is-after:has(.play.is-story-strip.is-win:not([data-n='3'])) .town-return .btn {
+    min-height: 44px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+
+  html[data-easy='on'] .is-after:has(.play.is-story-strip.is-win:not([data-n='3'])) .recall-gate.is-easy-hold .why-blast:not(.is-miss-teach):not(.is-win),
+  html[data-easy='on'] .is-after:has(.play.is-story-strip.is-win:not([data-n='3'])) .recall-gate.is-easy-hold .why-blast:not(.is-miss-teach):not(.is-win) .why-arena {
+    flex: 0 0 auto;
+    height: auto;
+    min-height: 0;
+    justify-content: flex-start;
+  }
+
+  html[data-easy='on'] .is-after:has(.play.is-story-strip.is-win:not([data-n='3'])) .recall-gate.is-easy-hold .why-blast:not(.is-miss-teach):not(.is-win) .why-arena {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+      'c0 c1'
+      'claim claim'
+      'c2 c3';
+    align-content: start;
+    gap: 4px;
+  }
+
+  html[data-easy='on'] .is-after:has(.play.is-story-strip.is-win:not([data-n='3'])) .why-chip {
+    height: auto;
+    min-height: 44px;
+    align-self: stretch;
+  }
+
+  html[data-easy='on'] .is-after:has(.play.is-story-strip.is-win:not([data-n='3'])) .why-claim {
+    margin: 0 !important;
+    padding: 6px 8px;
+    font-size: 0.95rem;
+    line-height: 1.15;
+  }
+}
+
+/* Tall Easy 5-frame win (ph-road at 768×1024). The centered block left a band
+   under the quiz. Grow the strip into that height. 412×915 and 4-frame wins
+   stay on the rules above. */
+@media (min-height: 960px) and (min-width: 700px) {
+  html[data-easy='on'] .app.is-play .app-body:has(.play.is-story-strip.is-win[data-n='5']) {
+    justify-content: flex-start;
+    padding-top: 4px;
+    padding-bottom: 8px;
+  }
+
+  html[data-easy='on'] .daily-page.is-after:has(.play.is-story-strip.is-win[data-n='5']),
+  html[data-easy='on'] .challenge-page.is-after:has(.play.is-story-strip.is-win[data-n='5']) {
+    flex: 1 1 auto;
+    height: 100%;
+    justify-content: flex-start;
+    overflow: hidden;
+  }
+
+  html[data-easy='on'] .daily-page.is-after:has(.play.is-story-strip.is-win[data-n='5']) .play.is-story-strip.is-win,
+  html[data-easy='on'] .challenge-page.is-after:has(.play.is-story-strip.is-win[data-n='5']) .play.is-story-strip.is-win {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  html[data-easy='on'] .play.is-story-strip.is-win[data-n='5'] .strip-board {
+    flex: 1 1 auto;
+    width: 100%;
+    height: auto;
+    min-height: 220px;
+    max-height: none;
+    aspect-ratio: auto;
+  }
+
+  html[data-easy='on'] .is-after:has(.play.is-story-strip.is-win[data-n='5']) .recall-gate.is-easy-hold,
+  html[data-easy='on'] .is-after:has(.play.is-story-strip.is-win[data-n='5']) .after-win {
+    padding-bottom: 0;
+    margin-bottom: 0;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.423',
+    title: 'Story Strip wins fit the phone',
+    when: '2026-10-09',
+    items: [
+      'Easy story wins on a phone keep the follow-up on the screen. The strip and the quote sit a little shorter so you can reach every choice.',
+      'After you answer, Say this tomorrow shows the line you kept.',
+      'The Good Samaritan win on a tall screen lets the pictures grow so the empty band under the choices goes away.',
+    ],
+  },
+  {
     version: '1.4.422',
     title: 'Story Strip uses plain words',
     when: '2026-10-09',
