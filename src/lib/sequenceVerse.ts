@@ -17,6 +17,7 @@ export const SEQUENCE_VERSES: Record<string, SequenceVerse> = {
   'daily-rest': {
     kicker: 'Jesus said',
     text: 'Come to me, all who labor and are heavy laden, and I will give you rest.',
+    easyLead: 'Heavy laden means carrying a big load.',
     ref: 'Matthew 11:28',
   },
   'daily-lantern': {
@@ -38,7 +39,7 @@ export const SEQUENCE_VERSES: Record<string, SequenceVerse> = {
     kicker: 'Paul wrote',
     text: '…that Christ died for our sins in accordance with the scriptures, that he was buried, that he was raised on the third day in accordance with the scriptures, and that he appeared to Cephas, then to the twelve.',
     easyLead:
-      'Cephas is Peter. “The scriptures” means God’s Word said long ago this would happen.',
+      'Cephas is Peter. The Twelve are Jesus’ twelve closest friends. “The scriptures” means God’s Word said long ago this would happen.',
     ref: '1 Corinthians 15:3–5',
   },
   'fg-reason': {
@@ -60,7 +61,7 @@ export const SEQUENCE_VERSES: Record<string, SequenceVerse> = {
     kicker: 'Jesus said',
     text: 'Which of these three, do you think, proved neighbor to the man who fell among the robbers? He said, “The one who showed mercy on him.” And Jesus said to him, “Go and do likewise.”',
     easyHeader: 'Luke 10:25–37',
-    easyLead: 'The one who showed mercy was the neighbor.',
+    easyLead: 'Likewise means do the same. The one who showed mercy was the neighbor.',
     easyText: 'Go and do likewise.',
     easyRef: 'Luke 10:37',
     ref: 'Luke 10:36–37',

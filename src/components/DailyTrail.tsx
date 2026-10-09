@@ -7,7 +7,7 @@ import { EASY, isEasy } from '../lib/easy'
 import { localDateKey } from '../lib/dates'
 import { useJuiceHandoff } from '../lib/juice'
 import { findLearning } from '../lib/learning'
-import { nextGapLabel } from '../lib/memory'
+import { isDue, nextGapLabel } from '../lib/memory'
 import { PuzzlePlay } from './PuzzlePlay'
 import { RecallGate } from './RecallGate'
 import { StoredLine } from './StoredLine'
@@ -52,8 +52,19 @@ export function DailyTrail({ onNavigate, forceId, debugStrip = false }: DailyTra
   const savedWin = useRef(false)
   const [missed, setMissed] = useState(false)
   const [peeked, setPeeked] = useState(false)
+  /** Easy story strips ask again, the same way a street strip does. */
+  const easyStrip = easy && challenge.kind === 'sequence'
+  const [reviewing] = useState(
+    () =>
+      Boolean(
+        easyStrip &&
+          brief &&
+          progress.memory[brief.id] &&
+          isDue(progress.memory[brief.id], today),
+      ),
+  )
   const [held, setHeld] = useState(
-    () => !brief || Boolean(progress.held.includes(brief.id)),
+    () => !brief || (!easyStrip && progress.held.includes(brief.id)),
   )
   const [taught, setTaught] = useState(() => debugStrip || !brief)
   const [arming, setArming] = useState(false)
@@ -146,7 +157,7 @@ export function DailyTrail({ onNavigate, forceId, debugStrip = false }: DailyTra
                     ? challenge.tiles.filter((tile) => tile.bin === 'keep')
                     : undefined
                 }
-                mode="encode"
+                mode={reviewing ? 'review' : 'encode'}
                 kicker={STORY.tapTakeaway}
                 onHeld={settleRecall}
               />
