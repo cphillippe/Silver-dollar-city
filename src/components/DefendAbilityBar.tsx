@@ -12,6 +12,7 @@ import {
   TOOL_TIER_MAX,
   WATCH_TOOLS,
 } from '../lib/watchTools'
+import { cheapestOpen, pathBadge, pathsOf, type LampPaths } from '../nightWatch/upgradeTree'
 import { AbilityMark } from './GemMark'
 import type { ProgressState } from '../types'
 import type { WatchAbility } from '../lib/defend'
@@ -31,6 +32,8 @@ export interface DefendAbilityBarProps {
   plantedTypes?: string[]
   unlocked: WatchAbility[]
   runTier: Record<string, number>
+  /** Easy tree ranks. Hard ignores this. */
+  runPaths?: Record<string, LampPaths>
   /** Sparks this night. At 0, between-wave column spend is not a live Tap. */
   sparks: number
   /** Between waves, a tap spends sparks. Mid-wave a tap only selects. */
@@ -47,6 +50,8 @@ export interface DefendAbilityBarProps {
   lampArmed?: string | null
   onArmPlace?: (id: WatchAbility) => void
   onBoost: (id: WatchAbility) => void
+  /** Easy: a planted card opens the path panel instead of spending immediately. */
+  onOpenTree?: (id: WatchAbility) => void
 }
 
 export function DefendAbilityBar({
@@ -60,6 +65,7 @@ export function DefendAbilityBar({
   plantedTypes = [],
   unlocked,
   runTier,
+  runPaths,
   sparks,
   boosting,
   placing = false,
@@ -69,6 +75,7 @@ export function DefendAbilityBar({
   lampArmed = null,
   onArmPlace,
   onBoost,
+  onOpenTree,
 }: DefendAbilityBarProps) {
   const swallowClick = useRef(false)
   const stopListen = useRef<(() => void) | null>(null)
@@ -156,11 +163,17 @@ export function DefendAbilityBar({
               const placed = plantedTypes.includes(tool.id)
               const heldLine = learningForTool(progress, tool.id)
               const tier = combatTier(tool.id, runTier)
-              const stepCost = easy ? easyTierCost(tier) : boostCost(tier)
+              const tree = easy ? pathsOf(runPaths, tool.id) : null
+              const openStep = tree ? cheapestOpen(tree) : null
+              const stepCost = tree ? (openStep?.cost ?? 0) : easy ? easyTierCost(tier) : boostCost(tier)
               const brokeWord = stepCost > 1 ? `Need ${stepCost} sparks` : 'Need a spark'
               const shopNew = paidPlace && !placed
+              const treeFull = Boolean(tree && !openStep)
               const spendDry =
-                boosting && open && tier < TOOL_TIER_MAX && sparks < stepCost && (!easy || placed)
+                boosting &&
+                open &&
+                (!easy || placed) &&
+                (tree ? Boolean(openStep) && sparks < stepCost : tier < TOOL_TIER_MAX && sparks < stepCost)
               const claim = open
                 ? tool.id === 'love'
                   ? loveHowTo(easy)
@@ -200,11 +213,16 @@ export function DefendAbilityBar({
                       )
                       return
                     }
-                    if (boosting) {
+                      if (boosting) {
                       if (easy && !placed) {
                         setToolLock(null)
                         setAbility(tool.id)
                         onArmPlace?.(tool.id)
+                        return
+                      }
+                      if (easy && placed) {
+                        setToolLock(null)
+                        onOpenTree?.(tool.id)
                         return
                       }
                       onBoost(tool.id)
@@ -218,7 +236,7 @@ export function DefendAbilityBar({
                   <AbilityMark ability={tool.id} size="md" />
                   <span className="defend-ability-label">{tool.label}</span>
                   <span className="defend-ability-tier" aria-hidden>
-                    {TIER_MARK[tier]}
+                    {tree ? pathBadge(tree) || '·' : TIER_MARK[tier]}
                   </span>
                   {open && !placed ? (
                     <span className={`defend-ability-stock${shopNew ? ' is-price' : ''}`} data-slot-badge="1">
@@ -229,12 +247,14 @@ export function DefendAbilityBar({
                     <span className="defend-ability-boost" aria-hidden>
                       {shopNew
                         ? `${EASY_LAMP_COST}✦`
-                        : tier >= TOOL_TIER_MAX
-                          ? 'Max'
+                        : treeFull
+                          ? 'Full'
+                          : tier >= TOOL_TIER_MAX && !tree
+                            ? 'Max'
                           : sparks < stepCost
                             ? brokeWord
                             : easy
-                              ? 'Tap'
+                              ? 'Paths'
                               : '↑ spark'}
                     </span>
                   ) : null}

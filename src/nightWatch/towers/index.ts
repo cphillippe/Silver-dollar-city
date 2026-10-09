@@ -32,6 +32,8 @@ export interface NightTowersModule {
     ability: string,
     progress: ProgressState,
     runTier?: Record<string, number>,
+    /** Easy Far steps. Added before the road-overlap rule. Hard passes 0. */
+    extra?: number,
   ): number
   cooldown(id: string, progress: ProgressState): number
   inRange(
@@ -40,6 +42,7 @@ export interface NightTowersModule {
     progress: ProgressState,
     target: NightPoint,
     runTier?: Record<string, number>,
+    extra?: number,
   ): boolean
   /** Idle vs firing lamp art — Parts registry wins when filled. */
   lampSrc(pose: NightLampPose): string
@@ -67,15 +70,16 @@ export const nightTowers: NightTowersModule = {
    * so the ring on screen is the ring that hits.
    * A free seat adds `FREE_LAMP_RANGE_BONUS` on every tier (1.4.392).
    */
-  range: (id, ability, progress, runTier) =>
+  range: (id, ability, progress, runTier, extra = 0) =>
     lampReach(
       id,
-      freeLampBase(id, abilityRange(ability, seatStage(id, progress), progress, runTier)),
+      freeLampBase(id, abilityRange(ability, seatStage(id, progress), progress, runTier)) +
+        Math.max(0, extra),
       pathClearance(lampAnchor(id)),
     ),
   cooldown: (id, progress) => towerCooldown(seatStage(id, progress)),
-  inRange: (id, ability, progress, target, runTier) =>
-    dist(lampAnchor(id), target) <= nightTowers.range(id, ability, progress, runTier),
+  inRange: (id, ability, progress, target, runTier, extra = 0) =>
+    dist(lampAnchor(id), target) <= nightTowers.range(id, ability, progress, runTier, extra),
   lampSrc: (pose) => nightParts.src('lamp', pose) ?? LOCAL_LAMP[pose],
   lampPose: (hot) => (hot ? 'firing' : 'idle'),
   lampImageBox: () => {

@@ -87,7 +87,7 @@ export const EASY = {
   nightPlant:
     'Pick Love, Logic, Reason, or Science. Drag the card onto open ground, or tap it and then tap the ground. Tap a lamp to make it stronger.',
   nightBoost:
-    'Round clear. Tap a planted lamp. Upgrade costs 3 sparks, then 6. A new lamp costs 5 — drag its card, or tap it and then the ground.',
+    'Round clear. Tap a planted lamp. Far reaches farther. Strong hits harder. Steps cost 3, then 6, then 12 sparks. One path goes to three. The other stops at one. A new lamp costs 5 — drag its card, or tap it and then the ground.',
   nightBoostPick: 'Skills',
   nightKeepLamp: 'Keep one lamp — tap a ring to plant more.',
   nightMiss: 'Wrong — tap the glowing face',
