@@ -1231,7 +1231,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         <div className="defend-lost">
           <p>
             {easy
-              ? 'You missed. Tap the face.'
+              ? `Reached round ${waveIndex + 1}. You missed. Tap the face.`
               : 'Porch flickered. Turn them again.'}
           </p>
           <button type="button" className="btn primary" onClick={retry}>

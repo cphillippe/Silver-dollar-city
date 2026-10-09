@@ -2,14 +2,17 @@ import { pathPoint } from './path/data.ts'
 import { easyRound } from './rounds.ts'
 
 /**
- * Two ordinary road seats used to tune slice 1.
- * Gap is about 68, so Level I reach (114) and Level II (132) both cover the road.
- * A face tap once a second is `tapEvery`. 0 means autofire only.
- * One leaked walker fails the round, matching the live Easy clear rule.
+ * Ordinary road seats used to tune slices 1 and 2.
+ * The first two (gap about 68) are the 1.4.402 pair: Level I reach (114) covers the road.
+ * Seats 3 and 4 sit further along the road, same kind of gap, so four planted lamps
+ * cover more of the walk than two. A face tap once a second is `tapEvery`.
+ * 0 means autofire only. One leaked walker fails the round, matching Easy.
  */
 const ROAD_SEATS = [
   { x: 475, y: 766 },
   { x: 230, y: 680 },
+  { x: 540, y: 560 },
+  { x: 620, y: 260 },
 ] as const
 
 function freeRange(gap: number, tier: number): number {
@@ -33,7 +36,7 @@ export function scoreEasyRoad(
   tapEvery = 0,
 ): 'clear' | 'lost' | 'timeout' {
   const round = easyRound(roundIndex)
-  const lamps = tiers.map((tier, index) => ({
+  const lamps = tiers.slice(0, ROAD_SEATS.length).map((tier, index) => ({
     x: ROAD_SEATS[index].x,
     y: ROAD_SEATS[index].y,
     tier,
