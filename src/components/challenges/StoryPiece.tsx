@@ -7,6 +7,8 @@ import type { SequenceVisual } from '../../lib/sequenceArt'
 export interface StripCard {
   id: string
   text: string
+  shortText?: string
+  role?: string
   orderIndex: number
   decoy?: boolean
   visual: SequenceVisual
@@ -17,8 +19,8 @@ interface StoryPieceProps {
   count: number
   hard: boolean
   showCaption: boolean
-  /** `line` is a short slot caption so a 5-frame strip can keep a readable face. */
-  caption?: 'full' | 'line'
+  /** `slot` uses the short line while the strip is still in play. */
+  caption?: 'full' | 'slot'
   wiggle?: boolean
   glow?: boolean
   snap?: boolean
@@ -57,23 +59,23 @@ export function StoryPiece({
   }, [])
 
   const edges = pieceEdges(card.orderIndex, count, hard)
-  const captionHeight = showCaption ? (caption === 'line' ? 34 : 52) : 0
+  const slotText = caption === 'slot' && card.shortText ? card.shortText : null
+  const captionHeight = showCaption ? (slotText ? 40 : 52) : 0
   const path = piecePath(box.w, box.h, edges.left, edges.right, captionHeight)
   const { backdrop } = card.visual
   const face = (
     <>
       <span
-        className="strip-art"
+        className={`strip-art ${card.visual.kind === 'story' ? 'is-story' : ''}`}
         style={showCaption ? { bottom: captionHeight } : { bottom: 0 }}
       >
         <PieceArt visual={card.visual} />
       </span>
       {showCaption ? (
-        <span
-          className={`strip-cap ${caption === 'line' ? 'is-line' : ''}`}
-          style={{ height: captionHeight }}
-        >
-          {card.text}
+        <span className={`strip-cap ${slotText ? 'is-slot' : ''}`} style={{ height: captionHeight }}>
+          <span className="strip-cap-text">
+            {slotText ? <SlotLine text={slotText} /> : <RoleLine text={card.text} role={card.role} />}
+          </span>
         </span>
       ) : null}
     </>
@@ -112,6 +114,40 @@ export function StoryPiece({
     <div ref={ref as RefObject<HTMLDivElement>} className={className} style={style}>
       {face}
     </div>
+  )
+}
+
+function SlotLine({ text }: { text: string }) {
+  const breakAt = text.indexOf('\n')
+  const firstLine = breakAt >= 0 ? text.slice(0, breakAt) : text
+  const rest = breakAt >= 0 ? text.slice(breakAt + 1) : ''
+  const space = firstLine.indexOf(' ')
+  const head = space < 0 ? firstLine : firstLine.slice(0, space)
+  const tail = space < 0 ? '' : firstLine.slice(space)
+  return (
+    <>
+      <strong>{head}</strong>
+      {tail}
+      {rest ? (
+        <>
+          <br />
+          {rest}
+        </>
+      ) : null}
+    </>
+  )
+}
+
+function RoleLine({ text, role }: { text: string; role?: string }) {
+  if (!role) return text
+  const at = text.toLowerCase().indexOf(role.toLowerCase())
+  if (at < 0) return text
+  return (
+    <>
+      {text.slice(0, at)}
+      <strong>{text.slice(at, at + role.length)}</strong>
+      {text.slice(at + role.length)}
+    </>
   )
 }
 

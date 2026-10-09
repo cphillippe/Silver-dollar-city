@@ -28,6 +28,8 @@ function toCard(item: SequenceItem, index: number, challengeId: string, decoy = 
   return {
     id: item.id,
     text: item.text,
+    shortText: decoy ? undefined : item.shortCaption,
+    role: decoy ? undefined : item.role,
     orderIndex: decoy ? -1 : index,
     decoy,
     visual: decoy
@@ -65,7 +67,6 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
   const [wiggleId, setWiggleId] = useState<string | null>(null)
   const [snapIndex, setSnapIndex] = useState<number | null>(null)
   const [marks, setMarks] = useState<Mark[]>(() => challenge.items.map(() => null))
-  const [peeked, setPeeked] = useState(false)
   const [busy, setBusy] = useState(false)
   const [verseOn, setVerseOn] = useState(false)
 
@@ -74,8 +75,8 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
   const tray = order.filter((card) => !placed.has(card.id))
   const full = nextIndex < 0
   const glowId =
-    misses >= 2 || peeked
-      ? challenge.items[nextIndex >= 0 ? nextIndex : firstWrong(chain, challenge.items)]?.id
+    easy && status !== 'ok' && misses >= 2 && nextIndex >= 0
+      ? challenge.items[nextIndex]?.id
       : undefined
   const lead = easy
     ? challenge.id.startsWith('fg-')
@@ -83,7 +84,7 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
       : 'Put the story in order!'
     : challenge.prompt
   const showSlotCaption = true
-  const slotCaption = count >= 5 && status !== 'ok' ? 'line' : 'full'
+  const slotCaption = status === 'ok' ? 'full' : 'slot'
 
   function win() {
     if (solved.current) return
@@ -101,6 +102,7 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
     setChain(next)
     setMarks(challenge.items.map(() => null))
     setSnapIndex(dest)
+    if (easy) setMisses(0)
     window.setTimeout(() => setSnapIndex((current) => (current === dest ? null : current)), 420)
     if (easy && next.every(Boolean)) win()
   }
@@ -272,10 +274,7 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
           <button
             type="button"
             className="strip-foot-btn"
-            onClick={() => {
-              onPeek?.()
-              setPeeked(true)
-            }}
+            onClick={() => onPeek?.()}
           >
             Peek
           </button>
@@ -291,9 +290,4 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
       ) : null}
     </div>
   )
-}
-
-function firstWrong(chain: (StripCard | null)[], items: SequenceItem[]): number {
-  const index = chain.findIndex((slot, slotIndex) => slot?.id !== items[slotIndex]?.id)
-  return index >= 0 ? index : 0
 }
