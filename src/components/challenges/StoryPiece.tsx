@@ -93,6 +93,11 @@ export function StoryPiece({
   const path = piecePath(box.w, box.h, edges.left, edges.right, captionHeight)
   const { backdrop } = card.visual
   const figure = hard ? undefined : card.figure
+  const captionFace = (slotText ?? card.text).replace(/\s+/g, ' ')
+  const cueRepeats =
+    figure != null &&
+    showCaption &&
+    new RegExp(`\\b${figure.cue}\\b`, 'i').test(captionFace)
   const face = (
     <>
       <span
@@ -111,7 +116,7 @@ export function StoryPiece({
         }}
       >
         <PieceArt visual={card.visual} />
-        {figure ? (
+        {figure && !cueRepeats ? (
           <span className="strip-cue" data-cue={figure.cue}>
             {figure.cue}
           </span>
