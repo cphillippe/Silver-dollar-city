@@ -126,6 +126,14 @@ export function DailyTrail({ onNavigate, forceId }: DailyTrailProps) {
         ) : null}
       {solved ? (
         <section className="after-win daily-done">
+          {easy && challenge.kind === 'sequence' ? (
+            <TownReturn
+              who={townVoice('porch').who}
+              line={townVoice('porch').afterWin}
+              action={EASY.home}
+              onGo={() => onNavigate({ name: 'hub', afterScene: true })}
+            />
+          ) : null}
           {brief && !held ? (
             <div className="rehearse-anchor">
               <RecallGate
@@ -164,7 +172,7 @@ export function DailyTrail({ onNavigate, forceId }: DailyTrailProps) {
             />
           ) : null}
 
-          {showNext ? (
+          {showNext && !(easy && challenge.kind === 'sequence') ? (
             <TownReturn
               who={townVoice('porch').who}
               line={townVoice('porch').afterWin}
