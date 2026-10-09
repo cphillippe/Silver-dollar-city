@@ -95,12 +95,13 @@ export function easyBossRound(index: number): boolean {
 }
 
 /**
- * Boss health. Round 5 stays soft so lamps plus a few taps can finish it.
- * Later bosses are thick: a glowing tap still nicks them, and the lamps have to finish the bar.
+ * Boss health. Round 5 is the teaching bar: lamps alone still lose it, and a
+ * few glowing taps plus one harder lamp can finish it.
+ * Later bosses stay thick: a glowing tap still nicks them, and the lamps have to finish the bar.
  */
 export function easyBossHp(index: number): number {
   const round = Math.floor(index) + 1
-  if (round <= 5) return 20
+  if (round <= 5) return 12
   if (round <= 10) return 44
   if (round <= 15) return 200
   if (round <= 20) return 260

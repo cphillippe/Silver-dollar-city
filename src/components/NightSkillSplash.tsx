@@ -19,13 +19,23 @@ export function NightSkillSplash({ id, onDismiss }: { id: KitId; onDismiss: () =
   }, [id])
 
   return createPortal(
-    <div className="nw-skill-splash" role="dialog" aria-modal="true" aria-labelledby="nw-skill-splash-title">
+    <div className="nw-skill-splash" role="dialog" aria-labelledby="nw-skill-splash-title">
       <div className="nw-skill-card">
         <img className="nw-skill-splash-art" src={SKILL_ART[id]} alt="" width={112} height={112} />
         <p className="nw-skill-kicker">New skill</p>
         <h2 id="nw-skill-splash-title">{label}</h2>
         <p className="nw-skill-blurb">{SKILL_BLURB[id]}</p>
-        <button ref={buttonRef} type="button" className="btn primary" onClick={onDismiss}>
+        <button
+          ref={buttonRef}
+          type="button"
+          className="btn primary"
+          onPointerDown={(event) => event.stopPropagation()}
+          onClick={(event) => {
+            event.preventDefault()
+            event.stopPropagation()
+            onDismiss()
+          }}
+        >
           Got it
         </button>
       </div>
