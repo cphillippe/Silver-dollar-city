@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.402',
+    title: 'Night Watch Easy runs six rounds',
+    when: '2026-10-09',
+    items: [
+      'Easy Night Watch is six rounds. Each round brings a few more walkers, a little more speed, and a little more health. Rounds 1 to 4 stay winnable with Level I lamps. Round 5 is tight unless you tap. Round 6 needs a lamp at Level II.',
+      'The map says Round 3 of 6. When the sixth round holds, the night held.',
+    ],
+  },
+  {
     version: '1.4.401',
     title: 'Story strip pictures fill the card',
     when: '2026-10-09',

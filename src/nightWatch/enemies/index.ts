@@ -45,6 +45,7 @@ export interface NightEnemiesModule {
     cleared: number,
     index: number,
     waveIndex?: number,
+    easy?: boolean,
   ): { text: string; kind: WalkerKind; id: string; label: string; lore: string }
   /** Easy: where on the road a new walker appears. */
   spawnT(index: number): number
