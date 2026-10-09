@@ -129,12 +129,18 @@ import {
   commitLamp,
   dragGhostClient,
   clampGhostHintLeft,
+  GHOST_HINT_EDGE,
+  GHOST_HINT_HALF,
+  ghostHintRail,
   LAMP_DRAG_LIFT_PX,
   LAMP_DRAG_START_PX,
   LAMP_TOO_FAR,
+  lampArtAboveAnchor,
   lampReachesRoad,
   lampRoadNote,
   lampSpotBlocked,
+  lampUnderFinger,
+  pathSpendControl,
   previewLamp,
   roadCoverD,
   roundStartKind,
@@ -1350,7 +1356,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.417')
+assert.equal(APP_VERSION, '1.4.418')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -4873,7 +4879,10 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(ability396, /onBoost\(tool\.id\)/, '1.4.400 a planted card can still upgrade')
   assert.match(card396, /boostCost\(tier\)/, '1.4.400 Hard card still prices one spark')
   assert.match(board396, /clampGhostHintLeft/, '1.4.400 the reach note stays on screen')
-  assert.ok(clampGhostHintLeft(360, 375) + 96 <= 375 - 8, '1.4.400 Too far from the road clears the right edge')
+  assert.ok(
+    clampGhostHintLeft(360, 375) + GHOST_HINT_HALF <= 375 - GHOST_HINT_EDGE,
+    '1.4.400 Too far from the road clears the right edge',
+  )
   assert.equal(clampGhostHintLeft(180, 375), 180, '1.4.400 a centered note stays put')
   assert.match(defendSrc396, /finishPlace\(/, '1.4.400 drag and tap share one plant')
   assert.ok(CHANGELOG.some((note) => note.version === '1.4.400'), '1.4.400 changelog row')
@@ -4884,6 +4893,143 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.400').items.join('\n'),
     /Fixes #|Closes #|Resolves #|monkey|balloon/i,
     '1.4.400 changelog avoids GitHub close keywords',
+  )
+}
+
+// Night Watch 1.4.418: the lamp picture lands on the finger, and the reach cue matches combat.
+{
+  const progress = emptyProgress()
+  const tier = freshRunTier()
+  const box = nightTowersMod.lampImageBox()
+  const finger = { x: 240, y: 500 }
+  const shifted = lampUnderFinger(finger)
+  const centerY = shifted.y + box.y + box.h / 2
+  assert.equal(lampArtAboveAnchor(), 26, '1.4.418 the picture center sits 26 units above the feet')
+  assert.ok(Math.abs(centerY - finger.y) < 0.001, '1.4.418 the picture center is on the finger')
+  const snapped = previewLamp(shifted, 'love', progress, tier)
+  const plantedCenter = snapped.at.y + box.y + box.h / 2
+  assert.ok(Math.abs(plantedCenter - finger.y) <= 0.5, '1.4.418 snapping keeps the picture on the finger')
+  assert.equal(pathSpendControl('btn primary defend-path-buy'), true)
+  assert.equal(pathSpendControl('defend-path-pip is-buy'), true)
+  assert.equal(pathSpendControl('defend-ability is-on is-placed'), false, '1.4.418 a lamp card does not spend')
+  for (const w of [375, 412, 768]) {
+    const left = clampGhostHintLeft(w, w)
+    assert.ok(left + GHOST_HINT_HALF <= w - GHOST_HINT_EDGE, `1.4.418 Too far stays on screen at ${w}`)
+    assert.ok(left - GHOST_HINT_HALF >= GHOST_HINT_EDGE, `1.4.418 Too far clears the left at ${w}`)
+    assert.ok(
+      left + GHOST_HINT_HALF <= w - ghostHintRail(w) + 0.01,
+      `1.4.418 Too far clears the lamp cards at ${w}`,
+    )
+  }
+  assert.equal(clampGhostHintLeft(180, 375), 180, '1.4.418 a centered note stays put')
+
+  function closestRoad(at) {
+    let best = DEFEND_PATH[0]
+    let bestD = Infinity
+    for (let i = 0; i < DEFEND_PATH.length - 1; i++) {
+      const a = DEFEND_PATH[i]
+      const b = DEFEND_PATH[i + 1]
+      const dx = b.x - a.x
+      const dy = b.y - a.y
+      const len2 = dx * dx + dy * dy || 1
+      let u = ((at.x - a.x) * dx + (at.y - a.y) * dy) / len2
+      u = Math.max(0, Math.min(1, u))
+      const p = { x: a.x + u * dx, y: a.y + u * dy }
+      const d = Math.hypot(at.x - p.x, at.y - p.y)
+      if (d < bestD) {
+        best = p
+        bestD = d
+      }
+    }
+    return best
+  }
+  function expectNote(spot, at, runTier, extra, easyTree) {
+    const combat = nightTowersMod.range(spot, 'love', progress, runTier, extra)
+    if (lampReachesRoad(at, combat)) return ''
+    if (easyTree) {
+      if (extra < 24 && lampReachesRoad(at, nightTowersMod.range(spot, 'love', progress, runTier, 24))) {
+        return 'Reaches on Far step 2'
+      }
+      if (extra < 40 && lampReachesRoad(at, nightTowersMod.range(spot, 'love', progress, runTier, 40))) {
+        return 'Reaches on Far step 3'
+      }
+      return LAMP_TOO_FAR
+    }
+    const current = runTier.love ?? 1
+    for (let step = current + 1; step <= 3; step++) {
+      const bumped = nightTowersMod.range(spot, 'love', progress, { love: step }, 0)
+      if (lampReachesRoad(at, bumped)) return step === 2 ? 'Reaches at Level II' : 'Reaches at Level III'
+    }
+    return LAMP_TOO_FAR
+  }
+  let checked = 0
+  for (let t = 0.12; t <= 0.88; t += 0.08) {
+    const a = pathPoint(Math.max(0, t - 0.004))
+    const b = pathPoint(Math.min(1, t + 0.004))
+    const dx = b.x - a.x
+    const dy = b.y - a.y
+    const len = Math.hypot(dx, dy) || 1
+    const origin = pathPoint(t)
+    for (const sign of [1, -1]) {
+      for (const dist of [50, 80, 100, 120, 145, 175]) {
+        const point = {
+          x: origin.x + (-dy / len) * dist * sign,
+          y: origin.y + (dx / len) * dist * sign,
+        }
+        if (point.x < 24 || point.y < 24 || point.x > 774 || point.y > 1110) continue
+        for (const extra of [0, 24, 40]) {
+          const look = previewLamp(point, 'love', progress, tier, {}, false, true, extra)
+          if (look.blocked) continue
+          const combat = nightTowersMod.range(look.spot, 'love', progress, tier, extra)
+          const road = closestRoad(look.at)
+          const hits = nightTowersMod.inRange(look.spot, 'love', progress, road, tier, extra)
+          assert.equal(look.range, combat, '1.4.418 the ring is the combat range')
+          assert.equal(look.reaches, hits, '1.4.418 reaches matches a walker on the road')
+          assert.equal(lampReachesRoad(look.at, combat), hits, '1.4.418 clearance matches combat')
+          const note = expectNote(look.spot, look.at, tier, extra, true)
+          assert.equal(look.note, note, '1.4.418 the cue names the first step that hits')
+          if (hits) {
+            assert.equal(look.note, '', '1.4.418 a spot in reach does not name a later step')
+          }
+          if (look.note === 'Reaches on Far step 3') {
+            assert.equal(hits, false)
+            assert.equal(lampReachesRoad(look.at, nightTowersMod.range(look.spot, 'love', progress, tier, 24)), false)
+            assert.equal(lampReachesRoad(look.at, combat), false)
+          }
+          checked += 1
+        }
+        const hard = previewLamp(point, 'love', progress, tier)
+        if (!hard.blocked) {
+          const combat = nightTowersMod.range(hard.spot, 'love', progress, tier, 0)
+          const hits = nightTowersMod.inRange(hard.spot, 'love', progress, closestRoad(hard.at), tier, 0)
+          assert.equal(hard.reaches, hits, '1.4.418 Hard reaches matches combat')
+          assert.equal(hard.note, expectNote(hard.spot, hard.at, tier, 0, false))
+          if (hits) assert.equal(hard.note, '')
+          if (hard.note === 'Reaches at Level III') {
+            assert.equal(
+              nightTowersMod.inRange(hard.spot, 'love', progress, closestRoad(hard.at), { love: 2 }, 0),
+              false,
+              '1.4.418 Level III is only when Level II still misses',
+            )
+          }
+          checked += 1
+        }
+      }
+    }
+  }
+  assert.ok(checked > 40, '1.4.418 the reach sweep covered open ground')
+  const ability417 = readFileSync(new URL('../src/components/DefendAbilityBar.tsx', import.meta.url), 'utf8')
+  const defend417 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  assert.match(ability417, /onOpenTree\?\.\(tool\.id\)/, '1.4.418 a planted card opens the tree')
+  assert.match(defend417, /lampUnderFinger/, '1.4.418 drag and tap share the finger point')
+  assert.match(defend417, /pathSpendControl/, '1.4.418 a card release does not spend')
+  assert.match(defend417, /armedPathBuy\.current = null/, '1.4.418 opening the tree clears an armed buy')
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.418'), '1.4.418 changelog row')
+  assert.match(latestChange('1.4.418').items.join('\n'), /Too far from the road/)
+  assert.doesNotMatch(
+    latestChange('1.4.418').items.join('\n'),
+    /Fixes #|Closes #|Resolves #|monkey|balloon/i,
+    '1.4.418 changelog avoids GitHub close keywords',
   )
 }
 
