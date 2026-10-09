@@ -5,6 +5,7 @@ import { boardFill, boardFillPoint, boardPoint as mapBoardPoint, boardView, nigh
 import type { DefendNightSkyProps } from './DefendNightSky'
 import { DefendNightSky } from './DefendNightSky'
 import { DefendTowerCard, type TowerCardPoint } from './DefendTowerCard'
+import { pathsOf, type LampPaths, type TreePath } from '../nightWatch/upgradeTree'
 import {
   DefendNightActorsSvg,
   DefendNightWalkerCue,
@@ -20,6 +21,8 @@ export type DefendNightBoardProps = Omit<DefendNightSkyProps, 'children'> &
     levelBurst?: { from: number; to: number } | null
     onPullLamp?: () => void
     onCloseUpgrade?: () => void
+    onUpgradePath?: (plotId: CityPlotId, path: TreePath) => void
+    runPaths?: Record<string, LampPaths>
     /** Easy phone: overlays share the fill camera with the board. */
     plateFill?: boolean
   }
@@ -31,12 +34,13 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
     flash, togglePad, fire, fireAtRaider, shots, easy, blasts, tapTarget, tapPos, tapJuice,
     walkerCalls, loreLine, runTier, boosting, onBoostTower,     upgradeAt, onOpenUpgrade, upFlashId, ghost = null,
     upgradePoint, boardBox, runSparks = 0, levelBurst = null, onPullLamp, onCloseUpgrade,
+    onUpgradePath, runPaths,
     plateFill = false, onPlacePointer,
   } = props
   const place = plateFill ? boardFillPoint : mapBoardPoint
   const cardAbility = upgradeAt ? towerType[upgradeAt] : undefined
   const roadNote =
-    upgradeAt && cardAbility ? lampRoadNote(upgradeAt, cardAbility, progress, runTier) : ''
+    upgradeAt && cardAbility ? lampRoadNote(upgradeAt, cardAbility, progress, runTier, easy) : ''
   const showCard = Boolean(
     upgradeAt && cardAbility && upgradePoint && boardBox && boardBox.w > 0 && onCloseUpgrade,
   )
@@ -98,6 +102,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
           blasts={blasts}
           phase={phase}
           runTier={runTier}
+          runPaths={runPaths}
           boosting={boosting}
           upgradeAt={upgradeAt}
           onOpenUpgrade={onOpenUpgrade}
@@ -114,6 +119,8 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
           point={upgradePoint as TowerCardPoint}
           board={boardBox as { w: number; h: number }}
           onUpgrade={() => onBoostTower?.(upgradeAt as CityPlotId)}
+          onUpgradePath={(path) => onUpgradePath?.(upgradeAt as CityPlotId, path)}
+          paths={easy && cardAbility ? pathsOf(runPaths, cardAbility) : undefined}
           clearOf={clearOf}
           cameraScale={cameraScale}
           onPull={onPullLamp}

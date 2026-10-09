@@ -7,7 +7,18 @@ import {
   TOWER_CARD_W,
   type TowerCardPoint,
 } from '../lib/towerCardPlace'
-import { boostCost, combatTier, easyTierCost, TIER_MARK, TOOL_TIER_MAX } from '../lib/watchTools'
+import { boostCost, combatTier, TIER_MARK, TOOL_TIER_MAX } from '../lib/watchTools'
+import {
+  canTake,
+  PATH_LABEL,
+  PATH_LINE,
+  stepLocked,
+  TREE_LOCK,
+  TREE_PATHS,
+  TREE_STEP_COST,
+  type LampPaths,
+  type TreePath,
+} from '../nightWatch/upgradeTree'
 
 export interface LevelBurst {
   from: number
@@ -24,6 +35,8 @@ export function DefendTowerCard({
   point,
   board,
   onUpgrade,
+  onUpgradePath,
+  paths,
   onPull,
   onClose,
   levelBurst = null,
@@ -40,6 +53,9 @@ export function DefendTowerCard({
   point: TowerCardPoint
   board: { w: number; h: number }
   onUpgrade: () => void
+  /** Easy tree. Hard keeps the single Upgrade button. */
+  onUpgradePath?: (path: TreePath) => void
+  paths?: LampPaths
   /** Plant and between waves. Hidden while walkers are on the road. */
   onPull?: () => void
   onClose: () => void
@@ -56,8 +72,8 @@ export function DefendTowerCard({
   const cardRef = useRef<HTMLDivElement>(null)
   const tier = combatTier(ability, runTier)
   const maxed = tier >= TOOL_TIER_MAX
-  const cost = easy ? easyTierCost(tier) : boostCost(tier)
-  const burstCost = levelBurst ? (easy ? easyTierCost(levelBurst.from) : 1) : 1
+  const cost = boostCost(tier)
+  const burstCost = 1
   const next = Math.min(TOOL_TIER_MAX, tier + 1)
   const canSpend = !maxed && sparks >= cost
   const label = WATCH_ABILITY_LABEL[ability] ?? 'Love'
@@ -82,6 +98,104 @@ export function DefendTowerCard({
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
+
+  if (easy && paths && onUpgradePath) {
+    return (
+      <div
+        ref={cardRef}
+        className={`defend-tower-card is-tree is-${placed.side}`}
+        data-upgrade-card
+        data-upgrade-tree="yes"
+        data-upgrade-plot={plotId}
+        role="dialog"
+        tabIndex={-1}
+        aria-label={`Upgrade ${label} at ${plotTitle}`}
+        style={{
+          left: placed.left,
+          top: placed.top,
+          width: TOWER_CARD_W,
+          ['--stem' as string]: `${Math.round(point.left - placed.left)}px`,
+        }}
+      >
+        {onPull ? (
+          <button
+            type="button"
+            className="defend-tower-pull"
+            aria-label={`Pull lamp at ${plotTitle}`}
+            onClick={onPull}
+          >
+            <svg className="defend-tower-trash" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                fill="currentColor"
+                d="M9 3h6l1 2h5v2H3V5h5l1-2zm-2 6h2v10H7V9zm4 0h2v10h-2V9zm4 0h2v10h-2V9z"
+              />
+            </svg>
+          </button>
+        ) : null}
+        <p className="defend-tower-tool">{label}</p>
+        {TREE_PATHS.map((path) => {
+          const rank = paths[path]
+          const buy = canTake(paths, path)
+          const broke = buy.ok && sparks < buy.cost
+          return (
+            <div key={path} className="defend-path" data-path={path} data-rank={rank}>
+              <p className="defend-path-name">
+                {PATH_LABEL[path]}
+                <span className="defend-path-line">{PATH_LINE[path]}</span>
+              </p>
+              <div className="defend-path-pips" aria-hidden="true">
+                {TREE_STEP_COST.map((stepCost, index) => {
+                  const step = index + 1
+                  const filled = rank >= step
+                  const locked = stepLocked(paths, path, step)
+                  return (
+                    <span
+                      key={stepCost}
+                      className={`defend-path-pip${filled ? ' is-on' : ''}${locked ? ' is-locked' : ''}`}
+                      data-step={step}
+                      data-cost={stepCost}
+                      data-locked={locked ? 'yes' : undefined}
+                    >
+                      {stepCost}
+                    </span>
+                  )
+                })}
+              </div>
+              {buy.ok ? (
+                <button
+                  type="button"
+                  className="btn primary defend-path-buy"
+                  disabled={broke}
+                  data-path-buy={path}
+                  data-cost={buy.cost}
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    onUpgradePath(path)
+                  }}
+                >
+                  {broke ? `Need ${buy.cost}` : `${buy.cost}✦`}
+                </button>
+              ) : (
+                <p className="defend-path-lock" data-path-lock={path}>
+                  {buy.reason}
+                </p>
+              )}
+              {buy.ok && stepLocked(paths, path, 2) ? (
+                <p className="defend-path-lock" data-path-lock={path}>
+                  {TREE_LOCK}
+                </p>
+              ) : null}
+            </div>
+          )
+        })}
+        {roadNote ? (
+          <p className="defend-tower-road" data-road-note={roadNote}>
+            {roadNote}
+          </p>
+        ) : null}
+      </div>
+    )
+  }
 
   return (
     <div

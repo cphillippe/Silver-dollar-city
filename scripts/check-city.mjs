@@ -87,7 +87,17 @@ import {
   wavePackSize,
 } from '../src/lib/defend.ts'
 import { EASY_ROUND_SPEED_CAP, EASY_ROUNDS, roundMark } from '../src/nightWatch/rounds.ts'
-import { scoreEasyRoad } from '../src/nightWatch/roundScore.ts'
+import { scoreEasyRoad, scoreEasyTree } from '../src/nightWatch/roundScore.ts'
+import {
+  applyPathStep,
+  canTake,
+  freshRunPaths,
+  lampStrike,
+  spendTreeNight,
+  stepLocked,
+  TREE_LOCK,
+  TREE_STEP_COST,
+} from '../src/nightWatch/upgradeTree.ts'
 import { boardFill, boardFillPoint } from '../src/nightWatch/map/phoneFill.ts'
 import {
   commitLamp,
@@ -1277,7 +1287,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.404')
+assert.equal(APP_VERSION, '1.4.405')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -4426,8 +4436,8 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(defendAbilitySrc, /'Need a spark'/, '1.4.388 the column still says Need a spark')
   assert.match(
     defendAbilitySrc,
-    /easy\s*\?\s*'Tap'\s*:\s*'↑ spark'/,
-    '1.4.388 Tap returns once a spark can be spent',
+    /easy\s*\?\s*'Paths'\s*:\s*'↑ spark'/,
+    '1.4.405 a planted Easy card opens the path panel',
   )
   assert.match(defendSrc388, /sparks=\{runSparks\}/, '1.4.388 the rail reads this night’s sparks')
   assert.match(defendSrc388, /is-spark-broke/, '1.4.388 the rail frame rests at 0 sparks')
@@ -4792,13 +4802,13 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(defendSrc396, /buyExtraLamp\(sparksRef\.current\)/, '1.4.400 a new lamp spends sparks')
   assert.match(
     defendSrc396,
-    /applyBoost\(id, runTierRef\.current, sparksRef\.current, easy\)/,
-    '1.4.400 Easy upgrades use the scaled price',
+    /applyBoost\(id, runTierRef\.current, sparksRef\.current, false\)/,
+    '1.4.400 Hard upgrades still spend one spark',
   )
   assert.match(defendSrc396, /placeArmRef/, '1.4.400 a paid plant is armed, not the old rings')
   assert.match(ability396, /paidPlace && !placed/, '1.4.400 an unplanted card places instead of upgrading')
   assert.match(ability396, /onBoost\(tool\.id\)/, '1.4.400 a planted card can still upgrade')
-  assert.match(card396, /easy \? easyTierCost\(tier\) : boostCost\(tier\)/, '1.4.400 the card shows the Easy price')
+  assert.match(card396, /boostCost\(tier\)/, '1.4.400 Hard card still prices one spark')
   assert.match(board396, /clampGhostHintLeft/, '1.4.400 the reach note stays on screen')
   assert.ok(clampGhostHintLeft(360, 375) + 96 <= 375 - 8, '1.4.400 Too far from the road clears the right edge')
   assert.equal(clampGhostHintLeft(180, 375), 180, '1.4.400 a centered note stays put')
@@ -4942,9 +4952,9 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
       sparks -= EASY_LAMP_COST
       tiers.push(1)
     }
-    assert.ok(sparks < 20, `1.4.404 a spender stays under 20 sparks after round ${index + 1}`)
+    assert.ok(sparks < 20, `1.4.404 the retired linear prices stay under 20 sparks after round ${index + 1}`)
   }
-  assert.deepEqual(tiers, [3, 3, 3, 3], '1.4.404 a spender is maxed by round 12')
+  assert.deepEqual(tiers, [3, 3, 3, 3], '1.4.404 the retired linear prices max by round 12')
   assert.match(
     readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8'),
     /Reached round \$\{waveIndex \+ 1\}\. You missed\. Tap the face\./,
@@ -4959,6 +4969,100 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.404').items.join('\n'),
     /Fixes #|Closes #|Resolves #/,
     '1.4.404 changelog avoids GitHub close keywords',
+  )
+}
+
+// Night Watch 1.4.405: Easy 2-path tree. Hard stays on the linear spark bump.
+{
+  const zero = { far: 0, strong: 0 }
+  const strong = (n) => ({ far: 0, strong: n })
+  const far = (n) => ({ far: n, strong: 0 })
+  assert.deepEqual(TREE_STEP_COST, [3, 6, 12], '1.4.405 steps cost 3, then 6, then 12')
+  assert.equal(canTake(zero, 'strong').cost, 3)
+  assert.equal(canTake(zero, 'far').cost, 3)
+  assert.equal(canTake({ far: 0, strong: 1 }, 'strong').cost, 6)
+  assert.equal(canTake({ far: 0, strong: 2 }, 'strong').cost, 12)
+  assert.equal(canTake({ far: 3, strong: 1 }, 'strong').ok, false)
+  assert.equal(canTake({ far: 3, strong: 1 }, 'far').ok, false)
+  assert.equal(canTake({ far: 3, strong: 0 }, 'strong').ok, true, '1.4.405 the short path can still take step 1')
+  assert.equal(canTake({ far: 3, strong: 1 }, 'strong').reason, TREE_LOCK)
+  assert.equal(stepLocked({ far: 3, strong: 0 }, 'strong', 1), false)
+  assert.equal(stepLocked({ far: 3, strong: 0 }, 'strong', 2), true)
+  assert.equal(stepLocked({ far: 3, strong: 0 }, 'strong', 3), true)
+  assert.equal(canTake({ far: 2, strong: 2 }, 'far').ok, false, '1.4.405 a lamp cannot be 2 and 2')
+  const first = applyPathStep('love', freshRunPaths(), 4, 'strong')
+  assert.equal(first.ok, true)
+  assert.equal(first.sparks, 1)
+  assert.equal(first.paths.love.strong, 1)
+  assert.equal(applyPathStep('love', first.paths, first.sparks, 'strong').ok, false, '1.4.405 step 2 needs 6')
+  assert.equal(lampStrike(zero).damage, 1)
+  assert.equal(lampStrike(zero).rangeBonus, 0)
+  assert.equal(lampStrike(zero).cooldownMs, 700)
+  assert.equal(lampStrike(strong(1)).damage, 1)
+  assert.equal(lampStrike(strong(1)).splash, 1)
+  assert.equal(lampStrike(strong(2)).damage, 2)
+  assert.equal(lampStrike(strong(3)).damage, 3)
+  assert.equal(lampStrike(far(1)).rangeBonus, 0)
+  assert.equal(lampStrike(far(1)).outer, 1)
+  assert.equal(lampStrike(far(2)).rangeBonus, 24)
+  assert.equal(lampStrike(far(3)).rangeBonus, 40)
+  assert.equal(lampStrike(far(3)).damage, 2)
+  assert.equal(applyBoost('logic', { logic: 1 }, 1).ok, true, '1.4.405 Hard still buys a step for one spark')
+  for (let index = 0; index < 4; index += 1) {
+    assert.equal(scoreEasyTree(index, [zero, zero], 0), 'clear', `1.4.405 round ${index + 1} holds with no steps`)
+  }
+  assert.equal(scoreEasyTree(4, [zero, zero], 0), 'lost', '1.4.405 round 5 leaks without taps')
+  assert.equal(scoreEasyTree(4, [zero, zero], 1), 'clear', '1.4.405 round 5 holds when taps')
+  assert.equal(scoreEasyTree(5, [zero, zero], 1), 'lost', '1.4.405 round 6 fails with no steps')
+  assert.equal(scoreEasyTree(5, [strong(1), strong(1)], 1), 'lost', '1.4.405 round 6 fails on Strong step 1')
+  assert.equal(scoreEasyTree(5, [far(1), far(1)], 1), 'lost', '1.4.405 round 6 fails on Far step 1')
+  assert.equal(scoreEasyTree(5, [strong(2), zero], 0), 'lost', '1.4.405 round 6 still needs taps')
+  assert.equal(scoreEasyTree(5, [strong(2), zero], 1), 'clear', '1.4.405 one Strong step 2 holds round 6')
+  assert.equal(scoreEasyTree(5, [far(2), zero], 0), 'lost', '1.4.405 Far step 2 still needs taps')
+  assert.equal(scoreEasyTree(5, [far(2), zero], 1), 'clear', '1.4.405 one Far step 2 holds round 6')
+  assert.equal(scoreEasyTree(9, [strong(2), strong(2)], 1), 'lost', '1.4.405 round 10 leaks on two Strong step 2 lamps')
+  assert.equal(scoreEasyTree(9, [strong(2), strong(2), strong(2)], 1), 'clear', '1.4.405 round 10 holds on three Strong step 2 lamps')
+  assert.equal(scoreEasyTree(14, [strong(2), strong(2), strong(2), strong(2)], 1), 'lost', '1.4.405 round 15 leaks if every lamp stopped at step 2')
+  assert.equal(scoreEasyTree(14, [strong(3), strong(3), strong(3)], 1), 'clear', '1.4.405 round 15 holds on three Strong step 3 lamps')
+  assert.equal(scoreEasyTree(24, [strong(3), strong(3), strong(3)], 1), 'lost', '1.4.405 round 25 leaks without the fourth lamp')
+  assert.equal(scoreEasyTree(24, [strong(3), strong(3), strong(3), strong(3)], 1), 'clear', '1.4.405 round 25 holds on four Strong step 3 lamps')
+  assert.equal(scoreEasyTree(24, [far(3), far(3), far(3)], 1), 'lost', '1.4.405 round 25 leaks on three Far step 3 lamps')
+  assert.equal(scoreEasyTree(24, [far(3), far(3), far(3), far(3)], 1), 'clear', '1.4.405 round 25 holds on four Far step 3 lamps')
+  const spent = spendTreeNight(EASY_ROUNDS.map((round) => round.count), EASY_LAMP_COST)
+  assert.equal(spent.doneAt, 18, '1.4.405 a spender finishes on round 18')
+  for (const row of spent.rows) {
+    if (row.round <= 18) assert.ok(row.sparks < 20, `1.4.405 bank stays under 20 after round ${row.round}`)
+  }
+  assert.equal(spent.rows[17].open, false)
+  assert.ok(spent.rows[16].open, '1.4.405 round 17 still has a step to buy')
+  const enter = (round) => spent.rows[round - 2].lamps
+  assert.equal(scoreEasyTree(5, enter(6), 1), 'clear', '1.4.405 the spender holds round 6')
+  assert.equal(scoreEasyTree(9, enter(10), 1), 'clear', '1.4.405 the spender holds round 10')
+  assert.equal(scoreEasyTree(14, enter(15), 1), 'clear', '1.4.405 the spender holds round 15')
+  assert.equal(scoreEasyTree(24, enter(25), 1), 'clear', '1.4.405 the spender holds round 25')
+  assert.match(
+    readFileSync(new URL('../src/components/DefendTowerCard.tsx', import.meta.url), 'utf8'),
+    /data-upgrade-tree="yes"/,
+  )
+  assert.match(
+    readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8'),
+    /applyPathStep\(/,
+  )
+  assert.match(
+    readFileSync(new URL('../src/components/DefendAbilityBar.tsx', import.meta.url), 'utf8'),
+    /onOpenTree\?\.\(tool\.id\)/,
+  )
+  assert.match(
+    readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8'),
+    /\.defend-path-pip\.is-locked/,
+  )
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.405'), '1.4.405 changelog row')
+  assert.match(latestChange('1.4.405').title, /path/i)
+  assert.match(latestChange('1.4.405').items.join('\n'), /3, then 6, then 12/)
+  assert.doesNotMatch(
+    latestChange('1.4.405').items.join('\n'),
+    /Fixes #|Closes #|Resolves #/,
+    '1.4.405 changelog avoids GitHub close keywords',
   )
 }
 

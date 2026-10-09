@@ -70,6 +70,13 @@ import {
   upgradeSpendAllowed,
 } from '../lib/nightPlants'
 import { applyBoost, buyExtraLamp, combatTier, EASY_LAMP_COST, freshRunTier } from '../lib/watchTools'
+import {
+  applyPathStep,
+  freshRunPaths,
+  lampStrike,
+  pathsOf,
+  type TreePath,
+} from '../nightWatch/upgradeTree'
 import { useJuiceHandoff } from '../lib/juice'
 import type { CityPlotId } from '../lib/city'
 import {
@@ -144,6 +151,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const [phase, setPhase] = useState<NightPhase>('plant')
   const [waveIndex, setWaveIndex] = useState(0)
   const [runTier, setRunTier] = useState<Record<string, number>>(freshRunTier)
+  const [runPaths, setRunPaths] = useState(freshRunPaths)
   const [runSparks, setRunSparks] = useState(0)
   const [skillReady, setSkillReady] = useState<Record<KitId, number>>({ still: 0, mend: 0 })
   const [skillNow, setSkillNow] = useState(0)
@@ -175,6 +183,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const [loreMeet, setLoreMeet] = useState<{ id: string; line: string } | null>(null)
   const runTierRef = useRef(runTier)
   runTierRef.current = runTier
+  const runPathsRef = useRef(runPaths)
+  runPathsRef.current = runPaths
   const waveIndexRef = useRef(waveIndex)
   waveIndexRef.current = waveIndex
   const skillReadyRef = useRef(skillReady)
@@ -603,7 +613,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     }
     const using = paid ? (paidId as WatchAbility) : unlocked.includes(ability) ? ability : 'love'
     const hud = hudCoversPoint(event.clientX, event.clientY, svg.ownerDocument)
-    const look = previewLamp(point, using, progress, runTier, plantsRef.current, hud)
+    const look = previewLamp(point, using, progress, runTier, plantsRef.current, hud, easy)
     if (event.type === 'pointercancel') {
       setGhost(null)
       return
@@ -645,7 +655,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     }
     const hud = overTowerCards(clientX, clientY, doc) || hudCoversPoint(lifted.x, lifted.y, doc)
     if (kind === 'move') {
-      setGhost(previewLamp(point, using, progress, runTier, plantsRef.current, hud))
+      setGhost(previewLamp(point, using, progress, runTier, plantsRef.current, hud, easy))
       return
     }
     finishPlace(plantsRef.current, point, using, hud, paid)
@@ -688,16 +698,40 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     return nightEnemies.at(raider)
   }
 
+  function lampCombat(toolId: string) {
+    if (!easy) {
+      return {
+        damage: combatTier(toolId, runTierRef.current),
+        rangeBonus: 0,
+        strike: null as ReturnType<typeof lampStrike> | null,
+      }
+    }
+    const strike = lampStrike(pathsOf(runPathsRef.current, toolId))
+    return {
+      damage: strike.damage,
+      rangeBonus: strike.rangeBonus,
+      strike,
+    }
+  }
+
+  function hitRange(id: CityPlotId, toolId: string) {
+    const combat = lampCombat(toolId)
+    return nightTowers.range(id, toolId, progress, runTierRef.current, combat.rangeBonus)
+  }
+
   function fire(id: CityPlotId, forceRaiderId?: number, manual = false) {
     if (phase !== 'wave' || won) return false
     const now = performance.now()
-    const wait = pacedCooldown(nightTowers.cooldown(id, progress), combatPace())
-    // A face tap is its own hit. Lamp cooldown only gates autofire.
-    if (!manual && (live.current.cool[id] ?? 0) + wait > now) return false
     const at = nightTowers.anchor(id)
     const using = towerAbility(id)
-    const tier = combatTier(using, runTier)
-    const range = nightTowers.range(id, using, progress, runTier)
+    const combat = lampCombat(using)
+    const wait = combat.strike
+      ? pacedCooldown(combat.strike.cooldownMs, combatPace())
+      : pacedCooldown(nightTowers.cooldown(id, progress), combatPace())
+    // A face tap is its own hit. Lamp cooldown only gates autofire.
+    if (!manual && (live.current.cool[id] ?? 0) + wait > now) return false
+    const tier = combat.damage
+    const range = hitRange(id, using)
     let best: Raider | null = null
     if (forceRaiderId !== undefined) {
       const forced = live.current.raiders.find((item) => item.id === forceRaiderId && !item.turned)
@@ -778,6 +812,41 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         setRunSparks((count) => count + 1)
         if (easy) live.current.spawnNow = true
       }
+      // Easy autofire only. A face tap stays one walker. Strong nicks inside the ring.
+      // Far step 1 nicks just past it. Neither changes the main shot, so round 6 still
+      // needs a second step.
+      if (easy && !manual && combat.strike) {
+        const nickOne = (minDist: number, maxDist: number, amount: number) => {
+          if (amount <= 0) return
+          let pick: Raider | null = null
+          let pickD = maxDist
+          for (const raider of live.current.raiders) {
+            if (raider.turned || raider.id === best.id || raider.hp <= 0) continue
+            const distance = dist(at, raiderAt(raider))
+            if (distance > minDist && distance <= pickD) {
+              pick = raider
+              pickD = distance
+            }
+          }
+          if (!pick) return
+          const nick = nightEnemies.hit(pick, amount)
+          const spot = raiderAt(pick)
+          live.current.raiders = live.current.raiders.map((item) =>
+            item.id !== pick.id
+              ? item
+              : nick.down
+                ? { ...nick.raider, turned: using, from: spot, heavenT: 0, struckAt: now, text: 'Toward heaven' }
+                : { ...nick.raider, struckAt: now },
+          )
+          if (nick.down) {
+            live.current.downed += 1
+            setRunSparks((count) => count + 1)
+            live.current.spawnNow = true
+          }
+        }
+        nickOne(-1, range * combat.strike.splashFrac, combat.strike.splash)
+        nickOne(range, range * (1 + combat.strike.outerFrac), combat.strike.outer)
+      }
     } else {
       live.current.raiders = live.current.raiders.map((item) =>
         item.id === best.id
@@ -813,10 +882,13 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   autoFireRef.current = (now: number, frozen: boolean) => {
     for (const id of live.current.planted) {
       const using = towerAbility(id)
-      const wait = pacedCooldown(nightTowers.cooldown(id, progress), combatPace())
+      const wait = pacedCooldown(
+        easy ? lampCombat(using).strike!.cooldownMs : nightTowers.cooldown(id, progress),
+        combatPace(),
+      )
       if (!lampReadyToFire(live.current.cool[id] ?? 0, now, wait, frozen)) continue
       const at = nightTowers.anchor(id)
-      const range = nightTowers.range(id, using, progress, runTier)
+      const range = hitRange(id, using)
       const aimed = live.current.raiders.some(
         (raider) => !raider.turned && dist(at, raiderAt(raider)) <= range,
       )
@@ -849,7 +921,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     let inRangeD = Infinity
     for (const id of live.current.planted) {
       const at = nightTowers.anchor(id)
-      const range = nightTowers.range(id, towerAbility(id), progress, runTier)
+      const range = hitRange(id, towerAbility(id))
       const d = dist(at, point)
       if (d < nearestD) {
         nearestD = d
@@ -884,7 +956,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     let bestD = Infinity
     for (const id of live.current.planted) {
       const at = nightTowers.anchor(id)
-      const range = nightTowers.range(id, towerAbility(id), progress, runTier)
+      const range = hitRange(id, towerAbility(id))
       for (const raider of live.current.raiders) {
         if (raider.turned) continue
         const d = dist(at, raiderAt(raider))
@@ -910,6 +982,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     setFlash([])
     setTapJuice(null)
     setRunTier(freshRunTier())
+    setRunPaths(freshRunPaths())
+    runPathsRef.current = freshRunPaths()
     setPlants(easy ? {} : starterPlants(pads, unlocked))
     clearPlaceArm()
     setRunSparks(0)
@@ -939,6 +1013,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   }
 
   function boostTool(id: WatchAbility, lampId?: CityPlotId | null) {
+    if (easy) return
     if (placeArmRef.current) {
       placeArmRef.current = null
       setPlaceArm(null)
@@ -946,7 +1021,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     }
     const before = combatTier(id, runTierRef.current)
     const beforeSparks = sparksRef.current
-    const next = applyBoost(id, runTierRef.current, sparksRef.current, easy)
+    const next = applyBoost(id, runTierRef.current, sparksRef.current, false)
     setBoostNote(next.note)
     if (!next.ok) return
     const after = combatTier(id, next.runTier)
@@ -971,6 +1046,39 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     }, LEVEL_BURST_MS)
   }
 
+  function boostPath(id: WatchAbility, path: TreePath, lampId?: CityPlotId | null) {
+    if (!easy) return
+    if (placeArmRef.current) {
+      placeArmRef.current = null
+      setPlaceArm(null)
+      setGhost(null)
+    }
+    const beforeSparks = sparksRef.current
+    const next = applyPathStep(id, runPathsRef.current, sparksRef.current, path)
+    setBoostNote(next.note)
+    if (!next.ok) return
+    runPathsRef.current = next.paths
+    sparksRef.current = next.sparks
+    setRunPaths(next.paths)
+    setRunSparks(next.sparks)
+    setSparkSpent(Math.max(1, beforeSparks - next.sparks))
+    setToolLock(null)
+    const lamp = lampId !== undefined ? lampId : upgradeAtRef.current
+    const plantedType = lamp ? plantsRef.current[lamp] : undefined
+    window.clearTimeout(burstTimer.current)
+    setSparkSpend(true)
+    if (lamp && plantedType === id) setUpFlash(lamp)
+    burstTimer.current = window.setTimeout(() => {
+      setSparkSpend(false)
+      setUpFlash((current) => (current === lamp ? null : current))
+    }, LEVEL_BURST_MS)
+  }
+
+  function openPlantedTree(id: WatchAbility) {
+    const plot = Object.entries(plantsRef.current).find(([, type]) => type === id)?.[0]
+    if (plot) openUpgrade(plot as CityPlotId)
+  }
+
   function boostSelectedTool(plotId: CityPlotId) {
     const now = performance.now()
     if (
@@ -986,6 +1094,23 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     const tool = lampUpgradeTool(plotId, plantsRef.current)
     if (!tool || !unlocked.includes(tool as WatchAbility)) return
     boostTool(tool as WatchAbility, plotId)
+  }
+
+  function boostSelectedPath(plotId: CityPlotId, path: TreePath) {
+    const now = performance.now()
+    if (
+      !upgradeSpendAllowed(
+        upgradeAtRef.current,
+        plotId,
+        upgradeTapRef.current.at,
+        now,
+      )
+    ) {
+      return
+    }
+    const tool = lampUpgradeTool(plotId, plantsRef.current)
+    if (!tool || !unlocked.includes(tool as WatchAbility)) return
+    boostPath(tool as WatchAbility, path, plotId)
   }
 
   function flashKit(note: string) {
@@ -1312,6 +1437,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       plantedTypes={Object.values(plants)}
       unlocked={unlocked}
       runTier={runTier}
+      runPaths={runPaths}
       sparks={runSparks}
       boosting={boosting}
       placing={easy && !won && phase !== 'lost'}
@@ -1321,6 +1447,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       onLampDrag={onLampDrag}
       onCardPress={onCardPress}
       onBoost={boostTool}
+      onOpenTree={openPlantedTree}
     />
   )
 
@@ -1404,8 +1531,10 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
               walkerCalls={walkerCalls}
               loreLine={loreMeet?.line ?? null}
               runTier={runTier}
+              runPaths={runPaths}
               boosting={boosting}
               onBoostTower={boostSelectedTool}
+              onUpgradePath={boostSelectedPath}
               upgradeAt={upgradeAt}
               onOpenUpgrade={openUpgrade}
               upFlashId={upFlash}

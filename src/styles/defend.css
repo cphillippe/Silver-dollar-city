@@ -2142,6 +2142,89 @@ img.walker-face.easy-walker-face,
   pointer-events: auto;
 }
 
+.defend-tower-card .defend-path-buy {
+  pointer-events: auto;
+}
+
+/* 1.4.405 Easy tree: two path rows on the lamp card. The body still ignores taps. */
+.defend-tower-card.is-tree {
+  padding: 8px 8px 10px;
+}
+
+.defend-path {
+  display: grid;
+  grid-template-columns: 46px 1fr auto;
+  gap: 4px;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.defend-path-name {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1.05;
+  color: #fff6e8;
+}
+
+.defend-path-line {
+  display: block;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  color: #ffe9b0;
+}
+
+.defend-path-pips {
+  display: flex;
+  gap: 3px;
+}
+
+.defend-path-pip {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 230, 160, 0.5);
+  background: rgba(255, 246, 232, 0.08);
+  color: #ffe9b0;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.defend-path-pip.is-on {
+  background: #ffcc33;
+  border-color: #ffcc33;
+  color: #3a2200;
+}
+
+.defend-path-pip.is-locked {
+  opacity: 0.55;
+  border-style: dashed;
+  text-decoration: line-through;
+  background: rgba(90, 28, 44, 0.35);
+}
+
+.defend-path-buy {
+  min-height: 28px;
+  min-width: 46px;
+  padding: 2px 6px;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.defend-path-lock {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1.15;
+  color: #ffd2c8;
+}
+
 .defend-tower-card:focus {
   outline: none;
 }
@@ -2286,6 +2369,18 @@ img.walker-face.easy-walker-face,
 
 /* 1.4.388: 0 sparks — Upgrade is a flat grey control. Need a spark stays the reason. */
 .defend-tower-card .btn.primary.defend-tower-upgrade:disabled {
+  opacity: 1;
+  cursor: not-allowed;
+  color: #5c5468;
+  -webkit-text-fill-color: #5c5468;
+  background: linear-gradient(180deg, #e4deea 0%, #c8c0d2 52%, #b0a8ba);
+  border-color: #d5cedf;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  filter: none;
+  transform: none;
+}
+
+.defend-tower-card .btn.primary.defend-path-buy:disabled {
   opacity: 1;
   cursor: not-allowed;
   color: #5c5468;
