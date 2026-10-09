@@ -994,7 +994,7 @@ img.walker-face.easy-walker-face,
 .defend-fast-rim {
   fill: none;
   stroke: #7ec8ff;
-  stroke-width: 4px;
+  stroke-width: 6px;
   vector-effect: non-scaling-stroke;
   pointer-events: none;
 }
@@ -1006,7 +1006,7 @@ img.walker-face.easy-walker-face,
 .defend-fast-badge path {
   fill: none;
   stroke: #7ec8ff;
-  stroke-width: 4px;
+  stroke-width: 6px;
   stroke-linecap: round;
   vector-effect: non-scaling-stroke;
   opacity: 1;

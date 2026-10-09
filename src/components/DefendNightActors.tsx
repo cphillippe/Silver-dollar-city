@@ -425,16 +425,6 @@ export function DefendNightActorsSvg({
                     <g className="defend-raider-body">
                     {raider.gait === 'fast' && !raider.turned ? (
                       <g aria-hidden>
-                        <circle
-                          className="defend-fast-rim"
-                          cy={PATH_WALKER_FACE_DY}
-                          r={FACE_HALF * 0.98}
-                        />
-                        <g className="defend-fast-badge">
-                          <path d="M50 -28 l18 -6" />
-                          <path d="M48 -14 l22 0" />
-                          <path d="M50 0 l16 6" />
-                        </g>
                         <g className="defend-fast-streaks">
                           <path d={`M${FACE_HALF * 0.2} ${FACE_TOP + 18} l22 10`} />
                           <path d={`M${FACE_HALF * 0.05} ${FACE_TOP + 34} l26 8`} />
@@ -500,6 +490,20 @@ export function DefendNightActorsSvg({
                       </g>
                     ) : null}
                     </g>
+                    {raider.gait === 'fast' && !raider.turned ? (
+                      <g className="defend-fast-mark" aria-hidden>
+                        <circle
+                          className="defend-fast-rim"
+                          cy={PATH_WALKER_FACE_DY}
+                          r={CUE_RING_R + 14}
+                        />
+                        <g className="defend-fast-badge">
+                          <path d={`M${CUE_RING_R + 22} ${PATH_WALKER_FACE_DY - 16} l26 -8`} />
+                          <path d={`M${CUE_RING_R + 20} ${PATH_WALKER_FACE_DY} l30 0`} />
+                          <path d={`M${CUE_RING_R + 22} ${PATH_WALKER_FACE_DY + 16} l24 8`} />
+                        </g>
+                      </g>
+                    ) : null}
                     <circle
                       className="defend-raider-hit"
                       data-face-hit={isTap ? 'easy' : undefined}
