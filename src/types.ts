@@ -204,6 +204,8 @@ export interface DefenseState {
   lastNight?: string
   /** Cast ids whose first-meet story has already been shown. */
   met?: string[]
+  /** Easy round 25 opened the Far Hills teaser. The area is not built yet. */
+  farHills?: boolean
 }
 
 export type AppTheme = 'candy' | 'dusk' | 'parchment'

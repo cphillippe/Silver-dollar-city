@@ -47,7 +47,9 @@ import {
 import {
   nightWatchDebugFrozen,
   readNightWatchDebug,
+  readNightWatchRoundJump,
 } from '../lib/nightWatchDebug'
+import { FarHillsUnlock } from './FarHillsUnlock'
 import {
   clientToMap,
   commitLamp,
@@ -306,8 +308,18 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   useEffect(() => {
     if (!juiceDone || saved.current || !brief) return
     saved.current = true
-    recordNight(today)
-  }, [juiceDone, brief, recordNight, today])
+    recordNight(today, easy)
+  }, [juiceDone, brief, recordNight, today, easy])
+
+  const roundJumpOnce = useRef(false)
+  useEffect(() => {
+    if (!easy || roundJumpOnce.current) return
+    const jump = readNightWatchRoundJump(nightLength(true))
+    if (jump == null) return
+    roundJumpOnce.current = true
+    setWaveIndex(jump)
+    if (jump + 1 >= nightLength(true)) setPhase('boost')
+  }, [easy])
 
   useEffect(() => {
     const saved = progress.defense.met ?? []
@@ -1457,23 +1469,26 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       aria-label={WATCH_TITLE}
     >
       {after ? (
-        <>
-          <article className="stored-line" aria-label={easy ? 'How to pray Love' : 'Love tip'}>
-            <p className="eyebrow">{easy ? 'How to pray Love' : 'Love tip'}</p>
-            <p className="stored-claim">{loveHowTo(easy)}</p>
-            {easy ? <p className="quiet">{EASY.nightTap}</p> : null}
-          </article>
-          <TownReturn
-            who="juniper"
-            line={
-              easy
-                ? `The night held after round ${rounds}.`
-                : 'Night held. The road turned toward heaven.'
-            }
-            action={easy ? EASY.home : 'See the town'}
-            onGo={() => onNavigate({ name: 'hub' })}
+        easy ? (
+          <FarHillsUnlock
+            held={`The night held after round ${rounds}.`}
+            home={EASY.home}
+            onHome={() => onNavigate({ name: 'hub' })}
           />
-        </>
+        ) : (
+          <>
+            <article className="stored-line" aria-label="Love tip">
+              <p className="eyebrow">Love tip</p>
+              <p className="stored-claim">{loveHowTo(easy)}</p>
+            </article>
+            <TownReturn
+              who="juniper"
+              line="Night held. The road turned toward heaven."
+              action="See the town"
+              onGo={() => onNavigate({ name: 'hub' })}
+            />
+          </>
+        )
       ) : (
         <>
           {easy ? (
