@@ -60,7 +60,7 @@ import {
   EASY_MISS_HOLD_MS,
   EASY_WALKER_FACE_PX,
   DEFEND_HEARTS,
-  EASY_GLOW_TAP_MULT,
+  EASY_GLOW_TAP_DAMAGE,
   EASY_LEAK_GRACE_MS,
   EASY_ROUND_HEART_CAP,
   applyEasyPaceLeaks,
@@ -1309,7 +1309,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.412')
+assert.equal(APP_VERSION, '1.4.413')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -5190,22 +5190,15 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   const zero = { far: 0, strong: 0 }
   const spent408 = spendTreeNight(EASY_ROUNDS.map((round) => round.count), EASY_LAMP_COST)
   let hearts = 3
-  let lampKills = 0
-  let tapKills = 0
-  for (let index = 0; index < 9; index += 1) {
+  for (let index = 0; index < 4; index += 1) {
     const paths = index === 0 ? [zero, zero] : spent408.rows[index - 1].lamps
     const round = paceEasyTree(index, paths, hearts, 3, 0.7, 1 + index * 17)
     assert.equal(round.result, 'clear', `1.4.408 a slow-tap spender holds round ${index + 1}`)
-    lampKills += round.lampKills
-    tapKills += round.tapKills
+    assert.equal(round.hearts, 3)
     hearts = round.hearts
   }
-  const tenth408 = paceEasyTree(9, spent408.rows[8].lamps, hearts, 3, 0.7, 1 + 9 * 17)
-  assert.equal(tenth408.result, 'lost', '1.4.412 a slow-tap spender loses round 10')
-  lampKills += tenth408.lampKills
-  tapKills += tenth408.tapKills
-  const share = lampKills / (lampKills + tapKills)
-  assert.ok(share > 0.55, '1.4.408 lamps take more than half the kills')
+  const fifth408 = paceEasyTree(4, spent408.rows[3].lamps, hearts, 3, 0.7, 1 + 4 * 17)
+  assert.equal(fifth408.result, 'lost', '1.4.413 flat taps: this two-lamp clumsy spender loses round 5')
   assert.ok(CHANGELOG.some((note) => note.version === '1.4.408'), '1.4.408 changelog row')
   assert.match(latestChange('1.4.408').title, /lamp/i)
   assert.doesNotMatch(latestChange('1.4.408').items.join('\n'), /Fixes #|Closes #|Resolves #/)
@@ -5246,10 +5239,10 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
 
 // Night Watch 1.4.410: round 5 is a tap gate, and a clear gives a heart back.
 {
-  assert.equal(EASY_GLOW_TAP_MULT, 2)
-  assert.equal(easyGlowTapDamage(1, 5), 2, '1.4.410 a glow tap is twice a Level I shot')
-  assert.equal(easyGlowTapDamage(1, 2), 2, '1.4.410 a glow tap finishes a two-hit walker')
-  assert.equal(easyGlowTapDamage(2, 9), 4, '1.4.410 a step-2 glow tap is twice that lamp')
+  assert.equal(EASY_GLOW_TAP_DAMAGE, 1)
+  assert.equal(easyGlowTapDamage(2), 1, '1.4.413 a glow tap is one flat hit')
+  assert.equal(easyGlowTapDamage(24), 1, '1.4.413 a tough bar soaks a glow tap')
+  assert.equal(easyGlowTapDamage(1), 1, '1.4.413 a one-hit walker still pops')
   assert.equal(easyClearHeart(1), 2)
   assert.equal(easyClearHeart(2), 3)
   assert.equal(easyClearHeart(3), 3, '1.4.410 a full bar does not grow')
@@ -5270,7 +5263,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     '1.4.410 rounds 1–4 stay put',
   )
   const screen410 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
-  assert.match(screen410, /easyGlowTapDamage\(tier, best\.hp\)/)
+  assert.match(screen410, /easyGlowTapDamage\(best\.hp\)/)
   assert.match(screen410, /easyClearHeart\(live\.current\.hearts\)/)
   assert.match(screen410, /easyRoundHeartCap\(waveIndexRef\.current\)/)
   assert.match(screen410, /\+1 ♥/)
@@ -5322,12 +5315,13 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     '1.4.410 step-1 lamps lose by round 7 in most seeds',
   )
   assert.ok(
-    held.filter((run) => run.furthest > 7).length >= 5,
-    '1.4.410 one step-2 holds rounds 6 and 7 in most seeds',
+    held.filter((run) => run.dead && run.furthest <= 7).length === 8,
+    '1.4.413 one Strong step 2 with clumsy taps loses by round 7',
   )
-  assert.ok(
-    spender.filter((run) => run.furthest >= 12).length >= 5,
-    '1.4.410 a spender reaches round 12 in most seeds',
+  assert.equal(
+    spender.filter((run) => run.furthest >= 12).length,
+    4,
+    '1.4.413 a clumsy two-lamp spender reaches round 12 on four seeds',
   )
   assert.ok(CHANGELOG.some((note) => note.version === '1.4.410'), '1.4.410 changelog row')
   assert.match(latestChange('1.4.410').title, /R5 tap value/i)
@@ -5419,12 +5413,8 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     '1.4.411 Level I with no taps still loses on round 5',
   )
   assert.ok(
-    active411.filter((run) => run.furthest > 5).length >= 5,
-    '1.4.411 active taps still hold round 5',
-  )
-  assert.ok(
-    active411.filter((run) => run.dead && run.furthest >= 7 && run.furthest <= 8).length >= 5,
-    '1.4.411 an active tapper with no upgrades loses on round 7 or 8',
+    active411.every((run) => run.dead && run.furthest <= 7),
+    '1.4.413 two Level I lamps and active taps lose by round 7',
   )
   assert.ok(
     spendActive.filter((run) => run.furthest >= 12).length >= 5,
@@ -5473,6 +5463,104 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.ok(CHANGELOG.some((note) => note.version === '1.4.412'), '1.4.412 changelog row')
   assert.match(latestChange('1.4.412').title, /live prove/i)
   assert.doesNotMatch(latestChange('1.4.412').items.join('\n'), /Fixes #|Closes #|Resolves #/)
+}
+
+// Night Watch 1.4.413: flat glow taps, and 3× is only a faster clock.
+{
+  const screen413 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const score413 = readFileSync(new URL('../src/nightWatch/roundScore.ts', import.meta.url), 'utf8')
+  assert.equal(EASY_GLOW_TAP_DAMAGE, 1)
+  assert.equal(easyGlowTapDamage(FAST_HP), 1, '1.4.413 a fast walker needs a second tap')
+  assert.equal(easyGlowTapDamage(walkerHp(2, 6, 'tough')), 1, '1.4.413 round 5 tough soaks a tap')
+  assert.match(screen413, /const slices = pace === NIGHT_PACE_FAST \? NIGHT_PACE_FAST : 1/)
+  assert.match(screen413, /const dt = gameDt \/ slices/)
+  assert.match(
+    screen413,
+    /applyEasyPaceLeaks\(\s*live\.current\.hearts,\s*leaked,\s*live\.current\.clock,/,
+    '1.4.413 leak grace reads the game clock',
+  )
+  assert.match(score413, /easyGlowTapDamage\(front\.hp\)/)
+  assert.match(score413, /pacedDt\(1 \/ 60, paceScale\) \/ slices/)
+  assert.ok(
+    Math.abs(pacedDt(1 / 60, NIGHT_PACE_FAST) / NIGHT_PACE_FAST - pacedDt(1 / 60, 1)) < 1e-12,
+    '1.4.413 one 3× slice is one 1× step',
+  )
+  const zero413 = { far: 0, strong: 0 }
+  const fourI = [zero413, zero413, zero413, zero413]
+  const oneII = [{ far: 0, strong: 2 }, zero413, zero413, zero413]
+  const spent413 = spendTreeNight(EASY_ROUNDS.map((round) => roundSparkPay(round)), EASY_LAMP_COST)
+  const seeds413 = Array.from({ length: 8 }, (_, seed) => 1 + seed * 97)
+  function night413(pathsFor, tapEvery, through, pace = 1, base = 1) {
+    let hearts = 3
+    const rows = []
+    for (let index = 0; index < through; index += 1) {
+      const round = paceEasyTree(
+        index,
+        pathsFor(index),
+        hearts,
+        tapEvery,
+        1,
+        base + index * 17,
+        0,
+        pace,
+      )
+      rows.push(round)
+      if (round.result !== 'clear') return { rows, dead: index + 1 }
+      hearts = easyClearHeart(round.hearts)
+    }
+    return { rows, dead: null }
+  }
+  const quiet413 = seeds413.map((base) => night413(() => fourI, 0, 5, 1, base))
+  const light413 = seeds413.map((base) => night413(() => oneII, 4, 9, 1, base))
+  const active413 = seeds413.map((base) => night413(() => fourI, 3, 8, 1, base))
+  const heavy413 = seeds413.map((base) => night413(() => fourI, 0.7, 10, 1, base))
+  const spend413 = seeds413.map((base) =>
+    night413(
+      (index) => (index === 0 ? fourI : spent413.rows[index - 1].lamps),
+      3,
+      16,
+      1,
+      base,
+    ),
+  )
+  assert.ok(
+    quiet413.every((run) => run.dead === 5 && run.rows.every((round) => round.taps === 0)),
+    '1.4.413 zero taps on four Level I lamps lose round 5',
+  )
+  assert.ok(
+    light413.every((run) => run.dead === 9 && run.rows[4].taps >= 5 && run.rows[4].taps <= 10),
+    '1.4.413 light taps plus one Strong step 2 hold round 5',
+  )
+  assert.ok(
+    active413.every(
+      (run) => run.dead === 8 && run.rows[4].taps >= 10 && run.rows[4].taps <= 20 && run.rows.every((round) => round.taps <= 20),
+    ),
+    '1.4.413 active taps with no upgrades wall on round 8',
+  )
+  assert.ok(
+    spend413.every((run) => run.dead == null && run.rows[4].taps >= 10 && run.rows[4].taps <= 20),
+    '1.4.413 active taps plus a spender clear through round 16',
+  )
+  assert.ok(
+    heavy413.every((run) => run.dead === 10 && run.rows[4].taps >= 30),
+    '1.4.413 heavy taps with no upgrades wall on round 10',
+  )
+  for (const every of [0, 3, 0.7]) {
+    for (const base of seeds413) {
+      for (let index = 0; index < 5; index += 1) {
+        const slow = paceEasyTree(index, fourI, 3, every, 1, base + index * 17, 0, 1)
+        const fast = paceEasyTree(index, fourI, 3, every, 1, base + index * 17, 0, 3)
+        assert.equal(fast.result, slow.result, '1.4.413 pace 3 matches pace 1')
+        assert.equal(fast.hearts, slow.hearts)
+        assert.equal(fast.lampKills, slow.lampKills)
+        assert.equal(fast.tapKills, slow.tapKills)
+        assert.equal(fast.taps, slow.taps)
+      }
+    }
+  }
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.413'), '1.4.413 changelog row')
+  assert.match(latestChange('1.4.413').title, /flat taps/i)
+  assert.doesNotMatch(latestChange('1.4.413').items.join('\n'), /Fixes #|Closes #|Resolves #/)
 }
 
 // Night Watch 1.4.392: reach cue, a longer level-I free lamp, and a plant pin.
@@ -10962,8 +11050,8 @@ console.log('check-city: ok')
   assert.match(defendScreenOnlySrc, /continueFromBoost/, '1.4.327 boost can continue')
   assert.match(
     defendScreenOnlySrc,
-    /nightEnemies\.hit\(best, easy && manual \? easyGlowTapDamage\(tier, best\.hp\) : tier\)/,
-    '1.4.410 an Easy glow tap hits twice and the lamp shot stays the tier',
+    /nightEnemies\.hit\(best, easy && manual \? easyGlowTapDamage\(best\.hp\) : tier\)/,
+    '1.4.413 an Easy glow tap is a flat hit and the lamp shot stays the tier',
   )
   assert.match(defendScreenOnlySrc, /combatTier\(/)
   assert.match(defendScreenOnlySrc, /label="Sparks"/)
