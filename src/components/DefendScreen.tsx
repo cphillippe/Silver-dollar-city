@@ -11,6 +11,7 @@ import {
 } from '../content/defend'
 import { EASY, isEasy, loveHowTo } from '../lib/easy'
 import { roundMark, easyRound } from '../nightWatch/rounds'
+import { pickWalkerFace } from '../nightWatch/enemies/faces'
 import {
   BOSS_PACE,
   easyBossHp,
@@ -567,6 +568,13 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
             setLoreMeet((current) => (current?.id === cast.id ? null : current))
           }, 2200)
         }
+        const face = easy
+          ? pickWalkerFace(
+              wave,
+              id,
+              walking.flatMap((item) => (item.face ? [item.face] : [])),
+            )
+          : undefined
         walking.push({
           id,
           t: nightEnemies.spawnT(id),
@@ -574,6 +582,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           kind: cast.kind,
           label: cast.label,
           castId: cast.id,
+          face,
           hp,
           maxHp: hp,
           gait,
@@ -1092,6 +1101,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           left: juiceAt.left,
           top: juiceAt.top,
           kind: best.kind,
+          face: best.face,
           down: struck.down,
         })
         window.setTimeout(() => {
