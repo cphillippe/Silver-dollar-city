@@ -27,13 +27,13 @@ const LOCI_STAMP: Record<string, LociStampSpec> = {
   'fg-reason': {
     whoId: 'ansel',
     placeLabel: 'Why Gate · Swinging Arch',
-    ideaShort: "Reason from God's light",
+    ideaShort: 'The mind you already trust needs a real ground.',
     plotId: 'gate',
   },
   'fg-ought': {
     whoId: 'ansel',
     placeLabel: 'Why Gate · Swinging Arch',
-    ideaShort: "Ought is God's law",
+    ideaShort: 'Rocks cannot write the law you already trust.',
     plotId: 'gate',
   },
   'fg-mover': {
