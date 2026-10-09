@@ -9,7 +9,7 @@ import type { SequenceChallenge, SequenceItem } from '../../types'
 import { shuffle } from '../../lib/shuffle'
 import { playGemPop, prefersReducedMotion } from '../../lib/juice'
 import { isEasy } from '../../lib/easy'
-import { resolveSequenceVisual, SEQUENCE_FIGURE } from '../../lib/sequenceArt'
+import { resolveSequenceVisual, SEQUENCE_CROP, SEQUENCE_FIGURE } from '../../lib/sequenceArt'
 import { SEQUENCE_DECOY, sequenceVerse } from '../../lib/sequenceVerse'
 import { useProgress } from '../../store/progress'
 import { WinBurst } from './WinBurst'
@@ -32,6 +32,7 @@ function toCard(
   easy = false,
 ): StripCard {
   const figure = !decoy && easy && item.art ? SEQUENCE_FIGURE[item.art] : undefined
+  const crop = !decoy && easy && item.art ? SEQUENCE_CROP[item.art] : undefined
   return {
     id: item.id,
     text: item.text,
@@ -41,6 +42,7 @@ function toCard(
     orderIndex: decoy ? -1 : index,
     decoy,
     figure,
+    crop,
     visual: decoy
       ? resolveSequenceVisual(challengeId, { id: item.id, text: item.text, gem: 'coin' }, -1)
       : resolveSequenceVisual(challengeId, item, index),

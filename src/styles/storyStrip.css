@@ -886,6 +886,257 @@ html[data-easy='on'] .play.is-story-strip.is-win[data-line='ph-road'] .strip-ver
   }
 }
 
+/* Short strips (3 frames). A wide 2:1 row leaves the height empty.
+   Slots, tray cards, and win thumbnails take a taller portrait and grow
+   into that height. 4- and 5-frame strips keep the rules above. */
+html[data-easy='on'] .app.is-play .app-body:has(.play.is-story-strip[data-n='3']) {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-height: 0;
+  overflow: hidden;
+  padding-bottom: 12px;
+}
+
+html[data-easy='on'] .daily-page:has(.play.is-story-strip[data-n='3']),
+html[data-easy='on'] .challenge-page:has(.play.is-story-strip[data-n='3']) {
+  flex: 1 1 auto;
+  min-height: 0;
+  justify-content: flex-start;
+  overflow: hidden;
+}
+
+html[data-easy='on'] .play.is-story-strip[data-n='3'] {
+  flex: 1 1 auto;
+  min-height: 0;
+  justify-content: flex-start;
+  height: auto;
+}
+
+html[data-easy='on'] .play.is-story-strip[data-n='3']:not(.is-win) .strip-board {
+  flex: 1 1 0;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  aspect-ratio: auto;
+}
+
+html[data-easy='on'] .play.is-story-strip[data-n='3']:not(.is-win) .strip-tray {
+  flex: 1.08 1 0;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  align-items: stretch;
+  justify-content: center;
+}
+
+html[data-easy='on'] .play.is-story-strip[data-n='3']:not(.is-win) .strip-tray[data-count='1'],
+html[data-easy='on'] .play.is-story-strip[data-n='3']:not(.is-win) .strip-tray[data-count='2'],
+html[data-easy='on'] .play.is-story-strip[data-n='3']:not(.is-win) .strip-tray[data-count='3'] {
+  --tray-n: 3;
+}
+
+html[data-easy='on'] .play.is-story-strip[data-n='3']:not(.is-win) .strip-tray[data-count='1'] {
+  --tray-n: 1;
+}
+
+html[data-easy='on'] .play.is-story-strip[data-n='3']:not(.is-win) .strip-tray[data-count='2'] {
+  --tray-n: 2;
+}
+
+html[data-easy='on'] .play.is-story-strip[data-n='3']:not(.is-win) .strip-tray .strip-face {
+  flex: 0 1 auto;
+  align-self: stretch;
+  width: auto;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  max-width: calc((100% - 8px * (var(--tray-n) - 1)) / var(--tray-n));
+  max-height: 100%;
+  aspect-ratio: 1 / 2;
+}
+
+/* Win rows: link, a growing portrait strip, then Home plus the recall.
+   The recall keeps a share and may clip; the strip does not collapse. */
+html[data-easy='on'] .daily-page.is-after:has(.play.is-story-strip[data-n='3']),
+html[data-easy='on'] .challenge-page.is-after:has(.play.is-story-strip[data-n='3']) {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) minmax(0, max-content);
+  align-content: stretch;
+  flex: 1 1 auto;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+html[data-easy='on'] .daily-page.is-after:has(.play.is-story-strip[data-n='3']) .play.is-story-strip.is-win,
+html[data-easy='on'] .challenge-page.is-after:has(.play.is-story-strip[data-n='3']) .play.is-story-strip.is-win {
+  position: relative;
+  flex: 1 1 auto;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  justify-content: flex-start;
+}
+
+html[data-easy='on'] .daily-page.is-after:has(.play.is-story-strip[data-n='3']) .play.is-story-strip.is-win .strip-lead,
+html[data-easy='on'] .challenge-page.is-after:has(.play.is-story-strip[data-n='3']) .play.is-story-strip.is-win .strip-lead,
+html[data-easy='on'] .daily-page.is-after:has(.play.is-story-strip[data-n='3']) .play.is-story-strip.is-win .strip-kicker,
+html[data-easy='on'] .challenge-page.is-after:has(.play.is-story-strip[data-n='3']) .play.is-story-strip.is-win .strip-kicker,
+html[data-easy='on'] .daily-page.is-after:has(.play.is-story-strip[data-n='3']) .play.is-story-strip.is-win .strip-stamp,
+html[data-easy='on'] .challenge-page.is-after:has(.play.is-story-strip[data-n='3']) .play.is-story-strip.is-win .strip-stamp,
+html[data-easy='on'] .daily-page.is-after:has(.play.is-story-strip[data-n='3']) .play.is-story-strip.is-win .strip-stars,
+html[data-easy='on'] .challenge-page.is-after:has(.play.is-story-strip[data-n='3']) .play.is-story-strip.is-win .strip-stars,
+html[data-easy='on'] .daily-page.is-after:has(.play.is-story-strip[data-n='3']) .play.is-story-strip.is-win .strip-verse,
+html[data-easy='on'] .challenge-page.is-after:has(.play.is-story-strip[data-n='3']) .play.is-story-strip.is-win .strip-verse {
+  flex: 0 0 auto;
+}
+
+html[data-easy='on'] .daily-page.is-after:has(.play.is-story-strip[data-n='3']) .play.is-story-strip.is-win .strip-board,
+html[data-easy='on'] .challenge-page.is-after:has(.play.is-story-strip[data-n='3']) .play.is-story-strip.is-win .strip-board {
+  flex: 1 1 auto;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  aspect-ratio: auto;
+}
+
+html[data-easy='on'] .daily-page.is-after:has(.play.is-story-strip[data-n='3']) .after-win,
+html[data-easy='on'] .challenge-page.is-after:has(.play.is-story-strip[data-n='3']) .after-win {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: 100%;
+  overflow: hidden;
+  height: auto;
+}
+
+html[data-easy='on'] .daily-page.is-after:has(.play.is-story-strip[data-n='3']) .recall-gate.is-easy-hold,
+html[data-easy='on'] .challenge-page.is-after:has(.play.is-story-strip[data-n='3']) .recall-gate.is-easy-hold {
+  gap: 4px;
+  min-height: 0;
+  padding-bottom: 0;
+}
+
+html[data-easy='on'] .daily-page.is-after:has(.play.is-story-strip[data-n='3']) .why-blast,
+html[data-easy='on'] .challenge-page.is-after:has(.play.is-story-strip[data-n='3']) .why-blast {
+  flex: 0 0 auto;
+  gap: 4px;
+  min-height: 0;
+  height: auto;
+}
+
+html[data-easy='on'] .daily-page.is-after:has(.play.is-story-strip[data-n='3']) .recall-gate .why-blast .why-arena,
+html[data-easy='on'] .challenge-page.is-after:has(.play.is-story-strip[data-n='3']) .recall-gate .why-blast .why-arena {
+  display: grid;
+  flex: 0 0 auto;
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  gap: 6px;
+  align-content: start;
+  justify-content: stretch;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas:
+    'c0 c1'
+    'claim claim'
+    'c2 c3';
+}
+
+html[data-easy='on'] .daily-page.is-after:has(.play.is-story-strip[data-n='3']) .why-chip,
+html[data-easy='on'] .challenge-page.is-after:has(.play.is-story-strip[data-n='3']) .why-chip {
+  min-height: 44px;
+  padding: 6px 8px;
+}
+
+html[data-easy='on'] .daily-page.is-after:has(.play.is-story-strip[data-n='3']) .why-claim,
+html[data-easy='on'] .challenge-page.is-after:has(.play.is-story-strip[data-n='3']) .why-claim {
+  padding: 8px 10px;
+}
+
+html[data-easy='on'] .daily-page.is-after:has(.play.is-story-strip[data-n='3']) .town-return,
+html[data-easy='on'] .challenge-page.is-after:has(.play.is-story-strip[data-n='3']) .town-return {
+  flex: 0 0 auto;
+}
+
+html[data-easy='on'] .daily-page.is-after:has(.play.is-story-strip[data-n='3']) .rehearse-anchor,
+html[data-easy='on'] .challenge-page.is-after:has(.play.is-story-strip[data-n='3']) .rehearse-anchor,
+html[data-easy='on'] .daily-page.is-after:has(.play.is-story-strip[data-n='3']) .why-blast,
+html[data-easy='on'] .challenge-page.is-after:has(.play.is-story-strip[data-n='3']) .why-blast,
+html[data-easy='on'] .daily-page.is-after:has(.play.is-story-strip[data-n='3']) .why-arena,
+html[data-easy='on'] .challenge-page.is-after:has(.play.is-story-strip[data-n='3']) .why-arena {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+html[data-easy='on'] .play.is-story-strip.is-win[data-n='3'] .strip-stamp,
+html[data-easy='on'] .play.is-story-strip.is-win[data-n='3'] .strip-stars {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+html[data-easy='on'] .play.is-story-strip.is-win[data-n='3'] .strip-verse {
+  padding: 3px 8px 4px;
+}
+
+html[data-easy='on'] .play.is-story-strip.is-win[data-n='3'] .strip-verse blockquote {
+  margin: 1px 0;
+}
+
+@media (max-height: 740px) {
+  html[data-easy='on'] .daily-page.is-after:has(.play.is-story-strip[data-n='3']),
+  html[data-easy='on'] .challenge-page.is-after:has(.play.is-story-strip[data-n='3']) {
+    grid-template-rows: auto minmax(236px, 1fr) minmax(0, 1fr);
+  }
+
+  html[data-easy='on'] .play.is-story-strip.is-win[data-n='3'] .strip-verse {
+    padding: 2px 6px 3px;
+  }
+
+  html[data-easy='on'] .play.is-story-strip.is-win[data-n='3'] .strip-verse blockquote {
+    font-size: 12px;
+    line-height: 1.12;
+  }
+
+  html[data-easy='on'] .daily-page.is-after:has(.play.is-story-strip[data-n='3']) .why-claim,
+  html[data-easy='on'] .challenge-page.is-after:has(.play.is-story-strip[data-n='3']) .why-claim {
+    padding: 4px 8px;
+    font-size: 0.95rem;
+    line-height: 1.12;
+  }
+
+  html[data-easy='on'] .daily-page.is-after:has(.play.is-story-strip[data-n='3']) .why-chip,
+  html[data-easy='on'] .challenge-page.is-after:has(.play.is-story-strip[data-n='3']) .why-chip {
+    min-height: 40px;
+    padding: 4px 6px;
+  }
+
+  html[data-easy='on'] .daily-page.is-after:has(.play.is-story-strip[data-n='3']) .recall-gate .why-blast .why-arena,
+  html[data-easy='on'] .challenge-page.is-after:has(.play.is-story-strip[data-n='3']) .recall-gate .why-blast .why-arena {
+    gap: 4px;
+  }
+
+  html[data-easy='on'] .daily-page.is-after:has(.play.is-story-strip[data-n='3']) .rehearse-anchor,
+  html[data-easy='on'] .challenge-page.is-after:has(.play.is-story-strip[data-n='3']) .rehearse-anchor {
+    zoom: 0.88;
+  }
+}
+
+html[data-easy='on'] .play.is-story-strip[data-n='3'] .strip-art img {
+  object-fit: cover;
+  object-position: var(--crop-x, 50%) var(--crop-y, 0%);
+  transform: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .strip-face.is-glow,
   .strip-face.is-glow::before,
