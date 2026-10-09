@@ -105,7 +105,7 @@ base64 -w 0 silver-city-release.keystore
 
 Paste the base64 output into `ANDROID_KEYSTORE_B64`.
 
-Every pull request, and every run that is not a push or dispatch on `main`, builds an APK with a key created inside that job and discarded. That file is the Actions artifact. The release-signed APK is uploaded only to the `latest` GitHub Release. If any of the four secrets is missing, the publish job fails and the release is left as it was.
+Every pull request, and every run that is not a push or dispatch on `main`, builds an APK with a key created inside that job and discarded. That file is the Actions artifact. The release-signed APK is uploaded only to the `latest` GitHub Release. The new file is written onto that release before the `latest` tag moves. If the publish job fails, the release that is already there stays.
 
 ## Android debug APK
 
