@@ -5184,6 +5184,24 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(css421, /\.nw-docks \.defend-boost \{[^}]*pointer-events:\s*none/)
   assert.match(css421, /\.defend-path\[data-path='far'\] button\.defend-path-pip\.is-buy[\s\S]*?#7ecbff/)
   assert.match(css421, /\.defend-path\[data-path='strong'\] button\.defend-path-pip\.is-buy[\s\S]*?#ff8a4a/)
+  const greyBuy421 = css421.indexOf('.defend-tower-card .btn.primary.defend-path-buy:disabled')
+  const farBuy421 = css421.indexOf(
+    ".defend-tower-card .defend-path[data-path='far'] .btn.primary.defend-path-buy:disabled",
+  )
+  const strongBuy421 = css421.indexOf(
+    ".defend-tower-card .defend-path[data-path='strong'] .btn.primary.defend-path-buy:disabled",
+  )
+  assert.ok(greyBuy421 > 0 && farBuy421 > greyBuy421 && strongBuy421 > farBuy421)
+  assert.match(
+    css421.slice(farBuy421, strongBuy421),
+    /background-color:\s*#1d4e89/,
+    '1.4.421 a Far buy stays blue when it says Need',
+  )
+  assert.match(
+    css421.slice(strongBuy421, strongBuy421 + 400),
+    /background-color:\s*#8a3412/,
+    '1.4.421 a Strong buy stays orange when it says Need',
+  )
   assert.match(card421, /className="defend-path-mark"/)
   assert.match(card421, /onUpgradePath\(path, true\)/)
   assert.match(
