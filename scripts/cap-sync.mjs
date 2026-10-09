@@ -23,7 +23,13 @@ function run(command) {
 
 const syncCmd = platform ? `npx cap sync ${platform}` : 'npx cap sync'
 const status = run(syncCmd)
-if (status === 0) process.exit(0)
+if (status === 0) {
+  if (platform === 'android' || platform === undefined) {
+    const patched = run('node scripts/android-live-shell.mjs')
+    if (patched !== 0) process.exit(patched)
+  }
+  process.exit(0)
+}
 if (platform === 'android' || !platform) process.exit(status)
 
 console.warn('cap sync ios: native pods/Xcode skipped on this machine. Copying web assets into ios/.')

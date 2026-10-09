@@ -52,7 +52,7 @@ captures/
 # Comment next line if keeping position of elements in Navigation Editor is relevant for you
 .idea/navEditor.xml
 
-# Keystore files — never commit Play/upload keys
+# Keystore files. Never commit a signing key.
 *.jks
 *.keystore
 *.p12

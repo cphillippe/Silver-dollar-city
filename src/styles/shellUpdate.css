@@ -1,0 +1,35 @@
+.shell-update {
+  position: fixed;
+  z-index: 40;
+  left: 12px;
+  right: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  max-width: 28rem;
+  margin: 0 auto;
+  padding: 14px 16px 16px;
+  border-radius: 18px;
+  background: #2a0d58;
+  color: #fff6e8;
+  border: 1px solid rgba(255, 204, 51, 0.45);
+  box-shadow: 0 12px 28px rgba(20, 0, 40, 0.45);
+}
+
+.shell-update-title {
+  margin: 0 0 4px;
+  font-weight: 700;
+}
+
+.shell-update p {
+  margin: 0 0 10px;
+}
+
+.shell-update-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.shell-update .btn {
+  min-height: 48px;
+  text-decoration: none;
+}

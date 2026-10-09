@@ -58,6 +58,55 @@ Progress is stored **offline-first on this device** (versioned save, same localS
 
 Installable as a PWA (Add to Home Screen) after a production build, or as an Android debug APK (below).
 
+## Android phone app
+
+One download link. The town updates by itself. Install again only when the app shows **Update available**.
+
+**Download:**  
+https://github.com/cphillippe/Silver-dollar-city/releases/download/latest/silver-city.apk
+
+That file is the rolling `latest` GitHub Release, rebuilt on every merge to `main`.
+
+**Install in Brave**
+
+1. Open the link in Brave on the phone.
+2. Allow **Install unknown apps** for Brave when Android asks.
+3. Open the downloaded file and tap Install.
+
+**How updates arrive**
+
+- **Town and puzzles.** The app loads https://cphillippe.github.io/Silver-dollar-city/ over HTTPS. After a merge reaches `main` and Pages finishes, close the app and open it again. The new town is there. You do not reinstall.
+- **No signal.** The app opens the copy packed in the APK. That copy keeps its own save on the phone. The live town comes back when the signal does.
+- **The app itself.** A native shell change bumps `versionCode` (kept in `public/shell.json` and `android/app/build.gradle`). The app shows a small **Update available** note. Tap **Get the update**, then install. That button opens this repo's release file in the browser. Android will not install a sideloaded app on its own. Ordinary town updates do not show this note.
+- **Other links.** The app stays on the Silver City Pages site. A link to any other site opens in the phone's browser.
+
+Web-only ships leave `versionCode` alone.
+
+**Release signing**
+
+The `latest` release is signed only from the protected Actions environment named `release`. Limit that environment to the `main` branch. Put these four secrets on that environment, not on the repository:
+
+| Secret | Value |
+| --- | --- |
+| `ANDROID_KEYSTORE_B64` | Base64 of the `.keystore` file |
+| `ANDROID_KEYSTORE_PASSWORD` | Store password |
+| `ANDROID_KEY_ALIAS` | Key alias |
+| `ANDROID_KEY_PASSWORD` | Key password |
+
+No keystore belongs in the repo. A keystore that was pushed on this branch is burned. Do not reuse it. Generate a new one on your machine, keep the file private, and store the passwords only in the `release` environment.
+
+```bash
+keytool -genkeypair -v \
+  -keystore silver-city-release.keystore \
+  -alias silver-city \
+  -keyalg RSA -keysize 2048 -validity 10000
+base64 -w 0 silver-city-release.keystore
+```
+
+Paste the base64 output into `ANDROID_KEYSTORE_B64`.
+
+Every pull request, and every run that is not a push or dispatch on `main`, builds an APK with a key created inside that job and discarded. That file is the Actions artifact. The release-signed APK is uploaded only to the `latest` GitHub Release. If any of the four secrets is missing, the publish job fails and the release is left as it was.
+
 ## Android debug APK
 
 **Direct download (debug, sideload):**  
