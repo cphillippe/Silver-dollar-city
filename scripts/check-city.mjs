@@ -86,7 +86,7 @@ import {
   waveIsClear,
   wavePackSize,
 } from '../src/lib/defend.ts'
-import { EASY_ROUNDS, roundMark } from '../src/nightWatch/rounds.ts'
+import { EASY_ROUND_SPEED_CAP, EASY_ROUNDS, roundMark } from '../src/nightWatch/rounds.ts'
 import { scoreEasyRoad } from '../src/nightWatch/roundScore.ts'
 import { boardFill, boardFillPoint } from '../src/nightWatch/map/phoneFill.ts'
 import {
@@ -1277,7 +1277,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.403')
+assert.equal(APP_VERSION, '1.4.404')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -4814,17 +4814,27 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   )
 }
 
-// Night Watch 1.4.402: Easy rounds R1–R6. Hard stays five flat waves.
+// Night Watch 1.4.402: the first six Easy rounds. Later slices append; they do not retune these.
 {
-  assert.equal(EASY_ROUNDS.length, 6, '1.4.402 Easy is six rounds')
-  assert.equal(nightLength(true), 6)
-  assert.equal(nightLength(false), DEFEND_NIGHT_WAVES, '1.4.402 Hard stays five waves')
   assert.deepEqual(
-    EASY_ROUNDS.map((round) => round.count),
+    EASY_ROUNDS.slice(0, 6).map((round) => round.count),
     [4, 4, 5, 5, 6, 6],
     '1.4.402 walker counts rise and round 1 still pays 4',
   )
-  for (let index = 1; index < EASY_ROUNDS.length; index += 1) {
+  assert.deepEqual(
+    EASY_ROUNDS.slice(0, 6).map((round) => [round.speed, round.hp, round.spawn]),
+    [
+      [1, 0, 1],
+      [1.35, 0, 0.95],
+      [1.8, 1, 0.9],
+      [2.6, 2, 0.85],
+      [5.5, 3, 0.75],
+      [6.4, 7, 0.72],
+    ],
+    '1.4.402 the first six rounds stay put',
+  )
+  assert.equal(nightLength(false), DEFEND_NIGHT_WAVES, '1.4.402 Hard stays five waves')
+  for (let index = 1; index < 6; index += 1) {
     assert.ok(EASY_ROUNDS[index].speed >= EASY_ROUNDS[index - 1].speed)
     assert.ok(EASY_ROUNDS[index].hp >= EASY_ROUNDS[index - 1].hp)
     assert.ok(EASY_ROUNDS[index].spawn <= EASY_ROUNDS[index - 1].spawn)
@@ -4844,7 +4854,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(scoreEasyRoad(5, [1, 1], 0), 'lost', '1.4.402 round 6 fails at Level I')
   assert.equal(scoreEasyRoad(5, [1, 1], 1), 'lost', '1.4.402 round 6 still fails when Level I taps')
   assert.equal(scoreEasyRoad(5, [2, 1], 1), 'clear', '1.4.402 round 6 holds with one Level II lamp')
-  const pay = EASY_ROUNDS.map((round) => round.count)
+  const pay = EASY_ROUNDS.slice(0, 6).map((round) => round.count)
   let sparks = 0
   const tiers = [1, 1]
   for (const income of pay) {
@@ -4881,6 +4891,74 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.402').items.join('\n'),
     /Fixes #|Closes #|Resolves #/,
     '1.4.402 changelog avoids GitHub close keywords',
+  )
+}
+
+// Night Watch 1.4.404: Easy climbs to 25 rounds. R1–R6 stay the 1.4.402 table.
+{
+  assert.equal(EASY_ROUNDS.length, 25, '1.4.404 Easy is 25 rounds')
+  assert.equal(nightLength(true), 25)
+  assert.equal(nightLength(false), DEFEND_NIGHT_WAVES, '1.4.404 Hard stays five waves')
+  assert.equal(roundMark(11, 25, true), 'Round 12 of 25')
+  assert.equal(roundMark(24, 25, true), 'Round 25 of 25')
+  assert.ok(EASY_ROUNDS.every((round) => round.speed <= EASY_ROUND_SPEED_CAP))
+  assert.equal(EASY_ROUNDS[24].speed, EASY_ROUND_SPEED_CAP)
+  for (const index of [7, 11, 15, 19, 23]) {
+    const prev = EASY_ROUNDS[index - 1]
+    const rest = EASY_ROUNDS[index]
+    assert.ok(rest.count <= prev.count && rest.speed <= prev.speed && rest.hp <= prev.hp && rest.spawn >= prev.spawn)
+    assert.ok(rest.count < prev.count || rest.speed < prev.speed || rest.hp < prev.hp || rest.spawn > prev.spawn)
+  }
+  assert.equal(scoreEasyRoad(6, [3, 3, 2], 1), 'clear', '1.4.404 round 7 holds for the build that just left round 6')
+  assert.equal(scoreEasyRoad(9, [2, 2], 1), 'lost', '1.4.404 round 10 leaks on two Level II lamps')
+  assert.equal(scoreEasyRoad(9, [3, 3], 1), 'clear', '1.4.404 round 10 holds on two Level III lamps')
+  assert.equal(scoreEasyRoad(9, [2, 2, 2, 2], 1), 'clear', '1.4.404 round 10 holds on four Level II lamps')
+  assert.equal(scoreEasyRoad(9, [1, 1, 1, 1], 1), 'lost', '1.4.404 round 10 leaks on four Level I lamps')
+  assert.equal(scoreEasyRoad(14, [2, 2, 2, 2], 1), 'lost', '1.4.404 round 15 leaks on four Level II lamps')
+  assert.equal(scoreEasyRoad(14, [3, 3], 1), 'lost', '1.4.404 round 15 leaks on two Level III lamps')
+  assert.equal(scoreEasyRoad(14, [3, 3, 3], 1), 'lost', '1.4.404 round 15 leaks without the fourth lamp')
+  assert.equal(scoreEasyRoad(14, [3, 3, 3, 2], 1), 'clear', '1.4.404 round 15 holds with three Level III and one Level II')
+  assert.equal(scoreEasyRoad(14, [3, 3, 3, 3], 1), 'clear', '1.4.404 round 15 holds with four Level III lamps')
+  assert.equal(scoreEasyRoad(19, [2, 2, 2, 2], 1), 'lost', '1.4.404 round 20 still leaks on four Level II lamps')
+  assert.equal(scoreEasyRoad(19, [3, 3, 3], 1), 'clear', '1.4.404 round 20 is a breather for three Level III lamps')
+  assert.equal(scoreEasyRoad(19, [3, 3, 3, 2], 1), 'clear', '1.4.404 round 20 holds with three Level III and one Level II')
+  assert.equal(scoreEasyRoad(19, [3, 3, 3, 3], 1), 'clear', '1.4.404 round 20 holds with four Level III lamps')
+  assert.equal(scoreEasyRoad(24, [2, 2, 2, 2], 1), 'lost', '1.4.404 round 25 leaks on four Level II lamps')
+  assert.equal(scoreEasyRoad(24, [3, 3, 3], 1), 'lost', '1.4.404 round 25 leaks without the fourth lamp')
+  assert.equal(scoreEasyRoad(24, [3, 3, 3, 2], 1), 'lost', '1.4.404 round 25 leaks if one lamp is still Level II')
+  assert.equal(scoreEasyRoad(24, [3, 3, 3, 3], 1), 'clear', '1.4.404 round 25 holds with four Level III lamps')
+  let sparks = 0
+  const tiers = [1, 1]
+  for (let index = 0; index < 12; index += 1) {
+    sparks += EASY_ROUNDS[index].count
+    const cheap = tiers
+      .map((tier, lamp) => ({ lamp, cost: easyTierCost(tier) }))
+      .filter((step) => step.cost > 0 && step.cost <= sparks)
+      .sort((a, b) => a.cost - b.cost)[0]
+    if (cheap) {
+      sparks -= cheap.cost
+      tiers[cheap.lamp] += 1
+    } else if (tiers.length < 4 && sparks >= EASY_LAMP_COST) {
+      sparks -= EASY_LAMP_COST
+      tiers.push(1)
+    }
+    assert.ok(sparks < 20, `1.4.404 a spender stays under 20 sparks after round ${index + 1}`)
+  }
+  assert.deepEqual(tiers, [3, 3, 3, 3], '1.4.404 a spender is maxed by round 12')
+  assert.match(
+    readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8'),
+    /Reached round \$\{waveIndex \+ 1\}\. You missed\. Tap the face\./,
+  )
+  assert.match(
+    readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8'),
+    /\.defend-page\.is-easy-watch \.nw-docks \.defend-lost p \{[^}]*font-size:\s*16px/,
+  )
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.404'), '1.4.404 changelog row')
+  assert.match(latestChange('1.4.404').title, /25/)
+  assert.doesNotMatch(
+    latestChange('1.4.404').items.join('\n'),
+    /Fixes #|Closes #|Resolves #/,
+    '1.4.404 changelog avoids GitHub close keywords',
   )
 }
 

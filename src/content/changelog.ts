@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.404',
+    title: 'Night Watch Easy runs 25 rounds',
+    when: '2026-10-09',
+    items: [
+      'Easy Night Watch runs 25 rounds. The first six are unchanged. Later rounds bring more walkers and more health, and the walk stays readable. Every fourth round eases off a little.',
+      'From round 15, several Level III lamps and all four planted lamps are what hold the road. The map says Round 12 of 25. A miss tells you the round you reached. When round 25 holds, the night held.',
+    ],
+  },
+  {
     version: '1.4.403',
     title: 'Story strip pictures grow',
     when: '2026-10-09',

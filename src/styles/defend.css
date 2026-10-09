@@ -2586,6 +2586,11 @@ img.walker-face.easy-walker-face,
     letter-spacing: 0.01em;
   }
 
+  .defend-page.is-easy-watch .nw-docks .defend-lost p {
+    font-size: 16px;
+    line-height: 1.25;
+  }
+
   .defend-page.is-easy-watch .nw-walker-slide.easy-walker-roster {
     top: 48px;
     width: max-content;
