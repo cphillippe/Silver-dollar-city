@@ -2,6 +2,14 @@
 export interface SequenceVerse {
   kicker: string
   text: string
+  /** Easy header reference. Hard keeps `ref`. */
+  easyHeader?: string
+  /** Easy line above the quote. Not spoken as the quote. */
+  easyLead?: string
+  /** Easy quote. Hard keeps `text`. */
+  easyText?: string
+  /** Easy citation. Hard keeps `ref`. */
+  easyRef?: string
   ref: string
 }
 
@@ -49,6 +57,10 @@ export const SEQUENCE_VERSES: Record<string, SequenceVerse> = {
   'ph-road': {
     kicker: 'Jesus said',
     text: 'Which of these three, do you think, proved neighbor to the man who fell among the robbers? He said, “The one who showed mercy on him.” And Jesus said to him, “Go and do likewise.”',
+    easyHeader: 'Luke 10:25–37',
+    easyLead: 'The one who showed mercy was the neighbor.',
+    easyText: 'Go and do likewise.',
+    easyRef: 'Luke 10:37',
     ref: 'Luke 10:36–37',
   },
 }

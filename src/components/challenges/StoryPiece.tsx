@@ -2,15 +2,19 @@ import { useLayoutEffect, useRef, useState, type RefObject } from 'react'
 import { GemMark } from '../GemMark'
 import { StoryPanelArt } from '../StoryPanelArt'
 import { pieceEdges, piecePath } from '../../lib/jigsawPath'
-import type { SequenceVisual } from '../../lib/sequenceArt'
+import type { SequenceFigure, SequenceVisual } from '../../lib/sequenceArt'
 
 export interface StripCard {
   id: string
   text: string
   shortText?: string
+  /** Easy win line. Hard keeps `text`. */
+  winText?: string
   role?: string
   orderIndex: number
   decoy?: boolean
+  /** Easy crop + name so Jesus and the priest stay apart when the card is small. */
+  figure?: SequenceFigure
   visual: SequenceVisual
 }
 
@@ -63,11 +67,18 @@ export function StoryPiece({
   }, [])
 
   const edges = pieceEdges(card.orderIndex, count, hard)
-  const slotText = caption === 'slot' && card.shortText ? card.shortText : null
+  const winShort = compact && !hard && Boolean(card.winText)
+  const slotText = winShort
+    ? card.winText
+    : caption === 'slot' && card.shortText
+      ? card.shortText
+      : null
   const captionHeight = showCaption
-    ? caption === 'slot'
+    ? caption === 'slot' || winShort
       ? count >= 5
-        ? 28
+        ? winShort
+          ? 32
+          : 28
         : 30
       : compact
         ? count >= 5
@@ -81,13 +92,30 @@ export function StoryPiece({
     : 0
   const path = piecePath(box.w, box.h, edges.left, edges.right, captionHeight)
   const { backdrop } = card.visual
+  const figure = hard ? undefined : card.figure
   const face = (
     <>
       <span
-        className={`strip-art ${card.visual.kind === 'story' ? 'is-story' : ''}`}
-        style={showCaption ? { bottom: captionHeight } : { bottom: 0 }}
+        className={`strip-art ${card.visual.kind === 'story' ? 'is-story' : ''} ${figure ? 'is-focus' : ''}`}
+        style={{
+          ...(showCaption ? { bottom: captionHeight } : { bottom: 0 }),
+          ...(figure
+            ? {
+                ['--focus-x' as string]: figure.x,
+                ['--focus-y' as string]: figure.y,
+                ['--focus-ox' as string]: figure.ox,
+                ['--focus-oy' as string]: figure.oy,
+                ['--focus-scale' as string]: String(figure.scale),
+              }
+            : null),
+        }}
       >
         <PieceArt visual={card.visual} />
+        {figure ? (
+          <span className="strip-cue" data-cue={figure.cue}>
+            {figure.cue}
+          </span>
+        ) : null}
       </span>
       {showCaption ? (
         <span className={`strip-cap ${slotText ? 'is-slot' : ''}`} style={{ height: captionHeight }}>

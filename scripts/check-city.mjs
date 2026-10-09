@@ -571,6 +571,40 @@ assert.match(
 assert.doesNotMatch(sequenceSrc, /Next step/)
 assert.doesNotMatch(sequenceSrc, /is-deal/)
 
+const storyPieceSrc = readFileSync(
+  new URL('../src/components/challenges/StoryPiece.tsx', import.meta.url),
+  'utf8',
+)
+const sequenceArtSrc = readFileSync(new URL('../src/lib/sequenceArt.ts', import.meta.url), 'utf8')
+const hollowSeqSrc = readFileSync(new URL('../src/content/parableHollow.ts', import.meta.url), 'utf8')
+assert.match(sequenceSrc, /SEQUENCE_FIGURE/)
+assert.match(sequenceSrc, /easy \? item\.winCaption/)
+assert.match(storyPieceSrc, /winShort/)
+assert.match(storyPieceSrc, /strip-cue/)
+assert.match(storyPieceSrc, /count >= 5\s*\?\s*76/, 'Hard five-up win caption stays the tall band')
+assert.match(storyPieceSrc, /winShort\s*\?\s*32/, 'Easy Samaritan win caption is the short band')
+assert.match(sequenceArtSrc, /'road1-lawyer': \{ cue: 'Jesus'/)
+assert.match(sequenceArtSrc, /'road3-temple': \{ cue: 'Priest'/)
+assert.match(sequenceArtSrc, /'creed4-appeared': \{ cue: 'Jesus'/)
+assert.match(hollowSeqSrc, /winCaption: 'Who is my\\nneighbor\?'/)
+assert.match(hollowSeqSrc, /winCaption: 'Priest\\npasses by\.'/)
+assert.match(hollowSeqSrc, /winCaption: 'Shows\\nmercy\.'/)
+const sequenceVerse = readFileSync(new URL('../src/lib/sequenceVerse.ts', import.meta.url), 'utf8')
+assert.match(sequenceVerse, /easyLead: 'The one who showed mercy was the neighbor\.'/)
+assert.match(sequenceVerse, /easyText: 'Go and do likewise\.'/)
+assert.match(sequenceVerse, /easyRef: 'Luke 10:37'/)
+assert.match(sequenceVerse, /easyHeader: 'Luke 10:25–37'/)
+assert.match(sequenceVerse, /ref: 'Luke 10:36–37'/)
+assert.match(sequenceSrc, /verse\.easyText/)
+assert.match(sequenceSrc, /verse\.easyLead/)
+assert.match(sequenceSrc, /verse\.easyHeader/)
+assert.match(sequenceArtSrc, /'road1-lawyer': \{ cue: 'Jesus', x: '75%'/)
+assert.match(sequenceArtSrc, /'creed4-appeared': \{ cue: 'Jesus', x: '23%'/)
+assert.match(
+  readFileSync(new URL('../src/styles/storyStrip.css', import.meta.url), 'utf8'),
+  /html\[data-easy='on'\] \.strip-board\.is-win\[data-n='5'\] \.strip-cap\.is-slot/,
+)
+
 const buildSrc = readFileSync(
   new URL('../src/components/challenges/BuildArgumentPlay.tsx', import.meta.url),
   'utf8',
@@ -1309,7 +1343,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.413')
+assert.equal(APP_VERSION, '1.4.414')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
