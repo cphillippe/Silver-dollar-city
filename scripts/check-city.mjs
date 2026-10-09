@@ -1406,7 +1406,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.423')
+assert.equal(APP_VERSION, '1.4.424')
 
 // Night Watch 1.4.419: on-screen walkers do not share a head. Kind and boss stats stay put.
 {
@@ -5303,6 +5303,33 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.doesNotMatch(latestChange('1.4.421').items.join('\n'), /Fixes #|Closes #|Resolves #/)
   assert.match(latestChange('1.4.416').title, /taller strip/i)
   assert.match(latestChange('1.4.414').title, /Story strip/i)
+}
+
+// Night Watch 1.4.424: only the glowing face keeps a hit disc. Playtest shows the tap tally.
+{
+  const css424 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const screen424 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  assert.match(
+    css424,
+    /\.defend-page\.is-easy-tap \.defend-raider-hit \{[^}]*pointer-events:\s*none/,
+    '1.4.424 a walker behind the glow does not take the tap',
+  )
+  assert.match(
+    css424,
+    /\.defend-page\.is-easy-tap \.defend-raider\.is-easy-cue \.defend-raider-hit \{[^}]*pointer-events:\s*all/,
+    '1.4.424 the glowing face keeps the hit disc',
+  )
+  assert.match(css424, /\.nw-tap-readout \{[^}]*pointer-events:\s*none/)
+  assert.match(screen424, /nightWatchJumpAllowed\(/)
+  assert.match(screen424, /className="nw-tap-readout"/)
+  assert.match(screen424, /noteFaceTap\(true, damage\)/)
+  assert.equal(easyBossHp(4), 12, '1.4.424 round 5 boss stays 12')
+  assert.equal(cueTapStrike(false, false), 'hit', '1.4.424 Hard still does not use the glow rule')
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.424'))
+  assert.match(latestChange('1.4.424').title, /glowing taps/i)
+  assert.doesNotMatch(latestChange('1.4.424').items.join('\n'), /Fixes #|Closes #|Resolves #/)
+  assert.match(latestChange('1.4.423').title, /wins fit/i)
+  assert.match(latestChange('1.4.422').title, /plain words/i)
 }
 
 // Night Watch 1.4.402: the first six Easy rounds. Later slices append; they do not retune these.

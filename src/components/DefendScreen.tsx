@@ -63,6 +63,7 @@ import {
 } from '../lib/nightPace'
 import {
   nightWatchDebugFrozen,
+  nightWatchJumpAllowed,
   readNightWatchDebug,
   readNightWatchRoundJump,
 } from '../lib/nightWatchDebug'
@@ -189,6 +190,9 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const [mendShield, setMendShield] = useState(false)
   const [powerBanner, setPowerBanner] = useState<string | null>(null)
   const [nwDebug, setNwDebug] = useState(() => readNightWatchDebug())
+  const [tapHits, setTapHits] = useState(0)
+  const [tapMisses, setTapMisses] = useState(0)
+  const [tapDamage, setTapDamage] = useState(0)
   const [debugPaused, setDebugPaused] = useState(false)
   const nwDebugRef = useRef(nwDebug)
   const debugPausedRef = useRef(debugPaused)
@@ -398,6 +402,9 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       return
     }
     const wave = waveIndexRef.current
+    setTapHits(0)
+    setTapMisses(0)
+    setTapDamage(0)
     const intro = skillUnlockOnWave(wave)
     if (intro && !seenSkill.current[intro]) {
       seenSkill.current[intro] = true
@@ -1207,6 +1214,16 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     }
   }
 
+  function noteFaceTap(hit: boolean, damage: number) {
+    if (!easy) return
+    if (hit) {
+      setTapHits((count) => count + 1)
+      setTapDamage((count) => count + damage)
+      return
+    }
+    setTapMisses((count) => count + 1)
+  }
+
   function showMiss() {
     const note = EASY.nightMiss
     setToolLock(note)
@@ -1227,6 +1244,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     if (!raider) return
     const glowing = nightEnemies.cueTarget(live.current.raiders)?.id === raider.id
     if (cueTapStrike(easy, glowing) === 'miss') {
+      noteFaceTap(false, 0)
       showMiss()
       return
     }
@@ -1250,12 +1268,19 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     }
     if (faceTapStrike(easy, true, inRange !== null) === 'hit') {
       const lamp = easy ? nearest : inRange
+      const damage = easy && lamp ? easyGlowTapDamage(raider.hp) : 0
       if (lamp && fire(lamp, raiderId, easy)) {
-        if (easy) dismissMiss()
+        if (easy) {
+          dismissMiss()
+          noteFaceTap(true, damage)
+        }
+        return
       }
-      return
     }
-    if (easy) showMiss()
+    if (easy) {
+      noteFaceTap(false, 0)
+      showMiss()
+    }
   }
 
   function fireBest() {
@@ -1265,6 +1290,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     }
     if (phase !== 'wave' || won) return
     if (faceTapStrike(easy, false, false) === 'miss' && easy) {
+      noteFaceTap(false, 0)
       showMiss()
       return
     }
@@ -1298,6 +1324,9 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     setBlasts([])
     setFlash([])
     setTapJuice(null)
+    setTapHits(0)
+    setTapMisses(0)
+    setTapDamage(0)
     setRunTier(freshRunTier())
     setRunPaths(freshRunPaths())
     runPathsRef.current = freshRunPaths()
@@ -1589,6 +1618,13 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const midWave = phase === 'wave' && !won
   const debugHarness = easy && nwDebug && midWave
   const debugFrozen = debugHarness && debugPaused
+  const tapReadoutOn =
+    easy &&
+    nightWatchJumpAllowed(
+      typeof window === 'undefined' ? '' : window.location.search,
+      nwDebug,
+    )
+  const bossLive = raiders.find((raider) => raider.boss && !raider.turned)
   const walkerCalls: EasyWalkerCall[] = midWave
     ? raiders
         .filter((raider) => !raider.turned)
@@ -1687,6 +1723,19 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
 
   const docks = (
     <>
+      {tapReadoutOn && (phase === 'wave' || phase === 'boost' || phase === 'lost') ? (
+        <p
+          className="nw-tap-readout"
+          role="status"
+          data-tap-hits={tapHits}
+          data-tap-misses={tapMisses}
+          data-tap-damage={tapDamage}
+          data-boss-hp={bossLive ? bossLive.hp : ''}
+          data-boss-max={bossLive ? bossLive.maxHp : ''}
+        >
+          {`Taps ${tapHits} hit · ${tapMisses} miss · ${tapDamage} dmg · Boss ${bossLive ? `${bossLive.hp}/${bossLive.maxHp ?? bossLive.hp}` : '—'}`}
+        </p>
+      ) : null}
       {debugHarness ? (
         <div className="defend-nw-debug" role="group" aria-label="Night Watch debug playtest">
           <p className="defend-nw-debug-label">Debug · test only</p>
