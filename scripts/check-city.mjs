@@ -81,10 +81,13 @@ import {
   RAID_CAST,
   raidForWave,
   unlockedWatchAbilities,
+  nightLength,
   waveCombat,
   waveIsClear,
   wavePackSize,
 } from '../src/lib/defend.ts'
+import { EASY_ROUNDS, roundMark } from '../src/nightWatch/rounds.ts'
+import { scoreEasyRoad } from '../src/nightWatch/roundScore.ts'
 import { boardFill, boardFillPoint } from '../src/nightWatch/map/phoneFill.ts'
 import {
   commitLamp,
@@ -1274,7 +1277,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.401')
+assert.equal(APP_VERSION, '1.4.402')
 assert.equal(CAST.river.name, 'River')
 assert.equal(CAST.juniper.name, 'Juniper Wick')
 assert.equal(CAST.mercy.name, 'Mercy Wren')
@@ -4808,6 +4811,76 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     latestChange('1.4.400').items.join('\n'),
     /Fixes #|Closes #|Resolves #|monkey|balloon/i,
     '1.4.400 changelog avoids GitHub close keywords',
+  )
+}
+
+// Night Watch 1.4.402: Easy rounds R1–R6. Hard stays five flat waves.
+{
+  assert.equal(EASY_ROUNDS.length, 6, '1.4.402 Easy is six rounds')
+  assert.equal(nightLength(true), 6)
+  assert.equal(nightLength(false), DEFEND_NIGHT_WAVES, '1.4.402 Hard stays five waves')
+  assert.deepEqual(
+    EASY_ROUNDS.map((round) => round.count),
+    [4, 4, 5, 5, 6, 6],
+    '1.4.402 walker counts rise and round 1 still pays 4',
+  )
+  for (let index = 1; index < EASY_ROUNDS.length; index += 1) {
+    assert.ok(EASY_ROUNDS[index].speed >= EASY_ROUNDS[index - 1].speed)
+    assert.ok(EASY_ROUNDS[index].hp >= EASY_ROUNDS[index - 1].hp)
+    assert.ok(EASY_ROUNDS[index].spawn <= EASY_ROUNDS[index - 1].spawn)
+  }
+  assert.equal(waveCombat(0, true).size, 4)
+  assert.equal(waveCombat(0, true).hpBonus, 0)
+  assert.equal(waveCombat(4, false).speedScale, 1, '1.4.402 Hard speed stays flat')
+  assert.equal(waveCombat(4, false).hpBonus, 0, '1.4.402 Hard HP stays flat')
+  assert.equal(roundMark(2, 6, true), 'Round 3 of 6')
+  assert.equal(roundMark(2, 5, false), 'Wave 3/5')
+  for (let index = 0; index < 4; index += 1) {
+    assert.equal(scoreEasyRoad(index, [1, 1], 0), 'clear', `1.4.402 round ${index + 1} holds on Level I`)
+  }
+  assert.equal(scoreEasyRoad(4, [1, 1], 0), 'lost', '1.4.402 round 5 leaks without taps')
+  assert.equal(scoreEasyRoad(4, [1, 1], 1), 'clear', '1.4.402 round 5 holds when Level I taps')
+  assert.equal(scoreEasyRoad(4, [2, 1], 1), 'clear', '1.4.402 round 5 holds with a Level II lamp')
+  assert.equal(scoreEasyRoad(5, [1, 1], 0), 'lost', '1.4.402 round 6 fails at Level I')
+  assert.equal(scoreEasyRoad(5, [1, 1], 1), 'lost', '1.4.402 round 6 still fails when Level I taps')
+  assert.equal(scoreEasyRoad(5, [2, 1], 1), 'clear', '1.4.402 round 6 holds with one Level II lamp')
+  const pay = EASY_ROUNDS.map((round) => round.count)
+  let sparks = 0
+  const tiers = [1, 1]
+  for (const income of pay) {
+    sparks += income
+    let spent = false
+    const cheap = tiers
+      .map((tier, index) => ({ index, cost: easyTierCost(tier) }))
+      .filter((step) => step.cost > 0 && step.cost <= sparks)
+      .sort((a, b) => a.cost - b.cost)[0]
+    if (cheap) {
+      sparks -= cheap.cost
+      tiers[cheap.index] += 1
+      spent = true
+    } else if (tiers.length < 4 && sparks >= EASY_LAMP_COST) {
+      sparks -= EASY_LAMP_COST
+      tiers.push(1)
+      spent = true
+    }
+    assert.equal(spent, true, '1.4.402 every round clear can spend')
+  }
+  assert.ok(sparks < 20, '1.4.402 a spending night stays under 20 sparks')
+  assert.match(
+    readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8'),
+    /\.defend-page\.is-easy-watch \.nw-wave-overlay \.defend-wave \{[^}]*font-size:\s*16px/,
+    '1.4.402 the round label is readable on the phone',
+  )
+  assert.match(
+    readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8'),
+    /The night held after round/,
+  )
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.402'), '1.4.402 changelog row')
+  assert.match(latestChange('1.4.402').title, /round/i)
+  assert.doesNotMatch(
+    latestChange('1.4.402').items.join('\n'),
+    /Fixes #|Closes #|Resolves #/,
+    '1.4.402 changelog avoids GitHub close keywords',
   )
 }
 
@@ -10363,10 +10436,9 @@ console.log('check-city: ok')
   assert.ok(wavePackSize(0) < 6 && wavePackSize(1) < 6 && wavePackSize(2) < 6 && wavePackSize(3) < 6)
   assert.ok(wavePackSize(4) > DEFEND_WAVE_SIZE, '1.4.328 wave 5 is denser than the old six')
   assert.equal(waveCombat(0, true).hpBonus, 0)
-  assert.equal(waveCombat(3, true).speedScale, 1)
-  assert.ok(waveCombat(4, true).hpBonus >= 4, '1.4.328 wave 5 Easy is tankier')
-  assert.ok(waveCombat(4, true).speedScale > 1, '1.4.328 wave 5 Easy is faster')
-  assert.ok(waveCombat(4, true).spawnScale < 1, '1.4.328 wave 5 Easy spawns sooner')
+  assert.equal(waveCombat(0, true).speedScale, 1, '1.4.328 round 1 keeps the soft pace')
+  assert.ok(waveCombat(4, true).speedScale > waveCombat(0, true).speedScale, '1.4.328 the late round is faster')
+  assert.ok(waveCombat(4, true).spawnScale < 1, '1.4.328 the late round spawns sooner')
   assert.equal(waveCombat(4, false).hpBonus, 0, '1.4.328 Hard keeps its own HP; Easy is the gate')
 
   for (let index = 0; index < 8; index += 1) {
@@ -10395,7 +10467,7 @@ console.log('check-city: ok')
     defendScreenOnlySrc.indexOf('function continueFromBoost'),
     defendScreenOnlySrc.indexOf('function continueFromBoost') + 420,
   )
-  assert.match(boostFn, /waveIndex \+ 1 < DEFEND_NIGHT_WAVES/)
+  assert.match(boostFn, /waveIndex \+ 1 < nightLength\(easy\)/)
   assert.match(boostFn, /setWaveIndex\(\(i\) => i \+ 1\)/, '1.4.328 Continue advances the wave')
   assert.match(boostFn, /setPhase\('wave'\)/)
   assert.match(boostFn, /setWon\(true\)/)
@@ -10404,8 +10476,9 @@ console.log('check-city: ok')
   assert.match(defendScreenOnlySrc, /applyBoost/)
   assert.match(defendScreenOnlySrc, /setWaveIndex\(0\)/, '1.4.328 a lost night resets the wave')
   assert.match(defendScreenOnlySrc, /setRunTier\(freshRunTier\(\)\)/)
-  assert.match(defendScreenOnlySrc, /Wave \{waveIndex \+ 1\}\/\{DEFEND_NIGHT_WAVES\}/)
+  assert.match(defendScreenOnlySrc, /roundMark\(waveIndex, rounds, easy\)/)
   assert.match(defendScreenOnlySrc, /Wave \$\{waveIndex \+ 1\} clear · spend sparks/)
+  assert.match(defendScreenOnlySrc, /Round \$\{waveIndex \+ 1\} clear · spend sparks/)
   assert.match(defendScreenOnlySrc, /markMetRef\.current\(cast\.id\)/)
   assert.match(
     readFileSync(new URL('../src/store/ProgressProvider.tsx', import.meta.url), 'utf8'),
