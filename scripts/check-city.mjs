@@ -631,7 +631,13 @@ assert.match(hollowSeqSrc, /easyText: 'A Samaritan felt sorry and helped\.'/)
 assert.match(sequenceVerse, /in accordance with the scriptures/)
 assert.match(sequenceVerse, /appeared to Cephas, then to the twelve/)
 assert.match(sequenceVerse, /ref: '1 Corinthians 15:3–5'/)
-assert.match(sequenceVerse, /easyLead: 'Peter is named first\. It matches the old holy writings\.'/)
+assert.match(
+  sequenceVerse,
+  /easyLead:\s*\n\s*'Cephas is Peter\. “The scriptures” means God’s Word said long ago this would happen\.'/,
+)
+const dailySeqSrc = readFileSync(new URL('../src/content/daily.ts', import.meta.url), 'utf8')
+assert.match(dailySeqSrc, /text: 'Jesus dies, is buried, and is raised\.'/)
+assert.match(dailySeqSrc, /easyText: 'Jesus died, was buried, rose\.'/)
 assert.equal(
   easyFacingLine(
     'wb-creed',
