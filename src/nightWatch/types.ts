@@ -21,6 +21,8 @@ export interface NightRaider {
   maxHp?: number
   /** Easy gait. Hard leaves this unset and walks at the round pace. */
   gait?: WalkerGait
+  /** Easy boss on rounds 5, 10, 15, 20, and 25. Hard leaves this unset. */
+  boss?: boolean
   /** Sparks this walker pays when turned. Tough pays more than one. */
   spark?: number
   turned?: string

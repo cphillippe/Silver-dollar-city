@@ -36,7 +36,7 @@ export const EASY_ROUNDS: readonly EasyRound[] = [
   { count: 4, speed: 1.35, hp: 0, spawn: 0.95, fast: 0, tough: 0 },
   { count: 5, speed: 1.8, hp: 1, spawn: 0.9, fast: 0, tough: 0 },
   { count: 5, speed: 2.6, hp: 2, spawn: 0.85, fast: 1, tough: 0 },
-  { count: 7, speed: 6.4, hp: 6, spawn: 0.66, fast: 2, tough: 3 },
+  { count: 7, speed: 6.4, hp: 6, spawn: 0.68, fast: 2, tough: 3 },
   { count: 7, speed: 6.4, hp: 8, spawn: 0.72, fast: 2, tough: 1 },
   { count: 9, speed: 6.2, hp: 24, spawn: 0.74, fast: 2, tough: 4 },
   { count: 6, speed: 5.8, hp: 16, spawn: 0.82, fast: 1, tough: 2 },

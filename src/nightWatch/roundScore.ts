@@ -3,7 +3,7 @@ import { NIGHT_PACE_FAST, pacedDt } from '../lib/nightPace.ts'
 import { pathPoint } from './path/data.ts'
 import { easyRound } from './rounds.ts'
 import { lampStrike, type LampPaths } from './upgradeTree.ts'
-import { gaitForSlot, walkerHp, walkerPace } from './walkers.ts'
+import { easyBossHp, easyBossRound, easyLatePush, BOSS_PACE, gaitForSlot, walkerHp, walkerPace } from './walkers.ts'
 
 /**
  * Ordinary road seats used to tune slices 1 and 2.
@@ -304,6 +304,9 @@ export function paceEasyTree(
   pace = 1,
 ): PaceRound {
   const round = easyRound(roundIndex)
+  const bossRound = easyBossRound(roundIndex)
+  const total = round.count + (bossRound ? 1 : 0)
+  const bonus = round.hp + easyLatePush(roundIndex)
   const lamps = paths.slice(0, LIVE_SEATS.length).map((rank, index) => {
     const strike = lampStrike({ far: rank.far, strong: rank.strong })
     const base = 114 + strike.rangeBonus
@@ -388,15 +391,16 @@ export function paceEasyTree(
       lostRound = paced.lostThisRound
       if (paced.failed || hearts <= 0) return finish('lost')
     }
-    if (spawned < round.count && live().length < 3 && (spawnNow || spawnAt >= spawnEvery || spawned === 0)) {
+    if (spawned < total && live().length < 3 && (spawnNow || spawnAt >= spawnEvery || spawned === 0)) {
       spawnNow = false
       spawnAt = 0
-      const gait = gaitForSlot(round, spawned)
+      const boss = bossRound && spawned === round.count
+      const gait = boss ? undefined : gaitForSlot(round, spawned)
       raiders.push({
         t: 0,
-        hp: walkerHp(2, round.hp, gait),
+        hp: boss ? easyBossHp(roundIndex) : walkerHp(2, bonus, gait),
         dead: false,
-        pace: walkerPace(gait),
+        pace: boss ? BOSS_PACE : walkerPace(gait),
       })
       spawned += 1
     }
@@ -446,8 +450,8 @@ export function paceEasyTree(
         if (front) wound(front, easyGlowTapDamage(front.hp), true)
       }
     }
-    if (downed >= round.count) return finish('clear')
-    if (spawned >= round.count && live().length === 0) return finish(hearts > 0 ? 'clear' : 'lost')
+    if (downed >= total) return finish('clear')
+    if (spawned >= total && live().length === 0) return finish(hearts > 0 ? 'clear' : 'lost')
     time += dt
   }
   return finish('timeout')

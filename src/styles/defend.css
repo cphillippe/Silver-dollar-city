@@ -1074,6 +1074,39 @@ img.walker-face.easy-walker-face,
   fill: #d85a3a;
 }
 
+.defend-boss-mantle {
+  fill: #9a1838;
+  stroke: #ffcc33;
+  stroke-width: 3.5;
+  pointer-events: none;
+}
+
+.defend-boss-crown {
+  fill: #ffcc33;
+  stroke: #8a5a10;
+  stroke-width: 1.6;
+  pointer-events: none;
+}
+
+.defend-raider.is-boss .defend-raider-body {
+  transform-origin: 50% 100%;
+  transform-box: fill-box;
+  transform: scale(1.72);
+}
+
+.defend-raider.is-boss .defend-raider-face {
+  filter: saturate(1.45) brightness(0.82);
+}
+
+.defend-raider.is-boss .defend-hp-fill {
+  fill: #ff5a7a;
+}
+
+.defend-raider.is-boss .defend-hp-track {
+  stroke: #ffcc33;
+  stroke-width: 1.4;
+}
+
 @keyframes defend-tough-step {
   0%,
   100% {
@@ -1096,6 +1129,10 @@ img.walker-face.easy-walker-face,
 
   .defend-raider.is-tough .defend-raider-body {
     transform: scale(1.28);
+  }
+
+  .defend-raider.is-boss .defend-raider-body {
+    transform: scale(1.72);
   }
 }
 
@@ -3297,6 +3334,14 @@ button.defend-new-lamp[aria-pressed='true'] {
   background: rgba(140, 32, 78, 0.9);
   border: 2px solid #ffe7a3;
   text-shadow: 0 0 12px rgba(255, 196, 92, 0.95);
+}
+
+.nw-power-banner.is-boss {
+  color: #2a1c08;
+  background: #ffcc33;
+  border: 3px solid #fff6b8;
+  font-size: 2.6rem;
+  text-shadow: none;
 }
 
 .defend-page.is-mend .defend-board {

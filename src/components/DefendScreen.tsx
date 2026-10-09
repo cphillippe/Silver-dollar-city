@@ -11,7 +11,16 @@ import {
 } from '../content/defend'
 import { EASY, isEasy, loveHowTo } from '../lib/easy'
 import { roundMark, easyRound } from '../nightWatch/rounds'
-import { gaitForSlot, walkerHp, walkerPace, walkerSpark } from '../nightWatch/walkers'
+import {
+  BOSS_PACE,
+  easyBossHp,
+  easyBossRound,
+  easyLatePush,
+  gaitForSlot,
+  walkerHp,
+  walkerPace,
+  walkerSpark,
+} from '../nightWatch/walkers'
 import { localDateKey } from '../lib/dates'
 import {
   DEFEND_BRIEF_ID,
@@ -453,7 +462,10 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           ...item,
           t: unturnedStep(
             item.t,
-            nightEnemies.speed(easy) * tune.speedScale * walkerPace(easy ? item.gait : undefined) * dt,
+            nightEnemies.speed(easy) *
+              tune.speedScale *
+              (item.boss ? BOSS_PACE : walkerPace(easy ? item.gait : undefined)) *
+              dt,
             frozen,
           ),
         }
@@ -524,10 +536,19 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         spawnAt = 0
         const id = live.current.spawned
         const cast = nightEnemies.cast(cleared, id, wave, easy)
-        const gait = easy ? gaitForSlot(easyRound(wave), id) : undefined
-        const hp = easy
-          ? walkerHp(nightEnemies.maxHp(cast.kind, easy), tune.hpBonus, gait)
-          : nightEnemies.maxHp(cast.kind, easy) + tune.hpBonus
+        const round = easyRound(wave)
+        const boss = easy && easyBossRound(wave) && id === round.count
+        const gait = easy && !boss ? gaitForSlot(round, id) : undefined
+        const hp = boss
+          ? easyBossHp(wave)
+          : easy
+            ? walkerHp(nightEnemies.maxHp(cast.kind, easy), tune.hpBonus + easyLatePush(wave), gait)
+            : nightEnemies.maxHp(cast.kind, easy) + tune.hpBonus
+        if (boss) {
+          setPowerBanner('Boss!')
+          window.clearTimeout(bannerTimer.current)
+          bannerTimer.current = window.setTimeout(() => setPowerBanner(null), 1800)
+        }
         if (!metRef.current.includes(cast.id)) {
           metRef.current = [...metRef.current, cast.id]
           markMetRef.current(cast.id)
@@ -547,6 +568,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           hp,
           maxHp: hp,
           gait,
+          boss,
           spark: walkerSpark(gait),
         })
         live.current.spawned += 1
@@ -1885,7 +1907,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                 {mendShield ? <div className="nw-mend-shield" aria-hidden="true" /> : null}
                 {powerBanner ? (
                   <p
-                    className={`nw-power-banner${powerBanner.startsWith('Mend') || powerBanner === 'Held' ? ' is-mend' : ' is-still'}`}
+                    className={`nw-power-banner${powerBanner === 'Boss!' ? ' is-boss' : powerBanner.startsWith('Mend') || powerBanner === 'Held' ? ' is-mend' : ' is-still'}`}
                     role="status"
                   >
                     {powerBanner}
