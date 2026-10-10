@@ -8,6 +8,17 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.430',
+    title: 'Lamps finish the thick walkers',
+    when: '2026-10-10',
+    items: [
+      'A glowing tap still pops and hurts a normal walker. From round 7, a thick walker only loses a little to taps. From round 15, the boss does the same. Lamps have to finish them.',
+      'Strong step 3 and the Far steps hit harder, so a built watch can clear the late bosses. One lamp and taps alone cannot bring those bosses down.',
+      'Round 5 stays the same. Hard is unchanged.',
+      'The little gold name on the road is gone. The sparks star stays fully on the phone.',
+    ],
+  },
+  {
     version: '1.4.429',
     title: 'The phone icon is the city coin',
     when: '2026-10-10',
