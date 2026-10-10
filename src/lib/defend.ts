@@ -95,10 +95,15 @@ export const TAP_SHRUG_CHIP = 4
  * Round 5's tough walkers stay open so that proven round does not move.
  * Hard does not read this.
  */
-export function easyTapArmored(roundIndex: number, gait?: string, boss = false): boolean {
+export function easyTapArmored(
+  roundIndex: number,
+  gait?: string,
+  boss = false,
+  armorFrom = 7,
+): boolean {
   const round = Math.floor(roundIndex) + 1
   if (boss && round >= 15) return true
-  if (gait === 'tough' && round >= 7) return true
+  if (gait === 'tough' && round >= armorFrom) return true
   return false
 }
 
@@ -116,10 +121,11 @@ export function easyGlowTapDamage(hp: number, chipped = 0, armored = false): num
 export function easyTapSoaked(
   roundIndex: number,
   raider: { tapChip?: number; gait?: string; boss?: boolean },
+  armorFrom = 7,
 ): boolean {
   if (!(roundIndex >= 0)) return false
   return (
-    easyTapArmored(roundIndex, raider.gait, !!raider.boss) &&
+    easyTapArmored(roundIndex, raider.gait, !!raider.boss, armorFrom) &&
     (raider.tapChip ?? 0) >= TAP_SHRUG_CHIP
   )
 }
@@ -131,6 +137,8 @@ export interface LiveStrikeShot {
   roundIndex: number
   /** Lamp tier damage. Face taps ignore this and use the glow chip. */
   lampDamage: number
+  /** Tough armor starts on this round. Omitted stays round 7, which is A2. */
+  armorFrom?: number
 }
 
 export interface LiveStrikeSize {
@@ -150,7 +158,7 @@ export function liveNightDamage(
   shot: LiveStrikeShot,
 ): LiveStrikeSize {
   const armored =
-    shot.easy && shot.manual && easyTapArmored(shot.roundIndex, raider.gait, !!raider.boss)
+    shot.easy && shot.manual && easyTapArmored(shot.roundIndex, raider.gait, !!raider.boss, shot.armorFrom ?? 7)
   const soaked = raider.tapChip ?? 0
   const lamp = Math.max(0, Math.floor(shot.lampDamage) || 0)
   const damage = shot.easy && shot.manual ? easyGlowTapDamage(raider.hp, soaked, armored) : lamp
@@ -239,11 +247,12 @@ export function easyPointerTapGate<
   raider: T,
   raiders: readonly T[],
   roundIndex = -1,
+  armorFrom = 7,
 ): 'hit' | 'miss' {
   if (raider.turned) return 'miss'
-  const soaked = easyTapSoaked(roundIndex, raider)
+  const soaked = easyTapSoaked(roundIndex, raider, armorFrom)
   if (easy && raider.boss && !soaked) return 'hit'
-  const cue = easyTapTarget(raiders, roundIndex)
+  const cue = easyTapTarget(raiders, roundIndex, armorFrom)
   return cueTapStrike(easy, cue?.id === raider.id)
 }
 
@@ -430,12 +439,12 @@ export function easyTapMode(easy: boolean, phase: string, won: boolean): boolean
  */
 export function easyTapTarget<
   T extends { turned?: string; t?: number; tapChip?: number; gait?: string; boss?: boolean },
->(raiders: readonly T[], roundIndex = -1): T | undefined {
+>(raiders: readonly T[], roundIndex = -1, armorFrom = 7): T | undefined {
   let pick: T | undefined
   let bestT = -1
   for (const item of raiders) {
     if (item.turned) continue
-    if (easyTapSoaked(roundIndex, item)) continue
+    if (easyTapSoaked(roundIndex, item, armorFrom)) continue
     const t = item.t ?? 0
     if (t >= bestT) {
       bestT = t

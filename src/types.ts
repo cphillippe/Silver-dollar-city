@@ -214,8 +214,10 @@ export interface DefenseState {
   met?: string[]
   /** Easy round 25 opened the Far Hills. */
   farHills?: boolean
+  /** Map ids whose round 10 boss has been beaten. The next map in the chain opens. */
+  mazeBeat?: string[]
   /** Easy map the next night starts on. Missing means A2. Hard ignores this. */
-  nightMap?: 'a2' | 'far-hills'
+  nightMap?: 'a2' | 'far-hills' | 'map03' | 'map04' | 'map05' | 'map06'
 }
 
 export type AppTheme = 'candy' | 'dusk' | 'parchment'

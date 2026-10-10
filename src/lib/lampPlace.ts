@@ -2,6 +2,7 @@ import type { ProgressState } from '../types.ts'
 import { nightTowers, TOWER_LAMP_SPRITE } from '../nightWatch/towers/index.ts'
 import {
   bindNightPath,
+  bindNightRoads,
   boundNightPath,
   DEFEND_PATH,
   freeSpotId,
@@ -9,6 +10,7 @@ import {
   lampAnchor,
   pathClearance,
   pathPoint,
+  type BoundRoad,
 } from '../nightWatch/path/data.ts'
 import type { NightPoint } from '../nightWatch/types.ts'
 import { isTowerType, plantType } from './nightPlants.ts'
@@ -74,11 +76,9 @@ function pathLength(path: readonly NightPoint[]): number {
   return lenValue
 }
 
-/** Length of the walker road inside this ring. */
-export function roadCoverLength(at: NightPoint, range: number, path?: readonly NightPoint[]): number {
-  const road = path ?? boundNightPath()
+function coverOne(at: NightPoint, range: number, road: readonly NightPoint[]): number {
   const length = pathLength(road)
-  if (!(range > 0) || !(length > 0)) return 0
+  if (!(range > 0) || !(length > 0) || road.length < 2) return 0
   const steps = 240
   let hit = 0
   for (let i = 0; i <= steps; i += 1) {
@@ -86,6 +86,70 @@ export function roadCoverLength(at: NightPoint, range: number, path?: readonly N
     if (Math.hypot(at.x - point.x, at.y - point.y) <= range + 0.5) hit += 1
   }
   return (hit / (steps + 1)) * length
+}
+
+function jointIndex(points: readonly NightPoint[], target: NightPoint, start: number): number {
+  for (let i = Math.max(0, start); i < points.length; i += 1) {
+    if (Math.hypot(points[i].x - target.x, points[i].y - target.y) <= 24) return i
+  }
+  let best = Math.max(0, start)
+  let bestD = Infinity
+  for (let i = best; i < points.length; i += 1) {
+    const d = Math.hypot(points[i].x - target.x, points[i].y - target.y)
+    if (d < bestD) {
+      bestD = d
+      best = i
+    }
+  }
+  return best
+}
+
+/**
+ * Road length inside the ring, across every walker road.
+ * A segment shared by two roads is counted once.
+ */
+export function roadsCoverLength(
+  at: NightPoint,
+  range: number,
+  roads: readonly BoundRoad[],
+  segments?: Readonly<Record<string, readonly NightPoint[]>>,
+): number {
+  if (roads.length <= 1) return coverOne(at, range, roads[0]?.points ?? [])
+  const seen = new Set<string>()
+  let total = 0
+  for (const road of roads) {
+    if (!road.via.length || !segments) {
+      if (seen.has(road.id)) continue
+      seen.add(road.id)
+      total += coverOne(at, range, road.points)
+      continue
+    }
+    let cursor = 0
+    for (let index = 0; index < road.via.length; index += 1) {
+      const id = road.via[index]
+      const last = index === road.via.length - 1
+      const controls = segments[id]
+      const end = controls?.[controls.length - 1]
+      const cut = last || !end ? road.points.length - 1 : jointIndex(road.points, end, cursor)
+      if (!seen.has(id)) {
+        seen.add(id)
+        const slice = road.points.slice(cursor, Math.max(cut + 1, cursor + 2))
+        total += coverOne(at, range, slice)
+      }
+      cursor = cut
+    }
+  }
+  return total
+}
+
+/** Length of the walker road inside this ring. */
+export function roadCoverLength(at: NightPoint, range: number, path?: readonly NightPoint[]): number {
+  if (path) return coverOne(at, range, path)
+  const plate = boundGround
+  if (plate?.roads && plate.roads.length > 1) {
+    return roadsCoverLength(at, range, plate.roads, plate.segments)
+  }
+  return coverOne(at, range, boundNightPath())
 }
 
 export function roadCoverRank(length: number): 'good' | 'some' | 'far' {
@@ -177,6 +241,10 @@ export interface LampGround {
   features: readonly Disc[]
   extraRoads: readonly (readonly NightPoint[])[]
   porchPaths: readonly (readonly NightPoint[])[]
+  /** Every walker road. Omitted on A2, which keeps the single `path`. */
+  roads?: readonly BoundRoad[]
+  /** Segment controls, so a shared stretch is counted once in the ghost. */
+  segments?: Readonly<Record<string, readonly NightPoint[]>>
 }
 
 /** A2 cottages, side paths, and porch icing. The same arrays the plate was measured with. */
@@ -194,6 +262,7 @@ let boundGround: LampGround | null = null
 export function bindLampGround(ground: LampGround | null): void {
   boundGround = ground
   bindNightPath(ground?.path ?? null)
+  bindNightRoads(ground?.roads ?? null)
 }
 
 function activeGround(): LampGround {
@@ -246,7 +315,10 @@ export function lampSpotBlocked(
 ): boolean {
   const plate = ground ?? activeGround()
   if (point.x < 16 || point.y < 16 || point.x > 782 || point.y > 1118) return true
-  if (polyClearance(point, plate.path) <= ROAD_BLOCK) return true
+  const roads = plate.roads && plate.roads.length > 0 ? plate.roads.map((road) => road.points) : [plate.path]
+  for (const road of roads) {
+    if (polyClearance(point, road) <= ROAD_BLOCK) return true
+  }
   for (const road of plate.extraRoads) {
     if (polyClearance(point, road) <= PATH_BLOCK + 8) return true
   }
@@ -463,6 +535,12 @@ export function lampRoadNote(
  * One subpath per covered stretch, in plate units.
  */
 export function roadCoverD(at: NightPoint, range: number, path?: readonly NightPoint[]): string {
+  if (!path && boundGround?.roads && boundGround.roads.length > 1) {
+    return boundGround.roads
+      .map((road) => roadCoverD(at, range, road.points))
+      .filter((part) => part.length > 0)
+      .join(' ')
+  }
   const road = path ?? boundNightPath()
   if (!(range > 0)) return ''
   const parts: string[] = []
