@@ -204,7 +204,7 @@ export function DefendAbilityBar({
                   data-spark-dry={spendDry ? 'yes' : undefined}
                   aria-pressed={ability === tool.id}
                   title={spendDry ? `${claim} Need a spark.` : claim}
-                  disabled={spendDry}
+                  disabled={spendDry && !(easy && boosting && placed)}
                   style={placing && open ? { touchAction: 'none' } : undefined}
                   onPointerDown={(event) => {
                     event.stopPropagation()

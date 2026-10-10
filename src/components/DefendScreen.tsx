@@ -418,7 +418,9 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     setTapMisses(0)
     setTapDamage(0)
     const intro = skillUnlockOnWave(wave)
-    if (intro && !seenSkill.current[intro]) {
+    if (intro === 'still') {
+      seenSkill.current.still = true
+    } else if (intro && !seenSkill.current[intro]) {
       seenSkill.current[intro] = true
       pendingIntroRef.current = intro
       skillHoldRef.current = true
@@ -1320,7 +1322,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     if (phase !== 'wave' || won) return
     const raider = live.current.raiders.find((item) => item.id === raiderId && !item.turned)
     if (!raider) return
-    if (easyPointerTapGate(easy, raider, live.current.raiders) === 'miss') {
+    if (easyPointerTapGate(easy, raider, live.current.raiders, waveIndexRef.current) === 'miss') {
       noteFaceTap(false, 0)
       showMiss()
       return
@@ -1693,7 +1695,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
 
   const after = juiceDone && won
   const easyTap = easyTapMode(easy, phase, won)
-  const tapTarget = easyTap ? nightEnemies.cueTarget(raiders) : undefined
+  const tapTarget = easyTap ? nightEnemies.cueTarget(raiders, waveIndex) : undefined
   const tapPos =
     tapTarget && boardBox.w > 0
       ? boardPoint(raiderAt(tapTarget).x, raiderAt(tapTarget).y)
@@ -1734,6 +1736,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const clearSpendOpen = easy && boosting && spendOpen && !upgradeAt && !placeArm
   const clearHelpOpen = easy && boosting && helpOpen && !upgradeAt && !placeArm
 
+  const heartShown = Math.min(DEFEND_HEARTS, Math.max(0, Math.floor(hearts) || 0))
   const hud = (
     <p className="defend-hud" aria-live="polite">
       {phase === 'wave' ? (
@@ -1741,10 +1744,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       ) : null}
       <span
         className={`defend-hearts${mendShield ? ' is-mend-shield' : ''}${mendOn ? ' is-mend-pop' : ''}`}
-        data-hearts={hearts}
+        data-hearts={heartShown}
+        data-heart-cap={DEFEND_HEARTS}
       >
         {Array.from({ length: DEFEND_HEARTS }, (_, index) => {
-          const full = index < hearts
+          const full = index < heartShown
           const dropped = heartDrop && index >= heartDrop.at && index < heartDrop.at + heartDrop.count
           return (
             <span
@@ -1757,13 +1761,13 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           )
         })}
         {mendShield ? <span className="nw-mend-hold">Gate</span> : null}
-        {heartPop ? (
-          <span className="defend-heart-gain" data-heart-gain="+1">
-            +1 ♥
-          </span>
-        ) : null}
         {powerBanner ? <span className="nw-power-chip">{powerBanner}</span> : null}
       </span>
+      {heartPop ? (
+        <span className="defend-heart-gain" data-heart-gain="+1">
+          +1
+        </span>
+      ) : null}
       <span className={`defend-count ${combo > 1 ? 'is-combo' : ''}`}>
         {phase === 'boost'
           ? runSparks > 0
@@ -2104,6 +2108,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
               onArmPathBuy={armPathBuy}
               upgradeAt={upgradeAt}
               onOpenUpgrade={openUpgrade}
+              roundIndex={waveIndex}
               upFlashId={upFlash}
               levelBurst={
                 levelBurst && upgradeAt === levelBurst.plotId
@@ -2127,6 +2132,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
               <div className="nw-wave-overlay">
                 <span className="defend-wave">{roundLabel}</span>
               </div>
+            ) : null}
+            {easy && phase === 'plant' ? (
+              <p className="nw-skill-toast" role="status">
+                New skill · Still
+              </p>
             ) : null}
             {showPace ? (
               <NightPaceControl waveIndex={waveIndex} fastOn={fastOn} onToggle={togglePace} />

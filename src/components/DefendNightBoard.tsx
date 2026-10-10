@@ -38,7 +38,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
     flash, togglePad, fire, fireAtRaider, shots, easy, blasts, tapTarget, tapPos, tapJuice,
     walkerCalls, loreLine, runTier, boosting, onBoostTower,     upgradeAt, onOpenUpgrade, upFlashId, ghost = null,
     upgradePoint, boardBox, runSparks = 0, levelBurst = null, onPullLamp, pullSparks = 0, onCloseUpgrade,
-    onUpgradePath, onArmPathBuy, runPaths,
+    onUpgradePath, onArmPathBuy, runPaths, roundIndex = -1,
     plateFill = false, onPlacePointer,
   } = props
   const place = plateFill ? boardFillPoint : mapBoardPoint
@@ -116,6 +116,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
           onOpenUpgrade={onOpenUpgrade}
           upFlashId={upFlashId}
           ghost={ghost}
+          roundIndex={roundIndex}
         />
       </DefendNightSky>
       {showCard ? (
@@ -153,6 +154,29 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
           {ghost.note}
         </span>
       ) : null}
+      {easy && boosting && boardBox && boardBox.w > 0
+        ? planted.map((id) => {
+            const at = place(boardBox, nightTowers.anchor(id))
+            const type = towerType[id]
+            const label = WATCH_ABILITY_LABEL[type ?? ''] ?? 'lamp'
+            return (
+              <button
+                key={`clear-lamp-${id}`}
+                type="button"
+                className="defend-clear-lamp"
+                data-clear-lamp={id}
+                data-tower-type={type}
+                aria-label={`Upgrade ${label}`}
+                style={{ left: at.left, top: at.top }}
+                onPointerDown={(event) => event.stopPropagation()}
+                onClick={(event) => {
+                  event.stopPropagation()
+                  onOpenUpgrade?.(id)
+                }}
+              />
+            )
+          })
+        : null}
       {typeChips}
       <DefendNightWalkerCue
         easyTap={easyTap}

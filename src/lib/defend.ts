@@ -61,9 +61,11 @@ export function easyRoundHeartCap(roundIndex: number): number {
 }
 
 /** A cleared Easy round gives one heart back, and the bar never passes three. */
+/** Hearts never pass the three slots. A fourth heart is not a feature. */
 export function easyClearHeart(hearts: number): number {
-  if (hearts <= 0 || hearts >= DEFEND_HEARTS) return hearts
-  return hearts + 1
+  const now = Math.max(0, Math.floor(Number(hearts)) || 0)
+  if (now <= 0 || now >= DEFEND_HEARTS) return Math.min(now, DEFEND_HEARTS)
+  return now + 1
 }
 
 /**
@@ -105,6 +107,21 @@ export function easyGlowTapDamage(hp: number, chipped = 0, armored = false): num
   const soaked = Math.max(0, Math.floor(chipped) || 0)
   if (armored && soaked >= TAP_SHRUG_CHIP) return 0
   return Math.min(left, EASY_GLOW_TAP_DAMAGE)
+}
+
+/**
+ * True when this walker has already shrugged glowing taps.
+ * Lamps do not read this. An open walker, including every round 1–6 walker, is never soaked.
+ */
+export function easyTapSoaked(
+  roundIndex: number,
+  raider: { tapChip?: number; gait?: string; boss?: boolean },
+): boolean {
+  if (!(roundIndex >= 0)) return false
+  return (
+    easyTapArmored(roundIndex, raider.gait, !!raider.boss) &&
+    (raider.tapChip ?? 0) >= TAP_SHRUG_CHIP
+  )
 }
 
 /** What a live Night Watch shot is. A face tap is `manual`. A lamp is not. */
@@ -215,14 +232,18 @@ export function cueTapStrike(easy: boolean, glowingFace: boolean): 'hit' | 'miss
  * A normal walker still has to be the glowing lead. The boss is always
  * a hit, even when a faster walker is ahead of it. Hard does not use the glow.
  */
-export function easyPointerTapGate<T extends { id: number; turned?: string; t?: number; boss?: boolean }>(
+export function easyPointerTapGate<
+  T extends { id: number; turned?: string; t?: number; boss?: boolean; tapChip?: number; gait?: string },
+>(
   easy: boolean,
   raider: T,
   raiders: readonly T[],
+  roundIndex = -1,
 ): 'hit' | 'miss' {
   if (raider.turned) return 'miss'
-  if (easy && raider.boss) return 'hit'
-  const cue = easyTapTarget(raiders)
+  const soaked = easyTapSoaked(roundIndex, raider)
+  if (easy && raider.boss && !soaked) return 'hit'
+  const cue = easyTapTarget(raiders, roundIndex)
   return cueTapStrike(easy, cue?.id === raider.id)
 }
 
@@ -235,7 +256,7 @@ export function applyEasyPointerTap<T extends NightRaider>(
   raiders: readonly T[],
   shot: LiveStrikeShot,
 ): { miss: true } | { miss: false; strike: LiveStrikeSize & { raider: T; down: boolean } } {
-  if (easyPointerTapGate(shot.easy, raider, raiders) === 'miss') return { miss: true }
+  if (easyPointerTapGate(shot.easy, raider, raiders, shot.roundIndex) === 'miss') return { miss: true }
   return {
     miss: false,
     strike: liveNightStrike(raider, { ...shot, manual: true }),
@@ -402,14 +423,19 @@ export function easyTapMode(easy: boolean, phase: string, won: boolean): boolean
   return easy && phase === 'wave' && !won
 }
 
-/** Front-most unturned walker — teach cue only (not the only live walker). */
-export function easyTapTarget<T extends { turned?: string; t?: number }>(
-  raiders: readonly T[],
-): T | undefined {
+/**
+ * Front-most unturned walker who can still take a glowing tap.
+ * Once a walker has shrugged, the glow moves to the next one.
+ * Omit the round and the lead stays the cue, which is how rounds 1–6 were locked.
+ */
+export function easyTapTarget<
+  T extends { turned?: string; t?: number; tapChip?: number; gait?: string; boss?: boolean },
+>(raiders: readonly T[], roundIndex = -1): T | undefined {
   let pick: T | undefined
   let bestT = -1
   for (const item of raiders) {
     if (item.turned) continue
+    if (easyTapSoaked(roundIndex, item)) continue
     const t = item.t ?? 0
     if (t >= bestT) {
       bestT = t

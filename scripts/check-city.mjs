@@ -91,7 +91,9 @@ import {
   easyTapFit,
   easyTapMode,
   easyTapPersonCount,
+  easyTapSoaked,
   easyTapTarget,
+  liveNightDamage,
   heavenPoint,
   padStage,
   pathClearance,
@@ -1456,7 +1458,14 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.435')
+assert.equal(APP_VERSION, '1.4.436')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.436'), '1.4.436 changelog row')
+assert.match(latestChange('1.4.436').title, /glow/i)
+assert.doesNotMatch(
+  latestChange('1.4.436').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.436 changelog avoids GitHub close keywords',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.435'), '1.4.435 changelog row')
 assert.match(latestChange('1.4.435').title, /boss/i)
 assert.doesNotMatch(
@@ -4866,7 +4875,11 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     '1.4.388 drops the faded-gold disabled Upgrade',
   )
   assert.match(defendAbilitySrc, /is-spark-dry/, '1.4.388 dry columns drop the live rail')
-  assert.match(defendAbilitySrc, /disabled=\{spendDry\}/, '1.4.388 a dry column is not tappable')
+  assert.match(
+    defendAbilitySrc,
+    /disabled=\{spendDry && !\(easy && boosting && placed\)\}/,
+    '1.4.436 a dry unplanted card stays shut, and a planted card at a clear still opens',
+  )
   assert.match(defendAbilitySrc, /'Need a spark'/, '1.4.388 the column still says Need a spark')
   assert.match(
     defendAbilitySrc,
@@ -5946,13 +5959,100 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   const screen435 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
   const actors435 = readFileSync(new URL('../src/components/DefendNightActors.tsx', import.meta.url), 'utf8')
   const css435 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
-  assert.match(screen435, /easyPointerTapGate\(easy, raider, live\.current\.raiders\)/)
+  assert.match(screen435, /easyPointerTapGate\(easy, raider, live\.current\.raiders, waveIndexRef\.current\)/)
   assert.match(
     screen435,
     /easy\s*\?\s*easyLiveSpawnT\(tune\.speedScale \* \(boss \? BOSS_PACE : walkerPace\(gait\)\)\)/,
   )
   assert.match(actors435, /tapTarget\?\.id === raider\.id \|\| !!raider\.boss/)
   assert.match(css435, /\.defend-page\.is-easy-tap \.defend-raider\.is-boss \.defend-raider-hit \{[^}]*pointer-events:\s*all/)
+}
+
+// Night Watch 1.4.436: a shrug moves the glow. The clear tree sits above the bar. Hearts stay at three.
+{
+  const tough436 = { id: 1, t: 0.82, hp: 24, gait: 'tough', tapChip: TAP_SHRUG_CHIP }
+  const plain436 = { id: 2, t: 0.41, hp: 6, gait: 'plain', tapChip: 0 }
+  const road436 = [tough436, plain436]
+  assert.equal(easyTapSoaked(7, tough436), true, '1.4.436 round 8 tough has shrugged')
+  assert.equal(easyTapTarget(road436, 7)?.id, 2, '1.4.436 the glow moves to the next walker')
+  const nextTap436 = applyEasyPointerTap(plain436, road436, {
+    easy: true,
+    manual: true,
+    roundIndex: 7,
+    lampDamage: 2,
+  })
+  assert.equal(nextTap436.miss, false, '1.4.436 a tap on the next walker is not a miss')
+  assert.equal(nextTap436.strike.damage, 1, '1.4.436 that tap deals damage')
+  assert.equal(nextTap436.strike.raider.hp, 5, '1.4.436 the normal walker loses a point')
+  assert.equal(plain436.hp, 6, '1.4.436 the tap returns a copy')
+  const lamp436 = liveNightDamage(tough436, {
+    easy: true,
+    manual: false,
+    roundIndex: 7,
+    lampDamage: 3,
+  })
+  assert.equal(lamp436.damage, 3, '1.4.436 a soaked walker still takes lamp damage')
+  assert.equal(
+    easyTapTarget(
+      [
+        { id: 1, t: 0.9, gait: 'tough', tapChip: TAP_SHRUG_CHIP },
+        { id: 2, t: 0.2, gait: 'plain', tapChip: 0 },
+      ],
+      5,
+    )?.id,
+    1,
+    '1.4.436 round 6 tough does not lose the glow',
+  )
+  const earlyBoss436 = { id: 8, t: 0.3, hp: 12, boss: true, tapChip: TAP_SHRUG_CHIP }
+  assert.equal(
+    easyPointerTapGate(true, earlyBoss436, [earlyBoss436], 4),
+    'hit',
+    '1.4.436 the round 5 boss still takes a tap',
+  )
+  assert.equal(easyClearHeart(4), DEFEND_HEARTS, '1.4.436 a fourth heart is not a feature')
+  assert.equal(easyClearHeart(3), DEFEND_HEARTS, '1.4.436 a full bar stays at three')
+  assert.equal(useMend(4).hearts, DEFEND_HEARTS, '1.4.436 Mend pulls a fourth heart back to three')
+  const screen436 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const actors436 = readFileSync(new URL('../src/components/DefendNightActors.tsx', import.meta.url), 'utf8')
+  const board436 = readFileSync(new URL('../src/components/DefendNightBoard.tsx', import.meta.url), 'utf8')
+  const bar436 = readFileSync(new URL('../src/components/DefendAbilityBar.tsx', import.meta.url), 'utf8')
+  const css436 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  assert.match(screen436, /intro === 'still'/, '1.4.436 Still does not freeze the first walker')
+  assert.match(screen436, /className="nw-skill-toast"/, '1.4.436 Still is a small note before Begin')
+  assert.match(screen436, /data-heart-cap=\{DEFEND_HEARTS\}/)
+  assert.match(board436, /className="defend-clear-lamp"/, '1.4.436 a planted lamp opens the tree at a clear')
+  assert.match(bar436, /spendDry && !\(easy && boosting && placed\)/, '1.4.436 a dry rail card still opens the tree')
+  assert.match(actors436, /easyTapSoaked\(roundIndex, raider\)/)
+  assert.match(css436, /\.defend-clear-lamp \{[^}]*z-index:\s*7/)
+  assert.match(css436, /\.nw-skill-toast \{[^}]*pointer-events:\s*none/)
+  assert.match(css436, /\.defend-tower-card \{[^}]*z-index:\s*9/)
+  const pays436 = EASY_ROUNDS.map(
+    (round, at) => roundSparkPay(round) + (easyBossRound(at) ? 1 + BOSS_CLEAR_SPARKS : 0),
+  )
+  const spent436 = spendTreeNight(pays436, EASY_LAMP_COST)
+  assert.equal(spent436.rows[13].sparks, easyJumpSparkBank(14), '1.4.436 round 15 still banks 22')
+  assert.equal(spent436.rows[23].sparks, easyJumpSparkBank(24), '1.4.436 round 25 still banks 138')
+  for (const index of [14, 24]) {
+    const jumped = paceEasyTree(index, spent436.rows[index - 1].lamps, 3, 3, 1, 1 + index * 17, 0, 1, true)
+    assert.equal(jumped.result, 'clear', `1.4.436 a spender clears jumped round ${index + 1}`)
+    assert.equal(jumped.boss, 'kill', `1.4.436 the round ${index + 1} boss goes down`)
+  }
+  for (const width of [375, 412, 768]) {
+    const w = Math.min(width, 780)
+    const h = Math.round((w * 1134) / 798)
+    const box = { w, h }
+    const points = EASY_PLANT_PADS.map((id) => boardFillPoint(box, DEFEND_ANCHOR[id]))
+    const scale = boardFill(box).scale
+    for (const point of points) {
+      const others = points.filter((item) => item !== point)
+      const placed = placeTowerCard(point, box, others, scale, CLEAR_BAR_RESERVE, TOWER_TREE_H)
+      assert.ok(placed.top >= 8, `1.4.436 the tree stays on a ${width} screen`)
+      assert.ok(
+        placed.top + TOWER_TREE_H <= h - CLEAR_BAR_RESERVE + 0.5,
+        `1.4.436 the tree stays above the clear bar at ${width}`,
+      )
+    }
+  }
 }
 
 // Night Watch 1.4.424: only the glowing face keeps a hit disc. Playtest shows the tap tally.
@@ -6363,7 +6463,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(capped.hearts, 1)
   assert.equal(applyEasyPaceLeaks(3, 1, 0, 0, 0, true).lostHearts, 0, '1.4.409 a shield still forgives')
   const screen409 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
-  assert.match(screen409, /easyPointerTapGate\(easy, raider, live\.current\.raiders\)/)
+  assert.match(screen409, /easyPointerTapGate\(easy, raider, live\.current\.raiders, waveIndexRef\.current\)/)
   assert.match(
     readFileSync(new URL('../src/lib/defend.ts', import.meta.url), 'utf8'),
     /return cueTapStrike\(easy, cue\?\.id === raider\.id\)/,
@@ -6414,7 +6514,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   )
   assert.match(screen410, /easyClearHeart\(live\.current\.hearts\)/)
   assert.match(screen410, /easyRoundHeartCap\(waveIndexRef\.current\)/)
-  assert.match(screen410, /\+1 ♥/)
+  assert.match(screen410, /data-heart-gain="\+1"/, '1.4.436 a clear still shows +1, outside the three heart slots')
   assert.match(
     readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8'),
     /\.defend-heart-gain/,

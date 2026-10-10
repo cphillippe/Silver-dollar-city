@@ -61,10 +61,12 @@ export interface MendResult {
   note: string
 }
 
-/** Restore one heart, never above DEFEND_HEARTS. Full hearts do not spend. */
+/** Restore one heart, never above the three slots. A full bar does not grow. */
 export function useMend(hearts: number, cap = DEFEND_HEARTS): MendResult {
-  if (hearts >= cap) return { hearts, healed: false, note: 'Hearts full' }
-  return { hearts: Math.min(cap, hearts + 1), healed: true, note: 'Mend' }
+  const room = Math.max(1, Math.floor(cap) || DEFEND_HEARTS)
+  const now = Math.max(0, Math.floor(Number(hearts)) || 0)
+  if (now >= room) return { hearts: Math.min(now, room), healed: false, note: 'Hearts full' }
+  return { hearts: now + 1, healed: true, note: 'Mend' }
 }
 
 /** Path step for an unturned walker. Freeze holds t. */
