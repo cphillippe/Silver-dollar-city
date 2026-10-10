@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.429',
+    title: 'The phone icon is the city coin',
+    when: '2026-10-10',
+    items: [
+      'The app icon on the phone is the silver coin with the town, the lamp, and the cross.',
+    ],
+  },
+  {
     version: '1.4.428',
     title: 'Story Strip words a child can say',
     when: '2026-10-09',
