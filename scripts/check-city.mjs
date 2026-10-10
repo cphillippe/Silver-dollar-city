@@ -170,6 +170,7 @@ import {
   freshRunPaths,
   easyShotReach,
   lampStrike,
+  lessonWaiting,
   LESSON_LOCK,
   pathSparkSpend,
   spendTreeNight,
@@ -6315,6 +6316,8 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   const card440 = readFileSync(new URL('../src/components/DefendTowerCard.tsx', import.meta.url), 'utf8')
   const screen440 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
   const shell440 = readFileSync(new URL('../src/components/AppShell.tsx', import.meta.url), 'utf8')
+  assert.equal(lessonWaiting(ceiling), true, '1.4.440 the rail can see a locked bonus step')
+  assert.equal(lessonWaiting({ far: 1, strong: 4 }), false)
   assert.equal(LESSON_LOCK, 'Learn in Lock In to unlock')
   assert.match(card440, /LESSON_LOCK/)
   assert.match(card440, /defend-lesson-lock/)
