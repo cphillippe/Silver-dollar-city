@@ -9,7 +9,8 @@ import {
 } from '../lib/defend.ts'
 import { DEFEND_ANCHOR, pathClearance, pathPoint } from './path/data.ts'
 import { easyRound as liveRound, type EasyRound } from './rounds.ts'
-import { lampStrike, type LampPaths } from './upgradeTree.ts'
+import { easyShotReach, FAR1_ROAD_REACH, lampStrike, type LampPaths } from './upgradeTree.ts'
+import { FREE_LAMP_RANGE_BONUS, lampReach } from './towers/index.ts'
 import {
   BOSS_PACE,
   easyBossHp,
@@ -142,13 +143,81 @@ interface LiveRules {
   walker: (kind: number, bonus: number, gait: WalkerGait | undefined, roundIndex: number) => number
 }
 
-function liveRules(): LiveRules {
+/** 1.4.437 boss bars, frozen so a later curve does not rewrite that porch fit. */
+function bossHp437(index: number): number {
+  const round = Math.floor(index) + 1
+  if (round <= 5) return 12
+  if (round < 10) return 44
+  if (round === 10) return 40
+  if (round <= 15) return 16
+  if (round <= 20) return 17
+  return 18
+}
+
+function walker437(
+  kind: number,
+  bonus: number,
+  gait: WalkerGait | undefined,
+  roundIndex: number,
+): number {
+  const round = Math.floor(roundIndex) + 1
+  if (gait !== 'tough' || round < 7 || round > 15) return walkerHp(kind, bonus, gait)
+  return 12
+}
+
+function rules437(): LiveRules {
+  return {
+    round: liveRound,
+    bossHp: bossHp437,
+    latePush: easyLatePush,
+    walker: walker437,
+  }
+}
+
+function currentRules(): LiveRules {
   return {
     round: liveRound,
     bossHp: easyBossHp,
     latePush: easyLatePush,
     walker: easyWalkerHp,
   }
+}
+
+/**
+ * Good seats from the 1.4.437 phone nights.
+ * The ghost said reaches=yes, and these four sit on that band, spread along the road.
+ * Level I reach is 114. Each gap is inside that ring.
+ */
+export const LEAD_GOOD_SEATS = [
+  { x: 490, y: 1000 },
+  { x: 250, y: 660 },
+  { x: 420, y: 430 },
+  { x: 450, y: 210 },
+] as const
+
+export interface SeatReach {
+  x: number
+  y: number
+  gap: number
+  level: number
+  far1: number
+}
+
+/** Gap and combat reach for the lead seats, level I and Far step 1. */
+export function leadSeatTable(): SeatReach[] {
+  return LEAD_GOOD_SEATS.map((seat) => {
+    const gap = pathClearance(seat)
+    const id = `at:${seat.x}:${seat.y}`
+    const level = lampReach(id, 96 + FREE_LAMP_RANGE_BONUS, gap)
+    const far1 = lampReach(id, 96 + FREE_LAMP_RANGE_BONUS + FAR1_ROAD_REACH, gap)
+    return {
+      x: seat.x,
+      y: seat.y,
+      gap: Math.round(gap),
+      level: Math.round(level),
+      far1: Math.round(far1),
+    }
+  })
 }
 
 function rules436(): LiveRules {
@@ -170,18 +239,34 @@ export function paceEasyLive(
   heartsIn = 3,
   frozen = false,
   tapEvery = LIVE_TAP_EVERY,
+  /**
+   * `plate` is the 1.4.437 porch fit. `road437` is the good-seat night on those
+   * frozen bars. `road` is the same seats on the current bars, with Far step 1 reach.
+   */
+  mode: 'plate' | 'road437' | 'road' = 'plate',
 ): PaceLive {
-  const rules = frozen ? rules436() : liveRules()
+  const road = mode === 'road' || mode === 'road437'
+  const rules = frozen ? rules436() : mode === 'road' ? currentRules() : rules437()
   const round = rules.round(roundIndex)
   const bossRound = easyBossRound(roundIndex)
   const total = round.count + (bossRound ? 1 : 0)
   const bonus = round.hp + rules.latePush(roundIndex)
-  const lamps = PLATE.map((seat, index) => {
-    const rank = paths[index] ?? { far: 0, strong: 0 }
-    const strike = lampStrike(rank)
-    const range = plateReach(seat.id, 96 + strike.rangeBonus, seat.gap) * LIVE_RING_SCALE
-    return { ...seat, strike, range, cool: 0 }
-  })
+  const lamps = road
+    ? LEAD_GOOD_SEATS.map((seat, index) => {
+        const rank = paths[index] ?? { far: 0, strong: 0 }
+        const strike = lampStrike(rank)
+        const bonusReach = mode === 'road' ? easyShotReach(rank) : strike.rangeBonus
+        const id = `at:${seat.x}:${seat.y}`
+        const gap = pathClearance(seat)
+        const range = lampReach(id, 96 + FREE_LAMP_RANGE_BONUS + bonusReach, gap)
+        return { id, x: seat.x, y: seat.y, gap, strike, range, cool: 0 }
+      })
+    : PLATE.map((seat, index) => {
+        const rank = paths[index] ?? { far: 0, strong: 0 }
+        const strike = lampStrike(rank)
+        const range = plateReach(seat.id, 96 + strike.rangeBonus, seat.gap) * LIVE_RING_SCALE
+        return { ...seat, strike, range, cool: 0 }
+      })
   const raiders: {
     t: number
     hp: number
@@ -387,6 +472,49 @@ export function paceEasyCampaign(kind: 'none' | 'natural' | 'ceiling', frozen = 
   const rows: Campaign['rows'] = []
   for (let index = 0; index < 25; index += 1) {
     const round = paceEasyLive(index, campaignLamps(kind, index), hearts, frozen)
+    rows.push({
+      round: index + 1,
+      result: round.result,
+      taps: round.taps,
+      hearts: round.hearts,
+      boss: round.boss,
+    })
+    if (round.result !== 'clear') return { dead: index + 1, rows }
+    hearts = easyClearHeart(round.hearts)
+  }
+  return { dead: null, rows }
+}
+
+/**
+ * The 1.4.437 good-seat night, then the current bars.
+ * `437` freezes the bars from that build. `live` uses the current curve.
+ */
+export function paceEasyRoad(
+  roundIndex: number,
+  paths: readonly Pick<LampPaths, 'far' | 'strong'>[],
+  heartsIn = 3,
+  era: '437' | 'live' = 'live',
+  tapEvery = LIVE_TAP_EVERY,
+): PaceLive {
+  return paceEasyLive(
+    roundIndex,
+    paths,
+    heartsIn,
+    false,
+    tapEvery,
+    era === '437' ? 'road437' : 'road',
+  )
+}
+
+export function paceEasyRoadCampaign(
+  kind: 'none' | 'natural' | 'ceiling',
+  era: '437' | 'live' = 'live',
+): Campaign {
+  let hearts = 3
+  const rows: Campaign['rows'] = []
+  const mode = era === '437' ? 'road437' : 'road'
+  for (let index = 0; index < 25; index += 1) {
+    const round = paceEasyLive(index, campaignLamps(kind, index), hearts, false, LIVE_TAP_EVERY, mode)
     rows.push({
       round: index + 1,
       result: round.result,

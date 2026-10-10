@@ -8,6 +8,17 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.438',
+    title: 'The road lights up where a lamp can reach',
+    when: '2026-10-10',
+    items: [
+      'While you place a lamp, the road inside the ring glows. The note says Good, Some, or Too far.',
+      'Far step 1 reaches the road from a seat beside it. A seat in the corner still says Too far.',
+      'With no upgrades, tapping stops around round 8. A spender clears round 10 and reaches the late teens. Round 25 is the thick boss, and it takes every lamp at Far 1 and Strong 3.',
+      'Pulling a lamp gives back the sparks you spent on it, and the upgrades go with it.',
+    ],
+  },
+  {
     version: '1.4.437',
     title: 'Strong lamps finish the thick walkers',
     when: '2026-10-10',

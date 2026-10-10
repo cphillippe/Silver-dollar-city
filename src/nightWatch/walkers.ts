@@ -198,31 +198,36 @@ export function easyBossRound(index: number): boolean {
 
 /**
  * Boss health. Round 5 stays the teaching bar (12). Rounds 6–9 stay 44.
- * Round 10 is 40: a Strong 3 porch ring plus taps land about 43, so the boss
- * falls and a lamp that never reaches still loses it.
- * Rounds 15, 20, and 25 used to be 200 / 260 / 320. Live play on 1.4.436 showed
- * a maxed lamp (Strong 3) land about 15 in the one ring that reaches the road,
- * plus four taps before the boss shrugs. The bar sits inside that budget.
- * A later, harder lamp still has to spend the pass. It does not delete the boss.
+ * Round 10 is 55, then 120, 180, and 240. Each boss is thicker than the one
+ * before it. Round 25 is the showdown: four Far 1 / Strong 3 lamps on good
+ * seats land about 240. Strong 2 leaks.
+ * Rounds 6–9 stay 44 so the round 6 snapshot does not move.
  */
 export function easyBossHp(index: number): number {
   const round = Math.floor(index) + 1
   if (round <= 5) return 12
   if (round < 10) return 44
-  // Round 10: lamps land about 15 and taps still count, for about 43 together.
-  if (round === 10) return 40
-  if (round <= 15) return 16
-  if (round <= 20) return 17
-  return 18
+  if (round === 10) return 55
+  if (round <= 15) return 120
+  if (round <= 20) return 180
+  return 240
 }
 
 /**
  * Tough health from round 7 through 15.
- * One porch ring at Strong 3 lands about 15 during the pass. Four taps take 4
- * before the shrug, so a bar of 12 is a kill for Strong 3 and a leak for a
- * level I lamp (about 2). Rounds 1–6 keep `TOUGH_HP_BONUS` via `walkerHp`.
+ * On a good seat a level I lamp plus taps still leaks a bar of 20, so a night
+ * with no upgrades walls at round 8. Strong 3 clears that bar. Rounds 1–6
+ * keep `TOUGH_HP_BONUS` via `walkerHp`.
  */
-export const EASY_TOUGH_WINDOW = 12
+export const EASY_TOUGH_WINDOW = 20
+
+/**
+ * Extra health from round 16 on, after a spender has already capped the lamps.
+ * The build does not get stronger. The walkers do, so hearts slip and a
+ * carried night ends in the late teens. A fresh round 25 with three hearts
+ * can still win.
+ */
+export const EASY_LATE_BULK = 140
 
 /** Live Easy walker health. Rounds 1–6 match `walkerHp`. Hard does not read this. */
 export function easyWalkerHp(
@@ -232,8 +237,10 @@ export function easyWalkerHp(
   roundIndex: number,
 ): number {
   const round = Math.floor(roundIndex) + 1
-  if (gait !== 'tough' || round < 7 || round > 15) return walkerHp(kindHp, roundBonus, gait)
-  return EASY_TOUGH_WINDOW
+  if (gait === 'tough' && round >= 7 && round <= 15) return EASY_TOUGH_WINDOW
+  const hp = walkerHp(kindHp, roundBonus, gait)
+  if (round >= 16 && gait !== 'fast') return hp + EASY_LATE_BULK
+  return hp
 }
 
 /** Extra sparks when an Easy boss round clears. A loss pays nothing. */
