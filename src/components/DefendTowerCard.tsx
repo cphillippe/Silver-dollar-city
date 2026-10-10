@@ -4,7 +4,9 @@ import { isFreeSpot } from '../lib/lampPlace'
 import { WATCH_ABILITY_LABEL } from '../lib/defend'
 import {
   placeTowerCard,
+  TOWER_CARD_H,
   TOWER_CARD_W,
+  TOWER_TREE_H,
   type TowerCardPoint,
 } from '../lib/towerCardPlace'
 import { boostCost, combatTier, TIER_MARK, TOOL_TIER_MAX } from '../lib/watchTools'
@@ -67,6 +69,8 @@ export function DefendTowerCard({
   roadNote = '',
   /** Easy uses the scaled tier prices. Hard stays at one spark. */
   easy = false,
+  /** Pixels at the bottom of the board the card should stay above. */
+  reserveBottom = 0,
 }: {
   plotId: CityPlotId
   ability: string
@@ -94,6 +98,7 @@ export function DefendTowerCard({
   /** Same reach note the plant ghost shows. Empty when this level already reaches. */
   roadNote?: string
   easy?: boolean
+  reserveBottom?: number
 }) {
   const cardRef = useRef<HTMLDivElement>(null)
   const [pullAsk, setPullAsk] = useState(false)
@@ -107,7 +112,8 @@ export function DefendTowerCard({
   const plotTitle =
     CITY_PLOTS.find((plot) => plot.id === plotId)?.title ??
     (isFreeSpot(plotId) ? 'open ground' : plotId)
-  const placed = placeTowerCard(point, board, clearOf, cameraScale)
+  const cardH = easy && paths ? TOWER_TREE_H : TOWER_CARD_H
+  const placed = placeTowerCard(point, board, clearOf, cameraScale, reserveBottom, cardH)
   const levelLine = maxed ? TIER_MARK[tier] : `${TIER_MARK[next]} · ${cost}✦`
   const bursting = Boolean(levelBurst && levelBurst.to > levelBurst.from)
   const fromMark = bursting ? TIER_MARK[levelBurst!.from] : ''
