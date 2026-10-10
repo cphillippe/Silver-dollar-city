@@ -17,6 +17,7 @@ import {
   easyBossClearSparks,
   easyBossHp,
   easyBossRound,
+  easyJumpSparkBank,
   easyLatePush,
   gaitForSlot,
   walkerHp,
@@ -28,13 +29,14 @@ import {
   DEFEND_BRIEF_ID,
   DEFEND_HEARTS,
   nightLength,
+  applyBossExitLeak,
   applyEasyPaceLeaks,
   applyGateLeaks,
   cueTapStrike,
   easyClearHeart,
-  easyGlowTapDamage,
   easyRoundHeartCap,
-  easyTapArmored,
+  liveBossClearPhase,
+  liveNightDamage,
   WATCH_ABILITY_LABEL,
   dist,
   unlockedWatchAbilities,
@@ -390,6 +392,9 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     const jump = readNightWatchRoundJump(nightLength(true))
     if (jump == null) return
     roundJumpOnce.current = true
+    const bank = easyJumpSparkBank(jump)
+    sparksRef.current = bank
+    setRunSparks(bank)
     setWaveIndex(jump)
   }, [easy])
 
@@ -495,6 +500,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         }
       })
       let leaked = 0
+      let bossThrough = false
       const walking = next.filter((item) => {
         if (item.turned) {
           if (easy) return false
@@ -502,7 +508,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           return true
         }
         if (item.t < 1) return true
-        leaked += 1
+        if (easy && item.boss) bossThrough = true
+        else leaked += 1
         return false
       })
       let shielded = false
@@ -513,7 +520,9 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         bannerTimer.current = window.setTimeout(() => setPowerBanner(null), 2800)
       }
       let gate
-      if (easy) {
+      if (easy && bossThrough) {
+        gate = applyBossExitLeak(live.current.hearts)
+      } else if (easy) {
         const paced = applyEasyPaceLeaks(
           live.current.hearts,
           leaked,
@@ -537,7 +546,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         setCombo(0)
         setLeakFlash(true)
         window.setTimeout(() => setLeakFlash(false), 900)
-        const through = gate.lostHearts === 1 ? 'One got through!' : `${gate.lostHearts} got through!`
+        const through = bossThrough
+          ? 'The boss got through!'
+          : gate.lostHearts === 1
+            ? 'One got through!'
+            : `${gate.lostHearts} got through!`
         setPowerBanner(through)
         window.clearTimeout(bannerTimer.current)
         bannerTimer.current = window.setTimeout(() => setPowerBanner(null), 1600)
@@ -641,29 +654,37 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         sparksRef.current += bonus
         setRunSparks((count) => count + bonus)
       }
-      if (
+      const endNight = () => {
+        const exit = applyBossExitLeak(live.current.hearts)
+        live.current.hearts = exit.hearts
+        setHearts(exit.hearts)
+        live.current.playing = false
+        setPhase('lost')
+      }
+      const roadClear =
         nightEnemies.isClear(
           easy,
           live.current.downed,
           live.current.spawned,
           alive.length,
           tune.size,
-        )
-      ) {
-        if (easy) grantClearHeart()
-        grantBossSparks()
-        live.current.playing = false
-        setToolLock(null)
-        setPhase('boost')
+        ) ||
+        (easy &&
+          live.current.spawned >= tune.size &&
+          alive.filter((item) => !item.turned).length === 0 &&
+          live.current.hearts > 0)
+      const fate = liveBossClearPhase({
+        easy,
+        bossRound: easyBossRound(wave),
+        bossDown: live.current.bossDown,
+        roadClear,
+      })
+      if (fate === 'lost') {
+        endNight()
         return
       }
-      if (
-        easy &&
-        live.current.spawned >= tune.size &&
-        alive.filter((item) => !item.turned).length === 0 &&
-        live.current.hearts > 0
-      ) {
-        grantClearHeart()
+      if (fate === 'clear') {
+        if (easy) grantClearHeart()
         grantBossSparks()
         live.current.playing = false
         setToolLock(null)
@@ -1130,11 +1151,16 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       combo: nextCombo,
     }
     if (fit === 'match') {
-      const armored = easy && manual && easyTapArmored(waveIndexRef.current, best.gait, !!best.boss)
-      const soaked = best.tapChip ?? 0
-      const tapDmg = easy && manual ? easyGlowTapDamage(best.hp, soaked, armored) : tier
-      const struck = nightEnemies.hit(best, tapDmg)
-      const nextChip = easy && manual && tapDmg > 0 ? soaked + tapDmg : soaked
+      const sized = liveNightDamage(best, {
+        easy,
+        manual,
+        roundIndex: waveIndexRef.current,
+        lampDamage: tier,
+      })
+      const struck = nightEnemies.hit(best, sized.damage)
+      const tapDmg = sized.damage
+      const armored = sized.armored
+      const nextChip = sized.nextChip
       const sparks = sparkAwardForHit(struck.down, best.spark ?? 1)
       blast.pop = struck.down
       blast.spark = sparks
@@ -1148,6 +1174,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           kind: best.kind,
           face: best.face,
           down: struck.down,
+          shrug: manual && armored && tapDmg <= 0,
         })
         window.setTimeout(() => {
           setTapJuice((current) => (current?.key === now ? null : current))
@@ -1318,11 +1345,12 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       const lamp = easy ? nearest : inRange
       const damage =
         easy && lamp
-          ? easyGlowTapDamage(
-              raider.hp,
-              raider.tapChip ?? 0,
-              easyTapArmored(waveIndexRef.current, raider.gait, !!raider.boss),
-            )
+          ? liveNightDamage(raider, {
+              easy: true,
+              manual: true,
+              roundIndex: waveIndexRef.current,
+              lampDamage: 0,
+            }).damage
           : 0
       if (lamp && fire(lamp, raiderId, easy)) {
         if (easy) {
