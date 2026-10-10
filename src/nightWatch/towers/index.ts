@@ -1,5 +1,6 @@
 import type { CityPlotId, CityStage } from '../../lib/city.ts'
 import { abilityRange, defendPads, dist, padStage, towerCooldown } from '../../lib/defend.ts'
+import { hillRangeBonus } from '../maps/features.ts'
 import { isFreeSpot, lampAnchor, pathClearance } from '../path/data.ts'
 import type { ProgressState } from '../../types.ts'
 import { nightParts } from '../parts/index.ts'
@@ -70,13 +71,16 @@ export const nightTowers: NightTowersModule = {
    * so the ring on screen is the ring that hits.
    * A free seat adds `FREE_LAMP_RANGE_BONUS` on every tier (1.4.392).
    */
-  range: (id, ability, progress, runTier, extra = 0) =>
-    lampReach(
+  range: (id, ability, progress, runTier, extra = 0) => {
+    const at = lampAnchor(id)
+    return lampReach(
       id,
       freeLampBase(id, abilityRange(ability, seatStage(id, progress), progress, runTier)) +
-        Math.max(0, extra),
-      pathClearance(lampAnchor(id)),
-    ),
+        Math.max(0, extra) +
+        hillRangeBonus(at),
+      pathClearance(at),
+    )
+  },
   cooldown: (id, progress) => towerCooldown(seatStage(id, progress)),
   inRange: (id, ability, progress, target, runTier, extra = 0) =>
     dist(lampAnchor(id), target) <= nightTowers.range(id, ability, progress, runTier, extra),

@@ -1,6 +1,8 @@
 import { HEAVEN_POINT } from '../lib/defend'
 import type { PointerEvent, RefObject, ReactNode } from 'react'
 import { MapPlate, NIGHT_MAP, nightPath, type NightMapSurface, type NightPhase } from '../nightWatch'
+import { FeatureSprites, PopPuffs } from '../nightWatch/map/FeatureSprites'
+import type { NightFeature } from '../nightWatch/maps/features'
 
 export interface DefendNightSkyProps {
   boardRef: RefObject<SVGSVGElement | null>
@@ -20,6 +22,8 @@ export interface DefendNightSkyProps {
   /** A2 porch icing. Off on other maps. */
   porchCandy?: boolean
   roadLabel?: string
+  mapFeatures?: readonly NightFeature[]
+  pops?: readonly { key: number; x: number; y: number }[]
   children?: ReactNode
 }
 
@@ -36,6 +40,8 @@ export function DefendNightSky({
   map = NIGHT_MAP,
   porchCandy = true,
   roadLabel = 'Night road through Silver City',
+  mapFeatures = [],
+  pops = [],
   children,
 }: DefendNightSkyProps) {
   return (
@@ -152,7 +158,10 @@ export function DefendNightSky({
                 <path d="M-10 6 V-16 M10 6 V-16" />
                 <path d="M-12 -16 H12" />
               </g>
+              <FeatureSprites features={mapFeatures} layer="under" />
 {children}
+              <FeatureSprites features={mapFeatures} layer="over" />
+              <PopPuffs pops={pops} />
             </svg>
   )
 }

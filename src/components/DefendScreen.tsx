@@ -23,7 +23,10 @@ import {
   easyLatePush,
   easyWalkerHp,
   scaledWalkerHp,
+  FAST_PACE,
   gaitForSlot,
+  nightTune,
+  roundForTune,
   walkerPace,
   walkerSpark,
 } from '../nightWatch/walkers'
@@ -79,10 +82,17 @@ import {
 import { FarHillsUnlock } from './FarHillsUnlock'
 import { NightMapPicker } from './NightMapPicker'
 import { applyNightMap } from '../nightWatch/maps/bind'
-import { mapIsOpen } from '../nightWatch/maps/chain'
+import { mapIsOpen, nextMap, NIGHT_MAP_NAME } from '../nightWatch/maps/chain'
 import { playableNightMap } from '../nightWatch/maps/mazeMaps'
 import { resolveNightMap, type NightMapId } from '../nightWatch/maps/resolve'
-import { nightTune, roundForTune } from '../nightWatch/walkers'
+import {
+  miniHp,
+  splitDue,
+  splitFeature,
+  walkerZone,
+  type NightFeature,
+} from '../nightWatch/maps/features'
+import { waveRound, waveWalkerHp, type NightWave } from '../nightWatch/maps/wave'
 import {
   clearPanelFolded,
   clientToMap,
@@ -266,6 +276,13 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const mapIdRef = useRef<NightMapId>('a2')
   const mazeBeatRef = useRef(recordMazeBeat)
   mazeBeatRef.current = recordMazeBeat
+  const mazeBeatListRef = useRef<readonly string[]>([])
+  mazeBeatListRef.current = progress.defense.mazeBeat ?? []
+  const waveRef = useRef<NightWave | null>(null)
+  const featuresRef = useRef<NightFeature[]>([])
+  const sparkFracRef = useRef(0)
+  const [unlockNote, setUnlockNote] = useState<string | null>(null)
+  const [pops, setPops] = useState<{ key: number; x: number; y: number }[]>([])
   const paidTypes = useRef<Set<string>>(new Set())
   const prevSparks = useRef(runSparks)
   const [sparkPop, setSparkPop] = useState(false)
@@ -327,6 +344,9 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     /** Easy boss was turned this round. A leak does not set this. */
     bossDown: false,
     freezeUntil: 0,
+    /** Minis still owed before a downed count can clear the round. */
+    extras: 0,
+    nextId: 100000,
   })
   const autoFireRef = useRef<(now: number, frozen: boolean) => void>(() => {})
   const flashGen = useRef<Record<string, number>>({})
@@ -409,6 +429,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   mapIdRef.current = mapId
   tuneRef.current = nightTune(playingMap?.rules)
   hpMulRef.current = playingMap?.hpMul ?? 1
+  waveRef.current = playingMap?.wave ?? null
+  featuresRef.current = playingMap?.mapFeatures ?? []
 
   useLayoutEffect(() => {
     applyNightMap(mapId)
@@ -489,11 +511,26 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       }, 2600)
     }
     const tune = waveCombat(wave, easy)
+    const spec = easy ? waveRef.current : null
+    const shaped = spec
+      ? waveRound(roundForTune(easyRound(wave), wave, tuneRef.current), wave, spec)
+      : null
+    const liveTune =
+      spec && shaped
+        ? {
+            ...tune,
+            size: shaped.count + (easyBossRound(wave) ? 1 : 0),
+            spawnScale: tune.spawnScale * spec.spawnMul,
+          }
+        : tune
     const cleared = progress.defense.cleared
     live.current.playing = true
     live.current.raiders = []
     live.current.spawned = 0
     live.current.downed = 0
+    live.current.extras = 0
+    live.current.nextId = 100000
+    sparkFracRef.current = 0
     live.current.bossDown = false
     // Easy keeps hearts across rounds. A new night (round 1) fills them again.
     if (!easy || waveIndexRef.current === 0) {
@@ -550,16 +587,19 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
           const tier = combatTier(item.turned, runTierRef.current)
           return { ...item, heavenT: (item.heavenT ?? 0) + nightEnemies.heavenSpeed(tier, easy) * dt }
         }
+        const gaitPace = item.boss ? BOSS_PACE : walkerPace(easy ? item.gait : undefined)
+        const paceMul = item.paceScale ?? 1
+        let step = nightEnemies.speed(easy) * tune.speedScale * gaitPace * paceMul * dt
+        let fog = item.fog
+        if (easy && featuresRef.current.length > 0) {
+          const zone = walkerZone(item.t, item.pathId, featuresRef.current)
+          step *= zone.speed
+          fog = zone.fog
+        }
         return {
           ...item,
-          t: unturnedStep(
-            item.t,
-            nightEnemies.speed(easy) *
-              tune.speedScale *
-              (item.boss ? BOSS_PACE : walkerPace(easy ? item.gait : undefined)) *
-              dt,
-            frozen,
-          ),
+          fog,
+          t: unturnedStep(item.t, step, frozen),
         }
       })
       let leaked = 0
@@ -626,32 +666,49 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       const holdSpawn = easy && nightEnemies.holdSpawn(unturnedLive)
       if (
         !frozen &&
-        live.current.spawned < tune.size &&
+        live.current.spawned < liveTune.size &&
         !holdSpawn &&
         (live.current.spawnNow ||
-          spawnAt >= nightEnemies.spawnEvery(easy) * tune.spawnScale ||
+          spawnAt >= nightEnemies.spawnEvery(easy) * liveTune.spawnScale ||
           (easy && live.current.spawned === 0))
       ) {
         live.current.spawnNow = false
         spawnAt = 0
+        let packLeft = spec?.pack ?? 1
+        while (
+          packLeft > 0 &&
+          live.current.spawned < liveTune.size &&
+          walking.filter((item) => !item.turned).length < (spec?.liveCap ?? 3)
+        ) {
+        packLeft -= 1
         const id = live.current.spawned
         const cast = nightEnemies.cast(cleared, id, wave, easy)
-        const round = roundForTune(easyRound(wave), wave, tuneRef.current)
+        const round = shaped ?? roundForTune(easyRound(wave), wave, tuneRef.current)
         const boss = easy && easyBossRound(wave) && id === round.count
         const gait = easy && !boss ? gaitForSlot(round, id) : undefined
         const hp = boss
           ? easyBossHp(wave)
           : easy
-            ? scaledWalkerHp(
-                easyWalkerHp(
+            ? spec
+              ? waveWalkerHp(
                   nightEnemies.maxHp(cast.kind, easy),
                   tune.hpBonus + easyLatePush(wave),
                   gait,
                   wave,
                   tuneRef.current,
-                ),
-                hpMulRef.current,
-              )
+                  hpMulRef.current,
+                  spec,
+                )
+              : scaledWalkerHp(
+                  easyWalkerHp(
+                    nightEnemies.maxHp(cast.kind, easy),
+                    tune.hpBonus + easyLatePush(wave),
+                    gait,
+                    wave,
+                    tuneRef.current,
+                  ),
+                  hpMulRef.current,
+                )
             : nightEnemies.maxHp(cast.kind, easy) + tune.hpBonus
         if (boss) {
           setPowerBanner('Boss!')
@@ -690,8 +747,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
           boss,
           spark: walkerSpark(gait),
           pathId: easy ? walkerRoadId(id) : undefined,
+          fog: false,
         })
         live.current.spawned += 1
+        }
       }
       live.current.raiders = walking
       const debugHold = easy && nwDebugRef.current && debugPausedRef.current
@@ -742,10 +801,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
           live.current.downed,
           live.current.spawned,
           alive.length,
-          tune.size,
+          liveTune.size + live.current.extras,
         ) ||
         (easy &&
-          live.current.spawned >= tune.size &&
+          live.current.spawned >= liveTune.size &&
           alive.filter((item) => !item.turned).length === 0 &&
           live.current.hearts > 0)
       const fate = liveBossClearPhase({
@@ -759,7 +818,19 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
         return
       }
       if (fate === 'clear') {
-        if (easy && wave === 9) mazeBeatRef.current(mapIdRef.current)
+        if (easy && wave === 9) {
+          const id = mapIdRef.current
+          const known = mazeBeatListRef.current.includes(id)
+          const opened = nextMap(id)
+          mazeBeatRef.current(id)
+          if (!known && opened) {
+            const line = `New map unlocked: ${NIGHT_MAP_NAME[opened]}!`
+            setUnlockNote(line)
+            window.setTimeout(() => {
+              setUnlockNote((current) => (current === line ? null : current))
+            }, 4200)
+          }
+        }
         if (easy) grantClearHeart()
         grantBossSparks()
         live.current.playing = false
@@ -1168,6 +1239,51 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     return nightTowers.range(id, toolId, progress, runTierRef.current, extra)
   }
 
+  function grantSparks(pay: number) {
+    const mul = waveRef.current?.sparkMul ?? 1
+    if (!(pay > 0) || !(mul > 0)) return
+    sparkFracRef.current += pay * mul
+    const whole = Math.floor(sparkFracRef.current)
+    if (whole <= 0) return
+    sparkFracRef.current -= whole
+    sparksRef.current += whole
+    setRunSparks((count) => count + whole)
+  }
+
+  function releaseMinis(parent: Raider) {
+    const split = splitFeature(featuresRef.current)
+    if (!splitDue(split, waveIndexRef.current, parent.gait, !!parent.boss, !!parent.mini) || !split) return
+    const at = raiderAt(parent)
+    for (let q = 0; q < split.into; q += 1) {
+      const hp = miniHp(parent.maxHp ?? parent.hp, split)
+      const id = live.current.nextId
+      live.current.nextId += 1
+      live.current.extras += 1
+      live.current.raiders.push({
+        id,
+        t: Math.max(0, parent.t - 0.02 * q),
+        text: parent.text,
+        kind: parent.kind,
+        label: parent.label,
+        face: parent.face,
+        castId: parent.castId,
+        hp,
+        maxHp: hp,
+        gait: 'plain',
+        boss: false,
+        spark: 0,
+        pathId: parent.pathId,
+        paceScale: FAST_PACE * 0.8,
+        mini: true,
+      })
+    }
+    const key = performance.now()
+    setPops((current) => [...current, { key, x: at.x, y: at.y }])
+    window.setTimeout(() => {
+      setPops((current) => current.filter((pop) => pop.key !== key))
+    }, 300)
+  }
+
   function fire(id: CityPlotId, forceRaiderId?: number, manual = false) {
     if (phase !== 'wave' || won) return false
     const now = performance.now()
@@ -1283,7 +1399,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       if (struck.down) {
         if (best.boss) live.current.bossDown = true
         live.current.downed += 1
-        setRunSparks((count) => count + sparks)
+        const sparks = best.spark ?? walkerSpark(best.gait)
+        if (waveRef.current) grantSparks(sparks)
+        else setRunSparks((count) => count + sparks)
+        releaseMinis(best)
         // Lamp kills keep the spawn cadence. A face tap must not pull the next walker in early.
         if (easy && !manual) live.current.spawnNow = true
       }
@@ -1316,7 +1435,9 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
           if (nick.down) {
             if (pick.boss) live.current.bossDown = true
             live.current.downed += 1
-            setRunSparks((count) => count + walkerSpark(pick.gait))
+            if (waveRef.current) grantSparks(pick.spark ?? walkerSpark(pick.gait))
+            else setRunSparks((count) => count + walkerSpark(pick.gait))
+            releaseMinis(pick)
             live.current.spawnNow = true
           }
         }
@@ -2296,6 +2417,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
                   : 'Night road through Silver City'
               }
               armorFrom={tuneRef.current.armorFrom}
+              mapFeatures={playingMap?.mapFeatures}
+              pops={pops}
             />
             {phase === 'wave' ? (
               <div className="nw-wave-overlay">
@@ -2305,6 +2428,16 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
             {easy && phase === 'plant' ? (
               <p className="nw-skill-toast" role="status">
                 New skill · Still
+              </p>
+            ) : null}
+            {easy && phase === 'plant' && waveIndex === 0 && playingMap?.featureNote ? (
+              <p className="nw-skill-toast is-feature" role="status">
+                {playingMap.featureNote}
+              </p>
+            ) : null}
+            {unlockNote ? (
+              <p className="nw-skill-toast nw-map-toast" role="status">
+                {unlockNote}
               </p>
             ) : null}
             {skillNote ? (

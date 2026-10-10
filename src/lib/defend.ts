@@ -241,7 +241,7 @@ export function cueTapStrike(easy: boolean, glowingFace: boolean): 'hit' | 'miss
  * a hit, even when a faster walker is ahead of it. Hard does not use the glow.
  */
 export function easyPointerTapGate<
-  T extends { id: number; turned?: string; t?: number; boss?: boolean; tapChip?: number; gait?: string },
+  T extends { id: number; turned?: string; t?: number; boss?: boolean; tapChip?: number; gait?: string; fog?: boolean },
 >(
   easy: boolean,
   raider: T,
@@ -249,7 +249,7 @@ export function easyPointerTapGate<
   roundIndex = -1,
   armorFrom = 7,
 ): 'hit' | 'miss' {
-  if (raider.turned) return 'miss'
+  if (raider.turned || raider.fog) return 'miss'
   const soaked = easyTapSoaked(roundIndex, raider, armorFrom)
   if (easy && raider.boss && !soaked) return 'hit'
   const cue = easyTapTarget(raiders, roundIndex, armorFrom)
@@ -438,12 +438,12 @@ export function easyTapMode(easy: boolean, phase: string, won: boolean): boolean
  * Omit the round and the lead stays the cue, which is how rounds 1–6 were locked.
  */
 export function easyTapTarget<
-  T extends { turned?: string; t?: number; tapChip?: number; gait?: string; boss?: boolean },
+  T extends { turned?: string; t?: number; tapChip?: number; gait?: string; boss?: boolean; fog?: boolean },
 >(raiders: readonly T[], roundIndex = -1, armorFrom = 7): T | undefined {
   let pick: T | undefined
   let bestT = -1
   for (const item of raiders) {
-    if (item.turned) continue
+    if (item.turned || item.fog) continue
     if (easyTapSoaked(roundIndex, item, armorFrom)) continue
     const t = item.t ?? 0
     if (t >= bestT) {
@@ -454,8 +454,8 @@ export function easyTapTarget<
   return pick
 }
 
-export function easyHoldSpawn(walkingUnturned: number): boolean {
-  return walkingUnturned >= EASY_WAVE_LIVE
+export function easyHoldSpawn(walkingUnturned: number, liveCap = EASY_WAVE_LIVE): boolean {
+  return walkingUnturned >= liveCap
 }
 
 /**
