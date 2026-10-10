@@ -346,7 +346,13 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
       </>
       )}
 
-      {easy ? null : <ShareInvite />}
+      {easy ? (
+        <button type="button" className="btn primary xl" onClick={() => onNavigate({ name: 'hub' })}>
+          {EASY.home}
+        </button>
+      ) : (
+        <ShareInvite />
+      )}
 
       {easy ? null : (
         <button type="button" className="btn ghost" onClick={() => onNavigate({ name: 'hub' })}>
