@@ -17,10 +17,11 @@ import {
   easyBossClearSparks,
   easyBossHp,
   easyBossRound,
+  easyJumpLoad,
   easyJumpSparkBank,
   easyLatePush,
+  easyWalkerHp,
   gaitForSlot,
-  walkerHp,
   walkerPace,
   walkerSpark,
 } from '../nightWatch/walkers'
@@ -394,9 +395,14 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     if (jump == null) return
     roundJumpOnce.current = true
     const bank = easyJumpSparkBank(jump)
+    const planted = easyJumpLoad(jump)
     sparksRef.current = bank
     setRunSparks(bank)
     setWaveIndex(jump)
+    runPathsRef.current = planted.paths
+    setRunPaths(planted.paths)
+    plantsRef.current = planted.plants
+    setPlants(planted.plants)
   }, [easy])
 
   useEffect(() => {
@@ -582,7 +588,12 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         const hp = boss
           ? easyBossHp(wave)
           : easy
-            ? walkerHp(nightEnemies.maxHp(cast.kind, easy), tune.hpBonus + easyLatePush(wave), gait)
+            ? easyWalkerHp(
+                nightEnemies.maxHp(cast.kind, easy),
+                tune.hpBonus + easyLatePush(wave),
+                gait,
+                wave,
+              )
             : nightEnemies.maxHp(cast.kind, easy) + tune.hpBonus
         if (boss) {
           setPowerBanner('Boss!')
@@ -1742,27 +1753,29 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       {phase === 'wave' ? (
         <span className="defend-wave">{roundLabel}</span>
       ) : null}
-      <span
-        className={`defend-hearts${mendShield ? ' is-mend-shield' : ''}${mendOn ? ' is-mend-pop' : ''}`}
-        data-hearts={heartShown}
-        data-heart-cap={DEFEND_HEARTS}
-      >
-        {Array.from({ length: DEFEND_HEARTS }, (_, index) => {
-          const full = index < heartShown
-          const dropped = heartDrop && index >= heartDrop.at && index < heartDrop.at + heartDrop.count
-          return (
-            <span
-              key={index}
-              className={`defend-heart-slot${full ? ' is-on' : ' is-empty'}${dropped ? ' is-drop' : ''}`}
-              data-heart-slot={full ? 'full' : 'empty'}
-            >
-              {full ? '♥' : '♡'}
-            </span>
-          )
-        })}
-        {mendShield ? <span className="nw-mend-hold">Gate</span> : null}
-        {powerBanner ? <span className="nw-power-chip">{powerBanner}</span> : null}
-      </span>
+      {phase === 'lost' ? null : (
+        <span
+          className={`defend-hearts${mendShield ? ' is-mend-shield' : ''}${mendOn ? ' is-mend-pop' : ''}`}
+          data-hearts={heartShown}
+          data-heart-cap={DEFEND_HEARTS}
+        >
+          {Array.from({ length: DEFEND_HEARTS }, (_, index) => {
+            const full = index < heartShown
+            const dropped = heartDrop && index >= heartDrop.at && index < heartDrop.at + heartDrop.count
+            return (
+              <span
+                key={index}
+                className={`defend-heart-slot${full ? ' is-on' : ' is-empty'}${dropped ? ' is-drop' : ''}`}
+                data-heart-slot={full ? 'full' : 'empty'}
+              >
+                {full ? '♥' : '♡'}
+              </span>
+            )
+          })}
+          {mendShield ? <span className="nw-mend-hold">Gate</span> : null}
+          {powerBanner ? <span className="nw-power-chip">{powerBanner}</span> : null}
+        </span>
+      )}
       {heartPop ? (
         <span className="defend-heart-gain" data-heart-gain="+1">
           +1
@@ -1857,9 +1870,23 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
               : 'Porch flickered. Turn them again.'}
           </p>
           {easy ? (
-            <p className="defend-hearts-left" data-hearts-left={hearts}>
-              {`Hearts left: ${hearts}`}
-            </p>
+            <>
+              <p
+                className="defend-hearts"
+                data-hearts={0}
+                data-heart-cap={DEFEND_HEARTS}
+                data-heart-slots={DEFEND_HEARTS}
+              >
+                {Array.from({ length: DEFEND_HEARTS }, (_, index) => (
+                  <span key={index} className="defend-heart-slot is-empty" data-heart-slot="empty">
+                    ♡
+                  </span>
+                ))}
+              </p>
+              <p className="defend-hearts-left" data-hearts-left={0}>
+                Hearts left: 0
+              </p>
+            </>
           ) : null}
           <button type="button" className="btn primary" onClick={retry}>
             Try the night again
