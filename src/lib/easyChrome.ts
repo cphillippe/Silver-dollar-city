@@ -132,6 +132,10 @@ export const EASY_CHROME: Record<string, string> = {
  * why lines stay in EASY_CHROME so the short why chip still applies.
  */
 export const EASY_STRIP_FACE: Record<string, string> = {
+  'The mind you already trust needs a real ground.':
+    'Your mind works because God gives it light.',
+  'Rocks cannot write the law you already trust.':
+    'God wrote right and wrong on your heart.',
   'Paul hands on an early public creed: died, buried, raised, appeared.':
     'Paul passes on a short list of what Christians believe: died, buried, raised, appeared.',
   'The creed is Paul’s private dream from decades later.':

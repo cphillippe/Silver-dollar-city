@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.431',
+    title: 'Easy lines name the speaker and God',
+    when: '2026-10-10',
+    items: [
+      'On the Samaritan win, the neighbor line sits above Jesus said. Jesus’ words stay “Go and do likewise.”',
+      'Why Gate Easy lines name God: your mind works because God gives it light, and God wrote right and wrong on your heart.',
+      'The creed gloss says the Twelve are the twelve followers Jesus chose. The last picture says Peter, then the Twelve, saw him.',
+    ],
+  },
+  {
     version: '1.4.430',
     title: 'Lamps finish the thick walkers',
     when: '2026-10-10',

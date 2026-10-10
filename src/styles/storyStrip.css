@@ -522,6 +522,7 @@ html[data-easy='on'] .play.is-story-strip.is-win[data-line='ph-road'] .strip-ver
   line-height: 1.1;
 }
 
+html[data-easy='on'] .play.is-story-strip.is-win[data-line='ph-road'] .strip-verse-above,
 html[data-easy='on'] .play.is-story-strip.is-win[data-line='ph-road'] .strip-verse-lead {
   margin: 0;
   font-size: 12px;
@@ -609,6 +610,16 @@ html[data-easy='on'] .play.is-story-strip.is-win[data-line='ph-road'] .strip-ver
   to {
     opacity: 0;
   }
+}
+
+.strip-verse-above {
+  margin: 0 0 2px;
+  font-size: 12.5px;
+  font-weight: 650;
+  line-height: 1.15;
+  letter-spacing: 0;
+  text-transform: none;
+  color: #3b1546;
 }
 
 .strip-verse figcaption {
@@ -1218,6 +1229,7 @@ html[data-easy='on'] .play.is-story-strip[data-n='3'] .strip-art img {
     padding: 2px 6px 3px;
   }
 
+  html[data-easy='on'] .play.is-story-strip.is-win:not([data-n='3']) .strip-verse-above,
   html[data-easy='on'] .play.is-story-strip.is-win:not([data-n='3']) .strip-verse figcaption,
   html[data-easy='on'] .play.is-story-strip.is-win:not([data-n='3']) .strip-verse-lead,
   html[data-easy='on'] .play.is-story-strip.is-win:not([data-n='3']) .strip-verse blockquote,

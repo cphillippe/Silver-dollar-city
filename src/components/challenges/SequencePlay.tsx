@@ -261,6 +261,7 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
           </p>
           {verse && verseOn ? (
             <figure className="strip-verse">
+              {easy && verse.easyAbove ? <p className="strip-verse-above">{verse.easyAbove}</p> : null}
               <figcaption>{verse.kicker}</figcaption>
               {easy && verse.easyLead ? <p className="strip-verse-lead">{verse.easyLead}</p> : null}
               <blockquote>“{easy && verse.easyText ? verse.easyText : verse.text}”</blockquote>
