@@ -124,6 +124,7 @@ import {
   easyJumpSparkBank,
   easyLatePush,
   easyWalkerHp,
+  EASY_LATE_BULK,
   EASY_TOUGH_WINDOW,
   gaitPlan,
   roundSparkPay,
@@ -146,9 +147,12 @@ import {
   CEILING_LAMPS,
   NAMED_LAMPS,
   bossDamageTable,
+  leadSeatTable,
   paceEasy436,
   paceEasyCampaign,
   paceEasyLive,
+  paceEasyRoad,
+  paceEasyRoadCampaign,
 } from '../src/nightWatch/livePace.ts'
 import {
   pickWalkerFace,
@@ -160,7 +164,9 @@ import {
   applyPathStep,
   canTake,
   freshRunPaths,
+  easyShotReach,
   lampStrike,
+  pathSparkSpend,
   spendTreeNight,
   stepLocked,
   TREE_LOCK,
@@ -185,6 +191,9 @@ import {
   lampUnderFinger,
   pathSpendControl,
   previewLamp,
+  ROAD_COVER_WORD,
+  roadCoverLength,
+  roadCoverRank,
   roadCoverD,
   roundStartKind,
   startsNextRound,
@@ -1470,7 +1479,14 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.437')
+assert.equal(APP_VERSION, '1.4.438')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.438'), '1.4.438 changelog row')
+assert.match(latestChange('1.4.438').title, /road/i)
+assert.doesNotMatch(
+  latestChange('1.4.438').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.438 changelog avoids GitHub close keywords',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.437'), '1.4.437 changelog row')
 assert.match(latestChange('1.4.437').title, /Strong/i)
 assert.doesNotMatch(
@@ -5439,10 +5455,10 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(KID_TAP_WASTE, 0.3, '1.4.421 about 30% of a kid tap misses')
   assert.equal(KID_TAP_REACT_S, 0.45, '1.4.421 a kid tap lands after a short wait')
   assert.equal(easyBossHp(4), 12, '1.4.421 round 5 boss is thinner')
-  assert.equal(easyBossHp(9), 40, '1.4.437 round 10 boss fits the porch ring plus taps')
-  assert.equal(easyBossHp(14), 16, '1.4.437 round 15 boss fits the porch ring plus taps')
-  assert.equal(easyBossHp(19), 17, '1.4.437 round 20 boss fits the porch ring plus taps')
-  assert.equal(easyBossHp(24), 18, '1.4.437 round 25 boss fits the porch ring plus taps')
+  assert.equal(easyBossHp(9), 55, '1.4.438 round 10 boss is the first step up from round 5')
+  assert.equal(easyBossHp(14), 120, '1.4.438 round 15 boss is thicker than round 10')
+  assert.equal(easyBossHp(19), 180, '1.4.438 round 20 boss is thicker than round 15')
+  assert.equal(easyBossHp(24), 240, '1.4.438 round 25 boss is the showdown')
   assert.equal(easyLatePush(11), 0, '1.4.421 the late push still starts at round 13')
   assert.equal(easyLatePush(14), 18, '1.4.421 round 15 push stays')
   assert.equal(BOSS_PACE, 0.7, '1.4.421 later bosses keep the same step')
@@ -5552,10 +5568,10 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     assert.equal(easyBossClearSparks(index), 0, `1.4.427 round ${index + 1} is not a boss clear`)
   }
   assert.equal(easyBossHp(4), 12, '1.4.427 round 5 boss stays 12')
-  assert.equal(easyBossHp(9), 40, '1.4.437 round 10 boss is 40')
-  assert.equal(easyBossHp(14), 16, '1.4.437 round 15 boss is 16')
-  assert.equal(easyBossHp(19), 17, '1.4.437 round 20 boss is 17')
-  assert.equal(easyBossHp(24), 18, '1.4.437 round 25 boss is 18')
+  assert.equal(easyBossHp(9), 55, '1.4.438 round 10 boss is 55')
+  assert.equal(easyBossHp(14), 120, '1.4.438 round 15 boss is 120')
+  assert.equal(easyBossHp(19), 180, '1.4.438 round 20 boss is 180')
+  assert.equal(easyBossHp(24), 240, '1.4.438 round 25 boss is 240')
   const grant426 = screen426.slice(
     screen426.indexOf('const grantBossSparks'),
     screen426.indexOf('const grantBossSparks') + 420,
@@ -6110,6 +6126,56 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(lostCard, /Array\.from\(\{ length: DEFEND_HEARTS \}/, '1.4.437 the loss screen draws three slots')
   assert.match(lostCard, /Hearts left: 0/)
   assert.doesNotMatch(lostCard, /length: 5/)
+}
+
+// Night Watch 1.4.438: good seats, an honest ghost, and a rising boss curve.
+{
+  const frozenNone = paceEasyRoadCampaign('none', '437')
+  const frozenSpend = paceEasyRoadCampaign('natural', '437')
+  assert.equal(frozenNone.dead, 15, '1.4.438 the frozen good-seat night dies on the round 15 boss')
+  assert.equal(frozenSpend.dead, null, '1.4.438 the frozen good-seat spender clears all 25')
+  const bare = paceEasyRoadCampaign('none', 'live')
+  const spender = paceEasyRoadCampaign('natural', 'live')
+  assert.ok(bare.dead >= 8 && bare.dead <= 10, '1.4.438 no upgrades wall at rounds 8 to 10')
+  assert.equal(spender.rows[9].result, 'clear', '1.4.438 the spender clears round 10')
+  assert.ok(spender.dead >= 16 && spender.dead <= 20, '1.4.438 the spender reaches the late teens')
+  const quiet5 = paceEasyRoad(4, BARE_LAMPS, 3, 'live', 999)
+  const tap5 = paceEasyRoad(4, BARE_LAMPS, 3, 'live')
+  assert.equal(quiet5.result, 'lost', '1.4.438 good seats still lose round 5 with no taps')
+  assert.equal(tap5.result, 'clear', '1.4.438 steady taps with no buys still hold round 5')
+  assert.equal(tap5.boss, 'kill')
+  const showdown = paceEasyRoad(24, CEILING_LAMPS, 3, 'live')
+  const short = paceEasyRoad(24, CEILING_LAMPS.map(() => ({ far: 1, strong: 2 })), 3, 'live')
+  assert.equal(showdown.boss, 'kill', '1.4.438 the clean build kills the round 25 boss')
+  assert.equal(showdown.bossMax, 240)
+  assert.ok(showdown.bossLamp + showdown.bossTap <= showdown.bossMax + 8)
+  assert.equal(short.boss, 'leak', '1.4.438 Strong 2 leaks the round 25 boss')
+  const bosses = [5, 10, 15, 20, 25].map((round) => easyBossHp(round - 1))
+  assert.deepEqual(bosses, [12, 55, 120, 180, 240])
+  for (let i = 1; i < bosses.length; i += 1) assert.ok(bosses[i] > bosses[i - 1])
+  const seats = leadSeatTable()
+  assert.equal(seats.length, 4)
+  for (const seat of seats) {
+    assert.ok(seat.level + 1 >= seat.gap, '1.4.438 level I reaches a good seat')
+    assert.ok(seat.far1 > seat.level, '1.4.438 Far 1 reaches farther than level I')
+  }
+  assert.equal(easyShotReach({ far: 0, strong: 3 }), 0)
+  assert.equal(easyShotReach({ far: 1, strong: 3 }), 48)
+  assert.equal(lampStrike({ far: 1, strong: 0 }).rangeBonus, 0, '1.4.438 the old strike bonus stays 0')
+  assert.equal(pathSparkSpend({ far: 1, strong: 3 }), 24, '1.4.438 pull returns the steps')
+  assert.equal(pathSparkSpend({ far: 0, strong: 0 }), 0)
+  assert.equal(EASY_LATE_BULK, 140)
+  assert.equal(easyWalkerHp(2, 16, 'tough', 4), walkerHp(2, 16, 'tough'))
+  assert.equal(easyWalkerHp(2, 0, 'plain', 16), walkerHp(2, 0, 'plain') + EASY_LATE_BULK)
+  const screen438 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  assert.match(screen438, /pathSparkSpend\(/)
+  assert.match(screen438, /freshLampPaths\(\)/)
+  const good = seats[0]
+  const look = previewLamp({ x: good.x, y: good.y }, 'love', emptyProgress(), {}, {}, false, true, 0)
+  if (!look.blocked) {
+    assert.equal(look.cover, roadCoverRank(roadCoverLength(look.at, look.range)))
+    assert.equal(ROAD_COVER_WORD[look.cover || 'far'], look.cover === 'good' ? 'Good' : look.cover === 'some' ? 'Some' : 'Too far')
+  }
 }
 
 // Night Watch 1.4.424: only the glowing face keeps a hit disc. Playtest shows the tap tally.
@@ -6935,10 +7001,10 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     if (index < EASY_ROUNDS.length) assert.equal(waveCombat(index, true).size, EASY_ROUNDS[index].count)
   }
   assert.equal(easyBossHp(4), 12, '1.4.421 round 5 boss is the thinner teaching bar')
-  assert.equal(easyBossHp(9), 40)
-  assert.equal(easyBossHp(14), 16, '1.4.437 round 15 boss fits the lamp window')
-  assert.equal(easyBossHp(19), 17, '1.4.437 round 20 boss fits the lamp window')
-  assert.equal(easyBossHp(24), 18)
+  assert.equal(easyBossHp(9), 55)
+  assert.equal(easyBossHp(14), 120, '1.4.438 round 15 boss is above round 10')
+  assert.equal(easyBossHp(19), 180, '1.4.438 round 20 boss is above round 15')
+  assert.equal(easyBossHp(24), 240)
   assert.equal(easyLatePush(11), 0, '1.4.417 the push starts at round 13')
   assert.equal(easyLatePush(12), 12)
   assert.equal(easyLatePush(13), 12)

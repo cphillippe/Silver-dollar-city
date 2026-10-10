@@ -1,12 +1,12 @@
 import type { CityPlotId } from '../lib/city'
-import { clampGhostHintLeft, lampRoadNote } from '../lib/lampPlace'
+import { clampGhostHintLeft, lampRoadNote, ROAD_COVER_WORD } from '../lib/lampPlace'
 import { CLEAR_BAR_RESERVE } from '../lib/towerCardPlace'
 import { WATCH_ABILITY_LABEL } from '../lib/defend'
 import { boardFill, boardFillPoint, boardPoint as mapBoardPoint, boardView, nightTowers } from '../nightWatch'
 import type { DefendNightSkyProps } from './DefendNightSky'
 import { DefendNightSky } from './DefendNightSky'
 import { DefendTowerCard, type TowerCardPoint } from './DefendTowerCard'
-import { lampStrike, pathsOf, type LampPaths, type TreePath } from '../nightWatch/upgradeTree'
+import { easyShotReach, pathsOf, type LampPaths, type TreePath } from '../nightWatch/upgradeTree'
 import {
   DefendNightActorsSvg,
   DefendNightWalkerCue,
@@ -44,7 +44,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
   const place = plateFill ? boardFillPoint : mapBoardPoint
   const cardAbility = upgradeAt ? towerType[upgradeAt] : undefined
   const reachBonus =
-    easy && cardAbility ? lampStrike(pathsOf(runPaths, cardAbility)).rangeBonus : 0
+    easy && cardAbility ? easyShotReach(pathsOf(runPaths, cardAbility)) : 0
   const roadNote =
     upgradeAt && cardAbility
       ? lampRoadNote(upgradeAt, cardAbility, progress, runTier, easy, reachBonus)
@@ -142,16 +142,17 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
           reserveBottom={easy && boosting ? CLEAR_BAR_RESERVE : 0}
         />
       ) : null}
-      {ghost && !ghost.blocked && ghost.note && boardBox && boardBox.w > 0 ? (
+      {ghost && !ghost.blocked && (ghost.cover || ghost.note) && boardBox && boardBox.w > 0 ? (
         <span
-          className="defend-ghost-hint"
-          data-road-note={ghost.note}
+          className={`defend-ghost-hint${ghost.cover ? ` is-${ghost.cover}` : ''}`}
+          data-road-note={ghost.cover ? ROAD_COVER_WORD[ghost.cover] : ghost.note}
+          data-road-rank={ghost.cover || ''}
           style={{
             left: clampGhostHintLeft(place(boardBox, ghost.at).left, boardBox.w),
             top: place(boardBox, { x: ghost.at.x, y: ghost.at.y - ghost.range }).top,
           }}
         >
-          {ghost.note}
+          {ghost.cover ? ROAD_COVER_WORD[ghost.cover] : ghost.note}
         </span>
       ) : null}
       {easy && boosting && boardBox && boardBox.w > 0
