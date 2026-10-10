@@ -1,6 +1,6 @@
 import type { ProgressState } from '../types.ts'
 import { nightTowers, TOWER_LAMP_SPRITE } from '../nightWatch/towers/index.ts'
-import { DEFEND_PATH, freeSpotId, isFreeSpot, lampAnchor, pathClearance } from '../nightWatch/path/data.ts'
+import { DEFEND_PATH, freeSpotId, isFreeSpot, lampAnchor, pathClearance, pathPoint } from '../nightWatch/path/data.ts'
 import type { NightPoint } from '../nightWatch/types.ts'
 import { isTowerType, plantType } from './nightPlants.ts'
 import { combatTier, TIER_MARK, TOOL_TIER_MAX } from './watchTools.ts'
@@ -24,14 +24,55 @@ export interface LampPreview {
   blocked: boolean
   /** Combat range meets the walker path at the current level. A red no-go is never a reach. */
   reaches: boolean
-  /** Road stretch inside the combat ring. Empty when the current level does not reach. */
+  /** Road stretch inside the combat ring. Empty when the ring misses the road. */
   road: string
+  /**
+   * How much of the walker road sits in the ring.
+   * `good` is a long stretch, `some` is a nick, `far` misses.
+   * Empty on a red no-go.
+   */
+  cover: '' | 'good' | 'some' | 'far'
   /**
    * Empty when the current level reaches. Otherwise the soonest upgrade that
    * would, or `LAMP_TOO_FAR` when level III still misses. Empty on a red no-go.
    */
   note: string
 }
+
+/** Road length that counts as a real stretch, not a nick. Plate units. */
+export const ROAD_GOOD_LEN = 140
+/** Shorter than this and the ring does not meet the road. */
+export const ROAD_SOME_LEN = 18
+
+const PATH_LEN = DEFEND_PATH.reduce((sum, point, index) => {
+  const next = DEFEND_PATH[index + 1]
+  if (!next) return sum
+  return sum + Math.hypot(next.x - point.x, next.y - point.y)
+}, 0)
+
+/** Length of the walker road inside this ring. */
+export function roadCoverLength(at: NightPoint, range: number): number {
+  if (!(range > 0) || !(PATH_LEN > 0)) return 0
+  const steps = 240
+  let hit = 0
+  for (let i = 0; i <= steps; i += 1) {
+    const point = pathPoint(i / steps)
+    if (Math.hypot(at.x - point.x, at.y - point.y) <= range + 0.5) hit += 1
+  }
+  return (hit / (steps + 1)) * PATH_LEN
+}
+
+export function roadCoverRank(length: number): 'good' | 'some' | 'far' {
+  if (length >= ROAD_GOOD_LEN) return 'good'
+  if (length >= ROAD_SOME_LEN) return 'some'
+  return 'far'
+}
+
+export const ROAD_COVER_WORD = {
+  good: 'Good',
+  some: 'Some',
+  far: 'Too far',
+} as const
 
 /** Painted yellow road, plus a small margin so a lamp does not sit on the lip. */
 const ROAD_BLOCK = 46
@@ -465,13 +506,16 @@ export function previewLamp(
     lampSpotBlocked(at, plants, ability)
   const reaches = !blocked && lampReachesRoad(at, range)
   const note = blocked ? '' : lampRoadNote(spot, ability, progress, runTier, easyTree, extra)
+  const length = blocked ? 0 : roadCoverLength(at, range)
+  const cover = blocked ? '' : roadCoverRank(length)
   return {
     spot,
     at,
     range,
     blocked,
     reaches,
-    road: reaches ? roadCoverD(at, range) : '',
+    cover,
+    road: cover === 'far' || cover === '' ? '' : roadCoverD(at, range),
     note,
   }
 }

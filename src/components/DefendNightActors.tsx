@@ -12,7 +12,7 @@ import {
   type WatchAbility,
 } from '../lib/defend'
 import { combatTier, TIER_MARK, WALKER_LABEL } from '../lib/watchTools'
-import { lampStrike, pathBadge, pathsOf, type LampPaths } from '../nightWatch/upgradeTree'
+import { easyShotReach, pathBadge, pathsOf, type LampPaths } from '../nightWatch/upgradeTree'
 import { CITY_PLOTS, type CityPlotId } from '../lib/city'
 import { TOWER_TYPE_SRC } from '../lib/towerTypeArt'
 import { EASY } from '../lib/easy'
@@ -93,6 +93,7 @@ export interface DefendNightActorsProps {
     reaches: boolean
     road: string
     note?: string
+    cover?: '' | 'good' | 'some' | 'far'
   } | null
 }
 
@@ -174,7 +175,7 @@ export function DefendNightActorsSvg({
                 const typeName = WATCH_ABILITY_LABEL[using] ?? 'Love'
                 const typeSrc = TOWER_TYPE_SRC[using]
                 const tree = easy ? pathsOf(runPaths, using) : null
-                const reachBonus = tree ? lampStrike(tree).rangeBonus : 0
+                const reachBonus = tree ? easyShotReach(tree) : 0
                 const tierMark = tree ? pathBadge(tree) : TIER_MARK[combatTier(using, runTier)]
                 const hot =
                   phase === 'wave' &&
@@ -364,13 +365,20 @@ export function DefendNightActorsSvg({
                 )
               })}
               {ghost?.road ? (
-                <path className="defend-road-cover" data-road-cover="yes" d={ghost.road} pointerEvents="none" />
+                <path
+                  className={`defend-road-cover${ghost.cover ? ` is-${ghost.cover}` : ''}`}
+                  data-road-cover="yes"
+                  data-road-rank={ghost.cover || ''}
+                  d={ghost.road}
+                  pointerEvents="none"
+                />
               ) : null}
               {ghost ? (
                 <g
-                  className={`defend-ghost${ghost.blocked ? ' is-nogo' : ghost.reaches ? ' is-reaches' : ' is-short'}`}
+                  className={`defend-ghost${ghost.blocked ? ' is-nogo' : ghost.cover === 'good' ? ' is-reaches is-good' : ghost.cover === 'some' ? ' is-some' : ' is-short'}`}
                   data-lamp-ghost={ghost.blocked ? 'nogo' : 'open'}
                   data-reaches={ghost.reaches ? 'yes' : 'no'}
+                  data-road-rank={ghost.cover || ''}
                   data-reach-note={ghost.note ?? ''}
                   data-hit-range={ghost.range}
                   transform={`translate(${ghost.at.x} ${ghost.at.y})`}
