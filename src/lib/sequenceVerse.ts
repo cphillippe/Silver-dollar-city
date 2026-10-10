@@ -4,6 +4,8 @@ export interface SequenceVerse {
   text: string
   /** Easy header reference. Hard keeps `ref`. */
   easyHeader?: string
+  /** Easy line above the speaker label. Not the speaker’s words. */
+  easyAbove?: string
   /** Easy line above the quote. Not spoken as the quote. */
   easyLead?: string
   /** Easy quote. Hard keeps `text`. */
@@ -39,7 +41,7 @@ export const SEQUENCE_VERSES: Record<string, SequenceVerse> = {
     kicker: 'Paul wrote',
     text: '…that Christ died for our sins in accordance with the scriptures, that he was buried, that he was raised on the third day in accordance with the scriptures, and that he appeared to Cephas, then to the twelve.',
     easyLead:
-      'Cephas is Peter. The Twelve is a name for Jesus’ closest friends. “The scriptures” means God’s Word said long ago this would happen.',
+      'Cephas is Peter. The Twelve are the twelve followers Jesus chose. “In accordance with the scriptures” means just as God’s Word said long ago.',
     ref: '1 Corinthians 15:3–5',
   },
   'fg-reason': {
@@ -61,7 +63,8 @@ export const SEQUENCE_VERSES: Record<string, SequenceVerse> = {
     kicker: 'Jesus said',
     text: 'Which of these three, do you think, proved neighbor to the man who fell among the robbers? He said, “The one who showed mercy on him.” And Jesus said to him, “Go and do likewise.”',
     easyHeader: 'Luke 10:25–37',
-    easyLead: 'Likewise means do the same. The one who showed mercy was the neighbor.',
+    easyAbove: 'The one who showed mercy was the neighbor.',
+    easyLead: 'Likewise means do the same.',
     easyText: 'Go and do likewise.',
     easyRef: 'Luke 10:37',
     ref: 'Luke 10:36–37',

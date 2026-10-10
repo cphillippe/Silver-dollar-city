@@ -173,7 +173,7 @@ assert.match(readme, /ANDROID_KEYSTORE_B64/)
 assert.match(readme, /environment named `release`/)
 assert.doesNotMatch(readme, /ANDROID_KEYSTORE_BASE64|silver-city-debug\.keystore/)
 
-assert.equal(APP_VERSION, '1.4.430')
+assert.equal(APP_VERSION, '1.4.431')
 assert.match(read('android/app/src/main/res/values/ic_launcher_background.xml'), /#2A1650/)
 assert.match(read('index.html'), /favicon\.png/)
 assert.match(read('index.html'), /apple-touch-icon\.png/)

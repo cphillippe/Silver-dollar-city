@@ -618,18 +618,18 @@ assert.match(storyPieceSrc, /winShort\s*\?\s*32/, 'Easy Samaritan win caption is
 assert.match(sequenceArtSrc, /'road1-lawyer': \{ cue: 'Jesus'/)
 assert.match(sequenceArtSrc, /'road3-temple': \{ cue: 'Priest'/)
 assert.match(sequenceArtSrc, /'creed4-appeared': \{ cue: 'Jesus'/)
+assert.doesNotMatch(sequenceArtSrc, /'road4-samaritan': \{ cue: 'Jesus'/)
 assert.match(hollowSeqSrc, /winCaption: 'Who is my\\nneighbor\?'/)
 assert.match(hollowSeqSrc, /winCaption: 'Priest\\npasses by\.'/)
 assert.match(hollowSeqSrc, /winCaption: 'Shows\\nmercy\.'/)
 const sequenceVerse = readFileSync(new URL('../src/lib/sequenceVerse.ts', import.meta.url), 'utf8')
-assert.match(
-  sequenceVerse,
-  /easyLead: 'Likewise means do the same\. The one who showed mercy was the neighbor\.'/,
-)
+assert.match(sequenceVerse, /easyAbove: 'The one who showed mercy was the neighbor\.'/)
+assert.match(sequenceVerse, /easyLead: 'Likewise means do the same\.'/)
 assert.match(sequenceVerse, /easyText: 'Go and do likewise\.'/)
 assert.match(sequenceVerse, /easyRef: 'Luke 10:37'/)
 assert.match(sequenceVerse, /easyHeader: 'Luke 10:25–37'/)
 assert.match(sequenceVerse, /ref: 'Luke 10:36–37'/)
+assert.match(sequenceSrc, /verse\.easyAbove[\s\S]{0,220}figcaption/)
 assert.match(sequenceSrc, /verse\.easyText/)
 assert.match(sequenceSrc, /verse\.easyLead/)
 assert.match(sequenceSrc, /verse\.easyHeader/)
@@ -649,7 +649,7 @@ assert.match(sequenceVerse, /appeared to Cephas, then to the twelve/)
 assert.match(sequenceVerse, /ref: '1 Corinthians 15:3–5'/)
 assert.match(
   sequenceVerse,
-  /easyLead:\s*\n\s*'Cephas is Peter\. The Twelve is a name for Jesus’ closest friends\. “The scriptures” means God’s Word said long ago this would happen\.'/,
+  /easyLead:\s*\n\s*'Cephas is Peter\. The Twelve are the twelve followers Jesus chose\. “In accordance with the scriptures” means just as God’s Word said long ago\.'/,
 )
 const dailySeqSrc = readFileSync(new URL('../src/content/daily.ts', import.meta.url), 'utf8')
 assert.match(dailySeqSrc, /text: 'Jesus dies, is buried, and is raised\.'/)
@@ -932,7 +932,9 @@ assert.match(benchSrc, /early public testimony, not a lab rerun/)
 assert.doesNotMatch(benchSrc, /appearances list widened/)
 assert.match(benchSrc, /1 Cor 15:3–5/)
 assert.match(benchSrc, /text: 'Peter, then the Twelve, saw him\.'/)
-assert.match(benchSrc, /easyText: 'Peter and his friends saw him\.'/)
+assert.match(benchSrc, /easyText: 'Peter, then the Twelve, saw him\.'/)
+assert.doesNotMatch(benchSrc, /Levite/)
+assert.doesNotMatch(hollowSeqSrc, /Levite/)
 
 const evidenceSrc = readFileSync(
   new URL('../src/content/evidence.ts', import.meta.url),
@@ -1441,7 +1443,38 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.430')
+assert.equal(APP_VERSION, '1.4.431')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.431'), '1.4.431 changelog row')
+assert.match(latestChange('1.4.431').title, /God/)
+assert.doesNotMatch(
+  latestChange('1.4.431').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.431 changelog avoids GitHub close keywords',
+)
+assert.equal(
+  lociStampFor('fg-reason').ideaShort,
+  'Your mind works because God gives it light.',
+)
+assert.equal(
+  easyFacingLine('fg-reason', 'The mind you already trust needs a real ground.'),
+  'Your mind works because God gives it light.',
+)
+assert.equal(
+  evidenceFor('fg-reason')?.claim,
+  'The mind you already trust needs a real ground.',
+)
+assert.equal(
+  lociStampFor('fg-ought').ideaShort,
+  'God wrote right and wrong on your heart.',
+)
+assert.equal(
+  easyFacingLine('fg-ought', 'Rocks cannot write the law you already trust.'),
+  'God wrote right and wrong on your heart.',
+)
+assert.equal(
+  evidenceFor('fg-ought')?.claim,
+  'Rocks cannot write the law you already trust.',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.430'), '1.4.430 changelog row')
 assert.match(latestChange('1.4.430').title, /lamps/i)
 assert.doesNotMatch(
