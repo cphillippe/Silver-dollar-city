@@ -652,6 +652,14 @@ html[data-easy='on'] .play.is-story-strip.is-win[data-line='ph-road'] .strip-ver
   min-height: 0;
 }
 
+/* Easy 4- and 5-frame wins can grow a line (gloss or the neighbor sentence).
+   Let that page scroll so the quote and the follow-up stay reachable. */
+html[data-easy='on'] .daily-page.is-after:has(.play.is-story-strip.is-win:not([data-n='3'])),
+html[data-easy='on'] .challenge-page.is-after:has(.play.is-story-strip.is-win:not([data-n='3'])) {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
 .daily-page.is-after:has(.is-story-strip) .after-win,
 .challenge-page.is-after:has(.is-story-strip) .after-win {
   flex: 0 0 auto;
