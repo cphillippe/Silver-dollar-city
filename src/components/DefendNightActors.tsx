@@ -392,7 +392,7 @@ export function DefendNightActorsSvg({
               {raiders.map((raider) => {
                 const at = raiderAt(raider)
                 const isTap = easyTap && !raider.turned
-                const isCue = isTap && tapTarget?.id === raider.id
+                const isCue = isTap && (tapTarget?.id === raider.id || !!raider.boss)
                 const lampHit =
                   raider.struckAt != null && performance.now() - raider.struckAt < SHOT_JUICE_MS
                 return (
