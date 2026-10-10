@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.427',
+    title: 'Boss rounds pay a small bonus',
+    when: '2026-10-09',
+    items: [
+      'Every fifth round still brings in the big walker with Boss! The walker keeps the gold crown, the wide red coat, and the long health bar.',
+      'Clearing that round pays 2 extra sparks. The clear panel says Boss down +2 sparks. Losing the round pays nothing.',
+      'Spending sparks and tapping can clear the later boss rounds. Standing still still loses round 5. Hard is unchanged.',
+    ],
+  },
+  {
     version: '1.4.426',
     title: 'The phone download stays up',
     when: '2026-10-09',

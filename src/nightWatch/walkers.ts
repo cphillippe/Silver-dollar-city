@@ -108,6 +108,13 @@ export function easyBossHp(index: number): number {
   return 320
 }
 
+/** Extra sparks when an Easy boss round clears. A loss pays nothing. */
+export const BOSS_CLEAR_SPARKS = 2
+
+export function easyBossClearSparks(index: number): number {
+  return easyBossRound(index) ? BOSS_CLEAR_SPARKS : 0
+}
+
 /**
  * Extra health from round 13 on, added to the table bonus.
  * Breather rounds take a smaller bump. The boss bar is separate.
