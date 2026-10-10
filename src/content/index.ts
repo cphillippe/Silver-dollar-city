@@ -1,11 +1,11 @@
 import type { Area, Challenge, JournalEntry } from '../types'
-import { DAILY_POOL } from './daily'
-import { firstGate } from './firstGate'
-import { highLookout } from './highLookout'
-import { journalEntries } from './journal'
-import { observatory } from './observatory'
-import { parableHollow } from './parableHollow'
-import { witnessBench } from './witnessBench'
+import { DAILY_POOL } from './daily.ts'
+import { firstGate } from './firstGate.ts'
+import { highLookout } from './highLookout.ts'
+import { journalEntries } from './journal.ts'
+import { observatory } from './observatory.ts'
+import { parableHollow } from './parableHollow.ts'
+import { witnessBench } from './witnessBench.ts'
 
 export const areas: Area[] = [
   parableHollow,
@@ -16,10 +16,10 @@ export const areas: Area[] = [
 ]
 
 export { journalEntries }
-export { CHANGELOG, latestChange } from './changelog'
-export { CONTENT_PACKS, packForArea } from './packs'
-export { PACK_CATALOG, PACK_ISSUES } from './packCatalog'
-export { STREET_CHALLENGE, STREET_LIGHTS } from './links'
+export { CHANGELOG, latestChange } from './changelog.ts'
+export { CONTENT_PACKS, packForArea } from './packs.ts'
+export { PACK_CATALOG, PACK_ISSUES } from './packCatalog.ts'
+export { STREET_CHALLENGE, STREET_LIGHTS } from './links.ts'
 
 export function getArea(id: string): Area | undefined {
   return areas.find((area) => area.id === id)

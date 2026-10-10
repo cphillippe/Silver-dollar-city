@@ -6,7 +6,8 @@ import { boardFill, boardFillPoint, boardPoint as mapBoardPoint, boardView, nigh
 import type { DefendNightSkyProps } from './DefendNightSky'
 import { DefendNightSky } from './DefendNightSky'
 import { DefendTowerCard, type TowerCardPoint } from './DefendTowerCard'
-import { easyShotReach, pathsOf, type LampPaths, type TreePath } from '../nightWatch/upgradeTree'
+import { samePillarLessons } from '../nightWatch/lampPillar'
+import { easyShotReach, pathsOf, type BonusGate, type LampPaths, type TreePath } from '../nightWatch/upgradeTree'
 import {
   DefendNightActorsSvg,
   DefendNightWalkerCue,
@@ -27,6 +28,12 @@ export type DefendNightBoardProps = Omit<DefendNightSkyProps, 'children'> &
     onUpgradePath?: (plotId: CityPlotId, path: TreePath, fromPip?: boolean) => void
     onArmPathBuy?: (path: TreePath) => void
     runPaths?: Record<string, LampPaths>
+    /** Held Lock In lines. The bonus step counts the ones on this lamp's pillar. */
+    heldLessons?: readonly string[]
+    /** playtest=1 or the debug freeze. Opens the bonus step with no lessons. */
+    playtestSteps?: boolean
+    /** Leave the night for this lamp's lessons, and come back. */
+    onOpenLessons?: () => void
     /** Easy phone: overlays share the fill camera with the board. */
     plateFill?: boolean
   }
@@ -39,6 +46,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
     walkerCalls, loreLine, runTier, boosting, onBoostTower,     upgradeAt, onOpenUpgrade, upFlashId, ghost = null,
     upgradePoint, boardBox, runSparks = 0, levelBurst = null, onPullLamp, pullSparks = 0, onCloseUpgrade,
     onUpgradePath, onArmPathBuy, runPaths, roundIndex = -1,
+    heldLessons, playtestSteps = false, onOpenLessons,
     plateFill = false, onPlacePointer,
   } = props
   const place = plateFill ? boardFillPoint : mapBoardPoint
@@ -49,6 +57,10 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
     upgradeAt && cardAbility
       ? lampRoadNote(upgradeAt, cardAbility, progress, runTier, easy, reachBonus)
       : ''
+  const lessonGate: BonusGate | undefined =
+    easy && cardAbility
+      ? { lessons: samePillarLessons(cardAbility, heldLessons), playtest: playtestSteps }
+      : undefined
   const showCard = Boolean(
     upgradeAt && cardAbility && upgradePoint && boardBox && boardBox.w > 0 && onCloseUpgrade,
   )
@@ -140,6 +152,8 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
           roadNote={roadNote}
           easy={easy}
           reserveBottom={easy && boosting ? CLEAR_BAR_RESERVE : 0}
+          gate={lessonGate}
+          onOpenLessons={onOpenLessons}
         />
       ) : null}
       {ghost && !ghost.blocked && (ghost.cover || ghost.note) && boardBox && boardBox.w > 0 ? (

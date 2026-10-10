@@ -103,6 +103,8 @@ import {
   upgradeSpendAllowed,
 } from '../lib/nightPlants'
 import { applyBoost, buyExtraLamp, combatTier, EASY_LAMP_COST, freshRunTier, WATCH_TOOLS } from '../lib/watchTools'
+import { lessonAreaFor, samePillarLessons } from '../nightWatch/lampPillar'
+import { clearNightReturn, readNightReturn, saveNightReturn } from '../nightWatch/nightReturn'
 import {
   applyPathStep,
   easyShotReach,
@@ -209,6 +211,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const [boostNote, setBoostNote] = useState<string | null>(null)
   const [bossBonus, setBossBonus] = useState(0)
   const [upgradeAt, setUpgradeAt] = useState<CityPlotId | null>(null)
+  const [returnPlot, setReturnPlot] = useState<CityPlotId | null>(null)
   const [spendOpen, setSpendOpen] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
   const upgradeAtRef = useRef<CityPlotId | null>(null)
@@ -357,6 +360,14 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   }, [phase])
 
   useEffect(() => {
+    if (!returnPlot) return
+    if (phase !== 'plant' && phase !== 'boost') return
+    upgradeAtRef.current = returnPlot
+    setUpgradeAt(returnPlot)
+    setReturnPlot(null)
+  }, [returnPlot, phase])
+
+  useEffect(() => {
     if (runSparks > prevSparks.current) {
       setSparkPop(true)
       const timer = window.setTimeout(() => setSparkPop(false), 700)
@@ -392,6 +403,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const roundJumpOnce = useRef(false)
   useEffect(() => {
     if (!easy || roundJumpOnce.current) return
+    if (readNightReturn()) return
     const jump = readNightWatchRoundJump(nightLength(true))
     if (jump == null) return
     roundJumpOnce.current = true
@@ -1500,6 +1512,54 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     }, LEVEL_BURST_MS)
   }
 
+  function bonusGateFor(id: string) {
+    return {
+      lessons: samePillarLessons(id, progress.held),
+      playtest: nightWatchJumpAllowed(
+        typeof window === 'undefined' ? '' : window.location.search,
+        nwDebugRef.current,
+      ),
+    }
+  }
+
+  function openLockInLessons() {
+    if (phase !== 'plant' && phase !== 'boost') return
+    const plotId = upgradeAtRef.current
+    const tool = plotId ? plantsRef.current[plotId] : ''
+    if (!plotId || !tool) return
+    saveNightReturn({
+      phase: phase === 'boost' ? 'boost' : 'plant',
+      waveIndex,
+      plants: { ...plantsRef.current },
+      paths: { ...runPathsRef.current },
+      sparks: sparksRef.current,
+      hearts,
+      paid: [...paidTypes.current],
+      upgradePlot: plotId,
+    })
+    onNavigate({ name: 'area', areaId: lessonAreaFor(tool, progress.held) })
+  }
+
+  useEffect(() => {
+    if (!easy || roundJumpOnce.current) return
+    const snap = readNightReturn()
+    if (!snap) return
+    roundJumpOnce.current = true
+    clearNightReturn()
+    sparksRef.current = snap.sparks
+    setRunSparks(snap.sparks)
+    setWaveIndex(snap.waveIndex)
+    runPathsRef.current = snap.paths
+    setRunPaths(snap.paths)
+    plantsRef.current = snap.plants
+    setPlants(snap.plants)
+    paidTypes.current = new Set(snap.paid)
+    live.current.hearts = snap.hearts
+    setHearts(snap.hearts)
+    if (snap.upgradePlot) setReturnPlot(snap.upgradePlot as CityPlotId)
+    setPhase(snap.phase)
+  }, [easy])
+
   function boostPath(id: WatchAbility, path: TreePath, lampId?: CityPlotId | null) {
     if (!easy) return
     if (placeArmRef.current) {
@@ -1508,7 +1568,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       setGhost(null)
     }
     const beforeSparks = sparksRef.current
-    const next = applyPathStep(id, runPathsRef.current, sparksRef.current, path)
+    const next = applyPathStep(id, runPathsRef.current, sparksRef.current, path, bonusGateFor(id))
     setBoostNote(next.note)
     if (!next.ok) return
     runPathsRef.current = next.paths
@@ -2035,6 +2095,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       onBoostCardPointer={() => {
         if (easy && phase === 'boost') clearCardAt.current = performance.now()
       }}
+      playtestSteps={tapReadoutOn}
       onBoost={boostTool}
       onOpenTree={openPlantedTree}
     />
@@ -2145,6 +2206,9 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
               }
               pullSparks={upgradeAt ? pullSparksFor(upgradeAt) : 0}
               onCloseUpgrade={closeUpgrade}
+              heldLessons={progress.held}
+              playtestSteps={tapReadoutOn}
+              onOpenLessons={openLockInLessons}
               onBoardTap={closeUpgrade}
               onPlacePointer={onPlacePointer}
               ghost={ghost}

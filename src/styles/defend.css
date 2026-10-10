@@ -2574,8 +2574,8 @@ img.walker-face.easy-walker-face,
 
 .defend-path {
   display: grid;
-  grid-template-columns: 72px 1fr auto;
-  gap: 8px;
+  grid-template-columns: 1fr auto;
+  gap: 6px 8px;
   align-items: center;
   margin-top: 10px;
 }
@@ -2637,6 +2637,7 @@ img.walker-face.easy-walker-face,
 }
 
 .defend-path-pips {
+  grid-column: 1 / -1;
   display: flex;
   gap: 3px;
 }
@@ -2694,6 +2695,62 @@ button.defend-path-pip {
   font-weight: 800;
   line-height: 1.15;
   color: #ffd2c8;
+}
+
+.defend-lesson-cue {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 4px;
+  pointer-events: none;
+}
+
+.defend-lesson-cue .defend-path-lock {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.defend-lesson-lock {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  margin-top: 1px;
+  color: #ffcc33;
+}
+
+.defend-lesson-pillar {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #fff6e8;
+}
+
+.defend-lesson-open {
+  pointer-events: auto;
+  min-height: 28px;
+  padding: 2px 8px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  touch-action: manipulation;
+}
+
+.nw-night-back {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 10px 14px;
+  border: 0;
+  border-bottom: 2px solid #ffcc33;
+  background: #1a0840;
+  color: #fff6e8;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-align: left;
+  cursor: pointer;
 }
 
 .defend-tower-card:focus {

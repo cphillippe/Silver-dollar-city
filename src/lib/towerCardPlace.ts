@@ -7,6 +7,8 @@ export const TOWER_CARD_W = 176
 export const TOWER_CARD_H = 168
 /** Easy tree card is taller than the single Upgrade card. */
 export const TOWER_TREE_H = 236
+/** Same card when the Lock In cue and its button are open. */
+export const TOWER_TREE_LESSON_H = 320
 /** Slim Easy clear bar. The lamp card stays above it when the board has room. */
 export const CLEAR_BAR_RESERVE = 92
 const RAIL = 72

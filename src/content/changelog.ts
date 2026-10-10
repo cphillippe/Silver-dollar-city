@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.440',
+    title: 'Lock In opens a bonus lamp step',
+    when: '2026-10-10',
+    items: [
+      'Steps I, II, and III still cost sparks only. With no Lock In lessons, a lamp still stops at Far 1 and Strong 3.',
+      'Three lessons of the same kind open one bonus step on that lamp. Love lessons open the Love lamp. Logic, Reason, and Science work the same way.',
+      'A locked step says Learn in Lock In to unlock, shows a lock and the lamp name, and a button opens those lessons. Back to the night returns you.',
+    ],
+  },
+  {
     version: '1.4.439',
     title: 'Jump lamps sit on good ground',
     when: '2026-10-10',

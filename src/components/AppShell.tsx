@@ -3,6 +3,7 @@ import { dueCount, getNextGoal, insightScore, useProgress } from '../store/progr
 import { easyLockInExit, isEasy } from '../lib/easy'
 import { EASY_HOME, EASY_TOP } from '../lib/easyNav'
 import { Avatar } from './Avatar'
+import { readNightReturn } from '../nightWatch/nightReturn'
 import type { View } from '../types'
 
 interface AppShellProps {
@@ -107,6 +108,17 @@ export function AppShell({ view, onNavigate, children }: AppShellProps) {
             </button>
           </nav>
         </header>
+      ) : null}
+
+      {view.name !== 'defend' && view.name !== 'welcome' && readNightReturn() ? (
+        <button
+          type="button"
+          className="nw-night-back"
+          data-night-back="yes"
+          onClick={() => onNavigate({ name: 'defend' })}
+        >
+          Back to the night
+        </button>
       ) : null}
 
       <div className="app-body">{children}</div>
