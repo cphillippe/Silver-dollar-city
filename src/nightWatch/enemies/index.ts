@@ -1,5 +1,6 @@
 import {
   DEFEND_WAVE_SIZE,
+  EASY_WAVE_LIVE,
   easyHoldSpawn,
   easySpawnT,
   easyTapFit,
@@ -15,6 +16,7 @@ import {
 import type { WalkerKind } from '../../types.ts'
 import { walkerFaceSrc } from './faces.ts'
 import { nightParts } from '../parts/index.ts'
+import { boundNightWave } from '../maps/wave.ts'
 import { pathPoint, roadById } from '../path/data.ts'
 import type { NightPoint, NightRaider } from '../types.ts'
 import { enemyHit, enemyMaxHp } from './hp.ts'
@@ -80,7 +82,7 @@ export const nightEnemies: NightEnemiesModule = {
     (easy ? NIGHT_DARK_FACE : (KIND_FACES[id as WalkerKind] ?? NIGHT_DARK_FACE)),
   cast: raidForWave,
   spawnT: easySpawnT,
-  holdSpawn: easyHoldSpawn,
+  holdSpawn: (liveUnturned) => easyHoldSpawn(liveUnturned, boundNightWave()?.liveCap ?? EASY_WAVE_LIVE),
   spawnEvery: waveSpawnEvery,
   speed: waveSpeed,
   heavenSpeed,

@@ -48,7 +48,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
     onUpgradePath, onArmPathBuy, runPaths, roundIndex = -1, armorFrom = 7,
     heldLessons, playtestSteps = false, onOpenLessons,
     plateFill = false, onPlacePointer,
-    map, porchCandy, roadLabel,
+    map, porchCandy, roadLabel, mapFeatures, pops,
   } = props
   const place = plateFill ? boardFillPoint : mapBoardPoint
   const cardAbility = upgradeAt ? towerType[upgradeAt] : undefined
@@ -105,6 +105,8 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
         map={map}
         porchCandy={porchCandy}
         roadLabel={roadLabel}
+        mapFeatures={mapFeatures}
+        pops={pops}
       >
         <DefendNightActorsSvg
           easyTap={easyTap}

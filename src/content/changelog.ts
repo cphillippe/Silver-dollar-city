@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.443',
+    title: 'More walkers, and each maze has a trick',
+    when: '2026-10-10',
+    items: [
+      'The mazes send more walkers, up to five on the road at once. A pop pays half a spark, so the extra walkers do not buy the lamps twice as fast.',
+      'Far Hills has a hilltop that sees farther. Peppermint has candy-cane dashes. Caramel has sticky pools. Licorice hides faces in fog, and lamps still hit them. Blueberry berries pop into two little ones.',
+      'Peppermint and Caramel keep the early walker count. A pop there pays a little more than half a spark, so an ordinary good spot can reach round 8 and a careful spot still lasts about as long. Beat round 10 and a note names the map that just opened.',
+    ],
+  },
+  {
     version: '1.4.442',
     title: 'Five mazes after the cottages',
     when: '2026-10-10',

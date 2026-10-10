@@ -40,6 +40,12 @@ export interface NightRaider {
   struckAt?: number
   /** Maze road this walker stays on. Unset on A2, which has one road. */
   pathId?: string
+  /** Extra pace on top of the gait. Berry minis are a bit quicker than a plain walker. */
+  paceScale?: number
+  /** Face is inside fog. Taps skip it. Lamps still hit. */
+  fog?: boolean
+  /** Popped from a bigger walker. It does not pop again. */
+  mini?: boolean
 }
 
 export interface NightShot {
