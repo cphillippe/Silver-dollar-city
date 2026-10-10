@@ -1,5 +1,13 @@
 apply plugin: 'com.android.application'
 
+// versionName and versionCode follow package.json: major*100000 + minor*1000 + patch.
+def appVersion = new groovy.json.JsonSlurper().parse(rootProject.file("../package.json")).version as String
+def appVersionParts = appVersion.tokenize('.')
+if (appVersionParts.size() != 3) {
+    throw new GradleException("package.json version must be major.minor.patch")
+}
+def derivedCode = (appVersionParts[0] as int) * 100000 + (appVersionParts[1] as int) * 1000 + (appVersionParts[2] as int)
+
 android {
     namespace = "city.silver.unending"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -7,8 +15,8 @@ android {
         applicationId "city.silver.unending"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 114
-        versionName "1.4.113"
+        versionCode derivedCode
+        versionName appVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

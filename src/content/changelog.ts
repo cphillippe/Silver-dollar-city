@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.433',
+    title: 'The round clear stays out of the city',
+    when: '2026-10-10',
+    items: [
+      'After a round, a short bar has Continue, New lamp, and Spend. Spend opens the skills. A question mark holds the long note.',
+      'A lamp card opens by that lamp and does not sit on the bar. The city stays visible. Continue still starts the next round.',
+      'The phone app version moves with the town. An older install can see Update available. A town change by itself does not.',
+    ],
+  },
+  {
     version: '1.4.432',
     title: 'A finished line brings you Home',
     when: '2026-10-10',

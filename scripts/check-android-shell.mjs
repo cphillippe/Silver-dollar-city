@@ -4,7 +4,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { APP_VERSION } from '../src/config/app.ts'
 import { CHANGELOG, latestChange } from '../src/content/changelog.ts'
-import { PAGES_APP_URL, SHELL_APK_URL, shellApkOffer } from '../src/config/shell.ts'
+import { PAGES_APP_URL, SHELL_APK_URL, shellApkOffer, shellVersionCode } from '../src/config/shell.ts'
 import { PAGES_APP_URL as PATCH_URL, withLivePagesShell } from './android-live-shell.mjs'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -39,6 +39,24 @@ assert.equal(
   shellApkOffer({ inShell: true, installed: 114, remote: 1.5, dismissed: 0 }),
   null,
 )
+assert.equal(shellVersionCode('1.4.433'), 104433)
+assert.equal(shellVersionCode('1.4.113'), 104113)
+assert.ok(shellVersionCode(APP_VERSION) < 1_000_000, 'the shell code stays inside the update card')
+assert.equal(
+  shellApkOffer({ inShell: true, installed: 114, remote: 104433, dismissed: 0 }),
+  SHELL_APK_URL,
+  'a real shell bump offers the apk to an install still on 114',
+)
+assert.equal(
+  shellApkOffer({ inShell: true, installed: 104433, remote: 104433, dismissed: 0 }),
+  null,
+  'a town update with the same shell code stays quiet',
+)
+assert.equal(
+  shellApkOffer({ inShell: false, installed: 114, remote: 104433, dismissed: 0 }),
+  null,
+  'the website does not offer the apk',
+)
 
 const patched = withLivePagesShell({
   appId: 'city.silver.unending',
@@ -61,11 +79,15 @@ assert.doesNotMatch(cap, /server\s*:\s*\{/)
 assert.doesNotMatch(cap, /url:\s*['"]http/)
 
 const gradle = read('android/app/build.gradle')
-assert.match(gradle, /versionName "1\.4\.113"/)
-const versionCode = Number(gradle.match(/versionCode\s+(\d+)/)?.[1])
+assert.match(gradle, /versionName appVersion/)
+assert.match(gradle, /versionCode derivedCode/)
+assert.match(gradle, /package\.json/)
+assert.doesNotMatch(gradle, /versionName "1\.4\.113"/)
+assert.doesNotMatch(gradle, /versionCode 114\b/)
 const shell = JSON.parse(read('public/shell.json'))
-assert.equal(shell.versionCode, versionCode)
-assert.ok(versionCode >= 114)
+assert.equal(shell.versionCode, shellVersionCode(APP_VERSION))
+assert.equal(shell.versionCode, 104433)
+assert.ok(shell.versionCode > 114, 'the published shell is newer than installs stuck at 114')
 assert.equal(Object.keys(shell).length, 1, 'shell.json carries versionCode only')
 
 assert.match(gradle, /ANDROID_KEYSTORE_PATH/)
@@ -173,7 +195,7 @@ assert.match(readme, /ANDROID_KEYSTORE_B64/)
 assert.match(readme, /environment named `release`/)
 assert.doesNotMatch(readme, /ANDROID_KEYSTORE_BASE64|silver-city-debug\.keystore/)
 
-assert.equal(APP_VERSION, '1.4.432')
+assert.equal(APP_VERSION, '1.4.433')
 assert.match(read('android/app/src/main/res/values/ic_launcher_background.xml'), /#2A1650/)
 assert.match(read('index.html'), /favicon\.png/)
 assert.match(read('index.html'), /apple-touch-icon\.png/)

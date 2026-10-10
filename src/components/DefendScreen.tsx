@@ -203,6 +203,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const [boostNote, setBoostNote] = useState<string | null>(null)
   const [bossBonus, setBossBonus] = useState(0)
   const [upgradeAt, setUpgradeAt] = useState<CityPlotId | null>(null)
+  const [spendOpen, setSpendOpen] = useState(false)
+  const [helpOpen, setHelpOpen] = useState(false)
   const upgradeAtRef = useRef<CityPlotId | null>(null)
   const upgradeTapRef = useRef<{ id: CityPlotId; at: number }>({ id: 'porch', at: -1e9 })
   /** Pointer is down on a path pip. Begin and Continue must not take that gesture. */
@@ -684,6 +686,12 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     setStillOn(false)
   }, [phase])
 
+  useEffect(() => {
+    if (phase === 'boost') return
+    setSpendOpen(false)
+    setHelpOpen(false)
+  }, [phase])
+
   useEffect(() => () => newLampStop.current?.(), [])
 
   useLayoutEffect(() => {
@@ -721,6 +729,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       return
     }
     if (phase === 'boost') clearCardAt.current = performance.now()
+    setSpendOpen(false)
+    setHelpOpen(false)
     placeArmRef.current = id
     setPlaceArm(id)
     setAbility(id)
@@ -981,6 +991,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   }
 
   function openUpgrade(id: CityPlotId) {
+    setSpendOpen(false)
+    setHelpOpen(false)
     if (placeArmRef.current) clearPlaceArm()
     const now = performance.now()
     const prev = upgradeTapRef.current
@@ -1689,6 +1701,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const boosting = phase === 'boost' && !won
 
   const showPace = easy && (phase === 'wave' || phase === 'boost') && !won
+  const clearSpendOpen = easy && boosting && spendOpen && !upgradeAt && !placeArm
+  const clearHelpOpen = easy && boosting && helpOpen && !upgradeAt && !placeArm
 
   const hud = (
     <p className="defend-hud" aria-live="polite">
@@ -1752,7 +1766,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           : HARD_PLANT_TIP
         : phase === 'boost' && !won
           ? easy
-            ? EASY.nightBoost
+            ? null
             : 'Tap a planted lamp or a tool on the right to spend sparks.'
           : null
 
@@ -1819,7 +1833,9 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         </div>
       ) : null}
       {phase === 'boost' && !won ? (
-        <div className="defend-boost">
+        <div
+          className={`defend-boost${easy ? ' is-clear-bar' : ''}${clearSpendOpen ? ' is-spend-open' : ''}${clearHelpOpen ? ' is-help-open' : ''}`}
+        >
           <p className="defend-boost-status" role="status">
             {easy ? `Round ${waveIndex + 1} clear` : `Wave ${waveIndex + 1} clear`}
             {easy && bossBonus > 0 ? (
@@ -1831,34 +1847,71 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
             {boostNote ? ` · ${boostNote}` : ''}
           </p>
           {easy ? (
-            <button
-              type="button"
-              className="btn defend-new-lamp"
-              data-lamp-cost={EASY_LAMP_COST}
-              data-new-lamp="yes"
-              aria-label={`New lamp, ${EASY_LAMP_COST} sparks`}
-              aria-pressed={placeArm ? true : undefined}
-              onPointerDown={trackNewLamp}
-              onClick={() => {
-                if (swallowNewLampClick.current) {
-                  swallowNewLampClick.current = false
-                  return
-                }
-                armUnplantedLamp()
-              }}
-            >
-              {`New lamp ${EASY_LAMP_COST}✦`}
-            </button>
+            <div className="defend-clear-row">
+              <button type="button" className="btn primary defend-continue" onClick={continueFromBoost}>
+                Continue
+              </button>
+              <button
+                type="button"
+                className="btn defend-new-lamp"
+                data-lamp-cost={EASY_LAMP_COST}
+                data-new-lamp="yes"
+                aria-label={`New lamp, ${EASY_LAMP_COST} sparks`}
+                aria-pressed={placeArm ? true : undefined}
+                onPointerDown={trackNewLamp}
+                onClick={() => {
+                  if (swallowNewLampClick.current) {
+                    swallowNewLampClick.current = false
+                    return
+                  }
+                  armUnplantedLamp()
+                }}
+              >
+                {`New lamp ${EASY_LAMP_COST}✦`}
+              </button>
+              <button
+                type="button"
+                className="btn defend-clear-spend"
+                aria-expanded={clearSpendOpen}
+                onClick={() => {
+                  setHelpOpen(false)
+                  const hadCard = Boolean(upgradeAtRef.current)
+                  if (hadCard) closeUpgrade(true)
+                  setSpendOpen((open) => (hadCard ? true : !open))
+                }}
+              >
+                {clearSpendOpen ? 'Hide' : 'Spend'}
+              </button>
+              <button
+                type="button"
+                className="btn defend-clear-help"
+                aria-expanded={clearHelpOpen}
+                aria-label="How to spend sparks"
+                onClick={() => {
+                  setSpendOpen(false)
+                  const hadCard = Boolean(upgradeAtRef.current)
+                  if (hadCard) closeUpgrade(true)
+                  setHelpOpen((open) => (hadCard ? true : !open))
+                }}
+              >
+                ?
+              </button>
+            </div>
           ) : null}
-          <div className="defend-spark-choices" role="group" aria-labelledby="defend-spark-pick">
-            <p id="defend-spark-pick" className="defend-spark-choices-label">
-              {easy ? EASY.nightBoostPick : 'Skills'}
-            </p>
-            {skillTray}
-          </div>
-          <button type="button" className="btn primary defend-continue" onClick={continueFromBoost}>
-            Continue
-          </button>
+          {!easy || clearSpendOpen ? (
+            <div className="defend-spark-choices" role="group" aria-labelledby="defend-spark-pick">
+              <p id="defend-spark-pick" className="defend-spark-choices-label">
+                {easy ? EASY.nightBoostPick : 'Skills'}
+              </p>
+              {skillTray}
+            </div>
+          ) : null}
+          {clearHelpOpen ? <p className="defend-tip">{EASY.nightBoost}</p> : null}
+          {easy ? null : (
+            <button type="button" className="btn primary defend-continue" onClick={continueFromBoost}>
+              Continue
+            </button>
+          )}
         </div>
       ) : null}
       {(phase === 'plant' || planted.length < 1) &&
@@ -1894,9 +1947,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         </p>
       ) : null}
       {tip ? <p className="defend-tip">{tip}</p> : null}
-      <p className="defend-angel-help" aria-hidden="true">
-        {ANGEL_STICKER}
-      </p>
+      {easy && boosting ? null : (
+        <p className="defend-angel-help" aria-hidden="true">
+          {ANGEL_STICKER}
+        </p>
+      )}
     </>
   )
 
