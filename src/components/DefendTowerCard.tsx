@@ -7,17 +7,21 @@ import {
   TOWER_CARD_H,
   TOWER_CARD_W,
   TOWER_TREE_H,
+  TOWER_TREE_LESSON_H,
   type TowerCardPoint,
 } from '../lib/towerCardPlace'
 import { boostCost, combatTier, TIER_MARK, TOOL_TIER_MAX } from '../lib/watchTools'
 import {
   canTake,
+  LESSON_LOCK,
   PATH_LABEL,
   PATH_LINE,
   stepLocked,
+  TREE_BONUS_COST,
   TREE_LOCK,
   TREE_PATHS,
   TREE_STEP_COST,
+  type BonusGate,
   type LampPaths,
   type TreePath,
 } from '../nightWatch/upgradeTree'
@@ -71,6 +75,10 @@ export function DefendTowerCard({
   easy = false,
   /** Pixels at the bottom of the board the card should stay above. */
   reserveBottom = 0,
+  /** Same-pillar lessons, and the playtest override. Steps I–III ignore this. */
+  gate,
+  /** Opens this lamp's Lock In lessons and keeps the night. */
+  onOpenLessons,
 }: {
   plotId: CityPlotId
   ability: string
@@ -99,6 +107,8 @@ export function DefendTowerCard({
   roadNote?: string
   easy?: boolean
   reserveBottom?: number
+  gate?: BonusGate
+  onOpenLessons?: () => void
 }) {
   const cardRef = useRef<HTMLDivElement>(null)
   const [pullAsk, setPullAsk] = useState(false)
@@ -112,7 +122,12 @@ export function DefendTowerCard({
   const plotTitle =
     CITY_PLOTS.find((plot) => plot.id === plotId)?.title ??
     (isFreeSpot(plotId) ? 'open ground' : plotId)
-  const cardH = easy && paths ? TOWER_TREE_H : TOWER_CARD_H
+  const lessonCue = Boolean(
+    easy &&
+      paths &&
+      TREE_PATHS.some((path) => canTake(paths, path, gate).gate === 'lesson'),
+  )
+  const cardH = easy && paths ? (lessonCue ? TOWER_TREE_LESSON_H : TOWER_TREE_H) : TOWER_CARD_H
   const placed = placeTowerCard(point, board, clearOf, cameraScale, reserveBottom, cardH)
   const levelLine = maxed ? TIER_MARK[tier] : `${TIER_MARK[next]} · ${cost}✦`
   const bursting = Boolean(levelBurst && levelBurst.to > levelBurst.from)
@@ -200,10 +215,18 @@ export function DefendTowerCard({
         <p className="defend-tower-tool">{label}</p>
         {TREE_PATHS.map((path) => {
           const rank = paths[path]
-          const buy = canTake(paths, path)
+          const buy = canTake(paths, path, gate)
           const broke = buy.ok && sparks < buy.cost
+          const lessonLocked = buy.gate === 'lesson'
+          const pipCosts = [...TREE_STEP_COST, TREE_BONUS_COST]
           return (
-            <div key={path} className="defend-path" data-path={path} data-rank={rank}>
+            <div
+              key={path}
+              className="defend-path"
+              data-path={path}
+              data-rank={rank}
+              data-lesson-lock={lessonLocked ? 'yes' : undefined}
+            >
               <p className="defend-path-name">
                 <span className="defend-path-title">
                   <PathMark path={path} />
@@ -212,16 +235,16 @@ export function DefendTowerCard({
                 <span className="defend-path-line">{PATH_LINE[path]}</span>
               </p>
               <div className="defend-path-pips">
-                {TREE_STEP_COST.map((stepCost, index) => {
+                {pipCosts.map((stepCost, index) => {
                   const step = index + 1
                   const filled = rank >= step
-                  const locked = stepLocked(paths, path, step)
+                  const locked = stepLocked(paths, path, step) || (lessonLocked && step === rank + 1)
                   const next = buy.ok && step === rank + 1
                   const className = `defend-path-pip${filled ? ' is-on' : ''}${locked ? ' is-locked' : ''}${next ? ' is-buy' : ''}`
                   if (next) {
                     return (
                       <button
-                        key={stepCost}
+                        key={step}
                         type="button"
                         className={className}
                         disabled={broke}
@@ -248,7 +271,7 @@ export function DefendTowerCard({
                   }
                   return (
                     <span
-                      key={stepCost}
+                      key={step}
                       className={className}
                       data-step={step}
                       data-cost={stepCost}
@@ -281,6 +304,33 @@ export function DefendTowerCard({
                 >
                   {broke ? `Need ${buy.cost}` : `${buy.cost}✦`}
                 </button>
+              ) : lessonLocked ? (
+                <div className="defend-lesson-cue" data-lesson-cue={ability} data-pillar={label}>
+                  <p className="defend-path-lock" data-path-lock={path}>
+                    <svg className="defend-lesson-lock" viewBox="0 0 16 16" aria-hidden="true">
+                      <rect x="3.2" y="7" width="9.6" height="6.4" rx="1.4" fill="currentColor" />
+                      <path
+                        d="M5.2 7V5.1a2.8 2.8 0 0 1 5.6 0V7"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.6"
+                      />
+                    </svg>
+                    {LESSON_LOCK}
+                  </p>
+                  <p className="defend-lesson-pillar">{label}</p>
+                  <button
+                    type="button"
+                    className="btn defend-lesson-open"
+                    data-lesson-open={ability}
+                    onClick={(event) => {
+                      event.stopPropagation()
+                      onOpenLessons?.()
+                    }}
+                  >
+                    {label} lessons
+                  </button>
+                </div>
               ) : (
                 <p className="defend-path-lock" data-path-lock={path}>
                   {buy.reason}

@@ -9,7 +9,15 @@ import {
 } from '../lib/defend.ts'
 import { DEFEND_ANCHOR, pathClearance, pathPoint } from './path/data.ts'
 import { easyRound as liveRound, type EasyRound } from './rounds.ts'
-import { easyShotReach, FAR1_ROAD_REACH, lampStrike, type LampPaths } from './upgradeTree.ts'
+import {
+  easyShotReach,
+  FAR1_ROAD_REACH,
+  lampStrike,
+  TREE_BONUS_COST,
+  TREE_CROSS_MAX,
+  TREE_STEP_MAX,
+  type LampPaths,
+} from './upgradeTree.ts'
 import { FREE_LAMP_RANGE_BONUS, lampReach } from './towers/index.ts'
 import {
   BOSS_PACE,
@@ -537,6 +545,68 @@ export interface BossRow {
   /** Damage the same build lands on the current bar, and whether the boss dies. */
   damage: number
   boss: PaceLive['boss']
+}
+
+export interface LockInBuyRow {
+  /** 1-based round about to start. */
+  round: number
+  /** Sparks left after the bonus steps bought before this wave. */
+  sparks: number
+  /** How many lamps already took the bonus step. */
+  bought: number
+  lamps: LampPaths[]
+}
+
+/**
+ * A spender who has Lock In lessons on every pillar.
+ * Steps I–III stay the natural plan. The bonus step is bought on Strong
+ * as soon as the bank can pay, which is the pile after Far 1 / Strong 3.
+ */
+export function lockInBuyTable(): LockInBuyRow[] {
+  const bought = [false, false, false, false]
+  let spent = 0
+  const rows: LockInBuyRow[] = []
+  for (let index = 0; index < 25; index += 1) {
+    const load = easyJumpLoad(index)
+    let sparks = load.sparks - spent
+    const lamps: LampPaths[] = []
+    for (let slot = 0; slot < 4; slot += 1) {
+      const lamp = load.lamps[slot] ?? { far: 0, strong: 0 }
+      lamps.push({ far: lamp.far, strong: lamp.strong + (bought[slot] ? 1 : 0) })
+    }
+    for (let slot = 0; slot < 4; slot += 1) {
+      const lamp = load.lamps[slot]
+      if (!lamp || bought[slot]) continue
+      if (lamp.strong < TREE_STEP_MAX || lamp.far > TREE_CROSS_MAX) continue
+      if (sparks < TREE_BONUS_COST) break
+      sparks -= TREE_BONUS_COST
+      spent += TREE_BONUS_COST
+      bought[slot] = true
+      lamps[slot] = { far: lamp.far, strong: lamp.strong + 1 }
+    }
+    rows.push({ round: index + 1, sparks, bought: bought.filter(Boolean).length, lamps })
+  }
+  return rows
+}
+
+/** Hearts carry. Bonus steps are in the kit before the wave they were bought for. */
+export function paceEasyLockCampaign(): Campaign {
+  let hearts = 3
+  const rows: Campaign['rows'] = []
+  const plan = lockInBuyTable()
+  for (let index = 0; index < 25; index += 1) {
+    const round = paceEasyLive(index, plan[index].lamps, hearts, false, LIVE_TAP_EVERY, 'road')
+    rows.push({
+      round: index + 1,
+      result: round.result,
+      taps: round.taps,
+      hearts: round.hearts,
+      boss: round.boss,
+    })
+    if (round.result !== 'clear') return { dead: index + 1, rows }
+    hearts = easyClearHeart(round.hearts)
+  }
+  return { dead: null, rows }
 }
 
 /** R15 / R20 / R25. Ceiling build, three hearts, one round. */

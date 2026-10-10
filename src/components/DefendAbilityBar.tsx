@@ -12,7 +12,8 @@ import {
   TOOL_TIER_MAX,
   WATCH_TOOLS,
 } from '../lib/watchTools'
-import { cheapestOpen, pathBadge, pathsOf, type LampPaths } from '../nightWatch/upgradeTree'
+import { samePillarLessons } from '../nightWatch/lampPillar'
+import { cheapestOpen, lessonWaiting, pathBadge, pathsOf, type LampPaths } from '../nightWatch/upgradeTree'
 import { AbilityMark } from './GemMark'
 import type { ProgressState } from '../types'
 import type { WatchAbility } from '../lib/defend'
@@ -54,6 +55,8 @@ export interface DefendAbilityBarProps {
   onBoost: (id: WatchAbility) => void
   /** Easy: a planted card opens the path panel instead of spending immediately. */
   onOpenTree?: (id: WatchAbility) => void
+  /** playtest=1 or the debug freeze. The bonus step is not a lock. */
+  playtestSteps?: boolean
 }
 
 export function DefendAbilityBar({
@@ -79,6 +82,7 @@ export function DefendAbilityBar({
   onArmPlace,
   onBoost,
   onOpenTree,
+  playtestSteps = false,
 }: DefendAbilityBarProps) {
   const swallowClick = useRef(false)
   const stopListen = useRef<(() => void) | null>(null)
@@ -169,11 +173,15 @@ export function DefendAbilityBar({
               const heldLine = learningForTool(progress, tool.id)
               const tier = combatTier(tool.id, runTier)
               const tree = easy ? pathsOf(runPaths, tool.id) : null
-              const openStep = tree ? cheapestOpen(tree) : null
+              const gate = tree
+                ? { lessons: samePillarLessons(tool.id, progress.held), playtest: playtestSteps }
+                : undefined
+              const openStep = tree ? cheapestOpen(tree, gate) : null
+              const lessonWait = Boolean(tree && lessonWaiting(tree, gate))
               const stepCost = tree ? (openStep?.cost ?? 0) : easy ? easyTierCost(tier) : boostCost(tier)
               const brokeWord = stepCost > 1 ? `Need ${stepCost} sparks` : 'Need a spark'
               const shopNew = paidPlace && !placed
-              const treeFull = Boolean(tree && !openStep)
+              const treeFull = Boolean(tree && !openStep && !lessonWait)
               const spendDry =
                 boosting &&
                 open &&
@@ -264,7 +272,9 @@ export function DefendAbilityBar({
                     <span className="defend-ability-boost" aria-hidden>
                       {shopNew
                         ? `${EASY_LAMP_COST}✦`
-                        : treeFull
+                        : lessonWait
+                          ? 'Lock'
+                          : treeFull
                           ? 'Full'
                           : tier >= TOOL_TIER_MAX && !tree
                             ? 'Max'
