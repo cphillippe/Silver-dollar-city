@@ -10,6 +10,7 @@ import {
   WATCH_TITLE,
 } from '../content/defend'
 import { EASY, isEasy, loveHowTo } from '../lib/easy'
+import { walkerRoadId } from '../nightWatch/path/data'
 import { roundMark, easyRound } from '../nightWatch/rounds'
 import { pickWalkerFace } from '../nightWatch/enemies/faces'
 import {
@@ -78,8 +79,10 @@ import {
 import { FarHillsUnlock } from './FarHillsUnlock'
 import { NightMapPicker } from './NightMapPicker'
 import { applyNightMap } from '../nightWatch/maps/bind'
-import { FAR_HILLS_NIGHT_MAP, FAR_HILLS_PLATE } from '../nightWatch/maps/farHillsMap'
+import { mapIsOpen } from '../nightWatch/maps/chain'
+import { playableNightMap } from '../nightWatch/maps/mazeMaps'
 import { resolveNightMap, type NightMapId } from '../nightWatch/maps/resolve'
+import { nightTune, roundForTune } from '../nightWatch/walkers'
 import {
   clearPanelFolded,
   clientToMap,
@@ -178,7 +181,7 @@ function usePhoneSe() {
 }
 
 export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
-  const { progress, recordNight, markMet, markMiss, chooseNightMap } = useProgress()
+  const { progress, recordNight, markMet, markMiss, chooseNightMap, recordMazeBeat } = useProgress()
   const easy = isEasy(progress)
   const phoneSe = usePhoneSe()
   const plateFill = easy && phoneSe
@@ -259,6 +262,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const sparksRef = useRef(runSparks)
   sparksRef.current = runSparks
   const hpMulRef = useRef(1)
+  const tuneRef = useRef(nightTune())
+  const mapIdRef = useRef<NightMapId>('a2')
+  const mazeBeatRef = useRef(recordMazeBeat)
+  mazeBeatRef.current = recordMazeBeat
   const paidTypes = useRef<Set<string>>(new Set())
   const prevSparks = useRef(runSparks)
   const [sparkPop, setSparkPop] = useState(false)
@@ -392,12 +399,16 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const mapId = resolveNightMap({
     easy,
     unlocked: progress.defense.farHills === true,
+    mazeBeat: progress.defense.mazeBeat,
     saved: progress.defense.nightMap,
     playtest: nightPlaytest,
     query: nightWatchMapQuery(nightSearch, nightPlaytest),
     session: sessionMap,
   })
-  hpMulRef.current = mapId === 'far-hills' ? FAR_HILLS_NIGHT_MAP.hpMul : 1
+  const playingMap = playableNightMap(mapId)
+  mapIdRef.current = mapId
+  tuneRef.current = nightTune(playingMap?.rules)
+  hpMulRef.current = playingMap?.hpMul ?? 1
 
   useLayoutEffect(() => {
     applyNightMap(mapId)
@@ -427,8 +438,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   useEffect(() => {
     if (!juiceDone || saved.current || !brief) return
     saved.current = true
-    recordNight(today, easy)
-  }, [juiceDone, brief, recordNight, today, easy])
+    recordNight(today, easy && mapId === 'a2')
+  }, [juiceDone, brief, recordNight, today, easy, mapId])
 
   const roundJumpOnce = useRef(false)
   useEffect(() => {
@@ -625,7 +636,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
         spawnAt = 0
         const id = live.current.spawned
         const cast = nightEnemies.cast(cleared, id, wave, easy)
-        const round = easyRound(wave)
+        const round = roundForTune(easyRound(wave), wave, tuneRef.current)
         const boss = easy && easyBossRound(wave) && id === round.count
         const gait = easy && !boss ? gaitForSlot(round, id) : undefined
         const hp = boss
@@ -637,6 +648,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
                   tune.hpBonus + easyLatePush(wave),
                   gait,
                   wave,
+                  tuneRef.current,
                 ),
                 hpMulRef.current,
               )
@@ -677,6 +689,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
           gait,
           boss,
           spark: walkerSpark(gait),
+          pathId: easy ? walkerRoadId(id) : undefined,
         })
         live.current.spawned += 1
       }
@@ -746,6 +759,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
         return
       }
       if (fate === 'clear') {
+        if (easy && wave === 9) mazeBeatRef.current(mapIdRef.current)
         if (easy) grantClearHeart()
         grantBossSparks()
         live.current.playing = false
@@ -1226,6 +1240,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
         manual,
         roundIndex: waveIndexRef.current,
         lampDamage: tier,
+        armorFrom: tuneRef.current.armorFrom,
       })
       const struck = nightEnemies.hit(best, sized.damage)
       const tapDmg = sized.damage
@@ -1387,7 +1402,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     if (phase !== 'wave' || won) return
     const raider = live.current.raiders.find((item) => item.id === raiderId && !item.turned)
     if (!raider) return
-    if (easyPointerTapGate(easy, raider, live.current.raiders, waveIndexRef.current) === 'miss') {
+    if (easyPointerTapGate(easy, raider, live.current.raiders, waveIndexRef.current, tuneRef.current.armorFrom) === 'miss') {
       noteFaceTap(false, 0)
       showMiss()
       return
@@ -1419,6 +1434,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
               manual: true,
               roundIndex: waveIndexRef.current,
               lampDamage: 0,
+              armorFrom: tuneRef.current.armorFrom,
             }).damage
           : 0
       if (lamp && fire(lamp, raiderId, easy)) {
@@ -1795,7 +1811,9 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
 
   const after = juiceDone && won
   const easyTap = easyTapMode(easy, phase, won)
-  const tapTarget = easyTap ? nightEnemies.cueTarget(raiders, waveIndex) : undefined
+  const tapTarget = easyTap
+    ? nightEnemies.cueTarget(raiders, waveIndex, tuneRef.current.armorFrom)
+    : undefined
   const tapPos =
     tapTarget && boardBox.w > 0
       ? boardPoint(raiderAt(tapTarget).x, raiderAt(tapTarget).y)
@@ -2067,10 +2085,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       {easy && phase === 'plant' && planted.length < 1 && !won ? (
         <NightMapPicker
           mapId={mapId}
-          hillsOpen={progress.defense.farHills === true || nightPlaytest}
+          isOpen={(id) => nightPlaytest || mapIsOpen(id, progress.defense)}
           onPick={(id) => {
             setSessionMap(id)
-            if (progress.defense.farHills) chooseNightMap(id)
+            if (mapIsOpen(id, progress.defense)) chooseNightMap(id)
           }}
         />
       ) : null}
@@ -2152,7 +2170,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       data-night-map={mapId}
     >
       {after ? (
-        easy ? (
+        easy && mapId === 'a2' ? (
           <FarHillsUnlock
             held={`The night held after round ${rounds}.`}
             home={EASY.home}
@@ -2162,6 +2180,14 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
               onFreshNight?.()
             }}
           />
+        ) : easy ? (
+          <section className="nw-far-hills" aria-label="Night held">
+            <h1 className="nw-far-hills-title">Night held</h1>
+            <p className="nw-far-hills-held">{`The night held after round ${rounds}.`}</p>
+            <button type="button" className="btn primary xl nw-far-hills-home" onClick={() => onNavigate({ name: 'hub' })}>
+              {EASY.home}
+            </button>
+          </section>
         ) : (
           <>
             <article className="stored-line" aria-label="Love tip">
@@ -2262,13 +2288,14 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
               onPlacePointer={onPlacePointer}
               ghost={ghost}
               plateFill={plateFill}
-              map={mapId === 'far-hills' ? FAR_HILLS_PLATE : undefined}
-              porchCandy={mapId !== 'far-hills'}
+              map={playingMap?.plate}
+              porchCandy={!playingMap}
               roadLabel={
-                mapId === 'far-hills'
-                  ? 'Night road through the Far Hills'
+                playingMap
+                  ? `Night road through ${playingMap.name}`
                   : 'Night road through Silver City'
               }
+              armorFrom={tuneRef.current.armorFrom}
             />
             {phase === 'wave' ? (
               <div className="nw-wave-overlay">

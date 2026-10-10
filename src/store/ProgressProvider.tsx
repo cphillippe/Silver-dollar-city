@@ -242,12 +242,23 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     return unlocked
   }, [write])
 
-  const chooseNightMap = useCallback((map: 'a2' | 'far-hills') => {
+  const chooseNightMap = useCallback((map: 'a2' | 'far-hills' | 'map03' | 'map04' | 'map05' | 'map06') => {
     setProgress((current) => {
       const defense = { ...current.defense }
-      if (map === 'far-hills') defense.nightMap = 'far-hills'
-      else delete defense.nightMap
+      if (map === 'a2') delete defense.nightMap
+      else defense.nightMap = map
       return write({ ...current, defense })
+    })
+  }, [write])
+
+  const recordMazeBeat = useCallback((map: 'a2' | 'far-hills' | 'map03' | 'map04' | 'map05' | 'map06') => {
+    setProgress((current) => {
+      const beat = current.defense.mazeBeat ?? []
+      if (beat.includes(map)) return current
+      return write({
+        ...current,
+        defense: { ...current.defense, mazeBeat: [...beat, map] },
+      })
     })
   }, [write])
 
@@ -423,6 +434,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       snoozeReviews,
       markMiss,
       recordNight,
+      recordMazeBeat,
       chooseNightMap,
       markMet,
       setTheme,
@@ -443,6 +455,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       progress,
       recordHeld,
       recordNight,
+      recordMazeBeat,
       chooseNightMap,
       recordReview,
       recordLessonHold,

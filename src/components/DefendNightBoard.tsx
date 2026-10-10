@@ -45,7 +45,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
     flash, togglePad, fire, fireAtRaider, shots, easy, blasts, tapTarget, tapPos, tapJuice,
     walkerCalls, loreLine, runTier, boosting, onBoostTower,     upgradeAt, onOpenUpgrade, upFlashId, ghost = null,
     upgradePoint, boardBox, runSparks = 0, levelBurst = null, onPullLamp, pullSparks = 0, onCloseUpgrade,
-    onUpgradePath, onArmPathBuy, runPaths, roundIndex = -1,
+    onUpgradePath, onArmPathBuy, runPaths, roundIndex = -1, armorFrom = 7,
     heldLessons, playtestSteps = false, onOpenLessons,
     plateFill = false, onPlacePointer,
     map, porchCandy, roadLabel,
@@ -133,6 +133,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
           upFlashId={upFlashId}
           ghost={ghost}
           roundIndex={roundIndex}
+          armorFrom={armorFrom}
         />
       </DefendNightSky>
       {showCard ? (

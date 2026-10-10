@@ -127,6 +127,7 @@ import {
   easyWalkerHp,
   EASY_LATE_BULK,
   EASY_TOUGH_WINDOW,
+  MAZE_V1_TUNE,
   gaitPlan,
   roundSparkPay,
   walkerHp,
@@ -1494,7 +1495,14 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.441')
+assert.equal(APP_VERSION, '1.4.442')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.442'), '1.4.442 changelog row')
+assert.match(latestChange('1.4.442').title, /mazes/i)
+assert.doesNotMatch(
+  latestChange('1.4.442').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.442 changelog avoids GitHub close keywords',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.441'), '1.4.441 changelog row')
 assert.match(latestChange('1.4.441').title, /Far Hills/i)
 assert.doesNotMatch(
@@ -6029,7 +6037,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   const screen435 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
   const actors435 = readFileSync(new URL('../src/components/DefendNightActors.tsx', import.meta.url), 'utf8')
   const css435 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
-  assert.match(screen435, /easyPointerTapGate\(easy, raider, live\.current\.raiders, waveIndexRef\.current\)/)
+  assert.match(screen435, /easyPointerTapGate\(easy, raider, live\.current\.raiders, waveIndexRef\.current(?:, tuneRef\.current\.armorFrom)?\)/)
   assert.match(
     screen435,
     /easy\s*\?\s*easyLiveSpawnT\(tune\.speedScale \* \(boss \? BOSS_PACE : walkerPace\(gait\)\)\)/,
@@ -6092,7 +6100,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(screen436, /data-heart-cap=\{DEFEND_HEARTS\}/)
   assert.match(board436, /className="defend-clear-lamp"/, '1.4.436 a planted lamp opens the tree at a clear')
   assert.match(bar436, /spendDry && !\(easy && boosting && placed\)/, '1.4.436 a dry rail card still opens the tree')
-  assert.match(actors436, /easyTapSoaked\(roundIndex, raider\)/)
+  assert.match(actors436, /easyTapSoaked\(roundIndex, raider(?:, armorFrom)?\)/)
   assert.match(css436, /\.defend-clear-lamp \{[^}]*z-index:\s*7/)
   assert.match(css436, /\.nw-skill-toast \{[^}]*pointer-events:\s*none/)
   assert.match(css436, /\.defend-tower-card \{[^}]*z-index:\s*9/)
@@ -6428,6 +6436,90 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   )
 }
 
+// Night Watch 1.4.442: maze maps 2–6. A2 rules and the round 6 table stay put.
+{
+  assert.equal(EASY_ROUNDS[5].tough, 1, '1.4.442 round 6 still lists one tough on A2')
+  assert.equal(easyTapArmored(5, 'tough', false), false, '1.4.442 A2 round 6 toughs still take taps')
+  assert.equal(easyTapArmored(4, 'tough', false), false, '1.4.442 round 5 aim still matters')
+  assert.equal(easyTapArmored(5, 'tough', false, MAZE_V1_TUNE.armorFrom), true)
+  assert.equal(easyWalkerHp(2, 0, 'tough', 5), walkerHp(2, 0, 'tough'))
+  assert.equal(easyWalkerHp(2, 0, 'tough', 5, MAZE_V1_TUNE), EASY_TOUGH_WINDOW)
+  assert.equal(easyWalkerHp(2, 0, 'plain', 10, MAZE_V1_TUNE), walkerHp(2, 0, 'plain') + MAZE_V1_TUNE.bulk)
+  assert.equal(easyWalkerHp(2, 0, 'plain', 15), walkerHp(2, 0, 'plain') + EASY_LATE_BULK)
+  const orders = {
+    map02: [[0, 1, 2, 3], [1, 4, 0, 5], [0, 3, 4, 1], [5, 3, 1, 0], [3, 0, 5, 1], [4, 0, 3, 1], [5, 1, 0, 4], [0, 5, 4, 2], [4, 0, 3, 2], [1, 3, 0, 2], [1, 3, 4, 2], [1, 2, 5, 4]],
+    map03: [[0, 1, 2, 3], [2, 4, 0, 7], [1, 3, 6, 5], [6, 7, 1, 0], [7, 0, 3, 5], [0, 5, 3, 2], [3, 4, 0, 2], [0, 7, 6, 4], [0, 3, 5, 1], [6, 5, 0, 4], [3, 6, 7, 5], [3, 2, 1, 5]],
+    map04: [[0, 1, 2, 3], [2, 4, 0, 7], [1, 3, 6, 5], [6, 7, 1, 0], [7, 0, 3, 5], [0, 5, 3, 2], [3, 4, 0, 2], [0, 7, 6, 4], [0, 3, 5, 1], [6, 5, 0, 4], [3, 6, 7, 5], [3, 2, 1, 5]],
+    map05: [[0, 1, 2, 3], [2, 4, 0, 7], [1, 3, 6, 5], [6, 7, 1, 0], [7, 0, 3, 5], [0, 5, 3, 2], [3, 4, 0, 2], [0, 7, 6, 4], [0, 3, 5, 1], [6, 5, 0, 4], [3, 6, 7, 5], [3, 2, 1, 5]],
+    map06: [[0, 1, 2, 3], [2, 4, 0, 7], [1, 3, 6, 5], [6, 7, 1, 0], [7, 0, 3, 5], [0, 5, 3, 2], [3, 4, 0, 2], [0, 7, 6, 4], [0, 3, 5, 1], [6, 5, 0, 4], [3, 6, 7, 5], [3, 2, 1, 5]],
+  }
+  const want = { map02: 13.83, map03: 12.75, map04: 12.17, map05: 10, map06: 9.75 }
+  for (const [file, sets] of Object.entries(orders)) {
+    const raw = JSON.parse(readFileSync(new URL(`../src/nightWatch/maps/maze/${file}.json`, import.meta.url), 'utf8'))
+    const pack = nightMapFromPack(raw)
+    assert.equal(pack.rules, 'maze-v1')
+    assert.ok(pack.roads.length >= 1)
+    if (file === 'map06') {
+      assert.equal(pack.roads.length, 3)
+      for (const road of pack.roads) assert.ok(Math.abs(road.share - 1 / 3) < 1e-9)
+    }
+    const seats = pack.seats
+    const deaths = []
+    let taps = 0
+    let noneAt = []
+    for (const set of sets) {
+      const map = {
+        path: pack.path,
+        roads: pack.roads,
+        seats: set.map((index) => seats[index]),
+        hpMul: pack.hpMul,
+        rules: pack.rules,
+      }
+      deaths.push(paceEasyMapCampaign('natural', map).dead ?? 26)
+      noneAt.push(paceEasyMapCampaign('none', map).dead ?? 26)
+      if (paceEasyMapCampaign('natural', map, 6, 0.45).dead == null) taps += 1
+    }
+    const mean = deaths.reduce((sum, dead) => sum + dead, 0) / deaths.length
+    noneAt.sort((a, b) => a - b)
+    const noneMedian = noneAt.length % 2 ? noneAt[(noneAt.length - 1) / 2] : (noneAt[noneAt.length / 2 - 1] + noneAt[noneAt.length / 2]) / 2
+    assert.equal(Number(mean.toFixed(2)), want[file], `1.4.442 ${pack.name} spender mean`)
+    assert.equal(noneMedian, 7, `1.4.442 ${pack.name} no upgrades`)
+    if (file === 'map02' || file === 'map03' || file === 'map04') {
+      assert.equal(taps, 12, `1.4.442 ${pack.name} steady tapper clears rounds 1–6`)
+    }
+  }
+  assert.equal(
+    resolveNightMap({ easy: false, unlocked: true, mazeBeat: ['a2', 'far-hills', 'map03', 'map04', 'map05'], saved: 'map06', playtest: true, query: 'map06', session: 'map06' }),
+    'a2',
+    '1.4.442 Hard stays on A2',
+  )
+  assert.equal(
+    resolveNightMap({ easy: true, unlocked: false, mazeBeat: ['a2'], saved: 'far-hills', playtest: false, query: null, session: null }),
+    'far-hills',
+    '1.4.442 A2 round 10 opens Far Hills',
+  )
+  assert.equal(
+    resolveNightMap({ easy: true, unlocked: false, mazeBeat: [], saved: 'map03', playtest: false, query: null, session: null }),
+    'a2',
+  )
+  assert.equal(
+    resolveNightMap({ easy: true, unlocked: false, playtest: true, query: 'map06', session: null }),
+    'map06',
+  )
+  assert.equal(nightWatchMapQuery('?playtest=1&nwMap=map04', true), 'map04')
+  assert.equal(nightWatchMapQuery('?playtest=1&nwMap=nope', true), null)
+  const beat = normalizeProgress({ defense: { cleared: 1, nights: [], mazeBeat: ['a2', 'map03', 'nope'] } })
+  assert.deepEqual(beat.defense.mazeBeat, ['a2', 'map03'])
+  const picker = readFileSync(new URL('../src/components/NightMapPicker.tsx', import.meta.url), 'utf8')
+  assert.match(picker, /Beat round 10 to unlock/)
+  for (const id of ['a2', 'far-hills', 'map03', 'map04', 'map05', 'map06']) {
+    assert.match(picker, new RegExp(`data-map=\\{id\\}|NIGHT_MAP_IDS`))
+  }
+  assert.match(readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8'), /recordMazeBeat/)
+  assert.equal(paceEasyRoadCampaign('none', 'live').dead, 8, '1.4.442 A2 with no upgrades still walls on round 8')
+  assert.equal(paceEasyRoadCampaign('natural', 'live').dead, 18, '1.4.442 an A2 spender still reaches round 18')
+}
+
 // Night Watch 1.4.424: only the glowing face keeps a hit disc. Playtest shows the tap tally.
 {
   const css424 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
@@ -6716,7 +6808,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   const screen406 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
   assert.match(screen406, /The night held after round/)
   assert.match(screen406, /readNightWatchRoundJump\(nightLength\(true\)\)/)
-  assert.match(screen406, /recordNight\(today, easy\)/)
+  assert.match(screen406, /recordNight\(today, easy(?: && mapId === 'a2')?\)/)
   const hills406 = readFileSync(new URL('../src/nightWatch/farHills.ts', import.meta.url), 'utf8')
   assert.match(hills406, /New place unlocked!/)
   assert.match(hills406, /The Far Hills/)
@@ -6836,7 +6928,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(capped.hearts, 1)
   assert.equal(applyEasyPaceLeaks(3, 1, 0, 0, 0, true).lostHearts, 0, '1.4.409 a shield still forgives')
   const screen409 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
-  assert.match(screen409, /easyPointerTapGate\(easy, raider, live\.current\.raiders, waveIndexRef\.current\)/)
+  assert.match(screen409, /easyPointerTapGate\(easy, raider, live\.current\.raiders, waveIndexRef\.current(?:, tuneRef\.current\.armorFrom)?\)/)
   assert.match(
     readFileSync(new URL('../src/lib/defend.ts', import.meta.url), 'utf8'),
     /return cueTapStrike\(easy, cue\?\.id === raider\.id\)/,
