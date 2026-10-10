@@ -408,7 +408,7 @@ export function DefendNightActorsSvg({
                 const at = raiderAt(raider)
                 const isTap = easyTap && !raider.turned
                 const shrugged = easyTapSoaked(roundIndex, raider, armorFrom)
-                const isCue = isTap && (tapTarget?.id === raider.id || !!raider.boss) && !shrugged
+                const isCue = isTap && !raider.fog && (tapTarget?.id === raider.id || !!raider.boss) && !shrugged
                 const lampHit =
                   raider.struckAt != null && performance.now() - raider.struckAt < SHOT_JUICE_MS
                 return (
@@ -417,7 +417,7 @@ export function DefendNightActorsSvg({
                     data-person-node={isTap ? 'walker' : undefined}
                     data-gait={raider.gait && raider.gait !== 'plain' ? raider.gait : undefined}
                     data-face={raider.face ?? raider.kind}
-                    className={`defend-raider ${raider.gait === 'fast' ? 'is-fast' : ''} ${raider.gait === 'tough' ? 'is-tough' : ''} ${raider.boss ? 'is-boss' : ''} ${raider.turned ? 'is-turned' : ''} ${isTap ? 'is-easy-tap-target' : ''} ${isCue ? 'is-easy-cue' : ''} ${lampHit ? 'is-lamp-hit' : ''}`}
+                    className={`defend-raider ${raider.mini ? 'is-mini' : ''} ${raider.gait === 'fast' ? 'is-fast' : ''} ${raider.gait === 'tough' ? 'is-tough' : ''} ${raider.boss ? 'is-boss' : ''} ${raider.turned ? 'is-turned' : ''} ${isTap ? 'is-easy-tap-target' : ''} ${isCue ? 'is-easy-cue' : ''} ${lampHit ? 'is-lamp-hit' : ''}`}
                     data-boss={raider.boss ? 'yes' : undefined}
                     transform={`translate(${at.x} ${at.y})`}
                     role={isTap ? 'button' : undefined}

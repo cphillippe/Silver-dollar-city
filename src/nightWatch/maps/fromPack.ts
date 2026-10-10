@@ -1,6 +1,8 @@
 import type { BoundRoad } from '../path/data.ts'
 import type { NightPoint } from '../types.ts'
 import type { LampGround } from '../../lib/lampPlace.ts'
+import { featuresFromPack, type NightFeature } from './features.ts'
+import { waveFromPack, type NightWave } from './wave.ts'
 
 export interface NightMapSeat {
   id: string
@@ -18,6 +20,12 @@ export interface NightMapPack extends LampGround {
   hpMul: number
   /** `maze-v1` on the maze maps. Anything else, including a missing field, is A2. */
   rules: 'a2' | 'maze-v1'
+  /** Extra walkers and the smoothed late bulk. Null on A2. */
+  wave: NightWave | null
+  /** Hill, gates, pools, fog, or a pop. Empty on A2. */
+  mapFeatures: NightFeature[]
+  /** One line on this map's first plant step. Empty when the map has no feature. */
+  featureNote: string
   seats: NightMapSeat[]
 }
 
@@ -129,6 +137,9 @@ export function nightMapFromPack(raw: unknown): NightMapPack {
     if (!seatId || x == null || y == null) continue
     seats.push({ id: seatId, x: x * width, y: y * height })
   }
+  const wave = waveFromPack(difficulty?.wave, roads.length)
+  const mapFeatures = featuresFromPack(pack.features, width, height)
+  const featureNote = typeof pack.featureNote === 'string' ? pack.featureNote : ''
   return {
     id,
     name,
@@ -137,6 +148,9 @@ export function nightMapFromPack(raw: unknown): NightMapPack {
     height,
     hpMul,
     rules,
+    wave,
+    mapFeatures,
+    featureNote,
     path,
     roads,
     segments,

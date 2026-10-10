@@ -756,7 +756,23 @@
   "speedMul": 1.0,
   "countMul": 1.0,
   "startCashMul": 1.0,
-  "rounds": 25
+  "rounds": 25,
+  "wave": {
+   "ruleset": "maze-v2",
+   "countMulEarly": 1.5,
+   "countMul": 2.0,
+   "countFrom": 7,
+   "hpScale": 0.75,
+   "bulkRamp": [
+    0.35,
+    0.7
+   ],
+   "liveCap": 5,
+   "spawnMul": 0.6,
+   "pack": 1,
+   "sparkMul": 0.5,
+   "note": "rules stays maze-v1 so 1.4.442 fromPack keeps reading it; wave is additive (see SPEC.md section 2)"
+  }
  },
  "art": {
   "theme": "green rolling candy hills at dusk, the same candy village art set as the reference but out in the open countryside: soft round hills, little gumdrop knolls",
@@ -968,5 +984,57 @@
    "reason": "The cottages share the exact same 3/4 isometric chunky proportions, candy-cane corner posts, piped icing trim, heart/circle windows, and lollipop-accented shrub bases with matching soft clay rendering."
   },
   "artRun": "run2"
+ },
+ "features": [
+  {
+   "type": "hill",
+   "x": 0.411,
+   "y": 0.261,
+   "r": 0.0451,
+   "rangeBonus": 40,
+   "sprite": "overlays/hill.png",
+   "spriteAnchorPx": [
+    96,
+    123
+   ],
+   "spritePxPerUnit": 2
+  }
+ ],
+ "featureNote": "Plant on the hilltop to see farther.",
+ "_simV2": {
+  "model": "nwlive.py (1.4.442 live loop), no-skill Strong-first spender, tap 0.28s, full seat search",
+  "bestSeats": [
+   [
+    0.653,
+    0.455
+   ],
+   [
+    0.618,
+    0.085
+   ],
+   [
+    0.425,
+    0.097
+   ],
+   [
+    0.372,
+    0.43
+   ]
+  ],
+  "bestDies": 14,
+  "avgDies": 11.0,
+  "avgRange": [
+   7,
+   14
+  ],
+  "noUpgrades": 7,
+  "tapper4_R1_R6": true,
+  "tapsPerRound_R1_10": 64.1,
+  "today": {
+   "bestDies": "alive R20",
+   "avgDies": 8.4,
+   "noUpgrades": 7,
+   "tapsPerRound_R1_10": 35.7
+  }
  }
 }

@@ -114,7 +114,7 @@
    "via": [
     "w"
    ],
-   "share": 0.3,
+   "share": 0.3333,
    "points": [
     [
      0.0,
@@ -405,7 +405,7 @@
    "via": [
     "c"
    ],
-   "share": 0.3,
+   "share": 0.3333,
    "points": [
     [
      0.5,
@@ -692,7 +692,7 @@
    "via": [
     "e"
    ],
-   "share": 0.4,
+   "share": 0.3333,
    "points": [
     [
      1.0,
@@ -986,7 +986,23 @@
   "speedMul": 1.0,
   "countMul": 1.0,
   "startCashMul": 1.0,
-  "rounds": 25
+  "rounds": 25,
+  "wave": {
+   "ruleset": "maze-v2",
+   "countMulEarly": 1.0,
+   "countMul": 2.0,
+   "countFrom": 7,
+   "hpScale": 0.7,
+   "bulkRamp": [
+    0.35,
+    0.7
+   ],
+   "liveCap": 5,
+   "spawnMul": 0.6,
+   "pack": "perRoad",
+   "sparkMul": 0.5,
+   "note": "rules stays maze-v1 so 1.4.442 fromPack keeps reading it; wave is additive (see SPEC.md section 2)"
+  }
  },
  "art": {
   "theme": "a blueberry jelly bog at night, the same candy village art set as the reference",
@@ -1163,5 +1179,59 @@
    "reason": "The houses in Image B perfectly match Image A's 3/4 isometric chunky cottages with soft-serve swirl frosting roofs, candy-cane corner posts, arched candy doors, and lollipop/candy shrub bases."
   },
   "artRun": "run2"
+ },
+ "features": [
+  {
+   "type": "split",
+   "into": 2,
+   "hpFrac": 0.2,
+   "minHp": 2,
+   "fromRound": 3,
+   "notFast": true,
+   "notBoss": true,
+   "sprite": "overlays/pop.png",
+   "spriteAnchorPx": [
+    72,
+    72
+   ],
+   "spritePxPerUnit": 2
+  }
+ ],
+ "featureNote": "Big berries pop into two little ones. Keep tapping!",
+ "_simV2": {
+  "model": "nwlive.py (1.4.442 live loop), no-skill Strong-first spender, tap 0.28s, full seat search",
+  "bestSeats": [
+   [
+    0.355,
+    0.196
+   ],
+   [
+    0.793,
+    0.294
+   ],
+   [
+    0.372,
+    0.393
+   ],
+   [
+    0.67,
+    0.504
+   ]
+  ],
+  "bestDies": 9,
+  "avgDies": 7.7,
+  "avgRange": [
+   7,
+   8
+  ],
+  "noUpgrades": 8,
+  "tapper4_R1_R6": true,
+  "tapsPerRound_R1_10": 52.7,
+  "today": {
+   "bestDies": 13,
+   "avgDies": 8.5,
+   "noUpgrades": 7,
+   "tapsPerRound_R1_10": 41.2
+  }
  }
 }
