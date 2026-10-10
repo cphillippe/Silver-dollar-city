@@ -102,7 +102,9 @@ import {
   TOUGH_HP_BONUS,
   TOUGH_PACE,
   TOUGH_SPARK,
+  BOSS_CLEAR_SPARKS,
   BOSS_PACE,
+  easyBossClearSparks,
   easyBossHp,
   easyBossRound,
   easyLatePush,
@@ -1406,7 +1408,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.426')
+assert.equal(APP_VERSION, '1.4.427')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.426'), '1.4.426 changelog row')
 assert.match(latestChange('1.4.426').title, /download/)
 assert.match(latestChange('1.4.426').items.join('\n'), /download/)
@@ -1422,6 +1424,14 @@ assert.doesNotMatch(
   latestChange('1.4.425').items.join('\n'),
   /Fixes #|Closes #|Resolves #/,
   '1.4.425 changelog avoids GitHub close keywords',
+)
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.427'), '1.4.427 changelog row')
+assert.match(latestChange('1.4.427').title, /bonus/i)
+assert.match(latestChange('1.4.427').items.join('\n'), /Boss down \+2 sparks/)
+assert.doesNotMatch(
+  latestChange('1.4.427').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.427 changelog avoids GitHub close keywords',
 )
 
 // Night Watch 1.4.419: on-screen walkers do not share a head. Kind and boss stats stay put.
@@ -5319,6 +5329,101 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.doesNotMatch(latestChange('1.4.421').items.join('\n'), /Fixes #|Closes #|Resolves #/)
   assert.match(latestChange('1.4.416').title, /taller strip/i)
   assert.match(latestChange('1.4.414').title, /Story strip/i)
+}
+
+// Night Watch 1.4.427: boss rounds keep their bars and pay 2 sparks on a clear.
+{
+  const screen426 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const css426 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  assert.equal(BOSS_CLEAR_SPARKS, 2, '1.4.427 a boss clear pays 2 sparks')
+  for (const index of [4, 9, 14, 19, 24]) {
+    assert.equal(easyBossRound(index), true)
+    assert.equal(easyBossClearSparks(index), 2)
+  }
+  for (const index of [0, 3, 5, 8, 13, 18, 23]) {
+    assert.equal(easyBossClearSparks(index), 0, `1.4.427 round ${index + 1} is not a boss clear`)
+  }
+  assert.equal(easyBossHp(4), 12, '1.4.427 round 5 boss stays 12')
+  assert.equal(easyBossHp(9), 44, '1.4.427 round 10 boss stays 44')
+  assert.equal(easyBossHp(14), 200, '1.4.427 round 15 boss stays 200')
+  assert.equal(easyBossHp(19), 260, '1.4.427 round 20 boss stays 260')
+  assert.equal(easyBossHp(24), 320, '1.4.427 round 25 boss stays 320')
+  const grant426 = screen426.slice(
+    screen426.indexOf('const grantBossSparks'),
+    screen426.indexOf('const grantBossSparks') + 420,
+  )
+  assert.match(grant426, /if \(!easy\)/, '1.4.427 Hard does not take the boss bonus')
+  assert.match(grant426, /easyBossClearSparks\(wave\)/)
+  assert.match(screen426, /Boss down \+/)
+  assert.match(screen426, /data-boss-bonus=\{bossBonus\}/)
+  assert.match(screen426, /setPowerBanner\('Boss!'\)/)
+  const jump426 = screen426.slice(screen426.indexOf('const roundJumpOnce'), screen426.indexOf('const roundJumpOnce') + 420)
+  assert.match(jump426, /setWaveIndex\(jump\)/)
+  assert.doesNotMatch(jump426, /setPhase\('boost'\)/, '1.4.427 round 25 playtest starts the round')
+  assert.match(css426, /\.defend-boss-bonus \{[^}]*color:\s*#ffcc33/)
+  assert.match(css426, /\.defend-raider\.is-boss \.defend-raider-body \{[^}]*transform:\s*scale\(1\.72\)/)
+  assert.match(screen426, /className="nw-tap-readout"/)
+  const spent426 = spendTreeNight(EASY_ROUNDS.map((round) => roundSparkPay(round)), EASY_LAMP_COST)
+  const seeds426 = Array.from({ length: 8 }, (_, seed) => 1 + seed * 97)
+  const bare426 = { far: 0, strong: 0 }
+  const fourI426 = [bare426, bare426, bare426, bare426]
+  const lamps426 = (index) => (index === 0 ? fourI426 : spent426.rows[index - 1].lamps)
+  function night426(tapEvery) {
+    let hearts = 3
+    const rows = []
+    for (let index = 0; index < 25; index += 1) {
+      const round = paceEasyTree(index, lamps426(index), hearts, tapEvery, 1, 1 + index * 17, 0, 1, true)
+      rows.push(round)
+      if (round.result !== 'clear') return { rows, dead: index + 1 }
+      hearts = easyClearHeart(round.hearts)
+    }
+    return { rows, dead: null }
+  }
+  const spend426 = seeds426.map((base) => {
+    let hearts = 3
+    const rows = []
+    for (let index = 0; index < 25; index += 1) {
+      const round = paceEasyTree(
+        index,
+        lamps426(index),
+        hearts,
+        3,
+        1,
+        base + index * 17,
+        0,
+        1,
+        true,
+      )
+      rows.push(round)
+      if (round.result !== 'clear') return { rows, dead: index + 1 }
+      hearts = easyClearHeart(round.hearts)
+    }
+    return { rows, dead: null }
+  })
+  const quiet426 = seeds426.map(() => night426(0))
+  assert.ok(
+    quiet426.every((run) => run.dead === 5 && run.rows[4].taps === 0),
+    '1.4.427 zero taps still lose round 5, so later bosses are not free',
+  )
+  assert.ok(
+    spend426.every(
+      (run) =>
+        (run.dead == null || run.dead === 25) &&
+        [9, 14, 19].every((index) => run.rows[index].result === 'clear' && run.rows[index].taps > 0),
+    ),
+    '1.4.427 a spender who taps clears boss rounds 10, 15, and 20',
+  )
+  for (const base of seeds426) {
+    const round = paceEasyTree(24, lamps426(24), 3, 3, 1, base + 24 * 17, 0, 1, true)
+    assert.equal(round.result, 'clear', '1.4.427 round 25 clears when the spender still has 3 hearts')
+    assert.ok(round.taps > 0)
+    const quiet = paceEasyTree(24, lamps426(24), 3, 0, 1, base + 24 * 17, 0, 1, true)
+    assert.equal(quiet.taps, 0)
+  }
+  assert.equal(cueTapStrike(false, false), 'hit', '1.4.427 Hard taps stay hits')
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.427'), '1.4.427 changelog row')
+  assert.match(latestChange('1.4.427').title, /bonus/i)
+  assert.doesNotMatch(latestChange('1.4.427').items.join('\n'), /Fixes #|Closes #|Resolves #/)
 }
 
 // Night Watch 1.4.424: only the glowing face keeps a hit disc. Playtest shows the tap tally.
@@ -11860,8 +11965,9 @@ console.log('check-city: ok')
   assert.match(defendScreenOnlySrc, /setWaveIndex\(0\)/, '1.4.328 a lost night resets the wave')
   assert.match(defendScreenOnlySrc, /setRunTier\(freshRunTier\(\)\)/)
   assert.match(defendScreenOnlySrc, /roundMark\(waveIndex, rounds, easy\)/)
-  assert.match(defendScreenOnlySrc, /Wave \$\{waveIndex \+ 1\} clear · spend sparks/)
-  assert.match(defendScreenOnlySrc, /Round \$\{waveIndex \+ 1\} clear · spend sparks/)
+  assert.match(defendScreenOnlySrc, /Wave \$\{waveIndex \+ 1\} clear/)
+  assert.match(defendScreenOnlySrc, /Round \$\{waveIndex \+ 1\} clear/)
+  assert.match(defendScreenOnlySrc, /` · spend sparks`/)
   assert.match(defendScreenOnlySrc, /markMetRef\.current\(cast\.id\)/)
   assert.match(
     readFileSync(new URL('../src/store/ProgressProvider.tsx', import.meta.url), 'utf8'),

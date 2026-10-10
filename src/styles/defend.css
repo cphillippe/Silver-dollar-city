@@ -1372,6 +1372,11 @@ img.walker-face.easy-walker-face,
   color: rgba(244, 234, 210, 0.88);
 }
 
+.defend-boss-bonus {
+  color: #ffcc33;
+  font-weight: 900;
+}
+
 .defend-spark-choices {
   width: 100%;
   margin: 0 0 10px;
