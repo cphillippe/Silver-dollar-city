@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.436',
+    title: 'The glow moves after a shrug',
+    when: '2026-10-10',
+    items: [
+      'After a thick walker or a late boss shrugs, the glow moves to the next walker. A tap on that walker counts. Lamps still hurt the one that shrugged.',
+      'At a round clear, tap any planted lamp or its card. The upgrade tree opens above the bar.',
+      'Hearts stay at three. Still shows as a small note before Begin, so the first walker is not covered.',
+    ],
+  },
+  {
     version: '1.4.435',
     title: 'The round 5 boss takes a tap',
     when: '2026-10-10',

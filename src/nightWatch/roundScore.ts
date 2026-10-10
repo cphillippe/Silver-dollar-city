@@ -4,6 +4,7 @@ import {
   easyGlowTapDamage,
   easyRoundHeartCap,
   easyTapArmored,
+  easyTapSoaked,
 } from '../lib/defend.ts'
 import { NIGHT_PACE_FAST, pacedDt } from '../lib/nightPace.ts'
 import { pathPoint } from './path/data.ts'
@@ -514,8 +515,18 @@ export function paceEasyTree(
         if (shot.at > time) continue
         shot.at = Infinity
         const aim = raiders.find((raider) => raider.id === shot.id)
-        const front = live().sort((a, b) => b.t - a.t)[0]
-        if (roll() < KID_TAP_WASTE || !aim || aim.dead || !front || front.id !== aim.id) continue
+        const walking = live().sort((a, b) => b.t - a.t)
+        const front = walking[0]
+        if (roll() < KID_TAP_WASTE || !aim || aim.dead || !front) continue
+        const soaked = easyTapSoaked(roundIndex, { tapChip: aim.chip, gait: aim.gait, boss: aim.boss })
+        if (soaked) {
+          const next = walking.find(
+            (raider) => !easyTapSoaked(roundIndex, { tapChip: raider.chip, gait: raider.gait, boss: raider.boss }),
+          )
+          if (next) tapWound(next)
+          continue
+        }
+        if (front.id !== aim.id) continue
         tapWound(aim)
       }
     }
@@ -523,16 +534,15 @@ export function paceEasyTree(
       tapAt = 0
       attempts += 1
       const walking = live().sort((a, b) => b.t - a.t)
+      const openTap = (raider: (typeof walking)[number]) =>
+        !easyTapSoaked(roundIndex, { tapChip: raider.chip, gait: raider.gait, boss: raider.boss })
+      const cue = walking.find(openTap) ?? walking[0]
       if (kid) {
-        const front = walking[0]
-        if (front) pending.push({ at: time + KID_TAP_REACT_S, id: front.id })
+        if (cue) pending.push({ at: time + KID_TAP_REACT_S, id: cue.id })
       } else {
         const offFace = walking.length > 1 && roll() < offCue
         const hit = roll() <= hitChance
-        if (!offFace && hit) {
-          const front = walking[0]
-          if (front) tapWound(front)
-        }
+        if (!offFace && hit && cue) tapWound(cue)
       }
     }
     const fate: string = bossFate

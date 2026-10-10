@@ -57,8 +57,8 @@ export interface NightEnemiesModule {
   heavenSpeed(tier: number, easy: boolean): number
   /** Walker position: on the road, or lifting toward heaven once turned. */
   at(raider: NightRaider): NightPoint
-  /** Front-most unturned walker (Easy cue on path, not a lone HTML face). */
-  cueTarget<T extends NightRaider>(raiders: T[]): T | undefined
+  /** Front-most unturned walker who can still take a tap. A shrugged walker is skipped. */
+  cueTarget<T extends NightRaider>(raiders: readonly T[], roundIndex?: number): T | undefined
   fit(easy: boolean, toolId: string, kind: WalkerKind): 'match' | 'weak'
   /** Spawn HP: swarm / mid / tank role per kind, lower on Easy. */
   maxHp(kind: WalkerKind, easy: boolean): number
