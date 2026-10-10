@@ -1074,7 +1074,23 @@
   "speedMul": 1.0,
   "countMul": 1.0,
   "startCashMul": 1.0,
-  "rounds": 25
+  "rounds": 25,
+  "wave": {
+   "ruleset": "maze-v2",
+   "countMulEarly": 1.5,
+   "countMul": 2.0,
+   "countFrom": 7,
+   "hpScale": 0.8,
+   "bulkRamp": [
+    0.35,
+    0.7
+   ],
+   "liveCap": 5,
+   "spawnMul": 0.6,
+   "pack": "perRoad",
+   "sparkMul": 0.5,
+   "note": "rules stays maze-v1 so 1.4.442 fromPack keeps reading it; wave is additive (see SPEC.md section 2)"
+  }
  },
  "art": {
   "theme": "a licorice forest at night, the same candy village art set as the reference",
@@ -1323,5 +1339,70 @@
    "reason": "The houses and bushes perfectly match the reference set's 3/4 isometric perspective, soft clay rendering, piped icing edges, candy-cane pillars, and candy/lollipop bases."
   },
   "artRun": "run3"
+ },
+ "features": [
+  {
+   "type": "fog",
+   "x": 0.2656,
+   "y": 0.4435,
+   "r": 0.1003,
+   "noTap": true,
+   "sprite": "overlays/fog.png",
+   "spriteAnchorPx": [
+    168,
+    168
+   ],
+   "spritePxPerUnit": 2
+  },
+  {
+   "type": "fog",
+   "x": 0.7611,
+   "y": 0.5266,
+   "r": 0.1003,
+   "noTap": true,
+   "sprite": "overlays/fog.png",
+   "spriteAnchorPx": [
+    168,
+    168
+   ],
+   "spritePxPerUnit": 2
+  }
+ ],
+ "featureNote": "Faces in the fog can't be tapped. Your lamps still see them.",
+ "_simV2": {
+  "model": "nwlive.py (1.4.442 live loop), no-skill Strong-first spender, tap 0.28s, full seat search",
+  "bestSeats": [
+   [
+    0.706,
+    0.48
+   ],
+   [
+    0.381,
+    0.188
+   ],
+   [
+    0.793,
+    0.332
+   ],
+   [
+    0.214,
+    0.492
+   ]
+  ],
+  "bestDies": 12,
+  "avgDies": 6.6,
+  "avgRange": [
+   5,
+   8
+  ],
+  "noUpgrades": 7,
+  "tapper4_R1_R6": true,
+  "tapsPerRound_R1_10": 55.8,
+  "today": {
+   "bestDies": 14,
+   "avgDies": 7.4,
+   "noUpgrades": 7,
+   "tapsPerRound_R1_10": 45.3
+  }
  }
 }

@@ -30,6 +30,11 @@ export function previousMap(id: NightMapId): NightMapId | null {
   return index > 0 ? NIGHT_MAP_IDS[index - 1] : null
 }
 
+export function nextMap(id: NightMapId): NightMapId | null {
+  const index = NIGHT_MAP_IDS.indexOf(id)
+  return index >= 0 && index < NIGHT_MAP_IDS.length - 1 ? NIGHT_MAP_IDS[index + 1] : null
+}
+
 /**
  * A2 is always open. Far Hills also opens from an Easy round 25.
  * Every later map opens when the previous map's round 10 boss is beaten.

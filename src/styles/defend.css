@@ -3521,6 +3521,40 @@ button.defend-new-lamp[aria-pressed='true'] {
   top: 44px;
 }
 
+/* 1.4.443: the map's one-line note sits under Still. It does not cover the road. */
+.nw-skill-toast.is-feature {
+  top: 44px;
+  max-width: min(340px, 92%);
+  white-space: normal;
+  letter-spacing: 0;
+}
+
+.nw-map-toast {
+  top: 46px;
+  max-width: min(340px, 92%);
+  white-space: normal;
+  letter-spacing: 0;
+}
+
+.nw-feature,
+.nw-pop-puff {
+  pointer-events: none;
+}
+
+.nw-pop-puff {
+  animation: nw-pop-puff 0.3s ease-out forwards;
+}
+
+@keyframes nw-pop-puff {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.defend-raider.is-mini .defend-raider-body {
+  transform: scale(0.7);
+  transform-origin: 0 0;
+}
+
 .nw-skill-splash {
   position: fixed;
   z-index: 40;
@@ -4204,8 +4238,11 @@ button.defend-new-lamp[aria-pressed='true'] {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  width: min(100%, 420px);
+  width: 100%;
+  max-width: 420px;
+  min-width: 0;
   margin: 0 auto 8px;
+  box-sizing: border-box;
 }
 
 .nw-map-rule {
@@ -4216,23 +4253,29 @@ button.defend-new-lamp[aria-pressed='true'] {
   color: #ffe9b0;
 }
 
+/* 1.4.443: all six maps stay on the page. No fixed height, no sideways scroll. */
 .nw-map-pick-scroll {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 6px;
-  max-height: 148px;
-  overflow-y: auto;
+  max-height: none;
+  overflow: visible;
 }
 
 .nw-map-pick button {
+  min-width: 0;
+  max-width: 100%;
   min-height: 40px;
+  padding: 0 8px;
   border-radius: 999px;
   border: 2px solid rgba(255, 233, 176, 0.45);
   background: rgba(26, 8, 64, 0.72);
   color: #f4ead2;
   font-weight: 800;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .nw-map-pick button.is-on {
@@ -4253,10 +4296,21 @@ button.defend-new-lamp[aria-pressed='true'] {
   vertical-align: -2px;
 }
 
+@media (min-width: 412px) {
+  .nw-map-pick button {
+    font-size: 0.82rem;
+  }
+}
+
 @media (min-width: 768px) {
+  .nw-map-pick {
+    max-width: 640px;
+  }
+
   .nw-map-pick-scroll {
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
     max-height: none;
+    overflow: visible;
   }
 }
 

@@ -128,6 +128,7 @@ import {
   EASY_LATE_BULK,
   EASY_TOUGH_WINDOW,
   MAZE_V1_TUNE,
+  roundForTune,
   gaitPlan,
   roundSparkPay,
   walkerHp,
@@ -158,10 +159,22 @@ import {
   paceEasyMapCampaign,
   paceEasyRoad,
   paceEasyRoadCampaign,
+  paceMazeSpender,
 } from '../src/nightWatch/livePace.ts'
 import { nightWatchMapQuery } from '../src/lib/nightWatchDebug.ts'
 import { A2_NIGHT_MAP } from '../src/nightWatch/maps/a2.ts'
 import { nightMapFromPack } from '../src/nightWatch/maps/fromPack.ts'
+import {
+  faceInFog,
+  featureContains,
+  featureSpeed,
+  hillRangeBonus,
+  miniHp,
+  splitDue,
+  splitFeature,
+} from '../src/nightWatch/maps/features.ts'
+import { waveRound, waveWalkerHp } from '../src/nightWatch/maps/wave.ts'
+import { nextMap } from '../src/nightWatch/maps/chain.ts'
 import { resolveNightMap } from '../src/nightWatch/maps/resolve.ts'
 import { rateMapSeats, spreadGoodSeats } from '../src/nightWatch/maps/seats.ts'
 import { scaledWalkerHp } from '../src/nightWatch/walkers.ts'
@@ -203,6 +216,7 @@ import {
   lampArtAboveAnchor,
   lampReachesRoad,
   lampRoadNote,
+  bindLampGround,
   lampSpotBlocked,
   lampUnderFinger,
   pathSpendControl,
@@ -1495,7 +1509,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.442')
+assert.equal(APP_VERSION, '1.4.443')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.442'), '1.4.442 changelog row')
 assert.match(latestChange('1.4.442').title, /mazes/i)
 assert.doesNotMatch(
@@ -6518,6 +6532,167 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8'), /recordMazeBeat/)
   assert.equal(paceEasyRoadCampaign('none', 'live').dead, 8, '1.4.442 A2 with no upgrades still walls on round 8')
   assert.equal(paceEasyRoadCampaign('natural', 'live').dead, 18, '1.4.442 an A2 spender still reaches round 18')
+}
+
+// Night Watch 1.4.443: maze-v2 waves and one feature per map. A2 stays the cottages.
+{
+  assert.equal(EASY_ROUNDS[5].tough, 1, '1.4.443 the round 6 table still lists one tough')
+  assert.equal(easyWalkerHp(2, 0, 'plain', 10), walkerHp(2, 0, 'plain'), '1.4.443 A2 round 11 has no bulk yet')
+  assert.equal(easyWalkerHp(2, 0, 'plain', 15), walkerHp(2, 0, 'plain') + EASY_LATE_BULK, '1.4.443 A2 bulk is still +140 at round 16')
+  assert.equal(easyHoldSpawn(3), true, '1.4.443 A2 still holds at three walkers')
+  assert.equal(easyHoldSpawn(2), false)
+  assert.equal(waveWalkerHp(2, 0, 'plain', 15, undefined, 1, null), easyWalkerHp(2, 0, 'plain', 15))
+  const packs = {}
+  for (const file of ['map02', 'map03', 'map04', 'map05', 'map06']) {
+    const raw = JSON.parse(readFileSync(new URL(`../src/nightWatch/maps/maze/${file}.json`, import.meta.url), 'utf8'))
+    packs[file] = nightMapFromPack(raw)
+    assert.equal(packs[file].rules, 'maze-v1', `${file} keeps maze-v1`)
+    assert.ok(packs[file].wave, `${file} has a wave`)
+    assert.equal(packs[file].wave.liveCap, 5)
+    assert.equal(packs[file].wave.spawnMul, 0.6)
+    assert.deepEqual(packs[file].wave.bulkRamp, [0.35, 0.7])
+  }
+  assert.equal(packs.map02.wave.sparkMul, 0.5)
+  assert.equal(packs.map03.wave.sparkMul, 0.65)
+  assert.equal(packs.map04.wave.sparkMul, 0.65)
+  assert.equal(packs.map05.wave.sparkMul, 0.5)
+  assert.equal(packs.map02.wave.hpScale, 0.75)
+  assert.equal(packs.map02.wave.countMulEarly, 1.5)
+  assert.equal(packs.map02.wave.pack, 1)
+  assert.equal(packs.map03.wave.countMulEarly, 1)
+  assert.equal(packs.map04.wave.countMulEarly, 1)
+  assert.equal(packs.map03.wave.pack, 2)
+  assert.equal(packs.map06.wave.pack, 3)
+  assert.equal(packs.map05.wave.hpScale, 0.8)
+  assert.equal(packs.map06.wave.hpScale, 0.7)
+  const early = waveRound(EASY_ROUNDS[0], 0, packs.map02.wave)
+  assert.equal(early.count, 6, '1.4.443 Far Hills round 1 is 4 × 1.5')
+  assert.equal(early.tough, 0)
+  const late = waveRound(roundForTune(EASY_ROUNDS[5], 5, MAZE_V1_TUNE), 5, packs.map02.wave)
+  assert.equal(late.tough, 2, '1.4.443 maze round 6 still has two toughs')
+  assert.equal(waveRound(EASY_ROUNDS[0], 0, packs.map03.wave).count, 4, '1.4.443 Peppermint round 1 stays at 4')
+  assert.equal(waveRound(EASY_ROUNDS[0], 0, packs.map04.wave).count, 4, '1.4.443 Caramel round 1 stays at 4')
+  const r11 = EASY_ROUNDS[10]
+  assert.equal(
+    waveWalkerHp(2, r11.hp, 'plain', 10, MAZE_V1_TUNE, 1, { ...packs.map02.wave, hpScale: 1 }),
+    walkerHp(2, r11.hp, 'plain') + 35,
+    '1.4.443 round 11 takes 35% of the late bulk',
+  )
+  assert.equal(
+    waveWalkerHp(2, EASY_ROUNDS[11].hp + 12, 'plain', 11, MAZE_V1_TUNE, 1, { ...packs.map02.wave, hpScale: 1 }),
+    walkerHp(2, EASY_ROUNDS[11].hp + 12, 'plain') + 70,
+    '1.4.443 round 12 takes 70% of the late bulk',
+  )
+  const hill = packs.map02.mapFeatures.find((feature) => feature.type === 'hill')
+  assert.ok(hill, '1.4.443 Far Hills has a hill')
+  assert.equal(hillRangeBonus(hill, packs.map02.mapFeatures), 40)
+  assert.equal(hillRangeBonus({ x: hill.x + hill.width, y: hill.y }, packs.map02.mapFeatures), 0)
+  assert.equal(featureContains(hill, hill), true)
+  const gate = packs.map03.mapFeatures.find((feature) => feature.type === 'sprint')
+  assert.equal(featureSpeed(gate, packs.map03.mapFeatures), 1.8)
+  assert.equal(featureSpeed({ x: 0, y: 0 }, packs.map03.mapFeatures), 1)
+  const pool = packs.map04.mapFeatures.find((feature) => feature.type === 'sticky')
+  assert.equal(featureSpeed(pool, packs.map04.mapFeatures), 0.5)
+  const fog = packs.map05.mapFeatures[0]
+  assert.equal(faceInFog({ x: fog.x, y: fog.y - -12 }, packs.map05.mapFeatures), true)
+  assert.equal(faceInFog({ x: 0, y: 0 }, packs.map05.mapFeatures), false)
+  const fogLead = { id: 1, t: 0.9, fog: true, boss: true }
+  const fogBack = { id: 2, t: 0.4 }
+  assert.equal(easyTapTarget([fogLead, fogBack])?.id, 2, '1.4.443 fog skips the lead face')
+  assert.equal(easyPointerTapGate(true, fogLead, [fogLead, fogBack], 9), 'miss', '1.4.443 a fogged boss cannot be tapped')
+  assert.equal(easyPointerTapGate(true, { id: 3, t: 0.9, boss: true }, [{ id: 3, t: 0.9, boss: true }], 4), 'hit', '1.4.443 an open boss still takes a tap')
+  const split = splitFeature(packs.map06.mapFeatures)
+  assert.ok(split)
+  assert.equal(split.into, 2)
+  assert.equal(miniHp(40, split), 8)
+  assert.equal(miniHp(4, split), 2)
+  assert.equal(splitDue(split, 1, 'plain', false, false), false, '1.4.443 pops start at round 3')
+  assert.equal(splitDue(split, 2, 'plain', false, false), true)
+  assert.equal(splitDue(split, 4, 'fast', false, false), false)
+  assert.equal(splitDue(split, 4, 'plain', true, false), false)
+  assert.equal(splitDue(split, 4, 'plain', false, true), false)
+  assert.equal(packs.map02.featureNote, 'Plant on the hilltop to see farther.')
+  assert.equal(nextMap('a2'), 'far-hills')
+  assert.equal(nextMap('map06'), null)
+  const screen443 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  assert.match(screen443, /New map unlocked:/)
+  const css443 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  assert.match(css443, /1\.4\.443: all six maps/)
+  assert.doesNotMatch(css443, /nw-map-pick-scroll \{[^}]*287px/)
+  assert.doesNotMatch(css443, /nw-map-pick-scroll \{[^}]*max-height:\s*148px/)
+  assert.equal(paceEasyRoadCampaign('none', 'live').dead, 8, '1.4.443 A2 with no upgrades still walls on round 8')
+  assert.equal(paceEasyRoadCampaign('natural', 'live').dead, 18, '1.4.443 an A2 spender still reaches round 18')
+  const bestDead = {}
+  for (const file of ['map02', 'map03', 'map04', 'map05', 'map06']) {
+    const raw = JSON.parse(readFileSync(new URL(`../src/nightWatch/maps/maze/${file}.json`, import.meta.url), 'utf8'))
+    const seats = raw._simV2.bestSeats.map(([x, y]) => ({ x: x * packs[file].width, y: y * packs[file].height }))
+    bestDead[file] = paceMazeSpender({
+      path: packs[file].path,
+      roads: packs[file].roads,
+      seats,
+      hpMul: packs[file].hpMul,
+      rules: packs[file].rules,
+      wave: packs[file].wave,
+      features: packs[file].mapFeatures,
+    }, 20, 0.28).dead
+  }
+  assert.equal(bestDead.map02, 14, '1.4.443 Far Hills best seats reach round 14')
+  assert.equal(bestDead.map03, 13, '1.4.443 Peppermint best seats stay near round 13')
+  assert.equal(bestDead.map04, 12, '1.4.443 Caramel best seats stay near round 13')
+  assert.equal(bestDead.map05, 12, '1.4.443 Licorice best seats reach round 12')
+  assert.equal(bestDead.map06, 9, '1.4.443 Blueberry best seats reach round 9')
+  const rng = (seed) => {
+    let a = seed
+    return () => {
+      a = (a + 0x6d2b79f5) | 0
+      let t = Math.imul(a ^ (a >>> 15), 1 | a)
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+    }
+  }
+  for (const file of ['map03', 'map04']) {
+    bindLampGround(packs[file])
+    const spots = []
+    for (let x = 36; x < packs[file].width; x += 32) {
+      for (let y = 36; y < packs[file].height; y += 32) {
+        const at = { x, y }
+        if (lampSpotBlocked(at)) continue
+        if (roadCoverLength(at, 114) >= 140) spots.push(at)
+      }
+    }
+    const random = rng(7)
+    const deaths = []
+    let guard = 0
+    while (deaths.length < 12 && guard < 8000) {
+      guard += 1
+      const pool = spots.slice()
+      const pick = []
+      let ok = true
+      for (let k = 0; k < 4; k += 1) {
+        const seat = pool.splice(Math.floor(random() * pool.length), 1)[0]
+        if (!seat || pick.some((held) => Math.hypot(held.x - seat.x, held.y - seat.y) < 60)) {
+          ok = false
+          break
+        }
+        pick.push(seat)
+      }
+      if (!ok) continue
+      deaths.push(
+        paceMazeSpender({
+          path: packs[file].path,
+          roads: packs[file].roads,
+          seats: pick,
+          hpMul: packs[file].hpMul,
+          rules: packs[file].rules,
+          wave: packs[file].wave,
+          features: packs[file].mapFeatures,
+        }, 16, 0.28).dead ?? 17,
+      )
+    }
+    const mean = deaths.reduce((sum, dead) => sum + dead, 0) / deaths.length
+    assert.ok(mean >= 8, `1.4.443 ${packs[file].name} ordinary good seats reach about round 8 (${mean.toFixed(2)})`)
+  }
+  bindLampGround(null)
 }
 
 // Night Watch 1.4.424: only the glowing face keeps a hit disc. Playtest shows the tap tally.
