@@ -130,15 +130,18 @@ export function lampStrike(paths: LampPaths): LampStrike {
     cooldownMs = 450
   }
   if (strong >= 3) {
-    damage = 3
-    cooldownMs = 360
+    damage = 5
+    cooldownMs = 280
   }
   if (far >= 1) outer = 1
-  if (far >= 2) rangeBonus = 24
+  if (far >= 2) {
+    rangeBonus = 24
+    damage = Math.max(damage, 2)
+  }
   if (far >= 3) {
     rangeBonus = 40
-    damage = Math.max(damage, 2)
-    cooldownMs = Math.min(cooldownMs, 350)
+    damage = Math.max(damage, 4)
+    cooldownMs = Math.min(cooldownMs, 280)
   }
   return {
     damage,

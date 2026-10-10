@@ -1,4 +1,4 @@
-import { applyEasyPaceLeaks, easyGlowTapDamage, easyRoundHeartCap } from '../lib/defend.ts'
+import { applyEasyPaceLeaks, easyGlowTapDamage, easyRoundHeartCap, easyTapArmored } from '../lib/defend.ts'
 import { NIGHT_PACE_FAST, pacedDt } from '../lib/nightPace.ts'
 import { pathPoint } from './path/data.ts'
 import { easyRound } from './rounds.ts'
@@ -280,6 +280,8 @@ export interface PaceRound {
   taps: number
   attempts: number
   hearts: number
+  /** Boss fate. `none` on a round with no boss. */
+  boss: 'kill' | 'leak' | 'up' | 'none'
 }
 
 /**
@@ -289,6 +291,14 @@ export interface PaceRound {
  */
 export const KID_TAP_WASTE = 0.3
 export const KID_TAP_REACT_S = 0.45
+
+/**
+ * A kid burst. Four tries at about 4 per second, then a pause.
+ * Waste and the short wait still apply. `burst` is off unless a caller asks.
+ */
+export const KID_BURST_GAP_S = 0.25
+export const KID_BURST_TAPS = 4
+export const KID_BURST_PAUSE_S = 1.5
 
 /**
  * One Easy round with a clumsy tap. A try lands every `tapEvery` seconds
@@ -302,6 +312,8 @@ export const KID_TAP_REACT_S = 0.45
  * The round is lost only at 0 hearts. `seed` keeps the misses the same from run to run.
  * `kid` uses the glowing-face wait above. The older hitChance / offCue rolls stay
  * when `kid` is false, so earlier nights keep their misses.
+ * `burst` replaces `tapEvery` with four quick tries and a pause. It stays off
+ * for the older nights.
  */
 export function paceEasyTree(
   roundIndex: number,
@@ -313,6 +325,7 @@ export function paceEasyTree(
   offCue = 0.2,
   pace = 1,
   kid = false,
+  burst = false,
 ): PaceRound {
   const round = easyRound(roundIndex)
   const bossRound = easyBossRound(roundIndex)
@@ -330,7 +343,16 @@ export function paceEasyTree(
       cool: 0,
     }
   })
-  const raiders: { id: number; t: number; hp: number; dead: boolean; pace: number }[] = []
+  const raiders: {
+    id: number
+    t: number
+    hp: number
+    dead: boolean
+    pace: number
+    gait?: string
+    boss: boolean
+    chip: number
+  }[] = []
   const pending: { at: number; id: number }[] = []
   let spawned = 0
   let downed = 0
@@ -345,6 +367,7 @@ export function paceEasyTree(
   let attempts = 0
   let graceUntil = 0
   let lostRound = 0
+  let bossFate: PaceRound['boss'] = bossRound ? 'up' : 'none'
   const walk = 0.01 * round.speed
   const spawnEvery = 3.8 * round.spawn
   let rng = seed >>> 0 || 1
@@ -360,6 +383,7 @@ export function paceEasyTree(
     taps,
     attempts,
     hearts,
+    boss: bossFate,
   })
   const wound = (raider: (typeof raiders)[number], amount: number, byTap: boolean) => {
     if (raider.dead || amount <= 0) return
@@ -370,7 +394,24 @@ export function paceEasyTree(
       if (!byTap) spawnNow = true
       if (byTap) tapKills += 1
       else lampKills += 1
+      if (raider.boss) bossFate = 'kill'
     }
+  }
+  const tapWound = (raider: (typeof raiders)[number]) => {
+    const dmg = easyGlowTapDamage(
+      raider.hp,
+      raider.chip,
+      easyTapArmored(roundIndex, raider.gait, raider.boss),
+    )
+    taps += 1
+    if (dmg > 0) raider.chip += dmg
+    wound(raider, dmg, true)
+  }
+  const tapGap = () => {
+    if (!burst) return tapEvery
+    const slot = attempts % KID_BURST_TAPS
+    if (attempts > 0 && slot === 0) return KID_BURST_GAP_S + KID_BURST_PAUSE_S
+    return KID_BURST_GAP_S
   }
   if (hearts <= 0) return finish('lost')
   const paceScale = pace === NIGHT_PACE_FAST ? NIGHT_PACE_FAST : 1
@@ -386,6 +427,7 @@ export function paceEasyTree(
       if (raider.t >= 1) {
         raider.dead = true
         leaked += 1
+        if (raider.boss) bossFate = 'leak'
       }
     }
     if (leaked > 0) {
@@ -414,6 +456,9 @@ export function paceEasyTree(
         hp: boss ? easyBossHp(roundIndex) : walkerHp(2, bonus, gait),
         dead: false,
         pace: boss ? BOSS_PACE : walkerPace(gait),
+        gait,
+        boss,
+        chip: 0,
       })
       spawned += 1
     }
@@ -458,11 +503,10 @@ export function paceEasyTree(
         const aim = raiders.find((raider) => raider.id === shot.id)
         const front = live().sort((a, b) => b.t - a.t)[0]
         if (roll() < KID_TAP_WASTE || !aim || aim.dead || !front || front.id !== aim.id) continue
-        taps += 1
-        wound(aim, easyGlowTapDamage(aim.hp), true)
+        tapWound(aim)
       }
     }
-    if (tapEvery > 0 && tapAt >= tapEvery && live().length > 0) {
+    if ((burst || tapEvery > 0) && tapAt >= tapGap() && live().length > 0) {
       tapAt = 0
       attempts += 1
       const walking = live().sort((a, b) => b.t - a.t)
@@ -473,9 +517,8 @@ export function paceEasyTree(
         const offFace = walking.length > 1 && roll() < offCue
         const hit = roll() <= hitChance
         if (!offFace && hit) {
-          taps += 1
           const front = walking[0]
-          if (front) wound(front, easyGlowTapDamage(front.hp), true)
+          if (front) tapWound(front)
         }
       }
     }

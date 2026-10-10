@@ -2283,6 +2283,11 @@ img.walker-face.easy-walker-face,
   .nw-walker-slide.easy-walker-roster { animation: none; }
 }
 
+/* 1.4.430: Easy does not paint walker names on the map. Hard keeps the slide. */
+.defend-page.is-easy-watch .nw-walker-slide.easy-walker-roster {
+  display: none;
+}
+
 /* 1.4.373: tap a planted lamp for an upgrade card at the tower. Pull is the small trash. */
 /* 1.4.374: that trash stays on the card after a wave clears, not only while planting. */
 .defend-upgrade-ring {
@@ -3655,11 +3660,18 @@ button.defend-new-lamp[aria-pressed='true'] {
     transition: opacity 0.4s ease;
   }
 
-  /* 1.4.383: Sparks stay clear of Accuser. The name chip sits below the star. */
-  .defend-page.is-easy-watch .nw-balloon-slot {
-    z-index: 8;
+  /* 1.4.430: no walker name chip on Easy. The sparks star stays inside the screen. */
+  .defend-page.is-easy-watch .nw-walker-slide.easy-walker-roster {
+    display: none;
   }
 
+  .defend-page.is-easy-watch .nw-balloon-slot {
+    z-index: 8;
+    top: 10px;
+    left: max(18px, calc(env(safe-area-inset-left, 0px) + 14px));
+  }
+
+  /* 1.4.383: Sparks stay clear of Accuser. The name chip sits below the star. */
   .defend-page.is-easy-watch .nw-walker-slide.easy-walker-roster {
     top: 152px;
     left: 8px;
