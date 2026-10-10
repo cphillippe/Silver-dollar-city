@@ -69,6 +69,8 @@ import {
   easyClearHeart,
   easyGlowTapDamage,
   easyRoundHeartCap,
+  easyTapArmored,
+  TAP_SHRUG_CHIP,
   easyFaceHitPx,
   faceTapStrike,
   EASY_WALKER_HIT_PX,
@@ -114,7 +116,16 @@ import {
   walkerPace,
   walkerSpark,
 } from '../src/nightWatch/walkers.ts'
-import { paceEasyTree, scoreEasyRoad, scoreEasyTree, KID_TAP_REACT_S, KID_TAP_WASTE } from '../src/nightWatch/roundScore.ts'
+import {
+  paceEasyTree,
+  scoreEasyRoad,
+  scoreEasyTree,
+  KID_BURST_GAP_S,
+  KID_BURST_PAUSE_S,
+  KID_BURST_TAPS,
+  KID_TAP_REACT_S,
+  KID_TAP_WASTE,
+} from '../src/nightWatch/roundScore.ts'
 import {
   pickWalkerFace,
   WALKER_FACE_POOL,
@@ -1430,7 +1441,14 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.429')
+assert.equal(APP_VERSION, '1.4.430')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.430'), '1.4.430 changelog row')
+assert.match(latestChange('1.4.430').title, /lamps/i)
+assert.doesNotMatch(
+  latestChange('1.4.430').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.430 changelog avoids GitHub close keywords',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.429'), '1.4.429 changelog row')
 assert.match(latestChange('1.4.429').title, /coin/)
 assert.match(latestChange('1.4.429').items.join('\n'), /lamp/)
@@ -5463,6 +5481,112 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.doesNotMatch(latestChange('1.4.427').items.join('\n'), /Fixes #|Closes #|Resolves #/)
 }
 
+// Night Watch 1.4.430: thick walkers shrug taps. Lamps finish the late bosses.
+{
+  const screen429 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  assert.equal(TAP_SHRUG_CHIP, 4, '1.4.430 an armored walker soaks four glowing taps')
+  assert.equal(EASY_GLOW_TAP_DAMAGE, 1, '1.4.430 a glowing tap is still one hit')
+  assert.equal(easyGlowTapDamage(2), 1, '1.4.430 a normal walker still takes the tap')
+  assert.equal(easyGlowTapDamage(24, 0, false), 1)
+  assert.equal(easyGlowTapDamage(24, 4, false), 1, '1.4.430 a normal walker does not shrug')
+  assert.equal(easyGlowTapDamage(200, 0, true), 1, '1.4.430 the first armored tap still shows')
+  assert.equal(easyGlowTapDamage(200, 3, true), 1)
+  assert.equal(easyGlowTapDamage(200, 4, true), 0, '1.4.430 further armored taps do not move the bar')
+  assert.equal(easyTapArmored(4, 'tough', false), false, '1.4.430 round 5 tough walkers stay open')
+  assert.equal(easyTapArmored(5, 'tough', false), false, '1.4.430 round 6 tough walkers stay open')
+  assert.equal(easyTapArmored(6, 'tough', true), true, '1.4.430 round 7 tough walkers shrug')
+  assert.equal(easyTapArmored(6, 'plain', false), false)
+  assert.equal(easyTapArmored(6, 'fast', false), false)
+  assert.equal(easyTapArmored(13, undefined, true), false, '1.4.430 the round 14 boss still takes taps')
+  assert.equal(easyTapArmored(14, undefined, true), true, '1.4.430 the round 15 boss shrugs')
+  assert.equal(easyTapArmored(24, undefined, true), true)
+  assert.equal(KID_BURST_TAPS, 4)
+  assert.equal(KID_BURST_GAP_S, 0.25)
+  assert.equal(KID_BURST_PAUSE_S, 1.5)
+  assert.equal(lampStrike({ far: 0, strong: 2 }).damage, 2, '1.4.430 Strong step 2 stays')
+  assert.equal(lampStrike({ far: 0, strong: 2 }).cooldownMs, 450)
+  assert.equal(lampStrike({ far: 0, strong: 3 }).damage, 5)
+  assert.equal(lampStrike({ far: 0, strong: 3 }).cooldownMs, 280)
+  assert.equal(lampStrike({ far: 2, strong: 0 }).damage, 2)
+  assert.equal(lampStrike({ far: 3, strong: 0 }).damage, 4)
+  assert.equal(lampStrike({ far: 3, strong: 0 }).cooldownMs, 280)
+  assert.equal(lampStrike({ far: 0, strong: 0 }).damage, 1)
+  assert.equal(lampStrike({ far: 0, strong: 0 }).cooldownMs, 700)
+  assert.match(screen429, /easy && manual && easyTapArmored/)
+  assert.match(screen429, /if \(best\.boss\) live\.current\.bossDown = true/)
+  assert.match(screen429, /easyBossRound\(wave\) && !live\.current\.bossDown/)
+  assert.match(screen429, /setTapJuice\(/)
+  assert.match(screen429, /walkerCalls=\{easy \? \[\] : walkerCalls\}/)
+  assert.match(
+    readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8'),
+    /\.defend-page\.is-easy-watch \.nw-walker-slide\.easy-walker-roster \{\s*display:\s*none/,
+  )
+  assert.match(
+    readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8'),
+    /\.defend-page\.is-easy-watch \.nw-balloon-slot \{[^}]*left:\s*max\(18px, calc\(env\(safe-area-inset-left, 0px\) \+ 14px\)\)/,
+  )
+  const zero429 = { far: 0, strong: 0 }
+  const fourI429 = [zero429, zero429, zero429, zero429]
+  const oneII429 = [{ far: 0, strong: 2 }, zero429, zero429, zero429]
+  const spent429 = spendTreeNight(EASY_ROUNDS.map((round) => roundSparkPay(round)), EASY_LAMP_COST)
+  const seeds429 = Array.from({ length: 8 }, (_, seed) => 1 + seed * 97)
+  function night429(pathsFor, tapEvery, through, burst, base) {
+    let hearts = 3
+    const rows = []
+    for (let index = 0; index < through; index += 1) {
+      const round = paceEasyTree(index, pathsFor(index), hearts, tapEvery, 1, base + index * 17, 0, 1, true, burst)
+      rows.push(round)
+      if (round.result !== 'clear') return { rows, dead: index + 1 }
+      hearts = easyClearHeart(round.hearts)
+    }
+    return { rows, dead: null }
+  }
+  const quiet429 = seeds429.map((base) => night429(() => fourI429, 0, 8, false, base))
+  const light429 = seeds429.map((base) => night429(() => oneII429, 4, 12, false, base))
+  const steady429 = seeds429.map((base) => night429(() => fourI429, 3, 12, false, base))
+  const burstBare = seeds429.map((base) => night429(() => fourI429, 3, 16, true, base))
+  const burstSpend = seeds429.map((base) =>
+    night429((index) => (index === 0 ? fourI429 : spent429.rows[index - 1].lamps), 3, 25, true, base),
+  )
+  assert.ok(
+    quiet429.every((run) => run.dead === 5 && run.rows[4].hearts === 0 && run.rows[4].taps === 0),
+    '1.4.430 zero taps on four Level I lamps still lose round 5',
+  )
+  assert.ok(
+    light429.every((run) => run.dead === 9 && run.rows[4].hearts === 3 && run.rows[4].result === 'clear'),
+    '1.4.430 light taps plus one Strong step 2 still hold round 5',
+  )
+  assert.ok(
+    steady429.every(
+      (run) => (run.dead === 7 || run.dead === 8) && run.rows[4].result === 'clear' && run.rows[4].boss === 'kill',
+    ),
+    '1.4.430 steady taps still clear round 5 and wall on round 7 or 8',
+  )
+  assert.ok(
+    burstBare.every((run) => run.dead === 8 && run.rows[4].boss === 'kill'),
+    '1.4.430 kid bursts with no upgrades wall on round 8',
+  )
+  assert.ok(
+    burstSpend.every((run) => {
+      if (run.dead != null) return false
+      return [14, 19, 24].every((index) => run.rows[index].result === 'clear' && run.rows[index].boss === 'kill')
+    }),
+    '1.4.430 a spender who taps in bursts kills the round 15, 20, and 25 bosses',
+  )
+  for (const index of [14, 24]) {
+    for (const base of seeds429) {
+      const burst = paceEasyTree(index, [zero429], 3, 3, 1, base, 0, 1, true, true)
+      const aimed = paceEasyTree(index, [zero429], 3, 0.2, 1, base, 0, 1, false, false)
+      assert.equal(burst.boss, 'leak', `1.4.430 one Level I lamp plus kid bursts loses the round ${index + 1} boss`)
+      assert.equal(aimed.boss, 'leak', `1.4.430 one Level I lamp plus fast taps loses the round ${index + 1} boss`)
+      assert.notEqual(burst.boss, 'kill')
+    }
+  }
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.430'), '1.4.430 changelog row')
+  assert.match(latestChange('1.4.430').title, /lamps/i)
+  assert.doesNotMatch(latestChange('1.4.430').items.join('\n'), /Fixes #|Closes #|Resolves #/)
+}
+
 // Night Watch 1.4.424: only the glowing face keeps a hit disc. Playtest shows the tap tally.
 {
   const css424 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
@@ -5671,12 +5795,12 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(lampStrike(strong(1)).damage, 1)
   assert.equal(lampStrike(strong(1)).splash, 1)
   assert.equal(lampStrike(strong(2)).damage, 2)
-  assert.equal(lampStrike(strong(3)).damage, 3)
+  assert.equal(lampStrike(strong(3)).damage, 5, '1.4.430 Strong step 3 hits harder')
   assert.equal(lampStrike(far(1)).rangeBonus, 0)
   assert.equal(lampStrike(far(1)).outer, 1)
   assert.equal(lampStrike(far(2)).rangeBonus, 24)
   assert.equal(lampStrike(far(3)).rangeBonus, 40)
-  assert.equal(lampStrike(far(3)).damage, 2)
+  assert.equal(lampStrike(far(3)).damage, 4, '1.4.430 Far step 3 hits harder')
   assert.equal(applyBoost('logic', { logic: 1 }, 1).ok, true, '1.4.405 Hard still buys a step for one spark')
   for (let index = 0; index < 4; index += 1) {
     assert.equal(scoreEasyTree(index, [zero, zero], 0), 'clear', `1.4.405 round ${index + 1} holds with no steps`)
@@ -5689,14 +5813,14 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(scoreEasyTree(5, [strong(2), zero], 0), 'lost', '1.4.405 round 6 still needs taps')
   assert.equal(scoreEasyTree(5, [strong(2), zero], 1), 'clear', '1.4.405 one Strong step 2 holds round 6')
   assert.equal(scoreEasyTree(5, [far(2), zero], 0), 'lost', '1.4.405 Far step 2 still needs taps')
-  assert.equal(scoreEasyTree(5, [far(2), zero], 1), 'lost', '1.4.412 one Far step 2 no longer holds round 6')
+  assert.equal(scoreEasyTree(5, [far(2), zero], 1), 'clear', '1.4.430 Far step 2 holds the old round 6 score')
   assert.equal(scoreEasyTree(9, [strong(2), strong(2)], 1), 'lost', '1.4.412 round 10 leaks on two Strong step 2 lamps')
   assert.equal(scoreEasyTree(9, [strong(2), strong(2), strong(2)], 1), 'lost', '1.4.412 round 10 leaks on three Strong step 2 lamps')
   assert.equal(scoreEasyTree(14, [strong(2), strong(2), strong(2), strong(2)], 1), 'lost', '1.4.405 round 15 leaks if every lamp stopped at step 2')
   assert.equal(scoreEasyTree(14, [strong(3), strong(3), strong(3)], 1), 'clear', '1.4.405 round 15 holds on three Strong step 3 lamps')
-  assert.equal(scoreEasyTree(24, [strong(3), strong(3), strong(3)], 1), 'lost', '1.4.405 round 25 leaks without the fourth lamp')
+  assert.equal(scoreEasyTree(24, [strong(3), strong(3), strong(3)], 1), 'clear', '1.4.430 three Strong step 3 lamps hold the old round 25 score')
   assert.equal(scoreEasyTree(24, [strong(3), strong(3), strong(3), strong(3)], 1), 'clear', '1.4.405 round 25 holds on four Strong step 3 lamps')
-  assert.equal(scoreEasyTree(24, [far(3), far(3), far(3)], 1), 'lost', '1.4.405 round 25 leaks on three Far step 3 lamps')
+  assert.equal(scoreEasyTree(24, [far(3), far(3), far(3)], 1), 'clear', '1.4.430 three Far step 3 lamps hold the old round 25 score')
   assert.equal(scoreEasyTree(24, [far(3), far(3), far(3), far(3)], 1), 'clear', '1.4.405 round 25 holds on four Far step 3 lamps')
   const spent = spendTreeNight(EASY_ROUNDS.map((round) => round.count), EASY_LAMP_COST)
   assert.equal(spent.doneAt, 16, '1.4.412 a count-pay spender finishes on round 16')
@@ -5908,7 +6032,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     '1.4.410 rounds 1–4 stay put',
   )
   const screen410 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
-  assert.match(screen410, /easyGlowTapDamage\(best\.hp\)/)
+  assert.match(screen410, /easyGlowTapDamage\(\s*best\.hp/)
   assert.match(screen410, /easyClearHeart\(live\.current\.hearts\)/)
   assert.match(screen410, /easyRoundHeartCap\(waveIndexRef\.current\)/)
   assert.match(screen410, /\+1 ♥/)
@@ -6124,7 +6248,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     /applyEasyPaceLeaks\(\s*live\.current\.hearts,\s*leaked,\s*live\.current\.clock,/,
     '1.4.413 leak grace reads the game clock',
   )
-  assert.match(score413, /easyGlowTapDamage\(front\.hp\)/)
+  assert.match(score413, /easyGlowTapDamage\(\s*raider\.hp/)
   assert.match(score413, /pacedDt\(1 \/ 60, paceScale\) \/ slices/)
   assert.ok(
     Math.abs(pacedDt(1 / 60, NIGHT_PACE_FAST) / NIGHT_PACE_FAST - pacedDt(1 / 60, 1)) < 1e-12,
@@ -6187,8 +6311,8 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     '1.4.413 active taps plus a spender clear through round 16',
   )
   assert.ok(
-    heavy413.every((run) => run.dead === 10 && run.rows[4].taps >= 30),
-    '1.4.413 heavy taps with no upgrades wall on round 10',
+    heavy413.every((run) => run.dead === 8 && run.rows[4].taps >= 30),
+    '1.4.430 heavy taps with no upgrades wall on round 8',
   )
   for (const every of [0, 3, 0.7]) {
     for (const base of seeds413) {
@@ -6346,24 +6470,24 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     '1.4.417 active taps with no upgrades wall on round 8',
   )
   assert.ok(
-    heavy417.every((run) => run.dead === 10 && run.rows[4].taps >= 30),
-    '1.4.417 heavy taps with no upgrades wall by round 15',
+    heavy417.every((run) => run.dead === 8 && run.rows[4].taps >= 30),
+    '1.4.430 heavy taps with no upgrades wall on round 8',
   )
   const spendHearts = [
     [12, 3, 3],
     [13, 3, 3],
     [14, 3, 3],
-    [15, 3, 2],
+    [15, 3, 3],
     [16, 3, 3],
     [17, 3, 3],
     [18, 3, 3],
-    [19, 3, 2],
-    [20, 3, 2],
+    [19, 3, 3],
+    [20, 3, 3],
     [21, 3, 3],
-    [22, 3, 2],
-    [23, 3, 2],
-    [24, 3, 2],
-    [25, 3, 1],
+    [22, 3, 3],
+    [23, 3, 3],
+    [24, 3, 3],
+    [25, 3, 3],
   ]
   assert.ok(
     spend417.every((run) => run.dead == null && run.rows[4].taps >= 10 && run.rows[4].taps <= 20),
@@ -6377,8 +6501,8 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
       assert.equal(row.result, 'clear')
     }
     assert.ok(
-      run.rows.slice(12, 20).some((row) => row.hearts < row.heartsIn),
-      '1.4.417 the spender loses a heart between rounds 13 and 20',
+      run.rows.slice(12, 20).every((row) => row.hearts === row.heartsIn && row.boss !== 'leak'),
+      '1.4.430 built lamps hold the spender from round 13 through 20',
     )
   }
   for (const every of [0, 3, 0.7]) {
@@ -11617,8 +11741,16 @@ console.log('check-city: ok')
     /const struck = nightEnemies\.hit\(best,/,
     '1.4.316 match hit goes through enemies.hit',
   )
-  assert.match(defendScreenOnlySrc, /struck\.down\s*\?\s*\{ \.\.\.struck\.raider, turned: using, from: to, heavenT: 0/, '1.4.316 keeps soft-turn verb at HP 0')
-  assert.match(defendScreenOnlySrc, /if \(struck\.down\) \{\s*live\.current\.downed \+= 1/, '1.4.316 downed counts only turned walkers')
+  assert.match(
+    defendScreenOnlySrc,
+    /struck\.down\s*\?\s*\{[\s\S]*?\.\.\.struck\.raider,[\s\S]*?turned: using,\s*from: to,\s*heavenT: 0/,
+    '1.4.316 keeps soft-turn verb at HP 0',
+  )
+  assert.match(
+    defendScreenOnlySrc,
+    /if \(struck\.down\) \{[\s\S]*?live\.current\.downed \+= 1/,
+    '1.4.316 downed counts only turned walkers',
+  )
   assert.match(defendScreenOnlySrc, /t: Math\.max\(0, item\.t - 0\.22\)/, '1.4.316 weak stays pushback')
   assert.match(defendNightSrc, /tapJuice\.down === false/, '1.4.316 Easy juice lifts heavenward only on the last hit')
   assert.match(latestChange('1.4.316').title, /Night Watch enemy HP/)
@@ -11887,9 +12019,10 @@ console.log('check-city: ok')
   assert.match(defendScreenOnlySrc, /continueFromBoost/, '1.4.327 boost can continue')
   assert.match(
     defendScreenOnlySrc,
-    /nightEnemies\.hit\(best, easy && manual \? easyGlowTapDamage\(best\.hp\) : tier\)/,
-    '1.4.413 an Easy glow tap is a flat hit and the lamp shot stays the tier',
+    /const tapDmg = easy && manual \? easyGlowTapDamage\(best\.hp, soaked, armored\) : tier/,
+    '1.4.430 an Easy glow tap is a flat hit and the lamp shot stays the tier',
   )
+  assert.match(defendScreenOnlySrc, /nightEnemies\.hit\(best, tapDmg\)/)
   assert.match(defendScreenOnlySrc, /combatTier\(/)
   assert.match(defendScreenOnlySrc, /label="Sparks"/)
   assert.doesNotMatch(defendScreenOnlySrc, /progress\.stars/, '1.4.327 does not drain journal stars')

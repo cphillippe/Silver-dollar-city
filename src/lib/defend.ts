@@ -67,13 +67,33 @@ export function easyClearHeart(hearts: number): number {
 
 /**
  * A glowing-face tap on Easy deals this much, and no more.
- * It does not grow with the lamp's tier. Tough walkers soak it.
+ * It does not grow with the lamp's tier.
  * Fast and plain walkers still drop in a tap or two. Hard does not read this.
  */
 export const EASY_GLOW_TAP_DAMAGE = 1
 
-export function easyGlowTapDamage(hp: number): number {
+/**
+ * An armored walker still loses this much to glowing taps, then shrugs.
+ * The tap keeps popping. The bar stops moving. Lamps have to finish it.
+ */
+export const TAP_SHRUG_CHIP = 4
+
+/**
+ * Tough walkers from round 7 on, and bosses from round 15 on.
+ * Round 5's tough walkers stay open so that proven round does not move.
+ * Hard does not read this.
+ */
+export function easyTapArmored(roundIndex: number, gait?: string, boss = false): boolean {
+  const round = Math.floor(roundIndex) + 1
+  if (boss && round >= 15) return true
+  if (gait === 'tough' && round >= 7) return true
+  return false
+}
+
+export function easyGlowTapDamage(hp: number, chipped = 0, armored = false): number {
   const left = Math.max(0, Math.floor(hp) || 0)
+  const soaked = Math.max(0, Math.floor(chipped) || 0)
+  if (armored && soaked >= TAP_SHRUG_CHIP) return 0
   return Math.min(left, EASY_GLOW_TAP_DAMAGE)
 }
 
