@@ -118,13 +118,25 @@ export const DEFEND_ANCHOR: Record<CityPlotId, NightPoint> = {
 /** The plate paints the road; the SVG road layers stay empty so they don't fight it. */
 export const NIGHT_ROAD_D = ''
 
-export function pathPoint(t: number): NightPoint {
+/** Null is the A2 road. A bound path is another map's walker line. */
+let boundPath: readonly NightPoint[] | null = null
+
+export function bindNightPath(path: readonly NightPoint[] | null): void {
+  boundPath = path
+}
+
+export function boundNightPath(): readonly NightPoint[] {
+  return boundPath ?? DEFEND_PATH
+}
+
+export function pathPoint(t: number, path: readonly NightPoint[] = boundNightPath()): NightPoint {
+  const road = path
   const clamped = Math.min(1, Math.max(0, t))
-  const scaled = clamped * (DEFEND_PATH.length - 1)
-  const i = Math.min(DEFEND_PATH.length - 2, Math.floor(scaled))
+  const scaled = clamped * (road.length - 1)
+  const i = Math.min(road.length - 2, Math.floor(scaled))
   const local = scaled - i
-  const a = DEFEND_PATH[i]
-  const b = DEFEND_PATH[i + 1]
+  const a = road[i]
+  const b = road[i + 1]
   return { x: a.x + (b.x - a.x) * local, y: a.y + (b.y - a.y) * local }
 }
 
@@ -139,10 +151,11 @@ function segDist(p: NightPoint, a: NightPoint, b: NightPoint): number {
 }
 
 /** Shortest distance from a lot seat to the walker road polyline. */
-export function pathClearance(from: NightPoint): number {
+export function pathClearance(from: NightPoint, path: readonly NightPoint[] = boundNightPath()): number {
+  const road = path
   let min = Infinity
-  for (let i = 0; i < DEFEND_PATH.length - 1; i++) {
-    min = Math.min(min, segDist(from, DEFEND_PATH[i], DEFEND_PATH[i + 1]))
+  for (let i = 0; i < road.length - 1; i++) {
+    min = Math.min(min, segDist(from, road[i], road[i + 1]))
   }
   return min
 }

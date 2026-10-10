@@ -505,6 +505,8 @@ export interface ProgressApi {
   snoozeReviews: (ids: string[], today: string) => void
   markMiss: (challengeId: string) => void
   recordNight: (dateKey: string, farHills?: boolean) => void
+  /** Remember which Easy map the next night starts on. */
+  chooseNightMap: (map: 'a2' | 'far-hills') => void
   /** First time a climb guy walks, remember them so the story does not repeat. */
   markMet: (castId: string) => void
   setTheme: (theme: AppTheme) => void

@@ -154,9 +154,16 @@ import {
   paceEasyLive,
   lockInBuyTable,
   paceEasyLockCampaign,
+  paceEasyMapCampaign,
   paceEasyRoad,
   paceEasyRoadCampaign,
 } from '../src/nightWatch/livePace.ts'
+import { nightWatchMapQuery } from '../src/lib/nightWatchDebug.ts'
+import { A2_NIGHT_MAP } from '../src/nightWatch/maps/a2.ts'
+import { nightMapFromPack } from '../src/nightWatch/maps/fromPack.ts'
+import { resolveNightMap } from '../src/nightWatch/maps/resolve.ts'
+import { rateMapSeats, spreadGoodSeats } from '../src/nightWatch/maps/seats.ts'
+import { scaledWalkerHp } from '../src/nightWatch/walkers.ts'
 import {
   pickWalkerFace,
   WALKER_FACE_POOL,
@@ -1487,7 +1494,14 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.440')
+assert.equal(APP_VERSION, '1.4.441')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.441'), '1.4.441 changelog row')
+assert.match(latestChange('1.4.441').title, /Far Hills/i)
+assert.doesNotMatch(
+  latestChange('1.4.441').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.441 changelog avoids GitHub close keywords',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.440'), '1.4.440 changelog row')
 assert.match(latestChange('1.4.440').title, /Lock In/i)
 assert.doesNotMatch(
@@ -6328,12 +6342,89 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(shell440, /Back to the night/)
   assert.match(shell440, /data-night-back/)
   assert.doesNotMatch(screen440, /skillHoldRef\.current = true/)
-  assert.equal(APP_VERSION, '1.4.440')
   assert.ok(CHANGELOG.some((note) => note.version === '1.4.440'), '1.4.440 changelog row')
   assert.doesNotMatch(
     latestChange('1.4.440').items.join('\n'),
     /Fixes #|Closes #|Resolves #/,
     '1.4.440 changelog avoids GitHub close keywords',
+  )
+}
+
+// Night Watch 1.4.441: The Far Hills is a second Easy map. A2 stays the default.
+{
+  assert.equal(A2_NIGHT_MAP.path, DEFEND_PATH, '1.4.441 A2 still uses the live road')
+  assert.equal(A2_NIGHT_MAP.ground.houses[0].x, 331, '1.4.441 A2 cottages stay put')
+  assert.equal(A2_NIGHT_MAP.hpMul, 1)
+  assert.equal(pathPoint(0).x, DEFEND_PATH[0].x)
+  assert.equal(pathPoint(1).y, DEFEND_PATH[DEFEND_PATH.length - 1].y)
+  assert.equal(scaledWalkerHp(20, 1), 20, '1.4.441 A2 health is not scaled')
+  assert.equal(scaledWalkerHp(EASY_TOUGH_WINDOW, 1.23), 25)
+  const raw441 = JSON.parse(
+    readFileSync(new URL('../src/nightWatch/maps/far-hills.json', import.meta.url), 'utf8'),
+  )
+  const hills = nightMapFromPack(raw441)
+  assert.equal(hills.id, 'far-hills')
+  assert.equal(hills.name, 'The Far Hills')
+  assert.equal(hills.width, 798)
+  assert.equal(hills.height, 1134)
+  assert.equal(hills.hpMul, 1.23)
+  assert.equal(hills.houses.length, 7)
+  assert.ok(hills.path.length >= 2)
+  assert.ok(existsSync(new URL('../src/assets/night-watch/maps/far-hills.webp', import.meta.url)))
+  const rated = rateMapSeats(hills.seats, hills.path)
+  assert.ok(rated.filter((seat) => seat.rank === 'good').length >= 8, '1.4.441 at least eight Good seats')
+  const seats = spreadGoodSeats(rated, 4)
+  assert.equal(seats.length, 4)
+  const cottage = { x: 331, y: 147 }
+  assert.equal(lampSpotBlocked(cottage), true, '1.4.441 A2 still blocks its own cottage')
+  assert.equal(
+    lampSpotBlocked({ x: hills.houses[1].x, y: hills.houses[1].y }, {}, undefined, hills),
+    true,
+    '1.4.441 a Far Hills cottage is a no-go on that map',
+  )
+  const bare = paceEasyMapCampaign('none', { path: hills.path, seats, hpMul: hills.hpMul })
+  const spender = paceEasyMapCampaign('natural', { path: hills.path, seats, hpMul: hills.hpMul })
+  assert.equal(bare.dead, 8, '1.4.441 no upgrades wall on round 8')
+  assert.equal(spender.dead, 17, '1.4.441 a spender reaches round 17')
+  assert.equal(
+    resolveNightMap({ easy: false, unlocked: true, saved: 'far-hills', playtest: true, query: 'far-hills', session: 'far-hills' }),
+    'a2',
+    '1.4.441 Hard stays on A2',
+  )
+  assert.equal(
+    resolveNightMap({ easy: true, unlocked: false, saved: 'far-hills', playtest: false, query: null, session: null }),
+    'a2',
+    '1.4.441 a locked save cannot start on the hills',
+  )
+  assert.equal(
+    resolveNightMap({ easy: true, unlocked: true, saved: 'far-hills', playtest: false, query: null, session: null }),
+    'far-hills',
+  )
+  assert.equal(
+    resolveNightMap({ easy: true, unlocked: false, playtest: true, query: 'far-hills', session: null }),
+    'far-hills',
+    '1.4.441 playtest can open the hills before round 25',
+  )
+  assert.equal(nightWatchMapQuery('?playtest=1&nwMap=far-hills', true), 'far-hills')
+  assert.equal(nightWatchMapQuery('?nwMap=far-hills', false), null)
+  const opened441 = normalizeProgress({ defense: { cleared: 1, nights: [], farHills: true, nightMap: 'far-hills' } })
+  assert.equal(opened441.defense.nightMap, 'far-hills')
+  const plain441 = normalizeProgress({ defense: { cleared: 1, nights: [], farHills: true } })
+  assert.notEqual(plain441.defense.nightMap, 'far-hills')
+  const screen441 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const unlock441 = readFileSync(new URL('../src/components/FarHillsUnlock.tsx', import.meta.url), 'utf8')
+  const app441 = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8')
+  const shell441 = readFileSync(new URL('../src/components/AppShell.tsx', import.meta.url), 'utf8')
+  assert.match(unlock441, /FAR_HILLS_PLAY/)
+  assert.match(unlock441, /data-far-hills-play/)
+  assert.doesNotMatch(unlock441, /FAR_HILLS_SOON/)
+  assert.match(screen441, /NightMapPicker/)
+  assert.match(screen441, /history\.pushState\(\{ nwNight: true \}/)
+  assert.match(app441, /popstate/)
+  assert.match(shell441, /history\.back\(\)/)
+  assert.match(
+    readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8'),
+    /\.nw-map-pick/,
   )
 }
 
@@ -12066,7 +12157,7 @@ console.log('check-city: ok')
   assert.doesNotMatch(defendScreenOnlySrc, /className=\{`defend-frame/)
   assert.doesNotMatch(defendScreenOnlySrc, /DEFEND_ANCHOR|pathPoint\(|interface Raider/)
   assert.match(defendScreenOnlySrc, /useState<NightPhase>/)
-  assert.match(defendSkySrc, /<MapPlate \/>/)
+  assert.match(defendSkySrc, /<MapPlate[\s/>]/)
   assert.match(defendSkySrc, /nightPath\.roadD/)
   assert.match(defendNightSrc, /nightTowers\.inRange/)
   assert.deepEqual(nightPathMod.points, DEFEND_PATH)
@@ -12097,7 +12188,7 @@ console.log('check-city: ok')
   assert.match(surface304, /nw-map-plate/, '1.4.304 wires NIGHT_MAP.plate import')
   assert.doesNotMatch(surface304, /plate: null/, '1.4.304 must fill the A2 plate')
   assert.match(mapPlate304, /defend-map-plate/)
-  assert.match(defendSkySrc, /<MapPlate \/>/)
+  assert.match(defendSkySrc, /<MapPlate[\s/>]/)
   assert.match(defendSkySrc, /has-map-plate/)
   const defendCss304 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
   assert.match(defendCss304, /has-map-plate|defend-map-plate/, 'defend.css must style A2 plate under board')
