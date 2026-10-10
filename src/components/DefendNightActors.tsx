@@ -83,6 +83,8 @@ export interface DefendNightActorsProps {
   onOpenUpgrade?: (id: CityPlotId) => void
   /** Live round. A shrugged walker loses the glow from this round on. */
   roundIndex?: number
+  /** Tough walkers shrug taps from this round. A2 is 7. Maze maps are 6. */
+  armorFrom?: number
   /** Lamp that just spent a spark. Brief ring only — peel 4 owns the burst. */
   upFlashId?: CityPlotId | null
   /** Tap or drag preview. The ring radius is the combat hit radius. */
@@ -153,6 +155,7 @@ export function DefendNightActorsSvg({
   upFlashId = null,
   ghost = null,
   roundIndex = -1,
+  armorFrom = 7,
 }: Omit<DefendNightActorsProps, 'tapPos' | 'fireBest' | 'tapJuice' | 'easy' | 'onBoostTower'> & {
   easy: boolean
 }) {
@@ -404,7 +407,7 @@ export function DefendNightActorsSvg({
               {raiders.map((raider) => {
                 const at = raiderAt(raider)
                 const isTap = easyTap && !raider.turned
-                const shrugged = easyTapSoaked(roundIndex, raider)
+                const shrugged = easyTapSoaked(roundIndex, raider, armorFrom)
                 const isCue = isTap && (tapTarget?.id === raider.id || !!raider.boss) && !shrugged
                 const lampHit =
                   raider.struckAt != null && performance.now() - raider.struckAt < SHOT_JUICE_MS

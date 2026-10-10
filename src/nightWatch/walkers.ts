@@ -103,14 +103,14 @@ export interface EasyJumpLoad {
  * Sparks left are the bank after the buys they could afford.
  * Playtest jumps only. A normal night does not call this.
  */
-export function easyJumpLoad(roundIndex: number): EasyJumpLoad {
+export function easyJumpLoad(roundIndex: number, tune: NightTune = A2_TUNE): EasyJumpLoad {
   const index = Math.max(0, Math.floor(roundIndex) || 0)
   const lamps: LampPaths[] = [{ far: 0, strong: 0 }]
   let sparks = 0
   let step = 0
   for (let at = 0; at < index; at += 1) {
     const boss = easyBossRound(at) ? 1 + BOSS_CLEAR_SPARKS : 0
-    sparks += roundSparkPay(EASY_ROUNDS[at]) + boss
+    sparks += roundSparkPay(roundForTune(EASY_ROUNDS[at], at, tune)) + boss
     let guard = 0
     while (guard < 40) {
       guard += 1
@@ -242,6 +242,45 @@ export const EASY_TOUGH_WINDOW = 20
 export const EASY_LATE_BULK = 140
 
 /**
+ * A2 keeps armor at round 7, one tough on round 6, and +140 from round 16.
+ * Maze maps pass `maze-v1`: armor at round 6, two toughs on round 6, +100 from round 11.
+ */
+export interface NightTune {
+  armorFrom: number
+  bulkFrom: number
+  bulk: number
+  r6tough: number
+}
+
+export const A2_TUNE: NightTune = {
+  armorFrom: 7,
+  bulkFrom: 16,
+  bulk: EASY_LATE_BULK,
+  r6tough: 1,
+}
+
+export const MAZE_V1_TUNE: NightTune = {
+  armorFrom: 6,
+  bulkFrom: 11,
+  bulk: 100,
+  r6tough: 2,
+}
+
+export function nightTune(rules?: string): NightTune {
+  return rules === 'maze-v1' ? MAZE_V1_TUNE : A2_TUNE
+}
+
+/** Round 6's tough count, without editing the shared Easy table. */
+export function roundForTune<T extends { tough: number }>(
+  round: T,
+  roundIndex: number,
+  tune: NightTune = A2_TUNE,
+): T {
+  if (tune.r6tough === 1 || Math.floor(roundIndex) !== 5 || round.tough === tune.r6tough) return round
+  return { ...round, tough: tune.r6tough }
+}
+
+/**
  * Far Hills walker health. A2 passes `1` and the table is unchanged.
  * Boss health is not scaled here.
  */
@@ -256,11 +295,13 @@ export function easyWalkerHp(
   roundBonus: number,
   gait: WalkerGait | undefined,
   roundIndex: number,
+  tune: NightTune = A2_TUNE,
 ): number {
   const round = Math.floor(roundIndex) + 1
-  if (gait === 'tough' && round >= 7 && round <= 15) return EASY_TOUGH_WINDOW
+  const windowEnd = Math.min(15, tune.bulkFrom - 1)
+  if (gait === 'tough' && round >= tune.armorFrom && round <= windowEnd) return EASY_TOUGH_WINDOW
   const hp = walkerHp(kindHp, roundBonus, gait)
-  if (round >= 16 && gait !== 'fast') return hp + EASY_LATE_BULK
+  if (round >= tune.bulkFrom && gait !== 'fast') return hp + tune.bulk
   return hp
 }
 

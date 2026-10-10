@@ -15,7 +15,7 @@ import {
 import type { WalkerKind } from '../../types.ts'
 import { walkerFaceSrc } from './faces.ts'
 import { nightParts } from '../parts/index.ts'
-import { nightPath } from '../path/index.ts'
+import { pathPoint, roadById } from '../path/data.ts'
 import type { NightPoint, NightRaider } from '../types.ts'
 import { enemyHit, enemyMaxHp } from './hp.ts'
 
@@ -58,7 +58,11 @@ export interface NightEnemiesModule {
   /** Walker position: on the road, or lifting toward heaven once turned. */
   at(raider: NightRaider): NightPoint
   /** Front-most unturned walker who can still take a tap. A shrugged walker is skipped. */
-  cueTarget<T extends NightRaider>(raiders: readonly T[], roundIndex?: number): T | undefined
+  cueTarget<T extends NightRaider>(
+    raiders: readonly T[],
+    roundIndex?: number,
+    armorFrom?: number,
+  ): T | undefined
   fit(easy: boolean, toolId: string, kind: WalkerKind): 'match' | 'weak'
   /** Spawn HP: swarm / mid / tank role per kind, lower on Easy. */
   maxHp(kind: WalkerKind, easy: boolean): number
@@ -83,8 +87,8 @@ export const nightEnemies: NightEnemiesModule = {
   at: (raider) =>
     raider.turned && raider.from
       ? heavenPoint(raider.from, raider.heavenT ?? 0)
-      : nightPath.pointAt(raider.t),
-  cueTarget: easyTapTarget,
+      : pathPoint(raider.t, roadById(raider.pathId)),
+  cueTarget: (raiders, roundIndex, armorFrom) => easyTapTarget(raiders, roundIndex, armorFrom),
   fit: easyTapFit,
   maxHp: enemyMaxHp,
   hit: enemyHit,

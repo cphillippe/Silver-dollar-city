@@ -38,6 +38,8 @@ export interface NightRaider {
   heavenT?: number
   /** Last lamp hit, for the path-face flash. */
   struckAt?: number
+  /** Maze road this walker stays on. Unset on A2, which has one road. */
+  pathId?: string
 }
 
 export interface NightShot {

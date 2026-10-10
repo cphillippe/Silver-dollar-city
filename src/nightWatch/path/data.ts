@@ -118,15 +118,70 @@ export const DEFEND_ANCHOR: Record<CityPlotId, NightPoint> = {
 /** The plate paints the road; the SVG road layers stay empty so they don't fight it. */
 export const NIGHT_ROAD_D = ''
 
+/** One walker road. `share` is that road's fraction of a round's walkers. */
+export interface BoundRoad {
+  id: string
+  share: number
+  via: readonly string[]
+  points: readonly NightPoint[]
+}
+
 /** Null is the A2 road. A bound path is another map's walker line. */
 let boundPath: readonly NightPoint[] | null = null
+/** Null is the one A2 road. A maze map binds every walker road. */
+let boundRoads: readonly BoundRoad[] | null = null
 
 export function bindNightPath(path: readonly NightPoint[] | null): void {
   boundPath = path
 }
 
+export function bindNightRoads(roads: readonly BoundRoad[] | null): void {
+  boundRoads = roads
+}
+
 export function boundNightPath(): readonly NightPoint[] {
   return boundPath ?? DEFEND_PATH
+}
+
+export function boundNightRoads(): readonly BoundRoad[] | null {
+  return boundRoads
+}
+
+/**
+ * Walker `n` takes the road furthest behind its share.
+ * A tie goes to the earlier road. One road always returns 0.
+ */
+export function pathPick(n: number, shares: readonly number[]): number {
+  if (shares.length <= 1) return 0
+  const counts = shares.map(() => 0)
+  let pick = 0
+  const last = Math.max(0, Math.floor(n) || 0)
+  for (let k = 0; k <= last; k += 1) {
+    let best = 0
+    let bestScore = -Infinity
+    for (let q = 0; q < shares.length; q += 1) {
+      const score = shares[q] * (k + 1) - counts[q]
+      if (score > bestScore || (score === bestScore && q < best)) {
+        bestScore = score
+        best = q
+      }
+    }
+    counts[best] += 1
+    pick = best
+  }
+  return pick
+}
+
+/** Road id for this spawn, or unset on A2. */
+export function walkerRoadId(spawned: number): string | undefined {
+  const roads = boundRoads
+  if (!roads || roads.length < 1) return undefined
+  return roads[pathPick(spawned, roads.map((road) => road.share))]?.id
+}
+
+export function roadById(id: string | undefined): readonly NightPoint[] | undefined {
+  if (!id || !boundRoads) return undefined
+  return boundRoads.find((road) => road.id === id)?.points
 }
 
 export function pathPoint(t: number, path: readonly NightPoint[] = boundNightPath()): NightPoint {
@@ -150,14 +205,25 @@ function segDist(p: NightPoint, a: NightPoint, b: NightPoint): number {
   return Math.hypot(p.x - (a.x + t * dx), p.y - (a.y + t * dy))
 }
 
-/** Shortest distance from a lot seat to the walker road polyline. */
-export function pathClearance(from: NightPoint, path: readonly NightPoint[] = boundNightPath()): number {
-  const road = path
+function clearanceOn(from: NightPoint, road: readonly NightPoint[]): number {
   let min = Infinity
   for (let i = 0; i < road.length - 1; i++) {
     min = Math.min(min, segDist(from, road[i], road[i + 1]))
   }
   return min
+}
+
+/**
+ * Shortest distance from a lot seat to the walker road.
+ * With no path, a maze map uses the nearest of its roads. A2 stays the one road.
+ */
+export function pathClearance(from: NightPoint, path?: readonly NightPoint[]): number {
+  if (!path && boundRoads && boundRoads.length > 1) {
+    let min = Infinity
+    for (const road of boundRoads) min = Math.min(min, clearanceOn(from, road.points))
+    return min
+  }
+  return clearanceOn(from, path ?? boundNightPath())
 }
 
 /** Free lamp seat. `at:360:812` is that point in plate units, not a city lot. */
