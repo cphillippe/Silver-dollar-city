@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.432',
+    title: 'A finished line brings you Home',
+    when: '2026-10-10',
+    items: [
+      'After you lock a line in, you land on Home. The saved-lines page opens only when you tap Lock In.',
+      'That page has a Home button, so you can leave it.',
+    ],
+  },
+  {
     version: '1.4.431',
     title: 'Easy lines name the speaker and God',
     when: '2026-10-10',
