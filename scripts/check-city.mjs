@@ -71,6 +71,11 @@ import {
   easyClearHeart,
   easyGlowTapDamage,
   easyRoundHeartCap,
+  applyEasyPointerTap,
+  easyLiveSpawnT,
+  easyPointerTapGate,
+  EASY_ON_SCREEN_SEC,
+  EASY_ON_SCREEN_T,
   easyTapArmored,
   liveBossClearPhase,
   liveNightStrike,
@@ -1451,7 +1456,14 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.434')
+assert.equal(APP_VERSION, '1.4.435')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.435'), '1.4.435 changelog row')
+assert.match(latestChange('1.4.435').title, /boss/i)
+assert.doesNotMatch(
+  latestChange('1.4.435').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.435 changelog avoids GitHub close keywords',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.434'), '1.4.434 changelog row')
 assert.match(latestChange('1.4.434').title, /boss/i)
 assert.doesNotMatch(
@@ -5070,8 +5082,8 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(easySpawnT(0), 0, '1.4.393 the first walker starts at the gate')
   assert.equal(easySpawnT(1), 0, '1.4.393 the second walker starts at the gate')
   assert.equal(easySpawnT(5), 0, '1.4.393 later walkers start at the gate')
-  assert.match(defendSrc393, /t: nightEnemies\.spawnT\(id\)/, '1.4.393 Easy and Hard share the gate spawn')
-  assert.doesNotMatch(defendSrc393, /t: easy \? nightEnemies\.spawnT/, '1.4.393 Easy no longer starts up the road')
+  assert.match(defendSrc393, /: nightEnemies\.spawnT\(id\)/, '1.4.393 Hard still starts at the gate')
+  assert.match(defendSrc393, /easyLiveSpawnT\(/, '1.4.435 Easy starts where the phone can see the walker')
   assert.match(css393, /@keyframes defend-gate-in/)
   assert.match(css393, /animation: defend-gate-in 250ms ease-out both/)
   assert.match(css393, /prefers-reduced-motion: reduce\) \{[\s\S]*?\.defend-raider \{[\s\S]*?animation: none/)
@@ -5845,6 +5857,104 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   }
 }
 
+// Night Watch 1.4.435: R1–R6 stay the 1.4.424 table. A boss tap goes through the glow gate.
+{
+  const snap435 = JSON.parse(
+    readFileSync(new URL('../src/nightWatch/r1r6-424.json', import.meta.url), 'utf8'),
+  )
+  const roundsSrc435 = readFileSync(new URL('../src/nightWatch/rounds.ts', import.meta.url), 'utf8')
+  assert.equal(snap435.from, '66f211f')
+  assert.ok(roundsSrc435.includes(snap435.source), '1.4.435 R1–R6 round rows match the 1.4.424 text')
+  const live435 = EASY_ROUNDS.slice(0, 6).map((round, index) => ({
+    count: round.count,
+    speed: round.speed,
+    hp: round.hp,
+    spawn: round.spawn,
+    fast: round.fast,
+    tough: round.tough,
+    gaits: gaitPlan(round),
+    boss: easyBossRound(index),
+    bossHp: easyBossHp(index),
+  }))
+  assert.deepEqual(live435, snap435.rounds, '1.4.435 R1–R6 count, HP, gaits, and boss HP match 1.4.424')
+  assert.equal(cueTapStrike(true, false), snap435.glow.easyOffCue)
+  assert.equal(cueTapStrike(true, true), snap435.glow.easyOnCue)
+  assert.equal(cueTapStrike(false, false), snap435.glow.hardOffCue)
+  for (const hp of [1, 2, 12, 24]) {
+    assert.equal(easyGlowTapDamage(hp), snap435.tapDamage[String(hp)], `1.4.435 a tap on ${hp} is still one`)
+    assert.equal(easyGlowTapDamage(hp, 4, false), 1, '1.4.435 an open walker does not soak')
+  }
+  for (let index = 0; index < 6; index += 1) {
+    assert.equal(easyTapArmored(index, 'plain', false), false, `1.4.435 round ${index + 1} plain stays open`)
+    assert.equal(easyTapArmored(index, 'fast', false), false, `1.4.435 round ${index + 1} fast stays open`)
+    assert.equal(easyTapArmored(index, 'tough', false), false, `1.4.435 round ${index + 1} tough does not soak`)
+    assert.equal(easyTapArmored(index, undefined, true), false, `1.4.435 round ${index + 1} boss does not shrug`)
+    assert.equal(
+      easyGlowTapDamage(12, TAP_SHRUG_CHIP, easyTapArmored(index, 'tough', false)),
+      1,
+      `1.4.435 round ${index + 1} still takes the fifth tap`,
+    )
+  }
+  assert.equal(easyTapArmored(6, 'tough', false), true, '1.4.435 round 7 tough still shrugs')
+  assert.equal(easyTapArmored(14, undefined, true), true, '1.4.435 a round 15 boss still shrugs')
+  const face = (id, t, extra = {}) => ({
+    id,
+    t,
+    text: 'walker',
+    kind: 'skeptic',
+    hp: extra.hp ?? 6,
+    maxHp: extra.hp ?? 6,
+    spark: 1,
+    ...extra,
+  })
+  const lead435 = face(1, 0.8, { hp: 4, maxHp: 4 })
+  const boss435 = face(7, 0.4, { hp: 12, maxHp: 12, boss: true })
+  const back435 = face(2, 0.2, { hp: 6, maxHp: 6 })
+  const road435 = [lead435, boss435, back435]
+  assert.equal(easyTapTarget(road435)?.id, 1, '1.4.435 the lead walker is still the teach cue')
+  assert.equal(easyPointerTapGate(true, boss435, road435), 'hit', '1.4.435 the boss passes the glow gate')
+  const bossTap435 = applyEasyPointerTap(boss435, road435, {
+    easy: true,
+    manual: true,
+    roundIndex: 4,
+    lampDamage: 1,
+  })
+  assert.equal(bossTap435.miss, false, '1.4.435 a pointer on the boss is not a miss')
+  assert.equal(bossTap435.strike.raider.hp, 11, '1.4.435 that tap cuts the round 5 boss')
+  assert.equal(boss435.hp, 12, '1.4.435 the tap returns a copy')
+  const backTap435 = applyEasyPointerTap(back435, road435, {
+    easy: true,
+    manual: true,
+    roundIndex: 4,
+    lampDamage: 1,
+  })
+  assert.equal(backTap435.miss, true, '1.4.435 a walker behind the glow is still a miss')
+  assert.equal(back435.hp, 6)
+  const leadTap435 = applyEasyPointerTap(lead435, road435, {
+    easy: true,
+    manual: true,
+    roundIndex: 4,
+    lampDamage: 1,
+  })
+  assert.equal(leadTap435.miss, false)
+  assert.equal(leadTap435.strike.raider.hp, 3, '1.4.435 the glowing lead still takes the tap')
+  const r1Wait = (EASY_ON_SCREEN_T - easyLiveSpawnT(1)) / 0.01
+  const r2Wait = (EASY_ON_SCREEN_T - easyLiveSpawnT(1.35)) / (0.01 * 1.35)
+  assert.ok(r1Wait <= EASY_ON_SCREEN_SEC + 0.001, '1.4.435 round 1 is in the picture within five seconds')
+  assert.ok(r2Wait <= EASY_ON_SCREEN_SEC + 0.001, '1.4.435 round 2 is in the picture within five seconds')
+  assert.equal(easySpawnT(0), 0, '1.4.435 the sim still starts at the gate')
+  const screen435 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const actors435 = readFileSync(new URL('../src/components/DefendNightActors.tsx', import.meta.url), 'utf8')
+  const css435 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  assert.match(screen435, /easyPointerTapGate\(easy, raider, live\.current\.raiders\)/)
+  assert.match(
+    screen435,
+    /easy\s*\?\s*easyLiveSpawnT\(tune\.speedScale \* \(boss \? BOSS_PACE : walkerPace\(gait\)\)\)/,
+  )
+  assert.match(actors435, /tapTarget\?\.id === raider\.id \|\| !!raider\.boss/)
+  assert.match(css435, /\.defend-page\.is-easy-tap \.defend-raider\.is-boss \.defend-raider-hit \{[^}]*pointer-events:\s*all/)
+}
+
 // Night Watch 1.4.424: only the glowing face keeps a hit disc. Playtest shows the tap tally.
 {
   const css424 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
@@ -6253,7 +6363,12 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(capped.hearts, 1)
   assert.equal(applyEasyPaceLeaks(3, 1, 0, 0, 0, true).lostHearts, 0, '1.4.409 a shield still forgives')
   const screen409 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
-  assert.match(screen409, /cueTapStrike\(easy, glowing\)/)
+  assert.match(screen409, /easyPointerTapGate\(easy, raider, live\.current\.raiders\)/)
+  assert.match(
+    readFileSync(new URL('../src/lib/defend.ts', import.meta.url), 'utf8'),
+    /return cueTapStrike\(easy, cue\?\.id === raider\.id\)/,
+    '1.4.409 a walker who is not glowing is still a miss',
+  )
   assert.match(screen409, /if \(easy && !manual\) live\.current\.spawnNow = true/)
   assert.match(screen409, /applyEasyPaceLeaks\(/)
   assert.match(screen409, /applyGateLeaks\(live\.current\.hearts, leaked, shielded\)/)

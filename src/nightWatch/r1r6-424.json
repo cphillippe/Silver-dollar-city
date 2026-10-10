@@ -1,0 +1,15 @@
+{
+  "from": "66f211f",
+  "note": "R1–R6 taken from 1.4.424. Late-round soak must not change these rows.",
+  "rounds": [
+    { "count": 4, "speed": 1, "hp": 0, "spawn": 1, "fast": 0, "tough": 0, "gaits": ["plain", "plain", "plain", "plain"], "boss": false, "bossHp": 12 },
+    { "count": 4, "speed": 1.35, "hp": 0, "spawn": 0.95, "fast": 0, "tough": 0, "gaits": ["plain", "plain", "plain", "plain"], "boss": false, "bossHp": 12 },
+    { "count": 5, "speed": 1.8, "hp": 1, "spawn": 0.9, "fast": 0, "tough": 0, "gaits": ["plain", "plain", "plain", "plain", "plain"], "boss": false, "bossHp": 12 },
+    { "count": 5, "speed": 2.6, "hp": 2, "spawn": 0.85, "fast": 1, "tough": 0, "gaits": ["plain", "fast", "plain", "plain", "plain"], "boss": false, "bossHp": 12 },
+    { "count": 7, "speed": 6.4, "hp": 6, "spawn": 0.68, "fast": 2, "tough": 3, "gaits": ["tough", "plain", "tough", "plain", "tough", "fast", "fast"], "boss": true, "bossHp": 12 },
+    { "count": 7, "speed": 6.4, "hp": 8, "spawn": 0.72, "fast": 2, "tough": 1, "gaits": ["tough", "plain", "fast", "plain", "plain", "fast", "plain"], "boss": false, "bossHp": 44 }
+  ],
+  "glow": { "easyOffCue": "miss", "easyOnCue": "hit", "hardOffCue": "hit" },
+  "tapDamage": { "1": 1, "2": 1, "12": 1, "24": 1 },
+  "source": "  { count: 4, speed: 1, hp: 0, spawn: 1, fast: 0, tough: 0 },\n  { count: 4, speed: 1.35, hp: 0, spawn: 0.95, fast: 0, tough: 0 },\n  { count: 5, speed: 1.8, hp: 1, spawn: 0.9, fast: 0, tough: 0 },\n  { count: 5, speed: 2.6, hp: 2, spawn: 0.85, fast: 1, tough: 0 },\n  { count: 7, speed: 6.4, hp: 6, spawn: 0.68, fast: 2, tough: 3 },\n  { count: 7, speed: 6.4, hp: 8, spawn: 0.72, fast: 2, tough: 1 },"
+}
