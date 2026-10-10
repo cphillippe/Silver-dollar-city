@@ -152,6 +152,8 @@ import {
   paceEasy436,
   paceEasyCampaign,
   paceEasyLive,
+  lockInBuyTable,
+  paceEasyLockCampaign,
   paceEasyRoad,
   paceEasyRoadCampaign,
 } from '../src/nightWatch/livePace.ts'
@@ -163,16 +165,20 @@ import {
 } from '../src/nightWatch/enemies/faces.ts'
 import {
   applyPathStep,
+  BONUS_LESSONS,
   canTake,
   freshRunPaths,
   easyShotReach,
   lampStrike,
+  LESSON_LOCK,
   pathSparkSpend,
   spendTreeNight,
   stepLocked,
+  TREE_BONUS_COST,
   TREE_LOCK,
   TREE_STEP_COST,
 } from '../src/nightWatch/upgradeTree.ts'
+import { lessonAreaFor, samePillarLessons } from '../src/nightWatch/lampPillar.ts'
 import { boardFill, boardFillPoint } from '../src/nightWatch/map/phoneFill.ts'
 import {
   clearPanelFolded,
@@ -1480,7 +1486,14 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.439')
+assert.equal(APP_VERSION, '1.4.440')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.440'), '1.4.440 changelog row')
+assert.match(latestChange('1.4.440').title, /Lock In/i)
+assert.doesNotMatch(
+  latestChange('1.4.440').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.440 changelog avoids GitHub close keywords',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.439'), '1.4.439 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.439').items.join('\n'),
@@ -6216,12 +6229,108 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.doesNotMatch(screen439, /NightSkillSplash/)
   assert.doesNotMatch(screen439, /skillHoldRef\.current = true/)
   assert.match(screen439, /intro === 'still'/, '1.4.439 Still stays the note before Begin')
-  assert.equal(APP_VERSION, '1.4.439')
   assert.ok(CHANGELOG.some((note) => note.version === '1.4.439'), '1.4.439 changelog row')
   assert.doesNotMatch(
     latestChange('1.4.439').items.join('\n'),
     /Fixes #|Closes #|Resolves #/,
     '1.4.439 changelog avoids GitHub close keywords',
+  )
+}
+
+// Night Watch 1.4.440: Lock In opens a bonus step. Steps I–III stay sparks-only.
+{
+  const ceiling = { far: 1, strong: 3 }
+  for (const tool of ['love', 'logic', 'reason', 'science']) {
+    assert.equal(samePillarLessons(tool, []), 0, '1.4.440 zero lock-ins hold nothing')
+    let paths = { far: 0, strong: 0 }
+    for (const cost of [3, 6, 12]) {
+      const buy = canTake(paths, 'strong')
+      assert.equal(buy.ok, true, `1.4.440 ${tool} buys Strong without lessons`)
+      assert.equal(buy.cost, cost)
+      assert.equal(buy.gate, undefined)
+      paths = { far: 0, strong: paths.strong + 1 }
+    }
+    const far = canTake(paths, 'far')
+    assert.equal(far.ok, true, `1.4.440 ${tool} still buys Far 1`)
+    assert.equal(far.cost, 3)
+    const bonus = canTake({ far: 1, strong: 3 }, 'strong')
+    assert.equal(bonus.ok, false, `1.4.440 ${tool} bonus stays locked`)
+    assert.equal(bonus.gate, 'lesson')
+    assert.equal(bonus.reason, LESSON_LOCK)
+    assert.equal(bonus.cost, TREE_BONUS_COST)
+    const spent = applyPathStep(tool, { [tool]: { far: 1, strong: 3 } }, 99, 'strong')
+    assert.equal(spent.ok, false, `1.4.440 ${tool} cannot spend into the bonus`)
+  }
+  assert.equal(BONUS_LESSONS, 3)
+  assert.equal(TREE_BONUS_COST, 15)
+  assert.deepEqual(TREE_STEP_COST, [3, 6, 12])
+  const loveHeld = ['ph-road', 'ph-father', 'ph-debt']
+  assert.equal(samePillarLessons('love', loveHeld), 3, '1.4.440 three Love lessons open Love')
+  assert.equal(samePillarLessons('logic', loveHeld), 0, '1.4.440 Love lessons do not open Logic')
+  assert.equal(samePillarLessons('love', ['ph-road', 'ph-father']), 2)
+  assert.equal(samePillarLessons('love', [...loveHeld, 'td-watch', 'wb-creed']), 3)
+  assert.equal(samePillarLessons('love', ['daily-lantern', 'ph-road', 'ph-father']), 3)
+  assert.equal(samePillarLessons('science', ['ob-tuning', 'daily-stars']), 2)
+  assert.equal(samePillarLessons('reason', ['hl-moral', 'fg-ought', 'daily-grace']), 3)
+  const open = canTake(ceiling, 'strong', { lessons: 3, playtest: false })
+  assert.equal(open.ok, true)
+  assert.equal(open.cost, 15)
+  const shut = canTake(ceiling, 'strong', { lessons: 2, playtest: false })
+  assert.equal(shut.gate, 'lesson')
+  const play = canTake(ceiling, 'strong', { lessons: 0, playtest: true })
+  assert.equal(play.ok, true, '1.4.440 playtest unlocks the bonus step')
+  assert.equal(play.cost, TREE_BONUS_COST)
+  const crossed = canTake(ceiling, 'far', { lessons: 9, playtest: true })
+  assert.equal(crossed.ok, false, '1.4.440 playtest still stops the short path at one')
+  assert.equal(crossed.reason, TREE_LOCK)
+  assert.equal(lampStrike(ceiling).damage, 5)
+  assert.equal(lampStrike(ceiling).cooldownMs, 280)
+  assert.equal(lampStrike({ far: 1, strong: 4 }).damage, 5)
+  assert.equal(lampStrike({ far: 1, strong: 4 }).cooldownMs, 180)
+  assert.equal(lampStrike({ far: 1, strong: 0 }).rangeBonus, 0)
+  assert.equal(easyShotReach({ far: 1, strong: 4 }), 48)
+  assert.equal(pathSparkSpend({ far: 1, strong: 4 }), 39, '1.4.440 pull returns the bonus step')
+  assert.equal(lessonAreaFor('love', []), 'parable-hollow')
+  assert.equal(lessonAreaFor('logic', []), 'witness-bench')
+  assert.equal(lessonAreaFor('science', []), 'observatory')
+  assert.equal(lessonAreaFor('reason', []), 'first-gate')
+  const zero = paceEasyRoadCampaign('natural', 'live')
+  const locked = paceEasyLockCampaign()
+  assert.equal(zero.dead, 18, '1.4.440 zero lock-ins still die on round 18')
+  assert.equal(locked.dead, null, '1.4.440 lock-in lessons carry a spender through round 25')
+  assert.equal(locked.rows[24].result, 'clear')
+  assert.equal(locked.rows[24].boss, 'kill')
+  assert.ok(locked.rows[24].hearts < 3, '1.4.440 round 25 still costs a heart')
+  const buys = lockInBuyTable()
+  assert.equal(buys[13].bought, 0, '1.4.440 round 14 is still saving')
+  assert.equal(buys[14].bought, 1, '1.4.440 the first bonus step is round 15')
+  assert.equal(buys[15].bought, 2)
+  assert.equal(buys[17].bought, 3, '1.4.440 round 18 starts with three bonus steps')
+  assert.equal(buys[18].bought, 4, '1.4.440 the fourth bonus step is round 19')
+  assert.deepEqual(
+    [5, 10, 15, 20, 25].map((round) => easyBossHp(round - 1)),
+    [12, 55, 120, 180, 240],
+    '1.4.440 boss health stays on the 438 curve',
+  )
+  const card440 = readFileSync(new URL('../src/components/DefendTowerCard.tsx', import.meta.url), 'utf8')
+  const screen440 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const shell440 = readFileSync(new URL('../src/components/AppShell.tsx', import.meta.url), 'utf8')
+  assert.equal(LESSON_LOCK, 'Learn in Lock In to unlock')
+  assert.match(card440, /LESSON_LOCK/)
+  assert.match(card440, /defend-lesson-lock/)
+  assert.match(card440, /data-lesson-open/)
+  assert.match(card440, /data-lesson-cue/)
+  assert.match(screen440, /saveNightReturn/)
+  assert.match(screen440, /readNightReturn/)
+  assert.match(shell440, /Back to the night/)
+  assert.match(shell440, /data-night-back/)
+  assert.doesNotMatch(screen440, /skillHoldRef\.current = true/)
+  assert.equal(APP_VERSION, '1.4.440')
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.440'), '1.4.440 changelog row')
+  assert.doesNotMatch(
+    latestChange('1.4.440').items.join('\n'),
+    /Fixes #|Closes #|Resolves #/,
+    '1.4.440 changelog avoids GitHub close keywords',
   )
 }
 

@@ -12,11 +12,22 @@ export type TreePath = (typeof TREE_PATHS)[number]
 /** Sparks for step 1, step 2, and step 3. The same row on every lamp and both paths. */
 export const TREE_STEP_COST = [3, 6, 12] as const
 
+/** Sparks for the Lock In bonus step. Steps 1–3 stay on the row above. */
+export const TREE_BONUS_COST = 15
+
+/** Same-pillar Lock In lessons needed before that bonus step can be bought. */
+export const BONUS_LESSONS = 3
+
 export const TREE_STEP_MAX = 3
+/** Step 4. Locked until same-pillar Lock In lessons open it. Steps 1–3 do not read this. */
+export const TREE_BONUS_MAX = 4
 /** The path you do not take deep can still take its first step. */
 export const TREE_CROSS_MAX = 1
 
 export const TREE_LOCK = 'One path goes to three. This one stops at one.'
+
+/** Shown on the bonus pip until Lock In lessons of this lamp's pillar open it. */
+export const LESSON_LOCK = 'Learn in Lock In to unlock'
 
 export const PATH_LABEL: Record<TreePath, string> = {
   far: 'Far',
@@ -38,6 +49,14 @@ export interface PathBuy {
   ok: boolean
   cost: number
   reason: string
+  /** Set when the next step is the bonus tier and Lock In has not opened it. */
+  gate?: 'lesson'
+}
+
+/** Lessons already held for this lamp, and the tester override. */
+export interface BonusGate {
+  lessons: number
+  playtest: boolean
 }
 
 export interface PathSpend {
@@ -98,7 +117,9 @@ export function pathSparkSpend(paths: LampPaths): number {
   let total = 0
   for (const path of TREE_PATHS) {
     const rank = clampRank(paths[path])
-    for (let step = 0; step < rank; step += 1) total += TREE_STEP_COST[step] ?? 0
+    for (let step = 0; step < rank; step += 1) {
+      total += step < TREE_STEP_COST.length ? (TREE_STEP_COST[step] ?? 0) : TREE_BONUS_COST
+    }
   }
   return total
 }
@@ -113,7 +134,7 @@ export function pathsOf(runPaths: Record<string, LampPaths> | undefined, toolId:
 
 function clampRank(rank: number | undefined): number {
   if (!rank || rank < 0) return 0
-  return Math.min(TREE_STEP_MAX, Math.floor(rank))
+  return Math.min(TREE_BONUS_MAX, Math.floor(rank))
 }
 
 export function otherPath(path: TreePath): TreePath {
@@ -123,15 +144,24 @@ export function otherPath(path: TreePath): TreePath {
 /** Price of the next step when the path is already at `rank`. Full paths cost 0. */
 export function stepPrice(rank: number): number {
   const at = Math.floor(rank)
-  if (at < 0 || at >= TREE_STEP_MAX) return 0
+  if (at === TREE_STEP_MAX) return TREE_BONUS_COST
+  if (at < 0 || at >= TREE_BONUS_MAX) return 0
   return TREE_STEP_COST[at] ?? 0
 }
 
-export function canTake(paths: LampPaths, path: TreePath): PathBuy {
+function bonusOpen(gate: BonusGate | undefined): boolean {
+  if (gate?.playtest) return true
+  return (gate?.lessons ?? 0) >= BONUS_LESSONS
+}
+
+export function canTake(paths: LampPaths, path: TreePath, gate?: BonusGate): PathBuy {
   const rank = clampRank(paths[path])
   const other = clampRank(paths[otherPath(path)])
-  if (rank >= TREE_STEP_MAX) return { ok: false, cost: 0, reason: 'This path is full.' }
+  if (rank >= TREE_BONUS_MAX) return { ok: false, cost: 0, reason: 'This path is full.' }
   if (rank >= TREE_CROSS_MAX && other >= 2) return { ok: false, cost: 0, reason: TREE_LOCK }
+  if (rank >= TREE_STEP_MAX && !bonusOpen(gate)) {
+    return { ok: false, cost: TREE_BONUS_COST, reason: LESSON_LOCK, gate: 'lesson' }
+  }
   return { ok: true, cost: stepPrice(rank), reason: '' }
 }
 
@@ -159,6 +189,9 @@ export function lampStrike(paths: LampPaths): LampStrike {
     damage = 5
     cooldownMs = 280
   }
+  if (strong >= 4) {
+    cooldownMs = 180
+  }
   if (far >= 1) outer = 1
   if (far >= 2) {
     rangeBonus = 24
@@ -168,6 +201,9 @@ export function lampStrike(paths: LampPaths): LampStrike {
     rangeBonus = 40
     damage = Math.max(damage, 4)
     cooldownMs = Math.min(cooldownMs, 280)
+  }
+  if (far >= 4) {
+    rangeBonus = 48
   }
   return {
     damage,
@@ -195,9 +231,10 @@ export function applyPathStep(
   runPaths: Record<string, LampPaths>,
   sparks: number,
   path: TreePath,
+  gate?: BonusGate,
 ): PathSpend {
   const current = pathsOf(runPaths, toolId)
-  const buy = canTake(current, path)
+  const buy = canTake(current, path, gate)
   const label = PATH_LABEL[path]
   if (!buy.ok) {
     return { ok: false, paths: runPaths, sparks, note: buy.reason, cost: 0 }
