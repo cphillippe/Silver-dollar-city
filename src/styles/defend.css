@@ -3459,6 +3459,11 @@ button.defend-new-lamp[aria-pressed='true'] {
   pointer-events: none;
 }
 
+/* 1.4.439: a skill that opens mid-night sits under the round chip. It does not cover the road. */
+.nw-skill-toast.is-mid {
+  top: 44px;
+}
+
 .nw-skill-splash {
   position: fixed;
   z-index: 40;

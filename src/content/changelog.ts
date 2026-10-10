@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.439',
+    title: 'Jump lamps sit on good ground',
+    when: '2026-10-10',
+    items: [
+      'A playtest jump plants the four lamps on open ground the ghost calls Good, spread along the road.',
+      'Mend opens as a small note, the same way Still does. It does not cover the road or stop the walkers.',
+    ],
+  },
+  {
     version: '1.4.438',
     title: 'The road lights up where a lamp can reach',
     when: '2026-10-10',
