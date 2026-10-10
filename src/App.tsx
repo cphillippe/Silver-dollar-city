@@ -20,6 +20,7 @@ import { findPlayable } from './content'
 import { adsAreVisible, quietPauseAllowed, scenePauseMountsOn } from './config/ads'
 import { liveInterstitialReady, showBetweenSceneInterstitial } from './lib/adAdapter'
 import { offerStoresComingNotice } from './lib/supportToast'
+import { readNightReturn } from './nightWatch/nightReturn'
 import { useProgress } from './store/progress'
 import type { View } from './types'
 
@@ -46,6 +47,7 @@ export default function App() {
     return { name: 'welcome' }
   })
   const [sceneAd, setSceneAd] = useState(false)
+  const [nightRun, setNightRun] = useState(0)
   const [pending, setPending] = useState<View | null>(null)
   const lastAdAt = useRef(0)
 
@@ -96,6 +98,14 @@ export default function App() {
   }, [view])
 
   useEffect(() => {
+    const onPop = () => {
+      if (readNightReturn()) setView({ name: 'defend' })
+    }
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [])
+
+  useEffect(() => {
     const theme = progress.theme ?? 'candy'
     document.documentElement.dataset.theme = theme
     document.documentElement.style.colorScheme = theme === 'parchment' ? 'light' : 'dark'
@@ -142,7 +152,7 @@ export default function App() {
       {view.name === 'pack-street' ? (
         <PackStreet packId={view.packId} onNavigate={go} />
       ) : null}
-      {view.name === 'defend' ? <DefendScreen onNavigate={go} /> : null}
+      {view.name === 'defend' ? <DefendScreen key={nightRun} onNavigate={go} onFreshNight={() => setNightRun((run) => run + 1)} /> : null}
       {view.name === 'link' ? (
         <LinkScreen
           key={view.debugLine ?? 'loop'}

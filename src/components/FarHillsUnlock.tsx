@@ -1,13 +1,14 @@
-import { FAR_HILLS_HEADER, FAR_HILLS_NAME, FAR_HILLS_SOON } from '../nightWatch/farHills'
+import { FAR_HILLS_HEADER, FAR_HILLS_NAME, FAR_HILLS_PLAY } from '../nightWatch/farHills'
 
 interface FarHillsUnlockProps {
   held: string
   home: string
   onHome: () => void
+  onPlay: () => void
 }
 
-/** Easy round-25 clear. The hills are a teaser — the walk there is not built yet. */
-export function FarHillsUnlock({ held, home, onHome }: FarHillsUnlockProps) {
+/** Easy round-25 clear. Play starts the Far Hills. Home goes back to the hub. */
+export function FarHillsUnlock({ held, home, onHome, onPlay }: FarHillsUnlockProps) {
   return (
     <section className="nw-far-hills" aria-label={FAR_HILLS_HEADER} data-far-hills="yes">
       <h1 className="nw-far-hills-title">{FAR_HILLS_HEADER}</h1>
@@ -26,10 +27,17 @@ export function FarHillsUnlock({ held, home, onHome }: FarHillsUnlockProps) {
           <p className="nw-far-hills-name">{FAR_HILLS_NAME}</p>
           <p className="nw-far-hills-tags">
             <span className="nw-area-badge">Unlocked</span>
-            <span className="nw-far-hills-soon">{FAR_HILLS_SOON}</span>
           </p>
         </div>
       </article>
+      <button
+        type="button"
+        className="btn primary xl nw-far-hills-play"
+        data-far-hills-play="yes"
+        onClick={onPlay}
+      >
+        {FAR_HILLS_PLAY}
+      </button>
       <button type="button" className="btn primary xl nw-far-hills-home" onClick={onHome}>
         {home}
       </button>

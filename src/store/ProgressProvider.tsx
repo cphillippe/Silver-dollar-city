@@ -242,6 +242,15 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     return unlocked
   }, [write])
 
+  const chooseNightMap = useCallback((map: 'a2' | 'far-hills') => {
+    setProgress((current) => {
+      const defense = { ...current.defense }
+      if (map === 'far-hills') defense.nightMap = 'far-hills'
+      else delete defense.nightMap
+      return write({ ...current, defense })
+    })
+  }, [write])
+
   const recordNight = useCallback((dateKey: string, farHills = false) => {
     setProgress((current) => {
       const seen = current.defense.nights.includes(dateKey)
@@ -414,6 +423,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       snoozeReviews,
       markMiss,
       recordNight,
+      chooseNightMap,
       markMet,
       setTheme,
       setEasyMode,
@@ -433,6 +443,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       progress,
       recordHeld,
       recordNight,
+      chooseNightMap,
       recordReview,
       recordLessonHold,
       recordMatchBonus,

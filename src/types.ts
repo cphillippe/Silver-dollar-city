@@ -212,8 +212,10 @@ export interface DefenseState {
   lastNight?: string
   /** Cast ids whose first-meet story has already been shown. */
   met?: string[]
-  /** Easy round 25 opened the Far Hills teaser. The area is not built yet. */
+  /** Easy round 25 opened the Far Hills. */
   farHills?: boolean
+  /** Easy map the next night starts on. Missing means A2. Hard ignores this. */
+  nightMap?: 'a2' | 'far-hills'
 }
 
 export type AppTheme = 'candy' | 'dusk' | 'parchment'

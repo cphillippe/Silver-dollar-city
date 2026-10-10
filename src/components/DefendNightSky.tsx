@@ -1,6 +1,6 @@
 import { HEAVEN_POINT } from '../lib/defend'
 import type { PointerEvent, RefObject, ReactNode } from 'react'
-import { MapPlate, NIGHT_MAP, nightPath, type NightPhase } from '../nightWatch'
+import { MapPlate, NIGHT_MAP, nightPath, type NightMapSurface, type NightPhase } from '../nightWatch'
 
 export interface DefendNightSkyProps {
   boardRef: RefObject<SVGSVGElement | null>
@@ -15,6 +15,11 @@ export interface DefendNightSkyProps {
   onBoardTap?: () => void
   /** Easy plant: finger on the plate moves the ghost and may place a lamp. */
   onPlacePointer?: (event: PointerEvent<SVGSVGElement>) => void
+  /** Painted plate. A2 when omitted. */
+  map?: NightMapSurface
+  /** A2 porch icing. Off on other maps. */
+  porchCandy?: boolean
+  roadLabel?: string
   children?: ReactNode
 }
 
@@ -28,16 +33,19 @@ export function DefendNightSky({
   easyTap: _easyTap,
   onBoardTap,
   onPlacePointer,
+  map = NIGHT_MAP,
+  porchCandy = true,
+  roadLabel = 'Night road through Silver City',
   children,
 }: DefendNightSkyProps) {
   return (
             <svg
               ref={boardRef}
-              className={`defend-board ${NIGHT_MAP.plate ? 'has-map-plate' : ''} ${shake ? 'is-shake' : ''} ${won ? 'is-clear' : ''}`}
+              className={`defend-board ${map.plate ? 'has-map-plate' : ''} ${shake ? 'is-shake' : ''} ${won ? 'is-clear' : ''}`}
               viewBox={viewBox}
               preserveAspectRatio="xMidYMid meet"
               role="img"
-              aria-label="Night road through Silver City"
+              aria-label={roadLabel}
               onPointerDown={onPlacePointer}
               onPointerMove={onPlacePointer}
               onPointerUp={onPlacePointer}
@@ -85,7 +93,7 @@ export function DefendNightSky({
                   </feMerge>
                 </filter>
               </defs>
-              <MapPlate />
+              <MapPlate map={map} porchCandy={porchCandy} />
               <rect width="640" height="420" fill="url(#defend-dusk)" />
               <ellipse cx="320" cy="198" rx="280" ry="28" fill="#ffcc33" opacity="0.28" />
               <circle cx="548" cy="48" r="32" fill="url(#defend-moon-glow)" />
