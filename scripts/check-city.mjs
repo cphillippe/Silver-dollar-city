@@ -1443,7 +1443,23 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.431')
+assert.equal(APP_VERSION, '1.4.432')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.432'), '1.4.432 changelog row')
+assert.match(latestChange('1.4.432').title, /Home/)
+assert.match(latestChange('1.4.432').items.join('\n'), /Home/)
+assert.match(
+  readFileSync(new URL('../src/components/Journal.tsx', import.meta.url), 'utf8'),
+  /\{EASY\.home\}/,
+)
+assert.doesNotMatch(
+  readFileSync(new URL('../src/easyTrail/lockIn/HoldPractice.tsx', import.meta.url), 'utf8'),
+  /sameProofRecap/,
+)
+assert.doesNotMatch(
+  latestChange('1.4.432').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.432 changelog avoids GitHub close keywords',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.431'), '1.4.431 changelog row')
 assert.match(latestChange('1.4.431').title, /God/)
 assert.doesNotMatch(
@@ -4133,7 +4149,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   const app362 = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8')
   const journal362 = readFileSync(new URL('../src/components/Journal.tsx', import.meta.url), 'utf8')
   const ads362 = readFileSync(new URL('../src/config/ads.ts', import.meta.url), 'utf8')
-  assert.match(hold362, /onNavigate\(sameProofRecap\(quizBrief\.id\)\)/)
+  assert.match(hold362, /onNavigate\(\{ name: 'hub' \}\)/)
   assert.doesNotMatch(hold362, /onNavigate\(EASY_HOME\)/)
   assert.match(ads362, /export function lockInQuizBlocksPause/)
   assert.match(app362, /quietPauseAllowed\(/)
@@ -12805,8 +12821,8 @@ console.log('check-city: ok')
   )
   assert.match(
     home335,
-    /if \(easy && advancing\) \{\n\s*recordHeld\(quizBrief\.id\)\n\s*recordReview\(\{\n\s*id: quizBrief\.id,\n\s*pillar,\n\s*kind: 'encode',\n\s*today,\n\s*clean: result\.clean,\n\s*peeked: false,\n\s*elaborated: false,\n\s*\}\)\n\s*recordLessonHold\(quizBrief\.id, result\.clean\)\n\s*offerSupportToast\(\)\n\s*onNavigate\(sameProofRecap\(quizBrief\.id\)\)\n\s*return\n\s*\}/,
-    '1.4.362 Easy encode records held / review / lesson hold / support toast, then the same-proof recap',
+    /if \(easy && advancing\) \{\n\s*recordHeld\(quizBrief\.id\)\n\s*recordReview\(\{\n\s*id: quizBrief\.id,\n\s*pillar,\n\s*kind: 'encode',\n\s*today,\n\s*clean: result\.clean,\n\s*peeked: false,\n\s*elaborated: false,\n\s*\}\)\n\s*recordLessonHold\(quizBrief\.id, result\.clean\)\n\s*offerSupportToast\(\)\n\s*onNavigate\(\{ name: 'hub' \}\)\n\s*return\n\s*\}/,
+    '1.4.432 Easy encode records held / review / lesson hold / support toast, then Home',
   )
   assert.deepEqual(EASY_HOME, { name: 'hub' }, '1.4.335 EASY_HOME is still Easy Home')
   assert.match(home335, /onNavigate\(\n\s*easy\n\s*\? \{ name: 'hub' \}/, '1.4.335 Easy review still lands Home')
