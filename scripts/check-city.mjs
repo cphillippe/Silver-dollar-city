@@ -1430,7 +1430,15 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.428')
+assert.equal(APP_VERSION, '1.4.429')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.429'), '1.4.429 changelog row')
+assert.match(latestChange('1.4.429').title, /coin/)
+assert.match(latestChange('1.4.429').items.join('\n'), /lamp/)
+assert.doesNotMatch(
+  latestChange('1.4.429').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.429 changelog avoids GitHub close keywords',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.428'), '1.4.428 changelog row')
 assert.match(latestChange('1.4.428').title, /words/)
 assert.doesNotMatch(
