@@ -2166,6 +2166,66 @@ img.walker-face.easy-walker-face,
   max-width: 200px;
 }
 
+/* 1.4.433: Easy round clear is a short bar. Skills and the long note open on purpose. */
+.defend-clear-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  pointer-events: none;
+}
+
+.defend-page.is-easy-watch.is-boost .nw-docks {
+  max-width: calc(100% - var(--nw-rail-w) - 12px);
+}
+
+.defend-page.is-easy-watch.is-boost .nw-docks .defend-boost.is-clear-bar {
+  width: max-content;
+  max-width: 100%;
+  gap: 6px;
+  padding: 6px 8px;
+}
+
+.defend-page.is-easy-watch.is-boost .defend-clear-row .btn,
+.defend-page.is-easy-watch.is-boost button.defend-new-lamp {
+  width: auto;
+  flex: 0 0 auto;
+  pointer-events: auto;
+}
+
+.defend-page.is-easy-watch.is-boost button.defend-new-lamp,
+.defend-page.is-easy-watch.is-boost .defend-continue,
+.defend-clear-spend,
+.defend-clear-help {
+  min-height: 40px;
+  padding: 6px 8px;
+  font-size: 0.78rem;
+}
+
+.defend-clear-spend,
+.defend-clear-help {
+  min-width: 40px;
+  border-radius: 999px;
+  font-weight: 800;
+}
+
+.defend-page.is-easy-watch.is-boost .defend-boost-status {
+  margin: 0;
+  max-width: 280px;
+  font-size: 0.72rem;
+  line-height: 1.25;
+}
+
+.defend-page.is-easy-watch.is-boost .defend-boost.is-spend-open .defend-spark-choices,
+.defend-page.is-easy-watch.is-boost .defend-boost.is-help-open .defend-tip {
+  max-width: 240px;
+}
+
+.defend-page.is-clear-fold .defend-clear-spend,
+.defend-page.is-clear-fold .defend-clear-help {
+  display: none;
+}
+
 @media (max-width: 480px) {
   .nw-docks {
     left: 6px;

@@ -1,5 +1,6 @@
 import type { CityPlotId } from '../lib/city'
 import { clampGhostHintLeft, lampRoadNote } from '../lib/lampPlace'
+import { CLEAR_BAR_RESERVE } from '../lib/towerCardPlace'
 import { WATCH_ABILITY_LABEL } from '../lib/defend'
 import { boardFill, boardFillPoint, boardPoint as mapBoardPoint, boardView, nightTowers } from '../nightWatch'
 import type { DefendNightSkyProps } from './DefendNightSky'
@@ -137,6 +138,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
           levelBurst={levelBurst}
           roadNote={roadNote}
           easy={easy}
+          reserveBottom={easy && boosting ? CLEAR_BAR_RESERVE : 0}
         />
       ) : null}
       {ghost && !ghost.blocked && ghost.note && boardBox && boardBox.w > 0 ? (
