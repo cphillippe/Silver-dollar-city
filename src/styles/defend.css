@@ -1771,10 +1771,43 @@ img.walker-face.easy-walker-face,
   30% { opacity: 1; transform: translateX(-50%) scale(1.15) translateY(-6px); }
   100% { opacity: 0; transform: translateX(-50%) scale(1) translateY(-36px); }
 }
+/* 1.4.434: a thick walker shrugs after four taps. The puff bounces off. */
+.easy-tap-puff {
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  z-index: 8;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 0 28%, rgba(255, 236, 190, 0.15) 70%, transparent 72%);
+  box-shadow:
+    -12px 4px 0 -3px #ffe7a3,
+    11px -2px 0 -3px #fff4c8,
+    2px -12px 0 -4px #ffd56a;
+  pointer-events: none;
+  animation: easy-tap-puff 0.42s ease-out both;
+}
+.easy-walker.is-shrug .easy-walker-face {
+  animation: easy-tap-shrug 0.42s ease-out both;
+}
+@keyframes easy-tap-puff {
+  0% { opacity: 0.3; transform: scale(0.35); }
+  40% { opacity: 1; transform: scale(1.2) translateY(-6px); }
+  100% { opacity: 0; transform: scale(0.7) translateY(8px); }
+}
+@keyframes easy-tap-shrug {
+  0% { transform: translateY(0) scale(1); }
+  35% { transform: translateY(-7px) scale(1.06); }
+  100% { transform: translateY(2px) scale(1); }
+}
 @media (prefers-reduced-motion: reduce) {
   .easy-walker.is-squash .easy-walker-face,
   .easy-walker.is-heaven .easy-walker-face,
+  .easy-walker.is-shrug .easy-walker-face,
   .easy-tap-plus,
+  .easy-tap-puff,
   .easy-tap-combo { animation: none; }
 }
 

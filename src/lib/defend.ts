@@ -2,7 +2,8 @@ import {
   unlockedNightCast,
   type NightCastGuy,
 } from '../nightWatch/enemies/cast.ts'
-import { NIGHT_ENEMY_ROLE } from '../nightWatch/enemies/hp.ts'
+import { enemyHit, NIGHT_ENEMY_ROLE } from '../nightWatch/enemies/hp.ts'
+import type { NightRaider } from '../nightWatch/types.ts'
 import type { ProgressState, WalkerKind } from '../types.ts'
 import { CITY_PLOTS, plotStage, type CityPlotId, type CityStage } from './city.ts'
 import { EASY_ROUNDS, easyRound } from '../nightWatch/rounds.ts'
@@ -66,6 +67,15 @@ export function easyClearHeart(hearts: number): number {
 }
 
 /**
+ * Easy boss at the exit. The per-round heart cap does not apply.
+ * Every heart left goes, and the night ends. Hard does not read this.
+ */
+export function applyBossExitLeak(hearts: number): GateLeak {
+  const left = Number.isFinite(hearts) ? Math.max(0, Math.floor(hearts)) : 0
+  return { hearts: 0, lostHearts: left, failed: true }
+}
+
+/**
  * A glowing-face tap on Easy deals this much, and no more.
  * It does not grow with the lamp's tier.
  * Fast and plain walkers still drop in a tap or two. Hard does not read this.
@@ -95,6 +105,68 @@ export function easyGlowTapDamage(hp: number, chipped = 0, armored = false): num
   const soaked = Math.max(0, Math.floor(chipped) || 0)
   if (armored && soaked >= TAP_SHRUG_CHIP) return 0
   return Math.min(left, EASY_GLOW_TAP_DAMAGE)
+}
+
+/** What a live Night Watch shot is. A face tap is `manual`. A lamp is not. */
+export interface LiveStrikeShot {
+  easy: boolean
+  manual: boolean
+  roundIndex: number
+  /** Lamp tier damage. Face taps ignore this and use the glow chip. */
+  lampDamage: number
+}
+
+export interface LiveStrikeSize {
+  damage: number
+  armored: boolean
+  nextChip: number
+}
+
+/**
+ * How hard the live shot is, before the hit lands.
+ * Round 5's boss is not armored, so a tap and a lamp both cut the bar.
+ * Tough walkers from round 7, and bosses from round 15, shrug taps after four.
+ * Lamps still use their tier. Hard does not read the Easy armor.
+ */
+export function liveNightDamage(
+  raider: { hp: number; tapChip?: number; gait?: string; boss?: boolean },
+  shot: LiveStrikeShot,
+): LiveStrikeSize {
+  const armored =
+    shot.easy && shot.manual && easyTapArmored(shot.roundIndex, raider.gait, !!raider.boss)
+  const soaked = raider.tapChip ?? 0
+  const lamp = Math.max(0, Math.floor(shot.lampDamage) || 0)
+  const damage = shot.easy && shot.manual ? easyGlowTapDamage(raider.hp, soaked, armored) : lamp
+  const nextChip = shot.easy && shot.manual && damage > 0 ? soaked + damage : soaked
+  return { damage, armored, nextChip }
+}
+
+/**
+ * The live shot: size it, then apply `enemyHit` (the same function the lamps use).
+ * `DefendScreen` fire() calls these two in that order.
+ */
+export function liveNightStrike<T extends NightRaider>(
+  raider: T,
+  shot: LiveStrikeShot,
+): LiveStrikeSize & { raider: T; down: boolean } {
+  const sized = liveNightDamage(raider, shot)
+  const struck = enemyHit(raider, sized.damage)
+  return { raider: struck.raider, down: struck.down, ...sized }
+}
+
+/**
+ * A boss round may open the clear bar only after the boss is down.
+ * If the road is empty and the boss is still up, the night is lost.
+ */
+export function liveBossClearPhase(input: {
+  easy: boolean
+  bossRound: boolean
+  bossDown: boolean
+  roadClear: boolean
+}): 'play' | 'clear' | 'lost' {
+  if (!input.roadClear) return 'play'
+  if (input.easy && input.bossRound && !input.bossDown) return 'lost'
+  return 'clear'
 }
 
 /**
@@ -271,6 +343,11 @@ export const PATH_WALKER_FACE_DY = -PATH_WALKER_FACE_U / 6
  * so a thumb lands on the gold ring and not the feet.
  */
 export const EASY_FACE_HIT_R = 80
+/**
+ * The boss body draws 1.72× from the feet, so the crown sits above the
+ * plain face disc. This radius still centers on the glow and covers that crown.
+ */
+export const EASY_CROWN_HIT_R = Math.round(EASY_FACE_HIT_R * 1.72)
 
 /** CSS px across the easy face disc at `scale` (board px per viewBox unit). */
 export function easyFaceHitPx(scale: number): number {

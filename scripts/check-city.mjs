@@ -56,6 +56,7 @@ import {
   DEFEND_WAVE_SIZE,
   defendPads,
   EASY_CUE_HOLD_MS,
+  EASY_CROWN_HIT_R,
   EASY_FACE_HIT_R,
   EASY_MISS_HOLD_MS,
   EASY_WALKER_FACE_PX,
@@ -63,6 +64,7 @@ import {
   EASY_GLOW_TAP_DAMAGE,
   EASY_LEAK_GRACE_MS,
   EASY_ROUND_HEART_CAP,
+  applyBossExitLeak,
   applyEasyPaceLeaks,
   applyGateLeaks,
   cueTapStrike,
@@ -70,6 +72,8 @@ import {
   easyGlowTapDamage,
   easyRoundHeartCap,
   easyTapArmored,
+  liveBossClearPhase,
+  liveNightStrike,
   TAP_SHRUG_CHIP,
   easyFaceHitPx,
   faceTapStrike,
@@ -109,6 +113,7 @@ import {
   easyBossClearSparks,
   easyBossHp,
   easyBossRound,
+  easyJumpSparkBank,
   easyLatePush,
   gaitPlan,
   roundSparkPay,
@@ -1446,7 +1451,14 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.433')
+assert.equal(APP_VERSION, '1.4.434')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.434'), '1.4.434 changelog row')
+assert.match(latestChange('1.4.434').title, /boss/i)
+assert.doesNotMatch(
+  latestChange('1.4.434').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.434 changelog avoids GitHub close keywords',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.433'), '1.4.433 changelog row')
 assert.match(latestChange('1.4.433').title, /clear/i)
 assert.doesNotMatch(
@@ -4649,7 +4661,11 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     '1.4.385 Wrong is timed, not sticky',
   )
   assert.match(defendNight385, /cy=\{isTap \? PATH_WALKER_FACE_DY : 0\}/)
-  assert.match(defendNight385, /r=\{isTap \? EASY_FACE_HIT_R : PATH_WALKER_HIT_R\}/)
+  assert.match(
+    defendNight385,
+    /r=\{isTap \? \(raider\.boss \? EASY_CROWN_HIT_R : EASY_FACE_HIT_R\) : PATH_WALKER_HIT_R\}/,
+    '1.4.385 a plain face keeps the fat disc; the boss crown uses the larger one',
+  )
   assert.match(defendNight385, /walker-cue-pad/)
   assert.match(defendNight385, /data-face-hit=\{isTap \? 'easy' : undefined\}/)
   assert.match(defendCss385, /1\.4\.385: gold pad fills the ring/)
@@ -5605,7 +5621,13 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(lampStrike({ far: 3, strong: 0 }).cooldownMs, 280)
   assert.equal(lampStrike({ far: 0, strong: 0 }).damage, 1)
   assert.equal(lampStrike({ far: 0, strong: 0 }).cooldownMs, 700)
-  assert.match(screen429, /easy && manual && easyTapArmored/)
+  assert.match(
+    readFileSync(new URL('../src/lib/defend.ts', import.meta.url), 'utf8'),
+    /shot\.easy && shot\.manual && easyTapArmored/,
+    '1.4.430 armor still gates the live strike',
+  )
+  assert.match(screen429, /liveNightDamage\(/, '1.4.434 the screen sizes the live strike')
+  assert.match(screen429, /nightEnemies\.hit\(best, sized\.damage\)/, '1.4.434 the screen applies that strike')
   assert.match(screen429, /if \(best\.boss\) live\.current\.bossDown = true/)
   assert.match(screen429, /easyBossRound\(wave\) && !live\.current\.bossDown/)
   assert.match(screen429, /setTapJuice\(/)
@@ -5672,12 +5694,155 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
       const aimed = paceEasyTree(index, [zero429], 3, 0.2, 1, base, 0, 1, false, false)
       assert.equal(burst.boss, 'leak', `1.4.430 one Level I lamp plus kid bursts loses the round ${index + 1} boss`)
       assert.equal(aimed.boss, 'leak', `1.4.430 one Level I lamp plus fast taps loses the round ${index + 1} boss`)
+      assert.equal(burst.result, 'lost', `1.4.434 one Level I lamp plus kid bursts loses round ${index + 1}`)
+      assert.equal(aimed.result, 'lost', `1.4.434 one Level I lamp plus fast taps loses round ${index + 1}`)
+      assert.equal(burst.hearts, 0, `1.4.434 a leaked round ${index + 1} boss takes the hearts`)
+      assert.equal(aimed.hearts, 0, `1.4.434 a leaked round ${index + 1} boss takes the hearts`)
       assert.notEqual(burst.boss, 'kill')
     }
   }
   assert.ok(CHANGELOG.some((note) => note.version === '1.4.430'), '1.4.430 changelog row')
   assert.match(latestChange('1.4.430').title, /lamps/i)
   assert.doesNotMatch(latestChange('1.4.430').items.join('\n'), /Fixes #|Closes #|Resolves #/)
+}
+
+// Night Watch 1.4.434: a boss at the exit ends the night. The two-heart cap stays for other walkers.
+{
+  const exit = applyBossExitLeak(3)
+  assert.equal(exit.hearts, 0, '1.4.434 a boss exit spends every heart')
+  assert.equal(exit.lostHearts, 3)
+  assert.equal(exit.failed, true)
+  assert.equal(applyBossExitLeak(2).lostHearts, 2)
+  assert.equal(applyEasyPaceLeaks(3, 1, 4000, 0, 2).lostHearts, 0, '1.4.434 other walkers still stop at two hearts')
+  assert.equal(easyRoundHeartCap(5), EASY_ROUND_HEART_CAP)
+  const screen434 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const actors434 = readFileSync(new URL('../src/components/DefendNightActors.tsx', import.meta.url), 'utf8')
+  const css434 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  assert.match(screen434, /applyBossExitLeak\(live\.current\.hearts\)/)
+  assert.match(screen434, /liveBossClearPhase\(\{/)
+  assert.match(screen434, /liveNightDamage\(best,/)
+  assert.match(screen434, /nightEnemies\.hit\(best, sized\.damage\)/)
+  assert.match(screen434, /easyRoundHeartCap\(waveIndexRef\.current\)/)
+  assert.doesNotMatch(screen434, /BOSS-SHOT|BOSS-SPAWN/)
+  const r5Boss = (hp = 12, tapChip = 0) => ({
+    id: 7,
+    t: 0.4,
+    text: 'boss',
+    kind: 'skeptic',
+    hp,
+    maxHp: 12,
+    boss: true,
+    spark: 1,
+    tapChip,
+  })
+  const r5Tap = liveNightStrike(r5Boss(), {
+    easy: true,
+    manual: true,
+    roundIndex: 4,
+    lampDamage: 1,
+  })
+  assert.equal(r5Tap.armored, false, '1.4.434 round 5 boss is not armored')
+  assert.equal(r5Tap.damage, 1, '1.4.434 a tap hurts the round 5 boss')
+  assert.equal(r5Tap.raider.hp, 11, '1.4.434 a tap takes the round 5 boss off 12')
+  const r5Lamp = liveNightStrike(r5Boss(), {
+    easy: true,
+    manual: false,
+    roundIndex: 4,
+    lampDamage: 1,
+  })
+  assert.equal(r5Lamp.damage, 1, '1.4.434 a Level I lamp hurts the round 5 boss')
+  assert.equal(r5Lamp.raider.hp, 11)
+  const r5Strong = liveNightStrike(r5Boss(), {
+    easy: true,
+    manual: false,
+    roundIndex: 4,
+    lampDamage: 2,
+  })
+  assert.equal(r5Strong.damage, 2, '1.4.434 a Strong lamp hurts the round 5 boss')
+  assert.equal(r5Strong.raider.hp, 10)
+  let chained = r5Boss()
+  const firstLamp = liveNightStrike(chained, {
+    easy: true,
+    manual: false,
+    roundIndex: 4,
+    lampDamage: 2,
+  })
+  chained = { ...firstLamp.raider, tapChip: firstLamp.nextChip }
+  const thenTap = liveNightStrike(chained, {
+    easy: true,
+    manual: true,
+    roundIndex: 4,
+    lampDamage: 2,
+  })
+  assert.equal(thenTap.raider.hp, 9, '1.4.434 lamp damage sticks and a tap cuts more')
+  assert.ok(thenTap.raider.hp < 12, '1.4.434 the round 5 boss does not stay at 12')
+  let soaked = { ...r5Boss(200), maxHp: 200 }
+  for (let n = 0; n < TAP_SHRUG_CHIP; n += 1) {
+    const chip = liveNightStrike(soaked, {
+      easy: true,
+      manual: true,
+      roundIndex: 14,
+      lampDamage: 1,
+    })
+    assert.equal(chip.damage, 1, '1.4.434 the first four taps still nick a late boss')
+    soaked = { ...chip.raider, tapChip: chip.nextChip }
+  }
+  const shrugged = liveNightStrike(soaked, {
+    easy: true,
+    manual: true,
+    roundIndex: 14,
+    lampDamage: 5,
+  })
+  assert.equal(shrugged.damage, 0, '1.4.434 a late boss shrugs taps after four')
+  assert.equal(shrugged.raider.hp, soaked.hp)
+  const lampFinish = liveNightStrike(soaked, {
+    easy: true,
+    manual: false,
+    roundIndex: 14,
+    lampDamage: 5,
+  })
+  assert.equal(lampFinish.damage, 5, '1.4.434 a lamp still finishes a late boss')
+  assert.equal(lampFinish.raider.hp, soaked.hp - 5)
+  assert.equal(
+    liveBossClearPhase({ easy: true, bossRound: true, bossDown: false, roadClear: true }),
+    'lost',
+    '1.4.434 a boss round cannot clear while the boss is alive',
+  )
+  assert.equal(
+    liveBossClearPhase({ easy: true, bossRound: true, bossDown: true, roadClear: true }),
+    'clear',
+    '1.4.434 a downed boss lets the round clear',
+  )
+  assert.equal(
+    liveBossClearPhase({ easy: true, bossRound: true, bossDown: false, roadClear: false }),
+    'play',
+  )
+  assert.equal(
+    liveBossClearPhase({ easy: true, bossRound: false, bossDown: false, roadClear: true }),
+    'clear',
+    '1.4.434 a normal round still clears',
+  )
+  assert.ok(EASY_CROWN_HIT_R > EASY_FACE_HIT_R, '1.4.434 the boss crown sits inside the tap disc')
+  assert.match(actors434, /EASY_CROWN_HIT_R/)
+  assert.match(screen434, /const bank = easyJumpSparkBank\(jump\)/)
+  assert.match(screen434, /shrug: manual && armored && tapDmg <= 0/)
+  assert.match(actors434, /Walker on the road\. \$\{EASY\.nightTap\}/)
+  assert.doesNotMatch(actors434, /Accuser/)
+  assert.match(css434, /\.easy-tap-puff \{/)
+  assert.match(actors434, /easy-tap-plus/)
+  assert.equal(easyJumpSparkBank(0), 0, '1.4.434 round 1 still starts with no sparks')
+  assert.equal(nightWatchRoundJump('?nwRound=15', 25, false), null, '1.4.434 a normal visit does not jump')
+  assert.equal(nightWatchJumpAllowed('?nwRound=15', false), false)
+  assert.equal(easyJumpSparkBank(14), 22, '1.4.434 a playtest jump to round 15 banks the spender leftover')
+  assert.equal(easyJumpSparkBank(19), 79, '1.4.434 a playtest jump to round 20 banks the spender leftover')
+  assert.equal(easyJumpSparkBank(24), 138, '1.4.434 a playtest jump to round 25 banks the spender leftover')
+  const lone = { far: 0, strong: 0 }
+  for (const index of [14, 24]) {
+    const quiet = paceEasyTree(index, [lone], 3, 0, 1, 1, 0, 1, false, false)
+    assert.equal(quiet.result, 'lost', `1.4.434 one Level I lamp loses round ${index + 1}`)
+    assert.equal(quiet.boss, 'leak')
+    assert.equal(quiet.hearts, 0)
+  }
 }
 
 // Night Watch 1.4.424: only the glowing face keeps a hit disc. Playtest shows the tap tally.
@@ -6125,7 +6290,13 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     '1.4.410 rounds 1–4 stay put',
   )
   const screen410 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
-  assert.match(screen410, /easyGlowTapDamage\(\s*best\.hp/)
+  assert.match(screen410, /liveNightDamage\(best,/, '1.4.434 the live shot is the strike the screen fires')
+  assert.match(screen410, /nightEnemies\.hit\(best, sized\.damage\)/)
+  assert.match(
+    readFileSync(new URL('../src/lib/defend.ts', import.meta.url), 'utf8'),
+    /easyGlowTapDamage\(raider\.hp, soaked, armored\)/,
+    '1.4.413 a glow tap still sizes the live strike',
+  )
   assert.match(screen410, /easyClearHeart\(live\.current\.hearts\)/)
   assert.match(screen410, /easyRoundHeartCap\(waveIndexRef\.current\)/)
   assert.match(screen410, /\+1 ♥/)
@@ -11300,8 +11471,8 @@ console.log('check-city: ok')
   assert.match(defendNightSrc, /nw-walker-slide/)
   assert.match(defendNightSrc, /easy-walker-kind/)
   assert.match(defendNightSrc, /easy-walker-taunt/)
-  assert.match(defendNightSrc, /WALKER_LABEL\[raider\.kind\]/)
-  assert.match(defendNightSrc, /raider\.text/)
+  assert.match(defendNightSrc, /Walker on the road/)
+  assert.match(defendNightSrc, /EASY\.nightTap/)
   assert.match(defendCss300, /Easy TAP Phase 1 taunt bubble/)
   assert.match(defendCss300, /\.easy-walker-call/)
   assert.match(defendCss300, /\.easy-walker-kind/)
@@ -12112,10 +12283,14 @@ console.log('check-city: ok')
   assert.match(defendScreenOnlySrc, /continueFromBoost/, '1.4.327 boost can continue')
   assert.match(
     defendScreenOnlySrc,
-    /const tapDmg = easy && manual \? easyGlowTapDamage\(best\.hp, soaked, armored\) : tier/,
-    '1.4.430 an Easy glow tap is a flat hit and the lamp shot stays the tier',
+    /liveNightDamage\(best, \{[^}]*lampDamage: tier/,
+    '1.4.434 an Easy glow tap is a flat hit and the lamp shot stays the tier',
   )
-  assert.match(defendScreenOnlySrc, /nightEnemies\.hit\(best, tapDmg\)/)
+  assert.match(
+    readFileSync(new URL('../src/lib/defend.ts', import.meta.url), 'utf8'),
+    /const sized = liveNightDamage\(raider, shot\)[\s\S]*enemyHit\(raider, sized\.damage\)/,
+    '1.4.434 the live strike uses the real hit',
+  )
   assert.match(defendScreenOnlySrc, /combatTier\(/)
   assert.match(defendScreenOnlySrc, /label="Sparks"/)
   assert.doesNotMatch(defendScreenOnlySrc, /progress\.stars/, '1.4.327 does not drain journal stars')

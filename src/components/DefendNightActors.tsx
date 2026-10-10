@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import {
+  EASY_CROWN_HIT_R,
   EASY_FACE_HIT_R,
   EASY_WALKER_FACE_PX,
   EASY_WALKER_HIT_PX,
@@ -37,6 +38,8 @@ export interface EasyTapJuice {
   face?: WalkerFaceId
   /** Last hit — juice lifts heavenward; otherwise squash only. */
   down?: boolean
+  /** Armored tap after the chip. A puff, not a +1. */
+  shrug?: boolean
 }
 
 export interface DefendNightActorsProps {
@@ -403,11 +406,7 @@ export function DefendNightActorsSvg({
                     transform={`translate(${at.x} ${at.y})`}
                     role={isTap ? 'button' : undefined}
                     tabIndex={isTap ? 0 : undefined}
-                    aria-label={
-                      isTap
-                        ? `${raider.label ?? WALKER_LABEL[raider.kind]}: ${raider.text}. ${EASY.nightTap}`
-                        : undefined
-                    }
+                    aria-label={isTap ? `Walker on the road. ${EASY.nightTap}` : undefined}
                     onClick={
                       isTap
                         ? (event) => {
@@ -546,8 +545,9 @@ export function DefendNightActorsSvg({
                     <circle
                       className="defend-raider-hit"
                       data-face-hit={isTap ? 'easy' : undefined}
+                      data-boss-hit={raider.boss ? 'yes' : undefined}
                       cy={isTap ? PATH_WALKER_FACE_DY : 0}
-                      r={isTap ? EASY_FACE_HIT_R : PATH_WALKER_HIT_R}
+                      r={isTap ? (raider.boss ? EASY_CROWN_HIT_R : EASY_FACE_HIT_R) : PATH_WALKER_HIT_R}
                       fill="transparent"
                       pointerEvents="all"
                     />
@@ -713,7 +713,7 @@ export function DefendNightWalkerCue({
             {tapJuice ? (
               <div className="easy-walkers easy-walkers-juice" aria-hidden>
                 <div
-                  className={`easy-walker is-easy-walker is-juice${juiceHeaven ? ' is-heaven' : ' is-squash'}`}
+                  className={`easy-walker is-easy-walker is-juice${tapJuice.shrug ? ' is-shrug' : juiceHeaven ? ' is-heaven' : ' is-squash'}`}
                   style={{
                     left: tapJuice.left,
                     top: tapJuice.top,
@@ -722,7 +722,11 @@ export function DefendNightWalkerCue({
                   }}
                 >
                   <span className="easy-hit-flash" />
-                  <span className="easy-tap-plus">+</span>
+                  {tapJuice.shrug ? (
+                    <span className="easy-tap-puff" />
+                  ) : (
+                    <span className="easy-tap-plus">+</span>
+                  )}
                   {tapJuice.combo > 1 ? (
                     <span className="easy-tap-combo">×{tapJuice.combo}</span>
                   ) : null}
