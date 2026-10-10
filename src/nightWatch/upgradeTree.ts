@@ -252,9 +252,14 @@ export function applyPathStep(
   }
 }
 
+/** True when the next step is the bonus tier and Lock In has not opened it. */
+export function lessonWaiting(paths: LampPaths, gate?: BonusGate): boolean {
+  return TREE_PATHS.some((path) => canTake(paths, path, gate).gate === 'lesson')
+}
+
 /** Cheapest open buy, for the rail's broke line. Null when both paths are finished. */
-export function cheapestOpen(paths: LampPaths): PathBuy | null {
-  const open = TREE_PATHS.map((path) => canTake(paths, path)).filter((buy) => buy.ok)
+export function cheapestOpen(paths: LampPaths, gate?: BonusGate): PathBuy | null {
+  const open = TREE_PATHS.map((path) => canTake(paths, path, gate)).filter((buy) => buy.ok)
   if (open.length === 0) return null
   return open.reduce((best, buy) => (buy.cost < best.cost ? buy : best))
 }

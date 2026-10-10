@@ -211,6 +211,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const [boostNote, setBoostNote] = useState<string | null>(null)
   const [bossBonus, setBossBonus] = useState(0)
   const [upgradeAt, setUpgradeAt] = useState<CityPlotId | null>(null)
+  const [returnPlot, setReturnPlot] = useState<CityPlotId | null>(null)
   const [spendOpen, setSpendOpen] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
   const upgradeAtRef = useRef<CityPlotId | null>(null)
@@ -357,6 +358,14 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     setGhost(null)
     window.clearTimeout(burstTimer.current)
   }, [phase])
+
+  useEffect(() => {
+    if (!returnPlot) return
+    if (phase !== 'plant' && phase !== 'boost') return
+    upgradeAtRef.current = returnPlot
+    setUpgradeAt(returnPlot)
+    setReturnPlot(null)
+  }, [returnPlot, phase])
 
   useEffect(() => {
     if (runSparks > prevSparks.current) {
@@ -1547,10 +1556,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     paidTypes.current = new Set(snap.paid)
     live.current.hearts = snap.hearts
     setHearts(snap.hearts)
-    if (snap.upgradePlot) {
-      upgradeAtRef.current = snap.upgradePlot as CityPlotId
-      setUpgradeAt(snap.upgradePlot as CityPlotId)
-    }
+    if (snap.upgradePlot) setReturnPlot(snap.upgradePlot as CityPlotId)
     setPhase(snap.phase)
   }, [easy])
 
@@ -2089,6 +2095,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       onBoostCardPointer={() => {
         if (easy && phase === 'boost') clearCardAt.current = performance.now()
       }}
+      playtestSteps={tapReadoutOn}
       onBoost={boostTool}
       onOpenTree={openPlantedTree}
     />
