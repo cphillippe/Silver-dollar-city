@@ -31,6 +31,8 @@ export interface NightRaider {
   boss?: boolean
   /** Sparks this walker pays when turned. Tough pays more than one. */
   spark?: number
+  /** Glowing-tap damage already soaked. Armored walkers stop chipping after a few. */
+  tapChip?: number
   turned?: string
   from?: NightPoint
   heavenT?: number

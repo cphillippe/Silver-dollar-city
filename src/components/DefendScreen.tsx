@@ -34,6 +34,7 @@ import {
   easyClearHeart,
   easyGlowTapDamage,
   easyRoundHeartCap,
+  easyTapArmored,
   WATCH_ABILITY_LABEL,
   dist,
   unlockedWatchAbilities,
@@ -296,6 +297,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     spawnNow: false,
     leakGraceUntil: 0,
     heartsLostRound: 0,
+    /** Easy boss was turned this round. A leak does not set this. */
+    bossDown: false,
     freezeUntil: 0,
   })
   const autoFireRef = useRef<(now: number, frozen: boolean) => void>(() => {})
@@ -421,6 +424,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     live.current.raiders = []
     live.current.spawned = 0
     live.current.downed = 0
+    live.current.bossDown = false
     // Easy keeps hearts across rounds. A new night (round 1) fills them again.
     if (!easy || waveIndexRef.current === 0) {
       live.current.hearts = DEFEND_HEARTS
@@ -622,6 +626,10 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       }
       const grantBossSparks = () => {
         if (!easy) {
+          setBossBonus(0)
+          return
+        }
+        if (easyBossRound(wave) && !live.current.bossDown) {
           setBossBonus(0)
           return
         }
@@ -1110,7 +1118,11 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       combo: nextCombo,
     }
     if (fit === 'match') {
-      const struck = nightEnemies.hit(best, easy && manual ? easyGlowTapDamage(best.hp) : tier)
+      const armored = easy && manual && easyTapArmored(waveIndexRef.current, best.gait, !!best.boss)
+      const soaked = best.tapChip ?? 0
+      const tapDmg = easy && manual ? easyGlowTapDamage(best.hp, soaked, armored) : tier
+      const struck = nightEnemies.hit(best, tapDmg)
+      const nextChip = easy && manual && tapDmg > 0 ? soaked + tapDmg : soaked
       const sparks = sparkAwardForHit(struck.down, best.spark ?? 1)
       blast.pop = struck.down
       blast.spark = sparks
@@ -1133,10 +1145,19 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         item.id !== best.id
           ? item
           : struck.down
-            ? { ...struck.raider, turned: using, from: to, heavenT: 0, struckAt: now, text: 'Toward heaven' }
-            : { ...struck.raider, struckAt: now },
+            ? {
+                ...struck.raider,
+                tapChip: nextChip,
+                turned: using,
+                from: to,
+                heavenT: 0,
+                struckAt: now,
+                text: 'Toward heaven',
+              }
+            : { ...struck.raider, tapChip: nextChip, struckAt: now },
       )
       if (struck.down) {
+        if (best.boss) live.current.bossDown = true
         live.current.downed += 1
         setRunSparks((count) => count + sparks)
         // Lamp kills keep the spawn cadence. A face tap must not pull the next walker in early.
@@ -1169,6 +1190,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                 : { ...nick.raider, struckAt: now },
           )
           if (nick.down) {
+            if (pick.boss) live.current.bossDown = true
             live.current.downed += 1
             setRunSparks((count) => count + walkerSpark(pick.gait))
             live.current.spawnNow = true
@@ -1282,7 +1304,14 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     }
     if (faceTapStrike(easy, true, inRange !== null) === 'hit') {
       const lamp = easy ? nearest : inRange
-      const damage = easy && lamp ? easyGlowTapDamage(raider.hp) : 0
+      const damage =
+        easy && lamp
+          ? easyGlowTapDamage(
+              raider.hp,
+              raider.tapChip ?? 0,
+              easyTapArmored(waveIndexRef.current, raider.gait, !!raider.boss),
+            )
+          : 0
       if (lamp && fire(lamp, raiderId, easy)) {
         if (easy) {
           dismissMiss()
@@ -1980,8 +2009,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
               tapTarget={tapTarget}
               tapPos={tapPos}
               tapJuice={tapJuice}
-              walkerCalls={walkerCalls}
-              loreLine={loreMeet?.line ?? null}
+              walkerCalls={easy ? [] : walkerCalls}
+              loreLine={easy ? null : (loreMeet?.line ?? null)}
               runTier={runTier}
               runPaths={runPaths}
               boosting={boosting}
