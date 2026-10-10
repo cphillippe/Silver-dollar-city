@@ -8,6 +8,17 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.437',
+    title: 'Strong lamps finish the thick walkers',
+    when: '2026-10-10',
+    items: [
+      'From round 7, a Strong 3 lamp finishes a thick walker after the taps shrug. A lamp that was never upgraded still lets that walker through. Rounds 1 to 6 are unchanged.',
+      'With no upgrades, an active tapper stops around round 8. A spender who buys Love to Strong 3 clears round 10 and reaches the middle teens.',
+      'The round 15, 20, and 25 bosses now fall to that same Strong 3 lamp plus a few taps. A playtest jump plants the lamps and the upgrades that spender would already own.',
+      'The loss screen shows three empty hearts.',
+    ],
+  },
+  {
     version: '1.4.436',
     title: 'The glow moves after a shrug',
     when: '2026-10-10',
