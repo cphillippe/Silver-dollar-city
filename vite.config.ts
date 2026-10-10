@@ -59,7 +59,13 @@ export default defineConfig({
     htmlSecurityHeaders(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'icon-192.png', 'icon-512.png'],
+      includeAssets: [
+        'favicon.png',
+        'apple-touch-icon.png',
+        'icon-192.png',
+        'icon-512.png',
+        'icon-maskable-512.png',
+      ],
       workbox: {
         // Box QA opens docs/qa-seed.html after the app SW is installed.
         // Without this, navigation fallback serves index.html and the seed never runs.
@@ -86,7 +92,7 @@ export default defineConfig({
             type: 'image/png',
           },
           {
-            src: 'icon-512.png',
+            src: 'icon-maskable-512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable',
