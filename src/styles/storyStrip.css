@@ -522,6 +522,7 @@ html[data-easy='on'] .play.is-story-strip.is-win[data-line='ph-road'] .strip-ver
   line-height: 1.1;
 }
 
+html[data-easy='on'] .play.is-story-strip.is-win[data-line='ph-road'] .strip-verse-above,
 html[data-easy='on'] .play.is-story-strip.is-win[data-line='ph-road'] .strip-verse-lead {
   margin: 0;
   font-size: 12px;
@@ -611,6 +612,16 @@ html[data-easy='on'] .play.is-story-strip.is-win[data-line='ph-road'] .strip-ver
   }
 }
 
+.strip-verse-above {
+  margin: 0 0 2px;
+  font-size: 12.5px;
+  font-weight: 650;
+  line-height: 1.15;
+  letter-spacing: 0;
+  text-transform: none;
+  color: #3b1546;
+}
+
 .strip-verse figcaption {
   font-size: 11px;
   font-weight: 700;
@@ -639,6 +650,14 @@ html[data-easy='on'] .play.is-story-strip.is-win[data-line='ph-road'] .strip-ver
   display: flex;
   flex-direction: column;
   min-height: 0;
+}
+
+/* Easy 4- and 5-frame wins can grow a line (gloss or the neighbor sentence).
+   Let that page scroll so the quote and the follow-up stay reachable. */
+html[data-easy='on'] .daily-page.is-after:has(.play.is-story-strip.is-win:not([data-n='3'])),
+html[data-easy='on'] .challenge-page.is-after:has(.play.is-story-strip.is-win:not([data-n='3'])) {
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .daily-page.is-after:has(.is-story-strip) .after-win,
@@ -1218,6 +1237,7 @@ html[data-easy='on'] .play.is-story-strip[data-n='3'] .strip-art img {
     padding: 2px 6px 3px;
   }
 
+  html[data-easy='on'] .play.is-story-strip.is-win:not([data-n='3']) .strip-verse-above,
   html[data-easy='on'] .play.is-story-strip.is-win:not([data-n='3']) .strip-verse figcaption,
   html[data-easy='on'] .play.is-story-strip.is-win:not([data-n='3']) .strip-verse-lead,
   html[data-easy='on'] .play.is-story-strip.is-win:not([data-n='3']) .strip-verse blockquote,

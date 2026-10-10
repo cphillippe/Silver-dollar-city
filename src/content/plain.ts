@@ -109,12 +109,12 @@ const PLAIN: Record<string, PlainLine> = {
     { term: 'Order', sense: 'the world hanging together — not a lucky pile', hint: 'Keep the lived trust. Toss the lucky pile.' },
   ),
   'fg-reason': line(
-    'The mind you already trust needs a real ground.',
+    'Your mind works because God gives it light.',
     'You already trust your mind enough to argue, count, and ask why. That trust is not a trick hanging in midair. John calls the Word the true light. Romans says what can be known of God is plain in what is made.',
     { term: 'Ground', sense: 'what holds a trust up — not a shrug in midair', hint: 'Keep the ground. Toss the floating trick.' },
   ),
   'fg-ought': line(
-    'Rocks cannot write the law you already trust.',
+    'God wrote right and wrong on your heart.',
     'You already treat some things as really wrong, not only a mood. Rocks and weather do not invent that pull. Romans says the law is already written on the heart.',
     { term: 'Ought', sense: 'real right and wrong — not only a mood', hint: 'Keep the law on the heart. Toss nature-as-enough.' },
   ),
