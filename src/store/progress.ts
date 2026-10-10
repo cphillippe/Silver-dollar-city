@@ -505,8 +505,10 @@ export interface ProgressApi {
   snoozeReviews: (ids: string[], today: string) => void
   markMiss: (challengeId: string) => void
   recordNight: (dateKey: string, farHills?: boolean) => void
+  /** Round 10's boss fell on this map, so the next map can open. */
+  recordMazeBeat: (map: 'a2' | 'far-hills' | 'map03' | 'map04' | 'map05' | 'map06') => void
   /** Remember which Easy map the next night starts on. */
-  chooseNightMap: (map: 'a2' | 'far-hills') => void
+  chooseNightMap: (map: 'a2' | 'far-hills' | 'map03' | 'map04' | 'map05' | 'map06') => void
   /** First time a climb guy walks, remember them so the story does not repeat. */
   markMet: (castId: string) => void
   setTheme: (theme: AppTheme) => void

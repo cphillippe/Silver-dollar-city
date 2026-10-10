@@ -1,3 +1,5 @@
+import { isNightMapId, type NightMapId } from '../nightWatch/maps/chain.ts'
+
 /**
  * Device-only Night Watch playtest harness. Default off — Easy shipping play unchanged.
  * Bill: pause walkers so playtests can read the cue and tap the glowing face.
@@ -42,12 +44,13 @@ export function nightWatchJumpAllowed(search: string, debugOn: boolean): boolean
 }
 
 /**
- * `?nwMap=far-hills` while playtest is allowed. A normal visit ignores it.
- * Anything else stays on A2.
+ * `?nwMap=` while playtest is allowed. A normal visit ignores it.
+ * An unknown id stays on A2.
  */
-export function nightWatchMapQuery(search: string, allowed: boolean): 'far-hills' | null {
+export function nightWatchMapQuery(search: string, allowed: boolean): NightMapId | null {
   if (!allowed) return null
-  return new URLSearchParams(search).get('nwMap') === 'far-hills' ? 'far-hills' : null
+  const raw = new URLSearchParams(search).get('nwMap')
+  return isNightMapId(raw) ? raw : null
 }
 
 /** Easy playtest jump. Null on Hard and on a normal visit. */

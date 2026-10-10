@@ -324,7 +324,27 @@ function asDefense(value: unknown): DefenseState {
     met: normalizeMet(value.met),
   }
   if (value.farHills === true) defense.farHills = true
-  if (value.nightMap === 'far-hills') defense.nightMap = 'far-hills'
+  if (
+    value.nightMap === 'far-hills' ||
+    value.nightMap === 'map03' ||
+    value.nightMap === 'map04' ||
+    value.nightMap === 'map05' ||
+    value.nightMap === 'map06'
+  ) {
+    defense.nightMap = value.nightMap
+  }
+  if (Array.isArray(value.mazeBeat)) {
+    const beat = value.mazeBeat.filter(
+      (id): id is NonNullable<DefenseState['nightMap']> =>
+        id === 'a2' ||
+        id === 'far-hills' ||
+        id === 'map03' ||
+        id === 'map04' ||
+        id === 'map05' ||
+        id === 'map06',
+    )
+    if (beat.length > 0) defense.mazeBeat = [...new Set(beat)]
+  }
   return defense
 }
 

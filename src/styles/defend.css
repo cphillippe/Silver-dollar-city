@@ -4202,20 +4202,37 @@ button.defend-new-lamp[aria-pressed='true'] {
 
 .nw-map-pick {
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  gap: 6px;
   width: min(100%, 420px);
   margin: 0 auto 8px;
 }
 
+.nw-map-rule {
+  margin: 0;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #ffe9b0;
+}
+
+.nw-map-pick-scroll {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  max-height: 148px;
+  overflow-y: auto;
+}
+
 .nw-map-pick button {
-  flex: 1 1 0;
-  min-height: 44px;
+  min-height: 40px;
   border-radius: 999px;
   border: 2px solid rgba(255, 233, 176, 0.45);
   background: rgba(26, 8, 64, 0.72);
   color: #f4ead2;
   font-weight: 800;
-  font-size: 0.95rem;
+  font-size: 0.82rem;
+  white-space: nowrap;
 }
 
 .nw-map-pick button.is-on {
@@ -4234,6 +4251,13 @@ button.defend-new-lamp[aria-pressed='true'] {
   height: 14px;
   margin-left: 6px;
   vertical-align: -2px;
+}
+
+@media (min-width: 768px) {
+  .nw-map-pick-scroll {
+    grid-template-columns: 1fr 1fr 1fr;
+    max-height: none;
+  }
 }
 
 /* 1.4.412: tablets were width-led, so the plate grew past the viewport and the

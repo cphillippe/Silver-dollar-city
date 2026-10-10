@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.442',
+    title: 'Five mazes after the cottages',
+    when: '2026-10-10',
+    items: [
+      'Easy nights go A2, Far Hills, Peppermint Pass, Caramel Canyon, Licorice Woods, then Blueberry Bog.',
+      'Beat round 10 on a map and the next one opens. Holding all 25 rounds on A2 still shows the Far Hills play screen.',
+      'The new Far Hills replaces the first one. Walkers take every road. A night with no upgrades stops around round 7, and a spender lasts a shorter night as the mazes get harder.',
+    ],
+  },
+  {
     version: '1.4.441',
     title: 'The Far Hills is a place you can play',
     when: '2026-10-10',
