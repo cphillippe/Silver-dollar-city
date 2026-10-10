@@ -85,8 +85,12 @@ assert.match(gradle, /package\.json/)
 assert.doesNotMatch(gradle, /versionName "1\.4\.113"/)
 assert.doesNotMatch(gradle, /versionCode 114\b/)
 const shell = JSON.parse(read('public/shell.json'))
-assert.equal(shell.versionCode, shellVersionCode(APP_VERSION))
 assert.equal(shell.versionCode, 104433)
+assert.notEqual(
+  shell.versionCode,
+  shellVersionCode(APP_VERSION),
+  '1.4.434 is a town change, so an install on 104433 is not nagged',
+)
 assert.ok(shell.versionCode > 114, 'the published shell is newer than installs stuck at 114')
 assert.equal(Object.keys(shell).length, 1, 'shell.json carries versionCode only')
 
@@ -195,7 +199,7 @@ assert.match(readme, /ANDROID_KEYSTORE_B64/)
 assert.match(readme, /environment named `release`/)
 assert.doesNotMatch(readme, /ANDROID_KEYSTORE_BASE64|silver-city-debug\.keystore/)
 
-assert.equal(APP_VERSION, '1.4.433')
+assert.equal(APP_VERSION, '1.4.434')
 assert.match(read('android/app/src/main/res/values/ic_launcher_background.xml'), /#2A1650/)
 assert.match(read('index.html'), /favicon\.png/)
 assert.match(read('index.html'), /apple-touch-icon\.png/)

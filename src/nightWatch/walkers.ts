@@ -1,4 +1,6 @@
-import type { EasyRound } from './rounds.ts'
+import { EASY_LAMP_COST } from '../lib/watchTools.ts'
+import { spendTreeNight } from './upgradeTree.ts'
+import { EASY_ROUNDS, type EasyRound } from './rounds.ts'
 
 /**
  * Easy walker gaits (1.4.411, slice 1 of #604).
@@ -44,6 +46,21 @@ export function roundSparkPay(round: Pick<EasyRound, 'count' | 'fast' | 'tough'>
   const count = Math.max(0, Math.floor(round.count) || 0)
   const tough = Math.max(0, Math.min(count, Math.floor(round.tough) || 0))
   return count + tough * (TOUGH_SPARK - 1)
+}
+
+/**
+ * Sparks a player who spent along the way still holds when this round begins.
+ * Boss rounds add the kill spark and the clear bonus. Round 1 is still zero.
+ * Playtest jumps only. A normal night does not call this.
+ */
+export function easyJumpSparkBank(roundIndex: number): number {
+  const index = Math.max(0, Math.floor(roundIndex) || 0)
+  if (index <= 0) return 0
+  const pays = EASY_ROUNDS.slice(0, index).map((round, at) => {
+    const boss = easyBossRound(at) ? 1 + BOSS_CLEAR_SPARKS : 0
+    return roundSparkPay(round) + boss
+  })
+  return spendTreeNight(pays, EASY_LAMP_COST).rows[index - 1]?.sparks ?? 0
 }
 
 /**
