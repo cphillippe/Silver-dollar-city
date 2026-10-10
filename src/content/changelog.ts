@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.435',
+    title: 'The round 5 boss takes a tap',
+    when: '2026-10-10',
+    items: [
+      'A tap on the boss counts, even when another walker is ahead of it. The boss glows while it is on the road.',
+      'Rounds 1 to 6 keep the same walkers as before. A thick walker still shrugs only from round 7, and a boss only from round 15.',
+      'The first walker shows up in the picture within a few seconds.',
+    ],
+  },
+  {
     version: '1.4.434',
     title: 'A boss that walks off ends the night',
     when: '2026-10-10',
