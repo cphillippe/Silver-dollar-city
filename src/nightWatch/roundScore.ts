@@ -1,4 +1,10 @@
-import { applyEasyPaceLeaks, easyGlowTapDamage, easyRoundHeartCap, easyTapArmored } from '../lib/defend.ts'
+import {
+  applyBossExitLeak,
+  applyEasyPaceLeaks,
+  easyGlowTapDamage,
+  easyRoundHeartCap,
+  easyTapArmored,
+} from '../lib/defend.ts'
 import { NIGHT_PACE_FAST, pacedDt } from '../lib/nightPace.ts'
 import { pathPoint } from './path/data.ts'
 import { easyRound } from './rounds.ts'
@@ -367,7 +373,7 @@ export function paceEasyTree(
   let attempts = 0
   let graceUntil = 0
   let lostRound = 0
-  let bossFate: PaceRound['boss'] = bossRound ? 'up' : 'none'
+  let bossFate: 'kill' | 'leak' | 'up' | 'none' = bossRound ? 'up' : 'none'
   const walk = 0.01 * round.speed
   const spawnEvery = 3.8 * round.spawn
   let rng = seed >>> 0 || 1
@@ -421,14 +427,21 @@ export function paceEasyTree(
     spawnAt += dt
     tapAt += dt
     let leaked = 0
+    let bossThrough = false
     for (const raider of raiders) {
       if (raider.dead) continue
       raider.t += walk * raider.pace * dt
       if (raider.t >= 1) {
         raider.dead = true
-        leaked += 1
-        if (raider.boss) bossFate = 'leak'
+        if (raider.boss) {
+          bossFate = 'leak'
+          bossThrough = true
+        } else leaked += 1
       }
+    }
+    if (bossThrough) {
+      hearts = applyBossExitLeak(hearts).hearts
+      return finish('lost')
     }
     if (leaked > 0) {
       const paced = applyEasyPaceLeaks(
@@ -522,8 +535,13 @@ export function paceEasyTree(
         }
       }
     }
-    if (downed >= total) return finish('clear')
-    if (spawned >= total && live().length === 0) return finish(hearts > 0 ? 'clear' : 'lost')
+    const fate: string = bossFate
+    const bossOpen = bossRound && fate !== 'kill'
+    if (downed >= total) return finish(bossOpen ? 'lost' : 'clear')
+    if (spawned >= total && live().length === 0) {
+      if (bossOpen) return finish('lost')
+      return finish(hearts > 0 ? 'clear' : 'lost')
+    }
     time += dt
   }
   return finish('timeout')

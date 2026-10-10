@@ -8,6 +8,17 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.434',
+    title: 'A boss that walks off ends the night',
+    when: '2026-10-10',
+    items: [
+      'On a boss round, the round clears only when the boss is down. If the boss reaches the exit, the night ends.',
+      'Round 5’s boss still loses health to a tap and to a lamp. A tap on the big crown still lands.',
+      'Other walkers still cost at most two hearts in a round.',
+      'After four taps, a thick walker shrugs. The next tap bounces off.',
+    ],
+  },
+  {
     version: '1.4.433',
     title: 'The round clear stays out of the city',
     when: '2026-10-10',
