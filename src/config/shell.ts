@@ -27,6 +27,21 @@ declare global {
   }
 }
 
+/**
+ * Native versionCode from a major.minor.patch app version.
+ * 1.4.433 → 104433. The patch stays under 1000 so each release is one higher
+ * than the last, and the result stays under the update card's ceiling.
+ */
+export function shellVersionCode(version: string): number {
+  const match = /^(\d+)\.(\d+)\.(\d+)$/.exec(version)
+  if (!match) throw new Error(`bad app version ${version}`)
+  const major = Number(match[1])
+  const minor = Number(match[2])
+  const patch = Number(match[3])
+  if (minor >= 100 || patch >= 1000) throw new Error(`version ${version} does not fit the shell code`)
+  return major * 100_000 + minor * 1000 + patch
+}
+
 export function inAndroidShell(): boolean {
   return (
     typeof window !== 'undefined' &&

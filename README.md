@@ -77,7 +77,7 @@ That file is the rolling `latest` GitHub Release, rebuilt on every merge to `mai
 
 - **Town and puzzles.** The app loads https://cphillippe.github.io/Silver-dollar-city/ over HTTPS. After a merge reaches `main` and Pages finishes, close the app and open it again. The new town is there. You do not reinstall.
 - **No signal.** The app opens the copy packed in the APK. That copy keeps its own save on the phone. The live town comes back when the signal does.
-- **The app itself.** A native shell change bumps `versionCode` (kept in `public/shell.json` and `android/app/build.gradle`). The app shows a small **Update available** note. Tap **Get the update**, then install. That button opens this repo's release file in the browser. Android will not install a sideloaded app on its own. Ordinary town updates do not show this note.
+- **The app itself.** A native shell change bumps `versionCode` (`major * 100000 + minor * 1000 + patch`, kept in `public/shell.json`, derived in `android/app/build.gradle` from `package.json`). The app shows a small **Update available** note. Tap **Get the update**, then install. That button opens this repo's release file in the browser. Android will not install a sideloaded app on its own. Ordinary town updates do not show this note.
 - **Other links.** The app stays on the Silver City Pages site. A link to any other site opens in the phone's browser.
 
 Web-only ships leave `versionCode` alone.

@@ -236,7 +236,10 @@ import {
   upgradeSpendAllowed,
 } from '../src/lib/nightPlants.ts'
 import {
+  CLEAR_BAR_RESERVE,
   placeTowerCard,
+  TOWER_CARD_H,
+  TOWER_TREE_H,
   upgradeControlsHitLamp,
 } from '../src/lib/towerCardPlace.ts'
 import { ideaUnlocked, mindGraph, mindMapHasLit } from '../src/lib/mindMap.ts'
@@ -1443,7 +1446,48 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.432')
+assert.equal(APP_VERSION, '1.4.433')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.433'), '1.4.433 changelog row')
+assert.match(latestChange('1.4.433').title, /clear/i)
+assert.doesNotMatch(
+  latestChange('1.4.433').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.433 changelog avoids GitHub close keywords',
+)
+{
+  const screen433 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const css433 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const phone = { w: 412, h: 700 }
+  const bare = placeTowerCard({ left: 180, top: 360 }, phone, [], 0.55)
+  const same = placeTowerCard({ left: 180, top: 360 }, phone, [], 0.55, 0, TOWER_CARD_H)
+  assert.deepEqual(bare, same, '1.4.433 a card with no reserve keeps the old seat')
+  const held = placeTowerCard({ left: 120, top: 520 }, phone, [], 0.55, CLEAR_BAR_RESERVE, TOWER_TREE_H)
+  assert.ok(held.top >= 8, '1.4.433 the lamp card stays on screen')
+  assert.ok(held.left >= 8 && held.left + 176 <= phone.w - 8)
+  assert.ok(
+    held.top + TOWER_TREE_H <= phone.h - CLEAR_BAR_RESERVE,
+    '1.4.433 the lamp card stays above the clear bar',
+  )
+  assert.match(screen433, /className="btn primary defend-continue"/)
+  assert.match(screen433, /className="btn defend-clear-spend"/)
+  assert.match(screen433, /className="btn defend-clear-help"/)
+  assert.match(screen433, /aria-label="How to spend sparks"/)
+  assert.match(screen433, /clearSpendOpen \? 'Hide' : 'Spend'/)
+  assert.match(screen433, /\{!easy \|\| clearSpendOpen \?/)
+  assert.match(screen433, /setSpendOpen\(false\)/)
+  assert.match(screen433, /clearPanelFolded\(boosting, placeArm\)/)
+  assert.match(screen433, /if \(performance\.now\(\) - clearCardAt\.current < 450\) return/)
+  assert.doesNotMatch(
+    screen433.slice(screen433.indexOf('function finishPlace'), screen433.indexOf('function togglePad')),
+    /setPhase\(/,
+    '1.4.433 planting does not start the round',
+  )
+  assert.match(css433, /\.nw-docks \.defend-boost \{[^}]*pointer-events:\s*none/)
+  assert.match(css433, /\.defend-page\.is-clear-fold \.nw-docks \.defend-boost \{[^}]*max-width:\s*200px/)
+  assert.match(css433, /\.defend-page\.is-clear-fold \.defend-clear-spend/)
+  assert.equal(startsNextRound('continue'), true)
+  assert.equal(startsNextRound('card'), false, '1.4.433 a lamp card does not start the next round')
+}
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.432'), '1.4.432 changelog row')
 assert.match(latestChange('1.4.432').title, /Home/)
 assert.match(latestChange('1.4.432').items.join('\n'), /Home/)
@@ -4717,7 +4761,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(board386, /towerType\[upgradeAt\]/)
   assert.doesNotMatch(board386, /: ability\) \?\? ability/)
   assert.match(card386, /data-upgrade-plot=\{plotId\}/)
-  assert.match(card386, /placeTowerCard\(point, board, clearOf, cameraScale\)/)
+  assert.match(card386, /placeTowerCard\(point, board, clearOf, cameraScale/)
   assert.match(css386, /1\.4\.386: the card body does not eat a lamp underneath/)
   assert.match(css386, /\.defend-tower-card \{[^}]*pointer-events:\s*none/)
   assert.match(css386, /\.defend-tower-card \.defend-tower-upgrade,\s*\.defend-tower-card \.defend-tower-pull \{[^}]*pointer-events:\s*auto/)
@@ -10553,7 +10597,7 @@ console.log('check-city: ok')
     indexCss274,
     /\.mind-map\.is-manage \.mind-map-scroll \{[\s\S]*?overflow:\s*auto/,
   )
-  assert.match(gradle274, /versionName "1\.4\.113"/)
+  assert.match(gradle274, /versionName appVersion/)
   assert.match(latestChange('1.4.274').title, /Manage|≤720|scrollbar|clip/)
   assert.match(
     latestChange('1.4.274').items.join('\n'),
@@ -10579,7 +10623,7 @@ console.log('check-city: ok')
     indexCss275,
     /1\.4\.274: Easy Manage hide web scrollbar[\s\S]*?padding-bottom:\s*12px[\s\S]*?scroll-padding-bottom:\s*12px/,
   )
-  assert.match(gradle275, /versionName "1\.4\.113"/)
+  assert.match(gradle275, /versionName appVersion/)
   assert.match(latestChange('1.4.275').title, /Manage|≤720|header|mask/)
   assert.match(
     latestChange('1.4.275').items.join('\n'),
@@ -10605,7 +10649,7 @@ console.log('check-city: ok')
     indexCss276,
     /1\.4\.275: Manage head stays above scroll[\s\S]*?background-color:\s*#48188c/,
   )
-  assert.match(gradle276, /versionName "1\.4\.113"/)
+  assert.match(gradle276, /versionName appVersion/)
   assert.match(latestChange('1.4.276').title, /Manage|≤720|smooth|fade|header/i)
   assert.match(
     latestChange('1.4.276').items.join('\n'),
@@ -12354,7 +12398,7 @@ console.log('check-city: ok')
     /faceSrc: \(id, easy\) =>\s*walkerFaceSrc\(id\) \?\?\s*nightParts\.src\('face', id\)/,
     '1.4.331 keeps kind portraits on the road',
   )
-  assert.match(gradle331, /versionName "1\.4\.113"/, '1.4.331 Android versionName stays 1.4.113')
+  assert.match(gradle331, /versionName appVersion/, '1.4.331 Android versionName follows package.json')
   assert.match(latestChange('1.4.331').title, /Night Watch/)
   assert.match(latestChange('1.4.331').items.join('\n'), /Fixes #472/)
   assert.match(latestChange('1.4.331').items.join('\n'), /thin/)
@@ -12438,7 +12482,7 @@ console.log('check-city: ok')
     readFileSync(new URL('../src/components/Journal.tsx', import.meta.url), 'utf8'),
     /from '\.\/RecallGate'/,
   )
-  assert.match(gradle332, /versionName "1\.4\.113"/, '1.4.332 Android versionName stays 1.4.113')
+  assert.match(gradle332, /versionName appVersion/, '1.4.332 Android versionName follows package.json')
   assert.match(latestChange('1.4.332').title, /Easy Trail|frame/i)
   assert.match(latestChange('1.4.332').items.join('\n'), /Fixes #476/)
   assert.match(latestChange('1.4.332').items.join('\n'), /shelves/)
@@ -12552,8 +12596,8 @@ console.log('check-city: ok')
 
   assert.match(
     readFileSync(new URL('../android/app/build.gradle', import.meta.url), 'utf8'),
-    /versionName "1\.4\.113"/,
-    '1.4.333 Android versionName stays 1.4.113',
+    /versionName appVersion/,
+    '1.4.333 Android versionName follows package.json',
   )
   assert.ok(CHANGELOG.some((note) => note.version === '1.4.333'), '1.4.333 row stays (no longer CHANGELOG[0] after 1.4.334)')
   const items333 = latestChange('1.4.333').items.join('\n')
@@ -12700,8 +12744,8 @@ console.log('check-city: ok')
 
   assert.match(
     readFileSync(new URL('../android/app/build.gradle', import.meta.url), 'utf8'),
-    /versionName "1\.4\.113"/,
-    '1.4.334 Android versionName stays 1.4.113',
+    /versionName appVersion/,
+    '1.4.334 Android versionName follows package.json',
   )
   assert.ok(CHANGELOG.some((note) => note.version === '1.4.334'), '1.4.334 changelog row')
   const items334 = latestChange('1.4.334').items.join('\n')
@@ -12891,8 +12935,8 @@ console.log('check-city: ok')
 
   assert.match(
     readFileSync(new URL('../android/app/build.gradle', import.meta.url), 'utf8'),
-    /versionName "1\.4\.113"/,
-    '1.4.335 Android versionName stays 1.4.113',
+    /versionName appVersion/,
+    '1.4.335 Android versionName follows package.json',
   )
   assert.ok(CHANGELOG.some((note) => note.version === '1.4.335'), '1.4.335 changelog row')
   const items335 = latestChange('1.4.335').items.join('\n')
@@ -13103,8 +13147,8 @@ console.log('check-city: ok')
 
   assert.match(
     readFileSync(new URL('../android/app/build.gradle', import.meta.url), 'utf8'),
-    /versionName "1\.4\.113"/,
-    '1.4.336 Android versionName stays 1.4.113',
+    /versionName appVersion/,
+    '1.4.336 Android versionName follows package.json',
   )
   assert.ok(CHANGELOG.some((note) => note.version === '1.4.336'), '1.4.336 changelog row')
   const items336 = latestChange('1.4.336').items.join('\n')
