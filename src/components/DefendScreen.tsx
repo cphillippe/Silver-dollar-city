@@ -21,6 +21,7 @@ import {
   easyJumpSparkBank,
   easyLatePush,
   easyWalkerHp,
+  scaledWalkerHp,
   gaitForSlot,
   walkerPace,
   walkerSpark,
@@ -70,10 +71,15 @@ import {
 import {
   nightWatchDebugFrozen,
   nightWatchJumpAllowed,
+  nightWatchMapQuery,
   readNightWatchDebug,
   readNightWatchRoundJump,
 } from '../lib/nightWatchDebug'
 import { FarHillsUnlock } from './FarHillsUnlock'
+import { NightMapPicker } from './NightMapPicker'
+import { applyNightMap } from '../nightWatch/maps/bind'
+import { FAR_HILLS_NIGHT_MAP, FAR_HILLS_PLATE } from '../nightWatch/maps/farHillsMap'
+import { resolveNightMap, type NightMapId } from '../nightWatch/maps/resolve'
 import {
   clearPanelFolded,
   clientToMap,
@@ -147,6 +153,8 @@ import type { EasyTapJuice, EasyWalkerCall } from './DefendNightActors'
 
 interface DefendScreenProps {
   onNavigate: (view: View) => void
+  /** Start the plant step over. Used when Play opens the Far Hills. */
+  onFreshNight?: () => void
 }
 
 /** 1.4.375: how long the lamp level-up burst, roman bump, and −1✦ stay readable. */
@@ -169,8 +177,8 @@ function usePhoneSe() {
   return phone
 }
 
-export function DefendScreen({ onNavigate }: DefendScreenProps) {
-  const { progress, recordNight, markMet, markMiss } = useProgress()
+export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
+  const { progress, recordNight, markMet, markMiss, chooseNightMap } = useProgress()
   const easy = isEasy(progress)
   const phoneSe = usePhoneSe()
   const plateFill = easy && phoneSe
@@ -186,6 +194,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const [toolLock, setToolLock] = useState<string | null>(null)
   const arming = false
   const [phase, setPhase] = useState<NightPhase>('plant')
+  const [sessionMap, setSessionMap] = useState<NightMapId | null>(null)
   const [waveIndex, setWaveIndex] = useState(0)
   const [runTier, setRunTier] = useState<Record<string, number>>(freshRunTier)
   const [runPaths, setRunPaths] = useState(freshRunPaths)
@@ -249,6 +258,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const mendShieldUntilRef = useRef(0)
   const sparksRef = useRef(runSparks)
   sparksRef.current = runSparks
+  const hpMulRef = useRef(1)
   const paidTypes = useRef<Set<string>>(new Set())
   const prevSparks = useRef(runSparks)
   const [sparkPop, setSparkPop] = useState(false)
@@ -376,6 +386,26 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     }
     prevSparks.current = runSparks
   }, [runSparks])
+
+  const nightSearch = typeof window === 'undefined' ? '' : window.location.search
+  const nightPlaytest = nightWatchJumpAllowed(nightSearch, nwDebug)
+  const mapId = resolveNightMap({
+    easy,
+    unlocked: progress.defense.farHills === true,
+    saved: progress.defense.nightMap,
+    playtest: nightPlaytest,
+    query: nightWatchMapQuery(nightSearch, nightPlaytest),
+    session: sessionMap,
+  })
+  hpMulRef.current = mapId === 'far-hills' ? FAR_HILLS_NIGHT_MAP.hpMul : 1
+
+  useLayoutEffect(() => {
+    applyNightMap(mapId)
+    setGhost(null)
+    return () => {
+      applyNightMap('a2')
+    }
+  }, [mapId])
 
   useEffect(() => {
     const sync = () => setNwDebug(readNightWatchDebug())
@@ -601,11 +631,14 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
         const hp = boss
           ? easyBossHp(wave)
           : easy
-            ? easyWalkerHp(
-                nightEnemies.maxHp(cast.kind, easy),
-                tune.hpBonus + easyLatePush(wave),
-                gait,
-                wave,
+            ? scaledWalkerHp(
+                easyWalkerHp(
+                  nightEnemies.maxHp(cast.kind, easy),
+                  tune.hpBonus + easyLatePush(wave),
+                  gait,
+                  wave,
+                ),
+                hpMulRef.current,
               )
             : nightEnemies.maxHp(cast.kind, easy) + tune.hpBonus
         if (boss) {
@@ -1527,6 +1560,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     const plotId = upgradeAtRef.current
     const tool = plotId ? plantsRef.current[plotId] : ''
     if (!plotId || !tool) return
+    if (typeof history !== 'undefined') history.pushState({ nwNight: true }, '')
     saveNightReturn({
       phase: phase === 'boost' ? 'boost' : 'plant',
       waveIndex,
@@ -2030,6 +2064,16 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           )}
         </div>
       ) : null}
+      {easy && phase === 'plant' && planted.length < 1 && !won ? (
+        <NightMapPicker
+          mapId={mapId}
+          hillsOpen={progress.defense.farHills === true || nightPlaytest}
+          onPick={(id) => {
+            setSessionMap(id)
+            if (progress.defense.farHills) chooseNightMap(id)
+          }}
+        />
+      ) : null}
       {(phase === 'plant' || planted.length < 1) &&
       phase !== 'lost' &&
       phase !== 'boost' &&
@@ -2105,6 +2149,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     <main
       className={`defend-page ${taught ? 'is-puzzle' : 'is-teach'} ${arming ? 'is-arming' : ''} ${won ? 'is-win' : ''} ${shake ? 'is-shake' : ''} ${leakFlash ? 'is-leak' : ''} ${firing ? 'is-firing' : ''} ${stillOn ? 'is-still' : ''} ${mendOn ? 'is-mend' : ''} ${mendShield ? 'is-mend-shield' : ''} ${debugFrozen ? 'is-nw-debug-freeze' : ''} ${easy ? 'is-easy-watch' : ''} ${easyTap ? 'is-easy-tap' : ''} ${boosting ? 'is-boost' : ''} ${clearPanelFolded(boosting, placeArm) ? 'is-clear-fold' : ''} ${phase === 'lost' ? 'is-lost' : ''} ${boosting && runSparks < 1 ? 'is-spark-broke' : ''} ${easy && phase === 'plant' && awaitingLamp ? 'is-need-lamp' : ''} ${easy && (phase === 'plant' || placeArm) ? 'is-placing' : ''} ${easy && !won && (phase === 'wave' || phase === 'boost') ? 'is-shop' : ''}`}
       aria-label={WATCH_TITLE}
+      data-night-map={mapId}
     >
       {after ? (
         easy ? (
@@ -2112,6 +2157,10 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
             held={`The night held after round ${rounds}.`}
             home={EASY.home}
             onHome={() => onNavigate({ name: 'hub' })}
+            onPlay={() => {
+              chooseNightMap('far-hills')
+              onFreshNight?.()
+            }}
           />
         ) : (
           <>
@@ -2213,6 +2262,13 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
               onPlacePointer={onPlacePointer}
               ghost={ghost}
               plateFill={plateFill}
+              map={mapId === 'far-hills' ? FAR_HILLS_PLATE : undefined}
+              porchCandy={mapId !== 'far-hills'}
+              roadLabel={
+                mapId === 'far-hills'
+                  ? 'Night road through the Far Hills'
+                  : 'Night road through Silver City'
+              }
             />
             {phase === 'wave' ? (
               <div className="nw-wave-overlay">

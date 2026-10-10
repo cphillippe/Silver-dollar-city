@@ -1,6 +1,15 @@
 import type { ProgressState } from '../types.ts'
 import { nightTowers, TOWER_LAMP_SPRITE } from '../nightWatch/towers/index.ts'
-import { DEFEND_PATH, freeSpotId, isFreeSpot, lampAnchor, pathClearance, pathPoint } from '../nightWatch/path/data.ts'
+import {
+  bindNightPath,
+  boundNightPath,
+  DEFEND_PATH,
+  freeSpotId,
+  isFreeSpot,
+  lampAnchor,
+  pathClearance,
+  pathPoint,
+} from '../nightWatch/path/data.ts'
 import type { NightPoint } from '../nightWatch/types.ts'
 import { isTowerType, plantType } from './nightPlants.ts'
 import { combatTier, TIER_MARK, TOOL_TIER_MAX } from './watchTools.ts'
@@ -44,22 +53,39 @@ export const ROAD_GOOD_LEN = 140
 /** Shorter than this and the ring does not meet the road. */
 export const ROAD_SOME_LEN = 18
 
-const PATH_LEN = DEFEND_PATH.reduce((sum, point, index) => {
-  const next = DEFEND_PATH[index + 1]
-  if (!next) return sum
-  return sum + Math.hypot(next.x - point.x, next.y - point.y)
-}, 0)
+function polylineLength(path: readonly NightPoint[]): number {
+  let sum = 0
+  for (let i = 0; i < path.length - 1; i += 1) {
+    const next = path[i + 1]
+    sum += Math.hypot(next.x - path[i].x, next.y - path[i].y)
+  }
+  return sum
+}
+
+const A2_PATH_LEN = polylineLength(DEFEND_PATH)
+let lenPath: readonly NightPoint[] = DEFEND_PATH
+let lenValue = A2_PATH_LEN
+
+function pathLength(path: readonly NightPoint[]): number {
+  if (path === DEFEND_PATH) return A2_PATH_LEN
+  if (path === lenPath) return lenValue
+  lenPath = path
+  lenValue = polylineLength(path)
+  return lenValue
+}
 
 /** Length of the walker road inside this ring. */
-export function roadCoverLength(at: NightPoint, range: number): number {
-  if (!(range > 0) || !(PATH_LEN > 0)) return 0
+export function roadCoverLength(at: NightPoint, range: number, path?: readonly NightPoint[]): number {
+  const road = path ?? boundNightPath()
+  const length = pathLength(road)
+  if (!(range > 0) || !(length > 0)) return 0
   const steps = 240
   let hit = 0
   for (let i = 0; i <= steps; i += 1) {
-    const point = pathPoint(i / steps)
+    const point = pathPoint(i / steps, road)
     if (Math.hypot(at.x - point.x, at.y - point.y) <= range + 0.5) hit += 1
   }
-  return (hit / (steps + 1)) * PATH_LEN
+  return (hit / (steps + 1)) * length
 }
 
 export function roadCoverRank(length: number): 'good' | 'some' | 'far' {
@@ -145,6 +171,35 @@ const PORCH_PATHS: readonly (readonly NightPoint[])[] = [
   quad({ x: 498, y: 662 }, { x: 488, y: 646 }, { x: 460, y: 622 }),
 ]
 
+export interface LampGround {
+  path: readonly NightPoint[]
+  houses: readonly Ellipse[]
+  features: readonly Disc[]
+  extraRoads: readonly (readonly NightPoint[])[]
+  porchPaths: readonly (readonly NightPoint[])[]
+}
+
+/** A2 cottages, side paths, and porch icing. The same arrays the plate was measured with. */
+export const A2_LAMP_GROUND: LampGround = {
+  path: DEFEND_PATH,
+  houses: HOUSES,
+  features: FEATURES,
+  extraRoads: EXTRA_ROADS,
+  porchPaths: PORCH_PATHS,
+}
+
+let boundGround: LampGround | null = null
+
+/** Null restores the A2 no-go lists and the A2 road. */
+export function bindLampGround(ground: LampGround | null): void {
+  boundGround = ground
+  bindNightPath(ground?.path ?? null)
+}
+
+function activeGround(): LampGround {
+  return boundGround ?? A2_LAMP_GROUND
+}
+
 function quad(a: NightPoint, c: NightPoint, b: NightPoint): NightPoint[] {
   const points: NightPoint[] = []
   for (let i = 0; i <= 6; i++) {
@@ -187,19 +242,21 @@ export function lampSpotBlocked(
   point: NightPoint,
   plants: Record<string, string> = {},
   ignoreAbility?: string,
+  ground?: LampGround | null,
 ): boolean {
+  const plate = ground ?? activeGround()
   if (point.x < 16 || point.y < 16 || point.x > 782 || point.y > 1118) return true
-  if (polyClearance(point, DEFEND_PATH) <= ROAD_BLOCK) return true
-  for (const road of EXTRA_ROADS) {
+  if (polyClearance(point, plate.path) <= ROAD_BLOCK) return true
+  for (const road of plate.extraRoads) {
     if (polyClearance(point, road) <= PATH_BLOCK + 8) return true
   }
-  for (const road of PORCH_PATHS) {
+  for (const road of plate.porchPaths) {
     if (polyClearance(point, road) <= PATH_BLOCK) return true
   }
-  for (const house of HOUSES) {
+  for (const house of plate.houses) {
     if (inEllipse(point, house)) return true
   }
-  for (const feature of FEATURES) {
+  for (const feature of plate.features) {
     if (Math.hypot(point.x - feature.x, point.y - feature.y) <= feature.r) return true
   }
   for (const [id, ability] of Object.entries(plants)) {
@@ -355,8 +412,8 @@ export function clientToMap(
 }
 
 /** True when this combat radius meets the walker path. */
-export function lampReachesRoad(at: NightPoint, range: number): boolean {
-  return range > 0 && pathClearance(at) <= range
+export function lampReachesRoad(at: NightPoint, range: number, path?: readonly NightPoint[]): boolean {
+  return range > 0 && pathClearance(at, path) <= range
 }
 
 /**
@@ -405,13 +462,14 @@ export function lampRoadNote(
  * SVG path of the walker road inside the combat ring.
  * One subpath per covered stretch, in plate units.
  */
-export function roadCoverD(at: NightPoint, range: number): string {
+export function roadCoverD(at: NightPoint, range: number, path?: readonly NightPoint[]): string {
+  const road = path ?? boundNightPath()
   if (!(range > 0)) return ''
   const parts: string[] = []
   let open = false
   let last: NightPoint | null = null
-  for (let i = 0; i < DEFEND_PATH.length - 1; i++) {
-    const hit = coverSegment(at, range, DEFEND_PATH[i], DEFEND_PATH[i + 1])
+  for (let i = 0; i < road.length - 1; i++) {
+    const hit = coverSegment(at, range, road[i], road[i + 1])
     if (!hit) {
       open = false
       last = null

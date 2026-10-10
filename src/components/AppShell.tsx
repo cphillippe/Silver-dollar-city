@@ -115,7 +115,11 @@ export function AppShell({ view, onNavigate, children }: AppShellProps) {
           type="button"
           className="nw-night-back"
           data-night-back="yes"
-          onClick={() => onNavigate({ name: 'defend' })}
+          onClick={() => {
+            const state = window.history.state as { nwNight?: boolean } | null
+            if (state?.nwNight) window.history.back()
+            else onNavigate({ name: 'defend' })
+          }}
         >
           Back to the night
         </button>

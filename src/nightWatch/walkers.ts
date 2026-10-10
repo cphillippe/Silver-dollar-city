@@ -241,6 +241,15 @@ export const EASY_TOUGH_WINDOW = 20
  */
 export const EASY_LATE_BULK = 140
 
+/**
+ * Far Hills walker health. A2 passes `1` and the table is unchanged.
+ * Boss health is not scaled here.
+ */
+export function scaledWalkerHp(hp: number, hpMul: number): number {
+  if (!(hpMul > 0) || hpMul === 1) return hp
+  return Math.max(1, Math.round(hp * hpMul))
+}
+
 /** Live Easy walker health. Rounds 1–6 match `walkerHp`. Hard does not read this. */
 export function easyWalkerHp(
   kindHp: number,

@@ -41,6 +41,15 @@ export function nightWatchJumpAllowed(search: string, debugOn: boolean): boolean
   return new URLSearchParams(search).get('playtest') === '1'
 }
 
+/**
+ * `?nwMap=far-hills` while playtest is allowed. A normal visit ignores it.
+ * Anything else stays on A2.
+ */
+export function nightWatchMapQuery(search: string, allowed: boolean): 'far-hills' | null {
+  if (!allowed) return null
+  return new URLSearchParams(search).get('nwMap') === 'far-hills' ? 'far-hills' : null
+}
+
 /** Easy playtest jump. Null on Hard and on a normal visit. */
 export function readNightWatchRoundJump(nightLen: number): number | null {
   if (typeof window === 'undefined') return null

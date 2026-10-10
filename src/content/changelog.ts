@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.441',
+    title: 'The Far Hills is a place you can play',
+    when: '2026-10-10',
+    items: [
+      'Hold an Easy night through round 25, then Play starts The Far Hills. A2 is still there when you want the cottages.',
+      'The hills use the same 25 rounds. The walkers are a little tougher, so a night with no upgrades still stops around round 8, and a spender reaches round 17.',
+      'The lesson button keeps Android Back on the night.',
+    ],
+  },
+  {
     version: '1.4.440',
     title: 'Lock In opens a bonus lamp step',
     when: '2026-10-10',
