@@ -2523,9 +2523,25 @@ img.walker-face.easy-walker-face,
 }
 
 /* 1.4.386: the card body does not eat a lamp underneath. Upgrade and Pull still take the tap. */
+/* 1.4.436: at a clear, a planted lamp stays tappable above the slim bar. */
+.defend-clear-lamp {
+  position: absolute;
+  z-index: 7;
+  width: 84px;
+  height: 120px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 18px;
+  background: transparent;
+  transform: translate(-50%, -78%);
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+
 .defend-tower-card {
   position: absolute;
-  z-index: 8;
+  z-index: 9;
   box-sizing: border-box;
   padding: 10px 10px 12px;
   border-radius: 16px;
@@ -3420,6 +3436,27 @@ button.defend-new-lamp[aria-pressed='true'] {
   font-weight: 800;
   letter-spacing: 0.03em;
   color: rgba(255, 233, 176, 0.92);
+}
+
+/* 1.4.436: Still is a small note before Begin. It does not cover the road. */
+.nw-skill-toast {
+  position: absolute;
+  z-index: 6;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  max-width: min(240px, 70%);
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 204, 51, 0.75);
+  background: rgba(26, 8, 64, 0.92);
+  color: #ffe7a3;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-align: center;
+  pointer-events: none;
 }
 
 .nw-skill-splash {
