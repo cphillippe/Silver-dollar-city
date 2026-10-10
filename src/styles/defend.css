@@ -3974,6 +3974,31 @@ button.defend-new-lamp[aria-pressed='true'] {
   stroke: rgba(255, 214, 80, 0.98);
 }
 
+/* 1.4.438: the ring says how much road it covers. Good is a long stretch. */
+.defend-ghost.is-some .defend-ghost-ring {
+  fill: rgba(120, 210, 160, 0.16);
+  stroke: rgba(150, 220, 170, 0.9);
+}
+
+.defend-road-cover.is-some {
+  stroke: rgba(180, 210, 90, 0.85);
+}
+
+.defend-ghost-hint.is-good {
+  background: rgba(72, 48, 8, 0.9);
+  color: #ffe08a;
+}
+
+.defend-ghost-hint.is-some {
+  background: rgba(20, 64, 40, 0.9);
+  color: #d8f5c4;
+}
+
+.defend-ghost-hint.is-far {
+  background: rgba(92, 36, 8, 0.9);
+  color: #ffb068;
+}
+
 .defend-road-cover {
   fill: none;
   stroke: rgba(120, 230, 140, 0.9);

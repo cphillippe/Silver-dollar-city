@@ -105,8 +105,11 @@ import {
 import { applyBoost, buyExtraLamp, combatTier, EASY_LAMP_COST, freshRunTier, WATCH_TOOLS } from '../lib/watchTools'
 import {
   applyPathStep,
+  easyShotReach,
+  freshLampPaths,
   freshRunPaths,
   lampStrike,
+  pathSparkSpend,
   pathsOf,
   type TreePath,
 } from '../nightWatch/upgradeTree'
@@ -1024,7 +1027,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   /** Far steps this type already owns. The ghost ring uses the same bonus as a shot. */
   function placeBonus(using: string): number {
     if (!easy) return 0
-    return lampStrike(pathsOf(runPathsRef.current, using)).rangeBonus
+    return easyShotReach(pathsOf(runPathsRef.current, using))
   }
 
   function openUpgrade(id: CityPlotId) {
@@ -1049,8 +1052,10 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   }
 
   function pullSparksFor(id: string): number {
-    const type = plants[id]
-    return lampPullRefund(Boolean(type && paidTypes.current.has(type)), EASY_LAMP_COST)
+    const type = plantsRef.current[id]
+    if (!type) return 0
+    const paid = lampPullRefund(paidTypes.current.has(type), EASY_LAMP_COST)
+    return paid + pathSparkSpend(pathsOf(runPathsRef.current, type))
   }
 
   function pullUpgradeLamp() {
@@ -1066,7 +1071,12 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       }
       return
     }
-    if (type) paidTypes.current.delete(type)
+    if (type) {
+      paidTypes.current.delete(type)
+      const cleared = { ...runPathsRef.current, [type]: freshLampPaths() }
+      runPathsRef.current = cleared
+      setRunPaths(cleared)
+    }
     if (refund > 0) {
       sparksRef.current += refund
       setRunSparks(sparksRef.current)
@@ -1097,7 +1107,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
 
   function hitRange(id: CityPlotId, toolId: string) {
     const combat = lampCombat(toolId)
-    return nightTowers.range(id, toolId, progress, runTierRef.current, combat.rangeBonus)
+    const extra = easy ? easyShotReach(pathsOf(runPathsRef.current, toolId)) : combat.rangeBonus
+    return nightTowers.range(id, toolId, progress, runTierRef.current, extra)
   }
 
   function fire(id: CityPlotId, forceRaiderId?: number, manual = false) {

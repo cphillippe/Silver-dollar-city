@@ -77,6 +77,32 @@ export function freshRunPaths(): Record<string, LampPaths> {
   return Object.fromEntries(WATCH_TOOLS.map((tool) => [tool.id, freshLampPaths()]))
 }
 
+/**
+ * Extra reach Far step 1 adds on the plate (1.4.438).
+ * `lampStrike` still reports 0 so the older score seats stay put.
+ * A free level I ring is 114. Plus 48 it meets a gap of about 138,
+ * which is the open ground beside the road, not the far corners.
+ */
+export const FAR1_ROAD_REACH = 48
+
+/** Combat reach bonus. Far step 1 grows the ring even though its strike bonus stays 0. */
+export function easyShotReach(paths: LampPaths): number {
+  const strike = lampStrike(paths)
+  if (strike.rangeBonus > 0) return strike.rangeBonus
+  if (clampRank(paths.far) >= 1) return FAR1_ROAD_REACH
+  return 0
+}
+
+/** Sparks already spent on this lamp's steps. Pull gives them back. */
+export function pathSparkSpend(paths: LampPaths): number {
+  let total = 0
+  for (const path of TREE_PATHS) {
+    const rank = clampRank(paths[path])
+    for (let step = 0; step < rank; step += 1) total += TREE_STEP_COST[step] ?? 0
+  }
+  return total
+}
+
 export function pathsOf(runPaths: Record<string, LampPaths> | undefined, toolId: string): LampPaths {
   const live = runPaths?.[toolId]
   return {
