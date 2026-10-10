@@ -324,6 +324,7 @@ function asDefense(value: unknown): DefenseState {
     met: normalizeMet(value.met),
   }
   if (value.farHills === true) defense.farHills = true
+  if (value.nightMap === 'far-hills') defense.nightMap = 'far-hills'
   return defense
 }
 

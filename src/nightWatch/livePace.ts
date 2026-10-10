@@ -27,10 +27,12 @@ import {
   easyLatePush,
   easyWalkerHp,
   gaitForSlot,
+  scaledWalkerHp,
   walkerHp,
   walkerPace,
   type WalkerGait,
 } from './walkers.ts'
+import type { NightPoint } from './types.ts'
 
 /**
  * 1.4.436 live play, center-aimed at 1×, fitted this ring.
@@ -252,20 +254,32 @@ export function paceEasyLive(
    * frozen bars. `road` is the same seats on the current bars, with Far step 1 reach.
    */
   mode: 'plate' | 'road437' | 'road' = 'plate',
+  /**
+   * Another map's road and seats. Omitted, the A2 good seats and `pathPoint`
+   * stay on the cottages.
+   */
+  map?: {
+    path: readonly NightPoint[]
+    seats: readonly { x: number; y: number }[]
+    hpMul: number
+  },
 ): PaceLive {
-  const road = mode === 'road' || mode === 'road437'
+  const road = mode === 'road' || mode === 'road437' || Boolean(map)
+  const roadPath = map?.path
+  const hpMul = map?.hpMul ?? 1
+  const seatList = map?.seats ?? LEAD_GOOD_SEATS
   const rules = frozen ? rules436() : mode === 'road' ? currentRules() : rules437()
   const round = rules.round(roundIndex)
   const bossRound = easyBossRound(roundIndex)
   const total = round.count + (bossRound ? 1 : 0)
   const bonus = round.hp + rules.latePush(roundIndex)
   const lamps = road
-    ? LEAD_GOOD_SEATS.map((seat, index) => {
+    ? seatList.map((seat, index) => {
         const rank = paths[index] ?? { far: 0, strong: 0 }
         const strike = lampStrike(rank)
-        const bonusReach = mode === 'road' ? easyShotReach(rank) : strike.rangeBonus
-        const id = `at:${seat.x}:${seat.y}`
-        const gap = pathClearance(seat)
+        const bonusReach = mode === 'road' || map ? easyShotReach(rank) : strike.rangeBonus
+        const id = `at:${Math.round(seat.x)}:${Math.round(seat.y)}`
+        const gap = pathClearance(seat, roadPath)
         const range = lampReach(id, 96 + FREE_LAMP_RANGE_BONUS + bonusReach, gap)
         return { id, x: seat.x, y: seat.y, gap, strike, range, cool: 0 }
       })
@@ -350,7 +364,9 @@ export function paceEasyLive(
       spawnAt = 0
       const boss = bossRound && spawned === round.count
       const gait = boss ? undefined : gaitForSlot(round, spawned)
-      const hp = boss ? rules.bossHp(roundIndex) : rules.walker(2, bonus, gait, roundIndex)
+      const hp = boss
+        ? rules.bossHp(roundIndex)
+        : scaledWalkerHp(rules.walker(2, bonus, gait, roundIndex), hpMul)
       if (boss) bossMax = hp
       raiders.push({
         t: easyLiveSpawnT(round.speed * (boss ? BOSS_PACE : walkerPace(gait))),
@@ -369,7 +385,7 @@ export function paceEasyLive(
       let best: (typeof raiders)[number] | null = null
       let bestD = lamp.range
       for (const raider of live()) {
-        const point = pathPoint(raider.t)
+        const point = pathPoint(raider.t, roadPath)
         const distance = Math.hypot(lamp.x - point.x, lamp.y - point.y)
         if (distance <= bestD) {
           best = raider
@@ -395,7 +411,7 @@ export function paceEasyLive(
         let pickD = lamp.range * lamp.strike.splashFrac
         for (const raider of live()) {
           if (raider === best || raider.dead) continue
-          const point = pathPoint(raider.t)
+          const point = pathPoint(raider.t, roadPath)
           const distance = Math.hypot(lamp.x - point.x, lamp.y - point.y)
           if (distance <= pickD) {
             pick = raider
@@ -409,7 +425,7 @@ export function paceEasyLive(
         let pickD = lamp.range * (1 + lamp.strike.outerFrac)
         for (const raider of live()) {
           if (raider === best || raider.dead) continue
-          const point = pathPoint(raider.t)
+          const point = pathPoint(raider.t, roadPath)
           const distance = Math.hypot(lamp.x - point.x, lamp.y - point.y)
           if (distance > lamp.range && distance <= pickD) {
             pick = raider
@@ -512,6 +528,40 @@ export function paceEasyRoad(
     tapEvery,
     era === '437' ? 'road437' : 'road',
   )
+}
+
+/** Same 25-round curve on another map. Walker health uses that map's multiplier. */
+export function paceEasyMapCampaign(
+  kind: 'none' | 'natural' | 'ceiling',
+  map: {
+    path: readonly NightPoint[]
+    seats: readonly { x: number; y: number }[]
+    hpMul: number
+  },
+): Campaign {
+  let hearts = 3
+  const rows: Campaign['rows'] = []
+  for (let index = 0; index < 25; index += 1) {
+    const round = paceEasyLive(
+      index,
+      campaignLamps(kind, index),
+      hearts,
+      false,
+      LIVE_TAP_EVERY,
+      'road',
+      map,
+    )
+    rows.push({
+      round: index + 1,
+      result: round.result,
+      taps: round.taps,
+      hearts: round.hearts,
+      boss: round.boss,
+    })
+    if (round.result !== 'clear') return { dead: index + 1, rows }
+    hearts = easyClearHeart(round.hearts)
+  }
+  return { dead: null, rows }
 }
 
 export function paceEasyRoadCampaign(
