@@ -209,6 +209,38 @@ export function cueTapStrike(easy: boolean, glowingFace: boolean): 'hit' | 'miss
   if (easy && !glowingFace) return 'miss'
   return 'hit'
 }
+
+/**
+ * Pointer on a walker, then the glow gate, then the caller strikes.
+ * A normal walker still has to be the glowing lead. The boss is always
+ * a hit, even when a faster walker is ahead of it. Hard does not use the glow.
+ */
+export function easyPointerTapGate<T extends { id: number; turned?: string; t?: number; boss?: boolean }>(
+  easy: boolean,
+  raider: T,
+  raiders: readonly T[],
+): 'hit' | 'miss' {
+  if (raider.turned) return 'miss'
+  if (easy && raider.boss) return 'hit'
+  const cue = easyTapTarget(raiders)
+  return cueTapStrike(easy, cue?.id === raider.id)
+}
+
+/**
+ * The tap handler path: gate, then the live strike.
+ * A miss never touches HP. `DefendScreen` fireAtRaider uses the same gate.
+ */
+export function applyEasyPointerTap<T extends NightRaider>(
+  raider: T,
+  raiders: readonly T[],
+  shot: LiveStrikeShot,
+): { miss: true } | { miss: false; strike: LiveStrikeSize & { raider: T; down: boolean } } {
+  if (easyPointerTapGate(shot.easy, raider, raiders) === 'miss') return { miss: true }
+  return {
+    miss: false,
+    strike: liveNightStrike(raider, { ...shot, manual: true }),
+  }
+}
 export const DEFEND_WAVE_SIZE = 6
 /** Hard night length. Easy reads `EASY_ROUNDS` instead. */
 export const DEFEND_NIGHT_WAVES = 5
@@ -371,7 +403,9 @@ export function easyTapMode(easy: boolean, phase: string, won: boolean): boolean
 }
 
 /** Front-most unturned walker — teach cue only (not the only live walker). */
-export function easyTapTarget<T extends { turned?: string; t?: number }>(raiders: T[]): T | undefined {
+export function easyTapTarget<T extends { turned?: string; t?: number }>(
+  raiders: readonly T[],
+): T | undefined {
   let pick: T | undefined
   let bestT = -1
   for (const item of raiders) {
@@ -395,6 +429,26 @@ export function easyHoldSpawn(walkingUnturned: number): boolean {
  */
 export function easySpawnT(_spawnIndex: number): number {
   return 0
+}
+
+/**
+ * The phone picture first holds the walker here. The gate itself sits off
+ * the right edge, under the bottom of the screen.
+ */
+export const EASY_ON_SCREEN_T = 0.55
+/** A spawned walker reaches that picture within this many seconds. */
+export const EASY_ON_SCREEN_SEC = 5
+const EASY_WALK_T_PER_SEC = 0.01
+
+/**
+ * Live spawn only. Slow rounds were waiting about a minute at the gate.
+ * Start close enough that the face is in the picture within five seconds.
+ * Round speed stays the 1.4.424 table. The sim still starts at `easySpawnT`.
+ */
+export function easyLiveSpawnT(speedScale = 1): number {
+  const speed = Math.max(0.2, Number(speedScale) || 1)
+  const lead = EASY_ON_SCREEN_SEC * EASY_WALK_T_PER_SEC * speed
+  return Math.max(0, Math.min(EASY_ON_SCREEN_T, EASY_ON_SCREEN_T - lead))
 }
 
 export function easyTapPersonCount(raiders: { turned?: string }[]): number {

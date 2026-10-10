@@ -32,8 +32,9 @@ import {
   applyBossExitLeak,
   applyEasyPaceLeaks,
   applyGateLeaks,
-  cueTapStrike,
   easyClearHeart,
+  easyLiveSpawnT,
+  easyPointerTapGate,
   easyRoundHeartCap,
   liveBossClearPhase,
   liveNightDamage,
@@ -604,7 +605,9 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           : undefined
         walking.push({
           id,
-          t: nightEnemies.spawnT(id),
+          t: easy
+            ? easyLiveSpawnT(tune.speedScale * (boss ? BOSS_PACE : walkerPace(gait)))
+            : nightEnemies.spawnT(id),
           text: cast.text,
           kind: cast.kind,
           label: cast.label,
@@ -1317,8 +1320,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     if (phase !== 'wave' || won) return
     const raider = live.current.raiders.find((item) => item.id === raiderId && !item.turned)
     if (!raider) return
-    const glowing = nightEnemies.cueTarget(live.current.raiders)?.id === raider.id
-    if (cueTapStrike(easy, glowing) === 'miss') {
+    if (easyPointerTapGate(easy, raider, live.current.raiders) === 'miss') {
       noteFaceTap(false, 0)
       showMiss()
       return

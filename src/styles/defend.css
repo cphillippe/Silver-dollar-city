@@ -1833,6 +1833,11 @@ img.walker-face.easy-walker-face,
   pointer-events: all;
 }
 
+/* 1.4.435: the boss is tappable even when a faster walker holds the lead glow. */
+.defend-page.is-easy-tap .defend-raider.is-boss .defend-raider-hit {
+  pointer-events: all;
+}
+
 .defend-page.is-easy-tap .defend-raider.is-easy-tap-target .defend-raider-face,
 .defend-page.is-easy-tap .defend-raider.is-easy-tap-target .defend-raider-shadow {
   pointer-events: none;
