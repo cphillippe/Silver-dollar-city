@@ -122,6 +122,7 @@ import {
   easyBossRound,
   easyJumpLoad,
   easyJumpSparkBank,
+  JUMP_GOOD_SEATS,
   easyLatePush,
   easyWalkerHp,
   EASY_LATE_BULK,
@@ -1479,7 +1480,13 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.438')
+assert.equal(APP_VERSION, '1.4.439')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.439'), '1.4.439 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.439').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.439 changelog avoids GitHub close keywords',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.438'), '1.4.438 changelog row')
 assert.match(latestChange('1.4.438').title, /road/i)
 assert.doesNotMatch(
@@ -5462,12 +5469,12 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(easyLatePush(11), 0, '1.4.421 the late push still starts at round 13')
   assert.equal(easyLatePush(14), 18, '1.4.421 round 15 push stays')
   assert.equal(BOSS_PACE, 0.7, '1.4.421 later bosses keep the same step')
-  const dismiss421 = screen421.slice(
-    screen421.indexOf('function dismissSkillSplash'),
-    screen421.indexOf('function combatPace'),
+  const intro421 = screen421.slice(
+    screen421.indexOf('const intro = skillUnlockOnWave(wave)'),
+    screen421.indexOf('const tune = waveCombat(wave, easy)'),
   )
-  assert.doesNotMatch(dismiss421, /setPhase\(/, '1.4.421 Got it does not start the round')
-  assert.match(screen421, /phase === 'wave' && skillSplash/, '1.4.421 the skill card waits for the wave')
+  assert.doesNotMatch(intro421, /setPhase\(/, '1.4.421 opening a skill does not start the round')
+  assert.doesNotMatch(intro421, /skillHoldRef\.current = true/, '1.4.439 a new skill does not hold the walkers')
   assert.match(screen421, /skillHoldRef/)
   assert.match(splash421, /Got it/)
   assert.match(splash421, /stopPropagation\(\)/)
@@ -6109,7 +6116,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   }
   const jump15 = easyJumpLoad(14)
   assert.equal(jump15.sparks, easyJumpSparkBank(14))
-  assert.equal(jump15.plants.porch, 'love', '1.4.437 the jump plants Love')
+  assert.ok(Object.values(jump15.plants).includes('love'), '1.4.437 the jump plants Love')
   assert.equal(jump15.paths.love.strong, 3, '1.4.437 the jump brings Love to Strong 3')
   assert.equal(jump15.paths.love.far, 1)
   assert.equal(Object.keys(jump15.plants).length, 4, '1.4.437 the jump plants four lamps, not five')
@@ -6176,6 +6183,46 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     assert.equal(look.cover, roadCoverRank(roadCoverLength(look.at, look.range)))
     assert.equal(ROAD_COVER_WORD[look.cover || 'far'], look.cover === 'good' ? 'Good' : look.cover === 'some' ? 'Some' : 'Too far')
   }
+}
+
+// Night Watch 1.4.439: jump lamps on Good seats, and a mid-night skill is a note.
+{
+  assert.equal(JUMP_GOOD_SEATS.length, 4, '1.4.439 the jump plants four seats')
+  const progress = emptyProgress()
+  for (const seat of JUMP_GOOD_SEATS) {
+    const look = previewLamp({ x: seat.x, y: seat.y }, 'love', progress, {}, {}, false, true, 0)
+    assert.equal(look.blocked, false, '1.4.439 a preset seat is open ground')
+    assert.equal(look.cover, 'good', '1.4.439 the ghost rates every preset seat Good')
+  }
+  for (let i = 0; i < JUMP_GOOD_SEATS.length; i += 1) {
+    for (let j = i + 1; j < JUMP_GOOD_SEATS.length; j += 1) {
+      const a = JUMP_GOOD_SEATS[i]
+      const b = JUMP_GOOD_SEATS[j]
+      assert.ok(Math.hypot(a.x - b.x, a.y - b.y) > 140, '1.4.439 preset lamps are spread along the road')
+    }
+  }
+  const jumped = easyJumpLoad(24)
+  const ids = JUMP_GOOD_SEATS.map((seat) => `at:${seat.x}:${seat.y}`)
+  assert.deepEqual(Object.keys(jumped.plants).sort(), [...ids].sort(), '1.4.439 the jump uses the Good seats')
+  assert.equal(Object.values(jumped.plants).length, 4)
+  assert.equal(easyBossHp(4), 12, '1.4.439 round 5 boss health stays')
+  assert.equal(easyBossHp(9), 55, '1.4.439 round 10 boss health stays')
+  assert.equal(easyBossHp(14), 120, '1.4.439 round 15 boss health stays')
+  assert.equal(easyBossHp(19), 180, '1.4.439 round 20 boss health stays')
+  assert.equal(easyBossHp(24), 240, '1.4.439 round 25 boss health stays')
+  const screen439 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  assert.match(screen439, /className="nw-skill-toast is-mid"/, '1.4.439 Mend is a small note')
+  assert.match(screen439, /New skill · \$\{KIT_LABEL\[skillNote\]\}/)
+  assert.doesNotMatch(screen439, /NightSkillSplash/)
+  assert.doesNotMatch(screen439, /skillHoldRef\.current = true/)
+  assert.match(screen439, /intro === 'still'/, '1.4.439 Still stays the note before Begin')
+  assert.equal(APP_VERSION, '1.4.439')
+  assert.ok(CHANGELOG.some((note) => note.version === '1.4.439'), '1.4.439 changelog row')
+  assert.doesNotMatch(
+    latestChange('1.4.439').items.join('\n'),
+    /Fixes #|Closes #|Resolves #/,
+    '1.4.439 changelog avoids GitHub close keywords',
+  )
 }
 
 // Night Watch 1.4.424: only the glowing face keeps a hit disc. Playtest shows the tap tally.
@@ -7375,7 +7422,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(defendScreenOnlySrc, /mendShieldUntilRef/)
   assert.match(defendScreenOnlySrc, /if \(leaked && now < mendShieldUntilRef\.current\)/)
   assert.match(defendScreenOnlySrc, /setPowerBanner\('Held'\)/)
-  assert.match(defendScreenOnlySrc, /NightSkillSplash/)
+  assert.match(defendScreenOnlySrc, /nw-skill-toast/, '1.4.439 a new skill is a small note')
   assert.match(defendScreenOnlySrc, /NightSkillTray/)
   assert.match(splash380, /role="dialog"/)
   assert.match(splash380, /New skill/)

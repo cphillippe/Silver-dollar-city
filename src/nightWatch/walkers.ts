@@ -1,5 +1,5 @@
-import { EASY_PLANT_PADS } from '../lib/nightPlants.ts'
 import { EASY_LAMP_COST, WATCH_TOOLS } from '../lib/watchTools.ts'
+import { freeSpotId } from './path/data.ts'
 import { TREE_STEP_COST, type LampPaths, type TreePath } from './upgradeTree.ts'
 import { EASY_ROUNDS, type EasyRound } from './rounds.ts'
 
@@ -49,7 +49,19 @@ export function roundSparkPay(round: Pick<EasyRound, 'count' | 'fast' | 'tough'>
   return count + tough * (TOUGH_SPARK - 1)
 }
 
-const JUMP_PADS = EASY_PLANT_PADS
+/**
+ * Playtest jump seats. Open ground the placement ghost calls Good,
+ * spread from the gate toward the porch the way a kid would plant.
+ * Named lots stay the gold rings. A jump does not use those weak seats.
+ */
+export const JUMP_GOOD_SEATS = [
+  { x: 490, y: 1000 },
+  { x: 250, y: 660 },
+  { x: 420, y: 430 },
+  { x: 450, y: 210 },
+] as const
+
+const JUMP_PADS = JUMP_GOOD_SEATS.map((seat) => freeSpotId(seat))
 const JUMP_TOOLS = WATCH_TOOLS.map((tool) => tool.id)
 
 /**
