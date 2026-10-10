@@ -140,7 +140,6 @@ import { WinBurst } from './challenges/WinBurst'
 import { DefendAbilityBar, type LampDragPhase } from './DefendAbilityBar'
 import { DefendNightBoard } from './DefendNightBoard'
 import { NightPaceControl } from './NightPaceControl'
-import { NightSkillSplash } from './NightSkillSplash'
 import { NightSkillTray } from './NightSkillTray'
 import type { EasyTapJuice, EasyWalkerCall } from './DefendNightActors'
 
@@ -191,7 +190,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const [runSparks, setRunSparks] = useState(0)
   const [skillReady, setSkillReady] = useState<Record<KitId, number>>({ still: 0, mend: 0 })
   const [skillNow, setSkillNow] = useState(0)
-  const [skillSplash, setSkillSplash] = useState<KitId | null>(null)
+  const [skillNote, setSkillNote] = useState<KitId | null>(null)
   const [fastOn, setFastOn] = useState(false)
   const [pulseId, setPulseId] = useState<KitId | null>(null)
   const [stillOn, setStillOn] = useState(false)
@@ -243,7 +242,6 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   const skillHoldRef = useRef(false)
   const fastOnRef = useRef(false)
   fastOnRef.current = fastOn
-  const pendingIntroRef = useRef<KitId | null>(null)
   const seenSkill = useRef<Record<KitId, boolean>>({ still: false, mend: false })
   const mendShieldUntilRef = useRef(0)
   const sparksRef = useRef(runSparks)
@@ -418,8 +416,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
   useEffect(() => {
     if (phase !== 'wave') {
       skillHoldRef.current = false
-      pendingIntroRef.current = null
-      setSkillSplash(null)
+      setSkillNote(null)
       return
     }
     const wave = waveIndexRef.current
@@ -431,11 +428,12 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
       seenSkill.current.still = true
     } else if (intro && !seenSkill.current[intro]) {
       seenSkill.current[intro] = true
-      pendingIntroRef.current = intro
-      skillHoldRef.current = true
-      setSkillSplash(intro)
-    } else if (intro && pendingIntroRef.current === intro) {
-      skillHoldRef.current = true
+      setSkillNote(intro)
+      setPulseId(intro)
+      window.clearTimeout(pulseTimer.current)
+      pulseTimer.current = window.setTimeout(() => {
+        setPulseId((current) => (current === intro ? null : current))
+      }, 2600)
     }
     const tune = waveCombat(wave, easy)
     const cleared = progress.defense.cleared
@@ -1449,9 +1447,8 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     skillReadyRef.current = ready
     setSkillReady(ready)
     seenSkill.current = { still: false, mend: false }
-    pendingIntroRef.current = null
     skillHoldRef.current = false
-    setSkillSplash(null)
+    setSkillNote(null)
     setPulseId(null)
     mendShieldUntilRef.current = 0
     setMendShield(false)
@@ -1635,19 +1632,6 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
     showPower(powered.note)
   }
 
-  function dismissSkillSplash() {
-    const opened = pendingIntroRef.current
-    pendingIntroRef.current = null
-    skillHoldRef.current = false
-    setSkillSplash(null)
-    if (!opened) return
-    setPulseId(opened)
-    window.clearTimeout(pulseTimer.current)
-    pulseTimer.current = window.setTimeout(() => {
-      setPulseId((current) => (current === opened ? null : current))
-    }, 2600)
-  }
-
   function combatPace(): number {
     if (!easy) return 1
     return paceScale(paceUnlocked(waveIndexRef.current), fastOnRef.current)
@@ -1666,7 +1650,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
 
   function castSkill(id: KitId) {
     const label = KIT_LABEL[id]
-    if (won || skillSplash) return
+    if (won) return
     if (!skillUnlocked(id, waveIndex)) {
       flashKit(`${label} unlocks on wave ${SKILL_UNLOCK_WAVE[id] + 1}`)
       return
@@ -1868,7 +1852,7 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
           ) : null}
         </div>
       ) : null}
-      {phase === 'wave' && !won && !skillSplash ? (
+      {phase === 'wave' && !won ? (
         <div className="defend-kits nw-skill-tray" role="group" aria-label="Skills">
           {skillTray}
         </div>
@@ -2176,11 +2160,13 @@ export function DefendScreen({ onNavigate }: DefendScreenProps) {
                 New skill · Still
               </p>
             ) : null}
+            {skillNote ? (
+              <p className="nw-skill-toast is-mid" role="status">
+                {`New skill · ${KIT_LABEL[skillNote]}`}
+              </p>
+            ) : null}
             {showPace ? (
               <NightPaceControl waveIndex={waveIndex} fastOn={fastOn} onToggle={togglePace} />
-            ) : null}
-            {phase === 'wave' && skillSplash ? (
-              <NightSkillSplash id={skillSplash} onDismiss={dismissSkillSplash} />
             ) : null}
             {createPortal(
               <>
