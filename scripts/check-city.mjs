@@ -611,7 +611,10 @@ assert.match(hollowSeqSrc, /winCaption: 'Who is my\\nneighbor\?'/)
 assert.match(hollowSeqSrc, /winCaption: 'Priest\\npasses by\.'/)
 assert.match(hollowSeqSrc, /winCaption: 'Shows\\nmercy\.'/)
 const sequenceVerse = readFileSync(new URL('../src/lib/sequenceVerse.ts', import.meta.url), 'utf8')
-assert.match(sequenceVerse, /easyLead: 'The one who showed mercy was the neighbor\.'/)
+assert.match(
+  sequenceVerse,
+  /easyLead: 'Likewise means do the same\. The one who showed mercy was the neighbor\.'/,
+)
 assert.match(sequenceVerse, /easyText: 'Go and do likewise\.'/)
 assert.match(sequenceVerse, /easyRef: 'Luke 10:37'/)
 assert.match(sequenceVerse, /easyHeader: 'Luke 10:25–37'/)
@@ -635,7 +638,7 @@ assert.match(sequenceVerse, /appeared to Cephas, then to the twelve/)
 assert.match(sequenceVerse, /ref: '1 Corinthians 15:3–5'/)
 assert.match(
   sequenceVerse,
-  /easyLead:\s*\n\s*'Cephas is Peter\. “The scriptures” means God’s Word said long ago this would happen\.'/,
+  /easyLead:\s*\n\s*'Cephas is Peter\. The Twelve is a name for Jesus’ closest friends\. “The scriptures” means God’s Word said long ago this would happen\.'/,
 )
 const dailySeqSrc = readFileSync(new URL('../src/content/daily.ts', import.meta.url), 'utf8')
 assert.match(dailySeqSrc, /text: 'Jesus dies, is buried, and is raised\.'/)
@@ -654,6 +657,20 @@ assert.equal(
 assert.equal(
   easyWhyLine('Nothing was handed on; it was only felt.'),
   'Nothing was passed on; it was only felt.',
+)
+assert.match(sequenceVerse, /labor and are heavy laden/)
+assert.match(sequenceVerse, /easyLead: 'Heavy laden means carrying a big load\.'/)
+assert.equal(
+  easyWhyLine('Buried is only poetic decoration.'),
+  'Buried is only pretty words.',
+)
+assert.equal(
+  easyWhyLine('“Buried” is only poetic decoration.'),
+  '“Buried” is only pretty words.',
+)
+assert.equal(
+  easyWhyLine('Appearances are admitted to be visions with no named people.'),
+  'The people who saw him had no names.',
 )
 assert.equal(
   easyFacingLine('ph-road', 'Neighbor is the one who shows mercy.'),
@@ -766,6 +783,9 @@ assert.doesNotMatch(dailyTrailSrc, /AdSlot/)
 assert.doesNotMatch(dailyTrailSrc, /district-flavor/)
 assert.doesNotMatch(dailyTrailSrc, /Tomorrow:/)
 assert.match(dailyTrailSrc, /TeachUnlock/)
+assert.match(dailyTrailSrc, /easyStrip/)
+assert.match(dailyTrailSrc, /isDue/)
+assert.match(dailyTrailSrc, /reviewing \? 'review' : 'encode'/)
 assert.match(dailyTrailSrc, /is-teach/)
 assert.match(dailyTrailSrc, /is-arming/)
 assert.doesNotMatch(dailyTrailSrc, /morningReview/)
@@ -900,6 +920,8 @@ assert.doesNotMatch(benchSrc, /None of these prove God/)
 assert.match(benchSrc, /early public testimony, not a lab rerun/)
 assert.doesNotMatch(benchSrc, /appearances list widened/)
 assert.match(benchSrc, /1 Cor 15:3–5/)
+assert.match(benchSrc, /text: 'Peter, then the Twelve, saw him\.'/)
+assert.match(benchSrc, /easyText: 'Peter and his friends saw him\.'/)
 
 const evidenceSrc = readFileSync(
   new URL('../src/content/evidence.ts', import.meta.url),
@@ -1408,7 +1430,14 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.427')
+assert.equal(APP_VERSION, '1.4.428')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.428'), '1.4.428 changelog row')
+assert.match(latestChange('1.4.428').title, /words/)
+assert.doesNotMatch(
+  latestChange('1.4.428').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.428 changelog avoids GitHub close keywords',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.426'), '1.4.426 changelog row')
 assert.match(latestChange('1.4.426').title, /download/)
 assert.match(latestChange('1.4.426').items.join('\n'), /download/)

@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.428',
+    title: 'Story Strip words a child can say',
+    when: '2026-10-09',
+    items: [
+      'Easy story wins explain heavy laden, likewise, and the Twelve above the Bible line. The Bible words stay the same.',
+      'A wrong answer says pretty words, or that the people who saw him had no names.',
+      'Come and rest, and the other Easy daily stories, ask you to tap the main idea you kept.',
+    ],
+  },
+  {
     version: '1.4.427',
     title: 'Boss rounds pay a small bonus',
     when: '2026-10-09',

@@ -27,7 +27,9 @@ export const EASY_CHROME: Record<string, string> = {
   'Burial resists a merely “spiritual” death; appearances resist a merely “spiritual” raising.':
     'Christ was buried and seen — not only a spirit story.',
   'Appearances are admitted to be visions with no named people.':
-    'The seen people are only nameless visions.',
+    'The people who saw him had no names.',
+  'Buried is only poetic decoration.': 'Buried is only pretty words.',
+  '“Buried” is only poetic decoration.': '“Buried” is only pretty words.',
   'Paul quotes a received formula and names known people; Luke claims inquiry among witnesses.':
     'Paul names people who saw him; Luke asked witnesses.',
   'Distance in time is the only historical question that matters.':
