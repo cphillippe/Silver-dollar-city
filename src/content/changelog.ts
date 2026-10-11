@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.458',
+    title: 'A row of three hits harder',
+    when: '2026-10-11',
+    items: [
+      'Three candles in a row hit walkers about a fifth harder, and two in a row hit a little harder. A boss in the first six rounds still takes the lone hit, so a zero-tap row still loses round 5.',
+      'After those early bosses, a row of three reaches a little farther, so the cluster covers more of the road.',
+      'The card still says a small candle is a sign of a prayer for someone.',
+    ],
+  },
+  {
     version: '1.4.457',
     title: 'A seeded night shoots',
     when: '2026-10-11',
