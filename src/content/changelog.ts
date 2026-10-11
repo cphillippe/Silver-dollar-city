@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.453',
+    title: 'The strip keeps its width',
+    when: '2026-10-11',
+    items: [
+      'Easy story wins keep the same picture width while you answer and after you answer. The scrollbar no longer nudges the strip or Home.',
+    ],
+  },
+  {
     version: '1.4.452',
     title: 'A candle sits beside the road',
     when: '2026-10-11',

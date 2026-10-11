@@ -1347,7 +1347,6 @@ html[data-easy='on'] .play.is-story-strip[data-n='3'] .strip-art img {
 @media (max-width: 520px) {
   html[data-easy='on'] .daily-page.is-after:has(.is-story-strip),
   html[data-easy='on'] .challenge-page.is-after:has(.is-story-strip) {
-    scrollbar-gutter: stable;
     overflow-anchor: none;
   }
 
@@ -1438,6 +1437,29 @@ html[data-easy='on'] .play.is-story-strip[data-n='3'] .strip-art img {
   html[data-easy='on'] .is-after:has(.play.is-story-strip) .why-blast,
   html[data-easy='on'] .is-after:has(.play.is-story-strip) .why-arena {
     gap: 4px;
+  }
+
+  /* The page was the box we padded, but .app-body is the box that scrolls.
+     A gutter on the page left the real scrollbar free to narrow the strip
+     by 15px whenever it appeared. One gutter on the app body, and no
+     second bar on the page, keeps the strip and Home the same width. */
+  html[data-easy='on'] .app.is-play .app-body:has(.play.is-story-strip),
+  html[data-easy='on'] .app.is-play .app-body:has(.play.is-story-strip.is-win),
+  html[data-easy='on'] .app.is-play .app-body:has(.play.is-story-strip[data-n='3']) {
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+    overflow-anchor: none;
+  }
+
+  html[data-easy='on'] .daily-page:has(.play.is-story-strip),
+  html[data-easy='on'] .challenge-page:has(.play.is-story-strip),
+  html[data-easy='on'] .daily-page.is-after:has(.play.is-story-strip.is-win:not([data-n='3'])),
+  html[data-easy='on'] .challenge-page.is-after:has(.play.is-story-strip.is-win:not([data-n='3'])),
+  html[data-easy='on'] .daily-page.is-after:has(.play.is-story-strip[data-n='3']),
+  html[data-easy='on'] .challenge-page.is-after:has(.play.is-story-strip[data-n='3']) {
+    overflow: visible;
+    scrollbar-gutter: auto;
   }
 }
 
