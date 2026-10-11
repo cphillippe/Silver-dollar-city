@@ -224,6 +224,7 @@ import {
   candlePathKey,
   candleRowMark,
   candleRowSize,
+  candleStrike,
   candlePlateReach,
   candleUnlocked,
   freshCandlePaths,
@@ -242,6 +243,8 @@ import {
 import {
   bindNightRoll,
   nightRoller,
+  nightSeedFaceShift,
+  nightSeedFirstShotAt,
   nightSeedPlan,
   nightSeedSteps,
   nightWatchSeed,
@@ -1575,7 +1578,14 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.456')
+assert.equal(APP_VERSION, '1.4.457')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.457'), '1.4.457 changelog row')
+assert.match(latestChange('1.4.457').title, /shoots/i)
+assert.doesNotMatch(
+  latestChange('1.4.457').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.457 changelog avoids GitHub close keywords',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.456'), '1.4.456 changelog row')
 assert.match(latestChange('1.4.456').title, /twice/i)
 assert.doesNotMatch(
@@ -15065,6 +15075,9 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
     '1.4.456 the outer nick uses the same boss cap',
   )
   const screenSrc = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  assert.match(screenSrc, /nightSeedFirstShotAt\(/, '1.4.457 the screen stamps the first shot once')
+  assert.match(screenSrc, /nightSeedFaceShift\(/, '1.4.457 the screen shifts walker faces with the seed')
+  assert.match(screenSrc, /data-lamp-damage/, '1.4.457 the screen records lamp damage')
   assert.match(screenSrc, /nightWatchSeed\(nightSearch\)/, '1.4.456 the screen reads the playtest seed')
   assert.match(screenSrc, /bindNightRoll\(nightSeed\)/, '1.4.456 the screen binds the seed roller')
   const seeds = [1, 2, 3, 4, 5]
@@ -15106,6 +15119,27 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.equal(lightSpreadDead[1], 9, '1.4.456 seed 2 is a live replay where the row outlasts the spread')
   assert.equal(lightRowDead[3], 10)
   assert.equal(lightSpreadDead[3], 9, '1.4.456 seed 4 is a live replay where the row outlasts the spread')
+  const openLast = nightSeedFirstShotAt(null, 1000, 700)
+  assert.equal(openLast, 300, '1.4.457 an unseeded lamp is already one wait behind')
+  assert.ok(1000 >= openLast + 700, '1.4.457 an unseeded lamp is ready on the first look')
+  const heldLast = nightSeedFirstShotAt(0.5, 0, 700)
+  assert.equal(heldLast, -350, '1.4.457 half a wait is a fixed mark behind the wave open')
+  assert.equal(nightSeedFirstShotAt(0.5, 5000, 700), heldLast, '1.4.457 the seeded mark does not chase the clock')
+  assert.equal(0 >= heldLast + 700, false, '1.4.457 the lamp is not ready at the open')
+  assert.ok(350 >= heldLast + 700, '1.4.457 the lamp is ready once the rest of the wait has run')
+  const facesFor = (seed) => {
+    const shift = nightSeedFaceShift(seed, WALKER_FACE_POOL.length)
+    const faces = []
+    for (let spawn = 0; spawn < 4; spawn += 1) faces.push(pickWalkerFace(0, spawn, faces, shift))
+    return faces
+  }
+  assert.notDeepEqual(facesFor(2), facesFor(4), '1.4.457 seeds 2 and 4 open on different heads')
+  assert.equal(pickWalkerFace(0, 0, [], 0), 'skeptic', '1.4.457 no shift keeps the unseeded head')
+  assert.equal(candleStrike(freshCandlePaths(), 3).splash, 0, '1.4.457 a fresh candle has no splash to add the row extra onto')
+  assert.equal(candleStrike(freshCandlePaths(), 3).outer, 0, '1.4.457 a fresh candle has no outer nick')
+  assert.equal(candleWalkerDamage(1, 2, 4, true), 1, '1.4.457 the round 5 boss stays off the row extra')
+  assert.equal(rowNight.dead, 5, '1.4.457 an unseeded zero-tap row still loses round 5')
 }
 
+await import('./check-seed-fire.mjs').then((mod) => mod.checkSeedFire())
 await import('./check-story-win.mjs').then((mod) => mod.checkStoryWins())

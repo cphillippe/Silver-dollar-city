@@ -8,6 +8,17 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.457',
+    title: 'A seeded night shoots',
+    when: '2026-10-11',
+    items: [
+      'A playtest seed no longer holds the lamps. They shoot on the same clock as a normal night.',
+      'Two seeds can show different walkers. A normal night still ignores the seed.',
+      'A row still does not put its extra on a boss in the first six rounds, on the shot or a splash. A zero-tap row still loses round 5.',
+      'The card still says a small candle is a sign of a prayer for someone.',
+    ],
+  },
+  {
     version: '1.4.456',
     title: 'The same night can be played twice',
     when: '2026-10-11',

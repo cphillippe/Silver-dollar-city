@@ -12,7 +12,7 @@ import {
 import { EASY, isEasy, loveHowTo } from '../lib/easy'
 import { walkerRoadId } from '../nightWatch/path/data'
 import { roundMark, easyRound } from '../nightWatch/rounds'
-import { pickWalkerFace } from '../nightWatch/enemies/faces'
+import { pickWalkerFace, WALKER_FACE_POOL } from '../nightWatch/enemies/faces'
 import {
   BOSS_PACE,
   easyBossClearSparks,
@@ -82,6 +82,8 @@ import {
 import {
   bindNightRoll,
   NIGHT_SEED_STEP,
+  nightSeedFaceShift,
+  nightSeedFirstShotAt,
   nightSeedPlan,
   nightSeedSpawnScale,
   nightSeedSteps,
@@ -252,6 +254,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const [tapHits, setTapHits] = useState(0)
   const [tapMisses, setTapMisses] = useState(0)
   const [tapDamage, setTapDamage] = useState(0)
+  const [lampHurt, setLampHurt] = useState(0)
   const [debugPaused, setDebugPaused] = useState(false)
   const nwDebugRef = useRef(nwDebug)
   const debugPausedRef = useRef(debugPaused)
@@ -446,6 +449,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const nightSeed = nightWatchSeed(nightSearch)
   const seedPlanRef = useRef(nightSeed == null ? null : nightSeedPlan(nightSeed))
   seedPlanRef.current = nightSeed == null ? null : nightSeedPlan(nightSeed)
+  const faceShiftRef = useRef(
+    nightSeed == null ? 0 : nightSeedFaceShift(nightSeed, WALKER_FACE_POOL.length),
+  )
+  faceShiftRef.current = nightSeed == null ? 0 : nightSeedFaceShift(nightSeed, WALKER_FACE_POOL.length)
   useEffect(() => {
     bindNightRoll(nightSeed)
     return () => bindNightRoll(null)
@@ -541,6 +548,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     setTapHits(0)
     setTapMisses(0)
     setTapDamage(0)
+    setLampHurt(0)
     const intro = skillUnlockOnWave(wave)
     if (intro === 'still') {
       seenSkill.current.still = true
@@ -793,6 +801,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
               wave,
               id,
               walking.flatMap((item) => (item.face ? [item.face] : [])),
+              faceShiftRef.current,
             )
           : undefined
         walking.push({
@@ -1503,6 +1512,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
         )
       }
       const struck = nightEnemies.hit(best, sized.damage)
+      if (easy && !manual) {
+        const applied = Math.max(0, best.hp - struck.raider.hp)
+        if (applied > 0) setLampHurt((hurt) => hurt + applied)
+      }
       const tapDmg = sized.damage
       const armored = sized.armored
       const nextChip = sized.nextChip
@@ -1567,6 +1580,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
             }
           }
           if (!pick) return
+          const beforeHp = pick.hp
           const nick = nightEnemies.hit(
             pick,
             isCandle(using)
@@ -1578,6 +1592,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
                 )
               : amount,
           )
+          const nicked = Math.max(0, beforeHp - nick.raider.hp)
+          if (nicked > 0) setLampHurt((hurt) => hurt + nicked)
           const spot = raiderAt(pick)
           live.current.raiders = live.current.raiders.map((item) =>
             item.id !== pick.id
@@ -1644,10 +1660,14 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
           : undefined
       const gate = wait * (rowPace ?? 1)
       const shotAt = easy ? live.current.clock : now
-      const shotFrac = seedPlanRef.current?.shotFrac
-      const last = easy
-        ? (live.current.cool[id] ?? shotAt - gate * (shotFrac == null ? 1 : shotFrac))
-        : (live.current.cool[id] ?? 0)
+      const shotFrac = seedPlanRef.current?.shotFrac ?? null
+      let last = live.current.cool[id]
+      if (easy && last == null) {
+        last = nightSeedFirstShotAt(shotFrac, shotAt, gate)
+        if (shotFrac != null) live.current.cool[id] = last
+      } else if (!easy && last == null) {
+        last = 0
+      }
       if (!lampReadyToFire(last, shotAt, gate, frozen)) continue
       const at = nightTowers.anchor(id)
       const range = hitRange(id, using)
@@ -1779,6 +1799,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     setTapHits(0)
     setTapMisses(0)
     setTapDamage(0)
+    setLampHurt(0)
     setRunTier(freshRunTier())
     setRunPaths(freshRunPaths())
     runPathsRef.current = freshRunPaths()
@@ -2170,7 +2191,12 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
 
   const heartShown = Math.min(DEFEND_HEARTS, Math.max(0, Math.floor(hearts) || 0))
   const hud = (
-    <p className="defend-hud" aria-live="polite" data-nw-seed={nightSeed ?? undefined}>
+    <p
+      className="defend-hud"
+      aria-live="polite"
+      data-nw-seed={nightSeed ?? undefined}
+      data-lamp-damage={lampHurt}
+    >
       {phase === 'wave' ? (
         <span className="defend-wave">{roundLabel}</span>
       ) : null}

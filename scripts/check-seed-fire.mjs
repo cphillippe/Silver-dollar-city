@@ -1,0 +1,214 @@
+/**
+ * Seeded Night Watch through the real DefendScreen (1.4.457).
+ * Plants four pillars, runs round 1 with no face taps, and checks the lamps hurt.
+ */
+import assert from 'node:assert/strict'
+import { fileURLToPath } from 'node:url'
+import { createServer } from 'vite'
+import { chromium } from '@playwright/test'
+import { SAVE_KIND } from '../src/lib/save.ts'
+import { SAVE_SCHEMA_VERSION, STORAGE_KEY } from '../src/config/app.ts'
+
+const SAVE = {
+  kind: SAVE_KIND,
+  schemaVersion: SAVE_SCHEMA_VERSION,
+  appVersion: '1.4.457',
+  savedAt: '2026-10-11T00:00:00.000Z',
+  progress: {
+    started: true,
+    easyMode: true,
+    theme: 'candy',
+    completed: [],
+    lastDailyDate: '2026-10-10',
+    held: [],
+  },
+}
+
+const TYPES = ['love', 'logic', 'reason', 'science']
+/** Seats that reach the road. The picture sits 26 units above the finger. */
+const SEATS = [
+  { x: 430, y: 160 - 26 },
+  { x: 250, y: 300 - 26 },
+  { x: 230, y: 440 - 26 },
+  { x: 310, y: 580 - 26 },
+  { x: 420, y: 430 - 26 },
+  { x: 450, y: 210 - 26 },
+  { x: 210, y: 740 - 26 },
+]
+
+async function launchBrowser() {
+  try {
+    return await chromium.launch({ headless: true })
+  } catch {
+    return await chromium.launch({ headless: true, channel: 'chrome' })
+  }
+}
+
+async function openNight(page, seed) {
+  await page.goto(`/?playtest=1&nwSeed=${seed}`)
+  const begin = page.getByRole('button', { name: 'Begin the watch' }).first()
+  await begin.waitFor({ timeout: 20_000 })
+  if ((await page.locator('.defend-page').count()) === 0) {
+    await begin.click()
+    await page.locator('.defend-page').waitFor()
+  }
+}
+
+async function clientSeat(page, seat) {
+  return page.evaluate((spot) => {
+    const svg = document.querySelector('.defend-board')
+    if (!(svg instanceof SVGSVGElement)) return null
+    const ctm = svg.getScreenCTM()
+    if (!ctm) return null
+    const point = svg.createSVGPoint()
+    point.x = spot.x
+    point.y = spot.y
+    const client = point.matrixTransform(ctm)
+    const hud = [...document.querySelectorAll('.nw-rail, .nw-docks, .nw-balloon-slot, .nw-wave-overlay')]
+    const covered = hud.some((node) => {
+      const box = node.getBoundingClientRect()
+      return (
+        box.width > 1 &&
+        client.x >= box.left &&
+        client.x <= box.right &&
+        client.y >= box.top &&
+        client.y <= box.bottom
+      )
+    })
+    const hit = document.elementFromPoint(client.x, client.y)
+    const onBoard = Boolean(hit && hit.closest('.defend-board'))
+    return { x: client.x, y: client.y, covered, onBoard }
+  }, seat)
+}
+
+async function plantFour(page) {
+  await page.locator('.defend-board').waitFor()
+  let placed = 0
+  for (const seat of SEATS) {
+    if (placed >= 4) break
+    const point = await clientSeat(page, seat)
+    if (!point || point.covered || !point.onBoard) continue
+    const type = TYPES[placed]
+    await page.locator(`[data-type="${type}"]`).click()
+    await page.locator(`[data-type="${type}"][aria-pressed="true"]`).waitFor()
+    await page.mouse.click(point.x, point.y)
+    const count = await page.locator('[data-tower-type]').count()
+    if (count > placed) placed = count
+  }
+  const types = await page.locator('[data-tower-type]').evaluateAll((nodes) =>
+    nodes.map((node) => node.getAttribute('data-tower-type')),
+  )
+  assert.equal(placed, 4, `four pillars are on the road, saw ${types.join(',') || 'none'}`)
+}
+
+async function beginRound(page) {
+  const go = page.locator('.defend-go')
+  await go.click()
+  await page.locator('.defend-page.is-easy-tap').waitFor()
+}
+
+async function facesSoFar(page, seen, ms) {
+  const start = Date.now()
+  while (Date.now() - start < ms && seen.length < 4) {
+    const faces = await page.locator('[data-face]').evaluateAll((nodes) =>
+      nodes.map((node) => node.getAttribute('data-face')).filter(Boolean),
+    )
+    for (const face of faces) {
+      if (!seen.includes(face)) seen.push(face)
+    }
+    await page.waitForTimeout(200)
+  }
+  return seen
+}
+
+/** Round 1, four pillars, no face taps. Lamps must deal damage and clear the round. */
+export async function checkSeedFire() {
+  const server = await createServer({ server: { host: '127.0.0.1', port: 0 } })
+  await server.listen()
+  const address = server.httpServer?.address()
+  const port = address && typeof address === 'object' ? address.port : 0
+  assert.ok(port > 0, '1.4.457 seed-fire server has a port')
+  const base = `http://127.0.0.1:${port}/`
+  const browser = await launchBrowser()
+  try {
+    const context = await browser.newContext({
+      baseURL: base,
+      viewport: { width: 390, height: 844 },
+      deviceScaleFactor: 1,
+      reducedMotion: 'reduce',
+    })
+    await context.addInitScript(
+      (payload) => {
+        localStorage.setItem(payload.key, JSON.stringify(payload.save))
+      },
+      { key: STORAGE_KEY, save: SAVE },
+    )
+    const page = await context.newPage()
+    const errors = []
+    page.on('pageerror', (error) => errors.push(String(error)))
+    await openNight(page, 2)
+    await plantFour(page)
+    await beginRound(page)
+    const faces2 = []
+    let sawShot = false
+    const started = Date.now()
+    let outcome = 'running'
+    let lampDamage = 0
+    let sparks = 0
+    while (Date.now() - started < 70_000) {
+      await facesSoFar(page, faces2, 250)
+      if (!sawShot && (await page.locator('.defend-shot, .is-flash, .is-lamp-hit').count()) > 0) {
+        sawShot = true
+      }
+      const snap = await page.evaluate(() => {
+        const hud = document.querySelector('.defend-hud')
+        const page = document.querySelector('.defend-page')
+        const sparks = document.querySelector('[aria-label^="Sparks:"]')
+        return {
+          damage: Number(hud?.getAttribute('data-lamp-damage') ?? '0'),
+          sparks: sparks?.getAttribute('aria-label') ?? '',
+          boost: page?.classList.contains('is-boost') ?? false,
+          lost: page?.classList.contains('is-lost') ?? false,
+          wave: document.querySelector('.defend-wave')?.textContent ?? '',
+        }
+      })
+      lampDamage = snap.damage
+      const sparkCount = Number(snap.sparks.replace(/[^\d]/g, '') || '0')
+      sparks = sparkCount
+      if (snap.lost) {
+        outcome = 'lost'
+        break
+      }
+      if (snap.boost || snap.wave.includes('Round 2')) {
+        outcome = 'clear'
+        break
+      }
+    }
+    assert.equal(errors.join('\n'), '', '1.4.457 seeded night stays free of page errors')
+    assert.equal(outcome, 'clear', `1.4.457 seed 2 clears round 1 (saw ${outcome}, damage ${lampDamage})`)
+    assert.ok(lampDamage > 0, `1.4.457 seed 2 lamp damage is above 0 (saw ${lampDamage})`)
+    assert.equal(sawShot, true, '1.4.457 seed 2 shows a lamp shot')
+    assert.ok(sparks > 0, `1.4.457 seed 2 earns sparks from the lamps (saw ${sparks})`)
+    assert.ok(faces2.length > 0, '1.4.457 seed 2 shows a walker face')
+
+    const other = await context.newPage()
+    await openNight(other, 4)
+    await plantFour(other)
+    await beginRound(other)
+    const faces4 = await facesSoFar(other, [], 8000)
+    assert.ok(faces4.length > 0, '1.4.457 seed 4 shows a walker face')
+    assert.notDeepEqual(faces2, faces4, `1.4.457 seeds 2 and 4 show different walkers (${faces2} vs ${faces4})`)
+    console.log(
+      `seed-fire: seed 2 damage ${lampDamage} sparks ${sparks} shot yes clear faces ${faces2.join(',')} | seed 4 faces ${faces4.join(',')}`,
+    )
+    await context.close()
+  } finally {
+    await browser.close()
+    await server.close()
+  }
+}
+
+if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+  await checkSeedFire()
+  console.log('check-seed-fire: ok')
+}
