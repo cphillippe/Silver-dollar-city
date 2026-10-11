@@ -2572,18 +2572,63 @@ img.walker-face.easy-walker-face,
   padding: 8px 8px 10px;
 }
 
-/* 1.4.445: candle card. Two steps, and the prayer lines. The hit is a game effect. */
+/* 1.4.450: candle card stays short so the road stays in view on a phone. */
 .defend-tower-card.is-candle {
-  padding-top: 22px;
+  padding: 4px 6px 6px;
+}
+
+.defend-tower-card.is-candle .defend-tower-tool {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.1;
+}
+
+.defend-tower-card.is-candle .defend-tower-pull {
+  width: 28px;
+  height: 28px;
+}
+
+.nw-candle-link,
+.nw-candle-link-core {
+  fill: none;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+
+.nw-candle-link {
+  stroke: rgba(255, 176, 64, 0.42);
+  stroke-width: 16;
+}
+
+.nw-candle-link-core {
+  stroke: rgba(255, 244, 196, 0.92);
+  stroke-width: 3;
+}
+
+.nw-candle-row {
+  pointer-events: none;
+}
+
+.nw-candle-row rect {
+  fill: rgba(42, 16, 6, 0.9);
+  stroke: #ffcc66;
+  stroke-width: 2;
+}
+
+.nw-candle-row text {
+  fill: #fff4c8;
+  font-family: var(--sans, system-ui, sans-serif);
+  font-size: 15px;
+  font-weight: 800;
 }
 
 .defend-candle-line,
 .defend-candle-verse,
 .defend-candle-help {
-  margin: 4px 0 0;
-  font-size: 0.68rem;
+  margin: 2px 0 0;
+  font-size: 0.58rem;
   font-weight: 700;
-  line-height: 1.25;
+  line-height: 1.15;
   text-align: left;
 }
 
@@ -2597,11 +2642,32 @@ img.walker-face.easy-walker-face,
 }
 
 .defend-tower-card.is-candle .defend-path {
-  margin-top: 6px;
+  margin-top: 3px;
+  gap: 2px 6px;
 }
 
 .defend-tower-card.is-candle .defend-path + .defend-path {
-  margin-top: 8px;
+  margin-top: 4px;
+}
+
+.defend-tower-card.is-candle .defend-path-name {
+  font-size: 0.62rem;
+}
+
+.defend-tower-card.is-candle .defend-path-line {
+  font-size: 0.52rem;
+}
+
+.defend-tower-card.is-candle .defend-path-pip {
+  width: 16px;
+  height: 16px;
+  font-size: 9px;
+}
+
+.defend-tower-card.is-candle .defend-path-buy {
+  min-height: 0;
+  padding: 3px 8px;
+  font-size: 0.68rem;
 }
 
 .nw-skill-tray button.defend-candle-lamp,

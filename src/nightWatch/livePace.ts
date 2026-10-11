@@ -150,6 +150,15 @@ export const BARE_LAMPS: readonly LampPaths[] = [
   { far: 0, strong: 0 },
 ]
 
+/** One extra shot source on the plate. The night spender does not buy these. */
+export interface PaceShot {
+  x: number
+  y: number
+  damage: number
+  range: number
+  cooldownMs: number
+}
+
 export interface PaceLive {
   result: 'clear' | 'lost' | 'timeout'
   taps: number
@@ -162,6 +171,8 @@ export interface PaceLive {
   boss: 'kill' | 'leak' | 'up' | 'none'
   /** Sparks this round paid, already rounded down. Boss-clear sparks are not included. */
   sparks: number
+  /** Hit points lamps removed this round, walkers and the boss. */
+  dealt: number
 }
 
 interface LiveRules {
@@ -295,6 +306,8 @@ export function paceEasyLive(
    * stay on the cottages.
    */
   map?: PaceMap,
+  /** Extra shots on top of the pillar seats. Omitted, the round is unchanged. */
+  shots: readonly PaceShot[] = [],
 ): PaceLive {
   const road = mode === 'road' || mode === 'road437' || Boolean(map)
   const roadPath = map?.path
@@ -335,6 +348,25 @@ export function paceEasyLive(
         const range = plateReach(seat.id, 96 + strike.rangeBonus, seat.gap) * LIVE_RING_SCALE
         return { ...seat, strike, range, cool: 0 }
       })
+  for (const shot of shots) {
+    lamps.push({
+      id: 'shot',
+      x: shot.x,
+      y: shot.y,
+      gap: 0,
+      strike: {
+        damage: shot.damage,
+        rangeBonus: 0,
+        cooldownMs: shot.cooldownMs,
+        splash: 0,
+        splashFrac: 0,
+        outer: 0,
+        outerFrac: 0,
+      },
+      range: shot.range,
+      cool: 0,
+    })
+  }
   const raiders: {
     t: number
     hp: number
@@ -358,6 +390,7 @@ export function paceEasyLive(
   let bossLamp = 0
   let bossTap = 0
   let bossMax = 0
+  let dealt = 0
   let graceUntil = 0
   let lostRound = 0
   const bossBox: { fate: PaceLive['boss'] } = { fate: bossRound ? 'up' : 'none' }
@@ -377,6 +410,7 @@ export function paceEasyLive(
     hearts,
     boss: bossBox.fate,
     sparks: Math.floor(sparkFloat),
+    dealt,
   })
   if (hearts <= 0) return finish('lost')
   while (time < 180) {
@@ -489,9 +523,10 @@ export function paceEasyLive(
       lamp.cool = lamp.strike.cooldownMs / 1000
       const apply = (raider: (typeof raiders)[number] | null, amount: number, byLamp: boolean) => {
         if (!raider || raider.dead || amount <= 0) return
-        const dealt = Math.min(raider.hp, amount)
-        raider.hp -= dealt
-        if (raider.boss) bossLamp += dealt
+        const hit = Math.min(raider.hp, amount)
+        raider.hp -= hit
+        dealt += hit
+        if (raider.boss) bossLamp += hit
         if (raider.hp <= 0) kill(raider, byLamp)
       }
       apply(best, lamp.strike.damage, true)
@@ -740,6 +775,35 @@ export function paceEasyRoadCampaign(
     hearts = easyClearHeart(round.hearts)
   }
   return { dead: null, rows }
+}
+
+/**
+ * Same pillar plan as the road night, plus extra shots.
+ * `tapEvery` above the round length is a zero-tap night.
+ */
+export function paceExtraNight(
+  kind: 'none' | 'natural' | 'ceiling',
+  shots: readonly PaceShot[] = [],
+  tapEvery = LIVE_TAP_EVERY,
+): { dead: number | null; dealt: number } {
+  let hearts = 3
+  let dealt = 0
+  for (let index = 0; index < 25; index += 1) {
+    const round = paceEasyLive(
+      index,
+      campaignLamps(kind, index),
+      hearts,
+      false,
+      tapEvery,
+      'road',
+      undefined,
+      shots,
+    )
+    dealt += round.dealt
+    if (round.result !== 'clear') return { dead: index + 1, dealt }
+    hearts = easyClearHeart(round.hearts)
+  }
+  return { dead: null, dealt }
 }
 
 export interface BossRow {

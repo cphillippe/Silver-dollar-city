@@ -13,10 +13,11 @@ import {
 } from './upgradeTree.ts'
 
 /**
- * Easy candle stand (1.4.447).
+ * Easy candle stand (1.4.450).
  * A cheap short lamp you plant in a row. It is not a fifth pillar tool.
  * The candle has no power of its own. It helps people pray and remember God.
  * Damage on the road is only a game effect.
+ * A row shares one glow and one damage mark. A lone candle shows neither.
  */
 
 export const CANDLE_ID = 'candle'
@@ -43,13 +44,14 @@ export const CANDLE_COOLDOWN_MS = 480
 
 export const CANDLE_DAMAGE = 1
 
-/** Another candle inside this radius adds a little damage. */
+/** Another candle inside this radius shares the row. */
 export const CANDLE_LINK = 78
 
-export const CANDLE_LINK_DAMAGE = 1
-
-/** Extra damage from nearby candles. A row of 3–4 fills this. */
-export const CANDLE_LINK_CAP = 2
+/**
+ * A pair hits at x2. Three or more in one row hit at x3.
+ * The badge uses the same marks: Row x2, Row x3.
+ */
+export const CANDLE_ROW_CAP = 3
 
 /** Each path stops at 2. The path you do not take deep still gets step 1. */
 export const CANDLE_STEP_MAX = 2
@@ -96,8 +98,9 @@ export function candleRoom(plants: Record<string, string>): boolean {
 }
 
 /**
- * A2 opens on the clear after round 2, so a row can be down before round 3.
- * A maze offers the candle from the start. Hard never does.
+ * A2 offers the candle on the clear after round 3, then on every later round.
+ * The wave of round 3 itself stays closed. A maze offers it from the first plant.
+ * Hard never does.
  */
 export function candleUnlocked(
   easy: boolean,
@@ -108,8 +111,8 @@ export function candleUnlocked(
   if (!easy) return false
   if (maze) return true
   const round = Math.floor(waveIndex) + 1
-  if (round >= CANDLE_FROM_ROUND) return true
-  if (phase === 'boost' && round + 1 >= CANDLE_FROM_ROUND) return true
+  if (round > CANDLE_FROM_ROUND) return true
+  if (phase === 'boost' && round >= CANDLE_FROM_ROUND) return true
   return false
 }
 
@@ -124,6 +127,61 @@ export function plantCandle(
   return { ...map, [pad]: CANDLE_ID }
 }
 
+export function candleIds(plants: Record<string, string>): string[] {
+  return Object.entries(plants)
+    .filter(([, type]) => type === CANDLE_ID)
+    .map(([id]) => id)
+}
+
+/** Pairs inside the link radius. Each pair once, nearer id first. */
+export function candleLinks(plants: Record<string, string>): [string, string][] {
+  const ids = candleIds(plants)
+  const pairs: [string, string][] = []
+  for (let i = 0; i < ids.length; i += 1) {
+    for (let j = i + 1; j < ids.length; j += 1) {
+      const a = lampAnchor(ids[i])
+      const b = lampAnchor(ids[j])
+      if (Math.hypot(a.x - b.x, a.y - b.y) <= CANDLE_LINK) pairs.push([ids[i], ids[j]])
+    }
+  }
+  return pairs
+}
+
+/** How many candles share this one's row, counting itself. A lone stand is 1. */
+export function candleRowSize(plotId: string, plants: Record<string, string>): number {
+  const ids = new Set(candleIds(plants))
+  ids.add(plotId)
+  const seen = new Set<string>([plotId])
+  const queue = [plotId]
+  while (queue.length > 0) {
+    const id = queue.pop() as string
+    const at = lampAnchor(id)
+    for (const other of ids) {
+      if (seen.has(other)) continue
+      const there = lampAnchor(other)
+      if (Math.hypot(there.x - at.x, there.y - at.y) <= CANDLE_LINK) {
+        seen.add(other)
+        queue.push(other)
+      }
+    }
+  }
+  return seen.size
+}
+
+/** Empty when the candle is alone. Otherwise `Row x2` or `Row x3`. */
+export function candleRowMark(size: number): string {
+  const n = Math.max(0, Math.floor(size) || 0)
+  if (n < 2) return ''
+  return `Row x${Math.min(CANDLE_ROW_CAP, n)}`
+}
+
+/** Lone candles stay at x1. A pair is x2. A longer row stops at x3. */
+export function candleRowFactor(size: number): number {
+  const n = Math.max(0, Math.floor(size) || 0)
+  if (n < 2) return 1
+  return Math.min(CANDLE_ROW_CAP, n)
+}
+
 export function candleNeighbors(plotId: string, plants: Record<string, string>): number {
   const at = lampAnchor(plotId)
   let near = 0
@@ -135,11 +193,6 @@ export function candleNeighbors(plotId: string, plants: Record<string, string>):
   return near
 }
 
-export function candleLinkBonus(neighbors: number): number {
-  const near = Math.max(0, Math.floor(neighbors) || 0)
-  return Math.min(CANDLE_LINK_CAP, near * CANDLE_LINK_DAMAGE)
-}
-
 function clampStep(rank: number | undefined): number {
   if (!rank || rank < 0) return 0
   return Math.min(CANDLE_STEP_MAX, Math.floor(rank))
@@ -149,11 +202,11 @@ export function candleFarBonus(paths: LampPaths): number {
   return clampStep(paths.far) * CANDLE_FAR_STEP
 }
 
-/** Game damage. Nearby candles add a little, then the cap holds. */
-export function candleDamage(paths: LampPaths, neighbors: number): number {
+/** Game damage. The whole row shares one factor. A lone candle stays at the base hit. */
+export function candleDamage(paths: LampPaths, rowSize: number): number {
   const strong = clampStep(paths.strong)
   const base = CANDLE_DAMAGE + (strong >= 2 ? 1 : 0)
-  return base + candleLinkBonus(neighbors)
+  return base * candleRowFactor(rowSize)
 }
 
 export function candleCooldown(paths: LampPaths): number {
@@ -192,9 +245,9 @@ export interface CandleStrike {
   outerFrac: number
 }
 
-export function candleStrike(paths: LampPaths, neighbors: number): CandleStrike {
+export function candleStrike(paths: LampPaths, rowSize: number): CandleStrike {
   return {
-    damage: candleDamage(paths, neighbors),
+    damage: candleDamage(paths, rowSize),
     rangeBonus: candleFarBonus(paths),
     cooldownMs: candleCooldown(paths),
     splash: 0,
