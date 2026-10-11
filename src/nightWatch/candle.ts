@@ -253,6 +253,13 @@ export const CANDLE_EARLY_PACE = 1.2
  */
 export const CANDLE_ROW_WALKER = 0.12
 
+/** A boss in rounds 1–6 does not take the row extra, on the main shot or a splash. */
+export function candleBossBonusCapped(roundIndex: number, boss: boolean): boolean {
+  if (!boss) return false
+  const round = Math.floor(roundIndex) + 1
+  return round >= 1 && round <= 6
+}
+
 /** Walker damage for this shot. Bosses and the early boss round stay at `damage`. */
 export function candleWalkerDamage(
   damage: number,
@@ -260,7 +267,9 @@ export function candleWalkerDamage(
   roundIndex: number,
   boss: boolean,
 ): number {
-  if (!(damage > 0) || boss || rowSize < 2) return damage
+  if (!(damage > 0) || rowSize < 2) return damage
+  if (candleBossBonusCapped(roundIndex, boss)) return damage
+  if (boss) return damage
   if (candleEarlyPace(rowSize, roundIndex)) return damage
   return damage * (1 + CANDLE_ROW_WALKER)
 }

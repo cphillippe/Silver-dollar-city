@@ -79,6 +79,14 @@ import {
   readNightWatchDebug,
   readNightWatchRoundJump,
 } from '../lib/nightWatchDebug'
+import {
+  bindNightRoll,
+  NIGHT_SEED_STEP,
+  nightSeedPlan,
+  nightSeedSpawnScale,
+  nightSeedSteps,
+  nightWatchSeed,
+} from '../nightWatch/seed'
 import { FarHillsUnlock } from './FarHillsUnlock'
 import { NightMapPicker } from './NightMapPicker'
 import { applyNightMap } from '../nightWatch/maps/bind'
@@ -435,6 +443,13 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
 
   const nightSearch = typeof window === 'undefined' ? '' : window.location.search
   const nightPlaytest = nightWatchJumpAllowed(nightSearch, nwDebug)
+  const nightSeed = nightWatchSeed(nightSearch)
+  const seedPlanRef = useRef(nightSeed == null ? null : nightSeedPlan(nightSeed))
+  seedPlanRef.current = nightSeed == null ? null : nightSeedPlan(nightSeed)
+  useEffect(() => {
+    bindNightRoll(nightSeed)
+    return () => bindNightRoll(null)
+  }, [nightSeed])
   const mapId = resolveNightMap({
     easy,
     unlocked: progress.defense.farHills === true,
@@ -580,6 +595,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     setDowned(0)
     let last = performance.now()
     let spawnAt = 0
+    let seedCarry = 0
     let frame = 0
 
     const tick = (now: number) => {
@@ -596,8 +612,20 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       // 3× is three steps of the 1× clock, so a clump of leaks is not one cheaper heart.
       const gameDt = pacedDt(wallDt, pace)
       const slices = pace === NIGHT_PACE_FAST ? NIGHT_PACE_FAST : 1
-      const dt = gameDt / slices
+      const seedPlan = seedPlanRef.current
+      let seededSteps = slices
+      if (seedPlan) {
+        const stepped = nightSeedSteps(seedCarry, gameDt)
+        seedCarry = stepped.carry
+        seededSteps = stepped.steps
+      }
       last = now
+      if (seedPlan && seededSteps < 1) {
+        frame = requestAnimationFrame(tick)
+        return
+      }
+      const dt = gameDt / slices
+      const clockDt = seedPlan ? NIGHT_SEED_STEP : dt
       const frozen = nightWatchDebugFrozen(
         easy,
         nwDebugRef.current,
@@ -605,19 +633,24 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
         now,
         live.current.freezeUntil,
       )
-      for (let slice = 0; slice < slices; slice += 1) {
+      for (let slice = 0; slice < (seedPlan ? seededSteps : slices); slice += 1) {
       if (!frozen) {
         spawnAt += dt
         if (easy) live.current.clock += dt * 1000
+        // A playtest seed spends fixed steps. These two lines stay the unseeded clock.
+        if (seedPlan) {
+          spawnAt += clockDt - dt
+          if (easy) live.current.clock += (clockDt - dt) * 1000
+        }
       }
       const next = live.current.raiders.map((item) => {
         if (item.turned) {
           const tier = combatTier(item.turned, runTierRef.current)
-          return { ...item, heavenT: (item.heavenT ?? 0) + nightEnemies.heavenSpeed(tier, easy) * dt }
+          return { ...item, heavenT: (item.heavenT ?? 0) + nightEnemies.heavenSpeed(tier, easy) * (seedPlan ? clockDt : dt) }
         }
         const gaitPace = item.boss ? BOSS_PACE : walkerPace(easy ? item.gait : undefined)
         const paceMul = item.paceScale ?? 1
-        let step = nightEnemies.speed(easy) * tune.speedScale * gaitPace * paceMul * dt
+        let step = nightEnemies.speed(easy) * tune.speedScale * gaitPace * paceMul * (seedPlan ? clockDt : dt)
         let fog = item.fog
         if (easy && featuresRef.current.length > 0) {
           const zone = walkerZone(item.t, item.pathId, featuresRef.current)
@@ -697,7 +730,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
         live.current.spawned < liveTune.size &&
         !holdSpawn &&
         (live.current.spawnNow ||
-          spawnAt >= nightEnemies.spawnEvery(easy) * liveTune.spawnScale ||
+          spawnAt >=
+            nightEnemies.spawnEvery(easy) *
+              liveTune.spawnScale *
+              (seedPlan ? nightSeedSpawnScale(seedPlan.spawnFrac) : 1) ||
           (easy && live.current.spawned === 0))
       ) {
         live.current.spawnNow = false
@@ -1531,7 +1567,17 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
             }
           }
           if (!pick) return
-          const nick = nightEnemies.hit(pick, amount)
+          const nick = nightEnemies.hit(
+            pick,
+            isCandle(using)
+              ? candleWalkerDamage(
+                  amount,
+                  candleRowSize(id, plantsRef.current),
+                  waveIndexRef.current,
+                  Boolean(pick.boss),
+                )
+              : amount,
+          )
           const spot = raiderAt(pick)
           live.current.raiders = live.current.raiders.map((item) =>
             item.id !== pick.id
@@ -1598,7 +1644,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
           : undefined
       const gate = wait * (rowPace ?? 1)
       const shotAt = easy ? live.current.clock : now
-      const last = easy ? (live.current.cool[id] ?? shotAt - gate) : (live.current.cool[id] ?? 0)
+      const shotFrac = seedPlanRef.current?.shotFrac
+      const last = easy
+        ? (live.current.cool[id] ?? shotAt - gate * (shotFrac == null ? 1 : shotFrac))
+        : (live.current.cool[id] ?? 0)
       if (!lampReadyToFire(last, shotAt, gate, frozen)) continue
       const at = nightTowers.anchor(id)
       const range = hitRange(id, using)
@@ -2121,7 +2170,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
 
   const heartShown = Math.min(DEFEND_HEARTS, Math.max(0, Math.floor(hearts) || 0))
   const hud = (
-    <p className="defend-hud" aria-live="polite">
+    <p className="defend-hud" aria-live="polite" data-nw-seed={nightSeed ?? undefined}>
       {phase === 'wave' ? (
         <span className="defend-wave">{roundLabel}</span>
       ) : null}
