@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.449',
+    title: 'Story wins keep their pictures',
+    when: '2026-10-11',
+    items: [
+      'Easy story wins keep the pictures, the story-set line, and the stars after you answer. The verse stays above Home. The rest of a long follow-up can scroll.',
+    ],
+  },
+  {
     version: '1.4.448',
     title: 'Pack checks follow the index',
     when: '2026-10-11',
