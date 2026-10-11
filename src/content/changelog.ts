@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.452',
+    title: 'A candle sits beside the road',
+    when: '2026-10-11',
+    items: [
+      'A level I candle on the lip of the road reads Good, and the next candle can sit beside it. While you drag, the ghost says Row x2 or Row x3 and slides toward that spot.',
+      'The row wears one mark. Three candles in that row hold a couple of rounds longer than the same three set apart. Six candles still end an Easy night in the middle rounds.',
+      'The card still says a small candle is a sign of a prayer for someone.',
+    ],
+  },
+  {
     version: '1.4.451',
     title: 'The first choice stays up',
     when: '2026-10-11',

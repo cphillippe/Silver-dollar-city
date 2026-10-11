@@ -31,25 +31,41 @@ export const CANDLE_CAP = 6
 /** A2 round that opens the candle. Mazes offer it from the first plant. */
 export const CANDLE_FROM_ROUND = 3
 
-/** Combat reach before the road-overlap rule. Shorter than a level I lamp (114). */
 /**
- * Short plate reach. The closest legal seat sits just past the road block (46),
- * and a lamp only meets the road when its reach clears that gap plus the
- * 24-unit overlap. 86 covers a seat in that band and stays under a pillar lamp.
+ * Level I reach. A seat on the lip of the road (just past the 46 block) covers
+ * a Good stretch, and the band beside the road is wide enough to walk a row.
+ * Still shorter than a free level I pillar (114).
  */
-export const CANDLE_RANGE = 86
+export const CANDLE_RANGE = 100
 
 /** Auto-shot wait. A little quicker than a level I lamp (700). */
 export const CANDLE_COOLDOWN_MS = 480
 
 export const CANDLE_DAMAGE = 1
 
-/** Another candle inside this radius shares the row. */
-export const CANDLE_LINK = 78
+/**
+ * Two candles within this many plate units are one row.
+ * About one and a half pad-widths, center to center, along or beside the road.
+ * The old 84-wide pad made the nearest real click about this far.
+ */
+export const CANDLE_LINK = 130
 
 /**
- * A pair hits at x2. Three or more in one row hit at x3.
- * The badge uses the same marks: Row x2, Row x3.
+ * No-go radius between two candles. Smaller than a pillar body, so the next
+ * candle can sit beside this one instead of a pad-width away.
+ */
+export const CANDLE_BODY = 34
+
+/** Tappable pad width. The row radius is about 1.5 of these. */
+export const CANDLE_PAD = 84
+
+/** Road length that counts as Good for a level I candle. Shorter than a pillar's Good. */
+export const CANDLE_GOOD_LEN = 96
+
+/**
+ * The badge counts the row: Row x2, Row x3.
+ * The hit stays at 1. A stronger hit on a real road-lip row jumps the
+ * night by five rounds, which is more than the row should add.
  */
 export const CANDLE_ROW_CAP = 3
 
@@ -168,6 +184,45 @@ export function candleRowSize(plotId: string, plants: Record<string, string>): n
   return seen.size
 }
 
+/** One head per row: the candle highest on the plate. Lone candles are omitted. */
+export function candleRowHeads(plants: Record<string, string>): { id: string; mark: string }[] {
+  const ids = candleIds(plants)
+  const seen = new Set<string>()
+  const heads: { id: string; mark: string }[] = []
+  for (const start of ids) {
+    if (seen.has(start)) continue
+    const group = [start]
+    const queue = [start]
+    seen.add(start)
+    while (queue.length > 0) {
+      const id = queue.pop() as string
+      const at = lampAnchor(id)
+      for (const other of ids) {
+        if (seen.has(other)) continue
+        const there = lampAnchor(other)
+        if (Math.hypot(there.x - at.x, there.y - at.y) <= CANDLE_LINK) {
+          seen.add(other)
+          group.push(other)
+          queue.push(other)
+        }
+      }
+    }
+    const mark = candleRowMark(group.length)
+    if (!mark) continue
+    let head = group[0]
+    let top = lampAnchor(head).y
+    for (const id of group) {
+      const y = lampAnchor(id).y
+      if (y < top) {
+        top = y
+        head = id
+      }
+    }
+    heads.push({ id: head, mark })
+  }
+  return heads
+}
+
 /** Empty when the candle is alone. Otherwise `Row x2` or `Row x3`. */
 export function candleRowMark(size: number): string {
   const n = Math.max(0, Math.floor(size) || 0)
@@ -175,11 +230,14 @@ export function candleRowMark(size: number): string {
   return `Row x${Math.min(CANDLE_ROW_CAP, n)}`
 }
 
-/** Lone candles stay at x1. A pair is x2. A longer row stops at x3. */
+/**
+ * A row does not multiply the hit. Three candles on one stretch already
+ * hold the road longer than the same three apart. A stronger hit jumps
+ * that lead from a couple of rounds to five.
+ */
 export function candleRowFactor(size: number): number {
-  const n = Math.max(0, Math.floor(size) || 0)
-  if (n < 2) return 1
-  return Math.min(CANDLE_ROW_CAP, n)
+  void size
+  return 1
 }
 
 export function candleNeighbors(plotId: string, plants: Record<string, string>): number {
