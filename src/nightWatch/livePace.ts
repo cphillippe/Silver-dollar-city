@@ -158,11 +158,11 @@ export interface PaceShot {
   range: number
   cooldownMs: number
   /**
-   * Hit used on a boss in rounds 1–6.
-   * `0` means this shot leaves that boss to the other lamps.
-   * Omitted, the shot uses `damage`.
+   * Wait scale on a boss round in rounds 1–6.
+   * Damage stays `damage` for walkers and for that boss.
+   * Omitted, the shot keeps `cooldownMs`.
    */
-  earlyBossDamage?: number
+  earlyPace?: number
 }
 
 export interface PaceLive {
@@ -354,7 +354,7 @@ export function paceEasyLive(
           strike,
           range,
           cool: 0,
-          earlyBossDamage: undefined as number | undefined,
+          earlyPace: undefined as number | undefined,
         }
       })
     : PLATE.map((seat, index) => {
@@ -366,7 +366,7 @@ export function paceEasyLive(
           strike,
           range,
           cool: 0,
-          earlyBossDamage: undefined as number | undefined,
+          earlyPace: undefined as number | undefined,
         }
       })
   for (const shot of shots) {
@@ -386,7 +386,7 @@ export function paceEasyLive(
       },
       range: shot.range,
       cool: 0,
-      earlyBossDamage: shot.earlyBossDamage,
+      earlyPace: shot.earlyPace,
     })
   }
   const raiders: {
@@ -533,10 +533,8 @@ export function paceEasyLive(
       if (lamp.cool > 0) continue
       let best: (typeof raiders)[number] | null = null
       let bestD = lamp.range
-      const spareBoss =
-        lamp.earlyBossDamage === 0 && easyBossRound(roundIndex) && roundIndex < 6
+      const earlyBoss = easyBossRound(roundIndex) && roundIndex < 6
       for (const raider of live()) {
-        if (spareBoss && raider.boss) continue
         const point = pathPoint(raider.t, raider.road)
         const distance = Math.hypot(lamp.x - point.x, lamp.y - point.y)
         if (distance <= bestD) {
@@ -545,7 +543,8 @@ export function paceEasyLive(
         }
       }
       if (!best) continue
-      lamp.cool = lamp.strike.cooldownMs / 1000
+      const pace = earlyBoss && lamp.earlyPace ? lamp.earlyPace : 1
+      lamp.cool = (lamp.strike.cooldownMs / 1000) * pace
       const apply = (raider: (typeof raiders)[number] | null, amount: number, byLamp: boolean) => {
         if (!raider || raider.dead || amount <= 0) return
         const hit = Math.min(raider.hp, amount)

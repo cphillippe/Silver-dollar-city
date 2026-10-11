@@ -133,7 +133,7 @@ import {
   candlePathKey,
   candlePlateReach,
   candleRoom,
-  candleSkipsEarlyBoss,
+  candleEarlyPace,
   candleStrike,
   candleUnlocked,
   isCandle,
@@ -1386,10 +1386,15 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     // Easy: the clock already runs at 1× or 3×, so the cooldown stays in game ms.
     // Hard keeps the wall clock. A face tap is its own hit and does not wait.
     const wait = easy ? rawCd : pacedCooldown(nightTowers.cooldown(id, progress), combatPace())
+    const rowPace =
+      easy && isCandle(using)
+        ? candleEarlyPace(candleRowSize(id, plantsRef.current), waveIndexRef.current)
+        : undefined
+    const gate = wait * (rowPace ?? 1)
     const shotAt = easy ? live.current.clock : now
     if (!manual) {
       const last = easy ? live.current.cool[id] : (live.current.cool[id] ?? 0)
-      if (last != null && last + wait > shotAt) return false
+      if (last != null && last + gate > shotAt) return false
     }
     const tier = combat.damage
     const range = hitRange(id, using)
@@ -1400,13 +1405,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       if (forced && (manual || dist(at, raiderAt(forced)) <= range)) best = forced
     } else {
       let bestD = range
-      const spareBoss =
-        easy &&
-        isCandle(using) &&
-        candleSkipsEarlyBoss(candleRowSize(id, plantsRef.current), waveIndexRef.current)
       for (const raider of live.current.raiders) {
         if (raider.turned) continue
-        if (spareBoss && raider.boss) continue
         const d = dist(at, raiderAt(raider))
         if (d <= bestD) {
           best = raider
@@ -1581,9 +1581,14 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
         ? lampCombat(using, id).strike!.cooldownMs
         : nightTowers.cooldown(id, progress)
       const wait = easy ? rawCd : pacedCooldown(nightTowers.cooldown(id, progress), combatPace())
+      const rowPace =
+        easy && isCandle(using)
+          ? candleEarlyPace(candleRowSize(id, plantsRef.current), waveIndexRef.current)
+          : undefined
+      const gate = wait * (rowPace ?? 1)
       const shotAt = easy ? live.current.clock : now
-      const last = easy ? (live.current.cool[id] ?? shotAt - wait) : (live.current.cool[id] ?? 0)
-      if (!lampReadyToFire(last, shotAt, wait, frozen)) continue
+      const last = easy ? (live.current.cool[id] ?? shotAt - gate) : (live.current.cool[id] ?? 0)
+      if (!lampReadyToFire(last, shotAt, gate, frozen)) continue
       const at = nightTowers.anchor(id)
       const range = hitRange(id, using)
       const aimed = live.current.raiders.some(
