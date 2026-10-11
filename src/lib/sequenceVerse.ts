@@ -25,11 +25,13 @@ export const SEQUENCE_VERSES: Record<string, SequenceVerse> = {
   'daily-lantern': {
     kicker: 'Jesus said',
     text: 'Let your light so shine before men, that they may see your good works and give glory to your Father who is in heaven.',
+    easyLead: '“Before men” means where people can see. Give glory to your Father means praise God.',
     ref: 'Matthew 5:16',
   },
   'daily-creed': {
     kicker: 'Paul wrote',
     text: 'For I delivered to you as of first importance what I also received, that Christ died for our sins…',
+    easyLead: '“Delivered” means handed on. “Of first importance” means most important.',
     ref: '1 Corinthians 15:3',
   },
   'daily-scroll': {
@@ -47,6 +49,7 @@ export const SEQUENCE_VERSES: Record<string, SequenceVerse> = {
   'fg-reason': {
     kicker: 'John wrote',
     text: 'The true light that enlightens every man was coming into the world.',
+    easyLead: '“Enlightens” means gives light to. “Every man” means every person. The true light is Jesus.',
     ref: 'John 1:9',
   },
   'fg-ground': {

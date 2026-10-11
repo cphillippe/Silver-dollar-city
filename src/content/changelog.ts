@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.446',
+    title: 'Three more stories get pictures',
+    when: '2026-10-11',
+    items: [
+      'The porch lamp, Older than the letter, and Trust needs a ground show real pictures on Easy.',
+      'The Easy win line explains hard Bible words above the verse. The Bible words stay the same.',
+    ],
+  },
+  {
     version: '1.4.444',
     title: 'Night checks stay in step',
     when: '2026-10-11',
