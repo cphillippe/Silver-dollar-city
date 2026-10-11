@@ -1547,7 +1547,28 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.447')
+assert.equal(APP_VERSION, '1.4.448')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.448'), '1.4.448 changelog row')
+assert.match(latestChange('1.4.448').title, /index/i)
+assert.doesNotMatch(
+  latestChange('1.4.448').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.448 changelog avoids GitHub close keywords',
+)
+{
+  const scans448 = readFileSync(new URL('./check-city-scans.mjs', import.meta.url), 'utf8')
+  const workflow448 = readFileSync(new URL('../.github/workflows/city-scans.yml', import.meta.url), 'utf8')
+  assert.match(scans448, /ALLOWED_CITY_SCANS = \[\]/, '1.4.448 city scan allowlist stays empty')
+  assert.match(workflow448, /check-packs\.mjs/, '1.4.448 CI runs the pack check')
+  assert.match(workflow448, /check-commerce\.mjs/, '1.4.448 CI runs the commerce check')
+}
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.447'), '1.4.447 changelog row')
+assert.match(latestChange('1.4.447').title, /candle/i)
+assert.doesNotMatch(
+  latestChange('1.4.447').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.447 changelog avoids GitHub close keywords',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.446'), '1.4.446 changelog row')
 assert.match(latestChange('1.4.446').title, /pictures/i)
 assert.doesNotMatch(

@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.448',
+    title: 'Pack checks follow the index',
+    when: '2026-10-11',
+    items: [
+      'The lesson count follows the pack index, and the trail line on Settings is the one the shop check looks for. Those checks run with the city scans.',
+    ],
+  },
+  {
     version: '1.4.447',
     title: 'A row of small candles',
     when: '2026-10-11',

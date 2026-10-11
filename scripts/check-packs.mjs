@@ -18,7 +18,27 @@ import { evidenceFor, evidenceForTier } from '../src/content/evidence.ts'
 
 assert.equal(PACK_ISSUES.length, 0, PACK_ISSUES.map((item) => `${item.file}: ${item.message}`).join('\n'))
 assert.equal(PACK_CATALOG.schemaVersion, PACK_SCHEMA_VERSION)
-assert.equal(PACK_CATALOG.lessons.length, 45)
+
+const indexXml = readFileSync(new URL('../src/content/packs/index.xml', import.meta.url), 'utf8')
+const indexLines = [...indexXml.matchAll(/<line\s+id="([^"]+)"\s+easyOrder="(\d+)"\s+pack="([^"]+)"/g)].map(
+  (match) => ({ id: match[1], easyOrder: Number(match[2]), pack: match[3] }),
+)
+const indexIds = indexLines.map((line) => line.id)
+assert.equal(new Set(indexIds).size, indexIds.length, 'index lesson ids are unique')
+const shelf = [...indexLines].sort((a, b) => a.easyOrder - b.easyOrder).map((line) => line.id)
+const declaredCount = [...indexXml.matchAll(/\blessonCount="(\d+)"/g)]
+  .map((match) => Number(match[1]))
+  .reduce((sum, count) => sum + count, 0)
+assert.equal(declaredCount, shelf.length, 'pack lessonCount matches the index lines')
+assert.equal(PACK_CATALOG.lessons.length, shelf.length, 'every index lesson loads')
+const catalogIds = PACK_CATALOG.lessons.map((lesson) => lesson.id)
+assert.equal(new Set(catalogIds).size, catalogIds.length, 'loaded lesson ids are unique')
+assert.deepEqual([...catalogIds].sort(), [...indexIds].sort())
+for (const line of indexLines) {
+  const lesson = packLesson(line.id)
+  assert.ok(lesson, `${line.id} loads`)
+  assert.equal(lesson.areaId, line.pack, `${line.id} has its index pillar`)
+}
 assert.ok(statSync(new URL('../src/content/packs/parable-hollow.xml', import.meta.url)).size > 50000)
 assert.ok(statSync(new URL('../src/content/packs/witness-bench.xml', import.meta.url)).size > 50000)
 assert.ok(statSync(new URL('../src/content/packs/observatory.xml', import.meta.url)).size > 50000)
@@ -28,9 +48,10 @@ assert.ok(statSync(new URL('../src/content/packs/stone-court.xml', import.meta.u
 assert.ok(statSync(new URL('../src/content/packs/ink-court.xml', import.meta.url)).size > 20000)
 assert.deepEqual(
   PACK_CATALOG.lessons.map((lesson) => lesson.easy.easyOrder).sort((a, b) => (a ?? 0) - (b ?? 0)),
-  Array.from({ length: 45 }, (_, i) => i + 1),
+  Array.from({ length: shelf.length }, (_, i) => i + 1),
 )
-assert.equal(EASY_LINE_ORDER.length, 45)
+assert.equal(EASY_LINE_ORDER.length, shelf.length)
+assert.deepEqual([...EASY_LINE_ORDER], shelf)
 assert.deepEqual(EASY_LINE_ORDER.slice(0, 7), [
   'ph-road',
   'ph-father',
@@ -43,7 +64,9 @@ assert.deepEqual(EASY_LINE_ORDER.slice(0, 7), [
 assert.equal(EASY_LINE_ORDER[0], 'ph-road')
 assert.equal(EASY_LINE_ORDER[1], 'ph-father')
 assert.ok(EASY_LINE_ORDER.indexOf('ph-father') < EASY_LINE_ORDER.indexOf('wb-creed'))
-assert.deepEqual([...EASY_LINE_ORDER].sort(), [...STREET_FACT_IDS].sort())
+for (const id of STREET_FACT_IDS) {
+  assert.ok(shelf.includes(id), `${id} is an index lesson`)
+}
 
 const mercy = packLesson('ph-road')
 assert.ok(mercy)
@@ -275,7 +298,7 @@ assert.deepEqual(easyWhoWhere('fg-order'), {
   who: 'Ansel',
   whoName: 'Ansel Gate',
   whoId: 'ansel',
-  place: 'Why Gate',
+  place: 'Why Gate Arch',
 })
 
 assert.match(tuning.claim, /Designer/)
@@ -528,7 +551,7 @@ assert.doesNotMatch(kalam.easy.learn, /^If /)
 
 const teachSrc = readFileSync(new URL('../src/components/TeachUnlock.tsx', import.meta.url), 'utf8')
 assert.match(teachSrc, /HeldTriad/)
-assert.match(teachSrc, /omitClaim/)
+assert.match(teachSrc, /claim=\{brief\.claim\}/)
 const storeSrc = readFileSync(new URL('../src/components/StoredLine.tsx', import.meta.url), 'utf8')
 assert.match(storeSrc, /HeldTriad/)
 assert.match(storeSrc, /sayTomorrow/)
