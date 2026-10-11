@@ -8,9 +8,18 @@ import {
   PATH_WALKER_FACE_DY,
   PATH_WALKER_FACE_U,
   PATH_WALKER_HIT_R,
+  dist,
   WATCH_ABILITY_LABEL,
   type WatchAbility,
 } from '../lib/defend'
+import { CandleSprite } from '../nightWatch/candleArt'
+import {
+  candleFarBonus,
+  candlePathKey,
+  candlePlateReach,
+  CANDLE_LABEL,
+  isCandle,
+} from '../nightWatch/candle'
 import { combatTier, TIER_MARK, WALKER_LABEL } from '../lib/watchTools'
 import { easyShotReach, pathBadge, pathsOf, type LampPaths } from '../nightWatch/upgradeTree'
 import { CITY_PLOTS, type CityPlotId } from '../lib/city'
@@ -96,6 +105,7 @@ export interface DefendNightActorsProps {
     road: string
     note?: string
     cover?: '' | 'good' | 'some' | 'far'
+    mark?: 'candle'
   } | null
 }
 
@@ -169,25 +179,30 @@ export function DefendNightActorsSvg({
                 const plot = CITY_PLOTS.find((item) => item.id === id)
                 const placeName = plot?.title ?? 'open ground'
                 const plantedType = towerType[id]
-                const using =
-                  on && plantedType && unlocked.includes(plantedType)
+                const candle = Boolean(on && isCandle(plantedType))
+                const using = candle
+                  ? plantedType
+                  : on && plantedType && unlocked.includes(plantedType)
                     ? plantedType
                     : unlocked.includes(ability)
                       ? ability
                       : 'love'
-                const typeName = WATCH_ABILITY_LABEL[using] ?? 'Love'
-                const typeSrc = TOWER_TYPE_SRC[using]
-                const tree = easy ? pathsOf(runPaths, using) : null
-                const reachBonus = tree ? easyShotReach(tree) : 0
+                const typeName = candle ? CANDLE_LABEL : (WATCH_ABILITY_LABEL[using] ?? 'Love')
+                const typeSrc = candle ? undefined : TOWER_TYPE_SRC[using]
+                const tree = easy ? pathsOf(runPaths, candle ? candlePathKey(id) : using) : null
+                const reachBonus = candle && tree ? candleFarBonus(tree) : tree ? easyShotReach(tree) : 0
+                const reach = candle
+                  ? candlePlateReach(id, reachBonus)
+                  : nightTowers.range(id, using, progress, runTier, reachBonus)
                 const tierMark = tree ? pathBadge(tree) : TIER_MARK[combatTier(using, runTier)]
                 const hot =
                   phase === 'wave' &&
                   on &&
-                  raiders.some(
-                    (raider) =>
-                      !raider.turned &&
-                      nightTowers.inRange(id, using, progress, raiderAt(raider), runTier, reachBonus),
-                  )
+                  raiders.some((raider) => {
+                    if (raider.turned) return false
+                    if (candle) return dist(at, raiderAt(raider)) <= reach
+                    return nightTowers.inRange(id, using, progress, raiderAt(raider), runTier, reachBonus)
+                  })
                 const firing = flash.includes(id)
                 const pose = nightTowers.lampPose(hot || firing)
                 const lampBox = nightTowers.lampImageBox()
@@ -225,7 +240,7 @@ export function DefendNightActorsSvg({
                         : phase === 'plant'
                           ? `${on ? 'Upgrade' : 'Plant'} lamp at ${placeName}`
                           : boostPad
-                            ? `Upgrade ${WATCH_ABILITY_LABEL[using] ?? using} at ${placeName}`
+                            ? `Upgrade ${typeName} at ${placeName}`
                             : `Fire ${placeName}`
                     }
                     onPointerDown={
@@ -285,14 +300,18 @@ export function DefendNightActorsSvg({
                         <ellipse className="defend-pool" cx="0" cy="12" rx={hot ? 30 : 20} ry={hot ? 11 : 7} />
                         <circle className="defend-type-ring" r="34" />
                         <g className="defend-lamp-sprite">
-                          <image
-                            className={`defend-tower-lamp is-${pose}`}
-                            href={nightTowers.lampSrc(pose)}
-                            x={lampBox.x}
-                            y={lampBox.y}
-                            width={lampBox.w}
-                            height={lampBox.h}
-                          />
+                          {candle ? (
+                            <CandleSprite hot={hot || firing} />
+                          ) : (
+                            <image
+                              className={`defend-tower-lamp is-${pose}`}
+                              href={nightTowers.lampSrc(pose)}
+                              x={lampBox.x}
+                              y={lampBox.y}
+                              width={lampBox.w}
+                              height={lampBox.h}
+                            />
+                          )}
                         </g>
                         {typeSrc ? (
                           <image
@@ -391,14 +410,18 @@ export function DefendNightActorsSvg({
                   {ghost.blocked ? null : (
                     <ellipse className="defend-plant-shadow" cx="0" cy="18" rx="20" ry="7" />
                   )}
-                  <image
-                    className="defend-ghost-lamp"
-                    href={nightTowers.lampSrc('idle')}
-                    x={ghostBox.x}
-                    y={ghostBox.y}
-                    width={ghostBox.w}
-                    height={ghostBox.h}
-                  />
+                  {ghost.mark === 'candle' ? (
+                    <CandleSprite />
+                  ) : (
+                    <image
+                      className="defend-ghost-lamp"
+                      href={nightTowers.lampSrc('idle')}
+                      x={ghostBox.x}
+                      y={ghostBox.y}
+                      width={ghostBox.w}
+                      height={ghostBox.h}
+                    />
+                  )}
                   {ghost.blocked ? null : (
                     <circle className="defend-plant-dot" data-plant-pin="yes" r="11" />
                   )}
