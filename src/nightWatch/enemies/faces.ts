@@ -63,11 +63,13 @@ export function pickWalkerFace(
   waveIndex: number,
   spawnIndex: number,
   liveFaces: readonly string[],
+  shift = 0,
 ): WalkerFaceId {
   const wave = Number.isFinite(waveIndex) ? Math.max(0, Math.floor(waveIndex)) : 0
   const spawn = Number.isFinite(spawnIndex) ? Math.max(0, Math.floor(spawnIndex)) : 0
+  const turn = Number.isFinite(shift) ? Math.abs(Math.floor(shift)) : 0
   const busy = new Set(liveFaces)
-  const start = (wave + spawn) % WALKER_FACE_POOL.length
+  const start = (wave + spawn + turn) % WALKER_FACE_POOL.length
   for (let step = 0; step < WALKER_FACE_POOL.length; step++) {
     const face = WALKER_FACE_POOL[(start + step) % WALKER_FACE_POOL.length]
     if (!busy.has(face)) return face

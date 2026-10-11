@@ -76,6 +76,28 @@ export function nightSeedShotWait(cooldownSec: number, shotFrac: number): number
 }
 
 /**
+ * Game-clock time of the virtual previous shot.
+ * Unseeded (`shotFrac` null) is already one full wait behind, so the lamp is ready.
+ * Seeded, the mark is fixed at the wave open. Rebuilding it from "now" every
+ * frame left the lamp short of the gate for the whole night.
+ */
+export function nightSeedFirstShotAt(shotFrac: number | null, shotAt: number, gate: number): number {
+  const wait = Math.max(0, gate)
+  if (shotFrac == null) return shotAt - wait
+  const frac = Math.min(1, Math.max(0, shotFrac))
+  return -wait * frac
+}
+
+/** Portrait offset for this seed. 0 keeps the unseeded heads. Nearby seeds do not share it. */
+export function nightSeedFaceShift(seed: number, pool: number): number {
+  const size = Math.max(1, Math.floor(pool) || 1)
+  let state = Math.imul(Math.floor(seed) >>> 0, 0x45d9f3b) >>> 0
+  state = Math.imul(state ^ (state >>> 16), 0x45d9f3b) >>> 0
+  state = (state ^ (state >>> 16)) >>> 0
+  return state % size
+}
+
+/**
  * How many fixed steps this frame may take, and the leftover to keep.
  * A short frame banks time instead of skipping the wave. A long frame
  * stops at `cap` so a background tab does not simulate the whole night.
