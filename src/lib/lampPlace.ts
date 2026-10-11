@@ -16,8 +16,12 @@ import type { NightPoint } from '../nightWatch/types.ts'
 import { isTowerType, plantType } from './nightPlants.ts'
 import { combatTier, TIER_MARK, TOOL_TIER_MAX } from './watchTools.ts'
 import {
+  CANDLE_ID,
   candlePlateReach,
+  candleLinks,
   candleRoadNote,
+  candleRowMark,
+  candleRowSize,
   candleRoom,
   isCandle,
   plantCandle,
@@ -57,6 +61,10 @@ export interface LampPreview {
   note: string
   /** Set when the ghost is a candle stand, not a pillar lamp. */
   mark?: 'candle'
+  /** `Row x2` or `Row x3` when this seat would join a row. Empty when it would stand alone. */
+  row?: string
+  /** Other candles this ghost would link to. */
+  rowTo?: NightPoint[]
 }
 
 /** Road length that counts as a real stretch, not a nick. Plate units. */
@@ -661,6 +669,17 @@ export function previewLamp(
       : lampRoadNote(spot, ability, progress, runTier, easyTree, extra)
   const length = blocked ? 0 : roadCoverLength(at, range)
   const cover = blocked ? '' : roadCoverRank(length)
+  let row = ''
+  let rowTo: NightPoint[] | undefined
+  if (candle && !blocked) {
+    const next = { ...plants, [spot]: CANDLE_ID }
+    row = candleRowMark(candleRowSize(spot, next))
+    if (row) {
+      rowTo = candleLinks(next)
+        .filter(([a, b]) => a === spot || b === spot)
+        .map(([a, b]) => lampAnchor(a === spot ? b : a))
+    }
+  }
   return {
     spot,
     at,
@@ -671,6 +690,8 @@ export function previewLamp(
     road: cover === 'far' || cover === '' ? '' : roadCoverD(at, range),
     note,
     mark: candle ? 'candle' : undefined,
+    row: row || undefined,
+    rowTo,
   }
 }
 

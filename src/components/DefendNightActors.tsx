@@ -15,8 +15,12 @@ import {
 import { CandleSprite } from '../nightWatch/candleArt'
 import {
   candleFarBonus,
+  candleLinks,
   candlePathKey,
   candlePlateReach,
+  candleRowMark,
+  candleRowSize,
+  CANDLE_ID,
   CANDLE_LABEL,
   isCandle,
 } from '../nightWatch/candle'
@@ -106,6 +110,8 @@ export interface DefendNightActorsProps {
     note?: string
     cover?: '' | 'good' | 'some' | 'far'
     mark?: 'candle'
+    row?: string
+    rowTo?: { x: number; y: number }[]
   } | null
 }
 
@@ -170,8 +176,23 @@ export function DefendNightActorsSvg({
   easy: boolean
 }) {
   const ghostBox = nightTowers.lampImageBox()
+  const candlePlants: Record<string, string> = {}
+  for (const id of planted) {
+    if (isCandle(towerType[id])) candlePlants[id] = CANDLE_ID
+  }
+  const candlePairs = candleLinks(candlePlants)
   return (
     <>
+              {candlePairs.map(([fromId, toId]) => {
+                const from = nightTowers.anchor(fromId)
+                const to = nightTowers.anchor(toId)
+                return (
+                  <g key={`${fromId}-${toId}`} data-candle-link="yes" pointerEvents="none">
+                    <line className="nw-candle-link" x1={from.x} y1={from.y} x2={to.x} y2={to.y} />
+                    <line className="nw-candle-link-core" x1={from.x} y1={from.y} x2={to.x} y2={to.y} />
+                  </g>
+                )
+              })}
               {(easy || easyTap ? planted : pads).map((id) => {
                 const at = nightTowers.anchor(id)
                 const on = planted.includes(id)
@@ -313,6 +334,20 @@ export function DefendNightActorsSvg({
                             />
                           )}
                         </g>
+                        {candle
+                          ? (() => {
+                              const mark = candleRowMark(candleRowSize(id, candlePlants))
+                              if (!mark) return null
+                              return (
+                                <g className="nw-candle-row" data-candle-row={mark} transform="translate(0 -64)">
+                                  <rect x="-38" y="-13" width="76" height="24" rx="8" />
+                                  <text y="4" textAnchor="middle">
+                                    {mark}
+                                  </text>
+                                </g>
+                              )
+                            })()
+                          : null}
                         {typeSrc ? (
                           <image
                             className="defend-type-mark"
@@ -395,6 +430,14 @@ export function DefendNightActorsSvg({
                   pointerEvents="none"
                 />
               ) : null}
+              {ghost?.mark === 'candle' && ghost.rowTo
+                ? ghost.rowTo.map((to, index) => (
+                    <g key={`ghost-row-${index}`} data-candle-link="ghost" pointerEvents="none">
+                      <line className="nw-candle-link" x1={ghost.at.x} y1={ghost.at.y} x2={to.x} y2={to.y} />
+                      <line className="nw-candle-link-core" x1={ghost.at.x} y1={ghost.at.y} x2={to.x} y2={to.y} />
+                    </g>
+                  ))
+                : null}
               {ghost ? (
                 <g
                   className={`defend-ghost${ghost.blocked ? ' is-nogo' : ghost.cover === 'good' ? ' is-reaches is-good' : ghost.cover === 'some' ? ' is-some' : ' is-short'}`}
@@ -403,6 +446,7 @@ export function DefendNightActorsSvg({
                   data-road-rank={ghost.cover || ''}
                   data-reach-note={ghost.note ?? ''}
                   data-hit-range={ghost.range}
+                  data-candle-row={ghost.row ?? ''}
                   transform={`translate(${ghost.at.x} ${ghost.at.y})`}
                   pointerEvents="none"
                 >
@@ -425,6 +469,14 @@ export function DefendNightActorsSvg({
                   {ghost.blocked ? null : (
                     <circle className="defend-plant-dot" data-plant-pin="yes" r="11" />
                   )}
+                  {ghost.row ? (
+                    <g className="nw-candle-row" data-candle-row={ghost.row} transform="translate(0 -64)">
+                      <rect x="-38" y="-13" width="76" height="24" rx="8" />
+                      <text y="4" textAnchor="middle">
+                        {ghost.row}
+                      </text>
+                    </g>
+                  ) : null}
                 </g>
               ) : null}
               {raiders.map((raider) => {
