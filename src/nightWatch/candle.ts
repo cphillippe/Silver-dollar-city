@@ -240,16 +240,17 @@ export function candleRowFactor(size: number): number {
 }
 
 /**
- * A row fires about 30% less often than a lone candle.
- * The live night outran the old sim, so the trim sits on the slow side of that gap.
- * Rounds 1–6 still keep the boss for a real aim; see `candleSkipsEarlyBoss`.
+ * On a boss round in rounds 1–6, a row waits this much longer.
+ * The hit stays the same. Outside those rounds the row keeps the lone rate.
+ * Long enough that a zero-tap row still loses round 5, short of a global slowdown.
  */
-export const CANDLE_ROW_RATE = 0.7
+export const CANDLE_EARLY_PACE = 1.2
 
-/** A row does not spend shots on the boss in rounds 1–6. Aim still has to finish it. */
-export function candleSkipsEarlyBoss(rowSize: number, roundIndex: number): boolean {
+/** Wait scale for a row on an early boss round. Lone candles and other rounds stay unset. */
+export function candleEarlyPace(rowSize: number, roundIndex: number): number | undefined {
   const round = Math.floor(roundIndex) + 1
-  return rowSize >= 2 && round <= 6 && round % 5 === 0
+  if (rowSize >= 2 && round <= 6 && round % 5 === 0) return CANDLE_EARLY_PACE
+  return undefined
 }
 
 export function candleNeighbors(plotId: string, plants: Record<string, string>): number {
@@ -280,12 +281,11 @@ export function candleDamage(paths: LampPaths, rowSize: number): number {
 }
 
 export function candleCooldown(paths: LampPaths, rowSize = 1): number {
+  void rowSize
   const strong = clampStep(paths.strong)
-  let wait = CANDLE_COOLDOWN_MS
-  if (strong >= 2) wait = 320
-  else if (strong >= 1) wait = 400
-  if (rowSize >= 2) wait = Math.round(wait / CANDLE_ROW_RATE)
-  return wait
+  if (strong >= 2) return 320
+  if (strong >= 1) return 400
+  return CANDLE_COOLDOWN_MS
 }
 
 export function candlePlateReach(plotId: string, farBonus = 0): number {

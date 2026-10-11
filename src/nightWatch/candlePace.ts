@@ -4,8 +4,8 @@ import {
   CANDLE_ID,
   CANDLE_LINK,
   candlePlateReach,
+  candleEarlyPace,
   candleRowSize,
-  candleSkipsEarlyBoss,
   candleStrike,
   freshCandlePaths,
 } from './candle.ts'
@@ -14,6 +14,12 @@ import { paceExtraNight, type PaceShot } from './livePace.ts'
 
 /** A zero-tap night is longer than one round, so no glow taps land. */
 const ZERO_TAP = 1e9
+
+/**
+ * A light tap in the live scorer. Often enough to hold round 5.
+ * The active aim is 0.28s. This is about once each 1.6s.
+ */
+export const CANDLE_LIGHT_TAP = 1.6
 
 /** The ghost calls this seat Good and open. Same check the pad uses. */
 export function candleGhostGood(point: CandleSeat, plants: Record<string, string> = {}): boolean {
@@ -223,7 +229,7 @@ export function candleShots(seats: readonly CandleSeat[]): PaceShot[] {
       damage: strike.damage,
       range: candlePlateReach(id, 0),
       cooldownMs: strike.cooldownMs,
-      earlyBossDamage: candleSkipsEarlyBoss(rowSize, 4) ? 0 : undefined,
+      earlyPace: candleEarlyPace(rowSize, 4),
     }
   })
 }
