@@ -19,6 +19,7 @@ import {
   candlePathKey,
   candlePlateReach,
   candleRowHeads,
+  candleRowReachBonus,
   candleRowSize,
   CANDLE_ID,
   CANDLE_LABEL,
@@ -213,8 +214,10 @@ export function DefendNightActorsSvg({
                 const typeSrc = candle ? undefined : TOWER_TYPE_SRC[using]
                 const tree = easy ? pathsOf(runPaths, candle ? candlePathKey(id) : using) : null
                 const reachBonus = candle && tree ? candleFarBonus(tree) : tree ? easyShotReach(tree) : 0
+                const rowReach =
+                  candle && roundIndex >= 6 ? candleRowReachBonus(candleRowSize(id, candlePlants)) : 0
                 const reach = candle
-                  ? candlePlateReach(id, reachBonus)
+                  ? candlePlateReach(id, reachBonus + rowReach)
                   : nightTowers.range(id, using, progress, runTier, reachBonus)
                 const tierMark = tree ? pathBadge(tree) : TIER_MARK[combatTier(using, runTier)]
                 const hot =

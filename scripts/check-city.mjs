@@ -206,7 +206,11 @@ import {
   CANDLE_CAP,
   CANDLE_BODY,
   CANDLE_EARLY_PACE,
-  CANDLE_ROW_WALKER,
+  CANDLE_RANGE,
+  CANDLE_ROW_REACH,
+  CANDLE_ROW_X2,
+  CANDLE_ROW_X3,
+  candleRowWalkerBonus,
   candleBossBonusCapped,
   candleWalkerDamage,
   CANDLE_CARD,
@@ -214,7 +218,6 @@ import {
   CANDLE_HELP,
   CANDLE_ID,
   CANDLE_INTRO,
-  CANDLE_RANGE,
   CANDLE_VERSE,
   CANDLE_VERSE_CITE,
   canTakeCandle,
@@ -1578,7 +1581,14 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.457')
+assert.equal(APP_VERSION, '1.4.458')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.458'), '1.4.458 changelog row')
+assert.match(latestChange('1.4.458').title, /harder/i)
+assert.doesNotMatch(
+  latestChange('1.4.458').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.458 changelog avoids GitHub close keywords',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.457'), '1.4.457 changelog row')
 assert.match(latestChange('1.4.457').title, /shoots/i)
 assert.doesNotMatch(
@@ -14938,11 +14948,16 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.equal(spreadShots[0].cooldownMs, 480, '1.4.454 a spread candle keeps the lone wait')
   assert.equal(rowShots[0].earlyPace, CANDLE_EARLY_PACE, '1.4.454 a row waits longer only on the early boss')
   assert.equal(spreadShots[0].earlyPace, undefined, '1.4.454 a spread candle is not slowed on the boss')
-  assert.equal(rowShots[0].walkerBonus, CANDLE_ROW_WALKER, '1.4.455 a row hits walkers a little harder')
+  assert.equal(rowShots[0].walkerBonus, CANDLE_ROW_X3, '1.4.458 a row of three hits walkers harder')
+  assert.equal(candleShots(rowSeats.slice(0, 2))[0].walkerBonus, CANDLE_ROW_X2, '1.4.458 a row of two hits a little harder')
+  assert.equal(rowShots[0].earlyRange, 100, '1.4.458 the early rounds keep the lone reach')
+  assert.equal(rowShots[0].range, rowShots[0].earlyRange + CANDLE_RANGE * CANDLE_ROW_REACH, '1.4.458 a row of three reaches farther after that')
   assert.equal(spreadShots[0].walkerBonus, undefined, '1.4.455 candles set apart stay at the lone hit')
   assert.equal(candleWalkerDamage(1, 2, 4, false), 1, '1.4.455 round 5 walkers do not take the row extra')
   assert.equal(candleWalkerDamage(1, 2, 9, true), 1, '1.4.455 a boss stays at the lone hit')
-  assert.equal(candleWalkerDamage(1, 2, 9, false), 1 + CANDLE_ROW_WALKER, '1.4.455 later walkers take the row extra')
+  assert.equal(candleWalkerDamage(1, 2, 9, false), 1 + CANDLE_ROW_X2, '1.4.458 a later walker in a row of two takes the smaller extra')
+  assert.equal(candleWalkerDamage(1, 3, 9, false), 1 + CANDLE_ROW_X3, '1.4.458 a later walker in a row of three takes the larger extra')
+  assert.equal(candleWalkerDamage(1, 3, 4, false), 1, '1.4.458 round 5 walkers in a row of three stay at the lone hit')
   for (const seat of [...rowSeats, ...spreadSeats, ...sixSeats]) {
     assert.equal(candleGhostGood(seat), true, `1.4.452 candle seat ${seat.x},${seat.y} is Good when empty`)
   }
@@ -15060,7 +15075,8 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.equal(candleBossBonusCapped(4, false), false, '1.4.456 a walker is not the boss cap')
   assert.equal(candleWalkerDamage(1.5, 2, 0, true), 1.5, '1.4.456 a round 1 boss splash stays at the base hit')
   assert.equal(candleWalkerDamage(1.5, 2, 5, true), 1.5, '1.4.456 a round 6 boss splash stays at the base hit')
-  assert.equal(candleWalkerDamage(1, 2, 5, false), 1 + CANDLE_ROW_WALKER, '1.4.456 a round 6 walker still takes the row extra')
+  assert.equal(candleWalkerDamage(1, 2, 5, false), 1 + candleRowWalkerBonus(2), '1.4.458 a round 6 walker in a row of two still takes the extra')
+  assert.equal(candleWalkerDamage(1, 3, 5, true), 1, '1.4.458 a round 6 boss in a row of three stays at the lone hit')
   assert.equal(candleWalkerDamage(1, 2, 9, true), 1, '1.4.456 a later boss stays at the lone hit')
   const paceSrc = readFileSync(new URL('../src/nightWatch/livePace.ts', import.meta.url), 'utf8')
   assert.match(paceSrc, /if \(raider\.boss && roundIndex < 6\) return 0/, '1.4.456 rounds 1–6 bosses skip the row extra')
@@ -15077,7 +15093,9 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   const screenSrc = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
   assert.match(screenSrc, /nightSeedFirstShotAt\(/, '1.4.457 the screen stamps the first shot once')
   assert.match(screenSrc, /nightSeedFaceShift\(/, '1.4.457 the screen shifts walker faces with the seed')
-  assert.match(screenSrc, /data-lamp-damage/, '1.4.457 the screen records lamp damage')
+  assert.match(screenSrc, /setAttribute\('data-lamp-damage'/, '1.4.458 lamp damage is written on the hud node')
+  assert.match(screenSrc, /if \(easy && !manual && nightPlaytest\)/, '1.4.458 lamp damage is recorded only in a playtest')
+  assert.doesNotMatch(screenSrc, /setLampHurt/, '1.4.458 a lamp hit does not re-render the screen')
   assert.match(screenSrc, /nightWatchSeed\(nightSearch\)/, '1.4.456 the screen reads the playtest seed')
   assert.match(screenSrc, /bindNightRoll\(nightSeed\)/, '1.4.456 the screen binds the seed roller')
   const seeds = [1, 2, 3, 4, 5]
@@ -15086,14 +15104,23 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   const lightSpreadDead = []
   const lightRowDealt = []
   const lightSpreadDealt = []
+  const lightX2Dead = []
+  const lightX2Dealt = []
+  const x2Shots = candleShots(rowSeats.slice(0, 2))
+  const tightShots = candleShots(candlePlantRow(3))
   for (const seed of seeds) {
     const zero = paceExtraNight('none', rowShots, 1e9, seed)
+    const zeroX2 = paceExtraNight('none', x2Shots, 1e9, seed)
+    const zeroTight = paceExtraNight('none', tightShots, 1e9, seed)
     const zeroSpread = paceExtraNight('none', spreadShots, 1e9, seed)
     const light = paceExtraNight('none', rowShots, CANDLE_LIGHT_TAP, seed)
+    const lightX2 = paceExtraNight('none', x2Shots, CANDLE_LIGHT_TAP, seed)
     const lightSpread = paceExtraNight('none', spreadShots, CANDLE_LIGHT_TAP, seed)
     const again = paceExtraNight('none', rowShots, CANDLE_LIGHT_TAP, seed)
     const boss = paceEasyLive(4, BARE_LAMPS, 3, false, 1e9, 'road', undefined, rowShots, seed)
-    assert.equal(zero.dead, 5, `1.4.456 zero-tap row seed ${seed} loses round 5`)
+    assert.equal(zero.dead, 5, `1.4.458 zero-tap row seed ${seed} loses round 5`)
+    assert.equal(zeroX2.dead, 5, `1.4.458 zero-tap row of two seed ${seed} loses round 5`)
+    assert.equal(zeroTight.dead, 5, `1.4.458 zero-tap tight row seed ${seed} loses round 5`)
     assert.equal(boss.result, 'lost', `1.4.456 zero-tap row seed ${seed} loses the round 5 fight`)
     assert.equal(boss.bossLamp, 12, `1.4.456 seed ${seed} still puts 12 on the round 5 boss`)
     assert.ok(zero.dealt > zeroSpread.dealt, `1.4.456 seed ${seed} zero-tap row deals more than the spread`)
@@ -15107,13 +15134,20 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
     lightSpreadDead.push(lightSpread.dead)
     lightRowDealt.push(Math.round(light.dealt))
     lightSpreadDealt.push(Math.round(lightSpread.dealt))
+    lightX2Dead.push(lightX2.dead)
+    lightX2Dealt.push(Math.round(lightX2.dealt))
   }
   const mid = (values) => [...values].sort((a, b) => a - b)[2]
   assert.deepEqual(zeroDead, [5, 5, 5, 5, 5], '1.4.456 every zero-tap seed loses round 5')
   assert.ok(mid(lightRowDead) >= mid(lightSpreadDead) + 1, '1.4.456 the light-tap row median lasts at least one round longer')
   assert.deepEqual(lightRowDead, [10, 10, 10, 10, 10], '1.4.456 light-tap row seeds stop on round 10')
   assert.deepEqual(lightSpreadDead, [10, 9, 9, 9, 9], '1.4.456 light-tap spread seeds')
-  assert.deepEqual(lightRowDealt, [659, 663, 677, 676, 674], '1.4.456 light-tap row damage')
+  assert.deepEqual(lightRowDealt, [672, 718, 689, 717, 718], '1.4.458 light-tap row damage')
+  assert.deepEqual(lightX2Dead, [9, 9, 9, 9, 9], '1.4.458 light-tap row of two stops on round 9')
+  assert.deepEqual(lightX2Dealt, [437, 438, 429, 432, 431], '1.4.458 light-tap row of two damage')
+  console.log(
+    `row-pay seeds 1-5 zero row/x2/tight/spread all R5 | light row ${lightRowDead.join(',')} dealt ${lightRowDealt.join(',')} | light x2 ${lightX2Dead.join(',')} dealt ${lightX2Dealt.join(',')} | light spread ${lightSpreadDead.join(',')} dealt ${lightSpreadDealt.join(',')}`,
+  )
   assert.deepEqual(lightSpreadDealt, [565, 449, 449, 449, 450], '1.4.456 light-tap spread damage')
   assert.equal(lightRowDead[1], 10)
   assert.equal(lightSpreadDead[1], 9, '1.4.456 seed 2 is a live replay where the row outlasts the spread')
