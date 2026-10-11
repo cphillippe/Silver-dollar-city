@@ -144,4 +144,16 @@ export const EASY_STRIP_FACE: Record<string, string> = {
     'Paul made up the words on the spot.',
   'Paul invents the creed as he writes.':
     'Paul makes up the list as he writes.',
+  'Light is only for insiders behind a door.':
+    'Hide your light under a basket.',
+  'The churches named Christ died, buried, and raised before Paul wrote.':
+    'Christians said “died, buried, raised” before Paul wrote.',
+  'Burial is skipped because it does not matter.':
+    'Being buried does not matter.',
+  'The mind needs a real ground.':
+    'God gives your mind light.',
+  'Reason is a free-floating trick with no ground.':
+    'Thinking floats with nothing under it.',
+  'Darkness is the last word about the world.':
+    'The world is dark forever.',
 }
