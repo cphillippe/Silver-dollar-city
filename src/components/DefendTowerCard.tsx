@@ -160,7 +160,7 @@ export function DefendTowerCard({
   }, [onClose])
 
   if (easy && isCandle(ability) && paths && onUpgradePath) {
-    const cardH = 360
+    const cardH = 196
     const placed = placeTowerCard(point, board, clearOf, cameraScale, reserveBottom, cardH)
     const pipCosts = [TREE_STEP_COST[0], TREE_STEP_COST[1]]
     return (

@@ -128,7 +128,7 @@ import {
   CANDLE_ID,
   CANDLE_INTRO,
   candleFarBonus,
-  candleNeighbors,
+  candleRowSize,
   candlePathKey,
   candlePlateReach,
   candleRoom,
@@ -1296,7 +1296,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   function lampCombat(toolId: string, plotId?: string) {
     if (easy && isCandle(toolId) && plotId) {
       const paths = pathsOf(runPathsRef.current, candlePathKey(plotId))
-      const strike = candleStrike(paths, candleNeighbors(plotId, plantsRef.current))
+      const strike = candleStrike(paths, candleRowSize(plotId, plantsRef.current))
       return { damage: strike.damage, rangeBonus: strike.rangeBonus, strike }
     }
     if (!easy) {

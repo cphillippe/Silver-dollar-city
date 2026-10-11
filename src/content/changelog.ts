@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.450',
+    title: 'A candle row shows',
+    when: '2026-10-11',
+    items: [
+      'Candles in a row glow between each other and wear a Row mark. One candle alone shows neither. The mark appears before you plant.',
+      'A row hits harder than the same candles set apart. Six candles still leave an Easy night in the middle rounds.',
+      'The card says a small candle is a sign of a prayer for someone. It opens after round 3 on the cottages, and the card leaves the map in view.',
+    ],
+  },
+  {
     version: '1.4.449',
     title: 'Story wins keep their pictures',
     when: '2026-10-11',
