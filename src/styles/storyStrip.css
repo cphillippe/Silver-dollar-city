@@ -601,9 +601,7 @@ html[data-easy='on'] .play.is-story-strip.is-win[data-line='ph-road'] .strip-ver
 }
 
 .play.is-story-strip .win-stamp-wrap {
-  top: 46%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  display: none;
 }
 
 @keyframes strip-burst-fade {
