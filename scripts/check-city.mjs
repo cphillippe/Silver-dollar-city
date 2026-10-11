@@ -1509,7 +1509,23 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.443')
+assert.equal(APP_VERSION, '1.4.444')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.444'), '1.4.444 changelog row')
+assert.match(latestChange('1.4.444').title, /check/i)
+assert.doesNotMatch(
+  latestChange('1.4.444').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.444 changelog avoids GitHub close keywords',
+)
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.443'), '1.4.443 changelog row')
+{
+  const scans444 = readFileSync(new URL('./check-city-scans.mjs', import.meta.url), 'utf8')
+  const workflow444 = readFileSync(new URL('../.github/workflows/city-scans.yml', import.meta.url), 'utf8')
+  const runner444 = readFileSync(new URL('./run-checks.mjs', import.meta.url), 'utf8')
+  assert.match(scans444, /ALLOWED_CITY_SCANS = \[\]/, '1.4.444 no city scan is allowed to fail')
+  assert.match(workflow444, /check-city-scans\.mjs/, '1.4.444 CI runs the city scan guard')
+  assert.match(runner444, /check-city-scans\.mjs/, '1.4.444 npm test runs the city scan guard')
+}
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.442'), '1.4.442 changelog row')
 assert.match(latestChange('1.4.442').title, /mazes/i)
 assert.doesNotMatch(
@@ -13565,6 +13581,8 @@ console.log('check-city: ok')
       Object.fromEntries([...propsSrc.matchAll(attr333)].map((m) => [m[1], m[2]])),
       {
         lineId: 'story.lineId',
+        // 1.4.350 remounts the hurt-man maze on the line. The wiring props stay.
+        ...(kind === 'road-maze' ? { key: 'story.lineId' } : {}),
         ...(kind === 'source-dig' ? { easy: 'wire.easy' } : { beats: 'story.beats' }),
         onMiss: 'wire.onMiss',
         onClear: 'wire.onClear',
@@ -13959,7 +13977,11 @@ console.log('check-city: ok')
     /\{view\.name === 'journal' \? \(\n\s*<Journal\n\s*focusId=\{view\.focusId\}\n\s*autoQuiz=\{view\.autoQuiz\}\n\s*onNavigate=\{go\}\n\s*\/>\n\s*\) : null\}/,
     '1.4.335 App still mounts Journal the same way',
   )
-  assert.match(src335('types.ts'), /\| \{ name: 'journal'; focusId\?: string; autoQuiz\?: boolean \}/)
+  assert.match(
+    src335('types.ts'),
+    /\| \{ name: 'journal'; focusId\?: string; autoQuiz\?: boolean; sceneRecap\?: boolean \}/,
+    '1.4.335 journal stays the route, with the 1.4.362 recap flag',
+  )
   const viewUnion335 = src335('types.ts').match(/export type View =([\s\S]*?)(?:\n\n|\n?$)/)?.[1] ?? ''
   assert.doesNotMatch(viewUnion335, /lock|hold|practice/i, '1.4.335 no Lock In-only App view')
 
@@ -14002,6 +14024,7 @@ console.log('check-city: ok')
     'easyLineHeld',
     'easyLineLearned',
     'easyLineTaught',
+    'easyLockInExit',
     'easyLoopLine',
     'easyMatchLine',
     'easyMatchReady',
@@ -14014,6 +14037,7 @@ console.log('check-city: ok')
     'markEasyTaught',
     'namesReady',
     'progressAfterMatchTaught',
+    'sameProofRecap',
     'stoneReady',
   ]
 
@@ -14030,16 +14054,23 @@ console.log('check-city: ok')
   assert.match(loop336, /^export type EasyHomeFocus = 'learn' \| 'match' \| 'hold'$/m, '1.4.336 EasyHomeFocus moves with easyHomeFocus')
   assert.match(loop336, /^type EasyLoopProgress = Pick<$/m, '1.4.336 EasyLoopProgress stays private to the loop')
   const trailDir336 = new URL('easyTrail/trail/', srcRoot336)
+  const trailImports336 = [...loop336.matchAll(/ from '([^']+)'/g)].map(([, spec]) =>
+    new URL(spec, trailDir336).href.slice(srcRoot336.href.length),
+  )
   assert.deepEqual(
-    [...loop336.matchAll(/ from '([^']+)'/g)].map(([, spec]) => new URL(spec, trailDir336).href.slice(srcRoot336.href.length)),
-    ['types.ts', 'content/packCatalog.ts', 'lib/tiers.ts', 'lib/sourceDig.ts'],
-    '1.4.336 trail home reads only types / pack order / tiers / Source Dig priors — never lib/easy (no cycle)',
+    trailImports336,
+    ['types.ts', 'content/packCatalog.ts', 'lib/roadMaze.ts', 'lib/tiers.ts', 'lib/sourceDig.ts'],
+    '1.4.336 trail home reads types, pack order, the road-maze line, tiers, and Source Dig priors',
+  )
+  assert.ok(
+    trailImports336.every((spec) => !spec.includes('lib/easy')),
+    '1.4.336 trail home never imports lib/easy (no cycle)',
   )
 
   // lib/easy is the compatibility shim: same bindings, no second definition, no loop logic left.
   const shim336 = easy336.match(/^export \{\n([^}]*)\n\} from '\.\.\/easyTrail\/trail\/loop\.ts'$/m)?.[1] ?? ''
   assert.deepEqual(
-    shim336.split(',').map((name) => name.trim()).filter(Boolean),
+    shim336.split(',').map((name) => name.trim()).filter(Boolean).sort(),
     TRAIL336,
     '1.4.336 lib/easy re-exports every trail name from the home',
   )
@@ -14345,7 +14376,11 @@ console.log('check-city: ok')
   assert.match(defendScreenOnlySrc, /EASY\.nightBoostPick/, '1.4.344 Easy pick label')
   assert.match(skillUi344, /defend-kit-name/, '1.4.344 kit name row')
   assert.match(skillUi344, /defend-kit-cost/, '1.4.344 kit spark cost row')
-  assert.match(defendAbilitySrc, /easy \? 'Tap' : '↑ spark'/, '1.4.344 Easy rail tap cue')
+  assert.match(
+    defendAbilitySrc,
+    /easy\s*\?\s*'Paths'\s*:\s*'↑ spark'/,
+    '1.4.344 Easy rail spend cue stays a short word, hard stays the spark arrow',
+  )
   assert.match(easyUi344, /nightBoostPick:/)
   assert.match(defendCss344, /1\.4\.344: Still \/ Mend \+ rail spend read as pick-one skills \(Fixes #493\)/)
   assert.match(defendCss344, /\.defend-kit-choice/)
