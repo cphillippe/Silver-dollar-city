@@ -710,12 +710,15 @@ export function previewLamp(
   }
 }
 
-/** How far a finger can jump onto a row seat while the ghost is near a candle. */
-const CANDLE_MAGNET = 64
+/**
+ * How far a finger pulls onto a row seat.
+ * About 20 screen pixels on a 375-wide board (375 / 798 × 43).
+ */
+const CANDLE_SNAP = 43
 
 /**
- * While a candle is armed, a finger near another candle slides onto a Good
- * seat that joins the row. A seat that is already Good and in a row stays put.
+ * While a candle is armed, a finger within a snap of a Good row seat
+ * pulls onto that seat. A seat that is already Good and in a row stays put.
  */
 export function magnetCandlePoint(
   point: NightPoint,
@@ -727,29 +730,43 @@ export function magnetCandlePoint(
 ): NightPoint {
   const anchors = candleIds(plants).map((id) => lampAnchor(id))
   if (anchors.length < 1) return point
-  if (!anchors.some((candle) => Math.hypot(candle.x - point.x, candle.y - point.y) <= CANDLE_LINK + CANDLE_MAGNET)) {
+  if (!anchors.some((candle) => Math.hypot(candle.x - point.x, candle.y - point.y) <= CANDLE_LINK + CANDLE_SNAP)) {
     return point
   }
   const here = previewLamp(point, CANDLE_ID, progress, runTier, plants, hudBlocked, false, extra)
   if (!here.blocked && here.cover === 'good' && here.row) return here.at
   let best: NightPoint | null = null
-  let bestD = CANDLE_MAGNET
-  const gaps = [CANDLE_BODY + 12, 72, 104]
-  for (const candle of anchors) {
-    for (let turn = 0; turn < 18; turn += 1) {
-      const rad = (turn / 18) * Math.PI * 2
-      for (const gap of gaps) {
-        const at = {
-          x: candle.x + Math.cos(rad) * gap,
-          y: candle.y + Math.sin(rad) * gap,
-        }
-        const away = Math.hypot(at.x - point.x, at.y - point.y)
-        if (away > bestD) continue
-        const look = previewLamp(at, CANDLE_ID, progress, runTier, plants, hudBlocked, false, extra)
-        if (look.blocked || look.cover !== 'good' || !look.row) continue
-        best = look.at
-        bestD = away
-      }
+  let bestD = CANDLE_SNAP + 0.01
+  const take = (look: LampPreview) => {
+    if (look.blocked || look.cover !== 'good' || !look.row) return
+    const away = Math.hypot(look.at.x - point.x, look.at.y - point.y)
+    if (away > CANDLE_SNAP || away >= bestD) return
+    best = look.at
+    bestD = away
+  }
+  const step = 8
+  for (let dy = -CANDLE_SNAP; dy <= CANDLE_SNAP; dy += step) {
+    for (let dx = -CANDLE_SNAP; dx <= CANDLE_SNAP; dx += step) {
+      if (dx * dx + dy * dy > CANDLE_SNAP * CANDLE_SNAP) continue
+      take(previewLamp({ x: point.x + dx, y: point.y + dy }, CANDLE_ID, progress, runTier, plants, hudBlocked, false, extra))
+    }
+  }
+  if (!best) return point
+  const found = best as NightPoint
+  for (let dy = -4; dy <= 4; dy += 1) {
+    for (let dx = -4; dx <= 4; dx += 1) {
+      take(
+        previewLamp(
+          { x: found.x + dx, y: found.y + dy },
+          CANDLE_ID,
+          progress,
+          runTier,
+          plants,
+          hudBlocked,
+          false,
+          extra,
+        ),
+      )
     }
   }
   return best ?? point

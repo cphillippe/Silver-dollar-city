@@ -232,12 +232,25 @@ export function candleRowMark(size: number): string {
 
 /**
  * A row does not multiply the hit. Three candles on one stretch already
- * hold the road longer than the same three apart. A stronger hit jumps
- * that lead from a couple of rounds to five.
+ * hold the road longer than the same three apart.
  */
 export function candleRowFactor(size: number): number {
   void size
   return 1
+}
+
+/**
+ * On a boss round in rounds 1–6, a row waits this much longer.
+ * The hit stays the same. Outside those rounds the row keeps the lone rate.
+ * Long enough that a zero-tap row still loses round 5, short of a global slowdown.
+ */
+export const CANDLE_EARLY_PACE = 1.2
+
+/** Wait scale for a row on an early boss round. Lone candles and other rounds stay unset. */
+export function candleEarlyPace(rowSize: number, roundIndex: number): number | undefined {
+  const round = Math.floor(roundIndex) + 1
+  if (rowSize >= 2 && round <= 6 && round % 5 === 0) return CANDLE_EARLY_PACE
+  return undefined
 }
 
 export function candleNeighbors(plotId: string, plants: Record<string, string>): number {
@@ -267,7 +280,8 @@ export function candleDamage(paths: LampPaths, rowSize: number): number {
   return base * candleRowFactor(rowSize)
 }
 
-export function candleCooldown(paths: LampPaths): number {
+export function candleCooldown(paths: LampPaths, rowSize = 1): number {
+  void rowSize
   const strong = clampStep(paths.strong)
   if (strong >= 2) return 320
   if (strong >= 1) return 400
@@ -307,7 +321,7 @@ export function candleStrike(paths: LampPaths, rowSize: number): CandleStrike {
   return {
     damage: candleDamage(paths, rowSize),
     rangeBonus: candleFarBonus(paths),
-    cooldownMs: candleCooldown(paths),
+    cooldownMs: candleCooldown(paths, rowSize),
     splash: 0,
     splashFrac: 0,
     outer: 0,
