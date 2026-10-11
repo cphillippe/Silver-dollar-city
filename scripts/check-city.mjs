@@ -207,6 +207,7 @@ import {
   CANDLE_BODY,
   CANDLE_EARLY_PACE,
   CANDLE_ROW_WALKER,
+  candleBossBonusCapped,
   candleWalkerDamage,
   CANDLE_CARD,
   CANDLE_COST,
@@ -238,6 +239,14 @@ import {
   CANDLE_LIGHT_TAP,
   paceCandleNight,
 } from '../src/nightWatch/candlePace.ts'
+import {
+  bindNightRoll,
+  nightRoller,
+  nightSeedPlan,
+  nightSeedSteps,
+  nightWatchSeed,
+  NIGHT_SEED_STEP,
+} from '../src/nightWatch/seed.ts'
 import { bindNightFeatures } from '../src/nightWatch/maps/features.ts'
 import { lessonAreaFor, samePillarLessons } from '../src/nightWatch/lampPillar.ts'
 import { boardFill, boardFillPoint } from '../src/nightWatch/map/phoneFill.ts'
@@ -1566,7 +1575,14 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.455')
+assert.equal(APP_VERSION, '1.4.456')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.456'), '1.4.456 changelog row')
+assert.match(latestChange('1.4.456').title, /twice/i)
+assert.doesNotMatch(
+  latestChange('1.4.456').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.456 changelog avoids GitHub close keywords',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.455'), '1.4.455 changelog row')
 assert.match(latestChange('1.4.455').title, /finger/i)
 assert.doesNotMatch(
@@ -15000,6 +15016,96 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.ok((ghostRow.rowTo?.length ?? 0) >= 1)
   const ghostLone = previewLamp({ x: 628, y: 222 }, CANDLE_ID, {}, {})
   assert.equal(ghostLone.row, undefined, '1.4.452 a lone ghost shows no row mark')
+  assert.equal(nightWatchSeed('?nwSeed=3'), null, '1.4.456 a seed without playtest is ignored')
+  assert.equal(nightWatchSeed('?nwDebug=1&nwSeed=3'), null, '1.4.456 debug freeze does not turn a seed on')
+  assert.equal(nightWatchSeed('?playtest=1'), null, '1.4.456 playtest alone does not invent a seed')
+  assert.equal(nightWatchSeed('?playtest=1&nwSeed=3'), 3, '1.4.456 playtest plus nwSeed is the seed')
+  assert.equal(nightWatchSeed('?nwSeed=3&playtest=1'), 3)
+  assert.deepEqual(nightSeedPlan(2), nightSeedPlan(2), '1.4.456 the same seed is the same plan')
+  assert.notDeepEqual(nightSeedPlan(2).shotFrac, nightSeedPlan(4).shotFrac, '1.4.456 two seeds do not share a shot phase')
+  const rollA = nightRoller(11)
+  const rollB = nightRoller(11)
+  const firstRoll = rollA()
+  assert.equal(firstRoll, rollB(), '1.4.456 a seed rolls the same number twice')
+  const nextRoll = rollA()
+  assert.equal(nextRoll, rollB(), '1.4.456 the roller stays lined up')
+  assert.notEqual(firstRoll, nextRoll, '1.4.456 the roller advances')
+  const short = nightSeedSteps(0, NIGHT_SEED_STEP / 2)
+  assert.equal(short.steps, 0, '1.4.456 a short frame banks time')
+  const caught = nightSeedSteps(short.carry, NIGHT_SEED_STEP / 2)
+  assert.equal(caught.steps, 1, '1.4.456 the next short frame spends the bank')
+  const prevRandom = Math.random
+  try {
+    bindNightRoll(7)
+    const expect = nightRoller(7)
+    assert.equal(Math.random(), expect(), '1.4.456 Math.random follows the playtest seed')
+    bindNightRoll(null)
+    assert.equal(Math.random, prevRandom, '1.4.456 clearing the seed restores Math.random')
+  } finally {
+    bindNightRoll(null)
+  }
+  assert.equal(candleBossBonusCapped(0, true), true, '1.4.456 round 1 bosses are capped')
+  assert.equal(candleBossBonusCapped(5, true), true, '1.4.456 round 6 bosses are capped')
+  assert.equal(candleBossBonusCapped(6, true), false, '1.4.456 the named cap stops after round 6')
+  assert.equal(candleBossBonusCapped(4, false), false, '1.4.456 a walker is not the boss cap')
+  assert.equal(candleWalkerDamage(1.5, 2, 0, true), 1.5, '1.4.456 a round 1 boss splash stays at the base hit')
+  assert.equal(candleWalkerDamage(1.5, 2, 5, true), 1.5, '1.4.456 a round 6 boss splash stays at the base hit')
+  assert.equal(candleWalkerDamage(1, 2, 5, false), 1 + CANDLE_ROW_WALKER, '1.4.456 a round 6 walker still takes the row extra')
+  assert.equal(candleWalkerDamage(1, 2, 9, true), 1, '1.4.456 a later boss stays at the lone hit')
+  const paceSrc = readFileSync(new URL('../src/nightWatch/livePace.ts', import.meta.url), 'utf8')
+  assert.match(paceSrc, /if \(raider\.boss && roundIndex < 6\) return 0/, '1.4.456 rounds 1–6 bosses skip the row extra')
+  assert.match(
+    paceSrc,
+    /lamp\.strike\.splash \* \(1 \+ \(pick \? rowExtra\(pick\) : 0\)\)/,
+    '1.4.456 splash uses the same boss cap',
+  )
+  assert.match(
+    paceSrc,
+    /lamp\.strike\.outer \* \(1 \+ \(pick \? rowExtra\(pick\) : 0\)\)/,
+    '1.4.456 the outer nick uses the same boss cap',
+  )
+  const screenSrc = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  assert.match(screenSrc, /nightWatchSeed\(nightSearch\)/, '1.4.456 the screen reads the playtest seed')
+  assert.match(screenSrc, /bindNightRoll\(nightSeed\)/, '1.4.456 the screen binds the seed roller')
+  const seeds = [1, 2, 3, 4, 5]
+  const zeroDead = []
+  const lightRowDead = []
+  const lightSpreadDead = []
+  const lightRowDealt = []
+  const lightSpreadDealt = []
+  for (const seed of seeds) {
+    const zero = paceExtraNight('none', rowShots, 1e9, seed)
+    const zeroSpread = paceExtraNight('none', spreadShots, 1e9, seed)
+    const light = paceExtraNight('none', rowShots, CANDLE_LIGHT_TAP, seed)
+    const lightSpread = paceExtraNight('none', spreadShots, CANDLE_LIGHT_TAP, seed)
+    const again = paceExtraNight('none', rowShots, CANDLE_LIGHT_TAP, seed)
+    const boss = paceEasyLive(4, BARE_LAMPS, 3, false, 1e9, 'road', undefined, rowShots, seed)
+    assert.equal(zero.dead, 5, `1.4.456 zero-tap row seed ${seed} loses round 5`)
+    assert.equal(boss.result, 'lost', `1.4.456 zero-tap row seed ${seed} loses the round 5 fight`)
+    assert.equal(boss.bossLamp, 12, `1.4.456 seed ${seed} still puts 12 on the round 5 boss`)
+    assert.ok(zero.dealt > zeroSpread.dealt, `1.4.456 seed ${seed} zero-tap row deals more than the spread`)
+    assert.ok(
+      Math.round(light.dealt) > Math.round(lightSpread.dealt) + 50,
+      `1.4.456 seed ${seed} light-tap row deals clearly more`,
+    )
+    assert.deepEqual(light, again, `1.4.456 seed ${seed} plays the same night twice`)
+    zeroDead.push(zero.dead)
+    lightRowDead.push(light.dead)
+    lightSpreadDead.push(lightSpread.dead)
+    lightRowDealt.push(Math.round(light.dealt))
+    lightSpreadDealt.push(Math.round(lightSpread.dealt))
+  }
+  const mid = (values) => [...values].sort((a, b) => a - b)[2]
+  assert.deepEqual(zeroDead, [5, 5, 5, 5, 5], '1.4.456 every zero-tap seed loses round 5')
+  assert.ok(mid(lightRowDead) >= mid(lightSpreadDead) + 1, '1.4.456 the light-tap row median lasts at least one round longer')
+  assert.deepEqual(lightRowDead, [10, 10, 10, 10, 10], '1.4.456 light-tap row seeds stop on round 10')
+  assert.deepEqual(lightSpreadDead, [10, 9, 9, 9, 9], '1.4.456 light-tap spread seeds')
+  assert.deepEqual(lightRowDealt, [659, 663, 677, 676, 674], '1.4.456 light-tap row damage')
+  assert.deepEqual(lightSpreadDealt, [565, 449, 449, 449, 450], '1.4.456 light-tap spread damage')
+  assert.equal(lightRowDead[1], 10)
+  assert.equal(lightSpreadDead[1], 9, '1.4.456 seed 2 is a live replay where the row outlasts the spread')
+  assert.equal(lightRowDead[3], 10)
+  assert.equal(lightSpreadDead[3], 9, '1.4.456 seed 4 is a live replay where the row outlasts the spread')
 }
 
 await import('./check-story-win.mjs').then((mod) => mod.checkStoryWins())

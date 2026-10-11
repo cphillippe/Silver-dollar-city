@@ -7,6 +7,7 @@ import {
   easyRoundHeartCap,
   easyTapArmored,
 } from '../lib/defend.ts'
+import { nightSeedPlan, nightSeedShotWait, nightSeedSpawnScale } from './seed.ts'
 import { DEFEND_ANCHOR, pathClearance, pathPick, pathPoint } from './path/data.ts'
 import { easyRound as liveRound, type EasyRound } from './rounds.ts'
 import {
@@ -319,6 +320,11 @@ export function paceEasyLive(
   map?: PaceMap,
   /** Extra shots on top of the pillar seats. Omitted, the round is unchanged. */
   shots: readonly PaceShot[] = [],
+  /**
+   * Playtest seed. Omitted, the round keeps the old first-shot and spawn gap.
+   * The same number always plays the same wave.
+   */
+  seed?: number,
 ): PaceLive {
   const road = mode === 'road' || mode === 'road437' || Boolean(map)
   const roadPath = map?.path
@@ -426,7 +432,14 @@ export function paceEasyLive(
   const bossBox: { fate: PaceLive['boss'] } = { fate: bossRound ? 'up' : 'none' }
   let sparkFloat = 0
   const dt = 1 / 60
-  const spawnEvery = 3.8 * table.spawn * (wave?.spawnMul ?? 1)
+  const plan = seed == null ? null : nightSeedPlan(seed)
+  if (plan) {
+    for (const lamp of lamps) {
+      const pace = lamp.earlyPace && easyBossRound(roundIndex) && roundIndex < 6 ? lamp.earlyPace : 1
+      lamp.cool = nightSeedShotWait((lamp.strike.cooldownMs / 1000) * pace, plan.shotFrac)
+    }
+  }
+  const spawnEvery = 3.8 * table.spawn * (wave?.spawnMul ?? 1) * (plan ? nightSeedSpawnScale(plan.spawnFrac) : 1)
   const liveCap = wave?.liveCap ?? 3
   const pack = wave?.pack ?? 1
   const sparkMul = wave?.sparkMul ?? 1
@@ -563,9 +576,15 @@ export function paceEasyLive(
         if (raider.boss) bossLamp += hit
         if (raider.hp <= 0) kill(raider, byLamp)
       }
-      const roadBonus = !best.boss && !earlyHold ? lamp.walkerBonus ?? 0 : 0
-      const shotDamage = lamp.strike.damage * (1 + roadBonus)
-      apply(best, shotDamage, true)
+      const rowExtra = (raider: { boss: boolean }) => {
+        if (!lamp.walkerBonus) return 0
+        if (earlyHold) return 0
+        // Rounds 1–6, then every later boss. Splash and the outer nick use this too.
+        if (raider.boss && roundIndex < 6) return 0
+        if (raider.boss) return 0
+        return lamp.walkerBonus
+      }
+      apply(best, lamp.strike.damage * (1 + rowExtra(best)), true)
       if (lamp.strike.splash > 0) {
         let pick: (typeof raiders)[number] | null = null
         let pickD = lamp.range * lamp.strike.splashFrac
@@ -578,7 +597,7 @@ export function paceEasyLive(
             pickD = distance
           }
         }
-        apply(pick, lamp.strike.splash, true)
+        apply(pick, lamp.strike.splash * (1 + (pick ? rowExtra(pick) : 0)), true)
       }
       if (lamp.strike.outer > 0) {
         let pick: (typeof raiders)[number] | null = null
@@ -592,7 +611,7 @@ export function paceEasyLive(
             pickD = distance
           }
         }
-        apply(pick, lamp.strike.outer, true)
+        apply(pick, lamp.strike.outer * (1 + (pick ? rowExtra(pick) : 0)), true)
       }
     }
     if (tapAt >= tapEvery && live().length > 0) {
@@ -821,6 +840,7 @@ export function paceExtraNight(
   kind: 'none' | 'natural' | 'ceiling',
   shots: readonly PaceShot[] = [],
   tapEvery = LIVE_TAP_EVERY,
+  seed?: number,
 ): { dead: number | null; dealt: number } {
   let hearts = 3
   let dealt = 0
@@ -834,6 +854,7 @@ export function paceExtraNight(
       'road',
       undefined,
       shots,
+      seed,
     )
     dealt += round.dealt
     if (round.result !== 'clear') return { dead: index + 1, dealt }
