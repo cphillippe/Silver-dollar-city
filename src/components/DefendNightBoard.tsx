@@ -8,6 +8,7 @@ import { DefendNightSky } from './DefendNightSky'
 import { DefendTowerCard, type TowerCardPoint } from './DefendTowerCard'
 import { samePillarLessons } from '../nightWatch/lampPillar'
 import { easyShotReach, pathsOf, type BonusGate, type LampPaths, type TreePath } from '../nightWatch/upgradeTree'
+import { candleFarBonus, candlePathKey, candleRoadNote, isCandle } from '../nightWatch/candle'
 import {
   DefendNightActorsSvg,
   DefendNightWalkerCue,
@@ -52,10 +53,17 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
   } = props
   const place = plateFill ? boardFillPoint : mapBoardPoint
   const cardAbility = upgradeAt ? towerType[upgradeAt] : undefined
-  const reachBonus =
-    easy && cardAbility ? easyShotReach(pathsOf(runPaths, cardAbility)) : 0
-  const roadNote =
-    upgradeAt && cardAbility
+  const candleCard = Boolean(cardAbility && isCandle(cardAbility) && upgradeAt)
+  const cardKey = candleCard && upgradeAt ? candlePathKey(upgradeAt) : cardAbility
+  const cardPaths = easy && cardKey ? pathsOf(runPaths, cardKey) : undefined
+  const reachBonus = candleCard && upgradeAt
+    ? candleFarBonus(pathsOf(runPaths, candlePathKey(upgradeAt)))
+    : easy && cardAbility
+      ? easyShotReach(pathsOf(runPaths, cardAbility))
+      : 0
+  const roadNote = candleCard && upgradeAt
+    ? candleRoadNote(upgradeAt, reachBonus)
+    : upgradeAt && cardAbility
       ? lampRoadNote(upgradeAt, cardAbility, progress, runTier, easy, reachBonus)
       : ''
   const lessonGate: BonusGate | undefined =
@@ -85,7 +93,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
               className={`defend-type-chip is-${type}`}
               style={{ left: at.left, top: at.top }}
             >
-              {WATCH_ABILITY_LABEL[type] ?? type}
+              {isCandle(type) ? 'Candle' : (WATCH_ABILITY_LABEL[type] ?? type)}
             </span>
           )
         })
@@ -149,7 +157,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
           onUpgrade={() => onBoostTower?.(upgradeAt as CityPlotId)}
           onUpgradePath={(path, fromPip) => onUpgradePath?.(upgradeAt as CityPlotId, path, fromPip)}
           onArmPathBuy={onArmPathBuy}
-          paths={easy && cardAbility ? pathsOf(runPaths, cardAbility) : undefined}
+          paths={cardPaths}
           clearOf={clearOf}
           cameraScale={cameraScale}
           onPull={onPullLamp}

@@ -15,6 +15,13 @@ import {
 import type { NightPoint } from '../nightWatch/types.ts'
 import { isTowerType, plantType } from './nightPlants.ts'
 import { combatTier, TIER_MARK, TOOL_TIER_MAX } from './watchTools.ts'
+import {
+  candlePlateReach,
+  candleRoadNote,
+  candleRoom,
+  isCandle,
+  plantCandle,
+} from '../nightWatch/candle.ts'
 
 /**
  * Easy lamp placement (1.4.390).
@@ -48,6 +55,8 @@ export interface LampPreview {
    * would, or `LAMP_TOO_FAR` when level III still misses. Empty on a red no-go.
    */
   note: string
+  /** Set when the ghost is a candle stand, not a pillar lamp. */
+  mark?: 'candle'
 }
 
 /** Road length that counts as a real stretch, not a nick. Plate units. */
@@ -635,13 +644,21 @@ export function previewLamp(
 ): LampPreview {
   const spot = freeSpotId(point)
   const at = lampAnchor(spot)
-  const range = nightTowers.range(spot, ability, progress, runTier, Math.max(0, extra))
+  const candle = isCandle(ability)
+  const range = candle
+    ? candlePlateReach(spot, Math.max(0, extra))
+    : nightTowers.range(spot, ability, progress, runTier, Math.max(0, extra))
+  // A candle does not skip other candles, so a row keeps a body-width gap.
   const blocked =
     hudBlocked ||
-    !isTowerType(ability) ||
-    lampSpotBlocked(at, plants, ability)
+    (candle ? !candleRoom(plants) : !isTowerType(ability)) ||
+    lampSpotBlocked(at, plants, candle ? undefined : ability)
   const reaches = !blocked && lampReachesRoad(at, range)
-  const note = blocked ? '' : lampRoadNote(spot, ability, progress, runTier, easyTree, extra)
+  const note = blocked
+    ? ''
+    : candle
+      ? candleRoadNote(spot, Math.max(0, extra))
+      : lampRoadNote(spot, ability, progress, runTier, easyTree, extra)
   const length = blocked ? 0 : roadCoverLength(at, range)
   const cover = blocked ? '' : roadCoverRank(length)
   return {
@@ -653,6 +670,7 @@ export function previewLamp(
     cover,
     road: cover === 'far' || cover === '' ? '' : roadCoverD(at, range),
     note,
+    mark: candle ? 'candle' : undefined,
   }
 }
 
@@ -669,5 +687,10 @@ export function commitLamp(
 ): { ok: boolean; plants: Record<string, string>; preview: LampPreview } {
   const preview = previewLamp(point, ability, progress, runTier, plants, hudBlocked, easyTree, extra)
   if (preview.blocked) return { ok: false, plants, preview }
+  if (preview.mark === 'candle') {
+    const next = plantCandle(plants, preview.spot)
+    if (next === plants) return { ok: false, plants, preview }
+    return { ok: true, plants: next, preview }
+  }
   return { ok: true, plants: plantType(plants, preview.spot, ability), preview }
 }
