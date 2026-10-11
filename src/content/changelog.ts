@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.451',
+    title: 'The first choice stays up',
+    when: '2026-10-11',
+    items: [
+      'On a phone, the first follow-up choice sits on the screen under a shorter Home bar. The verse padding and the Great job line take less room.',
+      'After you answer, the page returns to the top so Settings stays in view. A tall phone keeps one width, with the follow-up fitting and no sideways jump.',
+    ],
+  },
+  {
     version: '1.4.450',
     title: 'A candle row shows',
     when: '2026-10-11',

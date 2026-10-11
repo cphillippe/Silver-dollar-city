@@ -3,7 +3,9 @@ import { mkdirSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { createServer } from 'vite'
 import { chromium } from '@playwright/test'
+import { evidenceFor } from '../src/content/evidence.ts'
 import { findPlayable } from '../src/content/index.ts'
+import { easyWhyLine } from '../src/lib/easy.ts'
 import { storyStripLines } from '../src/lib/debugPlays.ts'
 
 /** Phone and tablet sizes from the Easy story-win playtest. */
@@ -16,7 +18,7 @@ const SIZES = [
 const SAVE = {
   kind: 'silver-city-save',
   schemaVersion: 1,
-  appVersion: '1.4.449',
+  appVersion: '1.4.451',
   savedAt: '2026-10-11T00:00:00.000Z',
   progress: {
     started: true,
@@ -70,8 +72,18 @@ function readWin() {
   const verse = document.querySelector('.strip-verse')
   const quote = document.querySelector('.strip-verse blockquote')
   const home = document.querySelector('.town-return .btn')
-  const chip = document.querySelector('.why-chip')
+  const chipEls = [...document.querySelectorAll('.why-chip')]
+  const chip = chipEls[0] ?? null
+  const chipBoxes = chipEls.map((el) => box(el)).filter(Boolean)
+  const rowBottom = chipBoxes.length
+    ? Math.max(
+        ...chipBoxes
+          .filter((item) => Math.abs(item.top - chipBoxes[0].top) < 12)
+          .map((item) => item.bottom),
+      )
+    : 0
   const link = document.querySelector('.daily-page > .text-link, .challenge-page > .text-link')
+  const page = document.querySelector('.daily-page, .challenge-page')
   const topbar = document.querySelector('.topbar')
   const imgs = [...document.querySelectorAll('.strip-board img')].map((img) => box(img))
   const slots = [...document.querySelectorAll('.strip-board .strip-slot')].map((slot) => box(slot))
@@ -94,6 +106,8 @@ function readWin() {
       : null,
     home: box(home),
     chip: chip ? { ...box(chip), hit: hit(chip) } : null,
+    rowBottom,
+    scrollOverflow: page ? page.scrollHeight - page.clientHeight : 0,
     link: link ? { ...box(link), text: link.textContent } : null,
     topbar: box(topbar),
     imgs,
@@ -106,8 +120,9 @@ function assertWin(id, width, height, win, widths) {
   const where = `${id} at ${width}×${height}`
   assert.ok(win.board, `${where} has a strip`)
   assert.ok(win.board.height > 120, `${where} strip stays above 120px (${Math.round(win.board.height)}px)`)
+  const widthFloor = width >= 700 ? win.innerWidth - 16 : win.innerWidth - 36
   assert.ok(
-    win.board.width >= win.innerWidth - 16,
+    win.board.width >= widthFloor,
     `${where} strip keeps its width (${Math.round(win.board.width)} of ${win.innerWidth})`,
   )
   assert.ok(Math.max(...widths) - Math.min(...widths) <= 2, `${where} strip width stays put (${widths.join(' → ')})`)
@@ -140,6 +155,18 @@ function assertWin(id, width, height, win, widths) {
     win.chip.top >= 0 && win.chip.bottom <= win.innerHeight + 0.5 && win.chip.hit,
     `${where} first choice is in view`,
   )
+  if (width <= 412) {
+    assert.ok(
+      win.rowBottom <= win.innerHeight + 0.5,
+      `${where} first choice row is in view (${Math.round(win.rowBottom)} of ${win.innerHeight})`,
+    )
+  }
+  if (width === 412) {
+    assert.ok(
+      win.scrollOverflow <= 1,
+      `${where} follow-up fits without a scrollbar (${Math.round(win.scrollOverflow)}px)`,
+    )
+  }
   assert.ok(win.link && win.topbar, `${where} has the back link`)
   assert.ok(win.link.top >= win.topbar.bottom - 1, `${where} back link is below the top bar`)
   assert.match(win.link.text, /Settings/, `${where} playtest link says Settings`)
@@ -173,14 +200,14 @@ export async function checkStoryWins() {
   await server.listen()
   const address = server.httpServer?.address()
   const port = address && typeof address === 'object' ? address.port : 0
-  assert.ok(port > 0, '1.4.449 story-win server has a port')
+  assert.ok(port > 0, '1.4.451 story-win server has a port')
   const base = `http://127.0.0.1:${port}/`
   const shots = process.env.STORY_WIN_SHOTS
   if (shots) mkdirSync(shots, { recursive: true })
   const browser = await launchBrowser()
   try {
     const strips = storyStripLines()
-    assert.ok(strips.length >= 3, '1.4.449 Easy story strips are listed')
+    assert.ok(strips.length >= 3, '1.4.451 Easy story strips are listed')
     for (const [width, height] of SIZES) {
       const context = await browser.newContext({
         baseURL: base,
@@ -202,8 +229,27 @@ export async function checkStoryWins() {
           Math.round(first.board?.width ?? 0),
           Math.round(second.board?.width ?? 0),
         ])
-        if (shots && width === 375 && (strip.lineId === 'daily-lantern' || strip.lineId === 'daily-creed')) {
-          await page.screenshot({ path: `${shots}/${strip.lineId}-375-win.png` })
+        const shotIds = ['daily-lantern', 'daily-creed', 'fg-reason', 'daily-rest']
+        if (shots && (width === 375 || width === 412) && shotIds.includes(strip.lineId)) {
+          await page.screenshot({ path: `${shots}/${strip.lineId}-${width}-win.png` })
+        }
+        const brief = evidenceFor(strip.lineId)
+        assert.ok(brief, `${strip.lineId} has a follow-up`)
+        await page.getByRole('button', { name: easyWhyLine(brief.reason), exact: true }).click()
+        await page.getByText('Say this tomorrow').waitFor()
+        await page.waitForFunction(() => {
+          const link = document.querySelector('.daily-page > .text-link, .challenge-page > .text-link')
+          const host = document.querySelector('.daily-page, .challenge-page')
+          return Boolean(link && link.getBoundingClientRect().top >= 0 && (host?.scrollTop ?? 0) <= 1)
+        })
+        const after = await page.evaluate(readWin)
+        assert.ok(after.link && after.link.top >= 0, `${strip.lineId} at ${width}×${height} keeps Settings on screen`)
+        assert.ok(
+          Math.abs(Math.round(after.board?.width ?? 0) - Math.round(second.board?.width ?? 0)) <= 2,
+          `${strip.lineId} at ${width}×${height} width stays put after the quiz (${Math.round(second.board?.width ?? 0)} → ${Math.round(after.board?.width ?? 0)})`,
+        )
+        if (shots && width === 375 && strip.lineId === 'daily-lantern') {
+          await page.screenshot({ path: `${shots}/${strip.lineId}-375-after.png` })
         }
         await page.close()
       }
