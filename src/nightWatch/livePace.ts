@@ -163,6 +163,11 @@ export interface PaceShot {
    * Omitted, the shot keeps `cooldownMs`.
    */
   earlyPace?: number
+  /**
+   * Extra fraction on a walker. Bosses stay at `damage`.
+   * 0.12 is about a tenth more on the road.
+   */
+  walkerBonus?: number
 }
 
 export interface PaceLive {
@@ -355,6 +360,7 @@ export function paceEasyLive(
           range,
           cool: 0,
           earlyPace: undefined as number | undefined,
+          walkerBonus: undefined as number | undefined,
         }
       })
     : PLATE.map((seat, index) => {
@@ -367,6 +373,7 @@ export function paceEasyLive(
           range,
           cool: 0,
           earlyPace: undefined as number | undefined,
+          walkerBonus: undefined as number | undefined,
         }
       })
   for (const shot of shots) {
@@ -387,6 +394,7 @@ export function paceEasyLive(
       range: shot.range,
       cool: 0,
       earlyPace: shot.earlyPace,
+      walkerBonus: shot.walkerBonus,
     })
   }
   const raiders: {
@@ -543,7 +551,9 @@ export function paceEasyLive(
         }
       }
       if (!best) continue
-      const pace = earlyBoss && lamp.earlyPace ? lamp.earlyPace : 1
+      const held = earlyBoss ? lamp.earlyPace : undefined
+      const pace = held ?? 1
+      const earlyHold = held != null
       lamp.cool = (lamp.strike.cooldownMs / 1000) * pace
       const apply = (raider: (typeof raiders)[number] | null, amount: number, byLamp: boolean) => {
         if (!raider || raider.dead || amount <= 0) return
@@ -553,7 +563,9 @@ export function paceEasyLive(
         if (raider.boss) bossLamp += hit
         if (raider.hp <= 0) kill(raider, byLamp)
       }
-      apply(best, lamp.strike.damage, true)
+      const roadBonus = !best.boss && !earlyHold ? lamp.walkerBonus ?? 0 : 0
+      const shotDamage = lamp.strike.damage * (1 + roadBonus)
+      apply(best, shotDamage, true)
       if (lamp.strike.splash > 0) {
         let pick: (typeof raiders)[number] | null = null
         let pickD = lamp.range * lamp.strike.splashFrac

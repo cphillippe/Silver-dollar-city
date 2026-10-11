@@ -246,6 +246,25 @@ export function candleRowFactor(size: number): number {
  */
 export const CANDLE_EARLY_PACE = 1.2
 
+/**
+ * A row hits walkers this much harder than the same candles set apart.
+ * Bosses stay at the lone hit. The early boss round does not take this extra,
+ * so a zero-tap row still loses round 5.
+ */
+export const CANDLE_ROW_WALKER = 0.12
+
+/** Walker damage for this shot. Bosses and the early boss round stay at `damage`. */
+export function candleWalkerDamage(
+  damage: number,
+  rowSize: number,
+  roundIndex: number,
+  boss: boolean,
+): number {
+  if (!(damage > 0) || boss || rowSize < 2) return damage
+  if (candleEarlyPace(rowSize, roundIndex)) return damage
+  return damage * (1 + CANDLE_ROW_WALKER)
+}
+
 /** Wait scale for a row on an early boss round. Lone candles and other rounds stay unset. */
 export function candleEarlyPace(rowSize: number, roundIndex: number): number | undefined {
   const round = Math.floor(roundIndex) + 1

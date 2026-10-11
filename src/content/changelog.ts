@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.455',
+    title: 'A row follows the finger',
+    when: '2026-10-11',
+    items: [
+      'While you drag a candle, the ghost snaps onto a row spot from your finger, about a thumb away. If the first candle covers that spot, the ghost takes the nearest open seat beside it.',
+      'A row hits walkers a little harder. The round 5 boss does not get that extra, so a zero-tap row still loses the round.',
+      'The card still says a small candle is a sign of a prayer for someone.',
+    ],
+  },
+  {
     version: '1.4.454',
     title: 'A row still meets the round 5 boss',
     when: '2026-10-11',

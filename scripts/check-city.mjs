@@ -204,7 +204,10 @@ import {
 import {
   applyCandleStep,
   CANDLE_CAP,
+  CANDLE_BODY,
   CANDLE_EARLY_PACE,
+  CANDLE_ROW_WALKER,
+  candleWalkerDamage,
   CANDLE_CARD,
   CANDLE_COST,
   CANDLE_HELP,
@@ -254,6 +257,7 @@ import {
   lampRoadNote,
   bindLampGround,
   lampSpotBlocked,
+  candlePlateFromPx,
   lampUnderFinger,
   magnetCandlePoint,
   pathSpendControl,
@@ -1562,7 +1566,14 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.454')
+assert.equal(APP_VERSION, '1.4.455')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.455'), '1.4.455 changelog row')
+assert.match(latestChange('1.4.455').title, /finger/i)
+assert.doesNotMatch(
+  latestChange('1.4.455').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.455 changelog avoids GitHub close keywords',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.454'), '1.4.454 changelog row')
 assert.match(latestChange('1.4.454').title, /boss/i)
 assert.doesNotMatch(
@@ -14901,6 +14912,11 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.equal(spreadShots[0].cooldownMs, 480, '1.4.454 a spread candle keeps the lone wait')
   assert.equal(rowShots[0].earlyPace, CANDLE_EARLY_PACE, '1.4.454 a row waits longer only on the early boss')
   assert.equal(spreadShots[0].earlyPace, undefined, '1.4.454 a spread candle is not slowed on the boss')
+  assert.equal(rowShots[0].walkerBonus, CANDLE_ROW_WALKER, '1.4.455 a row hits walkers a little harder')
+  assert.equal(spreadShots[0].walkerBonus, undefined, '1.4.455 candles set apart stay at the lone hit')
+  assert.equal(candleWalkerDamage(1, 2, 4, false), 1, '1.4.455 round 5 walkers do not take the row extra')
+  assert.equal(candleWalkerDamage(1, 2, 9, true), 1, '1.4.455 a boss stays at the lone hit')
+  assert.equal(candleWalkerDamage(1, 2, 9, false), 1 + CANDLE_ROW_WALKER, '1.4.455 later walkers take the row extra')
   for (const seat of [...rowSeats, ...spreadSeats, ...sixSeats]) {
     assert.equal(candleGhostGood(seat), true, `1.4.452 candle seat ${seat.x},${seat.y} is Good when empty`)
   }
@@ -14938,19 +14954,41 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.ok(rowNight.dealt > spreadNight.dealt + 10, '1.4.454 the row still deals clearly more than the spread')
   const rowLight = paceExtraNight('none', rowShots, CANDLE_LIGHT_TAP)
   const spreadLight = paceExtraNight('none', spreadShots, CANDLE_LIGHT_TAP)
-  assert.equal(spreadLight.dead, 7, '1.4.454 light taps with a spread stop on round 7')
-  assert.equal(rowLight.dead, 10, '1.4.454 light taps with a row stop on round 10')
-  assert.equal(rowLight.dead - spreadLight.dead, 3, '1.4.454 a light-tap row lasts three rounds longer')
+  assert.equal(spreadLight.dead, 9, '1.4.455 light taps with a spread stop on round 9')
+  assert.equal(rowLight.dead, 10, '1.4.455 light taps with a row stop on round 10')
+  assert.equal(rowLight.dead - spreadLight.dead, 1, '1.4.455 a light-tap row lasts a round longer than the spread')
+  assert.ok(Math.round(rowLight.dealt) > Math.round(spreadLight.dealt), '1.4.455 the row still deals more under light taps')
   assert.ok(sixNight.dead != null && sixNight.dead >= 17 && sixNight.dead <= 20, '1.4.454 six candles stay in rounds 17–20')
-  assert.equal(sixNight.dead, 18, '1.4.454 a six-candle spender stops on round 18')
+  assert.equal(sixNight.dead, 18, '1.4.455 a six-candle spender stops on round 18')
   const snapPlants = { [`at:${rowSeats[0].x}:${rowSeats[0].y}`]: CANDLE_ID }
-  const snapFinger = { x: rowSeats[1].x + 24, y: rowSeats[1].y + 16 }
-  const snapped = magnetCandlePoint(snapFinger, snapPlants, {}, undefined, false, 0)
+  const rowSpot = rowSeats[1]
+  const px20 = candlePlateFromPx(20)
+  const pointer = { x: rowSpot.x, y: rowSpot.y + px20 }
+  assert.ok(Math.abs(Math.hypot(pointer.x - rowSpot.x, pointer.y - rowSpot.y) - px20) < 0.01, '1.4.455 the pointer sits 20px off the row spot')
+  const snapped = magnetCandlePoint(pointer, snapPlants, {}, undefined, false, 0)
+  assert.ok(snapped, '1.4.455 a pointer 20px off a row spot snaps')
   const snapLook = previewLamp(snapped, CANDLE_ID, {}, {}, snapPlants)
   assert.equal(snapLook.blocked, false)
-  assert.equal(snapLook.cover, 'good', '1.4.454 a near finger snaps onto a Good seat')
-  assert.equal(snapLook.row, 'Row x2', '1.4.454 the snap joins the row')
-  assert.ok(Math.hypot(snapped.x - snapFinger.x, snapped.y - snapFinger.y) <= 43, '1.4.454 the snap stays within about 20px')
+  assert.equal(snapLook.cover, 'good', '1.4.455 the snap lands on a Good seat')
+  assert.equal(snapLook.row, 'Row x2', '1.4.455 the snap joins the row')
+  assert.ok(
+    Math.hypot(snapped.x - pointer.x, snapped.y - pointer.y) <= candlePlateFromPx(28) + 0.5,
+    '1.4.455 the snap is measured from the pointer, within about 28px',
+  )
+  const dx = rowSeats[1].x - rowSeats[0].x
+  const dy = rowSeats[1].y - rowSeats[0].y
+  const span = Math.hypot(dx, dy) || 1
+  const literal = {
+    x: rowSeats[0].x + (dx / span) * (CANDLE_BODY - 8),
+    y: rowSeats[0].y + (dy / span) * (CANDLE_BODY - 8),
+  }
+  assert.equal(previewLamp(literal, CANDLE_ID, {}, {}, snapPlants).blocked, true, '1.4.455 the first candle pad blocks the literal seat')
+  const padSnap = magnetCandlePoint(literal, snapPlants, {}, undefined, false, 0)
+  assert.ok(padSnap, '1.4.455 a blocked literal seat still offers a snap')
+  const padLook = previewLamp(padSnap, CANDLE_ID, {}, {}, snapPlants)
+  assert.equal(padLook.blocked, false)
+  assert.equal(padLook.cover, 'good', '1.4.455 the seat beside the pad is Good')
+  assert.equal(padLook.row, 'Row x2', '1.4.455 the seat beside the pad joins the row')
   const ghostPlants = {
     [`at:${rowSeats[0].x}:${rowSeats[0].y}`]: CANDLE_ID,
     [`at:${rowSeats[1].x}:${rowSeats[1].y}`]: CANDLE_ID,

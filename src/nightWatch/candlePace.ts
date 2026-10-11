@@ -5,6 +5,7 @@ import {
   CANDLE_LINK,
   candlePlateReach,
   candleEarlyPace,
+  CANDLE_ROW_WALKER,
   candleRowSize,
   candleStrike,
   freshCandlePaths,
@@ -17,9 +18,10 @@ const ZERO_TAP = 1e9
 
 /**
  * A light tap in the live scorer. Often enough to hold round 5.
- * The active aim is 0.28s. This is about once each 1.6s.
+ * Live candles set apart stop on round 9. Once each 1.6s stopped on round 7,
+ * so this gap is the one that lands on that live round.
  */
-export const CANDLE_LIGHT_TAP = 1.6
+export const CANDLE_LIGHT_TAP = 0.97
 
 /** The ghost calls this seat Good and open. Same check the pad uses. */
 export function candleGhostGood(point: CandleSeat, plants: Record<string, string> = {}): boolean {
@@ -230,6 +232,7 @@ export function candleShots(seats: readonly CandleSeat[]): PaceShot[] {
       range: candlePlateReach(id, 0),
       cooldownMs: strike.cooldownMs,
       earlyPace: candleEarlyPace(rowSize, 4),
+      walkerBonus: rowSize >= 2 ? CANDLE_ROW_WALKER : undefined,
     }
   })
 }
