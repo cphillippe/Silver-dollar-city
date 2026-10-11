@@ -1088,7 +1088,7 @@
    "liveCap": 5,
    "spawnMul": 0.6,
    "pack": "perRoad",
-   "sparkMul": 0.5,
+   "sparkMul": 1,
    "note": "rules stays maze-v1 so 1.4.442 fromPack keeps reading it; wave is additive (see SPEC.md section 2)"
   }
  },
@@ -1345,27 +1345,27 @@
    "type": "fog",
    "x": 0.2656,
    "y": 0.4435,
-   "r": 0.1003,
+   "r": 0.07,
    "noTap": true,
    "sprite": "overlays/fog.png",
    "spriteAnchorPx": [
     168,
     168
    ],
-   "spritePxPerUnit": 2
+   "spritePxPerUnit": 2.8
   },
   {
    "type": "fog",
    "x": 0.7611,
    "y": 0.5266,
-   "r": 0.1003,
+   "r": 0.07,
    "noTap": true,
    "sprite": "overlays/fog.png",
    "spriteAnchorPx": [
     168,
     168
    ],
-   "spritePxPerUnit": 2
+   "spritePxPerUnit": 2.8
   }
  ],
  "featureNote": "Faces in the fog can't be tapped. Your lamps still see them.",
@@ -1389,7 +1389,7 @@
     0.492
    ]
   ],
-  "bestDies": 12,
+  "bestDies": 14,
   "avgDies": 6.6,
   "avgRange": [
    5,

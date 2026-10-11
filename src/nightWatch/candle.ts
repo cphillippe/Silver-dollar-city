@@ -13,7 +13,7 @@ import {
 } from './upgradeTree.ts'
 
 /**
- * Easy candle stand (1.4.445).
+ * Easy candle stand (1.4.447).
  * A cheap short lamp you plant in a row. It is not a fifth pillar tool.
  * The candle has no power of its own. It helps people pray and remember God.
  * Damage on the road is only a game effect.
@@ -31,7 +31,12 @@ export const CANDLE_CAP = 6
 export const CANDLE_FROM_ROUND = 3
 
 /** Combat reach before the road-overlap rule. Shorter than a level I lamp (114). */
-export const CANDLE_RANGE = 62
+/**
+ * Short plate reach. The closest legal seat sits just past the road block (46),
+ * and a lamp only meets the road when its reach clears that gap plus the
+ * 24-unit overlap. 86 covers a seat in that band and stays under a pillar lamp.
+ */
+export const CANDLE_RANGE = 86
 
 /** Auto-shot wait. A little quicker than a level I lamp (700). */
 export const CANDLE_COOLDOWN_MS = 480

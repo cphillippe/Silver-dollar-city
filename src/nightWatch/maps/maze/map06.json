@@ -1186,7 +1186,7 @@
    "into": 2,
    "hpFrac": 0.2,
    "minHp": 2,
-   "fromRound": 3,
+   "fromRound": 5,
    "notFast": true,
    "notBoss": true,
    "sprite": "overlays/pop.png",

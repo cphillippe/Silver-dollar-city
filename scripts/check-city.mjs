@@ -1547,7 +1547,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.445')
+assert.equal(APP_VERSION, '1.4.447')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.444'), '1.4.444 changelog row')
 assert.match(latestChange('1.4.444').title, /check/i)
 assert.doesNotMatch(
@@ -6609,7 +6609,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(packs.map02.wave.sparkMul, 0.5)
   assert.equal(packs.map03.wave.sparkMul, 0.65)
   assert.equal(packs.map04.wave.sparkMul, 0.65)
-  assert.equal(packs.map05.wave.sparkMul, 0.5)
+  assert.equal(packs.map05.wave.sparkMul, 1, '1.4.447 Licorice pays one spark a pop')
   assert.equal(packs.map02.wave.hpScale, 0.75)
   assert.equal(packs.map02.wave.countMulEarly, 1.5)
   assert.equal(packs.map02.wave.pack, 1)
@@ -6660,8 +6660,9 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(split.into, 2)
   assert.equal(miniHp(40, split), 8)
   assert.equal(miniHp(4, split), 2)
-  assert.equal(splitDue(split, 1, 'plain', false, false), false, '1.4.443 pops start at round 3')
-  assert.equal(splitDue(split, 2, 'plain', false, false), true)
+  assert.equal(split.fromRound, 5, '1.4.447 berries wait until round 5')
+  assert.equal(splitDue(split, 3, 'plain', false, false), false, '1.4.447 round 4 does not pop')
+  assert.equal(splitDue(split, 4, 'plain', false, false), true, '1.4.447 round 5 pops')
   assert.equal(splitDue(split, 4, 'fast', false, false), false)
   assert.equal(splitDue(split, 4, 'plain', true, false), false)
   assert.equal(splitDue(split, 4, 'plain', false, true), false)
@@ -6693,8 +6694,55 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(bestDead.map02, 14, '1.4.443 Far Hills best seats reach round 14')
   assert.equal(bestDead.map03, 13, '1.4.443 Peppermint best seats stay near round 13')
   assert.equal(bestDead.map04, 12, '1.4.443 Caramel best seats stay near round 13')
-  assert.equal(bestDead.map05, 12, '1.4.443 Licorice best seats reach round 12')
-  assert.equal(bestDead.map06, 9, '1.4.443 Blueberry best seats reach round 9')
+  assert.equal(bestDead.map05, 14, '1.4.447 Licorice best seats reach round 14 once a pop pays a full spark')
+  assert.equal(bestDead.map06, 9, '1.4.447 Blueberry best seats stay at round 9')
+  const fogZones = packs.map05.mapFeatures.filter((feature) => feature.type === 'fog')
+  assert.equal(fogZones.length, 2)
+  let fogCover = 0
+  let fogRoad = 0
+  for (const road of packs.map05.roads) {
+    let walked = 0
+    let total = 0
+    for (let i = 1; i < road.points.length; i += 1) {
+      total += Math.hypot(road.points[i].x - road.points[i - 1].x, road.points[i].y - road.points[i - 1].y)
+    }
+    let prev = Math.atan2(road.points[1].y - road.points[0].y, road.points[1].x - road.points[0].x)
+    let bendAt = -1
+    for (let i = 2; i < road.points.length; i += 1) {
+      walked += Math.hypot(road.points[i - 1].x - road.points[i - 2].x, road.points[i - 1].y - road.points[i - 2].y)
+      const now = Math.atan2(road.points[i].y - road.points[i - 1].y, road.points[i].x - road.points[i - 1].x)
+      let turn = Math.abs(now - prev)
+      if (turn > Math.PI) turn = Math.PI * 2 - turn
+      prev = now
+      if (turn > 0.45 && walked / total < 0.3) {
+        bendAt = i
+        break
+      }
+    }
+    if (bendAt >= 0) {
+      for (let i = 0; i <= bendAt; i += 1) {
+        assert.equal(faceInFog(road.points[i], packs.map05.mapFeatures), false, `1.4.447 ${road.id} fog stays off the first bend`)
+      }
+    }
+    const steps = 240
+    for (let i = 0; i < steps; i += 1) {
+      const at = pathPoint(i / steps, road.points)
+      const next = pathPoint((i + 1) / steps, road.points)
+      const bit = Math.hypot(next.x - at.x, next.y - at.y)
+      fogRoad += bit
+      if (faceInFog(at, packs.map05.mapFeatures)) fogCover += bit
+    }
+  }
+  assert.ok(fogCover / fogRoad <= 1 / 3, `1.4.447 Licorice fog covers at most a third of the road (${(fogCover / fogRoad).toFixed(2)})`)
+  assert.ok(fogCover / fogRoad > 0.05, '1.4.447 Licorice still has fog on the road')
+  const miniSrc = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const releaseMinis = miniSrc.slice(miniSrc.indexOf('function releaseMinis'), miniSrc.indexOf('function fire'))
+  assert.match(releaseMinis, /spark: 0/, '1.4.447 a mini pop pays no sparks')
+  assert.match(
+    readFileSync(new URL('../src/nightWatch/livePace.ts', import.meta.url), 'utf8'),
+    /spark: 0,\s+mini: true/,
+    '1.4.447 the sim pays a mini nothing',
+  )
   const rng = (seed) => {
     let a = seed
     return () => {
@@ -6745,6 +6793,53 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     }
     const mean = deaths.reduce((sum, dead) => sum + dead, 0) / deaths.length
     assert.ok(mean >= 8, `1.4.443 ${packs[file].name} ordinary good seats reach about round 8 (${mean.toFixed(2)})`)
+  }
+  for (const file of ['map05', 'map06']) {
+    bindLampGround(packs[file])
+    const spots = []
+    for (let x = 36; x < packs[file].width; x += 32) {
+      for (let y = 36; y < packs[file].height; y += 32) {
+        const at = { x, y }
+        if (lampSpotBlocked(at)) continue
+        if (roadCoverLength(at, 114) >= 140) spots.push(at)
+      }
+    }
+    const random = rng(file === 'map05' ? 7 : 11)
+    const deaths = []
+    let guard = 0
+    while (deaths.length < 12 && guard < 8000) {
+      guard += 1
+      const pool = spots.slice()
+      const pick = []
+      let ok = true
+      for (let k = 0; k < 4; k += 1) {
+        const seat = pool.splice(Math.floor(random() * pool.length), 1)[0]
+        if (!seat || pick.some((held) => Math.hypot(held.x - seat.x, held.y - seat.y) < 60)) {
+          ok = false
+          break
+        }
+        pick.push(seat)
+      }
+      if (!ok) continue
+      deaths.push(
+        paceMazeSpender({
+          path: packs[file].path,
+          roads: packs[file].roads,
+          seats: pick,
+          hpMul: packs[file].hpMul,
+          rules: packs[file].rules,
+          wave: packs[file].wave,
+          features: packs[file].mapFeatures,
+        }, 16, 0.28).dead ?? 17,
+      )
+    }
+    deaths.sort((a, b) => a - b)
+    const mid = (deaths[5] + deaths[6]) / 2
+    if (file === 'map05') {
+      assert.ok(mid >= 11 && mid <= 12, `1.4.447 Licorice ordinary good seats reach about round 12 (${mid})`)
+    } else {
+      assert.ok(mid >= 8 && mid <= 10, `1.4.447 Blueberry ordinary good seats stay near round 9 (${mid})`)
+    }
   }
   bindLampGround(null)
 }
@@ -14642,7 +14737,9 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.equal(candleUnlocked(true, 2, false, 'wave'), true)
   assert.equal(candleUnlocked(true, 0, true, 'plant'), true)
   assert.ok(CANDLE_RANGE < 96)
+  assert.ok(CANDLE_RANGE >= 78, '1.4.445 a candle reaches a seat just past the road block')
   assert.ok(candlePlateReach('at:400:760', 0) < 114)
+  assert.ok(candlePlateReach('at:324:612', 0) >= 52, '1.4.445 a candle just off the road still reaches it')
   assert.deepEqual(EASY_ROUNDS.slice(0, 6), [
     { count: 4, speed: 1, hp: 0, spawn: 1, fast: 0, tough: 0 },
     { count: 4, speed: 1.35, hp: 0, spawn: 0.95, fast: 0, tough: 0 },
