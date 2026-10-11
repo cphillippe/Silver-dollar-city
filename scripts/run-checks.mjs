@@ -34,7 +34,7 @@ const SCOPES = {
       'check-debug-plays.mjs',
       'check-panel-blast.mjs',
       'check-android-shell.mjs',
-      'check-city.mjs',
+      'check-city-scans.mjs',
       'check-commerce.mjs',
     ],
   },
@@ -70,7 +70,7 @@ const SCOPES = {
   // City map / lots / mind-map (expensive alone)
   city: {
     embed: true,
-    checks: ['check-city.mjs'],
+    checks: ['check-city-scans.mjs'],
   },
   // Store/ads/support locks (stores PARKED — still validates parked state)
   commerce: {

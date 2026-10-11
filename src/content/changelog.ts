@@ -8,6 +8,14 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.444',
+    title: 'Night checks stay in step',
+    when: '2026-10-11',
+    items: [
+      'Night Watch plays the same. The city checks follow the notes later nights already used, and a new miss cannot hide behind an older one.',
+    ],
+  },
+  {
     version: '1.4.443',
     title: 'More walkers, and each maze has a trick',
     when: '2026-10-10',
