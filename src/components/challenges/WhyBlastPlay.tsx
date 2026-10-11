@@ -84,6 +84,8 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
   useEffect(() => {
     if (!locked) return
     const frame = window.requestAnimationFrame(() => {
+      const page = ctaRef.current?.closest('.daily-page, .challenge-page')
+      if (page?.querySelector('.is-story-strip')) return
       ctaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
     })
     const auto = window.setTimeout(() => finish(), reduced ? 420 : 1200)

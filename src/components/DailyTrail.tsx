@@ -8,6 +8,7 @@ import { localDateKey } from '../lib/dates'
 import { useJuiceHandoff } from '../lib/juice'
 import { findLearning } from '../lib/learning'
 import { isDue, nextGapLabel } from '../lib/memory'
+import { pinStoryPageTop } from '../lib/storyWinScroll'
 import { PuzzlePlay } from './PuzzlePlay'
 import { RecallGate } from './RecallGate'
 import { StoredLine } from './StoredLine'
@@ -91,6 +92,11 @@ export function DailyTrail({ onNavigate, forceId, debugStrip = false }: DailyTra
       })
     }
   }, [solved])
+
+  useEffect(() => {
+    if (!easyStrip || !held) return
+    pinStoryPageTop()
+  }, [easyStrip, held])
 
   function finishPuzzle() {
     afterJuice()
