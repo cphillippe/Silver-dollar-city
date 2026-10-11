@@ -8,6 +8,17 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.454',
+    title: 'A row still meets the round 5 boss',
+    when: '2026-10-11',
+    items: [
+      'A row of candles keeps its rate and still clears more of the road than the same candles set apart.',
+      'On the round 5 boss that extra tempo is capped, so a zero-tap row still loses the round. The boss takes at least as much as candles set apart, and the walkers take more.',
+      'While you drag, the ghost snaps onto a row spot when you are close. The row mark sits clear of the Candle control.',
+      'The card still says a small candle is a sign of a prayer for someone.',
+    ],
+  },
+  {
     version: '1.4.453',
     title: 'The strip keeps its width',
     when: '2026-10-11',

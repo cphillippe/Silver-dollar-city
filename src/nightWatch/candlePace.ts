@@ -4,6 +4,7 @@ import {
   CANDLE_ID,
   CANDLE_LINK,
   candlePlateReach,
+  candleEarlyPace,
   candleRowSize,
   candleStrike,
   freshCandlePaths,
@@ -13,6 +14,12 @@ import { paceExtraNight, type PaceShot } from './livePace.ts'
 
 /** A zero-tap night is longer than one round, so no glow taps land. */
 const ZERO_TAP = 1e9
+
+/**
+ * A light tap in the live scorer. Often enough to hold round 5.
+ * The active aim is 0.28s. This is about once each 1.6s.
+ */
+export const CANDLE_LIGHT_TAP = 1.6
 
 /** The ghost calls this seat Good and open. Same check the pad uses. */
 export function candleGhostGood(point: CandleSeat, plants: Record<string, string> = {}): boolean {
@@ -140,37 +147,22 @@ function chainRow(goods: readonly CandleSeat[], count: number): CandleSeat[] | n
   return null
 }
 
-/** Lip rows in order. Later starts that repeat an earlier row are skipped. */
-function lipChains(count: number, band: readonly [number, number], limit: number): CandleSeat[][] {
-  const goods = candleLipSeats().filter((seat) => inBand(seat, band))
-  const out: CandleSeat[][] = []
-  const seen = new Set<string>()
-  for (let start = 0; start < goods.length && out.length < limit; start += 1) {
-    const row = chainFrom(goods, start, count)
-    if (!row) continue
-    const key = row.map((seat) => `${seat.x}:${seat.y}`).join('|')
-    if (seen.has(key)) continue
-    seen.add(key)
-    out.push(row)
-  }
-  return out
-}
-
 /**
- * A Good lip row of three whose zero-tap night lasts two or three rounds
- * longer than three Good candles that do not share a row.
+ * The A2 lip row from the 1.4.452 re-run, if the ghost still calls each seat Good.
+ * Otherwise the first lip row on the bound map.
  */
 export function candleAheadRow(): CandleSeat[] | null {
-  const spread = candlePlantSpread(3)
-  const spreadDead = spread ? paceCandleNight(spread, 'none', false).dead : null
-  if (spreadDead == null) return null
-  for (const row of lipChains(3, [0.2, 0.8], 80)) {
-    const night = paceCandleNight(row, 'none', false)
-    if (night.dead == null) continue
-    const gap = night.dead - spreadDead
-    if (gap === 2 || gap === 3) return row
+  const bench: CandleSeat[] = [
+    { x: 410, y: 757 },
+    { x: 363, y: 737 },
+    { x: 392, y: 699 },
+  ]
+  let plants: Record<string, string> = {}
+  for (const seat of bench) {
+    if (!candleGhostGood(seat, plants)) return candlePlantRow(3)
+    plants = { ...plants, [`at:${seat.x}:${seat.y}`]: CANDLE_ID }
   }
-  return null
+  return bench
 }
 
 /**
@@ -229,13 +221,15 @@ export function candleShots(seats: readonly CandleSeat[]): PaceShot[] {
   for (const seat of seats) plants[`at:${seat.x}:${seat.y}`] = CANDLE_ID
   return seats.map((seat) => {
     const id = `at:${seat.x}:${seat.y}`
-    const strike = candleStrike(freshCandlePaths(), candleRowSize(id, plants))
+    const rowSize = candleRowSize(id, plants)
+    const strike = candleStrike(freshCandlePaths(), rowSize)
     return {
       x: seat.x,
       y: seat.y,
       damage: strike.damage,
       range: candlePlateReach(id, 0),
       cooldownMs: strike.cooldownMs,
+      earlyPace: candleEarlyPace(rowSize, 4),
     }
   })
 }
