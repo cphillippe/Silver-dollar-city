@@ -1,5 +1,5 @@
 /**
- * Flat candy candle stand (1.4.445).
+ * Flat candy candle stand (1.4.447).
  * No backdrop, so the SVG alpha is the flame and the stand only.
  * Warm gold flame, smaller than the pillar lamp sprite.
  */
