@@ -710,15 +710,28 @@ export function previewLamp(
   }
 }
 
-/**
- * How far a finger pulls onto a row seat.
- * About 20 screen pixels on a 375-wide board (375 / 798 × 43).
- */
-const CANDLE_SNAP = 43
+/** Phone width the snap radius is measured on. The plate is 798 units wide. */
+const CANDLE_BOARD_PX = 375
+const CANDLE_PLATE_W = 798
+
+/** Plate units for a screen-pixel gap on a 375-wide board. */
+export function candlePlateFromPx(px: number): number {
+  return (px * CANDLE_PLATE_W) / CANDLE_BOARD_PX
+}
 
 /**
- * While a candle is armed, a finger within a snap of a Good row seat
- * pulls onto that seat. A seat that is already Good and in a row stays put.
+ * How far a pointer pulls onto a row seat.
+ * About 28 screen pixels. Measured from the pointer, not the ghost.
+ * The candle picture hangs about 13px above the finger.
+ */
+export const CANDLE_SNAP_PX = 28
+const CANDLE_SNAP = candlePlateFromPx(CANDLE_SNAP_PX)
+
+/**
+ * While a candle is armed, a pointer within a snap of a Good row seat
+ * pulls onto that seat. `point` is the pointer on the plate, before the
+ * ghost lift. A seat the first candle's pad blocks offers the nearest
+ * legal seat beside it. No pull returns null, and the ghost keeps the finger.
  */
 export function magnetCandlePoint(
   point: NightPoint,
@@ -727,49 +740,88 @@ export function magnetCandlePoint(
   runTier: Record<string, number> | undefined,
   hudBlocked = false,
   extra = 0,
-): NightPoint {
+): NightPoint | null {
   const anchors = candleIds(plants).map((id) => lampAnchor(id))
-  if (anchors.length < 1) return point
+  if (anchors.length < 1) return null
   if (!anchors.some((candle) => Math.hypot(candle.x - point.x, candle.y - point.y) <= CANDLE_LINK + CANDLE_SNAP)) {
-    return point
+    return null
   }
-  const here = previewLamp(point, CANDLE_ID, progress, runTier, plants, hudBlocked, false, extra)
-  if (!here.blocked && here.cover === 'good' && here.row) return here.at
   let best: NightPoint | null = null
-  let bestD = CANDLE_SNAP + 0.01
-  const take = (look: LampPreview) => {
-    if (look.blocked || look.cover !== 'good' || !look.row) return
-    const away = Math.hypot(look.at.x - point.x, look.at.y - point.y)
-    if (away > CANDLE_SNAP || away >= bestD) return
-    best = look.at
+  let bestD = Infinity
+  const consider = (seat: NightPoint, aim: NightPoint) => {
+    const aimAway = Math.hypot(aim.x - point.x, aim.y - point.y)
+    const away = Math.hypot(seat.x - point.x, seat.y - point.y)
+    if (aimAway > CANDLE_SNAP && away > CANDLE_SNAP) return
+    if (away > CANDLE_SNAP + CANDLE_BODY) return
+    if (away >= bestD) return
+    best = seat
     bestD = away
   }
+  const legal = (at: NightPoint): NightPoint | null => {
+    const look = previewLamp(at, CANDLE_ID, progress, runTier, plants, hudBlocked, false, extra)
+    if (look.blocked || look.cover !== 'good' || !look.row) return null
+    return look.at
+  }
+  const besidePad = (blockedAt: NightPoint): NightPoint | null => {
+    let candle: NightPoint | null = null
+    let candleD = CANDLE_BODY + 1
+    for (const anchor of anchors) {
+      const away = Math.hypot(anchor.x - blockedAt.x, anchor.y - blockedAt.y)
+      if (away < candleD) {
+        candle = anchor
+        candleD = away
+      }
+    }
+    if (!candle) return null
+    const dx = blockedAt.x - candle.x
+    const dy = blockedAt.y - candle.y
+    const len = Math.hypot(dx, dy) || 1
+    let found: NightPoint | null = null
+    let foundD = Infinity
+    for (let dist = CANDLE_BODY + 1; dist <= CANDLE_LINK; dist += 3) {
+      const seat = legal({ x: candle.x + (dx / len) * dist, y: candle.y + (dy / len) * dist })
+      if (!seat) continue
+      const away = Math.hypot(seat.x - blockedAt.x, seat.y - blockedAt.y)
+      if (away < foundD) {
+        found = seat
+        foundD = away
+      }
+      break
+    }
+    return found
+  }
+  const direct = legal(point)
+  if (direct) consider(direct, direct)
   const step = 8
   for (let dy = -CANDLE_SNAP; dy <= CANDLE_SNAP; dy += step) {
     for (let dx = -CANDLE_SNAP; dx <= CANDLE_SNAP; dx += step) {
       if (dx * dx + dy * dy > CANDLE_SNAP * CANDLE_SNAP) continue
-      take(previewLamp({ x: point.x + dx, y: point.y + dy }, CANDLE_ID, progress, runTier, plants, hudBlocked, false, extra))
+      const at = { x: point.x + dx, y: point.y + dy }
+      const seat = legal(at)
+      if (seat) {
+        consider(seat, seat)
+        continue
+      }
+      const look = previewLamp(at, CANDLE_ID, progress, runTier, plants, hudBlocked, false, extra)
+      if (!look.blocked) continue
+      const beside = besidePad(at)
+      if (beside) consider(beside, at)
     }
   }
-  if (!best) return point
-  const found = best as NightPoint
-  for (let dy = -4; dy <= 4; dy += 1) {
-    for (let dx = -4; dx <= 4; dx += 1) {
-      take(
-        previewLamp(
-          { x: found.x + dx, y: found.y + dy },
-          CANDLE_ID,
-          progress,
-          runTier,
-          plants,
-          hudBlocked,
-          false,
-          extra,
-        ),
-      )
+  for (const candle of anchors) {
+    for (let turn = 0; turn < 12; turn += 1) {
+      const angle = (turn / 12) * Math.PI * 2
+      const ux = Math.cos(angle)
+      const uy = Math.sin(angle)
+      const literal = { x: candle.x + ux * (CANDLE_BODY - 6), y: candle.y + uy * (CANDLE_BODY - 6) }
+      let seat: NightPoint | null = null
+      for (let dist = CANDLE_BODY + 1; dist <= CANDLE_LINK && !seat; dist += 4) {
+        seat = legal({ x: candle.x + ux * dist, y: candle.y + uy * dist })
+      }
+      if (seat) consider(seat, literal)
     }
   }
-  return best ?? point
+  return best
 }
 
 /** Place when the spot is open. A blocked spot returns the same map. */

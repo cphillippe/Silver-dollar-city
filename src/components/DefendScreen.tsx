@@ -135,6 +135,7 @@ import {
   candleRoom,
   candleEarlyPace,
   candleStrike,
+  candleWalkerDamage,
   candleUnlocked,
   isCandle,
 } from '../nightWatch/candle'
@@ -1156,9 +1157,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     const using = paid ? (armed as WatchAbility) : unlocked.includes(ability) ? ability : 'love'
     const hud = hudCoversPoint(event.clientX, event.clientY, svg.ownerDocument)
     const finger = lampUnderFinger(point)
-    const seat = candleArm
-      ? magnetCandlePoint(finger, plantsRef.current, progress, runTier, hud, placeBonus(using))
-      : finger
+    const snapped = candleArm
+      ? magnetCandlePoint(point, plantsRef.current, progress, runTier, hud, placeBonus(using))
+      : null
+    const seat = snapped ?? finger
     const look = previewLamp(
       seat,
       using,
@@ -1214,9 +1216,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     }
     const finger = lampUnderFinger(raw)
     const hud = overTowerCards(clientX, clientY, doc) || hudCoversPoint(lifted.x, lifted.y, doc)
-    const point = candleArm
-      ? magnetCandlePoint(finger, plantsRef.current, progress, runTier, hud, placeBonus(using))
-      : finger
+    const snapped = candleArm
+      ? magnetCandlePoint(raw, plantsRef.current, progress, runTier, hud, placeBonus(using))
+      : null
+    const point = snapped ?? finger
     if (kind === 'move') {
       setGhost(
         previewLamp(point, using, progress, runTier, plantsRef.current, hud, easy, placeBonus(using)),
@@ -1455,6 +1458,14 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
         lampDamage: tier,
         armorFrom: tuneRef.current.armorFrom,
       })
+      if (isCandle(using) && !manual) {
+        sized.damage = candleWalkerDamage(
+          sized.damage,
+          candleRowSize(id, plantsRef.current),
+          waveIndexRef.current,
+          Boolean(best.boss),
+        )
+      }
       const struck = nightEnemies.hit(best, sized.damage)
       const tapDmg = sized.damage
       const armored = sized.armored
