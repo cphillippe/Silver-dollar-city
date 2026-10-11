@@ -1548,6 +1548,13 @@ assert.match(
   /whats-new/,
 )
 assert.equal(APP_VERSION, '1.4.447')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.446'), '1.4.446 changelog row')
+assert.match(latestChange('1.4.446').title, /pictures/i)
+assert.doesNotMatch(
+  latestChange('1.4.446').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.446 changelog avoids GitHub close keywords',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.444'), '1.4.444 changelog row')
 assert.match(latestChange('1.4.444').title, /check/i)
 assert.doesNotMatch(
