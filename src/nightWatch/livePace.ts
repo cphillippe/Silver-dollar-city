@@ -157,6 +157,12 @@ export interface PaceShot {
   y: number
   damage: number
   range: number
+  /**
+   * Range through round 6. A row's extra reach waits until the early bosses
+   * are past, so a zero-tap row still loses round 5.
+   * Omitted, `range` is used the whole night.
+   */
+  earlyRange?: number
   cooldownMs: number
   /**
    * Wait scale on a boss round in rounds 1–6.
@@ -166,7 +172,7 @@ export interface PaceShot {
   earlyPace?: number
   /**
    * Extra fraction on a walker. Bosses stay at `damage`.
-   * 0.12 is about a tenth more on the road.
+   * A row of two is about a tenth more. A row of three is about a fifth more.
    */
   walkerBonus?: number
 }
@@ -397,7 +403,7 @@ export function paceEasyLive(
         outer: 0,
         outerFrac: 0,
       },
-      range: shot.range,
+      range: roundIndex < 6 && shot.earlyRange != null ? shot.earlyRange : shot.range,
       cool: 0,
       earlyPace: shot.earlyPace,
       walkerBonus: shot.walkerBonus,
