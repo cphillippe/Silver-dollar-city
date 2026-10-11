@@ -252,6 +252,7 @@ import {
   bindLampGround,
   lampSpotBlocked,
   lampUnderFinger,
+  magnetCandlePoint,
   pathSpendControl,
   previewLamp,
   ROAD_COVER_WORD,
@@ -1558,7 +1559,14 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.453')
+assert.equal(APP_VERSION, '1.4.454')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.454'), '1.4.454 changelog row')
+assert.match(latestChange('1.4.454').title, /boss/i)
+assert.doesNotMatch(
+  latestChange('1.4.454').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.454 changelog avoids GitHub close keywords',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.453'), '1.4.453 changelog row')
 assert.match(latestChange('1.4.453').title, /width/i)
 assert.doesNotMatch(
@@ -14880,12 +14888,16 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   const rowSeats = candleAheadRow()
   const spreadSeats = candlePlantSpread(3)
   const sixSeats = candlePlantRow(6)
-  assert.ok(rowSeats, '1.4.452 a Good lip row beats a spread by two or three rounds')
+  assert.ok(rowSeats, '1.4.454 the live lip row is still a Good plant')
   assert.ok(spreadSeats && sixSeats && sixSeats.length === 6)
   const rowShots = candleShots(rowSeats)
   const spreadShots = candleShots(spreadSeats)
   assert.deepEqual(rowShots.map((shot) => shot.damage), [1, 1, 1], '1.4.452 a row of three still hits for 1')
   assert.deepEqual(spreadShots.map((shot) => shot.damage), [1, 1, 1], '1.4.452 spread candles stay at the lone hit')
+  assert.equal(rowShots[0].cooldownMs, 686, '1.4.454 a row fires about 30% less often')
+  assert.equal(spreadShots[0].cooldownMs, 480, '1.4.454 a spread candle keeps the lone wait')
+  assert.ok(rowShots.every((shot) => shot.earlyBossDamage === 0), '1.4.454 a row leaves the early boss')
+  assert.ok(spreadShots.every((shot) => shot.earlyBossDamage == null), '1.4.454 a spread candle still hits the boss')
   for (const seat of [...rowSeats, ...spreadSeats, ...sixSeats]) {
     assert.equal(candleGhostGood(seat), true, `1.4.452 candle seat ${seat.x},${seat.y} is Good when empty`)
   }
@@ -14898,17 +14910,35 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   const spreadNight = paceCandleNight(spreadSeats, 'none', false)
   const rowNight = paceCandleNight(rowSeats, 'none', false)
   const sixNight = paceCandleNight(sixSeats, 'natural', true)
+  const rowRound = paceEasyLive(4, BARE_LAMPS, 3, false, 1e9, 'road', undefined, rowShots)
+  const spreadRound = paceEasyLive(4, BARE_LAMPS, 3, false, 1e9, 'road', undefined, spreadShots)
   assert.equal(bareNight.dead, 5, '1.4.452 equal low pillars, zero taps, stop on round 5')
   assert.equal(bareNight.dealt, 102, '1.4.452 pillars alone deal 102')
   assert.equal(spreadNight.dead, 5, '1.4.452 three spread candles, zero taps, stop on round 5')
   assert.equal(spreadNight.dealt, 129, '1.4.452 the spread deals 129')
   assert.ok(spreadNight.dealt > bareNight.dealt, '1.4.452 spread candles still deal damage')
-  assert.equal(rowNight.dead, 7, '1.4.452 three candles in a row, zero taps, stop on round 7')
-  assert.equal(rowNight.dealt, 363, '1.4.452 the row deals 363')
-  assert.equal(rowNight.dead - spreadNight.dead, 2, '1.4.452 a row lasts two rounds longer than the spread')
-  assert.ok(rowNight.dealt < spreadNight.dealt * 4, '1.4.452 the row is not a several-times damage gap')
-  assert.ok(sixNight.dead != null && sixNight.dead >= 18 && sixNight.dead <= 23, '1.4.452 six candles stay in rounds 18–23')
-  assert.equal(sixNight.dead, 18, '1.4.452 a six-candle spender stops on round 18')
+  assert.equal(rowRound.result, 'lost', '1.4.454 a zero-tap row loses round 5')
+  assert.equal(rowRound.boss, 'up', '1.4.454 a zero-tap row does not beat the round 5 boss')
+  assert.equal(rowRound.bossLamp, 6, '1.4.454 pillars still touch the round 5 boss')
+  assert.equal(rowRound.bossMax, 12)
+  assert.equal(rowRound.dealt, 86, '1.4.454 the row deals 86 on round 5')
+  assert.ok(
+    rowRound.dealt - rowRound.bossLamp > spreadRound.dealt - spreadRound.bossLamp,
+    '1.4.454 the row clears more walkers than the spread',
+  )
+  assert.equal(rowNight.dead, 5, '1.4.454 three candles in a row, zero taps, stop on round 5')
+  assert.equal(rowNight.dealt, 135, '1.4.454 the row deals 135')
+  assert.ok(rowNight.dealt > spreadNight.dealt, '1.4.454 the row still deals more than the spread')
+  assert.ok(sixNight.dead != null && sixNight.dead >= 16 && sixNight.dead <= 20, '1.4.454 six candles stay in rounds 16–20')
+  assert.equal(sixNight.dead, 18, '1.4.454 a six-candle spender stops on round 18')
+  const snapPlants = { [`at:${rowSeats[0].x}:${rowSeats[0].y}`]: CANDLE_ID }
+  const snapFinger = { x: rowSeats[1].x + 24, y: rowSeats[1].y + 16 }
+  const snapped = magnetCandlePoint(snapFinger, snapPlants, {}, undefined, false, 0)
+  const snapLook = previewLamp(snapped, CANDLE_ID, {}, {}, snapPlants)
+  assert.equal(snapLook.blocked, false)
+  assert.equal(snapLook.cover, 'good', '1.4.454 a near finger snaps onto a Good seat')
+  assert.equal(snapLook.row, 'Row x2', '1.4.454 the snap joins the row')
+  assert.ok(Math.hypot(snapped.x - snapFinger.x, snapped.y - snapFinger.y) <= 43, '1.4.454 the snap stays within about 20px')
   const ghostPlants = {
     [`at:${rowSeats[0].x}:${rowSeats[0].y}`]: CANDLE_ID,
     [`at:${rowSeats[1].x}:${rowSeats[1].y}`]: CANDLE_ID,

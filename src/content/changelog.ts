@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.454',
+    title: 'A row leaves the round 5 boss',
+    when: '2026-10-11',
+    items: [
+      'A row of candles still clears more of the road than the same candles set apart. Lining them up no longer finishes the round 5 boss by itself.',
+      'While you drag, the ghost snaps onto a row spot when you are close. The row mark sits clear of the Candle control.',
+      'The card still says a small candle is a sign of a prayer for someone.',
+    ],
+  },
+  {
     version: '1.4.453',
     title: 'The strip keeps its width',
     when: '2026-10-11',

@@ -347,7 +347,7 @@ export function DefendNightActorsSvg({
                             className="nw-candle-row"
                             data-candle-row={rowHead.get(id)}
                             data-candle-row-head="yes"
-                            transform="translate(0 -78)"
+                            transform="translate(-46 -96)"
                           >
                             <rect x="-38" y="-13" width="76" height="24" rx="8" />
                             <text y="4" textAnchor="middle">
@@ -479,7 +479,7 @@ export function DefendNightActorsSvg({
                     <circle className="defend-plant-dot" data-plant-pin="yes" r="11" />
                   )}
                   {ghost.row ? (
-                    <g className="nw-candle-row" data-candle-row={ghost.row} transform="translate(0 -64)">
+                    <g className="nw-candle-row" data-candle-row={ghost.row} transform="translate(-46 -96)">
                       <rect x="-38" y="-13" width="76" height="24" rx="8" />
                       <text y="4" textAnchor="middle">
                         {ghost.row}

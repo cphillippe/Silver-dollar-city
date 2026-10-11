@@ -232,12 +232,24 @@ export function candleRowMark(size: number): string {
 
 /**
  * A row does not multiply the hit. Three candles on one stretch already
- * hold the road longer than the same three apart. A stronger hit jumps
- * that lead from a couple of rounds to five.
+ * hold the road longer than the same three apart.
  */
 export function candleRowFactor(size: number): number {
   void size
   return 1
+}
+
+/**
+ * A row fires about 30% less often than a lone candle.
+ * The live night outran the old sim, so the trim sits on the slow side of that gap.
+ * Rounds 1–6 still keep the boss for a real aim; see `candleSkipsEarlyBoss`.
+ */
+export const CANDLE_ROW_RATE = 0.7
+
+/** A row does not spend shots on the boss in rounds 1–6. Aim still has to finish it. */
+export function candleSkipsEarlyBoss(rowSize: number, roundIndex: number): boolean {
+  const round = Math.floor(roundIndex) + 1
+  return rowSize >= 2 && round <= 6 && round % 5 === 0
 }
 
 export function candleNeighbors(plotId: string, plants: Record<string, string>): number {
@@ -267,11 +279,13 @@ export function candleDamage(paths: LampPaths, rowSize: number): number {
   return base * candleRowFactor(rowSize)
 }
 
-export function candleCooldown(paths: LampPaths): number {
+export function candleCooldown(paths: LampPaths, rowSize = 1): number {
   const strong = clampStep(paths.strong)
-  if (strong >= 2) return 320
-  if (strong >= 1) return 400
-  return CANDLE_COOLDOWN_MS
+  let wait = CANDLE_COOLDOWN_MS
+  if (strong >= 2) wait = 320
+  else if (strong >= 1) wait = 400
+  if (rowSize >= 2) wait = Math.round(wait / CANDLE_ROW_RATE)
+  return wait
 }
 
 export function candlePlateReach(plotId: string, farBonus = 0): number {
@@ -307,7 +321,7 @@ export function candleStrike(paths: LampPaths, rowSize: number): CandleStrike {
   return {
     damage: candleDamage(paths, rowSize),
     rangeBonus: candleFarBonus(paths),
-    cooldownMs: candleCooldown(paths),
+    cooldownMs: candleCooldown(paths, rowSize),
     splash: 0,
     splashFrac: 0,
     outer: 0,

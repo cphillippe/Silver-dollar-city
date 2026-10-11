@@ -133,6 +133,7 @@ import {
   candlePathKey,
   candlePlateReach,
   candleRoom,
+  candleSkipsEarlyBoss,
   candleStrike,
   candleUnlocked,
   isCandle,
@@ -1399,8 +1400,13 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       if (forced && (manual || dist(at, raiderAt(forced)) <= range)) best = forced
     } else {
       let bestD = range
+      const spareBoss =
+        easy &&
+        isCandle(using) &&
+        candleSkipsEarlyBoss(candleRowSize(id, plantsRef.current), waveIndexRef.current)
       for (const raider of live.current.raiders) {
         if (raider.turned) continue
+        if (spareBoss && raider.boss) continue
         const d = dist(at, raiderAt(raider))
         if (d <= bestD) {
           best = raider
