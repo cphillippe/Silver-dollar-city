@@ -25,6 +25,17 @@ import {
   type LampPaths,
   type TreePath,
 } from '../nightWatch/upgradeTree'
+import {
+  CANDLE_CARD,
+  CANDLE_HELP,
+  CANDLE_LABEL,
+  CANDLE_LOCK,
+  CANDLE_VERSE,
+  CANDLE_VERSE_CITE,
+  canTakeCandle,
+  candleStepLocked,
+  isCandle,
+} from '../nightWatch/candle'
 
 function PathMark({ path }: { path: TreePath }) {
   if (path === 'far') {
@@ -118,7 +129,7 @@ export function DefendTowerCard({
   const burstCost = 1
   const next = Math.min(TOOL_TIER_MAX, tier + 1)
   const canSpend = !maxed && sparks >= cost
-  const label = WATCH_ABILITY_LABEL[ability] ?? 'Love'
+  const label = isCandle(ability) ? CANDLE_LABEL : (WATCH_ABILITY_LABEL[ability] ?? 'Love')
   const plotTitle =
     CITY_PLOTS.find((plot) => plot.id === plotId)?.title ??
     (isFreeSpot(plotId) ? 'open ground' : plotId)
@@ -147,6 +158,177 @@ export function DefendTowerCard({
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
+
+  if (easy && isCandle(ability) && paths && onUpgradePath) {
+    const cardH = 360
+    const placed = placeTowerCard(point, board, clearOf, cameraScale, reserveBottom, cardH)
+    const pipCosts = [TREE_STEP_COST[0], TREE_STEP_COST[1]]
+    return (
+      <div
+        ref={cardRef}
+        className={`defend-tower-card is-tree is-candle is-${placed.side}`}
+        data-upgrade-card
+        data-upgrade-tree="candle"
+        data-candle-card="yes"
+        data-upgrade-plot={plotId}
+        role="dialog"
+        tabIndex={-1}
+        aria-label={`Upgrade ${label} at ${plotTitle}`}
+        style={{
+          left: placed.left,
+          top: placed.top,
+          width: TOWER_CARD_W,
+          ['--stem' as string]: `${Math.round(point.left - placed.left)}px`,
+        }}
+      >
+        {onPull ? (
+          <button
+            type="button"
+            className="defend-tower-pull"
+            aria-label={`Pull lamp at ${plotTitle}`}
+            onClick={(event) => {
+              event.stopPropagation()
+              setPullAsk(true)
+            }}
+          >
+            <svg className="defend-tower-trash" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                fill="currentColor"
+                d="M9 3h6l1 2h5v2H3V5h5l1-2zm-2 6h2v10H7V9zm4 0h2v10h-2V9zm4 0h2v10h-2V9z"
+              />
+            </svg>
+          </button>
+        ) : null}
+        {pullAsk && onPull ? (
+          <div className="defend-pull-confirm" role="alertdialog" aria-label="Pull this lamp?">
+            <p className="defend-pull-copy">{`Pull this lamp? You get ${pullSparks} sparks back`}</p>
+            <div className="defend-pull-actions">
+              <button
+                type="button"
+                className="defend-pull-keep"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  setPullAsk(false)
+                }}
+              >
+                Keep
+              </button>
+              <button
+                type="button"
+                className="defend-pull-do"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  setPullAsk(false)
+                  onPull()
+                }}
+              >
+                Pull
+              </button>
+            </div>
+          </div>
+        ) : null}
+        <p className="defend-tower-tool">{label}</p>
+        <p className="defend-candle-line" data-candle-card-line="yes">
+          {CANDLE_CARD}
+        </p>
+        <p className="defend-candle-verse">
+          {CANDLE_VERSE}
+          <span className="defend-candle-cite">{` ${CANDLE_VERSE_CITE}`}</span>
+        </p>
+        <p className="defend-candle-help">{CANDLE_HELP}</p>
+        {TREE_PATHS.map((path) => {
+          const rank = paths[path]
+          const buy = canTakeCandle(paths, path)
+          const broke = buy.ok && sparks < buy.cost
+          return (
+            <div key={path} className="defend-path" data-path={path} data-rank={rank}>
+              <p className="defend-path-name">
+                <span className="defend-path-title">
+                  <PathMark path={path} />
+                  {PATH_LABEL[path]}
+                </span>
+                <span className="defend-path-line">{PATH_LINE[path]}</span>
+              </p>
+              <div className="defend-path-pips">
+                {pipCosts.map((stepCost, index) => {
+                  const step = index + 1
+                  const filled = rank >= step
+                  const locked = candleStepLocked(paths, path, step)
+                  const next = buy.ok && step === rank + 1
+                  const className = `defend-path-pip${filled ? ' is-on' : ''}${locked ? ' is-locked' : ''}${next ? ' is-buy' : ''}`
+                  if (next) {
+                    return (
+                      <button
+                        key={step}
+                        type="button"
+                        className={className}
+                        disabled={broke}
+                        data-step={step}
+                        data-cost={stepCost}
+                        data-path-pip={path}
+                        aria-label={`${PATH_LABEL[path]} step ${step}, ${buy.cost} sparks`}
+                        onPointerDown={(event) => {
+                          event.stopPropagation()
+                          if (!broke) onArmPathBuy?.(path)
+                        }}
+                        onPointerUp={(event) => {
+                          event.stopPropagation()
+                          if (!broke) onUpgradePath(path, true)
+                        }}
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          if (!broke) onUpgradePath(path, true)
+                        }}
+                      >
+                        {stepCost}
+                      </button>
+                    )
+                  }
+                  return (
+                    <span key={step} className={className} data-step={step} data-cost={stepCost}>
+                      {stepCost}
+                    </span>
+                  )
+                })}
+              </div>
+              {buy.ok ? (
+                <button
+                  type="button"
+                  className="btn primary defend-path-buy"
+                  disabled={broke}
+                  data-path-buy={path}
+                  data-cost={buy.cost}
+                  onPointerDown={(event) => {
+                    event.stopPropagation()
+                    if (!broke) onArmPathBuy?.(path)
+                  }}
+                  onPointerUp={(event) => {
+                    event.stopPropagation()
+                    if (!broke) onUpgradePath(path, true)
+                  }}
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    if (!broke) onUpgradePath(path, true)
+                  }}
+                >
+                  {broke ? `Need ${buy.cost}` : `${buy.cost}✦`}
+                </button>
+              ) : (
+                <p className="defend-path-lock" data-path-lock={path}>
+                  {buy.reason || CANDLE_LOCK}
+                </p>
+              )}
+            </div>
+          )
+        })}
+        {roadNote ? (
+          <p className="defend-tower-road" data-road-note={roadNote}>
+            {roadNote}
+          </p>
+        ) : null}
+      </div>
+    )
+  }
 
   if (easy && paths && onUpgradePath) {
     return (

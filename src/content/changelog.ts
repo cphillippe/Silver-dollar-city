@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.445',
+    title: 'A row of small candles',
+    when: '2026-10-11',
+    items: [
+      'From round 3, Easy nights can plant a cheap candle stand. It is a short light, and a row of them covers more of the road. Six is the most.',
+      'The candle has no power of its own. It helps people pray and remember God. The hit on the road is only a game effect.',
+      'Each maze stays locked until the round 10 boss on the map before it falls. The new-map note sits clear of the speed button, and the map names fit.',
+    ],
+  },
+  {
     version: '1.4.446',
     title: 'Three more stories get pictures',
     when: '2026-10-11',
