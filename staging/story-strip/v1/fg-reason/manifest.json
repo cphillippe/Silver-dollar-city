@@ -1,0 +1,140 @@
+{
+  "stripId": "fg-reason",
+  "packVersion": "v1",
+  "built": "2026-10-09 PT",
+  "framesCount": 4,
+  "challengeFile": "src/content/firstGate.ts",
+  "dailyPoolId": null,
+  "sequenceItems": [
+    {
+      "id": "a",
+      "art": "reason1-think",
+      "text": "You think, count, and ask why.",
+      "shortCaption": "Think and\nask why",
+      "winCaption": "You think\nand ask.",
+      "role": "think"
+    },
+    {
+      "id": "b",
+      "art": "reason2-ground",
+      "text": "Your mind needs solid ground.",
+      "shortCaption": "Solid\nground",
+      "winCaption": "Solid\nground.",
+      "role": "ground"
+    },
+    {
+      "id": "c",
+      "art": "reason3-light",
+      "text": "Jesus, the Word, is true light.",
+      "shortCaption": "True\nlight",
+      "winCaption": "Jesus is\nthe light.",
+      "role": "light"
+    },
+    {
+      "id": "d",
+      "art": "reason4-stands",
+      "text": "So your thinking stands on God.",
+      "easyText": "God gives your mind light.",
+      "shortCaption": "Stands\non God",
+      "easyShortCaption": "God gives\nlight",
+      "winCaption": "Your mind\nhas light.",
+      "role": "God",
+      "easyRole": "God"
+    }
+  ],
+  "sequenceVerse": {
+    "kicker": "John wrote",
+    "text": "The true light that enlightens every man was coming into the world.",
+    "easyLead": "“Enlightens” means gives light to. “Every man” means every person. The true light is Jesus.",
+    "ref": "John 1:9"
+  },
+  "verseNote": "Quote + ref + kicker UNCHANGED from live (exact RSV). Only easyLead is new.",
+  "sequenceArt": {
+    "reason1-think": "src/assets/story-strip/reason1-think.webp",
+    "reason2-ground": "src/assets/story-strip/reason2-ground.webp",
+    "reason3-light": "src/assets/story-strip/reason3-light.webp",
+    "reason4-stands": "src/assets/story-strip/reason4-stands.webp"
+  },
+  "cutoutBackdrop": {
+    "reason1-think": {
+      "sky": "#bfe3ff",
+      "horizon": "#fff3cf",
+      "ground": "#e2c58f"
+    },
+    "reason2-ground": {
+      "sky": "#bfe3ff",
+      "horizon": "#fff3cf",
+      "ground": "#9fc47a"
+    },
+    "reason3-light": {
+      "sky": "#ffe6a3",
+      "horizon": "#fffbe8",
+      "ground": "#f2d48a"
+    },
+    "reason4-stands": {
+      "sky": "#ffe9b8",
+      "horizon": "#fff8e6",
+      "ground": "#9fc47a"
+    }
+  },
+  "sequenceCrop": {},
+  "sequenceFigure": {
+    "reason3-light": {
+      "cue": "Jesus",
+      "x": "45%",
+      "y": "4%",
+      "ox": "45%",
+      "oy": "2%",
+      "scale": 1.8
+    }
+  },
+  "easyTakeaway": "Your mind works because God gives it light.",
+  "takeawayNote": "Biblical Scholar’s line (John 1:9). Easy FACE only, via EASY_STRIP_FACE. Pack claim stays “The mind you already trust needs a real ground.” (check-packs asserts /mind you already trust/ and easy.hold.why /Christ/).",
+  "easyFollowUp": {
+    "correct": "Your mind works because God gives it light.",
+    "wrong": [
+      "Thinking floats with nothing under it.",
+      "The world is dark forever."
+    ]
+  },
+  "easyStripFace": {
+    "The mind you already trust needs a real ground.": "Your mind works because God gives it light.",
+    "The mind needs a real ground.": "God gives your mind light.",
+    "Reason is a free-floating trick with no ground.": "Thinking floats with nothing under it.",
+    "Darkness is the last word about the world.": "The world is dark forever."
+  },
+  "glosses": [
+    {
+      "term": "Enlightens",
+      "sense": "gives light to"
+    },
+    {
+      "term": "Every man",
+      "sense": "every person"
+    }
+  ],
+  "reviewNotes": "Jesus has no halo/aura; his light is shown only as warm highlights + a pale-gold ground patch. Name chip “Jesus” only on reason3-light, centered on Jesus. reason4 has Jesus too but the crop would cut the girl, so no chip there.",
+  "assets": {
+    "reason1-think": {
+      "webp": "assets/reason1-think.webp",
+      "png": "assets/reason1-think.png",
+      "size": "512x512 RGBA"
+    },
+    "reason2-ground": {
+      "webp": "assets/reason2-ground.webp",
+      "png": "assets/reason2-ground.png",
+      "size": "512x512 RGBA"
+    },
+    "reason3-light": {
+      "webp": "assets/reason3-light.webp",
+      "png": "assets/reason3-light.png",
+      "size": "512x512 RGBA"
+    },
+    "reason4-stands": {
+      "webp": "assets/reason4-stands.webp",
+      "png": "assets/reason4-stands.png",
+      "size": "512x512 RGBA"
+    }
+  },
+  "contactSheet": "fg-reason-v1-contact.png"
+}
