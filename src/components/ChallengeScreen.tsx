@@ -10,6 +10,7 @@ import { useJuiceHandoff } from '../lib/juice'
 import { isDue } from '../lib/memory'
 import { findLearning } from '../lib/learning'
 import { nextGapLabel } from '../lib/memory'
+import { pinStoryPageTop } from '../lib/storyWinScroll'
 import { PuzzlePlay } from './PuzzlePlay'
 import { RecallGate } from './RecallGate'
 import { StoredLine } from './StoredLine'
@@ -88,6 +89,11 @@ export function ChallengeScreen({
       elaborated: false,
     })
   }, [showNext])
+
+  useEffect(() => {
+    if (!easy || challenge?.kind !== 'sequence' || !recalled) return
+    pinStoryPageTop()
+  }, [easy, challenge, recalled])
 
   if (!area || !challenge) {
     return (
