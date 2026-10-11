@@ -1,0 +1,122 @@
+{
+  "stripId": "daily-lantern",
+  "packVersion": "v1",
+  "built": "2026-10-09 PT",
+  "framesCount": 3,
+  "challengeFile": "src/content/daily.ts",
+  "dailyPoolId": "trail-lantern",
+  "sequenceItems": [
+    {
+      "id": "a",
+      "gem": "star",
+      "art": "lantern1-dark",
+      "text": "Night comes. The street is dark.",
+      "shortCaption": "Dark\nstreet",
+      "winCaption": "It is\ndark.",
+      "role": "dark"
+    },
+    {
+      "id": "b",
+      "gem": "lamp",
+      "art": "lantern2-lamp",
+      "text": "Someone sets a lamp out.",
+      "shortCaption": "Lamp\nset out",
+      "winCaption": "A lamp\nis set out.",
+      "role": "lamp"
+    },
+    {
+      "id": "c",
+      "gem": "heart",
+      "art": "lantern3-found",
+      "text": "A walker finds the way.",
+      "shortCaption": "Finds\nthe way",
+      "winCaption": "The way\nis seen.",
+      "role": "walker"
+    }
+  ],
+  "sequenceVerse": {
+    "kicker": "Jesus said",
+    "text": "Let your light so shine before men, that they may see your good works and give glory to your Father who is in heaven.",
+    "easyLead": "“Before men” means where people can see. Give glory to your Father means praise God.",
+    "ref": "Matthew 5:16"
+  },
+  "verseNote": "Quote + ref + kicker UNCHANGED from live (exact RSV, Jesus is speaking). Only easyLead is new.",
+  "sequenceArt": {
+    "lantern1-dark": "src/assets/story-strip/lantern1-dark.webp",
+    "lantern2-lamp": "src/assets/story-strip/lantern2-lamp.webp",
+    "lantern3-found": "src/assets/story-strip/lantern3-found.webp"
+  },
+  "cutoutBackdrop": {
+    "lantern1-dark": {
+      "sky": "#2c3a6b",
+      "horizon": "#4b5a8f",
+      "ground": "#3d4a3a"
+    },
+    "lantern2-lamp": {
+      "sky": "#33427a",
+      "horizon": "#ffd98a",
+      "ground": "#4a5a3e"
+    },
+    "lantern3-found": {
+      "sky": "#3a4a86",
+      "horizon": "#ffe2a0",
+      "ground": "#6b7a4a"
+    }
+  },
+  "sequenceCrop": {
+    "lantern1-dark": {
+      "x": "28%",
+      "y": "0%"
+    },
+    "lantern2-lamp": {
+      "x": "22%",
+      "y": "0%"
+    },
+    "lantern3-found": {
+      "x": "45%",
+      "y": "0%"
+    }
+  },
+  "sequenceFigure": {},
+  "easyTakeaway": "A lamp is meant to be seen.",
+  "takeawayNote": "LOCKED (STORY_SNAP_CLAIM + check-packs assert). Do not change the claim.",
+  "easyFollowUp": {
+    "correct": "A lamp is meant to be seen.",
+    "wrong": [
+      "We are told to become the sun.",
+      "Hide your light under a basket."
+    ]
+  },
+  "easyStripFace": {
+    "Light is only for insiders behind a door.": "Hide your light under a basket."
+  },
+  "glosses": [
+    {
+      "term": "Before men",
+      "sense": "where people can see"
+    },
+    {
+      "term": "Give glory to your Father",
+      "sense": "praise God"
+    }
+  ],
+  "reviewNotes": "The lamp is a picture: it only gives light; the neighbor sets it out so others can see (Matthew 5:16 is about people’s good works giving glory to the Father). No sparkles, no lamp power.",
+  "assets": {
+    "lantern1-dark": {
+      "webp": "assets/lantern1-dark.webp",
+      "png": "assets/lantern1-dark.png",
+      "size": "512x512 RGBA"
+    },
+    "lantern2-lamp": {
+      "webp": "assets/lantern2-lamp.webp",
+      "png": "assets/lantern2-lamp.png",
+      "size": "512x512 RGBA"
+    },
+    "lantern3-found": {
+      "webp": "assets/lantern3-found.webp",
+      "png": "assets/lantern3-found.png",
+      "size": "512x512 RGBA"
+    }
+  },
+  "contactSheet": "daily-lantern-v1-contact.png"
+}
