@@ -225,12 +225,14 @@ import {
   plantCandle,
 } from '../src/nightWatch/candle.ts'
 import {
-  CANDLE_ROW_SEATS,
-  CANDLE_SIX_SEATS,
-  CANDLE_SPREAD_SEATS,
+  candleAheadRow,
+  candleGhostGood,
+  candlePlantRow,
+  candlePlantSpread,
   candleShots,
   paceCandleNight,
 } from '../src/nightWatch/candlePace.ts'
+import { bindNightFeatures } from '../src/nightWatch/maps/features.ts'
 import { lessonAreaFor, samePillarLessons } from '../src/nightWatch/lampPillar.ts'
 import { boardFill, boardFillPoint } from '../src/nightWatch/map/phoneFill.ts'
 import {
@@ -1556,7 +1558,14 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.451')
+assert.equal(APP_VERSION, '1.4.452')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.452'), '1.4.452 changelog row')
+assert.match(latestChange('1.4.452').title, /candle/i)
+assert.doesNotMatch(
+  latestChange('1.4.452').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.452 changelog avoids GitHub close keywords',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.451'), '1.4.451 changelog row')
 assert.match(latestChange('1.4.451').title, /choice/i)
 assert.doesNotMatch(
@@ -14763,23 +14772,23 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.equal(plantCandle(row, 'at:9:1'), row)
   const plants = {
     'at:100:400': CANDLE_ID,
-    'at:152:400': CANDLE_ID,
-    'at:204:400': CANDLE_ID,
-    'at:256:400': CANDLE_ID,
+    'at:200:400': CANDLE_ID,
+    'at:300:400': CANDLE_ID,
+    'at:400:400': CANDLE_ID,
   }
   assert.equal(candleNeighbors('at:100:400', plants), 1)
-  assert.equal(candleNeighbors('at:152:400', plants), 2)
+  assert.equal(candleNeighbors('at:200:400', plants), 2)
   assert.equal(candleRowSize('at:100:400', plants), 4)
-  assert.equal(candleRowSize('at:152:400', plants), 4)
+  assert.equal(candleRowSize('at:200:400', plants), 4)
   assert.equal(candleRowMark(1), '')
   assert.equal(candleRowMark(2), 'Row x2')
   assert.equal(candleRowMark(3), 'Row x3')
   assert.equal(candleRowMark(6), 'Row x3')
   assert.equal(candleDamage(freshCandlePaths(), 0), 1)
   assert.equal(candleDamage(freshCandlePaths(), 1), 1)
-  assert.equal(candleDamage(freshCandlePaths(), candleRowSize('at:100:400', plants)), 3)
-  assert.equal(candleDamage(freshCandlePaths(), candleRowSize('at:152:400', plants)), 3)
-  assert.equal(candleDamage(freshCandlePaths(), 6), 3)
+  assert.equal(candleDamage(freshCandlePaths(), candleRowSize('at:100:400', plants)), 1)
+  assert.equal(candleDamage(freshCandlePaths(), candleRowSize('at:200:400', plants)), 1)
+  assert.equal(candleDamage(freshCandlePaths(), 6), 1, '1.4.452 a row does not multiply the hit')
   const lone = freshCandlePaths()
   assert.equal(canTakeCandle(lone, 'strong').cost, 3)
   assert.equal(canTakeCandle({ far: 0, strong: 2 }, 'far').ok, true)
@@ -14811,8 +14820,8 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.equal(candleUnlocked(true, 3, false, 'wave'), true)
   assert.equal(candleUnlocked(true, 0, true, 'plant'), true)
   assert.equal(candleUnlocked(false, 3, false, 'boost'), false)
-  assert.ok(CANDLE_RANGE < 96)
-  assert.ok(CANDLE_RANGE >= 78, '1.4.445 a candle reaches a seat just past the road block')
+  assert.ok(CANDLE_RANGE < 114, '1.4.452 a candle stays shorter than a free level I pillar')
+  assert.ok(CANDLE_RANGE >= 96, '1.4.452 a level I candle reaches the lip of the road')
   assert.ok(candlePlateReach('at:400:760', 0) < 114)
   assert.ok(candlePlateReach('at:324:612', 0) >= 52, '1.4.445 a candle just off the road still reaches it')
   assert.deepEqual(EASY_ROUNDS.slice(0, 6), [
@@ -14830,37 +14839,80 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
     /candle/,
     '1.4.445 the spender does not buy candles',
   )
-  const rowShots = candleShots(CANDLE_ROW_SEATS)
-  const spreadShots = candleShots(CANDLE_SPREAD_SEATS)
-  assert.deepEqual(rowShots.map((shot) => shot.damage), [3, 3, 3], '1.4.450 a row of three hits at x3')
-  assert.deepEqual(spreadShots.map((shot) => shot.damage), [1, 1, 1], '1.4.450 spread candles stay at the lone hit')
-  for (const seat of [...CANDLE_ROW_SEATS, ...CANDLE_SPREAD_SEATS, ...CANDLE_SIX_SEATS]) {
-    assert.equal(lampSpotBlocked(seat, {}), false, `1.4.450 candle seat ${seat.x},${seat.y} is open`)
-    assert.equal(lampReachesRoad(seat, candlePlateReach(`at:${seat.x}:${seat.y}`, 0)), true)
+  const mazeFiles = [
+    ['a2', null],
+    ['far-hills', 'map02'],
+    ['map03', 'map03'],
+    ['map04', 'map04'],
+    ['map05', 'map05'],
+    ['map06', 'map06'],
+  ]
+  for (const [id, file] of mazeFiles) {
+    if (!file) {
+      bindLampGround(null)
+      bindNightFeatures(null)
+    } else {
+      const pack = nightMapFromPack(
+        JSON.parse(readFileSync(new URL(`../src/nightWatch/maps/maze/${file}.json`, import.meta.url), 'utf8')),
+      )
+      bindLampGround(pack)
+      bindNightFeatures(pack.mapFeatures)
+    }
+    const planted = candlePlantRow(3)
+    assert.ok(planted, `1.4.452 a row of three is plantable on ${id}`)
+    let standing = {}
+    for (const seat of planted) {
+      assert.equal(candleGhostGood(seat, standing), true, `1.4.452 ${id} seat ${seat.x},${seat.y} is Good`)
+      standing = { ...standing, [`at:${seat.x}:${seat.y}`]: CANDLE_ID }
+    }
+    const last = planted[planted.length - 1]
+    assert.equal(candleRowSize(`at:${last.x}:${last.y}`, standing), 3, `1.4.452 ${id} plants one row`)
+  }
+  bindLampGround(null)
+  bindNightFeatures(null)
+  const rowSeats = candleAheadRow()
+  const spreadSeats = candlePlantSpread(3)
+  const sixSeats = candlePlantRow(6)
+  assert.ok(rowSeats, '1.4.452 a Good lip row beats a spread by two or three rounds')
+  assert.ok(spreadSeats && sixSeats && sixSeats.length === 6)
+  const rowShots = candleShots(rowSeats)
+  const spreadShots = candleShots(spreadSeats)
+  assert.deepEqual(rowShots.map((shot) => shot.damage), [1, 1, 1], '1.4.452 a row of three still hits for 1')
+  assert.deepEqual(spreadShots.map((shot) => shot.damage), [1, 1, 1], '1.4.452 spread candles stay at the lone hit')
+  for (const seat of [...rowSeats, ...spreadSeats, ...sixSeats]) {
+    assert.equal(candleGhostGood(seat), true, `1.4.452 candle seat ${seat.x},${seat.y} is Good when empty`)
+  }
+  let sixStanding = {}
+  for (const seat of sixSeats) {
+    assert.equal(candleGhostGood(seat, sixStanding), true, `1.4.452 six-candle seat ${seat.x},${seat.y} stays Good`)
+    sixStanding = { ...sixStanding, [`at:${seat.x}:${seat.y}`]: CANDLE_ID }
   }
   const bareNight = paceCandleNight([], 'none', false)
-  const spreadNight = paceCandleNight(CANDLE_SPREAD_SEATS, 'none', false)
-  const rowNight = paceCandleNight(CANDLE_ROW_SEATS, 'none', false)
-  const sixNight = paceCandleNight(CANDLE_SIX_SEATS, 'natural', true)
-  assert.ok(spreadNight.dealt > bareNight.dealt, '1.4.450 spread candles still deal damage')
-  assert.ok(rowNight.dead != null && spreadNight.dead != null && rowNight.dead > spreadNight.dead, '1.4.450 a row lasts longer than the same candles spread out')
-  assert.ok(rowNight.dealt >= spreadNight.dealt * 2, '1.4.450 a row deals a clear margin more damage')
-  assert.equal(rowNight.dead, 10, '1.4.450 three candles in a row, zero taps, stop on round 10')
-  assert.equal(spreadNight.dead, 5, '1.4.450 three spread candles, zero taps, stop on round 5')
-  assert.equal(rowNight.dealt, 876, '1.4.450 the row deals 876')
-  assert.equal(spreadNight.dealt, 120, '1.4.450 the spread deals 120')
-  assert.equal(bareNight.dealt, 102, '1.4.450 pillars alone deal 102')
-  assert.ok(sixNight.dead != null && sixNight.dead >= 18 && sixNight.dead <= 23, '1.4.450 six candles stay in rounds 18–23')
-  assert.equal(sixNight.dead, 18, '1.4.450 a six-candle spender stops on round 18')
-  const ghostRow = previewLamp({ x: 446, y: 684 }, CANDLE_ID, {}, {}, {
-    'at:348:726': CANDLE_ID,
-    'at:390:698': CANDLE_ID,
-  })
+  const spreadNight = paceCandleNight(spreadSeats, 'none', false)
+  const rowNight = paceCandleNight(rowSeats, 'none', false)
+  const sixNight = paceCandleNight(sixSeats, 'natural', true)
+  assert.equal(bareNight.dead, 5, '1.4.452 equal low pillars, zero taps, stop on round 5')
+  assert.equal(bareNight.dealt, 102, '1.4.452 pillars alone deal 102')
+  assert.equal(spreadNight.dead, 5, '1.4.452 three spread candles, zero taps, stop on round 5')
+  assert.equal(spreadNight.dealt, 129, '1.4.452 the spread deals 129')
+  assert.ok(spreadNight.dealt > bareNight.dealt, '1.4.452 spread candles still deal damage')
+  assert.equal(rowNight.dead, 7, '1.4.452 three candles in a row, zero taps, stop on round 7')
+  assert.equal(rowNight.dealt, 363, '1.4.452 the row deals 363')
+  assert.equal(rowNight.dead - spreadNight.dead, 2, '1.4.452 a row lasts two rounds longer than the spread')
+  assert.ok(rowNight.dealt < spreadNight.dealt * 4, '1.4.452 the row is not a several-times damage gap')
+  assert.ok(sixNight.dead != null && sixNight.dead >= 18 && sixNight.dead <= 23, '1.4.452 six candles stay in rounds 18–23')
+  assert.equal(sixNight.dead, 18, '1.4.452 a six-candle spender stops on round 18')
+  const ghostPlants = {
+    [`at:${rowSeats[0].x}:${rowSeats[0].y}`]: CANDLE_ID,
+    [`at:${rowSeats[1].x}:${rowSeats[1].y}`]: CANDLE_ID,
+  }
+  const ghostRow = previewLamp(rowSeats[2], CANDLE_ID, {}, {}, ghostPlants)
   assert.equal(ghostRow.blocked, false)
-  assert.equal(ghostRow.row, 'Row x3', '1.4.450 the ghost previews the row mark')
+  assert.equal(ghostRow.cover, 'good', '1.4.452 the third seat is Good beside the row')
+  assert.equal(ghostRow.row, 'Row x3', '1.4.452 the ghost previews the row mark')
   assert.ok((ghostRow.rowTo?.length ?? 0) >= 1)
   const ghostLone = previewLamp({ x: 628, y: 222 }, CANDLE_ID, {}, {})
-  assert.equal(ghostLone.row, undefined, '1.4.450 a lone ghost shows no row mark')
+  assert.equal(ghostLone.row, undefined, '1.4.452 a lone ghost shows no row mark')
 }
 
 await import('./check-story-win.mjs').then((mod) => mod.checkStoryWins())

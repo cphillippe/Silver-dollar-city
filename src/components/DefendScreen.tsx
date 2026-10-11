@@ -101,6 +101,7 @@ import {
   hudCoversPoint,
   LAMP_DRAG_START_PX,
   lampUnderFinger,
+  magnetCandlePoint,
   overTowerCards,
   pathSpendControl,
   previewLamp,
@@ -1153,7 +1154,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     }
     const using = paid ? (armed as WatchAbility) : unlocked.includes(ability) ? ability : 'love'
     const hud = hudCoversPoint(event.clientX, event.clientY, svg.ownerDocument)
-    const seat = lampUnderFinger(point)
+    const finger = lampUnderFinger(point)
+    const seat = candleArm
+      ? magnetCandlePoint(finger, plantsRef.current, progress, runTier, hud, placeBonus(using))
+      : finger
     const look = previewLamp(
       seat,
       using,
@@ -1207,8 +1211,11 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       setGhost(null)
       return
     }
-    const point = lampUnderFinger(raw)
+    const finger = lampUnderFinger(raw)
     const hud = overTowerCards(clientX, clientY, doc) || hudCoversPoint(lifted.x, lifted.y, doc)
+    const point = candleArm
+      ? magnetCandlePoint(finger, plantsRef.current, progress, runTier, hud, placeBonus(using))
+      : finger
     if (kind === 'move') {
       setGhost(
         previewLamp(point, using, progress, runTier, plantsRef.current, hud, easy, placeBonus(using)),
