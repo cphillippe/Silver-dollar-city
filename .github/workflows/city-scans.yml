@@ -30,6 +30,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npx playwright install --with-deps chromium
       - run: node --experimental-strip-types scripts/check-city-scans.mjs
       - run: node --experimental-strip-types scripts/check-packs.mjs
       - run: node --experimental-strip-types scripts/check-commerce.mjs

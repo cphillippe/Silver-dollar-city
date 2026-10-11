@@ -1547,7 +1547,18 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.448')
+assert.equal(APP_VERSION, '1.4.449')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.449'), '1.4.449 changelog row')
+assert.match(latestChange('1.4.449').title, /picture/i)
+assert.doesNotMatch(
+  latestChange('1.4.449').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.449 changelog avoids GitHub close keywords',
+)
+{
+  const workflow449 = readFileSync(new URL('../.github/workflows/city-scans.yml', import.meta.url), 'utf8')
+  assert.match(workflow449, /playwright install[\s\S]*chromium/, '1.4.449 CI can render story wins')
+}
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.448'), '1.4.448 changelog row')
 assert.match(latestChange('1.4.448').title, /index/i)
 assert.doesNotMatch(
@@ -14784,3 +14795,5 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
     '1.4.445 the spender does not buy candles',
   )
 }
+
+await import('./check-story-win.mjs').then((mod) => mod.checkStoryWins())
