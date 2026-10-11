@@ -16,7 +16,11 @@ import type { NightPoint } from '../nightWatch/types.ts'
 import { isTowerType, plantType } from './nightPlants.ts'
 import { combatTier, TIER_MARK, TOOL_TIER_MAX } from './watchTools.ts'
 import {
+  CANDLE_BODY,
+  CANDLE_GOOD_LEN,
   CANDLE_ID,
+  CANDLE_LINK,
+  candleIds,
   candlePlateReach,
   candleLinks,
   candleRoadNote,
@@ -329,6 +333,8 @@ export function lampSpotBlocked(
   plants: Record<string, string> = {},
   ignoreAbility?: string,
   ground?: LampGround | null,
+  /** When this is a candle, other candles use the smaller beside-gap. */
+  placeKind?: string,
 ): boolean {
   const plate = ground ?? activeGround()
   if (point.x < 16 || point.y < 16 || point.x > 782 || point.y > 1118) return true
@@ -351,7 +357,8 @@ export function lampSpotBlocked(
   for (const [id, ability] of Object.entries(plants)) {
     if (ability === ignoreAbility) continue
     const at = lampAnchor(id)
-    if (Math.hypot(point.x - at.x, point.y - at.y) <= LAMP_BODY) return true
+    const body = placeKind === CANDLE_ID && ability === CANDLE_ID ? CANDLE_BODY : LAMP_BODY
+    if (Math.hypot(point.x - at.x, point.y - at.y) <= body) return true
   }
   return false
 }
@@ -660,7 +667,7 @@ export function previewLamp(
   const blocked =
     hudBlocked ||
     (candle ? !candleRoom(plants) : !isTowerType(ability)) ||
-    lampSpotBlocked(at, plants, candle ? undefined : ability)
+    lampSpotBlocked(at, plants, candle ? undefined : ability, undefined, candle ? CANDLE_ID : undefined)
   const reaches = !blocked && lampReachesRoad(at, range)
   const note = blocked
     ? ''
@@ -668,7 +675,15 @@ export function previewLamp(
       ? candleRoadNote(spot, Math.max(0, extra))
       : lampRoadNote(spot, ability, progress, runTier, easyTree, extra)
   const length = blocked ? 0 : roadCoverLength(at, range)
-  const cover = blocked ? '' : roadCoverRank(length)
+  const cover = blocked
+    ? ''
+    : candle
+      ? length >= CANDLE_GOOD_LEN
+        ? 'good'
+        : length >= ROAD_SOME_LEN
+          ? 'some'
+          : 'far'
+      : roadCoverRank(length)
   let row = ''
   let rowTo: NightPoint[] | undefined
   if (candle && !blocked) {
@@ -693,6 +708,51 @@ export function previewLamp(
     row: row || undefined,
     rowTo,
   }
+}
+
+/** How far a finger can jump onto a row seat while the ghost is near a candle. */
+const CANDLE_MAGNET = 64
+
+/**
+ * While a candle is armed, a finger near another candle slides onto a Good
+ * seat that joins the row. A seat that is already Good and in a row stays put.
+ */
+export function magnetCandlePoint(
+  point: NightPoint,
+  plants: Record<string, string>,
+  progress: ProgressState,
+  runTier: Record<string, number> | undefined,
+  hudBlocked = false,
+  extra = 0,
+): NightPoint {
+  const anchors = candleIds(plants).map((id) => lampAnchor(id))
+  if (anchors.length < 1) return point
+  if (!anchors.some((candle) => Math.hypot(candle.x - point.x, candle.y - point.y) <= CANDLE_LINK + CANDLE_MAGNET)) {
+    return point
+  }
+  const here = previewLamp(point, CANDLE_ID, progress, runTier, plants, hudBlocked, false, extra)
+  if (!here.blocked && here.cover === 'good' && here.row) return here.at
+  let best: NightPoint | null = null
+  let bestD = CANDLE_MAGNET
+  const gaps = [CANDLE_BODY + 12, 72, 104]
+  for (const candle of anchors) {
+    for (let turn = 0; turn < 18; turn += 1) {
+      const rad = (turn / 18) * Math.PI * 2
+      for (const gap of gaps) {
+        const at = {
+          x: candle.x + Math.cos(rad) * gap,
+          y: candle.y + Math.sin(rad) * gap,
+        }
+        const away = Math.hypot(at.x - point.x, at.y - point.y)
+        if (away > bestD) continue
+        const look = previewLamp(at, CANDLE_ID, progress, runTier, plants, hudBlocked, false, extra)
+        if (look.blocked || look.cover !== 'good' || !look.row) continue
+        best = look.at
+        bestD = away
+      }
+    }
+  }
+  return best ?? point
 }
 
 /** Place when the spot is open. A blocked spot returns the same map. */

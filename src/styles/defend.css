@@ -2622,6 +2622,17 @@ img.walker-face.easy-walker-face,
   font-weight: 800;
 }
 
+/* 1.4.452: the candle pad is the small hit, not the ring or the word. */
+.defend-pad.is-candle .defend-type-ring,
+.defend-pad.is-candle .defend-pool,
+.defend-pad.is-candle .defend-earth,
+.defend-pad.is-candle .defend-type-label,
+.defend-pad.is-candle .nw-candle-row,
+.defend-pad.is-candle .defend-hot-halo,
+.defend-pad.is-candle .defend-level-pip {
+  pointer-events: none;
+}
+
 .defend-candle-line,
 .defend-candle-verse,
 .defend-candle-help {
@@ -2659,9 +2670,9 @@ img.walker-face.easy-walker-face,
 }
 
 .defend-tower-card.is-candle .defend-path-pip {
-  width: 16px;
-  height: 16px;
-  font-size: 9px;
+  width: 26px;
+  height: 26px;
+  font-size: 11px;
 }
 
 .defend-tower-card.is-candle .defend-path-buy {

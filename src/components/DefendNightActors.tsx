@@ -18,7 +18,7 @@ import {
   candleLinks,
   candlePathKey,
   candlePlateReach,
-  candleRowMark,
+  candleRowHeads,
   candleRowSize,
   CANDLE_ID,
   CANDLE_LABEL,
@@ -181,6 +181,7 @@ export function DefendNightActorsSvg({
     if (isCandle(towerType[id])) candlePlants[id] = CANDLE_ID
   }
   const candlePairs = candleLinks(candlePlants)
+  const rowHead = new Map(candleRowHeads(candlePlants).map((head) => [head.id, head.mark]))
   return (
     <>
               {candlePairs.map(([fromId, toId]) => {
@@ -305,13 +306,20 @@ export function DefendNightActorsSvg({
                       <rect
                         className="defend-hit"
                         data-lamp-wave-hit="yes"
-                        x="-42"
-                        y="-96"
-                        width="84"
-                        height="128"
+                        x={candle ? -14 : -42}
+                        y={candle ? -44 : -96}
+                        width={candle ? 28 : 84}
+                        height={candle ? 52 : 128}
                       />
                     ) : scenery ? null : on ? (
-                      <rect className="defend-hit" x="-42" y="-96" width="84" height="128" />
+                      <rect
+                        className="defend-hit"
+                        data-candle-hit={candle ? 'yes' : undefined}
+                        x={candle ? -14 : -42}
+                        y={candle ? -44 : -96}
+                        width={candle ? 28 : 84}
+                        height={candle ? 52 : 128}
+                      />
                     ) : (
                       <circle className="defend-hit" r="52" />
                     )}
@@ -319,7 +327,7 @@ export function DefendNightActorsSvg({
                     {on ? (
                       <>
                         <ellipse className="defend-pool" cx="0" cy="12" rx={hot ? 30 : 20} ry={hot ? 11 : 7} />
-                        <circle className="defend-type-ring" r="34" />
+                        <circle className="defend-type-ring" r={candle ? 16 : 34} />
                         <g className="defend-lamp-sprite">
                           {candle ? (
                             <CandleSprite hot={hot || firing} />
@@ -334,20 +342,19 @@ export function DefendNightActorsSvg({
                             />
                           )}
                         </g>
-                        {candle
-                          ? (() => {
-                              const mark = candleRowMark(candleRowSize(id, candlePlants))
-                              if (!mark) return null
-                              return (
-                                <g className="nw-candle-row" data-candle-row={mark} transform="translate(0 -64)">
-                                  <rect x="-38" y="-13" width="76" height="24" rx="8" />
-                                  <text y="4" textAnchor="middle">
-                                    {mark}
-                                  </text>
-                                </g>
-                              )
-                            })()
-                          : null}
+                        {rowHead.has(id) ? (
+                          <g
+                            className="nw-candle-row"
+                            data-candle-row={rowHead.get(id)}
+                            data-candle-row-head="yes"
+                            transform="translate(0 -78)"
+                          >
+                            <rect x="-38" y="-13" width="76" height="24" rx="8" />
+                            <text y="4" textAnchor="middle">
+                              {rowHead.get(id)}
+                            </text>
+                          </g>
+                        ) : null}
                         {typeSrc ? (
                           <image
                             className="defend-type-mark"
@@ -358,9 +365,11 @@ export function DefendNightActorsSvg({
                             height={44}
                           />
                         ) : null}
-                        <text className="defend-type-label" y="30" textAnchor="middle">
-                          {typeName}
-                        </text>
+                        {candle && candleRowSize(id, candlePlants) >= 2 ? null : (
+                          <text className="defend-type-label" y={candle ? -58 : 30} textAnchor="middle">
+                            {typeName}
+                          </text>
+                        )}
                         {hot ? <circle className="defend-hot-halo" r="27" /> : null}
                         {upgrading || justUp ? <circle className="defend-upgrade-ring" r="36" /> : null}
                         {phase !== 'wave' ? (
