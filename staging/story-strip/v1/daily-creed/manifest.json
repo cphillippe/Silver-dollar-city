@@ -1,0 +1,123 @@
+{
+  "stripId": "daily-creed",
+  "packVersion": "v1",
+  "built": "2026-10-09 PT",
+  "framesCount": 3,
+  "challengeFile": "src/content/daily.ts",
+  "dailyPoolId": "trail-creed",
+  "sequenceItems": [
+    {
+      "id": "a",
+      "art": "dcreed1-rose",
+      "text": "Jesus dies, is buried, and is raised.",
+      "easyText": "Jesus died, was buried, rose.",
+      "shortCaption": "Died, buried,\nraised",
+      "easyShortCaption": "Died, buried,\nrose",
+      "winCaption": "Died, buried,\nrose.",
+      "role": "raised",
+      "easyRole": "rose"
+    },
+    {
+      "id": "b",
+      "art": "dcreed2-tell",
+      "text": "Believers pass the news on.",
+      "shortCaption": "News\npassed on",
+      "winCaption": "Passed\non.",
+      "role": "Believers"
+    },
+    {
+      "id": "c",
+      "art": "dcreed3-letter",
+      "text": "Paul writes it in a letter.",
+      "shortCaption": "Paul\nwrites",
+      "winCaption": "Paul\nwrites it.",
+      "role": "Paul"
+    }
+  ],
+  "sequenceVerse": {
+    "kicker": "Paul wrote",
+    "text": "For I delivered to you as of first importance what I also received, that Christ died for our sins…",
+    "easyLead": "“Delivered” means handed on. “Of first importance” means most important.",
+    "ref": "1 Corinthians 15:3"
+  },
+  "verseNote": "Quote + ref + kicker UNCHANGED from live (exact RSV, cut with …). Only easyLead is new.",
+  "sequenceArt": {
+    "dcreed1-rose": "src/assets/story-strip/dcreed1-rose.webp",
+    "dcreed2-tell": "src/assets/story-strip/dcreed2-tell.webp",
+    "dcreed3-letter": "src/assets/story-strip/dcreed3-letter.webp"
+  },
+  "cutoutBackdrop": {
+    "dcreed1-rose": {
+      "sky": "#ffd59a",
+      "horizon": "#fff6e0",
+      "ground": "#8fbf6a"
+    },
+    "dcreed2-tell": {
+      "sky": "#f3d7a1",
+      "horizon": "#fff0c8",
+      "ground": "#7fba68"
+    },
+    "dcreed3-letter": {
+      "sky": "#e9d6b5",
+      "horizon": "#fff3dc",
+      "ground": "#b89a72"
+    }
+  },
+  "sequenceCrop": {
+    "dcreed1-rose": {
+      "x": "50%",
+      "y": "0%"
+    },
+    "dcreed2-tell": {
+      "x": "30%",
+      "y": "0%"
+    },
+    "dcreed3-letter": {
+      "x": "45%",
+      "y": "0%"
+    }
+  },
+  "sequenceFigure": {},
+  "easyTakeaway": "Christians said “died, buried, raised” before Paul wrote.",
+  "takeawayNote": "Easy FACE only, via EASY_STRIP_FACE. Pack claim stays “The churches named Christ died, buried, and raised before Paul wrote.” (check-packs asserts /Christ/).",
+  "easyFollowUp": {
+    "correct": "Christians said “died, buried, raised” before Paul wrote.",
+    "wrong": [
+      "Paul makes up the list as he writes.",
+      "Being buried does not matter."
+    ]
+  },
+  "easyStripFace": {
+    "The churches named Christ died, buried, and raised before Paul wrote.": "Christians said “died, buried, raised” before Paul wrote.",
+    "Burial is skipped because it does not matter.": "Being buried does not matter."
+  },
+  "glosses": [
+    {
+      "term": "Delivered",
+      "sense": "handed on"
+    },
+    {
+      "term": "Of first importance",
+      "sense": "most important"
+    }
+  ],
+  "reviewNotes": "Frame 2 man in brown is Peter (same design as wb-creed creed4). No name chip (SequenceFigure cue is only Jesus | Priest). Frame 1: empty cross with cloth + open empty tomb + risen Jesus (two small extra crosses drawn behind; Luke 23:33).",
+  "assets": {
+    "dcreed1-rose": {
+      "webp": "assets/dcreed1-rose.webp",
+      "png": "assets/dcreed1-rose.png",
+      "size": "512x512 RGBA"
+    },
+    "dcreed2-tell": {
+      "webp": "assets/dcreed2-tell.webp",
+      "png": "assets/dcreed2-tell.png",
+      "size": "512x512 RGBA"
+    },
+    "dcreed3-letter": {
+      "webp": "assets/dcreed3-letter.webp",
+      "png": "assets/dcreed3-letter.png",
+      "size": "512x512 RGBA"
+    }
+  },
+  "contactSheet": "daily-creed-v1-contact.png"
+}
