@@ -2572,6 +2572,44 @@ img.walker-face.easy-walker-face,
   padding: 8px 8px 10px;
 }
 
+/* 1.4.445: candle card. Two steps, and the prayer lines. The hit is a game effect. */
+.defend-tower-card.is-candle {
+  padding-top: 22px;
+}
+
+.defend-candle-line,
+.defend-candle-verse,
+.defend-candle-help {
+  margin: 4px 0 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: left;
+}
+
+.defend-candle-verse {
+  font-weight: 650;
+}
+
+.defend-candle-cite {
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.defend-tower-card.is-candle .defend-path {
+  margin-top: 6px;
+}
+
+.defend-tower-card.is-candle .defend-path + .defend-path {
+  margin-top: 8px;
+}
+
+.nw-skill-tray button.defend-candle-lamp,
+button.defend-candle-lamp {
+  width: auto;
+  margin: 0 0 6px;
+}
+
 .defend-path {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -3529,8 +3567,18 @@ button.defend-new-lamp[aria-pressed='true'] {
   letter-spacing: 0;
 }
 
+/* 1.4.445: the candle note sits under Still. It does not cover the road. */
+.nw-skill-toast.is-candle {
+  top: 78px;
+  max-width: min(280px, 86%);
+  white-space: normal;
+  letter-spacing: 0;
+}
+
+/* 1.4.445: the unlock note sits under the speed chip (top 56px), not behind it. */
 .nw-map-toast {
-  top: 46px;
+  top: 108px;
+  z-index: 8;
   max-width: min(340px, 92%);
   white-space: normal;
   letter-spacing: 0;
@@ -4262,20 +4310,35 @@ button.defend-new-lamp[aria-pressed='true'] {
   overflow: visible;
 }
 
+.nw-map-pick,
 .nw-map-pick button {
+  pointer-events: auto;
+}
+
+.nw-map-pick button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   min-width: 0;
   max-width: 100%;
   min-height: 40px;
-  padding: 0 8px;
+  height: auto;
+  padding: 6px 8px;
   border-radius: 999px;
   border: 2px solid rgba(255, 233, 176, 0.45);
   background: rgba(26, 8, 64, 0.72);
   color: #f4ead2;
   font-weight: 800;
   font-size: 0.78rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.15;
+  white-space: normal;
+  overflow: visible;
+  text-align: center;
+}
+
+.nw-map-name {
+  min-width: 0;
 }
 
 .nw-map-pick button.is-on {
@@ -4284,16 +4347,17 @@ button.defend-new-lamp[aria-pressed='true'] {
   color: #ffe9b0;
 }
 
-.nw-map-pick button:disabled {
-  opacity: 0.72;
+.nw-map-pick button:disabled,
+.nw-map-pick button.is-locked {
+  opacity: 0.55;
+  border-style: dashed;
 }
 
 .nw-map-lock {
-  display: inline-block;
+  display: block;
+  flex: 0 0 auto;
   width: 14px;
   height: 14px;
-  margin-left: 6px;
-  vertical-align: -2px;
 }
 
 @media (min-width: 412px) {
@@ -4303,14 +4367,23 @@ button.defend-new-lamp[aria-pressed='true'] {
 }
 
 @media (min-width: 768px) {
+  .nw-docks:has(.nw-map-pick) {
+    max-width: min(92%, 720px);
+  }
+
   .nw-map-pick {
-    max-width: 640px;
+    max-width: 720px;
   }
 
   .nw-map-pick-scroll {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
     max-height: none;
     overflow: visible;
+  }
+
+  .nw-map-pick button {
+    font-size: 0.95rem;
+    padding: 8px 10px;
   }
 }
 

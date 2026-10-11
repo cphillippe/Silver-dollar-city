@@ -1,4 +1,4 @@
-import { NIGHT_MAP_BADGE, NIGHT_MAP_IDS, type NightMapId } from '../nightWatch/maps/chain'
+import { NIGHT_MAP_IDS, NIGHT_MAP_NAME, type NightMapId } from '../nightWatch/maps/chain'
 
 interface NightMapPickerProps {
   mapId: NightMapId
@@ -24,22 +24,22 @@ export function NightMapPicker({ mapId, isOpen, onPick }: NightMapPickerProps) {
       <div className="nw-map-pick-scroll">
         {NIGHT_MAP_IDS.map((id) => {
           const open = isOpen(id)
-          const badge = NIGHT_MAP_BADGE[id]
+          const name = NIGHT_MAP_NAME[id]
           return (
             <button
               key={id}
               type="button"
-              className={mapId === id ? 'is-on' : ''}
+              className={`${mapId === id ? 'is-on' : ''}${open ? '' : ' is-locked'}`}
               data-map={id}
               data-map-locked={open ? 'no' : 'yes'}
               aria-pressed={mapId === id}
-              aria-label={open ? badge : `${badge}, locked`}
+              aria-label={open ? name : `${name}, locked`}
               disabled={!open}
               onClick={() => {
                 if (open) onPick(id)
               }}
             >
-              {badge}
+              <span className="nw-map-name">{name}</span>
               {open ? null : <Lock />}
             </button>
           )

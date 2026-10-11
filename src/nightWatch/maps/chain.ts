@@ -37,7 +37,8 @@ export function nextMap(id: NightMapId): NightMapId | null {
 
 /**
  * A2 is always open. Far Hills also opens from an Easy round 25.
- * Every later map opens when the previous map's round 10 boss is beaten.
+ * Every later map stays locked until each map before it has a round 10 boss
+ * in `mazeBeat`. A later id alone does not open that map or the one after it.
  */
 export function mapIsOpen(
   id: NightMapId,
@@ -45,6 +46,11 @@ export function mapIsOpen(
 ): boolean {
   if (id === 'a2') return true
   if (id === 'far-hills' && state.farHills === true) return true
-  const prev = previousMap(id)
-  return prev != null && (state.mazeBeat?.includes(prev) ?? false)
+  const index = NIGHT_MAP_IDS.indexOf(id)
+  if (index <= 0) return false
+  const beat = Array.isArray(state.mazeBeat) ? state.mazeBeat : []
+  for (let i = 0; i < index; i += 1) {
+    if (!beat.includes(NIGHT_MAP_IDS[i])) return false
+  }
+  return true
 }

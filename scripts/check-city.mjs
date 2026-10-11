@@ -174,7 +174,7 @@ import {
   splitFeature,
 } from '../src/nightWatch/maps/features.ts'
 import { waveRound, waveWalkerHp } from '../src/nightWatch/maps/wave.ts'
-import { nextMap } from '../src/nightWatch/maps/chain.ts'
+import { mapIsOpen, nextMap, NIGHT_MAP_IDS, NIGHT_MAP_NAME } from '../src/nightWatch/maps/chain.ts'
 import { resolveNightMap } from '../src/nightWatch/maps/resolve.ts'
 import { rateMapSeats, spreadGoodSeats } from '../src/nightWatch/maps/seats.ts'
 import { scaledWalkerHp } from '../src/nightWatch/walkers.ts'
@@ -200,6 +200,28 @@ import {
   TREE_LOCK,
   TREE_STEP_COST,
 } from '../src/nightWatch/upgradeTree.ts'
+import {
+  applyCandleStep,
+  CANDLE_CAP,
+  CANDLE_CARD,
+  CANDLE_COST,
+  CANDLE_HELP,
+  CANDLE_ID,
+  CANDLE_INTRO,
+  CANDLE_RANGE,
+  CANDLE_VERSE,
+  CANDLE_VERSE_CITE,
+  canTakeCandle,
+  candleCount,
+  candleDamage,
+  candleNeighbors,
+  candlePathKey,
+  candlePlateReach,
+  candleUnlocked,
+  freshCandlePaths,
+  isCandle,
+  plantCandle,
+} from '../src/nightWatch/candle.ts'
 import { lessonAreaFor, samePillarLessons } from '../src/nightWatch/lampPillar.ts'
 import { boardFill, boardFillPoint } from '../src/nightWatch/map/phoneFill.ts'
 import {
@@ -1525,14 +1547,7 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.446')
-assert.ok(CHANGELOG.some((note) => note.version === '1.4.446'), '1.4.446 changelog row')
-assert.match(latestChange('1.4.446').title, /pictures/i)
-assert.doesNotMatch(
-  latestChange('1.4.446').items.join('\n'),
-  /Fixes #|Closes #|Resolves #/,
-  '1.4.446 changelog avoids GitHub close keywords',
-)
+assert.equal(APP_VERSION, '1.4.445')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.444'), '1.4.444 changelog row')
 assert.match(latestChange('1.4.444').title, /check/i)
 assert.doesNotMatch(
@@ -14531,4 +14546,116 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
     time += dt
   }
   return 'timeout'
+}
+
+// Night Watch 1.4.445: candle stand, and the maze chain stays one map at a time.
+{
+  const freshOpen = NIGHT_MAP_IDS.filter((id) => mapIsOpen(id, {}))
+  assert.deepEqual(freshOpen, ['a2'], '1.4.445 a fresh profile opens only A2')
+  let beat = []
+  const chain = [
+    ['a2', ['a2', 'far-hills']],
+    ['far-hills', ['a2', 'far-hills', 'map03']],
+    ['map03', ['a2', 'far-hills', 'map03', 'map04']],
+    ['map04', ['a2', 'far-hills', 'map03', 'map04', 'map05']],
+    ['map05', ['a2', 'far-hills', 'map03', 'map04', 'map05', 'map06']],
+  ]
+  for (const [won, expectOpen] of chain) {
+    beat = [...beat, won]
+    const open = NIGHT_MAP_IDS.filter((id) => mapIsOpen(id, { mazeBeat: beat }))
+    assert.deepEqual(open, expectOpen, `1.4.445 beating ${won} opens only the next map`)
+  }
+  assert.equal(mapIsOpen('map05', { mazeBeat: ['a2'] }), false, '1.4.445 Licorice stays locked after A2')
+  assert.equal(mapIsOpen('map06', { mazeBeat: ['a2'] }), false, '1.4.445 Blueberry stays locked after A2')
+  assert.equal(mapIsOpen('map03', { mazeBeat: ['a2'] }), false, '1.4.445 Peppermint stays locked after A2')
+  assert.equal(mapIsOpen('map04', { mazeBeat: ['a2'] }), false, '1.4.445 Caramel stays locked after A2')
+  assert.equal(mapIsOpen('map06', { mazeBeat: ['map05'] }), false, '1.4.445 a later id does not skip the chain')
+  assert.equal(mapIsOpen('map05', { mazeBeat: ['map04'] }), false, '1.4.445 Caramel alone does not open Licorice')
+  assert.equal(mapIsOpen('map03', { farHills: true }), false, '1.4.445 round 25 opens the hills only')
+  assert.equal(mapIsOpen('far-hills', { farHills: true }), true)
+  const picker445 = readFileSync(new URL('../src/components/NightMapPicker.tsx', import.meta.url), 'utf8')
+  assert.match(picker445, /NIGHT_MAP_NAME/)
+  assert.doesNotMatch(picker445, /text-overflow/)
+  for (const name of Object.values(NIGHT_MAP_NAME)) {
+    assert.match(picker445, /NIGHT_MAP_NAME\[id\]/)
+    assert.ok(name.length > 0)
+  }
+  const css445 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  assert.match(css445, /\.nw-map-toast \{[^}]*top:\s*108px/)
+  assert.match(css445, /\.nw-pace \{[^}]*top:\s*56px/)
+  assert.doesNotMatch(
+    css445.slice(css445.indexOf('.nw-map-pick button {')),
+    /text-overflow:\s*ellipsis/,
+  )
+  const screen445 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  assert.doesNotMatch(screen445, /nightPlaytest \|\| mapIsOpen/)
+
+  assert.equal(CANDLE_COST, 3)
+  assert.ok(CANDLE_COST < EASY_LAMP_COST)
+  assert.equal(CANDLE_CAP, 6)
+  assert.equal(buyExtraLamp(3, CANDLE_COST).ok, true)
+  assert.equal(buyExtraLamp(3, CANDLE_COST).sparks, 0)
+  assert.equal(buyExtraLamp(2, CANDLE_COST).ok, false)
+  assert.equal(isCandle('candle'), true)
+  assert.equal(isTowerType(CANDLE_ID), false)
+  assert.equal(WATCH_TOOLS.length, 4, '1.4.445 the candle is not a fifth pillar')
+  assert.deepEqual(plantType({}, 'at:1:1', CANDLE_ID), {})
+  let row = {}
+  for (let i = 0; i < CANDLE_CAP; i += 1) row = plantCandle(row, `at:${i}:1`)
+  assert.equal(candleCount(row), CANDLE_CAP)
+  assert.equal(plantCandle(row, 'at:9:1'), row)
+  const plants = {
+    'at:100:400': CANDLE_ID,
+    'at:152:400': CANDLE_ID,
+    'at:204:400': CANDLE_ID,
+    'at:256:400': CANDLE_ID,
+  }
+  assert.equal(candleNeighbors('at:100:400', plants), 1)
+  assert.equal(candleNeighbors('at:152:400', plants), 2)
+  assert.equal(candleDamage(freshCandlePaths(), 0), 1)
+  assert.equal(candleDamage(freshCandlePaths(), candleNeighbors('at:152:400', plants)), 3)
+  assert.equal(candleDamage(freshCandlePaths(), 5), 3)
+  const lone = freshCandlePaths()
+  assert.equal(canTakeCandle(lone, 'strong').cost, 3)
+  assert.equal(canTakeCandle({ far: 0, strong: 2 }, 'far').ok, true)
+  assert.equal(canTakeCandle({ far: 1, strong: 2 }, 'far').ok, false)
+  const bought = applyCandleStep('at:1:1', {}, 10, 'strong')
+  assert.equal(bought.ok, true)
+  assert.equal(bought.sparks, 7)
+  assert.equal(bought.paths[candlePathKey('at:1:1')].strong, 1)
+  assert.equal(candlePathKey('at:2:2') in bought.paths, false)
+  assert.equal(CANDLE_CARD, 'A small candle is a sign of a prayer for someone.')
+  assert.equal(CANDLE_VERSE, 'The light shines in the darkness, and the darkness has not overcome it.')
+  assert.equal(CANDLE_VERSE_CITE, 'John 1:5, RSV')
+  assert.equal(CANDLE_HELP, 'One small light helps; many lights together fill the dark.')
+  assert.equal(CANDLE_INTRO, 'New lamp · Candle')
+  const cardCopy = [CANDLE_CARD, CANDLE_VERSE, CANDLE_HELP, CANDLE_INTRO].join('\n')
+  assert.doesNotMatch(cardCopy, /wish|luck|magic|ward/i)
+  const cardSrc = readFileSync(new URL('../src/components/DefendTowerCard.tsx', import.meta.url), 'utf8')
+  assert.match(cardSrc, /CANDLE_CARD/)
+  assert.match(cardSrc, /CANDLE_VERSE/)
+  assert.match(cardSrc, /CANDLE_HELP/)
+  assert.equal(candleUnlocked(false, 2, false, 'wave'), false)
+  assert.equal(candleUnlocked(true, 0, false, 'plant'), false)
+  assert.equal(candleUnlocked(true, 1, false, 'wave'), false)
+  assert.equal(candleUnlocked(true, 1, false, 'boost'), true)
+  assert.equal(candleUnlocked(true, 2, false, 'wave'), true)
+  assert.equal(candleUnlocked(true, 0, true, 'plant'), true)
+  assert.ok(CANDLE_RANGE < 96)
+  assert.ok(candlePlateReach('at:400:760', 0) < 114)
+  assert.deepEqual(EASY_ROUNDS.slice(0, 6), [
+    { count: 4, speed: 1, hp: 0, spawn: 1, fast: 0, tough: 0 },
+    { count: 4, speed: 1.35, hp: 0, spawn: 0.95, fast: 0, tough: 0 },
+    { count: 5, speed: 1.8, hp: 1, spawn: 0.9, fast: 0, tough: 0 },
+    { count: 5, speed: 2.6, hp: 2, spawn: 0.85, fast: 1, tough: 0 },
+    { count: 7, speed: 6.4, hp: 6, spawn: 0.68, fast: 2, tough: 3 },
+    { count: 7, speed: 6.4, hp: 8, spawn: 0.72, fast: 2, tough: 1 },
+  ], '1.4.445 A2 rounds 1–6 stay the snapshot')
+  assert.equal(paceEasyRoadCampaign('none', 'live').dead, 8, '1.4.445 A2 with no upgrades still walls on round 8')
+  assert.equal(paceEasyRoadCampaign('natural', 'live').dead, 18, '1.4.445 an A2 spender still reaches round 18')
+  assert.doesNotMatch(
+    readFileSync(new URL('../src/nightWatch/livePace.ts', import.meta.url), 'utf8'),
+    /candle/,
+    '1.4.445 the spender does not buy candles',
+  )
 }
