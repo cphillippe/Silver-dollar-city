@@ -50,9 +50,9 @@ export const DAILY_POOL: DailyPuzzle[] = [
       prompt: 'A neighbor leaves a lamp on the porch. Put the picture in order.',
       context: 'Matthew 5:14–16. Jesus used ordinary light to talk about a life that is seen.',
       items: [
-        { id: 'a', gem: 'star', text: 'Night comes. The street is dark.' },
-        { id: 'b', gem: 'lamp', text: 'Someone sets a lamp out.' },
-        { id: 'c', gem: 'heart', text: 'A walker finds the way.' },
+        { id: 'a', gem: 'star', art: 'lantern1-dark', text: 'Night comes. The street is dark.', shortCaption: 'Dark\nstreet', winCaption: 'It is\ndark.', role: 'dark' },
+        { id: 'b', gem: 'lamp', art: 'lantern2-lamp', text: 'Someone sets a lamp out.', shortCaption: 'Lamp\nset out', winCaption: 'A lamp\nis set out.', role: 'lamp' },
+        { id: 'c', gem: 'heart', art: 'lantern3-found', text: 'A walker finds the way.', shortCaption: 'Finds\nthe way', winCaption: 'The way\nis seen.', role: 'walker' },
       ],
       teachOnWrong:
         'The claim is not that we become the sun — only that we do not hide what we have received. Try the order again.',
@@ -137,9 +137,9 @@ export const DAILY_POOL: DailyPuzzle[] = [
       prompt: 'How did the creed reach Paul\'s letter?',
       context: '1 Corinthians 15:3–4. Paul received this line — he did not invent it.',
       items: [
-        { id: 'a', text: 'Jesus dies, is buried, and is raised.', easyText: 'Jesus died, was buried, rose.' },
-        { id: 'b', text: 'Believers pass the news on.' },
-        { id: 'c', text: 'Paul writes it in a letter.' },
+        { id: 'a', art: 'dcreed1-rose', text: 'Jesus dies, is buried, and is raised.', easyText: 'Jesus died, was buried, rose.', shortCaption: 'Died, buried,\nraised', easyShortCaption: 'Died, buried,\nrose', winCaption: 'Died, buried,\nrose.', role: 'raised', easyRole: 'rose' },
+        { id: 'b', art: 'dcreed2-tell', text: 'Believers pass the news on.', shortCaption: 'News\npassed on', winCaption: 'Passed\non.', role: 'Believers' },
+        { id: 'c', art: 'dcreed3-letter', text: 'Paul writes it in a letter.', shortCaption: 'Paul\nwrites', winCaption: 'Paul\nwrites it.', role: 'Paul' },
       ],
       teachOnWrong:
         'Paul is handing on something he received. The churches already named Christ died, buried, raised. Try the chain again.',

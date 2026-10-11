@@ -755,7 +755,23 @@ assert.equal(
 )
 assert.equal(
   easyFacingLine('daily-creed', 'The churches named Christ died, buried, and raised before Paul wrote.'),
-  'The churches named Christ died, buried, and raised before Paul wrote.',
+  'Christians said “died, buried, raised” before Paul wrote.',
+)
+assert.equal(
+  easyFacingLine('daily-lantern', 'Light is only for insiders behind a door.'),
+  'Hide your light under a basket.',
+)
+assert.match(
+  sequenceVerse,
+  /easyLead: '“Before men” means where people can see\. Give glory to your Father means praise God\.'/,
+)
+assert.match(
+  sequenceVerse,
+  /easyLead: '“Delivered” means handed on\. “Of first importance” means most important\.'/,
+)
+assert.match(
+  sequenceVerse,
+  /easyLead: '“Enlightens” means gives light to\. “Every man” means every person\. The true light is Jesus\.'/,
 )
 assert.match(sequenceArtSrc, /'road1-lawyer': \{ cue: 'Jesus', x: '75%'/)
 assert.match(sequenceArtSrc, /'creed4-appeared': \{ cue: 'Jesus', x: '23%'/)
@@ -1509,7 +1525,14 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.444')
+assert.equal(APP_VERSION, '1.4.446')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.446'), '1.4.446 changelog row')
+assert.match(latestChange('1.4.446').title, /pictures/i)
+assert.doesNotMatch(
+  latestChange('1.4.446').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.446 changelog avoids GitHub close keywords',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.444'), '1.4.444 changelog row')
 assert.match(latestChange('1.4.444').title, /check/i)
 assert.doesNotMatch(

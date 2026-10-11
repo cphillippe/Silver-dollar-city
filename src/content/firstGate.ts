@@ -63,10 +63,10 @@ export const firstGate: Area = {
       context:
         'John 1:1–9 names the Word as the true light. Romans 1:19–20 says what can be known of God is plain in what is made. Reason is not a trick hanging in midair.',
       items: [
-        { id: 'a', text: 'You think, count, and ask why.' },
-        { id: 'b', text: 'Your mind needs solid ground.' },
-        { id: 'c', text: 'Jesus, the Word, is true light.' },
-        { id: 'd', text: 'So your thinking stands on God.' },
+        { id: 'a', art: 'reason1-think', text: 'You think, count, and ask why.', shortCaption: 'Think and\nask why', winCaption: 'You think\nand ask.', role: 'think' },
+        { id: 'b', art: 'reason2-ground', text: 'Your mind needs solid ground.', shortCaption: 'Solid\nground', winCaption: 'Solid\nground.', role: 'ground' },
+        { id: 'c', art: 'reason3-light', text: 'Jesus, the Word, is true light.', shortCaption: 'True\nlight', winCaption: 'Jesus is\nthe light.', role: 'light' },
+        { id: 'd', art: 'reason4-stands', text: 'So your thinking stands on God.', easyText: 'God gives your mind light.', shortCaption: 'Stands\non God', easyShortCaption: 'God gives\nlight', winCaption: 'Your mind\nhas light.', role: 'God', easyRole: 'God' },
       ],
       teachOnWrong:
         'Do not leave reason hanging in midair. John names the Word as true light. Romans says the made world makes God knowable. That is a ground, not a shrug.',
