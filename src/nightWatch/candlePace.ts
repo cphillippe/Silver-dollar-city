@@ -5,8 +5,9 @@ import {
   CANDLE_LINK,
   candlePlateReach,
   candleEarlyPace,
-  CANDLE_ROW_WALKER,
+  candleRowReachBonus,
   candleRowSize,
+  candleRowWalkerBonus,
   candleStrike,
   freshCandlePaths,
 } from './candle.ts'
@@ -225,14 +226,16 @@ export function candleShots(seats: readonly CandleSeat[]): PaceShot[] {
     const id = `at:${seat.x}:${seat.y}`
     const rowSize = candleRowSize(id, plants)
     const strike = candleStrike(freshCandlePaths(), rowSize)
+    const reach = candleRowReachBonus(rowSize)
     return {
       x: seat.x,
       y: seat.y,
       damage: strike.damage,
-      range: candlePlateReach(id, 0),
+      range: candlePlateReach(id, reach),
+      earlyRange: reach > 0 ? candlePlateReach(id, 0) : undefined,
       cooldownMs: strike.cooldownMs,
       earlyPace: candleEarlyPace(rowSize, 4),
-      walkerBonus: rowSize >= 2 ? CANDLE_ROW_WALKER : undefined,
+      walkerBonus: candleRowWalkerBonus(rowSize) || undefined,
     }
   })
 }

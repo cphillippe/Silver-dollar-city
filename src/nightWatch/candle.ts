@@ -247,11 +247,36 @@ export function candleRowFactor(size: number): number {
 export const CANDLE_EARLY_PACE = 1.2
 
 /**
- * A row hits walkers this much harder than the same candles set apart.
+ * Row x2 hits walkers this much harder than the same candles set apart.
+ * A half-built row should not fall behind a spread.
+ */
+export const CANDLE_ROW_X2 = 0.1
+
+/**
+ * Row x3 hits walkers this much harder.
+ * Three candles on one stretch should outlast the same three apart.
  * Bosses stay at the lone hit. The early boss round does not take this extra,
  * so a zero-tap row still loses round 5.
  */
-export const CANDLE_ROW_WALKER = 0.12
+export const CANDLE_ROW_X3 = 0.22
+
+/** Row x3 reaches this much farther, so the cluster covers more of the road. */
+export const CANDLE_ROW_REACH = 0.1
+
+/** Extra walker fraction for this row. Lone candles stay at 0. A row of three or more uses the x3 rate. */
+export function candleRowWalkerBonus(rowSize: number): number {
+  const n = Math.max(0, Math.floor(rowSize) || 0)
+  if (n >= 3) return CANDLE_ROW_X3
+  if (n >= 2) return CANDLE_ROW_X2
+  return 0
+}
+
+/** Plate units added to a Row x3 reach. Row x2 and a lone candle add none. */
+export function candleRowReachBonus(rowSize: number): number {
+  const n = Math.max(0, Math.floor(rowSize) || 0)
+  if (n >= 3) return CANDLE_RANGE * CANDLE_ROW_REACH
+  return 0
+}
 
 /** A boss in rounds 1–6 does not take the row extra, on the main shot or a splash. */
 export function candleBossBonusCapped(roundIndex: number, boss: boolean): boolean {
@@ -267,11 +292,12 @@ export function candleWalkerDamage(
   roundIndex: number,
   boss: boolean,
 ): number {
-  if (!(damage > 0) || rowSize < 2) return damage
+  const extra = candleRowWalkerBonus(rowSize)
+  if (!(damage > 0) || extra <= 0) return damage
   if (candleBossBonusCapped(roundIndex, boss)) return damage
   if (boss) return damage
   if (candleEarlyPace(rowSize, roundIndex)) return damage
-  return damage * (1 + CANDLE_ROW_WALKER)
+  return damage * (1 + extra)
 }
 
 /** Wait scale for a row on an early boss round. Lone candles and other rounds stay unset. */

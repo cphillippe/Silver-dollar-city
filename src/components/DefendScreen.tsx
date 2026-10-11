@@ -142,6 +142,7 @@ import {
   candleRowSize,
   candlePathKey,
   candlePlateReach,
+  candleRowReachBonus,
   candleRoom,
   candleEarlyPace,
   candleStrike,
@@ -254,7 +255,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const [tapHits, setTapHits] = useState(0)
   const [tapMisses, setTapMisses] = useState(0)
   const [tapDamage, setTapDamage] = useState(0)
-  const [lampHurt, setLampHurt] = useState(0)
+  const lampHurtRef = useRef(0)
+  const hudRef = useRef<HTMLParagraphElement>(null)
   const [debugPaused, setDebugPaused] = useState(false)
   const nwDebugRef = useRef(nwDebug)
   const debugPausedRef = useRef(debugPaused)
@@ -548,7 +550,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     setTapHits(0)
     setTapMisses(0)
     setTapDamage(0)
-    setLampHurt(0)
+    lampHurtRef.current = 0
+    if (nightPlaytest) hudRef.current?.setAttribute('data-lamp-damage', '0')
     const intro = skillUnlockOnWave(wave)
     if (intro === 'still') {
       seenSkill.current.still = true
@@ -1372,7 +1375,12 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
 
   function hitRange(id: CityPlotId, toolId: string) {
     if (easy && isCandle(toolId)) {
-      return candlePlateReach(id, candleFarBonus(pathsOf(runPathsRef.current, candlePathKey(id))))
+      const rowReach =
+        waveIndexRef.current >= 6 ? candleRowReachBonus(candleRowSize(id, plantsRef.current)) : 0
+      return candlePlateReach(
+        id,
+        candleFarBonus(pathsOf(runPathsRef.current, candlePathKey(id))) + rowReach,
+      )
     }
     const combat = lampCombat(toolId)
     const extra = easy ? easyShotReach(pathsOf(runPathsRef.current, toolId)) : combat.rangeBonus
@@ -1512,9 +1520,12 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
         )
       }
       const struck = nightEnemies.hit(best, sized.damage)
-      if (easy && !manual) {
+      if (easy && !manual && nightPlaytest) {
         const applied = Math.max(0, best.hp - struck.raider.hp)
-        if (applied > 0) setLampHurt((hurt) => hurt + applied)
+        if (applied > 0) {
+          lampHurtRef.current += applied
+          hudRef.current?.setAttribute('data-lamp-damage', String(lampHurtRef.current))
+        }
       }
       const tapDmg = sized.damage
       const armored = sized.armored
@@ -1593,7 +1604,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
               : amount,
           )
           const nicked = Math.max(0, beforeHp - nick.raider.hp)
-          if (nicked > 0) setLampHurt((hurt) => hurt + nicked)
+          if (nicked > 0 && nightPlaytest) {
+            lampHurtRef.current += nicked
+            hudRef.current?.setAttribute('data-lamp-damage', String(lampHurtRef.current))
+          }
           const spot = raiderAt(pick)
           live.current.raiders = live.current.raiders.map((item) =>
             item.id !== pick.id
@@ -1799,7 +1813,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     setTapHits(0)
     setTapMisses(0)
     setTapDamage(0)
-    setLampHurt(0)
+    lampHurtRef.current = 0
     setRunTier(freshRunTier())
     setRunPaths(freshRunPaths())
     runPathsRef.current = freshRunPaths()
@@ -2192,10 +2206,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const heartShown = Math.min(DEFEND_HEARTS, Math.max(0, Math.floor(hearts) || 0))
   const hud = (
     <p
+      ref={hudRef}
       className="defend-hud"
       aria-live="polite"
       data-nw-seed={nightSeed ?? undefined}
-      data-lamp-damage={lampHurt}
     >
       {phase === 'wave' ? (
         <span className="defend-wave">{roundLabel}</span>
