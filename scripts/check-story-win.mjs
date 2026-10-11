@@ -51,6 +51,22 @@ function readWin() {
   const board = document.querySelector('.strip-board')
   const stamp = document.querySelector('.strip-stamp')
   const stars = document.querySelector('.strip-stars')
+  const storySets = [...document.querySelectorAll('.strip-stamp, .win-stamp')].flatMap((el) => {
+    const style = getComputedStyle(el)
+    const r = el.getBoundingClientRect()
+    const hidden =
+      style.display === 'none' ||
+      style.visibility === 'hidden' ||
+      Number(style.opacity) === 0 ||
+      r.width < 8 ||
+      r.height < 8 ||
+      r.bottom < 0 ||
+      r.top > window.innerHeight
+    if (hidden) return []
+    const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)
+    if (!hit || (hit !== el && !el.contains(hit))) return []
+    return [{ kind: el.classList.contains('strip-stamp') ? 'badge' : 'overlay', top: r.top }]
+  })
   const verse = document.querySelector('.strip-verse')
   const quote = document.querySelector('.strip-verse blockquote')
   const home = document.querySelector('.town-return .btn')
@@ -70,6 +86,7 @@ function readWin() {
     innerHeight: window.innerHeight,
     board: box(board),
     stamp: stamp ? { ...box(stamp), text: stamp.textContent, hit: hit(stamp) } : null,
+    storySets,
     stars: stars ? { ...box(stars), text: stars.textContent, hit: hit(stars) } : null,
     verse: box(verse),
     quote: quote
@@ -106,6 +123,12 @@ function assertWin(id, width, height, win, widths) {
   }
   assert.ok(win.stamp && /STORY SET/.test(win.stamp.text), `${where} shows STORY SET`)
   assert.ok(win.stamp.width >= 80 && win.stamp.height >= 20 && win.stamp.hit, `${where} STORY SET is visible`)
+  assert.equal(win.storySets.length, 1, `${where} shows exactly one STORY SET`)
+  assert.equal(win.storySets[0]?.kind, 'badge', `${where} keeps the gold badge`)
+  assert.ok(
+    win.stamp.top + win.stamp.height / 2 >= win.board.bottom - 2,
+    `${where} STORY SET sits below the pictures`,
+  )
   assert.ok(win.stars && /★/.test(win.stars.text), `${where} shows the stars`)
   assert.ok(win.stars.width >= 48 && win.stars.height >= 12 && win.stars.hit, `${where} stars are visible`)
   assert.ok(win.quote && win.verse && win.home, `${where} has the verse and Home`)
