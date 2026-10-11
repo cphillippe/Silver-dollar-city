@@ -18,7 +18,7 @@ const SIZES = [
 const SAVE = {
   kind: 'silver-city-save',
   schemaVersion: 1,
-  appVersion: '1.4.451',
+  appVersion: '1.4.453',
   savedAt: '2026-10-11T00:00:00.000Z',
   progress: {
     started: true,
@@ -200,14 +200,14 @@ export async function checkStoryWins() {
   await server.listen()
   const address = server.httpServer?.address()
   const port = address && typeof address === 'object' ? address.port : 0
-  assert.ok(port > 0, '1.4.451 story-win server has a port')
+  assert.ok(port > 0, '1.4.453 story-win server has a port')
   const base = `http://127.0.0.1:${port}/`
   const shots = process.env.STORY_WIN_SHOTS
   if (shots) mkdirSync(shots, { recursive: true })
   const browser = await launchBrowser()
   try {
     const strips = storyStripLines()
-    assert.ok(strips.length >= 3, '1.4.451 Easy story strips are listed')
+    assert.ok(strips.length >= 3, '1.4.453 Easy story strips are listed')
     for (const [width, height] of SIZES) {
       const context = await browser.newContext({
         baseURL: base,
@@ -217,6 +217,9 @@ export async function checkStoryWins() {
       })
       await context.addInitScript((save) => {
         localStorage.setItem('silver-city-progress-v1', JSON.stringify(save))
+        const style = document.createElement('style')
+        style.textContent = '::-webkit-scrollbar{width:15px;height:15px}*{scrollbar-width:auto}'
+        document.documentElement.appendChild(style)
       }, SAVE)
       for (const strip of strips) {
         const page = await context.newPage()
@@ -225,10 +228,6 @@ export async function checkStoryWins() {
         const first = await page.evaluate(readWin)
         await page.waitForTimeout(400)
         const second = await page.evaluate(readWin)
-        assertWin(strip.lineId, width, height, second, [
-          Math.round(first.board?.width ?? 0),
-          Math.round(second.board?.width ?? 0),
-        ])
         const shotIds = ['daily-lantern', 'daily-creed', 'fg-reason', 'daily-rest']
         if (shots && (width === 375 || width === 412) && shotIds.includes(strip.lineId)) {
           await page.screenshot({ path: `${shots}/${strip.lineId}-${width}-win.png` })
@@ -236,18 +235,32 @@ export async function checkStoryWins() {
         const brief = evidenceFor(strip.lineId)
         assert.ok(brief, `${strip.lineId} has a follow-up`)
         await page.getByRole('button', { name: easyWhyLine(brief.reason), exact: true }).click()
+        await page.locator('.why-blast.is-win').waitFor()
+        const mid = await page.evaluate(readWin)
+        assert.equal(await page.locator('.why-blast.is-win').count(), 1, `${strip.lineId} mid-quiz is still the locked follow-up`)
         await page.getByText('Say this tomorrow').waitFor()
         await page.waitForFunction(() => {
           const link = document.querySelector('.daily-page > .text-link, .challenge-page > .text-link')
-          const host = document.querySelector('.daily-page, .challenge-page')
-          return Boolean(link && link.getBoundingClientRect().top >= 0 && (host?.scrollTop ?? 0) <= 1)
+          const body = document.querySelector('.app-body')
+          return Boolean(link && link.getBoundingClientRect().top >= 0 && (body?.scrollTop ?? 0) <= 1)
         })
         const after = await page.evaluate(readWin)
-        assert.ok(after.link && after.link.top >= 0, `${strip.lineId} at ${width}×${height} keeps Settings on screen`)
-        assert.ok(
-          Math.abs(Math.round(after.board?.width ?? 0) - Math.round(second.board?.width ?? 0)) <= 2,
-          `${strip.lineId} at ${width}×${height} width stays put after the quiz (${Math.round(second.board?.width ?? 0)} → ${Math.round(after.board?.width ?? 0)})`,
+        const widths = [
+          Math.round(first.board?.width ?? 0),
+          Math.round(second.board?.width ?? 0),
+          Math.round(mid.board?.width ?? 0),
+          Math.round(after.board?.width ?? 0),
+        ]
+        assertWin(strip.lineId, width, height, second, widths.slice(0, 2))
+        assert.equal(
+          new Set(widths).size,
+          1,
+          `${strip.lineId} at ${width}×${height} strip width is identical across win, mid-quiz and recap (${widths.join(' → ')})`,
         )
+        assert.ok(after.link && after.link.top >= 0, `${strip.lineId} at ${width}×${height} keeps Settings on screen`)
+        if (shotIds.includes(strip.lineId)) {
+          console.log(`${strip.lineId} ${width}×${height} strip ${widths[0]}`)
+        }
         if (shots && width === 375 && strip.lineId === 'daily-lantern') {
           await page.screenshot({ path: `${shots}/${strip.lineId}-375-after.png` })
         }
