@@ -54,9 +54,16 @@ export function walkerFaceSrc(id: string): string | undefined {
 }
 
 /**
- * Face for this spawn. Skips any face already on the road.
- * Same wave, spawn index, and live faces always return the same portrait,
- * so a 1× night and a 3× night show the same heads.
+ * How far the next round steps into the pool.
+ * Five is coprime with the twelve portraits, so a night walks every head
+ * before a round opens on the same face again.
+ */
+export const WALKER_FACE_WAVE_STEP = 5
+
+/**
+ * Face for this spawn. Round-robin from this round's opening, skipping anyone
+ * already on the road. Same wave, spawn index, live faces, and seed shift
+ * always return the same portrait, so a 1× night and a 3× night show the same heads.
  * Kind, HP, gait, and the boss stay on the walker. This only picks the picture.
  */
 export function pickWalkerFace(
@@ -65,13 +72,14 @@ export function pickWalkerFace(
   liveFaces: readonly string[],
   shift = 0,
 ): WalkerFaceId {
+  const pool = WALKER_FACE_POOL.length
   const wave = Number.isFinite(waveIndex) ? Math.max(0, Math.floor(waveIndex)) : 0
   const spawn = Number.isFinite(spawnIndex) ? Math.max(0, Math.floor(spawnIndex)) : 0
   const turn = Number.isFinite(shift) ? Math.abs(Math.floor(shift)) : 0
   const busy = new Set(liveFaces)
-  const start = (wave + spawn + turn) % WALKER_FACE_POOL.length
-  for (let step = 0; step < WALKER_FACE_POOL.length; step++) {
-    const face = WALKER_FACE_POOL[(start + step) % WALKER_FACE_POOL.length]
+  const start = (wave * WALKER_FACE_WAVE_STEP + spawn + turn) % pool
+  for (let step = 0; step < pool; step++) {
+    const face = WALKER_FACE_POOL[(start + step) % pool]
     if (!busy.has(face)) return face
   }
   return WALKER_FACE_POOL[start]

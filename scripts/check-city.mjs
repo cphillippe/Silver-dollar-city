@@ -182,6 +182,7 @@ import { scaledWalkerHp } from '../src/nightWatch/walkers.ts'
 import {
   pickWalkerFace,
   WALKER_FACE_POOL,
+  WALKER_FACE_WAVE_STEP,
   WALKER_HEAD_VIEW,
   WALKER_PORTRAIT_PX,
 } from '../src/nightWatch/enemies/faces.ts'
@@ -1581,7 +1582,16 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.458')
+assert.equal(APP_VERSION, '1.4.459')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.459'), '1.4.459 changelog row')
+assert.match(latestChange('1.4.459').title, /people/i)
+assert.match(latestChange('1.4.459').items.join('\n'), /different heads/)
+assert.match(latestChange('1.4.459').items.join('\n'), /crown/)
+assert.doesNotMatch(
+  latestChange('1.4.459').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.459 changelog avoids GitHub close keywords',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.458'), '1.4.458 changelog row')
 assert.match(latestChange('1.4.458').title, /harder/i)
 assert.doesNotMatch(
@@ -15169,6 +15179,76 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   }
   assert.notDeepEqual(facesFor(2), facesFor(4), '1.4.457 seeds 2 and 4 open on different heads')
   assert.equal(pickWalkerFace(0, 0, [], 0), 'skeptic', '1.4.457 no shift keeps the unseeded head')
+  assert.equal(WALKER_FACE_WAVE_STEP, 5, '1.4.459 a round steps five portraits ahead')
+  assert.equal(WALKER_FACE_POOL.length % WALKER_FACE_WAVE_STEP !== 0, true, '1.4.459 the step shares no factor with the pool')
+  const openings = []
+  for (let wave = 0; wave < WALKER_FACE_POOL.length; wave += 1) {
+    openings.push(pickWalkerFace(wave, 0, [], 0))
+  }
+  assert.equal(new Set(openings).size, WALKER_FACE_POOL.length, '1.4.459 a night opens on every head before it repeats')
+  const roundOne = []
+  for (let spawn = 0; spawn < 4; spawn += 1) {
+    const face = pickWalkerFace(0, spawn, roundOne, 0)
+    assert.equal(roundOne.includes(face), false, '1.4.459 round 1 does not repeat a head')
+    roundOne.push(face)
+  }
+  assert.equal(new Set(roundOne).size, 4, '1.4.459 round 1 shows four heads, not one or two')
+  const hillsWave = {
+    countMulEarly: 1.5,
+    countMul: 2,
+    countFrom: 7,
+    hpScale: 0.75,
+    bulkRamp: [0.35, 0.7],
+    liveCap: 5,
+    spawnMul: 0.6,
+    pack: 1,
+    sparkMul: 0.5,
+  }
+  const crowdedRound = waveRound(EASY_ROUNDS[9], 9, hillsWave)
+  const crowdedCount = crowdedRound.count + (easyBossRound(9) ? 1 : 0)
+  assert.ok(crowdedCount >= 10, '1.4.459 round 10 on the hills is a long wave')
+  assert.equal(hillsWave.liveCap, 5, '1.4.459 the hills keep five walkers on the road')
+  const crowdOnce = (shift) => {
+    const road = []
+    const snaps = []
+    const cast = []
+    for (let spawn = 0; spawn < crowdedCount; spawn += 1) {
+      if (road.length >= hillsWave.liveCap) {
+        snaps.push([...road])
+        road.shift()
+      }
+      const face = pickWalkerFace(9, spawn, road, shift)
+      assert.equal(road.includes(face), false, `1.4.459 round 10 spawn ${spawn} does not copy a head on the road`)
+      road.push(face)
+      cast.push(face)
+    }
+    if (road.length > 0) snaps.push([...road])
+    return { snaps, cast }
+  }
+  const crowded = crowdOnce(0)
+  const full = crowded.snaps.filter((snap) => snap.length >= 4)
+  assert.ok(full.length > 0, '1.4.459 a crowded round 10 holds at least four walkers')
+  for (const snap of crowded.snaps) {
+    assert.equal(new Set(snap).size, snap.length, '1.4.459 simultaneous round 10 heads stay unique')
+  }
+  assert.ok(new Set(crowded.cast).size >= 6, '1.4.459 round 10 uses more than one or two heads')
+  assert.deepEqual(crowdOnce(0), crowded, '1.4.459 the same round 10 plays the same heads')
+  for (const seed of [1, 2, 3, 4, 5]) {
+    const shift = nightSeedFaceShift(seed, WALKER_FACE_POOL.length)
+    const played = crowdOnce(shift)
+    assert.deepEqual(played, crowdOnce(shift), `1.4.459 seed ${seed} round 10 heads stay fixed`)
+    for (const snap of played.snaps) {
+      assert.equal(new Set(snap).size, snap.length, `1.4.459 seed ${seed} keeps unique heads`)
+    }
+  }
+  const screen459 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const minis459 = screen459.slice(screen459.indexOf('function releaseMinis'), screen459.indexOf('function fire'))
+  assert.match(minis459, /pickWalkerFace\(/, '1.4.459 a split takes a free head')
+  assert.match(screen459, /defend-boss-crown|easyBossRound/)
+  const actors459 = readFileSync(new URL('../src/components/DefendNightActors.tsx', import.meta.url), 'utf8')
+  assert.match(actors459, /defend-fast-rim/)
+  assert.match(actors459, /defend-tough-bulk/)
+  assert.match(actors459, /defend-boss-crown/)
   assert.equal(candleStrike(freshCandlePaths(), 3).splash, 0, '1.4.457 a fresh candle has no splash to add the row extra onto')
   assert.equal(candleStrike(freshCandlePaths(), 3).outer, 0, '1.4.457 a fresh candle has no outer nick')
   assert.equal(candleWalkerDamage(1, 2, 4, true), 1, '1.4.457 the round 5 boss stays off the row extra')
