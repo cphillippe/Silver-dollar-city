@@ -1402,18 +1402,23 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     const split = splitFeature(featuresRef.current)
     if (!splitDue(split, waveIndexRef.current, parent.gait, !!parent.boss, !!parent.mini) || !split) return
     const at = raiderAt(parent)
+    const taken = live.current.raiders.flatMap((item) => (item.face ? [item.face] : []))
     for (let q = 0; q < split.into; q += 1) {
       const hp = miniHp(parent.maxHp ?? parent.hp, split)
       const id = live.current.nextId
       live.current.nextId += 1
       live.current.extras += 1
+      const face = easy
+        ? pickWalkerFace(waveIndexRef.current, id, taken, faceShiftRef.current)
+        : parent.face
+      if (face) taken.push(face)
       live.current.raiders.push({
         id,
         t: Math.max(0, parent.t - 0.02 * q),
         text: parent.text,
         kind: parent.kind,
         label: parent.label,
-        face: parent.face,
+        face,
         castId: parent.castId,
         hp,
         maxHp: hp,

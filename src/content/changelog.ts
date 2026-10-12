@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.459',
+    title: 'The road shows different people',
+    when: '2026-10-12',
+    items: [
+      'Walkers on the road at the same time wear different heads. A new one takes a head nobody else is wearing.',
+      'Each round steps further through the portraits, so one round is not the same one or two faces, and a night keeps changing the cast.',
+      'A fast walker still has the blue rim, a tough walker still has the heavy shoulders, and a boss still wears the crown.',
+    ],
+  },
+  {
     version: '1.4.458',
     title: 'A row of three hits harder',
     when: '2026-10-11',
