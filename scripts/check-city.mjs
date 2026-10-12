@@ -15292,5 +15292,11 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.equal(rowNight.dead, 5, '1.4.457 an unseeded zero-tap row still loses round 5')
 }
 
+const bossTapScan = readFileSync(new URL('./check-seed-fire.mjs', import.meta.url), 'utf8')
+assert.match(
+  bossTapScan,
+  /a glowing tap on the round 5 boss deals more than 0 damage/,
+  '1.4.460 the city scan taps the live round 5 boss and requires damage',
+)
 await import('./check-seed-fire.mjs').then((mod) => mod.checkSeedFire())
 await import('./check-story-win.mjs').then((mod) => mod.checkStoryWins())
