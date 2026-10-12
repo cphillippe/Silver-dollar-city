@@ -201,6 +201,61 @@ export async function checkSeedFire() {
     console.log(
       `seed-fire: seed 2 damage ${lampDamage} sparks ${sparks} shot yes clear faces ${faces2.join(',')} | seed 4 faces ${faces4.join(',')}`,
     )
+
+    const bossContext = await browser.newContext({
+      baseURL: base,
+      viewport: { width: 375, height: 667 },
+      deviceScaleFactor: 1,
+      reducedMotion: 'reduce',
+    })
+    await bossContext.addInitScript(
+      (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+      { key: STORAGE_KEY, save: SAVE },
+    )
+    const bossPage = await bossContext.newPage()
+    bossPage.on('pageerror', (error) => errors.push(String(error)))
+    await bossPage.goto('/?playtest=1&nwSeed=2&nwRound=5')
+    const bossBegin = bossPage.getByRole('button', { name: 'Begin the watch' }).first()
+    await bossBegin.waitFor({ timeout: 20_000 })
+    if ((await bossPage.locator('.defend-page').count()) === 0) await bossBegin.click()
+    await bossPage.locator('.defend-page').waitFor()
+    const bossGo = bossPage.locator('.defend-go')
+    if ((await bossGo.count()) && !(await bossGo.isDisabled())) await bossGo.click()
+    await bossPage.locator('.defend-page.is-easy-tap').waitFor({ timeout: 20_000 })
+    const crowned = bossPage.locator('[data-boss="yes"][data-face]').first()
+    await crowned.waitFor({ timeout: 40_000 })
+    const before = await bossPage.locator('[data-boss-hp]').getAttribute('data-boss-hp')
+    const face = await crowned.getAttribute('data-face')
+    const walkerId = await crowned.getAttribute('data-walker-id')
+    assert.ok(face, '1.4.460 the round 5 boss is wearing a head')
+    assert.ok(walkerId, '1.4.460 the boss carries its walker id')
+    assert.equal(Number(before), 12, `1.4.460 the round 5 boss starts at 12 (saw ${before})`)
+    const crown = await crowned.locator('.defend-boss-crown').boundingBox()
+    assert.ok(crown, '1.4.460 the boss is wearing its crown')
+    const aim = { x: crown.x + crown.width / 2, y: crown.y + crown.height / 2 }
+    const hit = await bossPage.evaluate(({ x, y }) => {
+      const node = document.elementFromPoint(x, y)
+      const walker = node?.closest?.('[data-walker-id]')
+      return {
+        className: node?.getAttribute?.('class') ?? '',
+        walkerId: walker?.getAttribute('data-walker-id') ?? '',
+        boss: walker?.getAttribute('data-boss') ?? '',
+      }
+    }, aim)
+    assert.equal(hit.boss, 'yes', '1.4.460 a tap on the crown lands on the boss')
+    assert.equal(hit.walkerId, walkerId, '1.4.460 the crown resolves to that walker')
+    assert.match(hit.className, /defend-boss-crown|defend-raider-face|defend-raider-hit/)
+    await bossPage.mouse.click(aim.x, aim.y)
+    await bossPage.waitForFunction(
+      (hp) => Number(document.querySelector('[data-boss-hp]')?.getAttribute('data-boss-hp')) < hp,
+      Number(before),
+      { timeout: 3_000 },
+    )
+    const after = await bossPage.locator('[data-boss-hp]').getAttribute('data-boss-hp')
+    assert.ok(Number(after) < Number(before), `1.4.460 the crowned face tap cuts the boss (${before} -> ${after})`)
+    assert.equal(errors.join('\n'), '', '1.4.460 crowned boss tap stays free of page errors')
+    console.log(`boss-tap: seed 2 face ${face} crown ${before} -> ${after}`)
+    await bossContext.close()
     await context.close()
   } finally {
     await browser.close()
