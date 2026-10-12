@@ -502,6 +502,7 @@ export function DefendNightActorsSvg({
                   <g
                     key={raider.id}
                     data-person-node={isTap ? 'walker' : undefined}
+                    data-walker-id={isTap ? raider.id : undefined}
                     data-gait={raider.gait && raider.gait !== 'plain' ? raider.gait : undefined}
                     data-face={raider.face ?? raider.kind}
                     className={`defend-raider ${raider.mini ? 'is-mini' : ''} ${raider.gait === 'fast' ? 'is-fast' : ''} ${raider.gait === 'tough' ? 'is-tough' : ''} ${raider.boss ? 'is-boss' : ''} ${raider.turned ? 'is-turned' : ''} ${isTap ? 'is-easy-tap-target' : ''} ${isCue ? 'is-easy-cue' : ''} ${lampHit ? 'is-lamp-hit' : ''}`}
@@ -514,7 +515,9 @@ export function DefendNightActorsSvg({
                       isTap
                         ? (event) => {
                             event.stopPropagation()
-                            fireAtRaider(raider.id)
+                            const host = event.currentTarget as SVGGElement
+                            const marked = Number(host.getAttribute('data-walker-id'))
+                            fireAtRaider(Number.isFinite(marked) ? marked : raider.id)
                           }
                         : undefined
                     }

@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.460',
+    title: 'The round 5 boss takes a tap',
+    when: '2026-10-12',
+    items: [
+      'A tap on the crowned face hurts the round 5 boss again. The crown and the portrait are that walker, whichever head it wears.',
+      'Walkers on the road together still wear different heads. A fast walker keeps the blue rim, a tough walker keeps the heavy shoulders, and the boss keeps the crown.',
+      'A night with no taps still loses round 5.',
+    ],
+  },
+  {
     version: '1.4.459',
     title: 'The road shows different people',
     when: '2026-10-12',
