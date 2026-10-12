@@ -1582,7 +1582,16 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.459')
+assert.equal(APP_VERSION, '1.4.460')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.460'), '1.4.460 changelog row')
+assert.match(latestChange('1.4.460').title, /boss/i)
+assert.match(latestChange('1.4.460').items.join('\n'), /crowned face/)
+assert.match(latestChange('1.4.460').items.join('\n'), /no taps still loses round 5/)
+assert.doesNotMatch(
+  latestChange('1.4.460').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.460 changelog avoids GitHub close keywords',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.459'), '1.4.459 changelog row')
 assert.match(latestChange('1.4.459').title, /people/i)
 assert.match(latestChange('1.4.459').items.join('\n'), /different heads/)
@@ -6258,6 +6267,17 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   )
   assert.match(actors435, /tapTarget\?\.id === raider\.id \|\| !!raider\.boss/)
   assert.match(css435, /\.defend-page\.is-easy-tap \.defend-raider\.is-boss \.defend-raider-hit \{[^}]*pointer-events:\s*all/)
+  assert.match(actors435, /data-walker-id=\{isTap \? raider\.id : undefined\}/, '1.4.460 the walker carries its own id')
+  assert.match(
+    actors435,
+    /host\.getAttribute\('data-walker-id'\)/,
+    '1.4.460 a tap resolves to that walker, whatever the face markup',
+  )
+  assert.match(
+    css435,
+    /\.defend-page\.is-easy-tap \.defend-raider\.is-boss \.defend-boss-crown,\s*\n\.defend-page\.is-easy-tap \.defend-raider\.is-boss \.defend-boss-mantle \{\s*\n\s*pointer-events:\s*all/,
+    '1.4.460 the crown is part of the boss hit',
+  )
 }
 
 // Night Watch 1.4.436: a shrug moves the glow. The clear tree sits above the bar. Hearts stay at three.
@@ -15092,6 +15112,11 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.match(paceSrc, /if \(raider\.boss && roundIndex < 6\) return 0/, '1.4.456 rounds 1–6 bosses skip the row extra')
   assert.match(
     paceSrc,
+    /!map && roundIndex < 6\s*\?\s*walking\.find\(\(raider\) => raider\.boss && openTap\(raider\)\)/,
+    '1.4.460 a light tap on round 5 prefers the boss',
+  )
+  assert.match(
+    paceSrc,
     /lamp\.strike\.splash \* \(1 \+ \(pick \? rowExtra\(pick\) : 0\)\)/,
     '1.4.456 splash uses the same boss cap',
   )
@@ -15152,13 +15177,25 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.ok(mid(lightRowDead) >= mid(lightSpreadDead) + 1, '1.4.456 the light-tap row median lasts at least one round longer')
   assert.deepEqual(lightRowDead, [10, 10, 10, 10, 10], '1.4.456 light-tap row seeds stop on round 10')
   assert.deepEqual(lightSpreadDead, [10, 9, 9, 9, 9], '1.4.456 light-tap spread seeds')
-  assert.deepEqual(lightRowDealt, [672, 718, 689, 717, 718], '1.4.458 light-tap row damage')
+  assert.deepEqual(lightRowDealt, [672, 718, 689, 715, 716], '1.4.460 light-tap row damage')
   assert.deepEqual(lightX2Dead, [9, 9, 9, 9, 9], '1.4.458 light-tap row of two stops on round 9')
-  assert.deepEqual(lightX2Dealt, [437, 438, 429, 432, 431], '1.4.458 light-tap row of two damage')
+  assert.deepEqual(lightX2Dealt, [434, 435, 426, 429, 428], '1.4.460 light-tap row of two damage')
   console.log(
     `row-pay seeds 1-5 zero row/x2/tight/spread all R5 | light row ${lightRowDead.join(',')} dealt ${lightRowDealt.join(',')} | light x2 ${lightX2Dead.join(',')} dealt ${lightX2Dealt.join(',')} | light spread ${lightSpreadDead.join(',')} dealt ${lightSpreadDealt.join(',')}`,
   )
-  assert.deepEqual(lightSpreadDealt, [565, 449, 449, 449, 450], '1.4.456 light-tap spread damage')
+  assert.deepEqual(lightSpreadDealt, [561, 445, 445, 445, 446], '1.4.460 light-tap spread damage')
+  const leadLamps = easyJumpLoad(4).lamps
+  const leadLight = paceEasyLive(4, leadLamps, 3, false, 1.6, 'road', undefined, [], 2)
+  const leadQuiet = paceEasyLive(4, leadLamps, 3, false, 1e9, 'road', undefined, [], 2)
+  assert.ok(leadLight.bossTap > 0, `1.4.460 seed 2 light taps cut the round 5 boss (bossTap ${leadLight.bossTap})`)
+  assert.ok(
+    leadLight.bossLamp + leadLight.bossTap > leadQuiet.bossLamp,
+    '1.4.460 those taps are damage the lamps did not already deal',
+  )
+  assert.equal(leadQuiet.result, 'lost', '1.4.460 seed 2 with no taps still loses the round 5 fight')
+  assert.equal(leadQuiet.bossTap, 0, '1.4.460 a night with no taps does not chip the boss')
+  assert.equal(leadQuiet.taps, 0)
+  assert.equal(paceExtraNight('natural', [], 1e9, 2).dead, 5, '1.4.460 seed 2 zero-tap lead night loses round 5')
   assert.equal(lightRowDead[1], 10)
   assert.equal(lightSpreadDead[1], 9, '1.4.456 seed 2 is a live replay where the row outlasts the spread')
   assert.equal(lightRowDead[3], 10)
@@ -15255,5 +15292,11 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.equal(rowNight.dead, 5, '1.4.457 an unseeded zero-tap row still loses round 5')
 }
 
+const bossTapScan = readFileSync(new URL('./check-seed-fire.mjs', import.meta.url), 'utf8')
+assert.match(
+  bossTapScan,
+  /a glowing tap on the round 5 boss deals more than 0 damage/,
+  '1.4.460 the city scan taps the live round 5 boss and requires damage',
+)
 await import('./check-seed-fire.mjs').then((mod) => mod.checkSeedFire())
 await import('./check-story-win.mjs').then((mod) => mod.checkStoryWins())
