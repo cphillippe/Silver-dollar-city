@@ -201,6 +201,64 @@ export async function checkSeedFire() {
     console.log(
       `seed-fire: seed 2 damage ${lampDamage} sparks ${sparks} shot yes clear faces ${faces2.join(',')} | seed 4 faces ${faces4.join(',')}`,
     )
+
+    const bossContext = await browser.newContext({
+      baseURL: base,
+      viewport: { width: 375, height: 667 },
+      deviceScaleFactor: 1,
+      reducedMotion: 'reduce',
+    })
+    await bossContext.addInitScript(
+      (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+      { key: STORAGE_KEY, save: SAVE },
+    )
+    const bossPage = await bossContext.newPage()
+    bossPage.on('pageerror', (error) => errors.push(String(error)))
+    await bossPage.goto('/?playtest=1&nwSeed=2&nwRound=5')
+    const bossBegin = bossPage.getByRole('button', { name: 'Begin the watch' }).first()
+    await bossBegin.waitFor({ timeout: 20_000 })
+    if ((await bossPage.locator('.defend-page').count()) === 0) await bossBegin.click()
+    await bossPage.locator('.defend-page').waitFor()
+    const bossGo = bossPage.locator('.defend-go')
+    if ((await bossGo.count()) && !(await bossGo.isDisabled())) await bossGo.click()
+    await bossPage.locator('.defend-page.is-easy-tap').waitFor({ timeout: 20_000 })
+    // 1.4.434 and 1.4.459 both let a round 5 boss take taps and lose no health.
+    // The city scan opens the real Easy screen and fails if a glowing tap deals 0.
+    const glowing = bossPage.locator('[data-boss="yes"].is-easy-cue').first()
+    await glowing.waitFor({ timeout: 40_000 })
+    const beforeHp = Number(await bossPage.locator('[data-boss-hp]').getAttribute('data-boss-hp'))
+    const beforeDmg = Number((await bossPage.locator('[data-tap-damage]').getAttribute('data-tap-damage')) ?? '0')
+    const face = await glowing.getAttribute('data-face')
+    const walkerId = await glowing.getAttribute('data-walker-id')
+    assert.ok(face, '1.4.460 the round 5 boss is wearing a head')
+    assert.ok(walkerId, '1.4.460 the boss carries its walker id')
+    assert.ok(beforeHp > 0, `1.4.460 the round 5 boss is on the road (saw ${beforeHp})`)
+    const faceBox = await glowing.locator('.defend-raider-face').boundingBox()
+    assert.ok(faceBox, '1.4.460 the glowing round 5 boss has a face to tap')
+    const aim = { x: faceBox.x + faceBox.width / 2, y: faceBox.y + faceBox.height / 2 }
+    const hit = await bossPage.evaluate(({ x, y }) => {
+      const node = document.elementFromPoint(x, y)
+      const walker = node?.closest?.('[data-boss="yes"]')
+      return {
+        className: node?.getAttribute?.('class') ?? '',
+        boss: walker?.getAttribute('data-boss') ?? '',
+        glowing: walker?.classList.contains('is-easy-cue') ?? false,
+      }
+    }, aim)
+    assert.equal(hit.boss, 'yes', '1.4.460 the glowing tap lands on the round 5 boss')
+    assert.equal(hit.glowing, true, '1.4.460 that boss is the glowing face')
+    await bossPage.mouse.click(aim.x, aim.y)
+    await bossPage.waitForTimeout(400)
+    const afterHp = Number(await bossPage.locator('[data-boss-hp]').getAttribute('data-boss-hp'))
+    const afterDmg = Number((await bossPage.locator('[data-tap-damage]').getAttribute('data-tap-damage')) ?? '0')
+    const lost = beforeHp - afterHp
+    assert.ok(
+      lost > 0,
+      `1.4.460 a glowing tap on the round 5 boss deals more than 0 damage (lost ${lost}, hp ${beforeHp} -> ${afterHp}, tap ${afterDmg - beforeDmg}, hit ${hit.className})`,
+    )
+    assert.equal(errors.join('\n'), '', '1.4.460 crowned boss tap stays free of page errors')
+    console.log(`boss-tap: seed 2 face ${face} glowing ${beforeHp} -> ${afterHp} lost ${lost}`)
+    await bossContext.close()
     await context.close()
   } finally {
     await browser.close()

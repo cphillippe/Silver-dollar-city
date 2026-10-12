@@ -1839,8 +1839,18 @@ img.walker-face.easy-walker-face,
 }
 
 .defend-page.is-easy-tap .defend-raider.is-easy-tap-target .defend-raider-face,
+.defend-page.is-easy-tap .defend-raider.is-easy-tap-target .defend-raider-face *,
 .defend-page.is-easy-tap .defend-raider.is-easy-tap-target .defend-raider-shadow {
   pointer-events: none;
+}
+
+/* 1.4.460: the crown and the portrait are the boss, whatever face is drawn.
+   A tap there resolves to that walker. It does not fall through to the lead. */
+.defend-page.is-easy-tap .defend-raider.is-boss .defend-raider-face,
+.defend-page.is-easy-tap .defend-raider.is-boss .defend-raider-face *,
+.defend-page.is-easy-tap .defend-raider.is-boss .defend-boss-crown,
+.defend-page.is-easy-tap .defend-raider.is-boss .defend-boss-mantle {
+  pointer-events: all;
 }
 
 /* 1.4.372: idle walkers stay quieter so the glowing lead pops. A hit still flashes full. */
