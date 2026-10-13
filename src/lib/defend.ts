@@ -107,11 +107,19 @@ export function easyTapArmored(
   return false
 }
 
-export function easyGlowTapDamage(hp: number, chipped = 0, armored = false): number {
+/**
+ * The first glowing tap on a round 5 tough opens this much extra.
+ * Later taps stay at one. Lamps do not read this, so a night with no taps
+ * still meets the old bar.
+ */
+export const EASY_R5_TOUGH_OPEN = 5
+
+export function easyGlowTapDamage(hp: number, chipped = 0, armored = false, openTough = false): number {
   const left = Math.max(0, Math.floor(hp) || 0)
   const soaked = Math.max(0, Math.floor(chipped) || 0)
   if (armored && soaked >= TAP_SHRUG_CHIP) return 0
-  return Math.min(left, EASY_GLOW_TAP_DAMAGE)
+  const open = openTough && soaked === 0 ? EASY_R5_TOUGH_OPEN : 0
+  return Math.min(left, EASY_GLOW_TAP_DAMAGE + open)
 }
 
 /**
@@ -161,7 +169,17 @@ export function liveNightDamage(
     shot.easy && shot.manual && easyTapArmored(shot.roundIndex, raider.gait, !!raider.boss, shot.armorFrom ?? 7)
   const soaked = raider.tapChip ?? 0
   const lamp = Math.max(0, Math.floor(shot.lampDamage) || 0)
-  const damage = shot.easy && shot.manual ? easyGlowTapDamage(raider.hp, soaked, armored) : lamp
+  const glow = shot.easy && shot.manual ? easyGlowTapDamage(raider.hp, soaked, armored) : lamp
+  const openTough =
+    glow > 0 &&
+    shot.easy &&
+    shot.manual &&
+    shot.roundIndex === 4 &&
+    raider.gait === 'tough' &&
+    soaked === 0 &&
+    (shot.armorFrom ?? 7) >= 7 &&
+    !raider.boss
+  const damage = openTough ? Math.min(raider.hp, glow + EASY_R5_TOUGH_OPEN) : glow
   const nextChip = shot.easy && shot.manual && damage > 0 ? soaked + damage : soaked
   return { damage, armored, nextChip }
 }
@@ -236,9 +254,26 @@ export function cueTapStrike(easy: boolean, glowingFace: boolean): 'hit' | 'miss
 }
 
 /**
+ * Who wears the gold ring.
+ * Rounds 1–4 and 6 keep the lead, and the boss when one is out.
+ * Round 5 lights every walker on the road, so a leak cannot slip past a dark face.
+ * A shrugged or fogged walker stays dark. Hard does not use the glow.
+ */
+export function easyFaceGlows<
+  T extends { id: number; turned?: string; t?: number; tapChip?: number; gait?: string; boss?: boolean; fog?: boolean },
+>(raider: T, raiders: readonly T[], roundIndex = -1, armorFrom = 7): boolean {
+  if (raider.turned || raider.fog) return false
+  if (easyTapSoaked(roundIndex, raider, armorFrom)) return false
+  if (Math.floor(roundIndex) === 4) return true
+  if (raider.boss) return true
+  return easyTapTarget(raiders, roundIndex, armorFrom)?.id === raider.id
+}
+
+/**
  * Pointer on a walker, then the glow gate, then the caller strikes.
- * A normal walker still has to be the glowing lead. The boss is always
- * a hit, even when a faster walker is ahead of it. Hard does not use the glow.
+ * Before round 5 a normal walker still has to be the glowing lead.
+ * On round 5 every walker on the road is a hit. The boss is always a hit
+ * when it is not soaked. Hard does not use the glow.
  */
 export function easyPointerTapGate<
   T extends { id: number; turned?: string; t?: number; boss?: boolean; tapChip?: number; gait?: string; fog?: boolean },
@@ -251,6 +286,7 @@ export function easyPointerTapGate<
 ): 'hit' | 'miss' {
   if (raider.turned || raider.fog) return 'miss'
   const soaked = easyTapSoaked(roundIndex, raider, armorFrom)
+  if (easy && Math.floor(roundIndex) === 4 && !soaked) return 'hit'
   if (easy && raider.boss && !soaked) return 'hit'
   const cue = easyTapTarget(raiders, roundIndex, armorFrom)
   return cueTapStrike(easy, cue?.id === raider.id)

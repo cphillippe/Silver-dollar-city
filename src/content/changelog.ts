@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.461',
+    title: 'Round 5 lights every walker',
+    when: '2026-10-13',
+    items: [
+      'On round 5 every walker on the road glows and can be tapped. A walker cannot slip through in the dark.',
+      'The first tap on a tough walker opens a little more of its bar. Later taps stay at one, and the lamps are unchanged.',
+      'A busy tapper holds round 5. A night with no taps still loses round 5.',
+    ],
+  },
+  {
     version: '1.4.460',
     title: 'The round 5 boss takes a tap',
     when: '2026-10-12',
