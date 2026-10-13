@@ -69,7 +69,9 @@ import {
   applyGateLeaks,
   cueTapStrike,
   easyClearHeart,
+  easyFaceGlows,
   easyGlowTapDamage,
+  EASY_R5_TOUGH_OPEN,
   easyRoundHeartCap,
   applyEasyPointerTap,
   easyLiveSpawnT,
@@ -1582,7 +1584,16 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.460')
+assert.equal(APP_VERSION, '1.4.461')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.461'), '1.4.461 changelog row')
+assert.match(latestChange('1.4.461').title, /round 5/i)
+assert.match(latestChange('1.4.461').items.join('\n'), /every walker/)
+assert.match(latestChange('1.4.461').items.join('\n'), /no taps still loses round 5/)
+assert.doesNotMatch(
+  latestChange('1.4.461').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.461 changelog avoids GitHub close keywords',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.460'), '1.4.460 changelog row')
 assert.match(latestChange('1.4.460').title, /boss/i)
 assert.match(latestChange('1.4.460').items.join('\n'), /crowned face/)
@@ -6242,8 +6253,23 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     roundIndex: 4,
     lampDamage: 1,
   })
-  assert.equal(backTap435.miss, true, '1.4.435 a walker behind the glow is still a miss')
-  assert.equal(back435.hp, 6)
+  assert.equal(backTap435.miss, false, '1.4.461 round 5 taps the walker behind the lead')
+  assert.equal(backTap435.strike.raider.hp, 5, '1.4.461 that back walker loses a health')
+  assert.equal(back435.hp, 6, '1.4.461 the tap returns a copy')
+  assert.equal(easyFaceGlows(back435, road435, 4), true, '1.4.461 a round 5 walker behind the lead still glows')
+  assert.equal(easyFaceGlows(lead435, road435, 4), true, '1.4.461 the round 5 lead still glows')
+  assert.equal(easyFaceGlows(boss435, road435, 4), true, '1.4.461 the round 5 boss still glows')
+  const earlyBack = applyEasyPointerTap(back435, road435, {
+    easy: true,
+    manual: true,
+    roundIndex: 0,
+    lampDamage: 1,
+  })
+  assert.equal(earlyBack.miss, true, '1.4.461 a walker behind the glow is still a miss before round 5')
+  assert.equal(easyFaceGlows(back435, road435, 0), false, '1.4.461 round 1 still glows only the lead')
+  assert.equal(easyGlowTapDamage(24, 0, false, true), 1 + EASY_R5_TOUGH_OPEN, '1.4.461 the first tap on a round 5 tough opens five extra')
+  assert.equal(easyGlowTapDamage(18, 6, false, true), 1, '1.4.461 the next tap on that tough is one')
+  assert.equal(easyGlowTapDamage(24), 1, '1.4.461 a tap off that opener is still one')
   const leadTap435 = applyEasyPointerTap(lead435, road435, {
     easy: true,
     manual: true,
@@ -6265,7 +6291,11 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     screen435,
     /easy\s*\?\s*easyLiveSpawnT\(tune\.speedScale \* \(boss \? BOSS_PACE : walkerPace\(gait\)\)\)/,
   )
-  assert.match(actors435, /tapTarget\?\.id === raider\.id \|\| !!raider\.boss/)
+  assert.match(
+    actors435,
+    /easyFaceGlows\(raider, raiders, roundIndex, armorFrom\)/,
+    '1.4.461 round 5 lights every walker on the road',
+  )
   assert.match(css435, /\.defend-page\.is-easy-tap \.defend-raider\.is-boss \.defend-raider-hit \{[^}]*pointer-events:\s*all/)
   assert.match(actors435, /data-walker-id=\{isTap \? raider\.id : undefined\}/, '1.4.460 the walker carries its own id')
   assert.match(
@@ -15177,13 +15207,13 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.ok(mid(lightRowDead) >= mid(lightSpreadDead) + 1, '1.4.456 the light-tap row median lasts at least one round longer')
   assert.deepEqual(lightRowDead, [10, 10, 10, 10, 10], '1.4.456 light-tap row seeds stop on round 10')
   assert.deepEqual(lightSpreadDead, [10, 9, 9, 9, 9], '1.4.456 light-tap spread seeds')
-  assert.deepEqual(lightRowDealt, [672, 718, 689, 715, 716], '1.4.460 light-tap row damage')
+  assert.deepEqual(lightRowDealt, [658, 704, 675, 707, 707], '1.4.461 light-tap row damage')
   assert.deepEqual(lightX2Dead, [9, 9, 9, 9, 9], '1.4.458 light-tap row of two stops on round 9')
-  assert.deepEqual(lightX2Dealt, [434, 435, 426, 429, 428], '1.4.460 light-tap row of two damage')
+  assert.deepEqual(lightX2Dealt, [424, 425, 416, 426, 424], '1.4.461 light-tap row of two damage')
   console.log(
     `row-pay seeds 1-5 zero row/x2/tight/spread all R5 | light row ${lightRowDead.join(',')} dealt ${lightRowDealt.join(',')} | light x2 ${lightX2Dead.join(',')} dealt ${lightX2Dealt.join(',')} | light spread ${lightSpreadDead.join(',')} dealt ${lightSpreadDealt.join(',')}`,
   )
-  assert.deepEqual(lightSpreadDealt, [561, 445, 445, 445, 446], '1.4.460 light-tap spread damage')
+  assert.deepEqual(lightSpreadDealt, [555, 439, 439, 439, 433], '1.4.461 light-tap spread damage')
   const leadLamps = easyJumpLoad(4).lamps
   const leadLight = paceEasyLive(4, leadLamps, 3, false, 1.6, 'road', undefined, [], 2)
   const leadQuiet = paceEasyLive(4, leadLamps, 3, false, 1e9, 'road', undefined, [], 2)
@@ -15196,6 +15226,27 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.equal(leadQuiet.bossTap, 0, '1.4.460 a night with no taps does not chip the boss')
   assert.equal(leadQuiet.taps, 0)
   assert.equal(paceExtraNight('natural', [], 1e9, 2).dead, 5, '1.4.460 seed 2 zero-tap lead night loses round 5')
+  for (const seed of [2, 4]) {
+    const active = paceEasyLive(4, BARE_LAMPS, 3, false, 1.2, 'road', undefined, [], seed)
+    const quiet = paceEasyLive(4, BARE_LAMPS, 3, false, 1e9, 'road', undefined, [], seed)
+    const night = paceExtraNight('none', [], 1.2, seed)
+    const still = paceExtraNight('none', [], 1e9, seed)
+    assert.equal(
+      active.result,
+      'clear',
+      `1.4.461 seed ${seed} active taps hold round 5 (hearts ${active.hearts}, taps ${active.taps}, boss ${active.boss})`,
+    )
+    assert.equal(active.hearts, 1, `1.4.461 seed ${seed} finishes round 5 with a heart left`)
+    assert.equal(active.taps, 23, `1.4.461 seed ${seed} active taps land 23 glowing hits`)
+    assert.equal(active.boss, 'kill', `1.4.461 seed ${seed} active taps fell the round 5 boss`)
+    assert.equal(active.bossTap, 6, `1.4.461 seed ${seed} some of those taps hit the boss`)
+    assert.equal(quiet.result, 'lost', `1.4.461 seed ${seed} with no taps still loses round 5`)
+    assert.equal(quiet.taps, 0, `1.4.461 seed ${seed} a quiet night does not tap`)
+    assert.equal(quiet.bossTap, 0, `1.4.461 seed ${seed} a quiet night does not chip the boss`)
+    assert.equal(quiet.boss, 'up', `1.4.461 seed ${seed} the boss is still up when the quiet night fails`)
+    assert.equal(still.dead, 5, `1.4.461 seed ${seed} zero-tap pillars lose round 5`)
+    assert.equal(night.dead, 7, `1.4.461 seed ${seed} active taps clear round 5 and reach round 7`)
+  }
   assert.equal(lightRowDead[1], 10)
   assert.equal(lightSpreadDead[1], 9, '1.4.456 seed 2 is a live replay where the row outlasts the spread')
   assert.equal(lightRowDead[3], 10)
