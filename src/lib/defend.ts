@@ -93,7 +93,7 @@ export const TAP_SHRUG_CHIP = 4
 /**
  * Tough walkers from round 7 on, and bosses from round 15 on.
  * Round 5's tough walkers stay open so that proven round does not move.
- * Hard does not read this.
+ * Hard does not read this. The lead round 10 boss is `easyLeadBossShrug`.
  */
 export function easyTapArmored(
   roundIndex: number,
@@ -105,6 +105,16 @@ export function easyTapArmored(
   if (boss && round >= 15) return true
   if (gait === 'tough' && round >= armorFrom) return true
   return false
+}
+
+/**
+ * The live lead road. The round 10 boss shrugs after a few taps.
+ * Plate sims and the frozen good-seat nights stay on `easyTapArmored`,
+ * and a maze night keeps this boss open.
+ */
+export function easyLeadBossShrug(roundIndex: number, boss = false, armorFrom = 7): boolean {
+  if (!boss || armorFrom < 7) return false
+  return Math.floor(roundIndex) + 1 === 10
 }
 
 /**
@@ -132,10 +142,10 @@ export function easyTapSoaked(
   armorFrom = 7,
 ): boolean {
   if (!(roundIndex >= 0)) return false
-  return (
-    easyTapArmored(roundIndex, raider.gait, !!raider.boss, armorFrom) &&
-    (raider.tapChip ?? 0) >= TAP_SHRUG_CHIP
-  )
+  const armored =
+    easyTapArmored(roundIndex, raider.gait, !!raider.boss, armorFrom) ||
+    easyLeadBossShrug(roundIndex, !!raider.boss, armorFrom)
+  return armored && (raider.tapChip ?? 0) >= TAP_SHRUG_CHIP
 }
 
 /** What a live Night Watch shot is. A face tap is `manual`. A lamp is not. */
@@ -158,7 +168,7 @@ export interface LiveStrikeSize {
 /**
  * How hard the live shot is, before the hit lands.
  * Round 5's boss is not armored, so a tap and a lamp both cut the bar.
- * Tough walkers from round 7, and bosses from round 15, shrug taps after four.
+ * Tough walkers from round 7, the round 10 boss, and bosses from round 15, shrug taps after four.
  * Lamps still use their tier. Hard does not read the Easy armor.
  */
 export function liveNightDamage(
@@ -166,7 +176,8 @@ export function liveNightDamage(
   shot: LiveStrikeShot,
 ): LiveStrikeSize {
   const armored =
-    shot.easy && shot.manual && easyTapArmored(shot.roundIndex, raider.gait, !!raider.boss, shot.armorFrom ?? 7)
+    (shot.easy && shot.manual && easyTapArmored(shot.roundIndex, raider.gait, !!raider.boss, shot.armorFrom ?? 7)) ||
+    (shot.easy && shot.manual && easyLeadBossShrug(shot.roundIndex, !!raider.boss, shot.armorFrom ?? 7))
   const soaked = raider.tapChip ?? 0
   const lamp = Math.max(0, Math.floor(shot.lampDamage) || 0)
   const glow = shot.easy && shot.manual ? easyGlowTapDamage(raider.hp, soaked, armored) : lamp
