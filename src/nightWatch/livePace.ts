@@ -3,6 +3,7 @@ import {
   applyEasyPaceLeaks,
   easyClearHeart,
   easyGlowTapDamage,
+  easyLeadBossShrug,
   easyLiveSpawnT,
   easyRoundHeartCap,
   easyTapArmored,
@@ -623,9 +624,13 @@ export function paceEasyLive(
     if (tapAt >= tapEvery && live().length > 0) {
       tapAt = 0
       const walking = live().sort((a, b) => b.t - a.t)
+      const leadBoss = (raider: { boss: boolean }) =>
+        mode === 'road' && !map && !frozen && easyLeadBossShrug(roundIndex, raider.boss, tune.armorFrom)
       const openTap = (raider: (typeof walking)[number]) => {
         if (features.length && faceInFog(pathPoint(raider.t, raider.road), features)) return false
-        return !easyTapArmored(roundIndex, raider.gait, raider.boss, tune.armorFrom) || raider.chip < 4
+        const armored =
+          easyTapArmored(roundIndex, raider.gait, raider.boss, tune.armorFrom) || leadBoss(raider)
+        return !armored || raider.chip < 4
       }
       // Round 5 on the lead road: the crown is a hit even when a faster walker is ahead.
       // Other maps and later bosses stay on the lead tap, so those nights do not move.
@@ -639,7 +644,7 @@ export function paceEasyLive(
         const dmg = easyGlowTapDamage(
           cue.hp,
           cue.chip,
-          easyTapArmored(roundIndex, cue.gait, cue.boss, tune.armorFrom),
+          easyTapArmored(roundIndex, cue.gait, cue.boss, tune.armorFrom) || leadBoss(cue),
           mode === 'road' && !map && roundIndex === 4 && cue.gait === 'tough' && (tune.armorFrom ?? 7) >= 7,
         )
         if (dmg > 0) {
