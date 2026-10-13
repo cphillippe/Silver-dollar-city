@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.462',
+    title: 'The round 10 boss shrugs',
+    when: '2026-10-13',
+    items: [
+      'The round 10 boss stops taking taps after four hits. The lamps have to finish that bar.',
+      'A built night still brings the boss down. Four plain lamps, and a single lamp, do not.',
+      'Round 5 is unchanged. A busy tapper holds it, and a night with no taps still loses it.',
+    ],
+  },
+  {
     version: '1.4.461',
     title: 'Round 5 lights every walker',
     when: '2026-10-13',

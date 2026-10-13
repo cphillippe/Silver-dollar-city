@@ -71,6 +71,7 @@ import {
   easyClearHeart,
   easyFaceGlows,
   easyGlowTapDamage,
+  easyLeadBossShrug,
   EASY_R5_TOUGH_OPEN,
   easyRoundHeartCap,
   applyEasyPointerTap,
@@ -153,6 +154,7 @@ import {
   NAMED_LAMPS,
   bossDamageTable,
   leadSeatTable,
+  LIVE_TAP_EVERY,
   paceEasy436,
   paceEasyCampaign,
   paceEasyLive,
@@ -1584,7 +1586,16 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.461')
+assert.equal(APP_VERSION, '1.4.462')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.462'), '1.4.462 changelog row')
+assert.match(latestChange('1.4.462').title, /shrug/i)
+assert.match(latestChange('1.4.462').items.join('\n'), /round 10 boss/)
+assert.match(latestChange('1.4.462').items.join('\n'), /Round 5 is unchanged/)
+assert.doesNotMatch(
+  latestChange('1.4.462').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.462 changelog avoids GitHub close keywords',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.461'), '1.4.461 changelog row')
 assert.match(latestChange('1.4.461').title, /round 5/i)
 assert.match(latestChange('1.4.461').items.join('\n'), /every walker/)
@@ -5943,6 +5954,10 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(easyTapArmored(6, 'tough', true), true, '1.4.430 round 7 tough walkers shrug')
   assert.equal(easyTapArmored(6, 'plain', false), false)
   assert.equal(easyTapArmored(6, 'fast', false), false)
+  assert.equal(easyTapArmored(9, undefined, true), false, '1.4.462 the plate round 10 boss still takes taps')
+  assert.equal(easyLeadBossShrug(9, true), true, '1.4.462 the lead round 10 boss shrugs')
+  assert.equal(easyLeadBossShrug(9, true, MAZE_V1_TUNE.armorFrom), false, '1.4.462 a maze round 10 boss stays open')
+  assert.equal(easyLeadBossShrug(4, true), false, '1.4.462 the round 5 boss stays open')
   assert.equal(easyTapArmored(13, undefined, true), false, '1.4.430 the round 14 boss still takes taps')
   assert.equal(easyTapArmored(14, undefined, true), true, '1.4.430 the round 15 boss shrugs')
   assert.equal(easyTapArmored(24, undefined, true), true)
@@ -15247,6 +15262,14 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
     assert.equal(still.dead, 5, `1.4.461 seed ${seed} zero-tap pillars lose round 5`)
     assert.equal(night.dead, 7, `1.4.461 seed ${seed} active taps clear round 5 and reach round 7`)
   }
+  const round10Bare = paceEasyLive(9, BARE_LAMPS, 3, false, LIVE_TAP_EVERY, 'road')
+  const round10Built = paceEasyLive(9, easyJumpLoad(9).lamps, 3, false, LIVE_TAP_EVERY, 'road')
+  assert.equal(round10Bare.bossTap, 4, '1.4.462 four plain lamps only chip the round 10 boss four times')
+  assert.equal(round10Bare.boss, 'leak', '1.4.462 those taps do not carry the round 10 boss')
+  assert.equal(round10Bare.bossLamp, 11, '1.4.462 the plain lamps still land 11 on that boss')
+  assert.equal(round10Built.boss, 'kill', '1.4.462 a built night still kills the round 10 boss')
+  assert.equal(round10Built.bossTap, 4, '1.4.462 the built night also stops at four boss taps')
+  assert.equal(round10Built.bossLamp, 51, '1.4.462 the lamps finish the rest of the round 10 boss')
   assert.equal(lightRowDead[1], 10)
   assert.equal(lightSpreadDead[1], 9, '1.4.456 seed 2 is a live replay where the row outlasts the spread')
   assert.equal(lightRowDead[3], 10)
