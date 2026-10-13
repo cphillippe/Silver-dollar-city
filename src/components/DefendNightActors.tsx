@@ -3,6 +3,7 @@ import {
   EASY_CROWN_HIT_R,
   EASY_FACE_HIT_R,
   EASY_WALKER_FACE_PX,
+  easyFaceGlows,
   easyTapSoaked,
   EASY_WALKER_HIT_PX,
   PATH_WALKER_FACE_DY,
@@ -495,7 +496,7 @@ export function DefendNightActorsSvg({
                 const at = raiderAt(raider)
                 const isTap = easyTap && !raider.turned
                 const shrugged = easyTapSoaked(roundIndex, raider, armorFrom)
-                const isCue = isTap && !raider.fog && (tapTarget?.id === raider.id || !!raider.boss) && !shrugged
+                const isCue = isTap && !shrugged && easyFaceGlows(raider, raiders, roundIndex, armorFrom)
                 const lampHit =
                   raider.struckAt != null && performance.now() - raider.struckAt < SHOT_JUICE_MS
                 return (

@@ -640,6 +640,7 @@ export function paceEasyLive(
           cue.hp,
           cue.chip,
           easyTapArmored(roundIndex, cue.gait, cue.boss, tune.armorFrom),
+          mode === 'road' && !map && roundIndex === 4 && cue.gait === 'tough' && (tune.armorFrom ?? 7) >= 7,
         )
         if (dmg > 0) {
           cue.chip += dmg
