@@ -93,7 +93,7 @@ export const TAP_SHRUG_CHIP = 4
 /**
  * Tough walkers from round 7 on, and bosses from round 15 on.
  * Round 5's tough walkers stay open so that proven round does not move.
- * Hard does not read this. The lead round 10 boss is `easyLeadBossShrug`.
+ * Hard does not read this. From round 7 the lead boss is `easyLeadBossShrug`.
  */
 export function easyTapArmored(
   roundIndex: number,
@@ -108,21 +108,20 @@ export function easyTapArmored(
 }
 
 /**
- * The live lead road. The round 10 boss shrugs after a few taps.
+ * The live lead road. From round 7 a boss shrugs after a few taps,
+ * the same cap a tough walker already has. Round 5's boss stays open.
  * Plate sims and the frozen good-seat nights stay on `easyTapArmored`,
  * and a maze night keeps this boss open.
  */
 export function easyLeadBossShrug(roundIndex: number, boss = false, armorFrom = 7): boolean {
   if (!boss || armorFrom < 7) return false
-  return Math.floor(roundIndex) + 1 === 10
+  return Math.floor(roundIndex) + 1 >= 7
 }
 
 /**
- * Live lead road, round 25 only. A plain walker shrugs after a few taps,
- * so the finale is lamp work. Earlier rounds stay open: a spender still
- * dies on round 18, and Lock In still clears the night.
- * Fast and tough stay on their own rules. Plate sims, frozen nights, and a
- * maze night do not read this.
+ * Live lead road, from round 7. A plain walker shrugs after four taps.
+ * Toughs and bosses already stop there. Plains were the rest of the pile.
+ * Plate sims, frozen nights, and a maze night do not read this.
  */
 export function easyLeadPlainShrug(
   roundIndex: number,
@@ -132,7 +131,7 @@ export function easyLeadPlainShrug(
 ): boolean {
   if (boss || armorFrom < 7) return false
   if (gait === 'tough' || gait === 'fast') return false
-  return Math.floor(roundIndex) + 1 >= 25
+  return Math.floor(roundIndex) + 1 >= 7
 }
 
 /**
@@ -196,7 +195,7 @@ export interface LiveStrikeSize {
 /**
  * How hard the live shot is, before the hit lands.
  * Round 5's boss is not armored, so a tap and a lamp both cut the bar.
- * Tough walkers from round 7, the round 10 boss, bosses from round 15, and plain walkers on round 25, shrug taps after four.
+ * From round 7, tough walkers, bosses, and plain walkers shrug taps after four. Round 5 stays open.
  * Lamps still use their tier. Hard does not read the Easy armor.
  */
 export function liveNightDamage(
