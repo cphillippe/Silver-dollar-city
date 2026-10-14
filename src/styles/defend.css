@@ -1377,6 +1377,31 @@ img.walker-face.easy-walker-face,
   font-weight: 900;
 }
 
+.defend-clear-spark {
+  color: #ffe9b0;
+  font-weight: 900;
+}
+
+.defend-bright-buy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 100%;
+  margin-top: 6px;
+}
+
+.defend-bright-line,
+.defend-bright-on {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #ffe9b0;
+}
+
+.defend-bright-on {
+  margin: 6px 0 0;
+}
+
 .defend-spark-choices {
   width: 100%;
   margin: 0 0 10px;
@@ -1791,6 +1816,23 @@ img.walker-face.easy-walker-face,
 }
 .easy-walker.is-shrug .easy-walker-face {
   animation: easy-tap-shrug 0.42s ease-out both;
+}
+
+.easy-shrug-cue {
+  position: absolute;
+  left: 50%;
+  top: -4px;
+  z-index: 9;
+  transform: translateX(-50%);
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: #1a0840;
+  color: #ffe7a3;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.2;
+  white-space: nowrap;
+  pointer-events: none;
 }
 @keyframes easy-tap-puff {
   0% { opacity: 0.3; transform: scale(0.35); }
@@ -2574,7 +2616,8 @@ img.walker-face.easy-walker-face,
   pointer-events: auto;
 }
 
-.defend-tower-card .defend-path-buy {
+.defend-tower-card .defend-path-buy,
+.defend-tower-card .defend-bright-buy {
   pointer-events: auto;
 }
 

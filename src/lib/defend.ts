@@ -117,6 +117,17 @@ export function easyLeadBossShrug(roundIndex: number, boss = false, armorFrom = 
   return Math.floor(roundIndex) + 1 === 10
 }
 
+/** The round 10 boss has already taken four taps, and this one bounces off. */
+export function r10ShrugCue(
+  roundIndex: number,
+  boss: boolean,
+  damage: number,
+  armored: boolean,
+  armorFrom = 7,
+): boolean {
+  return armored && damage <= 0 && easyLeadBossShrug(roundIndex, boss, armorFrom)
+}
+
 /**
  * The first glowing tap on a round 5 tough opens this much extra.
  * Later taps stay at one. Lamps do not read this, so a night with no taps
@@ -284,7 +295,8 @@ export function easyFaceGlows<
  * Pointer on a walker, then the glow gate, then the caller strikes.
  * Before round 5 a normal walker still has to be the glowing lead.
  * On round 5 every walker on the road is a hit. The boss is always a hit
- * when it is not soaked. Hard does not use the glow.
+ * when it is not soaked. After four chips the round 10 boss still takes the
+ * tap, so the bounce can say Shrugs. Hard does not use the glow.
  */
 export function easyPointerTapGate<
   T extends { id: number; turned?: string; t?: number; boss?: boolean; tapChip?: number; gait?: string; fog?: boolean },
@@ -299,6 +311,7 @@ export function easyPointerTapGate<
   const soaked = easyTapSoaked(roundIndex, raider, armorFrom)
   if (easy && Math.floor(roundIndex) === 4 && !soaked) return 'hit'
   if (easy && raider.boss && !soaked) return 'hit'
+  if (easy && easyLeadBossShrug(roundIndex, !!raider.boss, armorFrom)) return 'hit'
   const cue = easyTapTarget(raiders, roundIndex, armorFrom)
   return cueTapStrike(easy, cue?.id === raider.id)
 }

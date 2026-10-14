@@ -25,6 +25,7 @@ import { FREE_LAMP_RANGE_BONUS, lampReach } from './towers/index.ts'
 import {
   BOSS_PACE,
   easyBossClearSparks,
+  easyClearSparkBonus,
   easyBossHp,
   easyBossRound,
   easyJumpLoad,
@@ -792,7 +793,7 @@ export function paceMazeSpender(
     })
     if (round.result !== 'clear') return { dead: index + 1, rows }
     hearts = easyClearHeart(round.hearts)
-    bank += round.sparks + easyBossClearSparks(index)
+    bank += round.sparks + easyBossClearSparks(index) + easyClearSparkBonus(index)
     bank = strongFirstBuy(ranks, bank)
   }
   return { dead: null, rows }
