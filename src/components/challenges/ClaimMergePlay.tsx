@@ -258,6 +258,16 @@ export function ClaimMergePlay({
       <p className="story-kicker">
         {home.who} · {home.place}
       </p>
+      <ul className="merge-who-where match-teach-chips" aria-label="Who and where">
+        <li className="match-teach-chip is-who">
+          <span className="match-teach-kind">who</span>
+          <span className="match-teach-label">{home.who}</span>
+        </li>
+        <li className="match-teach-chip is-where">
+          <span className="match-teach-kind">where</span>
+          <span className="match-teach-label">{home.place}</span>
+        </li>
+      </ul>
       <div className="merge-hud">
         <p className={`merge-score ${plus ? 'is-juice' : ''}`} aria-live="polite">
           {view.score}

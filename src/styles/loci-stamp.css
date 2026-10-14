@@ -237,6 +237,12 @@ html[data-easy='on'] button.loci-stamp:active {
   -webkit-overflow-scrolling: touch;
 }
 
+.play.is-claim-merge .merge-who-where {
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: visible;
+}
+
 .match-teach-chip {
   display: flex;
   flex-direction: column;
