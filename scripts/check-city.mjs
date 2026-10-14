@@ -82,6 +82,7 @@ import {
   applyEasyPointerTap,
   easyLiveSpawnT,
   easyPointerTapGate,
+  easyVisibleFaceTap,
   EASY_ON_SCREEN_SEC,
   EASY_ON_SCREEN_T,
   easyTapArmored,
@@ -128,6 +129,7 @@ import {
   easyBossClearSparks,
   easyBossHp,
   easyBossRound,
+  easyBossSpawnId,
   easyJumpLoad,
   easyJumpSparkBank,
   JUMP_GOOD_SEATS,
@@ -1398,7 +1400,7 @@ assert.doesNotMatch(defendSrc, /TeachUnlock/)
 assert.doesNotMatch(defendSrc, /RecallGate/)
 assert.match(defendSrc, /defendPads/)
 assert.match(defendSrc, /afterJuiceRef/)
-assert.match(defendSrc, /}, \[phase, easy, progress\.defense\.cleared\]/)
+assert.match(defendSrc, /}, \[phase, easy, progress\.defense\.cleared, waveIndex\]/)
 assert.match(defendSrc, /fireBest/)
 const defendNightSrc = readFileSync(
   new URL('../src/components/DefendNightActors.tsx', import.meta.url),
@@ -1592,7 +1594,14 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.464')
+assert.equal(APP_VERSION, '1.4.465')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.465'), '1.4.465 changelog row')
+assert.match(latestChange('1.4.465').title, /face|tap/i)
+assert.doesNotMatch(
+  latestChange('1.4.465').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.465 changelog avoids GitHub close keywords',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.464'), '1.4.464 changelog row')
 assert.match(latestChange('1.4.464').title, /pace|walkers/i)
 assert.match(latestChange('1.4.464').items.join('\n'), /test panel stays off/)
@@ -3677,7 +3686,7 @@ assert.equal(EASY.savedSub, 'saved lines')
 assert.equal(EASY.nightMiss, 'Tap the glowing face')
 assert.match(defendSrc, /EASY\.nightMiss/)
 assert.match(defendSrc, /TAP \$\{remaining\} left/)
-assert.match(defendSrc, /You missed\. Tap the face/)
+assert.match(defendSrc, /The night won this time/)
 assert.match(defendSrc, /(easyHoldSpawn|nightEnemies\.holdSpawn)\(unturnedLive\)/)
 assert.doesNotMatch(defendSrc, /matching sentence/)
 assert.doesNotMatch(
@@ -3703,7 +3712,7 @@ assert.doesNotMatch(hubSrc, /Tap this next/)
 assert.match(hubSrc, /is-easy-home/)
 assert.doesNotMatch(cssSrc, /tap-next-dock/)
 assert.doesNotMatch(cssSrc, /is-easy-town/)
-assert.match(defendSrc, /Tap the face/)
+assert.match(defendSrc, /The night won this time\. You reached round \$\{waveIndex \+ 1\}\./)
 assert.match(defendSrc, /Porch flickered/)
 assert.doesNotMatch(TOWN_PATH_EASY, /scrapbook/)
 assert.match(
@@ -4906,7 +4915,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(defendSrc384, /applyGateLeaks\(live\.current\.hearts, leaked, shielded\)/)
   assert.match(defendSrc384, /gate\.failed \|\| live\.current\.hearts <= 0/)
   assert.match(defendSrc384, /setPhase\('lost'\)/)
-  assert.match(defendSrc384, /You missed/)
+  assert.match(defendSrc384, /The night won this time/)
   assert.match(defendCss384, /1\.4\.383: Begin stays readable until the first plant/, '1.4.384 keeps Begin')
   assert.match(defendCss384, /1\.4\.381: unlockable 3× speed/, '1.4.384 keeps 3× speed')
   assert.match(defendCss384, /1\.4\.380: skills pack/, '1.4.384 keeps the skill pack')
@@ -7235,7 +7244,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.deepEqual(tiers, [3, 3, 3, 3], '1.4.404 the retired linear prices max by round 12')
   assert.match(
     readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8'),
-    /Reached round \$\{waveIndex \+ 1\}\. You missed\. Tap the face\./,
+    /The night won this time\. You reached round \$\{waveIndex \+ 1\}\./,
   )
   assert.match(
     readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8'),
@@ -7516,6 +7525,49 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(ability464, /data-first-lamp=\{openingFree \? 'free'/)
   assert.match(latestChange('1.4.464').items.join('\n'), /first lamp is free/)
   assert.match(latestChange('1.4.464').items.join('\n'), /developer jump/)
+}
+
+// Night Watch 1.4.465: a visible face is one hit, Upgrade opens mid-wave, round 25 spawns its boss.
+{
+  const screen465 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const css465 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const bar465 = readFileSync(new URL('../src/components/DefendAbilityBar.tsx', import.meta.url), 'utf8')
+  const board465 = readFileSync(new URL('../src/components/DefendNightBoard.tsx', import.meta.url), 'utf8')
+  const sky465 = readFileSync(new URL('../src/components/DefendNightSky.tsx', import.meta.url), 'utf8')
+  assert.equal(easyVisibleFaceTap(true, { t: 0.2 }, 0), 'hit', '1.4.465 a drawn face counts')
+  assert.equal(easyVisibleFaceTap(true, { t: 0.4, fog: true }, 2), 'miss', '1.4.465 fog still misses')
+  assert.equal(
+    easyVisibleFaceTap(true, { t: 0.5, gait: 'tough', tapChip: 4 }, 8),
+    'miss',
+    '1.4.465 a shrugged walker still misses',
+  )
+  assert.equal(cueTapStrike(true, false), 'miss', '1.4.465 the glow rule stays a miss off the ring')
+  assert.equal(cueTapStrike(true, true), 'hit', '1.4.465 the glowing face still hits')
+  assert.match(
+    css465,
+    /\.defend-page\.is-easy-tap \.defend-raider\.is-easy-tap-target \.defend-raider-hit \{[^}]*pointer-events:\s*all/,
+    '1.4.465 every drawn face keeps a hit disc',
+  )
+  assert.match(screen465, /easyVisibleFaceTap\(/, '1.4.465 the live tap uses the drawn face')
+  assert.match(screen465, /function claimTap\(\)/, '1.4.465 one pointer cannot count twice')
+  assert.match(sky465, /closest\?\.\('\.defend-raider'\)/, '1.4.465 a face tap does not also miss on the board')
+  assert.match(
+    screen465,
+    /The night won this time\. You reached round \$\{waveIndex \+ 1\}\./,
+    '1.4.465 the loss line names the night',
+  )
+  assert.match(screen465, />\s*Try again\s*</, '1.4.465 the loss screen has Try again')
+  assert.match(bar465, /paidPlace && easy && placed/, '1.4.465 a planted card can open during the wave')
+  assert.match(bar465, /onOpenTree\?\.\(tool\.id\)/, '1.4.465 that card opens the tree')
+  assert.match(board465, /easy && \(boosting \|\| phase === 'wave'\)/, '1.4.465 Upgrade sits on the lamp during a wave')
+  assert.equal(easyBossSpawnId(EASY_ROUNDS[24].count, 24), 9, '1.4.465 round 25 crowns spawn id 9')
+  assert.equal(waveCombat(24, true).size, EASY_ROUNDS[24].count + 1, '1.4.465 round 25 keeps a slot for the boss')
+  assert.equal(easyBossHp(24), 240, '1.4.465 round 25 boss health stays 240')
+  assert.equal(easyBossSpawnId(EASY_ROUNDS[4].count, 4), 7, '1.4.465 round 5 still crowns the extra walker')
+  assert.match(screen465, /easyBossSpawnId\(round\.count, wave\)/, '1.4.465 the live spawn uses that id')
+  assert.match(screen465, /wave > 5 && live\.current\.spawned === easyBossSpawnId/, '1.4.465 the round 25 boss is not stuck behind the cap')
+  assert.match(latestChange('1.4.465').items.join('\n'), /Try again/)
+  assert.match(latestChange('1.4.465').items.join('\n'), /Round 25/)
 }
 
 // Night Watch 1.4.408: pip buy, Easy hearts, softer rounds 7–12.
@@ -8013,7 +8065,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(waveCombat(4, false).hpBonus, 0)
   assert.match(walkers417, /export type WalkerGait = 'plain' \| 'fast' \| 'tough'/)
   assert.doesNotMatch(walkers417, /shielded/i)
-  assert.match(screen417, /const boss = easy && easyBossRound\(wave\) && id === round\.count/)
+  assert.match(screen417, /const boss = easy && id === easyBossSpawnId\(round\.count, wave\)/)
   assert.match(screen417, /setPowerBanner\('Boss!'\)/)
   assert.match(screen417, /setTimeout\(\(\) => setPowerBanner\(null\), 1800\)/)
   assert.match(screen417, /item\.boss \? BOSS_PACE : walkerPace/)

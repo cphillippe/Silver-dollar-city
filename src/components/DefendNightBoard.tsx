@@ -187,7 +187,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
           {ghost.cover ? ROAD_COVER_WORD[ghost.cover] : ghost.note}
         </span>
       ) : null}
-      {easy && boosting && boardBox && boardBox.w > 0
+      {easy && (boosting || phase === 'wave') && boardBox && boardBox.w > 0
         ? planted.map((id) => {
             const at = place(boardBox, nightTowers.anchor(id))
             const type = towerType[id]
