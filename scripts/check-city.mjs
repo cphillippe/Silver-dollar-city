@@ -221,6 +221,20 @@ import {
   TREE_STEP_COST,
 } from '../src/nightWatch/upgradeTree.ts'
 import {
+  applyBellSlow,
+  applyBellStep,
+  bellDamage,
+  bellPaceFor,
+  bellSlow,
+  bellUnlocked,
+  BELL_CARD,
+  BELL_COST,
+  BELL_VERSE_CITE,
+  BELL_LABEL,
+  BELL_SLOW,
+} from '../src/nightWatch/bell.ts'
+import { lampAnchor } from '../src/nightWatch/path/data.ts'
+import {
   applyCandleStep,
   CANDLE_CAP,
   CANDLE_BODY,
@@ -1601,7 +1615,19 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.466')
+assert.equal(APP_VERSION, '1.4.467')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.467'), '1.4.467 changelog row')
+assert.match(latestChange('1.4.467').title, /bell/i)
+assert.doesNotMatch(
+  latestChange('1.4.467').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.467 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.467').items.join('\n'), /Bell/)
+assert.match(
+  latestChange('1.4.467').items.join('\n'),
+  /A bell calls people to stop and pray/,
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.466'), '1.4.466 changelog row')
 assert.match(latestChange('1.4.466').title, /spark|Bright|shrug/i)
 assert.doesNotMatch(
@@ -7661,6 +7687,57 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(latestChange('1.4.466').items.join('\n'), /\+1 spark/)
   assert.match(latestChange('1.4.466').items.join('\n'), /Shrugs!/)
   assert.match(latestChange('1.4.466').items.join('\n'), /Bright/)
+}
+
+// Night Watch 1.4.467: Bell unlocks after round 6 and slows. Rounds 1–6 stay as they were.
+{
+  const screen467 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const actors467 = readFileSync(new URL('../src/components/DefendNightActors.tsx', import.meta.url), 'utf8')
+  const card467 = readFileSync(new URL('../src/components/DefendTowerCard.tsx', import.meta.url), 'utf8')
+  const css467 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  assert.equal(BELL_COST, 6, '1.4.467 the bell costs 6 sparks')
+  assert.equal(BELL_LABEL, 'Bell', '1.4.467 the lamp is called Bell')
+  assert.equal(BELL_CARD, 'A bell calls people to stop and pray.', '1.4.467 the card line is the scholars line')
+  assert.equal(BELL_VERSE_CITE, 'Ps 95:6, RSV', '1.4.467 the card cites Ps 95:6, RSV')
+  assert.match(card467, /defend-candle-cite/, '1.4.467 the cite uses the same mark as the other cards')
+  assert.equal(bellUnlocked(true, 0, 'plant'), false, '1.4.467 round 1 keeps the bell locked')
+  assert.equal(bellUnlocked(true, 4, 'boost'), false, '1.4.467 the round 5 clear keeps the bell locked')
+  assert.equal(bellUnlocked(true, 5, 'wave'), false, '1.4.467 round 6 itself keeps the bell locked')
+  assert.equal(bellUnlocked(true, 5, 'plant'), false, '1.4.467 a jump to round 6 keeps the bell locked')
+  assert.equal(bellUnlocked(true, 5, 'boost'), true, '1.4.467 the round 6 clear unlocks the bell')
+  assert.equal(bellUnlocked(true, 6, 'wave'), true, '1.4.467 round 7 offers the bell')
+  assert.equal(bellUnlocked(false, 6, 'boost'), false, '1.4.467 Hard never offers the bell')
+  assert.deepEqual([...BELL_SLOW], [0.2, 0.3, 0.35], '1.4.467 the path slows by 20, 30, and 35 percent')
+  assert.equal(bellSlow(0), 0.2, '1.4.467 a planted bell slows by 20 percent')
+  assert.equal(bellSlow(1), 0.3, '1.4.467 the first buy slows by 30 percent')
+  assert.equal(bellSlow(2), 0.35, '1.4.467 the second buy slows by 35 percent')
+  assert.equal(applyBellSlow(1, 0, true), 1 - 0.2, '1.4.467 20 percent slow leaves 80 percent pace')
+  assert.equal(applyBellSlow(1, 1, true), 1 - 0.3, '1.4.467 30 percent slow leaves 70 percent pace')
+  assert.equal(applyBellSlow(1, 2, true), 1 - 0.35, '1.4.467 35 percent slow leaves 65 percent pace')
+  assert.equal(applyBellSlow(6.4, 2, false), 6.4, '1.4.467 a walker outside the ring keeps full pace')
+  assert.equal(bellDamage(), 0, '1.4.467 the bell deals no damage')
+  const seat = 'at:420:640'
+  const at = lampAnchor(seat)
+  const plants = { [seat]: 'bell' }
+  assert.equal(bellPaceFor(plants, {}, at), 1 - 0.2, '1.4.467 a walker in the planted ring is slowed 20 percent')
+  const step = applyBellStep(seat, {}, 9)
+  assert.equal(step.ok, true, '1.4.467 the first slow buy lands')
+  assert.equal(bellPaceFor(plants, step.paths, at), 1 - 0.3, '1.4.467 the first buy applies 30 percent')
+  const topped = applyBellStep(seat, step.paths, step.sparks)
+  assert.equal(topped.ok, true, '1.4.467 the second slow buy lands')
+  assert.equal(bellPaceFor(plants, topped.paths, at), 1 - 0.35, '1.4.467 the second buy applies 35 percent')
+  assert.equal(bellPaceFor(plants, topped.paths, { x: at.x + 4000, y: at.y }), 1, '1.4.467 a far walker is not slowed')
+  assert.equal(applyBellStep(seat, topped.paths, 20).ok, false, '1.4.467 the path stops at 35 percent')
+  assert.match(screen467, /bellUnlocked\(/, '1.4.467 the live button waits for the unlock')
+  assert.match(screen467, /data-bell-lamp="yes"/, '1.4.467 the button is the Bell')
+  assert.match(screen467, /waveIndexRef\.current >= 6[\s\S]{0,160}bellPaceFor\(/, '1.4.467 slow starts on round 7')
+  assert.match(screen467, /if \(isBell\(using\)\) return false/, '1.4.467 a bell does not shoot')
+  assert.match(screen467, /if \(isBell\(using\)\) continue/, '1.4.467 auto fire skips the bell')
+  assert.match(card467, /data-bell-card-line="yes"/, '1.4.467 the card shows the line')
+  assert.match(card467, /BELL_CARD/, '1.4.467 the card uses the scholars line')
+  assert.match(actors467, /is-bell-pulse/, '1.4.467 the ring is a gold pulse')
+  assert.match(css467, /@keyframes nw-bell-pulse/, '1.4.467 the pulse is warm gold')
+  assert.match(css467, /#ffcc33/, '1.4.467 the ring uses the gold already on the night')
 }
 
 // Night Watch 1.4.408: pip buy, Easy hearts, softer rounds 7–12.
