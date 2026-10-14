@@ -173,6 +173,7 @@ import {
   paceEasyRoad,
   paceEasyRoadCampaign,
   paceMazeSpender,
+  strongFirstBuy,
 } from '../src/nightWatch/livePace.ts'
 import { nightWatchMapQuery } from '../src/lib/nightWatchDebug.ts'
 import { A2_NIGHT_MAP } from '../src/nightWatch/maps/a2.ts'
@@ -6942,7 +6943,16 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     }, 20, 0.28).dead
   }
   assert.equal(bestDead.map02, 14, '1.4.443 Far Hills best seats reach round 14')
-  assert.equal(bestDead.map03, 10, '1.4.466 Peppermint best seats reach round 10 once rounds 7–9 pay a spark')
+  assert.equal(bestDead.map03, 13, 'Peppermint best seats reach round 13 when Far is bought before the next Strong')
+  const spread = [
+    { far: 1, strong: 2 },
+    { far: 0, strong: 1 },
+    { far: 0, strong: 1 },
+    { far: 0, strong: 1 },
+  ]
+  assert.equal(strongFirstBuy(spread, 12), 3, 'the extra spark still finishes Far on the lamp that just reached Strong 2')
+  assert.deepEqual(spread[1], { far: 1, strong: 2 })
+  assert.equal(spread[2].strong, 1, 'Strong 2 does not skip ahead onto the next lamp')
   assert.equal(bestDead.map04, 13, '1.4.466 Caramel best seats reach round 13 once rounds 7–9 pay a spark')
   assert.equal(bestDead.map05, 14, '1.4.447 Licorice best seats reach round 14 once a pop pays a full spark')
   assert.equal(bestDead.map06, 9, '1.4.447 Blueberry best seats stay at round 9')
