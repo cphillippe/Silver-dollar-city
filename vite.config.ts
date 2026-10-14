@@ -69,7 +69,7 @@ export default defineConfig({
       workbox: {
         // Box QA opens docs/qa-seed.html after the app SW is installed.
         // Without this, navigation fallback serves index.html and the seed never runs.
-        navigateFallbackDenylist: [/\/qa-seed\.html/],
+        navigateFallbackDenylist: [/\/qa-seed\.html/, /\/night-run\//],
       },
       manifest: {
         name: 'Silver City: Unending Evidence',
