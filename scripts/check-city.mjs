@@ -229,6 +229,7 @@ import {
   bellUnlocked,
   BELL_CARD,
   BELL_COST,
+  BELL_VERSE_CITE,
   BELL_LABEL,
   BELL_SLOW,
 } from '../src/nightWatch/bell.ts'
@@ -1625,7 +1626,7 @@ assert.doesNotMatch(
 assert.match(latestChange('1.4.467').items.join('\n'), /Bell/)
 assert.match(
   latestChange('1.4.467').items.join('\n'),
-  /Church bells call people to pray, and ring when someone needs help so neighbors come/,
+  /A bell calls people to stop and pray/,
 )
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.466'), '1.4.466 changelog row')
 assert.match(latestChange('1.4.466').title, /spark|Bright|shrug/i)
@@ -7696,11 +7697,9 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   const css467 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
   assert.equal(BELL_COST, 6, '1.4.467 the bell costs 6 sparks')
   assert.equal(BELL_LABEL, 'Bell', '1.4.467 the lamp is called Bell')
-  assert.equal(
-    BELL_CARD,
-    'Church bells call people to pray, and ring when someone needs help so neighbors come.',
-    '1.4.467 the card line is the scholars line',
-  )
+  assert.equal(BELL_CARD, 'A bell calls people to stop and pray.', '1.4.467 the card line is the scholars line')
+  assert.equal(BELL_VERSE_CITE, 'Ps 95:6, RSV', '1.4.467 the card cites Ps 95:6, RSV')
+  assert.match(card467, /defend-candle-cite/, '1.4.467 the cite uses the same mark as the other cards')
   assert.equal(bellUnlocked(true, 0, 'plant'), false, '1.4.467 round 1 keeps the bell locked')
   assert.equal(bellUnlocked(true, 4, 'boost'), false, '1.4.467 the round 5 clear keeps the bell locked')
   assert.equal(bellUnlocked(true, 5, 'wave'), false, '1.4.467 round 6 itself keeps the bell locked')

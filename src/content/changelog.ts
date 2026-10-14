@@ -14,7 +14,7 @@ export const CHANGELOG: ChangeNote[] = [
     items: [
       'After round 6 clears, Easy nights can plant a Bell for 6 sparks. It stays locked through round 6.',
       'The bell slows walkers in its ring by 20%, then 30%, then 35%. It does not hurt them.',
-      'The card says: Church bells call people to pray, and ring when someone needs help so neighbors come.',
+      'The card says: A bell calls people to stop and pray. Ps 95:6, RSV.',
     ],
   },
   {
