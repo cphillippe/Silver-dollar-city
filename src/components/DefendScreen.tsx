@@ -103,7 +103,7 @@ import { playableNightMap } from '../nightWatch/maps/mazeMaps'
 import { resolveNightMap, type NightMapId } from '../nightWatch/maps/resolve'
 import {
   miniHp,
-  splitDue,
+  minisOnKill,
   splitFeature,
   walkerZone,
   type NightFeature,
@@ -1620,10 +1620,11 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
 
   function releaseMinis(parent: Raider) {
     const split = splitFeature(featuresRef.current)
-    if (!splitDue(split, waveIndexRef.current, parent.gait, !!parent.boss, !!parent.mini) || !split) return
+    const born = minisOnKill(split, waveIndexRef.current, parent.gait, !!parent.boss, !!parent.mini)
+    if (!split || born < 1) return
     const at = raiderAt(parent)
     const taken = live.current.raiders.flatMap((item) => (item.face ? [item.face] : []))
-    for (let q = 0; q < split.into; q += 1) {
+    for (let q = 0; q < born; q += 1) {
       const hp = miniHp(parent.maxHp ?? parent.hp, split)
       const id = live.current.nextId
       live.current.nextId += 1

@@ -46,7 +46,7 @@ import {
   featureSpeed,
   hillRangeBonus,
   miniHp,
-  splitDue,
+  minisOnKill,
   splitFeature,
   type NightFeature,
 } from './maps/features.ts'
@@ -193,6 +193,8 @@ export interface PaceLive {
   sparks: number
   /** Hit points lamps removed this round, walkers and the boss. */
   dealt: number
+  /** Little berries released when a kill popped. */
+  minis: number
 }
 
 interface LiveRules {
@@ -435,6 +437,7 @@ export function paceEasyLive(
   let bossTap = 0
   let bossMax = 0
   let dealt = 0
+  let minis = 0
   let graceUntil = 0
   let lostRound = 0
   const bossBox: { fate: PaceLive['boss'] } = { fate: bossRound ? 'up' : 'none' }
@@ -462,6 +465,7 @@ export function paceEasyLive(
     boss: bossBox.fate,
     sparks: Math.floor(sparkFloat),
     dealt,
+    minis,
   })
   if (hearts <= 0) return finish('lost')
   while (time < 180) {
@@ -539,8 +543,10 @@ export function paceEasyLive(
       if (byLamp) spawnNow = true
       if (raider.boss) bossBox.fate = 'kill'
       const split = splitFeature(features)
-      if (!splitDue(split, roundIndex, raider.gait, raider.boss, raider.mini) || !split) return
-      for (let q = 0; q < split.into; q += 1) {
+      const born = minisOnKill(split, roundIndex, raider.gait, raider.boss, raider.mini)
+      if (!split || born < 1) return
+      minis += born
+      for (let q = 0; q < born; q += 1) {
         const mini = miniHp(raider.maxHp, split)
         raiders.push({
           t: Math.max(0, raider.t - 0.02 * q),

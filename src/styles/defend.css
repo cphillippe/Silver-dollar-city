@@ -349,6 +349,22 @@ img.walker-face.easy-walker-face,
   filter: url(#defend-glow);
 }
 
+/* 1.4.468: Caramel's road is pale and wide enough that a dark face sits on light paint. */
+.defend-page[data-night-map='map04'] .defend-road-bed {
+  stroke: #fff1d6;
+  stroke-width: 64;
+}
+
+.defend-page[data-night-map='map04'] .defend-road {
+  stroke: #fffaf0;
+  stroke-width: 46;
+}
+
+.defend-page[data-night-map='map04'] .defend-road-shine {
+  stroke: #ffffff;
+  stroke-width: 16;
+}
+
 /* 1.4.382: porch→road connectors are the candy image, not this thin gold dash.
    The path node stays so the heaven mark still has a hook. It draws nothing. */
 .defend-heaven-path {

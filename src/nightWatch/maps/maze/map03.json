@@ -1234,7 +1234,7 @@
       "x": 0.3441,
       "y": 0.3896,
       "r": 0.0476,
-      "speedMul": 1.8,
+      "speedMul": 0.75,
       "sprite": "overlays/gate.png",
       "spriteAnchorPx": [
         84,
@@ -1247,7 +1247,7 @@
       "x": 0.6544,
       "y": 0.3903,
       "r": 0.0476,
-      "speedMul": 1.8,
+      "speedMul": 0.75,
       "sprite": "overlays/gate.png",
       "spriteAnchorPx": [
         84,
@@ -1256,7 +1256,7 @@
       "spritePxPerUnit": 2
     }
   ],
-  "featureNote": "Candy canes make walkers dash. Light up the road after them.",
+  "featureNote": "Candy canes slow walkers. Light the road after them.",
   "_simV2": {
     "model": "nwlive.py (1.4.442 live loop), no-skill Strong-first spender, tap 0.28s, full seat search",
     "bestSeats": [

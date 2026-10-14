@@ -8,6 +8,18 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.468',
+    title: 'Map tricks that work',
+    when: '2026-10-14',
+    items: [
+      'Peppermint gates slow walkers who pass through them.',
+      'Caramel pools slow walkers, and the road is pale so dark faces show.',
+      'A lamp on the Far Hills hilltop reaches farther.',
+      'From round 5, a blueberry pops into two little berries when it falls.',
+      'Licorice fog is a pale cloud.',
+    ],
+  },
+  {
     version: '1.4.467',
     title: 'A bell slows the road',
     when: '2026-10-14',
