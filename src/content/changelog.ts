@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.463',
+    title: 'Round 25 plains shrug, and a tough opens',
+    when: '2026-10-14',
+    items: [
+      'On round 25, a plain walker stops taking taps after four hits. The lamps have to finish that bar.',
+      'A built night still brings the boss down. Every earlier round is unchanged.',
+      'The first tap on a round 5 tough opens it right away. The heavy shape drops, and the bar shows the chunk. A busy tapper still holds round 5, and a night with no taps still loses it.',
+    ],
+  },
+  {
     version: '1.4.462',
     title: 'The round 10 boss shrugs',
     when: '2026-10-13',
