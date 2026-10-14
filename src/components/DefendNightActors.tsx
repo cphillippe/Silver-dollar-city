@@ -13,6 +13,8 @@ import {
   WATCH_ABILITY_LABEL,
   type WatchAbility,
 } from '../lib/defend'
+import { BellSprite } from '../nightWatch/bellArt'
+import { bellMark, bellPathKey, bellPlateReach, BELL_LABEL, isBell } from '../nightWatch/bell'
 import { CandleSprite } from '../nightWatch/candleArt'
 import {
   candleFarBonus,
@@ -115,7 +117,7 @@ export interface DefendNightActorsProps {
     road: string
     note?: string
     cover?: '' | 'good' | 'some' | 'far'
-    mark?: 'candle'
+    mark?: 'candle' | 'bell'
     row?: string
     rowTo?: { x: number; y: number }[]
   } | null
@@ -215,30 +217,35 @@ export function DefendNightActorsSvg({
                 const plot = CITY_PLOTS.find((item) => item.id === id)
                 const placeName = plot?.title ?? 'open ground'
                 const plantedType = towerType[id]
+                const bell = Boolean(on && isBell(plantedType))
                 const candle = Boolean(on && isCandle(plantedType))
-                const using = candle
+                const using = bell || candle
                   ? plantedType
                   : on && plantedType && unlocked.includes(plantedType)
                     ? plantedType
                     : unlocked.includes(ability)
                       ? ability
                       : 'love'
-                const typeName = candle ? CANDLE_LABEL : (WATCH_ABILITY_LABEL[using] ?? 'Love')
-                const typeSrc = candle ? undefined : TOWER_TYPE_SRC[using]
-                const tree = easy ? pathsOf(runPaths, candle ? candlePathKey(id) : using) : null
-                const reachBonus = candle && tree ? candleFarBonus(tree) : tree ? easyShotReach(tree) : 0
+                const typeName = bell ? BELL_LABEL : candle ? CANDLE_LABEL : (WATCH_ABILITY_LABEL[using] ?? 'Love')
+                const typeSrc = bell || candle ? undefined : TOWER_TYPE_SRC[using]
+                const tree = easy
+                  ? pathsOf(runPaths, bell ? bellPathKey(id) : candle ? candlePathKey(id) : using)
+                  : null
+                const reachBonus = candle && tree ? candleFarBonus(tree) : tree && !bell ? easyShotReach(tree) : 0
                 const rowReach =
                   candle && roundIndex >= 6 ? candleRowReachBonus(candleRowSize(id, candlePlants)) : 0
-                const reach = candle
-                  ? candlePlateReach(id, reachBonus + rowReach)
-                  : nightTowers.range(id, using, progress, runTier, reachBonus)
+                const reach = bell
+                  ? bellPlateReach(id)
+                  : candle
+                    ? candlePlateReach(id, reachBonus + rowReach)
+                    : nightTowers.range(id, using, progress, runTier, reachBonus)
                 const tierMark = tree ? pathBadge(tree) : TIER_MARK[combatTier(using, runTier)]
                 const hot =
                   phase === 'wave' &&
                   on &&
                   raiders.some((raider) => {
                     if (raider.turned) return false
-                    if (candle) return dist(at, raiderAt(raider)) <= reach
+                    if (bell || candle) return dist(at, raiderAt(raider)) <= reach
                     return nightTowers.inRange(id, using, progress, raiderAt(raider), runTier, reachBonus)
                   })
                 const firing = flash.includes(id)
@@ -258,6 +265,10 @@ export function DefendNightActorsSvg({
                     onOpenUpgrade?.(id)
                     return
                   }
+                  if (bell) {
+                    onOpenUpgrade?.(id)
+                    return
+                  }
                   if (phase === 'wave') fire(id)
                 }
                 return (
@@ -266,7 +277,7 @@ export function DefendNightActorsSvg({
                     data-person-node={scenery ? undefined : 'pad'}
                     className={`defend-pad is-${stage} ${on ? `is-planted is-${using}` : ''} ${hot ? 'is-hot' : ''} ${firing ? 'is-flash' : ''} ${scenery ? 'is-tower-scenery' : ''} ${boostPad ? 'is-boost-pick' : ''} ${upgrading ? 'is-upgrade-open' : ''} ${justUp ? 'is-up' : ''}`}
                     data-tower-type={on ? using : undefined}
-                    data-level={on ? tierMark : undefined}
+                    data-level={on ? (bell && tree ? bellMark(tree) : tierMark) : undefined}
                     transform={`translate(${at.x} ${at.y})`}
                     role={scenery ? undefined : 'button'}
                     tabIndex={scenery ? undefined : 0}
@@ -345,7 +356,9 @@ export function DefendNightActorsSvg({
                         <ellipse className="defend-pool" cx="0" cy="12" rx={hot ? 30 : 20} ry={hot ? 11 : 7} />
                         <circle className="defend-type-ring" r={candle ? 16 : 34} />
                         <g className="defend-lamp-sprite">
-                          {candle ? (
+                          {bell ? (
+                            <BellSprite />
+                          ) : candle ? (
                             <CandleSprite hot={hot || firing} />
                           ) : (
                             <image
@@ -382,7 +395,7 @@ export function DefendNightActorsSvg({
                           />
                         ) : null}
                         {candle && candleRowSize(id, candlePlants) >= 2 ? null : (
-                          <text className="defend-type-label" y={candle ? -58 : 30} textAnchor="middle">
+                          <text className="defend-type-label" y={candle || bell ? -58 : 30} textAnchor="middle">
                             {typeName}
                           </text>
                         )}
@@ -393,10 +406,10 @@ export function DefendNightActorsSvg({
                             className={`defend-level-pip${justUp ? ' is-bump' : ''}`}
                             y="-98"
                             textAnchor="middle"
-                            data-level={tierMark}
+                            data-level={bell && tree ? bellMark(tree) : tierMark}
                             aria-hidden="true"
                           >
-                            {tierMark}
+                            {bell && tree ? bellMark(tree) : tierMark}
                           </text>
                         ) : null}
                         {justUp ? (
@@ -421,8 +434,8 @@ export function DefendNightActorsSvg({
                         ) : null}
                         {phase === 'wave' ? (
                           <circle
-                            className={`defend-range${firing ? ' is-firing' : ''}`}
-                            r={nightTowers.range(id, using, progress, runTier, reachBonus)}
+                            className={`defend-range${bell ? ' is-bell-pulse' : firing ? ' is-firing' : ''}`}
+                            r={bell ? reach : nightTowers.range(id, using, progress, runTier, reachBonus)}
                             pointerEvents="none"
                             style={
                               firing
@@ -479,7 +492,9 @@ export function DefendNightActorsSvg({
                   {ghost.blocked ? null : (
                     <ellipse className="defend-plant-shadow" cx="0" cy="18" rx="20" ry="7" />
                   )}
-                  {ghost.mark === 'candle' ? (
+                  {ghost.mark === 'bell' ? (
+                    <BellSprite />
+                  ) : ghost.mark === 'candle' ? (
                     <CandleSprite />
                   ) : (
                     <image
