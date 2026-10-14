@@ -235,12 +235,17 @@ export function easyBossHp(index: number): number {
 }
 
 /**
- * Tough health from round 7 through 15.
- * On a good seat a level I lamp plus taps still leaks a bar of 20, so a night
- * with no upgrades walls at round 8. Strong 3 clears that bar. Rounds 1–6
- * keep `TOUGH_HP_BONUS` via `walkerHp`.
+ * Tough health on round 7, and on a maze round 6.
+ * Round 8 and later use `EASY_TOUGH_OPEN` while taps still land.
  */
 export const EASY_TOUGH_WINDOW = 20
+
+/**
+ * From round 8 the thick bar stays open to taps, so it has to be taller
+ * than the four-chip shrug bar. A level I lamp plus taps still leaks it.
+ * Round 7 keeps the shorter bar so that round does not become the wall.
+ */
+export const EASY_TOUGH_OPEN = 56
 
 /**
  * Extra health from round 16 on, after a spender has already capped the lamps.
@@ -308,7 +313,9 @@ export function easyWalkerHp(
 ): number {
   const round = Math.floor(roundIndex) + 1
   const windowEnd = Math.min(15, tune.bulkFrom - 1)
-  if (gait === 'tough' && round >= tune.armorFrom && round <= windowEnd) return EASY_TOUGH_WINDOW
+  if (gait === 'tough' && round >= tune.armorFrom && round <= windowEnd) {
+    return round >= 8 ? EASY_TOUGH_OPEN : EASY_TOUGH_WINDOW
+  }
   const hp = walkerHp(kindHp, roundBonus, gait)
   if (round >= tune.bulkFrom && gait !== 'fast') return hp + tune.bulk
   return hp
