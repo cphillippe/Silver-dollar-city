@@ -7437,6 +7437,19 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.doesNotMatch(screen464, /const debugHarness = easy && nwDebug && midWave/)
   assert.match(screen464, /data-plant-pulse/)
   assert.match(screen464, /plantableHints/)
+  assert.match(screen464, /is-card-on/)
+  assert.match(screen464, /plantOpenGroundRef/)
+  const place464 = readFileSync(new URL('../src/lib/lampPlace.ts', import.meta.url), 'utf8')
+  assert.match(place464, /elementsFromPoint/)
+  assert.doesNotMatch(place464, /querySelectorAll\('\.nw-rail, \.nw-docks/)
+  assert.match(
+    readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8'),
+    /\.defend-page\.is-placing \.nw-map-pick[\s\S]*?pointer-events:\s*none/,
+  )
+  assert.match(
+    readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8'),
+    /\.is-card-on \.nw-rail \.defend-abilities \{\s*animation:\s*none/,
+  )
   assert.match(
     readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8'),
     /\.defend-plant-first\.is-pulse/,

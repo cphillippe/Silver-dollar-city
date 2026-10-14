@@ -112,6 +112,7 @@ import {
   dragGhostClient,
   hudCoversPoint,
   LAMP_DRAG_START_PX,
+  lampSpotBlocked,
   lampUnderFinger,
   magnetCandlePoint,
   overTowerCards,
@@ -232,7 +233,6 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const unlocked = nightPlantTypes(easy, trailOpen)
   const pads: CityPlotId[] = easy ? [...EASY_PLANT_PADS] : nightTowers.pads(progress)
   const [ability, setAbility] = useState<WatchAbility>(() => unlocked[0] ?? 'love')
-  const [lampPicked, setLampPicked] = useState(false)
   const taught = true
   const boardRef = useRef<SVGSVGElement>(null)
   const [boardBox, setBoardBox] = useState({ w: 0, h: 0 })
@@ -288,6 +288,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const [sparkSpent, setSparkSpent] = useState(1)
   const [placeArm, setPlaceArm] = useState<WatchAbility | null>(null)
   const placeArmRef = useRef<WatchAbility | null>(null)
+  const plantOpenGroundRef = useRef<(clientX: number, clientY: number) => boolean>(() => false)
   placeArmRef.current = placeArm
   /** A card press at a clear must not also hit Continue. */
   const clearCardAt = useRef(0)
@@ -513,6 +514,31 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     }
     if (phase === 'wave' && nightWatchDebugHolds(search, nwDebug)) setDebugPaused(true)
   }, [phase, waveIndex, nwDebug, easy])
+
+  useEffect(() => {
+    if (!(easy && phase === 'plant')) return
+    const onDown = (event: PointerEvent) => {
+      const target = event.target as Element | null
+      if (!target?.closest) return
+      if (target.closest('.defend-go, .defend-ability')) return
+      if (!target.closest('.nw-docks')) return
+      if (!plantOpenGroundRef.current(event.clientX, event.clientY)) return
+      event.preventDefault()
+      event.stopPropagation()
+      const swallow = (follow: Event) => {
+        follow.preventDefault()
+        follow.stopPropagation()
+      }
+      window.addEventListener('pointerup', swallow, true)
+      window.addEventListener('click', swallow, true)
+      window.setTimeout(() => {
+        window.removeEventListener('pointerup', swallow, true)
+        window.removeEventListener('click', swallow, true)
+      }, 400)
+    }
+    window.addEventListener('pointerdown', onDown, true)
+    return () => window.removeEventListener('pointerdown', onDown, true)
+  }, [easy, phase])
 
   useEffect(() => {
     if (phase !== 'wave' && phase !== 'boost') return
@@ -997,7 +1023,6 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     setHelpOpen(false)
     placeArmRef.current = id
     setPlaceArm(id)
-    setLampPicked(true)
     if (!candle) setAbility(id)
     closeUpgrade(true)
   }
@@ -1171,6 +1196,18 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     setGhost(null)
     closeUpgrade(true)
     return true
+  }
+
+  plantOpenGroundRef.current = (clientX, clientY) => {
+    if (phase !== 'plant') return false
+    const svg = boardRef.current
+    if (!svg) return false
+    const point = clientToMap(svg, clientX, clientY)
+    if (!point) return false
+    const finger = lampUnderFinger(point)
+    const using = unlocked.includes(ability) ? ability : 'love'
+    if (lampSpotBlocked(finger, plantsRef.current)) return false
+    return finishPlace(plantsRef.current, finger, using, false, false)
   }
 
   function togglePad(id: CityPlotId) {
@@ -2194,7 +2231,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   debugPanelRef.current = debugPanel
   const debugHarness = easy && debugPanel && midWave
   const debugFrozen = debugHarness && debugPaused
-  const groundPick = Boolean(easy && !won && (placeArm || (phase === 'plant' && lampPicked)))
+  const cardOn = Boolean(easy && phase === 'plant' && ability)
+  const groundPick = Boolean(easy && !won && (placeArm || cardOn))
   const groundHints = useMemo(
     () => (groundPick ? plantableHints(plants) : []),
     [groundPick, plants],
@@ -2576,10 +2614,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       progress={progress}
       easy={easy}
       ability={ability}
-      setAbility={(id) => {
-        setAbility(id)
-        setLampPicked(true)
-      }}
+      setAbility={setAbility}
       setToolLock={setToolLock}
       firing={firing}
       firingId={firingId}
@@ -2606,7 +2641,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
 
   return (
     <main
-      className={`defend-page ${taught ? 'is-puzzle' : 'is-teach'} ${arming ? 'is-arming' : ''} ${won ? 'is-win' : ''} ${shake ? 'is-shake' : ''} ${leakFlash ? 'is-leak' : ''} ${firing ? 'is-firing' : ''} ${stillOn ? 'is-still' : ''} ${mendOn ? 'is-mend' : ''} ${mendShield ? 'is-mend-shield' : ''} ${debugFrozen ? 'is-nw-debug-freeze' : ''} ${easy ? 'is-easy-watch' : ''} ${easyTap ? 'is-easy-tap' : ''} ${boosting ? 'is-boost' : ''} ${clearPanelFolded(boosting, placeArm) ? 'is-clear-fold' : ''} ${phase === 'lost' ? 'is-lost' : ''} ${boosting && runSparks < 1 ? 'is-spark-broke' : ''} ${easy && phase === 'plant' && awaitingLamp ? 'is-need-lamp' : ''} ${easy && (phase === 'plant' || placeArm) ? 'is-placing' : ''} ${easy && !won && (phase === 'wave' || phase === 'boost') ? 'is-shop' : ''}`}
+      className={`defend-page ${taught ? 'is-puzzle' : 'is-teach'} ${arming ? 'is-arming' : ''} ${won ? 'is-win' : ''} ${shake ? 'is-shake' : ''} ${leakFlash ? 'is-leak' : ''} ${firing ? 'is-firing' : ''} ${stillOn ? 'is-still' : ''} ${mendOn ? 'is-mend' : ''} ${mendShield ? 'is-mend-shield' : ''} ${debugFrozen ? 'is-nw-debug-freeze' : ''} ${easy ? 'is-easy-watch' : ''} ${easyTap ? 'is-easy-tap' : ''} ${boosting ? 'is-boost' : ''} ${clearPanelFolded(boosting, placeArm) ? 'is-clear-fold' : ''} ${phase === 'lost' ? 'is-lost' : ''} ${boosting && runSparks < 1 ? 'is-spark-broke' : ''} ${easy && phase === 'plant' && awaitingLamp ? 'is-need-lamp' : ''} ${cardOn ? 'is-card-on' : ''} ${easy && (phase === 'plant' || placeArm) ? 'is-placing' : ''} ${easy && !won && (phase === 'wave' || phase === 'boost') ? 'is-shop' : ''}`}
       aria-label={WATCH_TITLE}
       data-night-map={mapId}
     >
