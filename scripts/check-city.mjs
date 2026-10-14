@@ -82,7 +82,6 @@ import {
   applyEasyPointerTap,
   easyLiveSpawnT,
   easyPointerTapGate,
-  easyVisibleFaceTap,
   EASY_ON_SCREEN_SEC,
   EASY_ON_SCREEN_T,
   easyTapArmored,
@@ -7527,20 +7526,34 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(latestChange('1.4.464').items.join('\n'), /developer jump/)
 }
 
-// Night Watch 1.4.465: a visible face is one hit, Upgrade opens mid-wave, round 25 spawns its boss.
+// Night Watch 1.4.465: the glow gate decides the live tap, Upgrade opens mid-wave, round 25 spawns its boss.
 {
   const screen465 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
   const css465 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
   const bar465 = readFileSync(new URL('../src/components/DefendAbilityBar.tsx', import.meta.url), 'utf8')
   const board465 = readFileSync(new URL('../src/components/DefendNightBoard.tsx', import.meta.url), 'utf8')
   const sky465 = readFileSync(new URL('../src/components/DefendNightSky.tsx', import.meta.url), 'utf8')
-  assert.equal(easyVisibleFaceTap(true, { t: 0.2 }, 0), 'hit', '1.4.465 a drawn face counts')
-  assert.equal(easyVisibleFaceTap(true, { t: 0.4, fog: true }, 2), 'miss', '1.4.465 fog still misses')
-  assert.equal(
-    easyVisibleFaceTap(true, { t: 0.5, gait: 'tough', tapChip: 4 }, 8),
-    'miss',
-    '1.4.465 a shrugged walker still misses',
+  const liveTap465 = screen465.slice(screen465.indexOf('function fireAtRaider'), screen465.indexOf('function fireBest'))
+  assert.match(
+    liveTap465,
+    /const gate = easyPointerTapGate\(easy, raider, live\.current\.raiders, waveIndexRef\.current, tuneRef\.current\.armorFrom\)\s*if \(gate === 'miss'\)/,
+    '1.4.465 the live tap misses when the glow gate misses',
   )
+  for (const round of [0, 1, 2, 3, 5]) {
+    const glow = { id: 1, t: 0.8 }
+    const dark = { id: 2, t: 0.2 }
+    const road = [glow, dark]
+    assert.equal(
+      easyPointerTapGate(true, dark, road, round),
+      'miss',
+      `1.4.465 round ${round + 1} live tap misses a face that is not glowing`,
+    )
+    assert.equal(
+      easyPointerTapGate(true, glow, road, round),
+      'hit',
+      `1.4.465 round ${round + 1} live tap hits the glowing face`,
+    )
+  }
   assert.equal(cueTapStrike(true, false), 'miss', '1.4.465 the glow rule stays a miss off the ring')
   assert.equal(cueTapStrike(true, true), 'hit', '1.4.465 the glowing face still hits')
   assert.match(
@@ -7548,7 +7561,6 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     /\.defend-page\.is-easy-tap \.defend-raider\.is-easy-tap-target \.defend-raider-hit \{[^}]*pointer-events:\s*all/,
     '1.4.465 every drawn face keeps a hit disc',
   )
-  assert.match(screen465, /easyVisibleFaceTap\(/, '1.4.465 the live tap uses the drawn face')
   assert.match(screen465, /function claimTap\(\)/, '1.4.465 one pointer cannot count twice')
   assert.match(sky465, /closest\?\.\('\.defend-raider'\)/, '1.4.465 a face tap does not also miss on the board')
   assert.match(
