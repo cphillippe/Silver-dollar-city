@@ -118,11 +118,38 @@ export function easyLeadBossShrug(roundIndex: number, boss = false, armorFrom = 
 }
 
 /**
+ * Live lead road, round 25 only. A plain walker shrugs after a few taps,
+ * so the finale is lamp work. Earlier rounds stay open: a spender still
+ * dies on round 18, and Lock In still clears the night.
+ * Fast and tough stay on their own rules. Plate sims, frozen nights, and a
+ * maze night do not read this.
+ */
+export function easyLeadPlainShrug(
+  roundIndex: number,
+  gait?: string,
+  boss = false,
+  armorFrom = 7,
+): boolean {
+  if (boss || armorFrom < 7) return false
+  if (gait === 'tough' || gait === 'fast') return false
+  return Math.floor(roundIndex) + 1 >= 25
+}
+
+/**
  * The first glowing tap on a round 5 tough opens this much extra.
  * Later taps stay at one. Lamps do not read this, so a night with no taps
  * still meets the old bar.
  */
 export const EASY_R5_TOUGH_OPEN = 5
+
+/** The first hit has landed, so the round 5 tough is no longer a closed bulk. */
+export function easyR5ToughOpened(
+  roundIndex: number,
+  raider: { gait?: string; boss?: boolean; tapChip?: number },
+): boolean {
+  if (Math.floor(roundIndex) !== 4 || raider.gait !== 'tough' || raider.boss) return false
+  return (raider.tapChip ?? 0) > 0
+}
 
 export function easyGlowTapDamage(hp: number, chipped = 0, armored = false, openTough = false): number {
   const left = Math.max(0, Math.floor(hp) || 0)
@@ -144,7 +171,8 @@ export function easyTapSoaked(
   if (!(roundIndex >= 0)) return false
   const armored =
     easyTapArmored(roundIndex, raider.gait, !!raider.boss, armorFrom) ||
-    easyLeadBossShrug(roundIndex, !!raider.boss, armorFrom)
+    easyLeadBossShrug(roundIndex, !!raider.boss, armorFrom) ||
+    easyLeadPlainShrug(roundIndex, raider.gait, !!raider.boss, armorFrom)
   return armored && (raider.tapChip ?? 0) >= TAP_SHRUG_CHIP
 }
 
@@ -168,7 +196,7 @@ export interface LiveStrikeSize {
 /**
  * How hard the live shot is, before the hit lands.
  * Round 5's boss is not armored, so a tap and a lamp both cut the bar.
- * Tough walkers from round 7, the round 10 boss, and bosses from round 15, shrug taps after four.
+ * Tough walkers from round 7, the round 10 boss, bosses from round 15, and plain walkers on round 25, shrug taps after four.
  * Lamps still use their tier. Hard does not read the Easy armor.
  */
 export function liveNightDamage(
@@ -177,7 +205,8 @@ export function liveNightDamage(
 ): LiveStrikeSize {
   const armored =
     (shot.easy && shot.manual && easyTapArmored(shot.roundIndex, raider.gait, !!raider.boss, shot.armorFrom ?? 7)) ||
-    (shot.easy && shot.manual && easyLeadBossShrug(shot.roundIndex, !!raider.boss, shot.armorFrom ?? 7))
+    (shot.easy && shot.manual && easyLeadBossShrug(shot.roundIndex, !!raider.boss, shot.armorFrom ?? 7)) ||
+    (shot.easy && shot.manual && easyLeadPlainShrug(shot.roundIndex, raider.gait, !!raider.boss, shot.armorFrom ?? 7))
   const soaked = raider.tapChip ?? 0
   const lamp = Math.max(0, Math.floor(shot.lampDamage) || 0)
   const glow = shot.easy && shot.manual ? easyGlowTapDamage(raider.hp, soaked, armored) : lamp

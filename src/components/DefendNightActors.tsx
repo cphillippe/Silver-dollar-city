@@ -4,6 +4,7 @@ import {
   EASY_FACE_HIT_R,
   EASY_WALKER_FACE_PX,
   easyFaceGlows,
+  easyR5ToughOpened,
   easyTapSoaked,
   EASY_WALKER_HIT_PX,
   PATH_WALKER_FACE_DY,
@@ -496,6 +497,7 @@ export function DefendNightActorsSvg({
                 const at = raiderAt(raider)
                 const isTap = easyTap && !raider.turned
                 const shrugged = easyTapSoaked(roundIndex, raider, armorFrom)
+                const opened = easy && easyR5ToughOpened(roundIndex, raider)
                 const isCue = isTap && !shrugged && easyFaceGlows(raider, raiders, roundIndex, armorFrom)
                 const lampHit =
                   raider.struckAt != null && performance.now() - raider.struckAt < SHOT_JUICE_MS
@@ -505,8 +507,9 @@ export function DefendNightActorsSvg({
                     data-person-node={isTap ? 'walker' : undefined}
                     data-walker-id={isTap ? raider.id : undefined}
                     data-gait={raider.gait && raider.gait !== 'plain' ? raider.gait : undefined}
+                    data-open={opened ? 'yes' : undefined}
                     data-face={raider.face ?? raider.kind}
-                    className={`defend-raider ${raider.mini ? 'is-mini' : ''} ${raider.gait === 'fast' ? 'is-fast' : ''} ${raider.gait === 'tough' ? 'is-tough' : ''} ${raider.boss ? 'is-boss' : ''} ${raider.turned ? 'is-turned' : ''} ${isTap ? 'is-easy-tap-target' : ''} ${isCue ? 'is-easy-cue' : ''} ${lampHit ? 'is-lamp-hit' : ''}`}
+                    className={`defend-raider ${raider.mini ? 'is-mini' : ''} ${raider.gait === 'fast' ? 'is-fast' : ''} ${raider.gait === 'tough' && !opened ? 'is-tough' : ''} ${opened ? 'is-open' : ''} ${raider.boss ? 'is-boss' : ''} ${raider.turned ? 'is-turned' : ''} ${isTap ? 'is-easy-tap-target' : ''} ${isCue ? 'is-easy-cue' : ''} ${lampHit ? 'is-lamp-hit' : ''}`}
                     data-boss={raider.boss ? 'yes' : undefined}
                     transform={`translate(${at.x} ${at.y})`}
                     role={isTap ? 'button' : undefined}
@@ -543,7 +546,7 @@ export function DefendNightActorsSvg({
                         </g>
                       </g>
                     ) : null}
-                    {raider.gait === 'tough' && !raider.turned ? (
+                    {raider.gait === 'tough' && !raider.turned && !opened ? (
                       <ellipse
                         className="defend-tough-bulk"
                         cy={PATH_WALKER_FACE_DY + 4}
@@ -566,8 +569,8 @@ export function DefendNightActorsSvg({
                     <ellipse
                       className="defend-raider-shadow"
                       cy={12 * (PATH_WALKER_FACE_U / 36)}
-                      rx={(raider.gait === 'tough' ? 18 : 13) * (PATH_WALKER_FACE_U / 36)}
-                      ry={(raider.gait === 'tough' ? 6.2 : 4.6) * (PATH_WALKER_FACE_U / 36)}
+                      rx={(raider.gait === 'tough' && !opened ? 18 : 13) * (PATH_WALKER_FACE_U / 36)}
+                      ry={(raider.gait === 'tough' && !opened ? 6.2 : 4.6) * (PATH_WALKER_FACE_U / 36)}
                     />
                     {easy && !raider.turned ? (
                       <g className="defend-raider-face is-dark-face">
@@ -699,7 +702,7 @@ export function DefendNightActorsSvg({
                       <path d={`M${CUE_RING_R + 18} ${PATH_WALKER_FACE_DY + 16} l28 10`} />
                     </g>
                   ) : null}
-                  {tapTarget.gait === 'tough' ? (
+                  {tapTarget.gait === 'tough' && !easyR5ToughOpened(roundIndex, tapTarget) ? (
                     <g aria-hidden>
                       <ellipse
                         className="walker-cue-shoulders"

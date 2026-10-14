@@ -1090,6 +1090,20 @@ img.walker-face.easy-walker-face,
   fill: #d85a3a;
 }
 
+/* The first tap drops the closed bulk. The bar stays bright so the chunk reads. */
+.defend-raider.is-open .defend-raider-face {
+  filter: brightness(1.25) saturate(1.2) drop-shadow(0 0 8px #fff6b8);
+}
+
+.defend-raider.is-open .defend-hp-fill {
+  fill: #fff6b8;
+}
+
+.defend-raider.is-open .defend-hp-track {
+  stroke: #fff6b8;
+  stroke-width: 1.6;
+}
+
 .defend-boss-mantle {
   fill: #9a1838;
   stroke: #ffcc33;
