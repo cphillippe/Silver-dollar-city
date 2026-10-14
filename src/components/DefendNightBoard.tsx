@@ -28,6 +28,9 @@ export type DefendNightBoardProps = Omit<DefendNightSkyProps, 'children'> &
     onCloseUpgrade?: () => void
     onUpgradePath?: (plotId: CityPlotId, path: TreePath, fromPip?: boolean) => void
     onArmPathBuy?: (path: TreePath) => void
+    onBuyBright?: (plotId: CityPlotId) => void
+    /** Round 7 and later. Bright stays off the card before that. */
+    showBright?: boolean
     runPaths?: Record<string, LampPaths>
     /** Held Lock In lines. The bonus step counts the ones on this lamp's pillar. */
     heldLessons?: readonly string[]
@@ -47,7 +50,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
     walkerCalls, loreLine, runTier, boosting, onBoostTower,     upgradeAt, onOpenUpgrade, upFlashId, ghost = null,
     groundHints = [],
     upgradePoint, boardBox, runSparks = 0, levelBurst = null, onPullLamp, pullSparks = 0, onCloseUpgrade,
-    onUpgradePath, onArmPathBuy, runPaths, roundIndex = -1, armorFrom = 7,
+    onUpgradePath, onArmPathBuy, onBuyBright, showBright = false, runPaths, roundIndex = -1, armorFrom = 7,
     heldLessons, playtestSteps = false, onOpenLessons,
     plateFill = false, onPlacePointer,
     map, roadD, porchCandy, roadLabel, mapFeatures, pops,
@@ -160,6 +163,8 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
           onUpgrade={() => onBoostTower?.(upgradeAt as CityPlotId)}
           onUpgradePath={(path, fromPip) => onUpgradePath?.(upgradeAt as CityPlotId, path, fromPip)}
           onArmPathBuy={onArmPathBuy}
+          onBuyBright={onBuyBright ? () => onBuyBright(upgradeAt as CityPlotId) : undefined}
+          showBright={showBright}
           paths={cardPaths}
           clearOf={clearOf}
           cameraScale={cameraScale}
