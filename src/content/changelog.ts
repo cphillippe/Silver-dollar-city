@@ -9,11 +9,11 @@ export interface ChangeNote {
 export const CHANGELOG: ChangeNote[] = [
   {
     version: '1.4.463',
-    title: 'Round 25 plains shrug, and a tough opens',
+    title: 'Four taps, then the lamps',
     when: '2026-10-14',
     items: [
-      'On round 25, a plain walker stops taking taps after four hits. The lamps have to finish that bar.',
-      'A built night still brings the boss down. Every earlier round is unchanged.',
+      'From round 7, a plain walker stops taking taps after four hits, the same as a tough walker and a boss. A busy round lands a few dozen hits, not a pile.',
+      'The lamps finish the rest of those bars. Rounds 1 through 6 are unchanged.',
       'The first tap on a round 5 tough opens it right away. The heavy shape drops, and the bar shows the chunk. A busy tapper still holds round 5, and a night with no taps still loses it.',
     ],
   },
