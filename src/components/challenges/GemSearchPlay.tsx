@@ -99,6 +99,8 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   const home = easyWhoWhere(lineId)
   const matchChips = matchChipsFor(lineId)
   const lociStamp = lociStampFor(lineId)
+  const sameFace = lineId === 'fg-reason' || lineId === 'fg-ought'
+  const sayLine = sameFace ? lociStamp.ideaShort : (matchChips?.say ?? '')
   const needed = cellsStillNeeded(puzzle, found)
   const nextWord = puzzle.words.find((word) => !found.includes(word.id))
   const left = puzzle.words.length - found.length
@@ -548,7 +550,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
               role="status"
               aria-live="polite"
             >
-              {matchChips.say.split(/(\s+)/).map((part: string, index: number) => {
+              {sayLine.split(/(\s+)/).map((part: string, index: number) => {
                 const plain = part.replace(/[^A-Za-z]/g, '').toUpperCase()
                 const hit = puzzle.words.find((word) => word.text === plain)
                 const on = hit ? found.includes(hit.id) : false
@@ -595,7 +597,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
                 </button>
                 <LociStamp stamp={lociStamp} mode="hero" />
                 <p className={`match-teach-say is-sheet ${found.length === puzzle.words.length ? 'is-lit' : ''}`}>
-                  {matchChips.say}
+                  {sayLine}
                 </p>
                 <ul className="match-teach-chips" aria-label="Mind-map words">
                   {puzzle.words.map((word) => (
@@ -753,7 +755,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       {status === 'ok' ? (
         <>
           <WinBurst play={winStamp} stamp={EASY.matchWin} />
-          <MatchTakeaway lineId={lineId} title={clearBeat.title} />
+          <MatchTakeaway lineId={lineId} title={sameFace ? lociStamp.ideaShort : clearBeat.title} />
           <div className="cta-dock">
             <button
               type="button"

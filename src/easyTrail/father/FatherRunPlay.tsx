@@ -475,9 +475,10 @@ export function FatherRunPlay({
         </div>
         </>
       ) : (
-        <div className="cta-dock run-dock">
+        <div key="father-run-dock" className="cta-dock run-dock">
           <button
             key="father-run-pad"
+            data-run-pad="hold"
             ref={padRef}
             type="button"
             className={`run-pad ${holding ? 'is-held' : ''} ${dash.inWindow && phase === 'run' ? 'is-glow' : ''}`}

@@ -1619,7 +1619,15 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.470')
+assert.equal(APP_VERSION, '1.4.471')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.471'), '1.4.471 changelog row')
+assert.match(latestChange('1.4.471').title, /sentence|place|press/i)
+assert.match(latestChange('1.4.471').items.join('\n'), /Witness Square/)
+assert.doesNotMatch(
+  latestChange('1.4.471').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.471 changelog avoids GitHub close keywords',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.470'), '1.4.470 changelog row')
 assert.match(latestChange('1.4.470').title, /creed|fit|rest/i)
 assert.doesNotMatch(
@@ -15910,3 +15918,4 @@ assert.match(
 await import('./check-seed-fire.mjs').then((mod) => mod.checkSeedFire())
 await import('./check-night-jump.mjs').then((mod) => mod.checkNightJump())
 await import('./check-story-win.mjs').then((mod) => mod.checkStoryWins())
+await import('./check-easy-face.mjs').then((mod) => mod.checkEasyFace())
