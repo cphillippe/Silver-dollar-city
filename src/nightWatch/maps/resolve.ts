@@ -1,4 +1,4 @@
-import { isNightMapId, mapIsOpen, type NightMapId } from './chain.ts'
+import { isNightMapId, mapIsOpen, nightMapQueryId, type NightMapId } from './chain.ts'
 
 export type { NightMapId } from './chain.ts'
 
@@ -29,7 +29,8 @@ export function resolveNightMap(choice: NightMapChoice): NightMapId {
   if (!choice.easy) return 'a2'
   if (choice.session === 'a2') return 'a2'
   if (choice.session && (open(choice.session, choice) || choice.playtest)) return choice.session
-  if (choice.playtest && isNightMapId(choice.query) && choice.query !== 'a2') return choice.query
+  const asked = nightMapQueryId(choice.query)
+  if (choice.playtest && asked && asked !== 'a2') return asked
   if (choice.saved && isNightMapId(choice.saved) && open(choice.saved, choice)) return choice.saved
   return 'a2'
 }

@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.469',
+    title: 'The bell slows by a fifth',
+    when: '2026-10-14',
+    items: [
+      'A planted bell slows walkers in its ring by 20%, then 30%, then 35%. A second bell does not stack.',
+      'A bell and a map slow together never take more than 40% off the walk.',
+      'Playtest map02 opens Far Hills. map03 through map06 open those maps. A wrong name says Map not found.',
+    ],
+  },
+  {
     version: '1.4.468',
     title: 'Map tricks that work',
     when: '2026-10-14',

@@ -25,6 +25,24 @@ export function isNightMapId(value: unknown): value is NightMapId {
   return typeof value === 'string' && (NIGHT_MAP_IDS as readonly string[]).includes(value)
 }
 
+/**
+ * Playtest names in map order. map02 is Far Hills. map03–map06 are those maps.
+ * A real slug passes through.
+ */
+const MAP_QUERY_ALIAS: Record<string, NightMapId> = {
+  map02: 'far-hills',
+  map03: 'map03',
+  map04: 'map04',
+  map05: 'map05',
+  map06: 'map06',
+}
+
+export function nightMapQueryId(raw: string | null | undefined): NightMapId | null {
+  if (!raw) return null
+  if (isNightMapId(raw)) return raw
+  return MAP_QUERY_ALIAS[raw] ?? null
+}
+
 export function previousMap(id: NightMapId): NightMapId | null {
   const index = NIGHT_MAP_IDS.indexOf(id)
   return index > 0 ? NIGHT_MAP_IDS[index - 1] : null
