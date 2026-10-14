@@ -110,7 +110,7 @@ export function easyJumpLoad(roundIndex: number, tune: NightTune = A2_TUNE): Eas
   let step = 0
   for (let at = 0; at < index; at += 1) {
     const boss = easyBossRound(at) ? 1 + BOSS_CLEAR_SPARKS : 0
-    sparks += roundSparkPay(roundForTune(EASY_ROUNDS[at], at, tune)) + boss
+    sparks += roundSparkPay(roundForTune(EASY_ROUNDS[at], at, tune)) + boss + easyClearSparkBonus(at)
     let guard = 0
     while (guard < 40) {
       guard += 1
@@ -319,6 +319,13 @@ export const BOSS_CLEAR_SPARKS = 2
 
 export function easyBossClearSparks(index: number): number {
   return easyBossRound(index) ? BOSS_CLEAR_SPARKS : 0
+}
+
+/** One extra spark for clearing rounds 7, 8, and 9. Other rounds pay 0. */
+export function easyClearSparkBonus(index: number): number {
+  const round = Math.floor(index) + 1
+  if (round >= 7 && round <= 9) return 1
+  return 0
 }
 
 /**

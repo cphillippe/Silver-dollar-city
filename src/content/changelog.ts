@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.466',
+    title: 'A spark for the middle rounds',
+    when: '2026-10-14',
+    items: [
+      'Clearing rounds 7, 8, and 9 pays one extra spark. The clear box says +1 spark.',
+      'When the round 10 boss shrugs off a tap, the face says Shrugs!',
+      'After a lamp path is full, Bright costs 15 sparks and that lamp shoots a little faster.',
+    ],
+  },
+  {
     version: '1.4.465',
     title: 'A face tap counts once',
     when: '2026-10-14',
