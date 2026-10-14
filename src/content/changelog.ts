@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.471',
+    title: 'One sentence, a place, a steady press',
+    when: '2026-10-14',
+    items: [
+      'On Easy, Reason and Ought use one sentence in the header and in the line you keep. Your mind works because God gives it light. God wrote right and wrong on your heart.',
+      'The creed play names Silas and Witness Square.',
+      'Father’s run keeps the same Hold button while it glows. A press in that glow still counts.',
+    ],
+  },
+  {
     version: '1.4.470',
     title: 'The creed win fits',
     when: '2026-10-14',

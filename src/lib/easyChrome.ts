@@ -151,7 +151,9 @@ export const EASY_STRIP_FACE: Record<string, string> = {
   'Burial is skipped because it does not matter.':
     'Being buried does not matter.',
   'The mind needs a real ground.':
-    'God gives your mind light.',
+    'Your mind works because God gives it light.',
+  'Rocks cannot write the law.':
+    'God wrote right and wrong on your heart.',
   'Reason is a free-floating trick with no ground.':
     'Thinking floats with nothing under it.',
   'Darkness is the last word about the world.':
