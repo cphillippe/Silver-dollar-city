@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.472',
+    title: 'Taps keep landing',
+    when: '2026-10-14',
+    items: [
+      'From round 7, a tap on a walker keeps hurting them. A thick walker does not shrug.',
+      'Later rounds send more walkers, and more of them are fast or thick. The round 10 boss still shrugs.',
+      'Only that boss says Shrugs!',
+    ],
+  },
+  {
     version: '1.4.471',
     title: 'One sentence, a place, a steady press',
     when: '2026-10-14',
