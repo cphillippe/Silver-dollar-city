@@ -385,14 +385,18 @@ export function plantableHints(
  * Buttons and readouts that float on the map. A tap in one of these boxes
  * is a no-go even when the box lets the tap fall through to the plate.
  */
+const HUD_CONTROL = '.nw-rail button, .nw-docks button, .nw-docks .btn, .nw-wave-overlay button'
+
+/**
+ * A real button over the plate. The dock and the map list are taller than
+ * their buttons, and that empty box is still open ground.
+ */
 export function hudCoversPoint(clientX: number, clientY: number, doc: Document): boolean {
-  const nodes = doc.querySelectorAll('.nw-rail, .nw-docks, .nw-balloon-slot, .nw-wave-overlay')
-  for (const node of nodes) {
-    const box = node.getBoundingClientRect()
-    if (box.width < 1 || box.height < 1) continue
-    if (clientX >= box.left && clientX <= box.right && clientY >= box.top && clientY <= box.bottom) {
-      return true
-    }
+  const stack = typeof doc.elementsFromPoint === 'function' ? doc.elementsFromPoint(clientX, clientY) : []
+  for (const node of stack) {
+    if (!(node instanceof Element)) continue
+    if (node.closest('.defend-board')) return false
+    if (node.closest(HUD_CONTROL)) return true
   }
   return false
 }

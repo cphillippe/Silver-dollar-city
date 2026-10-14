@@ -4191,6 +4191,24 @@ button.defend-new-lamp[aria-pressed='true'] {
   animation: nw-lamp-nudge 1.8s ease-in-out infinite;
 }
 
+.defend-page.is-easy-watch.is-need-lamp.is-card-on .nw-rail::before {
+  content: none;
+}
+
+.defend-page.is-easy-watch.is-need-lamp.is-card-on .nw-rail .defend-abilities {
+  animation: none;
+}
+
+/* 1.4.464: the map list sits on the plate. Gaps and the caption let a plant tap through. */
+.defend-page.is-placing .nw-map-pick,
+.defend-page.is-placing .nw-map-rule {
+  pointer-events: none;
+}
+
+.defend-page.is-placing .nw-map-pick button {
+  pointer-events: auto;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .defend-page.is-easy-watch.is-need-lamp .nw-rail .defend-abilities {
     animation: none;
