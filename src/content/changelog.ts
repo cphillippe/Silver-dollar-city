@@ -16,6 +16,7 @@ export const CHANGELOG: ChangeNote[] = [
       'Rapid taps stay on the board. The page keeps moving.',
       'When the night wins, the line says the night won and the round you reached, with Try again.',
       'Upgrade opens during a wave, so Strong can be bought while walkers are out.',
+      'Upgrade also opens before Begin, from the lamp on the map or from its card.',
       'Round 25 brings the boss in, including a jumped build.',
     ],
   },
