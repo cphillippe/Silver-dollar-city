@@ -846,7 +846,10 @@ export function magnetCandlePoint(
   return best
 }
 
-/** Place when the spot is open. A blocked spot returns the same map. */
+/**
+ * Place when the spot is open ground.
+ * Road, houses, and features block. A short reach still plants.
+ */
 export function commitLamp(
   plants: Record<string, string>,
   point: NightPoint,
