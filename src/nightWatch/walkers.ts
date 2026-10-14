@@ -209,6 +209,15 @@ export function easyBossRound(index: number): boolean {
 }
 
 /**
+ * Spawn id that wears the crown. One past the round's walkers.
+ * `-1` when the round has no boss. Round 25's id is the table count (9).
+ */
+export function easyBossSpawnId(roundCount: number, roundIndex: number): number {
+  if (!easyBossRound(roundIndex)) return -1
+  return Math.max(0, Math.floor(roundCount) || 0)
+}
+
+/**
  * Boss health. Round 5 stays the teaching bar (12). Rounds 6–9 stay 44.
  * Round 10 is 55, then 120, 180, and 240. Each boss is thicker than the one
  * before it. Round 25 is the showdown: four Far 1 / Strong 3 lamps on good

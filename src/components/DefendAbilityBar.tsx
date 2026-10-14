@@ -107,6 +107,7 @@ export function DefendAbilityBar({
     if (!placing || !open) return
     // A planted card opens its tree on click. It is not a drag and it does not buy.
     if (paidPlace && placed) return
+    if (easy && placed && !paidPlace) return
     if (boosting && !paidPlace) return
     if (paidPlace) onArmPlaceRef.current?.(ability)
     if (event.pointerType === 'mouse' && event.button !== 0) return
@@ -221,7 +222,7 @@ export function DefendAbilityBar({
                     trackCard(event, tool.id, open, placed)
                   }}
                   onPointerUp={(event) => {
-                    if (!(easy && boosting && placed && open)) return
+                    if (!(easy && placed && open && (boosting || !paidPlace))) return
                     event.stopPropagation()
                     swallowClick.current = true
                     setToolLock(null)
@@ -254,8 +255,17 @@ export function DefendAbilityBar({
                       onBoost(tool.id)
                       return
                     }
+                    if (easy && placed && !paidPlace) {
+                      setToolLock(null)
+                      onOpenTree?.(tool.id)
+                      return
+                    }
                     setToolLock(null)
                     setAbility(tool.id)
+                    if (paidPlace && easy && placed) {
+                      onOpenTree?.(tool.id)
+                      return
+                    }
                     if (paidPlace) onArmPlace?.(tool.id)
                   }}
                 >
