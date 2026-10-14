@@ -18,6 +18,7 @@ import {
   easyBossClearSparks,
   easyBossHp,
   easyBossRound,
+  easyBossSpawnId,
   easyJumpLoad,
   easyJumpSparkBank,
   easyLatePush,
@@ -206,6 +207,15 @@ interface DefendScreenProps {
 /** 1.4.375: how long the lamp level-up burst, roman bump, and −1✦ stay readable. */
 const LEVEL_BURST_MS = 1100
 
+/** Playtest jump applied on the first paint, so Begin cannot start round 1 under a round 25 label. */
+function initialNightJump(easy: boolean) {
+  if (!easy || typeof window === 'undefined') return null
+  if (readNightReturn()) return null
+  const jump = readNightWatchRoundJump(nightLength(true))
+  if (jump == null) return null
+  return { index: jump, load: easyJumpLoad(jump) }
+}
+
 /** Easy SE chrome (1.4.379). Same cutoff as the phone rules in defend.css. */
 const PHONE_SE = '(max-width: 480px)'
 
@@ -241,10 +251,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const arming = false
   const [phase, setPhase] = useState<NightPhase>('plant')
   const [sessionMap, setSessionMap] = useState<NightMapId | null>(null)
-  const [waveIndex, setWaveIndex] = useState(0)
+  const [waveIndex, setWaveIndex] = useState(() => initialNightJump(easy)?.index ?? 0)
   const [runTier, setRunTier] = useState<Record<string, number>>(freshRunTier)
-  const [runPaths, setRunPaths] = useState(freshRunPaths)
-  const [runSparks, setRunSparks] = useState(0)
+  const [runPaths, setRunPaths] = useState(() => initialNightJump(easy)?.load.paths ?? freshRunPaths())
+  const [runSparks, setRunSparks] = useState(() => initialNightJump(easy)?.load.sparks ?? 0)
   const [skillReady, setSkillReady] = useState<Record<KitId, number>>({ still: 0, mend: 0 })
   const [skillNow, setSkillNow] = useState(0)
   const [skillNote, setSkillNote] = useState<KitId | null>(null)
@@ -260,6 +270,11 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const [tapHits, setTapHits] = useState(0)
   const [tapMisses, setTapMisses] = useState(0)
   const [tapDamage, setTapDamage] = useState(0)
+  const tapScoreRef = useRef({ hits: 0, misses: 0, damage: 0 })
+  const tapClaim = useRef(0)
+  const missLock = useRef<string | null>(null)
+  const missUntil = useRef(0)
+  const missShown = useRef<string | null>(null)
   const lampHurtRef = useRef(0)
   const hudRef = useRef<HTMLParagraphElement>(null)
   const [debugPaused, setDebugPaused] = useState(false)
@@ -332,14 +347,14 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const mendTimer = useRef(0)
   const shieldTimer = useRef(0)
   const bannerTimer = useRef(0)
-  const missTimer = useRef(0)
   const pulseTimer = useRef(0)
   const metRef = useRef<string[]>([...(progress.defense.met ?? [])])
   const markMetRef = useRef(markMet)
   markMetRef.current = markMet
-  const [plants, setPlants] = useState<Record<string, string>>(() =>
-    easy ? {} : starterPlants(pads, unlocked),
-  )
+  const [plants, setPlants] = useState<Record<string, string>>(() => {
+    if (!easy) return starterPlants(pads, unlocked)
+    return initialNightJump(true)?.load.plants ?? {}
+  })
   const [ghost, setGhost] = useState<LampPreview | null>(null)
   const lampDragLive = useRef(false)
   const plantsRef = useRef(plants)
@@ -361,6 +376,77 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const [firing, setFiring] = useState(false)
   const [firingId, setFiringId] = useState<string | null>(null)
   const comboRef = useRef(0)
+  const fxRef = useRef({
+    shots: [] as (Shot & { until: number })[],
+    blasts: [] as (Blast & { until: number })[],
+    juice: null as (EasyTapJuice & { until: number }) | null,
+    flash: [] as { id: CityPlotId; until: number }[],
+    firingUntil: 0,
+    firingId: null as string | null,
+    firingOn: false,
+    shakeUntil: 0,
+    shakeOn: false,
+    combo: 0,
+    downed: 0,
+    dirty: false,
+  })
+  const publishFxRef = useRef<() => void>(() => {})
+  publishFxRef.current = () => {
+    const fx = fxRef.current
+    const nowMs = performance.now()
+    if (missLock.current && nowMs >= missUntil.current) {
+      missLock.current = null
+      fx.dirty = true
+    }
+    const shotN = fx.shots.length
+    const blastN = fx.blasts.length
+    const flashN = fx.flash.length
+    fx.shots = fx.shots.filter((shot) => shot.until > nowMs)
+    fx.blasts = fx.blasts.filter((blast) => blast.until > nowMs)
+    fx.flash = fx.flash.filter((item) => item.until > nowMs)
+    if (fx.juice && fx.juice.until <= nowMs) {
+      fx.juice = null
+      fx.dirty = true
+    }
+    if (fx.shots.length !== shotN || fx.blasts.length !== blastN || fx.flash.length !== flashN) fx.dirty = true
+    const shaking = nowMs < fx.shakeUntil
+    const firingNow = nowMs < fx.firingUntil
+    if (shaking !== fx.shakeOn || firingNow !== fx.firingOn) fx.dirty = true
+    if (!fx.dirty) return
+    fx.dirty = false
+    fx.shakeOn = shaking
+    fx.firingOn = firingNow
+    const score = tapScoreRef.current
+    setTapHits(score.hits)
+    setTapMisses(score.misses)
+    setTapDamage(score.damage)
+    setShots(fx.shots.map(({ until: _until, ...shot }) => shot))
+    setBlasts(fx.blasts.map(({ until: _until, ...blast }) => blast))
+    setFlash(fx.flash.map((item) => item.id))
+    setTapJuice(
+      fx.juice
+        ? {
+            key: fx.juice.key,
+            combo: fx.juice.combo,
+            left: fx.juice.left,
+            top: fx.juice.top,
+            kind: fx.juice.kind,
+            face: fx.juice.face,
+            down: fx.juice.down,
+            shrug: fx.juice.shrug,
+          }
+        : null,
+    )
+    setCombo(fx.combo)
+    setShake(shaking)
+    setFiring(firingNow)
+    setFiringId(firingNow ? fx.firingId : null)
+    setDowned(fx.downed)
+    if (missShown.current !== missLock.current) {
+      missShown.current = missLock.current
+      setToolLock(missLock.current)
+    }
+  }
   const { juiceDone, afterJuice } = useJuiceHandoff()
   const saved = useRef(false)
   const afterJuiceRef = useRef(afterJuice)
@@ -390,7 +476,6 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     nextId: 100000,
   })
   const autoFireRef = useRef<(now: number, frozen: boolean) => void>(() => {})
-  const flashGen = useRef<Record<string, number>>({})
   const shotSeq = useRef(0)
 
   useEffect(() => {
@@ -588,6 +673,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       return
     }
     const wave = waveIndexRef.current
+    tapScoreRef.current = { hits: 0, misses: 0, damage: 0 }
     setTapHits(0)
     setTapMisses(0)
     setTapDamage(0)
@@ -776,7 +862,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
         markMissRef.current(DEFEND_BRIEF_ID)
       }
       const unturnedLive = walking.filter((item) => !item.turned).length
-      const holdSpawn = easy && nightEnemies.holdSpawn(unturnedLive)
+      const spawnRound = shaped ?? roundForTune(easyRound(wave), wave, tuneRef.current)
+      const bossWaiting =
+        easy && wave > 5 && live.current.spawned === easyBossSpawnId(spawnRound.count, wave)
+      const holdSpawn = easy && nightEnemies.holdSpawn(unturnedLive) && !bossWaiting
       if (
         !frozen &&
         live.current.spawned < liveTune.size &&
@@ -794,13 +883,14 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
         while (
           packLeft > 0 &&
           live.current.spawned < liveTune.size &&
-          walking.filter((item) => !item.turned).length < (spec?.liveCap ?? 3)
+          (walking.filter((item) => !item.turned).length < (spec?.liveCap ?? 3) ||
+            (easy && wave > 5 && live.current.spawned === easyBossSpawnId(spawnRound.count, wave)))
         ) {
         packLeft -= 1
         const id = live.current.spawned
         const cast = nightEnemies.cast(cleared, id, wave, easy)
-        const round = shaped ?? roundForTune(easyRound(wave), wave, tuneRef.current)
-        const boss = easy && easyBossRound(wave) && id === round.count
+        const round = spawnRound
+        const boss = easy && id === easyBossSpawnId(round.count, wave)
         const gait = easy && !boss ? gaitForSlot(round, id) : undefined
         const hp = boss
           ? easyBossHp(wave)
@@ -873,6 +963,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       const debugHold = easy && debugPanelRef.current && debugPausedRef.current
       autoFireRef.current(now, debugHold)
       const alive = live.current.raiders
+      publishFxRef.current()
       setRaiders(alive)
       if (gate.failed || live.current.hearts <= 0) {
         live.current.playing = false
@@ -963,7 +1054,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       live.current.playing = false
       cancelAnimationFrame(frame)
     }
-  }, [phase, easy, progress.defense.cleared])
+  }, [phase, easy, progress.defense.cleared, waveIndex])
 
   useEffect(() => {
     if (phase === 'wave') return
@@ -1530,12 +1621,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     }
     if (!manual) live.current.cool[id] = shotAt
     lightPad(id)
-    setFiring(true)
-    setFiringId(using)
-    window.setTimeout(() => {
-      setFiring(false)
-      setFiringId(null)
-    }, SHOT_JUICE_MS)
+    const fx = fxRef.current
+    fx.firingUntil = performance.now() + SHOT_JUICE_MS
+    fx.firingId = using
+    fx.dirty = true
     if (!best) return false
     const to = raiderAt(best)
     const aim = { x: to.x, y: to.y + PATH_WALKER_FACE_DY }
@@ -1543,9 +1632,9 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     const heldLine = learningForTool(progress, using)
     comboRef.current += 1
     const nextCombo = comboRef.current
-    setCombo(nextCombo)
-    setShake(true)
-    window.setTimeout(() => setShake(false), 160)
+    fx.combo = nextCombo
+    fx.shakeUntil = performance.now() + 160
+    fx.dirty = true
     const blast: Blast = {
       key: now,
       x: to.x,
@@ -1593,7 +1682,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       blast.spark = sparks
       if (easy) {
         const juiceAt = boardPoint(aim.x, aim.y)
-        setTapJuice({
+        fx.juice = {
           key: now,
           combo: nextCombo,
           left: juiceAt.left,
@@ -1602,10 +1691,9 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
           face: best.face,
           down: struck.down,
           shrug: manual && armored && tapDmg <= 0,
-        })
-        window.setTimeout(() => {
-          setTapJuice((current) => (current?.key === now ? null : current))
-        }, 620)
+          until: now + 620,
+        }
+        fx.dirty = true
       }
       live.current.raiders = live.current.raiders.map((item) =>
         item.id !== best.id
@@ -1696,27 +1784,21 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     shotSeq.current += 1
     const shotKey = shotSeq.current
     const muzzle = isCandle(using) ? { x: at.x, y: at.y - 36 } : nightTowers.muzzle(id)
-    setShots((current) => [...current.slice(-3), { key: shotKey, from: muzzle, to: aim }])
-    setBlasts((current) => [...current.slice(-3), blast])
-    window.setTimeout(() => {
-      setShots((current) => current.filter((item) => item.key !== shotKey))
-    }, SHOT_JUICE_MS)
-    window.setTimeout(() => {
-      setBlasts((current) => current.filter((item) => item.key !== now))
-    }, 620)
-    setRaiders(live.current.raiders)
-    setDowned(live.current.downed)
+    fx.shots = [
+      ...fx.shots.filter((shot) => shot.until > now).slice(-3),
+      { key: shotKey, from: muzzle, to: aim, until: now + SHOT_JUICE_MS },
+    ]
+    fx.blasts = [...fx.blasts.filter((item) => item.until > now).slice(-3), { ...blast, until: now + 620 }]
+    fx.downed = live.current.downed
+    fx.dirty = true
     return true
   }
 
   function lightPad(id: CityPlotId) {
-    const gen = (flashGen.current[id] ?? 0) + 1
-    flashGen.current[id] = gen
-    setFlash((current) => (current.includes(id) ? current : [...current, id]))
-    window.setTimeout(() => {
-      if (flashGen.current[id] !== gen) return
-      setFlash((current) => current.filter((item) => item !== id))
-    }, SHOT_JUICE_MS)
+    const until = performance.now() + SHOT_JUICE_MS
+    const fx = fxRef.current
+    fx.flash = [...fx.flash.filter((item) => item.id !== id && item.until > performance.now()), { id, until }]
+    fx.dirty = true
   }
 
   autoFireRef.current = (now: number, frozen: boolean) => {
@@ -1750,35 +1832,56 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     }
   }
 
+  function claimTap(): boolean {
+    if (tapClaim.current) return false
+    tapClaim.current = 1
+    queueMicrotask(() => {
+      tapClaim.current = 0
+    })
+    return true
+  }
+
   function noteFaceTap(hit: boolean, damage: number) {
     if (!easy) return
+    const score = tapScoreRef.current
     if (hit) {
-      setTapHits((count) => count + 1)
-      setTapDamage((count) => count + damage)
-      return
+      score.hits += 1
+      score.damage += damage
+    } else {
+      score.misses += 1
     }
-    setTapMisses((count) => count + 1)
+    const node = hudRef.current?.ownerDocument.querySelector('.nw-tap-readout')
+    if (node) {
+      node.setAttribute('data-tap-hits', String(score.hits))
+      node.setAttribute('data-tap-misses', String(score.misses))
+      node.setAttribute('data-tap-damage', String(score.damage))
+      const boss = node.getAttribute('data-boss-hp')
+      const max = node.getAttribute('data-boss-max')
+      node.textContent = `Taps ${score.hits} hit · ${score.misses} miss · ${score.damage} dmg · Boss ${boss ? `${boss}/${max}` : '—'}`
+    }
+    fxRef.current.dirty = true
   }
 
   function showMiss() {
-    const note = EASY.nightMiss
-    setToolLock(note)
-    window.clearTimeout(missTimer.current)
-    missTimer.current = window.setTimeout(() => {
-      setToolLock((current) => (current === note ? null : current))
-    }, EASY_MISS_HOLD_MS)
+    missLock.current = EASY.nightMiss
+    missUntil.current = performance.now() + EASY_MISS_HOLD_MS
+    fxRef.current.dirty = true
   }
 
   function dismissMiss() {
-    window.clearTimeout(missTimer.current)
-    setToolLock((current) => (current === EASY.nightMiss ? null : current))
+    if (missLock.current == null) return
+    missLock.current = null
+    missUntil.current = 0
+    fxRef.current.dirty = true
   }
 
   function fireAtRaider(raiderId: number) {
     if (phase !== 'wave' || won) return
+    if (!claimTap()) return
     const raider = live.current.raiders.find((item) => item.id === raiderId && !item.turned)
     if (!raider) return
-    if (easyPointerTapGate(easy, raider, live.current.raiders, waveIndexRef.current, tuneRef.current.armorFrom) === 'miss') {
+    const gate = easyPointerTapGate(easy, raider, live.current.raiders, waveIndexRef.current, tuneRef.current.armorFrom)
+    if (gate === 'miss') {
       noteFaceTap(false, 0)
       showMiss()
       return
@@ -1833,6 +1936,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       return
     }
     if (phase !== 'wave' || won) return
+    if (!claimTap()) return
     if (faceTapStrike(easy, false, false) === 'miss' && easy) {
       noteFaceTap(false, 0)
       showMiss()
@@ -1868,6 +1972,12 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     setBlasts([])
     setFlash([])
     setTapJuice(null)
+    tapScoreRef.current = { hits: 0, misses: 0, damage: 0 }
+    fxRef.current.shots = []
+    fxRef.current.blasts = []
+    fxRef.current.juice = null
+    fxRef.current.flash = []
+    fxRef.current.dirty = false
     setTapHits(0)
     setTapMisses(0)
     setTapDamage(0)
@@ -2409,7 +2519,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
         <div className="defend-lost">
           <p>
             {easy
-              ? `Reached round ${waveIndex + 1}. You missed. Tap the face.`
+              ? `The night won this time. You reached round ${waveIndex + 1}.`
               : 'Porch flickered. Turn them again.'}
           </p>
           {easy ? (
@@ -2432,7 +2542,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
             </>
           ) : null}
           <button type="button" className="btn primary" onClick={retry}>
-            Try the night again
+            Try again
           </button>
         </div>
       ) : null}
