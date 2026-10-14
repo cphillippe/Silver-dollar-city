@@ -82,6 +82,7 @@ import {
   applyEasyPointerTap,
   easyLiveSpawnT,
   easyPointerTapGate,
+  r10ShrugCue,
   EASY_ON_SCREEN_SEC,
   EASY_ON_SCREEN_T,
   easyTapArmored,
@@ -126,6 +127,7 @@ import {
   BOSS_CLEAR_SPARKS,
   BOSS_PACE,
   easyBossClearSparks,
+  easyClearSparkBonus,
   easyBossHp,
   easyBossRound,
   easyBossSpawnId,
@@ -197,7 +199,12 @@ import {
   WALKER_PORTRAIT_PX,
 } from '../src/nightWatch/enemies/faces.ts'
 import {
+  applyBright,
   applyPathStep,
+  BRIGHT_COST,
+  BRIGHT_SPEED,
+  brightRoundOpen,
+  canBuyBright,
   BONUS_LESSONS,
   canTake,
   freshRunPaths,
@@ -1593,7 +1600,14 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.465')
+assert.equal(APP_VERSION, '1.4.466')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.466'), '1.4.466 changelog row')
+assert.match(latestChange('1.4.466').title, /spark|Bright|shrug/i)
+assert.doesNotMatch(
+  latestChange('1.4.466').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.466 changelog avoids GitHub close keywords',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.465'), '1.4.465 changelog row')
 assert.match(latestChange('1.4.465').title, /face|tap/i)
 assert.doesNotMatch(
@@ -6209,9 +6223,9 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(easyJumpSparkBank(0), 0, '1.4.434 round 1 still starts with no sparks')
   assert.equal(nightWatchRoundJump('?nwRound=15', 25, false), null, '1.4.434 a normal visit does not jump')
   assert.equal(nightWatchJumpAllowed('?nwRound=15', false), false)
-  assert.equal(easyJumpSparkBank(14), 17, '1.4.437 a playtest jump to round 15 banks the natural leftover')
-  assert.equal(easyJumpSparkBank(19), 74, '1.4.437 a playtest jump to round 20 banks the natural leftover')
-  assert.equal(easyJumpSparkBank(24), 133, '1.4.437 a playtest jump to round 25 banks the natural leftover')
+  assert.equal(easyJumpSparkBank(14), 20, '1.4.437 a playtest jump to round 15 banks the natural leftover')
+  assert.equal(easyJumpSparkBank(19), 77, '1.4.437 a playtest jump to round 20 banks the natural leftover')
+  assert.equal(easyJumpSparkBank(24), 136, '1.4.437 a playtest jump to round 25 banks the natural leftover')
   const lone = { far: 0, strong: 0 }
   for (const index of [14, 24]) {
     const quiet = paceEasyTree(index, [lone], 3, 0, 1, 1, 0, 1, false, false)
@@ -6756,7 +6770,8 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     map05: [[0, 1, 2, 3], [2, 4, 0, 7], [1, 3, 6, 5], [6, 7, 1, 0], [7, 0, 3, 5], [0, 5, 3, 2], [3, 4, 0, 2], [0, 7, 6, 4], [0, 3, 5, 1], [6, 5, 0, 4], [3, 6, 7, 5], [3, 2, 1, 5]],
     map06: [[0, 1, 2, 3], [2, 4, 0, 7], [1, 3, 6, 5], [6, 7, 1, 0], [7, 0, 3, 5], [0, 5, 3, 2], [3, 4, 0, 2], [0, 7, 6, 4], [0, 3, 5, 1], [6, 5, 0, 4], [3, 6, 7, 5], [3, 2, 1, 5]],
   }
-  const want = { map02: 13.83, map03: 12.75, map04: 12.17, map05: 10, map06: 9.75 }
+  // 1.4.466: Far Hills mean moves 13.83 → 13.92 when rounds 7–9 pay a spark.
+  const want = { map02: 13.92, map03: 12.75, map04: 12.17, map05: 10, map06: 9.75 }
   for (const [file, sets] of Object.entries(orders)) {
     const raw = JSON.parse(readFileSync(new URL(`../src/nightWatch/maps/maze/${file}.json`, import.meta.url), 'utf8'))
     const pack = nightMapFromPack(raw)
@@ -6927,8 +6942,8 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     }, 20, 0.28).dead
   }
   assert.equal(bestDead.map02, 14, '1.4.443 Far Hills best seats reach round 14')
-  assert.equal(bestDead.map03, 13, '1.4.443 Peppermint best seats stay near round 13')
-  assert.equal(bestDead.map04, 12, '1.4.443 Caramel best seats stay near round 13')
+  assert.equal(bestDead.map03, 10, '1.4.466 Peppermint best seats reach round 10 once rounds 7–9 pay a spark')
+  assert.equal(bestDead.map04, 13, '1.4.466 Caramel best seats reach round 13 once rounds 7–9 pay a spark')
   assert.equal(bestDead.map05, 14, '1.4.447 Licorice best seats reach round 14 once a pop pays a full spark')
   assert.equal(bestDead.map06, 9, '1.4.447 Blueberry best seats stay at round 9')
   const fogZones = packs.map05.mapFeatures.filter((feature) => feature.type === 'fog')
@@ -7585,6 +7600,57 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(screen465, /wave > 5 && live\.current\.spawned === easyBossSpawnId/, '1.4.465 the round 25 boss is not stuck behind the cap')
   assert.match(latestChange('1.4.465').items.join('\n'), /Try again/)
   assert.match(latestChange('1.4.465').items.join('\n'), /Round 25/)
+}
+
+// Night Watch 1.4.466: rounds 7–9 pay one spark, the round 10 boss says Shrugs!, Bright is one late buy.
+{
+  const screen466 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const actors466 = readFileSync(new URL('../src/components/DefendNightActors.tsx', import.meta.url), 'utf8')
+  const card466 = readFileSync(new URL('../src/components/DefendTowerCard.tsx', import.meta.url), 'utf8')
+  const css466 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  for (const round of [6, 7, 8]) {
+    assert.equal(easyClearSparkBonus(round), 1, `1.4.466 round ${round + 1} pays one extra spark`)
+  }
+  assert.equal(easyClearSparkBonus(5), 0, '1.4.466 round 6 pays no extra spark')
+  assert.equal(easyClearSparkBonus(9), 0, '1.4.466 round 10 pays no extra spark')
+  assert.equal(easyJumpLoad(5).sparks, 2, '1.4.466 round 6 still starts on the old bank')
+  assert.equal(easyJumpSparkBank(9), 6, '1.4.466 the three bonuses are in the bank at round 10')
+  assert.match(screen466, /easyClearSparkBonus\(wave\)/, '1.4.466 the clear pays that spark')
+  assert.match(screen466, /\+1 spark/, '1.4.466 the clear box says +1 spark')
+  assert.equal(r10ShrugCue(9, true, 0, true), true, '1.4.466 the round 10 boss cue fires when the tap bounces')
+  assert.equal(r10ShrugCue(9, true, 1, true), false, '1.4.466 a tap that still hurts has no cue')
+  assert.equal(r10ShrugCue(6, false, 0, true), false, '1.4.466 a thick walker does not say Shrugs')
+  assert.equal(r10ShrugCue(4, true, 0, true), false, '1.4.466 the round 5 boss does not say Shrugs')
+  assert.equal(
+    easyPointerTapGate(true, { id: 1, t: 0.4, boss: true, tapChip: 4 }, [{ id: 2, t: 0.9 }, { id: 1, t: 0.4, boss: true, tapChip: 4 }], 9),
+    'hit',
+    '1.4.466 a shrugged round 10 boss tap still lands',
+  )
+  assert.equal(
+    easyPointerTapGate(true, { id: 1, t: 0.4, boss: true, tapChip: 4, fog: true }, [{ id: 1, t: 0.4, boss: true, tapChip: 4, fog: true }], 9),
+    'miss',
+    '1.4.466 a fogged round 10 boss still cannot be tapped',
+  )
+  assert.match(screen466, /r10ShrugCue\(/, '1.4.466 the live tap asks for the cue')
+  assert.match(actors466, /Shrugs!/, '1.4.466 the cue reads Shrugs!')
+  const plain466 = lampStrike({ far: 1, strong: 3 })
+  const bright466 = lampStrike({ far: 1, strong: 3, bright: 1 })
+  assert.equal(BRIGHT_COST, 15, '1.4.466 Bright costs 15 sparks')
+  assert.equal(bright466.damage, plain466.damage, '1.4.466 Bright does not change the hit')
+  assert.equal(bright466.cooldownMs, plain466.cooldownMs / BRIGHT_SPEED, '1.4.466 Bright is ten percent faster')
+  assert.equal(canBuyBright({ far: 1, strong: 3 }).ok, true, '1.4.466 a finished lamp can buy Bright')
+  assert.equal(canBuyBright({ far: 1, strong: 2 }).ok, false, '1.4.466 an unfinished lamp cannot buy Bright')
+  assert.equal(canBuyBright({ far: 1, strong: 3, bright: 1 }).ok, false, '1.4.466 Bright is one buy')
+  assert.equal(brightRoundOpen(5), false, '1.4.466 Bright stays shut through round 6')
+  assert.equal(brightRoundOpen(6), true, '1.4.466 Bright opens on round 7')
+  assert.equal(applyBright('love', { love: { far: 1, strong: 3 } }, 15).sparks, 0, '1.4.466 the buy spends 15')
+  assert.match(screen466, /brightRoundOpen\(waveIndexRef\.current\)/, '1.4.466 the live buy waits for round 7')
+  assert.match(card466, /data-bright-buy="yes"/, '1.4.466 the card offers Bright')
+  assert.match(css466, /\.defend-tower-card \.defend-bright-buy \{[^}]*pointer-events: auto/, '1.4.466 Bright takes the tap')
+  assert.match(card466, /Bright/, '1.4.466 the card says Bright')
+  assert.match(latestChange('1.4.466').items.join('\n'), /\+1 spark/)
+  assert.match(latestChange('1.4.466').items.join('\n'), /Shrugs!/)
+  assert.match(latestChange('1.4.466').items.join('\n'), /Bright/)
 }
 
 // Night Watch 1.4.408: pip buy, Easy hearts, softer rounds 7–12.

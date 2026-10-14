@@ -12,6 +12,9 @@ import {
 } from '../lib/towerCardPlace'
 import { boostCost, combatTier, TIER_MARK, TOOL_TIER_MAX } from '../lib/watchTools'
 import {
+  BRIGHT_COST,
+  BRIGHT_LINE,
+  canBuyBright,
   canTake,
   LESSON_LOCK,
   PATH_LABEL,
@@ -74,6 +77,8 @@ export function DefendTowerCard({
   onUpgrade,
   onUpgradePath,
   onArmPathBuy,
+  onBuyBright,
+  showBright = false,
   paths,
   onPull,
   pullSparks = 0,
@@ -102,6 +107,9 @@ export function DefendTowerCard({
   onUpgradePath?: (path: TreePath, fromPip?: boolean) => void
   /** Pointer went down on a pip. The round must not advance until that buy lands. */
   onArmPathBuy?: (path: TreePath) => void
+  onBuyBright?: () => void
+  /** Round 7 and later. Earlier rounds keep the card as it was. */
+  showBright?: boolean
   paths?: LampPaths
   /** Plant and between waves. Hidden while walkers are on the road. */
   onPull?: () => void
@@ -526,6 +534,27 @@ export function DefendTowerCard({
             </div>
           )
         })}
+        {showBright && paths && (paths.bright ?? 0) >= 1 ? (
+          <p className="defend-bright-on" data-bright="on">
+            Bright
+          </p>
+        ) : null}
+        {showBright && paths && canBuyBright(paths).ok ? (
+          <button
+            type="button"
+            className="btn defend-bright-buy"
+            data-bright-buy="yes"
+            data-cost={BRIGHT_COST}
+            disabled={sparks < BRIGHT_COST}
+            onClick={(event) => {
+              event.stopPropagation()
+              if (sparks >= BRIGHT_COST) onBuyBright?.()
+            }}
+          >
+            {sparks < BRIGHT_COST ? `Bright · Need ${BRIGHT_COST}` : `Bright · ${BRIGHT_COST}✦`}
+            <span className="defend-bright-line">{BRIGHT_LINE}</span>
+          </button>
+        ) : null}
         {roadNote ? (
           <p className="defend-tower-road" data-road-note={roadNote}>
             {roadNote}

@@ -43,6 +43,28 @@ export const PATH_LINE: Record<TreePath, string> = {
 export interface LampPaths {
   far: number
   strong: number
+  /** One extra step after the path is full. 1 means Bright is on. */
+  bright?: number
+}
+
+/** Sparks for Bright. One buy per lamp, after Far and Strong are finished. */
+export const BRIGHT_COST = 15
+
+/** Bright shoots this much faster. 1.1 is ten percent. */
+export const BRIGHT_SPEED = 1.1
+
+/** Bright stays off the card until round 7. Rounds 1–6 do not read it. */
+export function brightRoundOpen(roundIndex: number): boolean {
+  return Math.floor(roundIndex) >= 6
+}
+
+export const BRIGHT_LINE = 'Shoots a little faster'
+
+/** True when one path is at three and the other has its first step. */
+export function lampPathFull(paths: LampPaths): boolean {
+  const far = clampRank(paths.far)
+  const strong = clampRank(paths.strong)
+  return Math.max(far, strong) >= TREE_STEP_MAX && Math.min(far, strong) >= TREE_CROSS_MAX
 }
 
 export interface PathBuy {
@@ -121,6 +143,7 @@ export function pathSparkSpend(paths: LampPaths): number {
       total += step < TREE_STEP_COST.length ? (TREE_STEP_COST[step] ?? 0) : TREE_BONUS_COST
     }
   }
+  if ((paths.bright ?? 0) >= 1) total += BRIGHT_COST
   return total
 }
 
@@ -129,6 +152,7 @@ export function pathsOf(runPaths: Record<string, LampPaths> | undefined, toolId:
   return {
     far: clampRank(live?.far),
     strong: clampRank(live?.strong),
+    bright: (live?.bright ?? 0) >= 1 ? 1 : 0,
   }
 }
 
@@ -205,6 +229,7 @@ export function lampStrike(paths: LampPaths): LampStrike {
   if (far >= 4) {
     rangeBonus = 48
   }
+  if ((paths.bright ?? 0) >= 1) cooldownMs = cooldownMs / BRIGHT_SPEED
   return {
     damage,
     rangeBonus,
@@ -224,6 +249,34 @@ export function pathBadge(paths: LampPaths): string {
   if (far > 0 && strong === 0) return `Far ${far}`
   if (strong > 0 && far === 0) return `Strong ${strong}`
   return `F${far} S${strong}`
+}
+
+export function canBuyBright(paths: LampPaths): PathBuy {
+  if ((paths.bright ?? 0) >= 1) return { ok: false, cost: 0, reason: 'Bright is on.' }
+  if (!lampPathFull(paths)) return { ok: false, cost: BRIGHT_COST, reason: 'Finish this lamp first.' }
+  return { ok: true, cost: BRIGHT_COST, reason: '' }
+}
+
+export function applyBright(
+  toolId: string,
+  runPaths: Record<string, LampPaths>,
+  sparks: number,
+): PathSpend {
+  const current = pathsOf(runPaths, toolId)
+  const buy = canBuyBright(current)
+  if (!buy.ok) {
+    return { ok: false, paths: runPaths, sparks, note: buy.reason, cost: 0 }
+  }
+  if (sparks < buy.cost) {
+    return { ok: false, paths: runPaths, sparks, note: `Need ${buy.cost} sparks`, cost: buy.cost }
+  }
+  return {
+    ok: true,
+    paths: { ...runPaths, [toolId]: { ...current, bright: 1 } },
+    sparks: sparks - buy.cost,
+    note: 'Bright',
+    cost: buy.cost,
+  }
 }
 
 export function applyPathStep(

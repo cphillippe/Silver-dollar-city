@@ -16,6 +16,7 @@ import { pickWalkerFace, WALKER_FACE_POOL } from '../nightWatch/enemies/faces'
 import {
   BOSS_PACE,
   easyBossClearSparks,
+  easyClearSparkBonus,
   easyBossHp,
   easyBossRound,
   easyBossSpawnId,
@@ -42,6 +43,7 @@ import {
   easyClearHeart,
   easyLiveSpawnT,
   easyPointerTapGate,
+  r10ShrugCue,
   easyRoundHeartCap,
   liveBossClearPhase,
   liveNightDamage,
@@ -159,7 +161,9 @@ import {
 import { lessonAreaFor, samePillarLessons } from '../nightWatch/lampPillar'
 import { clearNightReturn, readNightReturn, saveNightReturn } from '../nightWatch/nightReturn'
 import {
+  applyBright,
   applyPathStep,
+  brightRoundOpen,
   easyShotReach,
   freshLampPaths,
   freshRunPaths,
@@ -287,6 +291,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   debugPausedRef.current = debugPaused
   const [boostNote, setBoostNote] = useState<string | null>(null)
   const [bossBonus, setBossBonus] = useState(0)
+  const [clearSpark, setClearSpark] = useState(0)
   const [upgradeAt, setUpgradeAt] = useState<CityPlotId | null>(null)
   const [returnPlot, setReturnPlot] = useState<CityPlotId | null>(null)
   const [spendOpen, setSpendOpen] = useState(false)
@@ -434,6 +439,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
             face: fx.juice.face,
             down: fx.juice.down,
             shrug: fx.juice.shrug,
+            shrugCue: fx.juice.shrugCue,
           }
         : null,
     )
@@ -996,6 +1002,17 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
         sparksRef.current += bonus
         setRunSparks((count) => count + bonus)
       }
+      const grantClearSpark = () => {
+        if (!easy) {
+          setClearSpark(0)
+          return
+        }
+        const bonus = easyClearSparkBonus(wave)
+        setClearSpark(bonus)
+        if (bonus <= 0) return
+        sparksRef.current += bonus
+        setRunSparks((count) => count + bonus)
+      }
       const endNight = () => {
         const exit = applyBossExitLeak(live.current.hearts)
         live.current.hearts = exit.hearts
@@ -1041,6 +1058,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
         }
         if (easy) grantClearHeart()
         grantBossSparks()
+        grantClearSpark()
         live.current.playing = false
         setToolLock(null)
         setPhase('boost')
@@ -1691,6 +1709,13 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
           face: best.face,
           down: struck.down,
           shrug: manual && armored && tapDmg <= 0,
+          shrugCue: r10ShrugCue(
+            waveIndexRef.current,
+            !!best.boss,
+            tapDmg,
+            armored,
+            tuneRef.current.armorFrom,
+          ),
           until: now + 620,
         }
         fx.dirty = true
@@ -1991,6 +2016,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     setRunSparks(0)
     sparksRef.current = 0
     setBossBonus(0)
+    setClearSpark(0)
     const ready = { still: 0, mend: 0 }
     skillReadyRef.current = ready
     setSkillReady(ready)
@@ -2212,6 +2238,29 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     boostPath(tool as WatchAbility, path, plotId)
   }
   boostPathRef.current = boostSelectedPath
+
+  function buyBright(plotId: CityPlotId) {
+    if (!easy || !brightRoundOpen(waveIndexRef.current)) return
+    const tool = lampUpgradeTool(plotId, plantsRef.current)
+    if (!tool || !unlocked.includes(tool as WatchAbility)) return
+    const beforeSparks = sparksRef.current
+    const next = applyBright(tool, runPathsRef.current, sparksRef.current)
+    setBoostNote(next.note)
+    if (!next.ok) return
+    runPathsRef.current = next.paths
+    sparksRef.current = next.sparks
+    setRunPaths(next.paths)
+    setRunSparks(next.sparks)
+    setSparkSpent(Math.max(1, beforeSparks - next.sparks))
+    setToolLock(null)
+    window.clearTimeout(burstTimer.current)
+    setSparkSpend(true)
+    setUpFlash(plotId)
+    burstTimer.current = window.setTimeout(() => {
+      setSparkSpend(false)
+      setUpFlash((current) => (current === plotId ? null : current))
+    }, LEVEL_BURST_MS)
+  }
 
   function flashKit(note: string) {
     setToolLock(note)
@@ -2557,6 +2606,11 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
                 {` · Boss down +${bossBonus} sparks`}
               </span>
             ) : null}
+            {easy && clearSpark > 0 ? (
+              <span className="defend-clear-spark" data-clear-spark={clearSpark}>
+                {' +1 spark'}
+              </span>
+            ) : null}
             {` · spend sparks`}
             {boostNote ? ` · ${boostNote}` : ''}
           </p>
@@ -2853,6 +2907,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
               onBoostTower={boostSelectedTool}
               onUpgradePath={boostSelectedPath}
               onArmPathBuy={armPathBuy}
+              onBuyBright={buyBright}
+              showBright={brightRoundOpen(waveIndex)}
               upgradeAt={upgradeAt}
               onOpenUpgrade={openUpgrade}
               roundIndex={waveIndex}

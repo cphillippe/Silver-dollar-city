@@ -56,6 +56,8 @@ export interface EasyTapJuice {
   down?: boolean
   /** Armored tap after the chip. A puff, not a +1. */
   shrug?: boolean
+  /** Round 10 boss bounced this tap. The word sits on the puff. */
+  shrugCue?: boolean
 }
 
 export interface DefendNightActorsProps {
@@ -844,6 +846,11 @@ export function DefendNightWalkerCue({
                   ) : (
                     <span className="easy-tap-plus">+</span>
                   )}
+                  {tapJuice.shrugCue ? (
+                    <span className="easy-shrug-cue" data-shrug-cue="yes">
+                      Shrugs!
+                    </span>
+                  ) : null}
                   {tapJuice.combo > 1 ? (
                     <span className="easy-tap-combo">×{tapJuice.combo}</span>
                   ) : null}
