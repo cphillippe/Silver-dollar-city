@@ -175,7 +175,7 @@ import {
   paceMazeSpender,
   strongFirstBuy,
 } from '../src/nightWatch/livePace.ts'
-import { nightWatchMapQuery } from '../src/lib/nightWatchDebug.ts'
+import { nightWatchMapMissing, nightWatchMapQuery } from '../src/lib/nightWatchDebug.ts'
 import { A2_NIGHT_MAP } from '../src/nightWatch/maps/a2.ts'
 import { nightMapFromPack } from '../src/nightWatch/maps/fromPack.ts'
 import {
@@ -227,6 +227,8 @@ import {
   applyBellStep,
   bellDamage,
   bellPaceFor,
+  walkerSlowPace,
+  SLOW_CAP,
   bellSlow,
   bellUnlocked,
   BELL_CARD,
@@ -1617,7 +1619,15 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.468')
+assert.equal(APP_VERSION, '1.4.469')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.469'), '1.4.469 changelog row')
+assert.match(latestChange('1.4.469').title, /bell/i)
+assert.doesNotMatch(
+  latestChange('1.4.469').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.469 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.469').items.join('\n'), /Map not found/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.468'), '1.4.468 changelog row')
 assert.match(latestChange('1.4.468').title, /map/i)
 assert.doesNotMatch(
@@ -7145,7 +7155,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   const css468 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
   const sprites468 = readFileSync(new URL('../src/nightWatch/map/FeatureSprites.tsx', import.meta.url), 'utf8')
   assert.match(screen468, /walkerZone\(item\.t, item\.pathId, featuresRef\.current\)/, '1.4.468 the live step reads the map zone')
-  assert.match(screen468, /step \*= zone\.speed/, '1.4.468 a gate or a pool changes the step')
+  assert.match(screen468, /mapPace = zone\.speed/, '1.4.468 a gate or a pool changes the step')
   assert.match(screen468, /minisOnKill\(/, '1.4.468 a kill asks whether berries pop')
   assert.match(sprites468, /fog_v2\.png/, '1.4.468 Licorice draws the pale fog')
   assert.match(css468, /\.defend-road \{\s*fill: none;\s*stroke: #ff9f1a;/, '1.4.468 the shared road stays the gold line')
@@ -7856,6 +7866,65 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(actors467, /is-bell-pulse/, '1.4.467 the ring is a gold pulse')
   assert.match(css467, /@keyframes nw-bell-pulse/, '1.4.467 the pulse is warm gold')
   assert.match(css467, /#ffcc33/, '1.4.467 the ring uses the gold already on the night')
+}
+
+// Night Watch 1.4.469: bell pace is 20/30/35, and a bell plus a map slow stops at 40%.
+{
+  const screen469 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const nearPace = (actual, expected, label) => {
+    assert.ok(Math.abs(actual - expected) < 1e-9, `${label} (${actual})`)
+  }
+  assert.equal(SLOW_CAP, 0.4, '1.4.469 bells and map slows together stop at 40 percent')
+  nearPace(walkerSlowPace(1, 0.8), 0.8, '1.4.469 level I is 20 percent by itself')
+  nearPace(walkerSlowPace(1, 0.7), 0.7, '1.4.469 level II is 30 percent by itself')
+  nearPace(walkerSlowPace(1, 0.65), 0.65, '1.4.469 level III is 35 percent by itself')
+  nearPace(walkerSlowPace(0.5, 1), 0.5, '1.4.469 a pool alone keeps half speed')
+  nearPace(walkerSlowPace(0.5, 0.8), 0.6, '1.4.469 a pool and a bell stop at 40 percent')
+  nearPace(walkerSlowPace(0.75, 0.65), 0.6, '1.4.469 a gate and a level III bell stop at 40 percent')
+  nearPace(walkerSlowPace(0.75, 0.8), 0.6, '1.4.469 a gate and a level I bell sit on the cap')
+  const plants469 = { 'at:400:700': 'bell', 'at:430:700': 'bell' }
+  const underBoth = { x: 415, y: 700 }
+  assert.equal(bellPaceFor(plants469, {}, underBoth), 0.8, '1.4.469 two bells do not stack')
+  function plateTravel(pace) {
+    let t = 0.15
+    let dist = 0
+    const step = 0.01 * 6.2 * pace * (1 / 60)
+    for (let i = 0; i < 120; i += 1) {
+      const a = pathPoint(t)
+      t += step
+      const b = pathPoint(t)
+      dist += Math.hypot(b.x - a.x, b.y - a.y)
+    }
+    return dist
+  }
+  const outside = plateTravel(1)
+  const perSec = outside / 2
+  // Round 7 (speed 6.2) covers about 112 path px/s. Level I is 80% of that.
+  // A 42-vs-80 sample is about 47% and is not this multiplier.
+  assert.ok(perSec > 100 && perSec < 125, `1.4.469 a plain walker at round 7 pace covers about 112 path px/s (${perSec.toFixed(1)})`)
+  for (const pace of [0.8, 0.7, 0.65]) {
+    const ratio = plateTravel(pace) / outside
+    assert.ok(Math.abs(ratio - pace) < 0.01, `1.4.469 pace ${pace} travels ${ratio.toFixed(3)} of full speed`)
+  }
+  assert.match(screen469, /step \*= walkerSlowPace\(mapPace, bellPace\)/, '1.4.469 the live step multiplies the slow once')
+  assert.match(screen469, /data-map-missing="yes"/, '1.4.469 a bad map name shows a note')
+  assert.match(screen469, /Map not found/, '1.4.469 the note says Map not found')
+  assert.equal(nightWatchMapQuery('?playtest=1&nwMap=map02', true), 'far-hills', '1.4.469 map02 is Far Hills')
+  assert.equal(nightWatchMapQuery('?playtest=1&nwMap=map03', true), 'map03')
+  assert.equal(nightWatchMapQuery('?playtest=1&nwMap=map04', true), 'map04')
+  assert.equal(nightWatchMapQuery('?playtest=1&nwMap=map05', true), 'map05')
+  assert.equal(nightWatchMapQuery('?playtest=1&nwMap=map06', true), 'map06')
+  assert.equal(nightWatchMapQuery('?playtest=1&nwMap=far-hills', true), 'far-hills')
+  assert.equal(
+    resolveNightMap({ easy: true, unlocked: false, playtest: true, query: 'map02', session: null }),
+    'far-hills',
+    '1.4.469 playtest map02 opens Far Hills',
+  )
+  assert.equal(nightWatchMapMissing('?playtest=1&nwMap=nope', true), true, '1.4.469 an unknown map is marked missing')
+  assert.equal(nightWatchMapMissing('?playtest=1&nwMap=map02', true), false)
+  assert.equal(nightWatchMapMissing('?playtest=1', true), false)
+  assert.equal(nightWatchMapMissing('?nwMap=nope', false), false, '1.4.469 a normal visit ignores the query')
+  assert.equal(nightWatchMapQuery('?playtest=1&nwMap=nope', true), null, '1.4.469 an unknown map stays on A2')
 }
 
 // Night Watch 1.4.408: pip buy, Easy hearts, softer rounds 7–12.
