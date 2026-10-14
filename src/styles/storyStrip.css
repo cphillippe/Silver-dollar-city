@@ -1299,6 +1299,15 @@ html[data-easy='on'] .play.is-story-strip[data-n='3'] .strip-art img {
   }
 }
 
+/* Tablet creed win. The why card's bottom pad stuck out of the page by a
+   short line. Drop that pad so the card ends with the choices. */
+@media (min-height: 800px) {
+  html[data-easy='on'] .is-after:has(.play.is-story-strip.is-win:not([data-n='3'])) .recall-gate.is-easy-hold {
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+}
+
 /* Tall Easy 5-frame win (ph-road at 768×1024). The centered block left a band
    under the quiz. Grow the strip into that height. 412×915 and 4-frame wins
    stay on the rules above. */
@@ -1450,6 +1459,68 @@ html[data-easy='on'] .play.is-story-strip[data-n='3'] .strip-art img {
     overflow-y: auto;
     scrollbar-gutter: stable;
     overflow-anchor: none;
+  }
+
+  /* 375×667, 4- and 5-frame wins. The gloss and the why card ran past the
+     page (wb-creed by about a short thumb). The picture row stays at the
+     1.4.452 height. Only the verse, the badge, and the why card get shorter. */
+  @media (max-height: 740px) {
+    html[data-easy='on'] .play.is-story-strip.is-win:not([data-n='3']) .strip-stamp {
+      padding: 0 8px;
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    html[data-easy='on'] .play.is-story-strip.is-win:not([data-n='3']) .strip-verse {
+      padding: 0 6px;
+    }
+
+    html[data-easy='on'] .play.is-story-strip.is-win:not([data-n='3']) .strip-verse-lead,
+    html[data-easy='on'] .play.is-story-strip.is-win:not([data-n='3']) .strip-verse blockquote,
+    html[data-easy='on'] .play.is-story-strip.is-win:not([data-n='3']) .strip-verse figcaption,
+    html[data-easy='on'] .play.is-story-strip.is-win:not([data-n='3']) .strip-verse cite {
+      font-size: 10.5px;
+      line-height: 1.02;
+    }
+
+    html[data-easy='on'] .is-after:has(.play.is-story-strip.is-win:not([data-n='3'])) .recall-gate.is-easy-hold {
+      gap: 0;
+      padding: 0;
+    }
+
+    html[data-easy='on'] .is-after:has(.play.is-story-strip.is-win:not([data-n='3'])) .recall-gate.is-easy-hold > .eyebrow {
+      display: none;
+    }
+
+    html[data-easy='on'] .is-after:has(.play.is-story-strip.is-win:not([data-n='3'])) .why-blast,
+    html[data-easy='on'] .is-after:has(.play.is-story-strip.is-win:not([data-n='3'])) .why-arena {
+      gap: 2px;
+    }
+
+    html[data-easy='on'] .is-after:has(.play.is-story-strip.is-win:not([data-n='3'])) .why-claim {
+      padding: 2px 6px;
+      font-size: 0.76rem;
+      line-height: 1.05;
+    }
+
+    html[data-easy='on'] .is-after:has(.play.is-story-strip.is-win:not([data-n='3'])) .held-from {
+      display: none;
+    }
+
+    /* The page was flex-shrunk under a tall bottom pad, so its content
+       spilled 35px even after the verse fit the screen. Let the page
+       grow to that content and keep the pad small enough to stay on screen. */
+    html[data-easy='on'] .app.is-play .app-body:has(.play.is-story-strip.is-win:not([data-n='3'])) {
+      padding-bottom: 8px;
+    }
+
+    html[data-easy='on'] .daily-page.is-after:has(.play.is-story-strip.is-win:not([data-n='3'])),
+    html[data-easy='on'] .challenge-page.is-after:has(.play.is-story-strip.is-win:not([data-n='3'])) {
+      flex: 1 0 auto;
+      height: auto;
+      min-height: min-content;
+      overflow: visible;
+    }
   }
 
   html[data-easy='on'] .daily-page:has(.play.is-story-strip),

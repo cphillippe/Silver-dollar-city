@@ -1619,7 +1619,14 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.469')
+assert.equal(APP_VERSION, '1.4.470')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.470'), '1.4.470 changelog row')
+assert.match(latestChange('1.4.470').title, /creed|fit|rest/i)
+assert.doesNotMatch(
+  latestChange('1.4.470').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.470 changelog avoids GitHub close keywords',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.469'), '1.4.469 changelog row')
 assert.match(latestChange('1.4.469').title, /bell/i)
 assert.doesNotMatch(
