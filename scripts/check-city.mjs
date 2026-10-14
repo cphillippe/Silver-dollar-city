@@ -30,7 +30,12 @@ import * as easyLib from '../src/lib/easy.ts'
 import * as trailLoopHome from '../src/easyTrail/trail/loop.ts'
 import * as trailShelf from '../src/easyTrail/trail/index.ts'
 import { normalizeProgress } from '../src/lib/save.ts'
-import { nightWatchJumpAllowed, nightWatchRoundJump } from '../src/lib/nightWatchDebug.ts'
+import {
+  nightWatchDebugHolds,
+  nightWatchDebugPanel,
+  nightWatchJumpAllowed,
+  nightWatchRoundJump,
+} from '../src/lib/nightWatchDebug.ts'
 import {
   PH_ROAD_SHOW_IT,
   SHOW_IT_LINE,
@@ -277,6 +282,7 @@ import {
   lampRoadNote,
   bindLampGround,
   lampSpotBlocked,
+  plantableHints,
   candlePlateFromPx,
   lampUnderFinger,
   magnetCandlePoint,
@@ -1586,7 +1592,17 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.462')
+assert.equal(APP_VERSION, '1.4.464')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.464'), '1.4.464 changelog row')
+assert.match(latestChange('1.4.464').title, /pace|walkers/i)
+assert.match(latestChange('1.4.464').items.join('\n'), /test panel stays off/)
+assert.match(latestChange('1.4.464').items.join('\n'), /Plant a lamp first/)
+assert.match(latestChange('1.4.464').items.join('\n'), /open ground/)
+assert.doesNotMatch(
+  latestChange('1.4.464').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.464 changelog avoids GitHub close keywords',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.462'), '1.4.462 changelog row')
 assert.match(latestChange('1.4.462').title, /shrug/i)
 assert.match(latestChange('1.4.462').items.join('\n'), /round 10 boss/)
@@ -7397,6 +7413,46 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(gateSrc, /get\('playtest'\) === '1'/)
   assert.ok(CHANGELOG.some((note) => note.version === '1.4.407'), '1.4.407 changelog row')
   assert.doesNotMatch(latestChange('1.4.407').items.join('\n'), /Fixes #|Closes #|Resolves #/)
+}
+
+// Night Watch 1.4.464: the debug panel stays off a normal night. Walkers keep moving.
+{
+  assert.equal(nightWatchDebugPanel('', false), false, '1.4.464 a normal night hides the debug panel')
+  assert.equal(nightWatchDebugPanel('?cb=1', false), false, '1.4.464 a cache buster is not a flag')
+  assert.equal(nightWatchDebugPanel('?playtest=true', false), false, '1.4.464 playtest=true is not the panel')
+  assert.equal(nightWatchDebugPanel('?playtest=1', false), true, '1.4.464 playtest=1 shows the panel')
+  assert.equal(nightWatchDebugPanel('?nwDebug=1', false), true, '1.4.464 nwDebug=1 shows the panel')
+  assert.equal(nightWatchDebugPanel('', true), true, '1.4.464 the developer switch shows the panel')
+  assert.equal(nightWatchDebugHolds('', false), false, '1.4.464 a normal night does not freeze walkers')
+  assert.equal(nightWatchDebugHolds('?playtest=1', false), false, '1.4.464 a playtest seed still runs')
+  assert.equal(nightWatchDebugHolds('?nwDebug=1', false), true, '1.4.464 nwDebug=1 holds the wave')
+  assert.equal(nightWatchDebugHolds('', true), true, '1.4.464 the developer switch holds the wave')
+  const debugSrc464 = readFileSync(new URL('../src/lib/nightWatchDebug.ts', import.meta.url), 'utf8')
+  const screen464 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  assert.match(debugSrc464, /sessionStorage.getItem\(NW_DEBUG_SESSION\) === 'on'/)
+  assert.match(debugSrc464, /localStorage.removeItem\(NW_DEBUG_KEY\)/)
+  assert.doesNotMatch(debugSrc464, /localStorage.getItem\(NW_DEBUG_KEY\) === 'on'/)
+  assert.match(screen464, /nightWatchDebugPanel\(/)
+  assert.match(screen464, /const debugHarness = easy && debugPanel && midWave/)
+  assert.doesNotMatch(screen464, /const debugHarness = easy && nwDebug && midWave/)
+  assert.match(screen464, /data-plant-pulse/)
+  assert.match(screen464, /plantableHints/)
+  assert.match(
+    readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8'),
+    /\.defend-plant-first\.is-pulse/,
+  )
+  assert.match(
+    readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8'),
+    /\.defend-plant-ground/,
+  )
+  bindLampGround(null)
+  const hints = plantableHints({})
+  assert.ok(hints.length > 4, `1.4.464 open ground has a soft mark (saw ${hints.length})`)
+  for (const spot of hints) {
+    assert.equal(lampSpotBlocked(spot), false, `1.4.464 a mark sits on open ground ${spot.x},${spot.y}`)
+  }
+  const roadSpot = DEFEND_PATH[Math.floor(DEFEND_PATH.length / 2)]
+  assert.equal(lampSpotBlocked(roadSpot), true, '1.4.464 the road itself stays dark')
 }
 
 // Night Watch 1.4.408: pip buy, Easy hearts, softer rounds 7–12.

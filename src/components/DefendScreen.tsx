@@ -74,6 +74,8 @@ import {
 } from '../lib/nightPace'
 import {
   nightWatchDebugFrozen,
+  nightWatchDebugHolds,
+  nightWatchDebugPanel,
   nightWatchJumpAllowed,
   nightWatchMapQuery,
   readNightWatchDebug,
@@ -114,6 +116,7 @@ import {
   magnetCandlePoint,
   overTowerCards,
   pathSpendControl,
+  plantableHints,
   previewLamp,
   roundStartKind,
   startsNextRound,
@@ -229,6 +232,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const unlocked = nightPlantTypes(easy, trailOpen)
   const pads: CityPlotId[] = easy ? [...EASY_PLANT_PADS] : nightTowers.pads(progress)
   const [ability, setAbility] = useState<WatchAbility>(() => unlocked[0] ?? 'love')
+  const [lampPicked, setLampPicked] = useState(false)
   const taught = true
   const boardRef = useRef<SVGSVGElement>(null)
   const [boardBox, setBoardBox] = useState({ w: 0, h: 0 })
@@ -258,8 +262,11 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const lampHurtRef = useRef(0)
   const hudRef = useRef<HTMLParagraphElement>(null)
   const [debugPaused, setDebugPaused] = useState(false)
+  const [plantPulse, setPlantPulse] = useState(false)
+  const plantPulseTimer = useRef(0)
   const nwDebugRef = useRef(nwDebug)
   const debugPausedRef = useRef(debugPaused)
+  const debugPanelRef = useRef(false)
   nwDebugRef.current = nwDebug
   debugPausedRef.current = debugPaused
   const [boostNote, setBoostNote] = useState<string | null>(null)
@@ -499,7 +506,12 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   }, [])
 
   useEffect(() => {
-    if (phase === 'wave' && nwDebug && easy) setDebugPaused(true)
+    const search = typeof window === 'undefined' ? '' : window.location.search
+    if (!easy || !nightWatchDebugPanel(search, nwDebug)) {
+      setDebugPaused(false)
+      return
+    }
+    if (phase === 'wave' && nightWatchDebugHolds(search, nwDebug)) setDebugPaused(true)
   }, [phase, waveIndex, nwDebug, easy])
 
   useEffect(() => {
@@ -639,7 +651,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       const clockDt = seedPlan ? NIGHT_SEED_STEP : dt
       const frozen = nightWatchDebugFrozen(
         easy,
-        nwDebugRef.current,
+        debugPanelRef.current,
         debugPausedRef.current,
         now,
         live.current.freezeUntil,
@@ -829,7 +841,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
         }
       }
       live.current.raiders = walking
-      const debugHold = easy && nwDebugRef.current && debugPausedRef.current
+      const debugHold = easy && debugPanelRef.current && debugPausedRef.current
       autoFireRef.current(now, debugHold)
       const alive = live.current.raiders
       setRaiders(alive)
@@ -985,6 +997,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     setHelpOpen(false)
     placeArmRef.current = id
     setPlaceArm(id)
+    setLampPicked(true)
     if (!candle) setAbility(id)
     closeUpgrade(true)
   }
@@ -2177,8 +2190,15 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       ? boardPoint(nightTowers.anchor(upgradeAt).x, nightTowers.anchor(upgradeAt).y)
       : null
   const midWave = phase === 'wave' && !won
-  const debugHarness = easy && nwDebug && midWave
+  const debugPanel = nightWatchDebugPanel(nightSearch, nwDebug)
+  debugPanelRef.current = debugPanel
+  const debugHarness = easy && debugPanel && midWave
   const debugFrozen = debugHarness && debugPaused
+  const groundPick = Boolean(easy && !won && (placeArm || (phase === 'plant' && lampPicked)))
+  const groundHints = useMemo(
+    () => (groundPick ? plantableHints(plants) : []),
+    [groundPick, plants],
+  )
   const tapReadoutOn =
     easy &&
     nightWatchJumpAllowed(
@@ -2492,19 +2512,30 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
             type="button"
             className={`btn primary xl defend-go${awaitingLamp ? ' is-awaiting-plant' : ' is-after-plant'}`}
             onClick={(event) => {
+              if (easy && awaitingLamp && phase === 'plant' && !arming) {
+                setPlantPulse(true)
+                window.clearTimeout(plantPulseTimer.current)
+                plantPulseTimer.current = window.setTimeout(() => setPlantPulse(false), 900)
+                return
+              }
               if (!startsNextRound(roundStartKind(event.currentTarget.className))) return
               if (awaitingLamp || phase !== 'plant') return
               if (roundChangeBlocked()) return
               setGhost(null)
               setPhase('wave')
             }}
-            disabled={awaitingLamp || arming || phase !== 'plant'}
+            disabled={(awaitingLamp || arming || phase !== 'plant') && !(easy && awaitingLamp && phase === 'plant' && !arming)}
+            aria-disabled={awaitingLamp || arming || phase !== 'plant' ? true : undefined}
             aria-describedby={easy && awaitingLamp ? 'defend-plant-first' : undefined}
           >
             {easy ? EASY.nightDo : 'The road is coming'}
           </button>
           {easy && awaitingLamp ? (
-            <p className="defend-plant-first" id="defend-plant-first">
+            <p
+              className={`defend-plant-first${plantPulse ? ' is-pulse' : ''}`}
+              id="defend-plant-first"
+              data-plant-pulse={plantPulse ? 'yes' : undefined}
+            >
               {EASY.nightPlantFirst}
             </p>
           ) : null}
@@ -2545,7 +2576,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       progress={progress}
       easy={easy}
       ability={ability}
-      setAbility={setAbility}
+      setAbility={(id) => {
+        setAbility(id)
+        setLampPicked(true)
+      }}
       setToolLock={setToolLock}
       firing={firing}
       firingId={firingId}
@@ -2694,6 +2728,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
               onBoardTap={closeUpgrade}
               onPlacePointer={onPlacePointer}
               ghost={ghost}
+              groundHints={groundHints}
               plateFill={plateFill}
               map={playingMap?.plate}
               porchCandy={!playingMap}

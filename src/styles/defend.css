@@ -4104,6 +4104,61 @@ button.defend-new-lamp[aria-pressed='true'] {
   pointer-events: none;
 }
 
+@keyframes nw-plant-first {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.08);
+    background: #ffcc33;
+    color: #2a1c08;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.defend-plant-first.is-pulse {
+  animation: nw-plant-first 0.7s ease;
+}
+
+.defend-plant-ground {
+  pointer-events: none;
+  animation: nw-ground-soft 2.6s ease-in-out infinite;
+}
+
+.defend-plant-ground circle {
+  fill: rgba(255, 214, 90, 0.34);
+  stroke: rgba(255, 236, 170, 0.55);
+  stroke-width: 2;
+}
+
+@keyframes nw-ground-soft {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .defend-plant-first.is-pulse,
+  .defend-plant-ground {
+    animation: none;
+  }
+
+  .defend-plant-first.is-pulse {
+    background: #ffcc33;
+    color: #2a1c08;
+  }
+
+  .defend-plant-ground {
+    opacity: 0.72;
+  }
+}
+
 /* Nudge the right-hand lamp cards while Begin is waiting on a plant. */
 @keyframes nw-lamp-nudge {
   0%,

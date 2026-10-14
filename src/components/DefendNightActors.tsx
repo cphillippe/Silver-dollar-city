@@ -102,6 +102,8 @@ export interface DefendNightActorsProps {
   armorFrom?: number
   /** Lamp that just spent a spark. Brief ring only — peel 4 owns the burst. */
   upFlashId?: CityPlotId | null
+  /** Soft marks on ground that can take the picked lamp. */
+  groundHints?: readonly { x: number; y: number }[]
   /** Tap or drag preview. The ring radius is the combat hit radius. */
   ghost?: {
     at: { x: number; y: number }
@@ -172,6 +174,7 @@ export function DefendNightActorsSvg({
   onOpenUpgrade,
   upFlashId = null,
   ghost = null,
+  groundHints = [],
   roundIndex = -1,
   armorFrom = 7,
 }: Omit<DefendNightActorsProps, 'tapPos' | 'fireBest' | 'tapJuice' | 'easy' | 'onBoostTower'> & {
@@ -186,6 +189,13 @@ export function DefendNightActorsSvg({
   const rowHead = new Map(candleRowHeads(candlePlants).map((head) => [head.id, head.mark]))
   return (
     <>
+              {groundHints.length > 0 ? (
+                <g className="defend-plant-ground" data-plant-ground="yes" pointerEvents="none">
+                  {groundHints.map((spot) => (
+                    <circle key={`${spot.x}-${spot.y}`} cx={spot.x} cy={spot.y} r="46" />
+                  ))}
+                </g>
+              ) : null}
               {candlePairs.map(([fromId, toId]) => {
                 const from = nightTowers.anchor(fromId)
                 const to = nightTowers.anchor(toId)

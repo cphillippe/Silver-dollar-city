@@ -499,8 +499,9 @@ export function Settings({ onNavigate }: SettingsProps) {
         <section className="settings-debug-group" aria-label="Night Watch playtest">
           <p className="eyebrow">Night Watch · debug freeze</p>
           <p>
-            Playtest only. Easy Night Watch pauses walkers each wave so you can read
-            the cue and tap the glowing face without racing. Off by default.
+            Playtest only. Turn it on for this visit and Easy Night Watch pauses each
+            wave so you can read the cue and tap the glowing face. A normal night leaves
+            the walkers moving. A playtest link can show the same panel.
           </p>
           <div className="settings-actions">
             <button
