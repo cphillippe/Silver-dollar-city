@@ -734,8 +734,9 @@ export function paceEasyRoad(
 }
 
 /**
- * Strong first, lowest lamp first. Far 1 waits until that lamp is at Strong 2.
- * Four lamps are already planted. Sparks only buy steps.
+ * Strong first, lowest lamp first. Far 1 waits until that lamp is at Strong 2,
+ * then that Far is bought before Strong 2 on the next lamp.
+ * Four lamps are already planted. Sparks only buy path steps. Bright is not one of them.
  */
 export function strongFirstBuy(
   ranks: { far: number; strong: number }[],
@@ -747,17 +748,20 @@ export function strongFirstBuy(
     guard += 1
     const opts: { pri: number; rank: number; slot: number; path: 'far' | 'strong'; cost: number }[] = []
     ranks.forEach((rank, slot) => {
-      if (rank.strong < 3) {
+      if (rank.strong < 1) {
+        opts.push({ pri: 0, rank: 0, slot, path: 'strong', cost: TREE_STEP_COST[0] ?? 3 })
+      }
+      if (rank.far < 1 && rank.strong >= 2) {
+        opts.push({ pri: 1, rank: 0, slot, path: 'far', cost: TREE_STEP_COST[0] ?? 3 })
+      }
+      if (rank.strong >= 1 && rank.strong < 3) {
         opts.push({
-          pri: 0,
+          pri: 2,
           rank: rank.strong,
           slot,
           path: 'strong',
           cost: TREE_STEP_COST[rank.strong] ?? 0,
         })
-      }
-      if (rank.far < 1 && rank.strong >= 2) {
-        opts.push({ pri: 1, rank: 0, slot, path: 'far', cost: TREE_STEP_COST[0] ?? 3 })
       }
     })
     opts.sort((a, b) => a.pri - b.pri || a.rank - b.rank || a.slot - b.slot)
