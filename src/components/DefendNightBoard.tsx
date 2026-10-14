@@ -8,6 +8,7 @@ import { DefendNightSky } from './DefendNightSky'
 import { DefendTowerCard, type TowerCardPoint } from './DefendTowerCard'
 import { samePillarLessons } from '../nightWatch/lampPillar'
 import { easyShotReach, pathsOf, type BonusGate, type LampPaths, type TreePath } from '../nightWatch/upgradeTree'
+import { bellPathKey, isBell } from '../nightWatch/bell'
 import { candleFarBonus, candlePathKey, candleRoadNote, isCandle } from '../nightWatch/candle'
 import {
   DefendNightActorsSvg,
@@ -57,19 +58,30 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
   } = props
   const place = plateFill ? boardFillPoint : mapBoardPoint
   const cardAbility = upgradeAt ? towerType[upgradeAt] : undefined
+  const bellCard = Boolean(cardAbility && isBell(cardAbility) && upgradeAt)
   const candleCard = Boolean(cardAbility && isCandle(cardAbility) && upgradeAt)
-  const cardKey = candleCard && upgradeAt ? candlePathKey(upgradeAt) : cardAbility
+  const cardKey =
+    bellCard && upgradeAt
+      ? bellPathKey(upgradeAt)
+      : candleCard && upgradeAt
+        ? candlePathKey(upgradeAt)
+        : cardAbility
   const cardPaths = easy && cardKey ? pathsOf(runPaths, cardKey) : undefined
-  const reachBonus = candleCard && upgradeAt
-    ? candleFarBonus(pathsOf(runPaths, candlePathKey(upgradeAt)))
-    : easy && cardAbility
-      ? easyShotReach(pathsOf(runPaths, cardAbility))
-      : 0
-  const roadNote = candleCard && upgradeAt
-    ? candleRoadNote(upgradeAt, reachBonus)
-    : upgradeAt && cardAbility
-      ? lampRoadNote(upgradeAt, cardAbility, progress, runTier, easy, reachBonus)
-      : ''
+  const reachBonus =
+    bellCard
+      ? 0
+      : candleCard && upgradeAt
+        ? candleFarBonus(pathsOf(runPaths, candlePathKey(upgradeAt)))
+        : easy && cardAbility
+          ? easyShotReach(pathsOf(runPaths, cardAbility))
+          : 0
+  const roadNote = bellCard
+    ? ''
+    : candleCard && upgradeAt
+      ? candleRoadNote(upgradeAt, reachBonus)
+      : upgradeAt && cardAbility
+        ? lampRoadNote(upgradeAt, cardAbility, progress, runTier, easy, reachBonus)
+        : ''
   const lessonGate: BonusGate | undefined =
     easy && cardAbility
       ? { lessons: samePillarLessons(cardAbility, heldLessons), playtest: playtestSteps }
@@ -97,7 +109,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
               className={`defend-type-chip is-${type}`}
               style={{ left: at.left, top: at.top }}
             >
-              {isCandle(type) ? 'Candle' : (WATCH_ABILITY_LABEL[type] ?? type)}
+              {isBell(type) ? 'Bell' : isCandle(type) ? 'Candle' : (WATCH_ABILITY_LABEL[type] ?? type)}
             </span>
           )
         })

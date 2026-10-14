@@ -158,6 +158,16 @@ import {
   candleUnlocked,
   isCandle,
 } from '../nightWatch/candle'
+import {
+  applyBellStep,
+  bellPaceFor,
+  bellPathKey,
+  bellRoom,
+  bellUnlocked,
+  BELL_COST,
+  BELL_ID,
+  isBell,
+} from '../nightWatch/bell'
 import { lessonAreaFor, samePillarLessons } from '../nightWatch/lampPillar'
 import { clearNightReturn, readNightReturn, saveNightReturn } from '../nightWatch/nightReturn'
 import {
@@ -491,7 +501,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
 
   function towerAbility(id: CityPlotId): WatchAbility {
     const plantedType = plants[id]
-    if (plantedType && (isCandle(plantedType) || unlocked.includes(plantedType))) return plantedType
+    if (plantedType && (isBell(plantedType) || isCandle(plantedType) || unlocked.includes(plantedType))) return plantedType
     return unlocked.includes(ability) ? ability : 'love'
   }
 
@@ -575,6 +585,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   waveRef.current = playingMap?.wave ?? null
   featuresRef.current = playingMap?.mapFeatures ?? []
   const candleOpen = candleUnlocked(easy, waveIndex, playingMap != null, phase)
+  const bellOpen = bellUnlocked(easy, waveIndex, phase)
 
   useEffect(() => {
     if (!candleOpen || seenCandle.current) return
@@ -800,6 +811,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
           const zone = walkerZone(item.t, item.pathId, featuresRef.current)
           step *= zone.speed
           fog = zone.fog
+        }
+        // Round 7 and later. Rounds 1–6 do not read the bell.
+        if (easy && waveIndexRef.current >= 6) {
+          step *= bellPaceFor(plantsRef.current, runPathsRef.current, nightEnemies.at(item))
         }
         return {
           ...item,
@@ -1117,8 +1132,15 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
 
   function armPlace(id: WatchAbility) {
     if (!easy || won) return
+    const bell = isBell(id)
     const candle = isCandle(id)
-    if (candle) {
+    if (bell) {
+      if (phase !== 'wave' && phase !== 'boost' && phase !== 'plant') return
+      if (!bellRoom(plantsRef.current)) {
+        clearPlaceArm()
+        return
+      }
+    } else if (candle) {
       if (phase !== 'wave' && phase !== 'boost' && phase !== 'plant') return
       if (!candleRoom(plantsRef.current)) {
         clearPlaceArm()
@@ -1135,8 +1157,26 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     setHelpOpen(false)
     placeArmRef.current = id
     setPlaceArm(id)
-    if (!candle) setAbility(id)
+    if (!candle && !bell) setAbility(id)
     closeUpgrade(true)
+  }
+
+  function armBell() {
+    if (!easy || won) return
+    if (!bellUnlocked(easy, waveIndexRef.current, phase)) return
+    if (isBell(placeArmRef.current)) {
+      clearPlaceArm()
+      return
+    }
+    if (!bellRoom(plantsRef.current)) {
+      flashKit('One bell')
+      return
+    }
+    if (sparksRef.current < BELL_COST) {
+      flashKit(`Need ${BELL_COST} sparks`)
+      return
+    }
+    armPlace(BELL_ID)
   }
 
   function armCandle() {
@@ -1270,9 +1310,11 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     hud: boolean,
     paid: boolean,
   ): boolean {
+    const bell = isBell(using)
     const candle = isCandle(using)
+    if (paid && bell && !bellRoom(plantsNow)) return false
     if (paid && candle && !candleRoom(plantsNow)) return false
-    if (paid && !candle && Object.values(plantsNow).includes(using)) return false
+    if (paid && !bell && !candle && Object.values(plantsNow).includes(using)) return false
     const next = commitLamp(
       plantsNow,
       point,
@@ -1288,7 +1330,11 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       return false
     }
     if (paid) {
-      const bought = candle ? buyExtraLamp(sparksRef.current, CANDLE_COST) : buyExtraLamp(sparksRef.current)
+      const bought = bell
+        ? buyExtraLamp(sparksRef.current, BELL_COST)
+        : candle
+          ? buyExtraLamp(sparksRef.current, CANDLE_COST)
+          : buyExtraLamp(sparksRef.current)
       if (!bought.ok) {
         setGhost(null)
         flashKit(`Need ${bought.cost} sparks`)
@@ -1302,7 +1348,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     }
     setPlants(next.plants)
     if (paid) {
-      if (candle) paidTypes.current.add(next.preview.spot)
+      if (bell || candle) paidTypes.current.add(next.preview.spot)
       else paidTypes.current.add(using)
     }
     setGhost(null)
@@ -1344,14 +1390,19 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       return
     }
     const armed = placeArmRef.current
+    const bellArm = isBell(armed)
     const candleArm = isCandle(armed)
-    const opening = easy && phase === 'plant' && !candleArm
+    const opening = easy && phase === 'plant' && !candleArm && !bellArm
     const typeFree = armed
-      ? candleArm
-        ? candleRoom(plantsRef.current)
-        : !Object.values(plantsRef.current).includes(armed)
+      ? bellArm
+        ? bellRoom(plantsRef.current)
+        : candleArm
+          ? candleRoom(plantsRef.current)
+          : !Object.values(plantsRef.current).includes(armed)
       : false
-    const paid = Boolean(armed && typeFree && easy && !opening && (candleArm || phase === 'wave' || phase === 'boost'))
+    const paid = Boolean(
+      armed && typeFree && easy && !opening && (bellArm || candleArm || phase === 'wave' || phase === 'boost'),
+    )
     if (!opening && !paid) return
     const svg = boardRef.current
     if (!svg) return
@@ -1398,12 +1449,15 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   }
 
   function onLampDrag(kind: LampDragPhase, using: WatchAbility, clientX: number, clientY: number) {
+    const bellArm = isBell(using)
     const candleArm = isCandle(using)
-    const opening = easy && phase === 'plant' && !candleArm
-    const typeFree = candleArm
-      ? candleRoom(plantsRef.current)
-      : !Object.values(plantsRef.current).includes(using)
-    const paid = typeFree && easy && (candleArm || phase === 'wave' || phase === 'boost')
+    const opening = easy && phase === 'plant' && !candleArm && !bellArm
+    const typeFree = bellArm
+      ? bellRoom(plantsRef.current)
+      : candleArm
+        ? candleRoom(plantsRef.current)
+        : !Object.values(plantsRef.current).includes(using)
+    const paid = typeFree && easy && (bellArm || candleArm || phase === 'wave' || phase === 'boost')
     if (kind === 'cancel' || (!opening && !paid)) {
       setGhost(null)
       return
@@ -1469,6 +1523,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   function pullSparksFor(id: string): number {
     const type = plantsRef.current[id]
     if (!type) return 0
+    if (isBell(type)) {
+      const paid = lampPullRefund(paidTypes.current.has(id), BELL_COST)
+      return paid + pathSparkSpend(pathsOf(runPathsRef.current, bellPathKey(id)))
+    }
     if (isCandle(type)) {
       const paid = lampPullRefund(paidTypes.current.has(id), CANDLE_COST)
       return paid + pathSparkSpend(pathsOf(runPathsRef.current, candlePathKey(id)))
@@ -1490,10 +1548,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       }
       return
     }
-    if (type && isCandle(type)) {
+    if (type && (isBell(type) || isCandle(type))) {
       paidTypes.current.delete(id)
       const cleared = { ...runPathsRef.current }
-      delete cleared[candlePathKey(id)]
+      delete cleared[isBell(type) ? bellPathKey(id) : candlePathKey(id)]
       runPathsRef.current = cleared
       setRunPaths(cleared)
     } else if (type) {
@@ -1604,6 +1662,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     const now = performance.now()
     const at = nightTowers.anchor(id)
     const using = towerAbility(id)
+    if (isBell(using)) return false
     const combat = lampCombat(using, id)
     const rawCd = combat.strike ? combat.strike.cooldownMs : nightTowers.cooldown(id, progress)
     // Easy: the clock already runs at 1× or 3×, so the cooldown stays in game ms.
@@ -1829,6 +1888,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   autoFireRef.current = (now: number, frozen: boolean) => {
     for (const id of live.current.planted) {
       const using = towerAbility(id)
+      if (isBell(using)) continue
       const rawCd = easy
         ? lampCombat(using, id).strike!.cooldownMs
         : nightTowers.cooldown(id, progress)
@@ -2186,6 +2246,32 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     return performance.now() - pathBuyAt.current < 450
   }
 
+  function boostBell(plotId: CityPlotId) {
+    if (!easy || !bellUnlocked(easy, waveIndexRef.current, phase)) return
+    if (placeArmRef.current) {
+      placeArmRef.current = null
+      setPlaceArm(null)
+      setGhost(null)
+    }
+    const beforeSparks = sparksRef.current
+    const next = applyBellStep(plotId, runPathsRef.current, sparksRef.current)
+    setBoostNote(next.note)
+    if (!next.ok) return
+    runPathsRef.current = next.paths
+    sparksRef.current = next.sparks
+    setRunPaths(next.paths)
+    setRunSparks(next.sparks)
+    setSparkSpent(Math.max(1, beforeSparks - next.sparks))
+    setToolLock(null)
+    window.clearTimeout(burstTimer.current)
+    setSparkSpend(true)
+    setUpFlash(plotId)
+    burstTimer.current = window.setTimeout(() => {
+      setSparkSpend(false)
+      setUpFlash((current) => (current === plotId ? null : current))
+    }, LEVEL_BURST_MS)
+  }
+
   function boostCandle(plotId: CityPlotId, path: TreePath) {
     if (!easy) return
     if (placeArmRef.current) {
@@ -2227,6 +2313,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
         now,
       )
     ) {
+      return
+    }
+    if (isBell(plantsRef.current[plotId])) {
+      boostBell(plotId)
       return
     }
     if (isCandle(plantsRef.current[plotId])) {
@@ -2561,6 +2651,22 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
               {`Candle ${CANDLE_COST}✦`}
             </button>
           ) : null}
+          {bellOpen ? (
+            <button
+              type="button"
+              className="btn defend-new-lamp defend-bell-lamp"
+              data-bell-lamp="yes"
+              data-bell-cost={BELL_COST}
+              aria-label={`Bell, ${BELL_COST} sparks`}
+              aria-pressed={isBell(placeArm) ? true : undefined}
+              onClick={(event) => {
+                event.stopPropagation()
+                armBell()
+              }}
+            >
+              {`Bell ${BELL_COST}✦`}
+            </button>
+          ) : null}
           {skillTray}
         </div>
       ) : null}
@@ -2625,7 +2731,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
                 data-lamp-cost={EASY_LAMP_COST}
                 data-new-lamp="yes"
                 aria-label={`New lamp, ${EASY_LAMP_COST} sparks`}
-                aria-pressed={placeArm && !isCandle(placeArm) ? true : undefined}
+                aria-pressed={placeArm && !isCandle(placeArm) && !isBell(placeArm) ? true : undefined}
                 onPointerDown={trackNewLamp}
                 onClick={() => {
                   if (swallowNewLampClick.current) {
@@ -2651,6 +2757,22 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
                   }}
                 >
                   {`Candle ${CANDLE_COST}✦`}
+                </button>
+              ) : null}
+              {bellOpen ? (
+                <button
+                  type="button"
+                  className="btn defend-new-lamp defend-bell-lamp"
+                  data-bell-lamp="yes"
+                  data-bell-cost={BELL_COST}
+                  aria-label={`Bell, ${BELL_COST} sparks`}
+                  aria-pressed={isBell(placeArm) ? true : undefined}
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    armBell()
+                  }}
+                >
+                  {`Bell ${BELL_COST}✦`}
                 </button>
               ) : null}
               <button
@@ -2758,6 +2880,22 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
               }}
             >
               {`Candle ${CANDLE_COST}✦`}
+            </button>
+          ) : null}
+          {bellOpen && phase === 'plant' ? (
+            <button
+              type="button"
+              className="btn defend-new-lamp defend-bell-lamp"
+              data-bell-lamp="yes"
+              data-bell-cost={BELL_COST}
+              aria-label={`Bell, ${BELL_COST} sparks`}
+              aria-pressed={isBell(placeArm) ? true : undefined}
+              onClick={(event) => {
+                event.stopPropagation()
+                armBell()
+              }}
+            >
+              {`Bell ${BELL_COST}✦`}
             </button>
           ) : null}
         </>

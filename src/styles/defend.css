@@ -564,6 +564,48 @@ img.walker-face.easy-walker-face,
   filter: drop-shadow(0 0 8px #ffcc33);
 }
 
+/* 1.4.467: the bell ring is a warm gold pulse. It does not flash like a shot. */
+.defend-range.is-bell-pulse {
+  fill: rgba(255, 204, 51, 0.08);
+  stroke: #ffcc33;
+  stroke-width: 4;
+  stroke-dasharray: none;
+  filter: drop-shadow(0 0 6px #ffcc33);
+  animation: nw-bell-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes nw-bell-pulse {
+  0%,
+  100% {
+    stroke-opacity: 0.45;
+    fill: rgba(255, 204, 51, 0.05);
+  }
+  50% {
+    stroke-opacity: 1;
+    fill: rgba(255, 214, 102, 0.16);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .defend-range.is-bell-pulse {
+    animation: none;
+    stroke-opacity: 0.9;
+  }
+}
+
+.nw-skill-tray button.defend-bell-lamp,
+button.defend-bell-lamp {
+  width: auto;
+  margin: 0 0 6px;
+}
+
+.defend-tower-card.is-bell .defend-bell-line {
+  margin: 6px 0 0;
+  font-size: 0.78rem;
+  line-height: 1.25;
+  color: #fff6e8;
+}
+
 .defend-shot {
   pointer-events: none;
 }
