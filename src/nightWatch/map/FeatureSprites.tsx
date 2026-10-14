@@ -1,4 +1,4 @@
-import fog from '../../assets/night-watch/maps/overlays/fog.png'
+import fog from '../../assets/night-watch/maps/overlays/fog_v2.png'
 import gate from '../../assets/night-watch/maps/overlays/gate.png'
 import hill from '../../assets/night-watch/maps/overlays/hill.png'
 import pool from '../../assets/night-watch/maps/overlays/pool.png'

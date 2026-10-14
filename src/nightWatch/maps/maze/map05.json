@@ -1347,7 +1347,7 @@
    "y": 0.4435,
    "r": 0.07,
    "noTap": true,
-   "sprite": "overlays/fog.png",
+   "sprite": "overlays/fog_v2.png",
    "spriteAnchorPx": [
     168,
     168
@@ -1360,7 +1360,7 @@
    "y": 0.5266,
    "r": 0.07,
    "noTap": true,
-   "sprite": "overlays/fog.png",
+   "sprite": "overlays/fog_v2.png",
    "spriteAnchorPx": [
     168,
     168
