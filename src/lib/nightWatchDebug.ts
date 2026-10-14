@@ -3,22 +3,61 @@ import { isNightMapId, type NightMapId } from '../nightWatch/maps/chain.ts'
 /**
  * Device-only Night Watch playtest harness. Default off — Easy shipping play unchanged.
  * Bill: pause walkers so playtests can read the cue and tap the glowing face.
+ * A saved switch used to stick on the device and freeze a normal night. This visit only.
  */
 
 export const NW_DEBUG_KEY = 'silver-city-nw-debug'
+/** This browser tab. A later visit starts with walkers moving. */
+export const NW_DEBUG_SESSION = 'silver-city-nw-debug-session'
+
+function clearStickyDebug() {
+  try {
+    localStorage.removeItem(NW_DEBUG_KEY)
+  } catch {
+    /* A locked store cannot keep the freeze on. */
+  }
+}
 
 export function readNightWatchDebug(): boolean {
-  if (typeof localStorage === 'undefined') return false
-  return localStorage.getItem(NW_DEBUG_KEY) === 'on'
+  clearStickyDebug()
+  try {
+    return sessionStorage.getItem(NW_DEBUG_SESSION) === 'on'
+  } catch {
+    return false
+  }
 }
 
 export function writeNightWatchDebug(on: boolean) {
-  if (typeof localStorage === 'undefined') return
-  if (on) localStorage.setItem(NW_DEBUG_KEY, 'on')
-  else localStorage.removeItem(NW_DEBUG_KEY)
+  clearStickyDebug()
+  try {
+    if (on) sessionStorage.setItem(NW_DEBUG_SESSION, 'on')
+    else sessionStorage.removeItem(NW_DEBUG_SESSION)
+  } catch {
+    /* This visit cannot store the switch. The night still runs. */
+  }
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new Event('silver-city-nw-debug'))
   }
+}
+
+/**
+ * The test panel. A normal night hides it.
+ * `?playtest=1`, `?nwDebug=1`, or the developer switch for this visit.
+ */
+export function nightWatchDebugPanel(search: string, devOn: boolean): boolean {
+  if (devOn === true) return true
+  const params = new URLSearchParams(search)
+  if (params.get('nwDebug') === '1') return true
+  return params.get('playtest') === '1'
+}
+
+/**
+ * Walkers start the wave held still.
+ * A playtest seed still runs. Only `?nwDebug=1` or the developer switch holds them.
+ */
+export function nightWatchDebugHolds(search: string, devOn: boolean): boolean {
+  if (devOn === true) return true
+  return new URLSearchParams(search).get('nwDebug') === '1'
 }
 
 /**

@@ -74,6 +74,8 @@ import {
 } from '../lib/nightPace'
 import {
   nightWatchDebugFrozen,
+  nightWatchDebugHolds,
+  nightWatchDebugPanel,
   nightWatchJumpAllowed,
   nightWatchMapQuery,
   readNightWatchDebug,
@@ -91,6 +93,7 @@ import {
 } from '../nightWatch/seed'
 import { FarHillsUnlock } from './FarHillsUnlock'
 import { NightMapPicker } from './NightMapPicker'
+import { activeNightRoadD } from '../nightWatch/path/data'
 import { applyNightMap } from '../nightWatch/maps/bind'
 import { mapIsOpen, nextMap, NIGHT_MAP_NAME } from '../nightWatch/maps/chain'
 import { playableNightMap } from '../nightWatch/maps/mazeMaps'
@@ -110,10 +113,12 @@ import {
   dragGhostClient,
   hudCoversPoint,
   LAMP_DRAG_START_PX,
+  lampSpotBlocked,
   lampUnderFinger,
   magnetCandlePoint,
   overTowerCards,
   pathSpendControl,
+  plantableHints,
   previewLamp,
   roundStartKind,
   startsNextRound,
@@ -258,8 +263,11 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const lampHurtRef = useRef(0)
   const hudRef = useRef<HTMLParagraphElement>(null)
   const [debugPaused, setDebugPaused] = useState(false)
+  const [plantPulse, setPlantPulse] = useState(false)
+  const plantPulseTimer = useRef(0)
   const nwDebugRef = useRef(nwDebug)
   const debugPausedRef = useRef(debugPaused)
+  const debugPanelRef = useRef(false)
   nwDebugRef.current = nwDebug
   debugPausedRef.current = debugPaused
   const [boostNote, setBoostNote] = useState<string | null>(null)
@@ -281,6 +289,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const [sparkSpent, setSparkSpent] = useState(1)
   const [placeArm, setPlaceArm] = useState<WatchAbility | null>(null)
   const placeArmRef = useRef<WatchAbility | null>(null)
+  const plantOpenGroundRef = useRef<(clientX: number, clientY: number) => boolean>(() => false)
   placeArmRef.current = placeArm
   /** A card press at a clear must not also hit Continue. */
   const clearCardAt = useRef(0)
@@ -484,8 +493,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     return () => window.clearTimeout(timer)
   }, [candleOpen])
 
+  const [roadD, setRoadD] = useState(activeNightRoadD)
   useLayoutEffect(() => {
     applyNightMap(mapId)
+    setRoadD(activeNightRoadD())
     setGhost(null)
     return () => {
       applyNightMap('a2')
@@ -499,8 +510,38 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   }, [])
 
   useEffect(() => {
-    if (phase === 'wave' && nwDebug && easy) setDebugPaused(true)
+    const search = typeof window === 'undefined' ? '' : window.location.search
+    if (!easy || !nightWatchDebugPanel(search, nwDebug)) {
+      setDebugPaused(false)
+      return
+    }
+    if (phase === 'wave' && nightWatchDebugHolds(search, nwDebug)) setDebugPaused(true)
   }, [phase, waveIndex, nwDebug, easy])
+
+  useEffect(() => {
+    if (!(easy && phase === 'plant')) return
+    const onDown = (event: PointerEvent) => {
+      const target = event.target as Element | null
+      if (!target?.closest) return
+      if (target.closest('.defend-go, .defend-ability')) return
+      if (!target.closest('.nw-docks')) return
+      if (!plantOpenGroundRef.current(event.clientX, event.clientY)) return
+      event.preventDefault()
+      event.stopPropagation()
+      const swallow = (follow: Event) => {
+        follow.preventDefault()
+        follow.stopPropagation()
+      }
+      window.addEventListener('pointerup', swallow, true)
+      window.addEventListener('click', swallow, true)
+      window.setTimeout(() => {
+        window.removeEventListener('pointerup', swallow, true)
+        window.removeEventListener('click', swallow, true)
+      }, 400)
+    }
+    window.addEventListener('pointerdown', onDown, true)
+    return () => window.removeEventListener('pointerdown', onDown, true)
+  }, [easy, phase])
 
   useEffect(() => {
     if (phase !== 'wave' && phase !== 'boost') return
@@ -639,7 +680,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       const clockDt = seedPlan ? NIGHT_SEED_STEP : dt
       const frozen = nightWatchDebugFrozen(
         easy,
-        nwDebugRef.current,
+        debugPanelRef.current,
         debugPausedRef.current,
         now,
         live.current.freezeUntil,
@@ -829,7 +870,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
         }
       }
       live.current.raiders = walking
-      const debugHold = easy && nwDebugRef.current && debugPausedRef.current
+      const debugHold = easy && debugPanelRef.current && debugPausedRef.current
       autoFireRef.current(now, debugHold)
       const alive = live.current.raiders
       setRaiders(alive)
@@ -1158,6 +1199,18 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     setGhost(null)
     closeUpgrade(true)
     return true
+  }
+
+  plantOpenGroundRef.current = (clientX, clientY) => {
+    if (phase !== 'plant') return false
+    const svg = boardRef.current
+    if (!svg) return false
+    const point = clientToMap(svg, clientX, clientY)
+    if (!point) return false
+    const finger = lampUnderFinger(point)
+    const using = unlocked.includes(ability) ? ability : 'love'
+    if (lampSpotBlocked(finger, plantsRef.current)) return false
+    return finishPlace(plantsRef.current, finger, using, false, false)
   }
 
   function togglePad(id: CityPlotId) {
@@ -2177,8 +2230,16 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       ? boardPoint(nightTowers.anchor(upgradeAt).x, nightTowers.anchor(upgradeAt).y)
       : null
   const midWave = phase === 'wave' && !won
-  const debugHarness = easy && nwDebug && midWave
+  const debugPanel = nightWatchDebugPanel(nightSearch, nwDebug)
+  debugPanelRef.current = debugPanel
+  const debugHarness = easy && debugPanel && midWave
   const debugFrozen = debugHarness && debugPaused
+  const cardOn = Boolean(easy && phase === 'plant' && ability)
+  const groundPick = Boolean(easy && !won && (placeArm || cardOn))
+  const groundHints = useMemo(
+    () => (groundPick ? plantableHints(plants) : []),
+    [groundPick, plants],
+  )
   const tapReadoutOn =
     easy &&
     nightWatchJumpAllowed(
@@ -2492,19 +2553,30 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
             type="button"
             className={`btn primary xl defend-go${awaitingLamp ? ' is-awaiting-plant' : ' is-after-plant'}`}
             onClick={(event) => {
+              if (easy && awaitingLamp && phase === 'plant' && !arming) {
+                setPlantPulse(true)
+                window.clearTimeout(plantPulseTimer.current)
+                plantPulseTimer.current = window.setTimeout(() => setPlantPulse(false), 900)
+                return
+              }
               if (!startsNextRound(roundStartKind(event.currentTarget.className))) return
               if (awaitingLamp || phase !== 'plant') return
               if (roundChangeBlocked()) return
               setGhost(null)
               setPhase('wave')
             }}
-            disabled={awaitingLamp || arming || phase !== 'plant'}
+            disabled={(awaitingLamp || arming || phase !== 'plant') && !(easy && awaitingLamp && phase === 'plant' && !arming)}
+            aria-disabled={awaitingLamp || arming || phase !== 'plant' ? true : undefined}
             aria-describedby={easy && awaitingLamp ? 'defend-plant-first' : undefined}
           >
             {easy ? EASY.nightDo : 'The road is coming'}
           </button>
           {easy && awaitingLamp ? (
-            <p className="defend-plant-first" id="defend-plant-first">
+            <p
+              className={`defend-plant-first${plantPulse ? ' is-pulse' : ''}`}
+              id="defend-plant-first"
+              data-plant-pulse={plantPulse ? 'yes' : undefined}
+            >
               {EASY.nightPlantFirst}
             </p>
           ) : null}
@@ -2572,7 +2644,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
 
   return (
     <main
-      className={`defend-page ${taught ? 'is-puzzle' : 'is-teach'} ${arming ? 'is-arming' : ''} ${won ? 'is-win' : ''} ${shake ? 'is-shake' : ''} ${leakFlash ? 'is-leak' : ''} ${firing ? 'is-firing' : ''} ${stillOn ? 'is-still' : ''} ${mendOn ? 'is-mend' : ''} ${mendShield ? 'is-mend-shield' : ''} ${debugFrozen ? 'is-nw-debug-freeze' : ''} ${easy ? 'is-easy-watch' : ''} ${easyTap ? 'is-easy-tap' : ''} ${boosting ? 'is-boost' : ''} ${clearPanelFolded(boosting, placeArm) ? 'is-clear-fold' : ''} ${phase === 'lost' ? 'is-lost' : ''} ${boosting && runSparks < 1 ? 'is-spark-broke' : ''} ${easy && phase === 'plant' && awaitingLamp ? 'is-need-lamp' : ''} ${easy && (phase === 'plant' || placeArm) ? 'is-placing' : ''} ${easy && !won && (phase === 'wave' || phase === 'boost') ? 'is-shop' : ''}`}
+      className={`defend-page ${taught ? 'is-puzzle' : 'is-teach'} ${arming ? 'is-arming' : ''} ${won ? 'is-win' : ''} ${shake ? 'is-shake' : ''} ${leakFlash ? 'is-leak' : ''} ${firing ? 'is-firing' : ''} ${stillOn ? 'is-still' : ''} ${mendOn ? 'is-mend' : ''} ${mendShield ? 'is-mend-shield' : ''} ${debugFrozen ? 'is-nw-debug-freeze' : ''} ${easy ? 'is-easy-watch' : ''} ${easyTap ? 'is-easy-tap' : ''} ${boosting ? 'is-boost' : ''} ${clearPanelFolded(boosting, placeArm) ? 'is-clear-fold' : ''} ${phase === 'lost' ? 'is-lost' : ''} ${boosting && runSparks < 1 ? 'is-spark-broke' : ''} ${easy && phase === 'plant' && awaitingLamp ? 'is-need-lamp' : ''} ${cardOn ? 'is-card-on' : ''} ${easy && (phase === 'plant' || placeArm) ? 'is-placing' : ''} ${easy && !won && (phase === 'wave' || phase === 'boost') ? 'is-shop' : ''}`}
       aria-label={WATCH_TITLE}
       data-night-map={mapId}
     >
@@ -2694,8 +2766,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
               onBoardTap={closeUpgrade}
               onPlacePointer={onPlacePointer}
               ghost={ghost}
+              groundHints={groundHints}
               plateFill={plateFill}
               map={playingMap?.plate}
+              roadD={roadD}
               porchCandy={!playingMap}
               roadLabel={
                 playingMap

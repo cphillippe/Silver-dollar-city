@@ -45,11 +45,12 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
     pads, planted, progress, raiders, raiderAt, ability, towerType, unlocked,
     flash, togglePad, fire, fireAtRaider, shots, easy, blasts, tapTarget, tapPos, tapJuice,
     walkerCalls, loreLine, runTier, boosting, onBoostTower,     upgradeAt, onOpenUpgrade, upFlashId, ghost = null,
+    groundHints = [],
     upgradePoint, boardBox, runSparks = 0, levelBurst = null, onPullLamp, pullSparks = 0, onCloseUpgrade,
     onUpgradePath, onArmPathBuy, runPaths, roundIndex = -1, armorFrom = 7,
     heldLessons, playtestSteps = false, onOpenLessons,
     plateFill = false, onPlacePointer,
-    map, porchCandy, roadLabel, mapFeatures, pops,
+    map, roadD, porchCandy, roadLabel, mapFeatures, pops,
   } = props
   const place = plateFill ? boardFillPoint : mapBoardPoint
   const cardAbility = upgradeAt ? towerType[upgradeAt] : undefined
@@ -111,6 +112,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
         onBoardTap={onBoardTap}
         onPlacePointer={onPlacePointer}
         map={map}
+        roadD={roadD}
         porchCandy={porchCandy}
         roadLabel={roadLabel}
         mapFeatures={mapFeatures}
@@ -142,6 +144,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
           onOpenUpgrade={onOpenUpgrade}
           upFlashId={upFlashId}
           ghost={ghost}
+          groundHints={groundHints}
           roundIndex={roundIndex}
           armorFrom={armorFrom}
         />

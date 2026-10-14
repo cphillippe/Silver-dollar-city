@@ -2,14 +2,14 @@ import type { CityPlotId } from '../../lib/city.ts'
 import { DEFEND_ANCHOR, DEFEND_PATH, NIGHT_ROAD_D, pathPoint } from './data.ts'
 import type { NightPoint } from '../types.ts'
 
-export { DEFEND_ANCHOR, DEFEND_PATH, NIGHT_ROAD_D, pathPoint } from './data.ts'
+export { activeNightRoadD, DEFEND_ANCHOR, DEFEND_PATH, NIGHT_ROAD_D, pathPoint, roadPolylineD } from './data.ts'
 
 export interface NightPathModule {
   /** Walker polyline on the plate's yellow road, painted gate (right edge) → top cottage. */
   readonly points: readonly NightPoint[]
   /** Where walkers enter (gate). */
   readonly start: NightPoint
-  /** SVG road overlay; empty while the map plate paints the road. */
+  /** Static overlay. The board paints `activeNightRoadD()` on top of this. */
   readonly roadD: string
   /** Position along the polyline, t in [0, 1]. */
   pointAt(t: number): NightPoint

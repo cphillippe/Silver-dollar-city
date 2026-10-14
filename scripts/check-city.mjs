@@ -30,7 +30,12 @@ import * as easyLib from '../src/lib/easy.ts'
 import * as trailLoopHome from '../src/easyTrail/trail/loop.ts'
 import * as trailShelf from '../src/easyTrail/trail/index.ts'
 import { normalizeProgress } from '../src/lib/save.ts'
-import { nightWatchJumpAllowed, nightWatchRoundJump } from '../src/lib/nightWatchDebug.ts'
+import {
+  nightWatchDebugHolds,
+  nightWatchDebugPanel,
+  nightWatchJumpAllowed,
+  nightWatchRoundJump,
+} from '../src/lib/nightWatchDebug.ts'
 import {
   PH_ROAD_SHOW_IT,
   SHOW_IT_LINE,
@@ -277,6 +282,7 @@ import {
   lampRoadNote,
   bindLampGround,
   lampSpotBlocked,
+  plantableHints,
   candlePlateFromPx,
   lampUnderFinger,
   magnetCandlePoint,
@@ -291,7 +297,7 @@ import {
 } from '../src/lib/lampPlace.ts'
 import { nightEnemies as nightEnemiesMod } from '../src/nightWatch/enemies/index.ts'
 import { nightParts as nightPartsMod } from '../src/nightWatch/parts/index.ts'
-import { nightPath as nightPathMod } from '../src/nightWatch/path/index.ts'
+import { activeNightRoadD, nightPath as nightPathMod } from '../src/nightWatch/path/index.ts'
 import { nightTowers as nightTowersMod, lampReach, lampReadyToFire, FREE_LAMP_RANGE_BONUS, LAMP_ROAD_OVERLAP, SHOT_JUICE_MS, sparkAwardForHit } from '../src/nightWatch/towers/index.ts'
 import {
   applyBoost,
@@ -1586,7 +1592,17 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.462')
+assert.equal(APP_VERSION, '1.4.464')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.464'), '1.4.464 changelog row')
+assert.match(latestChange('1.4.464').title, /pace|walkers/i)
+assert.match(latestChange('1.4.464').items.join('\n'), /test panel stays off/)
+assert.match(latestChange('1.4.464').items.join('\n'), /Plant a lamp first/)
+assert.match(latestChange('1.4.464').items.join('\n'), /open ground/)
+assert.doesNotMatch(
+  latestChange('1.4.464').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.464 changelog avoids GitHub close keywords',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.462'), '1.4.462 changelog row')
 assert.match(latestChange('1.4.462').title, /shrug/i)
 assert.match(latestChange('1.4.462').items.join('\n'), /round 10 boss/)
@@ -7397,6 +7413,109 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(gateSrc, /get\('playtest'\) === '1'/)
   assert.ok(CHANGELOG.some((note) => note.version === '1.4.407'), '1.4.407 changelog row')
   assert.doesNotMatch(latestChange('1.4.407').items.join('\n'), /Fixes #|Closes #|Resolves #/)
+}
+
+// Night Watch 1.4.464: the debug panel stays off a normal night. Walkers keep moving.
+{
+  assert.equal(nightWatchDebugPanel('', false), false, '1.4.464 a normal night hides the debug panel')
+  assert.equal(nightWatchDebugPanel('?cb=1', false), false, '1.4.464 a cache buster is not a flag')
+  assert.equal(nightWatchDebugPanel('?playtest=true', false), false, '1.4.464 playtest=true is not the panel')
+  assert.equal(nightWatchDebugPanel('?playtest=1', false), true, '1.4.464 playtest=1 shows the panel')
+  assert.equal(nightWatchDebugPanel('?nwDebug=1', false), true, '1.4.464 nwDebug=1 shows the panel')
+  assert.equal(nightWatchDebugPanel('', true), true, '1.4.464 the developer switch shows the panel')
+  assert.equal(nightWatchDebugHolds('', false), false, '1.4.464 a normal night does not freeze walkers')
+  assert.equal(nightWatchDebugHolds('?playtest=1', false), false, '1.4.464 a playtest seed still runs')
+  assert.equal(nightWatchDebugHolds('?nwDebug=1', false), true, '1.4.464 nwDebug=1 holds the wave')
+  assert.equal(nightWatchDebugHolds('', true), true, '1.4.464 the developer switch holds the wave')
+  const debugSrc464 = readFileSync(new URL('../src/lib/nightWatchDebug.ts', import.meta.url), 'utf8')
+  const screen464 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  assert.match(debugSrc464, /sessionStorage.getItem\(NW_DEBUG_SESSION\) === 'on'/)
+  assert.match(debugSrc464, /localStorage.removeItem\(NW_DEBUG_KEY\)/)
+  assert.doesNotMatch(debugSrc464, /localStorage.getItem\(NW_DEBUG_KEY\) === 'on'/)
+  assert.match(screen464, /nightWatchDebugPanel\(/)
+  assert.match(screen464, /const debugHarness = easy && debugPanel && midWave/)
+  assert.doesNotMatch(screen464, /const debugHarness = easy && nwDebug && midWave/)
+  assert.match(screen464, /data-plant-pulse/)
+  assert.match(screen464, /plantableHints/)
+  assert.match(screen464, /is-card-on/)
+  assert.match(screen464, /plantOpenGroundRef/)
+  const place464 = readFileSync(new URL('../src/lib/lampPlace.ts', import.meta.url), 'utf8')
+  assert.match(place464, /elementsFromPoint/)
+  assert.doesNotMatch(place464, /querySelectorAll\('\.nw-rail, \.nw-docks/)
+  assert.match(
+    readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8'),
+    /\.defend-page\.is-placing \.nw-map-pick[\s\S]*?pointer-events:\s*none/,
+  )
+  assert.match(
+    readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8'),
+    /\.is-card-on \.nw-rail \.defend-abilities \{\s*animation:\s*none/,
+  )
+  assert.match(
+    readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8'),
+    /\.defend-plant-first\.is-pulse/,
+  )
+  assert.match(
+    readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8'),
+    /\.defend-plant-ground/,
+  )
+  bindLampGround(null)
+  const hints = plantableHints({})
+  assert.ok(hints.length > 4, `1.4.464 open ground has a soft mark (saw ${hints.length})`)
+  for (const spot of hints) {
+    assert.equal(lampSpotBlocked(spot), false, `1.4.464 a mark sits on open ground ${spot.x},${spot.y}`)
+  }
+  const roadSpot = DEFEND_PATH[Math.floor(DEFEND_PATH.length / 2)]
+  assert.equal(lampSpotBlocked(roadSpot), true, '1.4.464 the road itself stays dark')
+  bindLampGround(null)
+  const roadD464 = activeNightRoadD()
+  assert.ok(roadD464.startsWith('M'), '1.4.464 the A2 road path loads')
+  assert.ok(roadD464.length > 40, '1.4.464 the loaded road is the walker line')
+  assert.equal(nightPathMod.roadD, '', '1.4.464 the static overlay stays empty')
+  bindLampGround({
+    path: [
+      { x: 10, y: 10 },
+      { x: 40, y: 20 },
+    ],
+    houses: [],
+    features: [],
+    extraRoads: [],
+    porchPaths: [],
+    roads: [
+      {
+        id: 'east',
+        share: 1,
+        via: [],
+        points: [
+          { x: 12, y: 18 },
+          { x: 48, y: 30 },
+        ],
+      },
+    ],
+  })
+  assert.equal(activeNightRoadD(), 'M12 18 L48 30', '1.4.464 a bound map loads its own road')
+  bindLampGround(null)
+  const fresh464 = emptyProgress()
+  const far464 = { x: 40, y: 40 }
+  const farLook = previewLamp(far464, 'love', fresh464, {}, {}, false, true, 0)
+  assert.equal(farLook.blocked, false, '1.4.464 open ground away from the road is legal')
+  assert.notEqual(farLook.cover, 'good', '1.4.464 that seat is outside the good-reach sliver')
+  assert.equal(
+    commitLamp({}, far464, 'love', fresh464, {}, false, true, 0).ok,
+    true,
+    '1.4.464 a short reach still plants',
+  )
+  assert.equal(
+    commitLamp({}, { x: 192, y: 537 }, 'love', fresh464, {}, false, true, 0).ok,
+    false,
+    '1.4.464 a house still refuses the plant',
+  )
+  const sky464 = readFileSync(new URL('../src/components/DefendNightSky.tsx', import.meta.url), 'utf8')
+  assert.match(sky464, /nightPath\.roadD \|\| roadD \|\| activeNightRoadD\(\)/)
+  const ability464 = readFileSync(new URL('../src/components/DefendAbilityBar.tsx', import.meta.url), 'utf8')
+  assert.match(ability464, /Free to plant/)
+  assert.match(ability464, /data-first-lamp=\{openingFree \? 'free'/)
+  assert.match(latestChange('1.4.464').items.join('\n'), /first lamp is free/)
+  assert.match(latestChange('1.4.464').items.join('\n'), /developer jump/)
 }
 
 // Night Watch 1.4.408: pip buy, Easy hearts, softer rounds 7–12.
@@ -15373,4 +15492,5 @@ assert.match(
   '1.4.460 the city scan taps the live round 5 boss and requires damage',
 )
 await import('./check-seed-fire.mjs').then((mod) => mod.checkSeedFire())
+await import('./check-night-jump.mjs').then((mod) => mod.checkNightJump())
 await import('./check-story-win.mjs').then((mod) => mod.checkStoryWins())
