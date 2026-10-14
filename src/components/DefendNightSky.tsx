@@ -1,6 +1,6 @@
 import { HEAVEN_POINT } from '../lib/defend'
 import type { PointerEvent, RefObject, ReactNode } from 'react'
-import { MapPlate, NIGHT_MAP, nightPath, type NightMapSurface, type NightPhase } from '../nightWatch'
+import { activeNightRoadD, MapPlate, NIGHT_MAP, nightPath, type NightMapSurface, type NightPhase } from '../nightWatch'
 import { FeatureSprites, PopPuffs } from '../nightWatch/map/FeatureSprites'
 import type { NightFeature } from '../nightWatch/maps/features'
 
@@ -19,6 +19,8 @@ export interface DefendNightSkyProps {
   onPlacePointer?: (event: PointerEvent<SVGSVGElement>) => void
   /** Painted plate. A2 when omitted. */
   map?: NightMapSurface
+  /** Walker-road SVG. The developer jump and Home both pass the bound roads. */
+  roadD?: string
   /** A2 porch icing. Off on other maps. */
   porchCandy?: boolean
   roadLabel?: string
@@ -38,12 +40,14 @@ export function DefendNightSky({
   onBoardTap,
   onPlacePointer,
   map = NIGHT_MAP,
+  roadD = '',
   porchCandy = true,
   roadLabel = 'Night road through Silver City',
   mapFeatures = [],
   pops = [],
   children,
 }: DefendNightSkyProps) {
+  const drawnRoad = nightPath.roadD || roadD || activeNightRoadD()
   return (
             <svg
               ref={boardRef}
@@ -132,9 +136,9 @@ export function DefendNightSky({
               <ellipse className="defend-canopy" cx="214" cy="252" rx="22" ry="13" />
               <ellipse className="defend-canopy" cx="402" cy="246" rx="24" ry="14" />
               <ellipse className="defend-canopy" cx="528" cy="258" rx="20" ry="12" />
-              <path className="defend-road-bed" d={nightPath.roadD} />
-              <path className="defend-road" d={nightPath.roadD} />
-              <path className="defend-road-shine" d={nightPath.roadD} />
+              <path className="defend-road-bed" d={drawnRoad} />
+              <path className="defend-road" d={drawnRoad} />
+              <path className="defend-road-shine" d={drawnRoad} />
               {/* 1.4.382: no thin dashes. Candy porch paths live on the plate image. */}
               <path
                 className="defend-heaven-path"

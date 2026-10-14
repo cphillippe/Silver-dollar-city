@@ -364,17 +364,39 @@ export function lampSpotBlocked(
 }
 
 /**
+ * Soft marks on open ground. A picked lamp card draws these.
+ * Roads, houses, and seats that already hold a lamp stay dark.
+ */
+export function plantableHints(
+  plants: Record<string, string> = {},
+  placeKind?: string,
+): NightPoint[] {
+  const spots: NightPoint[] = []
+  for (let y = 88; y <= 1040; y += 136) {
+    for (let x = 56; x <= 744; x += 136) {
+      const at = { x, y }
+      if (!lampSpotBlocked(at, plants, undefined, undefined, placeKind)) spots.push(at)
+    }
+  }
+  return spots
+}
+
+/**
  * Buttons and readouts that float on the map. A tap in one of these boxes
  * is a no-go even when the box lets the tap fall through to the plate.
  */
+const HUD_CONTROL = '.nw-rail button, .nw-docks button, .nw-docks .btn, .nw-wave-overlay button'
+
+/**
+ * A real button over the plate. The dock and the map list are taller than
+ * their buttons, and that empty box is still open ground.
+ */
 export function hudCoversPoint(clientX: number, clientY: number, doc: Document): boolean {
-  const nodes = doc.querySelectorAll('.nw-rail, .nw-docks, .nw-balloon-slot, .nw-wave-overlay')
-  for (const node of nodes) {
-    const box = node.getBoundingClientRect()
-    if (box.width < 1 || box.height < 1) continue
-    if (clientX >= box.left && clientX <= box.right && clientY >= box.top && clientY <= box.bottom) {
-      return true
-    }
+  const stack = typeof doc.elementsFromPoint === 'function' ? doc.elementsFromPoint(clientX, clientY) : []
+  for (const node of stack) {
+    if (!(node instanceof Element)) continue
+    if (node.closest('.defend-board')) return false
+    if (node.closest(HUD_CONTROL)) return true
   }
   return false
 }
@@ -824,7 +846,10 @@ export function magnetCandlePoint(
   return best
 }
 
-/** Place when the spot is open. A blocked spot returns the same map. */
+/**
+ * Place when the spot is open ground.
+ * Road, houses, and features block. A short reach still plants.
+ */
 export function commitLamp(
   plants: Record<string, string>,
   point: NightPoint,

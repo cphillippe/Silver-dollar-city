@@ -115,8 +115,33 @@ export const DEFEND_ANCHOR: Record<CityPlotId, NightPoint> = {
   porch: { x: 248, y: 288 },
 }
 
-/** The plate paints the road; the SVG road layers stay empty so they don't fight it. */
+/**
+ * Kept empty on the static module. The board draws `activeNightRoadD()`
+ * so every entry, including the developer jump, loads a real road.
+ */
 export const NIGHT_ROAD_D = ''
+
+/** SVG path for one walker polyline. Empty when the line has no segment. */
+export function roadPolylineD(points: readonly NightPoint[]): string {
+  if (points.length < 2) return ''
+  let d = `M${points[0].x} ${points[0].y}`
+  for (let i = 1; i < points.length; i += 1) {
+    d += ` L${points[i].x} ${points[i].y}`
+  }
+  return d
+}
+
+/**
+ * Walker roads for the map that is bound right now.
+ * A2 is the one yellow road. A maze map draws every walker road.
+ */
+export function activeNightRoadD(): string {
+  const roads = boundNightRoads()
+  if (roads && roads.length > 0) {
+    return roads.map((road) => roadPolylineD(road.points)).filter((part) => part.length > 0).join(' ')
+  }
+  return roadPolylineD(boundNightPath())
+}
 
 /** One walker road. `share` is that road's fraction of a round's walkers. */
 export interface BoundRoad {
