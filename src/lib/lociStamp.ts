@@ -110,7 +110,16 @@ function deriveStamp(lessonId: string): LociStampSpec {
   }
 }
 
+/** Header idea uses the same Easy face as the takeaway claim. */
+function facedHeaderIdea(lessonId: string): string | undefined {
+  if (lessonId !== 'fg-reason' && lessonId !== 'fg-ought') return undefined
+  const claim = packLesson(lessonId)?.claim || evidenceFor(lessonId)?.claim
+  return claim ? easyFacingLine(lessonId, claim) : undefined
+}
+
 /** Always returns a stamp — registry Why Gate first, else easyWhoWhere + short idea. */
 export function lociStampFor(lessonId: string): LociStampSpec {
-  return LOCI_STAMP[lessonId] ?? deriveStamp(lessonId)
+  const stamp = LOCI_STAMP[lessonId] ?? deriveStamp(lessonId)
+  const faced = facedHeaderIdea(lessonId)
+  return faced ? { ...stamp, ideaShort: faced } : stamp
 }
