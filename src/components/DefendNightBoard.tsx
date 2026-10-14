@@ -45,6 +45,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
     pads, planted, progress, raiders, raiderAt, ability, towerType, unlocked,
     flash, togglePad, fire, fireAtRaider, shots, easy, blasts, tapTarget, tapPos, tapJuice,
     walkerCalls, loreLine, runTier, boosting, onBoostTower,     upgradeAt, onOpenUpgrade, upFlashId, ghost = null,
+    groundHints = [],
     upgradePoint, boardBox, runSparks = 0, levelBurst = null, onPullLamp, pullSparks = 0, onCloseUpgrade,
     onUpgradePath, onArmPathBuy, runPaths, roundIndex = -1, armorFrom = 7,
     heldLessons, playtestSteps = false, onOpenLessons,
@@ -142,6 +143,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
           onOpenUpgrade={onOpenUpgrade}
           upFlashId={upFlashId}
           ghost={ghost}
+          groundHints={groundHints}
           roundIndex={roundIndex}
           armorFrom={armorFrom}
         />

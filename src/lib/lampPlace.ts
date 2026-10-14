@@ -364,6 +364,24 @@ export function lampSpotBlocked(
 }
 
 /**
+ * Soft marks on open ground. A picked lamp card draws these.
+ * Roads, houses, and seats that already hold a lamp stay dark.
+ */
+export function plantableHints(
+  plants: Record<string, string> = {},
+  placeKind?: string,
+): NightPoint[] {
+  const spots: NightPoint[] = []
+  for (let y = 88; y <= 1040; y += 136) {
+    for (let x = 56; x <= 744; x += 136) {
+      const at = { x, y }
+      if (!lampSpotBlocked(at, plants, undefined, undefined, placeKind)) spots.push(at)
+    }
+  }
+  return spots
+}
+
+/**
  * Buttons and readouts that float on the map. A tap in one of these boxes
  * is a no-go even when the box lets the tap fall through to the plate.
  */
