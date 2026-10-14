@@ -59,9 +59,12 @@ export function DefendNightSky({
               onPointerDown={onPlacePointer}
               onPointerMove={onPlacePointer}
               onPointerUp={onPlacePointer}
-              onClick={() => {
-                if (phase === 'wave') fireBest()
-                else onBoardTap?.()
+              onClick={(event) => {
+                if (phase === 'wave') {
+                  const node = event.target as Element | null
+                  if (node?.closest?.('.defend-raider')) return
+                  fireBest()
+                } else onBoardTap?.()
               }}
             >
               <defs>

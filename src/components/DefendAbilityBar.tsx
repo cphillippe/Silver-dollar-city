@@ -256,6 +256,10 @@ export function DefendAbilityBar({
                     }
                     setToolLock(null)
                     setAbility(tool.id)
+                    if (paidPlace && easy && placed) {
+                      onOpenTree?.(tool.id)
+                      return
+                    }
                     if (paidPlace) onArmPlace?.(tool.id)
                   }}
                 >

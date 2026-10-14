@@ -304,6 +304,23 @@ export function easyPointerTapGate<
 }
 
 /**
+ * A pointer that landed on a drawn face.
+ * The gold ring is the hint. Any living face still counts, once.
+ * Fog and a shrugged walker stay misses. Hard does not use this.
+ */
+export function easyVisibleFaceTap(
+  easy: boolean,
+  raider: { turned?: string; fog?: boolean; tapChip?: number; gait?: string; boss?: boolean },
+  roundIndex = -1,
+  armorFrom = 7,
+): 'hit' | 'miss' {
+  if (!easy) return 'hit'
+  if (raider.turned || raider.fog) return 'miss'
+  if (easyTapSoaked(roundIndex, raider, armorFrom)) return 'miss'
+  return 'hit'
+}
+
+/**
  * The tap handler path: gate, then the live strike.
  * A miss never touches HP. `DefendScreen` fireAtRaider uses the same gate.
  */

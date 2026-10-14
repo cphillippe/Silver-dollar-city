@@ -1838,6 +1838,11 @@ img.walker-face.easy-walker-face,
   pointer-events: all;
 }
 
+/* 1.4.465: every drawn face takes the tap. One pointer, one count. */
+.defend-page.is-easy-tap .defend-raider.is-easy-tap-target .defend-raider-hit {
+  pointer-events: all;
+}
+
 .defend-page.is-easy-tap .defend-raider.is-easy-tap-target .defend-raider-face,
 .defend-page.is-easy-tap .defend-raider.is-easy-tap-target .defend-raider-face *,
 .defend-page.is-easy-tap .defend-raider.is-easy-tap-target .defend-raider-shadow {
