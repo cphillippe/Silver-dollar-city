@@ -91,9 +91,11 @@ export const EASY_GLOW_TAP_DAMAGE = 1
 export const TAP_SHRUG_CHIP = 4
 
 /**
- * Tough walkers from round 7 on, and bosses from round 15 on.
- * Round 5's tough walkers stay open so that proven round does not move.
- * Hard does not read this. The lead round 10 boss is `easyLeadBossShrug`.
+ * Bosses from round 15 on still soak taps.
+ * A thick walker shrugs only before round 7 (a maze round 6). From round 7
+ * every walker keeps taking taps, the same as rounds 1–6. Pressure after that
+ * is the wave, not a shrug. Hard does not read this.
+ * The lead round 10 boss is `easyLeadBossShrug`.
  */
 export function easyTapArmored(
   roundIndex: number,
@@ -103,7 +105,7 @@ export function easyTapArmored(
 ): boolean {
   const round = Math.floor(roundIndex) + 1
   if (boss && round >= 15) return true
-  if (gait === 'tough' && round >= armorFrom) return true
+  if (gait === 'tough' && round >= armorFrom && round < 7) return true
   return false
 }
 
@@ -179,7 +181,8 @@ export interface LiveStrikeSize {
 /**
  * How hard the live shot is, before the hit lands.
  * Round 5's boss is not armored, so a tap and a lamp both cut the bar.
- * Tough walkers from round 7, the round 10 boss, and bosses from round 15, shrug taps after four.
+ * The round 10 boss and bosses from round 15 shrug taps after four.
+ * From round 7 a thick walker keeps taking taps.
  * Lamps still use their tier. Hard does not read the Easy armor.
  */
 export function liveNightDamage(

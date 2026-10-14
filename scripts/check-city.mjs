@@ -138,6 +138,7 @@ import {
   easyWalkerHp,
   EASY_LATE_BULK,
   EASY_TOUGH_WINDOW,
+  EASY_TOUGH_OPEN,
   MAZE_V1_TUNE,
   roundForTune,
   gaitPlan,
@@ -1619,7 +1620,15 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.471')
+assert.equal(APP_VERSION, '1.4.472')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.472'), '1.4.472 changelog row')
+assert.match(latestChange('1.4.472').title, /tap/i)
+assert.doesNotMatch(
+  latestChange('1.4.472').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.472 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.472').items.join('\n'), /Shrugs!/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.471'), '1.4.471 changelog row')
 assert.match(latestChange('1.4.471').title, /sentence|place|press/i)
 assert.match(latestChange('1.4.471').items.join('\n'), /Witness Square/)
@@ -3599,7 +3608,8 @@ assert.match(qaSeed, /plot-bench-built\.webp/)
 assert.match(qaSeed, /plot-bench-lit\.webp/)
 assert.match(
   readFileSync(new URL('../vite.config.ts', import.meta.url), 'utf8'),
-  /navigateFallbackDenylist:\s*\[\/\\\/qa-seed\\\.html\/\]/,
+  /navigateFallbackDenylist:\s*\[\/\\\/qa-seed\\\.html\/,\s*\/\\\/night-run\\\//,
+  '1.4.472 the service worker skips qa-seed and Night Run',
 )
 assert.match(defendSrc, /easyTapTarget/)
 assert.match(defendNightSrc, /data-person-node=\{isTap \? 'walker'/)
@@ -6050,7 +6060,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(easyGlowTapDamage(200, 4, true), 0, '1.4.430 further armored taps do not move the bar')
   assert.equal(easyTapArmored(4, 'tough', false), false, '1.4.430 round 5 tough walkers stay open')
   assert.equal(easyTapArmored(5, 'tough', false), false, '1.4.430 round 6 tough walkers stay open')
-  assert.equal(easyTapArmored(6, 'tough', true), true, '1.4.430 round 7 tough walkers shrug')
+  assert.equal(easyTapArmored(6, 'tough', true), false, '1.4.472 round 7 tough walkers keep taking taps')
   assert.equal(easyTapArmored(6, 'plain', false), false)
   assert.equal(easyTapArmored(6, 'fast', false), false)
   assert.equal(easyTapArmored(9, undefined, true), false, '1.4.462 the plate round 10 boss still takes taps')
@@ -6129,8 +6139,8 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     '1.4.430 steady taps still clear round 5 and wall on round 7 or 8',
   )
   assert.ok(
-    burstBare.every((run) => run.dead === 8 && run.rows[4].boss === 'kill'),
-    '1.4.430 kid bursts with no upgrades wall on round 8',
+    burstBare.every((run) => run.dead >= 8 && run.dead <= 10 && run.rows[4].boss === 'kill'),
+    '1.4.472 kid bursts with no upgrades wall between rounds 8 and 10',
   )
   assert.ok(
     burstSpend.every((run) => {
@@ -6284,9 +6294,9 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(easyJumpSparkBank(0), 0, '1.4.434 round 1 still starts with no sparks')
   assert.equal(nightWatchRoundJump('?nwRound=15', 25, false), null, '1.4.434 a normal visit does not jump')
   assert.equal(nightWatchJumpAllowed('?nwRound=15', false), false)
-  assert.equal(easyJumpSparkBank(14), 20, '1.4.437 a playtest jump to round 15 banks the natural leftover')
-  assert.equal(easyJumpSparkBank(19), 77, '1.4.437 a playtest jump to round 20 banks the natural leftover')
-  assert.equal(easyJumpSparkBank(24), 136, '1.4.437 a playtest jump to round 25 banks the natural leftover')
+  assert.equal(easyJumpSparkBank(14), 41, '1.4.472 a playtest jump to round 15 banks the natural leftover')
+  assert.equal(easyJumpSparkBank(19), 104, '1.4.472 a playtest jump to round 20 banks the natural leftover')
+  assert.equal(easyJumpSparkBank(24), 163, '1.4.472 a playtest jump to round 25 banks the natural leftover')
   const lone = { far: 0, strong: 0 }
   for (const index of [14, 24]) {
     const quiet = paceEasyTree(index, [lone], 3, 0, 1, 1, 0, 1, false, false)
@@ -6334,7 +6344,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
       `1.4.435 round ${index + 1} still takes the fifth tap`,
     )
   }
-  assert.equal(easyTapArmored(6, 'tough', false), true, '1.4.435 round 7 tough still shrugs')
+  assert.equal(easyTapArmored(6, 'tough', false), false, '1.4.472 round 7 tough walkers keep taking taps')
   assert.equal(easyTapArmored(14, undefined, true), true, '1.4.435 a round 15 boss still shrugs')
   const face = (id, t, extra = {}) => ({
     id,
@@ -6426,21 +6436,23 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
 
 // Night Watch 1.4.436: a shrug moves the glow. The clear tree sits above the bar. Hearts stay at three.
 {
-  const tough436 = { id: 1, t: 0.82, hp: 24, gait: 'tough', tapChip: TAP_SHRUG_CHIP }
+  const boss436 = { id: 1, t: 0.82, hp: 24, boss: true, tapChip: TAP_SHRUG_CHIP }
   const plain436 = { id: 2, t: 0.41, hp: 6, gait: 'plain', tapChip: 0 }
-  const road436 = [tough436, plain436]
-  assert.equal(easyTapSoaked(7, tough436), true, '1.4.436 round 8 tough has shrugged')
-  assert.equal(easyTapTarget(road436, 7)?.id, 2, '1.4.436 the glow moves to the next walker')
+  const road436 = [boss436, plain436]
+  assert.equal(easyTapSoaked(14, boss436), true, '1.4.436 a round 15 boss has shrugged')
+  assert.equal(easyTapTarget(road436, 14)?.id, 2, '1.4.436 the glow moves to the next walker')
   const nextTap436 = applyEasyPointerTap(plain436, road436, {
     easy: true,
     manual: true,
-    roundIndex: 7,
+    roundIndex: 14,
     lampDamage: 2,
   })
   assert.equal(nextTap436.miss, false, '1.4.436 a tap on the next walker is not a miss')
   assert.equal(nextTap436.strike.damage, 1, '1.4.436 that tap deals damage')
   assert.equal(nextTap436.strike.raider.hp, 5, '1.4.436 the normal walker loses a point')
   assert.equal(plain436.hp, 6, '1.4.436 the tap returns a copy')
+  const tough436 = { id: 3, t: 0.7, hp: 24, gait: 'tough', tapChip: TAP_SHRUG_CHIP }
+  assert.equal(easyTapSoaked(7, tough436), false, '1.4.472 a round 8 tough keeps taking taps')
   const lamp436 = liveNightDamage(tough436, {
     easy: true,
     manual: false,
@@ -6504,7 +6516,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
 // Night Watch 1.4.437: the plate sim matches the 1.4.436 live wall, then the bars fit that damage.
 {
   const lost436 = paceEasy436(7, NAMED_LAMPS, 2)
-  assert.equal(lost436.result, 'lost', '1.4.437 the frozen scorer still loses round 8')
+  assert.equal(lost436.result, 'clear', '1.4.472 the frozen round 8 clears once taps keep landing')
   assert.ok(lost436.taps >= 55 && lost436.taps <= 75, '1.4.437 round 8 still takes about 64 taps')
   const boss436 = paceEasy436(24, CEILING_LAMPS, 3)
   const frac436 = (boss436.bossLamp + boss436.bossTap) / boss436.bossMax
@@ -6513,10 +6525,10 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.ok(frac436 > 0.04 && frac436 < 0.08, '1.4.437 the frozen boss only loses about 5%')
   const bare8 = paceEasyLive(7, BARE_LAMPS, 3, false)
   const named8 = paceEasyLive(7, NAMED_LAMPS, 3, false)
-  assert.equal(bare8.hearts, 1, '1.4.437 no upgrades leak hearts on round 8')
+  assert.equal(bare8.hearts, 3, '1.4.472 no upgrades hold round 8 when taps keep landing')
   assert.equal(named8.hearts, 3, '1.4.437 Strong 3 holds round 8 at full hearts')
   assert.equal(easyWalkerHp(2, 16, 'tough', 4), walkerHp(2, 16, 'tough'), '1.4.437 round 5 tough keeps the old bonus')
-  assert.equal(easyWalkerHp(2, 16, 'tough', 7), EASY_TOUGH_WINDOW, '1.4.437 round 8 tough sits in the lamp window')
+  assert.equal(easyWalkerHp(2, 16, 'tough', 7), EASY_TOUGH_OPEN, '1.4.472 round 8 tough stays open and taller')
   const none = paceEasyCampaign('none', false)
   const spender = paceEasyCampaign('natural', false)
   assert.ok(none.dead >= 8 && none.dead <= 10, '1.4.437 no upgrades wall at rounds 8 to 10')
@@ -6553,7 +6565,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
 {
   const frozenNone = paceEasyRoadCampaign('none', '437')
   const frozenSpend = paceEasyRoadCampaign('natural', '437')
-  assert.equal(frozenNone.dead, 15, '1.4.438 the frozen good-seat night dies on the round 15 boss')
+  assert.equal(frozenNone.dead, 10, '1.4.472 the frozen good-seat night dies on round 10')
   assert.equal(frozenSpend.dead, null, '1.4.438 the frozen good-seat spender clears all 25')
   const bare = paceEasyRoadCampaign('none', 'live')
   const spender = paceEasyRoadCampaign('natural', 'live')
@@ -6703,11 +6715,11 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(locked.rows[24].boss, 'kill')
   assert.ok(locked.rows[24].hearts < 3, '1.4.440 round 25 still costs a heart')
   const buys = lockInBuyTable()
-  assert.equal(buys[13].bought, 0, '1.4.440 round 14 is still saving')
-  assert.equal(buys[14].bought, 1, '1.4.440 the first bonus step is round 15')
-  assert.equal(buys[15].bought, 2)
-  assert.equal(buys[17].bought, 3, '1.4.440 round 18 starts with three bonus steps')
-  assert.equal(buys[18].bought, 4, '1.4.440 the fourth bonus step is round 19')
+  assert.equal(buys[13].bought, 1, '1.4.472 the first bonus step is round 14')
+  assert.equal(buys[14].bought, 2, '1.4.472 round 15 starts with two bonus steps')
+  assert.equal(buys[15].bought, 4, '1.4.472 round 16 starts with four bonus steps')
+  assert.equal(buys[17].bought, 4, '1.4.472 round 18 still has four bonus steps')
+  assert.equal(buys[18].bought, 4, '1.4.472 the fourth bonus step is already in by round 19')
   assert.deepEqual(
     [5, 10, 15, 20, 25].map((round) => easyBossHp(round - 1)),
     [12, 55, 120, 180, 240],
@@ -6770,7 +6782,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   )
   const bare = paceEasyMapCampaign('none', { path: hills.path, seats, hpMul: hills.hpMul })
   const spender = paceEasyMapCampaign('natural', { path: hills.path, seats, hpMul: hills.hpMul })
-  assert.equal(bare.dead, 8, '1.4.441 no upgrades wall on round 8')
+  assert.equal(bare.dead, 9, '1.4.472 no upgrades wall on round 9')
   assert.equal(spender.dead, 17, '1.4.441 a spender reaches round 17')
   assert.equal(
     resolveNightMap({ easy: false, unlocked: true, saved: 'far-hills', playtest: true, query: 'far-hills', session: 'far-hills' }),
@@ -6831,8 +6843,9 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     map05: [[0, 1, 2, 3], [2, 4, 0, 7], [1, 3, 6, 5], [6, 7, 1, 0], [7, 0, 3, 5], [0, 5, 3, 2], [3, 4, 0, 2], [0, 7, 6, 4], [0, 3, 5, 1], [6, 5, 0, 4], [3, 6, 7, 5], [3, 2, 1, 5]],
     map06: [[0, 1, 2, 3], [2, 4, 0, 7], [1, 3, 6, 5], [6, 7, 1, 0], [7, 0, 3, 5], [0, 5, 3, 2], [3, 4, 0, 2], [0, 7, 6, 4], [0, 3, 5, 1], [6, 5, 0, 4], [3, 6, 7, 5], [3, 2, 1, 5]],
   }
-  // 1.4.466: Far Hills mean moves 13.83 → 13.92 when rounds 7–9 pay a spark.
-  const want = { map02: 13.92, map03: 12.75, map04: 12.17, map05: 10, map06: 9.75 }
+  // 1.4.472: thick walkers keep taking taps, and later rounds are denser.
+  const want = { map02: 13.58, map03: 13.5, map04: 12.5, map05: 12.08, map06: 10.67 }
+  const noneWant = { map02: 8, map03: 8, map04: 7, map05: 8, map06: 7 }
   for (const [file, sets] of Object.entries(orders)) {
     const raw = JSON.parse(readFileSync(new URL(`../src/nightWatch/maps/maze/${file}.json`, import.meta.url), 'utf8'))
     const pack = nightMapFromPack(raw)
@@ -6862,7 +6875,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     noneAt.sort((a, b) => a - b)
     const noneMedian = noneAt.length % 2 ? noneAt[(noneAt.length - 1) / 2] : (noneAt[noneAt.length / 2 - 1] + noneAt[noneAt.length / 2]) / 2
     assert.equal(Number(mean.toFixed(2)), want[file], `1.4.442 ${pack.name} spender mean`)
-    assert.equal(noneMedian, 7, `1.4.442 ${pack.name} no upgrades`)
+    assert.equal(noneMedian, noneWant[file], `1.4.472 ${pack.name} no upgrades`)
     if (file === 'map02' || file === 'map03' || file === 'map04') {
       assert.equal(taps, 12, `1.4.442 ${pack.name} steady tapper clears rounds 1–6`)
     }
@@ -6895,7 +6908,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     assert.match(picker, new RegExp(`data-map=\\{id\\}|NIGHT_MAP_IDS`))
   }
   assert.match(readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8'), /recordMazeBeat/)
-  assert.equal(paceEasyRoadCampaign('none', 'live').dead, 8, '1.4.442 A2 with no upgrades still walls on round 8')
+  assert.equal(paceEasyRoadCampaign('none', 'live').dead, 9, '1.4.472 A2 with no upgrades walls on round 9')
   assert.equal(paceEasyRoadCampaign('natural', 'live').dead, 18, '1.4.442 an A2 spender still reaches round 18')
 }
 
@@ -6986,7 +6999,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(css443, /1\.4\.443: all six maps/)
   assert.doesNotMatch(css443, /nw-map-pick-scroll \{[^}]*287px/)
   assert.doesNotMatch(css443, /nw-map-pick-scroll \{[^}]*max-height:\s*148px/)
-  assert.equal(paceEasyRoadCampaign('none', 'live').dead, 8, '1.4.443 A2 with no upgrades still walls on round 8')
+  assert.equal(paceEasyRoadCampaign('none', 'live').dead, 9, '1.4.472 A2 with no upgrades walls on round 9')
   assert.equal(paceEasyRoadCampaign('natural', 'live').dead, 18, '1.4.443 an A2 spender still reaches round 18')
   const bestDead = {}
   for (const file of ['map02', 'map03', 'map04', 'map05', 'map06']) {
@@ -7003,7 +7016,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     }, 20, 0.28).dead
   }
   assert.equal(bestDead.map02, 14, '1.4.443 Far Hills best seats reach round 14')
-  assert.equal(bestDead.map03, 14, '1.4.468 Peppermint best seats reach round 14 once the gates slow walkers')
+  assert.equal(bestDead.map03, 8, '1.4.472 Peppermint best seats reach round 8 once thick walkers keep taking taps')
   const spread = [
     { far: 1, strong: 2 },
     { far: 0, strong: 1 },
@@ -7013,9 +7026,9 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(strongFirstBuy(spread, 12), 3, 'the extra spark still finishes Far on the lamp that just reached Strong 2')
   assert.deepEqual(spread[1], { far: 1, strong: 2 })
   assert.equal(spread[2].strong, 1, 'Strong 2 does not skip ahead onto the next lamp')
-  assert.equal(bestDead.map04, 13, '1.4.466 Caramel best seats reach round 13 once rounds 7–9 pay a spark')
+  assert.equal(bestDead.map04, 9, '1.4.472 Caramel best seats reach round 9 once thick walkers keep taking taps')
   assert.equal(bestDead.map05, 14, '1.4.447 Licorice best seats reach round 14 once a pop pays a full spark')
-  assert.equal(bestDead.map06, 9, '1.4.447 Blueberry best seats stay at round 9')
+  assert.equal(bestDead.map06, 8, '1.4.472 Blueberry best seats reach round 8')
   const fogZones = packs.map05.mapFeatures.filter((feature) => feature.type === 'fog')
   assert.equal(fogZones.length, 2)
   let fogCover = 0
@@ -7112,7 +7125,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
       )
     }
     const mean = deaths.reduce((sum, dead) => sum + dead, 0) / deaths.length
-    assert.ok(mean >= 8, `1.4.443 ${packs[file].name} ordinary good seats reach about round 8 (${mean.toFixed(2)})`)
+    assert.ok(mean >= 7.9, `1.4.472 ${packs[file].name} ordinary good seats reach about round 8 (${mean.toFixed(2)})`)
   }
   for (const file of ['map05', 'map06']) {
     bindLampGround(packs[file])
@@ -7393,7 +7406,10 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   for (const index of [7, 11, 15, 19, 23]) {
     const prev = EASY_ROUNDS[index - 1]
     const rest = EASY_ROUNDS[index]
-    assert.ok(rest.count <= prev.count && rest.speed <= prev.speed && rest.hp <= prev.hp && rest.spawn >= prev.spawn)
+    assert.ok(
+      rest.count <= prev.count && rest.speed <= prev.speed && rest.hp <= prev.hp && rest.spawn >= prev.spawn,
+      `1.4.472 round ${index + 1} stays a breather`,
+    )
     assert.ok(rest.count < prev.count || rest.speed < prev.speed || rest.hp < prev.hp || rest.spawn > prev.spawn)
   }
   assert.equal(scoreEasyRoad(6, [3, 3, 2], 1), 'clear', '1.4.404 round 7 holds for the build that just left round 6')
@@ -7404,8 +7420,8 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(scoreEasyRoad(14, [2, 2, 2, 2], 1), 'lost', '1.4.404 round 15 leaks on four Level II lamps')
   assert.equal(scoreEasyRoad(14, [3, 3], 1), 'lost', '1.4.404 round 15 leaks on two Level III lamps')
   assert.equal(scoreEasyRoad(14, [3, 3, 3], 1), 'lost', '1.4.404 round 15 leaks without the fourth lamp')
-  assert.equal(scoreEasyRoad(14, [3, 3, 3, 2], 1), 'clear', '1.4.404 round 15 holds with three Level III and one Level II')
-  assert.equal(scoreEasyRoad(14, [3, 3, 3, 3], 1), 'clear', '1.4.404 round 15 holds with four Level III lamps')
+  assert.equal(scoreEasyRoad(14, [3, 3, 3, 2], 1), 'lost', '1.4.472 round 15 leaks with three Level III and one Level II')
+  assert.equal(scoreEasyRoad(14, [3, 3, 3, 3], 1), 'lost', '1.4.472 round 15 leaks with four Level III lamps')
   assert.equal(scoreEasyRoad(19, [2, 2, 2, 2], 1), 'lost', '1.4.404 round 20 still leaks on four Level II lamps')
   assert.equal(scoreEasyRoad(19, [3, 3, 3], 1), 'clear', '1.4.404 round 20 is a breather for three Level III lamps')
   assert.equal(scoreEasyRoad(19, [3, 3, 3, 2], 1), 'clear', '1.4.404 round 20 holds with three Level III and one Level II')
@@ -7509,12 +7525,14 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(scoreEasyTree(24, [far(3), far(3), far(3)], 1), 'clear', '1.4.430 three Far step 3 lamps hold the old round 25 score')
   assert.equal(scoreEasyTree(24, [far(3), far(3), far(3), far(3)], 1), 'clear', '1.4.405 round 25 holds on four Far step 3 lamps')
   const spent = spendTreeNight(EASY_ROUNDS.map((round) => round.count), EASY_LAMP_COST)
-  assert.equal(spent.doneAt, 16, '1.4.412 a count-pay spender finishes on round 16')
+  assert.equal(spent.doneAt, 14, '1.4.472 a count-pay spender finishes on round 14')
   for (const row of spent.rows) {
-    if (row.round <= 18) assert.ok(row.sparks < 20, `1.4.405 bank stays under 20 after round ${row.round}`)
+    if (row.round <= 16) assert.ok(row.sparks < 20, `1.4.405 bank stays under 20 after round ${row.round}`)
   }
+  assert.equal(spent.rows[16].sparks, 26, '1.4.472 round 17 holds the extra wave pay')
+  assert.equal(spent.rows[17].sparks, 34, '1.4.472 round 18 holds the extra wave pay')
   assert.equal(spent.rows[15].open, false)
-  assert.ok(spent.rows[14].open, '1.4.412 round 15 still has a step to buy')
+  assert.equal(spent.rows[14].open, false, '1.4.472 round 15 has no step left to buy')
   const enter = (round) => spent.rows[round - 2].lamps
   assert.equal(scoreEasyTree(5, enter(6), 1), 'clear', '1.4.405 the spender holds round 6')
   assert.equal(scoreEasyTree(9, enter(10), 1), 'clear', '1.4.405 the spender holds round 10')
@@ -7793,7 +7811,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(easyClearSparkBonus(5), 0, '1.4.466 round 6 pays no extra spark')
   assert.equal(easyClearSparkBonus(9), 0, '1.4.466 round 10 pays no extra spark')
   assert.equal(easyJumpLoad(5).sparks, 2, '1.4.466 round 6 still starts on the old bank')
-  assert.equal(easyJumpSparkBank(9), 6, '1.4.466 the three bonuses are in the bank at round 10')
+  assert.equal(easyJumpSparkBank(9), 7, '1.4.472 the three bonuses are in the bank at round 10')
   assert.match(screen466, /easyClearSparkBonus\(wave\)/, '1.4.466 the clear pays that spark')
   assert.match(screen466, /\+1 spark/, '1.4.466 the clear box says +1 spark')
   assert.equal(r10ShrugCue(9, true, 0, true), true, '1.4.466 the round 10 boss cue fires when the tap bounces')
@@ -7883,6 +7901,82 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(css467, /#ffcc33/, '1.4.467 the ring uses the gold already on the night')
 }
 
+// Night Watch 1.4.472: from round 7 a walker keeps taking taps. The round 10 boss still shrugs.
+{
+  assert.equal(EASY_TOUGH_OPEN, 56, '1.4.472 a thick walker from round 8 has a taller bar')
+  assert.equal(easyWalkerHp(2, 0, 'tough', 6), EASY_TOUGH_WINDOW, '1.4.472 round 7 thick walkers keep the short bar')
+  assert.equal(easyWalkerHp(2, 0, 'tough', 7), EASY_TOUGH_OPEN, '1.4.472 round 8 thick walkers use the taller bar')
+  assert.equal(easyTapArmored(6, 'plain', false), false, '1.4.472 a round 7 plain walker is open')
+  assert.equal(easyTapArmored(6, 'fast', false), false, '1.4.472 a round 7 fast walker is open')
+  assert.equal(easyTapArmored(6, 'tough', false), false, '1.4.472 a round 7 thick walker is open')
+  assert.equal(easyTapArmored(5, 'tough', false), false, '1.4.472 round 6 on A2 stays open')
+  for (let index = 6; index < EASY_ROUNDS.length; index += 1) {
+    const round = index + 1
+    for (const gait of ['plain', 'fast', 'tough']) {
+      assert.equal(easyTapArmored(index, gait, false), false, `1.4.472 round ${round} ${gait} does not shrug`)
+      assert.equal(
+        easyGlowTapDamage(40, TAP_SHRUG_CHIP, easyTapArmored(index, gait, false)),
+        1,
+        `1.4.472 round ${round} ${gait} still takes the fifth tap`,
+      )
+    }
+    assert.equal(
+      easyTapArmored(index, undefined, true),
+      round >= 15,
+      `1.4.472 round ${round} boss soak stays on the late bosses`,
+    )
+    assert.equal(easyLeadBossShrug(index, true), round === 10, `1.4.472 round ${round} lead shrug is the round 10 boss`)
+    assert.equal(r10ShrugCue(index, false, 0, true), false, `1.4.472 round ${round} walker does not say Shrugs`)
+    assert.equal(r10ShrugCue(index, true, 0, true), round === 10, `1.4.472 Shrugs stays on the round 10 boss`)
+  }
+  const kept = liveNightDamage(
+    { hp: 20, tapChip: 4, gait: 'tough' },
+    { easy: true, manual: true, roundIndex: 6, lampDamage: 5 },
+  )
+  assert.equal(kept.armored, false, '1.4.472 the fifth tap is not armor')
+  assert.equal(kept.damage, 1, '1.4.472 the fifth tap still hurts a thick walker')
+  const boss = liveNightDamage(
+    { hp: 55, tapChip: 4, boss: true },
+    { easy: true, manual: true, roundIndex: 9, lampDamage: 5 },
+  )
+  assert.equal(boss.armored, true, '1.4.472 the round 10 boss is still armored')
+  assert.equal(boss.damage, 0, '1.4.472 the round 10 boss still shrugs the fifth tap')
+  assert.equal(r10ShrugCue(9, true, 0, true), true, '1.4.472 Shrugs is the round 10 boss')
+  assert.equal(r10ShrugCue(9, false, 0, true), false, '1.4.472 a walker does not say Shrugs')
+  assert.equal(r10ShrugCue(6, false, 0, true), false, '1.4.472 a thick walker does not say Shrugs')
+  const breathers = new Set([8, 12, 16, 20, 24])
+  function builtLamps(index) {
+    const owned = easyJumpLoad(index).lamps.map((lamp) => ({ far: lamp.far, strong: lamp.strong }))
+    while (owned.length < 4) owned.push({ far: 0, strong: 0 })
+    return owned
+  }
+  for (const seed of [2, 4]) {
+    let hearts = 3
+    const early = []
+    for (let index = 0; index < 6; index += 1) {
+      const round = paceEasyLive(index, builtLamps(index), hearts, false, LIVE_TAP_EVERY, 'road', undefined, [], seed)
+      early.push(round.taps)
+      assert.equal(round.result, 'clear', `1.4.472 seed ${seed} round ${index + 1} still clears`)
+      hearts = easyClearHeart(round.hearts)
+    }
+    assert.deepEqual(early, [8, 8, 15, 14, 63, 43], `1.4.472 seed ${seed} rounds 1–6 land the same taps`)
+    for (let index = 6; index < 25; index += 1) {
+      if (breathers.has(index + 1)) continue
+      const round = paceEasyLive(index, builtLamps(index), 3, false, LIVE_TAP_EVERY, 'road', undefined, [], seed)
+      assert.ok(
+        round.taps >= 60,
+        `1.4.472 seed ${seed} round ${index + 1} lands ${round.taps} taps`,
+      )
+    }
+    const quiet = paceEasyLive(4, BARE_LAMPS, 3, false, 1e9, 'road', undefined, [], seed)
+    assert.equal(quiet.result, 'lost', `1.4.472 seed ${seed} with no taps still loses round 5`)
+  }
+  assert.equal(paceEasyRoadCampaign('none', 'live').dead, 9, '1.4.472 a night with no upgrades loses on round 9')
+  assert.equal(paceEasyRoadCampaign('natural', 'live').dead, 18, '1.4.472 the spender still reaches round 18')
+  assert.equal(paceExtraNight('natural', [], 1e9, 2).dead, 5, '1.4.472 a no-tap spender still loses round 5')
+  assert.equal(paceExtraNight('none', [], 1e9, 4).dead, 5, '1.4.472 a no-tap idle night still loses round 5')
+}
+
 // Night Watch 1.4.469: bell pace is 20/30/35, and a bell plus a map slow stops at 40%.
 {
   const screen469 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
@@ -7946,7 +8040,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
 {
   assert.deepEqual(
     EASY_ROUNDS.slice(6, 12).map((round) => round.hp),
-    [24, 16, 28, 32, 36, 18],
+    [24, 16, 28, 32, 48, 18],
     '1.4.412 rounds 7–12 raise health, with breathers at 8 and 12',
   )
   assert.deepEqual(
@@ -8146,7 +8240,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(EASY_ROUNDS[5].fast, 2)
   assert.equal(EASY_ROUNDS[5].tough, 1, '1.4.412 round 6 keeps one tough walker')
   assert.equal(EASY_ROUNDS[6].tough, 4, '1.4.411 round 7 is mostly tough')
-  assert.equal(EASY_ROUNDS[7].tough, 2, '1.4.412 round 8 is a breather with fewer tough walkers')
+  assert.equal(EASY_ROUNDS[7].tough, 3, '1.4.472 round 8 still has fewer thick walkers than round 7')
   assert.ok(EASY_ROUNDS.slice(6).every((round) => round.tough >= 1))
   assert.equal(roundSparkPay(EASY_ROUNDS[6]), EASY_ROUNDS[6].count + 4)
   assert.equal(gaitPlan(EASY_ROUNDS[3]).filter((gait) => gait === 'fast').length, 1)
@@ -8333,8 +8427,8 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     '1.4.413 active taps plus a spender clear through round 16',
   )
   assert.ok(
-    heavy413.every((run) => run.dead === 8 && run.rows[4].taps >= 30),
-    '1.4.430 heavy taps with no upgrades wall on round 8',
+    heavy413.every((run) => run.dead === 10 && run.rows[4].taps >= 30),
+    '1.4.472 heavy taps with no upgrades wall on round 10',
   )
   for (const every of [0, 3, 0.7]) {
     for (const base of seeds413) {
@@ -8492,8 +8586,8 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     '1.4.417 active taps with no upgrades wall on round 8',
   )
   assert.ok(
-    heavy417.every((run) => run.dead === 8 && run.rows[4].taps >= 30),
-    '1.4.430 heavy taps with no upgrades wall on round 8',
+    heavy417.every((run) => run.dead === 10 && run.rows[4].taps >= 30),
+    '1.4.472 heavy taps with no upgrades wall on round 10',
   )
   const spendHearts = [
     [12, 3, 3],
@@ -15515,7 +15609,7 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
     { count: 7, speed: 6.4, hp: 6, spawn: 0.68, fast: 2, tough: 3 },
     { count: 7, speed: 6.4, hp: 8, spawn: 0.72, fast: 2, tough: 1 },
   ], '1.4.445 A2 rounds 1–6 stay the snapshot')
-  assert.equal(paceEasyRoadCampaign('none', 'live').dead, 8, '1.4.445 A2 with no upgrades still walls on round 8')
+  assert.equal(paceEasyRoadCampaign('none', 'live').dead, 9, '1.4.472 A2 with no upgrades walls on round 9')
   assert.equal(paceEasyRoadCampaign('natural', 'live').dead, 18, '1.4.445 an A2 spender still reaches round 18')
   assert.doesNotMatch(
     readFileSync(new URL('../src/nightWatch/livePace.ts', import.meta.url), 'utf8'),
@@ -15613,8 +15707,8 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.ok(rowNight.dealt > spreadNight.dealt + 10, '1.4.454 the row still deals clearly more than the spread')
   const rowLight = paceExtraNight('none', rowShots, CANDLE_LIGHT_TAP)
   const spreadLight = paceExtraNight('none', spreadShots, CANDLE_LIGHT_TAP)
-  assert.equal(spreadLight.dead, 9, '1.4.455 light taps with a spread stop on round 9')
-  assert.equal(rowLight.dead, 10, '1.4.455 light taps with a row stop on round 10')
+  assert.equal(spreadLight.dead, 8, '1.4.472 light taps with a spread stop on round 8')
+  assert.equal(rowLight.dead, 9, '1.4.472 light taps with a row stop on round 9')
   assert.equal(rowLight.dead - spreadLight.dead, 1, '1.4.455 a light-tap row lasts a round longer than the spread')
   assert.ok(Math.round(rowLight.dealt) > Math.round(spreadLight.dealt), '1.4.455 the row still deals more under light taps')
   assert.ok(sixNight.dead != null && sixNight.dead >= 17 && sixNight.dead <= 20, '1.4.454 six candles stay in rounds 17–20')
@@ -15763,15 +15857,15 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   const mid = (values) => [...values].sort((a, b) => a - b)[2]
   assert.deepEqual(zeroDead, [5, 5, 5, 5, 5], '1.4.456 every zero-tap seed loses round 5')
   assert.ok(mid(lightRowDead) >= mid(lightSpreadDead) + 1, '1.4.456 the light-tap row median lasts at least one round longer')
-  assert.deepEqual(lightRowDead, [10, 10, 10, 10, 10], '1.4.456 light-tap row seeds stop on round 10')
-  assert.deepEqual(lightSpreadDead, [10, 9, 9, 9, 9], '1.4.456 light-tap spread seeds')
-  assert.deepEqual(lightRowDealt, [658, 704, 675, 707, 707], '1.4.461 light-tap row damage')
-  assert.deepEqual(lightX2Dead, [9, 9, 9, 9, 9], '1.4.458 light-tap row of two stops on round 9')
-  assert.deepEqual(lightX2Dealt, [424, 425, 416, 426, 424], '1.4.461 light-tap row of two damage')
+  assert.deepEqual(lightRowDead, [9, 9, 9, 9, 9], '1.4.472 light-tap row seeds stop on round 9')
+  assert.deepEqual(lightSpreadDead, [8, 8, 8, 8, 8], '1.4.472 light-tap spread seeds stop on round 8')
+  assert.deepEqual(lightRowDealt, [545, 546, 543, 536, 536], '1.4.472 light-tap row damage')
+  assert.deepEqual(lightX2Dead, [8, 8, 8, 8, 8], '1.4.472 light-tap row of two stops on round 8')
+  assert.deepEqual(lightX2Dealt, [358, 359, 352, 362, 339], '1.4.472 light-tap row of two damage')
   console.log(
     `row-pay seeds 1-5 zero row/x2/tight/spread all R5 | light row ${lightRowDead.join(',')} dealt ${lightRowDealt.join(',')} | light x2 ${lightX2Dead.join(',')} dealt ${lightX2Dealt.join(',')} | light spread ${lightSpreadDead.join(',')} dealt ${lightSpreadDealt.join(',')}`,
   )
-  assert.deepEqual(lightSpreadDealt, [555, 439, 439, 439, 433], '1.4.461 light-tap spread damage')
+  assert.deepEqual(lightSpreadDealt, [314, 314, 314, 314, 308], '1.4.472 light-tap spread damage')
   const leadLamps = easyJumpLoad(4).lamps
   const leadLight = paceEasyLive(4, leadLamps, 3, false, 1.6, 'road', undefined, [], 2)
   const leadQuiet = paceEasyLive(4, leadLamps, 3, false, 1e9, 'road', undefined, [], 2)
@@ -15813,10 +15907,10 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.equal(round10Built.boss, 'kill', '1.4.462 a built night still kills the round 10 boss')
   assert.equal(round10Built.bossTap, 4, '1.4.462 the built night also stops at four boss taps')
   assert.equal(round10Built.bossLamp, 51, '1.4.462 the lamps finish the rest of the round 10 boss')
-  assert.equal(lightRowDead[1], 10)
-  assert.equal(lightSpreadDead[1], 9, '1.4.456 seed 2 is a live replay where the row outlasts the spread')
-  assert.equal(lightRowDead[3], 10)
-  assert.equal(lightSpreadDead[3], 9, '1.4.456 seed 4 is a live replay where the row outlasts the spread')
+  assert.equal(lightRowDead[1], 9, '1.4.472 seed 2 light-tap row stops on round 9')
+  assert.equal(lightSpreadDead[1], 8, '1.4.472 seed 2 is a live replay where the row outlasts the spread')
+  assert.equal(lightRowDead[3], 9, '1.4.472 seed 4 light-tap row stops on round 9')
+  assert.equal(lightSpreadDead[3], 8, '1.4.472 seed 4 is a live replay where the row outlasts the spread')
   const openLast = nightSeedFirstShotAt(null, 1000, 700)
   assert.equal(openLast, 300, '1.4.457 an unseeded lamp is already one wait behind')
   assert.ok(1000 >= openLast + 700, '1.4.457 an unseeded lamp is ready on the first look')
