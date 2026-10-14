@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.470',
+    title: 'The creed win fits',
+    when: '2026-10-14',
+    items: [
+      'On a phone, the Witness Square creed win stays on the screen. The pictures keep their height, and the first why choice is in view.',
+      'Come and rest asks why the line is true before Say this tomorrow. The kept line is the one you already had.',
+    ],
+  },
+  {
     version: '1.4.469',
     title: 'The bell slows by a fifth',
     when: '2026-10-14',

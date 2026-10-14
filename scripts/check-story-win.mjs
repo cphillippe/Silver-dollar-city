@@ -5,7 +5,7 @@ import { createServer } from 'vite'
 import { chromium } from '@playwright/test'
 import { evidenceFor } from '../src/content/evidence.ts'
 import { findPlayable } from '../src/content/index.ts'
-import { easyWhyLine } from '../src/lib/easy.ts'
+import { easyFacingLine, easyWhyLine } from '../src/lib/easy.ts'
 import { storyStripLines } from '../src/lib/debugPlays.ts'
 
 /** Phone and tablet sizes from the Easy story-win playtest. */
@@ -108,6 +108,13 @@ function readWin() {
     chip: chip ? { ...box(chip), hit: hit(chip) } : null,
     rowBottom,
     scrollOverflow: page ? page.scrollHeight - page.clientHeight : 0,
+    bodyOverflow: (() => {
+      const body = document.querySelector('.app-body')
+      return body ? body.scrollHeight - body.clientHeight : 0
+    })(),
+    docX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    tap: document.querySelector('.next-tap')?.textContent ?? '',
+    stored: document.querySelector('.stored-line')?.textContent ?? '',
     link: link ? { ...box(link), text: link.textContent } : null,
     topbar: box(topbar),
     imgs,
@@ -217,12 +224,23 @@ export async function checkStoryWins() {
       })
       await context.addInitScript((save) => {
         localStorage.setItem('silver-city-progress-v1', JSON.stringify(save))
-        const style = document.createElement('style')
-        style.textContent = '::-webkit-scrollbar{width:15px;height:15px}*{scrollbar-width:auto}'
-        document.documentElement.appendChild(style)
+        const attach = () => {
+          if (!document.documentElement || document.getElementById('story-win-scroll')) return
+          const style = document.createElement('style')
+          style.id = 'story-win-scroll'
+          style.textContent = '::-webkit-scrollbar{width:15px;height:15px}*{scrollbar-width:auto}'
+          document.documentElement.appendChild(style)
+        }
+        attach()
+        document.addEventListener('DOMContentLoaded', attach)
       }, SAVE)
       for (const strip of strips) {
         const page = await context.newPage()
+        const errors = []
+        page.on('pageerror', (err) => errors.push(String(err)))
+        page.on('console', (msg) => {
+          if (msg.type() === 'error') errors.push(msg.text())
+        })
         const lines = linesFor(strip.lineId)
         await openWin(page, strip.lineId, lines)
         const first = await page.evaluate(readWin)
@@ -234,6 +252,18 @@ export async function checkStoryWins() {
         }
         const brief = evidenceFor(strip.lineId)
         assert.ok(brief, `${strip.lineId} has a follow-up`)
+        const fitContainer =
+          strip.lineId === 'wb-creed' || (strip.lineId === 'daily-rest' && (width === 412 || width === 768))
+        if (fitContainer) {
+          assert.ok(
+            second.bodyOverflow <= 1 && second.scrollOverflow <= 1,
+            `${strip.lineId} at ${width}×${height} win fits its container (body ${Math.round(second.bodyOverflow)}px, page ${Math.round(second.scrollOverflow)}px)`,
+          )
+        }
+        if (strip.lineId === 'daily-rest') {
+          assert.match(second.tap, /Tap why this is true/, `${strip.lineId} at ${width}×${height} asks why this is true`)
+        }
+        assert.ok(second.docX <= 1, `${strip.lineId} at ${width}×${height} has no horizontal scroll`)
         await page.getByRole('button', { name: easyWhyLine(brief.reason), exact: true }).click()
         await page.locator('.why-blast.is-win').waitFor()
         const mid = await page.evaluate(readWin)
@@ -258,6 +288,12 @@ export async function checkStoryWins() {
           `${strip.lineId} at ${width}×${height} strip width is identical across win, mid-quiz and recap (${widths.join(' → ')})`,
         )
         assert.ok(after.link && after.link.top >= 0, `${strip.lineId} at ${width}×${height} keeps Settings on screen`)
+        if (strip.lineId === 'daily-rest') {
+          const kept = easyFacingLine(strip.lineId, brief.claim)
+          assert.match(after.stored, /Say this tomorrow/i, `${strip.lineId} at ${width}×${height} says Say this tomorrow`)
+          assert.match(after.stored, new RegExp(kept.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')), `${strip.lineId} at ${width}×${height} keeps the line`)
+        }
+        assert.deepEqual(errors, [], `${strip.lineId} at ${width}×${height} has no console errors`)
         if (shotIds.includes(strip.lineId)) {
           console.log(`${strip.lineId} ${width}×${height} strip ${widths[0]}`)
         }
