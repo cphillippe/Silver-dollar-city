@@ -96,6 +96,25 @@ export function applyBellSlow(pace: number, rank: number, inReach: boolean): num
   return pace * (1 - bellSlow(rank))
 }
 
+/**
+ * The deepest a bell and a map slow can go together.
+ * 0.4 means the walk stays at least 60% of full pace.
+ * A bell alone stays at 20, 30, or 35. A pool alone stays at its own pace.
+ */
+export const SLOW_CAP = 0.4
+
+/**
+ * One pace for this step. Map speed and the strongest bell multiply once.
+ * When both are slowing, the product stops at `1 - SLOW_CAP`.
+ */
+export function walkerSlowPace(mapPace: number, bellPace: number): number {
+  const map = Number.isFinite(mapPace) && mapPace > 0 ? mapPace : 1
+  const bell = Number.isFinite(bellPace) && bellPace > 0 ? bellPace : 1
+  const combined = map * bell
+  if (!(map < 1 && bell < 1)) return combined
+  return Math.max(combined, 1 - SLOW_CAP)
+}
+
 export function bellUpgradeCost(rank: number): number {
   const at = bellRank({ far: 0, strong: rank })
   if (at >= BELL_SLOW.length - 1) return 0

@@ -1,4 +1,4 @@
-import { isNightMapId, type NightMapId } from '../nightWatch/maps/chain.ts'
+import { nightMapQueryId, type NightMapId } from '../nightWatch/maps/chain.ts'
 
 /**
  * Device-only Night Watch playtest harness. Default off — Easy shipping play unchanged.
@@ -84,12 +84,19 @@ export function nightWatchJumpAllowed(search: string, debugOn: boolean): boolean
 
 /**
  * `?nwMap=` while playtest is allowed. A normal visit ignores it.
- * An unknown id stays on A2.
+ * map02–map06 are the maps in order. An unknown id stays on A2.
  */
 export function nightWatchMapQuery(search: string, allowed: boolean): NightMapId | null {
   if (!allowed) return null
+  return nightMapQueryId(new URLSearchParams(search).get('nwMap'))
+}
+
+/** The playtest asked for a map and that name is not one of ours. */
+export function nightWatchMapMissing(search: string, allowed: boolean): boolean {
+  if (!allowed) return false
   const raw = new URLSearchParams(search).get('nwMap')
-  return isNightMapId(raw) ? raw : null
+  if (!raw) return false
+  return nightMapQueryId(raw) == null
 }
 
 /** Easy playtest jump. Null on Hard and on a normal visit. */

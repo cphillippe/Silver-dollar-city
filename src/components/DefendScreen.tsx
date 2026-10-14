@@ -80,6 +80,7 @@ import {
   nightWatchDebugHolds,
   nightWatchDebugPanel,
   nightWatchJumpAllowed,
+  nightWatchMapMissing,
   nightWatchMapQuery,
   readNightWatchDebug,
   readNightWatchRoundJump,
@@ -162,6 +163,7 @@ import {
   applyBellStep,
   bellPaceFor,
   bellPathKey,
+  walkerSlowPace,
   bellRoom,
   bellUnlocked,
   BELL_COST,
@@ -569,6 +571,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     bindNightRoll(nightSeed)
     return () => bindNightRoll(null)
   }, [nightSeed])
+  const mapMissing = nightWatchMapMissing(nightSearch, nightPlaytest)
   const mapId = resolveNightMap({
     easy,
     unlocked: progress.defense.farHills === true,
@@ -807,15 +810,20 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
         const paceMul = item.paceScale ?? 1
         let step = nightEnemies.speed(easy) * tune.speedScale * gaitPace * paceMul * (seedPlan ? clockDt : dt)
         let fog = item.fog
+        let mapPace = 1
         if (easy && featuresRef.current.length > 0) {
           const zone = walkerZone(item.t, item.pathId, featuresRef.current)
-          step *= zone.speed
+          mapPace = zone.speed
           fog = zone.fog
         }
         // Round 7 and later. Rounds 1–6 do not read the bell.
+        // One multiply for this slice. A second bell does not stack, and the
+        // next frame starts from the new t, so the slow does not compound.
+        let bellPace = 1
         if (easy && waveIndexRef.current >= 6) {
-          step *= bellPaceFor(plantsRef.current, runPathsRef.current, nightEnemies.at(item))
+          bellPace = bellPaceFor(plantsRef.current, runPathsRef.current, nightEnemies.at(item))
         }
+        step *= walkerSlowPace(mapPace, bellPace)
         return {
           ...item,
           fog,
@@ -3098,6 +3106,11 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
             {easy && phase === 'plant' && waveIndex === 0 && playingMap?.featureNote ? (
               <p className="nw-skill-toast is-feature" role="status">
                 {playingMap.featureNote}
+              </p>
+            ) : null}
+            {mapMissing ? (
+              <p className="nw-skill-toast nw-map-toast" role="status" data-map-missing="yes">
+                Map not found
               </p>
             ) : null}
             {unlockNote ? (
