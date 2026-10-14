@@ -40,8 +40,10 @@ export const BELL_SLOW = [0.2, 0.3, 0.35] as const
 export const BELL_LABEL = 'Bell'
 
 /** Scholars' card line. The object calls people. It does not strike. */
-export const BELL_CARD =
-  'Church bells call people to pray, and ring when someone needs help so neighbors come.'
+export const BELL_CARD = 'A bell calls people to stop and pray.'
+
+/** Same cite shape as the candle card. */
+export const BELL_VERSE_CITE = 'Ps 95:6, RSV'
 
 export function isBell(id: string | null | undefined): boolean {
   return id === BELL_ID

@@ -31,6 +31,7 @@ import {
 import {
   BELL_CARD,
   BELL_LABEL,
+  BELL_VERSE_CITE,
   BELL_SLOW,
   bellRank,
   canUpgradeBell,
@@ -249,6 +250,7 @@ export function DefendTowerCard({
         <p className="defend-tower-tool">{label}</p>
         <p className="defend-bell-line" data-bell-card-line="yes">
           {BELL_CARD}
+          <span className="defend-candle-cite">{` ${BELL_VERSE_CITE}`}</span>
         </p>
         <div className="defend-path" data-path="slow" data-rank={rank}>
           <p className="defend-path-name">
