@@ -59,6 +59,7 @@ const SPRITE_PX: Record<string, { name: NightSprite['name']; w: number; h: numbe
   'overlays/gate.png': { name: 'gate', w: 168, h: 152 },
   'overlays/pool.png': { name: 'pool', w: 200, h: 152 },
   'overlays/fog.png': { name: 'fog', w: 336, h: 336 },
+  'overlays/fog_v2.png': { name: 'fog', w: 336, h: 336 },
   'overlays/pop.png': { name: 'pop', w: 144, h: 144 },
 }
 
@@ -74,6 +75,32 @@ export function boundNightFeatures(): readonly NightFeature[] {
 
 function num(value: unknown): number | null {
   return typeof value === 'number' && Number.isFinite(value) ? value : null
+}
+
+/**
+ * How far the sprite reaches from its anchor, in normalized pack space.
+ * The corner of the art is the farthest point.
+ */
+function spriteExtentR(
+  spriteName: string,
+  anchor: unknown,
+  perUnit: unknown,
+  width: number,
+  height: number,
+): number {
+  const known = SPRITE_PX[spriteName]
+  if (!known || !(width > 0) || !(height > 0)) return 0
+  const scale = num(perUnit)
+  const px = scale != null && scale > 0 ? scale : 2
+  const ax = Array.isArray(anchor) ? num(anchor[0]) : null
+  const ay = Array.isArray(anchor) ? num(anchor[1]) : null
+  const left = (ax ?? known.w / 2) / px
+  const top = (ay ?? known.h / 2) / px
+  const right = known.w / px - left
+  const bottom = known.h / px - top
+  const dx = Math.max(left, right) / width
+  const dy = Math.max(top, bottom) / height
+  return Math.hypot(dx, dy)
 }
 
 function spriteBox(
@@ -134,7 +161,13 @@ export function featuresFromPack(raw: unknown, width: number, height: number): N
     const y = num(row.y)
     const r = num(row.r)
     if (x == null || y == null || r == null || r <= 0) continue
-    const zone: Zone = { x: x * width, y: y * height, r, width, height }
+    // The drawn hill is the hilltop. A circle smaller than that art left a
+    // lamp standing on the hill with no extra reach (1.4.468).
+    const radius =
+      type === 'hill' && typeof row.sprite === 'string'
+        ? Math.max(r, spriteExtentR(row.sprite, row.spriteAnchorPx, row.spritePxPerUnit, width, height))
+        : r
+    const zone: Zone = { x: x * width, y: y * height, r: radius, width, height }
     const drawn = spriteBox(row.sprite, row.spriteAnchorPx, row.spritePxPerUnit, zone.x, zone.y)
     if (type === 'hill') {
       if (!drawn) continue
@@ -198,6 +231,18 @@ export function splitFeature(features: readonly NightFeature[] = boundFeatures):
 /** Health of one mini. Minis pay no sparks. */
 export function miniHp(maxHp: number, split: SplitFeature): number {
   return Math.max(split.minHp, Math.round(Math.max(0, maxHp) * split.hpFrac))
+}
+
+/** How many minis a kill releases. Zero when this berry is not due. */
+export function minisOnKill(
+  split: SplitFeature | null,
+  roundIndex: number,
+  gait: string | undefined,
+  boss: boolean,
+  mini: boolean,
+): number {
+  if (!splitDue(split, roundIndex, gait, boss, mini) || !split) return 0
+  return split.into
 }
 
 export function splitDue(
