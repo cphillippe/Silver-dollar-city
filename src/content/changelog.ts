@@ -16,6 +16,9 @@ export const CHANGELOG: ChangeNote[] = [
       'That panel shows on a playtest link, or when the developer switch is on for this visit.',
       'Begin, before any lamp is planted, pulses Plant a lamp first when you tap it. A picked lamp card marks open ground with a soft glow, and the cards hold still.',
       'A tap on open ground plants the lamp, including ground under the map list.',
+      'The night road loads on every entry, including the developer jump.',
+      'Open ground takes a lamp. The road, the houses, and the features stay clear.',
+      'The first lamp is free. Sparks stay for the lamps that come after.',
     ],
   },
   {

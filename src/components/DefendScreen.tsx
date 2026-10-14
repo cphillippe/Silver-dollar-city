@@ -93,6 +93,7 @@ import {
 } from '../nightWatch/seed'
 import { FarHillsUnlock } from './FarHillsUnlock'
 import { NightMapPicker } from './NightMapPicker'
+import { activeNightRoadD } from '../nightWatch/path/data'
 import { applyNightMap } from '../nightWatch/maps/bind'
 import { mapIsOpen, nextMap, NIGHT_MAP_NAME } from '../nightWatch/maps/chain'
 import { playableNightMap } from '../nightWatch/maps/mazeMaps'
@@ -492,8 +493,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     return () => window.clearTimeout(timer)
   }, [candleOpen])
 
+  const [roadD, setRoadD] = useState(activeNightRoadD)
   useLayoutEffect(() => {
     applyNightMap(mapId)
+    setRoadD(activeNightRoadD())
     setGhost(null)
     return () => {
       applyNightMap('a2')
@@ -2766,6 +2769,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
               groundHints={groundHints}
               plateFill={plateFill}
               map={playingMap?.plate}
+              roadD={roadD}
               porchCandy={!playingMap}
               roadLabel={
                 playingMap

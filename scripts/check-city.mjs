@@ -297,7 +297,7 @@ import {
 } from '../src/lib/lampPlace.ts'
 import { nightEnemies as nightEnemiesMod } from '../src/nightWatch/enemies/index.ts'
 import { nightParts as nightPartsMod } from '../src/nightWatch/parts/index.ts'
-import { nightPath as nightPathMod } from '../src/nightWatch/path/index.ts'
+import { activeNightRoadD, nightPath as nightPathMod } from '../src/nightWatch/path/index.ts'
 import { nightTowers as nightTowersMod, lampReach, lampReadyToFire, FREE_LAMP_RANGE_BONUS, LAMP_ROAD_OVERLAP, SHOT_JUICE_MS, sparkAwardForHit } from '../src/nightWatch/towers/index.ts'
 import {
   applyBoost,
@@ -7466,6 +7466,56 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   }
   const roadSpot = DEFEND_PATH[Math.floor(DEFEND_PATH.length / 2)]
   assert.equal(lampSpotBlocked(roadSpot), true, '1.4.464 the road itself stays dark')
+  bindLampGround(null)
+  const roadD464 = activeNightRoadD()
+  assert.ok(roadD464.startsWith('M'), '1.4.464 the A2 road path loads')
+  assert.ok(roadD464.length > 40, '1.4.464 the loaded road is the walker line')
+  assert.equal(nightPathMod.roadD, '', '1.4.464 the static overlay stays empty')
+  bindLampGround({
+    path: [
+      { x: 10, y: 10 },
+      { x: 40, y: 20 },
+    ],
+    houses: [],
+    features: [],
+    extraRoads: [],
+    porchPaths: [],
+    roads: [
+      {
+        id: 'east',
+        share: 1,
+        via: [],
+        points: [
+          { x: 12, y: 18 },
+          { x: 48, y: 30 },
+        ],
+      },
+    ],
+  })
+  assert.equal(activeNightRoadD(), 'M12 18 L48 30', '1.4.464 a bound map loads its own road')
+  bindLampGround(null)
+  const fresh464 = emptyProgress()
+  const far464 = { x: 40, y: 40 }
+  const farLook = previewLamp(far464, 'love', fresh464, {}, {}, false, true, 0)
+  assert.equal(farLook.blocked, false, '1.4.464 open ground away from the road is legal')
+  assert.notEqual(farLook.cover, 'good', '1.4.464 that seat is outside the good-reach sliver')
+  assert.equal(
+    commitLamp({}, far464, 'love', fresh464, {}, false, true, 0).ok,
+    true,
+    '1.4.464 a short reach still plants',
+  )
+  assert.equal(
+    commitLamp({}, { x: 192, y: 537 }, 'love', fresh464, {}, false, true, 0).ok,
+    false,
+    '1.4.464 a house still refuses the plant',
+  )
+  const sky464 = readFileSync(new URL('../src/components/DefendNightSky.tsx', import.meta.url), 'utf8')
+  assert.match(sky464, /nightPath\.roadD \|\| roadD \|\| activeNightRoadD\(\)/)
+  const ability464 = readFileSync(new URL('../src/components/DefendAbilityBar.tsx', import.meta.url), 'utf8')
+  assert.match(ability464, /Free to plant/)
+  assert.match(ability464, /data-first-lamp=\{openingFree \? 'free'/)
+  assert.match(latestChange('1.4.464').items.join('\n'), /first lamp is free/)
+  assert.match(latestChange('1.4.464').items.join('\n'), /developer jump/)
 }
 
 // Night Watch 1.4.408: pip buy, Easy hearts, softer rounds 7–12.
@@ -15442,4 +15492,5 @@ assert.match(
   '1.4.460 the city scan taps the live round 5 boss and requires damage',
 )
 await import('./check-seed-fire.mjs').then((mod) => mod.checkSeedFire())
+await import('./check-night-jump.mjs').then((mod) => mod.checkNightJump())
 await import('./check-story-win.mjs').then((mod) => mod.checkStoryWins())

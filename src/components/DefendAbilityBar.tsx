@@ -181,6 +181,7 @@ export function DefendAbilityBar({
               const stepCost = tree ? (openStep?.cost ?? 0) : easy ? easyTierCost(tier) : boostCost(tier)
               const brokeWord = stepCost > 1 ? `Need ${stepCost} sparks` : 'Need a spark'
               const shopNew = paidPlace && !placed
+              const openingFree = easy && placing && !shopNew && !placed
               const treeFull = Boolean(tree && !openStep && !lessonWait)
               const spendDry =
                 boosting &&
@@ -264,8 +265,12 @@ export function DefendAbilityBar({
                     {tree ? pathBadge(tree) || '·' : TIER_MARK[tier]}
                   </span>
                   {open && !placed ? (
-                    <span className={`defend-ability-stock${shopNew ? ' is-price' : ''}`} data-slot-badge="1">
-                      {shopNew ? `${EASY_LAMP_COST}✦` : '1'}
+                    <span
+                      className={`defend-ability-stock${shopNew ? ' is-price' : ''}${openingFree ? ' is-free' : ''}`}
+                      data-slot-badge="1"
+                      data-first-lamp={openingFree ? 'free' : undefined}
+                    >
+                      {shopNew ? `${EASY_LAMP_COST}✦` : openingFree ? 'Free' : '1'}
                     </span>
                   ) : null}
                   {boosting && open ? (
@@ -287,7 +292,15 @@ export function DefendAbilityBar({
                   ) : null}
                   <span className="defend-ability-claim">
                     {claim}
-                    {open ? (placed ? ' Planted.' : shopNew ? ` ${EASY_LAMP_COST} sparks to plant.` : ' 1 to plant.') : ''}
+                    {open
+                      ? placed
+                        ? ' Planted.'
+                        : shopNew
+                          ? ` ${EASY_LAMP_COST} sparks to plant.`
+                          : openingFree
+                            ? ' Free to plant.'
+                            : ' 1 to plant.'
+                      : ''}
                     {spendDry ? ' Need a spark.' : ''}
                   </span>
                 </button>
