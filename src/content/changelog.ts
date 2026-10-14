@@ -12,7 +12,7 @@ export const CHANGELOG: ChangeNote[] = [
     title: 'A face tap counts once',
     when: '2026-10-14',
     items: [
-      'A tap on a face you can see counts as a hit. A tap on empty ground counts as one miss.',
+      'A tap on the glowing face counts as a hit. A tap off that glow counts as one miss.',
       'Rapid taps stay on the board. The page keeps moving.',
       'When the night wins, the line says the night won and the round you reached, with Try again.',
       'Upgrade opens during a wave, so Strong can be bought while walkers are out.',

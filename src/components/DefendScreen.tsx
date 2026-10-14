@@ -42,7 +42,6 @@ import {
   easyClearHeart,
   easyLiveSpawnT,
   easyPointerTapGate,
-  easyVisibleFaceTap,
   easyRoundHeartCap,
   liveBossClearPhase,
   liveNightDamage,
@@ -1882,10 +1881,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     const raider = live.current.raiders.find((item) => item.id === raiderId && !item.turned)
     if (!raider) return
     const gate = easyPointerTapGate(easy, raider, live.current.raiders, waveIndexRef.current, tuneRef.current.armorFrom)
-    const face = easy
-      ? easyVisibleFaceTap(true, raider, waveIndexRef.current, tuneRef.current.armorFrom)
-      : gate
-    if (face === 'miss') {
+    if (gate === 'miss') {
       noteFaceTap(false, 0)
       showMiss()
       return
