@@ -7558,8 +7558,13 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   )
   assert.match(screen465, />\s*Try again\s*</, '1.4.465 the loss screen has Try again')
   assert.match(bar465, /paidPlace && easy && placed/, '1.4.465 a planted card can open during the wave')
+  assert.match(bar465, /easy && placed && !paidPlace/, '1.4.465 a planted card opens the tree before Begin')
   assert.match(bar465, /onOpenTree\?\.\(tool\.id\)/, '1.4.465 that card opens the tree')
-  assert.match(board465, /easy && \(boosting \|\| phase === 'wave'\)/, '1.4.465 Upgrade sits on the lamp during a wave')
+  assert.match(
+    board465,
+    /phase === 'plant' \|\| boosting \|\| phase === 'wave'/,
+    '1.4.465 Upgrade sits on every planted lamp before Begin',
+  )
   assert.equal(easyBossSpawnId(EASY_ROUNDS[24].count, 24), 9, '1.4.465 round 25 crowns spawn id 9')
   assert.equal(waveCombat(24, true).size, EASY_ROUNDS[24].count + 1, '1.4.465 round 25 keeps a slot for the boss')
   assert.equal(easyBossHp(24), 240, '1.4.465 round 25 boss health stays 240')
