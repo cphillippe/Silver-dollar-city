@@ -184,8 +184,10 @@ import {
   featureSpeed,
   hillRangeBonus,
   miniHp,
+  minisOnKill,
   splitDue,
   splitFeature,
+  walkerZone,
 } from '../src/nightWatch/maps/features.ts'
 import { waveRound, waveWalkerHp } from '../src/nightWatch/maps/wave.ts'
 import { mapIsOpen, nextMap, NIGHT_MAP_IDS, NIGHT_MAP_NAME } from '../src/nightWatch/maps/chain.ts'
@@ -1615,7 +1617,14 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.467')
+assert.equal(APP_VERSION, '1.4.468')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.468'), '1.4.468 changelog row')
+assert.match(latestChange('1.4.468').title, /map/i)
+assert.doesNotMatch(
+  latestChange('1.4.468').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.468 changelog avoids GitHub close keywords',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.467'), '1.4.467 changelog row')
 assert.match(latestChange('1.4.467').title, /bell/i)
 assert.doesNotMatch(
@@ -6920,7 +6929,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(hillRangeBonus({ x: hill.x + hill.width, y: hill.y }, packs.map02.mapFeatures), 0)
   assert.equal(featureContains(hill, hill), true)
   const gate = packs.map03.mapFeatures.find((feature) => feature.type === 'sprint')
-  assert.equal(featureSpeed(gate, packs.map03.mapFeatures), 1.8)
+  assert.equal(featureSpeed(gate, packs.map03.mapFeatures), 0.75, '1.4.468 a gate slows to three quarters speed')
   assert.equal(featureSpeed({ x: 0, y: 0 }, packs.map03.mapFeatures), 1)
   const pool = packs.map04.mapFeatures.find((feature) => feature.type === 'sticky')
   assert.equal(featureSpeed(pool, packs.map04.mapFeatures), 0.5)
@@ -6969,7 +6978,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     }, 20, 0.28).dead
   }
   assert.equal(bestDead.map02, 14, '1.4.443 Far Hills best seats reach round 14')
-  assert.equal(bestDead.map03, 13, 'Peppermint best seats reach round 13 when Far is bought before the next Strong')
+  assert.equal(bestDead.map03, 14, '1.4.468 Peppermint best seats reach round 14 once the gates slow walkers')
   const spread = [
     { far: 1, strong: 2 },
     { far: 0, strong: 1 },
@@ -7128,6 +7137,115 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     }
   }
   bindLampGround(null)
+}
+
+// Night Watch 1.4.468: ?nwMap= applies each map feature on the live road.
+{
+  const screen468 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const css468 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const sprites468 = readFileSync(new URL('../src/nightWatch/map/FeatureSprites.tsx', import.meta.url), 'utf8')
+  assert.match(screen468, /walkerZone\(item\.t, item\.pathId, featuresRef\.current\)/, '1.4.468 the live step reads the map zone')
+  assert.match(screen468, /step \*= zone\.speed/, '1.4.468 a gate or a pool changes the step')
+  assert.match(screen468, /minisOnKill\(/, '1.4.468 a kill asks whether berries pop')
+  assert.match(sprites468, /fog_v2\.png/, '1.4.468 Licorice draws the pale fog')
+  assert.match(css468, /\.defend-road \{\s*fill: none;\s*stroke: #ff9f1a;/, '1.4.468 the shared road stays the gold line')
+  assert.match(
+    css468,
+    /\.defend-page\[data-night-map='map04'\] \.defend-road-bed \{\s*stroke: #fff1d6;\s*stroke-width: 64;/,
+    '1.4.468 Caramel’s road bed is pale and wide',
+  )
+  assert.match(
+    css468,
+    /\.defend-page\[data-night-map='map04'\] \.defend-road \{\s*stroke: #fffaf0;/,
+    '1.4.468 Caramel’s road paint is light',
+  )
+
+  function mapByQuery(search) {
+    const query = nightWatchMapQuery(search, true)
+    assert.ok(query, `${search} names a map`)
+    const id = resolveNightMap({
+      easy: true,
+      unlocked: false,
+      playtest: true,
+      query,
+      session: null,
+    })
+    assert.equal(id, query, search)
+    const file = id === 'far-hills' ? 'map02' : id
+    return nightMapFromPack(
+      JSON.parse(readFileSync(new URL(`../src/nightWatch/maps/maze/${file}.json`, import.meta.url), 'utf8')),
+    )
+  }
+
+  function slowest(pack) {
+    bindLampGround(pack)
+    let slow = 1
+    for (const road of pack.roads) {
+      for (let i = 0; i <= 400; i += 1) {
+        const zone = walkerZone(i / 400, road.id, pack.mapFeatures)
+        if (zone.speed < slow) slow = zone.speed
+      }
+    }
+    return slow
+  }
+
+  const gates = mapByQuery('?playtest=1&nwMap=map03')
+  assert.equal(slowest(gates), 0.75, '1.4.468 ?nwMap=map03 a walker in a gate moves at three quarters speed')
+  assert.equal(gates.featureNote, 'Candy canes slow walkers. Light the road after them.')
+  const pools = mapByQuery('?playtest=1&nwMap=map04')
+  assert.equal(slowest(pools), 0.5, '1.4.468 ?nwMap=map04 a walker in a pool moves at half speed')
+  const woods = mapByQuery('?playtest=1&nwMap=map05')
+  assert.equal(woods.mapFeatures.filter((feature) => feature.type === 'fog').length, 2, '1.4.468 pale fog keeps both zones')
+  bindLampGround(woods)
+  let fogHits = 0
+  for (const road of woods.roads) {
+    for (let i = 0; i <= 200; i += 1) {
+      if (walkerZone(i / 200, road.id, woods.mapFeatures).fog) fogHits += 1
+    }
+  }
+  assert.ok(fogHits > 0, '1.4.468 ?nwMap=map05 a face in the fog cannot be tapped')
+
+  const hills = mapByQuery('?playtest=1&nwMap=far-hills')
+  const hill = hills.mapFeatures.find((feature) => feature.type === 'hill')
+  assert.ok(hill && hill.sprite)
+  const onArt = { x: hill.sprite.x, y: hill.sprite.y + hill.sprite.h / 2 }
+  assert.equal(hillRangeBonus(onArt, hills.mapFeatures), 40, '1.4.468 a lamp on the drawn hill gets the 40 reach')
+  bindLampGround(hills)
+  bindNightFeatures(hills.mapFeatures)
+  const hillSpot = `at:${Math.round(hill.x)}:${Math.round(hill.y)}`
+  const onHill = nightTowersMod.range(hillSpot, 'love', empty, { love: 1 })
+  bindNightFeatures(null)
+  const offHill = nightTowersMod.range(hillSpot, 'love', empty, { love: 1 })
+  assert.ok(onHill >= offHill + 40, `1.4.468 ?nwMap=far-hills hilltop reach ${onHill} is farther than ${offHill}`)
+
+  const bog = mapByQuery('?playtest=1&nwMap=map06')
+  const split = splitFeature(bog.mapFeatures)
+  assert.equal(minisOnKill(split, 4, 'plain', false, false), 2, '1.4.468 ?nwMap=map06 round 5 pops two berries')
+  assert.equal(minisOnKill(split, 3, 'plain', false, false), 0, '1.4.468 round 4 does not pop')
+  assert.equal(minisOnKill(split, 4, 'fast', false, false), 0, '1.4.468 a fast berry does not pop')
+  const rawBog = JSON.parse(readFileSync(new URL('../src/nightWatch/maps/maze/map06.json', import.meta.url), 'utf8'))
+  const bogSeats = rawBog._simV2.bestSeats.map(([x, y]) => ({ x: x * bog.width, y: y * bog.height }))
+  const bogMap = {
+    path: bog.path,
+    roads: bog.roads,
+    seats: bogSeats,
+    hpMul: bog.hpMul,
+    rules: bog.rules,
+    wave: bog.wave,
+    features: bog.mapFeatures,
+  }
+  const built = [
+    { far: 2, strong: 2 },
+    { far: 2, strong: 2 },
+    { far: 2, strong: 2 },
+    { far: 2, strong: 2 },
+  ]
+  const popped = paceEasyLive(4, built, 3, false, 0.28, 'road', bogMap)
+  const held = paceEasyLive(3, built, 3, false, 0.28, 'road', bogMap)
+  assert.ok(popped.minis >= 2, `1.4.468 ?nwMap=map06 round 5 releases minis (${popped.minis})`)
+  assert.equal(held.minis, 0, '1.4.468 round 4 releases none')
+  bindLampGround(null)
+  bindNightFeatures(null)
 }
 
 // Night Watch 1.4.424: only the glowing face keeps a hit disc. Playtest shows the tap tally.
