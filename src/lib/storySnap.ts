@@ -28,8 +28,18 @@ export const SNAPS_TO_OPEN = 3
 export const BEAT_TRAVEL_MS = 2200
 export const BEAT_TRAVEL_MS_REDUCED = 2800
 
-/** Snap window as fraction of travel (center of lane). */
+/** Snap window as fraction of travel (center of lane). Hard stays this wide. */
 export const SNAP_WINDOW = 0.14
+
+/** Easy snap window in milliseconds. About twice the hard gate. */
+export const EASY_SNAP_MS = 600
+
+/** Ghost-hand travel. Slower than a player beat so the tap reads. */
+export const DEMO_TRAVEL_MS = 3600
+export const DEMO_TRAVEL_MS_REDUCED = 4200
+
+/** How long the demo beat rests under the gate before it locks. */
+export const DEMO_HOLD_MS = 900
 
 /** Gate sits at mid-lane. */
 export const GATE_AT = 0.5
@@ -66,6 +76,20 @@ export function travelMs(reduced = false): number {
   return reduced ? BEAT_TRAVEL_MS_REDUCED : BEAT_TRAVEL_MS
 }
 
+export function demoTravelMs(reduced = false): number {
+  return reduced ? DEMO_TRAVEL_MS_REDUCED : DEMO_TRAVEL_MS
+}
+
+/**
+ * Snap window as a fraction of this beat's travel.
+ * Hard keeps SNAP_WINDOW. Easy is about EASY_SNAP_MS wide.
+ */
+export function snapWindowFraction(durationMs: number, easy: boolean): number {
+  if (!easy) return SNAP_WINDOW
+  if (durationMs <= 0) return SNAP_WINDOW
+  return Math.min(0.8, EASY_SNAP_MS / durationMs)
+}
+
 /** Progress 0→1 along the fly lane. */
 export function beatProgress(elapsedMs: number, durationMs: number): number {
   if (durationMs <= 0) return 1
@@ -74,13 +98,24 @@ export function beatProgress(elapsedMs: number, durationMs: number): number {
 }
 
 /** True when the beat center is inside the snap gate window. */
-export function inSnapWindow(progress: number): boolean {
-  const half = SNAP_WINDOW / 2
+export function inSnapWindow(progress: number, windowFraction = SNAP_WINDOW): boolean {
+  const half = windowFraction / 2
   return progress >= GATE_AT - half && progress <= GATE_AT + half
 }
 
-export function beatPastGate(progress: number): boolean {
-  return progress > GATE_AT + SNAP_WINDOW / 2
+export function beatPastGate(progress: number, windowFraction = SNAP_WINDOW): boolean {
+  return progress > GATE_AT + windowFraction / 2
+}
+
+/** A fly-past is a miss only when the player tapped outside the gate. */
+export function missOnFlyPast(playerTapped: boolean): boolean {
+  return playerTapped
+}
+
+/** Easy score. Filled stars are snaps already locked. No digits. */
+export function easySnapStars(lockedCount: number): string {
+  const n = Math.max(0, Math.min(SNAPS_TO_OPEN, Math.floor(lockedCount)))
+  return `${'★'.repeat(n)}${'☆'.repeat(SNAPS_TO_OPEN - n)}`
 }
 
 export function snapsDone(locked: number): boolean {
