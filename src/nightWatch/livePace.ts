@@ -2,6 +2,7 @@ import {
   applyBossExitLeak,
   applyEasyPaceLeaks,
   easyClearHeart,
+  easyCrowdCap,
   easyGlowTapDamage,
   easyLeadBossShrug,
   easyLiveSpawnT,
@@ -18,7 +19,9 @@ import {
   lampStrike,
   TREE_STEP_COST,
   TREE_BONUS_COST,
+  TREE_BONUS_MAX,
   TREE_CROSS_MAX,
+  TREE_LATE_COST,
   TREE_STEP_MAX,
   type LampPaths,
 } from './upgradeTree.ts'
@@ -68,6 +71,13 @@ export const LIVE_RING_SCALE = 0.55
 
 /** Active center aim. A try about every 0.28s while someone is walking. */
 export const LIVE_TAP_EVERY = 0.28
+
+/**
+ * A person tapping the glowing face, a little slower than the active sim.
+ * On the road before the post-round-15 step, this pace dies in the late teens
+ * with every lamp full and sparks still in the bank.
+ */
+export const HUMAN_TAP_EVERY = 0.3
 
 const LAMP_ROAD_OVERLAP = 24
 const PLATE_SEATS = ['porch', 'hollow', 'journal', 'bench'] as const
@@ -458,7 +468,15 @@ export function paceEasyLive(
     }
   }
   const spawnEvery = 3.8 * table.spawn * (wave?.spawnMul ?? 1) * (plan ? nightSeedSpawnScale(plan.spawnFrac) : 1)
-  const liveCap = wave?.liveCap ?? 3
+  // Maze waves keep their own cap. Frozen and plate nights stay at three.
+  // The live road uses the same late caps as the board: 6 from round 7, 8 from round 11.
+  // Maze waves keep their own cap. Frozen and plate nights stay at three.
+  // The live road uses the same late caps as the board: 6 from round 7, 8 from round 11.
+  // Maze waves keep their own cap. A map study with no wave, and the frozen
+  // plate nights, stay at three. The live A2 road uses the board's caps:
+  // 6 from round 7, 8 from round 11.
+  const liveCap =
+    wave?.liveCap ?? (!map && mode === 'road' && !frozen ? easyCrowdCap(roundIndex) : 3)
   const pack = wave?.pack ?? 1
   const sparkMul = wave?.sparkMul ?? 1
   const live = () => raiders.filter((raider) => !raider.dead)
@@ -953,6 +971,75 @@ export function lockInBuyTable(): LockInBuyRow[] {
     rows.push({ round: index + 1, sparks, bought: bought.filter(Boolean).length, lamps })
   }
   return rows
+}
+
+export interface HumanNight {
+  dead: number | null
+  /** Sparks still in the bank when the night stopped, including what the last round paid. */
+  sparks: number
+  /** True when every planted lamp is at the old cap, Strong 4 and Far 1, before a late buy. */
+  full: boolean
+  lamps: LampPaths[]
+  rows: { round: number; result: PaceLive['result']; hearts: number; sparks: number }[]
+}
+
+/**
+ * Lock-in spender at a human tap.
+ * Steps I–IV stay the lock-in table, so rounds 1–15 do not see the new step.
+ * After the round 15 clear the bank buys Strong 5, then Far 2, on each lamp.
+ * `late` false is the 1.4.483 night, where that step did not exist.
+ */
+export function paceEasyHumanCampaign(late = true): HumanNight {
+  const plan = lockInBuyTable()
+  let hearts = 3
+  let spent = 0
+  const deep = [0, 0, 0, 0]
+  const cross = [0, 0, 0, 0]
+  const rows: HumanNight['rows'] = []
+  let sparks = 0
+  let lamps: LampPaths[] = []
+  const finish = (dead: number | null, earned: number): HumanNight => {
+    const wallet = sparks + earned
+    const full = lamps.length >= 4 && lamps.every((lamp) => lamp.strong >= TREE_BONUS_MAX && lamp.far >= 1 && lamp.strong < 5 && lamp.far < 2)
+    return { dead, sparks: wallet, full, lamps, rows }
+  }
+  for (let index = 0; index < 25; index += 1) {
+    sparks = plan[index].sparks - spent
+    lamps = plan[index].lamps.map((lamp, slot) => ({
+      far: lamp.far + cross[slot],
+      strong: lamp.strong + deep[slot],
+    }))
+    if (late && index >= 15) {
+      let guard = 0
+      while (guard < 16) {
+        guard += 1
+        const deepSlot = deep.findIndex((n, i) => n < 1 && lamps[i].strong >= TREE_BONUS_MAX)
+        if (deepSlot >= 0 && sparks >= TREE_LATE_COST) {
+          sparks -= TREE_LATE_COST
+          spent += TREE_LATE_COST
+          deep[deepSlot] += 1
+          lamps[deepSlot] = { ...lamps[deepSlot], strong: lamps[deepSlot].strong + 1 }
+          continue
+        }
+        const crossSlot = cross.findIndex(
+          (n, i) => n < 1 && lamps[i].far >= TREE_CROSS_MAX && lamps[i].strong >= TREE_BONUS_MAX,
+        )
+        if (crossSlot >= 0 && sparks >= TREE_LATE_COST) {
+          sparks -= TREE_LATE_COST
+          spent += TREE_LATE_COST
+          cross[crossSlot] += 1
+          lamps[crossSlot] = { ...lamps[crossSlot], far: lamps[crossSlot].far + 1 }
+          continue
+        }
+        break
+      }
+    }
+    const round = paceEasyLive(index, lamps, hearts, false, HUMAN_TAP_EVERY, 'road')
+    rows.push({ round: index + 1, result: round.result, hearts: round.hearts, sparks })
+    if (round.result !== 'clear') return finish(index + 1, round.sparks)
+    hearts = easyClearHeart(round.hearts)
+  }
+  return finish(null, 0)
 }
 
 /** Hearts carry. Bonus steps are in the kit before the wave they were bought for. */
