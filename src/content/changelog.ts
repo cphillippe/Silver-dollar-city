@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.483',
+    title: 'Map list up front',
+    when: '2026-10-15',
+    items: [
+      'On Easy, the map list is on screen before the night starts. Each locked map says which map to beat.',
+      'A lamp on the clear bar sits above Candle and Spend, including on a wide phone.',
+    ],
+  },
+  {
     version: '1.4.482',
     title: 'Taps land',
     when: '2026-10-15',

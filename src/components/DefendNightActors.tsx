@@ -111,6 +111,11 @@ export interface DefendNightActorsProps {
   upFlashId?: CityPlotId | null
   /** Soft marks on ground that can take the picked lamp. */
   groundHints?: readonly { x: number; y: number }[]
+  /**
+   * ViewBox units to lift a planted lamp off the clear panel. Negative is up.
+   * The clear-panel hit box uses the same distance in CSS pixels.
+   */
+  lampRise?: Record<string, number>
   /** Tap or drag preview. The ring radius is the combat hit radius. */
   ghost?: {
     at: { x: number; y: number }
@@ -184,6 +189,7 @@ export function DefendNightActorsSvg({
   groundHints = [],
   roundIndex = -1,
   armorFrom = 7,
+  lampRise = {},
 }: Omit<DefendNightActorsProps, 'tapPos' | 'fireBest' | 'tapJuice' | 'easy' | 'onBoostTower'> & {
   easy: boolean
 }) {
@@ -268,6 +274,7 @@ export function DefendNightActorsSvg({
                 const pose = nightTowers.lampPose(hot || firing)
                 const lampBox = nightTowers.lampImageBox()
                 const icon = lampIconBox(incense ? 'incense' : bell ? 'bell' : candle ? 'candle' : 'tower')
+                const lampShift = lampRise[id] ?? 0
                 const boostPad = boosting && on
                 const scenery = easyTap && !boostPad
                 const upgrading = on && upgradeAt === id
@@ -370,7 +377,7 @@ export function DefendNightActorsSvg({
                     )}
                     <ellipse className="defend-earth" cx="0" cy="10" rx="15" ry="6" />
                     {on ? (
-                      <>
+                      <g className="defend-lamp-art" transform={lampShift ? `translate(0 ${lampShift})` : undefined}>
                         <ellipse className="defend-pool" cx="0" cy="12" rx={hot ? 30 : 20} ry={hot ? 11 : 7} />
                         <circle className="defend-type-ring" r={candle ? 16 : 34} />
                         <g className="defend-lamp-sprite">
@@ -470,7 +477,7 @@ export function DefendNightActorsSvg({
                             }
                           />
                         ) : null}
-                      </>
+                      </g>
                     ) : scenery ? null : (
                       <>
                         <circle className="defend-ring" data-plant-ring="gold" r="42" />
