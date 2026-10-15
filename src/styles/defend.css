@@ -4706,6 +4706,11 @@ button.defend-new-lamp[aria-pressed='true'] {
   pointer-events: auto;
 }
 
+/* 1.4.483: last on the plate, above the rail and the clear bar. */
+.defend-page.is-map-sheet .nw-map-overlay {
+  z-index: 40;
+}
+
 .nw-map-overlay .nw-map-pick {
   margin: 0;
   padding: 12px;

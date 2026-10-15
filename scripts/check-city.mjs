@@ -1639,7 +1639,16 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.482')
+assert.equal(APP_VERSION, '1.4.483')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.483'), '1.4.483 changelog row')
+assert.match(latestChange('1.4.483').title, /map/i)
+assert.doesNotMatch(
+  latestChange('1.4.483').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.483 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.483').items.join('\n'), /map/)
+assert.match(latestChange('1.4.483').items.join('\n'), /Candle/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.482'), '1.4.482 changelog row')
 assert.match(latestChange('1.4.482').title, /tap/i)
 assert.doesNotMatch(
@@ -8265,6 +8274,13 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   )
   assert.equal(easyCrowdCap(4), EASY_WAVE_LIVE, '1.4.482 round 5 stays on the rounds 1–6 cap')
   assert.equal(EASY_WAVE_LIVE, 3)
+}
+{
+  const prove483 = readFileSync(new URL('./check-live-prove.mjs', import.meta.url), 'utf8')
+  const board483 = readFileSync(new URL('../src/components/DefendNightBoard.tsx', import.meta.url), 'utf8')
+  assert.match(prove483, /1\.4\.483 Easy at 375 shows the map list/, '1.4.483 a city scan shows the map list at 375')
+  assert.match(prove483, /overlap\.hit, false/, '1.4.483 the Love icon must not overlap Candle')
+  assert.match(board483, /translateY\(-/, '1.4.483 a lamp icon lifts off the clear panel')
 }
 {
   assert.equal(EASY_TOUGH_OPEN, 56, '1.4.472 a thick walker from round 8 has a taller bar')

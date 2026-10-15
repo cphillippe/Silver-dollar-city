@@ -15,6 +15,8 @@ export interface UiShellProps {
   rail?: ReactNode
   /** Overlaid on the playfield's bottom-left corner: lost card, toast, plant CTA, tip, helper sticker. */
   docks?: ReactNode
+  /** Last layer on the plate. The pre-start map list uses this so the board cannot cover it. */
+  sheet?: ReactNode
 }
 
 /**
@@ -23,7 +25,7 @@ export interface UiShellProps {
  * steals map height and no rail column steals map width.
  * Hosts slots only; owns no combat state.
  */
-export function UiShell({ shake, won, hud, coin, balloon, children, rail, docks }: UiShellProps) {
+export function UiShell({ shake, won, hud, coin, balloon, children, rail, docks, sheet }: UiShellProps) {
   return (
     <div className="nw-shell">
       {hud || coin ? (
@@ -37,6 +39,7 @@ export function UiShell({ shake, won, hud, coin, balloon, children, rail, docks 
           {children}
           {balloon ? <div className="nw-balloon-slot">{balloon}</div> : null}
           {docks ? <div className="nw-docks">{docks}</div> : null}
+          {sheet}
         </div>
         {rail ? <div className="nw-rail">{rail}</div> : null}
       </div>

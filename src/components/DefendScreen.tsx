@@ -2757,7 +2757,21 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     />
   )
 
+  // A normal Easy night shows the list before the first lamp. A seed, a real nwMap, or a round jump skips it.
   const showMapSheet = easy && phase === 'plant' && planted.length < 1 && !won && !mapChosen
+  const mapSheet = showMapSheet ? (
+    <div className="nw-map-overlay" role="dialog" aria-label="Choose a map" data-map-overlay="yes">
+      <NightMapPicker
+        mapId={mapId}
+        isOpen={(id) => mapIsOpen(id, progress.defense)}
+        onPick={(id) => {
+          setSessionMap(id)
+          if (mapIsOpen(id, progress.defense)) chooseNightMap(id)
+          setMapChosen(true)
+        }}
+      />
+    </div>
+  ) : null
 
   const docks = (
     <>
@@ -3210,20 +3224,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
             balloon={<MoneyBalloon count={runSparks} label="Sparks" gain={sparkPop} spend={sparkSpend} spent={sparkSpent} />}
             rail={rail}
             docks={docks}
+            sheet={mapSheet}
           >
-            {showMapSheet ? (
-              <div className="nw-map-overlay" role="dialog" aria-label="Choose a map" data-map-overlay="yes">
-                <NightMapPicker
-                  mapId={mapId}
-                  isOpen={(id) => mapIsOpen(id, progress.defense)}
-                  onPick={(id) => {
-                    setSessionMap(id)
-                    if (mapIsOpen(id, progress.defense)) chooseNightMap(id)
-                    setMapChosen(true)
-                  }}
-                />
-              </div>
-            ) : null}
             <DefendNightBoard
               boardRef={boardRef}
               viewBox={plateFill ? boardFillBox(boardBox) : boardViewBox(boardBox)}
