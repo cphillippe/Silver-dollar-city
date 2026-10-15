@@ -558,15 +558,15 @@ export function lampRoadNote(
   const tierMap = runTier ?? {}
   const at = lampAnchor(spot)
   const held = Math.max(0, extra)
-  const now = nightTowers.range(spot, ability, progress, tierMap, held)
+  const now = nightTowers.range(spot, ability, progress, tierMap, held, easyTree)
   if (lampReachesRoad(at, now)) return ''
   if (easyTree) {
     if (held < 24) {
-      const far2 = nightTowers.range(spot, ability, progress, tierMap, 24)
+      const far2 = nightTowers.range(spot, ability, progress, tierMap, 24, true)
       if (lampReachesRoad(at, far2)) return 'Reaches on Far step 2'
     }
     if (held < 40) {
-      const far3 = nightTowers.range(spot, ability, progress, tierMap, 40)
+      const far3 = nightTowers.range(spot, ability, progress, tierMap, 40, true)
       if (lampReachesRoad(at, far3)) return 'Reaches on Far step 3'
     }
     return LAMP_TOO_FAR
@@ -696,7 +696,7 @@ export function previewLamp(
         ? crossPlateReach(spot)
         : candle
           ? candlePlateReach(spot, Math.max(0, extra))
-          : nightTowers.range(spot, ability, progress, runTier, Math.max(0, extra))
+          : nightTowers.range(spot, ability, progress, runTier, Math.max(0, extra), easyTree)
   // A candle does not skip other candles, so a row keeps a body-width gap.
   const blocked =
     hudBlocked ||

@@ -10,10 +10,13 @@ import {
   easyTapArmored,
   EASY_LATE_LAMP_NICK,
 } from '../lib/defend.ts'
-import { applyIncenseTap } from './incense.ts'
+import { INCENSE_COST, applyIncenseTap, incenseBonusFor } from './incense.ts'
+import { BELL_COST, bellPaceFor, walkerSlowPace } from './bell.ts'
 import { CROSS_COST, applyCrossWait, crossPaceFor } from './cross.ts'
 import { nightSeedPlan, nightSeedShotWait, nightSeedSpawnScale } from './seed.ts'
-import { DEFEND_ANCHOR, pathClearance, pathPick, pathPoint } from './path/data.ts'
+import { boardFill } from './map/phoneFill.ts'
+import { EASY_LAMP_COST } from '../lib/watchTools.ts'
+import { DEFEND_ANCHOR, freeSpotId, isFreeSpot, lampAnchor, pathClearance, pathPick, pathPoint } from './path/data.ts'
 import { easyRound as liveRound, type EasyRound } from './rounds.ts'
 import {
   easyShotReach,
@@ -212,6 +215,32 @@ export interface PaceLive {
   minis: number
   /** Seconds the boss was on the road. 0 when the round has no boss. */
   bossSec: number
+  /** Set only for a pad-layout replay. Damage each planted lamp dealt. */
+  byLamp?: PaceLampHurt[]
+  /** Seconds from the round open until the boss spawned. Pad replays only. */
+  bossAt?: number
+}
+
+/** One planted lamp in a pad-layout replay. */
+export interface PaceLampHurt {
+  id: string
+  boss: number
+  trash: number
+  range: number
+  gap: number
+  /** Trash damage dealt while the boss was also inside this ring. */
+  passed: number
+}
+
+/**
+ * Named lots, or free seats, in place of the lead good seats.
+ * Omitted, `paceEasyLive` stays on those seats. Bell and incense are
+ * free plants. They do not shoot. A missing point leaves that plant out.
+ */
+export interface PacePadLayout {
+  pads: readonly { id: string; far: number; strong: number }[]
+  bellAt?: { x: number; y: number }
+  incenseAt?: { x: number; y: number }
 }
 
 interface LiveRules {
@@ -369,6 +398,12 @@ export function paceEasyLive(
    * A lamp inside the ring waits less. The cross does not shoot.
    */
   crossAt?: { x: number; y: number },
+  /**
+   * Named lots instead of the lead good seats. Omitted, the round is unchanged.
+   * Reach uses the live lot rule: city seats do not get the free-ground bonus.
+   * On Easy, a city seat whose reach already meets the road keeps that reach.
+   */
+  padLayout?: PacePadLayout,
 ): PaceLive {
   const road = mode === 'road' || mode === 'road437' || Boolean(map)
   const roadPath = map?.path
@@ -390,7 +425,27 @@ export function paceEasyLive(
   const bossRound = easyBossRound(roundIndex)
   const total = round.count + (bossRound ? 1 : 0)
   const bonus = table.hp + rules.latePush(roundIndex)
-  const lamps = road
+  const lamps = padLayout
+    ? padLayout.pads.map((pad) => {
+        const rank = { far: pad.far, strong: pad.strong }
+        const strike = lampStrike(rank)
+        const at = lampAnchor(pad.id)
+        const gap = pathClearance(at)
+        const free = isFreeSpot(pad.id) ? FREE_LAMP_RANGE_BONUS : 0
+        const range = lampReach(pad.id, 96 + free + easyShotReach(rank), gap, true)
+        return {
+          id: pad.id,
+          x: at.x,
+          y: at.y,
+          gap,
+          strike,
+          range,
+          cool: 0,
+          earlyPace: undefined as number | undefined,
+          walkerBonus: undefined as number | undefined,
+        }
+      })
+    : road
     ? seatList.map((seat, index) => {
         const rank = paths[index] ?? { far: 0, strong: 0 }
         const strike = lampStrike(rank)
@@ -481,6 +536,14 @@ export function paceEasyLive(
   let lostRound = 0
   let bossSeen = -1
   let bossGone = -1
+  const lampHurt = new Map<string, PaceLampHurt>()
+  if (padLayout) {
+    for (const lamp of lamps) {
+      lampHurt.set(lamp.id, { id: lamp.id, boss: 0, trash: 0, range: lamp.range, gap: lamp.gap, passed: 0 })
+    }
+  }
+  const bellPlants = padLayout?.bellAt ? { [freeSpotId(padLayout.bellAt)]: 'bell' } : null
+  const incensePlants = padLayout?.incenseAt ? { [freeSpotId(padLayout.incenseAt)]: 'incense' } : null
   const bossBox: { fate: PaceLive['boss'] } = { fate: bossRound ? 'up' : 'none' }
   let sparkFloat = 0
   const dt = 1 / 60
@@ -516,6 +579,12 @@ export function paceEasyLive(
     dealt,
     minis,
     bossSec: bossSeen >= 0 && bossGone >= bossSeen ? bossGone - bossSeen : 0,
+    ...(padLayout
+      ? {
+          byLamp: [...lampHurt.values()],
+          bossAt: bossSeen,
+        }
+      : {}),
   })
   if (hearts <= 0) return finish('lost')
   while (time < 180) {
@@ -527,7 +596,9 @@ export function paceEasyLive(
       if (raider.dead) continue
       const at = pathPoint(raider.t, raider.road)
       const mul = features.length ? featureSpeed(at, features) : 1
-      raider.t += 0.01 * round.speed * raider.pace * mul * dt
+      const bell =
+        bellPlants && roundIndex >= 6 ? walkerSlowPace(1, bellPaceFor(bellPlants, undefined, at)) : 1
+      raider.t += 0.01 * round.speed * raider.pace * mul * bell * dt
       if (raider.t >= 1) {
         raider.dead = true
         if (raider.boss) {
@@ -644,6 +715,18 @@ export function paceEasyLive(
         raider.hp -= hit
         dealt += hit
         if (raider.boss) bossLamp += hit
+        const note = lampHurt.get(lamp.id)
+        if (note) {
+          if (raider.boss) note.boss += hit
+          else {
+            note.trash += hit
+            const crown = raiders.find((other) => other.boss && !other.dead)
+            if (crown) {
+              const spot = pathPoint(crown.t, crown.road)
+              if (Math.hypot(lamp.x - spot.x, lamp.y - spot.y) <= lamp.range) note.passed += hit
+            }
+          }
+        }
         if (raider.hp <= 0) kill(raider, byLamp)
       }
       const rowExtra = (raider: { boss: boolean }) => {
@@ -720,7 +803,9 @@ export function paceEasyLive(
             : easyTapArmored(roundIndex, cue.gait, cue.boss, tune.armorFrom) || leadBoss(cue),
           mode === 'road' && !map && roundIndex === 4 && cue.gait === 'tough' && (tune.armorFrom ?? 7) >= 7,
         )
-        const hit = dmg > 0 && tapBonus > 0 ? applyIncenseTap(dmg, tapBonus) : dmg
+        const cloud = incensePlants ? incenseBonusFor(incensePlants, undefined, pathPoint(cue.t, cue.road)) : 0
+        const bonus = tapBonus + cloud
+        const hit = dmg > 0 && bonus > 0 ? applyIncenseTap(dmg, bonus) : dmg
         if (hit > 0) {
           cue.chip += hit
           cue.hp -= hit
@@ -1095,6 +1180,152 @@ export function paceEasyHumanCampaign(late = true, tapEvery = HUMAN_TAP_EVERY, w
     hearts = easyClearHeart(round.hearts)
   }
   return finish(null, 0)
+}
+
+/** Phone the round-10 plants were measured on. The board fills this box. */
+export const LEAD_PAD_VIEW = { w: 375, h: 667 } as const
+
+/** Bell bought on the round 7 clear. CSS px on that phone. */
+export const LEAD_BELL_CSS = { x: 83, y: 138 } as const
+
+/** Incense bought on the round 9 clear. CSS px on that phone. */
+export const LEAD_INCENSE_CSS = { x: 18, y: 330 } as const
+
+/** Love, Logic, Reason, Science on the four Easy rings, in rail order. */
+export const LEAD_DEFAULT_PADS = [
+  { id: 'porch', tool: 'love' },
+  { id: 'hollow', tool: 'logic' },
+  { id: 'journal', tool: 'reason' },
+  { id: 'bench', tool: 'science' },
+] as const
+
+/** CSS px on the 375×667 board, turned into plate units. */
+export function leadCssPlate(css: { x: number; y: number }): { x: number; y: number } {
+  const view = boardFill(LEAD_PAD_VIEW)
+  return {
+    x: Math.round(view.x + css.x / view.scale),
+    y: Math.round(view.y + css.y / view.scale),
+  }
+}
+
+export interface LeadPadNight {
+  dead: number | null
+  /** Sparks in the bank after the last spend. 23 is the live round-10 bank. */
+  sparks: number
+  rows: {
+    round: number
+    result: PaceLive['result']
+    hearts: number
+    sparks: number
+    bossLamp: number
+    bossTap: number
+    bossSec: number
+    bossMax: number
+    boss: PaceLive['boss']
+    bossAt: number
+    byLamp: PaceLampHurt[]
+    ranks: { id: string; far: number; strong: number }[]
+  }[]
+}
+
+/**
+ * Easy night on the four default rings, from round 1.
+ * The first lamp is free. The other three cost `EASY_LAMP_COST`.
+ * Every planted lamp takes Strong 1, then one lamp takes Far 1 and another
+ * takes Strong 2. Bell is bought on the round 7 clear. Incense is bought
+ * on the round 9 clear. This is not the jump-load spender.
+ */
+export function paceEasyLeadPads(
+  farPad: string,
+  strongPad: string,
+  tapEvery = HUMAN_TAP_EVERY,
+  seed?: number,
+): LeadPadNight {
+  const ranks: Record<string, { far: number; strong: number }> = {
+    porch: { far: 0, strong: 0 },
+    hollow: { far: 0, strong: 0 },
+    journal: { far: 0, strong: 0 },
+    bench: { far: 0, strong: 0 },
+  }
+  let planted = 1
+  let sparks = 0
+  let hearts = 3
+  let bell = false
+  let incense = false
+  const rows: LeadPadNight['rows'] = []
+  const spend = (cleared: number) => {
+    while (planted < LEAD_DEFAULT_PADS.length && sparks >= EASY_LAMP_COST) {
+      sparks -= EASY_LAMP_COST
+      planted += 1
+    }
+    for (let slot = 0; slot < planted; slot += 1) {
+      const id = LEAD_DEFAULT_PADS[slot].id
+      if (ranks[id].strong >= 1 || sparks < (TREE_STEP_COST[0] ?? 3)) continue
+      sparks -= TREE_STEP_COST[0] ?? 3
+      ranks[id] = { ...ranks[id], strong: 1 }
+    }
+    const armed = planted === LEAD_DEFAULT_PADS.length && LEAD_DEFAULT_PADS.every((pad) => ranks[pad.id].strong >= 1)
+    if (armed && ranks[farPad] && ranks[farPad].far < 1 && sparks >= (TREE_STEP_COST[1] ?? 6)) {
+      sparks -= TREE_STEP_COST[1] ?? 6
+      ranks[farPad] = { ...ranks[farPad], far: 1 }
+    }
+    if (armed && ranks[strongPad] && ranks[strongPad].strong < 2 && sparks >= (TREE_STEP_COST[1] ?? 6)) {
+      sparks -= TREE_STEP_COST[1] ?? 6
+      ranks[strongPad] = { ...ranks[strongPad], strong: 2 }
+    }
+    if (cleared >= 6 && !bell && sparks >= BELL_COST) {
+      sparks -= BELL_COST
+      bell = true
+    }
+    if (cleared >= 8 && !incense && sparks >= INCENSE_COST) {
+      sparks -= INCENSE_COST
+      incense = true
+    }
+  }
+  for (let index = 0; index < 10; index += 1) {
+    const pads = LEAD_DEFAULT_PADS.slice(0, planted).map((pad) => ({
+      id: pad.id,
+      far: ranks[pad.id].far,
+      strong: ranks[pad.id].strong,
+    }))
+    const round = paceEasyLive(
+      index,
+      [],
+      hearts,
+      false,
+      tapEvery,
+      'road',
+      undefined,
+      [],
+      seed,
+      0,
+      undefined,
+      {
+        pads,
+        bellAt: bell ? leadCssPlate(LEAD_BELL_CSS) : undefined,
+        incenseAt: incense ? leadCssPlate(LEAD_INCENSE_CSS) : undefined,
+      },
+    )
+    rows.push({
+      round: index + 1,
+      result: round.result,
+      hearts: round.hearts,
+      sparks,
+      bossLamp: round.bossLamp,
+      bossTap: round.bossTap,
+      bossSec: round.bossSec,
+      bossMax: round.bossMax,
+      boss: round.boss,
+      bossAt: round.bossAt ?? -1,
+      byLamp: round.byLamp ?? [],
+      ranks: pads,
+    })
+    if (round.result !== 'clear') return { dead: index + 1, sparks, rows }
+    hearts = easyClearHeart(round.hearts)
+    sparks += round.sparks + easyBossClearSparks(index) + easyClearSparkBonus(index)
+    spend(index)
+  }
+  return { dead: null, sparks, rows }
 }
 
 /** Hearts carry. Bonus steps are in the kit before the wave they were bought for. */
