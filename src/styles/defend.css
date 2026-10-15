@@ -190,6 +190,11 @@
   outline: none;
 }
 
+/* 1.4.482: Easy lifts the board. Hard keeps the unlayered board. */
+.defend-page.is-easy-watch .defend-board {
+  z-index: 1;
+}
+
 /* A2 map plate: candy cottages + yellow road paint under the soft-TD vector road. */
 .defend-board.has-map-plate {
   background: #2a0f5c;
@@ -2293,6 +2298,11 @@ button.defend-incense-lamp {
   pointer-events: none;
 }
 
+/* 1.4.482: Easy docks sit above lamp icons. Hard stays at z-index 5. */
+.defend-page.is-easy-watch .nw-docks {
+  z-index: 12;
+}
+
 .nw-docks .btn,
 .nw-docks .defend-lost {
   pointer-events: auto;
@@ -2436,6 +2446,21 @@ button.defend-incense-lamp {
 .defend-page.is-clear-fold .defend-clear-spend,
 .defend-page.is-clear-fold .defend-clear-help {
   display: none;
+}
+
+/* 1.4.482: arming a lamp on the Easy clear bar keeps Spend and the row. */
+.defend-page.is-easy-watch.is-boost.is-clear-fold .nw-docks .defend-boost .defend-boost-status {
+  display: block;
+}
+
+.defend-page.is-easy-watch.is-boost.is-clear-fold .defend-clear-spend,
+.defend-page.is-easy-watch.is-boost.is-clear-fold .defend-clear-help {
+  display: inline-flex;
+}
+
+.defend-page.is-easy-watch.is-boost.is-clear-fold .nw-docks .defend-boost.is-clear-bar {
+  max-width: 100%;
+  width: max-content;
 }
 
 @media (max-width: 480px) {
@@ -2705,6 +2730,19 @@ button.defend-incense-lamp {
 /* 1.4.478: during a wave the incense button lets a walker through. The card stays shut until plant or shop. */
 .defend-page.is-easy-tap .defend-clear-lamp[data-incense-icon='yes'] {
   pointer-events: none;
+}
+
+/* 1.4.482: the face sits above every lamp box, so a walker inside the icon still takes the tap. */
+.defend-walker-tap {
+  position: absolute;
+  z-index: 11;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  pointer-events: auto;
+  touch-action: manipulation;
 }
 
 .defend-clear-lamp {
@@ -4649,9 +4687,13 @@ button.defend-new-lamp[aria-pressed='true'] {
   pointer-events: auto;
 }
 
+.defend-page.is-map-sheet .defend-frame {
+  z-index: 20;
+}
+
 .nw-map-overlay {
   position: absolute;
-  z-index: 7;
+  z-index: 30;
   inset: 0;
   display: flex;
   align-items: center;
