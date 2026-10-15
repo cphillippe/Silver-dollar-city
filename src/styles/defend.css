@@ -649,9 +649,18 @@ button.defend-bell-lamp {
 }
 
 .nw-skill-tray button.defend-incense-lamp,
-button.defend-incense-lamp {
+button.defend-incense-lamp,
+.nw-skill-tray button.defend-cross-lamp,
+button.defend-cross-lamp {
   width: auto;
   margin: 0 0 6px;
+}
+
+.defend-tower-card.is-cross .defend-cross-line {
+  margin: 6px 0 0;
+  font-size: 0.78rem;
+  line-height: 1.25;
+  color: #fff6e8;
 }
 
 .defend-tower-card.is-bell .defend-bell-line,
@@ -3083,6 +3092,7 @@ button.defend-path-pip {
 .defend-page.is-easy-watch.is-easy-tap .nw-skill-tray .defend-candle-lamp,
 .defend-page.is-easy-watch.is-easy-tap .nw-skill-tray .defend-bell-lamp,
 .defend-page.is-easy-watch.is-easy-tap .nw-skill-tray .defend-incense-lamp,
+.defend-page.is-easy-watch.is-easy-tap .nw-skill-tray .defend-cross-lamp,
 .defend-page.is-easy-watch.is-easy-tap .nw-rail .defend-ability-tier {
   display: none;
 }

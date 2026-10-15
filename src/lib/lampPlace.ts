@@ -16,6 +16,7 @@ import type { NightPoint } from '../nightWatch/types.ts'
 import { isTowerType, plantType } from './nightPlants.ts'
 import { combatTier, TIER_MARK, TOOL_TIER_MAX } from './watchTools.ts'
 import { bellPlateReach, bellRoom, isBell, plantBell } from '../nightWatch/bell.ts'
+import { crossPlateReach, crossRoom, isCross, plantCross } from '../nightWatch/cross.ts'
 import { incensePlateReach, incenseRoom, isIncense, plantIncense } from '../nightWatch/incense.ts'
 import {
   CANDLE_BODY,
@@ -66,7 +67,7 @@ export interface LampPreview {
    */
   note: string
   /** Set when the ghost is a candle or a bell, not a pillar lamp. */
-  mark?: 'candle' | 'bell' | 'incense'
+  mark?: 'candle' | 'bell' | 'incense' | 'cross'
   /** `Row x2` or `Row x3` when this seat would join a row. Empty when it would stand alone. */
   row?: string
   /** Other candles this ghost would link to. */
@@ -686,22 +687,25 @@ export function previewLamp(
   const bell = isBell(ability)
   const incense = isIncense(ability)
   const candle = isCandle(ability)
+  const cross = isCross(ability)
   const range = bell
     ? bellPlateReach(spot)
     : incense
       ? incensePlateReach(spot)
-      : candle
-        ? candlePlateReach(spot, Math.max(0, extra))
-        : nightTowers.range(spot, ability, progress, runTier, Math.max(0, extra))
+      : cross
+        ? crossPlateReach(spot)
+        : candle
+          ? candlePlateReach(spot, Math.max(0, extra))
+          : nightTowers.range(spot, ability, progress, runTier, Math.max(0, extra))
   // A candle does not skip other candles, so a row keeps a body-width gap.
   const blocked =
     hudBlocked ||
-    (bell ? !bellRoom(plants) : incense ? !incenseRoom(plants) : candle ? !candleRoom(plants) : !isTowerType(ability)) ||
-    lampSpotBlocked(at, plants, bell || incense || candle ? undefined : ability, undefined, candle ? CANDLE_ID : undefined)
+    (bell ? !bellRoom(plants) : incense ? !incenseRoom(plants) : cross ? !crossRoom(plants) : candle ? !candleRoom(plants) : !isTowerType(ability)) ||
+    lampSpotBlocked(at, plants, bell || incense || candle || cross ? undefined : ability, undefined, candle ? CANDLE_ID : undefined)
   const reaches = !blocked && lampReachesRoad(at, range)
   const note = blocked
     ? ''
-    : bell || incense
+    : bell || incense || cross
       ? ''
       : candle
         ? candleRoadNote(spot, Math.max(0, extra))
@@ -736,7 +740,7 @@ export function previewLamp(
     cover,
     road: cover === 'far' || cover === '' ? '' : roadCoverD(at, range),
     note,
-    mark: bell ? 'bell' : incense ? 'incense' : candle ? 'candle' : undefined,
+    mark: bell ? 'bell' : incense ? 'incense' : cross ? 'cross' : candle ? 'candle' : undefined,
     row: row || undefined,
     rowTo,
   }
@@ -874,6 +878,11 @@ export function commitLamp(
   if (preview.blocked) return { ok: false, plants, preview }
   if (preview.mark === 'bell') {
     const next = plantBell(plants, preview.spot)
+    if (next === plants) return { ok: false, plants, preview }
+    return { ok: true, plants: next, preview }
+  }
+  if (preview.mark === 'cross') {
+    const next = plantCross(plants, preview.spot)
     if (next === plants) return { ok: false, plants, preview }
     return { ok: true, plants: next, preview }
   }
