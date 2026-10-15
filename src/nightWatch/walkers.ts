@@ -277,8 +277,8 @@ export function easyBusyTapFloor(index: number): number {
  * Round 10 is 55, then 120 through round 15, and 180 through round 19.
  * Rounds 20 and 25 are shorter bars on purpose. Lamp shots do not cut them.
  * A glowing tap does, so the fight is the taps and not a taller sponge.
- * Rounds 21–24 are not boss rounds; the number stays 240 so a stray read
- * does not invent a new bar.
+ * Round 25 is 72 (1.4.491). Round 20 stays 64. Rounds 21–24 are not boss
+ * rounds; the number stays 240 so a stray read does not invent a new bar.
  * Rounds 6–9 stay 44 so the round 6 snapshot does not move.
  */
 export function easyBossHp(index: number): number {
@@ -290,7 +290,7 @@ export function easyBossHp(index: number): number {
   if (round < 20) return 180
   if (round === 20) return 64
   if (round < 25) return 240
-  return 84
+  return 72
 }
 
 /**
