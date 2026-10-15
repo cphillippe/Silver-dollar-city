@@ -75,12 +75,15 @@ export function StoryPiece({
     : caption === 'slot' && card.shortText
       ? card.shortText
       : null
+  const shortBand = winShort ? 32 : 28
+  const roadWinBand =
+    winShort && count >= 5
+      ? Math.min(Math.floor(box.h * 0.4), Math.max(shortBand, Math.ceil(13 * 1.15 * 2 + 4)))
+      : null
   const captionHeight = showCaption
     ? caption === 'slot' || winShort
       ? count >= 5
-        ? winShort
-          ? 32
-          : 28
+        ? (roadWinBand ?? shortBand)
         : 30
       : compact
         ? count >= 5
