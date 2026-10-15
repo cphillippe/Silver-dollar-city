@@ -210,11 +210,24 @@ export function easyBossRound(index: number): boolean {
 
 /**
  * Spawn id that wears the crown. One past the round's walkers.
- * `-1` when the round has no boss. Round 25's id is the table count (9).
+ * `-1` when the round has no boss. Round 25's id is the table count.
  */
 export function easyBossSpawnId(roundCount: number, roundIndex: number): number {
   if (!easyBossRound(roundIndex)) return -1
   return Math.max(0, Math.floor(roundCount) || 0)
+}
+
+/**
+ * Landed-tap bar for an active player on a busy round.
+ * The check-city model is one isolated round: lamps from `easyJumpLoad`,
+ * three hearts, a tap every 0.28s, road mode. Breathers and rounds before 11
+ * are not on that bar.
+ */
+export function easyBusyTapFloor(index: number): number {
+  const round = Math.floor(index) + 1
+  if (round < 11 || round > EASY_ROUNDS.length) return 0
+  if (round === 12 || round === 16 || round === 20 || round === 24) return 0
+  return 60
 }
 
 /**
