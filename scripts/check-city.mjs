@@ -136,6 +136,7 @@ import {
   easyBossClearSparks,
   easyClearSparkBonus,
   easyBossHp,
+  EASY_R10_BOSS_HP,
   easyBossRound,
   easyBossSpawnId,
   easyBusyTapFloor,
@@ -1665,7 +1666,17 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.492')
+assert.equal(APP_VERSION, '1.4.493')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.493'), '1.4.493 changelog row')
+assert.match(latestChange('1.4.493').title, /boss/i)
+assert.doesNotMatch(
+  latestChange('1.4.493').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.493 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.493').items.join('\n'), /round 10/)
+assert.match(latestChange('1.4.493').items.join('\n'), /taps/)
+assert.match(latestChange('1.4.493').items.join('\n'), /Hard/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.492'), '1.4.492 changelog row')
 assert.match(latestChange('1.4.492').title, /road/i)
 assert.doesNotMatch(
@@ -6268,7 +6279,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(KID_TAP_WASTE, 0.3, '1.4.421 about 30% of a kid tap misses')
   assert.equal(KID_TAP_REACT_S, 0.45, '1.4.421 a kid tap lands after a short wait')
   assert.equal(easyBossHp(4), 12, '1.4.421 round 5 boss is thinner')
-  assert.equal(easyBossHp(9), 55, '1.4.438 round 10 boss is the first step up from round 5')
+  assert.equal(easyBossHp(9), 14, '1.4.493 round 10 boss is 14')
   assert.equal(easyBossHp(14), 120, '1.4.438 round 15 boss is thicker than round 10')
   assert.equal(easyBossHp(18), 180, '1.4.487 round 19 boss stays 180')
   assert.equal(easyBossHp(19), 64, '1.4.487 round 20 boss is a tap bar')
@@ -6382,7 +6393,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     assert.equal(easyBossClearSparks(index), 0, `1.4.427 round ${index + 1} is not a boss clear`)
   }
   assert.equal(easyBossHp(4), 12, '1.4.427 round 5 boss stays 12')
-  assert.equal(easyBossHp(9), 55, '1.4.438 round 10 boss is 55')
+  assert.equal(easyBossHp(9), 14, '1.4.493 round 10 boss is 14')
   assert.equal(easyBossHp(14), 120, '1.4.438 round 15 boss is 120')
   assert.equal(easyBossHp(19), 64, '1.4.487 round 20 boss is 64')
   assert.equal(easyBossHp(24), 72, '1.4.491 round 25 boss is 72')
@@ -7003,7 +7014,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.ok(showdown.bossLamp + showdown.bossTap <= showdown.bossMax + 8)
   assert.equal(short.boss, 'kill', '1.4.487 taps still fell the round 25 crown when the lamps are Strong 2')
   const bosses = [5, 10, 15, 20, 25].map((round) => easyBossHp(round - 1))
-  assert.deepEqual(bosses, [12, 55, 120, 64, 72], '1.4.491 round 20 stays 64 and round 25 is 72')
+  assert.deepEqual(bosses, [12, 14, 120, 64, 72], '1.4.493 round 10 is 14 and round 25 stays 72')
   assert.ok(bosses[1] > bosses[0] && bosses[2] > bosses[1], '1.4.487 rounds 5, 10, and 15 still rise')
   assert.ok(bosses[4] > bosses[3], '1.4.487 round 25 is a longer tap bar than round 20')
   const seats = leadSeatTable()
@@ -7052,7 +7063,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.deepEqual(Object.keys(jumped.plants).sort(), [...ids].sort(), '1.4.439 the jump uses the Good seats')
   assert.equal(Object.values(jumped.plants).length, 4)
   assert.equal(easyBossHp(4), 12, '1.4.439 round 5 boss health stays')
-  assert.equal(easyBossHp(9), 55, '1.4.439 round 10 boss health stays')
+  assert.equal(easyBossHp(9), 14, '1.4.493 round 10 boss health is 14')
   assert.equal(easyBossHp(14), 120, '1.4.439 round 15 boss health stays')
   assert.equal(easyBossHp(19), 64, '1.4.487 round 20 boss health is the tap bar')
   assert.equal(easyBossHp(24), 72, '1.4.491 round 25 boss health is the shorter tap bar')
@@ -7141,7 +7152,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(buys[18].bought, 4, '1.4.472 the fourth bonus step is already in by round 19')
   assert.deepEqual(
     [5, 10, 15, 20, 25].map((round) => easyBossHp(round - 1)),
-    [12, 55, 120, 64, 72],
+    [12, 14, 120, 64, 72],
     '1.4.487 rounds 20 and 25 leave the old sponge curve',
   )
   const card440 = readFileSync(new URL('../src/components/DefendTowerCard.tsx', import.meta.url), 'utf8')
@@ -8704,6 +8715,10 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     for (let index = 6; index < 25; index += 1) {
       if (breathers.has(index + 1)) continue
       const round = paceEasyLive(index, builtLamps(index), 3, false, LIVE_TAP_EVERY, 'road', undefined, [], seed)
+      if (index === 9) {
+        assert.equal(round.taps, 58, `1.4.493 seed ${seed} round 10 lands 58 taps`)
+        continue
+      }
       assert.ok(
         round.taps >= 60,
         `1.4.472 seed ${seed} round ${index + 1} lands ${round.taps} taps`,
@@ -9355,7 +9370,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     if (index < EASY_ROUNDS.length) assert.equal(waveCombat(index, true).size, EASY_ROUNDS[index].count)
   }
   assert.equal(easyBossHp(4), 12, '1.4.421 round 5 boss is the thinner teaching bar')
-  assert.equal(easyBossHp(9), 55)
+  assert.equal(easyBossHp(9), EASY_R10_BOSS_HP, '1.4.493 round 10 boss health is the shorter bar')
   assert.equal(easyBossHp(14), 120, '1.4.438 round 15 boss is above round 10')
   assert.equal(easyBossHp(18), 180, '1.4.487 round 19 stays above round 15')
   assert.equal(easyBossHp(19), 64, '1.4.487 round 20 is the tap bar')
@@ -16755,12 +16770,12 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   }
   const round10Bare = paceEasyLive(9, BARE_LAMPS, 3, false, LIVE_TAP_EVERY, 'road')
   const round10Built = paceEasyLive(9, easyJumpLoad(9).lamps, 3, false, LIVE_TAP_EVERY, 'road')
-  assert.equal(round10Bare.bossTap, 4, '1.4.462 four plain lamps only chip the round 10 boss four times')
-  assert.equal(round10Bare.boss, 'leak', '1.4.462 those taps do not carry the round 10 boss')
-  assert.equal(round10Bare.bossLamp, 11, '1.4.462 the plain lamps still land 11 on that boss')
-  assert.equal(round10Built.boss, 'kill', '1.4.462 a built night still kills the round 10 boss')
-  assert.equal(round10Built.bossTap, 4, '1.4.462 the built night also stops at four boss taps')
-  assert.equal(round10Built.bossLamp, 51, '1.4.462 the lamps finish the rest of the round 10 boss')
+  assert.equal(round10Bare.bossTap, 4, '1.4.493 four plain lamps still land four boss taps')
+  assert.equal(round10Bare.boss, 'kill', '1.4.493 those taps and the lamps fell the shorter round 10 boss')
+  assert.equal(round10Bare.bossLamp, 10, '1.4.493 the plain lamps land 10 on that boss')
+  assert.equal(round10Built.boss, 'kill', '1.4.493 a built night still kills the round 10 boss')
+  assert.equal(round10Built.bossTap, 0, '1.4.493 the built lamps finish the shorter bar before a tap')
+  assert.equal(round10Built.bossLamp, 14, '1.4.493 the built lamps are the whole round 10 bar')
   assert.equal(
     liveNightDamage(
       { hp: 55, boss: true, tapChip: 4 },
@@ -16804,10 +16819,25 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
     bellAt: leadBell,
     incenseAt: leadIncense,
   })
-  assert.equal(leadRound.boss, 'leak', '1.4.492 the round 10 boss still leaves')
-  assert.equal(leadRound.bossTap, 4, '1.4.492 default rings still stop at four boss taps')
-  assert.equal(leadRound.bossLamp, 10, '1.4.492 the four Strong 1 lamps land 10 on that boss')
-  assert.ok(leadRound.bossSec >= 14 && leadRound.bossSec <= 16, '1.4.492 the boss is still on the road about 15s')
+  assert.equal(EASY_R10_BOSS_HP, 14, '1.4.493 the round 10 bar is 14')
+  assert.equal(BOSS_PACE, 0.7, '1.4.493 the boss step stays 0.7')
+  assert.equal(easyBossPace(9), BOSS_PACE, '1.4.493 round 10 keeps the old boss step')
+  assert.equal(leadRound.result, 'clear', '1.4.493 the live layout clears round 10')
+  assert.equal(leadRound.boss, 'kill', '1.4.493 the live layout kills the round 10 boss')
+  assert.equal(leadRound.bossTap, 4, '1.4.493 the live layout uses all four soak taps')
+  assert.equal(leadRound.bossLamp, 10, '1.4.493 the four Strong 1 lamps land 10 on that boss')
+  assert.equal(leadRound.hearts, 1, '1.4.493 the live layout keeps a heart')
+  assert.ok(leadRound.bossSec >= 10 && leadRound.bossSec <= 12, `1.4.493 the boss falls at ${leadRound.bossSec.toFixed(2)}s`)
+  const leadQuietBoss = paceEasyLive(9, [], 3, false, 1e9, 'road', undefined, [], 2, 0, undefined, {
+    pads: leadPads,
+    bellAt: leadBell,
+    incenseAt: leadIncense,
+  })
+  assert.equal(leadQuietBoss.boss, 'leak', '1.4.493 a night with no taps still leaks the boss')
+  assert.equal(leadQuietBoss.bossLamp, 10, '1.4.493 lamps alone still land 10')
+  assert.equal(leadQuietBoss.bossTap, 0, '1.4.493 a night with no taps does not chip the boss')
+  assert.equal(leadQuietBoss.hearts, 0, '1.4.493 a night with no taps loses the round')
+  assert.ok(leadQuietBoss.bossSec >= 14 && leadQuietBoss.bossSec <= 16, '1.4.493 the no-tap boss is on the road about 15s')
   const leadBy = Object.fromEntries((leadRound.byLamp ?? []).map((lamp) => [lamp.id, lamp]))
   assert.equal(leadBy.journal.boss, 1, '1.4.492 Journal now nicks the boss')
   assert.equal(leadBy.bench.boss, 2, '1.4.492 Bench now nicks the boss')

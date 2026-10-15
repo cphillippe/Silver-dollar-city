@@ -274,18 +274,26 @@ export function easyBusyTapFloor(index: number): number {
 
 /**
  * Boss health. Round 5 stays the teaching bar (12). Rounds 6–9 stay 44.
- * Round 10 is 55, then 120 through round 15, and 180 through round 19.
+ * Round 10 is 14 (1.4.493), then 120 through round 15, and 180 through round 19.
  * Rounds 20 and 25 are shorter bars on purpose. Lamp shots do not cut them.
  * A glowing tap does, so the fight is the taps and not a taller sponge.
  * Round 25 is 72 (1.4.491). Round 20 stays 64. Rounds 21–24 are not boss
  * rounds; the number stays 240 so a stray read does not invent a new bar.
  * Rounds 6–9 stay 44 so the round 6 snapshot does not move.
  */
+/**
+ * Easy round 10 lead boss (1.4.493).
+ * The live Strong 1 layout deals 10 with lamps. Four soak taps make 14,
+ * which fells this bar before the boss leaves. With no taps, 10 is not enough
+ * and the boss leaks. Hard does not read this.
+ */
+export const EASY_R10_BOSS_HP = 14
+
 export function easyBossHp(index: number): number {
   const round = Math.floor(index) + 1
   if (round <= 5) return 12
   if (round < 10) return 44
-  if (round === 10) return 55
+  if (round === 10) return EASY_R10_BOSS_HP
   if (round <= 15) return 120
   if (round < 20) return 180
   if (round === 20) return 64
