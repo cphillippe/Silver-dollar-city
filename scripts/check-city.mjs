@@ -15089,7 +15089,7 @@ console.log('check-city: ok')
       assert.notEqual(
         storyPlayFor(DEBUG_LAYER_LINES[kind]),
         'story-snap',
-        '1.4.483 parked Story Snap is not reachable from the lantern line',
+        'parked Story Snap is not reachable from the lantern line',
       )
       continue
     }
