@@ -182,6 +182,10 @@ import {
   paceExtraNight,
   lockInBuyTable,
   paceEasyHumanCampaign,
+  paceEasyLeadPads,
+  LEAD_BELL_CSS,
+  LEAD_INCENSE_CSS,
+  leadCssPlate,
   paceEasyLockCampaign,
   paceEasyMapCampaign,
   paceEasyRoad,
@@ -16746,6 +16750,48 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.equal(round10Built.boss, 'kill', '1.4.462 a built night still kills the round 10 boss')
   assert.equal(round10Built.bossTap, 4, '1.4.462 the built night also stops at four boss taps')
   assert.equal(round10Built.bossLamp, 51, '1.4.462 the lamps finish the rest of the round 10 boss')
+  assert.equal(
+    liveNightDamage(
+      { hp: 55, boss: true, tapChip: 4 },
+      { easy: true, manual: false, roundIndex: 9, lampDamage: 2, armorFrom: 7 },
+    ).damage,
+    2,
+    'round 10 a dark boss still takes lamp shots',
+  )
+  assert.equal(
+    liveNightDamage(
+      { hp: 55, boss: true, tapChip: 4 },
+      { easy: true, manual: true, roundIndex: 9, lampDamage: 2, armorFrom: 7 },
+    ).damage,
+    0,
+    'round 10 the shrug still stops glowing taps',
+  )
+  const leadBell = leadCssPlate(LEAD_BELL_CSS)
+  const leadIncense = leadCssPlate(LEAD_INCENSE_CSS)
+  const leadPads = [
+    { id: 'porch', far: 0, strong: 1 },
+    { id: 'hollow', far: 0, strong: 1 },
+    { id: 'journal', far: 0, strong: 1 },
+    { id: 'bench', far: 0, strong: 1 },
+  ]
+  const leadRound = paceEasyLive(9, [], 3, false, HUMAN_TAP_EVERY, 'road', undefined, [], 2, 0, undefined, {
+    pads: leadPads,
+    bellAt: leadBell,
+    incenseAt: leadIncense,
+  })
+  assert.equal(leadRound.boss, 'leak', 'round 10 default rings leak the boss')
+  assert.equal(leadRound.bossTap, 4, 'round 10 default rings still stop at four boss taps')
+  assert.equal(leadRound.bossLamp, 7, 'round 10 porch and hollow only land 7 on that boss')
+  assert.ok(leadRound.bossSec >= 14 && leadRound.bossSec <= 16, 'round 10 the boss is on the road about 15s')
+  const leadBy = Object.fromEntries((leadRound.byLamp ?? []).map((lamp) => [lamp.id, lamp]))
+  assert.equal(leadBy.journal.boss + leadBy.journal.trash, 0, 'round 10 Journal misses the road at Strong 1')
+  assert.equal(leadBy.bench.boss + leadBy.bench.trash, 0, 'round 10 Bench misses the road at Strong 1')
+  assert.equal(leadBy.porch.boss, 5, 'round 10 the porch lamp is the one that nicks the boss')
+  assert.equal(leadBy.hollow.boss, 2, 'round 10 the hollow lamp nicks the boss twice')
+  assert.equal(leadBy.porch.passed, 0, 'round 10 the porch lamp already shoots the boss when it is in range')
+  assert.equal(leadBy.hollow.passed, 0, 'round 10 the hollow lamp already shoots the boss when it is in range')
+  const leadNight = paceEasyLeadPads('journal', 'porch', HUMAN_TAP_EVERY, 2)
+  assert.equal(leadNight.dead, 9, 'round 10 this spender dies on round 9 and never meets the boss')
   assert.equal(lightRowDead[1], 9, '1.4.472 seed 2 light-tap row stops on round 9')
   assert.equal(lightSpreadDead[1], 8, '1.4.472 seed 2 is a live replay where the row outlasts the spread')
   assert.equal(lightRowDead[3], 9, '1.4.472 seed 4 light-tap row stops on round 9')
