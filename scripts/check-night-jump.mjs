@@ -71,6 +71,10 @@ export async function checkNightJump() {
     await page.locator('summary', { hasText: 'Developer' }).click()
     await page.getByRole('button', { name: 'Jump · Night Watch' }).click()
     await page.locator('.defend-board').waitFor()
+    if (await page.locator('[data-map-overlay]').count()) {
+      await page.locator('[data-map="a2"]').click()
+      await page.locator('[data-map-overlay]').waitFor({ state: 'detached' })
+    }
     const roads = await page.locator('.defend-road, .defend-road-bed, .defend-road-shine').evaluateAll((nodes) =>
       nodes.map((node) => node.getAttribute('d') || ''),
     )

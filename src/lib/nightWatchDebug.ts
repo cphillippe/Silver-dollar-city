@@ -1,4 +1,5 @@
 import { nightMapQueryId, type NightMapId } from '../nightWatch/maps/chain.ts'
+import { nightWatchSeed } from '../nightWatch/seed.ts'
 
 /**
  * Device-only Night Watch playtest harness. Default off — Easy shipping play unchanged.
@@ -97,6 +98,17 @@ export function nightWatchMapMissing(search: string, allowed: boolean): boolean 
   const raw = new URLSearchParams(search).get('nwMap')
   if (!raw) return false
   return nightMapQueryId(raw) == null
+}
+
+/**
+ * A playtest that already named the night skips the map sheet.
+ * A seed, a round jump, or a real `nwMap` counts. An unknown map does not.
+ */
+export function nightWatchSkipsMapSheet(search: string, debugOn: boolean): boolean {
+  if (nightWatchSeed(search) != null) return true
+  const allowed = nightWatchJumpAllowed(search, debugOn)
+  if (nightWatchMapQuery(search, allowed)) return true
+  return nightWatchRoundJump(search, 25, allowed) != null
 }
 
 /** Easy playtest jump. Null on Hard and on a normal visit. */

@@ -192,7 +192,7 @@ import {
   walkerZone,
 } from '../src/nightWatch/maps/features.ts'
 import { waveRound, waveWalkerHp } from '../src/nightWatch/maps/wave.ts'
-import { mapIsOpen, nextMap, NIGHT_MAP_IDS, NIGHT_MAP_NAME } from '../src/nightWatch/maps/chain.ts'
+import { mapIsOpen, mapLockReason, nextMap, NIGHT_MAP_IDS, NIGHT_MAP_NAME } from '../src/nightWatch/maps/chain.ts'
 import { resolveNightMap } from '../src/nightWatch/maps/resolve.ts'
 import { rateMapSeats, spreadGoodSeats } from '../src/nightWatch/maps/seats.ts'
 import { scaledWalkerHp } from '../src/nightWatch/walkers.ts'
@@ -1635,7 +1635,15 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.477')
+assert.equal(APP_VERSION, '1.4.478')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.478'), '1.4.478 changelog row')
+assert.match(latestChange('1.4.478').title, /phone/i)
+assert.doesNotMatch(
+  latestChange('1.4.478').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.478 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.478').items.join('\n'), /locked map/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.477'), '1.4.477 changelog row')
 assert.match(latestChange('1.4.477').title, /snap|hand|story/i)
 assert.match(latestChange('1.4.477').items.join('\n'), /try again/)
@@ -6950,7 +6958,11 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   const beat = normalizeProgress({ defense: { cleared: 1, nights: [], mazeBeat: ['a2', 'map03', 'nope'] } })
   assert.deepEqual(beat.defense.mazeBeat, ['a2', 'map03'])
   const picker = readFileSync(new URL('../src/components/NightMapPicker.tsx', import.meta.url), 'utf8')
-  assert.match(picker, /Beat round 10 to unlock/)
+  assert.match(picker, /mapLockReason/)
+  assert.match(
+    readFileSync(new URL('../src/nightWatch/maps/chain.ts', import.meta.url), 'utf8'),
+    /Beat round 10 on \$\{NIGHT_MAP_NAME\[prev\]\} to unlock/,
+  )
   for (const id of ['a2', 'far-hills', 'map03', 'map04', 'map05', 'map06']) {
     assert.match(picker, new RegExp(`data-map=\\{id\\}|NIGHT_MAP_IDS`))
   }
@@ -8071,6 +8083,38 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     /DEFEND_WAVE_PACK = \[4, 4, 5, 5, 8\]/,
     '1.4.475 the hard pack is unchanged',
   )
+}
+
+// Night Watch 1.4.478: map sheet, a still clear bar, and a lamp icon that lets a walker through.
+{
+  assert.equal(mapLockReason('a2'), null, '1.4.478 Silver City has no lock line')
+  assert.equal(mapLockReason('far-hills'), 'Beat round 10 on Silver City to unlock')
+  assert.equal(mapLockReason('map03'), 'Beat round 10 on The Far Hills to unlock')
+  assert.equal(mapLockReason('map04'), 'Beat round 10 on Peppermint Pass to unlock')
+  assert.equal(mapLockReason('map05'), 'Beat round 10 on Caramel Canyon to unlock')
+  assert.equal(mapLockReason('map06'), 'Beat round 10 on Licorice Woods to unlock')
+  const picker477 = readFileSync(new URL('../src/components/NightMapPicker.tsx', import.meta.url), 'utf8')
+  const screen477 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const board477 = readFileSync(new URL('../src/components/DefendNightBoard.tsx', import.meta.url), 'utf8')
+  const actors477 = readFileSync(new URL('../src/components/DefendNightActors.tsx', import.meta.url), 'utf8')
+  const css477 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const debug477 = readFileSync(new URL('../src/lib/nightWatchDebug.ts', import.meta.url), 'utf8')
+  assert.match(picker477, /data-map-reason="yes"/, '1.4.478 each locked map shows its own reason')
+  assert.match(screen477, /data-map-overlay="yes"/, '1.4.478 the maps sit on their own panel')
+  assert.match(screen477, /setMapChosen\(true\)/, '1.4.478 a pick closes the panel')
+  assert.match(screen477, /const showMapSheet = easy &&/, '1.4.478 Hard never opens the map panel')
+  assert.match(screen477, /Map not found/)
+  assert.match(debug477, /nightWatchSkipsMapSheet/)
+  assert.match(screen477, /toolLock && !\(easy && phase === 'boost'\)/, '1.4.478 the clear bar does not grow a toast under the buttons')
+  assert.match(css477, /\.defend-clear-note \{[^}]*position:\s*absolute/)
+  assert.match(actors477, /lampIconBox\(/, '1.4.478 the lamp target is the icon')
+  assert.match(board477, /data-lamp-icon="yes"/)
+  assert.match(css477, /\.defend-range \{[^}]*pointer-events:\s*none/)
+  assert.match(css477, /\.defend-tower-card::after \{[^}]*pointer-events:\s*none/)
+  assert.match(screen477, /easyPointerTapGate\(/, '1.4.478 a walker tap still uses the glow gate')
+  const gateAt = screen477.indexOf('easyPointerTapGate(')
+  const bonusAt = screen477.indexOf('incenseBonusFor(', gateAt)
+  assert.ok(gateAt >= 0 && (bonusAt < 0 || gateAt < bonusAt), '1.4.478 the glow gate still runs before a later bonus')
 }
 {
   assert.equal(EASY_TOUGH_OPEN, 56, '1.4.472 a thick walker from round 8 has a taller bar')
@@ -16273,6 +16317,7 @@ assert.match(
 )
 await import('./check-seed-fire.mjs').then((mod) => mod.checkSeedFire())
 await import('./check-night-jump.mjs').then((mod) => mod.checkNightJump())
+await import('./check-phone-fixes.mjs').then((mod) => mod.checkPhoneFixes())
 await import('./check-story-win.mjs').then((mod) => mod.checkStoryWins())
 await import('./check-easy-face.mjs').then((mod) => mod.checkEasyFace())
 const snapHoldScan = readFileSync(new URL('./check-story-snap.mjs', import.meta.url), 'utf8')

@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.478',
+    title: 'Phone night',
+    when: '2026-10-15',
+    items: [
+      'Before the night starts, the maps sit on their own panel. A locked map says which map to beat.',
+      'Need sparks stays in its own spot, so the round-clear buttons do not jump.',
+      'A walker next to a lamp can still be tapped. The lamp icon still opens its card.',
+    ],
+  },
+  {
     version: '1.4.477',
     title: 'A hand shows the snap',
     when: '2026-10-15',
