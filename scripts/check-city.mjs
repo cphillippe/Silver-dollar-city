@@ -1662,6 +1662,21 @@ assert.equal(wavePipVisible(4, 3, false, true), false, '1.4.486 a locked Lock In
 assert.equal(wavePipVisible(4, 3, false, false), true, '1.4.486 the clear still shows the locked step')
 assert.equal(wavePipVisible(2, 1, true, true), true, '1.4.486 one filled step plus the next')
 assert.equal(wavePipVisible(3, 1, true, true), false, '1.4.486 the step after next stays hidden')
+const css486 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+assert.match(
+  css486,
+  /\.defend-page\.is-easy-watch\.is-easy-tap \.defend-path-pip\.is-locked,[\s\S]*?\.defend-page\.is-easy-watch\.is-easy-tap \.defend-lesson-cue,[\s\S]*?\.defend-page\.is-easy-watch\.is-easy-tap \.defend-lesson-open \{\s*display:\s*none;\s*\}/,
+  '1.4.486 Easy wave CSS hides locked pips and the Lock In cue',
+)
+assert.match(css486, /\.defend-lesson-cue \{\s*grid-column:[^}]*display:\s*grid/, '1.4.486 the cue still lays out when the wave is over')
+const hide486 = css486.match(
+  /\.defend-page\.is-easy-watch\.is-easy-tap \.defend-path-pip\.is-locked,[\s\S]*?display:\s*none;\s*\}/,
+)
+assert.ok(hide486, '1.4.486 the Easy wave hide is one rule')
+for (const line of hide486[0].split('\n')) {
+  if (!line.includes('.defend-page')) continue
+  assert.match(line, /\.defend-page\.is-easy-watch\.is-easy-tap/, `1.4.486 the hide stays on an Easy wave (${line.trim()})`)
+}
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.485'), '1.4.485 changelog row')
 assert.match(latestChange('1.4.485').title, /step/i)
 assert.doesNotMatch(
