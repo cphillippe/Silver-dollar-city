@@ -693,11 +693,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     roundJumpOnce.current = true
     const bank = easyJumpSparkBank(jump)
     const planted = easyJumpLoad(jump)
-    const search = window.location.search
-    const shown = capJumpPlants(planted, nightWatchLampCap(search))
     sparksRef.current = bank
     setRunSparks(bank)
     setWaveIndex(jump)
+    const shown = capJumpPlants(planted, nightWatchLampCap(window.location.search))
     runPathsRef.current = shown.paths
     setRunPaths(shown.paths)
     plantsRef.current = shown.plants
