@@ -18,7 +18,7 @@ import {
   demoTravelMs,
   easySnapStars,
   lockedAfterMiss,
-  missOnFlyPast,
+  flyPastIsMiss,
   missPointsLost,
   missToast,
   beatByIndex,
@@ -213,7 +213,7 @@ export function StorySnapPlayView({
       writeProgress(nextProgress)
       if (beatPastGate(nextProgress, windowRef.current) && snappable.current) {
         snappable.current = false
-        recycleBeat(missOnFlyPast(tappedRef.current))
+        recycleBeat(flyPastIsMiss(tappedRef.current, easyRef.current))
       }
     }
     frame.current = window.requestAnimationFrame(tick)
