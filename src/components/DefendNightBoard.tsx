@@ -9,6 +9,7 @@ import { DefendTowerCard, type TowerCardPoint } from './DefendTowerCard'
 import { samePillarLessons } from '../nightWatch/lampPillar'
 import { easyShotReach, pathsOf, type BonusGate, type LampPaths, type TreePath } from '../nightWatch/upgradeTree'
 import { bellPathKey, isBell } from '../nightWatch/bell'
+import { incensePathKey, INCENSE_LABEL, isIncense } from '../nightWatch/incense'
 import { candleFarBonus, candlePathKey, candleRoadNote, isCandle } from '../nightWatch/candle'
 import {
   DefendNightActorsSvg,
@@ -59,23 +60,26 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
   const place = plateFill ? boardFillPoint : mapBoardPoint
   const cardAbility = upgradeAt ? towerType[upgradeAt] : undefined
   const bellCard = Boolean(cardAbility && isBell(cardAbility) && upgradeAt)
+  const incenseCard = Boolean(cardAbility && isIncense(cardAbility) && upgradeAt)
   const candleCard = Boolean(cardAbility && isCandle(cardAbility) && upgradeAt)
   const cardKey =
-    bellCard && upgradeAt
-      ? bellPathKey(upgradeAt)
-      : candleCard && upgradeAt
-        ? candlePathKey(upgradeAt)
-        : cardAbility
+    incenseCard && upgradeAt
+      ? incensePathKey(upgradeAt)
+      : bellCard && upgradeAt
+        ? bellPathKey(upgradeAt)
+        : candleCard && upgradeAt
+          ? candlePathKey(upgradeAt)
+          : cardAbility
   const cardPaths = easy && cardKey ? pathsOf(runPaths, cardKey) : undefined
   const reachBonus =
-    bellCard
+    bellCard || incenseCard
       ? 0
       : candleCard && upgradeAt
         ? candleFarBonus(pathsOf(runPaths, candlePathKey(upgradeAt)))
         : easy && cardAbility
           ? easyShotReach(pathsOf(runPaths, cardAbility))
           : 0
-  const roadNote = bellCard
+  const roadNote = bellCard || incenseCard
     ? ''
     : candleCard && upgradeAt
       ? candleRoadNote(upgradeAt, reachBonus)
@@ -109,7 +113,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
               className={`defend-type-chip is-${type}`}
               style={{ left: at.left, top: at.top }}
             >
-              {isBell(type) ? 'Bell' : isCandle(type) ? 'Candle' : (WATCH_ABILITY_LABEL[type] ?? type)}
+              {isIncense(type) ? INCENSE_LABEL : isBell(type) ? 'Bell' : isCandle(type) ? 'Candle' : (WATCH_ABILITY_LABEL[type] ?? type)}
             </span>
           )
         })

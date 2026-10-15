@@ -239,6 +239,20 @@ import {
   BELL_LABEL,
   BELL_SLOW,
 } from '../src/nightWatch/bell.ts'
+import {
+  applyIncenseStep,
+  applyIncenseTap,
+  incenseBonusFor,
+  incenseDamage,
+  incenseTapAdd,
+  incenseTapBonus,
+  incenseUnlocked,
+  INCENSE_CARD,
+  INCENSE_COST,
+  INCENSE_TAP,
+  INCENSE_VERSE_CITE,
+  TAP_BONUS_CAP,
+} from '../src/nightWatch/incense.ts'
 import { lampAnchor } from '../src/nightWatch/path/data.ts'
 import {
   applyCandleStep,
@@ -1621,7 +1635,15 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.473')
+assert.equal(APP_VERSION, '1.4.475')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.475'), '1.4.475 changelog row')
+assert.match(latestChange('1.4.475').title, /incense/i)
+assert.doesNotMatch(
+  latestChange('1.4.475').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.475 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.475').items.join('\n'), /Rising smoke reminds us our prayers rise to God/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.473'), '1.4.473 changelog row')
 assert.match(latestChange('1.4.473').title, /later|busy/i)
 assert.doesNotMatch(
@@ -7910,7 +7932,129 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(css467, /#ffcc33/, '1.4.467 the ring uses the gold already on the night')
 }
 
-// Night Watch 1.4.472: from round 7 a walker keeps taking taps. The round 10 boss still shrugs.
+// Night Watch 1.4.475: Incense is one Easy cloud. Hard never offers it.
+{
+  const screen475 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const actors475 = readFileSync(new URL('../src/components/DefendNightActors.tsx', import.meta.url), 'utf8')
+  const card475 = readFileSync(new URL('../src/components/DefendTowerCard.tsx', import.meta.url), 'utf8')
+  const css475 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  assert.equal(INCENSE_COST, 8, '1.4.475 incense costs 8 sparks')
+  assert.equal(INCENSE_CARD, 'Rising smoke reminds us our prayers rise to God.', '1.4.475 the card line is the scholars line')
+  assert.equal(INCENSE_VERSE_CITE, 'Ps 141:2, RSV', '1.4.475 the card cites Ps 141:2, RSV')
+  assert.doesNotMatch(INCENSE_CARD, /cleans|purif|smudg|ward|zap|evil/i, '1.4.475 the card line stays the prayer')
+  assert.doesNotMatch(
+    card475.slice(card475.indexOf('isIncense'), card475.indexOf('isCandle(ability) && paths')),
+    /cleans|purif|smudg|ward|zap|evil/i,
+    '1.4.475 the incense card stays off those words',
+  )
+  for (let index = 0; index <= 8; index += 1) {
+    assert.equal(incenseUnlocked(true, index, 'wave'), false, `1.4.475 round ${index + 1} keeps incense locked`)
+  }
+  assert.equal(incenseUnlocked(true, 8, 'boost'), true, '1.4.475 the round 9 clear unlocks incense')
+  assert.equal(incenseUnlocked(true, 9, 'wave'), true, '1.4.475 round 10 offers incense')
+  assert.equal(incenseUnlocked(false, 9, 'boost'), false, '1.4.475 Hard never offers incense')
+  assert.equal(incenseUnlocked(false, 20, 'wave'), false, '1.4.475 Hard stays closed on a late wave')
+  assert.deepEqual([...INCENSE_TAP], [1, 1, 2], '1.4.475 the tap bonus is 1, 1, and 2')
+  assert.equal(incenseTapBonus(0), 1)
+  assert.equal(incenseTapBonus(1), 1)
+  assert.equal(incenseTapBonus(2), 2)
+  assert.equal(incenseDamage(), 0, '1.4.475 the cloud does not shoot')
+  assert.equal(bellDamage(), 0, '1.4.475 the bell still deals nothing')
+  assert.equal(applyIncenseTap(1 + bellDamage(), incenseTapBonus(2)), 3, '1.4.475 a tap with the bell stays at 3')
+  assert.ok(applyIncenseTap(1, incenseTapBonus(2)) <= TAP_BONUS_CAP, '1.4.475 per-tap damage stays at or under 3')
+  assert.equal(incenseTapAdd(incenseTapBonus(2), true, false), 0, '1.4.475 a soaked walker gets no cloud bonus')
+  assert.equal(incenseTapAdd(incenseTapBonus(2), false, true), 0, '1.4.475 a shrugging boss gets no cloud bonus')
+  const freshBoss = liveNightDamage(
+    { hp: 12, tapChip: 0, boss: true },
+    { easy: true, manual: true, roundIndex: 9, lampDamage: 0 },
+  )
+  assert.equal(freshBoss.damage, 1, '1.4.475 the round 10 boss tap stays 12 to 11')
+  const shrugBoss = liveNightDamage(
+    { hp: 12, tapChip: 4, boss: true },
+    { easy: true, manual: true, roundIndex: 9, lampDamage: 0, tapBonus: incenseTapBonus(2) },
+  )
+  assert.equal(shrugBoss.damage, 0, '1.4.475 a shrugging round 10 boss takes no cloud bonus')
+  const seat = 'at:420:640'
+  const at = lampAnchor(seat)
+  const plants = { [seat]: 'incense', 'at:10:10': 'bell' }
+  assert.equal(incenseBonusFor(plants, {}, at), 1, '1.4.475 a walker in the cloud gains 1')
+  assert.equal(incenseBonusFor(plants, {}, { x: at.x + 4000, y: at.y }), 0, '1.4.475 a walker outside the cloud gains 0')
+  const stepped = applyIncenseStep(seat, {}, 9)
+  assert.equal(incenseBonusFor(plants, stepped.paths, at), 1, '1.4.475 the first buy stays at 1')
+  const topped = applyIncenseStep(seat, stepped.paths, stepped.sparks)
+  assert.equal(incenseBonusFor(plants, topped.paths, at), 2, '1.4.475 the second buy reaches 2')
+  assert.equal(incenseBonusFor(plants, topped.paths, { x: at.x + 4000, y: at.y }), 0, '1.4.475 the stronger cloud still misses a far walker')
+  for (const round of [0, 1, 2, 3, 5]) {
+    const glow = { id: 1, t: 0.8 }
+    const dark = { id: 2, t: 0.2 }
+    assert.equal(
+      easyPointerTapGate(true, dark, [glow, dark], round),
+      'miss',
+      `1.4.475 round ${round + 1} still misses a face that is not glowing`,
+    )
+  }
+  const liveTap475 = screen475.slice(screen475.indexOf('function fireAtRaider'), screen475.indexOf('function fireBest'))
+  const missAt = liveTap475.indexOf("gate === 'miss'")
+  const bonusAt = liveTap475.indexOf('incenseBonusFor')
+  assert.ok(missAt >= 0 && bonusAt > missAt, '1.4.475 the cloud bonus waits until the glow gate passes')
+  assert.match(screen475, /if \(isIncense\(using\)\) return false/, '1.4.475 incense does not shoot')
+  assert.match(screen475, /if \(isIncense\(using\)\) continue/, '1.4.475 auto fire skips incense')
+  assert.match(actors475, /is-incense-cloud/, '1.4.475 the cloud is a ring')
+  assert.match(css475, /@keyframes nw-incense-cloud/, '1.4.475 the ring is warm gold')
+  assert.match(css475, /\.defend-range\.is-incense-cloud \{[^}]*#ffcc33/, '1.4.475 the cloud uses the gold already on the night')
+  assert.doesNotMatch(
+    css475.slice(css475.indexOf('.defend-range.is-incense-cloud'), css475.indexOf('@keyframes nw-incense-cloud')),
+    /green|#0f0|#00ff00/i,
+    '1.4.475 the cloud is not green',
+  )
+  function ownedLamps(index) {
+    const owned = easyJumpLoad(index).lamps.map((lamp) => ({ far: lamp.far, strong: lamp.strong }))
+    while (owned.length < 4) owned.push({ far: 0, strong: 0 })
+    return owned
+  }
+  function nightWithIncense(kind) {
+    let hearts = 3
+    for (let index = 0; index < 25; index += 1) {
+      const bonus = incenseUnlocked(true, index, 'wave') ? incenseTapBonus(0) : 0
+      const round = paceEasyLive(
+        index,
+        kind === 'none' ? BARE_LAMPS : ownedLamps(index),
+        hearts,
+        false,
+        LIVE_TAP_EVERY,
+        'road',
+        undefined,
+        [],
+        undefined,
+        bonus,
+      )
+      if (round.result !== 'clear') return index + 1
+      hearts = easyClearHeart(round.hearts)
+    }
+    return null
+  }
+  const idleIncense = nightWithIncense('none')
+  const spendIncense = nightWithIncense('natural')
+  assert.ok((idleIncense ?? 26) <= 9, `1.4.475 an idle night with incense loses by round ${idleIncense}`)
+  const spendBare = paceEasyRoadCampaign('natural', 'live').dead
+  assert.ok(
+    spendIncense == null || spendBare == null || spendIncense >= spendBare,
+    `1.4.475 incense does not shorten the spender (${spendIncense} vs ${spendBare})`,
+  )
+  const hardPack = [4, 4, 5, 5, 8]
+  for (let index = 0; index < hardPack.length; index += 1) {
+    assert.deepEqual(
+      waveCombat(index, false),
+      { size: hardPack[index], speedScale: 1, spawnScale: 1, hpBonus: 0 },
+      `1.4.475 hard wave ${index + 1} stays flat`,
+    )
+  }
+  assert.match(
+    readFileSync(new URL('../src/lib/defend.ts', import.meta.url), 'utf8'),
+    /DEFEND_WAVE_PACK = \[4, 4, 5, 5, 8\]/,
+    '1.4.475 the hard pack is unchanged',
+  )
+}
 {
   assert.equal(EASY_TOUGH_OPEN, 56, '1.4.472 a thick walker from round 8 has a taller bar')
   assert.equal(easyWalkerHp(2, 0, 'tough', 6), EASY_TOUGH_WINDOW, '1.4.472 round 7 thick walkers keep the short bar')
