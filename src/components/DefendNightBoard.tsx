@@ -89,7 +89,12 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
         : ''
   const lessonGate: BonusGate | undefined =
     easy && cardAbility
-      ? { lessons: samePillarLessons(cardAbility, heldLessons), playtest: playtestSteps }
+      ? {
+          lessons: samePillarLessons(cardAbility, heldLessons),
+          playtest: playtestSteps,
+          roundIndex,
+          cleared: boosting,
+        }
       : undefined
   const showCard = Boolean(
     upgradeAt && cardAbility && upgradePoint && boardBox && boardBox.w > 0 && onCloseUpgrade,

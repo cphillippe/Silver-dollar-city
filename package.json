@@ -1,7 +1,7 @@
 {
   "name": "silver-city",
   "private": true,
-  "version": "1.4.484",
+  "version": "1.4.485",
   "type": "module",
   "scripts": {
     "dev": "vite",

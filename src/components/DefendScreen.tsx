@@ -2260,6 +2260,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
         typeof window === 'undefined' ? '' : window.location.search,
         nwDebugRef.current,
       ),
+      roundIndex: waveIndexRef.current,
+      cleared: phase === 'boost',
     }
   }
 
@@ -3153,6 +3155,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
         if (easy && phase === 'boost') clearCardAt.current = performance.now()
       }}
       playtestSteps={tapReadoutOn}
+      roundIndex={waveIndex}
       onBoost={boostTool}
       onOpenTree={openPlantedTree}
     />

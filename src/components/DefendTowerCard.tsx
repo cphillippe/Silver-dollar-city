@@ -23,7 +23,10 @@ import {
   TREE_BONUS_COST,
   TREE_LOCK,
   TREE_PATHS,
+  TREE_BONUS_MAX,
+  TREE_LATE_COST,
   TREE_STEP_COST,
+  lateStepOpen,
   type BonusGate,
   type LampPaths,
   type TreePath,
@@ -725,7 +728,9 @@ export function DefendTowerCard({
           const buy = canTake(paths, path, gate)
           const broke = buy.ok && sparks < buy.cost
           const lessonLocked = buy.gate === 'lesson'
+          const late = lateStepOpen(gate)
           const pipCosts = [...TREE_STEP_COST, TREE_BONUS_COST]
+          if (late && rank >= TREE_BONUS_MAX) pipCosts.push(TREE_LATE_COST)
           return (
             <div
               key={path}
@@ -745,8 +750,9 @@ export function DefendTowerCard({
                 {pipCosts.map((stepCost, index) => {
                   const step = index + 1
                   const filled = rank >= step
-                  const locked = stepLocked(paths, path, step) || (lessonLocked && step === rank + 1)
                   const next = buy.ok && step === rank + 1
+                  const locked = !next && (stepLocked(paths, path, step) || (lessonLocked && step === rank + 1))
+                  const shownCost = next ? buy.cost : stepCost
                   const className = `defend-path-pip${filled ? ' is-on' : ''}${locked ? ' is-locked' : ''}${next ? ' is-buy' : ''}`
                   if (next) {
                     return (
@@ -756,7 +762,7 @@ export function DefendTowerCard({
                         className={className}
                         disabled={broke}
                         data-step={step}
-                        data-cost={stepCost}
+                        data-cost={shownCost}
                         data-path-pip={path}
                         aria-label={`${PATH_LABEL[path]} step ${step}, ${buy.cost} sparks`}
                         onPointerDown={(event) => {
@@ -772,7 +778,7 @@ export function DefendTowerCard({
                           if (!broke) onUpgradePath(path, true)
                         }}
                       >
-                        {stepCost}
+                        {shownCost}
                       </button>
                     )
                   }
@@ -781,10 +787,10 @@ export function DefendTowerCard({
                       key={step}
                       className={className}
                       data-step={step}
-                      data-cost={stepCost}
+                      data-cost={shownCost}
                       data-locked={locked ? 'yes' : undefined}
                     >
-                      {stepCost}
+                      {shownCost}
                     </span>
                   )
                 })}
@@ -843,7 +849,7 @@ export function DefendTowerCard({
                   {buy.reason}
                 </p>
               )}
-              {buy.ok && stepLocked(paths, path, 2) ? (
+              {buy.ok && stepLocked(paths, path, 2) && !(late && rank === 1) ? (
                 <p className="defend-path-lock" data-path-lock={path}>
                   {TREE_LOCK}
                 </p>
