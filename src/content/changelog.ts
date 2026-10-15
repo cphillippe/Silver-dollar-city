@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.481',
+    title: 'Snap on the line',
+    when: '2026-10-15',
+    items: [
+      'On Easy, SNAP lights only while the card is on the line.',
+      'The hand points at the line. It does not cover your stars. Stars start empty until you snap.',
+      'After the story opens, One more snap waits, so a second tap does not start over.',
+    ],
+  },
+  {
     version: '1.4.479',
     title: 'Your turn to snap',
     when: '2026-10-15',

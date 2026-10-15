@@ -23,11 +23,16 @@ import {
   applyDemoSnap,
   beatPastGate,
   beatProgress,
+  beatCoversGate,
   demoCountsLocked,
   demoTravelMs,
   easySnapStars,
   flyPastIsMiss,
   inSnapWindow,
+  lockedAfterDemo,
+  snapLabelLit,
+  WIN_INPUT_LOCK_MS,
+  winReplayBlocked,
   lockedAfterMiss,
   missOnFlyPast,
   missPointsLost,
@@ -69,6 +74,17 @@ assert.equal(flyPastIsMiss(true, true), true, 'Easy still counts a tap outside t
 assert.equal(easySnapStars(0), '☆☆☆')
 assert.equal(easySnapStars(1), '★☆☆')
 assert.equal(easySnapStars(3), '★★★')
+assert.deepEqual(lockedAfterDemo(['lamp']), ['lamp'])
+assert.deepEqual(lockedAfterDemo([]), [], 'the demo does not grant a star')
+assert.equal(WIN_INPUT_LOCK_MS >= 800, true, 'the win ignores a quick second tap')
+assert.equal(winReplayBlocked(400), true)
+assert.equal(winReplayBlocked(WIN_INPUT_LOCK_MS), false)
+assert.equal(snapLabelLit(true, false, true), false, 'Easy SNAP stays dark until the card is under the gate')
+assert.equal(snapLabelLit(true, true, true), true)
+assert.equal(snapLabelLit(false, true, true), false)
+assert.equal(snapLabelLit(true, false, false), true, 'Hard SNAP still follows the timing window')
+assert.equal(beatCoversGate(0, 100, 50), true)
+assert.equal(beatCoversGate(0, 100, 10), false, 'an edge clip is not under the gate')
 assert.equal(/\d/.test(easySnapStars(3)), false, 'Easy stars have no digit')
 assert.ok(demoTravelMs(false) > travelMs(false), 'the demo crosses slower than a player beat')
 assert.ok(DEMO_HOLD_MS >= 600, 'the demo rests under the gate long enough to read')
@@ -215,13 +231,23 @@ async function snapOnce(page) {
       let frames = 0
       let clicks = 0
       let started = false
+      let unfair = 0
       let last = ''
+      function coversGate() {
+        const beat = document.querySelector('.snap-beat')?.getBoundingClientRect()
+        const gate = document.querySelector('.snap-gate')?.getBoundingClientRect()
+        if (!beat || !gate || beat.right <= beat.left) return false
+        const inset = (beat.right - beat.left) * 0.22
+        const gateX = gate.left + gate.width / 2
+        return gateX >= beat.left + inset && gateX <= beat.right - inset
+      }
       function poke() {
         frames += 1
         const label = (pad?.textContent || '').replace(/\s+/g, ' ').trim()
         last = label
         const arm = label.includes('Tap to start') && !started
         if (arm) started = true
+        if (label.includes('SNAP!') && !coversGate()) unfair += 1
         if (arm || label.includes('SNAP!')) {
           clicks += 1
           pad.dispatchEvent(
@@ -236,7 +262,7 @@ async function snapOnce(page) {
         }
         const locked = document.querySelectorAll('.snap-chip.is-locked').length
         if (locked > prev) {
-          resolve({ ok: true, frames, clicks })
+          resolve({ ok: true, frames, clicks, unfair })
           return
         }
         if (frames > 700) {
@@ -244,6 +270,7 @@ async function snapOnce(page) {
             ok: false,
             frames,
             clicks,
+            unfair,
             last,
             toast: document.querySelector('.match-toast')?.textContent || '',
           })
@@ -255,6 +282,7 @@ async function snapOnce(page) {
     })
   }, before)
   if (!outcome.ok) throw new Error(`snap did not lock from ${before} ${JSON.stringify(outcome)}`)
+  if (outcome.unfair) throw new Error(`SNAP lit off the gate ${JSON.stringify(outcome)}`)
 }
 
 /** Easy Story Snap: demo hand, then the win card stays at least 5s. */
@@ -263,7 +291,7 @@ export async function checkSnapHold() {
   const save = {
     kind: 'silver-city-save',
     schemaVersion: 1,
-    appVersion: '1.4.479',
+    appVersion: '1.4.481',
     savedAt: `${today}T12:00:00.000Z`,
     progress: {
       started: true,
@@ -285,7 +313,7 @@ export async function checkSnapHold() {
   await server.listen()
   const address = server.httpServer?.address()
   const port = address && typeof address === 'object' ? address.port : 0
-  assert.ok(port > 0, '1.4.479 story-snap server has a port')
+  assert.ok(port > 0, '1.4.481 story-snap server has a port')
   const browser = await launchBrowser()
   try {
     for (const [width, height, reduceMotion] of SIZES) {
@@ -320,6 +348,33 @@ export async function checkSnapHold() {
       assert.equal(ghost.hidden, 'true', `${where} ghost hand is hidden from assistive tech`)
       assert.equal(ghost.svg, true, `${where} ghost hand is drawn`)
       assert.equal(ghost.img, false, `${where} ghost hand is not an image`)
+      const aim = await page.evaluate(() => {
+        const hand = document.querySelector('.snap-ghost')?.getBoundingClientRect()
+        const gate = document.querySelector('.snap-gate')?.getBoundingClientRect()
+        const score = document.querySelector('.match-score')?.getBoundingClientRect()
+        const stage = document.querySelector('.snap-stage')?.getBoundingClientRect()
+        if (!hand || !gate || !score || !stage) return null
+        const gateX = gate.left + gate.width / 2
+        const handX = hand.left + hand.width / 2
+        const midL = score.left + score.width / 3
+        const midR = score.right - score.width / 3
+        const coversMid =
+          hand.right > midL && hand.left < midR && hand.bottom > score.top && hand.top < score.bottom
+        const fingerY = hand.bottom
+        const gateY = gate.top + gate.height / 2
+        const scoreY = score.top + score.height / 2
+        return {
+          nearGate: Math.abs(handX - gateX) < 36,
+          coversMid,
+          closerToGate: Math.abs(fingerY - gateY) < Math.abs(fingerY - scoreY),
+          inStage: hand.top >= stage.top - 1 && hand.bottom <= stage.bottom + 8,
+        }
+      })
+      assert.ok(aim, `${where} ghost hand is on the lane`)
+      assert.equal(aim.nearGate, true, `${where} the hand points at the gate`)
+      assert.equal(aim.coversMid, false, `${where} the hand does not cover the middle star`)
+      assert.equal(aim.closerToGate, true, `${where} the hand aims at the gate, not the stars`)
+      assert.equal(aim.inStage, true, `${where} the hand stays on the lane`)
       await page.locator('.snap-pad').click()
       const seen = { tap: false, still: false, score: '' }
       const started = Date.now()
@@ -329,16 +384,18 @@ export async function checkSnapHold() {
           still: Boolean(document.querySelector('.snap-ghost.is-still')),
           locked: document.querySelectorAll('.snap-chip.is-locked').length,
           score: document.querySelector('.match-score')?.textContent?.trim() ?? '',
+          ghost: Boolean(document.querySelector('.snap-ghost')),
+          pad: (document.querySelector('.snap-pad')?.textContent || '').replace(/\s+/g, ' ').trim(),
         }))
         if (snap.tap) seen.tap = true
         if (snap.still) seen.still = true
-        if (snap.locked >= 1) {
+        if (!snap.ghost && snap.pad.includes('Tap to start')) {
           seen.score = snap.score
           break
         }
         await page.waitForTimeout(30)
       }
-      assert.equal(seen.score, easySnapStars(1), `${where} demo beat gives stars, not a number`)
+      assert.equal(seen.score, easySnapStars(0), `${where} stars start empty`)
       assert.equal(/\d/.test(seen.score), false, `${where} in-play score has no digit`)
       if (reduceMotion) {
         assert.equal(seen.still, true, `${where} static hand hint`)
@@ -346,7 +403,7 @@ export async function checkSnapHold() {
       } else {
         assert.equal(seen.tap, true, `${where} ghost hand taps`)
       }
-      assert.equal(await page.locator('.snap-chip.is-locked').count(), 1, `${where} demo counts as locked`)
+      assert.equal(await page.locator('.snap-chip.is-locked').count(), 0, `${where} the demo grants no star`)
       await page.locator('.snap-pad', { hasText: 'Tap to start' }).waitFor()
       const waiting = await page.evaluate(() => ({
         toast: document.querySelector('.match-toast')?.textContent || '',
@@ -362,8 +419,9 @@ export async function checkSnapHold() {
         pad: (document.querySelector('.snap-pad')?.textContent || '').replace(/\s+/g, ' ').trim(),
       }))
       assert.doesNotMatch(stillWaiting.toast, /Miss/, `${where} no tap is not a miss`)
-      assert.equal(stillWaiting.locked, 1, `${where} the next beat does not fly on its own`)
+      assert.equal(stillWaiting.locked, 0, `${where} the next beat does not fly on its own`)
       assert.match(stillWaiting.pad, /Tap to start/, `${where} pad still waits for the first tap`)
+      await snapOnce(page)
       await snapOnce(page)
       await snapOnce(page)
       await page.locator('.snap-result').waitFor()
@@ -379,7 +437,27 @@ export async function checkSnapHold() {
         1,
         `${where} one Lock In next`,
       )
-      assert.equal(await page.locator('.snap-pad').count(), 0, `${where} the snap pad is gone on the win`)
+      assert.equal(await page.locator('button.snap-pad').count(), 0, `${where} the snap button is gone on the win`)
+      const againSpot = await page.evaluate(() => {
+        const again = document.querySelector('.snap-again')?.getBoundingClientRect()
+        const slot = document.querySelector('.snap-pad-slot')?.getBoundingClientRect()
+        if (!again || !slot) return null
+        const overlap =
+          again.bottom > slot.top &&
+          again.top < slot.bottom &&
+          again.right > slot.left &&
+          again.left < slot.right
+        return { overlap, againH: again.height }
+      })
+      assert.ok(againSpot, `${where} One more snap sits beside a held SNAP spot`)
+      assert.equal(againSpot.overlap, false, `${where} One more snap is not on the SNAP spot`)
+      assert.ok(againSpot.againH < 48, `${where} One more snap is not a SNAP-sized button`)
+      await page.evaluate(() => {
+        document.querySelector('.snap-again')?.dispatchEvent(
+          new MouseEvent('click', { bubbles: true, cancelable: true }),
+        )
+      })
+      assert.equal(await page.locator('.snap-result').count(), 1, `${where} replay is locked on the win`)
       assert.equal(
         await page.locator('.snap-stage .win-stamp').count(),
         0,
