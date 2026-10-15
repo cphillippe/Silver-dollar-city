@@ -1,5 +1,5 @@
 /**
- * Live prove for 1.4.488.
+ * Live prove for 1.4.489.
  * Real clicks and elementFromPoint. A planted incense still hits.
  * A walker inside a lamp box wins. The map sheet is the top layer.
  * Later rounds field more than three walkers. The clear bar stays put.
@@ -20,7 +20,7 @@ import { DEFEND_PATH } from '../src/nightWatch/path/data.ts'
 const SAVE = {
   kind: SAVE_KIND,
   schemaVersion: SAVE_SCHEMA_VERSION,
-  appVersion: '1.4.488',
+  appVersion: '1.4.489',
   savedAt: '2026-10-15T00:00:00.000Z',
   progress: {
     started: true,
@@ -559,8 +559,50 @@ async function checkClearBar(browser, port, errors, width, height, probeClick) {
   await openJump(page, '?playtest=1&nwRound=9')
   const begin = await page.locator('.defend-go').boundingBox()
   assert.ok(begin && begin.height > 10, `1.4.483 ${width} Begin is on screen`)
+  if (width === 375) {
+    const planted = await page.evaluate(() => {
+      const read = (node) => {
+        const style = getComputedStyle(node)
+        const rect = node.getBoundingClientRect()
+        return { display: style.display, w: rect.width, text: (node.textContent || '').trim() }
+      }
+      return [...document.querySelectorAll('span.defend-type-chip')].map(read)
+    })
+    assert.ok(
+      planted.some((chip) => chip.display !== 'none' && chip.w > 0),
+      '1.4.489 Easy at 375 shows the name chips while planting',
+    )
+  }
   await page.mouse.click(begin.x + begin.width / 2, begin.y + begin.height / 2)
   await page.locator('.defend-page.is-easy-tap').waitFor()
+  if (width === 375) {
+    const names = await page.evaluate(() => {
+      const read = (node) => {
+        const style = getComputedStyle(node)
+        const rect = node.getBoundingClientRect()
+        return {
+          display: style.display,
+          w: rect.width,
+          h: rect.height,
+          text: (node.textContent || '').trim(),
+        }
+      }
+      return {
+        chips: [...document.querySelectorAll('span.defend-type-chip')].map(read),
+        labels: [...document.querySelectorAll('text.defend-type-label')].map(read),
+      }
+    })
+    assert.ok(names.chips.length > 0, '1.4.489 Easy at 375 still has map name chips in the page')
+    for (const chip of names.chips) {
+      assert.equal(chip.display, 'none', `1.4.489 Easy at 375 hides the ${chip.text} chip mid-wave`)
+      assert.equal(chip.w, 0, `1.4.489 Easy at 375 the ${chip.text} chip has no box mid-wave`)
+    }
+    assert.ok(names.labels.length > 0, '1.4.489 Easy at 375 still has SVG lamp words in the page')
+    for (const label of names.labels) {
+      assert.equal(label.display, 'none', `1.4.489 Easy at 375 hides the ${label.text} lamp word mid-wave`)
+      assert.equal(label.w, 0, `1.4.489 Easy at 375 the ${label.text} lamp word has no box mid-wave`)
+    }
+  }
   const started = Date.now()
   while (Date.now() - started < 90_000 && (await page.locator('.defend-page.is-boost').count()) < 1) {
     const cue = await page.evaluate(() => {
@@ -584,6 +626,27 @@ async function checkClearBar(browser, port, errors, width, height, probeClick) {
   await candle.waitFor()
   const candleShown = await candle.evaluate((node) => getComputedStyle(node).display)
   assert.notEqual(candleShown, 'none', `1.4.488 ${width} the clear panel still shows Candle`)
+  if (width === 375) {
+    const back = await page.evaluate(() => {
+      const read = (node) => {
+        const style = getComputedStyle(node)
+        const rect = node.getBoundingClientRect()
+        return { display: style.display, w: rect.width, text: (node.textContent || '').trim() }
+      }
+      return {
+        chips: [...document.querySelectorAll('span.defend-type-chip')].map(read),
+        labels: [...document.querySelectorAll('text.defend-type-label')].map(read),
+      }
+    })
+    assert.ok(
+      back.chips.some((chip) => chip.display !== 'none' && chip.w > 0),
+      '1.4.489 Easy at 375 shows the name chips on the clear',
+    )
+    assert.ok(
+      back.labels.some((label) => label.display !== 'none' && label.w > 0),
+      '1.4.489 Easy at 375 shows the SVG lamp words on the clear',
+    )
+  }
   const spend = page.locator('.defend-clear-spend')
   const before = await spend.boundingBox()
   assert.ok(before && before.height > 10, '1.4.482 Spend is on the round 9 clear bar')
