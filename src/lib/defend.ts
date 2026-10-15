@@ -6,6 +6,7 @@ import { enemyHit, NIGHT_ENEMY_ROLE } from '../nightWatch/enemies/hp.ts'
 import type { NightRaider } from '../nightWatch/types.ts'
 import type { ProgressState, WalkerKind } from '../types.ts'
 import { CITY_PLOTS, plotStage, type CityPlotId, type CityStage } from './city.ts'
+import { applyIncenseTap, incenseTapAdd } from '../nightWatch/incense.ts'
 import { EASY_ROUNDS, easyRound } from '../nightWatch/rounds.ts'
 import { easyBossRound } from '../nightWatch/walkers.ts'
 import { prefersReducedMotion } from './juice.ts'
@@ -170,6 +171,12 @@ export interface LiveStrikeShot {
   lampDamage: number
   /** Tough armor starts on this round. Omitted stays round 7, which is A2. */
   armorFrom?: number
+  /**
+   * Extra damage from a cloud the walker is standing in.
+   * Applied only after the glow gate has already called this a hit.
+   * A soaked walker or a shrugging boss keeps 0.
+   */
+  tapBonus?: number
 }
 
 export interface LiveStrikeSize {
@@ -204,7 +211,12 @@ export function liveNightDamage(
     soaked === 0 &&
     (shot.armorFrom ?? 7) >= 7 &&
     !raider.boss
-  const damage = openTough ? Math.min(raider.hp, glow + EASY_R5_TOUGH_OPEN) : glow
+  let damage = openTough ? Math.min(raider.hp, glow + EASY_R5_TOUGH_OPEN) : glow
+  const soakedOut = armored && soaked >= TAP_SHRUG_CHIP
+  const shrugging = Boolean(raider.boss) && armored && glow <= 0
+  const extra =
+    shot.easy && shot.manual ? incenseTapAdd(shot.tapBonus ?? 0, soakedOut, shrugging) : 0
+  if (extra > 0) damage = Math.min(raider.hp, applyIncenseTap(damage, extra))
   const nextChip = shot.easy && shot.manual && damage > 0 ? soaked + damage : soaked
   return { damage, armored, nextChip }
 }

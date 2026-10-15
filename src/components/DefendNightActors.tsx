@@ -14,7 +14,9 @@ import {
   type WatchAbility,
 } from '../lib/defend'
 import { BellSprite } from '../nightWatch/bellArt'
+import { IncenseSprite } from '../nightWatch/incenseArt'
 import { bellMark, bellPathKey, bellPlateReach, BELL_LABEL, isBell } from '../nightWatch/bell'
+import { incenseMark, incensePathKey, incensePlateReach, incenseRank, INCENSE_LABEL, isIncense } from '../nightWatch/incense'
 import { CandleSprite } from '../nightWatch/candleArt'
 import {
   candleFarBonus,
@@ -117,7 +119,7 @@ export interface DefendNightActorsProps {
     road: string
     note?: string
     cover?: '' | 'good' | 'some' | 'far'
-    mark?: 'candle' | 'bell'
+    mark?: 'candle' | 'bell' | 'incense'
     row?: string
     rowTo?: { x: number; y: number }[]
   } | null
@@ -218,34 +220,47 @@ export function DefendNightActorsSvg({
                 const placeName = plot?.title ?? 'open ground'
                 const plantedType = towerType[id]
                 const bell = Boolean(on && isBell(plantedType))
+                const incense = Boolean(on && isIncense(plantedType))
                 const candle = Boolean(on && isCandle(plantedType))
-                const using = bell || candle
+                const using = bell || incense || candle
                   ? plantedType
                   : on && plantedType && unlocked.includes(plantedType)
                     ? plantedType
                     : unlocked.includes(ability)
                       ? ability
                       : 'love'
-                const typeName = bell ? BELL_LABEL : candle ? CANDLE_LABEL : (WATCH_ABILITY_LABEL[using] ?? 'Love')
-                const typeSrc = bell || candle ? undefined : TOWER_TYPE_SRC[using]
+                const typeName = incense
+                  ? INCENSE_LABEL
+                  : bell
+                    ? BELL_LABEL
+                    : candle
+                      ? CANDLE_LABEL
+                      : (WATCH_ABILITY_LABEL[using] ?? 'Love')
+                const typeSrc = bell || incense || candle ? undefined : TOWER_TYPE_SRC[using]
                 const tree = easy
-                  ? pathsOf(runPaths, bell ? bellPathKey(id) : candle ? candlePathKey(id) : using)
+                  ? pathsOf(
+                      runPaths,
+                      incense ? incensePathKey(id) : bell ? bellPathKey(id) : candle ? candlePathKey(id) : using,
+                    )
                   : null
-                const reachBonus = candle && tree ? candleFarBonus(tree) : tree && !bell ? easyShotReach(tree) : 0
+                const reachBonus =
+                  candle && tree ? candleFarBonus(tree) : tree && !bell && !incense ? easyShotReach(tree) : 0
                 const rowReach =
                   candle && roundIndex >= 6 ? candleRowReachBonus(candleRowSize(id, candlePlants)) : 0
-                const reach = bell
-                  ? bellPlateReach(id)
-                  : candle
-                    ? candlePlateReach(id, reachBonus + rowReach)
-                    : nightTowers.range(id, using, progress, runTier, reachBonus)
+                const reach = incense
+                  ? incensePlateReach(id, incenseRank(tree ?? undefined))
+                  : bell
+                    ? bellPlateReach(id)
+                    : candle
+                      ? candlePlateReach(id, reachBonus + rowReach)
+                      : nightTowers.range(id, using, progress, runTier, reachBonus)
                 const tierMark = tree ? pathBadge(tree) : TIER_MARK[combatTier(using, runTier)]
                 const hot =
                   phase === 'wave' &&
                   on &&
                   raiders.some((raider) => {
                     if (raider.turned) return false
-                    if (bell || candle) return dist(at, raiderAt(raider)) <= reach
+                    if (bell || incense || candle) return dist(at, raiderAt(raider)) <= reach
                     return nightTowers.inRange(id, using, progress, raiderAt(raider), runTier, reachBonus)
                   })
                 const firing = flash.includes(id)
@@ -356,7 +371,9 @@ export function DefendNightActorsSvg({
                         <ellipse className="defend-pool" cx="0" cy="12" rx={hot ? 30 : 20} ry={hot ? 11 : 7} />
                         <circle className="defend-type-ring" r={candle ? 16 : 34} />
                         <g className="defend-lamp-sprite">
-                          {bell ? (
+                          {incense ? (
+                            <IncenseSprite />
+                          ) : bell ? (
                             <BellSprite />
                           ) : candle ? (
                             <CandleSprite hot={hot || firing} />
@@ -395,7 +412,7 @@ export function DefendNightActorsSvg({
                           />
                         ) : null}
                         {candle && candleRowSize(id, candlePlants) >= 2 ? null : (
-                          <text className="defend-type-label" y={candle || bell ? -58 : 30} textAnchor="middle">
+                          <text className="defend-type-label" y={candle || bell || incense ? -58 : 30} textAnchor="middle">
                             {typeName}
                           </text>
                         )}
@@ -406,10 +423,10 @@ export function DefendNightActorsSvg({
                             className={`defend-level-pip${justUp ? ' is-bump' : ''}`}
                             y="-98"
                             textAnchor="middle"
-                            data-level={bell && tree ? bellMark(tree) : tierMark}
+                            data-level={incense && tree ? incenseMark(tree) : bell && tree ? bellMark(tree) : tierMark}
                             aria-hidden="true"
                           >
-                            {bell && tree ? bellMark(tree) : tierMark}
+                            {incense && tree ? incenseMark(tree) : bell && tree ? bellMark(tree) : tierMark}
                           </text>
                         ) : null}
                         {justUp ? (
@@ -434,8 +451,8 @@ export function DefendNightActorsSvg({
                         ) : null}
                         {phase === 'wave' ? (
                           <circle
-                            className={`defend-range${bell ? ' is-bell-pulse' : firing ? ' is-firing' : ''}`}
-                            r={bell ? reach : nightTowers.range(id, using, progress, runTier, reachBonus)}
+                            className={`defend-range${incense ? ' is-incense-cloud' : bell ? ' is-bell-pulse' : firing ? ' is-firing' : ''}`}
+                            r={bell || incense ? reach : nightTowers.range(id, using, progress, runTier, reachBonus)}
                             pointerEvents="none"
                             style={
                               firing
@@ -492,7 +509,9 @@ export function DefendNightActorsSvg({
                   {ghost.blocked ? null : (
                     <ellipse className="defend-plant-shadow" cx="0" cy="18" rx="20" ry="7" />
                   )}
-                  {ghost.mark === 'bell' ? (
+                  {ghost.mark === 'incense' ? (
+                    <IncenseSprite />
+                  ) : ghost.mark === 'bell' ? (
                     <BellSprite />
                   ) : ghost.mark === 'candle' ? (
                     <CandleSprite />

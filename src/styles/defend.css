@@ -602,8 +602,34 @@ img.walker-face.easy-walker-face,
   }
 }
 
+/* 1.4.475: the incense cloud is a warm gold ring. It does not flash like a shot. */
+.defend-range.is-incense-cloud {
+  fill: rgba(255, 204, 51, 0.1);
+  stroke: #ffcc33;
+  stroke-width: 5;
+  stroke-dasharray: 2 12;
+  filter: drop-shadow(0 0 8px #ffcc33);
+  animation: nw-incense-cloud 2.4s ease-in-out infinite;
+}
+
+@keyframes nw-incense-cloud {
+  0%,
+  100% {
+    stroke-opacity: 0.4;
+    fill: rgba(255, 204, 51, 0.05);
+  }
+  50% {
+    stroke-opacity: 1;
+    fill: rgba(255, 214, 102, 0.18);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .defend-range.is-bell-pulse {
+    animation: none;
+    stroke-opacity: 0.9;
+  }
+  .defend-range.is-incense-cloud {
     animation: none;
     stroke-opacity: 0.9;
   }
@@ -615,7 +641,14 @@ button.defend-bell-lamp {
   margin: 0 0 6px;
 }
 
-.defend-tower-card.is-bell .defend-bell-line {
+.nw-skill-tray button.defend-incense-lamp,
+button.defend-incense-lamp {
+  width: auto;
+  margin: 0 0 6px;
+}
+
+.defend-tower-card.is-bell .defend-bell-line,
+.defend-tower-card.is-incense .defend-incense-line {
   margin: 6px 0 0;
   font-size: 0.78rem;
   line-height: 1.25;

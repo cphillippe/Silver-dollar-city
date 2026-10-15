@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.475',
+    title: 'Incense',
+    when: '2026-10-15',
+    items: [
+      'After round 9 clears, Easy can plant Incense for 8 sparks. You can plant one. Hard does not get it.',
+      'A tap inside the cloud hurts a little more. The cloud does not shoot.',
+      'The card says: Rising smoke reminds us our prayers rise to God. Ps 141:2, RSV.',
+    ],
+  },
+  {
     version: '1.4.473',
     title: 'Later nights get busy',
     when: '2026-10-14',
