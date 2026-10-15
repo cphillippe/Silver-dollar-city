@@ -235,6 +235,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
                 onPointerDown={(event) => event.stopPropagation()}
                 onClick={(event) => {
                   event.stopPropagation()
+                  if (phase === 'wave' && isIncense(type)) return
                   onOpenUpgrade?.(id)
                 }}
               />

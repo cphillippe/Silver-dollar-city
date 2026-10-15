@@ -336,9 +336,9 @@ export async function checkPhoneFixes() {
     await browser.close()
     await server.close()
   }
+  console.log('check-phone-fixes: ok')
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   await checkPhoneFixes()
-  console.log('check-phone-fixes: ok')
 }

@@ -2702,7 +2702,7 @@ button.defend-incense-lamp {
   pointer-events: none;
 }
 
-/* 1.4.478: during a wave the incense button lets a walker through. The icon hit opens the card. */
+/* 1.4.478: during a wave the incense button lets a walker through. The card stays shut until plant or shop. */
 .defend-page.is-easy-tap .defend-clear-lamp[data-incense-icon='yes'] {
   pointer-events: none;
 }

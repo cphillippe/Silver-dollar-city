@@ -3,6 +3,7 @@
  * One phone width. The cloud is not the hit. nwLamps=0..2 trims a jump.
  */
 import assert from 'node:assert/strict'
+import { fileURLToPath } from 'node:url'
 import { createServer } from 'vite'
 import { chromium } from '@playwright/test'
 
@@ -128,6 +129,11 @@ export async function checkIncenseLamps() {
       }
     }
     assert.equal(plantedIncense, true, '1.4.478 incense plants beside the road')
+    await page.locator('[data-incense-icon="yes"]').click()
+    await page.locator('.defend-tower-card').waitFor()
+    await page.waitForTimeout(80)
+    await page.keyboard.press('Escape')
+    await page.locator('.defend-tower-card').waitFor({ state: 'detached' })
     await page.locator('.defend-go').click()
     await page.locator('[data-incense-cloud="yes"]').waitFor()
     const sizes = await page.evaluate(() => {
@@ -239,7 +245,8 @@ export async function checkIncenseLamps() {
     }
     assert.ok(iconAt, '1.4.478 the incense icon can be tapped when the lamp is clear')
     await page.mouse.click(iconAt.x, iconAt.y)
-    await page.locator('.defend-tower-card').waitFor()
+    await page.waitForTimeout(300)
+    assert.equal(await page.locator('.defend-tower-card').count(), 0, '1.4.478 the incense icon stays shut during a wave')
     await context.close()
     assert.equal(errors.join('\n'), '', '1.4.478 incense nights stay free of console errors')
   } finally {
@@ -247,4 +254,8 @@ export async function checkIncenseLamps() {
     await server.close()
   }
   console.log('check-incense-lamps: ok')
+}
+
+if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+  await checkIncenseLamps()
 }
