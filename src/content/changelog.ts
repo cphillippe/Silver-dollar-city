@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.474',
+    title: 'Silas stands on the square',
+    when: '2026-10-14',
+    items: [
+      'On Easy, the creed story shows Silas and Witness Square while you put the pictures in order.',
+      'When the story is set, it says you are with Silas at Witness Square.',
+      'The road pictures keep most of the card. The words under them stay whole.',
+    ],
+  },
+  {
     version: '1.4.475',
     title: 'Incense',
     when: '2026-10-15',

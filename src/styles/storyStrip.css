@@ -57,6 +57,19 @@
   color: rgba(255, 243, 214, 0.82);
 }
 
+.play.is-story-strip .strip-with {
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.05;
+  color: #fff3d6;
+  white-space: nowrap;
+}
+
+/* The win line names the guide. Hide the same header so the first why choice stays on screen. */
+html[data-easy='on'] .play.is-story-strip.is-win[data-line='wb-creed'] .strip-kicker {
+  display: none;
+}
+
 .strip-board {
   position: relative;
   flex: 0 0 auto;
@@ -480,12 +493,23 @@ html[data-easy='on'] .strip-cue {
   padding: 1px 1px 0;
 }
 
-/* Easy Samaritan win: two short lines, so the picture stays the tall part of the card. */
-html[data-easy='on'] .strip-board.is-win[data-n='5'] .strip-cap.is-slot {
-  font-size: 11px;
-  line-height: 1.02;
-  letter-spacing: -0.03em;
-  padding: 0 1px;
+/* Easy Samaritan win: two lines at 13px, never more than 40% of the card. */
+html[data-easy='on'] .strip-board.is-win[data-n='5'] .strip-cap.is-slot,
+html[data-easy='on'] .play.is-story-strip.is-win[data-line='ph-road'] .strip-slot .strip-cap.is-slot {
+  box-sizing: border-box;
+  max-height: 40%;
+  font-size: 13px;
+  line-height: 1.15;
+  letter-spacing: 0;
+  padding: 1px 2px 0;
+  overflow: hidden;
+  text-overflow: clip;
+}
+
+html[data-easy='on'] .play.is-story-strip.is-win[data-line='ph-road'] .strip-slot .strip-cap-text {
+  overflow: visible;
+  text-overflow: clip;
+  -webkit-line-clamp: unset;
 }
 
 .strip-board.is-win[data-n='3'] .strip-cap {
@@ -1368,7 +1392,8 @@ html[data-easy='on'] .play.is-story-strip[data-n='3'] .strip-art img {
     line-height: 1;
   }
 
-  html[data-easy='on'] .play.is-story-strip.is-win .strip-kicker {
+  html[data-easy='on'] .play.is-story-strip.is-win .strip-kicker,
+  html[data-easy='on'] .play.is-story-strip.is-win .strip-with {
     margin: 0;
     font-size: 11px;
     line-height: 1.05;
