@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.485',
+    title: 'One more step',
+    when: '2026-10-15',
+    items: [
+      'After round 15, a finished lamp can take one more step. Strong 5 hits harder. Far 2 reaches farther.',
+      'The sparks that used to sit in the bank at the end of the night buy that step.',
+    ],
+  },
+  {
     version: '1.4.484',
     title: 'Snap waits',
     when: '2026-10-15',
