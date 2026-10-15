@@ -18,6 +18,7 @@ import {
   STORY_SNAP_BEATS,
   STORY_SNAP_CLAIM,
   STORY_SNAP_LINE,
+  STORY_SNAP_ON,
   STORY_SNAP_WIN,
   allBeatsLocked,
   applyDemoSnap,
@@ -50,8 +51,13 @@ assert.equal(STORY_SNAP_AGAIN, 'One more snap')
 assert.equal(EASY.snapAgain, STORY_SNAP_AGAIN)
 assert.equal(SNAPS_TO_OPEN, 3)
 assert.equal(STORY_SNAP_BEATS.length, 3)
-assert.equal(storyPlayFor('daily-lantern'), 'story-snap')
-assert.equal(lessonStory('daily-lantern').play, 'story-snap')
+assert.equal(typeof STORY_SNAP_ON, 'boolean')
+assert.equal(
+  storyPlayFor('daily-lantern'),
+  STORY_SNAP_ON ? 'story-snap' : 'panel-blast',
+  'the lantern play follows the one Story Snap flag',
+)
+assert.equal(lessonStory('daily-lantern').play, storyPlayFor('daily-lantern'))
 assert.equal(storyPlayFor('ph-debt'), 'panel-blast')
 assert.equal(GATE_AT, 0.5)
 assert.equal(beatProgress(0, 2200), 0)
@@ -146,7 +152,7 @@ assert.match(
 assert.doesNotMatch(playSrc, /recycleBeat\(missOnFlyPast\(/)
 
 const wire = readFileSync(new URL('../src/lib/storyPlay.ts', import.meta.url), 'utf8')
-assert.match(wire, /STORY_SNAP_LINE/)
+assert.match(wire, /STORY_SNAP_ON && lineId === STORY_SNAP_LINE/, 'one flag gates Story Snap')
 assert.match(wire, /story-snap/)
 
 assert.match(playSrc, /STORY_SNAP_HINT/)
@@ -300,8 +306,173 @@ async function snapOnce(page) {
   if (outcome.unfair) throw new Error(`SNAP lit off the gate ${JSON.stringify(outcome)}`)
 }
 
+function buttonNames() {
+  return [...document.querySelectorAll('button')].map((el) =>
+    (el.textContent || '').replace(/\s+/g, ' ').trim(),
+  )
+}
+
+/** Story Snap is parked: Home and the lantern play do not render it. */
+async function checkSnapHidden() {
+  assert.equal(STORY_SNAP_ON, false, 'Story Snap stays parked')
+  const today = localDateKey()
+  const easySave = {
+    kind: 'silver-city-save',
+    schemaVersion: 1,
+    appVersion: '1.4.483',
+    savedAt: `${today}T12:00:00.000Z`,
+    progress: {
+      started: true,
+      easyMode: true,
+      theme: 'candy',
+      completed: [],
+      lastDailyDate: today,
+      dailyDates: [today],
+      held: [],
+      easyHeld: [...priorLines],
+      easyTaught: [...priorLines],
+    },
+  }
+  const hardSave = {
+    ...easySave,
+    progress: {
+      ...easySave.progress,
+      easyMode: false,
+      easyHeld: [],
+      easyTaught: [],
+    },
+  }
+  const root = fileURLToPath(new URL('..', import.meta.url))
+  const server = await createServer({
+    root,
+    server: { host: '127.0.0.1', port: 0 },
+    logLevel: 'error',
+  })
+  await server.listen()
+  const address = server.httpServer?.address()
+  const port = address && typeof address === 'object' ? address.port : 0
+  assert.ok(port > 0, 'story-snap hide server has a port')
+  const browser = await launchBrowser()
+  try {
+    for (const [width, height] of [
+      [375, 667],
+      [412, 915],
+    ]) {
+      const where = `${width}×${height}`
+      const context = await browser.newContext({
+        baseURL: `http://127.0.0.1:${port}/`,
+        viewport: { width, height },
+        deviceScaleFactor: 1,
+      })
+      await context.addInitScript((payload) => {
+        localStorage.setItem('silver-city-progress-v1', JSON.stringify(payload))
+      }, easySave)
+      const page = await context.newPage()
+      const errors = []
+      page.on('pageerror', (err) => errors.push(String(err)))
+      await page.goto('/', { waitUntil: 'domcontentloaded' })
+      await page.locator('.hub.is-easy-home').waitFor()
+      const home = await page.evaluate(() => ({
+        snap: document.querySelectorAll('.play.is-story-snap').length,
+        names: [...document.querySelectorAll('button')].map((el) =>
+          (el.textContent || '').replace(/\s+/g, ' ').trim(),
+        ),
+        step: (document.querySelector('.easy-coach-step.is-dock-now')?.textContent || '')
+          .replace(/\s+/g, ' ')
+          .trim(),
+      }))
+      assert.equal(home.snap, 0, `${where} Easy home does not render Story Snap`)
+      assert.equal(
+        home.names.some((name) => name === 'Snap' || name === '2Snap' || name === 'Snap the story'),
+        false,
+        `${where} Easy home has no Snap button`,
+      )
+      assert.match(home.step, /Match/, `${where} the lantern step is Match`)
+      const match = page.locator('.easy-coach-step.is-dock-now')
+      const matchBox = await match.boundingBox()
+      assert.ok(matchBox && matchBox.height > 20, `${where} Match is a real button`)
+      await match.click()
+      await page.locator('.play.is-panel-blast').waitFor()
+      const play = await page.evaluate(() => {
+        const board = document.querySelector('.play.is-panel-blast')
+        const box = board?.getBoundingClientRect()
+        return {
+          snap: document.querySelectorAll('.play.is-story-snap').length,
+          h: box ? Math.round(box.height) : 0,
+          cells: document.querySelectorAll('.gem-cell, .panel-cell, .word-cell, button').length,
+        }
+      })
+      assert.equal(play.snap, 0, `${where} the lantern play is not Story Snap`)
+      assert.ok(play.h > 80, `${where} the lantern Match has a board`)
+      assert.ok(play.cells > 4, `${where} the lantern Match is not an empty slot`)
+      assert.deepEqual(errors, [], `${where} Easy lantern has 0 console errors`)
+      await context.close()
+    }
+
+    const context = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width: 375, height: 667 },
+      deviceScaleFactor: 1,
+    })
+    await context.addInitScript((payload) => {
+      localStorage.setItem('silver-city-progress-v1', JSON.stringify(payload))
+    }, hardSave)
+    const page = await context.newPage()
+    const errors = []
+    page.on('pageerror', (err) => errors.push(String(err)))
+    await page.goto('/', { waitUntil: 'domcontentloaded' })
+    await page.locator('.hub.is-town').waitFor()
+    const town = await page.evaluate(buttonNames)
+    assert.equal(await page.locator('.play.is-story-snap').count(), 0, 'Hard home does not render Story Snap')
+    assert.equal(
+      town.some((name) => name === 'Snap' || name === 'Snap the story'),
+      false,
+      'Hard home has no Snap button',
+    )
+    const street = page.locator('.street-link .btn.gold')
+    await street.waitFor()
+    const streetBox = await street.boundingBox()
+    assert.ok(streetBox && streetBox.height > 20, 'Hard still has the street link')
+    assert.equal(await page.locator('button', { hasText: 'Link the street' }).count() >= 1, true)
+    await street.click()
+    const unlock = page.getByRole('button', { name: 'Unlock the links' })
+    await unlock.waitFor()
+    const unlockBox = await unlock.boundingBox()
+    assert.ok(unlockBox && unlockBox.height > 20, 'Hard street opens on a real next tap')
+    assert.equal(await page.locator('.play.is-story-snap').count(), 0, 'Hard street teach is not Story Snap')
+    await unlock.click()
+    await page.locator('.play.is-link').waitFor()
+    const linked = await page.evaluate(() => {
+      const board = document.querySelector('.play.is-link')
+      const box = board?.getBoundingClientRect()
+      return {
+        snap: document.querySelectorAll('.play.is-story-snap').length,
+        h: box ? Math.round(box.height) : 0,
+      }
+    })
+    assert.equal(linked.snap, 0, 'Hard street is not Story Snap')
+    assert.ok(linked.h > 80, 'Hard street link has a board')
+    await page.getByRole('button', { name: 'Settings' }).click()
+    await page.locator('.settings-debug').waitFor()
+    assert.equal(
+      await page.locator('[aria-label="Story snap"]').count(),
+      0,
+      'Settings does not list a Story Snap jump',
+    )
+    assert.deepEqual(errors, [], 'Hard lantern path has 0 console errors')
+    await context.close()
+  } finally {
+    await browser.close()
+    await server.close()
+  }
+}
+
 /** Easy Story Snap: demo hand, then the win card stays at least 5s. */
 export async function checkSnapHold() {
+  if (!STORY_SNAP_ON) {
+    await checkSnapHidden()
+    return
+  }
   const today = localDateKey()
   const save = {
     kind: 'silver-city-save',
