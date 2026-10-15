@@ -44,7 +44,6 @@ import {
   applyGateLeaks,
   easyClearHeart,
   easyLiveSpawnT,
-  noteLiveSpawnRound,
   easyPointerTapGate,
   r10ShrugCue,
   easyRoundHeartCap,
@@ -997,7 +996,6 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
               faceShiftRef.current,
             )
           : undefined
-        if (easy && wave >= 5 && wave <= 9) noteLiveSpawnRound(wave)
         walking.push({
           id,
           t: easy

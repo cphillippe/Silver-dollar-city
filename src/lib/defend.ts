@@ -586,30 +586,14 @@ export const EASY_ON_SCREEN_SEC = 5
 const EASY_WALK_T_PER_SEC = 0.01
 
 /**
- * One spawn reads this, then forgets it. Callers that want the picture lead
- * leave it unset. Rounds 6–10 set it so those walkers enter at the path start.
- */
-let liveSpawnRound = -1
-
-export function noteLiveSpawnRound(index: number) {
-  liveSpawnRound = Math.floor(index) || 0
-}
-
-/**
  * Live spawn only. Slow rounds were waiting about a minute at the gate.
  * Start close enough that the face is in the picture within five seconds.
  * Round speed stays the 1.4.424 table. The sim still starts at `easySpawnT`.
- * Rounds 6–10 were appearing past the path start, up the road beyond the gate.
- * Those rounds enter at t = 0. Every other round keeps the picture lead.
  */
 export function easyLiveSpawnT(speedScale = 1): number {
-  const round = liveSpawnRound
-  liveSpawnRound = -1
   const speed = Math.max(0.2, Number(speedScale) || 1)
   const lead = EASY_ON_SCREEN_SEC * EASY_WALK_T_PER_SEC * speed
-  const pictured = Math.max(0, Math.min(EASY_ON_SCREEN_T, EASY_ON_SCREEN_T - lead))
-  if (round >= 5 && round <= 9) return 0
-  return pictured
+  return Math.max(0, Math.min(EASY_ON_SCREEN_T, EASY_ON_SCREEN_T - lead))
 }
 
 /** Playtest line: walker id, board x/y, and path progress at first draw. */
