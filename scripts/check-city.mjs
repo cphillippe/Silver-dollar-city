@@ -8230,6 +8230,21 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(screen480, /easyPointerTapGate\(/, '1.4.482 the glow gate still runs')
   assert.match(board480, /data-walker-tap=/, '1.4.482 the walker face is its own hit target')
   assert.match(css480, /\.defend-walker-tap \{[\s\S]*?z-index:\s*11/, '1.4.482 the walker face sits above a lamp box')
+  assert.match(
+    css480,
+    /(^|\n)\.nw-docks \{[^}]*z-index:\s*5/,
+    '1.4.482 Hard docks stay at z-index 5',
+  )
+  assert.match(
+    css480,
+    /\.defend-page\.is-easy-watch \.nw-docks \{[^}]*z-index:\s*12/,
+    '1.4.482 Easy docks sit above the lamp icons',
+  )
+  assert.match(
+    css480,
+    /\.defend-page\.is-easy-watch \.defend-board \{[^}]*z-index:\s*1/,
+    '1.4.482 Easy lifts the board',
+  )
   assert.match(css480, /\.defend-page\.is-map-sheet \.defend-frame \{[\s\S]*?z-index:\s*20/)
   assert.match(css480, /\.nw-map-overlay \{[\s\S]*?z-index:\s*30/)
   assert.match(
