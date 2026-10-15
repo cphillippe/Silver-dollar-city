@@ -27,6 +27,7 @@ import {
   TREE_LATE_COST,
   TREE_STEP_COST,
   lateStepOpen,
+  wavePipVisible,
   type BonusGate,
   type LampPaths,
   type TreePath,
@@ -111,6 +112,8 @@ export function DefendTowerCard({
   roadNote = '',
   /** Easy uses the scaled tier prices. Hard stays at one spark. */
   easy = false,
+  /** True while walkers are on the road. Plant and the clear keep the full card. */
+  midWave = false,
   /** Pixels at the bottom of the board the card should stay above. */
   reserveBottom = 0,
   /** Same-pillar lessons, and the playtest override. Steps I–III ignore this. */
@@ -147,6 +150,7 @@ export function DefendTowerCard({
   /** Same reach note the plant ghost shows. Empty when this level already reaches. */
   roadNote?: string
   easy?: boolean
+  midWave?: boolean
   reserveBottom?: number
   gate?: BonusGate
   onOpenLessons?: () => void
@@ -171,6 +175,7 @@ export function DefendTowerCard({
     (isFreeSpot(plotId) ? 'open ground' : plotId)
   const lessonCue = Boolean(
     easy &&
+      !midWave &&
       paths &&
       TREE_PATHS.some((path) => canTake(paths, path, gate).gate === 'lesson'),
   )
@@ -665,6 +670,7 @@ export function DefendTowerCard({
         className={`defend-tower-card is-tree is-${placed.side}`}
         data-upgrade-card
         data-upgrade-tree="yes"
+        data-mid-wave={midWave ? 'yes' : undefined}
         data-upgrade-plot={plotId}
         role="dialog"
         tabIndex={-1}
@@ -749,6 +755,7 @@ export function DefendTowerCard({
               <div className="defend-path-pips">
                 {pipCosts.map((stepCost, index) => {
                   const step = index + 1
+                  if (!wavePipVisible(step, rank, buy.ok, midWave)) return null
                   const filled = rank >= step
                   const next = buy.ok && step === rank + 1
                   const locked = !next && (stepLocked(paths, path, step) || (lessonLocked && step === rank + 1))
@@ -817,7 +824,7 @@ export function DefendTowerCard({
                 >
                   {broke ? `Need ${buy.cost}` : `${buy.cost}✦`}
                 </button>
-              ) : lessonLocked ? (
+              ) : lessonLocked && !midWave ? (
                 <div className="defend-lesson-cue" data-lesson-cue={ability} data-pillar={label}>
                   <p className="defend-path-lock" data-path-lock={path}>
                     <svg className="defend-lesson-lock" viewBox="0 0 16 16" aria-hidden="true">
@@ -844,7 +851,7 @@ export function DefendTowerCard({
                     {label} lessons
                   </button>
                 </div>
-              ) : (
+              ) : lessonLocked ? null : (
                 <p className="defend-path-lock" data-path-lock={path}>
                   {buy.reason}
                 </p>

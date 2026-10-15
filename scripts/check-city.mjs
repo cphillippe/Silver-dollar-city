@@ -221,6 +221,7 @@ import {
   easyShotReach,
   lampStrike,
   lateStepOpen,
+  wavePipVisible,
   TREE_LATE_COST,
   TREE_LATE_MAX,
   lessonWaiting,
@@ -1644,7 +1645,23 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.485')
+assert.equal(APP_VERSION, '1.4.486')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.486'), '1.4.486 changelog row')
+assert.match(latestChange('1.4.486').title, /step/i)
+assert.doesNotMatch(
+  latestChange('1.4.486').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.486 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.486').items.join('\n'), /wave/)
+assert.match(latestChange('1.4.486').items.join('\n'), /Lock In/)
+assert.equal(wavePipVisible(1, 0, true, true), true, '1.4.486 the next buy stays on the wave card')
+assert.equal(wavePipVisible(2, 0, true, true), false, '1.4.486 later prices stay off the wave card')
+assert.equal(wavePipVisible(3, 3, false, true), true, '1.4.486 filled steps stay on the wave card')
+assert.equal(wavePipVisible(4, 3, false, true), false, '1.4.486 a locked Lock In step stays off the wave card')
+assert.equal(wavePipVisible(4, 3, false, false), true, '1.4.486 the clear still shows the locked step')
+assert.equal(wavePipVisible(2, 1, true, true), true, '1.4.486 one filled step plus the next')
+assert.equal(wavePipVisible(3, 1, true, true), false, '1.4.486 the step after next stays hidden')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.485'), '1.4.485 changelog row')
 assert.match(latestChange('1.4.485').title, /step/i)
 assert.doesNotMatch(
