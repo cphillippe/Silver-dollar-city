@@ -2439,7 +2439,7 @@ button.defend-incense-lamp {
   display: none;
 }
 
-/* 1.4.480: arming a lamp on the Easy clear bar keeps Spend and the row. */
+/* 1.4.482: arming a lamp on the Easy clear bar keeps Spend and the row. */
 .defend-page.is-easy-watch.is-boost.is-clear-fold .nw-docks .defend-boost .defend-boost-status {
   display: block;
 }
@@ -2723,7 +2723,7 @@ button.defend-incense-lamp {
   pointer-events: none;
 }
 
-/* 1.4.480: the face sits above every lamp box, so a walker inside the icon still takes the tap. */
+/* 1.4.482: the face sits above every lamp box, so a walker inside the icon still takes the tap. */
 .defend-walker-tap {
   position: absolute;
   z-index: 11;

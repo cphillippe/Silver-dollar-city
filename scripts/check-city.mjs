@@ -8212,43 +8212,43 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(incenseMiss.damage, 1, '1.4.478 round 5 glow damage stays one without a cloud')
 }
 
-// Night Watch 1.4.480: a planted incense is not the shooter, and a walker face beats a lamp box.
+// Night Watch 1.4.482: a planted incense is not the shooter, and a walker face beats a lamp box.
 {
   const screen480 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
   const board480 = readFileSync(new URL('../src/components/DefendNightBoard.tsx', import.meta.url), 'utf8')
   const css480 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
   const enemies480 = readFileSync(new URL('../src/nightWatch/enemies/index.ts', import.meta.url), 'utf8')
-  assert.match(screen480, /if \(isIncense\(using\)\) return false/, '1.4.480 fire still refuses an incense shot')
+  assert.match(screen480, /if \(isIncense\(using\)\) return false/, '1.4.482 fire still refuses an incense shot')
   assert.match(
     screen480,
     /if \(isBell\(using\) \|\| isIncense\(using\)\) continue/,
-    '1.4.480 a tap skips incense when it picks a lamp',
+    '1.4.482 a tap skips incense when it picks a lamp',
   )
-  assert.match(screen480, /nightEnemies\.holdSpawn\(unturnedLive\)/, '1.4.480 the spawn call stays holdSpawn(unturnedLive)')
-  assert.match(screen480, /noteEasyCrowdRound\(wave\)/, '1.4.480 the tick notes the round before holdSpawn')
-  assert.match(screen480, /playtestBare/, '1.4.480 playtest with nwLamps=0 can begin')
-  assert.match(screen480, /easyPointerTapGate\(/, '1.4.480 the glow gate still runs')
-  assert.match(board480, /data-walker-tap=/, '1.4.480 the walker face is its own hit target')
-  assert.match(css480, /\.defend-walker-tap \{[\s\S]*?z-index:\s*11/, '1.4.480 the walker face sits above a lamp box')
+  assert.match(screen480, /nightEnemies\.holdSpawn\(unturnedLive\)/, '1.4.482 the spawn call stays holdSpawn(unturnedLive)')
+  assert.match(screen480, /noteEasyCrowdRound\(wave\)/, '1.4.482 the tick notes the round before holdSpawn')
+  assert.match(screen480, /playtestBare/, '1.4.482 playtest with nwLamps=0 can begin')
+  assert.match(screen480, /easyPointerTapGate\(/, '1.4.482 the glow gate still runs')
+  assert.match(board480, /data-walker-tap=/, '1.4.482 the walker face is its own hit target')
+  assert.match(css480, /\.defend-walker-tap \{[\s\S]*?z-index:\s*11/, '1.4.482 the walker face sits above a lamp box')
   assert.match(css480, /\.defend-page\.is-map-sheet \.defend-frame \{[\s\S]*?z-index:\s*20/)
   assert.match(css480, /\.nw-map-overlay \{[\s\S]*?z-index:\s*30/)
   assert.match(
     css480,
     /\.defend-page\.is-easy-watch\.is-boost\.is-clear-fold \.defend-clear-spend,[\s\S]*?display:\s*inline-flex/,
   )
-  assert.match(css480, /max-width:\s*200px/, '1.4.480 the folded clear bar rule stays')
+  assert.match(css480, /max-width:\s*200px/, '1.4.482 the folded clear bar rule stays')
   assert.match(enemies480, /boundNightWave\(\)\?\.liveCap \?\? easyCrowdCap\(\)/)
   const scans480 = readFileSync(new URL('./check-city.mjs', import.meta.url), 'utf8')
   const prove480 = readFileSync(new URL('./check-live-prove.mjs', import.meta.url), 'utf8')
-  assert.match(scans480, /checkLiveProve\(\)/, '1.4.480 city scans plant incense and tap the walkers')
-  assert.match(prove480, /page\.mouse\.click\(inside/, '1.4.480 a city scan taps inside the incense cloud')
-  assert.match(prove480, /page\.mouse\.click\(outside/, '1.4.480 a city scan taps outside the incense cloud')
+  assert.match(scans480, /checkLiveProve\(\)/, '1.4.482 city scans plant incense and tap the walkers')
+  assert.match(prove480, /page\.mouse\.click\(inside/, '1.4.482 a city scan taps inside the incense cloud')
+  assert.match(prove480, /page\.mouse\.click\(outside/, '1.4.482 a city scan taps outside the incense cloud')
   assert.match(
     prove480,
     /page\.mouse\.click\(overlap\.x, overlap\.y\)/,
-    '1.4.480 a city scan clicks the Candle button under the Love upgrade icon',
+    '1.4.482 a city scan clicks the Candle button under the Love upgrade icon',
   )
-  assert.equal(easyCrowdCap(4), EASY_WAVE_LIVE, '1.4.480 round 5 stays on the rounds 1–6 cap')
+  assert.equal(easyCrowdCap(4), EASY_WAVE_LIVE, '1.4.482 round 5 stays on the rounds 1–6 cap')
   assert.equal(EASY_WAVE_LIVE, 3)
 }
 {
