@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.495',
+    title: 'Quiet level tags',
+    when: '2026-10-15',
+    items: [
+      'During a wave, the map no longer prints F2 S1 or Strong 1 on the lamps.',
+      'Those tags come back while you plant and when the round is clear.',
+      'Hard nights keep their old tags.',
+    ],
+  },
+  {
     version: '1.4.494',
     title: 'Crowns take the last stretch slower',
     when: '2026-10-15',

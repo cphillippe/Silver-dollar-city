@@ -1670,7 +1670,17 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.494')
+assert.equal(APP_VERSION, '1.4.495')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.495'), '1.4.495 changelog row')
+assert.match(latestChange('1.4.495').title, /tag/i)
+assert.doesNotMatch(
+  latestChange('1.4.495').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.495 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.495').items.join('\n'), /wave/)
+assert.match(latestChange('1.4.495').items.join('\n'), /clear/)
+assert.match(latestChange('1.4.495').items.join('\n'), /Hard/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.494'), '1.4.494 changelog row')
 assert.match(latestChange('1.4.494').title, /crown/i)
 assert.doesNotMatch(
@@ -1809,6 +1819,20 @@ assert.doesNotMatch(
   css486.match(/\.defend-page\.is-easy-watch\.is-easy-tap \.defend-type-chip,[\s\S]*?display:\s*none;\s*\}/)?.[0] ?? '',
   /defend-clear-row|is-boost/,
   '1.4.489 the name hide is not the clear row',
+)
+const hide495 = css486.match(
+  /\.defend-page\.is-easy-watch\.is-easy-tap \.defend-level-pip \{\s*display:\s*none;\s*\}/,
+)
+assert.ok(hide495, '1.4.495 Easy wave CSS hides map level tags')
+assert.doesNotMatch(hide495[0], /defend-clear-row|is-boost|defend-raider|defend-path-pip/, '1.4.495 the level-tag hide is only the map pip')
+for (const line of hide495[0].split('\n')) {
+  if (!line.includes('.defend-page')) continue
+  assert.match(line, /\.defend-page\.is-easy-watch\.is-easy-tap/, `1.4.495 the hide stays on an Easy wave (${line.trim()})`)
+}
+assert.match(
+  readFileSync(new URL('../src/components/DefendNightActors.tsx', import.meta.url), 'utf8'),
+  /phase !== 'wave' \|\| easy/,
+  '1.4.495 Easy keeps the level tag mounted; Hard still omits it during a wave',
 )
 assert.equal(CROSS_CARD, 'The cross helps us remember Jesus died and rose for us.', '1.4.490 the teaching line stays verbatim')
 assert.equal(CROSS_VERSE_CITE, 'Hebrews 12:2, RSV', '1.4.490 the card cites Hebrews 12:2, RSV')
