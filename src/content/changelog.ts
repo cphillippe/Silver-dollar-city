@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.477',
+    title: 'A hand shows the snap',
+    when: '2026-10-15',
+    items: [
+      'On Easy, a miss says try again. Your score stays.',
+      'When the story opens, it stays until you tap Lock In next. The pictures, the line, and your score stay on the card.',
+      'The first snap shows a hand, then it is your turn.',
+    ],
+  },
+  {
     version: '1.4.476',
     title: 'Silas stands on the square',
     when: '2026-10-15',

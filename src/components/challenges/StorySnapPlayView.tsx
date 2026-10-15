@@ -6,12 +6,17 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent,
 } from 'react'
-import { EASY, easyWhoWhere } from '../../lib/easy'
+import { EASY, easyWhoWhere, isEasy } from '../../lib/easy'
 import {
   allBeatsLocked,
-  applyMissScore,
+  applyDemoSnap,
   applyOpenScore,
   applySnapScore,
+  demoCountsLocked,
+  DEMO_TURN,
+  lockedAfterMiss,
+  missPointsLost,
+  missToast,
   beatByIndex,
   beatPastGate,
   beatProgress,
@@ -33,6 +38,7 @@ import {
 // Live tree: playGemPop from '../../lib/juice'. Pack keeps the same import path.
 import { playGemPop, prefersReducedMotion } from '../../lib/juice'
 import type { StoryPanel } from '../../lib/storyPanels'
+import { useProgress } from '../../store/progress'
 
 interface StorySnapPlayProps {
   lineId: string
@@ -62,6 +68,8 @@ export function StorySnapPlayView({
   onEasyStop,
 }: StorySnapPlayProps) {
   void _beats
+  const { progress: trail } = useProgress()
+  const easy = isEasy(trail)
   const home = easyWhoWhere(lineId)
   const reduced = prefersReducedMotion()
   const duration = travelMs(reduced)
@@ -77,8 +85,14 @@ export function StorySnapPlayView({
   const [shake, setShake] = useState(false)
   const [claimShown, setClaimShown] = useState(false)
   const [attempt, setAttempt] = useState(0)
+  const [demoOn, setDemoOn] = useState(false)
 
   const phaseRef = useRef<StorySnapPhase>('ready')
+  const scoreRef = useRef(0)
+  const demoRef = useRef(false)
+  const stopping = useRef(false)
+  const easyRef = useRef(easy)
+  easyRef.current = easy
   const lockedRef = useRef<string[]>([])
   const flyRef = useRef(0)
   const elapsedRef = useRef(0)
@@ -101,6 +115,11 @@ export function StorySnapPlayView({
     setProgress(next)
   }
 
+  function commitScore(next: number) {
+    scoreRef.current = next
+    setScore(next)
+  }
+
   function resetRound(nextAttempt: number) {
     phaseRef.current = 'ready'
     lockedRef.current = []
@@ -109,17 +128,28 @@ export function StorySnapPlayView({
     lastTick.current = 0
     snappable.current = false
     cleared.current = false
+    stopping.current = false
+    demoRef.current = false
     writeProgress(0)
     setAttempt(nextAttempt)
     setPhase('ready')
     setLockedIds([])
     setFlyIndex(0)
-    setScore(0)
+    commitScore(0)
+    setDemoOn(false)
     setPlusFlash('')
     setWinStamp('')
     setShake(false)
     setClaimShown(false)
     flashToast(nextAttempt > 0 ? `${STORY_SNAP_AGAIN}. ${STORY_SNAP_HINT}` : STORY_SNAP_HINT)
+  }
+
+  function beginRound(nextAttempt: number) {
+    resetRound(nextAttempt)
+    if (!easyRef.current || nextAttempt !== 0) return
+    demoRef.current = true
+    setDemoOn(true)
+    startFly(0)
   }
 
   function replay() {
@@ -138,8 +168,11 @@ export function StorySnapPlayView({
   }
 
   useEffect(() => {
-    resetRound(0)
-    return () => window.cancelAnimationFrame(frame.current)
+    // A host line change while the story is open must not wipe the held card.
+    // The fly loop belongs to the duration effect — cancelling it here would
+    // freeze One more snap after that change.
+    if (phaseRef.current === 'open') return
+    beginRound(0)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lineId])
 
@@ -154,8 +187,11 @@ export function StorySnapPlayView({
       elapsedRef.current = nextElapsed
       const nextProgress = beatProgress(nextElapsed, duration)
       writeProgress(nextProgress)
+      if (demoRef.current && inSnapWindow(nextProgress)) {
+        lockDemo()
+        return
+      }
       if (beatPastGate(nextProgress) && snappable.current) {
-        // Floated past the gate without a snap — Miss −25, beat recycles.
         snappable.current = false
         recycleBeat(true)
       }
@@ -168,17 +204,44 @@ export function StorySnapPlayView({
     if (phaseRef.current === 'open') return
     if (penalize) {
       playGemPop('miss')
-      setScore((pts) => applyMissScore(pts))
+      const lost = missPointsLost(scoreRef.current, easyRef.current)
+      commitScore(scoreRef.current - lost)
+      lockedRef.current = lockedAfterMiss(lockedRef.current)
+      setLockedIds(lockedRef.current)
       setShake(true)
       window.setTimeout(() => setShake(false), 560)
       onMiss()
-      flashToast(`Miss −${SNAP_SCORE}`)
+      flashToast(missToast(lost))
     }
     const idx = nextBeatIndex(lockedRef.current)
     window.setTimeout(() => {
       if (phaseRef.current === 'open') return
       startFly(idx)
     }, penalize ? 380 : 120)
+  }
+
+  function lockDemo() {
+    if (!demoRef.current || phaseRef.current !== 'fly') return
+    demoRef.current = false
+    setDemoOn(false)
+    snappable.current = false
+    phaseRef.current = 'snap'
+    setPhase('snap')
+    const beat = beatByIndex(flyRef.current)
+    lockedRef.current = demoCountsLocked(lockedRef.current, beat.id)
+    setLockedIds(lockedRef.current)
+    playGemPop('find')
+    commitScore(applyDemoSnap(scoreRef.current))
+    flashToast(DEMO_TURN)
+    if (allBeatsLocked(lockedRef.current) || lockedRef.current.length >= SNAPS_TO_OPEN) {
+      window.setTimeout(() => openStory(), reduced ? 80 : 420)
+      return
+    }
+    const idx = nextBeatIndex(lockedRef.current)
+    window.setTimeout(() => {
+      if (phaseRef.current === 'open') return
+      startFly(idx)
+    }, reduced ? 60 : 360)
   }
 
   function lockSnap() {
@@ -197,7 +260,7 @@ export function StorySnapPlayView({
       setLockedIds(lockedRef.current)
     }
     playGemPop('find')
-    setScore((pts) => applySnapScore(pts))
+    commitScore(applySnapScore(scoreRef.current))
     setPlusFlash(`+${SNAP_SCORE}`)
     setWinStamp(STORY_SNAP_SNAP)
     flashToast(STORY_SNAP_SNAP)
@@ -217,19 +280,25 @@ export function StorySnapPlayView({
     phaseRef.current = 'open'
     setPhase('open')
     playGemPop('win')
-    setScore((pts) => applyOpenScore(pts))
+    commitScore(applyOpenScore(scoreRef.current))
     setPlusFlash(`+${STORY_OPEN_SCORE}`)
     setWinStamp(STORY_SNAP_WIN)
     setClaimShown(true)
     window.setTimeout(() => setPlusFlash(''), 900)
+  }
+
+  function holdWin() {
+    if (phaseRef.current !== 'open' || stopping.current) return
+    stopping.current = true
     if (!cleared.current) {
       cleared.current = true
       onClear?.()
     }
+    onEasyStop?.('hold')
   }
 
   function onPadDown(event: ReactPointerEvent<HTMLButtonElement>) {
-    if (phaseRef.current === 'open') return
+    if (phaseRef.current === 'open' || demoRef.current) return
     event.preventDefault()
     if (phaseRef.current === 'ready') {
       startFly(nextBeatIndex(lockedRef.current))
@@ -240,6 +309,7 @@ export function StorySnapPlayView({
 
   function onPadKeyDown(event: ReactKeyboardEvent<HTMLButtonElement>) {
     if (event.code !== 'Space' && event.key !== ' ') return
+    if (demoRef.current) return
     event.preventDefault()
     if (phaseRef.current === 'ready') {
       startFly(nextBeatIndex(lockedRef.current))
@@ -252,11 +322,13 @@ export function StorySnapPlayView({
   const padLabel =
     phase === 'open'
       ? EASY.holdNext
-      : phase === 'ready'
-        ? 'Tap to start'
-        : inWindow
-          ? 'SNAP!'
-          : 'Wait…'
+      : demoOn
+        ? 'Watch'
+        : phase === 'ready'
+          ? 'Tap to start'
+          : inWindow
+            ? 'SNAP!'
+            : 'Wait…'
 
   return (
     <div
@@ -302,14 +374,23 @@ export function StorySnapPlayView({
       </div>
 
       {claimShown ? (
-        <p className="snap-claim" role="status">
-          {STORY_SNAP_CLAIM}
+        <section className="snap-result" data-snap-hold="open" aria-label="Story open">
+          <p className="win-stamp">{STORY_SNAP_WIN}</p>
+          <ol className="snap-result-beats">
+            {STORY_SNAP_BEATS.map((beat) => (
+              <li key={beat.id}>{beat.label}</li>
+            ))}
+          </ol>
+          <p className="snap-claim" role="status">
+            {STORY_SNAP_CLAIM}
+          </p>
+          <p className="snap-result-score">{score}</p>
+        </section>
+      ) : (
+        <p className="match-score is-juice" aria-label={`Score ${score}`}>
+          {score}
         </p>
-      ) : null}
-
-      <p className="match-score is-juice" aria-label={`Score ${score}`}>
-        {score}
-      </p>
+      )}
 
       <button
         type="button"
@@ -319,12 +400,22 @@ export function StorySnapPlayView({
         aria-label={padLabel}
       >
         {padLabel}
+        {demoOn ? (
+          <span className={`snap-ghost ${reduced ? 'is-still' : 'is-tap'}`} aria-hidden>
+            <svg viewBox="0 0 72 96" width="44" height="58">
+              <rect x="16" y="6" width="40" height="34" rx="14" fill="#ffe7c2" stroke="#5a3a12" strokeWidth="2" />
+              <ellipse cx="14" cy="30" rx="9" ry="7" fill="#ffe7c2" stroke="#5a3a12" strokeWidth="2" />
+              <rect x="29" y="28" width="14" height="60" rx="7" fill="#ffe7c2" stroke="#5a3a12" strokeWidth="2" />
+              <rect x="32" y="76" width="8" height="8" rx="3" fill="#fff6e8" stroke="#5a3a12" strokeWidth="1.5" />
+            </svg>
+          </span>
+        ) : null}
       </button>
 
       <div className="cta-dock">
         {phase === 'open' ? (
           <>
-            <button type="button" className="btn primary xl" onClick={() => onEasyStop?.('hold')}>
+            <button type="button" className="btn primary xl" onClick={holdWin}>
               {EASY.holdNext}
             </button>
             <button type="button" className="text-link" onClick={replay}>
