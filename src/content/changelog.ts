@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.494',
+    title: 'Crowns take the last stretch slower',
+    when: '2026-10-15',
+    items: [
+      'On Easy, the round 20 and round 25 crowns walk slower on the last stretch of the road.',
+      'A tap still has to land while that crown is glowing. Lamps still do not cut it.',
+      'Hard nights, and the earlier rounds, keep their old step.',
+    ],
+  },
+  {
     version: '1.4.493',
     title: 'A shorter lead boss',
     when: '2026-10-15',

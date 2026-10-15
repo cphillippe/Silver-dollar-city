@@ -1014,6 +1014,7 @@ button.defend-cross-lamp {
   vector-effect: non-scaling-stroke;
   opacity: 1;
   pointer-events: none;
+  /* 1.4.494: cueGlow.ts reads this 0.9s pulse as the tap window. */
   animation: walker-cue-pulse 0.9s ease-in-out infinite;
 }
 
