@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.491',
+    title: 'A shorter crown',
+    when: '2026-10-15',
+    items: [
+      'The round 25 crown has a shorter health bar. Taps still bring it down.',
+      'Lamps still do not cut that crown. It still takes a long run of taps.',
+      'Rounds 1 through 24 stay as they were, including the round 20 crown.',
+    ],
+  },
+  {
     version: '1.4.490',
     title: 'The cross',
     when: '2026-10-15',
