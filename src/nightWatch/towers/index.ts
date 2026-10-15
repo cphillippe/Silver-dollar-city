@@ -51,6 +51,8 @@ export interface NightTowersModule {
     runTier?: Record<string, number>,
     /** Easy Far steps. Added before the road-overlap rule. Hard passes 0. */
     extra?: number,
+    /** Easy keeps a city seat that already meets the road. Hard stays on the overlap clip. */
+    easy?: boolean,
   ): number
   cooldown(id: string, progress: ProgressState): number
   inRange(
@@ -60,6 +62,7 @@ export interface NightTowersModule {
     target: NightPoint,
     runTier?: Record<string, number>,
     extra?: number,
+    easy?: boolean,
   ): boolean
   /** Idle vs firing lamp art — Parts registry wins when filled. */
   lampSrc(pose: NightLampPose): string
@@ -87,7 +90,7 @@ export const nightTowers: NightTowersModule = {
    * so the ring on screen is the ring that hits.
    * A free seat adds `FREE_LAMP_RANGE_BONUS` on every tier (1.4.392).
    */
-  range: (id, ability, progress, runTier, extra = 0) => {
+  range: (id, ability, progress, runTier, extra = 0, easy = false) => {
     const at = lampAnchor(id)
     return lampReach(
       id,
@@ -95,11 +98,12 @@ export const nightTowers: NightTowersModule = {
         Math.max(0, extra) +
         hillRangeBonus(at),
       pathClearance(at),
+      easy,
     )
   },
   cooldown: (id, progress) => towerCooldown(seatStage(id, progress)),
-  inRange: (id, ability, progress, target, runTier, extra = 0) =>
-    dist(lampAnchor(id), target) <= nightTowers.range(id, ability, progress, runTier, extra),
+  inRange: (id, ability, progress, target, runTier, extra = 0, easy = false) =>
+    dist(lampAnchor(id), target) <= nightTowers.range(id, ability, progress, runTier, extra, easy),
   lampSrc: (pose) => nightParts.src('lamp', pose) ?? LOCAL_LAMP[pose],
   lampPose: (hot) => (hot ? 'firing' : 'idle'),
   lampImageBox: () => {
@@ -128,6 +132,12 @@ export const LAMP_ROAD_OVERLAP = 24
  */
 export const FREE_LAMP_RANGE_BONUS = 18
 
+/**
+ * Easy Journal at level I. 96 stops one unit short of the road.
+ * 98 is the first reach that meets it. Hard stays at 96.
+ */
+export const EASY_JOURNAL_REACH = 98
+
 function freeLampBase(id: string, base: number): number {
   return isFreeSpot(id) ? base + FREE_LAMP_RANGE_BONUS : base
 }
@@ -137,12 +147,17 @@ function freeLampBase(id: string, base: number): number {
  * The East porch keeps the seat-to-road bridge from 1.4.348.
  * Other seats use their own reach, and a circle that would only nick the road
  * stops one unit short of it.
+ * Easy (1.4.492): a city seat whose reach already meets the road keeps that
+ * reach. Journal's level I reach is `EASY_JOURNAL_REACH`. Hard omits `easy`.
  */
-export function lampReach(plotId: string, base: number, roadGap: number): number {
+export function lampReach(plotId: string, base: number, roadGap: number, easy = false): number {
   if (plotId === 'porch') return base + roadGap
   if (!(base > 0)) return 0
-  if (base < roadGap + LAMP_ROAD_OVERLAP) return Math.min(base, Math.max(0, roadGap - 1))
-  return base
+  let reach = base
+  if (easy && plotId === 'journal' && reach < EASY_JOURNAL_REACH) reach = EASY_JOURNAL_REACH
+  if (easy && !isFreeSpot(plotId) && reach >= roadGap) return reach
+  if (reach < roadGap + LAMP_ROAD_OVERLAP) return Math.min(reach, Math.max(0, roadGap - 1))
+  return reach
 }
 
 export const SHOT_JUICE_MS = 500

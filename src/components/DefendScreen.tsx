@@ -1731,7 +1731,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     }
     const combat = lampCombat(toolId)
     const extra = easy ? easyShotReach(pathsOf(runPathsRef.current, toolId)) : combat.rangeBonus
-    return nightTowers.range(id, toolId, progress, runTierRef.current, extra)
+    return nightTowers.range(id, toolId, progress, runTierRef.current, extra, easy)
   }
 
   function grantSparks(pay: number) {

@@ -370,7 +370,7 @@ import {
 import { nightEnemies as nightEnemiesMod } from '../src/nightWatch/enemies/index.ts'
 import { nightParts as nightPartsMod } from '../src/nightWatch/parts/index.ts'
 import { activeNightRoadD, nightPath as nightPathMod } from '../src/nightWatch/path/index.ts'
-import { nightTowers as nightTowersMod, lampReach, lampReadyToFire, FREE_LAMP_RANGE_BONUS, LAMP_ROAD_OVERLAP, SHOT_JUICE_MS, sparkAwardForHit } from '../src/nightWatch/towers/index.ts'
+import { nightTowers as nightTowersMod, lampReach, lampReadyToFire, FREE_LAMP_RANGE_BONUS, LAMP_ROAD_OVERLAP, EASY_JOURNAL_REACH, SHOT_JUICE_MS, sparkAwardForHit } from '../src/nightWatch/towers/index.ts'
 import {
   applyBoost,
   boostCost,
@@ -1665,7 +1665,18 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.491')
+assert.equal(APP_VERSION, '1.4.492')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.492'), '1.4.492 changelog row')
+assert.match(latestChange('1.4.492').title, /road/i)
+assert.doesNotMatch(
+  latestChange('1.4.492').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.492 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.492').items.join('\n'), /Easy/)
+assert.match(latestChange('1.4.492').items.join('\n'), /Science/)
+assert.match(latestChange('1.4.492').items.join('\n'), /Reason/)
+assert.match(latestChange('1.4.492').items.join('\n'), /Hard/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.491'), '1.4.491 changelog row')
 assert.match(latestChange('1.4.491').title, /crown/i)
 assert.doesNotMatch(
@@ -16766,6 +16777,20 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
     0,
     'round 10 the shrug still stops glowing taps',
   )
+  const journalGap = pathClearance(DEFEND_ANCHOR.journal)
+  const benchGap492 = pathClearance(DEFEND_ANCHOR.bench)
+  assert.equal(EASY_JOURNAL_REACH, 98, '1.4.492 Reason reach is 98')
+  assert.ok(journalGap > 96 && journalGap <= EASY_JOURNAL_REACH, '1.4.492 Reason sits just off a 96 reach')
+  assert.equal(lampReach('journal', 96, journalGap, true), EASY_JOURNAL_REACH, '1.4.492 Easy Reason uses that reach')
+  assert.ok(lampReach('journal', 96, journalGap, true) >= journalGap, '1.4.492 Easy Reason meets the road')
+  assert.ok(lampReach('journal', 96, journalGap) < journalGap, '1.4.492 Hard Reason stays short')
+  assert.equal(lampReach('bench', 96, benchGap492, true), 96, '1.4.492 Easy Bench keeps 96')
+  assert.ok(lampReach('bench', 96, benchGap492, true) >= benchGap492, '1.4.492 Easy Bench meets the road')
+  assert.equal(
+    lampReach('bench', 96, benchGap492),
+    Math.min(96, benchGap492 - 1),
+    '1.4.492 Hard Bench still stops one unit short',
+  )
   const leadBell = leadCssPlate(LEAD_BELL_CSS)
   const leadIncense = leadCssPlate(LEAD_INCENSE_CSS)
   const leadPads = [
@@ -16779,19 +16804,25 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
     bellAt: leadBell,
     incenseAt: leadIncense,
   })
-  assert.equal(leadRound.boss, 'leak', 'round 10 default rings leak the boss')
-  assert.equal(leadRound.bossTap, 4, 'round 10 default rings still stop at four boss taps')
-  assert.equal(leadRound.bossLamp, 7, 'round 10 porch and hollow only land 7 on that boss')
-  assert.ok(leadRound.bossSec >= 14 && leadRound.bossSec <= 16, 'round 10 the boss is on the road about 15s')
+  assert.equal(leadRound.boss, 'leak', '1.4.492 the round 10 boss still leaves')
+  assert.equal(leadRound.bossTap, 4, '1.4.492 default rings still stop at four boss taps')
+  assert.equal(leadRound.bossLamp, 10, '1.4.492 the four Strong 1 lamps land 10 on that boss')
+  assert.ok(leadRound.bossSec >= 14 && leadRound.bossSec <= 16, '1.4.492 the boss is still on the road about 15s')
   const leadBy = Object.fromEntries((leadRound.byLamp ?? []).map((lamp) => [lamp.id, lamp]))
-  assert.equal(leadBy.journal.boss + leadBy.journal.trash, 0, 'round 10 Journal misses the road at Strong 1')
-  assert.equal(leadBy.bench.boss + leadBy.bench.trash, 0, 'round 10 Bench misses the road at Strong 1')
-  assert.equal(leadBy.porch.boss, 5, 'round 10 the porch lamp is the one that nicks the boss')
-  assert.equal(leadBy.hollow.boss, 2, 'round 10 the hollow lamp nicks the boss twice')
-  assert.equal(leadBy.porch.passed, 0, 'round 10 the porch lamp already shoots the boss when it is in range')
-  assert.equal(leadBy.hollow.passed, 0, 'round 10 the hollow lamp already shoots the boss when it is in range')
+  assert.equal(leadBy.journal.boss, 1, '1.4.492 Journal now nicks the boss')
+  assert.equal(leadBy.bench.boss, 2, '1.4.492 Bench now nicks the boss')
+  assert.ok(leadBy.journal.trash > 0, '1.4.492 Journal shoots the road')
+  assert.ok(leadBy.bench.trash > 0, '1.4.492 Bench shoots the road')
+  assert.ok(leadBy.journal.range >= leadBy.journal.gap, '1.4.492 Journal reach meets its gap')
+  assert.ok(leadBy.bench.range >= leadBy.bench.gap, '1.4.492 Bench reach meets its gap')
+  assert.equal(leadBy.porch.boss, 5, '1.4.492 the porch lamp still nicks the boss five times')
+  assert.equal(leadBy.hollow.boss, 2, '1.4.492 the hollow lamp still nicks the boss twice')
+  assert.equal(leadBy.porch.passed, 0, '1.4.492 the porch lamp already shoots the boss when it is in range')
+  assert.equal(leadBy.hollow.passed, 0, '1.4.492 the hollow lamp already shoots the boss when it is in range')
+  assert.equal(leadBy.journal.passed, 0, '1.4.492 Journal already shoots the boss when it is in range')
+  assert.equal(leadBy.bench.passed, 0, '1.4.492 Bench already shoots the boss when it is in range')
   const leadNight = paceEasyLeadPads('journal', 'porch', HUMAN_TAP_EVERY, 2)
-  assert.equal(leadNight.dead, 9, 'round 10 this spender dies on round 9 and never meets the boss')
+  assert.equal(leadNight.dead, 9, '1.4.492 this spender still dies on round 9 and never meets the boss')
   assert.equal(lightRowDead[1], 9, '1.4.472 seed 2 light-tap row stops on round 9')
   assert.equal(lightSpreadDead[1], 8, '1.4.472 seed 2 is a live replay where the row outlasts the spread')
   assert.equal(lightRowDead[3], 9, '1.4.472 seed 4 light-tap row stops on round 9')

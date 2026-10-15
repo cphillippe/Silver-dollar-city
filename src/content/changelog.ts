@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.492',
+    title: 'Lamps meet the road',
+    when: '2026-10-15',
+    items: [
+      'On Easy, a city lamp that already reaches the road keeps that reach. Science on the bench can shoot.',
+      'Reason reaches a little farther, so that lamp meets the road too.',
+      'Hard nights keep the old reach.',
+    ],
+  },
+  {
     version: '1.4.491',
     title: 'A shorter crown',
     when: '2026-10-15',
