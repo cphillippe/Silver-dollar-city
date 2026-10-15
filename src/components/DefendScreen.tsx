@@ -16,6 +16,7 @@ import { pickWalkerFace, WALKER_FACE_POOL } from '../nightWatch/enemies/faces'
 import {
   BOSS_PACE,
   easyBossPace,
+  easyCrownWalkMul,
   easyBossClearSparks,
   easyClearSparkBonus,
   easyBossHp,
@@ -863,6 +864,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
           bellPace = bellPaceFor(plantsRef.current, runPathsRef.current, nightEnemies.at(item))
         }
         step *= walkerSlowPace(mapPace, bellPace)
+        if (easy && item.boss) step *= easyCrownWalkMul(waveIndexRef.current, item.t, true)
         return {
           ...item,
           fog,

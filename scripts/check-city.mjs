@@ -132,7 +132,10 @@ import {
   BOSS_CLEAR_SPARKS,
   BOSS_PACE,
   SHOWDOWN_PACE,
+  EASY_CROWN_LAST_MUL,
+  EASY_CROWN_LAST_T,
   easyBossPace,
+  easyCrownWalkMul,
   easyBossClearSparks,
   easyClearSparkBonus,
   easyBossHp,
@@ -194,6 +197,7 @@ import {
   paceMazeSpender,
   strongFirstBuy,
 } from '../src/nightWatch/livePace.ts'
+import { CUE_GLOW_AT, CUE_PULSE_S, CUE_REACT_S, cueGlowDuty, cueGlowTaps } from '../src/nightWatch/cueGlow.ts'
 import { nightWatchMapMissing, nightWatchMapQuery } from '../src/lib/nightWatchDebug.ts'
 import { A2_NIGHT_MAP } from '../src/nightWatch/maps/a2.ts'
 import { nightMapFromPack } from '../src/nightWatch/maps/fromPack.ts'
@@ -1666,7 +1670,17 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.493')
+assert.equal(APP_VERSION, '1.4.494')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.494'), '1.4.494 changelog row')
+assert.match(latestChange('1.4.494').title, /crown/i)
+assert.doesNotMatch(
+  latestChange('1.4.494').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.494 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.494').items.join('\n'), /round 20/)
+assert.match(latestChange('1.4.494').items.join('\n'), /glow/)
+assert.match(latestChange('1.4.494').items.join('\n'), /Hard/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.493'), '1.4.493 changelog row')
 assert.match(latestChange('1.4.493').title, /boss/i)
 assert.doesNotMatch(
@@ -1944,6 +1958,53 @@ assert.match(
   assert.equal(after487.dead, null, '1.4.491 the main late night still clears round 25')
   assert.equal(crossNight.dead, null, '1.4.491 the cross night still clears round 25')
   assert.ok(idleDead === 20 || idleDead === 25, `1.4.491 an idle late run still loses on round ${idleDead}`)
+  assert.equal(CUE_PULSE_S, 0.9, '1.4.494 the live cue pulse is 0.9s')
+  assert.equal(CUE_REACT_S, 0.3, '1.4.494 the glow tap waits 300ms')
+  assert.equal(CUE_GLOW_AT, 0.575, '1.4.494 the glow window is the bright half of the pulse')
+  assert.equal(cueGlowTaps(39.69), 44, '1.4.494 an unslowed round 20 road lands 44 glow taps')
+  assert.equal(64 - cueGlowTaps(39.69), 20, '1.4.494 that leaves 20 of 64')
+  assert.equal(cueGlowTaps(38.92), 43, '1.4.494 an unslowed round 25 road lands 43 glow taps')
+  assert.equal(72 - cueGlowTaps(38.92), 29, '1.4.494 that leaves 29 of 72')
+  const dutyEarly = cueGlowDuty(0, 5)
+  const dutyLate = cueGlowDuty(34, 39)
+  assert.ok(dutyEarly > 0.4 && dutyEarly < 0.65, `1.4.494 early glow duty is ${dutyEarly.toFixed(3)}`)
+  assert.ok(dutyLate > 0.4 && dutyLate < 0.65, `1.4.494 low-HP glow duty is ${dutyLate.toFixed(3)}`)
+  assert.ok(dutyLate > dutyEarly * 0.8, '1.4.494 the glow windows do not shrink near the end')
+  assert.equal(EASY_CROWN_LAST_T, 0.65, '1.4.494 the slow starts at 65% of the path')
+  assert.equal(EASY_CROWN_LAST_MUL, 0.4, '1.4.494 the last stretch walks at 0.4')
+  assert.equal(easyCrownWalkMul(19, 0.5, true), 1, '1.4.494 the crown keeps the old step before the last stretch')
+  assert.equal(easyCrownWalkMul(19, 0.9, true), 0.4, '1.4.494 the round 20 crown slows on the last stretch')
+  assert.equal(easyCrownWalkMul(24, 0.9, true), 0.4, '1.4.494 the round 25 crown slows on the last stretch')
+  assert.equal(easyCrownWalkMul(19, 0.9, false), 1, '1.4.494 Hard does not take the last-stretch slow')
+  assert.equal(easyCrownWalkMul(9, 0.9, true), 1, '1.4.494 round 10 keeps its step')
+  assert.equal(easyBossPace(19), SHOWDOWN_PACE, '1.4.494 the showdown step itself stays 0.26')
+  const crown20 = paceEasyLive(19, lateLamps, 3, false, HUMAN_TAP_EVERY, 'road')
+  const idle20 = paceEasyLive(19, lateLamps, 3, false, 1e9, 'road')
+  const idle25 = paceEasyLive(24, lateLamps, 3, false, 1e9, 'road')
+  assert.equal(crown20.result, 'clear', '1.4.494 glow taps clear the round 20 crown')
+  assert.equal(crown20.boss, 'kill')
+  assert.equal(crown20.bossTap, 64, '1.4.494 the round 20 crown is still 64 taps')
+  assert.equal(crown20.bossLamp, 0, '1.4.494 lamps still do not cut the round 20 crown')
+  assert.ok(crown20.bossSec >= 55 && crown20.bossSec <= 62, `1.4.494 the round 20 crown falls at ${crown20.bossSec.toFixed(2)}s`)
+  assert.ok(idle20.bossSec - crown20.bossSec >= 3, `1.4.494 round 20 margin is ${(idle20.bossSec - crown20.bossSec).toFixed(2)}s`)
+  assert.equal(idle20.boss, 'leak', '1.4.494 an idle round 20 crown still leaks')
+  assert.equal(crown487.bossTap, 72, '1.4.494 the round 25 crown is still 72 taps')
+  assert.ok(crown487.bossSec >= 60 && crown487.bossSec <= 70, `1.4.494 the round 25 crown falls at ${crown487.bossSec.toFixed(2)}s`)
+  assert.ok(idle25.bossSec - crown487.bossSec >= 3, `1.4.494 round 25 margin is ${(idle25.bossSec - crown487.bossSec).toFixed(2)}s`)
+  assert.equal(idle25.boss, 'leak', '1.4.494 an idle round 25 crown still leaks')
+  const sloppy20 = paceEasyLive(19, lateLamps, 3, false, HUMAN_TAP_EVERY, 'road', undefined, [], undefined, 0, undefined, undefined, 0.5)
+  const sloppy25 = paceEasyLive(24, lateLamps, 3, false, HUMAN_TAP_EVERY, 'road', undefined, [], undefined, 0, undefined, undefined, 0.5)
+  assert.equal(sloppy20.boss, 'leak', '1.4.494 missing half the glow windows leaks the round 20 crown')
+  assert.ok(sloppy20.bossTap < 64 && sloppy20.bossTap > 0, `1.4.494 the sloppy round 20 crown keeps ${64 - sloppy20.bossTap} HP`)
+  assert.equal(sloppy25.boss, 'leak', '1.4.494 missing half the glow windows leaks the round 25 crown')
+  assert.ok(sloppy25.bossTap < 72, `1.4.494 the sloppy round 25 crown keeps ${72 - sloppy25.bossTap} HP`)
+  const defendCss494 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  assert.match(defendCss494, /animation: walker-cue-pulse 0\.9s ease-in-out infinite/, '1.4.494 the cue ring is still the 0.9s pulse')
+  assert.match(
+    readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8'),
+    /if \(easy && item\.boss\) step \*= easyCrownWalkMul/,
+    '1.4.494 only an Easy crown takes the last-stretch slow',
+  )
 }
 
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.485'), '1.4.485 changelog row')
