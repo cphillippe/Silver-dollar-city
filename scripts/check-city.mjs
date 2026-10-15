@@ -8243,6 +8243,11 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(scans480, /checkLiveProve\(\)/, '1.4.480 city scans plant incense and tap the walkers')
   assert.match(prove480, /page\.mouse\.click\(inside/, '1.4.480 a city scan taps inside the incense cloud')
   assert.match(prove480, /page\.mouse\.click\(outside/, '1.4.480 a city scan taps outside the incense cloud')
+  assert.match(
+    prove480,
+    /page\.mouse\.click\(overlap\.x, overlap\.y\)/,
+    '1.4.480 a city scan clicks the Candle button under the Love upgrade icon',
+  )
   assert.equal(easyCrowdCap(4), EASY_WAVE_LIVE, '1.4.480 round 5 stays on the rounds 1–6 cap')
   assert.equal(EASY_WAVE_LIVE, 3)
 }

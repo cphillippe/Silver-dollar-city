@@ -517,7 +517,7 @@ async function checkClearBar(browser, port, errors) {
   const before = await spend.boundingBox()
   assert.ok(before && before.height > 10, '1.4.480 Spend is on the round 9 clear bar')
   const overlap = await page.evaluate(() => {
-    const love = document.querySelector('[data-tower-type="love"]')
+    const love = document.querySelector('.defend-clear-lamp[data-tower-type="love"]')
     const button = document.querySelector('.defend-clear-row [data-candle-lamp="yes"]')
     if (!love || !button) return null
     const a = love.getBoundingClientRect()
@@ -530,10 +530,23 @@ async function checkClearBar(browser, port, errors) {
     return {
       hit: wide > 1 && tall > 1,
       top: node?.closest?.('[data-candle-lamp]') ? 'candle' : (node?.className?.toString?.() ?? '').slice(0, 40),
+      x,
+      y,
+      love: { x: a.x, y: a.y, w: a.width, h: a.height },
+      candle: { x: b.x, y: b.y, w: b.width, h: b.height },
     }
   })
-  assert.equal(overlap?.hit, true, '1.4.480 the Love icon overlaps the Candle button')
-  assert.equal(overlap?.top, 'candle', '1.4.480 the Candle button takes the click')
+  assert.ok(overlap, '1.4.480 the round 9 clear panel has a Love upgrade icon and a Candle button')
+  assert.equal(overlap.hit, true, `1.4.480 the Love upgrade icon overlaps the Candle button ${JSON.stringify(overlap)}`)
+  assert.equal(overlap.top, 'candle', '1.4.480 the Candle button takes the click through the Love upgrade icon')
+  await page.mouse.click(overlap.x, overlap.y)
+  await page.waitForTimeout(200)
+  const armed = await candle.getAttribute('aria-pressed')
+  const note = (await page.locator('.defend-clear-note').textContent()) ?? ''
+  assert.ok(
+    armed === 'true' || /Need \d+ sparks|Six candles/.test(note),
+    `1.4.480 a click on the overlapped Candle button reaches Candle (${armed ?? 'unset'} / ${note})`,
+  )
   await page.locator('[data-new-lamp="yes"]').click()
   await page.waitForTimeout(150)
   const after = await spend.boundingBox()
