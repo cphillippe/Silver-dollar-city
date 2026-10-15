@@ -135,6 +135,11 @@ assert.match(playSrc, /is-story-snap/)
 assert.match(playSrc, /STORY OPEN/)
 assert.match(
   playSrc,
+  /: easy \? \(\s*<div className="snap-pad snap-pad-slot" aria-hidden="true" \/>\s*\) : null/,
+  'Hard has no .snap-pad-slot on the win screen',
+)
+assert.match(
+  playSrc,
   /recycleBeat\(flyPastIsMiss\(tappedRef\.current, easyRef\.current\)\)/,
   'the fly-past miss is gated on Easy',
 )
@@ -167,6 +172,16 @@ assert.match(playSrc, /easy-who-where-line/, 'quiet who·place stays')
 assert.match(playSrc, /1\.4\.163.*#209|#209.*omit STORY_SNAP_TEACH/)
 
 const snapCss = readFileSync(new URL('../src/styles/storySnap.css', import.meta.url), 'utf8')
+assert.match(
+  snapCss,
+  /html\[data-easy='on'\] \.play\.is-story-snap \.snap-pad-slot/,
+  'the SNAP placeholder is Easy only',
+)
+assert.doesNotMatch(
+  snapCss,
+  /(^|\n)\.play\.is-story-snap \.snap-pad-slot \{/,
+  'Hard does not keep the SNAP placeholder gap',
+)
 assert.match(snapCss, /max-height:\s*720px/)
 assert.match(snapCss, /\.snap-teach/)
 assert.match(snapCss, /-webkit-line-clamp:\s*2/)

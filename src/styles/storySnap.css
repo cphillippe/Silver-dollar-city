@@ -225,7 +225,7 @@ html[data-easy='on'] .play.is-story-snap button.snap-pad:active {
   pointer-events: none;
 }
 
-.play.is-story-snap .snap-pad-slot {
+html[data-easy='on'] .play.is-story-snap .snap-pad-slot {
   visibility: hidden;
   pointer-events: none;
 }
