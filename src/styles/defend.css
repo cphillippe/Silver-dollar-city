@@ -3087,6 +3087,12 @@ button.defend-path-pip {
   display: none;
 }
 
+/* 1.4.489 Easy wave only. Map name chips and the SVG type words stay off while walkers move. Plant and the clear are is-easy-watch without is-easy-tap, so the names come back. Hard never has is-easy-watch. */
+.defend-page.is-easy-watch.is-easy-tap .defend-type-chip,
+.defend-page.is-easy-watch.is-easy-tap text.defend-type-label {
+  display: none;
+}
+
 /* Filled steps and the next buy share one rounded square. The next pip is a button, so it does not fall back to a round control. */
 .defend-page.is-easy-watch.is-easy-tap .defend-tower-card .defend-path-pip.is-on,
 .defend-page.is-easy-watch.is-easy-tap .defend-tower-card button.defend-path-pip.is-buy {

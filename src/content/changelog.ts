@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.489',
+    title: 'Quiet names',
+    when: '2026-10-15',
+    items: [
+      'During a wave, the map no longer prints Love, Logic, Reason, or Science on the lamps.',
+      'Those names come back while you plant and when the round is clear.',
+    ],
+  },
+  {
     version: '1.4.488',
     title: 'Quieter wave',
     when: '2026-10-15',
