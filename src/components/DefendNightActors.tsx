@@ -460,7 +460,8 @@ export function DefendNightActorsSvg({
                         )}
                         {hot ? <circle className="defend-hot-halo" r="27" /> : null}
                         {upgrading || justUp ? <circle className="defend-upgrade-ring" r="36" /> : null}
-                        {phase !== 'wave' ? (
+                        {/* Easy keeps the tag mounted so the wave stylesheet can hide it. Hard still omits it during a wave. */}
+                        {phase !== 'wave' || easy ? (
                           <text
                             className={`defend-level-pip${justUp ? ' is-bump' : ''}`}
                             y="-98"
