@@ -48,6 +48,13 @@ export function previousMap(id: NightMapId): NightMapId | null {
   return index > 0 ? NIGHT_MAP_IDS[index - 1] : null
 }
 
+/** Why a locked map stays shut. Silver City has no previous map. */
+export function mapLockReason(id: NightMapId): string | null {
+  const prev = previousMap(id)
+  if (!prev) return null
+  return `Beat round 10 on ${NIGHT_MAP_NAME[prev]} to unlock`
+}
+
 export function nextMap(id: NightMapId): NightMapId | null {
   const index = NIGHT_MAP_IDS.indexOf(id)
   return index >= 0 && index < NIGHT_MAP_IDS.length - 1 ? NIGHT_MAP_IDS[index + 1] : null

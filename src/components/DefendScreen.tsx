@@ -82,6 +82,7 @@ import {
   nightWatchJumpAllowed,
   nightWatchMapMissing,
   nightWatchMapQuery,
+  nightWatchSkipsMapSheet,
   readNightWatchDebug,
   readNightWatchRoundJump,
 } from '../lib/nightWatchDebug'
@@ -277,6 +278,9 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const arming = false
   const [phase, setPhase] = useState<NightPhase>('plant')
   const [sessionMap, setSessionMap] = useState<NightMapId | null>(null)
+  const [mapChosen, setMapChosen] = useState(
+    () => typeof window !== 'undefined' && nightWatchSkipsMapSheet(window.location.search, readNightWatchDebug()),
+  )
   const [waveIndex, setWaveIndex] = useState(() => initialNightJump(easy)?.index ?? 0)
   const [runTier, setRunTier] = useState<Record<string, number>>(freshRunTier)
   const [runPaths, setRunPaths] = useState(() => initialNightJump(easy)?.load.paths ?? freshRunPaths())
@@ -2700,6 +2704,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     />
   )
 
+  const showMapSheet = easy && phase === 'plant' && planted.length < 1 && !won && !mapChosen
+
   const docks = (
     <>
       {tapReadoutOn && (phase === 'wave' || phase === 'boost' || phase === 'lost') ? (
@@ -2818,6 +2824,11 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
         <div
           className={`defend-boost${easy ? ' is-clear-bar' : ''}${clearSpendOpen ? ' is-spend-open' : ''}${clearHelpOpen ? ' is-help-open' : ''}`}
         >
+          {easy ? (
+            <p className="defend-clear-note" data-clear-note={toolLock ? 'yes' : 'no'} role="status">
+              {toolLock ?? ''}
+            </p>
+          ) : null}
           <p className="defend-boost-status" role="status">
             {easy ? `Round ${waveIndex + 1} clear` : `Wave ${waveIndex + 1} clear`}
             {easy && bossBonus > 0 ? (
@@ -2949,17 +2960,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
           )}
         </div>
       ) : null}
-      {easy && phase === 'plant' && planted.length < 1 && !won ? (
-        <NightMapPicker
-          mapId={mapId}
-          isOpen={(id) => mapIsOpen(id, progress.defense)}
-          onPick={(id) => {
-            setSessionMap(id)
-            if (mapIsOpen(id, progress.defense)) chooseNightMap(id)
-          }}
-        />
-      ) : null}
       {(phase === 'plant' || planted.length < 1) &&
+      !showMapSheet &&
       phase !== 'lost' &&
       phase !== 'boost' &&
       !won ? (
@@ -3045,7 +3047,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
           ) : null}
         </>
       ) : null}
-      {toolLock ? (
+      {toolLock && !(easy && phase === 'boost') ? (
         <p className="match-toast" role="status">
           {toolLock}
         </p>
@@ -3156,6 +3158,19 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
             rail={rail}
             docks={docks}
           >
+            {showMapSheet ? (
+              <div className="nw-map-overlay" role="dialog" aria-label="Choose a map" data-map-overlay="yes">
+                <NightMapPicker
+                  mapId={mapId}
+                  isOpen={(id) => mapIsOpen(id, progress.defense)}
+                  onPick={(id) => {
+                    setSessionMap(id)
+                    if (mapIsOpen(id, progress.defense)) chooseNightMap(id)
+                    setMapChosen(true)
+                  }}
+                />
+              </div>
+            ) : null}
             <DefendNightBoard
               boardRef={boardRef}
               viewBox={plateFill ? boardFillBox(boardBox) : boardViewBox(boardBox)}

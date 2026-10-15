@@ -16,6 +16,20 @@ export const TOWER_LAMP_SPRITE = {
   footY: 12,
 }
 
+export type LampIconMark = 'tower' | 'candle' | 'bell' | 'incense'
+
+/**
+ * Tap box for a planted lamp, in viewBox units, feet on the anchor.
+ * A walker beside this box is outside the icon. The range ring is not a target.
+ */
+export function lampIconBox(mark: LampIconMark): { x: number; y: number; w: number; h: number } {
+  if (mark === 'candle') return { x: -14, y: -44, w: 28, h: 52 }
+  if (mark === 'bell') return { x: -20, y: -40, w: 40, h: 48 }
+  if (mark === 'incense') return { x: -18, y: -42, w: 36, h: 52 }
+  const { w, h, footY } = TOWER_LAMP_SPRITE
+  return { x: -w / 2, y: -(h - footY), w, h }
+}
+
 const LOCAL_LAMP: Record<NightLampPose, string> = {
   idle: new URL('../../assets/night-watch/nw-tower-lamp-idle-cut.png', import.meta.url).href,
   firing: new URL('../../assets/night-watch/nw-tower-lamp-firing-cut.png', import.meta.url).href,
