@@ -7,6 +7,7 @@ import {
   debugPlayGroups,
   debugPlayLabel,
 } from '../src/lib/debugPlays.ts'
+import { STORY_SNAP_ON } from '../src/lib/storySnap.ts'
 import { storyPlayFor } from '../src/lib/storyPlay.ts'
 import { readAppCss } from './readAppCss.mjs'
 
@@ -27,7 +28,7 @@ assert.equal(DEBUG_LAYER_LINES['why-blast'], 'ph-road')
 
 assert.equal(storyPlayFor('ph-road'), 'road-maze')
 assert.equal(storyPlayFor('ph-father'), 'father-run')
-assert.equal(storyPlayFor('daily-lantern'), 'story-snap')
+assert.equal(storyPlayFor('daily-lantern'), STORY_SNAP_ON ? 'story-snap' : 'panel-blast')
 assert.equal(storyPlayFor('ph-debt'), 'panel-blast')
 assert.equal(storyPlayFor('wb-creed'), 'claim-merge')
 assert.equal(storyPlayFor('wb-women'), 'source-dig')
@@ -37,7 +38,8 @@ assert.equal(storyPlayFor('ic-trajan'), 'source-dig')
 
 assert.ok(plays.has('road-maze'), 'debug lists road-maze')
 assert.ok(plays.has('father-run'), 'debug lists father-run')
-assert.ok(plays.has('story-snap'), 'debug lists story-snap')
+if (STORY_SNAP_ON) assert.ok(plays.has('story-snap'), 'debug lists story-snap')
+else assert.equal(plays.has('story-snap'), false, 'parked Story Snap is not a debug jump')
 assert.ok(plays.has('panel-blast'), 'debug lists gem Match / panel-blast')
 assert.ok(plays.has('claim-merge'), 'debug lists claim-merge')
 assert.ok(plays.has('source-dig'), 'debug lists source-dig')
@@ -45,7 +47,7 @@ assert.ok(plays.has('why-blast'), 'debug lists Lock In Why Blast')
 
 const maze = games.find((item) => item.lineId === 'ph-road' && item.play === 'road-maze')
 const run = games.find((item) => item.lineId === 'ph-father')
-const snap = games.find((item) => item.lineId === 'daily-lantern' && item.play === 'story-snap')
+const snap = games.find((item) => item.lineId === 'daily-lantern')
 const match = games.find((item) => item.lineId === 'ph-debt')
 const merge = games.find((item) => item.lineId === 'wb-creed')
 const dig = games.find((item) => item.lineId === 'wb-women')
@@ -74,6 +76,7 @@ assert.match(debugPlayLabel(hold), /^ph-road · Lock In Why Blast/)
 
 assert.deepEqual(debugJumpView(maze), { name: 'link', debugLine: 'ph-road' })
 assert.deepEqual(debugJumpView(run), { name: 'link', debugLine: 'ph-father' })
+assert.equal(snap.play, STORY_SNAP_ON ? 'story-snap' : 'panel-blast')
 assert.deepEqual(debugJumpView(snap), { name: 'link', debugLine: 'daily-lantern' })
 assert.deepEqual(debugJumpView(match), { name: 'link', debugLine: 'ph-debt' })
 assert.deepEqual(debugJumpView(merge), { name: 'link', debugLine: 'wb-creed' })
@@ -86,7 +89,9 @@ assert.deepEqual(debugJumpView(hold), {
 
 assert.deepEqual(
   groups.map((group) => group.play),
-  ['road-maze', 'father-run', 'story-snap', 'panel-blast', 'claim-merge', 'source-dig', 'why-blast'],
+  STORY_SNAP_ON
+    ? ['road-maze', 'father-run', 'story-snap', 'panel-blast', 'claim-merge', 'source-dig', 'why-blast']
+    : ['road-maze', 'father-run', 'panel-blast', 'claim-merge', 'source-dig', 'why-blast'],
 )
 assert.ok(games.filter((item) => item.play === 'source-dig').length >= 2)
 

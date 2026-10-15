@@ -446,6 +446,7 @@ import {
 import { emptyProgress, progressAfterReset } from '../src/lib/save.ts'
 import { EASY, EASY_LINE_ORDER, DIG_ARC, FOUNDATION_ARC, NAMES_ARC, STONE_ARC, INK_ARC, easyChromeLine, easyChromeNearDup, easyFacingLine, easyHomeFocus, easyHoldFields, easyHoldLine, easyHoldPractice, easyHoldView, easyLockInExit, easyLearnLine, easyLineHeld, easyLineLearned, easyLineTaught, easyLoopLine, easyMatchLine, easyMatchReady, easyTeachFields, easyTrailView, markEasyHeld, markEasyTaught, progressAfterMatchTaught, sameProofRecap, easyWhoWhere, easyWhoWhereLine, easyWhyLine, easyWhyWordCount, easyWrongTap, uniqueHoldChoices } from '../src/lib/easy.ts'
 import { storyPlayFor } from '../src/lib/storyPlay.ts'
+import { STORY_SNAP_ON } from '../src/lib/storySnap.ts'
 import { DEBUG_LAYER_LINES, debugJumpView, debugStoryStripJump, storyStripLines } from '../src/lib/debugPlays.ts'
 import { FATHER_RUN_LINE } from '../src/lib/fatherRun.ts'
 import * as fatherRunHome from '../src/easyTrail/father/fatherRun.ts'
@@ -1639,7 +1640,14 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.483')
+assert.equal(APP_VERSION, '1.4.484')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.484'), '1.4.484 changelog row')
+assert.match(latestChange('1.4.484').items.join('\n'), /Match/)
+assert.doesNotMatch(
+  latestChange('1.4.484').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.484 changelog avoids GitHub close keywords',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.483'), '1.4.483 changelog row')
 assert.match(latestChange('1.4.483').title, /map/i)
 assert.doesNotMatch(
@@ -15077,6 +15085,14 @@ console.log('check-city: ok')
   assert.match(match333, /export \{ lessonStory, storyPlayFor \} from '\.\.\/\.\.\/lib\/storyPlay\.ts'/)
 
   for (const kind of kinds333) {
+    if (kind === 'story-snap' && !STORY_SNAP_ON) {
+      assert.notEqual(
+        storyPlayFor(DEBUG_LAYER_LINES[kind]),
+        'story-snap',
+        'parked Story Snap is not reachable from the lantern line',
+      )
+      continue
+    }
     assert.equal(storyPlayFor(DEBUG_LAYER_LINES[kind]), kind, `1.4.333 ${kind} is reachable from a real line`)
   }
   assert.equal(storyPlayFor(FATHER_RUN_LINE), 'father-run')
