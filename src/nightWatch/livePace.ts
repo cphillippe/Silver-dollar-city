@@ -8,6 +8,7 @@ import {
   easyRoundHeartCap,
   easyTapArmored,
 } from '../lib/defend.ts'
+import { applyIncenseTap } from './incense.ts'
 import { nightSeedPlan, nightSeedShotWait, nightSeedSpawnScale } from './seed.ts'
 import { DEFEND_ANCHOR, pathClearance, pathPick, pathPoint } from './path/data.ts'
 import { easyRound as liveRound, type EasyRound } from './rounds.ts'
@@ -335,6 +336,12 @@ export function paceEasyLive(
    * The same number always plays the same wave.
    */
   seed?: number,
+  /**
+   * Extra damage on a glowing tap that already landed.
+   * 0 leaves the round unchanged. A soaked or shrugging hit stays at 0 damage,
+   * so this cannot add to a shrug.
+   */
+  tapBonus = 0,
 ): PaceLive {
   const road = mode === 'road' || mode === 'road437' || Boolean(map)
   const roadPath = map?.path
@@ -654,11 +661,12 @@ export function paceEasyLive(
           easyTapArmored(roundIndex, cue.gait, cue.boss, tune.armorFrom) || leadBoss(cue),
           mode === 'road' && !map && roundIndex === 4 && cue.gait === 'tough' && (tune.armorFrom ?? 7) >= 7,
         )
-        if (dmg > 0) {
-          cue.chip += dmg
-          cue.hp -= dmg
+        const hit = dmg > 0 && tapBonus > 0 ? applyIncenseTap(dmg, tapBonus) : dmg
+        if (hit > 0) {
+          cue.chip += hit
+          cue.hp -= hit
           taps += 1
-          if (cue.boss) bossTap += dmg
+          if (cue.boss) bossTap += hit
           if (cue.hp <= 0) kill(cue, false)
         }
       }
