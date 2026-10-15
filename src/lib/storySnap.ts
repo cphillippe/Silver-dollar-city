@@ -99,6 +99,40 @@ export function applyMissScore(score: number): number {
   return Math.max(0, score - MISS_PENALTY)
 }
 
+/** Easy miss copy. No points, so no digit. */
+export const MISS_TRY_AGAIN = 'Miss — try again'
+
+/** Shown when the ghost hand finishes the first beat. */
+export const DEMO_TURN = 'Your turn!'
+
+/** Points a miss actually takes. Easy stays put. Hard uses applyMissScore. */
+export function missPointsLost(score: number, easy: boolean): number {
+  if (easy) return 0
+  return Math.max(0, score - applyMissScore(score))
+}
+
+/** Toast for a miss. A zero loss, Easy or Hard, names no number. */
+export function missToast(lost: number): string {
+  if (lost <= 0) return MISS_TRY_AGAIN
+  return `Miss −${lost}`
+}
+
+/** A miss keeps every beat already locked. */
+export function lockedAfterMiss<T>(lockedIds: readonly T[]): T[] {
+  return [...lockedIds]
+}
+
+/** The demo snap adds nothing. */
+export function applyDemoSnap(score: number): number {
+  return score
+}
+
+/** The demo beat counts as locked, same as a player snap. */
+export function demoCountsLocked(lockedIds: readonly string[], beatId: string): string[] {
+  if (lockedIds.includes(beatId)) return [...lockedIds]
+  return [...lockedIds, beatId]
+}
+
 /** Next unlocked beat index; wraps / recycles misses via caller queue. */
 export function nextBeatIndex(lockedIds: readonly string[]): number {
   for (let i = 0; i < STORY_SNAP_BEATS.length; i += 1) {

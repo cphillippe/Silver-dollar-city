@@ -1635,7 +1635,15 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.476')
+assert.equal(APP_VERSION, '1.4.477')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.477'), '1.4.477 changelog row')
+assert.match(latestChange('1.4.477').title, /snap|hand|story/i)
+assert.match(latestChange('1.4.477').items.join('\n'), /try again/)
+assert.doesNotMatch(
+  latestChange('1.4.477').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.477 changelog avoids GitHub close keywords',
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.476'), '1.4.476 changelog row')
 assert.match(latestChange('1.4.476').title, /Silas|square/i)
 assert.match(latestChange('1.4.476').items.join('\n'), /Witness Square/)
@@ -16267,3 +16275,6 @@ await import('./check-seed-fire.mjs').then((mod) => mod.checkSeedFire())
 await import('./check-night-jump.mjs').then((mod) => mod.checkNightJump())
 await import('./check-story-win.mjs').then((mod) => mod.checkStoryWins())
 await import('./check-easy-face.mjs').then((mod) => mod.checkEasyFace())
+const snapHoldScan = readFileSync(new URL('./check-story-snap.mjs', import.meta.url), 'utf8')
+assert.match(snapHoldScan, /win card stays at least 5s/, '1.4.477 the city scan holds STORY OPEN')
+await import('./check-story-snap.mjs').then((mod) => mod.checkSnapHold())
