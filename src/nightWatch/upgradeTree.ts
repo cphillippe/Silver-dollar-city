@@ -99,6 +99,16 @@ export interface BonusGate {
   cleared?: boolean
 }
 
+/**
+ * Mid-wave Easy cards show the steps already bought and the next one that can be bought.
+ * Later prices, including a locked Lock In step, stay off the card until the wave ends.
+ */
+export function wavePipVisible(step: number, rank: number, nextOpen: boolean, midWave: boolean): boolean {
+  if (!midWave) return true
+  if (step <= rank) return true
+  return nextOpen && step === rank + 1
+}
+
 /** The step past Strong 4 / Far 1. Round 15's fight stays on the old caps. */
 export function lateStepOpen(gate?: BonusGate): boolean {
   if (gate?.roundIndex == null || !Number.isFinite(gate.roundIndex)) return false

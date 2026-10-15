@@ -1,12 +1,16 @@
 /**
- * Live prove for 1.4.485.
+ * Live prove for 1.4.486.
  * Real clicks and elementFromPoint. A planted incense still hits.
  * A walker inside a lamp box wins. The map sheet is the top layer.
  * Later rounds field more than three walkers. The clear bar stays put.
  * The Love lamp's box does not cover Candle or Spend.
  */
 import assert from 'node:assert/strict'
-import { fileURLToPath } from 'node:url'
+import { mkdirSync } from 'node:fs'
+import { fileURLToPath, pathToFileURL } from 'node:url'
+import { build } from 'esbuild'
+import { createElement } from 'react'
+import { renderToString } from 'react-dom/server'
 import { createServer } from 'vite'
 import { chromium } from '@playwright/test'
 import { SAVE_KIND } from '../src/lib/save.ts'
@@ -16,7 +20,7 @@ import { DEFEND_PATH } from '../src/nightWatch/path/data.ts'
 const SAVE = {
   kind: SAVE_KIND,
   schemaVersion: SAVE_SCHEMA_VERSION,
-  appVersion: '1.4.485',
+  appVersion: '1.4.486',
   savedAt: '2026-10-15T00:00:00.000Z',
   progress: {
     started: true,
@@ -645,6 +649,178 @@ async function checkClearBar(browser, port, errors, width, height, probeClick) {
   await context.close()
 }
 
+function pathPips(html, path) {
+  const start = html.indexOf(`data-path="${path}"`)
+  assert.ok(start >= 0, `1.4.486 the card has a ${path} path`)
+  const rest = html.slice(start + 1)
+  const next = rest.indexOf('data-path=')
+  const chunk = next >= 0 ? rest.slice(0, next) : rest
+  return [...chunk.matchAll(/data-step="(\d+)"/g)].map((match) => Number(match[1]))
+}
+
+/** The lesson-locked card, rendered the way the wave and the clear each show it. */
+async function checkCardCut() {
+  const outfile = fileURLToPath(new URL('../node_modules/.cache/nw-card-bundle.mjs', import.meta.url))
+  mkdirSync(fileURLToPath(new URL('../node_modules/.cache/', import.meta.url)), { recursive: true })
+  await build({
+    stdin: {
+      contents: `export { DefendTowerCard } from './src/components/DefendTowerCard.tsx'\n`,
+      resolveDir: fileURLToPath(new URL('..', import.meta.url)),
+      sourcefile: 'card-entry.tsx',
+      loader: 'tsx',
+    },
+    bundle: true,
+    format: 'esm',
+    platform: 'node',
+    outfile,
+    jsx: 'automatic',
+    external: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime'],
+    logLevel: 'silent',
+  })
+  const { DefendTowerCard } = await import(pathToFileURL(outfile).href + `?cut=${Date.now()}`)
+  const card = (midWave) =>
+    renderToString(
+      createElement(DefendTowerCard, {
+        plotId: 'porch',
+        ability: 'love',
+        runTier: { love: 1 },
+        sparks: 40,
+        point: { left: 240, top: 320 },
+        board: { w: 800, h: 1100 },
+        onUpgrade: () => {},
+        onUpgradePath: () => {},
+        onClose: () => {},
+        paths: { far: 0, strong: 3 },
+        easy: true,
+        midWave,
+        gate: { lessons: 0, playtest: false },
+      }),
+    )
+  const wave = card(true)
+  const clear = card(false)
+  assert.deepEqual(pathPips(wave, 'strong'), [1, 2, 3], '1.4.486 mid-wave Strong shows the filled steps only')
+  assert.deepEqual(pathPips(wave, 'far'), [1], '1.4.486 mid-wave Far shows the next buy and hides the locked prices')
+  assert.equal(wave.includes('Learn in Lock In'), false, '1.4.486 mid-wave hides the Lock In line')
+  assert.equal(wave.includes('data-lesson-open'), false, '1.4.486 mid-wave hides the Lock In button')
+  assert.equal(wave.includes('data-mid-wave="yes"'), true, '1.4.486 the wave card is marked')
+  assert.deepEqual(pathPips(clear, 'strong'), [1, 2, 3, 4], '1.4.486 the clear still shows the locked Strong price')
+  assert.equal(clear.includes('Learn in Lock In'), true, '1.4.486 the clear still says Learn in Lock In')
+  assert.equal(clear.includes('data-lesson-open'), true, '1.4.486 the clear still offers the lessons button')
+  const fresh = renderToString(
+    createElement(DefendTowerCard, {
+      plotId: 'porch',
+      ability: 'love',
+      runTier: { love: 1 },
+      sparks: 0,
+      point: { left: 240, top: 320 },
+      board: { w: 800, h: 1100 },
+      onUpgrade: () => {},
+      onUpgradePath: () => {},
+      onClose: () => {},
+      paths: { far: 0, strong: 0 },
+      easy: true,
+      midWave: true,
+      gate: { lessons: 0, playtest: false },
+    }),
+  )
+  assert.deepEqual(pathPips(fresh, 'strong'), [1], '1.4.486 a new lamp mid-wave shows one Strong pip')
+  assert.deepEqual(pathPips(fresh, 'far'), [1], '1.4.486 a new lamp mid-wave shows one Far pip')
+  const hard = renderToString(
+    createElement(DefendTowerCard, {
+      plotId: 'porch',
+      ability: 'love',
+      runTier: { love: 1 },
+      sparks: 3,
+      point: { left: 240, top: 320 },
+      board: { w: 800, h: 1100 },
+      onUpgrade: () => {},
+      onClose: () => {},
+      easy: false,
+      midWave: true,
+    }),
+  )
+  assert.equal(hard.includes('data-upgrade-tree'), false, '1.4.486 Hard keeps the single upgrade card')
+  assert.equal(hard.includes('Learn in Lock In'), false, '1.4.486 Hard has no Lock In card line')
+}
+
+async function readTreePips(page) {
+  return page.evaluate(() => {
+    const card = document.querySelector('[data-upgrade-tree="yes"]')
+    if (!card) return null
+    return {
+      mid: card.getAttribute('data-mid-wave'),
+      lesson: card.querySelectorAll('[data-lesson-open]').length,
+      text: card.textContent ?? '',
+      paths: [...card.querySelectorAll('[data-path]')].map((node) => ({
+        path: node.getAttribute('data-path'),
+        rank: Number(node.getAttribute('data-rank') ?? '0'),
+        steps: [...node.querySelectorAll('[data-step]')].map((pip) => Number(pip.getAttribute('data-step'))),
+        locked: node.querySelectorAll('[data-locked="yes"]').length,
+      })),
+    }
+  })
+}
+
+async function tapLoveLamp(page) {
+  await page.locator('.defend-clear-lamp[data-tower-type="love"]').evaluate((node) => {
+    if (node instanceof HTMLElement) node.click()
+  })
+}
+
+async function openLoveCard(page) {
+  await tapLoveLamp(page)
+  await page.locator('[data-upgrade-tree="yes"]').waitFor()
+}
+
+/** A real Easy wave, not the rendered card. Plant still shows the stack. */
+async function checkWaveCard(browser, port, errors) {
+  const context = await browser.newContext({
+    baseURL: `http://127.0.0.1:${port}/`,
+    viewport: { width: 412, height: 915 },
+    deviceScaleFactor: 1,
+    reducedMotion: 'reduce',
+  })
+  await context.addInitScript(
+    (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+    { key: STORAGE_KEY, save: SAVE },
+  )
+  const page = await context.newPage()
+  listen(page, errors, 'pips')
+  await openJump(page, '?playtest=1&nwRound=1&nwLamps=0')
+  await page.locator('.defend-go.is-after-plant').waitFor()
+  await mapClick(page, { x: 507, y: 598 })
+  await page.locator('.defend-clear-lamp[data-tower-type="love"]').waitFor()
+  await openLoveCard(page)
+  const plant = await readTreePips(page)
+  assert.ok(plant, '1.4.486 the plant card opens')
+  assert.notEqual(plant.mid, 'yes', '1.4.486 planting is not a wave')
+  for (const path of plant.paths) {
+    assert.ok(path.steps.length > path.rank + 1, `1.4.486 plant still shows later ${path.path} prices (${path.steps})`)
+  }
+  await page.waitForTimeout(450)
+  await tapLoveLamp(page)
+  await page.locator('[data-upgrade-tree="yes"]').waitFor({ state: 'detached' })
+  await page.locator('.defend-go.is-after-plant').click()
+  await page.locator('.defend-page.is-easy-tap').waitFor()
+  await setPaused(page, true)
+  await openLoveCard(page)
+  const wave = await readTreePips(page)
+  assert.ok(wave, '1.4.486 the wave card opens')
+  assert.equal(wave.mid, 'yes', '1.4.486 the open card is mid-wave')
+  assert.equal(wave.lesson, 0, '1.4.486 mid-wave Easy has no Lock In button')
+  assert.equal(/Learn in Lock In/.test(wave.text), false, '1.4.486 mid-wave Easy has no Lock In line')
+  assert.ok(wave.paths.length >= 2, '1.4.486 the wave card has Far and Strong')
+  for (const path of wave.paths) {
+    assert.ok(
+      path.steps.length <= path.rank + 1,
+      `1.4.486 mid-wave ${path.path} shows at most filled plus next (rank ${path.rank}, steps ${path.steps})`,
+    )
+    assert.equal(path.locked, 0, `1.4.486 mid-wave ${path.path} hides locked prices`)
+    if (path.rank === 0) assert.equal(path.steps.length, 1, `1.4.486 mid-wave ${path.path} shows the next pip`)
+  }
+  await context.close()
+}
+
 export async function checkLiveProve() {
   const server = await createServer({ server: { host: '127.0.0.1', port: 0 } })
   await server.listen()
@@ -654,7 +830,9 @@ export async function checkLiveProve() {
   const browser = await launchBrowser()
   const errors = []
   try {
+    await checkCardCut()
     await checkMaps(browser, port, errors)
+    await checkWaveCard(browser, port, errors)
     await checkBareBegin(browser, port, errors)
     await checkCrowd(browser, port, errors)
     await checkLampBox(browser, port, errors)
