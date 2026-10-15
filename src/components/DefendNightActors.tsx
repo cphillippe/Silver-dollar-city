@@ -290,7 +290,7 @@ export function DefendNightActorsSvg({
                       ? crossPlateReach(id)
                       : candle
                         ? candlePlateReach(id, reachBonus + rowReach)
-                        : nightTowers.range(id, using, progress, runTier, reachBonus)
+                        : nightTowers.range(id, using, progress, runTier, reachBonus, easy)
                 const tierMark = tree ? pathBadge(tree) : TIER_MARK[combatTier(using, runTier)]
                 const hot =
                   phase === 'wave' &&
@@ -298,7 +298,7 @@ export function DefendNightActorsSvg({
                   raiders.some((raider) => {
                     if (raider.turned) return false
                     if (bell || incense || candle || cross) return dist(at, raiderAt(raider)) <= reach
-                    return nightTowers.inRange(id, using, progress, raiderAt(raider), runTier, reachBonus)
+                    return nightTowers.inRange(id, using, progress, raiderAt(raider), runTier, reachBonus, easy)
                   })
                 const firing = flash.includes(id)
                 const pose = nightTowers.lampPose(hot || firing)
@@ -495,7 +495,7 @@ export function DefendNightActorsSvg({
                           <circle
                             className={`defend-range${incense ? ' is-incense-cloud' : bell ? ' is-bell-pulse' : firing ? ' is-firing' : ''}`}
                             data-incense-cloud={incense ? 'yes' : undefined}
-                            r={bell || incense || cross ? reach : nightTowers.range(id, using, progress, runTier, reachBonus)}
+                            r={bell || incense || cross ? reach : nightTowers.range(id, using, progress, runTier, reachBonus, easy && !candle)}
                             pointerEvents="none"
                             style={
                               firing

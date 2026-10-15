@@ -400,8 +400,8 @@ export function paceEasyLive(
   crossAt?: { x: number; y: number },
   /**
    * Named lots instead of the lead good seats. Omitted, the round is unchanged.
-   * Reach uses the live lot rule: city seats do not get the free-ground bonus,
-   * and a ring that only nicks the road stops short of it.
+   * Reach uses the live lot rule: city seats do not get the free-ground bonus.
+   * On Easy, a city seat whose reach already meets the road keeps that reach.
    */
   padLayout?: PacePadLayout,
 ): PaceLive {
@@ -432,7 +432,7 @@ export function paceEasyLive(
         const at = lampAnchor(pad.id)
         const gap = pathClearance(at)
         const free = isFreeSpot(pad.id) ? FREE_LAMP_RANGE_BONUS : 0
-        const range = lampReach(pad.id, 96 + free + easyShotReach(rank), gap)
+        const range = lampReach(pad.id, 96 + free + easyShotReach(rank), gap, true)
         return {
           id: pad.id,
           x: at.x,
