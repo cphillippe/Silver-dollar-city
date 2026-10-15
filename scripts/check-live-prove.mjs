@@ -1,5 +1,5 @@
 /**
- * Live prove for 1.4.494.
+ * Live prove for 1.4.495.
  * Real clicks and elementFromPoint. A planted incense still hits.
  * A walker inside a lamp box wins. The map sheet is the top layer.
  * Later rounds field more than three walkers. The clear bar stays put.
@@ -20,7 +20,7 @@ import { DEFEND_PATH } from '../src/nightWatch/path/data.ts'
 const SAVE = {
   kind: SAVE_KIND,
   schemaVersion: SAVE_SCHEMA_VERSION,
-  appVersion: '1.4.494',
+  appVersion: '1.4.495',
   savedAt: '2026-10-15T00:00:00.000Z',
   progress: {
     started: true,
@@ -67,6 +67,16 @@ function listen(page, errors, label) {
   page.on('console', (msg) => {
     if (msg.type() === 'error') errors.push(`${label} ${msg.text()}`)
   })
+}
+
+async function readLevelPips(page) {
+  return page.evaluate(() =>
+    [...document.querySelectorAll('text.defend-level-pip')].map((node) => {
+      const style = getComputedStyle(node)
+      const rect = node.getBoundingClientRect()
+      return { display: style.display, w: rect.width, text: (node.textContent || '').trim() }
+    }),
+  )
 }
 
 async function openJump(page, search) {
@@ -572,6 +582,11 @@ async function checkClearBar(browser, port, errors, width, height, probeClick) {
       planted.some((chip) => chip.display !== 'none' && chip.w > 0),
       '1.4.489 Easy at 375 shows the name chips while planting',
     )
+    const plantPips = await readLevelPips(page)
+    assert.ok(
+      plantPips.some((pip) => pip.text && pip.display !== 'none' && pip.w > 0),
+      `1.4.495 Easy at 375 shows lamp level tags while planting ${JSON.stringify(plantPips)}`,
+    )
   }
   await page.mouse.click(begin.x + begin.width / 2, begin.y + begin.height / 2)
   await page.locator('.defend-page.is-easy-tap').waitFor()
@@ -601,6 +616,12 @@ async function checkClearBar(browser, port, errors, width, height, probeClick) {
     for (const label of names.labels) {
       assert.equal(label.display, 'none', `1.4.489 Easy at 375 hides the ${label.text} lamp word mid-wave`)
       assert.equal(label.w, 0, `1.4.489 Easy at 375 the ${label.text} lamp word has no box mid-wave`)
+    }
+    const wavePips = await readLevelPips(page)
+    assert.ok(wavePips.some((pip) => pip.text), `1.4.495 Easy at 375 still has lamp level tags in the page ${JSON.stringify(wavePips)}`)
+    for (const pip of wavePips) {
+      assert.equal(pip.display, 'none', `1.4.495 Easy at 375 hides the ${pip.text || 'empty'} level tag mid-wave`)
+      assert.equal(pip.w, 0, `1.4.495 Easy at 375 the ${pip.text || 'empty'} level tag has no box mid-wave`)
     }
   }
   const started = Date.now()
@@ -645,6 +666,11 @@ async function checkClearBar(browser, port, errors, width, height, probeClick) {
     assert.ok(
       back.labels.some((label) => label.display !== 'none' && label.w > 0),
       '1.4.489 Easy at 375 shows the SVG lamp words on the clear',
+    )
+    const clearPips = await readLevelPips(page)
+    assert.ok(
+      clearPips.some((pip) => pip.text && pip.display !== 'none' && pip.w > 0),
+      `1.4.495 Easy at 375 shows lamp level tags on the clear ${JSON.stringify(clearPips)}`,
     )
   }
   const spend = page.locator('.defend-clear-spend')

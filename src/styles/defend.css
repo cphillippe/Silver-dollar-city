@@ -3104,6 +3104,11 @@ button.defend-path-pip {
   display: none;
 }
 
+/* 1.4.495 Easy wave only. Map level tags (F2 S1, Strong 1) stay off while walkers move. Plant and the clear are is-easy-watch without is-easy-tap, so the tags come back. Hard never has is-easy-watch. */
+.defend-page.is-easy-watch.is-easy-tap .defend-level-pip {
+  display: none;
+}
+
 /* Filled steps and the next buy share one rounded square. The next pip is a button, so it does not fall back to a round control. */
 .defend-page.is-easy-watch.is-easy-tap .defend-tower-card .defend-path-pip.is-on,
 .defend-page.is-easy-watch.is-easy-tap .defend-tower-card button.defend-path-pip.is-buy {
