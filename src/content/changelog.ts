@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.490',
+    title: 'The cross',
+    when: '2026-10-15',
+    items: [
+      'After round 12, Easy can plant one Cross beside the lamps.',
+      'Lamps near the Cross wait a little less between shots. The Cross itself does not fire.',
+      'The card says: The cross reminds us Jesus died and rose for us. (Hebrews 12:2, RSV)',
+    ],
+  },
+  {
     version: '1.4.489',
     title: 'Quiet names',
     when: '2026-10-15',

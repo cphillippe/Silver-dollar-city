@@ -16,7 +16,7 @@ export const TOWER_LAMP_SPRITE = {
   footY: 12,
 }
 
-export type LampIconMark = 'tower' | 'candle' | 'bell' | 'incense'
+export type LampIconMark = 'tower' | 'candle' | 'bell' | 'incense' | 'cross'
 
 /**
  * Tap box for a planted lamp, in viewBox units, feet on the anchor.
@@ -27,6 +27,7 @@ export function lampIconBox(mark: LampIconMark): { x: number; y: number; w: numb
   if (mark === 'candle') return { x: -14, y: -44, w: 28, h: 52 }
   if (mark === 'bell') return { x: -20, y: -40, w: 40, h: 48 }
   if (mark === 'incense') return { x: -18, y: -42, w: 36, h: 52 }
+  if (mark === 'cross') return { x: -16, y: -42, w: 32, h: 40 }
   const { w, h, footY } = TOWER_LAMP_SPRITE
   return { x: -w / 2, y: -(h - footY), w, h }
 }
