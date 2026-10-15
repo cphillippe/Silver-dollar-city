@@ -8,7 +8,7 @@ import { useMemo, useRef, useState } from 'react'
 import type { SequenceChallenge, SequenceItem } from '../../types'
 import { shuffle } from '../../lib/shuffle'
 import { playGemPop, prefersReducedMotion } from '../../lib/juice'
-import { isEasy } from '../../lib/easy'
+import { easyWhoWhere, isEasy } from '../../lib/easy'
 import { resolveSequenceVisual, SEQUENCE_CROP, SEQUENCE_FIGURE } from '../../lib/sequenceArt'
 import { SEQUENCE_DECOY, sequenceVerse } from '../../lib/sequenceVerse'
 import { useProgress } from '../../store/progress'
@@ -98,6 +98,7 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
       ? 'Put the steps in order!'
       : 'Put the story in order!'
     : challenge.prompt
+  const guide = easy ? easyWhoWhere(challenge.id) : null
   const showSlotCaption = true
   const slotCaption = status === 'ok' ? 'full' : 'slot'
 
@@ -192,7 +193,12 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
       data-testid="story-strip"
     >
       <h2 className="strip-lead">{status === 'ok' ? 'Great job!' : lead}</h2>
-      {verse ? (
+      {guide ? (
+        <p className="strip-kicker strip-guide">
+          {guide.who} · {guide.place}
+        </p>
+      ) : null}
+      {verse && (!guide || status !== 'ok') ? (
         <p className="strip-kicker">
           {challenge.title} · {easy && verse.easyHeader ? verse.easyHeader : verse.ref}
         </p>
@@ -259,6 +265,9 @@ export function SequencePlay({ challenge, onMiss, onSolved, onPeek }: SequencePl
           <p className="strip-stars" aria-hidden>
             ★ ★ ★
           </p>
+          {guide && challenge.id === 'wb-creed' ? (
+            <p className="strip-with">{`With ${guide.who} at ${guide.place}`}</p>
+          ) : null}
           {verse && verseOn ? (
             <figure className="strip-verse">
               {easy && verse.easyAbove ? <p className="strip-verse-above">{verse.easyAbove}</p> : null}
