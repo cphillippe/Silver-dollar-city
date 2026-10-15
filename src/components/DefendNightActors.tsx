@@ -15,6 +15,8 @@ import {
   type WatchAbility,
 } from '../lib/defend'
 import { BellSprite } from '../nightWatch/bellArt'
+import { CrossSprite } from '../nightWatch/crossArt'
+import { crossMark, crossPathKey, crossPlateReach, isCross, CROSS_LABEL } from '../nightWatch/cross'
 import { IncenseSprite } from '../nightWatch/incenseArt'
 import { bellMark, bellPathKey, bellPlateReach, BELL_LABEL, isBell } from '../nightWatch/bell'
 import { incenseMark, incensePathKey, incensePlateReach, incenseRank, INCENSE_LABEL, isIncense } from '../nightWatch/incense'
@@ -128,7 +130,7 @@ export interface DefendNightActorsProps {
     road: string
     note?: string
     cover?: '' | 'good' | 'some' | 'far'
-    mark?: 'candle' | 'bell' | 'incense'
+    mark?: 'candle' | 'bell' | 'incense' | 'cross'
     row?: string
     rowTo?: { x: number; y: number }[]
   } | null
@@ -244,7 +246,8 @@ export function DefendNightActorsSvg({
                 const bell = Boolean(on && isBell(plantedType))
                 const incense = Boolean(on && isIncense(plantedType))
                 const candle = Boolean(on && isCandle(plantedType))
-                const using = bell || incense || candle
+                const cross = Boolean(on && isCross(plantedType))
+                const using = bell || incense || candle || cross
                   ? plantedType
                   : on && plantedType && unlocked.includes(plantedType)
                     ? plantedType
@@ -257,38 +260,50 @@ export function DefendNightActorsSvg({
                     ? BELL_LABEL
                     : candle
                       ? CANDLE_LABEL
-                      : (WATCH_ABILITY_LABEL[using] ?? 'Love')
-                const typeSrc = bell || incense || candle ? undefined : TOWER_TYPE_SRC[using]
+                      : cross
+                        ? CROSS_LABEL
+                        : (WATCH_ABILITY_LABEL[using] ?? 'Love')
+                const typeSrc = bell || incense || candle || cross ? undefined : TOWER_TYPE_SRC[using]
                 const tree = easy
                   ? pathsOf(
                       runPaths,
-                      incense ? incensePathKey(id) : bell ? bellPathKey(id) : candle ? candlePathKey(id) : using,
+                      incense
+                        ? incensePathKey(id)
+                        : bell
+                          ? bellPathKey(id)
+                          : cross
+                            ? crossPathKey(id)
+                            : candle
+                              ? candlePathKey(id)
+                              : using,
                     )
                   : null
                 const reachBonus =
-                  candle && tree ? candleFarBonus(tree) : tree && !bell && !incense ? easyShotReach(tree) : 0
+                  candle && tree ? candleFarBonus(tree) : tree && !bell && !incense && !cross ? easyShotReach(tree) : 0
                 const rowReach =
                   candle && roundIndex >= 6 ? candleRowReachBonus(candleRowSize(id, candlePlants)) : 0
                 const reach = incense
                   ? incensePlateReach(id, incenseRank(tree ?? undefined))
                   : bell
                     ? bellPlateReach(id)
-                    : candle
-                      ? candlePlateReach(id, reachBonus + rowReach)
-                      : nightTowers.range(id, using, progress, runTier, reachBonus)
+                    : cross
+                      ? crossPlateReach(id)
+                      : candle
+                        ? candlePlateReach(id, reachBonus + rowReach)
+                        : nightTowers.range(id, using, progress, runTier, reachBonus)
                 const tierMark = tree ? pathBadge(tree) : TIER_MARK[combatTier(using, runTier)]
                 const hot =
                   phase === 'wave' &&
                   on &&
                   raiders.some((raider) => {
                     if (raider.turned) return false
-                    if (bell || incense || candle) return dist(at, raiderAt(raider)) <= reach
+                    if (bell || incense || candle || cross) return dist(at, raiderAt(raider)) <= reach
                     return nightTowers.inRange(id, using, progress, raiderAt(raider), runTier, reachBonus)
                   })
                 const firing = flash.includes(id)
                 const pose = nightTowers.lampPose(hot || firing)
                 const lampBox = nightTowers.lampImageBox()
-                const icon = lampIconBox(incense ? 'incense' : bell ? 'bell' : candle ? 'candle' : 'tower')
+                const icon = lampIconBox(incense ? 'incense' : bell ? 'bell' : cross ? 'cross' : candle ? 'candle' : 'tower')
                 const lampShift = lampRise[id] ?? 0
                 const boostPad = boosting && on
                 const scenery = easyTap && !boostPad
@@ -304,7 +319,7 @@ export function DefendNightActorsSvg({
                     onOpenUpgrade?.(id)
                     return
                   }
-                  if (bell) {
+                  if (bell || cross) {
                     onOpenUpgrade?.(id)
                     return
                   }
@@ -316,7 +331,7 @@ export function DefendNightActorsSvg({
                     data-person-node={scenery ? undefined : 'pad'}
                     className={`defend-pad is-${stage} ${on ? `is-planted is-${using}` : ''} ${hot ? 'is-hot' : ''} ${firing ? 'is-flash' : ''} ${scenery ? 'is-tower-scenery' : ''} ${boostPad ? 'is-boost-pick' : ''} ${upgrading ? 'is-upgrade-open' : ''} ${justUp ? 'is-up' : ''}`}
                     data-tower-type={on ? using : undefined}
-                    data-level={on ? (bell && tree ? bellMark(tree) : tierMark) : undefined}
+                    data-level={on ? (cross && tree ? crossMark(tree) : bell && tree ? bellMark(tree) : tierMark) : undefined}
                     transform={`translate(${at.x} ${at.y})`}
                     role={scenery ? undefined : 'button'}
                     tabIndex={scenery ? undefined : 0}
@@ -400,6 +415,8 @@ export function DefendNightActorsSvg({
                             <IncenseSprite />
                           ) : bell ? (
                             <BellSprite />
+                          ) : cross ? (
+                            <CrossSprite />
                           ) : candle ? (
                             <CandleSprite hot={hot || firing} />
                           ) : (
@@ -437,7 +454,7 @@ export function DefendNightActorsSvg({
                           />
                         ) : null}
                         {candle && candleRowSize(id, candlePlants) >= 2 ? null : (
-                          <text className="defend-type-label" y={candle || bell || incense ? -58 : 30} textAnchor="middle">
+                          <text className="defend-type-label" y={candle || bell || incense || cross ? -58 : 30} textAnchor="middle">
                             {typeName}
                           </text>
                         )}
@@ -448,10 +465,10 @@ export function DefendNightActorsSvg({
                             className={`defend-level-pip${justUp ? ' is-bump' : ''}`}
                             y="-98"
                             textAnchor="middle"
-                            data-level={incense && tree ? incenseMark(tree) : bell && tree ? bellMark(tree) : tierMark}
+                            data-level={incense && tree ? incenseMark(tree) : cross && tree ? crossMark(tree) : bell && tree ? bellMark(tree) : tierMark}
                             aria-hidden="true"
                           >
-                            {incense && tree ? incenseMark(tree) : bell && tree ? bellMark(tree) : tierMark}
+                            {incense && tree ? incenseMark(tree) : cross && tree ? crossMark(tree) : bell && tree ? bellMark(tree) : tierMark}
                           </text>
                         ) : null}
                         {justUp ? (
@@ -478,7 +495,7 @@ export function DefendNightActorsSvg({
                           <circle
                             className={`defend-range${incense ? ' is-incense-cloud' : bell ? ' is-bell-pulse' : firing ? ' is-firing' : ''}`}
                             data-incense-cloud={incense ? 'yes' : undefined}
-                            r={bell || incense ? reach : nightTowers.range(id, using, progress, runTier, reachBonus)}
+                            r={bell || incense || cross ? reach : nightTowers.range(id, using, progress, runTier, reachBonus)}
                             pointerEvents="none"
                             style={
                               firing
@@ -539,6 +556,8 @@ export function DefendNightActorsSvg({
                     <IncenseSprite />
                   ) : ghost.mark === 'bell' ? (
                     <BellSprite />
+                  ) : ghost.mark === 'cross' ? (
+                    <CrossSprite />
                   ) : ghost.mark === 'candle' ? (
                     <CandleSprite />
                   ) : (

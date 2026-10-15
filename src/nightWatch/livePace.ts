@@ -11,6 +11,7 @@ import {
   EASY_LATE_LAMP_NICK,
 } from '../lib/defend.ts'
 import { applyIncenseTap } from './incense.ts'
+import { CROSS_COST, applyCrossWait, crossPaceFor } from './cross.ts'
 import { nightSeedPlan, nightSeedShotWait, nightSeedSpawnScale } from './seed.ts'
 import { DEFEND_ANCHOR, pathClearance, pathPick, pathPoint } from './path/data.ts'
 import { easyRound as liveRound, type EasyRound } from './rounds.ts'
@@ -290,6 +291,12 @@ export const LEAD_GOOD_SEATS = [
   { x: 450, y: 210 },
 ] as const
 
+/**
+ * One cross beside the porch-end lamp. Rank 0, so that lamp waits ten percent less.
+ * The other good seats sit outside this ring.
+ */
+export const HUMAN_CROSS_AT = { x: 514, y: 1000 } as const
+
 export interface SeatReach {
   x: number
   y: number
@@ -357,6 +364,11 @@ export function paceEasyLive(
    * so this cannot add to a shrug.
    */
   tapBonus = 0,
+  /**
+   * A planted cross. Omitted, every lamp keeps its wait.
+   * A lamp inside the ring waits less. The cross does not shoot.
+   */
+  crossAt?: { x: number; y: number },
 ): PaceLive {
   const road = mode === 'road' || mode === 'road437' || Boolean(map)
   const roadPath = map?.path
@@ -414,6 +426,11 @@ export function paceEasyLive(
           walkerBonus: undefined as number | undefined,
         }
       })
+  const crossPace = new Map<string, number>()
+  if (crossAt) {
+    const planted = { [`at:${Math.round(crossAt.x)}:${Math.round(crossAt.y)}`]: 'cross' }
+    for (const lamp of lamps) crossPace.set(lamp.id, crossPaceFor(planted, undefined, lamp))
+  }
   for (const shot of shots) {
     lamps.push({
       id: 'shot',
@@ -620,6 +637,7 @@ export function paceEasyLive(
       const pace = held ?? 1
       const earlyHold = held != null
       lamp.cool = (lamp.strike.cooldownMs / 1000) * pace
+      if (crossAt) lamp.cool = applyCrossWait(lamp.cool, crossPace.get(lamp.id) ?? 1)
       const apply = (raider: (typeof raiders)[number] | null, amount: number, byLamp: boolean) => {
         if (!raider || raider.dead || amount <= 0) return
         const hit = Math.min(raider.hp, amount)
@@ -1012,11 +1030,13 @@ export interface HumanNight {
  * Steps I–IV stay the lock-in table, so rounds 1–15 do not see the new step.
  * After the round 15 clear the bank buys Strong 5, then Far 2, on each lamp.
  * `late` false is the 1.4.483 night, where that step did not exist.
+ * `withCross` pays for one cross at round 13 and leaves it planted. The default night does not.
  */
-export function paceEasyHumanCampaign(late = true, tapEvery = HUMAN_TAP_EVERY): HumanNight {
+export function paceEasyHumanCampaign(late = true, tapEvery = HUMAN_TAP_EVERY, withCross = false): HumanNight {
   const plan = lockInBuyTable()
   let hearts = 3
   let spent = 0
+  let crossBought = false
   const deep = [0, 0, 0, 0]
   const cross = [0, 0, 0, 0]
   const rows: HumanNight['rows'] = []
@@ -1058,7 +1078,18 @@ export function paceEasyHumanCampaign(late = true, tapEvery = HUMAN_TAP_EVERY): 
         break
       }
     }
-    const round = paceEasyLive(index, lamps, hearts, false, tapEvery, 'road')
+    let crossAt: { x: number; y: number } | undefined
+    if (withCross && index >= 12) {
+      if (!crossBought) {
+        sparks -= CROSS_COST
+        spent += CROSS_COST
+        crossBought = true
+      }
+      crossAt = HUMAN_CROSS_AT
+    }
+    const round = crossAt
+      ? paceEasyLive(index, lamps, hearts, false, tapEvery, 'road', undefined, [], undefined, 0, crossAt)
+      : paceEasyLive(index, lamps, hearts, false, tapEvery, 'road')
     rows.push({ round: index + 1, result: round.result, hearts: round.hearts, sparks })
     if (round.result !== 'clear') return finish(index + 1, round.sparks)
     hearts = easyClearHeart(round.hearts)

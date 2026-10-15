@@ -186,6 +186,17 @@ import {
   INCENSE_ID,
   isIncense,
 } from '../nightWatch/incense'
+import {
+  applyCrossStep,
+  applyCrossWait,
+  crossPaceFor,
+  crossPathKey,
+  crossRoom,
+  crossUnlocked,
+  CROSS_COST,
+  CROSS_ID,
+  isCross,
+} from '../nightWatch/cross'
 import { lessonAreaFor, samePillarLessons } from '../nightWatch/lampPillar'
 import { clearNightReturn, readNightReturn, saveNightReturn } from '../nightWatch/nightReturn'
 import {
@@ -528,7 +539,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
 
   function towerAbility(id: CityPlotId): WatchAbility {
     const plantedType = plants[id]
-    if (plantedType && (isBell(plantedType) || isIncense(plantedType) || isCandle(plantedType) || unlocked.includes(plantedType))) return plantedType
+    if (plantedType && (isBell(plantedType) || isIncense(plantedType) || isCandle(plantedType) || isCross(plantedType) || unlocked.includes(plantedType))) return plantedType
     return unlocked.includes(ability) ? ability : 'love'
   }
 
@@ -615,6 +626,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const candleOpen = candleUnlocked(easy, waveIndex, playingMap != null, phase)
   const bellOpen = bellUnlocked(easy, waveIndex, phase)
   const incenseOpen = incenseUnlocked(easy, waveIndex, phase)
+  const crossOpen = crossUnlocked(easy, waveIndex, phase)
 
   useEffect(() => {
     if (!candleOpen || seenCandle.current) return
@@ -654,7 +666,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     const onDown = (event: PointerEvent) => {
       const target = event.target as Element | null
       if (!target?.closest) return
-      if (target.closest('.defend-go, .defend-ability')) return
+      if (target.closest('.defend-go, .defend-ability, .defend-new-lamp')) return
       if (!target.closest('.nw-docks')) return
       if (!plantOpenGroundRef.current(event.clientX, event.clientY)) return
       event.preventDefault()
@@ -1172,6 +1184,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     const bell = isBell(id)
     const incense = isIncense(id)
     const candle = isCandle(id)
+    const cross = isCross(id)
     if (bell) {
       if (phase !== 'wave' && phase !== 'boost' && phase !== 'plant') return
       if (!bellRoom(plantsRef.current)) {
@@ -1190,6 +1203,12 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
         clearPlaceArm()
         return
       }
+    } else if (cross) {
+      if (phase !== 'wave' && phase !== 'boost' && phase !== 'plant') return
+      if (!crossRoom(plantsRef.current)) {
+        clearPlaceArm()
+        return
+      }
     } else if (phase !== 'wave' && phase !== 'boost') {
       return
     } else if (Object.values(plantsRef.current).includes(id)) {
@@ -1201,7 +1220,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     setHelpOpen(false)
     placeArmRef.current = id
     setPlaceArm(id)
-    if (!candle && !bell && !incense) setAbility(id)
+    if (!candle && !bell && !incense && !cross) setAbility(id)
     closeUpgrade(true)
   }
 
@@ -1239,6 +1258,24 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       return
     }
     armPlace(INCENSE_ID)
+  }
+
+  function armCross() {
+    if (!easy || won) return
+    if (!crossUnlocked(easy, waveIndexRef.current, phase)) return
+    if (isCross(placeArmRef.current)) {
+      clearPlaceArm()
+      return
+    }
+    if (!crossRoom(plantsRef.current)) {
+      flashKit('One cross')
+      return
+    }
+    if (sparksRef.current < CROSS_COST) {
+      flashKit(`Need ${CROSS_COST} sparks`)
+      return
+    }
+    armPlace(CROSS_ID)
   }
 
   function armCandle() {
@@ -1375,10 +1412,12 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     const bell = isBell(using)
     const incense = isIncense(using)
     const candle = isCandle(using)
+    const cross = isCross(using)
     if (paid && bell && !bellRoom(plantsNow)) return false
     if (paid && incense && !incenseRoom(plantsNow)) return false
     if (paid && candle && !candleRoom(plantsNow)) return false
-    if (paid && !bell && !incense && !candle && Object.values(plantsNow).includes(using)) return false
+    if (paid && cross && !crossRoom(plantsNow)) return false
+    if (paid && !bell && !incense && !candle && !cross && Object.values(plantsNow).includes(using)) return false
     const next = commitLamp(
       plantsNow,
       point,
@@ -1400,7 +1439,9 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
           ? buyExtraLamp(sparksRef.current, INCENSE_COST)
           : candle
             ? buyExtraLamp(sparksRef.current, CANDLE_COST)
-            : buyExtraLamp(sparksRef.current)
+            : cross
+              ? buyExtraLamp(sparksRef.current, CROSS_COST)
+              : buyExtraLamp(sparksRef.current)
       if (!bought.ok) {
         setGhost(null)
         flashKit(`Need ${bought.cost} sparks`)
@@ -1414,7 +1455,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     }
     setPlants(next.plants)
     if (paid) {
-      if (bell || incense || candle) paidTypes.current.add(next.preview.spot)
+      if (bell || incense || candle || cross) paidTypes.current.add(next.preview.spot)
       else paidTypes.current.add(using)
     }
     setGhost(null)
@@ -1459,7 +1500,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     const bellArm = isBell(armed)
     const incenseArm = isIncense(armed)
     const candleArm = isCandle(armed)
-    const opening = easy && phase === 'plant' && !candleArm && !bellArm && !incenseArm
+    const crossArm = isCross(armed)
+    const opening = easy && phase === 'plant' && !candleArm && !bellArm && !incenseArm && !crossArm
     const typeFree = armed
       ? bellArm
         ? bellRoom(plantsRef.current)
@@ -1467,10 +1509,12 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
           ? incenseRoom(plantsRef.current)
           : candleArm
             ? candleRoom(plantsRef.current)
-            : !Object.values(plantsRef.current).includes(armed)
+            : crossArm
+              ? crossRoom(plantsRef.current)
+              : !Object.values(plantsRef.current).includes(armed)
       : false
     const paid = Boolean(
-      armed && typeFree && easy && !opening && (bellArm || incenseArm || candleArm || phase === 'wave' || phase === 'boost'),
+      armed && typeFree && easy && !opening && (bellArm || incenseArm || candleArm || crossArm || phase === 'wave' || phase === 'boost'),
     )
     if (!opening && !paid) return
     const svg = boardRef.current
@@ -1521,15 +1565,18 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     const bellArm = isBell(using)
     const incenseArm = isIncense(using)
     const candleArm = isCandle(using)
-    const opening = easy && phase === 'plant' && !candleArm && !bellArm && !incenseArm
+    const crossArm = isCross(using)
+    const opening = easy && phase === 'plant' && !candleArm && !bellArm && !incenseArm && !crossArm
     const typeFree = bellArm
       ? bellRoom(plantsRef.current)
       : incenseArm
         ? incenseRoom(plantsRef.current)
         : candleArm
           ? candleRoom(plantsRef.current)
-          : !Object.values(plantsRef.current).includes(using)
-    const paid = typeFree && easy && (bellArm || incenseArm || candleArm || phase === 'wave' || phase === 'boost')
+          : crossArm
+            ? crossRoom(plantsRef.current)
+            : !Object.values(plantsRef.current).includes(using)
+    const paid = typeFree && easy && (bellArm || incenseArm || candleArm || crossArm || phase === 'wave' || phase === 'boost')
     if (kind === 'cancel' || (!opening && !paid)) {
       setGhost(null)
       return
@@ -1607,6 +1654,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       const paid = lampPullRefund(paidTypes.current.has(id), CANDLE_COST)
       return paid + pathSparkSpend(pathsOf(runPathsRef.current, candlePathKey(id)))
     }
+    if (isCross(type)) {
+      const paid = lampPullRefund(paidTypes.current.has(id), CROSS_COST)
+      return paid + pathSparkSpend(pathsOf(runPathsRef.current, crossPathKey(id)))
+    }
     const paid = lampPullRefund(paidTypes.current.has(type), EASY_LAMP_COST)
     return paid + pathSparkSpend(pathsOf(runPathsRef.current, type))
   }
@@ -1624,10 +1675,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       }
       return
     }
-    if (type && (isBell(type) || isIncense(type) || isCandle(type))) {
+    if (type && (isBell(type) || isIncense(type) || isCandle(type) || isCross(type))) {
       paidTypes.current.delete(id)
       const cleared = { ...runPathsRef.current }
-      delete cleared[isBell(type) ? bellPathKey(id) : isIncense(type) ? incensePathKey(id) : candlePathKey(id)]
+      delete cleared[isBell(type) ? bellPathKey(id) : isIncense(type) ? incensePathKey(id) : isCross(type) ? crossPathKey(id) : candlePathKey(id)]
       runPathsRef.current = cleared
       setRunPaths(cleared)
     } else if (type) {
@@ -1741,6 +1792,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     const using = towerAbility(id)
     if (isBell(using)) return false
     if (isIncense(using)) return false
+    if (isCross(using)) return false
     const combat = lampCombat(using, id)
     const rawCd = combat.strike ? combat.strike.cooldownMs : nightTowers.cooldown(id, progress)
     // Easy: the clock already runs at 1× or 3×, so the cooldown stays in game ms.
@@ -1750,7 +1802,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       easy && isCandle(using)
         ? candleEarlyPace(candleRowSize(id, plantsRef.current), waveIndexRef.current)
         : undefined
-    const gate = wait * (rowPace ?? 1)
+    const crossPace = easy ? crossPaceFor(plantsRef.current, runPathsRef.current, at) : 1
+    const gate = applyCrossWait(wait * (rowPace ?? 1), crossPace)
     const shotAt = easy ? live.current.clock : now
     if (!manual) {
       const last = easy ? live.current.cool[id] : (live.current.cool[id] ?? 0)
@@ -1973,6 +2026,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       const using = towerAbility(id)
       if (isBell(using)) continue
       if (isIncense(using)) continue
+      if (isCross(using)) continue
       const rawCd = easy
         ? lampCombat(using, id).strike!.cooldownMs
         : nightTowers.cooldown(id, progress)
@@ -1981,7 +2035,9 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
         easy && isCandle(using)
           ? candleEarlyPace(candleRowSize(id, plantsRef.current), waveIndexRef.current)
           : undefined
-      const gate = wait * (rowPace ?? 1)
+      const at = nightTowers.anchor(id)
+      const crossPace = easy ? crossPaceFor(plantsRef.current, runPathsRef.current, at) : 1
+      const gate = applyCrossWait(wait * (rowPace ?? 1), crossPace)
       const shotAt = easy ? live.current.clock : now
       const shotFrac = seedPlanRef.current?.shotFrac ?? null
       let last = live.current.cool[id]
@@ -1992,7 +2048,6 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
         last = 0
       }
       if (!lampReadyToFire(last, shotAt, gate, frozen)) continue
-      const at = nightTowers.anchor(id)
       const range = hitRange(id, using)
       const aimed = live.current.raiders.some(
         (raider) => !raider.turned && dist(at, raiderAt(raider)) <= range,
@@ -2063,6 +2118,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     for (const id of live.current.planted) {
       const using = towerAbility(id)
       if (isBell(using) || isIncense(using)) continue
+      if (isCross(using)) continue
       const at = nightTowers.anchor(id)
       const range = hitRange(id, using)
       const d = dist(at, point)
@@ -2150,6 +2206,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     for (const id of live.current.planted) {
       const using = towerAbility(id)
       if (isBell(using) || isIncense(using)) continue
+      if (isCross(using)) continue
       const at = nightTowers.anchor(id)
       const range = hitRange(id, using)
       for (const raider of live.current.raiders) {
@@ -2394,6 +2451,32 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     }, LEVEL_BURST_MS)
   }
 
+  function boostCross(plotId: CityPlotId) {
+    if (!easy || !crossUnlocked(easy, waveIndexRef.current, phase)) return
+    if (placeArmRef.current) {
+      placeArmRef.current = null
+      setPlaceArm(null)
+      setGhost(null)
+    }
+    const beforeSparks = sparksRef.current
+    const next = applyCrossStep(plotId, runPathsRef.current, sparksRef.current)
+    setBoostNote(next.note)
+    if (!next.ok) return
+    runPathsRef.current = next.paths
+    sparksRef.current = next.sparks
+    setRunPaths(next.paths)
+    setRunSparks(next.sparks)
+    setSparkSpent(Math.max(1, beforeSparks - next.sparks))
+    setToolLock(null)
+    window.clearTimeout(burstTimer.current)
+    setSparkSpend(true)
+    setUpFlash(plotId)
+    burstTimer.current = window.setTimeout(() => {
+      setSparkSpend(false)
+      setUpFlash((current) => (current === plotId ? null : current))
+    }, LEVEL_BURST_MS)
+  }
+
   function boostBell(plotId: CityPlotId) {
     if (!easy || !bellUnlocked(easy, waveIndexRef.current, phase)) return
     if (placeArmRef.current) {
@@ -2465,6 +2548,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     }
     if (isBell(plantsRef.current[plotId])) {
       boostBell(plotId)
+      return
+    }
+    if (isCross(plantsRef.current[plotId])) {
+      boostCross(plotId)
       return
     }
     if (isIncense(plantsRef.current[plotId])) {
@@ -2856,6 +2943,22 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
               {`Incense ${INCENSE_COST}✦`}
             </button>
           ) : null}
+          {crossOpen ? (
+            <button
+              type="button"
+              className="btn defend-new-lamp defend-cross-lamp"
+              data-cross-lamp="yes"
+              data-cross-cost={CROSS_COST}
+              aria-label={`Cross, ${CROSS_COST} sparks`}
+              aria-pressed={isCross(placeArm) ? true : undefined}
+              onClick={(event) => {
+                event.stopPropagation()
+                armCross()
+              }}
+            >
+              {`Cross ${CROSS_COST}✦`}
+            </button>
+          ) : null}
           {skillTray}
         </div>
       ) : null}
@@ -2925,7 +3028,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
                 data-lamp-cost={EASY_LAMP_COST}
                 data-new-lamp="yes"
                 aria-label={`New lamp, ${EASY_LAMP_COST} sparks`}
-                aria-pressed={placeArm && !isCandle(placeArm) && !isBell(placeArm) && !isIncense(placeArm) ? true : undefined}
+                aria-pressed={placeArm && !isCandle(placeArm) && !isBell(placeArm) && !isIncense(placeArm) && !isCross(placeArm) ? true : undefined}
                 onPointerDown={trackNewLamp}
                 onClick={() => {
                   if (swallowNewLampClick.current) {
@@ -2983,6 +3086,22 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
                   }}
                 >
                   {`Incense ${INCENSE_COST}✦`}
+                </button>
+              ) : null}
+              {crossOpen ? (
+                <button
+                  type="button"
+                  className="btn defend-new-lamp defend-cross-lamp"
+                  data-cross-lamp="yes"
+                  data-cross-cost={CROSS_COST}
+                  aria-label={`Cross, ${CROSS_COST} sparks`}
+                  aria-pressed={isCross(placeArm) ? true : undefined}
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    armCross()
+                  }}
+                >
+                  {`Cross ${CROSS_COST}✦`}
                 </button>
               ) : null}
               <button
@@ -3113,6 +3232,22 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
               }}
             >
               {`Incense ${INCENSE_COST}✦`}
+            </button>
+          ) : null}
+          {crossOpen && phase === 'plant' ? (
+            <button
+              type="button"
+              className="btn defend-new-lamp defend-cross-lamp"
+              data-cross-lamp="yes"
+              data-cross-cost={CROSS_COST}
+              aria-label={`Cross, ${CROSS_COST} sparks`}
+              aria-pressed={isCross(placeArm) ? true : undefined}
+              onClick={(event) => {
+                event.stopPropagation()
+                armCross()
+              }}
+            >
+              {`Cross ${CROSS_COST}✦`}
             </button>
           ) : null}
         </>
