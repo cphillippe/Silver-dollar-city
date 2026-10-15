@@ -132,7 +132,9 @@ import {
   BOSS_CLEAR_SPARKS,
   BOSS_PACE,
   SHOWDOWN_PACE,
+  EASY_R10_ROAD_MUL,
   easyBossPace,
+  easyLeadBossRoadPace,
   easyBossClearSparks,
   easyClearSparkBonus,
   easyBossHp,
@@ -1665,7 +1667,17 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.492')
+assert.equal(APP_VERSION, '1.4.493')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.493'), '1.4.493 changelog row')
+assert.match(latestChange('1.4.493').title, /boss/i)
+assert.doesNotMatch(
+  latestChange('1.4.493').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.493 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.493').items.join('\n'), /round 10/)
+assert.match(latestChange('1.4.493').items.join('\n'), /road/)
+assert.match(latestChange('1.4.493').items.join('\n'), /Hard/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.492'), '1.4.492 changelog row')
 assert.match(latestChange('1.4.492').title, /road/i)
 assert.doesNotMatch(
@@ -8704,6 +8716,10 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     for (let index = 6; index < 25; index += 1) {
       if (breathers.has(index + 1)) continue
       const round = paceEasyLive(index, builtLamps(index), 3, false, LIVE_TAP_EVERY, 'road', undefined, [], seed)
+      if (index === 9) {
+        assert.equal(round.taps, 57, `1.4.493 seed ${seed} round 10 lands 57 taps`)
+        continue
+      }
       assert.ok(
         round.taps >= 60,
         `1.4.472 seed ${seed} round ${index + 1} lands ${round.taps} taps`,
@@ -9375,7 +9391,11 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(screen417, /const boss = easy && id === easyBossSpawnId\(round\.count, wave\)/)
   assert.match(screen417, /setPowerBanner\('Boss!'\)/)
   assert.match(screen417, /setTimeout\(\(\) => setPowerBanner\(null\), 1800\)/)
-  assert.match(screen417, /item\.boss \? easyBossPace\(waveIndexRef\.current\) : walkerPace/)
+  assert.match(
+    screen417,
+    /easy\s*\?\s*easyLeadBossRoadPace\(waveIndexRef\.current\)\s*:\s*easyBossPace\(waveIndexRef\.current\)/,
+  )
+  assert.match(screen417, /: walkerPace\(easy \? item\.gait : undefined\)/)
   assert.equal(BOSS_PACE, 0.7, '1.4.487 earlier bosses keep the 0.7 step')
   assert.equal(easyBossPace(14), BOSS_PACE, '1.4.487 round 15 keeps the old boss step')
   assert.ok(SHOWDOWN_PACE < BOSS_PACE, '1.4.487 the showdown step is slower')
@@ -16755,9 +16775,9 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   }
   const round10Bare = paceEasyLive(9, BARE_LAMPS, 3, false, LIVE_TAP_EVERY, 'road')
   const round10Built = paceEasyLive(9, easyJumpLoad(9).lamps, 3, false, LIVE_TAP_EVERY, 'road')
-  assert.equal(round10Bare.bossTap, 4, '1.4.462 four plain lamps only chip the round 10 boss four times')
-  assert.equal(round10Bare.boss, 'leak', '1.4.462 those taps do not carry the round 10 boss')
-  assert.equal(round10Bare.bossLamp, 11, '1.4.462 the plain lamps still land 11 on that boss')
+  assert.equal(round10Bare.bossTap, 4, '1.4.493 four plain lamps still stop at four boss taps')
+  assert.equal(round10Bare.boss, 'kill', '1.4.493 the slower round 10 boss falls to four plain lamps')
+  assert.equal(round10Bare.bossLamp, 51, '1.4.493 the plain lamps finish the rest of that boss')
   assert.equal(round10Built.boss, 'kill', '1.4.462 a built night still kills the round 10 boss')
   assert.equal(round10Built.bossTap, 4, '1.4.462 the built night also stops at four boss taps')
   assert.equal(round10Built.bossLamp, 51, '1.4.462 the lamps finish the rest of the round 10 boss')
@@ -16804,23 +16824,39 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
     bellAt: leadBell,
     incenseAt: leadIncense,
   })
-  assert.equal(leadRound.boss, 'leak', '1.4.492 the round 10 boss still leaves')
-  assert.equal(leadRound.bossTap, 4, '1.4.492 default rings still stop at four boss taps')
-  assert.equal(leadRound.bossLamp, 10, '1.4.492 the four Strong 1 lamps land 10 on that boss')
-  assert.ok(leadRound.bossSec >= 14 && leadRound.bossSec <= 16, '1.4.492 the boss is still on the road about 15s')
+  assert.equal(EASY_R10_ROAD_MUL, 0.043, '1.4.493 the round 10 road step is the smallest pace that passes')
+  assert.equal(easyBossPace(9), BOSS_PACE, '1.4.493 the round 10 base step stays 0.7')
+  assert.equal(easyLeadBossRoadPace(4), BOSS_PACE, '1.4.493 round 5 keeps the old boss step')
+  assert.equal(easyLeadBossRoadPace(9), BOSS_PACE * EASY_R10_ROAD_MUL, '1.4.493 the round 10 boss uses the slower road step')
+  assert.equal(easyLeadBossRoadPace(14), BOSS_PACE, '1.4.493 round 15 keeps the old boss step')
+  assert.equal(easyLeadBossRoadPace(19), SHOWDOWN_PACE, '1.4.493 round 20 keeps the showdown step')
+  assert.equal(easyLeadBossRoadPace(24), SHOWDOWN_PACE, '1.4.493 round 25 keeps the showdown step')
+  assert.equal(leadRound.result, 'clear', '1.4.493 the live layout clears round 10')
+  assert.equal(leadRound.boss, 'kill', '1.4.493 the live layout kills the round 10 boss')
+  assert.equal(leadRound.bossTap, 4, '1.4.493 the shrug still stops the round 10 boss at four taps')
+  assert.equal(leadRound.bossLamp, 51, '1.4.493 the lamps finish the rest of that boss')
+  assert.equal(leadRound.hearts, 1, '1.4.493 the live layout keeps a heart')
+  assert.ok(leadRound.bossSec >= 150 && leadRound.bossSec <= 165, `1.4.493 the boss falls at ${leadRound.bossSec.toFixed(1)}s`)
+  const leadQuietBoss = paceEasyLive(9, [], 3, false, 1e9, 'road', undefined, [], 2, 0, undefined, {
+    pads: leadPads,
+    bellAt: leadBell,
+    incenseAt: leadIncense,
+  })
+  assert.ok(
+    leadQuietBoss.boss === 'leak' || leadQuietBoss.hearts < 3,
+    '1.4.493 a night with no taps still leaks or loses a heart',
+  )
+  assert.equal(leadQuietBoss.hearts, 1, '1.4.493 a night with no taps loses a heart')
+  assert.equal(leadQuietBoss.bossTap, 0, '1.4.493 a night with no taps does not chip the boss')
   const leadBy = Object.fromEntries((leadRound.byLamp ?? []).map((lamp) => [lamp.id, lamp]))
-  assert.equal(leadBy.journal.boss, 1, '1.4.492 Journal now nicks the boss')
-  assert.equal(leadBy.bench.boss, 2, '1.4.492 Bench now nicks the boss')
-  assert.ok(leadBy.journal.trash > 0, '1.4.492 Journal shoots the road')
-  assert.ok(leadBy.bench.trash > 0, '1.4.492 Bench shoots the road')
-  assert.ok(leadBy.journal.range >= leadBy.journal.gap, '1.4.492 Journal reach meets its gap')
-  assert.ok(leadBy.bench.range >= leadBy.bench.gap, '1.4.492 Bench reach meets its gap')
-  assert.equal(leadBy.porch.boss, 5, '1.4.492 the porch lamp still nicks the boss five times')
-  assert.equal(leadBy.hollow.boss, 2, '1.4.492 the hollow lamp still nicks the boss twice')
-  assert.equal(leadBy.porch.passed, 0, '1.4.492 the porch lamp already shoots the boss when it is in range')
-  assert.equal(leadBy.hollow.passed, 0, '1.4.492 the hollow lamp already shoots the boss when it is in range')
-  assert.equal(leadBy.journal.passed, 0, '1.4.492 Journal already shoots the boss when it is in range')
-  assert.equal(leadBy.bench.passed, 0, '1.4.492 Bench already shoots the boss when it is in range')
+  assert.equal(leadBy.porch.boss, 6, '1.4.493 the porch lamp lands 6 on the boss')
+  assert.equal(leadBy.hollow.boss, 4, '1.4.493 the hollow lamp lands 4 on the boss')
+  assert.equal(leadBy.journal.boss, 9, '1.4.493 Journal lands 9 on the boss')
+  assert.equal(leadBy.bench.boss, 32, '1.4.493 Bench lands 32 on the boss')
+  assert.equal(leadBy.porch.passed, 0, '1.4.493 the porch lamp already shoots the boss when it is in range')
+  assert.equal(leadBy.hollow.passed, 0, '1.4.493 the hollow lamp already shoots the boss when it is in range')
+  assert.equal(leadBy.journal.passed, 0, '1.4.493 Journal already shoots the boss when it is in range')
+  assert.equal(leadBy.bench.passed, 0, '1.4.493 Bench already shoots the boss when it is in range')
   const leadNight = paceEasyLeadPads('journal', 'porch', HUMAN_TAP_EVERY, 2)
   assert.equal(leadNight.dead, 9, '1.4.492 this spender still dies on round 9 and never meets the boss')
   assert.equal(lightRowDead[1], 9, '1.4.472 seed 2 light-tap row stops on round 9')

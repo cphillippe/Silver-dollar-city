@@ -16,6 +16,7 @@ import { pickWalkerFace, WALKER_FACE_POOL } from '../nightWatch/enemies/faces'
 import {
   BOSS_PACE,
   easyBossPace,
+  easyLeadBossRoadPace,
   easyBossClearSparks,
   easyClearSparkBonus,
   easyBossHp,
@@ -845,7 +846,11 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
           const tier = combatTier(item.turned, runTierRef.current)
           return { ...item, heavenT: (item.heavenT ?? 0) + nightEnemies.heavenSpeed(tier, easy) * (seedPlan ? clockDt : dt) }
         }
-        const gaitPace = item.boss ? easyBossPace(waveIndexRef.current) : walkerPace(easy ? item.gait : undefined)
+        const gaitPace = item.boss
+          ? easy
+            ? easyLeadBossRoadPace(waveIndexRef.current)
+            : easyBossPace(waveIndexRef.current)
+          : walkerPace(easy ? item.gait : undefined)
         const paceMul = item.paceScale ?? 1
         let step = nightEnemies.speed(easy) * tune.speedScale * gaitPace * paceMul * (seedPlan ? clockDt : dt)
         let fog = item.fog

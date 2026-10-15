@@ -33,7 +33,7 @@ import {
 import { FREE_LAMP_RANGE_BONUS, lampReach } from './towers/index.ts'
 import {
   BOSS_PACE,
-  easyBossPace,
+  easyLeadBossRoadPace,
   easyShowdownBoss,
   easyBossClearSparks,
   easyClearSparkBonus,
@@ -649,7 +649,7 @@ export function paceEasyLive(
         t: easyLiveSpawnT(round.speed * (boss ? BOSS_PACE : walkerPace(gait))),
         hp,
         dead: false,
-        pace: boss ? (mode === 'road' && !frozen && !map ? easyBossPace(roundIndex) : BOSS_PACE) : walkerPace(gait),
+        pace: boss ? (mode === 'road' && !frozen && !map ? easyLeadBossRoadPace(roundIndex) : BOSS_PACE) : walkerPace(gait),
         gait,
         boss,
         chip: 0,
