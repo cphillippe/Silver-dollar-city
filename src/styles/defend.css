@@ -3070,6 +3070,13 @@ button.defend-path-pip {
   touch-action: manipulation;
 }
 
+/* 1.4.486 Easy wave only. Plant and the clear stay is-easy-watch without is-easy-tap, so the stack and the Lock In cue can come back. Hard never has is-easy-watch. */
+.defend-page.is-easy-watch.is-easy-tap .defend-path-pip.is-locked,
+.defend-page.is-easy-watch.is-easy-tap .defend-lesson-cue,
+.defend-page.is-easy-watch.is-easy-tap .defend-lesson-open {
+  display: none;
+}
+
 .nw-night-back {
   position: sticky;
   top: 0;

@@ -818,6 +818,42 @@ async function checkWaveCard(browser, port, errors) {
     assert.equal(path.locked, 0, `1.4.486 mid-wave ${path.path} hides locked prices`)
     if (path.rank === 0) assert.equal(path.steps.length, 1, `1.4.486 mid-wave ${path.path} shows the next pip`)
   }
+  const cut = await page.evaluate(() => {
+    const pageNode = document.querySelector('.defend-page')
+    const rules = []
+    for (const sheet of document.styleSheets) {
+      let list
+      try {
+        list = sheet.cssRules
+      } catch {
+        continue
+      }
+      for (const rule of list) {
+        const text = rule.selectorText || ''
+        if (!text.includes('.defend-path-pip.is-locked') && !text.includes('.defend-lesson-cue')) continue
+        if (!text.includes('display') && rule.style?.display !== 'none') continue
+        rules.push({ text, display: rule.style?.display ?? '' })
+      }
+    }
+    return {
+      easy: pageNode?.classList.contains('is-easy-watch') === true,
+      wave: pageNode?.classList.contains('is-easy-tap') === true,
+      rules,
+    }
+  })
+  assert.equal(cut.easy, true, '1.4.486 the live night is Easy')
+  assert.equal(cut.wave, true, '1.4.486 the live night is mid-wave')
+  assert.ok(
+    cut.rules.some(
+      (rule) =>
+        rule.display === 'none' &&
+        rule.text.includes('.defend-page.is-easy-watch') &&
+        rule.text.includes('.is-easy-tap') &&
+        rule.text.includes('.defend-path-pip.is-locked') &&
+        rule.text.includes('.defend-lesson-cue'),
+    ),
+    `1.4.486 the Easy wave stylesheet hides locked pips and the Lock In cue ${JSON.stringify(cut.rules)}`,
+  )
   await context.close()
 }
 
