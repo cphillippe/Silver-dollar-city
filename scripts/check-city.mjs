@@ -96,6 +96,8 @@ import {
   PATH_WALKER_FACE_U,
   PATH_WALKER_HIT_R,
   EASY_WAVE_LIVE,
+  easyCrowdCap,
+  noteEasyCrowdRound,
   easyHoldSpawn,
   easySpawnT,
   easyTapFit,
@@ -1637,7 +1639,16 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.481')
+assert.equal(APP_VERSION, '1.4.482')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.482'), '1.4.482 changelog row')
+assert.match(latestChange('1.4.482').title, /tap/i)
+assert.doesNotMatch(
+  latestChange('1.4.482').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.482 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.482').items.join('\n'), /Incense/)
+assert.match(latestChange('1.4.482').items.join('\n'), /Candle/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.481'), '1.4.481 changelog row')
 assert.match(latestChange('1.4.481').title, /snap|line|star/i)
 assert.match(latestChange('1.4.481').items.join('\n'), /line/)
@@ -3456,6 +3467,15 @@ assert.equal(easyTapMode(false, 'wave', false), false)
   assert.equal(easyTapPersonCount(midWave3), 1)
   assert.equal(easyTapTarget(midWave3)?.id, 3)
   assert.equal(EASY_WAVE_LIVE, 3)
+  assert.equal(easyCrowdCap(0), 3)
+  assert.equal(easyCrowdCap(5), 3)
+  assert.equal(easyCrowdCap(6), 6)
+  assert.equal(easyCrowdCap(9), 6)
+  assert.equal(easyCrowdCap(10), 8)
+  assert.equal(easyCrowdCap(16), 8)
+  noteEasyCrowdRound(16)
+  assert.equal(easyCrowdCap(), 8)
+  noteEasyCrowdRound(0)
   assert.equal(easyHoldSpawn(2), false)
   assert.equal(easyHoldSpawn(3), true)
   assert.equal(easySpawnT(0), 0)
@@ -8190,6 +8210,40 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     { easy: true, manual: true, roundIndex: 4, lampDamage: 0, tapBonus: 0 },
   )
   assert.equal(incenseMiss.damage, 1, '1.4.478 round 5 glow damage stays one without a cloud')
+}
+
+// Night Watch 1.4.480: a planted incense is not the shooter, and a walker face beats a lamp box.
+{
+  const screen480 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const board480 = readFileSync(new URL('../src/components/DefendNightBoard.tsx', import.meta.url), 'utf8')
+  const css480 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const enemies480 = readFileSync(new URL('../src/nightWatch/enemies/index.ts', import.meta.url), 'utf8')
+  const workflow480 = readFileSync(new URL('../.github/workflows/city-scans.yml', import.meta.url), 'utf8')
+  const runner480 = readFileSync(new URL('./run-checks.mjs', import.meta.url), 'utf8')
+  assert.match(screen480, /if \(isIncense\(using\)\) return false/, '1.4.480 fire still refuses an incense shot')
+  assert.match(
+    screen480,
+    /if \(isBell\(using\) \|\| isIncense\(using\)\) continue/,
+    '1.4.480 a tap skips incense when it picks a lamp',
+  )
+  assert.match(screen480, /nightEnemies\.holdSpawn\(unturnedLive\)/, '1.4.480 the spawn call stays holdSpawn(unturnedLive)')
+  assert.match(screen480, /noteEasyCrowdRound\(wave\)/, '1.4.480 the tick notes the round before holdSpawn')
+  assert.match(screen480, /playtestBare/, '1.4.480 playtest with nwLamps=0 can begin')
+  assert.match(screen480, /easyPointerTapGate\(/, '1.4.480 the glow gate still runs')
+  assert.match(board480, /data-walker-tap=/, '1.4.480 the walker face is its own hit target')
+  assert.match(css480, /\.defend-walker-tap \{[\s\S]*?z-index:\s*11/, '1.4.480 the walker face sits above a lamp box')
+  assert.match(css480, /\.defend-page\.is-map-sheet \.defend-frame \{[\s\S]*?z-index:\s*20/)
+  assert.match(css480, /\.nw-map-overlay \{[\s\S]*?z-index:\s*30/)
+  assert.match(
+    css480,
+    /\.defend-page\.is-easy-watch\.is-boost\.is-clear-fold \.defend-clear-spend,[\s\S]*?display:\s*inline-flex/,
+  )
+  assert.match(css480, /max-width:\s*200px/, '1.4.480 the folded clear bar rule stays')
+  assert.match(enemies480, /boundNightWave\(\)\?\.liveCap \?\? easyCrowdCap\(\)/)
+  assert.match(workflow480, /check-live-prove\.mjs/, '1.4.480 CI runs the live prove')
+  assert.match(runner480, /check-live-prove\.mjs/, '1.4.480 npm test runs the live prove')
+  assert.equal(easyCrowdCap(4), EASY_WAVE_LIVE, '1.4.480 round 5 stays on the rounds 1–6 cap')
+  assert.equal(EASY_WAVE_LIVE, 3)
 }
 {
   assert.equal(EASY_TOUGH_OPEN, 56, '1.4.472 a thick walker from round 8 has a taller bar')

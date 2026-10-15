@@ -1,7 +1,7 @@
 import type { CityPlotId } from '../lib/city'
 import { clampGhostHintLeft, lampRoadNote, ROAD_COVER_WORD } from '../lib/lampPlace'
 import { CLEAR_BAR_RESERVE } from '../lib/towerCardPlace'
-import { WATCH_ABILITY_LABEL } from '../lib/defend'
+import { EASY_CROWN_HIT_R, EASY_FACE_HIT_R, PATH_WALKER_FACE_DY, WATCH_ABILITY_LABEL, easyFaceGlows } from '../lib/defend'
 import { boardFill, boardFillPoint, boardPoint as mapBoardPoint, boardView, lampIconBox, nightTowers } from '../nightWatch'
 import type { DefendNightSkyProps } from './DefendNightSky'
 import { DefendNightSky } from './DefendNightSky'
@@ -241,6 +241,39 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
               />
             )
           })
+        : null}
+      {easyTap && boardBox && boardBox.w > 0
+        ? raiders
+            .filter((raider) => !raider.turned)
+            .map((raider) => {
+              const at = raiderAt(raider)
+              const face = place(boardBox, { x: at.x, y: at.y + PATH_WALKER_FACE_DY })
+              const radius = (raider.boss ? EASY_CROWN_HIT_R : EASY_FACE_HIT_R) * (cameraScale > 0 ? cameraScale : 1)
+              const glowing = easyFaceGlows(raider, raiders, roundIndex, armorFrom)
+              return (
+                <button
+                  key={`walker-tap-${raider.id}`}
+                  type="button"
+                  className={`defend-walker-tap${glowing ? ' is-cue is-easy-cue' : ''}`}
+                  data-walker-tap={raider.id}
+                  data-walker-id={raider.id}
+                  data-boss={raider.boss ? 'yes' : undefined}
+                  aria-label="Tap walker"
+                  style={{
+                    left: face.left - radius,
+                    top: face.top - radius,
+                    width: radius * 2,
+                    height: radius * 2,
+                    zIndex: glowing ? 11 : 10,
+                  }}
+                  onPointerDown={(event) => event.stopPropagation()}
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    fireAtRaider(raider.id)
+                  }}
+                />
+              )
+            })
         : null}
       {typeChips}
       <DefendNightWalkerCue
