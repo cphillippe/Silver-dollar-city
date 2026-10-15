@@ -111,6 +111,18 @@ export function nightWatchSkipsMapSheet(search: string, debugOn: boolean): boole
   return nightWatchRoundJump(search, 25, allowed) != null
 }
 
+/**
+ * `?nwLamps=` while playtest is allowed.
+ * 0, 1, or 2. Missing or any other value keeps the full jump load.
+ */
+export function nightWatchLampCap(search: string, allowed: boolean): number | null {
+  if (!allowed) return null
+  const raw = new URLSearchParams(search).get('nwLamps')
+  if (raw == null || raw === '') return null
+  if (!/^[012]$/.test(raw)) return null
+  return Number(raw)
+}
+
 /** Easy playtest jump. Null on Hard and on a normal visit. */
 export function readNightWatchRoundJump(nightLen: number): number | null {
   if (typeof window === 'undefined') return null

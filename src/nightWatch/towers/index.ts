@@ -21,6 +21,7 @@ export type LampIconMark = 'tower' | 'candle' | 'bell' | 'incense'
 /**
  * Tap box for a planted lamp, in viewBox units, feet on the anchor.
  * A walker beside this box is outside the icon. The range ring is not a target.
+ * Incense is the censer and its base. The cloud is not part of this box.
  */
 export function lampIconBox(mark: LampIconMark): { x: number; y: number; w: number; h: number } {
   if (mark === 'candle') return { x: -14, y: -44, w: 28, h: 52 }

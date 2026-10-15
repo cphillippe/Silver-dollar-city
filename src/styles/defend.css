@@ -603,7 +603,9 @@ img.walker-face.easy-walker-face,
 }
 
 /* 1.4.475: the incense cloud is a warm gold ring. It does not flash like a shot. */
+/* 1.4.478: the cloud is not a tap. A walker in it takes the tap. The card opens from the icon. */
 .defend-range.is-incense-cloud {
+  pointer-events: none;
   fill: rgba(255, 204, 51, 0.1);
   stroke: #ffcc33;
   stroke-width: 5;
@@ -2696,6 +2698,15 @@ button.defend-incense-lamp {
 
 /* 1.4.436: at a clear, a planted lamp stays tappable above the slim bar. */
 /* 1.4.478: the target is the icon. Size comes from the lamp box. */
+.defend-incense {
+  pointer-events: none;
+}
+
+/* 1.4.478: during a wave the incense button lets a walker through. The icon hit opens the card. */
+.defend-page.is-easy-tap .defend-clear-lamp[data-incense-icon='yes'] {
+  pointer-events: none;
+}
+
 .defend-clear-lamp {
   position: absolute;
   z-index: 7;

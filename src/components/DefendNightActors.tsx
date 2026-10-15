@@ -327,6 +327,7 @@ export function DefendNightActorsSvg({
                       scenery && on
                         ? (event) => {
                             event.stopPropagation()
+                            if (incense) onOpenUpgrade?.(id)
                           }
                         : scenery
                           ? undefined
@@ -350,6 +351,7 @@ export function DefendNightActorsSvg({
                       <rect
                         className="defend-hit"
                         data-lamp-wave-hit="yes"
+                        data-incense-hit={incense ? 'icon' : undefined}
                         x={icon.x}
                         y={icon.y}
                         width={icon.w}
@@ -454,6 +456,7 @@ export function DefendNightActorsSvg({
                         {phase === 'wave' ? (
                           <circle
                             className={`defend-range${incense ? ' is-incense-cloud' : bell ? ' is-bell-pulse' : firing ? ' is-firing' : ''}`}
+                            data-incense-cloud={incense ? 'yes' : undefined}
                             r={bell || incense ? reach : nightTowers.range(id, using, progress, runTier, reachBonus)}
                             pointerEvents="none"
                             style={

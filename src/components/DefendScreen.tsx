@@ -20,6 +20,7 @@ import {
   easyBossHp,
   easyBossRound,
   easyBossSpawnId,
+  capJumpPlants,
   easyJumpLoad,
   easyJumpSparkBank,
   easyLatePush,
@@ -80,6 +81,7 @@ import {
   nightWatchDebugHolds,
   nightWatchDebugPanel,
   nightWatchJumpAllowed,
+  nightWatchLampCap,
   nightWatchMapMissing,
   nightWatchMapQuery,
   nightWatchSkipsMapSheet,
@@ -234,13 +236,20 @@ interface DefendScreenProps {
 /** 1.4.375: how long the lamp level-up burst, roman bump, and −1✦ stay readable. */
 const LEVEL_BURST_MS = 1100
 
+/** Playtest `nwLamps=0..2` trims the jump. A missing cap keeps the full load. */
+function jumpedNightLoad(jump: number) {
+  const search = typeof window === 'undefined' ? '' : window.location.search
+  const allowed = nightWatchJumpAllowed(search, readNightWatchDebug())
+  return capJumpPlants(easyJumpLoad(jump), nightWatchLampCap(search, allowed))
+}
+
 /** Playtest jump applied on the first paint, so Begin cannot start round 1 under a round 25 label. */
 function initialNightJump(easy: boolean) {
   if (!easy || typeof window === 'undefined') return null
   if (readNightReturn()) return null
   const jump = readNightWatchRoundJump(nightLength(true))
   if (jump == null) return null
-  return { index: jump, load: easyJumpLoad(jump) }
+  return { index: jump, load: jumpedNightLoad(jump) }
 }
 
 /** Easy SE chrome (1.4.379). Same cutoff as the phone rules in defend.css. */
@@ -685,13 +694,18 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     roundJumpOnce.current = true
     const bank = easyJumpSparkBank(jump)
     const planted = easyJumpLoad(jump)
+    const search = window.location.search
+    const shown = capJumpPlants(
+      planted,
+      nightWatchLampCap(search, nightWatchJumpAllowed(search, readNightWatchDebug())),
+    )
     sparksRef.current = bank
     setRunSparks(bank)
     setWaveIndex(jump)
-    runPathsRef.current = planted.paths
-    setRunPaths(planted.paths)
-    plantsRef.current = planted.plants
-    setPlants(planted.plants)
+    runPathsRef.current = shown.paths
+    setRunPaths(shown.paths)
+    plantsRef.current = shown.plants
+    setPlants(shown.plants)
   }, [easy])
 
   useEffect(() => {
@@ -2677,7 +2691,12 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   )
 
   // Pale Begin and the plant line follow how many lamps are standing, not ring slots.
-  const awaitingLamp = planted.length < 1
+  const jumpSearch = typeof window === 'undefined' ? '' : window.location.search
+  const bareLampJump =
+    easy &&
+    readNightWatchRoundJump(nightLength(true)) != null &&
+    nightWatchLampCap(jumpSearch, nightWatchJumpAllowed(jumpSearch, readNightWatchDebug())) === 0
+  const awaitingLamp = planted.length < 1 && !bareLampJump
 
   const tip =
     phase === 'wave'

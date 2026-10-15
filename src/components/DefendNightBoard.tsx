@@ -222,6 +222,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
                 className="defend-clear-lamp"
                 data-clear-lamp={id}
                 data-lamp-icon="yes"
+                data-incense-icon={isIncense(type) ? 'yes' : undefined}
                 data-tower-type={type}
                 aria-label={`Upgrade ${label}`}
                 style={{
