@@ -52,6 +52,14 @@ import {
   isIncense,
 } from '../nightWatch/incense'
 import {
+  CROSS_CARD,
+  CROSS_LABEL,
+  CROSS_SOONER,
+  canUpgradeCross,
+  crossRank,
+  isCross,
+} from '../nightWatch/cross'
+import {
   CANDLE_CARD,
   CANDLE_HELP,
   CANDLE_LABEL,
@@ -165,11 +173,13 @@ export function DefendTowerCard({
   const canSpend = !maxed && sparks >= cost
   const label = isIncense(ability)
     ? INCENSE_LABEL
-    : isBell(ability)
-      ? BELL_LABEL
-      : isCandle(ability)
-        ? CANDLE_LABEL
-        : (WATCH_ABILITY_LABEL[ability] ?? 'Love')
+    : isCross(ability)
+      ? CROSS_LABEL
+      : isBell(ability)
+        ? BELL_LABEL
+        : isCandle(ability)
+          ? CANDLE_LABEL
+          : (WATCH_ABILITY_LABEL[ability] ?? 'Love')
   const plotTitle =
     CITY_PLOTS.find((plot) => plot.id === plotId)?.title ??
     (isFreeSpot(plotId) ? 'open ground' : plotId)
@@ -199,6 +209,151 @@ export function DefendTowerCard({
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
+
+  if (easy && isCross(ability) && paths && onUpgradePath) {
+    const cardH = 228
+    const placed = placeTowerCard(point, board, clearOf, cameraScale, reserveBottom, cardH)
+    const rank = crossRank(paths)
+    const buy = canUpgradeCross(paths)
+    const broke = buy.ok && sparks < buy.cost
+    return (
+      <div
+        ref={cardRef}
+        className={`defend-tower-card is-tree is-cross is-${placed.side}`}
+        data-upgrade-card
+        data-upgrade-tree="cross"
+        data-cross-card="yes"
+        data-cross-sooner={CROSS_SOONER[rank]}
+        data-upgrade-plot={plotId}
+        role="dialog"
+        tabIndex={-1}
+        aria-label={`Upgrade ${label} at ${plotTitle}`}
+        style={{
+          left: placed.left,
+          top: placed.top,
+          width: TOWER_CARD_W,
+          ['--stem' as string]: `${Math.round(point.left - placed.left)}px`,
+        }}
+      >
+        {onPull ? (
+          <button
+            type="button"
+            className="defend-tower-pull"
+            aria-label={`Pull lamp at ${plotTitle}`}
+            onClick={(event) => {
+              event.stopPropagation()
+              setPullAsk(true)
+            }}
+          >
+            <svg className="defend-tower-trash" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                fill="currentColor"
+                d="M9 3h6l1 2h5v2H3V5h5l1-2zm-2 6h2v10H7V9zm4 0h2v10h-2V9zm4 0h2v10h-2V9z"
+              />
+            </svg>
+          </button>
+        ) : null}
+        {pullAsk && onPull ? (
+          <div className="defend-pull-confirm" role="alertdialog" aria-label="Pull this lamp?">
+            <p className="defend-pull-copy">{`Pull this lamp? You get ${pullSparks} sparks back`}</p>
+            <div className="defend-pull-actions">
+              <button
+                type="button"
+                className="defend-pull-keep"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  setPullAsk(false)
+                }}
+              >
+                Keep
+              </button>
+              <button
+                type="button"
+                className="defend-pull-do"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  setPullAsk(false)
+                  onPull()
+                }}
+              >
+                Pull
+              </button>
+            </div>
+          </div>
+        ) : null}
+        <p className="defend-tower-tool">{label}</p>
+        <p className="defend-cross-line" data-cross-card-line="yes">
+          {CROSS_CARD}
+        </p>
+        <div className="defend-path" data-path="sooner" data-rank={rank}>
+          <p className="defend-path-name">
+            <span className="defend-path-title">Sooner</span>
+            <span className="defend-path-line">Lamps beside it</span>
+          </p>
+          <div className="defend-path-pips">
+            {CROSS_SOONER.map((sooner, index) => {
+              const pct = Math.round(sooner * 100)
+              const filled = rank >= index
+              const next = buy.ok && index === rank + 1
+              const className = `defend-path-pip${filled ? ' is-on' : ''}${next ? ' is-buy' : ''}`
+              if (next) {
+                return (
+                  <button
+                    key={pct}
+                    type="button"
+                    className={className}
+                    disabled={broke}
+                    data-step={index + 1}
+                    data-cost={buy.cost}
+                    data-cross-step={pct}
+                    aria-label={`Sooner ${pct} percent, ${buy.cost} sparks`}
+                    onPointerDown={(event) => {
+                      event.stopPropagation()
+                      if (!broke) onArmPathBuy?.('strong')
+                    }}
+                    onClick={(event) => {
+                      event.stopPropagation()
+                      if (!broke) onUpgradePath('strong', true)
+                    }}
+                  >
+                    {`${pct}%`}
+                  </button>
+                )
+              }
+              return (
+                <span key={pct} className={className} data-step={index + 1} data-cross-step={pct}>
+                  {`${pct}%`}
+                </span>
+              )
+            })}
+          </div>
+          {buy.ok ? (
+            <button
+              type="button"
+              className="btn primary defend-path-buy"
+              disabled={broke}
+              data-path-buy="sooner"
+              data-cost={buy.cost}
+              onPointerDown={(event) => {
+                event.stopPropagation()
+                if (!broke) onArmPathBuy?.('strong')
+              }}
+              onClick={(event) => {
+                event.stopPropagation()
+                if (!broke) onUpgradePath('strong', true)
+              }}
+            >
+              {broke ? `Need ${buy.cost}` : `${buy.cost}✦`}
+            </button>
+          ) : (
+            <p className="defend-path-lock" data-path-lock="sooner">
+              {buy.reason}
+            </p>
+          )}
+        </div>
+      </div>
+    )
+  }
 
   if (easy && isBell(ability) && paths && onUpgradePath) {
     const cardH = 228

@@ -10,6 +10,7 @@ import { DefendTowerCard, type TowerCardPoint } from './DefendTowerCard'
 import { samePillarLessons } from '../nightWatch/lampPillar'
 import { easyShotReach, pathsOf, type BonusGate, type LampPaths, type TreePath } from '../nightWatch/upgradeTree'
 import { bellPathKey, isBell } from '../nightWatch/bell'
+import { crossPathKey, CROSS_LABEL, isCross } from '../nightWatch/cross'
 import { incensePathKey, INCENSE_LABEL, isIncense } from '../nightWatch/incense'
 import { candleFarBonus, candlePathKey, candleRoadNote, isCandle } from '../nightWatch/candle'
 import {
@@ -63,24 +64,27 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
   const bellCard = Boolean(cardAbility && isBell(cardAbility) && upgradeAt)
   const incenseCard = Boolean(cardAbility && isIncense(cardAbility) && upgradeAt)
   const candleCard = Boolean(cardAbility && isCandle(cardAbility) && upgradeAt)
+  const crossCard = Boolean(cardAbility && isCross(cardAbility) && upgradeAt)
   const cardKey =
     incenseCard && upgradeAt
       ? incensePathKey(upgradeAt)
       : bellCard && upgradeAt
         ? bellPathKey(upgradeAt)
-        : candleCard && upgradeAt
-          ? candlePathKey(upgradeAt)
-          : cardAbility
+        : crossCard && upgradeAt
+          ? crossPathKey(upgradeAt)
+          : candleCard && upgradeAt
+            ? candlePathKey(upgradeAt)
+            : cardAbility
   const cardPaths = easy && cardKey ? pathsOf(runPaths, cardKey) : undefined
   const reachBonus =
-    bellCard || incenseCard
+    bellCard || incenseCard || crossCard
       ? 0
       : candleCard && upgradeAt
         ? candleFarBonus(pathsOf(runPaths, candlePathKey(upgradeAt)))
         : easy && cardAbility
           ? easyShotReach(pathsOf(runPaths, cardAbility))
           : 0
-  const roadNote = bellCard || incenseCard
+  const roadNote = bellCard || incenseCard || crossCard
     ? ''
     : candleCard && upgradeAt
       ? candleRoadNote(upgradeAt, reachBonus)
@@ -173,7 +177,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
               className={`defend-type-chip is-${type}`}
               style={{ left: at.left, top: at.top }}
             >
-              {isIncense(type) ? INCENSE_LABEL : isBell(type) ? 'Bell' : isCandle(type) ? 'Candle' : (WATCH_ABILITY_LABEL[type] ?? type)}
+              {isIncense(type) ? INCENSE_LABEL : isCross(type) ? CROSS_LABEL : isBell(type) ? 'Bell' : isCandle(type) ? 'Candle' : (WATCH_ABILITY_LABEL[type] ?? type)}
             </span>
           )
         })
@@ -275,8 +279,8 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
         ? planted.map((id) => {
             const at = place(boardBox, nightTowers.anchor(id))
             const type = towerType[id]
-            const label = isIncense(type) ? INCENSE_LABEL : isBell(type) ? 'Bell' : isCandle(type) ? 'Candle' : (WATCH_ABILITY_LABEL[type ?? ''] ?? 'lamp')
-            const icon = lampIconBox(isIncense(type) ? 'incense' : isBell(type) ? 'bell' : isCandle(type) ? 'candle' : 'tower')
+            const label = isIncense(type) ? INCENSE_LABEL : isCross(type) ? CROSS_LABEL : isBell(type) ? 'Bell' : isCandle(type) ? 'Candle' : (WATCH_ABILITY_LABEL[type ?? ''] ?? 'lamp')
+            const icon = lampIconBox(isIncense(type) ? 'incense' : isCross(type) ? 'cross' : isBell(type) ? 'bell' : isCandle(type) ? 'candle' : 'tower')
             const scale = cameraScale > 0 ? cameraScale : 1
             const lift = lampLift[id] ?? 0
             return (

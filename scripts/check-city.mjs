@@ -254,6 +254,13 @@ import {
   BELL_SLOW,
 } from '../src/nightWatch/bell.ts'
 import {
+  CROSS_CARD,
+  applyCrossWait,
+  crossPaceFor,
+  crossUnlocked,
+  isCross,
+} from '../src/nightWatch/cross.ts'
+import {
   applyIncenseStep,
   applyIncenseTap,
   incenseBonusFor,
@@ -1650,7 +1657,15 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.489')
+assert.equal(APP_VERSION, '1.4.490')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.490'), '1.4.490 changelog row')
+assert.match(latestChange('1.4.490').title, /cross/i)
+assert.doesNotMatch(
+  latestChange('1.4.490').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.490 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.490').items.join('\n'), /The cross reminds us Jesus died and rose for us\. \(Hebrews 12:2, RSV\)/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.489'), '1.4.489 changelog row')
 assert.match(latestChange('1.4.489').title, /name/i)
 assert.doesNotMatch(
@@ -1717,6 +1732,7 @@ assert.match(hide488[0], /defend-range:not\(\.is-firing\):not\(\.is-bell-pulse\)
 assert.match(hide488[0], /\.nw-skill-tray \.defend-candle-lamp/)
 assert.match(hide488[0], /\.nw-skill-tray \.defend-bell-lamp/)
 assert.match(hide488[0], /\.nw-skill-tray \.defend-incense-lamp/)
+assert.match(hide488[0], /\.nw-skill-tray \.defend-cross-lamp/, '1.4.490 the wave hides the Cross buy with the other lamps')
 assert.doesNotMatch(hide488[0], /defend-clear-row/, '1.4.488 the clear row is not in the wave hide')
 for (const line of hide488[0].split('\n')) {
   if (!line.includes('.defend-page')) continue
@@ -1737,6 +1753,30 @@ assert.doesNotMatch(
   /defend-clear-row|is-boost/,
   '1.4.489 the name hide is not the clear row',
 )
+assert.equal(CROSS_CARD, 'The cross reminds us Jesus died and rose for us. (Hebrews 12:2, RSV)', '1.4.490 the teaching line stays verbatim')
+assert.equal(isCross('cross'), true)
+assert.equal(isCross('icon'), false, '1.4.490 this ship is the Cross')
+assert.equal(crossUnlocked(true, 5, 'wave'), false, '1.4.490 rounds 1–6 keep the cross locked')
+assert.equal(crossUnlocked(true, 11, 'wave'), false, '1.4.490 round 12 itself keeps the cross locked')
+assert.equal(crossUnlocked(true, 11, 'boost'), true, '1.4.490 the round 12 clear unlocks the cross')
+assert.equal(crossUnlocked(false, 20, 'boost'), false, '1.4.490 Hard never offers the cross')
+assert.equal(applyCrossWait(700, 1), 700, '1.4.490 a lamp outside the cross keeps its wait')
+assert.equal(applyCrossWait(700, 0.9), 630, '1.4.490 a lamp beside the planted cross waits ten percent less')
+assert.equal(crossPaceFor({}, undefined, { x: 0, y: 0 }), 1, '1.4.490 no cross leaves the wait alone')
+{
+  const early490 = []
+  let hearts = 3
+  for (let index = 0; index < 6; index += 1) {
+    const owned = easyJumpLoad(index).lamps.map((lamp) => ({ far: lamp.far, strong: lamp.strong }))
+    while (owned.length < 4) owned.push({ far: 0, strong: 0 })
+    const round = paceEasyLive(index, owned, hearts, false, LIVE_TAP_EVERY, 'road', undefined, [], 2)
+    early490.push(round.taps)
+    hearts = easyClearHeart(round.hearts)
+  }
+  assert.deepEqual(early490, [8, 8, 15, 14, 63, 43], '1.4.490 seed 2 rounds 1–6 stay on the old taps')
+  assert.equal(paceEasyRoadCampaign('none', 'live').dead, 9, '1.4.490 no upgrades still die on round 9')
+  assert.equal(paceEasyRoadCampaign('natural', 'live').dead, 9, '1.4.490 the 0.28 spender still dies on round 9')
+}
 
 {
   assert.deepEqual(
