@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.479',
+    title: 'Your turn to snap',
+    when: '2026-10-15',
+    items: [
+      'On Easy, the hand shows the snap more slowly. Then it waits for your tap.',
+      'A beat that flies past with no tap is not a miss.',
+      'The open story has one Lock In next button. Stars show how many snaps you locked.',
+    ],
+  },
+  {
     version: '1.4.478',
     title: 'Phone night',
     when: '2026-10-15',
