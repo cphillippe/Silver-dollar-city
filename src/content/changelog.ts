@@ -8,6 +8,17 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.488',
+    title: 'Quieter wave',
+    when: '2026-10-15',
+    items: [
+      'During a wave, lamp names and the dotted rings stay off the map.',
+      'Candle, Bell, and Incense wait on the clear. The wave does not show those buys.',
+      'Filled steps and the next step on a lamp card share one shape.',
+      'The right-hand lamp badges stay off during a wave.',
+    ],
+  },
+  {
     version: '1.4.487',
     title: 'Late taps',
     when: '2026-10-15',
