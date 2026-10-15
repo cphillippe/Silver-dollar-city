@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -12,11 +13,14 @@ import {
   applyDemoSnap,
   applyOpenScore,
   applySnapScore,
-  demoCountsLocked,
+  beatCoversGate,
   DEMO_HOLD_MS,
   DEMO_TURN,
   demoTravelMs,
   easySnapStars,
+  lockedAfterDemo,
+  snapLabelLit,
+  WIN_INPUT_LOCK_MS,
   lockedAfterMiss,
   flyPastIsMiss,
   missPointsLost,
@@ -110,7 +114,14 @@ export function StorySnapPlayView({
   const tappedRef = useRef(false)
   const demoHoldRef = useRef(0)
   const windowRef = useRef(SNAP_WINDOW)
+  const beatEl = useRef<HTMLDivElement>(null)
+  const gateEl = useRef<HTMLDivElement>(null)
+  const underRef = useRef(false)
+  const winLockRef = useRef(false)
+  const winLockTimer = useRef(0)
   windowRef.current = snapWindowFraction(duration, easy)
+  const [underGate, setUnderGate] = useState(false)
+  const [winLock, setWinLock] = useState(false)
 
   const flying = useMemo(() => beatByIndex(flyIndex), [flyIndex])
   const inWindow = inSnapWindow(progress, windowRef.current)
@@ -142,6 +153,11 @@ export function StorySnapPlayView({
     demoRef.current = false
     tappedRef.current = false
     demoHoldRef.current = 0
+    underRef.current = false
+    winLockRef.current = false
+    window.clearTimeout(winLockTimer.current)
+    setUnderGate(false)
+    setWinLock(false)
     writeProgress(0)
     setAttempt(nextAttempt)
     setPhase('ready')
@@ -165,6 +181,7 @@ export function StorySnapPlayView({
   }
 
   function replay() {
+    if (winLockRef.current) return
     resetRound(attempt + 1)
   }
 
@@ -220,6 +237,25 @@ export function StorySnapPlayView({
     return () => window.cancelAnimationFrame(frame.current)
   }, [duration, reduced])
 
+  useLayoutEffect(() => {
+    if (!easy || phase !== 'fly') {
+      if (underRef.current) {
+        underRef.current = false
+        setUnderGate(false)
+      }
+      return
+    }
+    const beat = beatEl.current
+    const gate = gateEl.current
+    if (!beat || !gate) return
+    const card = beat.getBoundingClientRect()
+    const line = gate.getBoundingClientRect()
+    const next = beatCoversGate(card.left, card.right, line.left + line.width / 2)
+    if (next === underRef.current) return
+    underRef.current = next
+    setUnderGate(next)
+  }, [progress, easy, phase])
+
   function recycleBeat(penalize: boolean) {
     if (phaseRef.current === 'open') return
     if (penalize) {
@@ -246,10 +282,8 @@ export function StorySnapPlayView({
     demoHoldRef.current = 0
     setDemoOn(false)
     snappable.current = false
-    const beat = beatByIndex(flyRef.current)
-    lockedRef.current = demoCountsLocked(lockedRef.current, beat.id)
+    lockedRef.current = lockedAfterDemo(lockedRef.current)
     setLockedIds(lockedRef.current)
-    playGemPop('find')
     commitScore(applyDemoSnap(scoreRef.current))
     flashToast(DEMO_TURN)
     phaseRef.current = 'ready'
@@ -297,10 +331,20 @@ export function StorySnapPlayView({
     setPlusFlash(`+${STORY_OPEN_SCORE}`)
     setWinStamp('')
     setClaimShown(true)
+    if (easyRef.current) {
+      winLockRef.current = true
+      setWinLock(true)
+      window.clearTimeout(winLockTimer.current)
+      winLockTimer.current = window.setTimeout(() => {
+        winLockRef.current = false
+        setWinLock(false)
+      }, WIN_INPUT_LOCK_MS)
+    }
     window.setTimeout(() => setPlusFlash(''), 900)
   }
 
   function holdWin() {
+    if (winLockRef.current) return
     if (phaseRef.current !== 'open' || stopping.current) return
     stopping.current = true
     if (!cleared.current) {
@@ -341,17 +385,12 @@ export function StorySnapPlayView({
   const stars = easySnapStars(lockedIds.length)
   const scoreShown = easy ? stars : String(score)
   const scoreLabel = easy ? `${Math.min(lockedIds.length, SNAPS_TO_OPEN)} stars` : `Score ${score}`
-  const padLabel = demoOn
-    ? 'Watch'
-    : phase === 'ready'
-      ? 'Tap to start'
-      : inWindow
-        ? 'SNAP!'
-        : 'Wait…'
+  const snapLit = easy ? phase === 'fly' && snapLabelLit(inWindow, underGate, true) : inWindow
+  const padLabel = demoOn ? 'Watch' : phase === 'ready' ? 'Tap to start' : snapLit ? 'SNAP!' : 'Wait…'
 
   return (
     <div
-      className={`play is-story-snap ${inWindow && phase === 'fly' ? 'is-glow' : ''} ${phase === 'open' ? 'is-win' : ''} ${shake ? 'is-shake' : ''}`}
+      className={`play is-story-snap ${phase === 'fly' && (easy ? snapLit : inWindow) ? 'is-glow' : ''} ${phase === 'open' ? 'is-win' : ''} ${winLock ? 'is-win-lock' : ''} ${shake ? 'is-shake' : ''}`}
     >
       <p className="eyebrow">Story Snap</p>
       {/* 1.4.163 / #209: Learn already showed short story — omit STORY_SNAP_TEACH reprint; pad·strip·gate teach mechanic */}
@@ -371,10 +410,21 @@ export function StorySnapPlayView({
       </div>
 
       <div className="snap-stage" aria-live="polite">
-        <div className="snap-gate" aria-hidden />
+        <div className="snap-gate" ref={gateEl} aria-hidden />
+        {demoOn ? (
+          <span className={`snap-ghost ${reduced ? 'is-still' : 'is-tap'}`} aria-hidden>
+            <svg viewBox="0 0 72 96" width="44" height="58">
+              <rect x="16" y="6" width="40" height="34" rx="14" fill="#ffe7c2" stroke="#5a3a12" strokeWidth="2" />
+              <ellipse cx="14" cy="30" rx="9" ry="7" fill="#ffe7c2" stroke="#5a3a12" strokeWidth="2" />
+              <rect x="29" y="28" width="14" height="60" rx="7" fill="#ffe7c2" stroke="#5a3a12" strokeWidth="2" />
+              <rect x="32" y="76" width="8" height="8" rx="3" fill="#fff6e8" stroke="#5a3a12" strokeWidth="1.5" />
+            </svg>
+          </span>
+        ) : null}
         <div className="snap-lane">
           {phase === 'fly' || phase === 'snap' ? (
             <div
+              ref={beatEl}
               className="snap-beat"
               style={{ left: `${beatLeftPct}%`, ['--gate' as string]: `${GATE_AT * 100}%` }}
             >
@@ -422,17 +472,9 @@ export function StorySnapPlayView({
           aria-label={padLabel}
         >
           {padLabel}
-          {demoOn ? (
-            <span className={`snap-ghost ${reduced ? 'is-still' : 'is-tap'}`} aria-hidden>
-              <svg viewBox="0 0 72 96" width="44" height="58">
-                <rect x="16" y="6" width="40" height="34" rx="14" fill="#ffe7c2" stroke="#5a3a12" strokeWidth="2" />
-                <ellipse cx="14" cy="30" rx="9" ry="7" fill="#ffe7c2" stroke="#5a3a12" strokeWidth="2" />
-                <rect x="29" y="28" width="14" height="60" rx="7" fill="#ffe7c2" stroke="#5a3a12" strokeWidth="2" />
-                <rect x="32" y="76" width="8" height="8" rx="3" fill="#fff6e8" stroke="#5a3a12" strokeWidth="1.5" />
-              </svg>
-            </span>
-          ) : null}
         </button>
+      ) : easy ? (
+        <div className="snap-pad snap-pad-slot" aria-hidden="true" />
       ) : null}
 
       <div className="cta-dock">
@@ -441,7 +483,7 @@ export function StorySnapPlayView({
             <button type="button" className="btn primary xl" onClick={holdWin}>
               {EASY.holdNext}
             </button>
-            <button type="button" className="text-link" onClick={replay}>
+            <button type="button" className="text-link snap-again" onClick={replay}>
               {STORY_SNAP_AGAIN}
             </button>
           </>

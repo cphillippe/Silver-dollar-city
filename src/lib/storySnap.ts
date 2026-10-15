@@ -117,10 +117,39 @@ export function flyPastIsMiss(playerTapped: boolean, easy: boolean): boolean {
   return easy ? missOnFlyPast(playerTapped) : true
 }
 
-/** Easy score. Filled stars are snaps already locked. No digits. */
+/** Easy score. Filled stars are snaps the player locked. No digits. */
 export function easySnapStars(lockedCount: number): string {
   const n = Math.max(0, Math.min(SNAPS_TO_OPEN, Math.floor(lockedCount)))
   return `${'★'.repeat(n)}${'☆'.repeat(SNAPS_TO_OPEN - n)}`
+}
+
+/** The ghost demo grants no star. The row stays put until a player snap. */
+export function lockedAfterDemo<T>(lockedIds: readonly T[]): T[] {
+  return [...lockedIds]
+}
+
+/** Ignore win-screen taps for this long so a follow-through does not restart. */
+export const WIN_INPUT_LOCK_MS = 800
+
+export function winReplayBlocked(elapsedMs: number): boolean {
+  return elapsedMs < WIN_INPUT_LOCK_MS
+}
+
+/**
+ * Easy SNAP! lights only when the gate sits in the middle of the card.
+ * Hard keeps the timing window alone.
+ */
+export function snapLabelLit(inWindow: boolean, cardUnderGate: boolean, easy: boolean): boolean {
+  if (!inWindow) return false
+  if (!easy) return true
+  return cardUnderGate
+}
+
+/** True when the gate line is in the card, not merely clipping an edge. */
+export function beatCoversGate(cardLeft: number, cardRight: number, gateX: number): boolean {
+  if (!(cardRight > cardLeft)) return false
+  const inset = (cardRight - cardLeft) * 0.22
+  return gateX >= cardLeft + inset && gateX <= cardRight - inset
 }
 
 export function snapsDone(locked: number): boolean {

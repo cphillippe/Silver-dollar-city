@@ -218,11 +218,40 @@ html[data-easy='on'] .play.is-story-snap button.snap-pad:active {
   position: absolute;
   z-index: 6;
   left: 50%;
-  top: -3.4rem;
+  top: 0.2rem;
   width: 44px;
   height: 58px;
-  margin-left: -24px;
+  margin-left: -22px;
   pointer-events: none;
+}
+
+html[data-easy='on'] .play.is-story-snap .snap-pad-slot {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.play.is-story-snap.is-win-lock .snap-again,
+.play.is-story-snap.is-win-lock .cta-dock .btn {
+  pointer-events: none;
+}
+
+html[data-easy='on'] .play.is-story-snap.is-win .cta-dock .text-link.snap-again {
+  display: inline-flex;
+  width: auto;
+  align-self: center;
+  min-height: 0;
+  margin-top: 0.15rem;
+  padding: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-decoration: underline;
+  color: #ffe7a3;
+  background: none;
+  background-image: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .play.is-story-snap .snap-ghost.is-tap {
