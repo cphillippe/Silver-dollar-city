@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.493',
+    title: 'A shorter lead boss',
+    when: '2026-10-15',
+    items: [
+      'On Easy, the round 10 boss has a shorter health bar. Lamps and a few taps bring it down.',
+      'With no taps, that boss still leaves.',
+      'Hard nights, and the other rounds, keep their old health.',
+    ],
+  },
+  {
     version: '1.4.492',
     title: 'Lamps meet the road',
     when: '2026-10-15',

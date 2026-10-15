@@ -1,5 +1,5 @@
 /**
- * Live prove for 1.4.492.
+ * Live prove for 1.4.493.
  * Real clicks and elementFromPoint. A planted incense still hits.
  * A walker inside a lamp box wins. The map sheet is the top layer.
  * Later rounds field more than three walkers. The clear bar stays put.
@@ -20,7 +20,7 @@ import { DEFEND_PATH } from '../src/nightWatch/path/data.ts'
 const SAVE = {
   kind: SAVE_KIND,
   schemaVersion: SAVE_SCHEMA_VERSION,
-  appVersion: '1.4.492',
+  appVersion: '1.4.493',
   savedAt: '2026-10-15T00:00:00.000Z',
   progress: {
     started: true,
