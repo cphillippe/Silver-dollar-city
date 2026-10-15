@@ -57,6 +57,8 @@ export interface DefendAbilityBarProps {
   onOpenTree?: (id: WatchAbility) => void
   /** playtest=1 or the debug freeze. The bonus step is not a lock. */
   playtestSteps?: boolean
+  /** 0-based round. The step past Strong 4 stays shut until round 15 is clear. */
+  roundIndex?: number
 }
 
 export function DefendAbilityBar({
@@ -83,6 +85,7 @@ export function DefendAbilityBar({
   onBoost,
   onOpenTree,
   playtestSteps = false,
+  roundIndex = -1,
 }: DefendAbilityBarProps) {
   const swallowClick = useRef(false)
   const stopListen = useRef<(() => void) | null>(null)
@@ -175,7 +178,12 @@ export function DefendAbilityBar({
               const tier = combatTier(tool.id, runTier)
               const tree = easy ? pathsOf(runPaths, tool.id) : null
               const gate = tree
-                ? { lessons: samePillarLessons(tool.id, progress.held), playtest: playtestSteps }
+                ? {
+                    lessons: samePillarLessons(tool.id, progress.held),
+                    playtest: playtestSteps,
+                    roundIndex,
+                    cleared: boosting,
+                  }
                 : undefined
               const openStep = tree ? cheapestOpen(tree, gate) : null
               const lessonWait = Boolean(tree && lessonWaiting(tree, gate))

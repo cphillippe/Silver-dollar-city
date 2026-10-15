@@ -15,6 +15,13 @@ export const TREE_STEP_COST = [3, 6, 12] as const
 /** Sparks for the Lock In bonus step. Steps 1–3 stay on the row above. */
 export const TREE_BONUS_COST = 15
 
+/**
+ * Sparks for the step past Strong 4 / Far 1.
+ * One buy on the deep path (Strong 5 or Far 5) and one on the short path
+ * (Far 2 or Strong 2). Both wait until round 15 is clear.
+ */
+export const TREE_LATE_COST = 12
+
 /** Same-pillar Lock In lessons needed before that bonus step can be bought. */
 export const BONUS_LESSONS = 3
 
@@ -23,6 +30,10 @@ export const TREE_STEP_MAX = 3
 export const TREE_BONUS_MAX = 4
 /** The path you do not take deep can still take its first step. */
 export const TREE_CROSS_MAX = 1
+/** Step 5 on the deep path. Round 15 has to be clear first. Steps 1–4 do not read this. */
+export const TREE_LATE_MAX = 5
+/** The short path's second step. Same round-15 gate. It does not open a third step. */
+export const TREE_LATE_CROSS = 2
 
 export const TREE_LOCK = 'One path goes to three. This one stops at one.'
 
@@ -79,6 +90,21 @@ export interface PathBuy {
 export interface BonusGate {
   lessons: number
   playtest: boolean
+  /**
+   * 0-based round on the board. Omitted, the step past Strong 4 / Far 1 stays shut,
+   * so older checks that only pass lessons do not open it.
+   */
+  roundIndex?: number
+  /** True on the clear panel for `roundIndex`. Round 15's clear is the first one. */
+  cleared?: boolean
+}
+
+/** The step past Strong 4 / Far 1. Round 15's fight stays on the old caps. */
+export function lateStepOpen(gate?: BonusGate): boolean {
+  if (gate?.roundIndex == null || !Number.isFinite(gate.roundIndex)) return false
+  const index = Math.floor(gate.roundIndex)
+  if (gate.cleared && index >= 14) return true
+  return index >= 15
 }
 
 export interface PathSpend {
@@ -126,21 +152,40 @@ export function freshRunPaths(): Record<string, LampPaths> {
  */
 export const FAR1_ROAD_REACH = 48
 
+/** Extra road reach when the short path takes its second step after Strong 4 or Far 4. */
+export const LATE_CROSS_REACH = 32
+
 /** Combat reach bonus. Far step 1 grows the ring even though its strike bonus stays 0. */
 export function easyShotReach(paths: LampPaths): number {
+  const far = clampRank(paths.far)
+  const strong = clampRank(paths.strong)
+  if (
+    (far >= TREE_LATE_CROSS && strong >= TREE_BONUS_MAX) ||
+    (strong >= TREE_LATE_CROSS && far >= TREE_BONUS_MAX)
+  ) {
+    return FAR1_ROAD_REACH + LATE_CROSS_REACH
+  }
   const strike = lampStrike(paths)
   if (strike.rangeBonus > 0) return strike.rangeBonus
-  if (clampRank(paths.far) >= 1) return FAR1_ROAD_REACH
+  if (far >= 1) return FAR1_ROAD_REACH
   return 0
 }
 
 /** Sparks already spent on this lamp's steps. Pull gives them back. */
+function sparkStepCost(step: number, rank: number, other: number): number {
+  if (step >= TREE_BONUS_MAX) return TREE_LATE_COST
+  if (step === TREE_STEP_MAX) return TREE_BONUS_COST
+  if (step >= TREE_CROSS_MAX && rank <= TREE_LATE_CROSS && other >= TREE_BONUS_MAX) return TREE_LATE_COST
+  return TREE_STEP_COST[step] ?? 0
+}
+
 export function pathSparkSpend(paths: LampPaths): number {
   let total = 0
   for (const path of TREE_PATHS) {
     const rank = clampRank(paths[path])
+    const other = clampRank(paths[otherPath(path)])
     for (let step = 0; step < rank; step += 1) {
-      total += step < TREE_STEP_COST.length ? (TREE_STEP_COST[step] ?? 0) : TREE_BONUS_COST
+      total += sparkStepCost(step, rank, other)
     }
   }
   if ((paths.bright ?? 0) >= 1) total += BRIGHT_COST
@@ -158,7 +203,7 @@ export function pathsOf(runPaths: Record<string, LampPaths> | undefined, toolId:
 
 function clampRank(rank: number | undefined): number {
   if (!rank || rank < 0) return 0
-  return Math.min(TREE_BONUS_MAX, Math.floor(rank))
+  return Math.min(TREE_LATE_MAX, Math.floor(rank))
 }
 
 export function otherPath(path: TreePath): TreePath {
@@ -169,7 +214,8 @@ export function otherPath(path: TreePath): TreePath {
 export function stepPrice(rank: number): number {
   const at = Math.floor(rank)
   if (at === TREE_STEP_MAX) return TREE_BONUS_COST
-  if (at < 0 || at >= TREE_BONUS_MAX) return 0
+  if (at === TREE_BONUS_MAX) return TREE_LATE_COST
+  if (at < 0 || at >= TREE_LATE_MAX) return 0
   return TREE_STEP_COST[at] ?? 0
 }
 
@@ -181,7 +227,16 @@ function bonusOpen(gate: BonusGate | undefined): boolean {
 export function canTake(paths: LampPaths, path: TreePath, gate?: BonusGate): PathBuy {
   const rank = clampRank(paths[path])
   const other = clampRank(paths[otherPath(path)])
-  if (rank >= TREE_BONUS_MAX) return { ok: false, cost: 0, reason: 'This path is full.' }
+  if (rank >= TREE_LATE_MAX) return { ok: false, cost: 0, reason: 'This path is full.' }
+  const lateDeep = rank >= TREE_BONUS_MAX
+  const lateCross = rank === TREE_CROSS_MAX && other >= TREE_BONUS_MAX
+  if (lateDeep || lateCross) {
+    if (!lateStepOpen(gate)) {
+      if (lateDeep) return { ok: false, cost: 0, reason: 'This path is full.' }
+      return { ok: false, cost: 0, reason: TREE_LOCK }
+    }
+    return { ok: true, cost: TREE_LATE_COST, reason: '' }
+  }
   if (rank >= TREE_CROSS_MAX && other >= 2) return { ok: false, cost: 0, reason: TREE_LOCK }
   if (rank >= TREE_STEP_MAX && !bonusOpen(gate)) {
     return { ok: false, cost: TREE_BONUS_COST, reason: LESSON_LOCK, gate: 'lesson' }
@@ -216,6 +271,10 @@ export function lampStrike(paths: LampPaths): LampStrike {
   if (strong >= 4) {
     cooldownMs = 180
   }
+  if (strong >= 5) {
+    damage = 8
+    cooldownMs = 110
+  }
   if (far >= 1) outer = 1
   if (far >= 2) {
     rangeBonus = 24
@@ -228,6 +287,11 @@ export function lampStrike(paths: LampPaths): LampStrike {
   }
   if (far >= 4) {
     rangeBonus = 48
+  }
+  if (far >= 5) {
+    rangeBonus = 64
+    damage = Math.max(damage, 6)
+    cooldownMs = Math.min(cooldownMs, 140)
   }
   if ((paths.bright ?? 0) >= 1) cooldownMs = cooldownMs / BRIGHT_SPEED
   return {
