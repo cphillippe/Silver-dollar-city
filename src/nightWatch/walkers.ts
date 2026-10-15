@@ -244,6 +244,20 @@ export function easyBossPace(index: number): number {
   return easyShowdownBoss(index) ? SHOWDOWN_PACE : BOSS_PACE
 }
 
+/**
+ * Easy crowns only (1.4.494). The last stretch of the road is slower.
+ * A glow-window tapper needs that time. Earlier bosses, and Hard, stay put.
+ * `0.65` is the last thirty-five percent of the plate path.
+ */
+export const EASY_CROWN_LAST_T = 0.65
+export const EASY_CROWN_LAST_MUL = 0.4
+
+export function easyCrownWalkMul(index: number, t: number, easy = true): number {
+  if (!easy || !easyShowdownBoss(index)) return 1
+  if (!(t >= EASY_CROWN_LAST_T)) return 1
+  return EASY_CROWN_LAST_MUL
+}
+
 /** Easy rounds 5, 10, 15, 20, and 25. Hard does not read this. */
 export function easyBossRound(index: number): boolean {
   const round = Math.floor(index) + 1

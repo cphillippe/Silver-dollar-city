@@ -31,9 +31,11 @@ import {
   type LampPaths,
 } from './upgradeTree.ts'
 import { FREE_LAMP_RANGE_BONUS, lampReach } from './towers/index.ts'
+import { CUE_REACT_S, CUE_TAP_GAP_S, cueTapAt, cueTapClock } from './cueGlow.ts'
 import {
   BOSS_PACE,
   easyBossPace,
+  easyCrownWalkMul,
   easyShowdownBoss,
   easyBossClearSparks,
   easyClearSparkBonus,
@@ -404,6 +406,11 @@ export function paceEasyLive(
    * On Easy, a city seat whose reach already meets the road keeps that reach.
    */
   padLayout?: PacePadLayout,
+  /**
+   * Showdown crowns only. Above 0, every other glow window is a miss.
+   * 0.5 is a sloppy run. Other rounds ignore this.
+   */
+  crownGlowMiss = 0,
 ): PaceLive {
   const road = mode === 'road' || mode === 'road437' || Boolean(map)
   const roadPath = map?.path
@@ -525,6 +532,9 @@ export function paceEasyLive(
   let spawnAt = 0
   let spawnNow = false
   let tapAt = 0
+  const crownClock = cueTapClock()
+  const crownGlow =
+    mode === 'road' && !frozen && !map && easyShowdownBoss(roundIndex) && tapEvery <= 1
   let time = 0
   let taps = 0
   let bossLamp = 0
@@ -598,7 +608,9 @@ export function paceEasyLive(
       const mul = features.length ? featureSpeed(at, features) : 1
       const bell =
         bellPlants && roundIndex >= 6 ? walkerSlowPace(1, bellPaceFor(bellPlants, undefined, at)) : 1
-      raider.t += 0.01 * round.speed * raider.pace * mul * bell * dt
+      const crownWalk =
+        mode === 'road' && !frozen && !map ? easyCrownWalkMul(roundIndex, raider.t, true) : 1
+      raider.t += 0.01 * round.speed * raider.pace * mul * bell * crownWalk * dt
       if (raider.t >= 1) {
         raider.dead = true
         if (raider.boss) {
@@ -772,7 +784,27 @@ export function paceEasyLive(
         apply(pick, lampHit(pick, lamp.strike.outer * (1 + (pick ? rowExtra(pick) : 0))), true)
       }
     }
-    if (tapAt >= tapEvery && live().length > 0) {
+    const crownUp = crownGlow && bossSeen >= 0 && live().some((raider) => raider.boss)
+    if (crownUp) {
+      tapAt = 0
+      const elapsed = time - bossSeen
+      if (cueTapAt(crownClock, elapsed, CUE_REACT_S, Math.max(CUE_TAP_GAP_S, tapEvery), crownGlowMiss)) {
+        const cue = live().find((raider) => raider.boss)
+        if (cue) {
+          const dmg = easyGlowTapDamage(cue.hp, cue.chip, false)
+          const cloud = incensePlants ? incenseBonusFor(incensePlants, undefined, pathPoint(cue.t, cue.road)) : 0
+          const bonus = tapBonus + cloud
+          const hit = dmg > 0 && bonus > 0 ? applyIncenseTap(dmg, bonus) : dmg
+          if (hit > 0) {
+            cue.chip += hit
+            cue.hp -= hit
+            taps += 1
+            bossTap += hit
+            if (cue.hp <= 0) kill(cue, false)
+          }
+        }
+      }
+    } else if (tapAt >= tapEvery && live().length > 0) {
       tapAt = 0
       const walking = live().sort((a, b) => b.t - a.t)
       const leadBoss = (raider: { boss: boolean }) =>
