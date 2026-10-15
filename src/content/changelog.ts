@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.473',
+    title: 'Later nights get busy',
+    when: '2026-10-14',
+    items: [
+      'From round 11, a busy night sends more people. Some run, and some are thick.',
+      'A tap still hurts a walker. Only a boss can shrug.',
+      'A quiet night still loses. A night that spends its sparks goes past round 10.',
+    ],
+  },
+  {
     version: '1.4.472',
     title: 'Taps keep landing',
     when: '2026-10-14',
