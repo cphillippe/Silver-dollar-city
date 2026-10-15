@@ -50,7 +50,8 @@ html,body{margin:0;height:100%;overflow:hidden;font-family:var(--sans);color:var
 <button id="back">↩ Turn around</button>
 <div id="btns"><button class="b" id="bl">⟲<small>TURN</small></button><button class="b" id="bf">⬆<small>WALK</small></button><button class="b" id="br">⟳<small>TURN</small></button></div>
 <div class="card" id="cIntro"><img class="guide" src="assets/juniper.webp" alt=""><div class="eyebrow" style="margin-top:22px">Night Run</div><h2>Who is my neighbor?</h2><img class="art" src="assets/road1-lawyer.webp" alt=""><p>Find the hurt man!</p><button class="cbtn" id="go">Go ▶</button></div>
-<div class="card" id="cLane"><div class="eyebrow">Dead end</div><h2 id="laneT"></h2><p><small id="laneP"></small></p><button class="cbtn" id="laneB">↩ Go back</button></div>
+<div class="card" id="cStory"><div class="eyebrow" id="stE"></div><h2 id="stT"></h2><img class="art" id="stA" alt=""><p><small id="stR"></small></p><button class="cbtn" id="storyB">Next ▶</button></div>
+<div class="card" id="cLane"><div class="eyebrow">Dead end</div><h2 id="laneT"></h2><img class="art" id="laneA" alt=""><p><small id="laneP"></small></p><button class="cbtn" id="laneB">↩ Go back</button></div>
 <div class="card" id="cHelp"><div class="eyebrow">You found him</div><h2>Help him!</h2><img class="art" src="assets/road4-samaritan.webp" alt=""><button class="cbtn" id="helpB">🩹 Bandage</button></div>
 <div class="card" id="cInn"><div class="eyebrow">You made it</div><h2>The inn!</h2><img class="art" alt="" style="width:46%"><p>Pay the innkeeper.<br><small>LUKE 10:35</small></p><button class="cbtn" id="payB"><img src="assets/coin-round.svg" style="width:24px;vertical-align:-5px"><img src="assets/coin-round.svg" style="width:24px;vertical-align:-5px"> Two coins</button></div>
 <div class="card" id="cEnd"><img class="guide" src="assets/juniper.webp" alt=""><div class="eyebrow" style="margin-top:22px">Who was the neighbor?</div><h2>The one who showed mercy.</h2><p><b>“Go and do likewise.”</b><br><small>LUKE 10:37</small></p><p id="stars" style="font-size:30px;margin:2px"></p><p id="endInfo"></p><button class="cbtn" id="again">Play again ↻</button></div>
@@ -121,10 +122,10 @@ function arrive(){const k=S.x+','+S.y;S.seen=S.seen||new Set();if(!S.seen.has(k)
  AMB.forEach((a,i)=>{if(a.t===k&&!S.amb.has(i)&&(a.ph||1)===(S.phase||1)){S.amb.add(i);S.robbers.push({sx:a.x,sy:a.y,x:a.x,y:a.y,px:a.x+.5,py:a.y+.5,gone:0,hold:3.5+Math.random()*1.5,amb:1});snd(200,.15,'square',.07);toast('A robber! Tap it!');}});
  if(S.sp.has(k)){S.sp.delete(k);S.gems++;updHUD();snd(880,.1,'sine',.06);}
  if(COINS.some(c=>c+''===k)&&!S.coins.has(k)){S.coins.add(k);updHUD();burst(RW/2,RH*.5,50);[988,1319,1568].forEach((f,i)=>setTimeout(()=>snd(f,.18,'sine',.07),i*90));toast('🪙 Coin! '+S.coins.size+'/'+CT);}
- if(c==='P'||c==='L'){S.paused=true;$('laneT').textContent=c==='P'?'The priest passed by.':'The Levite passed by.';
+ if(c==='P'||c==='L'){S.paused=true;$('laneT').textContent=c==='P'?'The priest passed by.':'The Levite passed by.';laneArt(c);
   $('laneP').textContent=c==='P'?'Luke 10:31':'Luke 10:32';$('cLane').style.display='block';updBtns();}
- if(c==='C'&&S.phase===2){S.paused=true;$('cInn').style.display='block';updBtns();}
- if(c==='H'&&S.phase!==2){S.paused=true;S.help=0;$('helpB').textContent=HELP[0];$('cHelp').style.display='block';updBtns();}
+ if(c==='C'&&S.phase===2){showStory(4,()=>{$('cInn').style.display='block';updBtns();});}
+ if(c==='H'&&S.phase!==2){S.help=0;$('helpB').textContent=HELP[0];showStory(1,()=>{$('cHelp').style.display='block';updBtns();});}
  checkHit();}
 function hit(why){if(S.inv>0||S.paused||Q.has('god'))return;S.hearts--;S.hitsTaken++;updHUD();S.inv=1.5;S.shake=.4;
  $('flash').style.transition='none';$('flash').style.opacity=.5;requestAnimationFrame(()=>{$('flash').style.transition='opacity .45s';$('flash').style.opacity=0;});
@@ -201,7 +202,7 @@ function render(dt){const t=S.t;const bob=Math.sin(S.bobT||0)*3;
  g.putImageData(img,0,0);
  gr=g.createRadialGradient(RW/2,RH*.62,20,RW/2,RH*.55,RH*.75);gr.addColorStop(0,'rgba(255,204,51,.06)');gr.addColorStop(.55,'rgba(0,0,0,0)');gr.addColorStop(1,'rgba(18,6,46,.55)');g.fillStyle=gr;g.fillRect(0,0,RW,RH);
  const sp=[];S.robbers.forEach((r,i)=>{if(!r.gone)sp.push({x:r.px,y:r.py,img:SPR.robber,s:.72,lift:Math.abs(Math.sin(t*6+i))*.06,kind:'robber',ref:r});});
- if(S.phase!==2)sp.push({x:HURT.x+.5,y:HURT.y+.5,img:SPR.man,s:.55,lift:0});sp.push({x:INN.x+.92,y:INN.y+.5,img:SPR.inn,s:.75,lift:0});
+ if(S.phase!==2)sp.push({x:HURT.x+.5,y:HURT.y+.5,img:SPR.man,s:.55,lift:0});sp.push({x:INN.x+.85,y:INN.y+.5,img:SPR.inn,s:.62,lift:0,minD:1.5,bright:1});
  if(S.hint&&Math.hypot(S.hint.x+.5-S.px,S.hint.y+.5-S.py)>.8)sp.push({x:S.hint.x+.5,y:S.hint.y+.5,img:ARROW,s:.25,lift:.05+Math.sin(t*5)*.03,glow:1});
  COINS.forEach(c=>{const k=c+'';if(S.coins.has(k))return;const spin=Math.abs(Math.cos(t*2.2+c[0]));sp.push({x:c[0]+.5,y:c[1]+.5,img:COINSPR,s:.34,lift:.22+Math.sin(t*3+c[1])*.04,kind:'coin',ref:k,sx:Math.max(.15,spin),bright:1});});
  S.sp.forEach(k=>{const[a,b]=k.split(',').map(Number);sp.push({x:a+.5,y:b+.5,img:SPR.gem,s:.2,lift:.3+Math.sin(t*3+a)*.05,kind:'gem',ref:k});});
@@ -209,7 +210,7 @@ function render(dt){const t=S.t;const bob=Math.sin(S.bobT||0)*3;
  TRAPS.forEach((tp,i)=>{const st=trapState(i,t),h=trapH(i,t);sp.push({x:tp.x+.5+(st==='warn'?Math.sin(t*60)*.03:0),y:tp.y+.5,img:SPR.block,s:3.2,lift:h*.8,warn:st==='warn'});});
  sp.forEach(s=>s.d=(s.x-S.px)**2+(s.y-S.py)**2);sp.sort((a,b)=>b.d-a.d);const inv=1/(plx*dy-dx*ply);S.rects=[];
  for(const s of sp){const rx=s.x-S.px,ry=s.y-S.py,tx=inv*(dy*rx-dx*ry),ty=inv*(-ply*rx+plx*ry);if(ty<.15)continue;
-  const scx=RW/2*(1+tx/ty),full=RH/ty*.9,hh=full*s.s,ww=hh*s.img.width/s.img.height*(s.sx||1),top=horizon+full*.5-hh-full*s.lift;
+  const scx=RW/2*(1+tx/ty),full=RH/Math.max(ty,s.minD||0)*.9,hh=full*s.s,ww=hh*s.img.width/s.img.height*(s.sx||1),top=horizon+full*.5-hh-full*s.lift;
   const x0=scx-ww/2;let vis=0;const sfog=1-Math.exp(-ty*.16);g.globalAlpha=s.bright?1:Math.max(.15,1-sfog*.9);for(let c=Math.max(0,x0|0);c<Math.min(RW,x0+ww);c++){if(ty>=Z[c])continue;vis++;const srcx=(c-x0)/ww*s.img.width;g.drawImage(s.img,srcx,0,1,s.img.height,c,top,1,hh);}g.globalAlpha=1;
   if(s.kind==='lamp'&&vis){g.fillStyle='rgba(255,220,100,'+(.4+.3*Math.sin(t*6))+')';g.beginPath();g.arc(scx,top+hh*.12,Math.max(6,ww*.6),0,7);g.fill();}
   if(s.kind&&vis&&(s.kind==='coin'?ty<9:s.kind==='gem'?ty<2.2:ty<4.5))S.rects.push({kind:s.kind,ref:s.ref,x0,y0:top,x1:x0+ww,y1:top+hh,d:ty});
@@ -266,21 +267,25 @@ hold('bl',()=>CTRL.bt=-1,()=>CTRL.bt=0);hold('br',()=>CTRL.bt=1,()=>CTRL.bt=0);
 hold('bf',()=>{if(!dash())CTRL.bf=1;},()=>CTRL.bf=0);$('back').onclick=()=>turnAround();
 const KEYS={};addEventListener('keydown',e=>{KEYS[e.key]=1;if(e.key==='ArrowDown')turnAround();if(e.key===' '||e.key==='ArrowUp'&&fwdTrap()>=0)dash();upd();});addEventListener('keyup',e=>{KEYS[e.key]=0;upd();});
 function upd(){CTRL.dt=(KEYS.ArrowRight?1:0)-(KEYS.ArrowLeft?1:0);CTRL.df=KEYS.ArrowUp?1:0;}
-$('go').onclick=()=>{$('cIntro').style.display='none';S.paused=false;updBtns();snd(440,.15,'sine',.05);};
+$('go').onclick=()=>{$('cIntro').style.display='none';snd(440,.15,'sine',.05);showStory(0);};
 $('laneB').onclick=()=>{$('cLane').style.display='none';S.paused=false;turnAround();updBtns();};
+function laneArt(c){$('laneA').src='assets/'+(c==='P'?'road3-temple':'panel-walk-past')+'.webp';}
+const STORY=[['On the road','Robbers hurt a man!','road2-robbers','LUKE 10:30'],['Look!','He is hurt and alone.','panel-hurt','LUKE 10:30'],['Kind hands','He cleans the hurt.','panel-help','LUKE 10:34'],['Up you go','He rides the donkey.','road4-samaritan','LUKE 10:34'],['The innkeeper','“Take care of him.”','road5-inn','LUKE 10:35'],['Jesus asks','Who was the neighbor?','road1-lawyer','LUKE 10:36']];
+let stNext=null;function showStory(i,then){const t=STORY[i];S.paused=true;$('stE').textContent=t[0];$('stT').textContent=t[1];$('stA').src='assets/'+t[2]+'.webp';$('stR').textContent=t[3];$('cStory').style.display='block';stNext=then||null;updBtns();}
+$('storyB').onclick=()=>{$('cStory').style.display='none';snd(600,.12,'sine',.05);const f=stNext;stNext=null;if(f)f();else{S.paused=false;updBtns();}};
 const HELP=['🩹 Bandage','🫒 Oil & wine','🫏 Take him to the inn'];
 $('helpB').onclick=()=>{const k=S.help;snd(520+k*130,.25,'sine',.07);burst(RW/2,RH*.6,30);S.help++;
- if(S.help<3){$('helpB').textContent=HELP[S.help];}else setTimeout(startPhase2,300);};
+ if(S.help===2){$('helpB').textContent=HELP[2];$('cHelp').style.display='none';showStory(2,()=>{$('cHelp').style.display='block';updBtns();});}else if(S.help<3){$('helpB').textContent=HELP[S.help];}else{$('cHelp').style.display='none';showStory(3,startPhase2);}};
 function startPhase2(){$('cHelp').style.display='none';S.phase=2;S.robbers=[];S.cp={x:HURT.x,y:HURT.y,dir:0};S.hist=[];S.idle=0;
  $('escort').style.display='flex';$('goalT').textContent='Inn';toast('🫏 The gate is open!');snd(660,.2,'sine',.07);S.paused=false;updBtns();}
-$('payB').onclick=()=>{$('escort').style.display='none';[880,1175].forEach((f,i)=>setTimeout(()=>snd(f,.15,'sine',.07),i*160));burst(RW/2,RH*.5,40);setTimeout(()=>{$('cInn').style.display='none';
+$('payB').onclick=()=>{$('escort').style.display='none';[880,1175].forEach((f,i)=>setTimeout(()=>snd(f,.15,'sine',.07),i*160));burst(RW/2,RH*.5,40);setTimeout(()=>{$('cInn').style.display='none';showStory(5,()=>{
   const stars=1+(S.hearts>=2?1:0)+(S.coins.size===CT?1:0);$('stars').textContent='⭐'.repeat(stars)+'☆'.repeat(3-stars);$('endInfo').innerHTML='🪙 '+S.coins.size+'/'+CT+'   💎 '+S.gems+'/'+GT+'   🍬 '+S.pops+(S.coins.size<CT?'<br><small>Find all coins for ⭐3</small>':'')+(S.gems===GT?'<br><b>🏆 All '+GT+' gems!</b>':'');
-  $('cEnd').style.display='block';S.done=true;$('status').textContent='WON';[523,659,784].forEach((f,i)=>setTimeout(()=>snd(f,.4,'sine',.06),i*150));},500);};
-$('again').onclick=()=>{$('escort').style.display='none';$('goalT').textContent='Hurt man';['cEnd','cFail','cLane','cHelp','cInn'].forEach(i=>$(i).style.display='none');reset(true);S.paused=false;updBtns();};
+  $('cEnd').style.display='block';S.done=true;$('status').textContent='WON';[523,659,784].forEach((f,i)=>setTimeout(()=>snd(f,.4,'sine',.06),i*150));});},500);};
+$('again').onclick=()=>{$('escort').style.display='none';$('goalT').textContent='Hurt man';['cEnd','cFail','cLane','cHelp','cInn','cStory'].forEach(i=>$(i).style.display='none');reset(true);S.paused=false;updBtns();};
 $('retry').onclick=()=>{$('cFail').style.display='none';reset(false);S.paused=false;updBtns();};
 $('rs').onclick=$('again').onclick;
 document.querySelector('#cInn img.art').src=INNSPR.toDataURL();reset(true);$('cIntro').style.display='block';requestAnimationFrame(frame);
 window.onerror=m=>{$('status').textContent='ERR '+m;};
-window.NR={COINS,get RW(){return RW},get RH(){return RH},get resL(){return resL},trapAt,CTRL,turnAround,dash,angDiff,goal:()=>S.phase===2?INN:HURT,open:(x,y)=>open(x,y),get S(){return S},move,tapAt,dashGreen,fwdTrap,MAP};
+window.NR={laneArt,showStory,COINS,get RW(){return RW},get RH(){return RH},get resL(){return resL},trapAt,CTRL,turnAround,dash,angDiff,goal:()=>S.phase===2?INN:HURT,open:(x,y)=>open(x,y),get S(){return S},move,tapAt,dashGreen,fwdTrap,MAP};
 setTimeout(()=>{if($('status').textContent==='init')$('status').textContent='OK';},50);
 </script></body></html>
