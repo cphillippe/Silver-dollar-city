@@ -14,7 +14,7 @@ export const CHANGELOG: ChangeNote[] = [
     items: [
       'After round 12, Easy can plant one Cross beside the lamps.',
       'Lamps near the Cross wait a little less between shots. The Cross itself does not fire.',
-      'The card says: The cross reminds us Jesus died and rose for us. (Hebrews 12:2, RSV)',
+      'The card says: The cross helps us remember Jesus died and rose for us. Hebrews 12:2, RSV.',
     ],
   },
   {
