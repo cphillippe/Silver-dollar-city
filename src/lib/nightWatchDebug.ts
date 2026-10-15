@@ -112,12 +112,13 @@ export function nightWatchSkipsMapSheet(search: string, debugOn: boolean): boole
 }
 
 /**
- * `?nwLamps=` while playtest is allowed.
- * 0, 1, or 2. Missing or any other value keeps the full jump load.
+ * `?nwLamps=` only with `playtest=1` or `nwDebug=1` on this URL.
+ * The debug switch alone does not open it. 0, 1, or 2. Anything else keeps the full jump.
  */
-export function nightWatchLampCap(search: string, allowed: boolean): number | null {
-  if (!allowed) return null
-  const raw = new URLSearchParams(search).get('nwLamps')
+export function nightWatchLampCap(search: string): number | null {
+  const params = new URLSearchParams(search)
+  if (params.get('playtest') !== '1' && params.get('nwDebug') !== '1') return null
+  const raw = params.get('nwLamps')
   if (raw == null || raw === '') return null
   if (!/^[012]$/.test(raw)) return null
   return Number(raw)

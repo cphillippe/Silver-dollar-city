@@ -140,8 +140,11 @@ export async function checkIncenseLamps() {
         icon: Math.round(iconBox.width),
         cloudPe: getComputedStyle(cloud).pointerEvents,
         iconPe: getComputedStyle(icon).pointerEvents,
+        fill: getComputedStyle(cloud).fill,
       }
     })
+    const cloudAlpha = Number(/rgba?\([^)]+,\s*([\d.]+)\s*\)/.exec(sizes.fill)?.[1] ?? '0')
+    assert.ok(cloudAlpha >= 0.3, `1.4.478 the incense cloud stays visible (${sizes.fill})`)
     assert.ok(sizes.cloud >= 90, `1.4.478 the incense cloud is the wide ring (${sizes.cloud}px)`)
     assert.ok(sizes.icon <= 48, `1.4.478 the incense target is the icon (${sizes.icon}px)`)
     assert.equal(sizes.cloudPe, 'none', '1.4.478 the cloud does not take a tap')

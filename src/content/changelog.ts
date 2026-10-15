@@ -16,6 +16,7 @@ export const CHANGELOG: ChangeNote[] = [
       'Need sparks stays in its own spot, so the round-clear buttons do not jump.',
       'A walker next to a lamp can still be tapped. The lamp icon still opens its card.',
       'A walker in the incense cloud can still be tapped. The incense card opens from the lamp itself.',
+      'The incense cloud is brighter, so it shows on the purple map.',
     ],
   },
   {
