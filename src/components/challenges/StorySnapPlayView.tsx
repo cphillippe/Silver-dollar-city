@@ -473,9 +473,9 @@ export function StorySnapPlayView({
         >
           {padLabel}
         </button>
-      ) : (
+      ) : easy ? (
         <div className="snap-pad snap-pad-slot" aria-hidden="true" />
-      )}
+      ) : null}
 
       <div className="cta-dock">
         {phase === 'open' ? (
