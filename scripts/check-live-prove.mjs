@@ -1,5 +1,5 @@
 /**
- * Live prove for 1.4.480.
+ * Live prove for 1.4.482.
  * Real clicks and elementFromPoint. A planted incense still hits.
  * A walker inside a lamp box wins. The map sheet is the top layer.
  * Later rounds field more than three walkers. The clear bar stays put.
@@ -15,7 +15,7 @@ import { DEFEND_PATH } from '../src/nightWatch/path/data.ts'
 const SAVE = {
   kind: SAVE_KIND,
   schemaVersion: SAVE_SCHEMA_VERSION,
-  appVersion: '1.4.480',
+  appVersion: '1.4.482',
   savedAt: '2026-10-15T00:00:00.000Z',
   progress: {
     started: true,
@@ -220,12 +220,12 @@ async function checkMaps(browser, port, errors) {
         top: Boolean(node?.closest?.('[data-map-overlay="yes"]')),
       }
     })
-    assert.ok(sheet && sheet.w > 200 && sheet.h > 120, `1.4.480 ${width} map sheet has a size`)
-    assert.equal(sheet.top, true, `1.4.480 ${width} the map sheet is the top layer`)
+    assert.ok(sheet && sheet.w > 200 && sheet.h > 120, `1.4.482 ${width} map sheet has a size`)
+    assert.equal(sheet.top, true, `1.4.482 ${width} the map sheet is the top layer`)
     for (const [id, reason] of Object.entries(LOCKS)) {
       const button = page.locator(`[data-map="${id}"]`)
       const text = (await button.locator('[data-map-reason="yes"]').innerText()).replace(/\s+/g, ' ').trim()
-      assert.equal(text, reason, `1.4.480 ${width} ${id} says why it is locked`)
+      assert.equal(text, reason, `1.4.482 ${width} ${id} says why it is locked`)
       const hit = await button.locator('[data-map-reason="yes"]').evaluate((node) => {
         const rect = node.getBoundingClientRect()
         const x = rect.x + rect.width / 2
@@ -237,9 +237,9 @@ async function checkMaps(browser, port, errors) {
           map: top?.closest?.('[data-map]')?.getAttribute('data-map') ?? '',
         }
       })
-      assert.equal(hit.inView, true, `1.4.480 ${width} ${reason} is on screen`)
-      assert.equal(hit.overlay, true, `1.4.480 ${width} ${reason} is on the map sheet`)
-      assert.equal(hit.map, id, `1.4.480 ${width} a tap on the reason hits ${id}`)
+      assert.equal(hit.inView, true, `1.4.482 ${width} ${reason} is on screen`)
+      assert.equal(hit.overlay, true, `1.4.482 ${width} ${reason} is on the map sheet`)
+      assert.equal(hit.map, id, `1.4.482 ${width} a tap on the reason hits ${id}`)
     }
     await context.close()
   }
@@ -261,8 +261,8 @@ async function checkBareBegin(browser, port, errors) {
   await page.locator('[data-map="a2"]').click()
   await page.locator('[data-map-overlay]').waitFor({ state: 'detached' })
   await page.locator('.defend-go.is-after-plant').waitFor()
-  assert.equal(await page.locator('#defend-plant-first').count(), 0, '1.4.480 playtest nwLamps=0 hides Plant a lamp first')
-  assert.equal(await page.locator('.defend-go').getAttribute('disabled'), null, '1.4.480 playtest nwLamps=0 Begin is live')
+  assert.equal(await page.locator('#defend-plant-first').count(), 0, '1.4.482 playtest nwLamps=0 hides Plant a lamp first')
+  assert.equal(await page.locator('.defend-go').getAttribute('disabled'), null, '1.4.482 playtest nwLamps=0 Begin is live')
   await context.close()
 }
 
@@ -280,7 +280,7 @@ async function checkCrowd(browser, port, errors) {
   listen(page, errors, 'crowd')
   await openJump(page, '?playtest=1&nwRound=17&nwLamps=0')
   await page.locator('.defend-go.is-after-plant').waitFor()
-  assert.equal(await page.locator('#defend-plant-first').count(), 0, '1.4.480 round 17 with nwLamps=0 can begin')
+  assert.equal(await page.locator('#defend-plant-first').count(), 0, '1.4.482 round 17 with nwLamps=0 can begin')
   await page.locator('.defend-go').click()
   await page.locator('.defend-page.is-easy-tap').waitFor()
   let peak = 0
@@ -303,9 +303,9 @@ async function checkCrowd(browser, port, errors) {
     if (peak >= 6 && sawFast) break
     await page.waitForTimeout(200)
   }
-  assert.match(waiting, /left/, `1.4.480 round 17 still shows walkers left (${waiting})`)
-  assert.ok(peak >= 4, `1.4.480 round 17 fields more than three walkers (saw ${peak})`)
-  assert.equal(sawFast, true, '1.4.480 a fast walker reaches the road on round 17')
+  assert.match(waiting, /left/, `1.4.482 round 17 still shows walkers left (${waiting})`)
+  assert.ok(peak >= 4, `1.4.482 round 17 fields more than three walkers (saw ${peak})`)
+  assert.equal(sawFast, true, '1.4.482 a fast walker reaches the road on round 17')
   await context.close()
 }
 
@@ -399,23 +399,23 @@ async function checkLampBox(browser, port, errors) {
         tick()
       }),
   )
-  assert.ok(lampHit?.top, `1.4.480 a walker stands inside a real lamp box ${JSON.stringify(lampHit)}`)
-  assert.ok(lampHit.lampW >= 24, `1.4.480 the lamp box is the planted icon (${lampHit.lampW}px)`)
-  assert.ok(lampHit.dist < lampHit.lampW * 0.75, `1.4.480 the tap is inside the ${lampHit.lampW}px lamp box`)
+  assert.ok(lampHit?.top, `1.4.482 a walker stands inside a real lamp box ${JSON.stringify(lampHit)}`)
+  assert.ok(lampHit.lampW >= 24, `1.4.482 the lamp box is the planted icon (${lampHit.lampW}px)`)
+  assert.ok(lampHit.dist < lampHit.lampW * 0.75, `1.4.482 the tap is inside the ${lampHit.lampW}px lamp box`)
   await setPaused(page, true)
   const still = await page.evaluate((spot) => {
     const node = document.elementFromPoint(spot.x, spot.y)
     const top = node?.closest?.('[data-walker-tap]')?.getAttribute('data-walker-tap') ?? ''
     return top === spot.top
   }, lampHit)
-  assert.equal(still, true, '1.4.480 the walker still owns the lamp box after the pause')
+  assert.equal(still, true, '1.4.482 the walker still owns the lamp box after the pause')
   const before = await tapTotals(page)
   await page.mouse.click(lampHit.x, lampHit.y)
   await page.waitForTimeout(250)
   const after = await tapTotals(page)
-  assert.equal(after.hits, before.hits + 1, '1.4.480 a tap inside the lamp box hits')
-  assert.equal(after.misses, before.misses, '1.4.480 a tap inside the lamp box is not a miss')
-  assert.ok(after.damage > before.damage, '1.4.480 a tap inside the lamp box applies damage')
+  assert.equal(after.hits, before.hits + 1, '1.4.482 a tap inside the lamp box hits')
+  assert.equal(after.misses, before.misses, '1.4.482 a tap inside the lamp box is not a miss')
+  assert.ok(after.damage > before.damage, '1.4.482 a tap inside the lamp box applies damage')
   await context.close()
 }
 
@@ -449,31 +449,31 @@ async function checkTaps(browser, port, errors) {
       }
     }
   }
-  assert.equal(planted, true, '1.4.480 incense plants near (160, 380) and the cloud covers the road')
+  assert.equal(planted, true, '1.4.482 incense plants near (160, 380) and the cloud covers the road')
 
   await page.getByRole('button', { name: 'Resume walkers' }).click()
   const beforeCloud = await tapTotals(page)
   const inside = await waitCue(page, true, 18_000)
-  assert.ok(inside?.top, '1.4.480 the cloud tap lands on the walker')
-  assert.equal(inside.top, inside.id, '1.4.480 elementFromPoint in the cloud is the walker')
+  assert.ok(inside?.top, '1.4.482 the cloud tap lands on the walker')
+  assert.equal(inside.top, inside.id, '1.4.482 elementFromPoint in the cloud is the walker')
   await page.mouse.click(inside.x, inside.y)
   await page.waitForTimeout(200)
   const afterCloud = await tapTotals(page)
-  assert.equal(afterCloud.hits, beforeCloud.hits + 1, '1.4.480 a tap in the incense cloud hits')
-  assert.equal(afterCloud.misses, beforeCloud.misses, '1.4.480 a tap in the incense cloud is not a miss')
-  assert.equal(afterCloud.damage, beforeCloud.damage + 2, '1.4.480 a tap in the incense cloud applies the +1')
+  assert.equal(afterCloud.hits, beforeCloud.hits + 1, '1.4.482 a tap in the incense cloud hits')
+  assert.equal(afterCloud.misses, beforeCloud.misses, '1.4.482 a tap in the incense cloud is not a miss')
+  assert.equal(afterCloud.damage, beforeCloud.damage + 2, '1.4.482 a tap in the incense cloud applies the +1')
 
   await page.getByRole('button', { name: 'Resume walkers' }).click()
   const beforeOut = await tapTotals(page)
   const outside = await waitCue(page, false, 18_000)
-  assert.ok(outside?.top, '1.4.480 a tap outside the cloud lands on the walker')
-  assert.equal(outside.top, outside.id, '1.4.480 elementFromPoint outside the cloud is the walker')
+  assert.ok(outside?.top, '1.4.482 a tap outside the cloud lands on the walker')
+  assert.equal(outside.top, outside.id, '1.4.482 elementFromPoint outside the cloud is the walker')
   await page.mouse.click(outside.x, outside.y)
   await page.waitForTimeout(200)
   const afterOut = await tapTotals(page)
-  assert.equal(afterOut.hits, beforeOut.hits + 1, '1.4.480 a tap outside the incense cloud hits')
-  assert.equal(afterOut.misses, beforeOut.misses, '1.4.480 a tap outside the incense cloud is not a miss')
-  assert.equal(afterOut.damage, beforeOut.damage + 1, '1.4.480 a tap outside the cloud stays a plain hit')
+  assert.equal(afterOut.hits, beforeOut.hits + 1, '1.4.482 a tap outside the incense cloud hits')
+  assert.equal(afterOut.misses, beforeOut.misses, '1.4.482 a tap outside the incense cloud is not a miss')
+  assert.equal(afterOut.damage, beforeOut.damage + 1, '1.4.482 a tap outside the cloud stays a plain hit')
   await context.close()
 }
 
@@ -515,7 +515,7 @@ async function checkClearBar(browser, port, errors) {
   await candle.waitFor()
   const spend = page.locator('.defend-clear-spend')
   const before = await spend.boundingBox()
-  assert.ok(before && before.height > 10, '1.4.480 Spend is on the round 9 clear bar')
+  assert.ok(before && before.height > 10, '1.4.482 Spend is on the round 9 clear bar')
   const overlap = await page.evaluate(() => {
     const love = document.querySelector('.defend-clear-lamp[data-tower-type="love"]')
     const button = document.querySelector('.defend-clear-row [data-candle-lamp="yes"]')
@@ -536,23 +536,23 @@ async function checkClearBar(browser, port, errors) {
       candle: { x: b.x, y: b.y, w: b.width, h: b.height },
     }
   })
-  assert.ok(overlap, '1.4.480 the round 9 clear panel has a Love upgrade icon and a Candle button')
-  assert.equal(overlap.hit, true, `1.4.480 the Love upgrade icon overlaps the Candle button ${JSON.stringify(overlap)}`)
-  assert.equal(overlap.top, 'candle', '1.4.480 the Candle button takes the click through the Love upgrade icon')
+  assert.ok(overlap, '1.4.482 the round 9 clear panel has a Love upgrade icon and a Candle button')
+  assert.equal(overlap.hit, true, `1.4.482 the Love upgrade icon overlaps the Candle button ${JSON.stringify(overlap)}`)
+  assert.equal(overlap.top, 'candle', '1.4.482 the Candle button takes the click through the Love upgrade icon')
   await page.mouse.click(overlap.x, overlap.y)
   await page.waitForTimeout(200)
   const armed = await candle.getAttribute('aria-pressed')
   const note = (await page.locator('.defend-clear-note').textContent()) ?? ''
   assert.ok(
     armed === 'true' || /Need \d+ sparks|Six candles/.test(note),
-    `1.4.480 a click on the overlapped Candle button reaches Candle (${armed ?? 'unset'} / ${note})`,
+    `1.4.482 a click on the overlapped Candle button reaches Candle (${armed ?? 'unset'} / ${note})`,
   )
   await page.locator('[data-new-lamp="yes"]').click()
   await page.waitForTimeout(150)
   const after = await spend.boundingBox()
-  assert.ok(after && after.height > 10, '1.4.480 Spend stays visible after a lamp is picked')
-  assert.ok(Math.abs(after.x - before.x) <= 1 && Math.abs(after.y - before.y) <= 1, '1.4.480 Spend stays put')
-  assert.ok(Math.abs(after.width - before.width) <= 1 && Math.abs(after.height - before.height) <= 1, '1.4.480 Spend keeps its size')
+  assert.ok(after && after.height > 10, '1.4.482 Spend stays visible after a lamp is picked')
+  assert.ok(Math.abs(after.x - before.x) <= 1 && Math.abs(after.y - before.y) <= 1, '1.4.482 Spend stays put')
+  assert.ok(Math.abs(after.width - before.width) <= 1 && Math.abs(after.height - before.height) <= 1, '1.4.482 Spend keeps its size')
   await context.close()
 }
 
@@ -561,7 +561,7 @@ export async function checkLiveProve() {
   await server.listen()
   const address = server.httpServer?.address()
   const port = address && typeof address === 'object' ? address.port : 0
-  assert.ok(port > 0, '1.4.480 live prove server has a port')
+  assert.ok(port > 0, '1.4.482 live prove server has a port')
   const browser = await launchBrowser()
   const errors = []
   try {
@@ -571,7 +571,7 @@ export async function checkLiveProve() {
     await checkLampBox(browser, port, errors)
     await checkTaps(browser, port, errors)
     await checkClearBar(browser, port, errors)
-    assert.equal(errors.join('\n'), '', '1.4.480 live prove stays free of console errors')
+    assert.equal(errors.join('\n'), '', '1.4.482 live prove stays free of console errors')
   } finally {
     await browser.close()
     await server.close()
