@@ -1,3 +1,4 @@
+import { useLayoutEffect, useState } from 'react'
 import type { CityPlotId } from '../lib/city'
 import { clampGhostHintLeft, lampRoadNote, ROAD_COVER_WORD } from '../lib/lampPlace'
 import { CLEAR_BAR_RESERVE } from '../lib/towerCardPlace'
@@ -101,6 +102,60 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
       : []
   const cameraScale =
     boardBox && boardBox.w > 0 ? (plateFill ? boardFill(boardBox) : boardView(boardBox)).scale : 0.55
+  // CSS pixels. Measured from layout (offsetTop), never from a transformed box, so the lift cannot chase itself.
+  const [lampLift, setLampLift] = useState<Record<string, number>>({})
+  useLayoutEffect(() => {
+    if (!easy || !boosting) {
+      setLampLift((prev) => (Object.keys(prev).length > 0 ? {} : prev))
+      return
+    }
+    const frame = boardRef.current?.closest('.defend-frame')
+    if (!(frame instanceof HTMLElement)) return
+    const gap = 8
+    const measure = () => {
+      const panel = frame.querySelector('.nw-docks')
+      if (!(panel instanceof HTMLElement)) return
+      const obstacles = [
+        panel,
+        ...frame.querySelectorAll<HTMLElement>('.defend-clear-row [data-candle-lamp="yes"], .defend-clear-spend'),
+      ]
+      const frameBox = frame.getBoundingClientRect()
+      const next: Record<string, number> = {}
+      frame.querySelectorAll<HTMLElement>('.defend-clear-lamp').forEach((button) => {
+        const id = button.getAttribute('data-clear-lamp')
+        if (!id) return
+        const left = frameBox.left + frame.clientLeft + button.offsetLeft
+        const right = left + button.offsetWidth
+        const bottom = frameBox.top + frame.clientTop + button.offsetTop + button.offsetHeight
+        let limit = Number.POSITIVE_INFINITY
+        for (const node of obstacles) {
+          const box = node.getBoundingClientRect()
+          const overlaps = Math.min(right, box.right) - Math.max(left, box.left) > 1
+          if (overlaps) limit = Math.min(limit, box.top - gap)
+        }
+        if (bottom > limit) next[id] = Math.ceil(bottom - limit)
+      })
+      setLampLift((prev) => {
+        const keys = new Set([...Object.keys(prev), ...Object.keys(next)])
+        for (const key of keys) {
+          if ((prev[key] ?? 0) !== (next[key] ?? 0)) return next
+        }
+        return prev
+      })
+    }
+    measure()
+    const panel = frame.querySelector('.nw-docks')
+    const observer = new ResizeObserver(measure)
+    observer.observe(frame)
+    if (panel instanceof HTMLElement) observer.observe(panel)
+    return () => observer.disconnect()
+  }, [easy, boosting, boardBox, planted, cameraScale, boardRef])
+  const lampRise: Record<string, number> = {}
+  if (cameraScale > 0) {
+    for (const [id, lift] of Object.entries(lampLift)) {
+      if (lift > 0) lampRise[id] = -lift / cameraScale
+    }
+  }
   const typeChips =
     boardBox && boardBox.w > 0
       ? planted.map((id) => {
@@ -166,6 +221,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
           groundHints={groundHints}
           roundIndex={roundIndex}
           armorFrom={armorFrom}
+          lampRise={lampRise}
         />
       </DefendNightSky>
       {showCard ? (
@@ -215,6 +271,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
             const label = isIncense(type) ? INCENSE_LABEL : isBell(type) ? 'Bell' : isCandle(type) ? 'Candle' : (WATCH_ABILITY_LABEL[type ?? ''] ?? 'lamp')
             const icon = lampIconBox(isIncense(type) ? 'incense' : isBell(type) ? 'bell' : isCandle(type) ? 'candle' : 'tower')
             const scale = cameraScale > 0 ? cameraScale : 1
+            const lift = lampLift[id] ?? 0
             return (
               <button
                 key={`clear-lamp-${id}`}
@@ -230,7 +287,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
                   top: at.top + icon.y * scale,
                   width: icon.w * scale,
                   height: icon.h * scale,
-                  transform: 'none',
+                  transform: lift > 0 ? `translateY(-${lift}px)` : 'none',
                 }}
                 onPointerDown={(event) => event.stopPropagation()}
                 onClick={(event) => {

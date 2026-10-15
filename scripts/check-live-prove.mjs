@@ -1,8 +1,9 @@
 /**
- * Live prove for 1.4.482.
+ * Live prove for 1.4.483.
  * Real clicks and elementFromPoint. A planted incense still hits.
  * A walker inside a lamp box wins. The map sheet is the top layer.
  * Later rounds field more than three walkers. The clear bar stays put.
+ * The Love lamp's box does not cover Candle or Spend.
  */
 import assert from 'node:assert/strict'
 import { fileURLToPath } from 'node:url'
@@ -15,7 +16,7 @@ import { DEFEND_PATH } from '../src/nightWatch/path/data.ts'
 const SAVE = {
   kind: SAVE_KIND,
   schemaVersion: SAVE_SCHEMA_VERSION,
-  appVersion: '1.4.482',
+  appVersion: '1.4.483',
   savedAt: '2026-10-15T00:00:00.000Z',
   progress: {
     started: true,
@@ -240,6 +241,63 @@ async function checkMaps(browser, port, errors) {
       assert.equal(hit.inView, true, `1.4.482 ${width} ${reason} is on screen`)
       assert.equal(hit.overlay, true, `1.4.482 ${width} ${reason} is on the map sheet`)
       assert.equal(hit.map, id, `1.4.482 ${width} a tap on the reason hits ${id}`)
+    }
+    if (width === 375) {
+      const live = await page.evaluate(() => {
+        const overlay = document.querySelector('[data-map-overlay="yes"]')
+        const rule = document.querySelector('.nw-map-rule')
+        const style = overlay instanceof HTMLElement ? getComputedStyle(overlay) : null
+        const ruleBox = rule?.getBoundingClientRect()
+        const overlayBox = overlay?.getBoundingClientRect()
+        const reasons = [...document.querySelectorAll('[data-map-reason="yes"]')].map((node) => {
+          const rect = node.getBoundingClientRect()
+          const x = rect.x + Math.min(rect.width / 2, 24)
+          const y = rect.y + rect.height / 2
+          const top = document.elementFromPoint(x, y)
+          return {
+            text: (node.textContent ?? '').replace(/\s+/g, ' ').trim(),
+            w: rect.width,
+            h: rect.height,
+            left: rect.left,
+            right: rect.right,
+            top: rect.top,
+            bottom: rect.bottom,
+            inOverlay: Boolean(
+              overlayBox &&
+                rect.top >= overlayBox.top - 1 &&
+                rect.bottom <= overlayBox.bottom + 1 &&
+                rect.left >= overlayBox.left - 1 &&
+                rect.right <= overlayBox.right + 1,
+            ),
+            hit: top?.closest?.('[data-map-reason="yes"]') ? top.closest('[data-map]')?.getAttribute('data-map') ?? '' : '',
+          }
+        })
+        return {
+          display: style?.display ?? '',
+          visibility: style?.visibility ?? '',
+          opacity: Number(style?.opacity ?? '0'),
+          rule: (rule?.textContent ?? '').replace(/\s+/g, ' ').trim(),
+          ruleIn: Boolean(
+            ruleBox && ruleBox.height > 8 && ruleBox.top >= -1 && ruleBox.bottom <= window.innerHeight + 1,
+          ),
+          reasons,
+          vh: window.innerHeight,
+          vw: window.innerWidth,
+        }
+      })
+      assert.equal(live.display, 'flex', '1.4.483 Easy at 375 shows the map list')
+      assert.equal(live.visibility, 'visible', '1.4.483 Easy at 375 the map list is visible')
+      assert.ok(live.opacity > 0.5, '1.4.483 Easy at 375 the map list is not faded out')
+      assert.equal(live.rule, 'Choose a map', '1.4.483 Easy at 375 says Choose a map')
+      assert.equal(live.ruleIn, true, '1.4.483 Choose a map is on screen at 375')
+      assert.equal(live.reasons.length, Object.keys(LOCKS).length, '1.4.483 every locked map has a reason at 375')
+      for (const reason of live.reasons) {
+        assert.ok(reason.w > 8 && reason.h > 8, `1.4.483 ${reason.text} has a box at 375`)
+        assert.ok(reason.top >= -1 && reason.bottom <= live.vh + 1, `1.4.483 ${reason.text} is fully on screen at 375`)
+        assert.ok(reason.left >= -1 && reason.right <= live.vw + 1, `1.4.483 ${reason.text} is inside the 375 width`)
+        assert.equal(reason.inOverlay, true, `1.4.483 ${reason.text} is inside the map list at 375`)
+        assert.ok(reason.hit, `1.4.483 ${reason.text} is the top layer at 375`)
+      }
     }
     await context.close()
   }
@@ -477,10 +535,10 @@ async function checkTaps(browser, port, errors) {
   await context.close()
 }
 
-async function checkClearBar(browser, port, errors) {
+async function checkClearBar(browser, port, errors, width, height, probeClick) {
   const context = await browser.newContext({
     baseURL: `http://127.0.0.1:${port}/`,
-    viewport: { width: 412, height: 915 },
+    viewport: { width, height },
     deviceScaleFactor: 1,
   })
   await context.addInitScript(
@@ -488,9 +546,11 @@ async function checkClearBar(browser, port, errors) {
     { key: STORAGE_KEY, save: SAVE },
   )
   const page = await context.newPage()
-  listen(page, errors, 'clear')
+  listen(page, errors, `clear ${width}`)
   await openJump(page, '?playtest=1&nwRound=9')
-  await page.locator('.defend-go').click()
+  const begin = await page.locator('.defend-go').boundingBox()
+  assert.ok(begin && begin.height > 10, `1.4.483 ${width} Begin is on screen`)
+  await page.mouse.click(begin.x + begin.width / 2, begin.y + begin.height / 2)
   await page.locator('.defend-page.is-easy-tap').waitFor()
   const started = Date.now()
   while (Date.now() - started < 90_000 && (await page.locator('.defend-page.is-boost').count()) < 1) {
@@ -517,42 +577,71 @@ async function checkClearBar(browser, port, errors) {
   const before = await spend.boundingBox()
   assert.ok(before && before.height > 10, '1.4.482 Spend is on the round 9 clear bar')
   const overlap = await page.evaluate(() => {
+    const boxOf = (node) => {
+      if (!node) return null
+      const rect = node.getBoundingClientRect()
+      return { x: rect.x, y: rect.y, w: rect.width, h: rect.height, right: rect.right, bottom: rect.bottom, top: rect.top, left: rect.left }
+    }
+    const crosses = (a, b) => {
+      if (!a || !b) return false
+      const wide = Math.min(a.right, b.right) - Math.max(a.left, b.left)
+      const tall = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top)
+      return wide > 1 && tall > 1
+    }
     const love = document.querySelector('.defend-clear-lamp[data-tower-type="love"]')
+    const art = document.querySelector('.defend-pad.is-love .defend-tower-lamp')
     const button = document.querySelector('.defend-clear-row [data-candle-lamp="yes"]')
-    if (!love || !button) return null
-    const a = love.getBoundingClientRect()
-    const b = button.getBoundingClientRect()
-    const wide = Math.min(a.right, b.right) - Math.max(a.left, b.left)
-    const tall = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top)
-    const x = b.x + b.width / 2
-    const y = b.y + b.height / 2
+    const spend = document.querySelector('.defend-clear-spend')
+    const dock = document.querySelector('.nw-docks')
+    if (!love || !button || !art || !spend || !dock) return null
+    const lamps = [...document.querySelectorAll('.defend-clear-lamp')].map((node) => boxOf(node))
+    const a = boxOf(love)
+    const artBox = boxOf(art)
+    const b = boxOf(button)
+    const spendBox = boxOf(spend)
+    const dockBox = boxOf(dock)
+    const x = b.x + b.w / 2
+    const y = b.y + b.h / 2
     const node = document.elementFromPoint(x, y)
     return {
-      hit: wide > 1 && tall > 1,
+      hit: crosses(a, b),
+      artHit: crosses(artBox, b),
+      spendHit: crosses(a, spendBox) || lamps.some((lamp) => crosses(lamp, spendBox) || crosses(lamp, b)),
+      edge: a.bottom - dockBox.top,
+      artEdge: artBox.bottom - dockBox.top,
       top: node?.closest?.('[data-candle-lamp]') ? 'candle' : (node?.className?.toString?.() ?? '').slice(0, 40),
       x,
       y,
-      love: { x: a.x, y: a.y, w: a.width, h: a.height },
-      candle: { x: b.x, y: b.y, w: b.width, h: b.height },
+      love: a,
+      art: artBox,
+      candle: b,
     }
   })
-  assert.ok(overlap, '1.4.482 the round 9 clear panel has a Love upgrade icon and a Candle button')
-  assert.equal(overlap.hit, true, `1.4.482 the Love upgrade icon overlaps the Candle button ${JSON.stringify(overlap)}`)
-  assert.equal(overlap.top, 'candle', '1.4.482 the Candle button takes the click through the Love upgrade icon')
-  await page.mouse.click(overlap.x, overlap.y)
-  await page.waitForTimeout(200)
-  const armed = await candle.getAttribute('aria-pressed')
-  const note = (await page.locator('.defend-clear-note').textContent()) ?? ''
-  assert.ok(
-    armed === 'true' || /Need \d+ sparks|Six candles/.test(note),
-    `1.4.482 a click on the overlapped Candle button reaches Candle (${armed ?? 'unset'} / ${note})`,
-  )
-  await page.locator('[data-new-lamp="yes"]').click()
-  await page.waitForTimeout(150)
-  const after = await spend.boundingBox()
-  assert.ok(after && after.height > 10, '1.4.482 Spend stays visible after a lamp is picked')
-  assert.ok(Math.abs(after.x - before.x) <= 1 && Math.abs(after.y - before.y) <= 1, '1.4.482 Spend stays put')
-  assert.ok(Math.abs(after.width - before.width) <= 1 && Math.abs(after.height - before.height) <= 1, '1.4.482 Spend keeps its size')
+  assert.ok(overlap, `1.4.483 ${width} the round 9 clear panel has a Love upgrade icon and a Candle button`)
+  assert.ok(overlap.love.h > 8 && overlap.art.h > 8, `1.4.483 ${width} the Love lamp still has a box`)
+  assert.ok(overlap.love.bottom > 40, `1.4.483 ${width} the Love lamp stays on the map`)
+  assert.equal(overlap.hit, false, `1.4.483 ${width} the Love upgrade icon does not overlap the Candle button ${JSON.stringify(overlap)}`)
+  assert.equal(overlap.artHit, false, `1.4.483 ${width} the Love lamp art does not overlap the Candle button ${JSON.stringify(overlap)}`)
+  assert.equal(overlap.spendHit, false, `1.4.483 ${width} lamp icons do not overlap Candle or Spend ${JSON.stringify(overlap)}`)
+  assert.ok(overlap.edge <= 1, `1.4.483 ${width} the Love lamp sits above the clear panel (${overlap.edge})`)
+  assert.ok(overlap.artEdge <= 1, `1.4.483 ${width} the Love lamp art sits above the clear panel (${overlap.artEdge})`)
+  assert.equal(overlap.top, 'candle', `1.4.483 ${width} the Candle button takes the click`)
+  if (probeClick) {
+    await page.mouse.click(overlap.x, overlap.y)
+    await page.waitForTimeout(200)
+    const armed = await candle.getAttribute('aria-pressed')
+    const note = (await page.locator('.defend-clear-note').textContent()) ?? ''
+    assert.ok(
+      armed === 'true' || /Need \d+ sparks|Six candles/.test(note),
+      `1.4.482 a click on the overlapped Candle button reaches Candle (${armed ?? 'unset'} / ${note})`,
+    )
+    await page.locator('[data-new-lamp="yes"]').click()
+    await page.waitForTimeout(150)
+    const after = await spend.boundingBox()
+    assert.ok(after && after.height > 10, '1.4.482 Spend stays visible after a lamp is picked')
+    assert.ok(Math.abs(after.x - before.x) <= 1 && Math.abs(after.y - before.y) <= 1, '1.4.482 Spend stays put')
+    assert.ok(Math.abs(after.width - before.width) <= 1 && Math.abs(after.height - before.height) <= 1, '1.4.482 Spend keeps its size')
+  }
   await context.close()
 }
 
@@ -570,7 +659,9 @@ export async function checkLiveProve() {
     await checkCrowd(browser, port, errors)
     await checkLampBox(browser, port, errors)
     await checkTaps(browser, port, errors)
-    await checkClearBar(browser, port, errors)
+    await checkClearBar(browser, port, errors, 375, 667, false)
+    await checkClearBar(browser, port, errors, 412, 915, true)
+    await checkClearBar(browser, port, errors, 768, 1024, false)
     assert.equal(errors.join('\n'), '', '1.4.482 live prove stays free of console errors')
   } finally {
     await browser.close()
