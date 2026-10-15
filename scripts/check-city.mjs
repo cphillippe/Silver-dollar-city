@@ -1650,7 +1650,16 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.488')
+assert.equal(APP_VERSION, '1.4.489')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.489'), '1.4.489 changelog row')
+assert.match(latestChange('1.4.489').title, /name/i)
+assert.doesNotMatch(
+  latestChange('1.4.489').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.489 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.489').items.join('\n'), /Love/)
+assert.match(latestChange('1.4.489').items.join('\n'), /clear/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.488'), '1.4.488 changelog row')
 assert.match(latestChange('1.4.488').title, /wave/i)
 assert.doesNotMatch(
@@ -1717,6 +1726,16 @@ assert.match(
   css486,
   /\.defend-page\.is-easy-watch\.is-easy-tap \.defend-tower-card \.defend-path-pip\.is-on,[\s\S]*?\.defend-page\.is-easy-watch\.is-easy-tap \.defend-tower-card button\.defend-path-pip\.is-buy \{\s*width:\s*20px;\s*height:\s*20px;[\s\S]*?border-radius:\s*6px;/,
   '1.4.488 filled and next pips share one rounded square',
+)
+assert.match(
+  css486,
+  /\.defend-page\.is-easy-watch\.is-easy-tap \.defend-type-chip,[\s\S]*?\.defend-page\.is-easy-watch\.is-easy-tap text\.defend-type-label \{\s*display:\s*none;\s*\}/,
+  '1.4.489 Easy wave CSS hides map name chips and SVG type words',
+)
+assert.doesNotMatch(
+  css486.match(/\.defend-page\.is-easy-watch\.is-easy-tap \.defend-type-chip,[\s\S]*?display:\s*none;\s*\}/)?.[0] ?? '',
+  /defend-clear-row|is-boost/,
+  '1.4.489 the name hide is not the clear row',
 )
 
 {
