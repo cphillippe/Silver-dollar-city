@@ -11,8 +11,8 @@ html,body{margin:0;height:100%;overflow:hidden;font-family:var(--sans);color:var
 #view{position:absolute;inset:0;width:100%;height:100%}
 #hud{position:absolute;top:max(10px,env(safe-area-inset-top));left:12px;right:96px;display:flex;flex-direction:column;gap:6px;pointer-events:none}
 .eyebrow{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
-.pills{display:flex;gap:8px}.pill{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:999px;background:rgba(42,13,88,.72);border:1.5px solid var(--line);font-weight:700;font-size:17px;box-shadow:0 6px 16px rgba(40,8,70,.4)}
-.pill img{width:20px;height:20px}#hearts{letter-spacing:1px;font-size:16px}
+.pills{display:flex;gap:6px}.pill{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:999px;background:rgba(42,13,88,.72);border:1.5px solid var(--line);font-weight:700;font-size:17px;box-shadow:0 6px 16px rgba(40,8,70,.4)}
+.pill img{width:18px;height:18px}#hearts{letter-spacing:1px;font-size:16px}
 #mini{position:absolute;top:max(10px,env(safe-area-inset-top));right:12px;width:64px;height:92px;border-radius:12px;background:rgba(42,13,88,.8);border:1.5px solid var(--line);pointer-events:none}
 #rs{position:absolute;top:118px;right:12px;width:66px;height:44px;border-radius:999px;border:1.5px solid var(--line);background:rgba(255,246,232,.12);color:var(--parchment);font-size:20px;font-weight:700}
 #btns{position:absolute;left:0;right:0;bottom:max(18px,env(safe-area-inset-bottom));display:flex;justify-content:center;gap:10px;padding:0 12px}
@@ -44,7 +44,7 @@ html,body{margin:0;height:100%;overflow:hidden;font-family:var(--sans);color:var
 </style></head><body><div id="wrap">
 <canvas id="view" width="300" height="500"></canvas>
 <div id="danger"></div>
-<div id="hud"><div class="eyebrow">Night Run · Find: <span id="goalT">Hurt man</span></div><div class="pills"><span class="pill" id="hearts"></span><span class="pill"><img src="assets/gem.webp" alt=""><span id="gems"></span></span></div></div>
+<div id="hud"><div class="eyebrow">Night Run · Find: <span id="goalT">Hurt man</span></div><div class="pills"><span class="pill" id="hearts"></span><span class="pill"><img src="assets/gem.webp" alt=""><span id="gems"></span></span><span class="pill"><img src="assets/coin-round.svg" alt=""><span id="coinsT"></span></span></div></div>
 <canvas id="mini" width="64" height="92"></canvas><button id="rs" aria-label="restart">↻</button>
 <div id="escort"><img src="assets/road4-samaritan.webp" alt=""><span>He rides with you 🫏</span></div><div id="swipe"><div class="hand">👆</div><div class="lbl">Drag to look · hold to walk</div></div><div id="flash"></div><div id="toast"></div>
 <button id="back">↩ Turn around</button>
@@ -69,7 +69,7 @@ const START=find('S'),HURT=find('H'),INN=find('C'),GATE=find('G'),TRAPS=[];for(l
 const SECC=[[255,204,51],[255,90,122],[200,107,255],[61,204,122],[110,170,255]];
 function sec(x,y){if(y<=4)return 4;y-=4;if(y>=6&&!(x===7&&y===6))return 0;if(x===7&&y===6)return 1;if(y>=4)return x>=5?1:0;if(y===3)return x>=5?2:3;if(y<=2&&x>=5)return 2;return 3;}
 const LAMPS=[{x:7,y:8},{x:3,y:6}];
-const SPARK0=[[3,7],[5,7],[6,7],[7,5],[6,5],[5,5],[6,3],[5,2],[6,1],[3,3],[2,3],[3,1],[2,1],[2,5],[3,5],[1,5]].map(([x,y])=>[x,y+4]);const SPARK2=[[1,3],[2,3],[5,3],[6,3],[5,1],[6,1]];const GT=22;
+const SPARK0=[[3,7],[5,7],[6,7],[7,5],[6,5],[5,5],[6,3],[5,2],[6,1],[3,3],[2,3],[3,1],[2,1],[2,5],[3,5],[1,5]].map(([x,y])=>[x,y+4]);const SPARK2=[[1,3],[2,3],[5,3],[6,3],[5,1],[6,1]];const GT=22;const COINS=[[7,5],[1,7],[3,9],[5,9],[6,3]];const CT=COINS.length;
 const AMBO=[[{t:'2,11',x:4,y:11},{t:'3,11',x:5,y:11},{t:'4,11',x:6,y:11}],[{t:'7,9',x:7,y:7}],[{t:'7,7',x:5,y:7}],[{t:'3,7',x:3,y:5}],[{t:'1,3',x:2,y:3,ph:2}],[{t:'5,3',x:5,y:1,ph:2},{t:'4,3',x:5,y:1,ph:2}]];
 let AMB=[];const pick=a=>a[Math.floor(Math.random()*a.length)];
 const HOMES=[{x:5,y:9},{x:5,y:5}];let RSPAWN=[];
@@ -79,8 +79,8 @@ function reset(full){if(full){AMB=AMBO.map(pick);RSPAWN=[pick(HOMES)];}const cp=
  S={x:START.x,y:START.y,dir:1,px:START.x+.5,py:START.y+.5,ang:0,hist:[],hearts:3,tw:null,
  robbers:RSPAWN.map(p=>({sx:p.x,sy:p.y,x:p.x,y:p.y,px:p.x+.5,py:p.y+.5,gone:0})),
  paused:true,inv:0,shake:0,visited:new Set(),sparks:[],t:0,rt:0,done:false,
- amb:new Set(),sp:new Set(SPARK0.concat(SPARK2).map(a=>a+'')),lit:new Set(),cp:null,taps:0,gems:0,pops:0,hitsTaken:0,rects:[]};
- if(keep){S.amb=keep.amb;S.sp=keep.sp;S.lit=keep.lit;S.cp=cp;S.taps=keep.taps;S.gems=keep.gems;S.pops=keep.pops;S.hitsTaken=keep.hitsTaken;S.visited=keep.visited;S.phase=keep.phase;if(S.phase===2){S.robbers=[];}
+ amb:new Set(),sp:new Set(SPARK0.concat(SPARK2).map(a=>a+'')),lit:new Set(),coins:new Set(),cp:null,taps:0,gems:0,pops:0,hitsTaken:0,rects:[]};
+ if(keep){S.amb=keep.amb;S.sp=keep.sp;S.coins=keep.coins;S.lit=keep.lit;S.cp=cp;S.taps=keep.taps;S.gems=keep.gems;S.pops=keep.pops;S.hitsTaken=keep.hitsTaken;S.visited=keep.visited;S.phase=keep.phase;if(S.phase===2){S.robbers=[];}
   if(cp){S.x=cp.x;S.y=cp.y;S.px=cp.x+.5;S.py=cp.y+.5;S.dir=cp.dir;S.ang=cp.dir*Math.PI/2-Math.PI/2;}}
  S.lastArr=S.x+','+S.y;S.visited.add(S.x+','+S.y);updHUD();updBtns();}
 function trapC(i,t){return(t+i*1.6)%3.2;}
@@ -88,7 +88,7 @@ function trapState(i,t){const c=trapC(i,t);return c<1.7?'up':c<2.5?'warn':'down'
 function trapH(i,t){const c=trapC(i,t);if(c<2.5)return 1;const k=(c-2.5)/.7;return k<.2?1-k/.2:k>.8?(k-.8)/.2:0;}
 function dashGreen(i){const c=trapC(i,S.t);return c<1.3||c>3.0;}
 function trapAt(x,y){return TRAPS.findIndex(t=>t.x===x&&t.y===y);}
-function updHUD(){$('hearts').textContent='❤️'.repeat(S.hearts)+'🤍'.repeat(3-S.hearts);$('gems').textContent=S.gems+'/'+GT;if(S.gems===GT&&!S.all16){S.all16=1;toast('🏆 All '+GT+'!');burst(RW/2,RH*.4,60);[784,988,1175].forEach((f,i)=>setTimeout(()=>snd(f,.25,'sine',.06),i*120));}}
+function updHUD(){$('hearts').textContent='❤️'.repeat(S.hearts)+'🤍'.repeat(3-S.hearts);$('gems').textContent=S.gems+'/'+GT;$('coinsT').textContent=S.coins.size+'/'+CT;if(S.gems===GT&&!S.all16){S.all16=1;toast('🏆 All '+GT+'!');burst(RW/2,RH*.4,60);[784,988,1175].forEach((f,i)=>setTimeout(()=>snd(f,.25,'sine',.06),i*120));}}
 const CTRL={turn:0,fwd:0,bt:0,bf:0,dt:0,df:0};const RAD=.22;
 function dirOf(a){return((Math.round((a+Math.PI/2)/(Math.PI/2))%4)+4)%4;}
 function angOf(d){return d*Math.PI/2-Math.PI/2;}
@@ -120,6 +120,7 @@ function burst(x,y,n,col){for(let i=0;i<n;i++)S.sparks.push({x,y,vx:(Math.random
 function arrive(){const k=S.x+','+S.y;S.seen=S.seen||new Set();if(!S.seen.has(k)){S.seen.add(k);S.idle=0;}if(S.lastArr===k){checkHit();return;}S.lastArr=k;const c=MAP[S.y][S.x];
  AMB.forEach((a,i)=>{if(a.t===k&&!S.amb.has(i)&&(a.ph||1)===(S.phase||1)){S.amb.add(i);S.robbers.push({sx:a.x,sy:a.y,x:a.x,y:a.y,px:a.x+.5,py:a.y+.5,gone:0,hold:3.5+Math.random()*1.5,amb:1});snd(200,.15,'square',.07);toast('A robber! Tap it!');}});
  if(S.sp.has(k)){S.sp.delete(k);S.gems++;updHUD();snd(880,.1,'sine',.06);}
+ if(COINS.some(c=>c+''===k)&&!S.coins.has(k)){S.coins.add(k);updHUD();burst(RW/2,RH*.5,50);[988,1319,1568].forEach((f,i)=>setTimeout(()=>snd(f,.18,'sine',.07),i*90));toast('🪙 Coin! '+S.coins.size+'/'+CT);}
  if(c==='P'||c==='L'){S.paused=true;$('laneT').textContent=c==='P'?'The priest passed by.':'The Levite passed by.';
   $('laneP').textContent=c==='P'?'Luke 10:31':'Luke 10:32';$('cLane').style.display='block';updBtns();}
  if(c==='C'&&S.phase===2){S.paused=true;$('cInn').style.display='block';updBtns();}
@@ -127,17 +128,11 @@ function arrive(){const k=S.x+','+S.y;S.seen=S.seen||new Set();if(!S.seen.has(k)
  checkHit();}
 function hit(why){if(S.inv>0||S.paused||Q.has('god'))return;S.hearts--;S.hitsTaken++;updHUD();S.inv=1.5;S.shake=.4;
  $('flash').style.transition='none';$('flash').style.opacity=.5;requestAnimationFrame(()=>{$('flash').style.transition='opacity .45s';$('flash').style.opacity=0;});
- snd(90,.3,'sawtooth',.1);toast(why);if(navigator.vibrate)navigator.vibrate(120);
+ snd(90,.3,'sawtooth',.1);const tt=$('toast');tt.classList.add('bad');toast(why);setTimeout(()=>tt.classList.remove('bad'),1200);if(navigator.vibrate)navigator.vibrate(120);
  S.robbers.forEach(r=>{if(Math.abs(r.x-S.x)+Math.abs(r.y-S.y)<2){r.x=r.sx;r.y=r.sy;r.px=r.x+.5;r.py=r.y+.5;r.gone=3;}});
  if(S.hearts<=0){S.paused=true;S.tw=null;$('cFail').style.display='block';updBtns();return;}
  if(why!=='Wait for green!')bump();}
-function checkHit(src){for(const r of S.robbers)if(!r.gone&&r.x===S.x&&r.y===S.y){
- if(src!=='robber'||!r.moved){ // you walked into a robber: Easy = gentle bump, nothing lost
-  if(S.inv>0)return;S.inv=.8;toast('Tap the robber first!');snd(160,.12,'square',.05);bump();return;}
- const front=r.ox===S.x+DX[S.dir]&&r.oy===S.y+DY[S.dir];
- if(!front){if(S.inv>0)return;S.inv=1.2;r.x=r.sx;r.y=r.sy;r.px=r.x+.5;r.py=r.y+.5;r.gone=r.amb?1e9:4;
-  const had=S.gems>0;if(had){S.gems--;updHUD();}stealFx(had);return;}
- return hit('Robber! −1 ❤️');}}
+function checkHit(src){for(const r of S.robbers)if(!r.gone&&r.x===S.x&&r.y===S.y)return hit('Robber! −1 ❤️');}
 function stealFx(had){const t=$('toast');t.classList.add('bad');toast(had?'🥷 A robber grabbed a gem!  −1 💎':'🥷 A robber sneaked up!');setTimeout(()=>t.classList.remove('bad'),1300);
  const gp=$('gems').parentElement;gp.classList.remove('lose');void gp.offsetWidth;gp.classList.add('lose');
  $('flash').style.transition='none';$('flash').style.opacity=.3;requestAnimationFrame(()=>{$('flash').style.transition='opacity .45s';$('flash').style.opacity=0;});
@@ -172,6 +167,7 @@ const INNSPR=mk(128,128,x=>{x.fillStyle='rgba(0,0,0,.25)';x.beginPath();x.ellips
  x.fillStyle='#ffe066';x.fillRect(26,72,18,16);x.fillRect(86,72,18,16);x.strokeStyle='#e09412';x.lineWidth=2;x.strokeRect(26,72,18,16);x.strokeRect(86,72,18,16);
  x.fillStyle='#3a1480';x.fillRect(40,40,48,16);x.strokeStyle='#ffcc33';x.strokeRect(40,40,48,16);x.fillStyle='#ffcc33';x.font='bold 13px sans-serif';x.textAlign='center';x.fillText('INN',64,53);});
 const ARROW=mk(64,64,x=>{x.fillStyle='rgba(255,204,51,.95)';x.strokeStyle='#fff6b8';x.lineWidth=4;x.beginPath();x.moveTo(32,4);x.lineTo(60,40);x.lineTo(42,40);x.lineTo(42,60);x.lineTo(22,60);x.lineTo(22,40);x.lineTo(4,40);x.closePath();x.fill();x.stroke();});
+const COINSPR=mk(96,96,x=>{const g2=x.createRadialGradient(48,48,8,48,48,48);g2.addColorStop(0,'rgba(255,230,120,.9)');g2.addColorStop(1,'rgba(255,204,51,0)');x.fillStyle=g2;x.fillRect(0,0,96,96);const gr=x.createLinearGradient(20,16,76,80);gr.addColorStop(0,'#fff8dc');gr.addColorStop(.45,'#ffcc33');gr.addColorStop(1,'#e09412');x.fillStyle=gr;x.beginPath();x.arc(48,48,30,0,7);x.fill();x.strokeStyle='#fff6b8';x.lineWidth=4;x.stroke();x.strokeStyle='#e09412';x.lineWidth=3;x.beginPath();x.arc(48,48,21,0,7);x.stroke();x.fillStyle='#b8700a';x.font='bold 26px serif';x.textAlign='center';x.textBaseline='middle';x.fillText('✦',48,50);});
 const SPR={inn:INNSPR,robber:IMG('robber-masked.webp'),man:IMG('hurt-man.webp'),gem:IMG('gem.webp'),lampOff:IMG('lamp-idle.webp'),lampOn:IMG('lamp-lit.webp'),
  block:mk(64,192,x=>{const gr=x.createLinearGradient(0,0,64,0);gr.addColorStop(0,'#2a0d58');gr.addColorStop(.35,'#8a5ad0');gr.addColorStop(.55,'#c8a0ff');gr.addColorStop(1,'#2a0d58');
   x.fillStyle=gr;x.fillRect(10,0,44,170);x.fillStyle='rgba(42,13,88,.45)';for(let i=0;i<4;i++)x.fillRect(16+i*10,0,3,170);
@@ -207,15 +203,16 @@ function render(dt){const t=S.t;const bob=Math.sin(S.bobT||0)*3;
  const sp=[];S.robbers.forEach((r,i)=>{if(!r.gone)sp.push({x:r.px,y:r.py,img:SPR.robber,s:.72,lift:Math.abs(Math.sin(t*6+i))*.06,kind:'robber',ref:r});});
  if(S.phase!==2)sp.push({x:HURT.x+.5,y:HURT.y+.5,img:SPR.man,s:.55,lift:0});sp.push({x:INN.x+.92,y:INN.y+.5,img:SPR.inn,s:.75,lift:0});
  if(S.hint&&Math.hypot(S.hint.x+.5-S.px,S.hint.y+.5-S.py)>.8)sp.push({x:S.hint.x+.5,y:S.hint.y+.5,img:ARROW,s:.25,lift:.05+Math.sin(t*5)*.03,glow:1});
+ COINS.forEach(c=>{const k=c+'';if(S.coins.has(k))return;const spin=Math.abs(Math.cos(t*2.2+c[0]));sp.push({x:c[0]+.5,y:c[1]+.5,img:COINSPR,s:.34,lift:.22+Math.sin(t*3+c[1])*.04,kind:'coin',ref:k,sx:Math.max(.15,spin),bright:1});});
  S.sp.forEach(k=>{const[a,b]=k.split(',').map(Number);sp.push({x:a+.5,y:b+.5,img:SPR.gem,s:.2,lift:.3+Math.sin(t*3+a)*.05,kind:'gem',ref:k});});
  LAMPS.forEach((l,i)=>{const on=S.lit.has(i);sp.push({x:l.x+.75,y:l.y+.25,img:on?SPR.lampOn:SPR.lampOff,s:1,lift:0,kind:on?null:'lamp',ref:i});});
  TRAPS.forEach((tp,i)=>{const st=trapState(i,t),h=trapH(i,t);sp.push({x:tp.x+.5+(st==='warn'?Math.sin(t*60)*.03:0),y:tp.y+.5,img:SPR.block,s:3.2,lift:h*.8,warn:st==='warn'});});
  sp.forEach(s=>s.d=(s.x-S.px)**2+(s.y-S.py)**2);sp.sort((a,b)=>b.d-a.d);const inv=1/(plx*dy-dx*ply);S.rects=[];
  for(const s of sp){const rx=s.x-S.px,ry=s.y-S.py,tx=inv*(dy*rx-dx*ry),ty=inv*(-ply*rx+plx*ry);if(ty<.15)continue;
-  const scx=RW/2*(1+tx/ty),full=RH/ty*.9,hh=full*s.s,ww=hh*s.img.width/s.img.height,top=horizon+full*.5-hh-full*s.lift;
-  const x0=scx-ww/2;let vis=0;const sfog=1-Math.exp(-ty*.16);g.globalAlpha=Math.max(.15,1-sfog*.9);for(let c=Math.max(0,x0|0);c<Math.min(RW,x0+ww);c++){if(ty>=Z[c])continue;vis++;const srcx=(c-x0)/ww*s.img.width;g.drawImage(s.img,srcx,0,1,s.img.height,c,top,1,hh);}g.globalAlpha=1;
+  const scx=RW/2*(1+tx/ty),full=RH/ty*.9,hh=full*s.s,ww=hh*s.img.width/s.img.height*(s.sx||1),top=horizon+full*.5-hh-full*s.lift;
+  const x0=scx-ww/2;let vis=0;const sfog=1-Math.exp(-ty*.16);g.globalAlpha=s.bright?1:Math.max(.15,1-sfog*.9);for(let c=Math.max(0,x0|0);c<Math.min(RW,x0+ww);c++){if(ty>=Z[c])continue;vis++;const srcx=(c-x0)/ww*s.img.width;g.drawImage(s.img,srcx,0,1,s.img.height,c,top,1,hh);}g.globalAlpha=1;
   if(s.kind==='lamp'&&vis){g.fillStyle='rgba(255,220,100,'+(.4+.3*Math.sin(t*6))+')';g.beginPath();g.arc(scx,top+hh*.12,Math.max(6,ww*.6),0,7);g.fill();}
-  if(s.kind&&vis&&ty<4.5)S.rects.push({kind:s.kind,ref:s.ref,x0,y0:top,x1:x0+ww,y1:top+hh,d:ty});
+  if(s.kind&&vis&&(s.kind==='coin'?ty<9:s.kind==='gem'?ty<2.2:ty<4.5))S.rects.push({kind:s.kind,ref:s.ref,x0,y0:top,x1:x0+ww,y1:top+hh,d:ty});
   if(s.warn&&vis){g.fillStyle='#ffcc33';g.font='bold '+Math.max(10,hh*.4|0)+'px sans-serif';g.textAlign='center';g.fillText('!',scx,top-4);}}
  S.sparks=S.sparks.filter(p=>(p.l-=dt)>0);S.sparks.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=30*dt;g.fillStyle='rgba('+p.c+','+p.l+')';g.fillRect(p.x,p.y,3,3);});
  cv.style.transform='translate('+sh+'px,'+(sh*.6)+'px)';
@@ -246,9 +243,10 @@ function step(dt){S.t+=dt;if(!S.paused&&!S.tw)S.noin=(S.noin||0)+dt;const showSw
    const st=trapState(i,S.t);if(st==='down'&&!S.tw&&S.x===tp.x&&S.y===tp.y){hit('Crushed! −1 ❤️');}tp.last=st;});
   if(!S.tw)checkHit();}}
 function tapAt(cx,cy){if(S.paused)return false;S.noin=0;const r=cv.getBoundingClientRect(),x=(cx-r.left)/r.width*RW,y=(cy-r.top)/r.height*RH,pad=14;
- let best=null;for(const q of S.rects){const ex=q.kind==='gem'?Math.max(pad,22-(q.x1-q.x0)/2):q.kind==='robber'?Math.max(pad,18-(q.x1-q.x0)/2):pad;if(x>q.x0-ex&&x<q.x1+ex&&y>q.y0-ex&&y<q.y1+ex&&(!best||q.d<best.d))best=q;}if(0)for(const q of S.rects)if(x>q.x0-pad&&x<q.x1+pad&&y>q.y0-pad&&y<q.y1+pad&&(!best||q.d<best.d))best=q;if(!best)return false;
+ let best=null;for(const q of S.rects.filter(q=>q.kind!=='coin').concat(S.rects.filter(q=>q.kind==='coin'))){const ex=q.kind==='gem'?Math.max(pad,22-(q.x1-q.x0)/2):q.kind==='robber'?Math.max(pad,18-(q.x1-q.x0)/2):pad;if(x>q.x0-ex&&x<q.x1+ex&&y>q.y0-ex&&y<q.y1+ex&&(!best||(best.kind==='coin'&&q.kind!=='coin')||(q.kind!=='coin'||best.kind==='coin')&&q.d<best.d&&!(best.kind!=='coin'&&q.kind==='coin')))best=q;}if(0)for(const q of S.rects)if(x>q.x0-pad&&x<q.x1+pad&&y>q.y0-pad&&y<q.y1+pad&&(!best||q.d<best.d))best=q;if(!best)return false;
  const mx=(best.x0+best.x1)/2,my=(best.y0+best.y1)/2;
  if(best.kind==='robber'){const rb=best.ref;rb.gone=rb.amb?1e9:8;S.pops++;burst(mx,my,30,'210,150,255');snd(700,.12,'square',.06);setTimeout(()=>snd(1000,.1,'square',.05),80);toast('Pop!');}
+ if(best.kind==='coin'){toast('Walk to it! 🚶');snd(300,.08,'sine',.05);}
  if(best.kind==='gem'&&S.sp.has(best.ref)){S.sp.delete(best.ref);S.gems++;updHUD();burst(mx,my,14);snd(880+S.gems*20,.1,'sine',.06);}
  if(best.kind==='lamp'){S.lit.add(best.ref);S.cp={x:S.x,y:S.y,dir:S.dir};burst(mx,best.y0,24);snd(520,.3,'sine',.07);toast('💡 Safe spot!');}
  return true;}
@@ -276,13 +274,13 @@ $('helpB').onclick=()=>{const k=S.help;snd(520+k*130,.25,'sine',.07);burst(RW/2,
 function startPhase2(){$('cHelp').style.display='none';S.phase=2;S.robbers=[];S.cp={x:HURT.x,y:HURT.y,dir:0};S.hist=[];S.idle=0;
  $('escort').style.display='flex';$('goalT').textContent='Inn';toast('🫏 The gate is open!');snd(660,.2,'sine',.07);S.paused=false;updBtns();}
 $('payB').onclick=()=>{$('escort').style.display='none';[880,1175].forEach((f,i)=>setTimeout(()=>snd(f,.15,'sine',.07),i*160));burst(RW/2,RH*.5,40);setTimeout(()=>{$('cInn').style.display='none';
-  const stars=1+(S.hearts>=2?1:0)+(S.gems>=10?1:0);$('stars').textContent='⭐'.repeat(stars)+'☆'.repeat(3-stars);$('endInfo').innerHTML='💎 '+S.gems+'/'+GT+'   🍬 '+S.pops+(S.gems===GT?'<br><b>🏆 All '+GT+' gems!</b>':'');
+  const stars=1+(S.hearts>=2?1:0)+(S.coins.size===CT?1:0);$('stars').textContent='⭐'.repeat(stars)+'☆'.repeat(3-stars);$('endInfo').innerHTML='🪙 '+S.coins.size+'/'+CT+'   💎 '+S.gems+'/'+GT+'   🍬 '+S.pops+(S.coins.size<CT?'<br><small>Find all coins for ⭐3</small>':'')+(S.gems===GT?'<br><b>🏆 All '+GT+' gems!</b>':'');
   $('cEnd').style.display='block';S.done=true;$('status').textContent='WON';[523,659,784].forEach((f,i)=>setTimeout(()=>snd(f,.4,'sine',.06),i*150));},500);};
 $('again').onclick=()=>{$('escort').style.display='none';$('goalT').textContent='Hurt man';['cEnd','cFail','cLane','cHelp','cInn'].forEach(i=>$(i).style.display='none');reset(true);S.paused=false;updBtns();};
 $('retry').onclick=()=>{$('cFail').style.display='none';reset(false);S.paused=false;updBtns();};
 $('rs').onclick=$('again').onclick;
 document.querySelector('#cInn img.art').src=INNSPR.toDataURL();reset(true);$('cIntro').style.display='block';requestAnimationFrame(frame);
 window.onerror=m=>{$('status').textContent='ERR '+m;};
-window.NR={get RW(){return RW},get RH(){return RH},get resL(){return resL},trapAt,CTRL,turnAround,dash,angDiff,goal:()=>S.phase===2?INN:HURT,open:(x,y)=>open(x,y),get S(){return S},move,tapAt,dashGreen,fwdTrap,MAP};
+window.NR={COINS,get RW(){return RW},get RH(){return RH},get resL(){return resL},trapAt,CTRL,turnAround,dash,angDiff,goal:()=>S.phase===2?INN:HURT,open:(x,y)=>open(x,y),get S(){return S},move,tapAt,dashGreen,fwdTrap,MAP};
 setTimeout(()=>{if($('status').textContent==='init')$('status').textContent='OK';},50);
 </script></body></html>
