@@ -14,7 +14,7 @@ export const CHANGELOG: ChangeNote[] = [
     items: [
       'Rounds 20 through 25 send more walkers, and more of them are thick.',
       'The round 20 and round 25 crowns ignore lamp shots. Taps bring them down, and the last crown stays up for a long while.',
-      'Rounds 6 through 10 step onto the road at the start of the path. A playtest link logs where each walker first appears.',
+      'A playtest link logs where each walker first appears.',
     ],
   },
   {

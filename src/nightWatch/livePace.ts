@@ -9,7 +9,6 @@ import {
   easyRoundHeartCap,
   easyTapArmored,
   EASY_LATE_LAMP_NICK,
-  noteLiveSpawnRound,
 } from '../lib/defend.ts'
 import { applyIncenseTap } from './incense.ts'
 import { nightSeedPlan, nightSeedShotWait, nightSeedSpawnScale } from './seed.ts'
@@ -557,8 +556,6 @@ export function paceEasyLive(
           : scaledWalkerHp(rules.walker(2, bonus, gait, roundIndex, tune), hpMul)
       if (boss) bossMax = hp
       const lane = roads ? roads[pathPick(spawned, roads.map((item) => item.share))] : undefined
-      const liveRoad = mode === 'road' && !frozen && !map
-      if (liveRoad && roundIndex >= 5 && roundIndex <= 9) noteLiveSpawnRound(roundIndex)
       if (boss) bossSeen = time
       raiders.push({
         t: easyLiveSpawnT(round.speed * (boss ? BOSS_PACE : walkerPace(gait))),
