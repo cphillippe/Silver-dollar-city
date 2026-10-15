@@ -1,5 +1,5 @@
 /**
- * Live prove for 1.4.487.
+ * Live prove for 1.4.488.
  * Real clicks and elementFromPoint. A planted incense still hits.
  * A walker inside a lamp box wins. The map sheet is the top layer.
  * Later rounds field more than three walkers. The clear bar stays put.
@@ -20,7 +20,7 @@ import { DEFEND_PATH } from '../src/nightWatch/path/data.ts'
 const SAVE = {
   kind: SAVE_KIND,
   schemaVersion: SAVE_SCHEMA_VERSION,
-  appVersion: '1.4.487',
+  appVersion: '1.4.488',
   savedAt: '2026-10-15T00:00:00.000Z',
   progress: {
     started: true,
@@ -498,7 +498,12 @@ async function checkTaps(browser, port, errors) {
   await page.locator('.defend-go.is-after-plant').click()
   await page.locator('.defend-page.is-easy-tap').waitFor()
   await setPaused(page, true)
-  await page.locator('[data-incense-lamp="yes"]').click()
+  const incenseBuy = page.locator('.nw-skill-tray [data-incense-lamp="yes"]')
+  await incenseBuy.waitFor({ state: 'attached' })
+  assert.equal(await incenseBuy.evaluate((node) => getComputedStyle(node).display), 'none', '1.4.488 the wave hides the Incense buy')
+  await incenseBuy.evaluate((node) => {
+    if (node instanceof HTMLElement) node.click()
+  })
   let planted = false
   for (const seat of INCENSE_SEATS) {
     await mapClick(page, seat)
@@ -577,6 +582,8 @@ async function checkClearBar(browser, port, errors, width, height, probeClick) {
   await page.locator('.defend-page.is-boost').waitFor()
   const candle = page.locator('.defend-clear-row [data-candle-lamp="yes"]')
   await candle.waitFor()
+  const candleShown = await candle.evaluate((node) => getComputedStyle(node).display)
+  assert.notEqual(candleShown, 'none', `1.4.488 ${width} the clear panel still shows Candle`)
   const spend = page.locator('.defend-clear-spend')
   const before = await spend.boundingBox()
   assert.ok(before && before.height > 10, '1.4.482 Spend is on the round 9 clear bar')
@@ -857,6 +864,62 @@ async function checkWaveCard(browser, port, errors) {
   await context.close()
 }
 
+/** Mid-wave Easy hides names, dotted rings, the left buys, and rail badges. Pips match. */
+async function checkShopTags(browser, port, errors) {
+  const context = await browser.newContext({
+    baseURL: `http://127.0.0.1:${port}/`,
+    viewport: { width: 412, height: 915 },
+    deviceScaleFactor: 1,
+    reducedMotion: 'reduce',
+  })
+  await context.addInitScript(
+    (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+    { key: STORAGE_KEY, save: SAVE },
+  )
+  const page = await context.newPage()
+  listen(page, errors, 'shop')
+  await openJump(page, '?playtest=1&nwRound=10')
+  await page.locator('.defend-go.is-after-plant').click()
+  await page.locator('.defend-page.is-easy-tap').waitFor()
+  await setPaused(page, true)
+  const shop = await page.evaluate(() => {
+    const shown = (node) => (node ? getComputedStyle(node).display : 'missing')
+    return {
+      candle: shown(document.querySelector('.nw-skill-tray [data-candle-lamp="yes"]')),
+      bell: shown(document.querySelector('.nw-skill-tray [data-bell-lamp="yes"]')),
+      incense: shown(document.querySelector('.nw-skill-tray [data-incense-lamp="yes"]')),
+      label: shown(document.querySelector('.defend-type-label')),
+      ring: shown(document.querySelector('.defend-range:not(.is-firing):not(.is-bell-pulse):not(.is-incense-cloud)')),
+      tier: shown(document.querySelector('.nw-rail .defend-ability-tier')),
+      clearCandle: document.querySelectorAll('.defend-clear-row [data-candle-lamp="yes"]').length,
+    }
+  })
+  assert.equal(shop.candle, 'none', '1.4.488 the wave hides the Candle buy')
+  assert.equal(shop.bell, 'none', '1.4.488 the wave hides the Bell buy')
+  assert.equal(shop.incense, 'none', '1.4.488 the wave hides the Incense buy')
+  assert.equal(shop.label, 'none', '1.4.488 the wave hides lamp names')
+  assert.equal(shop.ring, 'none', '1.4.488 the wave hides dotted reach rings')
+  assert.equal(shop.tier, 'none', '1.4.488 the wave hides right-rail badges')
+  assert.equal(shop.clearCandle, 0, '1.4.488 the clear row is not on the wave')
+  await openLoveCard(page)
+  const pips = await page.evaluate(() => {
+    const box = (node) => {
+      if (!node) return null
+      const style = getComputedStyle(node)
+      return { radius: style.borderRadius, w: style.width, h: style.height }
+    }
+    return {
+      on: box(document.querySelector('.defend-tower-card .defend-path-pip.is-on')),
+      buy: box(document.querySelector('.defend-tower-card button.defend-path-pip.is-buy')),
+    }
+  })
+  assert.ok(pips.on && pips.buy, `1.4.488 the wave card has a filled pip and a next pip ${JSON.stringify(pips)}`)
+  assert.equal(pips.on.radius, pips.buy.radius, '1.4.488 filled and next pips share a radius')
+  assert.equal(pips.on.w, pips.buy.w, '1.4.488 filled and next pips share a width')
+  assert.equal(pips.on.h, pips.buy.h, '1.4.488 filled and next pips share a height')
+  await context.close()
+}
+
 export async function checkLiveProve() {
   const server = await createServer({ server: { host: '127.0.0.1', port: 0 } })
   await server.listen()
@@ -869,6 +932,7 @@ export async function checkLiveProve() {
     await checkCardCut()
     await checkMaps(browser, port, errors)
     await checkWaveCard(browser, port, errors)
+    await checkShopTags(browser, port, errors)
     await checkBareBegin(browser, port, errors)
     await checkCrowd(browser, port, errors)
     await checkLampBox(browser, port, errors)

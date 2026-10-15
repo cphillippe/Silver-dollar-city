@@ -3077,6 +3077,37 @@ button.defend-path-pip {
   display: none;
 }
 
+/* 1.4.488 Easy wave only. Names, dotted reach rings, the left Candle/Bell/Incense row, and the right-rail rank badges stay off while walkers move. The clear is is-easy-watch without is-easy-tap, so those buys can come back. Bell pulse, incense cloud, and a shot ring stay. Hard never has is-easy-watch. */
+.defend-page.is-easy-watch.is-easy-tap .defend-type-label,
+.defend-page.is-easy-watch.is-easy-tap .defend-range:not(.is-firing):not(.is-bell-pulse):not(.is-incense-cloud),
+.defend-page.is-easy-watch.is-easy-tap .nw-skill-tray .defend-candle-lamp,
+.defend-page.is-easy-watch.is-easy-tap .nw-skill-tray .defend-bell-lamp,
+.defend-page.is-easy-watch.is-easy-tap .nw-skill-tray .defend-incense-lamp,
+.defend-page.is-easy-watch.is-easy-tap .nw-rail .defend-ability-tier {
+  display: none;
+}
+
+/* Filled steps and the next buy share one rounded square. The next pip is a button, so it does not fall back to a round control. */
+.defend-page.is-easy-watch.is-easy-tap .defend-tower-card .defend-path-pip.is-on,
+.defend-page.is-easy-watch.is-easy-tap .defend-tower-card button.defend-path-pip.is-buy {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  min-height: 20px;
+  padding: 0;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.defend-page.is-easy-watch.is-easy-tap .defend-tower-card.is-candle .defend-path-pip.is-on,
+.defend-page.is-easy-watch.is-easy-tap .defend-tower-card.is-candle button.defend-path-pip.is-buy {
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  min-height: 26px;
+  border-radius: 6px;
+}
+
 .nw-night-back {
   position: sticky;
   top: 0;
