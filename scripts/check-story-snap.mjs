@@ -26,6 +26,7 @@ import {
   demoCountsLocked,
   demoTravelMs,
   easySnapStars,
+  flyPastIsMiss,
   inSnapWindow,
   lockedAfterMiss,
   missOnFlyPast,
@@ -59,8 +60,12 @@ assert.ok(easyWindow > SNAP_WINDOW, 'Easy window is wider than Hard')
 assert.equal(inSnapWindow(0.5, easyWindow), true)
 assert.equal(beatPastGate(GATE_AT + easyWindow / 2 + 0.01, easyWindow), true)
 assert.equal(beatPastGate(0.5, easyWindow), false)
-assert.equal(missOnFlyPast(false), false, 'a fly-past with no tap is not a miss')
+assert.equal(missOnFlyPast(false), false, 'Easy fly-past with no tap is not a miss')
 assert.equal(missOnFlyPast(true), true, 'a tap outside the window is a miss')
+assert.equal(flyPastIsMiss(false, true), false, 'Easy ignores an untapped fly-past')
+assert.equal(flyPastIsMiss(false, false), true, 'Hard still counts an untapped fly-past as a miss')
+assert.equal(flyPastIsMiss(true, false), true, 'Hard still counts a tapped fly-past as a miss')
+assert.equal(flyPastIsMiss(true, true), true, 'Easy still counts a tap outside the window as a miss')
 assert.equal(easySnapStars(0), '☆☆☆')
 assert.equal(easySnapStars(1), '★☆☆')
 assert.equal(easySnapStars(3), '★★★')
@@ -112,6 +117,12 @@ const playSrc = readFileSync(
 )
 assert.match(playSrc, /is-story-snap/)
 assert.match(playSrc, /STORY OPEN/)
+assert.match(
+  playSrc,
+  /recycleBeat\(flyPastIsMiss\(tappedRef\.current, easyRef\.current\)\)/,
+  'the fly-past miss is gated on Easy',
+)
+assert.doesNotMatch(playSrc, /recycleBeat\(missOnFlyPast\(/)
 
 const wire = readFileSync(new URL('../src/lib/storyPlay.ts', import.meta.url), 'utf8')
 assert.match(wire, /STORY_SNAP_LINE/)

@@ -107,9 +107,14 @@ export function beatPastGate(progress: number, windowFraction = SNAP_WINDOW): bo
   return progress > GATE_AT + windowFraction / 2
 }
 
-/** A fly-past is a miss only when the player tapped outside the gate. */
+/** Easy only: a fly-past is a miss when the player tapped outside the gate. */
 export function missOnFlyPast(playerTapped: boolean): boolean {
   return playerTapped
+}
+
+/** Hard still counts every fly-past as a miss. Easy uses missOnFlyPast. */
+export function flyPastIsMiss(playerTapped: boolean, easy: boolean): boolean {
+  return easy ? missOnFlyPast(playerTapped) : true
 }
 
 /** Easy score. Filled stars are snaps already locked. No digits. */
