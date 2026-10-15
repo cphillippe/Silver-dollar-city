@@ -34,6 +34,7 @@ import {
   nightWatchDebugHolds,
   nightWatchDebugPanel,
   nightWatchJumpAllowed,
+  nightWatchLampCap,
   nightWatchRoundJump,
 } from '../src/lib/nightWatchDebug.ts'
 import {
@@ -132,6 +133,7 @@ import {
   easyBossRound,
   easyBossSpawnId,
   easyBusyTapFloor,
+  capJumpPlants,
   easyJumpLoad,
   easyJumpSparkBank,
   JUMP_GOOD_SEATS,
@@ -6604,7 +6606,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(Object.keys(jump15.plants).length, 4, '1.4.437 the jump plants four lamps, not five')
   const screen437 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
   assert.match(screen437, /const planted = easyJumpLoad\(jump\)/)
-  assert.match(screen437, /setPlants\(planted\.plants\)/)
+  assert.match(screen437, /setPlants\(shown\.plants\)/)
   assert.doesNotMatch(
     screen437.slice(screen437.indexOf('const roundJumpOnce'), screen437.indexOf('const roundJumpOnce') + 900),
     /setPhase\('boost'\)/,
@@ -8110,11 +8112,46 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(actors477, /lampIconBox\(/, '1.4.478 the lamp target is the icon')
   assert.match(board477, /data-lamp-icon="yes"/)
   assert.match(css477, /\.defend-range \{[^}]*pointer-events:\s*none/)
+  assert.match(css477, /\.defend-range\.is-incense-cloud \{[^}]*pointer-events:\s*none/)
+  assert.match(actors477, /data-incense-cloud=\{incense \? 'yes' : undefined\}/)
+  assert.match(actors477, /if \(incense\) onOpenUpgrade\?\.\(id\)/, '1.4.478 the incense icon opens its card')
+  assert.match(
+    css477,
+    /\.defend-page\.is-easy-tap \.defend-clear-lamp\[data-incense-icon='yes'\] \{[^}]*pointer-events:\s*none/,
+    '1.4.478 a walker in the incense cloud beats the lamp button',
+  )
+  assert.match(screen477, /capJumpPlants\(\s*planted,\s*nightWatchLampCap/)
   assert.match(css477, /\.defend-tower-card::after \{[^}]*pointer-events:\s*none/)
   assert.match(screen477, /easyPointerTapGate\(/, '1.4.478 a walker tap still uses the glow gate')
   const gateAt = screen477.indexOf('easyPointerTapGate(')
   const bonusAt = screen477.indexOf('incenseBonusFor(', gateAt)
   assert.ok(gateAt >= 0 && (bonusAt < 0 || gateAt < bonusAt), '1.4.478 the glow gate still runs before a later bonus')
+  assert.equal(nightWatchLampCap('?playtest=1&nwLamps=0', true), 0)
+  assert.equal(nightWatchLampCap('?playtest=1&nwLamps=1', true), 1)
+  assert.equal(nightWatchLampCap('?playtest=1&nwLamps=2', true), 2)
+  assert.equal(nightWatchLampCap('?playtest=1&nwLamps=3', true), null, '1.4.478 nwLamps stays inside 0..2')
+  assert.equal(nightWatchLampCap('?playtest=1', true), null, '1.4.478 a jump with no nwLamps keeps the full load')
+  assert.equal(nightWatchLampCap('?nwLamps=0', false), null, '1.4.478 a normal visit ignores nwLamps')
+  const jump15Lamps = easyJumpLoad(14)
+  assert.deepEqual(capJumpPlants(jump15Lamps, null), jump15Lamps)
+  assert.equal(Object.keys(capJumpPlants(jump15Lamps, 0).plants).length, 0)
+  assert.equal(capJumpPlants(jump15Lamps, 0).sparks, jump15Lamps.sparks)
+  assert.equal(Object.keys(capJumpPlants(jump15Lamps, 1).plants).length, 1)
+  assert.equal(Object.keys(capJumpPlants(jump15Lamps, 2).plants).length, 2)
+  assert.deepEqual(
+    capJumpPlants(jump15Lamps, 2).lamps,
+    jump15Lamps.lamps.slice(0, 2).map((lamp) => ({ far: lamp.far, strong: lamp.strong })),
+  )
+  const incenseHit = liveNightDamage(
+    { hp: 8, tapChip: 0, gait: 'plain', boss: false },
+    { easy: true, manual: true, roundIndex: 14, lampDamage: 0, tapBonus: 1 },
+  )
+  assert.equal(incenseHit.damage, 2, '1.4.478 a landed tap in the cloud gains the +1')
+  const incenseMiss = liveNightDamage(
+    { hp: 8, tapChip: 0, gait: 'plain', boss: false },
+    { easy: true, manual: true, roundIndex: 4, lampDamage: 0, tapBonus: 0 },
+  )
+  assert.equal(incenseMiss.damage, 1, '1.4.478 round 5 glow damage stays one without a cloud')
 }
 {
   assert.equal(EASY_TOUGH_OPEN, 56, '1.4.472 a thick walker from round 8 has a taller bar')
@@ -16318,6 +16355,7 @@ assert.match(
 await import('./check-seed-fire.mjs').then((mod) => mod.checkSeedFire())
 await import('./check-night-jump.mjs').then((mod) => mod.checkNightJump())
 await import('./check-phone-fixes.mjs').then((mod) => mod.checkPhoneFixes())
+await import('./check-incense-lamps.mjs').then((mod) => mod.checkIncenseLamps())
 await import('./check-story-win.mjs').then((mod) => mod.checkStoryWins())
 await import('./check-easy-face.mjs').then((mod) => mod.checkEasyFace())
 const snapHoldScan = readFileSync(new URL('./check-story-snap.mjs', import.meta.url), 'utf8')

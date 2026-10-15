@@ -15,6 +15,7 @@ export const CHANGELOG: ChangeNote[] = [
       'Before the night starts, the maps sit on their own panel. A locked map says which map to beat.',
       'Need sparks stays in its own spot, so the round-clear buttons do not jump.',
       'A walker next to a lamp can still be tapped. The lamp icon still opens its card.',
+      'A walker in the incense cloud can still be tapped. The incense card opens from the lamp itself.',
     ],
   },
   {
