@@ -172,7 +172,9 @@ import {
   NAMED_LAMPS,
   bossDamageTable,
   leadSeatTable,
+  HUMAN_CROSS_AT,
   HUMAN_TAP_EVERY,
+  LEAD_GOOD_SEATS,
   LIVE_TAP_EVERY,
   paceEasy436,
   paceEasyCampaign,
@@ -255,6 +257,8 @@ import {
 } from '../src/nightWatch/bell.ts'
 import {
   CROSS_CARD,
+  CROSS_COST,
+  CROSS_VERSE_CITE,
   applyCrossWait,
   crossPaceFor,
   crossUnlocked,
@@ -1665,7 +1669,10 @@ assert.doesNotMatch(
   /Fixes #|Closes #|Resolves #/,
   '1.4.490 changelog avoids GitHub close keywords',
 )
-assert.match(latestChange('1.4.490').items.join('\n'), /The cross reminds us Jesus died and rose for us\. \(Hebrews 12:2, RSV\)/)
+assert.match(
+  latestChange('1.4.490').items.join('\n'),
+  /The cross helps us remember Jesus died and rose for us\. Hebrews 12:2, RSV/,
+)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.489'), '1.4.489 changelog row')
 assert.match(latestChange('1.4.489').title, /name/i)
 assert.doesNotMatch(
@@ -1753,7 +1760,9 @@ assert.doesNotMatch(
   /defend-clear-row|is-boost/,
   '1.4.489 the name hide is not the clear row',
 )
-assert.equal(CROSS_CARD, 'The cross reminds us Jesus died and rose for us. (Hebrews 12:2, RSV)', '1.4.490 the teaching line stays verbatim')
+assert.equal(CROSS_CARD, 'The cross helps us remember Jesus died and rose for us.', '1.4.490 the teaching line stays verbatim')
+assert.equal(CROSS_VERSE_CITE, 'Hebrews 12:2, RSV', '1.4.490 the card cites Hebrews 12:2, RSV')
+assert.doesNotMatch(CROSS_CARD, /Hebrews|RSV/, '1.4.490 the card line has no verse')
 assert.equal(isCross('cross'), true)
 assert.equal(isCross('icon'), false, '1.4.490 this ship is the Cross')
 assert.equal(crossUnlocked(true, 5, 'wave'), false, '1.4.490 rounds 1–6 keep the cross locked')
@@ -1874,6 +1883,20 @@ assert.match(
     idleHearts = easyClearHeart(round.hearts)
   }
   assert.ok(idleDead != null && idleDead < 25, `1.4.487 an idle late run dies on round ${idleDead}`)
+  const crossNight = paceEasyHumanCampaign(true, HUMAN_TAP_EVERY, true)
+  const crossPlant = { [`at:${HUMAN_CROSS_AT.x}:${HUMAN_CROSS_AT.y}`]: 'cross' }
+  assert.equal(crossPaceFor(crossPlant, undefined, LEAD_GOOD_SEATS[0]), 0.9, '1.4.490 the round 13 cross reaches the porch-end lamp')
+  assert.equal(crossPaceFor(crossPlant, undefined, LEAD_GOOD_SEATS[3]), 1, '1.4.490 a far lamp stays outside that cross')
+  assert.equal(crossNight.dead, null, '1.4.490 the cross night still reaches round 25')
+  assert.equal(crossNight.rows[12].sparks, after487.rows[12].sparks - CROSS_COST, '1.4.490 the spender plants the cross at round 13')
+  for (let index = 0; index < 12; index += 1) {
+    assert.equal(crossNight.rows[index].hearts, after487.rows[index].hearts, `1.4.490 round ${index + 1} stays the same before the cross`)
+  }
+  const crossLow = crossNight.rows.filter((row) => row.round >= 20 && row.round <= 25 && row.hearts < 3)
+  assert.ok(crossLow.length > 0, `1.4.490 the cross night still drops below three hearts (${crossLow.map((row) => `R${row.round} h${row.hearts}`).join(' ')})`)
+  const crossCrown = paceEasyLive(24, crossNight.lamps, 3, false, HUMAN_TAP_EVERY, 'road', undefined, [], undefined, 0, HUMAN_CROSS_AT)
+  assert.equal(crossCrown.result, 'clear', '1.4.490 real taps still fell the round 25 crown')
+  assert.ok(crossCrown.bossSec >= 25, `1.4.490 the round 25 crown lasts ${crossCrown.bossSec.toFixed(1)}s with the cross`)
 }
 
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.485'), '1.4.485 changelog row')

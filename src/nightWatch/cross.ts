@@ -35,8 +35,11 @@ export const CROSS_SOONER = [0.1, 0.15, 0.2] as const
 
 export const CROSS_LABEL = 'Cross'
 
-/** Teaching line. Kept verbatim. */
-export const CROSS_CARD = 'The cross reminds us Jesus died and rose for us. (Hebrews 12:2, RSV)'
+/** Scholars' card line. The cross has no verse inside this string. */
+export const CROSS_CARD = 'The cross helps us remember Jesus died and rose for us.'
+
+/** Same cite shape as the bell and incense cards. */
+export const CROSS_VERSE_CITE = 'Hebrews 12:2, RSV'
 
 export function isCross(id: string | null | undefined): boolean {
   return id === CROSS_ID

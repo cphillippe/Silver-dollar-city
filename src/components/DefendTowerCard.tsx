@@ -55,6 +55,7 @@ import {
   CROSS_CARD,
   CROSS_LABEL,
   CROSS_SOONER,
+  CROSS_VERSE_CITE,
   canUpgradeCross,
   crossRank,
   isCross,
@@ -284,6 +285,7 @@ export function DefendTowerCard({
         <p className="defend-tower-tool">{label}</p>
         <p className="defend-cross-line" data-cross-card-line="yes">
           {CROSS_CARD}
+          <span className="defend-candle-cite">{` ${CROSS_VERSE_CITE}`}</span>
         </p>
         <div className="defend-path" data-path="sooner" data-rank={rank}>
           <p className="defend-path-name">
