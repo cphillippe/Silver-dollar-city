@@ -82,6 +82,8 @@ import {
   easyRoundHeartCap,
   applyEasyPointerTap,
   easyLiveSpawnT,
+  EASY_LATE_LAMP_NICK,
+  nightSpawnLine,
   easyPointerTapGate,
   r10ShrugCue,
   EASY_ON_SCREEN_SEC,
@@ -129,6 +131,8 @@ import {
   TOUGH_SPARK,
   BOSS_CLEAR_SPARKS,
   BOSS_PACE,
+  SHOWDOWN_PACE,
+  easyBossPace,
   easyBossClearSparks,
   easyClearSparkBonus,
   easyBossHp,
@@ -168,6 +172,7 @@ import {
   NAMED_LAMPS,
   bossDamageTable,
   leadSeatTable,
+  HUMAN_TAP_EVERY,
   LIVE_TAP_EVERY,
   paceEasy436,
   paceEasyCampaign,
@@ -1645,7 +1650,16 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.486')
+assert.equal(APP_VERSION, '1.4.487')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.487'), '1.4.487 changelog row')
+assert.match(latestChange('1.4.487').title, /tap/i)
+assert.doesNotMatch(
+  latestChange('1.4.487').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.487 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.487').items.join('\n'), /20/)
+assert.match(latestChange('1.4.487').items.join('\n'), /Taps/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.486'), '1.4.486 changelog row')
 assert.match(latestChange('1.4.486').title, /step/i)
 assert.doesNotMatch(
@@ -1677,6 +1691,100 @@ for (const line of hide486[0].split('\n')) {
   if (!line.includes('.defend-page')) continue
   assert.match(line, /\.defend-page\.is-easy-watch\.is-easy-tap/, `1.4.486 the hide stays on an Easy wave (${line.trim()})`)
 }
+
+{
+  assert.deepEqual(
+    EASY_ROUNDS.slice(0, 19).map((round) => ({ ...round })),
+    [
+      { count: 4, speed: 1, hp: 0, spawn: 1, fast: 0, tough: 0 },
+      { count: 4, speed: 1.35, hp: 0, spawn: 0.95, fast: 0, tough: 0 },
+      { count: 5, speed: 1.8, hp: 1, spawn: 0.9, fast: 0, tough: 0 },
+      { count: 5, speed: 2.6, hp: 2, spawn: 0.85, fast: 1, tough: 0 },
+      { count: 7, speed: 6.4, hp: 6, spawn: 0.68, fast: 2, tough: 3 },
+      { count: 7, speed: 6.4, hp: 8, spawn: 0.72, fast: 2, tough: 1 },
+      { count: 9, speed: 6.2, hp: 24, spawn: 0.74, fast: 2, tough: 4 },
+      { count: 6, speed: 5.8, hp: 16, spawn: 0.82, fast: 2, tough: 3 },
+      { count: 9, speed: 6.3, hp: 28, spawn: 0.7, fast: 2, tough: 4 },
+      { count: 9, speed: 6.4, hp: 32, spawn: 0.68, fast: 2, tough: 4 },
+      { count: 12, speed: 6.4, hp: 48, spawn: 0.64, fast: 3, tough: 5 },
+      { count: 8, speed: 6.0, hp: 18, spawn: 0.8, fast: 2, tough: 2 },
+      { count: 12, speed: 6.4, hp: 48, spawn: 0.64, fast: 3, tough: 6 },
+      { count: 12, speed: 6.4, hp: 52, spawn: 0.64, fast: 3, tough: 6 },
+      { count: 12, speed: 6.5, hp: 56, spawn: 0.64, fast: 3, tough: 5 },
+      { count: 8, speed: 6.2, hp: 36, spawn: 0.78, fast: 2, tough: 3 },
+      { count: 13, speed: 6.6, hp: 48, spawn: 0.62, fast: 4, tough: 6 },
+      { count: 14, speed: 6.7, hp: 52, spawn: 0.62, fast: 4, tough: 6 },
+      { count: 15, speed: 6.8, hp: 56, spawn: 0.6, fast: 4, tough: 7 },
+    ],
+    '1.4.487 rounds 1–19 stay byte-for-byte',
+  )
+  assert.equal(easyTapArmored(4, 'plain', false), false, '1.4.487 round 5 plain walkers stay open')
+  assert.equal(easyTapArmored(19, 'plain', false), false, '1.4.487 round 20 plain walkers do not shrug')
+  assert.equal(easyTapArmored(24, 'tough', false), false, '1.4.487 round 25 thick walkers do not shrug')
+  assert.equal(easyFaceGlows({ id: 1, t: 0.2, boss: true }, [{ id: 1, t: 0.2, boss: true }], 24), true, '1.4.487 the round 25 crown still glows')
+  const soakedTap = liveNightDamage(
+    { hp: 40, tapChip: 4, boss: true },
+    { easy: true, manual: true, roundIndex: 24, lampDamage: 8 },
+  )
+  assert.equal(soakedTap.damage, 1, '1.4.487 a fifth tap still cuts the round 25 crown')
+  assert.equal(
+    liveNightDamage({ hp: 40, boss: true }, { easy: true, manual: false, roundIndex: 24, lampDamage: 8 }).damage,
+    0,
+    '1.4.487 a lamp shot does not cut the round 25 crown',
+  )
+  assert.equal(
+    liveNightDamage({ hp: 40 }, { easy: true, manual: false, roundIndex: 22, lampDamage: 8 }).damage,
+    EASY_LATE_LAMP_NICK,
+    '1.4.487 a late walker takes a lamp nick',
+  )
+  assert.equal(
+    liveNightDamage({ hp: 40 }, { easy: true, manual: false, roundIndex: 18, lampDamage: 8 }).damage,
+    8,
+    '1.4.487 round 19 lamps still hit at full strength',
+  )
+  assert.ok(easyLiveSpawnT(6.4) > 0, '1.4.487 rounds 6–10 keep the picture lead')
+  assert.ok(easyLiveSpawnT(1) > 0, '1.4.487 a slow round keeps the picture lead')
+  assert.equal(nightSpawnLine(2, pathPoint(0).x, pathPoint(0).y, 0), 'nw-spawn 2 798 1097 0')
+  const actors487 = readFileSync(new URL('../src/components/DefendNightActors.tsx', import.meta.url), 'utf8')
+  const screen487 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const defend487 = readFileSync(new URL('../src/lib/defend.ts', import.meta.url), 'utf8')
+  assert.match(actors487, /if \(!spawnLog \|\| !easy\) return/, '1.4.487 the spawn log stays off a normal night')
+  assert.match(actors487, /nightSpawnLine\(/, '1.4.487 the first draw writes the spawn line')
+  assert.match(screen487, /spawnLog=\{easy && debugPanel\}/, '1.4.487 the log is playtest or nwDebug')
+  assert.doesNotMatch(defend487, /noteLiveSpawnRound/, '1.4.487 rounds 6–10 do not zero the picture lead')
+  assert.match(
+    screen487,
+    /easy\s*\?\s*easyLiveSpawnT\(tune\.speedScale \* \(boss \? BOSS_PACE : walkerPace\(gait\)\)\)/,
+    '1.4.487 the picture lead call stays',
+  )
+  const before487 = paceEasyHumanCampaign(false)
+  const after487 = paceEasyHumanCampaign(true)
+  assert.equal(paceEasyRoadCampaign('none', 'live').dead, 9, '1.4.487 no upgrades still die on round 9')
+  assert.ok(before487.dead != null && before487.dead >= 17, `1.4.487 a human pace without the late step dies at round ${before487.dead}`)
+  assert.equal(after487.dead, null, '1.4.487 a human pace with the late step reaches round 25')
+  assert.ok(
+    after487.rows.some((row) => row.round >= 20 && row.round <= 25 && row.hearts < 3),
+    '1.4.487 that night drops below three hearts in rounds 20–25',
+  )
+  const lateLamps = after487.lamps
+  const crown487 = paceEasyLive(24, lateLamps, 3, false, HUMAN_TAP_EVERY, 'road')
+  assert.equal(crown487.result, 'clear', '1.4.487 real taps fell the round 25 crown')
+  assert.ok(crown487.bossSec >= 25, `1.4.487 the round 25 crown lasts ${crown487.bossSec.toFixed(1)}s`)
+  assert.equal(crown487.bossLamp, 0, '1.4.487 lamps do not carry the round 25 crown')
+  assert.ok(crown487.bossTap >= 25, `1.4.487 the round 25 crown takes ${crown487.bossTap} tap damage`)
+  let idleHearts = 3
+  let idleDead = null
+  for (let index = 0; index < 25; index += 1) {
+    const round = paceEasyLive(index, lateLamps, idleHearts, false, 1e9, 'road')
+    if (round.result !== 'clear') {
+      idleDead = index + 1
+      break
+    }
+    idleHearts = easyClearHeart(round.hearts)
+  }
+  assert.ok(idleDead != null && idleDead < 25, `1.4.487 an idle late run dies on round ${idleDead}`)
+}
+
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.485'), '1.4.485 changelog row')
 assert.match(latestChange('1.4.485').title, /step/i)
 assert.doesNotMatch(
@@ -6012,8 +6120,9 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(easyBossHp(4), 12, '1.4.421 round 5 boss is thinner')
   assert.equal(easyBossHp(9), 55, '1.4.438 round 10 boss is the first step up from round 5')
   assert.equal(easyBossHp(14), 120, '1.4.438 round 15 boss is thicker than round 10')
-  assert.equal(easyBossHp(19), 180, '1.4.438 round 20 boss is thicker than round 15')
-  assert.equal(easyBossHp(24), 240, '1.4.438 round 25 boss is the showdown')
+  assert.equal(easyBossHp(18), 180, '1.4.487 round 19 boss stays 180')
+  assert.equal(easyBossHp(19), 64, '1.4.487 round 20 boss is a tap bar')
+  assert.equal(easyBossHp(24), 84, '1.4.487 round 25 boss is a tap bar')
   assert.equal(easyLatePush(11), 0, '1.4.421 the late push still starts at round 13')
   assert.equal(easyLatePush(14), 18, '1.4.421 round 15 push stays')
   assert.equal(BOSS_PACE, 0.7, '1.4.421 later bosses keep the same step')
@@ -6125,8 +6234,8 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(easyBossHp(4), 12, '1.4.427 round 5 boss stays 12')
   assert.equal(easyBossHp(9), 55, '1.4.438 round 10 boss is 55')
   assert.equal(easyBossHp(14), 120, '1.4.438 round 15 boss is 120')
-  assert.equal(easyBossHp(19), 180, '1.4.438 round 20 boss is 180')
-  assert.equal(easyBossHp(24), 240, '1.4.438 round 25 boss is 240')
+  assert.equal(easyBossHp(19), 64, '1.4.487 round 20 boss is 64')
+  assert.equal(easyBossHp(24), 84, '1.4.487 round 25 boss is 84')
   const grant426 = screen426.slice(
     screen426.indexOf('const grantBossSparks'),
     screen426.indexOf('const grantBossSparks') + 420,
@@ -6454,7 +6563,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(nightWatchJumpAllowed('?nwRound=15', false), false)
   assert.equal(easyJumpSparkBank(14), 45, '1.4.473 a playtest jump to round 15 banks the natural leftover')
   assert.equal(easyJumpSparkBank(19), 137, '1.4.473 a playtest jump to round 20 banks the natural leftover')
-  assert.equal(easyJumpSparkBank(24), 224, '1.4.473 a playtest jump to round 25 banks the natural leftover')
+  assert.equal(easyJumpSparkBank(24), 272, '1.4.487 a playtest jump to round 25 banks the thicker late pay')
   const lone = { far: 0, strong: 0 }
   for (const index of [14, 24]) {
     const quiet = paceEasyTree(index, [lone], 3, 0, 1, 1, 0, 1, false, false)
@@ -6724,7 +6833,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   const frozenNone = paceEasyRoadCampaign('none', '437')
   const frozenSpend = paceEasyRoadCampaign('natural', '437')
   assert.equal(frozenNone.dead, 10, '1.4.472 the frozen good-seat night dies on round 10')
-  assert.equal(frozenSpend.dead, null, '1.4.438 the frozen good-seat spender clears all 25')
+  assert.equal(frozenSpend.dead, 21, '1.4.487 the frozen good-seat spender dies on the thicker round 21')
   const bare = paceEasyRoadCampaign('none', 'live')
   const spender = paceEasyRoadCampaign('natural', 'live')
   assert.ok(bare.dead >= 8 && bare.dead <= 10, '1.4.438 no upgrades wall at rounds 8 to 10')
@@ -6738,12 +6847,15 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   const showdown = paceEasyRoad(24, CEILING_LAMPS, 3, 'live')
   const short = paceEasyRoad(24, CEILING_LAMPS.map(() => ({ far: 1, strong: 2 })), 3, 'live')
   assert.equal(showdown.boss, 'kill', '1.4.438 the clean build kills the round 25 boss')
-  assert.equal(showdown.bossMax, 240)
+  assert.equal(showdown.bossMax, 84, '1.4.487 the round 25 crown is a tap bar')
+  assert.equal(showdown.bossLamp, 0, '1.4.487 lamps do not cut the round 25 crown')
+  assert.ok(showdown.bossTap >= 25, '1.4.487 the round 25 crown takes a long run of taps')
   assert.ok(showdown.bossLamp + showdown.bossTap <= showdown.bossMax + 8)
-  assert.equal(short.boss, 'leak', '1.4.438 Strong 2 leaks the round 25 boss')
+  assert.equal(short.boss, 'kill', '1.4.487 taps still fell the round 25 crown when the lamps are Strong 2')
   const bosses = [5, 10, 15, 20, 25].map((round) => easyBossHp(round - 1))
-  assert.deepEqual(bosses, [12, 55, 120, 180, 240])
-  for (let i = 1; i < bosses.length; i += 1) assert.ok(bosses[i] > bosses[i - 1])
+  assert.deepEqual(bosses, [12, 55, 120, 64, 84], '1.4.487 rounds 20 and 25 are tap bars')
+  assert.ok(bosses[1] > bosses[0] && bosses[2] > bosses[1], '1.4.487 rounds 5, 10, and 15 still rise')
+  assert.ok(bosses[4] > bosses[3], '1.4.487 round 25 is a longer tap bar than round 20')
   const seats = leadSeatTable()
   assert.equal(seats.length, 4)
   for (const seat of seats) {
@@ -6792,8 +6904,8 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(easyBossHp(4), 12, '1.4.439 round 5 boss health stays')
   assert.equal(easyBossHp(9), 55, '1.4.439 round 10 boss health stays')
   assert.equal(easyBossHp(14), 120, '1.4.439 round 15 boss health stays')
-  assert.equal(easyBossHp(19), 180, '1.4.439 round 20 boss health stays')
-  assert.equal(easyBossHp(24), 240, '1.4.439 round 25 boss health stays')
+  assert.equal(easyBossHp(19), 64, '1.4.487 round 20 boss health is the tap bar')
+  assert.equal(easyBossHp(24), 84, '1.4.487 round 25 boss health is the tap bar')
   const screen439 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
   assert.match(screen439, /className="nw-skill-toast is-mid"/, '1.4.439 Mend is a small note')
   assert.match(screen439, /New skill · \$\{KIT_LABEL\[skillNote\]\}/)
@@ -6879,8 +6991,8 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(buys[18].bought, 4, '1.4.472 the fourth bonus step is already in by round 19')
   assert.deepEqual(
     [5, 10, 15, 20, 25].map((round) => easyBossHp(round - 1)),
-    [12, 55, 120, 180, 240],
-    '1.4.440 boss health stays on the 438 curve',
+    [12, 55, 120, 64, 84],
+    '1.4.487 rounds 20 and 25 leave the old sponge curve',
   )
   const card440 = readFileSync(new URL('../src/components/DefendTowerCard.tsx', import.meta.url), 'utf8')
   const screen440 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
@@ -7564,7 +7676,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(roundMark(24, 25, true), 'Round 25 of 25')
   assert.ok(EASY_ROUNDS.every((round) => round.speed <= EASY_ROUND_SPEED_CAP))
   assert.equal(EASY_ROUNDS[24].speed, EASY_ROUND_SPEED_CAP)
-  for (const index of [7, 11, 15, 19, 23]) {
+  for (const index of [7, 11, 15, 23]) {
     const prev = EASY_ROUNDS[index - 1]
     const rest = EASY_ROUNDS[index]
     assert.ok(
@@ -7572,6 +7684,11 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
       `1.4.472 round ${index + 1} stays a breather`,
     )
     assert.ok(rest.count < prev.count || rest.speed < prev.speed || rest.hp < prev.hp || rest.spawn > prev.spawn)
+  }
+  {
+    const prev = EASY_ROUNDS[18]
+    const rest = EASY_ROUNDS[19]
+    assert.ok(rest.hp > prev.hp && rest.spawn < prev.spawn, '1.4.487 round 20 is thicker than round 19')
   }
   assert.equal(scoreEasyRoad(6, [3, 3, 2], 1), 'clear', '1.4.404 round 7 holds for the build that just left round 6')
   assert.equal(scoreEasyRoad(9, [2, 2], 1), 'lost', '1.4.412 round 10 leaks on two Level II lamps')
@@ -7584,9 +7701,9 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(scoreEasyRoad(14, [3, 3, 3, 2], 1), 'lost', '1.4.472 round 15 leaks with three Level III and one Level II')
   assert.equal(scoreEasyRoad(14, [3, 3, 3, 3], 1), 'lost', '1.4.472 round 15 leaks with four Level III lamps')
   assert.equal(scoreEasyRoad(19, [2, 2, 2, 2], 1), 'lost', '1.4.404 round 20 still leaks on four Level II lamps')
-  assert.equal(scoreEasyRoad(19, [3, 3, 3], 1), 'clear', '1.4.404 round 20 is a breather for three Level III lamps')
-  assert.equal(scoreEasyRoad(19, [3, 3, 3, 2], 1), 'clear', '1.4.404 round 20 holds with three Level III and one Level II')
-  assert.equal(scoreEasyRoad(19, [3, 3, 3, 3], 1), 'clear', '1.4.404 round 20 holds with four Level III lamps')
+  assert.equal(scoreEasyRoad(19, [3, 3, 3], 1), 'lost', '1.4.487 round 20 leaks on three Level III lamps')
+  assert.equal(scoreEasyRoad(19, [3, 3, 3, 2], 1), 'lost', '1.4.487 round 20 leaks with three Level III and one Level II')
+  assert.equal(scoreEasyRoad(19, [3, 3, 3, 3], 1), 'lost', '1.4.487 round 20 leaks with four Level III lamps')
   assert.equal(scoreEasyRoad(24, [2, 2, 2, 2], 1), 'lost', '1.4.404 round 25 leaks on four Level II lamps')
   assert.equal(scoreEasyRoad(24, [3, 3, 3], 1), 'lost', '1.4.404 round 25 leaks without the fourth lamp')
   assert.equal(scoreEasyRoad(24, [3, 3, 3, 2], 1), 'lost', '1.4.404 round 25 leaks if one lamp is still Level II')
@@ -7681,9 +7798,9 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(scoreEasyTree(9, [strong(2), strong(2), strong(2)], 1), 'lost', '1.4.412 round 10 leaks on three Strong step 2 lamps')
   assert.equal(scoreEasyTree(14, [strong(2), strong(2), strong(2), strong(2)], 1), 'lost', '1.4.405 round 15 leaks if every lamp stopped at step 2')
   assert.equal(scoreEasyTree(14, [strong(3), strong(3), strong(3)], 1), 'clear', '1.4.405 round 15 holds on three Strong step 3 lamps')
-  assert.equal(scoreEasyTree(24, [strong(3), strong(3), strong(3)], 1), 'clear', '1.4.430 three Strong step 3 lamps hold the old round 25 score')
+  assert.equal(scoreEasyTree(24, [strong(3), strong(3), strong(3)], 1), 'lost', '1.4.487 three Strong step 3 lamps leak the late round 25')
   assert.equal(scoreEasyTree(24, [strong(3), strong(3), strong(3), strong(3)], 1), 'clear', '1.4.405 round 25 holds on four Strong step 3 lamps')
-  assert.equal(scoreEasyTree(24, [far(3), far(3), far(3)], 1), 'clear', '1.4.430 three Far step 3 lamps hold the old round 25 score')
+  assert.equal(scoreEasyTree(24, [far(3), far(3), far(3)], 1), 'lost', '1.4.487 three Far step 3 lamps leak the late round 25')
   assert.equal(scoreEasyTree(24, [far(3), far(3), far(3), far(3)], 1), 'clear', '1.4.405 round 25 holds on four Far step 3 lamps')
   const spent = spendTreeNight(EASY_ROUNDS.map((round) => round.count), EASY_LAMP_COST)
   assert.equal(spent.doneAt, 14, '1.4.472 a count-pay spender finishes on round 14')
@@ -7951,9 +8068,9 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     /phase === 'plant' \|\| boosting \|\| phase === 'wave'/,
     '1.4.465 Upgrade sits on every planted lamp before Begin',
   )
-  assert.equal(easyBossSpawnId(EASY_ROUNDS[24].count, 24), 15, '1.4.473 round 25 crowns the last walker')
+  assert.equal(easyBossSpawnId(EASY_ROUNDS[24].count, 24), 18, '1.4.487 round 25 crowns the last walker')
   assert.equal(waveCombat(24, true).size, EASY_ROUNDS[24].count + 1, '1.4.465 round 25 keeps a slot for the boss')
-  assert.equal(easyBossHp(24), 240, '1.4.465 round 25 boss health stays 240')
+  assert.equal(easyBossHp(24), 84, '1.4.487 round 25 boss health is the tap bar')
   assert.equal(easyBossSpawnId(EASY_ROUNDS[4].count, 4), 7, '1.4.465 round 5 still crowns the extra walker')
   assert.match(screen465, /easyBossSpawnId\(round\.count, wave\)/, '1.4.465 the live spawn uses that id')
   assert.match(screen465, /wave > 5 && live\.current\.spawned === easyBossSpawnId/, '1.4.465 the round 25 boss is not stuck behind the cap')
@@ -8466,10 +8583,10 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(EASY_ROUNDS[11].count, 8, '1.4.473 round 12 sends eight walkers')
   assert.equal(EASY_ROUNDS[11].fast, 2, '1.4.473 round 12 has two fast walkers')
   assert.equal(EASY_ROUNDS[11].tough, 2, '1.4.473 round 12 has two thick walkers')
-  for (let index = 15; index < EASY_ROUNDS.length; index += 1) {
+  for (let index = 15; index < 19; index += 1) {
     const round = EASY_ROUNDS[index]
     const n = index + 1
-    const breather = n === 16 || n === 20 || n === 24
+    const breather = n === 16
     if (breather) {
       assert.ok(round.count >= 7 && round.count <= 9, `1.4.473 round ${n} stays a short breather`)
     } else {
@@ -8478,6 +8595,13 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
       assert.ok(round.tough >= 5 && round.tough <= 7, `1.4.473 round ${n} mixes thick walkers`)
       assert.ok(round.spawn >= 0.6 && round.spawn <= 0.64, `1.4.473 round ${n} spawn stays in the busy band`)
     }
+  }
+  for (let index = 19; index < EASY_ROUNDS.length; index += 1) {
+    const round = EASY_ROUNDS[index]
+    const n = index + 1
+    assert.ok(round.count >= 14, `1.4.487 round ${n} sends a thick wave`)
+    assert.ok(round.tough >= 8, `1.4.487 round ${n} is mostly thick walkers`)
+    assert.ok(round.spawn <= 0.5, `1.4.487 round ${n} keeps a short gap`)
   }
   assert.ok(EASY_ROUNDS.every((round) => round.speed <= EASY_ROUND_SPEED_CAP), '1.4.473 every round stays under the speed cap')
   const hardPack = [4, 4, 5, 5, 8]
@@ -9083,8 +9207,9 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(easyBossHp(4), 12, '1.4.421 round 5 boss is the thinner teaching bar')
   assert.equal(easyBossHp(9), 55)
   assert.equal(easyBossHp(14), 120, '1.4.438 round 15 boss is above round 10')
-  assert.equal(easyBossHp(19), 180, '1.4.438 round 20 boss is above round 15')
-  assert.equal(easyBossHp(24), 240)
+  assert.equal(easyBossHp(18), 180, '1.4.487 round 19 stays above round 15')
+  assert.equal(easyBossHp(19), 64, '1.4.487 round 20 is the tap bar')
+  assert.equal(easyBossHp(24), 84, '1.4.487 round 25 is the longer tap bar')
   assert.equal(easyLatePush(11), 0, '1.4.417 the push starts at round 13')
   assert.equal(easyLatePush(12), 12)
   assert.equal(easyLatePush(13), 12)
@@ -9100,7 +9225,12 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(screen417, /const boss = easy && id === easyBossSpawnId\(round\.count, wave\)/)
   assert.match(screen417, /setPowerBanner\('Boss!'\)/)
   assert.match(screen417, /setTimeout\(\(\) => setPowerBanner\(null\), 1800\)/)
-  assert.match(screen417, /item\.boss \? BOSS_PACE : walkerPace/)
+  assert.match(screen417, /item\.boss \? easyBossPace\(waveIndexRef\.current\) : walkerPace/)
+  assert.equal(BOSS_PACE, 0.7, '1.4.487 earlier bosses keep the 0.7 step')
+  assert.equal(easyBossPace(14), BOSS_PACE, '1.4.487 round 15 keeps the old boss step')
+  assert.ok(SHOWDOWN_PACE < BOSS_PACE, '1.4.487 the showdown step is slower')
+  assert.equal(easyBossPace(19), SHOWDOWN_PACE, '1.4.487 round 20 uses the showdown step')
+  assert.equal(easyBossPace(24), SHOWDOWN_PACE, '1.4.487 round 25 uses the showdown step')
   assert.match(screen417, /powerBanner === 'Boss!' \? ' is-boss'/)
   assert.match(actors417, /data-boss=\{raider\.boss \? 'yes' : undefined\}/)
   assert.match(actors417, /className="defend-boss-mantle"/)
@@ -9169,7 +9299,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
     [22, 3, 3],
     [23, 3, 3],
     [24, 3, 3],
-    [25, 3, 3],
+    [25, 3, 1],
   ]
   assert.ok(
     spend417.every((run) => run.dead == null && run.rows[4].taps >= 10 && run.rows[4].taps <= 20),

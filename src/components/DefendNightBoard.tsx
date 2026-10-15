@@ -54,7 +54,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
     groundHints = [],
     upgradePoint, boardBox, runSparks = 0, levelBurst = null, onPullLamp, pullSparks = 0, onCloseUpgrade,
     onUpgradePath, onArmPathBuy, onBuyBright, showBright = false, runPaths, roundIndex = -1, armorFrom = 7,
-    heldLessons, playtestSteps = false, onOpenLessons,
+    heldLessons, playtestSteps = false, onOpenLessons, spawnLog = false,
     plateFill = false, onPlacePointer,
     map, roadD, porchCandy, roadLabel, mapFeatures, pops,
   } = props
@@ -227,6 +227,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
           roundIndex={roundIndex}
           armorFrom={armorFrom}
           lampRise={lampRise}
+          spawnLog={spawnLog}
         />
       </DefendNightSky>
       {showCard ? (

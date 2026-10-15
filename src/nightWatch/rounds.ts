@@ -7,7 +7,9 @@
  * on a 375×667 phone is still readable and tappable. Late rounds lean on
  * count and HP. `hp` is added to the kind's HP.
  * `spawn` multiplies the gap before the next walker. Below 1 comes sooner.
- * Rounds 8, 12, 16, 20, and 24 are breathers: a little easier than the round before.
+ * Rounds 8, 12, 16, and 24 are breathers: a little easier than the round before.
+ * Rounds 20–25 are the late push: more walkers, more thick ones, a shorter gap.
+ * Round 20 is not a breather.
  * 1.4.408 softens rounds 7–12 so a lamp-heavy spender can hold them.
  * 1.4.410 raises round 5 to the round-6 walk pace and brings the next walker
  * a little sooner. HP and the walker count stay put. R1–R4 stay put.
@@ -51,12 +53,12 @@ export const EASY_ROUNDS: readonly EasyRound[] = [
   { count: 13, speed: 6.6, hp: 48, spawn: 0.62, fast: 4, tough: 6 },
   { count: 14, speed: 6.7, hp: 52, spawn: 0.62, fast: 4, tough: 6 },
   { count: 15, speed: 6.8, hp: 56, spawn: 0.60, fast: 4, tough: 7 },
-  { count: 8, speed: 6.4, hp: 42, spawn: 0.76, fast: 2, tough: 3 },
-  { count: 13, speed: 6.6, hp: 50, spawn: 0.62, fast: 3, tough: 6 },
-  { count: 14, speed: 6.7, hp: 54, spawn: 0.62, fast: 4, tough: 6 },
-  { count: 15, speed: 6.8, hp: 58, spawn: 0.60, fast: 4, tough: 7 },
-  { count: 9, speed: 6.4, hp: 44, spawn: 0.74, fast: 2, tough: 3 },
-  { count: 15, speed: 6.8, hp: 60, spawn: 0.62, fast: 4, tough: 7 },
+  { count: 14, speed: 6.6, hp: 70, spawn: 0.5, fast: 4, tough: 8 },
+  { count: 18, speed: 6.8, hp: 84, spawn: 0.46, fast: 5, tough: 10 },
+  { count: 18, speed: 6.8, hp: 88, spawn: 0.44, fast: 5, tough: 10 },
+  { count: 18, speed: 6.8, hp: 92, spawn: 0.42, fast: 5, tough: 11 },
+  { count: 16, speed: 6.7, hp: 80, spawn: 0.48, fast: 4, tough: 9 },
+  { count: 18, speed: 6.8, hp: 96, spawn: 0.44, fast: 5, tough: 11 },
 ]
 
 export function easyRound(index: number): EasyRound {

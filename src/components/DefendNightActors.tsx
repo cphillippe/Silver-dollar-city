@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   EASY_CROWN_HIT_R,
   EASY_FACE_HIT_R,
   EASY_WALKER_FACE_PX,
   easyFaceGlows,
   easyTapSoaked,
+  nightSpawnLine,
   EASY_WALKER_HIT_PX,
   PATH_WALKER_FACE_DY,
   PATH_WALKER_FACE_U,
@@ -109,6 +110,8 @@ export interface DefendNightActorsProps {
   armorFrom?: number
   /** Lamp that just spent a spark. Brief ring only — peel 4 owns the burst. */
   upFlashId?: CityPlotId | null
+  /** playtest=1 or nwDebug. Logs each walker's first draw. A normal night stays quiet. */
+  spawnLog?: boolean
   /** Soft marks on ground that can take the picked lamp. */
   groundHints?: readonly { x: number; y: number }[]
   /**
@@ -190,9 +193,21 @@ export function DefendNightActorsSvg({
   roundIndex = -1,
   armorFrom = 7,
   lampRise = {},
+  spawnLog = false,
 }: Omit<DefendNightActorsProps, 'tapPos' | 'fireBest' | 'tapJuice' | 'easy' | 'onBoostTower'> & {
   easy: boolean
 }) {
+  const spawnSeen = useRef(new Set<string>())
+  useEffect(() => {
+    if (!spawnLog || !easy) return
+    for (const raider of raiders) {
+      const key = `${roundIndex}:${raider.id}`
+      if (spawnSeen.current.has(key)) continue
+      spawnSeen.current.add(key)
+      const at = raiderAt(raider)
+      console.info(nightSpawnLine(raider.id, at.x, at.y, raider.t))
+    }
+  }, [spawnLog, easy, raiders, roundIndex, raiderAt])
   const ghostBox = nightTowers.lampImageBox()
   const candlePlants: Record<string, string> = {}
   for (const id of planted) {

@@ -8,6 +8,7 @@ import {
   easyLiveSpawnT,
   easyRoundHeartCap,
   easyTapArmored,
+  EASY_LATE_LAMP_NICK,
 } from '../lib/defend.ts'
 import { applyIncenseTap } from './incense.ts'
 import { nightSeedPlan, nightSeedShotWait, nightSeedSpawnScale } from './seed.ts'
@@ -28,6 +29,8 @@ import {
 import { FREE_LAMP_RANGE_BONUS, lampReach } from './towers/index.ts'
 import {
   BOSS_PACE,
+  easyBossPace,
+  easyShowdownBoss,
   easyBossClearSparks,
   easyClearSparkBonus,
   easyBossHp,
@@ -206,6 +209,8 @@ export interface PaceLive {
   dealt: number
   /** Little berries released when a kill popped. */
   minis: number
+  /** Seconds the boss was on the road. 0 when the round has no boss. */
+  bossSec: number
 }
 
 interface LiveRules {
@@ -457,6 +462,8 @@ export function paceEasyLive(
   let minis = 0
   let graceUntil = 0
   let lostRound = 0
+  let bossSeen = -1
+  let bossGone = -1
   const bossBox: { fate: PaceLive['boss'] } = { fate: bossRound ? 'up' : 'none' }
   let sparkFloat = 0
   const dt = 1 / 60
@@ -491,6 +498,7 @@ export function paceEasyLive(
     sparks: Math.floor(sparkFloat),
     dealt,
     minis,
+    bossSec: bossSeen >= 0 && bossGone >= bossSeen ? bossGone - bossSeen : 0,
   })
   if (hearts <= 0) return finish('lost')
   while (time < 180) {
@@ -508,6 +516,7 @@ export function paceEasyLive(
         if (raider.boss) {
           bossBox.fate = 'leak'
           bossThrough = true
+          if (bossGone < 0) bossGone = time
         } else leaked += 1
       }
     }
@@ -547,11 +556,12 @@ export function paceEasyLive(
           : scaledWalkerHp(rules.walker(2, bonus, gait, roundIndex, tune), hpMul)
       if (boss) bossMax = hp
       const lane = roads ? roads[pathPick(spawned, roads.map((item) => item.share))] : undefined
+      if (boss) bossSeen = time
       raiders.push({
         t: easyLiveSpawnT(round.speed * (boss ? BOSS_PACE : walkerPace(gait))),
         hp,
         dead: false,
-        pace: boss ? BOSS_PACE : walkerPace(gait),
+        pace: boss ? (mode === 'road' && !frozen && !map ? easyBossPace(roundIndex) : BOSS_PACE) : walkerPace(gait),
         gait,
         boss,
         chip: 0,
@@ -566,7 +576,10 @@ export function paceEasyLive(
       raider.dead = true
       sparkFloat += raider.spark * sparkMul
       if (byLamp) spawnNow = true
-      if (raider.boss) bossBox.fate = 'kill'
+      if (raider.boss) {
+        bossBox.fate = 'kill'
+        if (bossGone < 0) bossGone = time
+      }
       const split = splitFeature(features)
       const born = minisOnKill(split, roundIndex, raider.gait, raider.boss, raider.mini)
       if (!split || born < 1) return
@@ -623,7 +636,12 @@ export function paceEasyLive(
         if (raider.boss) return 0
         return lamp.walkerBonus
       }
-      apply(best, lamp.strike.damage * (1 + rowExtra(best)), true)
+      const lampHit = (raider: { boss: boolean } | null, amount: number) => {
+        if (!(mode === 'road' && !frozen && !map) || roundIndex < 19 || roundIndex > 24) return amount
+        if (raider && easyShowdownBoss(roundIndex) && raider.boss) return 0
+        return Math.min(amount, EASY_LATE_LAMP_NICK)
+      }
+      apply(best, lampHit(best, lamp.strike.damage * (1 + rowExtra(best))), true)
       if (lamp.strike.splash > 0) {
         let pick: (typeof raiders)[number] | null = null
         let pickD = lamp.range * lamp.strike.splashFrac
@@ -636,7 +654,7 @@ export function paceEasyLive(
             pickD = distance
           }
         }
-        apply(pick, lamp.strike.splash * (1 + (pick ? rowExtra(pick) : 0)), true)
+        apply(pick, lampHit(pick, lamp.strike.splash * (1 + (pick ? rowExtra(pick) : 0))), true)
       }
       if (lamp.strike.outer > 0) {
         let pick: (typeof raiders)[number] | null = null
@@ -650,7 +668,7 @@ export function paceEasyLive(
             pickD = distance
           }
         }
-        apply(pick, lamp.strike.outer * (1 + (pick ? rowExtra(pick) : 0)), true)
+        apply(pick, lampHit(pick, lamp.strike.outer * (1 + (pick ? rowExtra(pick) : 0))), true)
       }
     }
     if (tapAt >= tapEvery && live().length > 0) {
@@ -658,8 +676,11 @@ export function paceEasyLive(
       const walking = live().sort((a, b) => b.t - a.t)
       const leadBoss = (raider: { boss: boolean }) =>
         mode === 'road' && !map && !frozen && easyLeadBossShrug(roundIndex, raider.boss, tune.armorFrom)
+      const showdownOpen = (raider: { boss: boolean }) =>
+        mode === 'road' && !frozen && !map && raider.boss && easyShowdownBoss(roundIndex)
       const openTap = (raider: (typeof walking)[number]) => {
         if (features.length && faceInFog(pathPoint(raider.t, raider.road), features)) return false
+        if (showdownOpen(raider)) return true
         const armored =
           easyTapArmored(roundIndex, raider.gait, raider.boss, tune.armorFrom) || leadBoss(raider)
         return !armored || raider.chip < 4
@@ -676,7 +697,9 @@ export function paceEasyLive(
         const dmg = easyGlowTapDamage(
           cue.hp,
           cue.chip,
-          easyTapArmored(roundIndex, cue.gait, cue.boss, tune.armorFrom) || leadBoss(cue),
+          showdownOpen(cue)
+            ? false
+            : easyTapArmored(roundIndex, cue.gait, cue.boss, tune.armorFrom) || leadBoss(cue),
           mode === 'road' && !map && roundIndex === 4 && cue.gait === 'tough' && (tune.armorFrom ?? 7) >= 7,
         )
         const hit = dmg > 0 && tapBonus > 0 ? applyIncenseTap(dmg, tapBonus) : dmg
@@ -695,6 +718,7 @@ export function paceEasyLive(
     }
     time += dt
   }
+  if (bossSeen >= 0 && bossGone < 0) bossGone = time
   return finish('timeout')
 }
 
@@ -989,7 +1013,7 @@ export interface HumanNight {
  * After the round 15 clear the bank buys Strong 5, then Far 2, on each lamp.
  * `late` false is the 1.4.483 night, where that step did not exist.
  */
-export function paceEasyHumanCampaign(late = true): HumanNight {
+export function paceEasyHumanCampaign(late = true, tapEvery = HUMAN_TAP_EVERY): HumanNight {
   const plan = lockInBuyTable()
   let hearts = 3
   let spent = 0
@@ -1034,7 +1058,7 @@ export function paceEasyHumanCampaign(late = true): HumanNight {
         break
       }
     }
-    const round = paceEasyLive(index, lamps, hearts, false, HUMAN_TAP_EVERY, 'road')
+    const round = paceEasyLive(index, lamps, hearts, false, tapEvery, 'road')
     rows.push({ round: index + 1, result: round.result, hearts: round.hearts, sparks })
     if (round.result !== 'clear') return finish(index + 1, round.sparks)
     hearts = easyClearHeart(round.hearts)
