@@ -25,6 +25,7 @@ html,body{margin:0;height:100%;overflow:hidden;font-family:var(--sans);color:var
 #back{position:absolute;bottom:118px;left:50%;transform:translateX(-50%);padding:12px 22px;border-radius:999px;border:1.5px solid var(--line);background:rgba(42,13,88,.85);color:var(--gold);font-weight:700;font-size:17px;display:none}
 #back.pulse{animation:pu 1s infinite;background:linear-gradient(180deg,#fff6b8,#ffcc33 46%,#ff9f1a);color:#2a1c08}@keyframes hint{50%{box-shadow:0 0 0 6px #fff6e8,0 0 30px 10px rgba(255,204,51,.9)}}.b.hint{animation:hint .9s infinite}
 @keyframes pu{50%{transform:translateX(-50%) scale(1.08)}}
+#toast.bad{background:rgba(176,28,64,.95);border-color:#ffc2d0;color:#fff6e8;font-size:19px}.pill.lose{animation:lose .9s}@keyframes lose{0%,60%{background:#e03058;transform:scale(1.15)}}
 #flash{position:absolute;inset:0;background:var(--cedar);opacity:0;pointer-events:none}
 #danger{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .4s;background:radial-gradient(ellipse at 50% 50%,transparent 45%,rgba(255,90,122,.8) 100%)}
 .card{position:absolute;left:16px;right:16px;top:16%;padding:20px 18px 22px;text-align:center;display:none;border-radius:22px;border:2px solid rgba(255,204,51,.7);
@@ -115,16 +116,23 @@ function hit(why){if(S.inv>0||S.paused||Q.has('god'))return;S.hearts--;S.hitsTak
  S.robbers.forEach(r=>{if(Math.abs(r.x-S.x)+Math.abs(r.y-S.y)<2){r.x=r.sx;r.y=r.sy;r.px=r.x+.5;r.py=r.y+.5;r.gone=3;}});
  if(S.hearts<=0){S.paused=true;S.tw=null;$('cFail').style.display='block';updBtns();return;}
  if(why!=='Wait for green!')bump();}
-function checkHit(){for(const r of S.robbers)if(!r.gone&&r.x===S.x&&r.y===S.y){
+function checkHit(src){for(const r of S.robbers)if(!r.gone&&r.x===S.x&&r.y===S.y){
+ if(src!=='robber'||!r.moved){ // you walked into a robber: Easy = gentle bump, nothing lost
+  if(S.inv>0)return;S.inv=.8;toast('Tap the robber first!');snd(160,.12,'square',.05);bump();return;}
  const front=r.ox===S.x+DX[S.dir]&&r.oy===S.y+DY[S.dir];
- if(!front&&S.inv<=0){S.inv=1.2;r.x=r.sx;r.y=r.sy;r.px=r.x+.5;r.py=r.y+.5;r.gone=r.amb?1e9:4;if(S.gems>0){S.gems--;updHUD();}toast('A robber grabbed a gem!');snd(200,.2,'sawtooth',.06);return;}
+ if(!front){if(S.inv>0)return;S.inv=1.2;r.x=r.sx;r.y=r.sy;r.px=r.x+.5;r.py=r.y+.5;r.gone=r.amb?1e9:4;
+  const had=S.gems>0;if(had){S.gems--;updHUD();}stealFx(had);return;}
  return hit('Robber! −1 ❤️');}}
+function stealFx(had){const t=$('toast');t.classList.add('bad');toast(had?'🥷 A robber grabbed a gem!  −1 💎':'🥷 A robber sneaked up!');setTimeout(()=>t.classList.remove('bad'),1300);
+ const gp=$('gems').parentElement;gp.classList.remove('lose');void gp.offsetWidth;gp.classList.add('lose');
+ $('flash').style.transition='none';$('flash').style.opacity=.3;requestAnimationFrame(()=>{$('flash').style.transition='opacity .45s';$('flash').style.opacity=0;});
+ snd(200,.25,'sawtooth',.07);if(navigator.vibrate)navigator.vibrate(80);}
 function toast(m){const t=$('toast');t.textContent=m;t.style.opacity=1;clearTimeout(t._h);t._h=setTimeout(()=>t.style.opacity=0,1100);}
 function bfs(from){const dist={},q=[from];dist[from.x+','+from.y]=0;while(q.length){const c=q.shift();for(let d=0;d<4;d++){const nx=c.x+DX[d],ny=c.y+DY[d],k=nx+','+ny;const ch=open(nx,ny)?MAP[ny][nx]:'#';if(ch!=='#'&&!'PLH'.includes(ch)&&!(k in dist)){dist[k]=dist[c.x+','+c.y]+1;q.push({x:nx,y:ny});}}}return dist;}
-function robberTick(){const dist=bfs({x:S.x,y:S.y});for(const r of S.robbers){if(r.gone)continue;if(r.hold>0)continue;
+function robberTick(){S.robbers.forEach(r=>r.moved=0);const dist=bfs({x:S.x,y:S.y});for(const r of S.robbers){if(r.gone)continue;if(r.hold>0)continue;
  const cur=dist[r.x+','+r.y];if(cur===undefined||cur>3)continue;
  let best=null;for(let d=0;d<4;d++){const nx=r.x+DX[d],ny=r.y+DY[d],k=nx+','+ny;if(k in dist&&dist[k]<cur&&trapAt(nx,ny)<0&&!S.robbers.some(o=>o!==r&&!o.gone&&o.x===nx&&o.y===ny))best={x:nx,y:ny};}
- if(best){r.ox=r.x;r.oy=r.y;r.x=best.x;r.y=best.y;}}checkHit();}
+ if(best){r.ox=r.x;r.oy=r.y;r.x=best.x;r.y=best.y;r.moved=1;}}checkHit('robber');}
 function nearest(){const dist=bfs({x:S.x,y:S.y});let m=99;S.robbers.forEach(r=>{if(!r.gone){const v=dist[r.x+','+r.y];if(v!==undefined)m=Math.min(m,v);}});return m;}
 function wallCol(u,v,side,dist,s,cx,cy){const B=SECC[s];const L=Math.min(1,1.8/(dist+.4))*(side?.85:1);
  if(v<.08){const st=((u*6)|0)%2;return st?[B[0]*L,B[1]*L,B[2]*L]:[255*L,246*L,232*L];}
