@@ -128,9 +128,9 @@ async function setPaused(page, paused) {
   if ((await button.count()) > 0) await button.click()
 }
 
-async function waitCue(page, inside, ms, act = false) {
+async function waitCue(page, inside, ms) {
   return page.evaluate(
-    ({ wantInside, ms: limit, act: shouldClick }) =>
+    ({ wantInside, ms: limit }) =>
       new Promise((resolve) => {
         const started = performance.now()
         const look = () => {
@@ -161,9 +161,6 @@ async function waitCue(page, inside, ms, act = false) {
               const node = document.elementFromPoint(x, y)
               const top = node?.closest?.('[data-walker-tap]')?.getAttribute('data-walker-tap') ?? ''
               if (top !== id) continue
-              if (shouldClick) node.closest('[data-walker-tap]')?.dispatchEvent(
-                new MouseEvent('click', { bubbles: true, cancelable: true, clientX: x, clientY: y }),
-              )
               return { x, y, id, inCloud, top }
             }
           }
@@ -176,7 +173,9 @@ async function waitCue(page, inside, ms, act = false) {
               (button.textContent ?? '').includes('Pause walkers'),
             )
             pause?.click()
-            resolve(found)
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => resolve(look() ?? found))
+            })
             return
           }
           if (performance.now() - started > limit) {
@@ -187,7 +186,7 @@ async function waitCue(page, inside, ms, act = false) {
         }
         tick()
       }),
-    { wantInside: inside, ms, act },
+    { wantInside: inside, ms },
   )
 }
 
@@ -454,9 +453,10 @@ async function checkTaps(browser, port, errors) {
 
   await page.getByRole('button', { name: 'Resume walkers' }).click()
   const beforeCloud = await tapTotals(page)
-  const inside = await waitCue(page, true, 18_000, true)
+  const inside = await waitCue(page, true, 18_000)
   assert.ok(inside?.top, '1.4.480 the cloud tap lands on the walker')
   assert.equal(inside.top, inside.id, '1.4.480 elementFromPoint in the cloud is the walker')
+  await page.mouse.click(inside.x, inside.y)
   await page.waitForTimeout(200)
   const afterCloud = await tapTotals(page)
   assert.equal(afterCloud.hits, beforeCloud.hits + 1, '1.4.480 a tap in the incense cloud hits')
@@ -465,9 +465,10 @@ async function checkTaps(browser, port, errors) {
 
   await page.getByRole('button', { name: 'Resume walkers' }).click()
   const beforeOut = await tapTotals(page)
-  const outside = await waitCue(page, false, 18_000, true)
+  const outside = await waitCue(page, false, 18_000)
   assert.ok(outside?.top, '1.4.480 a tap outside the cloud lands on the walker')
   assert.equal(outside.top, outside.id, '1.4.480 elementFromPoint outside the cloud is the walker')
+  await page.mouse.click(outside.x, outside.y)
   await page.waitForTimeout(200)
   const afterOut = await tapTotals(page)
   assert.equal(afterOut.hits, beforeOut.hits + 1, '1.4.480 a tap outside the incense cloud hits')
