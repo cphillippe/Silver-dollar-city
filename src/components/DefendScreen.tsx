@@ -666,7 +666,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     const onDown = (event: PointerEvent) => {
       const target = event.target as Element | null
       if (!target?.closest) return
-      if (target.closest('.defend-go, .defend-ability')) return
+      if (target.closest('.defend-go, .defend-ability, .defend-new-lamp')) return
       if (!target.closest('.nw-docks')) return
       if (!plantOpenGroundRef.current(event.clientX, event.clientY)) return
       event.preventDefault()
@@ -1200,6 +1200,12 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     } else if (candle) {
       if (phase !== 'wave' && phase !== 'boost' && phase !== 'plant') return
       if (!candleRoom(plantsRef.current)) {
+        clearPlaceArm()
+        return
+      }
+    } else if (cross) {
+      if (phase !== 'wave' && phase !== 'boost' && phase !== 'plant') return
+      if (!crossRoom(plantsRef.current)) {
         clearPlaceArm()
         return
       }

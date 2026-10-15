@@ -1763,6 +1763,11 @@ assert.equal(crossUnlocked(false, 20, 'boost'), false, '1.4.490 Hard never offer
 assert.equal(applyCrossWait(700, 1), 700, '1.4.490 a lamp outside the cross keeps its wait')
 assert.equal(applyCrossWait(700, 0.9), 630, '1.4.490 a lamp beside the planted cross waits ten percent less')
 assert.equal(crossPaceFor({}, undefined, { x: 0, y: 0 }), 1, '1.4.490 no cross leaves the wait alone')
+assert.match(
+  readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8'),
+  /closest\('\.defend-go, \.defend-ability, \.defend-new-lamp'\)/,
+  '1.4.490 a plant-phase lamp buy is not a ground tap',
+)
 {
   const early490 = []
   let hearts = 3
