@@ -251,6 +251,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
           levelBurst={levelBurst}
           roadNote={roadNote}
           easy={easy}
+          midWave={phase === 'wave'}
           reserveBottom={easy && boosting ? CLEAR_BAR_RESERVE : 0}
           gate={lessonGate}
           onOpenLessons={onOpenLessons}

@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.486',
+    title: 'The next step',
+    when: '2026-10-15',
+    items: [
+      'During a wave, a lamp shows the steps you already bought and the next one you can buy.',
+      'The Lock In reminder comes back when the wave is over.',
+    ],
+  },
+  {
     version: '1.4.485',
     title: 'One more step',
     when: '2026-10-15',
