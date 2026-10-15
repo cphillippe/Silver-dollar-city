@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.493',
+    title: 'A slower lead boss',
+    when: '2026-10-15',
+    items: [
+      'On Easy, the round 10 boss walks more slowly once it is on the road.',
+      'Its health stays the same, and it still shrugs after a few taps.',
+      'Other rounds, and Hard, keep their old step.',
+    ],
+  },
+  {
     version: '1.4.492',
     title: 'Lamps meet the road',
     when: '2026-10-15',

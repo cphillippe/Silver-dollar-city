@@ -244,6 +244,21 @@ export function easyBossPace(index: number): number {
   return easyShowdownBoss(index) ? SHOWDOWN_PACE : BOSS_PACE
 }
 
+/**
+ * Easy round 10 boss while it is on the road (1.4.493).
+ * Spawn still uses `BOSS_PACE`, so the picture lead stays put.
+ * Hard and every other round stay on `easyBossPace`.
+ * This is the smallest thousandth that lets the live Strong 1 layout
+ * fell that boss before it leaves. A night with no taps still loses a heart.
+ */
+export const EASY_R10_ROAD_MUL = 0.043
+
+/** Walk pace for an Easy boss already on the road. */
+export function easyLeadBossRoadPace(index: number): number {
+  if (Math.floor(index) + 1 === 10) return BOSS_PACE * EASY_R10_ROAD_MUL
+  return easyBossPace(index)
+}
+
 /** Easy rounds 5, 10, 15, 20, and 25. Hard does not read this. */
 export function easyBossRound(index: number): boolean {
   const round = Math.floor(index) + 1
