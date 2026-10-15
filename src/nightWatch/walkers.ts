@@ -161,6 +161,32 @@ export function easyJumpSparkBank(roundIndex: number): number {
 }
 
 /**
+ * Playtest `nwLamps`. Keeps the first lamps the jump would plant.
+ * A missing cap returns the load unchanged, sparks included.
+ * Round tables do not call this.
+ */
+export function capJumpPlants(load: EasyJumpLoad, cap: number | null): EasyJumpLoad {
+  if (cap == null || cap >= load.lamps.length) return load
+  const plants: Record<string, string> = {}
+  const kept = Object.entries(load.plants).slice(0, Math.max(0, cap))
+  const tools = new Set<string>()
+  for (const [pad, tool] of kept) {
+    plants[pad] = tool
+    tools.add(tool)
+  }
+  const paths: Record<string, LampPaths> = {}
+  for (const [tool, path] of Object.entries(load.paths)) {
+    paths[tool] = tools.has(tool) ? { far: path.far, strong: path.strong } : { far: 0, strong: 0 }
+  }
+  return {
+    sparks: load.sparks,
+    plants,
+    paths,
+    lamps: load.lamps.slice(0, Math.max(0, cap)).map((lamp) => ({ far: lamp.far, strong: lamp.strong })),
+  }
+}
+
+/**
  * Spread the specials through the round so they are not one clump at the gate.
  * Tough is placed first. Fast fills plain slots after that.
  */

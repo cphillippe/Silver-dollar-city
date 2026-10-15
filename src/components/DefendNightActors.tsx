@@ -36,6 +36,7 @@ import { CITY_PLOTS, type CityPlotId } from '../lib/city'
 import { TOWER_TYPE_SRC } from '../lib/towerTypeArt'
 import { EASY } from '../lib/easy'
 import {
+  lampIconBox,
   nightEnemies,
   nightTowers,
   SHOT_JUICE_MS,
@@ -266,6 +267,7 @@ export function DefendNightActorsSvg({
                 const firing = flash.includes(id)
                 const pose = nightTowers.lampPose(hot || firing)
                 const lampBox = nightTowers.lampImageBox()
+                const icon = lampIconBox(incense ? 'incense' : bell ? 'bell' : candle ? 'candle' : 'tower')
                 const boostPad = boosting && on
                 const scenery = easyTap && !boostPad
                 const upgrading = on && upgradeAt === id
@@ -348,19 +350,20 @@ export function DefendNightActorsSvg({
                       <rect
                         className="defend-hit"
                         data-lamp-wave-hit="yes"
-                        x={candle ? -14 : -42}
-                        y={candle ? -44 : -96}
-                        width={candle ? 28 : 84}
-                        height={candle ? 52 : 128}
+                        data-incense-hit={incense ? 'icon' : undefined}
+                        x={icon.x}
+                        y={icon.y}
+                        width={icon.w}
+                        height={icon.h}
                       />
                     ) : scenery ? null : on ? (
                       <rect
                         className="defend-hit"
                         data-candle-hit={candle ? 'yes' : undefined}
-                        x={candle ? -14 : -42}
-                        y={candle ? -44 : -96}
-                        width={candle ? 28 : 84}
-                        height={candle ? 52 : 128}
+                        x={icon.x}
+                        y={icon.y}
+                        width={icon.w}
+                        height={icon.h}
                       />
                     ) : (
                       <circle className="defend-hit" r="52" />
@@ -452,6 +455,7 @@ export function DefendNightActorsSvg({
                         {phase === 'wave' ? (
                           <circle
                             className={`defend-range${incense ? ' is-incense-cloud' : bell ? ' is-bell-pulse' : firing ? ' is-firing' : ''}`}
+                            data-incense-cloud={incense ? 'yes' : undefined}
                             r={bell || incense ? reach : nightTowers.range(id, using, progress, runTier, reachBonus)}
                             pointerEvents="none"
                             style={
