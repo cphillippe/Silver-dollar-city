@@ -1,6 +1,6 @@
 import {
   DEFEND_WAVE_SIZE,
-  EASY_WAVE_LIVE,
+  easyCrowdCap,
   easyHoldSpawn,
   easySpawnT,
   easyTapFit,
@@ -82,7 +82,7 @@ export const nightEnemies: NightEnemiesModule = {
     (easy ? NIGHT_DARK_FACE : (KIND_FACES[id as WalkerKind] ?? NIGHT_DARK_FACE)),
   cast: raidForWave,
   spawnT: easySpawnT,
-  holdSpawn: (liveUnturned) => easyHoldSpawn(liveUnturned, boundNightWave()?.liveCap ?? EASY_WAVE_LIVE),
+  holdSpawn: (liveUnturned) => easyHoldSpawn(liveUnturned, boundNightWave()?.liveCap ?? easyCrowdCap()),
   spawnEvery: waveSpawnEvery,
   speed: waveSpeed,
   heavenSpeed,

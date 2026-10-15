@@ -356,8 +356,29 @@ export function nightLength(easy: boolean): number {
 }
 /** Waves 1–4 stay under the old six. Wave 5 is the denser upgrade gate. */
 export const DEFEND_WAVE_PACK = [4, 4, 5, 5, 8] as const
-/** Easy soft TD: cap live unturned walkers before spawning the next. */
+/** Easy soft TD: cap live unturned walkers before spawning the next. Rounds 1–6 stay here. */
 export const EASY_WAVE_LIVE = 3
+
+/** Round the live night is spawning. 0 keeps the rounds 1–6 cap. */
+let easyCrowdRound = 0
+
+/** The tick sets this before `holdSpawn`, so a late night can field more than three. */
+export function noteEasyCrowdRound(roundIndex: number): void {
+  const index = Math.floor(roundIndex)
+  easyCrowdRound = Number.isFinite(index) ? Math.max(0, index) : 0
+}
+
+/**
+ * How many unturned walkers A2 may keep on the road.
+ * Rounds 1–6 stay at `EASY_WAVE_LIVE`. From round 7 the road holds six, and from round 11 it holds eight.
+ * A maze map's own `liveCap` still wins when one is bound.
+ */
+export function easyCrowdCap(roundIndex = easyCrowdRound): number {
+  const index = Math.floor(roundIndex)
+  if (!Number.isFinite(index) || index < 6) return EASY_WAVE_LIVE
+  if (index < 10) return 6
+  return 8
+}
 
 export { DEFEND_ANCHOR, DEFEND_PATH, pathClearance, pathPoint } from '../nightWatch/path/data.ts'
 

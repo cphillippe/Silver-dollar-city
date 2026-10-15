@@ -200,7 +200,9 @@ export async function checkIncenseLamps() {
           const fy = box.y + box.height / 2
           if (Math.hypot(x - fx, y - fy) > radius * 0.85) continue
           const node = document.elementFromPoint(x, y)
-          if (node?.closest?.('[data-walker-id]') !== walker) continue
+          const hit = node?.closest?.('[data-walker-id]')
+          if (!hit) continue
+          if (hit !== walker && hit.getAttribute('data-walker-id') !== walker.getAttribute('data-walker-id')) continue
           const before = {
             hits: Number(readout.getAttribute('data-tap-hits') ?? '0'),
             misses: Number(readout.getAttribute('data-tap-misses') ?? '0'),

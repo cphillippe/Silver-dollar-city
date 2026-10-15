@@ -8,6 +8,18 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.482',
+    title: 'Taps land',
+    when: '2026-10-15',
+    items: [
+      'A tap on a walker still lands after Incense is planted. Inside the cloud it hurts a little more.',
+      'A walker in front of a lamp takes the tap. The lamp icon still opens when the walker is not on it.',
+      'Before the night starts, the map list sits on top. Each locked map says why.',
+      'Later rounds keep more walkers on the road, including fast ones.',
+      'Picking a lamp on the clear bar keeps Spend in place. The Candle button stays tappable.',
+    ],
+  },
+  {
     version: '1.4.481',
     title: 'Snap on the line',
     when: '2026-10-15',
