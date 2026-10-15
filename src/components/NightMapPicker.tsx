@@ -1,4 +1,4 @@
-import { NIGHT_MAP_IDS, NIGHT_MAP_NAME, type NightMapId } from '../nightWatch/maps/chain'
+import { mapLockReason, NIGHT_MAP_IDS, NIGHT_MAP_NAME, type NightMapId } from '../nightWatch/maps/chain'
 
 interface NightMapPickerProps {
   mapId: NightMapId
@@ -16,15 +16,16 @@ function Lock() {
   )
 }
 
-/** Every Easy map, on the plant step. Locked maps wait for a round 10 boss. */
+/** Every Easy map, before the night starts. Locked maps name the one before them. */
 export function NightMapPicker({ mapId, isOpen, onPick }: NightMapPickerProps) {
   return (
     <div className="nw-map-pick" role="group" aria-label="Night map" data-map-pick="yes">
-      <p className="nw-map-rule">Beat round 10 to unlock</p>
+      <p className="nw-map-rule">Choose a map</p>
       <div className="nw-map-pick-scroll">
         {NIGHT_MAP_IDS.map((id) => {
           const open = isOpen(id)
           const name = NIGHT_MAP_NAME[id]
+          const reason = open ? null : mapLockReason(id)
           return (
             <button
               key={id}
@@ -33,14 +34,21 @@ export function NightMapPicker({ mapId, isOpen, onPick }: NightMapPickerProps) {
               data-map={id}
               data-map-locked={open ? 'no' : 'yes'}
               aria-pressed={mapId === id}
-              aria-label={open ? name : `${name}, locked`}
+              aria-label={reason ? `${name}. ${reason}` : name}
               disabled={!open}
               onClick={() => {
                 if (open) onPick(id)
               }}
             >
               <span className="nw-map-name">{name}</span>
-              {open ? null : <Lock />}
+              {reason ? (
+                <>
+                  <Lock />
+                  <span className="nw-map-reason" data-map-reason="yes">
+                    {reason}
+                  </span>
+                </>
+              ) : null}
             </button>
           )
         })}

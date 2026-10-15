@@ -2,7 +2,7 @@ import type { CityPlotId } from '../lib/city'
 import { clampGhostHintLeft, lampRoadNote, ROAD_COVER_WORD } from '../lib/lampPlace'
 import { CLEAR_BAR_RESERVE } from '../lib/towerCardPlace'
 import { WATCH_ABILITY_LABEL } from '../lib/defend'
-import { boardFill, boardFillPoint, boardPoint as mapBoardPoint, boardView, nightTowers } from '../nightWatch'
+import { boardFill, boardFillPoint, boardPoint as mapBoardPoint, boardView, lampIconBox, nightTowers } from '../nightWatch'
 import type { DefendNightSkyProps } from './DefendNightSky'
 import { DefendNightSky } from './DefendNightSky'
 import { DefendTowerCard, type TowerCardPoint } from './DefendTowerCard'
@@ -212,19 +212,30 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
         ? planted.map((id) => {
             const at = place(boardBox, nightTowers.anchor(id))
             const type = towerType[id]
-            const label = WATCH_ABILITY_LABEL[type ?? ''] ?? 'lamp'
+            const label = isIncense(type) ? INCENSE_LABEL : isBell(type) ? 'Bell' : isCandle(type) ? 'Candle' : (WATCH_ABILITY_LABEL[type ?? ''] ?? 'lamp')
+            const icon = lampIconBox(isIncense(type) ? 'incense' : isBell(type) ? 'bell' : isCandle(type) ? 'candle' : 'tower')
+            const scale = cameraScale > 0 ? cameraScale : 1
             return (
               <button
                 key={`clear-lamp-${id}`}
                 type="button"
                 className="defend-clear-lamp"
                 data-clear-lamp={id}
+                data-lamp-icon="yes"
+                data-incense-icon={isIncense(type) ? 'yes' : undefined}
                 data-tower-type={type}
                 aria-label={`Upgrade ${label}`}
-                style={{ left: at.left, top: at.top }}
+                style={{
+                  left: at.left + icon.x * scale,
+                  top: at.top + icon.y * scale,
+                  width: icon.w * scale,
+                  height: icon.h * scale,
+                  transform: 'none',
+                }}
                 onPointerDown={(event) => event.stopPropagation()}
                 onClick={(event) => {
                   event.stopPropagation()
+                  if (phase === 'wave' && isIncense(type)) return
                   onOpenUpgrade?.(id)
                 }}
               />

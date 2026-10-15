@@ -15,8 +15,8 @@ const RAIL = 72
 const MARGIN = 8
 const GAP = 28
 
-/** SVG hit rect on a planted lamp, in viewBox units. Matches DefendNightActors. */
-const LAMP_HIT = { x: 42, up: 96, down: 32 }
+/** SVG hit rect on a planted lamp, in viewBox units. Matches lampIconBox('tower'). */
+const LAMP_HIT = { x: 38, up: 64, down: 12 }
 /** Bottom band of the card: the Upgrade button. */
 const SPEND_H = 64
 /** Top-right trash control. */
