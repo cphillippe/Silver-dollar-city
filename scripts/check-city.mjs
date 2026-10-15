@@ -8114,7 +8114,24 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(css477, /\.defend-range \{[^}]*pointer-events:\s*none/)
   assert.match(css477, /\.defend-range\.is-incense-cloud \{[^}]*pointer-events:\s*none/)
   assert.match(actors477, /data-incense-cloud=\{incense \? 'yes' : undefined\}/)
-  assert.match(actors477, /if \(incense\) onOpenUpgrade\?\.\(id\)/, '1.4.478 the incense icon opens its card')
+  assert.doesNotMatch(
+    actors477.slice(actors477.indexOf('scenery && on'), actors477.indexOf('scenery && on') + 280),
+    /onOpenUpgrade/,
+    '1.4.478 a wave tap on incense does not open the card',
+  )
+  assert.match(actors477, /if \(phase === 'plant'\)/, '1.4.478 incense opens while planting')
+  assert.match(actors477, /if \(phase === 'boost' && on\)/, '1.4.478 incense opens in the shop')
+  assert.match(
+    board477,
+    /if \(phase === 'wave' && isIncense\(type\)\) return/,
+    '1.4.478 the incense icon stays shut during a wave',
+  )
+  const workflow478 = readFileSync(new URL('../.github/workflows/city-scans.yml', import.meta.url), 'utf8')
+  const runner478 = readFileSync(new URL('./run-checks.mjs', import.meta.url), 'utf8')
+  assert.match(workflow478, /check-phone-fixes\.mjs/, '1.4.478 CI runs the phone tap scan')
+  assert.match(workflow478, /check-incense-lamps\.mjs/, '1.4.478 CI runs the incense tap scan')
+  assert.match(runner478, /check-phone-fixes\.mjs/, '1.4.478 npm test runs the phone tap scan')
+  assert.match(runner478, /check-incense-lamps\.mjs/, '1.4.478 npm test runs the incense tap scan')
   assert.match(
     css477,
     /\.defend-page\.is-easy-tap \.defend-clear-lamp\[data-incense-icon='yes'\] \{[^}]*pointer-events:\s*none/,
@@ -16357,8 +16374,6 @@ assert.match(
 )
 await import('./check-seed-fire.mjs').then((mod) => mod.checkSeedFire())
 await import('./check-night-jump.mjs').then((mod) => mod.checkNightJump())
-await import('./check-phone-fixes.mjs').then((mod) => mod.checkPhoneFixes())
-await import('./check-incense-lamps.mjs').then((mod) => mod.checkIncenseLamps())
 await import('./check-story-win.mjs').then((mod) => mod.checkStoryWins())
 await import('./check-easy-face.mjs').then((mod) => mod.checkEasyFace())
 const snapHoldScan = readFileSync(new URL('./check-story-snap.mjs', import.meta.url), 'utf8')

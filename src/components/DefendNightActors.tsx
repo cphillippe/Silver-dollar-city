@@ -327,7 +327,6 @@ export function DefendNightActorsSvg({
                       scenery && on
                         ? (event) => {
                             event.stopPropagation()
-                            if (incense) onOpenUpgrade?.(id)
                           }
                         : scenery
                           ? undefined
