@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.484',
+    title: 'Snap waits',
+    when: '2026-10-15',
+    items: [
+      'Story Snap is put away for now. The lamp lesson still opens as Match.',
+      'Home does not show a Snap button. The next step is still there.',
+      'The street link on Hard stays. Nothing blank is left where Snap was.',
+    ],
+  },
+  {
     version: '1.4.483',
     title: 'Map list up front',
     when: '2026-10-15',

@@ -2,6 +2,12 @@
 
 export const STORY_SNAP_LINE = 'daily-lantern'
 
+/**
+ * Parked. While this is false, players never enter Story Snap.
+ * The play code stays. Flip this to true to bring the lantern timing play back.
+ */
+export const STORY_SNAP_ON = false
+
 /** Locked Easy Hold claim — do not rewrite. */
 export const STORY_SNAP_CLAIM = 'A lamp is meant to be seen.'
 

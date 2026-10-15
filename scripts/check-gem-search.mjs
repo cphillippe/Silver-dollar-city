@@ -47,6 +47,7 @@ import {
   storyFromPanels,
   storyPanelsFor,
 } from '../src/lib/storyPanels.ts'
+import { STORY_SNAP_ON } from '../src/lib/storySnap.ts'
 import { lessonStory, storyPlayFor } from '../src/lib/storyPlay.ts'
 import { isSourceDigLine } from '../src/lib/sourceDig.ts'
 import { readAppCss } from './readAppCss.mjs'
@@ -663,7 +664,7 @@ for (const id of EASY_LINE_ORDER) {
         ? 'road-maze'
         : id === 'wb-creed'
           ? 'claim-merge'
-          : id === 'daily-lantern'
+          : id === 'daily-lantern' && STORY_SNAP_ON
             ? 'story-snap'
             : isSourceDigLine(id)
               ? 'source-dig'
