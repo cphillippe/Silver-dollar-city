@@ -152,6 +152,7 @@ html[data-easy='on'] .play.is-story-snap button.snap-pad:active {
   place-items: center;
   pointer-events: none;
   z-index: 5;
+  transform: none;
 }
 
 .play.is-story-snap .win-stamp {
@@ -193,10 +194,24 @@ html[data-easy='on'] .play.is-story-snap button.snap-pad:active {
   color: #ffe7a3;
 }
 
+.play.is-story-snap .snap-result-win {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  color: #ffe08a;
+  text-shadow: 0 2px 0 #5a3a00;
+  background: none;
+  border: 0;
+  animation: none;
+  text-transform: none;
+}
+
 .play.is-story-snap .snap-result-score {
   margin: 0;
   font-size: 1.4rem;
   font-weight: 800;
+  letter-spacing: 0.12em;
 }
 
 .play.is-story-snap .snap-ghost {
@@ -211,7 +226,7 @@ html[data-easy='on'] .play.is-story-snap button.snap-pad:active {
 }
 
 .play.is-story-snap .snap-ghost.is-tap {
-  animation: snap-ghost-tap 0.7s ease-in-out infinite;
+  animation: snap-ghost-tap 1.15s ease-in-out infinite;
 }
 
 .play.is-story-snap .snap-ghost.is-still {

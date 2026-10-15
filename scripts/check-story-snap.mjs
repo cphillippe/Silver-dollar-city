@@ -7,8 +7,12 @@ import { localDateKey } from '../src/lib/dates.ts'
 import { EASY } from '../src/lib/easy.ts'
 import { EASY_LINE_ORDER, easyMatchLine, progressAfterMatchTaught } from '../src/easyTrail/trail/loop.ts'
 import {
+  BEAT_TRAVEL_MS,
+  DEMO_HOLD_MS,
+  EASY_SNAP_MS,
   GATE_AT,
   SNAP_SCORE,
+  SNAP_WINDOW,
   SNAPS_TO_OPEN,
   STORY_SNAP_AGAIN,
   STORY_SNAP_BEATS,
@@ -17,13 +21,20 @@ import {
   STORY_SNAP_WIN,
   allBeatsLocked,
   applyDemoSnap,
+  beatPastGate,
   beatProgress,
   demoCountsLocked,
+  demoTravelMs,
+  easySnapStars,
+  flyPastIsMiss,
   inSnapWindow,
   lockedAfterMiss,
+  missOnFlyPast,
   missPointsLost,
   missToast,
   nextBeatIndex,
+  snapWindowFraction,
+  travelMs,
 } from '../src/lib/storySnap.ts'
 import { lessonStory, storyPlayFor } from '../src/lib/storyPlay.ts'
 
@@ -42,6 +53,25 @@ assert.equal(beatProgress(0, 2200), 0)
 assert.equal(beatProgress(2200, 2200), 1)
 assert.equal(inSnapWindow(0.5), true)
 assert.equal(inSnapWindow(0), false)
+assert.equal(snapWindowFraction(BEAT_TRAVEL_MS, false), SNAP_WINDOW)
+const easyWindow = snapWindowFraction(BEAT_TRAVEL_MS, true)
+assert.ok(Math.abs(easyWindow * BEAT_TRAVEL_MS - EASY_SNAP_MS) < 1, 'Easy snap window is about 0.6s')
+assert.ok(easyWindow > SNAP_WINDOW, 'Easy window is wider than Hard')
+assert.equal(inSnapWindow(0.5, easyWindow), true)
+assert.equal(beatPastGate(GATE_AT + easyWindow / 2 + 0.01, easyWindow), true)
+assert.equal(beatPastGate(0.5, easyWindow), false)
+assert.equal(missOnFlyPast(false), false, 'Easy fly-past with no tap is not a miss')
+assert.equal(missOnFlyPast(true), true, 'a tap outside the window is a miss')
+assert.equal(flyPastIsMiss(false, true), false, 'Easy ignores an untapped fly-past')
+assert.equal(flyPastIsMiss(false, false), true, 'Hard still counts an untapped fly-past as a miss')
+assert.equal(flyPastIsMiss(true, false), true, 'Hard still counts a tapped fly-past as a miss')
+assert.equal(flyPastIsMiss(true, true), true, 'Easy still counts a tap outside the window as a miss')
+assert.equal(easySnapStars(0), '☆☆☆')
+assert.equal(easySnapStars(1), '★☆☆')
+assert.equal(easySnapStars(3), '★★★')
+assert.equal(/\d/.test(easySnapStars(3)), false, 'Easy stars have no digit')
+assert.ok(demoTravelMs(false) > travelMs(false), 'the demo crosses slower than a player beat')
+assert.ok(DEMO_HOLD_MS >= 600, 'the demo rests under the gate long enough to read')
 assert.equal(nextBeatIndex([]), 0)
 assert.equal(nextBeatIndex(['lamp']), 1)
 assert.equal(allBeatsLocked(['lamp', 'hill', 'seen']), true)
@@ -87,6 +117,12 @@ const playSrc = readFileSync(
 )
 assert.match(playSrc, /is-story-snap/)
 assert.match(playSrc, /STORY OPEN/)
+assert.match(
+  playSrc,
+  /recycleBeat\(flyPastIsMiss\(tappedRef\.current, easyRef\.current\)\)/,
+  'the fly-past miss is gated on Easy',
+)
+assert.doesNotMatch(playSrc, /recycleBeat\(missOnFlyPast\(/)
 
 const wire = readFileSync(new URL('../src/lib/storyPlay.ts', import.meta.url), 'utf8')
 assert.match(wire, /STORY_SNAP_LINE/)
@@ -153,7 +189,7 @@ function readCard() {
   const text = (el) => (el ? el.textContent.replace(/\s+/g, ' ').trim() : '')
   return {
     hold: card?.getAttribute('data-snap-hold') ?? '',
-    stamp: text(card?.querySelector('.win-stamp')),
+    stamp: text(card?.querySelector('.snap-result-win')),
     beats: [...document.querySelectorAll('.snap-result-beats li')].map((el) => el.textContent.trim()),
     claim: text(card?.querySelector('.snap-claim')),
     score: text(card?.querySelector('.snap-result-score')),
@@ -178,12 +214,15 @@ async function snapOnce(page) {
       const pad = document.querySelector('.snap-pad')
       let frames = 0
       let clicks = 0
+      let started = false
       let last = ''
       function poke() {
         frames += 1
         const label = (pad?.textContent || '').replace(/\s+/g, ' ').trim()
         last = label
-        if (label.includes('SNAP!')) {
+        const arm = label.includes('Tap to start') && !started
+        if (arm) started = true
+        if (arm || label.includes('SNAP!')) {
           clicks += 1
           pad.dispatchEvent(
             new PointerEvent('pointerdown', {
@@ -224,7 +263,7 @@ export async function checkSnapHold() {
   const save = {
     kind: 'silver-city-save',
     schemaVersion: 1,
-    appVersion: '1.4.477',
+    appVersion: '1.4.479',
     savedAt: `${today}T12:00:00.000Z`,
     progress: {
       started: true,
@@ -246,7 +285,7 @@ export async function checkSnapHold() {
   await server.listen()
   const address = server.httpServer?.address()
   const port = address && typeof address === 'object' ? address.port : 0
-  assert.ok(port > 0, '1.4.477 story-snap server has a port')
+  assert.ok(port > 0, '1.4.479 story-snap server has a port')
   const browser = await launchBrowser()
   try {
     for (const [width, height, reduceMotion] of SIZES) {
@@ -299,7 +338,8 @@ export async function checkSnapHold() {
         }
         await page.waitForTimeout(30)
       }
-      assert.equal(seen.score, '0', `${where} demo beat gives 0 points`)
+      assert.equal(seen.score, easySnapStars(1), `${where} demo beat gives stars, not a number`)
+      assert.equal(/\d/.test(seen.score), false, `${where} in-play score has no digit`)
       if (reduceMotion) {
         assert.equal(seen.still, true, `${where} static hand hint`)
         assert.equal(seen.tap, false, `${where} static hand does not tap`)
@@ -307,6 +347,23 @@ export async function checkSnapHold() {
         assert.equal(seen.tap, true, `${where} ghost hand taps`)
       }
       assert.equal(await page.locator('.snap-chip.is-locked').count(), 1, `${where} demo counts as locked`)
+      await page.locator('.snap-pad', { hasText: 'Tap to start' }).waitFor()
+      const waiting = await page.evaluate(() => ({
+        toast: document.querySelector('.match-toast')?.textContent || '',
+        locked: document.querySelectorAll('.snap-chip.is-locked').length,
+        pad: (document.querySelector('.snap-pad')?.textContent || '').replace(/\s+/g, ' ').trim(),
+      }))
+      assert.doesNotMatch(waiting.toast, /Miss/, `${where} demo does not miss`)
+      assert.match(waiting.pad, /Tap to start/, `${where} first beat waits`)
+      await page.waitForTimeout(1800)
+      const stillWaiting = await page.evaluate(() => ({
+        toast: document.querySelector('.match-toast')?.textContent || '',
+        locked: document.querySelectorAll('.snap-chip.is-locked').length,
+        pad: (document.querySelector('.snap-pad')?.textContent || '').replace(/\s+/g, ' ').trim(),
+      }))
+      assert.doesNotMatch(stillWaiting.toast, /Miss/, `${where} no tap is not a miss`)
+      assert.equal(stillWaiting.locked, 1, `${where} the next beat does not fly on its own`)
+      assert.match(stillWaiting.pad, /Tap to start/, `${where} pad still waits for the first tap`)
       await snapOnce(page)
       await snapOnce(page)
       await page.locator('.snap-result').waitFor()
@@ -315,7 +372,19 @@ export async function checkSnapHold() {
       assert.equal(first.stamp, STORY_SNAP_WIN, `${where} shows STORY OPEN`)
       assert.deepEqual(first.beats, ['Lamp', 'Hill', 'Seen'], `${where} shows the three snaps`)
       assert.equal(first.claim, STORY_SNAP_CLAIM, `${where} shows the claim`)
-      assert.equal(first.score, '150', `${where} final score counts the demo as 0`)
+      assert.equal(first.score, easySnapStars(SNAPS_TO_OPEN), `${where} win shows stars, not 150`)
+      assert.equal(/\d/.test(first.score), false, `${where} win score has no digit`)
+      assert.equal(
+        await page.getByRole('button', { name: EASY.holdNext }).count(),
+        1,
+        `${where} one Lock In next`,
+      )
+      assert.equal(await page.locator('.snap-pad').count(), 0, `${where} the snap pad is gone on the win`)
+      assert.equal(
+        await page.locator('.snap-stage .win-stamp').count(),
+        0,
+        `${where} no stamp sits in the lane`,
+      )
       assert.equal(first.win, true, `${where} stays on the win`)
       assert.ok(first.docX <= 1, `${where} has no horizontal scroll`)
       for (let sample = 0; sample < 10; sample += 1) {
@@ -326,6 +395,16 @@ export async function checkSnapHold() {
         assert.equal(next.claim, first.claim, `${where} claim stays`)
         assert.equal(next.score, first.score, `${where} score stays`)
         assert.equal(next.hold, 'open', `${where} win card stays at least 5s`)
+        assert.equal(
+          await page.getByRole('button', { name: EASY.holdNext }).count(),
+          1,
+          `${where} Lock In next stays one button`,
+        )
+        assert.equal(
+          await page.locator('.snap-stage .win-stamp').count(),
+          0,
+          `${where} the lane stays clear`,
+        )
         assert.ok(next.docX <= 1, `${where} has no horizontal scroll`)
       }
       if (width === 375) {
