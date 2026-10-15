@@ -52,6 +52,8 @@ import {
   dist,
   unlockedWatchAbilities,
   easyTapMode,
+  easyCrowdCap,
+  noteEasyCrowdRound,
   EASY_MISS_HOLD_MS,
   faceTapStrike,
   PATH_WALKER_FACE_DY,
@@ -918,6 +920,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       const spawnRound = shaped ?? roundForTune(easyRound(wave), wave, tuneRef.current)
       const bossWaiting =
         easy && wave > 5 && live.current.spawned === easyBossSpawnId(spawnRound.count, wave)
+      if (easy) noteEasyCrowdRound(wave)
       const holdSpawn = easy && nightEnemies.holdSpawn(unturnedLive) && !bossWaiting
       if (
         !frozen &&
@@ -936,7 +939,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
         while (
           packLeft > 0 &&
           live.current.spawned < liveTune.size &&
-          (walking.filter((item) => !item.turned).length < (spec?.liveCap ?? 3) ||
+          (walking.filter((item) => !item.turned).length <
+            (spec?.liveCap ?? (easy ? easyCrowdCap(wave) : 3)) ||
             (easy && wave > 5 && live.current.spawned === easyBossSpawnId(spawnRound.count, wave)))
         ) {
         packLeft -= 1
@@ -2056,8 +2060,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     let inRange: CityPlotId | null = null
     let inRangeD = Infinity
     for (const id of live.current.planted) {
+      const using = towerAbility(id)
+      if (isBell(using) || isIncense(using)) continue
       const at = nightTowers.anchor(id)
-      const range = hitRange(id, towerAbility(id))
+      const range = hitRange(id, using)
       const d = dist(at, point)
       if (d < nearestD) {
         nearestD = d
@@ -2070,22 +2076,53 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     }
     if (faceTapStrike(easy, true, inRange !== null) === 'hit') {
       const lamp = easy ? nearest : inRange
-      const damage =
-        easy && lamp
-          ? liveNightDamage(raider, {
-              easy: true,
-              manual: true,
-              roundIndex: waveIndexRef.current,
-              lampDamage: 0,
-              armorFrom: tuneRef.current.armorFrom,
-              tapBonus: incenseBonusFor(plantsRef.current, runPathsRef.current, point),
-            }).damage
-          : 0
+      const sized = easy
+        ? liveNightDamage(raider, {
+            easy: true,
+            manual: true,
+            roundIndex: waveIndexRef.current,
+            lampDamage: 0,
+            armorFrom: tuneRef.current.armorFrom,
+            tapBonus: incenseBonusFor(plantsRef.current, runPathsRef.current, point),
+          })
+        : null
+      const damage = sized?.damage ?? 0
       if (lamp && fire(lamp, raiderId, easy)) {
         if (easy) {
           dismissMiss()
           noteFaceTap(true, damage)
         }
+        return
+      }
+      if (easy && sized && !lamp) {
+        const struck = nightEnemies.hit(raider, sized.damage)
+        const now = performance.now()
+        live.current.raiders = live.current.raiders.map((item) =>
+          item.id !== raider.id
+            ? item
+            : struck.down
+              ? {
+                  ...struck.raider,
+                  tapChip: sized.nextChip,
+                  turned: 'love',
+                  from: point,
+                  heavenT: 0,
+                  struckAt: now,
+                  text: 'Toward heaven',
+                }
+              : { ...struck.raider, tapChip: sized.nextChip, struckAt: now },
+        )
+        if (struck.down) {
+          if (raider.boss) live.current.bossDown = true
+          live.current.downed += 1
+          const sparks = raider.spark ?? walkerSpark(raider.gait)
+          if (waveRef.current) grantSparks(sparks)
+          else setRunSparks((count) => count + sparks)
+          releaseMinis(raider)
+        }
+        dismissMiss()
+        noteFaceTap(true, sized.damage)
+        fxRef.current.dirty = true
         return
       }
     }
@@ -2110,8 +2147,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     let pick: CityPlotId | null = null
     let bestD = Infinity
     for (const id of live.current.planted) {
+      const using = towerAbility(id)
+      if (isBell(using) || isIncense(using)) continue
       const at = nightTowers.anchor(id)
-      const range = hitRange(id, towerAbility(id))
+      const range = hitRange(id, using)
       for (const raider of live.current.raiders) {
         if (raider.turned) continue
         const d = dist(at, raiderAt(raider))
@@ -2687,11 +2726,11 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
 
   // Pale Begin and the plant line follow how many lamps are standing, not ring slots.
   const jumpSearch = typeof window === 'undefined' ? '' : window.location.search
-  const bareLampJump =
+  const playtestBare =
     easy &&
-    readNightWatchRoundJump(nightLength(true)) != null &&
-    nightWatchLampCap(jumpSearch) === 0
-  const awaitingLamp = planted.length < 1 && !bareLampJump
+    nightWatchLampCap(jumpSearch) === 0 &&
+    nightWatchJumpAllowed(jumpSearch, readNightWatchDebug())
+  const awaitingLamp = planted.length < 1 && !playtestBare
 
   const tip =
     phase === 'wave'
@@ -3107,7 +3146,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
 
   return (
     <main
-      className={`defend-page ${taught ? 'is-puzzle' : 'is-teach'} ${arming ? 'is-arming' : ''} ${won ? 'is-win' : ''} ${shake ? 'is-shake' : ''} ${leakFlash ? 'is-leak' : ''} ${firing ? 'is-firing' : ''} ${stillOn ? 'is-still' : ''} ${mendOn ? 'is-mend' : ''} ${mendShield ? 'is-mend-shield' : ''} ${debugFrozen ? 'is-nw-debug-freeze' : ''} ${easy ? 'is-easy-watch' : ''} ${easyTap ? 'is-easy-tap' : ''} ${boosting ? 'is-boost' : ''} ${clearPanelFolded(boosting, placeArm) ? 'is-clear-fold' : ''} ${phase === 'lost' ? 'is-lost' : ''} ${boosting && runSparks < 1 ? 'is-spark-broke' : ''} ${easy && phase === 'plant' && awaitingLamp ? 'is-need-lamp' : ''} ${cardOn ? 'is-card-on' : ''} ${easy && (phase === 'plant' || placeArm) ? 'is-placing' : ''} ${easy && !won && (phase === 'wave' || phase === 'boost') ? 'is-shop' : ''}`}
+      className={`defend-page ${taught ? 'is-puzzle' : 'is-teach'} ${arming ? 'is-arming' : ''} ${won ? 'is-win' : ''} ${shake ? 'is-shake' : ''} ${leakFlash ? 'is-leak' : ''} ${firing ? 'is-firing' : ''} ${stillOn ? 'is-still' : ''} ${mendOn ? 'is-mend' : ''} ${mendShield ? 'is-mend-shield' : ''} ${debugFrozen ? 'is-nw-debug-freeze' : ''} ${easy ? 'is-easy-watch' : ''} ${easyTap ? 'is-easy-tap' : ''} ${boosting ? 'is-boost' : ''} ${clearPanelFolded(boosting, placeArm) ? 'is-clear-fold' : ''} ${phase === 'lost' ? 'is-lost' : ''} ${boosting && runSparks < 1 ? 'is-spark-broke' : ''} ${showMapSheet ? 'is-map-sheet' : ''} ${easy && phase === 'plant' && awaitingLamp ? 'is-need-lamp' : ''} ${cardOn ? 'is-card-on' : ''} ${easy && (phase === 'plant' || placeArm) ? 'is-placing' : ''} ${easy && !won && (phase === 'wave' || phase === 'boost') ? 'is-shop' : ''}`}
       aria-label={WATCH_TITLE}
       data-night-map={mapId}
     >

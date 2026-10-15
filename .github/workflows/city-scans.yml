@@ -34,5 +34,6 @@ jobs:
       - run: node --experimental-strip-types scripts/check-city-scans.mjs
       - run: node --experimental-strip-types scripts/check-phone-fixes.mjs
       - run: node --experimental-strip-types scripts/check-incense-lamps.mjs
+      - run: node --experimental-strip-types scripts/check-live-prove.mjs
       - run: node --experimental-strip-types scripts/check-packs.mjs
       - run: node --experimental-strip-types scripts/check-commerce.mjs

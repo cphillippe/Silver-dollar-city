@@ -179,6 +179,7 @@
 .defend-board {
   display: block;
   position: absolute;
+  z-index: 1;
   inset: 0;
   width: 100%;
   height: 100%;
@@ -2282,7 +2283,7 @@ button.defend-incense-lamp {
 
 .nw-docks {
   position: absolute;
-  z-index: 5;
+  z-index: 12;
   left: 8px;
   bottom: 8px;
   max-width: min(46%, 300px);
@@ -2436,6 +2437,21 @@ button.defend-incense-lamp {
 .defend-page.is-clear-fold .defend-clear-spend,
 .defend-page.is-clear-fold .defend-clear-help {
   display: none;
+}
+
+/* 1.4.480: arming a lamp on the Easy clear bar keeps Spend and the row. */
+.defend-page.is-easy-watch.is-boost.is-clear-fold .nw-docks .defend-boost .defend-boost-status {
+  display: block;
+}
+
+.defend-page.is-easy-watch.is-boost.is-clear-fold .defend-clear-spend,
+.defend-page.is-easy-watch.is-boost.is-clear-fold .defend-clear-help {
+  display: inline-flex;
+}
+
+.defend-page.is-easy-watch.is-boost.is-clear-fold .nw-docks .defend-boost.is-clear-bar {
+  max-width: 100%;
+  width: max-content;
 }
 
 @media (max-width: 480px) {
@@ -2705,6 +2721,19 @@ button.defend-incense-lamp {
 /* 1.4.478: during a wave the incense button lets a walker through. The card stays shut until plant or shop. */
 .defend-page.is-easy-tap .defend-clear-lamp[data-incense-icon='yes'] {
   pointer-events: none;
+}
+
+/* 1.4.480: the face sits above every lamp box, so a walker inside the icon still takes the tap. */
+.defend-walker-tap {
+  position: absolute;
+  z-index: 11;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  pointer-events: auto;
+  touch-action: manipulation;
 }
 
 .defend-clear-lamp {
@@ -4649,9 +4678,13 @@ button.defend-new-lamp[aria-pressed='true'] {
   pointer-events: auto;
 }
 
+.defend-page.is-map-sheet .defend-frame {
+  z-index: 20;
+}
+
 .nw-map-overlay {
   position: absolute;
-  z-index: 7;
+  z-index: 30;
   inset: 0;
   display: flex;
   align-items: center;
