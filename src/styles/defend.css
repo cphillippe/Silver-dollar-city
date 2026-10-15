@@ -603,26 +603,26 @@ img.walker-face.easy-walker-face,
 }
 
 /* 1.4.475: the incense cloud is a warm gold ring. It does not flash like a shot. */
-/* 1.4.478: the cloud is not a tap. A walker in it takes the tap. The card opens from the icon. */
+/* 1.4.478: the cloud is not a tap, and it stays bright on the purple plate. */
 .defend-range.is-incense-cloud {
   pointer-events: none;
-  fill: rgba(255, 204, 51, 0.1);
+  fill: rgba(255, 220, 120, 0.34);
   stroke: #ffcc33;
-  stroke-width: 5;
-  stroke-dasharray: 2 12;
-  filter: drop-shadow(0 0 8px #ffcc33);
+  stroke-width: 8;
+  stroke-dasharray: 14 10;
+  filter: drop-shadow(0 0 6px #fff1a8) drop-shadow(0 0 14px #ffcc33);
   animation: nw-incense-cloud 2.4s ease-in-out infinite;
 }
 
 @keyframes nw-incense-cloud {
   0%,
   100% {
-    stroke-opacity: 0.4;
-    fill: rgba(255, 204, 51, 0.05);
+    stroke-opacity: 0.92;
+    fill: rgba(255, 204, 51, 0.3);
   }
   50% {
     stroke-opacity: 1;
-    fill: rgba(255, 214, 102, 0.18);
+    fill: rgba(255, 244, 190, 0.5);
   }
 }
 

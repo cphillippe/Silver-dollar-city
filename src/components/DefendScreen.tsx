@@ -239,8 +239,7 @@ const LEVEL_BURST_MS = 1100
 /** Playtest `nwLamps=0..2` trims the jump. A missing cap keeps the full load. */
 function jumpedNightLoad(jump: number) {
   const search = typeof window === 'undefined' ? '' : window.location.search
-  const allowed = nightWatchJumpAllowed(search, readNightWatchDebug())
-  return capJumpPlants(easyJumpLoad(jump), nightWatchLampCap(search, allowed))
+  return capJumpPlants(easyJumpLoad(jump), nightWatchLampCap(search))
 }
 
 /** Playtest jump applied on the first paint, so Begin cannot start round 1 under a round 25 label. */
@@ -695,10 +694,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     const bank = easyJumpSparkBank(jump)
     const planted = easyJumpLoad(jump)
     const search = window.location.search
-    const shown = capJumpPlants(
-      planted,
-      nightWatchLampCap(search, nightWatchJumpAllowed(search, readNightWatchDebug())),
-    )
+    const shown = capJumpPlants(planted, nightWatchLampCap(search))
     sparksRef.current = bank
     setRunSparks(bank)
     setWaveIndex(jump)
@@ -2695,7 +2691,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const bareLampJump =
     easy &&
     readNightWatchRoundJump(nightLength(true)) != null &&
-    nightWatchLampCap(jumpSearch, nightWatchJumpAllowed(jumpSearch, readNightWatchDebug())) === 0
+    nightWatchLampCap(jumpSearch) === 0
   const awaitingLamp = planted.length < 1 && !bareLampJump
 
   const tip =
