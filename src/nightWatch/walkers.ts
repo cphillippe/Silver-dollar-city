@@ -228,6 +228,22 @@ export function gaitForSlot(
 /** Boss step. Slower than a plain walker so the big shape stays readable. */
 export const BOSS_PACE = 0.7
 
+/**
+ * Rounds 20 and 25. Slower than `BOSS_PACE` so a tapping player still has
+ * the crown on the road after twenty-five seconds. Earlier bosses stay on
+ * `BOSS_PACE`.
+ */
+export const SHOWDOWN_PACE = 0.26
+
+export function easyShowdownBoss(index: number): boolean {
+  const round = Math.floor(index) + 1
+  return round === 20 || round === 25
+}
+
+export function easyBossPace(index: number): number {
+  return easyShowdownBoss(index) ? SHOWDOWN_PACE : BOSS_PACE
+}
+
 /** Easy rounds 5, 10, 15, 20, and 25. Hard does not read this. */
 export function easyBossRound(index: number): boolean {
   const round = Math.floor(index) + 1
@@ -258,9 +274,11 @@ export function easyBusyTapFloor(index: number): number {
 
 /**
  * Boss health. Round 5 stays the teaching bar (12). Rounds 6–9 stay 44.
- * Round 10 is 55, then 120, 180, and 240. Each boss is thicker than the one
- * before it. Round 25 is the showdown: four Far 1 / Strong 3 lamps on good
- * seats land about 240. Strong 2 leaks.
+ * Round 10 is 55, then 120 through round 15, and 180 through round 19.
+ * Rounds 20 and 25 are shorter bars on purpose. Lamp shots do not cut them.
+ * A glowing tap does, so the fight is the taps and not a taller sponge.
+ * Rounds 21–24 are not boss rounds; the number stays 240 so a stray read
+ * does not invent a new bar.
  * Rounds 6–9 stay 44 so the round 6 snapshot does not move.
  */
 export function easyBossHp(index: number): number {
@@ -269,8 +287,10 @@ export function easyBossHp(index: number): number {
   if (round < 10) return 44
   if (round === 10) return 55
   if (round <= 15) return 120
-  if (round <= 20) return 180
-  return 240
+  if (round < 20) return 180
+  if (round === 20) return 64
+  if (round < 25) return 240
+  return 84
 }
 
 /**

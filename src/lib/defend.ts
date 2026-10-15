@@ -85,6 +85,9 @@ export function applyBossExitLeak(hearts: number): GateLeak {
  */
 export const EASY_GLOW_TAP_DAMAGE = 1
 
+/** Rounds 20–25. A lamp shot nicks at this much. Showdown crowns take none. */
+export const EASY_LATE_LAMP_NICK = 6
+
 /**
  * An armored walker still loses this much to glowing taps, then shrugs.
  * The tap keeps popping. The bar stops moving. Lamps have to finish it.
@@ -156,6 +159,9 @@ export function easyTapSoaked(
   armorFrom = 7,
 ): boolean {
   if (!(roundIndex >= 0)) return false
+  const round = Math.floor(roundIndex) + 1
+  // Rounds 20 and 25 keep taking taps. The four-chip shrug stays on the other late bosses.
+  if (raider.boss && (round === 20 || round === 25)) return false
   const armored =
     easyTapArmored(roundIndex, raider.gait, !!raider.boss, armorFrom) ||
     easyLeadBossShrug(roundIndex, !!raider.boss, armorFrom)
@@ -196,11 +202,19 @@ export function liveNightDamage(
   raider: { hp: number; tapChip?: number; gait?: string; boss?: boolean },
   shot: LiveStrikeShot,
 ): LiveStrikeSize {
+  const round = Math.floor(shot.roundIndex) + 1
+  const showdown = Boolean(raider.boss) && (round === 20 || round === 25)
   const armored =
-    (shot.easy && shot.manual && easyTapArmored(shot.roundIndex, raider.gait, !!raider.boss, shot.armorFrom ?? 7)) ||
-    (shot.easy && shot.manual && easyLeadBossShrug(shot.roundIndex, !!raider.boss, shot.armorFrom ?? 7))
+    !showdown &&
+    ((shot.easy && shot.manual && easyTapArmored(shot.roundIndex, raider.gait, !!raider.boss, shot.armorFrom ?? 7)) ||
+      (shot.easy && shot.manual && easyLeadBossShrug(shot.roundIndex, !!raider.boss, shot.armorFrom ?? 7)))
   const soaked = raider.tapChip ?? 0
-  const lamp = Math.max(0, Math.floor(shot.lampDamage) || 0)
+  let lamp = Math.max(0, Math.floor(shot.lampDamage) || 0)
+  // Rounds 20–25: lamp shots are a nick. Showdown crowns ignore them.
+  // A glowing tap is unchanged, so the late night is the taps.
+  if (shot.easy && !shot.manual && round >= 20 && round <= 25) {
+    lamp = showdown ? 0 : Math.min(lamp, EASY_LATE_LAMP_NICK)
+  }
   const glow = shot.easy && shot.manual ? easyGlowTapDamage(raider.hp, soaked, armored) : lamp
   const openTough =
     glow > 0 &&
@@ -572,14 +586,38 @@ export const EASY_ON_SCREEN_SEC = 5
 const EASY_WALK_T_PER_SEC = 0.01
 
 /**
+ * One spawn reads this, then forgets it. Callers that want the picture lead
+ * leave it unset. Rounds 6–10 set it so those walkers enter at the path start.
+ */
+let liveSpawnRound = -1
+
+export function noteLiveSpawnRound(index: number) {
+  liveSpawnRound = Math.floor(index) || 0
+}
+
+/**
  * Live spawn only. Slow rounds were waiting about a minute at the gate.
  * Start close enough that the face is in the picture within five seconds.
  * Round speed stays the 1.4.424 table. The sim still starts at `easySpawnT`.
+ * Rounds 6–10 were appearing past the path start, up the road beyond the gate.
+ * Those rounds enter at t = 0. Every other round keeps the picture lead.
  */
 export function easyLiveSpawnT(speedScale = 1): number {
+  const round = liveSpawnRound
+  liveSpawnRound = -1
   const speed = Math.max(0.2, Number(speedScale) || 1)
   const lead = EASY_ON_SCREEN_SEC * EASY_WALK_T_PER_SEC * speed
-  return Math.max(0, Math.min(EASY_ON_SCREEN_T, EASY_ON_SCREEN_T - lead))
+  const pictured = Math.max(0, Math.min(EASY_ON_SCREEN_T, EASY_ON_SCREEN_T - lead))
+  if (round >= 5 && round <= 9) return 0
+  return pictured
+}
+
+/** Playtest line: walker id, board x/y, and path progress at first draw. */
+export function nightSpawnLine(id: number, x: number, y: number, t: number): string {
+  const px = Math.round(Number(x) || 0)
+  const py = Math.round(Number(y) || 0)
+  const progress = Math.round((Number(t) || 0) * 1000) / 1000
+  return `nw-spawn ${Math.floor(id) || 0} ${px} ${py} ${progress}`
 }
 
 export function easyTapPersonCount(raiders: { turned?: string }[]): number {

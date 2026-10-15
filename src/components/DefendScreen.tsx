@@ -15,6 +15,7 @@ import { roundMark, easyRound } from '../nightWatch/rounds'
 import { pickWalkerFace, WALKER_FACE_POOL } from '../nightWatch/enemies/faces'
 import {
   BOSS_PACE,
+  easyBossPace,
   easyBossClearSparks,
   easyClearSparkBonus,
   easyBossHp,
@@ -43,6 +44,7 @@ import {
   applyGateLeaks,
   easyClearHeart,
   easyLiveSpawnT,
+  noteLiveSpawnRound,
   easyPointerTapGate,
   r10ShrugCue,
   easyRoundHeartCap,
@@ -832,7 +834,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
           const tier = combatTier(item.turned, runTierRef.current)
           return { ...item, heavenT: (item.heavenT ?? 0) + nightEnemies.heavenSpeed(tier, easy) * (seedPlan ? clockDt : dt) }
         }
-        const gaitPace = item.boss ? BOSS_PACE : walkerPace(easy ? item.gait : undefined)
+        const gaitPace = item.boss ? easyBossPace(waveIndexRef.current) : walkerPace(easy ? item.gait : undefined)
         const paceMul = item.paceScale ?? 1
         let step = nightEnemies.speed(easy) * tune.speedScale * gaitPace * paceMul * (seedPlan ? clockDt : dt)
         let fog = item.fog
@@ -995,6 +997,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
               faceShiftRef.current,
             )
           : undefined
+        if (easy && wave >= 5 && wave <= 9) noteLiveSpawnRound(wave)
         walking.push({
           id,
           t: easy
@@ -3268,6 +3271,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
               upgradeAt={upgradeAt}
               onOpenUpgrade={openUpgrade}
               roundIndex={waveIndex}
+              spawnLog={easy && debugPanel}
               upFlashId={upFlash}
               levelBurst={
                 levelBurst && upgradeAt === levelBurst.plotId
