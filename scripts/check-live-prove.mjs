@@ -973,12 +973,40 @@ async function checkShopTags(browser, port, errors) {
   await setPaused(page, true)
   const shop = await page.evaluate(() => {
     const shown = (node) => (node ? getComputedStyle(node).display : 'missing')
+    const idle = [...document.querySelectorAll('.defend-range:not(.is-firing):not(.is-bell-pulse):not(.is-incense-cloud)')]
+    const paint = (node) => {
+      const style = getComputedStyle(node)
+      return { display: style.display, opacity: style.opacity }
+    }
+    const sample = idle[0]
+    const withClass = (name) => {
+      if (!sample) return { display: 'missing', opacity: '' }
+      sample.classList.add(name)
+      const look = paint(sample)
+      sample.classList.remove(name)
+      return look
+    }
+    const board = document.querySelector('.defend-board')
+    const ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
+    ring.setAttribute('class', 'defend-ghost-ring')
+    ring.setAttribute('r', '48')
+    board?.appendChild(ring)
+    const ghost = paint(ring)
+    ring.remove()
     return {
       candle: shown(document.querySelector('.nw-skill-tray [data-candle-lamp="yes"]')),
       bell: shown(document.querySelector('.nw-skill-tray [data-bell-lamp="yes"]')),
       incense: shown(document.querySelector('.nw-skill-tray [data-incense-lamp="yes"]')),
       label: shown(document.querySelector('.defend-type-label')),
-      ring: shown(document.querySelector('.defend-range:not(.is-firing):not(.is-bell-pulse):not(.is-incense-cloud)')),
+      ring: shown(sample ?? null),
+      range: {
+        count: idle.length,
+        idle: idle.map(paint),
+        firing: withClass('is-firing'),
+        bell: withClass('is-bell-pulse'),
+        incense: withClass('is-incense-cloud'),
+        ghost,
+      },
       tier: shown(document.querySelector('.nw-rail .defend-ability-tier')),
       clearCandle: document.querySelectorAll('.defend-clear-row [data-candle-lamp="yes"]').length,
     }
@@ -988,6 +1016,16 @@ async function checkShopTags(browser, port, errors) {
   assert.equal(shop.incense, 'none', '1.4.488 the wave hides the Incense buy')
   assert.equal(shop.label, 'none', '1.4.488 the wave hides lamp names')
   assert.equal(shop.ring, 'none', '1.4.488 the wave hides dotted reach rings')
+  assert.ok(shop.range.count > 0, '1.4.496 the wave still has idle range rings')
+  for (const ring of shop.range.idle) {
+    assert.equal(ring.opacity, '0', '1.4.496 the idle yellow range line is hidden mid-wave')
+  }
+  assert.equal(shop.range.firing.opacity, '1', '1.4.496 a shot ring stays visible')
+  assert.notEqual(shop.range.firing.display, 'none', '1.4.496 a shot ring is not the idle hide')
+  assert.equal(shop.range.bell.opacity, '1', '1.4.496 the bell pulse stays visible')
+  assert.equal(shop.range.incense.opacity, '1', '1.4.496 the incense cloud stays visible')
+  assert.equal(shop.range.ghost.opacity, '1', '1.4.496 the placement ghost ring is not the idle hide')
+  assert.notEqual(shop.range.ghost.display, 'none', '1.4.496 the placement ghost ring still draws')
   assert.equal(shop.tier, 'none', '1.4.488 the wave hides right-rail badges')
   assert.equal(shop.clearCandle, 0, '1.4.488 the clear row is not on the wave')
   await openLoveCard(page)
@@ -1079,6 +1117,17 @@ async function checkWaveCues(browser, port, errors) {
   await openJump(page, '?playtest=1')
   await page.locator('[data-map="a2"]').click()
   await page.locator('[data-map-overlay]').waitFor({ state: 'detached' })
+  assert.equal(await page.locator('.defend-page.is-easy-tap').count(), 0, '1.4.496 planting is outside the mid-wave hide')
+  await page.locator('[data-type="love"]').click()
+  await page.mouse.move(SEAT_TAPS[0].x, SEAT_TAPS[0].y)
+  const ghost = await page.locator('.defend-ghost-ring').evaluate((node) => {
+    const style = getComputedStyle(node)
+    const box = node.getBoundingClientRect()
+    return { opacity: style.opacity, display: style.display, w: box.width }
+  })
+  assert.equal(ghost.opacity, '1', '1.4.496 the placement preview stays visible while placing')
+  assert.notEqual(ghost.display, 'none', '1.4.496 the placement preview is not the idle range hide')
+  assert.ok(ghost.w > 10, `1.4.496 the placement preview has a ring (${ghost.w})`)
   for (const tap of SEAT_TAPS) {
     await page.locator(`[data-type="${tap.type}"]`).click()
     await page.mouse.click(tap.x, tap.y)
@@ -1106,6 +1155,17 @@ async function checkWaveCues(browser, port, errors) {
   assert.equal(count.discs, 0, '1.4.496 the count is up before any hit disc')
   assert.notEqual(count.hit, 'cue', '1.4.496 a tap on the 3 falls through')
   assert.ok(count.nearest > 16, `1.4.496 the count stays off the road (${count.nearest})`)
+  const idle = await page.evaluate(() =>
+    [...document.querySelectorAll('.defend-range:not(.is-firing):not(.is-bell-pulse):not(.is-incense-cloud)')].map((node) => {
+      const style = getComputedStyle(node)
+      return { opacity: style.opacity, display: style.display }
+    }),
+  )
+  assert.ok(idle.length > 0, '1.4.496 Easy at 375 still has lamp range rings during the count')
+  for (const ring of idle) {
+    assert.equal(ring.opacity, '0', '1.4.496 Easy at 375 hides the idle yellow range line')
+    assert.equal(ring.display, 'none', '1.4.496 Easy at 375 the idle range line has no box')
+  }
   await page.screenshot({ path: '/opt/cursor/artifacts/nw-496-countdown.png' })
   const before = await tapTotals(page)
   await page.mouse.click(count.cx, count.cy)
@@ -1223,6 +1283,21 @@ async function checkWaveCues(browser, port, errors) {
     await hardPage.waitForTimeout(80)
   }
   assert.equal(sawWalker, true, '1.4.496 Hard sends a walker without the Easy count')
+  const hardRange = await hardPage.evaluate(() => {
+    const pageNode = document.querySelector('.defend-page')
+    const node = document.querySelector('.defend-range:not(.is-firing):not(.is-bell-pulse):not(.is-incense-cloud)')
+    const style = node ? getComputedStyle(node) : null
+    return {
+      easy: pageNode?.classList.contains('is-easy-watch') === true,
+      opacity: style?.opacity ?? '',
+      display: style?.display ?? '',
+    }
+  })
+  assert.equal(hardRange.easy, false, '1.4.496 Hard is outside the Easy range hide')
+  if (hardRange.opacity) {
+    assert.notEqual(hardRange.opacity, '0', '1.4.496 Hard still shows the idle range line')
+    assert.notEqual(hardRange.display, 'none', '1.4.496 Hard does not take the Easy range hide')
+  }
   await hard.close()
 }
 

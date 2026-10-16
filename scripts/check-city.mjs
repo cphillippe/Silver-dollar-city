@@ -1687,6 +1687,7 @@ assert.doesNotMatch(
 )
 assert.match(latestChange('1.4.496').items.join('\n'), /3, 2, 1/)
 assert.match(latestChange('1.4.496').items.join('\n'), /Wave survived/)
+assert.match(latestChange('1.4.496').items.join('\n'), /idle yellow lamp range line/)
 assert.match(latestChange('1.4.496').items.join('\n'), /Hard/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.495'), '1.4.495 changelog row')
 assert.match(latestChange('1.4.495').title, /tag/i)
@@ -1846,6 +1847,21 @@ for (const line of hide495[0].split('\n')) {
   if (!line.includes('.defend-page')) continue
   assert.match(line, /\.defend-page\.is-easy-watch\.is-easy-tap/, `1.4.495 the hide stays on an Easy wave (${line.trim()})`)
 }
+const hide496 = css486.match(
+  /\.defend-page\.is-easy-watch\.is-easy-tap \.defend-range:not\(\.is-firing\):not\(\.is-bell-pulse\):not\(\.is-incense-cloud\) \{\s*opacity:\s*0;\s*\}/,
+)
+assert.ok(hide496, '1.4.496 Easy wave CSS hides the idle lamp range line')
+assert.doesNotMatch(
+  hide496[0],
+  /defend-ghost-ring|defend-raider|defend-road/,
+  '1.4.496 the range hide leaves the ghost ring and the road',
+)
+assert.match(
+  hide496[0],
+  /:not\(\.is-firing\):not\(\.is-bell-pulse\):not\(\.is-incense-cloud\)/,
+  '1.4.496 a shot, the bell pulse, and the incense cloud stay',
+)
+assert.match(hide496[0], /\.defend-page\.is-easy-watch\.is-easy-tap/, '1.4.496 the range hide stays on an Easy wave')
 assert.match(
   readFileSync(new URL('../src/components/DefendNightActors.tsx', import.meta.url), 'utf8'),
   /phase !== 'wave' \|\| easy/,

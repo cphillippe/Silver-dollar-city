@@ -3109,6 +3109,11 @@ button.defend-path-pip {
   display: none;
 }
 
+/* 1.4.496 Easy wave only. The idle yellow attack line stays off while walkers move. A shot, the bell pulse, and the incense cloud stay. Plant and the clear are is-easy-watch without is-easy-tap, so the line comes back while a lamp is placed. The ghost ring is a different circle. Hard never has is-easy-watch. */
+.defend-page.is-easy-watch.is-easy-tap .defend-range:not(.is-firing):not(.is-bell-pulse):not(.is-incense-cloud) {
+  opacity: 0;
+}
+
 /* 1.4.496 Easy only. The count sits in the sky, off the road. It never takes a tap. */
 .nw-wave-count,
 .nw-wave-survived {
