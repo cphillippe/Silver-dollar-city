@@ -1,12 +1,12 @@
 /**
- * Live prove for 1.4.495.
+ * Live prove for 1.4.496.
  * Real clicks and elementFromPoint. A planted incense still hits.
  * A walker inside a lamp box wins. The map sheet is the top layer.
  * Later rounds field more than three walkers. The clear bar stays put.
  * The Love lamp's box does not cover Candle or Spend.
  */
 import assert from 'node:assert/strict'
-import { mkdirSync } from 'node:fs'
+import { mkdirSync, readFileSync } from 'node:fs'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { build } from 'esbuild'
 import { createElement } from 'react'
@@ -20,7 +20,7 @@ import { DEFEND_PATH } from '../src/nightWatch/path/data.ts'
 const SAVE = {
   kind: SAVE_KIND,
   schemaVersion: SAVE_SCHEMA_VERSION,
-  appVersion: '1.4.495',
+  appVersion: '1.4.496',
   savedAt: '2026-10-15T00:00:00.000Z',
   progress: {
     started: true,
@@ -1009,6 +1009,223 @@ async function checkShopTags(browser, port, errors) {
   await context.close()
 }
 
+/** 375×667 taps from docs/nw-prove-seats.md. The lamp feet are the plate anchor. */
+const SEAT_TAPS = [
+  { type: 'love', x: 111.0, y: 225.5, feet: 'translate(248 288)', doc: '111.0 | 225.5' },
+  { type: 'logic', x: 109.0, y: 294.4, feet: 'translate(244 424)', doc: '109.0 | 294.4' },
+  { type: 'reason', x: 275.1, y: 353.1, feet: 'translate(572 540)', doc: '275.1 | 353.1' },
+  { type: 'science', x: 93.8, y: 437.1, feet: 'translate(214 706)', doc: '93.8 | 437.1' },
+]
+
+const GROUND_TAPS = [
+  { attr: 'bell', round: 10, x: 46.3, y: 125.2, feet: 'translate(120 90)', doc: '46.3 | 125.2' },
+  { attr: 'incense', round: 13, x: 86.8, y: 130.3, feet: 'translate(200 100)', doc: '86.8 | 130.3' },
+  { attr: 'cross', round: 13, x: 36.1, y: 160.7, feet: 'translate(100 160)', doc: '36.1 | 160.7' },
+]
+
+function cueClearance(page, selector) {
+  return page.evaluate(({ sel, path }) => {
+    const node = document.querySelector(sel)
+    const svg = document.querySelector('.defend-board')
+    if (!(node instanceof Element) || !(svg instanceof SVGSVGElement)) return null
+    const box = node.getBoundingClientRect()
+    const ctm = svg.getScreenCTM()
+    if (!ctm || box.width < 1) return null
+    let nearest = Infinity
+    for (const spot of path) {
+      const p = svg.createSVGPoint()
+      p.x = spot.x
+      p.y = spot.y
+      const at = p.matrixTransform(ctm)
+      const dx = at.x < box.left ? box.left - at.x : at.x > box.right ? at.x - box.right : 0
+      const dy = at.y < box.top ? box.top - at.y : at.y > box.bottom ? at.y - box.bottom : 0
+      nearest = Math.min(nearest, Math.hypot(dx, dy))
+    }
+    const style = getComputedStyle(node)
+    const midX = box.x + box.width / 2
+    const midY = box.y + box.height / 2
+    const top = document.elementFromPoint(midX, midY)
+    return {
+      nearest,
+      events: style.pointerEvents,
+      text: (node.textContent || '').replace(/\s+/g, ' ').trim(),
+      digit: node.getAttribute('data-wave-count'),
+      discs: document.querySelectorAll('[data-walker-tap]').length,
+      hit: top === node || Boolean(top?.closest?.(sel)) ? 'cue' : (top?.tagName || ''),
+      cx: midX,
+      cy: midY,
+    }
+  }, { sel: selector, path: DEFEND_PATH })
+}
+
+async function checkWaveCues(browser, port, errors) {
+  const seatDoc = readFileSync(new URL('../docs/nw-prove-seats.md', import.meta.url), 'utf8')
+  for (const tap of [...SEAT_TAPS, ...GROUND_TAPS]) {
+    assert.ok(seatDoc.includes(tap.doc), `1.4.496 the seat doc lists ${tap.doc}`)
+  }
+  mkdirSync('/opt/cursor/artifacts', { recursive: true })
+  const context = await browser.newContext({
+    baseURL: `http://127.0.0.1:${port}/`,
+    viewport: { width: 375, height: 667 },
+    deviceScaleFactor: 1,
+    reducedMotion: 'reduce',
+  })
+  await context.addInitScript(
+    (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+    { key: STORAGE_KEY, save: SAVE },
+  )
+  const page = await context.newPage()
+  listen(page, errors, 'cue 375')
+  await openJump(page, '?playtest=1')
+  await page.locator('[data-map="a2"]').click()
+  await page.locator('[data-map-overlay]').waitFor({ state: 'detached' })
+  for (const tap of SEAT_TAPS) {
+    await page.locator(`[data-type="${tap.type}"]`).click()
+    await page.mouse.click(tap.x, tap.y)
+    await page.waitForTimeout(80)
+  }
+  const planted = await page.evaluate(() =>
+    [...document.querySelectorAll('.defend-pad')].map((node) => ({
+      type: node.getAttribute('data-tower-type'),
+      transform: node.getAttribute('transform'),
+    })),
+  )
+  for (const tap of SEAT_TAPS) {
+    assert.ok(
+      planted.some((pad) => pad.type === tap.type && pad.transform === tap.feet),
+      `1.4.496 ${tap.type} plants on its seat ${JSON.stringify(planted)}`,
+    )
+  }
+  const started = Date.now()
+  await page.locator('.defend-go').click()
+  await page.locator('[data-wave-count="3"]').waitFor()
+  const count = await cueClearance(page, '[data-wave-count="3"]')
+  assert.ok(count, '1.4.496 Easy shows the 3')
+  assert.equal(count.digit, '3', '1.4.496 the first number is 3')
+  assert.equal(count.events, 'none', '1.4.496 the count does not take a tap')
+  assert.equal(count.discs, 0, '1.4.496 the count is up before any hit disc')
+  assert.notEqual(count.hit, 'cue', '1.4.496 a tap on the 3 falls through')
+  assert.ok(count.nearest > 16, `1.4.496 the count stays off the road (${count.nearest})`)
+  await page.screenshot({ path: '/opt/cursor/artifacts/nw-496-countdown.png' })
+  const before = await tapTotals(page)
+  await page.mouse.click(count.cx, count.cy)
+  await page.waitForTimeout(40)
+  const after = await tapTotals(page)
+  assert.equal(after.misses, before.misses, '1.4.496 a tap on the count is not a miss')
+  assert.equal(await page.locator('.defend-raider').count(), 0, '1.4.496 walkers wait until the count ends')
+  await page.locator('.defend-raider').waitFor({ timeout: 4000 })
+  const spawned = Date.now() - started
+  assert.ok(spawned >= 1500, `1.4.496 walkers spawn after the count (${spawned}ms)`)
+  assert.ok(spawned < 3200, `1.4.496 walkers spawn when the count ends (${spawned}ms)`)
+  const fight = Date.now()
+  while (Date.now() - fight < 40_000 && (await page.locator('.defend-page.is-boost').count()) < 1) {
+    const cue = await page.evaluate(() => {
+      const face = document.querySelector('.defend-raider.is-easy-cue')
+      if (!face) return null
+      const id = face.getAttribute('data-walker-id')
+      const tap = document.querySelector(`[data-walker-tap="${id}"]`)
+      if (!tap) return null
+      const box = tap.getBoundingClientRect()
+      const x = box.x + box.width / 2
+      const y = box.y + box.height / 2
+      const node = document.elementFromPoint(x, y)
+      if (node?.closest?.('[data-walker-tap]')?.getAttribute('data-walker-tap') !== id) return null
+      return { x, y }
+    })
+    if (cue) await page.mouse.click(cue.x, cue.y)
+    await page.waitForTimeout(70)
+  }
+  await page.locator('[data-wave-survived]').waitFor()
+  const burst = await cueClearance(page, '[data-wave-survived]')
+  assert.ok(burst, '1.4.496 Easy shows the clear burst')
+  assert.match(burst.text, /Wave survived!/)
+  assert.match(burst.text, /Round 1/)
+  assert.equal(burst.events, 'none', '1.4.496 the burst does not take a tap')
+  assert.ok(burst.nearest > 16, `1.4.496 the burst stays off the road (${burst.nearest})`)
+  const kept = await page.evaluate(() => {
+    const button = document.querySelector('.defend-continue')
+    if (!button) return null
+    const box = button.getBoundingClientRect()
+    const burstBox = document.querySelector('[data-wave-survived]')?.getBoundingClientRect()
+    const x = box.x + box.width / 2
+    const y = box.y + box.height / 2
+    const node = document.elementFromPoint(x, y)
+    const wide = burstBox ? Math.min(box.right, burstBox.right) - Math.max(box.left, burstBox.left) : 0
+    const tall = burstBox ? Math.min(box.bottom, burstBox.bottom) - Math.max(box.top, burstBox.top) : 0
+    return {
+      top: node?.closest?.('.defend-continue') ? 'continue' : '',
+      overlap: wide > 1 && tall > 1,
+    }
+  })
+  assert.equal(kept?.top, 'continue', '1.4.496 Continue still takes the click')
+  assert.equal(kept?.overlap, false, '1.4.496 the burst does not cover Continue')
+  await page.screenshot({ path: '/opt/cursor/artifacts/nw-496-survived.png' })
+  await context.close()
+
+  for (const tap of GROUND_TAPS) {
+    const ground = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width: 375, height: 667 },
+      deviceScaleFactor: 1,
+    })
+    await ground.addInitScript(
+      (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+      { key: STORAGE_KEY, save: SAVE },
+    )
+    const leaf = await ground.newPage()
+    listen(leaf, errors, `${tap.attr} 375`)
+    await openJump(leaf, `?playtest=1&nwRound=${tap.round}`)
+    const button = leaf.locator(`[data-${tap.attr}-lamp="yes"]`).last()
+    await button.click()
+    assert.equal(await button.getAttribute('aria-pressed'), 'true', `1.4.496 ${tap.attr} arms`)
+    await leaf.mouse.click(tap.x, tap.y)
+    await leaf.waitForTimeout(150)
+    const pads = await leaf.evaluate(() =>
+      [...document.querySelectorAll('.defend-pad')].map((node) => ({
+        type: node.getAttribute('data-tower-type'),
+        transform: node.getAttribute('transform'),
+      })),
+    )
+    assert.ok(
+      pads.some((pad) => pad.type === tap.attr && pad.transform === tap.feet),
+      `1.4.496 ${tap.attr} plants on its free spot ${JSON.stringify(pads)}`,
+    )
+    await ground.close()
+  }
+
+  const hardSave = { ...SAVE, progress: { ...SAVE.progress, easyMode: false } }
+  const hard = await browser.newContext({
+    baseURL: `http://127.0.0.1:${port}/`,
+    viewport: { width: 375, height: 667 },
+    deviceScaleFactor: 1,
+  })
+  await hard.addInitScript(
+    (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+    { key: STORAGE_KEY, save: hardSave },
+  )
+  const hardPage = await hard.newPage()
+  listen(hardPage, errors, 'hard 375')
+  await hardPage.goto('/?playtest=1')
+  await hardPage.getByRole('button', { name: 'Hold the night' }).click()
+  await hardPage.locator('.defend-board').waitFor()
+  const hardGo = await hardPage.locator('.defend-go').boundingBox()
+  assert.ok(hardGo, '1.4.496 Hard Begin is on screen')
+  const hardStart = Date.now()
+  await hardPage.mouse.click(hardGo.x + hardGo.width / 2, hardGo.y + hardGo.height / 2)
+  let sawWalker = false
+  while (Date.now() - hardStart < 2200) {
+    assert.equal(await hardPage.locator('[data-wave-count]').count(), 0, '1.4.496 Hard has no count')
+    assert.equal(await hardPage.locator('[data-wave-survived]').count(), 0, '1.4.496 Hard has no burst')
+    if ((await hardPage.locator('.defend-raider').count()) > 0) {
+      sawWalker = true
+      break
+    }
+    await hardPage.waitForTimeout(80)
+  }
+  assert.equal(sawWalker, true, '1.4.496 Hard sends a walker without the Easy count')
+  await hard.close()
+}
+
 export async function checkLiveProve() {
   const server = await createServer({ server: { host: '127.0.0.1', port: 0 } })
   await server.listen()
@@ -1029,6 +1246,7 @@ export async function checkLiveProve() {
     await checkClearBar(browser, port, errors, 375, 667, false)
     await checkClearBar(browser, port, errors, 412, 915, true)
     await checkClearBar(browser, port, errors, 768, 1024, false)
+    await checkWaveCues(browser, port, errors)
     assert.equal(errors.join('\n'), '', '1.4.482 live prove stays free of console errors')
   } finally {
     await browser.close()

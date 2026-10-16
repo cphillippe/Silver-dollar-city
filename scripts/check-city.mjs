@@ -161,6 +161,13 @@ import {
   walkerSpark,
 } from '../src/nightWatch/walkers.ts'
 import {
+  WAVE_COUNT_MS,
+  WAVE_COUNT_STEP_MS,
+  WAVE_SURVIVED_MS,
+  waveCountDigit,
+  waveSurvivedOn,
+} from '../src/nightWatch/waveCue.ts'
+import {
   paceEasyTree,
   scoreEasyRoad,
   scoreEasyTree,
@@ -1670,7 +1677,17 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.495')
+assert.equal(APP_VERSION, '1.4.496')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.496'), '1.4.496 changelog row')
+assert.match(latestChange('1.4.496').title, /count|wave/i)
+assert.doesNotMatch(
+  latestChange('1.4.496').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.496 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.496').items.join('\n'), /3, 2, 1/)
+assert.match(latestChange('1.4.496').items.join('\n'), /Wave survived/)
+assert.match(latestChange('1.4.496').items.join('\n'), /Hard/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.495'), '1.4.495 changelog row')
 assert.match(latestChange('1.4.495').title, /tag/i)
 assert.doesNotMatch(
@@ -1834,6 +1851,50 @@ assert.match(
   /phase !== 'wave' \|\| easy/,
   '1.4.495 Easy keeps the level tag mounted; Hard still omits it during a wave',
 )
+assert.equal(WAVE_COUNT_STEP_MS, 600, '1.4.496 each count number stays about 0.6s')
+assert.equal(WAVE_COUNT_MS, 1800, '1.4.496 the count is three steps')
+assert.equal(WAVE_SURVIVED_MS, 1200, '1.4.496 the clear burst stays about 1.2s')
+assert.equal(waveCountDigit(0), 3)
+assert.equal(waveCountDigit(599), 3)
+assert.equal(waveCountDigit(600), 2)
+assert.equal(waveCountDigit(1200), 1)
+assert.equal(waveCountDigit(1799), 1)
+assert.equal(waveCountDigit(1800), null)
+assert.equal(waveSurvivedOn(0), true)
+assert.equal(waveSurvivedOn(1199), true)
+assert.equal(waveSurvivedOn(1200), false)
+assert.match(
+  css486,
+  /\.nw-wave-count,\s*\.nw-wave-survived \{[\s\S]*?pointer-events:\s*none;/,
+  '1.4.496 the count and the burst do not take a tap',
+)
+assert.match(
+  css486,
+  /@media \(prefers-reduced-motion:\s*reduce\) \{[\s\S]*?\.nw-wave-count,[\s\S]*?animation:\s*none;/,
+  '1.4.496 reduced motion keeps the words and drops the pop',
+)
+{
+  const screen496 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  assert.match(screen496, /if \(countUntilRef\.current > now\)/, '1.4.496 the live clock waits out the count')
+  assert.match(screen496, /easy && countDigit != null/, '1.4.496 the count renders on Easy only')
+  assert.match(screen496, /easy && survivedRound != null/, '1.4.496 the burst renders on Easy only')
+  assert.match(screen496, /if \(countUntilRef\.current > performance\.now\(\)\) return/, '1.4.496 a tap during the count is not a miss')
+  assert.doesNotMatch(
+    readFileSync(new URL('../src/nightWatch/livePace.ts', import.meta.url), 'utf8'),
+    /waveCue|WAVE_COUNT/,
+    '1.4.496 pace sims do not read the count',
+  )
+  const early496 = []
+  let hearts496 = 3
+  for (let index = 0; index < 6; index += 1) {
+    const owned = easyJumpLoad(index).lamps.map((lamp) => ({ far: lamp.far, strong: lamp.strong }))
+    while (owned.length < 4) owned.push({ far: 0, strong: 0 })
+    const round = paceEasyLive(index, owned, hearts496, false, LIVE_TAP_EVERY, 'road', undefined, [], 2)
+    early496.push(round.taps)
+    hearts496 = easyClearHeart(round.hearts)
+  }
+  assert.deepEqual(early496, [8, 8, 15, 14, 63, 43], '1.4.496 rounds 1–6 stay on the old taps')
+}
 assert.equal(CROSS_CARD, 'The cross helps us remember Jesus died and rose for us.', '1.4.490 the teaching line stays verbatim')
 assert.equal(CROSS_VERSE_CITE, 'Hebrews 12:2, RSV', '1.4.490 the card cites Hebrews 12:2, RSV')
 assert.doesNotMatch(CROSS_CARD, /Hebrews|RSV/, '1.4.490 the card line has no verse')
