@@ -5050,12 +5050,13 @@ button.defend-new-lamp[aria-pressed='true'] {
   --nw-icon-pace-locked: "🔒";
 }
 
-/* No text pills on Easy: round, pace words, status, new-skill, planted count.
-   The planted-count slot stays in the bar so the map camera does not jump. */
-.defend-page.is-easy-watch .defend-count {
-  visibility: hidden;
+/* No text pills on Easy. The words stay in the DOM for scans and screen readers.
+   The count slot's height stays so the phone map camera does not jump. */
+.defend-page.is-easy-watch .nw-hud {
+  min-height: 36px;
 }
 
+.defend-page.is-easy-watch .defend-count,
 .defend-page.is-easy-watch .nw-wave-overlay,
 .defend-page.is-easy-watch .nw-hud .defend-wave,
 .defend-page.is-easy-watch .nw-skill-toast,
@@ -5066,22 +5067,20 @@ button.defend-new-lamp[aria-pressed='true'] {
 .defend-page.is-easy-watch .defend-boost-status,
 .defend-page.is-easy-watch .defend-clear-note,
 .defend-page.is-easy-watch .nw-power-chip,
-.defend-page.is-easy-watch .nw-mend-hold {
-  display: none;
-}
-
+.defend-page.is-easy-watch .nw-mend-hold,
 .defend-page.is-easy-watch .nw-pace-rate,
 .defend-page.is-easy-watch .nw-pace-note {
   position: absolute;
+  display: block;
   width: 1px;
   height: 1px;
-  margin: -1px;
+  margin: 0;
   padding: 0;
   overflow: hidden;
   clip: rect(0 0 0 0);
+  clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
-  visibility: hidden;
 }
 
 .defend-page.is-easy-watch .nw-pace {
