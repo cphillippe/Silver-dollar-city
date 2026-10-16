@@ -35,6 +35,7 @@ import {
   walkerPace,
   walkerSpark,
 } from '../nightWatch/walkers'
+import { WAVE_COUNT_MS, WAVE_COUNT_STEP_MS, WAVE_SURVIVED_MS } from '../nightWatch/waveCue'
 import { localDateKey } from '../lib/dates'
 import {
   DEFEND_BRIEF_ID,
@@ -365,6 +366,11 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const newLampStop = useRef<(() => void) | null>(null)
   const swallowNewLampClick = useRef(false)
   const swallowWaveTap = useRef(false)
+  /** Easy 3-2-1. The live clock stays at 0 until this time. Hard leaves it at 0. */
+  const countUntilRef = useRef(0)
+  const countTimersRef = useRef<number[]>([])
+  const [countDigit, setCountDigit] = useState<3 | 2 | 1 | null>(null)
+  const [survivedRound, setSurvivedRound] = useState<number | null>(null)
   const [loreMeet, setLoreMeet] = useState<{ id: string; line: string } | null>(null)
   const runTierRef = useRef(runTier)
   runTierRef.current = runTier
@@ -798,6 +804,12 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
 
     const tick = (now: number) => {
       if (!live.current.playing) return
+      // Easy count holds the clock. The first step after 1 is still t = 0.
+      if (countUntilRef.current > now) {
+        last = now
+        frame = requestAnimationFrame(tick)
+        return
+      }
       if (skillHoldRef.current) {
         last = now
         frame = requestAnimationFrame(tick)
@@ -1144,7 +1156,21 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     if (phase === 'wave') return
     window.clearTimeout(stillTimer.current)
     setStillOn(false)
+    for (const id of countTimersRef.current) window.clearTimeout(id)
+    countTimersRef.current = []
+    countUntilRef.current = 0
+    setCountDigit(null)
   }, [phase])
+
+  useEffect(() => {
+    if (!easy || phase !== 'boost' || won) {
+      setSurvivedRound(null)
+      return
+    }
+    setSurvivedRound(waveIndexRef.current + 1)
+    const id = window.setTimeout(() => setSurvivedRound(null), WAVE_SURVIVED_MS)
+    return () => window.clearTimeout(id)
+  }, [easy, phase, won])
 
   useEffect(() => {
     if (phase === 'boost') return
@@ -2103,6 +2129,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
 
   function fireAtRaider(raiderId: number) {
     if (phase !== 'wave' || won) return
+    if (countUntilRef.current > performance.now()) return
     if (!claimTap()) return
     const raider = live.current.raiders.find((item) => item.id === raiderId && !item.turned)
     if (!raider) return
@@ -2197,6 +2224,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       return
     }
     if (phase !== 'wave' || won) return
+    if (countUntilRef.current > performance.now()) return
     if (!claimTap()) return
     if (faceTapStrike(easy, false, false) === 'miss' && easy) {
       noteFaceTap(false, 0)
@@ -2676,6 +2704,35 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     armSkill(id, performance.now())
   }
 
+  function clearCountTimers() {
+    for (const id of countTimersRef.current) window.clearTimeout(id)
+    countTimersRef.current = []
+  }
+
+  function armWaveCount() {
+    clearCountTimers()
+    if (!easy) {
+      countUntilRef.current = 0
+      setCountDigit(null)
+      return
+    }
+    countUntilRef.current = performance.now() + WAVE_COUNT_MS
+    setCountDigit(3)
+    countTimersRef.current = [
+      window.setTimeout(() => setCountDigit(2), WAVE_COUNT_STEP_MS),
+      window.setTimeout(() => setCountDigit(1), WAVE_COUNT_STEP_MS * 2),
+      window.setTimeout(() => {
+        countUntilRef.current = 0
+        setCountDigit(null)
+      }, WAVE_COUNT_MS),
+    ]
+  }
+
+  function startWave() {
+    armWaveCount()
+    setPhase('wave')
+  }
+
   function continueFromBoost(event: { currentTarget: HTMLButtonElement }) {
     if (!startsNextRound(roundStartKind(event.currentTarget.className))) return
     if (performance.now() - clearCardAt.current < 450) return
@@ -2685,7 +2742,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     setBossBonus(0)
     setLoreMeet(null)
     if (waveIndex + 1 < nightLength(easy)) {
-      setWaveIndex((i) => i + 1)
+      setWaveIndex((i) => i + 1); armWaveCount()
       setPhase('wave')
       return
     }
@@ -3171,7 +3228,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
               if (awaitingLamp || phase !== 'plant') return
               if (roundChangeBlocked()) return
               setGhost(null)
-              setPhase('wave')
+              startWave()
             }}
             disabled={(awaitingLamp || arming || phase !== 'plant') && !(easy && awaitingLamp && phase === 'plant' && !arming)}
             aria-disabled={awaitingLamp || arming || phase !== 'plant' ? true : undefined}
@@ -3445,6 +3502,17 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
               <div className="nw-wave-overlay">
                 <span className="defend-wave">{roundLabel}</span>
               </div>
+            ) : null}
+            {easy && countDigit != null ? (
+              <p className="nw-wave-count" data-wave-count={countDigit} aria-hidden="true">
+                {countDigit}
+              </p>
+            ) : null}
+            {easy && survivedRound != null ? (
+              <p className="nw-wave-survived" data-wave-survived={survivedRound} role="status">
+                <span className="nw-wave-survived-title">Wave survived!</span>
+                <span className="nw-wave-survived-round">{`Round ${survivedRound}`}</span>
+              </p>
             ) : null}
             {easy && phase === 'plant' ? (
               <p className="nw-skill-toast" role="status">
