@@ -5036,3 +5036,223 @@ button.defend-new-lamp[aria-pressed='true'] {
     padding: 4px 12px;
   }
 }
+
+/* 1.4.497 Easy phone chrome.
+   Swap glyphs here when real art lands. Each value is one icon.
+   Hard never has .is-easy-watch, so these rules do not reach it. */
+.defend-page.is-easy-watch {
+  --nw-icon-candle: "🕯";
+  --nw-icon-bell: "🔔";
+  --nw-icon-incense: "♨";
+  --nw-icon-cross: "✝";
+  --nw-icon-pace: "▶";
+  --nw-icon-pace-fast: "⏩";
+  --nw-icon-pace-locked: "🔒";
+}
+
+/* No text pills on Easy. The words stay in the DOM for scans and screen readers.
+   The count slot's height stays so the phone map camera does not jump. */
+.defend-page.is-easy-watch .nw-hud {
+  min-height: 36px;
+}
+
+.defend-page.is-easy-watch .defend-count,
+.defend-page.is-easy-watch .nw-wave-overlay,
+.defend-page.is-easy-watch .nw-hud .defend-wave,
+.defend-page.is-easy-watch .nw-skill-toast,
+.defend-page.is-easy-watch .defend-plant-first,
+.defend-page.is-easy-watch .nw-docks .defend-tip,
+.defend-page.is-easy-watch .nw-docks .defend-angel-help,
+.defend-page.is-easy-watch .nw-docks .match-toast,
+.defend-page.is-easy-watch .defend-boost-status,
+.defend-page.is-easy-watch .defend-clear-note,
+.defend-page.is-easy-watch .nw-power-chip,
+.defend-page.is-easy-watch .nw-mend-hold,
+.defend-page.is-easy-watch .nw-pace-rate,
+.defend-page.is-easy-watch .nw-pace-note {
+  position: absolute;
+  display: block;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.defend-page.is-easy-watch .nw-pace {
+  top: 56px;
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  gap: 0;
+}
+
+.defend-page.is-easy-watch .nw-pace::before {
+  content: var(--nw-icon-pace);
+  width: 32px;
+  height: 32px;
+  font-size: 18px;
+  line-height: 32px;
+  text-align: center;
+}
+
+.defend-page.is-easy-watch .nw-pace.is-fast::before,
+.defend-page.is-easy-watch .nw-pace[data-state='fast']::before {
+  content: var(--nw-icon-pace-fast);
+}
+
+.defend-page.is-easy-watch .nw-pace.is-locked::before,
+.defend-page.is-easy-watch .nw-pace[data-state='locked']::before {
+  content: var(--nw-icon-pace-locked);
+}
+
+/* The 3-2-1 sits in the open sky. The box hugs the digit so it stays off the road.
+   It does not take a tap. */
+.defend-page.is-easy-watch .nw-wave-count {
+  top: 8px;
+  left: 52px;
+  right: auto;
+  width: max-content;
+  margin: 0;
+  font-size: 64px;
+  line-height: 1;
+  text-align: center;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* A planted lamp's card paints above the Easy dock, so Upgrade stays tappable. */
+.defend-page.is-easy-watch .defend-tower-card {
+  z-index: 13;
+}
+
+@media (max-width: 480px) {
+  /* Pre-Begin only. The dock box stays a hairline so it does not cover seats.
+     Chips and Begin hang off it and take the taps. */
+  .defend-page.is-easy-watch .nw-docks:has(.defend-go) {
+    top: 0;
+    right: auto;
+    bottom: auto;
+    left: 0;
+    width: 0;
+    height: 100%;
+    max-width: none;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .defend-page.is-easy-watch .nw-docks:has(.defend-go) .defend-go,
+  .defend-page.is-easy-watch .nw-docks:has(.defend-go) .defend-go.is-awaiting-plant,
+  .defend-page.is-easy-watch .nw-docks:has(.defend-go) .defend-go.is-awaiting-plant:disabled,
+  .defend-page.is-easy-watch .nw-docks:has(.defend-go) .defend-go.is-after-plant {
+    position: absolute;
+    left: 50vw;
+    bottom: 8px;
+    width: min(240px, calc(100vw - 24px));
+    max-width: none;
+    height: auto;
+    margin: 0;
+    white-space: nowrap;
+    transform: translateX(-50%);
+    animation: none;
+    pointer-events: auto;
+    z-index: 3;
+  }
+
+  .defend-page.is-easy-watch .nw-docks:has(.defend-go) button.defend-new-lamp {
+    position: absolute;
+    left: 6px;
+    width: 52px;
+    min-width: 44px;
+    min-height: 52px;
+    margin: 0;
+    padding: 2px 2px 3px;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    font-size: 0;
+    line-height: 1;
+    color: transparent;
+    white-space: normal;
+    pointer-events: auto;
+    z-index: 3;
+  }
+
+  .defend-page.is-easy-watch .nw-docks:has(.defend-go) button.defend-candle-lamp {
+    top: 72px;
+  }
+
+  .defend-page.is-easy-watch .nw-docks:has(.defend-go) button.defend-bell-lamp {
+    top: 130px;
+  }
+
+  .defend-page.is-easy-watch .nw-docks:has(.defend-go) button.defend-incense-lamp {
+    top: 188px;
+  }
+
+  .defend-page.is-easy-watch .nw-docks:has(.defend-go) button.defend-cross-lamp {
+    top: 246px;
+  }
+
+  .defend-page.is-easy-watch .nw-docks:has(.defend-go) button.defend-new-lamp::before {
+    display: block;
+    width: 36px;
+    height: 32px;
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 32px;
+    text-align: center;
+    color: #2a1c08;
+  }
+
+  .defend-page.is-easy-watch .nw-docks:has(.defend-go) button.defend-new-lamp::after {
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1.1;
+    color: #2a1c08;
+  }
+
+  .defend-page.is-easy-watch .nw-docks:has(.defend-go) button.defend-candle-lamp::before {
+    content: var(--nw-icon-candle);
+  }
+
+  .defend-page.is-easy-watch .nw-docks:has(.defend-go) button.defend-bell-lamp::before {
+    content: var(--nw-icon-bell);
+  }
+
+  .defend-page.is-easy-watch .nw-docks:has(.defend-go) button.defend-incense-lamp::before {
+    content: var(--nw-icon-incense);
+  }
+
+  .defend-page.is-easy-watch .nw-docks:has(.defend-go) button.defend-cross-lamp::before {
+    content: var(--nw-icon-cross);
+  }
+
+  .defend-page.is-easy-watch .nw-docks:has(.defend-go) button.defend-candle-lamp::after {
+    content: attr(data-candle-cost) "✦";
+  }
+
+  .defend-page.is-easy-watch .nw-docks:has(.defend-go) button.defend-bell-lamp::after {
+    content: attr(data-bell-cost) "✦";
+  }
+
+  .defend-page.is-easy-watch .nw-docks:has(.defend-go) button.defend-incense-lamp::after {
+    content: attr(data-incense-cost) "✦";
+  }
+
+  .defend-page.is-easy-watch .nw-docks:has(.defend-go) button.defend-cross-lamp::after {
+    content: attr(data-cross-cost) "✦";
+  }
+}
