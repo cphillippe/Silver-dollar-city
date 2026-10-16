@@ -5084,10 +5084,10 @@ button.defend-new-lamp[aria-pressed='true'] {
 }
 
 .defend-page.is-easy-watch .nw-pace {
-  top: 8px;
-  left: auto;
-  right: calc(var(--nw-rail-w, 60px) + 8px);
-  transform: none;
+  top: 56px;
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
   width: 44px;
   height: 44px;
   min-width: 44px;
