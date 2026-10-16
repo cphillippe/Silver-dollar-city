@@ -8,6 +8,17 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.497',
+    title: 'Icons, not pills',
+    when: '2026-10-16',
+    items: [
+      'On Easy, the 3, 2, 1 count sits in the open sky so you can read it.',
+      'Before the wave, Candle, Bell, Incense, and Cross are small icons with a cost. Begin stays along the bottom. A planted lamp still opens.',
+      'Easy drops the round, pace, skill, and planted-count words. Pace is a small icon you can still tap.',
+      'Hard nights keep their words and their layout.',
+    ],
+  },
+  {
     version: '1.4.496',
     title: 'A count before the wave',
     when: '2026-10-15',
