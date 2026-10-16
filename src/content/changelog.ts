@@ -14,6 +14,7 @@ export const CHANGELOG: ChangeNote[] = [
     items: [
       'On Easy, Begin and Continue count 3, 2, 1. Walkers step out when the count ends.',
       'When a round holds, Easy shows Wave survived and the round number.',
+      'During a wave, the idle yellow lamp range line stays off. A shot, the bell, and incense still show, and the line comes back while you place a lamp.',
       'Hard nights start and clear as before.',
     ],
   },
