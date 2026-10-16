@@ -2764,8 +2764,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   }
 
   const after = juiceDone && won
-  const counting = easy && countDigit != null
-  const easyTap = easyTapMode(easy, phase, won) && !counting
+  const easyTap = easyTapMode(easy, phase, won)
   const tapTarget = easyTap
     ? nightEnemies.cueTarget(raiders, waveIndex, tuneRef.current.armorFrom)
     : undefined
