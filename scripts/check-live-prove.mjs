@@ -987,12 +987,15 @@ async function checkShopTags(browser, port, errors) {
       return look
     }
     const board = document.querySelector('.defend-board')
+    const host = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+    host.setAttribute('class', 'defend-ghost')
     const ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
     ring.setAttribute('class', 'defend-ghost-ring')
     ring.setAttribute('r', '48')
-    board?.appendChild(ring)
+    host.appendChild(ring)
+    board?.appendChild(host)
     const ghost = paint(ring)
-    ring.remove()
+    host.remove()
     return {
       candle: shown(document.querySelector('.nw-skill-tray [data-candle-lamp="yes"]')),
       bell: shown(document.querySelector('.nw-skill-tray [data-bell-lamp="yes"]')),
