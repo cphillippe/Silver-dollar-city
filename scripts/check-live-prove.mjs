@@ -1064,6 +1064,42 @@ const GROUND_TAPS = [
   { attr: 'cross', round: 13, x: 36.1, y: 160.7, feet: 'translate(100 160)', doc: '36.1 | 160.7' },
 ]
 
+/** Porch, hollow, journal, bench. The free-spot id is those feet. */
+const NAMED_SEATS = [
+  { id: 'porch', type: 'love', feet: 'translate(248 288)', word: 'LOVE' },
+  { id: 'hollow', type: 'logic', feet: 'translate(244 424)', word: 'LOGIC' },
+  { id: 'journal', type: 'reason', feet: 'translate(572 540)', word: 'REASON' },
+  { id: 'bench', type: 'science', feet: 'translate(214 706)', word: 'SCIENCE' },
+]
+
+function namedLampId(feet) {
+  const match = /translate\((\d+) (\d+)\)/.exec(feet)
+  assert.ok(match, `named seat feet ${feet}`)
+  return `at:${match[1]}:${match[2]}`
+}
+
+async function openNamedUpgrades(page, when) {
+  for (const seat of NAMED_SEATS) {
+    const lamp = namedLampId(seat.feet)
+    const button = page.locator(`[data-clear-lamp="${lamp}"]`)
+    await button.waitFor()
+    const hit = await button.evaluate((node) => {
+      const box = node.getBoundingClientRect()
+      const x = box.x + box.width / 2
+      const y = box.y + box.height / 2
+      const top = document.elementFromPoint(x, y)
+      return top?.closest?.('[data-clear-lamp]')?.getAttribute('data-clear-lamp') || ''
+    })
+    assert.equal(hit, lamp, `1.4.497 ${seat.id} takes the tap ${when}`)
+    await button.click()
+    const card = (await page.locator('.defend-tower-card').innerText()).replace(/\s+/g, ' ')
+    assert.match(card, new RegExp(seat.word), `1.4.497 ${seat.id} opens its upgrade ${when} (${card.slice(0, 40)})`)
+    await page.waitForTimeout(450)
+    await button.evaluate((node) => node.click())
+    await page.locator('.defend-tower-card').waitFor({ state: 'hidden' })
+  }
+}
+
 function cueClearance(page, selector) {
   return page.evaluate(({ sel, path }) => {
     const node = document.querySelector(sel)
@@ -1148,6 +1184,7 @@ async function checkWaveCues(browser, port, errors) {
       `1.4.496 ${tap.type} plants on its seat ${JSON.stringify(planted)}`,
     )
   }
+  await openNamedUpgrades(page, 'pre-Begin')
   const started = Date.now()
   await page.locator('.defend-go').click()
   await page.locator('[data-wave-count="3"]').waitFor()
@@ -1155,6 +1192,32 @@ async function checkWaveCues(browser, port, errors) {
   assert.ok(count, '1.4.496 Easy shows the 3')
   assert.equal(count.digit, '3', '1.4.496 the first number is 3')
   assert.equal(count.events, 'none', '1.4.496 the count does not take a tap')
+  const digit = await page.locator('[data-wave-count="3"]').evaluate((node) => {
+    const style = getComputedStyle(node)
+    const box = node.getBoundingClientRect()
+    const x = box.x + box.width / 2
+    const y = box.y + box.height / 2
+    const top = document.elementFromPoint(x, y)
+    return {
+      text: (node.textContent || '').trim(),
+      events: style.pointerEvents,
+      display: style.display,
+      visibility: style.visibility,
+      opacity: Number(style.opacity),
+      w: box.width,
+      h: box.height,
+      visible: typeof node.checkVisibility === 'function' ? node.checkVisibility() : true,
+      board: Boolean(top && top.closest('.defend-board')),
+      blocked: Boolean(top && (top === node || top.closest('[data-wave-count]'))),
+    }
+  })
+  assert.equal(digit.text, '3', '1.4.497 the countdown digit reads 3')
+  assert.equal(digit.events, 'none', '1.4.497 the countdown digit does not take a tap')
+  assert.notEqual(digit.display, 'none', '1.4.497 the countdown digit is shown')
+  assert.equal(digit.visibility, 'visible', '1.4.497 the countdown digit is visible')
+  assert.ok(digit.opacity > 0 && digit.w > 8 && digit.h > 8 && digit.visible, '1.4.497 the countdown digit is on screen')
+  assert.equal(digit.blocked, false, '1.4.497 the countdown digit does not catch the tap')
+  assert.equal(digit.board, true, '1.4.497 a walker tap during the count lands on the board')
   assert.equal(count.discs, 0, '1.4.496 the count is up before any hit disc')
   assert.notEqual(count.hit, 'cue', '1.4.496 a tap on the 3 falls through')
   assert.ok(count.nearest > 16, `1.4.496 the count stays off the road (${count.nearest})`)
@@ -1222,6 +1285,7 @@ async function checkWaveCues(browser, port, errors) {
   })
   assert.equal(kept?.top, 'continue', '1.4.496 Continue still takes the click')
   assert.equal(kept?.overlap, false, '1.4.496 the burst does not cover Continue')
+  await openNamedUpgrades(page, 'at round clear')
   await page.screenshot({ path: '/opt/cursor/artifacts/nw-496-survived.png' })
   await context.close()
 
@@ -1304,6 +1368,52 @@ async function checkWaveCues(browser, port, errors) {
   await hard.close()
 }
 
+async function checkJumpSeatsAndCandle(browser, port, errors) {
+  const context = await browser.newContext({
+    baseURL: `http://127.0.0.1:${port}/`,
+    viewport: { width: 375, height: 667 },
+    deviceScaleFactor: 1,
+    reducedMotion: 'reduce',
+  })
+  await context.addInitScript(
+    (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+    { key: STORAGE_KEY, save: SAVE },
+  )
+  const page = await context.newPage()
+  listen(page, errors, 'jump seats 375')
+  await openJump(page, '?playtest=1&nwRound=20&nwLamps=0')
+  if (await page.locator('[data-map-overlay]').count()) {
+    await page.locator('[data-map="a2"]').click()
+    await page.locator('[data-map-overlay]').waitFor({ state: 'detached' })
+  }
+  for (const seat of NAMED_SEATS) {
+    const tap = SEAT_TAPS.find((item) => item.type === seat.type)
+    await page.locator(`[data-type="${seat.type}"]`).click()
+    await page.mouse.click(tap.x, tap.y)
+    await page.waitForTimeout(80)
+  }
+  const planted = await page.evaluate(() =>
+    [...document.querySelectorAll('.defend-pad.is-planted')].map((node) => ({
+      type: node.getAttribute('data-tower-type'),
+      transform: node.getAttribute('transform'),
+    })),
+  )
+  for (const seat of NAMED_SEATS) {
+    assert.ok(
+      planted.some((pad) => pad.type === seat.type && pad.transform === seat.feet),
+      `1.4.497 ${seat.id} is planted after the nwRound jump ${JSON.stringify(planted)}`,
+    )
+  }
+  await openNamedUpgrades(page, 'pre-Begin after an nwRound jump')
+  const candle = page.locator('.nw-docks:has(.defend-go) button.defend-candle-lamp')
+  await candle.click()
+  assert.equal(await candle.getAttribute('aria-pressed'), 'true', '1.4.497 Candle arms from the chip')
+  await page.mouse.move(180, 280)
+  await page.waitForTimeout(80)
+  assert.ok((await page.locator('.defend-ghost-ring').count()) >= 1, '1.4.497 an armed Candle shows where it will plant')
+  await context.close()
+}
+
 export async function checkLiveProve() {
   const server = await createServer({ server: { host: '127.0.0.1', port: 0 } })
   await server.listen()
@@ -1325,6 +1435,7 @@ export async function checkLiveProve() {
     await checkClearBar(browser, port, errors, 412, 915, true)
     await checkClearBar(browser, port, errors, 768, 1024, false)
     await checkWaveCues(browser, port, errors)
+    await checkJumpSeatsAndCandle(browser, port, errors)
     assert.equal(errors.join('\n'), '', '1.4.482 live prove stays free of console errors')
   } finally {
     await browser.close()
