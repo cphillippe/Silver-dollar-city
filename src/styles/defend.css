@@ -5256,3 +5256,313 @@ button.defend-new-lamp[aria-pressed='true'] {
     content: attr(data-cross-cost) "✦";
   }
 }
+
+/* 1.4.498 Easy phone follow-up.
+   The 3-2-1 is a real digit in the open sky. Shop chips and Still/Mend stay tappable.
+   Hard never has .is-easy-watch. */
+.defend-page.is-easy-watch {
+  --nw-icon-lamp: "✦";
+}
+
+@media (max-width: 480px) {
+  /* The digit box hugs the number and sits in the band between the star and the rail.
+     clip is reset so the 497 text clip cannot catch it. It does not take a tap. */
+  .defend-page.is-easy-watch .nw-wave-count {
+    position: absolute;
+    top: 16px;
+    left: 100px;
+    right: auto;
+    width: max-content;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    display: block;
+    overflow: visible;
+    clip: auto;
+    clip-path: none;
+    border: 0;
+    font-size: 96px;
+    line-height: 0.85;
+    text-align: center;
+    color: #ffcc33;
+    white-space: nowrap;
+    z-index: 20;
+    pointer-events: none;
+  }
+
+  .defend-page.is-easy-watch .nw-docks:has(.defend-go) .defend-go {
+    font-size: 0;
+    line-height: 0;
+  }
+
+  .defend-page.is-easy-watch .nw-docks:has(.defend-go) .defend-go::after {
+    content: "Begin" / "";
+    font-size: 22px;
+    line-height: 1.2;
+    font-weight: 800;
+    color: inherit;
+    -webkit-text-fill-color: currentcolor;
+  }
+
+  /* Still and Mend stay the tap powers. Name, status, and the helper lines stay for scans. */
+  .defend-page.is-easy-watch .nw-docks .defend-kits.nw-skill-tray {
+    width: 48px;
+  }
+
+  .defend-page.is-easy-watch .nw-skill {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    min-height: 48px;
+    padding: 0;
+    gap: 0;
+    border-radius: 50%;
+  }
+
+  .defend-page.is-easy-watch .nw-skill-orb,
+  .defend-page.is-easy-watch .nw-skill-ring {
+    width: 48px;
+    height: 48px;
+  }
+
+  .defend-page.is-easy-watch .nw-skill-art {
+    width: 40px;
+    height: 40px;
+  }
+
+  .defend-page.is-easy-watch .defend-kit-name,
+  .defend-page.is-easy-watch .defend-kit-cost,
+  .defend-page.is-easy-watch .nw-skill-hint,
+  .defend-page.is-easy-watch .nw-skill-count,
+  .defend-page.is-easy-watch .easy-walker-cue-label,
+  .defend-page.is-easy-watch .defend-ability-boost {
+    position: absolute;
+    display: block;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* Locked 3× stays in the sky slot so it does not paint. The words stay in the button. */
+  .defend-page.is-easy-watch .nw-pace.is-locked,
+  .defend-page.is-easy-watch .nw-pace[data-state='locked'] {
+    opacity: 0;
+  }
+
+  .defend-page.is-easy-watch button.defend-candle-lamp[aria-pressed='true'] {
+    box-shadow: 0 0 0 3px #ffcc33, 0 0 14px rgba(255, 204, 51, 0.85);
+  }
+
+  /* Clear matches pre-Begin: a hairline dock, icon chips up the left, one Continue.
+     The dock box stays at the bottom edge so planted lamps sit above it. */
+  .defend-page.is-easy-watch.is-boost .nw-docks {
+    top: auto;
+    right: auto;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    max-width: none;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .defend-page.is-easy-watch.is-boost .nw-docks .defend-boost.is-clear-bar,
+  .defend-page.is-easy-watch.is-boost.is-clear-fold .nw-docks .defend-boost.is-clear-bar,
+  .defend-page.is-easy-watch.is-boost .defend-clear-row {
+    position: static;
+    width: 0;
+    height: 0;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    gap: 0;
+  }
+
+  .defend-page.is-easy-watch.is-boost .defend-continue {
+    position: absolute;
+    left: 50vw;
+    bottom: 8px;
+    width: min(240px, calc(100vw - 24px));
+    max-width: none;
+    height: 56px;
+    min-height: 56px;
+    margin: 0;
+    padding: 0 16px;
+    border-radius: 999px;
+    font-size: 22px;
+    white-space: nowrap;
+    transform: translateX(-50%);
+    pointer-events: auto;
+    z-index: 3;
+  }
+
+  .defend-page.is-easy-watch.is-boost .defend-clear-row button.defend-new-lamp {
+    position: absolute;
+    left: 6px;
+    width: 52px;
+    min-width: 44px;
+    min-height: 52px;
+    height: auto;
+    margin: 0;
+    padding: 2px 2px 3px;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    font-size: 0;
+    line-height: 1;
+    color: transparent;
+    white-space: normal;
+    pointer-events: auto;
+    z-index: 3;
+  }
+
+  .defend-page.is-easy-watch.is-boost .defend-clear-row button.defend-new-lamp[data-new-lamp='yes'] {
+    bottom: 292px;
+  }
+
+  .defend-page.is-easy-watch.is-boost .defend-clear-row button.defend-candle-lamp {
+    bottom: 236px;
+  }
+
+  .defend-page.is-easy-watch.is-boost .defend-clear-row button.defend-bell-lamp {
+    bottom: 180px;
+  }
+
+  .defend-page.is-easy-watch.is-boost .defend-clear-row button.defend-incense-lamp {
+    bottom: 124px;
+  }
+
+  .defend-page.is-easy-watch.is-boost .defend-clear-row button.defend-cross-lamp {
+    bottom: 68px;
+  }
+
+  .defend-page.is-easy-watch.is-boost .defend-clear-row button.defend-new-lamp::before {
+    display: block;
+    width: 36px;
+    height: 32px;
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 32px;
+    text-align: center;
+    color: #2a1c08;
+  }
+
+  .defend-page.is-easy-watch.is-boost .defend-clear-row button.defend-new-lamp::after {
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1.1;
+    color: #2a1c08;
+  }
+
+  .defend-page.is-easy-watch.is-boost .defend-clear-row button.defend-new-lamp[data-new-lamp='yes']::before {
+    content: var(--nw-icon-lamp);
+  }
+
+  .defend-page.is-easy-watch.is-boost .defend-clear-row button.defend-new-lamp[data-new-lamp='yes']::after {
+    content: attr(data-lamp-cost) "✦";
+  }
+
+  .defend-page.is-easy-watch.is-boost .defend-clear-row button.defend-candle-lamp::before {
+    content: var(--nw-icon-candle);
+  }
+
+  .defend-page.is-easy-watch.is-boost .defend-clear-row button.defend-bell-lamp::before {
+    content: var(--nw-icon-bell);
+  }
+
+  .defend-page.is-easy-watch.is-boost .defend-clear-row button.defend-incense-lamp::before {
+    content: var(--nw-icon-incense);
+  }
+
+  .defend-page.is-easy-watch.is-boost .defend-clear-row button.defend-cross-lamp::before {
+    content: var(--nw-icon-cross);
+  }
+
+  .defend-page.is-easy-watch.is-boost .defend-clear-row button.defend-candle-lamp::after {
+    content: attr(data-candle-cost) "✦";
+  }
+
+  .defend-page.is-easy-watch.is-boost .defend-clear-row button.defend-bell-lamp::after {
+    content: attr(data-bell-cost) "✦";
+  }
+
+  .defend-page.is-easy-watch.is-boost .defend-clear-row button.defend-incense-lamp::after {
+    content: attr(data-incense-cost) "✦";
+  }
+
+  .defend-page.is-easy-watch.is-boost .defend-clear-row button.defend-cross-lamp::after {
+    content: attr(data-cross-cost) "✦";
+  }
+
+  .defend-page.is-easy-watch.is-boost .defend-clear-spend,
+  .defend-page.is-easy-watch.is-boost .defend-clear-help,
+  .defend-page.is-easy-watch.is-boost.is-clear-fold .defend-clear-spend,
+  .defend-page.is-easy-watch.is-boost.is-clear-fold .defend-clear-help {
+    position: absolute;
+    left: auto;
+    right: 8px;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    font-size: 0;
+    line-height: 0;
+    border-radius: 50%;
+    pointer-events: auto;
+    z-index: 4;
+  }
+
+  .defend-page.is-easy-watch.is-boost .defend-clear-spend {
+    bottom: 72px;
+  }
+
+  .defend-page.is-easy-watch.is-boost .defend-clear-help {
+    bottom: 124px;
+  }
+
+  .defend-page.is-easy-watch.is-boost .defend-clear-spend::before,
+  .defend-page.is-easy-watch.is-boost .defend-clear-help::before {
+    font-size: 18px;
+    line-height: 1;
+    font-weight: 800;
+    color: #2a1c08;
+    -webkit-text-fill-color: #2a1c08;
+  }
+
+  .defend-page.is-easy-watch.is-boost .defend-clear-spend::before {
+    content: "✦" / "";
+  }
+
+  .defend-page.is-easy-watch.is-boost .defend-clear-help::before {
+    content: "?" / "";
+  }
+
+  /* The spark line stays in the DOM for scans. It sits on screen, clipped to a pixel. */
+  .defend-page.is-easy-watch.is-boost .defend-clear-note[data-clear-note='yes'] {
+    position: fixed;
+    top: 8px;
+    left: 8px;
+    bottom: auto;
+    right: auto;
+  }
+}
+
+/* Idle reach rings stay off until a lamp is being placed. Shots, the bell, and incense stay. */
+.defend-page.is-easy-watch:not(.is-placing) .defend-range:not(.is-firing):not(.is-bell-pulse):not(.is-incense-cloud) {
+  opacity: 0;
+}
