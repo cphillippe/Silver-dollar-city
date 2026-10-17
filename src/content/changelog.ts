@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.499',
+    title: 'Quiet Paths',
+    when: '2026-10-17',
+    items: [
+      'On Easy, Paths stays on the rail for anyone reading the screen, and it does not show.',
+      'A locked pace chip does not take a tap. During the wave an open lamp sits along the bottom, so a walker above it can still be tapped. The 3, 2, 1 stays a big digit you can see.',
+      'Still and Mend stay large enough to tap. Hard nights keep their words and their layout.',
+    ],
+  },
+  {
     version: '1.4.498',
     title: 'A big count in the sky',
     when: '2026-10-17',

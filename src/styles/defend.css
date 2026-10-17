@@ -5334,8 +5334,7 @@ button.defend-new-lamp[aria-pressed='true'] {
   .defend-page.is-easy-watch .defend-kit-cost,
   .defend-page.is-easy-watch .nw-skill-hint,
   .defend-page.is-easy-watch .nw-skill-count,
-  .defend-page.is-easy-watch .easy-walker-cue-label,
-  .defend-page.is-easy-watch .defend-ability-boost {
+  .defend-page.is-easy-watch .easy-walker-cue-label {
     position: absolute;
     display: block;
     width: 1px;
@@ -5349,10 +5348,11 @@ button.defend-new-lamp[aria-pressed='true'] {
     border: 0;
   }
 
-  /* Locked 3× stays in the sky slot so it does not paint. The words stay in the button. */
+  /* Locked 3× stays in the sky slot so it does not paint. It does not take a tap. */
   .defend-page.is-easy-watch .nw-pace.is-locked,
   .defend-page.is-easy-watch .nw-pace[data-state='locked'] {
     opacity: 0;
+    pointer-events: none;
   }
 
   .defend-page.is-easy-watch button.defend-candle-lamp[aria-pressed='true'] {
@@ -5565,4 +5565,34 @@ button.defend-new-lamp[aria-pressed='true'] {
 /* Idle reach rings stay off until a lamp is being placed. Shots, the bell, and incense stay. */
 .defend-page.is-easy-watch:not(.is-placing) .defend-range:not(.is-firing):not(.is-bell-pulse):not(.is-incense-cloud) {
   opacity: 0;
+}
+
+/* 1.4.499 Paths is the Easy rail word in DefendAbilityBar. It stays in the DOM.
+   Hard never has .is-easy-watch. */
+.defend-page.is-easy-watch .nw-rail .defend-ability-boost {
+  position: absolute;
+  display: block;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* A locked pace chip does not take a tap on Easy, at any width. */
+.defend-page.is-easy-watch .nw-pace.is-locked,
+.defend-page.is-easy-watch .nw-pace[data-state='locked'] {
+  pointer-events: none;
+}
+
+/* With the locked pace out of the way, the sky lamp opens. Its card used to cover
+   the road. Park the mid-wave card on the bottom edge so a walker above it can be tapped.
+   Hard never has .is-easy-watch. Plant and the clear keep the lamp-side card. */
+.defend-page.is-easy-watch.is-easy-tap .defend-tower-card {
+  top: auto !important;
+  bottom: 8px !important;
 }
