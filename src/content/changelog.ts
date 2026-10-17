@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.498',
+    title: 'A big count in the sky',
+    when: '2026-10-17',
+    items: [
+      'On Easy, the 3, 2, 1 is a big digit in the open sky. It does not take a tap.',
+      'Still and Mend are small icons you can still tap. When a round is clear, the shop is icons and Continue is the one big button.',
+      'The gold button says Begin. Hard nights keep their words and their layout.',
+    ],
+  },
+  {
     version: '1.4.497',
     title: 'Icons, not pills',
     when: '2026-10-16',
