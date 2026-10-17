@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.501',
+    title: 'Far and Strong marks',
+    when: '2026-10-17',
+    items: [
+      'On Easy, the two buys in the open-lamp strip each wear a small mark, so Far and Strong are not the same words in two colors.',
+      'The strip stays off the road, off the walkers, and off Still and Mend. Hard nights keep their full card.',
+    ],
+  },
+  {
     version: '1.4.500',
     title: 'A short buy',
     when: '2026-10-17',
