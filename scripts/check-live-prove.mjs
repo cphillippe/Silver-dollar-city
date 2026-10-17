@@ -1255,6 +1255,83 @@ async function checkWaveCues(browser, port, errors) {
   const spawned = Date.now() - started
   assert.ok(spawned >= 1500, `1.4.496 walkers spawn after the count (${spawned}ms)`)
   assert.ok(spawned < 3200, `1.4.496 walkers spawn when the count ends (${spawned}ms)`)
+  await page.locator('[data-walker-tap]').first().waitFor()
+  const lamp = await page.evaluate(() => {
+    const lamps = [...document.querySelectorAll('[data-lamp-icon]')]
+    for (const node of lamps) {
+      const box = node.getBoundingClientRect()
+      if (box.width < 8 || box.height < 8) continue
+      const x = box.x + box.width / 2
+      const y = box.y + box.height / 2
+      const top = document.elementFromPoint(x, y)
+      if (top?.closest?.('[data-lamp-icon]') === node) {
+        return { x, y, id: node.getAttribute('data-clear-lamp') }
+      }
+    }
+    return null
+  })
+  assert.ok(lamp?.id, '1.4.500 a planted lamp still opens during the wave')
+  await page.mouse.click(lamp.x, lamp.y)
+  await page.locator('.defend-tower-card').waitFor()
+  const strip = await page.evaluate(() => {
+    const card = document.querySelector('.defend-tower-card')
+    const road = document.querySelector('.defend-road')
+    if (!(card instanceof HTMLElement) || !(road instanceof SVGGeometryElement)) return null
+    const rect = card.getBoundingClientRect()
+    const svg = road.ownerSVGElement
+    const ctm = svg?.getScreenCTM()
+    if (!ctm) return null
+    const length = road.getTotalLength()
+    const step = length / 393
+    let roadHits = 0
+    for (let i = 0; i < 394; i += 1) {
+      const at = road.getPointAtLength(Math.min(length, i * step))
+      const point = svg.createSVGPoint()
+      point.x = at.x
+      point.y = at.y
+      const spot = point.matrixTransform(ctm)
+      if (spot.x >= rect.left && spot.x <= rect.right && spot.y >= rect.top && spot.y <= rect.bottom) roadHits += 1
+    }
+    const crosses = (node) => {
+      const box = node.getBoundingClientRect()
+      return (
+        box.width > 1 &&
+        box.height > 1 &&
+        box.right > rect.left &&
+        box.left < rect.right &&
+        box.bottom > rect.top &&
+        box.top < rect.bottom
+      )
+    }
+    const walkers = [...document.querySelectorAll('[data-walker-tap]')].filter(crosses).length
+    const still = [...document.querySelectorAll('.nw-skill[data-skill="still"]')].filter(crosses).length
+    const mend = [...document.querySelectorAll('.nw-skill[data-skill="mend"]')].filter(crosses).length
+    const buy = document.querySelector('.defend-path-buy')
+    const buyBox = buy?.getBoundingClientRect()
+    const bx = buyBox ? buyBox.x + buyBox.width / 2 : 0
+    const by = buyBox ? buyBox.y + buyBox.height / 2 : 0
+    const hit = buyBox ? document.elementFromPoint(bx, by) : null
+    return {
+      w: rect.width,
+      h: rect.height,
+      roadHits,
+      walkersOnBoard: document.querySelectorAll('[data-walker-tap]').length,
+      walkers,
+      still,
+      mend,
+      buy: Boolean(hit?.closest?.('.defend-path-buy')),
+    }
+  })
+  assert.ok(strip, '1.4.500 the mid-wave card is open at 375')
+  assert.ok(strip.h <= 100, `1.4.500 the mid-wave card is at most 100px tall (${strip.h})`)
+  assert.equal(strip.roadHits, 0, `1.4.500 the card overlaps 0 road points (${strip.roadHits})`)
+  assert.ok(strip.walkersOnBoard > 0, '1.4.500 a walker tap target is on the board')
+  assert.equal(strip.walkers, 0, `1.4.500 the card overlaps 0 walker tap targets (${strip.walkers})`)
+  assert.equal(strip.still, 0, '1.4.500 the card does not cover Still')
+  assert.equal(strip.mend, 0, '1.4.500 the card does not cover Mend')
+  assert.equal(strip.buy, true, '1.4.500 the buy button still takes the tap')
+  await page.locator(`[data-clear-lamp="${lamp.id}"]`).click({ force: true })
+  await page.locator('.defend-tower-card').waitFor({ state: 'hidden' })
   const fight = Date.now()
   while (Date.now() - fight < 40_000 && (await page.locator('.defend-page.is-boost').count()) < 1) {
     const cue = await page.evaluate(() => {
