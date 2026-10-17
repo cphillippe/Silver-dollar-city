@@ -1204,6 +1204,7 @@ async function checkWaveCues(browser, port, errors) {
       display: style.display,
       visibility: style.visibility,
       opacity: Number(style.opacity),
+      font: Number.parseFloat(style.fontSize),
       w: box.width,
       h: box.height,
       visible: typeof node.checkVisibility === 'function' ? node.checkVisibility() : true,
@@ -1216,6 +1217,17 @@ async function checkWaveCues(browser, port, errors) {
   assert.notEqual(digit.display, 'none', '1.4.497 the countdown digit is shown')
   assert.equal(digit.visibility, 'visible', '1.4.497 the countdown digit is visible')
   assert.ok(digit.opacity > 0 && digit.w > 8 && digit.h > 8 && digit.visible, '1.4.497 the countdown digit is on screen')
+  assert.ok(digit.visible && digit.font >= 90 && digit.font <= 102, `1.4.499 the countdown digit is about 96px and visible (${digit.font})`)
+  const skills = await page.locator('.nw-skill').evaluateAll((nodes) =>
+    nodes.map((node) => {
+      const box = node.getBoundingClientRect()
+      return { id: node.getAttribute('data-skill'), w: box.width, h: box.height }
+    }),
+  )
+  for (const id of ['still', 'mend']) {
+    const hit = skills.find((skill) => skill.id === id)
+    assert.ok(hit && hit.w >= 44 && hit.h >= 44, `1.4.499 ${id} hit area is at least 44px (${hit?.w}x${hit?.h})`)
+  }
   assert.equal(digit.blocked, false, '1.4.497 the countdown digit does not catch the tap')
   assert.equal(digit.board, true, '1.4.497 a walker tap during the count lands on the board')
   assert.equal(count.discs, 0, '1.4.496 the count is up before any hit disc')
