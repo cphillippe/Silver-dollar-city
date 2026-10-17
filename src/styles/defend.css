@@ -5643,12 +5643,16 @@ button.defend-new-lamp[aria-pressed='true'] {
   line-height: 1;
 }
 
+/* Empty alt, same as Begin. The letter stays visible and stays out of the name.
+   The plain line is the fallback when a browser drops the alt-text form. */
 .defend-page.is-easy-watch.is-easy-tap .defend-tower-card .defend-path[data-path='far'] .defend-path-buy::before {
   content: var(--nw-icon-far);
+  content: var(--nw-icon-far) / "";
 }
 
 .defend-page.is-easy-watch.is-easy-tap .defend-tower-card .defend-path[data-path='strong'] .defend-path-buy::before {
   content: var(--nw-icon-strong);
+  content: var(--nw-icon-strong) / "";
 }
 
 .defend-page.is-easy-watch.is-easy-tap .defend-tower-card .defend-tower-tool,
