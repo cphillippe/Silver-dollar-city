@@ -1078,7 +1078,21 @@ function namedLampId(feet) {
   return `at:${match[1]}:${match[2]}`
 }
 
+async function pathBuyNames(page) {
+  const names = {}
+  for (const path of ['far', 'strong']) {
+    const snap = await page
+      .locator(`.defend-tower-card .defend-path[data-path="${path}"] button.defend-path-buy`)
+      .ariaSnapshotJSON()
+    const nodes = Array.isArray(snap) ? snap : [snap]
+    const button = nodes.find((node) => node && node.role === 'button')
+    names[path] = button && typeof button.name === 'string' ? button.name : ''
+  }
+  return names
+}
+
 async function openNamedUpgrades(page, when) {
+  let names = null
   for (const seat of NAMED_SEATS) {
     const lamp = namedLampId(seat.feet)
     const button = page.locator(`[data-clear-lamp="${lamp}"]`)
@@ -1094,10 +1108,12 @@ async function openNamedUpgrades(page, when) {
     await button.click()
     const card = (await page.locator('.defend-tower-card').innerText()).replace(/\s+/g, ' ')
     assert.match(card, new RegExp(seat.word), `1.4.497 ${seat.id} opens its upgrade ${when} (${card.slice(0, 40)})`)
+    if (!names) names = await pathBuyNames(page)
     await page.waitForTimeout(450)
     await button.evaluate((node) => node.click())
     await page.locator('.defend-tower-card').waitFor({ state: 'hidden' })
   }
+  return names
 }
 
 function cueClearance(page, selector) {
@@ -1184,7 +1200,7 @@ async function checkWaveCues(browser, port, errors) {
       `1.4.496 ${tap.type} plants on its seat ${JSON.stringify(planted)}`,
     )
   }
-  await openNamedUpgrades(page, 'pre-Begin')
+  const beforeBuys = await openNamedUpgrades(page, 'pre-Begin')
   const started = Date.now()
   await page.locator('.defend-go').click()
   await page.locator('[data-wave-count="3"]').waitFor()
@@ -1311,6 +1327,10 @@ async function checkWaveCues(browser, port, errors) {
     const bx = buyBox ? buyBox.x + buyBox.width / 2 : 0
     const by = buyBox ? buyBox.y + buyBox.height / 2 : 0
     const hit = buyBox ? document.elementFromPoint(bx, by) : null
+    const marks = [...document.querySelectorAll('.defend-path-buy')].map((node) => ({
+      path: node.closest('[data-path]')?.getAttribute('data-path') || '',
+      mark: getComputedStyle(node, '::before').content.replace(/^["']|["']$/g, ''),
+    }))
     return {
       w: rect.width,
       h: rect.height,
@@ -1320,6 +1340,7 @@ async function checkWaveCues(browser, port, errors) {
       still,
       mend,
       buy: Boolean(hit?.closest?.('.defend-path-buy')),
+      marks,
     }
   })
   assert.ok(strip, '1.4.500 the mid-wave card is open at 375')
@@ -1330,6 +1351,21 @@ async function checkWaveCues(browser, port, errors) {
   assert.equal(strip.still, 0, '1.4.500 the card does not cover Still')
   assert.equal(strip.mend, 0, '1.4.500 the card does not cover Mend')
   assert.equal(strip.buy, true, '1.4.500 the buy button still takes the tap')
+  const farMark = strip.marks.find((item) => item.path === 'far')
+  const strongMark = strip.marks.find((item) => item.path === 'strong')
+  assert.ok(
+    farMark && strongMark && farMark.mark && strongMark.mark && farMark.mark !== 'none' && strongMark.mark !== 'none' && farMark.mark !== strongMark.mark,
+    `1.4.501 Far and Strong each show a distinct mark (${JSON.stringify(strip.marks)})`,
+  )
+  const waveBuys = await pathBuyNames(page)
+  for (const path of ['far', 'strong']) {
+    assert.ok(beforeBuys[path], `1.4.501 ${path} has a pre-Begin buy name (${beforeBuys[path]})`)
+    assert.equal(
+      waveBuys[path],
+      beforeBuys[path],
+      `1.4.501 ${path} mid-wave name matches pre-Begin with no mark letter (${waveBuys[path]} vs ${beforeBuys[path]})`,
+    )
+  }
   await page.locator(`[data-clear-lamp="${lamp.id}"]`).click({ force: true })
   await page.locator('.defend-tower-card').waitFor({ state: 'hidden' })
   const fight = Date.now()
