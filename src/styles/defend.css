@@ -5588,11 +5588,3 @@ button.defend-new-lamp[aria-pressed='true'] {
 .defend-page.is-easy-watch .nw-pace[data-state='locked'] {
   pointer-events: none;
 }
-
-/* With the locked pace out of the way, the sky lamp opens. Its card used to cover
-   the road. Park the mid-wave card on the bottom edge so a walker above it can be tapped.
-   Hard never has .is-easy-watch. Plant and the clear keep the lamp-side card. */
-.defend-page.is-easy-watch.is-easy-tap .defend-tower-card {
-  top: auto !important;
-  bottom: 8px !important;
-}
