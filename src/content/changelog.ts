@@ -8,6 +8,15 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.500',
+    title: 'A short buy',
+    when: '2026-10-17',
+    items: [
+      'On Easy, while walkers are moving, an open lamp is a short strip beside the road. It shows the buy and its cost.',
+      'That strip stays off the road, off the walkers, and off Still and Mend. Hard nights keep their full card.',
+    ],
+  },
+  {
     version: '1.4.499',
     title: 'Quiet Paths',
     when: '2026-10-17',
