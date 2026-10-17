@@ -1311,6 +1311,10 @@ async function checkWaveCues(browser, port, errors) {
     const bx = buyBox ? buyBox.x + buyBox.width / 2 : 0
     const by = buyBox ? buyBox.y + buyBox.height / 2 : 0
     const hit = buyBox ? document.elementFromPoint(bx, by) : null
+    const marks = [...document.querySelectorAll('.defend-path-buy')].map((node) => ({
+      path: node.closest('[data-path]')?.getAttribute('data-path') || '',
+      mark: getComputedStyle(node, '::before').content.replace(/^["']|["']$/g, ''),
+    }))
     return {
       w: rect.width,
       h: rect.height,
@@ -1320,6 +1324,7 @@ async function checkWaveCues(browser, port, errors) {
       still,
       mend,
       buy: Boolean(hit?.closest?.('.defend-path-buy')),
+      marks,
     }
   })
   assert.ok(strip, '1.4.500 the mid-wave card is open at 375')
@@ -1330,6 +1335,12 @@ async function checkWaveCues(browser, port, errors) {
   assert.equal(strip.still, 0, '1.4.500 the card does not cover Still')
   assert.equal(strip.mend, 0, '1.4.500 the card does not cover Mend')
   assert.equal(strip.buy, true, '1.4.500 the buy button still takes the tap')
+  const farMark = strip.marks.find((item) => item.path === 'far')
+  const strongMark = strip.marks.find((item) => item.path === 'strong')
+  assert.ok(
+    farMark && strongMark && farMark.mark && strongMark.mark && farMark.mark !== 'none' && strongMark.mark !== 'none' && farMark.mark !== strongMark.mark,
+    `1.4.501 Far and Strong each show a distinct mark (${JSON.stringify(strip.marks)})`,
+  )
   await page.locator(`[data-clear-lamp="${lamp.id}"]`).click({ force: true })
   await page.locator('.defend-tower-card').waitFor({ state: 'hidden' })
   const fight = Date.now()
