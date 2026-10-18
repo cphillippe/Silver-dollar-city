@@ -36,6 +36,8 @@ interface MindMapProps {
   onClose: () => void
   onEnter: (id: CityPlotId) => void
   onNavigate: (view: View) => void
+  /** Easy route-opened sheets hide Build. Hard and map-opened sheets keep it. */
+  allowBuild?: boolean
 }
 
 /** Easy PLACE repeats the sheet title — show the one-word path role instead. */
@@ -44,7 +46,7 @@ function easyPlaceTile(plotId: CityPlotId, placeTitle: string): string {
   return path === placeTitle ? placeTitle : path
 }
 
-export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) {
+export function MindMap({ plotId, onClose, onEnter, onNavigate, allowBuild = true }: MindMapProps) {
   const { progress, upgradeBuilding } = useProgress()
   const easy = isEasy(progress)
   const graph = (() => {
@@ -201,13 +203,19 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
               {easy ? `Walk ${gateTitle} next` : `Walk ${gateTitle}`}
             </button>
           ) : ready ? (
-            <button
-              type="button"
-              className="btn gold xl build-upgrade"
-              onClick={() => upgradeBuilding(plotId)}
-            >
-              Build this
-            </button>
+            easy && !allowBuild ? (
+              <button type="button" className="btn primary xl" onClick={() => onEnter(plotId)}>
+                {`Walk ${graph.placeTitle}`}
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="btn gold xl build-upgrade"
+                onClick={() => upgradeBuilding(plotId)}
+              >
+                Build this
+              </button>
+            )
           ) : (
             <button type="button" className="btn primary xl" onClick={() => onEnter(plotId)}>
               {easy ? `Walk ${graph.placeTitle}` : `Enter ${graph.placeTitle}`}
@@ -217,7 +225,7 @@ export function MindMap({ plotId, onClose, onEnter, onNavigate }: MindMapProps) 
             <button type="button" className="text-link mind-map-walk" onClick={onClose}>
               Stay on the map
             </button>
-          ) : ready ? (
+          ) : ready && !(easy && !allowBuild) ? (
             <button type="button" className="text-link mind-map-walk" onClick={() => onEnter(plotId)}>
               {easy ? `Walk ${graph.placeTitle}` : `Enter ${graph.placeTitle}`}
             </button>

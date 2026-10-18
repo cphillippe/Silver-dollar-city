@@ -44,6 +44,7 @@ import { easyTrailView, isEasy } from '../lib/easy'
 import type { View } from '../types'
 import riverWalk from '../assets/cast/portrait-river.png'
 import juniperWalk from '../assets/cast/portrait-juniper.png'
+import { RESIDENT_WALKER } from './city/residents'
 import {
   anyUpgradeReady,
   canUpgrade,
@@ -77,6 +78,11 @@ interface CityMapProps {
   onMindPlot?: (id: CityPlotId | null) => void
   /** Easy Home: grow the camera to the phone so the valley fills the stage. */
   fillStage?: boolean
+  /** Easy Home: the house the player chose before Build or a second tap. */
+  selectedPlot?: CityPlotId | null
+  onSelectPlot?: (id: CityPlotId | null) => void
+  /** Easy Manage sheet may hide Build when the route opened it. */
+  allowBuild?: boolean
 }
 
 const FULL_CAM = MAP_PLATE
@@ -102,6 +108,9 @@ export function CityMap({
   mindPlot: mindPlotProp,
   onMindPlot,
   fillStage = false,
+  selectedPlot = null,
+  onSelectPlot,
+  allowBuild = true,
 }: CityMapProps) {
   const { progress } = useProgress()
   const today = localDateKey()
@@ -172,6 +181,14 @@ export function CityMap({
       setTapped((cur) => (cur === id ? null : cur))
     }, 340)
     setLockNote(null)
+    if (isEasy(progress)) {
+      if (id !== selectedPlot) {
+        onSelectPlot?.(id)
+        return
+      }
+      setMindPlot(id)
+      return
+    }
     setMindPlot(id)
   }
 
@@ -397,6 +414,10 @@ export function CityMap({
   return (
     <section
       className={`city-overworld is-city-build is-age-${age} is-alive ${mode === 'poster' ? 'is-poster' : ''} ${celebrating ? 'is-revealing' : ''} ${homecoming ? 'is-homecoming' : ''}`}
+      onKeyDown={(event) => {
+        if (event.key !== 'Escape' || !easy) return
+        onSelectPlot?.(null)
+      }}
     >
       <svg
         ref={svgRef}
@@ -408,7 +429,7 @@ export function CityMap({
           mode === 'poster'
             ? 'A garden valley. The City of Heaven waits on the ridge.'
             : easy
-              ? 'Silver City. Tap a building to Manage it, walk, or Build this.'
+              ? 'Silver City. Tap a building to choose it, then Build this or tap again to open it.'
               : celebrating
                 ? `${beat?.beat} ${beat?.title}`
                 : `Silver City, ${CITY_AGE_TITLE[age]}. ${standing} of ${possible} landmarks standing. The town grows toward the City of Heaven.`
@@ -482,7 +503,13 @@ export function CityMap({
         </defs>
 
         {fillStage ? (
-          <g className="city-stage-bleed" aria-hidden>
+          <g
+            className="city-stage-bleed"
+            aria-hidden
+            onClick={() => {
+              if (easy) onSelectPlot?.(null)
+            }}
+          >
             <rect
               x={view.x - 4}
               y={view.y - 4}
@@ -553,6 +580,9 @@ export function CityMap({
           width={640}
           height={420}
           preserveAspectRatio="xMidYMid slice"
+          onClick={() => {
+            if (easy) onSelectPlot?.(null)
+          }}
         />
 
         <HeavenCity
@@ -560,6 +590,7 @@ export function CityMap({
           easy={easy}
           onOpen={() => {
             if (easy) {
+              onSelectPlot?.(null)
               setLockNote('Tap a building to walk or Manage it.')
               return
             }
@@ -604,25 +635,49 @@ export function CityMap({
 
         {!celebrating ? (
           <g className="city-walkers" aria-hidden>
-            <image
-              className="city-walker city-walker-a"
-              href={riverWalk}
-              x="78"
-              y="286"
-              width="32"
-              height="32"
-              clipPath="url(#city-face-clip)"
-            />
-            {age !== 'eden' ? (
+            {easy ? (
               <image
-                className="city-walker city-walker-b"
-                href={juniperWalk}
-                x="408"
-                y="266"
-                width="30"
-                height="30"
+                className="city-walker city-walker-a is-resident"
+                href={RESIDENT_WALKER.a}
+                x="78"
+                y="286"
+                width="32"
+                height="32"
+                preserveAspectRatio="xMidYMax meet"
+              />
+            ) : (
+              <image
+                className="city-walker city-walker-a"
+                href={riverWalk}
+                x="78"
+                y="286"
+                width="32"
+                height="32"
                 clipPath="url(#city-face-clip)"
               />
+            )}
+            {age !== 'eden' ? (
+              easy ? (
+                <image
+                  className="city-walker city-walker-b is-resident"
+                  href={RESIDENT_WALKER.b}
+                  x="408"
+                  y="266"
+                  width="30"
+                  height="30"
+                  preserveAspectRatio="xMidYMax meet"
+                />
+              ) : (
+                <image
+                  className="city-walker city-walker-b"
+                  href={juniperWalk}
+                  x="408"
+                  y="266"
+                  width="30"
+                  height="30"
+                  clipPath="url(#city-face-clip)"
+                />
+              )
             ) : null}
           </g>
         ) : null}
@@ -662,7 +717,7 @@ export function CityMap({
           </g>
         ) : null}
 
-        {mode === 'live' && !celebrating ? (
+        {mode === 'live' && !celebrating && !(easy && selectedPlot === nextId) ? (
           <g className="city-next-mark" transform={`translate(${nextAt.x} ${nextAt.y})`}>
             <circle
               r={easy ? 22 : 34}
@@ -684,6 +739,7 @@ export function CityMap({
           rising={rising === 'lookout'}
           tapped={tapped === 'lookout'}
           ready={canUpgrade('lookout', progress)}
+          selected={easy && selectedPlot === 'lookout'}
           onOpen={open}
         />
 
@@ -695,6 +751,7 @@ export function CityMap({
           rising={rising === 'observatory'}
           tapped={tapped === 'observatory'}
           ready={canUpgrade('observatory', progress)}
+          selected={easy && selectedPlot === 'observatory'}
           onOpen={open}
         />
 
@@ -706,6 +763,7 @@ export function CityMap({
           rising={rising === 'hollow'}
           tapped={tapped === 'hollow'}
           ready={canUpgrade('hollow', progress)}
+          selected={easy && selectedPlot === 'hollow'}
           onOpen={open}
         />
 
@@ -717,6 +775,7 @@ export function CityMap({
           rising={rising === 'journal'}
           tapped={tapped === 'journal'}
           ready={canUpgrade('journal', progress)}
+          selected={easy && selectedPlot === 'journal'}
           onOpen={open}
         />
 
@@ -728,6 +787,7 @@ export function CityMap({
           rising={rising === 'bench'}
           tapped={tapped === 'bench'}
           ready={canUpgrade('bench', progress)}
+          selected={easy && selectedPlot === 'bench'}
           onOpen={open}
         />
 
@@ -739,6 +799,7 @@ export function CityMap({
           rising={rising === 'lamps'}
           tapped={tapped === 'lamps'}
           ready={canUpgrade('lamps', progress)}
+          selected={easy && selectedPlot === 'lamps'}
           onOpen={open}
         />
 
@@ -750,6 +811,7 @@ export function CityMap({
           rising={rising === 'gate'}
           tapped={tapped === 'gate'}
           ready={canUpgrade('gate', progress)}
+          selected={easy && selectedPlot === 'gate'}
           onOpen={open}
         />
 
@@ -761,6 +823,7 @@ export function CityMap({
           rising={rising === 'porch'}
           tapped={tapped === 'porch'}
           ready={canUpgrade('porch', progress)}
+          selected={easy && selectedPlot === 'porch'}
           onOpen={open}
         />
 
@@ -872,6 +935,7 @@ export function CityMap({
           onClose={() => setMindPlot(null)}
           onEnter={enter}
           onNavigate={onNavigate}
+          allowBuild={allowBuild}
         />
       ) : null}
     </section>

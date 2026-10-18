@@ -426,6 +426,32 @@ html[data-easy='on'] .city-folk .city-porch-rail {
   filter: none;
 }
 
+.city-plot .city-plot-select {
+  display: none;
+}
+
+.city-plot.is-selected .city-plot-select {
+  display: block;
+  fill: rgba(255, 224, 138, 0.18);
+  stroke: var(--gold);
+  stroke-width: 3.5;
+  pointer-events: none;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: city-pulse 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .city-plot.is-selected .city-plot-select {
+    animation: none;
+    opacity: 0.9;
+  }
+}
+
+.hub.is-easy-home .easy-dock-build {
+  min-width: 44px;
+}
+
 /* Belt: SVG <image> fill paints its viewport rect through cutout alpha
    even when the parent <g> is fill:none (#165 leftover on Pages/porch). */
 .city-plot.has-candy-img .city-plot-img {
@@ -521,6 +547,15 @@ html[data-easy='on'] .city-folk .city-porch-rail {
 
 .city-overworld.is-alive .city-folk.is-lit .city-portrait-img {
   animation: city-cheer-glow 1.8s ease-in-out infinite;
+}
+
+.city-overworld .city-portrait-img.is-resident,
+.city-overworld .city-walker.is-resident {
+  filter: none;
+}
+
+.city-overworld.is-alive .city-folk .city-portrait-img.is-resident {
+  animation: none;
 }
 
 .city-plot.is-tapped {
