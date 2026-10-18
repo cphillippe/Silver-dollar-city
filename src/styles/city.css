@@ -426,11 +426,22 @@ html[data-easy='on'] .city-folk .city-porch-rail {
   filter: none;
 }
 
+/* Easy plot focus is the gold ring. The browser rectangle reads as a white plate. */
+.city-overworld .city-plot.is-easy-lot,
+.city-overworld .city-plot.is-easy-lot:focus,
+.city-overworld .city-plot.is-easy-lot:focus-visible,
+.city-overworld .city-plot.is-easy-lot .city-plot-hit,
+.city-overworld .city-plot.is-easy-lot .city-plot-hit:focus,
+.city-overworld .city-plot.is-easy-lot .city-plot-hit:focus-visible {
+  outline: none;
+}
+
 .city-plot .city-plot-select {
   display: none;
 }
 
-.city-plot.is-selected .city-plot-select {
+.city-plot.is-selected .city-plot-select,
+.city-overworld .city-plot.is-easy-lot:focus-visible .city-plot-select {
   display: block;
   fill: rgba(255, 224, 138, 0.18);
   stroke: var(--gold);
@@ -442,7 +453,8 @@ html[data-easy='on'] .city-folk .city-porch-rail {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .city-plot.is-selected .city-plot-select {
+  .city-plot.is-selected .city-plot-select,
+  .city-overworld .city-plot.is-easy-lot:focus-visible .city-plot-select {
     animation: none;
     opacity: 0.9;
   }

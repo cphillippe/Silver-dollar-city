@@ -334,7 +334,6 @@ export function PlotGroup({
       {clickable ? (
         <circle className="city-plot-hit" cx={at.x} cy={at.y} r={hit} />
       ) : null}
-      <circle className="city-plot-select" cx={at.x} cy={at.y} r={hit} />
       {vacant ? (
         next || ready ? (
           <g className="city-lot is-staked" transform={`translate(${at.x} ${at.y}) scale(${scale})`}>
@@ -378,6 +377,7 @@ export function PlotGroup({
           ))}
         </g>
       ) : null}
+      <circle className="city-plot-select" cx={at.x} cy={at.y} r={hit} />
     </g>
   )
 }
