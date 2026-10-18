@@ -7,6 +7,8 @@ import { localDateKey } from '../lib/dates'
 import { CITY_PLOTS, nextPlotId, type CityPlotId } from '../lib/city'
 import {
   appliedTier,
+  canUpgrade,
+  easyPlotTag,
   lampsBuildGift,
   lotTapWhy,
   nextUpgradeNeed,
@@ -62,13 +64,20 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
       ? (openPlot as CityPlotId)
       : null
   const [mindPlot, setMindPlot] = useState<CityPlotId | null>(requested)
+  const [selectedPlot, setSelectedPlot] = useState<CityPlotId | null>(null)
+  const [openedFromMap, setOpenedFromMap] = useState(false)
 
   useEffect(() => {
     setMindPlot(requested)
+    if (requested) {
+      setOpenedFromMap(false)
+      setSelectedPlot(null)
+    }
   }, [requested])
 
   function setPlot(id: CityPlotId | null) {
     setMindPlot(id)
+    if (id) setOpenedFromMap(true)
     if (!id && openPlot) onNavigate({ name: 'hub' })
   }
 
@@ -81,7 +90,32 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
     const buildNeed = nextUpgradeNeed(nextId, progress, true)
     const lampsGift = lampsBuildGift(progress, doneToday, upgradeReadyId)
     const readyLine = upgradeReadyId ? 'A building is ready. Tap it, then Build this.' : !doneToday ? 'Finish today’s story once. Then you can raise the building — no pay.' : buildNeed.line
-    const buildGift = lampsGift ?? readyLine
+    const idleGift = lampsGift ?? readyLine
+    const selectedReady = Boolean(selectedPlot && canUpgrade(selectedPlot, progress))
+    const selectedName = selectedPlot
+      ? selectedPlot === 'journal'
+        ? 'River’s pages'
+        : easyPlotTag(selectedPlot)
+      : ''
+    let dockEyebrow = 'Build It'
+    let dockGift = idleGift
+    if (selectedPlot && selectedReady) {
+      dockEyebrow = selectedName
+      dockGift = lampsBuildGift(progress, doneToday, selectedPlot) ?? 'Ready to raise. Tap Build this.'
+    } else if (selectedPlot) {
+      dockEyebrow = selectedName
+      const plot = CITY_PLOTS.find((item) => item.id === selectedPlot)
+      const why =
+        lotTapWhy(
+          selectedPlot,
+          progress,
+          true,
+          plot?.areaId ? isAreaUnlocked(plot.areaId, progress.completed) : true,
+          plot?.areaId ? areaGateCopy(plot.areaId, progress.completed, true) : '',
+          doneToday,
+        ) ?? nextUpgradeNeed(selectedPlot, progress, true).line
+      dockGift = `${why} Tap it again to open.`
+    }
     // 1.4.357: Home order is Read → Match → Lock In. One gold step. Trail focus stays.
     const readNow = !doneToday && focus !== 'hold'
     const playNow = matchReady && !readNow && focus !== 'hold'
@@ -89,7 +123,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
     const playLater = !playNow && !lockNow
 
     function easyBuildThis() {
-      const readyId = readyUpgradeId(progress, nextId)
+      const readyId = selectedPlot && canUpgrade(selectedPlot, progress) ? selectedPlot : null
       if (readyId) upgradeBuilding(readyId)
     }
     // Easy Clear 1.4.157: Home whisper = short next-step (maze/run/merge/dig/snap Home), not full hunt how — Fixes #203 (completes #192 family)
@@ -122,6 +156,9 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
             mindPlot={mindPlot}
             onMindPlot={setPlot}
             fillStage
+            selectedPlot={selectedPlot}
+            onSelectPlot={setSelectedPlot}
+            allowBuild={openedFromMap}
           />
         </section>
 
@@ -129,13 +166,16 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
           <p className="easy-home-whisper quiet">{homeWhisper}</p>
           <section className="easy-build-it" aria-label="Build It">
             <div className="easy-build-meta">
-              <p className="eyebrow">Build It</p>
-              <p className="easy-build-gift">{buildGift}</p>
+              <p className="eyebrow">{dockEyebrow}</p>
+              <p className="easy-build-gift" aria-live="polite">
+                {dockGift}
+              </p>
             </div>
-            {upgradeReadyId ? (
+            {selectedReady ? (
               <button
                 type="button"
                 className="btn gold easy-dock-build"
+                aria-label={`Build this, ${selectedName}`}
                 onClick={easyBuildThis}
               >
                 Build this

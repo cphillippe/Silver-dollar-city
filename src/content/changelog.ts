@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.502',
+    title: 'Tap the house first',
+    when: '2026-10-18',
+    items: [
+      'On Easy, tap a house to choose it. A gold ring shows, and Build this raises that house.',
+      'Tap the same house again to open it. Tap the empty map to clear the choice.',
+      'New neighbors stand on the map. Hard stays the same.',
+    ],
+  },
+  {
     version: '1.4.501',
     title: 'Far and Strong marks',
     when: '2026-10-17',

@@ -1,4 +1,5 @@
 import { portraitSrc } from '../Avatar'
+import { RESIDENT_PORTRAIT } from './residents'
 import plotBenchBuilt from '../../assets/city/plots/plot-bench-built.webp'
 import plotBenchLit from '../../assets/city/plots/plot-bench-lit.webp'
 import plotBenchScaffold from '../../assets/city/plots/plot-bench-scaffold.webp'
@@ -281,6 +282,7 @@ export function PlotGroup({
   rising,
   tapped,
   ready,
+  selected = false,
   onOpen,
 }: {
   id: CityPlotId
@@ -290,6 +292,7 @@ export function PlotGroup({
   rising: boolean
   tapped: boolean
   ready: boolean
+  selected?: boolean
   onOpen: (id: CityPlotId) => void
 }) {
   const { progress } = useProgress()
@@ -312,9 +315,10 @@ export function PlotGroup({
   const candyImg = plotImageHref(id, stage)
   return (
     <g
-      className={`city-plot is-${stage} ${next ? 'is-next' : ''} ${rising ? 'is-rising' : ''} ${tapped ? 'is-tapped' : ''} ${ready ? 'is-ready' : ''} ${easy ? 'is-easy-lot' : ''} ${candyImg ? 'has-candy-img' : ''}`}
+      className={`city-plot is-${stage} ${next ? 'is-next' : ''} ${rising ? 'is-rising' : ''} ${tapped ? 'is-tapped' : ''} ${ready ? 'is-ready' : ''} ${selected ? 'is-selected' : ''} ${easy ? 'is-easy-lot' : ''} ${candyImg ? 'has-candy-img' : ''}`}
       role={clickable ? 'button' : undefined}
       tabIndex={clickable ? 0 : undefined}
+      aria-pressed={clickable && easy ? Boolean(selected) : undefined}
       aria-label={`${title} ${stage}${ready ? ', upgrade ready' : ''}${next ? ', next to build' : ''}${rising ? ', just rose' : ''}`}
       onClick={() => {
         if (clickable) onOpen(id)
@@ -330,6 +334,7 @@ export function PlotGroup({
       {clickable ? (
         <circle className="city-plot-hit" cx={at.x} cy={at.y} r={hit} />
       ) : null}
+      <circle className="city-plot-select" cx={at.x} cy={at.y} r={hit} />
       {vacant ? (
         next || ready ? (
           <g className="city-lot is-staked" transform={`translate(${at.x} ${at.y}) scale(${scale})`}>
@@ -808,16 +813,28 @@ export function TownFolk({
           <path className="city-porch-rail" d="M-16 2 H16 M-16 2 v-8 M0 2 v-8 M16 2 v-8" />
         ) : null}
         {stage === 'lit' ? <circle className="city-lamp" cx="18" cy="-4" r="3.8" /> : null}
-        <image
-          className="city-portrait-img"
-          href={portraitSrc(voice.who)}
-          x={-FOLK_PORTRAIT_SIZE / 2}
-          y={FOLK_PORTRAIT_Y}
-          width={FOLK_PORTRAIT_SIZE}
-          height={FOLK_PORTRAIT_SIZE}
-          clipPath="url(#city-face-clip)"
-          preserveAspectRatio="xMidYMid slice"
-        />
+        {easy ? (
+          <image
+            className="city-portrait-img is-resident"
+            href={RESIDENT_PORTRAIT[id]}
+            x={-FOLK_PORTRAIT_SIZE / 2}
+            y={FOLK_PORTRAIT_Y}
+            width={FOLK_PORTRAIT_SIZE}
+            height={FOLK_PORTRAIT_SIZE}
+            preserveAspectRatio="xMidYMax meet"
+          />
+        ) : (
+          <image
+            className="city-portrait-img"
+            href={portraitSrc(voice.who)}
+            x={-FOLK_PORTRAIT_SIZE / 2}
+            y={FOLK_PORTRAIT_Y}
+            width={FOLK_PORTRAIT_SIZE}
+            height={FOLK_PORTRAIT_SIZE}
+            clipPath="url(#city-face-clip)"
+            preserveAspectRatio="xMidYMid slice"
+          />
+        )}
         {speaking ? (
           <g className="city-bubble">
             <rect x="-38" y="-62" width="76" height="16" rx="8" />
