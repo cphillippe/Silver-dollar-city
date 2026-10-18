@@ -17185,8 +17185,23 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.match(plot502, /portraitSrc\(voice\.who\)/, '1.4.502 TownFolk Hard keeps the cast portrait')
   const cityCss502 = readFileSync(new URL('../src/styles/city.css', import.meta.url), 'utf8')
   assert.match(cityCss502, /\.city-plot\.is-selected \.city-plot-select/)
+  assert.match(
+    cityCss502,
+    /\.city-overworld \.city-plot\.is-easy-lot,\s*\.city-overworld \.city-plot\.is-easy-lot:focus,\s*\.city-overworld \.city-plot\.is-easy-lot:focus-visible,\s*\.city-overworld \.city-plot\.is-easy-lot \.city-plot-hit,\s*\.city-overworld \.city-plot\.is-easy-lot \.city-plot-hit:focus,\s*\.city-overworld \.city-plot\.is-easy-lot \.city-plot-hit:focus-visible \{\s*outline:\s*none;\s*\}/,
+    '1.4.502 Easy plots and hit targets drop the focus rectangle',
+  )
+  assert.match(
+    cityCss502,
+    /\.city-overworld \.city-plot\.is-easy-lot:focus-visible \.city-plot-select/,
+    '1.4.502 keyboard focus shows the gold select ring',
+  )
   const indexCss502 = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
   assert.doesNotMatch(indexCss502, /city-plot-select/, '1.4.502 selection ring stays out of index.css')
+  assert.doesNotMatch(
+    indexCss502,
+    /\.city-plot\.is-easy-lot[\s\S]{0,120}outline:\s*none/,
+    '1.4.502 Easy plot outline stays out of index.css',
+  )
   assert.doesNotMatch(indexCss502, /is-resident/, '1.4.502 resident faces stay out of index.css')
   const residents502 = readFileSync(new URL('../src/components/city/residents.ts', import.meta.url), 'utf8')
   const residentFiles = [
