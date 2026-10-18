@@ -1677,7 +1677,17 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.501')
+assert.equal(APP_VERSION, '1.4.502')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.502'), '1.4.502 changelog row')
+assert.match(latestChange('1.4.502').title, /tap|house|build/i)
+assert.doesNotMatch(
+  latestChange('1.4.502').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.502 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.502').items.join('\n'), /tap a house/i)
+assert.match(latestChange('1.4.502').items.join('\n'), /neighbors/)
+assert.match(latestChange('1.4.502').items.join('\n'), /Hard/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.501'), '1.4.501 changelog row')
 assert.match(latestChange('1.4.501').title, /far|strong|mark/i)
 assert.doesNotMatch(
@@ -3457,9 +3467,11 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
     const easyBuildFn = hubSrc.match(/function easyBuildThis\(\) \{[\s\S]*?\n    \}/)?.[0] ?? ''
     assert.ok(easyBuildFn.length > 0, 'easyBuildThis handler present')
     assert.doesNotMatch(easyBuildFn, /setPlot\(nextId\)/)
+    assert.match(easyBuildFn, /selectedPlot/)
+    assert.doesNotMatch(easyBuildFn, /readyUpgradeId/)
   }
   assert.match(hubSrc, /upgradeReadyId/)
-  assert.match(easyHome, /upgradeReadyId \?/)
+  assert.match(easyHome, /selectedReady \?/)
   assert.match(easyHome, /easy-dock-walk/)
   assert.match(easyHome, /name: 'daily'/)
   assert.doesNotMatch(easyHome, /onClick=\{\(\) => setPlot\(nextId\)\}/)
@@ -4177,7 +4189,7 @@ assert.match(mapSrc, /easy \? null : <SpinePath/)
 assert.match(mapSrc, /easy \? null : \(\s*\n\s*<>[\s\S]*city-street-main/)
 assert.match(mapSrc, /if \(isEasy\(progress\)\) return/)
 assert.match(mapSrc, /if \(playing\.current && !isEasy\(progress\)\) return/)
-assert.match(mapSrc, /Tap a building to Manage it/)
+assert.match(mapSrc, /Tap a building to choose it, then Build this or tap again to open it/)
 assert.match(latestChange('1.4.316').title, /Night Watch|PARTS|parts|sprite|registry/i)
 assert.match(
   latestChange('1.4.316').items.join('\n'),
@@ -16299,7 +16311,7 @@ console.log('check-city: ok')
 // Easy Build It 1.4.338: honest walk-before-build on Easy Home — Fixes #438
 {
   const hub338 = readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8')
-  assert.match(hub338, /upgradeReadyId \?/, '1.4.338 gates gold Build this on ready (#438)')
+  assert.match(hub338, /selectedReady \?/, '1.4.338 gates gold Build this on the selected house (#438)')
   assert.match(hub338, /easy-dock-walk/, '1.4.338 walk CTA when story not done (#438)')
   assert.match(hub338, /name: 'daily'/, '1.4.338 sends to DailyTrail when not ready (#438)')
   {
@@ -17155,6 +17167,70 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.equal(candleStrike(freshCandlePaths(), 3).outer, 0, '1.4.457 a fresh candle has no outer nick')
   assert.equal(candleWalkerDamage(1, 2, 4, true), 1, '1.4.457 the round 5 boss stays off the row extra')
   assert.equal(rowNight.dead, 5, '1.4.457 an unseeded zero-tap row still loses round 5')
+}
+
+// Easy Home 1.4.502: tap the house first, then Build (#761) + resident faces (#594)
+{
+  const hub502 = readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8')
+  const easyBuild502 = hub502.match(/function easyBuildThis\(\) \{[\s\S]*?\n    \}/)?.[0] ?? ''
+  assert.match(easyBuild502, /selectedPlot/, '1.4.502 easyBuildThis uses the selected plot')
+  assert.doesNotMatch(easyBuild502, /readyUpgradeId/, '1.4.502 easyBuildThis does not call readyUpgradeId')
+  assert.match(hub502, /selectedReady \?/, '1.4.502 Easy Build this waits for a selected ready house')
+  assert.match(hub502, /aria-label=\{`Build this, /, '1.4.502 Build names the house')
+  const plot502 = readFileSync(new URL('../src/components/city/CityPlotArt.tsx', import.meta.url), 'utf8')
+  assert.match(plot502, /is-selected/, '1.4.502 PlotGroup marks the chosen house')
+  assert.match(plot502, /aria-pressed/, '1.4.502 PlotGroup exposes pressed')
+  assert.match(plot502, /city-plot-select/, '1.4.502 PlotGroup draws the selection ring')
+  assert.match(plot502, /RESIDENT_PORTRAIT/, '1.4.502 TownFolk Easy uses resident portraits')
+  assert.match(plot502, /portraitSrc\(voice\.who\)/, '1.4.502 TownFolk Hard keeps the cast portrait')
+  const cityCss502 = readFileSync(new URL('../src/styles/city.css', import.meta.url), 'utf8')
+  assert.match(cityCss502, /\.city-plot\.is-selected \.city-plot-select/)
+  assert.match(
+    cityCss502,
+    /\.city-overworld \.city-plot\.is-easy-lot,\s*\.city-overworld \.city-plot\.is-easy-lot:focus,\s*\.city-overworld \.city-plot\.is-easy-lot:focus-visible,\s*\.city-overworld \.city-plot\.is-easy-lot \.city-plot-hit,\s*\.city-overworld \.city-plot\.is-easy-lot \.city-plot-hit:focus,\s*\.city-overworld \.city-plot\.is-easy-lot \.city-plot-hit:focus-visible \{\s*outline:\s*none;\s*\}/,
+    '1.4.502 Easy plots and hit targets drop the focus rectangle',
+  )
+  assert.match(
+    cityCss502,
+    /\.city-overworld \.city-plot\.is-easy-lot:focus-visible \.city-plot-select/,
+    '1.4.502 keyboard focus shows the gold select ring',
+  )
+  const indexCss502 = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
+  assert.doesNotMatch(indexCss502, /city-plot-select/, '1.4.502 selection ring stays out of index.css')
+  assert.doesNotMatch(
+    indexCss502,
+    /\.city-plot\.is-easy-lot[\s\S]{0,120}outline:\s*none/,
+    '1.4.502 Easy plot outline stays out of index.css',
+  )
+  assert.doesNotMatch(indexCss502, /is-resident/, '1.4.502 resident faces stay out of index.css')
+  const residents502 = readFileSync(new URL('../src/components/city/residents.ts', import.meta.url), 'utf8')
+  const residentFiles = [
+    'res-baker-grandma.webp',
+    'res-lantern-boy.webp',
+    'res-reader-girl.webp',
+    'res-fisher-grandpa.webp',
+    'res-postman-dad.webp',
+    'res-headphone-teen.webp',
+    'res-knit-grandma.webp',
+    'res-gardener-mom.webp',
+    'res-curly-toddler.webp',
+    'res-hijab-teacher.webp',
+  ]
+  assert.equal(new Set(residentFiles).size, 10, '1.4.502 ten distinct resident files')
+  for (const file of residentFiles) {
+    assert.match(residents502, new RegExp(file.replace(/\./g, '\\.')), `1.4.502 maps ${file}`)
+    assert.ok(
+      existsSync(new URL(`../src/assets/city/residents/${file}`, import.meta.url)),
+      `1.4.502 missing ${file}`,
+    )
+  }
+  for (const plot of ['porch', 'lamps', 'journal', 'hollow', 'bench', 'gate', 'observatory', 'lookout']) {
+    assert.match(residents502, new RegExp(`${plot}:`), `1.4.502 portrait for ${plot}`)
+  }
+  assert.match(residents502, /RESIDENT_WALKER/, '1.4.502 walker faces')
+  const map502 = readFileSync(new URL('../src/components/CityMap.tsx', import.meta.url), 'utf8')
+  assert.match(map502, /RESIDENT_WALKER\.a/, '1.4.502 walker a is a resident')
+  assert.match(map502, /RESIDENT_WALKER\.b/, '1.4.502 walker b is a resident')
 }
 
 const bossTapScan = readFileSync(new URL('./check-seed-fire.mjs', import.meta.url), 'utf8')
