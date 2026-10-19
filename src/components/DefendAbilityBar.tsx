@@ -151,6 +151,7 @@ export function DefendAbilityBar({
       if (!start.moved) {
         start.moved = true
         setDragFrom(ability)
+        setAbility(ability)
       }
       if (ev.cancelable) ev.preventDefault()
       onLampDragRef.current?.('move', start.ability, ev.clientX, ev.clientY)

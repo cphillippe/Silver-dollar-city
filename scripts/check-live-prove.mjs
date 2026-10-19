@@ -1625,8 +1625,21 @@ async function checkDeadSeat(browser, port, errors) {
   await page.getByText('Too far from the road. Plant closer to the path.').waitFor()
   assert.equal(await page.locator('.defend-pad.is-planted').count(), 0, '1.4.503 the dead seat does not plant')
   await page.screenshot({ path: '/opt/cursor/artifacts/nw-503-dead-toast.png' })
-  const blockedFinger = await plateFinger(page, { x: 340, y: 656 })
-  await page.mouse.click(blockedFinger.x, blockedFinger.y)
+  const blockedFinger = await page.evaluate(() => {
+    const svg = document.querySelector('.defend-board')
+    if (!(svg instanceof SVGSVGElement)) return null
+    const ctm = svg.getScreenCTM()
+    if (!ctm) return null
+    const spot = svg.createSVGPoint()
+    spot.x = 288
+    spot.y = 200
+    const client = spot.matrixTransform(ctm)
+    return { x: client.x, y: client.y }
+  })
+  assert.ok(blockedFinger, '1.4.508 a road finger is on screen')
+  await page.mouse.move(blockedFinger.x, blockedFinger.y)
+  await page.mouse.down()
+  await page.mouse.up()
   await page.getByText('Plant on open ground.').waitFor()
   assert.equal(await page.locator('.defend-pad.is-planted').count(), 0, '1.4.503 a blocked seat does not plant')
   const livePlate = await page.evaluate(() => {
@@ -2016,6 +2029,333 @@ export async function checkOssuaryLesson(browser, port, errors) {
   await context.close()
 }
 
+const LEAD_GREY = {
+  map03: [[152, 275]],
+  map04: [
+    [152, 206],
+    [83, 482],
+    [220, 206],
+    [289, 482],
+  ],
+  map05: [[220, 413]],
+}
+
+const LEAD_GREEN_TAP = {
+  a2: [[220, 275]],
+  'far-hills': [[289, 206]],
+}
+
+const LEAD_GREEN_DRAG = {
+  map05: [
+    [152, 551],
+    [220, 551],
+  ],
+}
+
+const POINTER_MAPS = ['a2', 'far-hills', 'map03', 'map04', 'map05', 'map06']
+const TOO_FAR_TOAST = 'Too far from the road. Plant closer to the path.'
+const CLOSED_TOAST = 'Plant on open ground.'
+
+async function freshWatch(browser, port, errors, id, label) {
+  const context = await browser.newContext({
+    baseURL: `http://127.0.0.1:${port}/`,
+    viewport: { width: 375, height: 667 },
+    deviceScaleFactor: 1,
+    reducedMotion: 'reduce',
+  })
+  await context.addInitScript(
+    (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+    { key: STORAGE_KEY, save: SAVE },
+  )
+  const page = await context.newPage()
+  listen(page, errors, label)
+  const search = id === 'a2' ? '?playtest=1&nwSeed=2' : `?playtest=1&nwSeed=2&nwMap=${id}`
+  await openJump(page, search)
+  if (await page.locator('[data-map-overlay]').count()) {
+    await page.locator(`[data-map="${id}"]`).click()
+    await page.locator('[data-map-overlay]').waitFor({ state: 'detached' })
+  }
+  await page.locator('[data-seat="dead"]').first().waitFor()
+  return { context, page }
+}
+
+async function armCard(page, type) {
+  const card = page.locator(`[data-type="${type}"]`)
+  await card.click()
+  await page.locator(`[data-type="${type}"][aria-pressed="true"]`).waitFor()
+}
+
+async function plantedCount(page) {
+  return page.locator('.defend-pad.is-planted').count()
+}
+
+async function seatUnder(page, x, y) {
+  return page.evaluate(({ x, y }) => {
+    const svg = document.querySelector('.defend-board')
+    if (!(svg instanceof SVGSVGElement)) return null
+    const ctm = svg.getScreenCTM()
+    if (!ctm) return null
+    const point = svg.createSVGPoint()
+    point.x = x
+    point.y = y
+    const local = point.matrixTransform(ctm.inverse())
+    let best = null
+    let bestD = Infinity
+    for (const node of document.querySelectorAll('[data-seat]')) {
+      const cx = Number(node.getAttribute('cx'))
+      const cy = Number(node.getAttribute('cy'))
+      const away = Math.hypot(cx - local.x, cy - local.y)
+      if (away < bestD) {
+        bestD = away
+        best = { cx, cy, seat: node.getAttribute('data-seat'), d: away }
+      }
+    }
+    return best
+  }, { x, y })
+}
+
+async function pointerTap(page, x, y) {
+  await page.mouse.move(x, y)
+  await page.mouse.down()
+  await page.mouse.up()
+}
+
+async function pointerDrag(page, type, x, y) {
+  const box = await page.locator(`[data-type="${type}"]`).boundingBox()
+  assert.ok(box, `${type} card is on screen`)
+  const from = { x: box.x + box.width / 2, y: box.y + box.height / 2 }
+  await page.mouse.move(from.x, from.y)
+  await page.mouse.down()
+  await page.mouse.move(from.x + 28, from.y, { steps: 4 })
+  await page.mouse.move(x, y, { steps: 10 })
+  await page.mouse.up()
+}
+
+async function openSeatClients(page) {
+  return page.evaluate(() => {
+    const svg = document.querySelector('.defend-board')
+    if (!(svg instanceof SVGSVGElement)) return []
+    const ctm = svg.getScreenCTM()
+    if (!ctm) return []
+    const seats = []
+    for (const node of document.querySelectorAll('[data-seat]')) {
+      const x = Number(node.getAttribute('cx'))
+      const y = Number(node.getAttribute('cy'))
+      const point = svg.createSVGPoint()
+      point.x = x
+      point.y = y
+      const client = point.matrixTransform(ctm)
+      if (client.x < 4 || client.y < 48 || client.x > 368 || client.y > 640) continue
+      const hit = document.elementFromPoint(client.x, client.y)
+      const onBoard = Boolean(hit && hit.closest('.defend-board') && !hit.closest('button, .nw-rail, .nw-docks'))
+      if (!onBoard) continue
+      seats.push({ x, y, cx: client.x, cy: client.y, seat: node.getAttribute('data-seat') })
+    }
+    seats.sort((a, b) => Math.hypot(a.cx - 160, a.cy - 280) - Math.hypot(b.cx - 160, b.cy - 280))
+    return seats
+  })
+}
+
+async function assertGreyTap(page, x, y, label) {
+  const under = await seatUnder(page, x, y)
+  assert.equal(under?.seat, 'dead', `${label} ${x},${y} is a grey seat (${JSON.stringify(under)})`)
+  assert.ok(under.d < 8, `${label} ${x},${y} is the seat center (${under.d})`)
+  const before = await plantedCount(page)
+  await page.mouse.move(x, y)
+  await page.waitForTimeout(40)
+  const ring = await page.locator('.defend-ghost').evaluate((node) => ({
+    reaches: node.getAttribute('data-reaches'),
+    transform: node.getAttribute('transform') || '',
+  }))
+  assert.equal(ring.reaches, 'no', `${label} ring on ${x},${y} misses`)
+  assert.match(ring.transform, new RegExp(`translate\\(${under.cx}(?:\\.0)? ${under.cy}(?:\\.0)?\\)`))
+  await page.mouse.down()
+  await page.mouse.up()
+  await page.getByText(TOO_FAR_TOAST).waitFor()
+  assert.equal(await plantedCount(page), before, `${label} grey ${x},${y} does not plant`)
+}
+
+async function assertGreenTap(page, x, y, label) {
+  const under = await seatUnder(page, x, y)
+  assert.equal(under?.seat, 'live', `${label} ${x},${y} is a green seat (${JSON.stringify(under)})`)
+  assert.ok(under.d < 8, `${label} ${x},${y} is the seat center (${under.d})`)
+  const before = await plantedCount(page)
+  await pointerTap(page, x, y)
+  await page.waitForFunction(
+    (count) => document.querySelectorAll('.defend-pad.is-planted').length > count,
+    before,
+  )
+  assert.equal(await page.locator('[data-place-toast]').count(), 0, `${label} green ${x},${y} clears the toast`)
+}
+
+async function assertGreenDrag(page, type, x, y, label) {
+  const under = await seatUnder(page, x, y)
+  assert.equal(under?.seat, 'live', `${label} drag ${x},${y} is a green seat (${JSON.stringify(under)})`)
+  assert.ok(under.d < 8, `${label} drag ${x},${y} is the seat center (${under.d})`)
+  const before = await plantedCount(page)
+  await pointerDrag(page, type, x, y)
+  await page.waitForFunction(
+    (count) => document.querySelectorAll('.defend-pad.is-planted').length > count,
+    before,
+  )
+}
+
+async function plantOffRing(page, type, gesture) {
+  const candidates = await page.evaluate(() => {
+    const svg = document.querySelector('.defend-board')
+    if (!(svg instanceof SVGSVGElement)) return []
+    const ctm = svg.getScreenCTM()
+    if (!ctm) return []
+    const seats = [...document.querySelectorAll('[data-seat]')].map((node) => ({
+      x: Number(node.getAttribute('cx')),
+      y: Number(node.getAttribute('cy')),
+    }))
+    const out = []
+    for (let y = 140; y <= 860 && out.length < 16; y += 24) {
+      for (let x = 96; x <= 680 && out.length < 16; x += 24) {
+        const finger = { x, y: y - 26 }
+        const nearFinger = seats.some((seat) => Math.hypot(seat.x - finger.x, seat.y - finger.y) <= 46)
+        const nearPlant = seats.some((seat) => Math.hypot(seat.x - x, seat.y - y) <= 52)
+        if (nearFinger || nearPlant) continue
+        const point = svg.createSVGPoint()
+        point.x = finger.x
+        point.y = finger.y
+        const client = point.matrixTransform(ctm)
+        if (client.x < 8 || client.y < 64 || client.x > 300 || client.y > 560) continue
+        const hit = document.elementFromPoint(client.x, client.y)
+        if (!hit?.closest('.defend-board') || hit.closest('button, .nw-rail, .nw-docks')) continue
+        out.push({ x: client.x, y: client.y })
+      }
+    }
+    return out
+  })
+  for (const point of candidates) {
+    const before = await plantedCount(page)
+    if (gesture === 'tap') {
+      await armCard(page, type)
+      await pointerTap(page, point.x, point.y)
+    } else {
+      await pointerDrag(page, type, point.x, point.y)
+    }
+    if ((await plantedCount(page)) > before) return true
+  }
+  return false
+}
+
+async function assertGreyDrag(page, type, x, y, label) {
+  const under = await seatUnder(page, x, y)
+  assert.equal(under?.seat, 'dead', `${label} drag ${x},${y} is a grey seat (${JSON.stringify(under)})`)
+  const before = await plantedCount(page)
+  await pointerDrag(page, type, x, y)
+  await page.getByText(TOO_FAR_TOAST).waitFor()
+  assert.equal(await plantedCount(page), before, `${label} grey drag ${x},${y} does not plant`)
+}
+
+/** Real pointer events. Love and Logic, every map, on the seat center. */
+export async function checkPointerSeats(browser, port, errors) {
+  mkdirSync('/opt/cursor/artifacts', { recursive: true })
+  for (const type of ['love', 'logic']) {
+    for (const id of POINTER_MAPS) {
+      const { context, page } = await freshWatch(browser, port, errors, id, `pointer ${id} ${type}`)
+      await armCard(page, type)
+      if (id === 'a2' && type === 'love') {
+        const road = await page.evaluate(() => {
+          const svg = document.querySelector('.defend-board')
+          if (!(svg instanceof SVGSVGElement)) return null
+          const ctm = svg.getScreenCTM()
+          if (!ctm) return null
+          const spot = svg.createSVGPoint()
+          spot.x = 288
+          spot.y = 200
+          const client = spot.matrixTransform(ctm)
+          return { x: client.x, y: client.y }
+        })
+        assert.ok(road, 'a road point is on screen')
+        const before = await plantedCount(page)
+        await pointerTap(page, road.x, road.y)
+        await page.getByText(CLOSED_TOAST).waitFor()
+        assert.equal(await plantedCount(page), before, 'a road tap does not plant')
+      }
+      const listedGrey = LEAD_GREY[id]
+      if (listedGrey) {
+        for (const [x, y] of listedGrey) {
+          await assertGreyTap(page, x, y, `${id} ${type}`)
+        }
+        if (type === 'love' && (id === 'map03' || id === 'map04' || id === 'map05')) {
+          await page.screenshot({ path: `/opt/cursor/artifacts/nw-508-${id}-grey.png` })
+        }
+      } else {
+        const dead = (await openSeatClients(page)).find((seat) => seat.seat === 'dead')
+        assert.ok(dead, `${id} ${type} has a grey seat to tap`)
+        await assertGreyTap(page, dead.cx, dead.cy, `${id} ${type}`)
+      }
+      const listedGreen = LEAD_GREEN_TAP[id]
+      if (listedGreen) {
+        for (const [x, y] of listedGreen) await assertGreenTap(page, x, y, `${id} ${type}`)
+        if (type === 'love' && (id === 'map03' || id === 'map04' || id === 'map05')) {
+          await page.screenshot({ path: `/opt/cursor/artifacts/nw-508-${id}-green.png` })
+        }
+      }
+      await context.close()
+      const drags = LEAD_GREEN_DRAG[id] || []
+      for (const [x, y] of drags) {
+        const drag = await freshWatch(browser, port, errors, id, `drag ${id} ${type} ${x},${y}`)
+        await armCard(drag.page, type)
+        await assertGreenDrag(drag.page, type, x, y, `${id} ${type}`)
+        if (type === 'love' && x === 152) {
+          await drag.page.screenshot({ path: `/opt/cursor/artifacts/nw-508-${id}-green.png` })
+        }
+        await drag.context.close()
+      }
+      if (!listedGreen && drags.length === 0) {
+        const planted = await freshWatch(browser, port, errors, id, `green ${id} ${type}`)
+        await armCard(planted.page, type)
+        const live = (await openSeatClients(planted.page)).find((seat) => seat.seat === 'live')
+        assert.ok(live, `${id} ${type} has a green seat to tap`)
+        await assertGreenTap(planted.page, live.cx, live.cy, `${id} ${type}`)
+        if (type === 'love' && (id === 'map03' || id === 'map04' || id === 'map05')) {
+          await planted.page.screenshot({ path: `/opt/cursor/artifacts/nw-508-${id}-green.png` })
+        }
+        await planted.context.close()
+      }
+      console.log(`pointer ${id} ${type}: grey refused, green planted`)
+    }
+  }
+  for (const id of POINTER_MAPS) {
+    for (const finish of ['tap', 'drag']) {
+      const { context, page } = await freshWatch(browser, port, errors, id, `after ${id} ${finish}`)
+      const seats = await openSeatClients(page)
+      const live = seats.filter((seat) => seat.seat === 'live')
+      if (live.length >= 4) {
+        const setup = [live[0], live[Math.floor(live.length / 3)], live[Math.floor((live.length * 2) / 3)]]
+        await armCard(page, 'love')
+        await assertGreenTap(page, setup[0].cx, setup[0].cy, `${id} love setup`)
+        await armCard(page, 'logic')
+        await assertGreenTap(page, setup[1].cx, setup[1].cy, `${id} logic setup`)
+        await assertGreenDrag(page, 'reason', setup[2].cx, setup[2].cy, `${id} reason setup`)
+      } else {
+        assert.ok(await plantOffRing(page, 'love', 'tap'), `${id} plants a lamp off the rings`)
+        assert.ok(await plantOffRing(page, 'logic', 'tap'), `${id} plants a second lamp off the rings`)
+        assert.ok(await plantOffRing(page, 'reason', 'drag'), `${id} drags a lamp off the rings`)
+      }
+      assert.equal(await plantedCount(page), 3, `${id} holds two taps and one drag`)
+      const left = await openSeatClients(page)
+      const liveLeft = left.filter((seat) => seat.seat === 'live')
+      const deadLeft = left.filter((seat) => seat.seat === 'dead')
+      assert.ok(liveLeft.length >= 1, `${id} still has a green seat (${liveLeft.length})`)
+      assert.ok(deadLeft.length >= 2, `${id} still has grey seats (${deadLeft.length})`)
+      await armCard(page, 'science')
+      await assertGreyTap(page, deadLeft[0].cx, deadLeft[0].cy, `${id} science after`)
+      await assertGreyDrag(page, 'science', deadLeft[1].cx, deadLeft[1].cy, `${id} science after`)
+      if (finish === 'tap') await assertGreenTap(page, liveLeft[0].cx, liveLeft[0].cy, `${id} science after`)
+      else await assertGreenDrag(page, 'science', liveLeft[0].cx, liveLeft[0].cy, `${id} science after`)
+      assert.equal(await plantedCount(page), 4, `${id} ${finish} plants the green seat after the refusals`)
+      console.log(`pointer ${id} after 2 taps + 1 drag: grey tap and drag refused, green ${finish} planted`)
+      await context.close()
+    }
+  }
+}
+
 export async function checkLiveProve() {
   const server = await createServer({ server: { host: '127.0.0.1', port: 0 } })
   await server.listen()
@@ -2040,6 +2380,7 @@ export async function checkLiveProve() {
     await checkJumpSeatsAndCandle(browser, port, errors)
     await checkDeadSeat(browser, port, errors)
     await checkGreyMaps(browser, port, errors)
+    await checkPointerSeats(browser, port, errors)
     await checkShareCard(browser, port, errors)
     await checkOssuaryLesson(browser, port, errors)
     assert.equal(errors.join('\n'), '', '1.4.482 live prove stays free of console errors')

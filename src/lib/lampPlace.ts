@@ -757,6 +757,23 @@ export function previewLamp(
   }
 }
 
+/**
+ * One reach look for the tint, a tap, a drag, and Begin.
+ * Callers pass the live plants, the live Far bonus, and the bound road.
+ */
+export function lampPlaceReach(
+  point: NightPoint,
+  ability: string,
+  progress: ProgressState,
+  runTier: Record<string, number> | undefined,
+  plants: Record<string, string> = {},
+  hudBlocked = false,
+  easyTree = false,
+  extra = 0,
+): LampPreview {
+  return previewLamp(point, ability, progress, runTier, plants, hudBlocked, easyTree, extra)
+}
+
 /** Phone width the snap radius is measured on. The plate is 798 units wide. */
 const CANDLE_BOARD_PX = 375
 const CANDLE_PLATE_W = 798
@@ -891,9 +908,56 @@ export function armedSeatMarks(
   placeKind?: string,
 ): ArmedSeat[] {
   return plantableHints(plants, placeKind).map((at) => {
-    const look = previewLamp(at, ability, progress, runTier, plants, false, true, extra)
+    const look = lampPlaceReach(at, ability, progress, runTier, plants, false, true, extra)
     return { x: at.x, y: at.y, live: look.reaches }
   })
+}
+
+/** The seat circle. A fingertip inside this ring is that seat. */
+export const SEAT_TAP_R = 46
+
+/**
+ * Nearest armed-seat mark under this plate point.
+ * `point` is the fingertip before the lamp-picture shift.
+ * Outside every ring, returns null.
+ */
+export function markedSeatAt(point: NightPoint, marks: readonly ArmedSeat[]): ArmedSeat | null {
+  let best: ArmedSeat | null = null
+  let bestD = SEAT_TAP_R
+  for (const mark of marks) {
+    const away = Math.hypot(mark.x - point.x, mark.y - point.y)
+    if (away > bestD) continue
+    best = mark
+    bestD = away
+  }
+  return best
+}
+
+/**
+ * Plant point for a fingertip on the plate.
+ * A tap on the ring's center uses that seat, the same point the tint drew.
+ * Farther out in the ring, the seat wins when the picture shift would
+ * plant or refuse the other way. A named lot keeps the picture on the
+ * finger. A tap that already agrees, and open ground past every ring, does too.
+ */
+export function fingerPlantPoint(
+  point: NightPoint,
+  marks: readonly ArmedSeat[],
+  look: (at: NightPoint) => Pick<LampPreview, 'mark' | 'blocked' | 'reaches' | 'at'>,
+): NightPoint {
+  const marked = markedSeatAt(point, marks)
+  const finger = lampUnderFinger(point)
+  if (!marked) return finger
+  const seat = { x: marked.x, y: marked.y }
+  const near = Math.hypot(seat.x - point.x, seat.y - point.y) <= lampArtAboveAnchor()
+  if (near) return seat
+  if (namedLotAt(finger)) return finger
+  const seatLook = look(seat)
+  const fingerLook = look(finger)
+  const seatOk = !seatLook.blocked && !easyDeadSeat(seatLook)
+  const fingerOk = !fingerLook.blocked && !easyDeadSeat(fingerLook)
+  if (seatOk !== fingerOk) return seat
+  return finger
 }
 
 /** A city lot. Easy still plants these even when the current reach misses. */
@@ -927,8 +991,10 @@ export function plantedLampsTooFar(
     if (!isTowerType(ability) || !isFreeSpot(id)) continue
     const at = lampAnchor(id)
     if (namedLotAt(at)) continue
-    const range = nightTowers.range(id, ability, progress, runTier, bonusFor(ability), true)
-    if (!lampReachesRoad(at, range)) ids.push(id)
+    const others = { ...plants }
+    delete others[id]
+    const look = lampPlaceReach(at, ability, progress, runTier, others, false, true, bonusFor(ability))
+    if (easyDeadSeat(look)) ids.push(id)
   }
   return ids
 }
@@ -948,7 +1014,7 @@ export function commitLamp(
   easyTree = false,
   extra = 0,
 ): { ok: boolean; plants: Record<string, string>; preview: LampPreview } {
-  const preview = previewLamp(point, ability, progress, runTier, plants, hudBlocked, easyTree, extra)
+  const preview = lampPlaceReach(point, ability, progress, runTier, plants, hudBlocked, easyTree, extra)
   if (preview.blocked || (easyTree && easyDeadSeat(preview))) return { ok: false, plants, preview }
   if (preview.mark === 'bell') {
     const next = plantBell(plants, preview.spot)
