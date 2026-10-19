@@ -3890,15 +3890,30 @@ html[data-easy='on'] .play.is-easy-sort .match-recover.text-link {
   padding: 8px 0;
 }
 
-/* Easy Lock In: the first card pulses until the first drag. Phone float stays off. */
+/* Easy Lock In: the first card pulses until the first drag. Phone float stays off.
+   The cue stays one line. Chips and the arena give that line back so a 768 creed win still fits. */
 html[data-easy='on'] .why-drag-cue {
-  margin: 0;
+  margin: 0 0 -10px;
   text-align: center;
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 750;
-  line-height: 1.2;
+  line-height: 1.15;
   color: #2a2118;
   -webkit-text-fill-color: #2a2118;
+}
+
+html[data-easy='on'] .why-blast:has(.why-drag-cue) {
+  gap: 6px;
+}
+
+html[data-easy='on'] .why-blast:has(.why-drag-cue) .why-arena {
+  min-height: 208px;
+}
+
+html[data-easy='on'] .why-blast:has(.why-drag-cue) .why-chip {
+  min-height: 48px;
+  padding-top: 6px;
+  padding-bottom: 6px;
 }
 
 html[data-easy='on'] .why-blast:not(.is-win):not(.is-miss-teach) .why-chip.is-first-cue:not(.is-gone):not(.is-toss) {
