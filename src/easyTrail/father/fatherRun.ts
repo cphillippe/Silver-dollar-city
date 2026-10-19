@@ -43,7 +43,7 @@ export const EASY_RUN_TUNE = {
   dashWindowMs: 1500,
   holdSpeed: 0.09,
   stumble: 0.02,
-  /** Fail screen on this attempt index (the third try) offers Keep going. */
+  /** Fail screen 2 offers Keep going. attempt starts at 0, so the screen checks attempt + 1. */
   missesBeforeKeep: 2,
 } as const
 export const RETRY_CLOSER = 0.1

@@ -12,9 +12,9 @@ export const CHANGELOG: ChangeNote[] = [
     title: 'A run you can finish',
     when: '2026-10-19',
     items: [
-      'On Easy, the father run uses a wider glow and plain words. After two misses, Keep going is the gold button.',
+      'On Easy, the father run uses a wider glow and plain words. The second miss offers Keep going as the gold button.',
       'Run again is a filled gold button and stays on the run. Lock In says You got it, then Continue goes Home.',
-      'Home copy follows the gold step. Read on the first day says tomorrow.',
+      'A first road says Start your first road. Home copy follows the gold step. Read on the first day says tomorrow.',
       'Refs #771 #772 #762.',
     ],
   },

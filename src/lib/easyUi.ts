@@ -19,6 +19,7 @@ export const EASY = {
   mazeHunt: 'Find the hurt man. Help him. Take him to the inn.',
   mazeCta: 'Help on the road',
   mazeMatch: 'Help',
+  mazeFirst: 'Start your first road.',
   mazeHome: 'One more road.',  // Easy Clear 1.4.155: short Home next-step (not full mazeHunt; Fixes #192)
   mazeWinWhy: 'You found him, helped him, and took him to safety.',
   mazeAgain: 'One more road',
