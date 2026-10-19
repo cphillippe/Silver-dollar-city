@@ -382,6 +382,7 @@ export function FatherRunPlay({
     onPadUp()
   }
 
+  const easyCue = dash.inWindow && phase === 'run' ? 'Tap' : 'Hold'
   const fatherLeft = 8 + progress * 64
   const sonLeft = 88 - progress * 6
   const speechPct = Math.min(100, (elapsed / (HIRED_HAND_SPEECH.length * SPEECH_PHRASE_MS)) * 100)
@@ -506,7 +507,12 @@ export function FatherRunPlay({
                 >
                   {EASY.runKeepGoing}
                 </button>
-                <button type="button" className="btn xl" onClick={() => resetRound(attempt + 1)}>
+                <button
+                  type="button"
+                  className="btn xl"
+                  data-run-again
+                  onClick={() => resetRound(attempt + 1)}
+                >
                   Run again
                 </button>
               </>
@@ -550,15 +556,7 @@ export function FatherRunPlay({
             type="button"
             className={`run-pad ${holding ? 'is-held' : ''} ${dash.inWindow && phase === 'run' ? 'is-glow' : ''}`}
             aria-pressed={holding}
-            aria-label={
-              dash.inWindow && phase === 'run'
-                ? easy
-                  ? EASY.runTapNow
-                  : 'Let go — press now!'
-                : easy && holding
-                  ? EASY.runKeepHolding
-                  : 'Hold to run'
-            }
+            aria-label={easy ? easyCue : dash.inWindow && phase === 'run' ? 'Let go — press now!' : 'Hold to run'}
             onPointerDown={onPadDown}
             onPointerUp={onPadUp}
             onPointerCancel={onPadCancel}
@@ -566,12 +564,18 @@ export function FatherRunPlay({
             onKeyDown={onPadKeyDown}
             onKeyUp={onPadKeyUp}
           >
-            <span className={`run-pad-face ${dash.inWindow && phase === 'run' ? 'is-quiet' : ''}`} aria-hidden>
-              {easy && holding ? EASY.runKeepHolding : 'Hold to run'}
-            </span>
-            <span className={`run-pad-face ${dash.inWindow && phase === 'run' ? '' : 'is-quiet'}`} aria-hidden>
-              {easy ? EASY.runTapNow : 'Let go — press now!'}
-            </span>
+            {easy ? (
+              <span className="run-pad-face">{easyCue}</span>
+            ) : (
+              <>
+                <span className={`run-pad-face ${dash.inWindow && phase === 'run' ? 'is-quiet' : ''}`} aria-hidden>
+                  Hold to run
+                </span>
+                <span className={`run-pad-face ${dash.inWindow && phase === 'run' ? '' : 'is-quiet'}`} aria-hidden>
+                  Let go — press now!
+                </span>
+              </>
+            )}
           </button>
         </div>
       )}

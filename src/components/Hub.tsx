@@ -14,7 +14,7 @@ import {
   nextUpgradeNeed,
   readyUpgradeId,
 } from '../lib/cityBuild'
-import { EASY, EASY_MATCH_LINE, easyHomeFocus, easyHoldView, easyLineHeld, easyLockInExit, easyLoopLine, easyMatchReady, isEasy } from '../lib/easy'
+import { EASY, EASY_MATCH_LINE, easyHomeFocus, easyHoldView, easyLineHeld, easyLockInExit, easyLoopLine, easyMatchReady, easyWhoWhere, isEasy } from '../lib/easy'
 import { storyPlayFor } from '../lib/storyPlay'
 import { markLater, readLater, sessionDue } from '../lib/recall'
 import { Avatar } from './Avatar'
@@ -134,7 +134,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
                   ? EASY.snapHome
                   : coldMercy
                     ? 'Find Mercy’s story at Story Creek.'
-                    : 'Find the gems. The story opens as you play.'
+                    : `Find the words at ${easyWhoWhere(loopId).place}.`
 
     const readyLine = upgradeReadyId ? 'A building is ready. Tap it, then Build this.' : !doneToday ? 'Finish today’s story once. Then you can raise the building — no pay.' : buildNeed.line
     const trailGold = playNow || lockNow || readNow
@@ -229,7 +229,9 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
                         ? EASY.digMatch
                         : storyPlayFor(loopId) === 'story-snap'
                           ? EASY.snapMatch
-                          : EASY.matchCta}
+                          : storyPlayFor(loopId) === 'panel-blast'
+                            ? EASY.findWords
+                            : EASY.matchCta}
               </button>
               <button
                 type="button"

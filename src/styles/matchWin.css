@@ -396,3 +396,16 @@ html[data-easy='on'] .play.is-road-maze.is-win .cta-dock .btn:not(.primary) {
   font-size: 1rem;
   font-weight: 700;
 }
+
+/* Easy fail 2: the plain Run again sits on the cream dock. */
+html[data-easy='on'] .play.is-father-run.is-miss .run-miss .btn:not(.primary) {
+  background: transparent;
+  background-image: none;
+  color: #2a2118;
+  -webkit-text-fill-color: #2a2118;
+  border: 1.5px solid rgba(42, 33, 24, 0.35);
+  box-shadow: none;
+  min-height: 48px;
+  font-size: 1rem;
+  font-weight: 700;
+}
