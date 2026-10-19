@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.505',
+    title: 'Say it back',
+    when: '2026-10-19',
+    items: [
+      'On Easy, Say this tomorrow includes a card you can share. The button stays quiet, and Home stays the gold step.',
+      'The James bone box lesson starts with Paul and Josephus, then the inscription leading experts judge genuine.',
+      'Hard stays the same.',
+    ],
+  },
+  {
     version: '1.4.504',
     title: 'Dead seats stay empty',
     when: '2026-10-19',

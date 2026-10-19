@@ -16,6 +16,9 @@ import { chromium } from '@playwright/test'
 import { SAVE_KIND } from '../src/lib/save.ts'
 import { SAVE_SCHEMA_VERSION, STORAGE_KEY } from '../src/config/app.ts'
 import { DEFEND_PATH } from '../src/nightWatch/path/data.ts'
+import { evidenceFor } from '../src/content/evidence.ts'
+import { localDateKey } from '../src/lib/dates.ts'
+import { EASY_LINE_ORDER } from '../src/lib/easy.ts'
 
 const SAVE = {
   kind: SAVE_KIND,
@@ -1819,6 +1822,200 @@ async function checkGreyMaps(browser, port, errors) {
   }
 }
 
+export async function checkShareCard(browser, port, errors) {
+  const brief = evidenceFor('ph-road')
+  assert.ok(brief, 'ph-road has a line to share')
+  const today = localDateKey()
+  const save = {
+    kind: SAVE_KIND,
+    schemaVersion: SAVE_SCHEMA_VERSION,
+    appVersion: '1.4.505',
+    savedAt: '2026-10-19T00:00:00.000Z',
+    progress: {
+      started: true,
+      easyMode: true,
+      theme: 'candy',
+      completed: [],
+      lastDailyDate: today,
+      dailyDates: [today],
+      held: [],
+      easyHeld: [],
+      easyTaught: [],
+      learnings: [
+        {
+          id: 'ph-road',
+          claim: brief.claim,
+          reason: brief.reason,
+          source: brief.source,
+          anchor: 'Juniper’s east porch',
+          acquiredAt: today,
+        },
+      ],
+    },
+  }
+  mkdirSync('/opt/cursor/artifacts/screenshots', { recursive: true })
+  for (const [width, height] of [
+    [375, 667],
+    [412, 915],
+  ]) {
+    const context = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width, height },
+      deviceScaleFactor: 1,
+      reducedMotion: 'reduce',
+    })
+    await context.addInitScript(
+      (payload) => {
+        localStorage.setItem(payload.key, JSON.stringify(payload.save))
+        const calls = []
+        window.__shareCalls = calls
+        const share = async (data) => {
+          calls.push(data)
+        }
+        try {
+          Object.defineProperty(navigator, 'share', { configurable: true, writable: true, value: share })
+        } catch {
+          navigator.share = share
+        }
+        const clip = []
+        window.__clip = clip
+        const clipboard = { writeText: async (text) => { clip.push(text) } }
+        try {
+          Object.defineProperty(navigator, 'clipboard', { configurable: true, value: clipboard })
+        } catch {
+          navigator.clipboard = clipboard
+        }
+      },
+      { key: STORAGE_KEY, save },
+    )
+    const page = await context.newPage()
+    listen(page, errors, `share ${width}`)
+    await page.goto('/')
+    await page.locator('main.hub').waitFor()
+    await page.getByRole('banner').getByRole('button', { name: 'Lock In', exact: true }).click()
+    await page.getByRole('figure', { name: 'Say it back tomorrow' }).waitFor()
+    const layout = await page.evaluate((source) => {
+      const shareBtn = [...document.querySelectorAll('button')].find(
+        (node) => (node.textContent || '').trim() === 'Share this line',
+      )
+      const home = [...document.querySelectorAll('main.journal .btn.primary')].find(
+        (node) => (node.innerText || '').replace(/\s+/g, ' ').trim() === 'Home',
+      )
+      const card = document.querySelector('.share-card')
+      function place(node) {
+        if (!(node instanceof HTMLElement)) return null
+        const rect = node.getBoundingClientRect()
+        const top = document.elementFromPoint(rect.left + rect.width / 2, rect.top + Math.min(rect.height / 2, 12))
+        return {
+          top: Math.round(rect.top),
+          bottom: Math.round(rect.bottom),
+          hit: top === node || (top instanceof Node && node.contains(top)),
+        }
+      }
+      const golds = []
+      for (const el of document.querySelectorAll('.btn.primary, .btn.gold')) {
+        if (!(el instanceof HTMLElement)) continue
+        const style = getComputedStyle(el)
+        if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) continue
+        const rect = el.getBoundingClientRect()
+        if (rect.width <= 0 || rect.height <= 0) continue
+        golds.push({
+          gold: el.classList.contains('gold'),
+          primary: el.classList.contains('primary'),
+          text: (el.innerText || '').replace(/\s+/g, ' ').trim(),
+        })
+      }
+      const digits = source.match(/\d+/g) || []
+      let rest = card?.innerText || ''
+      for (const digit of digits) rest = rest.split(digit).join('')
+      return {
+        share: place(shareBtn),
+        home: place(home),
+        vh: window.innerHeight,
+        golds,
+        restHasDigit: /\d/.test(rest),
+        shareClass: shareBtn?.className || '',
+      }
+    }, brief.source)
+    assert.equal(layout.shareClass, 'btn', `${width} share button is a plain btn`)
+    assert.equal(layout.share?.hit, true, `${width} Share this line is the hit target ${JSON.stringify(layout.share)}`)
+    assert.ok(layout.home && layout.home.top >= 0 && layout.home.bottom <= layout.vh + 1, `${width} Home stays on screen ${JSON.stringify(layout.home)}`)
+    assert.equal(layout.restHasDigit, false, `${width} card digits are only the source ref`)
+    assert.equal(layout.golds.filter((item) => item.gold).length, 0, `${width} the share screen has no .btn.gold`)
+    const filled = layout.golds.filter((item) => item.primary)
+    assert.equal(filled.length, 1, `${width} one filled gold ${JSON.stringify(layout.golds)}`)
+    assert.equal(filled[0].text, 'Home', `${width} the filled gold is Home`)
+    if (width === 375) {
+      await page.screenshot({ path: '/opt/cursor/artifacts/screenshots/share-card-375.png' })
+    }
+    await page.getByRole('button', { name: 'Share this line', exact: true }).click()
+    await page.locator('.share-card-actions [role="status"]').filter({ hasText: 'Shared.' }).waitFor()
+    const shared = await page.evaluate(() => ({
+      calls: window.__shareCalls || [],
+      counts: JSON.parse(localStorage.getItem('silver-city-share-v1') || '{}'),
+    }))
+    assert.equal(shared.calls.length, 1, `${width} navigator.share received the line`)
+    assert.match(`${shared.calls[0].text}\n${shared.calls[0].url}`, /utm_campaign=sayitback/)
+    assert.doesNotMatch(`${shared.calls[0].text}\n${shared.calls[0].url}`, /playtest|debug|nwSeed|cb=/)
+    assert.equal(shared.counts.taps, 1, `${width} one local share tap`)
+    await page.reload()
+    const kept = await page.evaluate(() => JSON.parse(localStorage.getItem('silver-city-share-v1') || '{}'))
+    assert.equal(kept.taps, 1, `${width} share taps survive a reload`)
+    await context.close()
+  }
+}
+
+export async function checkOssuaryLesson(browser, port, errors) {
+  const today = localDateKey()
+  const at = EASY_LINE_ORDER.indexOf('psw-ossuary')
+  assert.ok(at > 0, 'psw-ossuary stays on the Easy line')
+  const prior = EASY_LINE_ORDER.slice(0, at)
+  const save = {
+    kind: SAVE_KIND,
+    schemaVersion: SAVE_SCHEMA_VERSION,
+    appVersion: '1.4.505',
+    savedAt: '2026-10-19T00:00:00.000Z',
+    progress: {
+      started: true,
+      easyMode: true,
+      theme: 'candy',
+      completed: [],
+      lastDailyDate: today,
+      dailyDates: [today],
+      held: prior,
+      easyHeld: prior,
+      easyTaught: prior,
+      learnings: [],
+    },
+  }
+  const context = await browser.newContext({
+    baseURL: `http://127.0.0.1:${port}/`,
+    viewport: { width: 375, height: 667 },
+    deviceScaleFactor: 1,
+    reducedMotion: 'reduce',
+  })
+  await context.addInitScript(
+    (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+    { key: STORAGE_KEY, save },
+  )
+  const page = await context.newPage()
+  listen(page, errors, 'ossuary 375')
+  await page.goto('/')
+  await page.locator('main.hub').waitFor()
+  const learn = page.getByRole('button', { name: 'Learn', exact: true })
+  await learn.scrollIntoViewIfNeeded()
+  await learn.click()
+  await page.locator('.teach-reason').waitFor()
+  const body = await page.locator('main').innerText()
+  assert.match(body, /Paul wrote that he saw James the Lord's brother/)
+  assert.match(body, /Galatians 1:19/)
+  assert.doesNotMatch(body, /A Jerusalem bone box names James/)
+  await page.locator('.teach-reason').scrollIntoViewIfNeeded()
+  mkdirSync('/opt/cursor/artifacts/screenshots', { recursive: true })
+  await page.screenshot({ path: '/opt/cursor/artifacts/screenshots/ossuary-lesson-375.png' })
+  await context.close()
+}
+
 export async function checkLiveProve() {
   const server = await createServer({ server: { host: '127.0.0.1', port: 0 } })
   await server.listen()
@@ -1843,6 +2040,8 @@ export async function checkLiveProve() {
     await checkJumpSeatsAndCandle(browser, port, errors)
     await checkDeadSeat(browser, port, errors)
     await checkGreyMaps(browser, port, errors)
+    await checkShareCard(browser, port, errors)
+    await checkOssuaryLesson(browser, port, errors)
     assert.equal(errors.join('\n'), '', '1.4.482 live prove stays free of console errors')
   } finally {
     await browser.close()
