@@ -13,12 +13,12 @@ import { createElement } from 'react'
 import { renderToString } from 'react-dom/server'
 import { createServer } from 'vite'
 import { chromium } from '@playwright/test'
-import { evidenceFor } from '../src/content/evidence.ts'
 import { SAVE_KIND } from '../src/lib/save.ts'
-import { localDateKey } from '../src/lib/dates.ts'
-import { EASY_LINE_ORDER } from '../src/lib/easy.ts'
 import { SAVE_SCHEMA_VERSION, STORAGE_KEY } from '../src/config/app.ts'
 import { DEFEND_PATH } from '../src/nightWatch/path/data.ts'
+import { evidenceFor } from '../src/content/evidence.ts'
+import { localDateKey } from '../src/lib/dates.ts'
+import { EASY_LINE_ORDER } from '../src/lib/easy.ts'
 
 const SAVE = {
   kind: SAVE_KIND,
@@ -1543,6 +1543,285 @@ async function checkJumpSeatsAndCandle(browser, port, errors) {
   await context.close()
 }
 
+async function plateFinger(page, plate) {
+  const point = await page.evaluate((spot) => {
+    const svg = document.querySelector('.defend-board')
+    if (!(svg instanceof SVGSVGElement)) return null
+    const ctm = svg.getScreenCTM()
+    if (!ctm) return null
+    const p = svg.createSVGPoint()
+    p.x = spot.x
+    p.y = spot.y - 26
+    const client = p.matrixTransform(ctm)
+    return { x: client.x, y: client.y }
+  }, plate)
+  assert.ok(point, '1.4.503 the plate finger is on screen')
+  return point
+}
+
+function rgbParts(fill) {
+  const match = /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(fill || '')
+  assert.ok(match, `fill ${fill}`)
+  return { r: Number(match[1]), g: Number(match[2]), b: Number(match[3]) }
+}
+
+/** Easy 375. A dead seat is refused with the toast. A live seat plants. */
+async function checkDeadSeat(browser, port, errors) {
+  mkdirSync('/opt/cursor/artifacts', { recursive: true })
+  const context = await browser.newContext({
+    baseURL: `http://127.0.0.1:${port}/`,
+    viewport: { width: 375, height: 667 },
+    deviceScaleFactor: 1,
+    reducedMotion: 'reduce',
+  })
+  await context.addInitScript(
+    (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+    { key: STORAGE_KEY, save: SAVE },
+  )
+  const page = await context.newPage()
+  listen(page, errors, 'dead seat 375')
+  await openJump(page, '?playtest=1')
+  if (await page.locator('[data-map-overlay]').count()) {
+    await page.locator('[data-map="a2"]').click()
+    await page.locator('[data-map-overlay]').waitFor({ state: 'detached' })
+  }
+  await page.locator('[data-type="love"]').click()
+  const tint = await page.evaluate(() => {
+    const fill = (node) => (node ? getComputedStyle(node).fill : '')
+    return {
+      live: document.querySelectorAll('[data-seat="live"]').length,
+      dead: document.querySelectorAll('[data-seat="dead"]').length,
+      liveFill: fill(document.querySelector('[data-seat="live"]')),
+      deadFill: fill(document.querySelector('[data-seat="dead"]')),
+      armed: document.querySelector('.defend-page')?.classList.contains('is-placing') === true,
+    }
+  })
+  assert.equal(tint.armed, true, '1.4.503 the card is armed while the seats tint')
+  assert.ok(tint.live > 0, `1.4.503 a live seat is tinted (${tint.live})`)
+  assert.ok(tint.dead > 0, `1.4.503 a dead seat is tinted (${tint.dead})`)
+  const liveRgb = rgbParts(tint.liveFill)
+  const deadRgb = rgbParts(tint.deadFill)
+  assert.ok(liveRgb.g > liveRgb.r && liveRgb.g > liveRgb.b, `1.4.503 live seats are green (${tint.liveFill})`)
+  assert.ok(
+    Math.abs(deadRgb.r - deadRgb.g) < 30 && Math.abs(deadRgb.g - deadRgb.b) < 30 && deadRgb.r < 140,
+    `1.4.503 dead seats are grey (${tint.deadFill})`,
+  )
+  await page.screenshot({ path: '/opt/cursor/artifacts/nw-503-armed.png' })
+  const deadPlate = { x: 56, y: 88 }
+  const deadFinger = await plateFinger(page, deadPlate)
+  await page.mouse.move(deadFinger.x, deadFinger.y)
+  await page.waitForTimeout(80)
+  const ring = await page.locator('.defend-ghost').evaluate((node) => ({
+    reaches: node.getAttribute('data-reaches'),
+    note: node.getAttribute('data-reach-note'),
+    dead: node.classList.contains('is-dead'),
+    transform: node.getAttribute('transform'),
+  }))
+  assert.equal(ring.reaches, 'no', '1.4.503 the finger ring says the dead seat misses')
+  assert.equal(ring.note, 'Too far from the road', '1.4.503 the dead seat stays too far')
+  assert.equal(ring.dead, true, '1.4.503 the dead ring is marked')
+  assert.match(ring.transform || '', /translate\(56(?:\.0)? 88(?:\.0)?\)/, `1.4.503 the ring sits on the dead seat (${ring.transform})`)
+  await page.mouse.click(deadFinger.x, deadFinger.y)
+  await page.getByText('Too far from the road. Plant closer to the path.').waitFor()
+  assert.equal(await page.locator('.defend-pad.is-planted').count(), 0, '1.4.503 the dead seat does not plant')
+  await page.screenshot({ path: '/opt/cursor/artifacts/nw-503-dead-toast.png' })
+  const blockedFinger = await plateFinger(page, { x: 340, y: 656 })
+  await page.mouse.click(blockedFinger.x, blockedFinger.y)
+  await page.getByText('Plant on open ground.').waitFor()
+  assert.equal(await page.locator('.defend-pad.is-planted').count(), 0, '1.4.503 a blocked seat does not plant')
+  const livePlate = await page.evaluate(() => {
+    const svg = document.querySelector('.defend-board')
+    if (!(svg instanceof SVGSVGElement)) return null
+    const ctm = svg.getScreenCTM()
+    if (!ctm) return null
+    for (const node of document.querySelectorAll('[data-seat="live"]')) {
+      const x = Number(node.getAttribute('cx'))
+      const y = Number(node.getAttribute('cy'))
+      const p = svg.createSVGPoint()
+      p.x = x
+      p.y = y - 26
+      const client = p.matrixTransform(ctm)
+      const hit = document.elementFromPoint(client.x, client.y)
+      const onBoard = Boolean(hit && hit.closest('.defend-board') && !hit.closest('button, .nw-rail, .nw-docks'))
+      if (onBoard) return { x, y }
+    }
+    return null
+  })
+  assert.ok(livePlate, '1.4.503 a live seat can take the tap')
+  const liveFinger = await plateFinger(page, livePlate)
+  await page.mouse.move(liveFinger.x, liveFinger.y)
+  await page.waitForTimeout(80)
+  const liveRing = await page.locator('.defend-ghost').evaluate((node) => node.getAttribute('data-reaches'))
+  assert.equal(liveRing, 'yes', '1.4.503 the finger ring says the live seat reaches')
+  await page.mouse.click(liveFinger.x, liveFinger.y)
+  await page.waitForTimeout(120)
+  const planted = await page.locator('.defend-pad.is-planted').evaluateAll((nodes) =>
+    nodes.map((node) => ({
+      label: node.getAttribute('aria-label'),
+      transform: node.getAttribute('transform'),
+    })),
+  )
+  assert.equal(planted.length, 1, `1.4.503 the live seat plants ${JSON.stringify(planted)}`)
+  assert.match(planted[0].label || '', /Upgrade lamp at open ground/, '1.4.503 the planted lamp keeps its name')
+  await page.locator('[data-place-toast]').waitFor({ state: 'detached', timeout: 1000 })
+  assert.equal(await page.locator('[data-place-toast]').count(), 0, '1.4.503 a live plant clears the refusal')
+  await page.screenshot({ path: '/opt/cursor/artifacts/nw-503-live-plant.png' })
+  await context.close()
+}
+
+/** Every map: every grey seat stays empty unless the too-far toast is up. */
+async function checkGreyMaps(browser, port, errors) {
+  const maps = ['a2', 'far-hills', 'map03', 'map04', 'map05', 'map06']
+  const tooFar = 'Too far from the road'
+  for (const id of maps) {
+    const context = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width: 375, height: 667 },
+      deviceScaleFactor: 1,
+      reducedMotion: 'reduce',
+    })
+    await context.addInitScript(
+      (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+      { key: STORAGE_KEY, save: SAVE },
+    )
+    const page = await context.newPage()
+    listen(page, errors, `grey ${id}`)
+    const search = id === 'a2' ? '?playtest=1&nwSeed=2' : `?playtest=1&nwSeed=2&nwMap=${id}`
+    await openJump(page, search)
+    if (await page.locator('[data-map-overlay]').count()) {
+      await page.locator(`[data-map="${id}"]`).click()
+      await page.locator('[data-map-overlay]').waitFor({ state: 'detached' })
+    }
+    await page.locator('[data-type="love"]').click()
+    await page.locator('[data-seat="dead"]').first().waitFor()
+    const readDead = () =>
+      page.locator('[data-seat="dead"]').evaluateAll((nodes) =>
+        nodes.map((node) => ({
+          x: Number(node.getAttribute('cx')),
+          y: Number(node.getAttribute('cy')),
+        })),
+      )
+    let seats = await readDead()
+    let settled = false
+    for (let attempt = 0; attempt < 8; attempt += 1) {
+      await page.waitForTimeout(120)
+      const next = await readDead()
+      const same =
+        next.length === seats.length && next.every((seat, index) => seat.x === seats[index].x && seat.y === seats[index].y)
+      seats = next
+      if (same && seats.length > 0) {
+        settled = true
+        break
+      }
+    }
+    assert.ok(settled, `1.4.504 ${id} grey seats settled (${seats.length})`)
+    let checked = 0
+    let toasted = 0
+    for (const seat of seats) {
+      const stillDead = await page.locator(`[data-seat="dead"][cx="${seat.x}"][cy="${seat.y}"]`).count()
+      assert.ok(stillDead > 0, `1.4.504 ${id} grey ${seat.x},${seat.y} is still a dead seat`)
+      const finger = await plateFinger(page, seat)
+      const before = await page.locator('.defend-pad.is-planted').count()
+      const onPlate = await page.evaluate((point) => {
+        if (point.x < 1 || point.y < 1 || point.x > 374 || point.y > 666) return false
+        const node = document.elementFromPoint(point.x, point.y)
+        return Boolean(node && node.closest && node.closest('.defend-board'))
+      }, finger)
+      const here = new RegExp(`translate\\(${seat.x}(?:\\.0)? ${seat.y}(?:\\.0)?\\)`)
+      const readRing = async () =>
+        (await page.locator('.defend-ghost').count())
+          ? page.locator('.defend-ghost').evaluate((node) => ({
+              reaches: node.getAttribute('data-reaches'),
+              dead: node.classList.contains('is-dead'),
+              nogo: node.getAttribute('data-lamp-ghost') === 'nogo',
+              note: node.getAttribute('data-reach-note') || '',
+              transform: node.getAttribute('transform') || '',
+            }))
+          : null
+      let openDead = false
+      let ring = null
+      if (onPlate) {
+        await page.mouse.move(finger.x, finger.y)
+        await page.waitForTimeout(40)
+        ring = await readRing()
+        openDead = Boolean(ring && !ring.nogo && ring.dead && ring.reaches === 'no' && here.test(ring.transform))
+        await page.mouse.down()
+        await page.mouse.up()
+      } else {
+        const board = page.locator('.defend-board')
+        await board.dispatchEvent('pointerdown', {
+          clientX: finger.x,
+          clientY: finger.y,
+          pointerId: 1,
+          bubbles: true,
+        })
+        await page.waitForTimeout(40)
+        ring = await readRing()
+        openDead = Boolean(ring && !ring.nogo && ring.dead && ring.reaches === 'no' && here.test(ring.transform))
+        await board.dispatchEvent('pointerup', {
+          clientX: finger.x,
+          clientY: finger.y,
+          pointerId: 1,
+          bubbles: true,
+        })
+      }
+      await page.waitForTimeout(120)
+      const afterClick = await page.evaluate((spot) => ({
+        toast: document.querySelector('[data-place-toast]')?.textContent?.trim() || '',
+        planted: document.querySelectorAll('.defend-pad.is-planted').length,
+        pads: [...document.querySelectorAll('.defend-pad.is-planted')].map((node) => node.getAttribute('transform') || ''),
+        phase: document.querySelector('.defend-page')?.getAttribute('data-phase') || '',
+        seatNow: document.querySelector(`[data-seat][cx="${spot.x}"][cy="${spot.y}"]`)?.getAttribute('data-seat') || '',
+      }), seat)
+      const saidWhy = afterClick.toast.includes(tooFar)
+      assert.ok(
+        afterClick.planted === before || saidWhy,
+        `1.4.504 ${id} grey ${seat.x},${seat.y} planted without the Too far from the road toast (${JSON.stringify({ ...afterClick, onPlate, openDead, ring })})`,
+      )
+      assert.equal(
+        afterClick.planted,
+        before,
+        `1.4.504 ${id} grey ${seat.x},${seat.y} does not plant (${JSON.stringify(afterClick)})`,
+      )
+      if (openDead) {
+        assert.equal(
+          afterClick.toast,
+          'Too far from the road. Plant closer to the path.',
+          `1.4.504 ${id} grey ${seat.x},${seat.y} says why (${JSON.stringify(afterClick)})`,
+        )
+      }
+      if (saidWhy) toasted += 1
+      checked += 1
+    }
+    assert.equal(checked, seats.length, `1.4.504 ${id} checks every grey seat`)
+    assert.ok(toasted > 0, `1.4.504 ${id} refused a grey seat with the toast (${toasted} of ${seats.length})`)
+    console.log(
+      `grey ${id}: ${seats.length} data-seat=dead checked, ${toasted} with the Too far from the road toast, 0 planted without that toast`,
+    )
+    if (id === 'a2') {
+      assert.ok(
+        seats.some((seat) => seat.x === 192 && seat.y === 632),
+        '1.4.503 the reported seat is grey',
+      )
+      const finger = await plateFinger(page, { x: 192, y: 632 })
+      await page.mouse.move(finger.x, finger.y)
+      await page.waitForTimeout(40)
+      const ring = await page.locator('.defend-ghost').evaluate((node) => ({
+        reaches: node.getAttribute('data-reaches'),
+        transform: node.getAttribute('transform') || '',
+      }))
+      assert.equal(ring.reaches, 'no', '1.4.503 the reported seat ring misses')
+      assert.match(ring.transform, /translate\(192(?:\.0)? 632(?:\.0)?\)/)
+      const before = await page.locator('.defend-pad.is-planted').count()
+      await page.mouse.click(finger.x, finger.y)
+      await page.getByText('Too far from the road. Plant closer to the path.').waitFor()
+      assert.equal(await page.locator('.defend-pad.is-planted').count(), before, '1.4.503 (192, 632) does not plant')
+      await page.screenshot({ path: '/opt/cursor/artifacts/nw-504-grey-192.png' })
+    }
+    await context.close()
+  }
+}
+
 export async function checkShareCard(browser, port, errors) {
   const brief = evidenceFor('ph-road')
   assert.ok(brief, 'ph-road has a line to share')
@@ -1759,6 +2038,8 @@ export async function checkLiveProve() {
     await checkClearBar(browser, port, errors, 768, 1024, false)
     await checkWaveCues(browser, port, errors)
     await checkJumpSeatsAndCandle(browser, port, errors)
+    await checkDeadSeat(browser, port, errors)
+    await checkGreyMaps(browser, port, errors)
     await checkShareCard(browser, port, errors)
     await checkOssuaryLesson(browser, port, errors)
     assert.equal(errors.join('\n'), '', '1.4.482 live prove stays free of console errors')
