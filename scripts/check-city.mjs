@@ -1683,17 +1683,17 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.503')
-assert.ok(CHANGELOG.some((note) => note.version === '1.4.503'), '1.4.503 changelog row')
-assert.match(latestChange('1.4.503').title, /dead|seat|lamp/i)
+assert.equal(APP_VERSION, '1.4.504')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.504'), '1.4.504 changelog row')
+assert.match(latestChange('1.4.504').title, /dead|seat|lamp/i)
 assert.doesNotMatch(
-  latestChange('1.4.503').items.join('\n'),
+  latestChange('1.4.504').items.join('\n'),
   /Fixes #|Closes #|Resolves #/,
-  '1.4.503 changelog avoids GitHub close keywords',
+  '1.4.504 changelog avoids GitHub close keywords',
 )
-assert.match(latestChange('1.4.503').items.join('\n'), /Too far from the road\. Plant closer to the path\./)
-assert.match(latestChange('1.4.503').items.join('\n'), /Your lamp can't reach the road/)
-assert.match(latestChange('1.4.503').items.join('\n'), /Hard/)
+assert.match(latestChange('1.4.504').items.join('\n'), /Too far from the road\. Plant closer to the path\./)
+assert.match(latestChange('1.4.504').items.join('\n'), /Your lamp can't reach the road/)
+assert.match(latestChange('1.4.504').items.join('\n'), /Hard/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.502'), '1.4.502 changelog row')
 assert.match(latestChange('1.4.502').title, /tap|house|build/i)
 assert.doesNotMatch(
@@ -17378,6 +17378,75 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   const marks = armedSeatMarks('love', progress, {}, {})
   assert.ok(marks.some((seat) => seat.live), '1.4.503 an armed card has a live seat')
   assert.ok(marks.some((seat) => !seat.live), '1.4.503 an armed card has a dead seat')
+  const repro = { x: 192, y: 632 }
+  const reproLook = previewLamp(repro, 'love', progress, {}, {}, false, true, 0)
+  assert.equal(reproLook.reaches, false, '1.4.503 the reported seat misses at the current reach')
+  assert.equal(reproLook.note, 'Reaches on Far step 3', '1.4.503 that miss is a later Far step, not the last one')
+  assert.equal(easyDeadSeat(reproLook), true, '1.4.503 a grey seat is refused')
+  assert.equal(commitLamp({}, repro, 'love', progress, {}, false, true, 0).ok, false, '1.4.503 Easy does not plant the grey seat')
+  assert.equal(commitLamp({}, repro, 'love', progress, {}, false, false, 0).ok, true, '1.4.503 Hard still plants the grey seat')
+  assert.deepEqual(
+    plantedLampsTooFar({ [reproLook.spot]: 'love', porch: 'logic' }, progress, {}),
+    [reproLook.spot],
+    '1.4.503 Begin names the grey lamp and leaves the named lot',
+  )
+  for (const seat of marks) {
+    if (seat.live) continue
+    const look = previewLamp(seat, 'love', progress, {}, {}, false, true, 0)
+    assert.equal(easyDeadSeat(look), true, `1.4.503 grey ${seat.x},${seat.y} is refused`)
+    assert.equal(commitLamp({}, seat, 'love', progress, {}, false, true, 0).ok, false, `1.4.503 grey ${seat.x},${seat.y} does not plant`)
+  }
+  const greyPacks = {
+    'far-hills': '../src/nightWatch/maps/maze/map02.json',
+    map03: '../src/nightWatch/maps/maze/map03.json',
+    map04: '../src/nightWatch/maps/maze/map04.json',
+    map05: '../src/nightWatch/maps/maze/map05.json',
+    map06: '../src/nightWatch/maps/maze/map06.json',
+  }
+  const houseMiss = {}
+  for (const [id, file] of Object.entries(greyPacks)) {
+    const pack = nightMapFromPack(JSON.parse(readFileSync(new URL(file, import.meta.url), 'utf8')))
+    bindLampGround(pack)
+    bindNightFeatures(pack.mapFeatures)
+    const grey = armedSeatMarks('love', progress, {}, {})
+    for (const seat of grey) {
+      if (seat.live) continue
+      const look = previewLamp(seat, 'love', progress, {}, {}, false, true, 0)
+      assert.equal(easyDeadSeat(look), true, `1.4.503 ${id} grey ${seat.x},${seat.y} is refused`)
+      assert.equal(
+        commitLamp({}, seat, 'love', progress, {}, false, true, 0).ok,
+        false,
+        `1.4.503 ${id} grey ${seat.x},${seat.y} does not plant`,
+      )
+    }
+    const quiet = []
+    for (const seat of pack.seats) {
+      const look = previewLamp(seat, 'love', progress, {}, {}, false, true, 0)
+      if (look.reaches) {
+        assert.equal(easyDeadSeat(look), false, `1.4.503 ${id} ${seat.id} still reaches`)
+        assert.equal(commitLamp({}, seat, 'love', progress, {}, false, true, 0).ok, true, `1.4.503 ${id} ${seat.id} still plants`)
+        continue
+      }
+      assert.equal(look.blocked, true, `1.4.503 ${id} ${seat.id} misses because it is not open ground`)
+      assert.equal(easyDeadSeat(look), false, `1.4.503 ${id} ${seat.id} is not a new dead seat`)
+      assert.equal(commitLamp({}, seat, 'love', progress, {}, false, true, 0).ok, false, `1.4.503 ${id} ${seat.id} was already refused`)
+      quiet.push(seat.id)
+    }
+    const raw = JSON.parse(readFileSync(new URL(file, import.meta.url), 'utf8'))
+    for (const [x, y] of raw._simV2?.bestSeats ?? []) {
+      const at = { x: x * pack.width, y: y * pack.height }
+      const look = previewLamp(at, 'love', progress, {}, {}, false, true, 0)
+      assert.equal(easyDeadSeat(look), false, `1.4.503 ${id} best seat is not a new refusal`)
+      if (!look.blocked) {
+        assert.equal(commitLamp({}, at, 'love', progress, {}, false, true, 0).ok, true, `1.4.503 ${id} best seat still plants`)
+      }
+    }
+    houseMiss[id] = quiet
+  }
+  assert.deepEqual(houseMiss['far-hills'], ['s1', 's5'], '1.4.503 Far Hills keeps two house seats off the new rule')
+  assert.deepEqual(houseMiss.map05, ['s5'], '1.4.503 Map 5 keeps one house seat off the new rule')
+  bindLampGround(null)
+  bindNightFeatures(null)
   const css503 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
   assert.match(css503, /\.defend-page\.is-easy-watch \.defend-plant-ground circle\.is-live/)
   assert.match(css503, /\.defend-page\.is-easy-watch \.defend-plant-ground circle\.is-dead/)
