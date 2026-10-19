@@ -24,6 +24,7 @@ import './styles/loci-stamp.css'
 import './styles/showIt.css'
 import './styles/fatherRunHint.css'
 import './styles/easyTopbar.css'
+import './styles/shareCard.css'
 
 if (inAndroidShell()) {
   // The shell loads Pages in the WebView. A worker from an older visit would

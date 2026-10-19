@@ -5,10 +5,13 @@ import { GemMark } from './GemMark'
 import { DigDeeper } from './DigDeeper'
 import { HeldTriad } from './HeldTriad'
 import { PlainTalk } from './PlainTalk'
+import { ShareCard } from './ShareCard.tsx'
 
 interface StoredLineProps {
   learning: Learning
   when?: string
+  /** Easy same-proof recap. The share card stays off every other stored line. */
+  recap?: boolean
 }
 
 /** After a win: claim · reason · source kids can say tomorrow. */
@@ -16,7 +19,7 @@ interface StoredLineProps {
 /* Easy Clear 1.4.208: ≤720 closes triad→Home purple gap — tighten after-win/held-triad gaps (fill 185 stays). */
 /* Easy Clear 1.4.231: phone portrait extends fill 185 + triad→Home 208 so StoredLine·Home close purple void (invent Fun/Clear). */
 /* Easy Fun 1.4.270: tall-phone one-more win-end dock — Home continue punches gold, claim stays readable (invent Fun/Clear · Shot wake). */
-export function StoredLine({ learning, when }: StoredLineProps) {
+export function StoredLine({ learning, when, recap = false }: StoredLineProps) {
   const { progress } = useProgress()
   const easy = isEasy(progress)
   return (
@@ -42,6 +45,7 @@ export function StoredLine({ learning, when }: StoredLineProps) {
           />
         </>
       )}
+      {easy && recap ? <ShareCard learning={learning} /> : null}
       {when ? <p className="quiet">{when}</p> : null}
     </article>
   )
