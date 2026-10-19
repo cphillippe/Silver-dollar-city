@@ -1,7 +1,6 @@
 package city.silver.unending;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -102,6 +101,8 @@ public class MainActivity extends BridgeActivity {
             return;
         }
         shareListenerReady = true;
+        // Removing the stock listener replaces window.androidBridge. The document-start
+        // script already ran, so this rebinds onmessage or launch replies never resolve.
         webView.evaluateJavascript(
             "(function(){var b=window.androidBridge;var c=window.Capacitor;" +
                 "if(!b||!c||typeof c.fromNative!=='function')return;" +
@@ -196,18 +197,16 @@ public class MainActivity extends BridgeActivity {
         } catch (RuntimeException ex) {
             pendingShare = null;
             call.fail("Share failed");
-        }
-    }
-
-    private void finishShare(ActivityResult result) {
-        PendingShare pending = pendingShare;
-        pendingShare = null;
-        if (pending == null) return;
-        if (result.getResultCode() == Activity.RESULT_CANCELED) {
-            pending.fail("Share canceled");
             return;
         }
-        pending.ok(jsonObject("activityType", ""));
+        // The page must hear back at launch. Waiting for the sheet to close lets the
+        // 3s timer open a second share. Close and cancel send nothing.
+        call.ok(jsonObject("activityType", ""));
+    }
+
+    /** The sheet is already acked. Closing it, including a cancel, sends nothing. */
+    private void finishShare(ActivityResult result) {
+        pendingShare = null;
     }
 
     private static boolean shareOriginAllowed(Uri origin) {

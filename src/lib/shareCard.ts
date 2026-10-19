@@ -172,7 +172,8 @@ async function shareOnTheWeb(title: string, text: string, url: string): Promise<
 /**
  * In the Android shell, open the share sheet through @capacitor/share.
  * On the web, use navigator.share, then the clipboard.
- * A missing bridge or a 3s silence uses that same web path.
+ * The 3s timer covers a bridge that never answers. Any reply, including the
+ * launch ack, returns here and must not open a second sheet or copy.
  * A cancel shows nothing. A thrown native plugin falls back to the copied toast.
  * A canvas image is skipped; measuring text for a 1080×1350 PNG is a later pass.
  */
