@@ -2829,7 +2829,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
             easy ? easyShotReach(pathsOf(runPaths, seatAbility)) : 0,
           )
         : [],
-    [groundPick, seatAbility, progress, runTier, plants, runPaths, easy],
+    // roadD changes after the map bind, and the seat tint reads that same road.
+    [groundPick, seatAbility, progress, runTier, plants, runPaths, easy, roadD],
   )
   const tapReadoutOn =
     easy &&

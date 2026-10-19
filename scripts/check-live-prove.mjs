@@ -1666,9 +1666,10 @@ async function checkDeadSeat(browser, port, errors) {
   await context.close()
 }
 
-/** Every map: a grey seat does not plant, and the refusal is the toast. */
+/** Every map: every grey seat stays empty unless the too-far toast is up. */
 async function checkGreyMaps(browser, port, errors) {
   const maps = ['a2', 'far-hills', 'map03', 'map04', 'map05', 'map06']
+  const tooFar = 'Too far from the road'
   for (const id of maps) {
     const context = await browser.newContext({
       baseURL: `http://127.0.0.1:${port}/`,
@@ -1689,50 +1690,111 @@ async function checkGreyMaps(browser, port, errors) {
       await page.locator('[data-map-overlay]').waitFor({ state: 'detached' })
     }
     await page.locator('[data-type="love"]').click()
-    const seats = await page.locator('[data-seat="dead"]').evaluateAll((nodes) =>
-      nodes.map((node) => ({
-        x: Number(node.getAttribute('cx')),
-        y: Number(node.getAttribute('cy')),
-      })),
-    )
-    assert.ok(seats.length > 0, `1.4.503 ${id} shows a grey seat`)
-    let refused = 0
-    for (const seat of seats) {
-      const finger = await plateFinger(page, seat)
-      if (finger.x < 4 || finger.y < 4 || finger.x > 371 || finger.y > 663) continue
-      await page.mouse.move(finger.x, finger.y)
-      await page.waitForTimeout(40)
-      const ring = (await page.locator('.defend-ghost').count())
-        ? await page.locator('.defend-ghost').evaluate((node) => ({
-            reaches: node.getAttribute('data-reaches'),
-            dead: node.classList.contains('is-dead'),
-            nogo: node.getAttribute('data-lamp-ghost') === 'nogo',
-            transform: node.getAttribute('transform') || '',
-          }))
-        : null
-      const here = new RegExp(`translate\\(${seat.x}(?:\\.0)? ${seat.y}(?:\\.0)?\\)`)
-      if (!ring || ring.nogo || !ring.dead || ring.reaches !== 'no' || !here.test(ring.transform)) continue
-      const before = await page.locator('.defend-pad.is-planted').count()
-      await page.mouse.click(finger.x, finger.y)
+    await page.locator('[data-seat="dead"]').first().waitFor()
+    const readDead = () =>
+      page.locator('[data-seat="dead"]').evaluateAll((nodes) =>
+        nodes.map((node) => ({
+          x: Number(node.getAttribute('cx')),
+          y: Number(node.getAttribute('cy')),
+        })),
+      )
+    let seats = await readDead()
+    let settled = false
+    for (let attempt = 0; attempt < 8; attempt += 1) {
       await page.waitForTimeout(120)
-      const afterClick = await page.evaluate(() => ({
+      const next = await readDead()
+      const same =
+        next.length === seats.length && next.every((seat, index) => seat.x === seats[index].x && seat.y === seats[index].y)
+      seats = next
+      if (same && seats.length > 0) {
+        settled = true
+        break
+      }
+    }
+    assert.ok(settled, `1.4.504 ${id} grey seats settled (${seats.length})`)
+    let checked = 0
+    let toasted = 0
+    for (const seat of seats) {
+      const stillDead = await page.locator(`[data-seat="dead"][cx="${seat.x}"][cy="${seat.y}"]`).count()
+      assert.ok(stillDead > 0, `1.4.504 ${id} grey ${seat.x},${seat.y} is still a dead seat`)
+      const finger = await plateFinger(page, seat)
+      const before = await page.locator('.defend-pad.is-planted').count()
+      const onPlate = await page.evaluate((point) => {
+        if (point.x < 1 || point.y < 1 || point.x > 374 || point.y > 666) return false
+        const node = document.elementFromPoint(point.x, point.y)
+        return Boolean(node && node.closest && node.closest('.defend-board'))
+      }, finger)
+      const here = new RegExp(`translate\\(${seat.x}(?:\\.0)? ${seat.y}(?:\\.0)?\\)`)
+      const readRing = async () =>
+        (await page.locator('.defend-ghost').count())
+          ? page.locator('.defend-ghost').evaluate((node) => ({
+              reaches: node.getAttribute('data-reaches'),
+              dead: node.classList.contains('is-dead'),
+              nogo: node.getAttribute('data-lamp-ghost') === 'nogo',
+              note: node.getAttribute('data-reach-note') || '',
+              transform: node.getAttribute('transform') || '',
+            }))
+          : null
+      let openDead = false
+      let ring = null
+      if (onPlate) {
+        await page.mouse.move(finger.x, finger.y)
+        await page.waitForTimeout(40)
+        ring = await readRing()
+        openDead = Boolean(ring && !ring.nogo && ring.dead && ring.reaches === 'no' && here.test(ring.transform))
+        await page.mouse.down()
+        await page.mouse.up()
+      } else {
+        const board = page.locator('.defend-board')
+        await board.dispatchEvent('pointerdown', {
+          clientX: finger.x,
+          clientY: finger.y,
+          pointerId: 1,
+          bubbles: true,
+        })
+        await page.waitForTimeout(40)
+        ring = await readRing()
+        openDead = Boolean(ring && !ring.nogo && ring.dead && ring.reaches === 'no' && here.test(ring.transform))
+        await board.dispatchEvent('pointerup', {
+          clientX: finger.x,
+          clientY: finger.y,
+          pointerId: 1,
+          bubbles: true,
+        })
+      }
+      await page.waitForTimeout(120)
+      const afterClick = await page.evaluate((spot) => ({
         toast: document.querySelector('[data-place-toast]')?.textContent?.trim() || '',
         planted: document.querySelectorAll('.defend-pad.is-planted').length,
+        pads: [...document.querySelectorAll('.defend-pad.is-planted')].map((node) => node.getAttribute('transform') || ''),
         phase: document.querySelector('.defend-page')?.getAttribute('data-phase') || '',
-      }))
-      assert.equal(
-        afterClick.toast,
-        'Too far from the road. Plant closer to the path.',
-        `1.4.503 ${id} grey ${seat.x},${seat.y} says why (${JSON.stringify(afterClick)})`,
+        seatNow: document.querySelector(`[data-seat][cx="${spot.x}"][cy="${spot.y}"]`)?.getAttribute('data-seat') || '',
+      }), seat)
+      const saidWhy = afterClick.toast.includes(tooFar)
+      assert.ok(
+        afterClick.planted === before || saidWhy,
+        `1.4.504 ${id} grey ${seat.x},${seat.y} planted without the Too far from the road toast (${JSON.stringify({ ...afterClick, onPlate, openDead, ring })})`,
       )
       assert.equal(
         afterClick.planted,
         before,
-        `1.4.503 ${id} grey ${seat.x},${seat.y} does not plant`,
+        `1.4.504 ${id} grey ${seat.x},${seat.y} does not plant (${JSON.stringify(afterClick)})`,
       )
-      refused += 1
+      if (openDead) {
+        assert.equal(
+          afterClick.toast,
+          'Too far from the road. Plant closer to the path.',
+          `1.4.504 ${id} grey ${seat.x},${seat.y} says why (${JSON.stringify(afterClick)})`,
+        )
+      }
+      if (saidWhy) toasted += 1
+      checked += 1
     }
-    assert.ok(refused > 0, `1.4.503 ${id} refused a grey seat (${refused} of ${seats.length})`)
+    assert.equal(checked, seats.length, `1.4.504 ${id} checks every grey seat`)
+    assert.ok(toasted > 0, `1.4.504 ${id} refused a grey seat with the toast (${toasted} of ${seats.length})`)
+    console.log(
+      `grey ${id}: ${seats.length} data-seat=dead checked, ${toasted} with the Too far from the road toast, 0 planted without that toast`,
+    )
     if (id === 'a2') {
       assert.ok(
         seats.some((seat) => seat.x === 192 && seat.y === 632),
