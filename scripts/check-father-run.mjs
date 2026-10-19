@@ -9,6 +9,7 @@ import {
   DASH_BOOST,
   DASH_PERIOD_MS,
   DASH_WINDOW_MS,
+  EASY_RUN_TUNE,
   fatherReached,
   fatherStartProgress,
   FATHER_RUN_AGAIN,
@@ -146,6 +147,29 @@ assert.doesNotMatch(
 )
 assert.match(playSrc, /Hold to run/)
 assert.match(playSrc, /Let go — press now/)
+assert.match(playSrc, /EASY\.runTapNow/)
+assert.match(playSrc, /EASY\.runKeepHolding/)
+assert.match(playSrc, /EASY\.runKeepGoing/)
+assert.match(playSrc, /goldButtonClass\('run-fail', 'runRetry'\)/)
+assert.match(playSrc, /data-run-retry/)
+assert.match(playSrc, /data-run-keep/)
+assert.doesNotMatch(playSrc, /name: 'defend'/)
+assert.equal(DASH_WINDOW_MS, 500, 'Hard glow window stays 500ms')
+assert.equal(EASY_RUN_TUNE.dashWindowMs, DASH_WINDOW_MS * 3)
+assert.match(playSrc, /attempt \+ 1 >= EASY_RUN_TUNE\.missesBeforeKeep/)
+assert.equal(EASY_RUN_TUNE.missesBeforeKeep, 2)
+assert.equal(0 + 1 >= EASY_RUN_TUNE.missesBeforeKeep, false, 'fail screen 1 is Run again')
+assert.equal(1 + 1 >= EASY_RUN_TUNE.missesBeforeKeep, true, 'fail screen 2 offers Keep going')
+assert.ok(EASY_RUN_TUNE.holdSpeed > 0.05)
+assert.ok(EASY_RUN_TUNE.stumble < 0.05)
+const hardOpen = DASH_PERIOD_MS - DASH_WINDOW_MS
+const easyOpen = DASH_PERIOD_MS - EASY_RUN_TUNE.dashWindowMs
+assert.equal(dashPhase(hardOpen + 600).inWindow, false, 'Hard misses a late release')
+assert.equal(dashPhase(easyOpen + 600, EASY_RUN_TUNE.dashWindowMs).inWindow, true, 'Easy still counts a late release')
+assert.equal(FATHER_RUN_CLAIM, 'The father runs with mercy before the speech is done.')
+assert.equal(FATHER_RUN_HINT, 'The run comes before the apology is done.')
+assert.equal(HIRED_HAND_SPEECH[0], 'Father, I have sinned against heaven')
+assert.equal(HIRED_HAND_SPEECH[3], 'Make me like one of your hired servants.')
 assert.match(playSrc, /stumbleIfHeldThrough/)
 assert.match(playSrc, /MIN_DASHES_TO_HUG/)
 assert.match(playSrc, /onPadKeyDown/)

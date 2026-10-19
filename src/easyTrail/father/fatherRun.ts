@@ -29,11 +29,23 @@ export const HOLD_SPEED_REDUCED = 0.062
 export const HOLD_CAP = 0.58
 export const DASH_BOOST = 0.22
 export const DASH_PERIOD_MS = 2100
+/** Hard glow. Easy uses EASY_RUN_TUNE so a late or early phone release still lands. */
 export const DASH_WINDOW_MS = 500
 export const STALL_AFTER_MS = 900
 export const STALL_FACTOR = 0.38
 export const STUMBLE = 0.05
 export const MIN_DASHES_TO_HUG = 2
+/**
+ * Easy-only timing. Hard callers keep DASH_WINDOW_MS / HOLD_SPEED / STUMBLE.
+ * An object so the 1.4.334 numeric export lock stays the Hard clock.
+ */
+export const EASY_RUN_TUNE = {
+  dashWindowMs: 1500,
+  holdSpeed: 0.09,
+  stumble: 0.02,
+  /** Fail screen 2 offers Keep going. attempt starts at 0, so the screen checks attempt + 1. */
+  missesBeforeKeep: 2,
+} as const
 export const RETRY_CLOSER = 0.1
 export const MIN_START_GAP = 0.5
 
@@ -63,12 +75,13 @@ export function speechFinished(elapsedMs: number): boolean {
   return elapsedMs >= speechDurationMs()
 }
 
-export function dashPhase(elapsedMs: number): { inWindow: boolean; travel: number } {
+export function dashPhase(elapsedMs: number, windowMs = DASH_WINDOW_MS): { inWindow: boolean; travel: number } {
   if (elapsedMs < 0) return { inWindow: false, travel: 0 }
+  const span = Math.max(1, Math.min(DASH_PERIOD_MS, windowMs))
   const cycle = elapsedMs % DASH_PERIOD_MS
-  const windowStart = DASH_PERIOD_MS - DASH_WINDOW_MS
+  const windowStart = DASH_PERIOD_MS - span
   if (cycle < windowStart) {
-    return { inWindow: false, travel: cycle / windowStart }
+    return { inWindow: false, travel: windowStart === 0 ? 1 : cycle / windowStart }
   }
   return {
     inWindow: true,
@@ -82,9 +95,10 @@ export function holdStep(
   holding: boolean,
   reduced = false,
   heldMs = 0,
+  speedOverride?: number,
 ): number {
   if (!holding || dtSec <= 0) return progress
-  let speed = reduced ? HOLD_SPEED_REDUCED : HOLD_SPEED
+  let speed = speedOverride ?? (reduced ? HOLD_SPEED_REDUCED : HOLD_SPEED)
   if (heldMs >= STALL_AFTER_MS) speed *= STALL_FACTOR
   const next = progress + speed * dtSec
   if (progress >= HOLD_CAP) return Math.min(1, next)
@@ -102,9 +116,10 @@ export function stumbleIfHeldThrough(
   inWindow: boolean,
   holding: boolean,
   dashedThisWindow: boolean,
+  stumble = STUMBLE,
 ): number {
   if (!wasInWindow || inWindow || !holding || dashedThisWindow) return progress
-  return Math.max(0, progress - STUMBLE)
+  return Math.max(0, progress - stumble)
 }
 
 /** How many story beats are open. First beat is up before the run; hug opens the last. */

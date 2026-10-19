@@ -119,3 +119,14 @@ export function easyReadIsHomeGold(progress: ReadProgress, today: string): boole
   if (open === today) return false
   return true
 }
+
+/**
+ * Day-1 Read is still tappable, but it is not the gold step.
+ * Does not change easyReadIsHomeGold or the firstSession rule.
+ */
+export function easyReadMarkedTomorrow(progress: ReadProgress, today: string): boolean {
+  if (easyReadIsHomeGold(progress, today)) return false
+  const held = progress.easyHeld?.length ?? 0
+  if (held === 0) return true
+  return storageGet(EASY_OPEN_DAY_KEY) === today
+}

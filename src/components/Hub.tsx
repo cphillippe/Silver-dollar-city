@@ -37,7 +37,7 @@ import {
 import type { View } from '../types'
 import { RecallOffer } from './RecallOffer'
 import { StoresComingNotice } from './StoresComingNotice'
-import { easyReadIsHomeGold, noteEasyOpenDay } from '../content/goldenPath'
+import { easyReadIsHomeGold, easyReadMarkedTomorrow, noteEasyOpenDay } from '../content/goldenPath'
 
 interface HubProps {
   onNavigate: (view: View) => void
@@ -90,18 +90,55 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
     const matchReady = easyMatchReady(progress)
     const focus = easyHomeFocus(progress)
     const loopId = easyLoopLine(progress)
+    const roadDone =
+      easyLineHeld(progress, loopId) ||
+      (progress.easyTaught ?? []).includes(loopId) ||
+      (progress.completed ?? []).includes(loopId)
     const coldMercy = loopId === EASY_MATCH_LINE && !easyLineHeld(progress, EASY_MATCH_LINE)
     const upgradeReadyId = readyUpgradeId(progress, nextId)
     const buildNeed = nextUpgradeNeed(nextId, progress, true)
     const lampsGift = lampsBuildGift(progress, doneToday, upgradeReadyId)
-    const readyLine = upgradeReadyId ? 'A building is ready. Tap it, then Build this.' : !doneToday ? 'Finish today’s story once. Then you can raise the building — no pay.' : buildNeed.line
-    const idleGift = lampsGift ?? readyLine
     const selectedReady = Boolean(selectedPlot && canUpgrade(selectedPlot, progress))
     const selectedName = selectedPlot
       ? selectedPlot === 'journal'
         ? 'River’s pages'
         : easyPlotTag(selectedPlot)
       : ''
+    // 1.4.503: first session gold is the Easy line. Read is gold only on a later day.
+    const readNow = easyReadIsHomeGold(progress, today) && focus !== 'hold'
+    const playNow = matchReady && !readNow && focus !== 'hold'
+    const lockNow = focus === 'hold'
+    const playLater = !playNow && !lockNow
+    const readTomorrow = easyReadMarkedTomorrow(progress, today)
+
+    function easyBuildThis() {
+      const readyId = selectedPlot && canUpgrade(selectedPlot, progress) ? selectedPlot : null
+      if (readyId) upgradeBuilding(readyId)
+    }
+    // Easy Clear 1.4.157: Home whisper = short next-step (maze/run/merge/dig/snap Home), not full hunt how — Fixes #203 (completes #192 family)
+    const homeWhisper = readNow
+      ? 'First, read today’s story.'
+      : focus === 'hold'
+        ? 'The story is open. Lock in the line.'
+        : storyPlayFor(loopId) === 'father-run'
+          ? EASY.runHome
+          : storyPlayFor(loopId) === 'road-maze'
+            ? roadDone
+              ? EASY.mazeHome
+              : EASY.mazeFirst
+            : storyPlayFor(loopId) === 'claim-merge'
+              ? EASY.mergeHome
+              : storyPlayFor(loopId) === 'source-dig'
+                ? EASY.digHome
+                : storyPlayFor(loopId) === 'story-snap'
+                  ? EASY.snapHome
+                  : coldMercy
+                    ? 'Find Mercy’s story at Story Creek.'
+                    : 'Find the gems. The story opens as you play.'
+
+    const readyLine = upgradeReadyId ? 'A building is ready. Tap it, then Build this.' : !doneToday ? 'Finish today’s story once. Then you can raise the building — no pay.' : buildNeed.line
+    const trailGold = playNow || lockNow || readNow
+    const idleGift = trailGold ? homeWhisper : (lampsGift ?? readyLine)
     let dockEyebrow = 'Build It'
     let dockGift = idleGift
     if (selectedPlot && selectedReady) {
@@ -121,34 +158,6 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
         ) ?? nextUpgradeNeed(selectedPlot, progress, true).line
       dockGift = `${why} Tap it again to open.`
     }
-    // 1.4.503: first session gold is the Easy line. Read is gold only on a later day.
-    const readNow = easyReadIsHomeGold(progress, today) && focus !== 'hold'
-    const playNow = matchReady && !readNow && focus !== 'hold'
-    const lockNow = focus === 'hold'
-    const playLater = !playNow && !lockNow
-
-    function easyBuildThis() {
-      const readyId = selectedPlot && canUpgrade(selectedPlot, progress) ? selectedPlot : null
-      if (readyId) upgradeBuilding(readyId)
-    }
-    // Easy Clear 1.4.157: Home whisper = short next-step (maze/run/merge/dig/snap Home), not full hunt how — Fixes #203 (completes #192 family)
-    const homeWhisper = readNow
-      ? 'First, read today’s story.'
-      : focus === 'hold'
-        ? 'The story is open. Lock in the line.'
-        : storyPlayFor(loopId) === 'father-run'
-          ? EASY.runHome
-          : storyPlayFor(loopId) === 'road-maze'
-            ? EASY.mazeHome
-            : storyPlayFor(loopId) === 'claim-merge'
-              ? EASY.mergeHome
-              : storyPlayFor(loopId) === 'source-dig'
-                ? EASY.digHome
-                : storyPlayFor(loopId) === 'story-snap'
-                  ? EASY.snapHome
-                  : coldMercy
-                    ? 'Find Mercy’s story at Story Creek.'
-                    : 'Find the gems. The story opens as you play.'
 
     return (
       <main
@@ -190,14 +199,15 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
           {/* Easy Clear 1.4.251: parchment coach labels — Learn/Lock In contrast (Fixes #343). */}
           {/* 1.4.357: numbered Read → Match/Learn → Lock In. One gold step. */}
           <ol className="easy-coach easy-home-steps" aria-label="Next step: Read, then Match, then Lock In">
-            <li className={readNow ? 'is-now' : 'is-quiet'}>
+            <li className={readNow ? 'is-now' : readTomorrow ? 'is-tomorrow' : 'is-quiet'}>
               <button
                 type="button"
                 className="easy-coach-step easy-dock-walk"
                 onClick={() => onNavigate({ name: 'daily' })}
               >
                 <span className="easy-step-num">1</span>
-                Read
+                <span>Read</span>
+                {readTomorrow ? <span className="easy-step-later">tomorrow</span> : null}
               </button>
             </li>
             <li className={playNow ? 'is-now' : playLater ? 'is-later' : 'is-quiet'}>
