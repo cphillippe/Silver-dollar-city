@@ -44,7 +44,7 @@ export const EASY = {
   learnThisFirst: 'Learn this first.',
   findGems: 'Find the gems',
   findWords: 'Find the words',
-  dragCard: 'Drag the card',
+  dragWhy: 'Drag the card that shows why.',
   panelCue: 'Find a word to flip the first panel.',
   rememberSentence: 'Tap the main idea you kept.',
   tapWhy: 'Tap why this is true.',
