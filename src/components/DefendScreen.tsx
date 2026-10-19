@@ -131,12 +131,14 @@ import {
   commitLamp,
   dragGhostClient,
   easyDeadSeat,
+  fingerPlantPoint,
   hudCoversPoint,
   LAMP_BEGIN_MISS,
   LAMP_CLOSED_TOAST,
   LAMP_DRAG_START_PX,
   LAMP_PLACE_TOAST,
   lampSpotBlocked,
+  lampPlaceReach,
   lampUnderFinger,
   magnetCandlePoint,
   overTowerCards,
@@ -946,12 +948,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
           live.current.crownHeld = true
           bossThrough = false
           walking.push({ ...boss, t: held.t, hp: held.hp })
-          setCrownLive('Held!')
           setPowerBanner('Held!')
           window.clearTimeout(bannerTimer.current)
           bannerTimer.current = window.setTimeout(() => {
             setPowerBanner((current) => (current === 'Held!' ? null : current))
-            setCrownLive((current) => (current === 'Held!' ? null : current))
           }, 2800)
         }
       }
@@ -1334,12 +1334,14 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       return
     }
     if (phase === 'boost') clearCardAt.current = performance.now()
-    setSpendOpen(false)
-    setHelpOpen(false)
     placeArmRef.current = id
-    setPlaceArm(id)
-    if (!candle && !bell && !incense && !cross) setAbility(id)
-    closeUpgrade(true)
+    flushSync(() => {
+      setSpendOpen(false)
+      setHelpOpen(false)
+      setPlaceArm(id)
+      if (!candle && !bell && !incense && !cross) setAbility(id)
+      closeUpgrade(true)
+    })
   }
 
   function armBell() {
@@ -1547,8 +1549,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       placeBonus(using),
     )
     if (!next.ok) {
-      setGhost(next.preview)
-      if (easy) notePlaceRefusal(next.preview)
+      flushSync(() => {
+        setGhost(next.preview)
+        if (easy) notePlaceRefusal(next.preview)
+      })
       return false
     }
     if (paid) {
@@ -1572,17 +1576,37 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       placeArmRef.current = null
       setPlaceArm(null)
     }
-    setPlants(next.plants)
-    setPlaceToast(null)
     window.clearTimeout(placeToastTimer.current)
-    setReachMiss([])
+    flushSync(() => {
+      setPlants(next.plants)
+      setPlaceToast(null)
+      setReachMiss([])
+      setGhost(null)
+    })
     if (paid) {
       if (bell || incense || candle || cross) paidTypes.current.add(next.preview.spot)
       else paidTypes.current.add(using)
     }
-    setGhost(null)
     closeUpgrade(true)
     return true
+  }
+
+  /** The seat the tint drew, when this fingertip is that ring. */
+  function plantPoint(raw: { x: number; y: number }, using: string, hud: boolean): { x: number; y: number } {
+    const candle = isCandle(using)
+    const special = candle || isBell(using) || isIncense(using) || isCross(using)
+    if (special) {
+      const snapped = candle
+        ? magnetCandlePoint(raw, plantsRef.current, progress, runTier, hud, placeBonus(using))
+        : null
+      return snapped ?? lampUnderFinger(raw)
+    }
+    const plantsNow = plantsRef.current
+    const extra = placeBonus(using)
+    const marks = armedSeatMarks(using, progress, runTier, plantsNow, extra)
+    return fingerPlantPoint(raw, marks, (at) =>
+      lampPlaceReach(at, using, progress, runTier, plantsNow, hud, easy, extra),
+    )
   }
 
   plantOpenGroundRef.current = (clientX, clientY) => {
@@ -1591,8 +1615,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     if (!svg) return false
     const point = clientToMap(svg, clientX, clientY)
     if (!point) return false
-    const finger = lampUnderFinger(point)
     const using = unlocked.includes(ability) ? ability : 'love'
+    const finger = plantPoint(point, using, false)
     if (lampSpotBlocked(finger, plantsRef.current)) return false
     return finishPlace(plantsRef.current, finger, using, false, false)
   }
@@ -1601,7 +1625,9 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     if (phase !== 'plant') return
     if (plants[id]) return
     const using = unlocked.includes(ability) ? ability : 'love'
-    setPlants((current) => plantType(current, id, using))
+    flushSync(() => {
+      setPlants((current) => plantType(current, id, using))
+    })
     closeUpgrade(true)
   }
 
@@ -1652,11 +1678,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     }
     const using = paid ? (armed as WatchAbility) : unlocked.includes(ability) ? ability : 'love'
     const hud = hudCoversPoint(event.clientX, event.clientY, svg.ownerDocument)
-    const finger = lampUnderFinger(point)
-    const snapped = candleArm
-      ? magnetCandlePoint(point, plantsRef.current, progress, runTier, hud, placeBonus(using))
-      : null
-    const seat = snapped ?? finger
+    const seat = plantPoint(point, using, hud)
     const look = previewLamp(
       seat,
       using,
@@ -1719,12 +1741,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       setGhost(null)
       return
     }
-    const finger = lampUnderFinger(raw)
     const hud = overTowerCards(clientX, clientY, doc) || hudCoversPoint(lifted.x, lifted.y, doc)
-    const snapped = candleArm
-      ? magnetCandlePoint(raw, plantsRef.current, progress, runTier, hud, placeBonus(using))
-      : null
-    const point = snapped ?? finger
+    const point = plantPoint(raw, using, hud)
     if (kind === 'move') {
       setGhost(
         previewLamp(point, using, progress, runTier, plantsRef.current, hud, easy, placeBonus(using)),
@@ -1813,7 +1831,9 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       sparksRef.current += refund
       setRunSparks(sparksRef.current)
     }
-    setPlants(next)
+    flushSync(() => {
+      setPlants(next)
+    })
     closeUpgrade(true)
   }
 
@@ -3479,7 +3499,9 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       progress={progress}
       easy={easy}
       ability={ability}
-      setAbility={setAbility}
+      setAbility={(id) => {
+        flushSync(() => setAbility(id))
+      }}
       setToolLock={setToolLock}
       firing={firing}
       firingId={firingId}

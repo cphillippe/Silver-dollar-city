@@ -372,7 +372,9 @@ import {
   LAMP_TOO_FAR,
   armedSeatMarks,
   easyDeadSeat,
+  fingerPlantPoint,
   lampArtAboveAnchor,
+  lampPlaceReach,
   plantedLampsTooFar,
   lampReachesRoad,
   lampRoadNote,
@@ -1691,16 +1693,14 @@ assert.match(
 )
 assert.equal(APP_VERSION, '1.4.509')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.509'), '1.4.509 changelog row')
-assert.match(latestChange('1.4.509').title, /plain|next|move/i)
+assert.match(latestChange('1.4.509').title, /seat/i)
 assert.doesNotMatch(
   latestChange('1.4.509').items.join('\n'),
   /Fixes #|Closes #|Resolves #/,
   '1.4.509 changelog avoids GitHub close keywords',
 )
-assert.match(latestChange('1.4.509').items.join('\n'), /Run again/)
-assert.match(latestChange('1.4.509').items.join('\n'), /Find the words/)
-assert.match(latestChange('1.4.509').items.join('\n'), /Drag the card/)
-assert.match(latestChange('1.4.509').items.join('\n'), /Hard/)
+assert.match(latestChange('1.4.509').items.join('\n'), /Too far from the road/)
+assert.match(latestChange('1.4.509').items.join('\n'), /Plant on open ground/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.508'), '1.4.508 changelog row')
 assert.match(latestChange('1.4.508').title, /share/i)
 assert.doesNotMatch(
@@ -1712,6 +1712,17 @@ assert.match(latestChange('1.4.508').items.join('\n'), /Share this line/)
 assert.match(latestChange('1.4.508').items.join('\n'), /Android/)
 assert.match(latestChange('1.4.508').items.join('\n'), /Home/)
 assert.match(latestChange('1.4.508').items.join('\n'), /Hard/)
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.509'), '1.4.509 changelog row')
+assert.match(latestChange('1.4.509').title, /plain|next|move/i)
+assert.doesNotMatch(
+  latestChange('1.4.509').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.509 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.509').items.join('\n'), /Run again/)
+assert.match(latestChange('1.4.509').items.join('\n'), /Find the words/)
+assert.match(latestChange('1.4.509').items.join('\n'), /Drag the card/)
+assert.match(latestChange('1.4.509').items.join('\n'), /Hard/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.507'), '1.4.507 changelog row')
 assert.match(latestChange('1.4.507').title, /crown/i)
 assert.doesNotMatch(
@@ -17724,6 +17735,84 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
     /easyDeadSeat|LAMP_PLACE_TOAST/,
     '1.4.503 the pace sim does not read the dead-seat rule',
   )
+}
+
+// Night Watch: a fingertip on a seat ring uses that seat's reach.
+{
+  const progress = emptyProgress()
+  const disagree = [
+    ['map03', '../src/nightWatch/maps/maze/map03.json', [[328, 360]], []],
+    [
+      'map04',
+      '../src/nightWatch/maps/maze/map04.json',
+      [
+        [328, 224],
+        [192, 768],
+        [464, 224],
+        [600, 768],
+      ],
+      [],
+    ],
+    ['map05', '../src/nightWatch/maps/maze/map05.json', [[464, 632]], []],
+    ['far-hills', '../src/nightWatch/maps/maze/map02.json', [], [[600, 224]]],
+  ]
+  for (const [id, file, greys, greens] of disagree) {
+    const pack = nightMapFromPack(JSON.parse(readFileSync(new URL(file, import.meta.url), 'utf8')))
+    bindLampGround(pack)
+    bindNightFeatures(pack.mapFeatures)
+    for (const type of ['love', 'logic']) {
+      const marks = armedSeatMarks(type, progress, {}, {})
+      const look = (at) => lampPlaceReach(at, type, progress, {}, {}, false, true, 0)
+      for (const [x, y] of greys) {
+        const seat = { x, y }
+        const planted = fingerPlantPoint(seat, marks, look)
+        assert.deepEqual(planted, seat, `${id} ${type} grey ${x},${y} plants on the ring`)
+        assert.equal(commitLamp({}, planted, type, progress, {}, false, true, 0).ok, false, `${id} ${type} grey ${x},${y} is refused`)
+        assert.equal(
+          commitLamp({}, lampUnderFinger(seat), type, progress, {}, false, true, 0).ok,
+          true,
+          `${id} ${type} grey ${x},${y} picture shift would have planted`,
+        )
+      }
+      for (const [x, y] of greens) {
+        const seat = { x, y }
+        const planted = fingerPlantPoint(seat, marks, look)
+        assert.deepEqual(planted, seat, `${id} ${type} green ${x},${y} plants on the ring`)
+        assert.equal(commitLamp({}, planted, type, progress, {}, false, true, 0).ok, true, `${id} ${type} green ${x},${y} plants`)
+        assert.equal(
+          commitLamp({}, lampUnderFinger(seat), type, progress, {}, false, true, 0).ok,
+          false,
+          `${id} ${type} green ${x},${y} picture shift would have refused`,
+        )
+      }
+    }
+  }
+  bindLampGround(null)
+  bindNightFeatures(null)
+  const marks = armedSeatMarks('love', progress, {}, {})
+  const look = (at) => lampPlaceReach(at, 'love', progress, {}, {}, false, true, 0)
+  const a2 = { x: 464, y: 360 }
+  assert.deepEqual(fingerPlantPoint(a2, marks, look), a2, 'a2 green ring stays on the seat')
+  assert.equal(commitLamp({}, a2, 'love', progress, {}, false, true, 0).ok, true, 'a2 green ring plants')
+  assert.equal(commitLamp({}, lampUnderFinger(a2), 'love', progress, {}, false, true, 0).ok, false, 'a2 picture shift refuses')
+  const journal = { x: 572, y: 514 }
+  assert.deepEqual(fingerPlantPoint(journal, marks, look), { x: 572, y: 540 }, 'a journal finger stays on the named lot')
+  for (const finger of [
+    { x: 430, y: 134 },
+    { x: 250, y: 274 },
+    { x: 230, y: 414 },
+    { x: 310, y: 554 },
+    { x: 420, y: 404 },
+    { x: 450, y: 184 },
+    { x: 210, y: 714 },
+  ]) {
+    assert.deepEqual(fingerPlantPoint(finger, marks, look), lampUnderFinger(finger), `seed finger ${finger.x},${finger.y} stays put`)
+  }
+  const screenReach = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  assert.match(screenReach, /fingerPlantPoint/)
+  assert.match(screenReach, /lampPlaceReach/)
+  assert.match(screenReach, /flushSync\(\(\) => \{\s*setPlants\(next\.plants\)/)
+  assert.match(readFileSync(new URL('../src/lib/lampPlace.ts', import.meta.url), 'utf8'), /export function lampPlaceReach/)
 }
 
 const bossTapScan = readFileSync(new URL('./check-seed-fire.mjs', import.meta.url), 'utf8')
