@@ -1689,7 +1689,18 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.508')
+assert.equal(APP_VERSION, '1.4.509')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.509'), '1.4.509 changelog row')
+assert.match(latestChange('1.4.509').title, /plain|next|move/i)
+assert.doesNotMatch(
+  latestChange('1.4.509').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.509 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.509').items.join('\n'), /Run again/)
+assert.match(latestChange('1.4.509').items.join('\n'), /Find the words/)
+assert.match(latestChange('1.4.509').items.join('\n'), /Drag the card/)
+assert.match(latestChange('1.4.509').items.join('\n'), /Hard/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.508'), '1.4.508 changelog row')
 assert.match(latestChange('1.4.508').title, /share/i)
 assert.doesNotMatch(
@@ -3802,13 +3813,13 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
     'Easy home dock: Build It before coach pills',
   )
   assert.ok(
-    easyHome.indexOf('EASY.matchCta') < easyHome.indexOf('EASY.saved'),
-    'Easy home order is Match before Hold',
+    easyHome.indexOf('EASY.findWords') < easyHome.indexOf('EASY.saved'),
+    'Easy home order is the play step before Hold',
   )
   {
     const coach = easyHome.slice(easyHome.indexOf('easy-home-steps'), easyHome.indexOf('Night Watch'))
     const iRead = coach.search(/>\s*Read\s*</)
-    const iMatch = coach.indexOf('EASY.matchCta')
+    const iMatch = coach.indexOf('EASY.findWords')
     const iLearn = coach.search(/>\s*Learn\s*</)
     const iLock = coach.indexOf('EASY.saved')
     assert.ok(iRead >= 0 && iMatch >= 0 && iLearn >= 0 && iLock >= 0, 'home steps have Read · Match · Learn · Lock In')

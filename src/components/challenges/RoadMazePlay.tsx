@@ -322,8 +322,9 @@ export function RoadMazePlay({
   function landOn(cell: MazeCoord) {
     atRef.current = cell
     setAt(cell)
-    if (mazeSame(cell, MAZE_HURT) && !foundRef.current) {
-      markFound(cell)
+    if (mazeSame(cell, MAZE_HURT)) {
+      if (!foundRef.current) markFound(cell)
+      if (document.documentElement.dataset.easy === 'on' && !helpedRef.current) markHelped(cell)
     } else if (mazeSame(cell, MAZE_INN) && !canWin(helpedRef.current, cell)) {
       flashToast(mazeBlockedHint(cell, foundRef.current, helpedRef.current))
     }

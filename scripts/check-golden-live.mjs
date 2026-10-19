@@ -161,33 +161,15 @@ async function readCell(loc) {
 }
 
 async function tapMaze(page, cell) {
-  const selector = `[data-maze-cell][data-r="${cell.r}"][data-c="${cell.c}"]`
-  const loc = page.locator(selector)
-  await loc.dispatchEvent('pointerdown', {
-    bubbles: true,
-    cancelable: true,
-    pointerId: 1,
-    pointerType: 'touch',
-    isPrimary: true,
-    button: 0,
-    buttons: 1,
-  })
-  await page.evaluate((sel) => {
-    const lift = (target) => {
-      target.dispatchEvent(
-        new PointerEvent('pointerup', {
-          bubbles: true,
-          cancelable: true,
-          pointerId: 1,
-          pointerType: 'touch',
-          isPrimary: true,
-        }),
-      )
-    }
-    const node = document.querySelector(sel)
-    if (node) lift(node)
-    lift(window)
-  }, selector)
+  const loc = page.locator(`[data-maze-cell][data-r="${cell.r}"][data-c="${cell.c}"]`)
+  await loc.scrollIntoViewIfNeeded()
+  const box = await loc.boundingBox()
+  if (!box) throw new Error(`maze cell ${cell.r},${cell.c} has no box`)
+  const x = box.x + box.width / 2
+  const y = box.y + box.height / 2
+  await page.mouse.move(x, y)
+  await page.mouse.down()
+  await page.mouse.up()
 }
 
 async function playRoad(page) {
@@ -205,6 +187,7 @@ async function playRoad(page) {
   const hurt = await readCell(page.locator('[data-maze-cell].is-hurt'))
   const inn = await readCell(page.locator('[data-maze-cell].is-inn'))
   await walkUntil(page, hurt, false)
+  await page.locator('.play.is-road-maze.is-helped').waitFor({ timeout: 4000 })
   await tapMaze(page, hurt)
   await page.locator('.play.is-road-maze.is-helped, .play.is-road-maze.is-win').waitFor()
   await walkUntil(page, inn, true)
@@ -240,6 +223,21 @@ async function walkUntil(page, target, winOnArrival) {
   throw new Error(`maze walk did not reach ${key(target)}`)
 }
 
+async function readRunCue(page) {
+  return page.evaluate(() => {
+    const pad = document.querySelector('[data-run-pad="hold"]')
+    if (!(pad instanceof HTMLElement)) return null
+    const faces = [...pad.querySelectorAll('.run-pad-face')].filter(
+      (el) => getComputedStyle(el).visibility !== 'hidden',
+    )
+    return {
+      label: (pad.getAttribute('aria-label') || '').trim(),
+      faces: faces.map((el) => (el.textContent || '').replace(/\s+/g, ' ').trim()),
+      glow: pad.classList.contains('is-glow'),
+    }
+  })
+}
+
 async function releaseRun(page, kind) {
   const pad = page.locator('[data-run-pad="hold"]')
   await pad.waitFor({ timeout: 15000 })
@@ -249,15 +247,35 @@ async function releaseRun(page, kind) {
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
   await page.mouse.down()
   if (kind === 'late') {
-    await page.waitForFunction(() => {
-      const node = document.querySelector('[data-run-pad="hold"]')
-      return (node?.getAttribute('aria-label') || '').includes('Now tap')
-    })
-    await page.waitForTimeout(500)
+    const bad = []
+    let sawTap = false
+    let sawHold = false
+    let shotCue = false
+    const start = Date.now()
+    while (Date.now() - start < 2600) {
+      const snap = await readRunCue(page)
+      const oneVerb = snap && snap.faces.length === 1 && snap.faces[0] === snap.label && (snap.label === 'Hold' || snap.label === 'Tap')
+      const matchesGlow = Boolean(snap && (snap.glow ? snap.label === 'Tap' : snap.label === 'Hold'))
+      if (!oneVerb || !matchesGlow) bad.push(snap)
+      if (snap?.label === 'Tap') {
+        sawTap = true
+        if (!shotCue && page.viewportSize()?.width === 375) {
+          await page.screenshot({ path: `${SHOTS}/run-pad-cue-375.png` })
+          shotCue = true
+        }
+      }
+      if (snap?.label === 'Hold') sawHold = true
+      await page.waitForTimeout(80)
+    }
+    assert.equal(bad.length, 0, `run cue flipped ${JSON.stringify(bad.slice(0, 3))}`)
+    assert.equal(sawHold, true, 'the pad says Hold between glows')
+    assert.equal(sawTap, true, 'the pad says Tap on the glow')
   } else {
     await page.waitForTimeout(160)
-    const label = (await pad.getAttribute('aria-label')) || ''
-    assert.doesNotMatch(label, /Now tap/, 'early release is before the glow')
+    const snap = await readRunCue(page)
+    assert.equal(snap?.faces?.length, 1, 'one run cue before the glow')
+    assert.equal(snap?.label, 'Hold', 'early release is a hold')
+    assert.equal(snap?.glow, false, 'early release is before the glow')
   }
   await page.mouse.up()
   await page.locator('.run-miss').waitFor({ timeout: 16000 })
@@ -295,14 +313,20 @@ async function hugFatherHuman(page) {
   assert.equal(keepLabel, 'Keep going', 'miss 2 gold is Keep going')
   const keepCls = (await keep.getAttribute('class')) || ''
   assert.match(keepCls, /\bprimary\b/, 'Keep going is .btn.primary')
-  const plain = page.locator('.run-miss button', { hasText: /^Run again$/ })
+  const plain = page.locator('.run-miss [data-run-again]')
   assert.equal(await plain.count(), 1, 'Run again stays visible')
+  const plainText = ((await plain.innerText()) || '').replace(/\s+/g, ' ').trim()
+  assert.equal(plainText, 'Run again', 'miss 2 plain label reads Run again')
   const plainCls = (await plain.getAttribute('class')) || ''
   assert.doesNotMatch(plainCls, /\bprimary\b/, 'Run again is a plain button on miss 2')
+  const ink = await plain.evaluate((el) => getComputedStyle(el).color)
+  const channels = ink.match(/\d+/g)?.map(Number) ?? []
+  assert.ok(channels.length >= 3 && Math.max(...channels.slice(0, 3)) < 80, `Run again ink is dark (${ink})`)
   const golds = await filledGolds(page)
   assert.equal(golds.length, 1, `miss 2 has one filled gold ${JSON.stringify(golds)}`)
   assert.match(golds[0].text, /Keep going/)
   await page.screenshot({ path: `${SHOTS}/run-fail-keep-going-375.png` })
+  await page.screenshot({ path: `${SHOTS}/fail-2-run-again-375.png` })
   await tapRunFailGold(page)
   await page.locator('.play.is-father-run.is-win .btn.primary').waitFor({ timeout: 8000 })
 }
@@ -329,7 +353,7 @@ async function hugFather(page) {
       throw new Error('father run missed')
     }
     const label = await pad.getAttribute('aria-label')
-    if (label && (label.includes('Now tap') || label.includes('Let go'))) {
+    if (label === 'Tap' || (label && label.includes('Let go'))) {
       await page.mouse.up()
       await page.waitForTimeout(30)
       await press()
@@ -385,13 +409,45 @@ async function playGem(page) {
   await page.locator('.play.is-gem-search.is-win').waitFor({ timeout: 8000 })
 }
 
+async function dragWhy(page, id) {
+  const brief = evidenceFor(id)
+  assert.ok(brief, `evidence for ${id}`)
+  const why = easyWhyLine(brief.reason)
+  const cue = page.locator('[data-drag-cue]')
+  await cue.waitFor({ timeout: 8000 })
+  assert.equal(((await cue.innerText()) || '').replace(/\s+/g, ' ').trim(), 'Drag the card')
+  const first = page.locator('button.why-chip').first()
+  await first.waitFor()
+  assert.match((await first.getAttribute('class')) || '', /is-first-cue/)
+  const pulse = await first.evaluate((el) => getComputedStyle(el).animationName)
+  assert.match(pulse, /why-first-pulse/, `first card pulses (${pulse})`)
+  assert.equal((await filledGolds(page)).length, 0, 'Lock In play has no gold button')
+  if (page.viewportSize()?.width === 375) {
+    await page.screenshot({ path: `${SHOTS}/lock-in-drag-cue-375.png` })
+  }
+  const chip = page.locator('button.why-chip', { hasText: why }).first()
+  await chip.waitFor()
+  const box = await chip.boundingBox()
+  if (!box) throw new Error('why chip has no box')
+  const x = box.x + box.width / 2
+  const y = box.y + box.height / 2
+  await page.mouse.move(x, y)
+  await page.mouse.down()
+  await page.mouse.move(x + 48, y + 20, { steps: 8 })
+  await page.mouse.up()
+  await cue.waitFor({ state: 'detached', timeout: 4000 })
+  await page.locator('.why-blast.is-yes, .why-blast.is-win').first().waitFor({ timeout: 8000 })
+}
+
 async function answerQuiz(page, id) {
   const brief = evidenceFor(id)
   assert.ok(brief, `evidence for ${id}`)
   const why = easyWhyLine(brief.reason)
   const chip = page.locator('button.why-chip', { hasText: why }).first()
   await chip.waitFor({ timeout: 8000 })
-  await chip.click()
+  const box = await chip.boundingBox()
+  if (!box) throw new Error('why chip has no box')
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
   await page.locator('.why-blast.is-yes, .why-blast.is-win').first().waitFor({ timeout: 8000 })
 }
 
@@ -561,6 +617,11 @@ export async function checkGoldenLive() {
       await page.locator('main.hub').waitFor()
       shot = await stamp('home-tuning')
       assert.doesNotMatch(shot.golds[0].text, /Read/)
+      assert.match(shot.golds[0].text, /Find the words/)
+      assert.doesNotMatch(shot.golds[0].text, /gems/)
+      const tuningWhisper = ((await page.locator('.easy-home-whisper').innerText()) || '').replace(/\s+/g, ' ').trim()
+      assert.match(tuningWhisper, /Find the words at Sky Watch/)
+      assert.doesNotMatch(tuningWhisper, /gems/)
       await tapFilledGold(page)
 
       await page.locator('.play.is-gem-search').waitFor()
@@ -582,6 +643,18 @@ export async function checkGoldenLive() {
       assert.equal(await page.locator('.play.is-gem-search').count(), 0, 'the gold tap did not replay the word search')
 
       if (width === 375) {
+        await dragWhy(page, 'ob-tuning')
+        shot = await stamp('quiz-tuning-done')
+        assert.match(shot.golds[0].text, /Continue/)
+        assert.equal(await page.locator('[data-drag-cue]').count(), 0, 'drag cue hides after the drag')
+        await tapFilledGold(page)
+        await page.locator('main.hub').waitFor()
+        shot = await stamp('home-after-tuning')
+        assert.match(shot.golds[0].text, /Find the words/)
+        const creek = ((await page.locator('.easy-home-whisper').innerText()) || '').replace(/\s+/g, ' ').trim()
+        assert.match(creek, /Find the words at Story Creek/)
+        assert.doesNotMatch(creek, /Sky Watch|gems/)
+        await page.screenshot({ path: `${SHOTS}/home-after-lesson-3-375.png` })
         await page.getByRole('button', { name: 'Settings' }).click()
         await page.locator('.settings-card').first().waitFor()
         const eyebrow = (await page.locator('.settings-card').first().locator('.eyebrow').innerText()).trim()
@@ -705,6 +778,11 @@ export async function checkGoldenLive() {
     const humanGift = (await humanPage.locator('.easy-build-gift').innerText()).replace(/\s+/g, ' ')
     assert.doesNotMatch(humanGift, /Build this/)
     assert.doesNotMatch(humanHome.golds[0].text, /Read/)
+    assert.match(humanHome.golds[0].text, /Find the words/)
+    assert.match(
+      ((await humanPage.locator('.easy-home-whisper').innerText()) || '').replace(/\s+/g, ' '),
+      /Find the words at Sky Watch/,
+    )
     await tapFilledGold(humanPage)
     await humanPage.locator('.play.is-gem-search').waitFor()
     await humanStamp('gem')

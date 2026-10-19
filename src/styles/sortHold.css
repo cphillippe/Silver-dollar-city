@@ -3889,3 +3889,47 @@ html[data-easy='on'] .play.is-easy-sort .match-recover.text-link {
   min-height: 44px;
   padding: 8px 0;
 }
+
+/* Easy Lock In: the first card pulses until the first drag. Phone float stays off.
+   The cue stays one line. Chips and the arena give that line back so a 768 creed win still fits. */
+html[data-easy='on'] .why-drag-cue {
+  margin: 0 0 -10px;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 750;
+  line-height: 1.15;
+  color: #2a2118;
+  -webkit-text-fill-color: #2a2118;
+}
+
+html[data-easy='on'] .why-blast:has(.why-drag-cue) {
+  gap: 6px;
+}
+
+html[data-easy='on'] .why-blast:has(.why-drag-cue) .why-arena {
+  min-height: 208px;
+}
+
+html[data-easy='on'] .why-blast:has(.why-drag-cue) .why-chip {
+  min-height: 48px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+html[data-easy='on'] .why-blast:not(.is-win):not(.is-miss-teach) .why-chip.is-first-cue:not(.is-gone):not(.is-toss) {
+  animation: why-first-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes why-first-pulse {
+  0%,
+  100% { transform: translateY(0) scale(1); }
+  50% { transform: scale(1.04); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-easy='on'] .why-blast:not(.is-win):not(.is-miss-teach) .why-chip.is-first-cue:not(.is-gone):not(.is-toss) {
+    animation: none;
+    outline: 3px solid rgba(255, 204, 51, 0.9);
+    outline-offset: 3px;
+  }
+}
