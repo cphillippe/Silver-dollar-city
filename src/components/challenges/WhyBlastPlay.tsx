@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { EASY, easyFacingLine, easyWhyLine } from '../../lib/easy'
 import { GEM_BURST, playGemPop, prefersReducedMotion } from '../../lib/juice'
 import { holdSuccessBeat } from '../../lib/successBeat'
@@ -75,6 +75,9 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
   const ctaRef = useRef<HTMLDivElement | null>(null)
   const missesRef = useRef(0)
   const doneRef = useRef(false)
+  const dragRef = useRef<{ id: number; x: number; y: number; line: string; moved: boolean } | null>(null)
+  const suppressClick = useRef(false)
+  const [dragCue, setDragCue] = useState(true)
   const reduced = prefersReducedMotion()
 
   useEffect(() => {
@@ -138,6 +141,40 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
     else miss(line)
   }
 
+  function onChipPointerDown(event: ReactPointerEvent<HTMLButtonElement>, line: string) {
+    if (locked || tossing || missTeach || gone.includes(line)) return
+    dragRef.current = { id: event.pointerId, x: event.clientX, y: event.clientY, line, moved: false }
+    try {
+      event.currentTarget.setPointerCapture(event.pointerId)
+    } catch {
+      /* pointer already released */
+    }
+  }
+
+  function onChipPointerMove(event: ReactPointerEvent<HTMLButtonElement>) {
+    const drag = dragRef.current
+    if (!drag || drag.id !== event.pointerId || drag.moved) return
+    const dx = event.clientX - drag.x
+    const dy = event.clientY - drag.y
+    if (dx * dx + dy * dy < 144) return
+    drag.moved = true
+    suppressClick.current = true
+    setDragCue(false)
+    pick(drag.line)
+  }
+
+  function onChipPointerUp(event: ReactPointerEvent<HTMLButtonElement>) {
+    if (dragRef.current?.id === event.pointerId) dragRef.current = null
+  }
+
+  function onChipClick(line: string) {
+    if (suppressClick.current) {
+      suppressClick.current = false
+      return
+    }
+    pick(line)
+  }
+
   return (
     <div
       className={`why-blast ${shake ? 'is-shake' : ''} ${locked ? 'is-yes is-win' : ''} ${missFlash ? 'is-miss' : ''} ${missTeach ? 'is-miss-teach' : ''} ${retryJuice ? 'is-retry-juice' : ''}`}
@@ -183,16 +220,27 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
           </div>
         </article>
       ) : (
+        <>
+        {dragCue && !locked ? (
+          <p className="why-drag-cue" data-drag-cue="yes">
+            {EASY.dragCard}
+          </p>
+        ) : null}
         <div className="why-arena">
           {/* Easy Clear 1.4.190/194/195: ≤720 fills purple void in sortHold.css (invent Fun/Clear · Fixes #251/#252). */}
           {chips.map((line, index) => {
             const tossed = tossing === line || gone.includes(line)
+            const firstCue = dragCue && !locked && index === 0 && !tossed
             return (
               <button
                 key={line}
                 type="button"
-                className={`why-chip match-card recall-card slot-${index} float-${index} ${tossed ? 'is-toss' : ''} ${gone.includes(line) ? 'is-gone' : ''} ${locked ? 'is-clear' : ''} ${locked && line === reason ? 'is-lock' : ''} ${retryJuice && !gone.includes(line) ? 'is-retry-pulse' : ''}`}
-                onClick={() => pick(line)}
+                className={`why-chip match-card recall-card slot-${index} float-${index} ${tossed ? 'is-toss' : ''} ${gone.includes(line) ? 'is-gone' : ''} ${locked ? 'is-clear' : ''} ${locked && line === reason ? 'is-lock' : ''} ${retryJuice && !gone.includes(line) ? 'is-retry-pulse' : ''} ${firstCue ? 'is-first-cue' : ''}`}
+                onPointerDown={(event) => onChipPointerDown(event, line)}
+                onPointerMove={onChipPointerMove}
+                onPointerUp={onChipPointerUp}
+                onPointerCancel={onChipPointerUp}
+                onClick={() => onChipClick(line)}
                 disabled={locked || tossed}
               >
                 {easyWhyLine(line)}
@@ -215,6 +263,7 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
               ))
             : null}
         </div>
+        </>
       )}
       {locked ? (
         <>

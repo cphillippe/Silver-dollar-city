@@ -227,7 +227,7 @@ export async function checkEasyFace() {
       await page.mouse.up()
       for (let tap = 1; tap <= 3; tap += 1) {
         await page.waitForFunction(
-          () => document.querySelector('[data-run-pad="hold"]')?.getAttribute('aria-label') === 'Now tap!',
+          () => document.querySelector('[data-run-pad="hold"]')?.getAttribute('aria-label') === 'Tap',
           null,
           { timeout: 8000 },
         )
@@ -243,7 +243,7 @@ export async function checkEasyFace() {
         assert.equal(score, tap * 25, `father tap ${tap}/3 at ${width}`)
         if (tap < 3) {
           await page.waitForFunction(
-            () => document.querySelector('[data-run-pad="hold"]')?.getAttribute('aria-label') === 'Hold to run',
+            () => document.querySelector('[data-run-pad="hold"]')?.getAttribute('aria-label') === 'Hold',
             null,
             { timeout: 8000 },
           )
