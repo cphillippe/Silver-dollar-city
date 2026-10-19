@@ -8,6 +8,19 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.511',
+    title: 'Drag the card that shows why',
+    when: '2026-10-19',
+    items: [
+      'On Easy, Lock In says Drag the card that shows why.',
+      'Every card gives the same small wiggle. No card is singled out.',
+      'The why line keeps the tail of the g on a phone.',
+      'The creed win keeps the cards under that line.',
+      'Hard stays the same.',
+      'Refs #782.',
+    ],
+  },
+  {
     version: '1.4.510',
     title: 'A grey seat stays empty',
     when: '2026-10-19',

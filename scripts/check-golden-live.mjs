@@ -409,20 +409,72 @@ async function playGem(page) {
   await page.locator('.play.is-gem-search.is-win').waitFor({ timeout: 8000 })
 }
 
+async function lockInFace(page) {
+  await page.locator('.why-blast-hud .next-tap').waitFor({ timeout: 8000 })
+  await page.locator('button.why-chip').first().waitFor()
+  return page.evaluate(() => {
+    const header = document.querySelector('.why-blast-hud .next-tap')
+    const chips = [...document.querySelectorAll('button.why-chip')].filter((el) => {
+      const style = getComputedStyle(el)
+      const box = el.getBoundingClientRect()
+      return style.visibility !== 'hidden' && style.display !== 'none' && box.height > 4
+    })
+    const headerBox = header ? header.getBoundingClientRect() : null
+    let covered = false
+    if (headerBox) {
+      for (const chip of chips) {
+        const box = chip.getBoundingClientRect()
+        const overlap =
+          box.bottom > headerBox.top + 0.5 &&
+          box.top < headerBox.bottom - 0.5 &&
+          box.right > headerBox.left + 0.5 &&
+          box.left < headerBox.right - 0.5
+        if (overlap) covered = true
+      }
+    }
+    const marks = chips.map((el) => {
+      const style = getComputedStyle(el)
+      const classes = [...el.classList]
+        .filter((name) => !/^slot-\d+$/.test(name) && !/^float-\d+$/.test(name))
+        .sort()
+        .join(' ')
+      return [style.animationName, style.outlineStyle, style.outlineWidth, style.backgroundColor, classes].join('|')
+    })
+    let descender = false
+    if (header) {
+      const range = document.createRange()
+      range.selectNodeContents(header)
+      const ink = range.getBoundingClientRect()
+      const box = header.getBoundingClientRect()
+      descender = ink.height > 8 && ink.bottom <= box.bottom + 0.5 && ink.top >= box.top - 0.5
+    }
+    return {
+      tap: header ? header.innerText.replace(/\s+/g, ' ').trim() : '',
+      cue: document.querySelectorAll('[data-drag-cue], .why-drag-cue, .is-first-cue').length,
+      covered,
+      unique: new Set(marks).size > 1,
+      descender,
+      lineHeight: header ? getComputedStyle(header).lineHeight : '',
+    }
+  })
+}
+
+function assertSharedCards(face, where) {
+  assert.equal(face.tap, 'Drag the card that shows why.', where)
+  assert.equal(face.cue, 0, `${where} has no separate drag line`)
+  assert.equal(face.unique, false, `${where} gives no card a unique highlight`)
+  assert.equal(face.covered, false, `${where} keeps the cards under the header`)
+}
+
 async function dragWhy(page, id) {
   const brief = evidenceFor(id)
   assert.ok(brief, `evidence for ${id}`)
   const why = easyWhyLine(brief.reason)
-  const cue = page.locator('[data-drag-cue]')
-  await cue.waitFor({ timeout: 8000 })
-  assert.equal(((await cue.innerText()) || '').replace(/\s+/g, ' ').trim(), 'Drag the card')
-  const first = page.locator('button.why-chip').first()
-  await first.waitFor()
-  assert.match((await first.getAttribute('class')) || '', /is-first-cue/)
-  const pulse = await first.evaluate((el) => getComputedStyle(el).animationName)
-  assert.match(pulse, /why-first-pulse/, `first card pulses (${pulse})`)
+  const face = await lockInFace(page)
+  assertSharedCards(face, id)
   assert.equal((await filledGolds(page)).length, 0, 'Lock In play has no gold button')
   if (page.viewportSize()?.width === 375) {
+    assert.equal(face.descender, true, `${id} keeps the g descender (${face.lineHeight})`)
     await page.screenshot({ path: `${SHOTS}/lock-in-drag-cue-375.png` })
   }
   const chip = page.locator('button.why-chip', { hasText: why }).first()
@@ -435,8 +487,8 @@ async function dragWhy(page, id) {
   await page.mouse.down()
   await page.mouse.move(x + 48, y + 20, { steps: 8 })
   await page.mouse.up()
-  await cue.waitFor({ state: 'detached', timeout: 4000 })
   await page.locator('.why-blast.is-yes, .why-blast.is-win').first().waitFor({ timeout: 8000 })
+  assert.equal(await page.locator('[data-drag-cue], .why-drag-cue').count(), 0)
 }
 
 async function answerQuiz(page, id) {
@@ -607,6 +659,12 @@ export async function checkGoldenLive() {
       await tapFilledGold(page)
       await page.locator('.why-blast').waitFor()
       await stamp('quiz-father')
+      const fatherFace = await lockInFace(page)
+      assertSharedCards(fatherFace, 'ph-father')
+      if (width === 375) {
+        assert.equal(fatherFace.descender, true, `ph-father keeps the g descender (${fatherFace.lineHeight})`)
+        await page.screenshot({ path: `${SHOTS}/lock-in-father-375.png` })
+      }
       await answerQuiz(page, 'ph-father')
       await page.locator('.why-blast.is-yes .btn.primary, .why-blast.is-win .btn.primary').first().waitFor()
       shot = await stamp('quiz-father-done')
@@ -646,7 +704,7 @@ export async function checkGoldenLive() {
         await dragWhy(page, 'ob-tuning')
         shot = await stamp('quiz-tuning-done')
         assert.match(shot.golds[0].text, /Continue/)
-        assert.equal(await page.locator('[data-drag-cue]').count(), 0, 'drag cue hides after the drag')
+        assert.equal(await page.locator('[data-drag-cue], .why-drag-cue').count(), 0)
         await tapFilledGold(page)
         await page.locator('main.hub').waitFor()
         shot = await stamp('home-after-tuning')

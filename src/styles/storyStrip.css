@@ -1324,11 +1324,34 @@ html[data-easy='on'] .play.is-story-strip[data-n='3'] .strip-art img {
 }
 
 /* Tablet creed win. The why card's bottom pad stuck out of the page by a
-   short line. Drop that pad so the card ends with the choices. */
+   short line. Drop that pad so the card ends with the choices.
+   The header keeps its own row. Cards stay in the arena under it. */
 @media (min-height: 800px) {
   html[data-easy='on'] .is-after:has(.play.is-story-strip.is-win:not([data-n='3'])) .recall-gate.is-easy-hold {
     margin-bottom: 0;
     padding-bottom: 0;
+  }
+
+  html[data-easy='on'] .is-after:has(.play.is-story-strip.is-win:not([data-n='3'])) .why-blast {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  html[data-easy='on'] .is-after:has(.play.is-story-strip.is-win:not([data-n='3'])) .why-blast-hud,
+  html[data-easy='on'] .is-after:has(.play.is-story-strip.is-win:not([data-n='3'])) .why-arena {
+    position: relative;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  html[data-easy='on'] .is-after:has(.play.is-story-strip.is-win:not([data-n='3'])) .why-blast-hud {
+    z-index: 2;
+    flex: 0 0 auto;
+  }
+
+  html[data-easy='on'] .is-after:has(.play.is-story-strip.is-win:not([data-n='3'])) .why-arena {
+    z-index: 1;
   }
 }
 

@@ -59,7 +59,7 @@ test('Easy phone trail stays honest from the road through Lock In', async ({ pag
     await playRoad(page)
     await expectHelpedDock(page)
     await page.getByRole('button', { name: 'Lock In next', exact: true }).click()
-    await expect(page.getByText(/Tap why this is true/)).toBeVisible()
+    await expect(page.getByText('Drag the card that shows why.', { exact: true })).toBeVisible()
     await expect(page.getByRole('grid', { name: 'Jericho road' })).toHaveCount(0)
     await expectNoQuietPause(page)
   })
@@ -85,7 +85,7 @@ test('Easy phone trail stays honest from the road through Lock In', async ({ pag
 
   await test.step('hub → Lock In does not pause', async () => {
     await lock.getByRole('button', { name: /Lock In/ }).click()
-    await expect(page.getByText(/Tap why this is true/)).toBeVisible()
+    await expect(page.getByText('Drag the card that shows why.', { exact: true })).toBeVisible()
     await expectNoQuietPause(page)
   })
 
