@@ -113,7 +113,39 @@ function readWin() {
       return body ? body.scrollHeight - body.clientHeight : 0
     })(),
     docX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
-    tap: document.querySelector('.next-tap')?.textContent ?? '',
+    tap: (document.querySelector('.why-blast-hud .next-tap')?.textContent ?? '').replace(/\s+/g, ' ').trim(),
+    ...(() => {
+      const header = document.querySelector('.why-blast-hud .next-tap')
+      const chips = [...document.querySelectorAll('button.why-chip')].filter((el) => {
+        const style = getComputedStyle(el)
+        const box = el.getBoundingClientRect()
+        return style.visibility !== 'hidden' && style.display !== 'none' && box.height > 4
+      })
+      const headerBox = header ? header.getBoundingClientRect() : null
+      let headerCovered = false
+      if (headerBox) {
+        for (const card of chips) {
+          const box = card.getBoundingClientRect()
+          if (
+            box.bottom > headerBox.top + 0.5 &&
+            box.top < headerBox.bottom - 0.5 &&
+            box.right > headerBox.left + 0.5 &&
+            box.left < headerBox.right - 0.5
+          ) {
+            headerCovered = true
+          }
+        }
+      }
+      const marks = chips.map((el) => {
+        const style = getComputedStyle(el)
+        const classes = [...el.classList]
+          .filter((name) => !/^slot-\d+$/.test(name) && !/^float-\d+$/.test(name))
+          .sort()
+          .join(' ')
+        return [style.animationName, style.outlineStyle, style.outlineWidth, style.backgroundColor, classes].join('|')
+      })
+      return { headerCovered, uniqueHighlight: new Set(marks).size > 1 }
+    })(),
     stored: document.querySelector('.stored-line')?.textContent ?? '',
     link: link ? { ...box(link), text: link.textContent } : null,
     topbar: box(topbar),
@@ -260,8 +292,17 @@ export async function checkStoryWins() {
             `${strip.lineId} at ${width}×${height} win fits its container (body ${Math.round(second.bodyOverflow)}px, page ${Math.round(second.scrollOverflow)}px)`,
           )
         }
+        if (strip.lineId === 'wb-creed') {
+          assert.equal(second.tap, 'Drag the card that shows why.', `${strip.lineId} at ${width}×${height} names the drag`)
+          assert.equal(second.headerCovered, false, `${strip.lineId} at ${width}×${height} keeps cards under the header`)
+          assert.equal(second.uniqueHighlight, false, `${strip.lineId} at ${width}×${height} gives no card a unique highlight`)
+          assert.ok(
+            second.bodyOverflow <= 0.5 && second.scrollOverflow <= 0.5,
+            `${strip.lineId} at ${width}×${height} creed win overflow stays at 0 (body ${second.bodyOverflow}px, page ${second.scrollOverflow}px)`,
+          )
+        }
         if (strip.lineId === 'daily-rest') {
-          assert.match(second.tap, /Tap why this is true/, `${strip.lineId} at ${width}×${height} asks why this is true`)
+          assert.equal(second.tap, 'Drag the card that shows why.', `${strip.lineId} at ${width}×${height} names the drag`)
         }
         assert.ok(second.docX <= 1, `${strip.lineId} at ${width}×${height} has no horizontal scroll`)
         await page.getByRole('button', { name: easyWhyLine(brief.reason), exact: true }).click()
