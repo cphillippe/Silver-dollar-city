@@ -4,6 +4,7 @@ import {
   bindNightPath,
   bindNightRoads,
   boundNightPath,
+  DEFEND_ANCHOR,
   DEFEND_PATH,
   freeSpotId,
   isFreeSpot,
@@ -37,14 +38,24 @@ import {
 /**
  * Easy lamp placement (1.4.390).
  * Tap a tower card, then tap open ground. A card press that slides uses the
- * same preview and commit. The reach cue (1.4.392) uses the combat range
- * and still lets a far lamp plant.
+ * same preview and commit. The reach cue (1.4.392) uses the combat range.
+ * Easy refuses open ground that misses the road at the current reach.
+ * Hard still plants it. A named city lot is unchanged.
  */
 export type { NightPoint }
 export { freeSpotId, isFreeSpot, lampAnchor }
 
-/** Shown when even level III cannot meet the walker path. The spot can still be planted. */
+/** Shown when even level III cannot meet the walker path. Hard can still plant it. */
 export const LAMP_TOO_FAR = 'Too far from the road'
+
+/** Easy refusal for a seat that stays off the road. */
+export const LAMP_PLACE_TOAST = 'Too far from the road. Plant closer to the path.'
+
+/** Easy Begin when a planted pillar still cannot meet the road. */
+export const LAMP_BEGIN_MISS = "Your lamp can't reach the road"
+
+/** Easy refusal when the finger is on the road, a house, or another lamp. */
+export const LAMP_CLOSED_TOAST = 'Plant on open ground.'
 
 export interface LampPreview {
   spot: string
@@ -860,9 +871,72 @@ export function magnetCandlePoint(
   return best
 }
 
+/** One soft mark, tinted by whether this armed lamp meets the road right now. */
+export interface ArmedSeat {
+  x: number
+  y: number
+  live: boolean
+}
+
+/**
+ * Open-ground marks for the armed card.
+ * `live` is the combat range meeting the road. A later Far step is not live yet.
+ */
+export function armedSeatMarks(
+  ability: string,
+  progress: ProgressState,
+  runTier: Record<string, number> | undefined,
+  plants: Record<string, string> = {},
+  extra = 0,
+  placeKind?: string,
+): ArmedSeat[] {
+  return plantableHints(plants, placeKind).map((at) => {
+    const look = previewLamp(at, ability, progress, runTier, plants, false, true, extra)
+    return { x: at.x, y: at.y, live: look.reaches }
+  })
+}
+
+/** A city lot. Easy still plants these even when the current reach misses. */
+function namedLotAt(at: NightPoint): boolean {
+  const x = Math.round(at.x)
+  const y = Math.round(at.y)
+  return Object.values(DEFEND_ANCHOR).some((lot) => Math.round(lot.x) === x && Math.round(lot.y) === y)
+}
+
+/**
+ * Easy open ground that misses the road at this lamp's current reach.
+ * The grey tint uses the same `reaches` flag. A later Far step does not make it live.
+ * Named lots and blocked ground (road, house) are not this seat.
+ */
+export function easyDeadSeat(preview: Pick<LampPreview, 'mark' | 'blocked' | 'reaches' | 'at'>): boolean {
+  return !preview.mark && !preview.blocked && !preview.reaches && !namedLotAt(preview.at)
+}
+
+/**
+ * Planted Easy pillars on open ground whose current shot misses the road.
+ * Same reach test as the grey tint. Named lots are not in this list.
+ */
+export function plantedLampsTooFar(
+  plants: Record<string, string>,
+  progress: ProgressState,
+  runTier: Record<string, number> | undefined,
+  bonusFor: (ability: string) => number = () => 0,
+): string[] {
+  const ids: string[] = []
+  for (const [id, ability] of Object.entries(plants)) {
+    if (!isTowerType(ability) || !isFreeSpot(id)) continue
+    const at = lampAnchor(id)
+    if (namedLotAt(at)) continue
+    const range = nightTowers.range(id, ability, progress, runTier, bonusFor(ability), true)
+    if (!lampReachesRoad(at, range)) ids.push(id)
+  }
+  return ids
+}
+
 /**
  * Place when the spot is open ground.
- * Road, houses, and features block. A short reach still plants.
+ * Road, houses, and features block.
+ * Hard still plants a short reach. Easy refuses open ground that misses now.
  */
 export function commitLamp(
   plants: Record<string, string>,
@@ -875,7 +949,7 @@ export function commitLamp(
   extra = 0,
 ): { ok: boolean; plants: Record<string, string>; preview: LampPreview } {
   const preview = previewLamp(point, ability, progress, runTier, plants, hudBlocked, easyTree, extra)
-  if (preview.blocked) return { ok: false, plants, preview }
+  if (preview.blocked || (easyTree && easyDeadSeat(preview))) return { ok: false, plants, preview }
   if (preview.mark === 'bell') {
     const next = plantBell(plants, preview.spot)
     if (next === plants) return { ok: false, plants, preview }
