@@ -199,7 +199,118 @@ assert.match(readme, /ANDROID_KEYSTORE_B64/)
 assert.match(readme, /environment named `release`/)
 assert.doesNotMatch(readme, /ANDROID_KEYSTORE_BASE64|silver-city-debug\.keystore/)
 
-assert.equal(APP_VERSION, '1.4.507')
+assert.equal(APP_VERSION, '1.4.508')
+const pkg = JSON.parse(read('package.json'))
+assert.equal(pkg.dependencies['@capacitor/share'], '^8.0.3')
+const settingsGradle = read('android/capacitor.settings.gradle')
+assert.match(settingsGradle, /include ':capacitor-share'/)
+assert.match(settingsGradle, /node_modules\/@capacitor\/share\/android/)
+const capBuild = read('android/app/capacitor.build.gradle')
+assert.match(capBuild, /implementation project\(':capacitor-share'\)/)
+assert.match(activity, /addWebMessageListener/)
+assert.match(activity, /"Share"\.equals\(pluginId\)/)
+assert.match(activity, /plugin not available/)
+assert.match(activity, /Intent\.ACTION_SEND/)
+assert.match(activity, /Share canceled/)
+assert.doesNotMatch(activity, /callPluginMethod/)
+assert.doesNotMatch(read('android/app/src/main/AndroidManifest.xml'), /admob|play-services-ads/i)
+assert.match(activity, /SHARE_MESSAGE_MAX = 16384/)
+assert.match(activity, /raw\.length\(\) > SHARE_MESSAGE_MAX/)
+assert.match(activity, /share message too large/)
+assert.match(activity, /SHARE_TEXT_MAX = 2000/)
+assert.match(activity, /SHARE_TITLE_MAX = 200/)
+assert.match(activity, /share text too long/)
+assert.match(activity, /share title too long/)
+assert.doesNotMatch(activity, /text\.substring|title\.substring|dialogTitle\.substring/)
+assert.doesNotMatch(activity, /startsWith\("http"\)/)
+assert.doesNotMatch(activity, /jsonString\(options, "url"\)/)
+assert.match(activity, /PAGES_SHARE_URL = "https:\/\/cphillippe\.github\.io\/Silver-dollar-city\/"/)
+assert.match(activity, /if \(shareListenerReady\) return/)
+assert.match(activity, /if \(!shareListenerReady\)/)
+assert.match(activity, /!WebViewFeature\.isFeatureSupported\(WebViewFeature\.WEB_MESSAGE_LISTENER\)/)
+assert.equal((activity.match(/addWebMessageListener/g) || []).length, 1, 'the share listener is registered once')
+const featureAt = activity.indexOf('!WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER)')
+const addListenerAt = activity.indexOf('addWebMessageListener')
+assert.ok(featureAt >= 0 && featureAt < addListenerAt, 'unsupported WebViews never register a listener')
+const handleAt = activity.indexOf('void handleShareMessage')
+const finishAt = activity.indexOf('void finishShare')
+const handle = activity.slice(handleAt, finishAt)
+const sizeAt = handle.indexOf('raw.length() > SHARE_MESSAGE_MAX')
+const parseAt = handle.indexOf('new JSONObject(raw)')
+const textAt = handle.indexOf('text.length() > SHARE_TEXT_MAX')
+const titleAt = handle.indexOf('title.length() > SHARE_TITLE_MAX')
+const dialogAt = handle.indexOf('dialogTitle.length() > SHARE_TITLE_MAX')
+assert.ok(sizeAt >= 0 && sizeAt < parseAt, 'an oversize message is rejected before JSONObject')
+assert.ok(parseAt < textAt && textAt < titleAt && titleAt < dialogAt, 'caps run after parse and fail the call')
+assert.match(handle, /\.fail\("share message too large"\)/)
+assert.match(handle, /call\.fail\("share text too long"\)/)
+assert.match(handle, /call\.fail\("share title too long"\)/)
+assert.doesNotMatch(handle, /substring\(/)
+assert.doesNotMatch(handle, /jsonString\(options, "url"\)/)
+assert.match(handle, /body = PAGES_SHARE_URL/)
+
+const messageMax = Number(activity.match(/SHARE_MESSAGE_MAX = (\d+)/)[1])
+const textMax = Number(activity.match(/SHARE_TEXT_MAX = (\d+)/)[1])
+const titleMax = Number(activity.match(/SHARE_TITLE_MAX = (\d+)/)[1])
+const pagesUrl = activity.match(/PAGES_SHARE_URL = "([^"]+)"/)[1]
+assert.equal(messageMax, 16384)
+assert.equal(textMax, 2000)
+assert.equal(titleMax, 200)
+assert.equal(pagesUrl, 'https://cphillippe.github.io/Silver-dollar-city/')
+
+/** Mirrors handleShareMessage's reject-or-body rules. The Java source above is the lock. */
+function sharePayload(raw) {
+  if (raw != null && raw.length > messageMax) return { error: 'share message too large' }
+  let post
+  try {
+    post = raw == null ? {} : JSON.parse(raw)
+  } catch {
+    return { dropped: true }
+  }
+  const field = (object, key) => {
+    if (!object || !Object.prototype.hasOwnProperty.call(object, key) || object[key] == null) return null
+    if (typeof object[key] !== 'string' || object[key] === '') return null
+    return object[key]
+  }
+  const options = post.options && typeof post.options === 'object' ? post.options : {}
+  const title = field(options, 'title')
+  const text = field(options, 'text')
+  const dialogTitle = field(options, 'dialogTitle')
+  if (text != null && text.length > textMax) return { error: 'share text too long' }
+  if (title != null && title.length > titleMax) return { error: 'share title too long' }
+  if (dialogTitle != null && dialogTitle.length > titleMax) return { error: 'share title too long' }
+  let body = text
+  if (body == null) body = pagesUrl
+  else if (!body.includes(pagesUrl)) body = `${body}\n${pagesUrl}`
+  return { body, sawPageUrl: Object.prototype.hasOwnProperty.call(options, 'url') }
+}
+
+const shareMessage = (options) => JSON.stringify({ pluginId: 'Share', methodName: 'share', options })
+assert.equal(sharePayload('x'.repeat(messageMax + 1)).error, 'share message too large')
+assert.equal(
+  sharePayload(shareMessage({ text: 'hi' }).padEnd(messageMax + 1, ' ')).error,
+  'share message too large',
+)
+assert.equal(sharePayload(shareMessage({ text: 'y'.repeat(textMax + 1) })).error, 'share text too long')
+assert.equal(sharePayload(shareMessage({ text: 'ok', title: 't'.repeat(titleMax + 1) })).error, 'share title too long')
+assert.equal(
+  sharePayload(shareMessage({ text: 'ok', dialogTitle: 'd'.repeat(titleMax + 1) })).error,
+  'share title too long',
+)
+const exact = sharePayload(shareMessage({ text: 'z'.repeat(textMax), title: 't'.repeat(titleMax) }))
+assert.equal(exact.error, undefined, 'a payload on the cap still shares')
+assert.equal(exact.body.startsWith('z'.repeat(textMax)), true)
+const poisoned = sharePayload(
+  shareMessage({ text: 'Say it back', url: 'https://evil.example/phish', title: 'Nope' }),
+)
+assert.equal(poisoned.sawPageUrl, true)
+assert.equal(poisoned.body, `Say it back\n${pagesUrl}`)
+assert.doesNotMatch(poisoned.body, /evil\.example/)
+const javascriptUrl = sharePayload(shareMessage({ text: 'Line', url: 'javascript:alert(1)' }))
+assert.equal(javascriptUrl.body, `Line\n${pagesUrl}`)
+assert.doesNotMatch(javascriptUrl.body, /javascript:/)
+const already = sharePayload(shareMessage({ text: `Line\n${pagesUrl}`, url: 'http://localhost/other' }))
+assert.equal(already.body, `Line\n${pagesUrl}`, 'a page url is ignored when the text already names Pages')
 assert.match(read('android/app/src/main/res/values/ic_launcher_background.xml'), /#2A1650/)
 assert.match(read('index.html'), /favicon\.png/)
 assert.match(read('index.html'), /apple-touch-icon\.png/)
