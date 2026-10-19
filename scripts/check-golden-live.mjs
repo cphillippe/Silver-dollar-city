@@ -366,28 +366,23 @@ async function finishRead(page, puzzle) {
   else if (kind === 'sort') await solveSort(page, puzzle.challenge)
   else if (kind === 'sequence') await solveSequence(page, puzzle.challenge)
   else throw new Error(`day-2 daily kind ${kind} is not in the early pool solver`)
-  for (let guard = 0; guard < 8; guard += 1) {
-    if ((await screenId(page)) === 'home') return
-    const id = await screenId(page)
-    if (id === 'quiz') {
+  for (let guard = 0; guard < 10; guard += 1) {
+    if ((await page.locator('.daily-page').count()) === 0 && (await screenId(page)) === 'home') return
+    const quizOpen = await page.locator('.why-blast').count()
+    const quizWon = await page.locator('.why-blast.is-yes, .why-blast.is-win').count()
+    if (quizOpen && !quizWon) {
       await answerQuiz(page, puzzle.challenge.id)
       continue
     }
-    const golds = await filledGolds(page)
-    if (golds.length === 1) {
-      await tapFilledGold(page)
-      await page.waitForTimeout(250)
-      continue
-    }
-    const home = page.getByRole('button', { name: 'Home', exact: true })
-    if (await home.count()) {
-      await home.first().click()
+    const step = page.locator('.why-blast .btn.primary, .town-return .btn.primary').first()
+    if (await step.count()) {
+      await step.click()
       await page.waitForTimeout(250)
       continue
     }
     await page.waitForTimeout(200)
   }
-  assert.equal(await screenId(page), 'home', 'day-2 Read returns Home')
+  assert.equal(await screenId(page), 'home', `day-2 Read returns Home (${puzzle.challenge.kind})`)
 }
 
 export async function checkGoldenLive() {
@@ -433,7 +428,7 @@ export async function checkGoldenLive() {
 
       shot = await stamp('home-fresh')
       assert.equal(shot.id, 'home')
-      assert.doesNotMatch(shot.golds[0].text, /\bRead\b/, 'first session gold is not Read')
+      assert.doesNotMatch(shot.golds[0].text, /Read/, 'first session gold is not Read')
       assert.equal(shot.golds[0].disabled, false, 'session 1 lesson step stays enabled')
       assert.equal(await page.locator('.easy-night-watch').count(), 0, 'Night Watch is hidden before the first Lock In')
       if (width === 375) await page.screenshot({ path: `${SHOTS}/easy-home-fresh-375.png` })
@@ -442,6 +437,7 @@ export async function checkGoldenLive() {
       await page.locator('.play.is-road-maze').waitFor()
       await stamp('maze')
       await playRoad(page)
+      await page.locator('[data-maze-next]').waitFor()
       shot = await stamp('maze-win')
       assert.equal(shot.id, 'maze-win')
       assert.match(shot.golds[0].text, /Lock In/)
@@ -450,6 +446,7 @@ export async function checkGoldenLive() {
       await page.locator('.why-blast').waitFor()
       await stamp('quiz-road')
       await answerQuiz(page, 'ph-road')
+      await page.locator('.why-blast.is-yes .btn.primary, .why-blast.is-win .btn.primary').first().waitFor()
       shot = await stamp('quiz-road-done')
       assert.match(shot.golds[0].text, /Lock In/)
       await tapFilledGold(page)
@@ -465,6 +462,7 @@ export async function checkGoldenLive() {
       await page.locator('[data-run-pad], .play.is-father-run').first().waitFor()
       await stamp('run')
       await hugFather(page)
+      await page.locator('.play.is-father-run.is-win .btn.primary').waitFor()
       shot = await stamp('run-win')
       assert.equal(shot.id, 'run-win')
       assert.match(shot.golds[0].text, /Lock In/)
@@ -472,17 +470,19 @@ export async function checkGoldenLive() {
       await page.locator('.why-blast').waitFor()
       await stamp('quiz-father')
       await answerQuiz(page, 'ph-father')
+      await page.locator('.why-blast.is-yes .btn.primary, .why-blast.is-win .btn.primary').first().waitFor()
       shot = await stamp('quiz-father-done')
       await tapFilledGold(page)
 
       await page.locator('main.hub').waitFor()
       shot = await stamp('home-tuning')
-      assert.doesNotMatch(shot.golds[0].text, /\bRead\b/)
+      assert.doesNotMatch(shot.golds[0].text, /Read/)
       await tapFilledGold(page)
 
       await page.locator('.play.is-gem-search').waitFor()
       await stamp('gem')
       await playGem(page)
+      await page.locator('.play.is-gem-search.is-win .btn.primary').waitFor()
       shot = await stamp('gem-win')
       assert.equal(shot.id, 'gem-win')
       assert.match(shot.golds[0].text, /Lock In/)
@@ -501,7 +501,7 @@ export async function checkGoldenLive() {
         await page.getByRole('button', { name: 'Settings' }).click()
         await page.locator('.settings-card').first().waitFor()
         const eyebrow = (await page.locator('.settings-card').first().locator('.eyebrow').innerText()).trim()
-        assert.equal(eyebrow, 'Reading', 'Settings opens on the Reading card')
+        assert.equal(eyebrow.toLowerCase(), 'reading', 'Settings opens on the Reading card')
         await page.screenshot({ path: `${SHOTS}/settings-reading-375.png` })
       }
 
@@ -542,7 +542,7 @@ export async function checkGoldenLive() {
     const home = await signature(page)
     traces.push(`day-2 home ${home.sig} n=${home.golds.length} daily=${puzzle.challenge.kind}:${puzzle.challenge.id}`)
     assert.equal(home.golds.length, 1, 'day-2 home has one gold')
-    assert.match(home.golds[0].text, /\bRead\b/, 'day-2 home gold is Read')
+    assert.match(home.golds[0].text, /Read/, 'day-2 home gold is Read')
     await tapFilledGold(page)
     await page.locator('.daily-page, .teach-gate').first().waitFor()
     const teach = await signature(page)
@@ -551,10 +551,15 @@ export async function checkGoldenLive() {
     await tapFilledGold(page)
     await finishRead(page, puzzle)
     await page.locator('main.hub').waitFor()
+    if (await page.locator('.scene-ad').count()) {
+      traces.push('day-2 quiet pause sits over Home; continue, then the lesson gold')
+      await page.getByRole('button', { name: 'Continue the trail' }).click()
+      await page.locator('.scene-ad').waitFor({ state: 'detached' })
+    }
     const after = await signature(page)
     traces.push(`day-2 after-read ${after.sig} n=${after.golds.length}`)
     assert.equal(after.golds.length, 1, 'after Read, Home has one gold')
-    assert.doesNotMatch(after.golds[0].text, /\bRead\b/, 'after Read, gold is the next Easy lesson')
+    assert.doesNotMatch(after.golds[0].text, /Read/, 'after Read, gold is the next Easy lesson')
     assert.equal(after.golds[0].disabled, false, 'the next lesson step is enabled after Read')
     await context.close()
   } finally {

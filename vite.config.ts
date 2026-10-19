@@ -70,6 +70,8 @@ export default defineConfig({
         // Box QA opens docs/qa-seed.html after the app SW is installed.
         // Without this, navigation fallback serves index.html and the seed never runs.
         navigateFallbackDenylist: [/\/qa-seed\.html/, /\/night-run\//],
+        // The app chunk is past the 2 MiB precache default.
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
       },
       manifest: {
         name: 'Silver City: Unending Evidence',
