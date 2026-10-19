@@ -496,7 +496,7 @@ export function FatherRunPlay({
           <p className="run-miss-hint">{FATHER_RUN_HINT}</p>
           <p className="quiet">Try again — you start closer.</p>
           <div className="cta-dock run-dock">
-            {easy && attempt >= EASY_RUN_TUNE.missesBeforeKeep ? (
+            {easy && attempt + 1 >= EASY_RUN_TUNE.missesBeforeKeep ? (
               <>
                 <button
                   type="button"

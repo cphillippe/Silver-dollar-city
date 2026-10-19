@@ -90,6 +90,10 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
     const matchReady = easyMatchReady(progress)
     const focus = easyHomeFocus(progress)
     const loopId = easyLoopLine(progress)
+    const roadDone =
+      easyLineHeld(progress, loopId) ||
+      (progress.easyTaught ?? []).includes(loopId) ||
+      (progress.completed ?? []).includes(loopId)
     const coldMercy = loopId === EASY_MATCH_LINE && !easyLineHeld(progress, EASY_MATCH_LINE)
     const upgradeReadyId = readyUpgradeId(progress, nextId)
     const buildNeed = nextUpgradeNeed(nextId, progress, true)
@@ -119,7 +123,9 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
         : storyPlayFor(loopId) === 'father-run'
           ? EASY.runHome
           : storyPlayFor(loopId) === 'road-maze'
-            ? EASY.mazeHome
+            ? roadDone
+              ? EASY.mazeHome
+              : EASY.mazeFirst
             : storyPlayFor(loopId) === 'claim-merge'
               ? EASY.mergeHome
               : storyPlayFor(loopId) === 'source-dig'

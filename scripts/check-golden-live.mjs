@@ -240,7 +240,7 @@ async function walkUntil(page, target, winOnArrival) {
   throw new Error(`maze walk did not reach ${key(target)}`)
 }
 
-async function earlyMiss(page) {
+async function releaseRun(page, kind) {
   const pad = page.locator('[data-run-pad="hold"]')
   await pad.waitFor({ timeout: 15000 })
   await pad.scrollIntoViewIfNeeded()
@@ -248,10 +248,20 @@ async function earlyMiss(page) {
   if (!box) throw new Error('run pad has no box')
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
   await page.mouse.down()
-  await page.waitForTimeout(40)
+  if (kind === 'late') {
+    await page.waitForFunction(() => {
+      const node = document.querySelector('[data-run-pad="hold"]')
+      return (node?.getAttribute('aria-label') || '').includes('Now tap')
+    })
+    await page.waitForTimeout(500)
+  } else {
+    await page.waitForTimeout(160)
+    const label = (await pad.getAttribute('aria-label')) || ''
+    assert.doesNotMatch(label, /Now tap/, 'early release is before the glow')
+  }
   await page.mouse.up()
   await page.locator('.run-miss').waitFor({ timeout: 16000 })
-  await page.waitForTimeout(500)
+  await page.waitForTimeout(400)
 }
 
 async function tapRunFailGold(page) {
@@ -270,18 +280,28 @@ async function tapRunFailGold(page) {
   assert.equal(await page.locator('.play.is-father-run').count(), 1, 'run-fail gold stays on the father run')
 }
 
-/** Gold-only, early glow release (before Now tap). Keep going is the way out after two misses. */
+/** Gold-only. Miss 1 is a late glow release. Miss 2 is an early release, then Keep going. */
 async function hugFatherHuman(page) {
-  for (let miss = 1; miss <= 2; miss += 1) {
-    await earlyMiss(page)
-    const label = ((await page.locator('.run-miss .btn.primary').innerText()) || '').replace(/\s+/g, ' ').trim()
-    assert.equal(label, 'Run again', `early miss ${miss} gold is Run again`)
-    await tapRunFailGold(page)
-    await page.locator('[data-run-pad="hold"]').waitFor()
-  }
-  await earlyMiss(page)
-  const keep = ((await page.locator('[data-run-keep]').innerText()) || '').replace(/\s+/g, ' ').trim()
-  assert.equal(keep, 'Keep going')
+  await releaseRun(page, 'late')
+  const again = ((await page.locator('.run-miss .btn.primary').innerText()) || '').replace(/\s+/g, ' ').trim()
+  assert.equal(again, 'Run again', 'miss 1 gold is Run again')
+  assert.equal(await page.locator('[data-run-keep]').count(), 0, 'miss 1 has no Keep going')
+  await tapRunFailGold(page)
+  await page.locator('[data-run-pad="hold"]').waitFor()
+
+  await releaseRun(page, 'early')
+  const keep = page.locator('[data-run-keep]')
+  const keepLabel = ((await keep.innerText()) || '').replace(/\s+/g, ' ').trim()
+  assert.equal(keepLabel, 'Keep going', 'miss 2 gold is Keep going')
+  const keepCls = (await keep.getAttribute('class')) || ''
+  assert.match(keepCls, /\bprimary\b/, 'Keep going is .btn.primary')
+  const plain = page.locator('.run-miss button', { hasText: /^Run again$/ })
+  assert.equal(await plain.count(), 1, 'Run again stays visible')
+  const plainCls = (await plain.getAttribute('class')) || ''
+  assert.doesNotMatch(plainCls, /\bprimary\b/, 'Run again is a plain button on miss 2')
+  const golds = await filledGolds(page)
+  assert.equal(golds.length, 1, `miss 2 has one filled gold ${JSON.stringify(golds)}`)
+  assert.match(golds[0].text, /Keep going/)
   await page.screenshot({ path: `${SHOTS}/run-fail-keep-going-375.png` })
   await tapRunFailGold(page)
   await page.locator('.play.is-father-run.is-win .btn.primary').waitFor({ timeout: 8000 })
@@ -475,6 +495,11 @@ export async function checkGoldenLive() {
 
       shot = await stamp('home-fresh')
       assert.equal(shot.id, 'home')
+      const freshDock = (await page.locator('.easy-home-whisper').innerText()).replace(/\s+/g, ' ').trim()
+      const freshGift = (await page.locator('.easy-build-gift').innerText()).replace(/\s+/g, ' ').trim()
+      assert.equal(freshDock, 'Start your first road.', 'first Home dock is a first road')
+      assert.equal(freshGift, 'Start your first road.', 'first Home gift matches the dock')
+      assert.doesNotMatch(`${freshDock} ${freshGift}`, /One more/, 'One more waits until a road is done')
       assert.doesNotMatch(shot.golds[0].text, /Read/, 'first session gold is not Read')
       assert.match(await page.locator('.easy-home-steps li').first().innerText(), /tomorrow/)
       assert.equal(shot.golds[0].disabled, false, 'session 1 lesson step stays enabled')
@@ -645,6 +670,8 @@ export async function checkGoldenLive() {
     await tapFilledGold(humanPage)
     await humanPage.locator('main.hub').waitFor()
     await humanStamp('home-fresh')
+    const humanFresh = (await humanPage.locator('.easy-build-gift').innerText()).replace(/\s+/g, ' ').trim()
+    assert.equal(humanFresh, 'Start your first road.')
     await tapFilledGold(humanPage)
     await humanPage.locator('.play.is-road-maze').waitFor()
     await humanStamp('maze')
