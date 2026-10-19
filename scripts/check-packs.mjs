@@ -18,6 +18,8 @@ import {
 } from '../src/lib/tiers.ts'
 import { STREET_FACT_IDS } from '../src/content/links.ts'
 import { evidenceFor, evidenceForTier } from '../src/content/evidence.ts'
+import { APP_VERSION } from '../src/config/app.ts'
+import { PACK_XML } from '../src/content/packEmbedded.ts'
 
 assert.equal(PACK_ISSUES.length, 0, PACK_ISSUES.map((item) => `${item.file}: ${item.message}`).join('\n'))
 assert.equal(PACK_CATALOG.schemaVersion, PACK_SCHEMA_VERSION)
@@ -621,6 +623,30 @@ for (const name of readdirSync(packDir)) {
     /<easyShelf[\s>]/,
     `${name} has a second <easyShelf>. The Easy order lives only in golden-path.xml`,
   )
+}
+
+function packAppVersion(xml, name) {
+  const match = xml.match(/<(?:goldenPath|silverCityPackIndex|areaPack)\b[^>]*\bappVersion="([^"]+)"/)
+  assert.ok(match, `${name} has a root appVersion`)
+  return match[1]
+}
+
+const releasePacks = ['golden-path.xml', 'index.xml']
+const packXmlNames = readdirSync(packDir).filter((name) => name.endsWith('.xml')).sort()
+assert.deepEqual(
+  releasePacks.filter((name) => !packXmlNames.includes(name)),
+  [],
+  'golden-path.xml and index.xml are pack XML files',
+)
+for (const name of packXmlNames) {
+  const disk = packAppVersion(readFileSync(join(packDir, name), 'utf8'), name)
+  const embeddedXml = PACK_XML[name]
+  assert.equal(typeof embeddedXml, 'string', `${name} is embedded`)
+  const embedded = packAppVersion(embeddedXml, `embedded ${name}`)
+  assert.equal(embedded, disk, `${name} embedded appVersion matches the pack XML`)
+  if (!releasePacks.includes(name)) continue
+  assert.equal(disk, APP_VERSION, `${name} appVersion equals APP_VERSION`)
+  assert.equal(embedded, APP_VERSION, `${name} embedded appVersion equals APP_VERSION`)
 }
 
 console.log('check-packs: ok')

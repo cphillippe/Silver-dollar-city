@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.510',
+    title: 'A grey seat stays empty',
+    when: '2026-10-19',
+    items: [
+      'On Easy Night Watch, a grey seat refuses the plant. The line says Too far from the road. Plant closer to the path.',
+      'A green seat plants. A tap on a house or the road says Plant on open ground.',
+      'Hard nights stay the same. Refs #759.',
+    ],
+  },
+  {
     version: '1.4.509',
     title: 'One plain next move',
     when: '2026-10-19',
