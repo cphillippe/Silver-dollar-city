@@ -8,7 +8,7 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
-    version: '1.4.509',
+    version: '1.4.510',
     title: 'A grey seat stays empty',
     when: '2026-10-19',
     items: [
