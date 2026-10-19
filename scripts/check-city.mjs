@@ -1691,16 +1691,16 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.509')
-assert.ok(CHANGELOG.some((note) => note.version === '1.4.509'), '1.4.509 changelog row')
-assert.match(latestChange('1.4.509').title, /seat/i)
+assert.equal(APP_VERSION, '1.4.510')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.510'), '1.4.510 changelog row')
+assert.match(latestChange('1.4.510').title, /seat/i)
 assert.doesNotMatch(
-  latestChange('1.4.509').items.join('\n'),
+  latestChange('1.4.510').items.join('\n'),
   /Fixes #|Closes #|Resolves #/,
-  '1.4.509 changelog avoids GitHub close keywords',
+  '1.4.510 changelog avoids GitHub close keywords',
 )
-assert.match(latestChange('1.4.509').items.join('\n'), /Too far from the road/)
-assert.match(latestChange('1.4.509').items.join('\n'), /Plant on open ground/)
+assert.match(latestChange('1.4.510').items.join('\n'), /Too far from the road/)
+assert.match(latestChange('1.4.510').items.join('\n'), /Plant on open ground/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.508'), '1.4.508 changelog row')
 assert.match(latestChange('1.4.508').title, /share/i)
 assert.doesNotMatch(
