@@ -3724,7 +3724,11 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
   assert.deepEqual([...NAMES_ARC], ['daily-names', 'daily-creed', 'daily-empty'])
   assert.deepEqual([...STONE_ARC], ['sc-tacitus', 'sc-james', 'sc-pliny'])
   assert.deepEqual([...INK_ARC], ['ic-trajan', 'ic-suetonius', 'ic-lucian'])
-  assert.deepEqual(EASY_LINE_ORDER.slice(7, 14), [...DIG_ARC, ...NAMES_ARC])
+  assert.deepEqual(
+    EASY_LINE_ORDER.slice(8, 15),
+    [...DIG_ARC, ...NAMES_ARC],
+    '1.4.503 dig and names follow fine-tuning at lesson 3',
+  )
   assert.deepEqual(EASY_LINE_ORDER.slice(39, 42), [...STONE_ARC])
   assert.deepEqual(EASY_LINE_ORDER.slice(42, 45), [...INK_ARC])
   const homes = {
@@ -4174,9 +4178,10 @@ assert.match(sortSrc, /showEasyPuzzleHint/)
 assert.match(sortSrc, /easyChromeNearDup/)
 assert.match(sortSrc, /easyLeadLine/)
 assert.doesNotMatch(hubSrc, /slot="hub-banner"/)
-assert.match(
+assert.doesNotMatch(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /EASY\.supportTrail/,
+  '1.4.503 Settings has no tip heading',
 )
 assert.match(
   readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8'),
@@ -15802,6 +15807,7 @@ console.log('check-city: ok')
     homeDeps334,
     [
       'react',
+      'content/goldenPath',
       'lib/easy',
       'lib/successBeat',
       'components/HeldTriad',
@@ -15941,14 +15947,13 @@ console.log('check-city: ok')
       'content/story',
       'lib/easy',
       'lib/recall',
-      'lib/supportToast',
       'lib/tiers',
       'components/EasyBack',
       'components/RecallGate',
       'store/progress',
       'types',
     ],
-    '1.4.335 moved hold practice reads the same modules Journal did',
+    '1.4.503 HoldPractice reads the same modules, and the tip box is not one of them',
   )
 
   // #448 teach-gate stays in Journal, unchanged; HoldPractice never re-gates.
