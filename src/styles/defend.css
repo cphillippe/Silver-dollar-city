@@ -4529,6 +4529,62 @@ button.defend-new-lamp[aria-pressed='true'] {
   stroke-width: 2;
 }
 
+/* 1.4.503 Easy armed seats. Live meets the road now. Dead does not. Hard has no .is-easy-watch. */
+.defend-page.is-easy-watch .defend-plant-ground circle.is-live {
+  fill: rgba(64, 176, 96, 0.46);
+  stroke: rgba(186, 245, 196, 0.92);
+}
+
+.defend-page.is-easy-watch .defend-plant-ground circle.is-dead {
+  fill: rgba(72, 76, 86, 0.5);
+  stroke: rgba(154, 158, 168, 0.78);
+}
+
+.defend-page.is-easy-watch .defend-ghost.is-live-ring .defend-ghost-ring {
+  fill: rgba(64, 176, 96, 0.22);
+  stroke: rgba(96, 220, 130, 0.98);
+}
+
+.defend-page.is-easy-watch .defend-ghost.is-dead .defend-ghost-ring {
+  fill: rgba(90, 96, 110, 0.2);
+  stroke: rgba(176, 180, 190, 0.95);
+}
+
+.defend-page.is-easy-watch .nw-place-toast {
+  position: absolute;
+  z-index: 8;
+  top: 52px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: min(280px, 86%);
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: rgba(18, 6, 46, 0.94);
+  color: #fff6df;
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1.25;
+  text-align: center;
+  pointer-events: none;
+  white-space: normal;
+}
+
+.defend-page.is-easy-watch .defend-pad.is-reach-miss .defend-lamp-sprite {
+  animation: nw-reach-miss 0.7s ease;
+}
+
+@keyframes nw-reach-miss {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  40% {
+    opacity: 0.28;
+  }
+}
+
 @keyframes nw-ground-soft {
   0%,
   100% {
@@ -4541,8 +4597,13 @@ button.defend-new-lamp[aria-pressed='true'] {
 
 @media (prefers-reduced-motion: reduce) {
   .defend-plant-first.is-pulse,
-  .defend-plant-ground {
+  .defend-plant-ground,
+  .defend-page.is-easy-watch .defend-pad.is-reach-miss .defend-lamp-sprite {
     animation: none;
+  }
+
+  .defend-page.is-easy-watch .defend-pad.is-reach-miss .defend-lamp-sprite {
+    opacity: 0.55;
   }
 
   .defend-plant-first.is-pulse {
