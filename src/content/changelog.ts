@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.508',
+    title: 'Share from the app',
+    when: '2026-10-19',
+    items: [
+      'On Easy, Share this line opens the Android share sheet. The button stays plain, and Home stays the gold step.',
+      'On the website, Share this line still shares, then copies the line if sharing is unavailable.',
+      'A closed share sheet stays quiet. Hard stays the same.',
+    ],
+  },
+  {
     version: '1.4.507',
     title: 'The crown tells you',
     when: '2026-10-19',
