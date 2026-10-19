@@ -1535,3 +1535,25 @@ html[data-easy='on'] .city-easy-tags {
 .hub.is-town .street-link .btn {
   width: 100%;
 }
+
+/* 1.4.506: day-1 Read stays tappable and is clearly not the gold step. */
+.hub.is-easy-home .easy-home-steps li.is-tomorrow .easy-coach-step {
+  opacity: 0.4;
+  font-weight: 650;
+  white-space: normal;
+  background: rgba(42, 13, 88, 0.22);
+  border-color: rgba(255, 246, 232, 0.14);
+  color: rgba(255, 246, 232, 0.55);
+  -webkit-text-fill-color: rgba(255, 246, 232, 0.55);
+  box-shadow: none;
+}
+
+.hub.is-easy-home .easy-step-later {
+  display: block;
+  margin-top: 1px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: lowercase;
+  opacity: 0.85;
+}
