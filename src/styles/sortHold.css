@@ -3890,46 +3890,36 @@ html[data-easy='on'] .play.is-easy-sort .match-recover.text-link {
   padding: 8px 0;
 }
 
-/* Easy Lock In: the first card pulses until the first drag. Phone float stays off.
-   The cue stays one line. Chips and the arena give that line back so a 768 creed win still fits. */
-html[data-easy='on'] .why-drag-cue {
-  margin: 0 0 -10px;
-  text-align: center;
-  font-size: 0.95rem;
-  font-weight: 750;
-  line-height: 1.15;
-  color: #2a2118;
-  -webkit-text-fill-color: #2a2118;
+/* Easy Lock In: the why header is the cue. Every card shares one entry wiggle.
+   No card is outlined or pulsed on its own. The wiggle stays sideways so a card
+   cannot climb onto the header. Phone next-tap line boxes were 1.15 and cut the g.
+   Line-height and padding keep the descender inside the line. */
+html[data-easy='on'] .why-blast:not(.is-win):not(.is-miss-teach) .why-blast-hud .next-tap {
+  overflow: visible;
 }
 
-html[data-easy='on'] .why-blast:has(.why-drag-cue) {
-  gap: 6px;
+@media (max-width: 400px) {
+  html[data-easy='on'] .why-blast:not(.is-win):not(.is-miss-teach) .why-blast-hud .next-tap,
+  html[data-easy='on'] .journal.is-rehearse .why-blast:not(.is-miss-teach):not(.is-win) .why-blast-hud .next-tap {
+    line-height: 1.45;
+    padding: 2px 0 4px;
+    overflow: visible;
+  }
 }
 
-html[data-easy='on'] .why-blast:has(.why-drag-cue) .why-arena {
-  min-height: 208px;
+html[data-easy='on'] .why-blast:not(.is-win):not(.is-miss-teach) .why-chip.is-entry {
+  animation: why-entry-wiggle 0.7s ease-in-out 1;
 }
 
-html[data-easy='on'] .why-blast:has(.why-drag-cue) .why-chip {
-  min-height: 48px;
-  padding-top: 6px;
-  padding-bottom: 6px;
-}
-
-html[data-easy='on'] .why-blast:not(.is-win):not(.is-miss-teach) .why-chip.is-first-cue:not(.is-gone):not(.is-toss) {
-  animation: why-first-pulse 1.6s ease-in-out infinite;
-}
-
-@keyframes why-first-pulse {
+@keyframes why-entry-wiggle {
   0%,
-  100% { transform: translateY(0) scale(1); }
-  50% { transform: scale(1.04); }
+  100% { transform: translateX(0); }
+  30% { transform: translateX(-3px); }
+  60% { transform: translateX(3px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html[data-easy='on'] .why-blast:not(.is-win):not(.is-miss-teach) .why-chip.is-first-cue:not(.is-gone):not(.is-toss) {
+  html[data-easy='on'] .why-blast:not(.is-win):not(.is-miss-teach) .why-chip.is-entry {
     animation: none;
-    outline: 3px solid rgba(255, 204, 51, 0.9);
-    outline-offset: 3px;
   }
 }

@@ -77,7 +77,6 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
   const doneRef = useRef(false)
   const dragRef = useRef<{ id: number; x: number; y: number; line: string; moved: boolean } | null>(null)
   const suppressClick = useRef(false)
-  const [dragCue, setDragCue] = useState(true)
   const reduced = prefersReducedMotion()
 
   useEffect(() => {
@@ -159,7 +158,6 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
     if (dx * dx + dy * dy < 144) return
     drag.moved = true
     suppressClick.current = true
-    setDragCue(false)
     pick(drag.line)
   }
 
@@ -184,7 +182,7 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
         {/* Easy Clear 1.4.139: miss teach sheet already prints .why-miss-badge — skip HUD dup. */}
         {missTeach ? null : (
           <p className="next-tap">
-            {locked ? EASY.gotIt : retryJuice ? EASY.oneMoreTry : EASY.tapWhy}
+            {locked ? EASY.gotIt : retryJuice ? EASY.oneMoreTry : EASY.dragWhy}
           </p>
         )}
         <p className="why-score" aria-live="polite">
@@ -221,21 +219,16 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
         </article>
       ) : (
         <>
-        {dragCue && !locked ? (
-          <p className="why-drag-cue" data-drag-cue="yes">
-            {EASY.dragCard}
-          </p>
-        ) : null}
         <div className="why-arena">
           {/* Easy Clear 1.4.190/194/195: ≤720 fills purple void in sortHold.css (invent Fun/Clear · Fixes #251/#252). */}
           {chips.map((line, index) => {
             const tossed = tossing === line || gone.includes(line)
-            const firstCue = dragCue && !locked && index === 0 && !tossed
+            const entry = !locked && !retryJuice && !tossed
             return (
               <button
                 key={line}
                 type="button"
-                className={`why-chip match-card recall-card slot-${index} float-${index} ${tossed ? 'is-toss' : ''} ${gone.includes(line) ? 'is-gone' : ''} ${locked ? 'is-clear' : ''} ${locked && line === reason ? 'is-lock' : ''} ${retryJuice && !gone.includes(line) ? 'is-retry-pulse' : ''} ${firstCue ? 'is-first-cue' : ''}`}
+                className={`why-chip match-card recall-card slot-${index} float-${index} ${tossed ? 'is-toss' : ''} ${gone.includes(line) ? 'is-gone' : ''} ${locked ? 'is-clear' : ''} ${locked && line === reason ? 'is-lock' : ''} ${retryJuice && !gone.includes(line) ? 'is-retry-pulse' : ''} ${entry ? 'is-entry' : ''}`}
                 onPointerDown={(event) => onChipPointerDown(event, line)}
                 onPointerMove={onChipPointerMove}
                 onPointerUp={onChipPointerUp}

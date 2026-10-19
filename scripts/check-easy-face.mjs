@@ -92,6 +92,43 @@ function readCreedWin() {
   const cite = document.querySelector('.strip-verse cite')
   const citeStyle = cite ? getComputedStyle(cite) : null
   const citeBox = cite ? cite.getBoundingClientRect() : null
+  const header = document.querySelector('.why-blast-hud .next-tap')
+  const cards = [...document.querySelectorAll('button.why-chip')].filter((el) => {
+    const style = getComputedStyle(el)
+    const box = el.getBoundingClientRect()
+    return style.visibility !== 'hidden' && style.display !== 'none' && box.height > 4
+  })
+  const headerBox = header ? header.getBoundingClientRect() : null
+  let covered = false
+  if (headerBox) {
+    for (const card of cards) {
+      const box = card.getBoundingClientRect()
+      if (
+        box.bottom > headerBox.top + 0.5 &&
+        box.top < headerBox.bottom - 0.5 &&
+        box.right > headerBox.left + 0.5 &&
+        box.left < headerBox.right - 0.5
+      ) {
+        covered = true
+      }
+    }
+  }
+  const marks = cards.map((el) => {
+    const style = getComputedStyle(el)
+    const classes = [...el.classList]
+      .filter((name) => !/^slot-\d+$/.test(name) && !/^float-\d+$/.test(name))
+      .sort()
+      .join(' ')
+    return [style.animationName, style.outlineStyle, style.outlineWidth, style.backgroundColor, classes].join('|')
+  })
+  let descender = false
+  if (header) {
+    const range = document.createRange()
+    range.selectNodeContents(header)
+    const ink = range.getBoundingClientRect()
+    const box = header.getBoundingClientRect()
+    descender = ink.height > 8 && ink.bottom <= box.bottom + 0.5 && ink.top >= box.top - 0.5
+  }
   return {
     text: play ? play.innerText.replace(/\s+/g, ' ') : '',
     withText: withLine ? withLine.innerText.replace(/\s+/g, ' ').trim() : '',
@@ -112,6 +149,11 @@ function readCreedWin() {
     bodyScroll: body ? body.scrollHeight - body.clientHeight : 99,
     chipBottom: chip ? chip.getBoundingClientRect().bottom : 9999,
     innerH: window.innerHeight,
+    tap: header ? header.innerText.replace(/\s+/g, ' ').trim() : '',
+    cue: document.querySelectorAll('[data-drag-cue], .why-drag-cue, .is-first-cue').length,
+    covered,
+    unique: new Set(marks).size > 1,
+    descender,
   }
 }
 
@@ -272,10 +314,15 @@ export async function checkEasyFace() {
       assert.match(creedWin.cite, /1 Corinthians 15:3/, `creed win shows the verse ref at ${width}`)
       assert.equal(creedWin.citeShown, true, `creed win verse ref is on screen at ${width}`)
       if (width === 375) assert.equal(creedWin.withLines, 1, 'creed win line is one line at 375')
+      assert.equal(creedWin.tap, 'Drag the card that shows why.', `creed win header at ${width}`)
+      assert.equal(creedWin.cue, 0, `creed win has no separate drag line at ${width}`)
+      assert.equal(creedWin.unique, false, `creed win gives no card a unique highlight at ${width}`)
+      assert.equal(creedWin.covered, false, `creed win cards stay under the header at ${width}`)
       assert.ok(
         creedWin.pageScroll <= 1 && creedWin.bodyScroll <= 1,
         `creed win fits without inner scroll at ${width} (page ${Math.round(creedWin.pageScroll)}px, body ${Math.round(creedWin.bodyScroll)}px)`,
       )
+      if (width === 375) assert.equal(creedWin.descender, true, 'creed win keeps the g descender at 375')
       assert.ok(
         creedWin.chipBottom <= creedWin.innerH + 0.5,
         `creed first why choice stays on screen at ${width} (${Math.round(creedWin.chipBottom)} of ${creedWin.innerH})`,
