@@ -7,14 +7,6 @@
     <blurb>Fine-tuning, life, and the question under physics.</blurb>
     <notes>Runtime/build content pack. Engine maps lesson fields 1:1 to Learn / Match / Hold / Journal / street.</notes>
   </meta>
-  <easyShelf order="daily-stars,ob-tuning,ob-design,ob-leibniz,ob-life,daily-life">
-    <line id="daily-stars" easyOrder="7">daily-stars</line>
-    <line id="ob-tuning" easyOrder="19">ob-tuning</line>
-    <line id="ob-design" easyOrder="20">ob-design</line>
-    <line id="ob-leibniz" easyOrder="21">ob-leibniz</line>
-    <line id="ob-life" easyOrder="22">ob-life</line>
-    <line id="daily-life" easyOrder="23">daily-life</line>
-  </easyShelf>
   <lessons>
     <lesson id="ob-tuning" place="Sky Watch" person="Nora Skye" tripleId="tuning-sky" ideaId="idea-tuning" ideaLabel="Fine-tuning points to a Designer." challengeKind="match" challengeTitle="Narrow ranges">
       <easy points="10" easyOrder="19">

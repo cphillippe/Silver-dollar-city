@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { shuffle } from '../../lib/shuffle'
 import type { SortChallenge, SortTile } from '../../types'
+import { goldButtonClass } from '../../content/goldenPath'
 import { plainFor } from '../../content/plain'
 import { STORY } from '../../content/story'
 import { EASY, easyChromeLine, easyChromeNearDup, isEasy } from '../../lib/easy'
@@ -211,10 +212,10 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
           <div className="sort-lock">
             <button
               type="button"
-              className="btn primary xl snap-bins"
-              onClick={() => evaluate()}
-            >
-              {easy ? EASY.lockIn : STORY.lockSort}
+              className={easy ? goldButtonClass('sort-done', 'savePicks', 'snap-bins') : 'btn primary xl snap-bins'}
+            onClick={() => evaluate()}
+          >
+            {easy ? EASY.lockIn : STORY.lockSort}
             </button>
           </div>
         ) : null
@@ -383,7 +384,7 @@ export function SortPlay({ challenge, onMiss, onSolved, onPeek }: SortPlayProps)
       {misses > 0 && status !== 'ok' ? (
         <button
           type="button"
-          className="btn tiny match-recover"
+          className={easy ? 'text-link match-recover' : 'btn tiny match-recover'}
           onClick={() => {
             setShake(false)
             setStatus('idle')

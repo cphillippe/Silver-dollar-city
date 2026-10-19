@@ -3876,3 +3876,16 @@ html[data-easy='on'] .play.is-easy-sort .chip.in-bin {
   -webkit-hyphens: none;
   white-space: normal;
 }
+
+/* 1.4.503: Easy Sort Try again is a quiet ink link, not a gold no-op. */
+html[data-easy='on'] .play.is-easy-sort .match-recover.text-link {
+  display: inline-flex;
+  align-items: center;
+  color: #2a2118;
+  -webkit-text-fill-color: #2a2118;
+  background: none;
+  border: 0;
+  box-shadow: none;
+  min-height: 44px;
+  padding: 8px 0;
+}

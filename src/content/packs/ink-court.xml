@@ -7,11 +7,6 @@
     <blurb>After Stone Court’s Pliny Hold, a new street of ink: Trajan, Suetonius, Lucian — Christ named by writers who were not the church.</blurb>
     <notes>Runtime/build content pack. After Pliny, a new street: ancient-first source-dig. Engine maps lesson fields 1:1 to Learn / Match / Hold / Journal / street.</notes>
   </meta>
-  <easyShelf order="ic-trajan,ic-suetonius,ic-lucian">
-    <line id="ic-trajan" easyOrder="43">ic-trajan</line>
-    <line id="ic-suetonius" easyOrder="44">ic-suetonius</line>
-    <line id="ic-lucian" easyOrder="45">ic-lucian</line>
-  </easyShelf>
   <lessons>
     <lesson id="ic-trajan" place="Ink Court" person="Silas Whitman" tripleId="trajan-ink" ideaId="idea-trajan" ideaLabel="Trajan writes: do not hunt Christians out." challengeKind="sort" challengeTitle="Do not hunt them out">
       <easy points="10" easyOrder="43">

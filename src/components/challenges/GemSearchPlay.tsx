@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import { goldButtonClass } from '../../content/goldenPath'
 import { EASY, easyWhoWhere } from '../../lib/easy'
 import {
   buildGemPuzzle,
@@ -759,7 +760,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
           <div className="cta-dock">
             <button
               type="button"
-              className="btn primary xl snap-bins"
+              className={goldButtonClass('gem-win', 'lockInNext', 'snap-bins')}
               onClick={() => onEasyStop?.('hold')}
             >
               {EASY.holdNext}

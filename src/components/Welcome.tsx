@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { APP_VERSION } from '../config/app'
+import { goldButtonClass } from '../content/goldenPath'
 import { EASY } from '../lib/easy'
 import { Avatar } from './Avatar'
 import { dailyDoneToday, useProgress } from '../store/progress'
@@ -57,7 +58,7 @@ export function Welcome({ onNavigate }: WelcomeProps) {
           <p className="teach-chip" role="note">
             {EASY.claimTeach}
           </p>
-          <button type="button" className="btn primary xl" onClick={begin}>
+          <button type="button" className={goldButtonClass('welcome', 'startEasy')} onClick={begin}>
             {returning ? EASY.home : EASY.startEasy}
           </button>
           <p className="welcome-version">{APP_VERSION}</p>

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type KeyboardEvent as ReactKeyboardEvent } from 'react'
+import { goldButtonClass } from '../../content/goldenPath'
 import { EASY, easyWhoWhere } from '../../lib/easy'
 import {
   aimMerge,
@@ -378,12 +379,12 @@ export function ClaimMergePlay({
           <div className="cta-dock">
             <button
               type="button"
-              className="btn primary xl snap-bins"
+              className={goldButtonClass('merge-win', 'lockInNext', 'snap-bins')}
               onClick={() => onEasyStop?.('hold')}
             >
               {EASY.holdNext}
             </button>
-            <button type="button" className="btn gold xl" onClick={replay}>
+            <button type="button" className="btn xl" onClick={replay}>
               One more bowl
             </button>
             <button type="button" className="btn xl" onClick={() => onEasyStop?.('home')}>

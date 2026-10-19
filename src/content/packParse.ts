@@ -584,6 +584,55 @@ function applyEasyShelf(lessons: PackLesson[], shelf: string[]) {
   }
 }
 
+export interface GoldenPathData {
+  appVersion: string
+  order: { id: string; pack: string }[]
+  firstSessionReadFirst: boolean
+  returningDayReadFirst: boolean
+  screens: { id: string; gold: string }[]
+}
+
+/** Easy order + one gold target per screen. Not an area pack. */
+export function parseGoldenPathXml(
+  xml: string,
+  file = 'golden-path.xml',
+  issues: PackParseIssue[] = [],
+): GoldenPathData {
+  const empty: GoldenPathData = {
+    appVersion: '',
+    order: [],
+    firstSessionReadFirst: false,
+    returningDayReadFirst: true,
+    screens: [],
+  }
+  const root = child(xml, 'goldenPath')
+  if (!root) {
+    issues.push({ file, message: xml.trim() ? 'Missing <goldenPath> root' : 'golden-path.xml is missing' })
+    return empty
+  }
+  const orderWrap = child(root.inner, 'order')
+  const order = (orderWrap ? children(orderWrap.inner, 'line') : [])
+    .map((item) => ({
+      id: item.attrs.id || strip(item.inner),
+      pack: item.attrs.pack || '',
+    }))
+    .filter((item) => item.id)
+  const rules = child(root.inner, 'rules')
+  const first = rules ? child(rules.inner, 'firstSession') : undefined
+  const returning = rules ? child(rules.inner, 'returningDay') : undefined
+  const screensWrap = child(root.inner, 'screens')
+  const screens = (screensWrap ? children(screensWrap.inner, 'screen') : [])
+    .map((item) => ({ id: item.attrs.id || '', gold: item.attrs.gold || '' }))
+    .filter((item) => item.id)
+  return {
+    appVersion: root.attrs.appVersion || '',
+    order,
+    firstSessionReadFirst: first?.attrs.readFirst === 'true',
+    returningDayReadFirst: returning ? returning.attrs.readFirst !== 'false' : true,
+    screens,
+  }
+}
+
 export function catalogFromXml(
   files: Record<string, string>,
   issues: PackParseIssue[] = [],
@@ -626,8 +675,11 @@ export function catalogFromXml(
     addArea(ref.file, xml)
   }
 
+  // golden-path.xml is the Easy order, not a street. index.xml is the pack list.
+  // Leaving either in this loop would record a missing-<areaPack> issue or a fake area.
+  const notStreets = new Set(['index.xml', 'golden-path.xml'])
   for (const [file, xml] of Object.entries(byName)) {
-    if (file === 'index.xml' || !file.endsWith('.xml')) continue
+    if (notStreets.has(file) || !file.endsWith('.xml')) continue
     addArea(file, xml)
   }
 
@@ -636,7 +688,8 @@ export function catalogFromXml(
     .sort((a, b) => a.order - b.order || a.id.localeCompare(b.id))
     .flatMap((area) => area.lessons)
 
-  applyEasyShelf(lessons, index.easyShelf)
+  const golden = parseGoldenPathXml(byName['golden-path.xml'] ?? '', 'golden-path.xml', issues)
+  applyEasyShelf(lessons, golden.order.map((line) => line.id))
 
   const ordered = lessons.slice().sort((a, b) => {
     const ao = a.easy.easyOrder ?? 999
