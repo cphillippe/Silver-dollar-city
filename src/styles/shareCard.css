@@ -1,0 +1,99 @@
+/* Easy recap share card. Navy plate, silver edge, gold claim.
+   The button stays a plain .btn so the Home continue is the one filled gold.
+   Short phones hide the extra Lock In chrome when this card is on the recap
+   so HeldTriad, the card, and Home stay inside 375×667. */
+
+html[data-easy='on'] .share-card {
+  margin: 0;
+  padding: 8px 10px 6px;
+  border: 1px solid #c5ced6;
+  border-radius: 14px;
+  background: #10243f;
+  color: #e7eef5;
+  display: grid;
+  gap: 2px;
+}
+
+html[data-easy='on'] .share-card .share-card-kicker {
+  margin: 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #c5ced6;
+}
+
+html[data-easy='on'] .share-card h2 {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.2;
+  color: #f4ead2;
+}
+
+html[data-easy='on'] .share-card .share-card-claim {
+  margin: 2px 0 0;
+  font-family: var(--serif);
+  font-size: 1.12rem;
+  font-weight: 650;
+  line-height: 1.25;
+  color: #ffcc33;
+}
+
+html[data-easy='on'] .share-card p {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.3;
+}
+
+html[data-easy='on'] .share-card .share-card-foot {
+  margin-top: 4px;
+  color: #c5ced6;
+  font-size: 0.72rem;
+}
+
+html[data-easy='on'] .share-card-actions {
+  display: grid;
+  gap: 2px;
+}
+
+html[data-easy='on'] .share-card-actions .btn {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 14px;
+  background: transparent;
+  color: var(--parchment);
+  border-color: #c5ced6;
+  box-shadow: none;
+}
+
+html[data-easy='on'] .share-card-actions [role='status'] {
+  margin: 0;
+  min-height: 0;
+  font-size: 0.78rem;
+}
+
+html[data-easy='on'] .share-card-actions [role='status']:empty {
+  display: none;
+}
+
+@media (max-height: 920px) {
+  html[data-easy='on'] .journal.is-easy-hold:has(.share-card) .page-head,
+  html[data-easy='on'] .journal.is-easy-hold:has(.share-card) .saved-tree-summary,
+  html[data-easy='on'] .journal.is-easy-hold:has(.share-card) .saved-tree-lead {
+    display: none;
+  }
+
+  html[data-easy='on'] .journal.is-easy-hold:has(.share-card) .stored-line {
+    margin: 0;
+    padding: 8px 10px;
+    gap: 4px;
+  }
+
+  html[data-easy='on'] .journal.is-easy-hold:has(.share-card) .held-triad {
+    gap: 4px;
+    margin: 0;
+  }
+
+  html[data-easy='on'] .journal.is-easy-hold:has(.share-card) > .btn.primary {
+    margin-top: 4px;
+  }
+}

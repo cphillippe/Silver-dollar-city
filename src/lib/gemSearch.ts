@@ -479,13 +479,13 @@ export const MATCH_CHIPS: Record<string, MatchChipSet> = {
     words: ['BOAZ', 'GATE', 'OSSUARY', 'FAMILY'],
     kinds: ['person', 'place', 'idea', 'idea'],
     roles: ['who', 'where', 'idea', 'keep'],
-    say: 'Boaz Archive keeps the line at Old Gate: an ossuary names the family of Jesus.',
+    say: 'Boaz Archive keeps the line at Old Gate: an old bone box names James, brother of Jesus.',
   },
   'psw-nazareth': {
     words: ['LEAH', 'STOOP', 'NAZARETH', 'HOUSES'],
     kinds: ['person', 'place', 'idea', 'idea'],
     roles: ['who', 'where', 'idea', 'keep'],
-    say: 'Leah Lamp marks the line at Quiet Stoop: ancient houses in Nazareth are where Jesus lived.',
+    say: 'Leah Lamp marks the line at Quiet Stoop: ancient houses show Nazareth was real in Jesus\' day.',
   },
 }
 
