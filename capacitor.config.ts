@@ -15,7 +15,8 @@ const config: CapacitorConfig = {
   },
   // Play Billing / StoreKit / AdMob plugins register here after the one-time
   // connect in README (Play Console / App Store Connect / ads). Empty =
-  // cannotCharge demo path.
+  // cannotCharge demo path. @capacitor/share is an npm plugin: cap sync
+  // registers it, and MainActivity answers only that plugin. No ad SDK.
 }
 
 export default config
