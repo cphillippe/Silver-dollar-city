@@ -360,8 +360,14 @@ import {
   ghostHintRail,
   LAMP_DRAG_LIFT_PX,
   LAMP_DRAG_START_PX,
+  LAMP_BEGIN_MISS,
+  LAMP_CLOSED_TOAST,
+  LAMP_PLACE_TOAST,
   LAMP_TOO_FAR,
+  armedSeatMarks,
+  easyDeadSeat,
   lampArtAboveAnchor,
+  plantedLampsTooFar,
   lampReachesRoad,
   lampRoadNote,
   bindLampGround,
@@ -1679,15 +1685,15 @@ assert.match(
 )
 assert.equal(APP_VERSION, '1.4.503')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.503'), '1.4.503 changelog row')
-assert.match(latestChange('1.4.503').title, /gold|step/i)
+assert.match(latestChange('1.4.503').title, /dead|seat|lamp/i)
 assert.doesNotMatch(
   latestChange('1.4.503').items.join('\n'),
   /Fixes #|Closes #|Resolves #/,
   '1.4.503 changelog avoids GitHub close keywords',
 )
-assert.match(latestChange('1.4.503').items.join('\n'), /gold/)
-assert.match(latestChange('1.4.503').items.join('\n'), /Night Watch/)
-assert.match(latestChange('1.4.503').items.join('\n'), /Reading/)
+assert.match(latestChange('1.4.503').items.join('\n'), /Too far from the road\. Plant closer to the path\./)
+assert.match(latestChange('1.4.503').items.join('\n'), /Your lamp can't reach the road/)
+assert.match(latestChange('1.4.503').items.join('\n'), /Hard/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.502'), '1.4.502 changelog row')
 assert.match(latestChange('1.4.502').title, /tap|house|build/i)
 assert.doesNotMatch(
@@ -1698,6 +1704,16 @@ assert.doesNotMatch(
 assert.match(latestChange('1.4.502').items.join('\n'), /tap a house/i)
 assert.match(latestChange('1.4.502').items.join('\n'), /neighbors/)
 assert.match(latestChange('1.4.502').items.join('\n'), /Hard/)
+const gold503 = CHANGELOG.find((note) => note.version === '1.4.503' && /gold|step/i.test(note.title))
+assert.ok(gold503, '1.4.503 gold changelog row')
+assert.doesNotMatch(
+  gold503.items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.503 gold changelog avoids GitHub close keywords',
+)
+assert.match(gold503.items.join('\n'), /gold/)
+assert.match(gold503.items.join('\n'), /Night Watch/)
+assert.match(gold503.items.join('\n'), /Reading/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.501'), '1.4.501 changelog row')
 assert.match(latestChange('1.4.501').title, /far|strong|mark/i)
 assert.doesNotMatch(
@@ -8331,7 +8347,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.match(screen464, /const debugHarness = easy && debugPanel && midWave/)
   assert.doesNotMatch(screen464, /const debugHarness = easy && nwDebug && midWave/)
   assert.match(screen464, /data-plant-pulse/)
-  assert.match(screen464, /plantableHints/)
+  assert.match(screen464, /armedSeatMarks/, '1.4.503 Easy seat marks still come from open ground')
   assert.match(screen464, /is-card-on/)
   assert.match(screen464, /plantOpenGroundRef/)
   const place464 = readFileSync(new URL('../src/lib/lampPlace.ts', import.meta.url), 'utf8')
@@ -8396,8 +8412,13 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.notEqual(farLook.cover, 'good', '1.4.464 that seat is outside the good-reach sliver')
   assert.equal(
     commitLamp({}, far464, 'love', fresh464, {}, false, true, 0).ok,
+    false,
+    '1.4.503 Easy refuses a seat that stays too far from the road',
+  )
+  assert.equal(
+    commitLamp({}, far464, 'love', fresh464, {}, false, false, 0).ok,
     true,
-    '1.4.464 a short reach still plants',
+    '1.4.503 Hard still plants that far seat',
   )
   assert.equal(
     commitLamp({}, { x: 192, y: 537 }, 'love', fresh464, {}, false, true, 0).ok,
@@ -17299,6 +17320,86 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.match(sort503, /easy \? 'text-link match-recover'/)
   const welcome503 = readFileSync(new URL('../src/components/Welcome.tsx', import.meta.url), 'utf8')
   assert.match(welcome503, /goldButtonClass\('welcome', 'startEasy'\)/)
+}
+
+// Night Watch 1.4.503: Easy refuses a dead seat. Sim seats and Hard stay plantable.
+{
+  const progress = emptyProgress()
+  const dead = { x: 40, y: 40 }
+  const deadLook = previewLamp(dead, 'love', progress, {}, {}, false, true, 0)
+  assert.equal(easyDeadSeat(deadLook), true, '1.4.503 the corner is a dead seat')
+  assert.equal(deadLook.note, LAMP_TOO_FAR)
+  assert.equal(commitLamp({}, dead, 'love', progress, {}, false, true, 0).ok, false, '1.4.503 Easy refuses the dead seat')
+  assert.equal(commitLamp({}, dead, 'love', progress, {}, false, false, 0).ok, true, '1.4.503 Hard still plants the dead seat')
+  assert.equal(LAMP_PLACE_TOAST, 'Too far from the road. Plant closer to the path.')
+  assert.equal(LAMP_BEGIN_MISS, "Your lamp can't reach the road")
+  assert.equal(LAMP_CLOSED_TOAST, 'Plant on open ground.')
+  const live = LEAD_GOOD_SEATS[2]
+  const liveLook = previewLamp(live, 'love', progress, {}, {}, false, true, 0)
+  assert.equal(liveLook.reaches, true, '1.4.503 a lead seat reaches')
+  assert.equal(easyDeadSeat(liveLook), false, '1.4.503 a lead seat is not dead')
+  assert.equal(commitLamp({}, live, 'love', progress, {}, false, true, 0).ok, true, '1.4.503 Easy accepts the live seat')
+  for (const seat of [...LEAD_GOOD_SEATS, ...JUMP_GOOD_SEATS]) {
+    const look = previewLamp(seat, 'love', progress, {}, {}, false, true, 0)
+    assert.equal(easyDeadSeat(look), false, `1.4.503 sim seat ${seat.x},${seat.y} is not a dead plant`)
+    assert.equal(
+      commitLamp({}, seat, 'love', progress, {}, false, true, 0).ok,
+      true,
+      `1.4.503 sim seat ${seat.x},${seat.y} still plants`,
+    )
+  }
+  for (const id of ['porch', 'hollow', 'journal', 'bench']) {
+    const at = DEFEND_ANCHOR[id]
+    const look = previewLamp(at, 'love', progress, {}, {}, false, true, 0)
+    assert.equal(easyDeadSeat(look), false, `1.4.503 ${id} stays plantable`)
+    assert.equal(commitLamp({}, at, 'love', progress, {}, false, true, 0).ok, true, `1.4.503 ${id} still plants`)
+  }
+  const seedFingers = [
+    { x: 430, y: 134 },
+    { x: 250, y: 274 },
+    { x: 230, y: 414 },
+    { x: 310, y: 554 },
+    { x: 420, y: 404 },
+    { x: 450, y: 184 },
+    { x: 210, y: 714 },
+  ]
+  for (const finger of seedFingers) {
+    const at = lampUnderFinger(finger)
+    const look = previewLamp(at, 'love', progress, {}, {}, false, true, 0)
+    assert.equal(easyDeadSeat(look), false, `1.4.503 seed seat ${at.x},${at.y} is not blocked`)
+    assert.equal(commitLamp({}, at, 'love', progress, {}, false, true, 0).ok, true)
+  }
+  const planted = { [deadLook.spot]: 'love', [liveLook.spot]: 'logic' }
+  assert.deepEqual(
+    plantedLampsTooFar(planted, progress, {}),
+    [deadLook.spot],
+    '1.4.503 Begin names only the lamp that stays off the road',
+  )
+  const marks = armedSeatMarks('love', progress, {}, {})
+  assert.ok(marks.some((seat) => seat.live), '1.4.503 an armed card has a live seat')
+  assert.ok(marks.some((seat) => !seat.live), '1.4.503 an armed card has a dead seat')
+  const css503 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  assert.match(css503, /\.defend-page\.is-easy-watch \.defend-plant-ground circle\.is-live/)
+  assert.match(css503, /\.defend-page\.is-easy-watch \.defend-plant-ground circle\.is-dead/)
+  assert.match(css503, /\.defend-page\.is-easy-watch \.defend-ghost\.is-live-ring \.defend-ghost-ring/)
+  assert.match(css503, /\.defend-page\.is-easy-watch \.defend-ghost\.is-dead \.defend-ghost-ring/)
+  assert.match(css503, /\.defend-page\.is-easy-watch \.nw-place-toast/)
+  assert.match(css503, /\.defend-page\.is-easy-watch \.defend-pad\.is-reach-miss/)
+  assert.doesNotMatch(
+    readFileSync(new URL('../src/index.css', import.meta.url), 'utf8'),
+    /nw-place-toast|is-reach-miss/,
+    '1.4.503 the seat tint stays out of index.css',
+  )
+  const screen503 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  assert.match(screen503, /LAMP_PLACE_TOAST/)
+  assert.match(screen503, /LAMP_BEGIN_MISS/)
+  assert.match(screen503, /LAMP_CLOSED_TOAST/)
+  assert.match(screen503, /plantedLampsTooFar/)
+  assert.doesNotMatch(
+    readFileSync(new URL('../src/nightWatch/livePace.ts', import.meta.url), 'utf8'),
+    /easyDeadSeat|LAMP_PLACE_TOAST/,
+    '1.4.503 the pace sim does not read the dead-seat rule',
+  )
 }
 
 const bossTapScan = readFileSync(new URL('./check-seed-fire.mjs', import.meta.url), 'utf8')
