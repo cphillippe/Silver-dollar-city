@@ -6,7 +6,12 @@ export const EASY = {
   mindMapShort: 'Scrapbook',
   connectLink: 'Tap the sentence, then the place, then the person.',
   matchHunt: 'Find a word. A story panel opens.',
-  runHunt: 'Hold to run. Let go when it glows, then press again.',
+  runHunt: 'Hold to run. When it says Now tap, tap.',
+  runKeepHolding: 'Keep holding',
+  runTapNow: 'Now tap!',
+  runKeepGoing: 'Keep going',
+  gotIt: 'You got it',
+  continueOn: 'Continue',
   runCta: 'Run to him',
   runMatch: 'Run',
   runHome: 'One more run.',  // Easy Clear 1.4.155: short Home next-step (not full runHunt; Fixes #192)

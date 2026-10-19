@@ -227,7 +227,7 @@ export async function checkEasyFace() {
       await page.mouse.up()
       for (let tap = 1; tap <= 3; tap += 1) {
         await page.waitForFunction(
-          () => document.querySelector('[data-run-pad="hold"]')?.getAttribute('aria-label') === 'Let go — press now!',
+          () => document.querySelector('[data-run-pad="hold"]')?.getAttribute('aria-label') === 'Now tap!',
           null,
           { timeout: 8000 },
         )

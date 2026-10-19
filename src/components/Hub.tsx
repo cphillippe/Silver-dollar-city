@@ -37,7 +37,7 @@ import {
 import type { View } from '../types'
 import { RecallOffer } from './RecallOffer'
 import { StoresComingNotice } from './StoresComingNotice'
-import { easyReadIsHomeGold, noteEasyOpenDay } from '../content/goldenPath'
+import { easyReadIsHomeGold, easyReadMarkedTomorrow, noteEasyOpenDay } from '../content/goldenPath'
 
 interface HubProps {
   onNavigate: (view: View) => void
@@ -94,38 +94,18 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
     const upgradeReadyId = readyUpgradeId(progress, nextId)
     const buildNeed = nextUpgradeNeed(nextId, progress, true)
     const lampsGift = lampsBuildGift(progress, doneToday, upgradeReadyId)
-    const readyLine = upgradeReadyId ? 'A building is ready. Tap it, then Build this.' : !doneToday ? 'Finish today’s story once. Then you can raise the building — no pay.' : buildNeed.line
-    const idleGift = lampsGift ?? readyLine
     const selectedReady = Boolean(selectedPlot && canUpgrade(selectedPlot, progress))
     const selectedName = selectedPlot
       ? selectedPlot === 'journal'
         ? 'River’s pages'
         : easyPlotTag(selectedPlot)
       : ''
-    let dockEyebrow = 'Build It'
-    let dockGift = idleGift
-    if (selectedPlot && selectedReady) {
-      dockEyebrow = selectedName
-      dockGift = lampsBuildGift(progress, doneToday, selectedPlot) ?? 'Ready to raise. Tap Build this.'
-    } else if (selectedPlot) {
-      dockEyebrow = selectedName
-      const plot = CITY_PLOTS.find((item) => item.id === selectedPlot)
-      const why =
-        lotTapWhy(
-          selectedPlot,
-          progress,
-          true,
-          plot?.areaId ? isAreaUnlocked(plot.areaId, progress.completed) : true,
-          plot?.areaId ? areaGateCopy(plot.areaId, progress.completed, true) : '',
-          doneToday,
-        ) ?? nextUpgradeNeed(selectedPlot, progress, true).line
-      dockGift = `${why} Tap it again to open.`
-    }
     // 1.4.503: first session gold is the Easy line. Read is gold only on a later day.
     const readNow = easyReadIsHomeGold(progress, today) && focus !== 'hold'
     const playNow = matchReady && !readNow && focus !== 'hold'
     const lockNow = focus === 'hold'
     const playLater = !playNow && !lockNow
+    const readTomorrow = easyReadMarkedTomorrow(progress, today)
 
     function easyBuildThis() {
       const readyId = selectedPlot && canUpgrade(selectedPlot, progress) ? selectedPlot : null
@@ -149,6 +129,29 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
                   : coldMercy
                     ? 'Find Mercy’s story at Story Creek.'
                     : 'Find the gems. The story opens as you play.'
+
+    const readyLine = upgradeReadyId ? 'A building is ready. Tap it, then Build this.' : !doneToday ? 'Finish today’s story once. Then you can raise the building — no pay.' : buildNeed.line
+    const trailGold = playNow || lockNow || readNow
+    const idleGift = trailGold ? homeWhisper : (lampsGift ?? readyLine)
+    let dockEyebrow = 'Build It'
+    let dockGift = idleGift
+    if (selectedPlot && selectedReady) {
+      dockEyebrow = selectedName
+      dockGift = lampsBuildGift(progress, doneToday, selectedPlot) ?? 'Ready to raise. Tap Build this.'
+    } else if (selectedPlot) {
+      dockEyebrow = selectedName
+      const plot = CITY_PLOTS.find((item) => item.id === selectedPlot)
+      const why =
+        lotTapWhy(
+          selectedPlot,
+          progress,
+          true,
+          plot?.areaId ? isAreaUnlocked(plot.areaId, progress.completed) : true,
+          plot?.areaId ? areaGateCopy(plot.areaId, progress.completed, true) : '',
+          doneToday,
+        ) ?? nextUpgradeNeed(selectedPlot, progress, true).line
+      dockGift = `${why} Tap it again to open.`
+    }
 
     return (
       <main
@@ -190,14 +193,15 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
           {/* Easy Clear 1.4.251: parchment coach labels — Learn/Lock In contrast (Fixes #343). */}
           {/* 1.4.357: numbered Read → Match/Learn → Lock In. One gold step. */}
           <ol className="easy-coach easy-home-steps" aria-label="Next step: Read, then Match, then Lock In">
-            <li className={readNow ? 'is-now' : 'is-quiet'}>
+            <li className={readNow ? 'is-now' : readTomorrow ? 'is-tomorrow' : 'is-quiet'}>
               <button
                 type="button"
                 className="easy-coach-step easy-dock-walk"
                 onClick={() => onNavigate({ name: 'daily' })}
               >
                 <span className="easy-step-num">1</span>
-                Read
+                <span>Read</span>
+                {readTomorrow ? <span className="easy-step-later">tomorrow</span> : null}
               </button>
             </li>
             <li className={playNow ? 'is-now' : playLater ? 'is-later' : 'is-quiet'}>

@@ -88,10 +88,8 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
       if (page?.querySelector('.is-story-strip')) return
       ctaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
     })
-    const auto = window.setTimeout(() => finish(), reduced ? 420 : 1200)
     return () => {
       window.cancelAnimationFrame(frame)
-      window.clearTimeout(auto)
     }
   }, [locked])
 
@@ -149,7 +147,7 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
         {/* Easy Clear 1.4.139: miss teach sheet already prints .why-miss-badge — skip HUD dup. */}
         {missTeach ? null : (
           <p className="next-tap">
-            {locked ? EASY.keepThis : retryJuice ? EASY.oneMoreTry : EASY.tapWhy}
+            {locked ? EASY.gotIt : retryJuice ? EASY.oneMoreTry : EASY.tapWhy}
           </p>
         )}
         <p className="why-score" aria-live="polite">
@@ -221,13 +219,17 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
       {locked ? (
         <>
           <MatchTakeaway lineId={id} title={beat.title} />
+          <p className="why-got-it" role="status">
+            {EASY.gotIt}
+          </p>
+          <p className="quiet">{EASY.keepThis}</p>
           <div className="cta-dock" ref={ctaRef}>
             <button
               type="button"
               className="btn primary xl recall-done"
               onClick={finish}
             >
-              {EASY.saved}
+              {EASY.continueOn}
             </button>
           </div>
         </>

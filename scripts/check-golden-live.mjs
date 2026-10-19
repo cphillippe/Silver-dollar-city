@@ -240,6 +240,53 @@ async function walkUntil(page, target, winOnArrival) {
   throw new Error(`maze walk did not reach ${key(target)}`)
 }
 
+async function earlyMiss(page) {
+  const pad = page.locator('[data-run-pad="hold"]')
+  await pad.waitFor({ timeout: 15000 })
+  await pad.scrollIntoViewIfNeeded()
+  const box = await pad.boundingBox()
+  if (!box) throw new Error('run pad has no box')
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+  await page.mouse.down()
+  await page.waitForTimeout(40)
+  await page.mouse.up()
+  await page.locator('.run-miss').waitFor({ timeout: 16000 })
+  await page.waitForTimeout(500)
+}
+
+async function tapRunFailGold(page) {
+  const btn = page.locator('.run-miss .btn.primary')
+  await btn.waitFor()
+  const cls = (await btn.getAttribute('class')) || ''
+  assert.match(cls, /\bprimary\b/, 'run-fail gold is .btn.primary')
+  assert.doesNotMatch(cls, /\bgold\b/, 'run-fail gold is not the pale .btn.gold')
+  const golds = await filledGolds(page)
+  assert.equal(golds.length, 1, `run-fail has one filled gold ${JSON.stringify(golds)}`)
+  await btn.click()
+  await page.waitForTimeout(250)
+  assert.equal(await page.locator('[aria-label="Choose a map"]').count(), 0, 'run-fail gold did not open Choose a map')
+  assert.equal(await page.locator('.nw-map-overlay').count(), 0, 'run-fail gold did not open the map overlay')
+  assert.equal(await page.locator('.defend-page').count(), 0, 'run-fail gold did not open Night Watch')
+  assert.equal(await page.locator('.play.is-father-run').count(), 1, 'run-fail gold stays on the father run')
+}
+
+/** Gold-only, early glow release (before Now tap). Keep going is the way out after two misses. */
+async function hugFatherHuman(page) {
+  for (let miss = 1; miss <= 2; miss += 1) {
+    await earlyMiss(page)
+    const label = ((await page.locator('.run-miss .btn.primary').innerText()) || '').replace(/\s+/g, ' ').trim()
+    assert.equal(label, 'Run again', `early miss ${miss} gold is Run again`)
+    await tapRunFailGold(page)
+    await page.locator('[data-run-pad="hold"]').waitFor()
+  }
+  await earlyMiss(page)
+  const keep = ((await page.locator('[data-run-keep]').innerText()) || '').replace(/\s+/g, ' ').trim()
+  assert.equal(keep, 'Keep going')
+  await page.screenshot({ path: `${SHOTS}/run-fail-keep-going-375.png` })
+  await tapRunFailGold(page)
+  await page.locator('.play.is-father-run.is-win .btn.primary').waitFor({ timeout: 8000 })
+}
+
 async function hugFather(page) {
   const pad = page.locator('[data-run-pad="hold"]')
   await pad.waitFor({ timeout: 15000 })
@@ -262,7 +309,7 @@ async function hugFather(page) {
       throw new Error('father run missed')
     }
     const label = await pad.getAttribute('aria-label')
-    if (label && label.includes('Let go')) {
+    if (label && (label.includes('Now tap') || label.includes('Let go'))) {
       await page.mouse.up()
       await page.waitForTimeout(30)
       await press()
@@ -429,6 +476,7 @@ export async function checkGoldenLive() {
       shot = await stamp('home-fresh')
       assert.equal(shot.id, 'home')
       assert.doesNotMatch(shot.golds[0].text, /Read/, 'first session gold is not Read')
+      assert.match(await page.locator('.easy-home-steps li').first().innerText(), /tomorrow/)
       assert.equal(shot.golds[0].disabled, false, 'session 1 lesson step stays enabled')
       assert.equal(await page.locator('.easy-night-watch').count(), 0, 'Night Watch is hidden before the first Lock In')
       if (width === 375) await page.screenshot({ path: `${SHOTS}/easy-home-fresh-375.png` })
@@ -448,7 +496,9 @@ export async function checkGoldenLive() {
       await answerQuiz(page, 'ph-road')
       await page.locator('.why-blast.is-yes .btn.primary, .why-blast.is-win .btn.primary').first().waitFor()
       shot = await stamp('quiz-road-done')
-      assert.match(shot.golds[0].text, /Lock In/)
+      assert.match(shot.golds[0].text, /Continue/)
+      assert.match(await page.locator('.why-got-it').innerText(), /You got it/)
+      if (width === 375) await page.screenshot({ path: `${SHOTS}/lock-in-you-got-it-375.png` })
       await tapFilledGold(page)
 
       await page.locator('main.hub').waitFor()
@@ -456,7 +506,14 @@ export async function checkGoldenLive() {
       assert.equal(await page.locator('.easy-night-watch').count(), 1, 'Night Watch returns after the first Lock In')
       const nwClass = await page.locator('.easy-night-watch button').getAttribute('class')
       assert.doesNotMatch(nwClass || '', /gold|primary/, 'Night Watch stays secondary')
-      if (width === 375) await page.screenshot({ path: `${SHOTS}/easy-home-after-lock-in-375.png` })
+      const roadGift = (await page.locator('.easy-build-gift').innerText()).replace(/\s+/g, ' ')
+      assert.doesNotMatch(roadGift, /Build this/, 'Home gift does not say Build this while gold is Run')
+      assert.match(roadGift, /run/i)
+      assert.match(shot.golds[0].text, /Run/)
+      if (width === 375) {
+        await page.screenshot({ path: `${SHOTS}/easy-home-after-lock-in-375.png` })
+        await page.screenshot({ path: `${SHOTS}/home-run-copy-375.png` })
+      }
       await tapFilledGold(page)
 
       await page.locator('[data-run-pad], .play.is-father-run').first().waitFor()
@@ -472,6 +529,8 @@ export async function checkGoldenLive() {
       await answerQuiz(page, 'ph-father')
       await page.locator('.why-blast.is-yes .btn.primary, .why-blast.is-win .btn.primary').first().waitFor()
       shot = await stamp('quiz-father-done')
+      assert.match(shot.golds[0].text, /Continue/)
+      assert.match(await page.locator('.why-got-it').innerText(), /You got it/)
       await tapFilledGold(page)
 
       await page.locator('main.hub').waitFor()
@@ -543,6 +602,7 @@ export async function checkGoldenLive() {
     traces.push(`day-2 home ${home.sig} n=${home.golds.length} daily=${puzzle.challenge.kind}:${puzzle.challenge.id}`)
     assert.equal(home.golds.length, 1, 'day-2 home has one gold')
     assert.match(home.golds[0].text, /Read/, 'day-2 home gold is Read')
+    assert.doesNotMatch(await page.locator('.easy-home-steps li').first().innerText(), /tomorrow/)
     await tapFilledGold(page)
     await page.locator('.daily-page, .teach-gate').first().waitFor()
     const teach = await signature(page)
@@ -562,6 +622,77 @@ export async function checkGoldenLive() {
     assert.doesNotMatch(after.golds[0].text, /Read/, 'after Read, gold is the next Easy lesson')
     assert.equal(after.golds[0].disabled, false, 'the next lesson step is enabled after Read')
     await context.close()
+
+    const human = await browser.newContext({ viewport: { width: 375, height: 667 } })
+    const humanPage = await human.newPage()
+    const humanErrors = []
+    humanPage.on('pageerror', (error) => humanErrors.push(String(error)))
+    await humanPage.goto(origin)
+    await humanPage.locator('.welcome').waitFor()
+    const humanTrace = []
+    const humanSeen = new Set()
+    async function humanStamp(label) {
+      const shot = await signature(humanPage)
+      humanTrace.push(`375x667 human ${label} ${shot.sig} n=${shot.golds.length}`)
+      assert.ok(!humanSeen.has(shot.sig), `human repeated screen ${shot.sig}`)
+      humanSeen.add(shot.sig)
+      assert.notEqual(shot.id, 'night-watch', 'human gold follower opened Night Watch')
+      if (playScreens(shot.id)) assert.equal(shot.golds.length, 0, `${label} play screen has a filled gold`)
+      else assert.equal(shot.golds.length, 1, `${label} needs one filled gold ${JSON.stringify(shot.golds)}`)
+      return shot
+    }
+    await humanStamp('welcome')
+    await tapFilledGold(humanPage)
+    await humanPage.locator('main.hub').waitFor()
+    await humanStamp('home-fresh')
+    await tapFilledGold(humanPage)
+    await humanPage.locator('.play.is-road-maze').waitFor()
+    await humanStamp('maze')
+    await playRoad(humanPage)
+    await humanPage.locator('[data-maze-next]').waitFor()
+    await humanStamp('maze-win')
+    await tapFilledGold(humanPage)
+    await humanPage.locator('.why-blast').waitFor()
+    await humanStamp('quiz-road')
+    await answerQuiz(humanPage, 'ph-road')
+    await humanPage.locator('.why-blast.is-yes .btn.primary').waitFor()
+    await humanStamp('quiz-road-done')
+    await tapFilledGold(humanPage)
+    await humanPage.locator('main.hub').waitFor()
+    await humanStamp('home-after-road')
+    await tapFilledGold(humanPage)
+    await humanPage.locator('[data-run-pad], .play.is-father-run').first().waitFor()
+    await humanStamp('run')
+    await hugFatherHuman(humanPage)
+    await humanStamp('run-win')
+    await tapFilledGold(humanPage)
+    await humanPage.locator('.why-blast').waitFor()
+    await humanStamp('quiz-father')
+    await answerQuiz(humanPage, 'ph-father')
+    await humanPage.locator('.why-got-it').waitFor()
+    const humanGot = await humanStamp('quiz-father-done')
+    assert.match(humanGot.golds[0].text, /Continue/)
+    await tapFilledGold(humanPage)
+    await humanPage.locator('main.hub').waitFor()
+    const humanHome = await humanStamp('home-tuning')
+    const humanGift = (await humanPage.locator('.easy-build-gift').innerText()).replace(/\s+/g, ' ')
+    assert.doesNotMatch(humanGift, /Build this/)
+    assert.doesNotMatch(humanHome.golds[0].text, /Read/)
+    await tapFilledGold(humanPage)
+    await humanPage.locator('.play.is-gem-search').waitFor()
+    await humanStamp('gem')
+    await playGem(humanPage)
+    await humanPage.locator('.play.is-gem-search.is-win .btn.primary').waitFor()
+    const humanGem = await humanStamp('gem-win')
+    assert.match(humanGem.golds[0].text, /Lock In/)
+    await tapFilledGold(humanPage)
+    await humanPage.locator('.why-blast').waitFor()
+    const humanScience = await humanStamp('quiz-tuning')
+    assert.equal(humanScience.id, 'quiz', 'human-like Run still reaches ob-tuning Lock In')
+    assert.equal(await humanPage.locator('.play.is-gem-search').count(), 0)
+    assert.equal(humanErrors.join('\n'), '', 'human page errors')
+    traces.push(humanTrace.join('\n'))
+    await human.close()
   } finally {
     await browser.close()
     await server.close()
