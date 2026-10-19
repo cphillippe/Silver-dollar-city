@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.507',
+    title: 'The crown tells you',
+    when: '2026-10-19',
+    items: [
+      'On Easy rounds 20 and 25, an active Mend holds that crown once. It steps back along the road, keeps its health, and costs no heart.',
+      'With no shield, hearts fall one at a time. The line says The crown got through! The loss says The crown reached the gate.',
+      'Hard nights stay the same.',
+    ],
+  },
+  {
     version: '1.4.506',
     title: 'A run you can finish',
     when: '2026-10-19',
