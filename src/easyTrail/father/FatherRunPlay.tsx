@@ -13,7 +13,9 @@ import { MatchTakeaway } from '../../components/HeldTriad'
 import {
   applyDash,
   beatsOpened,
+  DASH_WINDOW_MS,
   dashPhase,
+  EASY_RUN_TUNE,
   fatherStartProgress,
   FATHER_RUN_AGAIN,
   FATHER_RUN_CLAIM,
@@ -86,11 +88,14 @@ export function FatherRunPlay({
   const playRef = useRef<HTMLDivElement>(null)
   const padRef = useRef<HTMLButtonElement>(null)
   const padPointer = useRef<number | null>(null)
+  const easy = typeof document !== 'undefined' && document.documentElement.dataset.easy === 'on'
+  const easyRef = useRef(easy)
+  easyRef.current = easy
 
   const opened = beatsOpened(progress, panels.length)
   const phrase = clockOn.current || elapsed > 0 ? speechPhraseAt(elapsed) : HIRED_HAND_SPEECH[0]
   const spoken = clockOn.current || elapsed > 0 ? Math.min(HIRED_HAND_SPEECH.length, speechIndexAt(elapsed) + 1) : 0
-  const dash = dashPhase(elapsed)
+  const dash = dashPhase(elapsed, easy ? EASY_RUN_TUNE.dashWindowMs : DASH_WINDOW_MS)
   const latest = panels[Math.min(opened, panels.length) - 1]
   const caption =
     phase === 'hug'
@@ -105,6 +110,41 @@ export function FatherRunPlay({
   function flashToast(line: string) {
     setToast(line)
     window.setTimeout(() => setToast((current) => (current === line ? '' : current)), 1400)
+  }
+
+  function dashWindowMs() {
+    return easyRef.current ? EASY_RUN_TUNE.dashWindowMs : DASH_WINDOW_MS
+  }
+
+  function releasePadPointer() {
+    const node = padRef.current
+    const pointerId = padPointer.current
+    if (node && pointerId !== null) {
+      try {
+        if (node.hasPointerCapture(pointerId)) node.releasePointerCapture(pointerId)
+      } catch {
+        /* pointer already released */
+      }
+    }
+    padPointer.current = null
+    holdingRef.current = false
+  }
+
+  /** A finger still down when the pad unmounts must not click Home, Night Watch, or the shell. */
+  function swallowStrayPointer() {
+    if (padPointer.current === null) return
+    const stop = (event: Event) => {
+      event.preventDefault()
+      event.stopPropagation()
+    }
+    window.addEventListener('pointerup', stop, true)
+    window.addEventListener('pointercancel', stop, true)
+    window.addEventListener('click', stop, true)
+    window.setTimeout(() => {
+      window.removeEventListener('pointerup', stop, true)
+      window.removeEventListener('pointercancel', stop, true)
+      window.removeEventListener('click', stop, true)
+    }, 450)
   }
 
   function resetRound(nextAttempt: number) {
@@ -168,13 +208,14 @@ export function FatherRunPlay({
       elapsedRef.current = nextElapsed
       if (holdingRef.current) heldMsRef.current += dt * 1000
       else heldMsRef.current = 0
-      const windowNow = dashPhase(nextElapsed).inWindow
+      const windowNow = dashPhase(nextElapsed, dashWindowMs()).inWindow
       let nextProgress = holdStep(
         progressRef.current,
         dt,
         holdingRef.current,
         reduced,
         heldMsRef.current,
+        easyRef.current ? EASY_RUN_TUNE.holdSpeed : undefined,
       )
       nextProgress = stumbleIfHeldThrough(
         nextProgress,
@@ -182,6 +223,7 @@ export function FatherRunPlay({
         windowNow,
         holdingRef.current,
         dashedWindowRef.current,
+        easyRef.current ? EASY_RUN_TUNE.stumble : undefined,
       )
       if (inWindowRef.current && !windowNow) dashedWindowRef.current = false
       inWindowRef.current = windowNow
@@ -203,6 +245,7 @@ export function FatherRunPlay({
 
   function winRound() {
     if (phaseRef.current === 'hug') return
+    releasePadPointer()
     phaseRef.current = 'hug'
     holdingRef.current = false
     clockOn.current = false
@@ -222,6 +265,8 @@ export function FatherRunPlay({
 
   function missRound() {
     if (phaseRef.current === 'miss' || phaseRef.current === 'hug') return
+    swallowStrayPointer()
+    releasePadPointer()
     phaseRef.current = 'miss'
     holdingRef.current = false
     clockOn.current = false
@@ -257,7 +302,7 @@ export function FatherRunPlay({
       setPhase('run')
       setElapsed(0)
     }
-    const windowOpen = dashPhase(elapsedRef.current).inWindow
+    const windowOpen = dashPhase(elapsedRef.current, dashWindowMs()).inWindow
     // One dash per glow. A new down still counts if a cancelled hold left the latch stuck.
     if (windowOpen && !dashedWindowRef.current && !stillCaptured && (!wasHolding || pointerId !== undefined)) {
       const next = applyDash(progressRef.current)
@@ -451,9 +496,30 @@ export function FatherRunPlay({
           <p className="run-miss-hint">{FATHER_RUN_HINT}</p>
           <p className="quiet">Try again — you start closer.</p>
           <div className="cta-dock run-dock">
-            <button type="button" className="btn gold xl" onClick={() => resetRound(attempt + 1)}>
-              Run again
-            </button>
+            {easy && attempt + 1 >= EASY_RUN_TUNE.missesBeforeKeep ? (
+              <>
+                <button
+                  type="button"
+                  className={goldButtonClass('run-fail', 'runRetry')}
+                  data-run-keep="yes"
+                  onClick={() => winRound()}
+                >
+                  {EASY.runKeepGoing}
+                </button>
+                <button type="button" className="btn xl" onClick={() => resetRound(attempt + 1)}>
+                  Run again
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                className={easy ? goldButtonClass('run-fail', 'runRetry') : 'btn gold xl'}
+                data-run-retry="yes"
+                onClick={() => resetRound(attempt + 1)}
+              >
+                Run again
+              </button>
+            )}
           </div>
         </div>
       ) : phase === 'hug' ? (
@@ -484,7 +550,15 @@ export function FatherRunPlay({
             type="button"
             className={`run-pad ${holding ? 'is-held' : ''} ${dash.inWindow && phase === 'run' ? 'is-glow' : ''}`}
             aria-pressed={holding}
-            aria-label={dash.inWindow && phase === 'run' ? 'Let go — press now!' : 'Hold to run'}
+            aria-label={
+              dash.inWindow && phase === 'run'
+                ? easy
+                  ? EASY.runTapNow
+                  : 'Let go — press now!'
+                : easy && holding
+                  ? EASY.runKeepHolding
+                  : 'Hold to run'
+            }
             onPointerDown={onPadDown}
             onPointerUp={onPadUp}
             onPointerCancel={onPadCancel}
@@ -493,10 +567,10 @@ export function FatherRunPlay({
             onKeyUp={onPadKeyUp}
           >
             <span className={`run-pad-face ${dash.inWindow && phase === 'run' ? 'is-quiet' : ''}`} aria-hidden>
-              Hold to run
+              {easy && holding ? EASY.runKeepHolding : 'Hold to run'}
             </span>
             <span className={`run-pad-face ${dash.inWindow && phase === 'run' ? '' : 'is-quiet'}`} aria-hidden>
-              Let go — press now!
+              {easy ? EASY.runTapNow : 'Let go — press now!'}
             </span>
           </button>
         </div>

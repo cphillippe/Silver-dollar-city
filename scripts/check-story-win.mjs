@@ -268,6 +268,7 @@ export async function checkStoryWins() {
         await page.locator('.why-blast.is-win').waitFor()
         const mid = await page.evaluate(readWin)
         assert.equal(await page.locator('.why-blast.is-win').count(), 1, `${strip.lineId} mid-quiz is still the locked follow-up`)
+        await page.getByRole('button', { name: 'Continue' }).click()
         await page.getByText('Say this tomorrow').waitFor()
         await page.waitForFunction(() => {
           const link = document.querySelector('.daily-page > .text-link, .challenge-page > .text-link')
