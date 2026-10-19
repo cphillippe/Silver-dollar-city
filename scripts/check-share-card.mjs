@@ -213,11 +213,29 @@ installNavigator({
   },
 })
 resetNative()
+enterShell(true)
+setShareNativeTimeoutForTest(40)
+try {
+  assert.equal(await shareLine(learning), 'shared', 'a reply at launch resolves')
+  await new Promise((resolve) => setTimeout(resolve, 80))
+  assert.equal(nativeCalls.length, 1, 'the native call happened once')
+  assert.equal(navCalls.length, 0, 'a launch reply does not open a second share sheet')
+  assert.equal(clip.length, 0, 'a launch reply does not copy or toast')
+} finally {
+  setShareNativeTimeoutForTest(null)
+}
+
+installNavigator({
+  share: async (data) => {
+    navCalls.push(data)
+  },
+})
+resetNative()
 nativeHandler = () => new Promise(() => {})
 enterShell(true)
 setShareNativeTimeoutForTest(30)
 try {
-  assert.equal(await shareLine(learning), 'shared', 'a silent native share falls back to Web Share')
+  assert.equal(await shareLine(learning), 'shared', 'a bridge that never answers falls back to Web Share')
   assert.equal(nativeCalls.length, 1, 'the native call was attempted')
   assert.equal(navCalls.length, 1, 'timeout uses navigator.share')
   assert.equal(navCalls[0].text, text)
