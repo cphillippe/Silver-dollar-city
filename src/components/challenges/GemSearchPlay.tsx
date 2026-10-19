@@ -160,7 +160,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     resetBoard(true)
     if (replayToast.current) {
       replayToast.current = false
-      flashToast('One more Match. Find the gems.')
+      flashToast('One more Match. Find the words.')
     }
     // extra try / One more Match reshuffle
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -90,7 +90,11 @@ export function TeachUnlock({ brief, kind, onUnlock, unlock, beats }: TeachUnloc
                     ? EASY.digCta
                     : storyPlayFor(brief.id) === 'story-snap'
                       ? EASY.snapCta
-                      : EASY.findGems}
+                      : kind === 'match'
+                        ? EASY.findGems
+                        : storyPlayFor(brief.id) === 'panel-blast'
+                          ? EASY.findWords
+                          : EASY.findGems}
           </button>
           <button type="button" className="text-link" onClick={onUnlock}>
             Skip reading

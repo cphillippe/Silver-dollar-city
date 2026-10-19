@@ -3691,9 +3691,10 @@ html[data-easy='on'] .mind-node em {
 .hub.is-easy-home .easy-home-steps .easy-coach-step {
   min-height: 48px;
   padding: 10px 6px;
-  font-size: 0.92rem;
+  font-size: 0.82rem;
   font-weight: 750;
-  white-space: nowrap;
+  line-height: 1.15;
+  white-space: normal;
 }
 
 .hub.is-easy-home .easy-step-num {
@@ -4898,13 +4899,17 @@ html[data-easy='on'] .play.is-father-run .cta-dock.run-dock .run-pad {
   position: relative;
   display: grid;
   place-items: center;
+  text-transform: none;
+  letter-spacing: 0;
   transition: transform 0.08s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.08s ease, filter 0.08s ease;
 }
 
-/* Both cues share one cell so the glow does not resize or remount the pad. */
+/* One Easy verb shares the cell. Hard still stacks its two faces. */
 html[data-easy='on'] .play.is-father-run .cta-dock.run-dock .run-pad-face {
   grid-area: 1 / 1;
   white-space: nowrap;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 html[data-easy='on'] .play.is-father-run .cta-dock.run-dock .run-pad-face.is-quiet {

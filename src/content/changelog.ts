@@ -8,6 +8,20 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.509',
+    title: 'One plain next move',
+    when: '2026-10-19',
+    items: [
+      'On Easy, the second miss shows Run again in dark ink beside Keep going.',
+      'The run pad says Hold, then Tap, one word at a time.',
+      'Walking into the hurt man counts as helping him.',
+      'Lock In pulses the first card and says Drag the card until you drag one.',
+      'Home names the word search Find the words, and the next place shows after you finish.',
+      'Hard stays the same.',
+      'Refs #783 #780 #781 #782 #767.',
+    ],
+  },
+  {
     version: '1.4.508',
     title: 'Share from the app',
     when: '2026-10-19',
