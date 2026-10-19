@@ -9,6 +9,16 @@ export interface ChangeNote {
 export const CHANGELOG: ChangeNote[] = [
   {
     version: '1.4.503',
+    title: 'Dead seats stay empty',
+    when: '2026-10-19',
+    items: [
+      'On Easy, while a lamp card is armed, seats that reach the road turn green and seats that do not turn grey. The ring on your finger matches that reach.',
+      'A seat that stays too far from the road does not take a lamp. It says Too far from the road. Plant closer to the path.',
+      'Begin, with a lamp that cannot reach the road, says Your lamp can\'t reach the road and pulses that lamp. Hard nights stay the same.',
+    ],
+  },
+  {
+    version: '1.4.503',
     title: 'One gold step',
     when: '2026-10-19',
     items: [

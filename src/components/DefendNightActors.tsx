@@ -114,8 +114,10 @@ export interface DefendNightActorsProps {
   upFlashId?: CityPlotId | null
   /** playtest=1 or nwDebug. Logs each walker's first draw. A normal night stays quiet. */
   spawnLog?: boolean
-  /** Soft marks on ground that can take the picked lamp. */
-  groundHints?: readonly { x: number; y: number }[]
+  /** Soft marks on ground that can take the picked lamp. `live` meets the road now. */
+  groundHints?: readonly { x: number; y: number; live?: boolean }[]
+  /** Planted lamps Begin just called out. They pulse. */
+  reachMiss?: readonly string[]
   /**
    * ViewBox units to lift a planted lamp off the clear panel. Negative is up.
    * The clear-panel hit box uses the same distance in CSS pixels.
@@ -192,6 +194,7 @@ export function DefendNightActorsSvg({
   upFlashId = null,
   ghost = null,
   groundHints = [],
+  reachMiss = [],
   roundIndex = -1,
   armorFrom = 7,
   lampRise = {},
@@ -222,7 +225,14 @@ export function DefendNightActorsSvg({
               {groundHints.length > 0 ? (
                 <g className="defend-plant-ground" data-plant-ground="yes" pointerEvents="none">
                   {groundHints.map((spot) => (
-                    <circle key={`${spot.x}-${spot.y}`} cx={spot.x} cy={spot.y} r="46" />
+                    <circle
+                      key={`${spot.x}-${spot.y}`}
+                      className={spot.live ? 'is-live' : 'is-dead'}
+                      data-seat={spot.live ? 'live' : 'dead'}
+                      cx={spot.x}
+                      cy={spot.y}
+                      r="46"
+                    />
                   ))}
                 </g>
               ) : null}
@@ -329,7 +339,8 @@ export function DefendNightActorsSvg({
                   <g
                     key={id}
                     data-person-node={scenery ? undefined : 'pad'}
-                    className={`defend-pad is-${stage} ${on ? `is-planted is-${using}` : ''} ${hot ? 'is-hot' : ''} ${firing ? 'is-flash' : ''} ${scenery ? 'is-tower-scenery' : ''} ${boostPad ? 'is-boost-pick' : ''} ${upgrading ? 'is-upgrade-open' : ''} ${justUp ? 'is-up' : ''}`}
+                    className={`defend-pad is-${stage} ${on ? `is-planted is-${using}` : ''} ${hot ? 'is-hot' : ''} ${firing ? 'is-flash' : ''} ${scenery ? 'is-tower-scenery' : ''} ${boostPad ? 'is-boost-pick' : ''} ${upgrading ? 'is-upgrade-open' : ''} ${justUp ? 'is-up' : ''} ${reachMiss.includes(id) ? 'is-reach-miss' : ''}`}
+                    data-reach-miss={reachMiss.includes(id) ? 'yes' : undefined}
                     data-tower-type={on ? using : undefined}
                     data-level={on ? (cross && tree ? crossMark(tree) : bell && tree ? bellMark(tree) : tierMark) : undefined}
                     transform={`translate(${at.x} ${at.y})`}
@@ -539,7 +550,7 @@ export function DefendNightActorsSvg({
                 : null}
               {ghost ? (
                 <g
-                  className={`defend-ghost${ghost.blocked ? ' is-nogo' : ghost.cover === 'good' ? ' is-reaches is-good' : ghost.cover === 'some' ? ' is-some' : ' is-short'}`}
+                  className={`defend-ghost${ghost.blocked ? ' is-nogo' : ghost.cover === 'good' ? ' is-reaches is-good' : ghost.cover === 'some' ? ' is-some' : ' is-short'}${ghost.reaches ? ' is-live-ring' : ghost.blocked ? '' : ' is-dead'}`}
                   data-lamp-ghost={ghost.blocked ? 'nogo' : 'open'}
                   data-reaches={ghost.reaches ? 'yes' : 'no'}
                   data-road-rank={ghost.cover || ''}
