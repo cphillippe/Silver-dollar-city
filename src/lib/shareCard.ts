@@ -1,4 +1,6 @@
-import { PAGES_APP_URL } from '../config/shell.ts'
+import { Share } from '@capacitor/share'
+import { Capacitor } from '@capacitor/core'
+import { inAndroidShell, PAGES_APP_URL } from '../config/shell.ts'
 
 /** On-device share counts. Nothing is sent until a first-party counter exists. */
 export const SHARE_COUNT_KEY = 'silver-city-share-v1'
@@ -77,23 +79,72 @@ export function shareTapRate(): number {
 
 export type ShareResult = 'shared' | 'copied' | 'idle'
 
-/**
- * Share the line, then the clipboard.
- * A cancel is not a failure: it falls through the same way Share a morning does.
- * A canvas image is skipped; measuring text for a 1080×1350 PNG is a later pass.
- */
-export async function shareLine(learning: ShareLine): Promise<ShareResult> {
-  const text = shareCardText(learning)
-  const url = shareCardUrl()
-  const title = 'Say it back tomorrow'
-  try {
-    if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
-      await navigator.share({ title, text, url })
-      return 'shared'
-    }
-  } catch {
-    /* cancel or unsupported — try the clipboard */
-  }
+const SHARE_TITLE = 'Say it back tomorrow'
+/** Native share must answer quickly. Old WebViews never get a bridge. */
+export const SHARE_NATIVE_TIMEOUT_MS = 3000
+let shareNativeTimeoutMs = SHARE_NATIVE_TIMEOUT_MS
+
+/** Tests shorten the hang. Production stays at SHARE_NATIVE_TIMEOUT_MS. */
+export function setShareNativeTimeoutForTest(ms: number | null) {
+  shareNativeTimeoutMs = ms == null ? SHARE_NATIVE_TIMEOUT_MS : ms
+}
+
+function injectedNativePlatform(): boolean | null {
+  if (typeof window === 'undefined') return null
+  const cap = (window as Window & { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor
+  if (typeof cap?.isNativePlatform === 'function') return cap.isNativePlatform()
+  if (typeof Capacitor.isNativePlatform === 'function') return Capacitor.isNativePlatform()
+  return null
+}
+
+/** Android shell, and Capacitor's native check when that helper exists. */
+function shouldUseNativeShare(): boolean {
+  if (!inAndroidShell()) return false
+  const native = injectedNativePlatform()
+  return native !== false
+}
+
+/** The share-only listener is window.androidBridge. Missing means an old WebView. */
+function nativeBridgePresent(): boolean {
+  if (typeof window === 'undefined') return false
+  return (window as Window & { androidBridge?: unknown }).androidBridge != null
+}
+
+function isShareTimeout(error: unknown): boolean {
+  return error instanceof Error && error.name === 'ShareTimeout'
+}
+
+function withTimeout<T>(work: Promise<T>, ms: number): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      const error = new Error('share timed out')
+      error.name = 'ShareTimeout'
+      reject(error)
+    }, ms)
+    work.then(
+      (value) => {
+        clearTimeout(timer)
+        resolve(value)
+      },
+      (error) => {
+        clearTimeout(timer)
+        reject(error)
+      },
+    )
+  })
+}
+
+/** A closed sheet is not a failure and must not toast or copy. */
+function isShareCancel(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false
+  const name = 'name' in error ? String(error.name) : ''
+  if (name === 'AbortError') return true
+  const message = 'message' in error ? String(error.message) : ''
+  const lower = message.toLowerCase()
+  return lower.includes('cancel') || lower.includes('abort')
+}
+
+async function copyShareText(text: string): Promise<ShareResult> {
   try {
     if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
       await navigator.clipboard.writeText(text)
@@ -103,4 +154,41 @@ export async function shareLine(learning: ShareLine): Promise<ShareResult> {
     return 'idle'
   }
   return 'idle'
+}
+
+/** Website path: navigator.share, then the clipboard. A cancel stays quiet. */
+async function shareOnTheWeb(title: string, text: string, url: string): Promise<ShareResult> {
+  try {
+    if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+      await navigator.share({ title, text, url })
+      return 'shared'
+    }
+  } catch (error) {
+    if (isShareCancel(error)) return 'idle'
+  }
+  return copyShareText(text)
+}
+
+/**
+ * In the Android shell, open the share sheet through @capacitor/share.
+ * On the web, use navigator.share, then the clipboard.
+ * The 3s timer covers a bridge that never answers. Any reply, including the
+ * launch ack, returns here and must not open a second sheet or copy.
+ * A cancel shows nothing. A thrown native plugin falls back to the copied toast.
+ * A canvas image is skipped; measuring text for a 1080×1350 PNG is a later pass.
+ */
+export async function shareLine(learning: ShareLine): Promise<ShareResult> {
+  const text = shareCardText(learning)
+  const url = shareCardUrl()
+  const title = SHARE_TITLE
+  if (shouldUseNativeShare() && nativeBridgePresent()) {
+    try {
+      await withTimeout(Share.share({ title, text, url }), shareNativeTimeoutMs)
+      return 'shared'
+    } catch (error) {
+      if (isShareCancel(error)) return 'idle'
+      if (!isShareTimeout(error)) return copyShareText(text)
+    }
+  }
+  return shareOnTheWeb(title, text, url)
 }
