@@ -352,7 +352,16 @@ async function hugFather(page) {
       await page.mouse.up().catch(() => {})
       throw new Error('father run missed')
     }
-    const label = await pad.getAttribute('aria-label')
+    let label = null
+    try {
+      label = await pad.getAttribute('aria-label', { timeout: 500 })
+    } catch {
+      if (await page.locator('.play.is-father-run.is-win').count()) {
+        await page.mouse.up().catch(() => {})
+        return
+      }
+      continue
+    }
     if (label === 'Tap' || (label && label.includes('Let go'))) {
       await page.mouse.up()
       await page.waitForTimeout(30)
