@@ -38,6 +38,7 @@ const SCOPES = {
       'check-phone-fixes.mjs',
       'check-incense-lamps.mjs',
       'check-commerce.mjs',
+      'check-share-card.mjs',
     ],
   },
   // Save / progress / learning / dates — no arcade or city mega-check
@@ -77,7 +78,7 @@ const SCOPES = {
   // Store/ads/support locks (stores PARKED — still validates parked state)
   commerce: {
     embed: true,
-    checks: ['check-commerce.mjs'],
+    checks: ['check-commerce.mjs', 'check-share-card.mjs'],
   },
   // CSS peels: scripts that readFileSync index.css (and match sheet after peel)
   // CSS peels: checks that readAppCss / assert peeled selectors (commerce tip-drift stays in commerce scope)

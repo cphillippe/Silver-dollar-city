@@ -204,6 +204,7 @@ export function Journal({ focusId, autoQuiz, onNavigate }: JournalProps) {
                   <div key={learning.id} id={`learn-${learning.id}`}>
                     <StoredLine
                       learning={learning}
+                      recap
                       when={trace ? nextGapLabel(trace, today, true) : undefined}
                     />
                   </div>
