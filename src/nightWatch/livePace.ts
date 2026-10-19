@@ -8,8 +8,10 @@ import {
   easyLiveSpawnT,
   easyRoundHeartCap,
   easyTapArmored,
+  holdShowdownCrown,
   EASY_LATE_LAMP_NICK,
 } from '../lib/defend.ts'
+import { MEND_SHIELD_MS, SKILL_COOLDOWN_MS, SKILL_UNLOCK_WAVE, mendPower } from '../lib/nightSkills.ts'
 import { INCENSE_COST, applyIncenseTap, incenseBonusFor } from './incense.ts'
 import { BELL_COST, bellPaceFor, walkerSlowPace } from './bell.ts'
 import { CROSS_COST, applyCrossWait, crossPaceFor } from './cross.ts'
@@ -411,6 +413,14 @@ export function paceEasyLive(
    * 0.5 is a sloppy run. Other rounds ignore this.
    */
   crownGlowMiss = 0,
+  /**
+   * Time Mend against a round 20 or 25 crown. Off, this round matches the
+   * old sim: a crown exit still ends the night at 0 hearts. On, Mend is
+   * tapped as that crown reaches the gate, if it is ready. The shield holds
+   * the crown once, back to 0.9, with HP kept and no heart lost. Walker
+   * leaks do not cast Mend.
+   */
+  mendVsCrown = false,
 ): PaceLive {
   const road = mode === 'road' || mode === 'road437' || Boolean(map)
   const roadPath = map?.path
@@ -544,6 +554,9 @@ export function paceEasyLive(
   let minis = 0
   let graceUntil = 0
   let lostRound = 0
+  let mendReady = 0
+  let mendShieldUntil = -1
+  let crownHeld = false
   let bossSeen = -1
   let bossGone = -1
   const lampHurt = new Map<string, PaceLampHurt>()
@@ -612,12 +625,41 @@ export function paceEasyLive(
         mode === 'road' && !frozen && !map ? easyCrownWalkMul(roundIndex, raider.t, true) : 1
       raider.t += 0.01 * round.speed * raider.pace * mul * bell * crownWalk * dt
       if (raider.t >= 1) {
-        raider.dead = true
-        if (raider.boss) {
-          bossBox.fate = 'leak'
-          bossThrough = true
-          if (bossGone < 0) bossGone = time
-        } else leaked += 1
+        if (
+          mendVsCrown &&
+          raider.boss &&
+          easyShowdownBoss(roundIndex) &&
+          !crownHeld &&
+          roundIndex >= SKILL_UNLOCK_WAVE.mend &&
+          time >= mendReady
+        ) {
+          hearts = mendPower(hearts).hearts
+          mendShieldUntil = time + MEND_SHIELD_MS / 1000
+          mendReady = time + SKILL_COOLDOWN_MS.mend / 1000
+        }
+        const held = mendVsCrown
+          ? holdShowdownCrown({
+              easy: true,
+              roundIndex,
+              t: raider.t,
+              hp: raider.hp,
+              hearts,
+              shieldUp: time < mendShieldUntil,
+              alreadyHeld: crownHeld,
+            })
+          : null
+        if (held?.held) {
+          raider.t = held.t
+          raider.hp = held.hp
+          crownHeld = true
+        } else {
+          raider.dead = true
+          if (raider.boss) {
+            bossBox.fate = 'leak'
+            bossThrough = true
+            if (bossGone < 0) bossGone = time
+          } else leaked += 1
+        }
       }
     }
     if (bossThrough) {
@@ -1149,7 +1191,12 @@ export interface HumanNight {
  * `late` false is the 1.4.483 night, where that step did not exist.
  * `withCross` pays for one cross at round 13 and leaves it planted. The default night does not.
  */
-export function paceEasyHumanCampaign(late = true, tapEvery = HUMAN_TAP_EVERY, withCross = false): HumanNight {
+export function paceEasyHumanCampaign(
+  late = true,
+  tapEvery = HUMAN_TAP_EVERY,
+  withCross = false,
+  mendVsCrown = false,
+): HumanNight {
   const plan = lockInBuyTable()
   let hearts = 3
   let spent = 0
@@ -1204,9 +1251,22 @@ export function paceEasyHumanCampaign(late = true, tapEvery = HUMAN_TAP_EVERY, w
       }
       crossAt = HUMAN_CROSS_AT
     }
-    const round = crossAt
-      ? paceEasyLive(index, lamps, hearts, false, tapEvery, 'road', undefined, [], undefined, 0, crossAt)
-      : paceEasyLive(index, lamps, hearts, false, tapEvery, 'road')
+    const round = paceEasyLive(
+      index,
+      lamps,
+      hearts,
+      false,
+      tapEvery,
+      'road',
+      undefined,
+      [],
+      undefined,
+      0,
+      crossAt,
+      undefined,
+      0,
+      mendVsCrown,
+    )
     rows.push({ round: index + 1, result: round.result, hearts: round.hearts, sparks })
     if (round.result !== 'clear') return finish(index + 1, round.sparks)
     hearts = easyClearHeart(round.hearts)

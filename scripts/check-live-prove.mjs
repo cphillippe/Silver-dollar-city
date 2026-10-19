@@ -1829,7 +1829,7 @@ export async function checkShareCard(browser, port, errors) {
   const save = {
     kind: SAVE_KIND,
     schemaVersion: SAVE_SCHEMA_VERSION,
-    appVersion: '1.4.505',
+    appVersion: '1.4.507',
     savedAt: '2026-10-19T00:00:00.000Z',
     progress: {
       started: true,
@@ -1973,7 +1973,7 @@ export async function checkOssuaryLesson(browser, port, errors) {
   const save = {
     kind: SAVE_KIND,
     schemaVersion: SAVE_SCHEMA_VERSION,
-    appVersion: '1.4.505',
+    appVersion: '1.4.507',
     savedAt: '2026-10-19T00:00:00.000Z',
     progress: {
       started: true,

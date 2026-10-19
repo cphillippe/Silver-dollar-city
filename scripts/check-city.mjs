@@ -66,11 +66,17 @@ import {
   EASY_FACE_HIT_R,
   EASY_MISS_HOLD_MS,
   EASY_WALKER_FACE_PX,
+  CROWN_DRAIN_MS,
+  CROWN_GATE_LINE,
+  CROWN_HOLD_T,
+  CROWN_THROUGH_LINE,
   DEFEND_HEARTS,
   EASY_GLOW_TAP_DAMAGE,
   EASY_LEAK_GRACE_MS,
   EASY_ROUND_HEART_CAP,
   applyBossExitLeak,
+  crownDrainHearts,
+  holdShowdownCrown,
   applyEasyPaceLeaks,
   applyGateLeaks,
   cueTapStrike,
@@ -1683,7 +1689,17 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.506')
+assert.equal(APP_VERSION, '1.4.507')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.507'), '1.4.507 changelog row')
+assert.match(latestChange('1.4.507').title, /crown/i)
+assert.doesNotMatch(
+  latestChange('1.4.507').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.507 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.507').items.join('\n'), /The crown got through!/)
+assert.match(latestChange('1.4.507').items.join('\n'), /The crown reached the gate/)
+assert.match(latestChange('1.4.507').items.join('\n'), /Hard/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.506'), '1.4.506 changelog row')
 assert.match(latestChange('1.4.506').title, /run|finish/i)
 assert.doesNotMatch(
@@ -2211,6 +2227,200 @@ assert.match(
     /if \(easy && item\.boss\) step \*= easyCrownWalkMul/,
     '1.4.494 only an Easy crown takes the last-stretch slow',
   )
+  const heldOnce = holdShowdownCrown({
+    easy: true,
+    roundIndex: 19,
+    t: 1,
+    hp: 26,
+    hearts: 3,
+    shieldUp: true,
+    alreadyHeld: false,
+  })
+  assert.equal(heldOnce.held, true, '1.4.507 an active Mend holds the round 20 crown once')
+  assert.equal(heldOnce.t, CROWN_HOLD_T, '1.4.507 the held crown goes back to 0.9')
+  assert.equal(CROWN_HOLD_T, 0.9)
+  assert.equal(heldOnce.hp, 26, '1.4.507 the hold keeps the crown HP')
+  assert.equal(heldOnce.hearts, 3, '1.4.507 the hold costs no heart')
+  const heldTwice = holdShowdownCrown({
+    easy: true,
+    roundIndex: 19,
+    t: 1,
+    hp: heldOnce.hp,
+    hearts: heldOnce.hearts,
+    shieldUp: true,
+    alreadyHeld: true,
+  })
+  assert.equal(heldTwice.held, false, '1.4.507 the same crown is not held a second time')
+  assert.equal(heldTwice.hearts, 3)
+  assert.equal(heldTwice.hp, 26)
+  const held25 = holdShowdownCrown({
+    easy: true,
+    roundIndex: 24,
+    t: 1,
+    hp: 40,
+    hearts: 2,
+    shieldUp: true,
+    alreadyHeld: false,
+  })
+  assert.equal(held25.t, 0.9, '1.4.507 the round 25 crown uses the same hold')
+  assert.equal(held25.hp, 40)
+  assert.equal(held25.hearts, 2)
+  assert.equal(
+    holdShowdownCrown({ easy: true, roundIndex: 9, t: 1, hp: 14, hearts: 3, shieldUp: true, alreadyHeld: false }).held,
+    false,
+    '1.4.507 the round 10 boss is not held',
+  )
+  assert.equal(
+    holdShowdownCrown({ easy: false, roundIndex: 19, t: 1, hp: 64, hearts: 3, shieldUp: true, alreadyHeld: false }).held,
+    false,
+    '1.4.507 Hard does not take the crown hold',
+  )
+  assert.equal(
+    holdShowdownCrown({ easy: true, roundIndex: 19, t: 1, hp: 26, hearts: 3, shieldUp: false, alreadyHeld: false }).held,
+    false,
+    '1.4.507 the hold works only while Mend is active',
+  )
+  const drain507 = crownDrainHearts(3)
+  assert.deepEqual(drain507, [2, 1, 0], '1.4.507 an unshielded crown drains one heart at a time')
+  assert.equal(drain507[drain507.length - 1], 0, '1.4.507 the crown drain ends at 0')
+  assert.equal(crownDrainHearts(0)[0], 0, '1.4.507 an empty bar still ends the drain at 0')
+  assert.equal(CROWN_DRAIN_MS, 450, '1.4.507 the crown drain steps are 450ms apart')
+  assert.equal(applyBossExitLeak(3).hearts, 0, '1.4.507 the crown result is still every heart')
+  const screen507 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const defend507 = readFileSync(new URL('../src/lib/defend.ts', import.meta.url), 'utf8')
+  assert.match(screen507, /applyBossExitLeak\(live\.current\.hearts\)/)
+  assert.match(screen507, /liveBossClearPhase\(\{/)
+  assert.match(screen507, /if \(easy && item\.boss\) step \*= easyCrownWalkMul/)
+  assert.equal(CROWN_THROUGH_LINE, 'The crown got through!')
+  assert.equal(CROWN_GATE_LINE, 'The crown reached the gate.')
+  assert.match(defend507, /The crown got through!/)
+  assert.match(defend507, /The crown reached the gate\./)
+  assert.match(screen507, /CROWN_THROUGH_LINE/)
+  assert.match(screen507, /CROWN_GATE_LINE/)
+  assert.match(screen507, /aria-live="assertive"/)
+  assert.match(screen507, /crownHeld/)
+  assert.match(defendCss494, /\.defend-page\.is-easy-watch \.nw-crown-live \{/)
+  assert.match(defendCss494, /\.defend-page\.is-easy-watch \.nw-crown-live\.is-hold \{/)
+  assert.match(defendCss494, /\.defend-page\.is-easy-watch \.nw-docks \.defend-lost \.defend-crown-loss \{/)
+  assert.equal(before487.dead, 18, '1.4.507 the spender without the late step still dies at round 18')
+  assert.equal(after487.dead, null, '1.4.507 the spender with the late step still reaches round 25')
+  assert.ok(
+    after487.rows.some((row) => row.round >= 20 && row.round <= 25 && row.hearts < 3),
+    '1.4.507 that night still drops below three hearts in rounds 20–25',
+  )
+  assert.ok(crown487.bossSec >= 25, `1.4.507 the round 25 crown still needs ${crown487.bossSec.toFixed(1)}s`)
+  assert.equal(idleDead, 20, '1.4.507 an idle run still loses on round 20')
+  assert.equal(sloppy20.result, 'lost')
+  assert.equal(sloppy20.boss, 'leak', '1.4.507 the honest sloppy sim still loses the round 20 crown')
+  assert.equal(sloppy20.hearts, 0)
+  assert.equal(sloppy25.boss, 'leak', '1.4.507 the honest sloppy sim still loses the round 25 crown')
+  assert.equal(sloppy25.hearts, 0)
+  const mendLate = paceEasyHumanCampaign(true, HUMAN_TAP_EVERY, false, true)
+  const mendEarly = paceEasyHumanCampaign(false, HUMAN_TAP_EVERY, false, true)
+  const mendCrown = paceEasyLive(
+    24,
+    lateLamps,
+    3,
+    false,
+    HUMAN_TAP_EVERY,
+    'road',
+    undefined,
+    [],
+    undefined,
+    0,
+    undefined,
+    undefined,
+    0,
+    true,
+  )
+  const mendSloppy20 = paceEasyLive(
+    19,
+    lateLamps,
+    3,
+    false,
+    HUMAN_TAP_EVERY,
+    'road',
+    undefined,
+    [],
+    undefined,
+    0,
+    undefined,
+    undefined,
+    0.5,
+    true,
+  )
+  const mendSloppy25 = paceEasyLive(
+    24,
+    lateLamps,
+    3,
+    false,
+    HUMAN_TAP_EVERY,
+    'road',
+    undefined,
+    [],
+    undefined,
+    0,
+    undefined,
+    undefined,
+    0.5,
+    true,
+  )
+  let mendIdleHearts = 3
+  let mendIdleDead = null
+  for (let index = 0; index < 25; index += 1) {
+    const round = paceEasyLive(
+      index,
+      lateLamps,
+      mendIdleHearts,
+      false,
+      1e9,
+      'road',
+      undefined,
+      [],
+      undefined,
+      0,
+      undefined,
+      undefined,
+      0,
+      true,
+    )
+    if (round.result !== 'clear') {
+      mendIdleDead = index + 1
+      break
+    }
+    mendIdleHearts = easyClearHeart(round.hearts)
+  }
+  const mendR10 = paceEasyLive(9, lateLamps, 3, false, HUMAN_TAP_EVERY, 'road', undefined, [], undefined, 0, undefined, undefined, 0, true)
+  const plainR10 = paceEasyLive(9, lateLamps, 3, false, HUMAN_TAP_EVERY, 'road')
+  assert.equal(mendLate.dead, null, '1.4.507 Mend against the crown still reaches round 25 with the late step')
+  assert.deepEqual(
+    mendLate.rows.map((row) => [row.round, row.result, row.hearts]),
+    after487.rows.map((row) => [row.round, row.result, row.hearts]),
+    '1.4.507 Mend against the crown does not move the late-step hearts',
+  )
+  assert.ok(
+    mendLate.rows.some((row) => row.round >= 20 && row.round <= 25 && row.hearts < 3),
+    '1.4.507 that Mend night still drops below three hearts in rounds 20–25',
+  )
+  assert.equal(mendEarly.dead, 18, '1.4.507 Mend against the crown still dies at round 18 without the late step')
+  assert.equal(mendEarly.dead, before487.dead)
+  assert.equal(mendCrown.bossSec, crown487.bossSec, '1.4.507 Mend does not change the round 25 crown time')
+  assert.ok(mendCrown.bossSec >= 25)
+  assert.equal(mendCrown.bossTap, 72)
+  assert.equal(mendIdleDead, 20, '1.4.507 an idle Mend night still loses on round 20')
+  assert.equal(mendIdleDead, idleDead)
+  assert.equal(mendSloppy20.result, 'lost')
+  assert.equal(mendSloppy20.boss, 'leak', '1.4.507 the sloppy Mend night still loses the round 20 crown')
+  assert.equal(mendSloppy20.hearts, 0)
+  assert.equal(mendSloppy20.bossTap, 47, '1.4.507 the held sloppy round 20 crown still falls short at 47 taps')
+  assert.ok(mendSloppy20.bossTap < 64)
+  assert.equal(mendSloppy25.boss, 'leak', '1.4.507 the sloppy Mend night still loses the round 25 crown')
+  assert.equal(mendSloppy25.hearts, 0)
+  assert.equal(mendSloppy25.bossTap, 45, '1.4.507 the held sloppy round 25 crown still falls short at 45 taps')
+  assert.ok(mendSloppy25.bossTap < 72)
+  assert.equal(mendR10.boss, plainR10.boss, '1.4.507 the round 10 boss result stays put')
+  assert.equal(mendR10.bossSec, plainR10.bossSec)
+  assert.equal(easyBossHp(9), 14, '1.4.507 the round 10 boss stays 14')
 }
 
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.485'), '1.4.485 changelog row')

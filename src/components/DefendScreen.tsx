@@ -17,6 +17,7 @@ import {
   BOSS_PACE,
   easyBossPace,
   easyCrownWalkMul,
+  easyShowdownBoss,
   easyBossClearSparks,
   easyClearSparkBonus,
   easyBossHp,
@@ -38,13 +39,18 @@ import {
 import { WAVE_COUNT_MS, WAVE_COUNT_STEP_MS, WAVE_SURVIVED_MS } from '../nightWatch/waveCue'
 import { localDateKey } from '../lib/dates'
 import {
+  CROWN_DRAIN_MS,
+  CROWN_GATE_LINE,
+  CROWN_THROUGH_LINE,
   DEFEND_BRIEF_ID,
   DEFEND_HEARTS,
   nightLength,
   applyBossExitLeak,
   applyEasyPaceLeaks,
   applyGateLeaks,
+  crownDrainHearts,
   easyClearHeart,
+  holdShowdownCrown,
   easyLiveSpawnT,
   easyPointerTapGate,
   r10ShrugCue,
@@ -412,6 +418,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const mendTimer = useRef(0)
   const shieldTimer = useRef(0)
   const bannerTimer = useRef(0)
+  const crownDrainTimer = useRef(0)
+  const crownDrainGen = useRef(0)
   const pulseTimer = useRef(0)
   const metRef = useRef<string[]>([...(progress.defense.met ?? [])])
   const markMetRef = useRef(markMet)
@@ -431,6 +439,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const planted = useMemo(() => Object.keys(plants) as CityPlotId[], [plants])
   const [hearts, setHearts] = useState(DEFEND_HEARTS)
   const [heartDrop, setHeartDrop] = useState<{ at: number; count: number } | null>(null)
+  const [crownLive, setCrownLive] = useState<string | null>(null)
+  const [crownLoss, setCrownLoss] = useState(false)
   const [heartPop, setHeartPop] = useState(false)
   const [raiders, setRaiders] = useState<Raider[]>([])
   const [downed, setDowned] = useState(0)
@@ -540,6 +550,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     heartsLostRound: 0,
     /** Easy boss was turned this round. A leak does not set this. */
     bossDown: false,
+    /** This round's showdown crown already took its one Mend hold. */
+    crownHeld: false,
     freezeUntil: 0,
     /** Minis still owed before a downed count can clear the round. */
     extras: 0,
@@ -799,8 +811,13 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     live.current.spawnNow = false
     live.current.leakGraceUntil = 0
     live.current.heartsLostRound = 0
+    live.current.crownHeld = false
     live.current.freezeUntil = 0
     mendShieldUntilRef.current = 0
+    crownDrainGen.current += 1
+    window.clearTimeout(crownDrainTimer.current)
+    setCrownLive(null)
+    setCrownLoss(false)
     window.clearTimeout(shieldTimer.current)
     setMendShield(false)
     setToolLock(null)
@@ -912,6 +929,32 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
         window.clearTimeout(bannerTimer.current)
         bannerTimer.current = window.setTimeout(() => setPowerBanner(null), 2800)
       }
+      if (easy && bossThrough && easyShowdownBoss(waveIndexRef.current)) {
+        const boss = next.find((item) => item.boss && !item.turned && item.t >= 1)
+        const held = boss
+          ? holdShowdownCrown({
+              easy: true,
+              roundIndex: waveIndexRef.current,
+              t: boss.t,
+              hp: boss.hp,
+              hearts: live.current.hearts,
+              shieldUp: now < mendShieldUntilRef.current,
+              alreadyHeld: live.current.crownHeld,
+            })
+          : null
+        if (held?.held && boss) {
+          live.current.crownHeld = true
+          bossThrough = false
+          walking.push({ ...boss, t: held.t, hp: held.hp })
+          setCrownLive('Held!')
+          setPowerBanner('Held!')
+          window.clearTimeout(bannerTimer.current)
+          bannerTimer.current = window.setTimeout(() => {
+            setPowerBanner((current) => (current === 'Held!' ? null : current))
+            setCrownLive((current) => (current === 'Held!' ? null : current))
+          }, 2800)
+        }
+      }
       let gate
       if (easy && bossThrough) {
         gate = applyBossExitLeak(live.current.hearts)
@@ -930,6 +973,42 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
         gate = paced
       } else {
         gate = applyGateLeaks(live.current.hearts, leaked, shielded)
+      }
+      if (easy && bossThrough && easyShowdownBoss(waveIndexRef.current) && gate.failed) {
+        live.current.playing = false
+        const from = live.current.hearts
+        const steps = crownDrainHearts(from)
+        const gen = crownDrainGen.current
+        setCrownLive(CROWN_THROUGH_LINE)
+        setLeakFlash(true)
+        let step = 0
+        const drop = () => {
+          if (gen !== crownDrainGen.current) return
+          const left = steps[step]
+          step += 1
+          live.current.hearts = left
+          setHearts(left)
+          setHeartDrop({ at: left, count: 1 })
+          window.setTimeout(() => {
+            if (gen !== crownDrainGen.current) return
+            setHeartDrop((current) => (current && current.at === left ? null : current))
+          }, Math.min(400, CROWN_DRAIN_MS))
+          if (step >= steps.length) {
+            crownDrainTimer.current = window.setTimeout(() => {
+              if (gen !== crownDrainGen.current) return
+              setLeakFlash(false)
+              setHeartDrop(null)
+              setCrownLive(null)
+              setPowerBanner(null)
+              setCrownLoss(true)
+              setPhase('lost')
+            }, CROWN_DRAIN_MS)
+            return
+          }
+          crownDrainTimer.current = window.setTimeout(drop, CROWN_DRAIN_MS)
+        }
+        crownDrainTimer.current = window.setTimeout(drop, CROWN_DRAIN_MS)
+        return
       }
       if (gate.lostHearts > 0) {
         live.current.hearts = gate.hearts
@@ -1157,6 +1236,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     frame = requestAnimationFrame(tick)
     return () => {
       live.current.playing = false
+      crownDrainGen.current += 1
+      window.clearTimeout(crownDrainTimer.current)
       cancelAnimationFrame(frame)
     }
   }, [phase, easy, progress.defense.cleared, waveIndex])
@@ -2271,6 +2352,11 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     setDowned(0)
     setHearts(DEFEND_HEARTS)
     setHeartDrop(null)
+    crownDrainGen.current += 1
+    window.clearTimeout(crownDrainTimer.current)
+    setCrownLive(null)
+    setCrownLoss(false)
+    live.current.crownHeld = false
     comboRef.current = 0
     setCombo(0)
     setShots([])
@@ -3073,6 +3159,11 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
               ? `The night won this time. You reached round ${waveIndex + 1}.`
               : 'Porch flickered. Turn them again.'}
           </p>
+          {easy && crownLoss ? (
+            <p className="defend-crown-loss" role="status" aria-live="assertive" data-crown-loss="yes">
+              {CROWN_GATE_LINE}
+            </p>
+          ) : null}
           {easy ? (
             <>
               <p
@@ -3562,6 +3653,19 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
                 <span className="defend-wave">{roundLabel}</span>
               </div>
             ) : null}
+            {crownLive ? (
+              <p
+                className={`nw-crown-live${crownLive === 'Held!' ? ' is-hold' : ''}`}
+                role="status"
+                aria-live="assertive"
+                data-crown-live={crownLive}
+                data-crown-t={bossLive ? bossLive.t.toFixed(3) : ''}
+                data-crown-hp={bossLive ? String(bossLive.hp) : ''}
+                data-hearts={heartShown}
+              >
+                {crownLive}
+              </p>
+            ) : null}
             {easy && countDigit != null ? (
               <p className="nw-wave-count" data-wave-count={countDigit} aria-hidden="true">
                 {countDigit}
@@ -3617,7 +3721,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
                 {mendShield ? <div className="nw-mend-shield" aria-hidden="true" /> : null}
                 {powerBanner ? (
                   <p
-                    className={`nw-power-banner${powerBanner === 'Boss!' ? ' is-boss' : powerBanner.startsWith('Mend') || powerBanner === 'Held' ? ' is-mend' : ' is-still'}`}
+                    className={`nw-power-banner${powerBanner === 'Boss!' ? ' is-boss' : powerBanner === CROWN_THROUGH_LINE ? ' is-boss' : powerBanner.startsWith('Mend') || powerBanner === 'Held' || powerBanner === 'Held!' ? ' is-mend' : ' is-still'}`}
                     role="status"
                   >
                     {powerBanner}

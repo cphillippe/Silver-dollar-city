@@ -8,7 +8,7 @@ import type { ProgressState, WalkerKind } from '../types.ts'
 import { CITY_PLOTS, plotStage, type CityPlotId, type CityStage } from './city.ts'
 import { applyIncenseTap, incenseTapAdd } from '../nightWatch/incense.ts'
 import { EASY_ROUNDS, easyRound } from '../nightWatch/rounds.ts'
-import { easyBossRound } from '../nightWatch/walkers.ts'
+import { easyBossRound, easyShowdownBoss } from '../nightWatch/walkers.ts'
 import { prefersReducedMotion } from './juice.ts'
 import { combatTier, deployFit, toolTier, unlockedWatchTools, watchTool, WATCH_TOOLS } from './watchTools.ts'
 
@@ -76,6 +76,63 @@ export function easyClearHeart(hearts: number): number {
 export function applyBossExitLeak(hearts: number): GateLeak {
   const left = Number.isFinite(hearts) ? Math.max(0, Math.floor(hearts)) : 0
   return { hearts: 0, lostHearts: left, failed: true }
+}
+
+/**
+ * Easy rounds 20 and 25 only. An active Mend shield pushes that crown
+ * back to here once. The crown stays inside the slow last stretch.
+ */
+export const CROWN_HOLD_T = 0.9
+
+/** Gap between hearts while an unshielded showdown crown drains the bar. */
+export const CROWN_DRAIN_MS = 450
+
+export const CROWN_THROUGH_LINE = 'The crown got through!'
+export const CROWN_GATE_LINE = 'The crown reached the gate.'
+
+/**
+ * One hold per crown per round, and only while Mend's shield is up.
+ * HP and hearts stay. A second arrival, a dark shield, Hard, and any
+ * boss that is not round 20 or 25 all pass through.
+ */
+export function holdShowdownCrown(input: {
+  easy: boolean
+  roundIndex: number
+  t: number
+  hp: number
+  hearts: number
+  shieldUp: boolean
+  alreadyHeld: boolean
+}): { held: boolean; t: number; hp: number; hearts: number; alreadyHeld: boolean } {
+  const crown = input.easy && easyShowdownBoss(input.roundIndex) && input.t >= 1
+  if (crown && input.shieldUp && !input.alreadyHeld) {
+    return {
+      held: true,
+      t: CROWN_HOLD_T,
+      hp: input.hp,
+      hearts: input.hearts,
+      alreadyHeld: true,
+    }
+  }
+  return {
+    held: false,
+    t: input.t,
+    hp: input.hp,
+    hearts: input.hearts,
+    alreadyHeld: input.alreadyHeld,
+  }
+}
+
+/**
+ * Hearts still on the bar, then one less, down to 0.
+ * The last step is always 0, including a bar that was already empty.
+ */
+export function crownDrainHearts(hearts: number): number[] {
+  const start = Number.isFinite(hearts) ? Math.max(0, Math.floor(hearts)) : 0
+  const steps: number[] = []
+  for (let left = start - 1; left >= 0; left -= 1) steps.push(left)
+  if (steps.length === 0 || steps[steps.length - 1] !== 0) steps.push(0)
+  return steps
 }
 
 /**

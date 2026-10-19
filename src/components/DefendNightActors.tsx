@@ -611,6 +611,7 @@ export function DefendNightActorsSvg({
                     data-face={raider.face ?? raider.kind}
                     className={`defend-raider ${raider.mini ? 'is-mini' : ''} ${raider.gait === 'fast' ? 'is-fast' : ''} ${raider.gait === 'tough' ? 'is-tough' : ''} ${raider.boss ? 'is-boss' : ''} ${raider.turned ? 'is-turned' : ''} ${isTap ? 'is-easy-tap-target' : ''} ${isCue ? 'is-easy-cue' : ''} ${lampHit ? 'is-lamp-hit' : ''}`}
                     data-boss={raider.boss ? 'yes' : undefined}
+                    data-road-t={raider.boss ? raider.t.toFixed(3) : undefined}
                     transform={`translate(${at.x} ${at.y})`}
                     role={isTap ? 'button' : undefined}
                     tabIndex={isTap ? 0 : undefined}
