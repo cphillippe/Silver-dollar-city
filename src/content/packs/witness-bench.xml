@@ -7,15 +7,6 @@
     <blurb>A ledger hall of names: died, buried, raised, appeared.</blurb>
     <notes>Runtime/build content pack. Engine maps lesson fields 1:1 to Learn / Match / Hold / Journal / street.</notes>
   </meta>
-  <easyShelf order="wb-creed,wb-women,wb-early,wb-method,daily-names,daily-creed,daily-empty">
-    <line id="wb-creed" easyOrder="8">wb-creed</line>
-    <line id="wb-women" easyOrder="9">wb-women</line>
-    <line id="wb-early" easyOrder="10">wb-early</line>
-    <line id="wb-method" easyOrder="11">wb-method</line>
-    <line id="daily-names" easyOrder="12">daily-names</line>
-    <line id="daily-creed" easyOrder="13">daily-creed</line>
-    <line id="daily-empty" easyOrder="14">daily-empty</line>
-  </easyShelf>
   <lessons>
     <lesson id="wb-creed" place="Witness Square" person="Silas Whitman" tripleId="silas-bench" ideaId="idea-silas" ideaLabel="Died, buried, raised, appeared." challengeKind="sequence" challengeTitle="What Paul received">
       <easy points="10" easyOrder="4">

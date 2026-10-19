@@ -1347,7 +1347,8 @@ html[data-easy='on'] .challenge-page.is-teach .easy-story-card .cta-dock.easy-st
   }
 
   html[data-easy='on'] .challenge-page.is-teach .easy-story-card .easy-story-dock .text-link {
-    color: #8a5a12;
+    color: #2a2118;
+    -webkit-text-fill-color: #2a2118;
   }
 }
 

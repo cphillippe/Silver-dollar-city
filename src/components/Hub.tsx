@@ -37,7 +37,7 @@ import {
 import type { View } from '../types'
 import { RecallOffer } from './RecallOffer'
 import { StoresComingNotice } from './StoresComingNotice'
-import { SupportToast } from './SupportToast'
+import { easyReadIsHomeGold, noteEasyOpenDay } from '../content/goldenPath'
 
 interface HubProps {
   onNavigate: (view: View) => void
@@ -74,6 +74,11 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
       setSelectedPlot(null)
     }
   }, [requested])
+
+  useEffect(() => {
+    if (!easy) return
+    noteEasyOpenDay(today, progress.easyHeld?.length ?? 0)
+  }, [easy, today, progress.easyHeld])
 
   function setPlot(id: CityPlotId | null) {
     setMindPlot(id)
@@ -116,8 +121,8 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
         ) ?? nextUpgradeNeed(selectedPlot, progress, true).line
       dockGift = `${why} Tap it again to open.`
     }
-    // 1.4.357: Home order is Read → Match → Lock In. One gold step. Trail focus stays.
-    const readNow = !doneToday && focus !== 'hold'
+    // 1.4.503: first session gold is the Easy line. Read is gold only on a later day.
+    const readNow = easyReadIsHomeGold(progress, today) && focus !== 'hold'
     const playNow = matchReady && !readNow && focus !== 'hold'
     const lockNow = focus === 'hold'
     const playLater = !playNow && !lockNow
@@ -174,7 +179,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
             {selectedReady ? (
               <button
                 type="button"
-                className="btn gold easy-dock-build"
+                className="btn easy-dock-build"
                 aria-label={`Build this, ${selectedName}`}
                 onClick={easyBuildThis}
               >
@@ -242,6 +247,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
               </button>
             </li>
           </ol>
+          {(progress.easyHeld ?? []).length > 0 ? (
           <section className="night-watch easy-night-watch" aria-label="Night Watch">
             <p className="eyebrow">
               Night Watch
@@ -250,12 +256,13 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
             <p className="quiet">{EASY.nightLead}</p>
             <button
               type="button"
-              className="btn gold xl"
+              className="btn xl easy-nw-quiet"
               onClick={() => onNavigate({ name: 'defend' })}
             >
               {EASY.nightDo}
             </button>
           </section>
+          ) : null}
         </div>
 
         {/* Parked Extra streets / stacked core — CSS-hidden on Easy Home */}
@@ -266,7 +273,6 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
         </nav>
         <section className="easy-extra-streets" aria-hidden="true" hidden />
         <StoresComingNotice />
-        <SupportToast />
       </main>
     )
 
@@ -602,7 +608,6 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
       )}
 
       <StoresComingNotice />
-      <SupportToast />
     </main>
   )
 }

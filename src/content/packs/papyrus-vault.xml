@@ -3,11 +3,6 @@
   <howToEdit>RUNTIME CONTENT. Three tiers. Held claim·reason·source identical.</howToEdit>
   <meta><title>Silver City — Papyrus Vault</title><subtitle>Ancient Egyptian Sands Reveal the Earliest Pages of Christ's Gospels</subtitle><blurb>Skeptics claim the story of Jesus Christ was invented centuries later like a long game of telephone. Step into the Papyrus Vault to inspect the oldest surviving New Testament pages pulled from desert sands, proving the Gospels were written, copied, and read across the Roman world from the earliest generations.</blurb>
     <notes>Unlock after Iron Spike Way. Objection: The Gospels about Jesus Christ were invented hundreds of years later as evolving folklore.</notes></meta>
-  <easyShelf order="papr-p52,papr-p46,papr-p66">
-    <line id="papr-p52" easyOrder="88">papr-p52</line>
-    <line id="papr-p46" easyOrder="89">papr-p46</line>
-    <line id="papr-p66" easyOrder="90">papr-p66</line>
-  </easyShelf>
   <lessons>
     <lesson id="papr-p52" place="Papyrus Vault" person="Silas Whitman" tripleId="p52-dig" ideaId="idea-p52" ideaLabel="Earliest Gospel Fragment" challengeKind="sort" challengeTitle="The Egyptian Scrap">
       <easy points="10" easyOrder="88">

@@ -7,19 +7,6 @@
     <blurb>The world exists and did not have to.</blurb>
     <notes>Runtime/build content pack. Engine maps lesson fields 1:1 to Learn / Match / Hold / Journal / street.</notes>
   </meta>
-  <easyShelf order="fg-order,fg-reason,fg-ought,fg-ground,daily-cosmos,fg-mover,fg-contingent,fg-kalam,fg-limits,daily-scroll,daily-isaiah">
-    <line id="fg-order" easyOrder="4">fg-order</line>
-    <line id="fg-reason" easyOrder="5">fg-reason</line>
-    <line id="fg-ought" easyOrder="6">fg-ought</line>
-    <line id="fg-ground" easyOrder="7">fg-ground</line>
-    <line id="daily-cosmos" easyOrder="12">daily-cosmos</line>
-    <line id="fg-mover" easyOrder="28">fg-mover</line>
-    <line id="fg-contingent" easyOrder="29">fg-contingent</line>
-    <line id="fg-kalam" easyOrder="30">fg-kalam</line>
-    <line id="fg-limits" easyOrder="31">fg-limits</line>
-    <line id="daily-scroll" easyOrder="32">daily-scroll</line>
-    <line id="daily-isaiah" easyOrder="33">daily-isaiah</line>
-  </easyShelf>
   <lessons>
     <lesson id="fg-order" place="Why Gate Arch" person="Ansel Gate" personId="ansel" plotId="gate" tripleId="order-gate" ideaId="idea-order" ideaLabel="The world holds together in Christ." challengeKind="sort" challengeTitle="We already trust order">
       <easy points="10" easyOrder="4">

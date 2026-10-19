@@ -29,6 +29,7 @@ const SAVE = {
     completed: [],
     lastDailyDate: '2026-10-14',
     held: [],
+    easyHeld: ['ph-road'],
   },
 }
 

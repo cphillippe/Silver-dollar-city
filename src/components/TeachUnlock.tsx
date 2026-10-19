@@ -2,6 +2,7 @@ import type { Challenge, SequenceItem } from '../types'
 import type { EvidenceBrief } from '../content/evidence'
 import { packLesson } from '../content/packCatalog'
 import { plainFor } from '../content/plain'
+import { goldButtonClass } from '../content/goldenPath'
 import { EASY, isEasy } from '../lib/easy'
 import { storyPlayFor } from '../lib/storyPlay'
 import { currentLessonTier } from '../lib/tiers'
@@ -76,7 +77,7 @@ export function TeachUnlock({ brief, kind, onUnlock, unlock, beats }: TeachUnloc
           source={brief.source}
         />
         <div className="cta-dock easy-story-dock">
-          <button type="button" className="btn gold xl" onClick={onUnlock}>
+          <button type="button" className={goldButtonClass('read-teach', 'teachNext')} onClick={onUnlock}>
             {kind === 'sequence'
               ? 'Order the story'
               : storyPlayFor(brief.id) === 'father-run'

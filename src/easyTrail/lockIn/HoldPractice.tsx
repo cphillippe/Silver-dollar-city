@@ -4,7 +4,6 @@ import type { EvidenceBrief } from '../../content/evidence'
 import { STORY } from '../../content/story'
 import { EASY, isEasy } from '../../lib/easy'
 import { markLater, type RecallLaterState } from '../../lib/recall'
-import { offerSupportToast } from '../../lib/supportToast'
 import { needsTierHold } from '../../lib/tiers'
 import { EasyBack } from '../../components/EasyBack'
 import { RecallGate } from '../../components/RecallGate'
@@ -60,7 +59,6 @@ export function HoldPractice({ quizBrief, focusedEntry, today, setLater, onNavig
                 elaborated: false,
               })
               recordLessonHold(quizBrief.id, result.clean)
-              offerSupportToast()
               onNavigate({ name: 'hub' })
               return
             }

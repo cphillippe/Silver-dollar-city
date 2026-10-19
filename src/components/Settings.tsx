@@ -7,21 +7,8 @@ import {
   writeAdsPref,
   type AdsPref,
 } from '../config/ads'
-import {
-  SETTINGS_SUPPORT_LINE,
-  TRAIL_SUBTITLE,
-} from '../config/commerce'
-import {
-  HARBOR_PACK_CTA,
-  MILL_PACK_CTA,
-  PACKS_EXTERNAL_LINE,
-  STORES_COMING,
-  SUPPORT_HEADING,
-  SUPPORT_LINE,
-  TIP_BLURB,
-  TIP_CTA,
-  supportUrls,
-} from '../config/support'
+import { TRAIL_SUBTITLE } from '../config/commerce'
+import { STORES_COMING } from '../config/support'
 import {
   cloudSyncStatus,
   encodeShareCode,
@@ -163,62 +150,6 @@ export function Settings({ onNavigate }: SettingsProps) {
         <p>{savedLabel}</p>
       </header>
 
-      <section className="settings-card" aria-label="Support Silver City">
-        <p className="eyebrow">{easy ? EASY.supportTrail : 'Support the trail'}</p>
-        <h2>{SUPPORT_HEADING}</h2>
-        <p>{SUPPORT_LINE}</p>
-        <p>{TIP_BLURB}</p>
-        <p className="quiet">{TRAIL_SUBTITLE}</p>
-        <p>
-          The Easy trail stays free. Soft pauses sit between home and a lesson —
-          never over Match, Lock In, or arcade play, and never on Journal. Never a
-          hard paywall.
-        </p>
-        <div className="settings-actions">
-          <a
-            className="btn gold"
-            href={supportUrls().tip}
-            target="_blank"
-            rel="noopener noreferrer"
-            data-support-tip
-          >
-            {easy ? EASY.tip : TIP_CTA}
-          </a>
-          <a
-            className="btn"
-            href={supportUrls().mill}
-            target="_blank"
-            rel="noopener noreferrer"
-            data-support-mill
-          >
-            {MILL_PACK_CTA}
-          </a>
-          <a
-            className="btn"
-            href={supportUrls().harbor}
-            target="_blank"
-            rel="noopener noreferrer"
-            data-support-harbor
-          >
-            {HARBOR_PACK_CTA}
-          </a>
-        </div>
-        <p className="quiet">{PACKS_EXTERNAL_LINE}</p>
-        <p className="quiet">{SETTINGS_SUPPORT_LINE}</p>
-        <div className="settings-actions">
-          <button type="button" className="btn" disabled data-remove-ads-coming>
-            {STORES_COMING}
-          </button>
-          <button
-            type="button"
-            className="text-link"
-            onClick={() => onNavigate({ name: 'shop' })}
-          >
-            This-device Street Packs
-          </button>
-        </div>
-      </section>
-
       <section className="settings-card">
         <p className="eyebrow">Reading</p>
         <p>
@@ -273,7 +204,7 @@ export function Settings({ onNavigate }: SettingsProps) {
         <p className="quiet">
           {easy
             ? `${held} ${EASY.savedSub} · ${open} pages · ${progress.completed.length} walks`
-            : `${held} held lines · ${open} journal pages · ${progress.completed.length} district walks · streak ${progress.streak}${
+            : `${held} held lines · ${open} journal pages · ${progress.completed.length} district walks${
                 cloudSyncStatus() === 'local-only' ? ' · local only (no cloud login)' : ''
               }`}
         </p>
@@ -287,6 +218,28 @@ export function Settings({ onNavigate }: SettingsProps) {
 
       <details className={easy ? 'settings-advanced' : 'settings-flat'}>
         <summary>More</summary>
+
+      <section className="settings-card" aria-label="Trail notes">
+        <p className="eyebrow">Trail</p>
+        <p className="quiet">{TRAIL_SUBTITLE}</p>
+        <p>
+          The Easy trail stays free. Soft pauses sit between home and a lesson —
+          never over Match, Lock In, or arcade play, and never on Journal. Never a
+          hard paywall.
+        </p>
+        <div className="settings-actions">
+          <button type="button" className="btn" disabled data-remove-ads-coming>
+            {STORES_COMING}
+          </button>
+          <button
+            type="button"
+            className="text-link"
+            onClick={() => onNavigate({ name: 'shop' })}
+          >
+            This-device Street Packs
+          </button>
+        </div>
+      </section>
 
       {easy ? (
         <section className="settings-card" aria-label="Town">

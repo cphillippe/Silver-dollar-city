@@ -7,15 +7,6 @@
     <blurb>What looks over the town when the day ends.</blurb>
     <notes>Runtime/build content pack. Engine maps lesson fields 1:1 to Learn / Match / Hold / Journal / street.</notes>
   </meta>
-  <easyShelf order="hl-moral,hl-mind,hl-meaning,hl-beauty,daily-grace,daily-rest,daily-door">
-    <line id="hl-moral" easyOrder="9">hl-moral</line>
-    <line id="hl-mind" easyOrder="30">hl-mind</line>
-    <line id="hl-meaning" easyOrder="31">hl-meaning</line>
-    <line id="hl-beauty" easyOrder="32">hl-beauty</line>
-    <line id="daily-grace" easyOrder="33">daily-grace</line>
-    <line id="daily-rest" easyOrder="34">daily-rest</line>
-    <line id="daily-door" easyOrder="35">daily-door</line>
-  </easyShelf>
   <lessons>
     <lesson id="hl-moral" place="Meaning Ridge" person="Hope Ridge" tripleId="hope-lookout" ideaId="idea-moral" ideaLabel="Duty is more than taste." challengeKind="build-argument" challengeTitle="The grain of duty">
       <easy points="10" easyOrder="9">
