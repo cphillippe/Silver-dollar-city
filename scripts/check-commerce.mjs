@@ -306,7 +306,7 @@ assert.ok(
   '1.4.503 Settings opens on the Reading card, before More',
 )
 assert.ok(
-  settingsSrc.indexOf('<summary>More</summary>') < settingsSrc.indexOf('TRAIL_SUBTITLE'),
+  settingsSrc.indexOf('<summary>More</summary>') < settingsSrc.indexOf('{TRAIL_SUBTITLE}'),
   '1.4.503 non-payment trail notes sit inside More',
 )
 
