@@ -6,6 +6,7 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent,
 } from 'react'
+import { goldButtonClass } from '../../content/goldenPath'
 import { EASY, easyWhoWhere } from '../../lib/easy'
 import { fatherWinBeat } from '../../lib/successBeat'
 import { MatchTakeaway } from '../../components/HeldTriad'
@@ -461,12 +462,12 @@ export function FatherRunPlay({
         <div className="cta-dock">
           <button
             type="button"
-            className="btn primary xl snap-bins"
+            className={goldButtonClass('run-win', 'lockInNext', 'snap-bins')}
             onClick={() => onEasyStop?.('hold')}
           >
             {EASY.holdNext}
           </button>
-          <button type="button" className="btn gold xl" data-run-again onClick={replay}>
+          <button type="button" className="btn xl" data-run-again onClick={replay}>
             {FATHER_RUN_AGAIN}
           </button>
           <button type="button" className="btn xl" onClick={() => onEasyStop?.('home')}>

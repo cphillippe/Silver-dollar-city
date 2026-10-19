@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.503',
+    title: 'One gold step',
+    when: '2026-10-19',
+    items: [
+      'On Easy, one filled gold button is the next step. A replay stays quiet, and Home on a word-search win stays readable.',
+      'A first walk opens the road, then the father, then fine-tuning. Read is the gold step on a later day.',
+      'Night Watch waits until the first Lock In. The tip box is off. Settings opens on Reading.',
+    ],
+  },
+  {
     version: '1.4.502',
     title: 'Tap the house first',
     when: '2026-10-18',

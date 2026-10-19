@@ -6,6 +6,7 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent,
 } from 'react'
+import { goldButtonClass } from '../../content/goldenPath'
 import { EASY, easyWhoWhere } from '../../lib/easy'
 import {
   canWin,
@@ -646,7 +647,7 @@ export function RoadMazePlay({
         <div className="cta-dock" data-maze-dock>
           <button
             type="button"
-            className="btn primary xl snap-bins"
+            className={goldButtonClass('maze-win', 'lockInNext', 'snap-bins')}
             data-maze-next
             aria-label={roadCtaLabel(EASY.holdNext, 'Lock In next')}
             onClick={() => onEasyStop?.('hold')}
@@ -655,7 +656,7 @@ export function RoadMazePlay({
           </button>
           <button
             type="button"
-            className="btn gold xl"
+            className="btn xl"
             data-maze-again
             aria-label={roadCtaLabel(ROAD_MAZE_AGAIN, 'One more road')}
             onClick={replay}

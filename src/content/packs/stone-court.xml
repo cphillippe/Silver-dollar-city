@@ -7,11 +7,6 @@
     <blurb>A stone court of old names: Tacitus, Josephus, Pliny — Christ named by writers who were not the church.</blurb>
     <notes>Runtime/build content pack. After the Easy door, a new street: ancient-first source-dig. Engine maps lesson fields 1:1 to Learn / Match / Hold / Journal / street.</notes>
   </meta>
-  <easyShelf order="sc-tacitus,sc-james,sc-pliny">
-    <line id="sc-tacitus" easyOrder="40">sc-tacitus</line>
-    <line id="sc-james" easyOrder="41">sc-james</line>
-    <line id="sc-pliny" easyOrder="42">sc-pliny</line>
-  </easyShelf>
   <lessons>
     <lesson id="sc-tacitus" place="Stone Court" person="Silas Whitman" tripleId="tacitus-court" ideaId="idea-tacitus" ideaLabel="Tacitus names Christus under Pilate." challengeKind="sort" challengeTitle="A Roman names Christus">
       <easy points="10" easyOrder="40">

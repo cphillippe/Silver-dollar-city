@@ -137,11 +137,11 @@ Rules:
 
 ## Easy trail order
 
-All **45** facts sit on the Easy trail with `easyOrder` 1–45 (see `index.xml` `<easyShelf>`):
+All **45** facts sit on the Easy trail. Their order is [`golden-path.xml`](./golden-path.xml) (see [`GOLDEN-PATH.md`](./GOLDEN-PATH.md)), not an `<easyShelf>` in `index.xml`.
 
-1. Keep mercy-first Story Creek opening (`ph-road`, `ph-father`, `ph-debt`).
+1. Mercy-first opening, then fine-tuning: `ph-road`, `ph-father`, `ob-tuning`, `ph-debt`.
 2. Why Gate foundation pack next, stepped: `fg-order` → `fg-reason` → `fg-ought` → `fg-ground` (next opens after prior Hold).
-3. After Dig deeper, Witness leftovers **Names that stay** pack, stepped: `daily-names` → `daily-creed` → `daily-empty` (next opens after prior Hold; source-dig arcade). Then porch leftovers → Sky Watch (fine-tuning stays here) → Why Gate cosmological walks → Meaning Ridge. After the Easy door, **Stone Court** pack, stepped: `sc-tacitus` → `sc-james` → `sc-pliny` (ancient-first source-dig; next opens after prior Hold). After Pliny Hold, **Ink Court** pack, stepped: `ic-trajan` → `ic-suetonius` → `ic-lucian` (ancient-first source-dig; next opens after prior Hold).
+3. After Dig deeper, Witness leftovers **Names that stay** pack, stepped: `daily-names` → `daily-creed` → `daily-empty` (next opens after prior Hold; source-dig arcade). Then porch leftovers → Sky Watch → Why Gate cosmological walks → Meaning Ridge. After the Easy door, **Stone Court** pack, stepped: `sc-tacitus` → `sc-james` → `sc-pliny` (ancient-first source-dig; next opens after prior Hold). After Pliny Hold, **Ink Court** pack, stepped: `ic-trajan` → `ic-suetonius` → `ic-lucian` (ancient-first source-dig; next opens after prior Hold).
 
 Medium and Hard are available via mode select or Hold level-up — not a separate fact list.
 
@@ -157,7 +157,7 @@ Medium and Hard are available via mode select or Hold level-up — not a separat
 ## Index extras (`index.xml`)
 
 - `<packs>` — seven area files + lesson counts
-- `<easyShelf>` — global Easy trail order 1–45 with `pack=` pointer
+- Easy order and the one gold step per screen — `golden-path.xml` (do not add `<easyShelf>` here)
 - `<holdRules>` — level-up on Hold; fail → Easy
 - `<scoring>` — idea points by tier (10/12/15); journal showScorePerLevel + scoreFromHeldTier (best tier held)
 - `<tools>` — `td-watch` Love how-to (not a held claim)

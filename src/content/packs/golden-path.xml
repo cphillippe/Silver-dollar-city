@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<goldenPath schemaVersion="1" appVersion="1.4.503">
+  <howToEdit>See GOLDEN-PATH.md. Edit this file, run npm test, then open a PR. This is the one Easy lesson order and the one filled gold button per screen.</howToEdit>
+  <order>
+    <line id="ph-road" pack="parable-hollow"/>
+    <line id="ph-father" pack="parable-hollow"/>
+    <line id="ob-tuning" pack="observatory"/>
+    <line id="ph-debt" pack="parable-hollow"/>
+    <line id="fg-order" pack="first-gate"/>
+    <line id="fg-reason" pack="first-gate"/>
+    <line id="fg-ought" pack="first-gate"/>
+    <line id="fg-ground" pack="first-gate"/>
+    <line id="wb-creed" pack="witness-bench"/>
+    <line id="wb-women" pack="witness-bench"/>
+    <line id="wb-early" pack="witness-bench"/>
+    <line id="wb-method" pack="witness-bench"/>
+    <line id="daily-names" pack="witness-bench"/>
+    <line id="daily-creed" pack="witness-bench"/>
+    <line id="daily-empty" pack="witness-bench"/>
+    <line id="daily-lantern" pack="parable-hollow"/>
+    <line id="daily-stars" pack="observatory"/>
+    <line id="daily-cosmos" pack="first-gate"/>
+    <line id="hl-moral" pack="high-lookout"/>
+    <line id="ph-seeds" pack="parable-hollow"/>
+    <line id="daily-gems" pack="parable-hollow"/>
+    <line id="daily-seed" pack="parable-hollow"/>
+    <line id="daily-neighbor" pack="parable-hollow"/>
+    <line id="ob-design" pack="observatory"/>
+    <line id="ob-leibniz" pack="observatory"/>
+    <line id="ob-life" pack="observatory"/>
+    <line id="daily-life" pack="observatory"/>
+    <line id="fg-mover" pack="first-gate"/>
+    <line id="fg-contingent" pack="first-gate"/>
+    <line id="fg-kalam" pack="first-gate"/>
+    <line id="fg-limits" pack="first-gate"/>
+    <line id="daily-scroll" pack="first-gate"/>
+    <line id="daily-isaiah" pack="first-gate"/>
+    <line id="hl-mind" pack="high-lookout"/>
+    <line id="hl-meaning" pack="high-lookout"/>
+    <line id="hl-beauty" pack="high-lookout"/>
+    <line id="daily-grace" pack="high-lookout"/>
+    <line id="daily-rest" pack="high-lookout"/>
+    <line id="daily-door" pack="high-lookout"/>
+    <line id="sc-tacitus" pack="stone-court"/>
+    <line id="sc-james" pack="stone-court"/>
+    <line id="sc-pliny" pack="stone-court"/>
+    <line id="ic-trajan" pack="ink-court"/>
+    <line id="ic-suetonius" pack="ink-court"/>
+    <line id="ic-lucian" pack="ink-court"/>
+    <line id="papr-p52" pack="papyrus-vault"/>
+    <line id="papr-p46" pack="papyrus-vault"/>
+    <line id="papr-p66" pack="papyrus-vault"/>
+    <line id="aa-tacitus" pack="annals-alley"/>
+    <line id="aa-josephus" pack="annals-alley"/>
+    <line id="aa-suetonius" pack="annals-alley"/>
+    <line id="psw-pilate" pack="pilate-stone-way"/>
+    <line id="psw-ossuary" pack="pilate-stone-way"/>
+    <line id="psw-nazareth" pack="pilate-stone-way"/>
+  </order>
+  <rules>
+    <firstSession readFirst="false"/>
+    <returningDay readFirst="true"/>
+  </rules>
+  <!-- Dated Home gold (for example an Advent lamp) can be added later as another rule. This version does not apply a date rule. -->
+  <screens>
+    <screen id="welcome" gold="startEasy"/>
+    <screen id="home" gold="nextStep"/>
+    <screen id="read-teach" gold="teachNext"/>
+    <screen id="sort-done" gold="savePicks"/>
+    <screen id="maze-win" gold="lockInNext"/>
+    <screen id="run-win" gold="lockInNext"/>
+    <screen id="merge-win" gold="lockInNext"/>
+    <screen id="dig-win" gold="lockInNext"/>
+    <screen id="gem-win" gold="lockInNext"/>
+    <screen id="recall-miss" gold="tryAgain"/>
+    <screen id="read-recall-done" gold="home"/>
+    <screen id="run-fail" gold="runRetry"/>
+    <screen id="maze" gold="none"/>
+    <screen id="run" gold="none"/>
+    <screen id="sort" gold="none"/>
+    <screen id="word-search" gold="none"/>
+    <screen id="merge" gold="none"/>
+    <screen id="dig" gold="none"/>
+    <screen id="quiz" gold="none"/>
+    <screen id="read-recall" gold="none"/>
+  </screens>
+</goldenPath>

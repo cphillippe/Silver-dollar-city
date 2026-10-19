@@ -239,7 +239,7 @@ assert.doesNotMatch(
 const hubSrc = readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8')
 assert.match(hubSrc, /EASY\.matchCta|EASY\.mazeMatch|EASY\.runMatch|EASY\.mergeMatch|EASY\.digMatch/)
 assert.match(hubSrc, /EASY\.saved/)
-assert.match(hubSrc, /SupportToast/)
+assert.doesNotMatch(hubSrc, /<SupportToast[\s/>]/, '1.4.503 the tip box does not mount on Home')
 assert.match(hubSrc, /name: 'settings'/)
 // Easy Home (1.4.120+) parks Extra streets / pack-street paywall chrome off the home dock
 assert.match(hubSrc, /easy-extra-streets/)
@@ -292,18 +292,23 @@ assert.match(sceneAdSrc, /REMOVE_ADS_PRODUCT\.title/)
 
 const settingsSrc = readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8')
 assert.match(settingsSrc, /TRAIL_SUBTITLE/)
-assert.match(settingsSrc, /EASY\.supportTrail/)
-assert.match(settingsSrc, /SETTINGS_SUPPORT_LINE/)
 assert.match(settingsSrc, /Street Packs/)
-assert.match(settingsSrc, /Support Silver City/)
-assert.match(settingsSrc, /TIP_CTA|EASY\.tip/)
-assert.match(settingsSrc, /data-support-tip/)
-assert.match(settingsSrc, /data-support-mill/)
-assert.match(settingsSrc, /data-support-harbor/)
 assert.match(settingsSrc, /STORES_COMING/)
 assert.match(settingsSrc, /disabled/)
 assert.doesNotMatch(settingsSrc, /Subscribe/)
 assert.doesNotMatch(settingsSrc, /VITE_PLAY_BILLING\s*=\s*1/)
+assert.doesNotMatch(settingsSrc, /data-support-tip|data-support-mill|data-support-harbor/)
+assert.doesNotMatch(settingsSrc, /ko-fi|supportUrls|SETTINGS_SUPPORT_LINE|TIP_CTA/)
+assert.doesNotMatch(settingsSrc, /streak \$\{/, '1.4.503 Settings summary does not render streak')
+assert.ok(
+  settingsSrc.indexOf('eyebrow">Reading') >= 0 &&
+    settingsSrc.indexOf('eyebrow">Reading') < settingsSrc.indexOf('<summary>More</summary>'),
+  '1.4.503 Settings opens on the Reading card, before More',
+)
+assert.ok(
+  settingsSrc.indexOf('<summary>More</summary>') < settingsSrc.indexOf('TRAIL_SUBTITLE'),
+  '1.4.503 non-payment trail notes sit inside More',
+)
 
 const journalSrc = readFileSync(new URL('../src/components/Journal.tsx', import.meta.url), 'utf8')
 const holdPracticeSrc = readFileSync(new URL('../src/easyTrail/lockIn/HoldPractice.tsx', import.meta.url), 'utf8')
@@ -312,7 +317,7 @@ for (const src of [journalSrc, holdPracticeSrc]) {
   assert.doesNotMatch(src, /AdSlot/)
   assert.doesNotMatch(src, /data-support-toast/)
 }
-assert.match(holdPracticeSrc, /offerSupportToast/)
+assert.doesNotMatch(holdPracticeSrc, /offerSupportToast/, '1.4.503 Lock In does not offer the tip box')
 
 const matchSrc = readFileSync(new URL('../src/components/challenges/MatchPlay.tsx', import.meta.url), 'utf8')
 const holdSrc = readFileSync(new URL('../src/components/challenges/WhyBlastPlay.tsx', import.meta.url), 'utf8')
@@ -394,8 +399,11 @@ assert.equal(supportUrls().mill, MILL_PACK_URL)
 assert.equal(supportUrls().harbor, HARBOR_PACK_URL)
 assert.match(STORES_COMING, /Coming with stores/)
 
+const toastSrc = readFileSync(new URL('../src/components/SupportToast.tsx', import.meta.url), 'utf8')
+assert.match(toastSrc, /return null/, '1.4.503 the tip box renders nothing')
+assert.doesNotMatch(toastSrc, /ko-fi|href|supportUrls/)
 const toastCss = readAppCss()
-assert.match(toastCss, /\.support-toast[\s\S]{0,400}color:\s*#2a1a0e/)
+assert.match(toastCss, /\.support-toast/, '1.4.503 tip styles stay while the box is off')
 assert.doesNotMatch(toastCss, /var\(--card/)
 
 resetSupportToastForTest()

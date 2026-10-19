@@ -52,6 +52,7 @@ export function inkReady(progress: Pick<ProgressState, 'easyHeld'>, id: string):
 const FALLBACK_EASY_ORDER = [
   'ph-road',
   'ph-father',
+  'ob-tuning',
   'ph-debt',
   'fg-order',
   'fg-reason',
