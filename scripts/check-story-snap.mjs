@@ -387,7 +387,7 @@ async function checkSnapHidden() {
         false,
         `${where} Easy home has no Snap button`,
       )
-      assert.match(home.step, /Match/, `${where} the lantern step is Match`)
+      assert.match(home.step, /Find the words/, `${where} the lantern step names the word search`)
       const match = page.locator('.easy-coach-step.is-dock-now')
       const matchBox = await match.boundingBox()
       assert.ok(matchBox && matchBox.height > 20, `${where} Match is a real button`)
