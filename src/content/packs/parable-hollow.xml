@@ -8,16 +8,6 @@
     <notes>Runtime/build content pack. Engine maps lesson fields 1:1 to Learn / Match / Hold / Journal / street.</notes>
     <porchNote>East porch (Juniper) dailies ship with this pack — same mercy/picture pillar.</porchNote>
   </meta>
-  <easyShelf order="ph-road,ph-father,ph-debt,daily-lantern,ph-seeds,daily-gems,daily-seed,daily-neighbor">
-    <line id="ph-road" easyOrder="1">ph-road</line>
-    <line id="ph-father" easyOrder="2">ph-father</line>
-    <line id="ph-debt" easyOrder="3">ph-debt</line>
-    <line id="daily-lantern" easyOrder="6">daily-lantern</line>
-    <line id="ph-seeds" easyOrder="10">ph-seeds</line>
-    <line id="daily-gems" easyOrder="16">daily-gems</line>
-    <line id="daily-seed" easyOrder="17">daily-seed</line>
-    <line id="daily-neighbor" easyOrder="18">daily-neighbor</line>
-  </easyShelf>
   <lessons>
     <lesson id="ph-road" place="Story Creek" person="Mercy Wren" tripleId="mercy-hollow" ideaId="idea-mercy" ideaLabel="Neighbor is the one who shows mercy." challengeKind="sequence" challengeTitle="The Good Samaritan">
       <easy points="10" easyOrder="1">

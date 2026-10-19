@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import { goldButtonClass } from '../../content/goldenPath'
 import { EASY, easyWhoWhere } from '../../lib/easy'
 import {
   SOURCE_DIG_AGAIN,
@@ -387,12 +388,12 @@ export function SourceDigPlay({
           <div className="cta-dock">
             <button
               type="button"
-              className="btn primary xl snap-bins"
+              className={goldButtonClass('dig-win', 'lockInNext', 'snap-bins')}
               onClick={() => onEasyStop?.('hold')}
             >
               {EASY.holdNext}
             </button>
-            <button type="button" className="btn gold xl" data-dig-again onClick={replay}>
+            <button type="button" className="btn xl" data-dig-again onClick={replay}>
               {SOURCE_DIG_AGAIN}
             </button>
             <button type="button" className="btn xl" onClick={() => onEasyStop?.('home')}>

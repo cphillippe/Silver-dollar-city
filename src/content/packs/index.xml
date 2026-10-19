@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<silverCityPackIndex schemaVersion="3" appVersion="1.4.85" generated="2026-09-16T16:00:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/">
+<silverCityPackIndex schemaVersion="3" appVersion="1.4.503" generated="2026-09-16T16:00:00-05:00" host="https://cphillippe.github.io/Silver-dollar-city/">
   <howToEdit>Load one areaPack XML per area. Every lesson has three tiers: &lt;easy easyOrder="N"&gt;, &lt;medium&gt;, and &lt;hard&gt; — each with Learn/Match/Hold. Held claim stays plain on all tiers. Hold level-up / fail→Easy: see &lt;holdRules&gt;. Do not fork facts into separate files. Engine loader climb next.</howToEdit>
   <packs>
     <pack id="parable-hollow" file="parable-hollow.xml" title="Story Creek" person="Mercy Wren" lessonCount="8" />
@@ -13,62 +13,7 @@
     <pack id="annals-alley" file="annals-alley.xml" title="Annals Alley" person="Silas Whitman" lessonCount="3" />
     <pack id="pilate-stone-way" file="pilate-stone-way.xml" title="Pilate Stone Way" person="Silas Whitman" lessonCount="3" />
   </packs>
-  <easyShelf order="ph-road,ph-father,ph-debt,fg-order,fg-reason,fg-ought,fg-ground,wb-creed,wb-women,wb-early,wb-method,daily-names,daily-creed,daily-empty,daily-lantern,daily-stars,daily-cosmos,hl-moral,ph-seeds,daily-gems,daily-seed,daily-neighbor,ob-tuning,ob-design,ob-leibniz,ob-life,daily-life,fg-mover,fg-contingent,fg-kalam,fg-limits,daily-scroll,daily-isaiah,hl-mind,hl-meaning,hl-beauty,daily-grace,daily-rest,daily-door,sc-tacitus,sc-james,sc-pliny,ic-trajan,ic-suetonius,ic-lucian,papr-p52,papr-p46,papr-p66,aa-tacitus,aa-josephus,aa-suetonius,psw-pilate,psw-ossuary,psw-nazareth">
-    <line id="ph-road" easyOrder="1" pack="parable-hollow">ph-road</line>
-    <line id="ph-father" easyOrder="2" pack="parable-hollow">ph-father</line>
-    <line id="ph-debt" easyOrder="3" pack="parable-hollow">ph-debt</line>
-    <line id="fg-order" easyOrder="4" pack="first-gate">fg-order</line>
-    <line id="fg-reason" easyOrder="5" pack="first-gate">fg-reason</line>
-    <line id="fg-ought" easyOrder="6" pack="first-gate">fg-ought</line>
-    <line id="fg-ground" easyOrder="7" pack="first-gate">fg-ground</line>
-    <line id="wb-creed" easyOrder="8" pack="witness-bench">wb-creed</line>
-    <line id="wb-women" easyOrder="9" pack="witness-bench">wb-women</line>
-    <line id="wb-early" easyOrder="10" pack="witness-bench">wb-early</line>
-    <line id="wb-method" easyOrder="11" pack="witness-bench">wb-method</line>
-    <line id="daily-names" easyOrder="12" pack="witness-bench">daily-names</line>
-    <line id="daily-creed" easyOrder="13" pack="witness-bench">daily-creed</line>
-    <line id="daily-empty" easyOrder="14" pack="witness-bench">daily-empty</line>
-    <line id="daily-lantern" easyOrder="15" pack="parable-hollow">daily-lantern</line>
-    <line id="daily-stars" easyOrder="16" pack="observatory">daily-stars</line>
-    <line id="daily-cosmos" easyOrder="17" pack="first-gate">daily-cosmos</line>
-    <line id="hl-moral" easyOrder="18" pack="high-lookout">hl-moral</line>
-    <line id="ph-seeds" easyOrder="19" pack="parable-hollow">ph-seeds</line>
-    <line id="daily-gems" easyOrder="20" pack="parable-hollow">daily-gems</line>
-    <line id="daily-seed" easyOrder="21" pack="parable-hollow">daily-seed</line>
-    <line id="daily-neighbor" easyOrder="22" pack="parable-hollow">daily-neighbor</line>
-    <line id="ob-tuning" easyOrder="23" pack="observatory">ob-tuning</line>
-    <line id="ob-design" easyOrder="24" pack="observatory">ob-design</line>
-    <line id="ob-leibniz" easyOrder="25" pack="observatory">ob-leibniz</line>
-    <line id="ob-life" easyOrder="26" pack="observatory">ob-life</line>
-    <line id="daily-life" easyOrder="27" pack="observatory">daily-life</line>
-    <line id="fg-mover" easyOrder="28" pack="first-gate">fg-mover</line>
-    <line id="fg-contingent" easyOrder="29" pack="first-gate">fg-contingent</line>
-    <line id="fg-kalam" easyOrder="30" pack="first-gate">fg-kalam</line>
-    <line id="fg-limits" easyOrder="31" pack="first-gate">fg-limits</line>
-    <line id="daily-scroll" easyOrder="32" pack="first-gate">daily-scroll</line>
-    <line id="daily-isaiah" easyOrder="33" pack="first-gate">daily-isaiah</line>
-    <line id="hl-mind" easyOrder="34" pack="high-lookout">hl-mind</line>
-    <line id="hl-meaning" easyOrder="35" pack="high-lookout">hl-meaning</line>
-    <line id="hl-beauty" easyOrder="36" pack="high-lookout">hl-beauty</line>
-    <line id="daily-grace" easyOrder="37" pack="high-lookout">daily-grace</line>
-    <line id="daily-rest" easyOrder="38" pack="high-lookout">daily-rest</line>
-    <line id="daily-door" easyOrder="39" pack="high-lookout">daily-door</line>
-    <line id="sc-tacitus" easyOrder="40" pack="stone-court">sc-tacitus</line>
-    <line id="sc-james" easyOrder="41" pack="stone-court">sc-james</line>
-    <line id="sc-pliny" easyOrder="42" pack="stone-court">sc-pliny</line>
-    <line id="ic-trajan" easyOrder="43" pack="ink-court">ic-trajan</line>
-    <line id="ic-suetonius" easyOrder="44" pack="ink-court">ic-suetonius</line>
-    <line id="ic-lucian" easyOrder="45" pack="ink-court">ic-lucian</line>
-    <line id="papr-p52" easyOrder="88" pack="papyrus-vault">papr-p52</line>
-    <line id="papr-p46" easyOrder="89" pack="papyrus-vault">papr-p46</line>
-    <line id="papr-p66" easyOrder="90" pack="papyrus-vault">papr-p66</line>
-    <line id="aa-tacitus" easyOrder="91" pack="annals-alley">aa-tacitus</line>
-    <line id="aa-josephus" easyOrder="92" pack="annals-alley">aa-josephus</line>
-    <line id="aa-suetonius" easyOrder="93" pack="annals-alley">aa-suetonius</line>
-    <line id="psw-pilate" easyOrder="94" pack="pilate-stone-way">psw-pilate</line>
-    <line id="psw-ossuary" easyOrder="95" pack="pilate-stone-way">psw-ossuary</line>
-    <line id="psw-nazareth" easyOrder="96" pack="pilate-stone-way">psw-nazareth</line>
-  </easyShelf>
+  <!-- Easy lesson order and the one gold step per screen: src/content/packs/golden-path.xml. Do not add an easyShelf here. -->
   <holdRules>
     <summary>On Hold, the player may attempt a level-up to the next tier’s claim/why. If they fail the level-up — or fail Hold at the current tier — fall back to Easy (retry Easy Learn→Match→Hold: teach-before-test, not punish).</summary>
     <levelUp>easy Hold may set levelUpTo="medium"; medium Hold may set levelUpTo="hard". Hard is the top teach tier (no further levelUpTo).</levelUp>

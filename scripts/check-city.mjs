@@ -1677,7 +1677,17 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.502')
+assert.equal(APP_VERSION, '1.4.503')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.503'), '1.4.503 changelog row')
+assert.match(latestChange('1.4.503').title, /gold|step/i)
+assert.doesNotMatch(
+  latestChange('1.4.503').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.503 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.503').items.join('\n'), /gold/)
+assert.match(latestChange('1.4.503').items.join('\n'), /Night Watch/)
+assert.match(latestChange('1.4.503').items.join('\n'), /Reading/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.502'), '1.4.502 changelog row')
 assert.match(latestChange('1.4.502').title, /tap|house|build/i)
 assert.doesNotMatch(
@@ -3631,7 +3641,7 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
   assert.deepEqual(easyHoldFields(matchedWomen, 'wb-women'), ['wb-women'])
   const atDig = {
     ...fresh,
-    easyHeld: ['ph-road', 'ph-father', 'ph-debt', ...FOUNDATION_ARC, 'wb-creed'],
+    easyHeld: ['ph-road', 'ph-father', 'ob-tuning', 'ph-debt', ...FOUNDATION_ARC, 'wb-creed'],
   }
   assert.equal(easyLoopLine(atDig), 'wb-women')
   assert.equal(storyPlayFor('wb-women'), 'source-dig')
@@ -3714,7 +3724,11 @@ assert.doesNotMatch(hubSrc, /EASY\.nightSoon/)
   assert.deepEqual([...NAMES_ARC], ['daily-names', 'daily-creed', 'daily-empty'])
   assert.deepEqual([...STONE_ARC], ['sc-tacitus', 'sc-james', 'sc-pliny'])
   assert.deepEqual([...INK_ARC], ['ic-trajan', 'ic-suetonius', 'ic-lucian'])
-  assert.deepEqual(EASY_LINE_ORDER.slice(7, 14), [...DIG_ARC, ...NAMES_ARC])
+  assert.deepEqual(
+    EASY_LINE_ORDER.slice(8, 15),
+    [...DIG_ARC, ...NAMES_ARC],
+    '1.4.503 dig and names follow fine-tuning at lesson 3',
+  )
   assert.deepEqual(EASY_LINE_ORDER.slice(39, 42), [...STONE_ARC])
   assert.deepEqual(EASY_LINE_ORDER.slice(42, 45), [...INK_ARC])
   const homes = {
@@ -4164,9 +4178,10 @@ assert.match(sortSrc, /showEasyPuzzleHint/)
 assert.match(sortSrc, /easyChromeNearDup/)
 assert.match(sortSrc, /easyLeadLine/)
 assert.doesNotMatch(hubSrc, /slot="hub-banner"/)
-assert.match(
+assert.doesNotMatch(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /EASY\.supportTrail/,
+  '1.4.503 Settings has no tip heading',
 )
 assert.match(
   readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8'),
@@ -5185,7 +5200,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   const hub357 = readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8')
   const css357 = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
   assert.match(hub357, /easy-home-steps/)
-  assert.match(hub357, /const readNow = !doneToday && focus !== 'hold'/)
+  assert.match(hub357, /const readNow = easyReadIsHomeGold\(progress, today\) && focus !== 'hold'/)
   assert.match(hub357, /disabled=\{playLater \|\| \(!matchReady && !lockNow\)\}/)
   assert.match(hub357, /disabled=\{!lockNow\}/)
   assert.match(hub357, /easyLockInExit\(progress\)/)
@@ -13533,8 +13548,20 @@ console.log('check-city: ok')
   )
   assert.match(
     winCss270,
-    /1\.4\.270: Easy one-more win-end dock[\s\S]*?\.btn\.more-match \{[\s\S]*?min-height: 64px[\s\S]*?#ffcc33/,
+    /1\.4\.270: Easy one-more win-end dock[\s\S]*?\.btn\.more-match \{[\s\S]*?min-height: 48px[\s\S]*?background: transparent/,
   )
+  assert.doesNotMatch(
+    winCss270.slice(winCss270.indexOf('.btn.more-match {'), winCss270.indexOf('.btn.more-match {') + 700),
+    /#ffcc33/,
+    'more-match is secondary: no #ffcc33 fill',
+  )
+  assert.match(gem270, /goldButtonClass\('gem-win', 'lockInNext'/)
+  {
+    const gemDock = gem270.slice(gem270.indexOf("status === 'ok'"))
+    assert.equal(gemDock.split("goldButtonClass('gem-win', 'lockInNext'").length - 1, 1, 'Lock In next is the only gem-win gold')
+    assert.doesNotMatch(gemDock, /btn gold/, 'gem win dock has no .btn.gold')
+    assert.match(gemDock, /more-match/)
+  }
   assert.match(
     winCss270,
     /1\.4\.270: Easy one-more win-end dock[\s\S]*?\.snap-claim \{[\s\S]*?color: #2a2118/,
@@ -15780,6 +15807,7 @@ console.log('check-city: ok')
     homeDeps334,
     [
       'react',
+      'content/goldenPath',
       'lib/easy',
       'lib/successBeat',
       'components/HeldTriad',
@@ -15919,14 +15947,13 @@ console.log('check-city: ok')
       'content/story',
       'lib/easy',
       'lib/recall',
-      'lib/supportToast',
       'lib/tiers',
       'components/EasyBack',
       'components/RecallGate',
       'store/progress',
       'types',
     ],
-    '1.4.335 moved hold practice reads the same modules Journal did',
+    '1.4.503 HoldPractice reads the same modules, and the tip box is not one of them',
   )
 
   // #448 teach-gate stays in Journal, unchanged; HoldPractice never re-gates.
@@ -15983,9 +16010,10 @@ console.log('check-city: ok')
   )
   assert.match(
     home335,
-    /if \(easy && advancing\) \{\n\s*recordHeld\(quizBrief\.id\)\n\s*recordReview\(\{\n\s*id: quizBrief\.id,\n\s*pillar,\n\s*kind: 'encode',\n\s*today,\n\s*clean: result\.clean,\n\s*peeked: false,\n\s*elaborated: false,\n\s*\}\)\n\s*recordLessonHold\(quizBrief\.id, result\.clean\)\n\s*offerSupportToast\(\)\n\s*onNavigate\(\{ name: 'hub' \}\)\n\s*return\n\s*\}/,
-    '1.4.432 Easy encode records held / review / lesson hold / support toast, then Home',
+    /if \(easy && advancing\) \{\n\s*recordHeld\(quizBrief\.id\)\n\s*recordReview\(\{\n\s*id: quizBrief\.id,\n\s*pillar,\n\s*kind: 'encode',\n\s*today,\n\s*clean: result\.clean,\n\s*peeked: false,\n\s*elaborated: false,\n\s*\}\)\n\s*recordLessonHold\(quizBrief\.id, result\.clean\)\n\s*onNavigate\(\{ name: 'hub' \}\)\n\s*return\n\s*\}/,
+    '1.4.503 Easy encode records held / review / lesson hold, then Home. The tip box stays off.',
   )
+  assert.doesNotMatch(home335, /offerSupportToast/, '1.4.503 HoldPractice does not offer the tip box')
   assert.deepEqual(EASY_HOME, { name: 'hub' }, '1.4.335 EASY_HOME is still Easy Home')
   assert.match(home335, /onNavigate\(\n\s*easy\n\s*\? \{ name: 'hub' \}/, '1.4.335 Easy review still lands Home')
 
@@ -17233,6 +17261,46 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.match(map502, /RESIDENT_WALKER\.b/, '1.4.502 walker b is a resident')
 }
 
+// 1.4.503: one filled gold on each Easy win dock. Replays are secondary.
+{
+  const docks = [
+    ['maze', new URL('../src/components/challenges/RoadMazePlay.tsx', import.meta.url), 'maze-win'],
+    ['run', new URL('../src/easyTrail/father/FatherRunPlay.tsx', import.meta.url), 'run-win'],
+    ['merge', new URL('../src/components/challenges/ClaimMergePlay.tsx', import.meta.url), 'merge-win'],
+    ['dig', new URL('../src/components/challenges/SourceDigPlay.tsx', import.meta.url), 'dig-win'],
+    ['gem', new URL('../src/components/challenges/GemSearchPlay.tsx', import.meta.url), 'gem-win'],
+  ]
+  for (const [name, url, screen] of docks) {
+    const src = readFileSync(url, 'utf8')
+    const token = `goldButtonClass('${screen}', 'lockInNext'`
+    assert.equal(src.split(token).length - 1, 1, `1.4.503 ${name} win has one Lock In next gold`)
+    const at = src.indexOf(token)
+    const dock = src.slice(Math.max(0, at - 80), at + 500)
+    assert.doesNotMatch(dock, /btn gold/, `1.4.503 ${name} win dock has no .btn.gold`)
+  }
+  const teach503 = readFileSync(new URL('../src/components/TeachUnlock.tsx', import.meta.url), 'utf8')
+  assert.match(teach503, /goldButtonClass\('read-teach', 'teachNext'\)/)
+  assert.doesNotMatch(
+    teach503.slice(teach503.indexOf('easy-story-dock'), teach503.indexOf('easy-story-dock') + 500),
+    /btn gold/,
+    '1.4.503 Read-teach next is filled gold, not an outline',
+  )
+  const hub503 = readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8')
+  assert.match(hub503, /className="btn easy-dock-build"/)
+  assert.doesNotMatch(hub503, /easy-dock-build[\s\S]{0,80}btn gold/)
+  assert.match(hub503, /\(progress\.easyHeld \?\? \[\]\)\.length > 0/)
+  assert.match(hub503, /className="btn xl easy-nw-quiet"/)
+  assert.doesNotMatch(
+    hub503.slice(hub503.indexOf('easy-night-watch'), hub503.indexOf('easy-night-watch') + 600),
+    /btn gold/,
+    '1.4.503 Night Watch on Easy Home is never gold',
+  )
+  const sort503 = readFileSync(new URL('../src/components/challenges/SortPlay.tsx', import.meta.url), 'utf8')
+  assert.match(sort503, /easy \? 'text-link match-recover'/)
+  const welcome503 = readFileSync(new URL('../src/components/Welcome.tsx', import.meta.url), 'utf8')
+  assert.match(welcome503, /goldButtonClass\('welcome', 'startEasy'\)/)
+}
+
 const bossTapScan = readFileSync(new URL('./check-seed-fire.mjs', import.meta.url), 'utf8')
 assert.match(
   bossTapScan,
@@ -17248,3 +17316,4 @@ assert.match(snapHoldScan, /win card stays at least 5s/, '1.4.481 the city scan 
 assert.match(snapHoldScan, /replay is locked on the win/, '1.4.481 a second tap does not restart')
 await import('./check-story-snap.mjs').then((mod) => mod.checkSnapHold())
 await import('./check-live-prove.mjs').then((mod) => mod.checkLiveProve())
+await import('./check-golden-live.mjs').then((mod) => mod.checkGoldenLive())

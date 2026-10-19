@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict'
-import { readFileSync, statSync } from 'node:fs'
+import { readdirSync, readFileSync, statSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { emptyProgress } from '../src/lib/save.ts'
+import { GOLDEN, GOLDEN_SCREEN_TARGETS, PLAY_SCREEN_IDS, REPLAY_GOLDS } from '../src/content/goldenPath.ts'
 import { PACK_CATALOG, PACK_ISSUES, packLesson } from '../src/content/packCatalog.ts'
 import { PACK_SCHEMA_VERSION } from '../src/content/packTypes.ts'
 import { EASY_LINE_ORDER, FOUNDATION_ARC, DIG_ARC, NAMES_ARC, STONE_ARC, INK_ARC, easyHomeFocus, easyHoldPractice, easyLineTaught, easyLoopLine, easyMatchReady, easyWhoWhere } from '../src/lib/easy.ts'
@@ -19,11 +22,14 @@ import { evidenceFor, evidenceForTier } from '../src/content/evidence.ts'
 assert.equal(PACK_ISSUES.length, 0, PACK_ISSUES.map((item) => `${item.file}: ${item.message}`).join('\n'))
 assert.equal(PACK_CATALOG.schemaVersion, PACK_SCHEMA_VERSION)
 
+const packDir = join(dirname(fileURLToPath(import.meta.url)), '../src/content/packs')
 const indexXml = readFileSync(new URL('../src/content/packs/index.xml', import.meta.url), 'utf8')
-const indexLines = [...indexXml.matchAll(/<line\s+id="([^"]+)"\s+easyOrder="(\d+)"\s+pack="([^"]+)"/g)].map(
-  (match) => ({ id: match[1], easyOrder: Number(match[2]), pack: match[3] }),
+const goldenXml = readFileSync(new URL('../src/content/packs/golden-path.xml', import.meta.url), 'utf8')
+const indexLines = [...goldenXml.matchAll(/<line\s+id="([^"]+)"\s+pack="([^"]+)"\s*\/>/g)].map(
+  (match, index) => ({ id: match[1], easyOrder: index + 1, pack: match[2] }),
 )
 const indexIds = indexLines.map((line) => line.id)
+assert.doesNotMatch(indexXml, /<easyShelf[\s>]/, 'index.xml easyShelf moved to golden-path.xml')
 assert.equal(new Set(indexIds).size, indexIds.length, 'index lesson ids are unique')
 const shelf = [...indexLines].sort((a, b) => a.easyOrder - b.easyOrder).map((line) => line.id)
 const declaredCount = [...indexXml.matchAll(/\blessonCount="(\d+)"/g)]
@@ -55,14 +61,15 @@ assert.deepEqual([...EASY_LINE_ORDER], shelf)
 assert.deepEqual(EASY_LINE_ORDER.slice(0, 7), [
   'ph-road',
   'ph-father',
+  'ob-tuning',
   'ph-debt',
   'fg-order',
   'fg-reason',
   'fg-ought',
-  'fg-ground',
 ])
 assert.equal(EASY_LINE_ORDER[0], 'ph-road')
 assert.equal(EASY_LINE_ORDER[1], 'ph-father')
+assert.equal(EASY_LINE_ORDER[2], 'ob-tuning')
 assert.ok(EASY_LINE_ORDER.indexOf('ph-father') < EASY_LINE_ORDER.indexOf('wb-creed'))
 for (const id of STREET_FACT_IDS) {
   assert.ok(shelf.includes(id), `${id} is an index lesson`)
@@ -196,12 +203,12 @@ assert.ok(EASY_LINE_ORDER.indexOf('ob-tuning') < EASY_LINE_ORDER.indexOf('fg-mov
 assert.ok(EASY_LINE_ORDER.indexOf('wb-method') < EASY_LINE_ORDER.indexOf('daily-names'))
 assert.ok(EASY_LINE_ORDER.indexOf('daily-empty') < EASY_LINE_ORDER.indexOf('daily-lantern'))
 assert.ok(EASY_LINE_ORDER.indexOf('daily-stars') > EASY_LINE_ORDER.indexOf('daily-lantern'))
-assert.deepEqual(EASY_LINE_ORDER.slice(7, 14), [...DIG_ARC, ...NAMES_ARC])
+assert.deepEqual(EASY_LINE_ORDER.slice(8, 15), [...DIG_ARC, ...NAMES_ARC])
 
 const creekHeld = {
   ...emptyProgress(),
-  easyTaught: ['ph-road', 'ph-father', 'ph-debt'],
-  easyHeld: ['ph-road', 'ph-father', 'ph-debt'],
+  easyTaught: ['ph-road', 'ph-father', 'ob-tuning', 'ph-debt'],
+  easyHeld: ['ph-road', 'ph-father', 'ob-tuning', 'ph-debt'],
 }
 assert.equal(easyLoopLine(creekHeld), 'fg-order')
 assert.equal(easyLoopLine({ ...creekHeld, easyHeld: [...creekHeld.easyHeld, 'fg-order'] }), 'fg-reason')
@@ -569,5 +576,51 @@ assert.match(blastSrc, /MatchTakeaway/)
 assert.doesNotMatch(blastSrc, /One more/)
 const recallSrc = readFileSync(new URL('../src/components/RecallGate.tsx', import.meta.url), 'utf8')
 assert.match(recallSrc, /phase === 'teach'[\s\S]*?EASY\.sayFrom/)
+
+assert.equal(GOLDEN.order.length, EASY_LINE_ORDER.length, 'golden-path order is the Easy line')
+assert.deepEqual(
+  GOLDEN.order.map((line) => line.id),
+  [...EASY_LINE_ORDER],
+  'EASY_LINE_ORDER is golden-path.xml order',
+)
+assert.equal(GOLDEN.firstSessionReadFirst, false, 'first session must not be Read-first')
+assert.equal(GOLDEN.returningDayReadFirst, true, 'a returning day may gold the daily Read')
+assert.ok(!PACK_CATALOG.areas.some((area) => area.id === 'golden-path' || area.file === 'golden-path.xml'), 'golden-path.xml is not a street')
+
+const knownScreens = Object.keys(GOLDEN_SCREEN_TARGETS)
+const seenScreens = new Set()
+for (const screen of GOLDEN.screens) {
+  assert.ok(!seenScreens.has(screen.id), `duplicate screen ${screen.id}`)
+  seenScreens.add(screen.id)
+  const allowed = GOLDEN_SCREEN_TARGETS[screen.id]
+  assert.ok(allowed, `unknown screen id ${screen.id}`)
+  assert.ok(allowed.includes(screen.gold), `unknown gold target ${screen.gold} on ${screen.id}`)
+  const play = PLAY_SCREEN_IDS.includes(screen.id)
+  if (play) {
+    assert.equal(screen.gold, 'none', `${screen.id} is a play screen and must gold none`)
+  } else {
+    assert.notEqual(screen.gold, 'none', `${screen.id} needs one gold`)
+    assert.equal(screen.gold.split(/[\s,]+/).filter(Boolean).length, 1, `${screen.id} has more than one gold`)
+  }
+  assert.notEqual(screen.gold, 'buildThis', 'buildThis is never gold')
+  assert.notEqual(screen.gold, 'nightWatch', 'nightWatch is never gold')
+  if (screen.id.endsWith('-win')) {
+    assert.ok(!REPLAY_GOLDS.includes(screen.gold), `${screen.id} gold ${screen.gold} would loop`)
+  }
+}
+for (const id of knownScreens) {
+  assert.ok(seenScreens.has(id), `screen ${id} is missing from golden-path.xml`)
+}
+assert.equal(seenScreens.size, knownScreens.length, 'screen list does not match the code-known screens')
+
+for (const name of readdirSync(packDir)) {
+  if (!name.endsWith('.xml')) continue
+  const xml = readFileSync(join(packDir, name), 'utf8')
+  assert.doesNotMatch(
+    xml,
+    /<easyShelf[\s>]/,
+    `${name} has a second <easyShelf>. The Easy order lives only in golden-path.xml`,
+  )
+}
 
 console.log('check-packs: ok')

@@ -157,7 +157,7 @@ assert.doesNotMatch(digTablets('ic-suetonius')[0]?.bite ?? '', /Chrestus/)
 assert.doesNotMatch(digTablets('ic-lucian')[0]?.bite ?? '', /believed/)
 
 assert.ok(EASY_LINE_ORDER.indexOf('fg-ground') < EASY_LINE_ORDER.indexOf('wb-creed'))
-assert.deepEqual(EASY_LINE_ORDER.slice(7, 14), [...DIG_ARC, ...NAMES_ARC])
+assert.deepEqual(EASY_LINE_ORDER.slice(8, 15), [...DIG_ARC, ...NAMES_ARC])
 assert.ok(EASY_LINE_ORDER.indexOf('daily-empty') < EASY_LINE_ORDER.indexOf('daily-lantern'))
 assert.ok(EASY_LINE_ORDER.indexOf('daily-door') < EASY_LINE_ORDER.indexOf('sc-tacitus'))
 assert.deepEqual(EASY_LINE_ORDER.slice(39, 42), [...STONE_ARC])
@@ -165,8 +165,8 @@ assert.deepEqual(EASY_LINE_ORDER.slice(42, 45), [...INK_ARC])
 
 const creek = {
   ...emptyProgress(),
-  easyTaught: ['ph-road', 'ph-father', 'ph-debt', ...FOUNDATION_ARC],
-  easyHeld: ['ph-road', 'ph-father', 'ph-debt', ...FOUNDATION_ARC],
+  easyTaught: ['ph-road', 'ph-father', 'ob-tuning', 'ph-debt', ...FOUNDATION_ARC],
+  easyHeld: ['ph-road', 'ph-father', 'ob-tuning', 'ph-debt', ...FOUNDATION_ARC],
 }
 assert.equal(easyLoopLine(creek), 'wb-creed')
 assert.equal(easyLoopLine({ ...creek, easyHeld: [...creek.easyHeld, 'wb-creed'] }), 'wb-women')

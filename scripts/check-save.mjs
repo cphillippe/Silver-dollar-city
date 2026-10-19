@@ -212,12 +212,12 @@ assert.match(settingsSrc, /Clean parchment/)
 assert.match(settingsSrc, /Easy mode/)
 assert.match(settingsSrc, /setEasyMode/)
 assert.match(settingsSrc, /eyebrow">Reading/)
-assert.match(settingsSrc, /Support the trail/)
+assert.doesNotMatch(settingsSrc, /Support the trail/, '1.4.503 Settings has no tip heading')
 assert.match(settingsSrc, /Remove ads/)
 assert.match(settingsSrc, /name: 'shop'/)
 assert.ok(
-  settingsSrc.indexOf('Support the trail') < settingsSrc.indexOf('eyebrow">Reading'),
-  'Support the trail should sit above Reading',
+  settingsSrc.indexOf('eyebrow">Reading') < settingsSrc.indexOf('<summary>More</summary>'),
+  '1.4.503 Reading is the first Settings card, before More',
 )
 assert.ok(
   settingsSrc.indexOf('eyebrow">Look') < settingsSrc.indexOf('Export JSON'),
