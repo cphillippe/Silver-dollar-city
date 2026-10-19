@@ -4,6 +4,7 @@ import {
   bindNightPath,
   bindNightRoads,
   boundNightPath,
+  DEFEND_ANCHOR,
   DEFEND_PATH,
   freeSpotId,
   isFreeSpot,
@@ -38,12 +39,13 @@ import {
  * Easy lamp placement (1.4.390).
  * Tap a tower card, then tap open ground. A card press that slides uses the
  * same preview and commit. The reach cue (1.4.392) uses the combat range.
- * Easy refuses a seat that stays too far. Hard still plants it.
+ * Easy refuses open ground that misses the road at the current reach.
+ * Hard still plants it. A named city lot is unchanged.
  */
 export type { NightPoint }
 export { freeSpotId, isFreeSpot, lampAnchor }
 
-/** Shown when even level III cannot meet the walker path. Hard can still plant it. Easy refuses it. */
+/** Shown when even level III cannot meet the walker path. Hard can still plant it. */
 export const LAMP_TOO_FAR = 'Too far from the road'
 
 /** Easy refusal for a seat that stays off the road. */
@@ -894,14 +896,25 @@ export function armedSeatMarks(
   })
 }
 
-/** Easy pillar seat that stays off the road even after the last Far step. */
-export function easyDeadSeat(preview: Pick<LampPreview, 'mark' | 'blocked' | 'note'>): boolean {
-  return !preview.mark && !preview.blocked && preview.note === LAMP_TOO_FAR
+/** A city lot. Easy still plants these even when the current reach misses. */
+function namedLotAt(at: NightPoint): boolean {
+  const x = Math.round(at.x)
+  const y = Math.round(at.y)
+  return Object.values(DEFEND_ANCHOR).some((lot) => Math.round(lot.x) === x && Math.round(lot.y) === y)
 }
 
 /**
- * Planted Easy pillars whose shot still misses the road after the last Far step.
- * A seat that reaches on a later step is not in this list.
+ * Easy open ground that misses the road at this lamp's current reach.
+ * The grey tint uses the same `reaches` flag. A later Far step does not make it live.
+ * Named lots and blocked ground (road, house) are not this seat.
+ */
+export function easyDeadSeat(preview: Pick<LampPreview, 'mark' | 'blocked' | 'reaches' | 'at'>): boolean {
+  return !preview.mark && !preview.blocked && !preview.reaches && !namedLotAt(preview.at)
+}
+
+/**
+ * Planted Easy pillars on open ground whose current shot misses the road.
+ * Same reach test as the grey tint. Named lots are not in this list.
  */
 export function plantedLampsTooFar(
   plants: Record<string, string>,
@@ -911,8 +924,11 @@ export function plantedLampsTooFar(
 ): string[] {
   const ids: string[] = []
   for (const [id, ability] of Object.entries(plants)) {
-    if (!isTowerType(ability)) continue
-    if (lampRoadNote(id, ability, progress, runTier, true, bonusFor(ability)) === LAMP_TOO_FAR) ids.push(id)
+    if (!isTowerType(ability) || !isFreeSpot(id)) continue
+    const at = lampAnchor(id)
+    if (namedLotAt(at)) continue
+    const range = nightTowers.range(id, ability, progress, runTier, bonusFor(ability), true)
+    if (!lampReachesRoad(at, range)) ids.push(id)
   }
   return ids
 }
@@ -920,7 +936,7 @@ export function plantedLampsTooFar(
 /**
  * Place when the spot is open ground.
  * Road, houses, and features block.
- * Hard still plants a short reach. Easy refuses a seat that stays too far.
+ * Hard still plants a short reach. Easy refuses open ground that misses now.
  */
 export function commitLamp(
   plants: Record<string, string>,

@@ -1666,6 +1666,97 @@ async function checkDeadSeat(browser, port, errors) {
   await context.close()
 }
 
+/** Every map: a grey seat does not plant, and the refusal is the toast. */
+async function checkGreyMaps(browser, port, errors) {
+  const maps = ['a2', 'far-hills', 'map03', 'map04', 'map05', 'map06']
+  for (const id of maps) {
+    const context = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width: 375, height: 667 },
+      deviceScaleFactor: 1,
+      reducedMotion: 'reduce',
+    })
+    await context.addInitScript(
+      (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+      { key: STORAGE_KEY, save: SAVE },
+    )
+    const page = await context.newPage()
+    listen(page, errors, `grey ${id}`)
+    const search = id === 'a2' ? '?playtest=1&nwSeed=2' : `?playtest=1&nwSeed=2&nwMap=${id}`
+    await openJump(page, search)
+    if (await page.locator('[data-map-overlay]').count()) {
+      await page.locator(`[data-map="${id}"]`).click()
+      await page.locator('[data-map-overlay]').waitFor({ state: 'detached' })
+    }
+    await page.locator('[data-type="love"]').click()
+    const seats = await page.locator('[data-seat="dead"]').evaluateAll((nodes) =>
+      nodes.map((node) => ({
+        x: Number(node.getAttribute('cx')),
+        y: Number(node.getAttribute('cy')),
+      })),
+    )
+    assert.ok(seats.length > 0, `1.4.503 ${id} shows a grey seat`)
+    let refused = 0
+    for (const seat of seats) {
+      const finger = await plateFinger(page, seat)
+      if (finger.x < 4 || finger.y < 4 || finger.x > 371 || finger.y > 663) continue
+      await page.mouse.move(finger.x, finger.y)
+      await page.waitForTimeout(40)
+      const ring = (await page.locator('.defend-ghost').count())
+        ? await page.locator('.defend-ghost').evaluate((node) => ({
+            reaches: node.getAttribute('data-reaches'),
+            dead: node.classList.contains('is-dead'),
+            nogo: node.getAttribute('data-lamp-ghost') === 'nogo',
+            transform: node.getAttribute('transform') || '',
+          }))
+        : null
+      const here = new RegExp(`translate\\(${seat.x}(?:\\.0)? ${seat.y}(?:\\.0)?\\)`)
+      if (!ring || ring.nogo || !ring.dead || ring.reaches !== 'no' || !here.test(ring.transform)) continue
+      const before = await page.locator('.defend-pad.is-planted').count()
+      await page.mouse.click(finger.x, finger.y)
+      await page.waitForTimeout(120)
+      const afterClick = await page.evaluate(() => ({
+        toast: document.querySelector('[data-place-toast]')?.textContent?.trim() || '',
+        planted: document.querySelectorAll('.defend-pad.is-planted').length,
+        phase: document.querySelector('.defend-page')?.getAttribute('data-phase') || '',
+      }))
+      assert.equal(
+        afterClick.toast,
+        'Too far from the road. Plant closer to the path.',
+        `1.4.503 ${id} grey ${seat.x},${seat.y} says why (${JSON.stringify(afterClick)})`,
+      )
+      assert.equal(
+        afterClick.planted,
+        before,
+        `1.4.503 ${id} grey ${seat.x},${seat.y} does not plant`,
+      )
+      refused += 1
+    }
+    assert.ok(refused > 0, `1.4.503 ${id} refused a grey seat (${refused} of ${seats.length})`)
+    if (id === 'a2') {
+      assert.ok(
+        seats.some((seat) => seat.x === 192 && seat.y === 632),
+        '1.4.503 the reported seat is grey',
+      )
+      const finger = await plateFinger(page, { x: 192, y: 632 })
+      await page.mouse.move(finger.x, finger.y)
+      await page.waitForTimeout(40)
+      const ring = await page.locator('.defend-ghost').evaluate((node) => ({
+        reaches: node.getAttribute('data-reaches'),
+        transform: node.getAttribute('transform') || '',
+      }))
+      assert.equal(ring.reaches, 'no', '1.4.503 the reported seat ring misses')
+      assert.match(ring.transform, /translate\(192(?:\.0)? 632(?:\.0)?\)/)
+      const before = await page.locator('.defend-pad.is-planted').count()
+      await page.mouse.click(finger.x, finger.y)
+      await page.getByText('Too far from the road. Plant closer to the path.').waitFor()
+      assert.equal(await page.locator('.defend-pad.is-planted').count(), before, '1.4.503 (192, 632) does not plant')
+      await page.screenshot({ path: '/opt/cursor/artifacts/nw-504-grey-192.png' })
+    }
+    await context.close()
+  }
+}
+
 export async function checkLiveProve() {
   const server = await createServer({ server: { host: '127.0.0.1', port: 0 } })
   await server.listen()
@@ -1689,6 +1780,7 @@ export async function checkLiveProve() {
     await checkWaveCues(browser, port, errors)
     await checkJumpSeatsAndCandle(browser, port, errors)
     await checkDeadSeat(browser, port, errors)
+    await checkGreyMaps(browser, port, errors)
     assert.equal(errors.join('\n'), '', '1.4.482 live prove stays free of console errors')
   } finally {
     await browser.close()
