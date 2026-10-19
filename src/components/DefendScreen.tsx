@@ -121,16 +121,21 @@ import { waveRound, waveWalkerHp, type NightWave } from '../nightWatch/maps/wave
 import {
   clearPanelFolded,
   clientToMap,
+  armedSeatMarks,
   commitLamp,
   dragGhostClient,
+  easyDeadSeat,
   hudCoversPoint,
+  LAMP_BEGIN_MISS,
+  LAMP_CLOSED_TOAST,
   LAMP_DRAG_START_PX,
+  LAMP_PLACE_TOAST,
   lampSpotBlocked,
   lampUnderFinger,
   magnetCandlePoint,
   overTowerCards,
   pathSpendControl,
-  plantableHints,
+  plantedLampsTooFar,
   previewLamp,
   roundStartKind,
   startsNextRound,
@@ -416,6 +421,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     return initialNightJump(true)?.load.plants ?? {}
   })
   const [ghost, setGhost] = useState<LampPreview | null>(null)
+  const [placeToast, setPlaceToast] = useState<string | null>(null)
+  const [reachMiss, setReachMiss] = useState<string[]>([])
+  const placeToastTimer = useRef(0)
+  const reachPulseTimer = useRef(0)
   const lampDragLive = useRef(false)
   const plantsRef = useRef(plants)
   plantsRef.current = plants
@@ -1458,6 +1467,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     )
     if (!next.ok) {
       setGhost(next.preview)
+      if (easy) notePlaceRefusal(next.preview)
       return false
     }
     if (paid) {
@@ -1482,6 +1492,9 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       setPlaceArm(null)
     }
     setPlants(next.plants)
+    setPlaceToast(null)
+    window.clearTimeout(placeToastTimer.current)
+    setReachMiss([])
     if (paid) {
       if (bell || incense || candle || cross) paidTypes.current.add(next.preview.spot)
       else paidTypes.current.add(using)
@@ -2628,6 +2641,27 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     }, 900)
   }
 
+  /** Visible Easy reason. The clipped skill toast stays for skills. */
+  function flashPlace(note: string) {
+    setPlaceToast(note)
+    window.clearTimeout(placeToastTimer.current)
+    placeToastTimer.current = window.setTimeout(() => {
+      setPlaceToast((current) => (current === note ? null : current))
+    }, 3200)
+  }
+
+  function notePlaceRefusal(preview: LampPreview) {
+    if (easyDeadSeat(preview)) flashPlace(LAMP_PLACE_TOAST)
+    else flashPlace(LAMP_CLOSED_TOAST)
+  }
+
+  function warnDeadLamps(ids: string[]) {
+    setReachMiss(ids)
+    flashPlace(LAMP_BEGIN_MISS)
+    window.clearTimeout(reachPulseTimer.current)
+    reachPulseTimer.current = window.setTimeout(() => setReachMiss([]), 1200)
+  }
+
   function showPower(note: string) {
     setPowerBanner(note)
     window.clearTimeout(bannerTimer.current)
@@ -2783,9 +2817,20 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const debugFrozen = debugHarness && debugPaused
   const cardOn = Boolean(easy && phase === 'plant' && ability)
   const groundPick = Boolean(easy && !won && (placeArm || cardOn))
+  const seatAbility = placeArm ?? ability
   const groundHints = useMemo(
-    () => (groundPick ? plantableHints(plants) : []),
-    [groundPick, plants],
+    () =>
+      groundPick
+        ? armedSeatMarks(
+            seatAbility,
+            progress,
+            runTier,
+            plants,
+            easy ? easyShotReach(pathsOf(runPaths, seatAbility)) : 0,
+          )
+        : [],
+    // roadD changes after the map bind, and the seat tint reads that same road.
+    [groundPick, seatAbility, progress, runTier, plants, runPaths, easy, roadD],
   )
   const tapReadoutOn =
     easy &&
@@ -3227,12 +3272,25 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
               if (!startsNextRound(roundStartKind(event.currentTarget.className))) return
               if (awaitingLamp || phase !== 'plant') return
               if (roundChangeBlocked()) return
+              if (easy) {
+                const missed = plantedLampsTooFar(plantsRef.current, progress, runTier, (id) => placeBonus(id))
+                if (missed.length) {
+                  warnDeadLamps(missed)
+                  return
+                }
+              }
               setGhost(null)
               startWave()
             }}
             disabled={(awaitingLamp || arming || phase !== 'plant') && !(easy && awaitingLamp && phase === 'plant' && !arming)}
             aria-disabled={awaitingLamp || arming || phase !== 'plant' ? true : undefined}
-            aria-describedby={easy && awaitingLamp ? 'defend-plant-first' : undefined}
+            aria-describedby={
+              easy && placeToast === LAMP_BEGIN_MISS
+                ? 'nw-place-toast'
+                : easy && awaitingLamp
+                  ? 'defend-plant-first'
+                  : undefined
+            }
           >
             {easy ? EASY.nightDo : 'The road is coming'}
           </button>
@@ -3485,6 +3543,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
               onPlacePointer={onPlacePointer}
               ghost={ghost}
               groundHints={groundHints}
+              reachMiss={reachMiss}
               plateFill={plateFill}
               map={playingMap?.plate}
               roadD={roadD}
@@ -3512,6 +3571,11 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
               <p className="nw-wave-survived" data-wave-survived={survivedRound} role="status">
                 <span className="nw-wave-survived-title">Wave survived!</span>
                 <span className="nw-wave-survived-round">{`Round ${survivedRound}`}</span>
+              </p>
+            ) : null}
+            {easy && placeToast ? (
+              <p className="nw-place-toast" id="nw-place-toast" role="status" data-place-toast="yes">
+                {placeToast}
               </p>
             ) : null}
             {easy && phase === 'plant' ? (
