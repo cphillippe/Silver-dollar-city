@@ -3,6 +3,8 @@
 
 interface ImportMetaEnv {
   readonly VITE_PLAY_BILLING?: string
+  readonly VITE_PLAY_BUILD?: string
+  readonly VITE_PLAY_SHOP?: string
   readonly VITE_STOREKIT?: string
   readonly VITE_ADS_ENABLED?: string
   readonly VITE_ADMOB_APP_ID?: string

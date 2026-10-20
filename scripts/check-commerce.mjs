@@ -11,7 +11,16 @@ import {
   scenePauseMountsOn,
   softAdsVisible,
 } from '../src/config/ads.ts'
-import { billedSkus, liveAdmobIds, resetStoreFlagsForTest, setStoreFlagsForTest, storeFlags } from '../src/config/store.ts'
+import {
+  billedSkus,
+  liveAdmobIds,
+  resetPlayBuildForTest,
+  resetStoreFlagsForTest,
+  setPlayBuildForTest,
+  setPlayShopForTest,
+  setStoreFlagsForTest,
+  storeFlags,
+} from '../src/config/store.ts'
 import {
   HARBOR_PACK_URL,
   MILL_PACK_URL,
@@ -34,7 +43,13 @@ import {
   setAdPluginForTest,
   showBetweenSceneInterstitial,
 } from '../src/lib/adAdapter.ts'
-import { iapCanCharge, resetIapAdapterForTest, setBillingPluginForTest } from '../src/lib/iapAdapter.ts'
+import {
+  iapCanCharge,
+  pluginPurchase,
+  pluginRestore,
+  resetIapAdapterForTest,
+  setBillingPluginForTest,
+} from '../src/lib/iapAdapter.ts'
 import {
   resetStoreSurfaceForTest,
   setStoreSurfaceForTest,
@@ -597,5 +612,67 @@ assert.match(iosProj, /MARKETING_VERSION = 1.4.87/)
 assert.match(iosProj, /CURRENT_PROJECT_VERSION = 99/)
 
 resetBilling()
+
+setPlayBuildForTest(true)
+setPlayShopForTest(false)
+let closedPluginHits = 0
+setBillingPluginForTest({
+  async purchase() {
+    closedPluginHits += 1
+    return { sku: PLAY_SKUS.millStreet, orderId: 'GPA.closed', token: 'tok-closed' }
+  },
+  async restore() {
+    closedPluginHits += 1
+    return []
+  },
+})
+await assert.rejects(() => pluginPurchase(PLAY_SKUS.millStreet), /Play shop is closed/)
+await assert.rejects(() => pluginRestore(), /Play shop is closed/)
+assert.equal(closedPluginHits, 0, 'a closed Play shop never calls the billing plugin')
+await assert.rejects(() => checkoutOffer({ kind: 'pack', packId: 'mill-street' }), /Play shop is closed/)
+assert.throws(() => purchaseOffer({ kind: 'remove-ads' }), /Play shop is closed/)
+assert.throws(() => restorePurchases(), /Play shop is closed/)
+await assert.rejects(() => restoreFromStore(), /Play shop is closed/)
+assert.equal(readReceipts().length, 0, 'a closed Play shop writes no receipt')
+
+setPlayShopForTest(true)
+setBillingPluginForTest(undefined)
+resetIapAdapterForTest()
+resetStoreFlagsForTest()
+const playBlocked = await checkoutOffer({ kind: 'pack', packId: 'harbor-walk' })
+assert.equal(playBlocked.status, 'unavailable')
+assert.equal(playBlocked.cannotCharge, true)
+assert.equal(readReceipts().length, 0, 'Play checkout without a plugin writes no demo receipt')
+assert.throws(() => purchaseOffer({ kind: 'remove-ads' }), /Play build refused a demo grant/)
+
+resetPlayBuildForTest()
+setStoreSurfaceForTest('play')
+resetBilling()
+const playDemo = purchaseOffer({ kind: 'remove-ads' })
+assert.equal(playDemo.receipt?.source, 'play-demo')
+setPlayBuildForTest(true)
+setPlayShopForTest(true)
+writeCommerce(emptyCommerce())
+const stripped = restorePurchases()
+assert.equal(stripped.removeAds, false, 'restore on Play ignores a play-demo receipt')
+assert.equal(
+  readReceipts().some((row) => row.source === 'play-demo'),
+  false,
+  'restore on Play clears play-demo receipts',
+)
+assert.equal(softAdsVisible('on', false), false)
+assert.equal(softAdsVisible('default', false), false)
+assert.deepEqual(supportUrls(), { tip: '', mill: '', harbor: '' })
+
+resetPlayBuildForTest()
+resetStoreSurfaceForTest()
+resetStoreFlagsForTest()
+resetIapAdapterForTest()
+resetBilling()
+assert.equal(storeSurface(), 'web')
+assert.equal(softAdsVisible('default', false), true)
+assert.equal(supportUrls().tip, TIP_URL)
+assert.equal(supportUrls().mill, MILL_PACK_URL)
+assert.equal(supportUrls().harbor, HARBOR_PACK_URL)
 
 console.log('check-commerce: ok')

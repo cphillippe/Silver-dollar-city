@@ -7,6 +7,7 @@
  */
 
 import { storeFlags } from '../config/store.ts'
+import { playShopClosed } from '../config/playBuild.ts'
 import { storeSurface } from './nativeStore.ts'
 
 export interface StorePurchase {
@@ -102,6 +103,7 @@ export function isCancelError(error: unknown): boolean {
 }
 
 export async function pluginPurchase(sku: string): Promise<StorePurchase> {
+  if (playShopClosed()) throw new Error('Play shop is closed')
   const plugin = readBillingPlugin()
   if (!plugin) throw new Error('billing-plugin-missing')
   const paid = await plugin.purchase(sku)
@@ -110,6 +112,7 @@ export async function pluginPurchase(sku: string): Promise<StorePurchase> {
 }
 
 export async function pluginRestore(): Promise<StorePurchase[]> {
+  if (playShopClosed()) throw new Error('Play shop is closed')
   const plugin = readBillingPlugin()
   if (!plugin) return []
   const rows = await plugin.restore()

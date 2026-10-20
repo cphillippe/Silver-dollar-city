@@ -8,6 +8,18 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.519',
+    title: 'The Play copy of Silver City is stored on the phone',
+    when: '2026-10-20',
+    items: [
+      'The Play copy of Silver City is stored on the phone.',
+      'Settings includes a privacy link.',
+      'The shop waits. Paid streets on the map say Coming soon.',
+      'Hard stays the same.',
+      'Refs #806.',
+    ],
+  },
+  {
     version: '1.4.518',
     title: 'Lesson 3 says the world is set just right',
     when: '2026-10-20',

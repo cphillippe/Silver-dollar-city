@@ -1,5 +1,7 @@
 node_modules
 dist
+dist-play
+silver-city.aab
 dist-ssr
 *.local
 .DS_Store

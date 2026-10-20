@@ -10,7 +10,7 @@ const allowedHosts = ['localhost', '127.0.0.1', '.trycloudflare.com']
  * Production CSP for Pages / dist / Capacitor WebView.
  * Dev server skips this so Vite HMR can run. No unsafe-eval.
  * style-src unsafe-inline covers React `style={{}}` attributes.
- * Google Fonts stay allowlisted until fonts are self-hosted.
+ * Fraunces and Outfit are self-hosted under public/fonts.
  * frame-ancestors is header-only. A meta tag ignores it and logs a console error.
  */
 export const APP_CSP = [
@@ -19,8 +19,8 @@ export const APP_CSP = [
   "object-src 'none'",
   "form-action 'self'",
   "script-src 'self'",
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-  "font-src 'self' https://fonts.gstatic.com",
+  "style-src 'self' 'unsafe-inline'",
+  "font-src 'self'",
   "img-src 'self' data: blob:",
   "connect-src 'self'",
   "worker-src 'self'",

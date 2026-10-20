@@ -11,6 +11,7 @@
  */
 
 import { readCommerce } from '../lib/commerce.ts'
+import { isPlayBuild } from './playBuild.ts'
 
 export const ADS_PREF_KEY = 'silver-city-ads'
 
@@ -57,6 +58,7 @@ export function softAdsVisible(
   pref: AdsPref = readAdsPref(),
   removeAds = readCommerce().removeAds,
 ): boolean {
+  if (isPlayBuild()) return false
   if (removeAds) return false
   if (pref === 'off') return false
   if (pref === 'on') return true

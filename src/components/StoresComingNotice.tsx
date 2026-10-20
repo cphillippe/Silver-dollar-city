@@ -1,9 +1,15 @@
 import { useEffect, useState } from 'react'
 import { STORES_COMING } from '../config/support.ts'
+import { isPlayBuild } from '../config/playBuild.ts'
 import { consumeStoresComingNotice } from '../lib/supportToast.ts'
 
 /** Hub-only one-line after SceneAd Remove ads. Never opens Settings or Shop. */
 export function StoresComingNotice() {
+  if (isPlayBuild()) return null
+  return <StoresComingNoticeLive />
+}
+
+function StoresComingNoticeLive() {
   const [open, setOpen] = useState(() => consumeStoresComingNotice())
   useEffect(() => {
     if (!open) return
