@@ -9,6 +9,8 @@ import {
 } from '../config/ads'
 import { TRAIL_SUBTITLE } from '../config/commerce'
 import { STORES_COMING } from '../config/support'
+import { SHOP_OPENS_SOON, isPlayBuild, playShopClosed } from '../config/playBuild'
+import { PRIVACY_POLICY_URL } from '../config/privacy'
 import {
   cloudSyncStatus,
   encodeShareCode,
@@ -227,10 +229,13 @@ export function Settings({ onNavigate }: SettingsProps) {
           never over Match, Lock In, or arcade play, and never on Journal. Never a
           hard paywall.
         </p>
+        {playShopClosed() ? null : (
         <div className="settings-actions">
+          {isPlayBuild() ? null : (
           <button type="button" className="btn" disabled data-remove-ads-coming>
             {STORES_COMING}
           </button>
+          )}
           <button
             type="button"
             className="text-link"
@@ -239,6 +244,7 @@ export function Settings({ onNavigate }: SettingsProps) {
             This-device Street Packs
           </button>
         </div>
+        )}
       </section>
 
       {easy ? (
@@ -384,6 +390,7 @@ export function Settings({ onNavigate }: SettingsProps) {
         {message ? <p className="settings-msg">{message}</p> : null}
       </section>
 
+      {isPlayBuild() ? null : (
       <section className="settings-card">
         <p className="eyebrow">Between-scene pauses</p>
         <p>
@@ -415,6 +422,7 @@ export function Settings({ onNavigate }: SettingsProps) {
           </button>
         </div>
       </section>
+      )}
 
       </details>
 
@@ -442,6 +450,16 @@ export function Settings({ onNavigate }: SettingsProps) {
         </details>
       )}
 
+      {isPlayBuild() ? (
+        <section className="settings-card" aria-label="About" data-play-about>
+          {playShopClosed() ? <p>{SHOP_OPENS_SOON}</p> : null}
+          <p>
+            <a className="text-link" href={PRIVACY_POLICY_URL} rel="noopener noreferrer">
+              Privacy policy
+            </a>
+          </p>
+        </section>
+      ) : (
       <details className="settings-card settings-danger settings-debug">
         <summary>Developer · mini-game jumps</summary>
         <p className="eyebrow">Debug</p>
@@ -519,6 +537,7 @@ export function Settings({ onNavigate }: SettingsProps) {
           </section>
         ))}
       </details>
+      )}
     </main>
   )
 }

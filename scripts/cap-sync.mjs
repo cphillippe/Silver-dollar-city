@@ -25,7 +25,10 @@ const syncCmd = platform ? `npx cap sync ${platform}` : 'npx cap sync'
 const status = run(syncCmd)
 if (status === 0) {
   if (platform === 'android' || platform === undefined) {
-    const patched = run('node scripts/android-live-shell.mjs')
+    const shellScript = process.env.PLAY_AAB === '1'
+      ? 'node scripts/android-play-shell.mjs'
+      : 'node scripts/android-live-shell.mjs'
+    const patched = run(shellScript)
     if (patched !== 0) process.exit(patched)
   }
   process.exit(0)

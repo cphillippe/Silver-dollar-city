@@ -28,6 +28,16 @@ import {
   type CommerceState,
 } from './commerce.ts'
 import { storeSurface } from './nativeStore.ts'
+import { isPlayBuild, playShopClosed } from '../config/playBuild.ts'
+
+const PLAY_SHOP_CLOSED = 'Play shop is closed'
+const PLAY_DEMO_REFUSED = 'Play build refused a demo grant'
+
+function notePurchaseCall(kind: string) {
+  if (typeof window === 'undefined') return
+  const sink = (window as Window & { __silverPurchaseSpy?: (kind: string) => void }).__silverPurchaseSpy
+  if (typeof sink === 'function') sink(kind)
+}
 
 export const RECEIPTS_KEY = 'silver-city-receipts-v1'
 
@@ -193,7 +203,12 @@ export function applyReceipt(receipt: PurchaseReceipt): CommerceState {
 
 /** Re-apply every receipt. Survives a wiped flag store on this device. */
 export function restorePurchases(): CommerceState {
-  const rows = readReceipts()
+  if (playShopClosed()) throw new Error(PLAY_SHOP_CLOSED)
+  let rows = readReceipts()
+  if (isPlayBuild()) {
+    const kept = rows.filter((row) => row.source !== 'play-demo')
+    if (kept.length !== rows.length) rows = writeReceipts(kept)
+  }
   if (!rows.length) return readCommerce()
   for (const receipt of rows) applyReceipt(receipt)
   return readCommerce()
@@ -215,6 +230,9 @@ function alreadyOwns(offer: BillingOffer, state: CommerceState = readCommerce())
 
 /** Demo path. Never charges. Same grant Play will send after a live IAP. */
 export function purchaseOffer(offer: BillingOffer): PurchaseResult {
+  notePurchaseCall('purchaseOffer')
+  if (playShopClosed()) throw new Error(PLAY_SHOP_CLOSED)
+  if (isPlayBuild()) throw new Error(PLAY_DEMO_REFUSED)
   const product = storeProduct(offer)
   if (!product) {
     return { status: 'unavailable', cannotCharge: true, commerce: readCommerce() }
@@ -232,6 +250,9 @@ export function purchaseOffer(offer: BillingOffer): PurchaseResult {
     token: orderId,
     source: billingSource(),
   }
+  if (receipt.source === 'play-demo' || receipt.source === 'web-demo') {
+    notePurchaseCall(receipt.source)
+  }
   appendReceipt(receipt)
   const commerce = applyReceipt(receipt)
   return { status: 'purchased', cannotCharge: true, receipt, commerce }
@@ -242,6 +263,8 @@ export function purchaseOffer(offer: BillingOffer): PurchaseResult {
  * otherwise the cannotCharge demo grant.
  */
 export async function checkoutOffer(offer: BillingOffer): Promise<PurchaseResult> {
+  notePurchaseCall('checkoutOffer')
+  if (playShopClosed()) throw new Error(PLAY_SHOP_CLOSED)
   const product = storeProduct(offer)
   if (!product) {
     return { status: 'unavailable', cannotCharge: cannotCharge(), commerce: readCommerce() }
@@ -249,7 +272,12 @@ export async function checkoutOffer(offer: BillingOffer): Promise<PurchaseResult
   if (alreadyOwns(offer)) {
     return { status: 'already', cannotCharge: cannotCharge(), commerce: readCommerce() }
   }
-  if (!iapCanCharge()) return purchaseOffer(offer)
+  if (!iapCanCharge()) {
+    if (isPlayBuild()) {
+      return { status: 'unavailable', cannotCharge: true, commerce: readCommerce() }
+    }
+    return purchaseOffer(offer)
+  }
   try {
     const paid = await pluginPurchase(product.sku)
     const receipt: PurchaseReceipt = {
@@ -277,6 +305,7 @@ export function cancelPurchase(): PurchaseResult {
 
 /** Local receipts, then Play restore when the adapter can charge. */
 export async function restoreFromStore(): Promise<CommerceState> {
+  if (playShopClosed()) throw new Error(PLAY_SHOP_CLOSED)
   if (iapCanCharge()) {
     try {
       const rows = await pluginRestore()

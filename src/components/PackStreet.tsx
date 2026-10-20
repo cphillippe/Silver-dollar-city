@@ -4,6 +4,8 @@ import { shopPack, packPaywallLine } from '../config/commerce'
 import { localDateKey } from '../lib/dates'
 import { packIsUnlocked } from '../lib/commerce'
 import { checkoutOffer, packStreetLocked, type BillingOffer } from '../lib/billing'
+import { playShopClosed } from '../config/playBuild'
+import { COMING_SOON } from './city/ComingSoonPlots'
 import { EASY, isEasy } from '../lib/easy'
 import { RecallGate } from './RecallGate'
 import { CheckoutSheet } from './CheckoutSheet'
@@ -29,10 +31,25 @@ export function PackStreet({ packId, onNavigate }: PackStreetProps) {
   if (!street) {
     return (
       <main className="pack-street page">
-        <button type="button" className="text-link" onClick={() => onNavigate({ name: 'shop' })}>
-          ← Street Packs
+        <button
+          type="button"
+          className="text-link"
+          onClick={() => onNavigate(playShopClosed() ? { name: 'hub' } : { name: 'shop' })}
+        >
+          ← {playShopClosed() ? 'The town' : 'Street Packs'}
         </button>
-        <p>That street is not in this build.</p>
+        <p>{playShopClosed() ? COMING_SOON : 'That street is not in this build.'}</p>
+      </main>
+    )
+  }
+
+  if (!unlocked && playShopClosed()) {
+    return (
+      <main className="pack-street page is-locked" aria-label={street.place}>
+        <p>{COMING_SOON}</p>
+        <button type="button" className="btn primary xl" onClick={() => onNavigate({ name: 'hub' })}>
+          Back
+        </button>
       </main>
     )
   }

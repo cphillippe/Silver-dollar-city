@@ -1,4 +1,5 @@
 import { REMOVE_ADS_PRODUCT, SCENE_PAUSE_COPY } from '../config/commerce'
+import { isPlayBuild } from '../config/playBuild'
 
 interface SceneAdProps {
   onContinue: () => void
@@ -21,9 +22,11 @@ export function SceneAd({ onContinue, onSupport }: SceneAdProps) {
           <button type="button" className="btn primary xl" onClick={onContinue}>
             Continue the trail
           </button>
-          <button type="button" className="btn gold" onClick={onSupport}>
-            {REMOVE_ADS_PRODUCT.title}
-          </button>
+          {isPlayBuild() ? null : (
+            <button type="button" className="btn gold" onClick={onSupport}>
+              {REMOVE_ADS_PRODUCT.title}
+            </button>
+          )}
         </div>
       </div>
     </div>

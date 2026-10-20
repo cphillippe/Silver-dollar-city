@@ -17,6 +17,7 @@ import {
   type BillingOffer,
 } from '../lib/billing'
 import { EASY, isEasy } from '../lib/easy'
+import { SHOP_OPENS_SOON, isPlayBuild, playShopClosed } from '../config/playBuild'
 import { useProgress } from '../store/progress'
 import { CheckoutSheet } from './CheckoutSheet'
 import { useCommerce } from './AdSlot'
@@ -27,6 +28,20 @@ interface ShopProps {
 }
 
 export function Shop({ onNavigate }: ShopProps) {
+  if (playShopClosed()) {
+    return (
+      <main className="shop page" aria-label={SHOP_OPENS_SOON}>
+        <button type="button" className="text-link" onClick={() => onNavigate({ name: 'hub' })}>
+          ← The town
+        </button>
+        <p>{SHOP_OPENS_SOON}</p>
+      </main>
+    )
+  }
+  return <ShopLive onNavigate={onNavigate} />
+}
+
+function ShopLive({ onNavigate }: ShopProps) {
   const { progress } = useProgress()
   const easy = isEasy(progress)
   const commerce = useCommerce()
@@ -109,6 +124,7 @@ export function Shop({ onNavigate }: ShopProps) {
         </p>
       </header>
 
+      {isPlayBuild() ? null : (
       <section className="settings-card" aria-label="Remove ads">
         <p className="eyebrow">{REMOVE_ADS_PRODUCT.sku}</p>
         <h2>{REMOVE_ADS_PRODUCT.title}</h2>
@@ -139,6 +155,7 @@ export function Shop({ onNavigate }: ShopProps) {
           </button>
         </div>
       </section>
+      )}
 
       <section className="settings-card" aria-label="Street Packs">
         <p className="eyebrow">{easy ? EASY.packs : 'Street Packs'}</p>
