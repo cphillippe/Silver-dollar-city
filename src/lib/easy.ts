@@ -23,36 +23,7 @@ export {
 } from './sourceDig.ts'
 
 /** Easy trail loop — defined once in the trail home; these are the same bindings. */
-import {
-  EASY_LINE_ORDER,
-  EASY_MATCH_LINE,
-  FOUNDATION_ARC,
-  digReady,
-  easyHoldFields,
-  easyHoldLine,
-  easyHoldPractice,
-  easyHoldView,
-  easyHomeFocus,
-  easyLockInExit,
-  sameProofRecap,
-  easyLearnLine,
-  easyLineHeld,
-  easyLineLearned,
-  easyLineTaught,
-  easyLoopLine,
-  easyMatchLine,
-  easyMatchReady,
-  easyTeachFields,
-  easyTrailView,
-  foundationPrior,
-  foundationReady,
-  inkReady,
-  markEasyHeld,
-  markEasyTaught,
-  namesReady,
-  progressAfterMatchTaught,
-  stoneReady,
-} from '../easyTrail/trail/loop.ts'
+import { EASY_LINE_ORDER } from '../easyTrail/trail/loop.ts'
 export {
   EASY_LINE_ORDER,
   EASY_MATCH_LINE,
@@ -82,7 +53,7 @@ export {
   namesReady,
   progressAfterMatchTaught,
   stoneReady,
-}
+} from '../easyTrail/trail/loop.ts'
 export type { EasyHomeFocus } from '../easyTrail/trail/loop.ts'
 
 export function isEasy(progress: Pick<ProgressState, 'easyMode'> | { easyMode?: boolean }): boolean {
