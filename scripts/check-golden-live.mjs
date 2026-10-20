@@ -9,12 +9,12 @@ import { build, preview } from 'vite'
 import { evidenceFor } from '../src/content/evidence.ts'
 import { dailyForDate } from '../src/content/daily.ts'
 import { findStraightSpelling } from '../src/lib/gemSearchGrid.ts'
-import { easyChromeLine, easyWhyLine } from '../src/lib/easy.ts'
+import { gemWordsFor } from '../src/lib/gemSearch.ts'
+import { EASY, easyChromeLine, easyWhyLine } from '../src/lib/easy.ts'
 import { localDateKey } from '../src/lib/dates.ts'
 import { SAVE_KIND } from '../src/lib/save.ts'
 import { SAVE_SCHEMA_VERSION, STORAGE_KEY } from '../src/config/app.ts'
 
-const GEM_WORDS = ['LARK', 'STEPS', 'TUNING', 'DESIGNER']
 const SIZES = [
   [375, 667],
   [390, 844],
@@ -63,7 +63,7 @@ async function filledGolds(page) {
 async function tapFilledGold(page) {
   const golds = await filledGolds(page)
   assert.equal(golds.length, 1, `one filled gold, saw ${JSON.stringify(golds)}`)
-  await page.evaluate(() => {
+  const handle = await page.evaluateHandle(() => {
     for (const el of document.querySelectorAll('button, a.btn')) {
       if (!(el instanceof HTMLElement)) continue
       if (el.closest('.easy-core')) continue
@@ -75,11 +75,17 @@ async function tapFilledGold(page) {
       const primary = el.classList.contains('primary')
       const coach = el.classList.contains('easy-coach-step') && Boolean(el.closest('li.is-now'))
       if (!primary && !coach) continue
-      el.click()
-      return
+      return el
     }
-    throw new Error('filled gold disappeared before the tap')
+    return null
   })
+  const el = handle.asElement()
+  if (!el) throw new Error('filled gold disappeared before the tap')
+  await el.scrollIntoViewIfNeeded()
+  const box = await el.boundingBox()
+  await handle.dispose()
+  if (!box) throw new Error('filled gold disappeared before the tap')
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
   return golds[0]
 }
 
@@ -174,6 +180,94 @@ async function tapMaze(page, cell) {
   await page.mouse.up()
 }
 
+const STEP_DIRS = [
+  { r: -1, c: 0 },
+  { r: 1, c: 0 },
+  { r: 0, c: -1 },
+  { r: 0, c: 1 },
+]
+
+async function roadKeys(page) {
+  const keys = await page.locator('[data-maze-cell].is-road').evaluateAll((nodes) =>
+    nodes.map((node) => `${node.getAttribute('data-r')}:${node.getAttribute('data-c')}`),
+  )
+  return new Set(keys)
+}
+
+async function shotHop(page, name) {
+  const width = page.viewportSize()?.width
+  if (width !== 375 && width !== 412 && width !== 768) return
+  await page.screenshot({ path: `${SHOTS}/hop-a-${name}-${width}.png` })
+}
+
+async function assertNoNightWatch(page, where) {
+  assert.equal(await page.locator('.easy-night-watch').count(), 0, `${where} hides Night Watch on the first day`)
+}
+
+async function assertMazeStart(page) {
+  const how = page.locator('[data-maze-how]')
+  await how.waitFor()
+  const text = ((await how.innerText()) || '').replace(/\s+/g, ' ').trim()
+  assert.equal(text, EASY.mazeHow)
+  const box = await how.boundingBox()
+  const view = page.viewportSize()
+  assert.ok(box && view && box.y >= 0 && box.y + box.height <= view.height + 0.5, 'maze-how is inside the viewport')
+  assert.equal(await page.locator('[data-maze-cell].is-hurt.is-goal').count(), 1, 'the hurt man wears the gold ring')
+  const cells = await page.locator('[data-maze-cell]').evaluateAll((nodes) => {
+    const viewH = window.innerHeight
+    const viewW = window.innerWidth
+    return {
+      n: nodes.length,
+      scrollY: window.scrollY,
+      clipped: nodes.filter((node) => {
+        const rect = node.getBoundingClientRect()
+        return (
+          rect.width <= 0 ||
+          rect.top < -0.5 ||
+          rect.left < -0.5 ||
+          rect.bottom > viewH + 0.5 ||
+          rect.right > viewW + 0.5
+        )
+      }).length,
+    }
+  })
+  assert.equal(cells.n, 35, 'the maze is 5×7')
+  assert.equal(cells.scrollY, 0, 'the maze does not scroll the window')
+  assert.equal(cells.clipped, 0, 'every maze cell is inside the viewport')
+  assert.equal((await filledGolds(page)).length, 0, 'the maze has no filled gold')
+}
+
+async function assertMazeDrag(page) {
+  const at = await readCell(page.locator('[data-maze-cell].is-here'))
+  const open = await roadKeys(page)
+  const next = STEP_DIRS.map((dir) => ({ r: at.r + dir.r, c: at.c + dir.c })).find((cell) => open.has(key(cell)))
+  if (!next) throw new Error('the pawn has no road neighbor')
+  const rockBox = await page.locator('[data-maze-cell].is-rock').first().boundingBox()
+  const pawnBox = await page.locator('[data-maze-cell].is-here').boundingBox()
+  if (!rockBox || !pawnBox) throw new Error('maze drag boxes missing')
+  await page.mouse.move(rockBox.x + rockBox.width / 2, rockBox.y + rockBox.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(pawnBox.x + pawnBox.width / 2, pawnBox.y + pawnBox.height / 2, { steps: 8 })
+  await page.mouse.up()
+  assert.deepEqual(await readCell(page.locator('[data-maze-cell].is-here')), at, 'a drag that starts on rock does not move the pawn')
+  const nextBox = await page.locator(`[data-maze-cell][data-r="${next.r}"][data-c="${next.c}"]`).boundingBox()
+  const start = await page.locator('[data-maze-cell].is-here').boundingBox()
+  if (!nextBox || !start) throw new Error('pawn drag boxes missing')
+  await page.mouse.move(start.x + start.width / 2, start.y + start.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(nextBox.x + nextBox.width / 2, nextBox.y + nextBox.height / 2, { steps: 8 })
+  await page.mouse.up()
+  await page.waitForFunction(
+    ({ r, c }) => {
+      const here = document.querySelector('[data-maze-cell].is-here')
+      return here?.getAttribute('data-r') === String(r) && here?.getAttribute('data-c') === String(c)
+    },
+    next,
+  )
+  assert.deepEqual(await readCell(page.locator('[data-maze-cell].is-here')), next, 'a drag from the pawn steps one cell')
+  assert.equal(await page.locator('[data-maze-how]').count(), 0, 'maze-how hides after the first step')
+}
+
 async function playRoad(page) {
   await page.locator('[data-maze-cell].is-here').waitFor()
   const at = await readCell(page.locator('[data-maze-cell].is-here'))
@@ -190,10 +284,41 @@ async function playRoad(page) {
   const inn = await readCell(page.locator('[data-maze-cell].is-inn'))
   await walkUntil(page, hurt, false)
   await page.locator('.play.is-road-maze.is-helped').waitFor({ timeout: 4000 })
+  await shotHop(page, 'l1-after-help')
   await tapMaze(page, hurt)
   await page.locator('.play.is-road-maze.is-helped, .play.is-road-maze.is-win').waitFor()
   await walkUntil(page, inn, true)
   await page.locator('[data-maze-dock], .play.is-road-maze.is-win').first().waitFor({ timeout: 8000 })
+}
+
+async function playRoadAdjacent(page) {
+  await page.locator('[data-maze-cell].is-here').waitFor()
+  const hurt = await readCell(page.locator('[data-maze-cell].is-hurt'))
+  const inn = await readCell(page.locator('[data-maze-cell].is-inn'))
+  const at = await readCell(page.locator('[data-maze-cell].is-here'))
+  const open = await roadKeys(page)
+  const blocked = new Set(open)
+  blocked.delete(key(hurt))
+  const neighbors = STEP_DIRS.map((dir) => ({ r: hurt.r + dir.r, c: hurt.c + dir.c })).filter((cell) =>
+    blocked.has(key(cell)),
+  )
+  let beside = null
+  for (const cell of neighbors) {
+    if (shortest(at, cell, blocked)) {
+      beside = cell
+      break
+    }
+  }
+  if (!beside) throw new Error('no road beside the hurt man that avoids him')
+  await walkUntil(page, beside, false)
+  await page.locator('.play.is-road-maze.is-helped').waitFor({ timeout: 1000 })
+  const how = ((await page.locator('[data-maze-how]').innerText()) || '').replace(/\s+/g, ' ').trim()
+  assert.equal(how, EASY.mazeInnCue)
+  assert.equal(await page.locator('[data-maze-cell].is-inn.is-goal').count(), 1, 'the pink house wears the gold ring')
+  assert.equal(await page.locator('[data-maze-cell].is-hurt.is-goal').count(), 0, 'the hurt man drops the ring after Help')
+  await shotHop(page, 'l1-after-help')
+  await walkUntil(page, inn, true)
+  await page.locator('[data-maze-next]').waitFor({ timeout: 8000 })
 }
 
 async function walkUntil(page, target, winOnArrival) {
@@ -468,40 +593,117 @@ function assertWinBoard(before, after, gridBefore, gridAfter, width, height) {
   assert.deepEqual(gridAfter, gridBefore, `${width} letter grid changed`)
 }
 
+async function measureGemPoints(page, path) {
+  return page.evaluate((cells) => {
+    return cells.map(({ r, c }) => {
+      const el = document.querySelector(`[data-gem-cell][data-r="${r}"][data-c="${c}"]`)
+      if (!(el instanceof HTMLElement)) return null
+      const box = el.getBoundingClientRect()
+      const x = box.left + box.width / 2
+      const y = box.top + box.height / 2
+      return { x, y, r, c, hit: document.elementsFromPoint(x, y).includes(el) }
+    })
+  }, path)
+}
+
 async function dragPath(page, path) {
-  const first = page.locator(`[data-gem-cell][data-r="${path[0].r}"][data-c="${path[0].c}"]`)
-  const start = await first.boundingBox()
-  if (!start) throw new Error('gem cell has no box')
-  await page.mouse.move(start.x + start.width / 2, start.y + start.height / 2)
+  await page.locator('.gem-board').scrollIntoViewIfNeeded()
+  let points = await measureGemPoints(page, path)
+  if (points.some((point) => !point?.hit)) {
+    const anchor = path[Math.floor(path.length / 2)]
+    await page
+      .locator(`[data-gem-cell][data-r="${anchor.r}"][data-c="${anchor.c}"]`)
+      .scrollIntoViewIfNeeded()
+    points = await measureGemPoints(page, path)
+  }
+  if (points.some((point) => !point?.hit)) {
+    throw new Error(`gem cells not hittable ${JSON.stringify(points)}`)
+  }
+  await page.mouse.move(points[0].x, points[0].y)
   await page.mouse.down()
-  for (const cell of path.slice(1)) {
-    const box = await page.locator(`[data-gem-cell][data-r="${cell.r}"][data-c="${cell.c}"]`).boundingBox()
-    if (!box) throw new Error('gem step has no box')
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 6 })
+  for (let i = 1; i < points.length; i += 1) {
+    const from = points[i - 1]
+    const to = points[i]
+    const diagonal = path[i].r !== path[i - 1].r && path[i].c !== path[i - 1].c
+    if (diagonal) {
+      // Stay inside the start cell, then land on the target. A straight step
+      // between centers clips the corner neighbor and snaps off the word.
+      await page.mouse.move(from.x + (to.x - from.x) * 0.28, from.y + (to.y - from.y) * 0.28)
+      await page.mouse.move(to.x, to.y)
+    } else {
+      await page.mouse.move(to.x, to.y, { steps: 8 })
+    }
   }
   await page.mouse.up()
 }
 
-async function playGem(page, { watchLast = false } = {}) {
+async function playGem(page, lineId = 'ob-tuning', { watchLast = false } = {}) {
   await page.locator('[data-gem-cell]').first().waitFor()
+  const words = gemWordsFor(lineId).map((word) => word.text)
   const juice = { burst: 0, pop: false }
-  for (const word of GEM_WORDS) {
+  for (const word of words) {
     if (await page.locator('.play.is-gem-search.is-win').count()) return juice
-    const letters = await readGrid(page)
+    // Match reseeds once on mount (line effect bumps the round). Wait until the letters sit still.
+    let letters = await readGrid(page)
+    for (let attempt = 0; attempt < 8; attempt += 1) {
+      await page.waitForTimeout(40)
+      const next = await readGrid(page)
+      if (JSON.stringify(next) === JSON.stringify(letters)) {
+        letters = next
+        break
+      }
+      letters = next
+    }
     const path = findStraightSpelling(letters, word)
-    if (!path) throw new Error(`ob-tuning word ${word} is not on the board`)
+    if (!path) throw new Error(`${lineId} word ${word} is not on the board`)
+    const foundBefore = await page.locator('.match-teach-chip.is-found').count()
+    const expectJuice = watchLast && word === words[words.length - 1]
+    if (expectJuice) {
+      await page.evaluate(() => {
+        window.__gemJuice = 0
+        const until = performance.now() + 2500
+        const watch = () => {
+          const pop = document.querySelector('.gem-find-pop')
+          const burst = document.querySelectorAll('.gem-cell.is-burst').length
+          if (pop && burst > 0) {
+            const box = pop.getBoundingClientRect()
+            const opacity = Number(getComputedStyle(pop).opacity)
+            if (box.height > 0 && opacity > 0.15) window.__gemJuice = Math.max(window.__gemJuice, burst)
+          }
+          if (!window.__gemJuice && performance.now() < until) requestAnimationFrame(watch)
+        }
+        requestAnimationFrame(watch)
+      })
+    }
+    const landed = async () => {
+      try {
+        const handle = await page.waitForFunction(
+          (count) =>
+            document.querySelectorAll('.match-teach-chip.is-found').length > count ||
+            Boolean(document.querySelector('.play.is-gem-search.is-win')),
+          foundBefore,
+          { timeout: 1800 },
+        )
+        await handle.dispose()
+        return true
+      } catch {
+        return false
+      }
+    }
     await dragPath(page, path)
-    if (watchLast && word === GEM_WORDS[GEM_WORDS.length - 1]) {
-      await page.waitForFunction(() => {
-        const burst = document.querySelectorAll('.gem-cell.is-burst').length
-        const pop = document.querySelector('.gem-find-pop')
-        if (!pop || burst < 1) return false
-        const style = getComputedStyle(pop)
-        const box = pop.getBoundingClientRect()
-        return style.display !== 'none' && style.visibility !== 'hidden' && box.height > 0 && Number(style.opacity) > 0.2
-      }, { timeout: 2000 })
-      juice.burst = await page.locator('.gem-cell.is-burst').count()
-      juice.pop = true
+    let saw = await landed()
+    if (!saw) {
+      await dragPath(page, path)
+      saw = await landed()
+    }
+    if (!saw) {
+      const toast = ((await page.locator('.miss-banner, .match-toast, .bonus-banner').first().textContent().catch(() => '')) || '').replace(/\s+/g, ' ').trim()
+      throw new Error(`${lineId} drag missed ${word} path=${JSON.stringify(path)} toast=${toast || 'none'}`)
+    }
+    if (expectJuice) {
+      await page.waitForFunction(() => window.__gemJuice > 0, undefined, { timeout: 1200 }).catch(() => {})
+      juice.burst = await page.evaluate(() => window.__gemJuice || 0)
+      juice.pop = juice.burst > 0
     }
     await page.waitForTimeout(280)
   }
@@ -713,13 +915,21 @@ export async function checkGoldenLive() {
       assert.equal(shot.golds[0].disabled, false, 'session 1 lesson step stays enabled')
       assert.equal(await page.locator('.easy-night-watch').count(), 0, 'Night Watch is hidden before the first Lock In')
       if (width === 375) await page.screenshot({ path: `${SHOTS}/easy-home-fresh-375.png` })
+      await shotHop(page, 'home-1')
       await tapFilledGold(page)
 
       await page.locator('.play.is-road-maze').waitFor()
       await stamp('maze')
-      await playRoad(page)
+      await shotHop(page, 'l1-start')
+      if (width === 375 && height === 667) {
+        await assertMazeStart(page)
+        await assertMazeDrag(page)
+      }
+      if (width === 375 || width === 768) await playRoadAdjacent(page)
+      else await playRoad(page)
       await page.locator('[data-maze-next]').waitFor()
       shot = await stamp('maze-win')
+      await shotHop(page, 'l1-helped')
       assert.equal(shot.id, 'maze-win')
       assert.match(shot.golds[0].text, /Lock In/)
       await tapFilledGold(page)
@@ -736,9 +946,8 @@ export async function checkGoldenLive() {
 
       await page.locator('main.hub').waitFor()
       shot = await stamp('home-after-road')
-      assert.equal(await page.locator('.easy-night-watch').count(), 1, 'Night Watch returns after the first Lock In')
-      const nwClass = await page.locator('.easy-night-watch button').getAttribute('class')
-      assert.doesNotMatch(nwClass || '', /gold|primary/, 'Night Watch stays secondary')
+      assert.equal(await page.locator('.easy-night-watch').count(), 0, 'Night Watch stays hidden on the first day')
+      await shotHop(page, 'home-2')
       const roadGift = (await page.locator('.easy-build-gift').innerText()).replace(/\s+/g, ' ')
       assert.doesNotMatch(roadGift, /Build this/, 'Home gift does not say Build this while gold is Run')
       assert.match(roadGift, /run/i)
@@ -774,6 +983,7 @@ export async function checkGoldenLive() {
 
       await page.locator('main.hub').waitFor()
       shot = await stamp('home-tuning')
+      await assertNoNightWatch(page, 'home-tuning')
       assert.doesNotMatch(shot.golds[0].text, /Read/)
       assert.match(shot.golds[0].text, /Find the words/)
       assert.doesNotMatch(shot.golds[0].text, /gems/)
@@ -786,7 +996,7 @@ export async function checkGoldenLive() {
       await stamp('gem')
       const gemBefore = await readBoardGeom(page)
       const gridBefore = await readGrid(page)
-      const juice = await playGem(page, { watchLast: true })
+      const juice = await playGem(page, 'ob-tuning', { watchLast: true })
       assert.ok(juice.burst > 0, `${width} last find burst`)
       assert.equal(juice.pop, true, `${width} last find pop`)
       await page.locator('.play.is-gem-search.is-win .btn.primary').waitFor()
@@ -845,7 +1055,7 @@ export async function checkGoldenLive() {
       assert.equal(shot.id, 'quiz', 'word-search gold opens the Lock In quiz')
       assert.equal(await page.locator('.play.is-gem-search').count(), 0, 'the gold tap did not replay the word search')
 
-      if (width === 375) {
+      if (width === 375 || width === 412 || width === 768) {
         await dragWhy(page, 'ob-tuning')
         shot = await stamp('quiz-tuning-done')
         assert.match(shot.golds[0].text, /Continue/)
@@ -853,16 +1063,63 @@ export async function checkGoldenLive() {
         await tapFilledGold(page)
         await page.locator('main.hub').waitFor()
         shot = await stamp('home-after-tuning')
+        await assertNoNightWatch(page, 'home-after-tuning')
         assert.match(shot.golds[0].text, /Find the words/)
         const creek = ((await page.locator('.easy-home-whisper').innerText()) || '').replace(/\s+/g, ' ').trim()
         assert.match(creek, /Find the words at Story Creek/)
         assert.doesNotMatch(creek, /Sky Watch|gems/)
-        await page.screenshot({ path: `${SHOTS}/home-after-lesson-3-375.png` })
-        await page.getByRole('button', { name: 'Settings' }).click()
-        await page.locator('.settings-card').first().waitFor()
-        const eyebrow = (await page.locator('.settings-card').first().locator('.eyebrow').innerText()).trim()
-        assert.equal(eyebrow.toLowerCase(), 'reading', 'Settings opens on the Reading card')
-        await page.screenshot({ path: `${SHOTS}/settings-reading-375.png` })
+        if (width === 375) {
+          await page.screenshot({ path: `${SHOTS}/home-after-lesson-3-375.png` })
+          await page.getByRole('button', { name: 'Settings' }).click()
+          await page.locator('.settings-card').first().waitFor()
+          const eyebrow = (await page.locator('.settings-card').first().locator('.eyebrow').innerText()).trim()
+          assert.equal(eyebrow.toLowerCase(), 'reading', 'Settings opens on the Reading card')
+          await page.screenshot({ path: `${SHOTS}/settings-reading-375.png` })
+          await page.getByRole('button', { name: '← Home' }).click()
+          await page.locator('main.hub').waitFor()
+        }
+
+        await tapFilledGold(page)
+        await page.locator('.play.is-gem-search').waitFor()
+        await playGem(page, 'ph-debt')
+        await page.locator('.play.is-gem-search.is-win .btn.primary').waitFor()
+        await tapFilledGold(page)
+        await page.locator('.why-blast').waitFor()
+        await dragWhy(page, 'ph-debt')
+        await tapFilledGold(page)
+        await page.locator('main.hub').waitFor()
+        shot = await stamp('home-5')
+        await assertNoNightWatch(page, 'home-5')
+        assert.equal(shot.golds.length, 1, 'Home 5 has one gold')
+        const home5 = ((await page.locator('.easy-home-whisper').innerText()) || '').replace(/\s+/g, ' ').trim()
+        assert.match(home5, /Find the words at Why Gate Arch\./)
+        await shotHop(page, 'home-5')
+
+        await tapFilledGold(page)
+        await page.locator('.play.is-gem-search').waitFor()
+        await playGem(page, 'fg-order')
+        await page.locator('.play.is-gem-search.is-win .btn.primary').waitFor()
+        await tapFilledGold(page)
+        await page.locator('.why-blast').waitFor()
+        await dragWhy(page, 'fg-order')
+        await tapFilledGold(page)
+        await page.locator('main.hub').waitFor()
+        shot = await stamp('home-6')
+        await assertNoNightWatch(page, 'home-6')
+        assert.equal(shot.golds.length, 1, 'Home 6 has one gold')
+        assert.match(shot.golds[0].text, /Find the words/)
+        const home6 = ((await page.locator('.easy-home-whisper').innerText()) || '').replace(/\s+/g, ' ').trim()
+        assert.match(home6, /More words at Why Gate Arch, part 2\./)
+        assert.notEqual(home6, home5, 'Home 6 moves on from Home 5')
+        await shotHop(page, 'home-6')
+
+        await tapFilledGold(page)
+        await page.locator('.play.is-gem-search').waitFor()
+        const reasonLetters = await readGrid(page)
+        for (const word of gemWordsFor('fg-reason')) {
+          assert.ok(findStraightSpelling(reasonLetters, word.text), `fg-reason shows ${word.text}`)
+        }
+        assert.equal((await filledGolds(page)).length, 0, 'the word search has no filled gold')
       }
 
       assert.equal(errors.join('\n'), '', `${width} page errors`)
@@ -903,6 +1160,9 @@ export async function checkGoldenLive() {
     traces.push(`day-2 home ${home.sig} n=${home.golds.length} daily=${puzzle.challenge.kind}:${puzzle.challenge.id}`)
     assert.equal(home.golds.length, 1, 'day-2 home has one gold')
     assert.match(home.golds[0].text, /Read/, 'day-2 home gold is Read')
+    assert.equal(await page.locator('.easy-night-watch').count(), 1, 'day-2 Home shows Night Watch')
+    const dayNw = await page.locator('.easy-night-watch button').getAttribute('class')
+    assert.doesNotMatch(dayNw || '', /gold|primary/, 'day-2 Night Watch stays secondary')
     assert.doesNotMatch(await page.locator('.easy-home-steps li').first().innerText(), /tomorrow/)
     await tapFilledGold(page)
     await page.locator('.daily-page, .teach-gate').first().waitFor()
@@ -923,6 +1183,38 @@ export async function checkGoldenLive() {
     assert.doesNotMatch(after.golds[0].text, /Read/, 'after Read, gold is the next Easy lesson')
     assert.equal(after.golds[0].disabled, false, 'the next lesson step is enabled after Read')
     await context.close()
+
+    const proveSave = {
+      kind: SAVE_KIND,
+      schemaVersion: SAVE_SCHEMA_VERSION,
+      appVersion: '1.4.496',
+      savedAt: '2026-10-15T00:00:00.000Z',
+      progress: {
+        started: true,
+        easyMode: true,
+        theme: 'candy',
+        completed: [],
+        lastDailyDate: '2026-10-14',
+        held: [],
+        easyHeld: ['ph-road'],
+      },
+    }
+    const prove = await browser.newContext({ viewport: { width: 375, height: 667 } })
+    await prove.addInitScript(
+      ([key, raw]) => {
+        localStorage.clear()
+        localStorage.setItem(key, raw)
+      },
+      [STORAGE_KEY, JSON.stringify(proveSave)],
+    )
+    const provePage = await prove.newPage()
+    await provePage.goto(origin)
+    await provePage.locator('.easy-night-watch button').waitFor()
+    assert.equal(await provePage.locator('.easy-night-watch').count(), 1, 'a save with no open-day key still shows Night Watch')
+    const proveNw = await provePage.locator('.easy-night-watch button').getAttribute('class')
+    assert.doesNotMatch(proveNw || '', /gold|primary/, 'the seeded Night Watch card is not gold')
+    traces.push('live-prove seed shows Night Watch')
+    await prove.close()
 
     const human = await browser.newContext({ viewport: { width: 375, height: 667 } })
     const humanPage = await human.newPage()

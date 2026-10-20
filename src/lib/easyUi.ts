@@ -17,6 +17,8 @@ export const EASY = {
   runHome: 'One more run.',  // Easy Clear 1.4.155: short Home next-step (not full runHunt; Fixes #192)
   runAgain: 'One more run',
   mazeHunt: 'Find the hurt man. Help him. Take him to the inn.',
+  mazeHow: 'Tap the road to walk.',
+  mazeInnCue: 'Now walk him to the pink house.',
   mazeCta: 'Help on the road',
   mazeMatch: 'Help',
   mazeFirst: 'Start your first road.',

@@ -148,6 +148,11 @@ export function mazeNeighbors(cell: MazeCoord): MazeCoord[] {
   return DIRS.map((dir) => ({ r: cell.r + dir.r, c: cell.c + dir.c })).filter(isMazeRoad)
 }
 
+/** A road cell that shares a side with the hurt man. Standing on him is not "next to". */
+export function isNextToHurt(cell: MazeCoord): boolean {
+  return mazeNeighbors(MAZE_HURT).some((next) => mazeSame(next, cell))
+}
+
 /** One open-road step — tap / swipe / key. Never a far teleport. */
 export function isAdjacentRoadStep(from: MazeCoord, to: MazeCoord): boolean {
   if (!isMazeRoad(from) || !isMazeRoad(to)) return false

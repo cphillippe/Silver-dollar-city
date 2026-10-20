@@ -7,6 +7,7 @@ import { CITY_PLOTS, type CityPlotId } from './city.ts'
 
 import { EASY } from './easyUi.ts'
 export { EASY }
+import { storyPlayFor } from './storyPlay.ts'
 import { EASY_CHROME, EASY_STRIP_FACE } from './easyChrome.ts'
 
 export {
@@ -22,6 +23,7 @@ export {
 } from './sourceDig.ts'
 
 /** Easy trail loop — defined once in the trail home; these are the same bindings. */
+import { EASY_LINE_ORDER } from '../easyTrail/trail/loop.ts'
 export {
   EASY_LINE_ORDER,
   EASY_MATCH_LINE,
@@ -318,6 +320,25 @@ function easyWhoWhereFallback(id: string): EasyWhoWhere {
 export function easyWhoWhereLine(id: string): string {
   const { who, place } = easyWhoWhere(id)
   return `This idea lives at ${place}, with ${who}.`
+}
+
+/**
+ * Home whisper when the next lesson is a word search.
+ * The first visit to a place stays "Find the words". A repeat at that place counts up.
+ */
+export function easyWordsHomeLine(id: string): string {
+  const place = easyWhoWhere(id).place
+  const index = EASY_LINE_ORDER.indexOf(id)
+  let k = 0
+  for (let i = index - 1; i >= 0; i -= 1) {
+    const prev = EASY_LINE_ORDER[i]
+    if (!prev) break
+    if (storyPlayFor(prev) !== 'panel-blast') break
+    if (easyWhoWhere(prev).place !== place) break
+    k += 1
+  }
+  if (k === 0) return `Find the words at ${place}.`
+  return `More words at ${place}, part ${k + 1}.`
 }
 
 export function scrapbookLabel(easy: boolean, lit?: number) {

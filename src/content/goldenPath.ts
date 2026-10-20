@@ -130,3 +130,11 @@ export function easyReadMarkedTomorrow(progress: ReadProgress, today: string): b
   if (held === 0) return true
   return storageGet(EASY_OPEN_DAY_KEY) === today
 }
+
+/**
+ * Night Watch on Easy Home waits until a later calendar day.
+ * The first Easy day stays on the lesson. A save with no open-day key still shows the card.
+ */
+export function easyNightWatchOnHome(progress: ReadProgress, today: string): boolean {
+  return (progress.easyHeld?.length ?? 0) > 0 && storageGet(EASY_OPEN_DAY_KEY) !== today
+}

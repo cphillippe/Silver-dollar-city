@@ -413,6 +413,64 @@ html[data-easy='on'] .play.is-road-maze .maze-cell.is-road:active {
     0 3px 0 #8a5a22;
 }
 
+/* Easy: the current goal (hurt man, then the pink house) wears a gold ring. Paint only. */
+html[data-easy='on'] .play.is-road-maze .maze-cell.is-goal {
+  outline: 2px solid #ffcc33;
+  outline-offset: 0;
+  box-shadow:
+    0 0 0 3px #ffcc33,
+    0 0 14px rgba(255, 204, 51, 0.9),
+    0 3px 0 #8a5a22;
+  animation: maze-goal-pulse 1.15s ease-in-out infinite;
+}
+
+@keyframes maze-goal-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 2px #c9a227,
+      0 0 6px rgba(255, 204, 51, 0.45),
+      0 3px 0 #8a5a22;
+  }
+  50% {
+    box-shadow:
+      0 0 0 3px #ffe28a,
+      0 0 16px rgba(255, 204, 51, 0.95),
+      0 3px 0 #8a5a22;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-easy='on'] .play.is-road-maze .maze-cell.is-goal {
+    animation: none;
+  }
+}
+
+html[data-easy='on'] .play.is-road-maze .maze-stage {
+  flex-direction: column;
+}
+
+html[data-easy='on'] .play.is-road-maze .maze-how {
+  flex: 0 0 auto;
+  width: 100%;
+  margin: 0;
+  padding: 0 2px 2px;
+  text-align: center;
+  font-size: 0.78rem;
+  line-height: 1.15;
+  font-weight: 750;
+  color: #fff6e8;
+}
+
+@media (max-height: 920px) {
+  html[data-easy='on'] .play.is-road-maze .maze-how {
+    color: var(--ink, #2a2118);
+    font-size: 0.74rem;
+    line-height: 1.1;
+    padding: 0 2px;
+  }
+}
+
 .maze-cell.is-here {
   box-shadow:
     0 0 0 2px #fffce8,
