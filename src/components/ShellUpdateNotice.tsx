@@ -5,6 +5,7 @@ import {
   inAndroidShell,
   isBundledShellHost,
   shellApkOffer,
+  shellUpdateNoticeEnabled,
 } from '../config/shell'
 import '../styles/shellUpdate.css'
 
@@ -19,11 +20,16 @@ function readDismissed(): number {
 }
 
 /**
- * Shell chrome only. Hidden on the website and on iOS.
+ * Shell chrome only. Hidden on the website, on iOS, and on the Play bundle.
  * Update: newer native versionCode in shell.json.
  * No signal: bundled fallback (a different save from the live town).
  */
 export function ShellUpdateNotice() {
+  if (!shellUpdateNoticeEnabled()) return null
+  return <ShellUpdateNoticeLive />
+}
+
+function ShellUpdateNoticeLive() {
   const [apkUrl, setApkUrl] = useState<string | null>(null)
   const [remoteCode, setRemoteCode] = useState(0)
   const [offlineCopy, setOfflineCopy] = useState(false)

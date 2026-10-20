@@ -1,8 +1,10 @@
 /**
  * Android shell contract.
- * The phone app loads the live Pages origin. The bundled dist is only the
- * offline fallback. iOS and the website stay on the local build.
+ * The sideload app loads the live Pages origin. The Play app bundles dist
+ * and stays on BUNDLED_SHELL_ORIGIN. iOS and the website stay on the local build.
  */
+
+import { isPlayBuild } from './playBuild.ts'
 
 /** First-party Pages app. HTTPS only. */
 export const PAGES_APP_URL = 'https://cphillippe.github.io/Silver-dollar-city/'
@@ -16,6 +18,19 @@ export const SHELL_APK_URL =
 
 /** Dismissed shell versionCode. Separate from the game save. */
 export const SHELL_DISMISS_KEY = 'silver-city-shell-dismissed'
+
+/**
+ * Permanent origin of the Play bundle. Do not retarget this without a save migration.
+ * Scheme and hostname are pinned together.
+ */
+export const BUNDLED_SHELL_SCHEME = 'https'
+export const BUNDLED_SHELL_HOSTNAME = 'localhost'
+export const BUNDLED_SHELL_ORIGIN = `${BUNDLED_SHELL_SCHEME}://${BUNDLED_SHELL_HOSTNAME}`
+
+/** Sideload may offer the GitHub APK. The Play bundle never does. */
+export function shellUpdateNoticeEnabled(): boolean {
+  return !isPlayBuild()
+}
 
 export interface SilverCityShellBridge {
   getVersionCode: () => number
@@ -49,9 +64,13 @@ export function inAndroidShell(): boolean {
   )
 }
 
-/** Capacitor's local error page. The live town uses the Pages host. */
+/**
+ * Local Capacitor host.
+ * Sideload: the offline page when Pages did not load.
+ * Play: the permanent bundled origin (BUNDLED_SHELL_ORIGIN).
+ */
 export function isBundledShellHost(hostname: string): boolean {
-  return hostname === 'localhost' || hostname === '127.0.0.1'
+  return hostname === BUNDLED_SHELL_HOSTNAME || hostname === '127.0.0.1'
 }
 
 /**

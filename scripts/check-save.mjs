@@ -1,9 +1,11 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { adsAreVisible, adsEnabledDefault, AD_SLOTS, ADS_NEVER_COVER, isBetweenSceneTransition, softAdsDefault, softAdsVisible } from '../src/config/ads.ts'
-import { APP_VERSION, SAVE_SCHEMA_VERSION } from '../src/config/app.ts'
+import { APP_VERSION, SAVE_SCHEMA_VERSION, STORAGE_KEY } from '../src/config/app.ts'
 import {
+  corruptSaveKey,
   encodeShareCode,
+  loadSave,
   parseIncomingSave,
   SAVE_MAX_BYTES,
   wrapSave,
@@ -275,5 +277,63 @@ assert.match(androidIgnore, /^\*\.jks$/m)
 assert.match(androidIgnore, /^\*\.keystore$/m)
 assert.match(androidIgnore, /^google-services\.json$/m)
 assert.doesNotMatch(androidIgnore, /#\*\.jks/)
+
+const saveStore = new Map()
+globalThis.localStorage = {
+  getItem(key) {
+    return saveStore.has(key) ? saveStore.get(key) : null
+  },
+  setItem(key, value) {
+    saveStore.set(key, String(value))
+  },
+  removeItem(key) {
+    saveStore.delete(key)
+  },
+  clear() {
+    saveStore.clear()
+  },
+  key(index) {
+    return [...saveStore.keys()][index] ?? null
+  },
+  get length() {
+    return saveStore.size
+  },
+}
+
+function corruptCopies() {
+  return [...saveStore.keys()].filter((key) => key.startsWith(`${STORAGE_KEY}.corrupt-`))
+}
+
+function waitAMillisecond() {
+  const start = Date.now()
+  while (Date.now() === start) {
+    /* corrupt keys include the millisecond */
+  }
+}
+
+saveStore.set(STORAGE_KEY, '{"started":true}')
+const kept = loadSave()
+assert.equal(kept.progress.started, true)
+assert.deepEqual(corruptCopies(), [], 'a readable save is not copied aside')
+
+waitAMillisecond()
+saveStore.clear()
+saveStore.set(STORAGE_KEY, '{not')
+const broken = loadSave()
+assert.equal(broken.progress.started, false)
+const brokenCopies = corruptCopies()
+assert.equal(brokenCopies.length, 1)
+assert.equal(saveStore.get(brokenCopies[0]), '{not')
+assert.match(brokenCopies[0], new RegExp(`^${STORAGE_KEY}\\.corrupt-\\d+$`))
+assert.equal(corruptSaveKey(123), `${STORAGE_KEY}.corrupt-123`)
+
+waitAMillisecond()
+saveStore.clear()
+saveStore.set(STORAGE_KEY, '{"nope":1}')
+const foreign = loadSave()
+assert.equal(foreign.progress.started, false)
+const foreignCopies = corruptCopies()
+assert.equal(foreignCopies.length, 1)
+assert.equal(saveStore.get(foreignCopies[0]), '{"nope":1}')
 
 console.log('check-save: ok')

@@ -55,6 +55,7 @@ import {
   visualSnapshot,
 } from '../lib/cityBuild'
 import { TOWN_PATH_HARD } from '../content/lots'
+import { ComingSoonPlots } from './city/ComingSoonPlots'
 import { Avatar, portraitSrc } from './Avatar'
 import { GemMark } from './GemMark'
 import { MindMap } from './MindMap'
@@ -855,6 +856,8 @@ export function CityMap({
             ))}
           </g>
         ) : null}
+
+        {mode === 'live' ? <ComingSoonPlots /> : null}
       </svg>
 
       {beat && !easy ? (

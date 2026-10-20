@@ -4,6 +4,8 @@
  * Do not flip VITE_PLAY_BILLING / VITE_STOREKIT / VITE_ADS_ENABLED here.
  */
 
+import { isPlayBuild } from './playBuild.ts'
+
 export const TIP_URL = 'https://ko-fi.com/'
 export const MILL_PACK_URL = 'https://ko-fi.com/'
 export const HARBOR_PACK_URL = 'https://ko-fi.com/'
@@ -34,6 +36,7 @@ function readVite(key: string): string {
 }
 
 export function supportUrls(): { tip: string; mill: string; harbor: string } {
+  if (isPlayBuild()) return { tip: '', mill: '', harbor: '' }
   return {
     tip: readVite('VITE_TIP_URL') || TIP_URL,
     mill: readVite('VITE_MILL_PACK_URL') || MILL_PACK_URL,

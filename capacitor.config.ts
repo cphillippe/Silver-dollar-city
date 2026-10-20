@@ -4,8 +4,9 @@ const config: CapacitorConfig = {
   appId: 'city.silver.unending',
   appName: 'Silver City',
   webDir: 'dist',
-  // No server.url here. Android points at Pages after sync
-  // (scripts/android-live-shell.mjs). iOS keeps this bundled webDir.
+  // No server.url here. The sideload APK points at Pages after sync
+  // (scripts/android-live-shell.mjs). The Play AAB keeps this bundled webDir
+  // and pins https://localhost (scripts/android-play-shell.mjs). iOS stays bundled.
   android: {
     allowMixedContent: false,
   },

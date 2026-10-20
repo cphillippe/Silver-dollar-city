@@ -547,6 +547,19 @@ function storageSet(key: string, value: string) {
   localStorage.setItem(key, value)
 }
 
+/** Raw corrupt save, kept beside the live key before a reset. */
+export function corruptSaveKey(now = Date.now()): string {
+  return `${STORAGE_KEY}.corrupt-${now}`
+}
+
+function backupCorruptRaw(raw: string) {
+  try {
+    storageSet(corruptSaveKey(), raw)
+  } catch {
+    // The reset still proceeds when storage cannot take the copy.
+  }
+}
+
 export function loadSave(): { progress: ProgressState; meta: SaveMeta } {
   const raw = storageGet(STORAGE_KEY)
   if (!raw) {
@@ -564,6 +577,7 @@ export function loadSave(): { progress: ProgressState; meta: SaveMeta } {
   try {
     const parsed = parseUnknownSave(JSON.parse(raw) as unknown)
     if (!parsed.ok) {
+      backupCorruptRaw(raw)
       return {
         progress: emptyProgress(),
         meta: {
@@ -579,6 +593,7 @@ export function loadSave(): { progress: ProgressState; meta: SaveMeta } {
     }
     return { progress: parsed.progress, meta: parsed.meta }
   } catch {
+    backupCorruptRaw(raw)
     return {
       progress: emptyProgress(),
       meta: {

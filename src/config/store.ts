@@ -9,6 +9,8 @@ import { adsEnabledDefault } from './ads.ts'
 import { PLAY_SKUS } from './commerce.ts'
 import { storeSurface } from '../lib/nativeStore.ts'
 
+export { isPlayBuild, playShopClosed, playShopEnabled, resetPlayBuildForTest, setPlayBuildForTest, setPlayShopForTest } from './playBuild.ts'
+
 export interface StoreFlags {
   playBilling: boolean
   storeKit: boolean
