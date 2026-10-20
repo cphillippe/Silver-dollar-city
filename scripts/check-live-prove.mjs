@@ -2924,8 +2924,36 @@ function missSum(score) {
 
 async function toastText(page) {
   const toast = page.locator('.match-toast')
-  if ((await toast.count()) < 1) return ''
-  return (await toast.first().innerText()).replace(/\s+/g, ' ').trim()
+  const count = await toast.count()
+  if (count < 1) return ''
+  const parts = []
+  for (let i = 0; i < count; i += 1) {
+    const text = (await toast.nth(i).innerText()).replace(/\s+/g, ' ').trim()
+    if (text) parts.push(text)
+  }
+  return parts.join(' | ')
+}
+
+async function waitForToast(page, expected, ms = 1000) {
+  const until = Date.now() + ms
+  let text = await toastText(page)
+  while (text !== expected && Date.now() < until) {
+    await page.waitForTimeout(40)
+    text = await toastText(page)
+  }
+  return text
+}
+
+/** A setup tap can leave the miss line up. A glowing tap clears it. */
+async function settleToast(page) {
+  for (let i = 0; i < 4; i += 1) {
+    if ((await toastText(page)) === '') return
+    const cue = await faceClient(page, 'cue')
+    if (!cue) break
+    await page.mouse.click(cue.x, cue.y)
+    await page.waitForTimeout(180)
+  }
+  await waitForToast(page, '', 1600)
 }
 
 async function strayClient(page) {
@@ -3177,8 +3205,10 @@ async function checkTrustedMisses(browser, port, errors) {
     const run = await openMap(id, width, height, reduced)
     const { page, logs } = run
     const label = `${id} ${width}`
+    await settleToast(page)
     const before = await readMissScore(page)
-    assert.equal(await toastText(page), '', `${label} starts without a miss line`)
+    const startToast = await toastText(page)
+    assert.equal(startToast, '', `${label} starts without a miss line (${startToast})`)
     let strayAt = null
     for (let i = 0; i < 20; i += 1) {
       strayAt = await strayClient(page)
@@ -3190,7 +3220,8 @@ async function checkTrustedMisses(browser, port, errors) {
     const afterStray = await readMissScore(page)
     assert.equal(afterStray.misses, before.misses, `${label} stray taps are not misses`)
     assert.equal(afterStray.stray, before.stray + 20, `${label} stray +20`)
-    assert.equal(await toastText(page), '', `${label} stray shows no toast`)
+    const strayToast = await toastText(page)
+    assert.equal(strayToast, '', `${label} stray shows no toast (${strayToast})`)
     assert.ok(logs.some((line) => /^nw-stray \d+ \d+$/.test(line)), `${label} logs nw-stray`)
 
     const dark = await faceClient(page, 'dark')
@@ -3222,10 +3253,11 @@ async function checkTrustedMisses(browser, port, errors) {
       assert.equal(motion, 'walker-cue-nudge', `${label} the lead ring scales`)
       await page.screenshot({ path: '/opt/cursor/artifacts/nw-miss-a2-nudge-375.png' })
     }
+    const darkToast = await waitForToast(page, EASY.nightMiss, 900)
+    assert.equal(darkToast, EASY.nightMiss, `${label} dark toast (${darkToast})`)
     const afterDark = await readMissScore(page)
     assert.equal(afterDark.misses, afterStray.misses + 10, `${label} ten dark taps count`)
     assert.equal(afterDark.dark, afterStray.dark + 10, `${label} data-miss-dark +10`)
-    assert.equal(await toastText(page), EASY.nightMiss, `${label} dark toast`)
     if (hpBefore != null && lastDark.id === dark.id) {
       assert.equal(hpLast, hpBefore, `${label} a dark tap does not change HP`)
     }
@@ -3375,10 +3407,12 @@ async function checkTrustedMisses(browser, port, errors) {
   for (const id of MISS_MAPS) {
     await controls(id, 375, 667, false, true)
   }
-  if (!process.env.NW_MISS_MAPS) {
+  if (!process.env.NW_MISS_MAPS || process.env.NW_MISS_PHONE === '1') {
     await controls('a2', 412, 915, true, false)
     await controls('a2', 768, 1024, false, false)
   }
+  const missErrors = errors.filter((line) => line.startsWith('miss '))
+  if (missErrors.length) console.log(`miss-console ${missErrors.join(' | ')}`)
   writeFileSync('/opt/cursor/artifacts/nw-miss-report.json', JSON.stringify(rows, null, 2))
   console.log(`miss-report ${JSON.stringify(rows)}`)
 }
@@ -3414,7 +3448,7 @@ export async function checkLiveProve() {
     await checkShareCard(browser, port, errors)
     await checkShareBusyTap(browser, port, errors)
     await checkOssuaryLesson(browser, port, errors)
-    assert.equal(errors.join('\n'), '', '1.4.482 live prove stays free of console errors')
+    assert.equal(errors.join('\n'), '', `1.4.482 live prove stays free of console errors ${errors.join(' | ').slice(0, 160)}`)
   } finally {
     await browser.close()
     await server.close()
