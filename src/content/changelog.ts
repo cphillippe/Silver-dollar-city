@@ -8,6 +8,23 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.520',
+    title: 'Find the gems keeps the picture',
+    when: '2026-10-20',
+    items: [
+      'Find the gems keeps a picture when you tap its line or drag the picture onto the line.',
+      'On the first day, Read stays for tomorrow. One gold step opens.',
+      'Story Creek and the father run show who and where on a phone.',
+      'The website picks up a new copy on the next open. Play does not ask.',
+      'A word-search bonus shows the word you just found. A miss drag clears.',
+      'On Play, Coming soon streets are easier to tap and sit clear of the edge.',
+      'The Play shop stays off, so that build does not declare billing.',
+      'Hard stays the same.',
+      'Refs #809.',
+      'Refs #784.',
+    ],
+  },
+  {
     version: '1.4.519',
     title: 'The Play copy of Silver City is stored on the phone',
     when: '2026-10-20',

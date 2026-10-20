@@ -1487,3 +1487,17 @@ html[data-easy='on'] .play.is-road-maze .maze-cell.is-road:active {
   margin: 0;
   min-height: 4.5rem;
 }
+
+/* 1.4.520: Story Creek who · place stays on short and tall phones.
+   Thumbs and the caption stay peeled so the board and the gold button fit. */
+@media (max-height: 920px) {
+  html[data-easy='on'] .play.is-road-maze .story-kicker {
+    display: block;
+    flex: 0 0 auto;
+    margin: 0;
+    padding: 0 4px;
+    font-size: 0.72rem;
+    line-height: 1.1;
+    letter-spacing: 0.04em;
+  }
+}

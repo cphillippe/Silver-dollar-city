@@ -203,7 +203,12 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
               <button
                 type="button"
                 className="easy-coach-step easy-dock-walk"
-                onClick={() => onNavigate({ name: 'daily' })}
+                disabled={readTomorrow}
+                aria-disabled={readTomorrow ? true : undefined}
+                onClick={() => {
+                  if (readTomorrow) return
+                  onNavigate({ name: 'daily' })
+                }}
               >
                 <span className="easy-step-num">1</span>
                 <span>Read</span>

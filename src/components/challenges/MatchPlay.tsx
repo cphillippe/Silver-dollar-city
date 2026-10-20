@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { shuffle } from '../../lib/shuffle'
 import { plainFor } from '../../content/plain'
 import { EASY, easyChromeLine, easyWrongTap, isEasy } from '../../lib/easy'
+import { easyLead } from '../../lib/words'
 import { useProgress } from '../../store/progress'
 import type { MatchChallenge, MatchSceneId } from '../../types'
 import { MatchScene } from '../MatchScene'
@@ -49,6 +50,10 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
   const [decoyId, setDecoyId] = useState(() =>
     focusId ? decoyFor(left.map((pair) => pair.id), focusId, []) : '',
   )
+  const lockedRef = useRef<string[]>([])
+  const locking = useRef(false)
+  const dragFrom = useRef<{ id: string; x: number; y: number } | null>(null)
+  const dragMoved = useRef(false)
 
   useEffect(() => {
     if (!guided || !focusId) return
@@ -71,33 +76,27 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
     if (guided && focusId) setPicked({ side: 'left', id: focusId })
   }
 
-  function choose(side: Side, id: string) {
-    if (status === 'ok' || (shake || locked.includes(id)) && !guided) return
-    if (locked.includes(id) && !(side === 'right' && picked?.side === 'left')) return
-    if (!picked || picked.side === side) {
-      setPicked((current) =>
-        current?.side === side && current.id === id ? null : { side, id },
-      )
-      setStatus('idle')
-      return
+  function lockPair(id: string) {
+    if (status === 'ok' || locking.current || lockedRef.current.includes(id)) return
+    locking.current = true
+    const next = [...lockedRef.current, id]
+    lockedRef.current = next
+    setLocked(next)
+    setPicked(null)
+    setFlash(id)
+    queueMicrotask(() => {
+      locking.current = false
+    })
+    window.setTimeout(() => setFlash(null), 380)
+    if (next.length === challenge.pairs.length) {
+      setStatus('ok')
+      if (easy) setReady(true)
+      else onSolved()
     }
-    if (picked.id === id) {
-      const next = [...locked, id]
-      setLocked(next)
-      setPicked(null)
-      setFlash(id)
-      window.setTimeout(() => setFlash(null), 380)
-      if (next.length === challenge.pairs.length) {
-        setStatus('ok')
-        if (easy) {
-          setReady(true)
-        } else {
-          onSolved()
-        }
-      }
-      return
-    }
-    setFlash(picked.id)
+  }
+
+  function missPair(id: string) {
+    setFlash(id)
     setStatus('wrong')
     setShake(true)
     setMisses((count) => count + 1)
@@ -109,6 +108,60 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
       setStatus('idle')
       setPicked(guided && focusId ? { side: 'left', id: focusId } : keep)
     }, 880)
+  }
+
+  function choose(side: Side, id: string) {
+    if (status === 'ok') return
+    // Easy deal: the focus picture stays selected, and the matching line locks
+    // whether or not that picture was tapped first.
+    if (easy && guided && focusId) {
+      if (side === 'left') {
+        setPicked({ side: 'left', id: focusId })
+        setStatus('idle')
+        return
+      }
+      if (id === focusId) {
+        lockPair(focusId)
+        return
+      }
+      missPair(focusId)
+      return
+    }
+    if ((shake || locked.includes(id)) && !guided) return
+    if (locked.includes(id) && !(side === 'right' && picked?.side === 'left')) return
+    if (!picked || picked.side === side) {
+      setPicked((current) =>
+        current?.side === side && current.id === id ? null : { side, id },
+      )
+      setStatus('idle')
+      return
+    }
+    if (picked.id === id) {
+      lockPair(id)
+      return
+    }
+    missPair(picked.id)
+  }
+
+  function onPictureDown(event: ReactPointerEvent<HTMLButtonElement>, id: string) {
+    if (!easy || !guided || status === 'ok') return
+    dragMoved.current = false
+    dragFrom.current = { id, x: event.clientX, y: event.clientY }
+    event.currentTarget.setPointerCapture?.(event.pointerId)
+  }
+
+  function onPictureUp(event: ReactPointerEvent<HTMLButtonElement>) {
+    const start = dragFrom.current
+    dragFrom.current = null
+    if (!easy || !guided || !start || !focusId || status === 'ok') return
+    const moved = Math.hypot(event.clientX - start.x, event.clientY - start.y)
+    if (moved < 10) return
+    dragMoved.current = true
+    const hit = document.elementFromPoint(event.clientX, event.clientY)
+    const lineId = hit?.closest('[data-match-line]')?.getAttribute('data-match-line')
+    if (!lineId) return
+    if (lineId === focusId) lockPair(focusId)
+    else missPair(focusId)
   }
 
   const picture = (pair: (typeof left)[number]) => pictureOf(pair)
@@ -147,7 +200,7 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
       )}
       <p className="sort-how">
         {easy ? (
-          EASY.matchHow
+          easyLead(challenge.id, challenge.prompt)
         ) : (
           <>
             <strong>Tap a picture</strong>, then the claim that belongs
@@ -193,8 +246,15 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
                 className={`match-card is-picture ${scene ? 'is-gem' : ''} ${picked?.side === 'left' && picked.id === pair.id ? 'is-selected' : ''} ${locked.includes(pair.id) ? 'is-locked' : ''} ${flash === pair.id && !locked.includes(pair.id) ? 'is-flash' : ''} ${picked && picked.side === 'right' && !locked.includes(pair.id) ? 'awaiting' : ''}`}
                 style={status === 'ok' ? burstStyle(index, 'keep') : undefined}
                 aria-label={pair.left}
+                data-match-picture={pair.id}
+                onPointerDown={(event) => onPictureDown(event, pair.id)}
+                onPointerUp={onPictureUp}
                 onClick={(event) => {
                   event.stopPropagation()
+                  if (dragMoved.current) {
+                    dragMoved.current = false
+                    return
+                  }
                   choose('left', pair.id)
                 }}
               >
@@ -218,6 +278,7 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
               type="button"
               className={`match-card right ${picked?.side === 'right' && picked.id === item.id ? 'is-selected' : ''} ${locked.includes(item.id) ? 'is-locked' : ''} ${flash === item.id ? 'is-flash' : ''} ${picked && picked.side === 'left' && !locked.includes(item.id) ? 'awaiting' : ''}`}
               style={status === 'ok' ? burstStyle(index, 'discard') : undefined}
+              data-match-line={item.id}
               onClick={(event) => {
                 event.stopPropagation()
                 choose('right', item.id)

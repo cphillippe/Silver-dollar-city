@@ -121,8 +121,8 @@ export function easyReadIsHomeGold(progress: ReadProgress, today: string): boole
 }
 
 /**
- * Day-1 Read is still tappable, but it is not the gold step.
- * Does not change easyReadIsHomeGold or the firstSession rule.
+ * Day-1 Read is marked tomorrow and does not navigate.
+ * It is not the gold step. Does not change easyReadIsHomeGold.
  */
 export function easyReadMarkedTomorrow(progress: ReadProgress, today: string): boolean {
   if (easyReadIsHomeGold(progress, today)) return false
