@@ -593,16 +593,46 @@ function assertWinBoard(before, after, gridBefore, gridAfter, width, height) {
   assert.deepEqual(gridAfter, gridBefore, `${width} letter grid changed`)
 }
 
+async function measureGemPoints(page, path) {
+  return page.evaluate((cells) => {
+    return cells.map(({ r, c }) => {
+      const el = document.querySelector(`[data-gem-cell][data-r="${r}"][data-c="${c}"]`)
+      if (!(el instanceof HTMLElement)) return null
+      const box = el.getBoundingClientRect()
+      const x = box.left + box.width / 2
+      const y = box.top + box.height / 2
+      return { x, y, r, c, hit: document.elementsFromPoint(x, y).includes(el) }
+    })
+  }, path)
+}
+
 async function dragPath(page, path) {
-  const first = page.locator(`[data-gem-cell][data-r="${path[0].r}"][data-c="${path[0].c}"]`)
-  const start = await first.boundingBox()
-  if (!start) throw new Error('gem cell has no box')
-  await page.mouse.move(start.x + start.width / 2, start.y + start.height / 2)
+  await page.locator('.gem-board').scrollIntoViewIfNeeded()
+  let points = await measureGemPoints(page, path)
+  if (points.some((point) => !point?.hit)) {
+    const anchor = path[Math.floor(path.length / 2)]
+    await page
+      .locator(`[data-gem-cell][data-r="${anchor.r}"][data-c="${anchor.c}"]`)
+      .scrollIntoViewIfNeeded()
+    points = await measureGemPoints(page, path)
+  }
+  if (points.some((point) => !point?.hit)) {
+    throw new Error(`gem cells not hittable ${JSON.stringify(points)}`)
+  }
+  await page.mouse.move(points[0].x, points[0].y)
   await page.mouse.down()
-  for (const cell of path.slice(1)) {
-    const box = await page.locator(`[data-gem-cell][data-r="${cell.r}"][data-c="${cell.c}"]`).boundingBox()
-    if (!box) throw new Error('gem step has no box')
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 6 })
+  for (let i = 1; i < points.length; i += 1) {
+    const from = points[i - 1]
+    const to = points[i]
+    const diagonal = path[i].r !== path[i - 1].r && path[i].c !== path[i - 1].c
+    if (diagonal) {
+      // Stay inside the start cell, then land on the target. A straight step
+      // between centers clips the corner neighbor and snaps off the word.
+      await page.mouse.move(from.x + (to.x - from.x) * 0.28, from.y + (to.y - from.y) * 0.28)
+      await page.mouse.move(to.x, to.y)
+    } else {
+      await page.mouse.move(to.x, to.y, { steps: 8 })
+    }
   }
   await page.mouse.up()
 }
@@ -613,21 +643,67 @@ async function playGem(page, lineId = 'ob-tuning', { watchLast = false } = {}) {
   const juice = { burst: 0, pop: false }
   for (const word of words) {
     if (await page.locator('.play.is-gem-search.is-win').count()) return juice
-    const letters = await readGrid(page)
+    // Match reseeds once on mount (line effect bumps the round). Wait until the letters sit still.
+    let letters = await readGrid(page)
+    for (let attempt = 0; attempt < 8; attempt += 1) {
+      await page.waitForTimeout(40)
+      const next = await readGrid(page)
+      if (JSON.stringify(next) === JSON.stringify(letters)) {
+        letters = next
+        break
+      }
+      letters = next
+    }
     const path = findStraightSpelling(letters, word)
     if (!path) throw new Error(`${lineId} word ${word} is not on the board`)
+    const foundBefore = await page.locator('.match-teach-chip.is-found').count()
+    const expectJuice = watchLast && word === words[words.length - 1]
+    if (expectJuice) {
+      await page.evaluate(() => {
+        window.__gemJuice = 0
+        const until = performance.now() + 2500
+        const watch = () => {
+          const pop = document.querySelector('.gem-find-pop')
+          const burst = document.querySelectorAll('.gem-cell.is-burst').length
+          if (pop && burst > 0) {
+            const box = pop.getBoundingClientRect()
+            const opacity = Number(getComputedStyle(pop).opacity)
+            if (box.height > 0 && opacity > 0.15) window.__gemJuice = Math.max(window.__gemJuice, burst)
+          }
+          if (!window.__gemJuice && performance.now() < until) requestAnimationFrame(watch)
+        }
+        requestAnimationFrame(watch)
+      })
+    }
+    const landed = async () => {
+      try {
+        const handle = await page.waitForFunction(
+          (count) =>
+            document.querySelectorAll('.match-teach-chip.is-found').length > count ||
+            Boolean(document.querySelector('.play.is-gem-search.is-win')),
+          foundBefore,
+          { timeout: 1800 },
+        )
+        await handle.dispose()
+        return true
+      } catch {
+        return false
+      }
+    }
     await dragPath(page, path)
-    if (watchLast && word === words[words.length - 1]) {
-      await page.waitForFunction(() => {
-        const burst = document.querySelectorAll('.gem-cell.is-burst').length
-        const pop = document.querySelector('.gem-find-pop')
-        if (!pop || burst < 1) return false
-        const style = getComputedStyle(pop)
-        const box = pop.getBoundingClientRect()
-        return style.display !== 'none' && style.visibility !== 'hidden' && box.height > 0 && Number(style.opacity) > 0.2
-      }, { timeout: 2000 })
-      juice.burst = await page.locator('.gem-cell.is-burst').count()
-      juice.pop = true
+    let saw = await landed()
+    if (!saw) {
+      await dragPath(page, path)
+      saw = await landed()
+    }
+    if (!saw) {
+      const toast = ((await page.locator('.miss-banner, .match-toast, .bonus-banner').first().textContent().catch(() => '')) || '').replace(/\s+/g, ' ').trim()
+      throw new Error(`${lineId} drag missed ${word} path=${JSON.stringify(path)} toast=${toast || 'none'}`)
+    }
+    if (expectJuice) {
+      await page.waitForFunction(() => window.__gemJuice > 0, undefined, { timeout: 1200 }).catch(() => {})
+      juice.burst = await page.evaluate(() => window.__gemJuice || 0)
+      juice.pop = juice.burst > 0
     }
     await page.waitForTimeout(280)
   }
