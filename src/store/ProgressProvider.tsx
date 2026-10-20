@@ -20,11 +20,13 @@ import {
   masteryFromReview,
   type ReviewEvent,
 } from '../lib/memory'
+import { foundersLamp } from '../lib/foundersLamp'
 import {
   backupCurrentSave,
   parseIncomingSave,
   persistSave,
   progressAfterReset,
+  stampFirstSeen,
   type SaveMeta,
 } from '../lib/save'
 import { bestStars, type StarCount } from '../lib/stars'
@@ -305,6 +307,28 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     })
   }, [write])
 
+  const setLampStyle = useCallback((style: 'classic' | 'founders') => {
+    setProgress((current) => {
+      if (!foundersLamp(current)) return current
+      if (style === 'founders') {
+        if (current.lampStyle === 'founders') return current
+        return write({ ...current, lampStyle: 'founders' })
+      }
+      if (current.lampStyle !== 'founders' && current.lampStyle !== 'classic') return current
+      const next = { ...current }
+      delete next.lampStyle
+      return write(next)
+    })
+  }, [write])
+
+  const markFoundersGiftSeen = useCallback(() => {
+    setProgress((current) => {
+      if (current.foundersGiftSeen === true) return current
+      if (!foundersLamp(current)) return current
+      return write({ ...current, foundersGiftSeen: true })
+    })
+  }, [write])
+
   const recordTaught = useCallback((evidenceId: string, fromMatch = false) => {
     setProgress((current) => {
       const taught = current.taught ?? []
@@ -410,7 +434,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     backupCurrentSave()
     setMissed([])
     forgetCitySeen()
-    commit(parsed.progress)
+    commit(stampFirstSeen(parsed.progress))
     return { ok: true as const }
   }, [commit])
 
@@ -439,6 +463,8 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       markMet,
       setTheme,
       setEasyMode,
+      setLampStyle,
+      markFoundersGiftSeen,
       recordTaught,
       recordStreetLinks,
       upgradeBuilding,
@@ -471,6 +497,8 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       recordTaught,
       recordStreetLinks,
       setEasyMode,
+      setLampStyle,
+      markFoundersGiftSeen,
       setTheme,
       start,
       upgradeBuilding,

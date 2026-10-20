@@ -37,3 +37,4 @@ jobs:
       - run: node --experimental-strip-types scripts/check-packs.mjs
       - run: node --experimental-strip-types scripts/check-commerce.mjs
       - run: node scripts/check-play-shop.mjs
+      - run: node scripts/check-founders-lamp.mjs
