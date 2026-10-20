@@ -17,17 +17,21 @@
     0 3px 0 #c46a08,
     0 0 18px rgba(255, 204, 51, 0.75);
   pointer-events: none;
-  animation: gem-find-pop 0.98s cubic-bezier(0.2, 1.45, 0.3, 1) both;
+  animation: gem-find-pop 1.2s cubic-bezier(0.2, 1.45, 0.3, 1) both;
 }
 
 @keyframes gem-find-pop {
   0% {
-    opacity: 0;
-    transform: translateX(-50%) scale(0.55) translateY(12px);
+    opacity: 1;
+    transform: translateX(-50%) scale(0.72) translateY(8px);
   }
-  28% {
+  22% {
     opacity: 1;
     transform: translateX(-50%) scale(1.18) translateY(0);
+  }
+  78% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.05) translateY(-6px);
   }
   100% {
     opacity: 0;

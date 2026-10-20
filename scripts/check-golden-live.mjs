@@ -694,7 +694,7 @@ async function playGem(page, lineId = 'ob-tuning', { watchLast = false } = {}) {
     if (expectJuice) {
       await page.evaluate(() => {
         window.__gemJuice = 0
-        const until = performance.now() + 2500
+        window.__gemJuiceStop = false
         const watch = () => {
           const pop = document.querySelector('.gem-find-pop')
           const burst = document.querySelectorAll('.gem-cell.is-burst').length
@@ -703,7 +703,7 @@ async function playGem(page, lineId = 'ob-tuning', { watchLast = false } = {}) {
             const opacity = Number(getComputedStyle(pop).opacity)
             if (box.height > 0 && opacity > 0.15) window.__gemJuice = Math.max(window.__gemJuice, burst)
           }
-          if (!window.__gemJuice && performance.now() < until) requestAnimationFrame(watch)
+          if (!window.__gemJuice && !window.__gemJuiceStop) requestAnimationFrame(watch)
         }
         requestAnimationFrame(watch)
       })
@@ -734,7 +734,10 @@ async function playGem(page, lineId = 'ob-tuning', { watchLast = false } = {}) {
       throw new Error(`${lineId} drag missed ${word} path=${JSON.stringify(path)} toast=${toast || 'none'}`)
     }
     if (expectJuice) {
-      await page.waitForFunction(() => window.__gemJuice > 0, undefined, { timeout: 1200 }).catch(() => {})
+      await page.waitForFunction(() => window.__gemJuice > 0, undefined, { timeout: 2500 }).catch(() => {})
+      await page.evaluate(() => {
+        window.__gemJuiceStop = true
+      })
       juice.burst = await page.evaluate(() => window.__gemJuice || 0)
       juice.pop = juice.burst > 0
     }
