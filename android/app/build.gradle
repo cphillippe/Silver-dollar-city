@@ -50,6 +50,17 @@ android {
             }
         }
     }
+    if (playBundle) {
+        flavorDimensions "billing"
+        productFlavors {
+            shopOff {
+                dimension "billing"
+            }
+            shopOn {
+                dimension "billing"
+            }
+        }
+    }
 }
 
 repositories {
@@ -65,8 +76,10 @@ dependencies {
     implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
     implementation "androidx.webkit:webkit:$androidxWebkitVersion"
     implementation project(':capacitor-android')
-    if (System.getenv("PLAY_AAB") == "1") {
-        implementation "com.android.billingclient:billing:7.1.1"
+    // Play shop off must not declare BILLING. The library is shop-on only.
+    // src/shopOff also strips a merged BILLING node. Sideload (no PLAY_AAB) stays as it is.
+    if (playBundle) {
+        add("shopOnImplementation", "com.android.billingclient:billing:7.1.1")
     }
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"

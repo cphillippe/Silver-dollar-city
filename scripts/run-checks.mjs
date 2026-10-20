@@ -39,6 +39,7 @@ const SCOPES = {
       'check-incense-lamps.mjs',
       'check-commerce.mjs',
       'check-play-shop.mjs',
+      'check-launch-809.mjs',
       'check-share-card.mjs',
     ],
   },

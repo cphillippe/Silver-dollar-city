@@ -2889,3 +2889,21 @@ html[data-easy='on'] .mind-map.is-manage .place-sub {
   margin-top: 6px;
   font-size: 0.82rem;
 }
+
+/* 1.4.520: Father run who · place on a phone. The scene gives up a strip so the pad stays on screen. */
+@media (max-height: 920px) {
+  html[data-easy='on'] .play.is-father-run .story-kicker {
+    display: block;
+    flex: 0 0 auto;
+    margin: 0;
+    padding: 0 4px;
+    font-size: 0.72rem;
+    line-height: 1.1;
+    letter-spacing: 0.04em;
+  }
+
+  html[data-easy='on'] .play.is-father-run .run-scene {
+    height: 112px;
+    max-height: 120px;
+  }
+}

@@ -16,7 +16,7 @@ import {
   tryAddToPath,
   type GemCoord,
 } from '../../lib/gemSearch'
-import { lineBonusPoints, MATCH_DOCK_JUICE_POINTS } from '../../lib/matchBonus'
+import { MATCH_BONUS_POINTS, MATCH_DOCK_JUICE_POINTS } from '../../lib/matchBonus'
 import { gemBonusBeat, matchClearBeat } from '../../lib/successBeat'
 import { MatchTakeaway } from '../HeldTriad'
 import { storyPanelsFor, type StoryPanel } from '../../lib/storyPanels'
@@ -52,7 +52,7 @@ function cellFromPoint(x: number, y: number): GemCoord | null {
 }
 
 export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: GemSearchPlayProps) {
-  const { progress, recordMatchBonus, recordMatchDockJuice, recordMatchFind, recordMatchMiss } = useProgress()
+  const { recordMatchBonus, recordMatchDockJuice, recordMatchFind, recordMatchMiss } = useProgress()
   const [round, setRound] = useState(() => Date.now())
   const puzzle = useMemo(() => buildGemPuzzle(lineId, round), [lineId, round])
   const panels = useMemo(
@@ -77,6 +77,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   const [plusFlash, setPlusFlash] = useState(false)
   const [comboFlash, setComboFlash] = useState(0)
   const [findPop, setFindPop] = useState(0)
+  const [lastAward, setLastAward] = useState(0)
   const [status, setStatus] = useState<'play' | 'ok'>('play')
   const [winStamp, setWinStamp] = useState(false)
   const [stripMode, setStripMode] = useState<'hero' | 'dock' | 'sheet'>('dock')
@@ -105,7 +106,6 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   const needed = cellsStillNeeded(puzzle, found)
   const nextWord = puzzle.words.find((word) => !found.includes(word.id))
   const left = puzzle.words.length - found.length
-  const bonusPts = lineBonusPoints(progress, lineId)
   const clearBeat = matchClearBeat(lineId)
 
   function writePath(next: GemCoord[] | ((current: GemCoord[]) => GemCoord[])) {
@@ -138,6 +138,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     setPlusFlash(false)
     setComboFlash(0)
     setFindPop(0)
+    setLastAward(0)
     comboRef.current = 0
     setStatus('play')
     setWinStamp(false)
@@ -257,6 +258,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     const popPts = Math.max(25, cells.length * 10)
     const popMs = done ? 1200 : 980
     setFindPop(popPts)
+    setLastAward(popPts)
     findUntil.current = prefersReducedMotion() ? Date.now() : Date.now() + popMs
     // Persist find juice to account matchBonus (Journal / profile total) — not toast-only.
     // One visual punch: the +N pop and the cell burst. No second "Yes" toast on this beat.
@@ -372,6 +374,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
         window.setTimeout(() => setComboFlash(0), 1100)
       }
       recordMatchBonus(lineId)
+      setLastAward(MATCH_BONUS_POINTS)
       explodeBonus(nextPath, extra.label)
       return true
     }
@@ -379,7 +382,11 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   }
 
   function missIfSwipe(nextPath: GemCoord[]) {
-    if (scoredThisGesture.current) return
+    if (scoredThisGesture.current) {
+      writePath([])
+      rawRef.current = []
+      return
+    }
     const line = snapFingerPath(nextPath, puzzle.size)
     if (!shouldMissAfterSwipe(scoredThisGesture.current, line.length)) {
       writePath([])
@@ -456,7 +463,11 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     drag.current = true
     dragPointerId.current = event.pointerId
     boardPointer.current = event.currentTarget
-    event.currentTarget.setPointerCapture?.(event.pointerId)
+    const board = event.currentTarget.closest('.gem-board')
+    if (board instanceof HTMLElement) {
+      board.setPointerCapture?.(event.pointerId)
+      boardPointer.current = board
+    }
     moved.current = false
     scoredThisGesture.current = false
     setShake(false)
@@ -477,14 +488,11 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   function onBoardUp(event?: ReactPointerEvent<HTMLDivElement>) {
     if (!drag.current) return
     if (event && event.pointerId !== dragPointerId.current) return
-    drag.current = false
-    dragPointerId.current = null
-    if (scoredThisGesture.current) return
-    const nextPath = rawRef.current.length ? rawRef.current : pathRef.current
-    if (!nextPath.length) return
-    if (moved.current || nextPath.length >= 3) {
-      missIfSwipe(nextPath)
-    }
+    // A scored find already owns this gesture. Clear the trail and do not miss.
+    if (scoredThisGesture.current) return endDrag()
+    const nextPath = rawRef.current.length ? rawRef.current.slice() : pathRef.current.slice()
+    endDrag()
+    if (nextPath.length >= 3) missIfSwipe(nextPath)
   }
 
   function onBoardCancel() {
@@ -751,7 +759,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       <p className={`match-score ${plusFlash || findPop > 0 || comboFlash > 1 ? 'is-juice' : ''}`}>
         {left} left · {found.length} / {puzzle.words.length} found
         {bonusFound.length ? ` · ${bonusFound.length} bonus` : ''}
-        {bonusPts ? <span className="bonus-pts"> · +{bonusPts} bonus</span> : null}
+        {lastAward > 0 ? <span className="bonus-pts"> · +{lastAward} bonus</span> : null}
       </p>
       </div>
       {status === 'ok' ? (

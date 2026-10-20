@@ -14,6 +14,7 @@ import { LinkScreen } from './components/LinkScreen'
 import { Profile } from './components/Profile'
 import { SceneAd } from './components/SceneAd'
 import { ShellUpdateNotice } from './components/ShellUpdateNotice'
+import { WebBuildRefresh } from './components/WebBuildRefresh'
 import { Vista } from './components/Vista'
 import { Welcome } from './components/Welcome'
 import { findPlayable } from './content'
@@ -31,8 +32,9 @@ function sequenceBoot(): View | null {
   const id = new URLSearchParams(window.location.search).get('sequence')
   if (!id) return null
   const found = findPlayable(id)
-  if (!found || found.challenge.kind !== 'sequence') return null
+  if (!found) return null
   if (id.startsWith('daily-')) return { name: 'daily', forceId: id }
+  if (found.challenge.kind !== 'sequence') return null
   return { name: 'challenge', areaId: found.areaId, challengeId: id }
 }
 
@@ -166,6 +168,7 @@ export default function App() {
         <SceneAd onContinue={continueFromAd} onSupport={supportFromAd} />
       ) : null}
       <ShellUpdateNotice />
+      <WebBuildRefresh viewName={view.name} />
     </AppShell>
   )
 }
