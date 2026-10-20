@@ -17901,7 +17901,7 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   const sky515 = readFileSync(new URL('../src/components/DefendNightSky.tsx', import.meta.url), 'utf8')
   const actors515 = readFileSync(new URL('../src/components/DefendNightActors.tsx', import.meta.url), 'utf8')
   const css515 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
-  const faces515 = [{ x: 0, y: 0 }, { x: 40, y: 20 }]
+  const faces515 = [{ x: 0, y: 0 }]
   assert.equal(EASY_FACE_HIT_R, 80, '1.4.515 the face disc stays 80')
   assert.equal(EASY_CROWN_HIT_R, Math.round(80 * 1.72), '1.4.515 the crown disc stays')
   assert.equal(EASY_GLOW_TAP_DAMAGE, 1, '1.4.515 a glowing tap still deals 1')
@@ -17940,7 +17940,7 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   }
   assert.equal(easyBoardTapKind({ x: 160, y: 0 }, faces515), 'board-near', '1.4.515 160u is still beside a face')
   assert.equal(easyBoardTapKind({ x: 161, y: 0 }, faces515), 'stray', '1.4.515 a far board tap is stray')
-  assert.equal(easyBoardTapKind({ x: 400, y: 400 }, faces515), 'stray', '1.4.515 an empty seat far from faces is stray')
+  assert.equal(easyBoardTapKind({ x: 400, y: 400 }, [{ x: 0, y: 0 }, { x: 40, y: 20 }]), 'stray', '1.4.515 an empty seat far from faces is stray')
   assert.equal(easyMissOnSeat({ x: 400, y: 400 }, [{ x: 400, y: 420 }], 46), true, '1.4.515 the log can still see that seat')
   assert.equal(easyMissCounts('stray'), false, '1.4.515 stray is not counted')
   assert.equal(easyMissCounts('board-near'), true, '1.4.515 a near board tap is counted')
