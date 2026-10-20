@@ -3145,7 +3145,7 @@ async function checkTrustedMisses(browser, port, errors) {
       const text = msg.text()
       if (text.startsWith('nw-miss ') || text.startsWith('nw-stray ')) logs.push(text)
     })
-    listen(page, errors, `miss ${id} ${width}`)
+    listenCrown(page, errors, `miss ${id} ${width}`)
     const search =
       id === 'a2'
         ? '?playtest=1&nwSeed=2&nwRound=15'
