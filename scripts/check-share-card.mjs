@@ -131,6 +131,7 @@ resetNative()
 assert.equal(await shareLine(learning), 'copied', 'web without navigator.share copies')
 assert.equal(clip.length, 1)
 assert.equal(clip[0], text)
+const fallbackClip = clip[0]
 
 function enterShell(native, { bridge = true } = {}) {
   const shell = { getVersionCode() { return 104507 } }
@@ -258,14 +259,136 @@ try {
   setShareNativeTimeoutForTest(null)
 }
 
+async function waitForShareCall(list) {
+  for (let i = 0; i < 20 && list.length < 1; i += 1) {
+    await new Promise((resolve) => setTimeout(resolve, 0))
+  }
+}
+
+let releaseWeb = () => {}
+installNavigator({
+  share: (data) =>
+    new Promise((resolve) => {
+      navCalls.push(data)
+      releaseWeb = resolve
+    }),
+})
+resetNative()
+delete globalThis.window
+try {
+  const firstWeb = shareLine(learning)
+  await waitForShareCall(navCalls)
+  assert.equal(navCalls.length, 1, 'the first web tap calls navigator.share once')
+  assert.equal(nativeCalls.length, 0, 'the web tap does not call Share.share')
+  assert.equal(await shareLine(learning), 'copied', 'a second web tap while sharing copies')
+  assert.equal(navCalls.length, 1, 'a second web tap adds no navigator.share call')
+  assert.equal(nativeCalls.length, 0, 'a second web tap does not call Share.share')
+  assert.equal(clip.length, 1, 'a second web tap writes the clipboard once')
+  assert.equal(clip[0], fallbackClip, 'busy-tap clipboard write === the no-navigator.share fallback')
+  releaseWeb()
+  assert.equal(await firstWeb, 'shared', 'the first web share still resolves')
+  installNavigator({
+    share: async (data) => {
+      navCalls.push(data)
+    },
+  })
+  delete globalThis.window
+  assert.equal(await shareLine(learning), 'shared', 'after the web share resolves the next tap shares')
+  assert.equal(navCalls.length, 1, 'the tap after resolve calls navigator.share again')
+} finally {
+  releaseWeb()
+}
+
+installNavigator({
+  share: async () => {
+    navCalls.push('cancel')
+    const error = new Error('The user aborted a request.')
+    error.name = 'AbortError'
+    throw error
+  },
+})
+resetNative()
+delete globalThis.window
+assert.equal(await shareLine(learning), 'idle', 'a web cancel still stays quiet')
+installNavigator({
+  share: async (data) => {
+    navCalls.push(data)
+  },
+})
+delete globalThis.window
+assert.equal(await shareLine(learning), 'shared', 'after a web cancel the next tap shares')
+assert.equal(navCalls.length, 1)
+
+let releaseNative = () => {}
+installNavigator({
+  share: async (data) => {
+    navCalls.push(data)
+  },
+})
+resetNative()
+nativeHandler = () =>
+  new Promise((resolve) => {
+    releaseNative = () => resolve({ activityType: 'test' })
+  })
+enterShell(true)
+try {
+  const firstNative = shareLine(learning)
+  await waitForShareCall(nativeCalls)
+  assert.equal(nativeCalls.length, 1, 'the shell stub calls Share.share once')
+  assert.equal(navCalls.length, 0, 'the shell stub does not call navigator.share')
+  assert.equal(await shareLine(learning), 'copied', 'a second shell tap while sharing copies')
+  assert.equal(nativeCalls.length, 1, 'a second shell tap adds no Share.share call')
+  assert.equal(navCalls.length, 0, 'a second shell tap adds no navigator.share call')
+  assert.equal(clip.length, 1, 'a second shell tap writes the clipboard once')
+  assert.equal(clip[0], fallbackClip, 'shell busy-tap clipboard write === the no-navigator.share fallback')
+  releaseNative()
+  assert.equal(await firstNative, 'shared', 'the first native share still resolves')
+  nativeCalls.length = 0
+  navCalls.length = 0
+  clip.length = 0
+  nativeHandler = async () => ({ activityType: 'test' })
+  assert.equal(await shareLine(learning), 'shared', 'after the native share resolves the next tap shares')
+  assert.equal(nativeCalls.length, 1, 'the tap after native resolve calls Share.share again')
+  assert.equal(navCalls.length, 0)
+} finally {
+  releaseNative()
+}
+
+installNavigator({
+  share: async (data) => {
+    navCalls.push(data)
+  },
+})
+resetNative()
+nativeHandler = async () => {
+  throw new Error("Can't share while sharing is in progress")
+}
+enterShell(true)
+assert.equal(await shareLine(learning), 'copied', 'a native in-progress reject copies')
+assert.equal(nativeCalls.length, 1, 'the in-progress reject is the one Share.share call')
+assert.equal(navCalls.length, 0, 'a native in-progress reject does not call navigator.share')
+assert.equal(clip.length, 1)
+assert.equal(clip[0], text)
+nativeCalls.length = 0
+navCalls.length = 0
+clip.length = 0
+nativeHandler = async () => ({ activityType: 'test' })
+assert.equal(await shareLine(learning), 'shared', 'after the in-progress reject the next tap shares')
+assert.equal(nativeCalls.length, 1)
+assert.equal(navCalls.length, 0)
+
 const cardSrc = readFileSync(new URL('../src/components/ShareCard.tsx', import.meta.url), 'utf8')
 const libSrc = readFileSync(new URL('../src/lib/shareCard.ts', import.meta.url), 'utf8')
 assert.doesNotMatch(cardSrc, /btn gold/)
 assert.doesNotMatch(cardSrc, /btn primary/)
 assert.match(cardSrc, /className="btn"/)
 assert.match(cardSrc, /Share this line/)
+assert.match(cardSrc, /Copied\. Paste it to a friend\./)
+assert.equal((cardSrc.match(/onClick=/g) || []).length, 1, 'the share button has one onClick')
 assert.match(cardSrc, /result === 'shared'/)
 assert.match(cardSrc, /result === 'copied'/)
+assert.match(libSrc, /let sharing = false/)
+assert.match(libSrc, /if \(sharing\) return copyShareText\(shareCardText\(learning\)\)/)
 assert.doesNotMatch(cardSrc, /result === 'idle'/)
 assert.match(libSrc, /Share\.share\(\{ title, text, url \}\)/)
 assert.match(libSrc, /inAndroidShell\(\)/)

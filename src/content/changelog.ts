@@ -8,6 +8,17 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.513',
+    title: 'A second share tap copies the line',
+    when: '2026-10-20',
+    items: [
+      'On Easy, a second tap on Share this line while the share sheet is still opening copies the line and says Copied. Paste it to a friend.',
+      'The first tap still opens the share sheet once. A closed sheet stays quiet.',
+      'Hard stays the same.',
+      'Refs #786.',
+    ],
+  },
+  {
     version: '1.4.512',
     title: 'Mend holds the crown longer',
     when: '2026-10-19',
