@@ -6,7 +6,7 @@ import assert from 'node:assert/strict'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { chromium } from 'playwright'
 import { build, preview } from 'vite'
-import { evidenceFor } from '../src/content/evidence.ts'
+import { evidenceForTier } from '../src/content/evidence.ts'
 import { dailyForDate } from '../src/content/daily.ts'
 import { findStraightSpelling } from '../src/lib/gemSearchGrid.ts'
 import { gemWordsFor } from '../src/lib/gemSearch.ts'
@@ -769,7 +769,7 @@ function assertSharedCards(face, where) {
 }
 
 async function dragWhy(page, id) {
-  const brief = evidenceFor(id)
+  const brief = evidenceForTier(id, 'easy')
   assert.ok(brief, `evidence for ${id}`)
   const why = easyWhyLine(brief.reason)
   const face = await lockInFace(page)
@@ -794,7 +794,7 @@ async function dragWhy(page, id) {
 }
 
 async function answerQuiz(page, id) {
-  const brief = evidenceFor(id)
+  const brief = evidenceForTier(id, 'easy')
   assert.ok(brief, `evidence for ${id}`)
   const why = easyWhyLine(brief.reason)
   const chip = page.locator('button.why-chip', { hasText: why }).first()
