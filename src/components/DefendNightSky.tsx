@@ -1,4 +1,5 @@
 import { HEAVEN_POINT } from '../lib/defend'
+import { clientToMap } from '../lib/lampPlace'
 import type { PointerEvent, RefObject, ReactNode } from 'react'
 import { activeNightRoadD, MapPlate, NIGHT_MAP, nightPath, type NightMapSurface, type NightPhase } from '../nightWatch'
 import { FeatureSprites, PopPuffs } from '../nightWatch/map/FeatureSprites'
@@ -11,7 +12,7 @@ export interface DefendNightSkyProps {
   shake: boolean
   won: boolean
   phase: NightPhase
-  fireBest: () => void
+  fireBest: (point?: { x: number; y: number } | null) => void
   easyTap: boolean
   /** Plant / boost: a tap on open ground closes the lamp upgrade card. */
   onBoardTap?: () => void
@@ -63,7 +64,7 @@ export function DefendNightSky({
                 if (phase === 'wave') {
                   const node = event.target as Element | null
                   if (node?.closest?.('.defend-raider')) return
-                  fireBest()
+                  fireBest(clientToMap(event.currentTarget, event.clientX, event.clientY))
                 } else onBoardTap?.()
               }}
             >

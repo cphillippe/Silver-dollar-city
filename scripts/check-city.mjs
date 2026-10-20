@@ -127,6 +127,14 @@ import {
   waveCombat,
   waveIsClear,
   wavePackSize,
+  easyBoardTapKind,
+  easyGateMissReason,
+  easyMissCounts,
+  easyMissOnSeat,
+  easyTapReadout,
+  freshEasyTapScore,
+  nightMissLine,
+  nightStrayLine,
 } from '../src/lib/defend.ts'
 import { EASY_ROUND_SPEED_CAP, EASY_ROUNDS, roundMark } from '../src/nightWatch/rounds.ts'
 import {
@@ -1692,7 +1700,17 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.514')
+assert.equal(APP_VERSION, '1.4.515')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.515'), '1.4.515 changelog row')
+assert.match(latestChange('1.4.515').title, /miss|trust/i)
+assert.doesNotMatch(
+  latestChange('1.4.515').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.515 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.515').items.join('\n'), /Wait till he leaves the fog/)
+assert.match(latestChange('1.4.515').items.join('\n'), /Hard/)
+assert.match(latestChange('1.4.515').items.join('\n'), /Refs #748/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.514'), '1.4.514 changelog row')
 assert.match(latestChange('1.4.514').title, /board|MATCHED|word search/i)
 assert.doesNotMatch(
@@ -17875,6 +17893,113 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.match(screenReach, /lampPlaceReach/)
   assert.match(screenReach, /flushSync\(\(\) => \{\s*setPlants\(next\.plants\)/)
   assert.match(readFileSync(new URL('../src/lib/lampPlace.ts', import.meta.url), 'utf8'), /export function lampPlaceReach/)
+}
+
+// Night Watch 1.4.515: every counted Easy miss has a reason. A far board tap is stray.
+{
+  const screen515 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const sky515 = readFileSync(new URL('../src/components/DefendNightSky.tsx', import.meta.url), 'utf8')
+  const actors515 = readFileSync(new URL('../src/components/DefendNightActors.tsx', import.meta.url), 'utf8')
+  const css515 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const faces515 = [{ x: 0, y: 0 }]
+  assert.equal(EASY_FACE_HIT_R, 80, '1.4.515 the face disc stays 80')
+  assert.equal(EASY_CROWN_HIT_R, Math.round(80 * 1.72), '1.4.515 the crown disc stays')
+  assert.equal(EASY_GLOW_TAP_DAMAGE, 1, '1.4.515 a glowing tap still deals 1')
+  assert.equal(cueTapStrike(true, false), 'miss', '1.4.515 the glow rule is unchanged')
+  assert.equal(cueTapStrike(false, false), 'hit', '1.4.515 Hard still does not use the glow rule')
+  assert.equal(easyBossHp(9), 14, '1.4.515 the round 10 boss stays 14')
+  const gateCases = [
+    { name: 'dark', raider: { id: 2, t: 0.2 }, road: [{ id: 1, t: 0.8 }, { id: 2, t: 0.2 }], round: 0, why: 'dark' },
+    { name: 'fog', raider: { id: 1, t: 0.9, fog: true }, road: [{ id: 1, t: 0.9, fog: true }, { id: 2, t: 0.2 }], round: 2, why: 'fog' },
+    {
+      name: 'soaked boss',
+      raider: { id: 1, t: 0.5, boss: true, tapChip: 4 },
+      road: [{ id: 1, t: 0.5, boss: true, tapChip: 4 }, { id: 2, t: 0.2 }],
+      round: 14,
+      why: 'soaked',
+    },
+    { name: 'glow', raider: { id: 1, t: 0.8 }, road: [{ id: 1, t: 0.8 }, { id: 2, t: 0.2 }], round: 1, why: null },
+    { name: 'round 5', raider: { id: 2, t: 0.2 }, road: [{ id: 1, t: 0.9 }, { id: 2, t: 0.2 }], round: 4, why: null },
+    {
+      name: 'fog on round 5',
+      raider: { id: 2, t: 0.4, fog: true },
+      road: [{ id: 1, t: 0.9 }, { id: 2, t: 0.4, fog: true }],
+      round: 4,
+      why: 'fog',
+    },
+  ]
+  for (const item of gateCases) {
+    const gate = easyPointerTapGate(true, item.raider, item.road, item.round)
+    const why = easyGateMissReason(item.raider, item.road, item.round)
+    if (gate === 'miss') {
+      assert.ok(why === 'dark' || why === 'fog' || why === 'soaked', `1.4.515 ${item.name} maps a miss`)
+    } else {
+      assert.equal(why, null, `1.4.515 ${item.name} is a hit`)
+    }
+    assert.equal(why, item.why, `1.4.515 ${item.name} is ${item.why}`)
+  }
+  assert.equal(easyBoardTapKind({ x: 160, y: 0 }, faces515), 'board-near', '1.4.515 160u is still beside a face')
+  assert.equal(easyBoardTapKind({ x: 161, y: 0 }, faces515), 'stray', '1.4.515 a far board tap is stray')
+  assert.equal(easyBoardTapKind({ x: 400, y: 400 }, [{ x: 0, y: 0 }, { x: 40, y: 20 }]), 'stray', '1.4.515 an empty seat far from faces is stray')
+  assert.equal(easyMissOnSeat({ x: 400, y: 400 }, [{ x: 400, y: 420 }], 46), true, '1.4.515 the log can still see that seat')
+  assert.equal(easyMissCounts('stray'), false, '1.4.515 stray is not counted')
+  assert.equal(easyMissCounts('board-near'), true, '1.4.515 a near board tap is counted')
+  assert.equal(easyMissCounts('dark'), true, '1.4.515 a dark face is counted')
+  assert.equal(easyMissCounts('fog'), true, '1.4.515 fog is counted')
+  assert.equal(easyMissCounts('soaked'), true)
+  assert.equal(easyMissCounts('late'), true)
+  assert.equal(
+    nightMissLine('dark', 12.4, 40.2, 15, 3, 12.6, true),
+    'nw-miss dark 12 40 r15 lead=3 leadChangedMsAgo=13 seat=1',
+  )
+  assert.equal(nightStrayLine(8.2, 9.8), 'nw-stray 8 10')
+  assert.equal(
+    easyTapReadout(freshEasyTapScore(), '—'),
+    'Taps 0 hit · 0 miss (dark 0 · fog 0 · near 0) · 0 dmg · Boss —',
+  )
+  assert.equal(EASY.nightFog, 'Wait till he leaves the fog')
+  assert.equal(EASY.nightMiss, 'Tap the glowing face')
+  assert.match(sky515, /fireBest\(clientToMap\(event\.currentTarget, event\.clientX, event\.clientY\)\)/)
+  assert.match(actors515, /is-cue-nudge/)
+  assert.match(css515, /@keyframes walker-cue-nudge/)
+  assert.match(css515, /\.walker-cue-ring\.is-cue-nudge \{[^}]*animation: walker-cue-nudge 400ms/)
+  assert.match(
+    css515,
+    /@media \(prefers-reduced-motion: reduce\) \{\s*\.walker-cue-ring\.is-cue-nudge \{[^}]*animation: none/,
+  )
+  assert.match(css515, /\.nw-tap-readout \{[^}]*pointer-events:\s*none/)
+  assert.match(css515, /\.nw-tap-readout \{\s*margin: 0 0 6px;/)
+  const best515 = screen515.slice(screen515.indexOf('function fireBest'), screen515.indexOf('function retry'))
+  assert.match(best515, /faceTapStrike\(easy, false, false\) === 'miss' && easy/)
+  assert.match(best515, /easyBoardTapKind\(/)
+  assert.match(best515, /noteFaceTap\(false, 0, 'late'\)|noteFaceTap\(false, 0, 'board-near'\)/)
+  assert.match(screen515, /noteFaceTap\(false, 0, 'late'\)/)
+  assert.match(screen515, /easyGateMissReason\(/)
+  assert.match(screen515, /showMiss\(\)/)
+  const zero515 = { far: 0, strong: 0 }
+  const four515 = [zero515, zero515, zero515, zero515]
+  const seeds515 = Array.from({ length: 8 }, (_, seed) => 1 + seed * 97)
+  function night515(tapEvery, through, base) {
+    let hearts = 3
+    const rows = []
+    for (let index = 0; index < through; index += 1) {
+      const round = paceEasyTree(index, four515, hearts, tapEvery, 1, base + index * 17, 0, 1, true)
+      rows.push(round)
+      if (round.result !== 'clear') return { rows, dead: index + 1 }
+      hearts = easyClearHeart(round.hearts)
+    }
+    return { rows, dead: null }
+  }
+  const quiet515 = seeds515.map((base) => night515(0, 8, base))
+  const active515 = seeds515.map((base) => night515(3, 12, base))
+  assert.ok(
+    quiet515.every((run) => run.dead === 5 && run.rows[4].hearts === 0 && run.rows[4].taps === 0),
+    '1.4.515 zero taps still lose round 5',
+  )
+  assert.ok(
+    active515.every((run) => (run.dead === 7 || run.dead === 8) && run.rows[4].result === 'clear' && run.rows[4].hearts > 0),
+    '1.4.515 active taps still hold round 5',
+  )
 }
 
 const bossTapScan = readFileSync(new URL('./check-seed-fire.mjs', import.meta.url), 'utf8')

@@ -57,7 +57,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
     upgradePoint, boardBox, runSparks = 0, levelBurst = null, onPullLamp, pullSparks = 0, onCloseUpgrade,
     onUpgradePath, onArmPathBuy, onBuyBright, showBright = false, runPaths, roundIndex = -1, armorFrom = 7,
     heldLessons, playtestSteps = false, onOpenLessons, spawnLog = false,
-    plateFill = false, onPlacePointer,
+    plateFill = false, onPlacePointer, cueNudge = false,
     map, roadD, porchCandy, roadLabel, mapFeatures, pops,
   } = props
   const place = plateFill ? boardFillPoint : mapBoardPoint
@@ -234,6 +234,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
           armorFrom={armorFrom}
           lampRise={lampRise}
           spawnLog={spawnLog}
+          cueNudge={cueNudge}
         />
       </DefendNightSky>
       {showCard ? (
@@ -327,6 +328,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
                   className={`defend-walker-tap${glowing ? ' is-cue is-easy-cue' : ''}`}
                   data-walker-tap={raider.id}
                   data-walker-id={raider.id}
+                  data-fog={raider.fog ? 'yes' : undefined}
                   data-boss={raider.boss ? 'yes' : undefined}
                   aria-label="Tap walker"
                   style={{

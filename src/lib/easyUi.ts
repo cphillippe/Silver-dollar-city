@@ -99,6 +99,7 @@ export const EASY = {
   nightBoostPick: 'Skills',
   nightKeepLamp: 'Keep one lamp — tap a ring to plant more.',
   nightMiss: 'Tap the glowing face',
+  nightFog: 'Wait till he leaves the fog',
   startEasy: 'Start Easy',
   welcomeEyebrow: 'A short trail',
   welcomeTag: 'Reasons to believe',

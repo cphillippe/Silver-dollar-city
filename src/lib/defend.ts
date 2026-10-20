@@ -402,6 +402,28 @@ export function easyPointerTapGate<
   return cueTapStrike(easy, cue?.id === raider.id)
 }
 
+/** A counted Easy miss from the glow gate. A hit has no reason. */
+export type EasyGateMiss = 'dark' | 'fog' | 'soaked'
+
+/**
+ * Why the Easy glow gate refused this face.
+ * Fog wins, then a shrugged walker, then any other face that is not glowing.
+ * A hit returns null. Hard does not read this.
+ */
+export function easyGateMissReason<
+  T extends { id: number; turned?: string; t?: number; boss?: boolean; tapChip?: number; gait?: string; fog?: boolean },
+>(
+  raider: T,
+  raiders: readonly T[],
+  roundIndex = -1,
+  armorFrom = 7,
+): EasyGateMiss | null {
+  if (easyPointerTapGate(true, raider, raiders, roundIndex, armorFrom) !== 'miss') return null
+  if (raider.fog) return 'fog'
+  if (easyTapSoaked(roundIndex, raider, armorFrom)) return 'soaked'
+  return 'dark'
+}
+
 /**
  * The tap handler path: gate, then the live strike.
  * A miss never touches HP. `DefendScreen` fireAtRaider uses the same gate.
@@ -572,6 +594,97 @@ export const PATH_WALKER_FACE_DY = -PATH_WALKER_FACE_U / 6
  * so a thumb lands on the gold ring and not the feet.
  */
 export const EASY_FACE_HIT_R = 80
+
+/** Counted Easy misses. A stray board tap is not one of these. */
+export type EasyCountedMiss = EasyGateMiss | 'board-near' | 'late'
+
+export interface EasyTapWhy {
+  dark: number
+  fog: number
+  soaked: number
+  'board-near': number
+  late: number
+}
+
+export interface EasyTapScore {
+  hits: number
+  misses: number
+  damage: number
+  why: EasyTapWhy
+  stray: number
+}
+
+export function freshEasyTapScore(): EasyTapScore {
+  return {
+    hits: 0,
+    misses: 0,
+    damage: 0,
+    why: { dark: 0, fog: 0, soaked: 0, 'board-near': 0, late: 0 },
+    stray: 0,
+  }
+}
+
+/** A stray board tap is the only tap that does not count. */
+export function easyMissCounts(kind: EasyCountedMiss | 'stray'): boolean {
+  return kind !== 'stray'
+}
+
+/**
+ * Board tap beside the faces. `faces` are live unturned face centers.
+ * Farther than two face discs from every one is stray and is not counted.
+ * An empty seat uses this same distance. It is not exempt.
+ */
+export function easyBoardTapKind(
+  point: { x: number; y: number },
+  faces: readonly { x: number; y: number }[],
+): 'board-near' | 'stray' {
+  const limit = EASY_FACE_HIT_R * 2
+  for (const face of faces) {
+    if (dist(point, face) <= limit) return 'board-near'
+  }
+  return 'stray'
+}
+
+/** True when the board point sits on an empty seat ring. The kind does not change. */
+export function easyMissOnSeat(
+  point: { x: number; y: number },
+  seats: readonly { x: number; y: number }[],
+  radius: number,
+): boolean {
+  if (!(radius > 0)) return false
+  for (const seat of seats) {
+    if (dist(point, seat) <= radius) return true
+  }
+  return false
+}
+
+/** Playtest line for one counted miss. `seat` notes an empty seat without exempting it. */
+export function nightMissLine(
+  reason: string,
+  x: number,
+  y: number,
+  round: number,
+  leadId: number | string,
+  leadChangedMsAgo: number,
+  seat = false,
+): string {
+  const px = Math.round(Number(x) || 0)
+  const py = Math.round(Number(y) || 0)
+  const ago = Math.max(0, Math.round(Number(leadChangedMsAgo) || 0))
+  const seatBit = seat ? ' seat=1' : ''
+  return `nw-miss ${reason} ${px} ${py} r${Math.floor(round) || 0} lead=${leadId} leadChangedMsAgo=${ago}${seatBit}`
+}
+
+/** Playtest line for a board tap that is not counted. */
+export function nightStrayLine(x: number, y: number): string {
+  return `nw-stray ${Math.round(Number(x) || 0)} ${Math.round(Number(y) || 0)}`
+}
+
+/** Playtest readout. `near` is the board-near count. */
+export function easyTapReadout(score: EasyTapScore, boss: string): string {
+  const why = score.why
+  return `Taps ${score.hits} hit · ${score.misses} miss (dark ${why.dark} · fog ${why.fog} · near ${why['board-near']}) · ${score.damage} dmg · Boss ${boss}`
+}
 /**
  * The boss body draws 1.72× from the feet, so the crown sits above the
  * plain face disc. This radius still centers on the glow and covers that crown.
