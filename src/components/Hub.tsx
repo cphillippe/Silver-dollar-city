@@ -14,7 +14,7 @@ import {
   nextUpgradeNeed,
   readyUpgradeId,
 } from '../lib/cityBuild'
-import { EASY, EASY_MATCH_LINE, easyHomeFocus, easyHoldView, easyLineHeld, easyLockInExit, easyLoopLine, easyMatchReady, easyWhoWhere, isEasy } from '../lib/easy'
+import { EASY, EASY_MATCH_LINE, easyHomeFocus, easyHoldView, easyLineHeld, easyLockInExit, easyLoopLine, easyMatchReady, easyWordsHomeLine, isEasy } from '../lib/easy'
 import { storyPlayFor } from '../lib/storyPlay'
 import { markLater, readLater, sessionDue } from '../lib/recall'
 import { Avatar } from './Avatar'
@@ -37,7 +37,7 @@ import {
 import type { View } from '../types'
 import { RecallOffer } from './RecallOffer'
 import { StoresComingNotice } from './StoresComingNotice'
-import { easyReadIsHomeGold, easyReadMarkedTomorrow, noteEasyOpenDay } from '../content/goldenPath'
+import { easyNightWatchOnHome, easyReadIsHomeGold, easyReadMarkedTomorrow, noteEasyOpenDay } from '../content/goldenPath'
 
 interface HubProps {
   onNavigate: (view: View) => void
@@ -134,7 +134,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
                   ? EASY.snapHome
                   : coldMercy
                     ? 'Find Mercy’s story at Story Creek.'
-                    : `Find the words at ${easyWhoWhere(loopId).place}.`
+                    : easyWordsHomeLine(loopId)
 
     const readyLine = upgradeReadyId ? 'A building is ready. Tap it, then Build this.' : !doneToday ? 'Finish today’s story once. Then you can raise the building — no pay.' : buildNeed.line
     const trailGold = playNow || lockNow || readNow
@@ -259,7 +259,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
               </button>
             </li>
           </ol>
-          {(progress.easyHeld ?? []).length > 0 ? (
+          {easyNightWatchOnHome(progress, today) ? (
           <section className="night-watch easy-night-watch" aria-label="Night Watch">
             <p className="eyebrow">
               Night Watch

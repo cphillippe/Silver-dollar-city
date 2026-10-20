@@ -30,7 +30,9 @@ import {
   isMazeLookPan,
   isMazePathSwipe,
   isAdjacentRoadStep,
+  isNextToHurt,
   isMazeRoad,
+  mazeNeighbors,
   mazeStepToward,
   roadCtaLabel,
 } from '../src/lib/roadMaze.ts'
@@ -77,6 +79,16 @@ setMazePreset(0)
 assert.equal(shortestMazePath(MAZE_START, { r: 0, c: 2 }), null)
 
 assert.equal(mazeSame(MAZE_HURT, MAZE_INN), false, 'hurt and inn are distinct cells')
+setMazePreset(0)
+for (let i = 0; i < MAZE_PRESETS.length; i += 1) {
+  setMazePreset(i)
+  assert.equal(isNextToHurt(MAZE_HURT), false, `preset ${i}: standing on the hurt man is not next to him`)
+  assert.equal(isNextToHurt(MAZE_INN), false, `preset ${i}: the inn tile is not next to the hurt man`)
+  const beside = mazeNeighbors(MAZE_HURT)[0]
+  assert.ok(beside, `preset ${i}: the hurt man has a road neighbor`)
+  assert.equal(isNextToHurt(beside), true, `preset ${i}: a side road counts`)
+}
+setMazePreset(0)
 assert.equal(mazeSame(mazeGoal(true, false).at, mazeGoal(true, true).at), false, 'help locus ≠ inn')
 
 setMazePreset(0)
@@ -177,6 +189,17 @@ assert.doesNotMatch(
   /EASY\.mazeHunt/,
   'Easy Clear 1.4.143: omit mazeHunt .sort-how — beats + caption + score teach the road',
 )
+assert.match(playSrc, /is-goal/)
+assert.match(playSrc, /data-maze-how/)
+assert.match(playSrc, /EASY\.mazeHow/)
+assert.match(playSrc, /EASY\.mazeInnCue/)
+assert.match(
+  playSrc,
+  /dataset\.easy === 'on' && !foundRef\.current && isNextToHurt\(cell\)/,
+  'the tile next to the hurt man counts only on Easy',
+)
+assert.equal(EASY.mazeHow, 'Tap the road to walk.')
+assert.equal(EASY.mazeInnCue, 'Now walk him to the pink house.')
 assert.match(playSrc, /EASY\.holdNext/)
 assert.match(playSrc, /ROAD_MAZE_AGAIN/)
 assert.ok(playSrc.lastIndexOf('EASY.holdNext') < playSrc.lastIndexOf('ROAD_MAZE_AGAIN'))
