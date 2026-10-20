@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { getArea, getChallenge } from '../content'
-import { evidenceFor } from '../content/evidence'
+import { evidenceFor, evidenceForTier } from '../content/evidence'
 import { STORY, townVoiceForArea } from '../content/story'
 import { localDateKey } from '../lib/dates'
 import { EASY, isEasy } from '../lib/easy'
+import { currentLessonTier } from '../lib/tiers'
 import { EASY_HOME } from '../lib/easyNav'
 import { EasyBack } from './EasyBack'
 import { useJuiceHandoff } from '../lib/juice'
@@ -50,7 +51,9 @@ export function ChallengeScreen({
   const easy = isEasy(progress)
   const area = getArea(areaId)
   const challenge = getChallenge(areaId, challengeId)
-  const brief = evidenceFor(challengeId)
+  const brief =
+    evidenceForTier(challengeId, currentLessonTier(progress, challengeId)) ??
+    evidenceFor(challengeId)
   const today = localDateKey()
   const [reviewing] = useState(
     Boolean(

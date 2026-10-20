@@ -11,9 +11,9 @@
     <lesson id="ob-tuning" place="Sky Watch" person="Nora Skye" tripleId="tuning-sky" ideaId="idea-tuning" ideaLabel="Fine-tuning points to a Designer." challengeKind="match" challengeTitle="Narrow ranges">
       <easy points="10" easyOrder="19">
         <learn>
-          <shortStory>Life needs very tight numbers: how fast space expands, how atoms stick, how tidy the start was. Design predicts a world we can live in. Blind chance does not.</shortStory>
-          <mainIdea>The universe is finely tuned for life — that fit points to a Designer.</mainIdea>
-          <gloss>The universe is finely tuned for life — that fit points to a Designer.</gloss>
+          <shortStory>Space grows at just the right speed. Tiny bits stick together just right. Change one a little, and there's no life. God set them all on purpose.</shortStory>
+          <mainIdea>The world is set just right for life. God made it that way on purpose.</mainIdea>
+          <gloss>The world is set just right for life. God made it that way on purpose.</gloss>
           <loci>This idea lives at Sky Watch, with Nora.</loci>
           <word>
             <term>Fine-tuning</term>
@@ -22,34 +22,34 @@
           <hint>Tap the picture, then the mark that belongs. Two choices.</hint>
         </learn>
         <match>
-          <sentenceCorrect>The universe is finely tuned for life — that fit points to a Designer.</sentenceCorrect>
+          <sentenceCorrect>The world is set just right for life. God made it that way on purpose.</sentenceCorrect>
           <sentenceMisses>
             <miss>Fine-tuning is a rumor with no name in science.</miss>
             <miss>A habitable cosmos needs no explanation at all.</miss>
           </sentenceMisses>
           <placePrompt>That voice lives at Sky Watch.</placePrompt>
           <personPrompt>Nora keeps that sky.</personPrompt>
-          <ideaPrompt>Nora’s sky — fine-tuning points to a Designer.</ideaPrompt>
-          <ideaLabel>Fine-tuning points to a Designer.</ideaLabel>
-          <whyEasy>Nora watches the sky. Fine-tuning points to a Designer.</whyEasy>
+          <ideaPrompt>Nora’s sky — God set the world just right.</ideaPrompt>
+          <ideaLabel>God set the world just right.</ideaLabel>
+          <whyEasy>Nora watches the sky. God set the world just right.</whyEasy>
         </match>
         <hold levelUpTo="medium" onFail="easy">
-          <claim>The universe is finely tuned for life — that fit points to a Designer.</claim>
-          <reason>Life needs tight numbers — chance does not explain that.</reason>
+          <claim>The world is set just right for life. God made it that way on purpose.</claim>
+          <reason>Life needs many things set just right, all at once. Luck can't do that. God, the Maker, can.</reason>
           <source>Psalm 19:1–4; Romans 1:20</source>
-          <whyCorrect>Life needs tight numbers — chance does not explain that.</whyCorrect>
+          <whyCorrect>Life needs many things set just right, all at once. Luck can't do that. God, the Maker, can.</whyCorrect>
           <whyMisses>
             <miss>Life-permitting ranges are wide; blank chance predicts a habitable cosmos just as well.</miss>
             <miss>The fittedness is only a rumor in the numbers.</miss>
             <miss>The fittedness is only a rumor.</miss>
           </whyMisses>
           <claimChoices>
-            <choice>The universe is finely tuned for life — that fit points to a Designer.</choice>
+            <choice>The world is set just right for life. God made it that way on purpose.</choice>
             <choice>Fine-tuning is a rumor with no name in science.</choice>
             <choice>A habitable cosmos needs no explanation at all.</choice>
           </claimChoices>
           <reasonChoices>
-            <choice>Life needs tight numbers — chance does not explain that.</choice>
+            <choice>Life needs many things set just right, all at once. Luck can't do that. God, the Maker, can.</choice>
             <choice>Life-permitting ranges are wide; blank chance predicts a habitable cosmos just as well.</choice>
             <choice>The fittedness is only a rumor in the numbers.</choice>
           </reasonChoices>
