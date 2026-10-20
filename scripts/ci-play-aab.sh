@@ -45,24 +45,39 @@ node scripts/android-play-shell.mjs --omit dist
 node scripts/cap-sync.mjs android
 node scripts/write-android-local-properties.mjs
 
+shop="${VITE_PLAY_SHOP:-}"
+shop_on=0
+case "$(printf '%s' "${shop}" | tr '[:upper:]' '[:lower:]')" in
+  1|true|yes|on) shop_on=1 ;;
+esac
+
 cd android
 chmod +x ./gradlew
-./gradlew bundleRelease --no-daemon
+if [[ "${shop_on}" == 1 ]]; then
+  ./gradlew bundleShopOnRelease --no-daemon
+else
+  ./gradlew bundleShopOffRelease --no-daemon
+fi
 
 aab="$(find app/build/outputs/bundle -name '*.aab' -print -quit)"
 test -n "${aab}"
 test -f "${aab}"
 cp "${aab}" "${root}/silver-city.aab"
 
-manifest="$(find app/build/intermediates -name 'AndroidManifest.xml' -print | while read -r file; do
-  if grep -q 'com.android.vending.BILLING' "${file}"; then
-    printf '%s' "${file}"
-    break
+merged="$(find app/build/intermediates/merged_manifest -name 'AndroidManifest.xml' -print -quit)"
+test -n "${merged}"
+test -f "${merged}"
+if [[ "${shop_on}" == 1 ]]; then
+  if ! grep -q 'com.android.vending.BILLING' "${merged}"; then
+    echo "Play shop is on. Merged manifest is missing com.android.vending.BILLING"
+    exit 1
   fi
-done)"
-if [[ -z "${manifest}" ]]; then
-  echo "Play merged manifest is missing com.android.vending.BILLING"
-  exit 1
+  echo "BILLING permission is in the shop-on Play manifest."
+else
+  if grep -q 'com.android.vending.BILLING' "${merged}"; then
+    echo "Play shop is off. Merged manifest must not declare com.android.vending.BILLING"
+    exit 1
+  fi
+  echo "Shop off. BILLING is not in the Play manifest."
 fi
-echo "BILLING permission is in the Play manifest."
 echo "AAB written to silver-city.aab"

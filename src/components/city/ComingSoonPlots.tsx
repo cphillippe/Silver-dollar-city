@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useLayoutEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { paidPacks } from '../../config/commerce'
 import { playShopClosed } from '../../config/playBuild'
@@ -6,27 +6,76 @@ import { playShopClosed } from '../../config/playBuild'
 /** One line on a locked paid street. Not a price and not a purchase. */
 export const COMING_SOON = 'Coming soon'
 
-const SPOTS = [
-  { x: 48, y: 78 },
-  { x: 168, y: 78 },
-  { x: 48, y: 168 },
-  { x: 168, y: 168 },
-]
+interface PlotMetrics {
+  font: number
+  width: number
+  height: number
+  inset: number
+  originX: number
+  originY: number
+}
+
+const FALLBACK: PlotMetrics = {
+  font: 22,
+  width: 200,
+  height: 96,
+  inset: 28,
+  originX: 0,
+  originY: 0,
+}
 
 /**
  * Paid streets on the Play map while the shop is off.
  * A tap shows one Coming soon line and a gold Back. It does not open checkout.
+ * On a phone the pill stays at least 48px and the label at least 12px, clear of the edge.
  */
 export function ComingSoonPlots() {
   const [open, setOpen] = useState<string | null>(null)
-  if (!playShopClosed()) return null
+  const [metrics, setMetrics] = useState<PlotMetrics>(FALLBACK)
+  const closed = playShopClosed()
+
+  useLayoutEffect(() => {
+    if (!closed) return
+    const measure = () => {
+      const svg = document.querySelector('.city-svg')
+      if (!(svg instanceof SVGSVGElement)) return
+      const box = svg.getBoundingClientRect()
+      const view = svg.viewBox.baseVal
+      if (box.width < 1 || view.width < 1) return
+      const scale = box.width / view.width
+      setMetrics({
+        font: 13 / scale,
+        width: 132 / scale,
+        height: 56 / scale,
+        inset: 16 / scale,
+        originX: view.x,
+        originY: view.y,
+      })
+    }
+    measure()
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
+  }, [closed])
+
+  if (!closed) return null
   const streets = paidPacks()
   if (!streets.length) return null
 
+  const { font, width, height, inset, originX, originY } = metrics
+  const gap = inset
+  const spots = streets.map((_, index) => {
+    const col = index % 2
+    const row = Math.floor(index / 2)
+    return {
+      x: originX + inset + width / 2 + col * (width + gap),
+      y: originY + inset + height / 2 + 8 + row * (height + gap),
+    }
+  })
+
   return (
-    <g className="city-coming-streets" data-coming-streets>
+    <g className="city-coming-streets" data-coming-streets data-coming-ready="yes">
       {streets.map((pack, index) => {
-        const spot = SPOTS[index] ?? { x: 48 + (index % 2) * 120, y: 78 + Math.floor(index / 2) * 90 }
+        const spot = spots[index] ?? spots[0]!
         const choose = () => setOpen(pack.id)
         return (
           <g
@@ -47,11 +96,37 @@ export function ComingSoonPlots() {
               }
             }}
           >
-            <circle r="36" fill="#2a0d58" stroke="#ffcc33" strokeWidth="3" style={{ cursor: 'pointer' }} />
-            <text y="-6" textAnchor="middle" fill="#fff6e8" fontSize="11" pointerEvents="none">
+            <rect
+              x={-width / 2}
+              y={-height / 2}
+              width={width}
+              height={height}
+              rx={height / 4}
+              fill="#2a0d58"
+              stroke="#ffcc33"
+              strokeWidth={3}
+              style={{ cursor: 'pointer' }}
+            />
+            <text
+              className="city-coming-label"
+              data-coming-label={pack.id}
+              y={-font * 0.35}
+              textAnchor="middle"
+              fill="#fff6e8"
+              fontSize={font}
+              fontWeight={700}
+              pointerEvents="none"
+            >
               {pack.street}
             </text>
-            <text y="12" textAnchor="middle" fill="#ffcc33" fontSize="11" pointerEvents="none">
+            <text
+              y={font * 0.85}
+              textAnchor="middle"
+              fill="#ffcc33"
+              fontSize={font}
+              fontWeight={700}
+              pointerEvents="none"
+            >
               {COMING_SOON}
             </text>
           </g>

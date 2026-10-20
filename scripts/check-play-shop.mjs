@@ -3,7 +3,9 @@
  * Play bundle, shop off. 375×667. Real pointer taps never reach a purchase.
  */
 import assert from 'node:assert/strict'
-import { existsSync, mkdirSync, readFileSync, readdirSync } from 'node:fs'
+import { spawnSync } from 'node:child_process'
+import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
+import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { chromium } from 'playwright'
 import { build, preview } from 'vite'
@@ -157,6 +159,23 @@ try {
   )
   assert.ok(plotIds.includes('mill-street'), `Mill Street plot missing: ${plotIds.join(',')}`)
   assert.ok(plotIds.includes('harbor-walk'), `Harbor Walk plot missing: ${plotIds.join(',')}`)
+  await page.locator('[data-coming-ready="yes"]').waitFor()
+  for (const id of ['mill-street', 'harbor-walk']) {
+    const plot = page.locator(`[data-coming-plot="${id}"]`)
+    const box = await plot.boundingBox()
+    assert.ok(box, `${id} has no box`)
+    assert.ok(box.width >= 48, `${id} width ${box.width}`)
+    assert.ok(box.height >= 48, `${id} height ${box.height}`)
+    assert.ok(box.x >= 8, `${id} left edge ${box.x}`)
+    assert.ok(box.x + box.width <= 375 - 4, `${id} right edge ${box.x + box.width}`)
+    const label = page.locator(`[data-coming-label="${id}"]`)
+    const font = await label.evaluate((node) => Number.parseFloat(getComputedStyle(node).fontSize))
+    const labelBox = await label.boundingBox()
+    assert.ok(font >= 12 || (labelBox && labelBox.height >= 12), `${id} label ${font}`)
+  }
+  mkdirSync(shotDir, { recursive: true })
+  await page.screenshot({ path: join(shotDir, 'play-coming-plots-375x667.png') })
+  assert.equal(await page.locator('[data-web-refresh]').count(), 0)
   const townText = await page.locator('body').innerText()
   assert.doesNotMatch(townText, /\$\d/)
   assert.doesNotMatch(townText, /\bBuy\b/)
@@ -221,9 +240,84 @@ try {
 
   assert.deepEqual(await purchaseCalls(page), [])
   assert.deepEqual(errors, [], errors.join('\n'))
+  assert.equal(await page.locator('[data-web-refresh]').count(), 0)
 } finally {
   await browser.close()
   await server.close()
 }
 
+assertShopOffManifestHasNoBilling()
+
 console.log('check-play-shop: ok')
+
+function sdkHome() {
+  const candidates = [
+    process.env.ANDROID_HOME,
+    process.env.ANDROID_SDK_ROOT,
+    '/usr/local/lib/android/sdk',
+    '/opt/android-sdk',
+    join(homedir(), 'Android', 'Sdk'),
+  ].filter(Boolean)
+  return candidates.find((dir) => existsSync(dir)) || ''
+}
+
+function findMergedManifests(root) {
+  const dir = join(root, 'android/app/build/intermediates/merged_manifest')
+  if (!existsSync(dir)) return []
+  return walk(dir).filter((file) => file.endsWith('AndroidManifest.xml'))
+}
+
+/** Shop off: the merged Play manifest (or an AAB built from it) must not declare BILLING. */
+function assertShopOffManifestHasNoBilling() {
+  const sdk = sdkHome()
+  assert.ok(sdk, 'Android SDK is required to merge the shop-off Play manifest')
+  const platforms = join(sdk, 'platforms')
+  assert.ok(existsSync(platforms), `Android platforms missing under ${sdk}`)
+  if (!existsSync(join('dist', 'index.html'))) {
+    cpSync('dist-play', 'dist', { recursive: true })
+  }
+  const env = { ...process.env, ANDROID_HOME: sdk, ANDROID_SDK_ROOT: sdk, PLAY_AAB: '1' }
+  delete env.VITE_PLAY_SHOP
+  if (!existsSync(join('android', 'capacitor-cordova-android-plugins', 'cordova.variables.gradle'))) {
+    const synced = spawnSync('node', ['scripts/cap-sync.mjs', 'android'], {
+      env,
+      encoding: 'utf8',
+      timeout: 300_000,
+    })
+    if (synced.status !== 0) {
+      throw new Error(`cap sync failed\n${`${synced.stdout || ''}\n${synced.stderr || ''}`.slice(-4000)}`)
+    }
+  }
+  writeFileSync(join('android', 'local.properties'), `sdk.dir=${sdk.replaceAll('\\', '\\\\')}\n`)
+  delete env.VITE_PLAY_SHOP
+  const result = spawnSync(
+    './gradlew',
+    [':app:processShopOffReleaseManifest', '--no-daemon', '--stacktrace'],
+    { cwd: 'android', env, encoding: 'utf8', timeout: 600_000 },
+  )
+  if (result.status !== 0) {
+    const log = `${result.stdout || ''}\n${result.stderr || ''}`
+    throw new Error(`shop-off manifest merge failed\n${log.slice(-4000)}`)
+  }
+  const merged = findMergedManifests(process.cwd()).filter((file) => file.includes('shopOff'))
+  assert.ok(merged.length > 0, 'shop-off merged manifest was not written')
+  for (const file of merged) {
+    const xml = readFileSync(file, 'utf8')
+    assert.doesNotMatch(
+      xml,
+      /com\.android\.vending\.BILLING/,
+      `shop-off merged manifest still declares BILLING (${file})`,
+    )
+  }
+  const bundleDir = join('android', 'app', 'build', 'outputs', 'bundle')
+  const aabs = existsSync(bundleDir)
+    ? walk(bundleDir).filter((file) => file.endsWith('.aab') && file.toLowerCase().includes('shopoff'))
+    : []
+  for (const aab of aabs) {
+    const listed = spawnSync('unzip', ['-p', aab, 'base/manifest/AndroidManifest.xml'], {
+      encoding: 'utf8',
+    })
+    if (listed.status !== 0 || !listed.stdout) continue
+    assert.doesNotMatch(listed.stdout, /com\.android\.vending\.BILLING/, `${aab} declares BILLING`)
+  }
+}

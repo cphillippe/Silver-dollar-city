@@ -2,6 +2,7 @@ import type { Plugin } from 'vite'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import { APP_VERSION } from './src/config/app'
 
 /** Host-header allowlist — never `true`. Tunnels use trycloudflare.com; Pages is static. */
 const allowedHosts = ['localhost', '127.0.0.1', '.trycloudflare.com']
@@ -27,6 +28,28 @@ export const APP_CSP = [
   "manifest-src 'self'",
   'upgrade-insecure-requests',
 ].join('; ')
+
+function appVersionJson(): Plugin {
+  const source = `${JSON.stringify({ version: APP_VERSION })}\n`
+  return {
+    name: 'app-version-json',
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const path = req.url?.split('?')[0] ?? ''
+        if (!path.endsWith('/app-version.json')) {
+          next()
+          return
+        }
+        res.setHeader('Content-Type', 'application/json')
+        res.setHeader('Cache-Control', 'no-store')
+        res.end(source)
+      })
+    },
+    generateBundle() {
+      this.emitFile({ type: 'asset', fileName: 'app-version.json', source })
+    },
+  }
+}
 
 function htmlSecurityHeaders(): Plugin {
   return {
@@ -57,6 +80,7 @@ export default defineConfig({
   plugins: [
     react(),
     htmlSecurityHeaders(),
+    appVersionJson(),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: [
@@ -67,9 +91,21 @@ export default defineConfig({
         'icon-maskable-512.png',
       ],
       workbox: {
+        // The new worker takes the next open. The page reloads on Home, not mid-lesson.
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
         // Box QA opens docs/qa-seed.html after the app SW is installed.
         // Without this, navigation fallback serves index.html and the seed never runs.
-        navigateFallbackDenylist: [/\/qa-seed\.html/, /\/night-run\//],
+        // app-version.json stays on the network so a new deploy is visible without a hard reload.
+        navigateFallbackDenylist: [/\/qa-seed\.html/, /\/night-run\//, /\/app-version\.json/],
+        globIgnores: ['**/app-version.json'],
+        runtimeCaching: [
+          {
+            urlPattern: /app-version\.json/,
+            handler: 'NetworkOnly',
+          },
+        ],
         // The app chunk is past the 2 MiB precache default.
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
       },
