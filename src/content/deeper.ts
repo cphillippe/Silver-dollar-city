@@ -230,12 +230,12 @@ const GROUND_HOLD: DeeperLink[] = [
 const FIRST_WAY: DeeperLink[] = [
   father(
     'Aristotle, Physics VIII',
-    'http://classics.mit.edu/Aristotle/physics.8.viii.html',
+    'https://classics.mit.edu/Aristotle/physics.8.viii.html',
     'Aristotle · change and the first mover',
   ),
   father(
     'Aristotle, Metaphysics XII',
-    'http://classics.mit.edu/Aristotle/metaphysics.12.xii.html',
+    'https://classics.mit.edu/Aristotle/metaphysics.12.xii.html',
     'Aristotle · thought thinking itself',
   ),
   classic(
@@ -502,7 +502,7 @@ const DOSSIERS: Record<string, DeeperLink[]> = {
     ),
     father(
       'Aristotle, Metaphysics XII',
-      'http://classics.mit.edu/Aristotle/metaphysics.12.xii.html',
+      'https://classics.mit.edu/Aristotle/metaphysics.12.xii.html',
       'Aristotle',
     ),
   ],
@@ -559,7 +559,7 @@ const DOSSIERS: Record<string, DeeperLink[]> = {
     ),
     father(
       'Aristotle, De Anima',
-      'http://classics.mit.edu/Aristotle/soul.html',
+      'https://classics.mit.edu/Aristotle/soul.html',
       'Aristotle · soul as act',
     ),
   ],

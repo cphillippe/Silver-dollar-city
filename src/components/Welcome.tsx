@@ -1,5 +1,8 @@
 import { useEffect } from 'react'
 import { APP_VERSION } from '../config/app'
+import { isPlayBuild } from '../config/playBuild'
+import { PRIVACY_POLICY_URL } from '../config/privacy'
+import { PlayImportPrompt } from './PlayImportPrompt'
 import { goldButtonClass } from '../content/goldenPath'
 import { EASY } from '../lib/easy'
 import { Avatar } from './Avatar'
@@ -58,10 +61,18 @@ export function Welcome({ onNavigate }: WelcomeProps) {
           <p className="teach-chip" role="note">
             {EASY.claimTeach}
           </p>
+          <PlayImportPrompt />
           <button type="button" className={goldButtonClass('welcome', 'startEasy')} onClick={begin}>
             {returning ? EASY.home : EASY.startEasy}
           </button>
           <p className="welcome-version">{APP_VERSION}</p>
+          {isPlayBuild() ? (
+            <p>
+              <a className="text-link" href={PRIVACY_POLICY_URL} rel="noopener noreferrer">
+                Privacy policy
+              </a>
+            </p>
+          ) : null}
         </div>
       </div>
     </main>

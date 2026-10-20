@@ -1,10 +1,25 @@
 import assert from 'node:assert/strict'
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { APP_VERSION } from '../src/config/app.ts'
 import { CHANGELOG, latestChange } from '../src/content/changelog.ts'
-import { PAGES_APP_URL, SHELL_APK_URL, shellApkOffer, shellVersionCode } from '../src/config/shell.ts'
+import { resetPlayBuildForTest, setPlayBuildForTest } from '../src/config/playBuild.ts'
+import {
+  BUNDLED_SHELL_ORIGIN,
+  PAGES_APP_URL,
+  SHELL_APK_URL,
+  shellApkOffer,
+  shellUpdateNoticeEnabled,
+  shellVersionCode,
+} from '../src/config/shell.ts'
+import {
+  BUNDLED_ANDROID_HOSTNAME,
+  BUNDLED_ANDROID_SCHEME,
+  omitPlayBundle,
+  withBundledPlayShell,
+} from './android-play-shell.mjs'
 import { PAGES_APP_URL as PATCH_URL, withLivePagesShell } from './android-live-shell.mjs'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -199,7 +214,76 @@ assert.match(readme, /ANDROID_KEYSTORE_B64/)
 assert.match(readme, /environment named `release`/)
 assert.doesNotMatch(readme, /ANDROID_KEYSTORE_BASE64|silver-city-debug\.keystore/)
 
-assert.equal(APP_VERSION, '1.4.518')
+assert.equal(APP_VERSION, '1.4.519')
+assert.equal(BUNDLED_SHELL_ORIGIN, 'https://localhost')
+assert.ok(
+  shellVersionCode(APP_VERSION) > shell.versionCode,
+  'Play versionCode stays above the sideload shell.json code',
+)
+const bundled = withBundledPlayShell({
+  appId: 'city.silver.unending',
+  server: {
+    url: PAGES_APP_URL,
+    cleartext: true,
+    allowNavigation: ['evil.example'],
+  },
+  android: { allowMixedContent: true },
+})
+assert.equal('url' in bundled.server, false)
+assert.equal(bundled.server.androidScheme, BUNDLED_ANDROID_SCHEME)
+assert.equal(bundled.server.hostname, BUNDLED_ANDROID_HOSTNAME)
+assert.equal(bundled.server.cleartext, false)
+assert.equal(bundled.server.errorPath, 'index.html')
+assert.equal(bundled.server.allowNavigation, undefined)
+assert.equal(bundled.android.allowMixedContent, false)
+setPlayBuildForTest(true)
+assert.equal(shellUpdateNoticeEnabled(), false)
+resetPlayBuildForTest()
+assert.equal(shellUpdateNoticeEnabled(), true)
+const omitDir = mkdtempSync(join(tmpdir(), 'play-omit-'))
+writeFileSync(join(omitDir, 'qa-seed.html'), 'seed')
+mkdirSync(join(omitDir, 'night-run'))
+writeFileSync(join(omitDir, 'night-run', 'index.html'), 'night')
+writeFileSync(join(omitDir, 'index.html'), 'app')
+omitPlayBundle(omitDir)
+assert.equal(existsSync(join(omitDir, 'qa-seed.html')), false)
+assert.equal(existsSync(join(omitDir, 'night-run')), false)
+assert.equal(existsSync(join(omitDir, 'index.html')), true)
+rmSync(omitDir, { recursive: true, force: true })
+assert.match(gradle, /PLAY_AAB/)
+assert.match(gradle, /PLAY_UPLOAD_KEYSTORE_PATH/)
+assert.match(gradle, /PLAY_UPLOAD_KEYSTORE_PASSWORD/)
+assert.match(gradle, /PLAY_UPLOAD_KEY_ALIAS/)
+assert.match(gradle, /PLAY_UPLOAD_KEY_PASSWORD/)
+assert.match(gradle, /com\.android\.billingclient:billing:7\.1\.1/)
+assert.match(gradle, /ANDROID_KEYSTORE_PATH/)
+const aabWorkflow = read('.github/workflows/android-aab.yml')
+assert.match(aabWorkflow, /PLAY_UPLOAD_KEYSTORE_B64/)
+assert.match(aabWorkflow, /PLAY_UPLOAD_KEYSTORE_PASSWORD/)
+assert.match(aabWorkflow, /PLAY_UPLOAD_KEY_ALIAS/)
+assert.match(aabWorkflow, /PLAY_UPLOAD_KEY_PASSWORD/)
+assert.match(aabWorkflow, /environment: release/)
+assert.doesNotMatch(aabWorkflow, /ANDROID_KEYSTORE/)
+assert.match(aabWorkflow, /runs-on: ubuntu-24\.04/)
+assert.match(aabWorkflow, /actions\/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1/)
+assert.match(aabWorkflow, /actions\/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1/)
+assert.match(aabWorkflow, /actions\/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6/)
+assert.match(aabWorkflow, /actions\/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9/)
+assert.match(aabWorkflow, /bash scripts\/ci-play-aab\.sh/)
+const aabReleaseAt = aabWorkflow.indexOf('\n  aab-release:')
+assert.ok(aabReleaseAt > 0, 'aab-release job exists')
+const aabPr = aabWorkflow.slice(0, aabReleaseAt)
+const aabRelease = aabWorkflow.slice(aabReleaseAt)
+assert.doesNotMatch(aabPr, /environment:/)
+assert.doesNotMatch(aabPr, /secrets\./)
+assert.match(aabRelease, /environment: release/)
+assert.match(read('index.html'), /fonts\/fonts\.css/)
+assert.doesNotMatch(read('index.html'), /fonts\.googleapis\.com|fonts\.gstatic\.com/)
+assert.doesNotMatch(read('vite.config.ts'), /fonts\.googleapis\.com|fonts\.gstatic\.com/)
+assert.ok(existsSync(join(root, 'public/fonts/fraunces-latin.woff2')))
+assert.ok(existsSync(join(root, 'public/fonts/fraunces-latin-italic.woff2')))
+assert.ok(existsSync(join(root, 'public/fonts/outfit-latin.woff2')))
+assert.doesNotMatch(read('src/content/deeper.ts'), /http:\/\//)
 const pkg = JSON.parse(read('package.json'))
 assert.equal(pkg.dependencies['@capacitor/share'], '^8.0.3')
 const settingsGradle = read('android/capacitor.settings.gradle')

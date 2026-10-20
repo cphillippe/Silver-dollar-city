@@ -1,5 +1,6 @@
 import { cannotCharge, storeProduct, type BillingOffer } from '../lib/billing'
 import { billingSurface } from '../lib/commerce'
+import { playShopClosed } from '../config/playBuild'
 
 interface CheckoutSheetProps {
   offer: BillingOffer
@@ -9,6 +10,7 @@ interface CheckoutSheetProps {
 
 /** In-app checkout. Demo cannot charge; Play path uses the IAP adapter. */
 export function CheckoutSheet({ offer, onConfirm, onCancel }: CheckoutSheetProps) {
+  if (playShopClosed()) return null
   const product = storeProduct(offer)
   if (!product) return null
   const surface = billingSurface()
