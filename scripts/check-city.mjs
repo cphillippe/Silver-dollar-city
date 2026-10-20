@@ -2483,8 +2483,8 @@ assert.match(
   assert.match(screen507, /if \(leaked && now < mendShieldUntilRef\.current\)/)
   assert.match(
     screen507,
-    /if \(easy\) \{\s*crownHoldUntilRef\.current = now \+ MEND_CROWN_HOLD_MS/,
-    '1.4.512 only Easy arms the crown hold',
+    /if \(easy && !crownHoldArmedRef\.current\) \{\s*crownHoldArmedRef\.current = true\s*crownHoldUntilRef\.current = now \+ MEND_CROWN_HOLD_MS/,
+    '1.4.512 Easy arms the crown hold once per round',
   )
   assert.match(screen507, /shieldUp: now < crownHoldUntilRef\.current/)
   assert.doesNotMatch(screen507, /setCrownLive\('Held!'\)/, '1.4.512 no duplicate Held! line')
