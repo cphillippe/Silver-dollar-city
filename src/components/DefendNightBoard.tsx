@@ -1,6 +1,6 @@
-import { useLayoutEffect, useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import type { CityPlotId } from '../lib/city'
-import { clampGhostHintLeft, lampRoadNote, ROAD_COVER_WORD } from '../lib/lampPlace'
+import { clampGhostHintLeft, clientToMap, lampRoadNote, ROAD_COVER_WORD } from '../lib/lampPlace'
 import { CLEAR_BAR_RESERVE } from '../lib/towerCardPlace'
 import { EASY_CROWN_HIT_R, EASY_FACE_HIT_R, PATH_WALKER_FACE_DY, WATCH_ABILITY_LABEL, easyFaceGlows } from '../lib/defend'
 import { boardFill, boardFillPoint, boardPoint as mapBoardPoint, boardView, lampIconBox, nightTowers } from '../nightWatch'
@@ -60,6 +60,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
     plateFill = false, onPlacePointer, cueNudge = false,
     map, roadD, porchCandy, roadLabel, mapFeatures, pops,
   } = props
+  const walkerAim = useRef<{ id: number; point: { x: number; y: number } | null; pointerType: string } | null>(null)
   const place = plateFill ? boardFillPoint : mapBoardPoint
   const cardAbility = upgradeAt ? towerType[upgradeAt] : undefined
   const bellCard = Boolean(cardAbility && isBell(cardAbility) && upgradeAt)
@@ -338,10 +339,21 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
                     height: radius * 2,
                     zIndex: glowing ? 11 : 10,
                   }}
-                  onPointerDown={(event) => event.stopPropagation()}
+                  onPointerDown={(event) => {
+                    event.stopPropagation()
+                    const svg = boardRef.current
+                    const point = svg ? clientToMap(svg, event.clientX, event.clientY) : null
+                    walkerAim.current = {
+                      id: raider.id,
+                      point,
+                      pointerType: event.pointerType || 'none',
+                    }
+                  }}
                   onClick={(event) => {
                     event.stopPropagation()
-                    fireAtRaider(raider.id)
+                    const aim = walkerAim.current
+                    const mine = aim && aim.id === raider.id ? aim : null
+                    fireAtRaider(raider.id, mine?.point ?? null, mine?.pointerType)
                   }}
                 />
               )
