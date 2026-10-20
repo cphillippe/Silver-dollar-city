@@ -969,8 +969,8 @@ button.defend-cross-lamp {
   pointer-events: none;
 }
 
-/* 1.4.515: a dark-face tap pulses the lead ring for 400ms. No new gold. */
-.walker-cue-ring.is-cue-nudge {
+/* 1.4.517: a dark-face tap pulses the lead ring for 400ms. Easy only. No new gold. */
+.defend-page.is-easy-watch .walker-cue-ring.is-cue-nudge {
   transform-box: fill-box;
   transform-origin: center;
   animation: walker-cue-nudge 400ms ease-out 1;
@@ -987,7 +987,7 @@ button.defend-cross-lamp {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .walker-cue-ring.is-cue-nudge {
+  .defend-page.is-easy-watch .walker-cue-ring.is-cue-nudge {
     animation: none;
     stroke-width: 5;
     opacity: 1;
@@ -1681,6 +1681,79 @@ button.defend-cross-lamp {
   line-height: 1.3;
   text-align: center;
   pointer-events: none;
+}
+
+/* 1.4.517: the playtest pill can leave its dock slot when the cue ring is under it. */
+.defend-page.is-easy-watch .nw-tap-readout.is-shifted {
+  z-index: 8;
+}
+
+.defend-page.is-easy-watch.is-boost .nw-tap-readout {
+  position: relative;
+  z-index: 8;
+  width: max-content;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+/* 1.4.517: Easy dark-tap line, outside the dock so the hidden match toast stays for readers. */
+.defend-page.is-easy-watch .nw-miss-toast {
+  position: absolute;
+  z-index: 14;
+  left: 50%;
+  top: 12px;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 5px 10px;
+  border-radius: 10px;
+  background: rgba(84, 24, 44, 0.9);
+  color: #fff6d0;
+  font-size: 0.9rem;
+  font-weight: 800;
+  line-height: 1.2;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: nw-miss-toast-in 120ms ease-out both;
+}
+
+.defend-page.is-easy-watch .nw-miss-toast.is-low {
+  top: var(--nw-miss-top, 12px);
+}
+
+.defend-page.is-easy-watch .nw-miss-toast.is-leaving {
+  animation: nw-miss-toast-out 200ms ease-in both;
+}
+
+@keyframes nw-miss-toast-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes nw-miss-toast-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@media (min-width: 412px) {
+  .defend-page.is-easy-watch .nw-miss-toast {
+    font-size: 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .defend-page.is-easy-watch .nw-miss-toast,
+  .defend-page.is-easy-watch .nw-miss-toast.is-leaving {
+    animation: none;
+    opacity: 1;
+  }
 }
 
 .defend-page.is-nw-debug-freeze .defend-board {
@@ -5459,6 +5532,20 @@ button.defend-new-lamp[aria-pressed='true'] {
     max-width: none;
     overflow: visible;
     pointer-events: none;
+  }
+
+  /* Above Continue and clear of the left lamp column. The dock box is a point. */
+  .defend-page.is-easy-watch.is-boost .nw-tap-readout {
+    position: absolute;
+    z-index: 8;
+    left: 68px;
+    right: auto;
+    bottom: 80px;
+    width: max-content;
+    max-width: calc(100vw - 88px);
+    margin: 0;
+    overflow-wrap: anywhere;
+    white-space: normal;
   }
 
   .defend-page.is-easy-watch.is-boost .nw-docks .defend-boost.is-clear-bar,

@@ -3262,7 +3262,9 @@ async function checkTrustedMisses(browser, port, errors) {
       assert.equal(hpLast, hpBefore, `${label} a dark tap does not change HP`)
     }
     assert.ok(
-      logs.some((line) => /^nw-miss dark \d+ \d+ r15 lead=\d+ leadChangedMsAgo=\d+( seat=1)?$/.test(line)),
+      logs.some((line) =>
+        /^nw-miss dark -?\d+ -?\d+ r15 lead=\S+ leadChangedMsAgo=\d+( seat=1)? dx=-?\d+ dy=-?\d+ ptr=(touch|mouse)$/.test(line),
+      ),
       `${label} logs nw-miss dark`,
     )
     const left = 750 - (Date.now() - nudgedAt)
