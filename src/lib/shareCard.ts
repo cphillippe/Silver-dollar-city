@@ -83,6 +83,8 @@ const SHARE_TITLE = 'Say it back tomorrow'
 /** Native share must answer quickly. Old WebViews never get a bridge. */
 export const SHARE_NATIVE_TIMEOUT_MS = 3000
 let shareNativeTimeoutMs = SHARE_NATIVE_TIMEOUT_MS
+/** True from the moment Share.share or navigator.share is called until it settles. */
+let sharing = false
 
 /** Tests shorten the hang. Production stays at SHARE_NATIVE_TIMEOUT_MS. */
 export function setShareNativeTimeoutForTest(ms: number | null) {
@@ -160,8 +162,13 @@ async function copyShareText(text: string): Promise<ShareResult> {
 async function shareOnTheWeb(title: string, text: string, url: string): Promise<ShareResult> {
   try {
     if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
-      await navigator.share({ title, text, url })
-      return 'shared'
+      sharing = true
+      try {
+        await navigator.share({ title, text, url })
+        return 'shared'
+      } finally {
+        sharing = false
+      }
     }
   } catch (error) {
     if (isShareCancel(error)) return 'idle'
@@ -175,16 +182,23 @@ async function shareOnTheWeb(title: string, text: string, url: string): Promise<
  * The 3s timer covers a bridge that never answers. Any reply, including the
  * launch ack, returns here and must not open a second sheet or copy.
  * A cancel shows nothing. A thrown native plugin falls back to the copied toast.
+ * A second call while the sheet is still opening copies the same line.
  * A canvas image is skipped; measuring text for a 1080×1350 PNG is a later pass.
  */
 export async function shareLine(learning: ShareLine): Promise<ShareResult> {
+  if (sharing) return copyShareText(shareCardText(learning))
   const text = shareCardText(learning)
   const url = shareCardUrl()
   const title = SHARE_TITLE
   if (shouldUseNativeShare() && nativeBridgePresent()) {
     try {
-      await withTimeout(Share.share({ title, text, url }), shareNativeTimeoutMs)
-      return 'shared'
+      sharing = true
+      try {
+        await withTimeout(Share.share({ title, text, url }), shareNativeTimeoutMs)
+        return 'shared'
+      } finally {
+        sharing = false
+      }
     } catch (error) {
       if (isShareCancel(error)) return 'idle'
       if (!isShareTimeout(error)) return copyShareText(text)

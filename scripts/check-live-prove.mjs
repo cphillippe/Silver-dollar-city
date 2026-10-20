@@ -19,6 +19,7 @@ import { DEFEND_PATH } from '../src/nightWatch/path/data.ts'
 import { evidenceFor } from '../src/content/evidence.ts'
 import { localDateKey } from '../src/lib/dates.ts'
 import { EASY_LINE_ORDER } from '../src/lib/easy.ts'
+import { shareCardText } from '../src/lib/shareCard.ts'
 
 const SAVE = {
   kind: SAVE_KIND,
@@ -1989,6 +1990,194 @@ export async function checkShareCard(browser, port, errors) {
   }
 }
 
+const SHARE_URL =
+  'https://cphillippe.github.io/Silver-dollar-city/?utm_source=share&utm_medium=referral&utm_campaign=sayitback'
+
+/** Real pointer taps. Playwright tap(), never element.click(). */
+export async function checkShareBusyTap(browser, port, errors) {
+  const brief = evidenceFor('ph-road')
+  assert.ok(brief, 'ph-road has a line to share')
+  const expected = shareCardText({
+    claim: brief.claim,
+    reason: brief.reason,
+    source: brief.source,
+  })
+  assert.ok(expected.endsWith(SHARE_URL), 'the shared line ends with the sayitback url')
+  const today = localDateKey()
+  const save = {
+    kind: SAVE_KIND,
+    schemaVersion: SAVE_SCHEMA_VERSION,
+    appVersion: '1.4.513',
+    savedAt: '2026-10-20T00:00:00.000Z',
+    progress: {
+      started: true,
+      easyMode: true,
+      theme: 'candy',
+      completed: [],
+      lastDailyDate: today,
+      dailyDates: [today],
+      held: [],
+      easyHeld: [],
+      easyTaught: [],
+      learnings: [
+        {
+          id: 'ph-road',
+          claim: brief.claim,
+          reason: brief.reason,
+          source: brief.source,
+          anchor: 'Juniper’s east porch',
+          acquiredAt: today,
+        },
+      ],
+    },
+  }
+  mkdirSync('/opt/cursor/artifacts/screenshots', { recursive: true })
+  for (const [width, height] of [
+    [375, 667],
+    [412, 915],
+    [768, 1024],
+  ]) {
+    const context = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width, height },
+      deviceScaleFactor: 1,
+      reducedMotion: 'reduce',
+      hasTouch: true,
+    })
+    await context.addInitScript(
+      (payload) => {
+        localStorage.setItem(payload.key, JSON.stringify(payload.save))
+        const calls = []
+        window.__shareCalls = calls
+        window.__shareSettled = 0
+        let release = () => {}
+        window.__releaseShare = () => release()
+        const share = (data) => {
+          calls.push(data)
+          return new Promise((resolve) => {
+            release = () => {
+              window.__shareSettled += 1
+              resolve()
+            }
+          })
+        }
+        try {
+          Object.defineProperty(navigator, 'share', { configurable: true, writable: true, value: share })
+        } catch {
+          navigator.share = share
+        }
+        const clip = []
+        window.__clip = clip
+        const clipboard = { writeText: async (text) => { clip.push(text) } }
+        try {
+          Object.defineProperty(navigator, 'clipboard', { configurable: true, value: clipboard })
+        } catch {
+          navigator.clipboard = clipboard
+        }
+      },
+      { key: STORAGE_KEY, save },
+    )
+    const page = await context.newPage()
+    listen(page, errors, `share busy ${width}`)
+    await page.goto('/')
+    await page.locator('main.hub').waitFor()
+    await page.getByRole('banner').getByRole('button', { name: 'Lock In', exact: true }).click()
+    await page.getByRole('figure', { name: 'Say it back tomorrow' }).waitFor()
+    const shareBtn = page.getByRole('button', { name: 'Share this line', exact: true })
+    assert.equal(await shareBtn.count(), 1, `${width} one Share this line button`)
+    await shareBtn.tap()
+    await page.waitForFunction(() => (window.__shareCalls || []).length === 1)
+    const opened = await page.evaluate(() => ({
+      calls: (window.__shareCalls || []).length,
+      clip: (window.__clip || []).length,
+    }))
+    assert.equal(opened.calls, 1, `${width} the first tap calls navigator.share once`)
+    assert.equal(opened.clip, 0, `${width} the first tap does not copy`)
+    await shareBtn.tap()
+    const toast = page.locator('.share-card-actions [role="status"]').filter({
+      hasText: 'Copied. Paste it to a friend.',
+    })
+    await toast.waitFor()
+    const busy = await page.evaluate(() => ({
+      calls: (window.__shareCalls || []).length,
+      clip: window.__clip || [],
+      settled: window.__shareSettled || 0,
+    }))
+    assert.equal(busy.calls, 1, `${width} the second tap adds no share call`)
+    assert.equal(busy.settled, 0, `${width} the first share is still pending`)
+    assert.equal(busy.clip.length, 1, `${width} the second tap writes the clipboard once`)
+    assert.equal(busy.clip[0], expected, `${width} the clipboard is shareCardText`)
+    assert.equal(busy.clip[0].endsWith(SHARE_URL), true, `${width} the clipboard ends with the share url`)
+    const layout = await page.evaluate(() => {
+      function box(node) {
+        if (!(node instanceof HTMLElement)) return null
+        const rect = node.getBoundingClientRect()
+        return { top: rect.top, left: rect.left, right: rect.right, bottom: rect.bottom, width: rect.width, height: rect.height }
+      }
+      function overlaps(a, b) {
+        if (!a || !b || a.height <= 0 || b.height <= 0) return false
+        return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top
+      }
+      function inside(inner, outer) {
+        if (!inner || !outer) return false
+        return (
+          inner.top >= outer.top - 1 &&
+          inner.bottom <= outer.bottom + 1 &&
+          inner.left >= outer.left - 1 &&
+          inner.right <= outer.right + 1
+        )
+      }
+      const toastNode = document.querySelector('.share-card-actions [role="status"]')
+      const actions = document.querySelector('.share-card-actions')
+      const home = [...document.querySelectorAll('main.journal .btn.primary')].find(
+        (node) => (node.innerText || '').replace(/\s+/g, ' ').trim() === 'Home',
+      )
+      const back = [...document.querySelectorAll('button')].find(
+        (node) => (node.innerText || '').replace(/\s+/g, ' ').trim() === '← Home',
+      )
+      const toastBox = box(toastNode)
+      const homeBox = box(home)
+      const backBox = box(back)
+      return {
+        text: (toastNode?.textContent || '').trim(),
+        inside: inside(toastBox, box(actions)),
+        coversHome: overlaps(toastBox, homeBox),
+        coversBack: overlaps(toastBox, backBox),
+        vh: window.innerHeight,
+        homeTop: homeBox ? homeBox.top : null,
+        homeBottom: homeBox ? homeBox.bottom : null,
+        backTop: backBox ? backBox.top : null,
+      }
+    })
+    assert.equal(layout.text, 'Copied. Paste it to a friend.', `${width} the toast is the copied line`)
+    assert.equal(layout.inside, true, `${width} the toast stays inside the card actions ${JSON.stringify(layout)}`)
+    assert.equal(layout.coversHome, false, `${width} the toast covers Home ${JSON.stringify(layout)}`)
+    assert.equal(layout.coversBack, false, `${width} the toast covers ← Home ${JSON.stringify(layout)}`)
+    assert.ok(layout.homeTop != null && layout.homeBottom <= layout.vh + 1, `${width} Home stays on screen ${JSON.stringify(layout)}`)
+    assert.ok(layout.backTop != null && layout.backTop >= 0, `${width} ← Home stays on screen ${JSON.stringify(layout)}`)
+    if (width === 375) {
+      await page.screenshot({ path: '/opt/cursor/artifacts/screenshots/share-busy-toast-375.png' })
+    }
+    const appeared = Date.now()
+    await toast.waitFor({ state: 'hidden', timeout: 2500 })
+    const dismissed = Date.now() - appeared
+    assert.ok(dismissed <= 2500, `${width} the toast dismissed in ${dismissed}ms`)
+    await page.evaluate(async () => {
+      window.__releaseShare()
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+    await shareBtn.tap()
+    await page.waitForFunction(() => (window.__shareCalls || []).length === 2)
+    const again = await page.evaluate(() => ({
+      calls: (window.__shareCalls || []).length,
+      settled: window.__shareSettled || 0,
+    }))
+    assert.equal(again.settled, 1, `${width} the first share settled before the next tap`)
+    assert.equal(again.calls, 2, `${width} the tap after the share settles calls navigator.share again`)
+    await context.close()
+  }
+}
+
 export async function checkOssuaryLesson(browser, port, errors) {
   const today = localDateKey()
   const at = EASY_LINE_ORDER.indexOf('psw-ossuary')
@@ -2713,6 +2902,7 @@ export async function checkLiveProve() {
     await checkPointerSeats(browser, port, errors)
     await checkCrownHold(browser, port, errors)
     await checkShareCard(browser, port, errors)
+    await checkShareBusyTap(browser, port, errors)
     await checkOssuaryLesson(browser, port, errors)
     assert.equal(errors.join('\n'), '', '1.4.482 live prove stays free of console errors')
   } finally {
