@@ -999,7 +999,7 @@ export async function checkGoldenLive() {
           const eyebrow = (await page.locator('.settings-card').first().locator('.eyebrow').innerText()).trim()
           assert.equal(eyebrow.toLowerCase(), 'reading', 'Settings opens on the Reading card')
           await page.screenshot({ path: `${SHOTS}/settings-reading-375.png` })
-          await page.locator('main.settings .text-link').click()
+          await page.getByRole('button', { name: '← Home' }).click()
           await page.locator('main.hub').waitFor()
         }
 
