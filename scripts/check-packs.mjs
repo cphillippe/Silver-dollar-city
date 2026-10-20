@@ -152,6 +152,7 @@ assert.equal(
 )
 assert.match(matchChipsFor('ob-tuning')?.say ?? '', new RegExp(EASY_CLUE.replace(/[.]/g, '\\.')))
 assert.equal(matchClearBeat('ob-tuning').title, `Yes · ${EASY_CLAIM.replace(/\.$/, '')}`)
+assert.equal(matchClearBeat('ob-tuning').why, EASY_REASON)
 
 const easyXml = readFileSync(new URL('../src/content/packs/observatory.xml', import.meta.url), 'utf8')
 const tuningStart = easyXml.indexOf('<lesson id="ob-tuning"')
