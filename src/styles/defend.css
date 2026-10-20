@@ -5774,3 +5774,32 @@ button.defend-new-lamp[aria-pressed='true'] {
   line-height: 1.25;
   color: #ffe9b0;
 }
+
+/* 1.4.512 Easy crown hold. A small gold mark in the sky while Mend's 12s
+   crown window is armed. It stays off the road and off the hearts.
+   Hard never has .is-easy-watch, so this rule does not reach it. */
+.defend-page.is-easy-watch .nw-crown-hold {
+  position: absolute;
+  z-index: 16;
+  top: 10px;
+  left: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  margin: 0;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: #ffcc33;
+  color: #3a2200;
+  border: 2px solid #ffe7a3;
+  box-shadow:
+    0 0 0 3px rgba(255, 186, 40, 0.95),
+    0 0 10px 2px rgba(255, 204, 51, 0.95);
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  pointer-events: none;
+  white-space: nowrap;
+}
