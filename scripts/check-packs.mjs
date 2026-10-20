@@ -18,6 +18,9 @@ import {
 } from '../src/lib/tiers.ts'
 import { STREET_FACT_IDS } from '../src/content/links.ts'
 import { evidenceFor, evidenceForTier } from '../src/content/evidence.ts'
+import { EASY_CHROME, easyKidVerses } from '../src/lib/easyChrome.ts'
+import { matchChipsFor } from '../src/lib/gemSearch.ts'
+import { matchClearBeat } from '../src/lib/successBeat.ts'
 import { APP_VERSION } from '../src/config/app.ts'
 import { PACK_XML } from '../src/content/packEmbedded.ts'
 
@@ -111,18 +114,98 @@ const tuning = packLesson('ob-tuning')
 assert.ok(tuning)
 assert.match(tuning.claim, /Designer/)
 
+const EASY_CLAIM = 'The world is set just right for life. God made it that way on purpose.'
+const EASY_REASON =
+  "Life needs many things set just right, all at once. Luck can't do that. God, the Maker, can."
+const EASY_STORY =
+  "Space grows at just the right speed. Tiny bits stick together just right. Change one a little, and there's no life. God set them all on purpose."
+const EASY_CLUE = 'God set the world just right for life, on purpose.'
+const EASY_CHROME_46 = 'God wanted people, so He made the world just right.'
+const PSALM_KID =
+  'The sky tells how great God is. It shows the work of His hands. (Psalm 19:1, kid words)'
+const ROMANS_KID =
+  'Since God made the world, we can clearly see His forever power in the things He made. (Romans 1:20, kid words)'
+const OLD_CLAIM = 'The universe is finely tuned for life — that fit points to a Designer.'
+const OLD_REASON = 'Life needs tight numbers — chance does not explain that.'
+const OLD_STORY =
+  'Life needs very tight numbers: how fast space expands, how atoms stick, how tidy the start was. Design predicts a world we can live in. Blind chance does not.'
+const MULTIVERSE_BS =
+  'Some say luck did it with lots of other worlds. No one has ever seen even one of those worlds.'
+
+assert.equal(tuning.easy.learn, EASY_STORY)
+assert.equal(tuning.easy.gloss, EASY_CLAIM)
+assert.equal(tuning.easy.match.sentence, EASY_CLAIM)
+assert.equal(tuning.easy.hold.claim, EASY_CLAIM)
+assert.equal(tuning.easy.hold.why, EASY_REASON)
+assert.equal(evidenceForTier('ob-tuning', 'easy')?.claim, EASY_CLAIM)
+assert.equal(evidenceForTier('ob-tuning', 'easy')?.reason, EASY_REASON)
+assert.deepEqual(easyKidVerses('ob-tuning'), [PSALM_KID, ROMANS_KID])
+for (const line of easyKidVerses('ob-tuning')) {
+  assert.equal(line.includes('"'), false, 'kid paraphrases have no quote marks')
+  assert.match(line, /, kid words\)$/)
+}
+assert.equal(
+  EASY_CHROME[
+    'Life-permitting ranges are extravagantly narrow; a Designer who wants observers leads us to expect that fit — blank indifference does not.'
+  ],
+  EASY_CHROME_46,
+)
+assert.match(matchChipsFor('ob-tuning')?.say ?? '', new RegExp(EASY_CLUE.replace(/[.]/g, '\\.')))
+assert.equal(matchClearBeat('ob-tuning').title, `Yes · ${EASY_CLAIM.replace(/\.$/, '')}`)
+
+const easyXml = readFileSync(new URL('../src/content/packs/observatory.xml', import.meta.url), 'utf8')
+const tuningStart = easyXml.indexOf('<lesson id="ob-tuning"')
+const easyBlock = easyXml.slice(
+  easyXml.indexOf('<easy', tuningStart),
+  easyXml.indexOf('<medium', tuningStart),
+)
+const forbidden = ['finely tuned', 'Designer', 'tight numbers', 'chance does not explain']
+for (const phrase of forbidden) {
+  assert.equal(easyBlock.includes(phrase), false, `Easy lesson 3 still has ${phrase}`)
+}
+assert.equal(easyBlock.includes('maybe'), false)
+assert.equal(easyBlock.includes('some think'), false)
+assert.equal(easyBlock.includes('not a proof'), false)
+assert.equal(easyBlock.includes(MULTIVERSE_BS), false, 'Easy does not show the three-way multiverse choice')
+assert.equal(easyBlock.includes('multiverse'), false)
+
+assert.equal(
+  tuning.medium.learn,
+  'Life needs very tight numbers: how fast space expands, how atoms stick, how tidy the start was. Those life-permitting ranges are extravagantly narrow. Design predicts a world we can live in; blind chance does not. The fit points to a Designer.',
+)
+assert.equal(tuning.medium.gloss, OLD_CLAIM)
+assert.equal(tuning.medium.match.sentence, OLD_CLAIM)
+assert.equal(tuning.medium.hold.claim, OLD_CLAIM)
+assert.equal(tuning.medium.hold.why, OLD_REASON)
+assert.equal(tuning.hard.match.sentence, OLD_CLAIM)
+assert.equal(tuning.hard.hold.claim, OLD_CLAIM)
+assert.equal(tuning.hard.hold.why, OLD_REASON)
+assert.match(tuning.hard.learn, /The universe is finely tuned for life — that fit points to a Designer\./)
+assert.match(tuning.hard.learn, /Life needs tight numbers — chance does not explain that\./)
+assert.equal(evidenceForTier('ob-tuning', 'medium')?.claim, OLD_CLAIM)
+assert.equal(evidenceForTier('ob-tuning', 'medium')?.reason, OLD_REASON)
+assert.equal(evidenceForTier('ob-tuning', 'hard')?.claim, OLD_CLAIM)
+assert.equal(evidenceForTier('ob-tuning', 'hard')?.reason, OLD_REASON)
+assert.equal(tuning.medium.learn.includes(EASY_STORY), false)
+assert.equal(tuning.hard.learn.includes(EASY_CLAIM), false)
+assert.equal(OLD_STORY === tuning.easy.learn, false)
+
+function tierHoldClaim(lesson, tier) {
+  return lesson[tier].hold.claim || lesson.claim
+}
+
 for (const lesson of PACK_CATALOG.lessons) {
   assert.equal(lesson.easy.points, 10, `${lesson.id} Easy points`)
   assert.equal(lesson.medium.points, 12, `${lesson.id} Medium points`)
   assert.equal(lesson.hard.points, 15, `${lesson.id} Hard points`)
-  assert.equal(lesson.easy.match.sentence, lesson.claim, `${lesson.id} Easy match claim`)
-  assert.equal(lesson.medium.match.sentence, lesson.claim, `${lesson.id} Medium match claim`)
-  assert.equal(lesson.hard.match.sentence, lesson.claim, `${lesson.id} Hard match claim`)
+  assert.equal(lesson.easy.match.sentence, tierHoldClaim(lesson, 'easy'), `${lesson.id} Easy match claim`)
+  assert.equal(lesson.medium.match.sentence, tierHoldClaim(lesson, 'medium'), `${lesson.id} Medium match claim`)
+  assert.equal(lesson.hard.match.sentence, tierHoldClaim(lesson, 'hard'), `${lesson.id} Hard match claim`)
   assert.equal(lesson.easy.hold.onFail, 'easy')
   const brief = evidenceFor(lesson.id)
-  assert.equal(brief?.claim, lesson.claim)
+  assert.equal(brief?.claim, tierHoldClaim(lesson, 'medium'), `${lesson.id} medium brief claim`)
   const easyBrief = evidenceForTier(lesson.id, 'easy')
-  assert.equal(easyBrief?.claim, lesson.claim)
+  assert.equal(easyBrief?.claim, tierHoldClaim(lesson, 'easy'), `${lesson.id} easy brief claim`)
 }
 
 const fresh = emptyProgress()

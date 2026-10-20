@@ -1,4 +1,5 @@
 import { EASY, easyFacingLine, easyWhyLine, isEasy } from '../lib/easy'
+import { easyKidVerses } from '../lib/easyChrome'
 import { lineTakeaway } from '../lib/successBeat'
 import { WORDS } from '../lib/words'
 import { useProgress } from '../store/progress'
@@ -42,7 +43,16 @@ export function HeldTriad({
       </div>
       <div>
         <dt>{easy ? EASY.sayFrom : WORDS.source.term}</dt>
-        <dd>{source}</dd>
+        <dd>
+          {source}
+          {easy
+            ? easyKidVerses(id).map((line) => (
+                <span className="kid-verse" key={line}>
+                  {line}
+                </span>
+              ))
+            : null}
+        </dd>
       </div>
     </dl>
   )
@@ -66,6 +76,11 @@ export function MatchTakeaway({
           {EASY.sayFrom} {take.from}
         </span>
       ) : null}
+      {easyKidVerses(lineId).map((line) => (
+        <span className="kid-verse" key={line}>
+          {line}
+        </span>
+      ))}
     </p>
   )
 }

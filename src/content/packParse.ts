@@ -232,6 +232,7 @@ function parseHold(xml: string, whyFallback: string, tier: LessonTierId, claim: 
     levelUpTo,
     onFail: 'easy',
     why,
+    claim: holdClaim,
     claimMisses: uniqueLines(claimMisses),
     whyMisses: uniqueLines(whyMisses),
   }
@@ -372,6 +373,7 @@ function defaultTier(
       levelUpTo: name === 'easy' ? 'medium' : name === 'medium' ? 'hard' : undefined,
       onFail: 'easy',
       why,
+      claim,
       claimMisses: hold?.claimMisses ?? [],
       whyMisses: hold?.whyMisses ?? [],
     },
@@ -414,9 +416,9 @@ function parseLesson(xml: string, areaId: string, areaLoci: PackLoci): PackLesso
   const mediumHold = holdFields(mediumEl?.inner ?? '')
   const hardHold = holdFields(hardEl?.inner ?? '')
   const claim =
-    easyHold.claim ||
     mediumHold.claim ||
     hardHold.claim ||
+    easyHold.claim ||
     textOf(el.inner, 'claim') ||
     el.attrs.ideaLabel
   const gloss = parseGloss(easyEl?.inner ?? el.inner, '')
