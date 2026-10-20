@@ -19,7 +19,8 @@ export function lineTakeaway(lineId: string): { claim: string; why: string; from
   const claim = easyChromeLine(
     lesson?.easy.hold.claim || lesson?.claim || brief?.claim || '',
   ).replace(/\.$/, '')
-  const why = easyWhyLine(lesson?.easy.hold.why || brief?.reason || '')
+  const rawWhy = lesson?.easy.hold.why || brief?.reason || ''
+  const why = lineId === 'ob-tuning' ? rawWhy : easyWhyLine(rawWhy)
   const from = lesson?.source || brief?.source || ''
   return { claim, why, from }
 }
