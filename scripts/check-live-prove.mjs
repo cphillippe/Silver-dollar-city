@@ -6,7 +6,7 @@
  * The Love lamp's box does not cover Candle or Spend.
  */
 import assert from 'node:assert/strict'
-import { mkdirSync, readFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { build } from 'esbuild'
 import { createElement } from 'react'
@@ -20,6 +20,8 @@ import { evidenceFor } from '../src/content/evidence.ts'
 import { localDateKey } from '../src/lib/dates.ts'
 import { EASY_LINE_ORDER } from '../src/lib/easy.ts'
 import { shareCardText } from '../src/lib/shareCard.ts'
+import { EASY_FACE_HIT_R } from '../src/lib/defend.ts'
+import { EASY } from '../src/lib/easy.ts'
 
 const SAVE = {
   kind: SAVE_KIND,
@@ -2875,6 +2877,546 @@ export async function checkCrownHold(browser, port, errors) {
   console.log('crown hold: 10s holds, 13s misses, one hold per round, shield 4s, Hard unchanged')
 }
 
+const MISS_MAPS = (process.env.NW_MISS_MAPS || 'a2,far-hills,map03,map04,map05,map06')
+  .split(',')
+  .map((id) => id.trim())
+  .filter(Boolean)
+const MISS_PACE_MS = Number(process.env.NW_MISS_PACE_MS ?? '60000')
+const STRAY_U = EASY_FACE_HIT_R * 2
+
+async function pointerClick(page, locator) {
+  await locator.scrollIntoViewIfNeeded()
+  const box = await locator.boundingBox()
+  assert.ok(box && box.width > 2 && box.height > 2, 'pointer target is on screen')
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
+}
+
+async function pointerOpenJump(page, search) {
+  await page.goto(`/${search}`)
+  await pointerClick(page, page.getByRole('button', { name: 'Settings' }))
+  await pointerClick(page, page.locator('summary', { hasText: 'Developer' }))
+  await pointerClick(page, page.getByRole('button', { name: 'Jump · Night Watch' }))
+  await page.locator('.defend-board').waitFor()
+}
+
+async function readMissScore(page) {
+  return page.evaluate(() => {
+    const node = document.querySelector('.nw-tap-readout')
+    const num = (name) => Number(node?.getAttribute(name) ?? '0')
+    return {
+      hits: num('data-tap-hits'),
+      misses: num('data-tap-misses'),
+      damage: num('data-tap-damage'),
+      dark: num('data-miss-dark'),
+      fog: num('data-miss-fog'),
+      soaked: num('data-miss-soaked'),
+      near: num('data-miss-board-near'),
+      late: num('data-miss-late'),
+      stray: num('data-stray'),
+      text: (node?.textContent || '').replace(/\s+/g, ' ').trim(),
+    }
+  })
+}
+
+function missSum(score) {
+  return score.dark + score.fog + score.soaked + score.near + score.late
+}
+
+async function toastText(page) {
+  const toast = page.locator('.match-toast')
+  const count = await toast.count()
+  if (count < 1) return ''
+  const parts = []
+  for (let i = 0; i < count; i += 1) {
+    const text = (await toast.nth(i).innerText()).replace(/\s+/g, ' ').trim()
+    if (text) parts.push(text)
+  }
+  return parts.join(' | ')
+}
+
+async function waitForToast(page, expected, ms = 1000) {
+  const until = Date.now() + ms
+  let text = await toastText(page)
+  while (text !== expected && Date.now() < until) {
+    await page.waitForTimeout(40)
+    text = await toastText(page)
+  }
+  return text
+}
+
+/** A setup tap can leave the miss line up. A glowing tap clears it. */
+async function settleToast(page) {
+  for (let i = 0; i < 4; i += 1) {
+    if ((await toastText(page)) === '') return
+    const cue = await faceClient(page, 'cue')
+    if (!cue) break
+    await page.mouse.click(cue.x, cue.y)
+    await page.waitForTimeout(180)
+  }
+  await waitForToast(page, '', 1600)
+}
+
+async function strayClient(page) {
+  return page.evaluate((limit) => {
+    const svg = document.querySelector('.defend-board')
+    if (!(svg instanceof SVGSVGElement)) return null
+    const ctm = svg.getScreenCTM()
+    if (!ctm) return null
+    const faces = [...document.querySelectorAll('.defend-walker-tap')].map((node) => {
+      const box = node.getBoundingClientRect()
+      const p = svg.createSVGPoint()
+      p.x = box.x + box.width / 2
+      p.y = box.y + box.height / 2
+      const local = p.matrixTransform(ctm.inverse())
+      return { x: local.x, y: local.y }
+    })
+    const box = svg.getBoundingClientRect()
+    for (let gy = 0; gy < 16; gy += 1) {
+      for (let gx = 0; gx < 8; gx += 1) {
+        const cx = box.left + ((gx + 0.5) / 8) * box.width
+        const cy = box.top + ((gy + 0.5) / 16) * box.height
+        const p = svg.createSVGPoint()
+        p.x = cx
+        p.y = cy
+        const local = p.matrixTransform(ctm.inverse())
+        if (faces.some((face) => Math.hypot(face.x - local.x, face.y - local.y) <= limit)) continue
+        const node = document.elementFromPoint(cx, cy)
+        if (!node?.closest?.('.defend-board')) continue
+        if (node.closest('button, a, .nw-docks, .nw-rail, .nw-hud, .defend-walker-tap, .defend-raider, .nw-wave-overlay, .match-toast')) continue
+        return { x: cx, y: cy }
+      }
+    }
+    return null
+  }, STRAY_U)
+}
+
+async function faceClient(page, want) {
+  return page.evaluate((mode) => {
+    const buttons = [...document.querySelectorAll('.defend-walker-tap')]
+    for (const button of buttons) {
+      const cue = button.classList.contains('is-cue')
+      const fog = button.getAttribute('data-fog') === 'yes'
+      const boss = button.getAttribute('data-boss') === 'yes'
+      if (mode === 'dark' && (cue || fog || boss)) continue
+      if (mode === 'cue' && !cue) continue
+      if (mode === 'fog' && !fog) continue
+      if (mode === 'plain-cue' && (!cue || boss)) continue
+      const box = button.getBoundingClientRect()
+      const spots = [[0.5, 0.5]]
+      for (let turn = 0; turn < 8; turn += 1) {
+        const angle = (turn / 8) * Math.PI * 2
+        spots.push([0.5 + Math.cos(angle) * 0.38, 0.5 + Math.sin(angle) * 0.38])
+      }
+      for (const [fx, fy] of spots) {
+        const x = box.x + box.width * fx
+        const y = box.y + box.height * fy
+        const node = document.elementFromPoint(x, y)
+        const hit = node?.closest?.('[data-walker-tap]')
+        if (hit?.getAttribute('data-walker-id') !== button.getAttribute('data-walker-id')) continue
+        return { x, y, id: button.getAttribute('data-walker-id'), boss }
+      }
+    }
+    return null
+  }, want)
+}
+
+async function nearClient(page) {
+  return page.evaluate((limit) => {
+    const svg = document.querySelector('.defend-board')
+    if (!(svg instanceof SVGSVGElement)) return null
+    const ctm = svg.getScreenCTM()
+    if (!ctm) return null
+    const scale = Math.hypot(ctm.a, ctm.b) || 1
+    const faces = [...document.querySelectorAll('.defend-walker-tap')].map((node) => {
+      const box = node.getBoundingClientRect()
+      const p = svg.createSVGPoint()
+      p.x = box.x + box.width / 2
+      p.y = box.y + box.height / 2
+      const local = p.matrixTransform(ctm.inverse())
+      return {
+        x: local.x,
+        y: local.y,
+        r: box.width / 2 / scale,
+        cue: node.classList.contains('is-cue'),
+        fog: node.getAttribute('data-fog') === 'yes',
+      }
+    })
+    const dark = faces.find((face) => !face.cue && !face.fog && face.r < 100)
+    if (!dark) return null
+    const box = svg.getBoundingClientRect()
+    for (let turn = 0; turn < 16; turn += 1) {
+      const away = dark.r + 24
+      if (away > limit) continue
+      const x = dark.x + Math.cos(turn) * away
+      const y = dark.y + Math.sin(turn) * away
+      if (faces.some((face) => Math.hypot(face.x - x, face.y - y) <= face.r + 4)) continue
+      if (faces.every((face) => Math.hypot(face.x - x, face.y - y) > limit)) continue
+      const p = svg.createSVGPoint()
+      p.x = x
+      p.y = y
+      const client = p.matrixTransform(ctm)
+      if (client.x < box.left + 2 || client.y < box.top + 2 || client.x > box.right - 2 || client.y > box.bottom - 2) continue
+      const node = document.elementFromPoint(client.x, client.y)
+      if (!node?.closest?.('.defend-board')) continue
+      if (node.closest('button, a, .defend-walker-tap, .defend-raider, .nw-docks, .nw-rail, .nw-wave-overlay')) continue
+      return { x: client.x, y: client.y }
+    }
+    return null
+  }, STRAY_U)
+}
+
+async function hpWidth(page, id) {
+  return page.evaluate((walkerId) => {
+    const bar = document.querySelector(`.defend-raider[data-walker-id="${walkerId}"] .defend-hp-fill`)
+    if (!bar) return null
+    return Number(bar.getAttribute('width'))
+  }, id)
+}
+
+async function assertClearOf(page, label) {
+  const hit = await page.evaluate(() => {
+    const readoutNode = document.querySelector('.nw-tap-readout')
+    const readout = readoutNode?.getBoundingClientRect()
+    const nudge = document.querySelector('.walker-cue-ring.is-cue-nudge')?.getBoundingClientRect()
+    const names = ['.defend-abilities', '.defend-new-lamp', '.defend-hud', '.nw-wave-count', '.nw-wave-survived', '.nw-skill-tray']
+    const boxes = names.flatMap((name) =>
+      [...document.querySelectorAll(name)].map((node) => {
+        const box = node.getBoundingClientRect()
+        return { name, left: box.left, top: box.top, right: box.right, bottom: box.bottom, w: box.width, h: box.height }
+      }),
+    )
+    const overlap = (a, b) =>
+      Boolean(a && b && a.width > 1 && b.w > 1 && a.left < b.right - 1 && a.right > b.left + 1 && a.top < b.bottom - 1 && a.bottom > b.top + 1)
+    const read = readout ? { left: readout.left, top: readout.top, right: readout.right, bottom: readout.bottom, width: readout.width, height: readout.height } : null
+    const ring = nudge && nudge.width > 1 ? { left: nudge.left, top: nudge.top, right: nudge.right, bottom: nudge.bottom, width: nudge.width, height: nudge.height } : null
+    const covered = []
+    for (const box of boxes) {
+      if (overlap(read, box)) covered.push(`readout ${box.name}`)
+      if (overlap(ring, box)) covered.push(`nudge ${box.name}`)
+    }
+    const style = readoutNode ? getComputedStyle(readoutNode) : null
+    return {
+      covered,
+      font: style?.fontSize || '',
+      pad: style ? `${style.paddingTop} ${style.paddingRight} ${style.paddingBottom} ${style.paddingLeft}` : '',
+      margin: style ? `${style.marginTop} ${style.marginRight} ${style.marginBottom} ${style.marginLeft}` : '',
+      h: read?.height ?? 0,
+    }
+  })
+  assert.deepEqual(hit.covered, [], `${label} readout stays clear ${JSON.stringify(hit)}`)
+  return hit
+}
+
+async function pauseWalkers(page) {
+  const resume = page.getByRole('button', { name: 'Resume walkers' })
+  if ((await resume.count()) > 0) return
+  const toggle = page.locator('.defend-nw-debug-toggle')
+  const box = await toggle.boundingBox()
+  const viewH = page.viewportSize()?.height ?? 667
+  if (box && (box.y < 0 || box.y + box.height > viewH)) await toggle.scrollIntoViewIfNeeded()
+  await pointerBox(page, '.defend-nw-debug-toggle')
+  await page.getByRole('button', { name: 'Resume walkers' }).waitFor()
+}
+
+async function resumeWalkers(page) {
+  const resume = page.getByRole('button', { name: 'Resume walkers' })
+  if ((await resume.count()) < 1) return
+  await pointerClick(page, resume)
+}
+
+/** Easy misses: stray is not counted. Dark, fog, and a near board tap are. */
+async function checkTrustedMisses(browser, port, errors) {
+  mkdirSync('/opt/cursor/artifacts', { recursive: true })
+  const rows = []
+  async function openMap(id, width, height, reduced) {
+    const context = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width, height },
+      deviceScaleFactor: 1,
+      reducedMotion: reduced ? 'reduce' : 'no-preference',
+    })
+    await context.addInitScript(
+      (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+      { key: STORAGE_KEY, save: SAVE },
+    )
+    const page = await context.newPage()
+    const logs = []
+    page.on('console', (msg) => {
+      const text = msg.text()
+      if (text.startsWith('nw-miss ') || text.startsWith('nw-stray ')) logs.push(text)
+    })
+    listenCrown(page, errors, `miss ${id} ${width}`)
+    const search =
+      id === 'a2'
+        ? '?playtest=1&nwSeed=2&nwRound=15'
+        : `?playtest=1&nwSeed=2&nwRound=15&nwMap=${id}`
+    await pointerOpenJump(page, search)
+    if (await page.locator('[data-map-overlay]').count()) {
+      await pointerClick(page, page.locator(`[data-map="${id}"]`))
+      await page.locator('[data-map-overlay]').waitFor({ state: 'detached' })
+    }
+    await page.locator('.defend-go').waitFor()
+    await pointerBox(page, '.defend-go')
+    await page.locator('.defend-page.is-easy-tap').waitFor()
+    await page.locator('[data-wave-count]').waitFor({ state: 'detached', timeout: 5000 }).catch(() => {})
+    assert.equal(await page.locator('.defend-page').getAttribute('data-night-map'), id, `${id} is the night`)
+    let ready = false
+    for (let attempt = 0; attempt < 4 && !ready; attempt += 1) {
+      const born = Date.now() + 12_000
+      while (Date.now() < born) {
+        const darkFace = await faceClient(page, 'dark')
+        const cueFace = await faceClient(page, 'cue')
+        if (darkFace && cueFace) break
+        if (cueFace) await page.mouse.click(cueFace.x, cueFace.y)
+        if ((await page.locator('.defend-lost, .defend-page.is-lost').count()) > 0) break
+        await page.waitForTimeout(80)
+      }
+      await pauseWalkers(page)
+      const held = Date.now() + 1500
+      while (Date.now() < held) {
+        if ((await faceClient(page, 'dark')) && (await faceClient(page, 'cue'))) {
+          ready = true
+          break
+        }
+        await page.waitForTimeout(40)
+      }
+      if (ready) break
+      await resumeWalkers(page)
+    }
+    if (!ready) {
+      const snap = await page.evaluate(() => ({
+        map: document.querySelector('.defend-page')?.getAttribute('data-night-map'),
+        phase: document.querySelector('.defend-page')?.className,
+        taps: [...document.querySelectorAll('.defend-walker-tap')].map((node) => ({
+          id: node.getAttribute('data-walker-id'),
+          cue: node.classList.contains('is-cue'),
+          fog: node.getAttribute('data-fog'),
+          boss: node.getAttribute('data-boss'),
+        })),
+        lost: document.querySelector('.defend-lost, .defend-page.is-lost') ? 'yes' : 'no',
+        paused: document.querySelector('.defend-nw-debug-toggle')?.textContent || '',
+      }))
+      assert.ok(ready, `${id} ${width} has a dark face and a glowing face ${JSON.stringify(snap)}`)
+    }
+    return { context, page, logs }
+  }
+
+  async function controls(id, width, height, reduced, pace) {
+    const run = await openMap(id, width, height, reduced)
+    const { page, logs } = run
+    const label = `${id} ${width}`
+    await settleToast(page)
+    const before = await readMissScore(page)
+    const startToast = await toastText(page)
+    assert.equal(startToast, '', `${label} starts without a miss line (${startToast})`)
+    let strayAt = null
+    for (let i = 0; i < 20; i += 1) {
+      strayAt = await strayClient(page)
+      assert.ok(strayAt, `${label} has open ground past ${STRAY_U}u`)
+      await page.mouse.click(strayAt.x, strayAt.y)
+      await page.waitForTimeout(30)
+    }
+    await page.waitForTimeout(120)
+    const afterStray = await readMissScore(page)
+    assert.equal(afterStray.misses, before.misses, `${label} stray taps are not misses`)
+    assert.equal(afterStray.stray, before.stray + 20, `${label} stray +20`)
+    const strayToast = await toastText(page)
+    assert.equal(strayToast, '', `${label} stray shows no toast (${strayToast})`)
+    assert.ok(logs.some((line) => /^nw-stray \d+ \d+$/.test(line)), `${label} logs nw-stray`)
+
+    const dark = await faceClient(page, 'dark')
+    assert.ok(dark, `${label} still has a dark face`)
+    const hpBefore = await hpWidth(page, dark.id)
+    for (let i = 0; i < 9; i += 1) {
+      const spot = await faceClient(page, 'dark')
+      assert.ok(spot, `${label} dark face stays tappable`)
+      await page.mouse.click(spot.x, spot.y)
+      await page.waitForTimeout(40)
+    }
+    const lastDark = await faceClient(page, 'dark')
+    assert.ok(lastDark, `${label} dark face is still there`)
+    const hpLast = await hpWidth(page, lastDark.id)
+    const nudgedAt = Date.now()
+    await page.mouse.click(lastDark.x, lastDark.y)
+    await page.waitForTimeout(60)
+    const ring = page.locator('.walker-cue-ring.is-cue-nudge')
+    assert.equal(await ring.count(), 1, `${label} the lead ring nudges`)
+    if (reduced) {
+      const motion = await ring.evaluate((node) => {
+        const style = getComputedStyle(node)
+        return { animation: style.animationName, width: style.strokeWidth }
+      })
+      assert.equal(motion.animation, 'none', `${label} reduced motion holds the ring still`)
+      assert.ok(Number.parseFloat(motion.width) >= 4, `${label} reduced motion brightens the ring`)
+    } else if (width === 375 && id === 'a2') {
+      const motion = await ring.evaluate((node) => getComputedStyle(node).animationName)
+      assert.equal(motion, 'walker-cue-nudge', `${label} the lead ring scales`)
+      await page.screenshot({ path: '/opt/cursor/artifacts/nw-miss-a2-nudge-375.png' })
+    }
+    const darkToast = await waitForToast(page, EASY.nightMiss, 900)
+    assert.equal(darkToast, EASY.nightMiss, `${label} dark toast (${darkToast})`)
+    const afterDark = await readMissScore(page)
+    assert.equal(afterDark.misses, afterStray.misses + 10, `${label} ten dark taps count`)
+    assert.equal(afterDark.dark, afterStray.dark + 10, `${label} data-miss-dark +10`)
+    if (hpBefore != null && lastDark.id === dark.id) {
+      assert.equal(hpLast, hpBefore, `${label} a dark tap does not change HP`)
+    }
+    assert.ok(
+      logs.some((line) => /^nw-miss dark \d+ \d+ r15 lead=\d+ leadChangedMsAgo=\d+( seat=1)?$/.test(line)),
+      `${label} logs nw-miss dark`,
+    )
+    const left = 750 - (Date.now() - nudgedAt)
+    if (left > 0) await page.waitForTimeout(left)
+    assert.equal(await ring.count(), 0, `${label} the nudge lasts about 400ms`)
+
+    const near = await nearClient(page)
+    if (near) {
+      const beforeNear = await readMissScore(page)
+      await page.mouse.click(near.x, near.y)
+      await page.waitForTimeout(120)
+      const afterNear = await readMissScore(page)
+      assert.equal(afterNear.near, beforeNear.near + 1, `${label} a tap beside the disc is board-near`)
+      assert.equal(afterNear.misses, beforeNear.misses + 1, `${label} board-near counts`)
+      assert.equal(await toastText(page), EASY.nightMiss, `${label} board-near toast`)
+    }
+
+    if (!pace) {
+      await assertClearOf(page, label)
+      if (width === 412) await page.screenshot({ path: '/opt/cursor/artifacts/nw-miss-412.png' })
+      if (width === 768) await page.screenshot({ path: '/opt/cursor/artifacts/nw-miss-768.png' })
+      await run.context.close()
+      return
+    }
+
+    const glow = (await faceClient(page, 'plain-cue')) || (await faceClient(page, 'cue'))
+    assert.ok(glow, `${label} the glowing face is tappable`)
+    const beforeGlow = await readMissScore(page)
+    const glowHp = await hpWidth(page, glow.id)
+    await page.mouse.click(glow.x, glow.y)
+    await page.waitForTimeout(150)
+    const afterGlow = await readMissScore(page)
+    assert.equal(afterGlow.hits, beforeGlow.hits + 1, `${label} a glowing face is a hit`)
+    assert.equal(afterGlow.misses, beforeGlow.misses, `${label} a glowing face is not a miss`)
+    if (!glow.boss) {
+      assert.equal(afterGlow.damage, beforeGlow.damage + 1, `${label} a plain glowing tap still deals 1`)
+      const glowHpAfter = await hpWidth(page, glow.id)
+      if (glowHp != null && glowHpAfter != null) assert.ok(glowHpAfter < glowHp, `${label} the hit bar moved`)
+    } else {
+      assert.ok(
+        afterGlow.damage === beforeGlow.damage || afterGlow.damage === beforeGlow.damage + 1,
+        `${label} the crown tap deals the old chip`,
+      )
+    }
+
+    const scored = await readMissScore(page)
+    assert.equal(scored.misses, missSum(scored), `${label} misses equal the reason split`)
+    assert.equal(scored.late, 0, `${label} late is 0`)
+    await assertClearOf(page, label)
+    await page.screenshot({ path: `/opt/cursor/artifacts/nw-miss-${id}-readout-375.png` })
+
+    let fogShot = false
+    if (id === 'map05') {
+      await resumeWalkers(page)
+      const fogDeadline = Date.now() + 35_000
+      let caught = false
+      while (Date.now() < fogDeadline && !caught) {
+        const fog = await faceClient(page, 'fog')
+        if (!fog) {
+          const cueTap = await faceClient(page, 'cue')
+          if (cueTap) await page.mouse.click(cueTap.x, cueTap.y)
+          await page.waitForTimeout(40)
+          continue
+        }
+        const beforeFog = await readMissScore(page)
+        await page.mouse.click(fog.x, fog.y)
+        await page.waitForTimeout(80)
+        const afterFog = await readMissScore(page)
+        if (afterFog.fog === beforeFog.fog + 1) {
+          assert.equal(afterFog.misses, beforeFog.misses + 1, 'map05 fog counts')
+          assert.equal(await toastText(page), EASY.nightFog, 'map05 fog toast')
+          await page.screenshot({ path: '/opt/cursor/artifacts/nw-miss-map05-fog-375.png' })
+          fogShot = true
+          caught = true
+          break
+        }
+      }
+      assert.equal(fogShot, true, 'map05 a fogged walker was tapped')
+      const fogScore = await readMissScore(page)
+      assert.equal(fogScore.misses, missSum(fogScore), 'map05 misses still equal the reason split')
+      assert.equal(fogScore.late, 0, 'map05 late stays 0')
+      await pauseWalkers(page)
+    }
+
+    await resumeWalkers(page)
+    const origin = await readMissScore(page)
+    const carried = { hits: 0, misses: 0, dark: 0, fog: 0, soaked: 0, near: 0, late: 0, stray: 0 }
+    let seen = { ...origin }
+    const paceStart = Date.now()
+    const paceEnd = paceStart + MISS_PACE_MS
+    while (Date.now() < paceEnd) {
+      if ((await page.locator('.defend-lost, .defend-page.is-lost').count()) > 0) break
+      const aim = await page.evaluate(() => {
+        const svg = document.querySelector('.defend-board')
+        const button = document.querySelector('.defend-walker-tap.is-cue')
+        if (!(svg instanceof SVGSVGElement) || !button) return null
+        const box = button.getBoundingClientRect()
+        const board = svg.getBoundingClientRect()
+        const angle = Math.random() * Math.PI * 2
+        const reach = (box.width / 2) * (0.4 + Math.random() * 1.5)
+        const x = Math.min(board.right - 4, Math.max(board.left + 4, box.x + box.width / 2 + Math.cos(angle) * reach))
+        const y = Math.min(board.bottom - 4, Math.max(board.top + 4, box.y + box.height / 2 + Math.sin(angle) * reach))
+        return { x, y }
+      })
+      if (aim) await page.mouse.click(aim.x, aim.y)
+      await page.waitForTimeout(700)
+      const now = await readMissScore(page)
+      if (now.hits + now.misses + now.stray < seen.hits + seen.misses + seen.stray) {
+        carried.hits += seen.hits
+        carried.misses += seen.misses
+        carried.dark += seen.dark
+        carried.fog += seen.fog
+        carried.soaked += seen.soaked
+        carried.near += seen.near
+        carried.late += seen.late
+        carried.stray += seen.stray
+      }
+      seen = now
+    }
+    const paceScore = {
+      hits: carried.hits + seen.hits - origin.hits,
+      misses: carried.misses + seen.misses - origin.misses,
+      dark: carried.dark + seen.dark - origin.dark,
+      fog: carried.fog + seen.fog - origin.fog,
+      soaked: carried.soaked + seen.soaked - origin.soaked,
+      near: carried.near + seen.near - origin.near,
+      late: carried.late + seen.late - origin.late,
+      stray: carried.stray + seen.stray - origin.stray,
+    }
+    rows.push({
+      id,
+      width,
+      height,
+      paceMs: Date.now() - paceStart,
+      ...paceScore,
+      missesLeqHits: paceScore.misses <= paceScore.hits,
+    })
+    console.log(`miss-pace ${id} ${JSON.stringify(paceScore)}`)
+    await run.context.close()
+  }
+
+  for (const id of MISS_MAPS) {
+    await controls(id, 375, 667, false, true)
+  }
+  if (!process.env.NW_MISS_MAPS || process.env.NW_MISS_PHONE === '1') {
+    await controls('a2', 412, 915, true, false)
+    await controls('a2', 768, 1024, false, false)
+  }
+  const missErrors = errors.filter((line) => line.startsWith('miss '))
+  if (missErrors.length) console.log(`miss-console ${missErrors.join(' | ')}`)
+  writeFileSync('/opt/cursor/artifacts/nw-miss-report.json', JSON.stringify(rows, null, 2))
+  console.log(`miss-report ${JSON.stringify(rows)}`)
+}
+
 export async function checkLiveProve() {
   const server = await createServer({ server: { host: '127.0.0.1', port: 0 } })
   await server.listen()
@@ -2884,6 +3426,8 @@ export async function checkLiveProve() {
   const browser = await launchBrowser()
   const errors = []
   try {
+    await checkTrustedMisses(browser, port, errors)
+    if (process.env.NW_MISS_ONLY === '1') return
     await checkCardCut()
     await checkMaps(browser, port, errors)
     await checkWaveCard(browser, port, errors)
@@ -2904,7 +3448,7 @@ export async function checkLiveProve() {
     await checkShareCard(browser, port, errors)
     await checkShareBusyTap(browser, port, errors)
     await checkOssuaryLesson(browser, port, errors)
-    assert.equal(errors.join('\n'), '', '1.4.482 live prove stays free of console errors')
+    assert.equal(errors.join('\n'), '', `1.4.482 live prove stays free of console errors ${errors.join(' | ').slice(0, 160)}`)
   } finally {
     await browser.close()
     await server.close()

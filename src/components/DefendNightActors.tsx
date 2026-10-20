@@ -83,7 +83,9 @@ export interface DefendNightActorsProps {
   togglePad: (id: CityPlotId) => void
   fire: (id: CityPlotId) => void
   fireAtRaider: (id: number) => void
-  fireBest: () => void
+  fireBest: (point?: { x: number; y: number } | null) => void
+  /** Dark-face tap. The lead ring pulses for 400ms. */
+  cueNudge?: boolean
   shots: Shot[]
   easy: boolean
   blasts: Blast[]
@@ -199,6 +201,7 @@ export function DefendNightActorsSvg({
   armorFrom = 7,
   lampRise = {},
   spawnLog = false,
+  cueNudge = false,
 }: Omit<DefendNightActorsProps, 'tapPos' | 'fireBest' | 'tapJuice' | 'easy' | 'onBoostTower'> & {
   easy: boolean
 }) {
@@ -610,6 +613,7 @@ export function DefendNightActorsSvg({
                     data-gait={raider.gait && raider.gait !== 'plain' ? raider.gait : undefined}
                     data-face={raider.face ?? raider.kind}
                     className={`defend-raider ${raider.mini ? 'is-mini' : ''} ${raider.gait === 'fast' ? 'is-fast' : ''} ${raider.gait === 'tough' ? 'is-tough' : ''} ${raider.boss ? 'is-boss' : ''} ${raider.turned ? 'is-turned' : ''} ${isTap ? 'is-easy-tap-target' : ''} ${isCue ? 'is-easy-cue' : ''} ${lampHit ? 'is-lamp-hit' : ''}`}
+                    data-fog={raider.fog ? 'yes' : undefined}
                     data-boss={raider.boss ? 'yes' : undefined}
                     data-road-t={raider.boss ? raider.t.toFixed(3) : undefined}
                     transform={`translate(${at.x} ${at.y})`}
@@ -794,7 +798,11 @@ export function DefendNightActorsSvg({
                 >
                   <circle className="walker-cue-pad" cy={PATH_WALKER_FACE_DY} r={CUE_RING_R} />
                   <circle className="walker-cue-under" cy={PATH_WALKER_FACE_DY} r={CUE_RING_R} />
-                  <circle className="walker-cue-ring" cy={PATH_WALKER_FACE_DY} r={CUE_RING_R} />
+                  <circle
+                    className={`walker-cue-ring${cueNudge ? ' is-cue-nudge' : ''}`}
+                    cy={PATH_WALKER_FACE_DY}
+                    r={CUE_RING_R}
+                  />
                   <circle className="walker-cue-pulse" cy={PATH_WALKER_FACE_DY} r={CUE_RING_R + FACE_HALF * 0.22} />
                   {tapTarget.gait === 'fast' ? (
                     <g className="walker-cue-streaks" aria-hidden>

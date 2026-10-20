@@ -53,6 +53,15 @@ import {
   holdShowdownCrown,
   easyLiveSpawnT,
   easyPointerTapGate,
+  easyGateMissReason,
+  easyBoardTapKind,
+  easyMissOnSeat,
+  easyTapTarget,
+  easyTapReadout,
+  freshEasyTapScore,
+  type EasyCountedMiss,
+  nightMissLine,
+  nightStrayLine,
   r10ShrugCue,
   easyRoundHeartCap,
   liveBossClearPhase,
@@ -147,6 +156,8 @@ import {
   plantedLampsTooFar,
   previewLamp,
   roundStartKind,
+  SEAT_TAP_R,
+  plantableHints,
   startsNextRound,
   type LampPreview,
 } from '../lib/lampPlace'
@@ -339,7 +350,13 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const [tapHits, setTapHits] = useState(0)
   const [tapMisses, setTapMisses] = useState(0)
   const [tapDamage, setTapDamage] = useState(0)
-  const tapScoreRef = useRef({ hits: 0, misses: 0, damage: 0 })
+  const tapScoreRef = useRef(freshEasyTapScore())
+  const [tapWhy, setTapWhy] = useState(freshEasyTapScore().why)
+  const [tapStray, setTapStray] = useState(0)
+  const [cueNudge, setCueNudge] = useState(false)
+  const cueNudgeTimer = useRef(0)
+  const leadIdRef = useRef<number | null>(null)
+  const leadChangedAt = useRef(0)
   const tapClaim = useRef(0)
   const missLock = useRef<string | null>(null)
   const missUntil = useRef(0)
@@ -506,6 +523,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     setTapHits(score.hits)
     setTapMisses(score.misses)
     setTapDamage(score.damage)
+    setTapWhy({ ...score.why })
+    setTapStray(score.stray)
     setShots(fx.shots.map(({ until: _until, ...shot }) => shot))
     setBlasts(fx.blasts.map(({ until: _until, ...blast }) => blast))
     setFlash(fx.flash.map((item) => item.id))
@@ -767,10 +786,16 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       return
     }
     const wave = waveIndexRef.current
-    tapScoreRef.current = { hits: 0, misses: 0, damage: 0 }
+    tapScoreRef.current = freshEasyTapScore()
     setTapHits(0)
     setTapMisses(0)
     setTapDamage(0)
+    setTapWhy(freshEasyTapScore().why)
+    setTapStray(0)
+    leadIdRef.current = null
+    leadChangedAt.current = 0
+    window.clearTimeout(cueNudgeTimer.current)
+    setCueNudge(false)
     lampHurtRef.current = 0
     if (nightPlaytest) hudRef.current?.setAttribute('data-lamp-damage', '0')
     const intro = skillUnlockOnWave(wave)
@@ -1146,6 +1171,14 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       const alive = live.current.raiders
       publishFxRef.current()
       setRaiders(alive)
+      if (easy) {
+        const lead = easyTapTarget(alive, waveIndexRef.current, tuneRef.current.armorFrom)
+        const nextId = lead ? lead.id : null
+        if (nextId !== leadIdRef.current) {
+          leadIdRef.current = nextId
+          leadChangedAt.current = now
+        }
+      }
       if (gate.failed || live.current.hearts <= 0) {
         live.current.playing = false
         setPhase('lost')
@@ -2216,29 +2249,63 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     return true
   }
 
-  function noteFaceTap(hit: boolean, damage: number) {
+  function paintTapReadout() {
+    const score = tapScoreRef.current
+    const node = hudRef.current?.ownerDocument.querySelector('.nw-tap-readout')
+    if (!node) return
+    node.setAttribute('data-tap-hits', String(score.hits))
+    node.setAttribute('data-tap-misses', String(score.misses))
+    node.setAttribute('data-tap-damage', String(score.damage))
+    node.setAttribute('data-miss-dark', String(score.why.dark))
+    node.setAttribute('data-miss-fog', String(score.why.fog))
+    node.setAttribute('data-miss-soaked', String(score.why.soaked))
+    node.setAttribute('data-miss-board-near', String(score.why['board-near']))
+    node.setAttribute('data-miss-late', String(score.why.late))
+    node.setAttribute('data-stray', String(score.stray))
+    const boss = node.getAttribute('data-boss-hp')
+    const max = node.getAttribute('data-boss-max')
+    node.textContent = easyTapReadout(score, boss ? `${boss}/${max}` : '—')
+  }
+
+  function noteFaceTap(hit: boolean, damage: number, reason?: EasyCountedMiss) {
     if (!easy) return
     const score = tapScoreRef.current
     if (hit) {
       score.hits += 1
       score.damage += damage
-    } else {
+    } else if (reason) {
       score.misses += 1
+      score.why[reason] += 1
     }
-    const node = hudRef.current?.ownerDocument.querySelector('.nw-tap-readout')
-    if (node) {
-      node.setAttribute('data-tap-hits', String(score.hits))
-      node.setAttribute('data-tap-misses', String(score.misses))
-      node.setAttribute('data-tap-damage', String(score.damage))
-      const boss = node.getAttribute('data-boss-hp')
-      const max = node.getAttribute('data-boss-max')
-      node.textContent = `Taps ${score.hits} hit · ${score.misses} miss · ${score.damage} dmg · Boss ${boss ? `${boss}/${max}` : '—'}`
-    }
+    paintTapReadout()
     fxRef.current.dirty = true
   }
 
-  function showMiss() {
-    missLock.current = EASY.nightMiss
+  function noteStray() {
+    if (!easy) return
+    tapScoreRef.current.stray += 1
+    paintTapReadout()
+    fxRef.current.dirty = true
+  }
+
+  function logMiss(reason: string, at: { x: number; y: number }) {
+    if (!(easy && debugPanelRef.current)) return
+    const lead = easyTapTarget(live.current.raiders, waveIndexRef.current, tuneRef.current.armorFrom)
+    const ago = leadChangedAt.current ? performance.now() - leadChangedAt.current : 0
+    const seat = easyMissOnSeat(at, plantableHints(plantsRef.current), SEAT_TAP_R)
+    console.info(
+      nightMissLine(reason, at.x, at.y, waveIndexRef.current + 1, lead?.id ?? 'none', ago, seat),
+    )
+  }
+
+  function nudgeLead() {
+    setCueNudge(true)
+    window.clearTimeout(cueNudgeTimer.current)
+    cueNudgeTimer.current = window.setTimeout(() => setCueNudge(false), 400)
+  }
+
+  function showMiss(reason?: EasyCountedMiss) {
+    missLock.current = easy && reason === 'fog' ? EASY.nightFog : EASY.nightMiss
     missUntil.current = performance.now() + EASY_MISS_HOLD_MS
     fxRef.current.dirty = true
   }
@@ -2258,8 +2325,15 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     if (!raider) return
     const gate = easyPointerTapGate(easy, raider, live.current.raiders, waveIndexRef.current, tuneRef.current.armorFrom)
     if (gate === 'miss') {
-      noteFaceTap(false, 0)
-      showMiss()
+      const reason =
+        easyGateMissReason(raider, live.current.raiders, waveIndexRef.current, tuneRef.current.armorFrom) ??
+        'dark'
+      const at = raiderAt(raider)
+      noteFaceTap(false, 0, reason)
+      if (reason === 'fog') showMiss('fog')
+      else showMiss()
+      if (easy && reason === 'dark') nudgeLead()
+      logMiss(reason, { x: at.x, y: at.y + PATH_WALKER_FACE_DY })
       return
     }
     const point = raiderAt(raider)
@@ -2336,12 +2410,13 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       }
     }
     if (easy) {
-      noteFaceTap(false, 0)
+      noteFaceTap(false, 0, 'late')
       showMiss()
+      logMiss('late', { x: point.x, y: point.y + PATH_WALKER_FACE_DY })
     }
   }
 
-  function fireBest() {
+  function fireBest(point?: { x: number; y: number } | null) {
     if (swallowWaveTap.current) {
       swallowWaveTap.current = false
       return
@@ -2350,8 +2425,21 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     if (countUntilRef.current > performance.now()) return
     if (!claimTap()) return
     if (faceTapStrike(easy, false, false) === 'miss' && easy) {
-      noteFaceTap(false, 0)
+      const faces = live.current.raiders
+        .filter((raider) => !raider.turned)
+        .map((raider) => {
+          const at = raiderAt(raider)
+          return { x: at.x, y: at.y + PATH_WALKER_FACE_DY }
+        })
+      const kind = point ? easyBoardTapKind(point, faces) : 'stray'
+      if (kind === 'stray') {
+        noteStray()
+        if (point && debugPanelRef.current) console.info(nightStrayLine(point.x, point.y))
+        return
+      }
+      noteFaceTap(false, 0, 'board-near')
       showMiss()
+      if (point) logMiss('board-near', point)
       return
     }
     let pick: CityPlotId | null = null
@@ -2392,7 +2480,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     setBlasts([])
     setFlash([])
     setTapJuice(null)
-    tapScoreRef.current = { hits: 0, misses: 0, damage: 0 }
+    tapScoreRef.current = freshEasyTapScore()
     fxRef.current.shots = []
     fxRef.current.blasts = []
     fxRef.current.juice = null
@@ -2401,6 +2489,12 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     setTapHits(0)
     setTapMisses(0)
     setTapDamage(0)
+    setTapWhy(freshEasyTapScore().why)
+    setTapStray(0)
+    leadIdRef.current = null
+    leadChangedAt.current = 0
+    window.clearTimeout(cueNudgeTimer.current)
+    setCueNudge(false)
     lampHurtRef.current = 0
     setRunTier(freshRunTier())
     setRunPaths(freshRunPaths())
@@ -3105,10 +3199,19 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
           data-tap-hits={tapHits}
           data-tap-misses={tapMisses}
           data-tap-damage={tapDamage}
+          data-miss-dark={tapWhy.dark}
+          data-miss-fog={tapWhy.fog}
+          data-miss-soaked={tapWhy.soaked}
+          data-miss-board-near={tapWhy['board-near']}
+          data-miss-late={tapWhy.late}
+          data-stray={tapStray}
           data-boss-hp={bossLive ? bossLive.hp : ''}
           data-boss-max={bossLive ? bossLive.maxHp : ''}
         >
-          {`Taps ${tapHits} hit · ${tapMisses} miss · ${tapDamage} dmg · Boss ${bossLive ? `${bossLive.hp}/${bossLive.maxHp ?? bossLive.hp}` : '—'}`}
+          {easyTapReadout(
+            { hits: tapHits, misses: tapMisses, damage: tapDamage, why: tapWhy, stray: tapStray },
+            bossLive ? `${bossLive.hp}/${bossLive.maxHp ?? bossLive.hp}` : '—',
+          )}
         </p>
       ) : null}
       {debugHarness ? (
@@ -3690,6 +3793,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
                   : 'Night road through Silver City'
               }
               armorFrom={tuneRef.current.armorFrom}
+              cueNudge={cueNudge}
               mapFeatures={playingMap?.mapFeatures}
               pops={pops}
             />
