@@ -3124,6 +3124,187 @@ async function resumeWalkers(page) {
   await pointerClick(page, resume)
 }
 
+/** Painted frames of Easy R15. The cue ring lives in `.walker-target-cue`, not on the walker. */
+async function sampleCueClear(page, minFrames) {
+  return page.evaluate(
+    (need) =>
+      new Promise((resolve) => {
+        const overlap = (a, b) =>
+          a.width > 1 &&
+          a.height > 1 &&
+          b.width > 1 &&
+          b.height > 1 &&
+          a.left < b.right &&
+          a.right > b.left &&
+          a.top < b.bottom &&
+          a.bottom > b.top
+        let frames = 0
+        let overlaps = 0
+        let shifted = 0
+        let shiftedFrames = 0
+        let homeHits = 0
+        let wasShifted = false
+        let empty = 0
+        let steps = 0
+        const finish = () => resolve({ frames, overlaps, shifted, shiftedFrames, homeHits, empty })
+        const step = () => {
+          steps += 1
+          const rings = [...document.querySelectorAll('.walker-target-cue .walker-cue-ring')]
+          const pulses = [...document.querySelectorAll('.walker-target-cue .walker-cue-pulse')]
+          const readout = document.querySelector('.nw-tap-readout')
+          const lost = Boolean(document.querySelector('.defend-lost, .defend-page.is-lost'))
+          if (lost || steps > 720) {
+            finish()
+            return
+          }
+          if (rings.length < 1 || !(readout instanceof HTMLElement)) {
+            empty += 1
+            requestAnimationFrame(step)
+            return
+          }
+          const read = readout.getBoundingClientRect()
+          const parent = readout.offsetParent instanceof HTMLElement ? readout.offsetParent : null
+          const origin = parent ? parent.getBoundingClientRect() : new DOMRect()
+          const home = new DOMRect(origin.left + readout.offsetLeft, origin.top + readout.offsetTop, readout.offsetWidth, readout.offsetHeight)
+          const targets = [...rings, ...pulses].map((el) => el.getBoundingClientRect())
+          frames += 1
+          if (targets.some((rect) => overlap(read, rect))) overlaps += 1
+          if (targets.some((rect) => overlap(home, rect))) homeHits += 1
+          const on = readout.classList.contains('is-shifted')
+          if (on) shiftedFrames += 1
+          if (on && !wasShifted) shifted += 1
+          wasShifted = on
+          if (frames >= need && (homeHits > 0 || frames >= need * 3)) {
+            finish()
+            return
+          }
+          requestAnimationFrame(step)
+        }
+        requestAnimationFrame(step)
+      }),
+    minFrames,
+  )
+}
+
+/** Easy R15, walkers moving: the readout stays off the cue ring, and a dark tap still toasts. */
+async function checkReadoutCueClear(browser, port, errors) {
+  const widths = [
+    [375, 667],
+    [412, 915],
+    [768, 1024],
+  ]
+  const report = []
+  for (const [width, height] of widths) {
+    const context = await browser.newContext({
+      baseURL: `http://127.0.0.1:${port}/`,
+      viewport: { width, height },
+      deviceScaleFactor: 1,
+    })
+    await context.addInitScript(
+      (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+      { key: STORAGE_KEY, save: SAVE },
+    )
+    const page = await context.newPage()
+    listenCrown(page, errors, `cue-clear ${width}`)
+    await pointerOpenJump(page, '?playtest=1&nwSeed=2&nwRound=15')
+    if (await page.locator('[data-map-overlay]').count()) {
+      await pointerClick(page, page.locator('[data-map="a2"]'))
+      await page.locator('[data-map-overlay]').waitFor({ state: 'detached' })
+    }
+    await page.locator('.defend-go').waitFor()
+    await pointerBox(page, '.defend-go')
+    await page.locator('.defend-page.is-easy-tap').waitFor()
+    await page.locator('[data-wave-count]').waitFor({ state: 'detached', timeout: 5000 }).catch(() => {})
+    await page.locator('.nw-tap-readout').waitFor()
+    const born = Date.now() + 12000
+    let ringCount = 0
+    while (Date.now() < born) {
+      ringCount = await page.locator('.walker-target-cue .walker-cue-ring').count()
+      if (ringCount >= 1) break
+      await page.waitForTimeout(40)
+    }
+    assert.ok(ringCount >= 1, `${width} .walker-target-cue .walker-cue-ring finds a ring (${ringCount})`)
+    const sample = await sampleCueClear(page, 120)
+    assert.ok(sample.frames >= 20, `${width} sampled ${sample.frames} ring frames (empty ${sample.empty})`)
+    assert.equal(sample.overlaps, 0, `${width} readout covers the cue ring ${JSON.stringify(sample)}`)
+    if (sample.homeHits > 0) {
+      assert.ok(sample.shifted >= 1, `${width} the readout shifts when the ring is in its dock ${JSON.stringify(sample)}`)
+    }
+    await page.evaluate((line) => {
+      window.__nwToastWatch = { line, downAt: 0, seenMs: null }
+      document.addEventListener(
+        'pointerdown',
+        () => {
+          window.__nwToastWatch.downAt = performance.now()
+        },
+        true,
+      )
+    }, EASY.nightMiss)
+    let toastMs = null
+    let toastSnap = null
+    const darkUntil = Date.now() + 8000
+    while (Date.now() < darkUntil && toastMs == null) {
+      const dark = await faceClient(page, 'dark')
+      if (!dark) {
+        await page.waitForTimeout(40)
+        continue
+      }
+      await page.evaluate(() => {
+        window.__nwToastWatch.downAt = 0
+        window.__nwToastWatch.seenMs = null
+      })
+      await page.mouse.click(dark.x, dark.y)
+      toastSnap = await page.evaluate(async () => {
+        const watch = window.__nwToastWatch
+        const start = performance.now()
+        let last = null
+        while (performance.now() - start < 240) {
+          const node = document.querySelector('.nw-miss-toast')
+          if (node instanceof HTMLElement) {
+            const box = node.getBoundingClientRect()
+            const opacity = Number(getComputedStyle(node).opacity)
+            const text = (node.textContent || '').replace(/\s+/g, ' ').trim()
+            last = { text, opacity, w: box.width, h: box.height }
+            if (text === watch.line && opacity > 0.9 && box.width >= 120 && box.height >= 20 && watch.downAt > 0) {
+              watch.seenMs = performance.now() - watch.downAt
+              return { ok: true, ms: watch.seenMs, last }
+            }
+          }
+          await new Promise((resolve) => requestAnimationFrame(resolve))
+        }
+        return { ok: false, ms: watch.seenMs, last, downAt: watch.downAt }
+      })
+      if (toastSnap?.ok && toastSnap.ms <= 200) toastMs = toastSnap.ms
+    }
+    if (toastMs == null) {
+      toastSnap = {
+        ...(toastSnap || {}),
+        faces: await page.evaluate(() =>
+          [...document.querySelectorAll('.defend-walker-tap')].map((node) => ({
+            id: node.getAttribute('data-walker-id'),
+            cue: node.classList.contains('is-cue'),
+            fog: node.getAttribute('data-fog'),
+            boss: node.getAttribute('data-boss'),
+            w: Math.round(node.getBoundingClientRect().width),
+          })),
+        ),
+      }
+    }
+    assert.ok(
+      toastMs != null && toastMs <= 200,
+      `${width} the dark-tap toast shows within 200ms (${toastMs}) ${JSON.stringify(toastSnap)}`,
+    )
+    console.log(
+      `cue-clear ${width}x${height} frames=${sample.frames} overlaps=${sample.overlaps} shifted=${sample.shifted} shiftedFrames=${sample.shiftedFrames} homeHits=${sample.homeHits} toastMs=${toastMs}`,
+    )
+    report.push({ width, height, toastMs, ...sample })
+    await context.close()
+  }
+  mkdirSync('/opt/cursor/artifacts', { recursive: true })
+  writeFileSync('/opt/cursor/artifacts/nw-cue-clear.json', JSON.stringify(report, null, 2))
+  console.log(`cue-clear ${JSON.stringify(report)}`)
+}
+
 /** Easy misses: stray is not counted. Dark, fog, and a near board tap are. */
 async function checkTrustedMisses(browser, port, errors) {
   mkdirSync('/opt/cursor/artifacts', { recursive: true })
@@ -3428,6 +3609,8 @@ export async function checkLiveProve() {
   const browser = await launchBrowser()
   const errors = []
   try {
+    await checkReadoutCueClear(browser, port, errors)
+    if (process.env.NW_CUE_ONLY === '1') return
     await checkTrustedMisses(browser, port, errors)
     if (process.env.NW_MISS_ONLY === '1') return
     await checkCardCut()

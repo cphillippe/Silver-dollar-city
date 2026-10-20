@@ -329,8 +329,9 @@ function keepReadoutClear() {
   const frameEl = node.closest('.defend-frame')
   if (!(frameEl instanceof HTMLElement)) return
   const frame = frameEl.getBoundingClientRect()
-  const rings = ['.defend-raider.is-easy-cue .walker-cue-ring', '.defend-raider.is-easy-cue .walker-cue-pulse'].flatMap(
-    (sel) => [...document.querySelectorAll(sel)].map((el) => el.getBoundingClientRect()),
+  // The ring is drawn in g.walker-target-cue, beside the walkers, not inside .defend-raider.
+  const rings = ['.walker-target-cue .walker-cue-ring', '.walker-target-cue .walker-cue-pulse'].flatMap((sel) =>
+    [...document.querySelectorAll(sel)].map((el) => el.getBoundingClientRect()),
   )
   const blocks = [
     '.defend-boost.is-clear-bar',
@@ -1442,8 +1443,14 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
 
   useLayoutEffect(() => {
     if (!easy) return
-    keepReadoutClear()
-    if (missCue !== 'off') placeMissToast()
+    let frame = 0
+    const sync = () => {
+      keepReadoutClear()
+      if (missCue !== 'off') placeMissToast()
+      frame = window.requestAnimationFrame(sync)
+    }
+    sync()
+    return () => window.cancelAnimationFrame(frame)
   })
 
   function noteSpend(cost: number) {
