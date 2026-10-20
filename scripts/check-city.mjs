@@ -17998,6 +17998,10 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.match(screen515, /\.walker-target-cue \.walker-cue-pulse/)
   assert.doesNotMatch(screen515, /\.defend-raider\.is-easy-cue \.walker-cue-ring/)
   assert.doesNotMatch(screen515, /\.defend-raider\.is-easy-cue \.walker-cue-pulse/)
+  assert.match(
+    screen515,
+    /'\.nw-miss-toast',\s*'\.nw-balloon',\s*'\.defend-wave',\s*'\.nw-pace',\s*'\.nw-skill-hint',\s*'\.nw-skill-toast',/,
+  )
   const best515 = screen515.slice(screen515.indexOf('function fireBest'), screen515.indexOf('function retry'))
   assert.match(best515, /faceTapStrike\(easy, false, false\) === 'miss' && easy/)
   assert.match(best515, /easyBoardTapKind\(/)
