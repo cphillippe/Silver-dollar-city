@@ -199,7 +199,7 @@ assert.match(readme, /ANDROID_KEYSTORE_B64/)
 assert.match(readme, /environment named `release`/)
 assert.doesNotMatch(readme, /ANDROID_KEYSTORE_BASE64|silver-city-debug\.keystore/)
 
-assert.equal(APP_VERSION, '1.4.516')
+assert.equal(APP_VERSION, '1.4.517')
 const pkg = JSON.parse(read('package.json'))
 assert.equal(pkg.dependencies['@capacitor/share'], '^8.0.3')
 const settingsGradle = read('android/capacitor.settings.gradle')

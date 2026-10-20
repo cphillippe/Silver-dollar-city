@@ -38,6 +38,7 @@ import { easyShotReach, pathBadge, pathsOf, type LampPaths } from '../nightWatch
 import { CITY_PLOTS, type CityPlotId } from '../lib/city'
 import { TOWER_TYPE_SRC } from '../lib/towerTypeArt'
 import { EASY } from '../lib/easy'
+import { clientToMap } from '../lib/lampPlace'
 import {
   lampIconBox,
   nightEnemies,
@@ -82,8 +83,8 @@ export interface DefendNightActorsProps {
   flash: readonly CityPlotId[]
   togglePad: (id: CityPlotId) => void
   fire: (id: CityPlotId) => void
-  fireAtRaider: (id: number) => void
-  fireBest: (point?: { x: number; y: number } | null) => void
+  fireAtRaider: (id: number, tap?: { x: number; y: number } | null, pointerType?: string) => void
+  fireBest: (point?: { x: number; y: number } | null, pointerType?: string) => void
   /** Dark-face tap. The lead ring pulses for 400ms. */
   cueNudge?: boolean
   shots: Shot[]
@@ -206,6 +207,7 @@ export function DefendNightActorsSvg({
   easy: boolean
 }) {
   const spawnSeen = useRef(new Set<string>())
+  const faceAim = useRef<{ id: number; point: { x: number; y: number } | null; pointerType: string } | null>(null)
   useEffect(() => {
     if (!spawnLog || !easy) return
     for (const raider of raiders) {
@@ -620,13 +622,29 @@ export function DefendNightActorsSvg({
                     role={isTap ? 'button' : undefined}
                     tabIndex={isTap ? 0 : undefined}
                     aria-label={isTap ? `Walker on the road. ${EASY.nightTap}` : undefined}
+                    onPointerDown={
+                      isTap
+                        ? (event) => {
+                            const svg = (event.currentTarget as SVGGElement).ownerSVGElement
+                            const point = svg ? clientToMap(svg, event.clientX, event.clientY) : null
+                            faceAim.current = {
+                              id: raider.id,
+                              point,
+                              pointerType: event.pointerType || 'none',
+                            }
+                          }
+                        : undefined
+                    }
                     onClick={
                       isTap
                         ? (event) => {
                             event.stopPropagation()
                             const host = event.currentTarget as SVGGElement
                             const marked = Number(host.getAttribute('data-walker-id'))
-                            fireAtRaider(Number.isFinite(marked) ? marked : raider.id)
+                            const id = Number.isFinite(marked) ? marked : raider.id
+                            const aim = faceAim.current
+                            const mine = aim && aim.id === id ? aim : null
+                            fireAtRaider(id, mine?.point ?? null, mine?.pointerType)
                           }
                         : undefined
                     }
