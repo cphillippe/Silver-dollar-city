@@ -341,6 +341,20 @@ export interface ProgressState {
    * normalize fills {}. Schema stays 1 — do not wipe.
    */
   matchExtra: Record<string, number>
+  /**
+   * First local day this save was opened (YYYY-MM-DD). Optional on old
+   * saves; the first boot fills it. Schema stays 1 — do not wipe.
+   */
+  firstSeen?: string
+  /**
+   * Home lamp look. Absent means Classic. Optional; schema stays 1.
+   */
+  lampStyle?: 'classic' | 'founders'
+  /**
+   * The Home Founder's Lamp line has already been shown. Optional;
+   * absent means not yet. Schema stays 1.
+   */
+  foundersGiftSeen?: boolean
 }
 
 export type View =

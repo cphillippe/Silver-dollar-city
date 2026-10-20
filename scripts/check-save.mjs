@@ -2,11 +2,15 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { adsAreVisible, adsEnabledDefault, AD_SLOTS, ADS_NEVER_COVER, isBetweenSceneTransition, softAdsDefault, softAdsVisible } from '../src/config/ads.ts'
 import { APP_VERSION, SAVE_SCHEMA_VERSION, STORAGE_KEY } from '../src/config/app.ts'
+import { localDateKey } from '../src/lib/dates.ts'
+import { foundersLamp } from '../src/lib/foundersLamp.ts'
 import {
   corruptSaveKey,
   encodeShareCode,
   loadSave,
+  normalizeProgress,
   parseIncomingSave,
+  progressAfterReset,
   SAVE_MAX_BYTES,
   wrapSave,
 } from '../src/lib/save.ts'
@@ -326,6 +330,51 @@ assert.equal(brokenCopies.length, 1)
 assert.equal(saveStore.get(brokenCopies[0]), '{not')
 assert.match(brokenCopies[0], new RegExp(`^${STORAGE_KEY}\\.corrupt-\\d+$`))
 assert.equal(corruptSaveKey(123), `${STORAGE_KEY}.corrupt-123`)
+
+saveStore.clear()
+const fresh = loadSave()
+assert.equal(fresh.progress.firstSeen, localDateKey(), 'a fresh save gets firstSeen = today')
+assert.equal(SAVE_SCHEMA_VERSION, 1)
+
+saveStore.clear()
+saveStore.set(STORAGE_KEY, JSON.stringify(legacy))
+const legacyLoad = loadSave()
+assert.equal(legacyLoad.progress.firstSeen, localDateKey(), 'an existing save gets firstSeen on load')
+const legacyStored = JSON.parse(saveStore.get(STORAGE_KEY))
+assert.equal(legacyStored.schemaVersion, 1)
+assert.equal(legacyStored.progress.firstSeen, localDateKey())
+
+const granted = normalizeProgress({ ...legacy, firstSeen: '2027-01-06' })
+assert.equal(granted.firstSeen, '2027-01-06')
+assert.equal(foundersLamp(granted), true, '2027-01-06 grants the Founder\'s Lamp')
+const missed = normalizeProgress({ ...legacy, firstSeen: '2027-01-07' })
+assert.equal(missed.firstSeen, '2027-01-07')
+assert.equal(foundersLamp(missed), false, '2027-01-07 does not grant the lamp')
+const badDate = normalizeProgress({ ...legacy, firstSeen: 'not-a-date' })
+assert.equal(badDate.firstSeen, undefined, 'a bad firstSeen string is dropped')
+assert.equal(foundersLamp(badDate), false)
+assert.equal(SAVE_SCHEMA_VERSION, 1)
+
+saveStore.clear()
+const badEnvelope = wrapSave(normalizeProgress(legacy))
+badEnvelope.progress.firstSeen = 'not-a-date'
+saveStore.set(STORAGE_KEY, JSON.stringify(badEnvelope))
+const badLoad = loadSave()
+assert.equal(badLoad.progress.firstSeen, localDateKey(), 'a dropped bad date is filled on load')
+assert.equal(JSON.parse(saveStore.get(STORAGE_KEY)).schemaVersion, 1)
+
+const keptGrant = progressAfterReset({
+  ...granted,
+  theme: 'dusk',
+  easyMode: true,
+  lampStyle: 'founders',
+  foundersGiftSeen: true,
+})
+assert.equal(keptGrant.firstSeen, '2027-01-06')
+assert.equal(keptGrant.lampStyle, 'founders')
+assert.equal(keptGrant.foundersGiftSeen, true)
+assert.equal(foundersLamp(keptGrant), true)
+assert.equal(keptGrant.started, false)
 
 waitAMillisecond()
 saveStore.clear()

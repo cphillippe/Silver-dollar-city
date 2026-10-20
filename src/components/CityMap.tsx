@@ -39,6 +39,7 @@ import {
   rehearseGo,
   useProgress,
 } from '../store/progress'
+import { activeLampStyle } from '../lib/foundersLamp'
 import { localDateKey } from '../lib/dates'
 import { easyTrailView, isEasy } from '../lib/easy'
 import type { View } from '../types'
@@ -402,6 +403,7 @@ export function CityMap({
   const celebrating = Boolean(beat) || homecoming
   const beatVoice = beat ? townVoice(beat.id) : townVoice(nextId)
   const easy = isEasy(progress)
+  const founderLamps = activeLampStyle(progress) === 'founders'
   const plateSettled =
     Math.abs(cam.x - FULL_CAM.x) < 0.5 &&
     Math.abs(cam.y - FULL_CAM.y) < 0.5 &&
@@ -414,7 +416,7 @@ export function CityMap({
 
   return (
     <section
-      className={`city-overworld is-city-build is-age-${age} is-alive ${mode === 'poster' ? 'is-poster' : ''} ${celebrating ? 'is-revealing' : ''} ${homecoming ? 'is-homecoming' : ''}`}
+      className={`city-overworld is-city-build is-age-${age} is-alive ${mode === 'poster' ? 'is-poster' : ''} ${celebrating ? 'is-revealing' : ''} ${homecoming ? 'is-homecoming' : ''}${founderLamps ? ' is-style-founders' : ''}`}
       onKeyDown={(event) => {
         if (event.key !== 'Escape' || !easy) return
         onSelectPlot?.(null)
@@ -627,7 +629,10 @@ export function CityMap({
           </>
         )}
         {shownFill.lamps >= 1 ? (
-          <g className={`city-street-lamps is-${stageOf('lamps')}`} aria-hidden>
+          <g
+            className={`city-street-lamps is-${stageOf('lamps')}${founderLamps ? ' is-style-founders' : ''}`}
+            aria-hidden
+          >
             <circle className="city-lamp" cx="148" cy="298" r="5" />
             {shownFill.lamps >= 4 ? <circle className="city-lamp" cx="330" cy="296" r="5" /> : null}
             {shownFill.lamps >= 8 ? <circle className="city-lamp" cx="470" cy="292" r="5" /> : null}

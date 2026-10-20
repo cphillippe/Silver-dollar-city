@@ -1700,7 +1700,16 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.520')
+assert.equal(APP_VERSION, '1.4.521')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.521'), '1.4.521 changelog row')
+assert.match(latestChange('1.4.521').title, /Founder|Lamp|gift/i)
+assert.doesNotMatch(
+  latestChange('1.4.521').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.521 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.521').items.join('\n'), /Refs #737/)
+assert.match(latestChange('1.4.521').items.join('\n'), /Hard/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.520'), '1.4.520 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.520').items.join('\n'),
