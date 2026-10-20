@@ -27,7 +27,7 @@ export function HeldTriad({
   const { progress } = useProgress()
   const easy = isEasy(progress)
   const claimFace = easy ? easyFacingLine(id, claim) : claim
-  const reasonFace = easy ? easyWhyLine(reason) : reason
+  const reasonFace = easy ? (id === 'ob-tuning' ? reason : easyWhyLine(reason)) : reason
   return (
     <dl className="held-triad" aria-label="Claim, reason, and source">
       {kicker ? <p className="eyebrow">{kicker}</p> : null}
@@ -76,11 +76,6 @@ export function MatchTakeaway({
           {EASY.sayFrom} {take.from}
         </span>
       ) : null}
-      {easyKidVerses(lineId).map((line) => (
-        <span className="kid-verse" key={line}>
-          {line}
-        </span>
-      ))}
     </p>
   )
 }
