@@ -43,7 +43,7 @@ export const EASY_CHROME: Record<string, string> = {
   'Life-permitting ranges are wide; blank chance predicts a habitable cosmos just as well.':
     'Life numbers are wide — chance is enough.',
   'Life-permitting ranges are extravagantly narrow; a Designer who wants observers leads us to expect that fit — blank indifference does not.':
-    'A Designer who wants people fits these numbers.',
+    'God wanted people, so He made the world just right.',
   'Models describe a world already given; a physical “vacuum” is still something.':
     'A model still starts with something there.',
   'A model still starts with something there.':
@@ -131,7 +131,21 @@ export const EASY_CHROME: Record<string, string> = {
  * Easy Story Strip faces. Hard keeps the key. Claim and false answers only —
  * why lines stay in EASY_CHROME so the short why chip still applies.
  */
+/** Easy companion paraphrases. No quote marks; the label is part of the line. */
+export const EASY_KID_VERSES: Record<string, readonly string[]> = {
+  'ob-tuning': [
+    'The sky tells how great God is. It shows the work of His hands. (Psalm 19:1, kid words)',
+    'Since God made the world, we can clearly see His forever power in the things He made. (Romans 1:20, kid words)',
+  ],
+}
+
+export function easyKidVerses(id: string): readonly string[] {
+  return EASY_KID_VERSES[id] ?? []
+}
+
 export const EASY_STRIP_FACE: Record<string, string> = {
+  'Fine-tuning points to a Designer.':
+    'The world is set just right for life. God made it that way on purpose.',
   'The mind you already trust needs a real ground.':
     'Your mind works because God gives it light.',
   'Rocks cannot write the law you already trust.':

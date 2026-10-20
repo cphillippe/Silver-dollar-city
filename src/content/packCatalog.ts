@@ -42,13 +42,14 @@ export function briefFromPack(
   tier: LessonTierId = 'medium',
 ) {
   const pack = lesson[tier] ?? lesson.medium
+  const claim = pack.hold.claim || lesson.claim
   const why = pack.hold.why || lesson.claim
   return {
     id: lesson.id,
-    claim: lesson.claim,
+    claim,
     reason: why,
     source: lesson.source,
-    claimChoices: padChoices(lesson.claim, pack.hold.claimMisses),
+    claimChoices: padChoices(claim, pack.hold.claimMisses),
     reasonChoices: padWhyChoices(why, pack.hold.whyMisses),
   }
 }

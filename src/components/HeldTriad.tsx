@@ -1,4 +1,5 @@
 import { EASY, easyFacingLine, easyWhyLine, isEasy } from '../lib/easy'
+import { easyKidVerses } from '../lib/easyChrome'
 import { lineTakeaway } from '../lib/successBeat'
 import { WORDS } from '../lib/words'
 import { useProgress } from '../store/progress'
@@ -26,7 +27,7 @@ export function HeldTriad({
   const { progress } = useProgress()
   const easy = isEasy(progress)
   const claimFace = easy ? easyFacingLine(id, claim) : claim
-  const reasonFace = easy ? easyWhyLine(reason) : reason
+  const reasonFace = easy ? (id === 'ob-tuning' ? reason : easyWhyLine(reason)) : reason
   return (
     <dl className="held-triad" aria-label="Claim, reason, and source">
       {kicker ? <p className="eyebrow">{kicker}</p> : null}
@@ -42,7 +43,16 @@ export function HeldTriad({
       </div>
       <div>
         <dt>{easy ? EASY.sayFrom : WORDS.source.term}</dt>
-        <dd>{source}</dd>
+        <dd>
+          {source}
+          {easy
+            ? easyKidVerses(id).map((line) => (
+                <span className="kid-verse" key={line}>
+                  {line}
+                </span>
+              ))
+            : null}
+        </dd>
       </div>
     </dl>
   )

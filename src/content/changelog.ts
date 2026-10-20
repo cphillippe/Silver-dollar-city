@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.518',
+    title: 'Lesson 3 says the world is set just right',
+    when: '2026-10-20',
+    items: [
+      'On Easy, lesson 3 says the world is set just right for life. God made it that way on purpose.',
+      'Hard stays the same.',
+      'Refs #793.',
+    ],
+  },
+  {
     version: '1.4.517',
     title: 'Night Watch shows the dark-tap line',
     when: '2026-10-20',

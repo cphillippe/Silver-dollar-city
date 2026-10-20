@@ -31,6 +31,8 @@ export interface PackHold {
   levelUpTo?: LessonTierId
   onFail: 'easy'
   why: string
+  /** This tier’s hold claim. Easy may differ; Medium and Hard stay on their own lines. */
+  claim: string
   claimMisses: string[]
   whyMisses: string[]
 }

@@ -321,6 +321,11 @@ html[data-easy='on'] .next-tap {
   opacity: 0.86;
 }
 
+.kid-verse {
+  display: block;
+  margin-top: 0.35rem;
+}
+
 .btn.more-match {
   box-shadow: 0 4px 0 #e09412, inset 0 2px 0 rgba(255, 255, 255, 0.55);
 }

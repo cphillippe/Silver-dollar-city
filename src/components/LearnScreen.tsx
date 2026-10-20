@@ -1,6 +1,7 @@
-import { evidenceFor } from '../content/evidence'
+import { evidenceFor, evidenceForTier } from '../content/evidence'
 import { STORY } from '../content/story'
 import { EASY, easyLearnLine, isEasy } from '../lib/easy'
+import { currentLessonTier } from '../lib/tiers'
 import { EASY_HOME } from '../lib/easyNav'
 import { EasyBack } from './EasyBack'
 import { TeachUnlock } from './TeachUnlock'
@@ -16,7 +17,8 @@ export function LearnScreen({ onNavigate }: LearnScreenProps) {
   const { progress } = useProgress()
   const easy = isEasy(progress)
   const lineId = easyLearnLine(progress)
-  const brief = evidenceFor(lineId)
+  const brief =
+    evidenceForTier(lineId, currentLessonTier(progress, lineId)) ?? evidenceFor(lineId)
 
   function unlock() {
     onNavigate({ name: 'link' })
