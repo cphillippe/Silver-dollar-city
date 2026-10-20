@@ -1700,7 +1700,18 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.516')
+assert.equal(APP_VERSION, '1.4.517')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.517'), '1.4.517 changelog row')
+assert.match(latestChange('1.4.517').title, /dark|tap|Night Watch/i)
+assert.doesNotMatch(
+  latestChange('1.4.517').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.517 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.517').items.join('\n'), /Tap the glowing face/)
+assert.match(latestChange('1.4.517').items.join('\n'), /Hard/)
+assert.match(latestChange('1.4.517').items.join('\n'), /Refs #802/)
+assert.match(latestChange('1.4.517').items.join('\n'), /Refs #748/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.516'), '1.4.516 changelog row')
 assert.match(latestChange('1.4.516').title, /first run|maze|Home/i)
 assert.doesNotMatch(
@@ -17959,8 +17970,12 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.equal(easyMissCounts('soaked'), true)
   assert.equal(easyMissCounts('late'), true)
   assert.equal(
-    nightMissLine('dark', 12.4, 40.2, 15, 3, 12.6, true),
-    'nw-miss dark 12 40 r15 lead=3 leadChangedMsAgo=13 seat=1',
+    nightMissLine('dark', 12.4, 40.2, 15, 3, 12.6, true, 40.4, -1.2, 'touch'),
+    'nw-miss dark 12 40 r15 lead=3 leadChangedMsAgo=13 seat=1 dx=40 dy=-1 ptr=touch',
+  )
+  assert.equal(
+    nightMissLine('board-near', 8, 9, 15, 'none', 0, false, 12, -4, 'mouse'),
+    'nw-miss board-near 8 9 r15 lead=none leadChangedMsAgo=0 dx=12 dy=-4 ptr=mouse',
   )
   assert.equal(nightStrayLine(8.2, 9.8), 'nw-stray 8 10')
   assert.equal(
@@ -17969,16 +17984,24 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   )
   assert.equal(EASY.nightFog, 'Wait till he leaves the fog')
   assert.equal(EASY.nightMiss, 'Tap the glowing face')
-  assert.match(sky515, /fireBest\(clientToMap\(event\.currentTarget, event\.clientX, event\.clientY\)\)/)
+  assert.match(sky515, /fireBest\(clientToMap\(event\.currentTarget, event\.clientX, event\.clientY\), wavePtr\.current\)/)
   assert.match(actors515, /is-cue-nudge/)
   assert.match(css515, /@keyframes walker-cue-nudge/)
-  assert.match(css515, /\.walker-cue-ring\.is-cue-nudge \{[^}]*animation: walker-cue-nudge 400ms/)
+  assert.match(css515, /\.defend-page\.is-easy-watch \.walker-cue-ring\.is-cue-nudge \{[^}]*animation: walker-cue-nudge 400ms/)
   assert.match(
     css515,
-    /@media \(prefers-reduced-motion: reduce\) \{\s*\.walker-cue-ring\.is-cue-nudge \{[^}]*animation: none/,
+    /@media \(prefers-reduced-motion: reduce\) \{\s*\.defend-page\.is-easy-watch \.walker-cue-ring\.is-cue-nudge \{[^}]*animation: none/,
   )
   assert.match(css515, /\.nw-tap-readout \{[^}]*pointer-events:\s*none/)
   assert.match(css515, /\.nw-tap-readout \{\s*margin: 0 0 6px;/)
+  assert.match(screen515, /\.walker-target-cue \.walker-cue-ring/)
+  assert.match(screen515, /\.walker-target-cue \.walker-cue-pulse/)
+  assert.doesNotMatch(screen515, /\.defend-raider\.is-easy-cue \.walker-cue-ring/)
+  assert.doesNotMatch(screen515, /\.defend-raider\.is-easy-cue \.walker-cue-pulse/)
+  assert.match(
+    screen515,
+    /'\.nw-miss-toast',\s*'\.nw-balloon',\s*'\.defend-wave',\s*'\.nw-pace',\s*'\.nw-skill-hint',\s*'\.nw-skill-toast',/,
+  )
   const best515 = screen515.slice(screen515.indexOf('function fireBest'), screen515.indexOf('function retry'))
   assert.match(best515, /faceTapStrike\(easy, false, false\) === 'miss' && easy/)
   assert.match(best515, /easyBoardTapKind\(/)

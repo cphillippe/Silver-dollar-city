@@ -61,6 +61,7 @@ import {
   freshEasyTapScore,
   type EasyCountedMiss,
   nightMissLine,
+  nightPointerKind,
   nightStrayLine,
   r10ShrugCue,
   easyRoundHeartCap,
@@ -309,6 +310,104 @@ function usePhoneSe() {
   return phone
 }
 
+function rectsOverlap(a: DOMRect, b: DOMRect, pad = 0): boolean {
+  if (a.width < 1 || a.height < 1 || b.width < 1 || b.height < 1) return false
+  return a.left < b.right + pad && a.right > b.left - pad && a.top < b.bottom + pad && a.bottom > b.top - pad
+}
+
+/** Layout box, ignoring a shift transform so the dock slot stays the home. */
+function readoutHomeRect(node: HTMLElement): DOMRect {
+  const parent = node.offsetParent instanceof HTMLElement ? node.offsetParent : null
+  const origin = parent ? parent.getBoundingClientRect() : new DOMRect()
+  return new DOMRect(origin.left + node.offsetLeft, origin.top + node.offsetTop, node.offsetWidth, node.offsetHeight)
+}
+
+/** Move the playtest pill off the cue ring and off the clear-bar chrome. The ring stays put. */
+function keepReadoutClear() {
+  const node = document.querySelector('.nw-tap-readout')
+  if (!(node instanceof HTMLElement)) return
+  const frameEl = node.closest('.defend-frame')
+  if (!(frameEl instanceof HTMLElement)) return
+  const frame = frameEl.getBoundingClientRect()
+  // The ring is drawn in g.walker-target-cue, beside the walkers, not inside .defend-raider.
+  const rings = ['.walker-target-cue .walker-cue-ring', '.walker-target-cue .walker-cue-pulse'].flatMap((sel) =>
+    [...document.querySelectorAll(sel)].map((el) => el.getBoundingClientRect()),
+  )
+  const blocks = [
+    '.defend-boost.is-clear-bar',
+    '.defend-clear-row',
+    '.defend-clear-row .btn',
+    '.defend-continue',
+    '.nw-rail .defend-abilities',
+    '.nw-skill-tray',
+    '.defend-hearts',
+    '.nw-miss-toast',
+    '.nw-balloon',
+    '.defend-wave',
+    '.nw-pace',
+    '.nw-skill-hint',
+    '.nw-skill-toast',
+  ].flatMap((sel) => [...document.querySelectorAll(sel)].map((el) => el.getBoundingClientRect()))
+  const hits = (box: DOMRect) =>
+    rings.some((rect) => rectsOverlap(box, rect, 8)) || blocks.some((rect) => rectsOverlap(box, rect, 1))
+  const inside = (box: DOMRect) =>
+    box.width > 8 &&
+    box.height > 8 &&
+    box.left >= Math.max(0, frame.left) - 1 &&
+    box.top >= Math.max(0, frame.top) - 1 &&
+    box.right <= Math.min(window.innerWidth, frame.right) + 1 &&
+    box.bottom <= Math.min(window.innerHeight, frame.bottom) + 1
+  const home = readoutHomeRect(node)
+  const collapsed = node.clientWidth < 8 || node.clientHeight < 8
+  if (!collapsed && inside(home) && !hits(home)) {
+    node.classList.remove('is-shifted')
+    node.style.transform = ''
+    return
+  }
+  const width = Math.max(home.width, 120)
+  const height = Math.max(home.height, 28)
+  const lefts = [frame.left + 8, frame.left + Math.max(8, (frame.width - width) / 2), frame.right - width - 8]
+  const tops = [
+    frame.top + 12,
+    frame.top + 56,
+    frame.top + frame.height * 0.42,
+    frame.bottom - height - 88,
+    frame.bottom - height - 148,
+  ]
+  for (const y of tops) {
+    for (const x of lefts) {
+      const moved = new DOMRect(x, y, width, height)
+      if (!inside(moved) || hits(moved)) continue
+      node.classList.add('is-shifted')
+      node.style.transform = `translate(${x - home.left}px, ${y - home.top}px)`
+      return
+    }
+  }
+}
+
+/** Centered under the round strip, or 12px above the skill tray when that spot is taken. */
+function placeMissToast() {
+  const toast = document.querySelector('.nw-miss-toast')
+  if (!(toast instanceof HTMLElement)) return
+  toast.classList.remove('is-low')
+  toast.style.removeProperty('--nw-miss-top')
+  const blocked = ['.nw-rail .defend-abilities', '.nw-tap-readout', '.defend-hearts', '.nw-skill-tray'].some((sel) =>
+    [...document.querySelectorAll(sel)].some((node) =>
+      rectsOverlap(toast.getBoundingClientRect(), node.getBoundingClientRect(), 1),
+    ),
+  )
+  if (!blocked) return
+  const tray = document.querySelector('.nw-skill-tray')
+  const frame = toast.closest('.defend-frame')
+  if (!(tray instanceof HTMLElement) || !(frame instanceof HTMLElement)) return
+  const trayBox = tray.getBoundingClientRect()
+  const frameBox = frame.getBoundingClientRect()
+  const height = toast.getBoundingClientRect().height
+  const top = Math.max(12, trayBox.top - frameBox.top - height - 12)
+  toast.classList.add('is-low')
+  toast.style.setProperty('--nw-miss-top', `${top}px`)
+}
+
 export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const { progress, recordNight, markMet, markMiss, chooseNightMap, recordMazeBeat } = useProgress()
   const easy = isEasy(progress)
@@ -324,6 +423,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const boardRef = useRef<SVGSVGElement>(null)
   const [boardBox, setBoardBox] = useState({ w: 0, h: 0 })
   const [toolLock, setToolLock] = useState<string | null>(null)
+  const darkMissLine = easy && toolLock === EASY.nightMiss
+  const [missCue, setMissCue] = useState<'off' | 'in' | 'out'>('off')
   const arming = false
   const [phase, setPhase] = useState<NightPhase>('plant')
   const [sessionMap, setSessionMap] = useState<NightMapId | null>(null)
@@ -1326,6 +1427,37 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     return () => observer.disconnect()
   }, [phase, taught, easy])
 
+  useEffect(() => {
+    if (!easy) {
+      setMissCue('off')
+      return
+    }
+    if (darkMissLine) {
+      setMissCue('in')
+      return
+    }
+    setMissCue((cur) => (cur === 'off' ? 'off' : 'out'))
+  }, [easy, darkMissLine])
+
+  useEffect(() => {
+    if (missCue !== 'out') return
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const id = window.setTimeout(() => setMissCue('off'), reduce ? 0 : 200)
+    return () => window.clearTimeout(id)
+  }, [missCue])
+
+  useLayoutEffect(() => {
+    if (!easy) return
+    let frame = 0
+    const sync = () => {
+      keepReadoutClear()
+      if (missCue !== 'off') placeMissToast()
+      frame = window.requestAnimationFrame(sync)
+    }
+    sync()
+    return () => window.cancelAnimationFrame(frame)
+  })
+
   function noteSpend(cost: number) {
     setSparkSpent(cost)
     setSparkSpend(true)
@@ -2288,13 +2420,38 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     fxRef.current.dirty = true
   }
 
-  function logMiss(reason: string, at: { x: number; y: number }) {
+  function logMiss(reason: string, at: { x: number; y: number }, pointerType?: string) {
     if (!(easy && debugPanelRef.current)) return
     const lead = easyTapTarget(live.current.raiders, waveIndexRef.current, tuneRef.current.armorFrom)
     const ago = leadChangedAt.current ? performance.now() - leadChangedAt.current : 0
     const seat = easyMissOnSeat(at, plantableHints(plantsRef.current), SEAT_TAP_R)
+    let nearest: { x: number; y: number } | null = null
+    let best = Infinity
+    for (const raider of live.current.raiders) {
+      if (raider.turned) continue
+      const spot = raiderAt(raider)
+      const face = { x: spot.x, y: spot.y + PATH_WALKER_FACE_DY }
+      const gap = dist(at, face)
+      if (gap < best) {
+        best = gap
+        nearest = face
+      }
+    }
+    const dx = nearest ? at.x - nearest.x : 0
+    const dy = nearest ? at.y - nearest.y : 0
     console.info(
-      nightMissLine(reason, at.x, at.y, waveIndexRef.current + 1, lead?.id ?? 'none', ago, seat),
+      nightMissLine(
+        reason,
+        at.x,
+        at.y,
+        waveIndexRef.current + 1,
+        lead?.id ?? 'none',
+        ago,
+        seat,
+        dx,
+        dy,
+        nightPointerKind(pointerType),
+      ),
     )
   }
 
@@ -2317,7 +2474,11 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     fxRef.current.dirty = true
   }
 
-  function fireAtRaider(raiderId: number) {
+  function fireAtRaider(
+    raiderId: number,
+    tap?: { x: number; y: number } | null,
+    pointerType?: string,
+  ) {
     if (phase !== 'wave' || won) return
     if (countUntilRef.current > performance.now()) return
     if (!claimTap()) return
@@ -2329,11 +2490,12 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
         easyGateMissReason(raider, live.current.raiders, waveIndexRef.current, tuneRef.current.armorFrom) ??
         'dark'
       const at = raiderAt(raider)
+      const face = { x: at.x, y: at.y + PATH_WALKER_FACE_DY }
       noteFaceTap(false, 0, reason)
       if (reason === 'fog') showMiss('fog')
       else showMiss()
       if (easy && reason === 'dark') nudgeLead()
-      logMiss(reason, { x: at.x, y: at.y + PATH_WALKER_FACE_DY })
+      logMiss(reason, tap ?? face, pointerType)
       return
     }
     const point = raiderAt(raider)
@@ -2412,11 +2574,11 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     if (easy) {
       noteFaceTap(false, 0, 'late')
       showMiss()
-      logMiss('late', { x: point.x, y: point.y + PATH_WALKER_FACE_DY })
+      logMiss('late', tap ?? { x: point.x, y: point.y + PATH_WALKER_FACE_DY }, pointerType)
     }
   }
 
-  function fireBest(point?: { x: number; y: number } | null) {
+  function fireBest(point?: { x: number; y: number } | null, pointerType?: string) {
     if (swallowWaveTap.current) {
       swallowWaveTap.current = false
       return
@@ -2439,7 +2601,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       }
       noteFaceTap(false, 0, 'board-near')
       showMiss()
-      if (point) logMiss('board-near', point)
+      if (point) logMiss('board-near', point, pointerType)
       return
     }
     let pick: CityPlotId | null = null
@@ -3721,6 +3883,11 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
             docks={docks}
             sheet={mapSheet}
           >
+            {easy && missCue !== 'off' ? (
+              <p className={`nw-miss-toast${missCue === 'out' ? ' is-leaving' : ''}`} aria-hidden="true">
+                {EASY.nightMiss}
+              </p>
+            ) : null}
             <DefendNightBoard
               boardRef={boardRef}
               viewBox={plateFill ? boardFillBox(boardBox) : boardViewBox(boardBox)}

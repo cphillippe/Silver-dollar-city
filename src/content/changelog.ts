@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.517',
+    title: 'Night Watch shows the dark-tap line',
+    when: '2026-10-20',
+    items: [
+      'On Easy, a dark-face tap says Tap the glowing face where you can see it. The playtest line stays up and clear of the glowing face.',
+      'Hard stays the same.',
+      'Refs #802 · Refs #748',
+    ],
+  },
+  {
     version: '1.4.516',
     title: 'Easy first run shows the next step',
     when: '2026-10-20',

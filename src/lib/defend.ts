@@ -658,7 +658,18 @@ export function easyMissOnSeat(
   return false
 }
 
-/** Playtest line for one counted miss. `seat` notes an empty seat without exempting it. */
+/** Pointer that produced a counted miss. `none` is a tap with no pointer type. */
+export type NightPointerKind = 'mouse' | 'touch' | 'pen' | 'none'
+
+export function nightPointerKind(value: string | null | undefined): NightPointerKind {
+  if (value === 'mouse' || value === 'touch' || value === 'pen') return value
+  return 'none'
+}
+
+/**
+ * Playtest line for one counted miss. `seat` notes an empty seat without exempting it.
+ * `dx`/`dy` are the tap minus the nearest live face, in viewBox units. Log only.
+ */
 export function nightMissLine(
   reason: string,
   x: number,
@@ -667,12 +678,18 @@ export function nightMissLine(
   leadId: number | string,
   leadChangedMsAgo: number,
   seat = false,
+  dx = 0,
+  dy = 0,
+  ptr: NightPointerKind | string = 'none',
 ): string {
   const px = Math.round(Number(x) || 0)
   const py = Math.round(Number(y) || 0)
   const ago = Math.max(0, Math.round(Number(leadChangedMsAgo) || 0))
   const seatBit = seat ? ' seat=1' : ''
-  return `nw-miss ${reason} ${px} ${py} r${Math.floor(round) || 0} lead=${leadId} leadChangedMsAgo=${ago}${seatBit}`
+  const aimX = Math.round(Number(dx) || 0)
+  const aimY = Math.round(Number(dy) || 0)
+  const kind = nightPointerKind(ptr)
+  return `nw-miss ${reason} ${px} ${py} r${Math.floor(round) || 0} lead=${leadId} leadChangedMsAgo=${ago}${seatBit} dx=${aimX} dy=${aimY} ptr=${kind}`
 }
 
 /** Playtest line for a board tap that is not counted. */
