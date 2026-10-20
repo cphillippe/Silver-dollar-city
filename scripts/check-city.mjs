@@ -4884,15 +4884,15 @@ assert.match(cssSrc, /next-tap/)
 assert.match(cssSrc, /link-demo/)
 
 assert.equal(
-  plainFor('ob-tuning')?.gloss,
-  evidenceFor('ob-tuning')?.claim,
-)
-assert.equal(
   plainFor('ob-design')?.gloss,
   evidenceFor('ob-design')?.claim,
 )
 assert.equal(
   plainFor('ob-tuning')?.gloss,
+  'The world is set just right for life. God made it that way on purpose.',
+)
+assert.equal(
+  evidenceFor('ob-tuning')?.claim,
   'The universe is finely tuned for life — that fit points to a Designer.',
 )
 assert.equal(

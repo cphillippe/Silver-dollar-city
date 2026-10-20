@@ -16,7 +16,9 @@ export interface SuccessBeat {
 export function lineTakeaway(lineId: string): { claim: string; why: string; from: string } {
   const lesson = packLesson(lineId)
   const brief = evidenceFor(lineId)
-  const claim = easyChromeLine(lesson?.claim || brief?.claim || '').replace(/\.$/, '')
+  const claim = easyChromeLine(
+    lesson?.easy.hold.claim || lesson?.claim || brief?.claim || '',
+  ).replace(/\.$/, '')
   const why = easyWhyLine(lesson?.easy.hold.why || brief?.reason || '')
   const from = lesson?.source || brief?.source || ''
   return { claim, why, from }

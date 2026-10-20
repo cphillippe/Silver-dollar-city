@@ -296,10 +296,10 @@ export const MATCH_CHIPS: Record<string, MatchChipSet> = {
     say: 'Caleb Stone keeps the line at Mercy Bridge: a true neighbor acts with mercy.',
   },
   'ob-tuning': {
-    words: ['LARK', 'STEPS', 'TUNING', 'DESIGNER'],
+    words: ['LARK', 'STEPS', 'RIGHT', 'MAKER'],
     kinds: ['person', 'place', 'idea', 'idea'],
     roles: ['who', 'where', 'idea', 'keep'],
-    say: 'Lark Banner marks the line at Star Steps: fine tuning points to a Designer.',
+    say: 'Lark Banner marks the line at Star Steps: God set the world just right for life, on purpose.',
   },
   'ob-design': {
     words: ['RUTH', 'DOME', 'MIND', 'MAKER'],

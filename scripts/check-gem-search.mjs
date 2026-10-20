@@ -77,8 +77,11 @@ assert.deepEqual(lanternWords.map((w) => w.text), ['LEAH', 'LANE', 'LAMP', 'SEEN
 assert.match(matchChipsFor('daily-lantern')?.say ?? '', /lamp.*seen/i)
 
 const tuningWords = gemWordsFor('ob-tuning')
-assert.deepEqual(tuningWords.map((w) => w.text), ['LARK', 'STEPS', 'TUNING', 'DESIGNER'])
-assert.match(matchChipsFor('ob-tuning')?.say ?? '', /tuning.*Designer/i)
+assert.deepEqual(tuningWords.map((w) => w.text), ['LARK', 'STEPS', 'RIGHT', 'MAKER'])
+assert.match(
+  matchChipsFor('ob-tuning')?.say ?? '',
+  /God set the world just right for life, on purpose\./,
+)
 
 for (const id of EASY_LINE_ORDER) {
   const chips = matchChipsFor(id)
