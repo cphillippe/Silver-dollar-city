@@ -10,6 +10,8 @@ import { goldButtonClass } from '../../content/goldenPath'
 import { EASY, easyWhoWhere } from '../../lib/easy'
 import {
   canWin,
+  isAdjacentRoadStep,
+  isNextToHurt,
   MAZE_BEATS,
   MAZE_COLS,
   MAZE_FIND_SCORE,
@@ -86,6 +88,7 @@ export function RoadMazePlay({
   const [popAt, setPopAt] = useState('')
   const [beatPop, setBeatPop] = useState('')
   const [comboFlash, setComboFlash] = useState(0)
+  const [stepped, setStepped] = useState(false)
   const atRef = useRef(at)
   const foundRef = useRef(found)
   const helpedRef = useRef(helped)
@@ -109,6 +112,9 @@ export function RoadMazePlay({
   /** How the winning step started. A pointer-down must not release the dock until that finger is up. */
   const winGesture = useRef<'down' | 'up' | 'key'>('key')
   const dockRelease = useRef<(() => void) | null>(null)
+  /** Easy: a drag that starts on the pawn steps into the next road cell. */
+  const dragPawn = useRef(false)
+  const dragSeen = useRef('')
 
   useEffect(() => {
     setMazePreset(attempt)
@@ -231,6 +237,8 @@ export function RoadMazePlay({
     window.clearTimeout(stampTimer.current)
     walkingRef.current = false
     roadPointer.current = false
+    dragPawn.current = false
+    dragSeen.current = ''
     clearDockRelease()
     atRef.current = MAZE_START
     foundRef.current = false
@@ -255,6 +263,7 @@ export function RoadMazePlay({
     setPopAt('')
     setBeatPop('')
     setComboFlash(0)
+    setStepped(false)
     setAttempt((n) => n + 1)
   }
 
@@ -322,9 +331,13 @@ export function RoadMazePlay({
   function landOn(cell: MazeCoord) {
     atRef.current = cell
     setAt(cell)
+    setStepped(true)
     if (mazeSame(cell, MAZE_HURT)) {
       if (!foundRef.current) markFound(cell)
       if (document.documentElement.dataset.easy === 'on' && !helpedRef.current) markHelped(cell)
+    } else if (document.documentElement.dataset.easy === 'on' && !foundRef.current && isNextToHurt(cell)) {
+      markFound(MAZE_HURT)
+      markHelped(MAZE_HURT)
     } else if (mazeSame(cell, MAZE_INN) && !canWin(helpedRef.current, cell)) {
       flashToast(mazeBlockedHint(cell, foundRef.current, helpedRef.current))
     }
@@ -395,8 +408,24 @@ export function RoadMazePlay({
 
   function onPlayPointerEnd() {
     roadPointer.current = false
+    dragPawn.current = false
+    dragSeen.current = ''
     // Tap already stepped on pointerdown. Drop the latch if capture retargeted pointerup here.
     usedTap.current = false
+  }
+
+  function onPlayPointerMove(event: ReactPointerEvent<HTMLElement>) {
+    if (!dragPawn.current || event.buttons === 0 || walkingRef.current || wonRef.current || peeking.current) return
+    if (document.documentElement.dataset.easy !== 'on') return
+    const hit = document.elementFromPoint(event.clientX, event.clientY)
+    const node = hit instanceof Element ? hit.closest('[data-maze-cell]') : null
+    if (!(node instanceof HTMLElement) || !node.classList.contains('is-road')) return
+    const next = { r: Number(node.dataset.r), c: Number(node.dataset.c) }
+    if (!isAdjacentRoadStep(atRef.current, next)) return
+    const id = mazeKey(next)
+    if (dragSeen.current === id) return
+    dragSeen.current = id
+    walkPath([atRef.current, next])
   }
 
   function onCellDown(event: ReactPointerEvent<HTMLButtonElement>, cell: MazeCoord) {
@@ -406,6 +435,8 @@ export function RoadMazePlay({
     winGesture.current = 'down'
     // Capture on the play shell, which stays mounted when the inn unmounts the grid (#531).
     holdPointer(event)
+    dragPawn.current = document.documentElement.dataset.easy === 'on' && mazeSame(cell, atRef.current)
+    dragSeen.current = ''
     tryGo(cell)
   }
 
@@ -476,6 +507,7 @@ export function RoadMazePlay({
     <div
       ref={playRef}
       className={`play is-road-maze ${shake ? 'is-shake' : ''} ${won ? 'is-win' : ''} ${helpPhase ? 'is-help-phase' : ''} ${helped ? 'is-helped' : ''} ${found ? 'is-found' : ''}`}
+      onPointerMove={onPlayPointerMove}
       onPointerUp={onPlayPointerEnd}
       onPointerCancel={onPlayPointerEnd}
       style={{ ['--maze-cols' as string]: MAZE_COLS, ['--maze-rows' as string]: MAZE_ROWS }}
@@ -545,6 +577,11 @@ export function RoadMazePlay({
         </div>
       ) : (
         <>
+      {document.documentElement.dataset.easy === 'on' && !won && (helped || !stepped) ? (
+        <p className="maze-how" data-maze-how>
+          {helped ? EASY.mazeInnCue : EASY.mazeHow}
+        </p>
+      ) : null}
       {toast ? (
         <p className={`match-toast gem-toast is-yes`} role="status">
           <strong>{toast}</strong>
@@ -587,6 +624,7 @@ export function RoadMazePlay({
             const inn = mazeSame(cell, MAZE_INN)
             const glow = hintCell === mazeKey(cell)
             const helpCue = hurt && found && here && !helped
+            const goalTile = document.documentElement.dataset.easy === 'on' && mazeSame(cell, goal.at)
             return (
               <button
                 key={mazeKey(cell)}
@@ -600,7 +638,7 @@ export function RoadMazePlay({
                   if (!road) return
                   onCellDown(event, cell)
                 }}
-                className={`maze-cell ${road ? 'is-road' : 'is-rock'} ${here ? 'is-here' : ''} ${hurt ? 'is-hurt' : ''} ${inn ? 'is-inn' : ''} ${helpCue ? 'is-help-cue' : ''} ${glow ? 'is-hint' : ''} ${popAt === mazeKey(cell) ? 'is-pop' : ''}`}
+                className={`maze-cell ${road ? 'is-road' : 'is-rock'} ${here ? 'is-here' : ''} ${hurt ? 'is-hurt' : ''} ${inn ? 'is-inn' : ''} ${helpCue ? 'is-help-cue' : ''} ${glow ? 'is-hint' : ''} ${goalTile ? 'is-goal' : ''} ${popAt === mazeKey(cell) ? 'is-pop' : ''}`}
               >
                 {here && !helpCue ? (
                   <span className="maze-actor is-you">
