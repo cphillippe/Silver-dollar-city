@@ -1700,7 +1700,17 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.515')
+assert.equal(APP_VERSION, '1.4.516')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.516'), '1.4.516 changelog row')
+assert.match(latestChange('1.4.516').title, /first run|maze|Home/i)
+assert.doesNotMatch(
+  latestChange('1.4.516').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.516 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.516').items.join('\n'), /Night Watch waits for day 2/)
+assert.match(latestChange('1.4.516').items.join('\n'), /Hard/)
+assert.match(latestChange('1.4.516').items.join('\n'), /Refs #791/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.515'), '1.4.515 changelog row')
 assert.match(latestChange('1.4.515').title, /miss|trust/i)
 assert.doesNotMatch(
@@ -17655,7 +17665,7 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   const hub503 = readFileSync(new URL('../src/components/Hub.tsx', import.meta.url), 'utf8')
   assert.match(hub503, /className="btn easy-dock-build"/)
   assert.doesNotMatch(hub503, /easy-dock-build[\s\S]{0,80}btn gold/)
-  assert.match(hub503, /\(progress\.easyHeld \?\? \[\]\)\.length > 0/)
+  assert.match(hub503, /easyNightWatchOnHome\(progress, today\)/)
   assert.match(hub503, /className="btn xl easy-nw-quiet"/)
   assert.doesNotMatch(
     hub503.slice(hub503.indexOf('easy-night-watch'), hub503.indexOf('easy-night-watch') + 600),

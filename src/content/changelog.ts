@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.516',
+    title: 'Easy first run shows the next step',
+    when: '2026-10-20',
+    items: [
+      'Easy first run: the maze shows where to go and the tile next to the hurt man counts. Night Watch waits for day 2. Home moves on after lesson 5.',
+      'Hard stays the same.',
+      'Refs #791.',
+    ],
+  },
+  {
     version: '1.4.515',
     title: 'Night Watch misses you can trust',
     when: '2026-10-20',
