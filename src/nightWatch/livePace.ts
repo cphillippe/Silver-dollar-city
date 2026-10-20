@@ -11,7 +11,7 @@ import {
   holdShowdownCrown,
   EASY_LATE_LAMP_NICK,
 } from '../lib/defend.ts'
-import { MEND_SHIELD_MS, SKILL_COOLDOWN_MS, SKILL_UNLOCK_WAVE, mendPower } from '../lib/nightSkills.ts'
+import { MEND_CROWN_HOLD_MS, SKILL_COOLDOWN_MS, SKILL_UNLOCK_WAVE, mendPower } from '../lib/nightSkills.ts'
 import { INCENSE_COST, applyIncenseTap, incenseBonusFor } from './incense.ts'
 import { BELL_COST, bellPaceFor, walkerSlowPace } from './bell.ts'
 import { CROSS_COST, applyCrossWait, crossPaceFor } from './cross.ts'
@@ -416,9 +416,9 @@ export function paceEasyLive(
   /**
    * Time Mend against a round 20 or 25 crown. Off, this round matches the
    * old sim: a crown exit still ends the night at 0 hearts. On, Mend is
-   * tapped as that crown reaches the gate, if it is ready. The shield holds
-   * the crown once, back to 0.9, with HP kept and no heart lost. Walker
-   * leaks do not cast Mend.
+   * tapped as that crown reaches the gate, if it is ready. The 12s crown
+   * hold pushes it once, back to 0.9, with HP kept and no heart lost.
+   * Walker leaks do not cast Mend.
    */
   mendVsCrown = false,
 ): PaceLive {
@@ -555,7 +555,7 @@ export function paceEasyLive(
   let graceUntil = 0
   let lostRound = 0
   let mendReady = 0
-  let mendShieldUntil = -1
+  let crownHoldUntil = -1
   let crownHeld = false
   let bossSeen = -1
   let bossGone = -1
@@ -634,7 +634,7 @@ export function paceEasyLive(
           time >= mendReady
         ) {
           hearts = mendPower(hearts).hearts
-          mendShieldUntil = time + MEND_SHIELD_MS / 1000
+          crownHoldUntil = time + MEND_CROWN_HOLD_MS / 1000
           mendReady = time + SKILL_COOLDOWN_MS.mend / 1000
         }
         const held = mendVsCrown
@@ -644,7 +644,7 @@ export function paceEasyLive(
               t: raider.t,
               hp: raider.hp,
               hearts,
-              shieldUp: time < mendShieldUntil,
+              shieldUp: time < crownHoldUntil,
               alreadyHeld: crownHeld,
             })
           : null

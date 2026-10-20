@@ -424,6 +424,7 @@ import {
   useStill,
 } from '../src/lib/nightKits.ts'
 import {
+  MEND_CROWN_HOLD_MS,
   MEND_SHIELD_MS,
   SKILL_COOLDOWN_MS,
   SKILL_UNLOCK_WAVE,
@@ -1691,7 +1692,19 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.511')
+assert.equal(APP_VERSION, '1.4.512')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.512'), '1.4.512 changelog row')
+assert.match(latestChange('1.4.512').title, /crown/i)
+assert.doesNotMatch(
+  latestChange('1.4.512').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.512 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.512').items.join('\n'), /12 seconds/)
+assert.match(latestChange('1.4.512').items.join('\n'), /4 seconds/)
+assert.match(latestChange('1.4.512').items.join('\n'), /Hard/)
+assert.match(latestChange('1.4.512').items.join('\n'), /#760/)
+assert.match(latestChange('1.4.512').items.join('\n'), /#785/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.511'), '1.4.511 changelog row')
 assert.match(latestChange('1.4.511').title, /drag|why|card/i)
 assert.doesNotMatch(
@@ -2464,6 +2477,22 @@ assert.match(
   assert.equal(mendR10.boss, plainR10.boss, '1.4.507 the round 10 boss result stays put')
   assert.equal(mendR10.bossSec, plainR10.bossSec)
   assert.equal(easyBossHp(9), 14, '1.4.507 the round 10 boss stays 14')
+  assert.equal(MEND_SHIELD_MS, 4_000, '1.4.512 the walker shield stays 4s')
+  assert.equal(MEND_CROWN_HOLD_MS, 12_000, '1.4.512 the Easy crown hold is 12s')
+  assert.match(screen507, /mendShieldUntilRef\.current = now \+ MEND_SHIELD_MS/)
+  assert.match(screen507, /if \(leaked && now < mendShieldUntilRef\.current\)/)
+  assert.match(
+    screen507,
+    /if \(easy\) \{\s*crownHoldUntilRef\.current = now \+ MEND_CROWN_HOLD_MS/,
+    '1.4.512 only Easy arms the crown hold',
+  )
+  assert.match(screen507, /shieldUp: now < crownHoldUntilRef\.current/)
+  assert.doesNotMatch(screen507, /setCrownLive\('Held!'\)/, '1.4.512 no duplicate Held! line')
+  assert.match(defendCss494, /\.defend-page\.is-easy-watch \.nw-crown-hold \{/)
+  assert.match(
+    readFileSync(new URL('../src/nightWatch/livePace.ts', import.meta.url), 'utf8'),
+    /crownHoldUntil = time \+ MEND_CROWN_HOLD_MS \/ 1000/,
+  )
 }
 
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.485'), '1.4.485 changelog row')

@@ -8,6 +8,17 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.512',
+    title: 'Mend holds the crown longer',
+    when: '2026-10-19',
+    items: [
+      'On Easy, Mend arms a crown hold for 12 seconds. If the crown arrives while that hold is armed, the crown is held once.',
+      'The walker shield stays 4 seconds. A small crown glow shows while the crown hold is armed.',
+      'Hard nights stay the same.',
+      'Refs #760 #785.',
+    ],
+  },
+  {
     version: '1.4.511',
     title: 'Drag the card that shows why',
     when: '2026-10-19',

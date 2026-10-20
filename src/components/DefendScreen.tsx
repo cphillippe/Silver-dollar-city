@@ -72,6 +72,7 @@ import {
 import { learningForTool } from '../lib/learning'
 import { KIT_LABEL, STILL_MS, useStill, unturnedStep, type KitId } from '../lib/nightKits'
 import {
+  MEND_CROWN_HOLD_MS,
   MEND_SHIELD_MS,
   SKILL_COOLDOWN_MS,
   SKILL_UNLOCK_WAVE,
@@ -332,6 +333,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const [stillOn, setStillOn] = useState(false)
   const [mendOn, setMendOn] = useState(false)
   const [mendShield, setMendShield] = useState(false)
+  const [crownHold, setCrownHold] = useState(false)
   const [powerBanner, setPowerBanner] = useState<string | null>(null)
   const [nwDebug, setNwDebug] = useState(() => readNightWatchDebug())
   const [tapHits, setTapHits] = useState(0)
@@ -398,6 +400,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   fastOnRef.current = fastOn
   const seenSkill = useRef<Record<KitId, boolean>>({ still: false, mend: false })
   const mendShieldUntilRef = useRef(0)
+  const crownHoldUntilRef = useRef(0)
   const sparksRef = useRef(runSparks)
   sparksRef.current = runSparks
   const hpMulRef = useRef(1)
@@ -419,6 +422,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const stillTimer = useRef(0)
   const mendTimer = useRef(0)
   const shieldTimer = useRef(0)
+  const crownHoldTimer = useRef(0)
   const bannerTimer = useRef(0)
   const crownDrainTimer = useRef(0)
   const crownDrainGen = useRef(0)
@@ -816,6 +820,9 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     live.current.crownHeld = false
     live.current.freezeUntil = 0
     mendShieldUntilRef.current = 0
+    crownHoldUntilRef.current = 0
+    window.clearTimeout(crownHoldTimer.current)
+    setCrownHold(false)
     crownDrainGen.current += 1
     window.clearTimeout(crownDrainTimer.current)
     setCrownLive(null)
@@ -940,7 +947,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
               t: boss.t,
               hp: boss.hp,
               hearts: live.current.hearts,
-              shieldUp: now < mendShieldUntilRef.current,
+              shieldUp: now < crownHoldUntilRef.current,
               alreadyHeld: live.current.crownHeld,
             })
           : null
@@ -2411,7 +2418,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     setSkillNote(null)
     setPulseId(null)
     mendShieldUntilRef.current = 0
+    crownHoldUntilRef.current = 0
+    window.clearTimeout(crownHoldTimer.current)
     setMendShield(false)
+    setCrownHold(false)
     setMendOn(false)
     setPowerBanner(null)
     setStillOn(false)
@@ -2802,6 +2812,15 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       mendShieldUntilRef.current = 0
       setMendShield(false)
     }, MEND_SHIELD_MS)
+    if (easy) {
+      crownHoldUntilRef.current = now + MEND_CROWN_HOLD_MS
+      setCrownHold(true)
+      window.clearTimeout(crownHoldTimer.current)
+      crownHoldTimer.current = window.setTimeout(() => {
+        crownHoldUntilRef.current = 0
+        setCrownHold(false)
+      }, MEND_CROWN_HOLD_MS)
+    }
     window.clearTimeout(mendTimer.current)
     mendTimer.current = window.setTimeout(() => setMendOn(false), 980)
     showPower(powered.note)
@@ -3674,6 +3693,11 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
               <div className="nw-wave-overlay">
                 <span className="defend-wave">{roundLabel}</span>
               </div>
+            ) : null}
+            {easy && crownHold ? (
+              <p className="nw-crown-hold" data-crown-hold="armed" aria-hidden="true">
+                Crown
+              </p>
             ) : null}
             {crownLive ? (
               <p

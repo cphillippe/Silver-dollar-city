@@ -20,8 +20,16 @@ export const SKILL_COOLDOWN_MS: Record<KitId, number> = {
   mend: 14_000,
 }
 
-/** Gate hold after Mend. Leaks during this window do not cost a heart. */
+/** Gate hold after Mend. Walker leaks during this window do not cost a heart. */
 export const MEND_SHIELD_MS = 4_000
+
+/**
+ * Easy crown hold after Mend (1.4.512).
+ * Separate from the walker shield. Rounds 20 and 25 hold the crown
+ * once if it reaches the gate while this window is still armed.
+ * Hard does not read this.
+ */
+export const MEND_CROWN_HOLD_MS = 12_000
 
 export const SKILL_BLURB: Record<KitId, string> = {
   still: 'Freezes every walker for a moment. Tap it when the road is crowded. Then it recharges.',
