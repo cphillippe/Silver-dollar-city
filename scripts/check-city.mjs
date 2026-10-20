@@ -1692,7 +1692,18 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.513')
+assert.equal(APP_VERSION, '1.4.514')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.514'), '1.4.514 changelog row')
+assert.match(latestChange('1.4.514').title, /board|MATCHED|word search/i)
+assert.doesNotMatch(
+  latestChange('1.4.514').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.514 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.514').items.join('\n'), /MATCHED/)
+assert.match(latestChange('1.4.514').items.join('\n'), /Every letter stays visible/)
+assert.match(latestChange('1.4.514').items.join('\n'), /Hard/)
+assert.match(latestChange('1.4.514').items.join('\n'), /#794/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.513'), '1.4.513 changelog row')
 assert.match(latestChange('1.4.513').title, /share|cop/i)
 assert.doesNotMatch(

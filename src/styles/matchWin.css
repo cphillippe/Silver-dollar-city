@@ -1,13 +1,54 @@
-/* Match win — hide the solved board; Matched! + Lock In stay in the play flow. */
+/* Match win — the solved board stays a whole square; Matched! + Lock In stay in the play flow. */
 .play.is-gem-search.is-win {
   overflow: auto;
   justify-content: flex-start;
 }
 
-.play.is-gem-search.is-win .gem-scroll,
 .play.is-gem-search.is-win .match-teach-dock,
 .play.is-gem-search.is-win .story-strip {
   display: none;
+}
+
+/* 1.4.514 #794: win board stays one square. (0,6,0) beats the (0,5,0) play fill.
+   Easy cream rules are stronger, so the html[data-easy] copies repeat the same paint. */
+.play.is-gem-search.is-panel-blast.is-story-docked.is-win .gem-scroll,
+.play.is-gem-search.is-panel-blast.is-story-docked.is-win .gem-stage,
+html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked.is-win .gem-scroll,
+html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked.is-win .gem-stage {
+  flex: 0 0 auto;
+  min-height: auto;
+  overflow: visible;
+}
+
+.play.is-gem-search.is-panel-blast.is-story-docked.is-win .gem-board {
+  flex: 0 0 auto;
+  height: auto;
+  aspect-ratio: 1;
+  width: min(100%, 520px, 36vh);
+  width: min(100%, 520px, 36svh);
+  max-height: none;
+  align-self: center;
+}
+
+html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked.is-win .gem-board {
+  flex: 0 0 auto;
+  height: auto;
+  aspect-ratio: 1;
+  width: min(100%, 520px, 36vh);
+  width: min(100%, 520px, 36svh);
+  max-height: none;
+  align-self: center;
+}
+
+html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked.is-win,
+html[data-easy='on'] .challenge-page.is-puzzle .play.is-gem-search.is-panel-blast.is-story-docked.is-win {
+  overflow: auto;
+  justify-content: flex-start;
+}
+
+/* Paint-only found ring. Inset shadow does not change the cell box. */
+.play.is-gem-search.is-panel-blast.is-story-docked.is-win .gem-cell.is-found {
+  box-shadow: inset 0 0 0 2px rgba(255, 246, 184, 0.95);
 }
 
 .play.is-gem-search.is-win .win-burst,

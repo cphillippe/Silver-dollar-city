@@ -465,6 +465,26 @@ assert.match(
   'Lock In stays outside the hidden board scroller',
 )
 const winCss = readFileSync(new URL('../src/styles/matchWin.css', import.meta.url), 'utf8')
+assert.doesNotMatch(
+  winCss,
+  /\.gem-scroll\s*,[\s\S]{0,240}?\{\s*display:\s*none/,
+  'match win no longer hides .gem-scroll',
+)
+assert.doesNotMatch(
+  winCss,
+  /\.gem-scroll\s*\{[^}]*display:\s*none/,
+  'match win no longer hides .gem-scroll',
+)
+assert.match(
+  winCss,
+  /\.is-story-docked\.is-win \.gem-board\s*\{[^}]*aspect-ratio:\s*1/,
+  'win board stays square',
+)
+assert.match(
+  playSrc,
+  /const cellClear = status !== 'ok' && \(targetClear \|\| bonusClear\)/,
+  'found letters return on the win view',
+)
 assert.match(winCss, /\.play\.is-gem-search\.is-win \.cta-dock \.btn\.primary/)
 assert.match(winCss, /font-weight:\s*800/)
 assert.doesNotMatch(playSrc, /extras > 0/)
