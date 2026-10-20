@@ -458,24 +458,56 @@ async function hugFatherHuman(page) {
   await page.locator('.play.is-father-run.is-win .btn.primary').waitFor({ timeout: 8000 })
 }
 
+async function fatherRunEnd(page) {
+  if (await page.locator('.play.is-father-run.is-win').count()) return 'win'
+  if (await page.locator('.run-miss').count()) return 'miss'
+  return ''
+}
+
+/** Press the hold pad. A hug unmounts the pad in the same turn as the glow tap. */
+async function pressRunPad(page, pad) {
+  const before = await fatherRunEnd(page)
+  if (before) return before
+  let box = null
+  try {
+    box = await pad.boundingBox({ timeout: 2000 })
+  } catch {
+    box = null
+  }
+  if (!box) {
+    const after = await fatherRunEnd(page)
+    if (after) return after
+    const text = ((await page.locator('body').innerText().catch(() => '')) || '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 240)
+    throw new Error(`run pad has no box (${text})`)
+  }
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+  await page.mouse.down()
+  return 'down'
+}
+
+function finishFatherPress(state) {
+  if (state === 'win') return 'win'
+  if (state === 'miss') throw new Error('father run missed')
+  if (state !== 'down') throw new Error('run pad has no box')
+  return 'down'
+}
+
 async function hugFather(page) {
   const pad = page.locator('[data-run-pad="hold"]')
   await pad.waitFor({ timeout: 15000 })
   await pad.scrollIntoViewIfNeeded()
-  const press = async () => {
-    const box = await pad.boundingBox()
-    if (!box) throw new Error('run pad has no box')
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
-    await page.mouse.down()
-  }
-  await press()
+  finishFatherPress(await pressRunPad(page, pad))
   const start = Date.now()
   while (Date.now() - start < 12000) {
-    if (await page.locator('.play.is-father-run.is-win').count()) {
+    const end = await fatherRunEnd(page)
+    if (end === 'win') {
       await page.mouse.up().catch(() => {})
       return
     }
-    if (await page.locator('.run-miss').count()) {
+    if (end === 'miss') {
       await page.mouse.up().catch(() => {})
       throw new Error('father run missed')
     }
@@ -492,7 +524,8 @@ async function hugFather(page) {
     if (label === 'Tap' || (label && label.includes('Let go'))) {
       await page.mouse.up()
       await page.waitForTimeout(30)
-      await press()
+      const state = finishFatherPress(await pressRunPad(page, pad))
+      if (state === 'win') return
       await page.waitForTimeout(90)
     } else {
       await page.waitForTimeout(50)
