@@ -2411,9 +2411,10 @@ async function openEasyWave(browser, port, errors, search, label) {
   }
   await page.locator('.defend-go').waitFor()
   await pointerBox(page, '.defend-go')
+  const goAt = Date.now()
   await page.locator('[data-skill="mend"]').waitFor()
   await page.locator('[data-wave-count]').waitFor({ state: 'detached', timeout: 4000 }).catch(() => {})
-  return { context, page }
+  return { context, page, goAt }
 }
 
 async function crownSnap(page) {
@@ -2433,40 +2434,14 @@ async function crownSnap(page) {
   })
 }
 
-async function pressBeforeCrown(page, targetSec, floorSec) {
-  const deadline = Date.now() + 120_000
-  let prev = null
-  const speeds = []
-  while (Date.now() < deadline) {
-    const snap = await crownSnap(page)
-    const at = Date.now()
-    if (snap.through || snap.lost) break
-    if (snap.t != null && prev && snap.t > prev.t + 0.0005) {
-      const dt = (at - prev.at) / 1000
-      const speed = dt > 0 && dt < 0.35 ? (snap.t - prev.t) / dt : 0
-      if (speed > 0.01 && speed < 0.04) {
-        speeds.push(speed)
-        if (speeds.length > 7) speeds.shift()
-      }
-      if (speeds.length >= 4 && snap.t >= 0.66) {
-        const sorted = [...speeds].sort((a, b) => a - b)
-        const stable = sorted[Math.floor(sorted.length / 2)]
-        const remain = (1 - snap.t) / stable
-        if (remain <= targetSec + 0.35 && stable >= 0.015 && stable <= 0.024) {
-          assert.ok(
-            remain >= floorSec,
-            `1.4.512 the crown passed the ${targetSec}s mark at ${remain.toFixed(2)}s`,
-          )
-          const pressedAt = Date.now()
-          await pointerBox(page, '[data-skill="mend"]')
-          return { remain, t: snap.t, speed: stable, pressedAt }
-        }
-      }
-    }
-    if (snap.t != null) prev = { t: snap.t, at }
-    await page.waitForTimeout(40)
-  }
-  throw new Error(`1.4.512 the crown never reached ${targetSec}s`)
+/** Press Mend at a wall-clock offset from Go. Pace 3 crown arrives about 33.06s after Go. */
+async function pressMendAt(page, goAt, atSec) {
+  const left = Math.round(atSec * 1000 - (Date.now() - goAt))
+  if (left > 0) await page.waitForTimeout(left)
+  await page.locator('[data-skill="mend"][data-state="ready"]').waitFor({ timeout: 4000 })
+  const pressedAt = Date.now()
+  await pointerBox(page, '[data-skill="mend"]')
+  return { pressedAt, fromGo: (pressedAt - goAt) / 1000 }
 }
 
 async function waitCrownEnd(page, timeout) {
@@ -2543,8 +2518,20 @@ async function assertCrownGlowFits(page) {
   assert.equal(fit.inView, true, `1.4.512 the crown glow stays inside 375x667 ${JSON.stringify(fit)}`)
 }
 
-/** Easy Mend: 12s crown hold, 4s walker shield, one hold per round. Hard stays put. */
+/** Easy Mend: 12s crown hold, 4s walker shield, one arm and one hold per round. Hard stays put. */
 export async function checkCrownHold(browser, port, errors) {
+  const spendMend = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const mendBody = spendMend.slice(spendMend.indexOf('function spendMend'), spendMend.indexOf('function combatPace'))
+  assert.match(
+    mendBody,
+    /if \(easy && !crownHoldArmedRef\.current\) \{\s*crownHoldArmedRef\.current = true/,
+    '1.4.512 spendMend arms the crown hold once per round',
+  )
+  assert.equal(
+    spendMend.split('crownHoldArmedRef.current = false').length - 1,
+    2,
+    '1.4.512 the crown hold resets on round start and restart',
+  )
   mkdirSync('/opt/cursor/artifacts', { recursive: true })
   const shield = await openEasyWave(browser, port, errors, '?playtest=1&nwRound=2', 'crown shield')
   await shield.page.locator('[data-skill="mend"][data-state="ready"]').waitFor()
@@ -2573,6 +2560,17 @@ export async function checkCrownHold(browser, port, errors) {
   assert.equal(await shield.page.locator('[data-crown-hold="armed"]').count(), 1, '1.4.512 the crown hold is still armed at 11s')
   await waitFrom(13_200)
   assert.equal(await shield.page.locator('[data-crown-hold="armed"]').count(), 0, '1.4.512 the crown hold ends by 13.2s')
+  await shield.page.locator('[data-skill="mend"][data-state="ready"]').waitFor({ timeout: 8000 })
+  assert.ok(Date.now() - armedAt > 12_000, '1.4.512 the second Mend is after the 12s crown hold')
+  await pointerBox(shield.page, '[data-skill="mend"]')
+  await shield.page.locator('.nw-mend-shield').waitFor()
+  await shield.page.waitForTimeout(400)
+  assert.equal(
+    await shield.page.locator('[data-crown-hold="armed"]').count(),
+    0,
+    '1.4.512 a second Mend in the round does not re-arm the crown hold',
+  )
+  assert.equal(await shield.page.locator('.nw-mend-shield').count(), 1, '1.4.512 the second Mend still raises the walker shield')
   await shield.context.close()
 
   const hardSave = { ...SAVE, progress: { ...SAVE.progress, easyMode: false } }
@@ -2604,23 +2602,23 @@ export async function checkCrownHold(browser, port, errors) {
   assert.equal(await hardPage.locator('.nw-crown-hold').count(), 0, '1.4.512 Hard does not show the crown glow')
   await hard.close()
 
-  async function showdown(target, mode) {
+  async function showdown(atSec, mode) {
     const run = await openEasyWave(browser, port, errors, '?playtest=1&nwRound=20', `crown ${mode}`)
     await pointerBox(run.page, '.nw-pace')
     await run.page.waitForFunction(() => document.querySelector('[data-pace]')?.getAttribute('data-pace') === '3')
-    const pressed = await pressBeforeCrown(run.page, target.sec, target.floor)
+    const pressed = await pressMendAt(run.page, run.goAt, atSec)
     const end = await waitCrownEnd(run.page, 22_000)
     const elapsed = (Date.now() - pressed.pressedAt) / 1000
     console.log(
-      `crown ${mode}: estimated ${pressed.remain.toFixed(2)}s at t ${pressed.t.toFixed(3)}, arrived in ${elapsed.toFixed(2)}s, held ${end.held}`,
+      `crown ${mode}: pressed ${pressed.fromGo.toFixed(2)}s after Go, crown ${elapsed.toFixed(2)}s later, held ${end.held}`,
     )
     return { ...run, pressed, end, elapsed }
   }
 
-  const hit = await showdown({ sec: 10, floor: 9.2 }, 'hold')
+  const hit = await showdown(23, 'hold')
   assert.equal(hit.end.timeout, undefined, '1.4.512 the 10s crown arrived')
   assert.equal(hit.end.held, true, `1.4.512 a Mend press 10s before the crown holds it ${JSON.stringify(hit.end)}`)
-  assert.ok(hit.pressed.remain <= 10.6 && hit.pressed.remain >= 9.2, `1.4.512 the hold press was ${hit.pressed.remain}s out`)
+  assert.ok(hit.pressed.fromGo >= 22.7 && hit.pressed.fromGo <= 23.6, `1.4.512 the hold press was ${hit.pressed.fromGo}s after Go`)
   assert.ok(hit.elapsed > 8 && hit.elapsed < 12.2, `1.4.512 the 10s press arrived in ${hit.elapsed}s`)
   assert.notEqual(hit.end.through, 'Held!')
   assert.equal(await hit.page.locator('[data-crown-live="Held!"]').count(), 0, '1.4.512 the hold does not duplicate Held!')
@@ -2628,15 +2626,44 @@ export async function checkCrownHold(browser, port, errors) {
   await hit.page.screenshot({ path: '/opt/cursor/artifacts/crown-hold-hit-375.png' })
   await hit.context.close()
 
-  const miss = await showdown({ sec: 13, floor: 12.25 }, 'miss')
+  const miss = await showdown(20, 'miss')
   assert.equal(miss.end.held, false, `1.4.512 a Mend press 13s before the crown does not hold it ${JSON.stringify(miss.end)}`)
-  assert.ok(miss.pressed.remain >= 12.25 && miss.pressed.remain <= 13.6, `1.4.512 the miss press was ${miss.pressed.remain}s out`)
-  assert.ok(miss.elapsed > 12, `1.4.512 the 13s press arrived in ${miss.elapsed}s`)
+  assert.ok(miss.pressed.fromGo >= 19.7 && miss.pressed.fromGo <= 20.6, `1.4.512 the miss press was ${miss.pressed.fromGo}s after Go`)
+  assert.ok(miss.elapsed > 12 && miss.elapsed < 15, `1.4.512 the 13s press arrived in ${miss.elapsed}s`)
   assert.ok(miss.end.through.includes('got through') || miss.end.lost, '1.4.512 the late Mend lets the crown through')
   await miss.page.screenshot({ path: '/opt/cursor/artifacts/crown-hold-miss-375.png' })
   await miss.context.close()
 
-  const once = await showdown({ sec: 3, floor: 2 }, 'once')
+  const rearm = await openEasyWave(browser, port, errors, '?playtest=1&nwRound=20', 'crown rearm')
+  await pointerBox(rearm.page, '.nw-pace')
+  await rearm.page.waitForFunction(() => document.querySelector('[data-pace]')?.getAttribute('data-pace') === '3')
+  const early = await pressMendAt(rearm.page, rearm.goAt, 8.8)
+  await rearm.page.locator('[data-crown-hold="armed"]').waitFor()
+  const beforeSecond = Math.round(23.2 * 1000 - (Date.now() - rearm.goAt))
+  if (beforeSecond > 0) await rearm.page.waitForTimeout(beforeSecond)
+  assert.equal(
+    await rearm.page.locator('[data-crown-hold="armed"]').count(),
+    0,
+    '1.4.512 the first crown hold has ended before the second Mend',
+  )
+  const late = await pressMendAt(rearm.page, rearm.goAt, 23.2)
+  await rearm.page.locator('.nw-mend-shield').waitFor()
+  assert.equal(
+    await rearm.page.locator('[data-crown-hold="armed"]').count(),
+    0,
+    '1.4.512 the second R20 Mend does not re-arm the crown hold',
+  )
+  const rearmEnd = await waitCrownEnd(rearm.page, 20_000)
+  const rearmOffset = (Date.now() - late.pressedAt) / 1000
+  console.log(
+    `crown rearm: first ${early.fromGo.toFixed(2)}s, second ${late.fromGo.toFixed(2)}s after Go, crown ${rearmOffset.toFixed(2)}s after the second press, held ${rearmEnd.held}`,
+  )
+  assert.ok(rearmOffset > 8 && rearmOffset < 12, `1.4.512 the second Mend was ${rearmOffset}s before the crown`)
+  assert.equal(rearmEnd.held, false, `1.4.512 a Mend 24s out then 10s out lets the crown through ${JSON.stringify(rearmEnd)}`)
+  assert.ok(rearmEnd.through.includes('got through') || rearmEnd.lost, '1.4.512 the re-armed Mend does not hold the crown')
+  await rearm.context.close()
+
+  const once = await showdown(30, 'once')
   assert.equal(once.end.held, true, `1.4.512 the near Mend holds the crown once ${JSON.stringify(once.end)}`)
   assert.equal(once.end.hold, 'armed', '1.4.512 the crown hold is still armed after the first hold')
   let extra = 0

@@ -401,6 +401,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const seenSkill = useRef<Record<KitId, boolean>>({ still: false, mend: false })
   const mendShieldUntilRef = useRef(0)
   const crownHoldUntilRef = useRef(0)
+  const crownHoldArmedRef = useRef(false)
   const sparksRef = useRef(runSparks)
   sparksRef.current = runSparks
   const hpMulRef = useRef(1)
@@ -821,6 +822,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     live.current.freezeUntil = 0
     mendShieldUntilRef.current = 0
     crownHoldUntilRef.current = 0
+    crownHoldArmedRef.current = false
     window.clearTimeout(crownHoldTimer.current)
     setCrownHold(false)
     crownDrainGen.current += 1
@@ -2419,6 +2421,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     setPulseId(null)
     mendShieldUntilRef.current = 0
     crownHoldUntilRef.current = 0
+    crownHoldArmedRef.current = false
     window.clearTimeout(crownHoldTimer.current)
     setMendShield(false)
     setCrownHold(false)
@@ -2812,7 +2815,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
       mendShieldUntilRef.current = 0
       setMendShield(false)
     }, MEND_SHIELD_MS)
-    if (easy) {
+    if (easy && !crownHoldArmedRef.current) {
+      crownHoldArmedRef.current = true
       crownHoldUntilRef.current = now + MEND_CROWN_HOLD_MS
       setCrownHold(true)
       window.clearTimeout(crownHoldTimer.current)
