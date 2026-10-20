@@ -1,5 +1,5 @@
 /** Display + envelope version. Keep in lockstep with package.json. */
-export const APP_VERSION = '1.4.517'
+export const APP_VERSION = '1.4.518'
 
 /** Capacitor / Play id — do not change without a migration story. */
 export const APP_ID = 'city.silver.unending'
