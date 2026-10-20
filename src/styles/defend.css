@@ -969,6 +969,31 @@ button.defend-cross-lamp {
   pointer-events: none;
 }
 
+/* 1.4.515: a dark-face tap pulses the lead ring for 400ms. No new gold. */
+.walker-cue-ring.is-cue-nudge {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: walker-cue-nudge 400ms ease-out 1;
+}
+
+@keyframes walker-cue-nudge {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.35);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .walker-cue-ring.is-cue-nudge {
+    animation: none;
+    stroke-width: 5;
+    opacity: 1;
+  }
+}
+
 /* 1.4.412: a thin tinted ring so Fast and Tough still read while they glow. */
 .walker-target-cue[data-cue-gait='fast'] .walker-cue-pad {
   fill: rgba(126, 200, 255, 0.16);

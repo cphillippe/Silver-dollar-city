@@ -8,6 +8,17 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.515',
+    title: 'Night Watch misses you can trust',
+    when: '2026-10-20',
+    items: [
+      'On Easy, a tap far from every walker is not a miss. A tap on a dark face, the fog, or the road beside a walker still counts.',
+      'A dark-face tap pulses the glowing face. In the fog the line says Wait till he leaves the fog.',
+      'Hard stays the same.',
+      'Refs #748.',
+    ],
+  },
+  {
     version: '1.4.514',
     title: 'Word search: the board stays whole on the MATCHED! screen',
     when: '2026-10-20',
