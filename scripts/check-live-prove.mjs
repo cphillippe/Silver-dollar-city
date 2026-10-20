@@ -3138,15 +3138,35 @@ async function sampleCueClear(page, minFrames) {
           a.right > b.left &&
           a.top < b.bottom &&
           a.bottom > b.top
+        const hudNames = [
+          '.nw-balloon',
+          '.defend-wave',
+          '.defend-hearts',
+          '.nw-rail .defend-abilities',
+          '.nw-miss-toast',
+          '.nw-pace',
+          '.nw-skill-toast',
+        ]
+        const overlapBox = (a, b) =>
+          a.width >= 4 &&
+          a.height >= 4 &&
+          b.width >= 4 &&
+          b.height >= 4 &&
+          a.left < b.right &&
+          a.right > b.left &&
+          a.top < b.bottom &&
+          a.bottom > b.top
         let frames = 0
         let overlaps = 0
+        let hudOverlaps = 0
         let shifted = 0
         let shiftedFrames = 0
         let homeHits = 0
         let wasShifted = false
         let empty = 0
         let steps = 0
-        const finish = () => resolve({ frames, overlaps, shifted, shiftedFrames, homeHits, empty })
+        const slots = {}
+        const finish = () => resolve({ frames, overlaps, hudOverlaps, shifted, shiftedFrames, homeHits, empty, slots })
         const step = () => {
           steps += 1
           const rings = [...document.querySelectorAll('.walker-target-cue .walker-cue-ring')]
@@ -3171,7 +3191,20 @@ async function sampleCueClear(page, minFrames) {
           if (targets.some((rect) => overlap(read, rect))) overlaps += 1
           if (targets.some((rect) => overlap(home, rect))) homeHits += 1
           const on = readout.classList.contains('is-shifted')
-          if (on) shiftedFrames += 1
+          if (on) {
+            shiftedFrames += 1
+            const hud = hudNames.flatMap((sel) => [...document.querySelectorAll(sel)].map((el) => el.getBoundingClientRect()))
+            if (hud.some((rect) => overlapBox(read, rect))) hudOverlaps += 1
+            const frame = readout.closest('.defend-frame')?.getBoundingClientRect()
+            if (frame && frame.width >= 4 && frame.height >= 4) {
+              const dx = read.left - frame.left
+              const dy = read.top - frame.top
+              const col = dx <= frame.width * 0.2 ? 'left' : dx >= frame.width * 0.55 ? 'right' : 'center'
+              const row = Math.abs(dy - frame.height * 0.42) <= 28 ? 'mid' : dy < frame.height * 0.22 ? 'top' : 'bottom'
+              const name = `${row}-${col}`
+              slots[name] = (slots[name] || 0) + 1
+            }
+          }
           if (on && !wasShifted) shifted += 1
           wasShifted = on
           if (frames >= need && (homeHits > 0 || frames >= need * 3)) {
@@ -3230,6 +3263,8 @@ async function checkReadoutCueClear(browser, port, errors) {
     if (sample.homeHits > 0) {
       assert.ok(sample.shifted >= 1, `${width} the readout shifts when the ring is in its dock ${JSON.stringify(sample)}`)
     }
+    assert.ok(sample.shiftedFrames >= 1, `${width} the readout leaves its dock ${JSON.stringify(sample)}`)
+    assert.equal(sample.hudOverlaps, 0, `${width} shifted readout covers the HUD ${JSON.stringify(sample)}`)
     await page.evaluate((line) => {
       window.__nwToastWatch = { line, downAt: 0, seenMs: null }
       document.addEventListener(
@@ -3295,7 +3330,7 @@ async function checkReadoutCueClear(browser, port, errors) {
       `${width} the dark-tap toast shows within 200ms (${toastMs}) ${JSON.stringify(toastSnap)}`,
     )
     console.log(
-      `cue-clear ${width}x${height} frames=${sample.frames} overlaps=${sample.overlaps} shifted=${sample.shifted} shiftedFrames=${sample.shiftedFrames} homeHits=${sample.homeHits} toastMs=${toastMs}`,
+      `cue-clear ${width}x${height} frames=${sample.frames} overlaps=${sample.overlaps} hudOverlaps=${sample.hudOverlaps} shifted=${sample.shifted} shiftedFrames=${sample.shiftedFrames} homeHits=${sample.homeHits} slots=${JSON.stringify(sample.slots)} toastMs=${toastMs}`,
     )
     report.push({ width, height, toastMs, ...sample })
     await context.close()

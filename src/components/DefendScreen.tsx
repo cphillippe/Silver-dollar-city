@@ -342,6 +342,11 @@ function keepReadoutClear() {
     '.nw-skill-tray',
     '.defend-hearts',
     '.nw-miss-toast',
+    '.nw-balloon',
+    '.defend-wave',
+    '.nw-pace',
+    '.nw-skill-hint',
+    '.nw-skill-toast',
   ].flatMap((sel) => [...document.querySelectorAll(sel)].map((el) => el.getBoundingClientRect()))
   const hits = (box: DOMRect) =>
     rings.some((rect) => rectsOverlap(box, rect, 8)) || blocks.some((rect) => rectsOverlap(box, rect, 1))
