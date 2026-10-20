@@ -18,6 +18,8 @@ const GEM_WORDS = ['LARK', 'STEPS', 'TUNING', 'DESIGNER']
 const SIZES = [
   [375, 667],
   [390, 844],
+  [412, 915],
+  [768, 1024],
 ]
 const SHOTS = '/opt/cursor/artifacts/screenshots'
 
@@ -391,6 +393,81 @@ async function readGrid(page) {
   })
 }
 
+async function readBoardGeom(page) {
+  return page.evaluate(() => {
+    const cells = [...document.querySelectorAll('[data-gem-cell]')]
+    const byRow = new Map()
+    const cellSizes = []
+    let visibleLetters = 0
+    for (const cell of cells) {
+      const r = Number(cell.getAttribute('data-r'))
+      const box = cell.getBoundingClientRect()
+      const row = byRow.get(r) ?? { top: Math.round(box.top), height: box.height }
+      row.top = Math.min(row.top, Math.round(box.top))
+      row.height = Math.max(row.height, box.height)
+      byRow.set(r, row)
+      cellSizes.push({ w: box.width, h: box.height })
+      const letter = cell.querySelector('.gem-letter')
+      const text = (letter?.textContent || '').trim()
+      if (!letter || !text) continue
+      const style = getComputedStyle(letter)
+      const color = style.color
+      const transparent = color === 'transparent' || color === 'rgba(0, 0, 0, 0)'
+      if (Number(style.opacity) > 0.5 && !transparent) visibleLetters += 1
+    }
+    const boardEl = document.querySelector('.gem-board')
+    const boardBox = boardEl ? boardEl.getBoundingClientRect() : null
+    const rows = [...byRow.entries()]
+      .sort((a, b) => a[0] - b[0])
+      .map(([r, info]) => ({ r, top: info.top, height: info.height }))
+    return {
+      count: cells.length,
+      rows,
+      cells: cellSizes,
+      visibleLetters,
+      board: boardBox
+        ? { w: boardBox.width, h: boardBox.height, top: boardBox.top, right: boardBox.right, bottom: boardBox.bottom, left: boardBox.left }
+        : null,
+      clearCount: document.querySelectorAll('.gem-cell.is-clear').length,
+    }
+  })
+}
+
+function assertWinBoard(before, after, gridBefore, gridAfter, width, height) {
+  assert.equal(before.count, 64, `${width} gem cells before`)
+  assert.equal(after.count, before.count, `${width} gem cells changed`)
+  assert.equal(after.count, 64, `${width} gem cells after`)
+  assert.equal(before.rows.length, 8, `${width} rows before`)
+  assert.equal(after.rows.length, before.rows.length, `${width} row count changed`)
+  for (const shot of [before, after]) {
+    const ids = shot.rows.map((row) => row.r)
+    assert.ok(ids.includes(0) && ids.includes(7), `${width} bounding rows ${ids}`)
+    for (const row of shot.rows) assert.ok(row.height > 0, `${width} row ${row.r} collapsed`)
+    const tops = shot.rows.map((row) => row.top)
+    assert.equal(new Set(tops).size, 8, `${width} row tops ${tops}`)
+    for (let i = 1; i < tops.length; i += 1) {
+      assert.ok(tops[i] > tops[i - 1], `${width} row tops ${tops}`)
+    }
+  }
+  const heights = after.rows.map((row) => row.height)
+  const spread = Math.max(...heights) - Math.min(...heights)
+  assert.ok(spread <= 1, `${width} row height spread ${spread.toFixed(2)} [${heights.join(',')}]`)
+  for (const cell of after.cells) {
+    assert.ok(Math.abs(cell.w - cell.h) <= 2, `${width} cell ${cell.w.toFixed(1)}x${cell.h.toFixed(1)}`)
+  }
+  assert.ok(after.board, `${width} missing board rect`)
+  assert.ok(
+    Math.abs(after.board.w - after.board.h) <= 2,
+    `${width} board ${after.board.w.toFixed(1)}x${after.board.h.toFixed(1)}`,
+  )
+  assert.ok(after.board.top >= -0.5 && after.board.left >= -0.5, `${width} board origin`)
+  assert.ok(after.board.right <= width + 0.5, `${width} board right ${after.board.right}`)
+  assert.ok(after.board.bottom <= height + 0.5, `${width} board bottom ${after.board.bottom}`)
+  assert.equal(after.visibleLetters, 64, `${width} visible letters`)
+  assert.equal(after.clearCount, 0, `${width} is-clear cells on win`)
+  assert.deepEqual(gridAfter, gridBefore, `${width} letter grid changed`)
+}
+
 async function dragPath(page, path) {
   const first = page.locator(`[data-gem-cell][data-r="${path[0].r}"][data-c="${path[0].c}"]`)
   const start = await first.boundingBox()
@@ -405,17 +482,31 @@ async function dragPath(page, path) {
   await page.mouse.up()
 }
 
-async function playGem(page) {
+async function playGem(page, { watchLast = false } = {}) {
   await page.locator('[data-gem-cell]').first().waitFor()
+  const juice = { burst: 0, pop: false }
   for (const word of GEM_WORDS) {
-    if (await page.locator('.play.is-gem-search.is-win').count()) return
+    if (await page.locator('.play.is-gem-search.is-win').count()) return juice
     const letters = await readGrid(page)
     const path = findStraightSpelling(letters, word)
     if (!path) throw new Error(`ob-tuning word ${word} is not on the board`)
     await dragPath(page, path)
+    if (watchLast && word === GEM_WORDS[GEM_WORDS.length - 1]) {
+      await page.waitForFunction(() => {
+        const burst = document.querySelectorAll('.gem-cell.is-burst').length
+        const pop = document.querySelector('.gem-find-pop')
+        if (!pop || burst < 1) return false
+        const style = getComputedStyle(pop)
+        const box = pop.getBoundingClientRect()
+        return style.display !== 'none' && style.visibility !== 'hidden' && box.height > 0 && Number(style.opacity) > 0.2
+      }, { timeout: 2000 })
+      juice.burst = await page.locator('.gem-cell.is-burst').count()
+      juice.pop = true
+    }
     await page.waitForTimeout(280)
   }
   await page.locator('.play.is-gem-search.is-win').waitFor({ timeout: 8000 })
+  return juice
 }
 
 async function lockInFace(page) {
@@ -693,16 +784,61 @@ export async function checkGoldenLive() {
 
       await page.locator('.play.is-gem-search').waitFor()
       await stamp('gem')
-      await playGem(page)
+      const gemBefore = await readBoardGeom(page)
+      const gridBefore = await readGrid(page)
+      const juice = await playGem(page, { watchLast: true })
+      assert.ok(juice.burst > 0, `${width} last find burst`)
+      assert.equal(juice.pop, true, `${width} last find pop`)
       await page.locator('.play.is-gem-search.is-win .btn.primary').waitFor()
+      await page.waitForFunction(() => document.querySelectorAll('.gem-cell.is-burst').length === 0)
+      const gemAfter = await readBoardGeom(page)
+      const gridAfter = await readGrid(page)
+      assertWinBoard(gemBefore, gemAfter, gridBefore, gridAfter, width, height)
+      const stack = await page.evaluate(() => {
+        const box = (sel) => {
+          const el = document.querySelector(sel)
+          if (!el) return null
+          const r = el.getBoundingClientRect()
+          return { top: r.top, bottom: r.bottom, left: r.left, right: r.right, height: r.height }
+        }
+        const play = document.querySelector('.play.is-gem-search.is-win')
+        return {
+          board: box('.gem-board'),
+          stamp: box('.win-stamp-wrap'),
+          take: box('.match-yes'),
+          dock: box('.cta-dock'),
+          gold: box('.play.is-gem-search.is-win .cta-dock .btn.primary'),
+          scrollY: window.scrollY,
+          playScroll: play ? play.scrollTop : 0,
+          innerHeight: window.innerHeight,
+          stampText: (document.querySelector('.win-stamp')?.textContent || '').replace(/\s+/g, ' ').trim(),
+        }
+      })
+      assert.match(stack.stampText, /MATCHED!/i, `${width} win stamp`)
+      assert.ok(stack.board && stack.stamp && stack.board.bottom <= stack.stamp.top + 0.5, `${width} board overlaps MATCHED`)
+      assert.ok(stack.stamp && stack.take && stack.stamp.bottom <= stack.take.top + 0.5, `${width} MATCHED overlaps the takeaway`)
+      assert.ok(stack.take && stack.dock && stack.take.bottom <= stack.dock.top + 0.5, `${width} takeaway overlaps the dock`)
+      if (width === 375 && height === 667) {
+        assert.equal(stack.scrollY, 0, '375 win did not scroll the window')
+        assert.equal(stack.playScroll, 0, '375 win did not scroll the play')
+        assert.ok(stack.gold, '375 gold button')
+        assert.ok(stack.gold.top >= 0 && stack.gold.bottom <= stack.innerHeight, `375 Lock In next ${stack.gold.top}-${stack.gold.bottom} of ${stack.innerHeight}`)
+      }
+      trace.push(
+        `${width}x${height} gem-geom cells=${gemAfter.count} rows=${gemAfter.rows.length} letters=${gemAfter.visibleLetters} clear=${gemAfter.clearCount} board=${gemAfter.board.w.toFixed(1)}x${gemAfter.board.h.toFixed(1)} rowH=${gemAfter.rows.map((row) => row.height.toFixed(1)).join(',')} tops=${gemAfter.rows.map((row) => row.top).join(',')} gold=${stack.gold ? Math.round(stack.gold.bottom) : 'none'}/${height} stamp=${stack.stampText}`,
+      )
       shot = await stamp('gem-win')
       assert.equal(shot.id, 'gem-win')
+      assert.equal(shot.golds.length, 1, 'gem-win has one gold')
       assert.match(shot.golds[0].text, /Lock In/)
       assert.doesNotMatch(shot.golds[0].text, /One more/)
       const homeInk = await page.locator('.cta-dock .btn', { hasText: 'Home' }).evaluate((el) => getComputedStyle(el).color)
       const channels = homeInk.match(/\d+/g)?.map(Number) ?? []
       assert.ok(channels.length >= 3 && Math.max(...channels.slice(0, 3)) < 90, `Home ink is readable (${homeInk})`)
-      if (width === 375) await page.screenshot({ path: `${SHOTS}/gem-win-375.png` })
+      if (width === 375 || width === 412 || width === 768) {
+        await page.screenshot({ path: `${SHOTS}/gem-win-${width}.png` })
+        await page.screenshot({ path: `${SHOTS}/L3-wordsearch-matched-win-${width}.png` })
+      }
       await tapFilledGold(page)
       await page.locator('.why-blast').waitFor()
       shot = await stamp('quiz-tuning')

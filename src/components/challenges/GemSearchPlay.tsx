@@ -710,7 +710,8 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
             const sharedFound = kept && found.some((wordId) =>
               (puzzle.paths[wordId] ?? []).some((cell) => cell.r === r && cell.c === c),
             )
-            const cellClear = targetClear || bonusClear
+            const cellClear = status !== 'ok' && (targetClear || bonusClear)
+            const cellFound = status === 'ok' && (targetClear || sharedFound)
             const cellCracked = !bonusClear && (bonusGhost || sharedFound)
             return (
               <div
@@ -720,7 +721,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
                 data-r={r}
                 data-c={c}
                 onPointerDown={(event) => onCellDown(event, { r, c })}
-                className={`gem-cell hue-${gemHue(letter, r, c)} ${selected.has(key) ? 'is-sel' : ''} ${popping ? 'is-burst' : ''} ${cellClear ? 'is-clear' : ''} ${cellCracked ? 'is-cracked' : ''} ${hint.includes(key) ? 'is-hint' : ''} ${popping && (bonusClear || bonusGhost) ? 'is-bonus-burst' : ''}`}
+                className={`gem-cell hue-${gemHue(letter, r, c)} ${selected.has(key) ? 'is-sel' : ''} ${popping ? 'is-burst' : ''} ${cellClear ? 'is-clear' : ''} ${cellFound ? 'is-found' : ''} ${cellCracked ? 'is-cracked' : ''} ${hint.includes(key) ? 'is-hint' : ''} ${popping && (bonusClear || bonusGhost) ? 'is-bonus-burst' : ''}`}
               >
                 <span className="gem-letter">{letter}</span>
                 {popping

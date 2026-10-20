@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.514',
+    title: 'Word search: the board stays whole on the MATCHED! screen',
+    when: '2026-10-20',
+    items: [
+      'On Easy, the word search board stays whole on the MATCHED! screen. Every letter stays visible.',
+      'Hard stays the same.',
+      'Refs #794.',
+    ],
+  },
+  {
     version: '1.4.513',
     title: 'A second share tap copies the line',
     when: '2026-10-20',
