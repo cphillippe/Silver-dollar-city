@@ -92,13 +92,34 @@ function isCalendarDate(value: unknown): value is string {
   return date.getFullYear() === y && date.getMonth() === m - 1 && date.getDate() === d
 }
 
+function savedAtLocalDate(savedAt?: string): string | undefined {
+  if (!savedAt) return undefined
+  const date = new Date(savedAt)
+  if (Number.isNaN(date.getTime())) return undefined
+  const key = localDateKey(date)
+  return isCalendarDate(key) ? key : undefined
+}
+
 /**
- * First boot writes the local day when it is missing.
- * A valid stored day is left alone. Callers persist an existing save.
+ * A valid stored day stays. A missing or dropped day becomes the earliest
+ * of the walk dates, the envelope's local day, and today. A brand-new save
+ * has none of those earlier days, so it stays on today.
  */
-export function stampFirstSeen(progress: ProgressState, today = localDateKey()): ProgressState {
+export function stampFirstSeen(
+  progress: ProgressState,
+  today = localDateKey(),
+  savedAt?: string,
+): ProgressState {
   if (isCalendarDate(progress.firstSeen)) return progress
-  return { ...progress, firstSeen: today }
+  const days = [today]
+  for (const day of progress.dailyDates ?? []) {
+    if (isCalendarDate(day)) days.push(day)
+  }
+  if (isCalendarDate(progress.lastDailyDate)) days.push(progress.lastDailyDate)
+  const savedDay = savedAtLocalDate(savedAt)
+  if (savedDay) days.push(savedDay)
+  const firstSeen = days.reduce((earliest, day) => (day < earliest ? day : earliest))
+  return { ...progress, firstSeen }
 }
 
 export function emptyProgress(): ProgressState {
@@ -616,7 +637,7 @@ export function loadSave(): { progress: ProgressState; meta: SaveMeta } {
         },
       }
     }
-    const progress = stampFirstSeen(parsed.progress)
+    const progress = stampFirstSeen(parsed.progress, localDateKey(), parsed.meta.savedAt)
     if (parsed.meta.source === 'legacy' || progress !== parsed.progress) {
       persistSave(progress, parsed.meta.savedAt)
     }

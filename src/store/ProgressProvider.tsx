@@ -434,7 +434,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     backupCurrentSave()
     setMissed([])
     forgetCitySeen()
-    commit(stampFirstSeen(parsed.progress))
+    commit(stampFirstSeen(parsed.progress, undefined, parsed.meta.savedAt))
     return { ok: true as const }
   }, [commit])
 
