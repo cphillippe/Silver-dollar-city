@@ -477,3 +477,43 @@ export function stageCam(stageAspect: number, plate: MapCam = MAP_PLATE, focus =
   y = Math.min(plate.y, Math.max(plate.y + plate.h - h, y))
   return { x, y, w, h }
 }
+
+export interface PanFrame {
+  /** CSS px per plate unit. */
+  scale: number
+  /** Plate units visible across the stage width. */
+  viewW: number
+  /** Plate units visible down the stage height (the plate plus bleed under the dock). */
+  viewH: number
+  /** Furthest left edge of the view, in plate units. The pan runs 0 to maxX. */
+  maxX: number
+}
+
+/** Pan is for phones. Tablets and desktop keep the fit-to-width map. */
+export const EASY_PAN_MAX_W = 480
+
+/**
+ * Easy Home on a portrait phone: the full plate height fills the strip above the
+ * dock and the player pans sideways. Null on wide frames, which keep stageCam.
+ */
+export function easyPanFrame(
+  stageW: number,
+  stageH: number,
+  visibleH: number,
+  plate: MapCam = MAP_PLATE,
+): PanFrame | null {
+  if (!(stageW > 0 && stageH > 0 && visibleH > 48)) return null
+  if (stageW > EASY_PAN_MAX_W) return null
+  if (stageW / visibleH >= plate.w / plate.h) return null
+  const scale = Math.max(visibleH / plate.h, stageW / plate.w)
+  const viewW = stageW / scale
+  return { scale, viewW, viewH: stageH / scale, maxX: Math.max(0, plate.w - viewW) }
+}
+
+/** Keep the pan on the plate. Nothing outside it is ever drawn. */
+export const clampPan = (x: number, frame: PanFrame) =>
+  Math.min(frame.maxX, Math.max(0, Number.isFinite(x) ? x : 0))
+
+/** Pan that puts a plate x at the middle of the view, clamped to the plate. */
+export const panToward = (anchorX: number, frame: PanFrame) =>
+  clampPan(anchorX - frame.viewW / 2, frame)

@@ -8,6 +8,17 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.527',
+    title: 'A bigger Home map you can slide',
+    when: '2026-10-21',
+    items: [
+      'On a phone in Easy, the Home map is bigger and opens on your road. Slide it left and right to see every place you have opened.',
+      'The Center button brings you back to your house. Unfinished places stay out of view.',
+      'Hard stays the same.',
+      'Refs #817.',
+    ],
+  },
+  {
     version: '1.4.526',
     title: 'Walkers walk onto the map',
     when: '2026-10-21',
