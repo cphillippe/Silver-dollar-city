@@ -293,7 +293,7 @@ export async function checkStoryWins() {
           )
         }
         if (strip.lineId === 'wb-creed') {
-          assert.equal(second.tap, 'Drag the card that shows why.', `${strip.lineId} at ${width}×${height} names the drag`)
+          assert.equal(second.tap, 'Slide the card that shows why.', `${strip.lineId} at ${width}×${height} names the drag`)
           assert.equal(second.headerCovered, false, `${strip.lineId} at ${width}×${height} keeps cards under the header`)
           assert.equal(second.uniqueHighlight, false, `${strip.lineId} at ${width}×${height} gives no card a unique highlight`)
           assert.ok(
@@ -302,7 +302,7 @@ export async function checkStoryWins() {
           )
         }
         if (strip.lineId === 'daily-rest') {
-          assert.equal(second.tap, 'Drag the card that shows why.', `${strip.lineId} at ${width}×${height} names the drag`)
+          assert.equal(second.tap, 'Slide the card that shows why.', `${strip.lineId} at ${width}×${height} names the drag`)
         }
         assert.ok(second.docX <= 1, `${strip.lineId} at ${width}×${height} has no horizontal scroll`)
         await page.getByRole('button', { name: easyWhyLine(brief.reason), exact: true }).click()

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
-import { EASY, easyFacingLine, easyWhyLine } from '../../lib/easy'
+import { EASY, easyFacingLine, easyReasonHint, easyWhyLine } from '../../lib/easy'
 import { GEM_BURST, playGemPop, prefersReducedMotion } from '../../lib/juice'
 import { holdSuccessBeat } from '../../lib/successBeat'
 import {
@@ -180,9 +180,9 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
       <WinBurst play={locked} stamp={HOLD_LOCKED_STAMP} />
       <div className="why-blast-hud">
         {/* Easy Clear 1.4.139: miss teach sheet already prints .why-miss-badge — skip HUD dup. */}
-        {missTeach ? null : (
+        {missTeach || locked ? null : (
           <p className="next-tap">
-            {locked ? EASY.gotIt : retryJuice ? EASY.oneMoreTry : EASY.dragWhy}
+            {retryJuice ? EASY.oneMoreTry : EASY.dragWhy}
           </p>
         )}
         <p className="why-score" aria-live="polite">
@@ -197,24 +197,24 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
       {missTeach ? (
         <article className="why-miss-teach pop-in" role="status" aria-live="polite">
           <p className="why-miss-badge">{EASY.missTeachBadge}</p>
-          <p className="why-claim recall-line rehearse-stem">
-            <span className="why-miss-label">{EASY.mainIdea}</span>
-            {easyFacingLine(id, claim)}
-          </p>
-          <p className="why-miss-reason">
-            <span className="why-miss-label">{EASY.whyTrueLabel}</span>
-            {easyWhyLine(reason)}
-          </p>
-          {source ? (
-            <p className="held-from">
-              {EASY.sayFrom} {source}
+          {misses >= 2 ? (
+            <p className="why-miss-answer">
+              {easyFacingLine(id, claim)} — {easyWhyLine(reason)}
             </p>
-          ) : null}
+          ) : (
+            <p className="why-miss-hint">{easyReasonHint(reason)}</p>
+          )}
           {/* Easy Clear 1.4.161: miss sheet = triad + Try again — PlainTalk teach stays on Learn / first claim (#207). */}
           <div className="cta-dock" ref={ctaRef}>
-            <button type="button" className="btn gold xl why-miss-retry" onClick={retryAfterTeach}>
-              {EASY.tryAgain}
-            </button>
+            {misses >= 2 ? (
+              <button type="button" className="btn primary xl why-miss-continue" onClick={finish}>
+                {EASY.continueOn}
+              </button>
+            ) : (
+              <button type="button" className="btn primary xl why-miss-retry" onClick={retryAfterTeach}>
+                {EASY.tryAgain}
+              </button>
+            )}
           </div>
         </article>
       ) : (
@@ -260,11 +260,13 @@ export function WhyBlastPlay({ id, claim, reason, source, packMisses, onDone }: 
       )}
       {locked ? (
         <>
-          <MatchTakeaway lineId={id} title={beat.title} />
-          <p className="why-got-it" role="status">
-            {EASY.gotIt}
-          </p>
-          <p className="quiet">{EASY.keepThis}</p>
+          <article className="why-keep-card">
+            <MatchTakeaway lineId={id} title={beat.title} />
+            <p className="why-got-it" role="status">
+              {EASY.gotIt}
+            </p>
+            <p>{EASY.keepThis}</p>
+          </article>
           <div className="cta-dock" ref={ctaRef}>
             <button
               type="button"

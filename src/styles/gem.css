@@ -633,6 +633,28 @@ img.gem-heart {
   animation: need-pulse 0.9s ease-in-out infinite;
 }
 
+/* Easy word search: one gold pulse on the first letter until the first find. */
+html[data-easy='on'] .play.is-gem-search .gem-cell.is-start-gold {
+  z-index: 2;
+  border-color: #ffe28a;
+  box-shadow:
+    0 0 0 3px #ffcc33,
+    0 0 16px rgba(255, 204, 51, 0.95);
+  animation: need-pulse 1.15s ease-in-out infinite;
+}
+
+html[data-easy='on'] .play.is-gem-search .gem-start-hint {
+  margin: 0 0 4px;
+  padding: 6px 10px;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 750;
+  line-height: 1.2;
+  color: #2a2118;
+  background: #fff6e8;
+  border-radius: 12px;
+}
+
 /* Fixes #443: no board-wide .gem-cell.is-live after the first find.
    Idle letters keep this base paint. Glow is is-sel, is-hint, and is-burst only. */
 
