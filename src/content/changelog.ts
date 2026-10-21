@@ -8,6 +8,19 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.523',
+    title: 'Easy Run is hold to run',
+    when: '2026-10-21',
+    items: [
+      'On Easy, hold the pad and he runs. Each glow dashes on its own.',
+      'The first try says Hold to run! Later tries say the same.',
+      'The last line says Last line! Run! A miss says Almost! He finished first.',
+      'Keep going starts him close. One short hold still has to win.',
+      'Hard stays the same.',
+      'Refs #797.',
+    ],
+  },
+  {
     version: '1.4.522',
     title: 'Share the town link',
     when: '2026-10-21',
