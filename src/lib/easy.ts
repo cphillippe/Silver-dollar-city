@@ -140,6 +140,20 @@ export function easyWhyLine(text: string): string {
   return words.slice(0, WHY_WORD_CAP).join(' ')
 }
 
+/**
+ * First-miss nudge. Plain words already on the reason, shorter than the right card.
+ * No new sentence — a clause or a shorter run of those same words.
+ */
+export function easyReasonHint(reason: string): string {
+  const card = easyWhyLine(reason).replace(/[.!?]+$/g, '').trim()
+  const plain = easyChromeLine(reason).trim().replace(/[.!?]+$/g, '')
+  const clause = (plain.split(/[,—–]/)[0] ?? '').trim().replace(/[.!?]+$/g, '')
+  if (clause && clause.toLowerCase() !== card.toLowerCase() && clause.length < card.length) return clause
+  const words = card.split(/\s+/).filter(Boolean)
+  const count = Math.max(1, words.length - 1)
+  return words.slice(0, Math.min(4, count)).join(' ')
+}
+
 function easyPictureWord(beat: string): string {
   const text = beat.toLowerCase()
   if (text.includes('neighbor')) return 'neighbor picture'

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import { EASY_LINE_ORDER, easyWhyLine, easyWhyWordCount } from '../src/lib/easy.ts'
+import { EASY_LINE_ORDER, easyChromeLine, easyFacingLine, easyReasonHint, easyWhyLine, easyWhyWordCount } from '../src/lib/easy.ts'
 import { evidenceFor, evidenceForTier } from '../src/content/evidence.ts'
 import { packLesson } from '../src/content/packCatalog.ts'
 import {
@@ -65,8 +65,11 @@ assert.match(blastSrc, /miss-banner/)
 assert.match(blastSrc, /missTeach/)
 assert.match(blastSrc, /why-miss-teach/)
 assert.match(blastSrc, /EASY\.tryAgain/)
+assert.match(blastSrc, /EASY\.continueOn/)
 assert.match(blastSrc, /EASY\.missTeachBadge/)
-assert.match(blastSrc, /EASY\.whyTrueLabel/)
+assert.match(blastSrc, /easyReasonHint/)
+assert.match(blastSrc, /misses >= 2/)
+assert.match(blastSrc, /why-miss-continue/)
 assert.match(blastSrc, /EASY\.mainIdea/)
 assert.match(blastSrc, /why-miss-label[\s\S]*?EASY\.mainIdea/)
 // Easy Clear 1.4.141: live arena claim also labeled Main idea (not only miss teach).
@@ -75,7 +78,7 @@ assert.match(
   /why-arena[\s\S]*?why-claim[\s\S]*?why-miss-label[\s\S]*?EASY\.mainIdea/,
 )
 // Easy Clear 1.4.139: missTeachBadge on sheet only — HUD next-tap skips the dup when missTeach.
-assert.match(blastSrc, /missTeach \? null/)
+assert.match(blastSrc, /missTeach \|\| locked \? null/)
 assert.doesNotMatch(
   blastSrc,
   /missTeach\s*\n\s*\?\s*EASY\.missTeachBadge/,
@@ -98,6 +101,7 @@ assert.match(blastSrc, /why-claim[\s\S]*?\{locked[\s\S]*?EASY\.sayFrom/)
 assert.match(blastSrc, /WinBurst/)
 assert.match(blastSrc, /playGemPop\('miss'\)/)
 assert.match(blastSrc, /playGemPop\('win'\)/)
+assert.match(blastSrc, /dx \* dx \+ dy \* dy < 144/)
 
 const recallSrc = readFileSync(
   new URL('../src/components/RecallGate.tsx', import.meta.url),
@@ -106,6 +110,9 @@ const recallSrc = readFileSync(
 assert.match(recallSrc, /WhyBlastPlay/)
 assert.match(recallSrc, /is-why-blast/)
 assert.match(recallSrc, /EASY\.tryAgain/)
+assert.match(recallSrc, /easyReasonHint/)
+assert.match(recallSrc, /Here’s the line\./)
+assert.match(recallSrc, /Got it/)
 assert.doesNotMatch(recallSrc, /pool\.find\(\(line\) => line !== correct\)/)
 
 const gemSrc = readFileSync(
@@ -172,5 +179,22 @@ assert.match(
   holdCss,
   /@media \(max-height: 720px\) \{[\s\S]*?\.journal\.is-rehearse\.is-easy-hold-practice:has\(\.why-blast\) \.rehearse-anchor > \.eyebrow \{[\s\S]*?display: none/,
 )
+
+for (const id of EASY_LINE_ORDER) {
+  const brief = evidenceForTier(id, 'easy') ?? evidenceFor(id)
+  assert.ok(brief, id)
+  const card = easyWhyLine(brief.reason).replace(/[.!?]+$/g, '').trim()
+  const claim = easyFacingLine(id, brief.claim).trim()
+  const hint = easyReasonHint(brief.reason)
+  assert.notEqual(hint, card, `${id} hint is not the right card`)
+  assert.notEqual(hint, claim, `${id} hint is not the claim`)
+  assert.ok(hint.length > 0 && hint.length < card.length, `${id} hint is shorter than the card`)
+  const norm = (text) => text.toLowerCase().replace(/[^a-z0-9 ]/g, '')
+  const cardNorm = norm(card)
+  const chromeNorm = norm(easyChromeLine(brief.reason))
+  for (const word of norm(hint).split(/\s+/).filter(Boolean)) {
+    assert.ok(cardNorm.includes(word) || chromeNorm.includes(word), `${id} hint word ${word}`)
+  }
+}
 
 console.log('check-why-blast: ok')

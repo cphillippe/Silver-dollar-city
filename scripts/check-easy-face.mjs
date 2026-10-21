@@ -307,7 +307,7 @@ export async function checkEasyFace() {
       assert.match(creedWin.cite, /1 Corinthians 15:3/, `creed win shows the verse ref at ${width}`)
       assert.equal(creedWin.citeShown, true, `creed win verse ref is on screen at ${width}`)
       if (width === 375) assert.equal(creedWin.withLines, 1, 'creed win line is one line at 375')
-      assert.equal(creedWin.tap, 'Drag the card that shows why.', `creed win header at ${width}`)
+      assert.equal(creedWin.tap, 'Slide the card that shows why.', `creed win header at ${width}`)
       assert.equal(creedWin.cue, 0, `creed win has no separate drag line at ${width}`)
       assert.equal(creedWin.unique, false, `creed win gives no card a unique highlight at ${width}`)
       assert.equal(creedWin.covered, false, `creed win cards stay under the header at ${width}`)

@@ -339,6 +339,173 @@ html[data-easy='on'] .challenge-page.is-puzzle .play.is-gem-search.is-panel-blas
   }
 
   /* Hold win — claim chip only. Continue button stays the 268 gold punch. */
+  /* LOCKED!: silver stamp, no square plate behind Continue, keep-lines live in a card.
+     The column is pinned to the play viewport so a long takeaway scrolls inside the
+     card and Continue stays on a 375×667 phone. */
+  html[data-easy='on'] .app.is-play .app-body:has(.journal.is-rehearse .why-blast.is-win) {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding-bottom: 4px;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-win) {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    padding-bottom: 0;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-win) > .text-link {
+    flex: 0 0 auto;
+    margin: 0 0 4px;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-win) .rehearse-anchor {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    gap: 4px;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-win) .eyebrow {
+    flex: 0 0 auto;
+    margin: 0;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-win) .recall-gate.is-easy-hold {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    overflow: hidden;
+    margin-bottom: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    background-color: transparent;
+    background-image: none;
+    box-shadow: none;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-win) .recall-gate.is-easy-hold::before {
+    content: none;
+    display: none;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-win {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    gap: 6px;
+    overflow: hidden;
+    border: 0;
+    box-shadow: none;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-win > .win-burst {
+    flex: 0 0 auto;
+    margin: 0;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-win .why-blast-hud,
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-win .why-arena {
+    flex: 0 0 auto;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-win .why-keep-card {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-win .cta-dock {
+    flex: 0 0 auto;
+    margin-top: 0;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-win .win-stamp {
+    color: #1c2430;
+    background-color: #d5dbe3;
+    background-image: linear-gradient(180deg, #f7f9fb, #d5dbe3 55%, #9aa6b2);
+    background: linear-gradient(180deg, #f7f9fb, #d5dbe3 55%, #9aa6b2);
+    border: 2.5px solid #eef2f6;
+    box-shadow: 0 4px 0 #5c6770;
+    text-shadow: none;
+    filter: none;
+    animation: win-stamp-pop 0.48s cubic-bezier(0.2, 1.45, 0.35, 1) both;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-win .why-arena {
+    border-radius: 18px;
+    border: 2px solid rgba(255, 204, 51, 0.78);
+    padding: 8px;
+    background:
+      radial-gradient(120% 80% at 50% 0%, rgba(255, 230, 140, 0.16), transparent 55%),
+      linear-gradient(180deg, rgba(72, 24, 120, 0.92), rgba(28, 8, 58, 0.96));
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-win .why-keep-card {
+    margin: 0;
+    padding: 8px 12px;
+    border-radius: 18px;
+    border: 2px solid rgba(255, 204, 51, 0.78);
+    background: #fff6e8;
+    color: #2a2118;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-win .why-keep-card .match-yes {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    margin: 0 0 6px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    background-color: transparent;
+    background-image: none;
+    box-shadow: none;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-win .why-keep-card .why-got-it,
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-win .why-keep-card > p:last-child {
+    flex: 0 0 auto;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-win .why-keep-card p {
+    margin: 0;
+    color: #2a2118;
+    opacity: 1;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-win .why-keep-card .why-got-it {
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-win .cta-dock,
+  html[data-easy='on'] .journal.is-rehearse:has(.why-blast.is-win) .recall-gate.is-easy-hold .cta-dock {
+    background: transparent;
+    background-color: transparent;
+    background-image: none;
+    box-shadow: none;
+    padding: 8px 0 8px;
+  }
+
+  html[data-easy='on'] .journal.is-rehearse .why-blast.is-win .cta-dock .btn.primary {
+    border-radius: 999px;
+  }
+
   html[data-easy='on'] .journal.is-rehearse .why-blast.is-win .match-yes {
     color: #2a2118;
     background-color: #fff6e8;
