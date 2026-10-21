@@ -890,6 +890,29 @@ async function dragPath(page, path) {
   await page.mouse.up()
 }
 
+async function assertGemWinOneGold(page, label) {
+  const view = page.viewportSize()
+  if (view?.width !== 390 || view?.height !== 844) return
+  const golds = await filledGolds(page)
+  assert.equal(golds.length, 1, `${label} results one gold at 390 ${JSON.stringify(golds)}`)
+  assert.match(golds[0].text, /Lock In/)
+  const extras = await page.locator('.play.is-gem-search.is-win .cta-dock .btn:not(.primary)').evaluateAll((els) =>
+    els.map((el) => {
+      const style = getComputedStyle(el)
+      return {
+        text: (el.innerText || '').replace(/\s+/g, ' ').trim(),
+        border: style.borderTopColor,
+        bg: style.backgroundColor,
+        img: style.backgroundImage,
+      }
+    }),
+  )
+  for (const button of extras) {
+    assert.equal(isGoldPaint(button.border), false, `${label} ${button.text} border is not gold (${button.border})`)
+    assert.equal(isGoldPaint(button.bg) || isGoldPaint(button.img), false, `${label} ${button.text} fill is not gold`)
+  }
+}
+
 async function assertGemStart(page, lineId, { shot = false } = {}) {
   await page.locator('[data-gem-start]').waitFor()
   const hint = ((await page.locator('[data-gem-start]').innerText()) || '').replace(/\s+/g, ' ').trim()
@@ -900,6 +923,21 @@ async function assertGemStart(page, lineId, { shot = false } = {}) {
     await page.locator('[data-gem-start]').scrollIntoViewIfNeeded()
     await page.screenshot({ path: `${SHOTS}/word-search-start-375.png` })
   }
+}
+
+function spellsForward(letters, word, start) {
+  const dirs = [
+    { r: 0, c: 1 },
+    { r: 1, c: 0 },
+    { r: 1, c: 1 },
+  ]
+  return dirs.some((dir) => {
+    for (let i = 0; i < word.length; i += 1) {
+      const row = letters[start.r + dir.r * i]
+      if (!row || row[start.c + dir.c * i] !== word[i]) return false
+    }
+    return word.length > 0
+  })
 }
 
 async function playGem(page, lineId = 'ob-tuning', { watchLast = false, checkStart = false } = {}) {
@@ -975,8 +1013,39 @@ async function playGem(page, lineId = 'ob-tuning', { watchLast = false, checkSta
     }
     if (checkStart) {
       assert.equal(await page.locator('[data-gem-start]').count(), 0, `${lineId} start hint clears on the first find`)
-      assert.equal(await page.locator('[data-gem-start-cell]').count(), 0, `${lineId} start pulse clears on the first find`)
-      checkStart = false
+      await page.waitForFunction(() => document.querySelectorAll('.gem-cell.is-burst').length === 0, undefined, {
+        timeout: 4000,
+      })
+      const won = (await page.locator('.play.is-gem-search.is-win').count()) > 0
+      const pulses = page.locator('[data-gem-start-cell].is-start-gold')
+      if (won) {
+        assert.equal(await pulses.count(), 0, `${lineId} no start pulse after MATCHED`)
+      } else {
+        await page.waitForFunction(
+          () => document.querySelectorAll('[data-gem-start-cell].is-start-gold').length === 1,
+          undefined,
+          { timeout: 4000 },
+        )
+        const cells = await pulses.evaluateAll((els) =>
+          els.map((el) => ({
+            r: Number(el.getAttribute('data-r')),
+            c: Number(el.getAttribute('data-c')),
+            shadow: getComputedStyle(el).boxShadow,
+          })),
+        )
+        assert.equal(cells.length, 1, `${lineId} one pulse after a find`)
+        assert.equal(isGoldPaint(cells[0].shadow), true, `${lineId} pulse glow is gold`)
+        const nextLabel = (
+          (await page.locator('.match-teach-dock .match-teach-chip:not(.is-found) .match-teach-label').first().innerText()) || ''
+        )
+          .replace(/[^A-Za-z]/g, '')
+          .toUpperCase()
+        const lettersNow = await readGrid(page)
+        assert.ok(
+          spellsForward(lettersNow, nextLabel, cells[0]),
+          `${lineId} pulse ${cells[0].r},${cells[0].c} is the first letter of ${nextLabel}`,
+        )
+      }
     }
     if (expectJuice) {
       await page.waitForFunction(() => window.__gemJuice > 0, undefined, { timeout: 2500 }).catch(() => {})
@@ -1605,6 +1674,7 @@ export async function checkGoldenLive() {
       assert.equal(shot.id, 'gem-win')
       assert.equal(shot.golds.length, 1, 'gem-win has one gold')
       assert.match(shot.golds[0].text, /Lock In/)
+      await assertGemWinOneGold(page, 'ob-tuning')
       assert.doesNotMatch(shot.golds[0].text, /One more/)
       const homeInk = await page.locator('.cta-dock .btn', { hasText: 'Home' }).evaluate((el) => getComputedStyle(el).color)
       const channels = homeInk.match(/\d+/g)?.map(Number) ?? []
@@ -1619,7 +1689,7 @@ export async function checkGoldenLive() {
       assert.equal(shot.id, 'quiz', 'word-search gold opens the Lock In quiz')
       assert.equal(await page.locator('.play.is-gem-search').count(), 0, 'the gold tap did not replay the word search')
 
-      if (width === 375 || width === 412 || width === 768) {
+      if (width === 375 || width === 390 || width === 412 || width === 768) {
         await dragWhy(page, 'ob-tuning')
         shot = await stamp('quiz-tuning-done')
         assert.match(shot.golds[0].text, /Continue/)
@@ -1648,6 +1718,7 @@ export async function checkGoldenLive() {
         await page.locator('.play.is-gem-search').waitFor()
         await playGem(page, 'ph-debt', { checkStart: true })
         await page.locator('.play.is-gem-search.is-win .btn.primary').waitFor()
+        await assertGemWinOneGold(page, 'ph-debt')
         await tapFilledGold(page)
         await page.locator('.why-blast').waitFor()
         await dragWhy(page, 'ph-debt')
@@ -1665,6 +1736,7 @@ export async function checkGoldenLive() {
         await page.locator('.play.is-gem-search').waitFor()
         await playGem(page, 'fg-order', { checkStart: true })
         await page.locator('.play.is-gem-search.is-win .btn.primary').waitFor()
+        await assertGemWinOneGold(page, 'fg-order')
         await tapFilledGold(page)
         await page.locator('.why-blast').waitFor()
         await dragWhy(page, 'fg-order')
