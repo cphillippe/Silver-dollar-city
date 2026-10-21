@@ -366,10 +366,18 @@ export const EASY_FOLK_LIFT = 24
 /** Per-plot Easy seat nudge after lift — positive y plants folk on candy seats. */
 export const EASY_FOLK_NUDGE: Partial<Record<CityPlotId, { x?: number; y?: number }>> = {
   lookout: { y: 10 },
-  hollow: { x: -24 },
-  gate: { x: -38, y: 2 },
+  gate: { x: 4, y: 18 },
   porch: { x: 8, y: 22 },
 }
+
+/** Pan-mode overrides (portrait phone Easy). Wider Easy frames keep EASY_FOLK_NUDGE. */
+export const EASY_FOLK_NUDGE_PAN: Partial<Record<CityPlotId, { x?: number; y?: number }>> = {
+  hollow: { x: -24 },
+  gate: { x: -38, y: 2 },
+}
+
+export const easyFolkNudge = (id: CityPlotId, pan: boolean) =>
+  (pan ? EASY_FOLK_NUDGE_PAN[id] : undefined) ?? EASY_FOLK_NUDGE[id]
 
 /**
  * Chip centers in the 640×420 viewBox. Street names sit in a bottom band
@@ -378,7 +386,7 @@ export const EASY_FOLK_NUDGE: Partial<Record<CityPlotId, { x?: number; y?: numbe
 export const EASY_TAG_SLOT: Record<CityPlotId, { x: number; y: number }> = {
   hollow: { x: 96, y: 388 },
   lamps: { x: 208, y: 388 },
-  journal: { x: 292, y: 388 },
+  journal: { x: 268, y: 198 },
   bench: { x: 392, y: 388 },
   porch: { x: 536, y: 388 },
   gate: { x: 498, y: 230 },
@@ -396,10 +404,18 @@ export function easyTagLines(tag: string): string[] {
   return tag.includes(' ') ? tag.split(' ') : [tag]
 }
 
-export function easyTagMetrics(id: CityPlotId) {
+/** Pan-mode chip slots (portrait phone Easy). Wider Easy frames keep EASY_TAG_SLOT. */
+export const EASY_TAG_SLOT_PAN: Partial<Record<CityPlotId, { x: number; y: number }>> = {
+  journal: { x: 292, y: 388 },
+}
+
+export const easyTagSlot = (id: CityPlotId, pan: boolean) =>
+  (pan ? EASY_TAG_SLOT_PAN[id] : undefined) ?? EASY_TAG_SLOT[id]
+
+export function easyTagMetrics(id: CityPlotId, pan = false) {
   const tag = easyPlotTag(id)
   const lines = easyTagLines(tag)
-  const slot = EASY_TAG_SLOT[id]
+  const slot = easyTagSlot(id, pan)
   const longest = Math.max(...lines.map((line) => line.length))
   const w = Math.max(70, longest * 8.4 + 16)
   const h = lines.length * 13 + 6
@@ -411,7 +427,7 @@ export function easyTagMetrics(id: CityPlotId) {
 }
 
 export function easyTagsFit(ids: CityPlotId[] = EASY_NAMED_PLOTS) {
-  const boxes = ids.map(easyTagMetrics)
+  const boxes = ids.map((id) => easyTagMetrics(id))
   const { x0: sx0, y0: sy0, x1: sx1, y1: sy1 } = EASY_MAP_SAFE
   const gap = 8
   for (const box of boxes) {

@@ -38,8 +38,9 @@ import {
 } from '../../lib/city'
 import {
   EASY_FOLK_LIFT,
-  EASY_FOLK_NUDGE,
+  easyFolkNudge,
   EASY_TAG_SLOT,
+  EASY_TAG_SLOT_PAN,
   easyTagMetrics,
   HEAVEN_TAG,
   plotTag,
@@ -207,9 +208,9 @@ export function SpinePath({ age }: { age: CityAge }) {
   )
 }
 
-export function EasyPlotChip({ id }: { id: CityPlotId }) {
-  const { lines, x0, y0, w, h } = easyTagMetrics(id)
-  const slot = EASY_TAG_SLOT[id]
+export function EasyPlotChip({ id, pan = false }: { id: CityPlotId; pan?: boolean }) {
+  const { lines, x0, y0, w, h } = easyTagMetrics(id, pan)
+  const slot = (pan ? EASY_TAG_SLOT_PAN[id] : undefined) ?? EASY_TAG_SLOT[id]
   return (
     <g className="city-easy-chip">
       <rect className="city-plot-tag-bg" x={x0} y={y0} width={w} height={h} rx={10} />
@@ -808,6 +809,7 @@ export function TownFolk({
   rising,
   speaking,
   ack,
+  pan = false,
 }: {
   id: CityPlotId
   stage: CityStage
@@ -815,13 +817,14 @@ export function TownFolk({
   rising: boolean
   speaking: boolean
   ack?: CityUpgrade['beat']
+  pan?: boolean
 }) {
   const { progress } = useProgress()
   const easy = isEasy(progress)
   if (stage === 'empty' && !next) return null
   if (easy && (stage === 'empty' || easyArtHidden(id, stage))) return null
   const seat = FOLK[id]
-  const nudge = easy ? EASY_FOLK_NUDGE[id] : undefined
+  const nudge = easy ? easyFolkNudge(id, pan) : undefined
   const at = easy
     ? {
         x: seat.x + (nudge?.x ?? 0),
