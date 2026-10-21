@@ -1396,11 +1396,17 @@ html[data-easy='on'] .play.is-road-maze .maze-how {
   object-fit: contain;
 }
 
-.play.is-road-maze .maze-cell.is-hint,
-.play.is-road-maze .maze-cell.is-here {
+.play.is-road-maze .maze-cell.is-hint {
   box-shadow:
     0 0 0 2px #fff6c8,
     0 0 10px rgba(255, 204, 51, 0.55);
+}
+
+/* Easy: the pawn glow is blue so the goal pulse stays the only gold. Hard keeps the green glow. */
+html[data-easy='on'] .play.is-road-maze .maze-cell.is-here {
+  box-shadow:
+    0 0 0 2px #e7f2ff,
+    0 0 10px rgba(90, 160, 255, 0.85);
 }
 
 html[data-easy='on'] .play.is-road-maze .maze-cell.is-road:active {

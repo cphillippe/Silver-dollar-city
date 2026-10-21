@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { goldButtonClass } from '../../content/goldenPath'
-import { EASY, easyWhoWhere } from '../../lib/easy'
+import { EASY, easyWhoWhere, isEasy } from '../../lib/easy'
 import {
   buildGemPuzzle,
   cellKey,
@@ -52,7 +52,8 @@ function cellFromPoint(x: number, y: number): GemCoord | null {
 }
 
 export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: GemSearchPlayProps) {
-  const { recordMatchBonus, recordMatchDockJuice, recordMatchFind, recordMatchMiss } = useProgress()
+  const { progress, recordMatchBonus, recordMatchDockJuice, recordMatchFind, recordMatchMiss } = useProgress()
+  const easy = isEasy(progress)
   const [round, setRound] = useState(() => Date.now())
   const puzzle = useMemo(() => buildGemPuzzle(lineId, round), [lineId, round])
   const panels = useMemo(
@@ -648,6 +649,11 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
       />
       )}
       <div className="gem-scroll">
+      {easy && found.length === 0 && status !== 'ok' && puzzle.words[0] ? (
+        <p className="gem-start-hint" data-gem-start>
+          {EASY.bonusMissStraight}
+        </p>
+      ) : null}
       {/* Board-first 1.4.99: StoryStrip dock is a flex header above this scroll; board fills leftover — zero overlay. */}
       {stripMode === 'hero' ? (
       <ul className="gem-words" aria-label="Words to find">
@@ -721,6 +727,13 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
             const cellClear = status !== 'ok' && (targetClear || bonusClear)
             const cellFound = status === 'ok' && (targetClear || sharedFound)
             const cellCracked = !bonusClear && (bonusGhost || sharedFound)
+            const startCell = nextWord ? puzzle.paths[nextWord.id]?.[0] : undefined
+            const startGold =
+              easy &&
+              status !== 'ok' &&
+              startCell != null &&
+              startCell.r === r &&
+              startCell.c === c
             return (
               <div
                 key={key}
@@ -728,8 +741,9 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
                 data-gem-cell
                 data-r={r}
                 data-c={c}
+                {...(startGold ? { 'data-gem-start-cell': '' } : {})}
                 onPointerDown={(event) => onCellDown(event, { r, c })}
-                className={`gem-cell hue-${gemHue(letter, r, c)} ${selected.has(key) ? 'is-sel' : ''} ${popping ? 'is-burst' : ''} ${cellClear ? 'is-clear' : ''} ${cellFound ? 'is-found' : ''} ${cellCracked ? 'is-cracked' : ''} ${hint.includes(key) ? 'is-hint' : ''} ${popping && (bonusClear || bonusGhost) ? 'is-bonus-burst' : ''}`}
+                className={`gem-cell hue-${gemHue(letter, r, c)} ${selected.has(key) ? 'is-sel' : ''} ${popping ? 'is-burst' : ''} ${cellClear ? 'is-clear' : ''} ${cellFound ? 'is-found' : ''} ${cellCracked ? 'is-cracked' : ''} ${hint.includes(key) ? 'is-hint' : ''} ${startGold ? 'is-start-gold' : ''} ${popping && (bonusClear || bonusGhost) ? 'is-bonus-burst' : ''}`}
               >
                 <span className="gem-letter">{letter}</span>
                 {popping

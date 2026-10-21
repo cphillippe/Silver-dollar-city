@@ -209,7 +209,7 @@ export function MatchPlay({ challenge, onMiss, onSolved, onPeek }: MatchPlayProp
         )}
       </p>
 
-      {status === 'wrong' || misses > 0 ? (
+      {status !== 'ok' && (status === 'wrong' || misses > 0) ? (
         <p className="match-toast" role="status">
           {easy ? (
             <strong>{easyWrongTap(missCard ?? 'this card')}</strong>

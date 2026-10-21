@@ -8,6 +8,25 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.524',
+    title: 'Easy misses teach, then move on',
+    when: '2026-10-21',
+    items: [
+      'A first miss shows a hint from the reason. Try again is the gold button.',
+      'A second miss shows the line, then Continue moves on.',
+      'The road maze pawn glows blue. The goal pulse stays the one gold.',
+      'A straight drag on the road moves one tile per cell.',
+      'A word search starts with Try a full straight word and a gold first letter.',
+      'Lock In says Slide the card that shows why.',
+      'LOCKED! is a silver stamp. Continue is the only gold.',
+      'While an update banner shows, Start Easy stays the only gold.',
+      'Find the gems clears Wrong. Tap this one when the pair matches.',
+      'Hard stays the same.',
+      'Refs #791.',
+      'Refs #757.',
+    ],
+  },
+  {
     version: '1.4.523',
     title: 'Easy Run is hold to run',
     when: '2026-10-21',
