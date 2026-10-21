@@ -161,8 +161,7 @@ async function proveGrant(page, shop) {
   await pointerClick(page, page.locator('.topbar').getByRole('button', { name: 'Settings', exact: true }))
   await page.locator('main.settings').waitFor()
   assert.equal(await page.getByText(FOUNDERS_GIFT_LINE).count(), 0)
-  const group = page.getByRole('radiogroup', { name: 'Lamp style' })
-  await group.waitFor()
+  await assertLampStyleGroup(page)
   const founder = page.getByRole('radio', { name: "Founder's Lamp" })
   await founder.waitFor()
   assert.equal(await page.getByRole('radio', { name: 'Classic' }).isChecked(), true)
@@ -196,6 +195,50 @@ async function proveGrant(page, shop) {
   }
 }
 
+async function assertLampStyleGroup(page) {
+  const group = page.getByRole('radiogroup', { name: 'Lamp style' })
+  await group.waitFor()
+  const eyebrow = page.locator('main.settings p.eyebrow', { hasText: 'Lamp style' })
+  await eyebrow.waitFor()
+  const paint = await eyebrow.evaluate((el) => {
+    const style = getComputedStyle(el)
+    return { transform: style.textTransform, text: (el.textContent || '').trim() }
+  })
+  assert.equal(paint.text, 'Lamp style')
+  assert.equal(paint.transform, 'uppercase', 'the lamp card eyebrow reads LAMP STYLE')
+  return group
+}
+
+const RETURNING_517 = {
+  kind: 'silver-city-save',
+  schemaVersion: 1,
+  appVersion: '1.4.517',
+  savedAt: '2026-10-20T18:00:00.000Z',
+  progress: {
+    started: true,
+    easyMode: true,
+    theme: 'candy',
+    dailyDates: ['2026-10-14'],
+    lastDailyDate: '2026-10-14',
+  },
+}
+
+async function proveReturning(page) {
+  await page.goto('/')
+  await page.locator('main.hub').waitFor()
+  await dismissImport(page)
+  const gift = giftLine(page)
+  await gift.waitFor()
+  const box = await gift.boundingBox()
+  assert.ok(box && box.height > 0, 'the gift line is visible for a returning 517 save')
+  const envelope = await savedProgress(page)
+  assert.equal(envelope.progress.firstSeen, '2026-10-14')
+  assert.equal(envelope.schemaVersion, 1)
+  await pointerClick(page, page.locator('.topbar').getByRole('button', { name: 'Settings', exact: true }))
+  await page.locator('main.settings').waitFor()
+  await assertLampStyleGroup(page)
+}
+
 async function proveLate(page) {
   await openHome(page)
   assert.equal(await page.getByText(FOUNDERS_GIFT_LINE).count(), 0)
@@ -209,26 +252,33 @@ async function proveLate(page) {
   assert.equal(await page.locator('.city-overworld.is-style-founders').count(), 0)
 }
 
-async function withPage(browser, origin, run, { late = false } = {}) {
+async function withPage(browser, origin, run, { today, save } = {}) {
   const context = await browser.newContext({
     viewport: { width: 375, height: 667 },
     baseURL: origin,
   })
-  if (late) {
-    await context.addInitScript(() => {
-      const fixed = new Date(2027, 0, 7, 12, 0, 0).getTime()
-      const Original = Date
-      function FakeDate(...args) {
-        if (!new.target) return new Original(fixed).toString()
-        if (args.length === 0) return new Original(fixed)
-        return new Original(...args)
-      }
-      FakeDate.prototype = Original.prototype
-      FakeDate.now = () => fixed
-      FakeDate.parse = Original.parse.bind(Original)
-      FakeDate.UTC = Original.UTC.bind(Original)
-      window.Date = FakeDate
-    })
+  if (today || save) {
+    await context.addInitScript(
+      ({ today, save }) => {
+        if (today) {
+          const [year, month, day] = today.split('-').map(Number)
+          const fixed = new Date(year, month - 1, day, 12, 0, 0).getTime()
+          const Original = Date
+          function FakeDate(...args) {
+            if (!new.target) return new Original(fixed).toString()
+            if (args.length === 0) return new Original(fixed)
+            return new Original(...args)
+          }
+          FakeDate.prototype = Original.prototype
+          FakeDate.now = () => fixed
+          FakeDate.parse = Original.parse.bind(Original)
+          FakeDate.UTC = Original.UTC.bind(Original)
+          window.Date = FakeDate
+        }
+        if (save) localStorage.setItem('silver-city-progress-v1', JSON.stringify(save))
+      },
+      { today, save },
+    )
   }
   const page = await context.newPage()
   const errors = []
@@ -246,7 +296,11 @@ try {
   const off = await startServer(false)
   try {
     await withPage(browser, off.origin, (page) => proveGrant(page, 'off'))
-    await withPage(browser, off.origin, (page) => proveLate(page), { late: true })
+    await withPage(browser, off.origin, (page) => proveLate(page), { today: '2027-01-07' })
+    await withPage(browser, off.origin, (page) => proveReturning(page), {
+      today: '2027-02-01',
+      save: RETURNING_517,
+    })
   } finally {
     await off.server.close()
   }

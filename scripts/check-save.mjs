@@ -11,7 +11,9 @@ import {
   normalizeProgress,
   parseIncomingSave,
   progressAfterReset,
+  SAVE_KIND,
   SAVE_MAX_BYTES,
+  stampFirstSeen,
   wrapSave,
 } from '../src/lib/save.ts'
 
@@ -331,18 +333,47 @@ assert.equal(saveStore.get(brokenCopies[0]), '{not')
 assert.match(brokenCopies[0], new RegExp(`^${STORAGE_KEY}\\.corrupt-\\d+$`))
 assert.equal(corruptSaveKey(123), `${STORAGE_KEY}.corrupt-123`)
 
+function withToday(year, monthIndex, day, run) {
+  const Original = Date
+  const fixed = new Original(year, monthIndex, day, 12, 0, 0).getTime()
+  function FakeDate(...args) {
+    if (!new.target) return new Original(fixed).toString()
+    if (args.length === 0) return new Original(fixed)
+    return new Original(...args)
+  }
+  FakeDate.prototype = Original.prototype
+  FakeDate.now = () => fixed
+  FakeDate.parse = Original.parse.bind(Original)
+  FakeDate.UTC = Original.UTC.bind(Original)
+  globalThis.Date = FakeDate
+  try {
+    return run()
+  } finally {
+    globalThis.Date = Original
+  }
+}
+
 saveStore.clear()
 const fresh = loadSave()
 assert.equal(fresh.progress.firstSeen, localDateKey(), 'a fresh save gets firstSeen = today')
 assert.equal(SAVE_SCHEMA_VERSION, 1)
+assert.equal(saveStore.has(STORAGE_KEY), false, 'a brand-new save is not written until the player starts')
+
+withToday(2027, 0, 7, () => {
+  saveStore.clear()
+  const freshLate = loadSave()
+  assert.equal(freshLate.progress.firstSeen, '2027-01-07', 'a fresh save on 2027-01-07 stays that day')
+  assert.equal(foundersLamp(freshLate.progress), false, 'a fresh save on 2027-01-07 gets no gift')
+})
 
 saveStore.clear()
 saveStore.set(STORAGE_KEY, JSON.stringify(legacy))
 const legacyLoad = loadSave()
-assert.equal(legacyLoad.progress.firstSeen, localDateKey(), 'an existing save gets firstSeen on load')
+assert.equal(legacyLoad.progress.firstSeen, '2026-09-06', 'an existing walk keeps its earliest day')
 const legacyStored = JSON.parse(saveStore.get(STORAGE_KEY))
 assert.equal(legacyStored.schemaVersion, 1)
-assert.equal(legacyStored.progress.firstSeen, localDateKey())
+assert.equal(legacyStored.progress.firstSeen, '2026-09-06')
+assert.equal(foundersLamp(legacyLoad.progress), true)
 
 const granted = normalizeProgress({ ...legacy, firstSeen: '2027-01-06' })
 assert.equal(granted.firstSeen, '2027-01-06')
@@ -360,8 +391,69 @@ const badEnvelope = wrapSave(normalizeProgress(legacy))
 badEnvelope.progress.firstSeen = 'not-a-date'
 saveStore.set(STORAGE_KEY, JSON.stringify(badEnvelope))
 const badLoad = loadSave()
-assert.equal(badLoad.progress.firstSeen, localDateKey(), 'a dropped bad date is filled on load')
+assert.equal(badLoad.progress.firstSeen, '2026-09-06', 'a dropped bad date is derived from the walk')
+assert.equal(foundersLamp(badLoad.progress), true)
 assert.equal(JSON.parse(saveStore.get(STORAGE_KEY)).schemaVersion, 1)
+
+saveStore.clear()
+const emptyBad = wrapSave(normalizeProgress({ started: false }))
+emptyBad.progress.firstSeen = 'not-a-date'
+saveStore.set(STORAGE_KEY, JSON.stringify(emptyBad))
+const emptyBadLoad = loadSave()
+assert.equal(emptyBadLoad.progress.firstSeen, localDateKey(), 'a bad date on a new save derives to today')
+assert.equal(SAVE_SCHEMA_VERSION, 1)
+
+const returning517 = {
+  kind: SAVE_KIND,
+  schemaVersion: 1,
+  appVersion: '1.4.517',
+  savedAt: '2026-10-20T18:00:00.000Z',
+  progress: {
+    started: true,
+    easyMode: true,
+    theme: 'candy',
+    dailyDates: ['2026-10-14'],
+    lastDailyDate: '2026-10-14',
+  },
+}
+
+withToday(2027, 1, 1, () => {
+  saveStore.clear()
+  saveStore.set(STORAGE_KEY, JSON.stringify(returning517))
+  const opened = loadSave()
+  assert.equal(opened.progress.firstSeen, '2026-10-14', 'a 517 save opened in 2027 keeps October 14')
+  assert.equal(foundersLamp(opened.progress), true)
+  assert.equal(JSON.parse(saveStore.get(STORAGE_KEY)).progress.firstSeen, '2026-10-14')
+  assert.equal(JSON.parse(saveStore.get(STORAGE_KEY)).schemaVersion, 1)
+
+  const incoming = parseIncomingSave(JSON.stringify(returning517))
+  assert.equal(incoming.ok, true)
+  if (!incoming.ok) throw new Error('517 import')
+  const imported = stampFirstSeen(incoming.progress, undefined, incoming.meta.savedAt)
+  assert.equal(imported.firstSeen, '2026-10-14', 'an imported 517 save keeps October 14')
+  assert.equal(foundersLamp(imported), true)
+
+  const savedAt = '2026-10-01T12:00:00.000Z'
+  const savedDay = localDateKey(new Date(savedAt))
+  saveStore.set(
+    STORAGE_KEY,
+    JSON.stringify({
+      kind: SAVE_KIND,
+      schemaVersion: 1,
+      appVersion: '1.4.517',
+      savedAt,
+      progress: {
+        started: true,
+        dailyDates: ['2026-10-14', '2026-11-02'],
+        lastDailyDate: '2026-11-02',
+      },
+    }),
+  )
+  const earliest = loadSave()
+  assert.equal(earliest.progress.firstSeen, savedDay)
+  assert.ok(savedDay <= '2026-10-14')
+  assert.equal(foundersLamp(earliest.progress), true)
+})
 
 const keptGrant = progressAfterReset({
   ...granted,

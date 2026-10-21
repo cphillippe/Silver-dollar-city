@@ -197,6 +197,7 @@ export function Settings({ onNavigate }: SettingsProps) {
 
       {foundersLamp(progress) ? (
         <section className="settings-card">
+          <p className="eyebrow">Lamp style</p>
           <div className="lamp-style" role="radiogroup" aria-label="Lamp style">
             <label className="lamp-style-choice">
               <input

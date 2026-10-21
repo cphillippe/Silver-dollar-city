@@ -13,6 +13,7 @@ export const CHANGELOG: ChangeNote[] = [
     when: '2026-10-20',
     items: [
       'If you open Silver City by January 6, 2027, the Founder\'s Lamp is yours.',
+      'A walk you already saved keeps that gift from its first days.',
       'Settings lets you pick Classic or Founder\'s Lamp.',
       'Home thanks you once.',
       'Hard stays the same.',
