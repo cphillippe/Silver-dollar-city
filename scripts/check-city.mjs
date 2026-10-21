@@ -1745,6 +1745,12 @@ assert.match(
       assert.doesNotMatch(easyWhyLine(line), /\bchance\b/i, `#792 ${lesson.id} Easy wrong answer avoids chance: ${line}`)
     }
   }
+  // #792 C2: only the wb-women title moves to the RSV words. The teach text keeps "idle talk".
+  const wbXml = readFileSync(new URL('../src/content/packs/witness-bench.xml', import.meta.url), 'utf8')
+  assert.match(wbXml, /id="wb-women"[^>]*challengeTitle="An idle tale"/, '#792 C2 wb-women title is An idle tale')
+  assert.doesNotMatch(wbXml, /challengeTitle="Idle talk"/)
+  assert.match(wbXml, /idle talk/, '#792 C2 teach text keeps idle talk')
+  assert.match(readFileSync(new URL('../src/content/witnessBench.ts', import.meta.url), 'utf8'), /id: 'wb-women',\s*title: 'An idle tale',/)
   const obXml = readFileSync(new URL('../src/content/packs/observatory.xml', import.meta.url), 'utf8')
   const obTiers = obXml.slice(obXml.indexOf('<medium'), obXml.indexOf('</hard>') + '</hard>'.length)
   assert.equal(
@@ -16403,7 +16409,7 @@ console.log('check-city: ok')
         'Father, I have sinned against heaven',
         'and before you.',
         'I am no longer worthy to be called your son.',
-        'Make me like one of your hired servants.',
+        'Treat me as one of your hired servants.',
       ],
       HOLD_CAP: 0.58,
       HOLD_SPEED: 0.05,

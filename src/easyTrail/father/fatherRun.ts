@@ -19,7 +19,7 @@ export const HIRED_HAND_SPEECH = [
   'Father, I have sinned against heaven',
   'and before you.',
   'I am no longer worthy to be called your son.',
-  'Make me like one of your hired servants.',
+  'Treat me as one of your hired servants.',
 ] as const
 
 export const SPEECH_PHRASE_MS = 2600
