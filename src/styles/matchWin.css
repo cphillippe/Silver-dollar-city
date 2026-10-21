@@ -298,6 +298,7 @@ html[data-easy='on'] .challenge-page.is-puzzle .play.is-gem-search.is-panel-blas
     background: transparent;
     background-image: none;
     box-shadow: none;
+    border-color: rgba(42, 33, 24, 0.35);
   }
 
   /* Story Snap win — one-more text link becomes the loud CTA; claim stays a chip */

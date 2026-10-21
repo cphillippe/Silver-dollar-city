@@ -727,10 +727,9 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
             const cellClear = status !== 'ok' && (targetClear || bonusClear)
             const cellFound = status === 'ok' && (targetClear || sharedFound)
             const cellCracked = !bonusClear && (bonusGhost || sharedFound)
-            const startCell = puzzle.paths[puzzle.words[0]?.id ?? '']?.[0]
+            const startCell = nextWord ? puzzle.paths[nextWord.id]?.[0] : undefined
             const startGold =
               easy &&
-              found.length === 0 &&
               status !== 'ok' &&
               startCell != null &&
               startCell.r === r &&
