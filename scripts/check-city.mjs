@@ -1721,6 +1721,7 @@ assert.doesNotMatch(
   '1.4.526 changelog avoids GitHub close keywords',
 )
 assert.match(latestChange('1.4.526').items.join('\n'), /Refs #756/)
+assert.match(latestChange('1.4.526').items.join('\n'), /Refs #820/, '1.4.526 changelog refs its PR')
 assert.match(latestChange('1.4.526').items.join('\n'), /Hard/)
 assert.match(latestChange('1.4.526').items.join('\n'), /Easy/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.525'), '1.4.525 changelog row')
