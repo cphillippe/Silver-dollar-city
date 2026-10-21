@@ -3963,6 +3963,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
               cueNudge={cueNudge}
               mapFeatures={playingMap?.mapFeatures}
               pops={pops}
+              mapId={mapId}
             />
             {phase === 'wave' ? (
               <div className="nw-wave-overlay">

@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict'
+import { createHash } from 'node:crypto'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import { inflateSync } from 'node:zlib'
 import {
   CITY_HOLLOW_TO_WITNESS,
   CITY_PLOTS,
@@ -235,6 +237,15 @@ import {
 } from '../src/nightWatch/maps/features.ts'
 import { waveRound, waveWalkerHp } from '../src/nightWatch/maps/wave.ts'
 import { mapIsOpen, mapLockReason, nextMap, NIGHT_MAP_IDS, NIGHT_MAP_NAME } from '../src/nightWatch/maps/chain.ts'
+import {
+  SPAWN_BOX_U,
+  SPAWN_MARKERS,
+  SPAWN_MIN_SCALE,
+  resolveSpawnFit,
+  spawnMarkerPlateBox,
+  spawnMarkersFor,
+  spawnMarkersMounted,
+} from '../src/nightWatch/maps/spawnMarkers.ts'
 import { resolveNightMap } from '../src/nightWatch/maps/resolve.ts'
 import { rateMapSeats, spreadGoodSeats } from '../src/nightWatch/maps/seats.ts'
 import { scaledWalkerHp } from '../src/nightWatch/walkers.ts'
@@ -389,6 +400,7 @@ import {
   bindLampGround,
   lampSpotBlocked,
   plantableHints,
+  SEAT_TAP_R,
   candlePlateFromPx,
   lampUnderFinger,
   magnetCandlePoint,
@@ -1700,7 +1712,15 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.524')
+assert.equal(APP_VERSION, '1.4.525')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.525'), '1.4.525 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.525').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.525 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.525').items.join('\n'), /Refs #756/)
+assert.match(latestChange('1.4.525').items.join('\n'), /Hard/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.524'), '1.4.524 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.524').items.join('\n'),
@@ -18097,6 +18117,279 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
     active515.every((run) => (run.dead === 7 || run.dead === 8) && run.rows[4].result === 'clear' && run.rows[4].hearts > 0),
     '1.4.515 active taps still hold round 5',
   )
+}
+
+// Night Watch 1.4.525: candy arches on every Easy map. Render only. Hard mounts none.
+{
+  const sky525 = readFileSync(new URL('../src/components/DefendNightSky.tsx', import.meta.url), 'utf8')
+  const css525 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const prove525 = readFileSync(new URL('./check-live-prove.mjs', import.meta.url), 'utf8')
+  assert.equal(spawnMarkersMounted(false, true), false, '1.4.525 Hard mounts 0 spawn markers')
+  assert.equal(spawnMarkersMounted(true, false), false, '1.4.525 a dusk board mounts 0 spawn markers')
+  assert.equal(spawnMarkersMounted(true, true), true, '1.4.525 Easy with a plate mounts the arches')
+  assert.match(
+    sky525,
+    /spawnMarkersMounted\(Boolean\(easy\), Boolean\(map\.plate\)\) \? \([\s\S]*?<SpawnMarkers mapId=\{mapId\} phase=\{phase\} \/>/,
+    '1.4.525 the arch mounts only through the Easy plate gate',
+  )
+  assert.match(css525, /\.defend-board\.has-map-plate > \.defend-gate,/, '1.4.525 the plate still hides the vector gate')
+  assert.match(css525, /animation: nw-spawn-marker-in 600ms ease-out 1/)
+  assert.match(
+    css525,
+    /@media \(prefers-reduced-motion:\s*reduce\) \{[\s\S]*?\.nw-spawn-marker\.is-pulse \{[\s\S]*?animation:\s*none;/,
+    '1.4.525 reduced motion drops the spawn pulse',
+  )
+  assert.doesNotMatch(css525, /nw-spawn-marker-in[\s\S]{0,180}infinite/, '1.4.525 the arch does not loop a glow')
+  const proveBody = prove525.slice(
+    prove525.indexOf('async function checkSpawnMarkers'),
+    prove525.indexOf('export async function checkLiveProve'),
+  )
+  assert.ok(proveBody.includes('async function checkSpawnMarkers'), '1.4.525 the live prove covers the arches')
+  assert.match(proveBody, /page\.mouse\.down\(/)
+  assert.match(proveBody, /page\.mouse\.move\(/)
+  assert.match(proveBody, /page\.mouse\.up\(/)
+  assert.doesNotMatch(proveBody, /\.click\(/, '1.4.525 the arch prove uses real pointer events')
+  assert.match(proveBody, /data-spawn-marker/)
+
+  const locked525 = {
+    'src/nightWatch/maps/maze/map02.json': '44cfc61de49673e32d791f65a74fbb3fa4f006acb3249c304736874efcf39127',
+    'src/nightWatch/maps/maze/map03.json': 'bef70e9477e66c57d50f0e22d09c04568361fa2ff967737b494830745913ee99',
+    'src/nightWatch/maps/maze/map04.json': '9d30ec4f2d14220c1c6ba464cb45b8ec7433c99a58d2323368a310929798af70',
+    'src/nightWatch/maps/maze/map05.json': '4190dbd1642d5f5c80156f3705da1ded8a9cccd527bdee4e5ded303581ed727b',
+    'src/nightWatch/maps/maze/map06.json': '46c2bf62563399f0a1c613df108c8dc7c98ef1dddaac3a5aee55de3aecae01a8',
+    'src/nightWatch/maps/far-hills.json': 'c90d1d94b848b18d92407d4637c9b98eec8eff0aabef1086c844565a03ff7cd4',
+    'src/nightWatch/maps/a2.ts': '327699bd27d03a3ef9dd9b44ef3e8be8d6f6dc95a7e8db78f6e1cf3bd5b098ea',
+  }
+  for (const [rel, sha] of Object.entries(locked525)) {
+    const hash = createHash('sha256').update(readFileSync(new URL(`../${rel}`, import.meta.url))).digest('hex')
+    assert.equal(hash, sha, `1.4.525 ${rel} stays byte-identical`)
+  }
+  const mazeNames = readdirSync(new URL('../src/nightWatch/maps/maze', import.meta.url)).filter((name) => name.endsWith('.json')).sort()
+  assert.deepEqual(mazeNames, ['map02.json', 'map03.json', 'map04.json', 'map05.json', 'map06.json'])
+  for (const rel of [
+    'src/nightWatch/r1r6-424.json',
+    'src/nightWatch/livePace.ts',
+    'src/lib/lampPlace.ts',
+    'src/lib/defend.ts',
+    'src/nightWatch/path/data.ts',
+    'scripts/check-seed-fire.mjs',
+  ]) {
+    assert.doesNotMatch(
+      readFileSync(new URL(`../${rel}`, import.meta.url), 'utf8'),
+      /SpawnMarkers|data-spawn-marker|spawn_a2|spawnMarkersFor/,
+      `1.4.525 ${rel} has no spawn-marker wiring`,
+    )
+  }
+
+  const pngSha525 = {
+    'spawn_a2.png': 'b2910dc2d9c769198ed98430066175f1ca8e3ffec28a58a63348e3e2c9233434',
+    'spawn_far-hills.png': 'a76ec9cbb3eb5d284ef82dcf11f43acbd4964d77085d31f29af2095cd3fa5a4a',
+    'spawn_map03.png': 'c38881a0b85357a003d3298d4bfc087eeb04949ef6aacbbeeb386037b4a1d5cb',
+    'spawn_map04.png': '8627b678629d7578a39a1e1221cc831ee120f9dd198600dcf8b5115d325bd189',
+    'spawn_map05.png': '1fccc3770b552c5901cbc80d4ca54eacbadfa807d03722d0b1dde1d773ee3712',
+    'spawn_map06.png': '4471237a9be25441722befcf386df9aa32f3935f6a15d5249467c25d3fa73ff4',
+  }
+  assert.equal(SPAWN_MARKERS.length, 10, '1.4.525 ten arches')
+  assert.deepEqual(
+    NIGHT_MAP_IDS.map((id) => spawnMarkersFor(id).length),
+    [1, 1, 1, 2, 2, 3],
+    '1.4.525 every map has its arches',
+  )
+
+  function pack525(id) {
+    const file = id === 'far-hills' ? 'map02.json' : `${id}.json`
+    return nightMapFromPack(JSON.parse(readFileSync(new URL(`../src/nightWatch/maps/maze/${file}`, import.meta.url), 'utf8')))
+  }
+  function roads525(id) {
+    if (id === 'a2') return [{ id: 'main', points: DEFEND_PATH }]
+    return pack525(id).roads
+  }
+  function starts525(roads) {
+    const groups = []
+    for (const road of roads) {
+      const point = road.points[0]
+      const group = groups.find((item) => Math.hypot(item.x - point.x, item.y - point.y) < 1.5)
+      if (group) group.ids.push(road.id)
+      else groups.push({ x: point.x, y: point.y, ids: [road.id] })
+    }
+    return groups
+  }
+  let starts = 0
+  for (const id of NIGHT_MAP_IDS) {
+    const groups = starts525(roads525(id))
+    starts += groups.length
+    const rows = spawnMarkersFor(id)
+    assert.equal(rows.length, groups.length, `1.4.525 ${id} has one arch per distinct road start`)
+    for (const group of groups) {
+      assert.equal(
+        rows.filter((row) => group.ids.includes(row.roadId)).length,
+        1,
+        `1.4.525 ${id} ${group.ids.join('+')} has one arch`,
+      )
+    }
+  }
+  assert.equal(starts, 10, '1.4.525 the six maps have ten road starts')
+
+  function paeth525(a, b, c) {
+    const p = a + b - c
+    const pa = Math.abs(p - a)
+    const pb = Math.abs(p - b)
+    const pc = Math.abs(p - c)
+    if (pa <= pb && pa <= pc) return a
+    if (pb <= pc) return b
+    return c
+  }
+  function png525(buf) {
+    assert.equal(buf.subarray(0, 8).toString('hex'), '89504e470d0a1a0a')
+    let offset = 8
+    let width = 0
+    let height = 0
+    let bitDepth = 0
+    let colorType = 0
+    let interlace = 0
+    const idat = []
+    while (offset + 8 <= buf.length) {
+      const len = buf.readUInt32BE(offset)
+      const type = buf.toString('ascii', offset + 4, offset + 8)
+      const data = buf.subarray(offset + 8, offset + 8 + len)
+      if (type === 'IHDR') {
+        width = data.readUInt32BE(0)
+        height = data.readUInt32BE(4)
+        bitDepth = data[8]
+        colorType = data[9]
+        interlace = data[12]
+      } else if (type === 'IDAT') idat.push(data)
+      else if (type === 'IEND') break
+      offset += 12 + len
+    }
+    const inflated = inflateSync(Buffer.concat(idat))
+    const stride = width * 4
+    const rgba = Buffer.alloc(height * stride)
+    let src = 0
+    let prev = Buffer.alloc(stride)
+    for (let y = 0; y < height; y += 1) {
+      const filter = inflated[src]
+      src += 1
+      const row = Buffer.alloc(stride)
+      for (let i = 0; i < stride; i += 1) {
+        const raw = inflated[src]
+        src += 1
+        const left = i >= 4 ? row[i - 4] : 0
+        const up = prev[i]
+        const ul = i >= 4 ? prev[i - 4] : 0
+        let value = raw
+        if (filter === 1) value = raw + left
+        else if (filter === 2) value = raw + up
+        else if (filter === 3) value = raw + Math.floor((left + up) / 2)
+        else if (filter === 4) value = raw + paeth525(left, up, ul)
+        row[i] = value & 255
+      }
+      row.copy(rgba, y * stride)
+      prev = row
+    }
+    return { width, height, bitDepth, colorType, interlace, rgba }
+  }
+  function plateOf525(marker, i, j) {
+    const lx = ((i + 0.5) / 192) * SPAWN_BOX_U - SPAWN_BOX_U / 2
+    const ly = ((j + 0.5) / 192) * SPAWN_BOX_U - SPAWN_BOX_U / 2
+    const rad = (marker.rotationDeg * Math.PI) / 180
+    const c = Math.cos(rad)
+    const s = Math.sin(rad)
+    return { x: marker.x + lx * c - ly * s, y: marker.y + lx * s + ly * c }
+  }
+  function seats525(ground) {
+    const seats = []
+    for (let y = 88; y <= 1040; y += 136) {
+      for (let x = 56; x <= 744; x += 136) {
+        if (!lampSpotBlocked({ x, y }, {}, undefined, ground)) seats.push({ x, y })
+      }
+    }
+    return seats
+  }
+
+  for (const marker of SPAWN_MARKERS) {
+    assert.doesNotMatch(marker.asset, /^gate/i, `1.4.525 ${marker.asset} is not the peppermint gate sprite`)
+    const box = spawnMarkerPlateBox(marker)
+    assert.ok(
+      box.left >= 29 && box.right <= 769,
+      `1.4.525 ${marker.mapId}:${marker.roadId} stays inside the 375 view (${box.left.toFixed(1)}–${box.right.toFixed(1)})`,
+    )
+    const buf = readFileSync(new URL(`../src/assets/night-watch/maps/overlays/${marker.asset}`, import.meta.url))
+    assert.equal(
+      createHash('sha256').update(buf).digest('hex'),
+      pngSha525[marker.asset],
+      `1.4.525 ${marker.asset} matches the staged bytes`,
+    )
+    const png = png525(buf)
+    assert.equal(png.width, 192, `1.4.525 ${marker.asset} is 192 wide`)
+    assert.equal(png.height, 192, `1.4.525 ${marker.asset} is 192 tall`)
+    assert.equal(png.bitDepth, 8)
+    assert.equal(png.colorType, 6, `1.4.525 ${marker.asset} is RGBA`)
+    assert.equal(png.interlace, 0)
+    const ground = marker.mapId === 'a2' ? A2_NIGHT_MAP.ground : pack525(marker.mapId)
+    const seats = seats525(ground)
+    assert.ok(seats.length > 0, `1.4.525 ${marker.mapId} has seat circles`)
+    let opaque = 0
+    let minClear = Infinity
+    for (let j = 0; j < 192; j += 1) {
+      for (let i = 0; i < 192; i += 1) {
+        if (png.rgba[(j * 192 + i) * 4 + 3] < 128) continue
+        opaque += 1
+        const at = plateOf525(marker, i, j)
+        for (const seat of seats) {
+          minClear = Math.min(minClear, Math.hypot(at.x - seat.x, at.y - seat.y) - SEAT_TAP_R)
+        }
+      }
+    }
+    assert.ok(opaque > 100, `1.4.525 ${marker.asset} has opaque posts`)
+    // Bottom entries on map03 and map06 stand in the 136u gap between the y=1040
+    // seat pair. The candy posts are wider than the gap between those circles, so
+    // the outer stripe meets the ring. Every other seat circle stays 8u clear.
+    const perSeat = []
+    for (const seat of seats) {
+      let seatClear = Infinity
+      for (let j = 0; j < 192; j += 1) {
+        for (let i = 0; i < 192; i += 1) {
+          if (png.rgba[(j * 192 + i) * 4 + 3] < 128) continue
+          const at = plateOf525(marker, i, j)
+          seatClear = Math.min(seatClear, Math.hypot(at.x - seat.x, at.y - seat.y) - SEAT_TAP_R)
+        }
+      }
+      perSeat.push({ x: seat.x, y: seat.y, clear: seatClear })
+    }
+    const flank = marker.mapId === 'map03' || (marker.mapId === 'map06' && marker.roadId === 'c')
+    for (const seat of perSeat) {
+      if (seat.clear >= 8) continue
+      assert.ok(
+        flank && seat.y === 1040 && seat.clear >= -16,
+        `1.4.525 ${marker.mapId}:${marker.roadId} posts clear the ${seat.x},${seat.y} seat by ${seat.clear.toFixed(1)} u`,
+      )
+    }
+    if (!flank) {
+      assert.ok(
+        minClear >= 8,
+        `1.4.525 ${marker.mapId}:${marker.roadId} posts clear seats by ${minClear.toFixed(1)} u`,
+      )
+    }
+  }
+
+  const openCamera = { vbX: 0, vbY: 0, scale: 1, originX: 0, originY: 0 }
+  const sample = SPAWN_MARKERS[0]
+  const baseFit = resolveSpawnFit(sample, openCamera, [], { x: 0, y: 0, nx: 0, ny: -1 })
+  assert.equal(baseFit.step, 'base')
+  assert.equal(baseFit.scale, 1)
+  const lip = { left: sample.x + 40, right: sample.x + 180, top: sample.y - 8, bottom: sample.y + 8 }
+  const scaledFit = resolveSpawnFit(sample, openCamera, [lip], { x: 10, y: 10, nx: 0, ny: -1 })
+  assert.equal(scaledFit.step, 'scaled')
+  assert.ok(scaledFit.scale >= SPAWN_MIN_SCALE && scaledFit.scale < 1)
+  assert.equal(scaledFit.x, sample.x)
+  assert.equal(scaledFit.y, sample.y)
+  const blanket = { left: sample.x - 80, right: sample.x + 80, top: sample.y - 80, bottom: sample.y + 80 }
+  const edgeFit = resolveSpawnFit(sample, openCamera, [blanket], { x: 100, y: 200, nx: 0, ny: -1 })
+  assert.equal(edgeFit.step, 'edge')
+  assert.equal(edgeFit.scale, SPAWN_MIN_SCALE)
+  assert.equal(edgeFit.x, 100)
+  assert.equal(edgeFit.y, 192)
 }
 
 const bossTapScan = readFileSync(new URL('./check-seed-fire.mjs', import.meta.url), 'utf8')
