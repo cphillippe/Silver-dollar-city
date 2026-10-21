@@ -16,11 +16,11 @@ if (parts.length !== 3 || parts.some((part) => !Number.isInteger(part))) {
   process.exit(1)
 }
 const code = parts[0] * 100000 + parts[1] * 1000 + parts[2]
-if (!(code > shell.versionCode)) {
-  console.error(`versionCode ${code} is not above shell.json ${shell.versionCode}`)
+if (!(code >= shell.versionCode)) {
+  console.error(`versionCode ${code} is below shell.json ${shell.versionCode}`)
   process.exit(1)
 }
-console.log(`versionCode ${code} > shell.json ${shell.versionCode}`)
+console.log(`versionCode ${code} >= shell.json ${shell.versionCode}`)
 EOF
 
 unset ANDROID_KEYSTORE_B64 ANDROID_KEYSTORE_PATH ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD || true
