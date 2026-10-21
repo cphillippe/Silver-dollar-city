@@ -7557,7 +7557,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   )
   assert.match(
     actors435,
-    /easyFaceGlows\(raider, raiders, roundIndex, armorFrom\)/,
+    /easyFaceGlows\(raider, (?:raiders|tapPool), roundIndex, armorFrom\)/,
     '1.4.461 round 5 lights every walker on the road',
   )
   assert.match(css435, /\.defend-page\.is-easy-tap \.defend-raider\.is-boss \.defend-raider-hit \{[^}]*pointer-events:\s*all/)
