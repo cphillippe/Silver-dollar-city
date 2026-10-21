@@ -140,9 +140,6 @@ export function CityMap({
   const doneToday = dailyDoneToday(progress, today)
   const nextId = mode === 'poster' ? 'porch' : nextPlotId(progress, doneToday)
   const easy = isEasy(progress)
-  // Easy shows one gold cue: the building ready to raise, else the next road.
-  const cueId: CityPlotId =
-    easy && mode === 'live' ? (readyUpgradeId(progress, nextId) ?? nextId) : nextId
   const { standing, possible } = cityStanding(progress)
   const age = mode === 'poster' ? 'eden' : cityAge(progress)
   const liveSnap = mode === 'poster' ? citySnapshot(progress) : visualSnapshot(progress)
@@ -191,6 +188,8 @@ export function CityMap({
       : null
   const panFrameRef = useRef<PanFrame | null>(null)
   panFrameRef.current = panFrame
+  // Pan mode shows one gold cue: the building ready to raise, else the next road.
+  const cueId: CityPlotId = panFrame ? (readyUpgradeId(progress, nextId) ?? nextId) : nextId
   const cueRef = useRef(cueId)
   cueRef.current = cueId
 
@@ -382,7 +381,12 @@ export function CityMap({
       setOffHome(false)
       return
     }
-    setPan(panRef.current, true)
+    if (!panDragged.current) {
+      stopGlide()
+      panRef.current = homePan()
+      paintPan()
+      setOffHome(false)
+    } else setPan(panRef.current, true)
   }, [panKey])
 
   useEffect(() => {
@@ -1087,6 +1091,7 @@ export function CityMap({
                   : beat?.id === plot.id || (nextId === plot.id && !celebrating)
               }
               ack={beat?.id === plot.id ? beat.beat : undefined}
+              pan={Boolean(panFrame)}
             />
           ))
         : null}
@@ -1097,7 +1102,7 @@ export function CityMap({
             const stage = stageOf(id)
             return stage !== 'empty' || nextId === id
           }).map((id) => (
-            <EasyPlotChip key={`tag-${id}`} id={id} />
+            <EasyPlotChip key={`tag-${id}`} id={id} pan={Boolean(panFrame)} />
           ))}
         </g>
       ) : null}

@@ -1852,6 +1852,27 @@ async function proveHomeNoHidden(browser, origin, size, errorsOut) {
       await ctx.close()
     }
   }
+  await proveHomeNoHiddenFounders(browser, origin, size, errorsOut)
+}
+
+// Bar 3, Founder's Lamp: the gift style keeps no folk lamp dots either.
+async function proveHomeNoHiddenFounders(browser, origin, size, errorsOut) {
+  const where = `${size[0]}x${size[1]}`
+  const { ctx, page, errors } = await openHome(browser, origin, 'late', size, {}, { lampStyle: 'founders', firstSeen: '2026-10-01' })
+  try {
+    await settleHome(page)
+    assert.equal(await page.locator('.city-overworld.is-style-founders').count(), 1, `${where} founders style is on`)
+    for (const side of ['left', 'right', 'mid']) {
+      if (side !== 'mid') await panExtreme(page, side)
+      const folkLamps = await page.evaluate(
+        () => [...document.querySelectorAll('.city-folk .city-lamp')].filter((el) => getComputedStyle(el).display !== 'none').length,
+      )
+      assert.equal(folkLamps, 0, `homePan hidden: ${where} founders ${side} shows no folk lamp dots (${folkLamps})`)
+    }
+  } finally {
+    errorsOut.push(...errors)
+    await ctx.close()
+  }
 }
 
 // Bar 4: exactly one gold cue in view at open, on the target.
@@ -2158,6 +2179,57 @@ async function proveHomeWideAndHard(browser, origin, errorsOut) {
   } finally {
     errorsOut.push(...wide.errors)
     await wide.ctx.close()
+  }
+
+  // Ready lots without a candy still: main draws the gold ring on them. The next road is a different lot.
+  const readySeed = {
+    completed: [...HOME_HOLLOW, ...HOME_BENCH],
+    cityBuilt: { porch: 4, hollow: 4, bench: 1, observatory: 0, gate: 0, lookout: 0, journal: 0, lamps: 0 },
+  }
+  const readyCue = (page) =>
+    page.evaluate(() => {
+      const next = document.querySelector('g.city-plot.is-next')
+      const cx = (g) => Number(g?.querySelector('.city-plot-hit')?.getAttribute('cx'))
+      const mark = document.querySelector('g.city-next-mark')
+      const m = /translate\(\s*([-\d.]+)[ ,]+([-\d.]+)/.exec(mark?.getAttribute('transform') || '')
+      const rings = [...document.querySelectorAll('g.city-plot.is-ready')].map((g) => ({
+        id: g.getAttribute('data-plot'),
+        candy: g.classList.contains('has-candy-img'),
+        stroke: getComputedStyle(g.querySelector('.city-plot-hit')).stroke,
+      }))
+      return {
+        nextId: next?.getAttribute('data-plot'),
+        nextX: cx(next),
+        haloX: m ? Number(m[1]) : null,
+        rings,
+        pan: document.querySelectorAll('.city-overworld.is-easy-pan').length,
+      }
+    })
+  const ready768 = await openHome(browser, origin, 'ready', [768, 1024], {}, readySeed)
+  try {
+    await ready768.page.locator('.city-svg').waitFor()
+    await ready768.page.waitForTimeout(500)
+    const cue = await readyCue(ready768.page)
+    const plain = cue.rings.filter((ring) => !ring.candy)
+    assert.equal(cue.pan, 0, '768 is not in pan mode')
+    assert.ok(plain.length >= 1, `768 seed has a ready lot without a candy still ${JSON.stringify(cue)}`)
+    assert.ok(Math.abs(cue.haloX - cue.nextX) < 1, `768 the halo sits on the next road, as on main ${JSON.stringify(cue)}`)
+    for (const ring of plain) assert.notEqual(ring.stroke, 'none', `768 the gold ready ring is present on ${ring.id}, as on main`)
+  } finally {
+    errorsOut.push(...ready768.errors)
+    await ready768.ctx.close()
+  }
+
+  const readyPan = await openHome(browser, origin, 'ready', [390, 844], {}, readySeed)
+  try {
+    await settleHome(readyPan.page)
+    const cue = await readyCue(readyPan.page)
+    assert.equal(cue.pan, 1, '390 is in pan mode')
+    assert.ok(cue.rings.length >= 1, `390 seed has a ready lot ${JSON.stringify(cue)}`)
+    for (const ring of cue.rings) assert.equal(ring.stroke, 'none', `390 the ready ring is off in pan mode on ${ring.id}`)
+  } finally {
+    errorsOut.push(...readyPan.errors)
+    await readyPan.ctx.close()
   }
 
   const hard = await openHome(browser, origin, 'late', [390, 844], {}, { easyMode: false })
