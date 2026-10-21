@@ -171,7 +171,7 @@ assert.equal(dashPhase(easyOpen + 600, EASY_RUN_TUNE.dashWindowMs).inWindow, tru
 assert.equal(FATHER_RUN_CLAIM, 'The father runs with mercy before the speech is done.')
 assert.equal(FATHER_RUN_HINT, 'The run comes before the apology is done.')
 assert.equal(HIRED_HAND_SPEECH[0], 'Father, I have sinned against heaven')
-assert.equal(HIRED_HAND_SPEECH[3], 'Make me like one of your hired servants.')
+assert.equal(HIRED_HAND_SPEECH[3], 'Treat me as one of your hired servants.')
 assert.match(playSrc, /stumbleIfHeldThrough/)
 assert.match(playSrc, /MIN_DASHES_TO_HUG/)
 assert.match(playSrc, /onPadKeyDown/)
