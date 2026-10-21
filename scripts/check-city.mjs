@@ -1722,6 +1722,11 @@ assert.doesNotMatch(
 )
 assert.match(latestChange('1.4.526').items.join('\n'), /Refs #756/)
 assert.match(latestChange('1.4.526').items.join('\n'), /Refs #820/, '1.4.526 changelog refs its PR')
+assert.equal(
+  latestChange('1.4.526').items.at(-1),
+  'Refs #756 · Refs #653 · Refs #820',
+  '1.4.526 changelog refs #756, #653, and #820 with Refs only',
+)
 assert.match(latestChange('1.4.526').items.join('\n'), /Hard/)
 assert.match(latestChange('1.4.526').items.join('\n'), /Easy/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.525'), '1.4.525 changelog row')
@@ -18595,9 +18600,23 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   const fire526 = screen526.slice(screen526.indexOf('function fireAtRaider'), screen526.indexOf('function fireBest'))
   assert.match(
     fire526,
-    /if \(!raider\) return\s*if \(walkInHeld\(raider\)\) return\s*const gate = easyPointerTapGate\(easy, raider, live\.current\.raiders, waveIndexRef\.current, tuneRef\.current\.armorFrom\)/,
-    '1.4.526 a tap on an entering walker does nothing, and the gate call is unchanged',
+    /const raider = live\.current\.raiders\.find\(\(item\) => item\.id === raiderId && !item\.turned\)\s*if \(raider && walkInHeld\(raider\)\) return\s*if \(!claimTap\(\)\) return\s*if \(!raider\) return\s*const gate = easyPointerTapGate\(easy, raider, live\.current\.raiders, waveIndexRef\.current, tuneRef\.current\.armorFrom\)/,
+    '1.4.526 a tap on a held walker returns before it claims the tap, and the gate call is unchanged',
   )
+  assert.ok(
+    fire526.indexOf('walkInHeld(raider)') < fire526.indexOf('claimTap()'),
+    '1.4.526 the hold check runs before claimTap',
+  )
+  const shot526 = screen526.slice(screen526.indexOf('if (!best) return false'), screen526.indexOf('const fit = nightEnemies.fit(easy, using, best.kind)'))
+  assert.match(
+    shot526,
+    /const to = raiderAt\(best\)\s*const drawn = walkerDrawAt\(best\)\s*const aim = \{ x: drawn\.x, y: drawn\.y \+ PATH_WALKER_FACE_DY \}/,
+    '1.4.526 the beam end is the drawn walker; the sim point stays for range',
+  )
+  const blast526 = screen526.slice(screen526.indexOf('const blast: Blast = {'), screen526.indexOf('combo: nextCombo,', screen526.indexOf('const blast: Blast = {')))
+  assert.match(blast526, /x: drawn\.x,\s*y: drawn\.y,/, '1.4.526 the + blast sits on the drawn walker')
+  assert.match(screen526, /incenseBonusFor\(plantsRef\.current, runPathsRef\.current, to\)/, '1.4.526 the incense bonus still reads the sim point')
+  assert.match(screen526, /const d = dist\(at, raiderAt\(raider\)\)\s*if \(d <= bestD\)/, '1.4.526 lamp target choice still reads the sim point')
   const best526 = screen526.slice(screen526.indexOf('function fireBest'), screen526.indexOf('function retry'))
   assert.match(
     best526,
@@ -18644,6 +18663,11 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.match(actors526, /const cueAt = tapTarget \? drawAt\(tapTarget\) : null/, '1.4.526 the cue ring sits on the drawn walker')
   assert.match(actors526, /transform=\{`translate\(\$\{cueAt\.x\} \$\{cueAt\.y\}\)`\}/)
   assert.match(
+    actors526,
+    /<g className="nw-walk-cue" clipPath=\{walkIn \? 'url\(#nw-walk-clip\)' : undefined\}>\s*<g\s+className="walker-target-cue"/,
+    '1.4.526 the cue ring is clipped to the map with the walkers',
+  )
+  assert.match(
     board526,
     /\? raiders\s*\.filter\(\(raider\) => !raider\.turned && !walkIn\?\.held\(raider\)\)\s*\.map\(\(raider\) => \{\s*const at = walkIn \? walkIn\.drawAt\(raider\) : raiderAt\(raider\)/,
     '1.4.526 walker tap buttons skip held walkers and sit on the drawn spot',
@@ -18689,6 +18713,12 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.match(walkBody526, /pointerTap\(/)
   assert.match(prove526, /async function pointerTap\(page, x, y\) \{\s*await page\.mouse\.move\(x, y\)\s*await page\.mouse\.down\(\)\s*await page\.mouse\.up\(\)/)
   assert.match(walkBody526, /375x667,412x915,768x1024/, '1.4.526 the prove runs at 375, 412, and 768')
+  assert.match(walkBody526, /process\.env\.NW_WALKIN_ROUNDS \?\? '1,5'/, '1.4.526 the walk-in sweep runs on round 1 and round 5')
+  assert.match(walkBody526, /&nwRound=\$\{round\}&nwLamps=0/, '1.4.526 each sweep pass opens its round')
+  assert.match(walkBody526, /the beam ends on the drawn walker/, '1.4.526 the prove checks the beam end against the drawn walker')
+  assert.match(walkBody526, /the beam does not end on the sim point/)
+  assert.match(walkBody526, /the \+ blast sits on the drawn walker/)
+  assert.match(walkBody526, /the cue ring is clipped to the map/)
   assert.match(walkBody526, /every road start walked in/)
   assert.match(walkBody526, /walker px outside the map/)
   assert.match(walkBody526, /first visible frame \$\{frame\} touches the map edge/)

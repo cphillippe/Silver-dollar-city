@@ -2178,7 +2178,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     fx.dirty = true
     if (!best) return false
     const to = raiderAt(best)
-    const aim = { x: to.x, y: to.y + PATH_WALKER_FACE_DY }
+    const drawn = walkerDrawAt(best)
+    const aim = { x: drawn.x, y: drawn.y + PATH_WALKER_FACE_DY }
     const fit = nightEnemies.fit(easy, using, best.kind)
     const heldLine = learningForTool(progress, using)
     comboRef.current += 1
@@ -2188,8 +2189,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     fx.dirty = true
     const blast: Blast = {
       key: now,
-      x: to.x,
-      y: to.y,
+      x: drawn.x,
+      y: drawn.y,
       line: easy
         ? fit === 'match'
           ? '+'
@@ -2508,10 +2509,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   ) {
     if (phase !== 'wave' || won) return
     if (countUntilRef.current > performance.now()) return
-    if (!claimTap()) return
     const raider = live.current.raiders.find((item) => item.id === raiderId && !item.turned)
+    if (raider && walkInHeld(raider)) return
+    if (!claimTap()) return
     if (!raider) return
-    if (walkInHeld(raider)) return
     const gate = easyPointerTapGate(easy, raider, live.current.raiders, waveIndexRef.current, tuneRef.current.armorFrom)
     if (gate === 'miss') {
       const reason =

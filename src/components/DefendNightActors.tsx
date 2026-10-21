@@ -836,6 +836,7 @@ export function DefendNightActorsSvg({
                 </g>
               ))}
               {easyTap && tapTarget && cueAt && !tapTarget.turned ? (
+                <g className="nw-walk-cue" clipPath={walkIn ? 'url(#nw-walk-clip)' : undefined}>
                 <g
                   className="walker-target-cue"
                   data-cue="target"
@@ -878,6 +879,7 @@ export function DefendNightActorsSvg({
                     </g>
                   ) : null}
                   <path className="walker-cue-arrow" d={CUE_ARROW} />
+                </g>
                 </g>
               ) : null}
               {blasts.map((blast) => (
