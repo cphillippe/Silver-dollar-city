@@ -366,7 +366,107 @@ async function readRunCue(page) {
   })
 }
 
-async function releaseRun(page, shotMiss = false) {
+async function watchMissMount(page) {
+  await page.evaluate(() => {
+    window.__missMountAt = 0
+    window.__runPress = []
+    if (window.__missObs) window.__missObs.disconnect()
+    const stampMiss = () => {
+      if (window.__missMountAt) return
+      if (document.querySelector('.run-miss')) window.__missMountAt = performance.now()
+    }
+    const obs = new MutationObserver(stampMiss)
+    obs.observe(document.body, { childList: true, subtree: true })
+    window.__missObs = obs
+    if (window.__runPressListener) {
+      document.removeEventListener('pointerdown', window.__runPressListener.down, true)
+      document.removeEventListener('pointerup', window.__runPressListener.up, true)
+    }
+    const listen = (type) => (event) => {
+      window.__runPress.push({
+        type,
+        t: performance.now(),
+        x: event.clientX,
+        y: event.clientY,
+      })
+    }
+    const down = listen('down')
+    const up = listen('up')
+    window.__runPressListener = { down, up }
+    document.addEventListener('pointerdown', down, true)
+    document.addEventListener('pointerup', up, true)
+  })
+}
+
+async function mountAge(page, mountAt) {
+  const now = await page.evaluate(() => performance.now())
+  return now - mountAt
+}
+
+function pressesOnGold(log, mountAt, box) {
+  return log.filter(
+    (row) =>
+      row.t >= mountAt &&
+      row.x >= box.x - 2 &&
+      row.x <= box.x + box.width + 2 &&
+      row.y >= box.y - 2 &&
+      row.y <= box.y + box.height + 2,
+  )
+}
+
+/** Press the miss gold about 470 ms after it mounts, and let go by 500 ms. */
+async function pressGoldInsideArm(page, mountAt, box) {
+  const x = box.x + box.width / 2
+  const y = box.y + box.height / 2
+  await page.mouse.move(x, y)
+  const tripStart = Date.now()
+  await page.evaluate(() => performance.now())
+  const rtt = Math.max(8, Date.now() - tripStart)
+  const age = await mountAge(page, mountAt)
+  const sendAt = 470 - 2 * rtt
+  if (age < sendAt) {
+    await page.evaluate(
+      (ms) => new Promise((resolve) => window.setTimeout(resolve, ms)),
+      sendAt - age,
+    )
+  }
+  await page.mouse.down()
+  await page.mouse.up()
+  const log = await page.evaluate(() => window.__runPress.slice())
+  const hits = pressesOnGold(log, mountAt, box)
+  const down = hits.find((row) => row.type === 'down')
+  const up = hits.find((row) => row.type === 'up' && (!down || row.t >= down.t))
+  assert.ok(down, `miss gold received a press ${JSON.stringify(hits)}`)
+  assert.ok(up, 'miss gold received a release')
+  const downAge = down.t - mountAt
+  const upAge = up.t - mountAt
+  assert.ok(downAge >= 440 && downAge <= 495, `press is about 470 ms from the miss (${Math.round(downAge)})`)
+  assert.ok(upAge <= 500, `release is at or before 500 ms (${Math.round(upAge)})`)
+}
+
+/** Click the same gold after the arm, with a real pointer. */
+async function clickGoldAfterArm(page, mountAt, box) {
+  const x = box.x + box.width / 2
+  const y = box.y + box.height / 2
+  const age = await mountAge(page, mountAt)
+  if (age < 650) {
+    await page.evaluate(
+      (ms) => new Promise((resolve) => window.setTimeout(resolve, ms)),
+      650 - age,
+    )
+  }
+  await page.mouse.click(x, y)
+  const log = await page.evaluate(() => window.__runPress.slice())
+  const down = pressesOnGold(log, mountAt, box)
+    .filter((row) => row.type === 'down')
+    .at(-1)
+  assert.ok(down, 'reset click landed on the miss gold')
+  const clickAge = down.t - mountAt
+  assert.ok(clickAge >= 620, `reset click is after about 650 ms (${Math.round(clickAge)})`)
+}
+
+async function releaseRun(page, shotMiss = false, inspect) {
+  await watchMissMount(page)
   const pad = page.locator('[data-run-pad="hold"]')
   await pad.waitFor({ timeout: 15000 })
   await pad.scrollIntoViewIfNeeded()
@@ -399,38 +499,33 @@ async function releaseRun(page, shotMiss = false) {
   }
   await page.locator('.run-miss').waitFor({ timeout: 1000 })
   assert.equal(sawLast, true, 'phrase 4 says Last line before the miss')
-  const count = ((await page.locator('.run-speech-count').innerText()) || '').replace(/\s+/g, ' ').trim()
-  assert.equal(count, EASY.runAlmost, 'a miss does not read as a finished 4 / 4')
-  assert.notEqual(count, '4 / 4')
+  const mountAt = await page.evaluate(() => window.__missMountAt || 0)
+  assert.ok(mountAt > 0, 'MutationObserver saw the .run-miss mount')
+  const retry = page.locator('.run-miss .btn.primary')
+  const retryBox = await retry.boundingBox()
+  if (!retryBox) throw new Error('miss gold has no box')
+  await pressGoldInsideArm(page, mountAt, retryBox)
+  assert.equal(await page.locator('.run-miss').count(), 1, 'a tap during arming does not reset the round')
+  const during = ((await page.locator('.run-speech-count').innerText()) || '').replace(/\s+/g, ' ').trim()
+  assert.equal(during, EASY.runAlmost, 'arming keeps the miss copy')
+  assert.notEqual(during, '0 / 4')
   const hint = ((await page.locator('.run-miss-hint').innerText()) || '').replace(/\s+/g, ' ').trim()
   assert.equal(hint, FATHER_RUN_HINT)
   const closer = ((await page.locator('.run-miss .quiet').innerText()) || '').replace(/\s+/g, ' ').trim()
   assert.equal(closer, 'Try again — you start closer.')
   const golds = await filledGolds(page)
   assert.equal(golds.length, 1, `miss has one filled gold ${JSON.stringify(golds)}`)
-  const retry = page.locator('.run-miss .btn.primary')
-  const retryBox = await retry.boundingBox()
-  if (!retryBox) throw new Error('miss gold has no box')
-  await page.mouse.click(retryBox.x + retryBox.width / 2, retryBox.y + retryBox.height / 2)
-  await page.waitForTimeout(120)
-  assert.equal(await page.locator('.run-miss').count(), 1, 'a tap during arming does not reset the round')
-  const during = ((await page.locator('.run-speech-count').innerText()) || '').replace(/\s+/g, ' ').trim()
-  assert.equal(during, EASY.runAlmost, 'arming keeps the miss copy')
-  assert.notEqual(during, '0 / 4')
+  const goldCls = (await retry.getAttribute('class')) || ''
+  assert.match(goldCls, /\bprimary\b/, 'run-fail gold is .btn.primary')
+  assert.doesNotMatch(goldCls, /\bgold\b/, 'run-fail gold is not the pale .btn.gold')
   if (shotMiss) await page.screenshot({ path: `${SHOTS}/run-miss-almost-375.png` })
-  await page.waitForTimeout(600)
-}
-
-async function tapRunFailGold(page) {
-  const btn = page.locator('.run-miss .btn.primary')
-  await btn.waitFor()
-  const cls = (await btn.getAttribute('class')) || ''
-  assert.match(cls, /\bprimary\b/, 'run-fail gold is .btn.primary')
-  assert.doesNotMatch(cls, /\bgold\b/, 'run-fail gold is not the pale .btn.gold')
-  const golds = await filledGolds(page)
-  assert.equal(golds.length, 1, `run-fail has one filled gold ${JSON.stringify(golds)}`)
-  await btn.click()
-  await page.waitForTimeout(250)
+  if (inspect) await inspect()
+  await clickGoldAfterArm(page, mountAt, retryBox)
+  await page.locator('[data-run-pad="hold"]').waitFor({ timeout: 4000 })
+  assert.equal(await page.locator('.run-miss').count(), 0, 'a click after the arm resets the miss')
+  assert.equal(await page.locator('.play.is-father-run.is-win').count(), 0, 'the reset is not a hug')
+  const resetCount = ((await page.locator('.run-speech-count').innerText()) || '').replace(/\s+/g, ' ').trim()
+  assert.equal(resetCount, '0 / 4', 'the reset count is 0 / 4')
   assert.equal(await page.locator('[aria-label="Choose a map"]').count(), 0, 'run-fail gold did not open Choose a map')
   assert.equal(await page.locator('.nw-map-overlay').count(), 0, 'run-fail gold did not open the map overlay')
   assert.equal(await page.locator('.defend-page').count(), 0, 'run-fail gold did not open Night Watch')
@@ -439,36 +534,36 @@ async function tapRunFailGold(page) {
 
 /** Gold-only. Two real misses, then Keep going starts a close round the player still has to hold. */
 async function hugFatherHuman(page) {
-  await releaseRun(page, true)
-  const again = ((await page.locator('.run-miss .btn.primary').innerText()) || '').replace(/\s+/g, ' ').trim()
-  assert.equal(again, 'Run again', 'miss 1 gold is Run again')
-  assert.equal(await page.locator('[data-run-keep]').count(), 0, 'miss 1 has no Keep going')
-  await tapRunFailGold(page)
+  await releaseRun(page, true, async () => {
+    const again = ((await page.locator('.run-miss .btn.primary').innerText()) || '').replace(/\s+/g, ' ').trim()
+    assert.equal(again, 'Run again', 'miss 1 gold is Run again')
+    assert.equal(await page.locator('[data-run-keep]').count(), 0, 'miss 1 has no Keep going')
+  })
   await page.locator('[data-run-pad="hold"]').waitFor()
   assert.equal(await page.locator('[data-run-how]').count(), 0, 'the rule does not return after Run again')
   assert.equal(await page.locator('.play.is-father-run.is-win').count(), 0, 'Run again does not hug')
 
-  await releaseRun(page, false)
-  const keep = page.locator('[data-run-keep]')
-  const keepLabel = ((await keep.innerText()) || '').replace(/\s+/g, ' ').trim()
-  assert.equal(keepLabel, 'Keep going', 'miss 2 gold is Keep going')
-  const keepCls = (await keep.getAttribute('class')) || ''
-  assert.match(keepCls, /\bprimary\b/, 'Keep going is .btn.primary')
-  const plain = page.locator('.run-miss [data-run-again]')
-  assert.equal(await plain.count(), 1, 'Run again stays visible')
-  const plainText = ((await plain.innerText()) || '').replace(/\s+/g, ' ').trim()
-  assert.equal(plainText, 'Run again', 'miss 2 plain label reads Run again')
-  const plainCls = (await plain.getAttribute('class')) || ''
-  assert.doesNotMatch(plainCls, /\bprimary\b/, 'Run again is a plain button on miss 2')
-  const ink = await plain.evaluate((el) => getComputedStyle(el).color)
-  const channels = ink.match(/\d+/g)?.map(Number) ?? []
-  assert.ok(channels.length >= 3 && Math.max(...channels.slice(0, 3)) < 80, `Run again ink is dark (${ink})`)
-  const golds = await filledGolds(page)
-  assert.equal(golds.length, 1, `miss 2 has one filled gold ${JSON.stringify(golds)}`)
-  assert.match(golds[0].text, /Keep going/)
-  await page.screenshot({ path: `${SHOTS}/run-fail-keep-going-375.png` })
-  await page.screenshot({ path: `${SHOTS}/fail-2-run-again-375.png` })
-  await tapRunFailGold(page)
+  await releaseRun(page, false, async () => {
+    const keep = page.locator('[data-run-keep]')
+    const keepLabel = ((await keep.innerText()) || '').replace(/\s+/g, ' ').trim()
+    assert.equal(keepLabel, 'Keep going', 'miss 2 gold is Keep going')
+    const keepCls = (await keep.getAttribute('class')) || ''
+    assert.match(keepCls, /\bprimary\b/, 'Keep going is .btn.primary')
+    const plain = page.locator('.run-miss [data-run-again]')
+    assert.equal(await plain.count(), 1, 'Run again stays visible')
+    const plainText = ((await plain.innerText()) || '').replace(/\s+/g, ' ').trim()
+    assert.equal(plainText, 'Run again', 'miss 2 plain label reads Run again')
+    const plainCls = (await plain.getAttribute('class')) || ''
+    assert.doesNotMatch(plainCls, /\bprimary\b/, 'Run again is a plain button on miss 2')
+    const ink = await plain.evaluate((el) => getComputedStyle(el).color)
+    const channels = ink.match(/\d+/g)?.map(Number) ?? []
+    assert.ok(channels.length >= 3 && Math.max(...channels.slice(0, 3)) < 80, `Run again ink is dark (${ink})`)
+    const golds = await filledGolds(page)
+    assert.equal(golds.length, 1, `miss 2 has one filled gold ${JSON.stringify(golds)}`)
+    assert.match(golds[0].text, /Keep going/)
+    await page.screenshot({ path: `${SHOTS}/run-fail-keep-going-375.png` })
+    await page.screenshot({ path: `${SHOTS}/fail-2-run-again-375.png` })
+  })
   const assistPad = page.locator('[data-run-pad="hold"]')
   await assistPad.waitFor({ timeout: 4000 })
   assert.equal(await page.locator('.play.is-father-run.is-win').count(), 0, 'Keep going does not grant HUGGED')

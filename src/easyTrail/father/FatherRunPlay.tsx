@@ -323,7 +323,7 @@ export function FatherRunPlay({
   }
 
   function missLocked() {
-    return easyRef.current && performance.now() - missAtRef.current < 450
+    return easyRef.current && performance.now() - missAtRef.current < EASY_RUN_TUNE.missArmMs
   }
 
   function missRound() {
@@ -341,7 +341,7 @@ export function FatherRunPlay({
       missAtRef.current = performance.now()
       setArming(true)
       window.clearTimeout(armTimer.current)
-      armTimer.current = window.setTimeout(() => setArming(false), 450)
+      armTimer.current = window.setTimeout(() => setArming(false), EASY_RUN_TUNE.missArmMs)
     }
   }
 

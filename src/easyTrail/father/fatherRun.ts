@@ -51,6 +51,8 @@ export const EASY_RUN_TUNE = {
   assistStart: 0.86,
   /** Assisted round still has to dash. One is enough because he starts on the son's heels. */
   assistMinDashes: 1,
+  /** Easy miss buttons ignore a tap this long after the panel mounts. Hard stays immediate. */
+  missArmMs: 600,
 } as const
 export const RETRY_CLOSER = 0.1
 export const MIN_START_GAP = 0.5
