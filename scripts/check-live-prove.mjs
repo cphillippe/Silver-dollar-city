@@ -4200,8 +4200,11 @@ async function walkAtTop(page) {
   }, null, { polling: 50, timeout: 3000 })
 }
 
-/** Ticks the game until a walker that has not been seen is drawn. That paint is its first frame. */
-async function nextWalkIn(run, seen, label) {
+/**
+ * Ticks the game until a walker that has not been seen is drawn. That paint is its first frame.
+ * `soft` returns [] after `limit` steps instead of failing: the wave has no walker left.
+ */
+async function nextWalkIn(run, seen, label, { soft = false, limit = 2400 } = {}) {
   const found = await run.page.evaluate(
     async ({ known, tick, limit }) => {
       const frame = () => new Promise((done) => requestAnimationFrame(() => done()))
@@ -4218,8 +4221,9 @@ async function nextWalkIn(run, seen, label) {
       }
       return fresh()
     },
-    { known: [...seen], tick: WALK_STEP_MS, limit: 2400 },
+    { known: [...seen], tick: WALK_STEP_MS, limit },
   )
+  if (!found && soft) return []
   assert.ok(found, `${label} a new walker walks in`)
   const fresh = await run.page.evaluate((known) => {
     return [...document.querySelectorAll('.defend-raider[data-walk-in="yes"]')]
@@ -4671,70 +4675,141 @@ async function checkWalkInTaps(browser, port, errors) {
     rows.push({ check: 'a2 r1 tap at the drawn spot after 0.84 s', run: spawn.runMs, tapAtMs: WALK_IN_TAP_MAX_MS + 20, hit: 'yes' })
     await run.context.close()
   }
+
+  {
+    const label = '1.4.526 a2 r1 lamp shot'
+    const run = await openWalkMap(browser, port, errors, 'a2', 375, 667, '&nwRound=1')
+    const lamps = await run.page.locator('.defend-pad.is-planted').count()
+    assert.ok(lamps > 0, `${label} the round 1 jump plants a lamp`)
+    const [row] = await nextWalkIn(run, new Set(), label)
+    const spawn = walkSpawnRoad('a2', row.line)
+    const simFace = { x: spawn.x, y: spawn.y + PATH_WALKER_FACE_DY }
+    const readShot = (walkerId) => {
+      const beam = [...document.querySelectorAll('.defend-shot .defend-beam')].at(-1)
+      const blast = [...document.querySelectorAll('.defend-blast')].at(-1)
+      const node = document.querySelector(`.defend-raider[data-walk-id="${walkerId}"]`)
+      if (!beam || !node) return null
+      const cue = document.querySelector('.walker-target-cue')
+      return {
+        beam: { x: Number(beam.getAttribute('x2')), y: Number(beam.getAttribute('y2')) },
+        blast: blast?.getAttribute('transform') || '',
+        walker: node.getAttribute('transform') || '',
+        walkIn: node.getAttribute('data-walk-in') || '',
+        cueClipped: cue ? Boolean(cue.closest('[clip-path="url(#nw-walk-clip)"]')) : null,
+      }
+    }
+    const walkerNow = (walkerId) => document.querySelector(`.defend-raider[data-walk-id="${walkerId}"]`)?.getAttribute('transform') || ''
+    let shot = null
+    let elapsed = 0
+    let how = 'lamp autofire'
+    // Autofire runs inside the tick, so the beam and walker share a frame.
+    // A tap fires between frames, so the beam ends where the walker was drawn when tapped.
+    let firedFrom = ''
+    while (!shot && !firedFrom && elapsed + WALK_STEP_MS < spawn.runMs - 40) {
+      await walkStep(run.page, WALK_STEP_MS)
+      elapsed += WALK_STEP_MS
+      shot = await run.page.evaluate(readShot, row.id)
+      if (shot) firedFrom = shot.walker
+      else if (elapsed >= WALK_IN_TAP_MAX_MS + 20) {
+        how = 'face tap'
+        firedFrom = await run.page.evaluate(walkerNow, row.id)
+        const face = await walkClient(run.page, await walkerFaceNow(run.page, row.id))
+        await pointerTap(run.page, face.x, face.y)
+        await walkStep(run.page, WALK_STEP_MS)
+        shot = await run.page.evaluate(readShot, row.id)
+      }
+    }
+    assert.ok(shot, `${label} a lamp fires at the walker during its run-in`)
+    assert.equal(shot.walkIn, 'yes', `${label} the walker is still walking in when the shot lands`)
+    const drawn = walkTranslate(firedFrom)
+    const drawnFace = { x: drawn.x, y: drawn.y + PATH_WALKER_FACE_DY }
+    assert.ok(
+      Math.hypot(shot.beam.x - drawnFace.x, shot.beam.y - drawnFace.y) < 0.01,
+      `${label} the beam ends on the drawn walker ${JSON.stringify({ beam: shot.beam, drawnFace })}`,
+    )
+    assert.ok(Math.hypot(shot.beam.x - simFace.x, shot.beam.y - simFace.y) > 40, `${label} the beam does not end on the sim point ${JSON.stringify(simFace)}`)
+    const blastAt = walkTranslate(shot.blast)
+    assert.ok(blastAt && Math.hypot(blastAt.x - drawn.x, blastAt.y - drawn.y) < 0.01, `${label} the + blast sits on the drawn walker ${shot.blast}`)
+    if (shot.cueClipped !== null) assert.equal(shot.cueClipped, true, `${label} the cue ring is clipped to the map`)
+    rows.push({
+      check: 'a2 r1 lamp shot during the run-in',
+      run: spawn.runMs,
+      shotAtMs: Math.round(elapsed),
+      how,
+      beamToDrawn: Number(Math.hypot(shot.beam.x - drawnFace.x, shot.beam.y - drawnFace.y).toFixed(3)),
+      beamToSim: Math.round(Math.hypot(shot.beam.x - simFace.x, shot.beam.y - simFace.y)),
+      cueClipped: shot.cueClipped,
+    })
+    await run.context.close()
+  }
   return rows
 }
 
-/** Easy walkers walk in from past the edge at 375, 412, and 768 on every map. Real pointer events. */
+/** Easy walkers walk in from past the edge at 375, 412, and 768 on every map, on rounds 1 and 5. Real pointer events. */
 async function checkWalkIn(browser, port, errors) {
   mkdirSync('/opt/cursor/artifacts/hop-756-walkin', { recursive: true })
   const rows = []
   const widths = (process.env.NW_WALKIN_WIDTHS ?? '375x667,412x915,768x1024').split(',').filter(Boolean).map((pair) => pair.split('x').map(Number))
+  const rounds = (process.env.NW_WALKIN_ROUNDS ?? '1,5').split(',').filter(Boolean).map(Number)
+  for (const round of rounds)
   for (const [width, height] of widths) {
     for (const id of SPAWN_MAPS) {
       if (process.env.NW_WALKIN_MAP && process.env.NW_WALKIN_MAP !== id) continue
-      const label = `1.4.526 ${id} ${width}`
+      const label = `1.4.526 ${id} ${width} r${round}`
       const plate = walkPlate(id)
       const starts = new Set(spawnRoads(id).map((road) => walkStartKey(walkInEntry(road.points, plate).start)))
       const covered = new Set()
-      const seen = new Set()
-      const run = await openWalkMap(browser, port, errors, id, width, height, '&nwRound=5&nwLamps=0')
       let ghosts = width === 375
-      const until = Date.now() + 90000
-      while (covered.size < starts.size && Date.now() < until) {
-        const fresh = await nextWalkIn(run, seen, label)
-        let pick = null
-        for (const row of fresh) {
-          seen.add(row.id)
-          const spawn = { ...walkSpawnRoad(id, row.line), mapId: id }
-          if (!pick && !covered.has(walkStartKey(spawn.entry.start))) pick = { row, spawn }
+      // Walkers that step out on one frame are walked one per pass. The seed replays the wave.
+      for (let pass = 0; covered.size < starts.size && pass < 4; pass += 1) {
+        const seen = new Set()
+        const run = await openWalkMap(browser, port, errors, id, width, height, `&nwRound=${round}&nwLamps=0`)
+        const until = Date.now() + 180000
+        while (covered.size < starts.size && Date.now() < until) {
+          const fresh = await nextWalkIn(run, seen, label, { soft: true, limit: 900 })
+          if (fresh.length === 0) break
+          let pick = null
+          for (const row of fresh) {
+            seen.add(row.id)
+            const spawn = { ...walkSpawnRoad(id, row.line), mapId: id }
+            if (!pick && !covered.has(walkStartKey(spawn.entry.start))) pick = { row, spawn }
+          }
+          if (!pick) continue
+          const { row, spawn } = pick
+          covered.add(walkStartKey(spawn.entry.start))
+          const result = await stepWalkIn(run, row, spawn, label, ghosts)
+          rows.push({
+            map: id,
+            width,
+            round,
+            road: spawn.road.id,
+            side: spawn.entry.side,
+            start: walkStartKey(spawn.entry.start),
+            t: spawn.t,
+            runMs: spawn.runMs,
+            frames: result.frames,
+            firstFrame: result.first?.frame ?? null,
+            firstMs: result.first ? Math.round(result.first.ms) : null,
+            edgeGap: result.first ? Number(result.first.gap.toFixed(2)) : null,
+            chromePx: result.chromePx,
+          })
+          console.log(`walk-in ${id} ${width} r${round} ${spawn.road.id} ${spawn.entry.side} start ${walkStartKey(spawn.entry.start)} t ${spawn.t} run ${spawn.runMs} first ${result.first ? `${result.first.frame}@${Math.round(result.first.ms)}ms gap ${result.first.gap.toFixed(2)}` : 'off-screen'} frames ${result.frames} under-chrome ${result.chromePx}`)
+          if (ghosts) {
+            await run.page.screenshot({ path: `/opt/cursor/artifacts/hop-756-walkin/${id}-${width}${round === 5 ? '' : `-r${round}`}.png` })
+            await run.page.evaluate(() => document.querySelectorAll('[data-walk-ghost]').forEach((node) => node.remove()))
+            ghosts = false
+          }
         }
-        if (!pick) {
-          await walkStep(run.page, 1900)
-          continue
-        }
-        const { row, spawn } = pick
-        covered.add(walkStartKey(spawn.entry.start))
-        const result = await stepWalkIn(run, row, spawn, label, ghosts)
-        rows.push({
-          map: id,
-          width,
-          road: spawn.road.id,
-          side: spawn.entry.side,
-          start: walkStartKey(spawn.entry.start),
-          t: spawn.t,
-          runMs: spawn.runMs,
-          frames: result.frames,
-          firstFrame: result.first?.frame ?? null,
-          firstMs: result.first ? Math.round(result.first.ms) : null,
-          edgeGap: result.first ? Number(result.first.gap.toFixed(2)) : null,
-          chromePx: result.chromePx,
-        })
-        console.log(`walk-in ${id} ${width} ${spawn.road.id} ${spawn.entry.side} start ${walkStartKey(spawn.entry.start)} t ${spawn.t} run ${spawn.runMs} first ${result.first ? `${result.first.frame}@${Math.round(result.first.ms)}ms gap ${result.first.gap.toFixed(2)}` : 'off-screen'} frames ${result.frames} under-chrome ${result.chromePx}`)
-        if (ghosts) {
-          await run.page.screenshot({ path: `/opt/cursor/artifacts/hop-756-walkin/${id}-${width}.png` })
-          await run.page.evaluate(() => document.querySelectorAll('[data-walk-ghost]').forEach((node) => node.remove()))
-          ghosts = false
-        }
+        await run.context.close()
       }
       assert.deepEqual([...covered].sort(), [...starts].sort(), `${label} every road start walked in`)
-      assert.ok(rows.some((row) => row.map === id && row.width === width && row.firstFrame !== null), `${label} at least one walker is seen walking in`)
-      await run.context.close()
+      assert.ok(rows.some((row) => row.map === id && row.width === width && row.round === round && row.firstFrame !== null), `${label} at least one walker is seen walking in`)
     }
   }
   const taps = process.env.NW_WALKIN_TAPS === '0' ? [] : await checkWalkInTaps(browser, port, errors)
   writeFileSync('/opt/cursor/artifacts/hop-756-walkin/walk-in.json', JSON.stringify({ rows, taps }, null, 2))
   console.log('walk-in-table')
-  for (const row of rows) console.log(`${row.map}\t${row.width}\t${row.road}\t${row.side}\t${row.start}\t${row.t}\t${row.runMs}\t${row.firstFrame}\t${row.edgeGap}`)
+  for (const row of rows) console.log(`${row.map}\t${row.width}\tr${row.round}\t${row.road}\t${row.side}\t${row.start}\t${row.t}\t${row.runMs}\t${row.firstFrame}\t${row.edgeGap}`)
   for (const row of taps) console.log(`walk-in-tap ${JSON.stringify(row)}`)
 }
 
