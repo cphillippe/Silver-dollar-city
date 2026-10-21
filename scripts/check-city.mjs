@@ -526,6 +526,10 @@ import * as fatherRunHome from '../src/easyTrail/father/fatherRun.ts'
 import * as fatherRunShim from '../src/lib/fatherRun.ts'
 import { EASY_HOME } from '../src/lib/easyNav.ts'
 import { WORDS, easyLead } from '../src/lib/words.ts'
+import { PACK_CATALOG, packLesson } from '../src/content/packCatalog.ts'
+import { evidenceForTier } from '../src/content/evidence.ts'
+import { whyBlastExtras } from '../src/lib/whyBlast.ts'
+import { HEAVEN_POINT as HEAVEN_POINT_792 } from '../src/lib/defend.ts'
 import { deeperLinksFor, eraLabel } from '../src/content/deeper.ts'
 import { allEvidenceIds, evidenceFor } from '../src/content/evidence.ts'
 import { plainFor } from '../src/content/plain.ts'
@@ -1713,6 +1717,73 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
+// #792 Easy L3 kid words (Biblical Scholar ruling 2026-10-21, strings verbatim).
+{
+  const tuning = packLesson('ob-tuning')
+  assert.equal(tuning.easy.word.term, 'Set just right', '#792 Easy L3 word is Set just right')
+  assert.equal(tuning.medium.word.term, 'Fine-tuning', '#792 Medium keeps Fine-tuning')
+  assert.equal(WORDS.fineTuning.term, 'Fine-tuning', '#792 WORDS.fineTuning is unchanged')
+  assert.equal(
+    easyWhyLine('Life-permitting ranges are wide; blank chance predicts a habitable cosmos just as well.'),
+    'The settings for life could be almost anything, so luck explains it.',
+  )
+  assert.deepEqual(whyBlastExtras('daily-cosmos'), ['Luck is enough for a livable world.'])
+  const cosmos = packLesson('daily-cosmos')
+  assert.ok(cosmos.easy.hold.whyMisses.includes('Luck is enough for a livable world.'), '#792 Easy daily-cosmos miss says Luck')
+  assert.ok(!cosmos.easy.hold.whyMisses.includes('Chance is enough for a livable world.'))
+  assert.ok(cosmos.medium.hold.whyMisses.includes('Chance is enough for a livable world.'), '#792 Medium keeps Chance')
+  assert.ok(cosmos.hard.hold.whyMisses.includes('Chance is enough for a livable world.'), '#792 Hard keeps Chance')
+  assert.equal(
+    LOT_STORY.observatory.whyEasy,
+    'Nora’s dome looks up. See how God set the world just right, up on the ridge.',
+  )
+  for (const lesson of PACK_CATALOG.lessons) {
+    const brief = evidenceForTier(lesson.id, 'easy')
+    if (!brief) continue
+    const wrong = [...brief.reasonChoices.filter((choice) => choice !== brief.reason), ...whyBlastExtras(lesson.id)]
+    for (const line of [...lesson.easy.hold.whyMisses.filter((choice) => choice !== lesson.easy.hold.why), ...wrong]) {
+      assert.doesNotMatch(easyWhyLine(line), /\bchance\b/i, `#792 ${lesson.id} Easy wrong answer avoids chance: ${line}`)
+    }
+  }
+  const obXml = readFileSync(new URL('../src/content/packs/observatory.xml', import.meta.url), 'utf8')
+  const obTiers = obXml.slice(obXml.indexOf('<medium'), obXml.indexOf('</hard>') + '</hard>'.length)
+  assert.equal(
+    createHash('sha256').update(obTiers).digest('hex'),
+    'f0340d0d8f7de6ad440e49f8a8ce24deac11238053c74f78477c23417066d9bb',
+    '#792 observatory.xml Medium + Hard stay byte-identical',
+  )
+  const teachUnlock = readFileSync(new URL('../src/components/TeachUnlock.tsx', import.meta.url), 'utf8')
+  assert.match(
+    teachUnlock,
+    /extra=\{easy \|\| plain\?\.word\?\.term !== 'Set just right' \? plain\?\.word : undefined\}/,
+    '#792 Hard does not show the Easy-only Set just right word',
+  )
+}
+
+// #792 Easy-only Night Watch draw fixes and Home legend.
+{
+  const screenSrc = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  assert.match(screenSrc, /function keepHeavenClear\(\)/, '#792 Heaven sign slide exists')
+  assert.match(screenSrc, /HEAVEN_POINT\.x - units/, '#792 the slide is drawn from HEAVEN_POINT')
+  assert.match(
+    screenSrc,
+    /useLayoutEffect\(\(\) => \{\s*if \(!easy\) return\s*const sync = \(\) => keepHeavenClear\(\)[\s\S]*?\}, \[easy, phase, mapId\]\)/,
+    '#792 Heaven slide runs on Easy layout changes only',
+  )
+  const readout = screenSrc.match(/useLayoutEffect\(\(\) => \{\s*if \(!easy\) return\s*if \(!\(tapReadoutOn \|\| missCue !== 'off'\)\)[\s\S]*?\}, \[([^\]]*)\]\)/)
+  assert.ok(readout, '#792 readout loop only runs while a cue needs it')
+  assert.equal(readout[1], 'easy, tapReadoutOn, missCue, phase')
+  assert.match(screenSrc, /'\.defend-clear-lamp',\s*'\.defend-pad\.is-planted',\s*'\.nw-skill-tray \.btn',/, '#792 readout pill avoids lamp pins')
+  const defendCss = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  assert.match(defendCss, /\.defend-page\.is-easy-watch \.defend-heaven-label \{\s*text-anchor: end;/)
+  assert.match(defendCss, /\.defend-page\.is-easy-watch g\.defend-heaven\[data-heaven-tuck='yes'\] \.defend-heaven-label \{\s*display: none;/)
+  const mapSrc792 = readFileSync(new URL('../src/components/CityMap.tsx', import.meta.url), 'utf8')
+  const easyLegend = mapSrc792.slice(mapSrc792.indexOf('isEasy(progress) ? ('), mapSrc792.indexOf('<p className="eyebrow">Eden'))
+  assert.doesNotMatch(easyLegend, /city-gift/, '#792 Easy Home drops the hidden town legend gift')
+  assert.equal(HEAVEN_POINT_792.x, 572)
+  assert.equal(HEAVEN_POINT_792.y, 36)
+}
+
 assert.equal(APP_VERSION, '1.4.527')
 assert.equal(CHANGELOG[0].version, '1.4.527', '1.4.527 is the newest row')
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.526'), '1.4.526 changelog row')

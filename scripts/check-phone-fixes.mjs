@@ -26,7 +26,9 @@ const SAVE = {
 
 const WIDTHS = [
   [375, 667],
+  [390, 844],
   [412, 915],
+  [412, 732],
   [768, 1024],
 ]
 
@@ -54,6 +56,50 @@ async function noScroll(page, label) {
     () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
   )
   assert.ok(overflow <= 1, `${label} horizontal scroll ${overflow}`)
+}
+
+const SHOTS = '/opt/cursor/artifacts/screenshots'
+
+async function assertHeavenClear(page, label, shot = '') {
+  const read = () =>
+    page.evaluate(() => {
+      const sign = document.querySelector('g.defend-heaven')
+      const a = sign?.getBoundingClientRect()
+      const rail = document.querySelector('.nw-rail .defend-abilities')
+      const b = rail?.getBoundingClientRect()
+      if (!a || !b || a.width < 1 || b.width < 1) return { hit: 'missing' }
+      const label = sign.querySelector('.defend-heaven-label')
+      const text = label && getComputedStyle(label).display !== 'none' ? label.getBoundingClientRect() : null
+      const markers = [...document.querySelectorAll('.nw-spawn-marker')]
+        .map((el) => el.getBoundingClientRect())
+        .filter((box) => box.width > 1 && box.height > 1)
+      return {
+        hit: a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top,
+        labelGap: text ? b.left - text.right : null,
+        marker: markers.some((m) => a.left < m.right && a.right > m.left && a.top < m.bottom && a.bottom > m.top),
+      }
+    })
+  let seen = await read()
+  for (let i = 0; i < 10 && seen.hit !== false; i += 1) {
+    await page.waitForTimeout(100)
+    seen = await read()
+  }
+  assert.equal(seen.hit, false, `#792 ${label} Heaven sign clear of the lamp rail`)
+  if (seen.labelGap !== null) assert.ok(seen.labelGap >= 4, `#792 ${label} Heaven label ends 4px left of the rail (${seen.labelGap})`)
+  assert.equal(seen.marker, false, `#792 ${label} Heaven sign stays off the spawn arches`)
+  if (shot) await page.screenshot({ path: `${SHOTS}/${shot}.png` })
+}
+
+async function assertReadoutClear(page, label) {
+  const hit = await page.evaluate(() => {
+    const pill = document.querySelector('.nw-tap-readout')?.getBoundingClientRect()
+    if (!pill || pill.width < 2 || pill.height < 2) return false
+    return [...document.querySelectorAll('.defend-clear-lamp')].some((lamp) => {
+      const box = lamp.getBoundingClientRect()
+      return box.width > 1 && pill.left < box.right && pill.right > box.left && pill.top < box.bottom && pill.bottom > box.top
+    })
+  })
+  assert.equal(hit, false, `#792 ${label} readout pill avoids the lamp pins`)
 }
 
 async function openNight(page) {
@@ -250,6 +296,13 @@ export async function checkPhoneFixes() {
       await page.locator('[data-map="a2"]').click()
       await page.locator('[data-map-overlay]').waitFor({ state: 'detached' })
       await page.locator('#defend-plant-first').waitFor()
+      await assertHeavenClear(
+        page,
+        `plant at ${width}x${height}`,
+        height === 915 || height === 667 || height === 844 || (width === 768 && height === 1024)
+          ? `nw-heaven-clear-${width}`
+          : '',
+      )
       const reached = await page.evaluate(() => {
         const road = document.querySelector('.defend-board')
         if (!road) return false
@@ -263,6 +316,8 @@ export async function checkPhoneFixes() {
       await plantFour(page)
       await page.locator('.defend-go').click()
       await page.locator('.defend-page.is-easy-tap').waitFor()
+      await assertHeavenClear(page, `wave at ${width}x${height}`)
+      await assertReadoutClear(page, `wave at ${width}x${height}`)
       let beside = null
       const started = Date.now()
       while (Date.now() - started < 30_000 && !beside) {
@@ -309,6 +364,8 @@ export async function checkPhoneFixes() {
 
       await page.locator('.defend-page.is-boost').waitFor({ timeout: 70_000 })
       await noScroll(page, `1.4.478 clear bar at ${width}`)
+      await assertHeavenClear(page, `round clear at ${width}x${height}`)
+      await assertReadoutClear(page, `round clear at ${width}x${height}`)
       const sparks = await page.locator('.nw-balloon').getAttribute('aria-label')
       const sparkCount = Number((sparks ?? '').replace(/[^\d]/g, '') || '0')
       assert.ok(sparkCount < 5, `1.4.478 ${width} round 1 leaves fewer than 5 sparks (saw ${sparkCount})`)

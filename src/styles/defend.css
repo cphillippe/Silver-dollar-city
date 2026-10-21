@@ -5948,3 +5948,11 @@ button.defend-new-lamp[aria-pressed='true'] {
 .defend-page.is-easy-watch .defend-board .nw-walkers .defend-raider.is-walk-in * {
   pointer-events: none;
 }
+
+/* #792 Easy: the Heaven label ends at the gate so it stays left of the lamp rail. */
+.defend-page.is-easy-watch .defend-heaven-label {
+  text-anchor: end;
+}
+.defend-page.is-easy-watch g.defend-heaven[data-heaven-tuck='yes'] .defend-heaven-label {
+  display: none;
+}
