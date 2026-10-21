@@ -29,7 +29,7 @@ export const LOT_STORY: Record<CityPlotId, LotStory> = {
   },
   observatory: {
     path: 'Sky',
-    whyEasy: 'Nora’s dome looks up. Fine-tuning and the sky’s fit live on the ridge.',
+    whyEasy: 'Nora’s dome looks up. See how God set the world just right, up on the ridge.',
     whyHard:
       'Sky Watch sits on the north ridge so you look up. Life’s dials and “why anything at all” belong with a telescope, not a creek story.',
   },
