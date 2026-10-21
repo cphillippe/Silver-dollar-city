@@ -513,6 +513,8 @@ export interface ProgressApi {
   markMet: (castId: string) => void
   setTheme: (theme: AppTheme) => void
   setEasyMode: (easy: boolean) => void
+  setLampStyle: (style: 'classic' | 'founders') => void
+  markFoundersGiftSeen: () => void
   recordTaught: (evidenceId: string, fromMatch?: boolean) => void
   recordStreetLinks: (tripleIds: string[]) => void
   upgradeBuilding: (id: CityPlotId) => void

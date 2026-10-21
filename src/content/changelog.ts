@@ -8,6 +8,19 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.521',
+    title: 'The Founder\'s Lamp is a gift',
+    when: '2026-10-20',
+    items: [
+      'If you open Silver City by January 6, 2027, the Founder\'s Lamp is yours.',
+      'A walk you already saved keeps that gift from its first days.',
+      'Settings lets you pick Classic or Founder\'s Lamp.',
+      'Home thanks you once.',
+      'Hard stays the same.',
+      'Refs #737.',
+    ],
+  },
+  {
     version: '1.4.520',
     title: 'Find the gems keeps the picture',
     when: '2026-10-20',
