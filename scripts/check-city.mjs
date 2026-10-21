@@ -1712,7 +1712,17 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.525')
+assert.equal(APP_VERSION, '1.4.526')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.526'), '1.4.526 changelog row')
+assert.equal(CHANGELOG[0].version, '1.4.526', '1.4.526 is the newest row')
+assert.doesNotMatch(
+  latestChange('1.4.526').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.526 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.526').items.join('\n'), /Refs #756/)
+assert.match(latestChange('1.4.526').items.join('\n'), /Hard/)
+assert.match(latestChange('1.4.526').items.join('\n'), /Easy/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.525'), '1.4.525 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.525').items.join('\n'),
@@ -7540,7 +7550,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   const screen435 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
   const actors435 = readFileSync(new URL('../src/components/DefendNightActors.tsx', import.meta.url), 'utf8')
   const css435 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
-  assert.match(screen435, /easyPointerTapGate\(easy, raider, live\.current\.raiders, waveIndexRef\.current(?:, tuneRef\.current\.armorFrom)?\)/)
+  assert.match(screen435, /easyPointerTapGate\(easy, raider, (?:live\.current\.raiders|pool), waveIndexRef\.current(?:, tuneRef\.current\.armorFrom)?\)/)
   assert.match(
     screen435,
     /easy\s*\?\s*easyLiveSpawnT\(tune\.speedScale \* \(boss \? BOSS_PACE : walkerPace\(gait\)\)\)/,
@@ -8895,7 +8905,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   const liveTap465 = screen465.slice(screen465.indexOf('function fireAtRaider'), screen465.indexOf('function fireBest'))
   assert.match(
     liveTap465,
-    /const gate = easyPointerTapGate\(easy, raider, live\.current\.raiders, waveIndexRef\.current, tuneRef\.current\.armorFrom\)\s*if \(gate === 'miss'\)/,
+    /const gate = easyPointerTapGate\(easy, raider, (?:live\.current\.raiders|pool), waveIndexRef\.current, tuneRef\.current\.armorFrom\)\s*if \(gate === 'miss'\)/,
     '1.4.465 the live tap misses when the glow gate misses',
   )
   for (const round of [0, 1, 2, 3, 5]) {
@@ -9662,7 +9672,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(capped.hearts, 1)
   assert.equal(applyEasyPaceLeaks(3, 1, 0, 0, 0, true).lostHearts, 0, '1.4.409 a shield still forgives')
   const screen409 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
-  assert.match(screen409, /easyPointerTapGate\(easy, raider, live\.current\.raiders, waveIndexRef\.current(?:, tuneRef\.current\.armorFrom)?\)/)
+  assert.match(screen409, /easyPointerTapGate\(easy, raider, (?:live\.current\.raiders|pool), waveIndexRef\.current(?:, tuneRef\.current\.armorFrom)?\)/)
   assert.match(
     readFileSync(new URL('../src/lib/defend.ts', import.meta.url), 'utf8'),
     /return cueTapStrike\(easy, cue\?\.id === raider\.id\)/,
@@ -18390,6 +18400,252 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.equal(edgeFit.scale, SPAWN_MIN_SCALE)
   assert.equal(edgeFit.x, 100)
   assert.equal(edgeFit.y, 192)
+}
+
+// Night Watch 1.4.526: Easy walkers walk onto the map through their arch. Draw only. Hard is unchanged.
+{
+  const walk526 = await import('../src/nightWatch/maps/walkIn.ts')
+  const { DEFEND_PATH: path526, pathPoint: point526 } = await import('../src/nightWatch/path/data.ts')
+  const { nightMapFromPack: pack526 } = await import('../src/nightWatch/maps/fromPack.ts')
+  const defend526 = await import('../src/lib/defend.ts')
+  const walkers526 = await import('../src/nightWatch/walkers.ts')
+  const rounds526 = await import('../src/nightWatch/rounds.ts')
+  const plate526 = { width: 798, height: 1134 }
+  assert.equal(walk526.WALK_IN_LEAD_U, 96, '1.4.526 walkers start 96 map units past the edge')
+  assert.equal(walk526.WALK_IN_MIN_MS, 600)
+  assert.equal(walk526.WALK_IN_MAX_MS, 1800)
+  assert.equal(walk526.WALK_IN_TAP_MAX_MS, 840, '1.4.526 the tap lock is 0.84 s at most')
+  assert.equal(walk526.WALK_IN_SPAWN_T_CAP, defend526.EASY_ON_SCREEN_T, '1.4.526 the run-in cap is the live spawn cap')
+
+  const roads526 = (id) => {
+    if (id === 'a2') return [{ id: 'main', points: path526 }]
+    const file = id === 'far-hills' ? 'map02.json' : `${id}.json`
+    const pack = pack526(JSON.parse(readFileSync(new URL(`../src/nightWatch/maps/maze/${file}`, import.meta.url), 'utf8')))
+    assert.equal(pack.width, plate526.width, `1.4.526 ${id} plate width`)
+    assert.equal(pack.height, plate526.height, `1.4.526 ${id} plate height`)
+    return pack.roads
+  }
+  const r1T526 = defend526.easyLiveSpawnT(defend526.waveCombat(0, true).speedScale * walkers526.walkerPace('plain'))
+  assert.equal(r1T526, 0.5, '1.4.526 round 1 walkers step out at t 0.5')
+  const ms526 = (entry, points, t) => walk526.walkInMs(walk526.walkInLength(entry, points, t))
+  // map, road, side, edge x/y, start x/y, run ms at t 0, round 1, and the 0.55 cap.
+  const table526 = [
+    ['a2', 'main', 'right', 798.0, 1097.0, 892.1, 1115.8, 613, 740, 753],
+    ['far-hills', 'main', 'bottom', 175.6, 1134.0, 180.2, 1229.9, 613, 815, 835],
+    ['map03', 'west', 'bottom', 399.0, 1134.0, 399.0, 1230.0, 613, 726, 738],
+    ['map03', 'east', 'bottom', 399.0, 1134.0, 399.0, 1230.0, 613, 726, 738],
+    ['map04', 'a', 'bottom', 319.2, 1134.0, 326.5, 1229.7, 613, 730, 741],
+    ['map04', 'b', 'bottom', 478.8, 1134.0, 471.5, 1229.7, 613, 730, 741],
+    ['map05', 'west', 'bottom', 191.5, 1134.0, 211.0, 1228.0, 613, 702, 710],
+    ['map05', 'eastIn', 'bottom', 606.5, 1134.0, 588.8, 1228.4, 613, 704, 713],
+    ['map05', 'eastOut', 'bottom', 606.5, 1134.0, 588.8, 1228.4, 613, 700, 709],
+    ['map06', 'w', 'left', 0.0, 1088.6, -92.4, 1114.8, 613, 700, 709],
+    ['map06', 'c', 'bottom', 399.0, 1134.0, 394.4, 1229.9, 613, 699, 707],
+    ['map06', 'e', 'right', 798.0, 1088.6, 890.4, 1114.8, 613, 700, 709],
+  ]
+  const seen526 = []
+  for (const id of ['a2', 'far-hills', 'map03', 'map04', 'map05', 'map06']) {
+    for (const road of roads526(id)) {
+      const entry = walk526.walkInEntry(road.points, plate526)
+      const row = [
+        id,
+        road.id,
+        entry.side,
+        Number(entry.edge.x.toFixed(1)),
+        Number(entry.edge.y.toFixed(1)),
+        Number(entry.start.x.toFixed(1)),
+        Number(entry.start.y.toFixed(1)),
+        ms526(entry, road.points, 0),
+        ms526(entry, road.points, r1T526),
+        ms526(entry, road.points, walk526.WALK_IN_SPAWN_T_CAP),
+      ]
+      seen526.push(row)
+      assert.ok(
+        Math.abs(Math.hypot(entry.start.x - entry.edge.x, entry.start.y - entry.edge.y) - 96) < 1e-6,
+        `1.4.526 ${id}:${road.id} starts 96 u past its edge`,
+      )
+      assert.ok(Math.abs(Math.hypot(entry.nx, entry.ny) - 1) < 1e-9, `1.4.526 ${id}:${road.id} entry is a unit step`)
+      const p0 = road.points[0]
+      const back = Math.hypot(p0.x - entry.start.x, p0.y - entry.start.y)
+      const ahead = Math.hypot(point526(0.01, road.points).x - entry.start.x, point526(0.01, road.points).y - entry.start.y)
+      assert.ok(ahead > back, `1.4.526 ${id}:${road.id} walks along the road, not away from it`)
+      const onPlate = (p) => p.x >= 0 && p.y >= 0 && p.x <= plate526.width && p.y <= plate526.height
+      assert.equal(onPlate(entry.start), false, `1.4.526 ${id}:${road.id} first frame is off the map`)
+      assert.ok(
+        entry.edge.x <= 0.5 || entry.edge.y <= 0.5 || entry.edge.x >= plate526.width - 0.5 || entry.edge.y >= plate526.height - 0.5,
+        `1.4.526 ${id}:${road.id} edge is on the plate rim`,
+      )
+      const arch = spawnMarkersFor(id).find((marker) => {
+        const marked = roads526(id).find((item) => item.id === marker.roadId)
+        return marked && Math.hypot(marked.points[0].x - p0.x, marked.points[0].y - p0.y) < 1.5
+      })
+      assert.ok(arch, `1.4.526 ${id}:${road.id} walks in through its arch`)
+      const trail = walk526.walkInTrail(entry, road.points, 0.2)
+      const archGap = Math.min(
+        ...trail.slice(1).map((b, i) => {
+          const a = trail[i]
+          const dx = b.x - a.x
+          const dy = b.y - a.y
+          const k = Math.max(0, Math.min(1, ((arch.x - a.x) * dx + (arch.y - a.y) * dy) / (dx * dx + dy * dy || 1)))
+          return Math.hypot(arch.x - (a.x + k * dx), arch.y - (a.y + k * dy))
+        }),
+      )
+      assert.ok(archGap <= SPAWN_BOX_U, `1.4.526 ${id}:${road.id} trail passes its arch (${archGap.toFixed(1)} u)`)
+    }
+  }
+  assert.deepEqual(seen526, table526, '1.4.526 per-road entry, start, and run-in table')
+
+  const ts526 = new Set()
+  for (let wave = 0; wave < 40; wave += 1) {
+    const scale = defend526.waveCombat(wave, true).speedScale
+    for (const pace of [walkers526.walkerPace('plain'), walkers526.walkerPace('fast'), walkers526.walkerPace('tough'), walkers526.BOSS_PACE]) {
+      ts526.add(defend526.easyLiveSpawnT(scale * pace))
+    }
+  }
+  assert.ok(rounds526.EASY_ROUNDS.length <= 40, '1.4.526 the sweep covers every Easy round')
+  let low526 = Infinity
+  let high526 = 0
+  for (const t of ts526) {
+    assert.ok(t >= 0 && t <= walk526.WALK_IN_SPAWN_T_CAP, `1.4.526 live spawn t ${t} is inside the run-in cap`)
+    for (const id of ['a2', 'far-hills', 'map03', 'map04', 'map05', 'map06']) {
+      for (const road of roads526(id)) {
+        const ms = ms526(walk526.walkInEntry(road.points, plate526), road.points, t)
+        low526 = Math.min(low526, ms)
+        high526 = Math.max(high526, ms)
+        assert.ok(ms >= 600 && ms <= 1800, `1.4.526 ${id}:${road.id} t ${t} runs ${ms} ms`)
+        assert.ok(ms <= walk526.WALK_IN_TAP_MAX_MS, `1.4.526 ${id}:${road.id} t ${t} run-in fits the 0.84 s tap lock`)
+        assert.equal(walk526.walkInTapLockMs(ms), ms, `1.4.526 ${id}:${road.id} t ${t} the lock is the whole run-in`)
+      }
+    }
+  }
+  assert.equal(low526, 613, '1.4.526 shortest live run-in')
+  assert.equal(high526, 821, '1.4.526 longest live run-in')
+
+  assert.equal(walk526.walkInMs(0), 600)
+  assert.equal(walk526.walkInMs(Number.NaN), 600)
+  assert.equal(walk526.walkInMs(1e9), 1800, '1.4.526 the run-in never passes 1.8 s')
+  assert.equal(walk526.walkInMs(1000), 740)
+  assert.equal(walk526.walkInTapLockMs(700), 700)
+  assert.equal(walk526.walkInTapLockMs(1800), 840)
+  assert.equal(walk526.walkInEase(0), 0)
+  assert.equal(walk526.walkInEase(0.5), 0.5)
+  assert.equal(walk526.walkInEase(1), 1)
+  assert.equal(walk526.walkInEase(2), 1)
+  const inner526 = walk526.walkInEntry([{ x: 400, y: 1000 }, { x: 400, y: 900 }], plate526)
+  assert.deepEqual(inner526.edge, { x: 400, y: 1134 }, '1.4.526 a road that starts inside traces back to the rim')
+  assert.deepEqual(inner526.start, { x: 400, y: 1230 })
+  assert.equal(inner526.side, 'bottom')
+
+  const clock526 = walk526.createWalkInClock(() => path526, () => plate526)
+  const a2Entry526 = walk526.walkInEntry(path526, plate526)
+  const walker526 = { id: 7, t: 0.3 }
+  const sim526 = point526(0.3, path526)
+  const run526 = ms526(a2Entry526, path526, 0.3)
+  assert.deepEqual(clock526.drawAt(walker526, sim526, 1000), a2Entry526.start, '1.4.526 first frame is the start')
+  assert.equal(clock526.entering(walker526, 1000 + run526 - 1), true)
+  assert.equal(clock526.tapLocked(walker526, 1000 + run526 - 1), true)
+  assert.equal(clock526.entering(walker526, 1000 + run526), false)
+  assert.equal(clock526.tapLocked(walker526, 1000 + run526), false)
+  assert.deepEqual(clock526.drawAt(walker526, sim526, 1000 + run526), sim526, '1.4.526 the run-in ends on the sim point')
+  const mid526 = clock526.drawAt(walker526, sim526, 1000 + run526 / 2)
+  assert.ok(Math.hypot(mid526.x - sim526.x, mid526.y - sim526.y) > 1, '1.4.526 mid run-in is off the sim point')
+  const turned526 = { id: 7, t: 0.3, turned: 'love' }
+  assert.deepEqual(clock526.drawAt(turned526, sim526, 1000 + 10), sim526, '1.4.526 a turned walker draws at its sim point')
+  assert.equal(clock526.tapLocked(turned526, 1000 + 10), false)
+  for (const odd of [{ id: 8, t: 0.1, mini: true }, { id: 9, t: 0.6 }, { id: 10, t: 0.2, turned: 'love' }]) {
+    assert.equal(clock526.see(odd, 2000), null, `1.4.526 walker ${odd.id} has no run-in`)
+    assert.equal(clock526.entering(odd, 2000), false)
+    assert.equal(clock526.tapLocked(odd, 2000), false)
+  }
+  clock526.reset()
+  assert.deepEqual(clock526.drawAt(walker526, sim526, 5000), a2Entry526.start, '1.4.526 a new wave starts the run-in over')
+
+  const screen526 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
+  const actors526 = readFileSync(new URL('../src/components/DefendNightActors.tsx', import.meta.url), 'utf8')
+  const board526 = readFileSync(new URL('../src/components/DefendNightBoard.tsx', import.meta.url), 'utf8')
+  const css526 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
+  const prove526 = readFileSync(new URL('./check-live-prove.mjs', import.meta.url), 'utf8')
+  const fire526 = screen526.slice(screen526.indexOf('function fireAtRaider'), screen526.indexOf('function fireBest'))
+  assert.match(
+    fire526,
+    /const tapNow = performance\.now\(\)\s*if \(walkInHeld\(raider, tapNow\)\) return\s*const pool = tapPool\(live\.current\.raiders, tapNow\)\s*const gate = easyPointerTapGate\(easy, raider, pool,/,
+    '1.4.526 a tap on an entering walker does nothing, and the gate reads only tappable walkers',
+  )
+  assert.match(fire526, /easyGateMissReason\(raider, pool,/, '1.4.526 the dark-miss reason reads only tappable walkers')
+  const best526 = screen526.slice(screen526.indexOf('function fireBest'), screen526.indexOf('function retry'))
+  assert.match(best526, /const faces = tapPool\(live\.current\.raiders\)/, '1.4.526 a board tap is not near an entering walker')
+  assert.match(screen526, /nightEnemies\.cueTarget\(tapPool\(raiders, walkNow\)/, '1.4.526 the cue skips entering walkers')
+  assert.match(screen526, /return easy && walkInClock\(\)\.tapLocked\(raider, now\)/, '1.4.526 the tap lock is Easy only')
+  assert.match(screen526, /const walkIn: DefendWalkIn \| undefined = easy\s*\?/, '1.4.526 Hard gets no run-in')
+  assert.equal((screen526.match(/walkInRef\.current\?\.reset\(\)/g) || []).length, 2, '1.4.526 each wave and retry start the run-in clock over')
+  const spawnAt526 = screen526.indexOf('        walking.push({\n          id,\n          t: easy')
+  assert.ok(spawnAt526 > 0, '1.4.526 the spawn block is still there')
+  const spawnEnd526 = screen526.indexOf('live.current.spawned += 1', spawnAt526) + 'live.current.spawned += 1'.length
+  assert.equal(
+    createHash('sha256').update(screen526.slice(spawnAt526, spawnEnd526)).digest('hex'),
+    'd062ef4cf2a4d8df89d75277078dfa076099c5564d3bd0ac47544db5fa05dde8',
+    '1.4.526 the spawn line is byte-identical',
+  )
+  assert.match(actors526, /const at = walkIn \? walkIn\.drawAt\(raider\) : raiderAt\(raider\)/, '1.4.526 only the draw moves')
+  assert.match(actors526, /const isTap = easyTap && !raider\.turned && !held/)
+  assert.match(actors526, /pointerEvents=\{held \? 'none' : undefined\}/)
+  assert.match(
+    actors526,
+    /\{walkIn \? \(\s*<g className="nw-walkers" clipPath="url\(#nw-walk-clip\)" data-walk-clip="plate">\s*<clipPath id="nw-walk-clip">\s*<rect x=\{0\} y=\{0\} width=\{walkIn\.plate\.width\} height=\{walkIn\.plate\.height\} \/>/,
+    '1.4.526 Easy walkers are clipped to the plate',
+  )
+  assert.match(actors526, /transform=\{`translate\(\$\{raiderAt\(tapTarget\)\.x\} \$\{raiderAt\(tapTarget\)\.y\}\)`\}/, '1.4.526 the cue ring stays on the sim point')
+  assert.match(board526, /const tapPool = walkIn \? raiders\.filter\(\(raider\) => !walkIn\.held\(raider\)\) : raiders/)
+  assert.match(board526, /easyFaceGlows\(raider, tapPool, roundIndex, armorFrom\)/)
+  assert.match(css526, /\.defend-page\.is-easy-watch \.defend-raider \{\s*animation: none;\s*\}/, '1.4.526 no fade on Easy')
+  assert.match(
+    css526,
+    /\.defend-page\.is-easy-watch \.defend-board \.nw-walkers \.defend-raider\.is-walk-in,\s*\.defend-page\.is-easy-watch \.defend-board \.nw-walkers \.defend-raider\.is-walk-in \* \{\s*pointer-events: none;\s*\}/,
+    '1.4.526 an entering walker passes taps through',
+  )
+  assert.match(css526, /\.defend-raider \{[^}]*animation: defend-gate-in 250ms ease-out both/, '1.4.526 Hard keeps the gate fade')
+
+  const locked526 = {
+    'src/nightWatch/livePace.ts': '50b1decc2d1e3a7a203a25ee209861a9f07cfcca8c37c093821ddca2e74bb780',
+    'src/nightWatch/r1r6-424.json': '11bf9281c59d3ae203f1197a1c0ce59e6201b416f90a02164cb5aef20d3fb18d',
+    'src/nightWatch/path/data.ts': '15c4f4efdb03e922ef7489c9b0c77e27646288c3eadb627d096beb0bab702bd8',
+    'src/nightWatch/rounds.ts': '3615cfd4fde62d7f4a89b67af975e6ddd9c2bed22cee82e034e2a6c2340babc8',
+    'src/lib/defend.ts': '1788dc9a422ae3a8c5a91d4b02306f8d5c19ef7f851661fe18ca2402c5e65b41',
+    'src/nightWatch/walkers.ts': '46721dab0a247fbc490d66bf7be7231a22428c4b094a8585f0de1a8eafc2325f',
+  }
+  for (const [rel, sha] of Object.entries(locked526)) {
+    const hash = createHash('sha256').update(readFileSync(new URL(`../${rel}`, import.meta.url))).digest('hex')
+    assert.equal(hash, sha, `1.4.526 ${rel} stays byte-identical`)
+  }
+  for (const rel of [
+    'src/nightWatch/livePace.ts',
+    'src/nightWatch/path/data.ts',
+    'src/nightWatch/rounds.ts',
+    'src/nightWatch/walkers.ts',
+    'src/lib/defend.ts',
+    'src/lib/lampPlace.ts',
+    'scripts/check-seed-fire.mjs',
+  ]) {
+    assert.doesNotMatch(readFileSync(new URL(`../${rel}`, import.meta.url), 'utf8'), /walkIn|WalkIn/, `1.4.526 ${rel} has no walk-in wiring`)
+  }
+  assert.doesNotMatch(readFileSync(new URL('../src/nightWatch/maps/walkIn.ts', import.meta.url), 'utf8'), /from 'react'|livePace|nightEnemies/, '1.4.526 the run-in is a pure draw module')
+
+  const walkBody526 = prove526.slice(prove526.indexOf('const WALK_STEP_MS'), prove526.indexOf('export async function hardDrawSha'))
+  assert.ok(walkBody526.includes('async function checkWalkIn('), '1.4.526 the live prove walks every map in')
+  assert.doesNotMatch(walkBody526, /\.click\(/, '1.4.526 the walk-in prove uses real pointer events')
+  assert.match(walkBody526, /pointerTap\(/)
+  assert.match(prove526, /async function pointerTap\(page, x, y\) \{\s*await page\.mouse\.move\(x, y\)\s*await page\.mouse\.down\(\)\s*await page\.mouse\.up\(\)/)
+  assert.match(walkBody526, /375x667,412x915,768x1024/, '1.4.526 the prove runs at 375, 412, and 768')
+  assert.match(walkBody526, /every road start walked in/)
+  assert.match(walkBody526, /walker px outside the map/)
+  assert.match(walkBody526, /first visible frame \$\{frame\} touches the map edge/)
+  assert.match(walkBody526, /does not paint over the tray, HUD, or rail/)
+  assert.match(walkBody526, /entering dark walker tap is not a dark miss/)
+  assert.match(walkBody526, /the plant landed during the run-in/)
+  assert.match(walkBody526, /the lamp tap landed during the run-in/)
+  const live526 = prove526.slice(prove526.indexOf('export async function checkLiveProve'))
+  assert.match(live526, /await checkHardDraw\(\)\s*await checkWalkIn\(browser, port, errors\)\s*assert\.equal\(errors\.join/, '1.4.526 the full prove runs the walk-in before the error check')
+  assert.match(prove526, /Hard draw is byte-identical to 1\.4\.525/)
 }
 
 const bossTapScan = readFileSync(new URL('./check-seed-fire.mjs', import.meta.url), 'utf8')
