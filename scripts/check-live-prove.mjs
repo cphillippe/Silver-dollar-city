@@ -18,7 +18,7 @@ import { chromium } from '@playwright/test'
 import { SAVE_KIND, emptyProgress } from '../src/lib/save.ts'
 import { SAVE_SCHEMA_VERSION, STORAGE_KEY } from '../src/config/app.ts'
 import { DEFEND_PATH, pathPoint } from '../src/nightWatch/path/data.ts'
-import { walkInEntry, walkInLength, walkInMs, walkInTapLockMs } from '../src/nightWatch/maps/walkIn.ts'
+import { WALK_IN_TAP_MAX_MS, walkInEntry, walkInLength, walkInMs, walkInTapLockMs } from '../src/nightWatch/maps/walkIn.ts'
 import { nightMapFromPack } from '../src/nightWatch/maps/fromPack.ts'
 import { EASY_ROUNDS } from '../src/nightWatch/rounds.ts'
 import { gaitForSlot } from '../src/nightWatch/walkers.ts'
@@ -4124,8 +4124,11 @@ async function openWalkMap(browser, port, errors, id, width, height, extra) {
     (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
     { key: STORAGE_KEY, save: SAVE },
   )
+  // The game loop reads its frame time from requestAnimationFrame, so frames get the held clock too.
+  // Frozen, the game clock stands still. Each step is one game tick.
   await context.addInitScript(() => {
     const real = performance.now.bind(performance)
+    const raf = window.requestAnimationFrame.bind(window)
     let hold = null
     window.__nwClock = {
       freeze() {
@@ -4136,6 +4139,7 @@ async function openWalkMap(browser, port, errors, id, width, height, extra) {
       },
     }
     performance.now = () => hold ?? real()
+    window.requestAnimationFrame = (callback) => raf(() => callback(performance.now()))
   })
   const page = await context.newPage()
   const spawns = []
@@ -4157,17 +4161,33 @@ async function openWalkMap(browser, port, errors, id, width, height, extra) {
   await page.locator('.defend-go').waitFor()
   await pointerBox(page, '.defend-go')
   await page.evaluate(() => window.__nwClock.freeze())
+  await walkAtTop(page)
   return { context, page, spawns }
 }
 
+/** Steps the game `ms` in 1/60 s ticks, then lets React paint. Each tick is one seeded step. */
 async function walkStep(page, ms) {
-  await page.evaluate((step) => window.__nwClock.step(step), ms)
-  await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))))
+  await page.evaluate(async ({ total, tick }) => {
+    const frame = () => new Promise((done) => requestAnimationFrame(() => done()))
+    let left = total
+    while (left > 1e-6) {
+      const step = Math.min(tick, left)
+      window.__nwClock.step(step)
+      left -= step
+      await frame()
+    }
+    await frame()
+    await frame()
+  }, { total: ms, tick: WALK_STEP_MS })
 }
 
-/** The pause sits under the board on a phone. Pausing scrolls to it, so scroll back before measuring. */
+/** The debug pause sits under the board on a phone. Pausing scrolls to it, so scroll back before measuring. */
 async function pauseAtTop(page) {
   await pauseWalkers(page)
+  await walkAtTop(page)
+}
+
+async function walkAtTop(page) {
   await page.waitForFunction(() => {
     let moved = false
     for (const node of [document.scrollingElement, ...document.querySelectorAll('*')]) {
@@ -4180,23 +4200,27 @@ async function pauseAtTop(page) {
   }, null, { polling: 50, timeout: 3000 })
 }
 
-/** Resume, wait for a walker that has not been seen, pause. The clock is frozen, so it is still at its first frame. */
+/** Ticks the game until a walker that has not been seen is drawn. That paint is its first frame. */
 async function nextWalkIn(run, seen, label) {
-  await resumeWalkers(run.page)
-  const handle = await run.page.waitForFunction(
-    (known) => {
-      for (const node of document.querySelectorAll('.defend-raider[data-walk-in="yes"]')) {
-        const id = node.getAttribute('data-walk-id')
-        if (id && !known.includes(id)) return id
+  const found = await run.page.evaluate(
+    async ({ known, tick, limit }) => {
+      const frame = () => new Promise((done) => requestAnimationFrame(() => done()))
+      const fresh = () =>
+        [...document.querySelectorAll('.defend-raider[data-walk-in="yes"]')].some((node) => {
+          const id = node.getAttribute('data-walk-id')
+          return id && !known.includes(id)
+        })
+      for (let i = 0; i < limit; i += 1) {
+        if (fresh()) return true
+        window.__nwClock.step(tick)
+        await frame()
+        await frame()
       }
-      return null
+      return fresh()
     },
-    [...seen],
-    { timeout: 40000, polling: 100 },
-  ).catch(() => null)
-  assert.ok(handle, `${label} a new walker walks in`)
-  await pauseAtTop(run.page)
-  await walkStep(run.page, 0)
+    { known: [...seen], tick: WALK_STEP_MS, limit: 2400 },
+  )
+  assert.ok(found, `${label} a new walker walks in`)
   const fresh = await run.page.evaluate((known) => {
     return [...document.querySelectorAll('.defend-raider[data-walk-in="yes"]')]
       .map((node) => ({ id: node.getAttribute('data-walk-id') || '', transform: node.getAttribute('transform') || '' }))
@@ -4537,10 +4561,8 @@ async function checkWalkInTaps(browser, port, errors) {
       return hit?.getAttribute('data-walker-id') === walkerId ? { x, y } : null
     }
     let button = await run.page.evaluate(darkButton, target.id)
-    if (!button) {
-      await resumeWalkers(run.page)
-      await run.page.waitForFunction(darkButton, target.id, { timeout: 15000, polling: 50 }).catch(() => null)
-      await pauseAtTop(run.page)
+    for (let ms = 0; !button && ms < 15000; ms += 100) {
+      await walkStep(run.page, 100)
       button = await run.page.evaluate(darkButton, target.id)
     }
     assert.ok(button, `${label} after the run-in the walker is a dark face that takes the pointer`)
@@ -4594,6 +4616,59 @@ async function checkWalkInTaps(browser, port, errors) {
     assert.equal((await walkHeldState(run.page, row.id)).walkIn, 'yes', `${label} the lamp tap landed during the run-in`)
     assert.equal(missSum(after) + after.hits + after.stray, missSum(before) + before.hits + before.stray, `${label} the lamp tap is not a walker tap`)
     rows.push({ check: 'r5 lamp tap in run-in', map, run: spawn.runMs, card: 'open' })
+    await run.context.close()
+  }
+
+  {
+    const label = `1.4.526 ${map} debug freeze`
+    const run = await openWalkMap(browser, port, errors, map, 375, 667, '&nwRound=5&nwLamps=0')
+    const [row] = await nextWalkIn(run, new Set(), label)
+    const spawn = walkSpawnRoad(map, row.line)
+    const lockMs = walkInTapLockMs(spawn.runMs)
+    await walkStep(run.page, Math.round(lockMs / 3))
+    await pauseAtTop(run.page)
+    const before = await walkerFaceNow(run.page, row.id)
+    await walkStep(run.page, 3000)
+    const held = await walkHeldState(run.page, row.id)
+    const after = await walkerFaceNow(run.page, row.id)
+    assert.equal(held.walkIn, 'yes', `${label} 3 s of wall clock under the debug freeze leave the walker walking in`)
+    assert.match(held.cls, /is-walk-in/, `${label} and still held`)
+    assert.ok(Math.hypot(after.x - before.x, after.y - before.y) < 0.01, `${label} and drawn where it was`)
+    await resumeWalkers(run.page)
+    await walkAtTop(run.page)
+    await walkStep(run.page, lockMs)
+    assert.doesNotMatch((await walkHeldState(run.page, row.id)).cls, /is-walk-in/, `${label} the lock ends once the game clock runs again`)
+    rows.push({ check: 'debug freeze holds the run-in', map, run: spawn.runMs, lock: lockMs, frozeMs: 3000 })
+    await run.context.close()
+  }
+
+  {
+    const label = '1.4.526 a2 r1 long run-in'
+    const run = await openWalkMap(browser, port, errors, 'a2', 375, 667, '&nwRound=1&nwLamps=0')
+    const [row] = await nextWalkIn(run, new Set(), label)
+    const spawn = walkSpawnRoad('a2', row.line)
+    assert.ok(spawn.runMs > WALK_IN_TAP_MAX_MS, `${label} runs ${spawn.runMs} ms, past the 0.84 s lock`)
+    await walkStep(run.page, WALK_IN_TAP_MAX_MS + 20)
+    const state = await walkHeldState(run.page, row.id)
+    assert.equal(state.walkIn, 'yes', `${label} is still walking in at 860 ms`)
+    assert.doesNotMatch(state.cls, /is-walk-in/, `${label} is no longer held`)
+    assert.equal(state.tapButton, 1, `${label} has a tap button`)
+    const face = await walkClient(run.page, await walkerFaceNow(run.page, row.id))
+    const seen = (await walkMapRect(run.page))?.rect
+    assert.ok(
+      face && seen && face.x > seen.left && face.x < seen.right && face.y > seen.top && face.y < seen.bottom,
+      `${label} drawn face is on the visible map ${JSON.stringify({ face, seen })}`,
+    )
+    const tap = await run.page.evaluate((walkerId) => {
+      const box = document.querySelector(`.defend-walker-tap[data-walker-id="${walkerId}"]`)?.getBoundingClientRect()
+      return box ? { x: box.left + box.width / 2, y: box.top + box.height / 2 } : null
+    }, row.id)
+    assert.ok(tap && Math.hypot(tap.x - face.x, tap.y - face.y) <= 2, `${label} tap button sits on the drawn face ${JSON.stringify({ tap, face })}`)
+    const before = await readMissScore(run.page)
+    await pointerTap(run.page, face.x, face.y)
+    await run.page.waitForFunction((hits) => Number(document.querySelector('.nw-tap-readout')?.getAttribute('data-tap-hits') ?? '0') > hits, before.hits, { timeout: 3000 })
+    assert.equal((await walkHeldState(run.page, row.id)).walkIn, 'yes', `${label} the hit landed during the run-in`)
+    rows.push({ check: 'a2 r1 tap at the drawn spot after 0.84 s', run: spawn.runMs, tapAtMs: WALK_IN_TAP_MAX_MS + 20, hit: 'yes' })
     await run.context.close()
   }
   return rows
