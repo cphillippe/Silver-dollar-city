@@ -467,27 +467,17 @@ async function walkUntil(page, target, winOnArrival = false) {
 async function hugFather(page) {
   const pad = page.locator('[data-run-pad="hold"]')
   await pad.waitFor()
+  const box = await pad.boundingBox()
+  assert.ok(box, 'run pad left the screen')
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+  await page.mouse.down()
   const start = Date.now()
-  let holding = false
   while (Date.now() - start < 12000) {
     if (await page.locator('.play.is-father-run.is-win').count()) {
-      if (holding) await page.mouse.up().catch(() => {})
+      await page.mouse.up().catch(() => {})
       return
     }
-    const label = await pad.getAttribute('aria-label').catch(() => '')
-    if (!holding) {
-      const box = await pad.boundingBox()
-      assert.ok(box, 'run pad left the screen')
-      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
-      await page.mouse.down()
-      holding = true
-    } else if (label === 'Tap' || (label && label.includes('Let go'))) {
-      await page.mouse.up()
-      holding = false
-      await page.waitForTimeout(40)
-    } else {
-      await page.waitForTimeout(40)
-    }
+    await page.waitForTimeout(40)
   }
   await page.mouse.up().catch(() => {})
   throw new Error('father run did not hug')

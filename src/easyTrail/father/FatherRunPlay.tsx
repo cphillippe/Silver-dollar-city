@@ -28,9 +28,10 @@ import {
   hugBeforeSpeech,
   MIN_DASHES_TO_HUG,
   runOutcome,
-  SPEECH_PHRASE_MS,
+  speechDurationMs,
   speechIndexAt,
   speechPhraseAt,
+  stepEasyHold,
   stumbleIfHeldThrough,
 } from './fatherRun'
 import { GEM_BURST, playGemPop, prefersReducedMotion } from '../../lib/juice'
@@ -88,6 +89,10 @@ export function FatherRunPlay({
   const playRef = useRef<HTMLDivElement>(null)
   const padRef = useRef<HTMLButtonElement>(null)
   const padPointer = useRef<number | null>(null)
+  const assistRef = useRef(false)
+  const missAtRef = useRef(0)
+  const armTimer = useRef(0)
+  const [arming, setArming] = useState(false)
   const easy = typeof document !== 'undefined' && document.documentElement.dataset.easy === 'on'
   const easyRef = useRef(easy)
   easyRef.current = easy
@@ -147,8 +152,10 @@ export function FatherRunPlay({
     }, 450)
   }
 
-  function resetRound(nextAttempt: number) {
-    const start = fatherStartProgress(nextAttempt)
+  function resetRound(nextAttempt: number, startAt?: number) {
+    const assisted = startAt !== undefined
+    assistRef.current = assisted && easyRef.current
+    const start = assisted ? startAt : fatherStartProgress(nextAttempt)
     holdingRef.current = false
     clockOn.current = false
     lastTick.current = 0
@@ -172,12 +179,19 @@ export function FatherRunPlay({
     inWindowRef.current = false
     dashedWindowRef.current = false
     padPointer.current = null
-    flashToast(nextAttempt > 0 ? 'Closer this time. Hold — then press the glow.' : '')
+    missAtRef.current = 0
+    window.clearTimeout(armTimer.current)
+    setArming(false)
+    const closer = easyRef.current
+      ? 'Closer this time. Hold to run!'
+      : 'Closer this time. Hold — then press the glow.'
+    flashToast(nextAttempt > 0 ? closer : '')
   }
 
   function replay() {
+    assistRef.current = false
     resetRound(0)
-    flashToast('One more run. Hold — then press the glow.')
+    flashToast(easyRef.current ? 'One more run. Hold to run!' : 'One more run. Hold — then press the glow.')
   }
 
   useEffect(() => {
@@ -201,6 +215,51 @@ export function FatherRunPlay({
       const live = phaseRef.current
       if (live === 'hug' || live === 'miss') return
       if (!clockOn.current) return
+      if (easyRef.current) {
+        const prevEasy = lastTick.current || now
+        lastTick.current = now
+        const easyDt = Math.min(0.05, (now - prevEasy) / 1000)
+        const stepped = stepEasyHold(
+          {
+            progress: progressRef.current,
+            elapsedMs: elapsedRef.current,
+            dashes: dashCount.current,
+            heldMs: heldMsRef.current,
+            wasInWindow: inWindowRef.current,
+            dashedThisWindow: dashedWindowRef.current,
+            holding: holdingRef.current,
+          },
+          easyDt,
+          assistRef.current,
+        )
+        progressRef.current = stepped.progress
+        elapsedRef.current = stepped.elapsedMs
+        dashCount.current = stepped.dashes
+        heldMsRef.current = stepped.heldMs
+        inWindowRef.current = stepped.wasInWindow
+        dashedWindowRef.current = stepped.dashedThisWindow
+        setElapsed(stepped.elapsedMs)
+        setProgress(stepped.progress)
+        if (stepped.dashedNow) {
+          setDashFlash(true)
+          playGemPop('find')
+          setScore((pts) => pts + FATHER_RUN_DASH_SCORE)
+          setPlusFlash(`+${FATHER_RUN_DASH_SCORE}`)
+          if (stepped.dashes >= MIN_DASHES_TO_HUG) {
+            setComboFlash(stepped.dashes)
+            window.setTimeout(() => setComboFlash(0), 700)
+          }
+          flashToast('Mercy!')
+          window.setTimeout(() => setDashFlash(false), 320)
+          window.setTimeout(() => setPlusFlash(''), 800)
+        }
+        if (stepped.outcome === 'hug') {
+          winRound()
+          return
+        }
+        if (stepped.outcome === 'miss') missRound()
+        return
+      }
       const prev = lastTick.current || now
       lastTick.current = now
       const dt = Math.min(0.05, (now - prev) / 1000)
@@ -263,6 +322,10 @@ export function FatherRunPlay({
     window.setTimeout(() => setWinStamp(true), reduced ? 40 : 280)
   }
 
+  function missLocked() {
+    return easyRef.current && performance.now() - missAtRef.current < EASY_RUN_TUNE.missArmMs
+  }
+
   function missRound() {
     if (phaseRef.current === 'miss' || phaseRef.current === 'hug') return
     swallowStrayPointer()
@@ -274,6 +337,12 @@ export function FatherRunPlay({
     setPhase('miss')
     playGemPop('miss')
     onMiss()
+    if (easyRef.current) {
+      missAtRef.current = performance.now()
+      setArming(true)
+      window.clearTimeout(armTimer.current)
+      armTimer.current = window.setTimeout(() => setArming(false), EASY_RUN_TUNE.missArmMs)
+    }
   }
 
   function beginHold(fromPad?: HTMLButtonElement, pointerId?: number) {
@@ -303,8 +372,8 @@ export function FatherRunPlay({
       setElapsed(0)
     }
     const windowOpen = dashPhase(elapsedRef.current, dashWindowMs()).inWindow
-    // One dash per glow. A new down still counts if a cancelled hold left the latch stuck.
-    if (windowOpen && !dashedWindowRef.current && !stillCaptured && (!wasHolding || pointerId !== undefined)) {
+    // Hard: one dash per glow, on the press. Easy dashes from the hold clock instead.
+    if (!easyRef.current && windowOpen && !dashedWindowRef.current && !stillCaptured && (!wasHolding || pointerId !== undefined)) {
       const next = applyDash(progressRef.current)
       writeProgress(next)
       dashedWindowRef.current = true
@@ -382,15 +451,24 @@ export function FatherRunPlay({
     onPadUp()
   }
 
-  const easyCue = dash.inWindow && phase === 'run' ? 'Tap' : 'Hold'
+  const easyCue = 'Hold'
   const fatherLeft = 8 + progress * 64
   const sonLeft = 88 - progress * 6
-  const speechPct = Math.min(100, (elapsed / (HIRED_HAND_SPEECH.length * SPEECH_PHRASE_MS)) * 100)
+  const speechMs = speechDurationMs(easy ? EASY_RUN_TUNE.graceMs : 0)
+  const speechPct = Math.min(100, (elapsed / speechMs) * 100)
+  const showRunHow = easy && attempt === 0 && phase === 'ready'
+  const lastLine = easy && phase === 'run' && spoken >= HIRED_HAND_SPEECH.length
+  const countText =
+    easy && phase === 'miss'
+      ? EASY.runAlmost
+      : lastLine
+        ? `${HIRED_HAND_SPEECH.length} / ${HIRED_HAND_SPEECH.length} · ${EASY.runLastLine}`
+        : `${Math.min(spoken, HIRED_HAND_SPEECH.length)} / ${HIRED_HAND_SPEECH.length}`
 
   return (
     <div
       ref={playRef}
-      className={`play is-father-run ${holding ? 'is-running' : ''} ${dash.inWindow && phase === 'run' ? 'is-glow' : ''} ${dashFlash ? 'is-dash' : ''} ${phase === 'hug' ? 'is-win is-hug' : ''} ${phase === 'miss' ? 'is-miss' : ''}`}
+      className={`play is-father-run ${holding ? 'is-running' : ''} ${!easy && dash.inWindow && phase === 'run' ? 'is-glow' : ''} ${dashFlash ? 'is-dash' : ''} ${phase === 'hug' ? 'is-win is-hug' : ''} ${phase === 'miss' ? 'is-miss' : ''}`}
       onContextMenu={blockHoldMenu}
     >
       {/* Easy Clear 1.4.144: omit runHunt .sort-how — run-pad + toast + story-caption already teach Hold / glow. */}
@@ -472,13 +550,14 @@ export function FatherRunPlay({
       {/* Easy Clear 1.4.250: tall-phone cream plate fill — paint parchment play · warm run-scene · dark ink · dock pin — closes Shot 240 purple residual (Fixes #336). */}
       {/* Easy Clear 1.4.257: tall-phone cream shell fill — opaque cream app-body + play shell · solid cream run plate · warm run-scene · cream HOLD TO RUN dock floor — closes Shot 250 purple void after 250 (Fixes #349). */}
       {/* Easy Clear 1.4.266: tall residual cream floor (opaque cream play + app-body · HOLD TO RUN pinned to cream floor above the 920 cap) so leftover between the timing rail and the button is cream, not a purple void after 257 (Fixes #366). */}
-      <div className={`run-speech ${phase === 'miss' ? 'is-done' : ''}`} aria-live="polite">
+      <div
+        className={`run-speech ${phase === 'miss' ? 'is-done' : ''} ${lastLine ? 'is-last' : ''} ${easy && phase === 'miss' ? 'is-late' : ''}`}
+        aria-live="polite"
+      >
         <p className="run-speech-kicker">Hired-hand speech</p>
         <p className="run-speech-line">{phrase}</p>
         <span className="run-speech-bar" style={{ width: `${speechPct}%` }} />
-        <p className="run-speech-count">
-          {Math.min(spoken, HIRED_HAND_SPEECH.length)} / {HIRED_HAND_SPEECH.length}
-        </p>
+        <p className="run-speech-count">{countText}</p>
       </div>
       {phase === 'hug' || phase === 'miss' ? null : (
         <div className={`run-rail ${dash.inWindow ? 'is-hot' : ''}`} aria-hidden>
@@ -493,7 +572,7 @@ export function FatherRunPlay({
         </p>
       ) : null}
       {phase === 'miss' ? (
-        <div className="run-miss" role="status">
+        <div className={`run-miss${arming ? ' is-arming' : ''}`} role="status">
           <p className="run-miss-hint">{FATHER_RUN_HINT}</p>
           <p className="quiet">Try again — you start closer.</p>
           <div className="cta-dock run-dock">
@@ -503,7 +582,10 @@ export function FatherRunPlay({
                   type="button"
                   className={goldButtonClass('run-fail', 'runRetry')}
                   data-run-keep="yes"
-                  onClick={() => winRound()}
+                  onClick={() => {
+                    if (missLocked()) return
+                    resetRound(attempt + 1, EASY_RUN_TUNE.assistStart)
+                  }}
                 >
                   {EASY.runKeepGoing}
                 </button>
@@ -511,7 +593,10 @@ export function FatherRunPlay({
                   type="button"
                   className="btn xl"
                   data-run-again
-                  onClick={() => resetRound(attempt + 1)}
+                  onClick={() => {
+                    if (missLocked()) return
+                    resetRound(attempt + 1)
+                  }}
                 >
                   Run again
                 </button>
@@ -521,7 +606,10 @@ export function FatherRunPlay({
                 type="button"
                 className={easy ? goldButtonClass('run-fail', 'runRetry') : 'btn gold xl'}
                 data-run-retry="yes"
-                onClick={() => resetRound(attempt + 1)}
+                onClick={() => {
+                  if (missLocked()) return
+                  resetRound(attempt + 1)
+                }}
               >
                 Run again
               </button>
@@ -549,12 +637,17 @@ export function FatherRunPlay({
         </>
       ) : (
         <div key="father-run-dock" className="cta-dock run-dock">
+          {showRunHow ? (
+            <p className="run-how" data-run-how>
+              {EASY.runHow}
+            </p>
+          ) : null}
           <button
             key="father-run-pad"
             data-run-pad="hold"
             ref={padRef}
             type="button"
-            className={`run-pad ${holding ? 'is-held' : ''} ${dash.inWindow && phase === 'run' ? 'is-glow' : ''}`}
+            className={`run-pad ${holding ? 'is-held' : ''} ${!easy && dash.inWindow && phase === 'run' ? 'is-glow' : ''}`}
             aria-pressed={holding}
             aria-label={easy ? easyCue : dash.inWindow && phase === 'run' ? 'Let go — press now!' : 'Hold to run'}
             onPointerDown={onPadDown}

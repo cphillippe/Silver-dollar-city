@@ -45,14 +45,22 @@ export const EASY_RUN_TUNE = {
   stumble: 0.02,
   /** Fail screen 2 offers Keep going. attempt starts at 0, so the screen checks attempt + 1. */
   missesBeforeKeep: 2,
+  /** Extra time on the last phrase. Hard stays at 0. */
+  graceMs: 2600,
+  /** Keep going starts here. One dash reaches the son. */
+  assistStart: 0.86,
+  /** Assisted round still has to dash. One is enough because he starts on the son's heels. */
+  assistMinDashes: 1,
+  /** Easy miss buttons ignore a tap this long after the panel mounts. Hard stays immediate. */
+  missArmMs: 600,
 } as const
 export const RETRY_CLOSER = 0.1
 export const MIN_START_GAP = 0.5
 
 export type FatherRunPhase = 'ready' | 'run' | 'hug' | 'miss'
 
-export function speechDurationMs(): number {
-  return HIRED_HAND_SPEECH.length * SPEECH_PHRASE_MS
+export function speechDurationMs(graceMs = 0): number {
+  return HIRED_HAND_SPEECH.length * SPEECH_PHRASE_MS + graceMs
 }
 
 export function fatherStartProgress(attempt: number): number {
@@ -71,8 +79,8 @@ export function speechPhraseAt(elapsedMs: number): string {
   return HIRED_HAND_SPEECH[index] ?? HIRED_HAND_SPEECH[0]
 }
 
-export function speechFinished(elapsedMs: number): boolean {
-  return elapsedMs >= speechDurationMs()
+export function speechFinished(elapsedMs: number, graceMs = 0): boolean {
+  return elapsedMs >= speechDurationMs(graceMs)
 }
 
 export function dashPhase(elapsedMs: number, windowMs = DASH_WINDOW_MS): { inWindow: boolean; travel: number } {
@@ -136,16 +144,91 @@ export function fatherReached(progress: number): boolean {
 }
 
 /** Win = hug lands while the hired-hand speech is still unfinished, and the glow was timed. */
-export function hugBeforeSpeech(progress: number, elapsedMs: number, dashes = 0): boolean {
-  return fatherReached(progress) && !speechFinished(elapsedMs) && dashes >= MIN_DASHES_TO_HUG
+export function hugBeforeSpeech(
+  progress: number,
+  elapsedMs: number,
+  dashes = 0,
+  graceMs = 0,
+  minDashes = MIN_DASHES_TO_HUG,
+): boolean {
+  return fatherReached(progress) && !speechFinished(elapsedMs, graceMs) && dashes >= minDashes
 }
 
 export function runOutcome(
   progress: number,
   elapsedMs: number,
   dashes = 0,
+  graceMs = 0,
+  minDashes = MIN_DASHES_TO_HUG,
 ): 'run' | 'hug' | 'miss' {
-  if (hugBeforeSpeech(progress, elapsedMs, dashes)) return 'hug'
-  if (speechFinished(elapsedMs) && !hugBeforeSpeech(progress, elapsedMs, dashes)) return 'miss'
+  if (hugBeforeSpeech(progress, elapsedMs, dashes, graceMs, minDashes)) return 'hug'
+  if (speechFinished(elapsedMs, graceMs) && !hugBeforeSpeech(progress, elapsedMs, dashes, graceMs, minDashes)) {
+    return 'miss'
+  }
   return 'run'
+}
+
+export type EasyHoldState = {
+  progress: number
+  elapsedMs: number
+  dashes: number
+  heldMs: number
+  wasInWindow: boolean
+  dashedThisWindow: boolean
+  holding: boolean
+}
+
+/**
+ * Easy clock step. Holding runs the father. A dash fires once per open glow
+ * while the pad is held — no second tap. Hard does not call this.
+ */
+export function stepEasyHold(
+  state: EasyHoldState,
+  dtSec: number,
+  assisted = false,
+): EasyHoldState & { dashedNow: boolean; outcome: 'run' | 'hug' | 'miss' } {
+  const dt = Math.min(0.05, Math.max(0, dtSec))
+  const elapsedMs = state.elapsedMs + dt * 1000
+  let heldMs = state.holding ? state.heldMs + dt * 1000 : 0
+  const windowNow = dashPhase(elapsedMs, EASY_RUN_TUNE.dashWindowMs).inWindow
+  let progress = holdStep(
+    state.progress,
+    dt,
+    state.holding,
+    false,
+    heldMs,
+    EASY_RUN_TUNE.holdSpeed,
+  )
+  progress = stumbleIfHeldThrough(
+    progress,
+    state.wasInWindow,
+    windowNow,
+    state.holding,
+    state.dashedThisWindow,
+    EASY_RUN_TUNE.stumble,
+  )
+  let dashes = state.dashes
+  let dashedThisWindow = state.dashedThisWindow
+  let dashedNow = false
+  if (state.holding && windowNow && !dashedThisWindow) {
+    progress = applyDash(progress)
+    dashes += 1
+    dashedThisWindow = true
+    dashedNow = true
+    heldMs = 0
+  }
+  if (state.wasInWindow && !windowNow) dashedThisWindow = false
+  const minDashes = assisted ? EASY_RUN_TUNE.assistMinDashes : MIN_DASHES_TO_HUG
+  const outcome = runOutcome(progress, elapsedMs, dashes, EASY_RUN_TUNE.graceMs, minDashes)
+  return {
+    progress,
+    elapsedMs,
+    dashes,
+    heldMs,
+    wasInWindow: windowNow,
+    dashedThisWindow,
+    holding: state.holding,
+    dashedNow,
+    outcome,
+  }
 }

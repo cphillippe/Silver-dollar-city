@@ -32,6 +32,7 @@ import {
   speechFinished,
   speechIndexAt,
   speechPhraseAt,
+  stepEasyHold,
   STALL_AFTER_MS,
   stumbleIfHeldThrough,
 } from '../src/easyTrail/father/fatherRun.ts'
@@ -147,7 +148,7 @@ assert.doesNotMatch(
 )
 assert.match(playSrc, /Hold to run/)
 assert.match(playSrc, /Let go — press now/)
-assert.match(playSrc, /const easyCue = dash\.inWindow && phase === 'run' \? 'Tap' : 'Hold'/)
+assert.match(playSrc, /const easyCue = 'Hold'/)
 assert.doesNotMatch(playSrc, /EASY\.runTapNow/)
 assert.doesNotMatch(playSrc, /EASY\.runKeepHolding/)
 assert.match(playSrc, /EASY\.runKeepGoing/)
@@ -246,5 +247,94 @@ assert.match(easyUiRun, /runHome: 'One more run\.'/)
 assert.doesNotMatch(easyUiRun, /runHome: 'Hold to run\. Press the glow/)
 assert.match(hubRunSrc, /EASY\.runHome/)
 assert.match(hubRunSrc, /1\.4\.155.*whisper|#192/)
+
+assert.equal(EASY.runHow, 'Hold to run!')
+assert.equal(EASY.runLastLine, 'Last line! Run!')
+assert.equal(EASY.runAlmost, 'Almost! He finished first.')
+assert.match(playSrc, /EASY\.runHow/)
+assert.match(playSrc, /EASY\.runLastLine/)
+assert.match(playSrc, /EASY\.runAlmost/)
+assert.match(playSrc, /data-run-how/)
+assert.match(playSrc, /Closer this time\. Hold to run!/)
+assert.match(playSrc, /Hold — then press the glow/)
+assert.match(playSrc, /stepEasyHold/)
+assert.match(playSrc, /!easyRef\.current && windowOpen/)
+assert.doesNotMatch(playSrc, /onClick=\{\(\) => winRound\(\)\}/)
+assert.match(playSrc, /EASY_RUN_TUNE\.assistStart/)
+assert.match(playSrc, /missLocked\(\)/)
+assert.equal(EASY_RUN_TUNE.graceMs, 2600)
+assert.ok(EASY_RUN_TUNE.missArmMs >= 500, 'Easy miss arm covers a half-second tap')
+assert.equal((playSrc.match(/EASY_RUN_TUNE\.missArmMs/g) || []).length, 2)
+assert.equal(EASY_RUN_TUNE.assistMinDashes, 1)
+assert.ok(EASY_RUN_TUNE.assistStart + DASH_BOOST >= 1, 'one assisted dash reaches the son')
+assert.ok(EASY_RUN_TUNE.assistStart > fatherStartProgress(8), 'Keep going starts closer than a normal retry')
+assert.equal(speechDurationMs(EASY_RUN_TUNE.graceMs), HIRED_HAND_SPEECH.length * SPEECH_PHRASE_MS + 2600)
+assert.equal(speechDurationMs(), speechDurationMs(0))
+assert.equal(
+  runOutcome(1, 10400 + EASY_RUN_TUNE.graceMs - 40, 2, EASY_RUN_TUNE.graceMs),
+  'hug',
+)
+assert.equal(runOutcome(0.7, 10400 + EASY_RUN_TUNE.graceMs, 2, EASY_RUN_TUNE.graceMs), 'miss')
+assert.equal(runOutcome(EASY_RUN_TUNE.assistStart, 8000, 0, EASY_RUN_TUNE.graceMs), 'run')
+
+function dashPhaseLocked(elapsedMs, windowMs = DASH_WINDOW_MS) {
+  if (elapsedMs < 0) return { inWindow: false, travel: 0 }
+  const span = Math.max(1, Math.min(DASH_PERIOD_MS, windowMs))
+  const cycle = elapsedMs % DASH_PERIOD_MS
+  const windowStart = DASH_PERIOD_MS - span
+  if (cycle < windowStart) {
+    return { inWindow: false, travel: windowStart === 0 ? 1 : cycle / windowStart }
+  }
+  return { inWindow: true, travel: windowStart === 0 ? 1 : 1 }
+}
+for (let t = 0; t <= 12000; t += 50) {
+  assert.deepEqual(dashPhase(t), dashPhaseLocked(t), `hard dashPhase(${t})`)
+  assert.deepEqual(dashPhase(t, DASH_WINDOW_MS), dashPhaseLocked(t, DASH_WINDOW_MS))
+}
+for (const p of [0.4, 0.7, 1]) {
+  for (const d of [0, 2]) {
+    for (const t of [10360, 10400, 10440]) {
+      assert.equal(runOutcome(p, t, d), runOutcome(p, t, d, 0), `grace 0 matches omitted (${p}, ${t}, ${d})`)
+    }
+  }
+}
+
+function simulateEasyHold(dtSec, holdingForMs, start = 0, assisted = false) {
+  let state = {
+    progress: start,
+    elapsedMs: 0,
+    dashes: 0,
+    heldMs: 0,
+    wasInWindow: false,
+    dashedThisWindow: false,
+    holding: true,
+  }
+  for (let guard = 0; guard < 20000; guard += 1) {
+    state = { ...state, holding: state.elapsedMs < holdingForMs }
+    const next = stepEasyHold(state, dtSec, assisted)
+    if (next.outcome !== 'run') return next
+    state = next
+    if (next.elapsedMs > speechDurationMs(EASY_RUN_TUNE.graceMs) + 1000) return next
+  }
+  return state
+}
+
+for (const dt of [0.016, 0.05]) {
+  const held = simulateEasyHold(dt, 999999)
+  assert.equal(held.outcome, 'hug', `steady hold hugs at dt ${dt}`)
+  assert.ok(
+    held.elapsedMs < speechDurationMs() - 2000,
+    `steady hold wins comfortably before the speech ends (${held.elapsedMs} at dt ${dt})`,
+  )
+  const letGo = simulateEasyHold(dt, 200)
+  assert.equal(letGo.outcome, 'miss', `releasing early misses at dt ${dt}`)
+}
+
+const assisted = simulateEasyHold(0.016, 1500, EASY_RUN_TUNE.assistStart, true)
+assert.equal(assisted.outcome, 'hug', 'a short assisted hold hugs for real')
+assert.ok(assisted.elapsedMs < 1500, `assisted hug is a short hold (${assisted.elapsedMs})`)
+assert.ok(assisted.dashes >= 1, 'the assisted hug spends a real dash')
+const assistedIdle = simulateEasyHold(0.016, 0, EASY_RUN_TUNE.assistStart, true)
+assert.equal(assistedIdle.outcome, 'miss', 'Keep going does not hug without a hold')
 
 console.log('check-father-run: ok')
