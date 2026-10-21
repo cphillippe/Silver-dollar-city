@@ -64,7 +64,7 @@ function WebBuildRefreshLive({ viewName }: { viewName: string }) {
       <div className="shell-update-actions">
         <button
           type="button"
-          className="btn primary"
+          className="btn"
           onClick={() => {
             sessionStorage.removeItem('silver-city-web-refresh')
             window.location.reload()

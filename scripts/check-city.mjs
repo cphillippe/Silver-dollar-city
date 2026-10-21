@@ -1700,7 +1700,16 @@ assert.match(
   readFileSync(new URL('../src/components/Settings.tsx', import.meta.url), 'utf8'),
   /whats-new/,
 )
-assert.equal(APP_VERSION, '1.4.523')
+assert.equal(APP_VERSION, '1.4.524')
+assert.ok(CHANGELOG.some((note) => note.version === '1.4.524'), '1.4.524 changelog row')
+assert.doesNotMatch(
+  latestChange('1.4.524').items.join('\n'),
+  /Fixes #|Closes #|Resolves #/,
+  '1.4.524 changelog avoids GitHub close keywords',
+)
+assert.match(latestChange('1.4.524').items.join('\n'), /Refs #791/)
+assert.match(latestChange('1.4.524').items.join('\n'), /Refs #757/)
+assert.match(latestChange('1.4.524').items.join('\n'), /Hard/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.523'), '1.4.523 changelog row')
 assert.doesNotMatch(
   latestChange('1.4.523').items.join('\n'),
@@ -4863,7 +4872,7 @@ assert.match(defendSrc, /EASY\.nightLead/)
 assert.equal(EASY.nightLead, 'Tap the dark face.')
 assert.equal(EASY.rememberSentence, 'Tap the main idea you kept.')
 assert.equal(EASY.tapWhy, 'Tap why this is true.')
-assert.equal(EASY.dragWhy, 'Drag the card that shows why.')
+assert.equal(EASY.dragWhy, 'Slide the card that shows why.')
 assert.equal(EASY.reasonTeach, 'A reason is why this is true.')
 assert.equal(EASY.saved, 'Lock In')
 assert.equal(EASY.savedSub, 'saved lines')

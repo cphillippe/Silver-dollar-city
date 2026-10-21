@@ -115,6 +115,9 @@ export function RoadMazePlay({
   /** Easy: a drag that starts on the pawn steps into the next road cell. */
   const dragPawn = useRef(false)
   const dragSeen = useRef('')
+  const dragQueue = useRef<MazeCoord[]>([])
+  const dragWalking = useRef(false)
+  const dragPoint = useRef<{ x: number; y: number } | null>(null)
 
   useEffect(() => {
     setMazePreset(attempt)
@@ -136,10 +139,6 @@ export function RoadMazePlay({
   const helpPhase = found && !helped
   const latest = panels[Math.min(opened, panels.length) - 1]
   const storyLine = won ? ROAD_MAZE_CLAIM : helpPhase ? caption : (latest?.text ?? caption)
-
-  useEffect(() => {
-    atRef.current = at
-  }, [at])
 
   useEffect(() => {
     const node = playRef.current
@@ -239,6 +238,9 @@ export function RoadMazePlay({
     roadPointer.current = false
     dragPawn.current = false
     dragSeen.current = ''
+    dragQueue.current = []
+    dragWalking.current = false
+    dragPoint.current = null
     clearDockRelease()
     atRef.current = MAZE_START
     foundRef.current = false
@@ -372,9 +374,63 @@ export function RoadMazePlay({
     return playRef.current?.scrollTop ?? window.scrollY
   }
 
+  function cellFromBoardPoint(x: number, y: number): MazeCoord | null {
+    const hit = document.elementFromPoint(x, y)
+    const node = hit instanceof Element ? hit.closest('[data-maze-cell]') : null
+    if (!(node instanceof HTMLElement) || !node.classList.contains('is-road')) return null
+    const r = Number(node.dataset.r)
+    const c = Number(node.dataset.c)
+    if (!Number.isFinite(r) || !Number.isFinite(c)) return null
+    const cell = { r, c }
+    return isMazeRoad(cell) ? cell : null
+  }
+
+  function cellsAlong(from: { x: number; y: number }, to: { x: number; y: number }): MazeCoord[] {
+    const dist = Math.hypot(to.x - from.x, to.y - from.y)
+    const steps = Math.max(1, Math.ceil(dist / 6))
+    const out: MazeCoord[] = []
+    let prev = ''
+    for (let i = 1; i <= steps; i += 1) {
+      const t = i / steps
+      const cell = cellFromBoardPoint(from.x + (to.x - from.x) * t, from.y + (to.y - from.y) * t)
+      if (!cell) continue
+      const id = mazeKey(cell)
+      if (id === prev) continue
+      prev = id
+      out.push(cell)
+    }
+    return out
+  }
+
+  function enqueueDrag(cell: MazeCoord) {
+    const queued = dragQueue.current
+    const tail = queued[queued.length - 1] ?? atRef.current
+    if (mazeSame(tail, cell)) return
+    if (!isAdjacentRoadStep(tail, cell)) return
+    queued.push(cell)
+  }
+
+  function pumpDrag() {
+    if (dragWalking.current || wonRef.current) return
+    const next = dragQueue.current[0]
+    if (!next) return
+    if (!isAdjacentRoadStep(atRef.current, next)) {
+      dragQueue.current.shift()
+      pumpDrag()
+      return
+    }
+    dragQueue.current.shift()
+    dragWalking.current = true
+    landOn(next)
+    walkRef.current = window.setTimeout(() => {
+      dragWalking.current = false
+      pumpDrag()
+    }, reduced ? 30 : STEP_MS)
+  }
+
   function tryGo(target: MazeCoord) {
     // A road tap is a step. Look-peek must not swallow the next fast thumb (#509).
-    if (wonRef.current || walkingRef.current) return
+    if (wonRef.current || walkingRef.current || dragWalking.current) return
     if (!isFiniteCell(target)) return
     const here = atRef.current
     if (mazeSame(here, target)) {
@@ -409,23 +465,22 @@ export function RoadMazePlay({
   function onPlayPointerEnd() {
     roadPointer.current = false
     dragPawn.current = false
+    dragPoint.current = null
     dragSeen.current = ''
     // Tap already stepped on pointerdown. Drop the latch if capture retargeted pointerup here.
+    // Queued drag steps keep walking after the finger lifts.
     usedTap.current = false
   }
 
   function onPlayPointerMove(event: ReactPointerEvent<HTMLElement>) {
-    if (!dragPawn.current || event.buttons === 0 || walkingRef.current || wonRef.current || peeking.current) return
+    if (!dragPawn.current || event.buttons === 0 || wonRef.current || peeking.current) return
     if (document.documentElement.dataset.easy !== 'on') return
-    const hit = document.elementFromPoint(event.clientX, event.clientY)
-    const node = hit instanceof Element ? hit.closest('[data-maze-cell]') : null
-    if (!(node instanceof HTMLElement) || !node.classList.contains('is-road')) return
-    const next = { r: Number(node.dataset.r), c: Number(node.dataset.c) }
-    if (!isAdjacentRoadStep(atRef.current, next)) return
-    const id = mazeKey(next)
-    if (dragSeen.current === id) return
-    dragSeen.current = id
-    walkPath([atRef.current, next])
+    const point = { x: event.clientX, y: event.clientY }
+    const prev = dragPoint.current
+    dragPoint.current = point
+    if (!prev) return
+    for (const cell of cellsAlong(prev, point)) enqueueDrag(cell)
+    pumpDrag()
   }
 
   function onCellDown(event: ReactPointerEvent<HTMLButtonElement>, cell: MazeCoord) {
@@ -437,6 +492,12 @@ export function RoadMazePlay({
     holdPointer(event)
     dragPawn.current = document.documentElement.dataset.easy === 'on' && mazeSame(cell, atRef.current)
     dragSeen.current = ''
+    if (dragPawn.current) {
+      window.clearTimeout(walkRef.current)
+      dragWalking.current = false
+      dragQueue.current = []
+      dragPoint.current = { x: event.clientX, y: event.clientY }
+    }
     tryGo(cell)
   }
 

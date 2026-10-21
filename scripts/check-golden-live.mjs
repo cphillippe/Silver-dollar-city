@@ -7,10 +7,10 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { chromium } from 'playwright'
 import { build, preview } from 'vite'
 import { evidenceForTier } from '../src/content/evidence.ts'
-import { dailyForDate } from '../src/content/daily.ts'
+import { DAILY_POOL, dailyForDate } from '../src/content/daily.ts'
 import { findStraightSpelling } from '../src/lib/gemSearchGrid.ts'
 import { gemWordsFor } from '../src/lib/gemSearch.ts'
-import { EASY, easyChromeLine, easyWhyLine } from '../src/lib/easy.ts'
+import { EASY, easyChromeLine, easyFacingLine, easyReasonHint, easyWhyLine, easyWrongTap } from '../src/lib/easy.ts'
 import { FATHER_RUN_HINT } from '../src/easyTrail/father/fatherRun.ts'
 import { localDateKey } from '../src/lib/dates.ts'
 import { SAVE_KIND } from '../src/lib/save.ts'
@@ -205,6 +205,87 @@ async function assertNoNightWatch(page, where) {
   assert.equal(await page.locator('.easy-night-watch').count(), 0, `${where} hides Night Watch on the first day`)
 }
 
+function isGoldPaint(value) {
+  const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/g
+  let match
+  while ((match = re.exec(value || ''))) {
+    const r = Number(match[1])
+    const g = Number(match[2])
+    const b = Number(match[3])
+    if (r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+  }
+  return false
+}
+
+async function assertMazeOneGold(page, where) {
+  assert.equal((await filledGolds(page)).length, 0, `${where} has no filled gold button`)
+  const cues = await page.evaluate(() => {
+    const goldish = (value) => {
+      const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/g
+      let match
+      while ((match = re.exec(value || ''))) {
+        const r = Number(match[1])
+        const g = Number(match[2])
+        const b = Number(match[3])
+        if (r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+      }
+      return false
+    }
+    const here = document.querySelector('[data-maze-cell].is-here')
+    const hereStyle = here ? getComputedStyle(here) : null
+    const goldCells = [...document.querySelectorAll('[data-maze-cell]')].filter((el) => {
+      const style = getComputedStyle(el)
+      return goldish(style.boxShadow) || goldish(style.outlineColor) || goldish(style.borderColor)
+    }).length
+    return {
+      goals: document.querySelectorAll('[data-maze-cell].is-goal').length,
+      goldCells,
+      hereShadow: hereStyle?.boxShadow || '',
+      hereGold: hereStyle ? goldish(hereStyle.boxShadow) || goldish(hereStyle.outlineColor) : true,
+    }
+  })
+  assert.equal(cues.goals, 1, `${where} has one goal pulse`)
+  assert.equal(cues.goldCells, 1, `${where} has one gold maze cell`)
+  assert.equal(cues.hereGold, false, `${where} pawn glow is not gold (${cues.hereShadow})`)
+}
+
+function straightRun(at, open, length) {
+  for (const dir of STEP_DIRS) {
+    const cells = []
+    let cur = at
+    for (let i = 0; i < length; i += 1) {
+      const next = { r: cur.r + dir.r, c: cur.c + dir.c }
+      if (!open.has(key(next))) break
+      cells.push(next)
+      cur = next
+    }
+    if (cells.length === length) return cells
+  }
+  return null
+}
+
+async function dragMazeThrough(page, cells) {
+  const start = await page.locator('[data-maze-cell].is-here').boundingBox()
+  if (!start) throw new Error('pawn drag has no box')
+  await page.mouse.move(start.x + start.width / 2, start.y + start.height / 2)
+  await page.mouse.down()
+  for (const cell of cells) {
+    const box = await page.locator(`[data-maze-cell][data-r="${cell.r}"][data-c="${cell.c}"]`).boundingBox()
+    if (!box) throw new Error(`maze cell ${cell.r},${cell.c} has no box`)
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 8 })
+  }
+  await page.mouse.up()
+  const last = cells[cells.length - 1]
+  await page.waitForFunction(
+    ({ r, c }) => {
+      const here = document.querySelector('[data-maze-cell].is-here')
+      return here?.getAttribute('data-r') === String(r) && here?.getAttribute('data-c') === String(c)
+    },
+    last,
+    { timeout: 4000 },
+  )
+}
+
 async function assertMazeStart(page) {
   const how = page.locator('[data-maze-how]')
   await how.waitFor()
@@ -235,14 +316,13 @@ async function assertMazeStart(page) {
   assert.equal(cells.n, 35, 'the maze is 5×7')
   assert.equal(cells.scrollY, 0, 'the maze does not scroll the window')
   assert.equal(cells.clipped, 0, 'every maze cell is inside the viewport')
-  assert.equal((await filledGolds(page)).length, 0, 'the maze has no filled gold')
+  await assertMazeOneGold(page, 'maze start')
+  await page.screenshot({ path: `${SHOTS}/maze-375.png` })
 }
 
 async function assertMazeDrag(page) {
   const at = await readCell(page.locator('[data-maze-cell].is-here'))
   const open = await roadKeys(page)
-  const next = STEP_DIRS.map((dir) => ({ r: at.r + dir.r, c: at.c + dir.c })).find((cell) => open.has(key(cell)))
-  if (!next) throw new Error('the pawn has no road neighbor')
   const rockBox = await page.locator('[data-maze-cell].is-rock').first().boundingBox()
   const pawnBox = await page.locator('[data-maze-cell].is-here').boundingBox()
   if (!rockBox || !pawnBox) throw new Error('maze drag boxes missing')
@@ -251,22 +331,51 @@ async function assertMazeDrag(page) {
   await page.mouse.move(pawnBox.x + pawnBox.width / 2, pawnBox.y + pawnBox.height / 2, { steps: 8 })
   await page.mouse.up()
   assert.deepEqual(await readCell(page.locator('[data-maze-cell].is-here')), at, 'a drag that starts on rock does not move the pawn')
-  const nextBox = await page.locator(`[data-maze-cell][data-r="${next.r}"][data-c="${next.c}"]`).boundingBox()
-  const start = await page.locator('[data-maze-cell].is-here').boundingBox()
-  if (!nextBox || !start) throw new Error('pawn drag boxes missing')
-  await page.mouse.move(start.x + start.width / 2, start.y + start.height / 2)
-  await page.mouse.down()
-  await page.mouse.move(nextBox.x + nextBox.width / 2, nextBox.y + nextBox.height / 2, { steps: 8 })
-  await page.mouse.up()
-  await page.waitForFunction(
-    ({ r, c }) => {
-      const here = document.querySelector('[data-maze-cell].is-here')
-      return here?.getAttribute('data-r') === String(r) && here?.getAttribute('data-c') === String(c)
-    },
-    next,
-  )
-  assert.deepEqual(await readCell(page.locator('[data-maze-cell].is-here')), next, 'a drag from the pawn steps one cell')
+
+  const two = straightRun(at, open, 2)
+  if (!two) throw new Error('no 2-tile straight from the pawn')
+  await dragMazeThrough(page, two)
+  assert.deepEqual(await readCell(page.locator('[data-maze-cell].is-here')), two[1], 'a 2-tile drag steps two road tiles')
   assert.equal(await page.locator('[data-maze-how]').count(), 0, 'maze-how hides after the first step')
+  await assertMazeOneGold(page, 'maze after a straight drag')
+
+  const mid = two[1]
+  const openMid = await roadKeys(page)
+  const three = straightRun(mid, openMid, 3)
+  if (!three) throw new Error(`no 3-tile straight from ${key(mid)}`)
+  await dragMazeThrough(page, three)
+  assert.deepEqual(await readCell(page.locator('[data-maze-cell].is-here')), three[2], 'a 3-tile drag steps three road tiles')
+
+  const here = await readCell(page.locator('[data-maze-cell].is-here'))
+  const openHere = await roadKeys(page)
+  const next = STEP_DIRS.map((dir) => ({ r: here.r + dir.r, c: here.c + dir.c })).find((cell) => openHere.has(key(cell)))
+  if (!next) throw new Error('the pawn has no road neighbor')
+  await dragMazeThrough(page, [next])
+  assert.deepEqual(await readCell(page.locator('[data-maze-cell].is-here')), next, 'a 1-tile drag steps one cell')
+
+  const parked = await readCell(page.locator('[data-maze-cell].is-here'))
+  const openParked = await roadKeys(page)
+  let far = null
+  let farPath = null
+  for (const roadKey of openParked) {
+    const [r, c] = roadKey.split(':').map(Number)
+    const cell = { r, c }
+    const path = shortest(parked, cell, openParked)
+    if (path && path.length > 3) {
+      far = cell
+      farPath = path
+      break
+    }
+  }
+  if (!far || !farPath) throw new Error('no far road tap')
+  await tapMaze(page, far)
+  await page.waitForTimeout(450)
+  assert.deepEqual(
+    await readCell(page.locator('[data-maze-cell].is-here')),
+    farPath[1],
+    'a far tap steps one road tile',
+  )
+  await assertMazeOneGold(page, 'maze after a far tap')
 }
 
 async function playRoad(page) {
@@ -317,6 +426,7 @@ async function playRoadAdjacent(page) {
   assert.equal(how, EASY.mazeInnCue)
   assert.equal(await page.locator('[data-maze-cell].is-inn.is-goal').count(), 1, 'the pink house wears the gold ring')
   assert.equal(await page.locator('[data-maze-cell].is-hurt.is-goal').count(), 0, 'the hurt man drops the ring after Help')
+  await assertMazeOneGold(page, 'maze after Help')
   await shotHop(page, 'l1-after-help')
   await walkUntil(page, inn, true)
   await page.locator('[data-maze-next]').waitFor({ timeout: 8000 })
@@ -780,10 +890,23 @@ async function dragPath(page, path) {
   await page.mouse.up()
 }
 
-async function playGem(page, lineId = 'ob-tuning', { watchLast = false } = {}) {
+async function assertGemStart(page, lineId, { shot = false } = {}) {
+  await page.locator('[data-gem-start]').waitFor()
+  const hint = ((await page.locator('[data-gem-start]').innerText()) || '').replace(/\s+/g, ' ').trim()
+  assert.equal(hint, EASY.bonusMissStraight, `${lineId} start hint`)
+  assert.equal(await page.locator('[data-gem-start-cell].is-start-gold').count(), 1, `${lineId} one start pulse`)
+  assert.equal((await filledGolds(page)).length, 0, `${lineId} word search has no filled gold`)
+  if (shot) {
+    await page.locator('[data-gem-start]').scrollIntoViewIfNeeded()
+    await page.screenshot({ path: `${SHOTS}/word-search-start-375.png` })
+  }
+}
+
+async function playGem(page, lineId = 'ob-tuning', { watchLast = false, checkStart = false } = {}) {
   await page.locator('[data-gem-cell]').first().waitFor()
   const words = gemWordsFor(lineId).map((word) => word.text)
   const juice = { burst: 0, pop: false }
+  let startChecked = false
   for (const word of words) {
     if (await page.locator('.play.is-gem-search.is-win').count()) return juice
     // Match reseeds once on mount (line effect bumps the round). Wait until the letters sit still.
@@ -796,6 +919,13 @@ async function playGem(page, lineId = 'ob-tuning', { watchLast = false } = {}) {
         break
       }
       letters = next
+    }
+    if (checkStart && !startChecked) {
+      const view = page.viewportSize()
+      await assertGemStart(page, lineId, {
+        shot: view?.width === 375 && view?.height === 667 && lineId === 'ob-tuning',
+      })
+      startChecked = true
     }
     const path = findStraightSpelling(letters, word)
     if (!path) throw new Error(`${lineId} word ${word} is not on the board`)
@@ -842,6 +972,11 @@ async function playGem(page, lineId = 'ob-tuning', { watchLast = false } = {}) {
     if (!saw) {
       const toast = ((await page.locator('.miss-banner, .match-toast, .bonus-banner').first().textContent().catch(() => '')) || '').replace(/\s+/g, ' ').trim()
       throw new Error(`${lineId} drag missed ${word} path=${JSON.stringify(path)} toast=${toast || 'none'}`)
+    }
+    if (checkStart) {
+      assert.equal(await page.locator('[data-gem-start]').count(), 0, `${lineId} start hint clears on the first find`)
+      assert.equal(await page.locator('[data-gem-start-cell]').count(), 0, `${lineId} start pulse clears on the first find`)
+      checkStart = false
     }
     if (expectJuice) {
       await page.waitForFunction(() => window.__gemJuice > 0, undefined, { timeout: 2500 }).catch(() => {})
@@ -908,7 +1043,7 @@ async function lockInFace(page) {
 }
 
 function assertSharedCards(face, where) {
-  assert.equal(face.tap, 'Drag the card that shows why.', where)
+  assert.equal(face.tap, 'Slide the card that shows why.', where)
   assert.equal(face.cue, 0, `${where} has no separate drag line`)
   assert.equal(face.unique, false, `${where} gives no card a unique highlight`)
   assert.equal(face.covered, false, `${where} keeps the cards under the header`)
@@ -921,6 +1056,8 @@ async function dragWhy(page, id) {
   const face = await lockInFace(page)
   assertSharedCards(face, id)
   assert.equal((await filledGolds(page)).length, 0, 'Lock In play has no gold button')
+  const claimGold = await page.locator('.why-claim').evaluate((el) => getComputedStyle(el).borderTopColor)
+  assert.ok(isGoldPaint(claimGold), `${id} MAIN IDEA outline is the gold cue (${claimGold})`)
   if (page.viewportSize()?.width === 375) {
     assert.equal(face.descender, true, `${id} keeps the g descender (${face.lineHeight})`)
     await page.screenshot({ path: `${SHOTS}/lock-in-drag-cue-375.png` })
@@ -929,14 +1066,76 @@ async function dragWhy(page, id) {
   await chip.waitFor()
   const box = await chip.boundingBox()
   if (!box) throw new Error('why chip has no box')
-  const x = box.x + box.width / 2
+  const x = box.x + Math.min(28, box.width / 2)
   const y = box.y + box.height / 2
   await page.mouse.move(x, y)
   await page.mouse.down()
-  await page.mouse.move(x + 48, y + 20, { steps: 8 })
-  await page.mouse.up()
+  await page.mouse.move(x + 8, y, { steps: 3 })
+  await page.waitForTimeout(60)
+  assert.equal(await page.locator('.why-blast.is-yes, .why-blast.is-win').count(), 0, `${id} 8px slide does not pick`)
+  await page.mouse.move(x + 20, y, { steps: 4 })
   await page.locator('.why-blast.is-yes, .why-blast.is-win').first().waitFor({ timeout: 8000 })
+  await page.mouse.up()
   assert.equal(await page.locator('[data-drag-cue], .why-drag-cue').count(), 0)
+}
+
+async function assertLocked(page, label) {
+  await page.locator('.why-blast.is-win .win-stamp').waitFor()
+  const look = await page.evaluate(() => {
+    const goldish = (value) => {
+      const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/g
+      let match
+      while ((match = re.exec(value || ''))) {
+        const r = Number(match[1])
+        const g = Number(match[2])
+        const b = Number(match[3])
+        if (r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+      }
+      return false
+    }
+    const stamp = document.querySelector('.why-blast.is-win .win-stamp')
+    const dock = document.querySelector('.why-blast.is-win .cta-dock')
+    const arena = document.querySelector('.why-blast.is-win .why-arena')
+    const keep = document.querySelector('.why-keep-card')
+    const loose = [...document.querySelectorAll('.why-got-it, .why-blast .quiet')]
+      .filter((el) => !el.closest('.why-keep-card'))
+      .map((el) => (el.textContent || '').replace(/\s+/g, ' ').trim())
+      .filter(Boolean)
+    const stampStyle = stamp ? getComputedStyle(stamp) : null
+    const dockStyle = dock ? getComputedStyle(dock) : null
+    const arenaStyle = arena ? getComputedStyle(arena) : null
+    return {
+      stampText: (stamp?.textContent || '').replace(/\s+/g, ' ').trim(),
+      stampBg: stampStyle?.backgroundColor || '',
+      stampImg: stampStyle?.backgroundImage || '',
+      stampGold: stampStyle ? goldish(stampStyle.backgroundColor) || goldish(stampStyle.backgroundImage) : true,
+      btnBottom: Math.round(document.querySelector('.why-blast.is-win .btn.primary')?.getBoundingClientRect().bottom || 9999),
+      inner: window.innerHeight,
+      scrollY: window.scrollY,
+      dockBg: dockStyle?.backgroundColor || '',
+      arenaRadius: arenaStyle?.borderTopLeftRadius || '0px',
+      keepText: keep ? (keep.innerText || '').replace(/\s+/g, ' ').trim() : '',
+      loose,
+    }
+  })
+  assert.match(look.stampText, /LOCKED!/)
+  assert.equal(look.stampGold, false, `${label} stamp is not gold (${look.stampBg} ${look.stampImg})`)
+  assert.match(look.stampImg, /213,\s*219,\s*227|154,\s*166,\s*178/, `${label} stamp is silver`)
+  assert.ok(look.btnBottom <= look.inner + 1, `${label} Continue stays on screen (${look.btnBottom}/${look.inner})`)
+  assert.equal(look.scrollY, 0, `${label} LOCKED does not scroll`)
+  assert.match(look.dockBg, /rgba\(0,\s*0,\s*0,\s*0\)|transparent/, `${label} dock has no plate (${look.dockBg})`)
+  assert.notEqual(parseFloat(look.arenaRadius), 0, `${label} answer panel is rounded (${look.arenaRadius})`)
+  assert.match(look.keepText, /You got it/)
+  assert.match(look.keepText, /Yes — keep this/)
+  assert.deepEqual(look.loose, [], `${label} loose lines ${JSON.stringify(look.loose)}`)
+  const golds = await filledGolds(page)
+  assert.equal(golds.length, 1, `${label} LOCKED has one gold ${JSON.stringify(golds)}`)
+  assert.match(golds[0].text, /Continue/)
+  const view = page.viewportSize()
+  if (view?.width === 375 && view?.height === 667) {
+    await page.waitForTimeout(900)
+    await page.screenshot({ path: `${SHOTS}/locked-${label}-375.png` })
+  }
 }
 
 async function answerQuiz(page, id) {
@@ -1008,6 +1207,196 @@ async function finishRead(page, puzzle) {
   assert.equal(await screenId(page), 'home', `day-2 Read returns Home (${puzzle.challenge.kind})`)
 }
 
+function hopSave(progress) {
+  return {
+    kind: SAVE_KIND,
+    schemaVersion: SAVE_SCHEMA_VERSION,
+    appVersion: '1.4.523',
+    savedAt: '2026-10-21T00:00:00.000Z',
+    progress: {
+      started: true,
+      easyMode: true,
+      theme: 'candy',
+      completed: [],
+      held: [],
+      easyHeld: [],
+      easyTaught: ['ph-road'],
+      lastDailyDate: '2020-01-01',
+      dailyDates: ['2020-01-01'],
+      ...progress,
+    },
+  }
+}
+
+async function openSeeded(browser, origin, progress) {
+  const context = await browser.newContext({ viewport: { width: 375, height: 667 } })
+  await context.addInitScript(
+    ([storageKey, raw]) => {
+      localStorage.clear()
+      localStorage.setItem(storageKey, raw)
+    },
+    [STORAGE_KEY, JSON.stringify(hopSave(progress))],
+  )
+  const page = await context.newPage()
+  const errors = []
+  page.on('pageerror', (error) => errors.push(String(error)))
+  await page.goto(origin)
+  return { context, page, errors }
+}
+
+async function pointerClick(page, locator) {
+  await locator.scrollIntoViewIfNeeded()
+  const box = await locator.boundingBox()
+  if (!box) throw new Error('pointer target has no box')
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
+}
+
+async function openRoadLockIn(page) {
+  await page.locator('main.hub').waitFor()
+  await pointerClick(page, page.getByRole('button', { name: 'Settings' }))
+  const summary = page.locator('summary', { hasText: 'Developer · mini-game jumps' })
+  await summary.waitFor()
+  await pointerClick(page, summary)
+  await pointerClick(page, page.getByRole('button', { name: 'ph-road · Lock In Why Blast', exact: true }))
+}
+
+async function tapWrongWhy(page, why) {
+  const chips = page.locator('button.why-chip:not([disabled])')
+  const count = await chips.count()
+  for (let i = 0; i < count; i += 1) {
+    const text = ((await chips.nth(i).innerText()) || '').replace(/\s+/g, ' ').trim()
+    if (text === why) continue
+    const box = await chips.nth(i).boundingBox()
+    if (!box || box.height < 4) continue
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
+    return
+  }
+  throw new Error('no wrong why chip')
+}
+
+async function tapWrongRecall(page, claim) {
+  const cards = page.locator('button.recall-card')
+  const count = await cards.count()
+  for (let i = 0; i < count; i += 1) {
+    const text = ((await cards.nth(i).innerText()) || '').replace(/\s+/g, ' ').trim()
+    if (text === claim) continue
+    await pointerClick(page, cards.nth(i))
+    return
+  }
+  throw new Error('no wrong recall card')
+}
+
+async function proveNotQuite(browser, origin) {
+  const brief = evidenceForTier('ph-road', 'easy')
+  assert.ok(brief, 'ph-road easy brief')
+  const why = easyWhyLine(brief.reason)
+  const claim = easyFacingLine('ph-road', brief.claim)
+  const hint = easyReasonHint(brief.reason)
+  const answer = `${claim} — ${why}`
+
+  const blast = await openSeeded(browser, origin, {})
+  try {
+    await openRoadLockIn(blast.page)
+    await blast.page.locator('button.why-chip').first().waitFor()
+    await tapWrongWhy(blast.page, why)
+    await blast.page.locator('.why-miss-hint').waitFor()
+    const firstHint = ((await blast.page.locator('.why-miss-hint').innerText()) || '').replace(/\s+/g, ' ').trim()
+    assert.equal(firstHint, hint, 'first miss hints from the reason')
+    assert.equal(await blast.page.locator('.why-miss-answer').count(), 0, 'first miss hides the right card')
+    assert.ok(firstHint.length < why.length, 'the hint is shorter than the right card')
+    const firstGolds = await filledGolds(blast.page)
+    assert.equal(firstGolds.length, 1, `first miss one gold ${JSON.stringify(firstGolds)}`)
+    assert.equal(firstGolds[0].text, 'Try again')
+    await blast.page.screenshot({ path: `${SHOTS}/not-quite-first-375.png` })
+    await pointerClick(blast.page, blast.page.locator('.why-miss-retry'))
+    await blast.page.locator('button.why-chip:not(.is-gone)').first().waitFor()
+    await tapWrongWhy(blast.page, why)
+    await blast.page.locator('.why-miss-answer').waitFor()
+    const second = ((await blast.page.locator('.why-miss-answer').innerText()) || '').replace(/\s+/g, ' ').trim()
+    assert.equal(second, answer, 'second miss shows claim and reason on one line')
+    assert.equal(await blast.page.locator('.why-miss-retry').count(), 0, 'second miss has no third retry')
+    const secondGolds = await filledGolds(blast.page)
+    assert.equal(secondGolds.length, 1, `second miss one gold ${JSON.stringify(secondGolds)}`)
+    assert.equal(secondGolds[0].text, 'Continue')
+    await blast.page.screenshot({ path: `${SHOTS}/not-quite-second-375.png` })
+    await pointerClick(blast.page, blast.page.locator('.why-miss-continue'))
+    await blast.page.locator('main.hub').waitFor()
+    assert.equal(blast.errors.join('\n'), '', 'why-blast miss page errors')
+  } finally {
+    await blast.context.close()
+  }
+
+  const review = await openSeeded(browser, origin, {
+    held: ['ph-road'],
+    easyHeld: ['ph-road'],
+    lessonScore: { 'ph-road': 10 },
+    lessonTier: { 'ph-road': 'easy' },
+  })
+  try {
+    await openRoadLockIn(review.page)
+    await review.page.locator('button.recall-card').first().waitFor()
+    assert.equal(await review.page.locator('.why-blast').count(), 0, 'Easy review uses RecallGate')
+    await tapWrongRecall(review.page, claim)
+    await review.page.locator('.why-miss-hint').waitFor()
+    const reviewHint = ((await review.page.locator('.why-miss-hint').innerText()) || '').replace(/\s+/g, ' ').trim()
+    assert.equal(reviewHint, hint, 'RecallGate first miss hints from the reason')
+    assert.equal(await review.page.locator('.why-miss-answer').count(), 0)
+    const reviewFirst = await filledGolds(review.page)
+    assert.equal(reviewFirst.length, 1, `RecallGate first miss one gold ${JSON.stringify(reviewFirst)}`)
+    assert.equal(reviewFirst[0].text, 'Try again')
+    await pointerClick(review.page, review.page.locator('.why-miss-retry'))
+    await review.page.locator('button.recall-card').first().waitFor()
+    await tapWrongRecall(review.page, claim)
+    await review.page.locator('.why-miss-answer').waitFor()
+    const reviewAnswer = ((await review.page.locator('.why-miss-answer').innerText()) || '').replace(/\s+/g, ' ').trim()
+    assert.equal(reviewAnswer, answer, 'RecallGate second miss is one line')
+    assert.equal(await review.page.locator('.why-miss-retry').count(), 0)
+    const reviewSecond = await filledGolds(review.page)
+    assert.equal(reviewSecond.length, 1, `RecallGate second miss one gold ${JSON.stringify(reviewSecond)}`)
+    assert.equal(reviewSecond[0].text, 'Continue')
+    await pointerClick(review.page, review.page.locator('.why-miss-continue'))
+    await review.page.locator('main.hub').waitFor()
+    assert.equal(review.errors.join('\n'), '', 'recall miss page errors')
+  } finally {
+    await review.context.close()
+  }
+}
+
+async function proveGemToast(browser, origin) {
+  const gems = DAILY_POOL.find((item) => item.challenge.id === 'daily-gems')
+  assert.ok(gems && gems.challenge.kind === 'match', 'daily-gems is a picture match')
+  const seeded = await openSeeded(browser, origin, {})
+  const page = seeded.page
+  try {
+    await page.goto(`${origin}?sequence=daily-gems`)
+    await pointerClick(page, page.getByRole('button', { name: 'Find the gems' }))
+    await page.locator('[data-match-picture]').waitFor()
+    await page.waitForFunction(() => !document.querySelector('.is-arming'))
+    const id = await page.locator('[data-match-picture]').first().getAttribute('data-match-picture')
+    assert.ok(id, 'picture id')
+    const pair = gems.challenge.pairs.find((item) => item.id === id)
+    assert.ok(pair, `pair ${id}`)
+    await pointerClick(page, page.locator(`[data-match-line]:not([data-match-line="${id}"])`).first())
+    await page.locator('.match-toast').waitFor()
+    const toast = ((await page.locator('.match-toast').innerText()) || '').replace(/\s+/g, ' ').trim()
+    assert.equal(toast, easyWrongTap(pair.right))
+    for (let guard = 0; guard < 4; guard += 1) {
+      if (await page.locator('.play.is-match.is-win').count()) break
+      const picture = page.locator('[data-match-picture]').first()
+      await picture.waitFor()
+      const pictureId = await picture.getAttribute('data-match-picture')
+      await pointerClick(page, page.locator(`[data-match-line="${pictureId}"]`))
+      await page.waitForTimeout(200)
+    }
+    await page.locator('.play.is-match.is-win').waitFor({ timeout: 4000 })
+    assert.equal(await page.locator('.match-toast').count(), 0, 'MATCHED clears the wrong-tap toast')
+    assert.doesNotMatch(await page.locator('.play.is-match').innerText(), /Wrong\. Tap this one/)
+    assert.equal(seeded.errors.join('\n'), '', 'gem toast page errors')
+  } finally {
+    await seeded.context.close()
+  }
+}
+
 export async function checkGoldenLive() {
   await build({ logLevel: 'warn' })
   const server = await preview({
@@ -1030,6 +1419,24 @@ export async function checkGoldenLive() {
       page.on('pageerror', (error) => errors.push(String(error)))
       await page.goto(origin)
       await page.locator('.welcome').waitFor()
+      if (width === 375 && height === 667) {
+        await page.evaluate(() => {
+          sessionStorage.setItem('silver-city-web-refresh', '9.9.9')
+          window.dispatchEvent(new CustomEvent('silver-city-web-update', { detail: { version: '9.9.9' } }))
+        })
+        await page.locator('[data-web-refresh]').waitFor()
+        const updateClass = await page.locator('[data-web-refresh] button', { hasText: 'Get the update' }).getAttribute('class')
+        assert.equal(updateClass, 'btn', `update button stays non-gold (${updateClass})`)
+        const welcomeGolds = await filledGolds(page)
+        assert.equal(welcomeGolds.length, 1, `welcome banner keeps one gold ${JSON.stringify(welcomeGolds)}`)
+        assert.match(welcomeGolds[0].text, /Start Easy/)
+        await page.screenshot({ path: `${SHOTS}/welcome-update-banner-375.png` })
+        const notNow = page.locator('[data-web-refresh] button', { hasText: 'Not now' })
+        const notNowBox = await notNow.boundingBox()
+        if (!notNowBox) throw new Error('update dismiss has no box')
+        await page.mouse.click(notNowBox.x + notNowBox.width / 2, notNowBox.y + notNowBox.height / 2)
+        await page.locator('[data-web-refresh]').waitFor({ state: 'detached' })
+      }
 
       async function stamp(label) {
         const shot = await signature(page)
@@ -1087,6 +1494,7 @@ export async function checkGoldenLive() {
       shot = await stamp('quiz-road-done')
       assert.match(shot.golds[0].text, /Continue/)
       assert.match(await page.locator('.why-got-it').innerText(), /You got it/)
+      await assertLocked(page, 'ph-road')
       if (width === 375) await page.screenshot({ path: `${SHOTS}/lock-in-you-got-it-375.png` })
       await tapFilledGold(page)
 
@@ -1134,6 +1542,7 @@ export async function checkGoldenLive() {
       shot = await stamp('quiz-father-done')
       assert.match(shot.golds[0].text, /Continue/)
       assert.match(await page.locator('.why-got-it').innerText(), /You got it/)
+      await assertLocked(page, 'ph-father')
       await tapFilledGold(page)
 
       await page.locator('main.hub').waitFor()
@@ -1151,7 +1560,7 @@ export async function checkGoldenLive() {
       await stamp('gem')
       const gemBefore = await readBoardGeom(page)
       const gridBefore = await readGrid(page)
-      const juice = await playGem(page, 'ob-tuning', { watchLast: true })
+      const juice = await playGem(page, 'ob-tuning', { watchLast: true, checkStart: true })
       assert.ok(juice.burst > 0, `${width} last find burst`)
       assert.equal(juice.pop, true, `${width} last find pop`)
       await page.locator('.play.is-gem-search.is-win .btn.primary').waitFor()
@@ -1214,6 +1623,7 @@ export async function checkGoldenLive() {
         await dragWhy(page, 'ob-tuning')
         shot = await stamp('quiz-tuning-done')
         assert.match(shot.golds[0].text, /Continue/)
+        await assertLocked(page, 'ob-tuning')
         assert.equal(await page.locator('[data-drag-cue], .why-drag-cue').count(), 0)
         await tapFilledGold(page)
         await page.locator('main.hub').waitFor()
@@ -1236,11 +1646,12 @@ export async function checkGoldenLive() {
 
         await tapFilledGold(page)
         await page.locator('.play.is-gem-search').waitFor()
-        await playGem(page, 'ph-debt')
+        await playGem(page, 'ph-debt', { checkStart: true })
         await page.locator('.play.is-gem-search.is-win .btn.primary').waitFor()
         await tapFilledGold(page)
         await page.locator('.why-blast').waitFor()
         await dragWhy(page, 'ph-debt')
+        await assertLocked(page, 'ph-debt')
         await tapFilledGold(page)
         await page.locator('main.hub').waitFor()
         shot = await stamp('home-5')
@@ -1252,11 +1663,12 @@ export async function checkGoldenLive() {
 
         await tapFilledGold(page)
         await page.locator('.play.is-gem-search').waitFor()
-        await playGem(page, 'fg-order')
+        await playGem(page, 'fg-order', { checkStart: true })
         await page.locator('.play.is-gem-search.is-win .btn.primary').waitFor()
         await tapFilledGold(page)
         await page.locator('.why-blast').waitFor()
         await dragWhy(page, 'fg-order')
+        await assertLocked(page, 'fg-order')
         await tapFilledGold(page)
         await page.locator('main.hub').waitFor()
         shot = await stamp('home-6')
@@ -1270,6 +1682,7 @@ export async function checkGoldenLive() {
 
         await tapFilledGold(page)
         await page.locator('.play.is-gem-search').waitFor()
+        await assertGemStart(page, 'fg-reason')
         const reasonLetters = await readGrid(page)
         for (const word of gemWordsFor('fg-reason')) {
           assert.ok(findStraightSpelling(reasonLetters, word.text), `fg-reason shows ${word.text}`)
@@ -1406,6 +1819,7 @@ export async function checkGoldenLive() {
     await humanStamp('quiz-road')
     await answerQuiz(humanPage, 'ph-road')
     await humanPage.locator('.why-blast.is-yes .btn.primary').waitFor()
+    await assertLocked(humanPage, 'ph-road')
     await humanStamp('quiz-road-done')
     await tapFilledGold(humanPage)
     await humanPage.locator('main.hub').waitFor()
@@ -1420,6 +1834,7 @@ export async function checkGoldenLive() {
     await humanStamp('quiz-father')
     await answerQuiz(humanPage, 'ph-father')
     await humanPage.locator('.why-got-it').waitFor()
+    await assertLocked(humanPage, 'ph-father')
     const humanGot = await humanStamp('quiz-father-done')
     assert.match(humanGot.golds[0].text, /Continue/)
     await tapFilledGold(humanPage)
@@ -1436,7 +1851,7 @@ export async function checkGoldenLive() {
     await tapFilledGold(humanPage)
     await humanPage.locator('.play.is-gem-search').waitFor()
     await humanStamp('gem')
-    await playGem(humanPage)
+    await playGem(humanPage, 'ob-tuning', { checkStart: true })
     await humanPage.locator('.play.is-gem-search.is-win .btn.primary').waitFor()
     const humanGem = await humanStamp('gem-win')
     assert.match(humanGem.golds[0].text, /Lock In/)
@@ -1448,6 +1863,10 @@ export async function checkGoldenLive() {
     assert.equal(humanErrors.join('\n'), '', 'human page errors')
     traces.push(humanTrace.join('\n'))
     await human.close()
+
+    await proveNotQuite(browser, origin)
+    await proveGemToast(browser, origin)
+    traces.push('hop-b not-quite and gem toast')
   } finally {
     await browser.close()
     await server.close()

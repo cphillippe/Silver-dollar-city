@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { shuffle } from '../lib/shuffle'
 import { takeawayLines, type EvidenceBrief } from '../content/evidence'
 import { STORY } from '../content/story'
-import { EASY, easyFacingLine, easyWhyLine, isEasy, uniqueHoldChoices } from '../lib/easy'
+import { EASY, easyFacingLine, easyReasonHint, easyWhyLine, isEasy, uniqueHoldChoices } from '../lib/easy'
 import { WhyBlastPlay } from './challenges/WhyBlastPlay'
 import { learningBeat } from '../lib/learning'
 import { learningPicture, toolForEvidence } from '../lib/watchTools'
@@ -88,6 +88,7 @@ export function RecallGate({
     return uniqueHoldChoices(raw, reasonFace, correct)
   }, [brief.id, brief.reason, brief.reasonChoices, encode, chosen, easy])
   const [phase, setPhase] = useState<Phase>(deeper ? 'reason' : 'claim')
+  const [teachFrom, setTeachFrom] = useState<Phase>(deeper ? 'reason' : 'claim')
   const [misses, setMisses] = useState(0)
   const [flash, setFlash] = useState<string | null>(null)
   const [shake, setShake] = useState(false)
@@ -104,7 +105,9 @@ export function RecallGate({
   const nextTap =
     phase === 'teach'
       ? easy
-        ? 'Read this, then try again.'
+        ? misses >= 2
+          ? ''
+          : 'Read this, then try again.'
         : 'Read this, then tap Got it.'
       : phase === 'reason'
         ? confirmReason
@@ -154,7 +157,10 @@ export function RecallGate({
     window.setTimeout(() => {
       setShake(false)
       setFlash(null)
-      if (nextMisses >= 2) setPhase('teach')
+      if (easy && nextMisses >= 1) {
+        setTeachFrom(phase === 'teach' ? teachFrom : phase)
+        setPhase('teach')
+      } else if (nextMisses >= 2) setPhase('teach')
     }, 320)
   }
 
@@ -193,13 +199,12 @@ export function RecallGate({
   }
 
   function finishFromTeach() {
-    // Easy: teach-before-test — send them back for one more reason try.
-    if (easy) {
-      setMisses(0)
+    // Easy first miss: back to the same question. The miss count stays.
+    if (easy && misses < 2) {
       setFlash(null)
       setShake(false)
       setReasonLocked(false)
-      setPhase('reason')
+      setPhase(teachFrom === 'claim' ? 'claim' : 'reason')
       playGemPop('bonus')
       return
     }
@@ -362,23 +367,45 @@ export function RecallGate({
       ) : null}
 
       {phase === 'teach' ? (
+        easy ? (
+          misses >= 2 ? (
+            <>
+              <h2>{EASY.missTeachBadge}</h2>
+              <p className="why-miss-answer">
+                {easyFacingLine(brief.id, heldClaim)} — {reasonFace(heldReason)}
+              </p>
+              <button type="button" className="btn primary xl why-miss-continue" onClick={() => settle(false)}>
+                {EASY.continueOn}
+              </button>
+            </>
+          ) : (
+            <>
+              <h2>{EASY.missTeachBadge}</h2>
+              <p className="why-miss-hint">{easyReasonHint(heldReason)}</p>
+              <button type="button" className="btn primary xl why-miss-retry" onClick={finishFromTeach}>
+                {EASY.tryAgain}
+              </button>
+            </>
+          )
+        ) : (
         <>
-          <h2>{easy ? EASY.missTeachBadge : deeper ? 'Here’s the sharper line.' : 'Here’s the line.'}</h2>
+          <h2>{deeper ? 'Here’s the sharper line.' : 'Here’s the line.'}</h2>
           <article className="unlock-card pop-in">
-            <p className="recall-line">{easy ? easyFacingLine(brief.id, heldClaim) : heldClaim}</p>
-            <p>{easy ? reasonFace(heldReason) : heldReason}</p>
+            <p className="recall-line">{heldClaim}</p>
+            <p>{heldReason}</p>
             {brief.source ? (
               <p className="held-from">
-                {easy ? EASY.sayFrom : 'From'} {brief.source}
+                {EASY.sayFrom} {brief.source}
               </p>
             ) : null}
             <PlainTalk id={brief.id} teach />
           </article>
           <button type="button" className="btn gold xl" onClick={finishFromTeach}>
-            {easy ? EASY.tryAgain : 'Got it'}
+            Got it
           </button>
           <DigDeeper id={brief.id} />
         </>
+        )
       ) : null}
 
       {!encode && onSkip ? (
