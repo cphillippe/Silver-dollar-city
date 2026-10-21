@@ -79,7 +79,7 @@ const PLAIN: Record<string, PlainLine> = {
     'The universe is finely tuned for life — that fit points to a Designer.',
     'Life needs very tight numbers: how fast space expands, how atoms stick, how tidy the start was. Design predicts a world we can live in. Blind chance does not.',
     {
-      term: 'Fine-tuning',
+      term: 'Set just right',
       sense: 'life’s dials fit in a very narrow range',
       hint: 'Tap the picture, then the mark that belongs. Two choices.',
     },

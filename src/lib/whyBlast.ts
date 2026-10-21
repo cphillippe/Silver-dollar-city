@@ -25,7 +25,7 @@ export const WHY_BLAST_EXTRAS: Record<string, string[]> = {
   'wb-method': ['A late pious novel is just as strong.'],
   'daily-lantern': ['A lamp is meant to stay hidden.'],
   'daily-stars': ['The sky is silent decoration.'],
-  'daily-cosmos': ['Chance is enough for a livable world.'],
+  'daily-cosmos': ['Luck is enough for a livable world.'],
   'hl-moral': ['Duty is only a private feeling.'],
   'daily-names': ['Paul names no one who was alive.'],
   'daily-creed': ['The line is late, far from the event.'],
