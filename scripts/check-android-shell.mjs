@@ -489,6 +489,7 @@ assert.match(pages, /actions\/upload-pages-artifact@56afc609e74202658d3ffba0e8f6
 assert.match(pages, /actions\/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4\.0\.5/)
 assert.doesNotMatch(pages, /actions\/(?:checkout|setup-node|upload-pages-artifact|deploy-pages)@v\d/)
 assert.match(pages, /test ! -e dist\/qa-seed\.html/)
+assert.match(read('.gitignore'), /^dist-launch\/$/m, 'dist-launch/ is ignored')
 const scans = read('.github/workflows/city-scans.yml')
 assert.match(scans, /actions\/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4\.4\.0/)
 assert.match(scans, /actions\/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4\.4\.0/)

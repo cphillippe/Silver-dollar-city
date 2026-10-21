@@ -426,4 +426,9 @@ assert.equal(shared.search, '')
 assert.equal(shared.hash, '')
 assert.equal(sharedUrl, 'https://cphillippe.github.io/Silver-dollar-city/')
 
+const shareCss = readFileSync(new URL('../src/styles/shareCard.css', import.meta.url), 'utf8')
+const toastRule = shareCss.match(/html\[data-easy='on'\] \.share-card-actions \[role='status'\] \{[^}]*\}/)?.[0] ?? ''
+assert.match(toastRule, /color: #fff6e8/, '#792 share toast is cream on the dark card')
+assert.match(toastRule, /font-size: 0\.9rem/)
+
 console.log('check-share-card: ok')
