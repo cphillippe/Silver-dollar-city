@@ -187,3 +187,20 @@
     font-weight: 900;
   }
 }
+
+/* #792 Easy: the find pop keeps an ink edge so it reads on bright tiles. Hard keeps the base look. */
+html[data-easy='on'] .gem-find-pop {
+  -webkit-text-stroke: 1.5px #2a2118;
+  paint-order: stroke fill;
+  text-shadow:
+    0 0 0 #2a2118,
+    0 2px 0 #2a2118,
+    0 3px 0 #c46a08,
+    0 0 18px rgba(255, 204, 51, 0.75);
+  animation: gem-find-pop 1.6s cubic-bezier(0.2, 1.45, 0.3, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-easy='on'] .gem-find-pop {
+    animation: none;
+  }
+}

@@ -28,18 +28,20 @@ export function WebBuildRefresh({ viewName }: { viewName: string }) {
 function WebBuildRefreshLive({ viewName }: { viewName: string }) {
   const [version, setVersion] = useState<string | null>(null)
   const [prompt, setPrompt] = useState(false)
+  const [stale, setStale] = useState(false)
 
   useEffect(() => {
     const onUpdate = (event: Event) => {
-      const detail = (event as CustomEvent<{ version?: string }>).detail
+      const detail = (event as CustomEvent<{ version?: string; fresh?: boolean }>).detail
       const next = detail?.version || 'ready'
       setVersion(next)
+      setStale(detail?.fresh === false)
       const action = webRefreshAction({
         surface: 'web',
         safe: safeWebScreen(viewName),
         updateReady: true,
       })
-      if (action === 'reload' && claimAutoReload(next, sessionStorage)) {
+      if (action === 'reload' && detail?.fresh !== false && claimAutoReload(next, sessionStorage)) {
         window.location.reload()
         return
       }
@@ -50,11 +52,11 @@ function WebBuildRefreshLive({ viewName }: { viewName: string }) {
   }, [viewName])
 
   useEffect(() => {
-    if (!version || !prompt) return
+    if (!version || !prompt || stale) return
     if (!safeWebScreen(viewName)) return
     if (!claimAutoReload(version, sessionStorage)) return
     window.location.reload()
-  }, [prompt, version, viewName])
+  }, [prompt, version, viewName, stale])
 
   if (!prompt || !version) return null
 
