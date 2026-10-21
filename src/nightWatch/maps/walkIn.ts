@@ -4,10 +4,12 @@ import type { NightPoint } from '../types.ts'
 export const WALK_IN_LEAD_U = 96
 export const WALK_IN_MIN_MS = 600
 export const WALK_IN_MAX_MS = 1800
-/** Run-in time is this plus `WALK_IN_MS_PER_U` per plate unit of the drawn trail. */
-export const WALK_IN_BASE_MS = 600
-export const WALK_IN_MS_PER_U = 0.14
-/** A walker cannot take a tap for this long at most. */
+/** Drawn run-in speed in plate units per second, before the 600–1800 ms clamp. */
+export const WALK_IN_U_PER_S = 900
+/**
+ * A walker cannot take a tap for this long at most, in game ms.
+ * The fastest Easy walker covers 0.1 of its road in this time: 0.1 / (0.01 × 6.8 × 1.75) s.
+ */
 export const WALK_IN_TAP_MAX_MS = 840
 /** Live spawns never start past this t (`EASY_ON_SCREEN_T`). The time table is checked up to here. */
 export const WALK_IN_SPAWN_T_CAP = 0.55
@@ -117,9 +119,9 @@ export function walkInLength(entry: WalkInEntry, points: readonly NightPoint[], 
   return trailLength(walkInTrail(entry, points, t))
 }
 
-/** Scales with the trail and stays inside 600–1800 ms. */
+/** The trail at `WALK_IN_U_PER_S`, kept inside 600–1800 ms. */
 export function walkInMs(lengthU: number): number {
-  const raw = WALK_IN_BASE_MS + WALK_IN_MS_PER_U * Math.max(0, Number(lengthU) || 0)
+  const raw = (Math.max(0, Number(lengthU) || 0) * 1000) / WALK_IN_U_PER_S
   return Math.min(WALK_IN_MAX_MS, Math.max(WALK_IN_MIN_MS, Math.round(raw)))
 }
 
@@ -168,6 +170,7 @@ interface WalkInSeen {
 
 /**
  * First-draw times for one wave. Draw only: nothing here reaches the sim.
+ * `now` is the Easy game clock in ms, so 3× pace, holds, and the debug freeze all apply.
  * A walker that is turned, a mini, or already past the spawn cap draws at its sim point.
  */
 export interface WalkInClock {
