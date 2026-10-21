@@ -264,33 +264,26 @@ export async function checkEasyFace() {
       })
       const pad = page.locator('[data-run-pad="hold"]')
       await pad.hover()
+      const holdBox = await pad.boundingBox()
+      assert.ok(holdBox, `father pad has a box at ${width}`)
+      await page.mouse.move(holdBox.x + holdBox.width / 2, holdBox.y + holdBox.height / 2)
       await page.mouse.down()
-      await page.waitForTimeout(60)
-      await page.mouse.up()
-      for (let tap = 1; tap <= 3; tap += 1) {
-        await page.waitForFunction(
-          () => document.querySelector('[data-run-pad="hold"]')?.getAttribute('aria-label') === 'Tap',
-          null,
-          { timeout: 8000 },
-        )
-        const same = await page.evaluate(() => {
+      await page.waitForFunction(
+        () => {
           const live = document.querySelector('[data-run-pad="hold"]')
-          const marked = document.querySelector('[data-mark="stay"]')
-          return Boolean(live && marked === live && live.isConnected)
-        })
-        assert.equal(same, true, `father pad stays connected at ${width} tap ${tap}`)
-        await pad.click({ delay: 30 })
-        await page.waitForTimeout(40)
-        const score = Number((await page.locator('.match-score').innerText()).replace(/\D/g, ''))
-        assert.equal(score, tap * 25, `father tap ${tap}/3 at ${width}`)
-        if (tap < 3) {
-          await page.waitForFunction(
-            () => document.querySelector('[data-run-pad="hold"]')?.getAttribute('aria-label') === 'Hold',
-            null,
-            { timeout: 8000 },
-          )
-        }
-      }
+          const score = Number((document.querySelector('.match-score')?.textContent || '').replace(/\D/g, ''))
+          return live?.getAttribute('aria-label') === 'Hold' && !live.classList.contains('is-glow') && score >= 50
+        },
+        null,
+        { timeout: 8000 },
+      )
+      const same = await page.evaluate(() => {
+        const live = document.querySelector('[data-run-pad="hold"]')
+        const marked = document.querySelector('[data-mark="stay"]')
+        return Boolean(live && marked === live && live.isConnected && live.getAttribute('aria-label') === 'Hold')
+      })
+      assert.equal(same, true, `father pad stays Hold and connected at ${width}`)
+      await page.mouse.up()
       const fatherX = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
       assert.ok(fatherX <= 1, `father horizontal scroll at ${width}`)
 

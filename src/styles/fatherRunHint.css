@@ -38,3 +38,51 @@ html[data-easy='on'] .play.is-father-run .match-toast strong {
     line-height: 1.28;
   }
 }
+
+/* Easy Run: one line above the pad. Not the HUD peel (kicker, thumbs, caption). */
+html[data-easy='on'] .play.is-father-run .run-how {
+  display: block;
+  margin: 0 0 8px;
+  padding: 0 8px;
+  color: #2a1408;
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
+}
+
+/* Last line and the miss count stay the written words. Urgent berry, not gold, not a button. */
+html[data-easy='on'] .play.is-father-run .run-speech.is-last .run-speech-count,
+html[data-easy='on'] .play.is-father-run .run-speech.is-late .run-speech-count {
+  color: #9d1c3c;
+  font-size: 1rem;
+  font-weight: 850;
+  letter-spacing: 0;
+  text-transform: none;
+  text-align: center;
+}
+
+html[data-easy='on'] .play.is-father-run .run-speech.is-last .run-speech-count {
+  animation: run-last-pulse 0.7s ease-in-out infinite;
+}
+
+@keyframes run-last-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-easy='on'] .play.is-father-run .run-speech.is-last .run-speech-count {
+    animation: none;
+  }
+}
+
+/* Miss buttons ignore a finger that is still tapping as the panel mounts. */
+html[data-easy='on'] .play.is-father-run .run-miss.is-arming .btn {
+  pointer-events: none;
+}
