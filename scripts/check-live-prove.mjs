@@ -16,6 +16,10 @@ import { chromium } from '@playwright/test'
 import { SAVE_KIND } from '../src/lib/save.ts'
 import { SAVE_SCHEMA_VERSION, STORAGE_KEY } from '../src/config/app.ts'
 import { DEFEND_PATH } from '../src/nightWatch/path/data.ts'
+import { nightMapFromPack } from '../src/nightWatch/maps/fromPack.ts'
+import { EASY_ROUNDS } from '../src/nightWatch/rounds.ts'
+import { gaitForSlot } from '../src/nightWatch/walkers.ts'
+import { SPAWN_BOX_U, spawnMarkerPlateBox, spawnMarkersFor } from '../src/nightWatch/maps/spawnMarkers.ts'
 import { evidenceFor } from '../src/content/evidence.ts'
 import { localDateKey } from '../src/lib/dates.ts'
 import { EASY_LINE_ORDER } from '../src/lib/easy.ts'
@@ -3635,6 +3639,353 @@ async function checkTrustedMisses(browser, port, errors) {
   console.log(`miss-report ${JSON.stringify(rows)}`)
 }
 
+function spawnRoads(id) {
+  if (id === 'a2') return [{ id: 'main', points: DEFEND_PATH }]
+  const file = id === 'far-hills' ? 'map02.json' : `${id}.json`
+  const pack = nightMapFromPack(JSON.parse(readFileSync(new URL(`../src/nightWatch/maps/maze/${file}`, import.meta.url), 'utf8')))
+  return pack.roads
+}
+
+function gapToPlateBox(x, y, box) {
+  const dx = x < box.left ? box.left - x : x > box.right ? x - box.right : 0
+  const dy = y < box.top ? box.top - y : y > box.bottom ? y - box.bottom : 0
+  return Math.hypot(dx, dy)
+}
+
+function roadGap(point, points) {
+  let min = Infinity
+  for (let i = 0; i < points.length - 1; i += 1) {
+    const a = points[i]
+    const b = points[i + 1]
+    const dx = b.x - a.x
+    const dy = b.y - a.y
+    const len2 = dx * dx + dy * dy || 1
+    let t = ((point.x - a.x) * dx + (point.y - a.y) * dy) / len2
+    t = Math.max(0, Math.min(1, t))
+    min = Math.min(min, Math.hypot(point.x - (a.x + t * dx), point.y - (a.y + t * dy)))
+  }
+  return min
+}
+
+const SPAWN_MAPS = ['a2', 'far-hills', 'map03', 'map04', 'map05', 'map06']
+const SPAWN_COUNTS = { a2: 1, 'far-hills': 1, map03: 1, map04: 2, map05: 2, map06: 3 }
+
+async function readSpawnBoard(page) {
+  return page.evaluate(() => {
+    const blocks = [
+      '.defend-abilities',
+      '.defend-new-lamp',
+      '.defend-hud',
+      '.nw-wave-count',
+      '.nw-wave-survived',
+      '.nw-skill-tray',
+      '.nw-tap-readout',
+      '.defend-pad',
+    ]
+    const obstacles = []
+    for (const sel of blocks) {
+      for (const node of document.querySelectorAll(sel)) {
+        const box = node.getBoundingClientRect()
+        if (box.width > 1 && box.height > 1) {
+          obstacles.push({ sel, left: box.left, right: box.right, top: box.top, bottom: box.bottom })
+        }
+      }
+    }
+    const markers = [...document.querySelectorAll('[data-spawn-marker]')].map((node) => {
+      const box = node.getBoundingClientRect()
+      const cx = (box.left + box.right) / 2
+      const cy = (box.top + box.bottom) / 2
+      const hit = document.elementFromPoint(cx, cy)
+      return {
+        id: node.getAttribute('data-spawn-marker') || '',
+        fit: node.getAttribute('data-spawn-fit') || '',
+        scale: Number(node.getAttribute('data-spawn-scale')),
+        left: box.left,
+        top: box.top,
+        right: box.right,
+        bottom: box.bottom,
+        width: box.width,
+        height: box.height,
+        markerHit: Boolean(hit && hit.closest && hit.closest('[data-spawn-marker]')),
+      }
+    })
+    const overlaps = []
+    for (const marker of markers) {
+      for (const obstacle of obstacles) {
+        const w = Math.min(marker.right, obstacle.right) - Math.max(marker.left, obstacle.left)
+        const h = Math.min(marker.bottom, obstacle.bottom) - Math.max(marker.top, obstacle.top)
+        if (w > 0 && h > 0) overlaps.push(`${marker.id} ${obstacle.sel}`)
+      }
+    }
+    return { w: window.innerWidth, h: window.innerHeight, markers, overlaps }
+  })
+}
+
+async function seatClient(page, kind, width, height) {
+  return page.evaluate(({ kind, width, height }) => {
+    const svg = document.querySelector('.defend-board')
+    if (!(svg instanceof SVGSVGElement)) return null
+    const ctm = svg.getScreenCTM()
+    if (!ctm) return null
+    for (const node of document.querySelectorAll(`[data-seat="${kind}"]`)) {
+      const point = svg.createSVGPoint()
+      point.x = Number(node.getAttribute('cx'))
+      point.y = Number(node.getAttribute('cy'))
+      const client = point.matrixTransform(ctm)
+      if (client.x < 12 || client.y < 80 || client.x > width - 12 || client.y > height - 80) continue
+      const hit = document.elementFromPoint(client.x, client.y)
+      if (!hit || !hit.closest('.defend-board') || hit.closest('button, .nw-rail, .nw-docks, .nw-skill-tray')) continue
+      return { x: client.x, y: client.y }
+    }
+    return null
+  }, { kind, width, height })
+}
+
+async function openSpawnMap(browser, port, errors, id, width, height, extra = '') {
+  const context = await browser.newContext({
+    baseURL: `http://127.0.0.1:${port}/`,
+    viewport: { width, height },
+    deviceScaleFactor: 1,
+    reducedMotion: 'reduce',
+  })
+  await context.addInitScript(
+    (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+    { key: STORAGE_KEY, save: SAVE },
+  )
+  const page = await context.newPage()
+  const spawns = []
+  page.on('console', (msg) => {
+    const text = msg.text()
+    if (text.startsWith('nw-spawn ')) spawns.push(text)
+  })
+  listen(page, errors, `spawn ${id} ${width}`)
+  const map = id === 'a2' ? '' : `&nwMap=${id}`
+  await pointerOpenJump(page, `?playtest=1&nwSeed=2${map}${extra}`)
+  if (await page.locator('[data-map-overlay]').count()) {
+    const pick = page.locator(`[data-map="${id}"]`)
+    const box = await pick.boundingBox()
+    assert.ok(box, `${id} map pick is on screen`)
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+    await page.mouse.down()
+    await page.mouse.up()
+    await page.locator('[data-map-overlay]').waitFor({ state: 'detached' })
+  }
+  await page.locator('.defend-board.has-map-plate').waitFor()
+  await page.locator('[data-spawn-marker]').first().waitFor()
+  await page.waitForTimeout(120)
+  return { context, page, spawns }
+}
+
+/** Easy arches at 375, 412, and 768. Real pointer events. Hard is a check-city gate. */
+async function checkSpawnMarkers(browser, port, errors) {
+  mkdirSync('/opt/cursor/artifacts/hop-756', { recursive: true })
+  const rows = []
+  const shots = []
+  const widths = process.env.NW_SPAWN_LAYOUT === '0'
+    ? []
+    : [
+        [375, 667],
+        [412, 915],
+        [768, 1024],
+      ]
+  for (const [width, height] of widths) {
+    for (const id of SPAWN_MAPS) {
+      if (process.env.NW_SPAWN_MAP && process.env.NW_SPAWN_MAP !== id) continue
+      const run = await openSpawnMap(browser, port, errors, id, width, height)
+      const board = await readSpawnBoard(run.page)
+      assert.equal(board.markers.length, SPAWN_COUNTS[id], `1.4.525 ${id} at ${width} has ${SPAWN_COUNTS[id]} arches`)
+      assert.deepEqual(board.overlaps, [], `1.4.525 ${id} at ${width} arches clear the chrome (${board.overlaps.join(', ')})`)
+      for (const marker of board.markers) {
+        assert.equal(marker.markerHit, false, `1.4.525 ${marker.id} does not take the hit`)
+        assert.ok(marker.scale >= 0.7, `1.4.525 ${marker.id} scale ${marker.scale}`)
+        assert.ok(marker.left >= -1 && marker.top >= -1, `1.4.525 ${marker.id} starts inside ${width}`)
+        assert.ok(marker.right <= width + 1 && marker.bottom <= height + 1, `1.4.525 ${marker.id} ends inside ${width}`)
+        if (width === 375) assert.ok(marker.width >= 40, `1.4.525 ${marker.id} is ${marker.width.toFixed(1)} px wide`)
+        const rect = `${marker.left.toFixed(0)},${marker.top.toFixed(0)} ${marker.width.toFixed(0)}x${marker.height.toFixed(0)}`
+        rows.push({ map: id, width, marker: marker.id, fit: marker.fit, scale: marker.scale.toFixed(2), rect })
+        console.log(`spawn-box ${id} ${width} ${marker.id} ${marker.fit} ${marker.scale.toFixed(2)} ${rect}`)
+      }
+      const odd = board.markers.some((marker) => marker.fit !== 'base')
+      if (width === 375 || id === 'map06' || odd) {
+        if (width === 375) {
+          const card = await run.page.locator('[data-type="love"]').boundingBox()
+          assert.ok(card, '1.4.525 the Love card is on screen')
+          await run.page.mouse.move(card.x + card.width / 2, card.y + card.height / 2)
+          await run.page.mouse.down()
+          await run.page.mouse.up()
+          await run.page.locator('[data-type="love"][aria-pressed="true"]').waitFor()
+        }
+        const shot = `/opt/cursor/artifacts/hop-756/${id}-${width}.png`
+        await run.page.screenshot({ path: shot })
+        shots.push(shot)
+      }
+      if (width === 375) {
+        const before = await plantedCount(run.page)
+        for (const marker of board.markers) {
+          const x = (marker.left + marker.right) / 2
+          const y = (marker.top + marker.bottom) / 2
+          const hit = await run.page.evaluate(({ x, y }) => {
+            const node = document.elementFromPoint(x, y)
+            return Boolean(node && node.closest && node.closest('[data-spawn-marker]'))
+          }, { x, y })
+          assert.equal(hit, false, `1.4.525 ${marker.id} center is not the arch`)
+          const onBoard = await run.page.evaluate(({ x, y }) => {
+            const node = document.elementFromPoint(x, y)
+            return Boolean(node && node.closest && node.closest('.defend-board'))
+          }, { x, y })
+          await run.page.mouse.move(x, y)
+          await run.page.mouse.down()
+          await run.page.mouse.up()
+          if (onBoard) {
+            await run.page.waitForFunction(() => {
+              const text = document.querySelector('[data-place-toast]')?.textContent || ''
+              return text.includes('Plant on open ground') || text.includes('Too far from the road')
+            })
+          }
+          assert.equal(await plantedCount(run.page), before, `1.4.525 ${marker.id} tap does not plant`)
+        }
+        const live = await seatClient(run.page, 'live', width, height)
+        assert.ok(live, `1.4.525 ${id} has a green seat`)
+        await assertGreenDrag(run.page, 'love', live.x, live.y, `1.4.525 ${id}`)
+        const dead = await seatClient(run.page, 'dead', width, height)
+        assert.ok(dead, `1.4.525 ${id} has a grey seat`)
+        await assertGreyTap(run.page, dead.x, dead.y, `1.4.525 ${id}`)
+      }
+      await run.context.close()
+    }
+  }
+
+  const waveBrowser = widths.length > 0 ? await launchBrowser() : browser
+  try {
+  const round = EASY_ROUNDS[4]
+  let fastId = -1
+  for (let id = 0; id < round.count; id += 1) {
+    if (gaitForSlot(round, id) === 'fast') {
+      fastId = id
+      break
+    }
+  }
+  assert.ok(fastId >= 0, '1.4.525 round 5 has a fast walker')
+  for (const id of SPAWN_MAPS) {
+    if (process.env.NW_SPAWN_MAP && process.env.NW_SPAWN_MAP !== id) continue
+    const run = await openSpawnMap(waveBrowser, port, errors, id, 375, 667, '&nwRound=5&nwLamps=0')
+    const go = run.page.locator('.defend-go')
+    await go.waitFor()
+    const goClass = (await go.getAttribute('class')) || ''
+    assert.match(goClass, /is-after-plant/, `1.4.525 ${id} round 5 Begin is live (${goClass})`)
+    await pointerBox(run.page, '.defend-go')
+    const wave = run.page.locator('.defend-page.is-shop, .defend-raider').first()
+    try {
+      await wave.waitFor({ timeout: 4000 })
+    } catch {
+      const state = await run.page.evaluate(() => ({
+        cls: document.querySelector('.defend-page')?.className || '',
+        go: document.querySelector('.defend-go')?.className || '',
+        toast: document.querySelector('[data-place-toast]')?.textContent || '',
+        planted: document.querySelectorAll('.defend-pad.is-planted').length,
+      }))
+      assert.fail(`1.4.525 ${id} Begin did not start the wave ${JSON.stringify(state)}`)
+    }
+    const resume = run.page.getByRole('button', { name: 'Resume walkers' })
+    if (await resume.count()) await pointerBox(run.page, '.defend-nw-debug-toggle')
+    let line = ''
+    const until = Date.now() + 50000
+    while (Date.now() < until && !line) {
+      line = run.spawns.find((text) => /^nw-spawn \d+ -?\d+ -?\d+ 0$/.test(text)) || ''
+      if (line) break
+      const face = await run.page.locator('.defend-walker-tap').first().boundingBox().catch(() => null)
+      if (face) {
+        const x = face.x + face.width / 2
+        const y = face.y + face.height / 2
+        const onFace = await run.page.evaluate(({ x, y }) => {
+          const node = document.elementFromPoint(x, y)
+          return Boolean(node && node.closest && node.closest('.defend-walker-tap, .defend-raider'))
+        }, { x, y })
+        if (onFace) {
+          await run.page.mouse.move(x, y)
+          await run.page.mouse.down()
+          await run.page.mouse.up()
+        }
+      }
+      await run.page.waitForTimeout(90)
+    }
+    if (!line) {
+      const state = await run.page.evaluate(() => ({
+        cls: document.querySelector('.defend-page')?.className || '',
+        raiders: document.querySelectorAll('.defend-raider').length,
+        taps: document.querySelectorAll('.defend-walker-tap').length,
+      }))
+      assert.fail(`1.4.525 ${id} fast walker never logged t=0 saw [${run.spawns.join(' | ')}] state ${JSON.stringify(state)} errors [${errors.join(' | ')}]`)
+    }
+    assert.match(line, /^nw-spawn \d+ -?\d+ -?\d+ 0$/, `1.4.525 ${id} fast walker steps out at t=0 (${line})`)
+    const parts = line.split(' ')
+    const x = Number(parts[2])
+    const y = Number(parts[3])
+    const roads = spawnRoads(id)
+    let road = roads[0]
+    let startGap = Infinity
+    for (const candidate of roads) {
+      const gap = Math.hypot(candidate.points[0].x - x, candidate.points[0].y - y)
+      if (gap < startGap) {
+        startGap = gap
+        road = candidate
+      }
+    }
+    const marker = spawnMarkersFor(id).find((row) => {
+      const marked = roads.find((item) => item.id === row.roadId)
+      return marked && Math.hypot(marked.points[0].x - road.points[0].x, marked.points[0].y - road.points[0].y) < 1.5
+    })
+    assert.ok(marker, `1.4.525 ${id} fast walker is on a marked road`)
+    const box = spawnMarkerPlateBox(marker)
+    const gap = gapToPlateBox(x, y, box)
+    const client = await run.page.evaluate(({ x, y }) => {
+      const svg = document.querySelector('.defend-board')
+      if (!(svg instanceof SVGSVGElement)) return null
+      const ctm = svg.getScreenCTM()
+      if (!ctm) return null
+      const point = svg.createSVGPoint()
+      point.x = x
+      point.y = y
+      const at = point.matrixTransform(ctm)
+      return { x: at.x, y: at.y, w: window.innerWidth, h: window.innerHeight }
+    }, { x, y })
+    const offScreen = !client || client.x < 0 || client.y < 0 || client.x > client.w || client.y > client.h
+    assert.ok(
+      gap <= SPAWN_BOX_U || (offScreen && roadGap({ x: marker.x, y: marker.y }, road.points) <= SPAWN_BOX_U / 2),
+      `1.4.525 ${id} fast walker is within one arch of ${marker.roadId} (gap ${gap.toFixed(1)}, off ${offScreen})`,
+    )
+    const board = await readSpawnBoard(run.page)
+    const spot = board.markers[0]
+    assert.ok(spot, `1.4.525 ${id} still shows an arch in the wave`)
+    const before = await readMissScore(run.page)
+    const cx = (spot.left + spot.right) / 2
+    const cy = (spot.top + spot.bottom) / 2
+    const onBoard = await run.page.evaluate(({ x, y }) => {
+      const node = document.elementFromPoint(x, y)
+      return Boolean(node && node.closest && node.closest('.defend-board') && !node.closest('[data-spawn-marker]'))
+    }, { x: cx, y: cy })
+    await run.page.mouse.move(cx, cy)
+    await run.page.mouse.down()
+    await run.page.mouse.up()
+    await run.page.waitForTimeout(200)
+    const after = await readMissScore(run.page)
+    const taps = (score) => score.hits + score.misses + score.stray
+    if (onBoard) {
+      assert.ok(taps(after) > taps(before), `1.4.525 ${id} wave tap at the arch counts (${before.text} -> ${after.text})`)
+    } else {
+      assert.equal(taps(after), taps(before), `1.4.525 ${id} wave tap on the dock stays with the dock (${before.text})`)
+    }
+    if (id === 'map06') await run.page.screenshot({ path: '/opt/cursor/artifacts/hop-756/map06-r5.png' })
+    await run.context.close()
+  }
+  } finally {
+    if (waveBrowser !== browser) await waveBrowser.close()
+  }
+  writeFileSync('/opt/cursor/artifacts/hop-756/final-box.json', JSON.stringify({ rows, shots }, null, 2))
+  console.log('spawn-final-box')
+  for (const row of rows) console.log(`${row.map}\t${row.width}\t${row.marker}\t${row.fit}\t${row.scale}\t${row.rect}`)
+}
+
 export async function checkLiveProve() {
   const server = await createServer({ server: { host: '127.0.0.1', port: 0 } })
   await server.listen()
@@ -3644,6 +3995,10 @@ export async function checkLiveProve() {
   const browser = await launchBrowser()
   const errors = []
   try {
+    if (process.env.NW_SPAWN_ONLY === '1') {
+      await checkSpawnMarkers(browser, port, errors)
+      return
+    }
     await checkReadoutCueClear(browser, port, errors)
     if (process.env.NW_CUE_ONLY === '1') return
     await checkTrustedMisses(browser, port, errors)
@@ -3668,6 +4023,7 @@ export async function checkLiveProve() {
     await checkShareCard(browser, port, errors)
     await checkShareBusyTap(browser, port, errors)
     await checkOssuaryLesson(browser, port, errors)
+    await checkSpawnMarkers(browser, port, errors)
     assert.equal(errors.join('\n'), '', `1.4.482 live prove stays free of console errors ${errors.join(' | ').slice(0, 160)}`)
   } finally {
     await browser.close()
