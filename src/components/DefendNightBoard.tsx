@@ -58,9 +58,10 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
     onUpgradePath, onArmPathBuy, onBuyBright, showBright = false, runPaths, roundIndex = -1, armorFrom = 7,
     heldLessons, playtestSteps = false, onOpenLessons, spawnLog = false,
     plateFill = false, onPlacePointer, cueNudge = false,
-    map, roadD, porchCandy, roadLabel, mapFeatures, pops, mapId,
+    map, roadD, porchCandy, roadLabel, mapFeatures, pops, mapId, walkIn,
   } = props
   const walkerAim = useRef<{ id: number; point: { x: number; y: number } | null; pointerType: string } | null>(null)
+  const tapPool = walkIn ? raiders.filter((raider) => !walkIn.held(raider)) : raiders
   const place = plateFill ? boardFillPoint : mapBoardPoint
   const cardAbility = upgradeAt ? towerType[upgradeAt] : undefined
   const bellCard = Boolean(cardAbility && isBell(cardAbility) && upgradeAt)
@@ -212,6 +213,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
           progress={progress}
           raiders={raiders}
           raiderAt={raiderAt}
+          walkIn={walkIn}
           ability={ability}
           towerType={towerType}
           unlocked={unlocked}
@@ -317,13 +319,13 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
           })
         : null}
       {easyTap && boardBox && boardBox.w > 0
-        ? raiders
+        ? tapPool
             .filter((raider) => !raider.turned)
             .map((raider) => {
               const at = raiderAt(raider)
               const face = place(boardBox, { x: at.x, y: at.y + PATH_WALKER_FACE_DY })
               const radius = (raider.boss ? EASY_CROWN_HIT_R : EASY_FACE_HIT_R) * (cameraScale > 0 ? cameraScale : 1)
-              const glowing = easyFaceGlows(raider, raiders, roundIndex, armorFrom)
+              const glowing = easyFaceGlows(raider, tapPool, roundIndex, armorFrom)
               return (
                 <button
                   key={`walker-tap-${raider.id}`}

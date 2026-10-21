@@ -6,16 +6,19 @@
  * The Love lamp's box does not cover Candle or Spend.
  */
 import assert from 'node:assert/strict'
+import { createHash } from 'node:crypto'
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { inflateSync } from 'node:zlib'
 import { build } from 'esbuild'
 import { createElement } from 'react'
 import { renderToString } from 'react-dom/server'
 import { createServer } from 'vite'
 import { chromium } from '@playwright/test'
-import { SAVE_KIND } from '../src/lib/save.ts'
+import { SAVE_KIND, emptyProgress } from '../src/lib/save.ts'
 import { SAVE_SCHEMA_VERSION, STORAGE_KEY } from '../src/config/app.ts'
-import { DEFEND_PATH } from '../src/nightWatch/path/data.ts'
+import { DEFEND_PATH, pathPoint } from '../src/nightWatch/path/data.ts'
+import { walkInEntry, walkInLength, walkInMs, walkInTapLockMs } from '../src/nightWatch/maps/walkIn.ts'
 import { nightMapFromPack } from '../src/nightWatch/maps/fromPack.ts'
 import { EASY_ROUNDS } from '../src/nightWatch/rounds.ts'
 import { gaitForSlot } from '../src/nightWatch/walkers.ts'
@@ -24,7 +27,7 @@ import { evidenceFor } from '../src/content/evidence.ts'
 import { localDateKey } from '../src/lib/dates.ts'
 import { EASY_LINE_ORDER } from '../src/lib/easy.ts'
 import { shareCardText } from '../src/lib/shareCard.ts'
-import { EASY_FACE_HIT_R } from '../src/lib/defend.ts'
+import { EASY_FACE_HIT_R, PATH_WALKER_FACE_DY } from '../src/lib/defend.ts'
 import { EASY } from '../src/lib/easy.ts'
 
 const SAVE = {
@@ -3986,6 +3989,759 @@ async function checkSpawnMarkers(browser, port, errors) {
   for (const row of rows) console.log(`${row.map}\t${row.width}\t${row.marker}\t${row.fit}\t${row.scale}\t${row.rect}`)
 }
 
+const WALK_STEP_MS = 1000 / 60
+const WALK_CHROME = ['.nw-docks', '.nw-rail', '.nw-skill-tray', '.nw-tap-readout', '.defend-hearts', '.nw-hud', '.match-toast', '.defend-go']
+
+/** 8-bit RGB or RGBA, not interlaced. That is what Chromium writes. */
+function decodePng(buffer) {
+  let at = 8
+  let width = 0
+  let height = 0
+  let color = -1
+  const parts = []
+  while (at < buffer.length) {
+    const size = buffer.readUInt32BE(at)
+    const type = buffer.toString('ascii', at + 4, at + 8)
+    const data = buffer.subarray(at + 8, at + 8 + size)
+    if (type === 'IHDR') {
+      width = data.readUInt32BE(0)
+      height = data.readUInt32BE(4)
+      assert.equal(data[8], 8, 'walk-in shot is 8-bit')
+      color = data[9]
+      assert.equal(data[12], 0, 'walk-in shot is not interlaced')
+    } else if (type === 'IDAT') {
+      parts.push(data)
+    } else if (type === 'IEND') {
+      break
+    }
+    at += 12 + size
+  }
+  assert.ok(color === 2 || color === 6, `walk-in shot color type ${color}`)
+  const bpp = color === 6 ? 4 : 3
+  const raw = inflateSync(Buffer.concat(parts))
+  const stride = width * bpp
+  const out = Buffer.alloc(height * stride)
+  for (let y = 0; y < height; y += 1) {
+    const filter = raw[y * (stride + 1)]
+    const row = raw.subarray(y * (stride + 1) + 1, (y + 1) * (stride + 1))
+    const cur = out.subarray(y * stride, (y + 1) * stride)
+    const prev = y > 0 ? out.subarray((y - 1) * stride, y * stride) : null
+    for (let i = 0; i < stride; i += 1) {
+      const a = i >= bpp ? cur[i - bpp] : 0
+      const b = prev ? prev[i] : 0
+      const c = prev && i >= bpp ? prev[i - bpp] : 0
+      let value = row[i]
+      if (filter === 1) value += a
+      else if (filter === 2) value += b
+      else if (filter === 3) value += (a + b) >> 1
+      else if (filter === 4) {
+        const p = a + b - c
+        const pa = Math.abs(p - a)
+        const pb = Math.abs(p - b)
+        const pc = Math.abs(p - c)
+        value += pa <= pb && pa <= pc ? a : pb <= pc ? b : c
+      }
+      cur[i] = value & 255
+    }
+  }
+  return { width, height, bpp, data: out }
+}
+
+/** Walker pixels in a magenta shot: how many, how many fall outside `rect`, and the closest one to its edge. */
+function walkerPixels(png, rect, chrome) {
+  let count = 0
+  let outside = 0
+  let edgeGap = Infinity
+  let firstOut = null
+  const under = []
+  for (let y = 0; y < png.height; y += 1) {
+    for (let x = 0; x < png.width; x += 1) {
+      const i = (y * png.width + x) * png.bpp
+      const off = Math.abs(png.data[i] - 255) + png.data[i + 1] + Math.abs(png.data[i + 2] - 255)
+      if (off <= 24) continue
+      count += 1
+      const cx = x + 0.5
+      const cy = y + 0.5
+      if (cx < rect.left - 1 || cx > rect.right + 1 || cy < rect.top - 1 || cy > rect.bottom + 1) {
+        outside += 1
+        if (!firstOut) firstOut = { x, y }
+      }
+      edgeGap = Math.min(edgeGap, Math.abs(x - rect.left), Math.abs(rect.right - (x + 1)), Math.abs(y - rect.top), Math.abs(rect.bottom - (y + 1)))
+      if (chrome.some((box) => cx >= box.left && cx <= box.right && cy >= box.top && cy <= box.bottom)) under.push(i)
+    }
+  }
+  return { count, outside, edgeGap, firstOut, under }
+}
+
+function walkTranslate(text) {
+  const match = /translate\(\s*(-?[\d.e+-]+)[\s,]+(-?[\d.e+-]+)\s*\)/.exec(text || '')
+  return match ? { x: Number(match[1]), y: Number(match[2]) } : null
+}
+
+function walkPlate(id) {
+  if (id === 'a2') return { width: 798, height: 1134 }
+  const file = id === 'far-hills' ? 'map02.json' : `${id}.json`
+  const pack = nightMapFromPack(JSON.parse(readFileSync(new URL(`../src/nightWatch/maps/maze/${file}`, import.meta.url), 'utf8')))
+  return { width: pack.width, height: pack.height }
+}
+
+function walkStartKey(start) {
+  return `${start.x.toFixed(1)},${start.y.toFixed(1)}`
+}
+
+/** Road, start, and run time for one spawn line. Roads that share a start share the run. */
+function walkSpawnRoad(id, line) {
+  const parts = line.split(' ')
+  const x = Number(parts[2])
+  const y = Number(parts[3])
+  const t = Number(parts[4])
+  const plate = walkPlate(id)
+  const rows = spawnRoads(id).map((road) => {
+    const at = pathPoint(t, road.points)
+    const entry = walkInEntry(road.points, plate)
+    const runMs = walkInMs(walkInLength(entry, road.points, t))
+    return { road, entry, runMs, gap: Math.hypot(at.x - x, at.y - y) }
+  })
+  rows.sort((a, b) => a.gap - b.gap)
+  const best = rows[0]
+  assert.ok(best.gap <= 1.5, `1.4.526 ${id} spawn ${line} is on a road (gap ${best.gap.toFixed(2)})`)
+  for (const twin of rows.slice(1)) {
+    if (twin.gap > 1.5) continue
+    assert.equal(walkStartKey(twin.entry.start), walkStartKey(best.entry.start), `1.4.526 ${id} ${twin.road.id} and ${best.road.id} share a start`)
+    assert.ok(Math.abs(twin.runMs - best.runMs) <= 2, `1.4.526 ${id} ${twin.road.id} and ${best.road.id} share a run`)
+  }
+  return { ...best, x, y, t }
+}
+
+async function openWalkMap(browser, port, errors, id, width, height, extra) {
+  const context = await browser.newContext({
+    baseURL: `http://127.0.0.1:${port}/`,
+    viewport: { width, height },
+    deviceScaleFactor: 1,
+    reducedMotion: 'reduce',
+  })
+  await context.addInitScript(
+    (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+    { key: STORAGE_KEY, save: SAVE },
+  )
+  await context.addInitScript(() => {
+    const real = performance.now.bind(performance)
+    let hold = null
+    window.__nwClock = {
+      freeze() {
+        hold = real()
+      },
+      step(ms) {
+        hold = (hold ?? real()) + ms
+      },
+    }
+    performance.now = () => hold ?? real()
+  })
+  const page = await context.newPage()
+  const spawns = []
+  page.on('console', (msg) => {
+    const text = msg.text()
+    if (text.startsWith('nw-spawn ')) spawns.push(text)
+  })
+  listen(page, errors, `walk ${id} ${width}`)
+  const map = id === 'a2' ? '' : `&nwMap=${id}`
+  await pointerOpenJump(page, `?playtest=1&nwSeed=2${map}${extra}`)
+  if (await page.locator('[data-map-overlay]').count()) {
+    const pick = page.locator(`[data-map="${id}"]`)
+    const box = await pick.boundingBox()
+    assert.ok(box, `${id} map pick is on screen`)
+    await pointerTap(page, box.x + box.width / 2, box.y + box.height / 2)
+    await page.locator('[data-map-overlay]').waitFor({ state: 'detached' })
+  }
+  await page.locator('.defend-board.has-map-plate').waitFor()
+  await page.locator('.defend-go').waitFor()
+  await pointerBox(page, '.defend-go')
+  await page.evaluate(() => window.__nwClock.freeze())
+  return { context, page, spawns }
+}
+
+async function walkStep(page, ms) {
+  await page.evaluate((step) => window.__nwClock.step(step), ms)
+  await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))))
+}
+
+/** The pause sits under the board on a phone. Pausing scrolls to it, so scroll back before measuring. */
+async function pauseAtTop(page) {
+  await pauseWalkers(page)
+  await page.waitForFunction(() => {
+    let moved = false
+    for (const node of [document.scrollingElement, ...document.querySelectorAll('*')]) {
+      if (node && (node.scrollTop || node.scrollLeft)) {
+        node.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+        moved = true
+      }
+    }
+    return !moved
+  }, null, { polling: 50, timeout: 3000 })
+}
+
+/** Resume, wait for a walker that has not been seen, pause. The clock is frozen, so it is still at its first frame. */
+async function nextWalkIn(run, seen, label) {
+  await resumeWalkers(run.page)
+  const handle = await run.page.waitForFunction(
+    (known) => {
+      for (const node of document.querySelectorAll('.defend-raider[data-walk-in="yes"]')) {
+        const id = node.getAttribute('data-walk-id')
+        if (id && !known.includes(id)) return id
+      }
+      return null
+    },
+    [...seen],
+    { timeout: 40000, polling: 100 },
+  ).catch(() => null)
+  assert.ok(handle, `${label} a new walker walks in`)
+  await pauseAtTop(run.page)
+  await walkStep(run.page, 0)
+  const fresh = await run.page.evaluate((known) => {
+    return [...document.querySelectorAll('.defend-raider[data-walk-in="yes"]')]
+      .map((node) => ({ id: node.getAttribute('data-walk-id') || '', transform: node.getAttribute('transform') || '' }))
+      .filter((row) => !known.includes(row.id))
+  }, [...seen])
+  const rows = []
+  for (const row of fresh) {
+    const until = Date.now() + 2000
+    let line = ''
+    while (!line && Date.now() < until) {
+      line = run.spawns.find((text) => text.split(' ')[1] === row.id) || ''
+      if (!line) await run.page.waitForTimeout(30)
+    }
+    assert.ok(line, `${label} walker ${row.id} logged its spawn`)
+    rows.push({ ...row, line })
+  }
+  return rows
+}
+
+/** Visible map in client px: the plate, cut to the board box and the viewport. Plus the chrome boxes. */
+async function walkMapRect(page) {
+  return page.evaluate((chromeSel) => {
+    const svg = document.querySelector('.defend-board')
+    const group = document.querySelector('.defend-board .nw-walkers')
+    const clip = group?.querySelector('clipPath rect')
+    if (!(svg instanceof SVGSVGElement) || !(group instanceof SVGGElement) || !clip) return null
+    const ctm = group.getScreenCTM()
+    if (!ctm) return null
+    const corner = (x, y) => {
+      const p = svg.createSVGPoint()
+      p.x = x
+      p.y = y
+      return p.matrixTransform(ctm)
+    }
+    const w = Number(clip.getAttribute('width'))
+    const h = Number(clip.getAttribute('height'))
+    const a = corner(Number(clip.getAttribute('x')), Number(clip.getAttribute('y')))
+    const b = corner(w, h)
+    const box = svg.getBoundingClientRect()
+    const chrome = []
+    for (const sel of chromeSel) {
+      for (const node of document.querySelectorAll(sel)) {
+        const r = node.getBoundingClientRect()
+        if (r.width > 0 && r.height > 0) chrome.push({ sel, left: r.left, top: r.top, right: r.right, bottom: r.bottom })
+      }
+    }
+    return {
+      clip: [clip.getAttribute('x'), clip.getAttribute('y'), clip.getAttribute('width'), clip.getAttribute('height')].join(','),
+      plate: { left: a.x, top: a.y, right: b.x, bottom: b.y },
+      rect: {
+        left: Math.max(0, a.x, box.left),
+        top: Math.max(0, a.y, box.top),
+        right: Math.min(window.innerWidth, b.x, box.right),
+        bottom: Math.min(window.innerHeight, b.y, box.bottom),
+      },
+      chrome,
+      ctm: [ctm.a, ctm.b, ctm.c, ctm.d, ctm.e, ctm.f],
+    }
+  }, WALK_CHROME)
+}
+
+async function isolatedWalkerShot(page, id) {
+  await page.evaluate((walkerId) => {
+    const style = document.createElement('style')
+    style.id = 'nw-walk-iso'
+    style.textContent = `
+      html, body { background: #ff00ff !important; }
+      body, body * { visibility: hidden !important; }
+      clipPath, clipPath *, mask, mask * { visibility: visible !important; }
+      .defend-raider[data-walk-id="${walkerId}"], .defend-raider[data-walk-id="${walkerId}"] * { visibility: visible !important; }
+    `
+    document.head.append(style)
+  }, id)
+  const shot = await page.screenshot()
+  await page.evaluate(() => document.getElementById('nw-walk-iso')?.remove())
+  return decodePng(shot)
+}
+
+/** The board under the chrome paints the same with and without the walker. */
+async function chromeCoversWalker(page, id, under, label) {
+  if (under.length === 0) return 0
+  const plain = decodePng(await page.screenshot({ animations: 'disabled' }))
+  await page.evaluate((walkerId) => {
+    const style = document.createElement('style')
+    style.id = 'nw-walk-hide'
+    style.textContent = `.defend-raider[data-walk-id="${walkerId}"], .defend-raider[data-walk-id="${walkerId}"] * { visibility: hidden !important; }`
+    document.head.append(style)
+  }, id)
+  const bare = decodePng(await page.screenshot({ animations: 'disabled' }))
+  await page.evaluate(() => document.getElementById('nw-walk-hide')?.remove())
+  const changed = []
+  for (const i of under) {
+    const diff = Math.abs(plain.data[i] - bare.data[i]) + Math.abs(plain.data[i + 1] - bare.data[i + 1]) + Math.abs(plain.data[i + 2] - bare.data[i + 2])
+    if (diff > 12) {
+      const p = i / plain.bpp
+      changed.push({ x: p % plain.width, y: Math.floor(p / plain.width) })
+    }
+  }
+  const over = await page.evaluate(
+    ({ points, chromeSel, walkerId }) => {
+      const style = document.createElement('style')
+      style.id = 'nw-walk-hit'
+      style.textContent = `.defend-raider[data-walk-id="${walkerId}"], .defend-raider[data-walk-id="${walkerId}"] * { pointer-events: all !important; }`
+      document.head.append(style)
+      const rows = []
+      for (const pt of points) {
+        const stack = document.elementsFromPoint(pt.x + 0.5, pt.y + 0.5)
+        const chrome = stack.findIndex((node) => node.closest?.(chromeSel.join(', ')))
+        if (chrome < 0) continue
+        const walker = stack.findIndex((node) => node.closest?.(`.defend-raider[data-walk-id="${walkerId}"]`))
+        if (walker >= 0 && walker < chrome) rows.push({ ...pt, on: `${stack[chrome].tagName}.${String(stack[chrome].className).split(' ')[0]}` })
+      }
+      style.remove()
+      return rows
+    },
+    { points: changed, chromeSel: WALK_CHROME, walkerId: id },
+  )
+  assert.deepEqual(over.slice(0, 6), [], `${label} walker does not paint over the tray, HUD, or rail (${over.length} of ${under.length} px)`)
+  return under.length
+}
+
+/** Steps one walker from its first frame to its sim point. Every frame is checked against the map rect. */
+async function stepWalkIn(run, row, spawn, label, ghosts) {
+  const { page } = run
+  const start = walkTranslate(row.transform)
+  assert.ok(start, `${label} walker ${row.id} has a transform`)
+  assert.ok(
+    Math.hypot(start.x - spawn.entry.start.x, start.y - spawn.entry.start.y) <= 0.75,
+    `${label} ${spawn.road.id} first frame at ${start.x.toFixed(1)},${start.y.toFixed(1)} is the start ${walkStartKey(spawn.entry.start)}`,
+  )
+  const map = await walkMapRect(page)
+  assert.ok(map, `${label} has a walker layer`)
+  assert.equal(map.clip, `0,0,${walkPlate(spawn.mapId).width},${walkPlate(spawn.mapId).height}`, `${label} walkers clip to the plate`)
+  const stray = await page.evaluate(() => [...document.querySelectorAll('.defend-raider')].filter((node) => !node.closest('.nw-walkers')).length)
+  assert.equal(stray, 0, `${label} every walker is inside the clip`)
+  let elapsed = 0
+  let frame = 0
+  let first = null
+  let chromePx = 0
+  let chromeChecks = 0
+  const shoot = async () => {
+    const png = await isolatedWalkerShot(page, row.id)
+    const px = walkerPixels(png, map.rect, map.chrome)
+    assert.equal(
+      px.outside,
+      0,
+      `${label} ${spawn.road.id} frame ${frame} (${elapsed.toFixed(0)} ms) has ${px.outside} walker px outside the map ${JSON.stringify(map.rect)} first ${JSON.stringify(px.firstOut)}`,
+    )
+    if (px.count > 0 && !first) {
+      first = { frame, ms: elapsed, gap: px.edgeGap, px: px.count }
+      assert.ok(px.edgeGap <= 2, `${label} ${spawn.road.id} first visible frame ${frame} touches the map edge (gap ${px.edgeGap.toFixed(2)})`)
+    }
+    if (px.under.length > 0 && chromeChecks < 3) {
+      chromeChecks += 1
+      chromePx += await chromeCoversWalker(page, row.id, px.under, `${label} ${spawn.road.id} frame ${frame}`)
+    }
+    if (ghosts && px.count > 0 && frame % 4 === 0) {
+      await page.evaluate((walkerId) => {
+        const node = document.querySelector(`.defend-raider[data-walk-id="${walkerId}"]`)
+        if (!node) return
+        const ghost = node.cloneNode(true)
+        ghost.removeAttribute('data-walk-id')
+        ghost.removeAttribute('data-walk-in')
+        ghost.setAttribute('data-walk-ghost', 'yes')
+        ghost.setAttribute('opacity', '0.55')
+        node.before(ghost)
+      }, row.id)
+    }
+  }
+  await shoot()
+  while (elapsed + WALK_STEP_MS < spawn.runMs - 20) {
+    await walkStep(page, WALK_STEP_MS)
+    elapsed += WALK_STEP_MS
+    frame += 1
+    await shoot()
+  }
+  const lead = spawn.runMs - 20 - elapsed
+  await walkStep(page, lead)
+  elapsed += lead
+  frame += 1
+  const late = await page.locator(`.defend-raider[data-walk-id="${row.id}"]`).getAttribute('data-walk-in')
+  assert.equal(late, 'yes', `${label} ${spawn.road.id} still walks in at ${spawn.runMs - 20} ms`)
+  await shoot()
+  await walkStep(page, 40)
+  elapsed += 40
+  frame += 1
+  const done = await page.locator(`.defend-raider[data-walk-id="${row.id}"]`).getAttribute('data-walk-in')
+  assert.equal(done, null, `${label} ${spawn.road.id} is on its sim point at ${spawn.runMs + 20} ms`)
+  await shoot()
+  return { first, frames: frame + 1, chromePx, map }
+}
+
+async function walkClient(page, point) {
+  return page.evaluate(({ x, y }) => {
+    const svg = document.querySelector('.defend-board')
+    const group = document.querySelector('.defend-board .nw-walkers')
+    if (!(svg instanceof SVGSVGElement) || !(group instanceof SVGGElement)) return null
+    const ctm = group.getScreenCTM()
+    if (!ctm) return null
+    const p = svg.createSVGPoint()
+    p.x = x
+    p.y = y
+    const at = p.matrixTransform(ctm)
+    const node = document.elementFromPoint(at.x, at.y)
+    const chrome = Boolean(node?.closest?.('button, a, .nw-docks, .nw-rail, .nw-skill-tray, .nw-tap-readout, .defend-hearts, .nw-wave-overlay, .match-toast, .defend-pad'))
+    return {
+      x: at.x,
+      y: at.y,
+      open: at.x > 4 && at.y > 4 && at.x < window.innerWidth - 4 && at.y < window.innerHeight - 4 && Boolean(node?.closest?.('.defend-board')) && !chrome,
+    }
+  }, point)
+}
+
+async function walkerFaceNow(page, id) {
+  const transform = await page.locator(`.defend-raider[data-walk-id="${id}"]`).getAttribute('transform')
+  const at = walkTranslate(transform)
+  assert.ok(at, `walker ${id} has a transform`)
+  return { x: at.x, y: at.y + PATH_WALKER_FACE_DY }
+}
+
+async function walkHeldState(page, id) {
+  return page.evaluate((walkerId) => {
+    const node = document.querySelector(`.defend-raider[data-walk-id="${walkerId}"]`)
+    return {
+      walkIn: node?.getAttribute('data-walk-in') || '',
+      cls: node?.getAttribute('class') || '',
+      tapButton: document.querySelectorAll(`.defend-walker-tap[data-walker-id="${walkerId}"]`).length,
+      cue: document.querySelectorAll('[data-cue="target"]').length,
+      walkers: document.querySelectorAll('.defend-raider[data-walk-id]').length,
+      held: document.querySelectorAll('.defend-raider.is-walk-in').length,
+    }
+  }, id)
+}
+
+/** Steps an entering walker until its drawn face is open board, and returns that point. Stays inside the tap lock. */
+async function stepToOpenFace(page, id, lockMs, label, away = []) {
+  let elapsed = 0
+  while (elapsed + WALK_STEP_MS < lockMs - 60) {
+    const face = await walkerFaceNow(page, id)
+    const client = await walkClient(page, face)
+    const clear = away.every((other) => Math.hypot(other.x - face.x, other.y - face.y) > EASY_FACE_HIT_R * 2 + 8)
+    if (client?.open && clear) return { face, client, elapsed }
+    await walkStep(page, WALK_STEP_MS)
+    elapsed += WALK_STEP_MS
+  }
+  assert.fail(`${label} walker ${id} never showed an open face inside its ${lockMs} ms lock`)
+}
+
+async function checkWalkInTaps(browser, port, errors) {
+  const map = process.env.NW_WALKIN_TAP_MAP || 'map03'
+  const rows = []
+
+  {
+    const label = `1.4.526 ${map} r5 tap`
+    const run = await openWalkMap(browser, port, errors, map, 375, 667, '&nwRound=5&nwLamps=0')
+    const [row] = await nextWalkIn(run, new Set(), label)
+    const spawn = walkSpawnRoad(map, row.line)
+    const lockMs = walkInTapLockMs(spawn.runMs)
+    const open = await stepToOpenFace(run.page, row.id, lockMs, label)
+    const held = await walkHeldState(run.page, row.id)
+    assert.equal(held.walkIn, 'yes', `${label} walker is still walking in`)
+    assert.match(held.cls, /is-walk-in/, `${label} walker is held`)
+    assert.doesNotMatch(held.cls, /is-easy-cue|is-easy-tap-target/, `${label} entering walker does not glow (${held.cls})`)
+    assert.equal(held.tapButton, 0, `${label} entering walker has no tap button`)
+    assert.equal(held.held, held.walkers, `${label} every walker on the road is still walking in`)
+    assert.equal(held.cue, 0, `${label} no cue ring while every walker walks in`)
+    const before = await readMissScore(run.page)
+    await pointerTap(run.page, open.client.x, open.client.y)
+    await run.page.waitForTimeout(80)
+    const drawn = await readMissScore(run.page)
+    assert.equal(drawn.hits, before.hits, `${label} drawn face tap is not a hit`)
+    assert.equal(drawn.misses, before.misses, `${label} drawn face tap is not a miss`)
+    assert.equal(missSum(drawn), missSum(before), `${label} drawn face tap adds no miss reason`)
+    const simFace = { x: spawn.x, y: spawn.y + PATH_WALKER_FACE_DY }
+    const sim = await walkClient(run.page, simFace)
+    assert.ok(sim?.open, `${label} sim face ${spawn.x},${spawn.y} is open board ${JSON.stringify(sim)}`)
+    await pointerTap(run.page, sim.x, sim.y)
+    await run.page.waitForTimeout(80)
+    const simTap = await readMissScore(run.page)
+    assert.equal(simTap.hits, before.hits, `${label} sim face tap is not a hit`)
+    assert.equal(simTap.misses, before.misses, `${label} sim face tap is not a miss`)
+    assert.equal((await walkHeldState(run.page, row.id)).walkIn, 'yes', `${label} both taps were inside the run-in`)
+    await walkStep(run.page, spawn.runMs + 20)
+    const after = await walkHeldState(run.page, row.id)
+    assert.equal(after.walkIn, '', `${label} walker is on its sim point`)
+    assert.match(after.cls, /is-easy-cue/, `${label} round 5 walker glows after the run-in`)
+    assert.equal(after.tapButton, 1, `${label} walker takes taps after the run-in`)
+    const cue = await faceClient(run.page, 'cue')
+    assert.ok(cue, `${label} glowing face is on screen`)
+    await pointerTap(run.page, cue.x, cue.y)
+    await run.page.waitForFunction((hits) => Number(document.querySelector('.nw-tap-readout')?.getAttribute('data-tap-hits') ?? '0') > hits, before.hits)
+    rows.push({ check: 'r5 held taps', map, run: spawn.runMs, lock: lockMs, tapAtMs: Math.round(open.elapsed), hitAfter: 'yes' })
+    await run.context.close()
+  }
+
+  {
+    const label = `1.4.526 ${map} r6 dark`
+    const run = await openWalkMap(browser, port, errors, map, 375, 667, '&nwRound=6&nwLamps=0')
+    const seen = new Set()
+    let target = null
+    let leads = []
+    const until = Date.now() + 60000
+    while (!target && Date.now() < until) {
+      const fresh = await nextWalkIn(run, seen, label)
+      for (const row of fresh) seen.add(row.id)
+      leads = await run.page.evaluate(() =>
+        [...document.querySelectorAll('.defend-raider[data-walk-id]:not([data-walk-in])')].map((node) => node.getAttribute('transform') || ''),
+      )
+      if (leads.length > 0) {
+        target = fresh[0]
+        break
+      }
+      const spawn = walkSpawnRoad(map, fresh[0].line)
+      await walkStep(run.page, spawn.runMs + 20)
+    }
+    assert.ok(target, `${label} a second walker walks in behind the lead`)
+    const spawn = walkSpawnRoad(map, target.line)
+    const away = leads.map(walkTranslate).filter(Boolean).map((at) => ({ x: at.x, y: at.y + PATH_WALKER_FACE_DY }))
+    const open = await stepToOpenFace(run.page, target.id, walkInTapLockMs(spawn.runMs), label, away)
+    const held = await walkHeldState(run.page, target.id)
+    assert.equal(held.walkIn, 'yes', `${label} walker is still walking in`)
+    assert.doesNotMatch(held.cls, /is-easy-cue|is-easy-tap-target/, `${label} entering walker does not glow`)
+    const before = await readMissScore(run.page)
+    await pointerTap(run.page, open.client.x, open.client.y)
+    await run.page.waitForTimeout(80)
+    const after = await readMissScore(run.page)
+    assert.equal(after.dark, before.dark, `${label} entering dark walker tap is not a dark miss`)
+    assert.equal(after.misses, before.misses, `${label} entering dark walker tap is not a miss`)
+    assert.equal(after.hits, before.hits, `${label} entering dark walker tap is not a hit`)
+    await walkStep(run.page, spawn.runMs + 20)
+    const darkButton = (walkerId) => {
+      const node = document.querySelector(`.defend-walker-tap[data-walker-id="${walkerId}"]`)
+      if (!node || node.classList.contains('is-cue')) return null
+      const box = node.getBoundingClientRect()
+      const x = box.left + box.width / 2
+      const y = box.top + box.height / 2
+      const hit = document.elementFromPoint(x, y)?.closest?.('[data-walker-tap]')
+      return hit?.getAttribute('data-walker-id') === walkerId ? { x, y } : null
+    }
+    let button = await run.page.evaluate(darkButton, target.id)
+    if (!button) {
+      await resumeWalkers(run.page)
+      await run.page.waitForFunction(darkButton, target.id, { timeout: 15000, polling: 50 }).catch(() => null)
+      await pauseAtTop(run.page)
+      button = await run.page.evaluate(darkButton, target.id)
+    }
+    assert.ok(button, `${label} after the run-in the walker is a dark face that takes the pointer`)
+    await pointerTap(run.page, button.x, button.y)
+    await run.page.waitForFunction((dark) => Number(document.querySelector('.nw-tap-readout')?.getAttribute('data-miss-dark') ?? '0') > dark, after.dark)
+    rows.push({ check: 'r6 held dark', map, run: spawn.runMs, tapAtMs: Math.round(open.elapsed), dark: `${before.dark} -> ${after.dark}, then +1 after the run-in` })
+    await run.context.close()
+  }
+
+  {
+    const label = `1.4.526 ${map} r5 plant`
+    const run = await openWalkMap(browser, port, errors, map, 375, 667, '&nwRound=5&nwLamps=0')
+    const [row] = await nextWalkIn(run, new Set(), label)
+    const spawn = walkSpawnRoad(map, row.line)
+    await walkStep(run.page, Math.round(walkInTapLockMs(spawn.runMs) / 3))
+    await pointerBox(run.page, '[data-type="love"]')
+    await run.page.locator('[data-type="love"][aria-pressed="true"]').waitFor()
+    const live = await seatClient(run.page, 'live', 375, 667)
+    assert.ok(live, `${label} has a green seat`)
+    const before = await readMissScore(run.page)
+    await assertGreenTap(run.page, live.x, live.y, label)
+    const after = await readMissScore(run.page)
+    assert.equal((await walkHeldState(run.page, row.id)).walkIn, 'yes', `${label} the plant landed during the run-in`)
+    assert.equal(missSum(after) + after.hits + after.stray, missSum(before) + before.hits + before.stray, `${label} the seat tap is not a walker tap`)
+    rows.push({ check: 'r5 plant in run-in', map, run: spawn.runMs, planted: 'yes' })
+    await run.context.close()
+  }
+
+  {
+    const label = `1.4.526 ${map} r5 lamp`
+    const run = await openWalkMap(browser, port, errors, map, 375, 667, '&nwRound=5&nwLamps=1')
+    const [row] = await nextWalkIn(run, new Set(), label)
+    const spawn = walkSpawnRoad(map, row.line)
+    await walkStep(run.page, Math.round(walkInTapLockMs(spawn.runMs) / 3))
+    const lamp = await run.page.evaluate(() => {
+      for (const node of document.querySelectorAll('.defend-clear-lamp')) {
+        const box = node.getBoundingClientRect()
+        const x = box.left + box.width / 2
+        const y = box.top + box.height / 2
+        if (x < 4 || y < 4 || x > window.innerWidth - 4 || y > window.innerHeight - 4) continue
+        const hit = document.elementFromPoint(x, y)
+        if (hit?.closest?.('.defend-clear-lamp')) return { x, y }
+      }
+      return { lamps: document.querySelectorAll('.defend-clear-lamp').length, pads: document.querySelectorAll('.defend-pad.is-planted').length }
+    })
+    assert.ok(lamp && 'x' in lamp, `${label} a planted lamp takes the pointer ${JSON.stringify(lamp)}`)
+    const before = await readMissScore(run.page)
+    await pointerTap(run.page, lamp.x, lamp.y)
+    await run.page.locator('[data-upgrade-tree="yes"]').waitFor({ timeout: 3000 })
+    const after = await readMissScore(run.page)
+    assert.equal((await walkHeldState(run.page, row.id)).walkIn, 'yes', `${label} the lamp tap landed during the run-in`)
+    assert.equal(missSum(after) + after.hits + after.stray, missSum(before) + before.hits + before.stray, `${label} the lamp tap is not a walker tap`)
+    rows.push({ check: 'r5 lamp tap in run-in', map, run: spawn.runMs, card: 'open' })
+    await run.context.close()
+  }
+  return rows
+}
+
+/** Easy walkers walk in from past the edge at 375, 412, and 768 on every map. Real pointer events. */
+async function checkWalkIn(browser, port, errors) {
+  mkdirSync('/opt/cursor/artifacts/hop-756-walkin', { recursive: true })
+  const rows = []
+  const widths = (process.env.NW_WALKIN_WIDTHS ?? '375x667,412x915,768x1024').split(',').filter(Boolean).map((pair) => pair.split('x').map(Number))
+  for (const [width, height] of widths) {
+    for (const id of SPAWN_MAPS) {
+      if (process.env.NW_WALKIN_MAP && process.env.NW_WALKIN_MAP !== id) continue
+      const label = `1.4.526 ${id} ${width}`
+      const plate = walkPlate(id)
+      const starts = new Set(spawnRoads(id).map((road) => walkStartKey(walkInEntry(road.points, plate).start)))
+      const covered = new Set()
+      const seen = new Set()
+      const run = await openWalkMap(browser, port, errors, id, width, height, '&nwRound=5&nwLamps=0')
+      let ghosts = width === 375
+      const until = Date.now() + 90000
+      while (covered.size < starts.size && Date.now() < until) {
+        const fresh = await nextWalkIn(run, seen, label)
+        let pick = null
+        for (const row of fresh) {
+          seen.add(row.id)
+          const spawn = { ...walkSpawnRoad(id, row.line), mapId: id }
+          if (!pick && !covered.has(walkStartKey(spawn.entry.start))) pick = { row, spawn }
+        }
+        if (!pick) {
+          await walkStep(run.page, 1900)
+          continue
+        }
+        const { row, spawn } = pick
+        covered.add(walkStartKey(spawn.entry.start))
+        const result = await stepWalkIn(run, row, spawn, label, ghosts)
+        rows.push({
+          map: id,
+          width,
+          road: spawn.road.id,
+          side: spawn.entry.side,
+          start: walkStartKey(spawn.entry.start),
+          t: spawn.t,
+          runMs: spawn.runMs,
+          frames: result.frames,
+          firstFrame: result.first?.frame ?? null,
+          firstMs: result.first ? Math.round(result.first.ms) : null,
+          edgeGap: result.first ? Number(result.first.gap.toFixed(2)) : null,
+          chromePx: result.chromePx,
+        })
+        console.log(`walk-in ${id} ${width} ${spawn.road.id} ${spawn.entry.side} start ${walkStartKey(spawn.entry.start)} t ${spawn.t} run ${spawn.runMs} first ${result.first ? `${result.first.frame}@${Math.round(result.first.ms)}ms gap ${result.first.gap.toFixed(2)}` : 'off-screen'} frames ${result.frames} under-chrome ${result.chromePx}`)
+        if (ghosts) {
+          await run.page.screenshot({ path: `/opt/cursor/artifacts/hop-756-walkin/${id}-${width}.png` })
+          await run.page.evaluate(() => document.querySelectorAll('[data-walk-ghost]').forEach((node) => node.remove()))
+          ghosts = false
+        }
+      }
+      assert.deepEqual([...covered].sort(), [...starts].sort(), `${label} every road start walked in`)
+      assert.ok(rows.some((row) => row.map === id && row.width === width && row.firstFrame !== null), `${label} at least one walker is seen walking in`)
+      await run.context.close()
+    }
+  }
+  const taps = process.env.NW_WALKIN_TAPS === '0' ? [] : await checkWalkInTaps(browser, port, errors)
+  writeFileSync('/opt/cursor/artifacts/hop-756-walkin/walk-in.json', JSON.stringify({ rows, taps }, null, 2))
+  console.log('walk-in-table')
+  for (const row of rows) console.log(`${row.map}\t${row.width}\t${row.road}\t${row.side}\t${row.start}\t${row.t}\t${row.runMs}\t${row.firstFrame}\t${row.edgeGap}`)
+  for (const row of taps) console.log(`walk-in-tap ${JSON.stringify(row)}`)
+}
+
+/** Hard draws every walker at its sim point. Same markup as before the Easy run-in. */
+export async function hardDrawSha(root = fileURLToPath(new URL('..', import.meta.url))) {
+  const outdir = fileURLToPath(new URL('../node_modules/.cache/nw-hard-draw/', import.meta.url))
+  mkdirSync(outdir, { recursive: true })
+  const outfile = `${outdir}actors-${createHash('sha256').update(root).digest('hex').slice(0, 8)}.mjs`
+  const assets = ['.png', '.webp', '.jpg', '.svg', '.mp3', '.ogg', '.woff2']
+  await build({
+    stdin: {
+      contents: `export { DefendNightActorsSvg } from './src/components/DefendNightActors.tsx'\nexport { DEFEND_PATH, pathPoint } from './src/nightWatch/path/data.ts'\nexport { emptyProgress } from './src/lib/save.ts'\n`,
+      resolveDir: root,
+      sourcefile: 'hard-draw-entry.tsx',
+      loader: 'tsx',
+    },
+    bundle: true,
+    format: 'esm',
+    platform: 'node',
+    outfile,
+    jsx: 'automatic',
+    loader: Object.fromEntries(assets.map((ext) => [ext, 'file'])),
+    assetNames: '[name]',
+    plugins: [
+      {
+        name: 'vite-raw',
+        setup(on) {
+          on.onResolve({ filter: /\?raw$/ }, (args) => ({
+            path: fileURLToPath(new URL(args.path.replace(/\?raw$/, ''), pathToFileURL(`${args.resolveDir}/`))),
+            namespace: 'vite-raw',
+          }))
+          on.onLoad({ filter: /.*/, namespace: 'vite-raw' }, (args) => ({ contents: readFileSync(args.path, 'utf8'), loader: 'text' }))
+        },
+      },
+    ],
+    external: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime'],
+    logLevel: 'silent',
+  })
+  const mod = await import(pathToFileURL(outfile).href + `?hard=${Date.now()}`)
+  const raiders = [
+    { id: 1, t: 0, text: 'a', kind: 'skeptic', hp: 3, maxHp: 3 },
+    { id: 2, t: 0.12, text: 'b', kind: 'pagan', hp: 2, maxHp: 3 },
+    { id: 3, t: 0.4, text: 'c', kind: 'spiritual', hp: 1, maxHp: 3, struckAt: 1 },
+    { id: 4, t: 0.7, text: 'd', kind: 'image-bearer', hp: 0, maxHp: 3, turned: 'love', from: { x: 300, y: 300 }, heavenT: 0.2 },
+  ]
+  const html = renderToString(
+    createElement(mod.DefendNightActorsSvg, {
+      easyTap: false,
+      pads: [],
+      planted: [],
+      progress: mod.emptyProgress(),
+      raiders,
+      raiderAt: (raider) => mod.pathPoint(raider.t, mod.DEFEND_PATH),
+      ability: 'love',
+      towerType: {},
+      unlocked: ['love'],
+      flash: [],
+      togglePad: () => {},
+      fire: () => {},
+      fireAtRaider: () => {},
+      tapTarget: undefined,
+      shots: [],
+      blasts: [],
+      phase: 'wave',
+      easy: false,
+      runTier: {},
+    }),
+  )
+  assert.ok(html.includes('defend-raider'), 'hard draw renders walkers')
+  return { sha: createHash('sha256').update(html).digest('hex'), html }
+}
+
+/** sha256 of the Hard fixture above at 1.4.525. */
+const HARD_DRAW_SHA = '8d14e2995a5177db18b603755674bf59d05f427723850c7e1eec3ff3f4eb4d7e'
+
+async function checkHardDraw() {
+  const { sha, html } = await hardDrawSha()
+  assert.equal(html.includes('data-walk'), false, '1.4.526 Hard walkers carry no walk-in marks')
+  assert.equal(html.includes('nw-walkers'), false, '1.4.526 Hard walkers are not wrapped in the Easy clip')
+  assert.equal(sha, HARD_DRAW_SHA, '1.4.526 Hard draw is byte-identical to 1.4.525')
+}
+
 export async function checkLiveProve() {
   const server = await createServer({ server: { host: '127.0.0.1', port: 0 } })
   await server.listen()
@@ -3997,6 +4753,12 @@ export async function checkLiveProve() {
   try {
     if (process.env.NW_SPAWN_ONLY === '1') {
       await checkSpawnMarkers(browser, port, errors)
+      return
+    }
+    if (process.env.NW_WALKIN_ONLY === '1') {
+      await checkHardDraw()
+      await checkWalkIn(browser, port, errors)
+      assert.equal(errors.join('\n'), '', `1.4.526 walk-in prove stays free of console errors ${errors.join(' | ').slice(0, 160)}`)
       return
     }
     await checkReadoutCueClear(browser, port, errors)
@@ -4024,6 +4786,8 @@ export async function checkLiveProve() {
     await checkShareBusyTap(browser, port, errors)
     await checkOssuaryLesson(browser, port, errors)
     await checkSpawnMarkers(browser, port, errors)
+    await checkHardDraw()
+    await checkWalkIn(browser, port, errors)
     assert.equal(errors.join('\n'), '', `1.4.482 live prove stays free of console errors ${errors.join(' | ').slice(0, 160)}`)
   } finally {
     await browser.close()
