@@ -28,6 +28,7 @@ import './styles/showIt.css'
 import './styles/fatherRunHint.css'
 import './styles/easyTopbar.css'
 import './styles/shareCard.css'
+import './styles/lockInCue.css'
 
 const webSurface = webRefreshSurface({
   play: isPlayBuild(),
