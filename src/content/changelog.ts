@@ -8,6 +8,17 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.522',
+    title: 'Share the town link',
+    when: '2026-10-21',
+    items: [
+      'Sharing a morning sends the Silver City link.',
+      'An older phone install can get the newer app.',
+      'Hard stays the same.',
+      'Refs #808.',
+    ],
+  },
+  {
     version: '1.4.521',
     title: 'The Founder\'s Lamp is a gift',
     when: '2026-10-20',

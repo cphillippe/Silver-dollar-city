@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { createHash } from 'node:crypto'
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
@@ -100,11 +101,20 @@ assert.match(gradle, /package\.json/)
 assert.doesNotMatch(gradle, /versionName "1\.4\.113"/)
 assert.doesNotMatch(gradle, /versionCode 114\b/)
 const shell = JSON.parse(read('public/shell.json'))
-assert.equal(shell.versionCode, 104433)
-assert.notEqual(
-  shell.versionCode,
-  shellVersionCode(APP_VERSION),
-  '1.4.462 is a town change, so an install on 104433 is not nagged',
+const derivedShell = shellVersionCode(APP_VERSION)
+assert.ok(
+  shell.versionCode >= derivedShell,
+  'shell.json versionCode is at least the gradle-derived code',
+)
+assert.equal(
+  shellApkOffer({ inShell: true, installed: derivedShell, remote: shell.versionCode, dismissed: 0 }),
+  null,
+  'Play and the current sideload share the derived code, so this install is not offered the apk',
+)
+assert.equal(
+  shellApkOffer({ inShell: true, installed: 104433, remote: shell.versionCode, dismissed: 0 }),
+  SHELL_APK_URL,
+  'an older sideload install is offered the apk',
 )
 assert.ok(shell.versionCode > 114, 'the published shell is newer than installs stuck at 114')
 assert.equal(Object.keys(shell).length, 1, 'shell.json carries versionCode only')
@@ -138,6 +148,29 @@ assert.match(activity, /removeJavascriptInterface\("CapacitorSystemBarsAndroidIn
 assert.match(activity, /ACTION_VIEW/)
 assert.match(activity, /bridge\.setWebViewClient/)
 assert.doesNotMatch(activity, /addJavascriptInterface\([^)]*androidBridge/)
+assert.equal((activity.match(/class PagesOnlyClient/g) || []).length, 1, 'Play and Pages share one WebView client')
+assert.match(activity, /blocksCapacitorPrivatePath/)
+assert.match(activity, /shouldInterceptRequest/)
+assert.match(activity, /_capacitor_file_/)
+assert.match(activity, /_capacitor_content_/)
+assert.match(activity, /_capacitor_http_interceptor_/)
+assert.match(activity, /return new WebResourceResponse/)
+assert.match(activity, /403/)
+assert.match(activity, /super\.shouldInterceptRequest/)
+function blocksCapacitorPrivatePath(path) {
+  if (path == null) return false
+  return (
+    path.startsWith('/_capacitor_file_') ||
+    path.startsWith('/_capacitor_content_') ||
+    path.startsWith('/_capacitor_http_interceptor_')
+  )
+}
+assert.equal(blocksCapacitorPrivatePath('/_capacitor_file_/x'), true)
+assert.equal(blocksCapacitorPrivatePath('/_capacitor_content_/x'), true)
+assert.equal(blocksCapacitorPrivatePath('/_capacitor_http_interceptor_/x'), true)
+assert.equal(blocksCapacitorPrivatePath('/index.html'), false)
+assert.equal(blocksCapacitorPrivatePath('/Silver-dollar-city/'), false)
+assert.equal(blocksCapacitorPrivatePath(null), false)
 
 const main = read('src/main.tsx')
 assert.match(main, /inAndroidShell\(\)/)
@@ -156,6 +189,10 @@ assert.doesNotMatch(notice, /href=\{apkUrl\}/)
 const vite = read('vite.config.ts')
 assert.match(vite, /"script-src 'self'"/)
 assert.match(vite, /"connect-src 'self'"/)
+assert.match(vite, /"frame-src 'none'"/)
+assert.match(vite, /"child-src 'none'"/)
+assert.match(vite, /omit-production-qa-seed/)
+assert.match(vite, /globIgnores:\s*\[[^\]]*qa-seed\.html/)
 assert.doesNotMatch(vite, /script-src[^"\n]*unsafe-eval/)
 
 const workflow = read('.github/workflows/android-apk.yml')
@@ -214,13 +251,15 @@ assert.match(readme, /Update available/)
 assert.match(readme, /ANDROID_KEYSTORE_B64/)
 assert.match(readme, /environment named `release`/)
 assert.doesNotMatch(readme, /ANDROID_KEYSTORE_BASE64|silver-city-debug\.keystore/)
+assert.doesNotMatch(readme, /silver_city_debug\.apk/)
+assert.doesNotMatch(readme, /cursor\/silver-city-unending-evidence-8233/)
 
-assert.equal(APP_VERSION, '1.4.521')
+assert.equal(APP_VERSION, '1.4.522')
 assert.equal(BUNDLED_SHELL_ORIGIN, 'https://localhost')
-assert.ok(
-  shellVersionCode(APP_VERSION) > shell.versionCode,
-  'Play versionCode stays above the sideload shell.json code',
-)
+assert.equal(shellUpdateNoticeEnabled(), true)
+setPlayBuildForTest(true)
+assert.equal(shellUpdateNoticeEnabled(), false, 'Play does not offer the sideload apk')
+resetPlayBuildForTest()
 const bundled = withBundledPlayShell({
   appId: 'city.silver.unending',
   server: {
@@ -237,9 +276,6 @@ assert.equal(bundled.server.cleartext, false)
 assert.equal(bundled.server.errorPath, 'index.html')
 assert.equal(bundled.server.allowNavigation, undefined)
 assert.equal(bundled.android.allowMixedContent, false)
-setPlayBuildForTest(true)
-assert.equal(shellUpdateNoticeEnabled(), false)
-resetPlayBuildForTest()
 assert.equal(shellUpdateNoticeEnabled(), true)
 const omitDir = mkdtempSync(join(tmpdir(), 'play-omit-'))
 writeFileSync(join(omitDir, 'qa-seed.html'), 'seed')
@@ -431,5 +467,66 @@ assert.match(latestChange('1.4.426').items.join('\n'), /download/)
 assert.ok(CHANGELOG.some((note) => note.version === '1.4.425'))
 assert.match(latestChange('1.4.425').items.join('\n'), /Update available/)
 assert.doesNotMatch(latestChange('1.4.427').items.join('\n'), /Fixes #|Closes #|Resolves #/)
+
+const pages = read('.github/workflows/pages.yml')
+assert.doesNotMatch(pages, /cursor\/silver-city-unending-evidence-8233/)
+const pagesTop = pages.slice(0, pages.indexOf('\njobs:'))
+assert.match(pagesTop, /permissions:\n  contents: read\n/)
+assert.doesNotMatch(pagesTop, /pages: write|id-token: write/)
+const deployAt = pages.indexOf('\n  deploy:')
+assert.ok(deployAt > 0, 'pages deploy job exists')
+const pagesBuild = pages.slice(0, deployAt)
+const pagesDeploy = pages.slice(deployAt)
+assert.doesNotMatch(pagesBuild, /pages: write|id-token: write/)
+assert.match(pagesDeploy, /pages: write/)
+assert.match(pagesDeploy, /id-token: write/)
+assert.match(pages, /actions\/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4\.4\.0/)
+assert.match(pages, /actions\/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4\.4\.0/)
+assert.match(pages, /actions\/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3\.0\.1/)
+assert.match(pages, /actions\/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4\.0\.5/)
+assert.doesNotMatch(pages, /actions\/(?:checkout|setup-node|upload-pages-artifact|deploy-pages)@v\d/)
+assert.match(pages, /test ! -e dist\/qa-seed\.html/)
+const scans = read('.github/workflows/city-scans.yml')
+assert.match(scans, /actions\/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4\.4\.0/)
+assert.match(scans, /actions\/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4\.4\.0/)
+assert.doesNotMatch(scans, /actions\/(?:checkout|setup-node)@v\d/)
+assert.match(
+  read('android/gradle/wrapper/gradle-wrapper.properties'),
+  /distributionSha256Sum=ed1a8d686605fd7c23bdf62c7fc7add1c5b23b2bbc3721e661934ef4a4911d7c/,
+)
+const ignore = read('.gitignore')
+for (const pattern of ['*.jks', '*.keystore', '*.p12', '*.pem', '*.p8', '*.mobileprovision', '*.apk']) {
+  assert.match(ignore, new RegExp(`^${pattern.replace(/[.*]/g, '\\$&')}$`, 'm'))
+}
+for (const rel of [
+  '.github/workflows/materialize-board-first-1.4.98.yml',
+  '.github/workflows/materialize-dock-no-overlap-1.4.99.yml',
+  '.github/workflows/materialize-gem-search-play.yml',
+  '.github/workflows/materialize-match-art-101.yml',
+  '.github/workflows/materialize-match-teach-1.4.106.yml',
+  '.github/workflows/materialize-why-gate-split-1.4.105.yml',
+  '.github/workflows/patch-dock-css-cl.yml',
+  'scripts/assemble-patch-dock.mjs',
+  'scripts/patch-dock-css-cl.mjs',
+  'scripts/_patch-dock-p1.b64',
+  'scripts/_patch-dock-p2.b64',
+  'scripts/materialize-gem-search-play.mjs',
+  'scripts/materialize-match-art-101.mjs',
+  '.github/match-art-101/payload.part06.b64',
+  'releases/silver_city_debug.apk',
+]) {
+  assert.equal(existsSync(join(root, rel)), false, rel)
+}
+const nightRun = read('public/night-run/index.html')
+const nightScript = nightRun.match(/<script>([\s\S]*?)<\/script>/)
+assert.ok(nightScript, 'Night Run has one inline script')
+assert.equal((nightRun.match(/<script/g) || []).length, 1)
+const nightHash = createHash('sha256').update(nightScript[1]).digest('base64')
+assert.match(nightRun, /object-src 'none'/)
+assert.match(nightRun, /base-uri 'self'/)
+assert.ok(nightRun.includes(`script-src 'sha256-${nightHash}'`), 'Night Run CSP hash matches its script')
+const pkgJson = JSON.parse(read('package.json'))
+assert.match(pkgJson.devDependencies['@capacitor/cli'], /^\^8\./)
+assert.equal(pkgJson.overrides.xcode.uuid, '^11.1.1')
 
 console.log('check-android-shell: ok')

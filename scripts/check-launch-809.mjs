@@ -315,9 +315,12 @@ try {
 
   const shellContext = await browser.newContext()
   const shell = await shellContext.newPage({ viewport: { width: 375, height: 667 } })
-  await shell.addInitScript(() => {
-    window.SilverCityShell = { getVersionCode: () => 104433 }
-  })
+  const publishedShellCode = JSON.parse(
+    readFileSync(new URL('../public/shell.json', import.meta.url), 'utf8'),
+  ).versionCode
+  await shell.addInitScript((code) => {
+    window.SilverCityShell = { getVersionCode: () => code }
+  }, publishedShellCode)
   let shellLoads = 0
   shell.on('load', () => {
     shellLoads += 1

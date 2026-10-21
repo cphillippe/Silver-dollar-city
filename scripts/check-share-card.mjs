@@ -411,4 +411,19 @@ assert.doesNotMatch(block, /Israel Antiquities Authority/)
 const index = readFileSync(new URL('../src/content/packs/index.xml', import.meta.url), 'utf8')
 assert.match(index, /id="pilate-stone-way"[^>]*lessonCount="3"/)
 
+const inviteSrc = readFileSync(new URL('../src/components/ShareInvite.tsx', import.meta.url), 'utf8')
+assert.match(inviteSrc, /shareInviteUrl/)
+assert.doesNotMatch(inviteSrc, /location\.href/)
+const { shareInviteUrl, sharePitch } = await import('../src/lib/shareInvite.ts')
+assert.equal(shareInviteUrl(), 'https://cphillippe.github.io/Silver-dollar-city/')
+globalThis.window = {
+  location: { href: 'https://localhost/Silver-dollar-city/?nwDebug=1&playtest=1#debug' },
+}
+const pitched = sharePitch()
+const sharedUrl = pitched.slice(pitched.lastIndexOf('\n') + 1)
+const shared = new URL(sharedUrl)
+assert.equal(shared.search, '')
+assert.equal(shared.hash, '')
+assert.equal(sharedUrl, 'https://cphillippe.github.io/Silver-dollar-city/')
+
 console.log('check-share-card: ok')
