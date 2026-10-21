@@ -79,6 +79,7 @@ import {
   faceTapStrike,
   PATH_WALKER_FACE_DY,
   waveCombat,
+  HEAVEN_POINT,
   type WatchAbility,
 } from '../lib/defend'
 import { learningForTool } from '../lib/learning'
@@ -350,6 +351,9 @@ function keepReadoutClear() {
     '.nw-pace',
     '.nw-skill-hint',
     '.nw-skill-toast',
+    '.defend-clear-lamp',
+    '.defend-pad.is-planted',
+    '.nw-skill-tray .btn',
   ].flatMap((sel) => [...document.querySelectorAll(sel)].map((el) => el.getBoundingClientRect()))
   const hits = (box: DOMRect) =>
     rings.some((rect) => rectsOverlap(box, rect, 8)) || blocks.some((rect) => rectsOverlap(box, rect, 1))
@@ -385,6 +389,29 @@ function keepReadoutClear() {
       node.style.transform = `translate(${x - home.left}px, ${y - home.top}px)`
       return
     }
+  }
+}
+
+/** #792 Easy: slide the Heaven sign left (draw only) so it never touches the lamp rail. Sim keeps HEAVEN_POINT. */
+function keepHeavenClear() {
+  const sign = document.querySelector('.defend-board g.defend-heaven')
+  const rail = document.querySelector('.nw-rail .defend-abilities')
+  const svg = sign?.closest('svg')
+  if (!(sign instanceof SVGGElement) || !(rail instanceof HTMLElement) || !(svg instanceof SVGSVGElement)) return
+  sign.style.transform = ''
+  sign.removeAttribute('data-heaven-tuck')
+  const ctm = svg.getScreenCTM()
+  if (!ctm || ctm.a <= 0) return
+  const markers = () => [...document.querySelectorAll('.nw-spawn-marker')].map((el) => el.getBoundingClientRect())
+  const a = sign.getBoundingClientRect()
+  const b = rail.getBoundingClientRect()
+  if (!rectsOverlap(a, b, 6)) return
+  const shiftPx = a.right - b.left + 8
+  const units = Math.min(160, shiftPx / ctm.a)
+  sign.style.transform = `translate(${HEAVEN_POINT.x - units}px, ${HEAVEN_POINT.y}px)`
+  const moved = sign.getBoundingClientRect()
+  if (rectsOverlap(moved, b, 6) || markers().some((rect) => rectsOverlap(moved, rect, 0))) {
+    sign.setAttribute('data-heaven-tuck', 'yes')
   }
 }
 
@@ -756,6 +783,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
 
   const nightSearch = typeof window === 'undefined' ? '' : window.location.search
   const nightPlaytest = nightWatchJumpAllowed(nightSearch, nwDebug)
+  const tapReadoutOn = easy && nightPlaytest
   const nightSeed = nightWatchSeed(nightSearch)
   const seedPlanRef = useRef(nightSeed == null ? null : nightSeedPlan(nightSeed))
   seedPlanRef.current = nightSeed == null ? null : nightSeedPlan(nightSeed)
@@ -1455,6 +1483,10 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
 
   useLayoutEffect(() => {
     if (!easy) return
+    if (!(tapReadoutOn || missCue !== 'off')) {
+      keepReadoutClear()
+      return
+    }
     let frame = 0
     const sync = () => {
       keepReadoutClear()
@@ -1463,7 +1495,23 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     }
     sync()
     return () => window.cancelAnimationFrame(frame)
-  })
+  }, [easy, tapReadoutOn, missCue, phase])
+
+  useLayoutEffect(() => {
+    if (!easy) return
+    const sync = () => keepHeavenClear()
+    sync()
+    const settle = window.requestAnimationFrame(() => window.requestAnimationFrame(sync))
+    const frame = document.querySelector('.defend-frame')
+    const observer = typeof ResizeObserver === 'undefined' || !frame ? null : new ResizeObserver(sync)
+    if (frame) observer?.observe(frame)
+    window.addEventListener('resize', sync)
+    return () => {
+      window.cancelAnimationFrame(settle)
+      observer?.disconnect()
+      window.removeEventListener('resize', sync)
+    }
+  }, [easy, phase, mapId])
 
   function noteSpend(cost: number) {
     setSparkSpent(cost)
@@ -3255,12 +3303,6 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     // roadD changes after the map bind, and the seat tint reads that same road.
     [groundPick, seatAbility, progress, runTier, plants, runPaths, easy, roadD],
   )
-  const tapReadoutOn =
-    easy &&
-    nightWatchJumpAllowed(
-      typeof window === 'undefined' ? '' : window.location.search,
-      nwDebug,
-    )
   const bossLive = raiders.find((raider) => raider.boss && !raider.turned)
   const walkerCalls: EasyWalkerCall[] = midWave
     ? raiders
