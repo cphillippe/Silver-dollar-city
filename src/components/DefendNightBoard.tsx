@@ -58,7 +58,7 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
     onUpgradePath, onArmPathBuy, onBuyBright, showBright = false, runPaths, roundIndex = -1, armorFrom = 7,
     heldLessons, playtestSteps = false, onOpenLessons, spawnLog = false,
     plateFill = false, onPlacePointer, cueNudge = false,
-    map, roadD, porchCandy, roadLabel, mapFeatures, pops,
+    map, roadD, porchCandy, roadLabel, mapFeatures, pops, mapId,
   } = props
   const walkerAim = useRef<{ id: number; point: { x: number; y: number } | null; pointerType: string } | null>(null)
   const place = plateFill ? boardFillPoint : mapBoardPoint
@@ -202,6 +202,8 @@ export function DefendNightBoard(props: DefendNightBoardProps) {
         roadLabel={roadLabel}
         mapFeatures={mapFeatures}
         pops={pops}
+        easy={easy}
+        mapId={mapId}
       >
         <DefendNightActorsSvg
           easyTap={easyTap}

@@ -3,7 +3,10 @@ import { clientToMap } from '../lib/lampPlace'
 import { useRef, type PointerEvent, type RefObject, type ReactNode } from 'react'
 import { activeNightRoadD, MapPlate, NIGHT_MAP, nightPath, type NightMapSurface, type NightPhase } from '../nightWatch'
 import { FeatureSprites, PopPuffs } from '../nightWatch/map/FeatureSprites'
+import { SpawnMarkers } from '../nightWatch/map/SpawnMarkers'
+import type { NightMapId } from '../nightWatch/maps/chain'
 import type { NightFeature } from '../nightWatch/maps/features'
+import { spawnMarkersMounted } from '../nightWatch/maps/spawnMarkers'
 
 export interface DefendNightSkyProps {
   boardRef: RefObject<SVGSVGElement | null>
@@ -27,6 +30,9 @@ export interface DefendNightSkyProps {
   roadLabel?: string
   mapFeatures?: readonly NightFeature[]
   pops?: readonly { key: number; x: number; y: number }[]
+  /** Spawn arches render only on Easy, and only when the board has a plate. */
+  easy?: boolean
+  mapId?: NightMapId
   children?: ReactNode
 }
 
@@ -46,6 +52,8 @@ export function DefendNightSky({
   roadLabel = 'Night road through Silver City',
   mapFeatures = [],
   pops = [],
+  easy = false,
+  mapId = 'a2',
   children,
 }: DefendNightSkyProps) {
   const drawnRoad = nightPath.roadD || roadD || activeNightRoadD()
@@ -170,6 +178,9 @@ export function DefendNightSky({
                 <path d="M-10 6 V-16 M10 6 V-16" />
                 <path d="M-12 -16 H12" />
               </g>
+              {spawnMarkersMounted(Boolean(easy), Boolean(map.plate)) ? (
+                <SpawnMarkers mapId={mapId} phase={phase} />
+              ) : null}
               <FeatureSprites features={mapFeatures} layer="under" />
 {children}
               <FeatureSprites features={mapFeatures} layer="over" />
