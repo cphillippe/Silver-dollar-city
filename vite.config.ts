@@ -1,3 +1,5 @@
+import { existsSync, rmSync } from 'node:fs'
+import { join } from 'node:path'
 import type { Plugin } from 'vite'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
@@ -18,6 +20,8 @@ export const APP_CSP = [
   "default-src 'self'",
   "base-uri 'self'",
   "object-src 'none'",
+  "frame-src 'none'",
+  "child-src 'none'",
   "form-action 'self'",
   "script-src 'self'",
   "style-src 'self' 'unsafe-inline'",
@@ -47,6 +51,24 @@ function appVersionJson(): Plugin {
     },
     generateBundle() {
       this.emitFile({ type: 'asset', fileName: 'app-version.json', source })
+    },
+  }
+}
+
+/** Production builds drop the dev QA page. `vite dev` still serves public/qa-seed.html. */
+function omitProductionQaSeed(): Plugin {
+  let outDir = ''
+  return {
+    name: 'omit-production-qa-seed',
+    apply: 'build',
+    enforce: 'post',
+    configResolved(config) {
+      outDir = config.build.outDir
+    },
+    closeBundle() {
+      if (!outDir) return
+      const target = join(outDir, 'qa-seed.html')
+      if (existsSync(target)) rmSync(target)
     },
   }
 }
@@ -81,6 +103,7 @@ export default defineConfig({
     react(),
     htmlSecurityHeaders(),
     appVersionJson(),
+    omitProductionQaSeed(),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: [
@@ -99,7 +122,7 @@ export default defineConfig({
         // Without this, navigation fallback serves index.html and the seed never runs.
         // app-version.json stays on the network so a new deploy is visible without a hard reload.
         navigateFallbackDenylist: [/\/qa-seed\.html/, /\/night-run\//, /\/app-version\.json/],
-        globIgnores: ['**/app-version.json'],
+        globIgnores: ['**/app-version.json', '**/qa-seed.html'],
         runtimeCaching: [
           {
             urlPattern: /app-version\.json/,

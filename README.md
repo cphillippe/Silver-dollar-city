@@ -12,7 +12,7 @@ A stranger should know in 60 seconds: this is a **Christian reasoning game**. So
 https://cphillippe.github.io/Silver-dollar-city/
 
 Hard-reload once if you still see the old game (the PWA can keep a cached copy). Live bundle is published with V0 **1.4.85**. **Easy mode** is off by default — check **Easier words · bigger taps** on Welcome, or Settings → Reading → Easy mode. Easy home is Match → Hold on the Easy trail (all 45 facts in pack order); Mercy is a collect-help road maze with Gemini road stills and Helped! then Hold next and One more road; gem finds flip comic story panels, extra words on the board (a fresh 4–6 from the 3–6 letter dictionary each Match) score **BONUS! +100**; after MATCHED, Hold next then gold One more Match on every win; a miss swipe is **Miss −25** (floor 0); Easy Hold why-blast uses four chips and **Miss −25**; the father-run is a hold-to-run timing dash with five Gemini stills, Hugged! then Hold next and One more run; Witness Square’s creed is a Suika-style candy merge bowl with a loud Drop ghost, smash/combo/Miss pops, and MERGED! then one takeaway then Hold next. Cold Easy starts at Mercy / Story Creek until that line is held on Easy — Hard or older saves do not skip it. After the Story Creek opening, Why Gate’s foundation pack unlocks in order (order → reason → ought → living God). After that Hold, Witness Square Dig deeper is ancient-first arcade: creed merge, then women / early / method tap-ins (glowing tablets, DUG!, then Hold next and One more dig, Miss −25). After Dig deeper Hold, Names that stay opens next: named people, churches already named Christ, then the empty tomb — same source-dig tap-ins, stepped after each Hold. After the Easy door, Stone Court opens: Tacitus, Josephus on James, then Pliny — ancient-first source-digs, stepped after each Hold. After Pliny Hold, Ink Court opens: Trajan, Suetonius, Lucian — the same ancient-first source-digs. Easy Dig deeper is Dig the names — two or three scripture/ancient taps, not essay homework. Learn stays as an unboxed re-read. Town (soon) waits under Settings → More. Night Watch stays on Hard until Match→Hold is solid. We teach hard words first: a claim is the main idea we hold to be true. After that, Easy buttons say main idea. After a win, say the claim · reason · source. Open **Profile** from Town or Settings for every unlock. **Support the trail** (Settings or Easy home) opens Packs: the core Easy trail stays free; extra streets (Mill Street, Harbor Walk) are optional unlocks; Remove ads is a supporter gift. On GitHub Pages that unlock is an honest this-device stub plus Restore — the same flags Play / App Store IAP will set when the adapter has a plugin and `VITE_PLAY_BILLING` / `VITE_STOREKIT`. Soft pauses sit between home and a lesson only, never over Match, Hold, Journal, or arcade play, and never as a hard paywall. Capacitor **ios** + **android** shells share this codebase; store money still waits on the one-time connect below.
-Pages deploys `docs/` from `main` once that source is selected. Until then the same `docs/` is also on `cursor/silver-city-unending-evidence-8233`. Hard-reload github.io after it updates.
+Pages deploys from `main`. Hard-reload github.io after it updates.
 
 Skip older trycloudflare links. Skip StackBlitz.
 
@@ -107,29 +107,29 @@ Paste the base64 output into `ANDROID_KEYSTORE_B64`.
 
 Every pull request, and every run that is not a push or dispatch on `main`, builds an APK with a key created inside that job and discarded. That file is the Actions artifact. The release-signed APK is uploaded only to the `latest` GitHub Release. The new file is written onto that release before the `latest` tag moves. If the publish job fails, the release that is already there stays.
 
-## Android debug APK
+## Android app
 
-**Direct download (debug, sideload):**  
-https://github.com/cphillippe/Silver-dollar-city/raw/cursor/silver-city-unending-evidence-8233/releases/silver_city_debug.apk
+**Direct download:**  
+https://github.com/cphillippe/Silver-dollar-city/releases/download/latest/silver-city.apk
 
-Same file in the repo: [`releases/silver_city_debug.apk`](https://github.com/cphillippe/Silver-dollar-city/blob/cursor/silver-city-unending-evidence-8233/releases/silver_city_debug.apk)
-
-App id: `city.silver.unending` · name: **Silver City**. This is a **debug** build for testing, not a Play Store release.
+App id: `city.silver.unending` · name: **Silver City**.
 
 **Install on a phone**
 
-1. Open the download link on the phone (or copy the APK over USB/Drive).
-2. Settings → Security → allow **Install unknown apps** for Chrome/Files.
+1. Open the download link on the phone.
+2. Settings → Security → allow **Install unknown apps** for Chrome or Files.
 3. Open the APK and tap Install.
 
-Rebuild locally (needs Android SDK + JDK 17+, `ANDROID_HOME` or `ANDROID_SDK_ROOT`):
+That file is the signed `latest` release. This repo does not keep an APK.
+
+Rebuild a local debug APK (needs Android SDK + JDK 17+, `ANDROID_HOME` or `ANDROID_SDK_ROOT`):
 
 ```bash
 npm install
 npm run android:apk
 ```
 
-Gradle writes `android/app/build/outputs/apk/debug/app-debug.apk`. Copy it to `releases/silver_city_debug.apk` if you want the committed download file updated.
+Gradle writes `android/app/build/outputs/apk/debug/app-debug.apk` on your machine. Do not commit it.
 
 ## iOS (Xcode on a Mac)
 

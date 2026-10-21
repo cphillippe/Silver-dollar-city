@@ -27,7 +27,7 @@ Saves stay **offline-first** on this device. Players move devices with **Export 
 npm run android:apk
 ```
 
-Copy `android/app/build/outputs/apk/debug/app-debug.apk` to `releases/silver_city_debug.apk` when shipping a playtest build.
+A local debug APK stays at `android/app/build/outputs/apk/debug/app-debug.apk`. Do not commit it. Players install the signed file from the `latest` release.
 
 ## Tests
 
