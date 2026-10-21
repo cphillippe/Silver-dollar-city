@@ -52,6 +52,11 @@ assert.doesNotMatch(javascript, /fonts\.googleapis\.com|fonts\.gstatic\.com/)
 const html = readFileSync(join(outDir, 'index.html'), 'utf8')
 assert.match(html, /fonts\/fonts\.css/)
 assert.doesNotMatch(html, /fonts\.googleapis\.com|fonts\.gstatic\.com/)
+assert.match(html, /frame-src 'none'/)
+assert.match(html, /child-src 'none'/)
+for (const file of bundled) {
+  if (file.endsWith('sw.js')) assert.doesNotMatch(readFileSync(file, 'utf8'), /qa-seed\.html/)
+}
 
 const comingSrc = readFileSync(new URL('../src/components/city/ComingSoonPlots.tsx', import.meta.url), 'utf8')
 assert.match(comingSrc, /Coming soon/)
