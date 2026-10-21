@@ -8,6 +8,16 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.525',
+    title: 'A candy arch where they come in',
+    when: '2026-10-21',
+    items: [
+      'On Easy, each Night Watch map shows a candy arch where the road comes in.',
+      'Hard stays the same.',
+      'Refs #756.',
+    ],
+  },
+  {
     version: '1.4.524',
     title: 'Easy misses teach, then move on',
     when: '2026-10-21',

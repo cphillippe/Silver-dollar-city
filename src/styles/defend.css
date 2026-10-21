@@ -5915,3 +5915,24 @@ button.defend-new-lamp[aria-pressed='true'] {
   pointer-events: none;
   white-space: nowrap;
 }
+
+/* 1.4.525 Easy spawn arches. One 600ms pulse when a round starts.
+   Hard never mounts the marker, so these rules do not paint there. */
+.nw-spawn-marker {
+  pointer-events: none;
+}
+
+.nw-spawn-marker.is-pulse {
+  animation: nw-spawn-marker-in 600ms ease-out 1;
+}
+
+@keyframes nw-spawn-marker-in {
+  from { opacity: 0.4; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nw-spawn-marker.is-pulse {
+    animation: none;
+  }
+}
