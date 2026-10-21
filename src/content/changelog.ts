@@ -16,6 +16,7 @@ export const CHANGELOG: ChangeNote[] = [
       'For its first moment on the map, at most 0.84 s, a walker cannot be tapped. A tap there plants or opens the lamp under it.',
       'Hard stays the same.',
       'Refs #756.',
+      'Refs #820.',
     ],
   },
   {
