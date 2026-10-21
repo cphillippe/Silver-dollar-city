@@ -8,6 +8,17 @@ export interface ChangeNote {
 
 export const CHANGELOG: ChangeNote[] = [
   {
+    version: '1.4.526',
+    title: 'Walkers walk onto the map',
+    when: '2026-10-21',
+    items: [
+      'On Easy, each Night Watch walker walks in from past the edge of the map, through its candy arch.',
+      'For its first moment on the map, at most 0.84 s, a walker cannot be tapped. A tap there plants or opens the lamp under it.',
+      'Hard stays the same.',
+      'Refs #756 · Refs #653 · Refs #820',
+    ],
+  },
+  {
     version: '1.4.525',
     title: 'A candy arch where they come in',
     when: '2026-10-21',
