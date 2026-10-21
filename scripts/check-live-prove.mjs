@@ -4729,11 +4729,13 @@ export async function hardDrawSha(root = fileURLToPath(new URL('..', import.meta
     }),
   )
   assert.ok(html.includes('defend-raider'), 'hard draw renders walkers')
-  return { sha: createHash('sha256').update(html).digest('hex'), html }
+  // Asset hrefs resolve to the checkout path, which differs between this VM and the CI runner.
+  const portable = html.replace(/file:\/\/[^"]*\/([^/"]+)"/g, 'asset:$1"')
+  return { sha: createHash('sha256').update(portable).digest('hex'), html: portable }
 }
 
 /** sha256 of the Hard fixture above at 1.4.525. */
-const HARD_DRAW_SHA = '8d14e2995a5177db18b603755674bf59d05f427723850c7e1eec3ff3f4eb4d7e'
+const HARD_DRAW_SHA = '1fff16aa7efec5e5da8ea1c3d6a52025bcacecc55f827ec360d582548a7a6e81'
 
 async function checkHardDraw() {
   const { sha, html } = await hardDrawSha()
