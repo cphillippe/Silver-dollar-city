@@ -34,10 +34,10 @@ function roadEntry(mapId: NightMapId, roadId: string): SpawnEntry {
   const points =
     mapId === 'a2'
       ? DEFEND_PATH
-      : playableNightMap(mapId)?.roads.find((road) => road.id === roadId)?.points
-  if (!points || points.length < 2) return { x: 0, y: 0, nx: 0, ny: -1 }
-  const a = points[0]
-  const b = points[1]
+      : playableNightMap(mapId)?.roads?.find((road) => road.id === roadId)?.points
+  const a = points?.[0]
+  const b = points?.[1]
+  if (!a || !b) return { x: 0, y: 0, nx: 0, ny: -1 }
   const len = Math.hypot(b.x - a.x, b.y - a.y) || 1
   return { x: a.x, y: a.y, nx: (b.x - a.x) / len, ny: (b.y - a.y) / len }
 }
