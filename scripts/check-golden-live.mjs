@@ -11,6 +11,7 @@ import { dailyForDate } from '../src/content/daily.ts'
 import { findStraightSpelling } from '../src/lib/gemSearchGrid.ts'
 import { gemWordsFor } from '../src/lib/gemSearch.ts'
 import { EASY, easyChromeLine, easyWhyLine } from '../src/lib/easy.ts'
+import { FATHER_RUN_HINT } from '../src/easyTrail/father/fatherRun.ts'
 import { localDateKey } from '../src/lib/dates.ts'
 import { SAVE_KIND } from '../src/lib/save.ts'
 import { SAVE_SCHEMA_VERSION, STORAGE_KEY } from '../src/config/app.ts'
@@ -365,7 +366,7 @@ async function readRunCue(page) {
   })
 }
 
-async function releaseRun(page, kind) {
+async function releaseRun(page, shotMiss = false) {
   const pad = page.locator('[data-run-pad="hold"]')
   await pad.waitFor({ timeout: 15000 })
   await pad.scrollIntoViewIfNeeded()
@@ -373,40 +374,51 @@ async function releaseRun(page, kind) {
   if (!box) throw new Error('run pad has no box')
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
   await page.mouse.down()
-  if (kind === 'late') {
-    const bad = []
-    let sawTap = false
-    let sawHold = false
-    let shotCue = false
-    const start = Date.now()
-    while (Date.now() - start < 2600) {
-      const snap = await readRunCue(page)
-      const oneVerb = snap && snap.faces.length === 1 && snap.faces[0] === snap.label && (snap.label === 'Hold' || snap.label === 'Tap')
-      const matchesGlow = Boolean(snap && (snap.glow ? snap.label === 'Tap' : snap.label === 'Hold'))
-      if (!oneVerb || !matchesGlow) bad.push(snap)
-      if (snap?.label === 'Tap') {
-        sawTap = true
-        if (!shotCue && page.viewportSize()?.width === 375) {
-          await page.screenshot({ path: `${SHOTS}/run-pad-cue-375.png` })
-          shotCue = true
-        }
-      }
-      if (snap?.label === 'Hold') sawHold = true
-      await page.waitForTimeout(80)
-    }
-    assert.equal(bad.length, 0, `run cue flipped ${JSON.stringify(bad.slice(0, 3))}`)
-    assert.equal(sawHold, true, 'the pad says Hold between glows')
-    assert.equal(sawTap, true, 'the pad says Tap on the glow')
-  } else {
-    await page.waitForTimeout(160)
-    const snap = await readRunCue(page)
-    assert.equal(snap?.faces?.length, 1, 'one run cue before the glow')
-    assert.equal(snap?.label, 'Hold', 'early release is a hold')
-    assert.equal(snap?.glow, false, 'early release is before the glow')
-  }
+  await page.waitForTimeout(160)
+  const snap = await readRunCue(page)
+  assert.equal(snap?.faces?.length, 1, 'one run cue')
+  assert.equal(snap?.faces?.[0], 'Hold', 'the pad label stays Hold')
+  assert.equal(snap?.label, 'Hold', 'the pad label stays Hold')
+  assert.equal(snap?.glow, false, 'Easy pad does not flip to the pink Tap')
   await page.mouse.up()
-  await page.locator('.run-miss').waitFor({ timeout: 16000 })
-  await page.waitForTimeout(400)
+  let sawLast = false
+  const deadline = Date.now() + 18000
+  while (Date.now() < deadline) {
+    if (await page.locator('.run-miss').count()) break
+    const count = ((await page.locator('.run-speech-count').innerText().catch(() => '')) || '')
+      .replace(/\s+/g, ' ')
+      .trim()
+    if (!sawLast && /4 \/ 4 · Last line! Run!/.test(count)) {
+      const cls = (await page.locator('.run-speech').getAttribute('class')) || ''
+      assert.match(cls, /\bis-last\b/, 'phrase 4 is urgent, not a button')
+      assert.doesNotMatch(cls, /\bprimary\b/)
+      if (shotMiss) await page.screenshot({ path: `${SHOTS}/run-last-line-375.png` })
+      sawLast = true
+    }
+    await page.waitForTimeout(40)
+  }
+  await page.locator('.run-miss').waitFor({ timeout: 1000 })
+  assert.equal(sawLast, true, 'phrase 4 says Last line before the miss')
+  const count = ((await page.locator('.run-speech-count').innerText()) || '').replace(/\s+/g, ' ').trim()
+  assert.equal(count, EASY.runAlmost, 'a miss does not read as a finished 4 / 4')
+  assert.notEqual(count, '4 / 4')
+  const hint = ((await page.locator('.run-miss-hint').innerText()) || '').replace(/\s+/g, ' ').trim()
+  assert.equal(hint, FATHER_RUN_HINT)
+  const closer = ((await page.locator('.run-miss .quiet').innerText()) || '').replace(/\s+/g, ' ').trim()
+  assert.equal(closer, 'Try again — you start closer.')
+  const golds = await filledGolds(page)
+  assert.equal(golds.length, 1, `miss has one filled gold ${JSON.stringify(golds)}`)
+  const retry = page.locator('.run-miss .btn.primary')
+  const retryBox = await retry.boundingBox()
+  if (!retryBox) throw new Error('miss gold has no box')
+  await page.mouse.click(retryBox.x + retryBox.width / 2, retryBox.y + retryBox.height / 2)
+  await page.waitForTimeout(120)
+  assert.equal(await page.locator('.run-miss').count(), 1, 'a tap during arming does not reset the round')
+  const during = ((await page.locator('.run-speech-count').innerText()) || '').replace(/\s+/g, ' ').trim()
+  assert.equal(during, EASY.runAlmost, 'arming keeps the miss copy')
+  assert.notEqual(during, '0 / 4')
+  if (shotMiss) await page.screenshot({ path: `${SHOTS}/run-miss-almost-375.png` })
+  await page.waitForTimeout(600)
 }
 
 async function tapRunFailGold(page) {
@@ -425,16 +437,18 @@ async function tapRunFailGold(page) {
   assert.equal(await page.locator('.play.is-father-run').count(), 1, 'run-fail gold stays on the father run')
 }
 
-/** Gold-only. Miss 1 is a late glow release. Miss 2 is an early release, then Keep going. */
+/** Gold-only. Two real misses, then Keep going starts a close round the player still has to hold. */
 async function hugFatherHuman(page) {
-  await releaseRun(page, 'late')
+  await releaseRun(page, true)
   const again = ((await page.locator('.run-miss .btn.primary').innerText()) || '').replace(/\s+/g, ' ').trim()
   assert.equal(again, 'Run again', 'miss 1 gold is Run again')
   assert.equal(await page.locator('[data-run-keep]').count(), 0, 'miss 1 has no Keep going')
   await tapRunFailGold(page)
   await page.locator('[data-run-pad="hold"]').waitFor()
+  assert.equal(await page.locator('[data-run-how]').count(), 0, 'the rule does not return after Run again')
+  assert.equal(await page.locator('.play.is-father-run.is-win').count(), 0, 'Run again does not hug')
 
-  await releaseRun(page, 'early')
+  await releaseRun(page, false)
   const keep = page.locator('[data-run-keep]')
   const keepLabel = ((await keep.innerText()) || '').replace(/\s+/g, ' ').trim()
   assert.equal(keepLabel, 'Keep going', 'miss 2 gold is Keep going')
@@ -455,7 +469,19 @@ async function hugFatherHuman(page) {
   await page.screenshot({ path: `${SHOTS}/run-fail-keep-going-375.png` })
   await page.screenshot({ path: `${SHOTS}/fail-2-run-again-375.png` })
   await tapRunFailGold(page)
-  await page.locator('.play.is-father-run.is-win .btn.primary').waitFor({ timeout: 8000 })
+  const assistPad = page.locator('[data-run-pad="hold"]')
+  await assistPad.waitFor({ timeout: 4000 })
+  assert.equal(await page.locator('.play.is-father-run.is-win').count(), 0, 'Keep going does not grant HUGGED')
+  const assistBox = await assistPad.boundingBox()
+  if (!assistBox) throw new Error('assisted pad has no box')
+  await page.mouse.move(assistBox.x + assistBox.width / 2, assistBox.y + assistBox.height / 2)
+  await page.mouse.down()
+  await page.locator('.play.is-father-run.is-win').waitFor({ timeout: 5000 })
+  await page.mouse.up().catch(() => {})
+  await page.locator('.win-stamp', { hasText: 'Hugged!' }).waitFor({ timeout: 4000 })
+  const winGolds = await filledGolds(page)
+  assert.equal(winGolds.length, 1, `assisted win has one filled gold ${JSON.stringify(winGolds)}`)
+  await page.screenshot({ path: `${SHOTS}/run-assisted-win-375.png` })
 }
 
 async function fatherRunEnd(page) {
@@ -499,7 +525,8 @@ async function hugFather(page) {
   const pad = page.locator('[data-run-pad="hold"]')
   await pad.waitFor({ timeout: 15000 })
   await pad.scrollIntoViewIfNeeded()
-  finishFatherPress(await pressRunPad(page, pad))
+  const state = finishFatherPress(await pressRunPad(page, pad))
+  if (state === 'win') return
   const start = Date.now()
   while (Date.now() - start < 12000) {
     const end = await fatherRunEnd(page)
@@ -511,26 +538,14 @@ async function hugFather(page) {
       await page.mouse.up().catch(() => {})
       throw new Error('father run missed')
     }
-    let label = null
-    try {
-      label = await pad.getAttribute('aria-label', { timeout: 500 })
-    } catch {
-      if (await page.locator('.play.is-father-run.is-win').count()) {
-        await page.mouse.up().catch(() => {})
-        return
-      }
-      continue
+    const snap = await readRunCue(page)
+    if (snap && (snap.label === 'Tap' || snap.glow || (snap.faces || []).some((face) => face !== 'Hold'))) {
+      await page.mouse.up().catch(() => {})
+      throw new Error(`Easy pad left Hold ${JSON.stringify(snap)}`)
     }
-    if (label === 'Tap' || (label && label.includes('Let go'))) {
-      await page.mouse.up()
-      await page.waitForTimeout(30)
-      const state = finishFatherPress(await pressRunPad(page, pad))
-      if (state === 'win') return
-      await page.waitForTimeout(90)
-    } else {
-      await page.waitForTimeout(50)
-    }
+    await page.waitForTimeout(50)
   }
+  await page.mouse.up().catch(() => {})
   throw new Error('father run did not hug')
 }
 
@@ -996,7 +1011,16 @@ export async function checkGoldenLive() {
 
       await page.locator('[data-run-pad], .play.is-father-run').first().waitFor()
       await stamp('run')
+      const how = page.locator('[data-run-how]')
+      await how.waitFor()
+      const howText = ((await how.innerText()) || '').replace(/\s+/g, ' ').trim()
+      assert.equal(howText, EASY.runHow, 'the run rule shows once before the first press')
+      const howBox = await how.boundingBox()
+      assert.ok(howBox && howBox.height > 0, 'run-how has a box')
+      assert.ok(howBox.y >= 0 && howBox.y + howBox.height <= height + 1, `run-how sits in the viewport (${howBox.y})`)
+      if (width === 375 && height === 667) await page.screenshot({ path: `${SHOTS}/run-ready-375.png` })
       await hugFather(page)
+      assert.equal(await page.locator('[data-run-how]').count(), 0, 'the rule hides after the first press')
       await page.locator('.play.is-father-run.is-win .btn.primary').waitFor()
       shot = await stamp('run-win')
       assert.equal(shot.id, 'run-win')
