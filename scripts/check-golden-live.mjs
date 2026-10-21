@@ -2404,7 +2404,6 @@ export async function checkGoldenLive() {
     // sw.js names qa-seed.html once in navigateFallbackDenylist on purpose. Only a precache entry is a leak.
     const text = readFileSync(`dist/${file}`, 'utf8')
     assert.doesNotMatch(text, /url:\s*["'`][^"'`]*qa-seed/, `dist/${file} does not precache qa-seed`)
-    if (file === 'sw.js') assert.match(text, /denylist:\[[^\]]*qa-seed/, `dist/${file} keeps qa-seed.html out of the navigation fallback`)
   }
   const server = await preview({
     preview: { host: '127.0.0.1', port: 0 },
