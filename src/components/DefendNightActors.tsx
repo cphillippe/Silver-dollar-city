@@ -69,7 +69,7 @@ export interface EasyTapJuice {
   shrugCue?: boolean
 }
 
-/** Easy run-in. Draw only: the sim, taps, and lamps still read `raiderAt`. */
+/** Easy run-in. Draw only: the sim, lamp aim, and range still read `raiderAt`. */
 export interface DefendWalkIn {
   /** Plate rect. Easy walkers are clipped to it. */
   plate: { width: number; height: number }
@@ -238,14 +238,15 @@ export function DefendNightActorsSvg({
   }
   const candlePairs = candleLinks(candlePlants)
   const rowHead = new Map(candleRowHeads(candlePlants).map((head) => [head.id, head.mark]))
-  const tapPool = walkIn ? raiders.filter((raider) => !walkIn.held(raider)) : raiders
+  const drawAt = (raider: Raider) => (walkIn ? walkIn.drawAt(raider) : raiderAt(raider))
+  const cueAt = tapTarget ? drawAt(tapTarget) : null
   const walkers = raiders.map((raider) => {
     const held = walkIn ? walkIn.held(raider) : false
     const entering = walkIn ? walkIn.entering(raider) : false
-    const at = walkIn ? walkIn.drawAt(raider) : raiderAt(raider)
+    const at = drawAt(raider)
     const isTap = easyTap && !raider.turned && !held
     const shrugged = easyTapSoaked(roundIndex, raider, armorFrom)
-    const isCue = isTap && !shrugged && easyFaceGlows(raider, tapPool, roundIndex, armorFrom)
+    const isCue = isTap && !shrugged && easyFaceGlows(raider, raiders, roundIndex, armorFrom)
     const lampHit =
       raider.struckAt != null && performance.now() - raider.struckAt < SHOT_JUICE_MS
     return (
@@ -834,12 +835,12 @@ export function DefendNightActorsSvg({
                   />
                 </g>
               ))}
-              {easyTap && tapTarget && !tapTarget.turned ? (
+              {easyTap && tapTarget && cueAt && !tapTarget.turned ? (
                 <g
                   className="walker-target-cue"
                   data-cue="target"
                   data-cue-gait={tapTarget.boss ? 'boss' : tapTarget.gait && tapTarget.gait !== 'plain' ? tapTarget.gait : 'plain'}
-                  transform={`translate(${raiderAt(tapTarget).x} ${raiderAt(tapTarget).y})`}
+                  transform={`translate(${cueAt.x} ${cueAt.y})`}
                   aria-hidden
                   pointerEvents="none"
                 >

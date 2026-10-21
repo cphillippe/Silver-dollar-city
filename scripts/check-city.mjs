@@ -7550,14 +7550,14 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   const screen435 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
   const actors435 = readFileSync(new URL('../src/components/DefendNightActors.tsx', import.meta.url), 'utf8')
   const css435 = readFileSync(new URL('../src/styles/defend.css', import.meta.url), 'utf8')
-  assert.match(screen435, /easyPointerTapGate\(easy, raider, (?:live\.current\.raiders|pool), waveIndexRef\.current(?:, tuneRef\.current\.armorFrom)?\)/)
+  assert.match(screen435, /easyPointerTapGate\(easy, raider, live\.current\.raiders, waveIndexRef\.current(?:, tuneRef\.current\.armorFrom)?\)/)
   assert.match(
     screen435,
     /easy\s*\?\s*easyLiveSpawnT\(tune\.speedScale \* \(boss \? BOSS_PACE : walkerPace\(gait\)\)\)/,
   )
   assert.match(
     actors435,
-    /easyFaceGlows\(raider, (?:raiders|tapPool), roundIndex, armorFrom\)/,
+    /easyFaceGlows\(raider, raiders, roundIndex, armorFrom\)/,
     '1.4.461 round 5 lights every walker on the road',
   )
   assert.match(css435, /\.defend-page\.is-easy-tap \.defend-raider\.is-boss \.defend-raider-hit \{[^}]*pointer-events:\s*all/)
@@ -8905,7 +8905,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   const liveTap465 = screen465.slice(screen465.indexOf('function fireAtRaider'), screen465.indexOf('function fireBest'))
   assert.match(
     liveTap465,
-    /const gate = easyPointerTapGate\(easy, raider, (?:live\.current\.raiders|pool), waveIndexRef\.current, tuneRef\.current\.armorFrom\)\s*if \(gate === 'miss'\)/,
+    /const gate = easyPointerTapGate\(easy, raider, live\.current\.raiders, waveIndexRef\.current, tuneRef\.current\.armorFrom\)\s*if \(gate === 'miss'\)/,
     '1.4.465 the live tap misses when the glow gate misses',
   )
   for (const round of [0, 1, 2, 3, 5]) {
@@ -9672,7 +9672,7 @@ assert.doesNotMatch(teachSrc, /Acquire · \$\{brief\.source\}/)
   assert.equal(capped.hearts, 1)
   assert.equal(applyEasyPaceLeaks(3, 1, 0, 0, 0, true).lostHearts, 0, '1.4.409 a shield still forgives')
   const screen409 = readFileSync(new URL('../src/components/DefendScreen.tsx', import.meta.url), 'utf8')
-  assert.match(screen409, /easyPointerTapGate\(easy, raider, (?:live\.current\.raiders|pool), waveIndexRef\.current(?:, tuneRef\.current\.armorFrom)?\)/)
+  assert.match(screen409, /easyPointerTapGate\(easy, raider, live\.current\.raiders, waveIndexRef\.current(?:, tuneRef\.current\.armorFrom)?\)/)
   assert.match(
     readFileSync(new URL('../src/lib/defend.ts', import.meta.url), 'utf8'),
     /return cueTapStrike\(easy, cue\?\.id === raider\.id\)/,
@@ -18414,7 +18414,9 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.equal(walk526.WALK_IN_LEAD_U, 96, '1.4.526 walkers start 96 map units past the edge')
   assert.equal(walk526.WALK_IN_MIN_MS, 600)
   assert.equal(walk526.WALK_IN_MAX_MS, 1800)
+  assert.equal(walk526.WALK_IN_U_PER_S, 900, '1.4.526 walkers run in at 900 map units a second')
   assert.equal(walk526.WALK_IN_TAP_MAX_MS, 840, '1.4.526 the tap lock is 0.84 s at most')
+  assert.equal(Math.round(100 / (0.01 * 6.8 * 1.75)), 840, '1.4.526 0.84 s is 0.1 of the road for the fastest Easy walker')
   assert.equal(walk526.WALK_IN_SPAWN_T_CAP, defend526.EASY_ON_SCREEN_T, '1.4.526 the run-in cap is the live spawn cap')
 
   const roads526 = (id) => {
@@ -18430,18 +18432,18 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   const ms526 = (entry, points, t) => walk526.walkInMs(walk526.walkInLength(entry, points, t))
   // map, road, side, edge x/y, start x/y, run ms at t 0, round 1, and the 0.55 cap.
   const table526 = [
-    ['a2', 'main', 'right', 798.0, 1097.0, 892.1, 1115.8, 613, 740, 753],
-    ['far-hills', 'main', 'bottom', 175.6, 1134.0, 180.2, 1229.9, 613, 815, 835],
-    ['map03', 'west', 'bottom', 399.0, 1134.0, 399.0, 1230.0, 613, 726, 738],
-    ['map03', 'east', 'bottom', 399.0, 1134.0, 399.0, 1230.0, 613, 726, 738],
-    ['map04', 'a', 'bottom', 319.2, 1134.0, 326.5, 1229.7, 613, 730, 741],
-    ['map04', 'b', 'bottom', 478.8, 1134.0, 471.5, 1229.7, 613, 730, 741],
-    ['map05', 'west', 'bottom', 191.5, 1134.0, 211.0, 1228.0, 613, 702, 710],
-    ['map05', 'eastIn', 'bottom', 606.5, 1134.0, 588.8, 1228.4, 613, 704, 713],
-    ['map05', 'eastOut', 'bottom', 606.5, 1134.0, 588.8, 1228.4, 613, 700, 709],
-    ['map06', 'w', 'left', 0.0, 1088.6, -92.4, 1114.8, 613, 700, 709],
-    ['map06', 'c', 'bottom', 399.0, 1134.0, 394.4, 1229.9, 613, 699, 707],
-    ['map06', 'e', 'right', 798.0, 1088.6, 890.4, 1114.8, 613, 700, 709],
+    ['a2', 'main', 'right', 798.0, 1097.0, 892.1, 1115.8, 600, 1111, 1212],
+    ['far-hills', 'main', 'bottom', 175.6, 1134.0, 180.2, 1229.9, 600, 1705, 1800],
+    ['map03', 'west', 'bottom', 399.0, 1134.0, 399.0, 1230.0, 600, 1003, 1092],
+    ['map03', 'east', 'bottom', 399.0, 1134.0, 399.0, 1230.0, 600, 1003, 1092],
+    ['map04', 'a', 'bottom', 319.2, 1134.0, 326.5, 1229.7, 600, 1028, 1120],
+    ['map04', 'b', 'bottom', 478.8, 1134.0, 471.5, 1229.7, 600, 1028, 1120],
+    ['map05', 'west', 'bottom', 191.5, 1134.0, 211.0, 1228.0, 600, 806, 876],
+    ['map05', 'eastIn', 'bottom', 606.5, 1134.0, 588.8, 1228.4, 600, 828, 900],
+    ['map05', 'eastOut', 'bottom', 606.5, 1134.0, 588.8, 1228.4, 600, 794, 862],
+    ['map06', 'w', 'left', 0.0, 1088.6, -92.4, 1114.8, 600, 795, 864],
+    ['map06', 'c', 'bottom', 399.0, 1134.0, 394.4, 1229.9, 600, 784, 852],
+    ['map06', 'e', 'right', 798.0, 1088.6, 890.4, 1114.8, 600, 795, 864],
   ]
   const seen526 = []
   for (const id of ['a2', 'far-hills', 'map03', 'map04', 'map05', 'map06']) {
@@ -18494,6 +18496,16 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
     }
   }
   assert.deepEqual(seen526, table526, '1.4.526 per-road entry, start, and run-in table')
+  const r1Runs526 = seen526.map((row) => row[8])
+  assert.equal(Math.min(...r1Runs526), 784, '1.4.526 the shortest round 1 run-in is 784 ms')
+  assert.deepEqual(seen526.find((row) => row[8] === 784).slice(0, 2), ['map06', 'c'], '1.4.526 map06 road c is the shortest')
+  assert.equal(Math.max(...r1Runs526), 1705, '1.4.526 the longest round 1 run-in is 1705 ms')
+  assert.deepEqual(seen526.find((row) => row[8] === 1705).slice(0, 2), ['far-hills', 'main'], '1.4.526 far-hills is the longest')
+  assert.deepEqual(
+    [...new Set(seen526.filter((row) => row[8] > walk526.WALK_IN_TAP_MAX_MS).map((row) => row[0]))],
+    ['a2', 'far-hills', 'map03', 'map04'],
+    '1.4.526 round 1 run-ins past 0.84 s take taps at the drawn spot before they land',
+  )
 
   const ts526 = new Set()
   for (let wave = 0; wave < 40; wave += 1) {
@@ -18513,18 +18525,20 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
         low526 = Math.min(low526, ms)
         high526 = Math.max(high526, ms)
         assert.ok(ms >= 600 && ms <= 1800, `1.4.526 ${id}:${road.id} t ${t} runs ${ms} ms`)
-        assert.ok(ms <= walk526.WALK_IN_TAP_MAX_MS, `1.4.526 ${id}:${road.id} t ${t} run-in fits the 0.84 s tap lock`)
-        assert.equal(walk526.walkInTapLockMs(ms), ms, `1.4.526 ${id}:${road.id} t ${t} the lock is the whole run-in`)
+        assert.equal(walk526.walkInTapLockMs(ms), Math.min(ms, 840), `1.4.526 ${id}:${road.id} t ${t} the lock is the run-in, at most 0.84 s`)
       }
     }
   }
-  assert.equal(low526, 613, '1.4.526 shortest live run-in')
-  assert.equal(high526, 821, '1.4.526 longest live run-in')
+  console.log(`1.4.526 live run-ins ${low526}–${high526} ms`)
+  assert.equal(low526, 600, '1.4.526 shortest live run-in')
+  assert.equal(high526, 1753, '1.4.526 longest live run-in')
 
   assert.equal(walk526.walkInMs(0), 600)
   assert.equal(walk526.walkInMs(Number.NaN), 600)
   assert.equal(walk526.walkInMs(1e9), 1800, '1.4.526 the run-in never passes 1.8 s')
-  assert.equal(walk526.walkInMs(1000), 740)
+  assert.equal(walk526.walkInMs(900), 1000, '1.4.526 900 u is one second')
+  assert.equal(walk526.walkInMs(1000), 1111)
+  assert.equal(walk526.walkInMs(500), 600)
   assert.equal(walk526.walkInTapLockMs(700), 700)
   assert.equal(walk526.walkInTapLockMs(1800), 840)
   assert.equal(walk526.walkInEase(0), 0)
@@ -18542,10 +18556,22 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   const sim526 = point526(0.3, path526)
   const run526 = ms526(a2Entry526, path526, 0.3)
   assert.deepEqual(clock526.drawAt(walker526, sim526, 1000), a2Entry526.start, '1.4.526 first frame is the start')
+  const lock526 = walk526.walkInTapLockMs(run526)
   assert.equal(clock526.entering(walker526, 1000 + run526 - 1), true)
-  assert.equal(clock526.tapLocked(walker526, 1000 + run526 - 1), true)
+  assert.equal(clock526.tapLocked(walker526, 1000 + lock526 - 1), true)
   assert.equal(clock526.entering(walker526, 1000 + run526), false)
-  assert.equal(clock526.tapLocked(walker526, 1000 + run526), false)
+  assert.equal(clock526.tapLocked(walker526, 1000 + lock526), false)
+  const hills526 = roads526('far-hills')[0].points
+  const long526 = walk526.createWalkInClock(() => hills526, () => plate526)
+  const hillWalker526 = { id: 3, t: r1T526 }
+  const hillSim526 = point526(r1T526, hills526)
+  assert.equal(long526.see(hillWalker526, 0).runMs, 1705)
+  assert.equal(long526.tapLocked(hillWalker526, 839), true)
+  assert.equal(long526.tapLocked(hillWalker526, 840), false, '1.4.526 a long run-in takes taps after 0.84 s')
+  assert.equal(long526.entering(hillWalker526, 840), true, '1.4.526 and is still walking in')
+  const hillAt526 = long526.drawAt(hillWalker526, hillSim526, 840)
+  assert.ok(hillAt526.x >= 0 && hillAt526.y >= 0 && hillAt526.x <= 798 && hillAt526.y <= 1134, '1.4.526 its drawn spot is on the map by then')
+  assert.ok(Math.hypot(hillAt526.x - hillSim526.x, hillAt526.y - hillSim526.y) > 1, '1.4.526 its drawn spot is not its sim point')
   assert.deepEqual(clock526.drawAt(walker526, sim526, 1000 + run526), sim526, '1.4.526 the run-in ends on the sim point')
   const mid526 = clock526.drawAt(walker526, sim526, 1000 + run526 / 2)
   assert.ok(Math.hypot(mid526.x - sim526.x, mid526.y - sim526.y) > 1, '1.4.526 mid run-in is off the sim point')
@@ -18568,14 +18594,28 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   const fire526 = screen526.slice(screen526.indexOf('function fireAtRaider'), screen526.indexOf('function fireBest'))
   assert.match(
     fire526,
-    /const tapNow = performance\.now\(\)\s*if \(walkInHeld\(raider, tapNow\)\) return\s*const pool = tapPool\(live\.current\.raiders, tapNow\)\s*const gate = easyPointerTapGate\(easy, raider, pool,/,
-    '1.4.526 a tap on an entering walker does nothing, and the gate reads only tappable walkers',
+    /if \(!raider\) return\s*if \(walkInHeld\(raider\)\) return\s*const gate = easyPointerTapGate\(easy, raider, live\.current\.raiders, waveIndexRef\.current, tuneRef\.current\.armorFrom\)/,
+    '1.4.526 a tap on an entering walker does nothing, and the gate call is unchanged',
   )
-  assert.match(fire526, /easyGateMissReason\(raider, pool,/, '1.4.526 the dark-miss reason reads only tappable walkers')
   const best526 = screen526.slice(screen526.indexOf('function fireBest'), screen526.indexOf('function retry'))
-  assert.match(best526, /const faces = tapPool\(live\.current\.raiders\)/, '1.4.526 a board tap is not near an entering walker')
-  assert.match(screen526, /nightEnemies\.cueTarget\(tapPool\(raiders, walkNow\)/, '1.4.526 the cue skips entering walkers')
-  assert.match(screen526, /return easy && walkInClock\(\)\.tapLocked\(raider, now\)/, '1.4.526 the tap lock is Easy only')
+  assert.match(
+    best526,
+    /const faces = live\.current\.raiders\s*\.filter\(\(raider\) => !raider\.turned && !walkInHeld\(raider\)\)\s*\.map\(\(raider\) => \{\s*const at = walkerDrawAt\(raider\)/,
+    '1.4.526 a board tap is near what the player sees, and not near an entering walker',
+  )
+  assert.match(
+    screen526,
+    /const cueRaider = easyTap\s*\?\s*nightEnemies\.cueTarget\(raiders, waveIndex, tuneRef\.current\.armorFrom\)\s*:\s*undefined\s*const tapTarget = cueRaider && !walkInHeld\(cueRaider, walkNow\) \? cueRaider : undefined/,
+    '1.4.526 the cue call is unchanged and an entering walker gets no cue ring',
+  )
+  assert.match(screen526, /function walkInHeld\(raider: Raider, now = live\.current\.clock\): boolean \{\s*return easy && walkInClock\(\)\.tapLocked\(raider, now\)/, '1.4.526 the tap lock is Easy only, on the game clock')
+  assert.match(screen526, /function walkerDrawAt\(raider: Raider, now = live\.current\.clock\) \{\s*return easy \? walkInClock\(\)\.drawAt\(raider, raiderAt\(raider\), now\) : raiderAt\(raider\)/, '1.4.526 the drawn spot is its own helper')
+  assert.match(screen526, /const walkNow = live\.current\.clock\n/, '1.4.526 the run-in reads the game clock')
+  assert.match(screen526, /function raiderAt\(raider: Raider\) \{\n    return nightEnemies\.at\(raider\)\n  \}/, '1.4.526 raiderAt still drives lamp aim, range, and the spawn log')
+  const walkCode526 = screen526.slice(screen526.indexOf('function walkInClock'), screen526.indexOf('function lampCombat'))
+  assert.doesNotMatch(walkCode526, /performance\.now/, '1.4.526 the walk-in helpers never read the wall clock')
+  assert.doesNotMatch(readFileSync(new URL('../src/nightWatch/maps/walkIn.ts', import.meta.url), 'utf8'), /performance\.now|Date\.now/, '1.4.526 the run-in module takes its clock from the caller')
+  assert.doesNotMatch(screen526, /useWalkInFrame/, '1.4.526 the game loop repaints the run-in')
   assert.match(screen526, /const walkIn: DefendWalkIn \| undefined = easy\s*\?/, '1.4.526 Hard gets no run-in')
   assert.equal((screen526.match(/walkInRef\.current\?\.reset\(\)/g) || []).length, 2, '1.4.526 each wave and retry start the run-in clock over')
   const spawnAt526 = screen526.indexOf('        walking.push({\n          id,\n          t: easy')
@@ -18586,17 +18626,29 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
     'd062ef4cf2a4d8df89d75277078dfa076099c5564d3bd0ac47544db5fa05dde8',
     '1.4.526 the spawn line is byte-identical',
   )
-  assert.match(actors526, /const at = walkIn \? walkIn\.drawAt\(raider\) : raiderAt\(raider\)/, '1.4.526 only the draw moves')
+  assert.match(actors526, /const drawAt = \(raider: Raider\) => \(walkIn \? walkIn\.drawAt\(raider\) : raiderAt\(raider\)\)/, '1.4.526 only the draw moves')
+  assert.match(actors526, /const at = drawAt\(raider\)/)
   assert.match(actors526, /const isTap = easyTap && !raider\.turned && !held/)
+  assert.match(
+    actors526,
+    /const isCue = isTap && !shrugged && easyFaceGlows\(raider, raiders, roundIndex, armorFrom\)/,
+    '1.4.526 the glow gate sits around the unchanged glow call',
+  )
   assert.match(actors526, /pointerEvents=\{held \? 'none' : undefined\}/)
   assert.match(
     actors526,
     /\{walkIn \? \(\s*<g className="nw-walkers" clipPath="url\(#nw-walk-clip\)" data-walk-clip="plate">\s*<clipPath id="nw-walk-clip">\s*<rect x=\{0\} y=\{0\} width=\{walkIn\.plate\.width\} height=\{walkIn\.plate\.height\} \/>/,
     '1.4.526 Easy walkers are clipped to the plate',
   )
-  assert.match(actors526, /transform=\{`translate\(\$\{raiderAt\(tapTarget\)\.x\} \$\{raiderAt\(tapTarget\)\.y\}\)`\}/, '1.4.526 the cue ring stays on the sim point')
-  assert.match(board526, /const tapPool = walkIn \? raiders\.filter\(\(raider\) => !walkIn\.held\(raider\)\) : raiders/)
-  assert.match(board526, /easyFaceGlows\(raider, tapPool, roundIndex, armorFrom\)/)
+  assert.match(actors526, /const cueAt = tapTarget \? drawAt\(tapTarget\) : null/, '1.4.526 the cue ring sits on the drawn walker')
+  assert.match(actors526, /transform=\{`translate\(\$\{cueAt\.x\} \$\{cueAt\.y\}\)`\}/)
+  assert.match(
+    board526,
+    /\? raiders\s*\.filter\(\(raider\) => !raider\.turned && !walkIn\?\.held\(raider\)\)\s*\.map\(\(raider\) => \{\s*const at = walkIn \? walkIn\.drawAt\(raider\) : raiderAt\(raider\)/,
+    '1.4.526 walker tap buttons skip held walkers and sit on the drawn spot',
+  )
+  assert.match(board526, /const glowing = easyFaceGlows\(raider, raiders, roundIndex, armorFrom\)/, '1.4.526 the board glow call is unchanged')
+  assert.doesNotMatch(`${actors526}\n${board526}\n${screen526}`, /tapPool/, '1.4.526 glow and gate read every walker')
   assert.match(css526, /\.defend-page\.is-easy-watch \.defend-raider \{\s*animation: none;\s*\}/, '1.4.526 no fade on Easy')
   assert.match(
     css526,
@@ -18643,6 +18695,9 @@ function easyGateResult(waveIndex, damage, cooldown, baseHp = 2) {
   assert.match(walkBody526, /entering dark walker tap is not a dark miss/)
   assert.match(walkBody526, /the plant landed during the run-in/)
   assert.match(walkBody526, /the lamp tap landed during the run-in/)
+  assert.match(walkBody526, /window\.requestAnimationFrame = \(callback\) => raf\(\(\) => callback\(performance\.now\(\)\)\)/, '1.4.526 the prove steps the real game loop')
+  assert.match(walkBody526, /3 s of wall clock under the debug freeze leave the walker walking in/, '1.4.526 the debug freeze holds the run-in')
+  assert.match(walkBody526, /tap button sits on the drawn face/, '1.4.526 a long run-in takes taps at its drawn spot')
   const live526 = prove526.slice(prove526.indexOf('export async function checkLiveProve'))
   assert.match(live526, /await checkHardDraw\(\)\s*await checkWalkIn\(browser, port, errors\)\s*assert\.equal\(errors\.join/, '1.4.526 the full prove runs the walk-in before the error check')
   assert.match(prove526, /Hard draw is byte-identical to 1\.4\.525/)

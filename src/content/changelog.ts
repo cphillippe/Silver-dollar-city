@@ -13,7 +13,7 @@ export const CHANGELOG: ChangeNote[] = [
     when: '2026-10-21',
     items: [
       'On Easy, each Night Watch walker walks in from past the edge of the map, through its candy arch.',
-      'A walker still walking in cannot be tapped yet. A tap there plants or opens the lamp under it.',
+      'For its first moment on the map, at most 0.84 s, a walker cannot be tapped. A tap there plants or opens the lamp under it.',
       'Hard stays the same.',
       'Refs #756.',
     ],
