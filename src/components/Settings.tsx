@@ -29,6 +29,7 @@ import {
 } from '../lib/debugPlays'
 import { readNightWatchDebug, writeNightWatchDebug } from '../lib/nightWatchDebug'
 import { EASY, isEasy } from '../lib/easy'
+import { activeLampStyle, foundersLamp } from '../lib/foundersLamp'
 import { EASY_HOME } from '../lib/easyNav'
 import { EasyBack } from './EasyBack'
 import { useAdsPref } from './AdSlot'
@@ -40,7 +41,8 @@ interface SettingsProps {
 }
 
 export function Settings({ onNavigate }: SettingsProps) {
-  const { progress, saveMeta, importSaveText, reset, setTheme, setEasyMode } = useProgress()
+  const { progress, saveMeta, importSaveText, reset, setTheme, setEasyMode, setLampStyle } =
+    useProgress()
   const easy = isEasy(progress)
   const adsPref = useAdsPref()
   const fileRef = useRef<HTMLInputElement>(null)
@@ -192,6 +194,32 @@ export function Settings({ onNavigate }: SettingsProps) {
           </button>
         </div>
       </section>
+
+      {foundersLamp(progress) ? (
+        <section className="settings-card">
+          <p className="eyebrow">Lamp style</p>
+          <div className="lamp-style" role="radiogroup" aria-label="Lamp style">
+            <label className="lamp-style-choice">
+              <input
+                type="radio"
+                name="lamp-style"
+                checked={activeLampStyle(progress) !== 'founders'}
+                onChange={() => setLampStyle('classic')}
+              />
+              Classic
+            </label>
+            <label className="lamp-style-choice">
+              <input
+                type="radio"
+                name="lamp-style"
+                checked={activeLampStyle(progress) === 'founders'}
+                onChange={() => setLampStyle('founders')}
+              />
+              Founder's Lamp
+            </label>
+          </div>
+        </section>
+      ) : null}
 
       <section className="settings-card">
         <p className="eyebrow">This device</p>

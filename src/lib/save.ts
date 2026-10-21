@@ -61,20 +61,65 @@ export type ParseResult = ParseOk | ParseFail
 
 /** Settings Start over — fresh walk, same theme and Easy flag. Taught flags cannot survive. */
 export function progressAfterReset(
-  current: Pick<ProgressState, 'theme' | 'easyMode'>,
+  current: Pick<
+    ProgressState,
+    'theme' | 'easyMode' | 'firstSeen' | 'lampStyle' | 'foundersGiftSeen'
+  >,
 ): ProgressState {
-  return {
-    ...emptyProgress(),
-    theme: current.theme,
-    easyMode: current.easyMode,
-    taught: [],
-    held: [],
-    easyTaught: [],
-    easyHeld: [],
-    tierTaught: {},
-    lessonTier: {},
-    lessonScore: {},
+  const next = emptyProgress()
+  next.theme = current.theme
+  next.easyMode = current.easyMode
+  next.taught = []
+  next.held = []
+  next.easyTaught = []
+  next.easyHeld = []
+  next.tierTaught = {}
+  next.lessonTier = {}
+  next.lessonScore = {}
+  if (isCalendarDate(current.firstSeen)) next.firstSeen = current.firstSeen
+  if (current.lampStyle === 'classic' || current.lampStyle === 'founders') {
+    next.lampStyle = current.lampStyle
   }
+  if (current.foundersGiftSeen === true) next.foundersGiftSeen = true
+  return next
+}
+
+/** Keep a real YYYY-MM-DD. Drop anything else. */
+function isCalendarDate(value: unknown): value is string {
+  if (!isDateKey(value)) return false
+  const [y, m, d] = value.split('-').map(Number)
+  const date = new Date(y, m - 1, d)
+  return date.getFullYear() === y && date.getMonth() === m - 1 && date.getDate() === d
+}
+
+function savedAtLocalDate(savedAt?: string): string | undefined {
+  if (!savedAt) return undefined
+  const date = new Date(savedAt)
+  if (Number.isNaN(date.getTime())) return undefined
+  const key = localDateKey(date)
+  return isCalendarDate(key) ? key : undefined
+}
+
+/**
+ * A valid stored day stays. A missing or dropped day becomes the earliest
+ * of the walk dates, the envelope's local day, and today. A brand-new save
+ * has none of those earlier days, so it stays on today.
+ */
+export function stampFirstSeen(
+  progress: ProgressState,
+  today = localDateKey(),
+  savedAt?: string,
+): ProgressState {
+  if (isCalendarDate(progress.firstSeen)) return progress
+  const days = [today]
+  for (const day of progress.dailyDates ?? []) {
+    if (isCalendarDate(day)) days.push(day)
+  }
+  if (isCalendarDate(progress.lastDailyDate)) days.push(progress.lastDailyDate)
+  const savedDay = savedAtLocalDate(savedAt)
+  if (savedDay) days.push(savedDay)
+  const firstSeen = days.reduce((earliest, day) => (day < earliest ? day : earliest))
+  return { ...progress, firstSeen }
 }
 
 export function emptyProgress(): ProgressState {
@@ -292,6 +337,11 @@ export function normalizeProgress(parsed: Partial<ProgressState> | ProgressState
     matchBonus: asCountMap(parsed.matchBonus, MATCH_BONUS_MAX),
     matchExtra: asCountMap(parsed.matchExtra, MATCH_EXTRA_MAX),
   }
+  if (isCalendarDate(parsed.firstSeen)) base.firstSeen = parsed.firstSeen
+  if (parsed.lampStyle === 'classic' || parsed.lampStyle === 'founders') {
+    base.lampStyle = parsed.lampStyle
+  }
+  if (parsed.foundersGiftSeen === true) base.foundersGiftSeen = true
   base.memory = migrateMemory({ ...base, memory: parsed.memory ?? {} })
   base.cityBuilt =
     parsed.cityBuilt === undefined
@@ -563,9 +613,8 @@ function backupCorruptRaw(raw: string) {
 export function loadSave(): { progress: ProgressState; meta: SaveMeta } {
   const raw = storageGet(STORAGE_KEY)
   if (!raw) {
-    const empty = emptyProgress()
     return {
-      progress: empty,
+      progress: stampFirstSeen(emptyProgress()),
       meta: {
         schemaVersion: SAVE_SCHEMA_VERSION,
         appVersion: APP_VERSION,
@@ -579,7 +628,7 @@ export function loadSave(): { progress: ProgressState; meta: SaveMeta } {
     if (!parsed.ok) {
       backupCorruptRaw(raw)
       return {
-        progress: emptyProgress(),
+        progress: stampFirstSeen(emptyProgress()),
         meta: {
           schemaVersion: SAVE_SCHEMA_VERSION,
           appVersion: APP_VERSION,
@@ -588,14 +637,15 @@ export function loadSave(): { progress: ProgressState; meta: SaveMeta } {
         },
       }
     }
-    if (parsed.meta.source === 'legacy') {
-      persistSave(parsed.progress, parsed.meta.savedAt)
+    const progress = stampFirstSeen(parsed.progress, localDateKey(), parsed.meta.savedAt)
+    if (parsed.meta.source === 'legacy' || progress !== parsed.progress) {
+      persistSave(progress, parsed.meta.savedAt)
     }
-    return { progress: parsed.progress, meta: parsed.meta }
+    return { progress, meta: parsed.meta }
   } catch {
     backupCorruptRaw(raw)
     return {
-      progress: emptyProgress(),
+      progress: stampFirstSeen(emptyProgress()),
       meta: {
         schemaVersion: SAVE_SCHEMA_VERSION,
         appVersion: APP_VERSION,

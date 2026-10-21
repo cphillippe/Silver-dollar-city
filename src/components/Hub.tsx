@@ -38,6 +38,7 @@ import type { View } from '../types'
 import { RecallOffer } from './RecallOffer'
 import { StoresComingNotice } from './StoresComingNotice'
 import { easyNightWatchOnHome, easyReadIsHomeGold, easyReadMarkedTomorrow, noteEasyOpenDay } from '../content/goldenPath'
+import { FoundersGiftLine } from './FoundersGift'
 
 interface HubProps {
   onNavigate: (view: View) => void
@@ -177,6 +178,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
         </section>
 
         <div className="easy-home-dock">
+          <FoundersGiftLine />
           <p className="easy-home-whisper quiet">{homeWhisper}</p>
           <section className="easy-build-it" aria-label="Build It">
             <div className="easy-build-meta">
@@ -364,6 +366,7 @@ export function Hub({ onNavigate, openPlot }: HubProps) {
       className={`hub is-town is-inhabited${mindPlot ? ' is-manage-open' : ''}${mindPlot && appliedTier(mindPlot, progress) === 0 ? ' is-empty-lot' : ''}`}
       aria-label="The town"
     >
+      <FoundersGiftLine />
       {easy ? null : midStreet ? (
       <section className="next-card do-next" aria-label="Do this next">
         <p className="eyebrow">Do this next</p>
