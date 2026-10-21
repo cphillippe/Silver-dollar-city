@@ -69,6 +69,16 @@ export interface EasyTapJuice {
   shrugCue?: boolean
 }
 
+/** Easy run-in. Draw only: the sim, lamp aim, and range still read `raiderAt`. */
+export interface DefendWalkIn {
+  /** Plate rect. Easy walkers are clipped to it. */
+  plate: { width: number; height: number }
+  drawAt: (raider: Raider) => NightPoint
+  entering: (raider: Raider) => boolean
+  /** No tap, no glow, and no miss for this walker yet. */
+  held: (raider: Raider) => boolean
+}
+
 export interface DefendNightActorsProps {
   easyTap: boolean
   pads: CityPlotId[]
@@ -76,6 +86,8 @@ export interface DefendNightActorsProps {
   progress: ProgressState
   raiders: Raider[]
   raiderAt: (raider: Raider) => NightPoint
+  /** Easy only. Hard leaves this unset and draws every walker at its sim point. */
+  walkIn?: DefendWalkIn
   ability: WatchAbility
   /** Ability planted on each pad. Empty pads use the selected rail type. */
   towerType: Record<string, string>
@@ -177,6 +189,7 @@ export function DefendNightActorsSvg({
   progress,
   raiders,
   raiderAt,
+  walkIn,
   ability,
   towerType,
   unlocked,
@@ -225,6 +238,200 @@ export function DefendNightActorsSvg({
   }
   const candlePairs = candleLinks(candlePlants)
   const rowHead = new Map(candleRowHeads(candlePlants).map((head) => [head.id, head.mark]))
+  const drawAt = (raider: Raider) => (walkIn ? walkIn.drawAt(raider) : raiderAt(raider))
+  const cueAt = tapTarget ? drawAt(tapTarget) : null
+  const walkers = raiders.map((raider) => {
+    const held = walkIn ? walkIn.held(raider) : false
+    const entering = walkIn ? walkIn.entering(raider) : false
+    const at = drawAt(raider)
+    const isTap = easyTap && !raider.turned && !held
+    const shrugged = easyTapSoaked(roundIndex, raider, armorFrom)
+    const isCue = isTap && !shrugged && easyFaceGlows(raider, raiders, roundIndex, armorFrom)
+    const lampHit =
+      raider.struckAt != null && performance.now() - raider.struckAt < SHOT_JUICE_MS
+    return (
+      <g
+        key={raider.id}
+        data-person-node={isTap ? 'walker' : undefined}
+        data-walker-id={isTap ? raider.id : undefined}
+        data-walk-in={entering ? 'yes' : undefined}
+        data-walk-id={walkIn ? raider.id : undefined}
+        data-gait={raider.gait && raider.gait !== 'plain' ? raider.gait : undefined}
+        data-face={raider.face ?? raider.kind}
+        className={`defend-raider ${raider.mini ? 'is-mini' : ''} ${raider.gait === 'fast' ? 'is-fast' : ''} ${raider.gait === 'tough' ? 'is-tough' : ''} ${raider.boss ? 'is-boss' : ''} ${raider.turned ? 'is-turned' : ''} ${isTap ? 'is-easy-tap-target' : ''} ${isCue ? 'is-easy-cue' : ''} ${lampHit ? 'is-lamp-hit' : ''}${held ? ' is-walk-in' : ''}`}
+        data-fog={raider.fog ? 'yes' : undefined}
+        data-boss={raider.boss ? 'yes' : undefined}
+        data-road-t={raider.boss ? raider.t.toFixed(3) : undefined}
+        transform={`translate(${at.x} ${at.y})`}
+        pointerEvents={held ? 'none' : undefined}
+        role={isTap ? 'button' : undefined}
+        tabIndex={isTap ? 0 : undefined}
+        aria-label={isTap ? `Walker on the road. ${EASY.nightTap}` : undefined}
+        onPointerDown={
+          isTap
+            ? (event) => {
+                const svg = (event.currentTarget as SVGGElement).ownerSVGElement
+                const point = svg ? clientToMap(svg, event.clientX, event.clientY) : null
+                faceAim.current = {
+                  id: raider.id,
+                  point,
+                  pointerType: event.pointerType || 'none',
+                }
+              }
+            : undefined
+        }
+        onClick={
+          isTap
+            ? (event) => {
+                event.stopPropagation()
+                const host = event.currentTarget as SVGGElement
+                const marked = Number(host.getAttribute('data-walker-id'))
+                const id = Number.isFinite(marked) ? marked : raider.id
+                const aim = faceAim.current
+                const mine = aim && aim.id === id ? aim : null
+                fireAtRaider(id, mine?.point ?? null, mine?.pointerType)
+              }
+            : undefined
+        }
+        onKeyDown={
+          isTap
+            ? (event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault()
+                  fireAtRaider(raider.id)
+                }
+              }
+            : undefined
+        }
+      >
+        <g className="defend-raider-body">
+        {raider.gait === 'fast' && !raider.turned ? (
+          <g aria-hidden>
+            <g className="defend-fast-streaks">
+              <path d={`M${FACE_HALF * 0.2} ${FACE_TOP + 18} l22 10`} />
+              <path d={`M${FACE_HALF * 0.05} ${FACE_TOP + 34} l26 8`} />
+              <path d={`M${FACE_HALF * 0.35} ${FACE_TOP + 50} l18 12`} />
+            </g>
+          </g>
+        ) : null}
+        {raider.gait === 'tough' && !raider.turned ? (
+          <ellipse
+            className="defend-tough-bulk"
+            cy={PATH_WALKER_FACE_DY + 4}
+            rx={FACE_HALF * 0.92}
+            ry={FACE_HALF * 0.78}
+          />
+        ) : null}
+        {raider.boss && !raider.turned ? (
+          <g className="defend-boss-shape" aria-hidden>
+            <path
+              className="defend-boss-mantle"
+              d={`M0 ${PATH_WALKER_FACE_DY + 28} l${-FACE_HALF * 1.35} ${FACE_HALF * 0.15} l${FACE_HALF * 0.35} ${-FACE_HALF * 1.15} l${FACE_HALF * 1.0} ${FACE_HALF * 0.55} l${FACE_HALF * 1.0} ${-FACE_HALF * 0.55} l${FACE_HALF * 0.35} ${FACE_HALF * 1.15} Z`}
+            />
+            <path
+              className="defend-boss-crown"
+              d={`M${-FACE_HALF * 0.72} ${PATH_WALKER_FACE_DY - FACE_HALF * 0.72} l${FACE_HALF * 0.22} ${-FACE_HALF * 0.42} l${FACE_HALF * 0.18} ${FACE_HALF * 0.28} l${FACE_HALF * 0.32} ${-FACE_HALF * 0.5} l${FACE_HALF * 0.32} ${FACE_HALF * 0.5} l${FACE_HALF * 0.18} ${-FACE_HALF * 0.28} l${FACE_HALF * 0.22} ${FACE_HALF * 0.42} Z`}
+            />
+          </g>
+        ) : null}
+        <ellipse
+          className="defend-raider-shadow"
+          cy={12 * (PATH_WALKER_FACE_U / 36)}
+          rx={(raider.gait === 'tough' ? 18 : 13) * (PATH_WALKER_FACE_U / 36)}
+          ry={(raider.gait === 'tough' ? 6.2 : 4.6) * (PATH_WALKER_FACE_U / 36)}
+        />
+        {easy && !raider.turned ? (
+          <g className="defend-raider-face is-dark-face">
+            <circle
+              className="defend-face-back"
+              cx={0}
+              cy={PATH_WALKER_FACE_DY}
+              r={PATH_WALKER_FACE_U * 0.36}
+            />
+            <image
+              href={nightEnemies.faceSrc(raider.face ?? raider.kind, true)}
+              x={-FACE_HALF}
+              y={FACE_TOP}
+              width={PATH_WALKER_FACE_U}
+              height={PATH_WALKER_FACE_U}
+              clipPath="url(#defend-face-clip)"
+            />
+          </g>
+        ) : (
+          <image
+            className="defend-raider-face"
+            href={nightEnemies.faceSrc(raider.kind, easy)}
+            x={-FACE_HALF}
+            y={FACE_TOP}
+            width={PATH_WALKER_FACE_U}
+            height={PATH_WALKER_FACE_U}
+            clipPath="url(#defend-face-clip)"
+          />
+        )}
+        {lampHit ? (
+          <circle
+            className="defend-face-flash"
+            cy={PATH_WALKER_FACE_DY}
+            r={FACE_HALF * 0.82}
+          />
+        ) : null}
+        {!raider.turned && (raider.maxHp ?? 0) > 1 ? (
+          <g className="defend-hp-bar" aria-hidden>
+            <rect
+              className="defend-hp-track"
+              x={-(raider.boss ? HP_TRACK.w * 1.45 : HP_TRACK.w) / 2}
+              y={raider.boss ? HP_TRACK.y - 8 : HP_TRACK.y}
+              width={raider.boss ? HP_TRACK.w * 1.45 : HP_TRACK.w}
+              height={raider.boss ? HP_TRACK.h + 4 : HP_TRACK.h}
+              rx={HP_TRACK.rx}
+            />
+            <rect
+              className="defend-hp-fill"
+              x={-(raider.boss ? HP_TRACK.w * 1.45 : HP_TRACK.w) / 2 + HP_FILL.inset}
+              y={(raider.boss ? HP_TRACK.y - 8 : HP_TRACK.y) + HP_FILL.inset}
+              width={
+                (((raider.boss ? HP_TRACK.w * 1.45 : HP_TRACK.w) - HP_FILL.inset * 2) * raider.hp) /
+                (raider.maxHp ?? 1)
+              }
+              height={raider.boss ? HP_FILL.h + 2 : HP_FILL.h}
+              rx={HP_FILL.rx}
+            />
+          </g>
+        ) : null}
+        {raider.turned ? (
+          <g className="defend-heaven-cheer" aria-hidden>
+            <circle className="defend-cheer-spark" cx="-10" cy="-18" r="2.2" />
+            <circle className="defend-cheer-spark is-2" cx="12" cy="-20" r="1.8" />
+            <circle className="defend-cheer-spark is-3" cx="2" cy="-26" r="1.4" />
+          </g>
+        ) : null}
+        </g>
+        {raider.gait === 'fast' && !raider.turned ? (
+          <g className="defend-fast-mark" aria-hidden>
+            <circle
+              className="defend-fast-rim"
+              cy={PATH_WALKER_FACE_DY}
+              r={CUE_RING_R + 14}
+            />
+            <g className="defend-fast-badge">
+              <path d={`M${CUE_RING_R + 22} ${PATH_WALKER_FACE_DY - 16} l26 -8`} />
+              <path d={`M${CUE_RING_R + 20} ${PATH_WALKER_FACE_DY} l30 0`} />
+              <path d={`M${CUE_RING_R + 22} ${PATH_WALKER_FACE_DY + 16} l24 8`} />
+            </g>
+          </g>
+        ) : null}
+        <circle
+          className="defend-raider-hit"
+          data-face-hit={isTap ? 'easy' : undefined}
+          data-boss-hit={raider.boss ? 'yes' : undefined}
+          cy={isTap ? PATH_WALKER_FACE_DY : 0}
+          r={isTap ? (raider.boss ? EASY_CROWN_HIT_R : EASY_FACE_HIT_R) : PATH_WALKER_HIT_R}
+          fill="transparent"
+          pointerEvents="all"
+        />
+      </g>
+    )
+  })
   return (
     <>
               {groundHints.length > 0 ? (
@@ -600,193 +807,16 @@ export function DefendNightActorsSvg({
                   ) : null}
                 </g>
               ) : null}
-              {raiders.map((raider) => {
-                const at = raiderAt(raider)
-                const isTap = easyTap && !raider.turned
-                const shrugged = easyTapSoaked(roundIndex, raider, armorFrom)
-                const isCue = isTap && !shrugged && easyFaceGlows(raider, raiders, roundIndex, armorFrom)
-                const lampHit =
-                  raider.struckAt != null && performance.now() - raider.struckAt < SHOT_JUICE_MS
-                return (
-                  <g
-                    key={raider.id}
-                    data-person-node={isTap ? 'walker' : undefined}
-                    data-walker-id={isTap ? raider.id : undefined}
-                    data-gait={raider.gait && raider.gait !== 'plain' ? raider.gait : undefined}
-                    data-face={raider.face ?? raider.kind}
-                    className={`defend-raider ${raider.mini ? 'is-mini' : ''} ${raider.gait === 'fast' ? 'is-fast' : ''} ${raider.gait === 'tough' ? 'is-tough' : ''} ${raider.boss ? 'is-boss' : ''} ${raider.turned ? 'is-turned' : ''} ${isTap ? 'is-easy-tap-target' : ''} ${isCue ? 'is-easy-cue' : ''} ${lampHit ? 'is-lamp-hit' : ''}`}
-                    data-fog={raider.fog ? 'yes' : undefined}
-                    data-boss={raider.boss ? 'yes' : undefined}
-                    data-road-t={raider.boss ? raider.t.toFixed(3) : undefined}
-                    transform={`translate(${at.x} ${at.y})`}
-                    role={isTap ? 'button' : undefined}
-                    tabIndex={isTap ? 0 : undefined}
-                    aria-label={isTap ? `Walker on the road. ${EASY.nightTap}` : undefined}
-                    onPointerDown={
-                      isTap
-                        ? (event) => {
-                            const svg = (event.currentTarget as SVGGElement).ownerSVGElement
-                            const point = svg ? clientToMap(svg, event.clientX, event.clientY) : null
-                            faceAim.current = {
-                              id: raider.id,
-                              point,
-                              pointerType: event.pointerType || 'none',
-                            }
-                          }
-                        : undefined
-                    }
-                    onClick={
-                      isTap
-                        ? (event) => {
-                            event.stopPropagation()
-                            const host = event.currentTarget as SVGGElement
-                            const marked = Number(host.getAttribute('data-walker-id'))
-                            const id = Number.isFinite(marked) ? marked : raider.id
-                            const aim = faceAim.current
-                            const mine = aim && aim.id === id ? aim : null
-                            fireAtRaider(id, mine?.point ?? null, mine?.pointerType)
-                          }
-                        : undefined
-                    }
-                    onKeyDown={
-                      isTap
-                        ? (event) => {
-                            if (event.key === 'Enter' || event.key === ' ') {
-                              event.preventDefault()
-                              fireAtRaider(raider.id)
-                            }
-                          }
-                        : undefined
-                    }
-                  >
-                    <g className="defend-raider-body">
-                    {raider.gait === 'fast' && !raider.turned ? (
-                      <g aria-hidden>
-                        <g className="defend-fast-streaks">
-                          <path d={`M${FACE_HALF * 0.2} ${FACE_TOP + 18} l22 10`} />
-                          <path d={`M${FACE_HALF * 0.05} ${FACE_TOP + 34} l26 8`} />
-                          <path d={`M${FACE_HALF * 0.35} ${FACE_TOP + 50} l18 12`} />
-                        </g>
-                      </g>
-                    ) : null}
-                    {raider.gait === 'tough' && !raider.turned ? (
-                      <ellipse
-                        className="defend-tough-bulk"
-                        cy={PATH_WALKER_FACE_DY + 4}
-                        rx={FACE_HALF * 0.92}
-                        ry={FACE_HALF * 0.78}
-                      />
-                    ) : null}
-                    {raider.boss && !raider.turned ? (
-                      <g className="defend-boss-shape" aria-hidden>
-                        <path
-                          className="defend-boss-mantle"
-                          d={`M0 ${PATH_WALKER_FACE_DY + 28} l${-FACE_HALF * 1.35} ${FACE_HALF * 0.15} l${FACE_HALF * 0.35} ${-FACE_HALF * 1.15} l${FACE_HALF * 1.0} ${FACE_HALF * 0.55} l${FACE_HALF * 1.0} ${-FACE_HALF * 0.55} l${FACE_HALF * 0.35} ${FACE_HALF * 1.15} Z`}
-                        />
-                        <path
-                          className="defend-boss-crown"
-                          d={`M${-FACE_HALF * 0.72} ${PATH_WALKER_FACE_DY - FACE_HALF * 0.72} l${FACE_HALF * 0.22} ${-FACE_HALF * 0.42} l${FACE_HALF * 0.18} ${FACE_HALF * 0.28} l${FACE_HALF * 0.32} ${-FACE_HALF * 0.5} l${FACE_HALF * 0.32} ${FACE_HALF * 0.5} l${FACE_HALF * 0.18} ${-FACE_HALF * 0.28} l${FACE_HALF * 0.22} ${FACE_HALF * 0.42} Z`}
-                        />
-                      </g>
-                    ) : null}
-                    <ellipse
-                      className="defend-raider-shadow"
-                      cy={12 * (PATH_WALKER_FACE_U / 36)}
-                      rx={(raider.gait === 'tough' ? 18 : 13) * (PATH_WALKER_FACE_U / 36)}
-                      ry={(raider.gait === 'tough' ? 6.2 : 4.6) * (PATH_WALKER_FACE_U / 36)}
-                    />
-                    {easy && !raider.turned ? (
-                      <g className="defend-raider-face is-dark-face">
-                        <circle
-                          className="defend-face-back"
-                          cx={0}
-                          cy={PATH_WALKER_FACE_DY}
-                          r={PATH_WALKER_FACE_U * 0.36}
-                        />
-                        <image
-                          href={nightEnemies.faceSrc(raider.face ?? raider.kind, true)}
-                          x={-FACE_HALF}
-                          y={FACE_TOP}
-                          width={PATH_WALKER_FACE_U}
-                          height={PATH_WALKER_FACE_U}
-                          clipPath="url(#defend-face-clip)"
-                        />
-                      </g>
-                    ) : (
-                      <image
-                        className="defend-raider-face"
-                        href={nightEnemies.faceSrc(raider.kind, easy)}
-                        x={-FACE_HALF}
-                        y={FACE_TOP}
-                        width={PATH_WALKER_FACE_U}
-                        height={PATH_WALKER_FACE_U}
-                        clipPath="url(#defend-face-clip)"
-                      />
-                    )}
-                    {lampHit ? (
-                      <circle
-                        className="defend-face-flash"
-                        cy={PATH_WALKER_FACE_DY}
-                        r={FACE_HALF * 0.82}
-                      />
-                    ) : null}
-                    {!raider.turned && (raider.maxHp ?? 0) > 1 ? (
-                      <g className="defend-hp-bar" aria-hidden>
-                        <rect
-                          className="defend-hp-track"
-                          x={-(raider.boss ? HP_TRACK.w * 1.45 : HP_TRACK.w) / 2}
-                          y={raider.boss ? HP_TRACK.y - 8 : HP_TRACK.y}
-                          width={raider.boss ? HP_TRACK.w * 1.45 : HP_TRACK.w}
-                          height={raider.boss ? HP_TRACK.h + 4 : HP_TRACK.h}
-                          rx={HP_TRACK.rx}
-                        />
-                        <rect
-                          className="defend-hp-fill"
-                          x={-(raider.boss ? HP_TRACK.w * 1.45 : HP_TRACK.w) / 2 + HP_FILL.inset}
-                          y={(raider.boss ? HP_TRACK.y - 8 : HP_TRACK.y) + HP_FILL.inset}
-                          width={
-                            (((raider.boss ? HP_TRACK.w * 1.45 : HP_TRACK.w) - HP_FILL.inset * 2) * raider.hp) /
-                            (raider.maxHp ?? 1)
-                          }
-                          height={raider.boss ? HP_FILL.h + 2 : HP_FILL.h}
-                          rx={HP_FILL.rx}
-                        />
-                      </g>
-                    ) : null}
-                    {raider.turned ? (
-                      <g className="defend-heaven-cheer" aria-hidden>
-                        <circle className="defend-cheer-spark" cx="-10" cy="-18" r="2.2" />
-                        <circle className="defend-cheer-spark is-2" cx="12" cy="-20" r="1.8" />
-                        <circle className="defend-cheer-spark is-3" cx="2" cy="-26" r="1.4" />
-                      </g>
-                    ) : null}
-                    </g>
-                    {raider.gait === 'fast' && !raider.turned ? (
-                      <g className="defend-fast-mark" aria-hidden>
-                        <circle
-                          className="defend-fast-rim"
-                          cy={PATH_WALKER_FACE_DY}
-                          r={CUE_RING_R + 14}
-                        />
-                        <g className="defend-fast-badge">
-                          <path d={`M${CUE_RING_R + 22} ${PATH_WALKER_FACE_DY - 16} l26 -8`} />
-                          <path d={`M${CUE_RING_R + 20} ${PATH_WALKER_FACE_DY} l30 0`} />
-                          <path d={`M${CUE_RING_R + 22} ${PATH_WALKER_FACE_DY + 16} l24 8`} />
-                        </g>
-                      </g>
-                    ) : null}
-                    <circle
-                      className="defend-raider-hit"
-                      data-face-hit={isTap ? 'easy' : undefined}
-                      data-boss-hit={raider.boss ? 'yes' : undefined}
-                      cy={isTap ? PATH_WALKER_FACE_DY : 0}
-                      r={isTap ? (raider.boss ? EASY_CROWN_HIT_R : EASY_FACE_HIT_R) : PATH_WALKER_HIT_R}
-                      fill="transparent"
-                      pointerEvents="all"
-                    />
-                  </g>
-                )
-              })}
+              {walkIn ? (
+                <g className="nw-walkers" clipPath="url(#nw-walk-clip)" data-walk-clip="plate">
+                  <clipPath id="nw-walk-clip">
+                    <rect x={0} y={0} width={walkIn.plate.width} height={walkIn.plate.height} />
+                  </clipPath>
+                  {walkers}
+                </g>
+              ) : (
+                walkers
+              )}
               {shots.map((shot) => (
                 <g className="defend-shot" key={shot.key}>
                   <line
@@ -805,12 +835,13 @@ export function DefendNightActorsSvg({
                   />
                 </g>
               ))}
-              {easyTap && tapTarget && !tapTarget.turned ? (
+              {easyTap && tapTarget && cueAt && !tapTarget.turned ? (
+                <g className="nw-walk-cue" clipPath={walkIn ? 'url(#nw-walk-clip)' : undefined}>
                 <g
                   className="walker-target-cue"
                   data-cue="target"
                   data-cue-gait={tapTarget.boss ? 'boss' : tapTarget.gait && tapTarget.gait !== 'plain' ? tapTarget.gait : 'plain'}
-                  transform={`translate(${raiderAt(tapTarget).x} ${raiderAt(tapTarget).y})`}
+                  transform={`translate(${cueAt.x} ${cueAt.y})`}
                   aria-hidden
                   pointerEvents="none"
                 >
@@ -848,6 +879,7 @@ export function DefendNightActorsSvg({
                     </g>
                   ) : null}
                   <path className="walker-cue-arrow" d={CUE_ARROW} />
+                </g>
                 </g>
               ) : null}
               {blasts.map((blast) => (

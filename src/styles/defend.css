@@ -5936,3 +5936,15 @@ button.defend-new-lamp[aria-pressed='true'] {
     animation: none;
   }
 }
+
+/* 1.4.526 Easy walkers walk onto the map from past the road's edge.
+   No fade on Easy. For the first 840 game ms at most the walker takes no tap, so a tap
+   there reaches the lamp, seat, or board under it. Hard keeps the 250ms gate fade. */
+.defend-page.is-easy-watch .defend-raider {
+  animation: none;
+}
+
+.defend-page.is-easy-watch .defend-board .nw-walkers .defend-raider.is-walk-in,
+.defend-page.is-easy-watch .defend-board .nw-walkers .defend-raider.is-walk-in * {
+  pointer-events: none;
+}

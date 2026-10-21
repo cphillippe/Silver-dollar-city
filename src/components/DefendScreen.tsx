@@ -10,7 +10,9 @@ import {
   WATCH_TITLE,
 } from '../content/defend'
 import { EASY, isEasy, loveHowTo } from '../lib/easy'
-import { walkerRoadId } from '../nightWatch/path/data'
+import { boundNightPath, roadById, walkerRoadId } from '../nightWatch/path/data'
+import { createWalkInClock, type WalkInClock, type WalkInPlate } from '../nightWatch/maps/walkIn'
+import type { DefendWalkIn } from './DefendNightActors'
 import { roundMark, easyRound } from '../nightWatch/rounds'
 import { pickWalkerFace, WALKER_FACE_POOL } from '../nightWatch/enemies/faces'
 import {
@@ -249,6 +251,7 @@ import {
   boardFillPoint,
   boardPoint as mapBoardPoint,
   boardViewBox,
+  NIGHT_MAP,
   nightEnemies,
   nightTowers,
   lampReadyToFire,
@@ -458,6 +461,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   const cueNudgeTimer = useRef(0)
   const leadIdRef = useRef<number | null>(null)
   const leadChangedAt = useRef(0)
+  const walkPlateRef = useRef<WalkInPlate>(NIGHT_MAP)
+  const walkInRef = useRef<WalkInClock | null>(null)
   const tapClaim = useRef(0)
   const missLock = useRef<string | null>(null)
   const missUntil = useRef(0)
@@ -773,6 +778,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     session: sessionMap,
   })
   const playingMap = playableNightMap(mapId)
+  walkPlateRef.current = playingMap?.plate ?? NIGHT_MAP
   mapIdRef.current = mapId
   tuneRef.current = nightTune(playingMap?.rules)
   hpMulRef.current = playingMap?.hpMul ?? 1
@@ -958,6 +964,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     window.clearTimeout(shieldTimer.current)
     setMendShield(false)
     setToolLock(null)
+    walkInRef.current?.reset()
     setRaiders([])
     setDowned(0)
     let last = performance.now()
@@ -2015,6 +2022,26 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     return nightEnemies.at(raider)
   }
 
+  function walkInClock(): WalkInClock {
+    if (!walkInRef.current) {
+      walkInRef.current = createWalkInClock(
+        (pathId) => roadById(pathId) ?? boundNightPath(),
+        () => walkPlateRef.current,
+      )
+    }
+    return walkInRef.current
+  }
+
+  /** Easy only. A walker still walking in takes no tap, no glow, and no miss. Game ms, so the debug freeze holds it. */
+  function walkInHeld(raider: Raider, now = live.current.clock): boolean {
+    return easy && walkInClock().tapLocked(raider, now)
+  }
+
+  /** Where the walker is drawn. Lamps, range, and the sim keep `raiderAt`. */
+  function walkerDrawAt(raider: Raider, now = live.current.clock) {
+    return easy ? walkInClock().drawAt(raider, raiderAt(raider), now) : raiderAt(raider)
+  }
+
   function lampCombat(toolId: string, plotId?: string) {
     if (easy && isCandle(toolId) && plotId) {
       const paths = pathsOf(runPathsRef.current, candlePathKey(plotId))
@@ -2151,7 +2178,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     fx.dirty = true
     if (!best) return false
     const to = raiderAt(best)
-    const aim = { x: to.x, y: to.y + PATH_WALKER_FACE_DY }
+    const drawn = walkerDrawAt(best)
+    const aim = { x: drawn.x, y: drawn.y + PATH_WALKER_FACE_DY }
     const fit = nightEnemies.fit(easy, using, best.kind)
     const heldLine = learningForTool(progress, using)
     comboRef.current += 1
@@ -2161,8 +2189,8 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     fx.dirty = true
     const blast: Blast = {
       key: now,
-      x: to.x,
-      y: to.y,
+      x: drawn.x,
+      y: drawn.y,
       line: easy
         ? fit === 'match'
           ? '+'
@@ -2481,8 +2509,9 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   ) {
     if (phase !== 'wave' || won) return
     if (countUntilRef.current > performance.now()) return
-    if (!claimTap()) return
     const raider = live.current.raiders.find((item) => item.id === raiderId && !item.turned)
+    if (raider && walkInHeld(raider)) return
+    if (!claimTap()) return
     if (!raider) return
     const gate = easyPointerTapGate(easy, raider, live.current.raiders, waveIndexRef.current, tuneRef.current.armorFrom)
     if (gate === 'miss') {
@@ -2588,9 +2617,9 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
     if (!claimTap()) return
     if (faceTapStrike(easy, false, false) === 'miss' && easy) {
       const faces = live.current.raiders
-        .filter((raider) => !raider.turned)
+        .filter((raider) => !raider.turned && !walkInHeld(raider))
         .map((raider) => {
-          const at = raiderAt(raider)
+          const at = walkerDrawAt(raider)
           return { x: at.x, y: at.y + PATH_WALKER_FACE_DY }
         })
       const kind = point ? easyBoardTapKind(point, faces) : 'stray'
@@ -2627,6 +2656,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
   function retry() {
     setPhase('plant')
     setWon(false)
+    walkInRef.current?.reset()
     setRaiders([])
     setDowned(0)
     setHearts(DEFEND_HEARTS)
@@ -3184,13 +3214,21 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
 
   const after = juiceDone && won
   const easyTap = easyTapMode(easy, phase, won)
-  const tapTarget = easyTap
+  const walkNow = live.current.clock
+  const walkIn: DefendWalkIn | undefined = easy
+    ? {
+        plate: walkPlateRef.current,
+        drawAt: (raider) => walkerDrawAt(raider, walkNow),
+        entering: (raider) => walkInClock().entering(raider, walkNow),
+        held: (raider) => walkInHeld(raider, walkNow),
+      }
+    : undefined
+  const cueRaider = easyTap
     ? nightEnemies.cueTarget(raiders, waveIndex, tuneRef.current.armorFrom)
     : undefined
-  const tapPos =
-    tapTarget && boardBox.w > 0
-      ? boardPoint(raiderAt(tapTarget).x, raiderAt(tapTarget).y)
-      : null
+  const tapTarget = cueRaider && !walkInHeld(cueRaider, walkNow) ? cueRaider : undefined
+  const tapAt = tapTarget ? walkerDrawAt(tapTarget, walkNow) : null
+  const tapPos = tapAt && boardBox.w > 0 ? boardPoint(tapAt.x, tapAt.y) : null
   const upgradePoint =
     upgradeAt && boardBox.w > 0
       ? boardPoint(nightTowers.anchor(upgradeAt).x, nightTowers.anchor(upgradeAt).y)
@@ -3902,6 +3940,7 @@ export function DefendScreen({ onNavigate, onFreshNight }: DefendScreenProps) {
               progress={progress}
               raiders={raiders}
               raiderAt={raiderAt}
+              walkIn={walkIn}
               ability={ability}
               towerType={plants}
               unlocked={unlocked}
