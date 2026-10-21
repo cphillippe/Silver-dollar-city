@@ -18,4 +18,11 @@ android/**/build
 .env
 .env.*
 !.env.example
+*.jks
+*.keystore
+*.p12
+*.pem
+*.p8
+*.mobileprovision
+*.apk
 

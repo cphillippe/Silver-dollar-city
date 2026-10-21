@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultLauncher;
@@ -21,13 +22,16 @@ import androidx.webkit.WebViewFeature;
 import com.getcapacitor.Bridge;
 import com.getcapacitor.BridgeActivity;
 import com.getcapacitor.BridgeWebViewClient;
+import java.io.ByteArrayInputStream;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * Live Pages shell. Remote content may stay in the WebView only for the Silver
+ * Live Pages shell and the bundled Play shell share this activity.
+ * Remote content may stay in the WebView only for the Silver
  * City path, or for the bundled localhost copy used when that load fails.
  * Capacitor's general plugin bridge is removed: the Pages document must not
  * call Http, Cookies, SystemBars, or any other plugin. A share-only listener
@@ -361,9 +365,45 @@ public class MainActivity extends BridgeActivity {
         }
     }
 
+    /** Unused Capacitor paths. Refused for the live origin and the Play bundle. */
+    static boolean blocksCapacitorPrivatePath(String path) {
+        if (path == null) return false;
+        return path.startsWith("/_capacitor_file_")
+            || path.startsWith("/_capacitor_content_")
+            || path.startsWith("/_capacitor_http_interceptor_");
+    }
+
+    private static WebResourceResponse forbidden() {
+        return new WebResourceResponse(
+            "text/plain",
+            "utf-8",
+            403,
+            "Forbidden",
+            Collections.emptyMap(),
+            new ByteArrayInputStream(new byte[0])
+        );
+    }
+
     private final class PagesOnlyClient extends BridgeWebViewClient {
         PagesOnlyClient(Bridge bridge) {
             super(bridge);
+        }
+
+        @Override
+        public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+            Uri uri = request == null ? null : request.getUrl();
+            String path = uri == null ? null : uri.getPath();
+            if (blocksCapacitorPrivatePath(path)) return forbidden();
+            return super.shouldInterceptRequest(view, request);
+        }
+
+        @Override
+        @SuppressWarnings("deprecation")
+        public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+            Uri uri = url == null ? null : Uri.parse(url);
+            String path = uri == null ? null : uri.getPath();
+            if (blocksCapacitorPrivatePath(path)) return forbidden();
+            return super.shouldInterceptRequest(view, url);
         }
 
         @Override
