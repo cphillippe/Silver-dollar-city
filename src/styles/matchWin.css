@@ -618,3 +618,22 @@ html[data-easy='on'] .play.is-father-run.is-miss .run-miss .btn:not(.primary) {
   font-size: 1rem;
   font-weight: 700;
 }
+
+/* #792: on short phones the two plain buttons share a row so Home sits above the fold. */
+@media (max-height: 720px) {
+  html[data-easy='on'] .play.is-gem-search.is-win .cta-dock {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  html[data-easy='on'] .play.is-gem-search.is-win .cta-dock .btn.primary { grid-column: 1 / -1; }
+  html[data-easy='on'] .play.is-gem-search.is-win .cta-dock .btn.more-match,
+  html[data-easy='on'] .play.is-gem-search.is-win .cta-dock .btn.xl:not(.primary):not(.more-match) {
+    min-height: 44px;
+    padding-inline: 8px;
+  }
+  html[data-easy='on'] .play.is-gem-search.is-win .win-burst { min-height: 30px; margin: 0 0 4px; }
+  html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked.is-win .gem-board {
+    width: min(100%, 520px, 30svh);
+  }
+}

@@ -3,7 +3,7 @@
  * Taps only the one visible filled gold. Play screens are scripted.
  */
 import assert from 'node:assert/strict'
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { chromium } from 'playwright'
 import { build, preview } from 'vite'
 import { evidenceForTier } from '../src/content/evidence.ts'
@@ -118,12 +118,16 @@ async function screenId(page) {
   })
 }
 
+async function homeLine(page) {
+  return page.evaluate(() => ((document.querySelector('.easy-home-whisper') || document.querySelector('.easy-build-gift'))?.textContent || '').replace(/\s+/g, ' ').trim())
+}
+
 async function signature(page) {
   const id = await screenId(page)
   const golds = await filledGolds(page)
   const detail = await page.evaluate(() => {
     const claim = document.querySelector('.why-claim, .recall-line, .teach-reason')?.textContent || ''
-    const whisper = document.querySelector('.easy-home-whisper')?.textContent || ''
+    const whisper = (document.querySelector('.easy-home-whisper') || document.querySelector('.easy-build-gift'))?.textContent || ''
     return `${claim} ${whisper}`.replace(/\s+/g, ' ').trim().slice(0, 80)
   })
   return { id, golds, detail, sig: `${id}|${golds.map((gold) => gold.text).join('/')}||${detail}` }
@@ -215,6 +219,27 @@ function isGoldPaint(value) {
     if (r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
   }
   return false
+}
+
+async function lockInGoldCues(page) {
+  return page.evaluate(() => {
+    const goldish = (value) => {
+      const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/g
+      let m
+      while ((m = re.exec(value || ''))) {
+        const r = +m[1], g = +m[2], b = +m[3]
+        if (r > 190 && g > 140 && b < 120 && r > b + 60 && g > b + 30) return true
+      }
+      return false
+    }
+    const sel = '.why-blast .why-slide-cue, .why-blast .why-chip, .why-blast .why-claim, .why-blast .why-score, .why-blast .next-tap, .why-blast .held-from, .why-blast .btn.primary'
+    return [...document.querySelectorAll(sel)].filter((el) => {
+      const s = getComputedStyle(el)
+      const box = el.getBoundingClientRect()
+      if (s.display === 'none' || s.visibility === 'hidden' || box.width < 2 || box.height < 2) return false
+      return goldish(s.backgroundImage) || goldish(s.backgroundColor) || goldish(s.borderTopColor) || goldish(s.boxShadow)
+    }).map((el) => el.className.toString())
+  })
 }
 
 async function assertMazeOneGold(page, where) {
@@ -913,6 +938,50 @@ async function assertGemWinOneGold(page, label) {
   }
 }
 
+async function assertNoSideScroll(page, label) {
+  if (page.viewportSize()?.width !== 375) return
+  const extra = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+  assert.ok(extra <= 1, `${label} has no horizontal scroll at 375 (${extra})`)
+}
+
+async function assertGemWinFold(page, label) {
+  await assertNoSideScroll(page, `${label} MATCHED!`)
+  const view = page.viewportSize()
+  if (view?.width !== 375 || view?.height !== 667) return
+  await page.evaluate(() => {
+    document.querySelector('.play.is-gem-search.is-win').scrollTop = 0
+    window.scrollTo(0, 0)
+  })
+  const buttons = await page.locator('.play.is-gem-search.is-win .cta-dock .btn').evaluateAll((els) =>
+    els.map((el) => ({
+      text: (el.innerText || '').replace(/\s+/g, ' ').trim(),
+      bottom: el.getBoundingClientRect().bottom,
+      height: el.getBoundingClientRect().height,
+      innerHeight: window.innerHeight,
+    })),
+  )
+  assert.ok(buttons.length >= 2, `${label} win dock has buttons ${JSON.stringify(buttons)}`)
+  assert.ok(buttons.some((button) => button.text === 'Home'), `${label} win dock has Home`)
+  for (const button of buttons) {
+    assert.ok(button.height > 0, `${label} ${button.text} is rendered`)
+    assert.ok(button.bottom <= button.innerHeight + 1, `${label} ${button.text} above the 667 fold (${button.bottom})`)
+  }
+  const golds = await filledGolds(page)
+  assert.equal(golds.length, 1, `${label} win fold one gold ${JSON.stringify(golds)}`)
+  assert.match(golds[0].text, /Lock In next/)
+  const extras = await page.locator('.play.is-gem-search.is-win .cta-dock .btn:not(.primary)').evaluateAll((els) =>
+    els.map((el) => {
+      const style = getComputedStyle(el)
+      return { text: (el.innerText || '').replace(/\s+/g, ' ').trim(), border: style.borderTopColor, bg: style.backgroundColor, img: style.backgroundImage }
+    }),
+  )
+  for (const button of extras) {
+    assert.equal(isGoldPaint(button.border), false, `${label} ${button.text} border is not gold at 375 (${button.border})`)
+    assert.equal(isGoldPaint(button.bg) || isGoldPaint(button.img), false, `${label} ${button.text} fill is not gold at 375`)
+  }
+  await page.screenshot({ path: `${SHOTS}/matched-fold-${label}-375.png` })
+}
+
 async function assertGemStart(page, lineId, { shot = false } = {}) {
   await page.locator('[data-gem-start]').waitFor()
   const hint = ((await page.locator('[data-gem-start]').innerText()) || '').replace(/\s+/g, ' ').trim()
@@ -960,6 +1029,7 @@ async function playGem(page, lineId = 'ob-tuning', { watchLast = false, checkSta
     }
     if (checkStart && !startChecked) {
       const view = page.viewportSize()
+      await assertNoSideScroll(page, `${lineId} word search start`)
       await assertGemStart(page, lineId, {
         shot: view?.width === 375 && view?.height === 667 && lineId === 'ob-tuning',
       })
@@ -975,6 +1045,10 @@ async function playGem(page, lineId = 'ob-tuning', { watchLast = false, checkSta
         window.__gemJuiceStop = false
         const watch = () => {
           const pop = document.querySelector('.gem-find-pop')
+          if (pop) {
+            const popStyle = getComputedStyle(pop)
+            window.__gemPopInk = `${popStyle.textShadow} ${popStyle.webkitTextStroke}`
+          }
           const burst = document.querySelectorAll('.gem-cell.is-burst').length
           if (pop && burst > 0) {
             const box = pop.getBoundingClientRect()
@@ -1035,6 +1109,7 @@ async function playGem(page, lineId = 'ob-tuning', { watchLast = false, checkSta
         )
         assert.equal(cells.length, 1, `${lineId} one pulse after a find`)
         assert.equal(isGoldPaint(cells[0].shadow), true, `${lineId} pulse glow is gold`)
+        assert.match(cells[0].shadow, /rgb\(42, 33, 24\)/, `${lineId} pulse has an ink ring`)
         const nextLabel = (
           (await page.locator('.match-teach-dock .match-teach-chip:not(.is-found) .match-teach-label').first().innerText()) || ''
         )
@@ -1054,6 +1129,10 @@ async function playGem(page, lineId = 'ob-tuning', { watchLast = false, checkSta
       })
       juice.burst = await page.evaluate(() => window.__gemJuice || 0)
       juice.pop = juice.burst > 0
+      if (juice.pop) {
+        const popInk = await page.evaluate(() => window.__gemPopInk || '')
+        assert.match(popInk, /rgb\(42, 33, 24\)/, `${lineId} find pop has an ink outline (${popInk})`)
+      }
     }
     await page.waitForTimeout(280)
   }
@@ -1125,10 +1204,26 @@ async function dragWhy(page, id) {
   const face = await lockInFace(page)
   assertSharedCards(face, id)
   assert.equal((await filledGolds(page)).length, 0, 'Lock In play has no gold button')
+  const start = await lockInGoldCues(page)
+  assert.equal(start.length, 1, `${id} Lock In start has one gold ${JSON.stringify(start)}`)
+  assert.match(start[0], /why-slide-cue/, `${id} the one gold is the slide cue`)
   const claimGold = await page.locator('.why-claim').evaluate((el) => getComputedStyle(el).borderTopColor)
-  assert.ok(isGoldPaint(claimGold), `${id} MAIN IDEA outline is the gold cue (${claimGold})`)
+  assert.equal(isGoldPaint(claimGold), false, `${id} MAIN IDEA outline is not gold (${claimGold})`)
+  const cueGeo = await page.evaluate(() => {
+    const cue = document.querySelector('.why-slide-cue')?.getBoundingClientRect()
+    const claim = document.querySelector('.why-claim')?.getBoundingClientRect()
+    if (!cue || !claim) return null
+    return {
+      dx: Math.abs(cue.left + cue.width / 2 - (claim.left + claim.width / 2)),
+      below: cue.bottom - claim.top,
+    }
+  })
+  assert.ok(cueGeo, `${id} slide cue and claim have boxes`)
+  assert.ok(cueGeo.dx <= 6, `${id} slide cue is centred on MAIN IDEA (${cueGeo.dx})`)
+  assert.ok(cueGeo.below >= -2 && cueGeo.below <= 8, `${id} slide cue sits on the MAIN IDEA top edge (${cueGeo.below})`)
   if (page.viewportSize()?.width === 375) {
     assert.equal(face.descender, true, `${id} keeps the g descender (${face.lineHeight})`)
+    await page.screenshot({ path: `${SHOTS}/lock-in-slide-cue-375.png` })
     await page.screenshot({ path: `${SHOTS}/lock-in-drag-cue-375.png` })
   }
   const chip = page.locator('button.why-chip', { hasText: why }).first()
@@ -1142,6 +1237,11 @@ async function dragWhy(page, id) {
   await page.mouse.move(x + 8, y, { steps: 3 })
   await page.waitForTimeout(60)
   assert.equal(await page.locator('.why-blast.is-yes, .why-blast.is-win').count(), 0, `${id} 8px slide does not pick`)
+  const mid = await lockInGoldCues(page)
+  assert.equal(mid.length, 1, `${id} mid-drag has one gold ${JSON.stringify(mid)}`)
+  assert.match(mid[0], /why-chip.*is-pressed|is-pressed.*why-chip/, `${id} mid-drag gold is the pressed card`)
+  assert.equal(await page.locator('.why-slide-cue').count(), 0, 'cue hides while dragging')
+  if (page.viewportSize()?.width === 375) await page.screenshot({ path: `${SHOTS}/lock-in-pressed-375.png` })
   await page.mouse.move(x + 20, y, { steps: 4 })
   await page.locator('.why-blast.is-yes, .why-blast.is-win').first().waitFor({ timeout: 8000 })
   await page.mouse.up()
@@ -1297,8 +1397,8 @@ function hopSave(progress) {
   }
 }
 
-async function openSeeded(browser, origin, progress) {
-  const context = await browser.newContext({ viewport: { width: 375, height: 667 } })
+async function openSeeded(browser, origin, progress, viewport = { width: 375, height: 667 }) {
+  const context = await browser.newContext({ viewport })
   await context.addInitScript(
     ([storageKey, raw]) => {
       localStorage.clear()
@@ -1363,36 +1463,50 @@ async function proveNotQuite(browser, origin) {
   const hint = easyReasonHint(brief.reason)
   const answer = `${claim} — ${why}`
 
-  const blast = await openSeeded(browser, origin, {})
-  try {
-    await openRoadLockIn(blast.page)
-    await blast.page.locator('button.why-chip').first().waitFor()
-    await tapWrongWhy(blast.page, why)
-    await blast.page.locator('.why-miss-hint').waitFor()
-    const firstHint = ((await blast.page.locator('.why-miss-hint').innerText()) || '').replace(/\s+/g, ' ').trim()
-    assert.equal(firstHint, hint, 'first miss hints from the reason')
-    assert.equal(await blast.page.locator('.why-miss-answer').count(), 0, 'first miss hides the right card')
-    assert.ok(firstHint.length < why.length, 'the hint is shorter than the right card')
-    const firstGolds = await filledGolds(blast.page)
-    assert.equal(firstGolds.length, 1, `first miss one gold ${JSON.stringify(firstGolds)}`)
-    assert.equal(firstGolds[0].text, 'Try again')
-    await blast.page.screenshot({ path: `${SHOTS}/not-quite-first-375.png` })
-    await pointerClick(blast.page, blast.page.locator('.why-miss-retry'))
-    await blast.page.locator('button.why-chip:not(.is-gone)').first().waitFor()
-    await tapWrongWhy(blast.page, why)
-    await blast.page.locator('.why-miss-answer').waitFor()
-    const second = ((await blast.page.locator('.why-miss-answer').innerText()) || '').replace(/\s+/g, ' ').trim()
-    assert.equal(second, answer, 'second miss shows claim and reason on one line')
-    assert.equal(await blast.page.locator('.why-miss-retry').count(), 0, 'second miss has no third retry')
-    const secondGolds = await filledGolds(blast.page)
-    assert.equal(secondGolds.length, 1, `second miss one gold ${JSON.stringify(secondGolds)}`)
-    assert.equal(secondGolds[0].text, 'Continue')
-    await blast.page.screenshot({ path: `${SHOTS}/not-quite-second-375.png` })
-    await pointerClick(blast.page, blast.page.locator('.why-miss-continue'))
-    await blast.page.locator('main.hub').waitFor()
-    assert.equal(blast.errors.join('\n'), '', 'why-blast miss page errors')
-  } finally {
-    await blast.context.close()
+  for (const viewport of [{ width: 375, height: 667 }, { width: 390, height: 844 }]) {
+    const blast = await openSeeded(browser, origin, {}, viewport)
+    try {
+      await openRoadLockIn(blast.page)
+      await blast.page.locator('button.why-chip').first().waitFor()
+      const startCue = await lockInGoldCues(blast.page)
+      assert.equal(startCue.length, 1, `Lock In start one gold ${JSON.stringify(startCue)}`)
+      await tapWrongWhy(blast.page, why)
+      await blast.page.locator('.why-miss-hint').waitFor()
+      const firstHint = ((await blast.page.locator('.why-miss-hint').innerText()) || '').replace(/\s+/g, ' ').trim()
+      assert.equal(firstHint, hint, 'first miss hints from the reason')
+      assert.equal(await blast.page.locator('.why-miss-answer').count(), 0, 'first miss hides the right card')
+      assert.ok(firstHint.length < why.length, 'the hint is shorter than the right card')
+      const firstGolds = await filledGolds(blast.page)
+      assert.equal(firstGolds.length, 1, `first miss one gold ${JSON.stringify(firstGolds)}`)
+      assert.equal(firstGolds[0].text, 'Try again')
+      if (viewport.width === 375) await blast.page.screenshot({ path: `${SHOTS}/not-quite-first-375.png` })
+      await pointerClick(blast.page, blast.page.locator('.why-miss-retry'))
+      await blast.page.locator('button.why-chip:not(.is-gone)').first().waitFor()
+      const retryCue = await lockInGoldCues(blast.page)
+      assert.equal(retryCue.length, 1, `Lock In after Try again has one gold ${JSON.stringify(retryCue)}`)
+      assert.match(retryCue[0], /why-slide-cue/, 'after Try again the slide cue is back')
+      await tapWrongWhy(blast.page, why)
+      await blast.page.locator('.why-miss-answer').waitFor()
+      const second = ((await blast.page.locator('.why-miss-answer').innerText()) || '').replace(/\s+/g, ' ').trim()
+      assert.equal(second, answer, 'second miss shows claim and reason on one line')
+      assert.equal(await blast.page.locator('.why-miss-retry').count(), 0, 'second miss has no third retry')
+      const secondGolds = await filledGolds(blast.page)
+      assert.equal(secondGolds.length, 1, `second miss one gold ${JSON.stringify(secondGolds)}`)
+      assert.equal(secondGolds[0].text, 'Continue')
+      if (viewport.width === 375) await blast.page.screenshot({ path: `${SHOTS}/not-quite-second-375.png` })
+      await pointerClick(blast.page, blast.page.locator('.why-miss-continue'))
+      await blast.page.locator('main.hub').waitFor()
+      const after = await filledGolds(blast.page)
+      assert.equal(after.length, 1, `Home after 2nd miss has one gold ${JSON.stringify(after)}`)
+      assert.match(after[0].text, /Run/, '2nd-miss Continue moves on to the next step (L2 Run)')
+      const saved = await blast.page.evaluate((k) => JSON.parse(localStorage.getItem(k)), STORAGE_KEY)
+      const p = saved.progress ?? saved
+      assert.ok(p.easyHeld.includes('ph-road'), '2nd miss still moves the trail on')
+      assert.equal(p.lessonScore?.['ph-road'], undefined, '2nd miss does not lock (no score)')
+      assert.equal(blast.errors.join('\n'), '', 'why-blast miss page errors')
+    } finally {
+      await blast.context.close()
+    }
   }
 
   const review = await openSeeded(browser, origin, {
@@ -2284,6 +2398,14 @@ export async function proveHomePan(browser, origin) {
 
 export async function checkGoldenLive() {
   await build({ logLevel: 'warn' })
+  assert.ok(existsSync('dist/sw.js'), 'dist/sw.js exists')
+  assert.equal(existsSync('dist/qa-seed.html'), false, 'dist/qa-seed.html is not shipped')
+  for (const file of ['sw.js', ...readdirSync('dist').filter((name) => /^workbox-.*\.js$/.test(name))]) {
+    // sw.js names qa-seed.html once in navigateFallbackDenylist on purpose. Only a precache entry is a leak.
+    const text = readFileSync(`dist/${file}`, 'utf8')
+    assert.doesNotMatch(text, /url:\s*["'`][^"'`]*qa-seed/, `dist/${file} does not precache qa-seed`)
+    if (file === 'sw.js') assert.match(text, /denylist:\[[^\]]*qa-seed/, `dist/${file} keeps qa-seed.html out of the navigation fallback`)
+  }
   const server = await preview({
     preview: { host: '127.0.0.1', port: 0 },
     logLevel: 'warn',
@@ -2343,10 +2465,14 @@ export async function checkGoldenLive() {
 
       shot = await stamp('home-fresh')
       assert.equal(shot.id, 'home')
-      const freshDock = (await page.locator('.easy-home-whisper').innerText()).replace(/\s+/g, ' ').trim()
+      const freshDock = await homeLine(page)
       const freshGift = (await page.locator('.easy-build-gift').innerText()).replace(/\s+/g, ' ').trim()
       assert.equal(freshDock, 'Start your first road.', 'first Home dock is a first road')
       assert.equal(freshGift, 'Start your first road.', 'first Home gift matches the dock')
+      const dupes = await page.locator('.easy-home-dock').evaluate((dock) =>
+        [...dock.querySelectorAll('p')].filter((p) => p.textContent.trim() === 'Start your first road.' && p.getBoundingClientRect().height > 0).length)
+      assert.equal(dupes, 1, 'Home 1 says Start your first road. once')
+      assert.equal(await page.locator('.easy-home-whisper').count(), 0, 'no duplicate whisper on Home 1')
       assert.doesNotMatch(`${freshDock} ${freshGift}`, /One more/, 'One more waits until a road is done')
       assert.doesNotMatch(shot.golds[0].text, /Read/, 'first session gold is not Read')
       assert.match(await page.locator('.easy-home-steps li').first().innerText(), /tomorrow/)
@@ -2385,6 +2511,7 @@ export async function checkGoldenLive() {
 
       await page.locator('main.hub').waitFor()
       shot = await stamp('home-after-road')
+      assert.equal(await page.locator('.easy-home-map .city-gift').count(), 0, 'Easy Home has no hidden town legend line')
       assert.equal(await page.locator('.easy-night-watch').count(), 0, 'Night Watch stays hidden on the first day')
       await shotHop(page, 'home-2')
       const roadGift = (await page.locator('.easy-build-gift').innerText()).replace(/\s+/g, ' ')
@@ -2436,7 +2563,7 @@ export async function checkGoldenLive() {
       assert.doesNotMatch(shot.golds[0].text, /Read/)
       assert.match(shot.golds[0].text, /Find the words/)
       assert.doesNotMatch(shot.golds[0].text, /gems/)
-      const tuningWhisper = ((await page.locator('.easy-home-whisper').innerText()) || '').replace(/\s+/g, ' ').trim()
+      const tuningWhisper = await homeLine(page)
       assert.match(tuningWhisper, /Find the words at Sky Watch/)
       assert.doesNotMatch(tuningWhisper, /gems/)
       await tapFilledGold(page)
@@ -2490,7 +2617,8 @@ export async function checkGoldenLive() {
       assert.equal(shot.id, 'gem-win')
       assert.equal(shot.golds.length, 1, 'gem-win has one gold')
       assert.match(shot.golds[0].text, /Lock In/)
-      await assertGemWinOneGold(page, 'ob-tuning')
+      await assertGemWinFold(page, 'ob-tuning')
+      assertGemWinOneGold(page, 'ob-tuning')
       assert.doesNotMatch(shot.golds[0].text, /One more/)
       const homeInk = await page.locator('.cta-dock .btn', { hasText: 'Home' }).evaluate((el) => getComputedStyle(el).color)
       const channels = homeInk.match(/\d+/g)?.map(Number) ?? []
@@ -2516,7 +2644,7 @@ export async function checkGoldenLive() {
         shot = await stamp('home-after-tuning')
         await assertNoNightWatch(page, 'home-after-tuning')
         assert.match(shot.golds[0].text, /Find the words/)
-        const creek = ((await page.locator('.easy-home-whisper').innerText()) || '').replace(/\s+/g, ' ').trim()
+        const creek = await homeLine(page)
         assert.match(creek, /Find the words at Story Creek/)
         assert.doesNotMatch(creek, /Sky Watch|gems/)
         if (width === 375) {
@@ -2534,7 +2662,8 @@ export async function checkGoldenLive() {
         await page.locator('.play.is-gem-search').waitFor()
         await playGem(page, 'ph-debt', { checkStart: true })
         await page.locator('.play.is-gem-search.is-win .btn.primary').waitFor()
-        await assertGemWinOneGold(page, 'ph-debt')
+        await assertGemWinFold(page, 'ph-debt')
+        assertGemWinOneGold(page, 'ph-debt')
         await tapFilledGold(page)
         await page.locator('.why-blast').waitFor()
         await dragWhy(page, 'ph-debt')
@@ -2544,7 +2673,7 @@ export async function checkGoldenLive() {
         shot = await stamp('home-5')
         await assertNoNightWatch(page, 'home-5')
         assert.equal(shot.golds.length, 1, 'Home 5 has one gold')
-        const home5 = ((await page.locator('.easy-home-whisper').innerText()) || '').replace(/\s+/g, ' ').trim()
+        const home5 = await homeLine(page)
         assert.match(home5, /Find the words at Why Gate Arch\./)
         await shotHop(page, 'home-5')
 
@@ -2552,7 +2681,8 @@ export async function checkGoldenLive() {
         await page.locator('.play.is-gem-search').waitFor()
         await playGem(page, 'fg-order', { checkStart: true })
         await page.locator('.play.is-gem-search.is-win .btn.primary').waitFor()
-        await assertGemWinOneGold(page, 'fg-order')
+        await assertGemWinFold(page, 'fg-order')
+        assertGemWinOneGold(page, 'fg-order')
         await tapFilledGold(page)
         await page.locator('.why-blast').waitFor()
         await dragWhy(page, 'fg-order')
@@ -2563,7 +2693,7 @@ export async function checkGoldenLive() {
         await assertNoNightWatch(page, 'home-6')
         assert.equal(shot.golds.length, 1, 'Home 6 has one gold')
         assert.match(shot.golds[0].text, /Find the words/)
-        const home6 = ((await page.locator('.easy-home-whisper').innerText()) || '').replace(/\s+/g, ' ').trim()
+        const home6 = await homeLine(page)
         assert.match(home6, /More words at Why Gate Arch, part 2\./)
         assert.notEqual(home6, home5, 'Home 6 moves on from Home 5')
         await shotHop(page, 'home-6')
@@ -2733,7 +2863,7 @@ export async function checkGoldenLive() {
     assert.doesNotMatch(humanHome.golds[0].text, /Read/)
     assert.match(humanHome.golds[0].text, /Find the words/)
     assert.match(
-      ((await humanPage.locator('.easy-home-whisper').innerText()) || '').replace(/\s+/g, ' '),
+      await homeLine(humanPage),
       /Find the words at Sky Watch/,
     )
     await tapFilledGold(humanPage)
