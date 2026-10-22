@@ -370,6 +370,57 @@ async function typeOffenders(page, selector) {
   }, selector)
 }
 
+/** #FFCC33 / #FF9F1A (any alpha, gradients and glows included) outside Lock In next. Board tile fills are palette, not a cue. */
+async function goldCueOffenders(page) {
+  return page.evaluate(() => {
+    const gold = /rgba?\(255, 204, 51(?:, [\d.]+)?\)|rgba?\(255, 159, 26(?:, [\d.]+)?\)/
+    const props = [
+      'color', 'backgroundColor', 'backgroundImage', 'borderTopColor', 'borderRightColor', 'borderBottomColor',
+      'borderLeftColor', 'outlineColor', 'boxShadow', 'textShadow', 'filter', 'fill', 'stroke',
+    ]
+    const root = document.querySelector('.play.is-gem-search')
+    const hits = []
+    for (const node of [root, ...root.querySelectorAll('*')]) {
+      const lockIn = node.closest('button')
+      if (lockIn && /Lock In next/.test(lockIn.textContent || '')) continue
+      const box = node.getBoundingClientRect()
+      const own = getComputedStyle(node)
+      if (own.display === 'none' || own.visibility === 'hidden' || Number(own.opacity) === 0) continue
+      if (box.width === 0 && box.height === 0) continue
+      for (const pseudo of [null, '::before', '::after']) {
+        const style = pseudo ? getComputedStyle(node, pseudo) : own
+        if (pseudo && style.content === 'none') continue
+        for (const prop of props) {
+          if (!gold.test(style[prop])) continue
+          if (prop === 'backgroundColor' && node.classList.contains('gem-cell') && !pseudo) continue
+          hits.push(`${node.tagName.toLowerCase()}.${String(node.className).trim().split(/\s+/).join('.')}${pseudo ?? ''}:${prop}`)
+        }
+      }
+    }
+    return hits
+  })
+}
+
+async function contrastOf(page, selector) {
+  return page.locator(selector).first().evaluate((node) => {
+    const parse = (css) => css.match(/[\d.]+/g).map(Number)
+    const lum = ([r, g, b]) => {
+      const [lr, lg, lb] = [r, g, b].map((v) => {
+        const c = v / 255
+        return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
+      })
+      return 0.2126 * lr + 0.7152 * lg + 0.0722 * lb
+    }
+    const style = getComputedStyle(node)
+    const fg = parse(style.color)
+    const bg = parse(style.backgroundColor)
+    const alpha = bg.length > 3 ? bg[3] : 1
+    const a = lum(fg)
+    const b = lum(bg)
+    return { ratio: (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05), alpha, opacity: Number(style.opacity) }
+  })
+}
+
 async function toastText(page) {
   const toast = page.locator('.gem-stage .match-toast, .gem-stage .bonus-banner')
   await toast.first().waitFor({ timeout: 3000 })
@@ -415,12 +466,39 @@ async function run() {
       await swipe(page, story.path)
       assert.match(await toastText(page), /Story word! \+100/, `${tag} story word pops +100`)
       assert.deepEqual(await typeOffenders(page, '.gem-stage .match-toast'), [], `${tag} Story word! pop type is >= 13px sans`)
+      const toastLook = await contrastOf(page, '.gem-stage .match-toast')
+      assert.ok(toastLook.ratio >= 4.5, `${tag} Story word! toast text contrast ${toastLook.ratio.toFixed(2)} >= 4.5`)
+      assert.equal(toastLook.alpha, 1, `${tag} Story word! toast fill is opaque`)
+      assert.equal(toastLook.opacity, 1, `${tag} Story word! toast has no translucency`)
+      const toastShape = await page.locator('.gem-stage .match-toast').first().evaluate((n) => {
+        const s = getComputedStyle(n)
+        return { bg: s.backgroundColor, radius: parseFloat(s.borderTopLeftRadius) }
+      })
+      assert.equal(toastShape.bg, 'rgb(42, 16, 112)', `${tag} toast fill is --ink`)
+      assert.equal(toastShape.radius, 22, `${tag} toast uses --radius`)
+      assert.deepEqual(
+        (await goldCueOffenders(page)).filter((item) => !/is-start-gold|gem-cell\.[^:]*is-bonus-burst/.test(item)),
+        [],
+        `${tag} no gold cue beyond the start cell while the Story word! pop shows`,
+      )
       let progress = await savedProgress(page)
       assert.equal(progress.matchBonus[main.line] - 0 >= 100, true)
       const afterStory = progress.matchLifetime
       await page.waitForTimeout(700)
       await swipe(page, main.generic.path)
       assert.match(await toastText(page), /BONUS! \+50/, `${tag} ${main.generic.text} scores instead of "Not a bonus word"`)
+      const bannerLook = await page.locator('.gem-stage .bonus-banner').first().evaluate((n) => {
+        const s = getComputedStyle(n)
+        return { bg: s.backgroundColor, bgImage: s.backgroundImage, color: s.color }
+      })
+      assert.equal(bannerLook.bg, 'rgb(61, 204, 122)', `${tag} +50 banner fill is --pine`)
+      assert.equal(bannerLook.bgImage, 'none', `${tag} +50 banner has no gold gradient`)
+      assert.equal(bannerLook.color, 'rgb(255, 246, 232)', `${tag} +50 banner text is --parchment`)
+      assert.deepEqual(
+        (await goldCueOffenders(page)).filter((item) => !/is-start-gold|gem-cell\.[^:]*is-bonus-burst/.test(item)),
+        [],
+        `${tag} no gold cue beyond the start cell while the +50 banner shows`,
+      )
       assert.equal(await page.locator('.miss-banner').count(), 0, `${tag} no Not-a-bonus-word miss`)
       progress = await savedProgress(page)
       assert.equal(progress.matchLifetime, afterStory + 50, `${tag} generic extra fills the jar by 50`)
@@ -444,10 +522,13 @@ async function run() {
         `+${expected.toLocaleString('en-US')}`,
         { timeout: 4000 },
       )
+      await page.locator('.gem-jar.is-tipped').waitFor({ timeout: 4000 })
+      assert.deepEqual(await goldCueOffenders(page), [], `${tag} tipping screen: Lock In next is the only gold`)
       await page.locator('[data-gem-jar-reveal]').waitFor({ timeout: 4000 })
       await page.waitForTimeout(700)
       const layout = await winLayout(page, tag, viewport)
       assert.deepEqual(await typeOffenders(page, '[data-gem-jar]'), [], `${tag} jar, Story word! and skill reveal type is >= 13px sans`)
+      assert.deepEqual(await goldCueOffenders(page), [], `${tag} win screen: Lock In next is the only gold`)
       const jarGold = await goldElements(page, '[data-gem-jar]', null)
       assert.deepEqual(jarGold, [], `${tag} the jar has no gold (${jarGold.join(' | ')})`)
       const winGold = await goldElements(page, '.play.is-gem-search.is-win', null)
