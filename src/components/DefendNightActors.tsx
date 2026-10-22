@@ -432,14 +432,16 @@ export function DefendNightActorsSvg({
       </g>
     )
   })
+  const liveSeat = groundHints.findIndex((spot) => spot.live)
+  const firstSeat = liveSeat >= 0 ? liveSeat : 0
   return (
     <>
               {groundHints.length > 0 ? (
                 <g className="defend-plant-ground" data-plant-ground="yes" pointerEvents="none">
-                  {groundHints.map((spot) => (
+                  {groundHints.map((spot, index) => (
                     <circle
                       key={`${spot.x}-${spot.y}`}
-                      className={spot.live ? 'is-live' : 'is-dead'}
+                      className={`${spot.live ? 'is-live' : 'is-dead'}${index === firstSeat ? ' is-first-seat' : ''}`}
                       data-seat={spot.live ? 'live' : 'dead'}
                       cx={spot.x}
                       cy={spot.y}

@@ -2510,6 +2510,31 @@ async function prove792bHome(browser, origin, size, errorsOut) {
   }
 }
 
+// Mid-trail Home with Night Watch showing: the quiet Begin the watch button carries no gold border.
+async function proveHomeBeginRim(browser, origin, size, errorsOut) {
+  const where = `${size[0]}x${size[1]}`
+  const { ctx, page, errors } = await openHome(browser, origin, 'tall-dock', size)
+  try {
+    await settleHome(page)
+    const quiet = page.locator('.easy-night-watch .easy-nw-quiet')
+    await quiet.waitFor()
+    const paint = await quiet.evaluate((el) => {
+      const style = getComputedStyle(el)
+      return { border: style.borderTopColor, width: style.borderTopWidth, bg: style.backgroundImage + style.backgroundColor }
+    })
+    assert.equal(isGoldPaint(paint.border), false, `${where} Begin the watch border is not gold (${paint.border})`)
+    assert.equal(isGoldPaint(paint.bg), false, `${where} Begin the watch is not filled gold`)
+    const { cues } = await mapGoldCues(page)
+    const filled = await filledGolds(page)
+    assert.equal(cues.length + filled.length, 2, `${where} mid-trail Home gold: one map halo plus the one dock button (${JSON.stringify({ cues, filled })})`)
+    assert.equal(filled.length, 1, `${where} mid-trail Home keeps one filled gold`)
+    return { cues: cues.length, filled: filled.length }
+  } finally {
+    errorsOut.push(...errors)
+    await ctx.close()
+  }
+}
+
 export async function proveHomePan(browser, origin) {
   const errors = []
   const lines = []
@@ -2518,6 +2543,8 @@ export async function proveHomePan(browser, origin) {
     await proveHomeReach(browser, origin, size, errors)
     await proveHomeNoHidden(browser, origin, size, errors)
     await proveHomeOneGold(browser, origin, size, errors)
+    const rim = await proveHomeBeginRim(browser, origin, size, errors)
+    lines.push(`home mid-trail gold ${size[0]}x${size[1]}: map ${rim.cues}, dock ${rim.filled}, Begin rim 0`)
     await proveHomeTapSlop(browser, origin, size, errors)
     await proveHomeClampAndCenter(browser, origin, size, errors)
     await proveHomeKeys(browser, origin, size, errors)
