@@ -10,8 +10,7 @@ const ORB_FLY_MS = 450
 const SPARKS = [0, 1, 2, 3, 4, 5]
 
 /** Card heights (px). The win board shrinks by this much so the win stack never grows. */
-export const JAR_CARD_H = 46
-export const JAR_CARD_REVEAL_H = 68
+export const JAR_CARD_H = 54
 
 interface GemJarCardProps {
   /** Jar total when this board started. */
@@ -93,7 +92,7 @@ export function GemJarCard(props: GemJarCardProps) {
   const revealed = landed && crossing
   const reveal = revealed
     ? crossing.skill
-      ? `${EASY.skillNew}: ${crossing.skill.name} — ${crossing.skill.line}`
+      ? `${EASY.skillNew}: ${crossing.skill.name}`
       : `${EASY.jarFull} ×${crossing.full}`
     : ''
 
@@ -110,11 +109,6 @@ export function GemJarCard(props: GemJarCardProps) {
           <strong className="gem-jar-count" data-gem-jar-count>
             +{fmt(shown)}
           </strong>
-          {storyFound > 0 ? (
-            <span className="gem-jar-story" data-gem-story>
-              {EASY.storyWinLabel} ×{storyFound}
-            </span>
-          ) : null}
           <span className="gem-jar-caption" data-gem-jar-caption>
             {jarCaption(landed ? after : before)}
           </span>
@@ -135,15 +129,22 @@ export function GemJarCard(props: GemJarCardProps) {
           </svg>
           {flying ? <span className="gem-jar-orb" aria-hidden /> : null}
         </div>
-        {reveal ? (
-          <p className="gem-jar-reveal" data-gem-jar-reveal>
-            {reveal}
-          </p>
-        ) : (
-          <span className="gem-jar-bar" aria-hidden>
-            <span className="gem-jar-fill" style={{ width: `${fillPct}%` }} />
-          </span>
-        )}
+        <div className="gem-jar-row gem-jar-row2">
+          {reveal ? (
+            <p className="gem-jar-reveal" data-gem-jar-reveal>
+              {reveal}
+            </p>
+          ) : (
+            <span className="gem-jar-bar" aria-hidden>
+              <span className="gem-jar-fill" style={{ width: `${fillPct}%` }} />
+            </span>
+          )}
+          {storyFound > 0 ? (
+            <span className="gem-jar-story" data-gem-story>
+              {EASY.storyWinLabel} ×{storyFound}
+            </span>
+          ) : null}
+        </div>
         {tipped
           ? SPARKS.map((i) => (
               <span key={i} className="gem-jar-spark" style={{ ['--i' as string]: i }} aria-hidden />

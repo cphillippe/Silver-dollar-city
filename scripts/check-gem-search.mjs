@@ -480,7 +480,7 @@ assert.doesNotMatch(playSrc, /is-live/, '1.4.321 idle letters must not take a bo
 assert.match(playSrc, /is-story-docked/)
 assert.match(
   playSrc,
-  /match-score[\s\S]*?<\/p>\s*<\/div>\s*\{status === 'ok' \?/,
+  /match-score[\s\S]*?<\/p>\s*\)\}\s*<\/div>\s*\{status === 'ok' \?/,
   'Lock In stays outside the hidden board scroller',
 )
 const winCss = readFileSync(new URL('../src/styles/matchWin.css', import.meta.url), 'utf8')
