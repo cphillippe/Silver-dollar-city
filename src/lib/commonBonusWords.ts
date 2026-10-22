@@ -428,6 +428,31 @@ WRITER
 YELLOW
 `.trim()
 
+/** Everyday short words a kid will swipe: function words and common nouns. Scored, and only the non-STOP ones are planted. */
+const EXTRA_COMMON = `
+ACE AGE AGO AID AIM AIR ALL AND ARE ATE ACT ADD APT ARC ERA ONE OUR OUT OWN TOO THE FOR HOW
+WHY NOT BUT HAS WAS ITS TAX NOR OFF TEE PRO YEA ARCH EARL BEEF CAPE CENT HALO OOPS TRAIL
+FRIDGE TABLET
+`.trim()
+
+/** Hand-picked plurals. No generic +S rule: it makes junk like FIRS, ROTS and WONS. */
+const EXTRA_PLURALS = `
+PETS PIES PORTS SEAS EATS EARS RAILS NETS TOPS HALLS TENS SETS CAPS SONS LOTS LAPS HATS TAGS
+DOGS MATS CATS GATES TIES PINS NAPS LEGS TOES PEAKS LAWS PALS LIPS RESTS WORDS RAGS RACES
+HEATS PENS LABS PIGS DOTS RUNS BAGS DOORS COOKS BATS YEARS BEDS YARDS POPS PAWS JARS HOPES
+HEAPS PADS ENTERS JAWS ORDERS DROPS FLOWS SOILS TUBS TINS LAMBS SHIPS TRUTHS APPLES READS
+WINS TRACKS LOOPS YAMS DIPS KNEES EARNS BELTS GAPS CARES SPORTS TURNS SANDS HEARS TIPS FANS
+LIGHTS SHARES PAIRS NUTS KINGS POOLS HOSES HIDES RIDES JOINS KITS MARKS RAINS PUPS SEALS
+HUNTS SNOWS LACES SWEETS ROUNDS JAILS
+`.trim()
+
+/** Bible names count as bonus words on every board (RUTH is already in RAW). */
+const BIBLE_NAMES = `
+ADAM NOAH ABEL LEAH JOHN LUKE MARY ANNA PAUL PETER JAMES JUDE AMOS JOEL JONAH MOSES AARON
+DAVID EDEN ISAAC JACOB ESAU CALEB BOAZ MICAH NAOMI TITUS SILAS EZRA SARAH JESUS CHRIST ZION
+ELI ELIJAH HANNAH SETH
+`.trim()
+
 function parseWords(source: string): Set<string> {
   const words = new Set<string>()
   for (const bit of source.split(/\s+/)) {
@@ -438,9 +463,13 @@ function parseWords(source: string): Set<string> {
 }
 
 /** Common English extras. Lookup is O(1). */
-export const COMMON_BONUS_WORDS: ReadonlySet<string> = parseWords(RAW)
+export const COMMON_BONUS_WORDS: ReadonlySet<string> = parseWords(`${RAW} ${EXTRA_COMMON} ${EXTRA_PLURALS} ${BIBLE_NAMES}`)
 
 export const COMMON_BONUS_COUNT = COMMON_BONUS_WORDS.size
+
+export const EXTRA_COMMON_WORDS: readonly string[] = [...parseWords(EXTRA_COMMON)]
+export const EXTRA_PLURAL_WORDS: readonly string[] = [...parseWords(EXTRA_PLURALS)]
+export const BIBLE_NAME_WORDS: readonly string[] = [...parseWords(BIBLE_NAMES)]
 
 const PLANT_PREFERS: ReadonlySet<string> = new Set(
   [...parseWords(PLANT_PREFER_RAW)].filter((word) => COMMON_BONUS_WORDS.has(word) && !SKIP_BONUS.has(word)),

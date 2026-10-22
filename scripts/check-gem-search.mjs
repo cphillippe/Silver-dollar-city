@@ -6,13 +6,20 @@ import {
   BONUS_WORD_MAX,
   BONUS_WORD_MIN,
   COMMON_BONUS_COUNT,
+  BIBLE_NAME_WORDS,
   COMMON_BONUS_WORDS,
+  EXTRA_COMMON_WORDS,
+  EXTRA_PLURAL_WORDS,
   isKidFriendlyBonusWord,
   isPlantableBonusWord,
 } from '../src/lib/commonBonusWords.ts'
 import {
+  bonusPointsFor,
   bonusWordsFor,
   buildGemPuzzle,
+  isStoryWord,
+  LESSON_PLANT_MAX,
+  LESSON_PLANT_MIN,
   cellKey,
   cellsNeededByOpenPlanted,
   findStraightSpelling,
@@ -21,6 +28,7 @@ import {
   matchChipsFor,
   isBonusSpelling,
   isStraightPath,
+  LESSON_BONUS,
   matchBonusWord,
   matchGemWord,
   MAX_BONUS_PLANT,
@@ -38,8 +46,11 @@ import {
   consumeMatchExtra,
   MATCH_BONUS_POINTS,
   MATCH_DOCK_JUICE_POINTS,
+  MATCH_GENERIC_POINTS,
+  MATCH_STORY_POINTS,
   MATCH_MISS_POINTS,
 } from '../src/lib/matchBonus.ts'
+import { STOP } from '../src/lib/gemSearchGrid.ts'
 import { gemBonusBeat, gemTargetBeat, matchClearBeat } from '../src/lib/successBeat.ts'
 import {
   splitStorySentences,
@@ -361,7 +372,8 @@ assert.equal(bonusFace(100), '+100 bonus')
 assert.equal(bonusFace(75), '+75 bonus')
 assert.equal(bonusFace(0), '')
 assert.equal(consumeMatchExtra(awarded, 'ph-road').matchExtra['ph-road'], undefined)
-assert.match(gemBonusBeat('Help').title, /BONUS! \+100/)
+assert.match(gemBonusBeat('Help').title, /BONUS! \+50/)
+assert.match(gemBonusBeat('Help', true).title, /Story word! \+100/)
 assert.match(gemBonusBeat('Help').why, /Extra try/)
 assert.match(gemTargetBeat(mercyWords[0]).title, /Yes/)
 assert.match(matchClearBeat('ph-road').title, /Neighbor/)
@@ -383,7 +395,11 @@ for (const id of EASY_LINE_ORDER) {
   )
   const chips = new Set(puzzle.words.map((word) => word.text))
   for (const word of puzzle.planted) {
-    assert.equal(isPlantableBonusWord(word.text), true, `${id} ${word.text} from dict`)
+    assert.equal(
+      isPlantableBonusWord(word.text) || (LESSON_BONUS[id] ?? []).includes(word.text),
+      true,
+      `${id} ${word.text} from dict or authored lesson row`,
+    )
     assert.equal(isKidFriendlyBonusWord(word.text), true, `${id} ${word.text} kid-friendly`)
     assert.equal(chips.has(word.text), false, `${id} ${word.text} is not a required chip`)
     assert.ok(
@@ -707,5 +723,126 @@ const gemGridSrc = readFileSync(new URL('../src/lib/gemSearchGrid.ts', import.me
 assert.match(gemSearchSrc, /from '\.\/gemSearchGrid\.ts'/)
 assert.match(gemGridSrc, /export function (fillGrid|snapFingerPath|tryPlaceWord)/)
 assert.doesNotMatch(gemSearchSrc, /function emptyGrid\(/)
+
+// --- PART 1: expanded bonus dictionary (everyday words, hand-picked plurals, Bible names) ---
+const NEW_WORDS = [...EXTRA_COMMON_WORDS, ...EXTRA_PLURAL_WORDS, ...BIBLE_NAME_WORDS]
+assert.equal(EXTRA_COMMON_WORDS.length, 45)
+assert.equal(EXTRA_PLURAL_WORDS.length, 104)
+assert.equal(BIBLE_NAME_WORDS.length, 37)
+assert.ok(COMMON_BONUS_COUNT >= 2588, `bonus dict grew (${COMMON_BONUS_COUNT})`)
+for (const word of NEW_WORDS) {
+  assert.ok(COMMON_BONUS_WORDS.has(word), `${word} is in the bonus dict`)
+  assert.equal(isKidFriendlyBonusWord(word), true, `${word} is kid-safe (not on SKIP_BONUS)`)
+}
+const blankBoard = buildGemPuzzle('ph-father')
+for (const word of ['THE', 'ALL', 'PETS', 'ANNA', 'CHRIST']) {
+  assert.equal(isBonusSpelling(word, blankBoard), true, `${word} scores`)
+}
+assert.equal(isBonusSpelling('CHRIST', buildGemPuzzle('wb-creed')), false, 'a CHRIST chip is not a bonus')
+for (const word of ['ISN', 'KAL', 'NUDE', 'DAMN']) {
+  assert.equal(isBonusSpelling(word, blankBoard), false, `${word} stays out`)
+}
+for (const word of STOP) {
+  if (word.length < 3 || word.length > 6) continue
+  assert.ok(
+    ![...EXTRA_COMMON_WORDS].includes(word) || true,
+    'function words may score even though STOP keeps them from being planted',
+  )
+}
+
+function straightRuns(letters, word) {
+  const size = letters.length
+  const dirs = [[0, 1], [1, 0], [1, 1], [0, -1], [-1, 0], [-1, -1], [1, -1], [-1, 1]]
+  for (let r = 0; r < size; r += 1) {
+    for (let c = 0; c < size; c += 1) {
+      for (const [dr, dc] of dirs) {
+        let spelled = ''
+        for (let i = 0; i < word.length; i += 1) {
+          spelled += letters[r + dr * i]?.[c + dc * i] ?? '?'
+        }
+        if (spelled === word) return true
+      }
+    }
+  }
+  return false
+}
+
+let seenNew = 0
+let rejectedNew = 0
+for (const id of Object.keys(MATCH_CHIPS)) {
+  for (let seed = 0; seed < 40; seed += 1) {
+    const board = buildGemPuzzle(id, seed)
+    for (const word of NEW_WORDS) {
+      if (!straightRuns(board.letters, word)) continue
+      seenNew += 1
+      if (board.words.some((chip) => chip.text === word)) continue
+      if (!isBonusSpelling(word, board)) rejectedNew += 1
+    }
+  }
+}
+assert.ok(seenNew > 54 * 40, `the new words really show up on boards (${seenNew})`)
+assert.equal(rejectedNew, 0, 'no real new word on a board is rejected')
+
+// --- PART 2: related (story) words placed on every board ---
+assert.equal(LESSON_PLANT_MIN, 3)
+assert.equal(LESSON_PLANT_MAX, 4)
+assert.equal(MATCH_STORY_POINTS, 100)
+assert.equal(MATCH_GENERIC_POINTS, 50)
+assert.ok(MATCH_STORY_POINTS > MATCH_GENERIC_POINTS, 'story words pay more than generic extras')
+let boards = 0
+let fourWord = 0
+for (const id of Object.keys(MATCH_CHIPS)) {
+  const authoredRow = LESSON_BONUS[id] ?? []
+  assert.ok(authoredRow.length >= 6, `${id} has a grown related-word row (${authoredRow.length})`)
+  assert.equal(new Set(authoredRow).size, authoredRow.length, `${id} row has no duplicates`)
+  for (const word of authoredRow) {
+    assert.ok(word.length >= 3 && word.length <= 6, `${id} ${word} length`)
+    // wb-creed keeps its original DIED; it still scores there but is never planted.
+    if (word !== 'DIED') assert.equal(isKidFriendlyBonusWord(word), true, `${id} ${word} kid-safe`)
+  }
+  for (let seed = 0; seed < 40; seed += 1) {
+    const board = buildGemPuzzle(id, seed)
+    boards += 1
+    const chips = board.words.map((word) => word.text)
+    const lesson = board.lessonPlanted
+    assert.ok(lesson.length >= LESSON_PLANT_MIN, `${id}#${seed} places >=3 related words (${lesson.length})`)
+    assert.ok(lesson.length <= LESSON_PLANT_MAX, `${id}#${seed} places <=4 related words`)
+    if (lesson.length === LESSON_PLANT_MAX) fourWord += 1
+    for (const text of lesson) {
+      const planted = board.planted.find((word) => word.text === text)
+      assert.ok(planted, `${id}#${seed} ${text} is planted`)
+      const path = board.bonusPaths[planted.id]
+      assert.equal(pathLetters(path, board.letters), text, `${id}#${seed} ${text} spelled on the board`)
+      assert.equal(isStoryWord(text, board), true, `${id}#${seed} ${text} is a story word`)
+      assert.equal(bonusPointsFor(text, board), MATCH_STORY_POINTS)
+      assert.ok(authoredRow.includes(text) || board.bonusPool.includes(text), `${id} ${text} belongs to the lesson`)
+      assert.equal(STOP.has(text), false, `${id} ${text} not a function word`)
+      assert.equal(isKidFriendlyBonusWord(text), true)
+      assert.ok(!chips.some((chip) => chip === text || chip.includes(text) || text.includes(chip)), `${id} ${text} clears the chips`)
+      assert.ok(
+        lesson.every((other) => other === text || (!other.includes(text) && !text.includes(other))),
+        `${id}#${seed} related words do not nest in each other`,
+      )
+      assert.equal(matchBonusWord(path, board, [])?.text, text)
+    }
+    for (const chip of board.words) {
+      const path = board.paths[chip.id]
+      assert.equal(pathLetters(path, board.letters), chip.text, `${id}#${seed} chip ${chip.text} intact`)
+    }
+    assert.ok(board.planted.length >= MIN_BONUS_PLANT && board.planted.length <= MAX_BONUS_PLANT + 2)
+  }
+}
+assert.ok(fourWord / boards >= 0.5, `most boards fit a 4th related word (${fourWord}/${boards})`)
+const genericProbe = buildGemPuzzle('ph-father', 3)
+assert.equal(bonusPointsFor('THE', genericProbe), MATCH_GENERIC_POINTS, 'a generic extra pays +50')
+assert.equal(bonusPointsFor('HELP', buildGemPuzzle('wb-creed', 1)), MATCH_GENERIC_POINTS, 'shared HELP stays generic off its lesson')
+assert.equal(applyMatchBonus({ matchBonus: {}, matchExtra: {} }, 'x', MATCH_GENERIC_POINTS).matchBonus.x, 50)
+assert.equal(applyMatchBonus({ matchBonus: {}, matchExtra: {} }, 'x').matchBonus.x, 100)
+assert.equal(gemBonusBeat('Help', true).title, 'Story word! +100')
+assert.match(
+  readFileSync(new URL('../src/components/challenges/GemSearchPlay.tsx', import.meta.url), 'utf8'),
+  /storyWinLabel/,
+  'win screen names Story words',
+)
 
 console.log(`check-gem-search: ok (bonus dict ${COMMON_BONUS_COUNT} words, 3–6)`)

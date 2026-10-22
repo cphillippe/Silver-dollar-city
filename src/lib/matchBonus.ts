@@ -2,6 +2,10 @@ import type { ProgressState } from '../types.ts'
 
 /** Bill: 100 points for an extra try at the match. Not a Hold tier score. */
 export const MATCH_BONUS_POINTS = 100
+/** Story word (one of the lesson's own related words). Same as the classic bonus. */
+export const MATCH_STORY_POINTS = MATCH_BONUS_POINTS
+/** Any other real word on the board. */
+export const MATCH_GENERIC_POINTS = 50
 export const MATCH_MISS_POINTS = 25
 /** Bill: unlock/collapse of Match story strip — arcade +1000. */
 export const MATCH_DOCK_JUICE_POINTS = 1000
@@ -11,13 +15,15 @@ export const MATCH_EXTRA_MAX = 20
 export function applyMatchBonus<T extends Pick<ProgressState, 'matchBonus' | 'matchExtra'>>(
   progress: T,
   id: string,
+  points: number = MATCH_BONUS_POINTS,
 ): Pick<ProgressState, 'matchBonus' | 'matchExtra'> {
+  const add = Math.max(0, Math.floor(points))
   const prior = progress.matchBonus?.[id] ?? 0
   const extra = progress.matchExtra?.[id] ?? 0
   return {
     matchBonus: {
       ...(progress.matchBonus ?? {}),
-      [id]: Math.min(MATCH_BONUS_MAX, prior + MATCH_BONUS_POINTS),
+      [id]: Math.min(MATCH_BONUS_MAX, prior + add),
     },
     matchExtra: {
       ...(progress.matchExtra ?? {}),
