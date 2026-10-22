@@ -1,0 +1,224 @@
+/* Gem Jar (Easy Match win slot + play skills). Existing tokens only:
+   --parchment, --ink, --pine, --radius, --sans/--serif inherited. No gold here. */
+.play.is-gem-search .gem-jar-slot {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0 4px;
+  font-size: 0.9rem;
+  color: var(--ink);
+}
+
+.gem-jar {
+  position: relative;
+  display: grid;
+  grid-template-rows: 22px minmax(0, 1fr);
+  align-items: center;
+  gap: 3px;
+  box-sizing: border-box;
+  height: var(--gem-jar-h, 46px);
+  margin: 0 auto;
+  width: min(100%, 390px);
+  padding: 5px 10px;
+  border-radius: var(--radius);
+  background: var(--parchment);
+  border: 1.5px solid color-mix(in srgb, var(--ink) 22%, transparent);
+  color: var(--ink);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.gem-jar-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 22px;
+}
+
+.gem-jar-name {
+  font-weight: 750;
+  font-size: 0.78rem;
+}
+
+.gem-jar-count {
+  font-size: 0.95rem;
+  font-weight: 850;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.gem-jar-story {
+  font-size: 0.74rem;
+  font-weight: 750;
+  color: var(--ink);
+}
+
+.gem-jar-caption {
+  margin-left: auto;
+  font-size: 0.74rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 420px) {
+  .gem-jar {
+    padding-inline: 8px;
+  }
+
+  .gem-jar-row {
+    gap: 4px;
+  }
+
+  .gem-jar-name,
+  .gem-jar-story,
+  .gem-jar-caption {
+    font-size: 0.68rem;
+  }
+
+  .gem-jar-count {
+    font-size: 0.88rem;
+  }
+}
+
+.gem-jar-icon {
+  width: 18px;
+  height: 22px;
+  flex: 0 0 auto;
+  overflow: visible;
+}
+
+.gem-jar-lid,
+.gem-jar-glass {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.6;
+}
+
+.gem-jar-level {
+  fill: var(--pine);
+}
+
+.gem-jar-bar {
+  display: block;
+  height: 8px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--ink) 14%, transparent);
+}
+
+.gem-jar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--pine);
+  transition: width 0.6s ease-out;
+}
+
+.gem-jar-reveal {
+  margin: 0;
+  font-size: 0.74rem;
+  font-weight: 750;
+  line-height: 1.2;
+  white-space: normal;
+  color: var(--ink);
+}
+
+/* The win board shrinks by the card height, so the win stack never grows. */
+html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked.is-win.has-gem-jar .gem-board {
+  width: min(100%, 520px, calc(36vh - var(--gem-jar-h, 46px)));
+  width: min(100%, 520px, calc(36svh - var(--gem-jar-h, 46px)));
+}
+
+@media (max-height: 720px) {
+  html[data-easy='on'] .play.is-gem-search.is-panel-blast.is-story-docked.is-win.has-gem-jar .gem-board {
+    width: min(100%, 520px, calc(30vh - var(--gem-jar-h, 46px)));
+    width: min(100%, 520px, calc(30svh - var(--gem-jar-h, 46px)));
+  }
+}
+
+.gem-jar-orb {
+  position: absolute;
+  left: 4.6rem;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  margin: -6px;
+  border-radius: 50%;
+  background: var(--pine);
+  pointer-events: none;
+  animation: gem-jar-orb-fly 0.45s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes gem-jar-orb-fly {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(min(100vw, 390px) - 8rem), 0) scale(0.6);
+    opacity: 0.4;
+  }
+}
+
+.gem-jar.is-tipped .gem-jar-icon {
+  animation: gem-jar-tip 0.6s ease-in-out both;
+}
+
+@keyframes gem-jar-tip {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  35% {
+    transform: rotate(-16deg);
+  }
+  70% {
+    transform: rotate(10deg);
+  }
+}
+
+.gem-jar-spark {
+  position: absolute;
+  right: 20px;
+  top: 14px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--pine);
+  pointer-events: none;
+  animation: gem-pop-fly 0.7s cubic-bezier(0.12, 0.8, 0.3, 1) both;
+  animation-delay: calc(var(--i) * 24ms);
+}
+
+/* Bonus Sight: unfound planted word shimmers with a pine ring. Never on the start cell. */
+html[data-easy='on'] .play.is-gem-search .gem-cell.is-sight:not(.is-start-gold) {
+  z-index: 2;
+  box-shadow: 0 0 0 3px var(--pine), 0 0 14px var(--pine);
+  animation: gem-sight-pulse 0.8s ease-in-out infinite;
+}
+
+@keyframes gem-sight-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gem-jar-orb,
+  .gem-jar-spark {
+    display: none;
+  }
+
+  .gem-jar.is-tipped .gem-jar-icon,
+  html[data-easy='on'] .play.is-gem-search .gem-cell.is-sight:not(.is-start-gold) {
+    animation: none;
+  }
+
+  .gem-jar-fill {
+    transition: none;
+  }
+}

@@ -502,6 +502,7 @@ export interface ProgressApi {
   recordMatchFind: (lineId: string, points: number) => void
   recordMatchMiss: (lineId: string) => void
   consumeMatchExtra: (lineId: string) => void
+  markJarSeen: (step: number) => void
   snoozeReviews: (ids: string[], today: string) => void
   markMiss: (challengeId: string) => void
   recordNight: (dateKey: string, farHills?: boolean) => void
