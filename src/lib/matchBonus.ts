@@ -11,12 +11,19 @@ export const MATCH_MISS_POINTS = 25
 export const MATCH_DOCK_JUICE_POINTS = 1000
 export const MATCH_BONUS_MAX = 10_000
 export const MATCH_EXTRA_MAX = 20
+export const MATCH_LIFETIME_MAX = 10_000_000
 
-export function applyMatchBonus<T extends Pick<ProgressState, 'matchBonus' | 'matchExtra'>>(
+type Lifetime = Pick<ProgressState, 'matchLifetime'>
+
+function lifetimeAfter(progress: Partial<Lifetime>, add: number): number {
+  return Math.min(MATCH_LIFETIME_MAX, (progress.matchLifetime ?? 0) + add)
+}
+
+export function applyMatchBonus<T extends Pick<ProgressState, 'matchBonus' | 'matchExtra'> & Partial<Lifetime>>(
   progress: T,
   id: string,
   points: number = MATCH_BONUS_POINTS,
-): Pick<ProgressState, 'matchBonus' | 'matchExtra'> {
+): Pick<ProgressState, 'matchBonus' | 'matchExtra' | 'matchLifetime'> {
   const add = Math.max(0, Math.floor(points))
   const prior = progress.matchBonus?.[id] ?? 0
   const extra = progress.matchExtra?.[id] ?? 0
@@ -29,41 +36,46 @@ export function applyMatchBonus<T extends Pick<ProgressState, 'matchBonus' | 'ma
       ...(progress.matchExtra ?? {}),
       [id]: Math.min(MATCH_EXTRA_MAX, extra + 1),
     },
+    matchLifetime: lifetimeAfter(progress, add),
   }
 }
 
 /** Story strip hero→dock collapse — +1000 arcade juice, no extra try. */
-export function applyMatchDockJuice<T extends Pick<ProgressState, 'matchBonus'>>(
+export function applyMatchDockJuice<T extends Pick<ProgressState, 'matchBonus'> & Partial<Lifetime>>(
   progress: T,
   id: string,
-): Pick<ProgressState, 'matchBonus'> {
+): Pick<ProgressState, 'matchBonus' | 'matchLifetime'> {
   const prior = progress.matchBonus?.[id] ?? 0
   return {
     matchBonus: {
       ...(progress.matchBonus ?? {}),
       [id]: Math.min(MATCH_BONUS_MAX, prior + MATCH_DOCK_JUICE_POINTS),
     },
+    matchLifetime: lifetimeAfter(progress, MATCH_DOCK_JUICE_POINTS),
   }
 }
 
 /** Required-word find juice — persists the on-board +N pop into matchBonus (account score). */
-export function applyMatchFind<T extends Pick<ProgressState, 'matchBonus'>>(
+export function applyMatchFind<T extends Pick<ProgressState, 'matchBonus'> & Partial<Lifetime>>(
   progress: T,
   id: string,
   points: number,
-): Pick<ProgressState, 'matchBonus'> {
+): Pick<ProgressState, 'matchBonus' | 'matchLifetime'> {
   const add = Math.max(0, Math.floor(points))
-  if (!add) return { matchBonus: { ...(progress.matchBonus ?? {}) } }
+  if (!add) {
+    return { matchBonus: { ...(progress.matchBonus ?? {}) }, matchLifetime: progress.matchLifetime ?? 0 }
+  }
   const prior = progress.matchBonus?.[id] ?? 0
   return {
     matchBonus: {
       ...(progress.matchBonus ?? {}),
       [id]: Math.min(MATCH_BONUS_MAX, prior + add),
     },
+    matchLifetime: lifetimeAfter(progress, add),
   }
 }
 
-/** Wrong swipe on extras — −25, floor 0. Does not touch extras banked or required chips. */
+/** Wrong swipe on extras — −25, floor 0. Does not touch extras banked, required chips, or the Gem Jar. */
 export function applyMatchMiss<T extends Pick<ProgressState, 'matchBonus'>>(
   progress: T,
   id: string,
@@ -109,4 +121,11 @@ export function lineExtraTries(
 export function bonusFace(bonus: number | undefined): string {
   if (!bonus) return ''
   return `+${bonus} bonus`
+}
+
+export function applyJarSeen<T extends Partial<Pick<ProgressState, 'matchSkillSeen'>>>(
+  progress: T,
+  step: number,
+): Pick<ProgressState, 'matchSkillSeen'> {
+  return { matchSkillSeen: Math.max(progress.matchSkillSeen ?? 0, Math.max(0, Math.min(3, Math.floor(step)))) }
 }

@@ -342,6 +342,16 @@ export interface ProgressState {
    */
   matchExtra: Record<string, number>
   /**
+   * Gem Jar: every positive Match point ever earned. Only goes up; a miss never drains it.
+   * Optional on old saves; normalize backfills from the matchBonus sum. Schema stays 1 — do not wipe.
+   */
+  matchLifetime: number
+  /**
+   * Highest Gem Jar step whose reveal card has played (0..3), so each skill reveal plays once.
+   * Optional on old saves; normalize fills 0. Schema stays 1 — do not wipe.
+   */
+  matchSkillSeen: number
+  /**
    * First local day this save was opened (YYYY-MM-DD). Optional on old
    * saves; the first boot fills it. Schema stays 1 — do not wipe.
    */

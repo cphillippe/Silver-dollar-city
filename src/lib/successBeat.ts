@@ -37,8 +37,8 @@ export function gemTargetBeat(word: GemWord): SuccessBeat {
 }
 
 /** Kid-plain beat after an extra word. Story words (the lesson's own) say so and pay more. */
-export function gemBonusBeat(label: string, story = false): SuccessBeat {
-  return { title: story ? EASY.storyToast : EASY.bonusToast, why: `${label} · ${EASY.bonusWhy}` }
+export function gemBonusBeat(label: string, story = false, points = story ? 100 : 50): SuccessBeat {
+  return { title: `${story ? EASY.storyToast : EASY.bonusToast} +${points}`, why: `${label} · ${EASY.bonusWhy}` }
 }
 
 export function matchClaimLine(lineId: string): string {

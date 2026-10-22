@@ -26,6 +26,7 @@ const SCOPES = {
       'check-learning.mjs',
       'check-packs.mjs',
       'check-gem-search.mjs',
+      'check-gem-jar.mjs',
       'check-why-blast.mjs',
       'check-father-run.mjs',
       'check-road-maze.mjs',
@@ -66,6 +67,7 @@ const SCOPES = {
     embed: true,
     checks: [
       'check-gem-search.mjs',
+      'check-gem-jar.mjs',
       'check-why-blast.mjs',
       'check-father-run.mjs',
       'check-road-maze.mjs',
@@ -92,13 +94,14 @@ const SCOPES = {
       'check-claim-merge.mjs',
       'check-road-maze.mjs',
       'check-gem-search.mjs',
+      'check-gem-jar.mjs',
       'check-debug-plays.mjs',
     ],
   },
   // Alias: Match / Support juice hops
   juice: {
     embed: false,
-    checks: ['check-claim-merge.mjs', 'check-gem-search.mjs'],
+    checks: ['check-claim-merge.mjs', 'check-gem-search.mjs', 'check-gem-jar.mjs'],
   },
 }
 

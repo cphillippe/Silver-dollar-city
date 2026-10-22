@@ -19,6 +19,7 @@ import {
   type GemCoord,
 } from '../../lib/gemSearch'
 import { MATCH_DOCK_JUICE_POINTS } from '../../lib/matchBonus'
+import { jarCrossing, skillBonusPoints, skillsFor } from '../../lib/gemJar'
 import { gemBonusBeat, matchClearBeat } from '../../lib/successBeat'
 import { MatchTakeaway } from '../HeldTriad'
 import { storyPanelsFor, type StoryPanel } from '../../lib/storyPanels'
@@ -29,6 +30,7 @@ import { lociStampFor } from '../../lib/lociStamp'
 import { LociStamp } from '../LociStamp'
 import { StoryStrip } from '../StoryStrip'
 import { WinBurst } from './WinBurst'
+import { GemJarCard, JAR_CARD_H, JAR_CARD_REVEAL_H } from './GemJarCard'
 
 interface GemSearchPlayProps {
   lineId: string
@@ -39,6 +41,16 @@ interface GemSearchPlayProps {
 }
 
 const SHARDS = [0, 1, 2, 3, 4, 5, 6, 7]
+
+/** `?gemSeed=N` pins the deal for tests. Dev server only; production always deals fresh. */
+function dealRound(): number {
+  if (import.meta.env.DEV && typeof window !== 'undefined') {
+    const raw = new URLSearchParams(window.location.search).get('gemSeed')
+    const seed = raw == null ? NaN : Number(raw)
+    if (Number.isInteger(seed) && seed >= 0) return seed
+  }
+  return Date.now()
+}
 
 function cellFromPoint(x: number, y: number): GemCoord | null {
   // Pointer capture keeps the gesture alive, but an expanded dock/overlay can still
@@ -54,9 +66,10 @@ function cellFromPoint(x: number, y: number): GemCoord | null {
 }
 
 export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: GemSearchPlayProps) {
-  const { progress, recordMatchBonus, recordMatchDockJuice, recordMatchFind, recordMatchMiss } = useProgress()
+  const { progress, recordMatchBonus, recordMatchDockJuice, recordMatchFind, recordMatchMiss, markJarSeen } =
+    useProgress()
   const easy = isEasy(progress)
-  const [round, setRound] = useState(() => Date.now())
+  const [round, setRound] = useState(dealRound)
   const puzzle = useMemo(() => buildGemPuzzle(lineId, round), [lineId, round])
   const panels = useMemo(
     () => beats ?? storyPanelsFor(lineId, puzzle.words.length),
@@ -83,6 +96,14 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   const [lastAward, setLastAward] = useState(0)
   const [bonusPts, setBonusPts] = useState(0)
   const [storyFound, setStoryFound] = useState(0)
+  const lifetimeNow = progress.matchLifetime ?? 0
+  const lifetimeRef = useRef(lifetimeNow)
+  lifetimeRef.current = lifetimeNow
+  const [jarBefore, setJarBefore] = useState(lifetimeNow)
+  const [sightKeys, setSightKeys] = useState<string[]>([])
+  const [jarH, setJarH] = useState(JAR_CARD_H)
+  const boardPts = useRef(0)
+  const jarSkills = useMemo(() => (easy ? skillsFor(jarBefore) : []), [easy, jarBefore])
   const [status, setStatus] = useState<'play' | 'ok'>('play')
   const [winStamp, setWinStamp] = useState(false)
   const [stripMode, setStripMode] = useState<'hero' | 'dock' | 'sheet'>('dock')
@@ -146,6 +167,9 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     setLastAward(0)
     setBonusPts(0)
     setStoryFound(0)
+    setSightKeys([])
+    setJarBefore(lifetimeRef.current)
+    boardPts.current = 0
     comboRef.current = 0
     setStatus('play')
     setWinStamp(false)
@@ -157,7 +181,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
   }
 
   useEffect(() => {
-    setRound(Date.now())
+    setRound(dealRound())
     resetBoard(false)
     // line change only — new Match deal, not the leftover extras
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -173,6 +197,25 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     // extra try / One more Match reshuffle
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [round])
+
+  // Bonus Sight: once per board, shortly after the deal, one unfound planted word shimmers.
+  useEffect(() => {
+    if (!jarSkills.includes('sight')) return
+    let clearId = 0
+    const startId = window.setTimeout(() => {
+      const open = puzzle.planted.filter((word) => !bonusRef.current.includes(word.id))
+      const story = open.filter((word) => puzzle.lessonPlanted.includes(word.text))
+      const pool = story.length ? story : open
+      const pick = pool[Math.floor(Math.random() * pool.length)]
+      if (!pick) return
+      setSightKeys((puzzle.bonusPaths[pick.id] ?? []).map(cellKey))
+      clearId = window.setTimeout(() => setSightKeys([]), 1600)
+    }, 600)
+    return () => {
+      window.clearTimeout(startId)
+      window.clearTimeout(clearId)
+    }
+  }, [puzzle, jarSkills])
 
   // Art flash 1.4.101: first unlock may enter hero briefly; auto-dock within ≤1.2s.
   // First paint stays docked (board-first). Hero is only the brief big→tiny intro.
@@ -232,6 +275,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     const delay = Math.max(0, findUntil.current - Date.now())
     window.setTimeout(() => {
       recordMatchDockJuice(lineId)
+      boardPts.current += MATCH_DOCK_JUICE_POINTS
       setDockJuice(MATCH_DOCK_JUICE_POINTS)
       playGemPop('bonus')
       window.setTimeout(() => setDockJuice(null), prefersReducedMotion() ? 400 : 1200)
@@ -270,6 +314,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     // Persist find juice to account matchBonus (Journal / profile total) — not toast-only.
     // One visual punch: the +N pop and the cell burst. No second "Yes" toast on this beat.
     recordMatchFind(lineId, popPts)
+    boardPts.current += popPts
     window.setTimeout(() => setFindPop(0), popMs)
     revealPanel(foundCount)
     if (done) {
@@ -288,7 +333,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     window.setTimeout(() => setBurst([]), done ? 980 : 720)
   }
 
-  function explodeBonus(cells: GemCoord[], label: string, story: boolean) {
+  function explodeBonus(cells: GemCoord[], label: string, story: boolean, pts: number) {
     // Never delete letters still needed for lesson chips OR remaining planted bonuses.
     // Exclusive bonus cells clear; shared cells ghost/crack and stay playable.
     const needLesson = cellsStillNeeded(puzzle, foundRef.current)
@@ -307,15 +352,19 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     if (ghostKeys.length) {
       setBonusGhosted((current) => [...current, ...ghostKeys.filter((k) => !current.includes(k))])
     }
-    const beat = gemBonusBeat(label, story)
+    const beat = gemBonusBeat(label, story, pts)
     // If a find pop is still on screen, wait so BONUS! is its own punch.
     const wait = Math.max(0, findUntil.current - Date.now())
     window.setTimeout(() => {
       setBurst([...clearKeys, ...ghostKeys])
       playGemPop('bonus')
-      setPlusFlash(true)
-      window.setTimeout(() => setPlusFlash(false), 700)
-      flashToast(beat.title, '', true)
+      if (story) {
+        flashToast(beat.title, beat.why)
+      } else {
+        setPlusFlash(true)
+        window.setTimeout(() => setPlusFlash(false), 700)
+        flashToast(beat.title, '', true)
+      }
       window.setTimeout(() => setBurst([]), 640)
     }, wait)
   }
@@ -340,6 +389,8 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
     }
     const stampAt = prefersReducedMotion() ? 80 : 880
     window.setTimeout(() => {
+      const reveal = jarCrossing(jarBefore, jarBefore + boardPts.current, progress.matchSkillSeen ?? 0)
+      setJarH(reveal ? JAR_CARD_REVEAL_H : JAR_CARD_H)
       setWinStamp(true)
       setStatus('ok')
     }, stampAt)
@@ -381,12 +432,14 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
         window.setTimeout(() => setComboFlash(0), 1100)
       }
       const story = isStoryWord(extra.text, puzzle)
-      const pts = bonusPointsFor(extra.text, puzzle)
+      const pts =
+        bonusPointsFor(extra.text, puzzle) + skillBonusPoints(jarSkills, extra.text, comboRef.current)
       recordMatchBonus(lineId, pts)
+      boardPts.current += pts
       setLastAward(pts)
       setBonusPts(pts)
       if (story) setStoryFound((count) => count + 1)
-      explodeBonus(nextPath, extra.label, story)
+      explodeBonus(nextPath, extra.label, story, pts)
       return true
     }
     return false
@@ -520,8 +573,11 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
 
   return (
     <div
-      className={`play is-gem-search is-panel-blast is-story-docked ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''} ${burst.length ? 'is-boom' : ''} ${plusFlash ? 'is-bonus-pop' : ''} ${findPop ? 'is-find-pop' : ''}`}
-      style={{ ['--gem-size' as string]: puzzle.size }}
+      className={`play is-gem-search is-panel-blast is-story-docked ${shake ? 'is-shake' : ''} ${status === 'ok' ? 'is-win' : ''} ${status === 'ok' && easy ? 'has-gem-jar' : ''} ${burst.length ? 'is-boom' : ''} ${plusFlash ? 'is-bonus-pop' : ''} ${findPop ? 'is-find-pop' : ''}`}
+      style={{
+        ['--gem-size' as string]: puzzle.size,
+        ...(status === 'ok' && easy ? { ['--gem-jar-h' as string]: `${jarH}px` } : {}),
+      }}
       onPointerUp={onBoardUp}
       onPointerCancel={onBoardCancel}
     >
@@ -753,7 +809,7 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
                 data-c={c}
                 {...(startGold ? { 'data-gem-start-cell': '' } : {})}
                 onPointerDown={(event) => onCellDown(event, { r, c })}
-                className={`gem-cell hue-${gemHue(letter, r, c)} ${selected.has(key) ? 'is-sel' : ''} ${popping ? 'is-burst' : ''} ${cellClear ? 'is-clear' : ''} ${cellFound ? 'is-found' : ''} ${cellCracked ? 'is-cracked' : ''} ${hint.includes(key) ? 'is-hint' : ''} ${startGold ? 'is-start-gold' : ''} ${popping && (bonusClear || bonusGhost) ? 'is-bonus-burst' : ''}`}
+                className={`gem-cell hue-${gemHue(letter, r, c)} ${selected.has(key) ? 'is-sel' : ''} ${popping ? 'is-burst' : ''} ${cellClear ? 'is-clear' : ''} ${cellFound ? 'is-found' : ''} ${cellCracked ? 'is-cracked' : ''} ${hint.includes(key) ? 'is-hint' : ''} ${startGold ? 'is-start-gold' : ''} ${sightKeys.includes(key) && !bonusClear ? 'is-sight' : ''} ${popping && (bonusClear || bonusGhost) ? 'is-bonus-burst' : ''}`}
               >
                 <span className="gem-letter">{letter}</span>
                 {popping
@@ -780,12 +836,22 @@ export function GemSearchPlay({ lineId, beats, onMiss, onClear, onEasyStop }: Ge
         )}
       </div>
       </div>
+      {status === 'ok' && easy ? (
+        <GemJarCard
+          before={jarBefore}
+          boardPts={boardPts.current}
+          storyFound={storyFound}
+          seen={progress.matchSkillSeen ?? 0}
+          onSeen={markJarSeen}
+        />
+      ) : (
       <p className={`match-score ${plusFlash || findPop > 0 || comboFlash > 1 ? 'is-juice' : ''}`}>
         {left} left · {found.length} / {puzzle.words.length} found
         {bonusFound.length ? ` · ${bonusFound.length} bonus` : ''}
         {status === 'ok' && storyFound > 0 ? ` · ${EASY.storyWinLabel} ×${storyFound}` : ''}
         {lastAward > 0 ? <span className="bonus-pts"> · +{lastAward} bonus</span> : null}
       </p>
+      )}
       </div>
       {status === 'ok' ? (
         <>

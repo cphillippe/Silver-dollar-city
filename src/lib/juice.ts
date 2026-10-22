@@ -33,8 +33,12 @@ export function prefersReducedMotion(): boolean {
 let gemAudio: AudioContext | null = null
 
 /** Short candy pop — fail quiet if the browser blocks audio. */
-export function playGemPop(kind: 'find' | 'win' | 'miss' | 'bonus' = 'find') {
+export function playGemPop(kind: 'find' | 'win' | 'miss' | 'bonus' | 'jar' = 'find') {
   if (typeof window === 'undefined' || prefersReducedMotion()) return
+  if (kind === 'jar') {
+    playJarChime()
+    return
+  }
   try {
     gemAudio ??= new AudioContext()
     const ctx = gemAudio
@@ -58,6 +62,40 @@ export function playGemPop(kind: 'find' | 'win' | 'miss' | 'bonus' = 'find') {
   }
   try {
     if (kind !== 'miss') window.navigator.vibrate?.(kind === 'win' ? [18, 40, 24] : kind === 'bonus' ? [12, 20, 18] : 16)
+  } catch {
+    /* vibration is optional */
+  }
+}
+
+/** Gem Jar chime: a rising two-note sine. Silent under reduced motion (caller guards). */
+function playJarChime() {
+  try {
+    gemAudio ??= new AudioContext()
+    const ctx = gemAudio
+    void ctx.resume()
+    const now = ctx.currentTime
+    const notes: Array<[number, number, number]> = [
+      [990, 1480, 0],
+      [1320, 1980, 0.14],
+    ]
+    for (const [from, to, at] of notes) {
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.type = 'sine'
+      osc.frequency.setValueAtTime(from, now + at)
+      osc.frequency.exponentialRampToValueAtTime(to, now + at + 0.16)
+      gain.gain.setValueAtTime(0.12, now + at)
+      gain.gain.exponentialRampToValueAtTime(0.001, now + at + 0.22)
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      osc.start(now + at)
+      osc.stop(now + at + 0.3)
+    }
+  } catch {
+    /* autoplay / WebAudio can fail — the jar still reads as motion */
+  }
+  try {
+    window.navigator.vibrate?.([10, 30, 10, 30, 22])
   } catch {
     /* vibration is optional */
   }

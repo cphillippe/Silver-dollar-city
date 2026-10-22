@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState, type ReactNode } from 'react'
 import { easyHoldFields, easyTeachFields } from '../lib/easy'
 import {
+  applyJarSeen,
   applyMatchBonus,
   applyMatchDockJuice,
   applyMatchFind,
@@ -379,6 +380,14 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     setProgress((current) => write({ ...current, ...applyMatchMiss(current, lineId) }))
   }, [write])
 
+  const markJarSeen = useCallback((step: number) => {
+    setProgress((current) => {
+      const patch = applyJarSeen(current, step)
+      if (patch.matchSkillSeen === (current.matchSkillSeen ?? 0)) return current
+      return write({ ...current, ...patch })
+    })
+  }, [write])
+
   const consumeMatchExtra = useCallback((lineId: string) => {
     if (!lineId) return
     setProgress((current) => {
@@ -455,6 +464,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       recordMatchFind,
       recordMatchMiss,
       consumeMatchExtra,
+      markJarSeen,
       snoozeReviews,
       markMiss,
       recordNight,
@@ -490,6 +500,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       recordMatchFind,
       recordMatchMiss,
       consumeMatchExtra,
+      markJarSeen,
       snoozeReviews,
       recordStars,
       reset,
