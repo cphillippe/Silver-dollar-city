@@ -366,7 +366,7 @@ export const EASY_FOLK_LIFT = 24
 /** Per-plot Easy seat nudge after lift — positive y plants folk on candy seats. */
 export const EASY_FOLK_NUDGE: Partial<Record<CityPlotId, { x?: number; y?: number }>> = {
   lookout: { y: 10 },
-  gate: { x: 4, y: 18 },
+  gate: { x: -38, y: 2 },
   porch: { x: 8, y: 22 },
 }
 
@@ -386,7 +386,7 @@ export const easyFolkNudge = (id: CityPlotId, pan: boolean) =>
 export const EASY_TAG_SLOT: Record<CityPlotId, { x: number; y: number }> = {
   hollow: { x: 96, y: 388 },
   lamps: { x: 208, y: 388 },
-  journal: { x: 268, y: 198 },
+  journal: { x: 292, y: 388 },
   bench: { x: 392, y: 388 },
   porch: { x: 536, y: 388 },
   gate: { x: 498, y: 230 },

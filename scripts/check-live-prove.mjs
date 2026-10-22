@@ -1176,6 +1176,93 @@ function cueClearance(page, selector) {
   }, { sel: selector, path: DEFEND_PATH })
 }
 
+
+/** #792b NWUI-1: nodes that paint gold (255,204,51 or 255,159,26) among the screen's buttons and cards. */
+async function goldCues(page) {
+  return page.evaluate(() => {
+    const root = document.querySelector('.defend-page')
+    if (!root) return []
+    const gold = (value) => value.includes('255, 204, 51') || value.includes('255, 159, 26')
+    return [...root.querySelectorAll('.btn.primary, .defend-ability.is-on, .defend-tower-card, button.defend-new-lamp')]
+      .filter((node) => {
+        const box = node.getBoundingClientRect()
+        const style = getComputedStyle(node)
+        return box.width > 1 && box.height > 1 && style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0
+      })
+      .filter((node) => {
+        const style = getComputedStyle(node)
+        return gold(style.backgroundImage) || gold(style.backgroundColor) || gold(style.borderTopColor)
+      })
+      .map((node) => `${node.tagName}.${node.getAttribute('class') || ''}`.slice(0, 60))
+  })
+}
+
+async function tapCueUntilBoost(page, ms) {
+  const fight = Date.now()
+  while (Date.now() - fight < ms && (await page.locator('.defend-page.is-boost').count()) < 1) {
+    const cue = await page.evaluate(() => {
+      const face = document.querySelector('.defend-raider.is-easy-cue')
+      if (!face) return null
+      const id = face.getAttribute('data-walker-id')
+      const tap = document.querySelector(`[data-walker-tap="${id}"]`)
+      if (!tap) return null
+      const box = tap.getBoundingClientRect()
+      const x = box.x + box.width / 2
+      const y = box.y + box.height / 2
+      const node = document.elementFromPoint(x, y)
+      if (node?.closest?.('[data-walker-tap]')?.getAttribute('data-walker-tap') !== id) return null
+      return { x, y }
+    })
+    if (cue) await page.mouse.click(cue.x, cue.y)
+    await page.waitForTimeout(70)
+  }
+}
+
+/** #792b NWUI-1: one gold per Night Watch state, at 375 and 390. Real pointer input. */
+async function checkGoldCues(browser, port, errors, width, height) {
+  const label = `${width}x${height}`
+  const context = await browser.newContext({
+    baseURL: `http://127.0.0.1:${port}/`,
+    viewport: { width, height },
+    deviceScaleFactor: 1,
+    reducedMotion: 'reduce',
+  })
+  await context.addInitScript(
+    (payload) => localStorage.setItem(payload.key, JSON.stringify(payload.save)),
+    { key: STORAGE_KEY, save: SAVE },
+  )
+  const page = await context.newPage()
+  listen(page, errors, `gold ${label}`)
+  await openJump(page, '?playtest=1&nwRound=2')
+  const pre = await goldCues(page)
+  assert.ok(pre.length <= 1, `#792b NWUI-1 ${label} pre-Begin has at most one gold (${pre})`)
+  assert.ok(pre.some((name) => name.includes('defend-go')) || pre.length === 0, `#792b NWUI-1 ${label} the one pre-Begin gold is Begin (${pre})`)
+  await page.locator('.defend-clear-lamp').first().click()
+  await page.locator('.defend-tower-card').waitFor()
+  const planted = await goldCues(page)
+  assert.ok(planted.length <= 1, `#792b NWUI-1 ${label} after a plant, with the card open, has at most one gold (${planted})`)
+  assert.equal(await page.getByRole('button', { name: /^Far, (need \d+|\d+ sparks)$/ }).count(), 1, `#792b NWUI-3 ${label} one Far button pre-Begin`)
+  assert.equal(await page.getByRole('button', { name: /^Strong, (need \d+|\d+ sparks)$/ }).count(), 1, `#792b NWUI-3 ${label} one Strong button pre-Begin`)
+  await page.locator('.defend-go').click()
+  await page.locator('.defend-page.is-easy-tap').waitFor()
+  await page.locator('[data-walker-tap]').first().waitFor()
+  await page.locator('.defend-clear-lamp').first().click()
+  await page.locator('.defend-tower-card').waitFor()
+  const strip = await goldCues(page)
+  assert.ok(strip.length <= 1, `#792b NWUI-1 ${label} mid-wave with the strip open has at most one gold (${strip})`)
+  assert.equal(await page.getByRole('button', { name: /^Far, (need \d+|\d+ sparks)$/ }).count(), 1, `#792b NWUI-3 ${label} one Far button mid-wave`)
+  assert.equal(await page.getByRole('button', { name: /^Strong, (need \d+|\d+ sparks)$/ }).count(), 1, `#792b NWUI-3 ${label} one Strong button mid-wave`)
+  await page.locator('.defend-clear-lamp').first().click({ force: true })
+  await tapCueUntilBoost(page, 90_000)
+  await page.locator('.defend-page.is-boost').waitFor()
+  await page.locator('.defend-continue').waitFor()
+  const clear = await goldCues(page)
+  assert.ok(clear.length <= 1, `#792b NWUI-1 ${label} the clear has at most one gold (${clear})`)
+  assert.ok(clear.some((name) => name.includes('defend-continue')), `#792b NWUI-1 ${label} the one clear gold is Continue (${clear})`)
+  await page.screenshot({ path: `/opt/cursor/artifacts/screenshots/nwui-gold-clear-${width}.png` })
+  await context.close()
+}
+
 async function checkWaveCues(browser, port, errors) {
   const seatDoc = readFileSync(new URL('../docs/nw-prove-seats.md', import.meta.url), 'utf8')
   for (const tap of [...SEAT_TAPS, ...GROUND_TAPS]) {
@@ -1391,6 +1478,13 @@ async function checkWaveCues(browser, port, errors) {
       `1.4.501 ${path} mid-wave name matches pre-Begin with no mark letter (${waveBuys[path]} vs ${beforeBuys[path]})`,
     )
   }
+  assert.match(waveBuys.far, /^Far, (need \d+|\d+ sparks)$/, `#792b NWUI-3 mid-wave Far has its own name (${waveBuys.far})`)
+  assert.match(waveBuys.strong, /^Strong, (need \d+|\d+ sparks)$/, `#792b NWUI-3 mid-wave Strong has its own name (${waveBuys.strong})`)
+  assert.notEqual(waveBuys.far, waveBuys.strong, '#792b NWUI-3 Far and Strong names differ mid-wave')
+  assert.match(beforeBuys.far, /^Far, /, `#792b NWUI-3 pre-Begin Far name (${beforeBuys.far})`)
+  assert.match(beforeBuys.strong, /^Strong, /, `#792b NWUI-3 pre-Begin Strong name (${beforeBuys.strong})`)
+  assert.equal(await page.getByRole('button', { name: /^Far, (need \d+|\d+ sparks)$/ }).count(), 1, '#792b NWUI-3 one Far button by role')
+  assert.equal(await page.getByRole('button', { name: /^Strong, (need \d+|\d+ sparks)$/ }).count(), 1, '#792b NWUI-3 one Strong button by role')
   await page.locator(`[data-clear-lamp="${lamp.id}"]`).click({ force: true })
   await page.locator('.defend-tower-card').waitFor({ state: 'hidden' })
   const fight = Date.now()
@@ -4929,6 +5023,8 @@ export async function checkLiveProve() {
     await checkClearBar(browser, port, errors, 412, 915, true)
     await checkClearBar(browser, port, errors, 768, 1024, false)
     await checkWaveCues(browser, port, errors)
+    await checkGoldCues(browser, port, errors, 375, 667)
+    await checkGoldCues(browser, port, errors, 390, 844)
     await checkJumpSeatsAndCandle(browser, port, errors)
     await checkDeadSeat(browser, port, errors)
     await checkGreyMaps(browser, port, errors)
