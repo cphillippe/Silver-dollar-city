@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<goldenPath schemaVersion="1" appVersion="1.4.527">
+<goldenPath schemaVersion="1" appVersion="1.4.528">
   <howToEdit>See GOLDEN-PATH.md. Edit this file, run npm test, then open a PR. This is the one Easy lesson order and the one filled gold button per screen.</howToEdit>
   <order>
     <line id="ph-road" pack="parable-hollow"/>
