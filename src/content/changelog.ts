@@ -20,6 +20,7 @@ export const CHANGELOG: ChangeNote[] = [
       'Night Watch keeps the City of Heaven sign clear of the lamp buttons.',
       'The website update lands on the first reload.',
       'Hard stays the same.',
+      'CI: pin City scans to ubuntu-24.04 (ubuntu-latest moved to 26.04 / Java 25 broke Gradle)',
       'Refs #792.',
     ],
   },
